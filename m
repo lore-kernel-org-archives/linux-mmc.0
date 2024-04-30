@@ -1,121 +1,106 @@
-Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A84941292C7
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 09:37:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88185128386
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 09:53:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714469851; cv=none; b=YW+5TU6q1cpKC0dQIyL1JOLNJJEcDFhHWMdiiWsR9S8dOngv7W6OyhKQ2cs90gT5OpzVGrr7jDFLaoY/877jXA1Lrj8Slh+WzpKNyKsBpW29sg02rKRNNsI6Inx6ElIr48Ip4TqjSp3sQ20aaubL9yyhwqx+7q9RZl/djFGrUV8=
+	t=1714470818; cv=none; b=saEeqO2F1ytP8sKIo79CJ/jgNDSpwwjR4YpMljpUlO6dBnPC9K9xCFIhaS2YhhgPHsDQGVMmlZu9VvTtCH9THIfPTMLgCZecIIKK4AlTu62J/szjADWEoTZqjLl+uyxg0/41VTaqNMuSfkPM0QDzBy4MijSYcZWFdu3ZJQ2lIjE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714469851; c=relaxed/simple;
-	bh=uhKdkmK31MXKrfFbEk2DLsbTDwgGQVf30ZHxv26DDAM=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=SmNLfFMgEXRppLGTV6NLK0ETWIzZhWuopU/MXvqYrymfkNB7vmxHxEfBSFkDPC8qgsE/x1wAGcbh2inap27sBj1yltLOXuOvDhFrfOzs2GQrQc+DC7rb3CwMu7VTdDEGDQtIy+EuguFK64wSikqdnBdBVBIMKHCEpCOczOAPxOk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=Y47kbsDL; arc=none smtp.client-ip=209.85.208.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
+	s=arc-20240116; t=1714470818; c=relaxed/simple;
+	bh=GXKfWFFF7RQoHWKkPZ06vCZuiUcnMAH+8TtHuYpvnOI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=dN8kjkCtMwQe8LVupLWdiEhV80NjAeosPiyhVG9rGDWyjkF+1847K1oW9IjA1sKXu6LWz4+/8Q7A/r2EwN19mHpLF0NfWRok7wv/kt9FN1bNAOV63sAWYpNn4CrXeQupSgF3aXEmX4ILFISBBuzxUW9q0ag5AwqU1J7wUKBm2l8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=P4oUqNvM; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="Y47kbsDL"
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-56e1baf0380so6849439a12.3
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 02:37:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1714469848; x=1715074648; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=3StYaHb+jugcbYETWpU1s1DMvudTBsQ5hJ3Pe6RKnEM=;
-        b=Y47kbsDLY60xGN0JqDz/swP/KZyZbEv3Eu7eweo7KQTjPYRybZ44zPeoIuFdQ1t0C8
-         7ixcexpVZSUixS/4grmk0EA433PAV1+cPBgKppdR3yYtfoKrZx6C35JnP/mbuvzP6+tV
-         /eia6X5zAdAc3Z06XgYiyC0gLOVZsrT6d6L6zafI08pvJQKOU7MCIpum3uDz5xvEn/QT
-         oGklWH9dFRZcDkE4bxhXtI1uRpHctVc+gAojjt3fPcG2tvCINQy/cnKWYwGcksY96HGh
-         6psM9TT2EYSqIfjej8HkjTteYTMLODuDD4XkmL0blClAj6tUobXRkWLnSuT5XoCNURmI
-         O6uQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714469848; x=1715074648;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=3StYaHb+jugcbYETWpU1s1DMvudTBsQ5hJ3Pe6RKnEM=;
-        b=dYzbLTXPOyEfRmicp2vjoHlC61QXW01ueMn1jVE4fEJe3j/KoTs35axt55GFL3oX44
-         AG/2eyQC3taYO5SFbi38xhBPJ0Aw/iWKxyIJ+7WOINMdKD6lL2sKJIxf4GiaSGh8PQ+1
-         crLgdsPcOLCVU3NJYCxcZilRMZ+DypcoQLJrqzvCrB7+2V6C6JEuRw1IZIcZ3UxhfOQA
-         YMk0zJqLcogLtxbGRN43xstAFbJwHH/UtqUVE5tPLuaTvc90CBKi9yDRkgDHk4SQNOW3
-         GbFlobHnpsjNn4yWmNbpkgf/YswpRvPRlOpPjJXlq/CaeeuwFrw2ibpbUSsI31mSSr78
-         /CZg==
-X-Gm-Message-State: AOJu0YwixBnkdr9AENtAAyElpqFyzkxvbAZkPvVyr/wxbQUXh0hUE9PW
-	g489ymG4bvYSqkRRzgAD9MZ3XBXIBBjNwIJh072axdKdGIlrDQtuElh15poF4RM=
-X-Google-Smtp-Source: AGHT+IF791IVTgQYCkDZyT5QfKzOiH/FUM1qkzc17ar1STLr7dQzsY+zNJl2I4gZet00wmrxDzyerQ==
-X-Received: by 2002:a50:a456:0:b0:571:d380:95fd with SMTP id v22-20020a50a456000000b00571d38095fdmr1506622edb.28.1714469847790;
-        Tue, 30 Apr 2024 02:37:27 -0700 (PDT)
-Received: from claudiu-X670E-Pro-RS.. ([82.78.167.53])
-        by smtp.gmail.com with ESMTPSA id cq6-20020a056402220600b005723fe809f0sm5490448edb.80.2024.04.30.02.37.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Apr 2024 02:37:27 -0700 (PDT)
-From: Claudiu <claudiu.beznea@tuxon.dev>
-X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
-To: wsa+renesas@sang-engineering.com,
-	ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	claudiu.beznea@tuxon.dev,
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>,
-	Hien Huynh <hien.huynh.px@renesas.com>
-Subject: [PATCH v3] mmc: renesas_sdhi: Set the SDBUF after reset
-Date: Tue, 30 Apr 2024 12:37:24 +0300
-Message-Id: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
-X-Mailer: git-send-email 2.39.2
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="P4oUqNvM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=GXKf
+	WFFF7RQoHWKkPZ06vCZuiUcnMAH+8TtHuYpvnOI=; b=P4oUqNvMQ/CpzA4VWElE
+	p/bnhQaBQfV6FxSDtv/BAYmCbH2U8sz8HnECLyqs/K247dOIZYf8dsDCFRMPbExD
+	soztpszv25qeW0y3j5dIQSp8wpn9erRu6Ci8i0jioYOZ88LwJE4jjho82JEZm/31
+	MWo1dwrCzDVL7fYgzQ+m5ffh6ATDaKvAaFznGzSDnZtmG3MJSVnDBRRzMy9C0p0b
+	Gu8Hyck/1gRvuPsRgrXcfduOo6vCcfKBCxwzT0ELRQt2vA3aL89Vz6G86FS84VlB
+	pKpEFxg3pCPmOSvUQ6semuGGiPcOfzDK1KOypQqcg30ga9TfizNwGGnARG1TO1jg
+	zw==
+Received: (qmail 2585368 invoked from network); 30 Apr 2024 11:53:32 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Apr 2024 11:53:32 +0200
+X-UD-Smtp-Session: l3s3148p1@9gK/V00XzJBehhrb
+Date: Tue, 30 Apr 2024 11:53:32 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Claudiu <claudiu.beznea@tuxon.dev>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
+Subject: Re: [PATCH v3] mmc: renesas_sdhi: Set the SDBUF after reset
+Message-ID: <rekyp45sxw7xtwj7jz3kgnfskroc7z5txbmvmyk4tbw3djqhcn@qyulszizfvc3>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Claudiu <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
+References: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="jparjn2ysbxorccu"
+Content-Disposition: inline
+In-Reply-To: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
 
-From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-For development purpose, renesas_sdhi_probe() could be called w/
-dma_ops = NULL to force the usage of PIO mode. In this case the
-renesas_sdhi_enable_dma() will not be called before transferring data.
+--jparjn2ysbxorccu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
-call from renesas_sdhi_probe() will configure SDBUF by calling the
-renesas_sdhi_sdbuf_width() function, but then SDBUF will be reset in
-tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
-If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+On Tue, Apr 30, 2024 at 12:37:24PM +0300, Claudiu wrote:
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>=20
+> For development purpose, renesas_sdhi_probe() could be called w/
+> dma_ops =3D NULL to force the usage of PIO mode. In this case the
+> renesas_sdhi_enable_dma() will not be called before transferring data.
+>=20
+> If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
+> call from renesas_sdhi_probe() will configure SDBUF by calling the
+> renesas_sdhi_sdbuf_width() function, but then SDBUF will be reset in
+> tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
+> If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+>=20
+> To fix this call again the renesas_sdhi_sdbuf_width(host, 16) in
+> renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
+> removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
+>=20
+> Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
+> Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
+> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-To fix this call again the renesas_sdhi_sdbuf_width(host, 16) in
-renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
-removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
-Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
-Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
----
 
-Changes in v3:
-- shortened the comment introduced in renesas_sdhi_reset()
+--jparjn2ysbxorccu
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Changes in v2:
-- fixed typos in commit description
-- limit the comment lines to 80 chars
+-----BEGIN PGP SIGNATURE-----
 
- drivers/mmc/host/renesas_sdhi_core.c | 3 +++
- 1 file changed, 3 insertions(+)
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmYwv5cACgkQFA3kzBSg
+KbafUxAAsJ3wQuqSl+GQrbsQ7yA7ZNfWhXATEOMhQ0RtTH8zsooQ9MsSs1tsqqwp
+Ygi38r8GGo28LkvKV+YjxwA/jBnW02S5hbGajwYsiWuAOVbXtsneFJZ4ea79sQYP
+qazKz1Te386vHpPhfKs1d0qTBaaZp1XsD+1P4xd6Y1jak5o7iDca08LlpR0xt3+s
+b/F5Gy6GVoM69GWRrertb7evWyiiKc0G+QW+8/eXjixe3DUvu81M1f1vxvF7NKR0
+GjMYi/VUQJ5ypYBdyUPd94af3+3Z/URbM6886ugSpHOvj7PTs59zG36ddQ5yLJN0
+EZlUoofQZ8b0vYpVEm/JcXXG1BH8EOkaffdj5y67HtrQzj7/Jm68waMaTlQKQ+xO
+hMOdhX7lwYlWGVBFrpYX8UzUofwKnqJlk3w4XG37qTy1ZwH/AfdHHHWm5rdtGPFP
+IuEFZC0XUGX2aW4XgcKe5UcEGz2bCuqSvmOfUUg1oN553BasKfGIqRnR9innNb76
+uxEtrhmjFcQz9ZrBJACgHL0vo5/6NXNZyxx+mwjXWftXLpmmgAr5e6r2x+wGU0o3
+4Fi9DlvpJC0N5yjyN3uvI1OhqjD8zh+QyOzHuhWP372es13IpGqYfohxyYrm69Qf
+alt+AeYq15lanBxcPbhXGY/CgkqHQjQVGF4M75Dmn+tepwkcpIc=
+=vsZz
+-----END PGP SIGNATURE-----
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index f84f60139bcf..d9503f9f6e96 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -589,6 +589,9 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
- 			sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
- 			priv->needs_adjust_hs400 = false;
- 			renesas_sdhi_set_clock(host, host->clk_cache);
-+
-+			/* Ensure default value for this driver. */
-+			renesas_sdhi_sdbuf_width(host, 16);
- 		} else if (priv->scc_ctl) {
- 			renesas_sdhi_scc_reset(host, priv);
- 		}
--- 
-2.39.2
-
+--jparjn2ysbxorccu--
