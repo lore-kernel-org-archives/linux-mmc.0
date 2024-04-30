@@ -1,103 +1,121 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 459F18F49
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 01:27:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34706127B5C
+	for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 09:10:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714440437; cv=none; b=rx7trAQ5C3P7Ugp7lWAgQpKR05iVcotJXyrldRhc6HGTKqnv4kDZKVhjYnH8WByrUN/4MTIDYvlVuOSzx358HSheAfBuDNsXSvQByTelfHZHvZWg1QMxAZ9MTCEa1UjlsoGwXxUxOo8qqjwRtMay1fWNato8z7W2bwyLFmCluKg=
+	t=1714468240; cv=none; b=SgRD6hRUfTsUZhLR6s2pU9Cs8qJfgY2R0nDZEoXxjR54Su7rG0ylxh+9Gh9KHXvCVI8E2BHFlUyGxyklhN+HGY4mvmDO+oR1mblBfwQngtcWvnmniOWIZWiQb/k88zmT2TfRQTIGXvFYGkkRlogo9ObFxTpqsxoXBUNUZbyitjY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714440437; c=relaxed/simple;
-	bh=4aAZSnm2s2NBl3SVc8x7goe8wtzimDSqyHoOul6Ypmc=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=Shp5zBty2zF8pvj7qIB/DLS4mQEpjcc50R4wL3wTZCvnMpdkmwZB/h6mKQv++Qzwmpw1/WecrMrzUDhLOnitGUzBYGVnYCz1/D8IFAe9nR/YEVQlwMaXC6svE/om+7Y5q+uz1k5DVaGJsYnKX05GH5OQ4bXQ5+W2SlsaPuX4+Ic=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=B3H1B4v7; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1714468240; c=relaxed/simple;
+	bh=EnpC8uxdaBLW+uWUMw9JJXC1K+AjyDTh9tv4xrNIOPw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Yk3e6KiGZVPQ/pju924+8RjCU4dq1rML4B6sEBsQwCUJv2XtTQk3ei/KUFbB0h/TCXWrp4ZexMxBC4taxVmA3EFp67LpQEK41G5wry1O3E65b5yiQpoosC3V8OJC3kdtYbfdQ3WWvcZtWmi1QMCRxdqXuPiF8Jd048gShKann+Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=f2VFFO2N; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="B3H1B4v7"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="f2VFFO2N"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=QJb4
+	ulNH2VMgB23s2bKMJ77ejPMzfrg0P2qy+6olDX4=; b=f2VFFO2NU+TWRiqZ/1o9
+	4J6WInkbsJkiez5lhD2sEvYzfWiIJXZ70xNiNBDKGMwpTmXZ2O/ZmjA5lqgLwBoq
+	f61buPFYT3ZfjTd5tuNDAhzYz0dToa5H/WqFBMryj0X3ViTaDws9Glx++eKhdpPC
+	Nwi0tnlAK3E2w7JkyzO7UE3nOrVBV1gdadLwO/uf1PETVzpEjEvPgFPFlei9eHSc
+	rED5CxPg7bLUcxRRrKZNnL42jbzC8Zr4L7sN2UjaRHyNhLVO7OPKf0urtiF1dZpP
+	g/7l20tEfqk++x+WZgVj5SUmyajdyBdswyhJzNh+kxE+F8SkXroUvCKiBo3qRGf2
+	uw==
+Received: (qmail 2570745 invoked from network); 30 Apr 2024 11:10:33 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Apr 2024 11:10:33 +0200
+X-UD-Smtp-Session: l3s3148p1@tPMKvkwXBJtehhrb
+Date: Tue, 30 Apr 2024 11:10:33 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: Set the SDBUF after reset
+Message-ID: <h2fhduxr5bv3m7vkxl2ga6pqkkv5mlzpwgk2q6lfsnz3l63ckk@pyzj2vt4jkfw>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
+References: <20240410135416.2139173-1-claudiu.beznea.uj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1714440432;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=XVbET5PIn8Rgn08e108WJ+SjALJbECrcvPz0i6KsyBI=;
-	b=B3H1B4v7CKFRgzUpek/5yPzxAGRw/bWyWEhwakEjCrzIVYggaJwDrUBNsv5QjVBlLOf6wM
-	17DECuYDBDlaTjla8LZwgjDR2zbNB1P4Um/5WzWlMcHNxq1LvmgWtXq35yvLwMzaaCluDB
-	sRjnfg4BH0dz9Lnqct6QzaKO+aAHJmKXwKAyR8EpCQGHK1v0xs6zE3jFOuok1jB1AfGK+a
-	PTmppkaN2Grp3UiMxdbYr8t/AUmbP0XZir+ZlESevIhbAD4Q1TYREgFtX1xJ96bBJ+6V1Q
-	OsRrHW+wqw/AJJwXJHUctc1fgp3axxTnYhC8f+V1ZRxgAox/UGzF2LPHG7NAHw==
-Date: Tue, 30 Apr 2024 03:27:12 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Felix Qin <xiaokeqinhealth@126.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v3 1/1] mmc: core: increase the timeout period of the
- ACMD41 command.
-In-Reply-To: <20240429071955.163282-1-xiaokeqinhealth@126.com>
-References: <20240429071955.163282-1-xiaokeqinhealth@126.com>
-Message-ID: <3c362697ad716c7526c4caad8d3fb7a8@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="n7owwzlqyi25o6qu"
+Content-Disposition: inline
+In-Reply-To: <20240410135416.2139173-1-claudiu.beznea.uj@bp.renesas.com>
 
-Hello Felix,
 
-On 2024-04-29 09:19, Felix Qin wrote:
-> Extensive testing has shown that some specific SD cards require an
-> increased command timeout to be successfully initialized.
-> 
-> More info:
-> Platform: Rockchip SoC + DW Multimedia host Controller
-> SD card: Xvv microSD CMH34A17TMA12 (Made in Korea)
-> Note: The SD card is custom-made by the customer in collaboration
-> with the wafer foundry.
-> 
-> Signed-off-by: Felix Qin <xiaokeqinhealth@126.com>
+--n7owwzlqyi25o6qu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-After going through the associated discussion [1] and after
-reviewing the associated preparatory patch, [2] this patch is
-surely looking good to me.
+Hi Claudiu,
 
-Reviewed-by: Dragan Simic <dsimic@manjaro.org>
+On Wed, Apr 10, 2024 at 04:54:16PM +0300, Claudiu Beznea wrote:
+> For development purpose, renesas_sdhi_probe() could be called w/
+> dma_ops =3D NULL to force the usage of PIO mode. In this case the
+> renesas_sdhi_enable_dma() will not be called before transferring data.
+>=20
+> If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
+> call from renesas_sdhi_probe() will configure SDBUF by calling the
+> renesas_sdhi_sdbuf_width() function, but then SDBUF will be reset in
+> tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
+> If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+>=20
+> To fix this call again the renesas_sdhi_sdbuf_width(host, 16) in
+> renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
+> removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
 
-[1] 
-https://lore.kernel.org/linux-mmc/CAPDyKFqdA8yisf6tY4gJ-ejk5azTUOZOkZhySYjeHJKibVraLg@mail.gmail.com/
-[2] 
-https://lore.kernel.org/all/20240425133034.79599-1-ulf.hansson@linaro.org/
+So, I tried to find a place where we would need only one call to
+renesas_sdhi_sdbuf_width() but I also couldn't find a sweet spot. So,
+this approach seems also best to me.
 
-> ---
-> v2: Add more info
-> v3: Based on the __mmc_poll_for_busy API for modification
-> ---
->  drivers/mmc/core/sd_ops.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 3ce1ff336826..a1c028303ba7 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -19,8 +19,13 @@
->  #include "sd_ops.h"
->  #include "mmc_ops.h"
-> 
-> +/*
-> + * Extensive testing has shown that some specific SD cards
-> + * require an increased command timeout to be successfully
-> + * initialized.
-> + */
->  #define SD_APP_OP_COND_PERIOD_US	(10 * 1000) /* 10ms */
-> -#define SD_APP_OP_COND_TIMEOUT_MS	1000 /* 1s */
-> +#define SD_APP_OP_COND_TIMEOUT_MS	2000 /* 2s */
-> 
->  struct sd_app_op_cond_busy_data {
->  	struct mmc_host *host;
+> +
+> +			/*
+> +			 * In case the controller works in PIO mode the SDBUF
+> +			 * needs to be set as its reset value is zero.
+> +			 */
+
+But I think we can shorten the above comment to something like:
+
+			/* Ensure default value for this driver */
+> +			renesas_sdhi_sdbuf_width(host, 16);
+
+D'accord?
+
+Happy hacking,
+
+   Wolfram
+
+
+--n7owwzlqyi25o6qu
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmYwtYUACgkQFA3kzBSg
+KbYqdhAAh1BHkpYuhh4UgC9lTha0M8cRwfM9fPYYxLfGuMgJkUlTzNpqu1rOSsSJ
+QyN4vggjd5lhvLmBwNLIpeDPSt8sM2Pp2rKbyZj89SHlRShvzZkSSkWSwRDu+gbL
+k2l2mU/0xhrMkO3s3ZX7FcA5HGok/qb44xGMqaBVI4cvdZd4uEGPNDxXi6Yijd48
+gAxLCh3PN1gwMVETT9qt9ckp2LEtFM1omIbXic/yvry1572d9ujoqCeN7E+mx8wi
+26vWP1pVRCUFhTLJVysz6B5kh1JBBamjR7iSQnSl9K1dICIVkHlZF6WbAh3FBqbJ
+nW4C6JVl6rWg2VosQ4sBfe105PpZw3sjyuaOELh2HXFhfrFKl9QlUd4spkVqxAVz
+BCptmAs4PgUBaOcIoM7RrPteLvTOLprdHwWI+qJbSuMZJr0bVsYBbkcDEFXRGpdf
+TlwBChaFj2CFnCLAYVBTFBdLmsRGUOUhFC5PE0Ev93m7rXxd1AfiDRV3KKF0jKGW
+V4hNyDBrdmaSJnZb3eCQhzyJ+5SyjNQhhRO+C4qpqfMK2Yx86G77jJtVBrZTVS8n
+JY1cZg7fnE2Et2mmpkbw5+VrBdPks0YEU5IGDquBGQ/Iyrt7liR/dWCVtb/YsYe+
+XbHVJiutlclajSwTBBfyxTggxyXdkHkXWxAnHuSm8W5WDZa4axk=
+=1g6D
+-----END PGP SIGNATURE-----
+
+--n7owwzlqyi25o6qu--
