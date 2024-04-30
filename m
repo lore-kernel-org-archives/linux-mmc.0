@@ -1,106 +1,127 @@
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88185128386
-	for <linux-mmc@vger.kernel.org>; Tue, 30 Apr 2024 09:53:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F00E7710A;
+	Tue, 30 Apr 2024 15:00:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714470818; cv=none; b=saEeqO2F1ytP8sKIo79CJ/jgNDSpwwjR4YpMljpUlO6dBnPC9K9xCFIhaS2YhhgPHsDQGVMmlZu9VvTtCH9THIfPTMLgCZecIIKK4AlTu62J/szjADWEoTZqjLl+uyxg0/41VTaqNMuSfkPM0QDzBy4MijSYcZWFdu3ZJQ2lIjE=
+	t=1714489215; cv=none; b=OrFMVtsp3w0AJmJ6ENG8eMySR6JrC6Bm5YPTsm8DHbXKILGN49LxsPIudXlih9kzo21KR5MbHUt1sqxfoUY7BoPMpgQjQ5RzEsE28osb+udqKg9zo8azJZB8Hued41mB2+6SiGuzEZKchayS5yE7EPEg+pTgHe3RHxtdy6zvzqM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714470818; c=relaxed/simple;
-	bh=GXKfWFFF7RQoHWKkPZ06vCZuiUcnMAH+8TtHuYpvnOI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dN8kjkCtMwQe8LVupLWdiEhV80NjAeosPiyhVG9rGDWyjkF+1847K1oW9IjA1sKXu6LWz4+/8Q7A/r2EwN19mHpLF0NfWRok7wv/kt9FN1bNAOV63sAWYpNn4CrXeQupSgF3aXEmX4ILFISBBuzxUW9q0ag5AwqU1J7wUKBm2l8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=P4oUqNvM; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1714489215; c=relaxed/simple;
+	bh=CfSl9GtlAtHB+rcXJHozuQgrFboWGNOXnQ3OvS3lmTg=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=NwjlAkyYQftkL5bJDuBC9dPrY/bRGrv14yyjrLZtIe4elYTx72nUsWE3Lpj54isLIiH9Hhcg88Np7UXFzZbtqdRQaq3JaR2yxT+IyR34ukzuogwogXaxA4DNGHEZJh+IR8UzseKFnJ3fmdLTAbR2OazIhMlZ4Nd1/rBrjGZ/nJ0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EJE3Z4a2; arc=none smtp.client-ip=209.85.216.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="P4oUqNvM"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=GXKf
-	WFFF7RQoHWKkPZ06vCZuiUcnMAH+8TtHuYpvnOI=; b=P4oUqNvMQ/CpzA4VWElE
-	p/bnhQaBQfV6FxSDtv/BAYmCbH2U8sz8HnECLyqs/K247dOIZYf8dsDCFRMPbExD
-	soztpszv25qeW0y3j5dIQSp8wpn9erRu6Ci8i0jioYOZ88LwJE4jjho82JEZm/31
-	MWo1dwrCzDVL7fYgzQ+m5ffh6ATDaKvAaFznGzSDnZtmG3MJSVnDBRRzMy9C0p0b
-	Gu8Hyck/1gRvuPsRgrXcfduOo6vCcfKBCxwzT0ELRQt2vA3aL89Vz6G86FS84VlB
-	pKpEFxg3pCPmOSvUQ6semuGGiPcOfzDK1KOypQqcg30ga9TfizNwGGnARG1TO1jg
-	zw==
-Received: (qmail 2585368 invoked from network); 30 Apr 2024 11:53:32 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Apr 2024 11:53:32 +0200
-X-UD-Smtp-Session: l3s3148p1@9gK/V00XzJBehhrb
-Date: Tue, 30 Apr 2024 11:53:32 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Claudiu <claudiu.beznea@tuxon.dev>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Set the SDBUF after reset
-Message-ID: <rekyp45sxw7xtwj7jz3kgnfskroc7z5txbmvmyk4tbw3djqhcn@qyulszizfvc3>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Claudiu <claudiu.beznea@tuxon.dev>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
-References: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EJE3Z4a2"
+Received: by mail-pj1-f42.google.com with SMTP id 98e67ed59e1d1-2b27c660f91so709133a91.0;
+        Tue, 30 Apr 2024 08:00:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1714489214; x=1715094014; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=SkT2QLC8TQmVSP+rJF4kvPIyKIKgXzRowbjPH7GH+Ug=;
+        b=EJE3Z4a2AeEPgj4cqL30xNXk4k6BB+oymLgYG9tu9Ra5am6JFA8uuvFD4OC9RSHBvw
+         BCrXjCoYinx3hwJUmnuXo1PoKklWcw3Ta/nQjhz5OlRL71IUxqdIfYuQJXZn9dUqhn8E
+         +DaEXBJFM9dA0lyFT7WPMLctUZHfHL2B3VTwaawEBBDtIR25KwxA0AnJ1n4T2brFObP2
+         UOso9dD8NAB6kfP6K2qx42ns1fZZCWy7hvTwiwg0a5GnxCTXHYfplqZKpSKEmwaq8V0e
+         wg0RKBDGm/kip1Tda0DThZbZnngCZTaBysbM3DEIdEUJ8l+Am0gwqXWHRP2MIXToB5FK
+         FdjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1714489214; x=1715094014;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=SkT2QLC8TQmVSP+rJF4kvPIyKIKgXzRowbjPH7GH+Ug=;
+        b=NmwY/dvg5yU75NIbkUQcQP00MyV8AVUBPdNFteEBfWOiUMQ8faVtmTAGw6e5LkhLCY
+         ncRqO5VmSjaCcE2AN99JqoDUJ91CnNsgwVRkn+dvBrK/AX0hSBJBvoE3ofXpPWKrwu01
+         sNFZiygRl/oxuO7Ky0a2N8K1+rECu26/WPDVB7FOWLOHZr+RKfCoSA+nr6HHg9QQyG67
+         j5WQoLfI5drpqtyGgI1+aDO0CkqiXnekpUBQ/Gt6nkVKusJOGNcKpKtASAxqhQ60pKa8
+         /TuRQzRsl48hpKa8l2lqI512AkrI4doS/EKLYy6X2uyrboLZ1QXCZadC9hKui8L0p9Rh
+         qFLg==
+X-Forwarded-Encrypted: i=1; AJvYcCVoTKqxXrGFCN22+0JsEimWWBUFWIwJEMNYaIZz+Nv411CEHKKaM6MEUYD7ipzYIQnJr2T6YRYkX19R79kv65EIZTk/8dcaP4HxJa3TlO24Qw1ERezQadNGrt72HG6nffgy6Zo8XWUOuqxlVKQoj3wNBsxn1r7auE2R0e3pBuNtxddnb+HUngN0Vs4=
+X-Gm-Message-State: AOJu0YyTS32NI91QfdOPHS3GS3tBYmCLr/zz01PGSDTQa5DUYnbpc5Wl
+	LiCLhhA5XcDUsw8NSWEfMyyphCNksxxGx9CN4BcKT4GZ6LGB4Yqm
+X-Google-Smtp-Source: AGHT+IGAQ3aPK4tUlkrLyZpFr1uhaVhJVk+IDywxNHSn7gT4m3RnY2l3NP0GS3xjID/0W3CX1D2V3g==
+X-Received: by 2002:a17:90b:128f:b0:2b2:ac4e:9221 with SMTP id fw15-20020a17090b128f00b002b2ac4e9221mr1520475pjb.4.1714489213036;
+        Tue, 30 Apr 2024 08:00:13 -0700 (PDT)
+Received: from prasmi.domain.name ([103.219.60.80])
+        by smtp.gmail.com with ESMTPSA id r6-20020a17090a5c8600b002ade3490b4asm15428745pji.22.2024.04.30.08.00.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Apr 2024 08:00:12 -0700 (PDT)
+From: Prabhakar <prabhakar.csengg@gmail.com>
+X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+To: Geert Uytterhoeven <geert+renesas@glider.be>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH v3 0/3] Update compat strings for SD/MMC nodes on RZ/{G2L (family), G3S, V2M} SoCs
+Date: Tue, 30 Apr 2024 15:59:34 +0100
+Message-Id: <20240430145937.133643-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="jparjn2ysbxorccu"
-Content-Disposition: inline
-In-Reply-To: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
+Content-Transfer-Encoding: 8bit
 
+From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
---jparjn2ysbxorccu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Hi All,
 
-On Tue, Apr 30, 2024 at 12:37:24PM +0300, Claudiu wrote:
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
->=20
-> For development purpose, renesas_sdhi_probe() could be called w/
-> dma_ops =3D NULL to force the usage of PIO mode. In this case the
-> renesas_sdhi_enable_dma() will not be called before transferring data.
->=20
-> If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
-> call from renesas_sdhi_probe() will configure SDBUF by calling the
-> renesas_sdhi_sdbuf_width() function, but then SDBUF will be reset in
-> tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
-> If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
->=20
-> To fix this call again the renesas_sdhi_sdbuf_width(host, 16) in
-> renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
-> removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
->=20
-> Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
-> Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+- RZ/G2UL and RZ/Five ("r9a07g043")
+- RZ/G2L(C) ("r9a07g044")
+- RZ/V2L ("r9a07g054")
+- RZ/G3S ("r9a08g045")
+- RZ/V2M ("r9a09g011")
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+The SD/MMC Interface in the above listed SoCs is not identical to that of
+R-Car Gen3. These SoCs have HS400 disabled and use fixed address mode.
+Therefore, we need to apply fixed_addr_mode and hs400_disabled quirks.
+'renesas,rzg2l-sdhi' is introduced as a generic compatible string for the
+above SoCs where fixed_addr_mode and hs400_disabled quirks will be applied.
 
+v2->v3
+- Dropped items keyword
+- Sorted strings alphabetically
+- Collected Ack and RB tags 
 
---jparjn2ysbxorccu
-Content-Type: application/pgp-signature; name="signature.asc"
+v1->v2
+- Updated commit messages for patch #1 and #2
+- Dropped SoC DTSI changes as its a hard dependency
+- Grouped single const value items into an enum list.
+- For backward compatibility retained RZ/V2M compat string
 
------BEGIN PGP SIGNATURE-----
+v1: https://patchwork.kernel.org/project/linux-renesas-soc/cover/20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmYwv5cACgkQFA3kzBSg
-KbafUxAAsJ3wQuqSl+GQrbsQ7yA7ZNfWhXATEOMhQ0RtTH8zsooQ9MsSs1tsqqwp
-Ygi38r8GGo28LkvKV+YjxwA/jBnW02S5hbGajwYsiWuAOVbXtsneFJZ4ea79sQYP
-qazKz1Te386vHpPhfKs1d0qTBaaZp1XsD+1P4xd6Y1jak5o7iDca08LlpR0xt3+s
-b/F5Gy6GVoM69GWRrertb7evWyiiKc0G+QW+8/eXjixe3DUvu81M1f1vxvF7NKR0
-GjMYi/VUQJ5ypYBdyUPd94af3+3Z/URbM6886ugSpHOvj7PTs59zG36ddQ5yLJN0
-EZlUoofQZ8b0vYpVEm/JcXXG1BH8EOkaffdj5y67HtrQzj7/Jm68waMaTlQKQ+xO
-hMOdhX7lwYlWGVBFrpYX8UzUofwKnqJlk3w4XG37qTy1ZwH/AfdHHHWm5rdtGPFP
-IuEFZC0XUGX2aW4XgcKe5UcEGz2bCuqSvmOfUUg1oN553BasKfGIqRnR9innNb76
-uxEtrhmjFcQz9ZrBJACgHL0vo5/6NXNZyxx+mwjXWftXLpmmgAr5e6r2x+wGU0o3
-4Fi9DlvpJC0N5yjyN3uvI1OhqjD8zh+QyOzHuhWP372es13IpGqYfohxyYrm69Qf
-alt+AeYq15lanBxcPbhXGY/CgkqHQjQVGF4M75Dmn+tepwkcpIc=
-=vsZz
------END PGP SIGNATURE-----
+Cheers,
+Prabhakar
 
---jparjn2ysbxorccu--
+Lad Prabhakar (3):
+  dt-bindings: mmc: renesas,sdhi: Group single const value items into an
+    enum list
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G2L family compatibility
+  mmc: renesas_sdhi: Add compatible string for RZ/G2L family, RZ/G3S,
+    and RZ/V2M SoCs
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 39 ++++++++-----------
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  9 +++--
+ 2 files changed, 21 insertions(+), 27 deletions(-)
+
+-- 
+2.34.1
+
