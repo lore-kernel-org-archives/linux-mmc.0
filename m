@@ -1,85 +1,82 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12C6017B4EB;
-	Tue, 30 Apr 2024 17:10:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C01731CD32
+	for <linux-mmc@vger.kernel.org>; Thu,  2 May 2024 07:01:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.249.201.71
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714497004; cv=none; b=lAgRbXNQJbLO5RcHaOecn0lnv0n45ZrFP9ceRY4D/eMWsPePsqQ+Wd7+4uvDX5wQZvGp5SLwq0w3MaYdS9cHnUk9FeYfZ201yHKIwqH2cwZ3gvxevrZ4sglI9zzXEgjNs7CY6ciNggCpQPnkbA2d4gZsgkMur4XAxX5OpZBzRkY=
+	t=1714633273; cv=none; b=kFbdTEGikvgi0da+YdF0o4wtKtscNVWxChISQNasRfoEPkLZDRvfSb+iWpxYpGfX1DxS+m81Z3kk4Kdb5bu9BpRpCBC66Gsl/cJaRphVqHYIvEBoXNrPNEPsXm09IxTmasUZNV7guMiWDP60qF0G20cW933pnujb/ZWrnv5BIIE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714497004; c=relaxed/simple;
-	bh=oS0wEIIVuLjHd8cAg9atHETWc00gOO4f/bvn8u2zung=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dq8CSyFw2G785UT+mHfY+OIsGLiGOsahP+Gvlp9wMARydQQAMKsoLr0i2+8sBFlKDP4ZyZmcQ/s2r/sPuM6YkGix3bKdjgq0whgP78ZJ0OKX7BX7fIrIM7aiJ3qAG+gYaLpE7mJ9y8wCPXSOjW/5M4+bS3S2sfMtkk+Mb8sg9GE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tPOTRj/p; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1714633273; c=relaxed/simple;
+	bh=Kh6bFKp0zEzS8mXW8gXj5U1UJpOLExVceJOeJ13xwK0=;
+	h=To:Subject:MIME-Version:From:Content-Type:Message-Id:Date; b=ZR+gBQ6M/XuRyuW4JCjIp3JjsuluRGiIphrXJ9604BtzghSrT+t/6X2Bi8V2IqfYUE3J8I2aYhDgSvVqAwA2Y7+yhuB41E8DDHhGhfL8uGK/y8ljvAYsI7uQUAfnOhuPPKGec30OjJAbrFpCHi0JSOfyWFPzULgUF4hdc+/PTuI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com; spf=pass smtp.mailfrom=musicianspage.com; dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b=MfpHH5kZ; arc=none smtp.client-ip=170.249.201.71
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tPOTRj/p"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADC49C2BBFC;
-	Tue, 30 Apr 2024 17:10:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1714497003;
-	bh=oS0wEIIVuLjHd8cAg9atHETWc00gOO4f/bvn8u2zung=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=tPOTRj/pSHXu7HH0780Zg2qFPwdSz+xI5rhnE8huvbY2M8wUT0TKd6GZO/xcLPmeK
-	 nMSpyGD8zgZRw57MnXstP5RUDLKupLULh2avjfOTGfa1nZ1o1RbbOx6cZRhXbVs1fX
-	 8/oqsfSXTNR3ZT4aDnl7R/vP131ByBN6rsf+y57o1hhdCHwQfZJETY146WrLSxYpxK
-	 NbuKKamoS6EL/jliapcS9kqt3UwgS5leAL0YYlRXjbj9wbKFpgIiTmW4e1I6yATdcc
-	 Kv5AnZaZPwoJlM/WZ7QNAlxXzoIILTo+lJQLNQlqpZip9EfbHbd6cKk+KoG49DI77L
-	 PgPOuOoxA03hw==
-Date: Tue, 30 Apr 2024 18:09:58 +0100
-From: Conor Dooley <conor@kernel.org>
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: renesas,sdhi: Group single
- const value items into an enum list
-Message-ID: <20240430-idealness-breeze-4712d0798800@spud>
-References: <20240430145937.133643-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240430145937.133643-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
+	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="MfpHH5kZ"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+	List-Archive; bh=Kh6bFKp0zEzS8mXW8gXj5U1UJpOLExVceJOeJ13xwK0=; b=MfpHH5kZ4/Dk
+	p1h45gJOa84245MgCS2DYO8LjviHIhfU+Zu7RLFqjm07BBUNXc6r4gfnpnV237iO5PJhCRP1Gl/+5
+	m6KO3/zWGrjfeh7QCy2KQYkbwn8OdL/VkJDLv1Y0GG5M/a8X8EvP0F0gQImCYD1eUo4ikJCzML9b+
+	I6uDY=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+	(envelope-from <no-reply@musicianspage.com>)
+	id 1s2QRC-0000JY-Tt
+	for linux-mmc@vger.kernel.org; Thu, 02 May 2024 00:01:02 -0700
+To: linux-mmc@vger.kernel.org
+Subject: Your confirmation is needed.
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="G7AmvMY0rSIjFKEZ"
-Content-Disposition: inline
-In-Reply-To: <20240430145937.133643-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
-
-
---G7AmvMY0rSIjFKEZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+From: Musicians Page <mailingconfirm@musicianspage.com>
+Reply-To: Musicians Page <mailingconfirm@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1s2QRC-0000JY-Tt@list.virtualsheetmusic.com>
+Date: Thu, 02 May 2024 00:01:02 -0700
 
-On Tue, Apr 30, 2024 at 03:59:35PM +0100, Prabhakar wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
->=20
-> Group single const value items into an enum list.
->=20
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Dear Musician and Music Lover,
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
+thank you for your interest in subscribing
+to the Musicians Page Newsletter.
+It will keep you informed about the latest
+information about music events, site updates
+and news from the music industry.
 
---G7AmvMY0rSIjFKEZ
-Content-Type: application/pgp-signature; name="signature.asc"
+Your subscription is NOT complete until we
+receive your confirmation. To do so, just click
+the link below which will confirm your registration:
 
------BEGIN PGP SIGNATURE-----
+https://www.musicianspage.com/cj.php?email=3Dlinux-mmc@vger.kernel.org
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZjEl5gAKCRB4tDGHoIJi
-0m3CAQDjLgFJMGkDVl6KC0ieY80/I+Y5urG4mVkM7QOuqiWtYgD/d1I3Qf+zy1Ca
-KNZIUxZjNEZFpI+93O4C30JqCo0oaQo=
-=cL2N
------END PGP SIGNATURE-----
 
---G7AmvMY0rSIjFKEZ--
+Remember that our staff is always available to answer your questions
+or help with any problems. For assistance, just send a message to:
+mailto:support@musicianspage.com.
+
+We always strive to help you in your musical pursuits.
+
+If you did not request, or do not wish to subscribe to the Musicians
+Newsletter, please accept our apology and ignore this message.
+
+Thank you very much for your attention.
+
+My kindest regards,
+
+Fabrizio Ferrari
+
+supervisor
+Musicians Page
+https://www.musicianspage.com
+
+
+
