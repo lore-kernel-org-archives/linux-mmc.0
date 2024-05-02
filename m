@@ -1,466 +1,432 @@
-Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [170.249.201.71])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBFD354903
-	for <linux-mmc@vger.kernel.org>; Thu,  2 May 2024 09:53:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8ADB75E091
+	for <linux-mmc@vger.kernel.org>; Thu,  2 May 2024 10:57:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.249.201.71
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714643636; cv=none; b=nHJEesbnFW7hbcpLq3v7MgsprQOIBnnBGg9BRISSEX1hqDqkzTRwXiXjM4WVVbBOqPs05dJR6ITy+UmLJd9fYR2LcGQ7ywLon4gCV7ADxm/NWFzYntX+nb2V6wfeUJ80WDPViA7Ayuf11C0Pwj5XCgs4tjzROVvtxxoKloDTaOc=
+	t=1714647431; cv=none; b=n9LYT7y03wFazVoKHhb4apqUrrsN4DZHE/KMogxkqIHYTabbZoq6i+qT9mlVT3iuQqtpXT4Cf+j/vApgSjjCNi8jgAeuvvFNxw623wWnm6IkA5XsYjlkYvObVVvSidyAhIaqpZOicvGJm1/Hl7Bv5MKwwKWjc3RXVsegb7xsoCA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714643636; c=relaxed/simple;
-	bh=o87WVhVjQRBP+6ThfYJoj0Z2951o3PlEy881O0myrMg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZLfhL1TADEdg2oiErGRRzrk5RF5P0RRIzzuUjfV1XY7yO+U8ZERQwgklMALu+yDzH3f/7aYE0ntQKtM8ddUZ+4JwzxiE/G94m/HM+lSmXjGIQFoLcsm9nTsKFcuMajfbIe/x4OEmdq4uZ7SCBrBnrOilClVACnlkwvMH/wLn4ds=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ikaz5+8C; arc=none smtp.client-ip=209.85.161.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1714647431; c=relaxed/simple;
+	bh=c4Y5KR+pYOWKQ+rFNmqGlQvcEeSTIHeOCf8+RaQ2/f0=;
+	h=To:Subject:MIME-Version:From:Content-Type:Message-Id:Date; b=BvWmRVCBFMZcMv7Y+UebWYUMvO9wxLEkunzhpXMVYLMGmPst+svwUo/Myv/2J9hcxmwP5n52etrYave6tbMa+3UoMx8ge+Svfi0jmDd8+ncBt2037XT0Q9V2MmF6YzAizJrMKaE/22Q7pQPG1TPa+zDp9dtY4m1q7pLRW9UzINA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com; spf=pass smtp.mailfrom=musicianspage.com; dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b=ozW7n9wu; arc=none smtp.client-ip=170.249.201.71
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=musicianspage.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=musicianspage.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ikaz5+8C"
-Received: by mail-oo1-f50.google.com with SMTP id 006d021491bc7-5af702072a9so811380eaf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 02 May 2024 02:53:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714643632; x=1715248432; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/AcRINpNVGLwFNrbPHoo/3mfgbO66yT1OWofD/Yj738=;
-        b=ikaz5+8C9bxLyC5nWoMOMQae6Mfv4QcdM/kP2OrmQvRx4jtLHzYg3s6f6fHX1jZm3n
-         X2WctwqAXGe/gQillEXGZWeMvRuZlJ8Y9jctaGbXXOLjbladiuZL52jKHvAlRR0+ykoV
-         U+H2LhL45vTMiWdbDXTzoSaemV7FIqHbvYtDHaDLkaJ0xP1rJRlDaz0Gq4lbU/B87Ngz
-         pk6ovOHSaL/vhREfRzi90WEApxG4JIMPn32kBXA3CunJQSptKDApTGvhp5hHM06LG1Sw
-         Uuvq1YosYMy1SEKZRaeRG6/ZBr0hRVLNbmm2UYWvoGhT9a+ME3sZsDXn0RMJir2CXZ67
-         +xgg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714643632; x=1715248432;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=/AcRINpNVGLwFNrbPHoo/3mfgbO66yT1OWofD/Yj738=;
-        b=BOI1ySFv33zYkyAMobrbBVVnHvpqzSbEwofKDqD7ReOokBIY+jC3J+8f8D9LHSHik7
-         mSOtPyoDBHKzD5Gx+p0nzcJUvpuzSzbUHSdl+FSn9HWfOvv436PzAY0pc8mPWt5NGx/m
-         wonvmQIwZg6GW4K7UGqoBKh389Y0DkiMjlzWmI3Avu4JzMGB345VwreIkP1rA7OYPMID
-         oHivlOqwoI9yOMPrbgSsayoDAlLymFm4u/Aktl/Dt1jONibkrMs0QFsKQ8LfQMUnZgn3
-         0cSTVF+gJdNOsEgYmO4iM3xRjvLJ3G4/pqIyw00Kgq1DNEtbWFT1Y+D/+wkMiNfH6jZW
-         8LZw==
-X-Forwarded-Encrypted: i=1; AJvYcCXVsnJ7RGz+k0khSXcbHHMtUVSCTzq6zKz06JV5yNLX/ILAq3WFJXIo5xxqwFjzHWib8St1+HYp7ja8DbtuIBjDuXMI+Ws1GFCG
-X-Gm-Message-State: AOJu0YwmN+Y4y7MgydJpFBGQGgDeF+eJoEqzw4954oupNQHViJA0GYs+
-	OcjoWfIIKL1D7ArhtaC0HDQ5ptaDRLo4fXp+x9JCIGNvcHyBPVpDi29ij7pzg5lx3JRn9ml/6HV
-	AnCWlLRdcp/yos+HlAI1iYdZSxJxNY4dRuIEnbQ==
-X-Google-Smtp-Source: AGHT+IHpgmdM47sX6tHYGjiSKktGpCzsQjaRz/epLFCL8xJ5DlMgSvy3wd4tmG84krtRl6yPhG6Cc2DrCWia6ccKHAs=
-X-Received: by 2002:a4a:55d1:0:b0:5af:292b:6986 with SMTP id
- e200-20020a4a55d1000000b005af292b6986mr1132222oob.3.1714643631809; Thu, 02
- May 2024 02:53:51 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=list.virtualsheetmusic.com header.i=@list.virtualsheetmusic.com header.b="ozW7n9wu"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+	Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+	Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+	List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+	List-Archive; bh=c4Y5KR+pYOWKQ+rFNmqGlQvcEeSTIHeOCf8+RaQ2/f0=; b=ozW7n9wuVhii
+	kEx1pPGKda5il/r7N1blEl990TMoO6Kb4hVWFQFkvsylNBLx6doO4dLrPR1hF0Ml3lkm+eUGTLPfd
+	ktqfbKLdBv6emnPhxWY+N8fiW/hNV6+ni6nMBXS/HpcxFvTfyP21UcpoM2PsUWWLwVkCXkOqoQ6Kc
+	+OGq4=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+	(envelope-from <no-reply@musicianspage.com>)
+	id 1s2U7d-0001ZO-6R
+	for linux-mmc@vger.kernel.org; Thu, 02 May 2024 03:57:05 -0700
+To: linux-mmc@vger.kernel.org
+Subject: Music News and Site Updates (May 2, 2024)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240422091936.3714381-1-jens.wiklander@linaro.org>
- <20240422091936.3714381-3-jens.wiklander@linaro.org> <ZioXkvnIw5V5MXBU@mecka.net>
- <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
- <Zi9rKzz8u8z7cIy0@mecka.net> <CAHUa44HHtcaYXhcWg5zL5EQ8pEP7aEDKS+yjpaMJH8vTtF3xFw@mail.gmail.com>
- <Zi93_0aCq9mQ_6cD@mecka.net> <CAHUa44FG3ge3nyQVStKjfpeJvpjuQjNiZsxHjyRz+CUjHwkS=g@mail.gmail.com>
- <CAHUa44EecehfyzE97z49e=-qA513um21JyJz_CNKweuctp=HoQ@mail.gmail.com> <Zi-c6QXySx78JoJ_@mecka.net>
-In-Reply-To: <Zi-c6QXySx78JoJ_@mecka.net>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Thu, 2 May 2024 11:53:40 +0200
-Message-ID: <CAHUa44F1GrHpg4tatm_3+c9sg=CBWMjpdU5YE9BmQKRa+5vvaQ@mail.gmail.com>
-Subject: Re: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB subsystem
-To: Manuel Traut <manut@mecka.net>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
-	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
-	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
-	Alexander Usyskin <alexander.usyskin@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+From: Musicians Page <newsletter@musicianspage.com>
+Reply-To: Musicians Page <newsletter@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1s2U7d-0001ZO-6R@list.virtualsheetmusic.com>
+Date: Thu, 02 May 2024 03:57:05 -0700
 
-On Mon, Apr 29, 2024 at 3:13=E2=80=AFPM Manuel Traut <manut@mecka.net> wrot=
-e:
->
-> On Mon, Apr 29, 2024 at 01:13:58PM +0200, Jens Wiklander wrote:
-> > On Mon, Apr 29, 2024 at 12:45=E2=80=AFPM Jens Wiklander
-> > <jens.wiklander@linaro.org> wrote:
-> > >
-> > > On Mon, Apr 29, 2024 at 12:35=E2=80=AFPM Manuel Traut <manut@mecka.ne=
-t> wrote:
-> > > >
-> > > > On Mon, Apr 29, 2024 at 12:08:45PM +0200, Jens Wiklander wrote:
-> > > > > On Mon, Apr 29, 2024 at 11:41=E2=80=AFAM Manuel Traut <manut@meck=
-a.net> wrote:
-> > > > > >
-> > > > > > On Fri, Apr 26, 2024 at 03:24:21PM +0200, Jens Wiklander wrote:
-> > > > > > > On Thu, Apr 25, 2024 at 10:43=E2=80=AFAM Manuel Traut <manut@=
-mecka.net> wrote:
-> > > > > > > >
-> > > > > > > > On Mon, Apr 22, 2024 at 11:19:35AM +0200, Jens Wiklander wr=
-ote:
-> > > > > > > > > Register eMMC RPMB partition with the RPMB subsystem and =
-provide
-> > > > > > > > > an implementation for the RPMB access operations abstract=
-ing
-> > > > > > > > > the actual multi step process.
-> > > > > > > > >
-> > > > > > > > > Add a callback to extract the needed device information a=
-t registration
-> > > > > > > > > to avoid accessing the struct mmc_card at a later stage a=
-s we're not
-> > > > > > > > > holding a reference counter for this struct.
-> > > > > > > > >
-> > > > > > > > > Taking the needed reference to md->disk in mmc_blk_alloc_=
-rpmb_part()
-> > > > > > > > > instead of in mmc_rpmb_chrdev_open(). This is needed by t=
-he
-> > > > > > > > > route_frames() function pointer in struct rpmb_ops.
-> > > > > > > > >
-> > > > > > > > > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> > > > > > > > > Signed-off-by: Alexander Usyskin <alexander.usyskin@intel=
-.com>
-> > > > > > > > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> > > > > > > > > ---
-> > > > > > > > >  drivers/mmc/core/block.c | 241 +++++++++++++++++++++++++=
-+++++++++++++-
-> > > > > > > > >  1 file changed, 239 insertions(+), 2 deletions(-)
-> > > > > > > > >
-> > > > > > > > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/=
-block.c
-> > > > > > > > > index 32d49100dff5..a7f126fbc605 100644
-> > > > > > > > > --- a/drivers/mmc/core/block.c
-> > > > > > > > > +++ b/drivers/mmc/core/block.c
-> > > > > > > > > @@ -33,6 +33,7 @@
-> > > > > > > > >  #include <linux/cdev.h>
-> > > > > > > > >  #include <linux/mutex.h>
-> > > > > > > > >  #include <linux/scatterlist.h>
-> > > > > > > > > +#include <linux/string.h>
-> > > > > > > > >  #include <linux/string_helpers.h>
-> > > > > > > > >  #include <linux/delay.h>
-> > > > > > > > >  #include <linux/capability.h>
-> > > > > > > > > @@ -40,6 +41,7 @@
-> > > > > > > > >  #include <linux/pm_runtime.h>
-> > > > > > > > >  #include <linux/idr.h>
-> > > > > > > > >  #include <linux/debugfs.h>
-> > > > > > > > > +#include <linux/rpmb.h>
-> > > > > > > > >
-> > > > > > > > >  #include <linux/mmc/ioctl.h>
-> > > > > > > > >  #include <linux/mmc/card.h>
-> > > > > > > > > @@ -76,6 +78,48 @@ MODULE_ALIAS("mmc:block");
-> > > > > > > > >  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) =
->> 16)
-> > > > > > > > >  #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) =
->> 8)
-> > > > > > > > >
-> > > > > > > > > +/**
-> > > > > > > > > + * struct rpmb_frame - rpmb frame as defined by eMMC 5.1=
- (JESD84-B51)
-> > > > > > > > > + *
-> > > > > > > > > + * @stuff        : stuff bytes
-> > > > > > > > > + * @key_mac      : The authentication key or the message=
- authentication
-> > > > > > > > > + *                 code (MAC) depending on the request/r=
-esponse type.
-> > > > > > > > > + *                 The MAC will be delivered in the last=
- (or the only)
-> > > > > > > > > + *                 block of data.
-> > > > > > > > > + * @data         : Data to be written or read by signed =
-access.
-> > > > > > > > > + * @nonce        : Random number generated by the host f=
-or the requests
-> > > > > > > > > + *                 and copied to the response by the RPM=
-B engine.
-> > > > > > > > > + * @write_counter: Counter value for the total amount of=
- the successful
-> > > > > > > > > + *                 authenticated data write requests mad=
-e by the host.
-> > > > > > > > > + * @addr         : Address of the data to be programmed =
-to or read
-> > > > > > > > > + *                 from the RPMB. Address is the serial =
-number of
-> > > > > > > > > + *                 the accessed block (half sector 256B)=
-.
-> > > > > > > > > + * @block_count  : Number of blocks (half sectors, 256B)=
- requested to be
-> > > > > > > > > + *                 read/programmed.
-> > > > > > > > > + * @result       : Includes information about the status=
- of the write counter
-> > > > > > > > > + *                 (valid, expired) and result of the ac=
-cess made to the RPMB.
-> > > > > > > > > + * @req_resp     : Defines the type of request and respo=
-nse to/from the memory.
-> > > > > > > > > + *
-> > > > > > > > > + * The stuff bytes and big-endian properties are modeled=
- to fit to the spec.
-> > > > > > > > > + */
-> > > > > > > > > +struct rpmb_frame {
-> > > > > > > > > +     u8     stuff[196];
-> > > > > > > > > +     u8     key_mac[32];
-> > > > > > > > > +     u8     data[256];
-> > > > > > > > > +     u8     nonce[16];
-> > > > > > > > > +     __be32 write_counter;
-> > > > > > > > > +     __be16 addr;
-> > > > > > > > > +     __be16 block_count;
-> > > > > > > > > +     __be16 result;
-> > > > > > > > > +     __be16 req_resp;
-> > > > > > > > > +} __packed;
-> > > > > > > > > +
-> > > > > > > > > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Au=
-thentication Key */
-> > > > > > > > > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write=
- counter */
-> > > > > > > > > +#define RPMB_WRITE_DATA        0x3    /* Write data to R=
-PMB partition */
-> > > > > > > > > +#define RPMB_READ_DATA         0x4    /* Read data from =
-RPMB partition */
-> > > > > > > > > +#define RPMB_RESULT_READ       0x5    /* Read result req=
-uest  (Internal) */
-> > > > > > > > > +
-> > > > > > > > >  static DEFINE_MUTEX(block_mutex);
-> > > > > > > > >
-> > > > > > > > >  /*
-> > > > > > > > > @@ -163,6 +207,7 @@ struct mmc_rpmb_data {
-> > > > > > > > >       int id;
-> > > > > > > > >       unsigned int part_index;
-> > > > > > > > >       struct mmc_blk_data *md;
-> > > > > > > > > +     struct rpmb_dev *rdev;
-> > > > > > > > >       struct list_head node;
-> > > > > > > > >  };
-> > > > > > > > >
-> > > > > > > > > @@ -2672,7 +2717,6 @@ static int mmc_rpmb_chrdev_open(str=
-uct inode *inode, struct file *filp)
-> > > > > > > > >
-> > > > > > > > >       get_device(&rpmb->dev);
-> > > > > > > > >       filp->private_data =3D rpmb;
-> > > > > > > > > -     mmc_blk_get(rpmb->md->disk);
-> > > > > > > > >
-> > > > > > > > >       return nonseekable_open(inode, filp);
-> > > > > > > > >  }
-> > > > > > > > > @@ -2682,7 +2726,6 @@ static int mmc_rpmb_chrdev_release(=
-struct inode *inode, struct file *filp)
-> > > > > > > > >       struct mmc_rpmb_data *rpmb =3D container_of(inode->=
-i_cdev,
-> > > > > > > > >                                                 struct mm=
-c_rpmb_data, chrdev);
-> > > > > > > > >
-> > > > > > > > > -     mmc_blk_put(rpmb->md);
-> > > > > > > > >       put_device(&rpmb->dev);
-> > > > > > > > >
-> > > > > > > > >       return 0;
-> > > > > > > > > @@ -2703,10 +2746,165 @@ static void mmc_blk_rpmb_device_=
-release(struct device *dev)
-> > > > > > > > >  {
-> > > > > > > > >       struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev)=
-;
-> > > > > > > > >
-> > > > > > > > > +     rpmb_dev_unregister(rpmb->rdev);
-> > > > > > > > > +     mmc_blk_put(rpmb->md);
-> > > > > > > > >       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
-> > > > > > > > >       kfree(rpmb);
-> > > > > > > > >  }
-> > > > > > > > >
-> > > > > > > > > +static void free_idata(struct mmc_blk_ioc_data **idata, =
-unsigned int cmd_count)
-> > > > > > > > > +{
-> > > > > > > > > +     unsigned int n;
-> > > > > > > > > +
-> > > > > > > > > +     for (n =3D 0; n < cmd_count; n++)
-> > > > > > > > > +             kfree(idata[n]);
-> > > > > > > > > +     kfree(idata);
-> > > > > > > > > +}
-> > > > > > > > > +
-> > > > > > > > > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_=
-rpmb_data *rpmb,
-> > > > > > > > > +                                          unsigned int c=
-md_count)
-> > > > > > > > > +{
-> > > > > > > > > +     struct mmc_blk_ioc_data **idata;
-> > > > > > > > > +     unsigned int n;
-> > > > > > > > > +
-> > > > > > > > > +     idata =3D kcalloc(cmd_count, sizeof(*idata), GFP_KE=
-RNEL);
-> > > > > > > > > +     if (!idata)
-> > > > > > > > > +             return NULL;
-> > > > > > > > > +     for (n =3D 0; n < cmd_count; n++) {
-> > > > > > > > > +             idata[n] =3D kcalloc(1, sizeof(**idata), GF=
-P_KERNEL);
-> > > > > > > > > +             if (!idata[n]) {
-> > > > > > > > > +                     free_idata(idata, n);
-> > > > > > > > > +                     return NULL;
-> > > > > > > > > +             }
-> > > > > > > > > +             idata[n]->rpmb =3D rpmb;
-> > > > > > > > > +     }
-> > > > > > > > > +
-> > > > > > > > > +     return idata;
-> > > > > > > > > +}
-> > > > > > > > > +
-> > > > > > > > > +static void set_idata(struct mmc_blk_ioc_data *idata, u3=
-2 opcode,
-> > > > > > > > > +                   int write_flag, u8 *buf, unsigned int=
- buf_bytes)
-> > > > > > > > > +{
-> > > > > > > > > +     /*
-> > > > > > > > > +      * The size of an RPMB frame must match what's expe=
-cted by the
-> > > > > > > > > +      * hardware.
-> > > > > > > > > +      */
-> > > > > > > > > +     BUILD_BUG_ON(sizeof(struct rpmb_frame) !=3D 512);
-> > > > > > > > > +
-> > > > > > > > > +     idata->ic.opcode =3D opcode;
-> > > > > > > > > +     idata->ic.flags =3D MMC_RSP_R1 | MMC_CMD_ADTC;
-> > > > > > > > > +     idata->ic.write_flag =3D write_flag;
-> > > > > > > > > +     idata->ic.blksz =3D sizeof(struct rpmb_frame);
-> > > > > > > > > +     idata->ic.blocks =3D buf_bytes /  idata->ic.blksz;
-> > > > > > > > > +     idata->buf =3D buf;
-> > > > > > > >
-> > > > > > > > I tested the series on a i.MX8MM with a eMMC connected via =
-the imx-sdhci
-> > > > > > > > controller. Reading from RPMB does not work. It ends in tim=
-eouts due to
-> > > > > > > > no response from the SDHCI controller.
-> > > > > > > >
-> > > > > > > > If idata->buf is allocated here with kmalloc(buf_bytes, GFP=
-_KERNEL) and
-> > > > > > > > the content of buf is copied to the new allocated area, tra=
-nsfers succeed.
-> > > > > > > >
-> > > > > > > > Is it possible that idata->buf is not DMA capable? Any othe=
-r ideas?
-> > > > > > >
-> > > > > > > Thanks for testing. I don't know, the idata->buf is allocated=
- using
-> > > > > > > alloc_pages_exact(nr_pages * PAGE_SIZE, GFP_KERNEL | __GFP_ZE=
-RO); in
-> > > > > > > optee_pool_op_alloc_helper().
-> > > > > >
-> > > > > > Is this really true for idata->buf or isnt the complete RPMB fr=
-ame memory
-> > > > > > allocated like this and therefore idata->buf not page aligned?
-> > > > >
-> > > > > You're right.
-> > > > >
-> > > > > >
-> > > > > > For RPMB via tee-supplicant the idata->buf is allocated within =
-memdup_user
-> > > > > > and therefore page aligned.
-> > > > >
-> > > > > Yes, that's a difference. Have you tested with page-aligned buffe=
-rs to
-> > > > > see if it helps?
-> > > >
-> > > > Yes, this helps. I tested with the following patch, but probably it=
- can also
-> > > > be solved during frame allocation in optee?
-> > >
-> > > Great, thanks for confirming. Yes, we should fix that in the secure w=
-orld.
-> >
-> > I've pushed an update to
-> > https://github.com/jenswi-linaro/optee_os/tree/rpmb_probe
->
-> Thanks for taking care. I applied the additional patch
->
-> https://github.com/OP-TEE/optee_os/commit/cdbe8d149f1eed62bc8ef9137d20885=
-8bb7691d8.patch
->
-> to optee_os and removed the kmalloc dynalloc hack mentioned before from t=
-he
-> kernel.
->
-> The issue persists, please see below.
+Dear Musician and Music Lover,
 
-So it's not the alignment that is the problem. We need to understand
-this problem better before adding workarounds. If I'm not mistaken,
-alloc_pages_exact () and kmalloc() are supposed to provide DMAable
-memory. Could this be a symptom of some other error in your system?
+Here is the Newsletter from Musicians Page website:
 
-Thanks,
-Jens
+http://www.musicianspage.com
 
->
-> Thanks for your support
-> Manuel
->
-> E/TC:? 0
-> E/TC:? 0 TA panicked with code 0xffff0006
-> [   18.661761] mmc0: Timeout waiting for hardware interrupt.
-> [   18.661776] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI RE=
-GISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> E/LD:  Status of TA bc50d971-d4c9-42c4-82cb-343fb7f37896
-> E/LD:   arch: arm
-> E/LD:  region  0: va 0x40005000 pa 0xbe81b000 size 0x002000 flags rw-s (l=
-delf)
-> E/LD:  region  1: va 0x40007000 pa 0xbe81d000 size 0x008000 flags r-xs (l=
-delf)
-> E/LD:  region  2: va 0x4000f000 pa 0xbe825000 size 0x001000 flags rw-s (l=
-delf)
-> E/LD:  region  3: va 0x40010000 pa 0xbe826000 size 0x004000 flags rw-s (l=
-delf)
-> E/LD:  region  4: va 0x40014000 pa 0xbe82a000 size 0x001000 flags r--s
-> E/LD:  region  5: va 0x40015000 pa 0xbe88b000 size 0x011000 flags rw-s (s=
-tack)
-> E/LD:  region  6: va 0x40026000 pa 0x534f8000 size 0x002000 flags rw-- (p=
-aram)
-> E/LD:  region  7: va 0x40035000 pa 0x00001000 size 0x042000 flags r-xs [0=
-]
-> E/LD:  region  8: va 0x40077000 pa 0x00043000 size 0x01e000 flags rw-s [0=
-]
-> E/LD:   [0] bc50d971-d4c9-42c4-82cb-343fb7f37896 @ 0x40035000
-> E/LD:  Call stack:
-> E/LD:   0x40064d48
-> E/LD:   0x40060c17
-> E/LD:   0x40037d81
-> E/LD:   0x40038223
-> E/LD:   0x4004d343
-> E/LD:   0x4005d52d
-> E/LD:   0x4003885f
-> E/LD:   0x40064cd9
-> E/LD:   0x4006a8a3
-> E/LD:   0x4005d68c
-> [   18.661782] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x00000002
-> [   18.661790] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000006
-> [   18.661796] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
-> [   18.661802] mmc0: sdhci: Present:   0x01088a8e | Host ctl: 0x00000031
-> [   18.661808] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> [   18.661814] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-> [   18.661820] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-> [   18.661825] mmc0: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
-> [   18.661831] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-> [   18.661837] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x0000b407
-> [   18.661842] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00ffffff
-> [   18.661848] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-> [   18.661856] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00000900
-> [   18.661862] mmc0: sdhci: Host ctl2: 0x00000008
-> [   18.661868] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x412c0200
-> [   18.661874] mmc0: sdhci-esdhc-imx: =3D=3D=3D=3D=3D=3D=3D=3D=3D ESDHC I=
-MX DEBUG STATUS DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> [   18.661879] mmc0: sdhci-esdhc-imx: cmd debug status:  0x2120
-> [   18.661885] mmc0: sdhci-esdhc-imx: data debug status:  0x22d0
-> [   18.661893] mmc0: sdhci-esdhc-imx: trans debug status:  0x23c0
-> [   18.661900] mmc0: sdhci-esdhc-imx: dma debug status:  0x2400
-> [   18.661907] mmc0: sdhci-esdhc-imx: adma debug status:  0x25b4
-> [   18.661915] mmc0: sdhci-esdhc-imx: fifo debug status:  0x2650
-> [   18.661922] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x2760
-> [   18.661929] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D
-> [   18.662615] sdhci-esdhc-imx 30b40000.mmc: __mmc_blk_ioctl_cmd: data er=
-ror -110
-> [   18.772374] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke erro=
-r: 0xffff3024
-> [   18.772393] tpm tpm0: tpm_try_transmit: send(): error -53212
-> [   18.772447] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke erro=
-r: 0xffff3024
-> [   18.772455] tpm tpm0: tpm_try_transmit: send(): error -53212
-> [   18.772465] ftpm-tee tpm: ftpm_tee_probe: tpm_chip_register failed wit=
-h rc=3D-53212
-> [   18.772545] ftpm-tee: probe of tpm failed with error -53212
-> [   19.430011] caam_jr 30902000.jr: 20000254: CCB: desc idx 2: RNG: Not i=
-nstantiated
-> [   28.901794] mmc0: Timeout waiting for hardware interrupt.
-> [  *** ] (1 of 2) Job dev-tpmrm0.device/start running (37s / 1min 30s)
-> [ ***  ] (2 of 2) Job dev-tpm0.device/start running (47s / 1min 30s)
-> [ ***  ] (2 of 2) Job dev-tpm0.device/start
->
+As you have requested. Read on...
+
+(If you are no longer interested in subscribing to this newsletter, you can=
+ unsubscribe by clicking the link at the bottom of this newsletter. Thanks!=
+)
+
+
+
+
+---------------------------------------------------------------------------=
+-
+
+If you are not yet registered as a Musician or Band/Ensemble, be sure to si=
+gn-up from the following page (it's free!):
+
+https://www.musicianspage.com/signup.php?email=3Dlinux-mmc@vger.kernel.org
+
+---------------------------------------------------------------------------=
+-
+
+
+
+
+Consider to join with a Standard or Pro Membership
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Either if you are a Musician or a Music Employer, have a look at our Member=
+ship Plans and sign up for the one that best fits your needs:
+
+
+http://www.musicianspage.com/membership.html
+
+
+A Standard or Pro Membership gives you the ability to upload unlimited audi=
+o, video, and sheet music files to your profile; as well as a more complete=
+ resume (or service/company info if you are an employer) and a creative pag=
+e with media content. If you are a musician, you will also have the chance =
+to get featured on the new Musicians Page radio:
+
+http://www.musicianspage.com/music/radio/
+
+
+Musicians Page gives you a professional space on the web to showcase your t=
+alent to potential employers or, for employers, to have a professional and =
+targeted space on the web where to showcase your products or services to po=
+tential prospects. Musicians Page gives you the chance to differentiate you=
+rself from other musicians or the competition who only use amateur channels=
+ such as MySpace, FaceBook, YouTube, or other free sites.
+
+Also, do you know that your profile on Musicians Page is Google optimized?
+
+This means that employers, other musicians or prospects can easily find you=
+ via Google. Our system automatically optimizes every Musician's profile to=
+ appear at the top of Google results for relevant keywords. Just another re=
+ason to take full advantage of all that the Standard and Pro Memberships ha=
+ve to offer, and not rely solely on free social networks that won't optimiz=
+e your profile for others to see at the top of the list!
+
+With a Standard or Pro Membership, you'll also be able to find and apply fo=
+r external jobs Musicians Page finds for you on the web (if you are a music=
+ian) and, with a Pro Membership, be notified via email as soon as a new ext=
+ernal jobs, matching your profile, are found. Or, if you are an employer, b=
+e featured prominently on any webpage of our site to over 2,000 unique user=
+s daily.
+
+Musicians Page is a network for professional musicians and music employers,=
+ built and planned to grow based on professional musicians' and music emplo=
+yers' needs. Don't miss the opportunity to jump on the band wagon from the =
+beginning.
+
+Membership fees are likely to be increased in the coming weeks, so join Mus=
+icians Page today and start networking the right way!
+
+https://www.musicianspage.com/signup.php
+
+
+
+
+Are you looking for musicians, a song writer, a lyricist, a composer?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If so, please post your music job or project on Musicians Page.
+To post a job/project is completely free and takes 5 minutes:
+
+http://www.musicianspage.com/login/panel.php?yourjobs=3D1&postnew=3D1
+
+
+REMEMBER: you can post a job even for a FREE project you need musicians for=
+!
+
+
+
+
+Latest Posted Jobs on Musicians Page
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Hammond B3 Organ Player
+http://www.musicianspage.com/jobs/7729/
+
+Guitarist Wanted
+http://www.musicianspage.com/jobs/7728/
+
+New Woodwind orchestra
+http://www.musicianspage.com/jobs/7727/
+
+Female singer,rapper to Collab Remotely
+http://www.musicianspage.com/jobs/7724/
+
+Music Duo
+http://www.musicianspage.com/jobs/7721/
+
+Guitarist needed in Mexico for rock and roll music
+http://www.musicianspage.com/jobs/7720/
+
+STEEL PAN SOLOIST FOR CRUISE SHIPS URGENT
+http://www.musicianspage.com/jobs/7715/
+
+Lauren Daigle Cover Singer
+http://www.musicianspage.com/jobs/7716/
+
+Violinist Wanted
+http://www.musicianspage.com/jobs/7717/
+
+Power rock/pop trio for cruises
+http://www.musicianspage.com/jobs/7713/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest External Jobs or Opportunities (found on the web)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Guitarist wanted for cover band
+http://www.musicianspage.com/extjobs/1269621/
+
+LOOKING FOR LEAD GUITAR PLAYER &amp; DRUMMER
+http://www.musicianspage.com/extjobs/1269620/
+
+Energetic Rock Drummer wanted for Cover Band-Paid gigs.
+http://www.musicianspage.com/extjobs/1269619/
+
+Male Country Vocalist Seeking a Guitar Player to form a Duo
+http://www.musicianspage.com/extjobs/1269618/
+
+SEEKING Singer who loves Oldies &amp; Classic Rock
+http://www.musicianspage.com/extjobs/1269617/
+
+Looking for fiddle player/violinist for record
+http://www.musicianspage.com/extjobs/1269616/
+
+Drummer looking for band
+http://www.musicianspage.com/extjobs/1269615/
+
+80's Guitarist wanted for Originals
+http://www.musicianspage.com/extjobs/1269614/
+
+Versatile guitaristlooking for cover band
+http://www.musicianspage.com/extjobs/1269613/
+
+Classic Rock Vocalist Needed
+http://www.musicianspage.com/extjobs/1269612/
+
+
+More jobs:
+http://www.musicianspage.com/jobs/
+
+
+
+
+Latest Forum Topics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+New Release - by KonstantinDobriak
+posted on the General Forum forum
+http://www.musicianspage.com/forums/general/general/9051/
+
+
+Live Youtube - by Lucas e Karina
+posted on the Popular Music forum
+http://www.musicianspage.com/forums/music/popmusic/9050/
+
+
+Red Hot Chili Peppers-Under the Bridge (Guitar and Piano) - by Luis Afonso =
+Andre
+posted on the Rock Music forum
+http://www.musicianspage.com/forums/music/rockmusic/9049/
+
+
+More forum topics:
+http://www.musicianspage.com/forums/
+
+
+
+
+Latest Uploaded Audio Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Jesus Loves me by Tommy Labas (added by Tommy Labas)
+Genre: Gospel Music
+http://www.musicianspage.com/musicians/54019/audiofile/22985/
+
+
+5/4 RE DE LAMIREMI by LIONHELL VONTICH (added by Fontich Lionel)
+Genre: Rock
+http://www.musicianspage.com/musicians/54008/audiofile/22981/
+
+
+While There&#039;s Still time by Jeremiah Minahan (added by Jeremiah Minaha=
+n)
+Genre: Christian
+http://www.musicianspage.com/musicians/54000/audiofile/22980/
+
+
+More audio files:
+http://www.musicianspage.com/audio/
+
+
+We are waiting for your comments and if you have any, please upload your
+own audio files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addaudiofiles=3D1
+
+
+
+
+Latest Uploaded Video Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+2 Tchaikovski 2 now by Piannleoz Piano (added by Piannleoz Piano)
+Genre: Classical
+http://www.musicianspage.com/musicians/5627/videofile/21233/
+
+
+Lucas e Karina: Projeto Primavera #LIVE | Parte 2 - Flashback by Lucas e Ka=
+rina (added by Lucas e Karina)
+Genre: Pop
+http://www.musicianspage.com/musicians/44677/videofile/21232/
+
+
+Lucas e Karina by Lucas e Karina (added by Lucas e Karina)
+Genre: Pop
+http://www.musicianspage.com/musicians/44677/videofile/21231/
+
+
+More video files:
+http://www.musicianspage.com/video/
+
+
+We are waiting for your comments and if you have any, please upload your
+own video files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addvideofiles=3D1
+
+
+
+
+Latest Uploaded Sheet Music Files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sample of a completed order. Convert handwriting. by Constantine Grechanivs=
+ky (added by Grechanivsky)
+Genre: Contemporary
+http://www.musicianspage.com/musicians/9640/sheetmusic/3289/
+
+
+Rodrigo. Concierto de Aranjuez. Parts. by Joaquin Rodrigo (added by Grechan=
+ivsky)
+Genre: Other...
+http://www.musicianspage.com/musicians/9640/sheetmusic/3287/
+
+
+Along the Danube by Joe Sinha Semple (added by Joe Sinha Semple)
+Genre: Classical/Contemporary
+http://www.musicianspage.com/musicians/53961/sheetmusic/3286/
+
+
+More sheet music files:
+http://www.musicianspage.com/sheetmusic/
+
+
+We are waiting for your comments and if you have any, please upload your
+own sheet music files from the page below (you must register first):
+
+https://www.musicianspage.com/login/panel.php?addsheetmusic=3D1
+
+
+
+
+Earn money with your website, FaceBook, YouTube or MySpace
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you own a website or simply an account on FaceBook, YouTube, MySpace or =
+Twitter, be sure to check out the Virtual Sheet Music's Affiliate Program w=
+hich entitles you to earn 30% commission on any referred sale.
+
+It is completely free to join:
+
+https://affiliates.virtualsheetmusic.com/
+
+
+and once you have an account, start referring users using a special code to=
+ put on your website or social account (FaceBook, Twitter, etc).
+
+For any further questions, please reply to this email, we will be glad to h=
+elp you step by step.
+
+
+
+
+Join us on the major Social Networks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stay updated with our latest news on:
+
+1. on FaceBook:
+http://www.facebook.com/MusiciansPage
+
+2. on Twitter:
+http://twitter.com/MusiciansPage
+
+
+
+
+---------------------------------------------------------------------------=
+-----
+
+FEATURE YOURSELF ON MUSICIANS PAGE:
+=20
+If you have an upcoming concert, CD release, special Event, or just want to=
+ promote yourself and your activity, remember you can feature yourself in f=
+ront of thousands of musicians, music lovers, and music employers (includin=
+g music agents, artist management companies, etc.) by exclusively putting y=
+our picture and name on every page of Musicians Page, starting at just $10 =
+(that's right, just 10 bucks!):
+=20
+https://www.musicianspage.com/login/panel.php?featureyourself=3D1
+=20
+Your ad will be displayed exclusively for the duration of your campaign, gi=
+ving you maximum exposure to the Musicians Page community. Musicians Page i=
+s visited by thousands of musicians and people working in the music busines=
+s every day, so consider putting yourself in front of this specialized audi=
+ence.
+
+This is your chance to make new contacts and seize exciting opportunities i=
+n minutes! Don't miss this opportunity now!
+
+---------------------------------------------------------------------------=
+-----
+
+
+
+
+Please feel free to pass this Newsletter along to friends and other musicia=
+ns who might find this content valuable in the same way you do, and be sure=
+ to send us your ideas and thoughts by either replying to this email or by =
+posting your comments and feedback on the dedicated forum below:
+
+http://www.musicianspage.com/forums/general/feedback/
+
+Thank you!
+
+All the best,
+Fabrizio Ferrari, CEO
+Musicians Page
+http://www.musicianspage.com
+Virtual Sheet Music Inc.
+http://www.virtualsheetmusic.com
+29911 Niguel Road, #6992
+Laguna Niguel, CA 92677 (USA)
+Fax: +1 800 717 1876 or +1 973 273 2171
+----------------------------------------------
+This message was sent from Musicians Page
+http://www.musicianspage.com
+To unsubscribe, please go to:
+http://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
+=2Eorg
