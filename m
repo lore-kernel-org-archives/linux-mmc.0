@@ -1,146 +1,466 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
+Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1B8B53365
-	for <linux-mmc@vger.kernel.org>; Thu,  2 May 2024 09:12:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBFD354903
+	for <linux-mmc@vger.kernel.org>; Thu,  2 May 2024 09:53:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714641126; cv=none; b=QN+n3weGUPB4HqRVwixjk3CQb/Fy3HhZ7DOQibmxsYq8IZXkTvIneuqFqCUn1cnkV7SwY15qexl7aKqFynjXpGAFL48L536l7nOpyWJ3ZVJeHCB0sUYEFapVgd9E+5M5BcWNg9ZCiKFgwgT7yaNbxh1INvRPhH94hcp9j/0rAT8=
+	t=1714643636; cv=none; b=nHJEesbnFW7hbcpLq3v7MgsprQOIBnnBGg9BRISSEX1hqDqkzTRwXiXjM4WVVbBOqPs05dJR6ITy+UmLJd9fYR2LcGQ7ywLon4gCV7ADxm/NWFzYntX+nb2V6wfeUJ80WDPViA7Ayuf11C0Pwj5XCgs4tjzROVvtxxoKloDTaOc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714641126; c=relaxed/simple;
-	bh=QQDvn6Q8TkCbmjMUDI4cHKI+ospj5DHXLnkdPbN4GLU=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EyRxbi0ww6iSGsMt0P7VytkUruBsyyb8em4ooP+vKThnmk+sy4Q4cSJJsroZgtAgsFkt/NEfqEVrE85QskAN9H2C1v6buVYxIH5BgpLHWfXxNmrtXkdObvtfCF9hHg37s8B5dFix6nqWNEl32bm032/X4LjpdbX021mpYrcn/ZQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=Hl9WobmC; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1714643636; c=relaxed/simple;
+	bh=o87WVhVjQRBP+6ThfYJoj0Z2951o3PlEy881O0myrMg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ZLfhL1TADEdg2oiErGRRzrk5RF5P0RRIzzuUjfV1XY7yO+U8ZERQwgklMALu+yDzH3f/7aYE0ntQKtM8ddUZ+4JwzxiE/G94m/HM+lSmXjGIQFoLcsm9nTsKFcuMajfbIe/x4OEmdq4uZ7SCBrBnrOilClVACnlkwvMH/wLn4ds=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ikaz5+8C; arc=none smtp.client-ip=209.85.161.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="Hl9WobmC"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a5200202c1bso984166366b.0
-        for <linux-mmc@vger.kernel.org>; Thu, 02 May 2024 02:12:04 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ikaz5+8C"
+Received: by mail-oo1-f50.google.com with SMTP id 006d021491bc7-5af702072a9so811380eaf.1
+        for <linux-mmc@vger.kernel.org>; Thu, 02 May 2024 02:53:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1714641123; x=1715245923; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=XKBISEz5hivbFgsL9sOrWIy+M0J+RrEQV3Dl9y05i9U=;
-        b=Hl9WobmCJjmT63XPi8Rvic4HP5QhuB+fDVcGezn8lySClSevvmwl4pm1uz0CXYhdzg
-         gnYheJ2ua+kxAngBZOqyXsPXxqmMtNbX9ND9IsR09C3Od4WTzQNCN4v5HhgNDPMYdh/2
-         CWCVH/tvbsk6Am86OEhXcsiZkVRHemNPg6Fgbz4Z5p0jy1flwof4Py1B2ic35vnKbl5q
-         RRVTUz4cDXlG957Cta+czzr8h9Uodw0AAvTdlZbCciuod3BqoQ8URap7rYgutkBm+A7u
-         GRQeH6H3ieW3j7L1ZPiHsi5R+oZkEk3XoD7kyMIk/AARjoeRMHWUnmZENU7E7BsFHEjR
-         uatQ==
+        d=linaro.org; s=google; t=1714643632; x=1715248432; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/AcRINpNVGLwFNrbPHoo/3mfgbO66yT1OWofD/Yj738=;
+        b=ikaz5+8C9bxLyC5nWoMOMQae6Mfv4QcdM/kP2OrmQvRx4jtLHzYg3s6f6fHX1jZm3n
+         X2WctwqAXGe/gQillEXGZWeMvRuZlJ8Y9jctaGbXXOLjbladiuZL52jKHvAlRR0+ykoV
+         U+H2LhL45vTMiWdbDXTzoSaemV7FIqHbvYtDHaDLkaJ0xP1rJRlDaz0Gq4lbU/B87Ngz
+         pk6ovOHSaL/vhREfRzi90WEApxG4JIMPn32kBXA3CunJQSptKDApTGvhp5hHM06LG1Sw
+         Uuvq1YosYMy1SEKZRaeRG6/ZBr0hRVLNbmm2UYWvoGhT9a+ME3sZsDXn0RMJir2CXZ67
+         +xgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714641123; x=1715245923;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XKBISEz5hivbFgsL9sOrWIy+M0J+RrEQV3Dl9y05i9U=;
-        b=T5/4dlAODL+hItNQiAmkr5IkQBpZV4UCYGszVV9cvo0joq3FHH8TnK8ZCJAz/LrgGu
-         8rhA/iCuuw1n4534VEqvmYxeJPmZRSPlhcZs4iuxDHb5A5opUcbeVzcAga2V5FmUjHXN
-         MF7dpJzEga4B8mlKRkK3j/XifP607SgxMXwXq3yDIEGFS/wwY08ThV7d9LktPTn/ycIj
-         it7uRCnLSEHI3WHjcgQYoHSqg/JIrn40fq66PjrspjgEGP5gvEXATpbLwCRts6F6klll
-         0G8NNJOeANfpj7TloBaJms15Sch0I30Mlh5fpfy5IedSZ0VZwoUSneavZx7gFpcseDe8
-         YTxA==
-X-Forwarded-Encrypted: i=1; AJvYcCXewadOcpgGJ9aeaoz04XDVoK4qE9wGPze5ZZ/FguyTcMy9OFTYpRJIWds+twqNcrD2zrVutpinCVe+BqqXOa2qNum4Sejh+v+U
-X-Gm-Message-State: AOJu0YxZBwps1Whf5FZ7wQgyD8UKYUcX4iBSCSDKHa7twZ0avvV0+NaE
-	rOIfmqTXbwe8mL4ystqpqb14Bb9N1LW+oLDLjY+cQCSANDP9C2WLdGgB0Y26qJ0=
-X-Google-Smtp-Source: AGHT+IHQ6L475JtRROpjybMx/lyDKdF98v0PWXkxGP7wEay+2VSkVed/s8BZXiNF9X43dqxWFA0H2w==
-X-Received: by 2002:a17:906:79c3:b0:a58:9707:685b with SMTP id m3-20020a17090679c300b00a589707685bmr1128611ejo.16.1714641122948;
-        Thu, 02 May 2024 02:12:02 -0700 (PDT)
-Received: from localhost (host-87-1-234-99.retail.telecomitalia.it. [87.1.234.99])
-        by smtp.gmail.com with ESMTPSA id p22-20020a1709060e9600b00a5887833da8sm315074ejf.81.2024.05.02.02.12.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 May 2024 02:12:02 -0700 (PDT)
-From: Andrea della Porta <andrea.porta@suse.com>
-X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Thu, 2 May 2024 11:12:06 +0200
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Andrea della Porta <andrea.porta@suse.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org,
-	Jonathan Bell <jonathan@raspberrypi.com>,
-	Phil Elwell <phil@raspberrypi.com>
-Subject: Re: [PATCH 0/6] Add support for BCM2712 SD card controller
-Message-ID: <ZjNY5qY4ABOB3lv2@apocalypse>
-Mail-Followup-To: Stefan Wahren <wahrenst@gmx.net>,
-	Andrea della Porta <andrea.porta@suse.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org,
-	Jonathan Bell <jonathan@raspberrypi.com>,
-	Phil Elwell <phil@raspberrypi.com>
-References: <cover.1713036964.git.andrea.porta@suse.com>
- <fd77cfa2-9bd8-4393-95bd-eced676bf6d2@gmx.net>
+        d=1e100.net; s=20230601; t=1714643632; x=1715248432;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=/AcRINpNVGLwFNrbPHoo/3mfgbO66yT1OWofD/Yj738=;
+        b=BOI1ySFv33zYkyAMobrbBVVnHvpqzSbEwofKDqD7ReOokBIY+jC3J+8f8D9LHSHik7
+         mSOtPyoDBHKzD5Gx+p0nzcJUvpuzSzbUHSdl+FSn9HWfOvv436PzAY0pc8mPWt5NGx/m
+         wonvmQIwZg6GW4K7UGqoBKh389Y0DkiMjlzWmI3Avu4JzMGB345VwreIkP1rA7OYPMID
+         oHivlOqwoI9yOMPrbgSsayoDAlLymFm4u/Aktl/Dt1jONibkrMs0QFsKQ8LfQMUnZgn3
+         0cSTVF+gJdNOsEgYmO4iM3xRjvLJ3G4/pqIyw00Kgq1DNEtbWFT1Y+D/+wkMiNfH6jZW
+         8LZw==
+X-Forwarded-Encrypted: i=1; AJvYcCXVsnJ7RGz+k0khSXcbHHMtUVSCTzq6zKz06JV5yNLX/ILAq3WFJXIo5xxqwFjzHWib8St1+HYp7ja8DbtuIBjDuXMI+Ws1GFCG
+X-Gm-Message-State: AOJu0YwmN+Y4y7MgydJpFBGQGgDeF+eJoEqzw4954oupNQHViJA0GYs+
+	OcjoWfIIKL1D7ArhtaC0HDQ5ptaDRLo4fXp+x9JCIGNvcHyBPVpDi29ij7pzg5lx3JRn9ml/6HV
+	AnCWlLRdcp/yos+HlAI1iYdZSxJxNY4dRuIEnbQ==
+X-Google-Smtp-Source: AGHT+IHpgmdM47sX6tHYGjiSKktGpCzsQjaRz/epLFCL8xJ5DlMgSvy3wd4tmG84krtRl6yPhG6Cc2DrCWia6ccKHAs=
+X-Received: by 2002:a4a:55d1:0:b0:5af:292b:6986 with SMTP id
+ e200-20020a4a55d1000000b005af292b6986mr1132222oob.3.1714643631809; Thu, 02
+ May 2024 02:53:51 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <fd77cfa2-9bd8-4393-95bd-eced676bf6d2@gmx.net>
+References: <20240422091936.3714381-1-jens.wiklander@linaro.org>
+ <20240422091936.3714381-3-jens.wiklander@linaro.org> <ZioXkvnIw5V5MXBU@mecka.net>
+ <CAHUa44Fojanryuc+ciJrVZUopRLcTt2teS_pC4BBjt1Wmy240A@mail.gmail.com>
+ <Zi9rKzz8u8z7cIy0@mecka.net> <CAHUa44HHtcaYXhcWg5zL5EQ8pEP7aEDKS+yjpaMJH8vTtF3xFw@mail.gmail.com>
+ <Zi93_0aCq9mQ_6cD@mecka.net> <CAHUa44FG3ge3nyQVStKjfpeJvpjuQjNiZsxHjyRz+CUjHwkS=g@mail.gmail.com>
+ <CAHUa44EecehfyzE97z49e=-qA513um21JyJz_CNKweuctp=HoQ@mail.gmail.com> <Zi-c6QXySx78JoJ_@mecka.net>
+In-Reply-To: <Zi-c6QXySx78JoJ_@mecka.net>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Thu, 2 May 2024 11:53:40 +0200
+Message-ID: <CAHUa44F1GrHpg4tatm_3+c9sg=CBWMjpdU5YE9BmQKRa+5vvaQ@mail.gmail.com>
+Subject: Re: [PATCH v5 2/3] mmc: block: register RPMB partition with the RPMB subsystem
+To: Manuel Traut <manut@mecka.net>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
+	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Tomas Winkler <tomas.winkler@intel.com>, 
+	Alexander Usyskin <alexander.usyskin@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 12:07 Sun 14 Apr     , Stefan Wahren wrote:
-> Hi Andrea,
-> 
-> Am 14.04.24 um 00:14 schrieb Andrea della Porta:
-> > Hi,
-> > 
-> > This patchset adds support for the SDHCI controller on Broadcom BCM2712
-> > SoC in order to make it possible to boot (particularly) Raspberry Pi 5
-> > from SD card. This work is heavily based on downstream contributions.
-> since your goal is minimal Raspberry Pi 5 support, i suggest to use this
-> as the subject for this patch.
-> > Patch #1 and 2: introduce the dt binding definitions for, respectively,
-> > the new pin cfg/mux controller and the SD host controller as a preparatory
-> > step for the upcoming dts.
-> > 
-> > Patch #3: add a somewhat reasonable (*almost* bare-minimum) dts to be used
-> > to boot Rpi5 boards. Since till now there was no support at all for any
-> > 2712 based chipset, both the SoC and board dts plus definitions for the
-> > new Pin and SD host controller have been added.
-> The patch still seems to contain a lot unnecessary stuff (Wifi, BT,
-> SPI), please try to remove as much as possible for the minimal support
-> (just boot via debug UART & SD card) in order to make review easier. Btw
-> this patch must be after pinctrl & SDHCI support.
-> > Patch #4: the driver supporting the pin controller. Based on [1] and
-> > successive fix commits.
-> > 
-> > Patch #5: add SDHCI support. Based on [2] and the next 2 fix commits.
-> > Drop the SD Express implementation for now, that will be added by patch
-> > #6.
-> > 
-> > Patch #6: this patch offers SD Express support and can be considered totally
-> > optional. The callback plumbing is slightly different w.r.t. the downstream
-> > approach (see [3]), as explained in the patch comment. Not sure what is the best,
-> > any comment is highly appreciated.
-> I don't think this should be necessary for minimal Raspberry Pi 5
-> support. Maybe this should be addressed later.
+On Mon, Apr 29, 2024 at 3:13=E2=80=AFPM Manuel Traut <manut@mecka.net> wrot=
+e:
+>
+> On Mon, Apr 29, 2024 at 01:13:58PM +0200, Jens Wiklander wrote:
+> > On Mon, Apr 29, 2024 at 12:45=E2=80=AFPM Jens Wiklander
+> > <jens.wiklander@linaro.org> wrote:
+> > >
+> > > On Mon, Apr 29, 2024 at 12:35=E2=80=AFPM Manuel Traut <manut@mecka.ne=
+t> wrote:
+> > > >
+> > > > On Mon, Apr 29, 2024 at 12:08:45PM +0200, Jens Wiklander wrote:
+> > > > > On Mon, Apr 29, 2024 at 11:41=E2=80=AFAM Manuel Traut <manut@meck=
+a.net> wrote:
+> > > > > >
+> > > > > > On Fri, Apr 26, 2024 at 03:24:21PM +0200, Jens Wiklander wrote:
+> > > > > > > On Thu, Apr 25, 2024 at 10:43=E2=80=AFAM Manuel Traut <manut@=
+mecka.net> wrote:
+> > > > > > > >
+> > > > > > > > On Mon, Apr 22, 2024 at 11:19:35AM +0200, Jens Wiklander wr=
+ote:
+> > > > > > > > > Register eMMC RPMB partition with the RPMB subsystem and =
+provide
+> > > > > > > > > an implementation for the RPMB access operations abstract=
+ing
+> > > > > > > > > the actual multi step process.
+> > > > > > > > >
+> > > > > > > > > Add a callback to extract the needed device information a=
+t registration
+> > > > > > > > > to avoid accessing the struct mmc_card at a later stage a=
+s we're not
+> > > > > > > > > holding a reference counter for this struct.
+> > > > > > > > >
+> > > > > > > > > Taking the needed reference to md->disk in mmc_blk_alloc_=
+rpmb_part()
+> > > > > > > > > instead of in mmc_rpmb_chrdev_open(). This is needed by t=
+he
+> > > > > > > > > route_frames() function pointer in struct rpmb_ops.
+> > > > > > > > >
+> > > > > > > > > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> > > > > > > > > Signed-off-by: Alexander Usyskin <alexander.usyskin@intel=
+.com>
+> > > > > > > > > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> > > > > > > > > ---
+> > > > > > > > >  drivers/mmc/core/block.c | 241 +++++++++++++++++++++++++=
++++++++++++++-
+> > > > > > > > >  1 file changed, 239 insertions(+), 2 deletions(-)
+> > > > > > > > >
+> > > > > > > > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/=
+block.c
+> > > > > > > > > index 32d49100dff5..a7f126fbc605 100644
+> > > > > > > > > --- a/drivers/mmc/core/block.c
+> > > > > > > > > +++ b/drivers/mmc/core/block.c
+> > > > > > > > > @@ -33,6 +33,7 @@
+> > > > > > > > >  #include <linux/cdev.h>
+> > > > > > > > >  #include <linux/mutex.h>
+> > > > > > > > >  #include <linux/scatterlist.h>
+> > > > > > > > > +#include <linux/string.h>
+> > > > > > > > >  #include <linux/string_helpers.h>
+> > > > > > > > >  #include <linux/delay.h>
+> > > > > > > > >  #include <linux/capability.h>
+> > > > > > > > > @@ -40,6 +41,7 @@
+> > > > > > > > >  #include <linux/pm_runtime.h>
+> > > > > > > > >  #include <linux/idr.h>
+> > > > > > > > >  #include <linux/debugfs.h>
+> > > > > > > > > +#include <linux/rpmb.h>
+> > > > > > > > >
+> > > > > > > > >  #include <linux/mmc/ioctl.h>
+> > > > > > > > >  #include <linux/mmc/card.h>
+> > > > > > > > > @@ -76,6 +78,48 @@ MODULE_ALIAS("mmc:block");
+> > > > > > > > >  #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) =
+>> 16)
+> > > > > > > > >  #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) =
+>> 8)
+> > > > > > > > >
+> > > > > > > > > +/**
+> > > > > > > > > + * struct rpmb_frame - rpmb frame as defined by eMMC 5.1=
+ (JESD84-B51)
+> > > > > > > > > + *
+> > > > > > > > > + * @stuff        : stuff bytes
+> > > > > > > > > + * @key_mac      : The authentication key or the message=
+ authentication
+> > > > > > > > > + *                 code (MAC) depending on the request/r=
+esponse type.
+> > > > > > > > > + *                 The MAC will be delivered in the last=
+ (or the only)
+> > > > > > > > > + *                 block of data.
+> > > > > > > > > + * @data         : Data to be written or read by signed =
+access.
+> > > > > > > > > + * @nonce        : Random number generated by the host f=
+or the requests
+> > > > > > > > > + *                 and copied to the response by the RPM=
+B engine.
+> > > > > > > > > + * @write_counter: Counter value for the total amount of=
+ the successful
+> > > > > > > > > + *                 authenticated data write requests mad=
+e by the host.
+> > > > > > > > > + * @addr         : Address of the data to be programmed =
+to or read
+> > > > > > > > > + *                 from the RPMB. Address is the serial =
+number of
+> > > > > > > > > + *                 the accessed block (half sector 256B)=
+.
+> > > > > > > > > + * @block_count  : Number of blocks (half sectors, 256B)=
+ requested to be
+> > > > > > > > > + *                 read/programmed.
+> > > > > > > > > + * @result       : Includes information about the status=
+ of the write counter
+> > > > > > > > > + *                 (valid, expired) and result of the ac=
+cess made to the RPMB.
+> > > > > > > > > + * @req_resp     : Defines the type of request and respo=
+nse to/from the memory.
+> > > > > > > > > + *
+> > > > > > > > > + * The stuff bytes and big-endian properties are modeled=
+ to fit to the spec.
+> > > > > > > > > + */
+> > > > > > > > > +struct rpmb_frame {
+> > > > > > > > > +     u8     stuff[196];
+> > > > > > > > > +     u8     key_mac[32];
+> > > > > > > > > +     u8     data[256];
+> > > > > > > > > +     u8     nonce[16];
+> > > > > > > > > +     __be32 write_counter;
+> > > > > > > > > +     __be16 addr;
+> > > > > > > > > +     __be16 block_count;
+> > > > > > > > > +     __be16 result;
+> > > > > > > > > +     __be16 req_resp;
+> > > > > > > > > +} __packed;
+> > > > > > > > > +
+> > > > > > > > > +#define RPMB_PROGRAM_KEY       0x1    /* Program RPMB Au=
+thentication Key */
+> > > > > > > > > +#define RPMB_GET_WRITE_COUNTER 0x2    /* Read RPMB write=
+ counter */
+> > > > > > > > > +#define RPMB_WRITE_DATA        0x3    /* Write data to R=
+PMB partition */
+> > > > > > > > > +#define RPMB_READ_DATA         0x4    /* Read data from =
+RPMB partition */
+> > > > > > > > > +#define RPMB_RESULT_READ       0x5    /* Read result req=
+uest  (Internal) */
+> > > > > > > > > +
+> > > > > > > > >  static DEFINE_MUTEX(block_mutex);
+> > > > > > > > >
+> > > > > > > > >  /*
+> > > > > > > > > @@ -163,6 +207,7 @@ struct mmc_rpmb_data {
+> > > > > > > > >       int id;
+> > > > > > > > >       unsigned int part_index;
+> > > > > > > > >       struct mmc_blk_data *md;
+> > > > > > > > > +     struct rpmb_dev *rdev;
+> > > > > > > > >       struct list_head node;
+> > > > > > > > >  };
+> > > > > > > > >
+> > > > > > > > > @@ -2672,7 +2717,6 @@ static int mmc_rpmb_chrdev_open(str=
+uct inode *inode, struct file *filp)
+> > > > > > > > >
+> > > > > > > > >       get_device(&rpmb->dev);
+> > > > > > > > >       filp->private_data =3D rpmb;
+> > > > > > > > > -     mmc_blk_get(rpmb->md->disk);
+> > > > > > > > >
+> > > > > > > > >       return nonseekable_open(inode, filp);
+> > > > > > > > >  }
+> > > > > > > > > @@ -2682,7 +2726,6 @@ static int mmc_rpmb_chrdev_release(=
+struct inode *inode, struct file *filp)
+> > > > > > > > >       struct mmc_rpmb_data *rpmb =3D container_of(inode->=
+i_cdev,
+> > > > > > > > >                                                 struct mm=
+c_rpmb_data, chrdev);
+> > > > > > > > >
+> > > > > > > > > -     mmc_blk_put(rpmb->md);
+> > > > > > > > >       put_device(&rpmb->dev);
+> > > > > > > > >
+> > > > > > > > >       return 0;
+> > > > > > > > > @@ -2703,10 +2746,165 @@ static void mmc_blk_rpmb_device_=
+release(struct device *dev)
+> > > > > > > > >  {
+> > > > > > > > >       struct mmc_rpmb_data *rpmb =3D dev_get_drvdata(dev)=
+;
+> > > > > > > > >
+> > > > > > > > > +     rpmb_dev_unregister(rpmb->rdev);
+> > > > > > > > > +     mmc_blk_put(rpmb->md);
+> > > > > > > > >       ida_simple_remove(&mmc_rpmb_ida, rpmb->id);
+> > > > > > > > >       kfree(rpmb);
+> > > > > > > > >  }
+> > > > > > > > >
+> > > > > > > > > +static void free_idata(struct mmc_blk_ioc_data **idata, =
+unsigned int cmd_count)
+> > > > > > > > > +{
+> > > > > > > > > +     unsigned int n;
+> > > > > > > > > +
+> > > > > > > > > +     for (n =3D 0; n < cmd_count; n++)
+> > > > > > > > > +             kfree(idata[n]);
+> > > > > > > > > +     kfree(idata);
+> > > > > > > > > +}
+> > > > > > > > > +
+> > > > > > > > > +static struct mmc_blk_ioc_data **alloc_idata(struct mmc_=
+rpmb_data *rpmb,
+> > > > > > > > > +                                          unsigned int c=
+md_count)
+> > > > > > > > > +{
+> > > > > > > > > +     struct mmc_blk_ioc_data **idata;
+> > > > > > > > > +     unsigned int n;
+> > > > > > > > > +
+> > > > > > > > > +     idata =3D kcalloc(cmd_count, sizeof(*idata), GFP_KE=
+RNEL);
+> > > > > > > > > +     if (!idata)
+> > > > > > > > > +             return NULL;
+> > > > > > > > > +     for (n =3D 0; n < cmd_count; n++) {
+> > > > > > > > > +             idata[n] =3D kcalloc(1, sizeof(**idata), GF=
+P_KERNEL);
+> > > > > > > > > +             if (!idata[n]) {
+> > > > > > > > > +                     free_idata(idata, n);
+> > > > > > > > > +                     return NULL;
+> > > > > > > > > +             }
+> > > > > > > > > +             idata[n]->rpmb =3D rpmb;
+> > > > > > > > > +     }
+> > > > > > > > > +
+> > > > > > > > > +     return idata;
+> > > > > > > > > +}
+> > > > > > > > > +
+> > > > > > > > > +static void set_idata(struct mmc_blk_ioc_data *idata, u3=
+2 opcode,
+> > > > > > > > > +                   int write_flag, u8 *buf, unsigned int=
+ buf_bytes)
+> > > > > > > > > +{
+> > > > > > > > > +     /*
+> > > > > > > > > +      * The size of an RPMB frame must match what's expe=
+cted by the
+> > > > > > > > > +      * hardware.
+> > > > > > > > > +      */
+> > > > > > > > > +     BUILD_BUG_ON(sizeof(struct rpmb_frame) !=3D 512);
+> > > > > > > > > +
+> > > > > > > > > +     idata->ic.opcode =3D opcode;
+> > > > > > > > > +     idata->ic.flags =3D MMC_RSP_R1 | MMC_CMD_ADTC;
+> > > > > > > > > +     idata->ic.write_flag =3D write_flag;
+> > > > > > > > > +     idata->ic.blksz =3D sizeof(struct rpmb_frame);
+> > > > > > > > > +     idata->ic.blocks =3D buf_bytes /  idata->ic.blksz;
+> > > > > > > > > +     idata->buf =3D buf;
+> > > > > > > >
+> > > > > > > > I tested the series on a i.MX8MM with a eMMC connected via =
+the imx-sdhci
+> > > > > > > > controller. Reading from RPMB does not work. It ends in tim=
+eouts due to
+> > > > > > > > no response from the SDHCI controller.
+> > > > > > > >
+> > > > > > > > If idata->buf is allocated here with kmalloc(buf_bytes, GFP=
+_KERNEL) and
+> > > > > > > > the content of buf is copied to the new allocated area, tra=
+nsfers succeed.
+> > > > > > > >
+> > > > > > > > Is it possible that idata->buf is not DMA capable? Any othe=
+r ideas?
+> > > > > > >
+> > > > > > > Thanks for testing. I don't know, the idata->buf is allocated=
+ using
+> > > > > > > alloc_pages_exact(nr_pages * PAGE_SIZE, GFP_KERNEL | __GFP_ZE=
+RO); in
+> > > > > > > optee_pool_op_alloc_helper().
+> > > > > >
+> > > > > > Is this really true for idata->buf or isnt the complete RPMB fr=
+ame memory
+> > > > > > allocated like this and therefore idata->buf not page aligned?
+> > > > >
+> > > > > You're right.
+> > > > >
+> > > > > >
+> > > > > > For RPMB via tee-supplicant the idata->buf is allocated within =
+memdup_user
+> > > > > > and therefore page aligned.
+> > > > >
+> > > > > Yes, that's a difference. Have you tested with page-aligned buffe=
+rs to
+> > > > > see if it helps?
+> > > >
+> > > > Yes, this helps. I tested with the following patch, but probably it=
+ can also
+> > > > be solved during frame allocation in optee?
+> > >
+> > > Great, thanks for confirming. Yes, we should fix that in the secure w=
+orld.
+> >
+> > I've pushed an update to
+> > https://github.com/jenswi-linaro/optee_os/tree/rpmb_probe
+>
+> Thanks for taking care. I applied the additional patch
+>
+> https://github.com/OP-TEE/optee_os/commit/cdbe8d149f1eed62bc8ef9137d20885=
+8bb7691d8.patch
+>
+> to optee_os and removed the kmalloc dynalloc hack mentioned before from t=
+he
+> kernel.
+>
+> The issue persists, please see below.
 
-Thanks for all the feedback. Just a quick note to let you know that
-I'm working on V2 patchset that will fix all coding-style and dts/binding
-issues. The new patchset will be significantly smaller and I managed
-to remove everything that is not strictly needed in order to be able to
-boot an rpi5 from sd card.
+So it's not the alignment that is the problem. We need to understand
+this problem better before adding workarounds. If I'm not mistaken,
+alloc_pages_exact () and kmalloc() are supposed to provide DMAable
+memory. Could this be a symptom of some other error in your system?
 
-Best regards,
-Andrea
+Thanks,
+Jens
+
+>
+> Thanks for your support
+> Manuel
+>
+> E/TC:? 0
+> E/TC:? 0 TA panicked with code 0xffff0006
+> [   18.661761] mmc0: Timeout waiting for hardware interrupt.
+> [   18.661776] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI RE=
+GISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> E/LD:  Status of TA bc50d971-d4c9-42c4-82cb-343fb7f37896
+> E/LD:   arch: arm
+> E/LD:  region  0: va 0x40005000 pa 0xbe81b000 size 0x002000 flags rw-s (l=
+delf)
+> E/LD:  region  1: va 0x40007000 pa 0xbe81d000 size 0x008000 flags r-xs (l=
+delf)
+> E/LD:  region  2: va 0x4000f000 pa 0xbe825000 size 0x001000 flags rw-s (l=
+delf)
+> E/LD:  region  3: va 0x40010000 pa 0xbe826000 size 0x004000 flags rw-s (l=
+delf)
+> E/LD:  region  4: va 0x40014000 pa 0xbe82a000 size 0x001000 flags r--s
+> E/LD:  region  5: va 0x40015000 pa 0xbe88b000 size 0x011000 flags rw-s (s=
+tack)
+> E/LD:  region  6: va 0x40026000 pa 0x534f8000 size 0x002000 flags rw-- (p=
+aram)
+> E/LD:  region  7: va 0x40035000 pa 0x00001000 size 0x042000 flags r-xs [0=
+]
+> E/LD:  region  8: va 0x40077000 pa 0x00043000 size 0x01e000 flags rw-s [0=
+]
+> E/LD:   [0] bc50d971-d4c9-42c4-82cb-343fb7f37896 @ 0x40035000
+> E/LD:  Call stack:
+> E/LD:   0x40064d48
+> E/LD:   0x40060c17
+> E/LD:   0x40037d81
+> E/LD:   0x40038223
+> E/LD:   0x4004d343
+> E/LD:   0x4005d52d
+> E/LD:   0x4003885f
+> E/LD:   0x40064cd9
+> E/LD:   0x4006a8a3
+> E/LD:   0x4005d68c
+> [   18.661782] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x00000002
+> [   18.661790] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000006
+> [   18.661796] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
+> [   18.661802] mmc0: sdhci: Present:   0x01088a8e | Host ctl: 0x00000031
+> [   18.661808] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+> [   18.661814] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
+> [   18.661820] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+> [   18.661825] mmc0: sdhci: Int enab:  0x117f100b | Sig enab: 0x117f100b
+> [   18.661831] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
+> [   18.661837] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x0000b407
+> [   18.661842] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00ffffff
+> [   18.661848] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+> [   18.661856] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00000900
+> [   18.661862] mmc0: sdhci: Host ctl2: 0x00000008
+> [   18.661868] mmc0: sdhci: ADMA Err:  0x00000007 | ADMA Ptr: 0x412c0200
+> [   18.661874] mmc0: sdhci-esdhc-imx: =3D=3D=3D=3D=3D=3D=3D=3D=3D ESDHC I=
+MX DEBUG STATUS DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D
+> [   18.661879] mmc0: sdhci-esdhc-imx: cmd debug status:  0x2120
+> [   18.661885] mmc0: sdhci-esdhc-imx: data debug status:  0x22d0
+> [   18.661893] mmc0: sdhci-esdhc-imx: trans debug status:  0x23c0
+> [   18.661900] mmc0: sdhci-esdhc-imx: dma debug status:  0x2400
+> [   18.661907] mmc0: sdhci-esdhc-imx: adma debug status:  0x25b4
+> [   18.661915] mmc0: sdhci-esdhc-imx: fifo debug status:  0x2650
+> [   18.661922] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x2760
+> [   18.661929] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D
+> [   18.662615] sdhci-esdhc-imx 30b40000.mmc: __mmc_blk_ioctl_cmd: data er=
+ror -110
+> [   18.772374] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke erro=
+r: 0xffff3024
+> [   18.772393] tpm tpm0: tpm_try_transmit: send(): error -53212
+> [   18.772447] tpm tpm0: ftpm_tee_tpm_op_send: SUBMIT_COMMAND invoke erro=
+r: 0xffff3024
+> [   18.772455] tpm tpm0: tpm_try_transmit: send(): error -53212
+> [   18.772465] ftpm-tee tpm: ftpm_tee_probe: tpm_chip_register failed wit=
+h rc=3D-53212
+> [   18.772545] ftpm-tee: probe of tpm failed with error -53212
+> [   19.430011] caam_jr 30902000.jr: 20000254: CCB: desc idx 2: RNG: Not i=
+nstantiated
+> [   28.901794] mmc0: Timeout waiting for hardware interrupt.
+> [  *** ] (1 of 2) Job dev-tpmrm0.device/start running (37s / 1min 30s)
+> [ ***  ] (2 of 2) Job dev-tpm0.device/start running (47s / 1min 30s)
+> [ ***  ] (2 of 2) Job dev-tpm0.device/start
+>
