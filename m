@@ -1,126 +1,128 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6D31153BD8
-	for <linux-mmc@vger.kernel.org>; Fri,  3 May 2024 13:15:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEFB5154BEE
+	for <linux-mmc@vger.kernel.org>; Fri,  3 May 2024 13:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1714742128; cv=none; b=BUn/AZ1+eYTMI2oEWXl+Me/jytaB75l78foB73IIKN13k5Q7hP65hGid3+duIU36cMBD85QFJWS1rEFowG6Gxv5ihKtrc9Ktxr2DG4vqbbmiijlkpzPVxAQfvmuxDCKEPwAwf0vXvSZDkW4Lqvy109OQyb5E19JUEekkO7cl5iE=
+	t=1714742134; cv=none; b=qDxzCtERVLaiGLTBeorGa6YPT1vuSYfCtbLAcQCAtDbxF/xGEKFG47NMp9FRMg0li/xB1IPGTsleqaOt9sS0WX21kGitxnxva7PlTLE+nVDbrmx3ZvHNs3BVuIL0QMsecWB/qvQlziAEF3go8m+OJxW4q47ivhn+0+lwkRLak2k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1714742128; c=relaxed/simple;
-	bh=xrqzZwgdph5DRS4i3SCKXCa1JY0Gomt5Ypf74Pq1OsY=;
+	s=arc-20240116; t=1714742134; c=relaxed/simple;
+	bh=nJ+FiEP00RrtPRa8uswJfiMy2zzb9NIscqnw+JbmrlE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=W6hK8IsduxLYsMlnpH2ms8Kk/DUydHYs59UkXcG4LzBFCYLWMcdRQbglPD1+JGLzUiPxloE9v5qgerzbLggDOAzPz4vI/DtjK66ISw21s3Uf1FPLBeEEdseEWTyXHmHALJlo+v4Wa7W1yEoEcPtBMoNW7+DbCzF1OXUE4zscUX4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Mbnuzj+F; arc=none smtp.client-ip=209.85.219.176
+	 To:Cc:Content-Type; b=OOvOswJiNTfYwynFV3BEySEk5QyUnBLADnT5N2MJS63Sh404A1xWt6FXJmiBpKZ77TQY8TYxIzayOQgVfaXyJ1/jPWZ43c7a7spUv1r5bjH0l+aW2PmZeiQCHWef1S5z3rCHqXOa4KiKlNOSO3MeQK/XdS/ndFmWIgtJuAU8tMU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Bx6WWJ8q; arc=none smtp.client-ip=209.85.219.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Mbnuzj+F"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-dcc6fc978ddso2650708276.0
-        for <linux-mmc@vger.kernel.org>; Fri, 03 May 2024 06:15:26 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Bx6WWJ8q"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-de5a7b18acdso9020723276.3
+        for <linux-mmc@vger.kernel.org>; Fri, 03 May 2024 06:15:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1714742126; x=1715346926; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1714742131; x=1715346931; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=yRI9l6TRFX4cl/D/dHvxIPz5B9asZPit4lxB7Ww5SAs=;
-        b=Mbnuzj+F1O2ftcNQQa2gjKwnUIEzNWptcRetBceho0Y5Aa8AJhE/TqlCMOjfFt/M06
-         LZ4McigjWo0z4CA2xJGkMjOGRNpBJ2+h53A2VJAJpsKsqyC6Ktn0LzTOYk/SXmEsBmgs
-         v0XPoc+nMYnPxKy1KT77c5XS9JwIITbHaby7NRXwSdubet8A+jjQ8tiEb8BNkSwTVgpd
-         +CiquOg/lyTUnwkHHDdwj8lqAJCZ8DL/exZO3hqVIN1Zc6yablOs35WHNXnU1ZJmTyo1
-         xQ4iVz4vjrfdD3HXBMZTrdF2Tc3RHFv93D3EkvxgxMW2EPHkzYVy+tKgfgSmHMbk7pCe
-         vHqg==
+        bh=Bz627HBjMOmmynWa0zBG+92oc4pA2ou1WBH5AOlZFK8=;
+        b=Bx6WWJ8qiPazUlp8r1gkkyCLZa9f5OkTzjOIqttSst6zQZrPv50T1KhDTmnL8MNTQr
+         cgPm/gkLVU5/KH3DqDXag8VGgXHWxjYPRyIEYvXv7t045Uv0zHnmVSNHclJHIe9PP7Kn
+         kmblALCI+aFYUXuGROLqsNJ1qk5jSjGS91V/FXY6Ab1JqQ5YAPgHKR842sgZmI7paRxx
+         IqrGolnbzOeLUF9hXvCLG0Mz4FXLe3BfePUWziJSq2KPgizc5MpEilaiX1eRot1jdBom
+         XNQJTWFVOxNSMM5e8dLStGvi80mntT2tDUCsq1I51h//Y0v0hzdA2yW2jpe+P6ZHwKeU
+         5QKA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1714742126; x=1715346926;
+        d=1e100.net; s=20230601; t=1714742131; x=1715346931;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=yRI9l6TRFX4cl/D/dHvxIPz5B9asZPit4lxB7Ww5SAs=;
-        b=pidxzBe+I8IN2Zr3CyYAOKBEayibDc5N4TR2deDWZ9+/8iBXTPoz4HTqGnVXSOg2G5
-         4BVMcc9XkyiGrRkyvcxApGAVJj98XI1LzdW7sVqJSpZp2cUrwYkQnfFjxWfJwCtP+Swl
-         hQItBlaQ56R9+gpDz/DXNcUjYpxSFdIwhbbZnIme7m5HOzu2MeolroH329CDbT63qwjC
-         H6SWucoxDq9XEvlWu0zsXx3u38B6qR6e8R9fP4UAQyy5DjyeepHB9ugho140f9Xg/Mfb
-         eI9CbvabAOfax5foi6/Nycc84/7/lUN0t+RSHxkCXPIpC6nDnmc8mFpCJ+GliCFFRxT5
-         3uMg==
-X-Forwarded-Encrypted: i=1; AJvYcCUU0rX7U1Kb4nSBdJ/71hyq3dhMFsj3F2Zcm8Y4hMkfL3emBfEcPvptI+KZ7FsYCRe/RRCWjhnL+4oJXY9qTq4SJNI1BThLQuQH
-X-Gm-Message-State: AOJu0Ywr8hPqMvhu804zOZPQBG5a9mV99LYcwbTMLFAjxKHsS33Vpxmi
-	IJA3Udf0t6awZBh6yRk+oaRoAHrn9de/2N21h3meq/lwck6TWDMNZo4/qAevSycqLJ2Sz5vyu/A
-	nBvdLo/GaJfSqMEw5XOspTpA1yIO4EPN9zkGVRA==
-X-Google-Smtp-Source: AGHT+IHAuATqJlUN1KaAG6j30rTHBUQbuirlBENRxW4a0MCgvAe9RQrcnJ1n9j7vzbMqMlM2SL8OuwZJN888gEQV8HM=
-X-Received: by 2002:a25:aacb:0:b0:de8:a500:ffdb with SMTP id
- t69-20020a25aacb000000b00de8a500ffdbmr1856096ybi.26.1714742125931; Fri, 03
- May 2024 06:15:25 -0700 (PDT)
+        bh=Bz627HBjMOmmynWa0zBG+92oc4pA2ou1WBH5AOlZFK8=;
+        b=Fj5R6lL2Mg2LZcUCHS4/WzJKVFOz3QKAZ+WqGE4uDboMntcJcBthVG2aRXVYj1E9nO
+         vL+r2ACCJVL13nfNTYM779Xg6bgaO+syfgex4UOITcX+8qC996kFGWaXG/kZtYXmQH53
+         Q/zn+zL8cdO7WUo/Tx7U7bziktEIaUR+HGh2lt1UU2PV4ytOnB0ygJZf/RcwawmZp7ye
+         HHPzEJugu2HDMLD+zXu6hXdja8Lg5BSMuQDLYglAqlXmqiK/Jp8lfyAZFxMHGsSUzGU/
+         I2fw1OF1UG8BRAznIOFh8N48JaABf9tN5+X0i1+CRVDI6H1pN0h46HT4L+1pcnzEweXl
+         ikrQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWAi+6tdcJPutod7eqmAzRYxmCj1xJUtsg6SexryG72adgXE38LP9hGBX4WVnZ2lZxM+gie7F/C/n+e0ekHmJbi4wPSwHxiSbdm
+X-Gm-Message-State: AOJu0YxcbrZECjD6xBzTEI5EOOtF7a80UChoEDvmFXtbyAz6Bmcm6Nh3
+	UOzjmCwGqpVx+WWDxxCj/CUtzUdB/beBPcPc5SaEPh+IWf7JNDL+Hj1ZothbDf3LS6qLEvnwxLO
+	XeqziadQilIC5G4HR8yPo8JauXZ52v0aSVqGI/Q==
+X-Google-Smtp-Source: AGHT+IGffsIdpZF6BPv9Of+hyi7vyRpyRz79bbW9RmMLTofCsWiZmPRZRs0kpQ7Tcy7txTp5OlV1qfabQJWeVMOx5Es=
+X-Received: by 2002:a25:abc3:0:b0:dcf:3ef5:4d30 with SMTP id
+ v61-20020a25abc3000000b00dcf3ef54d30mr2869989ybi.17.1714742130823; Fri, 03
+ May 2024 06:15:30 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
-In-Reply-To: <20240430093724.2692232-1-claudiu.beznea.uj@bp.renesas.com>
+References: <20240430145937.133643-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20240430145937.133643-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 3 May 2024 15:14:50 +0200
-Message-ID: <CAPDyKFrPZ5XF93MD+g03UQP1d4WSPoop=VyAhzwLu9KV436KkA@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: renesas_sdhi: Set the SDBUF after reset
-To: Claudiu <claudiu.beznea@tuxon.dev>
-Cc: wsa+renesas@sang-engineering.com, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Hien Huynh <hien.huynh.px@renesas.com>
+Date: Fri, 3 May 2024 15:14:55 +0200
+Message-ID: <CAPDyKFpRjoVdyXh275YR3f4oOFR7MY49_JNzZ2nvrmSMYokRkA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/3] Update compat strings for SD/MMC nodes on RZ/{G2L
+ (family), G3S, V2M} SoCs
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 30 Apr 2024 at 11:37, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+On Tue, 30 Apr 2024 at 17:00, Prabhakar <prabhakar.csengg@gmail.com> wrote:
 >
-> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 >
-> For development purpose, renesas_sdhi_probe() could be called w/
-> dma_ops = NULL to force the usage of PIO mode. In this case the
-> renesas_sdhi_enable_dma() will not be called before transferring data.
+> Hi All,
 >
-> If renesas_sdhi_enable_dma() is not called, renesas_sdhi_clk_enable()
-> call from renesas_sdhi_probe() will configure SDBUF by calling the
-> renesas_sdhi_sdbuf_width() function, but then SDBUF will be reset in
-> tmio_mmc_host_probe() when calling tmio_mmc_reset() though host->reset().
-> If SDBUF is zero the data transfer will not work in PIO mode for RZ/G3S.
+> - RZ/G2UL and RZ/Five ("r9a07g043")
+> - RZ/G2L(C) ("r9a07g044")
+> - RZ/V2L ("r9a07g054")
+> - RZ/G3S ("r9a08g045")
+> - RZ/V2M ("r9a09g011")
 >
-> To fix this call again the renesas_sdhi_sdbuf_width(host, 16) in
-> renesas_sdhi_reset(). The call of renesas_sdhi_sdbuf_width() was not
-> removed from renesas_sdhi_clk_enable() as the host->reset() is optional.
+> The SD/MMC Interface in the above listed SoCs is not identical to that of
+> R-Car Gen3. These SoCs have HS400 disabled and use fixed address mode.
+> Therefore, we need to apply fixed_addr_mode and hs400_disabled quirks.
+> 'renesas,rzg2l-sdhi' is introduced as a generic compatible string for the
+> above SoCs where fixed_addr_mode and hs400_disabled quirks will be applied.
 >
-> Co-developed-by: Hien Huynh <hien.huynh.px@renesas.com>
-> Signed-off-by: Hien Huynh <hien.huynh.px@renesas.com>
-> Signed-off-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> v2->v3
+> - Dropped items keyword
+> - Sorted strings alphabetically
+> - Collected Ack and RB tags
+>
+> v1->v2
+> - Updated commit messages for patch #1 and #2
+> - Dropped SoC DTSI changes as its a hard dependency
+> - Grouped single const value items into an enum list.
+> - For backward compatibility retained RZ/V2M compat string
+>
+> v1: https://patchwork.kernel.org/project/linux-renesas-soc/cover/20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com/
+>
+> Cheers,
+> Prabhakar
+>
+> Lad Prabhakar (3):
+>   dt-bindings: mmc: renesas,sdhi: Group single const value items into an
+>     enum list
+>   dt-bindings: mmc: renesas,sdhi: Document RZ/G2L family compatibility
+>   mmc: renesas_sdhi: Add compatible string for RZ/G2L family, RZ/G3S,
+>     and RZ/V2M SoCs
+>
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 39 ++++++++-----------
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  9 +++--
+>  2 files changed, 21 insertions(+), 27 deletions(-)
+>
+> --
+> 2.34.1
+>
 
-Applied for next, thanks!
+The series applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->
-> Changes in v3:
-> - shortened the comment introduced in renesas_sdhi_reset()
->
-> Changes in v2:
-> - fixed typos in commit description
-> - limit the comment lines to 80 chars
->
->  drivers/mmc/host/renesas_sdhi_core.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index f84f60139bcf..d9503f9f6e96 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -589,6 +589,9 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
->                         sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
->                         priv->needs_adjust_hs400 = false;
->                         renesas_sdhi_set_clock(host, host->clk_cache);
-> +
-> +                       /* Ensure default value for this driver. */
-> +                       renesas_sdhi_sdbuf_width(host, 16);
->                 } else if (priv->scc_ctl) {
->                         renesas_sdhi_scc_reset(host, priv);
->                 }
-> --
-> 2.39.2
->
