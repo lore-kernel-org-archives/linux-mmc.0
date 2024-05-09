@@ -1,330 +1,227 @@
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from IND01-MAX-obe.outbound.protection.outlook.com (mail-maxind01olkn2023.outbound.protection.outlook.com [40.92.102.23])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 530D23A1BE
-	for <linux-mmc@vger.kernel.org>; Wed,  8 May 2024 08:51:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715158322; cv=none; b=IJS+/Af+IUByLvc168ltIEJFyI1I5Um4dtjO8ljStyhygdp/euievD3R5Rc93SYIHBgHPiDRA/kiss0dwxFvwtIo/EWRFmL6wVK1SJ4Ddt+rIiNHVZMp1SfxOXRqyw7MYPPlXfC6VjuTbrZI+UM0GpSV95fYFMcZDTA8qB5vpH8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715158322; c=relaxed/simple;
-	bh=HYXrsynpcK3FfS90LJUxK131eceRUH60ncTBYzhRG/o=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Rup6/qf2ZgtUiBDUgf8yvuGof5pAjwfLPCspYWkgcOxdCnJaBPM+ULA8/4AaJ6jvikoJso/WwhMjPA1+c+iejsHeT6S7cTb7/gAsmjQSXdJjablL5Jb4zkgDzZ6VwCY4iezRRV0mdmiorUASAQgqWnbewqB/knzZwBy17WJhats=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Nf3H4UFo; arc=none smtp.client-ip=209.85.219.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0FE1F13C90E;
+	Thu,  9 May 2024 02:18:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.102.23
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1715221085; cv=fail; b=nYuuuzVhJ4PsqkYQmUTw+c6Ao1bfX4Rc/aHHKaruJn5H/lzRkdYykpY/MIyj7tjRO7igv9xnmp86sr1TwR+7/Am0jydNLYAKOfES4x6v2l3O7aPn437q+0mU2ZFImX9D9Pn5UIcEenkQeTC9WuAyhX1Sg2wrZKXMDPfdj/AewrY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1715221085; c=relaxed/simple;
+	bh=foXiiuqWg+BdRt70QrNCGV+UVhrfBJaE+PPa2bhuyoo=;
+	h=Message-ID:Date:Subject:To:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=uvBKPQYnm3N2ueBi5JOtICjIgTR/jvgRQCtOcTXCzJSb2v2NP4PZABn4kCd5oS/N5/O4S0Y6Ccx3C4kq1EpL9MUkkAxGVZnOdaZKlTuMnCZSerHlXdaVE9DwMjFmjVl+uxhR8sEMBBvoOs/ayv3I3W373SidaPkGvfIpFXsMC9M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=uXNPDxNP; arc=fail smtp.client-ip=40.92.102.23
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Nf3H4UFo"
-Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-dcc71031680so4324894276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 08 May 2024 01:51:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1715158318; x=1715763118; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=in3B+Ik46blXOXrKxuDpO2qCSaCcioDyNF0gWPJLAiA=;
-        b=Nf3H4UFoBQ1WAmEVKExG48LdK0jQkC2Dkc8Q1BpaUykOofG5uW9BIAp6LATVisiJF2
-         Q0EVm+dKR7azlwrPnCCN7Jm6Ud9d4/XfDn5FrWo3FKBvQC7v2kD7XIBjEyElAQrCrPsQ
-         WkDcWvSe7Wx9JpSsnscB7dp55SzKhQUfu2QdzFDWBDVaBgvhcevfkmWGj/JPAdX23Ywo
-         twIZmRf/+616iyrsick3MUKZYAfjKO4GnUnb4biv5GyGeEFuJu9BDwDUYkOLI0tQT3T4
-         wWI5OvzpqvZVKMPtgtQC5Y4nb7gTf1Jha3Rog0xt2NpwZIu4PI6v3u0GDQufZ/g6JocW
-         u0Eg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1715158318; x=1715763118;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=in3B+Ik46blXOXrKxuDpO2qCSaCcioDyNF0gWPJLAiA=;
-        b=JS1u4RZ7GvVnRAH0jPjRBbdM+LXxH6sZ6ewHj02anqFwxY1xAaiKcGolzZIPgwBHyB
-         zDDVcTOOM2nljR4hlx7T6tEmLBnTydPZhymgCTUZdKhhdvKf1YZfoHfIbLX3Lyv//nOW
-         Z7Qjp/qUTisufdl49u/CJyNqUIaGhRop2/WiuEntppUIE8+mD971SCkDxVD9kZ6x2kEm
-         CeVba8jv5LFt6g6FCMjiojZiLxRgKE32GFOvy7AUu/JFJMfaKZkaJksD79NJHQih/mI6
-         9uSWXk8yUT9NJtePbFax9Xczir2GrUmNUZrAYYLW3cInHyOd9lRM+GDyA6S7NppV8nxs
-         YzMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW85s2kz6VibgcG8uZk4AadM/APrahJGl12XQmhrHMWRBYaeG6gotIjTy0kJmbKP2yOc1tQUjIlLNN3PrDWtFNxzjFKDU5UG3MR
-X-Gm-Message-State: AOJu0YxpbYu3S6V9hcRgUxQ8RtuIRr9SIbh3ccS+BBcVTV/2pCpIv18t
-	iEFFmzA/BOYJAqnhnGg8kpo6oVqhJtOr9EiUANOhZkq9Wl0oiA8dsCILCa7mgDYgcqp2Y+nX7es
-	IPpwx1mmlern/5pbEUh8KKuUU5ExnovBb3vlMzg==
-X-Google-Smtp-Source: AGHT+IGp6X2BhJs6wlRjN0lKnBeuPzHxeGy1JNrO+idMaCicMZwZ+qafrVrFGUQyhDqFhR8iHEcNxFj2A7rIXMXNbRc=
-X-Received: by 2002:a25:ac56:0:b0:de5:5706:b958 with SMTP id
- 3f1490d57ef6-debb9dbc831mr2100582276.38.1715158318252; Wed, 08 May 2024
- 01:51:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="uXNPDxNP"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=OF70x4d/22vtw9RSv5c7sDSuvm74H6LjHugl4XHWFwo4FZ+CpP77ta2VdtNwEkY8PQ08CW+2QRuc5YDMtzTiq2RCbf0dsZKqy5uv7tr0dOANPJXjNeo6cPTe3iJrSyKNUM1wiaZxX/L7IjOEsE74sFyqAPJkNdCrgWiPrdtRgj7mhuyZU20dJkFpbVlywTPORWMQtLeY+MhCiw8p+88i6tW2U4yKgnqa+vgneYzp8saNCqP0sbdPHmTPBwapuqUkGVYlrc4qJwqoWMIgtAk3JO6Hp/JlE2t0seOF1Bp+bMxL9pGWSvI6vFNK3pxaR3CVAbhvjtdtI5qYLeG5kp6oWw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Gfh7M8wA6dJghLsnv2o1EJjUKGIEmzflrttT1aqbLjo=;
+ b=IYsc9mPudhCdHAnp9OGUJLJhy4GGOqhRV5AWqKazslAaixwHb8yqSgK4mBcjoeZieGztNF0rdm1J02L0QJJsx552bzeoBo1EizIvGOm2KVPyPsZcZj0u9at6eY1tAloiTcwLAcS3ea1iG5dMOUIz58ebXmr1AqEhyxJblC5BBIqMk/w3pEsQCRu/516ldxqKEsdINE9iN8nnZMIQdeDupbKHlouIE8DtvdLAA48YBmYhJpmsHNteTdhAClg/4Y0IX2l8F+t7fQSds8rIxT9FqCKD4HxjawxlNkzafVYTw0c3frY+Oeku/mkIuyC1hSEznwkOlvbMbSWe2QgxjVJ8Ig==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Gfh7M8wA6dJghLsnv2o1EJjUKGIEmzflrttT1aqbLjo=;
+ b=uXNPDxNPo1pAHb9dr2s9MrW012zIuamNSB9+jvsvHnRwUPanGyHsHYE0isrHzNflAU7JN7rnxnmAdAStcoYnT4dCQ2iSkF7BUYKBo5cT201STZvIuB5RaCyEfwRYxMDjaz95GUw33e2f5RxlLN6jBEguZrRWZnkvF3FevF7dvG+W5eCQo5eZQmPI7MbCGWxEba2KV358Dt/SSVyhttsGE3Dr4YWg+bw6QFOfzvQ3vH5cflJ3xvUVI6TMgQrm+TmyGxSJKR9iopOjqAVJbwLcA2dDF39bif3IfN0/yNIrbC931tFL7rnGlqC6DOKKOSBSSDk8fMQoSXDcfgP6gOLzHw==
+Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:138::5)
+ by MA0P287MB0966.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:dd::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7544.47; Thu, 9 May
+ 2024 02:17:56 +0000
+Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ ([fe80::664:2ecc:c36:1f2c]) by MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ ([fe80::664:2ecc:c36:1f2c%3]) with mapi id 15.20.7544.046; Thu, 9 May 2024
+ 02:17:56 +0000
+Message-ID:
+ <MA0P287MB282273829FCBA4BE58BD9CC2FEE62@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
+Date: Thu, 9 May 2024 10:17:50 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/1] mmc: sdhci-of-dwcmshc: add callback functions for
+ dwcmshc_priv
+To: Adrian Hunter <adrian.hunter@intel.com>, Chen Wang <unicornxw@gmail.com>,
+ ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, jszhang@kernel.org, dfustini@baylibre.com,
+ yifeng.zhao@rock-chips.com, shawn.lin@rock-chips.com, chao.wei@sophgo.com,
+ haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
+ guoren@kernel.org, inochiama@outlook.com, unicorn_wang@outlook.com
+References: <cover.1714270290.git.unicorn_wang@outlook.com>
+ <5bb708cc830684676dede5f44ee22c7fd03300b7.1714270290.git.unicorn_wang@outlook.com>
+ <ed900af1-f090-49a9-bc7e-363a28a4ac2b@intel.com>
+From: Chen Wang <unicorn_wang@outlook.com>
+In-Reply-To: <ed900af1-f090-49a9-bc7e-363a28a4ac2b@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-TMN: [sgsrKTymjnuDZwdr2tTwb+NPP5XqQDhC]
+X-ClientProxiedBy: SI2P153CA0036.APCP153.PROD.OUTLOOK.COM
+ (2603:1096:4:190::11) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ (2603:1096:a01:138::5)
+X-Microsoft-Original-Message-ID:
+ <0475d918-f368-475b-a9f7-d11f8037f178@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240423200234.21480-1-kamal.dasu@broadcom.com>
- <CAPDyKFqLqbRx3gWCqT4G6mUVeMDWyA_f8T2_iYt07r_Ffqaaow@mail.gmail.com>
- <3f69d64e-7c41-48de-a7a0-42ab99cd7e7d@intel.com> <CAKekbev6YG+yVnX-n9tsQSwujj5mD-vpJXrd+xwcF-K=z45q+w@mail.gmail.com>
- <CAPDyKFoE4+sQ3D-9SKtFcksQQ88GyYd_P88dVOj9SYyVFqLxig@mail.gmail.com>
- <a55e1bdc-7c6a-4720-b941-0ddfd764b87e@arm.com> <CAKekbes-X-nnksQLjrGaZJOXZ7dCYos0_2cd1GukBc2KWh0KJg@mail.gmail.com>
-In-Reply-To: <CAKekbes-X-nnksQLjrGaZJOXZ7dCYos0_2cd1GukBc2KWh0KJg@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 8 May 2024 10:51:21 +0200
-Message-ID: <CAPDyKFpBPMxrt7T5UTZzjtco_41FPToztGqWgWTRNQd4YAn-ZQ@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: core: check R1_STATUS for erase/trim/discard
-To: Kamal Dasu <kamal.dasu@broadcom.com>
-Cc: Christian Loehle <christian.loehle@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ludovic.barre@st.com, 
-	f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MA0P287MB2822:EE_|MA0P287MB0966:EE_
+X-MS-Office365-Filtering-Correlation-Id: dc2a3e99-53f9-4c9b-afa1-08dc6fce3c4c
+X-Microsoft-Antispam:
+	BCL:0;ARA:14566002|461199019|3412199016|440099019|1710799017;
+X-Microsoft-Antispam-Message-Info:
+	S1tFPTJqskAu/Th89lKf5DYsTrSXCyzyfavhNMOa1WTn9UfD0khb0gJEWy/6Wp8gW3ASnMSD3xlLmh8NcnXMiT/6GOaaFzOl9Z1aaMBZWgW8/laPgmMgntGbYW5igQ/EZxOBAFnX786h2RNZTRzGENwIQrZc0wt4oXkMSeUCsBqIzgdTCu8y1bWaQpaPtyP6vALU+XccxK1Bq5CY8BcnpKioD3967hZVF01k+ySzHw9Q6PBYD4V/v25YdcLUIfCStXig7W5vc39+kvUAVJ5/UwGAaRhPbVInezY28Hg5MgnhbKlpeGpYbyskxlQM2Mnwd7EilaqHd3XT0KZzrbo27S4zUmq6d9LYS15CydToeVdHLne6LO942O8B/ly4CTNtRsBbAfL/C6uqZ2Q8bL/GCaazGdjASeSjhmw2fx1TJyrhMNG9SYPIMFnPcDb3sIDyhjsY4MN9VDOReUyDZuH6laT9OEzFlt0IeUySWkgdJzz7JiKWnr16FX4Bi2Fx3VEMkEAxExep/cIpSz/cE9Jcy1ZUKWY4QXuldQg35hsCyUrOn0iG5pSwg6T2PtktPryDzFad8einvgEBBerYsOLSYnQM9HQ8iWXr/y6fnVXpxCsjl0FLtiaTXBBhzuO++zgy
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?M0d4OStoeFlDaGdUQmVIbmZONGtCZzc4bE1pUHd6cXhHVFpjTTV4UGUrRUVj?=
+ =?utf-8?B?OXNDOXh1dDZaYmlJSUJ0YzlLdHdzTit2YmE5bTVkVXEvYkRrd2VCUHRLN3dx?=
+ =?utf-8?B?SlZ2WnVGM3o5VG5NczdrNEhiYS9qN0hzUVM1cW8yQVpDd25xbWpDNmZBUlNi?=
+ =?utf-8?B?c3JRZWdzUlp0akJTTHlJSkVHRnZMSEdScDRmOW5JbWxLRnV3Z2tlWHhlS3ZV?=
+ =?utf-8?B?K0h3emVMWTZyam02QTJSWEZBb2Z4U0ZrMDNlUWpaUGxvUG1qR0lzMnpwSWpZ?=
+ =?utf-8?B?L2JVN1pZVTI2UGJRQnpmRE9Gb2dsRnlxd01jY2xieHFURVZPejVpOHlXL1Rs?=
+ =?utf-8?B?c2xwL3FpRitHcVlTOVJ4TjhUWUN1V1l3MDVkbzJCdmVnN0hpRmhpK1FTTS9q?=
+ =?utf-8?B?N3h2eXk2c2ZqQkovNUNJNTUwcVpsT1djZUU5VTc0cmxXcit6SWxKS1gwZjl4?=
+ =?utf-8?B?L3dsQkdCZkdvVFVXZWNaYlk4TEVkMVJLemsvOEY2LzMranNJUjNYSjBtRUtY?=
+ =?utf-8?B?bmM1eHVLWlM3K1A0MEErdGZTNW5wdlVzamVER25KNE1QV1FaL3llakNZWnV4?=
+ =?utf-8?B?WEthUk1lTkVSNTVtNXV1cXdtRVpLdUdKN3hJNGlTdnNwbDZnUi9uaG1rSmll?=
+ =?utf-8?B?cm9ZaGo0MjJ6aVczOGt1UEdTV2VIaW1KK2dOaEtHRXJCYzhJWFNkbkExQlVG?=
+ =?utf-8?B?TWxjNjRjWjFZQmJHQlRnbmY0Z3Q1ZmFSU3QvUkRIRDBXdEVYaGFmb3BuWkJt?=
+ =?utf-8?B?M0NlOE1CQmoxYzV4V2l6WTh1UWNEZkVkK1M0VFRDa3UxV1pIcWV1WWtpSzFn?=
+ =?utf-8?B?VzVNajRTUEpFL0hLbFVUOEFacGUyeGUwVVFad2hHMVRaL3JmZ0lSaktDRUJ6?=
+ =?utf-8?B?b2VmYitFRjVBKzRzRnJhQTRZV0RyL25yTm1KWWd0ZVVNaGVLV3d2YlJIcFlN?=
+ =?utf-8?B?OGZydklqczQ3amIweHcwZWRQcUd2RkZET1VMSHFXVno0L3N3NDlNbUE5Ymwz?=
+ =?utf-8?B?R0Mxb2pPOE5KeDFmRWxhY29vK2lPMzhIV1JqU0ZQTGY4V3A3aE92T0hNaUhU?=
+ =?utf-8?B?RG1WVTFpWFROZDBncUxzbVJjRGtvT1l0TXZ1SkViYkJJOENJbjU5RGsyTk8x?=
+ =?utf-8?B?K1N0SWdVcDFpYkY0K3MxazJuaXRzZzBZeVVQTTh2QzYwT0hoMWlhejZPam84?=
+ =?utf-8?B?cXNBejBLTnBFaVUxUGFqOU9saGx2Y1cwNkNETFUxNjR1TnNqdHMxVy95NThX?=
+ =?utf-8?B?ajlZSUNDenZKZFozUXgwVFVjbzJXOUo3UlpNTFZsTGUySE9paEU1a2dETTJi?=
+ =?utf-8?B?b0dnenFRU283cmhteHBHQkgwZDYrWVJqT2Q1NElhZS96TmpGanc2QTE1R0Nn?=
+ =?utf-8?B?bDQxOFpWZkExWjJiQ1QzRDVQemh1NjRpRlpvbm5aYWZySUVEY0VKREUySnZF?=
+ =?utf-8?B?VmhKYzJSSDlOS1FQYldWVFR1dDdpMTBQVk1sbDNHRndtcE5zSnMwL0tSbmlQ?=
+ =?utf-8?B?RXlMek9WZnJ6S01YNDJEVURHZ2VLS0FNM0JTWDdFam9HZWdUK25NbUt5Q2Nw?=
+ =?utf-8?B?WVJncEVkbTRIc0xUYzdITVJOQVZNcVFGN0Naa3ppQVJJZXdVY1VGalJrUW1x?=
+ =?utf-8?B?b2tScXd4V25hR3JFc1hQcjd0MTdmZFJoWnd3Y0UrcFdYR1d6UWxtUDhGdzlk?=
+ =?utf-8?Q?PTY074eCojiaQjgIOxEC?=
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc2a3e99-53f9-4c9b-afa1-08dc6fce3c4c
+X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 May 2024 02:17:56.5351
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
+	00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA0P287MB0966
 
-On Mon, 6 May 2024 at 20:39, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
+
+On 2024/4/29 15:08, Adrian Hunter wrote:
+> On 28/04/24 05:32, Chen Wang wrote:
+>> From: Chen Wang <unicorn_wang@outlook.com>
+>>
+>> The current framework is not easily extended to support new SOCs.
+>> For example, in the current code we see that the SOC-level
+>> structure `rk35xx_priv` and related logic are distributed in
+>> functions such as dwcmshc_probe/dwcmshc_remove/dwcmshc_suspend/......,
+>> which is inappropriate.
+>>
+>> The solution is to abstract some possible common operations of soc
+>> into virtual members of `dwcmshc_priv`. Each soc implements its own
+>> corresponding callback function and registers it in init function.
+>> dwcmshc framework is responsible for calling these callback functions
+>> in those dwcmshc_xxx functions.
+>>
+>> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
+>> ---
+>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 152 +++++++++++++++++-----------
+>>   1 file changed, 91 insertions(+), 61 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> index 39edf04fedcf..525f954bcb65 100644
+>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>> @@ -214,6 +214,10 @@ struct dwcmshc_priv {
+>>   	void *priv; /* pointer to SoC private stuff */
+>>   	u16 delay_line;
+>>   	u16 flags;
+>> +
+>> +	void (*soc_postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+>> +	int (*soc_clks_enable)(struct dwcmshc_priv *dwc_priv);
+>> +	void (*soc_clks_disable)(struct dwcmshc_priv *dwc_priv);
+> Normally the ops would be part of platform data.  For example,
+> sdhci-of-arasan.c has:
 >
-> I was testing with different.
+> 	struct sdhci_arasan_of_data {
+> 		const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+> 		const struct sdhci_pltfm_data *pdata;
+> 		const struct sdhci_arasan_clk_ops *clk_ops;
+> 	};
 >
-> On Fri, May 3, 2024 at 9:55=E2=80=AFAM Christian Loehle
-> <christian.loehle@arm.com> wrote:
-> >
-> > On 03/05/2024 14:09, Ulf Hansson wrote:
-> > > On Fri, 26 Apr 2024 at 17:11, Kamal Dasu <kamal.dasu@broadcom.com> wr=
-ote:
-> > >>
-> > >> On Fri, Apr 26, 2024 at 2:17=E2=80=AFAM Adrian Hunter <adrian.hunter=
-@intel.com> wrote:
-> > >>>
-> > >>> On 25/04/24 19:18, Ulf Hansson wrote:
-> > >>>> + Wolfram, Adrian (to see if they have some input)
-> > >>>>
-> > >>>> On Tue, 23 Apr 2024 at 22:02, Kamal Dasu <kamal.dasu@broadcom.com>=
- wrote:
-> > >>>>>
-> > >>>>> When erase/trim/discard completion was converted to mmc_poll_for_=
-busy(),
-> > >>>>> optional ->card_busy() host ops support was added. sdhci card->bu=
-sy()
-> > >>>>> could return busy for long periods to cause mmc_do_erase() to blo=
-ck during
-> > >>>>> discard operation as shown below during mkfs.f2fs :
-> > >>>>>
-> > >>>>> Info: [/dev/mmcblk1p9] Discarding device
-> > >>>>> [   39.597258] sysrq: Show Blocked State
-> > >>>>> [   39.601183] task:mkfs.f2fs       state:D stack:0     pid:1561 =
- tgid:1561  ppid:1542   flags:0x0000000d
-> > >>>>> [   39.610609] Call trace:
-> > >>>>> [   39.613098]  __switch_to+0xd8/0xf4
-> > >>>>> [   39.616582]  __schedule+0x440/0x4f4
-> > >>>>> [   39.620137]  schedule+0x2c/0x48
-> > >>>>> [   39.623341]  schedule_hrtimeout_range_clock+0xe0/0x114
-> > >>>>> [   39.628562]  schedule_hrtimeout_range+0x10/0x18
-> > >>>>> [   39.633169]  usleep_range_state+0x5c/0x90
-> > >>>>> [   39.637253]  __mmc_poll_for_busy+0xec/0x128
-> > >>>>> [   39.641514]  mmc_poll_for_busy+0x48/0x70
-> > >>>>> [   39.645511]  mmc_do_erase+0x1ec/0x210
-> > >>>>> [   39.649237]  mmc_erase+0x1b4/0x1d4
-> > >>>>> [   39.652701]  mmc_blk_mq_issue_rq+0x35c/0x6ac
-> > >>>>> [   39.657037]  mmc_mq_queue_rq+0x18c/0x214
-> > >>>>> [   39.661022]  blk_mq_dispatch_rq_list+0x3a8/0x528
-> > >>>>> [   39.665722]  __blk_mq_sched_dispatch_requests+0x3a0/0x4ac
-> > >>>>> [   39.671198]  blk_mq_sched_dispatch_requests+0x28/0x5c
-> > >>>>> [   39.676322]  blk_mq_run_hw_queue+0x11c/0x12c
-> > >>>>> [   39.680668]  blk_mq_flush_plug_list+0x200/0x33c
-> > >>>>> [   39.685278]  blk_add_rq_to_plug+0x68/0xd8
-> > >>>>> [   39.689365]  blk_mq_submit_bio+0x3a4/0x458
-> > >>>>> [   39.693539]  __submit_bio+0x1c/0x80
-> > >>>>> [   39.697096]  submit_bio_noacct_nocheck+0x94/0x174
-> > >>>>> [   39.701875]  submit_bio_noacct+0x1b0/0x22c
-> > >>>>> [   39.706042]  submit_bio+0xac/0xe8
-> > >>>>> [   39.709424]  blk_next_bio+0x4c/0x5c
-> > >>>>> [   39.712973]  blkdev_issue_secure_erase+0x118/0x170
-> > >>>>> [   39.717835]  blkdev_common_ioctl+0x374/0x728
-> > >>>>> [   39.722175]  blkdev_ioctl+0x8c/0x2b0
-> > >>>>> [   39.725816]  vfs_ioctl+0x24/0x40
-> > >>>>> [   39.729117]  __arm64_sys_ioctl+0x5c/0x8c
-> > >>>>> [   39.733114]  invoke_syscall+0x68/0xec
-> > >>>>> [   39.736839]  el0_svc_common.constprop.0+0x70/0xd8
-> > >>>>> [   39.741609]  do_el0_svc+0x18/0x20
-> > >>>>> [   39.744981]  el0_svc+0x68/0x94
-> > >>>>> [   39.748107]  el0t_64_sync_handler+0x88/0x124
-> > >>>>> [   39.752455]  el0t_64_sync+0x168/0x16c
-> > >>>>
-> > >>>> Thanks for the detailed log!
-> > >>>>
-> > >>>>>
-> > >>>>> Fix skips the card->busy() and uses MMC_SEND_STATUS and R1_STATUS
-> > >>>>> check for MMC_ERASE_BUSY busy_cmd case in the mmc_busy_cb() funct=
-ion.
-> > >>>>>
-> > >>>>> Fixes: 0d84c3e6a5b2 ("mmc: core: Convert to mmc_poll_for_busy() f=
-or erase/trim/discard")
-> > >>>>> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-> > >>>>> ---
-> > >>>>>  drivers/mmc/core/mmc_ops.c | 3 ++-
-> > >>>>>  1 file changed, 2 insertions(+), 1 deletion(-)
-> > >>>>>
-> > >>>>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_op=
-s.c
-> > >>>>> index 3b3adbddf664..603fbd78c342 100644
-> > >>>>> --- a/drivers/mmc/core/mmc_ops.c
-> > >>>>> +++ b/drivers/mmc/core/mmc_ops.c
-> > >>>>> @@ -464,7 +464,8 @@ static int mmc_busy_cb(void *cb_data, bool *b=
-usy)
-> > >>>>>         u32 status =3D 0;
-> > >>>>>         int err;
-> > >>>>>
-> > >>>>> -       if (data->busy_cmd !=3D MMC_BUSY_IO && host->ops->card_bu=
-sy) {
-> > >>>>> +       if (data->busy_cmd !=3D MMC_BUSY_IO &&
-> > >>>>> +           data->busy_cmd !=3D MMC_BUSY_ERASE && host->ops->card=
-_busy) {
-> > >>>>>                 *busy =3D host->ops->card_busy(host);
-> > >>>>>                 return 0;
-> > >>>>>         }
-> > >>>>
-> > >>>> So it seems like the ->card_busy() callback is broken in for your =
-mmc
-> > >>>> host-driver and platform. Can you perhaps provide the information
-> > >>>> about what HW/driver you are using?
-> > >>>>
-> > >>
-> > >> Using the sdhci-brcmstb driver on a Broadcom Settop based SoC.
-> > >>
-> > >>>> The point with using the ->card_busy() callback, is to avoid sendi=
-ng
-> > >>>> the CMD13. Ideally it should be cheaper/faster and in most cases i=
-t
-> > >>>> translates to a read of a register. For larger erases, we would
-> > >>>> probably end up sending the CMD13 periodically every 32-64 ms, whi=
-ch
-> > >>>> shouldn't be a problem. However, for smaller erases and discards, =
-we
-> > >>>> may want the benefit the ->card_busy() callback provides us.
-> > >>>>
-> > >>
-> > >> I have tested two scenarios. One is like the mkfs.f2fs app that call=
-s :
-> > >> ioctl(fd, BLKSECDISCARD, &range);
-> > >>
-> > >> This has the following CMD and completion sequence:
-> > >> {CMD35->CMD36->CMD38} and poll for  DAT0  signal via card->busy .
-> > >> CMD38 has a response of R1b. The DAT0 (Busy line) will be driven by =
-the device.
-> > >> Busy (DAT0  =3D 0) is asserted by a device for  erasing blocks. Stay=
-s
-> > >> busy in brcmstb sdhci controller.
-> > >
-> > > How big is the "range"?
-> > >
+> And then:
 >
-> The task just blocks here. I have attached the stack.
+> 	static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
+> 		.soc_ctl_map = &rk3399_soc_ctl_map,
+> 		.pdata = &sdhci_arasan_cqe_pdata,
+> 		.clk_ops = &arasan_clk_ops,
+> 	};
+> 	etc
 >
-> > > Just so I get this right, it stays busy and we are waiting for the
-> > > timeout to fire? And ideally you think we should not be busy for that
-> > > long, right?
-> > >
-> The timeout does not fire.
+> 	static const struct of_device_id sdhci_arasan_of_match[] = {
+> 		/* SoC-specific compatible strings w/ soc_ctl_map */
+> 		{
+> 			.compatible = "rockchip,rk3399-sdhci-5.1",
+> 			.data = &sdhci_arasan_rk3399_data,
+> 		},
+> 		etc
 >
-> > >>
-> > >> With the additional change followed by CMD13 (response of R1), which
-> > >> returns the device status, the
-> > >> DAT0 will be pulled-up and next time we read the BUSY status it will
-> > >> indicate it is not busy.
-> > >
-> > > So you are referring to read the BUSY status with you ->card_busy()
-> > > callback? Or did you actually verify that this is true from an
-> > > electrical point of view, by monitoring the DAT0 signal?
-> > >
-> > > If the latter, perhaps it's the card that is failing and simply
-> > > requires CMD13 to be used to poll for busy. What card is this?
-> > >
-> > > Have you tried different cards with the same platform/driver?
-> > >
-> Yes, I have tried Micron and Sandisk 8GB cards with the same platform
-> with the same results.
-
-Okay, so it sounds like it's the ->card_busy() callback that may not
-work as expected after all.
-
-Do we have an SD card slot on this platform that we can try to run
-similar tests for but with an SD card instead?
-
+> So, say:
 >
-> > >>
-> > >> Also I tried the mmc util and that does not show the same issue with
-> > >> exactly the same ranges, however in that case there are some
-> > >> differences in the way the CMD sequence is sent for the entire disca=
-rd
-> > >> operation.
-> > >> # mmc erase discard 0x000087a4 0x002effff /dev/mmcblk1
-> > >> /* send erase cmd with multi-cmd */
-> > >> ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-> > >>
-> > >> CMD35->CMD13->CMD36->CMD13->CMD38->CMD13
-> > >> I do not see any hang in all the erase options discard, legacy, trim=
-, trim2,
-> > >> secure-trim used here with mmc util .
-> > >
-> > > So CMD13 seems to do the trick for you. Although, I think we need to
-> > > figure out if this a special "broken" card or if the problem is with
-> > > the ->card_busy() implementation for your platform.
-> > >
-> > >>
-> > >> Also looking at JEDEC Standard No. 84-B51 Page 276, 277
-> > >> "Once the erase groups are selected the host will send an ERASE
-> > >> (CMD38) command. It is recom-
-> > >> mended that the host terminates the sequence with a SEND_STATUS
-> > >> (CMD13) to poll any additional
-> > >> status information the Device may have (e.g., WP_ERASE_SKIP, etc.)."
-> > >
-> > > Isn't that exactly what is being done? After the card has stopped
-> > > signaling busy, we send a CMD13 in mmc_busy_cb() to read the
-> > > additional status information.
-> >
-> Yes, that is what the fix does. However in the original if
-> ->card->busy() is being used we do not send the CMD13.
-
-We are not sending CMD13 to poll for busy, but we are indeed sending a
-CMD13 *after* the card has stopped signal busy, to read the additional
-status information.
-
-This seems to be according to the spec.
-
+> struct dwcmshc_pltfm_data {
+> 	const struct sdhci_pltfm_data *pltfm_data;
+> 	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+> 	int  (*clks_enable)(struct dwcmshc_priv *dwc_priv);
+> 	void (*clks_disable)(struct dwcmshc_priv *dwc_priv);
+> }
 >
-> > Agreed with your interpretation FWIW.
-> >
-> > >
-> > > I don't get it, why should the card stop signal busy, just because we
-> > > send a CMD13. If so, the card should probably be considered broken.
-> > > For broken cards, we can try to use a card-quirk instead - to enforce
-> > > CMD13 polling.
-> >
-> Yes  would be one of the solutions that can be considered. Would open
-> to any suggestion on what card-quirk to use.
-
-As you have tested different cards, it's more likely to be a problem
-with the platform/HW and the ->card_busy() callback.
-
+> Or if the ops are mostly the same, it might be more convenient to
+> have them in their own structure:
 >
-> > I'll mention it here, I've seen some broken IP out there where the card=
-'s
-> > FSM (including busy-signalling) was dependent on the host providing the
-> > CLK, can't remember which one it was, though.
-> > Anyway for Kamal, it might be interesting to know if your host controll=
-er
-> > autostops the CLK (which it is allowed to) during the busy-signalling a=
-nd
-> > if not stopping it also works around the problem.
-> >
-> The host controller is not stopping the clock. Also stopping the clock
-> does not work around the problem. host is expecting the device FSM
-> pull up the busy line.
->
-> At this point I can either do this when  adding host:
-> +       /* we dont use busy signal */
-> +       host->mmc_host_ops.card_busy =3D NULL;
+> struct dwcmshc_pltfm_data {
+> 	const struct sdhci_pltfm_data *pltfm_data;
+> 	const struct dwcmshc_ops *ops;
+> }
 
-Looks like this is the best option, unless we can figure out why the
-->card_busy() callback doesn't work as expected.
+hi, Adrian,
 
->
-> Or introduce a card-quirk for this situation.
->
-> Kamal
+I thought about it for a while, and I would like to continue discussing 
+this issue as follows.
 
-Kind regards
-Uffe
+I feel like it would be simpler to put it at the dwcmshc_priv level 
+based on the ops involved in the code so far. Judging from the SOCs 
+currently supported by dwcmshc, the ops I abstracted only operate data 
+below the dwcmshc_priv level, and these ops are not used by most SOCs.
+- postinit: only required by rk35xx
+- init: involves rk35xx and th1520, and the new soc(sg2042) I want to add.
+- clks_enable/clks_disable: only rk35xx and the sg2042 I want to add
+
+In particular, for dwcmshc_suspend/dwcmshc_resume, we have already 
+obtained dwcmshc_priv. If ops is to be placed at the platformdata level, 
+we have to use device_get_match_data to obtain data again, which feels a 
+bit unnecessary.
+
+What do you think?
+
+Thanks,
+
+Chen
+
+[......]
+
+
