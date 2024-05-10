@@ -1,186 +1,149 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f48.google.com (mail-ej1-f48.google.com [209.85.218.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AF7E13B5A9;
-	Thu,  9 May 2024 08:21:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5ADE612C494
+	for <linux-mmc@vger.kernel.org>; Fri, 10 May 2024 14:35:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715242903; cv=none; b=qK3t+8rr9A3vpB1G+QQcwXC1TegAfnadSko3nh3euQ7knZe8cHBUNYHgACCpIfMqiWHE8w9HfHnNS2mRuckmmGSuZHpaomi128m6rvpvXpk1E1nAyCgm+KphRB6iPKsjlQJZ1E68FsUdpGS/qjcjP0pqpr5jSwjdhlF7+hdoj8c=
+	t=1715351728; cv=none; b=StgYi/KqaJoaUbRyghW54n7O+lV/LhY3tGoz2zdq5pKK/Z0jT39SyiRQ4poCCHjXzq7H9poZcTAlFjYh4w664vUY64tYiVCEzt8bf1YqXyLjQyfwxkPMIF4JIa9mDwyGMSq0sVZ6KY/hkxrPnTghC4Vogqaiz9a7CKkw7UTZZVY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715242903; c=relaxed/simple;
-	bh=bgDLzxpYitnFqSBkidhPvmb7A8VF+kvubgyIU2MFg0g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=T82L4Zd25nnVoERcRe46VSVjM0FQUV6AJL/4S3lryhx7ZaueUuXIz4e/hFyPlHQoEr0O+Uqe8lIZzgxfl6A9gaC3KN0c5Ae4FR0fiKvXGlWDhRi87/6MIv3iuq8i8X+zhs6cJFa2wGWar44dnJBIBGnDk9XofRWfi4OEBr9SmP8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Sx1qPmbk; arc=none smtp.client-ip=198.175.65.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1715351728; c=relaxed/simple;
+	bh=HmqN4Y2qfe+qiS8OCMxYIoCYYp8YoP49efyrVtxAzLg=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=urMmhPulnsS2hm3O9i6lWT2ag7Xb53nT5YezQw8/Pm8HXsydQ+hSKaaIdAbdhvS3e8OIAkIiUVr7IfHaZMjGG7mujKzqyV6+u+GVOtZanmAFX01sJ4CC/hUZ6xSnEtEIK4zrg+6YfszE5FDjEpVJc/GUAjMdwA0wubkx6puy7i4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=OdQumhKo; arc=none smtp.client-ip=209.85.218.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Sx1qPmbk"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1715242902; x=1746778902;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=bgDLzxpYitnFqSBkidhPvmb7A8VF+kvubgyIU2MFg0g=;
-  b=Sx1qPmbk7c+xdTC2smjOeJdfyELeISbORiRnbNiQP3UHqIeDOCcc9zuZ
-   UVPYeUp7XND6zlwhznxYcWD9rKhuRkrtTvZHO2Ufnleuwpx6+o/y/zLLf
-   fmSKPcs7hzDc8tnh+AkYBZYsRDbocXkTcyGbz4HgWd8gRqtKPJKHSMhfH
-   hS3vyfEhomN21aK9bqJ+vWw0V2boz5/pxrvnCIxG5dY9wI8i4RghfX9Cs
-   AFcspf/B7Q+h2+Vn2jX5h+J//TYd2MlcClYXfFjHAxaPSXyHhVSapx3CB
-   cOA142EK5hmWsHR9CfFMqAivOXJU7NsTsWEPYLSBiOIk5Cnr+iy5ABSeN
-   w==;
-X-CSE-ConnectionGUID: EsycnyROQS6/TWLL2lvC6Q==
-X-CSE-MsgGUID: CE8fm41dSJGUoGbdpRXJ/A==
-X-IronPort-AV: E=McAfee;i="6600,9927,11067"; a="22550983"
-X-IronPort-AV: E=Sophos;i="6.08,147,1712646000"; 
-   d="scan'208";a="22550983"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 May 2024 01:21:41 -0700
-X-CSE-ConnectionGUID: bBIbfyPmRDytOOx14qdCmA==
-X-CSE-MsgGUID: faG8c/p9TD2G7pIk/O9Vdw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,147,1712646000"; 
-   d="scan'208";a="29095902"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.34.226])
-  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 May 2024 01:21:38 -0700
-Message-ID: <c460081e-b74f-4e09-a666-def047b8e587@intel.com>
-Date: Thu, 9 May 2024 11:21:32 +0300
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="OdQumhKo"
+Received: by mail-ej1-f48.google.com with SMTP id a640c23a62f3a-a59a0168c75so557273566b.1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 May 2024 07:35:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1715351725; x=1715956525; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+L8ioAsAchAICMfzBcWsl13awgXH6DvKJHhUEwMw4lc=;
+        b=OdQumhKo8l2p94gJ8q0kX4HY9Yug/dcug8um1MvUrV0hL/xm9Q8gmzMRECkZGr1v1E
+         oZKbljDukVQMNp4Xm8Uy6uURjaMH1X26n6su4/9SkewHtju6ZupQ9MyxUVa9tOi4c9sl
+         x/yGgQ/Z7grAeX53vzjemadr0zFOeydDMqfnumfc8LhnwUmG7eIPBF6t5ck4nNpA/dmJ
+         fI+1wEX/DatCaEoY7LOHvHZmimO6gTNyA52LLZQ5o/eX4p1+4z12ZbGmmss/p2porbJT
+         036bWZ6xyhKmZ1fqbFw9DFiQBevpTtEWE8XpmZF7Bh2YUM7vCcl2q6j/jrxACkM2xo1f
+         D4KQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1715351725; x=1715956525;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+L8ioAsAchAICMfzBcWsl13awgXH6DvKJHhUEwMw4lc=;
+        b=NCL7EGAqwO+LV4fmVYatjKEdU+nlRl5zDP28PrSfwnaNVsztj5NaU2OIpNeNnFNgde
+         W16Ns3WR0EbrRzVBCxKRHIzNPuH2YxZcs1+/7fivQF0vcqXxq6IS3xX95JPxx+V1Lk49
+         u6cOAdAbbvkR3jYtzoYeK0lluosz0/PpYT/IDyBrg2EPtqXQyl9DDbIYrg/6wcxWowjI
+         XKS41fIQNJzvbkFzoGWRFo3+vwAxnSwRR4G6yNRJ0u7pn9y5hcGQGtiE5I1derwcEsOD
+         32bqSZKmvqgJ28r1Bhm3dfv/MuvRtqLya8vy6Uocul0HgQZDa3weDi1hddwbhQGhgfNe
+         QJ6A==
+X-Forwarded-Encrypted: i=1; AJvYcCVE9gQ18euAkXoXwTryHMyk0XvkreAteruXji+V8jZ7ecr38/TQSbaS6ugyCzer8v44u8l34bk4uCn8pPeBx8gWNhzc3uw+ig8i
+X-Gm-Message-State: AOJu0YyUJFHbo4mwI/IFAK788mlus8U6Jy6+EcnLc5DOC8Ew1YvexFnT
+	4KVjBPmSUW577Ws1E+KoLWMBSsLYPJOvvby0fG7XVNmHS7Ayon+NIE2quPHYWq8=
+X-Google-Smtp-Source: AGHT+IEfB00TSyx2m8PYgYVtXx6zGkM7eP4zIy2ysPMoUokR5lQDpc/14tsnYvzn3fDHx3nAmbCz1w==
+X-Received: by 2002:a17:906:c79a:b0:a5a:3a6c:8b57 with SMTP id a640c23a62f3a-a5a3a6c90ecmr84446166b.6.1715351724687;
+        Fri, 10 May 2024 07:35:24 -0700 (PDT)
+Received: from localhost (host-95-235-217-160.retail.telecomitalia.it. [95.235.217.160])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a5a1781ce5dsm190002366b.42.2024.05.10.07.35.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 May 2024 07:35:24 -0700 (PDT)
+From: Andrea della Porta <andrea.porta@suse.com>
+To: Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>,
+	Eric Anholt <eric@anholt.net>,
+	Stefan Wahren <wahrenst@gmx.net>,
+	devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Cc: Andrea della Porta <andrea.porta@suse.com>
+Subject: [PATCH v2 0/4] Add minimal boot support for Raspberry Pi 5
+Date: Fri, 10 May 2024 16:35:26 +0200
+Message-ID: <cover.1715332922.git.andrea.porta@suse.com>
+X-Mailer: git-send-email 2.44.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-of-dwcmshc: add callback functions for
- dwcmshc_priv
-To: Chen Wang <unicorn_wang@outlook.com>, Chen Wang <unicornxw@gmail.com>,
- ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, jszhang@kernel.org, dfustini@baylibre.com,
- yifeng.zhao@rock-chips.com, shawn.lin@rock-chips.com, chao.wei@sophgo.com,
- haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
- guoren@kernel.org, inochiama@outlook.com
-References: <cover.1714270290.git.unicorn_wang@outlook.com>
- <5bb708cc830684676dede5f44ee22c7fd03300b7.1714270290.git.unicorn_wang@outlook.com>
- <ed900af1-f090-49a9-bc7e-363a28a4ac2b@intel.com>
- <MA0P287MB282273829FCBA4BE58BD9CC2FEE62@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <MA0P287MB282273829FCBA4BE58BD9CC2FEE62@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 9/05/24 05:17, Chen Wang wrote:
-> 
-> On 2024/4/29 15:08, Adrian Hunter wrote:
->> On 28/04/24 05:32, Chen Wang wrote:
->>> From: Chen Wang <unicorn_wang@outlook.com>
->>>
->>> The current framework is not easily extended to support new SOCs.
->>> For example, in the current code we see that the SOC-level
->>> structure `rk35xx_priv` and related logic are distributed in
->>> functions such as dwcmshc_probe/dwcmshc_remove/dwcmshc_suspend/......,
->>> which is inappropriate.
->>>
->>> The solution is to abstract some possible common operations of soc
->>> into virtual members of `dwcmshc_priv`. Each soc implements its own
->>> corresponding callback function and registers it in init function.
->>> dwcmshc framework is responsible for calling these callback functions
->>> in those dwcmshc_xxx functions.
->>>
->>> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
->>> ---
->>>   drivers/mmc/host/sdhci-of-dwcmshc.c | 152 +++++++++++++++++-----------
->>>   1 file changed, 91 insertions(+), 61 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> index 39edf04fedcf..525f954bcb65 100644
->>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>> @@ -214,6 +214,10 @@ struct dwcmshc_priv {
->>>       void *priv; /* pointer to SoC private stuff */
->>>       u16 delay_line;
->>>       u16 flags;
->>> +
->>> +    void (*soc_postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
->>> +    int (*soc_clks_enable)(struct dwcmshc_priv *dwc_priv);
->>> +    void (*soc_clks_disable)(struct dwcmshc_priv *dwc_priv);
->> Normally the ops would be part of platform data.  For example,
->> sdhci-of-arasan.c has:
->>
->>     struct sdhci_arasan_of_data {
->>         const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
->>         const struct sdhci_pltfm_data *pdata;
->>         const struct sdhci_arasan_clk_ops *clk_ops;
->>     };
->>
->> And then:
->>
->>     static struct sdhci_arasan_of_data sdhci_arasan_rk3399_data = {
->>         .soc_ctl_map = &rk3399_soc_ctl_map,
->>         .pdata = &sdhci_arasan_cqe_pdata,
->>         .clk_ops = &arasan_clk_ops,
->>     };
->>     etc
->>
->>     static const struct of_device_id sdhci_arasan_of_match[] = {
->>         /* SoC-specific compatible strings w/ soc_ctl_map */
->>         {
->>             .compatible = "rockchip,rk3399-sdhci-5.1",
->>             .data = &sdhci_arasan_rk3399_data,
->>         },
->>         etc
->>
->> So, say:
->>
->> struct dwcmshc_pltfm_data {
->>     const struct sdhci_pltfm_data *pltfm_data;
->>     void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
->>     int  (*clks_enable)(struct dwcmshc_priv *dwc_priv);
->>     void (*clks_disable)(struct dwcmshc_priv *dwc_priv);
->> }
->>
->> Or if the ops are mostly the same, it might be more convenient to
->> have them in their own structure:
->>
->> struct dwcmshc_pltfm_data {
->>     const struct sdhci_pltfm_data *pltfm_data;
->>     const struct dwcmshc_ops *ops;
->> }
-> 
-> hi, Adrian,
-> 
-> I thought about it for a while, and I would like to continue discussing this issue as follows.
-> 
-> I feel like it would be simpler to put it at the dwcmshc_priv level based on the ops involved in the code so far. Judging from the SOCs currently supported by dwcmshc, the ops I abstracted only operate data below the dwcmshc_priv level, and these ops are not used by most SOCs.
-> - postinit: only required by rk35xx
-> - init: involves rk35xx and th1520, and the new soc(sg2042) I want to add.
-> - clks_enable/clks_disable: only rk35xx and the sg2042 I want to add
-> 
-> In particular, for dwcmshc_suspend/dwcmshc_resume, we have already obtained dwcmshc_priv. If ops is to be placed at the platformdata level, we have to use device_get_match_data to obtain data again, which feels a bit unnecessary.
-> 
-> What do you think?
+Hi,
 
-In sdhci-of-arasan.c, ops are copied from platform data to
-driver private data e.g.
+This patchset adds minimal support for the Broadcom BCM2712 SoC and for
+the on-board SDHCI controller on Broadcom BCM2712 in order to make it
+possible to boot (particularly) a Raspberry Pi 5 from SD card and get a
+console through uart.
+Changes to arm64/defconfig are not needed since the actual options work
+as they are.
+This work is heavily based on downstream contributions.
 
-static int sdhci_arasan_probe(struct platform_device *pdev)
-{
-	...
-	struct sdhci_arasan_data *sdhci_arasan;
-	const struct sdhci_arasan_of_data *data;
+Tested on Tumbleweed substituting the stock kernel with upstream one,
+either chainloading uboot+grub+kernel or directly booting the kernel
+from 1st stage bootloader. Steps to reproduce:
+- prepare an SD card from a Raspberry enabled raw image, mount the first
+  FAT partition.
+- make sure the FAT partition is big enough to contain the kernel,
+  anything bigger than 64Mb is usually enough, depending on your kernel
+  config options.
+- build the kernel and dtbs making sure that the support for your root
+  fs type is compiled as builtin.
+- copy the kernel image in your FAT partition overwriting the older one
+  (e.g. kernel*.img for Raspberry Pi OS or u-boot.bin for Tumbleweed).
+- copy arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb on FAT partition.
+- make sure you have a cmdline.txt file in FAT partition with the
+  following content:
+  # cat /boot/efi/cmdline.txt
+  root=/dev/mmcblk0p3 rootwait rw console=tty ignore_loglevel earlycon 
+  console=ttyAMA10,115200
+- if you experience random SD issues during boot, try to set
+  initial_turbo=0 in config.txt.
 
-	data = of_device_get_match_data(dev);
-	if (!data)
-		return -EINVAL;
-	...
-	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-	...
-	sdhci_arasan->clk_ops = data->clk_ops;
+Changes in V2:
 
+- the patchshet has been considerably simplified, both in terms of dts and
+  driver code. Notably, the pinctrl/pinmux driver (and associated binding)
+  was not strictly needed to use the SD card so it has been dropped.
+- dropped the optional SD express support patch
+- the patches order has been revisited
+- pass all checks (binding, dtb, checkpatch)
 
-Alternatively, a pointer could be put in driver private data
-to point to platform data.
+Many thanks,
+Andrea
+
+References:
+- Link to V1: https://lore.kernel.org/all/cover.1713036964.git.andrea.porta@suse.com/
+
+Andrea della Porta (4):
+  dt-bindings: arm: bcm: Add BCM2712 SoC support
+  dt-bindings: mmc: Add support for BCM2712 SD host controller
+  mmc: sdhci-brcmstb: Add BCM2712 support
+  arm64: dts: broadcom: Add support for BCM2712
+
+ .../devicetree/bindings/arm/bcm/bcm2835.yaml  |   6 +
+ .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |  23 ++
+ arch/arm64/boot/dts/broadcom/Makefile         |   1 +
+ .../boot/dts/broadcom/bcm2712-rpi-5-b.dts     |  62 ++++
+ arch/arm64/boot/dts/broadcom/bcm2712.dtsi     | 302 ++++++++++++++++++
+ drivers/mmc/host/sdhci-brcmstb.c              |  81 +++++
+ 6 files changed, 475 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712.dtsi
+
+-- 
+2.35.3
 
