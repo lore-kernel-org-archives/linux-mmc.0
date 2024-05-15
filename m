@@ -1,90 +1,123 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC2487317C;
-	Wed, 15 May 2024 12:10:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EC02128374;
+	Wed, 15 May 2024 14:22:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715775045; cv=none; b=lU8vgs0s/BaP/r9EA6ZB+6XBEZ69jmwvjxZCMZ5gKiKLP1s+Is5rkmWnqDca2pSifSRONxEdMpTm5NyViK5w0YIDEBr1XFfEZYJEZz0GU26QSAs/8gMJihUm2l8uiDSwv+n0NXi0o124xsLKBG8Nzf5r2Lt2tapO34YngMyN/DQ=
+	t=1715782943; cv=none; b=My5MG/+zZgTWznqrON6VtFbyQMIyxGNzCZ9YQmYEpqkxvu4q5oouYWbQb/oLO8T/yQvvJelVkWCteu/30fGr41rMM2qgA3oDKkRZzB2Z0wrQoDAHB+oOsaC1+8bWZl/RxQxXSVgXnZ+G7iZiHvrDqWonzclAd2pegU4vEdHzvkM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715775045; c=relaxed/simple;
-	bh=pJqvjsgCvNBkKyzYsgEoP0V2lPFJZrSdd7i0P9EDSt0=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=ir8mfexq85VfUWvs/yW94H4fwEg+l2/qBHkfnedKJMDRBDZyjUQkaLXYKFi1Ov04uy4tIQBkkume+SxiOK3D/N1mTgz6drCsNTjG8jbv52oJCH2H5rW4GiwUTsY7B69AMEUmVj32fh7hRQz44rKplKrjommjJmHCoNCRm/RP9mk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=CA89P5O5; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1715782943; c=relaxed/simple;
+	bh=IYa8U3GwTT6emlBqHWo5mWIUbSrmH2NUdPO0Of/UvTk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=lVBL7gbYuJic5L52HgXurxgGHZtEVudYs1gCaIIFngj3sMn/SQ7B1t9nOvOtU4IWmtqqc8nWUnhtgz23u0N+FLWTjthqJH4SEBvzg6ihio5FWtQZbLaVytHjiKJHLezgYNySlrNwVNRlZmSF7tdg/Z0Yipd9FiQc7IVyI4Pv4Zk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CueoZhB2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="CA89P5O5"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 44F90XOe007493;
-	Wed, 15 May 2024 12:10:27 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	from:to:cc:subject:date:message-id:mime-version:content-type; s=
-	qcppdkim1; bh=xEF+xDSBfTCHhiYaODH9Zu9Pp0jwfoPRn50l2ESd8fA=; b=CA
-	89P5O5VHLBw8cJIdFacZ8WKVzv/BafF9cPRBAambzhOPSUa6nc1o4r/SKE5FdiHf
-	rZggD+q5bAkEg9ekLX8eRBWeIQhckzQRCnGVvDraHX9uwrvhnKMAjJiBIp5HkCMS
-	/mnh/c//ZXL3Xr34IonKNTb/ahVFExaI+Xd02thFTqVoD8ZWezVmP1kfafStKQBL
-	F94jtpAOki3+HcEG9/isL2WFjN/Bxs7BZEqP9G/4kn5HITyGL9F5h1zh6mH66H4z
-	BySjJWo91WrWZLaE7Meqe+y3s0HJ/mXhVkn+JO+OzC9imGtGCSPgluDnCCr16bEg
-	/n9H7kjiIqYVb0w/nx4A==
-Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3y47f42q7d-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 15 May 2024 12:10:27 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 44FCAO2G022765
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 15 May 2024 12:10:24 GMT
-Received: from hyd-e160-a01-3-01.qualcomm.com (10.80.80.8) by
- nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Wed, 15 May 2024 05:10:20 -0700
-From: Naina Mehta <quic_nainmeht@quicinc.com>
-To: <ulf.hansson@linaro.org>, <robh@kernel.org>, <krzk+dt@kernel.org>,
-        <conor+dt@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <bhupesh.sharma@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        Naina Mehta
-	<quic_nainmeht@quicinc.com>
-Subject: [PATCH 0/3] Add SDHCI support for SDX75 SoC
-Date: Wed, 15 May 2024 17:39:55 +0530
-Message-ID: <20240515120958.32032-1-quic_nainmeht@quicinc.com>
-X-Mailer: git-send-email 2.17.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CueoZhB2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3BF0BC116B1;
+	Wed, 15 May 2024 14:22:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1715782943;
+	bh=IYa8U3GwTT6emlBqHWo5mWIUbSrmH2NUdPO0Of/UvTk=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=CueoZhB2zuuGwLARJMmvT6lzIV9pb4IWmO3syNwwkyLYfCqzWvzHWUe5tmQaK8N2b
+	 bA6SGbE3v1U3+VL1radDeRqtjTyFHZ85n0PN+bob4zqVdsNpefqV2P+/536RZe2scF
+	 +6W/KbwrcNATWV4M0KDpzL1pxCccXzdWlagdRN0R0b+pXA683vjjAFVwUyBy7IPrqx
+	 zQBhNQwpYFYdDMUBosVdSDWfFo0aJjnVfZKeH791NoIvME9t5X9Jw7sH1x0zuFO8xc
+	 GkLIDGgOCtPekJRh255BXM0E+/dOZgFW9Yk0J7cOzHULSMmALYbXGdA2iv4bKClr+J
+	 FaKjtsMkpNpqQ==
+Message-ID: <89359317-8f96-4781-924c-93cac1e0c443@kernel.org>
+Date: Wed, 15 May 2024 16:22:18 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 9pyKq2YjbFl6FZBU8xxNWWVMCLdjkkXm
-X-Proofpoint-ORIG-GUID: 9pyKq2YjbFl6FZBU8xxNWWVMCLdjkkXm
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.650,FMLib:17.11.176.26
- definitions=2024-05-15_06,2024-05-15_01,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- phishscore=0 bulkscore=0 clxscore=1011 malwarescore=0 adultscore=0
- lowpriorityscore=0 impostorscore=0 suspectscore=0 mlxlogscore=873
- mlxscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2405010000 definitions=main-2405150084
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-msm: Document the SDX75
+ compatible
+To: Naina Mehta <quic_nainmeht@quicinc.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ andersson@kernel.org, konrad.dybcio@linaro.org, bhupesh.sharma@linaro.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+References: <20240515120958.32032-1-quic_nainmeht@quicinc.com>
+ <20240515120958.32032-2-quic_nainmeht@quicinc.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240515120958.32032-2-quic_nainmeht@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Add SDHC instance for supporting SD card on SDX75 SoC.
+On 15/05/2024 14:09, Naina Mehta wrote:
+> Document the compatible for SDHCI on SDX75 SoC.
+> 
+> Signed-off-by: Naina Mehta <quic_nainmeht@quicinc.com>
+> ---
 
-Naina Mehta (3):
-  dt-bindings: mmc: sdhci-msm: Document the SDX75 compatible
-  arm64: dts: qcom: sdx75: Add SDHCI node
-  arm64: dts: qcom: sdx75-idp: add SDHCI for SD Card
 
- .../devicetree/bindings/mmc/sdhci-msm.yaml    |  1 +
- arch/arm64/boot/dts/qcom/sdx75-idp.dts        | 45 ++++++++++
- arch/arm64/boot/dts/qcom/sdx75.dtsi           | 89 +++++++++++++++++++
- 3 files changed, 135 insertions(+)
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
---
-2.17.1
+---
+
+This is an automated instruction, just in case, because many review tags
+are being ignored. If you know the process, you can skip it (please do
+not feel offended by me posting it here - no bad intentions intended).
+If you do not know the process, here is a short explanation:
+
+Please add Acked-by/Reviewed-by/Tested-by tags when posting new
+versions, under or above your Signed-off-by tag. Tag is "received", when
+provided in a message replied to you on the mailing list. Tools like b4
+can help here. However, there's no need to repost patches *only* to add
+the tags. The upstream maintainer will do that for tags received on the
+version they apply.
+
+https://elixir.bootlin.com/linux/v6.5-rc3/source/Documentation/process/submitting-patches.rst#L577
+
+Best regards,
+Krzysztof
 
