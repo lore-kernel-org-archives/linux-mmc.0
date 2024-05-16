@@ -1,123 +1,122 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F8E46214D;
-	Wed, 15 May 2024 14:23:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E21BE19BDC;
+	Thu, 16 May 2024 05:21:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715783003; cv=none; b=LCWXMbTTuzy+v3j6N+loFw7x/u6+OuxzssEa8i7ZfKKEXvayEFinkquoRdqBGdnSwefYHDgFbcGGkM0KfD14722mFzBSUy5yjlQrBW804wVyA/Kw1EItfyG5fI/h4M1Ld1QqastLni+52pRAamyoMG7M0nGucWjBzL0sDpH7OTI=
+	t=1715836907; cv=none; b=gg+A/wjqIKFQ3kNeVDkq+FnvU4MD0v07KZCKtEhqq0fdrAQff7AgwXsUeEataieTUhyQRJgsB9MoJAixG3PEZwSMx3gnY3plI4VefJm8kl8RyxUe2byzj/Ai4um65dvjyEp/6SW0jzSbhdHOPuc0bGPA335hHYwiBpicwYqk78M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715783003; c=relaxed/simple;
-	bh=b2WSbJJtikE2IrS3tTleC0R//uK4vxCZ7pxmMLEk25E=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=NVcAehP5bER+LSRjhgQuzhm6pCN9tCZmlROhPC6Hpv3DKdSaAZYuqAQtd01sc8EqIVaUuPX8ONKXmat4HOX02H2Jw617l2Jtd+0ns12gea+g29/4KDo6LxyOrAHojCF49EcsQD4RUxbOCgh+U00feEIkdCHL8y6ljDb24cXkog8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aB2THjf9; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1715836907; c=relaxed/simple;
+	bh=cm+ncD9TzT2Ed1NJcnpO9JfgJn2k9hpkBCfu2LLb0A8=;
+	h=Subject:To:CC:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=PEUbuD/Q/An6jgW1kPP+jZBJ4RffD9fU48laLjsX3OovZTxRbuSs0xgYPG5FV23kXCJdRWvszyshm8fSzfbjzluRg/s1wAhjxbtiKZ9pSLRgw85e1frll5ndw3O+RkizMqVtauqYy8nugDKdC5cvjE314cscF072DoWwGgLV81s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=nkGoA0qD; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aB2THjf9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DC06EC116B1;
-	Wed, 15 May 2024 14:23:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715783002;
-	bh=b2WSbJJtikE2IrS3tTleC0R//uK4vxCZ7pxmMLEk25E=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=aB2THjf9FqEcRy6ED+gb3vWh1QehHA8HCSPdyuYHZ6tuI2Cb8KBvSpTB2kr4Oq9Bs
-	 68MhZHJGa1xmIrmRZZeNRVyfG/iEVmCQi5mMYBiw0ZzusF9jzjCf85E3iGez8bgJja
-	 TRirioJBAbnXBMU94JpcQrdNEDbj9mzwQEHG03Sr9DjoVFso3VvtyISJys8KzSpF2F
-	 Z2/0uOGvg8Ono+BD0S1NRGw/I7pyZ2Jwr1BPtIWv9utXZo5sf9CY4o8pn0L/fRJZ0w
-	 K+CoxKgOAkPKoZUtpwqkNJae6kvnbNGzLlAMovVbDX9KVJYlHFOP27gCpzYS3Wq/lT
-	 N2g9tXBSsZumg==
-Message-ID: <a5833628-65f3-493d-9de5-33ba87a18875@kernel.org>
-Date: Wed, 15 May 2024 16:23:18 +0200
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="nkGoA0qD"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 44FHpuum003199;
+	Thu, 16 May 2024 05:21:42 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	subject:to:cc:references:from:message-id:date:mime-version
+	:in-reply-to:content-type:content-transfer-encoding; s=
+	qcppdkim1; bh=0nwfSddRoIrKkrX40wnOEIroy2jpiYW8tb8aX6qBDbE=; b=nk
+	GoA0qDMINYVBMiYvKjeoAqvKdRm5/1tkmsOj6it871isyHtueYfxgY8+DFowDZxA
+	w27tjO9AmOQsthe/pe4cON9oSYp+/KyJ0UGDyLcJIp6WGKH9fB3uyjJ+l2YCBFnk
+	4ZYshAS6l6St7w5Wd4sQwAQ3+WHmo+u3f7klplVsQvkiHh8j1EomBswynnXxG7AB
+	HydVvgY8GoxvSYpJQ3JaLDb/0bRAySlxE0YVqCHaFCu3/iV9noivedYV9ZD242Bn
+	qOsAqs20qBpzJaAHQ0F0EABK2Dzo9GxyuPaKr6KnNSSP8A9mrVugfiIf8TVdlKPT
+	FxJhYpTlfwghzM1uZliQ==
+Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3y51tuh0h5-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 16 May 2024 05:21:42 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 44G5LfJ5026334
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 16 May 2024 05:21:41 GMT
+Received: from [10.216.27.118] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Wed, 15 May
+ 2024 22:21:37 -0700
+Subject: Re: [PATCH 3/3] arm64: dts: qcom: sdx75-idp: add SDHCI for SD Card
+To: Krzysztof Kozlowski <krzk@kernel.org>, <ulf.hansson@linaro.org>,
+        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
+        <andersson@kernel.org>, <konrad.dybcio@linaro.org>,
+        <bhupesh.sharma@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>
+References: <20240515120958.32032-1-quic_nainmeht@quicinc.com>
+ <20240515120958.32032-4-quic_nainmeht@quicinc.com>
+ <a5833628-65f3-493d-9de5-33ba87a18875@kernel.org>
+From: Naina Mehta <quic_nainmeht@quicinc.com>
+Message-ID: <2ed5326a-b2ea-220a-2a9b-0478df0c6f12@quicinc.com>
+Date: Thu, 16 May 2024 10:51:22 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/3] arm64: dts: qcom: sdx75-idp: add SDHCI for SD Card
-To: Naina Mehta <quic_nainmeht@quicinc.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- andersson@kernel.org, konrad.dybcio@linaro.org, bhupesh.sharma@linaro.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-References: <20240515120958.32032-1-quic_nainmeht@quicinc.com>
- <20240515120958.32032-4-quic_nainmeht@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <a5833628-65f3-493d-9de5-33ba87a18875@kernel.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20240515120958.32032-4-quic_nainmeht@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: yAceZD2qWHiq8oFcVrVCpD_lP2AUZ5cp
+X-Proofpoint-GUID: yAceZD2qWHiq8oFcVrVCpD_lP2AUZ5cp
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.650,FMLib:17.11.176.26
+ definitions=2024-05-16_02,2024-05-15_01,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 phishscore=0
+ spamscore=0 impostorscore=0 bulkscore=0 suspectscore=0 clxscore=1011
+ mlxscore=0 lowpriorityscore=0 mlxlogscore=932 malwarescore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2405010000 definitions=main-2405160034
 
-On 15/05/2024 14:09, Naina Mehta wrote:
-> Enable SDHCI on sdx75-idp to support SD card.
-> Also add the required regulators.
+
+
+On 5/15/2024 7:53 PM, Krzysztof Kozlowski wrote:
+> On 15/05/2024 14:09, Naina Mehta wrote:
+>> Enable SDHCI on sdx75-idp to support SD card.
+>> Also add the required regulators.
+>>
+>> Signed-off-by: Naina Mehta <quic_nainmeht@quicinc.com>
+>> ---
+>>   arch/arm64/boot/dts/qcom/sdx75-idp.dts | 45 ++++++++++++++++++++++++++
+>>   1 file changed, 45 insertions(+)
+>>
+>> diff --git a/arch/arm64/boot/dts/qcom/sdx75-idp.dts b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>> index f76e72fb2072..6f94278cf837 100644
+>> --- a/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>> +++ b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>> @@ -41,6 +41,29 @@
+>>
+>>   		vin-supply = <&vph_ext>;
+>>   	};
+>> +
+>> +	vreg_sd_vccb: sd-vccb {
 > 
-> Signed-off-by: Naina Mehta <quic_nainmeht@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/sdx75-idp.dts | 45 ++++++++++++++++++++++++++
->  1 file changed, 45 insertions(+)
+> Please use name for all fixed regulators which matches current format
+> recommendation: 'regulator-[0-9]+v[0-9]+'
+
+Did you mean that vreg_sd_vdd should be updated according to the 
+suggested format because vreg_sd_vccb is not a fixed regulator?
+
+Thanks,
+Naina
+
 > 
-> diff --git a/arch/arm64/boot/dts/qcom/sdx75-idp.dts b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
-> index f76e72fb2072..6f94278cf837 100644
-> --- a/arch/arm64/boot/dts/qcom/sdx75-idp.dts
-> +++ b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
-> @@ -41,6 +41,29 @@
+> https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git/commit/?id=b6d4b3500d57370f5b3abf0701c9166b384db976
 > 
->  		vin-supply = <&vph_ext>;
->  	};
-> +
-> +	vreg_sd_vccb: sd-vccb {
-
-Please use name for all fixed regulators which matches current format
-recommendation: 'regulator-[0-9]+v[0-9]+'
-
-https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git/commit/?id=b6d4b3500d57370f5b3abf0701c9166b384db976
-
-
-Best regards,
-Krzysztof
-
+> 
+> Best regards,
+> Krzysztof
+> 
