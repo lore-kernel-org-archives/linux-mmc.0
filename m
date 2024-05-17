@@ -1,63 +1,135 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 81DAD14EC6F;
-	Thu, 16 May 2024 16:23:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC4C8E572;
+	Fri, 17 May 2024 08:52:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1715876630; cv=none; b=jYSk4xoIYO7GeJFilBuHHEC/EevB3AVmu6RwFUD8CHRBd2JCgz7v5sr/Tsc2Esmdo74cWzT8HQkXK+sR2AvRpaXRxXPKoosHo6cDkd/sRTUZlBGKEyJBb7soKRUM0riwf4zeHXs44X1W0BcMg88SQ+fI4v3MTLB5G4GzKIFJ/7o=
+	t=1715935955; cv=none; b=ur4JWOi8a5CvFARKZzDspRsmdjXUHdqKcLLZ7qgetfcAiXxCqbQ53/7dRM9r1v8n26yNGl5NR1pIS3IwpOiCIBD5UrTQYGuafQbZuYxM6So16yqLMo2aRxQWkA83s8G99EXRcid2PehquxwUd3G/5MtcFOAmzSWz/4Yvjjkk9oI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1715876630; c=relaxed/simple;
-	bh=6wx9TT5qJlGAXBwfJiOGgUpLZiAXL+P+zjmxdAOWe94=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=rrZ/MVkAdjSJntpPNNJa3SDHi41AIO9rcBfsDVzt+TKEw03uwb7kOLEtyhHruHw4pmlfDuhMVD+XUeun4f+Q6HMjyydLpXLE/cLaq7Oi5Anm2doELKmTYeKPL/si71QhRSYTmqIjTtSx2rjol/GJL1Zh4QyhKKaSJSUBhdq5Q1c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Z+wejWm5; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1715935955; c=relaxed/simple;
+	bh=OQVoTWse2zVyZLUZZY0IQ3FmeZD7K5/Q/qilVQc8qmI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ebp2eXLz81Sg0nRQyG8wcs3fWEW0vk6mkiROlLig/nDlBet3mVk/cReRZiSaR+HOvZb4IDzUO3TScHf8JIIuyGdyhOMx5FhVx/Z3Huvpg5gSc64qPUjP1bWJvMwOcv668pFOSLePqBaBaem1yau4W9KLOdjEPM1OVgd9nOX8G0E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TIQ7H1Zw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Z+wejWm5"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 654EEC4AF0A;
-	Thu, 16 May 2024 16:23:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TIQ7H1Zw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79B2AC2BD10;
+	Fri, 17 May 2024 08:52:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1715876630;
-	bh=6wx9TT5qJlGAXBwfJiOGgUpLZiAXL+P+zjmxdAOWe94=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=Z+wejWm5hye8G1ILLYV+3EXD46M05dAUHq7wrCVzH5mh+mIGed/jZhi/x1A2yZmrl
-	 H7FMxaImdeu+Dkai1Wk7OaDeUefz0DFl8V30SGin8HZuiaA/ldrpWMjv/j/6T6pyOF
-	 mGEfvM2Epuh//ZhlQPI5fJynM8YrdFTetuCwK19tPR5pIglUJGLONXwl2vEI1OCcMS
-	 VzGRAjmcSTKZjBnGzTq+Gw9D4l9nXajUaEsnfJjuVPq/9Pm6QKHoFeTJPuZHGLLhgu
-	 4bVSa2ZYmoi5r6qKhUMtmKjTqUiZbNJUqtPpkFdrXRu7HE7JZEtNKXz5Md3SfNzk1H
-	 s2o/nCYzig1tA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 5D064C43339;
-	Thu, 16 May 2024 16:23:50 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v6.10
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20240516152012.30550-1-ulf.hansson@linaro.org>
-References: <20240516152012.30550-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20240516152012.30550-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10
-X-PR-Tracked-Commit-Id: 35eea0defb6e46b26e286066e0e77ac5d53e7fba
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 8b06f7538a1bb6ad15969114e31be7a99420125b
-Message-Id: <171587663037.28916.6045100576015693084.pr-tracker-bot@kernel.org>
-Date: Thu, 16 May 2024 16:23:50 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	s=k20201202; t=1715935955;
+	bh=OQVoTWse2zVyZLUZZY0IQ3FmeZD7K5/Q/qilVQc8qmI=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=TIQ7H1ZwlGcqHPS3zWahL7nsSEEup0FUrBwTxSUSgMak2iahHmfnz6AYJ6dlXw1Oo
+	 r7g/Ven7wmg1ZAREazzRA5qSKTcI/fngAA2megMLy/RzyLDxyudVqiSxAGn52p83rs
+	 SOirBH1QGeKtfrnD2Gp85F+Ouw1H47Yx+ZeQZDl4XMdukFtiWoMb4EJFOniW3+0k+W
+	 Wxv+3BiNbWKq2XjzPlYMmJeGu6qfPumiP+AGgg+ySrseNF+M16m4np7SG5vE/pPGG2
+	 V9SI7xrh8Fbt26VNJEVt3KSkkwtJt2hcii94ccAosWhTILCK3F0mq9fEhoPUY6vpBP
+	 CZGhMfTQbvLwg==
+Message-ID: <743c2a10-0ce6-4b84-8127-f3d762976366@kernel.org>
+Date: Fri, 17 May 2024 10:52:30 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 3/3] arm64: dts: qcom: sdx75-idp: add SDHCI for SD Card
+To: Naina Mehta <quic_nainmeht@quicinc.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ andersson@kernel.org, konrad.dybcio@linaro.org, bhupesh.sharma@linaro.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+References: <20240515120958.32032-1-quic_nainmeht@quicinc.com>
+ <20240515120958.32032-4-quic_nainmeht@quicinc.com>
+ <a5833628-65f3-493d-9de5-33ba87a18875@kernel.org>
+ <2ed5326a-b2ea-220a-2a9b-0478df0c6f12@quicinc.com>
+Content-Language: en-US
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <2ed5326a-b2ea-220a-2a9b-0478df0c6f12@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-The pull request you sent on Thu, 16 May 2024 17:20:12 +0200:
+On 16/05/2024 07:21, Naina Mehta wrote:
+> 
+> 
+> On 5/15/2024 7:53 PM, Krzysztof Kozlowski wrote:
+>> On 15/05/2024 14:09, Naina Mehta wrote:
+>>> Enable SDHCI on sdx75-idp to support SD card.
+>>> Also add the required regulators.
+>>>
+>>> Signed-off-by: Naina Mehta <quic_nainmeht@quicinc.com>
+>>> ---
+>>>   arch/arm64/boot/dts/qcom/sdx75-idp.dts | 45 ++++++++++++++++++++++++++
+>>>   1 file changed, 45 insertions(+)
+>>>
+>>> diff --git a/arch/arm64/boot/dts/qcom/sdx75-idp.dts b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>>> index f76e72fb2072..6f94278cf837 100644
+>>> --- a/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>>> +++ b/arch/arm64/boot/dts/qcom/sdx75-idp.dts
+>>> @@ -41,6 +41,29 @@
+>>>
+>>>   		vin-supply = <&vph_ext>;
+>>>   	};
+>>> +
+>>> +	vreg_sd_vccb: sd-vccb {
+>>
+>> Please use name for all fixed regulators which matches current format
+>> recommendation: 'regulator-[0-9]+v[0-9]+'
+> 
+> Did you mean that vreg_sd_vdd should be updated according to the 
+> suggested format because vreg_sd_vccb is not a fixed regulator?
+> 
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10
+Yeah, it should be about sd-vdd, but then this one should be named as
+well with a similar prefix to have it consistent.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/8b06f7538a1bb6ad15969114e31be7a99420125b
 
-Thank you!
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Best regards,
+Krzysztof
+
