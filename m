@@ -1,57 +1,57 @@
-Received: from mail-il1-f170.google.com (mail-il1-f170.google.com [209.85.166.170])
+Received: from mail-pf1-f176.google.com (mail-pf1-f176.google.com [209.85.210.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9012C84D0A;
-	Wed, 22 May 2024 11:09:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41B8484DE8;
+	Wed, 22 May 2024 11:09:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716376197; cv=none; b=cOdSfWm0x8eBF6Nl+j7VWZmpYIVOhIgutYdqJ0WeSER4wfFR9bSqUUFYOgyLZdCCI72mg4w0eBmDJmTpca0cZJjwE4O4Lx0oleClzxpYDASn+/oXRfm0x46qU/+LkUPyuL2RtK1aXa13DOLxb2N86vZJTL29QlvrWiz8nopgQIs=
+	t=1716376200; cv=none; b=dHOYeZpXxAi7fRQ95YudkATDXOn7gvigYoEjf0jrBwnlOAFrVfIGMb7a8tlA5UDXYMX5fWP1DwSb33v1bvneEav819goW3QsHrA+sScnDtDqbe50uanZY/yS3XoRIyQMruH2vJ846MM+adbm5WISoTKI96CRU/CMXvYZ9fh1qlY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716376197; c=relaxed/simple;
-	bh=vENF9HCmcpJXEqgwxvddYUAdwYA+NrUfNCsZT+T4wFw=;
+	s=arc-20240116; t=1716376200; c=relaxed/simple;
+	bh=VDO+0Tj49KEOBq19KziQB7YiThTUgR5jttu90eNxnUQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=JBEEdEehRZR8NUke1HKLTuR6Ee4LEF2zUQjWeIqaZ251ELPu+GR2rkUJYZV2SdhhPO/aTbBJSX6aJ4qqivJJULXj94UP7ziKr8CaEyKzXJqB54/LPR1cwJ1eKfp9domYH33GWa0O0kte6zUB/2Pk57Y8HiCyJ+XBl51nxWxzpAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=J54+6YIy; arc=none smtp.client-ip=209.85.166.170
+	 MIME-Version; b=DL8bH63JSAbrlpJpbG13VeIysJMlwIBt/TEgtXsotHnyNdrLg9NFT0VChJ5yChKzpb/v/DoMKBYDAflL0mJooK1d5kjDksXF22h95fJH83lxDFg83upSPh7Ya6w9YE/XKVY97V8BrJlgKeixsarsxusXQLAK666pd8r5lM7fnNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aPzg9btK; arc=none smtp.client-ip=209.85.210.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J54+6YIy"
-Received: by mail-il1-f170.google.com with SMTP id e9e14a558f8ab-36cc8dbe09aso22872205ab.2;
-        Wed, 22 May 2024 04:09:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aPzg9btK"
+Received: by mail-pf1-f176.google.com with SMTP id d2e1a72fcca58-6f4603237e0so583746b3a.0;
+        Wed, 22 May 2024 04:09:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1716376195; x=1716980995; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1716376198; x=1716980998; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=u4ulBUi6egoC57FE+2wADM8HkpJFXf6Ty5HbDsYr4Os=;
-        b=J54+6YIyIvVh3eBlf9vgh66dINCHMM8pppcP8sE8YIcagTBV0feVj7Z58Aareq110b
-         rk0uWddQncIOF8uew/eCNamGWfwbO8qAB10tT1DwKga8YqYqSlkZTa63fUJ/bAV16xdp
-         2+vUWsewKIUZ6ddQdWQlUwjQ/4wag4Wuj8hpNJ0dB8NWQcTRdzin3WZ9mMJYmeMInBll
-         0NeOa5wGckfnLIzpFIQ2mbh2RrbPMLehvHa414GRIV88ju+0O5d0xTVDzqxpU0LAoCc1
-         vvGjv5BpfJumZUihcXgP7CHlNVmbeBMInUF/wMNNLOW+j/7rFX5R9Ig2qgRaViGsJ7Cm
-         NG8g==
+        bh=0E+X0B3463x+ySzrb8RMJMYXBtgxmBPuTkwp509q9vM=;
+        b=aPzg9btKdV4MHCIeP3Sfd+r4FvBtANO/3LH+azQ6OmrP7ym3lJlvYq7FCzeTioJmGi
+         8uY1Rt4Vd2/xnuyxLcNEnQEbKJFTiXzCU1kYI+ol52NymvXkpe1w+FljckpB1HW2hsZG
+         FtpoMdJunX2zhhvMHqFzGZNyS7HN/bnL5GevkyNpwMk9wp+akQ+h3sGsbRp7ldaVF/Jv
+         yW/Poh9WQ0LhGQCkyT6Vnda04/bj/Q7SoplZ6F1GUP1XD0zKvOANKHNgm+XhOQHUZYAZ
+         iiE1i+lpHZjjzNf16IKG8eiIRxM5cBg86zmuxVZFTUdCBWL/ZmEGSec51qRi9wV+16+2
+         DCBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716376195; x=1716980995;
+        d=1e100.net; s=20230601; t=1716376198; x=1716980998;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=u4ulBUi6egoC57FE+2wADM8HkpJFXf6Ty5HbDsYr4Os=;
-        b=FqC/oDXSV95cFWBLkocxE3r1xNyMChtji8b/UG9d6D25xm3Q+TkzvcuzHdsq1pY7fW
-         3dtV9JSOUFsLlC4XKlpd4UMYW6bxGaaiDBI3HbVO6ojsDjPstnzM/5wZwhB/BQ0vmGnw
-         JjlnpLuE8yww+Qk1m1gcyI5XYVVrljQAKnSEIg1VnIHei/K/PWXMb7avgRWrj79lQuFn
-         EJF4aV1vT3HkXBcNzSoteL4oAC2razQNDibqyy4rEoT6mSxhrYDZmRm2jl5bY26Cd4Io
-         AV47V0jt9dSyiSKZN+9rcL2bV7CXPRJ5SSwoAJ3WSmdmLez33eE9rSJXRSApnhMCooqK
-         TSjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXc42K0CaIJ+U95bytwuY1+qdkhr7xGbPjSlxLKuoh4iPgd08CeTlzT8S2ca3C9D+Rf4ESdNCxIGwDKnKNv8bB+EKu5/Usl+EvGEiBz
-X-Gm-Message-State: AOJu0YxJkXnwvcQNGGsO1AWqyaLUOTjdbHIz+viDKeKZnW0juo7qFFSw
-	L6NIHK8jT3nKHUCdfyV24XFQjJyZ91Z8hrZ0XJRB/hu50HlS4XC3
-X-Google-Smtp-Source: AGHT+IE+Y0TAHuoXeZ0m0OvbMIBJXjolqZox3OGtfJs+zhDRElZJq2ioXB6T+zbKwFoArH3Z2rPD1g==
-X-Received: by 2002:a05:6e02:20eb:b0:36b:46b:1338 with SMTP id e9e14a558f8ab-371f9dda871mr19732825ab.9.1716376194794;
-        Wed, 22 May 2024 04:09:54 -0700 (PDT)
+        bh=0E+X0B3463x+ySzrb8RMJMYXBtgxmBPuTkwp509q9vM=;
+        b=r/6iNq3sNAwpZA0mWgOGFWK8TxW4LIVQb6/4A0i9pwNYM0QKpFnqqx7G4WwfEoLfMz
+         ivPq/56F7dWMiAdR9dc8DghZA7E5S8Va++crt5VDBMqx4reC7dZo6fAcGq93R5U2vbg6
+         KxEyIpqj9NzuMJW7Gt2eeSynTaZjxZzPTFNGP6Wdj5o++3PX4zTfpevzc2vsIutcXoAb
+         0ebKiKxm+rY7sNm75tYCBWSgo8RdTesVedQVLpPHdV4Nyv652Q+La2BUtUl5FBcU4ucp
+         ga3F4MXyAiOjpSCd/AWXQj0gGWsAVkuBNUtYn04ANpHJhFjWRimTZUHKViPBk/ZCXAb3
+         mtxg==
+X-Forwarded-Encrypted: i=1; AJvYcCW/Ca8d/KdORVekgr2HawOX5mcUd+amjwVFponCUKbJyDRyuGJW5qoe5mRnVCA3YSi2NhB71stt1wcz3XcCOklVbDjgHpvuVAF0xo0C
+X-Gm-Message-State: AOJu0YyuthaDWHmCJwBEgrcSFnMLilnR79ijGDcRYKR7u0PbCL79nsm2
+	+ldMWkSOGruNzd3yf1m7f6cigHyZb9+2KHLI4NwLhrdcq5VYkRVF
+X-Google-Smtp-Source: AGHT+IF4VENsbbnmq7nmBHhDtjsHR7cjFyY44oicXCuJkk8cYm01B+IVY/LMPP+a0shqm/l4GhjRuw==
+X-Received: by 2002:a05:6a20:5b23:b0:1af:d08d:da34 with SMTP id adf61e73a8af0-1b1ca2cb315mr14642366637.0.1716376198680;
+        Wed, 22 May 2024 04:09:58 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e283-0474-753d-295c-237e-167b.emome-ip6.hinet.net. [2001:b400:e283:474:753d:295c:237e:167b])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f4d2af2a98sm22223760b3a.169.2024.05.22.04.09.51
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-6f4d2af2a98sm22223760b3a.169.2024.05.22.04.09.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 May 2024 04:09:54 -0700 (PDT)
+        Wed, 22 May 2024 04:09:58 -0700 (PDT)
 From: Victor Shih <victorshihgli@gmail.com>
 To: ulf.hansson@linaro.org,
 	adrian.hunter@intel.com
@@ -65,9 +65,9 @@ Cc: linux-mmc@vger.kernel.org,
 	Victor Shih <victorshihgli@gmail.com>,
 	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
 	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V16 10/23] mmc: sdhci: add UHS-II module and add a kernel configuration
-Date: Wed, 22 May 2024 19:08:56 +0800
-Message-Id: <20240522110909.10060-11-victorshihgli@gmail.com>
+Subject: [PATCH V16 11/23] mmc: sdhci-uhs2: dump UHS-II registers
+Date: Wed, 22 May 2024 19:08:57 +0800
+Message-Id: <20240522110909.10060-12-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240522110909.10060-1-victorshihgli@gmail.com>
 References: <20240522110909.10060-1-victorshihgli@gmail.com>
@@ -81,120 +81,112 @@ Content-Transfer-Encoding: 8bit
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-This patch adds sdhci-uhs2.c as a module for UHS-II support.
-This is a skeleton for further development in this patch series.
-
-This kernel configuration, CONFIG_MMC_SDHCI_UHS2, will be used
-in the following commits to indicate UHS-II specific code in sdhci
-controllers.
+Dump UHS-II specific registers, if available, in sdhci_dumpregs()
+for informative/debugging use.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 
-Updates in V9:
- - Modify the commit message.
+Updates in V14:
+ - Use mmc_card_uhs2() to stead sdhci_uhs2_mode() in the
+   sdhci_uhs2_dump_regs().
 
-Updates in V8:
- - Modify MODULE_LICENSE from "GPL v2" to "GPL".
+Updates in V7:
+ - Use sdhci_uhs2_mode() to simplify code.
 
 Updates in V6:
- - Merage V5 of patch[7] and patch[9] in to V6 of patch[8].
+ - Remove unnecessary code.
 
 ---
 
- drivers/mmc/host/Kconfig      |  9 +++++++
- drivers/mmc/host/Makefile     |  1 +
- drivers/mmc/host/sdhci-uhs2.c | 46 +++++++++++++++++++++++++++++++++++
- 3 files changed, 56 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-uhs2.c
+ drivers/mmc/host/sdhci-uhs2.c | 30 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-uhs2.h |  4 ++++
+ drivers/mmc/host/sdhci.c      |  3 +++
+ drivers/mmc/host/sdhci.h      |  1 +
+ 4 files changed, 38 insertions(+)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index bb0d4fb0892a..342bbc3ef577 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -98,6 +98,15 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
- 
- 	  This is the case for the Nintendo Wii SDHCI.
- 
-+config MMC_SDHCI_UHS2
-+	tristate "UHS2 support on SDHCI controller"
-+	depends on MMC_SDHCI
-+	help
-+	  This option is selected by SDHCI controller drivers that want to
-+	  support UHS2-capable devices.
-+
-+	  If you have a controller with this feature, say Y or M here.
-+
- config MMC_SDHCI_PCI
- 	tristate "SDHCI support on PCI bus"
- 	depends on MMC_SDHCI && PCI
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index f53f86d200ac..fc064a3030ca 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -11,6 +11,7 @@ obj-$(CONFIG_MMC_PXA)		+= pxamci.o
- obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
- obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
- obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
-+obj-$(CONFIG_MMC_SDHCI_UHS2)	+= sdhci-uhs2.o
- obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
- sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o sdhci-pci-arasan.o \
- 				   sdhci-pci-dwc-mshc.o sdhci-pci-gli.o
 diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-new file mode 100644
-index 000000000000..608f8ad5aaed
---- /dev/null
+index 608f8ad5aaed..9cb0f1b2a37d 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
 +++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -0,0 +1,46 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/*
-+ *  linux/drivers/mmc/host/sdhci_uhs2.c - Secure Digital Host Controller
-+ *  Interface driver
-+ *
-+ *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
-+ *  Copyright (C) 2020 Genesys Logic, Inc.
-+ *  Authors: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-+ *  Copyright (C) 2020 Linaro Limited
-+ *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
-+ */
+@@ -18,6 +18,36 @@
+ #define DRIVER_NAME "sdhci_uhs2"
+ #define DBG(f, x...) \
+ 	pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
++#define SDHCI_UHS2_DUMP(f, x...) \
++	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
 +
-+#include <linux/module.h>
-+
-+#include "sdhci.h"
-+#include "sdhci-uhs2.h"
-+
-+#define DRIVER_NAME "sdhci_uhs2"
-+#define DBG(f, x...) \
-+	pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
-+
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Driver init/exit                                                          *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
++void sdhci_uhs2_dump_regs(struct sdhci_host *host)
 +{
-+	return 0;
-+}
++	if (!(mmc_card_uhs2(host->mmc)))
++		return;
 +
-+static int __init sdhci_uhs2_mod_init(void)
-+{
-+	return 0;
++	SDHCI_UHS2_DUMP("==================== UHS2 ==================\n");
++	SDHCI_UHS2_DUMP("Blk Size:  0x%08x | Blk Cnt:  0x%08x\n",
++			sdhci_readw(host, SDHCI_UHS2_BLOCK_SIZE),
++			sdhci_readl(host, SDHCI_UHS2_BLOCK_COUNT));
++	SDHCI_UHS2_DUMP("Cmd:       0x%08x | Trn mode: 0x%08x\n",
++			sdhci_readw(host, SDHCI_UHS2_CMD),
++			sdhci_readw(host, SDHCI_UHS2_TRANS_MODE));
++	SDHCI_UHS2_DUMP("Int Stat:  0x%08x | Dev Sel : 0x%08x\n",
++			sdhci_readw(host, SDHCI_UHS2_DEV_INT_STATUS),
++			sdhci_readb(host, SDHCI_UHS2_DEV_SELECT));
++	SDHCI_UHS2_DUMP("Dev Int Code:  0x%08x\n",
++			sdhci_readb(host, SDHCI_UHS2_DEV_INT_CODE));
++	SDHCI_UHS2_DUMP("Reset:     0x%08x | Timer:    0x%08x\n",
++			sdhci_readw(host, SDHCI_UHS2_SW_RESET),
++			sdhci_readw(host, SDHCI_UHS2_TIMER_CTRL));
++	SDHCI_UHS2_DUMP("ErrInt:    0x%08x | ErrIntEn: 0x%08x\n",
++			sdhci_readl(host, SDHCI_UHS2_INT_STATUS),
++			sdhci_readl(host, SDHCI_UHS2_INT_STATUS_ENABLE));
++	SDHCI_UHS2_DUMP("ErrSigEn:  0x%08x\n",
++			sdhci_readl(host, SDHCI_UHS2_INT_SIGNAL_ENABLE));
 +}
-+module_init(sdhci_uhs2_mod_init);
++EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+ 
+ /*****************************************************************************\
+  *                                                                           *
+diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+index e993f41ffb7f..2bfe18d29bca 100644
+--- a/drivers/mmc/host/sdhci-uhs2.h
++++ b/drivers/mmc/host/sdhci-uhs2.h
+@@ -174,4 +174,8 @@
+ #define SDHCI_UHS2_EMBED_CTRL_PTR		0xE6
+ #define SDHCI_UHS2_VENDOR_PTR			0xE8
+ 
++struct sdhci_host;
 +
-+static void __exit sdhci_uhs2_mod_exit(void)
-+{
-+}
-+module_exit(sdhci_uhs2_mod_exit);
++void sdhci_uhs2_dump_regs(struct sdhci_host *host);
 +
-+MODULE_AUTHOR("Intel, Genesys Logic, Linaro");
-+MODULE_DESCRIPTION("MMC UHS-II Support");
-+MODULE_LICENSE("GPL");
+ #endif /* __SDHCI_UHS2_H */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 746f4cf7ab03..8fc3e001db74 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -110,6 +110,9 @@ void sdhci_dumpregs(struct sdhci_host *host)
+ 		}
+ 	}
+ 
++	if (host->ops->dump_uhs2_regs)
++		host->ops->dump_uhs2_regs(host);
++
+ 	if (host->ops->dump_vendor_regs)
+ 		host->ops->dump_vendor_regs(host);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7d68d5666080..13703f1a3710 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -721,6 +721,7 @@ struct sdhci_ops {
+ 	void	(*request_done)(struct sdhci_host *host,
+ 				struct mmc_request *mrq);
+ 	void    (*dump_vendor_regs)(struct sdhci_host *host);
++	void	(*dump_uhs2_regs)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 2.25.1
 
