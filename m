@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 203DA6E60F;
-	Thu, 23 May 2024 17:08:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80C97AD2C;
+	Thu, 23 May 2024 17:09:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716484110; cv=none; b=NKi7XXfqEjW0VPD/DpvstA+IJDlt/yk4hLwHktkTIvcz1a7CANdu1K3pX1nfDL9mCYCxAhO+NZAqOpzx4/E9kmmDBNZ8pOHis2cM6UxjxmYAOuvwk+ij+Tkpq54Fs35al6o8KsIVnMhMd1LRhyNfNqa18+YVmqgpUg5l1rwKRZo=
+	t=1716484197; cv=none; b=IN+jxJ+t0mOByz7ZyJa/mlfR+PQfOB1fBs1Z16OomxZtnaaGYhbzENlvEeWb3KrfyNizgCze6zFv6KUaMk2cww15RvuYemKqCrKtGyzpTDegfbvAoY6zDlKApMfZd+JxNyp4Q6OM4VfgsGF93yzh1uOLybP++etVSVOlGHMyfqo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716484110; c=relaxed/simple;
-	bh=mO2C24AuLnZTL9f5oaz0mHHfnqvOcor9Wz9/UixnKCU=;
+	s=arc-20240116; t=1716484197; c=relaxed/simple;
+	bh=5yWPOER3Cws9HMq0dWVLRKmFRFwVmYgXF2Os7cck9k0=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=M2FY6xUMQn7Iet37xnpsLP/2YJVm0XAqRraMKbRCWTAH3D7XA/I4pmoc7KK7pGSNAhc4XgJ+wzd8KOC8Oe8Ze/RRWy1FpWmIdT8JDtngRcErq2xUZfX3OK4VTJ2wITnQAvoLHXPg4veohhPX8MrF5cLPHUoP4LWOvdrw/LjzqJg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BSaKMs1U; arc=none smtp.client-ip=198.175.65.16
+	 In-Reply-To:Content-Type; b=ZaonQBFpTTSuaqnThtylGOu9TukwQZVuiUFa7JQL8XvI/abTnP1qa+T2+t3FCavy0dKeDnW5j5Fsak2XcKjOIRGgBJ81R/s9UsIane6Tsdwl+g8cW/WLEFGb5GeHkoUhA876XTiwijCv4IzD/hr1jIkjHVl7RBUcuwe53yQ7+Ko=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=K6HQUfdG; arc=none smtp.client-ip=198.175.65.16
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BSaKMs1U"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="K6HQUfdG"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1716484108; x=1748020108;
+  t=1716484195; x=1748020195;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=mO2C24AuLnZTL9f5oaz0mHHfnqvOcor9Wz9/UixnKCU=;
-  b=BSaKMs1UccJ+naMqch0tP1OPGLsVi+QFEbbXEujQXKsAkqsvwNxqtIEw
-   olXOblaiPqH8SBRERIvn1fe1jnTVPOG6mkXZ+w7G6JTLh8VgvvhUCKVzT
-   aEHp40B6Mz2tXxJqC9gKOUytjW32FxlRQdmoTsEZcg8htsLD2XG0kQ967
-   GETJCb268dwraiqE2eKTMu0MOstkguxtkgu7142FEeRtBkXQ69s3j7g3U
-   1VSNHS1wuzI5tSoEUofLfSW9UjdRdTH0xU5nUXgou82n6gE93sakmKq6j
-   giNb8qUZwY9U6dZGNURNwzgIlFsFU92GGk8savWQFXes4QgrEZ6OIJHMq
-   Q==;
-X-CSE-ConnectionGUID: K0CIhHC6RnmyHfIqTSKfKQ==
-X-CSE-MsgGUID: ZK3C/eBiRGm/W9aqy8S3Zw==
-X-IronPort-AV: E=McAfee;i="6600,9927,11081"; a="12939636"
+  bh=5yWPOER3Cws9HMq0dWVLRKmFRFwVmYgXF2Os7cck9k0=;
+  b=K6HQUfdGRTsygQOvQcGeMzpZyKK05cQCX474b+1CtBjhpBgBO2IB6epi
+   jqpSDcuMja92y1ohs9tP+V5NbxSvKG7ZjRtk0qvY9XfqRF+A4FbYdmfK9
+   av+DoQuYvJLtLcetedBmdjl0wl+atfFpkuJBeSX1HvHQWA1JCuQPaQ2dO
+   smv36ejc1rhtB//yn3/6+gnSy1s6V5WMiaPSc6pwdhHJYyMa6KbRgHCmg
+   KMNzOv1k9nrVlbTnbGfnjgEP59mjmJXJqu0zxHdLqa9GId2Ll8FOyQDoC
+   milM/m/59h3Cbbaqqp/VIfoEc9W4MLjHcujEXL4CTEWVQfWbN5jcjXyhS
+   g==;
+X-CSE-ConnectionGUID: bUE0vLkxS7C042ipX4kPGA==
+X-CSE-MsgGUID: gEkjfxoTTDCltfQnlps4DQ==
+X-IronPort-AV: E=McAfee;i="6600,9927,11081"; a="12939928"
 X-IronPort-AV: E=Sophos;i="6.08,183,1712646000"; 
-   d="scan'208";a="12939636"
+   d="scan'208";a="12939928"
 Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2024 10:08:27 -0700
-X-CSE-ConnectionGUID: VouEAT/LQ/O7XPVIghJ8nA==
-X-CSE-MsgGUID: no97A+AZRn+3x3pLl7DiUg==
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2024 10:09:55 -0700
+X-CSE-ConnectionGUID: cz2rOkgPSue8AI23o4IG0g==
+X-CSE-MsgGUID: P7gmAOPHTCuWLxT8MJCdtA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.08,183,1712646000"; 
-   d="scan'208";a="56975148"
+   d="scan'208";a="56976048"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.48.38])
-  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2024 10:08:24 -0700
-Message-ID: <75bc82b1-4a2b-4274-b55e-06288af6dc7a@intel.com>
-Date: Thu, 23 May 2024 20:08:19 +0300
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2024 10:09:49 -0700
+Message-ID: <81adac4f-edc5-4e3d-8c74-68a33183c3e3@intel.com>
+Date: Thu, 23 May 2024 20:09:44 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -165,11 +165,6 @@ On 22/05/24 14:09, Victor Shih wrote:
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD) {
-
-That is the same as:
-
-	if (mmc_card_uhs2(host->mmc)) {
-
 > +		/* need internal clock */
 > +		if (mask & SDHCI_RESET_ALL) {
 > +			ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
@@ -184,10 +179,6 @@ That is the same as:
 > +			}
 > +		}
 > +		if ((mask & SDHCI_RESET_CMD) | (mask & SDHCI_RESET_DATA))
-
-Simpler:
-		if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA))
-
 > +			sdhci_gli_uhs2_reset_sd_tran(host);
 > +
 > +		sdhci_uhs2_reset(host, mask);
@@ -260,11 +251,6 @@ Simpler:
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
 > +	    host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD) {
-
-That is the same as:
-
-	if (mmc_card_uhs2(host->mmc)) {
-
 > +		gl9767_vhs_write(pdev);
 > +
 > +		pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &value);
@@ -338,6 +324,9 @@ That is the same as:
 >  	}
 >  }
 > +EXPORT_SYMBOL_GPL(sdhci_uhs2_set_power);
+
+Might as well export sdhci_uhs2_set_power() when it is first added
+
 >  
 >  static u8 sdhci_calc_timeout_uhs2(struct sdhci_host *host, u8 *cmd_res, u8 *dead_lock)
 >  {
