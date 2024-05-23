@@ -1,88 +1,121 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from relay.smtp-ext.broadcom.com (relay.smtp-ext.broadcom.com [192.19.144.205])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7ABF2AD00
-	for <linux-mmc@vger.kernel.org>; Thu, 23 May 2024 19:53:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C723823AF;
+	Thu, 23 May 2024 21:45:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.19.144.205
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716494022; cv=none; b=h4ZbGWv+IdXEwvpR//Ivgs1cJHgQ+KwqLcps/WJVp+PqVg2BJGBNHqZ4w0WxKm1gt5dZayG8jzNfoEUA5mdBccVsOOc8cQFdDH83a3m+CXF9cD+/ozvfwxD2AqJ93WwnZUqQMFOo3LAHr0T2b/bEBnggYoQuQOBEeRDaLefMQR4=
+	t=1716500737; cv=none; b=pDV/8WpozLWIcwz8XOIDNoHVH+njyovFHG0SxFAB9oD+jt0Y4+uF67YuKZ3sx92ssJNW5f8lxuUHAmbYgVmDX62tNhledtUzOJJYr9UGWRTfkio3K/nExJ4AYAParQL56lQYKerkVyIR0NCxrKKKHWfBf8MrRjjK4YfVasomLzQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716494022; c=relaxed/simple;
-	bh=FkF4ZrNi8IbvmuiF7Q7hch3s/WZ246n/47w4adKFDJw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n+Jxu+qQBbkZ+7+5/GCqfTAIGaK7NYyAmSw44DgXBumazDG8BmS++B3rlqPUZKX3LbQVTIHVJJU9HY7Q62HYrXoH+0enL/YM32LQQ/BnPzayjpEzYrsD41nHRRjw8q7aXevu0cI9pVyIY6wUE/RlGIA6C1Q0oUyX4QjEhJgwh+k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vKR5BLpP; arc=none smtp.client-ip=209.85.128.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1716500737; c=relaxed/simple;
+	bh=sh70DTywu3wqQXotgAFqRS5mApT9pgQ+LLx20K47w5Y=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=cqvn9f74IP1G8SGvjcVeofmK+gOXYV3IbrHDkJENSNX2Q9u8UhxrA4pexC0yzWALUpO0CukuKXg/jN/A8mZyviPmyYJdwaCQTSayjHPE3aQ49WW3KtTxSAlZLGld/rxuICEbeTx3Lq9zUnRwEERQgx3f4wyAAWHPRo5NVOFMdv4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=PtWAKfEA; arc=none smtp.client-ip=192.19.144.205
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vKR5BLpP"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-62a08b1a81bso872077b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 May 2024 12:53:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1716494020; x=1717098820; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=FkF4ZrNi8IbvmuiF7Q7hch3s/WZ246n/47w4adKFDJw=;
-        b=vKR5BLpP0PgMw4vEBvlcTG6b+LqsGwdQpcPQ3DtWybiSzSmwXF9R0ImVWUva9eXqdh
-         qlClkN1zHtL+wfxASU9E9HJ3QOICmWbhq9Y9884B7HQn5rkoLPIIKgFSDkiugBMIiFE9
-         /15NMPIiHw6+iJxLUmeg/VD5x50hcjCeJ2U+9OWbe2Zoii7d1U4//XyDkxKIAdiutvC/
-         MIbMrlzwny8wgkjzOdjSRyLIaarLyypc4VStcLuxAMHRn4hN/ZUMbXW5pplCy4scz4Oq
-         0JIgt0zsiGRYFv8QRjBd/iS1DQsV4DtMRKCai9QfIPcM4rJv/V5llRPE/UqWkRSigKHL
-         PHPA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716494020; x=1717098820;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=FkF4ZrNi8IbvmuiF7Q7hch3s/WZ246n/47w4adKFDJw=;
-        b=l4u99kxppR5RLEws4IiPZ6oN/zr2H6nPq9nEKxKG2GW+BBXeBYDT08R3ryKAjRZqV3
-         odMxkhYesXxF4rmeU6bVvBuia59rJSK8TLyeSQCtUGVzOMqcpeDGPucl9z6uR4+f6z5n
-         d3MtvPu0Dbk1trIJmihTzh5fVfe0HY0vT7C5qay2GHrKqe5atTyDbNM/kNtd//+QUqN3
-         1djTHOnt0KgJgVPF1AbntcOW3psge5647EtU93kBJNGALlg+0t1mLMWlUC1NbVD4Vnlx
-         2pPJvsfD9YPyxWwTxrIG0NB6qj4uHdsQtT40XhRgcn3DK8nrAo14UAqBcqVTWRlXF62B
-         uRMA==
-X-Gm-Message-State: AOJu0YwL2N4JFWeX4iq021A1jfT2iNOZM75gxsdKdGSuK3w8EbHBuzqI
-	Dn8pS7OV+eKEkg38uKFH6AWV5Lduh1TEFZ92Z2TypnXz9vfcEv+xteBIVkF9mf70UJ77ExYdLhp
-	Zsvpep9jNmExG46+0M1NblbpyOUYIKdmT3u+maaZSH+lm2uRtWsQ=
-X-Google-Smtp-Source: AGHT+IGpITgkgtKo70SaA2ccYNuI7ZXQ70lQpopqOlDYwR3c0rJUwDyDgGog1ZlDRm6hhMowhyEk5Fp24+1XbVKLnLQ=
-X-Received: by 2002:a05:690c:fcb:b0:622:c8ef:ddb5 with SMTP id
- 00721157ae682-62a08d4f35fmr1879877b3.8.1716494019759; Thu, 23 May 2024
- 12:53:39 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="PtWAKfEA"
+Received: from mail-lvn-it-01.lvn.broadcom.net (mail-lvn-it-01.lvn.broadcom.net [10.36.132.253])
+	by relay.smtp-ext.broadcom.com (Postfix) with ESMTP id 15637C0000F4;
+	Thu, 23 May 2024 14:45:28 -0700 (PDT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 relay.smtp-ext.broadcom.com 15637C0000F4
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=broadcom.com;
+	s=dkimrelay; t=1716500728;
+	bh=sh70DTywu3wqQXotgAFqRS5mApT9pgQ+LLx20K47w5Y=;
+	h=From:To:Cc:Subject:Date:From;
+	b=PtWAKfEAWQTYtBkTrGaAK6XdygzsTl8sMasludkhyg+1uzTJepGxqLsrM/Sg2QX1S
+	 Qxiipgt7r7mjBxJ8iKxlJZNM4CXDJarAoXvl2odcHawB7ketrFfGHUkpjL02hcJZxI
+	 aASDeyIRnRmD4G5pwMBzhYcai8yBZvMI+NjKw1zk=
+Received: from stbirv-lnx-1.igp.broadcom.net (stbirv-lnx-1.igp.broadcom.net [10.67.48.32])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by mail-lvn-it-01.lvn.broadcom.net (Postfix) with ESMTPSA id 12B9018041CAC4;
+	Thu, 23 May 2024 14:45:26 -0700 (PDT)
+From: Florian Fainelli <florian.fainelli@broadcom.com>
+To: stable@vger.kernel.org
+Cc: Jorge Ramirez-Ortiz <jorge@foundries.io>,
+	Avri Altman <avri.altman@wdc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	linux-kernel@vger.kernel.org (open list)
+Subject: [PATCH stable 4.19] mmc: core: Do not force a retune before RPMB switch
+Date: Thu, 23 May 2024 14:45:20 -0700
+Message-Id: <20240523214525.200347-1-florian.fainelli@broadcom.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CABikg9z9NqFwJ5VGtHhtZY9_gNAAoSbAfmAnTHcbp2=b0M3LcA@mail.gmail.com>
-In-Reply-To: <CABikg9z9NqFwJ5VGtHhtZY9_gNAAoSbAfmAnTHcbp2=b0M3LcA@mail.gmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Thu, 23 May 2024 21:53:28 +0200
-Message-ID: <CACRpkdZdojaNGB88OGnVO8d8-PWz1yC-8Gw509NiNdyAKPFRNw@mail.gmail.com>
-Subject: Re: breaking commit: mmc: moxart-mmc: Use sg_miter for PIO
-To: Sergei Antonov <saproj@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Sat, Apr 20, 2024 at 10:38=E2=80=AFPM Sergei Antonov <saproj@gmail.com> =
-wrote:
+From: Jorge Ramirez-Ortiz <jorge@foundries.io>
 
-> Hello, Linus!
-> I see that commit 3ee0e7c3e67cab83ffbbe7707b43df8d41c9fe47 (mmc:
-> moxart-mmc: Use sg_miter for PIO) leads to "BUG: scheduling while
-> atomic".
->
-> Can you suggest a way to rework the code and fix this problem? I can
-> probably make a patch then. The waiting part of this driver needs
-> improvement anyway. It calls
-> wait_for_completion_interruptible_timeout() without checking its
-> return value.
+commit 67380251e8bbd3302c64fea07f95c31971b91c22 upstream
 
-I have no idea why this happens, so if it solves the problem we should
-revert the patch, because I do not think it is used on HIGHMEM
-systems so it doesn't really need to use the sg_miter() iterator.
+Requesting a retune before switching to the RPMB partition has been
+observed to cause CRC errors on the RPMB reads (-EILSEQ).
 
-Yours,
-Linus Walleij
+Since RPMB reads can not be retried, the clients would be directly
+affected by the errors.
+
+This commit disables the retune request prior to switching to the RPMB
+partition: mmc_retune_pause() no longer triggers a retune before the
+pause period begins.
+
+This was verified with the sdhci-of-arasan driver (ZynqMP) configured
+for HS200 using two separate eMMC cards (DG4064 and 064GB2). In both
+cases, the error was easy to reproduce triggering every few tenths of
+reads.
+
+With this commit, systems that were utilizing OP-TEE to access RPMB
+variables will experience an enhanced performance. Specifically, when
+OP-TEE is configured to employ RPMB as a secure storage solution, it not
+only writes the data but also the secure filesystem within the
+partition. As a result, retrieving any variable involves multiple RPMB
+reads, typically around five.
+
+For context, on ZynqMP, each retune request consumed approximately
+8ms. Consequently, reading any RPMB variable used to take at the very
+minimum 40ms.
+
+After droping the need to retune before switching to the RPMB partition,
+this is no longer the case.
+
+Signed-off-by: Jorge Ramirez-Ortiz <jorge@foundries.io>
+Acked-by: Avri Altman <avri.altman@wdc.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Link: https://lore.kernel.org/r/20240103112911.2954632-1-jorge@foundries.io
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Florian Fainelli <florian.fainelli@broadcom.com>
+---
+ drivers/mmc/core/host.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 3e94401c0eb3..23d95d2bdf05 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -68,13 +68,12 @@ void mmc_retune_enable(struct mmc_host *host)
+ 
+ /*
+  * Pause re-tuning for a small set of operations.  The pause begins after the
+- * next command and after first doing re-tuning.
++ * next command.
+  */
+ void mmc_retune_pause(struct mmc_host *host)
+ {
+ 	if (!host->retune_paused) {
+ 		host->retune_paused = 1;
+-		mmc_retune_needed(host);
+ 		mmc_retune_hold(host);
+ 	}
+ }
+-- 
+2.34.1
+
