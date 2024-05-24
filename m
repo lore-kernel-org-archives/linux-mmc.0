@@ -1,58 +1,58 @@
 Received: from mail-wm1-f99.google.com (mail-wm1-f99.google.com [209.85.128.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D7F13FB1C
-	for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 18:27:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A04D405D8
+	for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 18:27:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716575277; cv=none; b=F0+6VpnQ8dv/pDrucxPf8SfvSm4v3eZONDKtJEFWRyRa64knVBpLS6NISYJFx1MvuLauLHNr0BM3KpgdEM0mMvSY53Wi1um8JOdIQCZp4EOjIfRSyQyQvux1x9gjt6CbP9aZLmzG4M9tIPGRt77uqlf1F6EqFpc/RQOspZ9CwoU=
+	t=1716575279; cv=none; b=AnkDueoMx/wLY6Z5x7F/QUiv47uKep737YeWmBP15QDf6O0zFECZJhgUMg3Y2Wv72mCZOdkh/gvz3GgOw+zLmNjfp/NOyuU1lHqGqXe+YntgEWivqXbAsNpjtBfMNQdfNM3BPvhoSzMgSlsoocFvXwSz7GdgGg9o+Wu+IaCVENM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716575277; c=relaxed/simple;
-	bh=KzZ2/ILylgxy50sk/StCVlBR9s2jedRDn061bSZ6QRA=;
+	s=arc-20240116; t=1716575279; c=relaxed/simple;
+	bh=z+GE4dD4yPnc63WvqBNiPDl9b7TaZQb9Yc7IQzit1Hk=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=OxceezYc5DIUnZ9Z9DGCqoKdRchQexUPjm2x38j5MhcXH4PzycTFkXVxGoJjb/1WWDc9pjUcYGRm5x7jRuNyu4t5DhC2Yd3tO+lsEGwgnOWfIpHPeGezjHHdUxFOfp9KGQPL3QrwRulYZrW3wJON6cUCv8VFnB+HNnqM36gECvs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=TXjTMPjv; arc=none smtp.client-ip=209.85.128.99
+	 MIME-Version; b=mbRpdS83RT6rREU+Za8xUp0HiPC9Uje1C3FvVkdHmK2hsvI0PTONEuOp+8e2c8u78FEadaYoY1nF5/G9huME7T8T2Gm9pU6qOpjAQpJLoFQDKIfGI1hOol/lV+x8Eg/4Dy98f/xB0CXJYXI2IUeOE9Rp7J8xMj9m9tIxbiPRd/I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=Dc9AYa0h; arc=none smtp.client-ip=209.85.128.99
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="TXjTMPjv"
-Received: by mail-wm1-f99.google.com with SMTP id 5b1f17b1804b1-4202c1d19d5so64558355e9.2
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="Dc9AYa0h"
+Received: by mail-wm1-f99.google.com with SMTP id 5b1f17b1804b1-421087b6f3fso11219325e9.1
         for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 11:27:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=raspberrypi.com; s=google; t=1716575273; x=1717180073; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2MV7QZf2fhH+OEhBA38QGxT92fUaASU1Nxo1nxUSVd8=;
-        b=TXjTMPjvEB/mpo5ZJFhiMaaLnozrvLslAQ+8QJMzQMCPL24NoORbh/iE+2u0VB2MfZ
-         1EfFvNlEv3pYHOX3PLnPH81gO8rl+M3C9pwpf76F3Ym4Cmroc3xhPvVpSak5XcrMHzHm
-         D5mZhstvelzEAdDlKGhTP6mZHGx2SL2LLuA04oOSyJeQ+FQhAeR9LYDZn2a0FSVJcOeD
-         W5NC7dvCF5W0HL2IU8T53zi9BLYm9nBfyYCdJDv1I0XaAJ2lJvQom18lNOpjx5B8xXTs
-         qytn/30BOA7mU5yGUg/NF7guE60VaGTNLsr7ROhtnuCRWtpSC6DJpuLb4qAgg1xJpb67
-         HmOQ==
+        bh=TKd9X1LOVt1ChaX4vRXT/Yfb21vDTf36hviq/MF6+cg=;
+        b=Dc9AYa0hTWZphKr9rgBXa49QYki0fCu6QHW7ASVWDHQXTla6c0OVa+PPCb+IvJrEyL
+         70Gyp66vyypP1RR+AoNJ/gUB1uhyth/NfABPlWvV0rv7fi0hlLbJDbdk1L8tKr6JY6B6
+         em471noo7L/LOOqzXobq9HYA0a1jnSuwtXj1GaoHEJxaT0SAYHQ6GaImeFeCYWi7b7sH
+         cew7CfSNky8qR2K6lgR6Qj23DI2B/ybeEnswq6KDKxn0K+yu2ry7W0f1BQK26OEFFdGj
+         Yc7fynQt/OpMGE/dmi+c6US8v71HJkzcL90qHHADUDyLTe5y0KOEe1uQqkw1u7Qwt6Pw
+         hx2w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20230601; t=1716575273; x=1717180073;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=2MV7QZf2fhH+OEhBA38QGxT92fUaASU1Nxo1nxUSVd8=;
-        b=OXCWZNisGjYDG3Vm1g60kb/fUT8w9xbkktbyVdN8MS5rQvq5Cz9T9CsXYv2Rn6psAW
-         yaH78AHmeFjZ7BLKpH2OddZoO451N6hAc68R3zh9p3vup/hGlhCY3UhNiAn7SETvEDNh
-         Ig4DlAFkGCWYEz7lcgm0g80+JqNvUAHHOJzGSZJ0JOWOK1fgi2hJ5+I0Ja5g+JWTxRW8
-         NMvajkaIy2AWJmBmwqazGc8IJ2hA2Vnv2GQjFkhCVsnamoyYxUIGh5KBx1H80teV0Frc
-         YUWqEzqa2feYeOohfuFWT2EERAMZzDCrt+3eP0/a6H9WZ4fcjjNPqW8wbnbV0sOIV9ek
-         J0eA==
-X-Forwarded-Encrypted: i=1; AJvYcCVbqiezGglH9RT3vs4fnos9A/lg2sFYiQr/86vmaC7TsCcITMJ/cncymNhGpLroau4AB8GdTz9OtAul58XFvNvZlEjI1KKU7tGc
-X-Gm-Message-State: AOJu0YyPuprOzxQO2on2WiO2YHmYaRV95cJFGBHZz0UGzY3yS0w+b197
-	ZiF0b6qBiHVw8eSF37SdtmG3luqX6ihk0pzmWWoC0iEa2HWlnV+h9NFpGg6QYozt4o71CUZAFwJ
-	hxJf8YcBPy6urwlzKg8VngILxfNsEnqNy
-X-Google-Smtp-Source: AGHT+IHWZ0JTRBQwe/XochchvTJaAoc7r7/ijNNUJ35CDCjZA7ALjlPQSMAk7tENe+DW/f85sGYNAcbTrrfr
-X-Received: by 2002:a05:600c:5799:b0:41b:f2ca:19cc with SMTP id 5b1f17b1804b1-421089f93b7mr26088945e9.34.1716575272958;
-        Fri, 24 May 2024 11:27:52 -0700 (PDT)
+        bh=TKd9X1LOVt1ChaX4vRXT/Yfb21vDTf36hviq/MF6+cg=;
+        b=hWMcr7wP1mZwBsXz9qpG+zu43SrIlfqnNs8f45l6CIobG8VQteRC7iB8ogquiqee7h
+         V2ctWyxOcwXYT/hsyYdVC5oVIDAFeoE5YJtEanwNfnOx+rFnnUTNE4463/vKWqo8DIG4
+         zSDpL92Ws8TaglYK8qoGTH0W04r4Ou7FOp5kwkyBzplbaHxkJhyx7CIMq7fkDaWeu0eM
+         uVD28CgqUtXqqxFUdQfe8YifLmLp4COwBJsLHWlFG6aqyvN/Apgi1eC5KEh4bp5cFWAG
+         HCIn2MnHhHmcFaZhzNqGKYAfqUze6btq2Y1aOo6dTy3p1JAGbFirZamOnP+KUpcWIHuW
+         uPVg==
+X-Forwarded-Encrypted: i=1; AJvYcCWCxgOO4QAX3joLM8RoR1I45Ncb6YF2X+Vk5PJD4EM9ujmLk85myjiDVGgoKNw72rjI4AShIhGkEHx7Cr/0QTSkTHS20YHPZWaq
+X-Gm-Message-State: AOJu0YyIfM8tvvwSak1NGiTGPG180ChfMji6hLQLRSHXUtjszsDHb1L6
+	Hty4iOMWoE2WzSRS7z5hM7NIzXKOEJhBmDqWXYyZWIVq0wmCkw8BytE3bfMRA8D4N1/8YqPxQTM
+	ssFZH6qCzZ2yPTNdfE0mU8mSXm4k8b+aV
+X-Google-Smtp-Source: AGHT+IE1vodFu4VYv4ismPyHD4+ricu2iZqmWOTNKtTorabHI/piuhSxGYfbWmThDOKYJ4k1kIH/5D1hvWp9
+X-Received: by 2002:a7b:c305:0:b0:41c:2313:d966 with SMTP id 5b1f17b1804b1-421089d3943mr28029795e9.1.1716575273524;
+        Fri, 24 May 2024 11:27:53 -0700 (PDT)
 Received: from raspberrypi.com ([188.39.149.98])
-        by smtp-relay.gmail.com with ESMTPS id 5b1f17b1804b1-4210891c6edsm1217615e9.20.2024.05.24.11.27.52
+        by smtp-relay.gmail.com with ESMTPS id 5b1f17b1804b1-42100fb4c8fsm5347505e9.49.2024.05.24.11.27.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 May 2024 11:27:52 -0700 (PDT)
+        Fri, 24 May 2024 11:27:53 -0700 (PDT)
 X-Relaying-Domain: raspberrypi.com
 From: Dave Stevenson <dave.stevenson@raspberrypi.com>
 To: Rob Herring <robh@kernel.org>,
@@ -90,10 +90,11 @@ Cc: devicetree@vger.kernel.org,
 	linux-spi@vger.kernel.org,
 	iommu@lists.linux.dev,
 	linux-sound@vger.kernel.org,
+	Stefan Wahren <stefan.wahren@i2se.com>,
 	Dave Stevenson <dave.stevenson@raspberrypi.com>
-Subject: [PATCH 03/18] ARM: dts: bcm283x: Update to use dma-channel-mask
-Date: Fri, 24 May 2024 19:26:47 +0100
-Message-Id: <20240524182702.1317935-4-dave.stevenson@raspberrypi.com>
+Subject: [PATCH 04/18] dmaengine: bcm2835: move CB info generation into separate function
+Date: Fri, 24 May 2024 19:26:48 +0100
+Message-Id: <20240524182702.1317935-5-dave.stevenson@raspberrypi.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
 References: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
@@ -105,42 +106,133 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Now the driver looks for the common dma-channel-mask property
-rather than the vendor-specific brcm,dma-channel-mask, update
-the dt files to follow suit.
+From: Stefan Wahren <stefan.wahren@i2se.com>
 
+Actually the generation of the Control Block info follows some simple
+rules. So handle this with a separate function to avoid open coding
+for every DMA operation. Another advantage is that we can easier
+introduce other platforms with different info bits.
+
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 Signed-off-by: Dave Stevenson <dave.stevenson@raspberrypi.com>
 ---
- arch/arm/boot/dts/broadcom/bcm2711.dtsi        | 2 +-
- arch/arm/boot/dts/broadcom/bcm2835-common.dtsi | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/dma/bcm2835-dma.c | 50 +++++++++++++++++++++++++--------------
+ 1 file changed, 32 insertions(+), 18 deletions(-)
 
-diff --git a/arch/arm/boot/dts/broadcom/bcm2711.dtsi b/arch/arm/boot/dts/broadcom/bcm2711.dtsi
-index e4e42af21ef3..d64bf098b697 100644
---- a/arch/arm/boot/dts/broadcom/bcm2711.dtsi
-+++ b/arch/arm/boot/dts/broadcom/bcm2711.dtsi
-@@ -103,7 +103,7 @@ dma: dma-controller@7e007000 {
- 					  "dma9",
- 					  "dma10";
- 			#dma-cells = <1>;
--			brcm,dma-channel-mask = <0x07f5>;
-+			dma-channel-mask = <0x07f5>;
- 		};
+diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
+index 528c4593b45a..7cef7ff89575 100644
+--- a/drivers/dma/bcm2835-dma.c
++++ b/drivers/dma/bcm2835-dma.c
+@@ -201,6 +201,34 @@ static inline struct bcm2835_desc *to_bcm2835_dma_desc(
+ 	return container_of(t, struct bcm2835_desc, vd.tx);
+ }
  
- 		pm: watchdog@7e100000 {
-diff --git a/arch/arm/boot/dts/broadcom/bcm2835-common.dtsi b/arch/arm/boot/dts/broadcom/bcm2835-common.dtsi
-index 9261b67dbee1..3ba8db8eed0f 100644
---- a/arch/arm/boot/dts/broadcom/bcm2835-common.dtsi
-+++ b/arch/arm/boot/dts/broadcom/bcm2835-common.dtsi
-@@ -46,7 +46,7 @@ dma: dma-controller@7e007000 {
- 					  "dma14",
- 					  "dma-shared-all";
- 			#dma-cells = <1>;
--			brcm,dma-channel-mask = <0x7f35>;
-+			dma-channel-mask = <0x7f35>;
- 		};
++static u32 bcm2835_dma_prepare_cb_info(struct bcm2835_chan *c,
++				       enum dma_transfer_direction direction,
++				       bool zero_page)
++{
++	u32 result;
++
++	if (direction == DMA_MEM_TO_MEM)
++		return BCM2835_DMA_D_INC | BCM2835_DMA_S_INC;
++
++	result = BCM2835_DMA_WAIT_RESP;
++
++	/* Setup DREQ channel */
++	if (c->dreq != 0)
++		result |= BCM2835_DMA_PER_MAP(c->dreq);
++
++	if (direction == DMA_DEV_TO_MEM) {
++		result |= BCM2835_DMA_S_DREQ | BCM2835_DMA_D_INC;
++	} else {
++		result |= BCM2835_DMA_D_DREQ | BCM2835_DMA_S_INC;
++
++		/* non-lite channels can write zeroes w/o accessing memory */
++		if (zero_page && !c->is_lite_channel)
++			result |= BCM2835_DMA_S_IGNORE;
++	}
++
++	return result;
++}
++
+ static void bcm2835_dma_free_cb_chain(struct bcm2835_desc *desc)
+ {
+ 	size_t i;
+@@ -615,7 +643,7 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_memcpy(
+ {
+ 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+ 	struct bcm2835_desc *d;
+-	u32 info = BCM2835_DMA_D_INC | BCM2835_DMA_S_INC;
++	u32 info = bcm2835_dma_prepare_cb_info(c, DMA_MEM_TO_MEM, false);
+ 	u32 extra = BCM2835_DMA_INT_EN | BCM2835_DMA_WAIT_RESP;
+ 	size_t max_len = bcm2835_dma_max_frame_length(c);
+ 	size_t frames;
+@@ -646,7 +674,7 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_slave_sg(
+ 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+ 	struct bcm2835_desc *d;
+ 	dma_addr_t src = 0, dst = 0;
+-	u32 info = BCM2835_DMA_WAIT_RESP;
++	u32 info = bcm2835_dma_prepare_cb_info(c, direction, false);
+ 	u32 extra = BCM2835_DMA_INT_EN;
+ 	size_t frames;
  
- 		intc: interrupt-controller@7e00b200 {
+@@ -656,19 +684,14 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_slave_sg(
+ 		return NULL;
+ 	}
+ 
+-	if (c->dreq != 0)
+-		info |= BCM2835_DMA_PER_MAP(c->dreq);
+-
+ 	if (direction == DMA_DEV_TO_MEM) {
+ 		if (c->cfg.src_addr_width != DMA_SLAVE_BUSWIDTH_4_BYTES)
+ 			return NULL;
+ 		src = c->cfg.src_addr;
+-		info |= BCM2835_DMA_S_DREQ | BCM2835_DMA_D_INC;
+ 	} else {
+ 		if (c->cfg.dst_addr_width != DMA_SLAVE_BUSWIDTH_4_BYTES)
+ 			return NULL;
+ 		dst = c->cfg.dst_addr;
+-		info |= BCM2835_DMA_D_DREQ | BCM2835_DMA_S_INC;
+ 	}
+ 
+ 	/* count frames in sg list */
+@@ -698,7 +721,8 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_cyclic(
+ 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+ 	struct bcm2835_desc *d;
+ 	dma_addr_t src, dst;
+-	u32 info = BCM2835_DMA_WAIT_RESP;
++	u32 info = bcm2835_dma_prepare_cb_info(c, direction,
++					       buf_addr == od->zero_page);
+ 	u32 extra = 0;
+ 	size_t max_len = bcm2835_dma_max_frame_length(c);
+ 	size_t frames;
+@@ -729,26 +753,16 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_cyclic(
+ 			      "%s: buffer_length (%zd) is not a multiple of period_len (%zd)\n",
+ 			      __func__, buf_len, period_len);
+ 
+-	/* Setup DREQ channel */
+-	if (c->dreq != 0)
+-		info |= BCM2835_DMA_PER_MAP(c->dreq);
+-
+ 	if (direction == DMA_DEV_TO_MEM) {
+ 		if (c->cfg.src_addr_width != DMA_SLAVE_BUSWIDTH_4_BYTES)
+ 			return NULL;
+ 		src = c->cfg.src_addr;
+ 		dst = buf_addr;
+-		info |= BCM2835_DMA_S_DREQ | BCM2835_DMA_D_INC;
+ 	} else {
+ 		if (c->cfg.dst_addr_width != DMA_SLAVE_BUSWIDTH_4_BYTES)
+ 			return NULL;
+ 		dst = c->cfg.dst_addr;
+ 		src = buf_addr;
+-		info |= BCM2835_DMA_D_DREQ | BCM2835_DMA_S_INC;
+-
+-		/* non-lite channels can write zeroes w/o accessing memory */
+-		if (buf_addr == od->zero_page && !c->is_lite_channel)
+-			info |= BCM2835_DMA_S_IGNORE;
+ 	}
+ 
+ 	/* calculate number of frames */
 -- 
 2.34.1
 
