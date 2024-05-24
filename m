@@ -1,193 +1,191 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
+Received: from mail-wr1-f99.google.com (mail-wr1-f99.google.com [209.85.221.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B06C17578;
-	Fri, 24 May 2024 08:01:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E987D3D551
+	for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 18:27:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716537708; cv=none; b=lEug3JvuIRaxbHiam6rT8wc8DXjOS1inmTHYGkHbGbrTBri45CC74TPW8Xu561lFnjXoJJ0iIcwAfgRg1i1vfa39SexiXUP+UXIV23fpz+jS7DHlkknKt2hg3d5RSJtCP2wNMJh79XCCRBM0ktL/Ol9uTEEIcgB96btlA4Npx9g=
+	t=1716575275; cv=none; b=LPYns/9WhRLq/UGI8WN7yqrhcwVK/Qa/KOx+i2wIfDgE7Zo4TEYsnupLxSWp6mW4yxx/U4PoK4AlYlMPy1jVWvW2BpO6uK1CxYkU9HYZS+biMbIobbDDqESt4z2BWnHTDUnNwwnjjhhZwHJ0Q1SHCVCl38PlOFl7kB7bjYuifwA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716537708; c=relaxed/simple;
-	bh=SKY3VRl+bMcbZGIWvSO5VX4gbnQYaFgj0+jNolM/xz4=;
-	h=Content-Type:Mime-Version:Date:Message-Id:From:To:Cc:Subject:
-	 References:In-Reply-To; b=lAmFresUPdK1CzO02ehHgsB3jzhJzrP4VAMFOGinG1KzurqyRz0Eenu5w2IrqF3LagzPv4Idwepwp8oBH97I1fa2qQ2JsGMnrpu801j0yspe6GJyPOMvxjKetr0nB98fbKzVVT18rKv/MIC8sj/09lUlt1vQi/E93ON0j9FRq7w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZjwPQTzk; arc=none smtp.client-ip=209.85.128.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1716575275; c=relaxed/simple;
+	bh=td/Vk7YkZYHrVt/nOdJ0BOQkIAcpR2c/B2eHAhBjQLk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=sTHaWWKhE2XGgDSxlchHbluA51OqTKVwzyJj5kNrRedhHx2qASpgBh1y74JNroNZ2YBWBtvkJR48uZW2AwHypGcffv/4BYZScJ4DOq+uSmX03T1X//OcmxG4Huj9Ipcaehx2bOIhKsL0uy3PZiRTBj2meCkQpV2UeWegcp0I53I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=dxrqh2Dl; arc=none smtp.client-ip=209.85.221.99
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZjwPQTzk"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-4202ca70318so59662715e9.1;
-        Fri, 24 May 2024 01:01:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="dxrqh2Dl"
+Received: by mail-wr1-f99.google.com with SMTP id ffacd0b85a97d-354e0d4db6cso2090200f8f.0
+        for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 11:27:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1716537705; x=1717142505; darn=vger.kernel.org;
-        h=in-reply-to:references:subject:cc:to:from:message-id:date
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=xUZEtBZTSSESf71yCpejIBGUuWcjhkuyzTnO6DQP9Lc=;
-        b=ZjwPQTzkWpnq0PA+seElYZ2wNPS9WAqpF4G7Rw1kIBHy1IL7xjn1HYScZ6xeo38y09
-         j8UCsjHEaqIWDn0FNJ4l1Ac2q8D7Xvyw5uhWKzrawB9OyDQxJcidOQ7Xo+EF9UtODnWr
-         KUV/bAlmFSrxEsWN4hvbXM+nAExrTgZ3ibIV0Rw14lhzvJlcxVJ7/CY3JcGcR6eqymZr
-         TNU00LPrLRdvtHL/AVKExwL3vWVv6NmxFCsJ5/wCrdHBNU6D/56VLV2MyXji8VzrPOLX
-         nvmZp8orUhYuivmRmzXXf7PDujzA4jTHEYKY6M9f0HphYRlVsl6xpYuzaQRJTYw/wCmD
-         +JJw==
+        d=raspberrypi.com; s=google; t=1716575271; x=1717180071; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Xql1CWOkqvawpbosdHCKSvgqjnwNVKxpQqZxh7tM+T4=;
+        b=dxrqh2DlxIVia43NACZLda+CTXfnSS7U4U3G5ZWpxu5FyGVH2d39QrQv0aqklsfeEr
+         9IWlHdJyqSA/pPsrsx19+OvL+pg9kWdnARtf/lNOaXC5EzhRx2u46d6fbSS2kgfp+B4n
+         2P+3I/kfASS6IlWSQyVu0/akO8qupmHF97J4G8s3b3lPBDcqj0BmMqoLMQcpDq+PisnA
+         BAh4FhNuhj7gcDZh9V57WyF0bZXeKJLIQqJf8uPD4bci7Fp4QVVrO9gylpMYMon84cs5
+         VY8wYLrgrh4blrEh3cdnb3TFAePY1zWBoo15rfq9t2rpTwsM+j9XL1Lto+MXFkB1itAk
+         WH2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716537705; x=1717142505;
-        h=in-reply-to:references:subject:cc:to:from:message-id:date
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1716575271; x=1717180071;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=xUZEtBZTSSESf71yCpejIBGUuWcjhkuyzTnO6DQP9Lc=;
-        b=HXXGG/6WZ5MINKCosZQkOyA+dKgsTYv5n/HuDvWtPa2RRoZUwpFLIvRKhOVs780wtl
-         HbxCoqgLY+5Wzinw1nknaInZw89MjtXjMeIh5V+fy10Qd/RPuOSoV3qtLl3dcXz/wYK2
-         +KfPqjdRFCZIosrSXEzMnoI30cG0AFI7AusVOEqcCKX4KoNdEpva1+Lk4HF3YD7gBqYo
-         G2Eu0Yi4DBt5lAWXYBwSxt9olTT/Mf9StCYR2YNRHh1ZYciHSelot92y3/4niOkFAJML
-         QiSOmke20QbDh5DYPsx/CoaCfDDLUgw4/jSdt4q7UcC6IxBGkZqWqtMa1MwBZTd65ih1
-         19Dg==
-X-Forwarded-Encrypted: i=1; AJvYcCV4O6YtWs6DHLugok5R7MhCIy2FbIMWs2yeL6HJ22/Sd+Lmuv9LnxCcGiNCjZoxyhs1SUGGnnwYUFYFmftJtEino9/m5biH4m63f2SMKH5o57WLvPbjPWyjmjqsn3F6pk5uhj3j0ASUkmcglGGJzm9QUbdQrbqIpm9jSd4NwBxYFf9et9vvLexz0NUBdPwiqkUiIvKc/MeP1461uzKNZzzKd6kBbeDp+7gZrhNf/Fspaw2oBgfStQMEHttukKkUbRSEemgJIfzxoWpYxNBZpOPUIABOrP3X
-X-Gm-Message-State: AOJu0Yx3ck75w3reM/KmshBx2pmQoGBG8TFCt1stf+6u5u5U3R/QKCwp
-	++/eC6SnKrkSCn0eCALPHHBVrWOLV8pTmT5K51hIwgtT8RAK4fTd
-X-Google-Smtp-Source: AGHT+IEez6MoiosPjUNo30HprrvAuJWApsgOJu0yXmAphaccvJr1e0LN+Dvwto5+6abdUbvgubrc5g==
-X-Received: by 2002:a7b:cd94:0:b0:41a:f76f:3362 with SMTP id 5b1f17b1804b1-421089d3927mr10443355e9.21.1716537704679;
-        Fri, 24 May 2024 01:01:44 -0700 (PDT)
-Received: from localhost (p200300e41f162000f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f16:2000:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42100fadcabsm45671125e9.35.2024.05.24.01.01.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 24 May 2024 01:01:43 -0700 (PDT)
-Content-Type: multipart/signed;
- boundary=fb8b70f1c41e009f374399bb3450b2fa3c696c750a469b66dabbee56955e;
- micalg=pgp-sha256; protocol="application/pgp-signature"
+        bh=Xql1CWOkqvawpbosdHCKSvgqjnwNVKxpQqZxh7tM+T4=;
+        b=fNLiTvRoe58J2zFSHINFAmIoXw4blERUnc66DT85CmQnGFjavXd+k3zkYJSJf3jwHs
+         H2UYci9uG4Vs56/l6GM9WnV0hI0/D5D8DufvMy21aoE7is8dV81VE1Y0rpuhZTL8XOdJ
+         RWyPYstpezU4ekN6ti3ZkZLhJ32crV/v46ULFLvzg9Dt+hQZFnrtUvsMfcAHmxrqFJ9/
+         xUqefOa8sayULGxObhcYNQw8nk3TDXhwWdoCd+YihGdRwU79678NqkibXVnCuBgQQ/UQ
+         GDiiq4OPGBrxNiCkvuJ7tokT/raVqLEkD205Xn2KORZMB1U26Mgdmza/TYB5qx8t0cqx
+         TmbA==
+X-Forwarded-Encrypted: i=1; AJvYcCVmNjDujOg0f5mzpcdCSU5VTcPHgHjk9MWGWW6AuMrsx4HKAJG+sMiGVfZyoD3ny3n+dL6qk9YBhDzVYQdYpTNtkzBl/aYbA4so
+X-Gm-Message-State: AOJu0Yza33jl40la3fuQzQr0+433kJ4Nr3gypxCdyvRaNjiOsKqW+SvB
+	Wuq/xzBFYpFYA/YuqyST0LAIUTKgdpHXf2mGuD1MZ/+iMxQQMdFjG5ERSv3Stti/nTYCW2tKKEG
+	TsN7FRtbihKt3JLTjL42wi/cJ7aZ0xtoq
+X-Google-Smtp-Source: AGHT+IEv4pOsw1zoXJUhXCDnkIg536hPcEoYyVLGKEBIg1WFslqr8Kj1DBgMYFhuBxYsZGvlD4sKieE6j1gT
+X-Received: by 2002:a05:6000:1753:b0:354:fce5:4cc3 with SMTP id ffacd0b85a97d-354fce54d2dmr4599736f8f.19.1716575271168;
+        Fri, 24 May 2024 11:27:51 -0700 (PDT)
+Received: from raspberrypi.com ([188.39.149.98])
+        by smtp-relay.gmail.com with ESMTPS id ffacd0b85a97d-35579d7b436sm63138f8f.14.2024.05.24.11.27.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 May 2024 11:27:51 -0700 (PDT)
+X-Relaying-Domain: raspberrypi.com
+From: Dave Stevenson <dave.stevenson@raspberrypi.com>
+To: Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Maxime Ripard <mripard@kernel.org>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	David Airlie <airlied@gmail.com>,
+	Daniel Vetter <daniel@ffwll.ch>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Mark Brown <broonie@kernel.org>,
+	Christoph Hellwig <hch@lst.de>,
+	Marek Szyprowski <m.szyprowski@samsung.com>,
+	Robin Murphy <robin.murphy@arm.com>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Jaroslav Kysela <perex@perex.cz>,
+	Takashi Iwai <tiwai@suse.com>,
+	Vladimir Murzin <vladimir.murzin@arm.com>,
+	Phil Elwell <phil@raspberrypi.com>,
+	Stefan Wahren <wahrenst@gmx.net>,
+	Serge Semin <Sergey.Semin@baikalelectronics.ru>
+Cc: devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	dmaengine@vger.kernel.org,
+	dri-devel@lists.freedesktop.org,
+	linux-mmc@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	iommu@lists.linux.dev,
+	linux-sound@vger.kernel.org,
+	Dave Stevenson <dave.stevenson@raspberrypi.com>
+Subject: [PATCH 00/18] BCM2835 DMA mapping cleanups and fixes
+Date: Fri, 24 May 2024 19:26:44 +0100
+Message-Id: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Date: Fri, 24 May 2024 10:01:42 +0200
-Message-Id: <D1HPTY9MKVCF.WZDYWSJUWFYM@gmail.com>
-From: "Thierry Reding" <thierry.reding@gmail.com>
-To: "Krzysztof Kozlowski" <krzk@kernel.org>, "Krishna Yarlagadda"
- <kyarlagadda@nvidia.com>, <linux-tegra@vger.kernel.org>,
- <devicetree@vger.kernel.org>, <linux-doc@vger.kernel.org>,
- <linux-i2c@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
- <linux-kernel@vger.kernel.org>
-Cc: <jonathanh@nvidia.com>, <robh@kernel.org>, <krzk+dt@kernel.org>,
- <conor+dt@kernel.org>, <corbet@lwn.net>, <andi.shyti@kernel.org>,
- <wsa+renesas@sang-engineering.com>, <ulf.hansson@linaro.org>,
- <adrian.hunter@intel.com>, <digetx@gmail.com>, <ldewangan@nvidia.com>,
- <mkumard@nvidia.com>
-Subject: Re: [RFC PATCH 03/11] soc: tegra: config settings binding document
-X-Mailer: aerc 0.16.0-1-0-g560d6168f0ed-dirty
-References: <20240506225139.57647-1-kyarlagadda@nvidia.com>
- <20240506225139.57647-4-kyarlagadda@nvidia.com>
- <29e26d22-04b3-47ee-ba70-9f4eb77326f7@kernel.org>
-In-Reply-To: <29e26d22-04b3-47ee-ba70-9f4eb77326f7@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
---fb8b70f1c41e009f374399bb3450b2fa3c696c750a469b66dabbee56955e
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
+Hi All
 
-On Tue May 7, 2024 at 8:32 AM CEST, Krzysztof Kozlowski wrote:
-> On 07/05/2024 00:51, Krishna Yarlagadda wrote:
-> > Config framework parses device tree and provides a list of register
-> > settings with mask per mode to be applied by the controller.
-> >=20
-> > Add binding document for config settings framework. Config settings
-> > are defined as a property per field and have different modes per device=
-.
->
-> Please use subject prefixes matching the subsystem. You can get them for
-> example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
-> your patch is touching. For bindings, the preferred subjects are
-> explained here:
-> https://www.kernel.org/doc/html/latest/devicetree/bindings/submitting-pat=
-ches.html#i-for-patch-submitters
->
-> >=20
-> > Signed-off-by: Krishna Yarlagadda <kyarlagadda@nvidia.com>
-> > ---
-> >  .../misc/nvidia,tegra-config-settings.yaml    | 50 +++++++++++++++++++
-> >  MAINTAINERS                                   |  1 +
-> >  2 files changed, 51 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/misc/nvidia,tegra=
--config-settings.yaml
-> >=20
-> > diff --git a/Documentation/devicetree/bindings/misc/nvidia,tegra-config=
--settings.yaml b/Documentation/devicetree/bindings/misc/nvidia,tegra-config=
--settings.yaml
-> > new file mode 100644
-> > index 000000000000..e379cbd5b597
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/misc/nvidia,tegra-config-settin=
-gs.yaml
-> > @@ -0,0 +1,50 @@
-> > +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/misc/nvidia,tegra-config-settings.y=
-aml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: Config properties for a device.
->
-> No full stop, that's a title.
->
-> > +
-> > +description:
-> > +  Config setting is the configuration based on chip/board/system
-> > +  characterization on interface/controller settings. This is needed fo=
-r
-> > +  - making the controller internal configuration to better perform
-> > +  - making the interface to work proper by setting drive strength, sle=
-w
-> > +    rates etc
-> > +  - making the low power leakage.
-> > +  There are two types of recommended configuration settings
-> > +  - Controller register specific for internal operation of controller.
-> > +  - Pad control/Pinmux/pincontrol registers for interfacing.
-> > +  These configurations can further be categorized as static and dynami=
-c.
-> > +  - Static config does not change until a controller is reset.
-> > +  - Dynamic config changes based on mode or condition, controller is
-> > +    operating in.
-> > +
-> > +maintainers:
-> > +  - Thierry Reding <thierry.reding@gmail.com>
-> > +
-> > +patternProperties:
-> > +  "^[a-z0-9_]*$":
-> > +    description:
-> > +      Config name to be applied on controller.
-> > +    type: object
->
-> Nope, this means nothing. Sorry, describe hardware, do not create some
-> fake nodes.
+This series initially cleans up the BCM2835 DMA driver in preparation for
+supporting the 40bit version. It then fixes up the incorrect mapping behaviour
+we've had to date.
 
-We're trying to solve a real problem here, though. In order for the
-hardware to operate properly we need certain parameters to be programmed
-into the hardware.
+The cleanups are based on Stefan Wahren's RFC [1], with a couple of minor bugs
+fixed, but stopping before actually adding the 40bit support. If we can sort
+the mapping issue, it avoids having to have workarounds in the 40bit support.
 
-If this is not acceptable, do you have a suggestion on where else to put
-this information?
+The mapping issues were discussed in [2].
+Up until this point all DMA users have been passing in dma addresses rather than
+CPU physical addresses, and the DMA driver has been using those directly rather
+than using dma_map_resource() to map them.
+The DT has also been missing some of the required mappings in "dma-ranges", but
+they have been present in "ranges". I've therefore duplicated the minimum amount
+of of_dma_get_range and translate_phys_to_dma to be able to use "ranges" as 
+discussed in that thread. I'm assuming that sort of code is not desirable in the
+core code as it shouldn't be necessary, so keeping it contained within a driver
+is the better solution.
 
-Thierry
+When Andrea posted our downstream patches in [3], Robin Murphy stated that
+dma_map_resource is the correct API, but as it currently doesn't check the
+dma_range_map we need Sergey Semin's patch [4].
+There seemed to be no follow up over the implications of it. I've therefore
+included it in the series at least for discussion. If it's not acceptable then
+I'm not sure of the route forward in fixing this mapping issue.
 
---fb8b70f1c41e009f374399bb3450b2fa3c696c750a469b66dabbee56955e
-Content-Type: application/pgp-signature; name="signature.asc"
+I'm expecting there to be some discussion, but also acknowledge that merging this
+will need to be phased with the patches 1-13 needing to be merged before any of
+14-17, and then 18 merged last to remove the workaround. I suspect that's the
+least of my worries though.
 
------BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmZQSWcACgkQ3SOs138+
-s6FkbQ//TcU3nWtL50zZ6CO7YiGnMZvV0R3SIBQaxEZaD/C4mMNwfyJoHH5vQ87E
-CnYewOH/nzdwzIUQsG3iY0mCQamHuJgC/N5JDvlDg/Y9TmFYq59F8DC584Ueh4DN
-l2k/0HcAB89IU2+C1rZ/RwcTMgLNpMcGXYf2ZbgI0UtkHAPsW5X5HlKWivupg21B
-9tU73AKBHd9kbS5u3WxtzwbPDgFlSY26et+HgNuDpTQpbLsEKMMFcAz2S4+/36L8
-IB4eJk8DLtTFnQ5dzYiNbOWk/T8L7GNkPAyiuD2yYVJC7ISbzVsFlXrwR1OGbGTz
-rVwQOB4W727+pfj+oneHHF2y5H+wcSZs15yqPARC6TAb3PuwwUGzEcNqim7Upzpf
-DwC7OWP78ieFgfRX/6CfOVtNtXUEPFwVVBvnaWGwveecpXrW+4V28WQItY7iPgZ2
-kff+q54lIbEoNIJagO7qaomRbjL2jQ2WH8wkTzs/8ItFYxIh8LADLrzgnrByV9ik
-b23yGaLv+qWDIwzIr2rFggiBqeMl/PITM9aN2FQvrcsNoNtsRMttljYEFKu9FP4D
-YMa5rJh3sHCYCwsroLMZTo3jLLVmZKgp5+vPZgfdiUYglWphC7LrQKN4WjUeOwsH
-6RQDaOFra+X0ri/GnNRb+xfrHJC5QCpYlmoLySobHrv6MuiP7Vc=
-=2nUy
------END PGP SIGNATURE-----
+I will apologise in advance if I don't respond immediately to comments - I'm
+out of the office for the next week, but do appreciate any feedback.
 
---fb8b70f1c41e009f374399bb3450b2fa3c696c750a469b66dabbee56955e--
+Thanks
+  Dave
+
+[1] https://lore.kernel.org/linux-arm-kernel/13ec386b-2305-27da-9765-8fa3ad71146c@i2se.com/T/
+[2] https://lore.kernel.org/linux-arm-kernel/CAPY8ntBua=wPVUj+SM0WGcUL0fT56uEHo8YZUTMB8Z54X_aPRw@mail.gmail.com/T/
+[3] https://lore.kernel.org/lkml/cover.1706948717.git.andrea.porta@suse.com/T/
+[4] https://lore.kernel.org/linux-iommu/20220610080802.11147-1-Sergey.Semin@baikalelectronics.ru/
+
+Dave Stevenson (7):
+  ARM: dts: bcm283x: Update to use dma-channel-mask
+  dmaengine: bcm2835: Add function to handle DMA mapping
+  dmaengine: bcm2835: Add backwards compatible handling until clients
+    updated
+  dmaengine: bcm2835: Use dma_map_resource to map addresses
+  dmaengine: bcm2835: Read ranges if dma-ranges aren't mapped
+  arm: dt: Add dma-ranges to the bcm283x platforms
+  dmaengine: bcm2835: Revert the workaround for DMA addresses
+
+Phil Elwell (4):
+  mmc: bcm2835: Use phys addresses for slave DMA config
+  spi: bcm2835: Use phys addresses for slave DMA config
+  drm/vc4: Use phys addresses for slave DMA config
+  ASoC: bcm2835-i2s: Use phys addresses for DAI DMA
+
+Serge Semin (1):
+  dma-direct: take dma-ranges/offsets into account in resource mapping
+
+Stefan Wahren (6):
+  dmaengine: bcm2835: Support common dma-channel-mask
+  dmaengine: bcm2835: move CB info generation into separate function
+  dmaengine: bcm2835: move CB final extra info generation into function
+  dmaengine: bcm2835: make address increment platform independent
+  dmaengine: bcm2385: drop info parameters
+  dmaengine: bcm2835: pass dma_chan to generic functions
+
+ arch/arm/boot/dts/broadcom/bcm2711.dtsi       |  14 +-
+ .../arm/boot/dts/broadcom/bcm2835-common.dtsi |   2 +-
+ arch/arm/boot/dts/broadcom/bcm2835.dtsi       |   3 +-
+ arch/arm/boot/dts/broadcom/bcm2836.dtsi       |   3 +-
+ arch/arm/boot/dts/broadcom/bcm2837.dtsi       |   3 +-
+ drivers/dma/bcm2835-dma.c                     | 432 ++++++++++++++----
+ drivers/gpu/drm/vc4/vc4_hdmi.c                |  15 +-
+ drivers/mmc/host/bcm2835.c                    |  17 +-
+ drivers/spi/spi-bcm2835.c                     |  23 +-
+ kernel/dma/direct.c                           |   2 +-
+ sound/soc/bcm/bcm2835-i2s.c                   |  18 +-
+ 11 files changed, 383 insertions(+), 149 deletions(-)
+
+-- 
+2.34.1
+
