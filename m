@@ -1,58 +1,58 @@
-Received: from mail-wm1-f98.google.com (mail-wm1-f98.google.com [209.85.128.98])
+Received: from mail-wm1-f99.google.com (mail-wm1-f99.google.com [209.85.128.99])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9EAE43AC5
-	for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 18:27:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.98
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CC0F4EB3D
+	for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 18:28:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.99
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716575283; cv=none; b=SjBSz4RzGmr0h1hbKaj2MmkMB0hJUildV2m7RixlVniLoDwde18/eIL21Slx5eOijFJjlYu8lf7iAnVCk8j+klRFY2cpmOtXDEJwaWzqgnxdXaZhIYheNBmblhw8Wkk2mCS8Cco2d6N5cFmMrXwTnMbznteXJMPRwuqJgKKOrmI=
+	t=1716575287; cv=none; b=L/xnJsrVwTQOEzU0rQIcRG2X5TvpoeT9nwF2Hx8o6YE5OrNa31dNcqfI1s5XYRT5R89NXy1AgJ2lirzoRgtP5cbSYPNmK/FW5PS65WNga0nTrTGoyorpLiW7PpNVYbNZXw+NAishCW3L/nrhmIumMPcMIZN+FOQmFoczKjlwtSg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716575283; c=relaxed/simple;
-	bh=q/vPvexOj8BorMyOQXoWhY2JPB5kWHRHIatWLRoYFL8=;
+	s=arc-20240116; t=1716575287; c=relaxed/simple;
+	bh=vAXHDE0/SqkQsUMGiVCRffAB088Mi79YDBrfTqisc/Y=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=ova9mCAsh0gzv5mppJ4016feHy+axgVqwxi6KW+ysYcpSUMP4qDMGF6pnprFTrfiEWGIXCtM5epsDoF76Ig1NbPbCzuQ4KuScNM6yUEI1y35K4aPsZPWMaCOZeIFpVwF/fphcHYCSsctRWcyycG3TFlKTXo9iynazxQ/tqkDeZQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=iEOZDZFP; arc=none smtp.client-ip=209.85.128.98
+	 MIME-Version; b=NJx/mev3JYO+l/eC4bSQpCVecpQOOLcvEpel+jm8WGs1L/wrejr9niU37ieJyp65ajsSi0brm1N7V3U8Qvy9ulZbTMdHA+IEsvsbBuqpup+706KS8Of/YWXwssBNNZK7izOXN14U37McIgpiyRZ+wkFX1bKZjj4DyvjBi3X/ws0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=lfEYg52p; arc=none smtp.client-ip=209.85.128.99
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="iEOZDZFP"
-Received: by mail-wm1-f98.google.com with SMTP id 5b1f17b1804b1-4202dd90dcfso32400775e9.0
-        for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 11:27:57 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="lfEYg52p"
+Received: by mail-wm1-f99.google.com with SMTP id 5b1f17b1804b1-4200ee78f34so32625635e9.3
+        for <linux-mmc@vger.kernel.org>; Fri, 24 May 2024 11:28:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=raspberrypi.com; s=google; t=1716575275; x=1717180075; darn=vger.kernel.org;
+        d=raspberrypi.com; s=google; t=1716575278; x=1717180078; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=94Kgj4XNRFYduQRTRfIrQIcXqS9keoQhSCwvILhnmSs=;
-        b=iEOZDZFPhCWfBwNhTss3azICVGcHfq3YdwuiFxHNXSYKe5RG62yeX2/HLJGcEETqE3
-         DeltBSFm60DNjff864htX9sXlwhdcSLoGQQjpTqFudGzUROcVjUNbSvcbRr3ngaREWKY
-         wUFXYh5UrbK6mzaWMsDbSi2Ww01xc/j3vzRoQ/LijUsgKTjPyqm9MRzyFwdT6x1OlaAl
-         dTxdTyduycLLrZt7J72H4iJR9EDsfvAUA/Ua9sHW8BgflLeHfOr4QwlI+E2fXZvc35cP
-         OdD7q8PVTQb9RGjptftuRA9Iuq8N71mz9B64qtL7JnGaRd3atLxS0WlB1e7/BZJRjnLA
-         QYqg==
+        bh=LczGECRfXrurv9dI4g4iDY7uh7b4Krp6PtWjBnzvVYI=;
+        b=lfEYg52pyu+DKsD80EA7rNZ2YDy7brFQQ1vMXAb1docWr7tuY1IgRRqSq5MT4QWp0P
+         sgwiBC90cJ4/L6vugOJxWR0YJO+PP5niD7GiJpqWSLeyW20FOtsPtVk8CPck5MnCpKJh
+         DeD1nf2R/CAuWqwhVsJtFCSHgNACajOGFjWIx30547WdOSe6frg6fMruNgUlfWwNuZMo
+         nDffxv+b3+/z9TwG3h8mjVLJSpvQai77nfpxJEdD6RvTl1qoU0pxGe8fsFYo3LWfFPrL
+         SGVs0gTCyCsT2qPPuxclMo3AEatxcJ7PWRRSSeWTi9g9tEkocdzYubTwdkoOmFkcDbxX
+         Y2BQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716575275; x=1717180075;
+        d=1e100.net; s=20230601; t=1716575278; x=1717180078;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=94Kgj4XNRFYduQRTRfIrQIcXqS9keoQhSCwvILhnmSs=;
-        b=Y8VT6gWUoILo7eIOt9eFAGgSV1yYKDeXrpaEYcLLkvfcfD70cp4++hJv0HHBUEnWIm
-         v68Y3INrHlKVQsE6MpOGV/emyowjl59RYcNywYjqEfT6hkJrUL+CQb7dSpTJawpTLyK6
-         IB8vTkVPgiRccNAX7NkNTB8NPglytHxRGnZbPTzCv671+eoF3vLAENTJ7+yjgEngh+tV
-         dnuk4qv8ympPNiE930+27x5hsxuV+KylpNR32W2hNzRi055+PcklN1UWC7aCr37KN6JE
-         diPBU8lwU4FHMTmGFtE2z8QrfViDIrM2GXnLhsgFYXgw0x/l0oa03fPL6D9FN28IdZhW
-         eQfQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWgBpo7J5ErxM1eIdQGM60q+tq5wy+58XPuCqZ6CmmbaTMd1hM7vShAbpQL68Ibdj6sdIvhDe8NQq6VWh2ihb2Z5EqtbeDn/i0v
-X-Gm-Message-State: AOJu0YwiNIds9I2OnjBqOxXzpej1bP/nOaN+Kvcr+nom2MuwSGw+lA8L
-	sT6ZyyEDQrajN/N9TNkUrTHLId3iIbTqt+Rr4cKOgZfPIIAUVHZLrh+j61wj98zBq7lUFGA8U7U
-	11WKm55lx56WebKOyEw/VVZ/AVRDLvvll
-X-Google-Smtp-Source: AGHT+IGesJtEvV+unRtxxlqVpvfAyXBqt4L3VhNP7OXMl0+5bcpxZXNW6Yligrt0JA2P+vgera6GBoU5TmNu
-X-Received: by 2002:a05:6000:248:b0:34d:b605:ec68 with SMTP id ffacd0b85a97d-35526c37d2emr2209418f8f.17.1716575275087;
-        Fri, 24 May 2024 11:27:55 -0700 (PDT)
+        bh=LczGECRfXrurv9dI4g4iDY7uh7b4Krp6PtWjBnzvVYI=;
+        b=gwUnNGHYkY+mBlIbPOtMsAr/dBW3bNL654CWDWhwWk9nFlwi7eqUEjff33aAnvEfEw
+         tA/szKh7/5TbvEj5gJJTpRXpAl2CZOPR5qXS7MJVZLIdUS9y+7u3iHyzwMK+pfc/SrEJ
+         nVDAy6F9EHzf7Ho4Vn89hFE+UZUnwzeG0etTYwdLPNWot3GrGJ6OAXn199yy0xK512Tu
+         +UL00WgiudQe1kbO7YM3a9zRwpTKfMPmmwkKya8uSwOnuAy7GuBPgvpkY9ggsI6pFv5+
+         BIT+GWq3L7zfeyntoL+4NjySaQXA7KB0T1dMU6d/m/mBY8xonLf7ZEB4Y4OzfHMqYc10
+         yNcQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUddPptjMuBTcCtxYx4uAi+zLjU/Ulphq9E9puauLfwZRCle0w5QCHeRt8ZZoFq3kfyloaMNilHSrickcR9Nj6AmJHmi/7yv6UE
+X-Gm-Message-State: AOJu0YxNPtvNrAaJJJMhCeX4e3KRwRor7lntd2UTJ+7odf5iyUio6BSE
+	ncPouNVskXAUpmFP73MqH/p82tUumUv2rLlPK2mLMLuXjlR3uO/zSvAkdJhfEowptAYkjKTBr8l
+	Pav+bare4IUC21ACR9v/pqB6Pg0NjWdkA
+X-Google-Smtp-Source: AGHT+IFZwqy7hi4v9+jui3sDRfDYyIcnFYr2RUg4s5QWzy/T07+ZLpqeeBjaPUd6wfnyXf+trffGHFzZtrlM
+X-Received: by 2002:a05:600c:2948:b0:41f:ec3e:9797 with SMTP id 5b1f17b1804b1-421089de607mr27580345e9.16.1716575278201;
+        Fri, 24 May 2024 11:27:58 -0700 (PDT)
 Received: from raspberrypi.com ([188.39.149.98])
-        by smtp-relay.gmail.com with ESMTPS id ffacd0b85a97d-35579d7beacsm64758f8f.21.2024.05.24.11.27.54
+        by smtp-relay.gmail.com with ESMTPS id ffacd0b85a97d-35586b0b42fsm56761f8f.115.2024.05.24.11.27.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 May 2024 11:27:55 -0700 (PDT)
+        Fri, 24 May 2024 11:27:58 -0700 (PDT)
 X-Relaying-Domain: raspberrypi.com
 From: Dave Stevenson <dave.stevenson@raspberrypi.com>
 To: Rob Herring <robh@kernel.org>,
@@ -90,11 +90,10 @@ Cc: devicetree@vger.kernel.org,
 	linux-spi@vger.kernel.org,
 	iommu@lists.linux.dev,
 	linux-sound@vger.kernel.org,
-	Stefan Wahren <stefan.wahren@i2se.com>,
 	Dave Stevenson <dave.stevenson@raspberrypi.com>
-Subject: [PATCH 07/18] dmaengine: bcm2385: drop info parameters
-Date: Fri, 24 May 2024 19:26:51 +0100
-Message-Id: <20240524182702.1317935-8-dave.stevenson@raspberrypi.com>
+Subject: [PATCH 12/18] dmaengine: bcm2835: Read ranges if dma-ranges aren't mapped
+Date: Fri, 24 May 2024 19:26:56 +0100
+Message-Id: <20240524182702.1317935-13-dave.stevenson@raspberrypi.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
 References: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
@@ -106,230 +105,217 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-From: Stefan Wahren <stefan.wahren@i2se.com>
+We have a historical error in the DT files that don't define
+the dma-ranges fully, and DMA users have been passing in
+DMA addresses instead of CPU physical addresses.
 
-The parameters info and finalextrainfo are platform specific. So drop
-them by generating them within bcm2835_dma_create_cb_chain().
+As DT is ABI, we have to be able to work with old DT but new
+kernel, which means handling this missing dma-range mapping
+somehow.
+The "ranges" property has always been defined correctly, so
+abuse that in the event that dma-ranges are missing.
 
-Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+There appears to be no easy route to access "ranges", so
+duplicate the functions for handling "dma-ranges" here to
+keep the hack contained.
+
 Signed-off-by: Dave Stevenson <dave.stevenson@raspberrypi.com>
 ---
- drivers/dma/bcm2835-dma.c | 83 +++++++++++++++++++--------------------
- 1 file changed, 40 insertions(+), 43 deletions(-)
+ drivers/dma/bcm2835-dma.c | 139 ++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 134 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
-index d6c5a2762a46..e2f9c8692e6b 100644
+index e48008b06716..06407691ef28 100644
 --- a/drivers/dma/bcm2835-dma.c
 +++ b/drivers/dma/bcm2835-dma.c
-@@ -287,13 +287,11 @@ static void bcm2835_dma_desc_free(struct virt_dma_desc *vd)
- 		container_of(vd, struct bcm2835_desc, vd));
- }
+@@ -25,6 +25,7 @@
+ #include <linux/interrupt.h>
+ #include <linux/list.h>
+ #include <linux/module.h>
++#include <linux/of_address.h>
+ #include <linux/platform_device.h>
+ #include <linux/slab.h>
+ #include <linux/io.h>
+@@ -37,6 +38,12 @@
+ #define BCM2835_DMA_MAX_DMA_CHAN_SUPPORTED 14
+ #define BCM2835_DMA_CHAN_NAME_SIZE 8
  
--static void bcm2835_dma_create_cb_set_length(
--	struct bcm2835_chan *chan,
--	struct bcm2835_dma_cb *control_block,
--	size_t len,
--	size_t period_len,
--	size_t *total_len,
--	u32 finalextrainfo)
-+static bool
-+bcm2835_dma_create_cb_set_length(struct bcm2835_chan *chan,
-+				 struct bcm2835_dma_cb *control_block,
-+				 size_t len, size_t period_len,
-+				 size_t *total_len)
- {
- 	size_t max_len = bcm2835_dma_max_frame_length(chan);
++struct bcm2835_bus_dma_region {
++	phys_addr_t	cpu_start;
++	dma_addr_t	dma_start;
++	u64		size;
++};
++
+ /**
+  * struct bcm2835_dmadev - BCM2835 DMA controller
+  * @ddev: DMA device
+@@ -48,6 +55,8 @@ struct bcm2835_dmadev {
+ 	struct dma_device ddev;
+ 	void __iomem *base;
+ 	dma_addr_t zero_page;
++	bool ranges_initialised;
++	struct bcm2835_bus_dma_region *ranges_map;
+ };
  
-@@ -302,7 +300,7 @@ static void bcm2835_dma_create_cb_set_length(
+ struct bcm2835_dma_cb {
+@@ -71,6 +80,7 @@ struct bcm2835_dma_chan_map {
  
- 	/* finished if we have no period_length */
- 	if (!period_len)
--		return;
-+		return false;
+ 	phys_addr_t slave_addr;
+ 	unsigned int xfer_size;
++	bool ranges;
+ };
  
- 	/*
- 	 * period_len means: that we need to generate
-@@ -316,7 +314,7 @@ static void bcm2835_dma_create_cb_set_length(
- 	if (*total_len + control_block->length < period_len) {
- 		/* update number of bytes in this period so far */
- 		*total_len += control_block->length;
--		return;
-+		return false;
- 	}
+ struct bcm2835_chan {
+@@ -279,6 +289,114 @@ static inline bool need_dst_incr(enum dma_transfer_direction direction)
+ 	return false;
+ };
  
- 	/* calculate the length that remains to reach period_length */
-@@ -325,8 +323,7 @@ static void bcm2835_dma_create_cb_set_length(
- 	/* reset total_length for next period */
- 	*total_len = 0;
- 
--	/* add extrainfo bits in info */
--	control_block->info |= finalextrainfo;
-+	return true;
- }
- 
- static inline size_t bcm2835_dma_count_frames_for_sg(
-@@ -352,7 +349,6 @@ static inline size_t bcm2835_dma_count_frames_for_sg(
-  * @chan:           the @dma_chan for which we run this
-  * @direction:      the direction in which we transfer
-  * @cyclic:         it is a cyclic transfer
-- * @info:           the default info bits to apply per controlblock
-  * @frames:         number of controlblocks to allocate
-  * @src:            the src address to assign
-  * @dst:            the dst address to assign
-@@ -360,22 +356,24 @@ static inline size_t bcm2835_dma_count_frames_for_sg(
-  * @period_len:     the period length when to apply @finalextrainfo
-  *                  in addition to the last transfer
-  *                  this will also break some control-blocks early
-- * @finalextrainfo: additional bits in last controlblock
-- *                  (or when period_len is reached in case of cyclic)
-  * @gfp:            the GFP flag to use for allocation
-+ * @flags
-  */
- static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
- 	struct dma_chan *chan, enum dma_transfer_direction direction,
--	bool cyclic, u32 info, u32 finalextrainfo, size_t frames,
--	dma_addr_t src, dma_addr_t dst, size_t buf_len,
--	size_t period_len, gfp_t gfp)
-+	bool cyclic, size_t frames, dma_addr_t src, dma_addr_t dst,
-+	size_t buf_len,	size_t period_len, gfp_t gfp, unsigned long flags)
- {
++static int bcm2835_dma_init_ranges(struct dma_chan *chan)
++{
 +	struct bcm2835_dmadev *od = to_bcm2835_dma_dev(chan->device);
- 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
- 	size_t len = buf_len, total_len;
- 	size_t frame;
- 	struct bcm2835_desc *d;
- 	struct bcm2835_cb_entry *cb_entry;
- 	struct bcm2835_dma_cb *control_block;
-+	u32 extrainfo = bcm2835_dma_prepare_cb_extra(c, direction, cyclic,
-+						     false, flags);
-+	bool zero_page = false;
- 
- 	if (!frames)
- 		return NULL;
-@@ -389,6 +387,14 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
- 	d->dir = direction;
- 	d->cyclic = cyclic;
- 
-+	switch (direction) {
-+	case DMA_MEM_TO_MEM:
-+	case DMA_DEV_TO_MEM:
-+		break;
-+	default:
-+		zero_page = src == od->zero_page;
++	struct device *dev = chan->device->dev;
++	struct device_node *node = of_node_get(dev->of_node);
++	const __be32 *ranges = NULL;
++	bool found_ranges = false;
++	struct of_range_parser parser;
++	struct of_range range;
++	struct bcm2835_bus_dma_region *r;
++	int len, num_ranges = 0;
++	int ret = 0;
++
++	while (node) {
++		ranges = of_get_property(node, "ranges", &len);
++
++		/* Ignore empty ranges, they imply no translation required */
++		if (ranges && len > 0)
++			break;
++
++		/* Once we find 'dma-ranges', then a missing one is an error */
++		if (found_ranges && !ranges) {
++			ret = -ENODEV;
++			goto out;
++		}
++		found_ranges = true;
++
++		node = of_get_next_parent(node);
 +	}
 +
- 	/*
- 	 * Iterate over all frames, create a control block
- 	 * for each frame and link them together.
-@@ -402,7 +408,8 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
++	if (!node || !ranges) {
++		pr_debug("no ranges found for node(%pOF)\n", dev->of_node);
++		ret = -ENODEV;
++		goto out;
++	}
++
++	of_pci_range_parser_init(&parser, node);
++	for_each_of_range(&parser, &range) {
++		if (range.cpu_addr == OF_BAD_ADDR) {
++			pr_err("translation of DMA address(%llx) to CPU address failed node(%pOF)\n",
++			       range.bus_addr, node);
++			continue;
++		}
++		num_ranges++;
++	}
++
++	if (!num_ranges) {
++		ret = -EINVAL;
++		goto out;
++	}
++
++	r = kcalloc(num_ranges + 1, sizeof(*r), GFP_KERNEL);
++	if (!r) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	/*
++	 * Record all info in the generic DMA ranges array for struct device,
++	 * returning an error if we don't find any parsable ranges.
++	 */
++	od->ranges_map = r;
++	of_pci_range_parser_init(&parser, node);
++	for_each_of_range(&parser, &range) {
++		pr_debug("dma_addr(%llx) cpu_addr(%llx) size(%llx)\n",
++			 range.bus_addr, range.cpu_addr, range.size);
++		if (range.cpu_addr == OF_BAD_ADDR)
++			continue;
++		r->cpu_start = range.cpu_addr;
++		r->dma_start = range.bus_addr;
++		r->size = range.size;
++		r++;
++	}
++out:
++	of_node_put(node);
++	return ret;
++}
++
++static dma_addr_t bcm2835_translate_phys_to_dma(struct bcm2835_dmadev *od,
++						phys_addr_t paddr)
++{
++	const struct bcm2835_bus_dma_region *m;
++
++	for (m = od->ranges_map; m && m->size; m++) {
++		u64 offset = paddr - m->cpu_start;
++
++		if (paddr >= m->cpu_start && offset < m->size)
++			return m->dma_start + offset;
++	}
++
++	/* make sure dma_capable fails when no translation is available */
++	return DMA_MAPPING_ERROR;
++}
++
++static dma_addr_t
++bcm2835_dma_map_using_range(struct dma_chan *chan, phys_addr_t phys_addr,
++			    size_t size, enum dma_data_direction dir)
++{
++	struct bcm2835_dmadev *od = to_bcm2835_dma_dev(chan->device);
++
++	if (!od->ranges_initialised) {
++		bcm2835_dma_init_ranges(chan);
++		od->ranges_initialised = true;
++	}
++
++	return bcm2835_translate_phys_to_dma(od, phys_addr);
++}
++
+ static int bcm2835_dma_map_slave_addr(struct dma_chan *chan,
+ 				      phys_addr_t dev_addr,
+ 				      size_t dev_size,
+@@ -307,8 +425,11 @@ static int bcm2835_dma_map_slave_addr(struct dma_chan *chan,
+ 	    dev_dir == map->dir)
+ 		return 0;
  
- 		/* fill in the control block */
- 		control_block = cb_entry->cb;
--		control_block->info = info;
-+		control_block->info = bcm2835_dma_prepare_cb_info(c, direction,
-+								  zero_page);
- 		control_block->src = src;
- 		control_block->dst = dst;
- 		control_block->stride = 0;
-@@ -410,10 +417,12 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
- 		/* set up length in control_block if requested */
- 		if (buf_len) {
- 			/* calculate length honoring period_length */
--			bcm2835_dma_create_cb_set_length(
--				c, control_block,
--				len, period_len, &total_len,
--				cyclic ? finalextrainfo : 0);
-+			if (bcm2835_dma_create_cb_set_length(c, control_block,
-+							     len, period_len,
-+							     &total_len)) {
-+				/* add extrainfo bits in info */
-+				control_block->info |= extrainfo;
-+			}
+-	/* Remove old mapping if present. */
+-	if (map->xfer_size) {
++	/*
++	 * Remove old mapping if present and we haven't used our own "ranges"
++	 * mapping (which has no unmap)
++	 */
++	if (map->xfer_size && !map->ranges) {
+ 		dev_dbg(chan->device->dev, "chan: unmap %zx@%pap to %pad dir: %s\n",
+ 			dev_size, &dev_addr, &map->addr,
+ 			dev_dir == DMA_TO_DEVICE ? "DMA_TO_DEVICE" : "DMA_FROM_DEVICE");
+@@ -322,9 +443,17 @@ static int bcm2835_dma_map_slave_addr(struct dma_chan *chan,
+ 				     dev_dir, 0);
  
- 			/* calculate new remaining length */
- 			len -= control_block->length;
-@@ -434,7 +443,9 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
+ 	if (dma_mapping_error(chan->device->dev, map->addr)) {
+-		dev_err(chan->device->dev, "chan: failed to map %zx@%pap",
+-			dev_size, &dev_addr);
+-		return -EIO;
++		map->addr = bcm2835_dma_map_using_range(chan, dev_addr, dev_size,
++							dev_dir);
++		if (dma_mapping_error(chan->device->dev, map->addr)) {
++			dev_err(chan->device->dev, "chan: failed to map %zx@%pap",
++				dev_size, &dev_addr);
++
++			return -EIO;
++		}
++		map->ranges = true;
++	} else {
++		map->ranges = false;
  	}
  
- 	/* the last frame requires extra flags */
--	d->cb_list[d->frames - 1].cb->info |= finalextrainfo;
-+	extrainfo = bcm2835_dma_prepare_cb_extra(c, direction, cyclic, true,
-+						 flags);
-+	d->cb_list[d->frames - 1].cb->info |= extrainfo;
- 
- 	/* detect a size missmatch */
- 	if (buf_len && (d->size != buf_len))
-@@ -682,9 +693,6 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_memcpy(
- {
- 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
- 	struct bcm2835_desc *d;
--	u32 info = bcm2835_dma_prepare_cb_info(c, DMA_MEM_TO_MEM, false);
--	u32 extra = bcm2835_dma_prepare_cb_extra(c, DMA_MEM_TO_MEM, false,
--						 true, 0);
- 	size_t max_len = bcm2835_dma_max_frame_length(c);
- 	size_t frames;
- 
-@@ -696,9 +704,8 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_memcpy(
- 	frames = bcm2835_dma_frames_for_length(len, max_len);
- 
- 	/* allocate the CB chain - this also fills in the pointers */
--	d = bcm2835_dma_create_cb_chain(chan, DMA_MEM_TO_MEM, false,
--					info, extra, frames,
--					src, dst, len, 0, GFP_KERNEL);
-+	d = bcm2835_dma_create_cb_chain(chan, DMA_MEM_TO_MEM, false, frames,
-+					src, dst, len, 0, GFP_KERNEL, 0);
- 	if (!d)
- 		return NULL;
- 
-@@ -714,8 +721,6 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_slave_sg(
- 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
- 	struct bcm2835_desc *d;
- 	dma_addr_t src = 0, dst = 0;
--	u32 info = bcm2835_dma_prepare_cb_info(c, direction, false);
--	u32 extra = bcm2835_dma_prepare_cb_extra(c, direction, false, true, 0);
- 	size_t frames;
- 
- 	if (!is_slave_direction(direction)) {
-@@ -738,10 +743,8 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_slave_sg(
- 	frames = bcm2835_dma_count_frames_for_sg(c, sgl, sg_len);
- 
- 	/* allocate the CB chain */
--	d = bcm2835_dma_create_cb_chain(chan, direction, false,
--					info, extra,
--					frames, src, dst, 0, 0,
--					GFP_NOWAIT);
-+	d = bcm2835_dma_create_cb_chain(chan, direction, false, frames, src,
-+					dst, 0, 0, GFP_NOWAIT, 0);
- 	if (!d)
- 		return NULL;
- 
-@@ -757,13 +760,9 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_cyclic(
- 	size_t period_len, enum dma_transfer_direction direction,
- 	unsigned long flags)
- {
--	struct bcm2835_dmadev *od = to_bcm2835_dma_dev(chan->device);
- 	struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
- 	struct bcm2835_desc *d;
- 	dma_addr_t src, dst;
--	u32 info = bcm2835_dma_prepare_cb_info(c, direction,
--					       buf_addr == od->zero_page);
--	u32 extra = bcm2835_dma_prepare_cb_extra(c, direction, true, true, 0);
- 	size_t max_len = bcm2835_dma_max_frame_length(c);
- 	size_t frames;
- 
-@@ -814,10 +813,8 @@ static struct dma_async_tx_descriptor *bcm2835_dma_prep_dma_cyclic(
- 	 * note that we need to use GFP_NOWAIT, as the ALSA i2s dmaengine
- 	 * implementation calls prep_dma_cyclic with interrupts disabled.
- 	 */
--	d = bcm2835_dma_create_cb_chain(chan, direction, true,
--					info, extra,
--					frames, src, dst, buf_len,
--					period_len, GFP_NOWAIT);
-+	d = bcm2835_dma_create_cb_chain(chan, direction, true, frames, src, dst,
-+					buf_len, period_len, GFP_NOWAIT, flags);
- 	if (!d)
- 		return NULL;
- 
+ 	dev_dbg(chan->device->dev, "chan: map %zx@%pap to %pad dir: %s\n",
 -- 
 2.34.1
 
