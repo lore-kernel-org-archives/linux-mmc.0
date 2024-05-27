@@ -1,471 +1,304 @@
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 508E62AF1B
-	for <linux-mmc@vger.kernel.org>; Sat, 25 May 2024 14:44:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.141.245
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716648291; cv=fail; b=gIJPxBTJH8bdnyLt6eyGUXyPGZBQxRtViLmifCnxVY0fFbNS3GzHGf6+Pq9sc7PQ6foK5lIQkuWQ5r7CEq/iJeK37iaGpg8f1o5h410360cjWuJQjIHMTxRbbVLqaCc7xJ3JbQ28gUgZrIF40+SHu7WDCpW/ErjYNrb7Oq1STTU=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716648291; c=relaxed/simple;
-	bh=iIUsdhI9jMQqgTWV8DNNH5S4TbN3N2gVKJ4LgWvnw/g=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=i0YgL7knuLIhI9XV+h5+4k9vUKIKGNKHJR6xzOdJQjnmxkRkmzjZg3bXDPl8UY0mHVJw9m5rBE1vdJMx1KWw+yuPF1Lam+MKLsvQDkZEtdkkbww2kF5UfZzucwd4mqzERlgiJYr4sd0+9lr76WjEUipP3hk7j2fhlNUNwkIxnwM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Xki50Vfz; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=dY+A10Em; arc=fail smtp.client-ip=68.232.141.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA60717BD5
+	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 07:27:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1716794857; cv=none; b=FCKZ78xZjYd8HjHNbZ0/bjhCHU866PNNT/Wviyz4rBqe55Tpz3q0ojqDmhNn1S7gPNb8uug+eWRykOxfugSIe2UfYTpAZuXO7g8To7w7WYv5o8u6dmUkXwWLkcwLATLJMayW4pYpBXKwYTWJMxw1ryRLyFp6Wbi7z9xkUg7Owv0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1716794857; c=relaxed/simple;
+	bh=sc2dXMdM8I170FsVHX97DbIKM+TPkoHaIGmAf1Ax5QU=;
+	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NcE32DEqjAIBk46/ZVYhjvR2jxIpK2IiRviTzd0xKTQJNa8lnDmPR+rOJTGPFtB9BkQRuZhHjMmQZvOw2sOB5ONWMx37/oSgJf4qv0iZGy72ejHUiz9kN4RlyU3IzjgVAEmee0f95PHEGM088DWTjOl899b+hB3baCTt/zjbfG8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=N6npEU/s; arc=none smtp.client-ip=209.85.208.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Xki50Vfz";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="dY+A10Em"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1716648289; x=1748184289;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=iIUsdhI9jMQqgTWV8DNNH5S4TbN3N2gVKJ4LgWvnw/g=;
-  b=Xki50VfzVkxwtVAKnJmeP90nnK5aFvL2MROwfToAFugOuFAHJqkI0hPG
-   NOMKrku5vWPc/Sqb/OhW+x1pxWEM6va9JTYDR+mjuEArPwyWhIZRuIo6a
-   dr0GCpKE1a2j1bmC7XOBdvpAWWyGfKSGTul8KO4BjNljB0hW0y1qN6ycc
-   ZiuJSrKPPQ+xAPyFA50giu+KnJNynXgyprK0rm92Iu2L6RKdwXEF4efxD
-   u03A+3OjqTAdmqaTm5/+dwX9za4iw5EmgY9AY1T1ZIRztZ5+r2Gcb5JgS
-   C4/JyRH97uIc5Thpm0TbUe8UTGDV9FynE7YldP/eXFF9V5yZir+8cOPZX
-   Q==;
-X-CSE-ConnectionGUID: AUugCpEHQLisp/NY2W1Sog==
-X-CSE-MsgGUID: Rj8EOlJKQd+4tkZQ4i4hZw==
-X-IronPort-AV: E=Sophos;i="6.08,188,1712592000"; 
-   d="scan'208";a="17516738"
-Received: from mail-co1nam11lp2168.outbound.protection.outlook.com (HELO NAM11-CO1-obe.outbound.protection.outlook.com) ([104.47.56.168])
-  by ob1.hgst.iphmx.com with ESMTP; 25 May 2024 22:44:42 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bfQQD1WloBzgy5/uUNkFD/OLJCEk3g8aGwCwWJBCeGQsyq/bRDm4fVDHeeMHSQajYVnQ1kS9JOX9FMOy5OQtyOFMn43Ez6ecKZtojpatn6ruDAbHv2NPIEzvGUnorMGkJ2V10hjuNbnztnmTaGFHadjBEI9nZeVgIW8NhZost3eJdQEKGPBSXh14xqPXJBTzhRimiOdveXs12PwyA7UPDWsoEUCQEy2X8GDXN0YrPJHXqf9db4JE6/Vj3rjQJFEHLFkjPf5LL1r+3pFSKWQrg2GDFnvkS8jy9l+9ecSe000gNFHZkWlXJwjzD1doOHQz3eZvIUFoGGVrXxbgTPNS+g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=g+oys6/7zUNOVzZgsI7JPtDUI7QKi2NlsBzr3haZ4io=;
- b=TFOCHsrsftRt9KI49/LCJnVOYfWkexS3IpBSTuDi+RViSYmIwRlShIshw8VUXOmLgyzDlVeDjg80GxSZEMKqeSjrMNg69pTkwQLyfoUISfBPzvuAmX/JIz0B0d6MXLYNjYcyYykJTJXqi7+9i695quSDr/J56/nG5PbnkbuxkSXhvGs1VOFIzvNGMNDMvUrmtCqgqTgOyQPm6wPrXXFfig5Aw2DOk9xXLz9a8xaXQW8HaMYD8VWkC3RR9dgibzfosvcrDS8hmyrx94tj1uJWvDXlEwp7v9GZVS/sjA1WZ20vAtTCE+2QQEXEyckSXNNKcdWyyAE/gaoY7Dd26aEwkA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="N6npEU/s"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-57857e0f45eso2111901a12.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 00:27:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=g+oys6/7zUNOVzZgsI7JPtDUI7QKi2NlsBzr3haZ4io=;
- b=dY+A10EmZH5bzBhdyJCpZ5i16m8QV6/DrA54OvrOTZOtr2p67jsDNx2cRVpIWHTray7tZs8lKXEctCkFdiaAaU9va/v7ZZARpi++24vgh9CrirpaSQOMnm3x8eqjwhvuCi2n7g9y7aBgbM6oZFuBu6xyj0hc7nGhzWJVZcmclQY=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- PH7PR04MB8579.namprd04.prod.outlook.com (2603:10b6:510:2b4::6) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.7611.19; Sat, 25 May 2024 14:44:38 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f%5]) with mapi id 15.20.7611.025; Sat, 25 May 2024
- 14:44:37 +0000
-From: Avri Altman <Avri.Altman@wdc.com>
-To: Avri Altman <Avri.Altman@wdc.com>, "linux-mmc@danman.eu"
-	<linux-mmc@danman.eu>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org"
-	<ulf.hansson@linaro.org>
-Subject: RE: [PATCH] mmc-utils: implemented CMD42 locking/unlocking
-Thread-Topic: [PATCH] mmc-utils: implemented CMD42 locking/unlocking
-Thread-Index: AQHaqbt6tJbSe7J5F0aYFSUNoe3rsLGemxwAgAlZAKA=
-Date: Sat, 25 May 2024 14:44:37 +0000
-Message-ID:
- <DM6PR04MB657574B7688DF8C88E2DD3D9FCF62@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20240519070843.467268-1-linux-mmc@danman.eu>
- <DM6PR04MB65756D83C351681616139155FCE82@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To:
- <DM6PR04MB65756D83C351681616139155FCE82@DM6PR04MB6575.namprd04.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|PH7PR04MB8579:EE_
-x-ms-office365-filtering-correlation-id: 1f9ae0a1-e554-4fbd-27e0-08dc7cc933d0
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230031|1800799015|376005|366007|38070700009;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?mTg8Q1jwFh5WqEeoe5PTdsQpFP5jY6N9BLsME7h4xO8Y5LOvDrQHbjbh4f6o?=
- =?us-ascii?Q?2JEsbY56/qvj+HwKyh0/CHZY77nOfINOgBgpgUqRbtlJ7nNEh/FkxaAPwSbv?=
- =?us-ascii?Q?CFlNzz2XhnLCZLnbC/+x30EolI/58GTjpFRbhmZXqp7tg4LcAHlFe778UK34?=
- =?us-ascii?Q?4tV/sCvVEOg2SSCDCANYQVBdAhoeaeOF6cMQXet5p5xO9ek8t9reM8bxsZgP?=
- =?us-ascii?Q?QsYZAnYtAt9899ZaOvgEn7hHywNo9p5O36OW5FZqlznvNEQKI6CzmIMwqjB0?=
- =?us-ascii?Q?CCevOnU2oBKP7ZjKrduSwoLb5kSNBiajBUTcK0VEaQdz6fD2TJuoqfyIuYHs?=
- =?us-ascii?Q?zm16l+dCuqhY08s9kSpSe2fa1N0u0IzdM5D/KQGW6+FTdE2J8yUITbI7Vl0O?=
- =?us-ascii?Q?cbqlZu6hdE6kQj1rjkPG6S00tynkpn2mKH57npBBYbqsORgNbtbb7+W9mjm5?=
- =?us-ascii?Q?cLMNDBQJD2At6fniOtx4zE49Buqi+Qh4h/9TH4OKa5AVIOnPQwZykmbw2L0S?=
- =?us-ascii?Q?XQMH26ixW+dx7w9kRk21/oAr1CtyRdq8EtIXlDNcNKci2LmRCG6rqM0dFLk/?=
- =?us-ascii?Q?bTc3b/5LNs6Kryidzw8k4HBjIclBqZ7r/5LD4z+R6q4FZqlt95kojT74Zaym?=
- =?us-ascii?Q?R3cNvZPBbSCZ2CtTRoiBXtNbORtX8BeaaRHxkhzq4g1kn8R04oef4nCpkKvu?=
- =?us-ascii?Q?IiU2avEWdlUMXp1Kl0lGZtB1Q6vm8jHsyo6NBuPsj3+t2WLPDRWkpV2QgCTO?=
- =?us-ascii?Q?aHmfF4rKlCealEDBE5dYnBKEx3LQDpgBNr0T7Kss0kmf/l7hYK3IUyPUlKXh?=
- =?us-ascii?Q?E+0n7p6J6uaXqNj1S56LuuI42dtH0rgujLqzcD67LG3r1X5wUnw6yib01fJM?=
- =?us-ascii?Q?YHqZVjhOe37ajvL+xEX5WqFNGe4M5ys35MWjOMsyZJ0RjDhfKrDLYGOKHmOv?=
- =?us-ascii?Q?4+RMKdSSPcFxS5V14lqJIatb/cQF6PpM5KXXGK9To5mQwJc0exAAKHCSphL4?=
- =?us-ascii?Q?HG+c6bGDvvCEXLgwhJO3mEFMiW5S9hAxlexLIbACfnsgsIWfL32bVPwXImtp?=
- =?us-ascii?Q?ZyWReLvGCshXPyOPVjJNvYhDgf0rri0BbVNZjlMHk5BABC1J73HkkXVPPrmL?=
- =?us-ascii?Q?/osHjbx9jK9+aK8qyynIjOMtkNB16+/rXtQjlldpxuFMVkd7d0lEMeE+2Rd+?=
- =?us-ascii?Q?lVFYTKSobvbqXclaK7QSFY3XXtS3XtOpkNmcEYzVhRG6mP3B0H2rpB8UC5o5?=
- =?us-ascii?Q?yPJC4BOP25VOQjJyUDlIj9ZpgZLoQSl9tXeh51zFEg=3D=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(1800799015)(376005)(366007)(38070700009);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?90tdiu7WkegA3cygXshZ5ClwlEdwxqM8SkSOhm6T5ndcr+RRYtzPEYWpnikj?=
- =?us-ascii?Q?4lNcD3oEv7pMFZGOO9Ur5oLWjSLvRnkF5/PeoSbt851EjT+esqbhX5lUYMNE?=
- =?us-ascii?Q?M60OcXIsxetTqdgVwZg+6uUJqSos2UnIMQdsd8YR1Dg/KR5IKXMqgudHegqm?=
- =?us-ascii?Q?oR+SoxhXrAN/Gu2X3O+FjOSD4WTsiHAUN8igmErF0zMEx80iu7/gOOrX5orX?=
- =?us-ascii?Q?fywavAuHOsXjZDwvJJb9J+gA6mmrxwcVtarlPq3ns2bqmmuIzbLoJJiNl9YA?=
- =?us-ascii?Q?t7cKxyVx2e2lGgk+UJm8Itnshhj1bJye38pvY5E/5W4qWPIWSf/EU5KaGkA4?=
- =?us-ascii?Q?aEdBz0xAEPtf2Z3vyt1YY6pV2tL4PSgdndl7VdRJ67I/kCypKn9LhP3dQKgK?=
- =?us-ascii?Q?nLlsDmKMrxKjuzjQ4ucmKrSKddgFQxTy2PQv/YuIWPz/Xi98oTuTag7jUkTK?=
- =?us-ascii?Q?kqV5+evuva7EdEnc7igKXaTF6cwBTnJhSmzFtN8rCTVo63u4FEpvJ0bkMaoF?=
- =?us-ascii?Q?8SYUn+D6Wf3+2GoysUxk9J2XW3JEf7JhMPnT3NdAFiJXFOUKMyiWcqp8v0lx?=
- =?us-ascii?Q?P9TiqvPQWnivCJAz4FGCRBc0kWYfvSHkumhX1chq4F6xA8uvd+C348F9c90u?=
- =?us-ascii?Q?yZXKBSgZRW8BL3nhKOWZolY/43o+fEnbZvYk8+hjGKXMBs6f7RurQmh/wK6A?=
- =?us-ascii?Q?L0x51yZsJBmQMi2pqf4cOPDUPmGBNwEbXIDiSNNo/Gavd8/7gmP8kilNXf34?=
- =?us-ascii?Q?C5vsB75sQaazA2utoN2qTx8pj69XDVaZgY/k1jLxn/8/flYj5wwGhgPVSvsK?=
- =?us-ascii?Q?y/WMgJzrzbP9XG3eMn0SqMuoawyMDWa8vxSTDVv+cnlGX5yFmSoGU8y6io8a?=
- =?us-ascii?Q?UXakNh2abl0rL4b2lb1ahYkIhKsbumHQORolf/a33nMFYPJSwiNrHRZsJkgW?=
- =?us-ascii?Q?o+LncHlItxW0mtLoGcYTvGGJ5TtUsoXWT5x8xBgM+4sOHDn1kEyw/Zhkwey5?=
- =?us-ascii?Q?zJMAtIsAruHlJekoV6PbCz75hjy7me1u48NRR3piUzq9FvcJKhljDr6x2q2U?=
- =?us-ascii?Q?s1Fmd6Z8CwfRv4ovkdOzBuTo6VX7UY/YlFUb3b2OwvehxAasv+AbWN01Fbre?=
- =?us-ascii?Q?vSlZ4n8FIyeXzUlRg74GPc14CbyXr/5vjiRxEvmLZkCohs23K3lCO3+w3KA5?=
- =?us-ascii?Q?ZcVrpEhbhfuRNOEeYFbg7n7lt9SgZ88eYPYFuLr9IrR1AZKXTjq+rc0aUBnj?=
- =?us-ascii?Q?Jn3olwygtJAnglt7CmUzPGPfWdVmexkWiJEC1pldf7bcHdR/Wg5MLDeu4Rwc?=
- =?us-ascii?Q?vBQILjjGmiMQ/ZvZS0Lg1djiA6xodiKB/mM1zgmWLBEnrTBkX+F3CEamC8IS?=
- =?us-ascii?Q?CSe3eoLTcJhO+Cng7+BHubbbXAKw0j+ESLcXqFeZKxqzoIwzcVR9QhwX1gEY?=
- =?us-ascii?Q?ymgAPb6GLi2UQ8gEeP+Zl0rLULdEsLYUl7I566WOFU7FHJYkmKdgij1MrBcH?=
- =?us-ascii?Q?3tzJB53e0yVC24JOESoxuDM7H7wFl6i4M/BBn7bt5IL4GJX2hgjS1tD16XUM?=
- =?us-ascii?Q?vm0upR5kDJasSVlNd8qodBQR/pWrC3G9Yze22QwpjiUc/jaq7pCtCggXJVCR?=
- =?us-ascii?Q?98YgR3VMVyGugejXGPUjW5aBDDnRua7OH/xd+1xmlec7?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=suse.com; s=google; t=1716794853; x=1717399653; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:mail-followup-to:message-id:subject:cc:to
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Tq08Kk3nKg9qcVVrH+CQCgxy3zPqfMg+Tuq3n+0tlL4=;
+        b=N6npEU/s3i+7twLzlkvo88IyK4KO07VkRx63bWrgBUEIuO+lhNWVoj0W394jdZDEgH
+         nQ12Q1cjNmNia/KslqZW0a8K5AH84s0/98NX2vabx7FF6wlyTYLet6AyKqylhlA0x1SY
+         W7t7FtjTIWBi7GlNTjvayLa2vmWwD3zaZkt2AxdpMWglP1vmTrLeX/okf9W3ZZFjgPlw
+         R0syGBSCYl4Sf8FzqY2gnx9OQSZSY5rMVdAWLjQ2zNmR5S9r9EGMk06SXgF3zuy8W+IQ
+         S+QCuF2T1cYzzumdK8OGub+wf0tDFFsE0zhT0+EftF+mZK8upioljHl6QOb0K0p/Lp4V
+         T4uQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1716794853; x=1717399653;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:mail-followup-to:message-id:subject:cc:to
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Tq08Kk3nKg9qcVVrH+CQCgxy3zPqfMg+Tuq3n+0tlL4=;
+        b=o75h81/fgjss4DrqWOh3qEfW7V1t15D+OCZ/LaZodZC3di6BOuph4PKuRZatodK2pz
+         XIp/uQnj4RJfwMLvS5RAWxpo/lZPQxb85GFFxu3S2SzBp3qY2DuPt0F8AEeIvU5BMEVj
+         3wFY4t4E7/C+MYUaY7a3dKIA2Dd9pPemQpEt30G1xSP/6wgyQuNHfw58A1Xc7sbCy/Uy
+         2AbmnSfqU7U/WoV9qrR0QQWpOP5fvSi3q8E2xylrVXgC6a4nTfsyz4+trI/CMpS96h76
+         hccF0ehjg02QQePiC3vyfcOu+nIr7NJMla3O6497L8fD9U2z3v3qPvTpKVReDQuP4ztC
+         baSQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUUM8T2L0v7DYXbHGYFMKjQu/obi4RUeNcAMTQzSJogx4sneeEFJ+Kvcmv3BtpNWIdjQXylvdyYu0H0D9DNsbma8C5aXXJBJAma
+X-Gm-Message-State: AOJu0YymGnkwgnZSugmqTaDu2Lc6NMR5QOF6ZLZ96LCq6uNcbOBJ5l+3
+	ThxIA/p89GY3bu69i+9XMeloN44iCeYWIOTdaaQ+4Hg8pHKE0vcgalbfiu0Aemo=
+X-Google-Smtp-Source: AGHT+IF/Ad/UrVqGCx4yFYh9J4k54L4ZIgvX2cg0dOunkhcbkkjAaaXiLkqInRLp/8vA3D0cOmTk6Q==
+X-Received: by 2002:a50:9518:0:b0:578:6438:be99 with SMTP id 4fb4d7f45d1cf-5786438bed5mr5978574a12.7.1716794853077;
+        Mon, 27 May 2024 00:27:33 -0700 (PDT)
+Received: from localhost (host-87-18-209-253.retail.telecomitalia.it. [87.18.209.253])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-57852495de0sm5342116a12.61.2024.05.27.00.27.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 May 2024 00:27:32 -0700 (PDT)
+From: Andrea della Porta <andrea.porta@suse.com>
+X-Google-Original-From: Andrea della Porta <aporta@suse.de>
+Date: Mon, 27 May 2024 09:27:45 +0200
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Andrea della Porta <andrea.porta@suse.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+	Marc Zyngier <maz@kernel.org>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v3 3/4] mmc: sdhci-brcmstb: Add BCM2712 support
+Message-ID: <ZlQ18byCTvj1kg_q@apocalypse>
+Mail-Followup-To: Stefan Wahren <wahrenst@gmx.net>,
+	Andrea della Porta <andrea.porta@suse.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+	Marc Zyngier <maz@kernel.org>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+References: <cover.1716277695.git.andrea.porta@suse.com>
+ <c413737f538d9bd403c30104a83a7fbb1ea7461d.1716277695.git.andrea.porta@suse.com>
+ <f27aaf92-8109-4cad-94ba-6f72cd9bdabf@gmx.net>
+ <ZlF5dQbNpZ921e66@apocalypse>
+ <9ef2d8c2-621a-4e05-8afa-5d2b99a36caa@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	8HrueFIJb542Klyf3DmrxIxl4pYnDDjsuAIjmCPHZsDLbK3aPC66JNC0L/mbRagx87lGxn9a1dfEW+5IeadwVWGb3s6rprwFAodSy7hDJWSRL2ijVezXLRJa53XKkN4TdknJZva2gPll5izXE9weB5WtTAbbY6yZPezfkWcInrSaxmQxGDi73JD04WXBEk9Q8sLO5loq68NhuCvgAqfOfxxU7Khptj57Id6cyNZX8bUZd7lJfjNWO54bcZJOiT87EStDEyWpK90hLN/ihQJgw7TaWTpMdRDUDQKySB+wberVcPPYCV/hJwelewR7QDsHtNT+/NkQny1AGBQxEtNJqXTUHk2QDtsqx1udASb48GaeDKBzSnwEc+hywv2ssiaMMgY+wpod7MmyFJDGDDiEp1q1OFsvaIwIttnZUTy/xOerWlP1exDZ1Fd9DObBRsCsMYa4irR7JGzb5bxGv9RQ8HGLXz/eN2OtV2XjEvgZfxU1XKQaZRuNoG36DyvDetATy9Onrah6+tCZg1hXA5csqsQY8UgiAKGsgOltQlnJ+L2X/TQnIvC8CnYgXTpBRItvrL2FA+Qrzg/BAjk2G/zSBy4Brs6Gr+en21ARH/3/4o+1xM7vmd9RH/d3lGG8NAKO
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1f9ae0a1-e554-4fbd-27e0-08dc7cc933d0
-X-MS-Exchange-CrossTenant-originalarrivaltime: 25 May 2024 14:44:37.9112
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: GIziCXwK/UKrcyLaYuOS02pB+DKzkYFYzvAX6LhbYcyyP+QceeNibq89to1izED8tj4/xHHu+GWc52ZQ4uNkxg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR04MB8579
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <9ef2d8c2-621a-4e05-8afa-5d2b99a36caa@gmx.net>
 
->=20
-> Hi,
-> Please see some comments below.
-> Please don't send a v2 yet - allow few days to look into the details of t=
-his
-> feature.
-Some more comments below.
+Hi Stefan,
 
->=20
-> > From: Daniel Kucera <linux-mmc@danman.eu>
-> >
-> > Implemented locking/unlocking using CMD42 according to Micron
-> > Technical Note
-> >
-> > original link https://media-www.micron.com/-
-> > /media/client/global/documents/products/technical-note/sd-
-> >
-> cards/tnsd01_enable_sd_lock_unlock_in_linux.pdf?rev=3D03f03a6bc0f8435faf
-> > a93a
-> > 8fc8e88988
-> > currently available at https://github.com/danielkucera/esp32-
-> > sdcard/blob/master/tnsd01_enable_sd_lock_unlock_in_linux.pdf
-> The above technical note specifically refers to SD,  Is this designated f=
-or SD
-> only?
-> If yes please make note of that.
-> If not - Please relate in your commit log to the differences, if any, bet=
-ween
-> eMMC & SD.
->=20
-> The above technical note contains an implementation for mmc-utils.
-> Are you the author of that code?
->=20
-> >
-> > Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
-> > ---
-> >  mmc.c      |  11 +++++
-> >  mmc.h      |  11 +++++
-> >  mmc_cmds.c | 117
-> > +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  mmc_cmds.h |   2 +
-> >  4 files changed, 141 insertions(+)
-> >
-> > diff --git a/mmc.c b/mmc.c
-> > index bc8f74e..3ff7308 100644
-> > --- a/mmc.c
-> > +++ b/mmc.c
-> > @@ -250,6 +250,17 @@ static struct Command commands[] =3D {
-> >                 "be 1.",
-> >         NULL
-> >         },
-> > +       { do_lock_unlock, -3,
-> > +       "cmd42", "<password> " "<parameter> " "<device>\n"
-> > +               "Usage: mmc cmd42 <password> <s|c|l|u|e> <device>\n"
-> > +               "s\tset password\n"
-> > +               "c\tclear password\n"
-> > +               "l\tlock\n"
-> > +               "sl\tset password and lock\n"
-> > +               "u\tunlock\n"
-> > +               "e\tforce erase\n",
-> > +       NULL
-> > +       },
-> >         { do_softreset, -1,
-> >           "softreset", "<device>\n"
-> >           "Issues a CMD0 softreset, e.g. for testing if hardware reset
-> > for UHS works", diff --git a/mmc.h b/mmc.h index 6f1bf3e..f8bac22
-> > 100644
-> > --- a/mmc.h
-> > +++ b/mmc.h
-> > @@ -30,6 +30,7 @@
-> >  #define MMC_SEND_STATUS                13      /* ac   [31:16] RCA    =
-    R1  */
-> >  #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
-> >  #define MMC_SWITCH_MODE_WRITE_BYTE     0x03    /* Set target to value
-> */
-> > +#define MMC_SET_BLOCKLEN       16  /* ac [31:0] block len R1 */
-> >  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  *=
-/
-> >  #define MMC_SET_BLOCK_COUNT      23   /* adtc [31:0] data addr   R1  *=
-/
-> >  #define MMC_WRITE_BLOCK                24      /* adtc [31:0] data add=
-r        R1
-> */
-> > @@ -46,6 +47,7 @@
-> >                                               [1] Discard Enable
-> >                                               [0] Identify Write Blocks=
- for
-> >                                               Erase (or TRIM Enable)
-> > R1b */
-> > +#define MMC_LOCK_UNLOCK                42  /* adtc R1b */
-> >  #define MMC_GEN_CMD            56   /* adtc  [31:1] stuff bits.
-> >                                               [0]: RD/WR1 R1 */
-> >
-> > @@ -70,6 +72,15 @@
-> >  #define R1_EXCEPTION_EVENT      (1 << 6)        /* sr, a */
-> >  #define R1_APP_CMD              (1 << 5)        /* sr, c */
-> >
-> > +#define MMC_CMD42_UNLOCK       0x0 /* UNLOCK */
-> > +#define MMC_CMD42_SET_PWD      0x1 /* SET_PWD */
-> > +#define MMC_CMD42_CLR_PWD      0x2 /* CLR_PWD */
-> > +#define MMC_CMD42_LOCK         0x4 /* LOCK */
-> > +#define MMC_CMD42_SET_LOCK     0x5 /* SET_PWD & LOCK */
-> > +#define MMC_CMD42_ERASE                0x8 /* ERASE */
-There are 3 variants of sd cards that support lock/unlock.
-There is a warning in the spec - see note 2* to table 4-10 in sd spec 9.0:
-"The host should not issue a force erase command if the permanent write pro=
-tect is set to 1,
-Otherwise, the type 1 cards can no longer be used even if the user remember=
-s the password."
-For that reason, its destructive nature, and the complications of FEP with =
-COP vs. non-COP cards -=20
-I think its better to leave FEP out for now.
+On 08:59 Sat 25 May     , Stefan Wahren wrote:
+> Hi Andrea,
+> 
+> Am 25.05.24 um 07:39 schrieb Andrea della Porta:
+> > On 14:26 Tue 21 May     , Stefan Wahren wrote:
+> > > Hi Andrea,
+> > > 
+> > > Am 21.05.24 um 10:35 schrieb Andrea della Porta:
+> > > > Broadcom BCM2712 SoC has an SDHCI card controller using the SDIO CFG
+> > > > register block present on other STB chips. Add support for BCM2712
+> > > > SD capabilities of this chipset.
+> > > > The silicon is SD Express capable but this driver port does not currently
+> > > > include that feature yet.
+> > > > Based on downstream driver by raspberry foundation maintained kernel.
+> > > > 
+> > > > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
+> > > > ---
+> > > >    drivers/mmc/host/sdhci-brcmstb.c | 65 ++++++++++++++++++++++++++++++++
+> > > >    1 file changed, 65 insertions(+)
+> > > > 
+> > > > diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> > > > index 9053526fa212..b349262da36e 100644
+> > > > --- a/drivers/mmc/host/sdhci-brcmstb.c
+> > > > +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> > > > @@ -30,6 +30,21 @@
+> > > > 
+> > > >    #define SDHCI_ARASAN_CQE_BASE_ADDR		0x200
+> > > > 
+> > > > +#define SDIO_CFG_CQ_CAPABILITY			0x4c
+> > > > +#define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
+> > > > +
+> > > > +#define SDIO_CFG_CTRL				0x0
+> > > > +#define SDIO_CFG_CTRL_SDCD_N_TEST_EN		BIT(31)
+> > > > +#define SDIO_CFG_CTRL_SDCD_N_TEST_LEV		BIT(30)
+> > > > +
+> > > > +#define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
+> > > > +#define SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
+> > > > +#define SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
+> > > > +
+> > > > +#define MMC_CAP_HSE_MASK	(MMC_CAP2_HSX00_1_2V | MMC_CAP2_HSX00_1_8V)
+> > > > +/* Select all SD UHS type I SDR speed above 50MB/s */
+> > > > +#define MMC_CAP_UHS_I_SDR_MASK	(MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104)
+> > > > +
+> > > >    struct sdhci_brcmstb_priv {
+> > > >    	void __iomem *cfg_regs;
+> > > >    	unsigned int flags;
+> > > > @@ -38,6 +53,7 @@ struct sdhci_brcmstb_priv {
+> > > >    };
+> > > > 
+> > > >    struct brcmstb_match_priv {
+> > > > +	void (*cfginit)(struct sdhci_host *host);
+> > > >    	void (*hs400es)(struct mmc_host *mmc, struct mmc_ios *ios);
+> > > >    	struct sdhci_ops *ops;
+> > > >    	const unsigned int flags;
+> > > > @@ -168,6 +184,38 @@ static void sdhci_brcmstb_set_uhs_signaling(struct sdhci_host *host,
+> > > >    	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> > > >    }
+> > > > 
+> > > > +static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
+> > > > +{
+> > > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > > > +	struct sdhci_brcmstb_priv *brcmstb_priv = sdhci_pltfm_priv(pltfm_host);
+> > > > +	u32 reg, base_clk_mhz;
+> > > > +
+> > > > +	/*
+> > > > +	 * If we support a speed that requires tuning,
+> > > > +	 * then select the delay line PHY as the clock source.
+> > > > +	 */
+> > > > +	if ((host->mmc->caps & MMC_CAP_UHS_I_SDR_MASK) || (host->mmc->caps2 & MMC_CAP_HSE_MASK)) {
+> > > > +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+> > > > +		reg &= ~SDIO_CFG_MAX_50MHZ_MODE_ENABLE;
+> > > > +		reg |= SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE;
+> > > > +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
+> > > > +	}
+> > > > +
+> > > > +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
+> > > > +	    (host->mmc->caps & MMC_CAP_NEEDS_POLL)) {
+> > > > +		/* Force presence */
+> > > > +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+> > > > +		reg &= ~SDIO_CFG_CTRL_SDCD_N_TEST_LEV;
+> > > > +		reg |= SDIO_CFG_CTRL_SDCD_N_TEST_EN;
+> > > > +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
+> > > > +	}
+> > > > +
+> > > > +	/* Guesstimate the timer frequency (controller base clock) */
+> > > > +	base_clk_mhz = max_t(u32, clk_get_rate(pltfm_host->clk) / (1000 * 1000), 1);
+> > > > +	reg = SDIO_CFG_CQ_CAPABILITY_FMUL | base_clk_mhz;
+> > > > +	writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
+> > > This part assumes the clock isn't changed afterwards, see below ...
+> > > > +}
+> > > > +
+> > > >    static void sdhci_brcmstb_dumpregs(struct mmc_host *mmc)
+> > > >    {
+> > > >    	sdhci_dumpregs(mmc_priv(mmc));
+> > > > @@ -200,6 +248,14 @@ static struct sdhci_ops sdhci_brcmstb_ops = {
+> > > >    	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> > > >    };
+> > > > 
+> > > > +static struct sdhci_ops sdhci_brcmstb_ops_2712 = {
+> > > > +	.set_clock = sdhci_set_clock,
+> > > > +	.set_power = sdhci_set_power_and_bus_voltage,
+> > > > +	.set_bus_width = sdhci_set_bus_width,
+> > > > +	.reset = sdhci_reset,
+> > > > +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> > > > +};
+> > > > +
+> > > >    static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
+> > > >    	.set_clock = sdhci_brcmstb_set_clock,
+> > > >    	.set_bus_width = sdhci_set_bus_width,
+> > > > @@ -214,6 +270,11 @@ static struct sdhci_ops sdhci_brcmstb_ops_74165b0 = {
+> > > >    	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
+> > > >    };
+> > > > 
+> > > > +static const struct brcmstb_match_priv match_priv_2712 = {
+> > > > +	.cfginit = sdhci_brcmstb_cfginit_2712,
+> > > > +	.ops = &sdhci_brcmstb_ops_2712,
+> > > > +};
+> > > > +
+> > > >    static struct brcmstb_match_priv match_priv_7425 = {
+> > > >    	.flags = BRCMSTB_MATCH_FLAGS_NO_64BIT |
+> > > >    	BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
+> > > > @@ -238,6 +299,7 @@ static struct brcmstb_match_priv match_priv_74165b0 = {
+> > > >    };
+> > > > 
+> > > >    static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
+> > > > +	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
+> > > >    	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
+> > > >    	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
+> > > >    	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
+> > > > @@ -370,6 +432,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+> > > >    	    (host->mmc->caps2 & MMC_CAP2_HS400_ES))
+> > > >    		host->mmc_host_ops.hs400_enhanced_strobe = match_priv->hs400es;
+> > > > 
+> > > > +	if (match_priv->cfginit)
+> > > > +		match_priv->cfginit(host);
+> > > > +
+> > > I'm not sure this is the right place to call cfginit.
+> > > sdhci_brcmstb_cfginit_2712 retrives the current controller base clock,
+> > > but at the end of  sdhci_brcmstb_probe this clock frequency could be
+> > > adjusted by the device property "clock-frequency". So i'm not sure this
+> > > is intended.
+> > I've tried to interpret the meaning of those two clocks since unfortunately I don't
+> > own the datasheet for any of the platforms involved, so please take the following
+> > as the result of my own (possibly wrong) intuition and (mostly wild) guessing.
+> > 
+> > The main clock is 'sw_sdio' while 'sdio_freq' is optional and the latter seems to be
+> > orthogonal to the former.
+> > While sw_sdio is mostly used for SD storage card, sdio_freq seems more related to
+> > SDIO family of cards (wifi, gps, camera, etc) for which you could specify a particular
+> > (and higher) base frequency.
+> > Unfortunately I wasn't able to find any reference to sdio_freq in current devicetree
+> > so it's probably only specific to custom appliances: to be honest I'm not even sure
+> > that BCM2712 is supporting that improved clock source.  Also, from the following lines
+> > at the end of cfginit function:
+> > 
+> > /* Guesstimate the timer frequency (controller base clock) */
+> > base_clk_mhz = max_t(u32, clk_get_rate(pltfm_host->clk) / (1000 * 1000), 1);
+> > reg = SDIO_CFG_CQ_CAPABILITY_FMUL | base_clk_mhz;
+> > writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
+> > 
+> > judging from the name of SDIO_CFG_CQ_CAPABILITY register, I'd guess that it relates
+> > to some Command Queue (timeout?) setting so it's probably only important if CQE is
+> > enabled specifying 'supports-cqe' property, which is not in current devicetree (nor
+> > in  downstream one). If this is the case it's mostly a performance improvement, and
+> > as such something that we are not necessarily interested in right now since this
+> > patchset adds just minimal boot support. I would then drop those lines, as we could
+> > just reintroduce them if they need be once we have a better understanding of that
+> > specific register and/if the cqe support will be enabled. As a matter of fact those
+> > lines are not working as expected in any case since pltfm_host->clk is set at the
+> > very end of sdhci_brcmstb_probe() while the cfginit function is invoked much earlier.
+> > The result is that right now the value set ito SDIO_CFG_CQ_CAPABILITY register is always
+> > equal to 1MHz. Further testing reveals that it is indeed working fine even with those
+> > lines dropped, so I would deem that code as unnecessary for this early patchset.
+> > Is it a viable solution?
+> I don't have any knowledge about this hardware, so my opinion based on
+> your good investigations. But i would be fine with this.
+> 
+> Just to make it clear, this works with and without U-Boot in the bootchain?
 
-> > +#define MAX_PWD_LENGTH         32 /* max PWDS_LEN: old+new */
-> > +#define MMC_BLOCK_SIZE         512 /* data blk size for cmd42 */
-> > +
-> >  /*
-> >   * EXT_CSD fields
-> >   */
-> > diff --git a/mmc_cmds.c b/mmc_cmds.c
-> > index 936e0c5..07ba18a 100644
-> > --- a/mmc_cmds.c
-> > +++ b/mmc_cmds.c
-> > @@ -129,6 +129,123 @@ int send_status(int fd, __u32 *response)
-> >         return ret;
-> >  }
-> >
-> > +//lock/unlock feature implementation
-> C99 style single line comments (//) should not be used. Prefer the block
-> comment style instead.
-> See: https://www.kernel.org/doc/html/latest/process/coding-
-> style.html#commenting
-> Please change throughout.
->=20
-> > +int do_lock_unlock(int nargs, char **argv) {
-> > +       int fd, ret =3D 0;
-> > +       char *device;
-> > +       __u8 data_block[MMC_BLOCK_SIZE] =3D {0};
-> Just empty braces please.
->=20
-> > +       __u8 data_block_onebyte[1] =3D {0};
-> > +       int block_size =3D 0;
-> > +       struct mmc_ioc_cmd idata;
-> > +       int cmd42_para;                 //parameter of cmd42
-> > +       char pwd[MAX_PWD_LENGTH+1];     //password
-> > +       int pwd_len;                    //password length
-> > +       __u32 r1_response;              //R1 response token
-> > +
-> > +       if (nargs !=3D 4) {
-> > +               fprintf(stderr, "Usage: mmc cmd42 <password>
-> > + <s|c|l|u|e>
-> > <device>\n");
-> > +               exit(1);
-> > +       }
-> > +
-> > +       strcpy(pwd, argv[1]);
-Maybe strncpy up to MAX_PWD_LENGTH
-Also, in case of a password change, it makes more sense to capture the old =
-and new as 2 different strings.
-
-> > +       pwd_len =3D strlen(pwd);
-Maybe clarify in the usage, that passwords are not allowed to include '\0'
-
-> > +
-> > +       if (!strcmp("s", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_SET_PWD;
-> > +               printf("Set password: password=3D%s ...\n", pwd);
-> > +       } else if (!strcmp("c", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_CLR_PWD;
-> > +               printf("Clear password: password=3D%s ...\n", pwd);
-> > +       } else if (!strcmp("l", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_LOCK;
-> > +               printf("Lock the card: password=3D%s ...\n", pwd);
-> > +       } else if (!strcmp("sl", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_SET_LOCK;
-> > +               printf("Set password and lock the card: password - %s .=
-..\n", pwd);
-> > +       } else if (!strcmp("u", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_UNLOCK;
-> > +               printf("Unlock the card: password=3D%s ...\n", pwd);
-> > +       } else if (!strcmp("e", argv[2])) {
-> > +               cmd42_para =3D MMC_CMD42_ERASE;
-> > +               printf("Force erase (Warning: all card data will be
-> > + erased together with
-> > PWD!)\n");
-> > +       } else {
-> > +               printf("Invalid parameter:\n" "s\tset password\n"
-> > + "c\tclear
-> > password\n" "l\tlock\n"
-> > +                       "sl\tset password and lock\n" "u\tunlock\n" "e\=
-tforce
-> erase\n");
-> > +               exit(1);
-> > +       }
-> > +
-> > +       device =3D argv[nargs-1];
-> > +
-> > +       fd =3D open(device, O_RDWR);
-> > +       if (fd < 0) {
-> > +               perror("open");
-> > +               exit(1);
-> > +       }
-> > +
-> > +       if (cmd42_para =3D=3D MMC_CMD42_ERASE)
-> > +               block_size =3D 2; //set blk size to 2-byte for Force
-> > + Erase @DDR50
-> > compatibility
-> > +       else
-> > +               block_size =3D MMC_BLOCK_SIZE;
-> > +
-> > +       ret =3D set_block_len(fd, block_size); //set data block size pr=
-ior to cmd42
-> > +       printf("Set to data block length =3D %d byte(s).\n",
-> > + block_size);
-On a failure here you should bail out.
-But it makes more sense to me that you would pack cmd16 & cmd42 in a multi-=
-ioctl.
-
-> > +
-> > +       if (cmd42_para =3D=3D MMC_CMD42_ERASE) {
-> > +               data_block_onebyte[0] =3D cmd42_para;
-> > +       } else {
-> > +               data_block[0] =3D cmd42_para;
-> > +               data_block[1] =3D pwd_len;
-> > +               memcpy((char *)(data_block+2), pwd, pwd_len);
-> > +       }
-> > +
-> > +       memset(&idata, 0, sizeof(idata));
-Can be initialized with {}
+Yes, I confirm it works with both.
 
 Thanks,
-Avri
+Andrea
 
-> > +       idata.write_flag =3D 1;
-> > +       idata.opcode =3D MMC_LOCK_UNLOCK;
-> > +       idata.arg =3D 0;          //set all 0 for cmd42 arg
-> > +       idata.flags =3D MMC_RSP_R1 | MMC_CMD_AC | MMC_CMD_ADTC;
-> > +       idata.blksz =3D block_size;
-> > +       idata.blocks =3D 1;
-> > +
-> > +       if (cmd42_para =3D=3D MMC_CMD42_ERASE)
-> > +               mmc_ioc_cmd_set_data(idata, data_block_onebyte);
-> > +       else
-> > +               mmc_ioc_cmd_set_data(idata, data_block);
-> > +
-> > +       ret =3D ioctl(fd, MMC_IOC_CMD, &idata);           //Issue CMD42
-> > +
-> > +       r1_response =3D idata.response[0];
-> > +       printf("cmd42 response: 0x%08x\n", r1_response);
-> > +       if (r1_response & R1_ERROR) {           //check CMD42 error
-> > +               printf("cmd42 error! Error code: 0x%08x\n", r1_response=
- &
-> R1_ERROR);
-> > +               ret =3D -1;
-> > +       }
-> > +       if (r1_response & R1_LOCK_UNLOCK_FAILED) {      //check lock/un=
-lock
-> error
-> > +               printf("Card lock/unlock fail! Error code: 0x%08x\n",
-> > +               r1_response & R1_LOCK_UNLOCK_FAILED);
-> > +               ret =3D -1;
-> > +       }
-> > +
-> > +       close(fd);
-> > +       return ret;
-> > +}
-> > +
-> > +//change data block length
-> > +int set_block_len(int fd, int blk_len) {
-> > +       int ret =3D 0;
-> > +       struct mmc_ioc_cmd idata;
-> > +
-> > +       memset(&idata, 0, sizeof(idata));
-> > +       idata.opcode =3D MMC_SET_BLOCKLEN;
-> > +       idata.arg =3D blk_len;
-> > +       idata.flags =3D MMC_RSP_R1 | MMC_CMD_AC;
-> > +
-> > +       ret =3D ioctl(fd, MMC_IOC_CMD, &idata);
-> > +
-> > +       return ret;
-> > +}
-> > +
-> >  static __u32 get_size_in_blks(int fd)  {
-> >         int res;
-> > diff --git a/mmc_cmds.h b/mmc_cmds.h
-> > index 5f2bef1..9ee78a2 100644
-> > --- a/mmc_cmds.h
-> > +++ b/mmc_cmds.h
-> > @@ -50,3 +50,5 @@ int do_general_cmd_read(int nargs, char **argv);
-> > int do_softreset(int nargs, char **argv);  int do_preidle(int nargs,
-> > char **argv);  int do_alt_boot_op(int nargs, char **argv);
-> > +int do_lock_unlock(int nargs, char **argv); int set_block_len(int fd,
-> > +int blk_len);
-> Please make set_block_len() static - as its only caller is do_lock_unlock=
-.
->=20
-> Thanks,
-> Avri
->=20
-> > --
-> > 2.34.1
-> >
->=20
-
+> 
+> Thanks
+> > 
+> > Many thanks,
+> > Andrea
+> > 
+> > > >    	/*
+> > > >    	 * Supply the existing CAPS, but clear the UHS modes. This
+> > > >    	 * will allow these modes to be specified by device tree
+> 
