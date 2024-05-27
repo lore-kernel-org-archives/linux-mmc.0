@@ -1,129 +1,129 @@
-Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8BF715E5D4
-	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 13:24:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA6D743AC1;
+	Mon, 27 May 2024 13:24:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716816256; cv=none; b=uc06cC3+Ch8Jd9KCGzhn6FKkR9j4W1ehbzGjDjYgXBtXm60YB+v/EJPDSNLdxSvn1pB6FHlwW/MRI+ooiRjw6zJ+lCvgsyjetCQZQk5HNdEuohdkuvqUD7Bfm57ipz6Fr+o0n2JzeLlEt+hqgiz8nsmCFd8m+qHkNIL4Z8JBroU=
+	t=1716816297; cv=none; b=IyM8a12fmb77XuWMBzJ/5SIhTWSqjLR40/W/dMw4IYJyrSx461S2iYs/GjdCF+ePNWU+d8qd3FPdKSN/duYgw2faN6YpdRoIFeFZWD8JHyWggEFijnGMSZIRJB0YOfEPVjSftYdZtKwPL7prDU5o8XqcvU+4plz0Xpe0j3DUAgQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716816256; c=relaxed/simple;
-	bh=BeMqoH5GvSpJ1d9avTl/slNkeZp+MwMFavChpJnITDU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=CDFC4otrL3E4HhO2m0cFwqFpbpf6HVX+Cesfc6yAUt9sD4DUBkKhuOJeQ0m38PnaKoiXuZBzfStbRoDxz4uu49y3bBERMO/K4o2q+OtmWOHRPtGRW8K21nDdJPeBnulGdNaxKx8jg9nYiYaKWrI805I27LvgoO/4upLUuStjfWk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=T2ka2B0X; arc=none smtp.client-ip=209.85.161.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1716816297; c=relaxed/simple;
+	bh=f4fM4T0TMF6cOrFSdyxC7ZQRG1qooTij00PqLggleCU=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=SyM2m8f6GWfMpdOXGF8l/87uAxO94cZ5AuQIxKcSr2VtfUO4WLGe9cWLuznxa6B1iLozEkIeKZWcvkalVqqgYu6ei/YnzCFl8tgUhaTsB4nJzceOxFEpvk9DEWLWZpZI72WjfeWQ3VCm/ZK5aXdgCkpeDdVr+R57cmZD7GdW3b0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=N53DSNHT; arc=none smtp.client-ip=192.198.163.15
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="T2ka2B0X"
-Received: by mail-oo1-f50.google.com with SMTP id 006d021491bc7-5b277a61f6fso2110156eaf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 06:24:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1716816254; x=1717421054; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=lHrHZEEV9e4XfK4jWbKD94symQTEPPz3n5O2dV/Sklk=;
-        b=T2ka2B0XNH2fbhlUlOYkda/4neCoJZnbbZitc6m2ZLtd/9pHRrwSP5AXzGL2pqiZui
-         NStIEqWW+UKuI1tdydtCzwy4fGB/LxPUVEsk+6JfF3VYJLD4vj05k0oEorsOdMcgZoTw
-         2KIX1pAoeedXHOiQE8ShwbF23Hg9JWNV4mKNoG9ebr6lEaM5OkbBjeYfN0vzb3Xxk3xY
-         V2jBTzejhOXwz7F+sLI2OZP5uyQAdAezFdIdvJKzOGBcROpRxNQQepBXOLBHx4Ihg0wq
-         +qezH8fip8RBP7wMT+psPhmgu98ERMHqU559NGw6y7xt2ZSi4Z+WHLGx5ZRybQxTiO3i
-         S56w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716816254; x=1717421054;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=lHrHZEEV9e4XfK4jWbKD94symQTEPPz3n5O2dV/Sklk=;
-        b=CNY7nOgECyOyfLZtsfb004ghpzXFnnVkh4Fr1VtGuUuxnr/uNy4pl6eXMr9ixH5Xe9
-         766XISmy5x42WsHFmaqCVxA18fe8b4Y919DpRMtCWl36l109GgovSTdW+aeQHLyzb/3+
-         cR/eR9/DWh9QquR8gxGayCSaG85cpAtiXyaRxzgxL3t7LHzneHM/sTNhXnk6DU6jklo1
-         bLYfoK+RekCA2vxYmZUpR0vRv/2FGWuZGueYMavJYRR9zLcqjQJMUCgxp9BMemMcJxAX
-         n6wZsKrTZNl4WvBsu54r0NUG1XF9n7cke+fkr/18cOznUruSEgQsXt5xU0KwpRxGp2X2
-         yoOw==
-X-Forwarded-Encrypted: i=1; AJvYcCWovLvyR0GDBe1ObvCLB6Ukg0pMWkZUXYfGKG/oGNlpZGNn4BUn6X49Ad85cImO2B47b0ozQDgGDABYvfIYIvKVn/1OKnYeJTaf
-X-Gm-Message-State: AOJu0YwSYlLDD0GuvOND5l7tA8lxObMjafMKjA3rzEIJ+VPOATxAea40
-	uDOyvSqI4AGjj7zNmifAlGXxMf+skV7+FcN13VIqgFhCbRv721hrZ+25KWK5IBsNgujl837sT8U
-	lGOj9iQ8DdIzi4esDTLC0VEt6gBZ1kPPJmAnt3Ys388cx7SL6sqAF0w==
-X-Google-Smtp-Source: AGHT+IFJyq+AmvAn3DRrmHTUYcPq5TlAmpW0rWrghLQmgqDTzPzpoHnXo1PKce+wt5kaPQ1qmeH225azZTV6JbGWreY=
-X-Received: by 2002:a05:6820:22aa:b0:5b9:89d9:c5ef with SMTP id
- 006d021491bc7-5b989d9c96amr2849706eaf.0.1716816253777; Mon, 27 May 2024
- 06:24:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="N53DSNHT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1716816296; x=1748352296;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=f4fM4T0TMF6cOrFSdyxC7ZQRG1qooTij00PqLggleCU=;
+  b=N53DSNHTW8iifcNnvTDSSvDmuqqQiKqXtGdJQBG0lJMdNyBrTps3ITWT
+   lw1CFrVwWGPiwKYB28RifwdqyFD4Xp6z6bEJdA+K4kU3ew8GJCe/x56k9
+   fLpBO60EK4gAIRyGNuMpS55Uhrh3YibtIVR6lDaJKnlsZtiPzQYcYPy8S
+   tTg13TB5RGQI6gPuPBs5WCalcrMWA0yDXKQkEL0YMIIIQpUisrN33VjKU
+   L5I6cPSfDrak7Uq1UXI/j+Xkb7B97tymrsSXfP2SJiMWS2pZy1335DYcm
+   zHyGFp8UJS8nHbaG5lYKIdRrLntcVqNc1wSj3Ayyyt0iXryCwgsqi0GGZ
+   Q==;
+X-CSE-ConnectionGUID: tM/vpn2rQYmDru4cRgnhaw==
+X-CSE-MsgGUID: R+ksqsj7TbWaSKdI2oMGrQ==
+X-IronPort-AV: E=McAfee;i="6600,9927,11084"; a="13325750"
+X-IronPort-AV: E=Sophos;i="6.08,192,1712646000"; 
+   d="scan'208";a="13325750"
+Received: from fmviesa010.fm.intel.com ([10.60.135.150])
+  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 May 2024 06:24:55 -0700
+X-CSE-ConnectionGUID: gxmgFYY+Ti2gmtwIf+Yhdw==
+X-CSE-MsgGUID: 9PZXqOcCSlyWLBpfjurhRA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.08,192,1712646000"; 
+   d="scan'208";a="34841336"
+Received: from unknown (HELO localhost) ([10.245.247.140])
+  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 May 2024 06:24:52 -0700
+From: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Fengguang Wu <fengguang.wu@intel.com>,
+	Pierre Ossman <drzeus@drzeus.cx>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+	stable@vger.kernel.org
+Subject: [PATCH 1/2] mmc: sdhci-pci: Convert PCIBIOS_* return codes to errnos
+Date: Mon, 27 May 2024 16:24:41 +0300
+Message-Id: <20240527132443.14038-1-ilpo.jarvinen@linux.intel.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240527121340.3931987-1-jens.wiklander@linaro.org>
- <20240527121340.3931987-5-jens.wiklander@linaro.org> <fc3bfebb-78b7-428e-8da5-5221f4921faa@linaro.org>
-In-Reply-To: <fc3bfebb-78b7-428e-8da5-5221f4921faa@linaro.org>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Mon, 27 May 2024 15:24:01 +0200
-Message-ID: <CAHUa44G0bcK55RxNrN5sXiicBZ-BJtA46KpedfBdUSKsN8eUOA@mail.gmail.com>
-Subject: Re: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
-To: Jerome Forissier <jerome.forissier@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Linus Walleij <linus.walleij@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Manuel Traut <manut@mecka.net>, 
-	Mikko Rapeli <mikko.rapeli@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Mon, May 27, 2024 at 3:00=E2=80=AFPM Jerome Forissier
-<jerome.forissier@linaro.org> wrote:
->
-> On 5/27/24 14:13, Jens Wiklander wrote:
-> > Adds support in the OP-TEE drivers (both SMC and FF-A ABIs) to probe an=
-d
-> > use an RPMB device via the RPMB subsystem instead of passing the RPMB
-> > frames via tee-supplicant in user space. A fallback mechanism is kept t=
-o
-> > route RPMB frames via tee-supplicant if the RPMB subsystem isn't
-> > available.
-> >
-> > The OP-TEE RPC ABI is extended to support iterating over all RPMB
-> > devices until one is found with the expected RPMB key already
-> > programmed.
-> >
-> > Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> > Tested-by: Manuel Traut <manut@mecka.net>
-> > ---
-> >  Documentation/ABI/testing/sysfs-class-tee |  15 ++
-> >  MAINTAINERS                               |   1 +
-> >  drivers/tee/optee/core.c                  |  96 +++++++++++-
-> >  drivers/tee/optee/device.c                |   7 +
-> >  drivers/tee/optee/ffa_abi.c               |  14 ++
-> >  drivers/tee/optee/optee_ffa.h             |   2 +
-> >  drivers/tee/optee/optee_private.h         |  26 +++-
-> >  drivers/tee/optee/optee_rpc_cmd.h         |  35 +++++
-> >  drivers/tee/optee/optee_smc.h             |   2 +
-> >  drivers/tee/optee/rpc.c                   | 177 ++++++++++++++++++++++
-> >  drivers/tee/optee/smc_abi.c               |  14 ++
-> >  11 files changed, 387 insertions(+), 2 deletions(-)
-> >  create mode 100644 Documentation/ABI/testing/sysfs-class-tee
-> >
-> > diff --git a/Documentation/ABI/testing/sysfs-class-tee b/Documentation/=
-ABI/testing/sysfs-class-tee
-> > new file mode 100644
-> > index 000000000000..c9144d16003e
-> > --- /dev/null
-> > +++ b/Documentation/ABI/testing/sysfs-class-tee
-> > @@ -0,0 +1,15 @@
-> > +What:                /sys/class/tee/tee{,priv}X/rpmb_routing_model
->
-> Wouldn't /sys/class/tee/teeX/rpmb_routing_model be good enough?
+jmicron_pmos() and sdhci_pci_probe() use pci_{read,write}_config_byte()
+that return PCIBIOS_* codes. The return code is then returned as is by
+jmicron_probe() and sdhci_pci_probe(). Similarly, the return code is
+also returned as is from jmicron_resume(). Both probe and resume
+functions should return normal errnos.
 
-Doesn't the routing model concern tee-supplicant more than a TEE
-client? Then it might make more sense to have
-/sys/class/tee/teeprivX/rpmb_routing_model only. Keeping it for both
-devices representing the same internal struct optee makes it easier to
-find. Anyway, I don't mind removing one. Mikko, what do you prefer?
+Convert PCIBIOS_* returns code using pcibios_err_to_errno() into normal
+errno before returning them the fix these issues.
 
-Cheers,
-Jens
+Fixes: 7582041ff3d4 ("mmc: sdhci-pci: fix simple_return.cocci warnings")
+Fixes: 45211e215984 ("sdhci: toggle JMicron PMOS setting")
+Cc: stable@vger.kernel.org
+Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index ef89ec382bfe..23e6ba70144c 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1326,7 +1326,7 @@ static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
+ 
+ 	ret = pci_read_config_byte(chip->pdev, 0xAE, &scratch);
+ 	if (ret)
+-		return ret;
++		goto fail;
+ 
+ 	/*
+ 	 * Turn PMOS on [bit 0], set over current detection to 2.4 V
+@@ -1337,7 +1337,10 @@ static int jmicron_pmos(struct sdhci_pci_chip *chip, int on)
+ 	else
+ 		scratch &= ~0x47;
+ 
+-	return pci_write_config_byte(chip->pdev, 0xAE, scratch);
++	ret = pci_write_config_byte(chip->pdev, 0xAE, scratch);
++
++fail:
++	return pcibios_err_to_errno(ret);
+ }
+ 
+ static int jmicron_probe(struct sdhci_pci_chip *chip)
+@@ -2202,7 +2205,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	ret = pci_read_config_byte(pdev, PCI_SLOT_INFO, &slots);
+ 	if (ret)
+-		return ret;
++		return pcibios_err_to_errno(ret);
+ 
+ 	slots = PCI_SLOT_INFO_SLOTS(slots) + 1;
+ 	dev_dbg(&pdev->dev, "found %d slot(s)\n", slots);
+@@ -2211,7 +2214,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
+ 
+ 	ret = pci_read_config_byte(pdev, PCI_SLOT_INFO, &first_bar);
+ 	if (ret)
+-		return ret;
++		return pcibios_err_to_errno(ret);
+ 
+ 	first_bar &= PCI_SLOT_INFO_FIRST_BAR_MASK;
+ 
+-- 
+2.39.2
+
