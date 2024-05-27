@@ -1,304 +1,270 @@
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+Received: from mail-ej1-f66.google.com (mail-ej1-f66.google.com [209.85.218.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA60717BD5
-	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 07:27:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E15B15DBC0
+	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 12:14:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.66
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716794857; cv=none; b=FCKZ78xZjYd8HjHNbZ0/bjhCHU866PNNT/Wviyz4rBqe55Tpz3q0ojqDmhNn1S7gPNb8uug+eWRykOxfugSIe2UfYTpAZuXO7g8To7w7WYv5o8u6dmUkXwWLkcwLATLJMayW4pYpBXKwYTWJMxw1ryRLyFp6Wbi7z9xkUg7Owv0=
+	t=1716812075; cv=none; b=J9IDSIOUgyt0uVRaKwOHF8Xqt3+UvDCKA1mXmcBLcIjhPLfed+cpMZYnnb3t45w0ddIB6I7afme4ux5lKWtpNwHRuaNp8rEab/omzGWrtaPOSw5VG8MMb8wjWi7tEwtCHdMEGX9Zisj6Zxo8ScCyHRX+dCCRRNaPZbxj3EmgzZo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716794857; c=relaxed/simple;
-	bh=sc2dXMdM8I170FsVHX97DbIKM+TPkoHaIGmAf1Ax5QU=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NcE32DEqjAIBk46/ZVYhjvR2jxIpK2IiRviTzd0xKTQJNa8lnDmPR+rOJTGPFtB9BkQRuZhHjMmQZvOw2sOB5ONWMx37/oSgJf4qv0iZGy72ejHUiz9kN4RlyU3IzjgVAEmee0f95PHEGM088DWTjOl899b+hB3baCTt/zjbfG8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=N6npEU/s; arc=none smtp.client-ip=209.85.208.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1716812075; c=relaxed/simple;
+	bh=3BIdX3EdAPuVTft31wCYTBWCiJrQdkcS6E6jn6Egyfg=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=mXbV7hGxPogDPkwvKHygVe1BEV3STVpfWaHf86ksFtIx8u/Uxb7x7OGLzoCm/boPC1P/PHpwbNRymDYOY4ivXWpDywsHPdgB2lpyNVLskw3Joagtmwy3c7P9wiBx55LJ+zUCTwRptXMaemnMiDGWyIHm8acx4zKqynwFze5aZdo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YxtTi8Tn; arc=none smtp.client-ip=209.85.218.66
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="N6npEU/s"
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-57857e0f45eso2111901a12.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 00:27:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YxtTi8Tn"
+Received: by mail-ej1-f66.google.com with SMTP id a640c23a62f3a-a6265d3ccf7so378606166b.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 05:14:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1716794853; x=1717399653; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:mail-followup-to:message-id:subject:cc:to
-         :date:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Tq08Kk3nKg9qcVVrH+CQCgxy3zPqfMg+Tuq3n+0tlL4=;
-        b=N6npEU/s3i+7twLzlkvo88IyK4KO07VkRx63bWrgBUEIuO+lhNWVoj0W394jdZDEgH
-         nQ12Q1cjNmNia/KslqZW0a8K5AH84s0/98NX2vabx7FF6wlyTYLet6AyKqylhlA0x1SY
-         W7t7FtjTIWBi7GlNTjvayLa2vmWwD3zaZkt2AxdpMWglP1vmTrLeX/okf9W3ZZFjgPlw
-         R0syGBSCYl4Sf8FzqY2gnx9OQSZSY5rMVdAWLjQ2zNmR5S9r9EGMk06SXgF3zuy8W+IQ
-         S+QCuF2T1cYzzumdK8OGub+wf0tDFFsE0zhT0+EftF+mZK8upioljHl6QOb0K0p/Lp4V
-         T4uQ==
+        d=linaro.org; s=google; t=1716812072; x=1717416872; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=lwzLqzyjdxC6O475cVXSLXVvtX9GC0h/UvWCIMp5xzM=;
+        b=YxtTi8TnE+Mkn48uzSyrZhbKpvEMme5DAC9WQHW2kxmTe5YZFhnW0iGTp06nCrVNgO
+         5RG7jdWH5Z3OJG+hFr0g3FFxgEVXbqNYB5nZmltl8ADDRVMm3CqjFh2k8YWjgHJT7wvW
+         L5O7gpism/a+Fjrd1pOddMxPR9ewC7jMGMazCunIFHBg4NhianfcPX1oMXKtBC3TBZqF
+         GKvg5TfxQ29W5i3Rrgcgd1FbzNkIvKBPrF+Qt11bz/8GqxmmGgmfRYsgUWZaKHUJ1ZXl
+         D2so44m9bAC52BAQQ8sJloW8HdiKfovN5FVUOwws3rfYfW0u9tgJ7ZWJ2R8H30f3YgT4
+         +1CQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716794853; x=1717399653;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:mail-followup-to:message-id:subject:cc:to
-         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1716812072; x=1717416872;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Tq08Kk3nKg9qcVVrH+CQCgxy3zPqfMg+Tuq3n+0tlL4=;
-        b=o75h81/fgjss4DrqWOh3qEfW7V1t15D+OCZ/LaZodZC3di6BOuph4PKuRZatodK2pz
-         XIp/uQnj4RJfwMLvS5RAWxpo/lZPQxb85GFFxu3S2SzBp3qY2DuPt0F8AEeIvU5BMEVj
-         3wFY4t4E7/C+MYUaY7a3dKIA2Dd9pPemQpEt30G1xSP/6wgyQuNHfw58A1Xc7sbCy/Uy
-         2AbmnSfqU7U/WoV9qrR0QQWpOP5fvSi3q8E2xylrVXgC6a4nTfsyz4+trI/CMpS96h76
-         hccF0ehjg02QQePiC3vyfcOu+nIr7NJMla3O6497L8fD9U2z3v3qPvTpKVReDQuP4ztC
-         baSQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUUM8T2L0v7DYXbHGYFMKjQu/obi4RUeNcAMTQzSJogx4sneeEFJ+Kvcmv3BtpNWIdjQXylvdyYu0H0D9DNsbma8C5aXXJBJAma
-X-Gm-Message-State: AOJu0YymGnkwgnZSugmqTaDu2Lc6NMR5QOF6ZLZ96LCq6uNcbOBJ5l+3
-	ThxIA/p89GY3bu69i+9XMeloN44iCeYWIOTdaaQ+4Hg8pHKE0vcgalbfiu0Aemo=
-X-Google-Smtp-Source: AGHT+IF/Ad/UrVqGCx4yFYh9J4k54L4ZIgvX2cg0dOunkhcbkkjAaaXiLkqInRLp/8vA3D0cOmTk6Q==
-X-Received: by 2002:a50:9518:0:b0:578:6438:be99 with SMTP id 4fb4d7f45d1cf-5786438bed5mr5978574a12.7.1716794853077;
-        Mon, 27 May 2024 00:27:33 -0700 (PDT)
-Received: from localhost (host-87-18-209-253.retail.telecomitalia.it. [87.18.209.253])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-57852495de0sm5342116a12.61.2024.05.27.00.27.32
+        bh=lwzLqzyjdxC6O475cVXSLXVvtX9GC0h/UvWCIMp5xzM=;
+        b=ERX818/28VkdYh0u3Aw707lQl06Reip1SfSRPb0v2T9QKIriWPTv6kqIovXUQJK54d
+         6YHY1tNkVWA9efYlDjUzwuthj5DTgErdXRTo8uR2kCnHJMY4IQgtrSFbh8pddCTsuNYD
+         FQlOzlAT8Ha1VryB8OiTfTY+56w7OoWdGt3jhifzMdAicRwLxLjtLUZvLnrNX2tuZ9mB
+         Fy4tGKGXNDkXysQzEHGmU1bcmL2p7ueoS5YifYCKsszoB/sSYLwMyegGuV9QM+8+MZqD
+         sZUbarTeWwzdznM3wsT1b/hNxwXfwhzhvSVbJWtukfTtLZDOXAI+1y0umhCCuIbHFsdJ
+         Ca5g==
+X-Forwarded-Encrypted: i=1; AJvYcCVK2jc5X4gFQWP78MHKuBkkLzxopK9UqAKiVaqgaiZR1cEUV1UsUfrZKxRSC8wfEtb1O4K8vc1uz7qToD+geqkKqPj1ImgmFYHf
+X-Gm-Message-State: AOJu0YxNyTN5vpKbI5divHfV0Ag47ZdePRzZR9j901siv9H19pilXSnE
+	kS5cmJkFSu/poAt42+oSTaP+3WwzZhNQwuBXU/2chk89RI2XHtaUtOyDXpbXU2s=
+X-Google-Smtp-Source: AGHT+IHlP8euj8xyOdayyJM/cHvYJE4SjNAGnZvJhK5Cw8KD+R/MQB5q3lR4IvDNHRqcVv1jGVM2gg==
+X-Received: by 2002:a17:906:4c4f:b0:a59:c28a:d350 with SMTP id a640c23a62f3a-a62641cde01mr549994066b.24.1716812071405;
+        Mon, 27 May 2024 05:14:31 -0700 (PDT)
+Received: from rayden.urgonet (h-217-31-164-171.A175.priv.bahnhof.se. [217.31.164.171])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a626cc8c2a8sm484100866b.165.2024.05.27.05.14.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 May 2024 00:27:32 -0700 (PDT)
-From: Andrea della Porta <andrea.porta@suse.com>
-X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Mon, 27 May 2024 09:27:45 +0200
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Andrea della Porta <andrea.porta@suse.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Marc Zyngier <maz@kernel.org>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+        Mon, 27 May 2024 05:14:30 -0700 (PDT)
+From: Jens Wiklander <jens.wiklander@linaro.org>
+To: linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	op-tee@lists.trustedfirmware.org
+Cc: Shyam Saini <shyamsaini@linux.microsoft.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
-	linux-rpi-kernel@lists.infradead.org,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v3 3/4] mmc: sdhci-brcmstb: Add BCM2712 support
-Message-ID: <ZlQ18byCTvj1kg_q@apocalypse>
-Mail-Followup-To: Stefan Wahren <wahrenst@gmx.net>,
-	Andrea della Porta <andrea.porta@suse.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Marc Zyngier <maz@kernel.org>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
-	linux-rpi-kernel@lists.infradead.org,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-References: <cover.1716277695.git.andrea.porta@suse.com>
- <c413737f538d9bd403c30104a83a7fbb1ea7461d.1716277695.git.andrea.porta@suse.com>
- <f27aaf92-8109-4cad-94ba-6f72cd9bdabf@gmx.net>
- <ZlF5dQbNpZ921e66@apocalypse>
- <9ef2d8c2-621a-4e05-8afa-5d2b99a36caa@gmx.net>
+	Linus Walleij <linus.walleij@linaro.org>,
+	Jerome Forissier <jerome.forissier@linaro.org>,
+	Sumit Garg <sumit.garg@linaro.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Ard Biesheuvel <ardb@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Manuel Traut <manut@mecka.net>,
+	Mikko Rapeli <mikko.rapeli@linaro.org>,
+	Jens Wiklander <jens.wiklander@linaro.org>
+Subject: [PATCH v7 0/4] Replay Protected Memory Block (RPMB) subsystem
+Date: Mon, 27 May 2024 14:13:36 +0200
+Message-Id: <20240527121340.3931987-1-jens.wiklander@linaro.org>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <9ef2d8c2-621a-4e05-8afa-5d2b99a36caa@gmx.net>
 
-Hi Stefan,
+Hi,
 
-On 08:59 Sat 25 May     , Stefan Wahren wrote:
-> Hi Andrea,
-> 
-> Am 25.05.24 um 07:39 schrieb Andrea della Porta:
-> > On 14:26 Tue 21 May     , Stefan Wahren wrote:
-> > > Hi Andrea,
-> > > 
-> > > Am 21.05.24 um 10:35 schrieb Andrea della Porta:
-> > > > Broadcom BCM2712 SoC has an SDHCI card controller using the SDIO CFG
-> > > > register block present on other STB chips. Add support for BCM2712
-> > > > SD capabilities of this chipset.
-> > > > The silicon is SD Express capable but this driver port does not currently
-> > > > include that feature yet.
-> > > > Based on downstream driver by raspberry foundation maintained kernel.
-> > > > 
-> > > > Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
-> > > > ---
-> > > >    drivers/mmc/host/sdhci-brcmstb.c | 65 ++++++++++++++++++++++++++++++++
-> > > >    1 file changed, 65 insertions(+)
-> > > > 
-> > > > diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> > > > index 9053526fa212..b349262da36e 100644
-> > > > --- a/drivers/mmc/host/sdhci-brcmstb.c
-> > > > +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> > > > @@ -30,6 +30,21 @@
-> > > > 
-> > > >    #define SDHCI_ARASAN_CQE_BASE_ADDR		0x200
-> > > > 
-> > > > +#define SDIO_CFG_CQ_CAPABILITY			0x4c
-> > > > +#define SDIO_CFG_CQ_CAPABILITY_FMUL		GENMASK(13, 12)
-> > > > +
-> > > > +#define SDIO_CFG_CTRL				0x0
-> > > > +#define SDIO_CFG_CTRL_SDCD_N_TEST_EN		BIT(31)
-> > > > +#define SDIO_CFG_CTRL_SDCD_N_TEST_LEV		BIT(30)
-> > > > +
-> > > > +#define SDIO_CFG_MAX_50MHZ_MODE			0x1ac
-> > > > +#define SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE	BIT(31)
-> > > > +#define SDIO_CFG_MAX_50MHZ_MODE_ENABLE		BIT(0)
-> > > > +
-> > > > +#define MMC_CAP_HSE_MASK	(MMC_CAP2_HSX00_1_2V | MMC_CAP2_HSX00_1_8V)
-> > > > +/* Select all SD UHS type I SDR speed above 50MB/s */
-> > > > +#define MMC_CAP_UHS_I_SDR_MASK	(MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104)
-> > > > +
-> > > >    struct sdhci_brcmstb_priv {
-> > > >    	void __iomem *cfg_regs;
-> > > >    	unsigned int flags;
-> > > > @@ -38,6 +53,7 @@ struct sdhci_brcmstb_priv {
-> > > >    };
-> > > > 
-> > > >    struct brcmstb_match_priv {
-> > > > +	void (*cfginit)(struct sdhci_host *host);
-> > > >    	void (*hs400es)(struct mmc_host *mmc, struct mmc_ios *ios);
-> > > >    	struct sdhci_ops *ops;
-> > > >    	const unsigned int flags;
-> > > > @@ -168,6 +184,38 @@ static void sdhci_brcmstb_set_uhs_signaling(struct sdhci_host *host,
-> > > >    	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > > >    }
-> > > > 
-> > > > +static void sdhci_brcmstb_cfginit_2712(struct sdhci_host *host)
-> > > > +{
-> > > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > > +	struct sdhci_brcmstb_priv *brcmstb_priv = sdhci_pltfm_priv(pltfm_host);
-> > > > +	u32 reg, base_clk_mhz;
-> > > > +
-> > > > +	/*
-> > > > +	 * If we support a speed that requires tuning,
-> > > > +	 * then select the delay line PHY as the clock source.
-> > > > +	 */
-> > > > +	if ((host->mmc->caps & MMC_CAP_UHS_I_SDR_MASK) || (host->mmc->caps2 & MMC_CAP_HSE_MASK)) {
-> > > > +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
-> > > > +		reg &= ~SDIO_CFG_MAX_50MHZ_MODE_ENABLE;
-> > > > +		reg |= SDIO_CFG_MAX_50MHZ_MODE_STRAP_OVERRIDE;
-> > > > +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_MAX_50MHZ_MODE);
-> > > > +	}
-> > > > +
-> > > > +	if ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
-> > > > +	    (host->mmc->caps & MMC_CAP_NEEDS_POLL)) {
-> > > > +		/* Force presence */
-> > > > +		reg = readl(brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
-> > > > +		reg &= ~SDIO_CFG_CTRL_SDCD_N_TEST_LEV;
-> > > > +		reg |= SDIO_CFG_CTRL_SDCD_N_TEST_EN;
-> > > > +		writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CTRL);
-> > > > +	}
-> > > > +
-> > > > +	/* Guesstimate the timer frequency (controller base clock) */
-> > > > +	base_clk_mhz = max_t(u32, clk_get_rate(pltfm_host->clk) / (1000 * 1000), 1);
-> > > > +	reg = SDIO_CFG_CQ_CAPABILITY_FMUL | base_clk_mhz;
-> > > > +	writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
-> > > This part assumes the clock isn't changed afterwards, see below ...
-> > > > +}
-> > > > +
-> > > >    static void sdhci_brcmstb_dumpregs(struct mmc_host *mmc)
-> > > >    {
-> > > >    	sdhci_dumpregs(mmc_priv(mmc));
-> > > > @@ -200,6 +248,14 @@ static struct sdhci_ops sdhci_brcmstb_ops = {
-> > > >    	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> > > >    };
-> > > > 
-> > > > +static struct sdhci_ops sdhci_brcmstb_ops_2712 = {
-> > > > +	.set_clock = sdhci_set_clock,
-> > > > +	.set_power = sdhci_set_power_and_bus_voltage,
-> > > > +	.set_bus_width = sdhci_set_bus_width,
-> > > > +	.reset = sdhci_reset,
-> > > > +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> > > > +};
-> > > > +
-> > > >    static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
-> > > >    	.set_clock = sdhci_brcmstb_set_clock,
-> > > >    	.set_bus_width = sdhci_set_bus_width,
-> > > > @@ -214,6 +270,11 @@ static struct sdhci_ops sdhci_brcmstb_ops_74165b0 = {
-> > > >    	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
-> > > >    };
-> > > > 
-> > > > +static const struct brcmstb_match_priv match_priv_2712 = {
-> > > > +	.cfginit = sdhci_brcmstb_cfginit_2712,
-> > > > +	.ops = &sdhci_brcmstb_ops_2712,
-> > > > +};
-> > > > +
-> > > >    static struct brcmstb_match_priv match_priv_7425 = {
-> > > >    	.flags = BRCMSTB_MATCH_FLAGS_NO_64BIT |
-> > > >    	BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT,
-> > > > @@ -238,6 +299,7 @@ static struct brcmstb_match_priv match_priv_74165b0 = {
-> > > >    };
-> > > > 
-> > > >    static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] = {
-> > > > +	{ .compatible = "brcm,bcm2712-sdhci", .data = &match_priv_2712 },
-> > > >    	{ .compatible = "brcm,bcm7425-sdhci", .data = &match_priv_7425 },
-> > > >    	{ .compatible = "brcm,bcm7445-sdhci", .data = &match_priv_7445 },
-> > > >    	{ .compatible = "brcm,bcm7216-sdhci", .data = &match_priv_7216 },
-> > > > @@ -370,6 +432,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
-> > > >    	    (host->mmc->caps2 & MMC_CAP2_HS400_ES))
-> > > >    		host->mmc_host_ops.hs400_enhanced_strobe = match_priv->hs400es;
-> > > > 
-> > > > +	if (match_priv->cfginit)
-> > > > +		match_priv->cfginit(host);
-> > > > +
-> > > I'm not sure this is the right place to call cfginit.
-> > > sdhci_brcmstb_cfginit_2712 retrives the current controller base clock,
-> > > but at the end of  sdhci_brcmstb_probe this clock frequency could be
-> > > adjusted by the device property "clock-frequency". So i'm not sure this
-> > > is intended.
-> > I've tried to interpret the meaning of those two clocks since unfortunately I don't
-> > own the datasheet for any of the platforms involved, so please take the following
-> > as the result of my own (possibly wrong) intuition and (mostly wild) guessing.
-> > 
-> > The main clock is 'sw_sdio' while 'sdio_freq' is optional and the latter seems to be
-> > orthogonal to the former.
-> > While sw_sdio is mostly used for SD storage card, sdio_freq seems more related to
-> > SDIO family of cards (wifi, gps, camera, etc) for which you could specify a particular
-> > (and higher) base frequency.
-> > Unfortunately I wasn't able to find any reference to sdio_freq in current devicetree
-> > so it's probably only specific to custom appliances: to be honest I'm not even sure
-> > that BCM2712 is supporting that improved clock source.  Also, from the following lines
-> > at the end of cfginit function:
-> > 
-> > /* Guesstimate the timer frequency (controller base clock) */
-> > base_clk_mhz = max_t(u32, clk_get_rate(pltfm_host->clk) / (1000 * 1000), 1);
-> > reg = SDIO_CFG_CQ_CAPABILITY_FMUL | base_clk_mhz;
-> > writel(reg, brcmstb_priv->cfg_regs + SDIO_CFG_CQ_CAPABILITY);
-> > 
-> > judging from the name of SDIO_CFG_CQ_CAPABILITY register, I'd guess that it relates
-> > to some Command Queue (timeout?) setting so it's probably only important if CQE is
-> > enabled specifying 'supports-cqe' property, which is not in current devicetree (nor
-> > in  downstream one). If this is the case it's mostly a performance improvement, and
-> > as such something that we are not necessarily interested in right now since this
-> > patchset adds just minimal boot support. I would then drop those lines, as we could
-> > just reintroduce them if they need be once we have a better understanding of that
-> > specific register and/if the cqe support will be enabled. As a matter of fact those
-> > lines are not working as expected in any case since pltfm_host->clk is set at the
-> > very end of sdhci_brcmstb_probe() while the cfginit function is invoked much earlier.
-> > The result is that right now the value set ito SDIO_CFG_CQ_CAPABILITY register is always
-> > equal to 1MHz. Further testing reveals that it is indeed working fine even with those
-> > lines dropped, so I would deem that code as unnecessary for this early patchset.
-> > Is it a viable solution?
-> I don't have any knowledge about this hardware, so my opinion based on
-> your good investigations. But i would be fine with this.
-> 
-> Just to make it clear, this works with and without U-Boot in the bootchain?
+This patch set introduces a new RPMB subsystem, based on patches from [1],
+[2], and [3]. The RPMB subsystem aims at providing access to RPMB
+partitions to other kernel drivers, in particular the OP-TEE driver. A new
+user space ABI isn't needed, we can instead continue using the already
+present ABI when writing the RPMB key during production.
 
-Yes, I confirm it works with both.
+I've added and removed things to keep only what is needed by the OP-TEE
+driver. Since the posting of [3], there has been major changes in the MMC
+subsystem so "mmc: block: register RPMB partition with the RPMB subsystem"
+is in practice completely rewritten.
+
+With this OP-TEE can access RPMB during early boot instead of having to
+wait for user space to become available as in the current design [4].
+This will benefit the efi variables [5] since we won't rely on userspace as
+well as some TPM issues [6] that were solved.
+
+The OP-TEE driver finds the correct RPMB device to interact with by
+iterating over available devices until one is found with a programmed
+authentication matching the one OP-TEE is using. This enables coexisting
+users of other RPMBs since the owner can be determined by who knows the
+authentication key.
+
+The corresponding secure world OP-TEE patches are available at [7].
+
+I've put myself as a maintainer for the RPMB subsystem as I have an
+interest in the OP-TEE driver to keep this in good shape. However, if you'd
+rather see someone else taking the maintainership that's fine too. I'll
+help keep the subsystem updated regardless.
+
+[1] https://lore.kernel.org/lkml/20230722014037.42647-1-shyamsaini@linux.microsoft.com/
+[2] https://lore.kernel.org/lkml/20220405093759.1126835-2-alex.bennee@linaro.org/
+[3] https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-tomas.winkler@intel.com/
+[4] https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#rpmb-secure-storage
+[5] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c44b6be62e8dd4ee0a308c36a70620613e6fc55f
+[6] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=7269cba53d906cf257c139d3b3a53ad272176bca
+[7] https://github.com/jenswi-linaro/optee_os/tree/rpmb_probe_v7
 
 Thanks,
-Andrea
+Jens
 
-> 
-> Thanks
-> > 
-> > Many thanks,
-> > Andrea
-> > 
-> > > >    	/*
-> > > >    	 * Supply the existing CAPS, but clear the UHS modes. This
-> > > >    	 * will allow these modes to be specified by device tree
-> 
+Changes since v6:
+* Add Tested-by: Manuel Traut <manut@mecka.net> provided for the v6
+* Add a new patch "tee: add tee_device_set_dev_groups()" needed later in
+  the patch set
+* Reintroduce the rpmb_class as requested by Greg, this affects the patches
+  "rpmb: add Replay Protected Memory Block (RPMB) subsystem" and
+  "optee: probe RPMB device using RPMB subsystem"
+* "rpmb: add Replay Protected Memory Block (RPMB) subsystem":
+  - rpmb_interface_{,un}register() are now based on
+    class_interface_{,un}register()
+  - Embed a separate device in struct rpmb_dev for life cycle
+    management etc
+* "optee: probe RPMB device using RPMB subsystem"
+  - Add an internal blocking_notifier to deal with the struct
+    class_interface callback
+  - Add a rpmb_routing_model variable in sysfs to help integration with
+    systemd, requested by Mikko Rapeli
+  - Add an RPMB probe capability flag in the ABI shared with the secure
+    world, both SMC and FF-A ABI, needed to support the rpmb_routing_model
+    variable
+  - optee_rpc_cmd() is strict whether an RPMB RPC request should be
+    forwarded to tee-supplicant or routed via the RPMB subsystem, depending
+    on the reported RPMB routing model
+
+Changes since v5:
+Manuel Traut reported and investigated an error on an i.MX8MM, the root
+cause was identified as insufficient alignment on frames sent to the RPMB
+device. Fixed in the OP-TEE driver as described below.
+* "rpmb: add Replay Protected Memory Block (RPMB) subsystem"
+  - Adding a missing EXPORT_SYMBOL_GPL()
+* "optee: probe RPMB device using RPMB subsystem"
+  - Replacing the old OPTEE_RPC_CMD_RPMB ABI with OPTEE_RPC_CMD_RPMB_FRAMES
+    to get rid of the small header struct rpmb_req (now removed) causing
+    the problem.
+  - Matching changes on the secure side + support for re-initializing
+    RPMB in case a boot stage has used RPMB, the latter also reported by 
+    Manuel Traut.
+
+Changes since v4:
+* "rpmb: add Replay Protected Memory Block (RPMB) subsystem"
+  - Describing struct rpmb_descr as RPMB description instead of descriptor
+* "mmc: block: register RPMB partition with the RPMB subsystem"
+  - Addressing review comments
+  - Adding more comments for struct rpmb_frame
+  - Fixing assignment of reliable_wr_count and capacity in mmc_blk_rpmb_add()
+* "optee: probe RPMB device using RPMB subsystem"
+  - Updating struct rpmb_dev_info to match changes in "rpmb: add Replay
+    Protected Memory Block (RPMB) subsystem"
+
+Changes since v3:
+* Move struct rpmb_frame into the MMC driver since the format of the RPMB
+  frames depend on the implementation, one format for eMMC, another for
+  UFS, and so on
+* "rpmb: add Replay Protected Memory Block (RPMB) subsystem"
+  - Adding Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+  - Adding more description of the API functions
+  - Removing the set_dev_info() op from struct rpmb_ops, the needed information
+    is supplied in the arguments to rpmb_dev_register() instead.
+  - Getting rid of struct rpmb_ops since only the route_frames() op was
+    remaining, store that op directly in struct rpmb_dev
+  - Changed rpmb_interface_register() and rpmb_interface_unregister() to use
+    notifier_block instead of implementing the same thing ourselves
+* "mmc: block: register RPMB partition with the RPMB subsystem"
+  - Moving the call to rpmb_dev_register() to be done at the end of
+    mmc_blk_probe() when the device is fully available
+* "optee: probe RPMB device using RPMB subsystem"
+  - Use IS_REACHABLE(CONFIG_RPMB) to determine if the RPMB subsystem is
+    available
+  - Translate TEE_ERROR_STORAGE_NOT_AVAILABLE if encountered in get_devices()
+    to recognize the error in optee_rpmb_scan()
+  - Simplified optee_rpmb_scan() and optee_rpmb_intf_rdev()
+
+Changes since v2:
+* "rpmb: add Replay Protected Memory Block (RPMB) subsystem"
+  - Fixing documentation issues
+  - Adding a "depends on MMC" in the Kconfig
+  - Removed the class-device and the embedded device, struct rpmb_dev now
+    relies on the parent device for reference counting as requested
+  - Removed the now unneeded rpmb_ops get_resources() and put_resources()
+    since references are already taken in mmc_blk_alloc_rpmb_part() before
+    rpmb_dev_register() is called
+  - Added rpmb_interface_{,un}register() now that
+    class_interface_{,un}register() can't be used ay longer
+* "mmc: block: register RPMB partition with the RPMB subsystem"
+  - Adding the missing error cleanup in alloc_idata()
+  - Taking the needed reference to md->disk in mmc_blk_alloc_rpmb_part()
+    instead of in mmc_rpmb_chrdev_open() and rpmb_op_mmc_get_resources()
+* "optee: probe RPMB device using RPMB subsystem"
+  - Registering to get a notification when an RPMB device comes online
+  - Probes for RPMB devices each time an RPMB device comes online, until
+    a usable device is found
+  - When a usable RPMB device is found, call
+    optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB)
+  - Pass type of rpmb in return value from OPTEE_RPC_CMD_RPMB_PROBE_NEXT
+
+Changes since Shyam's RFC:
+* Removed the remaining leftover rpmb_cdev_*() function calls
+* Refactored the struct rpmb_ops with all the previous ops replaced, in
+  some sense closer to [3] with the route_frames() op
+* Added rpmb_route_frames()
+* Added struct rpmb_frame, enum rpmb_op_result, and enum rpmb_type from [3]
+* Removed all functions not needed in the OP-TEE use case
+* Added "mmc: block: register RPMB partition with the RPMB subsystem", based
+  on the commit with the same name in [3]
+* Added "optee: probe RPMB device using RPMB subsystem" for integration
+  with OP-TEE
+* Moved the RPMB driver into drivers/misc/rpmb-core.c
+* Added my name to MODULE_AUTHOR() in rpmb-core.c
+* Added an rpmb_mutex to serialize access to the IDA
+* Removed the target parameter from all rpmb_*() functions since it's
+  currently unused
+
+
+Jens Wiklander (4):
+  rpmb: add Replay Protected Memory Block (RPMB) subsystem
+  mmc: block: register RPMB partition with the RPMB subsystem
+  tee: add tee_device_set_dev_groups()
+  optee: probe RPMB device using RPMB subsystem
+
+ Documentation/ABI/testing/sysfs-class-tee |  15 ++
+ MAINTAINERS                               |   8 +
+ drivers/misc/Kconfig                      |  10 +
+ drivers/misc/Makefile                     |   1 +
+ drivers/misc/rpmb-core.c                  | 232 +++++++++++++++++++++
+ drivers/mmc/core/block.c                  | 241 +++++++++++++++++++++-
+ drivers/tee/optee/core.c                  |  96 ++++++++-
+ drivers/tee/optee/device.c                |   7 +
+ drivers/tee/optee/ffa_abi.c               |  14 ++
+ drivers/tee/optee/optee_ffa.h             |   2 +
+ drivers/tee/optee/optee_private.h         |  26 ++-
+ drivers/tee/optee/optee_rpc_cmd.h         |  35 ++++
+ drivers/tee/optee/optee_smc.h             |   2 +
+ drivers/tee/optee/rpc.c                   | 177 ++++++++++++++++
+ drivers/tee/optee/smc_abi.c               |  14 ++
+ drivers/tee/tee_core.c                    |  19 +-
+ include/linux/rpmb.h                      | 123 +++++++++++
+ include/linux/tee_drv.h                   |  12 ++
+ 18 files changed, 1024 insertions(+), 10 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-tee
+ create mode 100644 drivers/misc/rpmb-core.c
+ create mode 100644 include/linux/rpmb.h
+
+-- 
+2.34.1
+
