@@ -1,57 +1,57 @@
-Received: from mail-ej1-f67.google.com (mail-ej1-f67.google.com [209.85.218.67])
+Received: from mail-ed1-f66.google.com (mail-ed1-f66.google.com [209.85.208.66])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E30515E5B9
-	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 12:14:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.67
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C8E315E5D3
+	for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 12:14:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.66
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716812081; cv=none; b=UN/Hpvlv/RZn+25GfIOqdlG1RftksnO9DRtNyUdEBgMVqNB1jGpaZsW6Z94Mr/e0ohnyBk30NEvtY8RqX0AwolltXOjn4ZtH2ZYhsdtzC7ss25XsmeonJuGyfBp/qCEJMw+/4et4yfI48caqyLx/s06OxR0F3K38G9yA3EhIQ38=
+	t=1716812084; cv=none; b=exL8djwcSw2hyJomjxjzjb5mJcNdUYD0CbpOcqw8QJVLuebOOuhZOEd1zPlZQ3Osa2fMzQqsAkr/kt39ZSDa0j3sGMwI+VVM9DnTKtDloSrH9XEu2hiMp7dFqusla7eb85rFe6VZne8jDHnQVfVl8BaCAXrnQxmzkWgyYfA+toI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716812081; c=relaxed/simple;
-	bh=7VmazO7bnwyBKzQBdOOzNJpuCsoK5YgtAfEQDEL9W/k=;
+	s=arc-20240116; t=1716812084; c=relaxed/simple;
+	bh=QD7gnQxv8cIAN7TtB/CTTPJa7RLvuQHAFayQoObEyiU=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=BWEnnYLG1a035K7tLALvA4GWgOdkLbgiEG1VqX+cVvGlaLCAMSx47AW8HmsiJw6hbS+zu2dzliuNRXPIcty7360bs4x0TE09K2M5BhTT9UEVle2o6QchX1Ej9j75VzjdEims39rDdFDSCp5FRaTfNg8G1Pb0CsN4M4q9Wvnkgvc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Z/JihZ9k; arc=none smtp.client-ip=209.85.218.67
+	 MIME-Version; b=dYQy5OJBJMeBsbz0cP7Cz+VyYQXocJY/mh942TnUve88j4KrnaaL3cwzImzBP6dLtiwsD+FAUbaTdOA0zCFT8ebFCo/joX97LZ3eVoegErrGPIVWYP7FM8b6F67dGWMnCm7FY5qv8g4SZLVrwCJ8KRyBj4BiYaJf3wuimmyWVnI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XqTc79OE; arc=none smtp.client-ip=209.85.208.66
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z/JihZ9k"
-Received: by mail-ej1-f67.google.com with SMTP id a640c23a62f3a-a6267639e86so362072266b.2
-        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 05:14:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XqTc79OE"
+Received: by mail-ed1-f66.google.com with SMTP id 4fb4d7f45d1cf-57863a8f4b2so2801001a12.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 May 2024 05:14:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1716812078; x=1717416878; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1716812080; x=1717416880; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HrgPnKBBv+BUaZqoRnff5gH7xS3FqnddUk3UhQHcZus=;
-        b=Z/JihZ9k0TR/lVZ0BjS0cX+K8sAuExfhG34eJswFxyY/7nLsdDaa4GvhAjlF2RdCXy
-         AbenthOY6ROdcm16i7u9jRF5PIj8/VcZGsiQqIb1qtlgP9cERA7bBuPOvjYRA4G20V7E
-         E6uTwNYFa9d+n0xiv4Y8L2ppV34uD+uTbP1lIGxriG2gVaFVMsZRCC5QjYwUwFTJUy7g
-         04Cd76jAbE86w1q8DEcXJ7YHKwW4plWkjd3Y+5Z/Ow+LRVmJAL4ToT1p1QSW1PYgmtIf
-         MLWEvCLah9ssZ8JYzFtgXQgf8GDhV77zQlJAFqf6IRHs5TntRMuhEmplssiApdm64Yq/
-         MxtA==
+        bh=xURT2KPwgmYzjI1Hql+2YgnmnDPpF3nkLLW1M9i6H0M=;
+        b=XqTc79OEJ7pB3KLxfQMVNiDjGTer40jl7xz1L9bLZk5rIhyvVuXBuorh9vX9H86XtB
+         Jz+WE00OMNj92iqlOI1lrX3vflRp7kMsOtR2WKgINYJIAc/hOQDLez+AU6+Rqh/Vvzqk
+         BqL1wMgaRLbU3pnPX7xc9mHa7Gkf1eso5pgLGQzRIuAp+xp+ofEvyoZwq7uUAaoovUw+
+         ruBNPYwkvL36crZTtDOTYF238Fz0ra5CS6+BfOSwPAXC91k5e+JozMLJD86VEE1Er9Vz
+         Ks1b8hzfaL2KNIE3B9b8pkzlj98dZb2LFXPyiUbXbtBy+ZPptpbl32LXN37occ5rvbnD
+         S63g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716812078; x=1717416878;
+        d=1e100.net; s=20230601; t=1716812080; x=1717416880;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HrgPnKBBv+BUaZqoRnff5gH7xS3FqnddUk3UhQHcZus=;
-        b=KB93UWU6TwcoR1H03I2OzkHI1HOXG3IL1LgBtQ8IRBWmiNqAQWJtdUw4PWYfOxYTbg
-         aJS794/OeK2eWe2mIzyiqsLJbKhQ9f6SFlU2TiypqT+rJZpzyIbl+6R0v6jAzt8Bvgxv
-         c5MkW5REj6LPNMQ4RiCIEbKBYvKnBiv5yd8Hhb57m8tPLBQpEf/U5Se+EW7C3zyguynD
-         OKQzshGVbvCSvK+1+u0940+WUeQsbRdJ5oR+5TIy+Am6J58tClQi21OOFrjy0ljXXNfU
-         i+1hZXx5qI/YSdAFBow1hYh/DM4WV49sUt02ifbiv53JYNWi08FvbbJebZTNj7QXqH8z
-         Ii7g==
-X-Forwarded-Encrypted: i=1; AJvYcCV20wDeth4TP/T1EOK3IOhwyDxoMSRh4aKqHe9jUCyHa0Cck5G71dZAB7UBRve4xgLSWhuLqGtWZ/ulDqhlrcOc4WtYJSAB4MQp
-X-Gm-Message-State: AOJu0YzJYgmBHTLIlvXAPktwkQkZE7xBADXRiO/r9P0wLpT9+0X13JH5
-	HgpzYXP/mH6MIWlGGphXrnNTmqjKEZrXjUpyN2A1XKeIeBQOa/rEr2hP0+IQI/Y=
-X-Google-Smtp-Source: AGHT+IGiEWsSuQuBHe/443UJSVgM0UxwtUlUkfRxSh6GhDm2zPVBq6AkIs9cC9ia2KBhDVbTBAZ9gQ==
-X-Received: by 2002:a17:906:2c4e:b0:a5a:84f9:df73 with SMTP id a640c23a62f3a-a62649be0dfmr533849466b.38.1716812077813;
-        Mon, 27 May 2024 05:14:37 -0700 (PDT)
+        bh=xURT2KPwgmYzjI1Hql+2YgnmnDPpF3nkLLW1M9i6H0M=;
+        b=DNNB1RLvSerJNdzRx5pqQz1hZIhk30ghpf6q7IWMCYMdo+q9nFth2HweebDe7S1TOc
+         Y32HlvoB6yCmHn3UpTnsDgtNK97jxpU0zwFDR9KpSZd2pRlPCX9LKIuTvlV/EQ+krTAd
+         V8hj8kA9CBMcPCtrOs7Zt8DAiQfoXUJQZsPHLOfnTvOJEFX1paqMdmESX/BKv6HZnOhS
+         XMSMGht+wR9k8+9ZyHkTeP03B+H7yv0wSUyqyjI9Pi8cem9uz9xk3HQ9PRTdVfBqxRGj
+         xpAm7s7wbfoifHy8/yECPJYP4U3F+s9dsuEHOAGgJM6WG/3BvJgvoNu9bA76W5zhs/fN
+         9ftQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW2IelFD7WlQwchHp6Zy2Dq8S6SefCVDKUUOCDBt3JOJkRF4HmmEOPVgSlL+bZKvnPf+aYHZNYBm3uW2PQDZdM3Tuh/z6tdywNt
+X-Gm-Message-State: AOJu0YytToLAlMUS9VDFcwfQUYtEvYnmgqueelRNxrZJnY86ea4QPwTo
+	rDoBedCfpJawnTdFhLj25oe/ShatDlrvDlDb9MBNEflQRgfvmGPY3TVGirToiM4=
+X-Google-Smtp-Source: AGHT+IE+CJ/HmsAtAe0Rgf8LN8OQ2LRZKOt58Zc2GR+pg/KVtCa8QSwfHK+s/xlJ9tmOyDx9FspfSQ==
+X-Received: by 2002:a17:906:2d4a:b0:a59:bdb7:73e8 with SMTP id a640c23a62f3a-a6264f16087mr590890166b.53.1716812079659;
+        Mon, 27 May 2024 05:14:39 -0700 (PDT)
 Received: from rayden.urgonet (h-217-31-164-171.A175.priv.bahnhof.se. [217.31.164.171])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a626cc8c2a8sm484100866b.165.2024.05.27.05.14.36
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a626cc8c2a8sm484100866b.165.2024.05.27.05.14.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 May 2024 05:14:37 -0700 (PDT)
+        Mon, 27 May 2024 05:14:38 -0700 (PDT)
 From: Jens Wiklander <jens.wiklander@linaro.org>
 To: linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
@@ -70,9 +70,9 @@ Cc: Shyam Saini <shyamsaini@linux.microsoft.com>,
 	Manuel Traut <manut@mecka.net>,
 	Mikko Rapeli <mikko.rapeli@linaro.org>,
 	Jens Wiklander <jens.wiklander@linaro.org>
-Subject: [PATCH v7 3/4] tee: add tee_device_set_dev_groups()
-Date: Mon, 27 May 2024 14:13:39 +0200
-Message-Id: <20240527121340.3931987-4-jens.wiklander@linaro.org>
+Subject: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
+Date: Mon, 27 May 2024 14:13:40 +0200
+Message-Id: <20240527121340.3931987-5-jens.wiklander@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20240527121340.3931987-1-jens.wiklander@linaro.org>
 References: <20240527121340.3931987-1-jens.wiklander@linaro.org>
@@ -84,452 +84,729 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add tee_device_set_dev_groups() to TEE drivers to supply driver specific
-attribute groups. The class specific attributes are from now on added
-via the tee_class, which currently only consist of implementation_id.
+Adds support in the OP-TEE drivers (both SMC and FF-A ABIs) to probe and
+use an RPMB device via the RPMB subsystem instead of passing the RPMB
+frames via tee-supplicant in user space. A fallback mechanism is kept to
+route RPMB frames via tee-supplicant if the RPMB subsystem isn't
+available.
+
+The OP-TEE RPC ABI is extended to support iterating over all RPMB
+devices until one is found with the expected RPMB key already
+programmed.
 
 Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+Tested-by: Manuel Traut <manut@mecka.net>
 ---
- drivers/misc/rpmb-core.c | 155 +++++++++++++++++++--------------------
- drivers/tee/tee_core.c   |  19 +++--
- include/linux/rpmb.h     |  53 +++++--------
- include/linux/tee_drv.h  |  12 +++
- 4 files changed, 122 insertions(+), 117 deletions(-)
+ Documentation/ABI/testing/sysfs-class-tee |  15 ++
+ MAINTAINERS                               |   1 +
+ drivers/tee/optee/core.c                  |  96 +++++++++++-
+ drivers/tee/optee/device.c                |   7 +
+ drivers/tee/optee/ffa_abi.c               |  14 ++
+ drivers/tee/optee/optee_ffa.h             |   2 +
+ drivers/tee/optee/optee_private.h         |  26 +++-
+ drivers/tee/optee/optee_rpc_cmd.h         |  35 +++++
+ drivers/tee/optee/optee_smc.h             |   2 +
+ drivers/tee/optee/rpc.c                   | 177 ++++++++++++++++++++++
+ drivers/tee/optee/smc_abi.c               |  14 ++
+ 11 files changed, 387 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-tee
 
-diff --git a/drivers/misc/rpmb-core.c b/drivers/misc/rpmb-core.c
-index e42a45debc76..691d7de247f6 100644
---- a/drivers/misc/rpmb-core.c
-+++ b/drivers/misc/rpmb-core.c
-@@ -12,10 +12,8 @@
- #include <linux/rpmb.h>
+diff --git a/Documentation/ABI/testing/sysfs-class-tee b/Documentation/ABI/testing/sysfs-class-tee
+new file mode 100644
+index 000000000000..c9144d16003e
+--- /dev/null
++++ b/Documentation/ABI/testing/sysfs-class-tee
+@@ -0,0 +1,15 @@
++What:		/sys/class/tee/tee{,priv}X/rpmb_routing_model
++Date:		May 2024
++KernelVersion:	6.10
++Contact:        op-tee@lists.trustedfirmware.org
++Description:
++		RPMB frames can be routed to the RPMB device via the
++		user-space daemon tee-supplicant or the RPMB subsystem
++		in the kernel. The value "user" means that the driver
++		will route the RPMB frames via user space. Conversely,
++		"kernel" means that the frames are routed via the RPMB
++		subsystem without assistance from tee-supplicant. It
++		should be assumed that RPMB frames are routed via user
++		space if the variable is absent. The primary purpose
++		of this variable is to let systemd know whether
++		tee-supplicant is needed in the early boot with initramfs.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 4c671827a08b..0d0bc01fd3eb 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -21709,6 +21709,7 @@ M:	Jens Wiklander <jens.wiklander@linaro.org>
+ R:	Sumit Garg <sumit.garg@linaro.org>
+ L:	op-tee@lists.trustedfirmware.org
+ S:	Maintained
++F:	Documentation/ABI/testing/sysfs-class-tee
+ F:	Documentation/driver-api/tee.rst
+ F:	Documentation/tee/
+ F:	Documentation/userspace-api/tee.rst
+diff --git a/drivers/tee/optee/core.c b/drivers/tee/optee/core.c
+index 3aed554bc8d8..3194c071a175 100644
+--- a/drivers/tee/optee/core.c
++++ b/drivers/tee/optee/core.c
+@@ -11,12 +11,28 @@
+ #include <linux/io.h>
+ #include <linux/mm.h>
+ #include <linux/module.h>
++#include <linux/rpmb.h>
  #include <linux/slab.h>
+ #include <linux/string.h>
+ #include <linux/tee_drv.h>
+ #include <linux/types.h>
+ #include "optee_private.h"
  
--static struct list_head rpmb_dev_list;
-+static DEFINE_IDA(rpmb_ida);
- static DEFINE_MUTEX(rpmb_mutex);
--static struct blocking_notifier_head rpmb_interface =
--	BLOCKING_NOTIFIER_INIT(rpmb_interface);
- 
- /**
-  * rpmb_dev_get() - increase rpmb device ref counter
-@@ -24,7 +22,7 @@ static struct blocking_notifier_head rpmb_interface =
- struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
- {
- 	if (rdev)
--		get_device(rdev->parent_dev);
-+		get_device(&rdev->dev);
- 	return rdev;
++struct blocking_notifier_head optee_rpmb_intf_added =
++	BLOCKING_NOTIFIER_INIT(optee_rpmb_intf_added);
++
++static int rpmb_add_dev(struct device *dev)
++{
++	blocking_notifier_call_chain(&optee_rpmb_intf_added, 0,
++				     to_rpmb_dev(dev));
++
++	return 0;
++}
++
++static struct class_interface rpmb_class_intf = {
++	.add_dev = rpmb_add_dev,
++};
++
+ int optee_pool_op_alloc_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
+ 			       size_t size, size_t align,
+ 			       int (*shm_register)(struct tee_context *ctx,
+@@ -80,11 +96,63 @@ void optee_pool_op_free_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
+ 	shm->pages = NULL;
  }
- EXPORT_SYMBOL_GPL(rpmb_dev_get);
-@@ -36,7 +34,7 @@ EXPORT_SYMBOL_GPL(rpmb_dev_get);
- void rpmb_dev_put(struct rpmb_dev *rdev)
- {
- 	if (rdev)
--		put_device(rdev->parent_dev);
-+		put_device(&rdev->dev);
- }
- EXPORT_SYMBOL_GPL(rpmb_dev_put);
  
-@@ -56,11 +54,27 @@ int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
- 	if (!req || !req_len || !rsp || !rsp_len)
++void optee_bus_scan_rpmb(struct work_struct *work)
++{
++	struct optee *optee = container_of(work, struct optee,
++					   rpmb_scan_bus_work);
++	int ret;
++
++	if (!optee->rpmb_scan_bus_done) {
++		ret = optee_enumerate_devices(PTA_CMD_GET_DEVICES_RPMB);
++		optee->rpmb_scan_bus_done = !ret;
++		if (ret && ret != -ENODEV)
++			pr_info("Scanning for RPMB device: ret %d\n", ret);
++	}
++}
++
++int optee_rpmb_intf_rdev(struct notifier_block *intf, unsigned long action,
++			 void *data)
++{
++	struct optee *optee = container_of(intf, struct optee, rpmb_intf);
++
++	schedule_work(&optee->rpmb_scan_bus_work);
++
++	return 0;
++}
++
+ static void optee_bus_scan(struct work_struct *work)
+ {
+ 	WARN_ON(optee_enumerate_devices(PTA_CMD_GET_DEVICES_SUPP));
+ }
+ 
++static ssize_t rpmb_routing_model_show(struct device *dev,
++				       struct device_attribute *attr, char *buf)
++{
++	struct optee *optee = dev_get_drvdata(dev);
++	const char *s;
++
++	if (optee->in_kernel_rpmb_routing)
++		s = "kernel";
++	else
++		s = "user";
++
++	return scnprintf(buf, PAGE_SIZE, "%s\n", s);
++}
++static DEVICE_ATTR_RO(rpmb_routing_model);
++
++static struct attribute *optee_dev_attrs[] = {
++	&dev_attr_rpmb_routing_model.attr,
++	NULL
++};
++
++ATTRIBUTE_GROUPS(optee_dev);
++
++void optee_set_dev_group(struct optee *optee)
++{
++	tee_device_set_dev_groups(optee->teedev, optee_dev_groups);
++	tee_device_set_dev_groups(optee->supp_teedev, optee_dev_groups);
++}
++
+ int optee_open(struct tee_context *ctx, bool cap_memref_null)
+ {
+ 	struct optee_context_data *ctxdata;
+@@ -161,6 +229,9 @@ void optee_release_supp(struct tee_context *ctx)
+ 
+ void optee_remove_common(struct optee *optee)
+ {
++	blocking_notifier_chain_unregister(&optee_rpmb_intf_added,
++					   &optee->rpmb_intf);
++	cancel_work_sync(&optee->rpmb_scan_bus_work);
+ 	/* Unregister OP-TEE specific client devices on TEE bus */
+ 	optee_unregister_devices();
+ 
+@@ -177,13 +248,18 @@ void optee_remove_common(struct optee *optee)
+ 	tee_shm_pool_free(optee->pool);
+ 	optee_supp_uninit(&optee->supp);
+ 	mutex_destroy(&optee->call_queue.mutex);
++	rpmb_dev_put(optee->rpmb_dev);
++	mutex_destroy(&optee->rpmb_dev_mutex);
+ }
+ 
+ static int smc_abi_rc;
+ static int ffa_abi_rc;
++static bool intf_is_regged;
+ 
+ static int __init optee_core_init(void)
+ {
++	int rc;
++
+ 	/*
+ 	 * The kernel may have crashed at the same time that all available
+ 	 * secure world threads were suspended and we cannot reschedule the
+@@ -194,18 +270,36 @@ static int __init optee_core_init(void)
+ 	if (is_kdump_kernel())
+ 		return -ENODEV;
+ 
++	if (IS_ENABLED(CONFIG_RPMB)) {
++		rc = rpmb_interface_register(&rpmb_class_intf);
++		if (rc)
++			return rc;
++		intf_is_regged = true;
++	}
++
+ 	smc_abi_rc = optee_smc_abi_register();
+ 	ffa_abi_rc = optee_ffa_abi_register();
+ 
+ 	/* If both failed there's no point with this module */
+-	if (smc_abi_rc && ffa_abi_rc)
++	if (smc_abi_rc && ffa_abi_rc) {
++		if (IS_ENABLED(CONFIG_RPMB)) {
++			rpmb_interface_unregister(&rpmb_class_intf);
++			intf_is_regged = false;
++		}
+ 		return smc_abi_rc;
++	}
++
+ 	return 0;
+ }
+ module_init(optee_core_init);
+ 
+ static void __exit optee_core_exit(void)
+ {
++	if (IS_ENABLED(CONFIG_RPMB) && intf_is_regged) {
++		rpmb_interface_unregister(&rpmb_class_intf);
++		intf_is_regged = false;
++	}
++
+ 	if (!smc_abi_rc)
+ 		optee_smc_abi_unregister();
+ 	if (!ffa_abi_rc)
+diff --git a/drivers/tee/optee/device.c b/drivers/tee/optee/device.c
+index 1892e49a8e6a..ff26850f704f 100644
+--- a/drivers/tee/optee/device.c
++++ b/drivers/tee/optee/device.c
+@@ -43,6 +43,13 @@ static int get_devices(struct tee_context *ctx, u32 session,
+ 	ret = tee_client_invoke_func(ctx, &inv_arg, param);
+ 	if ((ret < 0) || ((inv_arg.ret != TEEC_SUCCESS) &&
+ 			  (inv_arg.ret != TEEC_ERROR_SHORT_BUFFER))) {
++		/*
++		 * TEE_ERROR_STORAGE_NOT_AVAILABLE is returned when getting
++		 * the list of device TAs that depends on RPMB but a usable
++		 * RPMB device isn't found.
++		 */
++		if (inv_arg.ret == TEE_ERROR_STORAGE_NOT_AVAILABLE)
++			return -ENODEV;
+ 		pr_err("PTA_CMD_GET_DEVICES invoke function err: %x\n",
+ 		       inv_arg.ret);
  		return -EINVAL;
+diff --git a/drivers/tee/optee/ffa_abi.c b/drivers/tee/optee/ffa_abi.c
+index ecb5eb079408..b3b87e49f7fb 100644
+--- a/drivers/tee/optee/ffa_abi.c
++++ b/drivers/tee/optee/ffa_abi.c
+@@ -7,6 +7,7 @@
  
--	return rdev->descr.route_frames(rdev->parent_dev, req, req_len,
-+	return rdev->descr.route_frames(rdev->dev.parent, req, req_len,
- 					rsp, rsp_len);
+ #include <linux/arm_ffa.h>
+ #include <linux/errno.h>
++#include <linux/rpmb.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sched.h>
+ #include <linux/slab.h>
+@@ -903,6 +904,10 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
+ 	optee->ffa.bottom_half_value = U32_MAX;
+ 	optee->rpc_param_count = rpc_param_count;
+ 
++	if (IS_REACHABLE(CONFIG_RPMB) &&
++	    (sec_caps & OPTEE_FFA_SEC_CAP_RPMB_PROBE))
++		optee->in_kernel_rpmb_routing = true;
++
+ 	teedev = tee_device_alloc(&optee_ffa_clnt_desc, NULL, optee->pool,
+ 				  optee);
+ 	if (IS_ERR(teedev)) {
+@@ -919,6 +924,8 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
+ 	}
+ 	optee->supp_teedev = teedev;
+ 
++	optee_set_dev_group(optee);
++
+ 	rc = tee_device_register(optee->teedev);
+ 	if (rc)
+ 		goto err_unreg_supp_teedev;
+@@ -934,6 +941,7 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
+ 	optee_cq_init(&optee->call_queue, 0);
+ 	optee_supp_init(&optee->supp);
+ 	optee_shm_arg_cache_init(optee, arg_cache_flags);
++	mutex_init(&optee->rpmb_dev_mutex);
+ 	ffa_dev_set_drvdata(ffa_dev, optee);
+ 	ctx = teedev_open(optee->teedev);
+ 	if (IS_ERR(ctx)) {
+@@ -955,6 +963,10 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
+ 	if (rc)
+ 		goto err_unregister_devices;
+ 
++	INIT_WORK(&optee->rpmb_scan_bus_work, optee_bus_scan_rpmb);
++	optee->rpmb_intf.notifier_call = optee_rpmb_intf_rdev;
++	blocking_notifier_chain_register(&optee_rpmb_intf_added,
++					 &optee->rpmb_intf);
+ 	pr_info("initialized driver\n");
+ 	return 0;
+ 
+@@ -968,6 +980,8 @@ static int optee_ffa_probe(struct ffa_device *ffa_dev)
+ 	teedev_close_context(ctx);
+ err_rhashtable_free:
+ 	rhashtable_free_and_destroy(&optee->ffa.global_ids, rh_free_fn, NULL);
++	rpmb_dev_put(optee->rpmb_dev);
++	mutex_destroy(&optee->rpmb_dev_mutex);
+ 	optee_supp_uninit(&optee->supp);
+ 	mutex_destroy(&optee->call_queue.mutex);
+ 	mutex_destroy(&optee->ffa.mutex);
+diff --git a/drivers/tee/optee/optee_ffa.h b/drivers/tee/optee/optee_ffa.h
+index 5db779dc00de..257735ae5b56 100644
+--- a/drivers/tee/optee/optee_ffa.h
++++ b/drivers/tee/optee/optee_ffa.h
+@@ -92,6 +92,8 @@
+ #define OPTEE_FFA_SEC_CAP_ARG_OFFSET	BIT(0)
+ /* OP-TEE supports asynchronous notification via FF-A */
+ #define OPTEE_FFA_SEC_CAP_ASYNC_NOTIF	BIT(1)
++/* OP-TEE supports probing for RPMB device if needed */
++#define OPTEE_FFA_SEC_CAP_RPMB_PROBE	BIT(2)
+ 
+ #define OPTEE_FFA_EXCHANGE_CAPABILITIES OPTEE_FFA_BLOCKING_CALL(2)
+ 
+diff --git a/drivers/tee/optee/optee_private.h b/drivers/tee/optee/optee_private.h
+index 7a5243c78b55..1a41d4736bf8 100644
+--- a/drivers/tee/optee/optee_private.h
++++ b/drivers/tee/optee/optee_private.h
+@@ -7,7 +7,9 @@
+ #define OPTEE_PRIVATE_H
+ 
+ #include <linux/arm-smccc.h>
++#include <linux/notifier.h>
+ #include <linux/rhashtable.h>
++#include <linux/rpmb.h>
+ #include <linux/semaphore.h>
+ #include <linux/tee_drv.h>
+ #include <linux/types.h>
+@@ -20,11 +22,13 @@
+ /* Some Global Platform error codes used in this driver */
+ #define TEEC_SUCCESS			0x00000000
+ #define TEEC_ERROR_BAD_PARAMETERS	0xFFFF0006
++#define TEEC_ERROR_ITEM_NOT_FOUND	0xFFFF0008
+ #define TEEC_ERROR_NOT_SUPPORTED	0xFFFF000A
+ #define TEEC_ERROR_COMMUNICATION	0xFFFF000E
+ #define TEEC_ERROR_OUT_OF_MEMORY	0xFFFF000C
+ #define TEEC_ERROR_BUSY			0xFFFF000D
+ #define TEEC_ERROR_SHORT_BUFFER		0xFFFF0010
++#define TEE_ERROR_STORAGE_NOT_AVAILABLE 0xF0100003
+ 
+ #define TEEC_ORIGIN_COMMS		0x00000002
+ 
+@@ -197,6 +201,12 @@ struct optee_ops {
+  * @notif:		notification synchronization struct
+  * @supp:		supplicant synchronization struct for RPC to supplicant
+  * @pool:		shared memory pool
++ * @mutex:		mutex protecting @rpmb_dev
++ * @rpmb_dev:		current RPMB device or NULL
++ * @rpmb_scan_bus_done	flag if device registation of RPMB dependent devices
++ *			was already done
++ * @rpmb_scan_bus_work	workq to for an RPMB device and to scan optee bus
++ *			and register RPMB dependent optee drivers
+  * @rpc_param_count:	If > 0 number of RPC parameters to make room for
+  * @scan_bus_done	flag if device registation was already done.
+  * @scan_bus_work	workq to scan optee bus and register optee drivers
+@@ -215,9 +225,16 @@ struct optee {
+ 	struct optee_notif notif;
+ 	struct optee_supp supp;
+ 	struct tee_shm_pool *pool;
++	/* Protects rpmb_dev pointer */
++	struct mutex rpmb_dev_mutex;
++	struct rpmb_dev *rpmb_dev;
++	struct notifier_block rpmb_intf;
+ 	unsigned int rpc_param_count;
+-	bool   scan_bus_done;
++	bool scan_bus_done;
++	bool rpmb_scan_bus_done;
++	bool in_kernel_rpmb_routing;
+ 	struct work_struct scan_bus_work;
++	struct work_struct rpmb_scan_bus_work;
+ };
+ 
+ struct optee_session {
+@@ -250,6 +267,8 @@ struct optee_call_ctx {
+ 	size_t num_entries;
+ };
+ 
++extern struct blocking_notifier_head optee_rpmb_intf_added;
++
+ int optee_notif_init(struct optee *optee, u_int max_key);
+ void optee_notif_uninit(struct optee *optee);
+ int optee_notif_wait(struct optee *optee, u_int key);
+@@ -280,8 +299,12 @@ int optee_cancel_req(struct tee_context *ctx, u32 cancel_id, u32 session);
+ 
+ #define PTA_CMD_GET_DEVICES		0x0
+ #define PTA_CMD_GET_DEVICES_SUPP	0x1
++#define PTA_CMD_GET_DEVICES_RPMB	0x2
+ int optee_enumerate_devices(u32 func);
+ void optee_unregister_devices(void);
++void optee_bus_scan_rpmb(struct work_struct *work);
++int optee_rpmb_intf_rdev(struct notifier_block *intf, unsigned long action,
++			 void *data);
+ 
+ int optee_pool_op_alloc_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
+ 			       size_t size, size_t align,
+@@ -295,6 +318,7 @@ void optee_pool_op_free_helper(struct tee_shm_pool *pool, struct tee_shm *shm,
+ 						     struct tee_shm *shm));
+ 
+ 
++void optee_set_dev_group(struct optee *optee);
+ void optee_remove_common(struct optee *optee);
+ int optee_open(struct tee_context *ctx, bool cap_memref_null);
+ void optee_release(struct tee_context *ctx);
+diff --git a/drivers/tee/optee/optee_rpc_cmd.h b/drivers/tee/optee/optee_rpc_cmd.h
+index f3f06e0994a7..4a3c02914f9c 100644
+--- a/drivers/tee/optee/optee_rpc_cmd.h
++++ b/drivers/tee/optee/optee_rpc_cmd.h
+@@ -103,4 +103,39 @@
+ /* I2C master control flags */
+ #define OPTEE_RPC_I2C_FLAGS_TEN_BIT	BIT(0)
+ 
++/*
++ * Reset RPMB probing
++ *
++ * Releases an eventually already used RPMB devices and starts over searching
++ * for RPMB devices. Returns the kind of shared memory to use in subsequent
++ * OPTEE_RPC_CMD_RPMB_PROBE_NEXT and OPTEE_RPC_CMD_RPMB calls.
++ *
++ * [out]    value[0].a	    OPTEE_RPC_SHM_TYPE_*, the parameter for
++ *			    OPTEE_RPC_CMD_SHM_ALLOC
++ */
++#define OPTEE_RPC_CMD_RPMB_PROBE_RESET	22
++
++/*
++ * Probe next RPMB device
++ *
++ * [out]    value[0].a	    Type of RPMB device, OPTEE_RPC_RPMB_*
++ * [out]    value[0].b	    EXT CSD-slice 168 "RPMB Size"
++ * [out]    value[0].c	    EXT CSD-slice 222 "Reliable Write Sector Count"
++ * [out]    memref[1]       Buffer with the raw CID
++ */
++#define OPTEE_RPC_CMD_RPMB_PROBE_NEXT	23
++
++/* Type of RPMB device */
++#define OPTEE_RPC_RPMB_EMMC		0
++#define OPTEE_RPC_RPMB_UFS		1
++#define OPTEE_RPC_RPMB_NVME		2
++
++/*
++ * Replay Protected Memory Block access
++ *
++ * [in]     memref[0]	    Frames to device
++ * [out]    memref[1]	    Frames from device
++ */
++#define OPTEE_RPC_CMD_RPMB_FRAMES	24
++
+ #endif /*__OPTEE_RPC_CMD_H*/
+diff --git a/drivers/tee/optee/optee_smc.h b/drivers/tee/optee/optee_smc.h
+index 7d9fa426505b..879426300821 100644
+--- a/drivers/tee/optee/optee_smc.h
++++ b/drivers/tee/optee/optee_smc.h
+@@ -278,6 +278,8 @@ struct optee_smc_get_shm_config_result {
+ #define OPTEE_SMC_SEC_CAP_ASYNC_NOTIF		BIT(5)
+ /* Secure world supports pre-allocating RPC arg struct */
+ #define OPTEE_SMC_SEC_CAP_RPC_ARG		BIT(6)
++/* Secure world supports probing for RPMB device if needed */
++#define OPTEE_SMC_SEC_CAP_RPMB_PROBE		BIT(7)
+ 
+ #define OPTEE_SMC_FUNCID_EXCHANGE_CAPABILITIES	9
+ #define OPTEE_SMC_EXCHANGE_CAPABILITIES \
+diff --git a/drivers/tee/optee/rpc.c b/drivers/tee/optee/rpc.c
+index e69bc6380683..cf6a4b97549c 100644
+--- a/drivers/tee/optee/rpc.c
++++ b/drivers/tee/optee/rpc.c
+@@ -7,6 +7,7 @@
+ 
+ #include <linux/delay.h>
+ #include <linux/i2c.h>
++#include <linux/rpmb.h>
+ #include <linux/slab.h>
+ #include <linux/tee_drv.h>
+ #include "optee_private.h"
+@@ -255,6 +256,154 @@ void optee_rpc_cmd_free_suppl(struct tee_context *ctx, struct tee_shm *shm)
+ 	optee_supp_thrd_req(ctx, OPTEE_RPC_CMD_SHM_FREE, 1, &param);
  }
- EXPORT_SYMBOL_GPL(rpmb_route_frames);
  
-+static void rpmb_dev_release(struct device *dev)
++static void handle_rpc_func_rpmb_probe_reset(struct tee_context *ctx,
++					     struct optee *optee,
++					     struct optee_msg_arg *arg)
++{
++	struct tee_param params[1];
++
++	if (arg->num_params != ARRAY_SIZE(params) ||
++	    optee->ops->from_msg_param(optee, params, arg->num_params,
++				       arg->params) ||
++	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		return;
++	}
++
++	params[0].u.value.a = OPTEE_RPC_SHM_TYPE_KERNEL;
++	params[0].u.value.b = 0;
++	params[0].u.value.c = 0;
++	if (optee->ops->to_msg_param(optee, arg->params,
++				     arg->num_params, params)) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		return;
++	}
++
++	mutex_lock(&optee->rpmb_dev_mutex);
++	rpmb_dev_put(optee->rpmb_dev);
++	optee->rpmb_dev = NULL;
++	mutex_unlock(&optee->rpmb_dev_mutex);
++
++	arg->ret = TEEC_SUCCESS;
++}
++
++static int rpmb_type_to_rpc_type(enum rpmb_type rtype)
++{
++	switch (rtype) {
++	case RPMB_TYPE_EMMC:
++		return OPTEE_RPC_RPMB_EMMC;
++	case RPMB_TYPE_UFS:
++		return OPTEE_RPC_RPMB_UFS;
++	case RPMB_TYPE_NVME:
++		return OPTEE_RPC_RPMB_NVME;
++	default:
++		return -1;
++	}
++}
++
++static int rpc_rpmb_match(struct device *dev, const void *data)
 +{
 +	struct rpmb_dev *rdev = to_rpmb_dev(dev);
 +
-+	mutex_lock(&rpmb_mutex);
-+	ida_simple_remove(&rpmb_ida, rdev->id);
-+	mutex_unlock(&rpmb_mutex);
-+	kfree(rdev->descr.dev_id);
-+	kfree(rdev);
++	return rpmb_type_to_rpc_type(rdev->descr.type) >= 0;
 +}
 +
-+static struct class rpmb_class = {
-+	.name = "rpmb",
-+	.dev_release = rpmb_dev_release,
-+};
-+
- /**
-  * rpmb_dev_find_device() - return first matching rpmb device
-  * @data: data for the match function
-@@ -79,35 +93,34 @@ EXPORT_SYMBOL_GPL(rpmb_route_frames);
-  */
- struct rpmb_dev *rpmb_dev_find_device(const void *data,
- 				      const struct rpmb_dev *start,
--				      int (*match)(struct rpmb_dev *rdev,
-+				      int (*match)(struct device *dev,
- 						   const void *data))
- {
--	struct rpmb_dev *rdev;
--	struct list_head *pos;
-+	struct device *dev;
-+	const struct device *start_dev = NULL;
- 
--	mutex_lock(&rpmb_mutex);
- 	if (start)
--		pos = start->list_node.next;
--	else
--		pos = rpmb_dev_list.next;
--
--	while (pos != &rpmb_dev_list) {
--		rdev = container_of(pos, struct rpmb_dev, list_node);
--		if (match(rdev, data)) {
--			rpmb_dev_get(rdev);
--			goto out;
--		}
--		pos = pos->next;
--	}
--	rdev = NULL;
--
--out:
--	mutex_unlock(&rpmb_mutex);
-+		start_dev = &start->dev;
-+	dev = class_find_device(&rpmb_class, start_dev, data, match);
- 
--	return rdev;
-+	return dev ? to_rpmb_dev(dev) : NULL;
- }
- EXPORT_SYMBOL_GPL(rpmb_dev_find_device);
- 
-+int rpmb_interface_register(struct class_interface *intf)
++static void handle_rpc_func_rpmb_probe_next(struct tee_context *ctx,
++					    struct optee *optee,
++					    struct optee_msg_arg *arg)
 +{
-+	intf->class = &rpmb_class;
++	struct rpmb_dev *rdev;
++	struct tee_param params[2];
++	void *buf;
 +
-+	return class_interface_register(intf);
-+}
-+EXPORT_SYMBOL_GPL(rpmb_interface_register);
-+
-+void rpmb_interface_unregister(struct class_interface *intf)
-+{
-+	class_interface_unregister(intf);
-+}
-+EXPORT_SYMBOL_GPL(rpmb_interface_unregister);
-+
- /**
-  * rpmb_dev_unregister() - unregister RPMB partition from the RPMB subsystem
-  * @rdev: the rpmb device to unregister
-@@ -122,11 +135,9 @@ int rpmb_dev_unregister(struct rpmb_dev *rdev)
- 	if (!rdev)
- 		return -EINVAL;
- 
--	mutex_lock(&rpmb_mutex);
--	list_del(&rdev->list_node);
--	mutex_unlock(&rpmb_mutex);
--	kfree(rdev->descr.dev_id);
--	kfree(rdev);
-+	device_del(&rdev->dev);
-+
-+	rpmb_dev_put(rdev);
- 
- 	return 0;
- }
-@@ -146,6 +157,7 @@ struct rpmb_dev *rpmb_dev_register(struct device *dev,
- 				   struct rpmb_descr *descr)
- {
- 	struct rpmb_dev *rdev;
-+	int ret;
- 
- 	if (!dev || !descr || !descr->route_frames || !descr->dev_id ||
- 	    !descr->dev_id_len)
-@@ -158,71 +170,58 @@ struct rpmb_dev *rpmb_dev_register(struct device *dev,
- 	rdev->descr.dev_id = kmemdup(descr->dev_id, descr->dev_id_len,
- 				     GFP_KERNEL);
- 	if (!rdev->descr.dev_id) {
--		kfree(rdev);
--		return ERR_PTR(-ENOMEM);
-+		ret = -ENOMEM;
-+		goto err_free_rdev;
- 	}
- 
--	rdev->parent_dev = dev;
--
--	dev_dbg(rdev->parent_dev, "registered device\n");
--
- 	mutex_lock(&rpmb_mutex);
--	list_add_tail(&rdev->list_node, &rpmb_dev_list);
--	blocking_notifier_call_chain(&rpmb_interface, RPMB_NOTIFY_ADD_DEVICE,
--				     rdev);
-+	ret = ida_simple_get(&rpmb_ida, 0, 0, GFP_KERNEL);
- 	mutex_unlock(&rpmb_mutex);
-+	if (ret < 0)
-+		goto err_free_dev_id;
-+	rdev->id = ret;
- 
--	return rdev;
--}
--EXPORT_SYMBOL_GPL(rpmb_dev_register);
-+	dev_set_name(&rdev->dev, "rpmb%d", rdev->id);
-+	rdev->dev.class = &rpmb_class;
-+	rdev->dev.parent = dev;
- 
--/**
-- * rpmb_interface_register() - register for new device notifications
-- *
-- * @nb : New entry in notifier chain
-- *
-- * Returns: 0 on success  -EEXIST on error.
-- */
--int rpmb_interface_register(struct notifier_block *nb)
--{
--	struct rpmb_dev *rdev;
--	int ret;
--
--	ret = blocking_notifier_chain_register(&rpmb_interface, nb);
-+	ret = device_register(&rdev->dev);
- 	if (ret)
--		return ret;
-+		goto err_id_remove;
- 
--	mutex_lock(&rpmb_mutex);
--	list_for_each_entry(rdev, &rpmb_dev_list, list_node)
--		nb->notifier_call(nb, RPMB_NOTIFY_ADD_DEVICE, rdev);
--	mutex_unlock(&rpmb_mutex);
-+	dev_dbg(&rdev->dev, "registered device\n");
- 
--	return 0;
--}
--EXPORT_SYMBOL_GPL(rpmb_interface_register);
-+	return rdev;
- 
--/**
-- * rpmb_interface_unregister() - unregister from new device notifications
-- *
-- * @nb : Entry to remove from notifier chain
-- *
-- * Returns: 0 on success or -ENOENT on failure.
-- */
--int rpmb_interface_unregister(struct notifier_block *nb)
--{
--	return blocking_notifier_chain_unregister(&rpmb_interface, nb);
-+err_id_remove:
-+	mutex_lock(&rpmb_mutex);
-+	ida_simple_remove(&rpmb_ida, rdev->id);
-+	mutex_unlock(&rpmb_mutex);
-+err_free_dev_id:
-+	kfree(rdev->descr.dev_id);
-+err_free_rdev:
-+	kfree(rdev);
-+	return ERR_PTR(ret);
- }
--EXPORT_SYMBOL_GPL(rpmb_interface_unregister);
-+EXPORT_SYMBOL_GPL(rpmb_dev_register);
- 
- static int __init rpmb_init(void)
- {
--	INIT_LIST_HEAD(&rpmb_dev_list);
-+	int ret;
-+
-+	ret = class_register(&rpmb_class);
-+	if (ret) {
-+		pr_err("couldn't create class\n");
-+		return ret;
++	if (arg->num_params != ARRAY_SIZE(params) ||
++	    optee->ops->from_msg_param(optee, params, arg->num_params,
++				       arg->params) ||
++	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_VALUE_OUTPUT ||
++	    params[1].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		return;
 +	}
-+	ida_init(&rpmb_ida);
- 	return 0;
- }
- 
- static void __exit rpmb_exit(void)
- {
--	mutex_destroy(&rpmb_mutex);
-+	ida_destroy(&rpmb_ida);
-+	class_unregister(&rpmb_class);
- }
- 
- subsys_initcall(rpmb_init);
-diff --git a/drivers/tee/tee_core.c b/drivers/tee/tee_core.c
-index e59c20d74b36..437d00fa6d4c 100644
---- a/drivers/tee/tee_core.c
-+++ b/drivers/tee/tee_core.c
-@@ -40,10 +40,7 @@ static const uuid_t tee_client_uuid_ns = UUID_INIT(0x58ac9ca0, 0x2086, 0x4683,
- static DECLARE_BITMAP(dev_mask, TEE_NUM_DEVICES);
- static DEFINE_SPINLOCK(driver_lock);
- 
--static const struct class tee_class = {
--	.name = "tee",
--};
--
-+static const struct class tee_class;
- static dev_t tee_devt;
- 
- struct tee_context *teedev_open(struct tee_device *teedev)
-@@ -965,6 +962,13 @@ struct tee_device *tee_device_alloc(const struct tee_desc *teedesc,
- }
- EXPORT_SYMBOL_GPL(tee_device_alloc);
- 
-+void tee_device_set_dev_groups(struct tee_device *teedev,
-+			       const struct attribute_group **dev_groups)
-+{
-+	teedev->dev.groups = dev_groups;
++	buf = tee_shm_get_va(params[1].u.memref.shm,
++			     params[1].u.memref.shm_offs);
++	if (!buf) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		return;
++	}
++
++	mutex_lock(&optee->rpmb_dev_mutex);
++	rdev = rpmb_dev_find_device(NULL, optee->rpmb_dev, rpc_rpmb_match);
++	rpmb_dev_put(optee->rpmb_dev);
++	optee->rpmb_dev = rdev;
++	mutex_unlock(&optee->rpmb_dev_mutex);
++
++	if (!rdev) {
++		arg->ret = TEEC_ERROR_ITEM_NOT_FOUND;
++		return;
++	}
++
++	if (params[1].u.memref.size < rdev->descr.dev_id_len) {
++		arg->ret = TEEC_ERROR_SHORT_BUFFER;
++		return;
++	}
++	memcpy(buf, rdev->descr.dev_id, rdev->descr.dev_id_len);
++	params[1].u.memref.size = rdev->descr.dev_id_len;
++	params[0].u.value.a = rpmb_type_to_rpc_type(rdev->descr.type);
++	params[0].u.value.b = rdev->descr.capacity;
++	params[0].u.value.c = rdev->descr.reliable_wr_count;
++	if (optee->ops->to_msg_param(optee, arg->params,
++				     arg->num_params, params)) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		return;
++	}
++
++	arg->ret = TEEC_SUCCESS;
 +}
-+EXPORT_SYMBOL_GPL(tee_device_set_dev_groups);
 +
- static ssize_t implementation_id_show(struct device *dev,
- 				      struct device_attribute *attr, char *buf)
++static void handle_rpc_func_rpmb_frames(struct tee_context *ctx,
++					struct optee *optee,
++					struct optee_msg_arg *arg)
++{
++	struct tee_param params[2];
++	struct rpmb_dev *rdev;
++	void *p0, *p1;
++
++	mutex_lock(&optee->rpmb_dev_mutex);
++	rdev = rpmb_dev_get(optee->rpmb_dev);
++	mutex_unlock(&optee->rpmb_dev_mutex);
++	if (!rdev) {
++		arg->ret = TEEC_ERROR_ITEM_NOT_FOUND;
++		return;
++	}
++
++	if (arg->num_params != ARRAY_SIZE(params) ||
++	    optee->ops->from_msg_param(optee, params, arg->num_params,
++				       arg->params) ||
++	    params[0].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_INPUT ||
++	    params[1].attr != TEE_IOCTL_PARAM_ATTR_TYPE_MEMREF_OUTPUT) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		goto out;
++	}
++
++	p0 = tee_shm_get_va(params[0].u.memref.shm,
++			    params[0].u.memref.shm_offs);
++	p1 = tee_shm_get_va(params[1].u.memref.shm,
++			    params[1].u.memref.shm_offs);
++	if (rpmb_route_frames(rdev, p0, params[0].u.memref.size, p1,
++			      params[1].u.memref.size)) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		goto out;
++	}
++	if (optee->ops->to_msg_param(optee, arg->params,
++				     arg->num_params, params)) {
++		arg->ret = TEEC_ERROR_BAD_PARAMETERS;
++		goto out;
++	}
++	arg->ret = TEEC_SUCCESS;
++out:
++	rpmb_dev_put(rdev);
++}
++
+ void optee_rpc_cmd(struct tee_context *ctx, struct optee *optee,
+ 		   struct optee_msg_arg *arg)
  {
-@@ -983,6 +987,11 @@ static struct attribute *tee_dev_attrs[] = {
- 
- ATTRIBUTE_GROUPS(tee_dev);
- 
-+static const struct class tee_class = {
-+	.name = "tee",
-+	.dev_groups = tee_dev_groups,
-+};
-+
- /**
-  * tee_device_register() - Registers a TEE device
-  * @teedev:	Device to register
-@@ -1001,8 +1010,6 @@ int tee_device_register(struct tee_device *teedev)
- 		return -EINVAL;
+@@ -271,6 +420,34 @@ void optee_rpc_cmd(struct tee_context *ctx, struct optee *optee,
+ 	case OPTEE_RPC_CMD_I2C_TRANSFER:
+ 		handle_rpc_func_cmd_i2c_transfer(ctx, arg);
+ 		break;
++	/*
++	 * optee->in_kernel_rpmb_routing true means that OP-TEE supports
++	 * in-kernel RPMB routing _and_ that the RPMB subsystem is
++	 * reachable. This is reported to user space with
++	 * rpmb_routing_model=kernel in sysfs.
++	 *
++	 * rpmb_routing_model=kernel is also a promise to user space that
++	 * RPMB access will not require supplicant support, hence the
++	 * checks below.
++	 */
++	case OPTEE_RPC_CMD_RPMB_PROBE_RESET:
++		if (optee->in_kernel_rpmb_routing)
++			handle_rpc_func_rpmb_probe_reset(ctx, optee, arg);
++		else
++			handle_rpc_supp_cmd(ctx, optee, arg);
++		break;
++	case OPTEE_RPC_CMD_RPMB_PROBE_NEXT:
++		if (optee->in_kernel_rpmb_routing)
++			handle_rpc_func_rpmb_probe_next(ctx, optee, arg);
++		else
++			handle_rpc_supp_cmd(ctx, optee, arg);
++		break;
++	case OPTEE_RPC_CMD_RPMB_FRAMES:
++		if (optee->in_kernel_rpmb_routing)
++			handle_rpc_func_rpmb_frames(ctx, optee, arg);
++		else
++			handle_rpc_supp_cmd(ctx, optee, arg);
++		break;
+ 	default:
+ 		handle_rpc_supp_cmd(ctx, optee, arg);
  	}
+diff --git a/drivers/tee/optee/smc_abi.c b/drivers/tee/optee/smc_abi.c
+index a37f87087e5c..fd689dfb5697 100644
+--- a/drivers/tee/optee/smc_abi.c
++++ b/drivers/tee/optee/smc_abi.c
+@@ -20,6 +20,7 @@
+ #include <linux/of_irq.h>
+ #include <linux/of_platform.h>
+ #include <linux/platform_device.h>
++#include <linux/rpmb.h>
+ #include <linux/sched.h>
+ #include <linux/slab.h>
+ #include <linux/string.h>
+@@ -1688,6 +1689,10 @@ static int optee_probe(struct platform_device *pdev)
+ 	optee->smc.sec_caps = sec_caps;
+ 	optee->rpc_param_count = rpc_param_count;
  
--	teedev->dev.groups = tee_dev_groups;
--
- 	rc = cdev_device_add(&teedev->cdev, &teedev->dev);
- 	if (rc) {
- 		dev_err(&teedev->dev,
-diff --git a/include/linux/rpmb.h b/include/linux/rpmb.h
-index 3ced206fdc17..8fb672ab7b9f 100644
---- a/include/linux/rpmb.h
-+++ b/include/linux/rpmb.h
-@@ -6,9 +6,8 @@
- #ifndef __RPMB_H__
- #define __RPMB_H__
- 
--#include <linux/types.h>
- #include <linux/device.h>
--#include <linux/notifier.h>
-+#include <linux/types.h>
- 
- /**
-  * enum rpmb_type - type of underlying storage technology
-@@ -48,38 +47,29 @@ struct rpmb_descr {
- /**
-  * struct rpmb_dev - device which can support RPMB partition
-  *
-- * @parent_dev       : parent device
-+ * @dev              : device
-+ * @id               : device_id
-  * @list_node        : linked list node
-  * @descr            : RPMB description
-  */
- struct rpmb_dev {
--	struct device *parent_dev;
-+	struct device dev;
-+	int id;
- 	struct list_head list_node;
- 	struct rpmb_descr descr;
- };
- 
--enum rpmb_interface_action {
--	RPMB_NOTIFY_ADD_DEVICE,
--};
--
--/**
-- * struct rpmb_interface - subscribe to new RPMB devices
-- *
-- * @list_node     : linked list node
-- * @add_rdev      : notifies that a new RPMB device has been found
-- */
--struct rpmb_interface {
--	struct list_head list_node;
--	void (*add_rdev)(struct rpmb_interface *intf, struct rpmb_dev *rdev);
--};
-+#define to_rpmb_dev(x)		container_of((x), struct rpmb_dev, dev)
- 
- #if IS_ENABLED(CONFIG_RPMB)
- struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev);
- void rpmb_dev_put(struct rpmb_dev *rdev);
- struct rpmb_dev *rpmb_dev_find_device(const void *data,
- 				      const struct rpmb_dev *start,
--				      int (*match)(struct rpmb_dev *rdev,
-+				      int (*match)(struct device *dev,
- 						   const void *data));
-+int rpmb_interface_register(struct class_interface *intf);
-+void rpmb_interface_unregister(struct class_interface *intf);
- struct rpmb_dev *rpmb_dev_register(struct device *dev,
- 				   struct rpmb_descr *descr);
- int rpmb_dev_unregister(struct rpmb_dev *rdev);
-@@ -87,8 +77,6 @@ int rpmb_dev_unregister(struct rpmb_dev *rdev);
- int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
- 		      unsigned int req_len, u8 *resp, unsigned int resp_len);
- 
--int rpmb_interface_register(struct notifier_block *nb);
--int rpmb_interface_unregister(struct notifier_block *nb);
- #else
- static inline struct rpmb_dev *rpmb_dev_get(struct rpmb_dev *rdev)
- {
-@@ -99,13 +87,22 @@ static inline void rpmb_dev_put(struct rpmb_dev *rdev) { }
- 
- static inline struct rpmb_dev *
- rpmb_dev_find_device(const void *data, const struct rpmb_dev *start,
--		     int (*match)(struct rpmb_dev *rdev, const void *data))
-+		     int (*match)(struct device *dev, const void *data))
- {
- 	return NULL;
- }
- 
-+static inline int rpmb_interface_register(struct class_interface *intf)
-+{
-+	return -EOPNOTSUPP;
-+}
++	if (IS_REACHABLE(CONFIG_RPMB) &&
++	    (sec_caps & OPTEE_SMC_SEC_CAP_RPMB_PROBE))
++		optee->in_kernel_rpmb_routing = true;
 +
-+static inline void rpmb_interface_unregister(struct class_interface *intf)
-+{
-+}
-+
- static inline struct rpmb_dev *
--rpmb_dev_register(struct device *dev, const struct rpmb_ops *ops)
-+rpmb_dev_register(struct device *dev, struct rpmb_descr *descr)
- {
- 	return NULL;
- }
-@@ -121,16 +118,6 @@ static inline int rpmb_route_frames(struct rpmb_dev *rdev, u8 *req,
- {
- 	return -EOPNOTSUPP;
- }
--
--static inline int rpmb_interface_register(struct notifier_block *nb)
--{
--	return -EOPNOTSUPP;
--}
--
--static inline int rpmb_interface_unregister(struct notifier_block *nb)
--{
--	return -EOPNOTSUPP;
--}
- #endif /* CONFIG_RPMB */
+ 	teedev = tee_device_alloc(&optee_clnt_desc, NULL, pool, optee);
+ 	if (IS_ERR(teedev)) {
+ 		rc = PTR_ERR(teedev);
+@@ -1702,6 +1707,8 @@ static int optee_probe(struct platform_device *pdev)
+ 	}
+ 	optee->supp_teedev = teedev;
  
- #endif /* __RPMB_H__ */
-diff --git a/include/linux/tee_drv.h b/include/linux/tee_drv.h
-index 71632e3c5f18..c668e51ae939 100644
---- a/include/linux/tee_drv.h
-+++ b/include/linux/tee_drv.h
-@@ -169,6 +169,18 @@ int tee_device_register(struct tee_device *teedev);
-  */
- void tee_device_unregister(struct tee_device *teedev);
- 
-+/**
-+ * tee_device_set_dev_groups() - Set device attribute groups
-+ * @teedev:	Device to register
-+ * @dev_groups: Attribute groups
-+ *
-+ * Assigns the provided @dev_groups to the @teedev to be registered later
-+ * with tee_device_register(). Calling this function is optional, but if
-+ * it's called it must be called before tee_device_register().
-+ */
-+void tee_device_set_dev_groups(struct tee_device *teedev,
-+			       const struct attribute_group **dev_groups);
++	optee_set_dev_group(optee);
 +
- /**
-  * tee_session_calc_client_uuid() - Calculates client UUID for session
-  * @uuid:		Resulting UUID
+ 	rc = tee_device_register(optee->teedev);
+ 	if (rc)
+ 		goto err_unreg_supp_teedev;
+@@ -1715,6 +1722,7 @@ static int optee_probe(struct platform_device *pdev)
+ 	optee->smc.memremaped_shm = memremaped_shm;
+ 	optee->pool = pool;
+ 	optee_shm_arg_cache_init(optee, arg_cache_flags);
++	mutex_init(&optee->rpmb_dev_mutex);
+ 
+ 	platform_set_drvdata(pdev, optee);
+ 	ctx = teedev_open(optee->teedev);
+@@ -1769,6 +1777,10 @@ static int optee_probe(struct platform_device *pdev)
+ 	if (rc)
+ 		goto err_disable_shm_cache;
+ 
++	INIT_WORK(&optee->rpmb_scan_bus_work, optee_bus_scan_rpmb);
++	optee->rpmb_intf.notifier_call = optee_rpmb_intf_rdev;
++	blocking_notifier_chain_register(&optee_rpmb_intf_added,
++					 &optee->rpmb_intf);
+ 	pr_info("initialized driver\n");
+ 	return 0;
+ 
+@@ -1782,6 +1794,8 @@ static int optee_probe(struct platform_device *pdev)
+ err_close_ctx:
+ 	teedev_close_context(ctx);
+ err_supp_uninit:
++	rpmb_dev_put(optee->rpmb_dev);
++	mutex_destroy(&optee->rpmb_dev_mutex);
+ 	optee_shm_arg_cache_uninit(optee);
+ 	optee_supp_uninit(&optee->supp);
+ 	mutex_destroy(&optee->call_queue.mutex);
 -- 
 2.34.1
 
