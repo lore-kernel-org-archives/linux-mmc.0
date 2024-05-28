@@ -1,57 +1,57 @@
-Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
+Received: from mail-ed1-f48.google.com (mail-ed1-f48.google.com [209.85.208.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32E5716F858
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0305416F843
 	for <linux-mmc@vger.kernel.org>; Tue, 28 May 2024 13:33:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1716903182; cv=none; b=W7t3HolxF2AKgLynmeFSEnxbgdP6Ufmg/P3UW42wXgH73/RYxv8o8doH4uJiNQq0d6e/Fzp3iGvOIoCegjFwJOiczqvQAYThL0NCI9Sb2g38NWTBhwQZafB1EedaypnS0Jw9YKtcqv+WEOgDKfexHnqRFwF8GhkppTxLJruOrzE=
+	t=1716903183; cv=none; b=MDXx3m/Oq8PhVvpiLYmIp8Fft8QmANdln2pdWTvaI7nJmpuJ+sxzAZZaxh5ptiJnqyI1+ehD1Ej1WZFB3uB/1oplqGx9NGHJYMT83B//uQleu+cxCOK9FHO2a5kH1VfexlrZSigtThOTO9+EPvq7YcIzWCbuM/nhCFKcDG+lXaM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1716903182; c=relaxed/simple;
-	bh=9k25ZsPTf+WrTiK8qVLkskl+r232la4YhtO+5MWY/Sk=;
+	s=arc-20240116; t=1716903183; c=relaxed/simple;
+	bh=IXiic31ZGn5xiaoNZvGY5NBDRfFO2Bu6aMdiRK86lmc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ISEegfvrz5UFYAWCeLFXWxPTltzy+wsgoc0YewEFWVuAqp3m3xPYHh8pdYFIdB56h56HN3/7TUa3OSwUEOPoWLrDapHEJUAxvnKG/vFy6KHwZL1CC/3evFCl0idDfIGglg3phfdf2PkagZSF3JDe9B3piZTaOfz/60CbZwsR3a8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=fd3kvgt1; arc=none smtp.client-ip=209.85.208.173
+	 MIME-Version; b=oviIiTstmqRu44IUs4pzkqo8a9Wz5O5V8qg0o0sp1zI2WoI/MEq79T1yhW5DJW7Ul6ixzXgvzrTlXs2qtDu1rQcQD+4j4LCgJlqKeqaWf1Jp3/jvpZcWKFSN/6/1FesHPWimOe487HSAjafiDLBa9E8k898U9k1yc2w8Y48DP14=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=XNwj5Bl/; arc=none smtp.client-ip=209.85.208.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="fd3kvgt1"
-Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-2e9819a630fso12732191fa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 28 May 2024 06:32:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="XNwj5Bl/"
+Received: by mail-ed1-f48.google.com with SMTP id 4fb4d7f45d1cf-57869599ed5so1011133a12.2
+        for <linux-mmc@vger.kernel.org>; Tue, 28 May 2024 06:33:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1716903178; x=1717507978; darn=vger.kernel.org;
+        d=suse.com; s=google; t=1716903179; x=1717507979; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=sE1zrpU4sY3RHfj/RfOgVZHYb52D/eP6ho+94PIl9YU=;
-        b=fd3kvgt1mB7F98/c+nrDsIQR1aPE4xbrVgnvejOCN6hP3kuSPyfhEyyrYWdUhQP+yx
-         PD7SB2F00cCkS3g6GU99TVCjj4dfEKgYsYg5zarhgv5Fb14wuVvgWs1DI0LOCXibAJYJ
-         ER4glnZdMNkoK9gIkxA7nQSQput9arVSB9fhWSsOZukFSA/TUStU+wcO8yL6wJbQs8Ag
-         YWWrxCzsMW6sjIESkQ9Lg9c6WtSowCJclFsw4lboywn/rBe67chVm+rwiM4IhfVMwAy8
-         J4EobSszR40irUj/nvGflzNpHOiDz9hlYtno+R6bwYZeKKjwtHRGaeiC612+o4lT9bEH
-         pIqg==
+        bh=msFCFwiwqcyL6ZO/+kBlzRSH/Up7idI6elTyfBuDv4M=;
+        b=XNwj5Bl/NMQVIhWsqAZV3T3uX1o1/TSuCjHmc60VpZQTVVg6j7/xA07yq6a6lfRXex
+         97u8/U22pCWr1vCW4rt4EjwophrblLpOUWoLOorhzfm1F8FxcpNH77NKTtxShy205h2h
+         rfUflg5OYjgG8b30YCletaLv7eUY1pYcWPxixWQJMX9MKtPTLewpOsRjg8LANTdnaxrL
+         mmKyGXwEyNHEtzsLGEpSeg6M9YlXsNXojlYboY0qUKRMc6GONJBmOc0wMNYVzubx6ieq
+         ih4hfEATOIQY7pj54mK0Y1l4D1EQXrh1UmaCbhnsfGeYZnPUbGBuHPsID9yx3EqTxyFl
+         +6WQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1716903178; x=1717507978;
+        d=1e100.net; s=20230601; t=1716903179; x=1717507979;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=sE1zrpU4sY3RHfj/RfOgVZHYb52D/eP6ho+94PIl9YU=;
-        b=l1ycXZPjaI0fRJn2eXFL7rRomSm/COru9bPmNXJ8la/cmyACL61H4agRFLiUSJSmTv
-         poSX6YHzk71uVM6kjRO/tQMybpz9cVSzJ03rLhNqoLcDazwEqMtzLcTfZLOtnyod9Ci/
-         XgekZyx/HLAV40CKcwpGQhaV31VzT11lbGNl2ij4Z87Yb5b20ztVmHATFeSrdbwpAqCe
-         fVlVyPd7XPT9Ac3vBeEXBlTHaEjG9ByvCIjSws2549xOmL5SeUI2FD4JxBEr3JiKwZLq
-         scEt/fS4nhDGsrgKT5ZgevmFYdwb/ELaQ1c+IpyoSAwmeYIHEZOkHPpHP0t12lfLuXly
-         w10g==
-X-Forwarded-Encrypted: i=1; AJvYcCUuYe94aNrfd0fVCqRlfKU5hZcUCIvjgMCTgiiCt8PeujdamyDf61ObQbR7d8w798LnztOxv0MlJb+mWdCXFVeMTSjpRVw1PDYF
-X-Gm-Message-State: AOJu0YxozJ1QBa8wR2plHTWEuOqxKQ+0nXujz82onWV+uhqEuzUhYG+L
-	HFaJoEPWmlg8GDKCWPcfJOLXJk1LxmlDV9uz5SMVvS9I+b++jxwWfNMLjBPUfOQ=
-X-Google-Smtp-Source: AGHT+IHEXl3H52Dmzhq+38r5mv+t/FOvPtQ+YYhX+r6nXpLxsLtRN0zdfqcZDN5fXmZhSF3uHYSdMA==
-X-Received: by 2002:a2e:a403:0:b0:2e9:8852:3d16 with SMTP id 38308e7fff4ca-2e9885242f1mr14453351fa.35.1716903178395;
-        Tue, 28 May 2024 06:32:58 -0700 (PDT)
+        bh=msFCFwiwqcyL6ZO/+kBlzRSH/Up7idI6elTyfBuDv4M=;
+        b=ZT6T0ro+E92P+qhKUKvdu02wAZUNHEc8wDP2c9BwTiceu2+y70aD89bVvrm6Hfqljr
+         dJtDFWNGGYpII5512jSNyrx5qklPJRmj+Gb/BrmxA2R2h8opMwAmrAgE84lUc0SjWes4
+         uexlRuKaWU5g/Cwowa5yhG+msEW1gsiOMJTZBigISqhm82qFAJnuHCzwBfTY0N8uxr2U
+         aOdymscBTO/h3u3kEPijC6rlUBZ1NAAkvky1PfE0VCSWPiv2WzOZLzHAdft8cxEnVdWt
+         PxkynJS1gWhx2RZBqNDnhJ6bvOdVuRvIpnHbWM8q/Kh5m7a+yDQ0thUTlZqkuCxZaHTi
+         Nbtg==
+X-Forwarded-Encrypted: i=1; AJvYcCVLCcuQjupznh84A0gAL11jtYPIm4N1I6vEyqLS3r2xEFsnUtCXF3UWtNfBJf+aK683v/opp5oBkCWSsK0Syngsuk67bvxNI64y
+X-Gm-Message-State: AOJu0Yx0xmPHIpsInZe+gTWpqW/GrBLLUcXXDL/pB2mDm3opOKY3zXgE
+	i7+KMkSUw1dMQYWJnDGVaxKPC/XBGdljxXkpQVnqZKOS8EpTSNez+6lRXAmFK20=
+X-Google-Smtp-Source: AGHT+IHtQeY8ahqqVRpLNRs6x2IiovKEZoNZkln4ViArMLwhSpDlpLCjMNDDdGHS+xJ3s0TUu2LfjQ==
+X-Received: by 2002:a50:9343:0:b0:579:e7c5:1001 with SMTP id 4fb4d7f45d1cf-579e7c51a1cmr2278257a12.23.1716903179511;
+        Tue, 28 May 2024 06:32:59 -0700 (PDT)
 Received: from localhost (host-87-16-233-11.retail.telecomitalia.it. [87.16.233.11])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a626cda60bdsm615456466b.207.2024.05.28.06.32.57
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5785241214dsm7320265a12.55.2024.05.28.06.32.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 May 2024 06:32:58 -0700 (PDT)
+        Tue, 28 May 2024 06:32:59 -0700 (PDT)
 From: Andrea della Porta <andrea.porta@suse.com>
 To: Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -70,12 +70,10 @@ To: Rob Herring <robh@kernel.org>,
 	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org
-Cc: Andrea della Porta <andrea.porta@suse.com>,
-	Conor Dooley <conor.dooley@microchip.com>,
-	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v4 1/4] dt-bindings: arm: bcm: Add BCM2712 SoC support
-Date: Tue, 28 May 2024 15:32:38 +0200
-Message-ID: <cfc4db17981ef946a71d40d522118a560aa0f15b.1716899600.git.andrea.porta@suse.com>
+Cc: Andrea della Porta <andrea.porta@suse.com>
+Subject: [PATCH v4 2/4] dt-bindings: mmc: Add support for BCM2712 SD host controller
+Date: Tue, 28 May 2024 15:32:39 +0200
+Message-ID: <0f263886c0622f43d3a2f4cccaebae0c39ba1bc5.1716899600.git.andrea.porta@suse.com>
 X-Mailer: git-send-email 2.44.0
 In-Reply-To: <cover.1716899600.git.andrea.porta@suse.com>
 References: <cover.1716899600.git.andrea.porta@suse.com>
@@ -87,34 +85,26 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The BCM2712 SoC is found on Raspberry Pi 5. Add compatible string to
-acknowledge its new chipset.
+The BCM2712 has an SDHCI capable host interface similar to the one found
+in other STB chipsets. Add the relevant compatible string.
 
 Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
-Reviewed-by: Stefan Wahren <wahrenst@gmx.net>
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
- Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml | 6 ++++++
- 1 file changed, 6 insertions(+)
+ Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml b/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
-index 162a39dab218..e4ff71f006b8 100644
---- a/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
-+++ b/Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml
-@@ -23,6 +23,12 @@ properties:
-               - raspberrypi,4-model-b
-           - const: brcm,bcm2711
- 
-+      - description: BCM2712 based Boards
-+        items:
-+          - enum:
-+              - raspberrypi,5-model-b
-+          - const: brcm,bcm2712
-+
-       - description: BCM2835 based Boards
-         items:
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+index cbd3d6c6c77f..eee6be7a7867 100644
+--- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
++++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+@@ -20,6 +20,7 @@ properties:
+           - const: brcm,sdhci-brcmstb
+       - items:
            - enum:
++              - brcm,bcm2712-sdhci
+               - brcm,bcm74165b0-sdhci
+               - brcm,bcm7445-sdhci
+               - brcm,bcm7425-sdhci
 -- 
 2.35.3
 
