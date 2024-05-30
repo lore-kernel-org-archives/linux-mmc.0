@@ -1,212 +1,123 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2C561527B3;
-	Thu, 30 May 2024 12:45:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 808D117C9F7;
+	Thu, 30 May 2024 13:44:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717073147; cv=none; b=TbME9yM+j/Lyj0dpSp9hs9PLxfMMutDZWhljvqigeypysLlHeAx14t7/QaRw9eIKsGmeOgadvobQ1RH1aionr6orHHlmioNkzABdivAw22+WMgBAAk4MMxeCohYOLfsdeHynqjzu0M/y/nFupO8ExE1SKWhGlMUlN0O8J2k3vZQ=
+	t=1717076654; cv=none; b=j0Hg8iI145m8mDaU4Xo9OrUVgGGYk/r0EPSI+YaNi47r+kY0elsqfdVWz5dpEuGAbd4QIABkXEeByF+6B1HpvZ5aFT7RArLmWIOVUjSQTncNF8J8PAIFwUJiYeRHp6unKWdgCWm6Je7Gn2R8NBqaZNWYBLNecXVnmxn8EydVjYk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717073147; c=relaxed/simple;
-	bh=CF6wj9uwwxJ7t4T/CRYfBis0J60Ov5IUPcDshFPFLlc=;
-	h=Date:Content-Type:MIME-Version:From:To:Cc:In-Reply-To:References:
-	 Message-Id:Subject; b=TqVksg2wWfKg9QPj8HMCwSq1uj9Jow41/IdxKRUYjy5SbeS2oYVrGKGSYvrdQfd/sV+aqpZN8ztjKa3K5F6/fGsSANEp5UYW8aoyHmpzWdpCPZZcONVHAd2w9NyRWYx549Z1DzXgR/3ypsUtFeMsIp4tbPs7X0v3RpBSMtRyTf0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Afups1Pj; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Afups1Pj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB69BC32786;
-	Thu, 30 May 2024 12:45:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717073147;
-	bh=CF6wj9uwwxJ7t4T/CRYfBis0J60Ov5IUPcDshFPFLlc=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=Afups1Pj8vrizdavbZTHDdY8jqH5BqXfqq/LTJqLi2FbeFO6l1/N4uSMbTfqxWiRG
-	 V5suGxISt8I6blPriTNfVuQ/I6Pmr9yDrulVKbqGKPndn+JIKkmA8tzb0s7uN1vQvV
-	 kV5+PDfakVUpF9E7mYnyBHcDkK57maHJKwe7IC5kk4ihspNN1OWY07i/rNRrLcHq7G
-	 Y40CjmHvRESAd+gPkx+t5P82PGaxVMjuo0zNxFP9zx414sQHJPHyeATEIAPv2m+95g
-	 eRjgcqGAp/6QRHdBGSihhfXQlMHiJekrU0nvmO3PcO+wEmGuMA8DvO6Gn5kIyoyp4V
-	 p0mLFEOLjkgHQ==
-Date: Thu, 30 May 2024 07:45:46 -0500
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+	s=arc-20240116; t=1717076654; c=relaxed/simple;
+	bh=WAQ94FAkmmst5XBLICAuOBXkPx+QebudViPIoZrjHDk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=b379SvXzsc/415G59T5g63cdh03TTGUoG6a8xNJjo0f7gwK7ctODPilKGRe/kBDck0zALwUj2xN98BY9URT3SI0YGs65DHa+aKjuWoi0XdQas8JZGY9UjSJQ1X3A9dTCMG7Vv6pFaxCYh7wfXCZPeSDkg7+PjCAL68X6zOJHT1o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-62a0873c6e4so8403807b3.3;
+        Thu, 30 May 2024 06:44:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1717076650; x=1717681450;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=tCmfn7QmN2YKSjQZBi6juMoZ0F7gpnZynmpI9+bTokI=;
+        b=CkCDUuJtIg5q3J7j93G1V2yc+kDtytPStm5orfk9PfgyGu5+l338CBtRwjuUEhtd6W
+         zV0ztHD0GkZXOIc3D+sWGrr6dix1SLTjzl7jsZD4pcZo0NwSvy6g/58Z21SZ3q4kTs6f
+         3wILNIkCDefdzE4uHq+vSublEq53DGCvC6ebtC4NIFmw5nAjlVQQ+Dm1J58TOtH09e2x
+         lrFzfg4UbZxIRktQZERESd1vj+LoQR7Yav7bXN9MtrgDR33zufr4ZBCDY5u77crv1YiX
+         Bu+X+SfMXMgjjrzlwVmoxL8p1cpE4tXt+OKBMhWNUBtiGwRIgq2OVQJ+tgqW6IA1+E97
+         vwTA==
+X-Forwarded-Encrypted: i=1; AJvYcCXTIUbsQCLKoGVUWfOkfqR9aVHs62ZnyPmdQRtP5zSMRkHfzghJkfH8lDGGNGGSIwbxlOqrgKdUj4d5Wuf0LIPSPZ0Ef9+s102V0LSNgodTDbbMrh98ODGTrZOz9H3ULaigYz+y7ZGpAQXkn5Ocl8Y2WVoa4bSdzOl6HP1UYShWXAQRmM5Q60HMEKMK42PpwynLGbUEdLzOCf4ZwvGty0Eoilih7ntC
+X-Gm-Message-State: AOJu0Yyb7IewndNT5yvppWlt1UOJ+MqeLL81MM0IPiNcBIWAokQdzWEM
+	ABbd9yTPP99w3l3JoOZhj5nwz84tUsG/lmeffwv0mWdbeG0evPczDPaI3vy9
+X-Google-Smtp-Source: AGHT+IEyNBEzUGHmLljO3yP2xLsPffWKWyvzySlz6S8yeefOCiRCUBNulQlH9Hg2keYjmNnGHIQu1Q==
+X-Received: by 2002:a81:4327:0:b0:622:f785:5499 with SMTP id 00721157ae682-62c6bcc59damr25507207b3.37.1717076649734;
+        Thu, 30 May 2024 06:44:09 -0700 (PDT)
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com. [209.85.219.170])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-62a0a56a5c3sm27797017b3.137.2024.05.30.06.44.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 30 May 2024 06:44:09 -0700 (PDT)
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-dfa59545e0fso878973276.0;
+        Thu, 30 May 2024 06:44:09 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVFq2BEtDUup3xKrj2hh7SqXMv05OV/0ioMCy+1Yh/Nopzlo9mJCec1MEUyvu+v+ZGm4ju/IQ3A8zKkD0x58i+Y49h/2FJPBNGA58LvpDkV8jxvhJmAastH32Y+XG3vj4UslaoPLhBICF+4KklYoSjKBeELoGkJx32U9Zr/IHrVk7fLM79a0kxkyXGHzGCn4reRqnZyltnu2+YfM70HD7QODLb1LAS/
+X-Received: by 2002:a25:d8d6:0:b0:df7:9bf8:a5c7 with SMTP id
+ 3f1490d57ef6-dfa5a7ce112mr3001630276.57.1717076648680; Thu, 30 May 2024
+ 06:44:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Andrea della Porta <andrea.porta@suse.com>
-Cc: Scott Branden <sbranden@broadcom.com>, 
- Florian Fainelli <florian.fainelli@broadcom.com>, 
- Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, 
- Conor Dooley <conor+dt@kernel.org>, Al Cooper <alcooperx@gmail.com>, 
- Ray Jui <rjui@broadcom.com>, Stefan Wahren <wahrenst@gmx.net>, 
- devicetree@vger.kernel.org, 
- Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, 
- linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, 
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
- Kamal Dasu <kamal.dasu@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
- Adrian Hunter <adrian.hunter@intel.com>
-In-Reply-To: <cover.1717061147.git.andrea.porta@suse.com>
-References: <cover.1717061147.git.andrea.porta@suse.com>
-Message-Id: <171707307136.1811771.156652831565902028.robh@kernel.org>
-Subject: Re: [PATCH v5 0/4] Add minimal boot support for Raspberry Pi 5
+References: <20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdW3YQMUOe9pP6TLjWTTkS-UNmzz21eqgW0nMQ4SUkwxGA@mail.gmail.com>
+In-Reply-To: <CAMuHMdW3YQMUOe9pP6TLjWTTkS-UNmzz21eqgW0nMQ4SUkwxGA@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Thu, 30 May 2024 15:43:55 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdWEL2PJZ=wKse2V2KyBW=XEt3FFY19y4UD5k4tQNjOJtg@mail.gmail.com>
+Message-ID: <CAMuHMdWEL2PJZ=wKse2V2KyBW=XEt3FFY19y4UD5k4tQNjOJtg@mail.gmail.com>
+Subject: Re: [PATCH 0/6] Update compat strings for SD/MMC nodes on RZ/{G2L
+ (family), G3S, V2M} SoCs
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Tue, Apr 23, 2024 at 8:57=E2=80=AFAM Geert Uytterhoeven <geert@linux-m68=
+k.org> wrote:
+> On Mon, Apr 22, 2024 at 11:30=E2=80=AFPM Prabhakar <prabhakar.csengg@gmai=
+l.com> wrote:
+> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > - RZ/G2UL and RZ/Five ("r9a07g043")
+> > - RZ/G2L(C) ("r9a07g044")
+> > - RZ/V2L ("r9a07g054")
+> > - RZ/G3S ("r9a08g045")
+> > - RZ/V2M ("r9a09g011")
+> >
+> > The SD/MMC Interface in the above listed SoCs is not identical to that =
+of
+> > R-Car Gen3. These SoCs have HS400 disabled and use fixed address mode.
+> > Therefore, we need to apply fixed_addr_mode and hs400_disabled quirks.
+> > 'renesas,rzg2l-sdhi' is introduced as a generic compatible string for t=
+he
+> > above SoCs where fixed_addr_mode and hs400_disabled quirks will be appl=
+ied.
+>
+> Thanks for your series!
+>
+> > Lad Prabhakar (6):
+> >   dt-bindings: mmc: renesas,sdhi: Drop 'items' keyword
+> >   dt-bindings: mmc: renesas,sdhi: Document RZ/G2L family compatibility
+> >   mmc: renesas_sdhi: Add compatible string for RZ/G2L family, RZ/G3S,
+> >     and RZ/V2M SoCs
+> >   arm64: dts: renesas: r9a09g011: Update fallback string for SDHI nodes
+> >   arm64: dts: renesas: rzg2l-family: Update fallback string for SDHI
+> >     nodes
+> >   arm64: dts: renesas: r9a08g045: Update fallback string for SDHI nodes
+>
+> The DTS patches have a hard dependency on the driver changes, right?
+> So they cannot be applied in parallel.
 
-On Thu, 30 May 2024 12:11:57 +0200, Andrea della Porta wrote:
-> Hi,
-> 
-> This patchset adds minimal support for the Broadcom BCM2712 SoC and for
-> the on-board SDHCI controller on Broadcom BCM2712 in order to make it
-> possible to boot (particularly) a Raspberry Pi 5 from SD card and get a
-> console through uart.
-> Changes to arm64/defconfig are not needed since the actual options work
-> as they are.
-> This work is heavily based on downstream contributions.
-> 
-> Tested on Tumbleweed substituting the stock kernel with upstream one,
-> either chainloading uboot+grub+kernel or directly booting the kernel
-> from 1st stage bootloader. Steps to reproduce:
-> - prepare an SD card from a Raspberry enabled raw image, mount the first
->   FAT partition.
-> - make sure the FAT partition is big enough to contain the kernel,
->   anything bigger than 64Mb is usually enough, depending on your kernel
->   config options.
-> - build the kernel and dtbs making sure that the support for your root
->   fs type is compiled as builtin.
-> - copy the kernel image in your FAT partition overwriting the older one
->   (e.g. kernel*.img for Raspberry Pi OS or u-boot.bin for Tumbleweed).
-> - copy arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb on FAT partition.
-> - make sure you have a cmdline.txt file in FAT partition with the
->   following content:
->   # cat /boot/efi/cmdline.txt
->   root=/dev/mmcblk0p3 rootwait rw console=tty ignore_loglevel earlycon
->   console=ttyAMA10,115200
-> - if you experience random SD issues during boot, try to set
->   initial_turbo=0 in config.txt.
-> 
-> 
-> Changes in V5:
-> 
-> DTS:
-> - axi node merged into soc node
-> - redefined the mapping ranges of the soc node to have proper translation,
->   and a narrower address and size cell number for child nodes.Child nodes
->   reg properties adjusted accordingly
-> - augemented the comment in 'gio_aon' node
-> 
-> sdhci-brcmstb.c:
-> - removed unused 'base_clk_mhz' variable
-> 
-> 
-> Changes in V4:
-> 
-> sdhci-brcmstb.c:
-> - dropped the last 4 lines of sdhci_brcmstb_cfginit_2712() function
->   to avoid setting the SDIO_CFG_CQ_CAPABILITY register. The rationale
->   behind this can be found in [4] and subsequent comments
-> 
-> DT-bindings:
-> - simplified the compatible item list for 'brcm,bcm2712-sdhci' as per [5]
-> 
-> 
-> Changes in V3:
-> 
-> DTS:
-> - uart0 renamed to uart10 to reflect the current indexing (ttyAMA10
->   and serial10)
-> - updated the license to (GPL-2.0 OR MIT)
-> - sd_io_1v8_reg 'states' property have second cells as decimal instead
->   of hex.
-> - root node has size-cells=<2> now to accommodate for the DRAM controller
->   and the address bus mapping that goes beyond 4GB. As a consequence,
->   memory, axi and reserved-memory nodes have also size-cells=<2> and
->   subnodes reg and ranges properties have been updated accordingly
-> - ranges property in 'axi' node has been fixed, reg properties of sdio1
->   and gicv2 subnodes have been adjusted according to the new mapping
-> - 'interrupt-controller@7d517000' node is now enabled by default
-> - dropped 'arm,cpu-registers-not-fw-configured' as it is no longer
->   relevant on A76 core
-> - l2 cache nodes moved under respective cpus, since they are per-cpu
-> - dropped psci cpu functions properties
-> - added the hypervisor EL2 virtual timer interrupt to the 'timer' node
-> - splitted-lines url are now on a single line
-> 
-> sdhci-brcmstb.c:
-> - simplified MMC_CAP_HSE_MASK leveraging already existing definitions
-> - MMC_CAP_UHS_MASK renamed to MMC_CAP_UHS_I_SDR_MASK to better reflect
->   its purpose. Added also a comment.
-> - sdhci_brcmstb_set_power() replaced with the already existing (and
->   equivalent) sdhci_set_power_and_bus_voltage()
-> 
-> DT-bindings:
-> - removed the BCM2712 specific example, as per Rob's request
-> 
-> 
-> Changes in V2:
-> 
-> - the patchshet has been considerably simplified, both in terms of dts and
->   driver code. Notably, the pinctrl/pinmux driver (and associated binding)
->   was not strictly needed to use the SD card so it has been dropped
-> - dropped the optional SD express support patch
-> - the patches order has been revisited
-> - pass all checks (binding, dtb, checkpatch)
-> 
-> 
-> Many thanks,
-> Andrea
-> 
-> References:
-> [1] - Link to V1: https://lore.kernel.org/all/cover.1713036964.git.andrea.porta@suse.com/
-> [2] - Link to V2: https://lore.kernel.org/all/cover.1715332922.git.andrea.porta@suse.com/
-> [3] - Link to V3: https://lore.kernel.org/all/cover.1716277695.git.andrea.porta@suse.com/
-> [4] - https://lore.kernel.org/all/ZlF5dQbNpZ921e66@apocalypse/
-> [5] - https://lore.kernel.org/all/bc1eb98c-9d49-4424-ab89-16be6c67c3f5@gmx.net/#t
-> 
-> Andrea della Porta (4):
->   dt-bindings: arm: bcm: Add BCM2712 SoC support
->   dt-bindings: mmc: Add support for BCM2712 SD host controller
->   mmc: sdhci-brcmstb: Add BCM2712 support
->   arm64: dts: broadcom: Add minimal support for Raspberry Pi 5
-> 
->  .../devicetree/bindings/arm/bcm/bcm2835.yaml  |   6 +
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      |   1 +
->  arch/arm64/boot/dts/broadcom/Makefile         |   1 +
->  .../boot/dts/broadcom/bcm2712-rpi-5-b.dts     |  64 ++++
->  arch/arm64/boot/dts/broadcom/bcm2712.dtsi     | 283 ++++++++++++++++++
->  drivers/mmc/host/sdhci-brcmstb.c              |  60 ++++
->  6 files changed, 415 insertions(+)
->  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
->  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2712.dtsi
-> 
-> --
-> 2.35.3
-> 
-> 
-> 
+As this dependency is not i v6.10-rc1, I will queue the DTS patches
+in renesas-devel for v6.11.
 
+Gr{oetje,eeting}s,
 
-My bot found new DTB warnings on the .dts files added or changed in this
-series.
+                        Geert
 
-Some warnings may be from an existing SoC .dtsi. Or perhaps the warnings
-are fixed by another series. Ultimately, it is up to the platform
-maintainer whether these warnings are acceptable or not. No need to reply
-unless the platform maintainer has comments.
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-If you already ran DT checks and didn't see these error(s), then
-make sure dt-schema is up to date:
-
-  pip3 install dtschema --upgrade
-
-
-New warnings running 'make CHECK_DTBS=y broadcom/bcm2712-rpi-5-b.dtb' for cover.1717061147.git.andrea.porta@suse.com:
-
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc@107c000000/timer@7c003000: failed to match any schema with compatible: ['brcm,bcm2835-system-timer']
-arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb: /soc@107c000000/local-intc@7cd00000: failed to match any schema with compatible: ['brcm,bcm2836-l1-intc']
-
-
-
-
-
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
