@@ -1,123 +1,186 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 808D117C9F7;
-	Thu, 30 May 2024 13:44:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+Received: from mecka.net (mecka.net [159.69.159.214])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 15C0616F0E8;
+	Thu, 30 May 2024 14:22:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.69.159.214
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717076654; cv=none; b=j0Hg8iI145m8mDaU4Xo9OrUVgGGYk/r0EPSI+YaNi47r+kY0elsqfdVWz5dpEuGAbd4QIABkXEeByF+6B1HpvZ5aFT7RArLmWIOVUjSQTncNF8J8PAIFwUJiYeRHp6unKWdgCWm6Je7Gn2R8NBqaZNWYBLNecXVnmxn8EydVjYk=
+	t=1717078944; cv=none; b=E3sKQv7ZNN5rir8jbhv6NBOXWN2zaD1iIxFgwZvQ1Jnt2UMzyybisxUP0HWfiqUZm9jkwyk4pqfwu99mN8FUz4syFEwyZ2Pu/4/ntCapdZGwHqH6dPkdvu/WZ7g/MMXA9o1HLXJOPataaUko5ih9kvKR2krgDfBcOP1wSYybRNQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717076654; c=relaxed/simple;
-	bh=WAQ94FAkmmst5XBLICAuOBXkPx+QebudViPIoZrjHDk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=b379SvXzsc/415G59T5g63cdh03TTGUoG6a8xNJjo0f7gwK7ctODPilKGRe/kBDck0zALwUj2xN98BY9URT3SI0YGs65DHa+aKjuWoi0XdQas8JZGY9UjSJQ1X3A9dTCMG7Vv6pFaxCYh7wfXCZPeSDkg7+PjCAL68X6zOJHT1o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-62a0873c6e4so8403807b3.3;
-        Thu, 30 May 2024 06:44:12 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1717076650; x=1717681450;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=tCmfn7QmN2YKSjQZBi6juMoZ0F7gpnZynmpI9+bTokI=;
-        b=CkCDUuJtIg5q3J7j93G1V2yc+kDtytPStm5orfk9PfgyGu5+l338CBtRwjuUEhtd6W
-         zV0ztHD0GkZXOIc3D+sWGrr6dix1SLTjzl7jsZD4pcZo0NwSvy6g/58Z21SZ3q4kTs6f
-         3wILNIkCDefdzE4uHq+vSublEq53DGCvC6ebtC4NIFmw5nAjlVQQ+Dm1J58TOtH09e2x
-         lrFzfg4UbZxIRktQZERESd1vj+LoQR7Yav7bXN9MtrgDR33zufr4ZBCDY5u77crv1YiX
-         Bu+X+SfMXMgjjrzlwVmoxL8p1cpE4tXt+OKBMhWNUBtiGwRIgq2OVQJ+tgqW6IA1+E97
-         vwTA==
-X-Forwarded-Encrypted: i=1; AJvYcCXTIUbsQCLKoGVUWfOkfqR9aVHs62ZnyPmdQRtP5zSMRkHfzghJkfH8lDGGNGGSIwbxlOqrgKdUj4d5Wuf0LIPSPZ0Ef9+s102V0LSNgodTDbbMrh98ODGTrZOz9H3ULaigYz+y7ZGpAQXkn5Ocl8Y2WVoa4bSdzOl6HP1UYShWXAQRmM5Q60HMEKMK42PpwynLGbUEdLzOCf4ZwvGty0Eoilih7ntC
-X-Gm-Message-State: AOJu0Yyb7IewndNT5yvppWlt1UOJ+MqeLL81MM0IPiNcBIWAokQdzWEM
-	ABbd9yTPP99w3l3JoOZhj5nwz84tUsG/lmeffwv0mWdbeG0evPczDPaI3vy9
-X-Google-Smtp-Source: AGHT+IEyNBEzUGHmLljO3yP2xLsPffWKWyvzySlz6S8yeefOCiRCUBNulQlH9Hg2keYjmNnGHIQu1Q==
-X-Received: by 2002:a81:4327:0:b0:622:f785:5499 with SMTP id 00721157ae682-62c6bcc59damr25507207b3.37.1717076649734;
-        Thu, 30 May 2024 06:44:09 -0700 (PDT)
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com. [209.85.219.170])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-62a0a56a5c3sm27797017b3.137.2024.05.30.06.44.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 30 May 2024 06:44:09 -0700 (PDT)
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-dfa59545e0fso878973276.0;
-        Thu, 30 May 2024 06:44:09 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVFq2BEtDUup3xKrj2hh7SqXMv05OV/0ioMCy+1Yh/Nopzlo9mJCec1MEUyvu+v+ZGm4ju/IQ3A8zKkD0x58i+Y49h/2FJPBNGA58LvpDkV8jxvhJmAastH32Y+XG3vj4UslaoPLhBICF+4KklYoSjKBeELoGkJx32U9Zr/IHrVk7fLM79a0kxkyXGHzGCn4reRqnZyltnu2+YfM70HD7QODLb1LAS/
-X-Received: by 2002:a25:d8d6:0:b0:df7:9bf8:a5c7 with SMTP id
- 3f1490d57ef6-dfa5a7ce112mr3001630276.57.1717076648680; Thu, 30 May 2024
- 06:44:08 -0700 (PDT)
+	s=arc-20240116; t=1717078944; c=relaxed/simple;
+	bh=j/5sxtjkE1VMqIsq7Kzk+4jzHYmqSi6AnnqTz+HctSI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eTIuw/7Ugv1SOeSaekeNpkvK4UPWL3Knawvd3/vg+Pp4EyccIWRcosUegau3DrPIZhTzjN78SGeRqBZdQdmjSffJizNtq2klDJb1eoeM1LCXNj5tCao2Qu7JPdu48Vg/y60QEKUzFnmofgntYU1DSMPYJFcu+Ajsliuhnz+gOww=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net; spf=pass smtp.mailfrom=mecka.net; dkim=fail (0-bit key) header.d=mecka.net header.i=@mecka.net header.b=B2ffU7hG reason="key not found in DNS"; arc=none smtp.client-ip=159.69.159.214
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=mecka.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mecka.net
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=fail reason="key not found in DNS" (0-bit key) header.d=mecka.net header.i=@mecka.net header.b="B2ffU7hG"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=mecka.net; s=2016.11;
+	t=1717078933; bh=j/5sxtjkE1VMqIsq7Kzk+4jzHYmqSi6AnnqTz+HctSI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=B2ffU7hGMxt1l+bCgPf7HV8S/wd6vWGjjPhZ5Db43KsZZwUqr2WUPf9QytevB/EXW
+	 0HDr9Aw53iGoAkXFhFt/TwQmJNJShDcuFVLqebuhJtiFRXpSFcsmibwE0KctuLtRe8
+	 Nf/ZsVclLqyDtXrpeDxt7gOMq0lGz3jM8NPluypl9CqR4v94qt7TcLe8UUquYLx0/X
+	 TsD8KHGAMeBK4VxIeT0BzHaSwWcva735y0tfTryNwfNw960AjFgRyVTgfDYPsyt0ZZ
+	 VsEPSZOsrry5aGa1nJzPjC0SEwW+qwF5VPJnZVazG5snevRxLGxj2Ef7Iwp21Cx1Pc
+	 1rFg0a9ZOBnFg==
+Received: from mecka.net (unknown [185.147.11.134])
+	by mecka.net (Postfix) with ESMTPSA id 29F6450C1EB;
+	Thu, 30 May 2024 16:22:13 +0200 (CEST)
+Date: Thu, 30 May 2024 16:22:11 +0200
+From: Manuel Traut <manut@mecka.net>
+To: Mikko Rapeli <mikko.rapeli@linaro.org>
+Cc: Sumit Garg <sumit.garg@linaro.org>,
+	Jens Wiklander <jens.wiklander@linaro.org>,
+	Jerome Forissier <jerome.forissier@linaro.org>,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	op-tee@lists.trustedfirmware.org,
+	Shyam Saini <shyamsaini@linux.microsoft.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Randy Dunlap <rdunlap@infradead.org>,
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
+Message-ID: <ZliLk1VkekBQlyO7@mecka.net>
+References: <20240527121340.3931987-5-jens.wiklander@linaro.org>
+ <fc3bfebb-78b7-428e-8da5-5221f4921faa@linaro.org>
+ <CAHUa44G0bcK55RxNrN5sXiicBZ-BJtA46KpedfBdUSKsN8eUOA@mail.gmail.com>
+ <ZlWkSCCjJ2fbE2ML@nuoska>
+ <CAFA6WYOT52fdqgGvDYE91DQ_4MUbAv_1Gnn2fTyMNhrj_Agu=w@mail.gmail.com>
+ <ZlbUwI0G3HGvioNm@nuoska>
+ <Zlb3fuqvQIO9ghQX@manut.de>
+ <Zlc7B6khuhGZ6QOZ@nuoska>
+ <ZlgsLibqO59kNQUE@mecka.net>
+ <Zlg411JGQJf2zRPe@nuoska>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240422213006.505576-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <CAMuHMdW3YQMUOe9pP6TLjWTTkS-UNmzz21eqgW0nMQ4SUkwxGA@mail.gmail.com>
-In-Reply-To: <CAMuHMdW3YQMUOe9pP6TLjWTTkS-UNmzz21eqgW0nMQ4SUkwxGA@mail.gmail.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 30 May 2024 15:43:55 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWEL2PJZ=wKse2V2KyBW=XEt3FFY19y4UD5k4tQNjOJtg@mail.gmail.com>
-Message-ID: <CAMuHMdWEL2PJZ=wKse2V2KyBW=XEt3FFY19y4UD5k4tQNjOJtg@mail.gmail.com>
-Subject: Re: [PATCH 0/6] Update compat strings for SD/MMC nodes on RZ/{G2L
- (family), G3S, V2M} SoCs
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <Zlg411JGQJf2zRPe@nuoska>
 
-On Tue, Apr 23, 2024 at 8:57=E2=80=AFAM Geert Uytterhoeven <geert@linux-m68=
-k.org> wrote:
-> On Mon, Apr 22, 2024 at 11:30=E2=80=AFPM Prabhakar <prabhakar.csengg@gmai=
-l.com> wrote:
-> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > - RZ/G2UL and RZ/Five ("r9a07g043")
-> > - RZ/G2L(C) ("r9a07g044")
-> > - RZ/V2L ("r9a07g054")
-> > - RZ/G3S ("r9a08g045")
-> > - RZ/V2M ("r9a09g011")
-> >
-> > The SD/MMC Interface in the above listed SoCs is not identical to that =
-of
-> > R-Car Gen3. These SoCs have HS400 disabled and use fixed address mode.
-> > Therefore, we need to apply fixed_addr_mode and hs400_disabled quirks.
-> > 'renesas,rzg2l-sdhi' is introduced as a generic compatible string for t=
-he
-> > above SoCs where fixed_addr_mode and hs400_disabled quirks will be appl=
-ied.
->
-> Thanks for your series!
->
-> > Lad Prabhakar (6):
-> >   dt-bindings: mmc: renesas,sdhi: Drop 'items' keyword
-> >   dt-bindings: mmc: renesas,sdhi: Document RZ/G2L family compatibility
-> >   mmc: renesas_sdhi: Add compatible string for RZ/G2L family, RZ/G3S,
-> >     and RZ/V2M SoCs
-> >   arm64: dts: renesas: r9a09g011: Update fallback string for SDHI nodes
-> >   arm64: dts: renesas: rzg2l-family: Update fallback string for SDHI
-> >     nodes
-> >   arm64: dts: renesas: r9a08g045: Update fallback string for SDHI nodes
->
-> The DTS patches have a hard dependency on the driver changes, right?
-> So they cannot be applied in parallel.
+On Thu, May 30, 2024 at 11:29:11AM +0300, Mikko Rapeli wrote:
+> On Thu, May 30, 2024 at 09:35:10AM +0200, Manuel Traut wrote:
+> > Hi Mikko,
+> > 
+> > On Wed, May 29, 2024 at 05:26:15PM +0300, Mikko Rapeli wrote:
+> > > Hi,
+> > > 
+> > > On Wed, May 29, 2024 at 11:38:06AM +0200, Manuel Traut wrote:
+> > > > Hi Mikko,
+> > > > 
+> > > > On 10:09 Wed 29 May     , Mikko Rapeli wrote:
+> > > > > On Wed, May 29, 2024 at 10:56:04AM +0530, Sumit Garg wrote:
+> > > > > > On Tue, 28 May 2024 at 15:00, Mikko Rapeli <mikko.rapeli@linaro.org> wrote:
+> > > > > > > On Mon, May 27, 2024 at 03:24:01PM +0200, Jens Wiklander wrote:
+> > > > > > > > On Mon, May 27, 2024 at 3:00 PM Jerome Forissier
+> > > > > > > > <jerome.forissier@linaro.org> wrote:
+> > > > > > > > > On 5/27/24 14:13, Jens Wiklander wrote:
+> > > > > > > Outside of these patches, I think the optee RPC setup with fTPM TA is one area which
+> > > > > > > currently requires tee-supplicant to be started. Detecting the existence of TPM before
+> > > > > > > kernel drivers are loaded is possible via the exported EFI logs from firmware to kernel
+> > > > > > > or ACPI TPM2 table entry, and detecting optee and thus starting tee-supplicant in userspace too.
+> > > > > > 
+> > > > > > One thing I am trying to find an answer about is why do we need to
+> > > > > > defer tee-supplicant launch if it's bundled into initrd? Once you
+> > > > > > detect OP-TEE then tee-supplicant should be launched unconditionally.
+> > > > > > As per your example below, the motivation here seems to be the TPM2
+> > > > > > device dependent on RPMB backend but what if other future systemd
+> > > > > > services come up and depend on other services offered by
+> > > > > > tee-supplicant?
+> > > > > 
+> > > > > There is an annoying depedency between firmware side optee and TAs, and kernel optee driver,
+> > > > > tee-supplicant in userspace and kernel TA drivers like fTPM.
+> > > > > 
+> > > > > Kernel fTPM driver and fTPM TA require tee-supplicant in userspace for RPMB, RPC etc.
+> > > > > 
+> > > > > This patch series is adding kernel side support for RPMB handling so that the dependency to
+> > > > > tee-supplicant in userspace can be removed. For fTPM use case, there is still the optee RPC
+> > > > > buffer setup which currently requires tee-supplicant in userspace or fTPM TA will panic.
+> > > > > 
+> > > > > So yes, currently, tee-supplicant must be started. But it would be great if kernel drivers
+> > > > > and firmware optee trusted applications would not depend on tee-supplicant running in userspace.
+> > > > > The startup sequence is really tricky to get right. My fTPM use case is using the TPM device
+> > > > > to encrypt rootfs and thus all SW components including tee-supplicant need to run early in
+> > > > > initramfs. Currently also switch from initramfs to main rootfs requires unloading
+> > > > > fTPM kernel driver and stopping tee-supplicant in initrd, and then starting tee-supplicant
+> > > > > and loading fTPM kernel driver from main rootfs. udev and automatic module loading for
+> > > > > fTPM can not be used due to the tee-supplicant userspace dependency.
+> > > > 
+> > > > I decided to build fTPM as buildin-TA into OP-TEE. RPMB routing is already
+> > > > implemented in u-boot so it can already write PCR registers.
+> > > 
+> > > Is build in TA same as early TA? I presume so.
+> > 
+> > Indeed.. sorry for using the wrong term.
+> 
+> Ok, no problem. Then we have the same fTPM TA setup. I'm using optee 4.1
+> with RPMB kernel support changes from Jens cherry-picked on top.
+> 
+> > > > With this series and the required changes in OP-TEE and a compiled in fTPM
+> > > > kernel driver and systemd v256 it is possible to use the fTPM in the initrd
+> > > > without tee-supplicant.
+> > > > 
+> > > > Maybe this information is helpful to you, regards
+> > > 
+> > > This is very interesting and I'm trying to get to the same state, though with
+> > > fTPM kernel driver as module. With v6 of this patch set and matching optee changes
+> > > I was not able to make this work as fTPM TA was crashing when loading ftpm kernel driver
+> > > due to failing RPC allocation, which tee-supplicant was setting up in the whole chain.
+> > > I'll try to get v7 patches working and test this again on my yocto based setup and kernel 6.6.y.
+> > 
+> > I'll try today also with v7 and 6.10-rc1 on an i.MX8MM. It should also
+> > work with fTPM as kernel module if you use systemd in the initrd
+> > with the new tpm.target in systemd v256.
+> 
+> Thanks for the details. I'm testing on qemu, rockpi4b (Rockchip rk3399 SoC) and synquacer
+> (Socionext Developer Box, SC2A11:Cortex-A53 MPCore 24cores). Kernel and rootfs
+> are from our yocto master branch based Trusted Reference Stack distro
+> ( https://gitlab.com/Linaro/trusted-reference-stack/trs )
+> with kernel 6.6.29 (porting the RPMB v7 patches currently), systemd 255.4 (tpm2.target
+> backported), tee-supplicant 4.1 etc. I'm switching the initramfs from shell scripts
+> to systemd currently, but running into various issues.
 
-As this dependency is not i v6.10-rc1, I will queue the DTS patches
-in renesas-devel for v6.11.
+I just use a mkosi generated Debian/sid image..
 
-Gr{oetje,eeting}s,
+> UEFI firmware is our Trusted Substrate ( https://gitlab.com/Linaro/trustedsubstrate/meta-ts/ )
 
-                        Geert
+This is a cool project! I was not aware of it. Thanks for sharing.
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
+> ARM System Ready IR compatible with secure boot and TPM support, u-boot
+> 2024.04 (except rockpi4b still on 2023.01), optee 4.1, fTPM etc from meta-arm
+> yocto layer.
 
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+I am on a Toradex Verdin board with an i.MX8MM SoM. u-boot is still
+2024.01, optee_os from Jens referenced branch, with a little change in:
+
+lib/libutee/include/user_ta_header.h
+
+-#define TA_FLAGS_MASK  GENMASK_32(10, 0)
++#define TA_FLAGS_MASK  GENMASK_32(12, 0)
+
+fTPM is from ms-tpm-20-ref.git on github. Need to check what is in the meta-arm.
+Figured out some problems with this regarding OrPolicies used by
+systemd-cryptenroll..
+
+> Booting without tee-supplicant has so far only resulted in the fTPM TA panic'ing
+> because RPC setup is failing. Also the fTPM TA enumation needs to be changed
+> from current yocto defaults to always discoverable if there is no tee-supplicant:
+> https://git.yoctoproject.org/meta-arm/tree/meta-arm/recipes-security/optee-ftpm/optee-ftpm/0001-add-enum-to-ta-flags.patch
+
+Ah, seems to be the same change than above, just limited to the fTPM TA?
+Shouldn't it be part of optee_os since it is a capability of it?
+
+> I hope to get v7 of these patches into testing today.
+
+Was able to test it. But ended also in TA panic. Will share the details
+in another mail.
+
+Regards
+Manuel
