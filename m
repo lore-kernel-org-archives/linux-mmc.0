@@ -1,317 +1,332 @@
-Received: from speedy.danman.eu (speedy.danman.eu [46.227.180.235])
+Received: from EUR05-DB8-obe.outbound.protection.outlook.com (mail-db8eur05on2062.outbound.protection.outlook.com [40.107.20.62])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6AD61E498
-	for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 18:33:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.227.180.235
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717180410; cv=none; b=VujOQBQC3cJqB+bqxXd1qviMKSsaIAOCaMtUBVU8OcIuXSg4DTv6dcXIhymrFH7uTR4zd3Y3zvKm7PaSU5s3pnDpAaHUWUI0HNwPgPyCaQ4hwFbkf1rrxsd3ErLPysBrPU8oPzA9YPdylQhmq776w3i+EevVsxe3XWzhCOeYCcY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717180410; c=relaxed/simple;
-	bh=Ua2epOBJdfvMZRj4QucRXwfjwR0i5bSwnn/VWtR25I8=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=FF4FgCnEWltiHZfEcr45gbUicPvOFF/3wD6e/JiHoyKcws1IT4QP85kFquz7sqcCrTDhTjeBGlv2j8VR1m29IQ3B1LlIfBlz9scI8Bzqak2CD7mtUOZMHVXgNrBAQfuDtggU+Saxn9EJ/k8jcaQ0yQwAiURBV6Q/L+nIkjWDn3o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu; spf=pass smtp.mailfrom=danman.eu; arc=none smtp.client-ip=46.227.180.235
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=danman.eu
-Received: from silverhorse.byt.danman.eu (unknown [62.197.239.54])
-	by speedy.danman.eu (Postfix) with ESMTPSA id F1861240DA3;
-	Fri, 31 May 2024 20:25:21 +0200 (CEST)
-From: linux-mmc@danman.eu
-To: Avri.Altman@wdc.com,
-	linux-mmc@vger.kernel.org
-Cc: Daniel Kucera <linux-mmc@danman.eu>
-Subject: [PATCH v2] mmc-utils: implemented CMD42 locking/unlocking
-Date: Fri, 31 May 2024 20:25:17 +0200
-Message-Id: <20240531182517.929498-1-linux-mmc@danman.eu>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFFCB1C6BD;
+	Fri, 31 May 2024 19:38:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.20.62
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1717184286; cv=fail; b=qejkTdIfXOnpGbO4if14Zfk2U7kS1/W2qcDimEmryqDLh5/UOiKZfbo+WmWeCSd+RpmX/RM2JE4gdloSa4XVn53Ns/jlyOmIhICRQ8cwzuZ6vNh58RhJAq4ThgNEPaaBsvWmZcAolkzo9zE/zAL73mVT4TLtW/GDDS3V0yZR40A=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1717184286; c=relaxed/simple;
+	bh=b5qLBBkJ+SvPVJNI4gFw4nBxckfFpiJotHgfHQx1i00=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=Azrnom3NpcBIAwdnRGvddbRe8TvPynR04/kB7jFnUokpG3mFgZsAqecm0i/xF1PbXOlifgUYdRHFdfjRbmJ2DFA1Y8oMSCHXayzIg1hvpsUm4HCUTqCT/fzfgUIpSEsdvQRLpKFMcGnlVx/7qBmVIqu4/EVximsZrss8a7HW/4k=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=R4LqesnC; arc=fail smtp.client-ip=40.107.20.62
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="R4LqesnC"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Ru053B+zEGnLwgBjlChxEN7eLiZyXUwI47aprielt1uzGQnemUzQfTDt3xRY8G6QVvXvnEcmKDbwsvT/fwCj+J7Ur66yU9M56RkJwYVEamGYddgM8Qs/MoxKr+y7k84dh6DgxPiPxTy7Zp5Lkrfj8KOWCu783GzAudoWBFOlx7UyCo2Z3E17KZFxUYBs4pKDWZBI7lI86l+U2LyOCgnPdXkAucKGd+Uy28RzgNdWsLSsnmf5PhYo+LXyZ4geBmLjEalCctatcmqK/89Xp+IEc7uWGRbYwzcD9ALIBi8VgVZjlKrGJMHx/e+B5kWwENeaw7vNmrwJxSgmAJRpV9vPAw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=mvo8YjzHqpXZCUtF7QAcDJNfyWDpFyzDZ/VtAgqOG+I=;
+ b=Mc2yutHMBSvM0o/fXY22C5Jm/VXokjUCnC05DVL05ctZxE4WqMu86ntbENH149YwnR5HuejOW5Sg4by8RmLfelbV7786s1fcebRvMzY+fsu5FzLrVhOS5XfOf5/Px6WYGYU6Nl/z0blj53/b3jwGWbs4aXMFo9xf91N9hUwmHmX+7IYA9XtZ8c+DfZ9YzJ1rjh/O4sijxLkOqP0AtvxApju1H0s5kwDHYiMPuacYnhPsQPJSTFIu/eUfcKb84fYu6mIM/ULNFvELyiwnA/IRwDHeZnaOiuvWoICn5n8yS0tyLodqy0wZz+aL7PS+VAySslY0yXi84kTdeYN9B95Obw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=mvo8YjzHqpXZCUtF7QAcDJNfyWDpFyzDZ/VtAgqOG+I=;
+ b=R4LqesnCXK9Nwyn6U8p+QTT7oZwjUBJYTXIA8EKToIfJAtcED+maJ/NNFDAzxNg32KI7N7msqVQA781RUll/A7ahLRMi8AfRS5qO71w7nxTq9NI0uwoUcIESzfMXwLnUdIZFmqGoV2O0NOlqrS/hT9kd6xSRPQm1lBtX1rHD0qc=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
+ by PAXPR04MB9679.eurprd04.prod.outlook.com (2603:10a6:102:23d::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7633.21; Fri, 31 May
+ 2024 19:38:01 +0000
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.7633.018; Fri, 31 May 2024
+ 19:38:01 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS),
+	linux-kernel@vger.kernel.org (open list)
+Cc: imx@lists.linux.dev
+Subject: [PATCH 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
+Date: Fri, 31 May 2024 15:37:44 -0400
+Message-Id: <20240531193745.1714046-1-Frank.Li@nxp.com>
 X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: BY5PR04CA0006.namprd04.prod.outlook.com
+ (2603:10b6:a03:1d0::16) To PAXPR04MB9642.eurprd04.prod.outlook.com
+ (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|PAXPR04MB9679:EE_
+X-MS-Office365-Filtering-Correlation-Id: 0b095422-695a-40a5-8d7c-08dc81a92e7b
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230031|366007|376005|52116005|1800799015|38350700005;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?NTDYMZ0dNnJ3pZfsoBi1qxHscjQeXlSil55PcZSQQzoCNbQ3Nr7I87cQinB3?=
+ =?us-ascii?Q?EHDFv5YoC0EaFG2mZPzgVFL74QNeYZzuYUXj8TVeBI+QUbok6WPm9U0l7j5E?=
+ =?us-ascii?Q?/Q8taK/e5B1o3PsB370wupCFRZNhedL0WGqLwIqDdkB1OtMsHJfF7ralDNfs?=
+ =?us-ascii?Q?aO86dcqDU4ZHRVVrqU7c3gW7iVtNsK43gZJJXTfkIKj3yizQFuGgBzwmy3v8?=
+ =?us-ascii?Q?SUtkQ9BSYSRi8PgaRYbZs9yciqc4DochXJO490efE8HN+nuwPrQyrblbxTIo?=
+ =?us-ascii?Q?nBdhpX3wbXkZCblAokTT3gOB98TI5jCLg/MEmS5M3EKm1yUtWr505GZoyf0X?=
+ =?us-ascii?Q?n5MRoX0HitFU6KADNn+LrBlcDNRUFMUzDbTv288eMP3LZltJHjvrDaPPLf2b?=
+ =?us-ascii?Q?2ckCq9xBXlCWT6xry2V6NPdE9UlfIfrSoxgPBuWP0epnYRPj521NgFAf0/ZJ?=
+ =?us-ascii?Q?LxdQUAa5jqIbMWHzSknHnuWpZAfvC3wIU7Za/Ow14gWOKKtZLTvv+GNyAgh5?=
+ =?us-ascii?Q?33hwqCva8JC7Xnvem3W1bWEojSHAgTLK873++7FGiGkr1LnwfdmWRvc3BwiE?=
+ =?us-ascii?Q?+H5oGqhKBD3RyLX7jooyC6pXr42T+42CnFGlBZnYbEAHwC84ef0k1akMRVs1?=
+ =?us-ascii?Q?leT0ONYPTU8HhOI24OQ41TEXpDmQdHxfaVwmG9Pv5Lj0cahSyrrzwgiUe2cY?=
+ =?us-ascii?Q?93wj+FcdmB/FwZ8IgfqmwgGozQLW9m+gSb5yytsK5TSg7H8bfS+h1zIGc7i3?=
+ =?us-ascii?Q?elMOA3xp3pLXjn08BdX+dQbBU7I6adlfrHU9f4HSRiUyLERvtDcqozF5rtgy?=
+ =?us-ascii?Q?jzvtvg508eNEULBOFwf+PZuM2p2i8DcL+ULEECDeYDwlnQwIiwc0aFkvrkP6?=
+ =?us-ascii?Q?0Gp/ZhCzWI2se3aUjkUz9QXNHbltODYxV7S0WGtV7qMpDwX4O1Zk82jl2ivR?=
+ =?us-ascii?Q?f7rxUlzOOyITk1DNTjEfCcWqJvPi6djq1X8G9HMEy6eIJqD9K4zd/0mQuPxQ?=
+ =?us-ascii?Q?PPoxqqGw2u1Hlq9Hb1GJH15njrc/6oZFB0/peFn/G+/6zu96j2Cd07GgpUHw?=
+ =?us-ascii?Q?1ETRFEF1S5HYPUKN+mkC78l/LpIm34yGURDwX1u+bSOaRswpe8p1XhReMcdt?=
+ =?us-ascii?Q?rofDXJWswGGdAwK54vKV7if3iTjXKxJCqtrJtx9hE+uBEx869gEpIgSc6YgT?=
+ =?us-ascii?Q?P8JUI56W4/kHJJI9RI9zd98TN6gjD1ZtFSCOAuVyjtNFCsshXaCy5LmQkFL4?=
+ =?us-ascii?Q?SRtzhCTkEKLf79qwRB65SRS8V3jcQkM4Jfwamlc8k8BgdYC1yWWL7hQ3Yb4l?=
+ =?us-ascii?Q?FNg=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(366007)(376005)(52116005)(1800799015)(38350700005);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?c0LEX8vLNLkdxi9ucUmf6pVU4Iq2didbCsz88H+wnh1K5qWApgh+wsChz8mD?=
+ =?us-ascii?Q?42nN+7Tb4XC1GLERF6o2okqys+/8dC4/T3Yu71fgwamhZNvvHp0nTXMjBrQh?=
+ =?us-ascii?Q?1PsRhJPY99ehSysNImOkgcp0hR3eSc38xFnk7zCSt5pkVuWxARCRorcdqvZW?=
+ =?us-ascii?Q?aTWCFftBoQA6UrgYXtULq9DSPYJV150arVL0IqPzg9RW7LQ47IR7HHzI47id?=
+ =?us-ascii?Q?hrJMJapcYFIxU/5XrhZ4XEIcNVRgRkKtDMq9KEASGKnGH4nfaOpxtEo6pR5D?=
+ =?us-ascii?Q?qAwbZeTilu2YhFgrBtmSbot+3od3SGwxtX5JSIScwirFUjMtd0ohTWpusM/W?=
+ =?us-ascii?Q?Yt1/0CuQuwu0tetrJIqNbChxT5Wa8o3T3yS4ibhfEF1LoZU17FTLLLTBSvrM?=
+ =?us-ascii?Q?b1cFDayD0C9rjeYzCTYmHA3rQrXOBk4Motmh9HSbqii61wY/VVCzuvpbfi2v?=
+ =?us-ascii?Q?EKt4heuHUQobJegRkiijJHr20lNdHXFUuMLwZ1AkfmUXd12UgRAPmoU4jKKX?=
+ =?us-ascii?Q?2H+TzIkv17t/pjyJ+fInzGg6NmAjYVmfD8eCeFwNGBReKWkkfLao5n+QCP3S?=
+ =?us-ascii?Q?mx/XaY1Cn6mPfOyZP0GyjYT/9dQxGf+LkxQIEzu7ZDqS4BpWH65IfCNMM8bf?=
+ =?us-ascii?Q?FQ6E59XUFe9k7kahq24ynJyjW/96ee7iFXjedExfaE7xV0e2PK4j03FNqR2w?=
+ =?us-ascii?Q?qZQ4kyvnAhEwommzPHjeEcjH5h4Ag5/75o5lsAh8pfWW9SaGx1xwUztVAxJa?=
+ =?us-ascii?Q?WMVpIp4yvgt7tfpQDl2Siv+K69901EfqPHhra5/CBzm2NTRISVYS44b4fKTx?=
+ =?us-ascii?Q?8UYB2PELz9TfcAiXqFUDcZv5Riv5uAvqxF4Ggj+9OKhg2CxXvPOL9hKeNQo/?=
+ =?us-ascii?Q?bR7w6tqYobFcoCSUsOzI6HbpgDPAXajvRXsdZmY+MkNP6ae1Qq7/HSGpDBjd?=
+ =?us-ascii?Q?DDvhWiFvYWUpQ0F1rf1kf33Ea11HxwZRw2CsuxQ1iNa+Y1sqzQrjILC+/AiR?=
+ =?us-ascii?Q?EjynHcbJ5Nf0+VIOa1OMNmq5VECnn8Jg0TQk18Rah8/6yT/zww3KolQhbETh?=
+ =?us-ascii?Q?S1La4pj2azlbRQuoY79/rHxJscPC4xUwKfOpK+qrbp/S0/++tR2KB0W5gKpm?=
+ =?us-ascii?Q?Yv43WM1zOiAHIUcPNyn2g1Onu1c20AdT7KSy9piNQT/W1sDrosb2zCRBPjfg?=
+ =?us-ascii?Q?A48YbC+kyZOhLoWVj+CFcz+WasSA0PpfDIjntMUb3Yao64iSIvNjmt6jW5Zz?=
+ =?us-ascii?Q?3mhTjB/bxygCGRcC+/NXlEUAHFCa8n50Z1Cu4EJ9xCzAQlS0sx6q67Uxe8cB?=
+ =?us-ascii?Q?xNVVv9ho5swLUzx3/kclnOW2EEgs770Ft6xld8K42ImAFzgQfslV/NDK5fHy?=
+ =?us-ascii?Q?n1MZAL2VkWb61AU7Hw39Y5I4/ULuUIxKiD6lATRMWU/DCtSZ3gZsjSxeWw2F?=
+ =?us-ascii?Q?4OhKDcpkmg1g9wCEi1Xl3M/+ad3NF0X7ZCcwwLqmvcOB7l8B1lJmBrIHtqli?=
+ =?us-ascii?Q?+DYj/Bs0WcSfoQHuGg/VyUuf9zHwT2bxuizgFipvyf0awhuvmlD+E/Ymmav+?=
+ =?us-ascii?Q?E16OA3x0xFQIYUcRWhPA2thzxQNqxl8KMdrc+PwG?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0b095422-695a-40a5-8d7c-08dc81a92e7b
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 May 2024 19:38:01.0553
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: FWsGQhUWwc2x5cUZMgYWhQKuj4QOF02GdLQr7P4agS0ghaK5XJypRrB5d1JvqvcliTpJS+wLrYAUOF6IhgMAfQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR04MB9679
 
-From: Daniel Kucera <linux-mmc@danman.eu>
+Convert layerscape fsl-esdhc binding doc from txt to yaml format.
 
-Implemented locking/unlocking using CMD42 according to Micron
-Technical Note
+Addtional change during convert:
+- deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
+- Add "reg" and "interrupts" property.
+- change example "sdhci@2e000" to "mmc@2e000".
+- compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
+most existed dts file.
 
-original link https://media-www.micron.com/-/media/client/global/documents/products/technical-note/sd-cards/tnsd01_enable_sd_lock_unlock_in_linux.pdf?rev=03f03a6bc0f8435fafa93a8fc8e88988
-currently available at https://github.com/danielkucera/esp32-sdcard/blob/master/tnsd01_enable_sd_lock_unlock_in_linux.pdf
-
-Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
 ---
- mmc.c      |  12 ++++
- mmc.h      |  10 +++
- mmc_cmds.c | 189 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |   1 +
- 4 files changed, 212 insertions(+)
 
-diff --git a/mmc.c b/mmc.c
-index bc8f74e..38e3e72 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -250,6 +250,18 @@ static struct Command commands[] = {
- 		"be 1.",
- 	NULL
- 	},
-+	{ do_lock_unlock, -3,
-+	"cmd42", "<parameter> " "<device> " "[password] " "[new_password]\n"
-+		"Usage: mmc cmd42 <s|c|l|u|e> <device> [password] [new_password]\n"
-+		"<password> can be up to 16 character plaintext or hex string starting with 0x\n"
-+		"s\tset password\n"
-+		"c\tclear password\n"
-+		"l\tlock\n"
-+		"sl\tset password and lock\n"
-+		"u\tunlock\n"
-+		"e\tforce erase\n",
-+	NULL
-+	},
- 	{ do_softreset, -1,
- 	  "softreset", "<device>\n"
- 	  "Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works",
-diff --git a/mmc.h b/mmc.h
-index 6f1bf3e..ddbb06c 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -30,6 +30,7 @@
- #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
- #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
-+#define MMC_SET_BLOCKLEN	16  /* ac [31:0] block len R1 */
- #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
- #define MMC_SET_BLOCK_COUNT      23   /* adtc [31:0] data addr   R1  */
- #define MMC_WRITE_BLOCK		24	/* adtc [31:0] data addr	R1  */
-@@ -46,6 +47,7 @@
- 					      [1] Discard Enable
- 					      [0] Identify Write Blocks for
- 					      Erase (or TRIM Enable)  R1b */
-+#define MMC_LOCK_UNLOCK		42  /* adtc R1b */
- #define MMC_GEN_CMD		56   /* adtc  [31:1] stuff bits.
- 					      [0]: RD/WR1 R1 */
- 
-@@ -70,6 +72,14 @@
- #define R1_EXCEPTION_EVENT      (1 << 6)        /* sr, a */
- #define R1_APP_CMD              (1 << 5)        /* sr, c */
- 
-+#define MMC_CMD42_UNLOCK	0x0 /* UNLOCK */
-+#define MMC_CMD42_SET_PWD	0x1 /* SET_PWD */
-+#define MMC_CMD42_CLR_PWD	0x2 /* CLR_PWD */
-+#define MMC_CMD42_LOCK		0x4 /* LOCK */
-+#define MMC_CMD42_ERASE		0x8 /* ERASE */
-+#define MAX_PWD_LENGTH		32 /* max PWDS_LEN: old+new */
-+#define MMC_BLOCK_SIZE		512 /* data blk size for cmd42 */
+Notes:
+    pass dt_binding_check
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8  dt_binding_check DT_SCHEMA_FILES=fsl-ls-esdhc.yaml
+      SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+      CHKDT   Documentation/devicetree/bindings
+      LINT    Documentation/devicetree/bindings
+      DTEX    Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dts
+      DTC_CHK Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dtb
+
+ .../devicetree/bindings/mmc/fsl-esdhc.txt     | 52 ----------
+ .../devicetree/bindings/mmc/fsl-ls-esdhc.yaml | 98 +++++++++++++++++++
+ 2 files changed, 98 insertions(+), 52 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml
+
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+deleted file mode 100644
+index edb8cadb95412..0000000000000
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ /dev/null
+@@ -1,52 +0,0 @@
+-* Freescale Enhanced Secure Digital Host Controller (eSDHC)
+-
+-The Enhanced Secure Digital Host Controller provides an interface
+-for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the sdhci-esdhc driver.
+-
+-Required properties:
+-  - compatible : should be "fsl,esdhc", or "fsl,<chip>-esdhc".
+-    Possible compatibles for PowerPC:
+-	"fsl,mpc8536-esdhc"
+-	"fsl,mpc8378-esdhc"
+-	"fsl,p2020-esdhc"
+-	"fsl,p4080-esdhc"
+-	"fsl,t1040-esdhc"
+-	"fsl,t4240-esdhc"
+-    Possible compatibles for ARM:
+-	"fsl,ls1012a-esdhc"
+-	"fsl,ls1028a-esdhc"
+-	"fsl,ls1088a-esdhc"
+-	"fsl,ls1043a-esdhc"
+-	"fsl,ls1046a-esdhc"
+-	"fsl,ls2080a-esdhc"
+-  - clock-frequency : specifies eSDHC base clock frequency.
+-
+-Optional properties:
+-  - sdhci,wp-inverted : specifies that eSDHC controller reports
+-    inverted write-protect state; New devices should use the generic
+-    "wp-inverted" property.
+-  - sdhci,1-bit-only : specifies that a controller can only handle
+-    1-bit data transfers. New devices should use the generic
+-    "bus-width = <1>" property.
+-  - sdhci,auto-cmd12: specifies that a controller can only handle auto
+-    CMD12.
+-  - voltage-ranges : two cells are required, first cell specifies minimum
+-    slot voltage (mV), second cell specifies maximum slot voltage (mV).
+-    Several ranges could be specified.
+-  - little-endian : If the host controller is little-endian mode, specify
+-    this property. The default endian mode is big-endian.
+-
+-Example:
+-
+-sdhci@2e000 {
+-	compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
+-	reg = <0x2e000 0x1000>;
+-	interrupts = <42 0x8>;
+-	interrupt-parent = <&ipic>;
+-	/* Filled in by U-Boot */
+-	clock-frequency = <0>;
+-	voltage-ranges = <3300 3300>;
+-};
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml
+new file mode 100644
+index 0000000000000..cafc09c4f1234
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml
+@@ -0,0 +1,98 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/fsl-ls-esdhc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
- /*
-  * EXT_CSD fields
-  */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 936e0c5..dbbaf8d 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -3245,3 +3245,192 @@ dev_fd_close:
- 		exit(1);
- 	return 0;
- }
++title: Freescale Enhanced Secure Digital Host Controller (eSDHC)
 +
-+static int hex_to_bytes(char *input, char *output, int len)
-+{
-+	int ilen = strlen(input);
++description:
++  The Enhanced Secure Digital Host Controller provides an interface
++  for MMC, SD, and SDIO types of memory cards.
 +
-+	if (ilen % 2) {
-+		printf("Error: hex string has odd number of characters\n");
-+		exit(1);
-+	}
++maintainers:
++  - Frank Li <Frank.Li@nxp.com>
 +
-+	if (ilen / 2 > len) {
-+		printf("Error: hex string is too long\n");
-+		exit(1);
-+	}
++properties:
++  compatible:
++    items:
++      - enum:
++          - fsl,mpc8536-esdhc
++          - fsl,mpc8378-esdhc
++          - fsl,p2020-esdhc
++          - fsl,p4080-esdhc
++          - fsl,t1040-esdhc
++          - fsl,t4240-esdhc
++          - fsl,ls1012a-esdhc
++          - fsl,ls1028a-esdhc
++          - fsl,ls1088a-esdhc
++          - fsl,ls1043a-esdhc
++          - fsl,ls1046a-esdhc
++          - fsl,ls2080a-esdhc
++      - const: fsl,esdhc
 +
-+	for (int i = 0; i < (ilen / 2); i++) {
-+		if (sscanf(input + 2 * i, "%2hhx", &output[i]) != 1) {
-+			printf("Error: failed to parse hex string\n");
-+			exit(1);
-+		}
-+	}
++  reg:
++    maxItems: 1
 +
-+	return ilen/2;
-+}
++  interrupts:
++    maxItems: 1
 +
-+static int parse_password(char *pass, char *buf)
-+{
-+	int pwd_len;
++  clock-frequency:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: specifies eSDHC base clock frequency.
 +
-+	if (!strncmp("0x", pass, 2)) {
-+		pwd_len = hex_to_bytes(pass+2, buf, MAX_PWD_LENGTH);
-+	} else {
-+		pwd_len = strlen(pass);
-+		strncpy(buf, pass, MAX_PWD_LENGTH);
-+	}
++  sdhci,wp-inverted:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that eSDHC controller reports
++      inverted write-protect state; New devices should use the generic
++      "wp-inverted" property.
 +
-+	if (pwd_len > MAX_PWD_LENGTH) {
-+		printf("Password too long.\n");
-+		exit(1);
-+	}
++  sdhci,1-bit-only:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that a controller can only handle
++      1-bit data transfers. New devices should use the generic
++      "bus-width = <1>" property.
 +
-+	return pwd_len;
-+}
++  sdhci,auto-cmd12:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      specifies that a controller can only handle auto CMD12.
 +
-+int do_lock_unlock(int nargs, char **argv)
-+{
-+	int fd, ret = 0;
-+	char *device;
-+	__u8 data_block[MMC_BLOCK_SIZE] = {};
-+	__u8 data_block_onebyte[1] = {0};
-+	int block_size = 0;
-+	struct mmc_ioc_multi_cmd *mioc;
-+	struct mmc_ioc_cmd *idata;
-+	int cmd42_para;
-+	char pwd[MAX_PWD_LENGTH*2+1];
-+	int pwd_len = 0, new_pwd_len;
-+	int min_args, max_args;
-+	__u32 r1_response;
++  voltage-ranges:
++    $ref: /schemas/types.yaml#/definitions/uint32-matrix
++    items:
++      items:
++        - description: specifies minimum slot voltage (mV).
++        - description: specifies maximum slot voltage (mV).
 +
-+	min_args = 4;
-+	max_args = 4;
++  little-endian:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      If the host controller is little-endian mode, specify
++      this property. The default endian mode is big-endian.
 +
-+	printf("Function: ");
-+	if (!strcmp("s", argv[1])) {
-+		cmd42_para = MMC_CMD42_SET_PWD;
-+		printf("Set password\n");
-+		max_args = 5;
-+	} else if (!strcmp("c", argv[1])) {
-+		cmd42_para = MMC_CMD42_CLR_PWD;
-+		printf("Clear password\n");
-+	} else if (!strcmp("l", argv[1])) {
-+		cmd42_para = MMC_CMD42_LOCK;
-+		printf("Lock the card\n");
-+	} else if (!strcmp("sl", argv[1])) {
-+		cmd42_para = MMC_CMD42_SET_PWD | MMC_CMD42_LOCK;
-+		printf("Set password and lock the card\n");
-+		max_args = 5;
-+	} else if (!strcmp("u", argv[1])) {
-+		cmd42_para = MMC_CMD42_UNLOCK;
-+		printf("Unlock the card\n");
-+	} else if (!strcmp("e", argv[1])) {
-+#ifdef DANGEROUS_COMMANDS_ENABLED
-+		cmd42_para = MMC_CMD42_ERASE;
-+		printf("Force erase (Warning: all card data will be erased together with PWD!)\n");
-+		min_args = 3;
-+		max_args = 3;
-+#else
-+		printf("Erase is disabled unless compiled with DANGEROUS_COMMANDS_ENABLED\n");
-+		exit(1);
-+#endif
-+	} else {
-+		printf("Invalid parameter:\n" "s\tset password\n"
-+			"c\tclear password\n" "l\tlock\n"
-+			"sl\tset password and lock\n" "u\tunlock\n"
-+			"e\tforce erase\n");
-+		exit(1);
-+	}
++required:
++  - compatible
++  - reg
++  - interrupts
 +
-+	if ((nargs < min_args) || (nargs > max_args)) {
-+		fprintf(stderr, "Usage: mmc cmd42 <s|c|l|u|e> <device> [password] [new_password]\n");
-+		exit(1);
-+	}
++allOf:
++  - $ref: sdhci-common.yaml#
 +
-+	if (nargs > 3) {
-+		pwd_len = parse_password(argv[3], pwd);
-+		printf("Using password '%s', length %d\n", argv[3], pwd_len);
-+	}
++unevaluatedProperties: false
 +
-+	if (nargs == 5) {
-+		new_pwd_len = parse_password(argv[4], pwd+pwd_len);
-+		printf("New password '%s', length %d\n", argv[4], new_pwd_len);
-+
-+		pwd_len += new_pwd_len;
-+	}
-+
-+	device = argv[2];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	if (cmd42_para == MMC_CMD42_ERASE)
-+		block_size = 2;
-+	else
-+		block_size = MMC_BLOCK_SIZE;
-+
-+	printf("Set data block length = %d byte(s).\n", block_size);
-+
-+	mioc = (struct mmc_ioc_multi_cmd *)
-+		calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
-+			2 * sizeof(struct mmc_ioc_cmd));
-+	if (!mioc)
-+		return -ENOMEM;
-+
-+	mioc->num_of_cmds = 2;
-+
-+	idata = &mioc->cmds[0];
-+	set_single_cmd(idata, MMC_SET_BLOCKLEN, 0, 0, block_size);
-+
-+	if (cmd42_para == MMC_CMD42_ERASE) {
-+		data_block_onebyte[0] = cmd42_para;
-+	} else {
-+		data_block[0] = cmd42_para;
-+		data_block[1] = pwd_len;
-+		memcpy((char *)(data_block+2), pwd, pwd_len);
-+	}
-+
-+	idata = &mioc->cmds[1];
-+
-+	idata->write_flag = 1;
-+	idata->opcode = MMC_LOCK_UNLOCK;
-+	idata->arg = 0;
-+	idata->flags = MMC_RSP_R1 | MMC_CMD_AC | MMC_CMD_ADTC;
-+	idata->blksz = block_size;
-+	idata->blocks = 1;
-+
-+	if (cmd42_para == MMC_CMD42_ERASE)
-+		mmc_ioc_cmd_set_data((*idata), data_block_onebyte);
-+	else
-+		mmc_ioc_cmd_set_data((*idata), data_block);
-+
-+	ret = ioctl(fd, MMC_IOC_MULTI_CMD, mioc);
-+
-+	printf("Multi cmd response: %d\n", ret);
-+
-+	printf("Set block length response: 0x%08x\n",
-+		mioc->cmds[0].response[0]);
-+
-+	r1_response = mioc->cmds[1].response[0];
-+	printf("cmd42 response: 0x%08x\n", r1_response);
-+
-+	if (r1_response & R1_ERROR) {
-+		printf("cmd42 error! Error code: 0x%08x\n",
-+			r1_response & R1_ERROR);
-+		ret = -1;
-+	}
-+
-+	if (r1_response & R1_LOCK_UNLOCK_FAILED) {
-+		printf("Card lock/unlock fail! Error code: 0x%08x\n",
-+		r1_response & R1_LOCK_UNLOCK_FAILED);
-+		ret = -1;
-+	}
-+
-+	close(fd);
-+	return ret;
-+}
-+
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 5f2bef1..96da608 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -50,3 +50,4 @@ int do_general_cmd_read(int nargs, char **argv);
- int do_softreset(int nargs, char **argv);
- int do_preidle(int nargs, char **argv);
- int do_alt_boot_op(int nargs, char **argv);
-+int do_lock_unlock(int nargs, char **argv);
++examples:
++  - |
++    mmc@2e000 {
++        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
++        reg = <0x2e000 0x1000>;
++        interrupts = <42 0x8>;
++        interrupt-parent = <&ipic>;
++        /* Filled in by U-Boot */
++        clock-frequency = <0>;
++        voltage-ranges = <3300 3300>;
++    };
 -- 
 2.34.1
 
