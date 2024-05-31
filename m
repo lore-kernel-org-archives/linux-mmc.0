@@ -1,167 +1,109 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3AF81586CC
-	for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 12:59:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F256158D69;
+	Fri, 31 May 2024 13:29:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717160389; cv=none; b=uKRnzi25Xb89NCn/ORaWv70jc6Myqq+rW4uW+n/ple0NZBSzxXnsiMw6LXaKnzSfvuQq1FQuOTCRMXK9Sy6wtZTKZfz55pm8WS3C2590zIIHr+7U+IDnSVjZ+50+46s7ZBEfn9GPaKKDa6JPaWtHh4CqzI9iHWEW7lNaHBMWfVg=
+	t=1717162171; cv=none; b=o4M6e6v1YXpLHwR760bht5Eqe0E0Wj9G6SWyVDBJSes1vU++ywdYI1Ye2MyzUaFedc+RNYE5G/DgzgO+ERPMWZ/ytx9k96dObDTNFXKJ1O2HFYEJ+t7UgCz9NlZ3ZCdrouWGzATD+cZhScgj0zlLUffzZa8oe339v6JsSzlNoY4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717160389; c=relaxed/simple;
-	bh=SbSIJSaxifN8ilLLlOjjSgs1ZMiaEBqAYbYSm87dysY=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NCt0k3WqScClD6GdKW2rZoucUwgUdRLoYi48v/TqIUdDf4/Za859PGb7x92YbTslfzK46U6lzqp6mvb2S6jzk6z8XefxXQw6OkDExi2Jwr/OkYHvulnl6fkSX+G1Mg09yrTnsv/WyDXKO64c+MYqySTL5Uto8clZ7jPMn3IR4Ss=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=G7lL3qDy; arc=none smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1717162171; c=relaxed/simple;
+	bh=1B5Ail3gluKkIFy3ZhVZfOGqKlrQeSOnSE+DIaF3Mgg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=uI6Au0Gcxb2VAm+CiMiowb+Ae9Q2i7eLw7bBKOLIWGg0yBs+cRnXefJ5ch/0nqNwffobPfTftA+BUQqv7GxreHB1UpTPSjP/FtuIYQx6miP2HgG184KqWiDtJjcKwM83QsJf7PCX5gmsGUH361B+FkcNMeZlPCahg7hvhRNmF2w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fKqoHK29; arc=none smtp.client-ip=198.175.65.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="G7lL3qDy"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-52b0d25b54eso2975933e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 05:59:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1717160385; x=1717765185; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=YgAedokl3gRs935zOQgIriLiKTu9cIN2F2d3LZv5g+w=;
-        b=G7lL3qDy5+ZxjT5P/cfwMcOi1cbsdQ0w9aj4BYh+UPwTU5bqqwklbpq6cairLOC9mx
-         seoRopbpZcHFgitTeVM+kyev1WDoCpRhdYXFDsNRK/jFHY6cDVN/fd3Ncj55cyX/TZvV
-         Ztskw+DgtQZOOVLsYU3QzkPQt4GbF5ap2anSoRftnLDDH7/Ke0EJsu9aep5Hc3wS7TtQ
-         jERxHmPA/FE2C6gZRYTxZ70C5ID48SVL7MVySA+FLbv0msOYmF0bgyEGl6Dv+z5AT5A6
-         MqHYSZHyr6m/3JxLvQGB1H+SCZv6GKWev+h88u9DDbduL8lkJ9cyjrTPsTlxdR0Cgnnj
-         CqcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1717160385; x=1717765185;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=YgAedokl3gRs935zOQgIriLiKTu9cIN2F2d3LZv5g+w=;
-        b=H6eIGCHKEQvveBfPDSr6h8ep2Ef3evAuvrTkgqe6P6fsyp4NKEYr+t7gQcx+wT3Uoq
-         BfXMb9K/1z1Gwf/OdHnJ26RCeGRSYjX6pA4n7Y1cGxvwymIsCne6qDK856MHyEzIXOuN
-         6HkCcb+3dd3tcOd68B1RlFNZ37oXLJKL2srE6fWKJWaPEwPdVgAQSeUP8W3C82qbMLGK
-         yH//j9LI02lHN0tfF1jL3clRf9QfZiVWNVZLshbXHJZI65bzaFr5pKFh7Hw5owSpsYi0
-         76HOGVMFZfXMQDXjWjCAzp3TDbfgAj0lbDB5i/HmVKdF4MkPBQvF4+zZZaF/FAgKvm7Z
-         OayQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWCf6kK3yNv6acpWJ2NrNnQSFEwWOKbzGnyLE5J9AxL7KzqDtzBqenjI+7pxlCMbi977EiMEZO8BXUMTSsS03h+BgGnA0xlKGLB
-X-Gm-Message-State: AOJu0YyC3g/dZTJ+V2wYtpJG/1xEElJPQ6EyDeG8FY5ahV4C8CZSWPO3
-	k4z+uIt95c1DXt25FqCrD/gt4Uk3nKtIup3KWg+CCYmWQLAQtLUoTD3Ojs8ufsU=
-X-Google-Smtp-Source: AGHT+IHlzlusjyEOgZJnGuSuPZL0kGHD+/XX/Cx4GjQtie8rM3SZ6VVnGyuOMCLAHH96a+kEylXvFA==
-X-Received: by 2002:ac2:5332:0:b0:52a:5551:5606 with SMTP id 2adb3069b0e04-52b895a3e7amr1619090e87.50.1717160384912;
-        Fri, 31 May 2024 05:59:44 -0700 (PDT)
-Received: from localhost (host-87-16-233-11.retail.telecomitalia.it. [87.16.233.11])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a67e6f03728sm84644066b.20.2024.05.31.05.59.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 May 2024 05:59:44 -0700 (PDT)
-From: Andrea della Porta <andrea.porta@suse.com>
-X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Fri, 31 May 2024 14:59:58 +0200
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Andrea della Porta <andrea.porta@suse.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
-	linux-rpi-kernel@lists.infradead.org,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v5 0/4] Add minimal boot support for Raspberry Pi 5
-Message-ID: <ZlnJzqnvTk70O3ap@apocalypse>
-Mail-Followup-To: Stefan Wahren <wahrenst@gmx.net>,
-	Andrea della Porta <andrea.porta@suse.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Kamal Dasu <kamal.dasu@broadcom.com>,
-	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
-	linux-rpi-kernel@lists.infradead.org,
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-References: <cover.1717061147.git.andrea.porta@suse.com>
- <36642bd8-c981-4190-9f44-072ac3c97c6b@gmx.net>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fKqoHK29"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1717162170; x=1748698170;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=1B5Ail3gluKkIFy3ZhVZfOGqKlrQeSOnSE+DIaF3Mgg=;
+  b=fKqoHK29j2Ply4TRyhgVfaKWy+IKBj1y5XAHUsZGGuUsd4eVWRZ6/d6m
+   w9A2Rslv060+vKKFSY8gButHI4uBHPkiVQ9NWM+CTsepr+iKCxIEkCN6U
+   iw4S1x8CYmFPx/Vf4Bh7S8ctsiYbUi3Oy3XUWZiYU4tGqyrgStIl9Cd8g
+   Yi4nQ8Fz41mpy5xRGUduPWYYlkxbEr6orOl0UpDrsCjLCUuBkTGNbVDc5
+   23lpR33z3y+75/cjbifMUc7oFp8Hnv4DFnZEG/26QuE1QNVUkgIw1HUQA
+   Dv7SiV2MD1B9OInJMRiWp/1SXAkI+BEw70VKaUcFKERb0zDAH3hpoqKor
+   Q==;
+X-CSE-ConnectionGUID: 53EQ6DuISeODcO9Bvi5SWQ==
+X-CSE-MsgGUID: z0n0AeboSbeSkmitZi/AFA==
+X-IronPort-AV: E=McAfee;i="6600,9927,11088"; a="24264776"
+X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
+   d="scan'208";a="24264776"
+Received: from fmviesa006.fm.intel.com ([10.60.135.146])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 06:29:29 -0700
+X-CSE-ConnectionGUID: 65t5r04gR3CfyhuOBFPsQg==
+X-CSE-MsgGUID: zXqrHzlNSZeV3UI/dHXMsA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
+   d="scan'208";a="36188428"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.41.28])
+  by fmviesa006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 06:29:26 -0700
+Message-ID: <b42123e6-eb46-442e-9caf-0184f86d723b@intel.com>
+Date: Fri, 31 May 2024 16:29:20 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <36642bd8-c981-4190-9f44-072ac3c97c6b@gmx.net>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: set CQE irq-handler for rockchip
+ variants
+To: Heiko Stuebner <heiko@sntech.de>, ulf.hansson@linaro.org
+Cc: serghox@gmail.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, quentin.schulz@cherry.de,
+ Heiko Stuebner <heiko.stuebner@cherry.de>
+References: <20240530215547.2192457-1-heiko@sntech.de>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240530215547.2192457-1-heiko@sntech.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi Stefan,
-
-On 12:00 Fri 31 May     , Stefan Wahren wrote:
-> Hi Andrea,
+On 31/05/24 00:55, Heiko Stuebner wrote:
+> From: Heiko Stuebner <heiko.stuebner@cherry.de>
 > 
-> Am 30.05.24 um 12:11 schrieb Andrea della Porta:
-> > Hi,
-> > 
-> > This patchset adds minimal support for the Broadcom BCM2712 SoC and for
-> > the on-board SDHCI controller on Broadcom BCM2712 in order to make it
-> > possible to boot (particularly) a Raspberry Pi 5 from SD card and get a
-> > console through uart.
-> > Changes to arm64/defconfig are not needed since the actual options work
-> > as they are.
-> > This work is heavily based on downstream contributions.
-> > 
-> > Tested on Tumbleweed substituting the stock kernel with upstream one,
-> > either chainloading uboot+grub+kernel or directly booting the kernel
-> > from 1st stage bootloader. Steps to reproduce:
-> > - prepare an SD card from a Raspberry enabled raw image, mount the first
-> >    FAT partition.
-> > - make sure the FAT partition is big enough to contain the kernel,
-> >    anything bigger than 64Mb is usually enough, depending on your kernel
-> >    config options.
-> > - build the kernel and dtbs making sure that the support for your root
-> >    fs type is compiled as builtin.
-> > - copy the kernel image in your FAT partition overwriting the older one
-> >    (e.g. kernel*.img for Raspberry Pi OS or u-boot.bin for Tumbleweed).
-> > - copy arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb on FAT partition.
-> > - make sure you have a cmdline.txt file in FAT partition with the
-> >    following content:
-> >    # cat /boot/efi/cmdline.txt
-> >    root=/dev/mmcblk0p3 rootwait rw console=tty ignore_loglevel earlycon
-> >    console=ttyAMA10,115200
-> > - if you experience random SD issues during boot, try to set
-> >    initial_turbo=0 in config.txt.
-> was this an issue since the beginning of this series?
->
+> The dwcmshc used on Rockchip rk3568 and rk3588 can use cqe, so set
+> the needed irq handler.
+> 
+> Tested on a rk3588-tiger SoM with dd, hdparm and fio. fio performance
+> does increase slightly from
+> 
+> Run status group 0 (all jobs):
+>    READ: bw=209MiB/s (219MB/s), 209MiB/s-209MiB/s (219MB/s-219MB/s), io=4096MiB (4295MB), run=19607-19607msec
+> 
+> without CQE to
+> 
+> Run status group 0 (all jobs):
+>    READ: bw=215MiB/s (225MB/s), 215MiB/s-215MiB/s (225MB/s-225MB/s), io=4096MiB (4295MB), run=19062-19062msec
+> 
+> with CQE enabled.
+> 
+> Signed-off-by: Heiko Stuebner <heiko.stuebner@cherry.de>
 
-I experienced this even during early testing, using the complete downstream
-driver. It seems that when initual_turbo != 0, the fw can throttle the clock
-to reduce the boot time and it (directly or indirectly) may affect SD functionality.
-I believe that the probability of this to happen is likely a function of SD
-card speed, whether it requires timing tuning, initial_turbo exact value  and whether
-you are booting the kernel directly or chainloading u-boot + grub (or
-whatever combination of secondary stage bootloader). For example, your 
-boot setup may have a timeout in the grub boot menu that is large enough for the clocks
-to settle and the boot process to end successfully, while faster boot time can lead
-to the issue described. Since this behaviour seems to depend on all of this factors and
-does not necessarily arise in practice, disabling initial_turbo is just a suggestion
-in case things go haywire. 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> What kind of SD issues?
->
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 4410d4523728d..3c203857189f9 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -908,6 +908,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
+>  	.get_max_clock		= rk35xx_get_max_clock,
+>  	.reset			= rk35xx_sdhci_reset,
+>  	.adma_write_desc	= dwcmshc_adma_write_desc,
+> +	.irq			= dwcmshc_cqe_irq_handler,
+>  };
+>  
+>  static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
 
-I wasn't able to boot from SD card due to clock issues.
- 
-> Is there a downstream reference?
-
-Some (old) reference e.g.:
-https://forums.raspberrypi.com/viewtopic.php?t=112480#:~:text=It%20sets%20turbo%20mode%20from,have%20turbo%20during%20the%20boot.
-
-but there are probably more.
-
-Many thanks,
-Andrea
