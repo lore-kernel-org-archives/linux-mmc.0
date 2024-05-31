@@ -1,137 +1,317 @@
-Received: from APC01-TYZ-obe.outbound.protection.outlook.com (mail-tyzapc01olkn2104.outbound.protection.outlook.com [40.92.107.104])
+Received: from speedy.danman.eu (speedy.danman.eu [46.227.180.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0877FC8E9;
-	Fri, 31 May 2024 14:15:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.107.104
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717164914; cv=fail; b=F86AP8BIo0Ug8STgy9DXD+/gUK1RK8gvbXfX81zPy2nYrrs+PMq3FgRvtomDmA9AxMw30zWAoIFlTAIY+grxPYehEt5YL+ntsFFVIOmsIZAbybRJqqrtGTHxJkvhAYLt42ZU+mjYH8yKMtIdjG73cBTboD8scbEocWpo4pBmKgw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717164914; c=relaxed/simple;
-	bh=+9Jce2dLDeXLhhqSxnAUbRhpWxBtm+ZaX2iMJc0hCbI=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=foV6QqfOmrLXEo+DXHDfGfIuU2joJ9jdNHYLqoktQ/x/Eu3r7dfIzfxgWpa8D+k0SzCg0L23RJp+nEUx2QsIKiRmKHHO6FSnsI7hA4+jlEzjUkJImJQXz1aJMoVnMkfpBq/cL0t8X+bFX1TJ20YQigZvrEyBI+HeQiyYpth0pr0=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=WXo5Xiwe; arc=fail smtp.client-ip=40.92.107.104
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="WXo5Xiwe"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Y2Zn/hQaVHxSipnbr00uLmtFzQ+iMqqxPVvhQpo8su8HRAjqWJ8GKwjPYZKhepVQtcBLoHZh38vmETii5fxOfGff7oRPDeUgTt2t5hSjsdeFhVC9QtyekIJE1sOMBOoR2IH/zujxLzVhc74rp3mhGxMEXpROMpBSL1B6Dv9kYLs8OHuEj2aXVrbgqMenzbq+rTCyppmlQnLPLtBWgxiXLHYJtZpCBYU+IDD3KEK2HYYF9gxia+M0m3wUNOLMbzsK/ehcgP/EYRMsFd4SPEMC6iz9Gl1mKAHCRK12jsfRmPWHNxRJUG3lW0vzfIuBOxGO4nwLnLbNYl2E2aMD5f5Q4g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=uXDM6K1q07Y0YEG3v7e4sMLZaimXnNRlrxgIfUo3Jz0=;
- b=M+X89p9kqWvX7CzmxTNX5K494QoFaxL5cfX0sj/fcpqLT0eYCiB/LEb4pEw3KRKReFImxyfw+h8gVVKH9HBwQEAxC/2Qfkx/sTH1IycelejFxJlNSnqncMIRzb6dciUiCgJuJSFv3iq3NaAiLtRHppQs5fk57GTMb7dEvid+YZ+Ju4z952c97hCZD3ggkzHj3B9uuLcqZJ0XrwPSE68lD1550uV1QQzufxSEYs69WtnalkJCOgoD88byPWeSevQAyvMeFyK4V8FCUZI9t/1k/vMuWFPsxBJ7tJ88S6Za6c09UYOYddzNu9/h+3BhcnWF9KMmxx8c7Y6XdxEbnpb/5g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=uXDM6K1q07Y0YEG3v7e4sMLZaimXnNRlrxgIfUo3Jz0=;
- b=WXo5XiweXVRWqFPCTz5TGnd38MWFjtUGfXYFzJuSjDLwrA7mrS46atfpIZzeaST4Lp+3va1D1QC/XnHwsoDUsHq2uShJfHJXR6UxeeyNjSY3OYdVihZB5EHnpBxE0aGwHn/yKw8QXLC1qTLpUCat6ivfKOyBf0582v50H9ueUfW1E51i0hrmxsUkvIKW4KBS3BurSnW+tOdT2DX6YUttkH7weQxpu6ImNLLn7VQOo2JCyErL47BDnasyC3BDZFgwJpG68lNhddmtlvTgpsqDmQKnsIIvNiZC46+QoN5RqhlpqeGn7zOjot7QdnUNbN22mHju0Flzy2JvVrfoU7gPWg==
-Received: from SEYPR01MB4221.apcprd01.prod.exchangelabs.com
- (2603:1096:101:56::12) by JH0PR01MB5730.apcprd01.prod.exchangelabs.com
- (2603:1096:990:4c::13) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7633.17; Fri, 31 May
- 2024 14:15:09 +0000
-Received: from SEYPR01MB4221.apcprd01.prod.exchangelabs.com
- ([fe80::b674:8f70:6e29:3756]) by SEYPR01MB4221.apcprd01.prod.exchangelabs.com
- ([fe80::b674:8f70:6e29:3756%4]) with mapi id 15.20.7611.030; Fri, 31 May 2024
- 14:15:09 +0000
-From: Haylen Chu <heylenay@outlook.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Jisheng Zhang <jszhang@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Haylen Chu <heylenay@outlook.com>
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: Use inverted-wp quirk for CV18xx and SG200x SoCs
-Date: Fri, 31 May 2024 14:13:47 +0000
-Message-ID:
- <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
-X-Mailer: git-send-email 2.45.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-TMN: [IwscU5nAj36b8MDnCsjlyLkRp3XA+8qZ]
-X-ClientProxiedBy: SI1PR02CA0005.apcprd02.prod.outlook.com
- (2603:1096:4:1f7::13) To SEYPR01MB4221.apcprd01.prod.exchangelabs.com
- (2603:1096:101:56::12)
-X-Microsoft-Original-Message-ID: <20240531141347.36159-1-heylenay@outlook.com>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6AD61E498
+	for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 18:33:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.227.180.235
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1717180410; cv=none; b=VujOQBQC3cJqB+bqxXd1qviMKSsaIAOCaMtUBVU8OcIuXSg4DTv6dcXIhymrFH7uTR4zd3Y3zvKm7PaSU5s3pnDpAaHUWUI0HNwPgPyCaQ4hwFbkf1rrxsd3ErLPysBrPU8oPzA9YPdylQhmq776w3i+EevVsxe3XWzhCOeYCcY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1717180410; c=relaxed/simple;
+	bh=Ua2epOBJdfvMZRj4QucRXwfjwR0i5bSwnn/VWtR25I8=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=FF4FgCnEWltiHZfEcr45gbUicPvOFF/3wD6e/JiHoyKcws1IT4QP85kFquz7sqcCrTDhTjeBGlv2j8VR1m29IQ3B1LlIfBlz9scI8Bzqak2CD7mtUOZMHVXgNrBAQfuDtggU+Saxn9EJ/k8jcaQ0yQwAiURBV6Q/L+nIkjWDn3o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu; spf=pass smtp.mailfrom=danman.eu; arc=none smtp.client-ip=46.227.180.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=danman.eu
+Received: from silverhorse.byt.danman.eu (unknown [62.197.239.54])
+	by speedy.danman.eu (Postfix) with ESMTPSA id F1861240DA3;
+	Fri, 31 May 2024 20:25:21 +0200 (CEST)
+From: linux-mmc@danman.eu
+To: Avri.Altman@wdc.com,
+	linux-mmc@vger.kernel.org
+Cc: Daniel Kucera <linux-mmc@danman.eu>
+Subject: [PATCH v2] mmc-utils: implemented CMD42 locking/unlocking
+Date: Fri, 31 May 2024 20:25:17 +0200
+Message-Id: <20240531182517.929498-1-linux-mmc@danman.eu>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: SEYPR01MB4221:EE_|JH0PR01MB5730:EE_
-X-MS-Office365-Filtering-Correlation-Id: 43fc49d1-a1b2-4037-071b-08dc817c1418
-X-Microsoft-Antispam:
-	BCL:0;ARA:14566002|461199019|440099019|3412199016|1710799017;
-X-Microsoft-Antispam-Message-Info:
-	3Ikpjy56z4n5JN/YJhOu6SQroYrQaIiBypM+FzlBuOQ925YKXQ0I9mSjrZ3IA38XomKt7auJKeGakFU9VM7h+iEt3WfHBkItFP+0UVUBNeool3sbUxJ3jDSrQpNJpBPqO/2/ls6m3FOE/IitLvew+DpBgfoooY7rfDSEl7t7hYnjCBmwS3ETs5MPayeABQt55nQhh2EKp/zuww/XBctY9y32UwL+06qS97pDh847wNQWXrJyumExEKijfKduiGFOz3NkC8Skvo5hghng53F5rYJqm3qrAWoA8KIX3cIAt5aaHjWOPsNG4FmCqzI74F9y/Ett7ETwl2JlcV63x7mY5RMyGuNjkz9MNhrTSmsVKP9YZO8mU7VxvIga3RzwSPCLegfGU9GQvI+46y0V9IddP7FuMyAov+d/xXfkykR/8Ork3/wHScKIkJn4I6ZXE8DcdREe5+j+aU461B6vpLD7a7M1ejNCtPZAVk7TRZZTC5KaeOzZLY5sbkHJ93u0uBaDXuLE0ZwCCjnslTATPDYfZPFMdt6nHeop5MUflU+F5CLL+O+DITv1AASdBBu+xJMyBwz0m9pF24/DeKwYpnO24hbvx8LP79XG3Yc0Wl/FrdELBegi68wiYsp0n0itIpon
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?ByaGaYUewRUDT3/dLb6RMdUhkwQPhZukrzyiV9/9yBSbXPSk7TDeOJRrc+bV?=
- =?us-ascii?Q?8wovMA6g6z6znQ5PIHnEODhDFDXz6kUu7cv6bIMTdZw2STsau9DNS/Nz99mN?=
- =?us-ascii?Q?Nm/ut79s0JHL872glfSimJj8JGB1qbFuO7cd/M0ULmIQl5R47KFm1aYPxULK?=
- =?us-ascii?Q?K33gmopLzOd48cg//WxqIXhiGNhaapt0DbRUh4MALZL3NRCihdEeIwRmlZ27?=
- =?us-ascii?Q?EpWu37i+DBBqCxDXEA1DHrkb7BZFHRCYMU5TUoqrvz8oPpDau3t+8yBUE0eK?=
- =?us-ascii?Q?3CV0hDRkBEIzo+UhFyY6gZgDK4ZLLnApmtpewFkIQqVtjIyklEcZ4QeQHgzY?=
- =?us-ascii?Q?UBZletlo/dbz1lVbPcTP5FffiF7ZHloIAiKua4BdSad/7pHDl7maxnm+fGTT?=
- =?us-ascii?Q?oQPg+/Cgs5cIkCfnxDsq9ZP3qVo/AhqDOuKI69QJRhqTjNYHn9Wf3VldQNIZ?=
- =?us-ascii?Q?hSiJCi7RFjOQGVnO9ToI6rgwngTbrYUkghhF+hR4XKb4q5SU6HQLJ3EF0h1c?=
- =?us-ascii?Q?Gs7TgJrXszB9vdBCTcPSOoU1XgCEXwZ7QSLvKkC9Ggqd6+p2gITWuE7G4Teb?=
- =?us-ascii?Q?W2YI2OoW2P6QdG1GcA/dJgWou40Smjm2ikHaukxk9VTEIGNChUg01rW4FZxi?=
- =?us-ascii?Q?qtuZLkf1OME6X/hwBwNqyMYPJrQBubYbyEqZvsLhejG0MKQ2p5Nem4ujjiTA?=
- =?us-ascii?Q?4cfYljTXZcQ/8RCfHOq2L1u1tGrSlBWRlfCozngp1GHqsmri7fimgzY8lpyg?=
- =?us-ascii?Q?J7doyOqVkvF6ps9wCMfkP7Zu1B4J8UW1Swrz2M0Ttmwvzf1sCkn4xSIb9+F2?=
- =?us-ascii?Q?K5xylrSOMf2e4T2Sst3/wdI8Qu5UB8/BZxtD+thnV3L+nuq2hx3ThA/RJAn/?=
- =?us-ascii?Q?ro8InHrjCVsOEj7SnbEN9tPoI7fgO5/mGc7U+SS7+diHTFZaEtDiTWk/F1Qx?=
- =?us-ascii?Q?rIXj1bU2KSgMOdmxCGO7S2INjDpEDwMtsOdKeQn+o11vBRQRXuSHyzDj6pnG?=
- =?us-ascii?Q?YmaAuVpDQLQCUYnm5YjiOqVIVhHl1seGz4ZMobuntV7H7otVlNioV5RJfl/G?=
- =?us-ascii?Q?4bnH5nvy4pQibTyN9EHP9wPDG84FvTqZEuXEeg4jW7IFyOUy7ria4DGimIJW?=
- =?us-ascii?Q?mpMz1nTP7lmd6URooc985IyPsmjTO9lZg6S4J0gRKi0HKXlYFRrhKg155EW5?=
- =?us-ascii?Q?SgJJi5mlINpw3LCjIh39pJodHcA/1J7ZgV0zDf9+XhT5WmmDdOqTOhsngh4?=
- =?us-ascii?Q?=3D?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 43fc49d1-a1b2-4037-071b-08dc817c1418
-X-MS-Exchange-CrossTenant-AuthSource: SEYPR01MB4221.apcprd01.prod.exchangelabs.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 May 2024 14:15:09.6397
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: JH0PR01MB5730
+Content-Transfer-Encoding: 8bit
 
-MMC controller integrated in Sophgo CV18xx and SG200x SoCs has an
-inverted write-protect flag, causing SDCards misdetected as read-only.
-So set SDHCI_QURIK_INVERTED_WRITE_PROTECT to make write protection work
-correctly.
+From: Daniel Kucera <linux-mmc@danman.eu>
 
-Fixes: 017199c2849c ("mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002")
-Signed-off-by: Haylen Chu <heylenay@outlook.com>
+Implemented locking/unlocking using CMD42 according to Micron
+Technical Note
+
+original link https://media-www.micron.com/-/media/client/global/documents/products/technical-note/sd-cards/tnsd01_enable_sd_lock_unlock_in_linux.pdf?rev=03f03a6bc0f8435fafa93a8fc8e88988
+currently available at https://github.com/danielkucera/esp32-sdcard/blob/master/tnsd01_enable_sd_lock_unlock_in_linux.pdf
+
+Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ mmc.c      |  12 ++++
+ mmc.h      |  10 +++
+ mmc_cmds.c | 189 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |   1 +
+ 4 files changed, 212 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 39edf04fedcf..62b7f28de54f 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -962,7 +962,8 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+diff --git a/mmc.c b/mmc.c
+index bc8f74e..38e3e72 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -250,6 +250,18 @@ static struct Command commands[] = {
+ 		"be 1.",
+ 	NULL
+ 	},
++	{ do_lock_unlock, -3,
++	"cmd42", "<parameter> " "<device> " "[password] " "[new_password]\n"
++		"Usage: mmc cmd42 <s|c|l|u|e> <device> [password] [new_password]\n"
++		"<password> can be up to 16 character plaintext or hex string starting with 0x\n"
++		"s\tset password\n"
++		"c\tclear password\n"
++		"l\tlock\n"
++		"sl\tset password and lock\n"
++		"u\tunlock\n"
++		"e\tforce erase\n",
++	NULL
++	},
+ 	{ do_softreset, -1,
+ 	  "softreset", "<device>\n"
+ 	  "Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works",
+diff --git a/mmc.h b/mmc.h
+index 6f1bf3e..ddbb06c 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -30,6 +30,7 @@
+ #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
+ #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
++#define MMC_SET_BLOCKLEN	16  /* ac [31:0] block len R1 */
+ #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
+ #define MMC_SET_BLOCK_COUNT      23   /* adtc [31:0] data addr   R1  */
+ #define MMC_WRITE_BLOCK		24	/* adtc [31:0] data addr	R1  */
+@@ -46,6 +47,7 @@
+ 					      [1] Discard Enable
+ 					      [0] Identify Write Blocks for
+ 					      Erase (or TRIM Enable)  R1b */
++#define MMC_LOCK_UNLOCK		42  /* adtc R1b */
+ #define MMC_GEN_CMD		56   /* adtc  [31:1] stuff bits.
+ 					      [0]: RD/WR1 R1 */
  
- static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
- 	.ops = &sdhci_dwcmshc_cv18xx_ops,
--	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- };
+@@ -70,6 +72,14 @@
+ #define R1_EXCEPTION_EVENT      (1 << 6)        /* sr, a */
+ #define R1_APP_CMD              (1 << 5)        /* sr, c */
  
++#define MMC_CMD42_UNLOCK	0x0 /* UNLOCK */
++#define MMC_CMD42_SET_PWD	0x1 /* SET_PWD */
++#define MMC_CMD42_CLR_PWD	0x2 /* CLR_PWD */
++#define MMC_CMD42_LOCK		0x4 /* LOCK */
++#define MMC_CMD42_ERASE		0x8 /* ERASE */
++#define MAX_PWD_LENGTH		32 /* max PWDS_LEN: old+new */
++#define MMC_BLOCK_SIZE		512 /* data blk size for cmd42 */
++
+ /*
+  * EXT_CSD fields
+  */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 936e0c5..dbbaf8d 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -3245,3 +3245,192 @@ dev_fd_close:
+ 		exit(1);
+ 	return 0;
+ }
++
++static int hex_to_bytes(char *input, char *output, int len)
++{
++	int ilen = strlen(input);
++
++	if (ilen % 2) {
++		printf("Error: hex string has odd number of characters\n");
++		exit(1);
++	}
++
++	if (ilen / 2 > len) {
++		printf("Error: hex string is too long\n");
++		exit(1);
++	}
++
++	for (int i = 0; i < (ilen / 2); i++) {
++		if (sscanf(input + 2 * i, "%2hhx", &output[i]) != 1) {
++			printf("Error: failed to parse hex string\n");
++			exit(1);
++		}
++	}
++
++	return ilen/2;
++}
++
++static int parse_password(char *pass, char *buf)
++{
++	int pwd_len;
++
++	if (!strncmp("0x", pass, 2)) {
++		pwd_len = hex_to_bytes(pass+2, buf, MAX_PWD_LENGTH);
++	} else {
++		pwd_len = strlen(pass);
++		strncpy(buf, pass, MAX_PWD_LENGTH);
++	}
++
++	if (pwd_len > MAX_PWD_LENGTH) {
++		printf("Password too long.\n");
++		exit(1);
++	}
++
++	return pwd_len;
++}
++
++int do_lock_unlock(int nargs, char **argv)
++{
++	int fd, ret = 0;
++	char *device;
++	__u8 data_block[MMC_BLOCK_SIZE] = {};
++	__u8 data_block_onebyte[1] = {0};
++	int block_size = 0;
++	struct mmc_ioc_multi_cmd *mioc;
++	struct mmc_ioc_cmd *idata;
++	int cmd42_para;
++	char pwd[MAX_PWD_LENGTH*2+1];
++	int pwd_len = 0, new_pwd_len;
++	int min_args, max_args;
++	__u32 r1_response;
++
++	min_args = 4;
++	max_args = 4;
++
++	printf("Function: ");
++	if (!strcmp("s", argv[1])) {
++		cmd42_para = MMC_CMD42_SET_PWD;
++		printf("Set password\n");
++		max_args = 5;
++	} else if (!strcmp("c", argv[1])) {
++		cmd42_para = MMC_CMD42_CLR_PWD;
++		printf("Clear password\n");
++	} else if (!strcmp("l", argv[1])) {
++		cmd42_para = MMC_CMD42_LOCK;
++		printf("Lock the card\n");
++	} else if (!strcmp("sl", argv[1])) {
++		cmd42_para = MMC_CMD42_SET_PWD | MMC_CMD42_LOCK;
++		printf("Set password and lock the card\n");
++		max_args = 5;
++	} else if (!strcmp("u", argv[1])) {
++		cmd42_para = MMC_CMD42_UNLOCK;
++		printf("Unlock the card\n");
++	} else if (!strcmp("e", argv[1])) {
++#ifdef DANGEROUS_COMMANDS_ENABLED
++		cmd42_para = MMC_CMD42_ERASE;
++		printf("Force erase (Warning: all card data will be erased together with PWD!)\n");
++		min_args = 3;
++		max_args = 3;
++#else
++		printf("Erase is disabled unless compiled with DANGEROUS_COMMANDS_ENABLED\n");
++		exit(1);
++#endif
++	} else {
++		printf("Invalid parameter:\n" "s\tset password\n"
++			"c\tclear password\n" "l\tlock\n"
++			"sl\tset password and lock\n" "u\tunlock\n"
++			"e\tforce erase\n");
++		exit(1);
++	}
++
++	if ((nargs < min_args) || (nargs > max_args)) {
++		fprintf(stderr, "Usage: mmc cmd42 <s|c|l|u|e> <device> [password] [new_password]\n");
++		exit(1);
++	}
++
++	if (nargs > 3) {
++		pwd_len = parse_password(argv[3], pwd);
++		printf("Using password '%s', length %d\n", argv[3], pwd_len);
++	}
++
++	if (nargs == 5) {
++		new_pwd_len = parse_password(argv[4], pwd+pwd_len);
++		printf("New password '%s', length %d\n", argv[4], new_pwd_len);
++
++		pwd_len += new_pwd_len;
++	}
++
++	device = argv[2];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	if (cmd42_para == MMC_CMD42_ERASE)
++		block_size = 2;
++	else
++		block_size = MMC_BLOCK_SIZE;
++
++	printf("Set data block length = %d byte(s).\n", block_size);
++
++	mioc = (struct mmc_ioc_multi_cmd *)
++		calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
++			2 * sizeof(struct mmc_ioc_cmd));
++	if (!mioc)
++		return -ENOMEM;
++
++	mioc->num_of_cmds = 2;
++
++	idata = &mioc->cmds[0];
++	set_single_cmd(idata, MMC_SET_BLOCKLEN, 0, 0, block_size);
++
++	if (cmd42_para == MMC_CMD42_ERASE) {
++		data_block_onebyte[0] = cmd42_para;
++	} else {
++		data_block[0] = cmd42_para;
++		data_block[1] = pwd_len;
++		memcpy((char *)(data_block+2), pwd, pwd_len);
++	}
++
++	idata = &mioc->cmds[1];
++
++	idata->write_flag = 1;
++	idata->opcode = MMC_LOCK_UNLOCK;
++	idata->arg = 0;
++	idata->flags = MMC_RSP_R1 | MMC_CMD_AC | MMC_CMD_ADTC;
++	idata->blksz = block_size;
++	idata->blocks = 1;
++
++	if (cmd42_para == MMC_CMD42_ERASE)
++		mmc_ioc_cmd_set_data((*idata), data_block_onebyte);
++	else
++		mmc_ioc_cmd_set_data((*idata), data_block);
++
++	ret = ioctl(fd, MMC_IOC_MULTI_CMD, mioc);
++
++	printf("Multi cmd response: %d\n", ret);
++
++	printf("Set block length response: 0x%08x\n",
++		mioc->cmds[0].response[0]);
++
++	r1_response = mioc->cmds[1].response[0];
++	printf("cmd42 response: 0x%08x\n", r1_response);
++
++	if (r1_response & R1_ERROR) {
++		printf("cmd42 error! Error code: 0x%08x\n",
++			r1_response & R1_ERROR);
++		ret = -1;
++	}
++
++	if (r1_response & R1_LOCK_UNLOCK_FAILED) {
++		printf("Card lock/unlock fail! Error code: 0x%08x\n",
++		r1_response & R1_LOCK_UNLOCK_FAILED);
++		ret = -1;
++	}
++
++	close(fd);
++	return ret;
++}
++
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 5f2bef1..96da608 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -50,3 +50,4 @@ int do_general_cmd_read(int nargs, char **argv);
+ int do_softreset(int nargs, char **argv);
+ int do_preidle(int nargs, char **argv);
+ int do_alt_boot_op(int nargs, char **argv);
++int do_lock_unlock(int nargs, char **argv);
 -- 
-2.45.1
+2.34.1
 
