@@ -1,278 +1,167 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2471415575A;
-	Fri, 31 May 2024 11:25:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3AF81586CC
+	for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 12:59:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717154743; cv=none; b=NunbCoasuH6IEc2/mlwE3bse2nRuqghZNoyxQ5gtM8/xy36V9AWqWwAbiMzHbjkWWLKlND9eunDU1P7sajV3B5Hyi7fQxLJFpnJafDQQNA6ILcpvVaZW+U1/BQQPYy9PgTQIbb42kILEnQaIjvGhbD7Iz8/CIlHhnXIV33YCF00=
+	t=1717160389; cv=none; b=uKRnzi25Xb89NCn/ORaWv70jc6Myqq+rW4uW+n/ple0NZBSzxXnsiMw6LXaKnzSfvuQq1FQuOTCRMXK9Sy6wtZTKZfz55pm8WS3C2590zIIHr+7U+IDnSVjZ+50+46s7ZBEfn9GPaKKDa6JPaWtHh4CqzI9iHWEW7lNaHBMWfVg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717154743; c=relaxed/simple;
-	bh=8rvouJXSTI4Pm7kS/trxN1GuwWPDuIYI3MqGF8IM4eE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=a8QUzmN0fcGWyJ89tBD4u2FtOd4tEtMMTQiTcLhIvfc6IZOXmBcv8oI6dI8BcYawD3BLOC0KYG/06w1Ojnw3uo6OV4BJwSEiGPtml/lYX47aUc1R+4oC8M4ec574Mmf9Ht0OKi5FA+zszOLkPO1bWG+9RE7sEKqyuPlwBW7Fg9M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Cv9TEttt; arc=none smtp.client-ip=192.198.163.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1717160389; c=relaxed/simple;
+	bh=SbSIJSaxifN8ilLLlOjjSgs1ZMiaEBqAYbYSm87dysY=;
+	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NCt0k3WqScClD6GdKW2rZoucUwgUdRLoYi48v/TqIUdDf4/Za859PGb7x92YbTslfzK46U6lzqp6mvb2S6jzk6z8XefxXQw6OkDExi2Jwr/OkYHvulnl6fkSX+G1Mg09yrTnsv/WyDXKO64c+MYqySTL5Uto8clZ7jPMn3IR4Ss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=G7lL3qDy; arc=none smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Cv9TEttt"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1717154741; x=1748690741;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=8rvouJXSTI4Pm7kS/trxN1GuwWPDuIYI3MqGF8IM4eE=;
-  b=Cv9TEtttqn1D+ZYS4iIpUZbvlJJVlggevmk9d1Sx1ONYiyRopsQgcjVm
-   t7T7u6Rn8M9wQOFlSYV/0ql87u5SwLTmqjtFPNv3Ud+0n8++kE2evl/Hj
-   494mXNJlZU2Fx5XGEBRpRmhB+Y0ypMYMdqb8PFaVTplRR4IT27NhYp660
-   f+NVWA/KuWxLW7ph9IyEs1d9XsWTONpbjhGXRXT2v5Sc24YdGziKAchIK
-   heb/SzV02wzyH+Jp4E4tjR0OfcozssPrZSNjM+GoCWGJInpKIIMYuonfD
-   m7VVoM0SVs2ksscs8th+uMZ85HAGJnYybEJDwGB76a4fQIyi02F8n96Rb
-   g==;
-X-CSE-ConnectionGUID: fLejgK87QGW19IpwjfMmzw==
-X-CSE-MsgGUID: l8ZdtoDUTXiRc40UXErvHg==
-X-IronPort-AV: E=McAfee;i="6600,9927,11088"; a="13916927"
-X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
-   d="scan'208";a="13916927"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 04:25:39 -0700
-X-CSE-ConnectionGUID: s/V0LCyfQgubFb97mBSlCQ==
-X-CSE-MsgGUID: sIKyOqq8S72f1xaIKEPK5Q==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,204,1712646000"; 
-   d="scan'208";a="36232672"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.41.28])
-  by fmviesa009-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2024 04:25:36 -0700
-Message-ID: <a4542d2a-490f-40ab-a2a8-a42b921d2656@intel.com>
-Date: Fri, 31 May 2024 14:25:30 +0300
+	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="G7lL3qDy"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-52b0d25b54eso2975933e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 31 May 2024 05:59:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=suse.com; s=google; t=1717160385; x=1717765185; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references
+         :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=YgAedokl3gRs935zOQgIriLiKTu9cIN2F2d3LZv5g+w=;
+        b=G7lL3qDy5+ZxjT5P/cfwMcOi1cbsdQ0w9aj4BYh+UPwTU5bqqwklbpq6cairLOC9mx
+         seoRopbpZcHFgitTeVM+kyev1WDoCpRhdYXFDsNRK/jFHY6cDVN/fd3Ncj55cyX/TZvV
+         Ztskw+DgtQZOOVLsYU3QzkPQt4GbF5ap2anSoRftnLDDH7/Ke0EJsu9aep5Hc3wS7TtQ
+         jERxHmPA/FE2C6gZRYTxZ70C5ID48SVL7MVySA+FLbv0msOYmF0bgyEGl6Dv+z5AT5A6
+         MqHYSZHyr6m/3JxLvQGB1H+SCZv6GKWev+h88u9DDbduL8lkJ9cyjrTPsTlxdR0Cgnnj
+         CqcA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1717160385; x=1717765185;
+        h=in-reply-to:content-disposition:mime-version:references
+         :mail-followup-to:message-id:subject:cc:to:date:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=YgAedokl3gRs935zOQgIriLiKTu9cIN2F2d3LZv5g+w=;
+        b=H6eIGCHKEQvveBfPDSr6h8ep2Ef3evAuvrTkgqe6P6fsyp4NKEYr+t7gQcx+wT3Uoq
+         BfXMb9K/1z1Gwf/OdHnJ26RCeGRSYjX6pA4n7Y1cGxvwymIsCne6qDK856MHyEzIXOuN
+         6HkCcb+3dd3tcOd68B1RlFNZ37oXLJKL2srE6fWKJWaPEwPdVgAQSeUP8W3C82qbMLGK
+         yH//j9LI02lHN0tfF1jL3clRf9QfZiVWNVZLshbXHJZI65bzaFr5pKFh7Hw5owSpsYi0
+         76HOGVMFZfXMQDXjWjCAzp3TDbfgAj0lbDB5i/HmVKdF4MkPBQvF4+zZZaF/FAgKvm7Z
+         OayQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWCf6kK3yNv6acpWJ2NrNnQSFEwWOKbzGnyLE5J9AxL7KzqDtzBqenjI+7pxlCMbi977EiMEZO8BXUMTSsS03h+BgGnA0xlKGLB
+X-Gm-Message-State: AOJu0YyC3g/dZTJ+V2wYtpJG/1xEElJPQ6EyDeG8FY5ahV4C8CZSWPO3
+	k4z+uIt95c1DXt25FqCrD/gt4Uk3nKtIup3KWg+CCYmWQLAQtLUoTD3Ojs8ufsU=
+X-Google-Smtp-Source: AGHT+IHlzlusjyEOgZJnGuSuPZL0kGHD+/XX/Cx4GjQtie8rM3SZ6VVnGyuOMCLAHH96a+kEylXvFA==
+X-Received: by 2002:ac2:5332:0:b0:52a:5551:5606 with SMTP id 2adb3069b0e04-52b895a3e7amr1619090e87.50.1717160384912;
+        Fri, 31 May 2024 05:59:44 -0700 (PDT)
+Received: from localhost (host-87-16-233-11.retail.telecomitalia.it. [87.16.233.11])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a67e6f03728sm84644066b.20.2024.05.31.05.59.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 31 May 2024 05:59:44 -0700 (PDT)
+From: Andrea della Porta <andrea.porta@suse.com>
+X-Google-Original-From: Andrea della Porta <aporta@suse.de>
+Date: Fri, 31 May 2024 14:59:58 +0200
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Andrea della Porta <andrea.porta@suse.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v5 0/4] Add minimal boot support for Raspberry Pi 5
+Message-ID: <ZlnJzqnvTk70O3ap@apocalypse>
+Mail-Followup-To: Stefan Wahren <wahrenst@gmx.net>,
+	Andrea della Porta <andrea.porta@suse.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>, devicetree@vger.kernel.org,
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+References: <cover.1717061147.git.andrea.porta@suse.com>
+ <36642bd8-c981-4190-9f44-072ac3c97c6b@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V16 12/23] mmc: sdhci-uhs2: add reset function function
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
- Greg.tu@genesyslogic.com.tw, dlunev@chromium.org,
- Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- Victor Shih <victor.shih@genesyslogic.com.tw>, ulf.hansson@linaro.org
-References: <20240522110909.10060-1-victorshihgli@gmail.com>
- <20240522110909.10060-13-victorshihgli@gmail.com>
- <42f2b1d4-e6c2-4860-956d-4f10c3b05529@intel.com>
- <CAK00qKBA81zx=QmU7m=pZXOzdY4syOht4p_-SU7fdw+-an0ciQ@mail.gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAK00qKBA81zx=QmU7m=pZXOzdY4syOht4p_-SU7fdw+-an0ciQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <36642bd8-c981-4190-9f44-072ac3c97c6b@gmx.net>
 
-On 31/05/24 13:32, Victor Shih wrote:
-> On Fri, May 24, 2024 at 3:23 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 22/05/24 14:08, Victor Shih wrote:
->>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->>>
->>> Sdhci_uhs2_reset() does a UHS-II specific reset operation.
->>>
->>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->>> ---
->>>
->>> Updates in V15:
->>>  - Refer the SD Host Controller Standard Specification Section 3.10
->>>    to add reset command data mechanism.
->>>
->>> Updates in V14:
->>>  - Since mmc_card_uhs2() is the same as sdhci_uhs2_mode(), so drop
->>>    sdhci_uhs2_mode() and use mmc_card_uhs2() instead of sdhci_uhs2_mode().
->>>
->>> Updates in V13:
->>>  - Use ios timing to stead MMC_UHS2_SUPPORT for indicate the UHS2 mode.
->>>
->>> Updates in V8:
->>>  - Adjust the position of matching brackets.
->>>
->>> Updates in V6:
->>>  - Remove unnecessary functions and simplify code.
->>>
->>> ---
->>>
->>>  drivers/mmc/host/sdhci-uhs2.c | 57 +++++++++++++++++++++++++++++++++++
->>>  drivers/mmc/host/sdhci-uhs2.h |  1 +
->>>  drivers/mmc/host/sdhci.c      |  3 +-
->>>  drivers/mmc/host/sdhci.h      |  1 +
->>>  4 files changed, 61 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
->>> index 9cb0f1b2a37d..7652158ea151 100644
->>> --- a/drivers/mmc/host/sdhci-uhs2.c
->>> +++ b/drivers/mmc/host/sdhci-uhs2.c
->>> @@ -10,7 +10,9 @@
->>>   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>>   */
->>>
->>> +#include <linux/delay.h>
->>>  #include <linux/module.h>
->>> +#include <linux/iopoll.h>
->>>
->>>  #include "sdhci.h"
->>>  #include "sdhci-uhs2.h"
->>> @@ -21,6 +23,8 @@
->>>  #define SDHCI_UHS2_DUMP(f, x...) \
->>>       pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
->>>
->>> +#define UHS2_RESET_TIMEOUT_100MS             100000
->>> +
->>>  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
->>>  {
->>>       if (!(mmc_card_uhs2(host->mmc)))
->>> @@ -49,6 +53,57 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
->>>  }
->>>  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
->>>
->>> +/*****************************************************************************\
->>> + *                                                                           *
->>> + * Low level functions                                                       *
->>> + *                                                                           *
->>> +\*****************************************************************************/
->>> +
->>> +/**
->>> + * sdhci_uhs2_reset - invoke SW reset
->>> + * @host: SDHCI host
->>> + * @mask: Control mask
->>> + *
->>> + * Invoke SW reset, depending on a bit in @mask and wait for completion.
->>> + */
->>> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
->>> +{
->>> +     u32 val;
->>> +
->>> +     sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
->>> +
->>> +     if (mask & SDHCI_UHS2_SW_RESET_FULL)
->>> +             host->clock = 0;
->>> +
->>> +     /* hw clears the bit when it's done */
->>> +     if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
->>> +                                  UHS2_RESET_TIMEOUT_100MS, true, host, SDHCI_UHS2_SW_RESET)) {
->>> +             pr_warn("%s: %s: Reset 0x%x never completed. %s: clean reset bit.\n", __func__,
->>> +                     mmc_hostname(host->mmc), (int)mask, mmc_hostname(host->mmc));
->>> +             sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
->>> +             return;
->>> +     }
->>> +}
->>> +EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
->>> +
->>> +static void sdhci_uhs2_reset_cmd_data(struct mmc_host *mmc)
->>> +{
->>> +     struct sdhci_host *host = mmc_priv(mmc);
->>> +
->>> +     sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->>> +
->>> +     if (host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A ||
->>> +         host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
->>> +         host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
->>> +         host->mmc->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD) {
->>
->> Please use mmc_card_uhs2()
->>
-> 
-> Hi, Adrian
-> 
->      I will update this in the v17 version.
-> 
-> Thanks, Victor Shih
-> 
->>> +             sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
->>> +
->>> +             sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->>> +             sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
->>> +             sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI_UHS2_INT_ERROR_MASK);
->>> +     }
->>> +}
->>> +
->>>  /*****************************************************************************\
->>>   *                                                                           *
->>>   * Driver init/exit                                                          *
->>> @@ -57,6 +112,8 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
->>>
->>>  static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
->>>  {
->>> +     host->mmc_host_ops.uhs2_reset_cmd_data = sdhci_uhs2_reset_cmd_data;
->>
->> As noted for patch 8, any host controller resets needed
->> should be done before completing the request, so a call
->> back function should not be needed.
->>
-> 
-> Hi, Adrian
-> 
->      I want to confirm further, so can I call
-> sdhci_uhs2_reset_cmd_data() directly
->      in the mmc_wait_for_req_done()?
+Hi Stefan,
 
-No
-
->      Am I understanding something wrong?
-
-See the response to your questions over patch 8.
-
+On 12:00 Fri 31 May     , Stefan Wahren wrote:
+> Hi Andrea,
 > 
-> Thanks, Victor Shih
-> 
->>> +
->>>       return 0;
->>>  }
->>>
->>> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
->>> index 2bfe18d29bca..caaf9fba4975 100644
->>> --- a/drivers/mmc/host/sdhci-uhs2.h
->>> +++ b/drivers/mmc/host/sdhci-uhs2.h
->>> @@ -177,5 +177,6 @@
->>>  struct sdhci_host;
->>>
->>>  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
->>> +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
->>>
->>>  #endif /* __SDHCI_UHS2_H */
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 8fc3e001db74..f212da6dc2aa 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -236,7 +236,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->>>  }
->>>  EXPORT_SYMBOL_GPL(sdhci_reset);
->>>
->>> -static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
->>> +bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
->>>  {
->>>       if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
->>>               struct mmc_host *mmc = host->mmc;
->>> @@ -249,6 +249,7 @@ static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
->>>
->>>       return true;
->>>  }
->>> +EXPORT_SYMBOL_GPL(sdhci_do_reset);
->>>
->>>  static void sdhci_reset_for_all(struct sdhci_host *host)
->>>  {
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index 13703f1a3710..83d994c8d89e 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -845,6 +845,7 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
->>>  int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->>>  void sdhci_set_bus_width(struct sdhci_host *host, int width);
->>>  void sdhci_reset(struct sdhci_host *host, u8 mask);
->>> +bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
->>>  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->>>  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->>>  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
->>
+> Am 30.05.24 um 12:11 schrieb Andrea della Porta:
+> > Hi,
+> > 
+> > This patchset adds minimal support for the Broadcom BCM2712 SoC and for
+> > the on-board SDHCI controller on Broadcom BCM2712 in order to make it
+> > possible to boot (particularly) a Raspberry Pi 5 from SD card and get a
+> > console through uart.
+> > Changes to arm64/defconfig are not needed since the actual options work
+> > as they are.
+> > This work is heavily based on downstream contributions.
+> > 
+> > Tested on Tumbleweed substituting the stock kernel with upstream one,
+> > either chainloading uboot+grub+kernel or directly booting the kernel
+> > from 1st stage bootloader. Steps to reproduce:
+> > - prepare an SD card from a Raspberry enabled raw image, mount the first
+> >    FAT partition.
+> > - make sure the FAT partition is big enough to contain the kernel,
+> >    anything bigger than 64Mb is usually enough, depending on your kernel
+> >    config options.
+> > - build the kernel and dtbs making sure that the support for your root
+> >    fs type is compiled as builtin.
+> > - copy the kernel image in your FAT partition overwriting the older one
+> >    (e.g. kernel*.img for Raspberry Pi OS or u-boot.bin for Tumbleweed).
+> > - copy arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb on FAT partition.
+> > - make sure you have a cmdline.txt file in FAT partition with the
+> >    following content:
+> >    # cat /boot/efi/cmdline.txt
+> >    root=/dev/mmcblk0p3 rootwait rw console=tty ignore_loglevel earlycon
+> >    console=ttyAMA10,115200
+> > - if you experience random SD issues during boot, try to set
+> >    initial_turbo=0 in config.txt.
+> was this an issue since the beginning of this series?
+>
 
+I experienced this even during early testing, using the complete downstream
+driver. It seems that when initual_turbo != 0, the fw can throttle the clock
+to reduce the boot time and it (directly or indirectly) may affect SD functionality.
+I believe that the probability of this to happen is likely a function of SD
+card speed, whether it requires timing tuning, initial_turbo exact value  and whether
+you are booting the kernel directly or chainloading u-boot + grub (or
+whatever combination of secondary stage bootloader). For example, your 
+boot setup may have a timeout in the grub boot menu that is large enough for the clocks
+to settle and the boot process to end successfully, while faster boot time can lead
+to the issue described. Since this behaviour seems to depend on all of this factors and
+does not necessarily arise in practice, disabling initial_turbo is just a suggestion
+in case things go haywire. 
+
+> What kind of SD issues?
+>
+
+I wasn't able to boot from SD card due to clock issues.
+ 
+> Is there a downstream reference?
+
+Some (old) reference e.g.:
+https://forums.raspberrypi.com/viewtopic.php?t=112480#:~:text=It%20sets%20turbo%20mode%20from,have%20turbo%20during%20the%20boot.
+
+but there are probably more.
+
+Many thanks,
+Andrea
