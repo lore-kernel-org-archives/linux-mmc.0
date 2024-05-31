@@ -1,55 +1,55 @@
-Received: from mail-vs1-f53.google.com (mail-vs1-f53.google.com [209.85.217.53])
+Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com [209.85.221.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 208C57828B;
-	Fri, 31 May 2024 10:32:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 678F7156242;
+	Fri, 31 May 2024 10:32:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717151532; cv=none; b=PQgzHS2PgxX57parLdAaGa6zs9+/crAfQ75XNAjNcK0NJn1MMU5YxIkmlrWwx38cPmuENIeBCtUnovpn38RYsrSiHZN/8E1F0vX32cPAXCNOosEMuM8duNtoYSy9d6LoP1vJ0uOYf4odYljppQ1uMYAZjh1i9UmyxuzyTvbtDrM=
+	t=1717151536; cv=none; b=DfLq4tkP7QyIIaDnBdaaEa8+c/hHsGvtCts2GxHPbrk6y/nM8pB+JV0l0rMNDHRa185zmTm3rxT/JybBOz/vkaLBjV412bRMzFNKgwoZ7SL0C0aF0UVTQXWpWX1wYmW3+UDIj3XvG1EQeRfAOk2cItd70EnfEYUSbn7tjaTmYfU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717151532; c=relaxed/simple;
-	bh=dDDEfEsjfFj4dAcpfnAUrhvu/hMoCIIpnPxuOy34JhY=;
+	s=arc-20240116; t=1717151536; c=relaxed/simple;
+	bh=BhfDWRQAxg2H0nNvxN8ST80r+VkjlyGPhD/DEZuE9cA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GhxfOhn0kDhEeUIJatNGcaU/umPwYZ5RXeuSS1FcEx49dBqxzqwFOXqYfUK51+ZWU7zb1Fkgt9y82BPzcs+7MU91tWuXypfbdWNR11is505RExqVnpNfm4nVORstM5OgyZFreDYe8FmX2s8GhCc4Jf6HE0tHiKplehGiSPG7VSU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=L/zOt286; arc=none smtp.client-ip=209.85.217.53
+	 To:Cc:Content-Type; b=Ja1rvNOY6Y32Rl3AsLlgX6KvzPwD6DbNlmuDeXjg12WDnXzZ2kxeHWWegCCKMoka4GJjd+ZkEwxiGQDUB+e4oPVGk/S+kK/z2Wo7E4D9W1VynzUlXbxTsAj7x+ZNijQwLs6OTV/SeC8rNKYn2jLbwMcKOek641t65jfMciJz7/g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QFqgR77B; arc=none smtp.client-ip=209.85.221.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L/zOt286"
-Received: by mail-vs1-f53.google.com with SMTP id ada2fe7eead31-48bb4f21172so435469137.3;
-        Fri, 31 May 2024 03:32:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QFqgR77B"
+Received: by mail-vk1-f174.google.com with SMTP id 71dfb90a1353d-4e4eff99f16so645298e0c.1;
+        Fri, 31 May 2024 03:32:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1717151530; x=1717756330; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1717151533; x=1717756333; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HcM/q+B64c+IL4z3ll1HNo6g5Ua5mFGJaDl0RMo26bw=;
-        b=L/zOt286fPVQtRfoIQf3gm4hGixulnHmVoNGnxDIdg/1H5mBtOBaySjbVZDCCV0Ln+
-         MXQc3b4YUElTT+bZJkmTeyZ+TW6xOsahgIgFaiafV8BJY5QhiKC8pP0aIzX79GzbMUH7
-         qmyGiW4DNAQ0AYDdB7bBtCBiGqGnN9ZTnaR6evrBGZ/aKvKyhrY2cUccA8dniH4l+peg
-         5LfM5H5D4ol+yYY5SQz/xt2rd0pgSfo9VdmA3KuzkPzIyEosGB6hi7GEdBo9UaVMxqn1
-         6iKoCVFpJFIvae856MjJRKhri1m+gj7HAnesJO4q8Jurp0qoAS4V9ajNs8g6M7LbcJUK
-         yvMg==
+        bh=2HS0R4iju6FvJzIbu0g7hhKx4uFltPTHH/SC2V6Zi2U=;
+        b=QFqgR77BRRKftpefS+UmcyAYv9s60ebwnwL8MzURxweO3qLstQaTql+tVeoJFZ+vAX
+         c7s4ctDIg57lAhCNo3jcw8hd+4hfC+S6anZifocJY8s+Edu2ru4pRzu6D/j36b7mQe9B
+         0TC/izaOjLFOtSx0mdCe8WamPni4vSB4yUOhfOyVYPzIUXxyLwG9lEJyZWeGmg4HHTrj
+         Ygn1X72c/XCi95kk4incjSebcEowKwHsYySv5vZ/8Dr2/RNbrM0MC1k+85HKSLTUaeaM
+         E7ZkSrnoqih+1CmC8X+kIGcZwqBGYwB7PSeS8KrF+J4tW8gVAQ0zIeEmDomuh7stW8Vl
+         IdnA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1717151530; x=1717756330;
+        d=1e100.net; s=20230601; t=1717151533; x=1717756333;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HcM/q+B64c+IL4z3ll1HNo6g5Ua5mFGJaDl0RMo26bw=;
-        b=T/IIbmlesL1gJJHbSqwfqhVdIVhIJ6o6BycDpadwznblSTx4fYdHOM4Li6/3qmM+AL
-         3HH/DMmin8LxxeM/P2GmZJj+j8Xc98X9zcMszByHo+74MM6FqsFj3qNX0FyYmZWyFSab
-         lire34BsARl1OB+RIxLO/cxSHFlpJpOCtasA7vyTB+BbnUIVMub0QpxtG0jshnBEEcwY
-         9nJJVb+wyZX70MKk+QdD7buqe5kVUd1HPCj3qyn7auVvNsuGoANWZM79XHEt5l1eK6rE
-         QQOooXzAoC9FzZFKIJffrOwrpDe3q1ItN8wjoxJWfAiohDiCMCCiRXyjcPuN4J3q77JH
-         4ZAQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUkT2QiZfZqPlmnGjXQxKLu3E7CY104JDhxdAbdbypo8d3exwY6J80PthBXJu/nG9ZPbqr7un5GpXEKtKU5VCy5FelvFKVil4PlJazx
-X-Gm-Message-State: AOJu0YyoNGBlYHQFp/dG11iV/irYxxnG8opep8qd/ahfVSwJRYC6q78O
-	cNASHX+9WFvoEjf+EdNgBgAIdC1V1CbcVIo1KodHgt9RdBaB0wBDV1ObR1f1mAtNNdynlWBM3j7
-	yKXCN1tMFBE6q02+EdYkLmVVJFdY=
-X-Google-Smtp-Source: AGHT+IFMx05bSFeyu9+XIMW5dT9oLVgwhPOC7hSRPgf5r+X56J3wm4qotnkJlP/JvyyuWn5DKR7+dZuysCe50OUcaew=
-X-Received: by 2002:a67:ba0a:0:b0:48b:bce7:a80 with SMTP id
- ada2fe7eead31-48bc21a90a2mr1617620137.24.1717151529815; Fri, 31 May 2024
- 03:32:09 -0700 (PDT)
+        bh=2HS0R4iju6FvJzIbu0g7hhKx4uFltPTHH/SC2V6Zi2U=;
+        b=VSDT2jY62GaDLzErB4DJZWf5+8UbM+UxHYcK09njl95iTano7uiocECt3Q+Mfq9D2F
+         jIKJkw3LZV7Yv+VhDAfAGngHBkF0eP9kzrcdVrXgHC+yHobJl/DhKc321wyxCYJJhwq+
+         aH1ND/Ovddn7492lD9JHKu9yjEy8yF86pJf8L/MqikdnPclf5N+fk5aA6Ax0/JtmzIYP
+         +Sb+UKVGq8fwpWyF4hvdWXKOQqdCAl1Q0SsSyv807SpXQEHvQyqxjjMi+SulibyEf21G
+         8+oPNndpIigHQ2Oge79Xj3z68poEwyU9U21fnsmd0sOMUjO6oEWtzww3KP7Pt5pI6D7v
+         Mg3w==
+X-Forwarded-Encrypted: i=1; AJvYcCVk1P77eTai8hL4+5nG4y9dNUBJJGFmIw2CkEGIbJa9/jhqo3UI3QJNYFr96BQm2KG0dTf8SRQr0TRO7XzX0WPUOLZjo6RnJZDqjvS4
+X-Gm-Message-State: AOJu0YyUBip2g5rfge7TzRUujXN/IItGyHa9b5AT2NqIgFSxeqrDL7WW
+	cTth4yhYKtMZq7PANsawH1UwBAkXcugXG5FaFNbO4jb2FfSM/MhCT6dc0or3NqKsWFW3zmSZXVe
+	A7ajMXwLLhw176F4cEkqNfGUxDaw=
+X-Google-Smtp-Source: AGHT+IG46cRNTa/gtranYKJdBT6/dNezPeSoykLRMIt4Z33qyDiPIc0MZ/By/svPwuzcGaqNtVEed7QZH55x6+hKuhU=
+X-Received: by 2002:a05:6122:458d:b0:4e4:eda9:ec32 with SMTP id
+ 71dfb90a1353d-4eb02e5a92bmr1688549e0c.10.1717151533191; Fri, 31 May 2024
+ 03:32:13 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,12 +57,12 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20240522110909.10060-1-victorshihgli@gmail.com>
- <20240522110909.10060-9-victorshihgli@gmail.com> <4354636c-24dd-4145-a551-75dc5c69910b@intel.com>
-In-Reply-To: <4354636c-24dd-4145-a551-75dc5c69910b@intel.com>
+ <20240522110909.10060-13-victorshihgli@gmail.com> <42f2b1d4-e6c2-4860-956d-4f10c3b05529@intel.com>
+In-Reply-To: <42f2b1d4-e6c2-4860-956d-4f10c3b05529@intel.com>
 From: Victor Shih <victorshihgli@gmail.com>
-Date: Fri, 31 May 2024 18:31:57 +0800
-Message-ID: <CAK00qKCRD1Xdb5DmWud9F=r85aVxtnQ5wS_=yhzQ46LS0Mjqsg@mail.gmail.com>
-Subject: Re: [PATCH V16 08/23] mmc: core: Support UHS-II Auto Command Error Recovery
+Date: Fri, 31 May 2024 18:32:00 +0800
+Message-ID: <CAK00qKBA81zx=QmU7m=pZXOzdY4syOht4p_-SU7fdw+-an0ciQ@mail.gmail.com>
+Subject: Re: [PATCH V16 12/23] mmc: sdhci-uhs2: add reset function function
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw, 
@@ -72,234 +72,222 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 24, 2024 at 2:54=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+On Fri, May 24, 2024 at 3:23=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
 com> wrote:
 >
 > On 22/05/24 14:08, Victor Shih wrote:
 > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
 > >
-> > Add UHS-II Auto Command Error Recovery functionality
-> > into the MMC request processing flow.
->
-> Not sure what "auto" means here, but the commit message
-> should outline what the spec. requires for error recovery.
->
-
-Hi, Adrian
-
-     I will add instructions in the v17 version.
-
-Thanks, Victor Shih
-
+> > Sdhci_uhs2_reset() does a UHS-II specific reset operation.
 > >
 > > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 > > ---
 > >
-> > Updates in V16:
-> >  - Separate the Error Recovery mechanism from patch#7 to patch#8.
+> > Updates in V15:
+> >  - Refer the SD Host Controller Standard Specification Section 3.10
+> >    to add reset command data mechanism.
+> >
+> > Updates in V14:
+> >  - Since mmc_card_uhs2() is the same as sdhci_uhs2_mode(), so drop
+> >    sdhci_uhs2_mode() and use mmc_card_uhs2() instead of sdhci_uhs2_mode=
+().
+> >
+> > Updates in V13:
+> >  - Use ios timing to stead MMC_UHS2_SUPPORT for indicate the UHS2 mode.
+> >
+> > Updates in V8:
+> >  - Adjust the position of matching brackets.
+> >
+> > Updates in V6:
+> >  - Remove unnecessary functions and simplify code.
 > >
 > > ---
 > >
-> >  drivers/mmc/core/core.c    |  4 ++
-> >  drivers/mmc/core/core.h    |  1 +
-> >  drivers/mmc/core/sd_uhs2.c | 80 ++++++++++++++++++++++++++++++++++++++
-> >  include/linux/mmc/host.h   |  6 +++
-> >  4 files changed, 91 insertions(+)
+> >  drivers/mmc/host/sdhci-uhs2.c | 57 +++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-uhs2.h |  1 +
+> >  drivers/mmc/host/sdhci.c      |  3 +-
+> >  drivers/mmc/host/sdhci.h      |  1 +
+> >  4 files changed, 61 insertions(+), 1 deletion(-)
 > >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 68496c51a521..18642afc405f 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -403,6 +403,10 @@ void mmc_wait_for_req_done(struct mmc_host *host, =
-struct mmc_request *mrq)
-> >       while (1) {
-> >               wait_for_completion(&mrq->completion);
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
+2.c
+> > index 9cb0f1b2a37d..7652158ea151 100644
+> > --- a/drivers/mmc/host/sdhci-uhs2.c
+> > +++ b/drivers/mmc/host/sdhci-uhs2.c
+> > @@ -10,7 +10,9 @@
+> >   *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> >   */
 > >
-> > +             if (host->ops->get_cd(host))
-> > +                     if (mrq->cmd->error || (mrq->data && mrq->data->e=
-rror))
-> > +                             mmc_sd_uhs2_error_recovery(host, mrq);
->
-> There are several issues with this:
->
-> 1. It is not OK to start a request from within the request path
-> because it is recursive:
->
->    mmc_wait_for_req_done()                      <--
->       mmc_sd_uhs2_error_recovery()
->          sd_uhs2_abort_trans()
->             mmc_wait_for_cmd()
->                mmc_wait_for_req()
->                   mmc_wait_for_req_done()       <--
->
-> 2. The mmc block driver does not use this path
->
-> 3. No need to always call ->get_cd() if there is no error
->
-> It is worth considering whether the host controller could
-> send the abort command as part of the original request, as
-> is done with the stop command.
->
-
-Hi, Adrian
-
-     1. It looks like just issuing a command in
-mmc_wait_for_req_done() will cause a recursion.
-         I will drop sd_uhs2_abort_trans() and
-sd_uhs2_abort_status_read() in the v17 version.
-     2. I have no idea about this part, could you please give me some advic=
-e?
-     3. I will try to modify this part in the v17 version.
-
-Thanks, Victor Shih
-
+> > +#include <linux/delay.h>
+> >  #include <linux/module.h>
+> > +#include <linux/iopoll.h>
+> >
+> >  #include "sdhci.h"
+> >  #include "sdhci-uhs2.h"
+> > @@ -21,6 +23,8 @@
+> >  #define SDHCI_UHS2_DUMP(f, x...) \
+> >       pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+> >
+> > +#define UHS2_RESET_TIMEOUT_100MS             100000
 > > +
-> >               cmd =3D mrq->cmd;
-> >
-> >               if (!cmd->error || !cmd->retries ||
-> > diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> > index 920323faa834..259d47c8bb19 100644
-> > --- a/drivers/mmc/core/core.h
-> > +++ b/drivers/mmc/core/core.h
-> > @@ -82,6 +82,7 @@ int mmc_attach_mmc(struct mmc_host *host);
-> >  int mmc_attach_sd(struct mmc_host *host);
-> >  int mmc_attach_sdio(struct mmc_host *host);
-> >  int mmc_attach_sd_uhs2(struct mmc_host *host);
-> > +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_reque=
-st *mrq);
-> >
-> >  /* Module parameters */
-> >  extern bool use_spi_crc;
-> > diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-> > index 85939a2582dc..d5acb4e6ccac 100644
-> > --- a/drivers/mmc/core/sd_uhs2.c
-> > +++ b/drivers/mmc/core/sd_uhs2.c
-> > @@ -1324,3 +1324,83 @@ int mmc_attach_sd_uhs2(struct mmc_host *host)
-> >
-> >       return err;
+> >  void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+> >  {
+> >       if (!(mmc_card_uhs2(host->mmc)))
+> > @@ -49,6 +53,57 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
 > >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+> >
+> > +/*********************************************************************=
+********\
+> > + *                                                                    =
+       *
+> > + * Low level functions                                                =
+       *
+> > + *                                                                    =
+       *
+> > +\*********************************************************************=
+********/
 > > +
-> > +static void sd_uhs2_abort_trans(struct mmc_host *mmc)
+> > +/**
+> > + * sdhci_uhs2_reset - invoke SW reset
+> > + * @host: SDHCI host
+> > + * @mask: Control mask
+> > + *
+> > + * Invoke SW reset, depending on a bit in @mask and wait for completio=
+n.
+> > + */
+> > +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
 > > +{
-> > +     struct mmc_request mrq =3D {};
-> > +     struct mmc_command cmd =3D {0};
-> > +     struct uhs2_command uhs2_cmd =3D {};
-> > +     int err;
+> > +     u32 val;
 > > +
-> > +     mrq.cmd =3D &cmd;
-> > +     mmc->ongoing_mrq =3D &mrq;
+> > +     sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
 > > +
-> > +     uhs2_cmd.header =3D UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD |
-> > +                       mmc->card->uhs2_config.node_id;
-> > +     uhs2_cmd.arg =3D ((UHS2_DEV_CMD_TRANS_ABORT & 0xFF) << 8) |
-> > +                     UHS2_NATIVE_CMD_WRITE |
-> > +                     (UHS2_DEV_CMD_TRANS_ABORT >> 8);
+> > +     if (mask & SDHCI_UHS2_SW_RESET_FULL)
+> > +             host->clock =3D 0;
 > > +
-> > +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
-> > +     err =3D mmc_wait_for_cmd(mmc, &cmd, 0);
-> > +
-> > +     if (err)
-> > +             pr_err("%s: %s: UHS2 CMD send fail, err=3D 0x%x!\n",
-> > +                    mmc_hostname(mmc), __func__, err);
-> > +}
-> > +
-> > +static void sd_uhs2_abort_status_read(struct mmc_host *mmc)
-> > +{
-> > +     struct mmc_request mrq =3D {};
-> > +     struct mmc_command cmd =3D {0};
-> > +     struct uhs2_command uhs2_cmd =3D {};
-> > +     int err;
-> > +
-> > +     mrq.cmd =3D &cmd;
-> > +     mmc->ongoing_mrq =3D &mrq;
-> > +
-> > +     uhs2_cmd.header =3D UHS2_NATIVE_PACKET |
-> > +                       UHS2_PACKET_TYPE_CCMD |
-> > +                       mmc->card->uhs2_config.node_id;
-> > +     uhs2_cmd.arg =3D ((UHS2_DEV_STATUS_REG & 0xFF) << 8) |
-> > +                     UHS2_NATIVE_CMD_READ |
-> > +                     UHS2_NATIVE_CMD_PLEN_4B |
-> > +                     (UHS2_DEV_STATUS_REG >> 8);
-> > +
-> > +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
-> > +     err =3D mmc_wait_for_cmd(mmc, &cmd, 0);
-> > +
-> > +     if (err)
-> > +             pr_err("%s: %s: UHS2 CMD send fail, err=3D 0x%x!\n",
-> > +                    mmc_hostname(mmc), __func__, err);
-> > +}
-> > +
-> > +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_reque=
-st *mrq)
-> > +{
-> > +     mmc->ops->uhs2_reset_cmd_data(mmc);
->
-> The host controller should already have done any resets needed.
-> sdhci already has support for doing that - see host->pending_reset
->
-
-Hi, Adrian
-
-     I'm not sure what this means. Could you please give me more informatio=
-n?
-
-Thanks, Victor Shih
-
-> > +
-> > +     if (mrq->data) {
-> > +             if (mrq->data->error && mmc_card_uhs2(mmc)) {
-> > +                     if (mrq->cmd) {
-> > +                             switch (mrq->cmd->error) {
-> > +                             case ETIMEDOUT:
-> > +                             case EILSEQ:
-> > +                             case EIO:
-> > +                                     sd_uhs2_abort_trans(mmc);
-> > +                                     sd_uhs2_abort_status_read(mmc);
->
-> What is the purpose of sd_uhs2_abort_status_read() here?
-> It is not obvious it does anything.
->
-
-Hi, Adrian
-
-     sd_uhs2_abort_status_read() seems to only have read status,
-     I will drop this in the v17 version.
-
-Thanks, Victor Shih
-
-> > +                                     break;
-> > +                             default:
-> > +                                     break;
-> > +                             }
-> > +                     }
-> > +             }
-> > +     } else {
-> > +             if (mrq->cmd) {
-> > +                     switch (mrq->cmd->error) {
-> > +                     case ETIMEDOUT:
-> > +                             sd_uhs2_abort_trans(mmc);
-> > +                             break;
-> > +                     }
-> > +             }
+> > +     /* hw clears the bit when it's done */
+> > +     if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
+> > +                                  UHS2_RESET_TIMEOUT_100MS, true, host=
+, SDHCI_UHS2_SW_RESET)) {
+> > +             pr_warn("%s: %s: Reset 0x%x never completed. %s: clean re=
+set bit.\n", __func__,
+> > +                     mmc_hostname(host->mmc), (int)mask, mmc_hostname(=
+host->mmc));
+> > +             sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
+> > +             return;
 > > +     }
 > > +}
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index fc9520b3bfa4..c914a58f7e1e 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -271,6 +271,12 @@ struct mmc_host_ops {
-> >        * negative errno in case of a failure or zero for success.
-> >        */
-> >       int     (*uhs2_control)(struct mmc_host *host, enum sd_uhs2_opera=
-tion op);
+> > +EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
 > > +
-> > +     /*
-> > +      * The uhs2_reset_cmd_data callback is used to excute reset
-> > +      * when a auto command error occurs.
-> > +      */
-> > +     void    (*uhs2_reset_cmd_data)(struct mmc_host *host);
-> >  };
+> > +static void sdhci_uhs2_reset_cmd_data(struct mmc_host *mmc)
+> > +{
+> > +     struct sdhci_host *host =3D mmc_priv(mmc);
+> > +
+> > +     sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> > +
+> > +     if (host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_A ||
+> > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_A_HD ||
+> > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B ||
+> > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B_HD) {
+>
+> Please use mmc_card_uhs2()
+>
+
+Hi, Adrian
+
+     I will update this in the v17 version.
+
+Thanks, Victor Shih
+
+> > +             sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
+> > +
+> > +             sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+> > +             sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+> > +             sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI=
+_UHS2_INT_ERROR_MASK);
+> > +     }
+> > +}
+> > +
+> >  /*********************************************************************=
+********\
+> >   *                                                                    =
+       *
+> >   * Driver init/exit                                                   =
+       *
+> > @@ -57,6 +112,8 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
 > >
-> >  struct mmc_cqe_ops {
+> >  static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+> >  {
+> > +     host->mmc_host_ops.uhs2_reset_cmd_data =3D sdhci_uhs2_reset_cmd_d=
+ata;
+>
+> As noted for patch 8, any host controller resets needed
+> should be done before completing the request, so a call
+> back function should not be needed.
+>
+
+Hi, Adrian
+
+     I want to confirm further, so can I call
+sdhci_uhs2_reset_cmd_data() directly
+     in the mmc_wait_for_req_done()?
+     Am I understanding something wrong?
+
+Thanks, Victor Shih
+
+> > +
+> >       return 0;
+> >  }
+> >
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs=
+2.h
+> > index 2bfe18d29bca..caaf9fba4975 100644
+> > --- a/drivers/mmc/host/sdhci-uhs2.h
+> > +++ b/drivers/mmc/host/sdhci-uhs2.h
+> > @@ -177,5 +177,6 @@
+> >  struct sdhci_host;
+> >
+> >  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
+> > +void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
+> >
+> >  #endif /* __SDHCI_UHS2_H */
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 8fc3e001db74..f212da6dc2aa 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -236,7 +236,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+> >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_reset);
+> >
+> > -static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
+> > +bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
+> >  {
+> >       if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+> >               struct mmc_host *mmc =3D host->mmc;
+> > @@ -249,6 +249,7 @@ static bool sdhci_do_reset(struct sdhci_host *host,=
+ u8 mask)
+> >
+> >       return true;
+> >  }
+> > +EXPORT_SYMBOL_GPL(sdhci_do_reset);
+> >
+> >  static void sdhci_reset_for_all(struct sdhci_host *host)
+> >  {
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> > index 13703f1a3710..83d994c8d89e 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -845,6 +845,7 @@ void sdhci_request(struct mmc_host *mmc, struct mmc=
+_request *mrq);
+> >  int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq=
+);
+> >  void sdhci_set_bus_width(struct sdhci_host *host, int width);
+> >  void sdhci_reset(struct sdhci_host *host, u8 mask);
+> > +bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
+> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)=
+;
+> >  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+> >  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
 >
