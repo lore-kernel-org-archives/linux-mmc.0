@@ -1,41 +1,33 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB11117736;
-	Sat,  1 Jun 2024 08:27:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A76F111AD;
+	Sat,  1 Jun 2024 15:25:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717230460; cv=none; b=kPcb5gX1/jsguUugOpnRwqUejiS76Is33+rdUajD7RUDJanFPB0BPN6nn1MP6nTUp2hdbMsge5Tg4gCLiSfOdpgAqGTUnim4yMSjWI3NWaktvX8ZhwnyGQCoU/4O0Ee5dD+h7MAu+lQu+4wYpDDEay00Lseweq6SkJDsg2hK2kk=
+	t=1717255550; cv=none; b=QvxgD3yHZwCoVGWZUs1jKVi0B8JY/20Jt7VsgekquJFPphnqRgHXk0BN44/GnWxAQGaOCFrwkZPD0KAwtwR7r9PueCXCe0xLdPFUIBmiY+aMVezAJbE8U9oaiX6JvZJMH70Q6DmwLSE15/4EmJ0xazPEhPnH7bG7KZuDrYQ7zIQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717230460; c=relaxed/simple;
-	bh=CCGdaeCR/uSlXg0QGvO7hXoUNkCEtxBToDVRpLZJZDw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=ejlWXI72AYHLK0qQN58gLCPQiA02YppPVFnsKoalx76QlfkSOjNnaHmWPI6WWSbJ0O6PtuGMcijJ2h0Xh7fOgtGEvb/4qt+NRpawMs8KYTMd+GsEnL1cF4gKARdJ8xK+Dp8JDTR9ciZkh5Ne5BPDCFj6inXHqFh6CF2HtM9OJlY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=gqVIp9oq; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
+	s=arc-20240116; t=1717255550; c=relaxed/simple;
+	bh=6arLZDLJuJlo6JuZXNw8KfGVxYLRDu0gY7ndaZcELgs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=R2fDMFs9zwBGwdbawpqvpQSvc6OISx2P52ILXDFtI+Hz9zNbaXRY1QhG0j0iDazZqoBW9jatjFaGSfAMSftfNlLBLvITKgiLMT5PzkGrtNtzMkRDQxDtHjRl8w707KaI1Zaevq+9PS5QC/0jPo5OW6qrOoesEqPOkI9pElNP4Go=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UKNwUi/Z; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="gqVIp9oq"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1717230441; x=1717835241; i=wahrenst@gmx.net;
-	bh=CCGdaeCR/uSlXg0QGvO7hXoUNkCEtxBToDVRpLZJZDw=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=gqVIp9oqJ24/c2lzQKDkZ2QtAkJHYXEqWiawrrXMWXvw1gtOqUzsThlO3aW+gsLa
-	 tAnUH6unRCIrHm1RuZOsTxbRi1bJbiAWXvpiQRoYBIcsKe6nfnVRYIQQWwiJL6M7g
-	 lwZUWcp+kA16BjU9onxsMP2vXdlg55N++7va74VBfwBjks/gw8tL4XivnLJahCilp
-	 c72+h7RJGOu7Ku1zgNWvVTyIE3CnbC/KGyHsANbHd7xFC7mvJcNm98EAtGtHZ2F0B
-	 ZC1S980PKiWWjAk5XqRJnuaeaE0rJlCak0lYXBEKOJ+ATxvJ9lCDGtkc+NH9JnSez
-	 Ar59cDDvZb1cY0kBuA==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.1.127] ([37.4.248.43]) by mail.gmx.net (mrgmx105
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MIx3C-1rstW702cE-00KSlK; Sat, 01
- Jun 2024 10:27:21 +0200
-Message-ID: <dbcd0f28-3f45-4506-aefb-b8dc6be47a43@gmx.net>
-Date: Sat, 1 Jun 2024 10:27:18 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UKNwUi/Z"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED31FC116B1;
+	Sat,  1 Jun 2024 15:25:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1717255550;
+	bh=6arLZDLJuJlo6JuZXNw8KfGVxYLRDu0gY7ndaZcELgs=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=UKNwUi/ZG96iN4HmYc3blfQJ0y6H4YO4j/U1ogjpCJ7ZKqj3hwtlv7xNJWZinU1Wc
+	 M6LsTxD604zMz+m1MtLqCVhNNznq1eVhf0GbkELX1+prAF3fJl3NlrT26tVcr7gdcA
+	 Eihndo4ZPQwfN/5BoO1csMa0qqB1RLwMQE5zz3VkuA32hux7PpZzoFLoS8Der35fRj
+	 3+t7Lio5XC8QJyEtRSCi1IaN18zuwgnXZEioDdE+3sp7ZlY2ii6nt0fn3z7gkZaPLA
+	 XYvziZyT+8BjLyn3i8MCdR14/jTG452SGVUdKXFM2l4H028sLSISG5A4pFl2dj2qv4
+	 qbmcx9DRYO+sQ==
+Message-ID: <b78b14c7-e71c-4403-a606-80564a31e107@kernel.org>
+Date: Sat, 1 Jun 2024 17:25:46 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,50 +35,158 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 4/4] arm64: dts: broadcom: Add minimal support for
- Raspberry Pi 5
-To: Andrea della Porta <andrea.porta@suse.com>, Rob Herring
- <robh@kernel.org>, Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+Subject: Re: [PATCH 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
+To: Frank Li <Frank.Li@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>,
- Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui
- <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
- Broadcom internal kernel review list
- <bcm-kernel-feedback-list@broadcom.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Kamal Dasu <kamal.dasu@broadcom.com>, Al Cooper <alcooperx@gmail.com>,
- devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <cover.1717061147.git.andrea.porta@suse.com>
- <874589f6c621036620cca944986e5be7238b4784.1717061147.git.andrea.porta@suse.com>
+ "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..."
+ <linux-mmc@vger.kernel.org>,
+ "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS"
+ <devicetree@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+Cc: imx@lists.linux.dev
+References: <20240531193745.1714046-1-Frank.Li@nxp.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-From: Stefan Wahren <wahrenst@gmx.net>
-In-Reply-To: <874589f6c621036620cca944986e5be7238b4784.1717061147.git.andrea.porta@suse.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240531193745.1714046-1-Frank.Li@nxp.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:eAMNr6tyKKk5lXgBC/lHAUcrQiVwXALGXb+bV2UoQxMspC3HHqW
- /7/yOEI2IyRxgRUdmgTvVDulpss+/ExBcchPXhxue8QT0GlCXP3XU9nLMV03V/lRj4M04n5
- bw+ihcEEye0eAJkV/hwQhfScsS0+POT8kneoRJ0RgdOwuiXKHyajHIrknV00lnRchj5IjMu
- dqIExM+aSdlQJ+L0QUOcg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:U+Adulxrhug=;DQtuSnTMoCZFQSZXDz5eLyzymsi
- oD/abWDWRHWpdJVXD50f3xTYhJTvvj122R8WH9ivX4OrtyLJe19eEdzvlJjd/CbrZauN2JB5K
- S0EqQN1fGjqCgPN5KlRHqukyYLSDwgqlkxnfWNJSxN1Q7d22u2ChcDSBA4qKflRZTz36xZAct
- TWyLVodQsx7hbM/krHfjjMKM7sf9nLNpKLvgDLwEaKb+aYFxM7iwH4gfOWA8PwqithXsaunmR
- NVi+fFUVmze614RFKNHnId1zNKmDf/96NHk82Lu29F9y+0IDOEmwZnxZWZxKyJMCXBXsLmMRL
- ybfi15ZkSPZPM87t7pC36qV8jFYCpcHuhxXn16qOZVuqmx9gJJUORigEdJB9EFDZStL1RgkcB
- 13cMwHVKoELLko7aFMFunhevjK687a9qn/UlS9KZOrqG903SXAzFbMm9ORUGf7ktympYMpeCw
- doNoMtxo2adNqHAlpXfGYqPfABlI4AZewE1p6o4K5gSkETzzGfwIDtVAOCrC6ZRlfn67NJ75K
- UdmyP/hzKhOosdxIUr38Ds/nAYxUABV3LP9bREuByKU/RvU6QrAKV8T8BOsqYbqWb2Qs9m4tR
- f5lslYEl2QjXRhsCxHE2E/xaCFxelWf8u3e7FzV+n3Wo6Wi6stqf71XPxN8N6xMq97YUbEHNm
- H6IvtM51SmPymWSExS+QHJJK7JVAI3ISTe/DERQB+0KwcXCIlftWiKmxb7iWbZDKBxHjU9QBt
- 200w6Hfne8iRnnCdmGoDc4XTbgkHfuKxfUZQyx4zrpUPwvZBp4Oz4C9nAqGwdiJMDaLVmPTSe
- 2PAGPxLimnRq/cEN3gWPkYFKIjFtzUP+l4NJ0vxvK+N8E=
 
-Am 30.05.24 um 12:12 schrieb Andrea della Porta:
-> The BCM2712 SoC family can be found on Raspberry Pi 5.
-> Add minimal SoC and board (Rpi5 specific) dts file to be able to
-> boot from SD card and use console on debug UART.
->
-> Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
-Reviewed-by: Stefan Wahren <wahrenst@gmx.net>
+On 31/05/2024 21:37, Frank Li wrote:
+> Convert layerscape fsl-esdhc binding doc from txt to yaml format.
+> 
+> Addtional change during convert:
+> - deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
+> - Add "reg" and "interrupts" property.
+> - change example "sdhci@2e000" to "mmc@2e000".
+> - compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
+> most existed dts file.
+> 
+
+
+> -};
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml
+> new file mode 100644
+> index 0000000000000..cafc09c4f1234
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.yaml
+
+Filename: fsl,esdhc.yaml
+
+> @@ -0,0 +1,98 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+
+...
+
+> +  clock-frequency:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description: specifies eSDHC base clock frequency.
+> +
+> +  sdhci,wp-inverted:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    deprecated: true
+> +    description:
+> +      specifies that eSDHC controller reports
+> +      inverted write-protect state; New devices should use the generic
+> +      "wp-inverted" property.
+> +
+> +  sdhci,1-bit-only:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    deprecated: true
+> +    description:
+> +      specifies that a controller can only handle
+> +      1-bit data transfers. New devices should use the generic
+> +      "bus-width = <1>" property.
+> +
+> +  sdhci,auto-cmd12:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      specifies that a controller can only handle auto CMD12.
+> +
+> +  voltage-ranges:
+> +    $ref: /schemas/types.yaml#/definitions/uint32-matrix
+> +    items:
+> +      items:
+> +        - description: specifies minimum slot voltage (mV).
+> +        - description: specifies maximum slot voltage (mV).
+> +
+> +  little-endian:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      If the host controller is little-endian mode, specify
+> +      this property. The default endian mode is big-endian.
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+
+clock-frequency was required. Isn't it required now?
+
+> +
+> +allOf:
+> +  - $ref: sdhci-common.yaml#
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    mmc@2e000 {
+> +        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
+> +        reg = <0x2e000 0x1000>;
+> +        interrupts = <42 0x8>;
+> +        interrupt-parent = <&ipic>;
+> +        /* Filled in by U-Boot */
+> +        clock-frequency = <0>;
+
+Please provide complete (final) example.
+
+> +        voltage-ranges = <3300 3300>;
+> +    };
+
+Best regards,
+Krzysztof
+
