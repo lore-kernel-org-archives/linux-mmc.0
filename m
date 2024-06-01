@@ -1,41 +1,41 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75247134BC;
-	Sat,  1 Jun 2024 08:17:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB11117736;
+	Sat,  1 Jun 2024 08:27:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717229870; cv=none; b=YlkCWx7B4xtMjc05lUqXha4p4vgjwjn7+I4ztHYoXLBHr+qJ2MCuU/eNQDgc9BbkiO8MAHIXO1ns8SVIhodo6/P3cHVbE/d1iBHUNZd0aj5bw138quCLhxsPRLVXThb1Cc1vRmgPGkSg8kpHxxQX9mRfoHnH/YCQ1h5PDGb6k9E=
+	t=1717230460; cv=none; b=kPcb5gX1/jsguUugOpnRwqUejiS76Is33+rdUajD7RUDJanFPB0BPN6nn1MP6nTUp2hdbMsge5Tg4gCLiSfOdpgAqGTUnim4yMSjWI3NWaktvX8ZhwnyGQCoU/4O0Ee5dD+h7MAu+lQu+4wYpDDEay00Lseweq6SkJDsg2hK2kk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717229870; c=relaxed/simple;
-	bh=7eeatt4CcPmiwk7FadqALe+uBEk9RzdNLVP4oBfTTKE=;
+	s=arc-20240116; t=1717230460; c=relaxed/simple;
+	bh=CCGdaeCR/uSlXg0QGvO7hXoUNkCEtxBToDVRpLZJZDw=;
 	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=bfyJIzG1PJRzJfFaCGj3gsqeNi4K1AIqw+mq2v+pIl7GVK7eDTEs2TGaUgRxp/zYmtfQ9YCsqq+DD3zVi5gzsN4weXib4QOJZlKpd55oE53izmrb/J5ctb0sUoxUSfirBhFxY3s3SDfxYXxIv2PotjMcK06jYJfhrtjXxKJTUAg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=s6bYa9xp; arc=none smtp.client-ip=212.227.17.20
+	 In-Reply-To:Content-Type; b=ejlWXI72AYHLK0qQN58gLCPQiA02YppPVFnsKoalx76QlfkSOjNnaHmWPI6WWSbJ0O6PtuGMcijJ2h0Xh7fOgtGEvb/4qt+NRpawMs8KYTMd+GsEnL1cF4gKARdJ8xK+Dp8JDTR9ciZkh5Ne5BPDCFj6inXHqFh6CF2HtM9OJlY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=gqVIp9oq; arc=none smtp.client-ip=212.227.17.21
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="s6bYa9xp"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="gqVIp9oq"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1717229848; x=1717834648; i=wahrenst@gmx.net;
-	bh=9g8i1E4J9Qgk8VQ+f5MzIOoR/utW2DTqj5vifxeAFu0=;
+	s=s31663417; t=1717230441; x=1717835241; i=wahrenst@gmx.net;
+	bh=CCGdaeCR/uSlXg0QGvO7hXoUNkCEtxBToDVRpLZJZDw=;
 	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
 	 References:From:In-Reply-To:Content-Type:
 	 Content-Transfer-Encoding:cc:content-transfer-encoding:
 	 content-type:date:from:message-id:mime-version:reply-to:subject:
 	 to;
-	b=s6bYa9xp91jDDnaO2Kpu+8DRegMiTGOgaXKB5Mhg5+c0CxhX6N+KZEnbOhs284yb
-	 201Qihxzh59QbT6NLof7RVxYhmL4pyuH7gaBq4AsthocxoV14DKBRLF4tUs3WOLKf
-	 WEkW7PPdZx3/ipknLGdkZbrfqYlMEfiMg22lJJ0g+zcaJb90vbZKJFjMiF5ElEpMy
-	 q/jie6giETFV+PLeGydIgqlfu/HfaEFb5HLttNT9V6JhuprZEFpMc1GymbxLRPMR+
-	 VVB4wufjQ+f/hC9SwsS2T0SZXS0K9Ic+kqvghAuiikIb2zbzu4mXp4AY4+cJ+1MNN
-	 fIT0Jm0KATg9WbhHlw==
+	b=gqVIp9oqJ24/c2lzQKDkZ2QtAkJHYXEqWiawrrXMWXvw1gtOqUzsThlO3aW+gsLa
+	 tAnUH6unRCIrHm1RuZOsTxbRi1bJbiAWXvpiQRoYBIcsKe6nfnVRYIQQWwiJL6M7g
+	 lwZUWcp+kA16BjU9onxsMP2vXdlg55N++7va74VBfwBjks/gw8tL4XivnLJahCilp
+	 c72+h7RJGOu7Ku1zgNWvVTyIE3CnbC/KGyHsANbHd7xFC7mvJcNm98EAtGtHZ2F0B
+	 ZC1S980PKiWWjAk5XqRJnuaeaE0rJlCak0lYXBEKOJ+ATxvJ9lCDGtkc+NH9JnSez
+	 Ar59cDDvZb1cY0kBuA==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.1.127] ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1N6bfq-1sXTkM0R6U-01528i; Sat, 01
- Jun 2024 10:17:28 +0200
-Message-ID: <0a041812-875b-42e3-b303-4d984b0f9a54@gmx.net>
-Date: Sat, 1 Jun 2024 10:17:26 +0200
+Received: from [192.168.1.127] ([37.4.248.43]) by mail.gmx.net (mrgmx105
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1MIx3C-1rstW702cE-00KSlK; Sat, 01
+ Jun 2024 10:27:21 +0200
+Message-ID: <dbcd0f28-3f45-4506-aefb-b8dc6be47a43@gmx.net>
+Date: Sat, 1 Jun 2024 10:27:18 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,7 +43,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 0/4] Add minimal boot support for Raspberry Pi 5
+Subject: Re: [PATCH v5 4/4] arm64: dts: broadcom: Add minimal support for
+ Raspberry Pi 5
 To: Andrea della Porta <andrea.porta@suse.com>, Rob Herring
  <robh@kernel.org>, Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
  Conor Dooley <conor+dt@kernel.org>,
@@ -57,119 +58,35 @@ To: Andrea della Porta <andrea.porta@suse.com>, Rob Herring
  linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  linux-mmc@vger.kernel.org
 References: <cover.1717061147.git.andrea.porta@suse.com>
- <36642bd8-c981-4190-9f44-072ac3c97c6b@gmx.net> <ZlnJzqnvTk70O3ap@apocalypse>
+ <874589f6c621036620cca944986e5be7238b4784.1717061147.git.andrea.porta@suse.com>
 Content-Language: en-US
 From: Stefan Wahren <wahrenst@gmx.net>
-In-Reply-To: <ZlnJzqnvTk70O3ap@apocalypse>
+In-Reply-To: <874589f6c621036620cca944986e5be7238b4784.1717061147.git.andrea.porta@suse.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:goG2aefWUGM6HYTd+wn1rjaTrNzvf9I4cz3NFvFZ99ncYKSE6rO
- iJQzkald9qRVqEJ2oEE2aeOE0fxuGQfDjplO0NPDzwkzUisk2+SS0IcrfHLc/bV4Ii1yKsf
- i9ZV5Jb5zcumld0v0rACFuw8a/vtP1ZfF1j6fzo9zY6RlJdmUrDzmjmDJlyeBO7slxHXPbj
- ZHpwb5QMnwYkjDcqWGmtQ==
+Content-Transfer-Encoding: 7bit
+X-Provags-ID: V03:K1:eAMNr6tyKKk5lXgBC/lHAUcrQiVwXALGXb+bV2UoQxMspC3HHqW
+ /7/yOEI2IyRxgRUdmgTvVDulpss+/ExBcchPXhxue8QT0GlCXP3XU9nLMV03V/lRj4M04n5
+ bw+ihcEEye0eAJkV/hwQhfScsS0+POT8kneoRJ0RgdOwuiXKHyajHIrknV00lnRchj5IjMu
+ dqIExM+aSdlQJ+L0QUOcg==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:f4k/wUKkgVI=;4dC/SJSfIquim+tu6BbxkI3Fa50
- 3mHopelSNKrGAnz6sAKWy+wmGFFdSoy5ZplfsfOF5qQXnZ5L9KbZfiZ8Ogm3/kMcFnBzd03ai
- OymQOumXnn98K93p1s1DvwQD5Y+Do/lZNywUqzjt1T+dwiqHffiZqUExRyk6T2ttfi6rgZFJl
- crBjYOLZU9PnwFxtnEYxdDsNxU0CwPzbttfoF0m/8XWrdNdg3dGdqbPrkw0Qi5jVrbkQfZeCg
- mNd3njO/3t7g4FyRBZVzVsVxaceCqMxP1iJqRZlrD7Gqogb1BVqFa6dYa2qcY0+/DXnSH0nEa
- ewvLP3kNv8dMyTYrf8p+52SzLV6KC5t0NIgd8IzRVSX4eo2vp7dzsKxfJYQjgIgUnSsySnwZ0
- f/Ws409+fdIr8qWx0/FinFJlWN4HmxcpxApcEPlrxi/bmOoL3199H9f56bFWfcJ5L8aRRspus
- cA6epR/LQxUNy0XHF7amOH9HXsBQbcpZNO1H+YE2XTdgrjggZtm1Ws/Lh6H9dJUFi5zKWyPgH
- Pw8jnMNfpUvyCeApCUfDhhK9+6BC0annUnkfc3B6nUIJdOz3cklfDQCoVeK7N76+mADDYpbE/
- qxGWSM87tkkUbW5T8iZjhhmrAI0VK4w2xpx9mr0s7PdQ3j2Scf+AhMnGFtplGBoRxW40/tzLe
- CBWTsaPyyDPebTSNyotf1ALh+Kd63qISh2hWXLsM73ZxNo4+uy6tzh7BIIv7+MLUvt3Uq9xQH
- LVVBi20eUDmQG99rWSqnzXQ4U6+z8lus8ad2ads3YjbV+z6AYGLoGkC8yY3XEV1r7evEAlAIO
- LckLuCpPucU7wz4uGz0o7BVaZahYsfiAG6UZZNVzz6eio=
+UI-OutboundReport: notjunk:1;M01:P0:U+Adulxrhug=;DQtuSnTMoCZFQSZXDz5eLyzymsi
+ oD/abWDWRHWpdJVXD50f3xTYhJTvvj122R8WH9ivX4OrtyLJe19eEdzvlJjd/CbrZauN2JB5K
+ S0EqQN1fGjqCgPN5KlRHqukyYLSDwgqlkxnfWNJSxN1Q7d22u2ChcDSBA4qKflRZTz36xZAct
+ TWyLVodQsx7hbM/krHfjjMKM7sf9nLNpKLvgDLwEaKb+aYFxM7iwH4gfOWA8PwqithXsaunmR
+ NVi+fFUVmze614RFKNHnId1zNKmDf/96NHk82Lu29F9y+0IDOEmwZnxZWZxKyJMCXBXsLmMRL
+ ybfi15ZkSPZPM87t7pC36qV8jFYCpcHuhxXn16qOZVuqmx9gJJUORigEdJB9EFDZStL1RgkcB
+ 13cMwHVKoELLko7aFMFunhevjK687a9qn/UlS9KZOrqG903SXAzFbMm9ORUGf7ktympYMpeCw
+ doNoMtxo2adNqHAlpXfGYqPfABlI4AZewE1p6o4K5gSkETzzGfwIDtVAOCrC6ZRlfn67NJ75K
+ UdmyP/hzKhOosdxIUr38Ds/nAYxUABV3LP9bREuByKU/RvU6QrAKV8T8BOsqYbqWb2Qs9m4tR
+ f5lslYEl2QjXRhsCxHE2E/xaCFxelWf8u3e7FzV+n3Wo6Wi6stqf71XPxN8N6xMq97YUbEHNm
+ H6IvtM51SmPymWSExS+QHJJK7JVAI3ISTe/DERQB+0KwcXCIlftWiKmxb7iWbZDKBxHjU9QBt
+ 200w6Hfne8iRnnCdmGoDc4XTbgkHfuKxfUZQyx4zrpUPwvZBp4Oz4C9nAqGwdiJMDaLVmPTSe
+ 2PAGPxLimnRq/cEN3gWPkYFKIjFtzUP+l4NJ0vxvK+N8E=
 
-Hi Andrea,
-
-Am 31.05.24 um 14:59 schrieb Andrea della Porta:
-> Hi Stefan,
+Am 30.05.24 um 12:12 schrieb Andrea della Porta:
+> The BCM2712 SoC family can be found on Raspberry Pi 5.
+> Add minimal SoC and board (Rpi5 specific) dts file to be able to
+> boot from SD card and use console on debug UART.
 >
-> On 12:00 Fri 31 May     , Stefan Wahren wrote:
->> Hi Andrea,
->>
->> Am 30.05.24 um 12:11 schrieb Andrea della Porta:
->>> Hi,
->>>
->>> This patchset adds minimal support for the Broadcom BCM2712 SoC and fo=
-r
->>> the on-board SDHCI controller on Broadcom BCM2712 in order to make it
->>> possible to boot (particularly) a Raspberry Pi 5 from SD card and get =
-a
->>> console through uart.
->>> Changes to arm64/defconfig are not needed since the actual options wor=
-k
->>> as they are.
->>> This work is heavily based on downstream contributions.
->>>
->>> Tested on Tumbleweed substituting the stock kernel with upstream one,
->>> either chainloading uboot+grub+kernel or directly booting the kernel
->>> from 1st stage bootloader. Steps to reproduce:
->>> - prepare an SD card from a Raspberry enabled raw image, mount the fir=
-st
->>>     FAT partition.
->>> - make sure the FAT partition is big enough to contain the kernel,
->>>     anything bigger than 64Mb is usually enough, depending on your ker=
-nel
->>>     config options.
->>> - build the kernel and dtbs making sure that the support for your root
->>>     fs type is compiled as builtin.
->>> - copy the kernel image in your FAT partition overwriting the older on=
-e
->>>     (e.g. kernel*.img for Raspberry Pi OS or u-boot.bin for Tumbleweed=
-).
->>> - copy arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dtb on FAT partiti=
-on.
->>> - make sure you have a cmdline.txt file in FAT partition with the
->>>     following content:
->>>     # cat /boot/efi/cmdline.txt
->>>     root=3D/dev/mmcblk0p3 rootwait rw console=3Dtty ignore_loglevel ea=
-rlycon
->>>     console=3DttyAMA10,115200
->>> - if you experience random SD issues during boot, try to set
->>>     initial_turbo=3D0 in config.txt.
->> was this an issue since the beginning of this series?
->>
-> I experienced this even during early testing, using the complete downstr=
-eam
-> driver. It seems that when initual_turbo !=3D 0, the fw can throttle the=
- clock
-> to reduce the boot time and it (directly or indirectly) may affect SD fu=
-nctionality.
-> I believe that the probability of this to happen is likely a function of=
- SD
-> card speed, whether it requires timing tuning, initial_turbo exact value=
-  and whether
-> you are booting the kernel directly or chainloading u-boot + grub (or
-> whatever combination of secondary stage bootloader). For example, your
-> boot setup may have a timeout in the grub boot menu that is large enough=
- for the clocks
-> to settle and the boot process to end successfully, while faster boot ti=
-me can lead
-> to the issue described. Since this behaviour seems to depend on all of t=
-his factors and
-> does not necessarily arise in practice, disabling initial_turbo is just =
-a suggestion
-> in case things go haywire.
-yes in case the VPU changes the SD clock or one of the parent while the
-ARM cores tries to boot, they won't be informed about these changes
-which could ends up with the wrong SD clock frequency.
-
-Thanks for your explanations
->
->> What kind of SD issues?
->>
-> I wasn't able to boot from SD card due to clock issues.
->
->> Is there a downstream reference?
-> Some (old) reference e.g.:
-> https://forums.raspberrypi.com/viewtopic.php?t=3D112480#:~:text=3DIt%20s=
-ets%20turbo%20mode%20from,have%20turbo%20during%20the%20boot.
->
-> but there are probably more.
->
-> Many thanks,
-> Andrea
-
+> Signed-off-by: Andrea della Porta <andrea.porta@suse.com>
+Reviewed-by: Stefan Wahren <wahrenst@gmx.net>
