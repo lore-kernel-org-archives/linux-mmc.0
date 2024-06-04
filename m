@@ -1,341 +1,263 @@
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-vi1eur04on2061.outbound.protection.outlook.com [40.107.8.61])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f46.google.com (mail-oa1-f46.google.com [209.85.160.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C5AC12B17A;
-	Tue,  4 Jun 2024 14:53:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.8.61
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717512815; cv=fail; b=ItZcn3C468eY13CAQpLevZu5OZKJ+OKs9KdlZIP8PkjdPEMd7lpODpP5XpbkLciObwPMAaOLwNFG1WiNKOzIGt2WLlMYQJKKpmolN+LzDUlptwSR3Y4m9yu3Qd4UW6yz+0hhTjRgOF7+uHUu+raBvZyTlz2EETPS3xjahYMj9xc=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717512815; c=relaxed/simple;
-	bh=AwLJFydDRSar8/yMCgBWM15Att3NFrrsyAUHD4zCFeE=;
-	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=cI3oTpeVDHKJFjfjQiPvR0c0LPc/xkI+6R4EAMxzK85MbtzAK6HTOVIgZ2+ody6SaHF1qpVcZxGFIGEzQL1jSsWfO3zhDqTgnWhhtnsOkThB3IIBL1cfIKe1WY6r2QP8iSD+y6CPoXLJvFP0LnHk5zdPFSBY6YIUNsyNS57DqE8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=OznoapqN; arc=fail smtp.client-ip=40.107.8.61
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2CC9145A03
+	for <linux-mmc@vger.kernel.org>; Tue,  4 Jun 2024 15:42:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.46
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1717515772; cv=none; b=ZG86xDyknRA9SGp7a9i1CCd84tep503PJEM/MSd6V6hr4FvWdlkBUmKRSp5Jlk6tc8CgRNngcLTHS3JsTQI3Z1MkkrF+6VTML5t38LN4BiZH0hH8cP950VluQJohcw5EibAWRnpI1e4tznntFqYFKli4Nhqax3ePEoJ6WCfK3Sk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1717515772; c=relaxed/simple;
+	bh=9TbsJFtaPUbCJoDjh/fow7fFlKMisHx6OakI+PBDzd4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Ti8iCxXYqeoUbQ4Ii0Gnk/6aDwY4n0PuGKZWxKXt0JFccrFwQMZlzfAwzJ4draAEzTgGK9zcWj7i0OnfmR/XPpNi6d1XvIOI9GxPsCFsdMVLAG5PpUBmurR737ER+M/vy0APGYpBhuEQBdAqjcLHQw9EU18skyhoro6qfkYhFhg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=XNkPjkhY; arc=none smtp.client-ip=209.85.160.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="OznoapqN"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CQsDV9lTSQC+xPo0xV9zoZy4lzOxWLi8D1GbJxtF6SjRR7kWAFwBOwxtK8Q0qQuPjZ7BhYbsd4SMEp10NCBLIWttcriIz5fWIPmokBxPedHc7ngCCPP6iLjoKY5F43nbtK0dX63JIbzfaNUePh3bNB7BrhqdP6fej4x5kBfwJB74jtPjX2fC6MZhHIoOhbgvRRLQkfbhXlmFEKS3b81mWVgPZYck4LMGCSyIF6aHQCKSnVzijzK4DueQYm6pq4+RDezErYPnQUQUrSZoy191Y6z2jh5oLZWx2cF/S2EY7cm78dnPh8OTD11zE9s4ztNzBdqoN/iSXpDHziLlfDvp3Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=4YDM7CYNGrgBLyPlaZnHk3P/2X2djuPJw+C2hVfyj1o=;
- b=Dk+TlHs+4iQJ+YbWnzZGU7yqt39VECoxF/HZUXDPkthVgPRdLtJfI55zc2qzCrUeMvrayuOysPIiYZ21s9mj1cKdIBvV+oFc6VF1UN7KvuaF2Fti9fP8b+lZQj1npNJfyfBjLjJLTTCgoJG/9mMq48E2V9SJDERsSWxDkcxKZ92CPd0W7vVydNgaNvswLIhnZIJnRMLRt2wIsFoUOE1XLdosDvDBWQ6V0nVnmX8w+ICSNh4NUOXRecA++ibtbP5ZWoifV1/M5V4rh6tv3099f6UppUZn2A+wKMMqcJ6zuJM+6pwtmXOKEJkNEG2ByiDlqy43HCzIojONrfQXbJW+mA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4YDM7CYNGrgBLyPlaZnHk3P/2X2djuPJw+C2hVfyj1o=;
- b=OznoapqNd07YDfo89EoSZ1Ixl6WbYzroYqyS12qi6AAazk8LZn+x5JjaqY6X+kZ5pwW5krScmdQHzELud3GhYCzCnBEoucPz12DY6aysbejF4rUWS91ZadkHRmm6kSJ9JCN1k9VUGeIXn8fWeH0bTvyML28gHmePjGGmY9huTdA=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
- by GVXPR04MB10826.eurprd04.prod.outlook.com (2603:10a6:150:226::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7633.27; Tue, 4 Jun
- 2024 14:53:27 +0000
-Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
- ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
- ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.7633.021; Tue, 4 Jun 2024
- 14:53:27 +0000
-From: Frank Li <Frank.Li@nxp.com>
-To: krzk@kernel.org
-Cc: Frank.li@nxp.com,
-	conor+dt@kernel.org,
-	devicetree@vger.kernel.org,
-	imx@lists.linux.dev,
-	krzk+dt@kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	robh@kernel.org,
-	ulf.hansson@linaro.org
-Subject: [PATCH v2 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-Date: Tue,  4 Jun 2024 10:53:08 -0400
-Message-Id: <20240604145308.2417017-1-Frank.Li@nxp.com>
-X-Mailer: git-send-email 2.34.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: BYAPR21CA0029.namprd21.prod.outlook.com
- (2603:10b6:a03:114::39) To PAXPR04MB9642.eurprd04.prod.outlook.com
- (2603:10a6:102:240::14)
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="XNkPjkhY"
+Received: by mail-oa1-f46.google.com with SMTP id 586e51a60fabf-2510648fbacso457344fac.1
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Jun 2024 08:42:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1717515769; x=1718120569; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=eGmMGG4m4qTTbpagci4R5HMhIwKsm4Q6LdlN7j5XVqI=;
+        b=XNkPjkhYUMe8+PX8SFwj0fI9xCWgxhnXAogL1+RYins3gpCmyE91V2+Hd9qVe0GCyT
+         9/Gio40v6I2b250Ofu99PoWUYKVwpaRZ9vW7vbNKdN199A6Bsfq++0lolnWUEXWweFzo
+         xCVNuUMurxfjk5Tq1L642SA3uPKdGnmxP2CKQ=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1717515769; x=1718120569;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=eGmMGG4m4qTTbpagci4R5HMhIwKsm4Q6LdlN7j5XVqI=;
+        b=DtYk5sqgFd4fiGbbCZNaoKMp95gHTE95EILjTQ7gCSaSxtSnvtSvkkcNcGsgpKED+2
+         IMAv16WI5yuf3ANXfIpzzyZdFBIkvcVppL5oDmkkGjFgExe0pYPEIX+Tn1T+6ytIekcA
+         Y4Nf8KKMwGa6mSqAghij3/LJqMs3ogJMO3F3/CvXz+9uDS0Px9zzR94AyOI8X3ZCBYga
+         RT6jqx0C1KTzXM1d+dsL+AY/MGwNzaiCdcYcFj9XSOPGoyZr4D07JYO1mtGwE/7pbL+9
+         JGqKMohAkXl/sUIPPpXmYb03yDagci2a5PtngWDaJ3ltWEYtLyHgJW0Ctxu33mJQdxMr
+         tSfg==
+X-Forwarded-Encrypted: i=1; AJvYcCXNer8ownoxEmh1Jc3ucGL8fRKooA20UN6/OQEgI2JqtRuStLSaiV+AvvpZZGuP/Pw0N4XYVcdPsFhblXlfDBdS202Bv2XJJMYP
+X-Gm-Message-State: AOJu0Yz5tPEZgR152MIVO/fmZ1x7vAr/CJ4rlaMV608NwzKhj64mVL7t
+	s0PjGXEP8VnwJZm1vLB2o/SmK9rsojdismoxLwNrNWyYBEQeE8MMS+mJR8eIJfD9rr4aaql1rJz
+	LG3YiMK90IBFu3QNDvB7CSwpmtGErVb2pC4er
+X-Google-Smtp-Source: AGHT+IGB/rduOe7VuUnqKKPTpxby23105z+u+FGKaOfGxDOzBmoKc4Rdtq6ADa5DDVWLsYkCNGB3fzck976BtNYJJw4=
+X-Received: by 2002:a05:6870:e9a0:b0:24f:ca0b:a416 with SMTP id
+ 586e51a60fabf-2508b993cfamr15623795fac.25.1717515768507; Tue, 04 Jun 2024
+ 08:42:48 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|GVXPR04MB10826:EE_
-X-MS-Office365-Filtering-Correlation-Id: 41ad6e5e-c11b-4c16-47b6-08dc84a61739
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230031|52116005|376005|1800799015|366007|38350700005;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?9QBlvrc1CYzICDTBxn0mnOh1NVki+gIBymSu3KFsbNzJf083sJ6DaEoyd9C4?=
- =?us-ascii?Q?ZHmJVBlHvcfhoCGobVyhPzwWB8zxGvtVD950a2NozOfasrR1lMSujaL4ccB2?=
- =?us-ascii?Q?ngPPlvM9RX2+KAPXDVvGBvmRZiQTjqgU4MlthZpeMHX7thJiaRo32eGMyrQw?=
- =?us-ascii?Q?VMD5UYOvbU6s7ieUXtkxdv9qo1zWjqIgrXTRrJmDoUirPMojcJywDp6YXkzh?=
- =?us-ascii?Q?jNMT1uerzU9CXKaH4u1w7ZRNhz+Y8MqRaTPZ/Y1/VSE+IeDG7E+s/GXVHSV2?=
- =?us-ascii?Q?1XdxdMuq/GMFmLUccMMtwuWn/IVAueMmGMLhKdHPtd48dnqBFyFzRrKbsGJr?=
- =?us-ascii?Q?fnnBKYeCxW2BNDSarkmJdrtHjW43I+r/qTX3sAKwiL3xWDGoFn8jOzBJfD2i?=
- =?us-ascii?Q?wr66KMIT0K305Ia6EqkHPMC8F3AeqavyJiV2K1VtW6bDFTlZXkjXlYCVEos7?=
- =?us-ascii?Q?mEsRp4tYRRliW2cz7Jb7Ocm3eImmKLLShY8bhDrE+By+LSb8mW30w+0YMk/L?=
- =?us-ascii?Q?oqtwZD7Vcdgpao9vn6P6gq59XSHrMFVJ1w4oShVfXQrGUjm063GjqqggS5ST?=
- =?us-ascii?Q?ZZj18+BMtreVXByRm+HYNt6U5gQ42JiT0INXXrE9XI4Cn2XXh8ZZRqyZ0wvR?=
- =?us-ascii?Q?j3gyKzSkpE0aDnp0c4NMLARA3pTvw7r8C5zTBfiU0mEwjHsD7oAQsg4gpTZ9?=
- =?us-ascii?Q?wngj+6oIrTpYGsxbq+iRc5naqsfLXn4xbcJSjQsElaPzXSuGuOgTLNVnBSgr?=
- =?us-ascii?Q?LCvvy/pbiAI5lqakAFDCic0dARwaJLDokS4Vy5oiywTcdlNfDtK19FHnkVkm?=
- =?us-ascii?Q?0gnqahXafFWWV7bG1rQqTipdfulmPG0OWG4wOgXi2saWnziiAG+OFQ/m/Zny?=
- =?us-ascii?Q?jn5Ea8IZ0lyBCOnrljJyIA86jYgN2Pvgm9yO/bRf5B1SEimgrmKFpouqzNzX?=
- =?us-ascii?Q?MjR/tzXPgnS/dMwdw1knhSIySR0010QdgsR0MimYXEnhOl6Q8P2VXQkokr0z?=
- =?us-ascii?Q?ACIPhndTWhAg0D0CH0NRZlmO7KYbT1pj2YZYww9Nk/cbPkGEJfmHDRQZb2KX?=
- =?us-ascii?Q?+zya5ubfay5ua6OZ4rdsKF8pquiHp5z1/V7f3eo5Z06ezyq5enjl7h1DomlS?=
- =?us-ascii?Q?T1XHzNB/VMXSDJ/H8PQx9uPtpy8QOHupeiOecqGZewYnsz/aWHhzmd2HMtN9?=
- =?us-ascii?Q?gSVQUib0ub7qC/ry14Ulff9SrmZ2sqQrXPwntJcJs3OWSyjpmXV/m/IdJFUt?=
- =?us-ascii?Q?UZuR6DDePeBEhL3d+rFomIeIUMTL8U/ev7JkSVhPXgizNaTzpABi91FUnFNN?=
- =?us-ascii?Q?3ftSG+8h72Ml26vfaG9fIAMV?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(52116005)(376005)(1800799015)(366007)(38350700005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?qwRKzh44k0p8Stfbzb6Btwwz2xd4bhlqb/ZdCrTPTjmD6yycIydbgue+/fpt?=
- =?us-ascii?Q?z1ylivgXzD5CVUbZemb+h4u2dHjGrw1Ei1I+8c1I+8cobxZH8zjPH5jhpkRz?=
- =?us-ascii?Q?5Dx41Gp2O0d3ofUNWA86+iz5tmq2OG7jhSrSBw2ig6IywmkdDDSb68IVuhwn?=
- =?us-ascii?Q?Om8RteCNWbEkoXA4iWxWpPJ3DQ09Sp2HgueIc1yTxYXjbJY8+7f4TJnfvVAc?=
- =?us-ascii?Q?r4xH+3tHOMDTZflKVbAquldzSCVWtpLy+b9rWYWxSXwIzGQnMEXn3dWAP0MW?=
- =?us-ascii?Q?gFBGU3JJhJk31blgDLzqM8EZYZKEAJEgNZYov82vlD4SGXlAp90Jtzm6p2sm?=
- =?us-ascii?Q?yHwkB6nDlDr9PlGrnZC5JX93itTZWUKkwBmW61LfwuD7KDdjc4f534CD0YVp?=
- =?us-ascii?Q?5x4IvvFVibhaKEnL59lHeYscfiOzSGUSXxD7WdQMxzM5KxtYNZ+Eb2huW3mj?=
- =?us-ascii?Q?kys7nQBCmIO1zT5B1bAb8ZEFX+hg0oZ0nvkXvp6Li2OBldg5nns0SCy5bPwQ?=
- =?us-ascii?Q?daMKCXE7bCjRVlbnTy+j1KJOL8hMhHmvKS4iiN8DjpE7xM1UNiFLhBmQMIC0?=
- =?us-ascii?Q?WCtj23+8kOqtJLq9RZ6bSauia5ZJqHad0owNQbrAvY0MgGaYskq4uA96uIVj?=
- =?us-ascii?Q?jvs8q3MsmXJTONWtzH/z1wGHmdF4ftES6E6ekoTpaLe/FEWIQeM5/GuRjqI+?=
- =?us-ascii?Q?bKEfB63N/EaYWZ6w3NPd6Lv1ogSiSQaYh2YUZaWqwFdaVfib+hA2voTM64MY?=
- =?us-ascii?Q?DCx1qZX8cMR71JSucEmB76EEUKEcbp1OQIBiUo2FK4ppoSRJW6+r+h+jA0T0?=
- =?us-ascii?Q?F3LM0CJjeFkNarHlFY2lV39Qz7+l8U3mmh1pb7XWKtaA7r4gH4mQN7/yJrB2?=
- =?us-ascii?Q?+VZEyMetFZW1gazo92fKVdjL86ZWx3QDKnO7o3VHe7PnUYIaRLTB/lRVF6/S?=
- =?us-ascii?Q?zr4YNl79WwunQ7yqAcIyaviuzPpmcjxWhgqHhW29vdepjSZUh4tCMXgwC3+z?=
- =?us-ascii?Q?6Ghs2A6OjV3Dm8aa206pngOliILqyS9Zwg5NkGtgyicXtsYN2+CZpAogsfsF?=
- =?us-ascii?Q?EzUqRtNg9G4anWjr29jaJiJ2c69QSmlS0fB6In8PZrMChrmTgvJs1anmRiFR?=
- =?us-ascii?Q?Okn5ZE1fS6Dl19uiYjHk/Z+19fUCZ8rHvxt/Qa4BsZrTuoygj5WjAtaToF48?=
- =?us-ascii?Q?c/cYNLQJMvaWU47/t5ylaDwiuP3TNy9Ph3v+qpRSdFxOz1dg6bA4sSQZvUuL?=
- =?us-ascii?Q?PDfS1zqttQlSmWMu11EofVC5KfXGXWe4+zY3/EPTuXk0U3t170NThKsQWuBG?=
- =?us-ascii?Q?Ov6ml0rt2MyRAylnSGUZ87l+I0KAItX1z5/3iCUFgxg8L3u7oDfAprNs3xdF?=
- =?us-ascii?Q?swtFMN734kZXMnp6aJE3ZJUnoFBXHLj714vVSRw6HzaoKaZCGdxPtUOZ/gnv?=
- =?us-ascii?Q?oM3EhNpINte0gEthsgm1jg8nO4oiUblA5fEsytER0891VDYsetVtNCNZStLs?=
- =?us-ascii?Q?KxQUaD74Ki1LYTobz2NCp8FKbGmFeA/XLxKMlWYBY7wbnKLVcbt+W26g4VcK?=
- =?us-ascii?Q?72T6rHdHc0DI0+WitgJDUWfNV9c89wbFkSwBw9Pp?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 41ad6e5e-c11b-4c16-47b6-08dc84a61739
-X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Jun 2024 14:53:27.0338
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ZRY2g77G7tDf+mVuDIYAqRWSL2bAVEpZhz2SNd8XcftgMTQ2A6xhT+90DheAIikkibrxm8VY8wDkBC24Klr8qA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR04MB10826
+References: <20240603220834.21989-1-kamal.dasu@broadcom.com>
+ <20240603220834.21989-2-kamal.dasu@broadcom.com> <CAPDyKFqk4uzSm_ti=66wU22GM8TqeM83aCz6=j9Gr9-sCUuR8Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFqk4uzSm_ti=66wU22GM8TqeM83aCz6=j9Gr9-sCUuR8Q@mail.gmail.com>
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+Date: Tue, 4 Jun 2024 11:42:12 -0400
+Message-ID: <CAKekbetJT1hob1Bd9ZOsf+J9JVfjRanq6GUdKF7oZr6xkPCzZw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/1] mmc: sdhci-brcmstb: check R1_STATUS for erase/trim/discard
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	ludovic.barre@st.com, f.fainelli@gmail.com, 
+	bcm-kernel-feedback-list@broadcom.com
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+	boundary="000000000000545065061a124dc9"
 
-Convert layerscape fsl-esdhc binding doc from txt to yaml format.
+--000000000000545065061a124dc9
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Addtional change during convert:
-- Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
-- Add "reg" and "interrupts" property.
-- Change example "sdhci@2e000" to "mmc@2e000".
-- Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
-most existed dts file.
-- Set clock-frequency to 100mhz in example.
+On Tue, Jun 4, 2024 at 7:14=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> On Tue, 4 Jun 2024 at 00:09, Kamal Dasu <kamal.dasu@broadcom.com> wrote:
+> >
+> > When erase/trim/discard completion was converted to mmc_poll_for_busy()=
+,
+> > optional ->card_busy() host ops support was added as part of
+> > dd0d84c3e6a5b2 ("mmc: core: Convert to mmc_poll_for_busy() for erase/tr=
+im/discard").
+>
+> I can't find the above commit hash. You probably want "0d84c3e6a5b2"?
+>
+> > sdhci card->busy() could return busy for long periods to cause
+> > mmc_do_erase() to block during discard operation as shown below
+> > during mkfs.f2fs :
+> >
+> >     Info: [/dev/mmcblk1p9] Discarding device
+> >     [   39.597258] sysrq: Show Blocked State
+> >     [   39.601183] task:mkfs.f2fs       state:D stack:0     pid:1561  t=
+gid:1561  ppid:1542   flags:0x0000000d
+> >     [   39.610609] Call trace:
+> >     [   39.613098]  __switch_to+0xd8/0xf4
+> >     [   39.616582]  __schedule+0x440/0x4f4
+> >     [   39.620137]  schedule+0x2c/0x48
+> >     [   39.623341]  schedule_hrtimeout_range_clock+0xe0/0x114
+> >     [   39.628562]  schedule_hrtimeout_range+0x10/0x18
+> >     [   39.633169]  usleep_range_state+0x5c/0x90
+> >     [   39.637253]  __mmc_poll_for_busy+0xec/0x128
+> >     [   39.641514]  mmc_poll_for_busy+0x48/0x70
+> >     [   39.645511]  mmc_do_erase+0x1ec/0x210
+> >     [   39.649237]  mmc_erase+0x1b4/0x1d4
+> >     [   39.652701]  mmc_blk_mq_issue_rq+0x35c/0x6ac
+> >     [   39.657037]  mmc_mq_queue_rq+0x18c/0x214
+> >     [   39.661022]  blk_mq_dispatch_rq_list+0x3a8/0x528
+> >     [   39.665722]  __blk_mq_sched_dispatch_requests+0x3a0/0x4ac
+> >     [   39.671198]  blk_mq_sched_dispatch_requests+0x28/0x5c
+> >     [   39.676322]  blk_mq_run_hw_queue+0x11c/0x12c
+> >     [   39.680668]  blk_mq_flush_plug_list+0x200/0x33c
+> >     [   39.685278]  blk_add_rq_to_plug+0x68/0xd8
+> >     [   39.689365]  blk_mq_submit_bio+0x3a4/0x458
+> >     [   39.693539]  __submit_bio+0x1c/0x80
+> >     [   39.697096]  submit_bio_noacct_nocheck+0x94/0x174
+> >     [   39.701875]  submit_bio_noacct+0x1b0/0x22c
+> >     [   39.706042]  submit_bio+0xac/0xe8
+> >     [   39.709424]  blk_next_bio+0x4c/0x5c
+> >     [   39.712973]  blkdev_issue_secure_erase+0x118/0x170
+> >     [   39.717835]  blkdev_common_ioctl+0x374/0x728
+> >     [   39.722175]  blkdev_ioctl+0x8c/0x2b0
+> >     [   39.725816]  vfs_ioctl+0x24/0x40
+> >     [   39.729117]  __arm64_sys_ioctl+0x5c/0x8c
+> >     [   39.733114]  invoke_syscall+0x68/0xec
+> >     [   39.736839]  el0_svc_common.constprop.0+0x70/0xd8
+> >     [   39.741609]  do_el0_svc+0x18/0x20
+> >     [   39.744981]  el0_svc+0x68/0x94
+> >     [   39.748107]  el0t_64_sync_handler+0x88/0x124
+> >     [   39.752455]  el0t_64_sync+0x168/0x16c
+> >
+> > This problem is obsereved with BLKSECDISCARD ioctl on brcmstb mmc
+> > controllers. Fix makes mmc_host_ops.card_busy NULL and forces
+> > MMC_SEND_STATUS and R1_STATUS check in mmc_busy_cb() function.
+> >
+> > Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+>
+> We probably want a fixes/stable tag for this too, right?
+>
+> Fixes: 0d84c3e6a5b2 ("mmc: core: Convert to mmc_poll_for_busy() for
+> erase/trim/discard")
+>
+> I have amended the commit message and applied this for fixes, thanks!
+>
 
-Signed-off-by: Frank Li <Frank.Li@nxp.com>
----
+Thank you Ulffe.
 
-Notes:
-    Change from v1 to v2
-    - use filename fsl,esdhc.yaml
-    - Add clock-frequency to required
-    - change clock-frequency to 100mhz in example
-    
-    pass dt_binding_check
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8  dt_binding_check DT_SCHEMA_FILES=fsl,esdhc.yaml
-      SCHEMA  Documentation/devicetree/bindings/processed-schema.json
-      CHKDT   Documentation/devicetree/bindings
-      LINT    Documentation/devicetree/bindings
-      DTEX    Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dts
-      DTC_CHK Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dtb
+> Kind regards
+> Uffe
+>
+>
+> > ---
+> >  drivers/mmc/host/sdhci-brcmstb.c | 4 ++++
+> >  1 file changed, 4 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-=
+brcmstb.c
+> > index 9053526fa212..150fb477b7cc 100644
+> > --- a/drivers/mmc/host/sdhci-brcmstb.c
+> > +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> > @@ -24,6 +24,7 @@
+> >  #define BRCMSTB_MATCH_FLAGS_NO_64BIT           BIT(0)
+> >  #define BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT     BIT(1)
+> >  #define BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE     BIT(2)
+> > +#define BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY      BIT(4)
+> >
+> >  #define BRCMSTB_PRIV_FLAGS_HAS_CQE             BIT(0)
+> >  #define BRCMSTB_PRIV_FLAGS_GATE_CLOCK          BIT(1)
+> > @@ -384,6 +385,9 @@ static int sdhci_brcmstb_probe(struct platform_devi=
+ce *pdev)
+> >         if (match_priv->flags & BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT)
+> >                 host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> >
+> > +       if (!(match_priv->flags & BRCMSTB_MATCH_FLAGS_USE_CARD_BUSY))
+> > +               host->mmc_host_ops.card_busy =3D NULL;
+> > +
+> >         /* Change the base clock frequency if the DT property exists */
+> >         if (device_property_read_u32(&pdev->dev, "clock-frequency",
+> >                                      &priv->base_freq_hz) !=3D 0)
+> > --
+> > 2.17.1
+> >
 
- .../devicetree/bindings/mmc/fsl,esdhc.yaml    | 99 +++++++++++++++++++
- .../devicetree/bindings/mmc/fsl-esdhc.txt     | 52 ----------
- 2 files changed, 99 insertions(+), 52 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+--000000000000545065061a124dc9
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-new file mode 100644
-index 0000000000000..4164fdfb9f8e6
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-@@ -0,0 +1,99 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/fsl,esdhc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Freescale Enhanced Secure Digital Host Controller (eSDHC)
-+
-+description:
-+  The Enhanced Secure Digital Host Controller provides an interface
-+  for MMC, SD, and SDIO types of memory cards.
-+
-+maintainers:
-+  - Frank Li <Frank.Li@nxp.com>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - fsl,mpc8536-esdhc
-+          - fsl,mpc8378-esdhc
-+          - fsl,p2020-esdhc
-+          - fsl,p4080-esdhc
-+          - fsl,t1040-esdhc
-+          - fsl,t4240-esdhc
-+          - fsl,ls1012a-esdhc
-+          - fsl,ls1028a-esdhc
-+          - fsl,ls1088a-esdhc
-+          - fsl,ls1043a-esdhc
-+          - fsl,ls1046a-esdhc
-+          - fsl,ls2080a-esdhc
-+      - const: fsl,esdhc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clock-frequency:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: specifies eSDHC base clock frequency.
-+
-+  sdhci,wp-inverted:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    deprecated: true
-+    description:
-+      specifies that eSDHC controller reports
-+      inverted write-protect state; New devices should use the generic
-+      "wp-inverted" property.
-+
-+  sdhci,1-bit-only:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    deprecated: true
-+    description:
-+      specifies that a controller can only handle
-+      1-bit data transfers. New devices should use the generic
-+      "bus-width = <1>" property.
-+
-+  sdhci,auto-cmd12:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description:
-+      specifies that a controller can only handle auto CMD12.
-+
-+  voltage-ranges:
-+    $ref: /schemas/types.yaml#/definitions/uint32-matrix
-+    items:
-+      items:
-+        - description: specifies minimum slot voltage (mV).
-+        - description: specifies maximum slot voltage (mV).
-+
-+  little-endian:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description:
-+      If the host controller is little-endian mode, specify
-+      this property. The default endian mode is big-endian.
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clock-frequency
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@2e000 {
-+        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
-+        reg = <0x2e000 0x1000>;
-+        interrupts = <42 0x8>;
-+        interrupt-parent = <&ipic>;
-+        /* Filled in by U-Boot */
-+        clock-frequency = <100000000>;
-+        voltage-ranges = <3300 3300>;
-+    };
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-deleted file mode 100644
-index edb8cadb95412..0000000000000
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ /dev/null
-@@ -1,52 +0,0 @@
--* Freescale Enhanced Secure Digital Host Controller (eSDHC)
--
--The Enhanced Secure Digital Host Controller provides an interface
--for MMC, SD, and SDIO types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the sdhci-esdhc driver.
--
--Required properties:
--  - compatible : should be "fsl,esdhc", or "fsl,<chip>-esdhc".
--    Possible compatibles for PowerPC:
--	"fsl,mpc8536-esdhc"
--	"fsl,mpc8378-esdhc"
--	"fsl,p2020-esdhc"
--	"fsl,p4080-esdhc"
--	"fsl,t1040-esdhc"
--	"fsl,t4240-esdhc"
--    Possible compatibles for ARM:
--	"fsl,ls1012a-esdhc"
--	"fsl,ls1028a-esdhc"
--	"fsl,ls1088a-esdhc"
--	"fsl,ls1043a-esdhc"
--	"fsl,ls1046a-esdhc"
--	"fsl,ls2080a-esdhc"
--  - clock-frequency : specifies eSDHC base clock frequency.
--
--Optional properties:
--  - sdhci,wp-inverted : specifies that eSDHC controller reports
--    inverted write-protect state; New devices should use the generic
--    "wp-inverted" property.
--  - sdhci,1-bit-only : specifies that a controller can only handle
--    1-bit data transfers. New devices should use the generic
--    "bus-width = <1>" property.
--  - sdhci,auto-cmd12: specifies that a controller can only handle auto
--    CMD12.
--  - voltage-ranges : two cells are required, first cell specifies minimum
--    slot voltage (mV), second cell specifies maximum slot voltage (mV).
--    Several ranges could be specified.
--  - little-endian : If the host controller is little-endian mode, specify
--    this property. The default endian mode is big-endian.
--
--Example:
--
--sdhci@2e000 {
--	compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
--	reg = <0x2e000 0x1000>;
--	interrupts = <42 0x8>;
--	interrupt-parent = <&ipic>;
--	/* Filled in by U-Boot */
--	clock-frequency = <0>;
--	voltage-ranges = <3300 3300>;
--};
--- 
-2.34.1
-
+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
+DxuNuBlySpn/GYqPcDcRZd8EENWqnZrjtjHMk0j7ZfrPGXq8sQkbG3OX+DOwSaefPRq1pLGWBZaZ
+YuUo5O7CNHo7h7Hc9GgjiW+6X9BjKAzSaDy8jwIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdrYW1hbC5kYXN1QGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUcRYSWvAVyA3hgTrQ2c4AFquBsG0wDQYJ
+KoZIhvcNAQELBQADggEBAIKB2IOweF2sIYGBZTDm+Hwmhga+sjekM167Sk/KwxxvQFwZYP6i0SnR
+7aR59vbfVQVaAiZH/a+35EYxP/sXaIM4+E3bFykBuXwcGEnYyEn6MceiOCkjkWQq1Co2JyOdNvkP
+nAxyPoWlsJtr+N/MF1EYKGpYMdPM7S2T/gujjO9N56BCGu9yJElszWcXHmBl5IsaQqMS36vhsV0b
+NxffjNkeAdgfN/SS9S9Rj4WXD7pF1M0Xq8gPLCLyXrx1i2KkYOYJsj0PWlC6VRg6E1xXkYDte0VL
+fAAG4QsETU27E1HBNQyp5zF1PoPCPvq3EnWQnbLgYk+Jz2iwIUwiqwr/bDgxggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgw89WX2Pp7ue922QVkwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIOBTFgWLQQBjz+trPDKlf7VieljOl91AU8rEPK0X
+WFTeMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTI0MDYwNDE1NDI0
+OVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQCHDitsVrSIBqEBfi+BtUh/VV4n01E3KUZmMiIeHPu26bc/VPdvyKtajqAM
+WcXtKSxa/LIduy33Uf9rBZIbMYXAMetjJeD1ez4diXNfgtDhy94kokDyIRP7MdmN5yivsr111KXs
+inzTLpTxSanh5pGzsyWCdqVOPoZWaxXfc5T9l2Lb2eHa7onxds3wqFe2qA7fIY6gTsKoRxlD9oR9
+ixEzo5s6kxydsYO7olMixGTpbVwiC+0GKNOTzM1PKRxAPQB7nQhNhdzoPRn3Bes0hsP8HkFoDE20
+s1Et24gsdM6Q3loughwUE0Eif4Am5EKHx9Sf2KsAvWA2aYgxzU72IvVv
+--000000000000545065061a124dc9--
