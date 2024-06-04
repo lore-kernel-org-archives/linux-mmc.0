@@ -1,365 +1,341 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-vi1eur04on2061.outbound.protection.outlook.com [40.107.8.61])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC382148300;
-	Tue,  4 Jun 2024 13:41:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717508492; cv=none; b=jWHhiAegQiwPDlrFtlMFdNOomSeQpYvtgP6YEYbafr4xSFZ8JIdo56RQfohyWzPZTi+E/UvUp+x3J4vWovziN+W95/Hv3ZmOvdCpDf6o9eqOWhIsXkf1oKIim/uNpH/ARXVnT/Ed7xPG5r2M2cu4e2eSl7cqqmcnXaDENYuuCEg=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717508492; c=relaxed/simple;
-	bh=FArcXwplL8wN1ALhCuGpUD+BoCuPOB8+aNe29ijJswU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZeRJ2qvcoFeWuP8tj3Ghd6tq/ax4CdaOGoLw+6/qWX8WcClN85JUMC8LYvqHwEoQY+sXRsY2z+kg6B97KsWFjBsi81qs2XlysFIAeP5LCQOnj8am51OPFnwJyImIQpp0s8T05xB7xMwWo04Erm24GsnJ7XPTWcZFy/RgrLRaHW8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bXYkUdIM; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C5AC12B17A;
+	Tue,  4 Jun 2024 14:53:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.8.61
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1717512815; cv=fail; b=ItZcn3C468eY13CAQpLevZu5OZKJ+OKs9KdlZIP8PkjdPEMd7lpODpP5XpbkLciObwPMAaOLwNFG1WiNKOzIGt2WLlMYQJKKpmolN+LzDUlptwSR3Y4m9yu3Qd4UW6yz+0hhTjRgOF7+uHUu+raBvZyTlz2EETPS3xjahYMj9xc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1717512815; c=relaxed/simple;
+	bh=AwLJFydDRSar8/yMCgBWM15Att3NFrrsyAUHD4zCFeE=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=cI3oTpeVDHKJFjfjQiPvR0c0LPc/xkI+6R4EAMxzK85MbtzAK6HTOVIgZ2+ody6SaHF1qpVcZxGFIGEzQL1jSsWfO3zhDqTgnWhhtnsOkThB3IIBL1cfIKe1WY6r2QP8iSD+y6CPoXLJvFP0LnHk5zdPFSBY6YIUNsyNS57DqE8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=OznoapqN; arc=fail smtp.client-ip=40.107.8.61
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bXYkUdIM"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6BE38C2BBFC;
-	Tue,  4 Jun 2024 13:41:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717508491;
-	bh=FArcXwplL8wN1ALhCuGpUD+BoCuPOB8+aNe29ijJswU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=bXYkUdIM5G5RAUoPD7MJYr//S1oqHl+LJ3fxfw7lfSFuBw8JhGTBW9PLufCUqHKjY
-	 OJVFk7K+rOrq9HuH76qkiJL0A/sTi2rTQodn+TKkQocB/tbQHZeZKu3m3G2lM5wcf0
-	 VD97GRCGMBes8MaOHcg8KM5fvFeye/FAQg9SKZN6tpIn5+9U5FE+VZJf0uRZu8AxbF
-	 xrs4Rlqn5YOUS7D0btNT9APFrOK0n1Q8HZ/ji58Sj2kGEhPit3yyT7IaR0HjrbKKbe
-	 82WAiCP1NrKaOO3384inkZ8fhbN5SYnrWSCyMgS7pEXOOMKSO77chS2wlgGdCmIr5c
-	 AAtt4MysOip3g==
-Date: Tue, 4 Jun 2024 14:41:26 +0100
-From: Andi Shyti <andi.shyti@kernel.org>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Corey Minyard <minyard@acm.org>, 
-	Allen Pais <apais@linux.microsoft.com>, Sebastian Reichel <sebastian.reichel@collabora.com>, 
-	Perry Yuan <perry.yuan@amd.com>, Giovanni Cabiddu <giovanni.cabiddu@intel.com>, 
-	Herbert Xu <herbert@gondor.apana.org.au>, Nuno Sa <nuno.sa@analog.com>, Guenter Roeck <linux@roeck-us.net>, 
-	Randy Dunlap <rdunlap@infradead.org>, Heiner Kallweit <hkallweit1@gmail.com>, 
-	Lee Jones <lee@kernel.org>, Samuel Holland <samuel@sholland.org>, 
-	Elad Nachman <enachman@marvell.com>, Arseniy Krasnov <AVKrasnov@sberdevices.ru>, 
-	Johannes Berg <johannes.berg@intel.com>, Gregory Greenman <gregory.greenman@intel.com>, 
-	Benjamin Berg <benjamin.berg@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, 
-	Robert Richter <rrichter@amd.com>, Vinod Koul <vkoul@kernel.org>, 
-	Chunfeng Yun <chunfeng.yun@mediatek.com>, Linus Walleij <linus.walleij@linaro.org>, 
-	Hans de Goede <hdegoede@redhat.com>, Ilpo =?utf-8?B?SsOkcnZpbmVu?= <ilpo.jarvinen@linux.intel.com>, 
-	Nikita Kravets <teackot@gmail.com>, Jiri Slaby <jirislaby@kernel.org>, 
-	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Stanley Chang <stanley_chang@realtek.com>, 
-	Heikki Krogerus <heikki.krogerus@linux.intel.com>, Abdel Alkuor <abdelalkuor@geotab.com>, 
-	Kent Overstreet <kent.overstreet@linux.dev>, Eric Biggers <ebiggers@google.com>, 
-	Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, 
-	"Steven Rostedt (Google)" <rostedt@goodmis.org>, Daniel Bristot de Oliveira <bristot@kernel.org>, 
-	Andrew Morton <akpm@linux-foundation.org>, Hugh Dickins <hughd@google.com>, 
-	Abel Wu <wuyun.abel@bytedance.com>, John Johansen <john.johansen@canonical.com>, 
-	Mimi Zohar <zohar@linux.ibm.com>, Stefan Berger <stefanb@linux.ibm.com>, 
-	Roberto Sassu <roberto.sassu@huawei.com>, Eric Snowberg <eric.snowberg@oracle.com>, 
-	Takashi Iwai <tiwai@suse.de>, Takashi Sakamoto <o-takashi@sakamocchi.jp>, 
-	Jiapeng Chong <jiapeng.chong@linux.alibaba.com>, Mark Brown <broonie@kernel.org>, 
-	Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linuxppc-dev@lists.ozlabs.org, linux-kernel@vger.kernel.org, 
-	keyrings@vger.kernel.org, linux-crypto@vger.kernel.org, linux-acpi@vger.kernel.org, 
-	linux-ide@vger.kernel.org, openipmi-developer@lists.sourceforge.net, 
-	linux-clk@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, 
-	linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-tegra@vger.kernel.org, 
-	linux-pm@vger.kernel.org, qat-linux@intel.com, dri-devel@lists.freedesktop.org, 
-	intel-gfx@lists.freedesktop.org, intel-xe@lists.freedesktop.org, nouveau@lists.freedesktop.org, 
-	linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org, linux-leds@vger.kernel.org, 
-	linux-sunxi@lists.linux.dev, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, netdev@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	linux-pci@vger.kernel.org, linux-mediatek@lists.infradead.org, 
-	linux-phy@lists.infradead.org, linux-gpio@vger.kernel.org, platform-driver-x86@vger.kernel.org, 
-	linux-staging@lists.linux.dev, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, 
-	linux-bcachefs@vger.kernel.org, linux-hardening@vger.kernel.org, cgroups@vger.kernel.org, 
-	linux-trace-kernel@vger.kernel.org, linux-mm@kvack.org, apparmor@lists.ubuntu.com, 
-	linux-security-module@vger.kernel.org, linux-integrity@vger.kernel.org, alsa-devel@alsa-project.org, 
-	linux-sound@vger.kernel.org, Michael Ellerman <mpe@ellerman.id.au>, 
-	Nicholas Piggin <npiggin@gmail.com>, Christophe Leroy <christophe.leroy@csgroup.eu>, 
-	"Naveen N. Rao" <naveen.n.rao@linux.ibm.com>, Thomas Gleixner <tglx@linutronix.de>, 
-	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
-	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>, 
-	David Howells <dhowells@redhat.com>, "David S. Miller" <davem@davemloft.net>, 
-	"Rafael J. Wysocki" <rafael@kernel.org>, Len Brown <lenb@kernel.org>, Sergey Shtylyov <s.shtylyov@omp.ru>, 
-	Damien Le Moal <dlemoal@kernel.org>, Niklas Cassel <cassel@kernel.org>, 
-	Daniel Scally <djrscally@gmail.com>, Sakari Ailus <sakari.ailus@linux.intel.com>, 
-	Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, 
-	Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
-	Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Heiko Stuebner <heiko@sntech.de>, 
-	Peter De Schrijver <pdeschrijver@nvidia.com>, Prashant Gaikwad <pgaikwad@nvidia.com>, 
-	Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, 
-	Huang Rui <ray.huang@amd.com>, "Gautham R. Shenoy" <gautham.shenoy@amd.com>, 
-	Mario Limonciello <mario.limonciello@amd.com>, Viresh Kumar <viresh.kumar@linaro.org>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, 
-	Daniel Vetter <daniel@ffwll.ch>, Jani Nikula <jani.nikula@linux.intel.com>, 
-	Rodrigo Vivi <rodrigo.vivi@intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, 
-	Tvrtko Ursulin <tursulin@ursulin.net>, Karol Herbst <kherbst@redhat.com>, Lyude Paul <lyude@redhat.com>, 
-	Danilo Krummrich <dakr@redhat.com>, Jean Delvare <jdelvare@suse.com>, 
-	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Pavel Machek <pavel@ucw.cz>, Chen-Yu Tsai <wens@csie.org>, 
-	Jernej Skrabec <jernej.skrabec@gmail.com>, Tony Lindgren <tony@atomide.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Hu Ziji <huziji@marvell.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, 
-	Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
-	Potnuri Bharat Teja <bharat@chelsio.com>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
-	Miri Korenblit <miriam.rachel.korenblit@intel.com>, Kalle Valo <kvalo@kernel.org>, 
-	Mahesh J Salgaonkar <mahesh@linux.ibm.com>, Oliver O'Halloran <oohall@gmail.com>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, JC Kuo <jckuo@nvidia.com>, Andrew Lunn <andrew@lunn.ch>, 
-	Gregory Clement <gregory.clement@bootlin.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, 
-	Sebastian Reichel <sre@kernel.org>, Daniel Lezcano <daniel.lezcano@linaro.org>, 
-	Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>, 
-	Thinh Nguyen <Thinh.Nguyen@synopsys.com>, Helge Deller <deller@gmx.de>, Brian Foster <bfoster@redhat.com>, 
-	Zhihao Cheng <chengzhihao1@huawei.com>, Tejun Heo <tj@kernel.org>, Zefan Li <lizefan.x@bytedance.com>, 
-	Johannes Weiner <hannes@cmpxchg.org>, Peter Zijlstra <peterz@infradead.org>, 
-	Juri Lelli <juri.lelli@redhat.com>, Vincent Guittot <vincent.guittot@linaro.org>, 
-	Dietmar Eggemann <dietmar.eggemann@arm.com>, Ben Segall <bsegall@google.com>, Mel Gorman <mgorman@suse.de>, 
-	Daniel Bristot de Oliveira <bristot@redhat.com>, Valentin Schneider <vschneid@redhat.com>, 
-	Masami Hiramatsu <mhiramat@kernel.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
-	Jason Baron <jbaron@akamai.com>, Jim Cromie <jim.cromie@gmail.com>, 
-	Paul Moore <paul@paul-moore.com>, James Morris <jmorris@namei.org>, 
-	"Serge E. Hallyn" <serge@hallyn.com>, Dmitry Kasatkin <dmitry.kasatkin@gmail.com>, 
-	Clemens Ladisch <clemens@ladisch.de>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
-	Liam Girdwood <lgirdwood@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH v1 1/1] treewide: Align match_string() with
- sysfs_match_string()
-Message-ID: <3ojs6btxgava4dcasys5tnrg5vsrqlshagcg7otvrdgfcwwje4@lcrd3r6gkfcs>
-References: <20240603211538.289765-1-andriy.shevchenko@linux.intel.com>
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="OznoapqN"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=CQsDV9lTSQC+xPo0xV9zoZy4lzOxWLi8D1GbJxtF6SjRR7kWAFwBOwxtK8Q0qQuPjZ7BhYbsd4SMEp10NCBLIWttcriIz5fWIPmokBxPedHc7ngCCPP6iLjoKY5F43nbtK0dX63JIbzfaNUePh3bNB7BrhqdP6fej4x5kBfwJB74jtPjX2fC6MZhHIoOhbgvRRLQkfbhXlmFEKS3b81mWVgPZYck4LMGCSyIF6aHQCKSnVzijzK4DueQYm6pq4+RDezErYPnQUQUrSZoy191Y6z2jh5oLZWx2cF/S2EY7cm78dnPh8OTD11zE9s4ztNzBdqoN/iSXpDHziLlfDvp3Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=4YDM7CYNGrgBLyPlaZnHk3P/2X2djuPJw+C2hVfyj1o=;
+ b=Dk+TlHs+4iQJ+YbWnzZGU7yqt39VECoxF/HZUXDPkthVgPRdLtJfI55zc2qzCrUeMvrayuOysPIiYZ21s9mj1cKdIBvV+oFc6VF1UN7KvuaF2Fti9fP8b+lZQj1npNJfyfBjLjJLTTCgoJG/9mMq48E2V9SJDERsSWxDkcxKZ92CPd0W7vVydNgaNvswLIhnZIJnRMLRt2wIsFoUOE1XLdosDvDBWQ6V0nVnmX8w+ICSNh4NUOXRecA++ibtbP5ZWoifV1/M5V4rh6tv3099f6UppUZn2A+wKMMqcJ6zuJM+6pwtmXOKEJkNEG2ByiDlqy43HCzIojONrfQXbJW+mA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=4YDM7CYNGrgBLyPlaZnHk3P/2X2djuPJw+C2hVfyj1o=;
+ b=OznoapqNd07YDfo89EoSZ1Ixl6WbYzroYqyS12qi6AAazk8LZn+x5JjaqY6X+kZ5pwW5krScmdQHzELud3GhYCzCnBEoucPz12DY6aysbejF4rUWS91ZadkHRmm6kSJ9JCN1k9VUGeIXn8fWeH0bTvyML28gHmePjGGmY9huTdA=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
+ by GVXPR04MB10826.eurprd04.prod.outlook.com (2603:10a6:150:226::19) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7633.27; Tue, 4 Jun
+ 2024 14:53:27 +0000
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.7633.021; Tue, 4 Jun 2024
+ 14:53:27 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: krzk@kernel.org
+Cc: Frank.li@nxp.com,
+	conor+dt@kernel.org,
+	devicetree@vger.kernel.org,
+	imx@lists.linux.dev,
+	krzk+dt@kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	robh@kernel.org,
+	ulf.hansson@linaro.org
+Subject: [PATCH v2 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
+Date: Tue,  4 Jun 2024 10:53:08 -0400
+Message-Id: <20240604145308.2417017-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: BYAPR21CA0029.namprd21.prod.outlook.com
+ (2603:10b6:a03:114::39) To PAXPR04MB9642.eurprd04.prod.outlook.com
+ (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240603211538.289765-1-andriy.shevchenko@linux.intel.com>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|GVXPR04MB10826:EE_
+X-MS-Office365-Filtering-Correlation-Id: 41ad6e5e-c11b-4c16-47b6-08dc84a61739
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230031|52116005|376005|1800799015|366007|38350700005;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?9QBlvrc1CYzICDTBxn0mnOh1NVki+gIBymSu3KFsbNzJf083sJ6DaEoyd9C4?=
+ =?us-ascii?Q?ZHmJVBlHvcfhoCGobVyhPzwWB8zxGvtVD950a2NozOfasrR1lMSujaL4ccB2?=
+ =?us-ascii?Q?ngPPlvM9RX2+KAPXDVvGBvmRZiQTjqgU4MlthZpeMHX7thJiaRo32eGMyrQw?=
+ =?us-ascii?Q?VMD5UYOvbU6s7ieUXtkxdv9qo1zWjqIgrXTRrJmDoUirPMojcJywDp6YXkzh?=
+ =?us-ascii?Q?jNMT1uerzU9CXKaH4u1w7ZRNhz+Y8MqRaTPZ/Y1/VSE+IeDG7E+s/GXVHSV2?=
+ =?us-ascii?Q?1XdxdMuq/GMFmLUccMMtwuWn/IVAueMmGMLhKdHPtd48dnqBFyFzRrKbsGJr?=
+ =?us-ascii?Q?fnnBKYeCxW2BNDSarkmJdrtHjW43I+r/qTX3sAKwiL3xWDGoFn8jOzBJfD2i?=
+ =?us-ascii?Q?wr66KMIT0K305Ia6EqkHPMC8F3AeqavyJiV2K1VtW6bDFTlZXkjXlYCVEos7?=
+ =?us-ascii?Q?mEsRp4tYRRliW2cz7Jb7Ocm3eImmKLLShY8bhDrE+By+LSb8mW30w+0YMk/L?=
+ =?us-ascii?Q?oqtwZD7Vcdgpao9vn6P6gq59XSHrMFVJ1w4oShVfXQrGUjm063GjqqggS5ST?=
+ =?us-ascii?Q?ZZj18+BMtreVXByRm+HYNt6U5gQ42JiT0INXXrE9XI4Cn2XXh8ZZRqyZ0wvR?=
+ =?us-ascii?Q?j3gyKzSkpE0aDnp0c4NMLARA3pTvw7r8C5zTBfiU0mEwjHsD7oAQsg4gpTZ9?=
+ =?us-ascii?Q?wngj+6oIrTpYGsxbq+iRc5naqsfLXn4xbcJSjQsElaPzXSuGuOgTLNVnBSgr?=
+ =?us-ascii?Q?LCvvy/pbiAI5lqakAFDCic0dARwaJLDokS4Vy5oiywTcdlNfDtK19FHnkVkm?=
+ =?us-ascii?Q?0gnqahXafFWWV7bG1rQqTipdfulmPG0OWG4wOgXi2saWnziiAG+OFQ/m/Zny?=
+ =?us-ascii?Q?jn5Ea8IZ0lyBCOnrljJyIA86jYgN2Pvgm9yO/bRf5B1SEimgrmKFpouqzNzX?=
+ =?us-ascii?Q?MjR/tzXPgnS/dMwdw1knhSIySR0010QdgsR0MimYXEnhOl6Q8P2VXQkokr0z?=
+ =?us-ascii?Q?ACIPhndTWhAg0D0CH0NRZlmO7KYbT1pj2YZYww9Nk/cbPkGEJfmHDRQZb2KX?=
+ =?us-ascii?Q?+zya5ubfay5ua6OZ4rdsKF8pquiHp5z1/V7f3eo5Z06ezyq5enjl7h1DomlS?=
+ =?us-ascii?Q?T1XHzNB/VMXSDJ/H8PQx9uPtpy8QOHupeiOecqGZewYnsz/aWHhzmd2HMtN9?=
+ =?us-ascii?Q?gSVQUib0ub7qC/ry14Ulff9SrmZ2sqQrXPwntJcJs3OWSyjpmXV/m/IdJFUt?=
+ =?us-ascii?Q?UZuR6DDePeBEhL3d+rFomIeIUMTL8U/ev7JkSVhPXgizNaTzpABi91FUnFNN?=
+ =?us-ascii?Q?3ftSG+8h72Ml26vfaG9fIAMV?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230031)(52116005)(376005)(1800799015)(366007)(38350700005);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?qwRKzh44k0p8Stfbzb6Btwwz2xd4bhlqb/ZdCrTPTjmD6yycIydbgue+/fpt?=
+ =?us-ascii?Q?z1ylivgXzD5CVUbZemb+h4u2dHjGrw1Ei1I+8c1I+8cobxZH8zjPH5jhpkRz?=
+ =?us-ascii?Q?5Dx41Gp2O0d3ofUNWA86+iz5tmq2OG7jhSrSBw2ig6IywmkdDDSb68IVuhwn?=
+ =?us-ascii?Q?Om8RteCNWbEkoXA4iWxWpPJ3DQ09Sp2HgueIc1yTxYXjbJY8+7f4TJnfvVAc?=
+ =?us-ascii?Q?r4xH+3tHOMDTZflKVbAquldzSCVWtpLy+b9rWYWxSXwIzGQnMEXn3dWAP0MW?=
+ =?us-ascii?Q?gFBGU3JJhJk31blgDLzqM8EZYZKEAJEgNZYov82vlD4SGXlAp90Jtzm6p2sm?=
+ =?us-ascii?Q?yHwkB6nDlDr9PlGrnZC5JX93itTZWUKkwBmW61LfwuD7KDdjc4f534CD0YVp?=
+ =?us-ascii?Q?5x4IvvFVibhaKEnL59lHeYscfiOzSGUSXxD7WdQMxzM5KxtYNZ+Eb2huW3mj?=
+ =?us-ascii?Q?kys7nQBCmIO1zT5B1bAb8ZEFX+hg0oZ0nvkXvp6Li2OBldg5nns0SCy5bPwQ?=
+ =?us-ascii?Q?daMKCXE7bCjRVlbnTy+j1KJOL8hMhHmvKS4iiN8DjpE7xM1UNiFLhBmQMIC0?=
+ =?us-ascii?Q?WCtj23+8kOqtJLq9RZ6bSauia5ZJqHad0owNQbrAvY0MgGaYskq4uA96uIVj?=
+ =?us-ascii?Q?jvs8q3MsmXJTONWtzH/z1wGHmdF4ftES6E6ekoTpaLe/FEWIQeM5/GuRjqI+?=
+ =?us-ascii?Q?bKEfB63N/EaYWZ6w3NPd6Lv1ogSiSQaYh2YUZaWqwFdaVfib+hA2voTM64MY?=
+ =?us-ascii?Q?DCx1qZX8cMR71JSucEmB76EEUKEcbp1OQIBiUo2FK4ppoSRJW6+r+h+jA0T0?=
+ =?us-ascii?Q?F3LM0CJjeFkNarHlFY2lV39Qz7+l8U3mmh1pb7XWKtaA7r4gH4mQN7/yJrB2?=
+ =?us-ascii?Q?+VZEyMetFZW1gazo92fKVdjL86ZWx3QDKnO7o3VHe7PnUYIaRLTB/lRVF6/S?=
+ =?us-ascii?Q?zr4YNl79WwunQ7yqAcIyaviuzPpmcjxWhgqHhW29vdepjSZUh4tCMXgwC3+z?=
+ =?us-ascii?Q?6Ghs2A6OjV3Dm8aa206pngOliILqyS9Zwg5NkGtgyicXtsYN2+CZpAogsfsF?=
+ =?us-ascii?Q?EzUqRtNg9G4anWjr29jaJiJ2c69QSmlS0fB6In8PZrMChrmTgvJs1anmRiFR?=
+ =?us-ascii?Q?Okn5ZE1fS6Dl19uiYjHk/Z+19fUCZ8rHvxt/Qa4BsZrTuoygj5WjAtaToF48?=
+ =?us-ascii?Q?c/cYNLQJMvaWU47/t5ylaDwiuP3TNy9Ph3v+qpRSdFxOz1dg6bA4sSQZvUuL?=
+ =?us-ascii?Q?PDfS1zqttQlSmWMu11EofVC5KfXGXWe4+zY3/EPTuXk0U3t170NThKsQWuBG?=
+ =?us-ascii?Q?Ov6ml0rt2MyRAylnSGUZ87l+I0KAItX1z5/3iCUFgxg8L3u7oDfAprNs3xdF?=
+ =?us-ascii?Q?swtFMN734kZXMnp6aJE3ZJUnoFBXHLj714vVSRw6HzaoKaZCGdxPtUOZ/gnv?=
+ =?us-ascii?Q?oM3EhNpINte0gEthsgm1jg8nO4oiUblA5fEsytER0891VDYsetVtNCNZStLs?=
+ =?us-ascii?Q?KxQUaD74Ki1LYTobz2NCp8FKbGmFeA/XLxKMlWYBY7wbnKLVcbt+W26g4VcK?=
+ =?us-ascii?Q?72T6rHdHc0DI0+WitgJDUWfNV9c89wbFkSwBw9Pp?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 41ad6e5e-c11b-4c16-47b6-08dc84a61739
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Jun 2024 14:53:27.0338
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: ZRY2g77G7tDf+mVuDIYAqRWSL2bAVEpZhz2SNd8XcftgMTQ2A6xhT+90DheAIikkibrxm8VY8wDkBC24Klr8qA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR04MB10826
 
-Hi Andy,
+Convert layerscape fsl-esdhc binding doc from txt to yaml format.
 
-On Sun, Jun 02, 2024 at 06:57:12PM +0300, Andy Shevchenko wrote:
-> Make two APIs look similar. Hence convert match_string() to be
-> a 2-argument macro. In order to avoid unneeded churn, convert
-> all users as well. There is no functional change intended.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Addtional change during convert:
+- Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
+- Add "reg" and "interrupts" property.
+- Change example "sdhci@2e000" to "mmc@2e000".
+- Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
+most existed dts file.
+- Set clock-frequency to 100mhz in example.
 
-nice patch, I checked some (maybe most) of your changes. There
-are a few unrelated changes which I don't mind, but there are two
-errors where the error value changes from ENODEV to EINVAL.
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
+---
 
-Find the comments through the line.
+Notes:
+    Change from v1 to v2
+    - use filename fsl,esdhc.yaml
+    - Add clock-frequency to required
+    - change clock-frequency to 100mhz in example
+    
+    pass dt_binding_check
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8  dt_binding_check DT_SCHEMA_FILES=fsl,esdhc.yaml
+      SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+      CHKDT   Documentation/devicetree/bindings
+      LINT    Documentation/devicetree/bindings
+      DTEX    Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dts
+      DTC_CHK Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dtb
 
-...
+ .../devicetree/bindings/mmc/fsl,esdhc.yaml    | 99 +++++++++++++++++++
+ .../devicetree/bindings/mmc/fsl-esdhc.txt     | 52 ----------
+ 2 files changed, 99 insertions(+), 52 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
 
-> diff --git a/drivers/cpufreq/amd-pstate.c b/drivers/cpufreq/amd-pstate.c
-> index 1b7e82a0ad2e..b6f52f44625f 100644
-> --- a/drivers/cpufreq/amd-pstate.c
-> +++ b/drivers/cpufreq/amd-pstate.c
-> @@ -1117,9 +1117,9 @@ static ssize_t store_energy_performance_preference(
->  	if (ret != 1)
->  		return -EINVAL;
->  
-> -	ret = match_string(energy_perf_strings, -1, str_preference);
-> +	ret = __match_string(energy_perf_strings, -1, str_preference);
->  	if (ret < 0)
-> -		return -EINVAL;
-> +		return ret;
+diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+new file mode 100644
+index 0000000000000..4164fdfb9f8e6
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+@@ -0,0 +1,99 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/fsl,esdhc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Freescale Enhanced Secure Digital Host Controller (eSDHC)
++
++description:
++  The Enhanced Secure Digital Host Controller provides an interface
++  for MMC, SD, and SDIO types of memory cards.
++
++maintainers:
++  - Frank Li <Frank.Li@nxp.com>
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - fsl,mpc8536-esdhc
++          - fsl,mpc8378-esdhc
++          - fsl,p2020-esdhc
++          - fsl,p4080-esdhc
++          - fsl,t1040-esdhc
++          - fsl,t4240-esdhc
++          - fsl,ls1012a-esdhc
++          - fsl,ls1028a-esdhc
++          - fsl,ls1088a-esdhc
++          - fsl,ls1043a-esdhc
++          - fsl,ls1046a-esdhc
++          - fsl,ls2080a-esdhc
++      - const: fsl,esdhc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clock-frequency:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: specifies eSDHC base clock frequency.
++
++  sdhci,wp-inverted:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that eSDHC controller reports
++      inverted write-protect state; New devices should use the generic
++      "wp-inverted" property.
++
++  sdhci,1-bit-only:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that a controller can only handle
++      1-bit data transfers. New devices should use the generic
++      "bus-width = <1>" property.
++
++  sdhci,auto-cmd12:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      specifies that a controller can only handle auto CMD12.
++
++  voltage-ranges:
++    $ref: /schemas/types.yaml#/definitions/uint32-matrix
++    items:
++      items:
++        - description: specifies minimum slot voltage (mV).
++        - description: specifies maximum slot voltage (mV).
++
++  little-endian:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      If the host controller is little-endian mode, specify
++      this property. The default endian mode is big-endian.
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clock-frequency
++
++allOf:
++  - $ref: sdhci-common.yaml#
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    mmc@2e000 {
++        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
++        reg = <0x2e000 0x1000>;
++        interrupts = <42 0x8>;
++        interrupt-parent = <&ipic>;
++        /* Filled in by U-Boot */
++        clock-frequency = <100000000>;
++        voltage-ranges = <3300 3300>;
++    };
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+deleted file mode 100644
+index edb8cadb95412..0000000000000
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ /dev/null
+@@ -1,52 +0,0 @@
+-* Freescale Enhanced Secure Digital Host Controller (eSDHC)
+-
+-The Enhanced Secure Digital Host Controller provides an interface
+-for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the sdhci-esdhc driver.
+-
+-Required properties:
+-  - compatible : should be "fsl,esdhc", or "fsl,<chip>-esdhc".
+-    Possible compatibles for PowerPC:
+-	"fsl,mpc8536-esdhc"
+-	"fsl,mpc8378-esdhc"
+-	"fsl,p2020-esdhc"
+-	"fsl,p4080-esdhc"
+-	"fsl,t1040-esdhc"
+-	"fsl,t4240-esdhc"
+-    Possible compatibles for ARM:
+-	"fsl,ls1012a-esdhc"
+-	"fsl,ls1028a-esdhc"
+-	"fsl,ls1088a-esdhc"
+-	"fsl,ls1043a-esdhc"
+-	"fsl,ls1046a-esdhc"
+-	"fsl,ls2080a-esdhc"
+-  - clock-frequency : specifies eSDHC base clock frequency.
+-
+-Optional properties:
+-  - sdhci,wp-inverted : specifies that eSDHC controller reports
+-    inverted write-protect state; New devices should use the generic
+-    "wp-inverted" property.
+-  - sdhci,1-bit-only : specifies that a controller can only handle
+-    1-bit data transfers. New devices should use the generic
+-    "bus-width = <1>" property.
+-  - sdhci,auto-cmd12: specifies that a controller can only handle auto
+-    CMD12.
+-  - voltage-ranges : two cells are required, first cell specifies minimum
+-    slot voltage (mV), second cell specifies maximum slot voltage (mV).
+-    Several ranges could be specified.
+-  - little-endian : If the host controller is little-endian mode, specify
+-    this property. The default endian mode is big-endian.
+-
+-Example:
+-
+-sdhci@2e000 {
+-	compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
+-	reg = <0x2e000 0x1000>;
+-	interrupts = <42 0x8>;
+-	interrupt-parent = <&ipic>;
+-	/* Filled in by U-Boot */
+-	clock-frequency = <0>;
+-	voltage-ranges = <3300 3300>;
+-};
+-- 
+2.34.1
 
-a bit of unrelated changes here, but I guess no one will complain :-)
-
->  
->  	mutex_lock(&amd_pstate_limits_lock);
->  	ret = amd_pstate_set_energy_pref_index(cpudata, ret);
-
-...
-
-> diff --git a/drivers/mmc/host/sdhci-xenon-phy.c b/drivers/mmc/host/sdhci-xenon-phy.c
-> index cc9d28b75eb9..1865e26ae736 100644
-> --- a/drivers/mmc/host/sdhci-xenon-phy.c
-> +++ b/drivers/mmc/host/sdhci-xenon-phy.c
-> @@ -135,15 +135,14 @@ struct xenon_emmc_phy_regs {
->  	u32 logic_timing_val;
->  };
->  
-> -static const char * const phy_types[] = {
-> -	"emmc 5.0 phy",
-> -	"emmc 5.1 phy"
-> -};
-> -
->  enum xenon_phy_type_enum {
->  	EMMC_5_0_PHY,
->  	EMMC_5_1_PHY,
-> -	NR_PHY_TYPES
-> +};
-> +
-> +static const char * const phy_types[] = {
-> +	[EMMC_5_0_PHY] = "emmc 5.0 phy",
-> +	[EMMC_5_1_PHY] = "emmc 5.1 phy",
->  };
-
-Another unrelated cleanup, but I don't complain
-
->  enum soc_pad_ctrl_type {
-
-...
-
-> -	tablet_found = match_string(tablet_chassis_types,
-> -				    ARRAY_SIZE(tablet_chassis_types),
-> -				    chassis_type) >= 0;
-> -	if (!tablet_found)
-> -		return -ENODEV;
-> +	ret = match_string(tablet_chassis_types, chassis_type);
-> +	if (ret < 0)
-> +		return ret;
-
-This is a logical change though, because we are changing from
--ENODEV to -EINVAL. Even if it might look the right thing, but
-still, it's a logical change.
-
->  
->  	ret = hp_wmi_perform_query(HPWMI_SYSTEM_DEVICE_MODE, HPWMI_READ,
->  				   system_device_mode, zero_if_sup(system_device_mode),
-> @@ -490,9 +487,7 @@ static bool is_omen_thermal_profile(void)
->  	if (!board_name)
->  		return false;
->  
-> -	return match_string(omen_thermal_profile_boards,
-> -			    ARRAY_SIZE(omen_thermal_profile_boards),
-> -			    board_name) >= 0;
-> +	return match_string(omen_thermal_profile_boards, board_name) >= 0;
->  }
->  
->  static int omen_get_thermal_policy_version(void)
-
-...
-
-> diff --git a/drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c b/drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c
-> index e56db75a94fb..dbd176b0fb1f 100644
-> --- a/drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c
-> +++ b/drivers/thermal/intel/int340x_thermal/processor_thermal_rfim.c
-> @@ -111,7 +111,7 @@ static ssize_t suffix##_show(struct device *dev,\
->  		match_strs = (const char **)fivr_strings;\
->  		mmio_regs = tgl_fivr_mmio_regs;\
->  	} \
-> -	ret = match_string(match_strs, -1, attr->attr.name);\
-> +	ret = __match_string(match_strs, -1, attr->attr.name);\
->  	if (ret < 0)\
->  		return ret;\
->  	reg_val = readl((void __iomem *) (proc_priv->mmio_base + mmio_regs[ret].offset));\
-> @@ -145,7 +145,7 @@ static ssize_t suffix##_store(struct device *dev,\
->  		mmio_regs = tgl_fivr_mmio_regs;\
->  	} \
->  	\
-> -	ret = match_string(match_strs, -1, attr->attr.name);\
-> +	ret = __match_string(match_strs, -1, attr->attr.name);\
->  	if (ret < 0)\
->  		return ret;\
->  	if (mmio_regs[ret].read_only)\
-> diff --git a/drivers/thermal/intel/int340x_thermal/processor_thermal_wt_req.c b/drivers/thermal/intel/int340x_thermal/processor_thermal_wt_req.c
-> index f298e7442662..57f456befb34 100644
-> --- a/drivers/thermal/intel/int340x_thermal/processor_thermal_wt_req.c
-> +++ b/drivers/thermal/intel/int340x_thermal/processor_thermal_wt_req.c
-> @@ -50,7 +50,7 @@ static ssize_t workload_type_store(struct device *dev,
->  	if (ret != 1)
->  		return -EINVAL;
->  
-> -	ret = match_string(workload_types, -1, str_preference);
-> +	ret = __match_string(workload_types, -1, str_preference);
-
-We could even thing of a "match_string_terminated" (or a better
-name), but maybe it's too much?
-
->  	if (ret < 0)
->  		return ret;
->  
-
-...
-
-> -	c->auth_hash_algo = match_string(hash_algo_name, HASH_ALGO__LAST,
-> -					 c->auth_hash_name);
-> -	if ((int)c->auth_hash_algo < 0) {
-> +	err = __match_string(hash_algo_name, HASH_ALGO__LAST, c->auth_hash_name);
-> +	if (err < 0) {
->  		ubifs_err(c, "Unknown hash algo %s specified",
->  			  c->auth_hash_name);
-> -		return -EINVAL;
-> +		return err;
-
-This is correct!
-
->  	}
-> +	c->auth_hash_algo = err;
->  
->  	snprintf(hmac_name, CRYPTO_MAX_ALG_NAME, "hmac(%s)",
->  		 c->auth_hash_name);
-
-...
-
-> +int __match_string(const char * const *array, size_t n, const char *string);
-> +
-> +/**
-> + * match_string - matches given string in an array
-> + * @_a: array of strings
-> + * @_s: string to match with
-> + *
-> + * Helper for __match_string(). Calculates the size of @a automatically.
-
-/@a/@_a/
-
-> + */
-> +#define match_string(_a, _s) __match_string(_a, ARRAY_SIZE(_a), _s)
-> +
-
-...
-
-> diff --git a/security/apparmor/lsm.c b/security/apparmor/lsm.c
-> index 6239777090c4..e3fc94b4c7e5 100644
-> --- a/security/apparmor/lsm.c
-> +++ b/security/apparmor/lsm.c
-> @@ -1820,9 +1820,9 @@ static int param_set_audit(const char *val, const struct kernel_param *kp)
->  	if (apparmor_initialized && !aa_current_policy_admin_capable(NULL))
->  		return -EPERM;
->  
-> -	i = match_string(audit_mode_names, AUDIT_MAX_INDEX, val);
-> +	i = __match_string(audit_mode_names, AUDIT_MAX_INDEX, val);
-
-pity here... this could have been a match_string, but the
-MAX_INDEX is hardcoded outside the enum.
-
->  	if (i < 0)
-> -		return -EINVAL;
-> +		return i;
->  
->  	aa_g_audit = i;
->  	return 0;
-
-...
-
-> diff --git a/sound/soc/soc-dapm.c b/sound/soc/soc-dapm.c
-> index 16dad4a45443..7064f4cae549 100644
-> --- a/sound/soc/soc-dapm.c
-> +++ b/sound/soc/soc-dapm.c
-> @@ -769,14 +769,13 @@ static int dapm_connect_mux(struct snd_soc_dapm_context *dapm,
->  		item = 0;
->  	}
->  
-> -	i = match_string(e->texts, e->items, control_name);
-> +	i = __match_string(e->texts, e->items, control_name);
->  	if (i < 0)
-> -		return -ENODEV;
-> +		return i;
-
-Also this return value is wrong.
-
-Andi
-
->  
->  	path->name = e->texts[i];
->  	path->connect = (i == item);
->  	return 0;
-> -
->  }
->  
->  /* set up initial codec paths */
-> -- 
-> 2.43.0.rc1.1336.g36b5255a03ac
-> 
