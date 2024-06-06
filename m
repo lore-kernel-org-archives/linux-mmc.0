@@ -1,109 +1,143 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from speedy.danman.eu (speedy.danman.eu [46.227.180.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5954413BC20;
-	Thu,  6 Jun 2024 06:44:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C6CA5C96
+	for <linux-mmc@vger.kernel.org>; Thu,  6 Jun 2024 08:18:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=46.227.180.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717656251; cv=none; b=h3qNgm5Sj1nex2Tn97cbSDBvgtmOd8XIsH/cZ3dEQ+EB/O65aFFsuKEsugZyYx2FpLzZ855T+cbpvEiXuAvgZFj40+kJDgMIurm35t3+4eQz3P/nH5ewcJ6mt4qRpkNkOFtZnE1BsDxMbvrY7sexELLJcdboABFxMXyo84H/SdU=
+	t=1717661885; cv=none; b=YVS2KemEItJ5DgynPbSolUJKZwlnVAL5ZRhkSah69lqiiCI8n88bEkxp22zUfhg5Tl+WveRX2i8J0os+FHohgY4Csu1XzA4DvOe1O+zAnF+9utofrubYFcNF+zcCrz8bZbQ1wKTOPOsMLFa+jDqL6AhBueo3gpdqeVKDDZk3QbQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717656251; c=relaxed/simple;
-	bh=3ZCCiIZVN2JELpO+tKNP2BLYPCzEKTVkvzzbdR0N+fI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=K1sYvqpbhawJ2r5dDKznXSZnO2Hd02oe/lL4tKohbTKeXMGCY3zY8F6fFuuJ7fi67IxNmklMM84yabhEiwBumoqbQGgSaAwvCu7DVhGMf4URyyXnC4aHmyxQ85/tEX6vyzh3Xxz+iJ4OdW6HxPLH6+jdiydtpr/xG1rNNjNtjHI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sShhanP/; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sShhanP/"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 947DAC4AF0D;
-	Thu,  6 Jun 2024 06:44:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717656251;
-	bh=3ZCCiIZVN2JELpO+tKNP2BLYPCzEKTVkvzzbdR0N+fI=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=sShhanP/FFJUHQNKWsv/7lYVwGsM1lZdd+hEcJYODoxhjL/GlzkjwwuHGciILcGwN
-	 8reE1FU4slMISoNq7VvRFvib68yNoTNMTZNIkI2201SY6FOdpsrx61vcMrfr7txz/I
-	 XgAMTUXx08A8veo/PkR3PJcqviXspOKcf/L2EAZa7xU9eNLBo1VOPDtlWsIDufZsqD
-	 d+AVFYYlB1+THL8ZVrIzLSYHyaqYP6Ni+JH63UO00yxQtl0fdF+0JhRf1otmE58kZ4
-	 Ara+uofViO9HoO8WT4VDPwR4KfQ+E6tdWl24HPc0mlPao5WdZzgWY5u7RtLwDKFepm
-	 eL538UBx9uoTg==
-Message-ID: <b1c51acc-441d-4484-adef-1da368571097@kernel.org>
-Date: Thu, 6 Jun 2024 08:44:06 +0200
+	s=arc-20240116; t=1717661885; c=relaxed/simple;
+	bh=dnbQgJcycV4ZFTIVEcHP8lN5ekPLm1U9Tef5ExHk158=;
+	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=YU3bb4bHYnvL5XCx/neFBZRtXQ0olCkD2qNyPcthNPs1g5WCT/DGlF7qy6rFmbMFXPyYMGodBMoj0DbJA8i7yt6gZrM7+b/+5XBVV6xwjuisESjcQ3oKchotmXvmUJd2GJ+prdZqFSk3U295cKUFsf59DxSf7YmjZyfin7D4sQU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu; spf=pass smtp.mailfrom=danman.eu; arc=none smtp.client-ip=46.227.180.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=danman.eu
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=danman.eu
+Received: from mail.danman.eu (localhost [IPv6:::1])
+	by speedy.danman.eu (Postfix) with ESMTPA id 93D00240A83;
+	Thu,  6 Jun 2024 10:17:52 +0200 (CEST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-To: Frank Li <Frank.Li@nxp.com>
-Cc: conor+dt@kernel.org, devicetree@vger.kernel.org, imx@lists.linux.dev,
- krzk+dt@kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- robh@kernel.org, ulf.hansson@linaro.org
-References: <20240605185046.1057877-1-Frank.Li@nxp.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20240605185046.1057877-1-Frank.Li@nxp.com>
-Content-Type: text/plain; charset=UTF-8
+Date: Thu, 06 Jun 2024 10:17:52 +0200
+From: Daniel Kucera <linux-mmc@danman.eu>
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Subject: Re: [PATCH v3] mmc: core: allow detection of locked cards
+In-Reply-To: <DM6PR04MB6575B624ABC7190E84D73D4EFCFE2@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20240523132016.599343-1-linux-mmc@danman.eu>
+ <8e03fa17dd41180f53fede6897ab1bf8@danman.eu>
+ <DM6PR04MB65758D11355C0A516B10704DFCFE2@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <4716f78bbe71f4d8262b16a546393758@danman.eu>
+ <DM6PR04MB6575B624ABC7190E84D73D4EFCFE2@DM6PR04MB6575.namprd04.prod.outlook.com>
+User-Agent: Roundcube Webmail/1.5.0
+Message-ID: <f6b219a15cdbdb96b302d8923d7768e6@danman.eu>
+X-Sender: linux-mmc@danman.eu
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 05/06/2024 20:50, Frank Li wrote:
-> Convert layerscape fsl-esdhc binding doc from txt to yaml format.
+Hi Avri,
+
+On 2024-06-02 14:59, Avri Altman wrote:
+>> Hello Avri,
+>> 
+>> On 2024-06-02 07:26, Avri Altman wrote:
+>> >> On 2024-05-23 15:20, linux-mmc@danman.eu wrote:
+>> >> > From: Daniel Kucera <linux-mmc@danman.eu>
+>> >> >
+>> >> > Locked card will not reply to SEND_SCR or SD_STATUS commands so it
+>> >> > was failing to initialize previously. When skipped, the card will
+>> >> > get initialized and CMD42 can be sent using ioctl to unlock the
+>> >> > card or remove password protection.
+>> >> > Until unlocked, all read/write calls will timeout.
+>> >> >
+>> >> > Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
+>> >> > ---
+>> >> >  drivers/mmc/core/sd.c | 13 ++++++++++++-
+>> >> >  1 file changed, 12 insertions(+), 1 deletion(-)
+>> >> >
+>> >> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+>> >> > 1c8148cdd..ae821df7d 100644
+>> >> > --- a/drivers/mmc/core/sd.c
+>> >> > +++ b/drivers/mmc/core/sd.c
+>> >> > @@ -928,8 +928,19 @@ int mmc_sd_setup_card(struct mmc_host *host,
+>> >> > struct mmc_card *card,
+>> >> >       bool reinit)
+>> >> >  {
+>> >> >       int err;
+>> >> > +     u32 card_status;
+>> >> >
+>> >> > -     if (!reinit) {
+>> >> > +     err = mmc_send_status(card, &card_status);
+>> >> > +     if (err){
+>> >> > +             pr_err("%s: unable to get card status\n", mmc_hostname(host));
+>> >> > +             return err;
+>> >> > +     }
+>> >> > +
+>> >> > +     if (card_status & R1_CARD_IS_LOCKED){
+>> >> > +             pr_warn("%s: card is locked\n", mmc_hostname(host));
+>> >> > +     }
+>> >> > +
+>> >> > +     if (!reinit && !(card_status & R1_CARD_IS_LOCKED)) {
+>> >> >               /*
+>> >> >                * Fetch SCR from card.
+>> >> >                */
+>> >>
+>> >> Any feedback please?
+>> > You didn't address my comment from your v1 - Since eMMC & SD shares
+>> > the very same locking feature (non-COP SD that
+>> > is) -
+>> > You should at least explain in your commit log why it isn't an issue
+>> > for eMMC, If indeed it is not.
+>> 
+>> I'm sorry, I didn't get what you mean by that. I am touching only the 
+>> sd.c code, not
+>> the mmc.c (where eMMC is initialized, am I correct?).
+>> How should I address this?
+>> Should I test with eMMC to SD adaptor? I don't have any currently.
+> Theoretically, looking in the eMMC spec, a locked eMMC device
+> shouldn't have any issue returning from power down.
+> The only flow that is affected is that its not allowed to switch to
+> hs200 in a locked state until unlocked - not to say that it is a
+> problem.
+> If you can't verify that via code review,  can you test your mmc-utils
+> code on an eMMC platform?
+
+I've just tested with an eMMC to SD adapter in my reader and it is 
+detected correctly:
+
+[1463181.072006] mmc1: unexpected status 0x2000900 after switch
+[1463181.074560] mmc1: unexpected status 0x2000900 after switch
+[1463181.077038] mmc1: unexpected status 0x2000900 after switch
+[1463181.079709] mmc1: unexpected status 0x2000900 after switch
+[1463181.081972] mmc1: unexpected status 0x2000900 after switch
+[1463181.083412] mmc1: unexpected status 0x2000900 after switch
+[1463181.084831] mmc1: unexpected status 0x2000900 after switch
+[1463181.084836] mmc1: new high speed MMC card at address 0001
+[1463181.085195] mmcblk1: mmc1:0001 004GA0 2.59 GiB
+
+Do I need to do some changes to the patch?
+
 > 
-> Addtional change during convert:
-> - Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
-> - Add "reg" and "interrupts" property.
-> - Change example "sdhci@2e000" to "mmc@2e000".
-> - Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
-> most existed dts file.
-> - Set clock-frequency to 100mhz in example.
-> 
+> Thanks,
+> Avri
+>> 
+>> I am sorry if these are stupid questions, I am a layman.
+>> 
+>> >
+>> > Thanks,
+>> > Avri
+>> >
+>> >>
+>> >> D.
+>> 
+>> Thank you.
+>> Daniel.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-Best regards,
-Krzysztof
-
+Thank you,
+Daniel
