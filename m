@@ -1,52 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 864236FD0;
-	Thu,  6 Jun 2024 00:26:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1A9810F7;
+	Thu,  6 Jun 2024 00:33:16 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717633609; cv=none; b=bzivyi1sJz3ZTGG5fDYIF8rb+fcafy/K4X2L0VGYqUBYEl9vX7BuGeiy+Oyw5VzA1beQkExWFMqYcOzFIXu7FfsA/YEAo79bJDAC5tjIEEtPns7v8DJ3//LEKcLCu2gIxsTWdCqUQ3KYWsdVGzSOo3l5etB2xUJXDGvwdycpPSM=
+	t=1717633997; cv=none; b=qPSWEWBC69qhgaMM3IWDbdRNRvpE9rAohtr1jdvQElavRvt/mvZKz74wD+eOr21T6AUQvtKHga8bLwqgRnP+A1gRSTkSgyH1GOjLR1KO1/gwsNbNzcDJyiz4MDo0K5e1UTFHNWR7XOBib6PQ37H5StUfGkYQBXuMSjhydIrCwj8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717633609; c=relaxed/simple;
-	bh=MM2QMsLe0ZgjuDnS73yE9zszh8M3oKt5xpWPRXHXlmA=;
+	s=arc-20240116; t=1717633997; c=relaxed/simple;
+	bh=WQF0gHP8Z0+bptDb1mHSImhPzB/SQ12M5264wKzMY5U=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OQnqfrTnqMD3D30bHG+bC+5R8tsaCuSc7QNRPRirOnhgLVAbRfFjENhHGid0O+VZanqMn25ExqNAHIEET0i3QOsJuFD22UlPZhCiTpqu9u0OMfs5l/+mGbSMz4+pSnUBDBi6Ypypsvr0e8gQBtHE57kKdBB59GSc2gtFLfYyISw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LN2eheQr; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=NmmV+7WfUHXsbglDG396XYSJz3CEwhLOXYwWea6ppMnNV+rR5DGnedZKpcSGsCJD7CiMDyTSR4YMX1U27CVPQyWBF6Wdu3M2Md4P4O0XRGNW8WIsaJyJIMpp3Yx7Z+XJMHE1DsNaigPNjdfPJZHSlIyQXepLVPg0yBdXZreOeI8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bLgHCFPv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LN2eheQr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B69C8C2BD11;
-	Thu,  6 Jun 2024 00:26:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bLgHCFPv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2EE93C2BD11;
+	Thu,  6 Jun 2024 00:33:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1717633609;
-	bh=MM2QMsLe0ZgjuDnS73yE9zszh8M3oKt5xpWPRXHXlmA=;
+	s=k20201202; t=1717633996;
+	bh=WQF0gHP8Z0+bptDb1mHSImhPzB/SQ12M5264wKzMY5U=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=LN2eheQrWpwtH/IqSC6KHJvOdTTmeEc3ZOyb68UIJETLdERLNTpkxSfytI/fI+gfY
-	 PAyNBZ6frbn/j0Dy1Bxmrxyp8JKWZof9Vw5Y9+KdY7LMxBgFA6ijG2LvAiZ1DlI9cE
-	 g42vtbuwRqYVhh2fXww+1nMBCYb3TFI28HDPqawaH/dMtLr9yotqPZvADWOrwFblcb
-	 pDO/M97IvRnBEFNQDfsEz1t9dH93Vnx56oCNyM0VXnKfMTGnK86fKLYhYjcJQ5IKfK
-	 4dXwo1628JeOHqAn4OvWThps3oxN+56OAImLj/0dVRPPJA3jl8WzLpp+GwW2VnjpT3
-	 5VmLiIKMzuUKQ==
-Date: Wed, 5 Jun 2024 18:26:46 -0600
-From: Rob Herring <robh@kernel.org>
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
+	b=bLgHCFPvdj12ouyCp2nhTERThnl3msBGm6S6R5Glz4n+rmeMjnM+Ofv7AXjMVRFnk
+	 T3BPG9OUGwYxO/yspQrFZu6Ql+3bi+yW9rDNnpa2aTa9jaDsflyriLNeWZTSFt35ak
+	 0Agw6hO6zC/TWBLNXhllP5TgOuIbRTyc+W7gwW23Di9jE9vfpGE2/coDik5fSQ9MK+
+	 HuHjnsjYqPjTeeAUqvmjVu4JPUkolyX0oOMkUtgW8q0iS4cLAjAVH2+7oWJaFhXgpO
+	 Me4Sx7E6+X3aiR9qh3i5jrHwfpkWBNUiigmvLmKU4W8uEvvD6SBEOcH7fXrScX2O8T
+	 I0c+AF5sb9WMg==
+Date: Wed, 5 Jun 2024 18:33:13 -0600
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Neil Armstrong <neil.armstrong@linaro.org>
+Cc: Kevin Hilman <khilman@baylibre.com>, linux-amlogic@lists.infradead.org,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>,
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [RFC PATCH 3/4] dt-bindings: mmc: renesas,sdhi: Document
- RZ/V2H(P) support
-Message-ID: <20240606002646.GA3509352-robh@kernel.org>
-References: <20240605074936.578687-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240605074936.578687-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
+	Jerome Brunet <jbrunet@baylibre.com>,
+	linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: meson-gx: add optional power-domains
+Message-ID: <171763399122.3518466.10613163286977063987.robh@kernel.org>
+References: <20240605-topic-amlogic-upstream-bindings-fixes-power-domains-mmc-v1-1-4acbb8cc2626@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,78 +47,18 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240605074936.578687-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20240605-topic-amlogic-upstream-bindings-fixes-power-domains-mmc-v1-1-4acbb8cc2626@linaro.org>
 
-On Wed, Jun 05, 2024 at 08:49:35AM +0100, Prabhakar wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+
+On Wed, 05 Jun 2024 11:34:46 +0200, Neil Armstrong wrote:
+> On newer SoCs, the MMC controller can require a power-domain to operate,
+> add it as optional.
 > 
-> The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to that
-> of the R-Car Gen3, but it has some differences:
-> - HS400 is not supported.
-> - It supports the SD_IOVS bit to control the IO voltage level.
-> - It supports fixed address mode.
-> 
-> To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g057'
-> compatible string is added.
-> 
-> A "vqmmc-r9a09g057-regulator" regulator object is added to handle the
-> voltage level switch of the SD/MMC pins.
-> 
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 > ---
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 20 ++++++++++++++++++-
->  1 file changed, 19 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index 3d0e61e59856..154f5767cf03 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -18,6 +18,7 @@ properties:
->            - renesas,sdhi-r7s9210 # SH-Mobile AG5
->            - renesas,sdhi-r8a73a4 # R-Mobile APE6
->            - renesas,sdhi-r8a7740 # R-Mobile A1
-> +          - renesas,sdhi-r9a09g057 # RZ/V2H(P)
->            - renesas,sdhi-sh73a0  # R-Mobile APE6
->        - items:
->            - enum:
-> @@ -118,7 +119,9 @@ allOf:
->        properties:
->          compatible:
->            contains:
-> -            const: renesas,rzg2l-sdhi
-> +            enum:
-> +              - renesas,sdhi-r9a09g057
-> +              - renesas,rzg2l-sdhi
->      then:
->        properties:
->          clocks:
-> @@ -204,6 +207,21 @@ allOf:
->          sectioned off to be run by a separate second clock source to allow
->          the main core clock to be turned off to save power.
->  
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: renesas,sdhi-r9a09g057
-> +    then:
-> +      properties:
-> +        vqmmc-r9a09g057-regulator:
 
-The node is already conditional on the compatible, so why the chip name? 
-Then it doesn't work when the 2nd chip needs this.
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
 
-
-> +          type: object
-> +          description: VQMMC SD regulator
-> +          $ref: /schemas/regulator/regulator.yaml#
-> +          unevaluatedProperties: false
-> +      required:
-> +        - vqmmc-r9a09g057-regulator
-> +
->  required:
->    - compatible
->    - reg
-> -- 
-> 2.34.1
-> 
