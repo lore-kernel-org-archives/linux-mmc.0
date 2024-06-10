@@ -1,360 +1,203 @@
-Received: from mail-ua1-f47.google.com (mail-ua1-f47.google.com [209.85.222.47])
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF4C92230F;
-	Sun,  9 Jun 2024 18:40:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C6D96F06D
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2024 08:08:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1717958420; cv=none; b=EhUIvge8sNvy9p3u90DdVO3bujNEIXJ2UlT7O9ZJ0TCYPqRPSX6zMajV3G4cK98iJcAq3ESUQOEjEzfKm2VJ0/0U5gXyBg1C4kZ3sFQb1f1rxVsmlzoH48/KYnagLWPApJmvRo8hXvatuMgemAihcs9uUdpupW6flpZXc9kK1Rk=
+	t=1718006898; cv=none; b=ab8qCkakb82jah7Pu913Vl8YHQvi1006vjFFYdiq8nLs+aMeP3T34qRqbkCQ1mBBbdbXz3dQqh/tyyiRCN7Uy+LlF5U197ffMt4GK8J/1HY3qjm2CPnSvVAEb1cPi96g3b4TPpPXXcR2PEmUfNsmhGtYogqePT2BTLkmCIgyzKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1717958420; c=relaxed/simple;
-	bh=+bViJuDxXa74UHn4YmTjEWVDpJeuv+vmp/IQOhBpbUw=;
+	s=arc-20240116; t=1718006898; c=relaxed/simple;
+	bh=/L5y1Dv6ivY3eszYnYmdXRYc401x9YYY2yBAmmyUG/k=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ZaOt3D1wemTymeGS6bkoiHNfki17UrSDOEuiDIUbXV6vfn6uIc1weNcHpHTB5s7UVvj+UwXx+KhQ1LbDCxnB6b1CMKh0Op3eY23ufh36JbU79AQfNeu+1+pX6c2GtGkQqe43tC+WGPWq0cCbKRXlx2XnWz/MhuwrC1CEnfd7fy0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HuR4bvXq; arc=none smtp.client-ip=209.85.222.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=LyTuFz3CBiGsrT5NwYdALRUXHBFE96lWetesquNsV+JGZQVPKQykjab45FFPrW8S6EJZoV2DDiaGyeaA8f3LZGoxjeUDKXxWaRBiKDfs519PouZl2ddTNO/5NLKTdgORe4V476Mvsutf5WG9MJVD2iDEx9D7+WmOX8rviJC3yAY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SSdm1Yf7; arc=none smtp.client-ip=209.85.167.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HuR4bvXq"
-Received: by mail-ua1-f47.google.com with SMTP id a1e0cc1a2514c-804ee8b03afso1077423241.0;
-        Sun, 09 Jun 2024 11:40:18 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SSdm1Yf7"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-5295e488248so4550152e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2024 01:08:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1717958417; x=1718563217; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1718006892; x=1718611692; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=zLalX01o4044G4qjc+kHPp7MpcTDv6VnqaMgH/BUy8k=;
-        b=HuR4bvXqB0zTGtlTTbOYTvcmyIdWdcfP2iBZRN9/pIzFbfNKH0ShOf3vAu5etKftze
-         nBUUonjDz3o7eDDl5CwIcAi6afIGxEt1sXy4nJrcA3C38oTAvmqRA3Srb33Og6nd1u+t
-         I/ka45ioNLSbTHuurtg8Rb7qG9Tgv65nJ10/Zfh3qiWRBrVyEEL7eAz4bwnVKQF/dO6e
-         /qxkR2Y7TXB5eoT+3kX0u2eWM/yciKUxaRiHfLAZdYvkp4JtG0vBZsb+nH3LMI6L1qxY
-         XIN6YNVSg1ahtqD88DjWJwrsnxK6YLkY44CksBYtQ8ct3EDEW4FlSNLYztf+czJUqeaX
-         8U/A==
+        bh=/L5y1Dv6ivY3eszYnYmdXRYc401x9YYY2yBAmmyUG/k=;
+        b=SSdm1Yf7Ra0G4T+e1Uib9M+gpZrMF9N8k3TFc0cVz1F5pABZzdduYWAgb/AYK6aN5U
+         uGRb/9C4DKJ1MAyhzNdKqtcLtbbSe8pWQRtjbEXBTFYju2cMxL2Ljf60A9rhzibs/z9k
+         58QLu/Go6rD3ZcOU2IPsm9uBcLwH6W8ua/ujy6yuJ5oy7dAijMMVBbsXY4yd4XeI8BMF
+         tBO40weDDLMTfnvv7w8kEWecrxwMfi5uAXCD7QK5dcWAdVEgifdMXyQiRMcm7v1g27Rl
+         Fpd3yivenYWJYij2nMGl+Ls46Hekj1+LChnFu8YHVJOJbKSpUse8j4k2fpw4j2G2Sdq2
+         vB0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1717958417; x=1718563217;
+        d=1e100.net; s=20230601; t=1718006892; x=1718611692;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=zLalX01o4044G4qjc+kHPp7MpcTDv6VnqaMgH/BUy8k=;
-        b=GkWIr4n+ola+bbnVjjZ13hfoPLcSzg0pTEnNGds95CjHRhSmjiA7DoItotrh4+NVF6
-         MfThcKSkwNKAsnlHyVziQSZlaljoqXn2nOAySF4s/FoZQQKH3Yj0o1tr8MWD9DqBjdGJ
-         pZr46peeZcuw3g5bCx0VJpRfTyVEQqRRKf12lisQfGL0zIPdavkALl1oAJxyRcWrCBWT
-         MNJcRmCMiyrIdeiKxwowEMtD3FxLyuEk0YpoCFaYnXKMprlw7I+1XMI1MWEN6dbC5tgH
-         kMPaPAixd+Lj45neafAW1OCjcFwZ9HCLzDIOqCrKiUpJYp92LGd9CESe+zPjEG8mOori
-         BuXA==
-X-Forwarded-Encrypted: i=1; AJvYcCU81ulmOqUnNRgHnr7CtaphiyHzkmLD/GZ+mTQ/szervnd5hitqaMV6/onDuhSMdVr6f7CAN3mCC2VXkkiuT4/kqVNFHH5StWSHEyKc
-X-Gm-Message-State: AOJu0Yysrblm8GW/j9de8bN5wQBlPDVyVAsvVT/qfNpGl4892CnesPl/
-	bH5W/mYhk+eHGQdELe1bK0mBZIAnUJxDo90lKG+cyQvyN4mid0YktXQYSaTXeBBJqcpK101O7cu
-	JhFoOFpwHXHsAz/BTmpggFWpDe1M=
-X-Google-Smtp-Source: AGHT+IHzx4REhqhCgV7VOEsx43Fefo6LRmYcB4taGEm99vDtReySNKBIedezN20FM6Vi+Tn0MDtEE3JJ03bsZrm3yco=
-X-Received: by 2002:a67:ebcc:0:b0:48c:39d6:4c43 with SMTP id
- ada2fe7eead31-48c39d64df5mr5375382137.25.1717958417456; Sun, 09 Jun 2024
- 11:40:17 -0700 (PDT)
+        bh=/L5y1Dv6ivY3eszYnYmdXRYc401x9YYY2yBAmmyUG/k=;
+        b=mQCJqFVuSjEbCOY8RjXTWS+t2jIiP/cXQxwNMVizEAH7O+wKTJyaI0G276ziCxQsBo
+         M0M/G+fOgr1VxrUXdljRqF/1fbLp1oaoF+bhhVDxzCA2S0aNXB0+4I1z6lMXXS6kgPEv
+         Jx+Duun10zsOrIgNkUf9Wh7sDsIthpBdLyqZV5gPW2Q6Ilrbkrlw61pq0kpnv4BuRG66
+         g6YRiOtKRRT6NFTIlPYfvQKS1Nmq8lTcBGVyHQOcFIKBDBKyMqIpIRhKtQ+Q9SjTRH7t
+         qe3Z8B5AShfb5Nh0kyvqpT13fbk+PTXwZbQLaoZymS5nGXcNKdLmib3dzt6qPmUoCqqv
+         QEyA==
+X-Forwarded-Encrypted: i=1; AJvYcCU+iD6RYUBCQt5NSZ6O99huP1Ipi+etA3BXGKD77obznYGECIX0axBzwq6iTvWcfYHvacwvQNZN4zI2JDG2hJORJ00RPrwVvyc0
+X-Gm-Message-State: AOJu0Yy8sEdyO+m39BhFvPjeZ/WxXVQMTn9QA26jwhI5hKlPg1fctvMW
+	Wt8jf0s33IQqKyXayGAYr5Xa1OZQZnvwjyxwWkuOZ5QQlyfXjBxi0tBFkCpA9Ln9Xz9XUxz35mf
+	PZY33D1uSfGey4EXB3IgNcz7YakRFFGCgOvf42w==
+X-Google-Smtp-Source: AGHT+IEoIIaopVbMhKiBzu+ZFeFG117iZrYhuaSy1PLsnicMvCE0nAaF1iUL9hhnUeVtUHqe9i20V059/u6XmSWe6yI=
+X-Received: by 2002:a05:6512:234d:b0:52b:be9b:cafe with SMTP id
+ 2adb3069b0e04-52bbe9bcbadmr5940256e87.21.1718006892189; Mon, 10 Jun 2024
+ 01:08:12 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240522110909.10060-1-victorshihgli@gmail.com>
- <20240522110909.10060-9-victorshihgli@gmail.com> <4354636c-24dd-4145-a551-75dc5c69910b@intel.com>
- <CAK00qKCRD1Xdb5DmWud9F=r85aVxtnQ5wS_=yhzQ46LS0Mjqsg@mail.gmail.com> <84c57084-eb9d-4d11-9c2f-2a4ded6290c6@intel.com>
-In-Reply-To: <84c57084-eb9d-4d11-9c2f-2a4ded6290c6@intel.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Mon, 10 Jun 2024 02:40:10 +0800
-Message-ID: <CAK00qKAHuLKGtcUnv=pKyQ4bKe+HqM1rFCQMRxPrGH9Aeat6Qw@mail.gmail.com>
-Subject: Re: [PATCH V16 08/23] mmc: core: Support UHS-II Auto Command Error Recovery
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org, dlunev@chromium.org, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>, ulf.hansson@linaro.org
+References: <20240603211538.289765-1-andriy.shevchenko@linux.intel.com> <87tti9cfry.fsf@intel.com>
+In-Reply-To: <87tti9cfry.fsf@intel.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Mon, 10 Jun 2024 10:08:00 +0200
+Message-ID: <CACRpkdZFPG_YLici-BmYfk9HZ36f4WavCN3JNotkk8cPgCODCg@mail.gmail.com>
+Subject: Re: [PATCH v1 1/1] treewide: Align match_string() with sysfs_match_string()
+To: Jani Nikula <jani.nikula@linux.intel.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, 
+	"Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Corey Minyard <minyard@acm.org>, 
+	Allen Pais <apais@linux.microsoft.com>, 
+	Sebastian Reichel <sebastian.reichel@collabora.com>, Perry Yuan <perry.yuan@amd.com>, 
+	Giovanni Cabiddu <giovanni.cabiddu@intel.com>, Herbert Xu <herbert@gondor.apana.org.au>, 
+	Nuno Sa <nuno.sa@analog.com>, Guenter Roeck <linux@roeck-us.net>, 
+	Randy Dunlap <rdunlap@infradead.org>, Andi Shyti <andi.shyti@kernel.org>, 
+	Heiner Kallweit <hkallweit1@gmail.com>, Lee Jones <lee@kernel.org>, 
+	Samuel Holland <samuel@sholland.org>, Elad Nachman <enachman@marvell.com>, 
+	Arseniy Krasnov <AVKrasnov@sberdevices.ru>, Johannes Berg <johannes.berg@intel.com>, 
+	Gregory Greenman <gregory.greenman@intel.com>, Benjamin Berg <benjamin.berg@intel.com>, 
+	Bjorn Helgaas <bhelgaas@google.com>, Robert Richter <rrichter@amd.com>, Vinod Koul <vkoul@kernel.org>, 
+	Chunfeng Yun <chunfeng.yun@mediatek.com>, Hans de Goede <hdegoede@redhat.com>, 
+	=?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>, 
+	Nikita Kravets <teackot@gmail.com>, Jiri Slaby <jirislaby@kernel.org>, 
+	Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, 
+	Stanley Chang <stanley_chang@realtek.com>, 
+	Heikki Krogerus <heikki.krogerus@linux.intel.com>, Abdel Alkuor <abdelalkuor@geotab.com>, 
+	Kent Overstreet <kent.overstreet@linux.dev>, Eric Biggers <ebiggers@google.com>, 
+	Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, 
+	"Steven Rostedt (Google)" <rostedt@goodmis.org>, Daniel Bristot de Oliveira <bristot@kernel.org>, 
+	Andrew Morton <akpm@linux-foundation.org>, Hugh Dickins <hughd@google.com>, 
+	Abel Wu <wuyun.abel@bytedance.com>, John Johansen <john.johansen@canonical.com>, 
+	Mimi Zohar <zohar@linux.ibm.com>, Stefan Berger <stefanb@linux.ibm.com>, 
+	Roberto Sassu <roberto.sassu@huawei.com>, Eric Snowberg <eric.snowberg@oracle.com>, 
+	Takashi Iwai <tiwai@suse.de>, Takashi Sakamoto <o-takashi@sakamocchi.jp>, 
+	Jiapeng Chong <jiapeng.chong@linux.alibaba.com>, Mark Brown <broonie@kernel.org>, 
+	Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linuxppc-dev@lists.ozlabs.org, 
+	linux-kernel@vger.kernel.org, keyrings@vger.kernel.org, 
+	linux-crypto@vger.kernel.org, linux-acpi@vger.kernel.org, 
+	linux-ide@vger.kernel.org, openipmi-developer@lists.sourceforge.net, 
+	linux-clk@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, 
+	linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, 
+	linux-tegra@vger.kernel.org, linux-pm@vger.kernel.org, qat-linux@intel.com, 
+	dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org, 
+	intel-xe@lists.freedesktop.org, nouveau@lists.freedesktop.org, 
+	linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-leds@vger.kernel.org, linux-sunxi@lists.linux.dev, 
+	linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-mtd@lists.infradead.org, netdev@vger.kernel.org, 
+	linux-wireless@vger.kernel.org, linux-pci@vger.kernel.org, 
+	linux-mediatek@lists.infradead.org, linux-phy@lists.infradead.org, 
+	linux-gpio@vger.kernel.org, platform-driver-x86@vger.kernel.org, 
+	linux-staging@lists.linux.dev, linux-usb@vger.kernel.org, 
+	linux-fbdev@vger.kernel.org, linux-bcachefs@vger.kernel.org, 
+	linux-hardening@vger.kernel.org, cgroups@vger.kernel.org, 
+	linux-trace-kernel@vger.kernel.org, linux-mm@kvack.org, 
+	apparmor@lists.ubuntu.com, linux-security-module@vger.kernel.org, 
+	linux-integrity@vger.kernel.org, alsa-devel@alsa-project.org, 
+	linux-sound@vger.kernel.org, Michael Ellerman <mpe@ellerman.id.au>, 
+	Nicholas Piggin <npiggin@gmail.com>, Christophe Leroy <christophe.leroy@csgroup.eu>, 
+	"Naveen N. Rao" <naveen.n.rao@linux.ibm.com>, Thomas Gleixner <tglx@linutronix.de>, 
+	Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, 
+	Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, 
+	"H. Peter Anvin" <hpa@zytor.com>, David Howells <dhowells@redhat.com>, 
+	"David S. Miller" <davem@davemloft.net>, "Rafael J. Wysocki" <rafael@kernel.org>, Len Brown <lenb@kernel.org>, 
+	Sergey Shtylyov <s.shtylyov@omp.ru>, Damien Le Moal <dlemoal@kernel.org>, 
+	Niklas Cassel <cassel@kernel.org>, Daniel Scally <djrscally@gmail.com>, 
+	Sakari Ailus <sakari.ailus@linux.intel.com>, Michael Turquette <mturquette@baylibre.com>, 
+	Stephen Boyd <sboyd@kernel.org>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Heiko Stuebner <heiko@sntech.de>, 
+	Peter De Schrijver <pdeschrijver@nvidia.com>, Prashant Gaikwad <pgaikwad@nvidia.com>, 
+	Thierry Reding <thierry.reding@gmail.com>, Jonathan Hunter <jonathanh@nvidia.com>, 
+	Huang Rui <ray.huang@amd.com>, "Gautham R. Shenoy" <gautham.shenoy@amd.com>, 
+	Mario Limonciello <mario.limonciello@amd.com>, Viresh Kumar <viresh.kumar@linaro.org>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+	Rodrigo Vivi <rodrigo.vivi@intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, 
+	Tvrtko Ursulin <tursulin@ursulin.net>, Karol Herbst <kherbst@redhat.com>, Lyude Paul <lyude@redhat.com>, 
+	Danilo Krummrich <dakr@redhat.com>, Jean Delvare <jdelvare@suse.com>, 
+	Alexander Shishkin <alexander.shishkin@linux.intel.com>, Pavel Machek <pavel@ucw.cz>, 
+	Chen-Yu Tsai <wens@csie.org>, Jernej Skrabec <jernej.skrabec@gmail.com>, 
+	Tony Lindgren <tony@atomide.com>, Adrian Hunter <adrian.hunter@intel.com>, Hu Ziji <huziji@marvell.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Miquel Raynal <miquel.raynal@bootlin.com>, 
+	Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, 
+	Potnuri Bharat Teja <bharat@chelsio.com>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+	Miri Korenblit <miriam.rachel.korenblit@intel.com>, Kalle Valo <kvalo@kernel.org>, 
+	Mahesh J Salgaonkar <mahesh@linux.ibm.com>, "Oliver O'Halloran" <oohall@gmail.com>, 
+	Kishon Vijay Abraham I <kishon@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, JC Kuo <jckuo@nvidia.com>, 
+	Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>, 
+	Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Sebastian Reichel <sre@kernel.org>, 
+	Daniel Lezcano <daniel.lezcano@linaro.org>, Zhang Rui <rui.zhang@intel.com>, 
+	Lukasz Luba <lukasz.luba@arm.com>, Thinh Nguyen <Thinh.Nguyen@synopsys.com>, 
+	Helge Deller <deller@gmx.de>, Brian Foster <bfoster@redhat.com>, 
+	Zhihao Cheng <chengzhihao1@huawei.com>, Tejun Heo <tj@kernel.org>, 
+	Zefan Li <lizefan.x@bytedance.com>, Johannes Weiner <hannes@cmpxchg.org>, 
+	Peter Zijlstra <peterz@infradead.org>, Juri Lelli <juri.lelli@redhat.com>, 
+	Vincent Guittot <vincent.guittot@linaro.org>, Dietmar Eggemann <dietmar.eggemann@arm.com>, 
+	Ben Segall <bsegall@google.com>, Mel Gorman <mgorman@suse.de>, 
+	Daniel Bristot de Oliveira <bristot@redhat.com>, Valentin Schneider <vschneid@redhat.com>, 
+	Masami Hiramatsu <mhiramat@kernel.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, 
+	Jason Baron <jbaron@akamai.com>, Jim Cromie <jim.cromie@gmail.com>, 
+	Paul Moore <paul@paul-moore.com>, James Morris <jmorris@namei.org>, 
+	"Serge E. Hallyn" <serge@hallyn.com>, Dmitry Kasatkin <dmitry.kasatkin@gmail.com>, 
+	Clemens Ladisch <clemens@ladisch.de>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 31, 2024 at 7:23=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 31/05/24 13:31, Victor Shih wrote:
-> > On Fri, May 24, 2024 at 2:54=E2=80=AFPM Adrian Hunter <adrian.hunter@in=
-tel.com> wrote:
-> >>
-> >> On 22/05/24 14:08, Victor Shih wrote:
-> >>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >>>
-> >>> Add UHS-II Auto Command Error Recovery functionality
-> >>> into the MMC request processing flow.
-> >>
-> >> Not sure what "auto" means here, but the commit message
-> >> should outline what the spec. requires for error recovery.
-> >>
-> >
-> > Hi, Adrian
-> >
-> >      I will add instructions in the v17 version.
-> >
-> > Thanks, Victor Shih
-> >
-> >>>
-> >>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >>> ---
-> >>>
-> >>> Updates in V16:
-> >>>  - Separate the Error Recovery mechanism from patch#7 to patch#8.
-> >>>
-> >>> ---
-> >>>
-> >>>  drivers/mmc/core/core.c    |  4 ++
-> >>>  drivers/mmc/core/core.h    |  1 +
-> >>>  drivers/mmc/core/sd_uhs2.c | 80 ++++++++++++++++++++++++++++++++++++=
-++
-> >>>  include/linux/mmc/host.h   |  6 +++
-> >>>  4 files changed, 91 insertions(+)
-> >>>
-> >>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >>> index 68496c51a521..18642afc405f 100644
-> >>> --- a/drivers/mmc/core/core.c
-> >>> +++ b/drivers/mmc/core/core.c
-> >>> @@ -403,6 +403,10 @@ void mmc_wait_for_req_done(struct mmc_host *host=
-, struct mmc_request *mrq)
-> >>>       while (1) {
-> >>>               wait_for_completion(&mrq->completion);
-> >>>
-> >>> +             if (host->ops->get_cd(host))
-> >>> +                     if (mrq->cmd->error || (mrq->data && mrq->data-=
->error))
-> >>> +                             mmc_sd_uhs2_error_recovery(host, mrq);
-> >>
-> >> There are several issues with this:
-> >>
-> >> 1. It is not OK to start a request from within the request path
-> >> because it is recursive:
-> >>
-> >>    mmc_wait_for_req_done()                      <--
-> >>       mmc_sd_uhs2_error_recovery()
-> >>          sd_uhs2_abort_trans()
-> >>             mmc_wait_for_cmd()
-> >>                mmc_wait_for_req()
-> >>                   mmc_wait_for_req_done()       <--
-> >>
-> >> 2. The mmc block driver does not use this path
-> >>
-> >> 3. No need to always call ->get_cd() if there is no error
-> >>
-> >> It is worth considering whether the host controller could
-> >> send the abort command as part of the original request, as
-> >> is done with the stop command.
-> >>
-> >
-> > Hi, Adrian
-> >
-> >      1. It looks like just issuing a command in
-> > mmc_wait_for_req_done() will cause a recursion.
-> >          I will drop sd_uhs2_abort_trans() and
-> > sd_uhs2_abort_status_read() in the v17 version.
-> >      2. I have no idea about this part, could you please give me some a=
-dvice?
->
-> The mmc block driver sets the ->done() callback and so
-> mmc_wait_for_req_done() is never called for data transfers.
->
-> That won't matter if the host controller handles doing
-> the abort command, as was suggested elsewhere.
->
-> >      3. I will try to modify this part in the v17 version.
-> >
-> > Thanks, Victor Shih
-> >
-> >>> +
-> >>>               cmd =3D mrq->cmd;
-> >>>
-> >>>               if (!cmd->error || !cmd->retries ||
-> >>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> >>> index 920323faa834..259d47c8bb19 100644
-> >>> --- a/drivers/mmc/core/core.h
-> >>> +++ b/drivers/mmc/core/core.h
-> >>> @@ -82,6 +82,7 @@ int mmc_attach_mmc(struct mmc_host *host);
-> >>>  int mmc_attach_sd(struct mmc_host *host);
-> >>>  int mmc_attach_sdio(struct mmc_host *host);
-> >>>  int mmc_attach_sd_uhs2(struct mmc_host *host);
-> >>> +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_req=
-uest *mrq);
-> >>>
-> >>>  /* Module parameters */
-> >>>  extern bool use_spi_crc;
-> >>> diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-> >>> index 85939a2582dc..d5acb4e6ccac 100644
-> >>> --- a/drivers/mmc/core/sd_uhs2.c
-> >>> +++ b/drivers/mmc/core/sd_uhs2.c
-> >>> @@ -1324,3 +1324,83 @@ int mmc_attach_sd_uhs2(struct mmc_host *host)
-> >>>
-> >>>       return err;
-> >>>  }
-> >>> +
-> >>> +static void sd_uhs2_abort_trans(struct mmc_host *mmc)
-> >>> +{
-> >>> +     struct mmc_request mrq =3D {};
-> >>> +     struct mmc_command cmd =3D {0};
-> >>> +     struct uhs2_command uhs2_cmd =3D {};
-> >>> +     int err;
-> >>> +
-> >>> +     mrq.cmd =3D &cmd;
-> >>> +     mmc->ongoing_mrq =3D &mrq;
-> >>> +
-> >>> +     uhs2_cmd.header =3D UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD =
-|
-> >>> +                       mmc->card->uhs2_config.node_id;
-> >>> +     uhs2_cmd.arg =3D ((UHS2_DEV_CMD_TRANS_ABORT & 0xFF) << 8) |
-> >>> +                     UHS2_NATIVE_CMD_WRITE |
-> >>> +                     (UHS2_DEV_CMD_TRANS_ABORT >> 8);
-> >>> +
-> >>> +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
-> >>> +     err =3D mmc_wait_for_cmd(mmc, &cmd, 0);
-> >>> +
-> >>> +     if (err)
-> >>> +             pr_err("%s: %s: UHS2 CMD send fail, err=3D 0x%x!\n",
-> >>> +                    mmc_hostname(mmc), __func__, err);
-> >>> +}
-> >>> +
-> >>> +static void sd_uhs2_abort_status_read(struct mmc_host *mmc)
-> >>> +{
-> >>> +     struct mmc_request mrq =3D {};
-> >>> +     struct mmc_command cmd =3D {0};
-> >>> +     struct uhs2_command uhs2_cmd =3D {};
-> >>> +     int err;
-> >>> +
-> >>> +     mrq.cmd =3D &cmd;
-> >>> +     mmc->ongoing_mrq =3D &mrq;
-> >>> +
-> >>> +     uhs2_cmd.header =3D UHS2_NATIVE_PACKET |
-> >>> +                       UHS2_PACKET_TYPE_CCMD |
-> >>> +                       mmc->card->uhs2_config.node_id;
-> >>> +     uhs2_cmd.arg =3D ((UHS2_DEV_STATUS_REG & 0xFF) << 8) |
-> >>> +                     UHS2_NATIVE_CMD_READ |
-> >>> +                     UHS2_NATIVE_CMD_PLEN_4B |
-> >>> +                     (UHS2_DEV_STATUS_REG >> 8);
-> >>> +
-> >>> +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
-> >>> +     err =3D mmc_wait_for_cmd(mmc, &cmd, 0);
-> >>> +
-> >>> +     if (err)
-> >>> +             pr_err("%s: %s: UHS2 CMD send fail, err=3D 0x%x!\n",
-> >>> +                    mmc_hostname(mmc), __func__, err);
-> >>> +}
-> >>> +
-> >>> +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_req=
-uest *mrq)
-> >>> +{
-> >>> +     mmc->ops->uhs2_reset_cmd_data(mmc);
-> >>
-> >> The host controller should already have done any resets needed.
-> >> sdhci already has support for doing that - see host->pending_reset
-> >>
-> >
-> > Hi, Adrian
-> >
-> >      I'm not sure what this means. Could you please give me more inform=
-ation?
->
-> sdhci_uhs2_request_done() checks sdhci_needs_reset() and does
-> sdhci_uhs2_reset().
->
-> sdhci_needs_reset() does not cater for data errors because
-> the reset for data errors is done directly in what becomes
-> __sdhci_finish_data_common().
->
-> You may need to:
->  1. add a parameter to __sdhci_finish_data_common() to
->  skip doing the sdhci reset and instead set
->  host->pending_reset
->  2. amend sdhci_uhs2_request_done() to check for data error
->  also to decide if a reset is needed
->
+On Tue, Jun 4, 2024 at 9:46=E2=80=AFAM Jani Nikula <jani.nikula@linux.intel=
+.com> wrote:
 
-Hi, Adrian
+[Maybe slightly off-topic, ranty]
 
-If there is any mistake in my understanding, please help me correct it.
-My understanding is as follows:
-
-static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-{
-      ...
-      if (sdhci_needs_reset(host, mrq)) {
-            ...
-            if (mrq->cmd->error || (mrq->data && mrq->data->error))
-                  sdhci_uhs2_reset_cmd_data(host->mmc);
-            ...
-      }
-      ...
-}
-
-I have another question. the sdhci_uhs2_request_done() belongs to the patch=
-#18.
-Can the above content be modified directly in the patch#18?
-Or does it need to be separated into another patch?
-
-Thanks, Victor Shih
-
-> >
-> > Thanks, Victor Shih
-> >
-> >>> +
-> >>> +     if (mrq->data) {
-> >>> +             if (mrq->data->error && mmc_card_uhs2(mmc)) {
-> >>> +                     if (mrq->cmd) {
-> >>> +                             switch (mrq->cmd->error) {
-> >>> +                             case ETIMEDOUT:
-> >>> +                             case EILSEQ:
-> >>> +                             case EIO:
-> >>> +                                     sd_uhs2_abort_trans(mmc);
-> >>> +                                     sd_uhs2_abort_status_read(mmc);
-> >>
-> >> What is the purpose of sd_uhs2_abort_status_read() here?
-> >> It is not obvious it does anything.
-> >>
-> >
-> > Hi, Adrian
-> >
-> >      sd_uhs2_abort_status_read() seems to only have read status,
-> >      I will drop this in the v17 version.
-> >
-> > Thanks, Victor Shih
-> >
-> >>> +                                     break;
-> >>> +                             default:
-> >>> +                                     break;
-> >>> +                             }
-> >>> +                     }
-> >>> +             }
-> >>> +     } else {
-> >>> +             if (mrq->cmd) {
-> >>> +                     switch (mrq->cmd->error) {
-> >>> +                     case ETIMEDOUT:
-> >>> +                             sd_uhs2_abort_trans(mmc);
-> >>> +                             break;
-> >>> +                     }
-> >>> +             }
-> >>> +     }
-> >>> +}
-> >>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> >>> index fc9520b3bfa4..c914a58f7e1e 100644
-> >>> --- a/include/linux/mmc/host.h
-> >>> +++ b/include/linux/mmc/host.h
-> >>> @@ -271,6 +271,12 @@ struct mmc_host_ops {
-> >>>        * negative errno in case of a failure or zero for success.
-> >>>        */
-> >>>       int     (*uhs2_control)(struct mmc_host *host, enum sd_uhs2_ope=
-ration op);
-> >>> +
-> >>> +     /*
-> >>> +      * The uhs2_reset_cmd_data callback is used to excute reset
-> >>> +      * when a auto command error occurs.
-> >>> +      */
-> >>> +     void    (*uhs2_reset_cmd_data)(struct mmc_host *host);
-> >>>  };
-> >>>
-> >>>  struct mmc_cqe_ops {
-> >>
+> Why do we think it's a good idea to increase and normalize the use of
+> double-underscore function names across the kernel, like
+> __match_string() in this case? It should mean "reserved for the
+> implementation, not to be called directly".
 >
+> If it's to be used directly, it should be named accordingly, right?
+
+It's a huge mess. "__" prefix is just so ambiguous I think it just
+shouldn't be used or prolifierated, and it usually breaks Rusty Russells
+API rules times over.
+
+Consider __set_bit() from <linux/bitops.h>, used all over the place,
+in contrast with set_bit() for example, what does "__" represent in
+this context that makes __set_bit() different from set_bit()?
+
+It means "non-atomic"...
+
+How does a random contributor know this?
+
+Yeah, you guess it. By the token of "everybody knows that".
+(Grep, google, repeat for the number of contributors to the kernel.)
+
+I was considering to send a script to Torvalds to just change all
+this to set_bit_nonatomic() (etc) but was hesitating because that
+makes the name unambiguous but long. I think I stayed off it
+because changing stuff like that all over the place creates churn
+and churn is bad.
+
+Yours,
+Linus Walleij
