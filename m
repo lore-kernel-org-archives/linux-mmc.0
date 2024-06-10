@@ -1,114 +1,111 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f43.google.com (mail-oo1-f43.google.com [209.85.161.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4B8780023;
-	Mon, 10 Jun 2024 12:30:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC57780C16
+	for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2024 12:52:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718022606; cv=none; b=HO4cxztqAc4SQr94eI541JiSYc6PgmRZlQH/QifL7ZRpIpZGSwf+UhWm+KkMjBgj8Mxl9mJo4TmpQVnUiQRYfxjrr+qYZt4/ONjG/+zK/QoPnOo0/UQydn+6Rk5fuGwRq6IE63JE9qfn/pqudAHJXk8lr7DO64yrBo/jEhAfC1U=
+	t=1718023965; cv=none; b=rKRtzT150b/yaKvw5omSpbAWDP4F2T0xn/cdHiX3Mzas28W/hDhfXbB5gHfusW/XqRKdtKtrTFMdUHzRttfZbLTTCvYSqqCvSbGgqCfwDy5ZmsuOJiqch2oHc4iPWuiULV8/QHWZR/doA1BxZyGYaCQa7+AR6UUSL4YN3N9nqb4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718022606; c=relaxed/simple;
-	bh=wXWzKQNVmmoknWUuxl5TpIguOxzloEaxf0SrpN6DQ50=;
-	h=Message-ID:Date:MIME-Version:Subject:From:To:Cc:References:
-	 In-Reply-To:Content-Type; b=NhRvAypBMOMSnvCNSKOFJn33FzRHT3FKJLEqE28RnC18a4mnIjrOIr84lKAnis7tq0ggdfE+PKaBJUuM7oHj6dyxhnl7GidoCeYL2K3K8eFfMrvcvc6+GsXzwJCUenD5J5EHHvGPR+zLT0GUDs0bDAH+d77lyLNYG3GXtymreBw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FNbrZeyx; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1718023965; c=relaxed/simple;
+	bh=Pb4ILEn1rx7BaUK688G74zQ8ueGofBspL2NxeMpyZXU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=SVhOKU81E31x7ubRID4W+YJji6eaLFBm2jQ+ZJFfLZXY5k0/L0PoF0O4rpnq8byDKsGQp1pY6unkqwWArSaDTiIQ2TAQ3I0dDvnYmHQzqZVss4dq396kqJPgXN95qvNnL41zVW9uCOrdILXK7TxCi/7xBBB8g2UXYq08uU9DgX4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KQeiIwpl; arc=none smtp.client-ip=209.85.161.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FNbrZeyx"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89951C2BBFC;
-	Mon, 10 Jun 2024 12:30:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718022605;
-	bh=wXWzKQNVmmoknWUuxl5TpIguOxzloEaxf0SrpN6DQ50=;
-	h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-	b=FNbrZeyxJjw3h2m1C/E86shrnvRv1IW5oyAmmeWnus0p2qpTaY+bQhmh68VRaEGxz
-	 xSn2H0bHfdCEqXMOk8PU51kEJTnLdWnZf7dAG96XfuR/awJcFe1VclLYpH8wcM25ME
-	 +MXEUbpN3FeLFAGcpG5nJnbRK2xsb7vNv0r5WYEMASbr23hPNzjORNbAP4lIOnJ8Ua
-	 aw50UmjMsyz79jIp5Tmyuwh89SF/dzvUO8lWNYmumWpvJuqq/RPuWivsW04jyoc+tk
-	 wOKDlBB9Qs9Cj+Z813j94Dk5FKgC5nNG6X2CUQLSg/O6Ea+cn2tCP+DhHnuG6ELk/J
-	 aBWnUPcw9nTCQ==
-Message-ID: <8901d498-d30a-43db-bda2-25d3d1d58e8d@kernel.org>
-Date: Mon, 10 Jun 2024 14:29:57 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KQeiIwpl"
+Received: by mail-oo1-f43.google.com with SMTP id 006d021491bc7-5b9778bb7c8so2217168eaf.3
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jun 2024 05:52:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1718023963; x=1718628763; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=MNyMG3UNAL6Sc8i1K2Tl8gyCNYCtq54XofHbrxpAG/M=;
+        b=KQeiIwplc6apgOu25MCr8dRl7RR+RWss2dc7rZVLhom5KTEHpcoRyMTw/1eOQRTN+O
+         y7O9BlRJwePfyGQXhAMjQway3wfVCaUeUPnRE15Y/ue3nqcJFeXDceogfcS7EhJTfhKu
+         m363niMfsEUW41I1tm9r8lP3bDpeZxNKSx2RNjbyQy2Rgjs9Dp1VVr2UiOw3Z/ik7sYY
+         3/DWI6s6pd2zwLHxpMcUjw2UeTMbDOFUz4/7/cK8UrG2OIYhphGNCfwSqBGdmq+gju06
+         25/vz74sPN+92ihK5okPPJETNac6hL8NZZ1nw6OXJgWhXzbY8VxEjyXkTQwi+GH+lTNv
+         8GGA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718023963; x=1718628763;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=MNyMG3UNAL6Sc8i1K2Tl8gyCNYCtq54XofHbrxpAG/M=;
+        b=HKlGldWyaE7+LL0ooa0XZ4H2s/HcM9BqqjsuLG1qBcgakZhivbZSIFQp1m6JhUvofA
+         wiba/G9psV6smPZaY/oM2TSg5WBdYomRhiyE1QoR0GiB0kM7t+5aaUPTNb6miayULog4
+         nbSwl/l25XPCdaxMtSMpOKL8QnaDpKZv/wirW+Wu5GE98rhmnlViiZRwv/Dnr7ivJYYv
+         9E6ebQYc3pJniMXpjPd6cwV/XXFmqoc1svEAl36/3FSY2fwULe9wg+BTQipF/07r1YSo
+         HNyRPoxoZp8ZltdGKEUaV8gznToqaz60PfRPoVcH+315N5wcVpH1INSttA0KjvrofJuj
+         /Eeg==
+X-Forwarded-Encrypted: i=1; AJvYcCWV0CrjGlLmP7G4y4FbJaE1LevpPkQocpfVU2MQxtKTuLvDjrD6tgUDTF8HDRqdGQA7QJfj8m57Z8Na0WFK7kQSEeu1BzLlefOR
+X-Gm-Message-State: AOJu0YxMRRYLVI7Lqg7plfIfmd82pgDp6ZSQvduWpbhIaiEqbLgo57Ih
+	EadvHKjhls6ON5CbiPWE/UTod1Z38J6HoAha1k3fj2EPtV5Euk8iLXddL4CBBejobMiI0CVbNTa
+	8bBteGh6gV1mYOfRjLEMG+lrIApFNHDPLisu+gQ==
+X-Google-Smtp-Source: AGHT+IFFE/hFRs/En+Bg22yshxU9afylbEt0nscWxB/+DIRAwe3OFfdP/zEyzYCZF/ZLgGKI6XzonkiYq5JT3bsnmVQ=
+X-Received: by 2002:a05:6820:1c90:b0:5ba:e2cb:c853 with SMTP id
+ 006d021491bc7-5bae2cbd02cmr4030715eaf.5.1718023962852; Mon, 10 Jun 2024
+ 05:52:42 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/1] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: conor+dt@kernel.org, devicetree@vger.kernel.org, imx@lists.linux.dev,
- krzk+dt@kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- robh@kernel.org, ulf.hansson@linaro.org
-References: <20240605185046.1057877-1-Frank.Li@nxp.com>
- <b1c51acc-441d-4484-adef-1da368571097@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <b1c51acc-441d-4484-adef-1da368571097@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240527121340.3931987-1-jens.wiklander@linaro.org>
+ <20240527121340.3931987-5-jens.wiklander@linaro.org> <Zl2Ibey9Qck-VLWE@manut.de>
+In-Reply-To: <Zl2Ibey9Qck-VLWE@manut.de>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Mon, 10 Jun 2024 14:52:31 +0200
+Message-ID: <CAHUa44GAiUf9+PxqhXOwGfOuc250YDyJ7uzGe2B1bGmBw2iegg@mail.gmail.com>
+Subject: Re: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
+To: Manuel Traut <manut@mecka.net>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
+	Sumit Garg <sumit.garg@linaro.org>, Ilias Apalodimas <ilias.apalodimas@linaro.org>, 
+	Bart Van Assche <bvanassche@acm.org>, Randy Dunlap <rdunlap@infradead.org>, 
+	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mikko Rapeli <mikko.rapeli@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 06/06/2024 08:44, Krzysztof Kozlowski wrote:
-> On 05/06/2024 20:50, Frank Li wrote:
->> Convert layerscape fsl-esdhc binding doc from txt to yaml format.
->>
->> Addtional change during convert:
->> - Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
->> - Add "reg" and "interrupts" property.
->> - Change example "sdhci@2e000" to "mmc@2e000".
->> - Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
->> most existed dts file.
->> - Set clock-frequency to 100mhz in example.
->>
-> 
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Hi Manuel,
 
-Or not... are you sure that DTS validates? Did you test it? kbuild has a
-bit different opinion.
+On Mon, Jun 3, 2024 at 11:10=E2=80=AFAM Manuel Traut <manut@mecka.net> wrot=
+e:
+>
+> On 14:13 Mon 27 May     , Jens Wiklander wrote:
+> > --- a/drivers/tee/optee/ffa_abi.c
+> > +++ b/drivers/tee/optee/ffa_abi.c
+> > @@ -7,6 +7,7 @@
+> >
+> >  #include <linux/arm_ffa.h>
+> >  #include <linux/errno.h>
+> > +#include <linux/rpmb.h>
+> >  #include <linux/scatterlist.h>
+> >  #include <linux/sched.h>
+> >  #include <linux/slab.h>
+> > @@ -903,6 +904,10 @@ static int optee_ffa_probe(struct ffa_device *ffa_=
+dev)
+> >       optee->ffa.bottom_half_value =3D U32_MAX;
+> >       optee->rpc_param_count =3D rpc_param_count;
+> >
+> > +     if (IS_REACHABLE(CONFIG_RPMB) &&
+> > +         (sec_caps & OPTEE_FFA_SEC_CAP_RPMB_PROBE))
+> > +             optee->in_kernel_rpmb_routing =3D true;
+>
+> The SEC_CAP_RPMB_PROBE flag seems to be missing in optee_os at the moment=
+.
+> If I remove this check here, the series works for me.
 
-Best regards,
-Krzysztof
+You're right, I missed pushing those flags to optee_os. I've pushed them no=
+w.
 
+Cheers,
+Jens
