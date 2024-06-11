@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B6F212E61;
-	Tue, 11 Jun 2024 20:16:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC70F7350E;
+	Tue, 11 Jun 2024 20:23:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718136993; cv=none; b=n7nH/t4d60Eb7XaQz/PlzuYU2F6FAH+xWqKlU4NCsXjkGEsvHzX6SOuPBI9FxpC69cIQcI88RULL+RMsIksnopLwE0Nwl/o6fBVR/aY2B4x7xiZ2yCfP+g2h6iD47HDW6Vhgpxn6WM3iP2/JAmNswSFfcRq1BZh74dTicEVl3jk=
+	t=1718137394; cv=none; b=WsMoowsAO/I+REqRoxcN2VSFo9rOt1qvl9KQxIn5L+fxPW+6Rc+A/XQ+MIMBaEiJeB71hksJT2S3JSbxyDqc2+aQKBrPXrVfanrhahz62oxiIkvvk47PUxU2VBEshbK+cO8TaaPOlUmJFVrdMdM2u3z4LFE2C0hhye2BoBYcTww=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718136993; c=relaxed/simple;
-	bh=ypjaG6RRmQ019AQrSCd6Tnv5zFqudupklgD00PZTb0o=;
+	s=arc-20240116; t=1718137394; c=relaxed/simple;
+	bh=56NOMgdsoxv7ugc+ao6X6J5QmSuvu4JChgfjXogleMI=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GTSF4ermusMn23Lt0V8Q2u0quQToSZY0zTVlp7FxVHIHYvHoz/gbzE1DxttVj49YwQVdv4LfUbGGuhV1Fm9QAF2VYGCvG7n+uM9sYH8KoLWz27D/ym+n51Op0YmBfsNuoYjoAe5QcL2XZgTlulAesqtCXoVhmOBGpCy3PcE5smM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QfmV+4HT; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=Fy1J9EBA65DbVrk8il+eIlwN/v32SYVJqWh7dnlDtxbdoBiL+vOVGU5izWpliwLrEmyE0fA2Z1gbqCJt4EoEbVXXuWQRIXvZ/8eP3czz/6LU8uZ+lsFt8hQu5JyWOoagMv+dcWItq9XJM2KH3oehsoE2d7GY9g71FLqUUx9PzU4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TUVtHTD+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QfmV+4HT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BE569C2BD10;
-	Tue, 11 Jun 2024 20:16:32 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TUVtHTD+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E708AC2BD10;
+	Tue, 11 Jun 2024 20:23:12 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718136993;
-	bh=ypjaG6RRmQ019AQrSCd6Tnv5zFqudupklgD00PZTb0o=;
+	s=k20201202; t=1718137393;
+	bh=56NOMgdsoxv7ugc+ao6X6J5QmSuvu4JChgfjXogleMI=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=QfmV+4HTAuNi17zzOZZge2d9OmlcazjXGzXNMsh+/nlePzdP8VpoBL1cnX6bZM1RC
-	 D5PHW76sSoUHMIQL/oBIBI9MJTKO6e34DKpHW22nJzBzdhpo1Ts/f4mmjcsVyNFr9P
-	 Zkqfq561aJ56e2xqYyEho8w7Yk0iPpRTxhwUZmDhVqJ+UZ/i1Zf+wn/MOE33yGP3Ld
-	 NxtzY0h8fps8+Rh4BuQAC4pP1DyzAbeK+P+XWqEvCwutXCn30xSsd8vIwqfdXtGedM
-	 Ne6RQivU2UPhCD//IunnJUa+f+RIlxUnLY+7FRv8X6G7OcUvEfJd5x7fQDU9qMQ0Uw
-	 RbG0kXapbLEdA==
-Date: Tue, 11 Jun 2024 14:16:31 -0600
+	b=TUVtHTD+w/kTSIrjuW9puv0jtLqV5sx4w5q2Sq5hPhdc/gbV9VUlDReL9JiSnuzXq
+	 Vno81Y9nhfHacE7rS+MKwGs+UAVaTcbHX+ZyoFhmPHlhBh2ZL4qEIdrDj4VDPX4/4J
+	 KxQNFqcKrS6Ds/JYog6j/FJLtwHh24UhhgBQ9lwxkBqZjMF490WVFxoJ4p0lCZhQt4
+	 TIsxSktoFBXqKlhSJFKYr7mwKUXYufcall3mTa/cdnz74amEMeXZd9ReaZZdBtQ/50
+	 dQh+bcge7VuRkTxZbPLYyqzYi+9J/AVNR7MeNWeO4MSZuTTX/i//UtDiCPnSofEMz3
+	 JuTWOdSrUCVgQ==
+Date: Tue, 11 Jun 2024 14:23:11 -0600
 From: Rob Herring <robh@kernel.org>
 To: Frank Li <Frank.Li@nxp.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>,
@@ -35,10 +35,11 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
 	imx@lists.linux.dev
-Subject: Re: [PATCH v4 0/8] arm64: dts: convert fsl,esdhc.txt to yaml and fix
- layerscape dts warning
-Message-ID: <20240611201631.GA3003237-robh@kernel.org>
+Subject: Re: [PATCH v4 2/8] dt-bindings: mmc: mmc-spi-slot: Change
+ voltage-ranges to uint32-matrix
+Message-ID: <20240611202311.GB3003237-robh@kernel.org>
 References: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
+ <20240611-ls_waring_esdhc-v4-2-d0d8a5b3f3cb@nxp.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,34 +48,57 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
+In-Reply-To: <20240611-ls_waring_esdhc-v4-2-d0d8a5b3f3cb@nxp.com>
 
-On Tue, Jun 11, 2024 at 12:01:45PM -0400, Frank Li wrote:
-> Start from v4 because fsl.esdhc.txt to yaml already sent out as v3.
-> 
-> Change from v3 to v4
-> - Add dts warning fixes
-> - Add mmc-spi-slot's voltage range fix, (not sure why it apply to
-> layserscape's dts file.
-> - clock-frequency is not required property
-> - add dma-conherence: true in binding doc
-> 
-> Now only "bit-endian" proptery warning left.
+On Tue, Jun 11, 2024 at 12:01:47PM -0400, Frank Li wrote:
+> According to common mmc core, voltages-ranges should be matrix.
 > 
 > Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> 
 > ---
-> Frank Li (8):
->       dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
->       dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to uint32-matrix
+> Not sure why it impact other mmc yaml's voltage-ranges.
 
->       arm64: dts: ls1012a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1043a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1046a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1088a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls208ax: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: lx2160a: Chang node name from 'esdhc' to 'mmc'
+It's a quirk of the tools. When decoding properties, the tools only know 
+all possible types. Types are global, not per binding. Sometimes it can 
+be figured out, but cases like this cannot be.
 
-It is all the same change to the same maintainer, so these can be just 
-one patch. Then you just have 1 typo to fix.
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml | 17 ++++++++++-------
+>  1 file changed, 10 insertions(+), 7 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+> index 36acc40c7d181..05815b837219d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+> @@ -27,17 +27,20 @@ properties:
+>      maxItems: 1
+>  
+>    voltage-ranges:
+> -    $ref: /schemas/types.yaml#/definitions/uint32-array
+> +    $ref: /schemas/types.yaml#/definitions/uint32-matrix
+>      description: |
+>        Two cells are required, first cell specifies minimum slot voltage (mV),
+>        second cell specifies maximum slot voltage (mV).
+>      items:
+> -      - description: |
+> -          value for minimum slot voltage in mV
+> -        default: 3200
+> -      - description: |
+> -          value for maximum slot voltage in mV
+> -        default: 3400
+> +      items:
+> +        - description: |
+> +            value for minimum slot voltage in mV
+> +          default: 3200
+> +        - description: |
+> +            value for maximum slot voltage in mV
+> +          default: 3400
+> +    minItems: 1
+> +    maxItems: 8
+
+From what I remember, SPI mode doesn't support voltage changes. 
+Switching to 1.8V came much later in the spec. So it should be 
+'maxItems: 1'. Or better yet, make the outer 'items' a list (of 1 
+entry).
 
 Rob
