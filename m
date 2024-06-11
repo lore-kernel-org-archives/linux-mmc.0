@@ -1,207 +1,148 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D650172773;
-	Tue, 11 Jun 2024 07:30:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54022172795;
+	Tue, 11 Jun 2024 07:30:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718091009; cv=none; b=Ws6VtvibiL0xGt2bxMHuVjXOi/SkRq0hMQv3wpYiFwlbI2wB6a2dTOn23Zuvzb/5El0KkTswwv8Koks1+jmPHKdlQC3lpMXqEeVUy5uHSr5Hg2MCX/V6sAxsshcPpQ93OXD8yjlCkt4bzj2J8Li9zyd52etcD0hrM8YNqu/jY2M=
+	t=1718091046; cv=none; b=T0Kt9a7Kz9LJablClmHOQ7Fnl/BJlON3U5ysAbikS0KejBOwIqSa0XFZqHUOAr3IRTFqnUtuiiuHoiCyOsG0emo5OtiORv4DME9SOFHQzV/JNnvJ9/yxfEUdJty59zkOn2TpXAdMo1oxQ5GcLxSPuuPrkHgnkbEUES4dXq5JX5Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718091009; c=relaxed/simple;
-	bh=uf0SF1oNbuDXzEY9wmV/rDi/IXN4m+CWwdsB3yedEhM=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=JTVDJiavN2gA6gpkdeIc82GC7VljPOOGho7TNqWzUd/vUDvK+tmobVfStRP/wjOq5VBa79olH6SuVHDw1u6GBtrjGJpMyCSxN4YxPrxkFsQvsewQxHn5QkSieQEWddB7EYIfpQqFMeOen6UpodKaoK6uIzfFdjuFP0ip4STcNoY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=wPU4n/Gw; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1718091046; c=relaxed/simple;
+	bh=mXwlDhzGw5x2p2Nr8gAFPISP2nDIAfZIJOaFJyvJXOI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=QvMlz1qoL0/mE667j99aP850Mfaz7WKBIa5XQ/7dkrMfYAXJKm5YKz9f+EkZ/kUvDEpVQbyEuR8WC62q0y8I1TD/5cl+DY4HMiiDqY0j4zKeKYHtJ41YEqBtaNMlplzxknt3FAnNLl8rWamWg9NKSVuTeTMP4HgguUdCJc+yR24=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VCI1eDgX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="wPU4n/Gw"
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VCI1eDgX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EEC6CC2BD10;
+	Tue, 11 Jun 2024 07:30:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718091045;
+	bh=mXwlDhzGw5x2p2Nr8gAFPISP2nDIAfZIJOaFJyvJXOI=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=VCI1eDgXTsePnpt155uEye/3wYDicIPNZJ3+S2Hq2BKZNkLNvV5I0fT+JdCzdUnSb
+	 yuXJ7xiSHP9TiSA6PVPXt+qO9Dn4e1NQaWtG0WZKRDKr7qk2obBVABl9+DPiAto15R
+	 ZY06Qeaqugg7VSWPCcJ0qkt9/u4FV8hF/W3PG2hU6Xg27Ev50hNdLuTn4EcUBYyJ8n
+	 S+KRGHhRfCxLhpogZoDRTutfmrs5hXd1HvW8FhrlCCZSHQ5haYJkZbrzON8/BzrfEH
+	 kcYMtKu/xYq8uguhHsXhgHJwfT/OivpjDtyI/mVqW6dF9WSlmB2m2KaCIH1Th4AQTt
+	 8udJurnL3fqPA==
+Message-ID: <fdfc024a-368a-4495-8b85-b5ab7741f6d4@kernel.org>
+Date: Tue, 11 Jun 2024 16:30:39 +0900
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1718091002;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=vdaMoEnTDtvgD8I+Uno75VA5I/ban+WgDT8n3yc4lCA=;
-	b=wPU4n/Gw+9Saq9zhwbu7iND2gCs2KaWziMCtXASBaApTumAjl52W2/m181X+WtIL0C1tve
-	79mSNgKHdXGi4S+Mos7Zwgg1YDHEFWxkohdcFzEv2ETWWNmmRa2IF00d2AahEQN1Zq05TY
-	LJBVZM9YWqyzc0bdWEl8K2gX1/nHlI92ks8dxsv1RfY4IFlaTbReO8smj0qXFdzu06YbXR
-	0QsAhmD+7X1nCElNS/Thx2h59V0cJL1iSUyKT80SpnPZMWTNwkPcoZ4W008NWhWTC5G07b
-	QZ2vqrLrgiIj7HwrHy9/h9jZpaPWYRIZa8lfocGhj3NeYG00E/yhe1/17hpMOw==
-Date: Tue, 11 Jun 2024 09:29:59 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Jeff Johnson <quic_jjohnson@quicinc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang
- <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
- kernel-janitors@vger.kernel.org
-Subject: Re: [PATCH] mmc: add missing MODULE_DESCRIPTION() macros
-In-Reply-To: <20240610-md-drivers-mmc-v1-1-c2a2593e4121@quicinc.com>
-References: <20240610-md-drivers-mmc-v1-1-c2a2593e4121@quicinc.com>
-Message-ID: <8f2e755bd711b566274119762b19505d@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when they
+ fail
+To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>,
+ Richard Weinberger <richard@nod.at>,
+ Philipp Reisner <philipp.reisner@linbit.com>,
+ Lars Ellenberg <lars.ellenberg@linbit.com>,
+ =?UTF-8?Q?Christoph_B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+ Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
+ "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>,
+ =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
+ Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
+ Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
+ Yu Kuai <yukuai3@huawei.com>, Vineeth Vijayan <vneethv@linux.ibm.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
+ drbd-dev@lists.linbit.com, nbd@other.debian.org,
+ linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
+ virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
+ linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
+ linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
+ linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
+References: <20240611051929.513387-1-hch@lst.de>
+ <20240611051929.513387-11-hch@lst.de>
+Content-Language: en-US
+From: Damien Le Moal <dlemoal@kernel.org>
+Organization: Western Digital Research
+In-Reply-To: <20240611051929.513387-11-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-Hello Jeff,
-
-Thanks for the patch.  Please see a few comments below.
-
-On 2024-06-10 16:17, Jeff Johnson wrote:
-> make allmodconfig && make W=1 C=1 reports:
-> WARNING: modpost: missing MODULE_DESCRIPTION() in 
-> drivers/mmc/host/of_mmc_spi.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in
-> drivers/mmc/host/tmio_mmc_core.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in
-> drivers/mmc/host/renesas_sdhi_core.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in 
-> drivers/mmc/core/mmc_core.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in
-> drivers/mmc/core/pwrseq_simple.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in
-> drivers/mmc/core/pwrseq_sd8787.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in 
-> drivers/mmc/core/pwrseq_emmc.o
-> WARNING: modpost: missing MODULE_DESCRIPTION() in 
-> drivers/mmc/core/sdio_uart.o
+On 6/11/24 2:19 PM, Christoph Hellwig wrote:
+> blkfront always had a robust negotiation protocol for detecting a write
+> cache.  Stop simply disabling cache flushes when they fail as that is
+> a grave error.
 > 
-> Add the missing invocations of the MODULE_DESCRIPTION() macro.
-> 
-> Signed-off-by: Jeff Johnson <quic_jjohnson@quicinc.com>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+Looks good to me but maybe mention that removal of xlvbd_flush() as well ?
+And it feels like the "stop disabling cache flushes when they fail" part should
+be a fix patch sent separately...
+
+Anyway, for both parts, feel free to add:
+
+Reviewed-by: Damien Le Moal <dlemoal@kernel.org>
+
 > ---
-> Corrections to these descriptions are welcomed. I'm not an expert in
-> this code so in most cases I've taken these descriptions directly from
-> code comments, Kconfig descriptions, or git logs.  History has shown
-> that in some cases these are originally wrong due to cut-n-paste
-> errors, and in other cases the drivers have evolved such that the
-> original information is no longer accurate.
-> ---
->  drivers/mmc/core/core.c              | 1 +
->  drivers/mmc/core/pwrseq_emmc.c       | 1 +
->  drivers/mmc/core/pwrseq_sd8787.c     | 1 +
->  drivers/mmc/core/pwrseq_simple.c     | 1 +
->  drivers/mmc/core/sdio_uart.c         | 1 +
->  drivers/mmc/host/of_mmc_spi.c        | 1 +
->  drivers/mmc/host/renesas_sdhi_core.c | 1 +
->  drivers/mmc/host/tmio_mmc_core.c     | 1 +
->  8 files changed, 8 insertions(+)
+>  drivers/block/xen-blkfront.c | 29 +++++++++--------------------
+>  1 file changed, 9 insertions(+), 20 deletions(-)
 > 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index a8c17b4cd737..d6c819dd68ed 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2362,4 +2362,5 @@ static void __exit mmc_exit(void)
->  subsys_initcall(mmc_init);
->  module_exit(mmc_exit);
-> 
-> +MODULE_DESCRIPTION("MMC core driver");
->  MODULE_LICENSE("GPL");
-> diff --git a/drivers/mmc/core/pwrseq_emmc.c 
-> b/drivers/mmc/core/pwrseq_emmc.c
-> index 3b6d69cefb4e..fff30330574f 100644
-> --- a/drivers/mmc/core/pwrseq_emmc.c
-> +++ b/drivers/mmc/core/pwrseq_emmc.c
-> @@ -115,4 +115,5 @@ static struct platform_driver 
-> mmc_pwrseq_emmc_driver = {
->  };
-> 
->  module_platform_driver(mmc_pwrseq_emmc_driver);
-> +MODULE_DESCRIPTION("HW reset support for eMMC");
-
-"Hardware reset support for eMMC" would read a bit better.
-
->  MODULE_LICENSE("GPL v2");
-> diff --git a/drivers/mmc/core/pwrseq_sd8787.c 
-> b/drivers/mmc/core/pwrseq_sd8787.c
-> index 0c5808fc3206..f24bbd68e251 100644
-> --- a/drivers/mmc/core/pwrseq_sd8787.c
-> +++ b/drivers/mmc/core/pwrseq_sd8787.c
-> @@ -130,4 +130,5 @@ static struct platform_driver 
-> mmc_pwrseq_sd8787_driver = {
->  };
-> 
->  module_platform_driver(mmc_pwrseq_sd8787_driver);
-> +MODULE_DESCRIPTION("Power sequence support for Marvell SD8787 BT + 
-> Wifi chip");
->  MODULE_LICENSE("GPL v2");
-> diff --git a/drivers/mmc/core/pwrseq_simple.c 
-> b/drivers/mmc/core/pwrseq_simple.c
-> index df9588503ad0..97f6d69d9c80 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -159,4 +159,5 @@ static struct platform_driver 
-> mmc_pwrseq_simple_driver = {
->  };
-> 
->  module_platform_driver(mmc_pwrseq_simple_driver);
-> +MODULE_DESCRIPTION("Simple HW reset support for MMC");
-
-"Simple power sequence management for MMC" would be more accurate.
-
->  MODULE_LICENSE("GPL v2");
-> diff --git a/drivers/mmc/core/sdio_uart.c 
-> b/drivers/mmc/core/sdio_uart.c
-> index 575ebbce378e..6b7471dba3bf 100644
-> --- a/drivers/mmc/core/sdio_uart.c
-> +++ b/drivers/mmc/core/sdio_uart.c
-> @@ -1162,4 +1162,5 @@ module_init(sdio_uart_init);
->  module_exit(sdio_uart_exit);
-> 
->  MODULE_AUTHOR("Nicolas Pitre");
-> +MODULE_DESCRIPTION("SDIO UART/GPS driver");
->  MODULE_LICENSE("GPL");
-> diff --git a/drivers/mmc/host/of_mmc_spi.c 
-> b/drivers/mmc/host/of_mmc_spi.c
-> index bf54776fb26c..05939f30a5ae 100644
-> --- a/drivers/mmc/host/of_mmc_spi.c
-> +++ b/drivers/mmc/host/of_mmc_spi.c
-> @@ -19,6 +19,7 @@
->  #include <linux/mmc/core.h>
->  #include <linux/mmc/host.h>
-> 
-> +MODULE_DESCRIPTION("OpenFirmware bindings for the MMC-over-SPI 
-> driver");
->  MODULE_LICENSE("GPL");
-> 
->  struct of_mmc_spi {
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c
-> b/drivers/mmc/host/renesas_sdhi_core.c
-> index 12f4faaaf4ee..d62a4ed86775 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -1162,4 +1162,5 @@ void renesas_sdhi_remove(struct platform_device 
-> *pdev)
+> diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
+> index 9b4ec3e4908cce..9794ac2d3299d1 100644
+> --- a/drivers/block/xen-blkfront.c
+> +++ b/drivers/block/xen-blkfront.c
+> @@ -982,18 +982,6 @@ static const char *flush_info(struct blkfront_info *info)
+>  		return "barrier or flush: disabled;";
 >  }
->  EXPORT_SYMBOL_GPL(renesas_sdhi_remove);
-> 
-> +MODULE_DESCRIPTION("Renesas SDHI driver");
+>  
+> -static void xlvbd_flush(struct blkfront_info *info)
+> -{
+> -	blk_queue_write_cache(info->rq, info->feature_flush ? true : false,
+> -			      info->feature_fua ? true : false);
+> -	pr_info("blkfront: %s: %s %s %s %s %s %s %s\n",
+> -		info->gd->disk_name, flush_info(info),
+> -		"persistent grants:", info->feature_persistent ?
+> -		"enabled;" : "disabled;", "indirect descriptors:",
+> -		info->max_indirect_segments ? "enabled;" : "disabled;",
+> -		"bounce buffer:", info->bounce ? "enabled" : "disabled;");
+> -}
+> -
+>  static int xen_translate_vdev(int vdevice, int *minor, unsigned int *offset)
+>  {
+>  	int major;
+> @@ -1162,7 +1150,15 @@ static int xlvbd_alloc_gendisk(blkif_sector_t capacity,
+>  	info->sector_size = sector_size;
+>  	info->physical_sector_size = physical_sector_size;
+>  
+> -	xlvbd_flush(info);
+> +	blk_queue_write_cache(info->rq, info->feature_flush ? true : false,
+> +			      info->feature_fua ? true : false);
+> +
+> +	pr_info("blkfront: %s: %s %s %s %s %s %s %s\n",
+> +		info->gd->disk_name, flush_info(info),
+> +		"persistent grants:", info->feature_persistent ?
+> +		"enabled;" : "disabled;", "indirect descriptors:",
+> +		info->max_indirect_segments ? "enabled;" : "disabled;",
+> +		"bounce buffer:", info->bounce ? "enabled" : "disabled;");
+>  
+>  	if (info->vdisk_info & VDISK_READONLY)
+>  		set_disk_ro(gd, 1);
+> @@ -1622,13 +1618,6 @@ static irqreturn_t blkif_interrupt(int irq, void *dev_id)
+>  				       info->gd->disk_name, op_name(bret.operation));
+>  				blkif_req(req)->error = BLK_STS_NOTSUPP;
+>  			}
+> -			if (unlikely(blkif_req(req)->error)) {
+> -				if (blkif_req(req)->error == BLK_STS_NOTSUPP)
+> -					blkif_req(req)->error = BLK_STS_OK;
+> -				info->feature_fua = 0;
+> -				info->feature_flush = 0;
+> -				xlvbd_flush(info);
+> -			}
+>  			fallthrough;
+>  		case BLKIF_OP_READ:
+>  		case BLKIF_OP_WRITE:
 
-"Renesas SDHI core driver" would be a bit more accurate.
+-- 
+Damien Le Moal
+Western Digital Research
 
->  MODULE_LICENSE("GPL v2");
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c 
-> b/drivers/mmc/host/tmio_mmc_core.c
-> index 93e912afd3ae..c1a4ade5f949 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -1319,4 +1319,5 @@ int tmio_mmc_host_runtime_resume(struct device 
-> *dev)
->  EXPORT_SYMBOL_GPL(tmio_mmc_host_runtime_resume);
->  #endif
-> 
-> +MODULE_DESCRIPTION("TMIO MMC core driver");
->  MODULE_LICENSE("GPL v2");
-> 
-> ---
-> base-commit: 83a7eefedc9b56fe7bfeff13b6c7356688ffa670
-> change-id: 20240610-md-drivers-mmc-cb5f273b5b33
