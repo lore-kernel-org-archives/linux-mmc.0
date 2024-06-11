@@ -1,106 +1,89 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from 009.lax.mailroute.net (009.lax.mailroute.net [199.89.1.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BC3B7404F;
-	Tue, 11 Jun 2024 18:48:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E16784C634;
+	Tue, 11 Jun 2024 19:19:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=199.89.1.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718131705; cv=none; b=To/+3tGcrNi7dQkN8X/DW55PVW8A96PLOtztMrKRHPAL3rY2o0hI/yf9so1RHC6T5xk04XUproWaD/wdCtobyyNzOXrDUAJBq6oEzGFb511Neb9ASiwxqGlzY/qnxdLUwKEz3moDwiFu7fxh8Z4hVUHq1ngxkwUlv8N+z1hBhdw=
+	t=1718133551; cv=none; b=CDEhDOk9uFz/8VOog2o2PpHfk0XzhRXVy1Ocu6kBUf+202rKD27nW0Oudx0mbtacVNp2HzinEQykJw12N2TxPQENb+hrMd6Aq5Sv5bsIujbKzcO7GPgfBVAghA9018Xb9OGp7uCZ+9zLiQEg/mxwHZnZRh8xUs7KRoeqSD3uZ6c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718131705; c=relaxed/simple;
-	bh=Icqk58bHNQpmqcH0SQq+ysoIzb40fVRvR1VlJKa7kBE=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=FkkrCxCNEQseYASJBzoDc6Mx9QttfLLvT/QEQkDAn5zvjaWSKdL+QIr2XYs8XYFMdc+9EY3lbxusEGj8CapxjACf3QIrPSFdFUUygOpMaTdXO6laVxfeoyswtXdaZ0yvjRAo5/k+b4JiIQiSg2wBlcUiqKa2ojaScwH17mziM8k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=dmPM0NPF; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1718133551; c=relaxed/simple;
+	bh=e50OkfwQkdYNsuEj2sRCpJpU6UJFKQUYFDkTfnQwR40=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=latmv7/OaIStOQK/WKH2blAXICzkBljK7xJYFilnPzg9kRNG7JlpqTDk8hGMs0LNsB6LYE7MxxYv8iBm6NemAPc6b2jhgNQ3TbqrwaOUN38U0PKhDeU3wUdACwwGATHqPuEYKP6FngFQTQD3oYFY1XdVhcNoMFkKH9qwJhY/xJU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org; spf=pass smtp.mailfrom=acm.org; dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b=aLYYpUIO; arc=none smtp.client-ip=199.89.1.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=acm.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=acm.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="dmPM0NPF"
+	dkim=pass (2048-bit key) header.d=acm.org header.i=@acm.org header.b="aLYYpUIO"
+Received: from localhost (localhost [127.0.0.1])
+	by 009.lax.mailroute.net (Postfix) with ESMTP id 4VzJPg1skBzlgMVP;
+	Tue, 11 Jun 2024 19:19:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=acm.org; h=
+	content-transfer-encoding:content-type:content-type:in-reply-to
+	:from:from:content-language:references:subject:subject
+	:user-agent:mime-version:date:date:message-id:received:received;
+	 s=mr01; t=1718133535; x=1720725536; bh=1x28cs1vNnTovmOEZshDr4sX
+	K3dLcchrq6+7Natc4C0=; b=aLYYpUIO/Gxr6+oqIDEKMSeJEI9bEPlY1LmfpMwQ
+	E2zY/jIjQz06DLuKS7/oqPEXBkmWPwKJXv7uV9mIl2KYhZCemVl03S1oSnwY4qxi
+	j0LRHUdBHYckWLy3gMU7t6sg6PZRzo7w6uU2MvHhI0f4HAtEwdZgsvVAv0FAT7p4
+	EBEjjdqMwYqi/U4rE0KUxNAQvcj1p4UprqA32cXd2cHFp7mwER3riMRLdMFdlrrT
+	vPbUR/NzJad+yqXUxUvzt01I+FlnPsokOOQFYLX++R6LD2ksIREkny28AtjzGpS9
+	3ApefM2xSewPQ14QhJuxg0s5WeeRKuj87Ridc/j3ANOv2A==
+X-Virus-Scanned: by MailRoute
+Received: from 009.lax.mailroute.net ([127.0.0.1])
+ by localhost (009.lax [127.0.0.1]) (mroute_mailscanner, port 10029) with LMTP
+ id Krn5mVvq-SSd; Tue, 11 Jun 2024 19:18:55 +0000 (UTC)
+Received: from [100.96.154.26] (unknown [104.132.0.90])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: bvanassche@acm.org)
+	by 009.lax.mailroute.net (Postfix) with ESMTPSA id 4VzJPL3DslzlgMVN;
+	Tue, 11 Jun 2024 19:18:46 +0000 (UTC)
+Message-ID: <fc9fb8dd-05e4-48b8-ab01-d1dd84996df4@acm.org>
+Date: Tue, 11 Jun 2024 12:18:40 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1718131699;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=hBtxcdOxJTOjlj2FBleR4Qh4QGHB6NSgACszEOvwy/I=;
-	b=dmPM0NPFa+Pl1FLHihlW+/5Ay7uMd4qTXv3RqSCicUE3xta3wnPvuDzJZIeipr7W6xeTXP
-	om3pKp4287ufJnbrlPLjpu2D/oe2MPTjYmx3R9i4WAanGMu3d2zrKoSPPBxUzNPR+a6+WI
-	MBJ3qaMe595YKVTuOhGqrokM2mOYfKQZOQCrB/vxajtHjpz18GtMcoNIJ0v/B90JwRjMNG
-	VmeUTLNbUxm9KhdxixH8oArxSmQGRXypm0+Gp6gj51ch8UbD24cCRdwBXx2w5IJwNr9bG9
-	djVKzsb/kZYybEOEJ54lTBlW8WXVMUIrBvx+N50J6GGEDsd8Jd4Km+5bjF6kQQ==
-Date: Tue, 11 Jun 2024 20:48:19 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Frank Li <Frank.Li@nxp.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- imx@lists.linux.dev
-Subject: Re: [PATCH v4 0/8] arm64: dts: convert fsl,esdhc.txt to yaml and fix
- layerscape dts warning
-In-Reply-To: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
-References: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
-Message-ID: <ea54d6b7794fbbd81df7653b4e988915@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 01/26] sd: fix sd_is_zoned
+To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>,
+ Richard Weinberger <richard@nod.at>,
+ Philipp Reisner <philipp.reisner@linbit.com>,
+ Lars Ellenberg <lars.ellenberg@linbit.com>,
+ =?UTF-8?Q?Christoph_B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+ Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
+ "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>,
+ =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
+ Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
+ Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
+ Yu Kuai <yukuai3@huawei.com>, Vineeth Vijayan <vneethv@linux.ibm.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
+ drbd-dev@lists.linbit.com, nbd@other.debian.org,
+ linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
+ virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
+ linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
+ linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
+ linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
+References: <20240611051929.513387-1-hch@lst.de>
+ <20240611051929.513387-2-hch@lst.de>
+Content-Language: en-US
+From: Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <20240611051929.513387-2-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-Hello Frank,
+On 6/10/24 10:19 PM, Christoph Hellwig wrote:
+> Since commit 7437bb73f087 ("block: remove support for the host aware zone
+> model"), only ZBC devices expose a zoned access model.  sd_is_zoned is
+> used to check for that and thus return false for host aware devices.
 
-Please see my comment below.
-
-On 2024-06-11 18:01, Frank Li wrote:
-> Start from v4 because fsl.esdhc.txt to yaml already sent out as v3.
-> 
-> Change from v3 to v4
-> - Add dts warning fixes
-> - Add mmc-spi-slot's voltage range fix, (not sure why it apply to
-> layserscape's dts file.
-> - clock-frequency is not required property
-> - add dma-conherence: true in binding doc
-> 
-> Now only "bit-endian" proptery warning left.
-> 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
-> Frank Li (8):
->       dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
->       dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to 
-> uint32-matrix
->       arm64: dts: ls1012a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1043a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1046a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls1088a: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: ls208ax: Chang node name from 'esdhc' to 'mmc'
->       arm64: dts: lx2160a: Chang node name from 'esdhc' to 'mmc'
-
-s/Chang /Change / -- in all patch subjects
-
->  .../devicetree/bindings/mmc/fsl,esdhc.yaml         | 105 
-> +++++++++++++++++++++
->  .../devicetree/bindings/mmc/fsl-esdhc.txt          |  52 ----------
->  .../devicetree/bindings/mmc/mmc-spi-slot.yaml      |  17 ++--
->  arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi     |   4 +-
->  arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi     |   2 +-
->  arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi     |   2 +-
->  arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi     |   2 +-
->  arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi     |   2 +-
->  arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi     |   8 +-
->  9 files changed, 125 insertions(+), 69 deletions(-)
-> ---
-> base-commit: d35b2284e966c0bef3e2182a5c5ea02177dd32e4
-> change-id: 20240610-ls_waring_esdhc-93136a5dd794
-> 
-> Best regards,
-> ---
-> Frank Li <Frank.Li@nxp.com>
+Reviewed-by: Bart Van Assche <bvanassche@acm.org>
