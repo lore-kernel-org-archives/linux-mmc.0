@@ -1,55 +1,54 @@
-Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-ve1eur01on2042.outbound.protection.outlook.com [40.107.14.42])
+Received: from EUR03-AM7-obe.outbound.protection.outlook.com (mail-am7eur03on2071.outbound.protection.outlook.com [40.107.105.71])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F200017573;
-	Tue, 11 Jun 2024 16:02:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.14.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 133923A29C;
+	Tue, 11 Jun 2024 16:02:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.105.71
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718121747; cv=fail; b=k8yUyP9VfY/qX0s0mdy81TDjHVsOQLEwu7JTDN7dAh3X8KHIvUFSuwuS2k5LKpmM/QwJksIg43T0vXkUa9VsaQXcSJgfzMH5gUG5VK6up0sTKavlFziEbEDFTPX93RB3cXRQuBS2lbWVCEWrvJEyB8h420Y+btblmcbtVyTNzmI=
+	t=1718121751; cv=fail; b=nVW2lEvvSJoSGhZ4DE66+yXJVQkaaBAVD2FC2oWpHBSiIOUdld9ufFz9KkIDH606ySaoMH+Qxg9QUeRzM3jFNMIt/Z7WPbVJkuS5vrkCELxVT3AbNaaLlAp1GL0gdn8HY5ayQwBO+CI//bxC2P0JJ/EMnBVVHkqfHwgJekJrLvQ=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718121747; c=relaxed/simple;
-	bh=5dX6n2/7tQD1IvcrjFPR/z7msGkfgduYI8XE2ZgayOk=;
-	h=From:Subject:Date:Message-Id:Content-Type:To:Cc:MIME-Version; b=IbesQNze2Bhoe34c8oU5icsMfVEXJ1IbsEy+VC9YBlSqiMcg3K7VMzFG0UHI5tJuR3nj92amO/g0xdkX6o2RA4Hq7ubIfISIozbOkZwbPRrf1VkDns37ZbH/YIE5EUv+92yKITGUJVMgi5tzNsmUeTM43QfBJyTmDNkLMxO8LcA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=F+bW43IZ; arc=fail smtp.client-ip=40.107.14.42
+	s=arc-20240116; t=1718121751; c=relaxed/simple;
+	bh=LKlyJXTL1wk9fiWDehxW2c7+JJzS3ilJP9FoltVBtQo=;
+	h=From:Date:Subject:Content-Type:Message-Id:References:In-Reply-To:
+	 To:Cc:MIME-Version; b=KVwtySbvLoZelqZjMzOmaTYnAp3LCWFgEQDzF4ro/QwC+PT/N05HDpaLJKpVYZEWlxe/GUe+5GilNbESDak4vyQrXUtJtatx7gFh42uvctavkualhmUi/SQl3IFTGue2SPEV2gv0PWB3ebGrbqDAkhKfYJypGwCRBzSHR3vCaO8=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=U1tDYV4f; arc=fail smtp.client-ip=40.107.105.71
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="F+bW43IZ"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="U1tDYV4f"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=SwG2xkKU0osu/UeJiF5K9twrPoG/DOkZW62BUjtLMAaKbb3fySYz95KlVVKRCOBcHRznJT49bNbYpyQ/igHNONRYT7uTfkmD0L0yVjMX8cGvEmS6FyNyKEWuSHemVvRGvUV012ZONUsUOAVvS9FEi5LG651meZ8H6ikK4UAmBK+Wrmd6f/1/FK+fzdV2w6I4Ruw9A/tk/CUi3JQTN9jBxKHXSwX7JJ/ofJxbou8nMh24+3QuecdqtgbvfIQU6Bcfe5bAjpsFHyUoiVSj7HkLajm8zrPPeNeJATMgo8hO3Ne94fP7EwMyFvsArrYPgpQUB9VOajXq53HQ3UjR8yMI9g==
+ b=YqPRwYMozXz9NYLEvXCfSgqCL3je2+YWhFSqI2yM3pxlBNklgjcqhlo0Kpx8CgTvQmzeQ034B4eVwWVq2i5h0lY7qc2yIkHYEDqD0oOiZedhZUqA+0df0tppKLnvcvW6Q47CePsjJifvZPl5oCmnqTgN5ND4BvvW/R2u5+2Vi9ezJ9yt23gNkS5dkyJM1IxKtrK9gKTu1N1asBBuw8BIVgUE1V2G7BFvts1v/z66UiHeZwzaMQBBQoByGGXx6NfppA7kw2+JHqHwOIGQ2dWhgNccBiAhza5T+G67nMjLRiYuWjEzvdV0LdFVyKfTxlO9i/kKgNe0kYIbHBsMaC3N9g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=Nz9NhjNbXXabUEF0wPX41oKciy7IIyz/I4hN1/9Gruc=;
- b=dnKSnCa0sHRGuRkNpOKNCRQgmA9Qiv3VDLReWcFMbMsuGDCez1NuDojhXgshzKMyJeIUv9vapp0HJJugEd/A00MQAybUIQadmFygUqFBSZUFje2okNbeyoCWcLkd7IAXBGkDinBlhLhmsPpdx8dk9QsmPv4qBXpi3LWaKmVVCey73/bmCgM4StxmEoYBS61i3WSb6L1jYTnQ+hNLbZ40cV7V6b50Nqu68pQ1H8TuDfOaHf/tmsl6gGdiRZPVa98h/KH21iM3NC6rXZgDD7fTii+z68JiNUT6STrOoP8bhpPYN+lCVRqVzFObbG4OIeeT0Y+CKlxX/DD1sAznWC1Hag==
+ bh=yRigU/HJWru8YfX/7aohN9dmxVgr27FaA++EasCOa3Y=;
+ b=nabmFLw2cMB+rV5KVpY2xE/m/SmfpP03Oad9kMlzwJurgBAVkpNWElsBvwNYHNIu3LHqn+7gvCRlBA/d1BwP83CXFhxN9hoCarKMPyyX28js/jDqAZ4ekdSR9pMLus+5o3MpWJXP6vgIDaUhW976nRRVfJ5O2whayS2LgrRFVQ3GK5s+FkUnD7TVcXw3+0MZ1Goqu8pLEEFGaM5fFPc2xnLx452T9EdX9rvZ0H/rZ592RrAZk06+10dcXBXBkVDe4i7tVLaT4Gx+i/n+iCQVZ869d36d9THAHif6p5YqvUiiILKbOpxo8DUkJAtaGlSSpqKO0aaqStfHqoBI5kXDfA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Nz9NhjNbXXabUEF0wPX41oKciy7IIyz/I4hN1/9Gruc=;
- b=F+bW43IZppXqag+145RfR9um5O3JLZDLx/xgxz2m6FTbLpT4eWqtSFfD2EaEN160K/pie/4WqKkVo3ZAnTT/HO3vR3t/vhlcV2E2MERtt7bgcMG3O620Fz0QwPinBx7+aRFuBAUlqbnHQLLYjeboKta2ffq3bIrEOrQDyGM6mL8=
+ bh=yRigU/HJWru8YfX/7aohN9dmxVgr27FaA++EasCOa3Y=;
+ b=U1tDYV4fSLe3/9WTunOiFmsY0ujvPgJTBog9m7ZvelONVXisnJyKgwsQ8sgyFrk7Mc6lg5ouqDgnXvxrgQpMQlPQfqO2bRUOY2dvSrw/iNwHdt3wISBgABsyKE6eH86DV++UbdFMkQmZMHkJV5qhUfXc0s7SubNxMYUw7pYq6AM=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nxp.com;
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
- by VI2PR04MB10287.eurprd04.prod.outlook.com (2603:10a6:800:220::15) with
+ by AS8PR04MB8005.eurprd04.prod.outlook.com (2603:10a6:20b:2ac::12) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7633.36; Tue, 11 Jun
- 2024 16:02:17 +0000
+ 2024 16:02:20 +0000
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.7633.036; Tue, 11 Jun 2024
- 16:02:21 +0000
+ 16:02:24 +0000
 From: Frank Li <Frank.Li@nxp.com>
-Subject: [PATCH v4 0/8] arm64: dts: convert fsl,esdhc.txt to yaml and fix
- layerscape dts warning
-Date: Tue, 11 Jun 2024 12:01:45 -0400
-Message-Id: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
+Date: Tue, 11 Jun 2024 12:01:46 -0400
+Subject: [PATCH v4 1/8] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAOl0aGYC/x3MQQqAIBBA0avIrBO0rLCrRIjklANh4UAF0d2Tl
- m/x/wOMmZBhEA9kPIlpTwWmEjBHn1aUFIqhVrVRnVZyY3f5TGl1yCHO0ja66XwbQm8NlOrIuND
- 9H8fpfT8j7hsvYQAAAA==
+Message-Id: <20240611-ls_waring_esdhc-v4-1-d0d8a5b3f3cb@nxp.com>
+References: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
+In-Reply-To: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
  Krzysztof Kozlowski <krzk+dt@kernel.org>, 
  Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>
@@ -57,11 +56,11 @@ Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
  imx@lists.linux.dev, Frank Li <Frank.Li@nxp.com>
 X-Mailer: b4 0.13-dev-e586c
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1718121738; l=1744;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1718121738; l=6845;
  i=Frank.Li@nxp.com; s=20240130; h=from:subject:message-id;
- bh=5dX6n2/7tQD1IvcrjFPR/z7msGkfgduYI8XE2ZgayOk=;
- b=lQZz5kUY55711rRSbUmAOHkubW7xBPpt6ePPO4mm6NHr6oCkSqg/1Eh4HQVFLdXnKS3Vzh3tq
- Vlm+xH02f/xD5XqA2b3swbhw7Nv7n9y1O8LH3zY7Wf6PIPqVQ63LqQN
+ bh=LKlyJXTL1wk9fiWDehxW2c7+JJzS3ilJP9FoltVBtQo=;
+ b=IyXRqzfPQIva/eWVERwh6+e84Th1qiACcFNBOrWcSRnEfYrqVKNxkVrGXWutW4PcuVfli1u/V
+ YvrpytHAojaAj/CCv3+iFxdL0TJqeuObOqGW4EGdwAMsXEQGgctpVhI
 X-Developer-Key: i=Frank.Li@nxp.com; a=ed25519;
  pk=I0L1sDUfPxpAkRvPKy7MdauTuSENRq+DnA+G4qcS94Q=
 X-ClientProxiedBy: SJ0PR13CA0017.namprd13.prod.outlook.com
@@ -74,134 +73,307 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|VI2PR04MB10287:EE_
-X-MS-Office365-Filtering-Correlation-Id: c8f2949d-eebf-449f-1f7d-08dc8a2fe0b4
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|AS8PR04MB8005:EE_
+X-MS-Office365-Filtering-Correlation-Id: a7313f2d-4ac8-4a63-705b-08dc8a2fe27d
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230032|52116006|376006|7416006|366008|1800799016|38350700006;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?ajB0dndXK0hEQzRCMkE2UVdjVUVwa1dWR1A1MmhidXkxMXlwbFpSYjloN0FD?=
- =?utf-8?B?c3NDSFNNaWVJL3dpODdxSTljQkwxMXhDQlhQNGZ6ZnJEaGxRWUxJQ1QyYkFh?=
- =?utf-8?B?ZytBUkw1VCtMMUxtbmZHb2tYNzFITDFtT3RIWGhIOEQ4bEJEZWhHLzhtUVAv?=
- =?utf-8?B?TDJpSnk0RlhseURRUzFRYi9DazlGZEw3cVNRUWxOdmRaUWN0bTdMbVJTZEFu?=
- =?utf-8?B?cFZPWUJnN0JsQ3pSdERjMHhQWjR3cXkxQno5ajRRRXNWZEVuZWlVaHJ1UGhE?=
- =?utf-8?B?UUdMdk1kUWNTci9vcVdQbTJGRmdDUzQvZ0J2TjhBSXFObU92TWV4WTh4cXY2?=
- =?utf-8?B?TEZmVWZZL1Z4L3ZLN3R6Z0lTZml4YTcyeFVxQ0pQZFo0MkJJSTZac2theUJL?=
- =?utf-8?B?bDdSWmdtcHZMRmI4TXh5bGs3WGJmMVgvVVBCN1gvSkF1OTVCeXlYYVI2TmtB?=
- =?utf-8?B?NEVsUlBsb2JoSCswY1VhaGhySHhzaW5mRjJUQmtmVm5BMW1ReFJwclJEUnNZ?=
- =?utf-8?B?S0Zma3dueStJc2ZEdFRKYU84QUNzQ1YzQkc4VjlkS0JHQlFFVUxGMGlOVXNw?=
- =?utf-8?B?U0dUZ0xoYityN2I4VjZWalFGVUR0RVlkWXdYbktWcWlOeHpBZUd0dU82T0ds?=
- =?utf-8?B?OFBKQzZiRnRoWjlUTmltOURHbGljaXR0cEwzeXR2aUZnNFV4WmNqQjE5UEpE?=
- =?utf-8?B?Q1IxbVBCd1YxYnNybnN2ZWtJY1VuWXYyWnlzMWdEUlJrNWU4eHJYR1h2WVN5?=
- =?utf-8?B?ZGZkd1pWU1Z6cE9IMkdaM3c4WElwZGIvTUlCVi9aVmF0K0Z4R1BtaTFYZVlB?=
- =?utf-8?B?N2xycWNmblVDTk9RclVWUTVQZU82QUpSekdCbGRoejI4Ry9JRlJlQkYydjls?=
- =?utf-8?B?TkFhZXZmb0FlSko5UUU3STBVN09tSldmSW4yb0tvWEVtcnZQVEN6c0ZNcFpp?=
- =?utf-8?B?a0tBbFpQT3l4d0Z0b3NVR0JVTVd5ZVUyTFRNek5Wc1BuajJQeFBxcS9aeGw3?=
- =?utf-8?B?am1qSHZhZjFpSXdmaUpBWEhjdlhOVXNPM25xYnkySko4bEZUbkNMU0FSeXky?=
- =?utf-8?B?cGNnSlBveGNtT2xRN2IyVk1WcS96c3U3OW5iV2E0d3J4T0JkQ0ZHUjZJUTRp?=
- =?utf-8?B?M2Jhd2pjQjhNc05ub2Zrbk5RUjF1YTcyaVhsWDVPTnBkUGwwb2tmMEJiVGVC?=
- =?utf-8?B?Q01IRUN2bTJyNEltTVhlWGo5U2NpQTRzMGI2eVFQMGZjVWpqcjJNQW9ERGU5?=
- =?utf-8?B?UHJTcHhrNysvU0R2K2g0eEZrOVUrd1krUUxiZU9tTnpBTXEyT0FZYVdFd3Uw?=
- =?utf-8?B?WDNrYWo1OERrUi96Z1pqdzBTczZ3eDYxQjUxT3pyV2FHYjZqSENkRGJHb29a?=
- =?utf-8?B?V3VjQUJUbXZseTNia2txWkEremRaRWVvdXdWN21rTDc3ZWRLa0s3VGVPVENq?=
- =?utf-8?B?amJqcUM1Z3JxLzVaZEp2OUx0bmR5SEpaVXg2aE5oaUlTK1JFZ3VsWlk4N2pM?=
- =?utf-8?B?NDV2MFU2WnBhNWxGNC9YR1Y3dUxQWTVlWmpUWkx3SkdXeFpnTVF1Y2NhUzJK?=
- =?utf-8?B?a0dUTkwzZXNrT3RENnNUN2pPT2JvVWJkbFkxUFN4d3FoaGpVU3ljWE9JSm5W?=
- =?utf-8?B?SStBZFRzYllEY253ZVFhYXRPY2dHUVZLTC9xTkpLclBqVTlScXJNTmIvUU53?=
- =?utf-8?B?YWRxTTNTcE9VTnZPcXQ3WU9RQ2dWMllVVkdaS2pNU1MvT3JIdnI4U2Voc1ls?=
- =?utf-8?B?M2d2YmdOaWx2QXZMbi9ZUFZxQXFvb1lrbUszZTRwcnN1bDlqTVhVekJHSmhE?=
- =?utf-8?Q?pf2YORoVP4c2vAJi15e6yLCs+farihng2bJGM=3D?=
+	=?utf-8?B?OW56UG5uQjV2WXhTc0h2dnNlQkhoeVlNSk5HK3dacTRBNHZ2aGYrNS9RWUZM?=
+ =?utf-8?B?QkVxZEhmQjlWL0VPOXB5TDFXRS9HZmd6cHhTVTdycGU5eTN5SzBzOFVkbXhF?=
+ =?utf-8?B?WkpkU1ZzQUJGNHdSTzFvK1pHSXJXRzFaa1h6ZHc3aHUrdm56KzhKcmJTNmxB?=
+ =?utf-8?B?ZkRQcmxsVnU2ZjRvL2x0NWllUGlNeWdlM1VXRER2QTl3dnR0V0t6T2Vnb2JE?=
+ =?utf-8?B?SmY4QkQyZG9OaXA5OTRLSlVuYUpQQS9RWlVVRHVjdm5nQ1ZCQzB3NEs3WWJO?=
+ =?utf-8?B?cXczUGpYOU9RcFhxbzlDKzRHSjBTQmdCRTd6ZnFNbUk3WXdLTGtPOGN3dUdo?=
+ =?utf-8?B?Zk5DbCtZYmxweG4zY2hLcFp5ZjlRWkFMdnJCanBSZmdWTVdzeDJFbW4yd1Bl?=
+ =?utf-8?B?ay9VTXlHV0F6UlFrc2VKL2hibHQrY0pya3AyUVFVOVc0SmFzYktFUml6NEpK?=
+ =?utf-8?B?dGVQVjhMZ1pPQmplZ1dYL2ZKMnF4cW9mcWF3VnJtY2lJS3RKc1Q3Wlk1Wi9s?=
+ =?utf-8?B?QVByalZ5dnZhOU53SC9OVVd1UUdPbjVpVlFnQVhlemtHT0x5UU81cTErcStw?=
+ =?utf-8?B?NHk5bjRIb0kxYVI1N3lnSUIzZ0dVekFHMWpNSmdXZ2Jrc2p3T2w2bm0rUnpy?=
+ =?utf-8?B?L1FoSzl3aWR2NkdiQnpGcm5BUTYvM3ZVcTNPMHJtVENBU1NzNlFERkdOdzd6?=
+ =?utf-8?B?bDFOcm1TZGR3MnJFVnRib1FYRmRkMTZuWVVKckRCOWF2TXFuVXBiUnJwY04r?=
+ =?utf-8?B?Z3pQODZIeU8rQWcxWEJWZTdqRzBHZUp6eVBkQ1lxSzJObDhPN09kVlM4TVkr?=
+ =?utf-8?B?U1VFRXBWdGpjVklBbHJmTTdrOTdYZlpIWFVOV210MmlIR3gyaFJEY2Z5ZzM0?=
+ =?utf-8?B?NzljdXFvRTBRUzJqN3NKUmROZGpOeVNzdHhraUxmUmY4SlIzR09oblNVM0Vo?=
+ =?utf-8?B?eFB1a04xQlpyaFpkeVQ3bXdMLys4ZGxpRjYyRG42K3hHTitZM3JvYStFMFcr?=
+ =?utf-8?B?UThCVEdUMitzTVQvWldmRTdrMnFiVFVZc25FQi9jcWtTREdKSkJVM2dmZjg3?=
+ =?utf-8?B?SVZvdGR1SVJvTXJFS2Y0c0RMOW9sYzNES0pBUDJVL3JEQTZWQWtaVlpFTDkr?=
+ =?utf-8?B?TUM2RzBabVdMRjBBQW1UT3NrMUgyQXJiRlRRczQ1RXpIUndWdVBSUjU5ODRL?=
+ =?utf-8?B?bUFLL3ZqVzQxVk5YNld2Ri9KSTlMa1FEbFcyRXU1d1VQWGFDWlZPQlpFeitK?=
+ =?utf-8?B?VGVZMXdmRC9DT0VaSlpSN0NXdkxIMEFjTi9ybWk3VC9Pc1FLY3RVbnFvZklJ?=
+ =?utf-8?B?QWorazNndnlMSHRNRG1Mby80T1pRQ3dNZ05GN2tRbzJPeTgwSVJJK1pXQmpW?=
+ =?utf-8?B?SFpjNWxvNlRuOXpsbS85bGVpTk9uMDBRTkQ1LzZJVDZYek8xd28yQ25xUjlV?=
+ =?utf-8?B?U2JISHNoQ21tWnY3ZlNFQ3F2UUl0ZVV2TFUwTVlZNCtybGFkR1d2QlJBL1Mv?=
+ =?utf-8?B?eWxzQ0FaMVpiK3p6NDdRYTFON1ppNFRkalRYWXZaRFNvWnZzcEh4MHVxK0hB?=
+ =?utf-8?B?Y3FOUlc5TlZUUUV4bmd5alJWaVlYOGRrTEZhZ3NhWTh5QUxiVnpDdjZQRmRS?=
+ =?utf-8?B?TGkxcWQ3OVlPdjRveWNPRytBYmpuYkFDT290SlAxVUxSN3d5ZlhidWtVR3kw?=
+ =?utf-8?B?OVVWVk8wZ0VrSmdpVjFWdXJ3NWQzWS9yeHh0c0JPK1hudWw3UTJVL1hXcUo2?=
+ =?utf-8?Q?u4DhaJepUMlnvSX90n0dMtjBAvBsRb8ODaLGFhl?=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230032)(52116006)(376006)(7416006)(366008)(1800799016)(38350700006);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?OG1NYlBCc0hjRFRZYlZWS0YySXVFT0twakhUMjFOUXpXWFB3NURsWUdJTnFx?=
- =?utf-8?B?dGNacEFKOXpoMGZrOXZVWm5jR2Q1bmo0WkVjai8vVXNVdnZVTHpINm5FUWZ4?=
- =?utf-8?B?NStzT2RPaWtlQkJJaEwrdlRSZlpsbDFPVmx1TVY4M2gzTUhrdGUzWjI1clk4?=
- =?utf-8?B?ZGlYd29lUnB6QjNPajhHNUVMMERCQ25ybHRneFZ6RkZTZ3JIOW1NU2NXem5N?=
- =?utf-8?B?T0JJM3UrcGdxTjJHdkpFaW5LVmI0dHJmYnVScmRaYSt1MWl1Ry9hWkJhRTI2?=
- =?utf-8?B?Ylh4Z0pZbzJCSVA1TXBuMmpaN2ZMWnRvZ0tCb2FqdXFidFZENWRaQysvTFFE?=
- =?utf-8?B?N1RBekppbHpJVDM4Z1NLK2VSeVVLR3lZcUpZKzV2cG1FcGxZK3RrQkkzM2Ju?=
- =?utf-8?B?cE05Ym9FU0FMdmtGYlBiZDg2Z1NFUzZOYTQrMWVNOUg3THFIbVRrNkptRk1i?=
- =?utf-8?B?K1ZnY2Y0NEV6VlZKTHJWMGJ0UldOdi9aL3pKcEtMSm93QS9mYUhVWHA0WGNC?=
- =?utf-8?B?TmZqU0hsYU1MUzE0UzZOM1pzUnZmQmp0d3Q5VmZEaEh0MHA1R1hCaWpKeHFw?=
- =?utf-8?B?UlpXUG5ZZ0FBRW94WllrZVkzaFhJaXQrY2FwR1ZQMHViWEFLczBtOG9NWnZV?=
- =?utf-8?B?U1NRQ3F2bXdwS2pVWlRLWlFiNjJVUk5ieWdmWjFLU2ZSaVl2QzM3M1YyYWZj?=
- =?utf-8?B?bkFpMGhuQVZGKzJKRkVwUlYzZnF5NVNoZS9oRzdNM01VOXRubHRBYmVCdTNE?=
- =?utf-8?B?VGtIblFPWW9kUlNsSnRmdnp6cXFuWElUVmFMR01uL1ZIMEtVbnArcGg1cVcz?=
- =?utf-8?B?RjFmYXQ5TG91aWJzSkhlMWVLV2dRdXNwZndXcTNBMCtKRDFUSy94WEtpVFVh?=
- =?utf-8?B?Qld4dmp6a1FuTDNYSW56YjNCTHVZZEJHelFXblRralRUVUp0cm1vbDNVaW1W?=
- =?utf-8?B?N3J1Y01JMTdoYTV0OVBHUkw1K2hBaDlia3R3MUI5aERPTFYxTHhEd2RjWGt6?=
- =?utf-8?B?K2x4STh2MnZLa0tuR1BoeVAyd0tHMHZNNjBhek1Jbm1NbE15WGJRWTNaS0o3?=
- =?utf-8?B?RlBSUWZ4eDFEaXYremg5OEUrMGlNd0JseHNrc0VhOGRjamk4TXYvNFVhMWls?=
- =?utf-8?B?cFJiRUtxMmFqeUFIVS90YnA3blBHdDlPNk1uNWxta01FL3EyMVlQSXFGZkVs?=
- =?utf-8?B?bzR6UTVDSWdRcVdTazJQS09nM2p0RThxZWVoVHNOOGlaRDArZndOdGlsbHhR?=
- =?utf-8?B?a2hTdGtqampOSUpKTU9JM2RyMFA5RzdOL20zVjNuci9DWlRJOG1XWk9haHFI?=
- =?utf-8?B?UC84L2pmNktoa1diZlhsVFdQK0M1UlArVEp3bkpDdHE5L3FxdDZJejlDV2JP?=
- =?utf-8?B?V1lzZ3QwNTJOVHZPMDVZM09mLzNxbWRaRSs5VlpJQkUrTzFyWFlMSXNCNHpC?=
- =?utf-8?B?Q3NNSDIremJEZEswYmdJcmc1LzlwRFg2NlBZNzRJU1BKWlpEVHJBSW5xQ1Fv?=
- =?utf-8?B?MlpWVFdYM0dNK2JqTE9sSi9xR21Gc0drOHhWZ29LcGk1K0U1Nm5EU3ZWSnJ1?=
- =?utf-8?B?WE02cytiUTExSzZDd3h0TUNIUWYwWXQ2a3BzRHNhaG5oL1VNMWRMTXg4WVVs?=
- =?utf-8?B?c0UxNWlLNjI4K08rSUhkVVJ3ekpFekQ3NnY0UnFmWUNUMEFFRnM5ZnNUSG1t?=
- =?utf-8?B?c1krZFVnZXNtSFRkU2NUS0ZqZElnSnkrSUN0dnZVSHRWMkUzMWdYbHdLeVMv?=
- =?utf-8?B?ZERZM2IxL3NFZE5RU1JVMTRQdk83c1FUbE1UU2VBdVRZQS80TkM4NWwvOVlH?=
- =?utf-8?B?N3IxN2YrbzcwMllXUnlpZDFHbmZmcG9VUjlDNjBVTFM4WWZaSU1sUnNHbDhF?=
- =?utf-8?B?RTRNZEd6UjdJekNhYTFEMldiNFBGbmcwUk9MQXd1SGdDaUZIR0tGY0RLdGtD?=
- =?utf-8?B?aFBWMGQ3TitaczhQRUt0SWMzMHlnVWN6L3ZCbUlBNGtWSDhhYXVZS20ycTFR?=
- =?utf-8?B?OEl5dU1JdHFzRUhXMEdTVEY4dUlORzFYMDkrbWVRQjY0YXpVc2kzclJoaURX?=
- =?utf-8?B?U292T3BXd1VxdnlGdElJb05qb3BZT3dyKysxY043S1hnMG5qbjA5bjFnSG5P?=
- =?utf-8?Q?Gx1WRc8Qu9hVseA6h14z88O/g?=
+	=?utf-8?B?ZlVUc0I0MTRmeWV0S1VjOGNzd05RNGdxTnU1YWtLNk55di9CYThUaWJlMHJy?=
+ =?utf-8?B?S2F5YXdVeXpVdnMrd2N3SWRWVFI3anB3OFRZR2UwQnFBY1RKVFdERE02RGV1?=
+ =?utf-8?B?SFE0ZVhYQ1NpVTNzV21ySldQVXJMY2RJR3dVNllTMjdha3drMEFEUmFGdlVN?=
+ =?utf-8?B?MjBaN0NIVWtsbE1zWFRJZUxMRm41bkdHSFdNblNUWGUweGNLekVMd09qblc4?=
+ =?utf-8?B?YmFEY1djSnBDcTMwQXRqdW5aejd4ZEpMSTB5aVdhejBmbzl0U3Fwd2djejNS?=
+ =?utf-8?B?VEVrKzh2cG5MZ0laeXB6UVV5NG5JRmdEZVpFV2czczFJTTA3cjNweG4yT04z?=
+ =?utf-8?B?b0tJZkkrNzlGRVYrRHh4TW9pdTJKVDNBZmdjeDdrbkMzckFDdHBseWE5UXc1?=
+ =?utf-8?B?SDQ5ajFVd3YzTkthVm13dHFnSHdDanhQcGRSQUt1SHowL3BURElZdG16dmM4?=
+ =?utf-8?B?b2NsUlZUbHFGc0xNZGFpc0NQUW8wWk1GTEUzcjFZdXpSZCtpWXAvOUtWNmhO?=
+ =?utf-8?B?Y3lrL1BwNTZrbHRodkdlcmZtTVNYNXdlekg5WkJnOHNoSG9xa1VTRWIzRWRG?=
+ =?utf-8?B?WWU0eGozOE02RE1ZTDZ1Mm9tUnovdXdMRHRZTEFBc0Rwa2NvVVBSQ0VxKzV2?=
+ =?utf-8?B?RFY5aWMvRnY2dHRnS2JHaWNpamZPRGgxOVJxRFVxY1h4RFVnbkxRSEF2eDVo?=
+ =?utf-8?B?VXVLdXZhdVdLQzkxcjhuL2hTTEpuZXVTTTloaHZhOUdJdmpSSDVjbmJnQ3li?=
+ =?utf-8?B?TUFzTkxOOWMrTU5wN2hPR1ZFemxHRk1KYTZqUXJJK1NaWFI5czQ1aUx0WlpF?=
+ =?utf-8?B?Wk9IREdsbkJOMWdKYTI2R1pjKzNWUGJJOTFETTQ1VXc2dnhPZjZtL2toSVdo?=
+ =?utf-8?B?VHY1ekFubXQvaVVVbWZMcW1hdGltazZ5aVVrOWZla2FiYVRuS3JESElNRVBm?=
+ =?utf-8?B?SkdQbWhFK2czZm9HcGpuVmFCZERzSkNFYXpmYzBHanBlTUZOaUN2aUFLeStM?=
+ =?utf-8?B?dnVYeUJsWjY1d0pZcW90QUdlRWFMOURGQkEyRjRCSnFKemNZU1RjNGRRM0Iz?=
+ =?utf-8?B?L3FRalVDTHUxN3ZjZ2pZNXptUy9jZHNkUkpjM1UzeEtVL0pReGJKcFBDR2Rp?=
+ =?utf-8?B?cm5QSG1MTHdSN0ZLUmxWa0ZOTzZPNkNQVHlia0JKQ0gxRHY3YU5mSERsZ2Ix?=
+ =?utf-8?B?MlRiSERFWE9Tb01CMHFkVldhS3oxUjhTd21pM0tIb2llNmd3U1VUUVFwQUxE?=
+ =?utf-8?B?MjRIa3NSRnRmdkVDOHd6dlN0TFNDeDU0dHhneFFiTWFlVWZTS1hCeDBNL09R?=
+ =?utf-8?B?SjhsdFlFVEYxaWpKdFJHU25lUWx3elRWTTVvaE44eWhUbGFtZUJBWDJYVVN5?=
+ =?utf-8?B?K2F2d2pvUWI3TFdCdGZkT3dWMjhiNWN3cVNwSlNsQ2xtdFJkRGk3eG5hQjdD?=
+ =?utf-8?B?NGIzQzFzTWUzRmJwZ3FHU0RHT3FhcHpjR2FBRFdhMS9nci9UdytvYk9sZWds?=
+ =?utf-8?B?WUhDNzJxZWUzNVlDR2I3TW5JUUNESUtGaGpORjlseU5oSEpxRzlvK1p2UFN3?=
+ =?utf-8?B?NEJMZVRwaWoyRlFHdmlnSnJ2bXZwZTVZaEZ1bEpIQXhTSHFtdUtmQ2RnZ2to?=
+ =?utf-8?B?Z3lJTFhMRGt6YmVNRURMV0VrY216UUYzZTc3U0tHYVRFbW9yYzd2TnVMd21a?=
+ =?utf-8?B?aldrWjR6cXljTHN4M0dXN2x2eThVU1h1M0VMdmd1UjBnWDBuUlBObTQxMWpL?=
+ =?utf-8?B?SmFXVlcvTnVTODE0WkR1T2dDNzJzQVlRUkVIRjluK3FNUFFwZjNscVhRdEdU?=
+ =?utf-8?B?MmdoYzFLUEdlT3NiL1BKalkxbjgwbmd1MzN2VGFWZWoxU0ZDUFlMOXk2bk1a?=
+ =?utf-8?B?VkJPcDYzaTFZOWtqc0htdXdMMEV6S0FjUEo5YzRHYU5TcE5WeTdpdk5PL0xm?=
+ =?utf-8?B?Q1BoWHMweUN6eWF3OEFHYnUvendWaTFkdnB2N0txNnFzdXNPU05uWHlYMWVh?=
+ =?utf-8?B?bUwzUTlrWXVZUzZiZ0ErOFpGakpJWm1OZFF4NU0reFd2citwS0hrTWVpS0tT?=
+ =?utf-8?B?SHdGQjlrY25nNkMzb3BNODMrbEZpSlhLa0lNQXFLQVBrd01RemVZc0QzOFRL?=
+ =?utf-8?Q?VqUWSrDYy/dU0JtZG2BLD1c+h?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c8f2949d-eebf-449f-1f7d-08dc8a2fe0b4
+X-MS-Exchange-CrossTenant-Network-Message-Id: a7313f2d-4ac8-4a63-705b-08dc8a2fe27d
 X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Jun 2024 16:02:21.8764
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Jun 2024 16:02:24.8502
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: S5KLDeK+qyfuq+TaB6+9kPWQ3UpYktjq0ma8qylj1zWAp3105MJpDo7FF0+dEOSjx2X/tgaeaE9u4sLliQ/Sgg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI2PR04MB10287
+X-MS-Exchange-CrossTenant-UserPrincipalName: PbyQUbKNEtVcA0MhE97+TCYN87It9uetuSbq9CLip9un/0O1IaocvBRpZE9TxINYNwQuv+4T7Kqevs0wvDpBlw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8005
 
-Start from v4 because fsl.esdhc.txt to yaml already sent out as v3.
+Convert layerscape fsl-esdhc binding doc from txt to yaml format.
 
-Change from v3 to v4
-- Add dts warning fixes
-- Add mmc-spi-slot's voltage range fix, (not sure why it apply to
-layserscape's dts file.
-- clock-frequency is not required property
-- add dma-conherence: true in binding doc
-
-Now only "bit-endian" proptery warning left.
+Addtional change during convert:
+- Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
+- Add "reg" and "interrupts" property.
+- Change example "sdhci@2e000" to "mmc@2e000".
+- Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
+most existed dts file.
+- Set clock-frequency to 100mhz in example.
+- clock-frequency is not required now.
+- Allow dma-coherence
+- Add clocks
 
 Signed-off-by: Frank Li <Frank.Li@nxp.com>
----
-Frank Li (8):
-      dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-      dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to uint32-matrix
-      arm64: dts: ls1012a: Chang node name from 'esdhc' to 'mmc'
-      arm64: dts: ls1043a: Chang node name from 'esdhc' to 'mmc'
-      arm64: dts: ls1046a: Chang node name from 'esdhc' to 'mmc'
-      arm64: dts: ls1088a: Chang node name from 'esdhc' to 'mmc'
-      arm64: dts: ls208ax: Chang node name from 'esdhc' to 'mmc'
-      arm64: dts: lx2160a: Chang node name from 'esdhc' to 'mmc'
 
+---
+Change from v3 to v4
+    - Remove clock-frequency from required
+    - Add dma-coherence
+    - Add clocks
+    - Not add Krzysztof Kozlowski review tag because some additional change.
+
+Change from v2 to v3
+    - add minItems and maxItems for voltage-ranges
+
+    Change from v1 to v2
+    - use filename fsl,esdhc.yaml
+    - Add clock-frequency to required
+    - change clock-frequency to 100mhz in example
+
+    pass dt_binding_check
+    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8  dt_binding_check DT_SCHEMA_FILES=fsl,esdhc.yaml
+      SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+      CHKDT   Documentation/devicetree/bindings
+      LINT    Documentation/devicetree/bindings
+      DTEX    Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dts
+      DTC_CHK Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dtb
+---
  .../devicetree/bindings/mmc/fsl,esdhc.yaml         | 105 +++++++++++++++++++++
  .../devicetree/bindings/mmc/fsl-esdhc.txt          |  52 ----------
- .../devicetree/bindings/mmc/mmc-spi-slot.yaml      |  17 ++--
- arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi     |   4 +-
- arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi     |   2 +-
- arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi     |   2 +-
- arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi     |   2 +-
- arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi     |   2 +-
- arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi     |   8 +-
- 9 files changed, 125 insertions(+), 69 deletions(-)
----
-base-commit: d35b2284e966c0bef3e2182a5c5ea02177dd32e4
-change-id: 20240610-ls_waring_esdhc-93136a5dd794
+ 2 files changed, 105 insertions(+), 52 deletions(-)
 
-Best regards,
----
-Frank Li <Frank.Li@nxp.com>
+diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+new file mode 100644
+index 0000000000000..b86ffb53b18b5
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
+@@ -0,0 +1,105 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/fsl,esdhc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Freescale Enhanced Secure Digital Host Controller (eSDHC)
++
++description:
++  The Enhanced Secure Digital Host Controller provides an interface
++  for MMC, SD, and SDIO types of memory cards.
++
++maintainers:
++  - Frank Li <Frank.Li@nxp.com>
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - fsl,mpc8536-esdhc
++          - fsl,mpc8378-esdhc
++          - fsl,p2020-esdhc
++          - fsl,p4080-esdhc
++          - fsl,t1040-esdhc
++          - fsl,t4240-esdhc
++          - fsl,ls1012a-esdhc
++          - fsl,ls1028a-esdhc
++          - fsl,ls1088a-esdhc
++          - fsl,ls1043a-esdhc
++          - fsl,ls1046a-esdhc
++          - fsl,ls2080a-esdhc
++      - const: fsl,esdhc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  clock-frequency:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: specifies eSDHC base clock frequency.
++
++  sdhci,wp-inverted:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that eSDHC controller reports
++      inverted write-protect state; New devices should use the generic
++      "wp-inverted" property.
++
++  sdhci,1-bit-only:
++    $ref: /schemas/types.yaml#/definitions/flag
++    deprecated: true
++    description:
++      specifies that a controller can only handle
++      1-bit data transfers. New devices should use the generic
++      "bus-width = <1>" property.
++
++  sdhci,auto-cmd12:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      specifies that a controller can only handle auto CMD12.
++
++  voltage-ranges:
++    $ref: /schemas/types.yaml#/definitions/uint32-matrix
++    items:
++      items:
++        - description: specifies minimum slot voltage (mV).
++        - description: specifies maximum slot voltage (mV).
++    minItems: 1
++    maxItems: 8
++
++  dma-coherent: true
++
++  little-endian:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      If the host controller is little-endian mode, specify
++      this property. The default endian mode is big-endian.
++
++required:
++  - compatible
++  - reg
++  - interrupts
++
++allOf:
++  - $ref: sdhci-common.yaml#
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    mmc@2e000 {
++        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
++        reg = <0x2e000 0x1000>;
++        interrupts = <42 0x8>;
++        interrupt-parent = <&ipic>;
++        /* Filled in by U-Boot */
++        clock-frequency = <100000000>;
++        voltage-ranges = <3300 3300>;
++    };
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+deleted file mode 100644
+index edb8cadb95412..0000000000000
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ /dev/null
+@@ -1,52 +0,0 @@
+-* Freescale Enhanced Secure Digital Host Controller (eSDHC)
+-
+-The Enhanced Secure Digital Host Controller provides an interface
+-for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the sdhci-esdhc driver.
+-
+-Required properties:
+-  - compatible : should be "fsl,esdhc", or "fsl,<chip>-esdhc".
+-    Possible compatibles for PowerPC:
+-	"fsl,mpc8536-esdhc"
+-	"fsl,mpc8378-esdhc"
+-	"fsl,p2020-esdhc"
+-	"fsl,p4080-esdhc"
+-	"fsl,t1040-esdhc"
+-	"fsl,t4240-esdhc"
+-    Possible compatibles for ARM:
+-	"fsl,ls1012a-esdhc"
+-	"fsl,ls1028a-esdhc"
+-	"fsl,ls1088a-esdhc"
+-	"fsl,ls1043a-esdhc"
+-	"fsl,ls1046a-esdhc"
+-	"fsl,ls2080a-esdhc"
+-  - clock-frequency : specifies eSDHC base clock frequency.
+-
+-Optional properties:
+-  - sdhci,wp-inverted : specifies that eSDHC controller reports
+-    inverted write-protect state; New devices should use the generic
+-    "wp-inverted" property.
+-  - sdhci,1-bit-only : specifies that a controller can only handle
+-    1-bit data transfers. New devices should use the generic
+-    "bus-width = <1>" property.
+-  - sdhci,auto-cmd12: specifies that a controller can only handle auto
+-    CMD12.
+-  - voltage-ranges : two cells are required, first cell specifies minimum
+-    slot voltage (mV), second cell specifies maximum slot voltage (mV).
+-    Several ranges could be specified.
+-  - little-endian : If the host controller is little-endian mode, specify
+-    this property. The default endian mode is big-endian.
+-
+-Example:
+-
+-sdhci@2e000 {
+-	compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
+-	reg = <0x2e000 0x1000>;
+-	interrupts = <42 0x8>;
+-	interrupt-parent = <&ipic>;
+-	/* Filled in by U-Boot */
+-	clock-frequency = <0>;
+-	voltage-ranges = <3300 3300>;
+-};
+
+-- 
+2.34.1
 
