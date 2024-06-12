@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 359FE16B753;
-	Wed, 12 Jun 2024 06:30:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3196E169AF7;
+	Wed, 12 Jun 2024 06:31:42 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718173841; cv=none; b=UcGfBNlFIrwg6PE1aCnL3+6Safs5WYhMsg3QDBBkjKznhHx/sz88Yu6nFhjzIsXdY8RgQsDYv2aU0MQdk+ek6gXme9RhAcbgnFn9PjsLZCWDeXLRdAswRGXftGn+VsPGCw1+S/N5KtZ4yug1M9ajIEMW8A8JwNGxTJSSS2vdusI=
+	t=1718173902; cv=none; b=SdM9yiwDH6IBjJ/+xAlD88jCo8/KVHh1Z+8Zfmw43XM+61cRYrKzyPPYuzX45FV7d8Br8ZMdaZZn6t3j+SvCeO3XKu6X/dQweIJj5GsAvPWFOAN2Wew8oTErFZm1OpaALiXVHBaDbvgYoikGeXWTvpi5dUfN7sy4tp3PV175DqE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718173841; c=relaxed/simple;
-	bh=/brZ8Bm/ujKNea1kD2AZUfepAHKz3kdRlxre0z2RpAM=;
+	s=arc-20240116; t=1718173902; c=relaxed/simple;
+	bh=i1+VOgf7JC0IY2Ue96bb89W2YVnFv+gDNbzNiyd5/q0=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AhfXswRmfe4E0Vopg4dOmer0auf0VmUuKvvboQHqlmlI+zhcV6Qy55zZ1xLnOiN7eczbTCw2GC8JXmxG6Lio1HtxqNXWtWKKSJP8kCUv1Iz8+PvykCzFkogumUISTJ8LpwRVt2enTNYAZjkBZtX9CNo8/QdaT6+pE3IO1t0/TqQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O3x2QI5r; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=utSAzue5sGbrPjuf9wzQBAROqEvwnPQthrS79ovfCAlO1jA6N62xdZsbUk5pGS58jVRARUMWhf4civoHlTinWbCkVo2rbEB+i8mII+HPy5EfNo6f2J+m1+dUzeGYM5zql7YxxP53OKWTsENuxZYXmJFSq4QIIKbnnQl6TY51qjc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Rd8NHwVX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O3x2QI5r"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2B87C4AF1C;
-	Wed, 12 Jun 2024 06:30:36 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Rd8NHwVX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D8BBAC32786;
+	Wed, 12 Jun 2024 06:31:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718173840;
-	bh=/brZ8Bm/ujKNea1kD2AZUfepAHKz3kdRlxre0z2RpAM=;
+	s=k20201202; t=1718173902;
+	bh=i1+VOgf7JC0IY2Ue96bb89W2YVnFv+gDNbzNiyd5/q0=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=O3x2QI5rb4Ech92Xzx1LY3lScfQuzAbA0ei+iuX57E+RK0ZkHJBbEPA9/HwcWgIOA
-	 iuAUkpnrfUjRkABPwB7GI1UzSKkB8oSG5dIbfClnnBp1RukGBZlYq+02nMfJuU0MgC
-	 5PsgHGYN7KjXy5w2whNiYOt94FmKcsQlpTQ6KdZlUDfTxkc3vXcvJYgwEM5mb7RLdp
-	 9PkvyOeY5/+c8dvx1FN5FGgyLdIftkJrGxEWvKUq/qMtUwzeSIwnERLVnZ4VGii64a
-	 e/XsLL1WLyYZJcvuf315ScrYcUcdAIlp9+XWFVYAiAlJP1ABzWHm6IOOACp0YvSaev
-	 fESkXEekUtoSA==
-Message-ID: <7ea69c8d-d3ba-41e3-bcde-cd10274ff498@kernel.org>
-Date: Wed, 12 Jun 2024 08:30:34 +0200
+	b=Rd8NHwVXBMipTVyHNug/0buJUjjOlMn7ixTsf7iHfBIlmyWVwFCfiNfyFEPWcuF3b
+	 ThitVPfEqHnFE+9aGbq9s2Xj9+VbdfdhUkoC1g5WPHxVhT2WJYbp4ACwTM8tYAaah8
+	 NibboH/m1kkuJ5CPMgNlfhucvWIgynROX0w5r/XNtHfJwaMDucS4j0NuugpPsNw0UK
+	 gS8YQXfUaRXs5xy1gFd8oNMAacqkkycJx81/gOeFy5HUE57FZtIBE1FTMwY4+iRZ4l
+	 YZZtFcqJzoagK/RH0QlkDX+PnpLfpVl7845RoKHFOw5GqRh9ueMk+oWHqhENijPlo1
+	 G1K2xIOT+uoDQ==
+Message-ID: <c0fb3d95-c61b-4808-96c7-dcc45384ec2b@kernel.org>
+Date: Wed, 12 Jun 2024 08:31:35 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,15 +35,17 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 1/8] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-To: Frank Li <Frank.Li@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+Subject: Re: [PATCH v4 0/8] arm64: dts: convert fsl,esdhc.txt to yaml and fix
+ layerscape dts warning
+To: Rob Herring <robh@kernel.org>, Frank Li <Frank.Li@nxp.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
  imx@lists.linux.dev
 References: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
- <20240611-ls_waring_esdhc-v4-1-d0d8a5b3f3cb@nxp.com>
+ <20240611201631.GA3003237-robh@kernel.org>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -89,31 +91,41 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
  7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
  5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
-In-Reply-To: <20240611-ls_waring_esdhc-v4-1-d0d8a5b3f3cb@nxp.com>
+In-Reply-To: <20240611201631.GA3003237-robh@kernel.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 11/06/2024 18:01, Frank Li wrote:
-> Convert layerscape fsl-esdhc binding doc from txt to yaml format.
+On 11/06/2024 22:16, Rob Herring wrote:
+> On Tue, Jun 11, 2024 at 12:01:45PM -0400, Frank Li wrote:
+>> Start from v4 because fsl.esdhc.txt to yaml already sent out as v3.
+>>
+>> Change from v3 to v4
+>> - Add dts warning fixes
+>> - Add mmc-spi-slot's voltage range fix, (not sure why it apply to
+>> layserscape's dts file.
+>> - clock-frequency is not required property
+>> - add dma-conherence: true in binding doc
+>>
+>> Now only "bit-endian" proptery warning left.
+>>
+>> Signed-off-by: Frank Li <Frank.Li@nxp.com>
+>> ---
+>> Frank Li (8):
+>>       dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
+>>       dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to uint32-matrix
 > 
-> Addtional change during convert:
-> - Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
-> - Add "reg" and "interrupts" property.
-> - Change example "sdhci@2e000" to "mmc@2e000".
-> - Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
-> most existed dts file.
-> - Set clock-frequency to 100mhz in example.
-> - clock-frequency is not required now.
-> - Allow dma-coherence
-> - Add clocks
+>>       arm64: dts: ls1012a: Chang node name from 'esdhc' to 'mmc'
+>>       arm64: dts: ls1043a: Chang node name from 'esdhc' to 'mmc'
+>>       arm64: dts: ls1046a: Chang node name from 'esdhc' to 'mmc'
+>>       arm64: dts: ls1088a: Chang node name from 'esdhc' to 'mmc'
+>>       arm64: dts: ls208ax: Chang node name from 'esdhc' to 'mmc'
+>>       arm64: dts: lx2160a: Chang node name from 'esdhc' to 'mmc'
 > 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> 
+> It is all the same change to the same maintainer, so these can be just 
+> one patch. Then you just have 1 typo to fix.
 
-This should be reversed with the second patch, because first you fix
-voltage-ranges to the same type, then you use it.
-
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Yeah, considering that this is trivial node name alignment, so rather
+style issue.
 
 Best regards,
 Krzysztof
