@@ -1,264 +1,135 @@
-Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EF98168C13
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 06:56:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC8F116C6B1
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 08:01:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718175382; cv=none; b=UzxbW2H2qj4U9bQlU4chKt+mjZicVDBlgttCvSHQhgupOdYwbPtg4RL0olMqG2ds6n3Oc+SvNfWuUvejyVSF3EeSFP0CE/YeRK1h+Cbu153rEy7zaca7Z1p2FkitbgM9MS5cu5YLbXEnpgJpKHMEXoufx8CUR6Pa17nOMoSFN1g=
+	t=1718179285; cv=none; b=jYIVp5SASHfofojl3AyZwE0ee5W5NGSN2Mx5iUDr9ZrOzKzizjqLw2uxAD/tXgPci5xpDrIcBEQ3ti1wK0u/TeAAh2B5yS3bb8y1r01UM4Wqfp6eA1M0wb4pY6AmU3RQqyI3hehnURW0FO7y2iJ6uQs/7xhZIcwR4RoOMwdLeOg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718175382; c=relaxed/simple;
-	bh=2Ua0nGG0EAK9OtUoDrHzQ2WSgUsgITqxokxmviplgzQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=sLGoIZk1p0OOCwawpuVcL3fqzpwQytWFVcksFFvmgvzWppEueIvUVYU8v9xp8P/HGwU3dt4Slej/CMrZXPrK68K5U04CGv6IQTOQBLNspp74QSxo30qZsiEzlErDwO8qGkOYP98sJU/ZUIEu+qBh7viSaJD6fFm+KUn3nAQN0B8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oHMb1Jq7; arc=none smtp.client-ip=209.85.160.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1718179285; c=relaxed/simple;
+	bh=2cExcM3FQdKVHy7cL3IiNx2Bk/UFeUgrDgrQcqyJhl8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=oHQk7bpP6ts8iPbVra6eNmsUW0pHVhPPTo9SBylAtsIqC7GZngcoEA4AcZeo7BuMKwXb6szCUZKxxTw2z2NyyieoxK2/3Ihnd4mnOsixAwPXXitOuMQtEIOy+F5FucoFtD+mtwBipyvlEwQJ9IYtQGJ5TQV3WMfKwr19u+yYKeI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com; spf=pass smtp.mailfrom=cloud.com; dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b=wGSiQ07I; arc=none smtp.client-ip=209.85.128.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloud.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oHMb1Jq7"
-Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-254c22faf4cso1323784fac.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Jun 2024 23:56:20 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b="wGSiQ07I"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-62cecc3f949so23116157b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 01:01:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718175379; x=1718780179; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Fz+vtmXVQrksH83NPuXPvwENKWM7qR/JOFyTm8EoID8=;
-        b=oHMb1Jq7aW9IwmNtGLrM2cJX4GuzcjcqGFY6Mlna/5GK3cEO8Nl09PIP5d7dMhB7zG
-         o68aTn/xLA+N4oSR9tVXTdSJ9Or3RV+oPRGRFzPontSGGETXeUUGG1YOVN7cJ/wPjl2K
-         mO04zHn8oGfdo0reRRfY/cPoOunkgLOZoS0gVwmwD90yYx+lKrWRYZHuQH2RsQ6A9ULd
-         ObqmnM935LT/g1m9yEKxMqsl66f8XCrBfh4Ivvws0M0dXfGiLf/oAutdTQedKsGuswkI
-         seRBYangONDG3UhTWsNGSGDXPqilyr3JBnnefHXq6d+Vv1WCgD45EilePQoIhsKiGxPQ
-         XE3A==
+        d=citrix.com; s=google; t=1718179283; x=1718784083; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=1PGf6HlJc1ANQenmlixWu1Sno9FA8D3ndcnX4NZVy9I=;
+        b=wGSiQ07IIsz3I5o3sJPfsRh6+YQ4aS+dl8faDVi6tCb8oJsgDTIAJhb3nIcw252bU0
+         nDpxqZOv3GJrkXMrxGioYAsvh4Pq/cnolHHO/TtN2xI0rAGtwEWsQRY4QkfU7k3Bm65M
+         hGrDJE6dultwgkDJcvbr8RkJ/+8f2Omv1w+bg=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718175379; x=1718780179;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Fz+vtmXVQrksH83NPuXPvwENKWM7qR/JOFyTm8EoID8=;
-        b=lHXXx9+bRhKNOJJuO/9m1Tc6NoalsxHkxcqhrs5L9dntaKYl7/C1dnseCWt0gIsWsA
-         g/VvRAjTjwNUc5ZeHgNOTkU2jrNaPWWnKjCkqDQSaM2MoM734kc/Ues4dBxhQGzD+p+i
-         iyFLzTbqWuUiRY8Aip959GcoZLTy3JDok2xt9uHOzAL0RZ2nBQ25F5igSkblpHjiBmXh
-         2qrISL36GuW1+AauxdXWlCFf/hmweXoSKRckKA9VzPxUUz0LOdzQohUybRgmrzNuSNTL
-         LXafBtlePR8KWVly2CV5kfuE9j1quP2TbC1ngSdqNojZ9Qvyb4EOtIy54VMSN+BN+Y4C
-         VE8g==
-X-Forwarded-Encrypted: i=1; AJvYcCUYfKhM0w80AYmISQ6MRxyJZEpywDAnskiIbb7xG8YmNrS/nXficcNsn3xZHdmdNWYU74T3TAMAvLUZnorJz7nX+w6UfjmW3L5s
-X-Gm-Message-State: AOJu0YxsFqBYqfIovAELmI65Wfcb78v0L66ERPo8MYcRSrs64JreoO0F
-	F1ePc9K3h8rLhlCQgbipuzl8DifmtNMOAZbYI6Ns1xEGCR/ONJGFWJ9yM3yDZZ/TVyaTQwwWBkD
-	PIhQTQdL/mBQtjvCd3ahiivupiKv8FfFbqj2hWA==
-X-Google-Smtp-Source: AGHT+IHEbPnS3vGWtKgLg5y/Xl1GQNVn/cBKHYQZbPYu2bxiWaoRaiZv7DNixRQUCHror/nc1b+hktM0NXzAqzsf+kE=
-X-Received: by 2002:a05:6870:ce88:b0:24f:e09d:3c83 with SMTP id
- 586e51a60fabf-25514e367d7mr1089220fac.36.1718175379100; Tue, 11 Jun 2024
- 23:56:19 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1718179283; x=1718784083;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1PGf6HlJc1ANQenmlixWu1Sno9FA8D3ndcnX4NZVy9I=;
+        b=xI9OFgKWcdojguYgBE2FZkGHXKe7v+ZCUBf3tL+7gzPQ3NdNEdfsnZOs6Y9CfNYBiQ
+         DjrBcosSdwUcoG+9RdvHt/y2m2/POYi8+2AdZlVTDR+QeNq4F9SnoAMbfRq0FlXcHwnV
+         8IxiDVKU+q5KZFlTVNi7zU7lYSzlyeX4VhuCwSPrLxprHbTriqFLy7CbLHut1KXS8xAs
+         8OjgI/HWgTnD0vYRUhTJ9kUwLY7XP43So+TfxkDGRgnHLSc4eH2t4E3cpn81GAG0xaYq
+         JDM3mr2GYrIbYr6S+RU4mWQVCmJKLCLSalFUJXtnBZmEGN9ZIGc7zSfOMd+ccXsbQYl6
+         Z0Yg==
+X-Forwarded-Encrypted: i=1; AJvYcCXN5PWs5GJhXTQYPo2s17txnDxmyjY1m/AQj1+6Pu/9ioE2y0VLRSvBGI1tkC19fZjj1wQoH+knGwYgOxS5o9DqF0SOtsfSz8TZ
+X-Gm-Message-State: AOJu0YyxISQisoB9Bbs9xrqcFeW3KWAETR5r8eDtfX/rFH7t81kAZM8d
+	Tk1Wa9MgoAlRosAAT/tNlEHgqfUfI2nX7JeLifYYPic7vLVJn47D3kt/y6e1HiA=
+X-Google-Smtp-Source: AGHT+IEk5bObzz8qCZsqdRqFNOU7a/dh67daOPgnEKJGJzh0sP06pKqPApTvT03CHGJxr8rf1zPYww==
+X-Received: by 2002:a81:b647:0:b0:61b:e62e:73f1 with SMTP id 00721157ae682-62fb8a58273mr12605907b3.3.1718179282688;
+        Wed, 12 Jun 2024 01:01:22 -0700 (PDT)
+Received: from localhost ([46.222.2.38])
+        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-6b093aff889sm6894416d6.101.2024.06.12.01.01.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Jun 2024 01:01:22 -0700 (PDT)
+Date: Wed, 12 Jun 2024 10:01:18 +0200
+From: Roger Pau =?utf-8?B?TW9ubsOp?= <roger.pau@citrix.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@kernel.dk>, Geert Uytterhoeven <geert@linux-m68k.org>,
+	Richard Weinberger <richard@nod.at>,
+	Philipp Reisner <philipp.reisner@linbit.com>,
+	Lars Ellenberg <lars.ellenberg@linbit.com>,
+	Christoph =?utf-8?Q?B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
+	"Michael S. Tsirkin" <mst@redhat.com>,
+	Jason Wang <jasowang@redhat.com>, Alasdair Kergon <agk@redhat.com>,
+	Mike Snitzer <snitzer@kernel.org>,
+	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
+	Yu Kuai <yukuai3@huawei.com>,
+	Vineeth Vijayan <vneethv@linux.ibm.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
+	drbd-dev@lists.linbit.com, nbd@other.debian.org,
+	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
+	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
+	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
+	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
+	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
+Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when
+ they fail
+Message-ID: <ZmlVziizbaboaBSn@macbook>
+References: <20240611051929.513387-1-hch@lst.de>
+ <20240611051929.513387-11-hch@lst.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240527121340.3931987-1-jens.wiklander@linaro.org>
- <20240527121340.3931987-5-jens.wiklander@linaro.org> <Zl2Ibey9Qck-VLWE@manut.de>
- <CAHUa44GAiUf9+PxqhXOwGfOuc250YDyJ7uzGe2B1bGmBw2iegg@mail.gmail.com>
- <Zme-NMa3Bvp2h7aL@nuoska> <CAFA6WYPYSfrDtnLPRs7_0h5Hf01oPfOpqmt4c7_Twxv-re87xQ@mail.gmail.com>
- <Zmj2Wg_YqdebN3xO@nuoska>
-In-Reply-To: <Zmj2Wg_YqdebN3xO@nuoska>
-From: Jens Wiklander <jens.wiklander@linaro.org>
-Date: Wed, 12 Jun 2024 08:56:07 +0200
-Message-ID: <CAHUa44FP_eN+S4QBWJWmZ6PLptYg1+9iackz9P4Q1_Yc5EK3tQ@mail.gmail.com>
-Subject: Re: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
-To: Mikko Rapeli <mikko.rapeli@linaro.org>
-Cc: Sumit Garg <sumit.garg@linaro.org>, Manuel Traut <manut@mecka.net>, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org, 
-	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
-	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
-	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Peter Huewe <peterhuewe@gmx.de>, 
-	Jarkko Sakkinen <jarkko@kernel.org>, Jason Gunthorpe <jgg@ziepe.ca>, linux-integrity@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20240611051929.513387-11-hch@lst.de>
 
-On Wed, Jun 12, 2024 at 3:14=E2=80=AFAM Mikko Rapeli <mikko.rapeli@linaro.o=
-rg> wrote:
->
-> Hi,
->
-> Adding TPM maintainers and linux-integrity since discussion relates to fi=
-rmware TPM
-> driver tpm_ftpm_tee
->
-> On Tue, Jun 11, 2024 at 04:13:21PM +0530, Sumit Garg wrote:
-> > On Tue, 11 Jun 2024 at 08:32, Mikko Rapeli <mikko.rapeli@linaro.org> wr=
-ote:
-> > >
-> > > Hi,
-> > >
-> > > On Mon, Jun 10, 2024 at 02:52:31PM +0200, Jens Wiklander wrote:
-> > > > Hi Manuel,
-> > > >
-> > > > On Mon, Jun 3, 2024 at 11:10=E2=80=AFAM Manuel Traut <manut@mecka.n=
-et> wrote:
-> > > > >
-> > > > > On 14:13 Mon 27 May     , Jens Wiklander wrote:
-> > > > > > --- a/drivers/tee/optee/ffa_abi.c
-> > > > > > +++ b/drivers/tee/optee/ffa_abi.c
-> > > > > > @@ -7,6 +7,7 @@
-> > > > > >
-> > > > > >  #include <linux/arm_ffa.h>
-> > > > > >  #include <linux/errno.h>
-> > > > > > +#include <linux/rpmb.h>
-> > > > > >  #include <linux/scatterlist.h>
-> > > > > >  #include <linux/sched.h>
-> > > > > >  #include <linux/slab.h>
-> > > > > > @@ -903,6 +904,10 @@ static int optee_ffa_probe(struct ffa_devi=
-ce *ffa_dev)
-> > > > > >       optee->ffa.bottom_half_value =3D U32_MAX;
-> > > > > >       optee->rpc_param_count =3D rpc_param_count;
-> > > > > >
-> > > > > > +     if (IS_REACHABLE(CONFIG_RPMB) &&
-> > > > > > +         (sec_caps & OPTEE_FFA_SEC_CAP_RPMB_PROBE))
-> > > > > > +             optee->in_kernel_rpmb_routing =3D true;
-> > > > >
-> > > > > The SEC_CAP_RPMB_PROBE flag seems to be missing in optee_os at th=
-e moment.
-> > > > > If I remove this check here, the series works for me.
-> > > >
-> > > > You're right, I missed pushing those flags to optee_os. I've pushed=
- them now.
-> > >
-> > > Thanks! Tested with optee 4.1 and your patches from
-> > > https://github.com/jenswi-linaro/optee_os/commits/rpmb_probe_v7/
-> > > in Trusted Substrate uefi firmware
-> > > ( https://gitlab.com/Linaro/trustedsubstrate/meta-ts/ )
-> > > and this series and a bunch of dependencies backported to
-> > > our Trusted Reference Stack
-> > > ( https://trs.readthedocs.io/en/latest/ )
-> > > 6.6.29 kernel on rockpi4b (rk3399 ARM64 SoC) with secure boot and
-> > > the optee side fTPM TA device used to create an encrypted rootfs with
-> > > systemd. Kernel side RPMB routing is in use and works for the TPM use=
- cases.
-> > >
-> >
-> > Glad to see that you can get fTPM to work without tee-supplicant after
-> > this patch-set.
->
-> Sorry but the fTPM TA only works with tee-supplicant in userspace. It's n=
-eeded
-> for RPC setup. For RPMB it is not needed or used with these patches appli=
-ed.
+On Tue, Jun 11, 2024 at 07:19:10AM +0200, Christoph Hellwig wrote:
+> blkfront always had a robust negotiation protocol for detecting a write
+> cache.  Stop simply disabling cache flushes when they fail as that is
+> a grave error.
 
-I've never been able to find out what fTPM is trying to do with
-tee-supplicant at this stage. I guess the RPC is a shared memory
-allocation preparing for another request.
+It's my understanding the current code attempts to cover up for the
+lack of guarantees the feature itself provides:
 
->
-> > > Full boot and test log (with unrelated test failures)
-> > > https://ledge.validation.linaro.org/scheduler/job/88692
-> > >
-> > > root@trs-qemuarm64:~# cat /sys/class/tee/tee0/rpmb_routing_model
-> > > ...
-> > > kernel
-> >
-> > So coming back to the real question, do we really need this new
-> > rpmb_routing_model ABI? Did systemd still need it with no
-> > tee-supplicant dependency? IMHO, a user-space ABI requires use-case
-> > justification otherwise it's just going to add on maintenance burden.
->
-> Currently it is not needed, because tee-supplicant is still required to
-> setup RPC with fTPM. If the RPC setup were also done in kernel directly a=
-nd
-> tee-supplicant need is removed, then this kind of ABI is important so tha=
-t
-> userspace init knows if it needs to queue startup of tee-supplicant or no=
-t.
->
-> On a related note, the kernel tpm_ftpm_tee driver for fTPM TA really has
-> a hard dependency to tee-supplicant in userspace. If tee-supplicant is st=
-opped,
-> restarted etc without unloading the kernel module (or otherwise disabling=
- the TPM device),
-> then all TPM device actions done without tee-supplicant running will fail=
- ane keep
-> failing until next reboot. The kernel driver is not crashing but all func=
-tionality
-> breaks.
->
-> The availability of tpm_ftpm_tee should be tied much harder to the tee-su=
-pplicant
-> running in userspace, e.g. optee should be in charge to start and bring t=
-pm_ftpm_tee down
-> based on tee-supplicant userspace daemon availability. Or the needed tee-=
-supplicant code
-> should be moved to kernel side. Currently systemd side init scripts have =
-issues switching
-> from initrd to main rootfs since they need to disable tpm_ftpm_tee driver=
-, built in or a module,
-> before shutting down tee-supplicant. A suspend or other inactive state in=
- the ftpm driver
-> needs to be triggered, which AFAIK is not currently possible, at least fr=
-om userspace
-> (I'd happy be proven wrong here).
->
-> An alternative for tpm_fptm_tee driver is to use optee APIs so that the c=
-alls
-> wait for tee-supplicant in userspace if needed:
->
-> --- a/drivers/char/tpm/tpm_ftpm_tee.c
-> +++ b/drivers/char/tpm/tpm_ftpm_tee.c
-> @@ -237,6 +237,9 @@ static int ftpm_tee_probe(struct device *dev)
->                 return PTR_ERR(pvt_data->ctx);
->         }
->
-> +       /* wait for tee-supplicant in userspace, fTPM TA really depends o=
-n it */
-> +       pvt_data->ctx->supp_nowait =3D false;
-> +
->         /* Open a session with fTPM TA */
->         memset(&sess_arg, 0, sizeof(sess_arg));
->         export_uuid(sess_arg.uuid, &ftpm_ta_uuid);
->
-> This works pretty well for the tee-supplicant initrd to main rootfs switc=
-h but currently
-> breaks for example reboot (just hangs), and Jens doesn't approve of this =
-as a
-> real solution.
+ * feature-barrier
+ *      Values:         0/1 (boolean)
+ *      Default Value:  0
+ *
+ *      A value of "1" indicates that the backend can process requests
+ *      containing the BLKIF_OP_WRITE_BARRIER request opcode.  Requests
+ *      of this type may still be returned at any time with the
+ *      BLKIF_RSP_EOPNOTSUPP result code.
+ *
+ * feature-flush-cache
+ *      Values:         0/1 (boolean)
+ *      Default Value:  0
+ *
+ *      A value of "1" indicates that the backend can process requests
+ *      containing the BLKIF_OP_FLUSH_DISKCACHE request opcode.  Requests
+ *      of this type may still be returned at any time with the
+ *      BLKIF_RSP_EOPNOTSUPP result code.
 
-Yes, the hang part is my main concern.
+So even when the feature is exposed, the backend might return
+EOPNOTSUPP for the flush/barrier operations.
 
->
-> So as an alternative, userspace needs to be very careful in initrd and ro=
-otfs
-> to start tee-supplicant earlier than loading tpm_ftpm_tee driver which ca=
-n
-> only be supported as module and removed before shutting down tee-supplica=
-nt.
+Such failure is tied on whether the underlying blkback storage
+supports REQ_OP_WRITE with REQ_PREFLUSH operation.  blkback will
+expose "feature-barrier" and/or "feature-flush-cache" without knowing
+whether the underlying backend supports those operations, hence the
+weird fallback in blkfront.
 
-Unbind/bind via sysfs might be an option. But that's still only a
-workaround since getting rid of the tee-supplicant dependency in
-initrd should avoid the problem entirely.
+I'm unsure whether lack of REQ_PREFLUSH support is not something that
+we should worry about, it seems like it was when the code was
+introduced, but that's > 10y ago.
 
-Cheers,
-Jens
+Overall blkback should ensure that REQ_PREFLUSH is supported before
+exposing "feature-barrier" or "feature-flush-cache", as then the
+exposed features would really match what the underlying backend
+supports (rather than the commands blkback knows about).
 
-> In other use cases, TPM drivers are only supported if driver is built int=
-o
-> the kernel (or ACPI table entry for a TPM device exists) which I'm trying
-> to change with
->
-> [PATCH] efi: expose TPM event log to userspace via sysfs
->
-> https://lore.kernel.org/lkml/20240422112711.362779-1-mikko.rapeli@linaro.=
-org/
->
-> where userspace init can check if it should wait longer for the tpm devic=
-e to appear,
-> e.g. let udev load optee etc drivers which eventually start also tee-supp=
-licant and
-> thus load tpm_ftpm_tee driver (fTPM TA enumration is tied to tee-supplica=
-nt in userspace
-> https://git.yoctoproject.org/meta-arm/tree/meta-arm/recipes-security/opte=
-e-ftpm/optee-ftpm/0001-add-enum-to-ta-flags.patch )
->
-> Cheers,
->
-> -Mikko
+Thanks, Roger.
