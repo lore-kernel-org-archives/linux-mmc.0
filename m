@@ -1,81 +1,83 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26A7716F295;
-	Wed, 12 Jun 2024 16:40:44 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D93B843144;
+	Wed, 12 Jun 2024 20:48:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718210444; cv=none; b=TCV+sDWR8F2eWL/BmBt/0uQ/Mp/bByOW+C7VzYJfT+9lxcoYmkIPoJgGvgs++WEqdu7gqG7OiMj6JQ48A6+WzHJWT+P8D5jUoQLgK6RyilOBXtCqTpLfwR1lghPX5czW5dfoHUfKkuhLvAXCxsyrfU2elZSWreZQUnfT9ABp72E=
+	t=1718225301; cv=none; b=TOqs6bUEfETx+8wVTv8QscxFkNEA82Ft74MGJJFzd0P0F5EZizhRqNEi3vB0oZCbje5bV0opedYItRGGRKw+OpoAVQ4UDq49L2cQoC2+s0i9djNUlLaxoIv2XpoDIjIIShs+jQr2t3lossyU9jKF1NkdaImfSqKLr5If/fAPfjc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718210444; c=relaxed/simple;
-	bh=85XKwtq8lgNQ9l2YL8a7SauGQb3hZbNGMy8WU/0vk1g=;
+	s=arc-20240116; t=1718225301; c=relaxed/simple;
+	bh=MfGZFVPsFpf3+XCOO+MmYqSxn4sBXKGuxmCFvCgEDG0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t2+qwRS+R7ZTYSAqZ1aJKYGKK5c66Xc5l99EXcQ4oRs2EvBkojqaWlvTLEybNL0CggFUGGOVq0FCT6GJpSVcyp2JjuAbVv6OYRzaIHCYLOHHLdnqm/9rS4mr1U9ILNf1n1soVEKZ+cqUgwg8dKHjOEd8YcUUdXl1xN0u0Gksfhs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Onyhj8Vn; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=cnLCAuYMSI6dKwKzBQTbHkqvQGF/yu6SxFkhFRwxKojg2jDB1Fq+L82Sb+cS69Wy6XBEIrqcpOAauFdEYbyhEMha2IAPtg5sExf7lJzajGeBACemBU7f5S11VmKTl+El4E+34h/r5k/iqvOsRmJPPRaP7yM4Fzihy12e7esKBEc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UgrkWcnv; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Onyhj8Vn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43E9AC116B1;
-	Wed, 12 Jun 2024 16:40:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UgrkWcnv"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B3126C116B1;
+	Wed, 12 Jun 2024 20:48:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718210444;
-	bh=85XKwtq8lgNQ9l2YL8a7SauGQb3hZbNGMy8WU/0vk1g=;
+	s=k20201202; t=1718225300;
+	bh=MfGZFVPsFpf3+XCOO+MmYqSxn4sBXKGuxmCFvCgEDG0=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=Onyhj8VnaDXMhsbCz7cO+Y8QwfDHUHrbPdQuUwf3RtVAPOQVp6hFN36QZkn8UZyjj
-	 z1QiIOV9ySHhisFsBLEpfP2/jcgqX8ctchnG4WmeDsX3PaGsAEOnBNpF2HF8tMjpVI
-	 wD+mXurj7sKz1FUlW6atUkUhBcvK35uqQ0c26t3unHt78YjVQJVoj7018kqF8S5LHR
-	 LBWVa0N2JqW9XnK4rGJZskhVQOStjDYwhYUASlE46Z8ljlljsy1dHvta3r4ja0vywE
-	 cEK/TmxyBAu12SgetSgLfa+6PAMVBdf4AzaMXC8ia2LsIELW/GWOx4VmHhJS1NWL/C
-	 heUprjyrZFDQw==
-Date: Wed, 12 Jun 2024 17:40:39 +0100
-From: Mark Brown <broonie@kernel.org>
-To: Conor Dooley <conor@kernel.org>
+	b=UgrkWcnvbcG+QCx5ZOYMW8duHqfdUz0RMpJBQxsDa3J/CS1kht88B60gsxIsW3A3k
+	 KnKojcgQJMQLWvYpbWqsNcB/2ka8srXcU1BLFjr09Nryldm3DjaupHRjCqZVNyIHpE
+	 +5GZyxy114uCqtB20n0g8S+RjZ0cZWzg9/YS60GaaDp5++zq5hCQUyKCveUWOEV9z8
+	 5OyWEQMvUHS9Q2LjOU8M3PZZbUR8xk4m3L++O8kNBUodevnuI4JLumx2y+jjfDJlbS
+	 XowRSqyOqDISCAQuWAdxBCSyZ2O0Lfx/ujN6Q0bWQegM8QzewB9TenZTRFMF2+iV5i
+	 v6uNYH53jOokw==
+Date: Wed, 12 Jun 2024 21:48:16 +0100
+From: Conor Dooley <conor@kernel.org>
+To: Mark Brown <broonie@kernel.org>
 Cc: linux-mmc@vger.kernel.org, Conor Dooley <conor.dooley@microchip.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>, cyril.jean@microchip.com,
 	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
 	linux-spi@vger.kernel.org
 Subject: Re: [RFC v1 2/3] spi: microchip-core-qspi: Add regular transfers
-Message-ID: <ZmnPh39YyfS4ocNU@finisterre.sirena.org.uk>
+Message-ID: <20240612-spending-stalling-62070dbbcf3d@spud>
 References: <20240612-brigade-shell-1f626e7e592f@spud>
  <20240612-uphold-dinner-a47b4c44be18@spud>
+ <ZmnPh39YyfS4ocNU@finisterre.sirena.org.uk>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="MdwxjcRzQ3pyUpUj"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="biSQJgC0nBJ0ng09"
 Content-Disposition: inline
-In-Reply-To: <20240612-uphold-dinner-a47b4c44be18@spud>
-X-Cookie: Your love life will be... interesting.
+In-Reply-To: <ZmnPh39YyfS4ocNU@finisterre.sirena.org.uk>
 
 
---MdwxjcRzQ3pyUpUj
+--biSQJgC0nBJ0ng09
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jun 12, 2024 at 04:48:32PM +0100, Conor Dooley wrote:
+On Wed, Jun 12, 2024 at 05:40:39PM +0100, Mark Brown wrote:
+> On Wed, Jun 12, 2024 at 04:48:32PM +0100, Conor Dooley wrote:
+>=20
+> > +	//TODO: questionable robustness if both cs_change and cs_off toggle
+> > +	list_for_each_entry(t, &m->transfers, transfer_list) {
+> > +		//cs_change being set means we need to re-enable
+>=20
+> Is it not possible to implement prepare_message() and transfer_one()
+> rather than open coding all this?
 
-> +	//TODO: questionable robustness if both cs_change and cs_off toggle
-> +	list_for_each_entry(t, &m->transfers, transfer_list) {
-> +		//cs_change being set means we need to re-enable
+If I can, I will. I already found one issue with the cs toggling in the
+code Cyril gave me and I need to figure out why there's a udelay(750)
+required later on in the function anyway!
 
-Is it not possible to implement prepare_message() and transfer_one()
-rather than open coding all this?
-
---MdwxjcRzQ3pyUpUj
+--biSQJgC0nBJ0ng09
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmZpz4YACgkQJNaLcl1U
-h9AVQwf+MGtExjI/bWW1yGC4RO+HV4ZjtGV3c7j96NAiLdf+87svqV9in+GrvgRZ
-Gv3J0UZoID/NR9sJoPYXZ1j9KR7cD/ps2pScjog4b8t7K1RKGzO1lck5WOlh+c4E
-D9WThX1LgACsUO8N0tplHE2OK/86wJe6LiSrJttKezDV+RpuvevMMAFs1vv9M+CV
-abVC0AHa//7OZ9gYfzg3tLeclZCtrnHSvfG6ftXwso1glyYK3ky6sR+JN0BwvoXV
-4o8mXO6+SyWkx7p/8FVVZ3qM21w3UHodxvslwMKAlXmAIdXes8c4v1wlUUuzr4sK
-sSThubOWebv8HG4Pc3SfyEldXQ6CHQ==
-=pdjw
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZmoJkAAKCRB4tDGHoIJi
+0oIOAQCI5MxS5rORWIKfQ0df26eMH0LZJpvdduLKgF9ND2AMjwEAjwqa72ze/NHD
+y6U4StWSZ8PThzRWia2S0or0/neQvA4=
+=JRBj
 -----END PGP SIGNATURE-----
 
---MdwxjcRzQ3pyUpUj--
+--biSQJgC0nBJ0ng09--
