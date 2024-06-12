@@ -1,157 +1,81 @@
-Received: from mail-qv1-f53.google.com (mail-qv1-f53.google.com [209.85.219.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA851181325
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 15:56:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26A7716F295;
+	Wed, 12 Jun 2024 16:40:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718207781; cv=none; b=UIx1RV1431qcgWcQzevgIZxtLFYos1Vmb6r5NOZ5MegZ7Xky5inW882LFe8qO0d/uK/1f18QLfw4FzW5fGYd5Vv6Q13T3QZ/gFmcToex8aLHPoUS/aF8qiG+1btsnyxBo9ZU9glTzGXTirJSTHNixrubwLq+ZKa4JWMSGJbXyoA=
+	t=1718210444; cv=none; b=TCV+sDWR8F2eWL/BmBt/0uQ/Mp/bByOW+C7VzYJfT+9lxcoYmkIPoJgGvgs++WEqdu7gqG7OiMj6JQ48A6+WzHJWT+P8D5jUoQLgK6RyilOBXtCqTpLfwR1lghPX5czW5dfoHUfKkuhLvAXCxsyrfU2elZSWreZQUnfT9ABp72E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718207781; c=relaxed/simple;
-	bh=WxiyGuZAC7bj+QrxGa2lDi15MZrXhgJnJEV+bRK2uiI=;
+	s=arc-20240116; t=1718210444; c=relaxed/simple;
+	bh=85XKwtq8lgNQ9l2YL8a7SauGQb3hZbNGMy8WU/0vk1g=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YeuVgcfArlO5oWRiBE2ZEbsnkQa4rOUCms8k7eXTErFadkqsdecCnxI4Gbr9H4ZoSJ6fvxgCS04sNvZhYBImQ2u7LdvASFPZJwmmiWILP8jyyMGL3ZMY8frf+n+1XY0RHwjfUJ3OJglLxYWkx3AVjFlA0JAzHzNjuooAWDnIwa4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com; spf=pass smtp.mailfrom=cloud.com; dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b=V7cG6Ag/; arc=none smtp.client-ip=209.85.219.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloud.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=t2+qwRS+R7ZTYSAqZ1aJKYGKK5c66Xc5l99EXcQ4oRs2EvBkojqaWlvTLEybNL0CggFUGGOVq0FCT6GJpSVcyp2JjuAbVv6OYRzaIHCYLOHHLdnqm/9rS4mr1U9ILNf1n1soVEKZ+cqUgwg8dKHjOEd8YcUUdXl1xN0u0Gksfhs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Onyhj8Vn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b="V7cG6Ag/"
-Received: by mail-qv1-f53.google.com with SMTP id 6a1803df08f44-6afc61f9a2eso170346d6.0
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 08:56:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=citrix.com; s=google; t=1718207778; x=1718812578; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=0JAgWI6yypeQvJHtBsLjxy9EsiTAtsBZFfQkPH4VMNc=;
-        b=V7cG6Ag/z6iCUMnCyee02CpPpVNNKq0aFi2gbS3Dd7usN46ko1fDHLZJlYgCyUyzgM
-         PkWsxqJiUKaH93GKZqh+J6Tx9GmEzvjLAPs83YmL2Gkt9gUBj/Q88Lr7e+uzv1URoIzD
-         VKiz75cG3gC5YRvgiukyfUkbgvM5OnMGUnJzU=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718207778; x=1718812578;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=0JAgWI6yypeQvJHtBsLjxy9EsiTAtsBZFfQkPH4VMNc=;
-        b=qiE2eR5vBpMgfZpbLHwQcOZpPrnt595fnsuKttXH8lmUImnrUHt8Oa8/9efKVR4r5m
-         fDrQzv6xlqGWGEpBLO5TAIVfPt71RzPh/DXjJ1T1hf1u5f8iL9zdrlDvnqpBJiPLGzkV
-         8MHpxE5IWQ6RykoQkSxZ+2MUYKEZkjjD0prcqElRaGuuJ6LqagIrdCEDVs3bCbwouirg
-         ovSMbi/4Tpb9ghRr5KSgmTn42S68CMzQ6ZraqIYk8P5mu9CQmbWYtRroWvwQ3RHqKhaf
-         aBcQylLulRc9ytG1AZH23hnbxtxVOLCkStIcvj+MAMno8OORGV2sSkuNrr2hS/ZCOi8E
-         tCaw==
-X-Forwarded-Encrypted: i=1; AJvYcCWReYugIFoy5BHST48uU+tPmrtjWuWVaWp0K1TYjHTJ7iU+6G67tQMavY1GVHC9Ks+xKwgrxayAU0P7AafvMzBE4puktpC7vfN7
-X-Gm-Message-State: AOJu0Yy7YAbu/oAqN05AmRBSJ65WS6W1fuvbW97H0i4cjeHI5DftZMTk
-	kheZKgrwJEwqKzr6MVCabz3iXiE4aeCwmcelRp0VteibTvErzM0Oh53QaF00Iqo=
-X-Google-Smtp-Source: AGHT+IH3vJ/Cfk8LzYoeLv9cXT/SgN6Pt3X56xC7VVYFazmjn8i4deMSmAqg4iM25NKqjeo5TBvU1g==
-X-Received: by 2002:a05:6214:2a47:b0:6b0:7365:dde0 with SMTP id 6a1803df08f44-6b2a33de160mr1306776d6.18.1718207777691;
-        Wed, 12 Jun 2024 08:56:17 -0700 (PDT)
-Received: from localhost ([213.195.124.163])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-6b0884337e9sm22877866d6.16.2024.06.12.08.56.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Jun 2024 08:56:17 -0700 (PDT)
-Date: Wed, 12 Jun 2024 17:56:15 +0200
-From: Roger Pau =?utf-8?B?TW9ubsOp?= <roger.pau@citrix.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@kernel.dk>, Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?utf-8?Q?B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>, Alasdair Kergon <agk@redhat.com>,
-	Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when
- they fail
-Message-ID: <ZmnFH17bTV2Ot_iR@macbook>
-References: <20240611051929.513387-1-hch@lst.de>
- <20240611051929.513387-11-hch@lst.de>
- <ZmlVziizbaboaBSn@macbook>
- <20240612150030.GA29188@lst.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Onyhj8Vn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43E9AC116B1;
+	Wed, 12 Jun 2024 16:40:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718210444;
+	bh=85XKwtq8lgNQ9l2YL8a7SauGQb3hZbNGMy8WU/0vk1g=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=Onyhj8VnaDXMhsbCz7cO+Y8QwfDHUHrbPdQuUwf3RtVAPOQVp6hFN36QZkn8UZyjj
+	 z1QiIOV9ySHhisFsBLEpfP2/jcgqX8ctchnG4WmeDsX3PaGsAEOnBNpF2HF8tMjpVI
+	 wD+mXurj7sKz1FUlW6atUkUhBcvK35uqQ0c26t3unHt78YjVQJVoj7018kqF8S5LHR
+	 LBWVa0N2JqW9XnK4rGJZskhVQOStjDYwhYUASlE46Z8ljlljsy1dHvta3r4ja0vywE
+	 cEK/TmxyBAu12SgetSgLfa+6PAMVBdf4AzaMXC8ia2LsIELW/GWOx4VmHhJS1NWL/C
+	 heUprjyrZFDQw==
+Date: Wed, 12 Jun 2024 17:40:39 +0100
+From: Mark Brown <broonie@kernel.org>
+To: Conor Dooley <conor@kernel.org>
+Cc: linux-mmc@vger.kernel.org, Conor Dooley <conor.dooley@microchip.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, cyril.jean@microchip.com,
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
+	linux-spi@vger.kernel.org
+Subject: Re: [RFC v1 2/3] spi: microchip-core-qspi: Add regular transfers
+Message-ID: <ZmnPh39YyfS4ocNU@finisterre.sirena.org.uk>
+References: <20240612-brigade-shell-1f626e7e592f@spud>
+ <20240612-uphold-dinner-a47b4c44be18@spud>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="MdwxjcRzQ3pyUpUj"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20240612150030.GA29188@lst.de>
+In-Reply-To: <20240612-uphold-dinner-a47b4c44be18@spud>
+X-Cookie: Your love life will be... interesting.
 
-On Wed, Jun 12, 2024 at 05:00:30PM +0200, Christoph Hellwig wrote:
-> On Wed, Jun 12, 2024 at 10:01:18AM +0200, Roger Pau Monné wrote:
-> > On Tue, Jun 11, 2024 at 07:19:10AM +0200, Christoph Hellwig wrote:
-> > > blkfront always had a robust negotiation protocol for detecting a write
-> > > cache.  Stop simply disabling cache flushes when they fail as that is
-> > > a grave error.
-> > 
-> > It's my understanding the current code attempts to cover up for the
-> > lack of guarantees the feature itself provides:
-> 
-> > So even when the feature is exposed, the backend might return
-> > EOPNOTSUPP for the flush/barrier operations.
-> 
-> How is this supposed to work?  I mean in the worst case we could
-> just immediately complete the flush requests in the driver, but
-> we're really lying to any upper layer.
 
-Right.  AFAICT advertising "feature-barrier" and/or
-"feature-flush-cache" could be done based on whether blkback
-understand those commands, not on whether the underlying storage
-supports the equivalent of them.
+--MdwxjcRzQ3pyUpUj
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Worst case we can print a warning message once about the underlying
-storage failing to complete flush/barrier requests, and that data
-integrity might not be guaranteed going forward, and not propagate the
-error to the upper layer?
+On Wed, Jun 12, 2024 at 04:48:32PM +0100, Conor Dooley wrote:
 
-What would be the consequence of propagating a flush error to the
-upper layers?
+> +	//TODO: questionable robustness if both cs_change and cs_off toggle
+> +	list_for_each_entry(t, &m->transfers, transfer_list) {
+> +		//cs_change being set means we need to re-enable
 
-> > Such failure is tied on whether the underlying blkback storage
-> > supports REQ_OP_WRITE with REQ_PREFLUSH operation.  blkback will
-> > expose "feature-barrier" and/or "feature-flush-cache" without knowing
-> > whether the underlying backend supports those operations, hence the
-> > weird fallback in blkfront.
-> 
-> If we are just talking about the Linux blkback driver (I know there
-> probably are a few other implementations) it won't every do that.
-> I see it has code to do so, but the Linux block layer doesn't
-> allow the flush operation to randomly fail if it was previously
-> advertised.  Note that even blkfront conforms to this as it fixes
-> up the return value when it gets this notsupp error to ok.
+Is it not possible to implement prepare_message() and transfer_one()
+rather than open coding all this?
 
-Yes, I'm afraid it's impossible to know what the multiple incarnations
-of all the scattered blkback implementations possibly do (FreeBSD,
-NetBSD, QEMU and blktap at least I know of).
+--MdwxjcRzQ3pyUpUj
+Content-Type: application/pgp-signature; name="signature.asc"
 
-> > Overall blkback should ensure that REQ_PREFLUSH is supported before
-> > exposing "feature-barrier" or "feature-flush-cache", as then the
-> > exposed features would really match what the underlying backend
-> > supports (rather than the commands blkback knows about).
-> 
-> Yes.  The in-tree xen-blkback does that, but even without that the
-> Linux block layer actually makes sure flushes sent by upper layers
-> always succeed even when not supported.
+-----BEGIN PGP SIGNATURE-----
 
-Given the description of the feature in the blkif header, I'm afraid
-we cannot guarantee that seeing the feature exposed implies barrier or
-flush support, since the request could fail at any time (or even from
-the start of the disk attachment) and it would still sadly be a correct
-implementation given the description of the options.
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmZpz4YACgkQJNaLcl1U
+h9AVQwf+MGtExjI/bWW1yGC4RO+HV4ZjtGV3c7j96NAiLdf+87svqV9in+GrvgRZ
+Gv3J0UZoID/NR9sJoPYXZ1j9KR7cD/ps2pScjog4b8t7K1RKGzO1lck5WOlh+c4E
+D9WThX1LgACsUO8N0tplHE2OK/86wJe6LiSrJttKezDV+RpuvevMMAFs1vv9M+CV
+abVC0AHa//7OZ9gYfzg3tLeclZCtrnHSvfG6ftXwso1glyYK3ky6sR+JN0BwvoXV
+4o8mXO6+SyWkx7p/8FVVZ3qM21w3UHodxvslwMKAlXmAIdXes8c4v1wlUUuzr4sK
+sSThubOWebv8HG4Pc3SfyEldXQ6CHQ==
+=pdjw
+-----END PGP SIGNATURE-----
 
-Thanks, Roger.
+--MdwxjcRzQ3pyUpUj--
