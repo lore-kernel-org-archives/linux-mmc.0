@@ -1,98 +1,102 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E96B17E908;
-	Wed, 12 Jun 2024 15:00:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3DBFB65E;
+	Wed, 12 Jun 2024 15:48:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718204440; cv=none; b=ru5Svhb/K7Hdtt5dqTrVf7tD816u9DEBbEfvXwAievlxn2AEOLn0QhxUo4Jk6KnaQc2nkoHdDzwpf1ChorHcv/E9m0qpM22R9M58Gz/dehIu/Zn/H8qEGr6RA1q+DcuH9Qn+8Uy3ggPhuy8fwMSuOAJlNLZVUH2lgq4Ps1gyvSo=
+	t=1718207331; cv=none; b=L08tyo0PjBXle/6acKVvk8milD9nNL6RzWfptDj21pk74KoaRyjGyuWnFZFAqgaYLhzeo04z9L0ISkvkFxSXtIQqv2zQlfooG/hpaMuHGnZ2aORWUWcNRezROqsks09GdOR+AHtDMKLm515oxJpKbfTBkdhHscNjhp+/rYjHa5M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718204440; c=relaxed/simple;
-	bh=D9AKY16RIxKwWo5ffG5YBSyB4zSbRy1JLPHVsaztKec=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=VZufRr/mp4lxVf+sOBILTJqZhJxQDNxR5XMmCsrAEhczCzxAPcIIl/fRYVkDp2Lvfh1keEmRaHFnb44k4BPbtrBYe5bObOkUwRIaiW6TRDUMUeLd2tXLr7CR11PwKC2gJwLa4tUiGrHwRxOpgzRaopjZi2qcO3STgpcUFCCegzA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 9E11668AFE; Wed, 12 Jun 2024 17:00:30 +0200 (CEST)
-Date: Wed, 12 Jun 2024 17:00:30 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?iso-8859-1?Q?B=F6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>, Alasdair Kergon <agk@redhat.com>,
-	Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when
- they fail
-Message-ID: <20240612150030.GA29188@lst.de>
-References: <20240611051929.513387-1-hch@lst.de> <20240611051929.513387-11-hch@lst.de> <ZmlVziizbaboaBSn@macbook>
+	s=arc-20240116; t=1718207331; c=relaxed/simple;
+	bh=Zv5RO+ev5GfuXBQM8OVvJacsGQmGXoAme99ziwuiEck=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=p3h7mFzV9nCp47Yr3lJgvXOamm5+wcxap4XXzjuUmTfWwCUkNiTr6ohDNPoEKZkqjSvgzfKu4f67YvvIlOGT82RJVoMjL+adyCTgQGIt9wXf4ZRTb9fW7J7GazT59G/mDL+xOIxkVF1eE33cIZ7nfuAfQqFCPocNXYhWsiua3B0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=BX7YQziI; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="BX7YQziI"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E4F4C116B1;
+	Wed, 12 Jun 2024 15:48:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718207331;
+	bh=Zv5RO+ev5GfuXBQM8OVvJacsGQmGXoAme99ziwuiEck=;
+	h=From:To:Cc:Subject:Date:From;
+	b=BX7YQziIjwMZfXU0YaZomh/upatYQYZUGXQ/gieuDsa9lHHH6IXuLe5CWwi8zvEiO
+	 4MVnoIG7zXqf/0d24cWmZHPf3kTevU7tUBOj26/3MnuklimKVGk5huSRgKYwztRmu/
+	 GgkcV19g3+RW982sqldDpHHAyHvbiGqO4/GwXUcplKhwhc1jhFSXMOFwjOAeS/uY2g
+	 UURuFkVVoi6LncNTPzj390R3bL4rqB7DQ5N9JiXHB2HBpnNkuAw2AP6yUK23Mddplw
+	 L+GDRo7hirnaWDCQs9G5tvMOJL78qu04pnRH/U7EWVNQWmfqsfvDi7Kk7dRbB9Dxri
+	 UMWjj3YilADrw==
+From: Conor Dooley <conor@kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: conor@kernel.org,
+	Conor Dooley <conor.dooley@microchip.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	cyril.jean@microchip.com,
+	Mark Brown <broonie@kernel.org>,
+	linux-kernel@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	linux-spi@vger.kernel.org
+Subject: [RFC v1 0/3] mmc-spi - support controllers incapable of getting as low as 400KHz
+Date: Wed, 12 Jun 2024 16:48:30 +0100
+Message-ID: <20240612-brigade-shell-1f626e7e592f@spud>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1827; i=conor.dooley@microchip.com; h=from:subject:message-id; bh=jUBdCKFRhPbdoAZJHxpB1biK3nMfNT3Pp93RB7R03bE=; b=owGbwMvMwCFWscWwfUFT0iXG02pJDGmZh31+Pm/g6ohf0duw6nVeD9Per0uMtwtxV56d+SrMv b92nZBlRykLgxgHg6yYIkvi7b4WqfV/XHY497yFmcPKBDKEgYtTACbytpbhr8Bf9Si3ZXVFdZVd x49dWL3xPsN13mz1GY8DrmmEx8WwlTL8L+kS/R9c+YftQeCvP85rHr7O8L3xseH8jP878tVe9mf sZAMA
+X-Developer-Key: i=conor.dooley@microchip.com; a=openpgp; fpr=F9ECA03CF54F12CD01F1655722E2C55B37CF380C
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <ZmlVziizbaboaBSn@macbook>
-User-Agent: Mutt/1.5.17 (2007-11-01)
 
-On Wed, Jun 12, 2024 at 10:01:18AM +0200, Roger Pau Monné wrote:
-> On Tue, Jun 11, 2024 at 07:19:10AM +0200, Christoph Hellwig wrote:
-> > blkfront always had a robust negotiation protocol for detecting a write
-> > cache.  Stop simply disabling cache flushes when they fail as that is
-> > a grave error.
-> 
-> It's my understanding the current code attempts to cover up for the
-> lack of guarantees the feature itself provides:
+From: Conor Dooley <conor.dooley@microchip.com>
 
-> So even when the feature is exposed, the backend might return
-> EOPNOTSUPP for the flush/barrier operations.
+Yo,
 
-How is this supposed to work?  I mean in the worst case we could
-just immediately complete the flush requests in the driver, but
-we're really lying to any upper layer.
+RFC for some stuff that I've got in-progress for a customer's board
+where they want to use mmc-spi-slot with a QSPI controller that is
+incapable of getting as low as 400KHz with the way clocks have been
+configured on the system. At the moment, if a controller cannot get that
+low, linux continuously reports that queuing a transfer fails. The first
+couple of transfers will complete on this system, until mmc_start_host()
+kicks in and clamps the frequency to the larger of host->f_min and 400
+KHz.
+Doing something like patch 1 of this set would allow the mmc-spi-slot to
+function for some sd cards, an improvement on the current none. I don't
+have any sd cards on hand that don't support the 5 MHz minimum frequency
+that this controller is limited to, so I amn't sure at what point this
+will blow up if such a card was used.
 
-> Such failure is tied on whether the underlying blkback storage
-> supports REQ_OP_WRITE with REQ_PREFLUSH operation.  blkback will
-> expose "feature-barrier" and/or "feature-flush-cache" without knowing
-> whether the underlying backend supports those operations, hence the
-> weird fallback in blkfront.
+Is this sort of change something that would fly?
 
-If we are just talking about the Linux blkback driver (I know there
-probably are a few other implementations) it won't every do that.
-I see it has code to do so, but the Linux block layer doesn't
-allow the flush operation to randomly fail if it was previously
-advertised.  Note that even blkfront conforms to this as it fixes
-up the return value when it gets this notsupp error to ok.
+Patches 2 & 3 are just here b/c without #3 the qspi driver for this
+platform doesn't support anything other than mem ops and #2 is required
+to set the minimum frequency for mmc_spi to pick up.
 
-> Overall blkback should ensure that REQ_PREFLUSH is supported before
-> exposing "feature-barrier" or "feature-flush-cache", as then the
-> exposed features would really match what the underlying backend
-> supports (rather than the commands blkback knows about).
+Cheers,
+Conor.
 
-Yes.  The in-tree xen-blkback does that, but even without that the
-Linux block layer actually makes sure flushes sent by upper layers
-always succeed even when not supported.
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Conor Dooley <conor.dooley@microchip.com>
+CC: cyril.jean@microchip.com
+CC: Mark Brown <broonie@kernel.org>
+CC: linux-mmc@vger.kernel.org
+CC: linux-kernel@vger.kernel.org
+CC: linux-riscv@lists.infradead.org
+CC: linux-spi@vger.kernel.org
+
+Conor Dooley (2):
+  mmc: mmc_spi: allow for spi controllers incapable of getting as low as
+    400k
+  spi: microchip-core-qspi: set min_speed_hz during probe
+
+Cyril Jean (1):
+  spi: microchip-core-qspi: Add regular transfers
+
+ drivers/mmc/host/mmc_spi.c            |   5 +-
+ drivers/spi/spi-microchip-core-qspi.c | 224 +++++++++++++++++++++++++-
+ 2 files changed, 226 insertions(+), 3 deletions(-)
+
+-- 
+2.43.0
 
