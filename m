@@ -1,135 +1,99 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC8F116C6B1
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 08:01:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3934745948;
+	Wed, 12 Jun 2024 08:11:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718179285; cv=none; b=jYIVp5SASHfofojl3AyZwE0ee5W5NGSN2Mx5iUDr9ZrOzKzizjqLw2uxAD/tXgPci5xpDrIcBEQ3ti1wK0u/TeAAh2B5yS3bb8y1r01UM4Wqfp6eA1M0wb4pY6AmU3RQqyI3hehnURW0FO7y2iJ6uQs/7xhZIcwR4RoOMwdLeOg=
+	t=1718179890; cv=none; b=U2jurtTPjtt7xQi3F2Kc1+5lsBleCnlt85MM6Erh54qfgSv834t3L/sxHFHIK+g88kHiqEOkCdQt2EDRqOYZ299Ag7+ZlYBNwWcTXhN4c6OOlauqGJUQYWxYD+w55o1kyQ1ewTi0Tn70XBsq3YNJIs2yKTRrpM/GUJ0ys+49ELI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718179285; c=relaxed/simple;
-	bh=2cExcM3FQdKVHy7cL3IiNx2Bk/UFeUgrDgrQcqyJhl8=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=oHQk7bpP6ts8iPbVra6eNmsUW0pHVhPPTo9SBylAtsIqC7GZngcoEA4AcZeo7BuMKwXb6szCUZKxxTw2z2NyyieoxK2/3Ihnd4mnOsixAwPXXitOuMQtEIOy+F5FucoFtD+mtwBipyvlEwQJ9IYtQGJ5TQV3WMfKwr19u+yYKeI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com; spf=pass smtp.mailfrom=cloud.com; dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b=wGSiQ07I; arc=none smtp.client-ip=209.85.128.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloud.com
+	s=arc-20240116; t=1718179890; c=relaxed/simple;
+	bh=xvC0pYsKju6If2He1LE0lGCBfp0CbEd4zvgJoGQEK+4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=pc6M9dyUG+uCnjKgr/CeHT5ZnFxRvw4A6MNIZ/g30Y5sMtHgInK/AS+pgompr1nNfVjToYpVBlt9nLmhaHvNkd6k8ilKJKDaRlNFmTG+PGTxA2xTCslqvjb4PuxACA0RYA+/1KzoKszvLmv2sZSkmVTLyM9WBfc3NuUNxnLlNyE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Zyxi54du; arc=none smtp.client-ip=198.175.65.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b="wGSiQ07I"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-62cecc3f949so23116157b3.2
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 01:01:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=citrix.com; s=google; t=1718179283; x=1718784083; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=1PGf6HlJc1ANQenmlixWu1Sno9FA8D3ndcnX4NZVy9I=;
-        b=wGSiQ07IIsz3I5o3sJPfsRh6+YQ4aS+dl8faDVi6tCb8oJsgDTIAJhb3nIcw252bU0
-         nDpxqZOv3GJrkXMrxGioYAsvh4Pq/cnolHHO/TtN2xI0rAGtwEWsQRY4QkfU7k3Bm65M
-         hGrDJE6dultwgkDJcvbr8RkJ/+8f2Omv1w+bg=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718179283; x=1718784083;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1PGf6HlJc1ANQenmlixWu1Sno9FA8D3ndcnX4NZVy9I=;
-        b=xI9OFgKWcdojguYgBE2FZkGHXKe7v+ZCUBf3tL+7gzPQ3NdNEdfsnZOs6Y9CfNYBiQ
-         DjrBcosSdwUcoG+9RdvHt/y2m2/POYi8+2AdZlVTDR+QeNq4F9SnoAMbfRq0FlXcHwnV
-         8IxiDVKU+q5KZFlTVNi7zU7lYSzlyeX4VhuCwSPrLxprHbTriqFLy7CbLHut1KXS8xAs
-         8OjgI/HWgTnD0vYRUhTJ9kUwLY7XP43So+TfxkDGRgnHLSc4eH2t4E3cpn81GAG0xaYq
-         JDM3mr2GYrIbYr6S+RU4mWQVCmJKLCLSalFUJXtnBZmEGN9ZIGc7zSfOMd+ccXsbQYl6
-         Z0Yg==
-X-Forwarded-Encrypted: i=1; AJvYcCXN5PWs5GJhXTQYPo2s17txnDxmyjY1m/AQj1+6Pu/9ioE2y0VLRSvBGI1tkC19fZjj1wQoH+knGwYgOxS5o9DqF0SOtsfSz8TZ
-X-Gm-Message-State: AOJu0YyxISQisoB9Bbs9xrqcFeW3KWAETR5r8eDtfX/rFH7t81kAZM8d
-	Tk1Wa9MgoAlRosAAT/tNlEHgqfUfI2nX7JeLifYYPic7vLVJn47D3kt/y6e1HiA=
-X-Google-Smtp-Source: AGHT+IEk5bObzz8qCZsqdRqFNOU7a/dh67daOPgnEKJGJzh0sP06pKqPApTvT03CHGJxr8rf1zPYww==
-X-Received: by 2002:a81:b647:0:b0:61b:e62e:73f1 with SMTP id 00721157ae682-62fb8a58273mr12605907b3.3.1718179282688;
-        Wed, 12 Jun 2024 01:01:22 -0700 (PDT)
-Received: from localhost ([46.222.2.38])
-        by smtp.gmail.com with ESMTPSA id 6a1803df08f44-6b093aff889sm6894416d6.101.2024.06.12.01.01.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Jun 2024 01:01:22 -0700 (PDT)
-Date: Wed, 12 Jun 2024 10:01:18 +0200
-From: Roger Pau =?utf-8?B?TW9ubsOp?= <roger.pau@citrix.com>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@kernel.dk>, Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?utf-8?Q?B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>, Alasdair Kergon <agk@redhat.com>,
-	Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when
- they fail
-Message-ID: <ZmlVziizbaboaBSn@macbook>
-References: <20240611051929.513387-1-hch@lst.de>
- <20240611051929.513387-11-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Zyxi54du"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1718179890; x=1749715890;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=xvC0pYsKju6If2He1LE0lGCBfp0CbEd4zvgJoGQEK+4=;
+  b=Zyxi54du5tLqP04BQYyj7HzQK7HPB0U90BfGp8N8UJNq58aNxQicqM13
+   zHsu0qWTzpXnYbMAHTyevXbJyWgfKuLLapGCJlaAkKBt4UNk3M2qZgFDv
+   ZOkdW+aSefNBhNNpIUdKLTISdB29Vnntq1N09kCqiK8aPH1EIzsWTtx5h
+   7BjtDS9K+qM5N3mwrbNTxh8tkoFYShlLn/mWdcld7Yy0oe+mWdvBVg7oI
+   IqsyOJVnmP3Atd/rXw7NzEYk75yrH1LjBalI1vumHk49QPhvP1HPe/WzV
+   dsIcPvCGtzuYvJ1vPFRbaPDVlNIpk4M8S07vdOg//LfV1ZBrMman8BqqB
+   g==;
+X-CSE-ConnectionGUID: QKONC2pCRoeRZd5SrdoE0A==
+X-CSE-MsgGUID: eYr9wkSkTEGV27t/T40bPg==
+X-IronPort-AV: E=McAfee;i="6600,9927,11100"; a="25505634"
+X-IronPort-AV: E=Sophos;i="6.08,232,1712646000"; 
+   d="scan'208";a="25505634"
+Received: from fmviesa008.fm.intel.com ([10.60.135.148])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jun 2024 01:11:29 -0700
+X-CSE-ConnectionGUID: lI9f8LxPSEi81r+jBhM2Bg==
+X-CSE-MsgGUID: aLELKqIWQ1eac12kCawmlw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.08,232,1712646000"; 
+   d="scan'208";a="39672038"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.41.28])
+  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jun 2024 01:11:27 -0700
+Message-ID: <a5bb2bb3-efe3-461f-a3d8-88af82f29b15@intel.com>
+Date: Wed, 12 Jun 2024 11:11:22 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20240611051929.513387-11-hch@lst.de>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Use inverted-wp quirk for CV18xx
+ and SG200x SoCs
+To: Haylen Chu <heylenay@outlook.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Jisheng Zhang <jszhang@kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Tue, Jun 11, 2024 at 07:19:10AM +0200, Christoph Hellwig wrote:
-> blkfront always had a robust negotiation protocol for detecting a write
-> cache.  Stop simply disabling cache flushes when they fail as that is
-> a grave error.
+On 31/05/24 17:13, Haylen Chu wrote:
+> MMC controller integrated in Sophgo CV18xx and SG200x SoCs has an
+> inverted write-protect flag, causing SDCards misdetected as read-only.
 
-It's my understanding the current code attempts to cover up for the
-lack of guarantees the feature itself provides:
+Is it the SDHCI_WRITE_PROTECT bit of the SDHCI_PRESENT_STATE
+register that needs to be inverted?
 
- * feature-barrier
- *      Values:         0/1 (boolean)
- *      Default Value:  0
- *
- *      A value of "1" indicates that the backend can process requests
- *      containing the BLKIF_OP_WRITE_BARRIER request opcode.  Requests
- *      of this type may still be returned at any time with the
- *      BLKIF_RSP_EOPNOTSUPP result code.
- *
- * feature-flush-cache
- *      Values:         0/1 (boolean)
- *      Default Value:  0
- *
- *      A value of "1" indicates that the backend can process requests
- *      containing the BLKIF_OP_FLUSH_DISKCACHE request opcode.  Requests
- *      of this type may still be returned at any time with the
- *      BLKIF_RSP_EOPNOTSUPP result code.
+> So set SDHCI_QURIK_INVERTED_WRITE_PROTECT to make write protection work
+> correctly.
+> 
+> Fixes: 017199c2849c ("mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002")
+> Signed-off-by: Haylen Chu <heylenay@outlook.com>
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 39edf04fedcf..62b7f28de54f 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -962,7 +962,8 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+>  
+>  static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
+>  	.ops = &sdhci_dwcmshc_cv18xx_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
+>  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  };
+>  
 
-So even when the feature is exposed, the backend might return
-EOPNOTSUPP for the flush/barrier operations.
-
-Such failure is tied on whether the underlying blkback storage
-supports REQ_OP_WRITE with REQ_PREFLUSH operation.  blkback will
-expose "feature-barrier" and/or "feature-flush-cache" without knowing
-whether the underlying backend supports those operations, hence the
-weird fallback in blkfront.
-
-I'm unsure whether lack of REQ_PREFLUSH support is not something that
-we should worry about, it seems like it was when the code was
-introduced, but that's > 10y ago.
-
-Overall blkback should ensure that REQ_PREFLUSH is supported before
-exposing "feature-barrier" or "feature-flush-cache", as then the
-exposed features would really match what the underlying backend
-supports (rather than the commands blkback knows about).
-
-Thanks, Roger.
