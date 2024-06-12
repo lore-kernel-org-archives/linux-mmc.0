@@ -1,132 +1,264 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3196E169AF7;
-	Wed, 12 Jun 2024 06:31:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EF98168C13
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Jun 2024 06:56:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718173902; cv=none; b=SdM9yiwDH6IBjJ/+xAlD88jCo8/KVHh1Z+8Zfmw43XM+61cRYrKzyPPYuzX45FV7d8Br8ZMdaZZn6t3j+SvCeO3XKu6X/dQweIJj5GsAvPWFOAN2Wew8oTErFZm1OpaALiXVHBaDbvgYoikGeXWTvpi5dUfN7sy4tp3PV175DqE=
+	t=1718175382; cv=none; b=UzxbW2H2qj4U9bQlU4chKt+mjZicVDBlgttCvSHQhgupOdYwbPtg4RL0olMqG2ds6n3Oc+SvNfWuUvejyVSF3EeSFP0CE/YeRK1h+Cbu153rEy7zaca7Z1p2FkitbgM9MS5cu5YLbXEnpgJpKHMEXoufx8CUR6Pa17nOMoSFN1g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718173902; c=relaxed/simple;
-	bh=i1+VOgf7JC0IY2Ue96bb89W2YVnFv+gDNbzNiyd5/q0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=utSAzue5sGbrPjuf9wzQBAROqEvwnPQthrS79ovfCAlO1jA6N62xdZsbUk5pGS58jVRARUMWhf4civoHlTinWbCkVo2rbEB+i8mII+HPy5EfNo6f2J+m1+dUzeGYM5zql7YxxP53OKWTsENuxZYXmJFSq4QIIKbnnQl6TY51qjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Rd8NHwVX; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1718175382; c=relaxed/simple;
+	bh=2Ua0nGG0EAK9OtUoDrHzQ2WSgUsgITqxokxmviplgzQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=sLGoIZk1p0OOCwawpuVcL3fqzpwQytWFVcksFFvmgvzWppEueIvUVYU8v9xp8P/HGwU3dt4Slej/CMrZXPrK68K5U04CGv6IQTOQBLNspp74QSxo30qZsiEzlErDwO8qGkOYP98sJU/ZUIEu+qBh7viSaJD6fFm+KUn3nAQN0B8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oHMb1Jq7; arc=none smtp.client-ip=209.85.160.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Rd8NHwVX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D8BBAC32786;
-	Wed, 12 Jun 2024 06:31:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718173902;
-	bh=i1+VOgf7JC0IY2Ue96bb89W2YVnFv+gDNbzNiyd5/q0=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Rd8NHwVXBMipTVyHNug/0buJUjjOlMn7ixTsf7iHfBIlmyWVwFCfiNfyFEPWcuF3b
-	 ThitVPfEqHnFE+9aGbq9s2Xj9+VbdfdhUkoC1g5WPHxVhT2WJYbp4ACwTM8tYAaah8
-	 NibboH/m1kkuJ5CPMgNlfhucvWIgynROX0w5r/XNtHfJwaMDucS4j0NuugpPsNw0UK
-	 gS8YQXfUaRXs5xy1gFd8oNMAacqkkycJx81/gOeFy5HUE57FZtIBE1FTMwY4+iRZ4l
-	 YZZtFcqJzoagK/RH0QlkDX+PnpLfpVl7845RoKHFOw5GqRh9ueMk+oWHqhENijPlo1
-	 G1K2xIOT+uoDQ==
-Message-ID: <c0fb3d95-c61b-4808-96c7-dcc45384ec2b@kernel.org>
-Date: Wed, 12 Jun 2024 08:31:35 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oHMb1Jq7"
+Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-254c22faf4cso1323784fac.2
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Jun 2024 23:56:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1718175379; x=1718780179; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Fz+vtmXVQrksH83NPuXPvwENKWM7qR/JOFyTm8EoID8=;
+        b=oHMb1Jq7aW9IwmNtGLrM2cJX4GuzcjcqGFY6Mlna/5GK3cEO8Nl09PIP5d7dMhB7zG
+         o68aTn/xLA+N4oSR9tVXTdSJ9Or3RV+oPRGRFzPontSGGETXeUUGG1YOVN7cJ/wPjl2K
+         mO04zHn8oGfdo0reRRfY/cPoOunkgLOZoS0gVwmwD90yYx+lKrWRYZHuQH2RsQ6A9ULd
+         ObqmnM935LT/g1m9yEKxMqsl66f8XCrBfh4Ivvws0M0dXfGiLf/oAutdTQedKsGuswkI
+         seRBYangONDG3UhTWsNGSGDXPqilyr3JBnnefHXq6d+Vv1WCgD45EilePQoIhsKiGxPQ
+         XE3A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718175379; x=1718780179;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Fz+vtmXVQrksH83NPuXPvwENKWM7qR/JOFyTm8EoID8=;
+        b=lHXXx9+bRhKNOJJuO/9m1Tc6NoalsxHkxcqhrs5L9dntaKYl7/C1dnseCWt0gIsWsA
+         g/VvRAjTjwNUc5ZeHgNOTkU2jrNaPWWnKjCkqDQSaM2MoM734kc/Ues4dBxhQGzD+p+i
+         iyFLzTbqWuUiRY8Aip959GcoZLTy3JDok2xt9uHOzAL0RZ2nBQ25F5igSkblpHjiBmXh
+         2qrISL36GuW1+AauxdXWlCFf/hmweXoSKRckKA9VzPxUUz0LOdzQohUybRgmrzNuSNTL
+         LXafBtlePR8KWVly2CV5kfuE9j1quP2TbC1ngSdqNojZ9Qvyb4EOtIy54VMSN+BN+Y4C
+         VE8g==
+X-Forwarded-Encrypted: i=1; AJvYcCUYfKhM0w80AYmISQ6MRxyJZEpywDAnskiIbb7xG8YmNrS/nXficcNsn3xZHdmdNWYU74T3TAMAvLUZnorJz7nX+w6UfjmW3L5s
+X-Gm-Message-State: AOJu0YxsFqBYqfIovAELmI65Wfcb78v0L66ERPo8MYcRSrs64JreoO0F
+	F1ePc9K3h8rLhlCQgbipuzl8DifmtNMOAZbYI6Ns1xEGCR/ONJGFWJ9yM3yDZZ/TVyaTQwwWBkD
+	PIhQTQdL/mBQtjvCd3ahiivupiKv8FfFbqj2hWA==
+X-Google-Smtp-Source: AGHT+IHEbPnS3vGWtKgLg5y/Xl1GQNVn/cBKHYQZbPYu2bxiWaoRaiZv7DNixRQUCHror/nc1b+hktM0NXzAqzsf+kE=
+X-Received: by 2002:a05:6870:ce88:b0:24f:e09d:3c83 with SMTP id
+ 586e51a60fabf-25514e367d7mr1089220fac.36.1718175379100; Tue, 11 Jun 2024
+ 23:56:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/8] arm64: dts: convert fsl,esdhc.txt to yaml and fix
- layerscape dts warning
-To: Rob Herring <robh@kernel.org>, Frank Li <Frank.Li@nxp.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- imx@lists.linux.dev
-References: <20240611-ls_waring_esdhc-v4-0-d0d8a5b3f3cb@nxp.com>
- <20240611201631.GA3003237-robh@kernel.org>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20240611201631.GA3003237-robh@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240527121340.3931987-1-jens.wiklander@linaro.org>
+ <20240527121340.3931987-5-jens.wiklander@linaro.org> <Zl2Ibey9Qck-VLWE@manut.de>
+ <CAHUa44GAiUf9+PxqhXOwGfOuc250YDyJ7uzGe2B1bGmBw2iegg@mail.gmail.com>
+ <Zme-NMa3Bvp2h7aL@nuoska> <CAFA6WYPYSfrDtnLPRs7_0h5Hf01oPfOpqmt4c7_Twxv-re87xQ@mail.gmail.com>
+ <Zmj2Wg_YqdebN3xO@nuoska>
+In-Reply-To: <Zmj2Wg_YqdebN3xO@nuoska>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Wed, 12 Jun 2024 08:56:07 +0200
+Message-ID: <CAHUa44FP_eN+S4QBWJWmZ6PLptYg1+9iackz9P4Q1_Yc5EK3tQ@mail.gmail.com>
+Subject: Re: [PATCH v7 4/4] optee: probe RPMB device using RPMB subsystem
+To: Mikko Rapeli <mikko.rapeli@linaro.org>
+Cc: Sumit Garg <sumit.garg@linaro.org>, Manuel Traut <manut@mecka.net>, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Linus Walleij <linus.walleij@linaro.org>, Jerome Forissier <jerome.forissier@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Peter Huewe <peterhuewe@gmx.de>, 
+	Jarkko Sakkinen <jarkko@kernel.org>, Jason Gunthorpe <jgg@ziepe.ca>, linux-integrity@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 11/06/2024 22:16, Rob Herring wrote:
-> On Tue, Jun 11, 2024 at 12:01:45PM -0400, Frank Li wrote:
->> Start from v4 because fsl.esdhc.txt to yaml already sent out as v3.
->>
->> Change from v3 to v4
->> - Add dts warning fixes
->> - Add mmc-spi-slot's voltage range fix, (not sure why it apply to
->> layserscape's dts file.
->> - clock-frequency is not required property
->> - add dma-conherence: true in binding doc
->>
->> Now only "bit-endian" proptery warning left.
->>
->> Signed-off-by: Frank Li <Frank.Li@nxp.com>
->> ---
->> Frank Li (8):
->>       dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
->>       dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to uint32-matrix
-> 
->>       arm64: dts: ls1012a: Chang node name from 'esdhc' to 'mmc'
->>       arm64: dts: ls1043a: Chang node name from 'esdhc' to 'mmc'
->>       arm64: dts: ls1046a: Chang node name from 'esdhc' to 'mmc'
->>       arm64: dts: ls1088a: Chang node name from 'esdhc' to 'mmc'
->>       arm64: dts: ls208ax: Chang node name from 'esdhc' to 'mmc'
->>       arm64: dts: lx2160a: Chang node name from 'esdhc' to 'mmc'
-> 
-> It is all the same change to the same maintainer, so these can be just 
-> one patch. Then you just have 1 typo to fix.
+On Wed, Jun 12, 2024 at 3:14=E2=80=AFAM Mikko Rapeli <mikko.rapeli@linaro.o=
+rg> wrote:
+>
+> Hi,
+>
+> Adding TPM maintainers and linux-integrity since discussion relates to fi=
+rmware TPM
+> driver tpm_ftpm_tee
+>
+> On Tue, Jun 11, 2024 at 04:13:21PM +0530, Sumit Garg wrote:
+> > On Tue, 11 Jun 2024 at 08:32, Mikko Rapeli <mikko.rapeli@linaro.org> wr=
+ote:
+> > >
+> > > Hi,
+> > >
+> > > On Mon, Jun 10, 2024 at 02:52:31PM +0200, Jens Wiklander wrote:
+> > > > Hi Manuel,
+> > > >
+> > > > On Mon, Jun 3, 2024 at 11:10=E2=80=AFAM Manuel Traut <manut@mecka.n=
+et> wrote:
+> > > > >
+> > > > > On 14:13 Mon 27 May     , Jens Wiklander wrote:
+> > > > > > --- a/drivers/tee/optee/ffa_abi.c
+> > > > > > +++ b/drivers/tee/optee/ffa_abi.c
+> > > > > > @@ -7,6 +7,7 @@
+> > > > > >
+> > > > > >  #include <linux/arm_ffa.h>
+> > > > > >  #include <linux/errno.h>
+> > > > > > +#include <linux/rpmb.h>
+> > > > > >  #include <linux/scatterlist.h>
+> > > > > >  #include <linux/sched.h>
+> > > > > >  #include <linux/slab.h>
+> > > > > > @@ -903,6 +904,10 @@ static int optee_ffa_probe(struct ffa_devi=
+ce *ffa_dev)
+> > > > > >       optee->ffa.bottom_half_value =3D U32_MAX;
+> > > > > >       optee->rpc_param_count =3D rpc_param_count;
+> > > > > >
+> > > > > > +     if (IS_REACHABLE(CONFIG_RPMB) &&
+> > > > > > +         (sec_caps & OPTEE_FFA_SEC_CAP_RPMB_PROBE))
+> > > > > > +             optee->in_kernel_rpmb_routing =3D true;
+> > > > >
+> > > > > The SEC_CAP_RPMB_PROBE flag seems to be missing in optee_os at th=
+e moment.
+> > > > > If I remove this check here, the series works for me.
+> > > >
+> > > > You're right, I missed pushing those flags to optee_os. I've pushed=
+ them now.
+> > >
+> > > Thanks! Tested with optee 4.1 and your patches from
+> > > https://github.com/jenswi-linaro/optee_os/commits/rpmb_probe_v7/
+> > > in Trusted Substrate uefi firmware
+> > > ( https://gitlab.com/Linaro/trustedsubstrate/meta-ts/ )
+> > > and this series and a bunch of dependencies backported to
+> > > our Trusted Reference Stack
+> > > ( https://trs.readthedocs.io/en/latest/ )
+> > > 6.6.29 kernel on rockpi4b (rk3399 ARM64 SoC) with secure boot and
+> > > the optee side fTPM TA device used to create an encrypted rootfs with
+> > > systemd. Kernel side RPMB routing is in use and works for the TPM use=
+ cases.
+> > >
+> >
+> > Glad to see that you can get fTPM to work without tee-supplicant after
+> > this patch-set.
+>
+> Sorry but the fTPM TA only works with tee-supplicant in userspace. It's n=
+eeded
+> for RPC setup. For RPMB it is not needed or used with these patches appli=
+ed.
 
-Yeah, considering that this is trivial node name alignment, so rather
-style issue.
+I've never been able to find out what fTPM is trying to do with
+tee-supplicant at this stage. I guess the RPC is a shared memory
+allocation preparing for another request.
 
-Best regards,
-Krzysztof
+>
+> > > Full boot and test log (with unrelated test failures)
+> > > https://ledge.validation.linaro.org/scheduler/job/88692
+> > >
+> > > root@trs-qemuarm64:~# cat /sys/class/tee/tee0/rpmb_routing_model
+> > > ...
+> > > kernel
+> >
+> > So coming back to the real question, do we really need this new
+> > rpmb_routing_model ABI? Did systemd still need it with no
+> > tee-supplicant dependency? IMHO, a user-space ABI requires use-case
+> > justification otherwise it's just going to add on maintenance burden.
+>
+> Currently it is not needed, because tee-supplicant is still required to
+> setup RPC with fTPM. If the RPC setup were also done in kernel directly a=
+nd
+> tee-supplicant need is removed, then this kind of ABI is important so tha=
+t
+> userspace init knows if it needs to queue startup of tee-supplicant or no=
+t.
+>
+> On a related note, the kernel tpm_ftpm_tee driver for fTPM TA really has
+> a hard dependency to tee-supplicant in userspace. If tee-supplicant is st=
+opped,
+> restarted etc without unloading the kernel module (or otherwise disabling=
+ the TPM device),
+> then all TPM device actions done without tee-supplicant running will fail=
+ ane keep
+> failing until next reboot. The kernel driver is not crashing but all func=
+tionality
+> breaks.
+>
+> The availability of tpm_ftpm_tee should be tied much harder to the tee-su=
+pplicant
+> running in userspace, e.g. optee should be in charge to start and bring t=
+pm_ftpm_tee down
+> based on tee-supplicant userspace daemon availability. Or the needed tee-=
+supplicant code
+> should be moved to kernel side. Currently systemd side init scripts have =
+issues switching
+> from initrd to main rootfs since they need to disable tpm_ftpm_tee driver=
+, built in or a module,
+> before shutting down tee-supplicant. A suspend or other inactive state in=
+ the ftpm driver
+> needs to be triggered, which AFAIK is not currently possible, at least fr=
+om userspace
+> (I'd happy be proven wrong here).
+>
+> An alternative for tpm_fptm_tee driver is to use optee APIs so that the c=
+alls
+> wait for tee-supplicant in userspace if needed:
+>
+> --- a/drivers/char/tpm/tpm_ftpm_tee.c
+> +++ b/drivers/char/tpm/tpm_ftpm_tee.c
+> @@ -237,6 +237,9 @@ static int ftpm_tee_probe(struct device *dev)
+>                 return PTR_ERR(pvt_data->ctx);
+>         }
+>
+> +       /* wait for tee-supplicant in userspace, fTPM TA really depends o=
+n it */
+> +       pvt_data->ctx->supp_nowait =3D false;
+> +
+>         /* Open a session with fTPM TA */
+>         memset(&sess_arg, 0, sizeof(sess_arg));
+>         export_uuid(sess_arg.uuid, &ftpm_ta_uuid);
+>
+> This works pretty well for the tee-supplicant initrd to main rootfs switc=
+h but currently
+> breaks for example reboot (just hangs), and Jens doesn't approve of this =
+as a
+> real solution.
 
+Yes, the hang part is my main concern.
+
+>
+> So as an alternative, userspace needs to be very careful in initrd and ro=
+otfs
+> to start tee-supplicant earlier than loading tpm_ftpm_tee driver which ca=
+n
+> only be supported as module and removed before shutting down tee-supplica=
+nt.
+
+Unbind/bind via sysfs might be an option. But that's still only a
+workaround since getting rid of the tee-supplicant dependency in
+initrd should avoid the problem entirely.
+
+Cheers,
+Jens
+
+> In other use cases, TPM drivers are only supported if driver is built int=
+o
+> the kernel (or ACPI table entry for a TPM device exists) which I'm trying
+> to change with
+>
+> [PATCH] efi: expose TPM event log to userspace via sysfs
+>
+> https://lore.kernel.org/lkml/20240422112711.362779-1-mikko.rapeli@linaro.=
+org/
+>
+> where userspace init can check if it should wait longer for the tpm devic=
+e to appear,
+> e.g. let udev load optee etc drivers which eventually start also tee-supp=
+licant and
+> thus load tpm_ftpm_tee driver (fTPM TA enumration is tied to tee-supplica=
+nt in userspace
+> https://git.yoctoproject.org/meta-arm/tree/meta-arm/recipes-security/opte=
+e-ftpm/optee-ftpm/0001-add-enum-to-ta-flags.patch )
+>
+> Cheers,
+>
+> -Mikko
