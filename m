@@ -1,69 +1,79 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52EE813F447;
-	Thu, 13 Jun 2024 09:39:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A40DA9449;
+	Thu, 13 Jun 2024 13:17:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718271566; cv=none; b=IyLbHFKIFpUnKKlbwKSx8wf2Pyu4uZxUgV/Cw6mqtDaGvfjTZyWYIn8uFAa1o4z3xpBIuvIGvFRPwLfCtHkk8QAE1PiOVR5BTBH1db+v7xafIzz+zgkpsW8s3Sv0iC+Ppes4kmS+acDdTpK9ZknCuho1JmMJbc3g+5jQKWDvU1g=
+	t=1718284632; cv=none; b=GINDdsXRjBbeqmrmLM1qGVzBLWZORJCAlnH5i+Ym8FqfJjn+hBEV73Zz/7+UiiqCWb7TnoXrhpAFzn8FZ3wbBUdojydDF0jIyM7yO5YS1yhQZ3dRNbJTYHrpVbP4uCAGULEzMcnwOGwxIHUodVFp3aV52YDuN5Nn/AZMNOhmRws=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718271566; c=relaxed/simple;
-	bh=pRWDt1CymWhiVCIQGhuTbaxcmQTdtnlTPpKr9sPmjbg=;
+	s=arc-20240116; t=1718284632; c=relaxed/simple;
+	bh=JfrHfE5+wnDYBc2X9VtRgknSQ9saw1R3/iTpUCH9BvE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Lh0Fwn7cmYc21I9mA0518KG0rTkN1hEwdyBWcoDWWv/luEahuIgunuNT0bP3HwEkZUCQdw1g7LIvtYKbfQ9jGDNpBWrY4lqOBy7ceD87gaKiQ2SxgIahiM4u6/3Wv28BmSOaBOy430rgNmV9odeyHYwFrRtbQgpJsTt04OkpfhU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 7DE0E68B05; Thu, 13 Jun 2024 11:39:18 +0200 (CEST)
-Date: Thu, 13 Jun 2024 11:39:18 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Damien Le Moal <dlemoal@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?iso-8859-1?Q?B=F6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>,
-	Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
-	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 02/26] sd: move zone limits setup out of
- sd_read_block_characteristics
-Message-ID: <20240613093918.GA27629@lst.de>
-References: <20240611051929.513387-1-hch@lst.de> <20240611051929.513387-3-hch@lst.de> <40ca8052-6ac1-4c1b-8c39-b0a7948839f8@kernel.org>
+	 Content-Type:Content-Disposition:In-Reply-To; b=RZvMEJMAJEognwFOcCPO6IWiiyKQWivVdSvur9wKR0C+9V8IdPIcruxwyQXqHoY9+wAHGPN38f2VNNsQbixxAe32z4mAsTE5b2ujIlP5a1qgexjV1WL5dNVq7ErFwV4pTdbbbtrHH5eMJxFUiT5Kp9cotNQTG1uSoJiZsTrFGbA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FN/YXXTf; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FN/YXXTf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4AEEC2BBFC;
+	Thu, 13 Jun 2024 13:17:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718284632;
+	bh=JfrHfE5+wnDYBc2X9VtRgknSQ9saw1R3/iTpUCH9BvE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=FN/YXXTfFlj5TBAZkWQYn5iGGeI1YxwT+7U2UH1v2gP0eiqakofHTI/1ITWPmE0/h
+	 e0hXtLxzPQhuQGHtC2TBz4TOVtIg1tbM/NxZ7TiV4WnfocY4rknXbE5OK+hWFeoKHp
+	 odyJol4pNo4rwKy9RX9KAc0Li2dLqE8fkUY0rbO22djo5QxhZUYiGh4gzJl6XkhwGm
+	 TjbwBiRIlV+UO/9OH/uRXNJsdiAzUjPQ3z3NijkbC9EEj/B8KlEvvY82XFw/bmGh0d
+	 oylavdJe4YlgsLLjapFSASlDcQc9R5eb95TjZNYO1IIbF8Ueytu+p9jziy/EUxHlp/
+	 XRG4SnanyDiAA==
+Date: Thu, 13 Jun 2024 21:03:20 +0800
+From: Jisheng Zhang <jszhang@kernel.org>
+To: Haylen Chu <heylenay@outlook.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Use inverted-wp quirk for CV18xx
+ and SG200x SoCs
+Message-ID: <Zmrt-dcPR_ZXlYH-@xhacker>
+References: <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <40ca8052-6ac1-4c1b-8c39-b0a7948839f8@kernel.org>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
 
-On Tue, Jun 11, 2024 at 02:51:24PM +0900, Damien Le Moal wrote:
-> > +	if (sdkp->device->type == TYPE_ZBC)
+On Fri, May 31, 2024 at 02:13:47PM +0000, Haylen Chu wrote:
+> MMC controller integrated in Sophgo CV18xx and SG200x SoCs has an
+> inverted write-protect flag, causing SDCards misdetected as read-only.
+> So set SDHCI_QURIK_INVERTED_WRITE_PROTECT to make write protection work
+> correctly.
+
+No, I would rather set cd-inverted property in dts.
 > 
-> Nit: use sd_is_zoned() here ?
-
-Actually - is there much in even keeping sd_is_zoned now that the
-host aware support is removed?  Just open coding the type check isn't
-any more code, and probably easier to follow.
-
+> Fixes: 017199c2849c ("mmc: sdhci-of-dwcmshc: Add support for Sophgo CV1800B and SG2002")
+> Signed-off-by: Haylen Chu <heylenay@outlook.com>
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 39edf04fedcf..62b7f28de54f 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -962,7 +962,8 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+>  
+>  static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
+>  	.ops = &sdhci_dwcmshc_cv18xx_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +		  SDHCI_QUIRK_INVERTED_WRITE_PROTECT,
+>  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  };
+>  
+> -- 
+> 2.45.1
+> 
