@@ -1,157 +1,75 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9571657C8D;
-	Thu, 13 Jun 2024 20:06:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9973E2F50;
+	Thu, 13 Jun 2024 20:08:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718309218; cv=none; b=t9IDmMw9zFJEklXjxl6W4GlGnFR+B8uHAAHZn0R4dkx5p/qFQRXbosN0cU3wAA0bk8vCaWA1x+moEc+OxX/qXS9Mqki+PhnQXKoZ75aj/u6fgU68Z10oEKccmB5mulp5g9tdAOZvQAhH3nuuwSSnmD///iz+wX1Uwv4j6Ovzhss=
+	t=1718309320; cv=none; b=r3z6oRjY6dwuKBVGrfXo9FLCLtykWUqzrTuG6OBhQNkCOvYI8IhOHfYALaAHRtJhkeN3ng7/5SmAaJS3WeH5CmfGqoLzTMrSIl73OEBHzYx4R7ffzSoxcDVoZ0sd5/d0MBE77a/nkLFlZLpNyToZ11XqwC+0hzDlAEB2zcucjc4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718309218; c=relaxed/simple;
-	bh=k7uhUnd2YjV9SjYh5H4FEETcIbU38E9IRN7qo9tzQak=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ohPbWdsKRmH8cqvbKD2jwGOixTeOZtYNNn3yuNCbbEKM9O2T3iu6rs7jK8jyETQX7NBLJdEVyutTdJdvxp7FA8U/ENbtseckfGiYoaehU1VUvt55Is3fh+in6NGidkY0JBsMxBopwOhB/QFt0uhA17R0y58ddnWXius5CerfRsQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DlEuq7k7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1718309320; c=relaxed/simple;
+	bh=ygqYGRp7qazQZCtbOT5FAGb8ulegaXFd8LoNaGXhais=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=bzTctHS0PvYaAehha5ntXs1oyiTvptgdRyM3jTM44QktjScNG098QdXK/e3Oy7it0wYDvzi1uHfGVWiTpmIRBM1AGWtgKu28XBWTIp6rRddkaCIqTA/GDlFmFEreE1MbiOhyd3LvwCbYf7P6q7WlL/3uoC4+T9PHsuNnS6wLXyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=d6dR/5Oh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DlEuq7k7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B8A1C4AF1D;
-	Thu, 13 Jun 2024 20:06:58 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="d6dR/5Oh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A439AC2BBFC;
+	Thu, 13 Jun 2024 20:08:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1718309218;
-	bh=k7uhUnd2YjV9SjYh5H4FEETcIbU38E9IRN7qo9tzQak=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=DlEuq7k7xrWfF+/uNxHPvjM8TTeMBhwxJQ8nyfU7Qt4wrrLUOPT8f7o2SJUbi+lXW
-	 umpOfL7+joOMEVeowV2j/m+wTJmeSdBV9zubEgsL9wLZxaJJPPIF84ttDeorkEWHHh
-	 oakBQMHx+ZsgzZRPETNoukfAl/W+MX7QonMTUtKHkU9QhoTEy7/+e3AJUMxHfGgBID
-	 oX8qBbkBFZG0R4awJ9Gczy0UGewwkhvTqZsjwv1oQc6N6WbUwg+180FaME/yKmIh2u
-	 3igJcS9QrhVLvmDvQ0DhrIO1E150txoTgq2NoCGlF6E2mMnVVd3ChnFQwxCVlu5Bcn
-	 a0psAPDI0+Aeg==
-Received: by mail-lj1-f172.google.com with SMTP id 38308e7fff4ca-2ebe785b234so13847661fa.1;
-        Thu, 13 Jun 2024 13:06:58 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVyETfAYDEsJr879ZJqipkOGD6JggVww8VXcOT3tQv2gYpitVeJ2IZr93VHoXUn9CjDCI156OomVXG9DbR2neN3AOxdUTYZ+ZuglL654LW0cZcUQJnY821Ejh98mYrUm6eM06nHU4W78M0kRXJ1AlIynnMe/hx/SwQMz9tC4OI5/FkFhqhcqiw5ktkACJwpbEbgDeyIAbOU7/4W/HJu9JZVclELpxKA
-X-Gm-Message-State: AOJu0YzgSc349G/OamnWNNY/ZmjOgTnERRbnTc/+oJVnOt52ZAbIoVV0
-	3rdX590FuF+2xhHobKcSgveZZjozzoDb6YIM275Xw3E+hD9H9X4kAePYbOxjQc/piP4cc8jzmgO
-	PHMZr7bg31Xj9ySoNiz2vvMHUQw==
-X-Google-Smtp-Source: AGHT+IFsTzkTtOjxqfkBNekUNSpBS4UpU4fzi8jxmSPav4ifHXSAVrkwliOQ59BFj0yros0YUN2epLKBg7Nd0rOUY60=
-X-Received: by 2002:a2e:9dda:0:b0:2e1:2169:a5cc with SMTP id
- 38308e7fff4ca-2ec0e46d9e8mr5397851fa.15.1718309216375; Thu, 13 Jun 2024
- 13:06:56 -0700 (PDT)
+	s=k20201202; t=1718309320;
+	bh=ygqYGRp7qazQZCtbOT5FAGb8ulegaXFd8LoNaGXhais=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=d6dR/5OhG8kuPCJVgGNWx5iZ3GsM87EOFD4n1u2bwFIiLrIuWhtrw2lnTkQq0ijf4
+	 peZ/851Qqtnlfo0SKPzZWCWxHPiFiH21Y4/weZ54HBvGB96oEwnTS9p3O2Y5LNDHT/
+	 406VK23CIGB+VeJRlxqxYGWhP4CD3DUJuGb4mpLzeQjUNldJqb13/ywitKjS6RFJYc
+	 vG3wbZnfZC1+ZQIftxbTlAZVLKelQUlZweKAenPHjldo8rsaAKzrgA02J7Z4IsOYYw
+	 wciqae9vYmmgypCL8AX/0tFiP8t58OslcEC4dvbiXtK4b/+ZpCTyCQ7y8mwaIE/XKX
+	 NVJVjjcyfh+BA==
+Date: Thu, 13 Jun 2024 14:08:37 -0600
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Frank Li <Frank.Li@nxp.com>
+Cc: linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-arm-kernel@lists.infradead.org,
+	Conor Dooley <conor+dt@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, imx@lists.linux.dev
+Subject: Re: [PATCH v5 1/3] dt-bindings: mmc: mmc-spi-slot: Change
+ voltage-ranges to uint32-matrix
+Message-ID: <171830931400.2391260.17890560707264408523.robh@kernel.org>
+References: <20240613-ls_waring_esdhc-v5-0-36644e2fe21c@nxp.com>
+ <20240613-ls_waring_esdhc-v5-1-36644e2fe21c@nxp.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240605074936.578687-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240605074936.578687-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240606002646.GA3509352-robh@kernel.org> <CA+V-a8vX5cop1m40mz6ENy=dDcVBniy39mf2tb0erOQJokb+og@mail.gmail.com>
-In-Reply-To: <CA+V-a8vX5cop1m40mz6ENy=dDcVBniy39mf2tb0erOQJokb+og@mail.gmail.com>
-From: Rob Herring <robh@kernel.org>
-Date: Thu, 13 Jun 2024 14:06:43 -0600
-X-Gmail-Original-Message-ID: <CAL_Jsq+P3myoPwEJu_TSi6zgSPhjg2QnB5x4hhMeEVGvh1ncyQ@mail.gmail.com>
-Message-ID: <CAL_Jsq+P3myoPwEJu_TSi6zgSPhjg2QnB5x4hhMeEVGvh1ncyQ@mail.gmail.com>
-Subject: Re: [RFC PATCH 3/4] dt-bindings: mmc: renesas,sdhi: Document
- RZ/V2H(P) support
-To: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Wolfram Sang <wsa+renesas@sang-engineering.com>, Liam Girdwood <lgirdwood@gmail.com>, 
-	Mark Brown <broonie@kernel.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, Biju Das <biju.das.jz@bp.renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, Jun 6, 2024 at 3:12=E2=80=AFAM Lad, Prabhakar
-<prabhakar.csengg@gmail.com> wrote:
->
-> Hi Rob,
->
-> Thank you for the review.
->
-> On Thu, Jun 6, 2024 at 1:26=E2=80=AFAM Rob Herring <robh@kernel.org> wrot=
-e:
-> >
-> > On Wed, Jun 05, 2024 at 08:49:35AM +0100, Prabhakar wrote:
-> > > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > >
-> > > The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to tha=
-t
-> > > of the R-Car Gen3, but it has some differences:
-> > > - HS400 is not supported.
-> > > - It supports the SD_IOVS bit to control the IO voltage level.
-> > > - It supports fixed address mode.
-> > >
-> > > To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g=
-057'
-> > > compatible string is added.
-> > >
-> > > A "vqmmc-r9a09g057-regulator" regulator object is added to handle the
-> > > voltage level switch of the SD/MMC pins.
-> > >
-> > > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com=
->
-> > > ---
-> > >  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 20 +++++++++++++++++=
-+-
-> > >  1 file changed, 19 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml =
-b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > index 3d0e61e59856..154f5767cf03 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > > @@ -18,6 +18,7 @@ properties:
-> > >            - renesas,sdhi-r7s9210 # SH-Mobile AG5
-> > >            - renesas,sdhi-r8a73a4 # R-Mobile APE6
-> > >            - renesas,sdhi-r8a7740 # R-Mobile A1
-> > > +          - renesas,sdhi-r9a09g057 # RZ/V2H(P)
-> > >            - renesas,sdhi-sh73a0  # R-Mobile APE6
-> > >        - items:
-> > >            - enum:
-> > > @@ -118,7 +119,9 @@ allOf:
-> > >        properties:
-> > >          compatible:
-> > >            contains:
-> > > -            const: renesas,rzg2l-sdhi
-> > > +            enum:
-> > > +              - renesas,sdhi-r9a09g057
-> > > +              - renesas,rzg2l-sdhi
-> > >      then:
-> > >        properties:
-> > >          clocks:
-> > > @@ -204,6 +207,21 @@ allOf:
-> > >          sectioned off to be run by a separate second clock source to=
- allow
-> > >          the main core clock to be turned off to save power.
-> > >
-> > > +  - if:
-> > > +      properties:
-> > > +        compatible:
-> > > +          contains:
-> > > +            const: renesas,sdhi-r9a09g057
-> > > +    then:
-> > > +      properties:
-> > > +        vqmmc-r9a09g057-regulator:
-> >
-> > The node is already conditional on the compatible, so why the chip name=
-?
-> > Then it doesn't work when the 2nd chip needs this.
-> >
-> Are you suggesting to use a generic name "vqmmc-regulator"?
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240613-ls_waring_esdhc-v5-1-36644e2fe21c@nxp.com>
 
 
-Yes, but "regulator-vqmmc" or just "regulator".
+On Thu, 13 Jun 2024 10:32:05 -0400, Frank Li wrote:
+> According to common mmc core, voltages-ranges should be matrix.
+> 
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> 
+> ---
+> Change from v4 to v5
+> - Change maxItems to 1
+> 
+> Not sure why it impact other mmc yaml's voltage-ranges.
+> Rob's answer:
+> 
+> It's a quirk of the tools. When decoding properties, the tools only know
+> all possible types. Types are global, not per binding. Sometimes it can
+> be figured out, but cases like this cannot be.
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml | 16 +++++++++-------
+>  1 file changed, 9 insertions(+), 7 deletions(-)
+> 
 
->
-> Currently depending on the compat value "vqmmc-r9a09g057-regulator" in
-> the driver the corresponding OF data is populated. In future if a
-> different chip needs a regulator which varies slightly to the
-> r9a09g057 chip this will have to have a different OF data. Hence I
-> added the chip name in the regulator.
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
 
-Yes, compatible values distinguish different chips, not node names.
-
-Rob
