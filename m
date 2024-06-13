@@ -1,52 +1,53 @@
 Received: from EUR04-HE1-obe.outbound.protection.outlook.com (mail-he1eur04on2083.outbound.protection.outlook.com [40.107.7.83])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89B8F142E9D;
-	Thu, 13 Jun 2024 14:32:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3736F1465A9;
+	Thu, 13 Jun 2024 14:32:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.7.83
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718289158; cv=fail; b=tv/JhAoZbqvD8p6XfVEGyWrm3IknZE5d6v4JV7S0WnacrKxHFJ6L36ImHgZRqrTc1ne5F5jg7y0EMD+RFmRfiVq1cWMGx8fBpjiMW42nUkkwBSIrELyyJuZTYBAsBmaX1TkkJgHDQLp1UCGskrN+hMSAYcvFmzRPiiEM8+aOp8U=
+	t=1718289161; cv=fail; b=e4w2n/k+mMnDrqf3K2r0wx5UViYPDP39vRFQdd/7PZLQjlfMuxfHOgN8UQ4H97TcIvajVeRZoSA5GyyyKky3g+hGHVo4E1IGGwxqrXSg6bwnsllm0ppcKBAPSUrSzywbYQRPLnhuMQcA7kgMEduBwi8Ow142vSnLUjOCy8nWm00=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718289158; c=relaxed/simple;
-	bh=KO/9Dii51hytfogf5YTfygqSFnJxkMKRwTRQWXcQWZY=;
+	s=arc-20240116; t=1718289161; c=relaxed/simple;
+	bh=s+5+b4w1YZpbi5xnB906ewb3bvJknRFJ1303eoHH8W8=;
 	h=From:Date:Subject:Content-Type:Message-Id:References:In-Reply-To:
-	 To:Cc:MIME-Version; b=s7Z8b6XmeeS+w4lYRpjaNdi6uuvc9RHw6AMDxpYPMWzGPJQD0uKXMWJ+7du/BTwMFcPHc0GNzQV5qKEvobOjdQqn8jcByRCUQW908HnjHbbT5cSU1F0S4dbbJqkKLVdsC9eVLhXHAwTr6jFGz9sH6JL1vAvja+kdECxCSLXG+cE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=J7ScDJNq; arc=fail smtp.client-ip=40.107.7.83
+	 To:Cc:MIME-Version; b=gAyBRI47RHI6pC67DAqqP6jOZG5kvFgyU06LnKsJ6KnQst/4hDdrZSO9uLsQgNp8y0hzZFU3hZC1P7m9HLtn2ziKJofA/gcCxMxxX86NmeolrNWfk/4unO2yg6uIzEDBGS0mGBQxm4PB0/0/oVv9WmU19HDHfbFhnQe9E1qbTUc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b=BDBx3rPJ; arc=fail smtp.client-ip=40.107.7.83
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="J7ScDJNq"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="BDBx3rPJ"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WG8TvsVv6s1b+4fYYrj8xsRPj4JWXV6y5BorkuQUKhH4k39z/6Mse1Sdnh0bQV0zV2+DPC+rIiU/f+GCQ1LQswCxTfZKrtJfYi/06WkROj2flXPDFchhrEl7V9D7bGUc4qbW0hPZYrnKrVY+cvwZcQEytPd1aIpEhlHABHLhNMJ+3Ilu27DYO6ikhNldX0hNs0vxfOVxGDZfQB+rh8y6waG1rPa5GAXZkBgSedhjH4O3Wpw/NCHJ2ZlnMgr1WNNIGyVJEEyAVB1Ss58VKK/Tw7ukTLrW3TYerEhROs4Flyh8DG8Scp+66Zs3xSBFbZImeCY1A+xiKsVpJTRZ6xYmWw==
+ b=LLnMkRcGwOCWAV6CVDIRMFFjl6Fnr41nylUdgXB2y9aLlVupjlj/azFicpEDZcX/4ZN67TAsAD0+D6+Elc6fyPuXZEyz9yx/IMZcwD+wh3j2/J0rWc1rC/fmPAZHWGtwpuEzkn+YkwwrdRC7K6Gjn362ohleDzUyZz/yLNfjlylTLj4XJsBLlfgijM34Oi43jK2YCSKV4GCEOIZriXC1TyXhMlMe9EFy4xWsBNH6Dk73p/DSf7yWAqgxpLlbMg0sRk5RHGxPImTUqc7dH7IfGyuD9cOWkMKaCG26KVcMYekQlCU2/GjRo7+LYygHxwg0odCFMeh4wLkpoYfiLVIFSw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=PrGh1vSUxjxrYTHKhqnht0YI2ZzYqgsKipEZ3IzHndQ=;
- b=gMLP5FnnbZFVAZihvrJlperSOb4Phsu6wj+CYDhA/gr190+qtds13ok35smHSgd3aQvVT10jLxCfEVfacujMBm7t7rLLK3nYE8iyrj02iL587XCEcI6T2sC1koFQ6mYJJNK2kb3U3xLiRFBzZYxDnAKhS0ElGvVJcowMVth+FH37Es11n9o+WEsBbemd/0bu8pYqqnPPwyhQGpq+azPfM7PDl6J5zF/ES/P74XpM4oFYoTcx6n/7Ve/2Da8WNQ6GYGYczE5fq2IkM1wVkw0AiiL77BS/fQ9QmPOydgmiiCljffdclWBX2D7vDts/Ml8gIdixOL4pSF1ByHJ4wgxTzw==
+ bh=GTmXQ/3fpq4n2gUscxZrhnRKHdbnSRXL7JdKFFI5Gs4=;
+ b=coKWpoYrPKLL78HPaBO48RB1PI5SjsMlf0+xEOCKlgZwxUiNjoi39WB5LL6Egb+ArDzL2YAQ3sQZgVOYSxjbK3BUzfo0aN/BVHp4OWw1q53AicciEGh3eNf/dqbGtUYJq45POgPJmAKHxgeYBV8PRo27x7UWOqqfu2HWjdTLrIFTkW8IpR57A1x1bpyPbJZ9qmeCUWBsgCXpn1D2/VRMENJVVfY/ZXT3R+6sqYs8CIGevL4mvVWB30NqnLJJuNmMSV0t9Cgv+cQK0SBVAMwHpxtQsKjp+nsylfUW2r8akwlU7QJB9surohwYFWmRuQGh80v3h1WbJ+JvU74SI/drZA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=PrGh1vSUxjxrYTHKhqnht0YI2ZzYqgsKipEZ3IzHndQ=;
- b=J7ScDJNqI8AGGO0vDemG88z8V3nR2ujsgI16TS2amrj4JiwLQ7U/rjlTAFqw7OOn8xFoosZ5ljzBUpmmL++H94d+mZqSMJ5A1Zmyfhj33FaStq032NbT/PwDYqgwhDMNjHiQh7F2dHalqtZlYnDaNUjcB/RR7GtIQNCg8DbZI5w=
+ bh=GTmXQ/3fpq4n2gUscxZrhnRKHdbnSRXL7JdKFFI5Gs4=;
+ b=BDBx3rPJoSPyOWs63QZCbRNQsH27OY8NY6PKs6rY2d+HIGM/BNP3C8vkXMC4ntKVyCzdG0TtA4TydICB6AghHvb12bEbBjj4QH/+kLXrdLKEkNkqLEivvCdXsFtGUnvjaTgX7YM/SyeT1u8xnMSI08fgrkuENHyQv1YbO96VlcY=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nxp.com;
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
  by PAXPR04MB8256.eurprd04.prod.outlook.com (2603:10a6:102:1c6::6) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.20; Thu, 13 Jun
- 2024 14:32:32 +0000
+ 2024 14:32:35 +0000
 Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
  ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.7633.036; Thu, 13 Jun 2024
- 14:32:32 +0000
+ 14:32:35 +0000
 From: Frank Li <Frank.Li@nxp.com>
-Date: Thu, 13 Jun 2024 10:32:06 -0400
-Subject: [PATCH v5 2/3] dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
+Date: Thu, 13 Jun 2024 10:32:07 -0400
+Subject: [PATCH v5 3/3] arm64: dts: layerscape: Change node name from
+ 'esdhc' to 'mmc'
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20240613-ls_waring_esdhc-v5-2-36644e2fe21c@nxp.com>
+Message-Id: <20240613-ls_waring_esdhc-v5-3-36644e2fe21c@nxp.com>
 References: <20240613-ls_waring_esdhc-v5-0-36644e2fe21c@nxp.com>
 In-Reply-To: <20240613-ls_waring_esdhc-v5-0-36644e2fe21c@nxp.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -54,14 +55,13 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>
 Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
  linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- imx@lists.linux.dev, Frank Li <Frank.Li@nxp.com>, 
- Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+ imx@lists.linux.dev, Frank Li <Frank.Li@nxp.com>
 X-Mailer: b4 0.13-dev-e586c
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1718289143; l=6976;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1718289143; l=5612;
  i=Frank.Li@nxp.com; s=20240130; h=from:subject:message-id;
- bh=KO/9Dii51hytfogf5YTfygqSFnJxkMKRwTRQWXcQWZY=;
- b=l/lMHqciyUBU8tRo4FAyNsDO1amWBxYRxkqokENGNjbDDtvI/CgbREKHG5rx6G1fJ/rSHt3GE
- juttPMNN0pUAShcwWr5sr9Jx9EjR7CuWUy+YyxhlScYr1vol7JvvaRJ
+ bh=s+5+b4w1YZpbi5xnB906ewb3bvJknRFJ1303eoHH8W8=;
+ b=0QZGhRHNy3XDXmqN7elmqDiOHzNAKo4iO2qoKmU6TpR3J7ktPWEETO67KYAqD4c46h8TTZDUu
+ 7uNcekJU6EyDDd1Uvnv8QDwyH5jE5eBOUp+oUqMdmm2FLTM+rubSyFw
 X-Developer-Key: i=Frank.Li@nxp.com; a=ed25519;
  pk=I0L1sDUfPxpAkRvPKy7MdauTuSENRq+DnA+G4qcS94Q=
 X-ClientProxiedBy: BYAPR03CA0017.namprd03.prod.outlook.com
@@ -75,307 +75,216 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|PAXPR04MB8256:EE_
-X-MS-Office365-Filtering-Correlation-Id: 9b5b6c5e-916c-416d-ac1e-08dc8bb5a90b
+X-MS-Office365-Filtering-Correlation-Id: 238b6050-51bb-4bfe-410c-08dc8bb5aac3
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam:
 	BCL:0;ARA:13230035|1800799019|366011|7416009|376009|52116009|38350700009;
 X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?VUpnK3FvMllNbDFQRUpvdlhObkxzTnN0RXljZy8wbU1TS3ppUjh5Q0JGRDEx?=
- =?utf-8?B?K3p4dllZWVJPZXBqczQzYW9ibFJ1RlBOYU9GZzIyYkQ0dXl3amhRZnZ0TVUy?=
- =?utf-8?B?c3JGdzVrMmRPelNwZ0UvckJJc0NwKzAraDgvWTVqUHNOVUJtSGVBRXp5SVRx?=
- =?utf-8?B?aU9GbmMwY1ZMKzhEdm1oekZYZk1CYU1VaU9yVEl4NVdoTVgxcjBwK3h2b3N5?=
- =?utf-8?B?SzBSWmNiMjYxWFRYOE5mM3ZEeXZKemVIZjFIM1lBQlY5VDNqV0lVQ3REZFdN?=
- =?utf-8?B?ME9Vdzlha0VDMCtDek5aNVdhcDlYSmtUUlJZVUZtUXFhQjJrbnRHY2V2eFRi?=
- =?utf-8?B?ZmRybWNIaTdvVnZuS3pBc0w0VTl5LzBObXhBa0xqQ0N3NXZVYTNadmlzZUh5?=
- =?utf-8?B?S2VoUWVCMkJpMFB3dHlTNFZjREU5b21sOE9GZkFzMm1CYW5BV0hLY09FcnR1?=
- =?utf-8?B?Zm5QeVNyajYvSUgrWnJpZkJ3Z0lWbWZocFZ1REE5bjVmWHVuTUZsMmxVdnEz?=
- =?utf-8?B?K1ZNV1RHdFFnRGVIRkRMemdneWRXM2EvRGhCSGhsK2VIS0dScnY2NExqb3FV?=
- =?utf-8?B?cjBLYU5IMGk2dmdtdk9MOXVkclAvNTJMWThqS29VMTl1NnZ1R25KdGZqcVMw?=
- =?utf-8?B?dkFlZU9ObnZBdm8vZGRQM2xUU2Z4TzEyZlJsOW85L2hIUXNQYUh0M1NFdWRZ?=
- =?utf-8?B?YTZxc3hFenZrOHV0WHh2VlR3YUpjNVFnY3h3Y3ZPZmoyUTErSmxSTUF2LzNi?=
- =?utf-8?B?Qy8yOExoNmtIY1VSWEd2Z01kdlBSdi9GTWsxbCtqaXFmcmhmZXFsWVRVRFQ0?=
- =?utf-8?B?anVFNktqMDRrL1FrblZVSjdNQWpVN0FRcHNTMEVhN1JmMDRRaFF4RmdLT2dm?=
- =?utf-8?B?Wm1uM2pmZHNueVNQNytwTlNsOFhYdURMRng0aXBiSUtXeVBITzlyOERJOXVv?=
- =?utf-8?B?bmthbkZzb1NweDBTNXlBZndDVkZhaXNpT2h6THZwV2laVlhXYjFuS1N5T25i?=
- =?utf-8?B?bno0Mjdad1dmTjJRQ2JTdSsrRld2aEdDdi9ta2ZqUFBzSFhyQVZiZFY3UThJ?=
- =?utf-8?B?Y1FWQkpXUHBieDQvTmdwWE9mVzM4ckVRcGUra2JXVHo4dWNJRTQvMkkwclBl?=
- =?utf-8?B?QUJnVkt6REJTaHRjdlBvNU9Ncm1iVHhEcUxDeEVPYWpXRE02MkQ1MTNwNW94?=
- =?utf-8?B?R2ZDbzVZL1lqQVRQcGVmRTFMMGJoYkRSQkRvYTU4amZ2bUV3OUZTR21yUDA4?=
- =?utf-8?B?S2JuL1M3TXVad25WVGRPOGpUbW0zdkYvYU90OFkrdGhnb2w2Uys5WHBCdWQ2?=
- =?utf-8?B?ZEM5YlpZbEhEOHpJRWVDWHNFc0VtQW5aSmNuY0tXd1oyNmJQWVlzdmh1VjAv?=
- =?utf-8?B?SllzS1I0Slp6OVc3alRZWWRVaDJYaUpZd01DdmlyWXhEUVlQUnk2R1dJcTFw?=
- =?utf-8?B?c1luQTUyUG5mMWNXSk8rRmZCSnprUHptWlR6M0xmM1NETmhKcmlKdU1sVlpJ?=
- =?utf-8?B?bGlMYlJkVm9ubGN6bjhha2JkbUVvaG11MUtaVUpnOSsveENsQnU5TGRLRGVO?=
- =?utf-8?B?OWtwZy9uUEwxcXRpVllVaC8wdEl0MlQrT2ovWGpwbll3V0NFZUJCRHBldUV1?=
- =?utf-8?B?dnBYOEJLcjhQRnRPbFN0bUlTRmZwbDBWejgwQyt1di9xZnJObnFIUllPWWVS?=
- =?utf-8?B?aEZqUWZSMktDa1JOYVprY3pZdWJJQTIvSjRldThYcUVqek5LSVZndDJZcjRv?=
- =?utf-8?Q?CfV8fi/4vgrtKAV7CWQY4N7DbmIXw8cJP+Stq8C?=
+	=?utf-8?B?QVFnOXdSQzB0K0MyMTVFUG0vOHdxUTM3a2s3YXB6K3VYTVJmU0lsZXk4cVpB?=
+ =?utf-8?B?eDA2Wis5NjBSZlVpZzdjYmtPeThsVlp2Q1ZYbkZJcWo1dHZGYldkZEhKSUpm?=
+ =?utf-8?B?L2dQdFprSVJ5NDFwQnJtc05Ud0FQVnFMcVBQNDMxQjNlTmQ3MkVrYWU4U3pp?=
+ =?utf-8?B?Uk1xOCtCWlFmN0VuUWRuSHZaUXpNd1pEN3A0UXIxK21vWStrUUxoTm1NeWxK?=
+ =?utf-8?B?dGRDb3VlKzBqRm9rNWY0WVBmdnNWdGZVMXUrU081cDJqY3pvVERuM1B1YW02?=
+ =?utf-8?B?cTNCYVJ2dUxUbktycGFKc0puR29FblNJNEh4T0RnK2hxUkhodHVMbW1nQmRX?=
+ =?utf-8?B?cVBoSHZjaDNrUWg2WVl6Qy9MYjBBSlBLUXFVR2Z6aVA1L05BVDlZTU9aTzhr?=
+ =?utf-8?B?eXRrNG1IbkM1M0Z2U0NGcHkzZ0RSRkJJdGpRRTU0RStUSWRlVStYZkN4UVRR?=
+ =?utf-8?B?dUpDQXphdnR0c3NMRlZGaEFlK0NtZjcvbFUrL215SUpBdU1LeDhHWGJZajBB?=
+ =?utf-8?B?TFlGVW0wSXZmcmc3NmNtSmlLa2cvVkl3KzFIVXpGMzNLeU03WEZOWnBSU01t?=
+ =?utf-8?B?enJGQmJGb2JkcDFScGp1WlZNS2xVekt5Nm0rWXBHQklGc0hvMmZMeUVQUUdN?=
+ =?utf-8?B?Tk5SeHFrZzQ5RGZDL2trR2dveHhkbmZaaWdKUEJscFptUS9vSnVoTG5SUXdK?=
+ =?utf-8?B?eEE1bWc4NXRjMGg0VjExK1BIckIrZHNKdDVXdzJJWERKOUJlWERockFpWVB0?=
+ =?utf-8?B?T2VJTWpUZG9sWG1XcHBDc2FCeHlQUDJHQlZKazBNaXdQUmhhZmVlSHJJWGFn?=
+ =?utf-8?B?R2c0U0NyWVMzeHRzV0xOTDhHQU9ieTZuMVVCc1NuYzNIMDJxZGJ5b3NoT255?=
+ =?utf-8?B?QUVMYk8rVVdRVmJsN0RQaDArakVZUEZzWlBNYnJ5bkpLRHhLblhmbHlDYy82?=
+ =?utf-8?B?VUZlQml5d2tIb29ibVR2d0I1WC9RTTR3U2FaQlN4Tk1pTHMwKzNsc1Jia2Yz?=
+ =?utf-8?B?TXh2VCs4N2ZCTUxWTXp5Y0kwTGY1b0djcXo2T1pLUVo5UWRDbUpkV3ZWeU5k?=
+ =?utf-8?B?eDdNRElZaGhERy8zS2draWVqWlkvL3pXRFlzSHYyYjlhWGxkOEFUNXEvQ1JO?=
+ =?utf-8?B?K0Z3TkhXSnZHR2VMaVQwV0JEaElva3F2OFR1cDNGZ2Rxak1LWmJuVkpBT0ZQ?=
+ =?utf-8?B?L1ppWVExeDlOY2RibDhid3hoOC9iekdlZU1CWEY2VEZ5SXM4NlhmV0pzcEgz?=
+ =?utf-8?B?TURXTjN5R3djQlQ4QTdXQWxla0V3NDVyM3Z0T0NjSXNSWE1OM0M4NlY3cHhk?=
+ =?utf-8?B?MnZlaDhsNi9DQmpqbDhKL3Qxek1TRW9NbUhMVjE4VkdWOHE4RFY1bEY2R3VK?=
+ =?utf-8?B?ejIzcVc2bW9Ja0t0Y2c1UGdMM2FXUXpuWkg3Mk9mbGIrc1RGR00xK1hkSnFr?=
+ =?utf-8?B?by9iNGFRczZKYzdRaDB5UmNJT0htTGp0c2x0MlYrZXV0MnR0SWJuQ1NlSm5t?=
+ =?utf-8?B?V24rQWR6ZzU4Y1lTckF2dEdNc2tXSytFZXlFZEY4aUo0NXNpKzlDeVVLdDBO?=
+ =?utf-8?B?QmhDQXdLMGdvS2VYQ09wbk5vNzVqMFBPcHNIWmNVbUtTV2VEZzNxa1cwaGxy?=
+ =?utf-8?B?cUZkRmYvdzBONmlCblhkK0hCQytEK1ppaU1HbkM1VHJaelpLeUFJV2RyOXZ0?=
+ =?utf-8?B?eHBmQjdnLzJ2Zk9SdmNyL3BGbWFnKzhqZ2NVQkhOd3ZIQWNjOEx0MkNFY3lx?=
+ =?utf-8?Q?fJjVsBcA1xiRzJs/8jXhgqQQzWDQWwChLkIn9SV?=
 X-Forefront-Antispam-Report:
 	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230035)(1800799019)(366011)(7416009)(376009)(52116009)(38350700009);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?SmNSQ0I0V05DS2plTVUrSE1veTFVZWQrUndrd2E0TE85Nis3QlhFQ3RlRkIw?=
- =?utf-8?B?VnlYNklTQzF4ekRxaUcyMnNwZGxyL0dGaGhLTEN6WmVLUjUzN2R2d3ZjZlZq?=
- =?utf-8?B?ekpTT2tIRTNTL2IrZEcrU0UzZS8raDM0a0xDN2Y3UmkzOEI5UEJUVGFvRmox?=
- =?utf-8?B?RUwwNVZLU2hNRjUvNzNZcHM1MkRHdnk4Y1NsSUczWW9CZnpEdFhiRFdCNlF0?=
- =?utf-8?B?bjd6bFdHdXlQenF5bGFtTURpSVFCUGZpeUhqUmx5clkwRExFNEpOVDRJbjgr?=
- =?utf-8?B?aE4wcDFWblN5OTRSN2htVVMrZGliU2daMEFmYzJiSTNCZ0hYVytHbVZCV2VI?=
- =?utf-8?B?T1Z4aU50UXdmWXI0dStHVGRHWkc2TXRVbml2NHFJejUrOWR2L1JNMU5ZbkEz?=
- =?utf-8?B?MlBMRDY4UHZyWXJSNjM2WXB2eVkvVjZsUU1sZnQzQmM1b3FCSjVxSks1N0VZ?=
- =?utf-8?B?eVM2aHFWMGVUakFpVEVFZDdNNDh1aEJMMGhSamVtbys5YlVBMk5iaysrcWEr?=
- =?utf-8?B?MFFjbmVYK04weHFwSmhPbnZmTE9xRjFycDI5Zy8rNk1wRGhqTUExR1hUNTRo?=
- =?utf-8?B?V3NmTEozM1o5N1M4dFU0MmJxMitUd2NaUEVHMHFQMklzVitNUjhzZ2dYaGRQ?=
- =?utf-8?B?eGVkWGkvbmtzT0tXdkdBVnR4bW53RHJzODFoSnh1NGt1Wm5JLzN6c0RlU0pp?=
- =?utf-8?B?S25DUHFTbEQ3M2wxbEUzZEhVQWlqOGhZRm56eUIzSVhYdnlsU2NaM2RmZFJ1?=
- =?utf-8?B?WWYvZVVJeUZMR0ZDaEhEQnRKS1hFdTR4cmIwaXQzREsrK2lLYmlQWFB3YzRq?=
- =?utf-8?B?M2xCYTJqMjk4RkRCaXROeUxEV0tRT0EzQ1Q1dDRtT1JQbWk4RHBBcUl1MmFr?=
- =?utf-8?B?SnBJNy9WZ0hjRFlsSGxKVlFEclBKK1NqcUtKbmtyRXZmUG9ldnJlaVZES2Vn?=
- =?utf-8?B?eHlmU0J4RzloOEREOVg2dlRvTXpPNDhMQVFrL2YyZ3JRSEZ1cmVxWmxhVVZM?=
- =?utf-8?B?bm1XYUF0TzB1bUJxZlgzSk1PRlNvVC9tOW4xeWJpdlNhcXh0Q052eHNEZnVi?=
- =?utf-8?B?Q1dSN04vZnVoMzREQXFKdEpINnpZcGtaU21CRWNEZXRGcnZnMUk1ei9Ceng3?=
- =?utf-8?B?L21Za3g2TmJ1WEFCdVphYWl4LzZtb2IxOWRhbnh0Y2RpdXpFQmwrdGVTT2h2?=
- =?utf-8?B?ZlFpVitnRzd0c1ZyejJuQ2xTbkF3RE9pWXhJeFR3V1R0dXo2N3JTSEcvaUlm?=
- =?utf-8?B?S0ZTQjZZN2tyYnNCZk9jMkt6WDd3RVc5TUxpRE8vUWJ2THhYNGtVeHJlMlJk?=
- =?utf-8?B?RjMxbVVYUmd4ZDlkN3JNWERzd3JjWnZOWGhHQXU5WG9yeGJ5bk1wRjVLS2N2?=
- =?utf-8?B?SkxJOS83U2ZKc2d4VlNXU3VSMzFSdytmY3JxU2xvT0o0QlFFbTI3UzdRT2Yy?=
- =?utf-8?B?cW15MnN4ZGxpTWhUcHhlWGhUcEQ5enBkY0pFRndhbjBPNVljMDNpZ2ZMbGc3?=
- =?utf-8?B?NU95L2p0R1NDK0dnYUp0QW1Od0xGWGY0WmhGaTgybnVMZWlHdHVTSEFXYnUy?=
- =?utf-8?B?Mlk1RmxFTk1STks4a05ZMU9LN05ZanVZUzluRnVSMk9UM2lYUWROUEVuRUdz?=
- =?utf-8?B?T21EVW9GcEYxZ1o5eFcwVFFoOURRZ0lqTlFUUGxzaW5jaDMxQjhEUVI2MGdo?=
- =?utf-8?B?WlN3YjcwcmVXYWZaTmpDVDBBNXJLc0JJcXY3U1ROSXlKa3YwUmE0MDk5MXBo?=
- =?utf-8?B?OTlTVzBGcDZVY1NnclNtR2hvN3FKWFBhc1ROU1VZcGhSRmUrSkUwQmY1Um5B?=
- =?utf-8?B?N3JSRFZwcnFEdlRqNVRTcVVINGNHam9sUW9qVUZaWjVHU0tkYStVSUkyVGJ3?=
- =?utf-8?B?N2FNU2xDVmVNcm5KM2JYZ0E3UUpobTFPZjhTa3Y5YWJrRXh3SXBPU0pVVkg4?=
- =?utf-8?B?bGJrN0RqNTg5Um1NNkhLeFFKZEtwRUxlb0xWQW00VlNrTTdvbHV4elpWNE9h?=
- =?utf-8?B?Rkt3RHBLSCt4Q1BCbDM0UDlhc20xL1J1VngxTTRwOWNhbHZqcFBSeGQ4dWcw?=
- =?utf-8?B?U092WU9BaGd5Mk9ORVFPOVpOa0dVaDBvRVJtQkRyZmR3SXFic2JCNmtlUGlL?=
- =?utf-8?Q?t1X1VGJmmvTWHTZBcW+c9ABXC?=
+	=?utf-8?B?aEhvdVFGTDdpYmo0NUtrTncvcWRJdzNGRjdZVm9WY0lxN2tyRS9XUU4yWFNw?=
+ =?utf-8?B?RkdTL0NpbGxqc0ZnMlFuZThZalRIdGR1V0ZMRjhHVzlYZncvKzh4ODhXVlNC?=
+ =?utf-8?B?U1NFcVJST3o2U2JyM25qb0MxRWNYaHVvOHJnUnhYSXpNcjNpdDIvc1lsdVhX?=
+ =?utf-8?B?MlE0OTZEdE5lYTBzbFN3U2hSdUdpdzdSVDhYNEYyNUpiWW8zOUE0WEZ3dFhl?=
+ =?utf-8?B?TC9teDNjUVhGektWRTlTMDNUWnNVV25uNFRjMC9MYWNLOVhIcHVZM0tXNW82?=
+ =?utf-8?B?QUxhZm41dE9mVVZDV2JiN0Qvajl1ejNOeWZLbnhYOUxyZDhpMGhMK0JaMGJn?=
+ =?utf-8?B?NmFTMlZiWXJzeHVKcGlIT1pneVJSQlpNY3hlSm1uY0RrbW5XWU5UWU9oN0R2?=
+ =?utf-8?B?WC9oNU5DdFQzZ2YzYWlRNVgxeXVPS2NJcUVkRWRBZTI1L1ZJRzQ1bC85R21m?=
+ =?utf-8?B?bGVRMm85KzJWMTRGU2RRRUpBYldDMTJYMitpWlpLMWlyKzlydkFSSGVUOVpw?=
+ =?utf-8?B?QVE4czFWaVJmQkcvZEw4ZFhHL09nUmo2Q043QWlZOU5ZY3MwL0prN053RUFy?=
+ =?utf-8?B?TjlzSDB6Y1AvUDZwMmlJeE1nbXVkYlBBWkR2UEUwWDBYY1krMHJQcE12SFRI?=
+ =?utf-8?B?QnBsaDQrWVFvdXVKTEl0enZUY3dnRXBNZ2d2RWdMWHMrNnNybjlnR3I1UWZN?=
+ =?utf-8?B?TDF5dlZIZUN6L29Ua25JOHMxZmFwQVNNODE2cVZCdW5Yc3VJWUMybFRmdXV0?=
+ =?utf-8?B?b1BpUzNvK1FnZXBlaE5NODl2RnlPMSt5Wk85V2NFeFBEREZ3M2p4cklaUDRa?=
+ =?utf-8?B?SUFIbFFpVXJiNFVadm5WRDJTYWxpN2IxS3Brb1I5T3cvaDUyWS9tbVJLMHJF?=
+ =?utf-8?B?R3NzMkxCVVBmZDR5SmpldFdJVHNHUisyWHY1K2daREZaN29ZVTk2MTRQVmVO?=
+ =?utf-8?B?TjNxQWh3YlNaWktEeFQ3SnlxUTdnNlBwMXF6VDJhcGUxQVBySWoyTk8vN2E5?=
+ =?utf-8?B?b3lBSC84NGtTOG9XTjVwT1RTWHY5ZGloSjg2ZndyUzdNejdYTkRqdWVNU2xz?=
+ =?utf-8?B?NERqS0VlUnJpdkxyd2tUNW8vcms4ci9BY2VmeTNpZGRmNzEvWUt4S2FId3oy?=
+ =?utf-8?B?eVFYVjJHb3ltbVVuaXBWZXR6OUF4OHEwYmI4Nzh0c2JIN0hObE9wQjZkM0pB?=
+ =?utf-8?B?Z21aYkJhdkVIVXIxUmtSTk84M093UzZ4SjdEVWVIWFQ5WnlRU0dTbnk5a2V4?=
+ =?utf-8?B?Wkpkb0E2TFRscHpxRUFCdll5dFFXcGx2RXpQdkdhUEZwVFA0REVka2VSaXpj?=
+ =?utf-8?B?bmlaUjRwWnZQbVo0S2lJRURjUENFdUFtWGQ5VWpucTFpdlc4M2MyaDYreUVl?=
+ =?utf-8?B?VWpMZ1llUWNhRnpJK21iR2Yrb1AxUWJZMHNycjBONCtyZTYrM0FuT3IxMlM1?=
+ =?utf-8?B?amM4SDVCL1R6d2tvN3p6N25MRXR0SHA0VnFRS1c1ZzZPNFAzOGxOMC85OFRN?=
+ =?utf-8?B?V3FDNUJWUE1FTW83WjVWTGVWcVB4Y2pVd3kyYjE5d0h5M3U1dzJsa3prcllT?=
+ =?utf-8?B?UGQ4ZDZOaFNWbVJ0YzFaMEdmMU4rVndKblVJOFZLbWd6OWJQYmloUHVMU1FO?=
+ =?utf-8?B?RXl5Zi8xNTM5TXd2TnZMSDBQTFRvNmt2MFlkS0pBM0pPMjBON1dLSG0xTDk5?=
+ =?utf-8?B?cTltdDhTQ0JPWnRtMkg1c053V0ppY3ZuYjFjbWh6NXQ5bEtobUVUOWkzTXcv?=
+ =?utf-8?B?SW0rNXp5UUQyL3RYVXMwdzBzQUMxZW5PQUx1UXVxeElnTXYzbVBkSWJpN1ZG?=
+ =?utf-8?B?cWUzbUZGQUZIZGtEajlBR1VxWDZXQ21ody84YWhleXdweklESWU5NnMvSzBJ?=
+ =?utf-8?B?blVSUEQ2RHZhUEFzcTVlVE9JUUJwOWFNcHI0R1VkY1d6TFZNYzJMNmF1Y2hF?=
+ =?utf-8?B?K2hJK1VRQkxTbEFQNWtCWmtvbHhnT0xQZnpweVlxVENTOHBWeFNydWVKalNV?=
+ =?utf-8?B?TkxyNUpUUFlrN2V5TFN5amY3VG9wZjdBZGFvNVJWbjBDejZhU1RzMmdJTjk0?=
+ =?utf-8?B?SGtaRWF1dWJWdlNBc0tocG9Pd2kyd0ViMTFicGp1aXBiUDFVWjQ5QVMxRVda?=
+ =?utf-8?Q?0sIV1jp1iSqvASYjUcCPfixhh?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9b5b6c5e-916c-416d-ac1e-08dc8bb5a90b
+X-MS-Exchange-CrossTenant-Network-Message-Id: 238b6050-51bb-4bfe-410c-08dc8bb5aac3
 X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Jun 2024 14:32:32.2353
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Jun 2024 14:32:35.0845
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: A9CIPwo0p98HQRTcByjCU/34o7GdXU5kziOApPFyr34ecig6NPFg89aeDJLziUiQauKwoXpzoKujeWlmXh237w==
+X-MS-Exchange-CrossTenant-UserPrincipalName: 6piFUGJBpIQeENkZe2pI9zHZDqNwHMA24mvM+S22laEhZv6ANQibdYkMqVIImSoqk8iht3BS13dGLLvNIeOLKw==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR04MB8256
 
-Convert layerscape fsl-esdhc binding doc from txt to yaml format.
+Use common node name 'mmc' to fix DTB_CHECK warning.
+Add compatible string 'fsl,ls2080a-esdhc' for fsl-lx2160a.
 
-Addtional change during convert:
-- Deprecate "sdhci,wp-inverted", "sdhci,1-bit-only".
-- Add "reg" and "interrupts" property.
-- Change example "sdhci@2e000" to "mmc@2e000".
-- Compatible string require fsl,<chip>-esdhc followed by fsl,esdhc to match
-most existed dts file.
-- Set clock-frequency to 100mhz in example.
-- clock-frequency is not required now.
-- Allow dma-coherence
-- Add clocks
+arch/arm64/boot/dts/freescale/fsl-ls1012a-frdm.dtb: esdhc@1560000: $nodename:0: 'esdhc@1560000' does not match '^mmc(@.*)?$'
+arch/arm64/boot/dts/freescale/fsl-ls1043a-qds.dtb: esdhc@1560000: $nodename:0: 'esdhc@1560000' does not match '^mmc(@.*)?$'
+arch/arm64/boot/dts/freescale/fsl-ls1046a-frwy.dtb: esdhc@1560000: $nodename:0: 'esdhc@1560000' does not match '^mmc(@.*)?$'
+arch/arm64/boot/dts/freescale/fsl-ls1088a-qds.dtb: esdhc@2140000: $nodename:0: 'esdhc@2140000' does not match '^mmc(@.*)?$'
+arch/arm64/boot/dts/freescale/fsl-ls2080a-qds.dtb: esdhc@2140000: $nodename:0: 'esdhc@2140000' does not match '^mmc(@.*)?$'
+arch/arm64/boot/dts/freescale/fsl-lx2160a-honeycomb.dtb: esdhc@2140000: compatible:0: 'fsl,esdhc' is not one of ['fsl,mpc8536-esdhc', 'fsl,mpc8378-esdhc', 'fsl,p2020-esdhc', 'fsl,p4080-esdhc', 'fsl,t1040-esdhc', 'fsl,t4240-esdhc', 'fsl,ls1012a-esdhc', 'fsl,ls1028a-esdhc', 'fsl,ls1088a-esdhc', 'fsl,ls1043a-esdhc', 'fsl,ls1046a-esdhc', 'fsl,ls2080a-esdhc']
+        from schema $id: http://devicetree.org/schemas/mmc/fsl,esdhc.yaml#
+arch/arm64/boot/dts/freescale/fsl-lx2160a-honeycomb.dtb: esdhc@2140000: $nodename:0: 'esdhc@2140000' does not match '^mmc(@.*)?$'
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Signed-off-by: Frank Li <Frank.Li@nxp.com>
 ---
-Change from v4 to v5
-    - Add Krzysztof Kozlowski's review tag
-Change from v3 to v4
-    - Remove clock-frequency from required
-    - Add dma-coherence
-    - Add clocks
-    - Not add Krzysztof Kozlowski review tag because some additional change.
+ arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi | 4 ++--
+ arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi | 2 +-
+ arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi | 2 +-
+ arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi | 2 +-
+ arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi | 2 +-
+ arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi | 8 ++++----
+ 6 files changed, 10 insertions(+), 10 deletions(-)
 
-Change from v2 to v3
-    - add minItems and maxItems for voltage-ranges
-
-    Change from v1 to v2
-    - use filename fsl,esdhc.yaml
-    - Add clock-frequency to required
-    - change clock-frequency to 100mhz in example
-
-    pass dt_binding_check
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j8  dt_binding_check DT_SCHEMA_FILES=fsl,esdhc.yaml
-      SCHEMA  Documentation/devicetree/bindings/processed-schema.json
-      CHKDT   Documentation/devicetree/bindings
-      LINT    Documentation/devicetree/bindings
-      DTEX    Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dts
-      DTC_CHK Documentation/devicetree/bindings/mmc/fsl-ls-esdhc.example.dtb
----
- .../devicetree/bindings/mmc/fsl,esdhc.yaml         | 105 +++++++++++++++++++++
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |  52 ----------
- 2 files changed, 105 insertions(+), 52 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-new file mode 100644
-index 0000000000000..b86ffb53b18b5
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
-@@ -0,0 +1,105 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/fsl,esdhc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Freescale Enhanced Secure Digital Host Controller (eSDHC)
-+
-+description:
-+  The Enhanced Secure Digital Host Controller provides an interface
-+  for MMC, SD, and SDIO types of memory cards.
-+
-+maintainers:
-+  - Frank Li <Frank.Li@nxp.com>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - fsl,mpc8536-esdhc
-+          - fsl,mpc8378-esdhc
-+          - fsl,p2020-esdhc
-+          - fsl,p4080-esdhc
-+          - fsl,t1040-esdhc
-+          - fsl,t4240-esdhc
-+          - fsl,ls1012a-esdhc
-+          - fsl,ls1028a-esdhc
-+          - fsl,ls1088a-esdhc
-+          - fsl,ls1043a-esdhc
-+          - fsl,ls1046a-esdhc
-+          - fsl,ls2080a-esdhc
-+      - const: fsl,esdhc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  clock-frequency:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description: specifies eSDHC base clock frequency.
-+
-+  sdhci,wp-inverted:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    deprecated: true
-+    description:
-+      specifies that eSDHC controller reports
-+      inverted write-protect state; New devices should use the generic
-+      "wp-inverted" property.
-+
-+  sdhci,1-bit-only:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    deprecated: true
-+    description:
-+      specifies that a controller can only handle
-+      1-bit data transfers. New devices should use the generic
-+      "bus-width = <1>" property.
-+
-+  sdhci,auto-cmd12:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description:
-+      specifies that a controller can only handle auto CMD12.
-+
-+  voltage-ranges:
-+    $ref: /schemas/types.yaml#/definitions/uint32-matrix
-+    items:
-+      items:
-+        - description: specifies minimum slot voltage (mV).
-+        - description: specifies maximum slot voltage (mV).
-+    minItems: 1
-+    maxItems: 8
-+
-+  dma-coherent: true
-+
-+  little-endian:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description:
-+      If the host controller is little-endian mode, specify
-+      this property. The default endian mode is big-endian.
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@2e000 {
-+        compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
-+        reg = <0x2e000 0x1000>;
-+        interrupts = <42 0x8>;
-+        interrupt-parent = <&ipic>;
-+        /* Filled in by U-Boot */
-+        clock-frequency = <100000000>;
-+        voltage-ranges = <3300 3300>;
-+    };
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-deleted file mode 100644
-index edb8cadb95412..0000000000000
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ /dev/null
-@@ -1,52 +0,0 @@
--* Freescale Enhanced Secure Digital Host Controller (eSDHC)
--
--The Enhanced Secure Digital Host Controller provides an interface
--for MMC, SD, and SDIO types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the sdhci-esdhc driver.
--
--Required properties:
--  - compatible : should be "fsl,esdhc", or "fsl,<chip>-esdhc".
--    Possible compatibles for PowerPC:
--	"fsl,mpc8536-esdhc"
--	"fsl,mpc8378-esdhc"
--	"fsl,p2020-esdhc"
--	"fsl,p4080-esdhc"
--	"fsl,t1040-esdhc"
--	"fsl,t4240-esdhc"
--    Possible compatibles for ARM:
--	"fsl,ls1012a-esdhc"
--	"fsl,ls1028a-esdhc"
--	"fsl,ls1088a-esdhc"
--	"fsl,ls1043a-esdhc"
--	"fsl,ls1046a-esdhc"
--	"fsl,ls2080a-esdhc"
--  - clock-frequency : specifies eSDHC base clock frequency.
--
--Optional properties:
--  - sdhci,wp-inverted : specifies that eSDHC controller reports
--    inverted write-protect state; New devices should use the generic
--    "wp-inverted" property.
--  - sdhci,1-bit-only : specifies that a controller can only handle
--    1-bit data transfers. New devices should use the generic
--    "bus-width = <1>" property.
--  - sdhci,auto-cmd12: specifies that a controller can only handle auto
--    CMD12.
--  - voltage-ranges : two cells are required, first cell specifies minimum
--    slot voltage (mV), second cell specifies maximum slot voltage (mV).
--    Several ranges could be specified.
--  - little-endian : If the host controller is little-endian mode, specify
--    this property. The default endian mode is big-endian.
--
--Example:
--
--sdhci@2e000 {
--	compatible = "fsl,mpc8378-esdhc", "fsl,esdhc";
--	reg = <0x2e000 0x1000>;
--	interrupts = <42 0x8>;
--	interrupt-parent = <&ipic>;
--	/* Filled in by U-Boot */
--	clock-frequency = <0>;
--	voltage-ranges = <3300 3300>;
--};
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi
+index a0f7bbd691a00..7f8c83670ca86 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi
+@@ -156,7 +156,7 @@ QORIQ_CLK_PLL_DIV(1)>,
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc0: esdhc@1560000 {
++		esdhc0: mmc@1560000 {
+ 			compatible = "fsl,ls1012a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x1560000 0x0 0x10000>;
+ 			interrupts = <0 62 0x4>;
+@@ -175,7 +175,7 @@ scfg: scfg@1570000 {
+ 			big-endian;
+ 		};
+ 
+-		esdhc1: esdhc@1580000 {
++		esdhc1: mmc@1580000 {
+ 			compatible = "fsl,ls1012a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x1580000 0x0 0x10000>;
+ 			interrupts = <0 65 0x4>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
+index 8ee6d8c0ef619..3eeed7290be9e 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi
+@@ -424,7 +424,7 @@ QORIQ_CLK_PLL_DIV(1)>,
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc: esdhc@1560000 {
++		esdhc: mmc@1560000 {
+ 			compatible = "fsl,ls1043a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x1560000 0x0 0x10000>;
+ 			interrupts = <0 62 0x4>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
+index 754a64be739cf..4d65093341774 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1046a.dtsi
+@@ -308,7 +308,7 @@ QORIQ_CLK_PLL_DIV(2)>,
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc: esdhc@1560000 {
++		esdhc: mmc@1560000 {
+ 			compatible = "fsl,ls1046a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x1560000 0x0 0x10000>;
+ 			interrupts = <GIC_SPI 62 IRQ_TYPE_LEVEL_HIGH>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi
+index 604bf88d70b3a..20f331dc28f13 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls1088a.dtsi
+@@ -474,7 +474,7 @@ QORIQ_CLK_PLL_DIV(4)>,
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc: esdhc@2140000 {
++		esdhc: mmc@2140000 {
+ 			compatible = "fsl,ls1088a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x2140000 0x0 0x10000>;
+ 			interrupts = <0 28 0x4>; /* Level high type */
+diff --git a/arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi b/arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi
+index ccba0a135b247..80fd1420d2299 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi
+@@ -940,7 +940,7 @@ dspi: spi@2100000 {
+ 			spi-num-chipselects = <5>;
+ 		};
+ 
+-		esdhc: esdhc@2140000 {
++		esdhc: mmc@2140000 {
+ 			status = "disabled";
+ 			compatible = "fsl,ls2080a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x2140000 0x0 0x10000>;
+diff --git a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
+index 96055593204ab..742de15bbfd87 100644
+--- a/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
++++ b/arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi
+@@ -925,8 +925,8 @@ dspi2: spi@2120000 {
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc0: esdhc@2140000 {
+-			compatible = "fsl,esdhc";
++		esdhc0: mmc@2140000 {
++			compatible = "fsl,ls2080a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x2140000 0x0 0x10000>;
+ 			interrupts = <0 28 0x4>; /* Level high type */
+ 			clocks = <&clockgen QORIQ_CLK_PLATFORM_PLL
+@@ -939,8 +939,8 @@ esdhc0: esdhc@2140000 {
+ 			status = "disabled";
+ 		};
+ 
+-		esdhc1: esdhc@2150000 {
+-			compatible = "fsl,esdhc";
++		esdhc1: mmc@2150000 {
++			compatible = "fsl,ls2080a-esdhc", "fsl,esdhc";
+ 			reg = <0x0 0x2150000 0x0 0x10000>;
+ 			interrupts = <0 63 0x4>; /* Level high type */
+ 			clocks = <&clockgen QORIQ_CLK_PLATFORM_PLL
 
 -- 
 2.34.1
