@@ -1,161 +1,221 @@
-Received: from mout-p-101.mailbox.org (mout-p-101.mailbox.org [80.241.56.151])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com [209.85.160.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35A1D139CE2;
-	Thu, 13 Jun 2024 21:10:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.241.56.151
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23FBB152504
+	for <linux-mmc@vger.kernel.org>; Fri, 14 Jun 2024 07:56:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718313016; cv=none; b=R+LgeZeAZeRwqKc6K+P6kZsu/LOY36KsD+hNyJXpcbOhe84sNAIiUz/MrOsrmX8NO3jgY53kBrlLgQhSI6aql9aEghcSlvrLM0aAz43GItNz7X7Y0JvH26qlzstBIZCPeo/6Qa+kjeDOgQrNhvHB9D5M6eavHfWzTZQ6127voO4=
+	t=1718351808; cv=none; b=bhC4Go7poPIi1OBqT1eEkU71Q1c328lcVDIvfFJKyMjRGXLwp8DF/WOK6wySYa4om+kLvh5IH8mIwC7p8gX6NSKCPiN5xpCamCUziDg1X+F32RNCoq7kB1FuB0Ft4oacTKZf0VDJNnoSInWKVegiktXMNQXoLrsOq1KNN3VPDbQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718313016; c=relaxed/simple;
-	bh=1J4WLBtZ95L8XtXYwCU1lBJTRVbRe4D591TuQlCYEHM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=HnrjlAuleO0nRK4dPAt1Y3F5lKR8qMtYWsNK2Q6HRogDTwDnJay4YN8Lwg9hTlt8xthdTgv9i2nA4eoArFTntde5zGGiFi4o/hf2MuA7Dg6LVCIbNuLLFT7b37xsHs1Uy4iiyXXc+dmqupQlDjEhDQGYAOOthEkzMaZ5c18amuM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hauke-m.de; spf=pass smtp.mailfrom=hauke-m.de; dkim=pass (2048-bit key) header.d=hauke-m.de header.i=@hauke-m.de header.b=sivM0bTx; arc=none smtp.client-ip=80.241.56.151
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=hauke-m.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=hauke-m.de
+	s=arc-20240116; t=1718351808; c=relaxed/simple;
+	bh=cCTHejGQxMi6RzmM8k0/qqpdwyLsfEJT+eXWS8ocifI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=e8gR58dbNMsxxhZeomVnHmCwUd472dn46ptVLh/ml297pCMYCc2Dz+JiP4pJWV7b+uAoyTALPyW2HW2J/hYm3fiDQ2LzBNLnZPH00EmcA6fT+nEq77lyWbJ2ZkTIpIyinJeKD+v6NXqTLYWBmNTdM+xBdG9Xonl6TjO9zdwCGgc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com; spf=pass smtp.mailfrom=cloud.com; dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b=Fm1tcN3V; arc=none smtp.client-ip=209.85.160.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=citrix.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=cloud.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=hauke-m.de header.i=@hauke-m.de header.b="sivM0bTx"
-Received: from smtp2.mailbox.org (smtp2.mailbox.org [IPv6:2001:67c:2050:b231:465::2])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mout-p-101.mailbox.org (Postfix) with ESMTPS id 4W0Zmy33WLz9sPq;
-	Thu, 13 Jun 2024 23:10:10 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=hauke-m.de; s=MBO0001;
-	t=1718313010;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=Zf/D0AMDmsG7+mRQtcpHFjZ6BvLst9hXH1WNYtGV8o0=;
-	b=sivM0bTxsqdxmFANQaTA5jst3UhQRRoBhxKaU4DCdHIjOp5u+0tVO/l4/8oPPdfXBuy0su
-	q+0bDukQL6xZ7573zc92yW924ivLssKZ/Q8gC3PFvj28t3GYmeC8IMJGYwB4MoH4LEUsNL
-	l9OC6FT83P2hXD0KbUyBkf3gETKgGWi2HWrwOtOII/lpj250pXPiKG+4xjzlaZ4xTwPSQI
-	0paINADGZDr8vTYHVc6eFPgXFa8L5N1mNNeL8MI7oBI9UE2negABMB8ecTyrhtuM2UYUX3
-	DnxZvp8BhZvWQCqLDhPup9ze6paM7fLaxfvKXM+6k7zHTas63jgmI63sCx6XiA==
-Message-ID: <93428cdd-301a-46d7-84ef-e5c8ad42f495@hauke-m.de>
-Date: Thu, 13 Jun 2024 23:09:55 +0200
+	dkim=pass (1024-bit key) header.d=citrix.com header.i=@citrix.com header.b="Fm1tcN3V"
+Received: by mail-qt1-f175.google.com with SMTP id d75a77b69052e-44116be80ecso11040551cf.2
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jun 2024 00:56:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=citrix.com; s=google; t=1718351805; x=1718956605; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=BedO1x12znmji4xt7UpC8XDe1FvgdzsEI86mvlWGudA=;
+        b=Fm1tcN3Vo3gJO6/SCGnqGesXhAtXTa/SULB8j+OCYKi91pBbnkv9madB1toyUbEmqU
+         n1PWVnReUBEajRAGUKRwA/n4y6aByM5MFtRcCVNryNdcI08bph4xYoVR37w9nTKZYbm2
+         Ey9Gr1/er1ywu6fbx5njWRb6cyHvBMvDWfQuU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718351805; x=1718956605;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=BedO1x12znmji4xt7UpC8XDe1FvgdzsEI86mvlWGudA=;
+        b=lLekjKsjji0ljTPqgP/8emKHV/eQeJ/jolsEGjUbYmdBVuo5TVCTL3mvnJGF5dHUB1
+         bVJGGR4Q1I86XIe5qW9u8l4O3ZdX8xY2FHsWrttvey+LbuJ48grmmyx52oIEnQo1yQcz
+         cCMeL7ljDUg9wTYbOXOahm212yQ5ad7DZxczz+wZkL8Rwt1hIkjZFAlaADNWdOlZ+Au6
+         ENFU8aqskhY0dBsDwCu0NIq2YnKKa7NJpaZMakAfVIjJaO4xII9z31CQvkkc+p1G7ddA
+         Wq7zA3qWSbxvFRyINKmByqwBF/ndaJHY9Lu5SHYmsoN7xTZ+4lA5hyQ0QOCO8MOftpNc
+         i4Pw==
+X-Forwarded-Encrypted: i=1; AJvYcCVStZoF7BWLGzraoLo3+vYeTVqT1euHQ1ZmFilFwGkTGRBXiL80sQ3QdRyIuXFKjgmv9CBGpvFMsNOxYWDt+u/kpn6jIsl4C0TQ
+X-Gm-Message-State: AOJu0Yygikc3Q8iRAhdMSarjEgp4HxsCubZ2uvPgWJbT2nTJI52dSuCn
+	pUWGaCqrMsaMFNuLjAtgqNceR/O0sQJurn3VXj8B2ZeBkdN1A6bY/Htkae9LjzI=
+X-Google-Smtp-Source: AGHT+IEDi8BhVjLu2vbVbmBxB83hP6gyIibQXt+H84ODwaVrhmTedMPZYFZeMGGsfo/+7hGiDnXdRg==
+X-Received: by 2002:a05:622a:1822:b0:43e:2639:a987 with SMTP id d75a77b69052e-44216b3a874mr27744421cf.59.1718351804940;
+        Fri, 14 Jun 2024 00:56:44 -0700 (PDT)
+Received: from localhost ([213.195.124.163])
+        by smtp.gmail.com with ESMTPSA id d75a77b69052e-441f2ff9ef8sm13823221cf.89.2024.06.14.00.56.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Jun 2024 00:56:44 -0700 (PDT)
+Date: Fri, 14 Jun 2024 09:56:42 +0200
+From: Roger Pau =?utf-8?B?TW9ubsOp?= <roger.pau@citrix.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Jens Axboe <axboe@kernel.dk>, Geert Uytterhoeven <geert@linux-m68k.org>,
+	Richard Weinberger <richard@nod.at>,
+	Philipp Reisner <philipp.reisner@linbit.com>,
+	Lars Ellenberg <lars.ellenberg@linbit.com>,
+	Christoph =?utf-8?Q?B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
+	"Michael S. Tsirkin" <mst@redhat.com>,
+	Jason Wang <jasowang@redhat.com>, Alasdair Kergon <agk@redhat.com>,
+	Mike Snitzer <snitzer@kernel.org>,
+	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
+	Yu Kuai <yukuai3@huawei.com>,
+	Vineeth Vijayan <vneethv@linux.ibm.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
+	drbd-dev@lists.linbit.com, nbd@other.debian.org,
+	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
+	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
+	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
+	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
+	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
+Subject: Re: [PATCH 10/26] xen-blkfront: don't disable cache flushes when
+ they fail
+Message-ID: <Zmv3usMvGGK7ZbMT@macbook>
+References: <20240611051929.513387-1-hch@lst.de>
+ <20240611051929.513387-11-hch@lst.de>
+ <ZmlVziizbaboaBSn@macbook>
+ <20240612150030.GA29188@lst.de>
+ <ZmnFH17bTV2Ot_iR@macbook>
+ <20240613140508.GA16529@lst.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Subject: Re: [PATCH v2 2/9] block: partitions: populate fwnode
-To: Daniel Golle <daniel@makrotopia.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Jens Axboe <axboe@kernel.dk>,
- Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
- Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
- Christian Brauner <brauner@kernel.org>,
- =?UTF-8?Q?Thomas_Wei=C3=9Fschuh?= <linux@weissschuh.net>,
- Al Viro <viro@zeniv.linux.org.uk>, Li Lingfeng <lilingfeng3@huawei.com>,
- Christian Heusel <christian@heusel.eu>, Min Li <min15.li@samsung.com>,
- Avri Altman <avri.altman@wdc.com>, Adrian Hunter <adrian.hunter@intel.com>,
- Hannes Reinecke <hare@suse.de>, Mikko Rapeli <mikko.rapeli@linaro.org>,
- Yeqi Fu <asuk4.q@gmail.com>, Victor Shih <victor.shih@genesyslogic.com.tw>,
- Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
- Li Zhijian <lizhijian@fujitsu.com>,
- "Ricardo B. Marliere" <ricardo@marliere.net>, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-block@vger.kernel.org
-References: <cover.1717031992.git.daniel@makrotopia.org>
- <3329bf2fa25695934b392944ff977ae95dc8c02d.1717031992.git.daniel@makrotopia.org>
-Content-Language: en-US
-From: Hauke Mehrtens <hauke@hauke-m.de>
-In-Reply-To: <3329bf2fa25695934b392944ff977ae95dc8c02d.1717031992.git.daniel@makrotopia.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Rspamd-Queue-Id: 4W0Zmy33WLz9sPq
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20240613140508.GA16529@lst.de>
 
-Hi Daniel,
-
-On 5/30/24 04:13, Daniel Golle wrote:
-> Let block partitions to be represented by a firmware node and hence
-> allow them to being referenced e.g. for use with blk-nvmem.
+On Thu, Jun 13, 2024 at 04:05:08PM +0200, Christoph Hellwig wrote:
+> On Wed, Jun 12, 2024 at 05:56:15PM +0200, Roger Pau Monné wrote:
+> > Right.  AFAICT advertising "feature-barrier" and/or
+> > "feature-flush-cache" could be done based on whether blkback
+> > understand those commands, not on whether the underlying storage
+> > supports the equivalent of them.
+> > 
+> > Worst case we can print a warning message once about the underlying
+> > storage failing to complete flush/barrier requests, and that data
+> > integrity might not be guaranteed going forward, and not propagate the
+> > error to the upper layer?
+> > 
+> > What would be the consequence of propagating a flush error to the
+> > upper layers?
 > 
-> Signed-off-by: Daniel Golle <daniel@makrotopia.org>
+> If you propage the error to the upper layer you will generate an
+> I/O error there, which usually leads to a file system shutdown.
+> 
+> > Given the description of the feature in the blkif header, I'm afraid
+> > we cannot guarantee that seeing the feature exposed implies barrier or
+> > flush support, since the request could fail at any time (or even from
+> > the start of the disk attachment) and it would still sadly be a correct
+> > implementation given the description of the options.
+> 
+> Well, then we could do something like the patch below, which keeps
+> the existing behavior, but insolates the block layer from it and
+> removes the only user of blk_queue_write_cache from interrupt
+> context:
+
+LGTM, I'm not sure there's much else we can do.
+
 > ---
->   block/partitions/core.c | 41 +++++++++++++++++++++++++++++++++++++++++
->   1 file changed, 41 insertions(+)
+> From e6e82c769ab209a77302994c3829cf6ff7a595b8 Mon Sep 17 00:00:00 2001
+> From: Christoph Hellwig <hch@lst.de>
+> Date: Thu, 30 May 2024 08:58:52 +0200
+> Subject: xen-blkfront: don't disable cache flushes when they fail
 > 
-> diff --git a/block/partitions/core.c b/block/partitions/core.c
-> index ab76e64f0f6c..93d109409905 100644
-> --- a/block/partitions/core.c
-> +++ b/block/partitions/core.c
-> @@ -10,6 +10,8 @@
->   #include <linux/ctype.h>
->   #include <linux/vmalloc.h>
->   #include <linux/raid/detect.h>
-> +#include <linux/property.h>
-> +
->   #include "check.h"
->   
->   static int (*const check_part[])(struct parsed_partitions *) = {
-> @@ -281,6 +283,43 @@ static ssize_t whole_disk_show(struct device *dev,
->   }
->   static const DEVICE_ATTR(whole_disk, 0444, whole_disk_show, NULL);
->   
-> +static struct fwnode_handle *find_partition_fwnode(struct block_device *bdev)
-> +{
-> +	struct fwnode_handle *fw_parts, *fw_part;
-> +	struct device *ddev = disk_to_dev(bdev->bd_disk);
-> +	const char *partname, *uuid;
-> +	u32 partno;
-> +
-> +	fw_parts = device_get_named_child_node(ddev, "partitions");
-> +	if (!fw_parts)
-> +		fw_parts = device_get_named_child_node(ddev->parent, "partitions");
+> blkfront always had a robust negotiation protocol for detecting a write
+> cache.  Stop simply disabling cache flushes in the block layer as the
+> flags handling is moving to the atomic queue limits API that needs
+> user context to freeze the queue for that.  Instead handle the case
+> of the feature flags cleared inside of blkfront.  This removes old
+> debug code to check for such a mismatch which was previously impossible
+> to hit, including the check for passthrough requests that blkfront
+> never used to start with.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/block/xen-blkfront.c | 44 +++++++++++++++++++-----------------
+>  1 file changed, 23 insertions(+), 21 deletions(-)
+> 
+> diff --git a/drivers/block/xen-blkfront.c b/drivers/block/xen-blkfront.c
+> index 9b4ec3e4908cce..e2c92d5095ff17 100644
+> --- a/drivers/block/xen-blkfront.c
+> +++ b/drivers/block/xen-blkfront.c
+> @@ -788,6 +788,14 @@ static int blkif_queue_rw_req(struct request *req, struct blkfront_ring_info *ri
+>  			 * A barrier request a superset of FUA, so we can
+>  			 * implement it the same way.  (It's also a FLUSH+FUA,
+>  			 * since it is guaranteed ordered WRT previous writes.)
+> +			 *
+> +			 * Note that can end up here with a FUA write and the
+> +			 * flags cleared.  This happens when the flag was
+> +			 * run-time disabled and raced with I/O submission in
+> +			 * the block layer.  We submit it as a normal write
 
-Could you please explain why you try to get the node from the device and 
-the parent when it is not available? I think this should go into the 
-commit description.
+Since blkfront no longer signals that FUA is no longer available for the
+device, getting a request with FUA is not actually a race I think?
 
-> +
-> +	if (!fw_parts)
-> +		return NULL;
-> +
-> +	fwnode_for_each_child_node(fw_parts, fw_part) {
-> +		if (!fwnode_property_read_string(fw_part, "uuid", &uuid) &&
-> +		    (!bdev->bd_meta_info || strncmp(uuid,
-> +						    bdev->bd_meta_info->uuid,
-> +						    PARTITION_META_INFO_UUIDLTH)))
+> +			 * here.  A pure flush should never end up here with
+> +			 * the flags cleared as they are completed earlier for
+> +			 * the !feature_flush case.
+>  			 */
+>  			if (info->feature_flush && info->feature_fua)
+>  				ring_req->operation =
+> @@ -795,8 +803,6 @@ static int blkif_queue_rw_req(struct request *req, struct blkfront_ring_info *ri
+>  			else if (info->feature_flush)
+>  				ring_req->operation =
+>  					BLKIF_OP_FLUSH_DISKCACHE;
+> -			else
+> -				ring_req->operation = 0;
+>  		}
+>  		ring_req->u.rw.nr_segments = num_grant;
+>  		if (unlikely(require_extra_req)) {
+> @@ -887,16 +893,6 @@ static inline void flush_requests(struct blkfront_ring_info *rinfo)
+>  		notify_remote_via_irq(rinfo->irq);
+>  }
+>  
+> -static inline bool blkif_request_flush_invalid(struct request *req,
+> -					       struct blkfront_info *info)
+> -{
+> -	return (blk_rq_is_passthrough(req) ||
+> -		((req_op(req) == REQ_OP_FLUSH) &&
+> -		 !info->feature_flush) ||
+> -		((req->cmd_flags & REQ_FUA) &&
+> -		 !info->feature_fua));
+> -}
+> -
+>  static blk_status_t blkif_queue_rq(struct blk_mq_hw_ctx *hctx,
+>  			  const struct blk_mq_queue_data *qd)
+>  {
+> @@ -908,23 +904,30 @@ static blk_status_t blkif_queue_rq(struct blk_mq_hw_ctx *hctx,
+>  	rinfo = get_rinfo(info, qid);
+>  	blk_mq_start_request(qd->rq);
+>  	spin_lock_irqsave(&rinfo->ring_lock, flags);
+> -	if (RING_FULL(&rinfo->ring))
+> -		goto out_busy;
+>  
+> -	if (blkif_request_flush_invalid(qd->rq, rinfo->dev_info))
+> -		goto out_err;
+> +	/*
+> +	 * Check if the backend actually supports flushes.
+> +	 *
+> +	 * While the block layer won't send us flushes if we don't claim to
+> +	 * support them, the Xen protocol allows the backend to revoke support
+> +	 * at any time.  That is of course a really bad idea and dangerous, but
+> +	 * has been allowed for 10+ years.  In that case we simply clear the
+> +	 * flags, and directly return here for an empty flush and ignore the
+> +	 * FUA flag later on.
+> +	 */
+> +	if (unlikely(req_op(qd->rq) == REQ_OP_FLUSH && !info->feature_flush))
+> +		goto out;
 
-I think you should check that the uuid provided in the device tree is 
-not longer than PARTITION_META_INFO_UUIDLTH. Same for the volume name.
+Don't you need to complete the request here?
 
-> +			continue;
-> +
-> +		if (!fwnode_property_read_string(fw_part, "partname", &partname) &&
-> +		    (!bdev->bd_meta_info || strncmp(partname,
-> +						    bdev->bd_meta_info->volname,
-> +						    PARTITION_META_INFO_VOLNAMELTH)))
-> +			continue;
-> +
-> +		if (!fwnode_property_read_u32(fw_part, "partno", &partno) &&
-> +		    bdev_partno(bdev) != partno)
-> +			continue;
-> +
-> +		return fw_part;
-> +	}
-> +
-> +	return NULL;
-> +}
-> +
->   /*
->    * Must be called either with open_mutex held, before a disk can be opened or
->    * after all disk users are gone.
-> @@ -355,6 +394,8 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
->   			goto out_put;
->   	}
->   
-> +	device_set_node(pdev, find_partition_fwnode(bdev));
-> +
->   	/* delay uevent until 'holders' subdir is created */
->   	dev_set_uevent_suppress(pdev, 1);
->   	err = device_add(pdev);
-
-Hauke
-
+Thanks, Roger.
