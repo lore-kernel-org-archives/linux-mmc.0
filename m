@@ -1,109 +1,96 @@
-Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36E1B18F2C2
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2024 07:34:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94AB618754D;
+	Mon, 17 Jun 2024 07:37:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718609644; cv=none; b=HlvNwt4uGGDFp+5+7Kqiy6cDHkjjMGgXi3KM4ytYIgyHmK7HVwc1sVwo7S562LWWVtkrzTavbXllyqNIN32zLdpygICxiX8hzMNWoBAAu/HDNYiKrsXMlw8Q9AglNktYgxIwSsIAxQBpOlitf+69kQkR3yelGdkSDtb8f9rHQc4=
+	t=1718609853; cv=none; b=oazrnA05qBYqkYJT2RwYrKlvZPEkz7iTAS3izEi3tPyO/stIVfrsws3+D52z4PP6AlXe6Are+uBmyW5vhRJxxJX9yYeI25Ur2U48KKVTZMPnx+kL68ozomFOwXaBad2jIRrN7bkH3+dN31JzXAYV/9R4stCIBHUYGlhjB6KiVFM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718609644; c=relaxed/simple;
-	bh=ZFmi+yUTc9Zjr/M0kxKvyOleY7JfCQGrFTVa2o2QNlU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dHPMS7rotvOVjdu75Sou+fzi6gHHUN3Y6Vft/u8dpTjqA9vFucyQbG+xhOdWaFwF696KF/b75PfwsijL9wXisDcTw96tDE6bXUX+K2Itm89Cf7gxqjJql5/FOdTTcJSXUbEnU9KCAPbDFYnYJYlFocVlsAzUGC8LkTtkYWzM22k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Hsw5egON; arc=none smtp.client-ip=209.85.167.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Hsw5egON"
-Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-52bc274f438so4372955e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2024 00:34:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718609640; x=1719214440; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=aBphVFOrP22wHUL3UOKiauwrKM/dUJgf2+E0bXR1o6w=;
-        b=Hsw5egONtdB5Rv2L3vDgQHy8VYNd9jfISdm5F+7cb8oHPb9XwczHqXAePc7TwkcvQ3
-         UCw+Zl7HsGbOKvGxEidU0G4K5www6wsNN1Hh2/y51FruMM5yF8ST8GAaqXj6kFcJxIku
-         b5gyS9IJJIEUy4Ut7sWE8ZW8YPFyMnl1T6qHsnwHI5nx0fNUXWL+biDLcuYLkcKAbXnU
-         8bpD10ZtT35jgr7taKWIKF6zjBfD/m2QqH+RqySm0614DE+53PjXG9Wy7kHFMx6if2Vd
-         2bGJY/OaLfkGmMjAIjmx8M6TwpbO/VsKYR+Jn0JjW2orK1wfEQjlbawyk4QiqbSR6210
-         HCyQ==
+	s=arc-20240116; t=1718609853; c=relaxed/simple;
+	bh=aRWdFzLVfZURJmJduJBKPPGYnq9whgbZmBnQ57F0zTM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=F3Ln+uF9ezQYbiHrhzEDNl73bovLVbayx0TmZMClm/tOYz4Y/mCTsapdse3n5+XnwN7AnoHqraoW5o31tl8maoK0P8myDZptvy8thslI0v3VJ7YlgssHtdcVNzjuO/OHWqHnCMpj3lnr5HagKaJ8MAuoqnYRxC//LnpwLxXigy8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6316253dc52so29589607b3.0;
+        Mon, 17 Jun 2024 00:37:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718609640; x=1719214440;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=aBphVFOrP22wHUL3UOKiauwrKM/dUJgf2+E0bXR1o6w=;
-        b=iwv/g8qW+DMTrIaUK40axdWY3Mw1BSTockZacB8RS3SJvRFI2Ed5hqHYYgkc0hjyHV
-         0RcFJA8LubDqgbg/iaem8p8lRnJf5yNfQRSyHEuMsiD2kk4l7U1igg/anJo0+pHDF8NE
-         2KIZtNzeVEJWlvPNyglCBxQAOl9DL7pRd+bu1kHNeIDWFGl0DErLO3J2mbBhjloxs82W
-         DSrIKt1UWcB5cEAUtzuyonUn7iAq80NZsgwKGCKkJVl9xBsUSgeLJbKSIYbRAAtXkedp
-         y2Z6lgaLOQw+sg+ukSMy4l5SHaLvx9GmtjfMe5tQcSVPDz07tlYrYDv17WBCL433GTJT
-         Ar9Q==
-X-Forwarded-Encrypted: i=1; AJvYcCW3FkBY7O0OXR/VrYNp4RwweUsUQNCggIGCLlI+k5hZKd0iVw5NmFeitM1THAmSlYzsEscQACV0x/zqbbOcDhN3NGOrKiKxZviR
-X-Gm-Message-State: AOJu0YzfsU1alcVpDEU9pBj7Mo+2GQqpwGRi5m+69lxdvcjsHVPkIBsi
-	9IfJy3/Zq38htvPCUsi7tuH/dgP6cqp9SwtwBuhsVHFFDGHDJrIsukHqZJVA4+A=
-X-Google-Smtp-Source: AGHT+IF8TZ85wRS0H2kr1KtmiIH/CU55Vp03UXdrbqOj8557e44sDO8j3EJKyLPHPMMhkL8bWOcIHQ==
-X-Received: by 2002:a05:6512:3093:b0:52c:bd36:b8c7 with SMTP id 2adb3069b0e04-52cbd36b937mr1561115e87.53.1718609640435;
-        Mon, 17 Jun 2024 00:34:00 -0700 (PDT)
-Received: from eriador.lumag.spb.ru (dzdbxzyyyyyyyyyyybrhy-3.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-52ca282f112sm1161208e87.89.2024.06.17.00.33.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Jun 2024 00:34:00 -0700 (PDT)
-Date: Mon, 17 Jun 2024 10:33:58 +0300
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc: linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	andersson@kernel.org, ebiggers@google.com, neil.armstrong@linaro.org, 
-	srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, 
-	robh+dt@kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	kernel@quicinc.com, linux-crypto@vger.kernel.org, devicetree@vger.kernel.org, 
-	quic_omprsing@quicinc.com, quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org, 
-	konrad.dybcio@linaro.org, ulf.hansson@linaro.org, jejb@linux.ibm.com, 
-	martin.petersen@oracle.com, mani@kernel.org, davem@davemloft.net, 
-	herbert@gondor.apana.org.au, psodagud@quicinc.com, quic_apurupa@quicinc.com, 
-	sonalg@quicinc.com
-Subject: Re: [PATCH v5 02/15] qcom_scm: scm call for deriving a software
- secret
-Message-ID: <gidy3f2b7lfh3nl366vt3ytx75s6xcqx77ahay2yvwn7wnli3p@tdxw3zomvvwr>
-References: <20240617005825.1443206-1-quic_gaurkash@quicinc.com>
- <20240617005825.1443206-3-quic_gaurkash@quicinc.com>
+        d=1e100.net; s=20230601; t=1718609849; x=1719214649;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=CkULF+2ESB/U0wrTn2s5lPj+LcRpJ2ZK8TfZlI/6LPY=;
+        b=f934UQyjVNcCPF4GR4SDiieo6Xy+jEAlWdl8L82GsU6CUr6XspvLW2pQCmZ8W/D1A8
+         v+obOKbG38GnHcBh7uFH1tZ03cbeT7yNHIxp8rI1ZwdxjMup/H6aWGREhd2h12qQH+GY
+         NxwEfUDQaAWl293Cu2e0oGbx//eEXT13lsnsysuHvlx6NvZt9e1lr7tVle/HTNvDNXdp
+         oQEJ3N2CVUToQQRSdk9Q3MMlqitfUm2ilfzXTLJyNOt1Uhl4Hq8KP2Xb82k+XaUHJSjr
+         SaPoDi96cAg2m/tkGPbNKzOW68WOXbbYNm0oykS7z5yXyq6bir55V/aVM0aY/wwz4o4m
+         Bzcg==
+X-Forwarded-Encrypted: i=1; AJvYcCWvUNmcDdDagaHtP/n88+55ALkMJZ9sKzFNVDB6cfaSFdqVer7wuOxKz63cOBx+lFsJhUkDLypBnKouCXj3eC9F6nnKtRy2iMTfYmOIxL7AXsxaIrKXR8jZbp6ohpEa8+QTSjw6PVl0iedZQy1fh7ZTGwSCcWEMpaGDgfy27hmzKdRt3I6NzUGJ4cDi5TYfzCk9Mdxvl6FkKcsnNpTQyRVb4TOey2Da
+X-Gm-Message-State: AOJu0YyfbfTZAcw/tjLFWK+e/RfD48hsFn8sfg7OV8zsgcAXdepdb1ES
+	bShj4ywNa6P7hSROcI2UMGxdpkeknLAcNapTDqxfYkI/fyfTnTStOuTx9mWJ
+X-Google-Smtp-Source: AGHT+IETGMetluZrPaT0awRlvXhyTyrX5WNulhjzR+Nda40pF+TWY1wP0Rgo4p284EQMNm+qX7IX4A==
+X-Received: by 2002:a0d:dec7:0:b0:61a:d21f:a131 with SMTP id 00721157ae682-63223a411ecmr76150057b3.37.1718609849210;
+        Mon, 17 Jun 2024 00:37:29 -0700 (PDT)
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com. [209.85.219.175])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-6311a446193sm13559347b3.78.2024.06.17.00.37.28
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 17 Jun 2024 00:37:28 -0700 (PDT)
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-dff2df7de4aso1326349276.2;
+        Mon, 17 Jun 2024 00:37:28 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCXls+8+6IjFdC1g/TnJjWD4AVUceWYBnMMoIDt64xmIJ1QFINsXJqIphnMFre6oQQJ9hii1bwUYdePVr7CcbcYx4BkyzVyPS41GUhmB6p1N77FAtvTx98kgF+J1fYSuuVz87wFPxT6p6VvhSZpiQNinoTcii3FwdGfYgUzSU29fxHOGZ/Q9TVGCEaSb4do5fpYViofBy/N1BwGhBuLwkGS0Keg7V2MB
+X-Received: by 2002:a25:ad48:0:b0:dfb:6d6:a542 with SMTP id
+ 3f1490d57ef6-dff153a66damr5859831276.28.1718609848585; Mon, 17 Jun 2024
+ 00:37:28 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240617005825.1443206-3-quic_gaurkash@quicinc.com>
+References: <20240613091721.525266-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <20240613091721.525266-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20240613091721.525266-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 17 Jun 2024 09:37:16 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXVF+Lk+biS02zo9L3j5R6OSSdsFig9dtm+oFc__63g_w@mail.gmail.com>
+Message-ID: <CAMuHMdXVF+Lk+biS02zo9L3j5R6OSSdsFig9dtm+oFc__63g_w@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 2/3] mmc: tmio: Use MMC core APIs to control the
+ vqmmc regulator
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Sun, Jun 16, 2024 at 05:50:57PM GMT, Gaurav Kashyap wrote:
-> Inline storage encryption may require deriving a software
-> secret from storage keys added to the kernel.
-> 
-> For non-wrapped keys, this can be directly done in the kernel as
-> keys are in the clear.
-> 
-> However, hardware wrapped keys can only be unwrapped by the wrapping
-> entity. In case of Qualcomm's wrapped key solution, this is done by
-> the Hardware Key Manager (HWKM) from Trustzone.
-> Hence, adding a new SCM call which in the end provides a hook
-> to the software secret crypto profile API provided by the block
-> layer.
-> 
-> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
-> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> ---
->  drivers/firmware/qcom/qcom_scm.c       | 65 ++++++++++++++++++++++++++
->  drivers/firmware/qcom/qcom_scm.h       |  1 +
->  include/linux/firmware/qcom/qcom_scm.h |  2 +
->  3 files changed, 68 insertions(+)
-> 
+On Thu, Jun 13, 2024 at 11:17=E2=80=AFAM Prabhakar <prabhakar.csengg@gmail.=
+com> wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+>
+> Use the mmc_regulator_enable_vqmmc() and mmc_regulator_disable_vqmmc() AP=
+Is
+> to enable/disable the vqmmc regulator.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Reviewed-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
--- 
-With best wishes
-Dmitry
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
+
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
