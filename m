@@ -1,173 +1,115 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC04D187544
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2024 08:31:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 27500190676;
+	Mon, 17 Jun 2024 10:03:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718613070; cv=none; b=Jnm2hoR8xTapKHKt39ktSz8YLb/vQm4takHxi82YAXhbP3AHlZ88YSwsvOFQnhvXpwuZidYLN/dAjqFJ1BOHGNpp9jNEXrVonACS2/ta6AjAsbHQjZ5f46lXVuIkD6CianiYiqnGntR4ZEkXL0PDy6s/LEaCcVkNP6umKxLJiB4=
+	t=1718618614; cv=none; b=WRmPlpZW/ADIS8m86qZni6aBd0WWh/H1jKy0T6ojy43P1zPLG3butzODtA8a6y+jqVhd7tqkS0Ya2jiRWVs4kXIrO6h6KV0c7BuKMQf0Nus61gblMiR2IGRsKqKSmjCqKFyxQRXUcx8ugPdU9BX9IOc8+IP+oHjnZmGjSZZaBAA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718613070; c=relaxed/simple;
-	bh=ZbDI9c0HmPjexoKRl1GQN/dSXPz2UkxaGRrj1fQpjmw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YNq5Dp3CRe1+sUhOLIzHIk4Cn+O6fcxytRU+3mpBmTGSV8UjHeqYmxvxLNW17wAFqJidpi113tB2l2QfC8fQgBDhiHiXLqrZtCxLMm6F1ZIiRWhwh7gkL+SYu3UiHD6kOW0YfyU37E2sJD2DWa7GZ60Kc66YMwthjIqpCkdyHdI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ZC1lh2pf; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ZC1lh2pf"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=sJgM
-	bxWu9V+TwYJoRKfSyRjs1pVcjqeuejguaECABE8=; b=ZC1lh2pfEulFpMwsIFWX
-	45+u8TZdz4dTG5H7V2BK77Aro1V0Lpuv2Q0qJH2TFKZ510s24oNWfVnOrzqTSEg2
-	XBac43WDfHZF7MjbAVnhOaHWG5zTwVw5X+7veDo/vBmw9TsoJ51aYH7MqLnAknKH
-	BbYsjtFswv2ky1bYws0OyerF+rzu4YKqi06QvpqTAN/vuu7DbjgfH4HTEzlS2Mtk
-	q1mPhzgAO9HVnyHCPJ/+AtWswBH1+kHK6ty6OmBDyqGZ8PKe3n+HxbLOpYV4I06V
-	0n1jGw2ADAkaddXlgic/ykP6pa5+fHHEaRDSFmubkka/fzKYkMg/jfjgBQH+zHiM
-	8Q==
-Received: (qmail 2258176 invoked from network); 17 Jun 2024 10:31:02 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 17 Jun 2024 10:31:02 +0200
-X-UD-Smtp-Session: l3s3148p1@b8YRyREbzJggAwDPXzjQABqqX1QYyOSW
-Date: Mon, 17 Jun 2024 10:31:01 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [RFC PATCH v2 3/3] mmc: renesas_sdhi: Add support for RZ/V2H(P)
- SoC
-Message-ID: <prdvmtsp35yy2naohivbrya3go6vh5ji2cdjoebw3ovditcujo@bhck6tca6mhj>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Prabhakar <prabhakar.csengg@gmail.com>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20240613091721.525266-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240613091721.525266-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
+	s=arc-20240116; t=1718618614; c=relaxed/simple;
+	bh=92z7pB4Bzm0tDFXo5lXRs6iigUIdyScghocPuLR6neU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=X9sJuFfmVv4ehqJIgoUjj0d3IZeUPNLzBRMJLUq0SVv08LN42v6/Oh7HOMiXofH2iYkvWkJoKpW3yFHvjH6k5Sa7TN+c90x2JEqjgrrzlLl7Ys+RGJV6mMh4KQGuy7AD0h40tvGSKQAFa6fKRLpzemg1tIg3sa0H0NNuAKS+/8I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 71D2B5FE68;
+	Mon, 17 Jun 2024 10:03:31 +0000 (UTC)
+Authentication-Results: smtp-out2.suse.de;
+	none
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id C1D5F139AB;
+	Mon, 17 Jun 2024 10:03:30 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id AoLhLvIJcGaVAQAAD6G6ig
+	(envelope-from <hare@suse.de>); Mon, 17 Jun 2024 10:03:30 +0000
+Message-ID: <9e1764de-0080-4b8f-a705-de4016a55f5a@suse.de>
+Date: Mon, 17 Jun 2024 12:03:30 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ue4f7wdlmrpwmuit"
-Content-Disposition: inline
-In-Reply-To: <20240613091721.525266-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 01/26] xen-blkfront: don't disable cache flushes when they
+ fail
+To: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>,
+ Richard Weinberger <richard@nod.at>,
+ Philipp Reisner <philipp.reisner@linbit.com>,
+ Lars Ellenberg <lars.ellenberg@linbit.com>,
+ =?UTF-8?Q?Christoph_B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
+ Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
+ "Michael S. Tsirkin" <mst@redhat.com>, Jason Wang <jasowang@redhat.com>,
+ =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
+ Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
+ Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
+ Yu Kuai <yukuai3@huawei.com>, Vineeth Vijayan <vneethv@linux.ibm.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
+ drbd-dev@lists.linbit.com, nbd@other.debian.org,
+ linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
+ virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
+ linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
+ linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
+ linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+ linux-scsi@vger.kernel.org, linux-block@vger.kernel.org
+References: <20240617060532.127975-1-hch@lst.de>
+ <20240617060532.127975-2-hch@lst.de>
+Content-Language: en-US
+From: Hannes Reinecke <hare@suse.de>
+In-Reply-To: <20240617060532.127975-2-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
+X-Spamd-Result: default: False [-4.00 / 50.00];
+	REPLY(-4.00)[]
+X-Rspamd-Queue-Id: 71D2B5FE68
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Pre-Result: action=no action;
+	module=replies;
+	Message is reply to one we originated
+X-Rspamd-Action: no action
+X-Spam-Flag: NO
+X-Spam-Score: -4.00
+X-Spam-Level: 
 
+On 6/17/24 08:04, Christoph Hellwig wrote:
+> blkfront always had a robust negotiation protocol for detecting a write
+> cache.  Stop simply disabling cache flushes in the block layer as the
+> flags handling is moving to the atomic queue limits API that needs
+> user context to freeze the queue for that.  Instead handle the case
+> of the feature flags cleared inside of blkfront.  This removes old
+> debug code to check for such a mismatch which was previously impossible
+> to hit, including the check for passthrough requests that blkfront
+> never used to start with.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>   drivers/block/xen-blkfront.c | 44 +++++++++++++++++++-----------------
+>   1 file changed, 23 insertions(+), 21 deletions(-)
+> 
+Reviewed-by: Hannes Reinecke <hare@suse.de>
 
---ue4f7wdlmrpwmuit
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Cheers,
 
-Hi Prabhakar,
+Hannes
+-- 
+Dr. Hannes Reinecke                  Kernel Storage Architect
+hare@suse.de                                +49 911 74053 688
+SUSE Software Solutions GmbH, Frankenstr. 146, 90461 Nürnberg
+HRB 36809 (AG Nürnberg), GF: I. Totev, A. McDonald, W. Knoblich
 
-> - Ive modelled the regulator now to control the PWEN aswell.
-
-Yay, this looks much better. Good work!
-
-> - I have still kept regulator bits in quirks I was wondering if I should
->   move this to renesas_sdhi_of_data instead?
-
-I think so. An internal regulator is not a quirk.
-
-> - I still need to add checks if the internal regulator used and
->   only then call regulator_enable/regulator_set_voltage. ATM I am still
->   unclear on differentiating if internal/external regulator is used.
-
-When it comes to re-enabling the regulator in sdhi_reset, I think this
-can be a sdhi_flag like SDHI_FLAG_ENABLE_REGULATOR_IN_RESET or alike.
-
-When it comes to the regulator, I wonder if it wouldn't be clearer to
-replace renesas_sdhi_internal_dmac_register_regulator() with a proper
-probe function and a dedicated compatible value for it. We could use
-platform_driver_probe() to instantiate the new driver within the SDHI
-probe function. This will ensure that the regulator driver will only be
-started once the main driver got all needed resources (mapped
-registers).
-
-My gut feeling is that it will pay off if the internal regulator will be
-described in DT as any other regulator. Like, we could name the
-regulator in DT as always etc...
-
-More opinions on this idea are welcome, though...
-
-> --- a/drivers/mmc/host/renesas_sdhi.h
-> +++ b/drivers/mmc/host/renesas_sdhi.h
-> @@ -11,6 +11,9 @@
-> =20
->  #include <linux/dmaengine.h>
->  #include <linux/platform_device.h>
-> +#include <linux/regmap.h>
-
-Regmap can luckily go now.
-
-> +#include <linux/regulator/driver.h>
-> +#include <linux/regulator/machine.h>
->  #include "tmio_mmc.h"
-> =20
->  struct renesas_sdhi_scc {
-> @@ -49,6 +52,9 @@ struct renesas_sdhi_quirks {
->  	bool manual_tap_correction;
->  	bool old_info1_layout;
->  	u32 hs400_bad_taps;
-> +	bool internal_regulator;
-> +	struct regulator_desc *rdesc;
-> +	struct regulator_init_data *reg_init_data;
->  	const u8 (*hs400_calib_table)[SDHI_CALIB_TABLE_MAX];
->  };
-> =20
-> @@ -93,6 +99,8 @@ struct renesas_sdhi {
->  	unsigned int tap_set;
-> =20
->  	struct reset_control *rstc;
-> +
-> +	struct regulator_dev *sd_status;
-
-This is a strange name for the regulater. Especially given that you have
-as well the more fitting 'u32 sd_status' in the code later.
-
-=2E..
-
-> +static struct regulator_init_data r9a09g057_regulator_init_data =3D {
-> +	.constraints =3D {
-> +		.valid_ops_mask =3D REGULATOR_CHANGE_STATUS,
-
-Don't we need REGULATOR_CHANGE_VOLTAGE here as well? Or is this implicit
-because of REGULATOR_VOLTAGE? Can't find this, though.
-
-So much for now. Thanks!
-
-   Wolfram
-
-
---ue4f7wdlmrpwmuit
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmZv9EIACgkQFA3kzBSg
-KbYmhRAArX6HJmfEhElIby3cdkoYJ9a6reWiPnb/H+5jI2ai9dNl2W2oVhfvtI2M
-DAsSAmWM2NzRIy6K/dt8XhLqfBdfcG5qmKQyp3GJxK5iD4naYsQOxGs8IBBvvPgT
-ASWBe6S0bSBUte1dR80iMoVkFXV97BBq2JatTu73hBkZvIaBpcU1Ekr1vAHHvAu8
-ZKf72yONTm7jdPRiEl3P9dSAT957uqh1pQ1Y5SC8rMDiXZ+MGOaBZxXK61lpNoao
-NDXfcDHBEanl0skuiQuWVbLEVw47KJZlEzyEFXzeWaI5/zzE8qxFTFUHcMaNeAHe
-ppnuEqGkgzntT+6je+xuRItcsJbmSlhTGf5LMoU29m99VB7jYN+AGHqfkTpma9Yz
-JIzQ4AdnUm+hi/UzNtxqZXthBcw0KnDThfvWuLFuCojOCaoFFbK/D/fRApdClOG0
-dqRU+e0runDmUPcRSdALGbcfFZCql1phHBaYS185ORd1DReRPagOQxNRn2UDMll6
-6SDUq9A5iEjiRL81MN04Fugi3QXpDSeowa/9QTjEqlOXOCaXghVXqFH0y9KKfL4S
-eN3KNa027p48WYLcSzjfzOceMCL0Ixzkj6oUNur1NmXaVs6TEZSpoc2oDHA5/xAV
-ip8W+RQhRHuui/apICpDV5Pjk0GtQTNuAcbGGxE1lm1VDMfiLrM=
-=00e5
------END PGP SIGNATURE-----
-
---ue4f7wdlmrpwmuit--
