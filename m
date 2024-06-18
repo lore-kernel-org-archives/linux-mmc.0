@@ -1,69 +1,70 @@
-Received: from IND01-BMX-obe.outbound.protection.outlook.com (mail-bmxind01olkn2031.outbound.protection.outlook.com [40.92.103.31])
+Received: from IND01-BMX-obe.outbound.protection.outlook.com (mail-bmxind01olkn2093.outbound.protection.outlook.com [40.92.103.93])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9023C1367;
-	Tue, 18 Jun 2024 00:09:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.103.31
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EFFB368;
+	Tue, 18 Jun 2024 00:12:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.103.93
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718669351; cv=fail; b=rfxz6Cf1AobLPhd4UhDp3BmZ6MNQBljrJDqZuxsPISXXdVyh7y63unRstnK46zfaKA0Y+nghbqTtnc6+H0ngmOuqwSFADyLWGCqyw4js2yS+KwnwbX8iiOjpBNPrPpxn5IvppA/MrnaU6rHNOQVseT+tpi4V3vhmCf3tYZ+39Js=
+	t=1718669538; cv=fail; b=PkCrDiPbmhpzLkQlcJCnki/iEXQMaBoaMRYqg+wLabAmemNfSaRYl8nkhtBQiS8muAx/sP4pPYJ+rNPQeQ6wOVjpBC6adSc1eYG+Y3TaSWr7KuN8TkymNmuKnYkgr9EebSBJOIjZc5GwyUvY7/2G9xv1Bp5r54Orlaw8EFZEnj0=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718669351; c=relaxed/simple;
-	bh=BYz/2oaKD7NTQ+SNa2dn+XhCoVUwa2hPA6dDxgE9hi8=;
+	s=arc-20240116; t=1718669538; c=relaxed/simple;
+	bh=14F6T41//hBiSYJsPmKaV6VjTvC7OH3e7MQA276xD+Q=;
 	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=CZfk5T3h7Z7HP1xwlVunZ6g+Br/8hES0FeB8DWcau562i191bjzHNmlSeTQmjsnMBZo9/Z570bTm+XZzjuPGfsq3ccVm/qTVHTnP8vRkCN/NM2phX0KIypWC/TZoP1tg5LqS5ojBkFeObfdG0w6h1HN2O0giIcVu2mpzCjy1IW8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=NCcovWaK; arc=fail smtp.client-ip=40.92.103.31
+	 Content-Type:MIME-Version; b=MjaKtZkIB8p55pDzhF55Zk6Wj6q9cCgQTM+ASpt5/xwGleAW2F+2oz//2TEY0H/wXh+qQQjt5ZeiHCoHOLwwWeacBp0omC580xczaU0SGteWqguPW73op/13TKmNpqzioWhRmOOPJECPE9IuzXKUNgAznhMh4ZiW+n0gpwljNf4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=mjj2Di6J; arc=fail smtp.client-ip=40.92.103.93
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="NCcovWaK"
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="mjj2Di6J"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=UF3pLVFMzfl8ZgAgC6lHBvzxUhm2Cmkm/IlC1nMGNn7knd2GGQwSkzibV1fXLhkaCfLTzSS+TW13GIwb2P2poW0Pnd1Cu0wA8TxXO2T0K4yeikP2N1lsLgn+N2IRXKpQ1opWbZG227Cmlq7kpQ6OmWJcbFRjFEePUohvk7lH5NwNHu8zNAaIXkqLN+lhtQYTqlgHXD7Ha53Kl5iBiL6700XKsHKs5nsHeKH+E10RqjJKhLN/c1aBsRCzTtXD0FMUoF51wTuK7Md3TYX/ksrHDqB+ES75l1kX3cXWUOMV3ObntNbvxsiVEcxlMUmkVLTLnz8Hiy1C1CWf625kTB1yiA==
+ b=ChGebS2KqzvZaUJ3P4kVuL5FT/BGR+0OArVSoONRhwQjpQBygHbv2lSOX7vAKq94LiniKs38sZKMqMy6d8cXfYIBHLNl+7ucr02LWbM/jAMz4fQksqtNFqOeV6RRY+DFhg1M4surAZO4RKaWHLEA6zAFxyzBkWzJ1SY9e/JY29Jy1ndMukRi1JWz3AaTrfRfIpq9NxTouf8bDcP01F79y8BpqgSP7HOl2PDM9mh2Na2brxvp8QkYAEIBdWJsA3MHsbeoDK/Y/Jx5ka9CXN2wmwxbFAwOB+mu5ro9m6CEJN7v3FXxQO+4axyNSq6Bky0LXVMjQzUDu79kH3/LsSh1ZQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=PnA5P3qDAH+fqK/ueMY2TXU2K0iPm0phm3CIX3vY5HU=;
- b=AAMbIwJKpZDadcvbnzp9GwMQxkEh3/1BiE8ELSjVbq1oeIp+CDFA2j0Tmskgz7x6SAHyn7sGxJDw6wtw03UT09d2iJsV8CBDZReDgFUL+Zo32ZNZAG3eYAIl+Xc/jJeIvh1AHrve14kTTSet1RTfbRAgdG0SLZrWaxqZfX+4dyB25wusr6JBzqM6ju2uzos9jKJt5EIZ8tGHpyUnuYKRi4ymUpOnlxLQWbkz7UFEqZsCvZWNTf5dXuzz+nE3dUcEV3ALhb92seK+hPzQF4PAGQZe647T9aWpOJnnc5XKxCzsdSXhd5tkVW7TBN41nJLnp1Op8r3nKGJRYUoR1NYDQg==
+ bh=KfYPs1kwS5b3AXJOYq2Pm0Zsuxt9JTxBidFj7djxErA=;
+ b=OAr+4tVtUaE4qHqmo8KGGt8BEAwtMGLGDeyioDOGV2TeSEpEolB7axEtsjEzJUrarOBf+c4OaZZQkrOd5lEBY1Zm2Ugo9CY29KZ8ZP0SffhCnM9uDA35INjZQL6250LyX2eVzbeI1F360oUPEdsFLFkUxyH+uP5JH7FQxOZZGBG9JyjYvfn9W7eAC8Un7NKUiZbWqmxe1v61lOxL7a/tjF8TH/iI+RLI5UEA6wn3HhFm6aWIagduN8+ctUlMHWK6+XvZR1kvMayMFSTdrWlihb6UqiasnS+lpACcTc3dwS9A+7NSau9likYwJ4azJQzDrxS93sNUaQS1v3nlnPSbmQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
  dkim=none; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=PnA5P3qDAH+fqK/ueMY2TXU2K0iPm0phm3CIX3vY5HU=;
- b=NCcovWaKh5ixbT4qmE4l7tdd/SBJnYwhp4rkklO+aZbVLSh7A09k6Ux2/mEDJiNTytaFcjAGDVyBjfqKWJdF5+LqRY2UH8X47fRuy4+j4fh6OJI5Vo3DGyjSg3i/8FvGwhYuGr1anHCf8lERlwK83cfFHhI/ixyZLgso2M4IbXAZnE61eHasyvhtuhPeHdnL/8iFe/Sgama7IvFUjZZyU18flYOLVjmLe79YeXmYj9VQ0nygpPnjSuqYmHAiA8VTvuR4zPlz1CVNvRcEtfl3A6o7c/cnBySvok0tCqF2SPj9vzvPgDqT2QL42JWmfTYl7vAYB12JERY1IiCYB4r9uA==
+ bh=KfYPs1kwS5b3AXJOYq2Pm0Zsuxt9JTxBidFj7djxErA=;
+ b=mjj2Di6JJFGgCdFgUOZMeWXSVCJHxVx0mS9chBJa3WzgjWzPz3eMlW6H+nTVESe/06uiyWECKv5jStIGbbGT9H8eVSlx//0qTONr8XpPdfyiwt6QLmGgGI+Tuexe7KlTC8G16Io7O2yF45cnCVDJwnffXIDekyh8/Mh4vGLAQioGvvR3JZhCf0H2qRmbC6Qs5zVToISDair/9KPL7LibWg4eIauIDz10U26U3fMR1Yv6PBwcBwhGSJ6g/lzFqfFJdC0K6z+OqNsHQmMi/rVeBb+3KoeveJJA7Glyzngn8xAByG1i+H2bsj4YXMPeAl0v8ROZETELIDskAA3LaJt/LA==
 Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:138::5)
  by MA0P287MB1497.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:f3::10) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.31; Tue, 18 Jun
- 2024 00:09:01 +0000
+ 2024 00:12:08 +0000
 Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
  ([fe80::a94:ad0a:9071:806c]) by MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
  ([fe80::a94:ad0a:9071:806c%3]) with mapi id 15.20.7677.030; Tue, 18 Jun 2024
- 00:09:01 +0000
+ 00:12:08 +0000
 Message-ID:
- <MA0P287MB2822FA0D5E803B0C91A0E19FFECE2@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Date: Tue, 18 Jun 2024 08:08:53 +0800
+ <MA0P287MB2822DCBF6E0AFC2146E05621FECE2@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
+Date: Tue, 18 Jun 2024 08:12:03 +0800
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v3 0/4] mmc: sdhci-of-dwcmshc: enhance framework
-To: Jisheng Zhang <jszhang@kernel.org>, Chen Wang <unicornxw@gmail.com>
+To: Drew Fustini <dfustini@tenstorrent.com>, Chen Wang <unicornxw@gmail.com>
 Cc: adrian.hunter@intel.com, aou@eecs.berkeley.edu, conor+dt@kernel.org,
- guoren@kernel.org, inochiama@outlook.com, krzysztof.kozlowski+dt@linaro.org,
- palmer@dabbelt.com, paul.walmsley@sifive.com, robh@kernel.org,
- ulf.hansson@linaro.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-riscv@lists.infradead.org, chao.wei@sophgo.com,
- haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com
+ guoren@kernel.org, inochiama@outlook.com, jszhang@kernel.org,
+ krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
+ paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
+ chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
+ tingzhu.wang@sophgo.com
 References: <cover.1718241495.git.unicorn_wang@outlook.com>
- <ZnBFsLFJdi5TMA2e@xhacker>
+ <Zm5OYfzMSv6hnCdL@x1>
 From: Chen Wang <unicorn_wang@outlook.com>
-In-Reply-To: <ZnBFsLFJdi5TMA2e@xhacker>
+In-Reply-To: <Zm5OYfzMSv6hnCdL@x1>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-TMN: [SnAmz4zYLvP/EpSWIT7jXPI9dEsd6maz]
-X-ClientProxiedBy: TYCP286CA0255.JPNP286.PROD.OUTLOOK.COM
- (2603:1096:400:456::15) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+X-TMN: [acJsLYoxQqlPLR0DycVh2uIVt6Fc2fMR]
+X-ClientProxiedBy: SG2PR01CA0151.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:8f::31) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
  (2603:1096:a01:138::5)
 X-Microsoft-Original-Message-ID:
- <04243d53-765e-470e-80a8-62371886542f@outlook.com>
+ <faf58cd2-06b0-41c5-ab9b-2c8022315e67@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -73,47 +74,46 @@ MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: MA0P287MB2822:EE_|MA0P287MB1497:EE_
-X-MS-Office365-Filtering-Correlation-Id: de746c9e-1c92-4f00-d7f5-08dc8f2adb33
-X-Microsoft-Antispam:
-	BCL:0;ARA:14566002|461199025|3412199022|4302099010|440099025|1602099009;
+X-MS-Office365-Filtering-Correlation-Id: 9b3626f9-3c46-4900-d48c-08dc8f2b4ad6
+X-Microsoft-Antispam: BCL:0;ARA:14566002|461199025|3412199022|440099025;
 X-Microsoft-Antispam-Message-Info:
-	XgJAc0yWCoWG0SdZXt1JsXOjVEUnIh6n3kuREiN3eTDcdZgeRNmNjys9Ia3w1nui3QnSM0djkdL0oo43tJ1k2MmWZiMZlvz+gF160UVedr/t/HObZp0ghVYsH3PmgTkXh8ylYEy+tMIjdUa1yJF+TDbtG6mTwBRkdnuJ13PzFj5llJ+qG5vj75Pbi713Kf0ZwzBQvfSgo7bofhQ5ObB6Kdb2LyLcifjhfu2oETOMbjTL9Vb2g1GVEcbXc/iMDD9pSp1D1iNv+wFSim2Zk9tkXJEeXvYW1FApLziKzIS594MnnHpmtYg9bNslv+pq1mZ+/u0dz8tGnlC6dztqVIR/+aXCrzrpQOtL2FSbULS4J65eMDd0qIEDgPOWT6x4vctUOqX64tV6YGmuiZ45Xtupwfq2OIzZZYdUNSKFGq6tPA6lSvd9Jp2fHJhodETAbkioJDUrJUwsd8ZF2BB+ap6vOduNl46e39CsF0IkKwdaeoQdEb6LoVvpjp63kL6AreLKBxLxLX7sBHsHZauCrwL+K9Zih3WEDnV6myS3fSSpFxIY++qCBp3Hb0mq5ZxXMg6+mv/cvaMTv3+k+5LyZIBPq1I+m4NqAjbz3Ar0S2Ztu8lD0SHykNHI8NHRXM2wWvqqKCtWlZxJ0sY8R18n5Ru1l+dI1InnQzfBq/sHwxY3DcEYYHYkfNG/n8keHWOcsOL0JLveK7u7lbMT7qTI3MSwAw==
+	SdTyY6sWbkHlyTcT3sUtX1lrPXQX2qSAiGnfK3xZClp/GX0wH/Rs7SwXfEniQMURQazyoj3kmxCSXEU/JzoObwGeqozMeDBjMin1mfzCLo5GE9yzqGxrWPm5lglI1WhiaeV3ikKkTmd5kIfnQJktrIi04BJnzXfcMovhwRijISTVgm6u8Q4I3Qpc19r9CyhiKD0Pb9ZjrUzTFNYSD5F8xAQ0L9PGIev+I2m5KUzjVD130XsTCKa4JssYbFKWrrJqvi37Ve8p+pDHr20X/TGGuK+wkL5tgO8Bp2GSzfeJ3jGa3SBV6QsvZAlJbTaKXPcJ6mjxr7djkjUYPv+0+uy0jmsA49BN8LYsLs6dPUcIbof/5yQFYuJJ55T9dZw0JqcGAvutd7Z0DcuGaO5TS+3KMietkqWbowJlNOmSAUr85l0f09rr/7TvXgXLT0My3IleqfdFQM2+eIRqGUYzRZ2kw/Bs6EtU6EfTvtBpaKXTvXtKw7pI8sVECcbBV15oxErt+AtoAdQZt1xf/6ThbMJNX0hYav11qJeD6/+5pbi28SFwH+qQLZCSkDA6s94qRFe6
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?WEY0MEZ2MDRaazZzVUFwK1dCNldSc2xLTEtrSVFjV0FLZTNuV1hnMkdDSUZi?=
- =?utf-8?B?eFNBVmtIaCtrZFBZNDZtb1NBNTBrSTg3UHFFam5vZ2hUdHpvVEFGUDQ5U0ww?=
- =?utf-8?B?MUxMQVZCQ1BudmoyZUZSNGYrclJtU1VRNzdRMDRzN2tvVzJDWDFaRzMwYmtx?=
- =?utf-8?B?U2lJdXBKOFg3YWNqYWRTbHl6RlFwTENBUHYxUXJpNHB6Z2NVVGtoQmoyaExK?=
- =?utf-8?B?amRyL091SHVscXNwWFZRbUg1N0t3c09JNU9FYkhub3dmMkF1bk0ydGEzbS94?=
- =?utf-8?B?di9icU92Ri9MY0tHa2JPK3FaN25aVUFKMUZVM2ZoVVRobXRWSWhJWE93Um82?=
- =?utf-8?B?TFBtWUZCSXBIdlYwMGZUd21ISFB3RERVQy9MR1pBeGlETU5ZRFFNVnBNcFI5?=
- =?utf-8?B?VkNTK200ajB1M2pYWWhBVzFldnV3N3BCVjR3dkI3RXJvMWRGdVBGQkZOTE8w?=
- =?utf-8?B?dXpiTWEzNktHNEhmYnlpQUZXUEtxaVdubUlaY1pkSEV5b0R3QUVIeU1sUkZO?=
- =?utf-8?B?YW5YWHUwY1VBYmpONDhOa3dXc0FaVGdXQlMyQ0J2dDFWWUlXcGtyKzRhVGVN?=
- =?utf-8?B?bXNsRktOYWFBUXNka3g1OE4wVGtRTTdyUUt4YVh4ZW1BeERkNXlBc2dBRkxn?=
- =?utf-8?B?b2F4TWtwY2lERERrT3ptL2hiZm92NXoxVEowLzBxY0pzUlVBdXJnZHJkTkZP?=
- =?utf-8?B?Z3NCUWV3VC9uUnhlSEY5cGNpdWhBbWtXa0FYRWk1TTdETW1WQ1BiTE9PbEF5?=
- =?utf-8?B?R0VEajZLbm1BczkrdnNWVDBZR2NiMXQ1blFtWlpBdnVEaXR1YzByOFc4ZGxt?=
- =?utf-8?B?enVEMWVQNjVySmJtK29INWVIc1k4anZuc09OSmVNdy81MTM0M3c4WGdjR1VO?=
- =?utf-8?B?eUswQWFoeURrYUUwaTRBWlVPdWc1RWUwRE9EODNhT0x2WVlWY2R5U3JPUlVq?=
- =?utf-8?B?NkxseWR3TUtPRU5jUG5tSHJhUjh5NnlJdGV6Q05MWEF6bHFkdXR3RnlqUEhC?=
- =?utf-8?B?NDVpL2grcXlkZW5pekltb0k2dXpnWUtwYjNXVG1xaUxlZWs2cmdsL3l4blpZ?=
- =?utf-8?B?QnlPVnlTNXBneUhyd01LZ1pMbE5DemI3ZTVOY09TSmxGQ1ByUm10WnhJTWVJ?=
- =?utf-8?B?ODhIR2dWaFhZRmxtYXVUaDVkalIxYTA0LzlVdDFZSDY2L21ySE5XRlFEbGtn?=
- =?utf-8?B?U1hRVWx6SStmVnNiTW9JQVpqb0gzTHJXRkkzUkJoQ0tJTStQdURRRFVWUVZO?=
- =?utf-8?B?RHJuS1Ewd2hybDFUdDVyVU4xNHorV2ljRHNNeFQyQktNSHRBMGhqOVRIWTJN?=
- =?utf-8?B?anJvZG5UcjJLb083M1M3M0xiZThjRWF3Wmt3R2NnYzdVS2hZN054Q0pFL1lK?=
- =?utf-8?B?TUVMYWIvNmx0Qml2SUFYamJUa0ZsaEwwV1I0eWZubitKYS9QNFNtVlFiREJQ?=
- =?utf-8?B?TjJaSk1zcUd0NmJNRURHazhNYkZYTjc4QjN6K2FUamZkbCsrRk5vMzJIT2JR?=
- =?utf-8?B?Ymkvd3NRZmI2bnZlQndFdFdlaTdpcDdMSWdLUVkwNmt6eExJOEF4cTJPNjEv?=
- =?utf-8?B?N1hzN0hqTXkyQW40NWlselh4eVphTnVzNmtZZlkrcG5YU1gwK0pSUy9lV2hp?=
- =?utf-8?B?djN1OTd3VEVYN0lWUWZvUFZSZFpEYnJRUE4xcEgxTytKKzlNYVZ0RmErZ2xv?=
- =?utf-8?Q?q0nVmQqhs0y6WSKNQiI+?=
+	=?utf-8?B?T3hoU0gvRkVyVGorL2FrV2QzdFI0YzJkNUVkNmRZZ09DKzlQUzZaYkdsQnND?=
+ =?utf-8?B?VDlITm8wbUphU0ZsZmVDT2hOQ0U2Z1k3MXVONDhua0pJaEdoVlN6MjQvZjR5?=
+ =?utf-8?B?WVNFVTBubGw4cDFoOVRpTVRQbmx1cHQzaTl0SktjNG8zMFF5dXV1YVJqcEhx?=
+ =?utf-8?B?anJWcHlmMG55aWlPS1RIbWMzdlQ0UnJBMU12aWJLbjNZSVd1UXBoMHhxWlNz?=
+ =?utf-8?B?aFQrdldHdWh1K09nNlRMMXVHZ1MzbU82ZmZOcjNWU0NEdW4yUEhvYlRCeTZX?=
+ =?utf-8?B?eENnL2l4enpMWlFJOTVHUHhrWUQ2azhBVGdDWXgwTVpZMkhZQzN3QzBUakpM?=
+ =?utf-8?B?dlpSWUlkZGYyd1BXN1htV21wSk0yNjFZVnY1Mmd0cGxqb0d5bkswaEdGa2Ew?=
+ =?utf-8?B?elpxWHI4VkY1UGZyUkhjYUlDSlpKZExVR2RmenUxdDRDemQ2T2tCQW4vaDg3?=
+ =?utf-8?B?aE5UcThZZlgweWJLUG9pb2daRHlWUlhWMWZjYjhZdXkxMURtR0QzckMzbEI4?=
+ =?utf-8?B?amRsT3VDLy81cVBHVXgyM04weVk0ZFI5SGd5SUwvcmtiRmJic2xaZjVEc0Fo?=
+ =?utf-8?B?WUE3ODdEZ1ROdHJpT2o3RmtGd0pMNndlR2EyQmZBaFI3M0lKRS8zV0w1MmEw?=
+ =?utf-8?B?eTY0OFRsd1Y0dzkzY3R1alpOeVFvd3NBUjZqUjBYdW9EL2hOWXg4WnF1Y29E?=
+ =?utf-8?B?WldVaTArS2hWaDJEamFFd0lXY0dHUnVUOVg5TjNhaE1ya2lMMkx6Y216d3R1?=
+ =?utf-8?B?ZWZoaVp2QVlWakVNZS9FV2VZUnB5Rk8wcFJUUzQrRXNZTGpncWprUFhMa1dL?=
+ =?utf-8?B?MENWem8yQzcxQ0FndEJLSjFWWHVtZSs3cU5xL1FFYW9MVnlTTllCRXdRYzMr?=
+ =?utf-8?B?QlJlS3p0emNkT0ZicnczeEZLK2FBc1hjdkxTMlpHd241eGJhdWFzN0N5bmFq?=
+ =?utf-8?B?RDFjbnNlb0MrUGhzRmlvR3loL1czUk12ZDRTM3JySUFVNzlLblEyODNyczdU?=
+ =?utf-8?B?MWRlalZnbnBIcHBONXNIalpEVDJudlkrbzJwNXJSS2tQUU1aTEROVEE3cHJG?=
+ =?utf-8?B?eElmdkhWK3p1T3AzWDZhVlRwOXdRZVV6YWpiWmRwc2YxYnFGYVBlZXJwWmdz?=
+ =?utf-8?B?ejFWOTRUaHV2R2hIdExDMnNVaXRjcGlZK3o2QURpeS9tNTM0NU51SW9CYTd3?=
+ =?utf-8?B?a1BqaW9oVERFRkNhdDBGY1A2R20wZkIxdUJJUWtVbEFCczkvQ0toZjJJT3Zn?=
+ =?utf-8?B?YTVicjVpdTU5cjlrU1V3ODNseW13aWcwZXNOTUJEaTFLZm1jTUpCcmRXb3Uy?=
+ =?utf-8?B?N2ZDYnIxNHliazlVRzJFdi82Vll2KzI4a2tkaWkzREZ0a2xoMEswa1BQRlpI?=
+ =?utf-8?B?VlMwNnpsZituaWxwMUZVVWZkaVBKU0gzZ3NNYTdIdWpRT0grY29LZ0VPM2Rj?=
+ =?utf-8?B?YXhnWlBmeXNCbmdCNDlPZnpNUFFqRGRPMmNjeDg2TEZ0clZqVmNqNmZlTzBZ?=
+ =?utf-8?B?QkgxSjhFY2M4THVLUDUrSGRWQ0VqRlFoOTVGMGdQSW9SV2lKa3gxemIrUXpa?=
+ =?utf-8?B?b3JudDMwRG1pMkM5enBLM2tZeXpPWXVrald4Mkhnd0h1SE1kbFVHZ0JTZXNK?=
+ =?utf-8?B?ZDJsT2swWklpNFQyck9rekdvbHhZNzlSOFpGVWJ3QzlqVTgyamhyVHVNS2pK?=
+ =?utf-8?Q?U5N6Nl7RIGdO61K8Fjuk?=
 X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: de746c9e-1c92-4f00-d7f5-08dc8f2adb33
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9b3626f9-3c46-4900-d48c-08dc8f2b4ad6
 X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jun 2024 00:09:01.1066
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jun 2024 00:12:08.3023
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
@@ -122,75 +122,17 @@ X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA0P287MB1497
 
 
-On 2024/6/17 22:18, Jisheng Zhang wrote:
+On 2024/6/16 10:30, Drew Fustini wrote:
 > On Thu, Jun 13, 2024 at 09:42:03AM +0800, Chen Wang wrote:
->> From: Chen Wang <unicorn_wang@outlook.com>
->>
->> When I tried to add a new soc to sdhci-of-dwcmshc, I found that the
->> existing driver code could be optimized to facilitate expansion for
->> the new soc. You can see another patch [sg2042-dwcmshc], which I am
->> working on to add SG2042 to sdhci-of-dwcmshc.
-> Hi Chen,
+[......]
+> I have tested successfully on top of 6.10-rc3 with the Lichee Pi 4a:
 >
-> IMHO, you'd better put the sg2042 support as the last patch of this
-> series, we want to see why the enhancement is necessary and how does
-> it help sg2042 upstreaming.
->
-> thanks
+> Tested-by: Drew Fustini <dfustini@tenstorrent.com> # TH1520
 
-OK, I will consider this in next revision.
+Thank you for your testing effort. I will continue to revise it 
+according to other reviewers' suggestions.
 
-Thanks,
+Regards,
 
 Chen
 
->> By the way, although I believe this patch only optimizes the framework
->> of the code and does not change the specific logic, simple verification
->> is certainly better. Since I don't have rk35xx/th1520 related hardware,
->> it would be greatly appreciated if someone could help verify it.
->>
->> ---
->>
->> Changes in v3:
->>    
->>    The patch series is based on latest 'next' branch of [mmc-git].
->>
->>    Improved the dirvier code as per comments from Adrian Hunter.
->>    Define new structure for dwcmshc platform data/ops. In addition, I organized
->>    the code and classified the helper functions.
->>
->>    Since the file changes were relatively large (though the functional logic did
->>    not change much), I split the original patch into four for the convenience of
->>    review.
->>
->> Changes in v2:
->>
->>    Rebased on latest 'next' branch of [mmc-git]. You can simply review or test the
->>    patches at the link [2].
->>
->> Changes in v1:
->>
->>    The patch series is based on v6.9-rc1. You can simply review or test the
->>    patches at the link [1].
->>
->> Link: https://lore.kernel.org/linux-mmc/cover.1713258948.git.unicorn_wang@outlook.com/ [sg2042-dwcmshc]
->> Link: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git [mmc-git]
->> Link: https://lore.kernel.org/linux-mmc/cover.1713257181.git.unicorn_wang@outlook.com/ [1]
->> Link: https://lore.kernel.org/linux-mmc/cover.1714270290.git.unicorn_wang@outlook.com/ [2]
->>
->> ---
->>
->> Chen Wang (4):
->>    mmc: sdhci-of-dwcmshc: adjust positions of helper routines
->>    mmc: sdhci-of-dwcmshc: unify the naming of soc helper functions
->>    mmc: sdhci-of-dwcmshc: extract init function for rk35xx/th1520
->>    mmc: sdhci-of-dwcmshc: add callback functions for dwcmshc
->>
->>   drivers/mmc/host/sdhci-of-dwcmshc.c | 598 ++++++++++++++++------------
->>   1 file changed, 339 insertions(+), 259 deletions(-)
->>
->>
->> base-commit: d6cd1206ffaaa890e81f5d1134856d9edd406ec6
->> -- 
->> 2.25.1
->>
