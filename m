@@ -1,60 +1,61 @@
-Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB7BB26281
-	for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2024 06:30:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 977861465BD
+	for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2024 07:13:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718692242; cv=none; b=sfUa9JJTqpUgpk745kg6lP24ULqxp6UZ3yqMH2+q8mXdAW0z0Bswj9X3+KOivgOfZY8P8HdBXGHS0DxwEnfH5WsJ+X3CD5D3Gpo6mnqwnAqrk+uQ00NApYwchjYtlT9HQSgBRGOmG2z1N2FECAUa6F6S2bUcuNm315LCx8sAJ3w=
+	t=1718694820; cv=none; b=C0XCoWSugnmAFwxDIVzHSDbm11wxMcER9i2bgza2Z2FXB+LZPDrR+MiE8QejAEFFoY+Ozgr0YzqQGOGSYPYPOgsf+3t8urWKd7A469RjoTg9vCxU3wnH/Kz9ZslsQ0UDpD21JQvPlLXcDZa0jetlauEUWMFyLRa7HNmZ9q7lwSE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718692242; c=relaxed/simple;
-	bh=hZDWCI2YcLFzdh55xjCS9DfloNBolM+/C0zHHdHtNiU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gvi4oFHOlmhTX77iJI2V4PwJ2XMWrjLK6FxPm/2vY75Xgoiu7AsH3YEGcyf3PYfxPG3nPZeV9d+p7hLfXzyOxd5MAQ8NAIo8GyKa7Xot3jHhjvYWIJGjd2Z5Igv1G+JZ5AFxiHxh0QGl2FRRKd/lTVL1yBQYV7NNWxZbfIYlLBk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SaK/Ydek; arc=none smtp.client-ip=209.85.128.42
+	s=arc-20240116; t=1718694820; c=relaxed/simple;
+	bh=9ya6iEKqGg8De/4s6Ze4xDIb+xQaAQNCIrZCtIWF/7s=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=VMcWuF4SeM8MOKCK/tQDuJKT94/A15mWXqG25cupfO4309e6sqMtvPbIJqVa6sXybORXYfmyuSx4Y1LGL+Xp2qxrLTwCAmkJ6jhbi+QKxnuRF1Y+gJe+YHkZRlCfLBIgbzbB9BMejp3f4ILk+lgAj6jR1PMDdMptEXgOgjxfaM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ldU06kSN; arc=none smtp.client-ip=209.85.128.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SaK/Ydek"
-Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-421a1b834acso43358995e9.3
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Jun 2024 23:30:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ldU06kSN"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-4217990f8baso46108965e9.2
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2024 00:13:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718692239; x=1719297039; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :from:references:cc:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZWeFAAAi2L8rsVHef4RgO7GjNAUeaqypAMAbTcH7e2Y=;
-        b=SaK/YdekwElrCs9TdoZGIrQBLFVhY92bRlH69N7EKVGrUpzSt3SF81k3IcdK49ATD2
-         xWEOr/qIoyV786gDOgQ7v4t8pe3YP59WSIUHv/sAE0Jpus9IW7TDSy/72DPnzGiQWRxM
-         PUp7yeeku0xE4c2KmVJR1/QqPR18Ln7j4R40yU7a+Qa4bhEECxfbu6YQrfjlnuOSETdj
-         PWwDuOUXg3dM89/a/p+vYfAEAFGb6MHOY3o4q4l7LqjVCK15+7lUtw0Wkl+eaYnyCvMm
-         nFHidbPivnzXOtiUtEwnQpS02HsBUnhw/3oaHcQRydklrGEPV2W99TATy4BN1Ktf5xDv
-         FSqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718692239; x=1719297039;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :from:references:cc:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=linaro.org; s=google; t=1718694817; x=1719299617; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=ZWeFAAAi2L8rsVHef4RgO7GjNAUeaqypAMAbTcH7e2Y=;
-        b=gM0Ala6Wy1xvMoystueUUWW75S4TrANhvLtJa/GoT5xW+1EyAkt9XuFt9huJWwi7+3
-         bb3xQugUTOD6JdfNyYIesdpOb2O6kUptjQdA5EU9AucdgbXJSfAkRuxH/ogtL60yWEZK
-         FWWJtBzhOr502Y+MnlLkGm7VRStZJR+09oBMCnGVtUBLIhI1cHKkbwJB1YtucjweYvcN
-         pnwJWfz8HBQEXhK6w+IHeneLBzx8TuFRLib+WU7fdC4nZz1AZf5MhDfSJlK/oBiV3UIt
-         cIRMacJAmaiVG/9LRY/j72YGtQiKJeGwt9VDCK7K0LpOmwp3MDCwwSVpL5mM163MFGOY
-         EA2w==
-X-Forwarded-Encrypted: i=1; AJvYcCXteCG7gFNEbLI3AZqiOMubeQDk0slymZDtP+FYs1z/rAoWELsyCHQVsHONoV+NTo/94W7d7dabnQ3RVOyL56NuGUuQTAWepPkq
-X-Gm-Message-State: AOJu0YwW3feWvl/deL3ZdE6hKXXSkpY7q0Rkj6hUGfbdsnIJ4fD/5sHG
-	KuTdF5zmZRFYPyVJNa3T62iO/0Ef9QsJhYYDC1sCpJe4gN3aBHkPufQkZaD9YJQ=
-X-Google-Smtp-Source: AGHT+IEJ4gLarh4h757fQ4nJrn6vzZRFlVK5KgpSEj7lt/PYKYzRz80A/D0z0k+dx/QjESmAgiEWvw==
-X-Received: by 2002:a05:600c:1c9a:b0:422:6449:1307 with SMTP id 5b1f17b1804b1-4230484f994mr115936955e9.32.1718692239154;
-        Mon, 17 Jun 2024 23:30:39 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.137])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-422874e73b1sm217722655e9.45.2024.06.17.23.30.37
+        bh=1wiBjLcn5WbWlRuyHrxpnQqW9c9nIklW7PRJKCt1+mI=;
+        b=ldU06kSNw0FLOx0n2BJJ3b9TFaxXyCr755UCfA+09pmW4BWiyu/y/rYdPzSZedPGLI
+         BLFc87rF+wBB97XUgdajI0/miFtn6wpU/PJqCu6l3rWw4x+99WbIivv9jDB6VAVzp8oI
+         4H/qVj4imD6x0OuP63l8aMWF7kCKsrjfvwXsZc6oUuCGh0Srn7NMB5YCIvSJH0G5EPwe
+         UjcNqynrSM4qCl9wmrHU6KPs2A1zIvC7HGy5z0iNuuS4NBtT9DR7rOj6p6t/rOr6UBkE
+         YTTN9xOTKWsoGJURhYdOfxllvu0DHjKds8nyWnZg2YoN9VOWAOd/R6qrdBfAQ9P0f/CA
+         8IWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718694817; x=1719299617;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=1wiBjLcn5WbWlRuyHrxpnQqW9c9nIklW7PRJKCt1+mI=;
+        b=gyGBQww09ebWrPyKZuV+nURRw9Vu5fGdEPy3HgM8PRa4L61jOv6f50E6/jCIz0ffGt
+         /C5O7hP1XATyLDQ0bsCyyFBKkGYKBBGMLI0qG85ozVHRlDLKYW5x0LoXvck7iN01yopS
+         tA2tqCqDdepJnzZ2TTHom19h5JORdYPngxc/HxVQxgsB4WBoZzVTMKaKlfNB+VW4kj6O
+         NQj05Xnh0cStT7AEiu2dhgcjaGFw6VT/9KNLvZogbV1Ptz/GRQ+2oFFCzpKVKXpRnymW
+         AhFrlLJPvtOiCEe/RdbodWVAQxhxylVXoEV81MVslivTlLfJuodr5zx0aIEw8BE3FuY5
+         6N3Q==
+X-Forwarded-Encrypted: i=1; AJvYcCXKAcaZ/mlCxrAyrUVlRKo7jjwZIXxGAw0VnJ0AUvA3r8L8YOggjPLs0db/pOG+3oaCTQlqhycurUkTmDTbboATU7cwGyhcGZOI
+X-Gm-Message-State: AOJu0Yyye2iMZTYQpWwxWO7IAnwiG+camo1/fItSFv44BGu1CTif7Bed
+	iWis4dMb8rVk5DSMIYrtpbj1WdBDBspygXUcuvY/Lq84BUetfV4JIJIdheOhlfI=
+X-Google-Smtp-Source: AGHT+IHS9iZxX2xl/jBNg4f+neP7mB0SCIizLgvgWkWOKv8wSW3XcXSQF6qHt2nKb5aYk3tH9re1MA==
+X-Received: by 2002:a05:600c:154d:b0:421:8028:a507 with SMTP id 5b1f17b1804b1-4230482b872mr76976565e9.18.1718694816781;
+        Tue, 18 Jun 2024 00:13:36 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:982:cbb0:7f31:be49:5b98:50cd? ([2a01:e0a:982:cbb0:7f31:be49:5b98:50cd])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-422a1e68d04sm196876345e9.36.2024.06.18.00.13.35
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Jun 2024 23:30:38 -0700 (PDT)
-Message-ID: <b0f52816-8a9e-4f6a-8b48-18e77ed5dfaf@linaro.org>
-Date: Tue, 18 Jun 2024 08:30:36 +0200
+        Tue, 18 Jun 2024 00:13:36 -0700 (PDT)
+Message-ID: <ad7f22f5-21e4-4411-88f3-7daa448d2c83@linaro.org>
+Date: Tue, 18 Jun 2024 09:13:34 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,133 +63,125 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 13/15] dt-bindings: crypto: ice: document the hwkm
- property
-To: "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>,
- "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
- "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
- "andersson@kernel.org" <andersson@kernel.org>,
- "ebiggers@google.com" <ebiggers@google.com>,
- "neil.armstrong@linaro.org" <neil.armstrong@linaro.org>,
- "srinivas.kandagatla" <srinivas.kandagatla@linaro.org>,
- "krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
- "conor+dt@kernel.org" <conor+dt@kernel.org>,
- "robh+dt@kernel.org" <robh+dt@kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- kernel <kernel@quicinc.com>,
- "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>,
- "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
- "Om Prakash Singh (QUIC)" <quic_omprsing@quicinc.com>,
- "Bao D. Nguyen (QUIC)" <quic_nguyenb@quicinc.com>,
- "bartosz.golaszewski" <bartosz.golaszewski@linaro.org>,
- "konrad.dybcio@linaro.org" <konrad.dybcio@linaro.org>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "jejb@linux.ibm.com" <jejb@linux.ibm.com>,
- "martin.petersen@oracle.com" <martin.petersen@oracle.com>,
- "mani@kernel.org" <mani@kernel.org>,
- "davem@davemloft.net" <davem@davemloft.net>,
- "herbert@gondor.apana.org.au" <herbert@gondor.apana.org.au>,
- Prasad Sodagudi <psodagud@quicinc.com>, Sonal Gupta <sonalg@quicinc.com>
+From: neil.armstrong@linaro.org
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v5 04/15] soc: qcom: ice: add hwkm support in ice
+To: Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+ linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org,
+ andersson@kernel.org, ebiggers@google.com, srinivas.kandagatla@linaro.org,
+ krzysztof.kozlowski+dt@linaro.org, conor+dt@kernel.org, robh+dt@kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ kernel@quicinc.com, linux-crypto@vger.kernel.org,
+ devicetree@vger.kernel.org, quic_omprsing@quicinc.com,
+ quic_nguyenb@quicinc.com, bartosz.golaszewski@linaro.org,
+ konrad.dybcio@linaro.org, ulf.hansson@linaro.org, jejb@linux.ibm.com,
+ martin.petersen@oracle.com, mani@kernel.org, davem@davemloft.net,
+ herbert@gondor.apana.org.au, psodagud@quicinc.com, quic_apurupa@quicinc.com,
+ sonalg@quicinc.com
 References: <20240617005825.1443206-1-quic_gaurkash@quicinc.com>
- <20240617005825.1443206-14-quic_gaurkash@quicinc.com>
- <a9d8606d-fb4a-4394-bab6-3304e1f8b9e5@linaro.org>
- <af1df42efdb4497cb174bc664c692651@quicinc.com>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Content-Language: en-US
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <af1df42efdb4497cb174bc664c692651@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
+ <20240617005825.1443206-5-quic_gaurkash@quicinc.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20240617005825.1443206-5-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 18/06/2024 02:35, Gaurav Kashyap (QUIC) wrote:
-> Hello Krzysztof
+On 17/06/2024 02:50, Gaurav Kashyap wrote:
+> Qualcomm's ICE (Inline Crypto Engine) contains a proprietary
+> key management hardware called Hardware Key Manager (HWKM).
+> This patch integrates HWKM support in ICE when it is
+> available. HWKM primarily provides hardware wrapped key support
+> where the ICE (storage) keys are not available in software and
+> protected in hardware.
 > 
-> On   06/17/2024 12:17 AM PDT, Krzysztof Kozlowski wrote:
->> On 17/06/2024 02:51, Gaurav Kashyap wrote:
->>> +  qcom,ice-use-hwkm:
->>> +    type: boolean
->>> +    description:
->>> +      Use the supported Hardware Key Manager (HWKM) in Qualcomm ICE
->>> +      to support wrapped keys. Having this entry helps scenarios where
->>> +      the ICE hardware supports HWKM, but the Trustzone firmware does
->>> +      not have the full capability to use this HWKM and support wrapped
->>> +      keys. Not having this entry enabled would make ICE function in
->>> +      non-HWKM mode supporting standard keys.
->>
->> No changelog, previous comments and discussion ignored.
->>
->> NAK
+> When HWKM software support is not fully available (from Trustzone),
+> there can be a scenario where the ICE hardware supports HWKM, but
+> it cannot be used for wrapped keys. In this case, standard keys have
+> to be used without using HWKM. Hence, providing a toggle controlled
+> by a devicetree entry to use HWKM or not.
 > 
-> Apologies for not addressing the previous comments.
-> https://lore.kernel.org/all/9892c541ba4e4b5d975faaa4b49c92ba@quicinc.com/
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> ---
+>   drivers/soc/qcom/ice.c | 153 +++++++++++++++++++++++++++++++++++++++--
+>   include/soc/qcom/ice.h |   1 +
+>   2 files changed, 150 insertions(+), 4 deletions(-)
 > 
-> Maybe we can continue our discussion here;
-> " SM8450 and SM8350 QCOM ICE both support HWKM in their ICE hardware.
-> However, wrapped keys can not be enabled on those targets due to certain
-> missing trustzone support. If we solely rely on hardware version to decide
-> if ICE has to use wrapped keys for data encryption, then it becomes untestable
-> on those chipsets. 
+> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
+> index 6f941d32fffb..d5e74cf2946b 100644
+> --- a/drivers/soc/qcom/ice.c
+> +++ b/drivers/soc/qcom/ice.c
+> @@ -26,6 +26,40 @@
 
-That does not make any sense to me. You enable it for SM8550 and SM8650
-not SM8450 and SM8350.
+<snip>
 
-> 
-> So, we want another way to distinguish this scenario, and hence I chose a DT vendor property
+> +
+>   static struct qcom_ice *qcom_ice_create(struct device *dev,
+>   					void __iomem *base)
+>   {
+> @@ -239,6 +382,8 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
+>   		engine->core_clk = devm_clk_get_enabled(dev, NULL);
+>   	if (IS_ERR(engine->core_clk))
+>   		return ERR_CAST(engine->core_clk);
+> +	engine->use_hwkm = of_property_read_bool(dev->of_node,
+> +						 "qcom,ice-use-hwkm");
 
-What scenario? Show it in your patches.
+Please drop this property and instead add an scm function calling:
 
-> to explicitly mention if we have to use the supported HWKM.
-> If there is another way, I am open to exploring that as well."
+__qcom_scm_is_call_available(QCOM_SCM_SVC_ES, QCOM_SCM_ES_DERIVE_SW_SECRET)
 
-That property is just entirely redundant. If you claim otherwise, show
-it through patches.
+like
 
-To be clear, so you will not resend the same ignoring comments: NAK.
+bool qcom_scm_derive_sw_secret_available(void)
+{
+	if (!__qcom_scm_is_call_available(__scm->dev, QCOM_SCM_SVC_ES,
+					  QCOM_SCM_ES_DERIVE_SW_SECRET))
+		return false;
 
-Best regards,
-Krzysztof
+	return true;
+}
+
+You may perhaps only call qcom_scm_derive_sw_secret_available() for some
+ICE versions.
+
+Neil
+
+>   
+>   	if (!qcom_ice_check_supported(engine))
+>   		return ERR_PTR(-EOPNOTSUPP);
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 9dd835dba2a7..1f52e82e3e1c 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>   			 const struct blk_crypto_key *bkey,
+>   			 u8 data_unit_size, int slot);
+>   int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
+>   struct qcom_ice *of_qcom_ice_get(struct device *dev);
+>   #endif /* __QCOM_ICE_H__ */
 
