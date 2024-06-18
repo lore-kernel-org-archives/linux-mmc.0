@@ -1,503 +1,482 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 91F5D156878;
-	Tue, 18 Jun 2024 11:13:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A0281C2BD;
+	Tue, 18 Jun 2024 22:07:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718709197; cv=none; b=rGsgqnMBl08vmuOuVN496ZNYjJp6mFNXkiexJucrnCwuXcQNqfbOhh1V/nsUHgAuR9C82hVJ5OFHEJBEu87k0v0gH7zz37rE72yTOS4EPFXo+JjyNRHdmzTIdOjEIFMDUSBAp337ODReg6+7WSr8htS5yHJU2b7reHZScTxjZLo=
+	t=1718748461; cv=none; b=YKdCZgcecNXQCHSoLbUZcF5+P+ldMyiuII/TLnzT4lfXRQiVWeqBPmWYxbcsg/giVKxzJc1KT1SlMgjYKctnJQGOe23x16zCNrgHv/+/kW5EApX8DFH49jqrA/RzvG0tAf93ZHzlyFxOJKaJ6v6L5dHGYhs8xmN/xyexdN0XJ2Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718709197; c=relaxed/simple;
-	bh=bEej2AuJl8VoCBhanZUeLAC/QLQGwqQyjs1aKqyerk4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=buELXsj/YN0c81du+9SrtEVwXpfovSZtP3QG1yD2073bCWmZduGYbFyXadmRb4ECdZcTrX5St1M/Zoh20DmdOCX0K2PqA68AEmi3XEU6VS4xg+46IV1rBvC3MibVoI2EvhUBLU97+fov2WdyFQf5WA9arFh1KOxyQfDhOY4518Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gIYBggKO; arc=none smtp.client-ip=198.175.65.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1718748461; c=relaxed/simple;
+	bh=vshtYJ6auOWRkjWkQysHLBE7xhnTPobPLeAKIUjR0ak=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=FlTMyc6hD60yaWfVBFf8U68x74AuycRaKAtl4rs8/UqALlyquqSegTPDLYfSdYyeTdhHigQl/033ky4/ZDJxFlDR/9LnDy6bFAEstp2GBGsJkryf7aoDiLM17yAvOWip50ojkCvwVxe8BgPVPqM2wJcNwhN335gVRTL3Yz3E8nE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=fZmnRh7T; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gIYBggKO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1718709195; x=1750245195;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=bEej2AuJl8VoCBhanZUeLAC/QLQGwqQyjs1aKqyerk4=;
-  b=gIYBggKOB8HBRR7bI+dHDvvhz4oX4ECGHQzNekCdv1qAyZD948sO1MJD
-   Mx820Q/HnLblfnwR13XwR9tOMX/y2fBae2/9o4+zGIDyexE4yU7/WxKbf
-   ID/hZlP4FVRf1HGqYI3GorZlBxPvbzhKU2lF4vGtz9/kr43SnBYAmC8oG
-   Ke8PnCUZj3T1pNEqxZm7KAgu0HX9iHqXw5auwnhH0sFOSPYYHF8rjlnNh
-   FaPtcvCFUW0Ek11BypSg516Ll3b0BjeRXg9rL6GCR3ydjoqkFUgfNTtDs
-   y8KRGFj4xohiaotzgYtuPPKZxnyCOEh1JPAL7KTfO3G9oDfmkGZjU1np5
-   Q==;
-X-CSE-ConnectionGUID: 2CSfegYORf+JdmJzowrUtA==
-X-CSE-MsgGUID: 17SibHEWRWKcIq+/UDraUQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11106"; a="19358624"
-X-IronPort-AV: E=Sophos;i="6.08,247,1712646000"; 
-   d="scan'208";a="19358624"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jun 2024 04:13:15 -0700
-X-CSE-ConnectionGUID: vQI9wUOwSXyqG26pIkpZvQ==
-X-CSE-MsgGUID: 4eGKaP9YRT+8SCn3HfQJSg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.08,247,1712646000"; 
-   d="scan'208";a="46470772"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.41.28])
-  by orviesa005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Jun 2024 04:13:12 -0700
-Message-ID: <1e7d20d9-619e-4c82-802b-6e99a1a71a95@intel.com>
-Date: Tue, 18 Jun 2024 14:13:06 +0300
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="fZmnRh7T"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 45ILbUud007757;
+	Tue, 18 Jun 2024 22:07:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	e4GxQEU865+I+Ap5uFV4RigVEcUPLczIXhdKtfPyRfw=; b=fZmnRh7T8Bces6zh
+	SsmrVvD2sbd0FJBuvv7L25zhSmbsSHJpc3rUvUH+tghqLRqbsuLBIBb1w2dMYjXa
+	B0MqsyuuXOAFo8iKV/Gio76o5fHBlf19LfZ3fJkMh56PT4MK9iIQ0RgFe4oHTboZ
+	xOZCjwAhPfQGaJSE0pG8FFaN8or1x8kZm6xO25BsqSh2Ms74B+nKQQE3Z0io2bgF
+	iv0YnrEK+bzgHEgkG3xlQAh+Z4z502y7XWavxoCIl3Tw3m8QVEllDha32gOmKie0
+	lunmlayQz75GzskBfE/iuToj5b5sAs688IH7/4Q6HNXGXxA3M1rvm9UamcDeHJpK
+	RsZ/cw==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3yujag01jf-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 18 Jun 2024 22:07:19 +0000 (GMT)
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+	by NALASPPMTA05.qualcomm.com (8.17.1.19/8.17.1.19) with ESMTPS id 45IM7Ivf005763
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 18 Jun 2024 22:07:18 GMT
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nalasex01a.na.qualcomm.com (10.47.209.196) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Tue, 18 Jun 2024 15:07:14 -0700
+Received: from nalasex01a.na.qualcomm.com ([fe80::62ba:cee1:5495:c89]) by
+ nalasex01a.na.qualcomm.com ([fe80::62ba:cee1:5495:c89%4]) with mapi id
+ 15.02.1544.009; Tue, 18 Jun 2024 15:07:14 -0700
+From: "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
+To: "dmitry.baryshkov@linaro.org" <dmitry.baryshkov@linaro.org>,
+        "Gaurav
+ Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
+CC: "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        "andersson@kernel.org" <andersson@kernel.org>,
+        "ebiggers@google.com"
+	<ebiggers@google.com>,
+        "neil.armstrong@linaro.org"
+	<neil.armstrong@linaro.org>,
+        srinivas.kandagatla
+	<srinivas.kandagatla@linaro.org>,
+        "krzysztof.kozlowski+dt@linaro.org"
+	<krzysztof.kozlowski+dt@linaro.org>,
+        "conor+dt@kernel.org"
+	<conor+dt@kernel.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        kernel
+	<kernel@quicinc.com>,
+        "linux-crypto@vger.kernel.org"
+	<linux-crypto@vger.kernel.org>,
+        "devicetree@vger.kernel.org"
+	<devicetree@vger.kernel.org>,
+        "Om Prakash Singh (QUIC)"
+	<quic_omprsing@quicinc.com>,
+        "Bao D. Nguyen (QUIC)"
+	<quic_nguyenb@quicinc.com>,
+        bartosz.golaszewski
+	<bartosz.golaszewski@linaro.org>,
+        "konrad.dybcio@linaro.org"
+	<konrad.dybcio@linaro.org>,
+        "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>,
+        "jejb@linux.ibm.com" <jejb@linux.ibm.com>,
+        "martin.petersen@oracle.com" <martin.petersen@oracle.com>,
+        "mani@kernel.org"
+	<mani@kernel.org>,
+        "davem@davemloft.net" <davem@davemloft.net>,
+        "herbert@gondor.apana.org.au" <herbert@gondor.apana.org.au>,
+        Prasad Sodagudi
+	<psodagud@quicinc.com>,
+        Sonal Gupta <sonalg@quicinc.com>
+Subject: RE: [PATCH v5 04/15] soc: qcom: ice: add hwkm support in ice
+Thread-Topic: [PATCH v5 04/15] soc: qcom: ice: add hwkm support in ice
+Thread-Index: AQHawFGQ2Cb4IdeC1UawBk8ySHD6CrHMC+2AgAKAhjA=
+Date: Tue, 18 Jun 2024 22:07:14 +0000
+Message-ID: <96e2ce4b154a4f918be0bc2a45011e6d@quicinc.com>
+References: <20240617005825.1443206-1-quic_gaurkash@quicinc.com>
+ <20240617005825.1443206-5-quic_gaurkash@quicinc.com>
+ <3eehkn3cdhhjfqtzpahxhjxtu5uqwhntpgu22k3hknctrop3g5@f7dhwvdvhr3k>
+In-Reply-To: <3eehkn3cdhhjfqtzpahxhjxtu5uqwhntpgu22k3hknctrop3g5@f7dhwvdvhr3k>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V16 08/23] mmc: core: Support UHS-II Auto Command Error
- Recovery
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
- Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
- dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- Victor Shih <victor.shih@genesyslogic.com.tw>, ulf.hansson@linaro.org
-References: <20240522110909.10060-1-victorshihgli@gmail.com>
- <20240522110909.10060-9-victorshihgli@gmail.com>
- <4354636c-24dd-4145-a551-75dc5c69910b@intel.com>
- <CAK00qKCRD1Xdb5DmWud9F=r85aVxtnQ5wS_=yhzQ46LS0Mjqsg@mail.gmail.com>
- <84c57084-eb9d-4d11-9c2f-2a4ded6290c6@intel.com>
- <CAK00qKAHuLKGtcUnv=pKyQ4bKe+HqM1rFCQMRxPrGH9Aeat6Qw@mail.gmail.com>
- <3020280e-5e00-48f2-ae67-2260129ead9c@intel.com>
- <CAK00qKBMT8PkeLcuXhKWGPOgpU7y=RZ1JyM-P_mhPM7Rt9KVQQ@mail.gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAK00qKBMT8PkeLcuXhKWGPOgpU7y=RZ1JyM-P_mhPM7Rt9KVQQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 51Uig091LoehcODDGFqcphBcAsS3zefx
+X-Proofpoint-ORIG-GUID: 51Uig091LoehcODDGFqcphBcAsS3zefx
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.28.16
+ definitions=2024-06-18_04,2024-06-17_01,2024-05-17_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ phishscore=0 mlxscore=0 adultscore=0 mlxlogscore=999 impostorscore=0
+ spamscore=0 bulkscore=0 malwarescore=0 clxscore=1011 suspectscore=0
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2405170001 definitions=main-2406180162
 
-On 18/06/24 13:47, Victor Shih wrote:
-> On Mon, Jun 17, 2024 at 1:04 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 9/06/24 21:40, Victor Shih wrote:
->>> On Fri, May 31, 2024 at 7:23 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>
->>>> On 31/05/24 13:31, Victor Shih wrote:
->>>>> On Fri, May 24, 2024 at 2:54 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>>
->>>>>> On 22/05/24 14:08, Victor Shih wrote:
->>>>>>> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->>>>>>>
->>>>>>> Add UHS-II Auto Command Error Recovery functionality
->>>>>>> into the MMC request processing flow.
->>>>>>
->>>>>> Not sure what "auto" means here, but the commit message
->>>>>> should outline what the spec. requires for error recovery.
->>>>>>
->>>>>
->>>>> Hi, Adrian
->>>>>
->>>>>      I will add instructions in the v17 version.
->>>>>
->>>>> Thanks, Victor Shih
->>>>>
->>>>>>>
->>>>>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>>>>>> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->>>>>>> ---
->>>>>>>
->>>>>>> Updates in V16:
->>>>>>>  - Separate the Error Recovery mechanism from patch#7 to patch#8.
->>>>>>>
->>>>>>> ---
->>>>>>>
->>>>>>>  drivers/mmc/core/core.c    |  4 ++
->>>>>>>  drivers/mmc/core/core.h    |  1 +
->>>>>>>  drivers/mmc/core/sd_uhs2.c | 80 ++++++++++++++++++++++++++++++++++++++
->>>>>>>  include/linux/mmc/host.h   |  6 +++
->>>>>>>  4 files changed, 91 insertions(+)
->>>>>>>
->>>>>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>>>>> index 68496c51a521..18642afc405f 100644
->>>>>>> --- a/drivers/mmc/core/core.c
->>>>>>> +++ b/drivers/mmc/core/core.c
->>>>>>> @@ -403,6 +403,10 @@ void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
->>>>>>>       while (1) {
->>>>>>>               wait_for_completion(&mrq->completion);
->>>>>>>
->>>>>>> +             if (host->ops->get_cd(host))
->>>>>>> +                     if (mrq->cmd->error || (mrq->data && mrq->data->error))
->>>>>>> +                             mmc_sd_uhs2_error_recovery(host, mrq);
->>>>>>
->>>>>> There are several issues with this:
->>>>>>
->>>>>> 1. It is not OK to start a request from within the request path
->>>>>> because it is recursive:
->>>>>>
->>>>>>    mmc_wait_for_req_done()                      <--
->>>>>>       mmc_sd_uhs2_error_recovery()
->>>>>>          sd_uhs2_abort_trans()
->>>>>>             mmc_wait_for_cmd()
->>>>>>                mmc_wait_for_req()
->>>>>>                   mmc_wait_for_req_done()       <--
->>>>>>
->>>>>> 2. The mmc block driver does not use this path
->>>>>>
->>>>>> 3. No need to always call ->get_cd() if there is no error
->>>>>>
->>>>>> It is worth considering whether the host controller could
->>>>>> send the abort command as part of the original request, as
->>>>>> is done with the stop command.
->>>>>>
->>>>>
->>>>> Hi, Adrian
->>>>>
->>>>>      1. It looks like just issuing a command in
->>>>> mmc_wait_for_req_done() will cause a recursion.
->>>>>          I will drop sd_uhs2_abort_trans() and
->>>>> sd_uhs2_abort_status_read() in the v17 version.
->>>>>      2. I have no idea about this part, could you please give me some advice?
->>>>
->>>> The mmc block driver sets the ->done() callback and so
->>>> mmc_wait_for_req_done() is never called for data transfers.
->>>>
->>>> That won't matter if the host controller handles doing
->>>> the abort command, as was suggested elsewhere.
->>>>
->>>>>      3. I will try to modify this part in the v17 version.
->>>>>
->>>>> Thanks, Victor Shih
->>>>>
->>>>>>> +
->>>>>>>               cmd = mrq->cmd;
->>>>>>>
->>>>>>>               if (!cmd->error || !cmd->retries ||
->>>>>>> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
->>>>>>> index 920323faa834..259d47c8bb19 100644
->>>>>>> --- a/drivers/mmc/core/core.h
->>>>>>> +++ b/drivers/mmc/core/core.h
->>>>>>> @@ -82,6 +82,7 @@ int mmc_attach_mmc(struct mmc_host *host);
->>>>>>>  int mmc_attach_sd(struct mmc_host *host);
->>>>>>>  int mmc_attach_sdio(struct mmc_host *host);
->>>>>>>  int mmc_attach_sd_uhs2(struct mmc_host *host);
->>>>>>> +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_request *mrq);
->>>>>>>
->>>>>>>  /* Module parameters */
->>>>>>>  extern bool use_spi_crc;
->>>>>>> diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
->>>>>>> index 85939a2582dc..d5acb4e6ccac 100644
->>>>>>> --- a/drivers/mmc/core/sd_uhs2.c
->>>>>>> +++ b/drivers/mmc/core/sd_uhs2.c
->>>>>>> @@ -1324,3 +1324,83 @@ int mmc_attach_sd_uhs2(struct mmc_host *host)
->>>>>>>
->>>>>>>       return err;
->>>>>>>  }
->>>>>>> +
->>>>>>> +static void sd_uhs2_abort_trans(struct mmc_host *mmc)
->>>>>>> +{
->>>>>>> +     struct mmc_request mrq = {};
->>>>>>> +     struct mmc_command cmd = {0};
->>>>>>> +     struct uhs2_command uhs2_cmd = {};
->>>>>>> +     int err;
->>>>>>> +
->>>>>>> +     mrq.cmd = &cmd;
->>>>>>> +     mmc->ongoing_mrq = &mrq;
->>>>>>> +
->>>>>>> +     uhs2_cmd.header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD |
->>>>>>> +                       mmc->card->uhs2_config.node_id;
->>>>>>> +     uhs2_cmd.arg = ((UHS2_DEV_CMD_TRANS_ABORT & 0xFF) << 8) |
->>>>>>> +                     UHS2_NATIVE_CMD_WRITE |
->>>>>>> +                     (UHS2_DEV_CMD_TRANS_ABORT >> 8);
->>>>>>> +
->>>>>>> +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
->>>>>>> +     err = mmc_wait_for_cmd(mmc, &cmd, 0);
->>>>>>> +
->>>>>>> +     if (err)
->>>>>>> +             pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
->>>>>>> +                    mmc_hostname(mmc), __func__, err);
->>>>>>> +}
->>>>>>> +
->>>>>>> +static void sd_uhs2_abort_status_read(struct mmc_host *mmc)
->>>>>>> +{
->>>>>>> +     struct mmc_request mrq = {};
->>>>>>> +     struct mmc_command cmd = {0};
->>>>>>> +     struct uhs2_command uhs2_cmd = {};
->>>>>>> +     int err;
->>>>>>> +
->>>>>>> +     mrq.cmd = &cmd;
->>>>>>> +     mmc->ongoing_mrq = &mrq;
->>>>>>> +
->>>>>>> +     uhs2_cmd.header = UHS2_NATIVE_PACKET |
->>>>>>> +                       UHS2_PACKET_TYPE_CCMD |
->>>>>>> +                       mmc->card->uhs2_config.node_id;
->>>>>>> +     uhs2_cmd.arg = ((UHS2_DEV_STATUS_REG & 0xFF) << 8) |
->>>>>>> +                     UHS2_NATIVE_CMD_READ |
->>>>>>> +                     UHS2_NATIVE_CMD_PLEN_4B |
->>>>>>> +                     (UHS2_DEV_STATUS_REG >> 8);
->>>>>>> +
->>>>>>> +     sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, 0, 0);
->>>>>>> +     err = mmc_wait_for_cmd(mmc, &cmd, 0);
->>>>>>> +
->>>>>>> +     if (err)
->>>>>>> +             pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
->>>>>>> +                    mmc_hostname(mmc), __func__, err);
->>>>>>> +}
->>>>>>> +
->>>>>>> +void mmc_sd_uhs2_error_recovery(struct mmc_host *mmc, struct mmc_request *mrq)
->>>>>>> +{
->>>>>>> +     mmc->ops->uhs2_reset_cmd_data(mmc);
->>>>>>
->>>>>> The host controller should already have done any resets needed.
->>>>>> sdhci already has support for doing that - see host->pending_reset
->>>>>>
->>>>>
->>>>> Hi, Adrian
->>>>>
->>>>>      I'm not sure what this means. Could you please give me more information?
->>>>
->>>> sdhci_uhs2_request_done() checks sdhci_needs_reset() and does
->>>> sdhci_uhs2_reset().
->>>>
->>>> sdhci_needs_reset() does not cater for data errors because
->>>> the reset for data errors is done directly in what becomes
->>>> __sdhci_finish_data_common().
->>>>
->>>> You may need to:
->>>>  1. add a parameter to __sdhci_finish_data_common() to
->>>>  skip doing the sdhci reset and instead set
->>>>  host->pending_reset
->>>>  2. amend sdhci_uhs2_request_done() to check for data error
->>>>  also to decide if a reset is needed
->>>>
->>>
->>> Hi, Adrian
->>>
->>> If there is any mistake in my understanding, please help me correct it.
->>> My understanding is as follows:
->>>
->>> static bool sdhci_uhs2_request_done(struct sdhci_host *host)
->>> {
->>>       ...
->>>       if (sdhci_needs_reset(host, mrq)) {
->>>             ...
->>>             if (mrq->cmd->error || (mrq->data && mrq->data->error))
->>>                   sdhci_uhs2_reset_cmd_data(host->mmc);
->>>             ...
->>>       }
->>>       ...
->>> }
->>
->> Like this:
->>
->> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
->> index 47180429448b..3cb5fe1d488c 100644
->> --- a/drivers/mmc/host/sdhci-uhs2.c
->> +++ b/drivers/mmc/host/sdhci-uhs2.c
->> @@ -581,7 +581,7 @@ static void sdhci_uhs2_finish_data(struct sdhci_host *host)
->>  {
->>         struct mmc_data *data = host->data;
->>
->> -       __sdhci_finish_data_common(host);
->> +       __sdhci_finish_data_common(host, true);
->>
->>         __sdhci_finish_mrq(host, data->mrq);
->>  }
->> @@ -932,6 +932,12 @@ static void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
->>   *                                                                           *
->>  \*****************************************************************************/
->>
->> +static bool sdhci_uhs2_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)
->> +{
->> +       return sdhci_needs_reset(host, mrq) ||
->> +              (!(host->flags & SDHCI_DEVICE_DEAD) && mrq->data && mrq->data->error);
->> +}
->> +
->>  static bool sdhci_uhs2_request_done(struct sdhci_host *host)
->>  {
->>         unsigned long flags;
->> @@ -963,7 +969,7 @@ static bool sdhci_uhs2_request_done(struct sdhci_host *host)
->>          * The controller needs a reset of internal state machines
->>          * upon error conditions.
->>          */
->> -       if (sdhci_needs_reset(host, mrq)) {
->> +       if (sdhci_uhs2_needs_reset(host, mrq)) {
->>                 /*
->>                  * Do not finish until command and data lines are available for
->>                  * reset. Note there can only be one other mrq, so it cannot
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index ed55aab24f92..55f0db0fc007 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1563,7 +1563,7 @@ void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
->>  }
->>  EXPORT_SYMBOL_GPL(sdhci_finish_mrq);
->>
->> -void __sdhci_finish_data_common(struct sdhci_host *host)
->> +void __sdhci_finish_data_common(struct sdhci_host *host, bool defer_reset)
->>  {
->>         struct mmc_command *data_cmd = host->data_cmd;
->>         struct mmc_data *data = host->data;
->> @@ -1576,7 +1576,9 @@ void __sdhci_finish_data_common(struct sdhci_host *host)
->>          * conditions.
->>          */
->>         if (data->error) {
->> -               if (!host->cmd || host->cmd == data_cmd)
->> +               if (defer_reset)
->> +                       host->pending_reset = true;
->> +               else if (!host->cmd || host->cmd == data_cmd)
->>                         sdhci_reset_for(host, REQUEST_ERROR);
->>                 else
->>                         sdhci_reset_for(host, REQUEST_ERROR_DATA_ONLY);
->> @@ -1604,7 +1606,7 @@ static void __sdhci_finish_data(struct sdhci_host *host, bool sw_data_timeout)
->>  {
->>         struct mmc_data *data = host->data;
->>
->> -       __sdhci_finish_data_common(host);
->> +       __sdhci_finish_data_common(host, false);
->>
->>         /*
->>          * Need to send CMD12 if -
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 576b8de2c04e..5ac5234fecf0 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -840,7 +840,7 @@ void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data);
->>  bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq);
->>  void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
->>  void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
->> -void __sdhci_finish_data_common(struct sdhci_host *host);
->> +void __sdhci_finish_data_common(struct sdhci_host *host, bool defer_reset);
->>  bool sdhci_present_error(struct sdhci_host *host, struct mmc_command *cmd, bool present);
->>  u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
->>                    unsigned int *actual_clock);
->>
->>
-> 
-> Hi, Adrian
-> 
-> Please let me confirm with you. Based on your above comments, will the
-> sdhci_uhs2_request_done()
-> be modified to option 1 or option 2?
-> After testing, when a command error occurs, only executing
-> sdhci_uhs2_reset() has no effect,
-> we need to execute the reset DAT Line and CMD Line. So option 3 has no effect.
+Hello Dmitry,
 
-Obviously do whatever reset is necessary.  Don't use
-pending_reset to differentiate which reset, because it
-doesn't mean anything other than what it says.  Instead
-look at the mrq->data, mrq->data->error etc
+On 06/17/2024 12:55 AM PDT, Dmitry Baryshkov wrote:
+> On Sun, Jun 16, 2024 at 05:50:59PM GMT, Gaurav Kashyap wrote:
+> > Qualcomm's ICE (Inline Crypto Engine) contains a proprietary key
+> > management hardware called Hardware Key Manager (HWKM).
+> > This patch integrates HWKM support in ICE when it is available. HWKM
+> > primarily provides hardware wrapped key support where the ICE
+> > (storage) keys are not available in software and protected in
+> > hardware.
+> >
+> > When HWKM software support is not fully available (from Trustzone),
+> > there can be a scenario where the ICE hardware supports HWKM, but it
+> > cannot be used for wrapped keys. In this case, standard keys have to
+> > be used without using HWKM. Hence, providing a toggle controlled by a
+> > devicetree entry to use HWKM or not.
+> >
+> > Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> > Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> > ---
+> >  drivers/soc/qcom/ice.c | 153
+> +++++++++++++++++++++++++++++++++++++++--
+> >  include/soc/qcom/ice.h |   1 +
+> >  2 files changed, 150 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c index
+> > 6f941d32fffb..d5e74cf2946b 100644
+> > --- a/drivers/soc/qcom/ice.c
+> > +++ b/drivers/soc/qcom/ice.c
+> > @@ -26,6 +26,40 @@
+> >  #define QCOM_ICE_REG_FUSE_SETTING            0x0010
+> >  #define QCOM_ICE_REG_BIST_STATUS             0x0070
+> >  #define QCOM_ICE_REG_ADVANCED_CONTROL                0x1000
+> > +#define QCOM_ICE_REG_CONTROL                 0x0
+> > +/* QCOM ICE HWKM registers */
+> > +#define QCOM_ICE_REG_HWKM_TZ_KM_CTL                  0x1000
+> > +#define QCOM_ICE_REG_HWKM_TZ_KM_STATUS                       0x1004
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BANKN_IRQ_STATUS     0x2008
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_0                       0x5000
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_1                       0x5004
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_2                       0x5008
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_3                       0x500C
+> > +#define QCOM_ICE_REG_HWKM_BANK0_BBAC_4                       0x5010
+> > +
+> > +/* QCOM ICE HWKM reg vals */
+> > +#define QCOM_ICE_HWKM_BIST_DONE_V1           BIT(16)
+> > +#define QCOM_ICE_HWKM_BIST_DONE_V2           BIT(9)
+> > +#define QCOM_ICE_HWKM_BIST_DONE(ver)
+> QCOM_ICE_HWKM_BIST_DONE_V##ver
+> > +
+> > +#define QCOM_ICE_HWKM_CRYPTO_BIST_DONE_V1            BIT(14)
+> > +#define QCOM_ICE_HWKM_CRYPTO_BIST_DONE_V2            BIT(7)
+> > +#define QCOM_ICE_HWKM_CRYPTO_BIST_DONE(v)
+> QCOM_ICE_HWKM_CRYPTO_BIST_DONE_V##v
+> > +
+> > +#define QCOM_ICE_HWKM_BOOT_CMD_LIST1_DONE            BIT(2)
+> > +#define QCOM_ICE_HWKM_BOOT_CMD_LIST0_DONE            BIT(1)
+> > +#define QCOM_ICE_HWKM_KT_CLEAR_DONE                  BIT(0)
+> > +
+> > +#define QCOM_ICE_HWKM_BIST_VAL(v)
+> (QCOM_ICE_HWKM_BIST_DONE(v) |           \
+> > +                                     QCOM_ICE_HWKM_CRYPTO_BIST_DONE(v)=
+ |     \
+> > +                                     QCOM_ICE_HWKM_BOOT_CMD_LIST1_DONE=
+ |     \
+> > +                                     QCOM_ICE_HWKM_BOOT_CMD_LIST0_DONE=
+ |     \
+> > +                                     QCOM_ICE_HWKM_KT_CLEAR_DONE)
+> > +
+> > +#define QCOM_ICE_HWKM_V1_STANDARD_MODE_VAL   (BIT(0) | BIT(1)
+> | BIT(2))
+> > +#define QCOM_ICE_HWKM_V2_STANDARD_MODE_MASK
+> GENMASK(31, 1) #define
+> > +QCOM_ICE_HWKM_DISABLE_CRC_CHECKS_VAL (BIT(1) | BIT(2))
+> > +#define QCOM_ICE_HWKM_RSP_FIFO_CLEAR_VAL     BIT(3)
+> >
+> >  /* BIST ("built-in self-test") status flags */
+> >  #define QCOM_ICE_BIST_STATUS_MASK            GENMASK(31, 28)
+> > @@ -34,6 +68,9 @@
+> >  #define QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK  0x2  #define
+> > QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK  0x4
+> >
+> > +#define QCOM_ICE_HWKM_REG_OFFSET     0x8000
+> > +#define HWKM_OFFSET(reg)             ((reg) +
+> QCOM_ICE_HWKM_REG_OFFSET)
+> > +
+> >  #define qcom_ice_writel(engine, val, reg)    \
+> >       writel((val), (engine)->base + (reg))
+> >
+> > @@ -46,6 +83,9 @@ struct qcom_ice {
+> >       struct device_link *link;
+> >
+> >       struct clk *core_clk;
+> > +     u8 hwkm_version;
+> > +     bool use_hwkm;
+> > +     bool hwkm_init_complete;
+> >  };
+> >
+> >  static bool qcom_ice_check_supported(struct qcom_ice *ice) @@ -63,8
+> > +103,21 @@ static bool qcom_ice_check_supported(struct qcom_ice *ice)
+> >               return false;
+> >       }
+> >
+> > -     dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d\n",
+> > -              major, minor, step);
+> > +     if (major >=3D 4 || (major =3D=3D 3 && minor =3D=3D 2 && step >=
+=3D 1))
+> > +             ice->hwkm_version =3D 2;
+> > +     else if (major =3D=3D 3 && minor =3D=3D 2)
+> > +             ice->hwkm_version =3D 1;
+> > +     else
+> > +             ice->hwkm_version =3D 0;
+> > +
+> > +     if (ice->hwkm_version =3D=3D 0)
+> > +             ice->use_hwkm =3D false;
+> > +
+> > +     dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d,
+> HWKM v%d\n",
+> > +              major, minor, step, ice->hwkm_version);
+> > +
+> > +     if (!ice->use_hwkm)
+> > +             dev_info(dev, "QC ICE HWKM (Hardware Key Manager) not
+> > + used/supported");
+> >
+> >       /* If fuses are blown, ICE might not work in the standard way. */
+> >       regval =3D qcom_ice_readl(ice, QCOM_ICE_REG_FUSE_SETTING); @@
+> > -113,27 +166,106 @@ static void qcom_ice_optimization_enable(struct
+> qcom_ice *ice)
+> >   * fails, so we needn't do it in software too, and (c) properly testin=
+g
+> >   * storage encryption requires testing the full storage stack anyway,
+> >   * and not relying on hardware-level self-tests.
+> > + *
+> > + * However, we still care about if HWKM BIST failed (when supported)
+> > + as
+> > + * important functionality would fail later, so disable hwkm on failur=
+e.
+> >   */
+> >  static int qcom_ice_wait_bist_status(struct qcom_ice *ice)  {
+> >       u32 regval;
+> > +     u32 bist_done_val;
+> >       int err;
+> >
+> >       err =3D readl_poll_timeout(ice->base + QCOM_ICE_REG_BIST_STATUS,
+> >                                regval, !(regval & QCOM_ICE_BIST_STATUS_=
+MASK),
+> >                                50, 5000);
+> > -     if (err)
+> > +     if (err) {
+> >               dev_err(ice->dev, "Timed out waiting for ICE self-test
+> > to complete\n");
+> > +             return err;
+> > +     }
+> >
+> > +     if (ice->use_hwkm) {
+> > +             bist_done_val =3D ice->hwkm_version =3D=3D 1 ?
+> > +                             QCOM_ICE_HWKM_BIST_VAL(1) :
+> > +                             QCOM_ICE_HWKM_BIST_VAL(2);
+> > +             if (qcom_ice_readl(ice,
+> > +
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_STATUS)) !=3D
+> > +                                bist_done_val) {
+> > +                     dev_err(ice->dev, "HWKM BIST error\n");
+> > +                     ice->use_hwkm =3D false;
+> > +                     err =3D -ENODEV;
+> > +             }
+> > +     }
+> >       return err;
+> >  }
+> >
+> > +static void qcom_ice_enable_standard_mode(struct qcom_ice *ice) {
+> > +     u32 val =3D 0;
+> > +
+> > +     /*
+> > +      * When ICE is in standard (hwkm) mode, it supports HW wrapped
+> > +      * keys, and when it is in legacy mode, it only supports standard
+> > +      * (non HW wrapped) keys.
+>=20
+> I can't say this is very logical.
+>=20
+> standard mode =3D> HW wrapped keys
+> legacy mode =3D> standard keys
+>=20
+> Consider changing the terms.
+>=20
 
-> 
-> option 1:
-> static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-> {
->       ...
->       if (sdhci_uhs2_needs_reset(host, mrq)) {
->             ...
->             if (host->pending_reset)
->                   sdhci_uhs2_reset_cmd_data(host->mmc);
->             else
->                   sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET);
->             host->pending_reset = false;
->       }
->       ...
-> }
-> 
-> option 2:
-> static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-> {
->       ...
->       if (sdhci_uhs2_needs_reset(host, mrq)) {
->             ...
->             sdhci_uhs2_reset_cmd_data(host->mmc);
->             host->pending_reset = false;
->       }
->       ...
-> }
-> 
-> option 3:
-> static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-> {
->       ...
->       if (sdhci_uhs2_needs_reset(host, mrq)) {
->             ...
->             sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET);
->             host->pending_reset = false;
->       }
->       ...
-> }
-> 
-> Thanks, Victor Shih
-> 
->>>
->>> I have another question. the sdhci_uhs2_request_done() belongs to the patch#18.
->>> Can the above content be modified directly in the patch#18?
->>> Or does it need to be separated into another patch?
->>
->> Please update the existing patches.
->>
->>>
->>> Thanks, Victor Shih
->>>
->>>>>
->>>>> Thanks, Victor Shih
->>>>>
->>>>>>> +
->>>>>>> +     if (mrq->data) {
->>>>>>> +             if (mrq->data->error && mmc_card_uhs2(mmc)) {
->>>>>>> +                     if (mrq->cmd) {
->>>>>>> +                             switch (mrq->cmd->error) {
->>>>>>> +                             case ETIMEDOUT:
->>>>>>> +                             case EILSEQ:
->>>>>>> +                             case EIO:
->>>>>>> +                                     sd_uhs2_abort_trans(mmc);
->>>>>>> +                                     sd_uhs2_abort_status_read(mmc);
->>>>>>
->>>>>> What is the purpose of sd_uhs2_abort_status_read() here?
->>>>>> It is not obvious it does anything.
->>>>>>
->>>>>
->>>>> Hi, Adrian
->>>>>
->>>>>      sd_uhs2_abort_status_read() seems to only have read status,
->>>>>      I will drop this in the v17 version.
->>>>>
->>>>> Thanks, Victor Shih
->>>>>
->>>>>>> +                                     break;
->>>>>>> +                             default:
->>>>>>> +                                     break;
->>>>>>> +                             }
->>>>>>> +                     }
->>>>>>> +             }
->>>>>>> +     } else {
->>>>>>> +             if (mrq->cmd) {
->>>>>>> +                     switch (mrq->cmd->error) {
->>>>>>> +                     case ETIMEDOUT:
->>>>>>> +                             sd_uhs2_abort_trans(mmc);
->>>>>>> +                             break;
->>>>>>> +                     }
->>>>>>> +             }
->>>>>>> +     }
->>>>>>> +}
->>>>>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>>>>>> index fc9520b3bfa4..c914a58f7e1e 100644
->>>>>>> --- a/include/linux/mmc/host.h
->>>>>>> +++ b/include/linux/mmc/host.h
->>>>>>> @@ -271,6 +271,12 @@ struct mmc_host_ops {
->>>>>>>        * negative errno in case of a failure or zero for success.
->>>>>>>        */
->>>>>>>       int     (*uhs2_control)(struct mmc_host *host, enum sd_uhs2_operation op);
->>>>>>> +
->>>>>>> +     /*
->>>>>>> +      * The uhs2_reset_cmd_data callback is used to excute reset
->>>>>>> +      * when a auto command error occurs.
->>>>>>> +      */
->>>>>>> +     void    (*uhs2_reset_cmd_data)(struct mmc_host *host);
->>>>>>>  };
->>>>>>>
->>>>>>>  struct mmc_cqe_ops {
->>>>>>
->>>>
->>
+Ack, will make this clearer
 
+> > +      *
+> > +      * Put ICE in standard mode, ICE defaults to legacy mode.
+> > +      * Legacy mode - ICE HWKM slave not supported.
+> > +      * Standard mode - ICE HWKM slave supported.
+>=20
+> s/slave/some other term/
+>=20
+Ack - will address this.
+
+> Is it possible to use both kind of keys when working on standard mode?
+> If not, it should be the user who selects what type of keys to be used.
+> Enforcing this via DT is not a way to go.
+>=20
+
+Unfortunately, that support is not there yet. When you say user, do you mea=
+n to have it as a filesystem
+mount option?
+
+The way the UFS/EMMC crypto layer is designed currently is that, this infor=
+mation
+is needed when the modules are loaded.
+https://lore.kernel.org/all/20231104211259.17448-2-ebiggers@kernel.org/#Z31=
+drivers:ufs:core:ufshcd-crypto.c
+
+I am thinking of a way now to do this with DT, but without having a new ven=
+dor property.
+Is it acceptable to use the addressable range as the deciding factor? Say u=
+se legacy mode of ICE
+when the addressable size is 0x8000 and use HWKM mode of ICE when the addre=
+ssable size is
+0x10000.
+
+> > +      *
+> > +      * Depending on the version of HWKM, it is controlled by differen=
+t
+> > +      * registers in ICE.
+> > +      */
+> > +     if (ice->hwkm_version >=3D 2) {
+> > +             val =3D qcom_ice_readl(ice, QCOM_ICE_REG_CONTROL);
+> > +             val =3D val & QCOM_ICE_HWKM_V2_STANDARD_MODE_MASK;
+> > +             qcom_ice_writel(ice, val, QCOM_ICE_REG_CONTROL);
+> > +     } else {
+> > +             qcom_ice_writel(ice,
+> QCOM_ICE_HWKM_V1_STANDARD_MODE_VAL,
+> > +                             HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_CTL))=
+;
+> > +     }
+> > +}
+> > +
+> > +static void qcom_ice_hwkm_init(struct qcom_ice *ice) {
+> > +     /* Disable CRC checks. This HWKM feature is not used. */
+> > +     qcom_ice_writel(ice, QCOM_ICE_HWKM_DISABLE_CRC_CHECKS_VAL,
+> > +                     HWKM_OFFSET(QCOM_ICE_REG_HWKM_TZ_KM_CTL));
+> > +
+> > +     /*
+> > +      * Give register bank of the HWKM slave access to read and modify
+> > +      * the keyslots in ICE HWKM slave. Without this, trustzone will n=
+ot
+> > +      * be able to program keys into ICE.
+> > +      */
+> > +     qcom_ice_writel(ice, GENMASK(31, 0),
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_0));
+> > +     qcom_ice_writel(ice, GENMASK(31, 0),
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_1));
+> > +     qcom_ice_writel(ice, GENMASK(31, 0),
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_2));
+> > +     qcom_ice_writel(ice, GENMASK(31, 0),
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_3));
+> > +     qcom_ice_writel(ice, GENMASK(31, 0),
+> > + HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BBAC_4));
+> > +
+> > +     /* Clear HWKM response FIFO before doing anything */
+> > +     qcom_ice_writel(ice, QCOM_ICE_HWKM_RSP_FIFO_CLEAR_VAL,
+> > +
+> HWKM_OFFSET(QCOM_ICE_REG_HWKM_BANK0_BANKN_IRQ_STATUS));
+> > +     ice->hwkm_init_complete =3D true;
+> > +}
+> > +
+> >  int qcom_ice_enable(struct qcom_ice *ice)  {
+> > +     int err;
+> > +
+> >       qcom_ice_low_power_mode_enable(ice);
+> >       qcom_ice_optimization_enable(ice);
+> >
+> > -     return qcom_ice_wait_bist_status(ice);
+> > +     if (ice->use_hwkm)
+> > +             qcom_ice_enable_standard_mode(ice);
+> > +
+> > +     err =3D qcom_ice_wait_bist_status(ice);
+> > +     if (err)
+> > +             return err;
+> > +
+> > +     if (ice->use_hwkm)
+> > +             qcom_ice_hwkm_init(ice);
+> > +
+> > +     return err;
+> >  }
+> >  EXPORT_SYMBOL_GPL(qcom_ice_enable);
+> >
+> > @@ -149,6 +281,10 @@ int qcom_ice_resume(struct qcom_ice *ice)
+> >               return err;
+> >       }
+> >
+> > +     if (ice->use_hwkm) {
+> > +             qcom_ice_enable_standard_mode(ice);
+> > +             qcom_ice_hwkm_init(ice);
+> > +     }
+> >       return qcom_ice_wait_bist_status(ice);  }
+> > EXPORT_SYMBOL_GPL(qcom_ice_resume);
+> > @@ -156,6 +292,7 @@ EXPORT_SYMBOL_GPL(qcom_ice_resume);
+> >  int qcom_ice_suspend(struct qcom_ice *ice)  {
+> >       clk_disable_unprepare(ice->core_clk);
+> > +     ice->hwkm_init_complete =3D false;
+> >
+> >       return 0;
+> >  }
+> > @@ -205,6 +342,12 @@ int qcom_ice_evict_key(struct qcom_ice *ice, int
+> > slot)  }  EXPORT_SYMBOL_GPL(qcom_ice_evict_key);
+> >
+>=20
+> Documentation?
+>=20
+> > +bool qcom_ice_hwkm_supported(struct qcom_ice *ice)
+> > +{
+> > +     return ice->use_hwkm;
+>=20
+> I see that use_hwkm can change during runtime. Will it have an impact on
+> a driver that calls this first?
+>=20
+> > +}
+> > +EXPORT_SYMBOL_GPL(qcom_ice_hwkm_supported);
+> > +
+> >  static struct qcom_ice *qcom_ice_create(struct device *dev,
+> >                                       void __iomem *base)
+> >  {
+> > @@ -239,6 +382,8 @@ static struct qcom_ice *qcom_ice_create(struct
+> device *dev,
+> >               engine->core_clk =3D devm_clk_get_enabled(dev, NULL);
+> >       if (IS_ERR(engine->core_clk))
+> >               return ERR_CAST(engine->core_clk);
+> > +     engine->use_hwkm =3D of_property_read_bool(dev->of_node,
+> > +                                              "qcom,ice-use-hwkm");
+>=20
+> DT bindings should come before driver changes.
+>=20
+> >
+> >       if (!qcom_ice_check_supported(engine))
+> >               return ERR_PTR(-EOPNOTSUPP);
+> > diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> > index 9dd835dba2a7..1f52e82e3e1c 100644
+> > --- a/include/soc/qcom/ice.h
+> > +++ b/include/soc/qcom/ice.h
+> > @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+> >                        const struct blk_crypto_key *bkey,
+> >                        u8 data_unit_size, int slot);
+> >  int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+> > +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
+> >  struct qcom_ice *of_qcom_ice_get(struct device *dev);
+> >  #endif /* __QCOM_ICE_H__ */
+> > --
+> > 2.43.0
+> >
+>=20
+> --
+> With best wishes
+> Dmitry
+
+Regards,
+Gaurav
