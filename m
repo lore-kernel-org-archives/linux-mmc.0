@@ -1,172 +1,123 @@
-Received: from mail-ot1-f53.google.com (mail-ot1-f53.google.com [209.85.210.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from APC01-PSA-obe.outbound.protection.outlook.com (mail-psaapc01olkn2042.outbound.protection.outlook.com [40.92.52.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C22281BF38;
-	Tue, 18 Jun 2024 08:39:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.53
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718699972; cv=none; b=VZOanuChLmHO7HWKZvdK+sAY3rCrbTMg1I6b4ukTt5cwzemaFVi6Fjb4r9w+EXkzSU5+BLKzMJj67MMV+lK7MDrgWwNfIHg6rSMkQESDGHgYiTuSN4D53R9RKpp6hNz82lm7NA69qKPSo4MxrKJiePK5qU8kjYpJMmQTpqJ/qMc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718699972; c=relaxed/simple;
-	bh=WYq2OHBK0AdgEaVT9jkh0Es0lUwnAC4FuwB4yD1Lrnk=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=j/nsrS7OT60kuBMH/OB8rHJTtvFKm8Bowq31lX1qzN4f+dWR/O8819HVBqgSRveU3DZypktqfmuwvLr3ImFdFgO7ykK7QE7ERjWnxtO6m50zz6dpQ6FFKlblr6ZdVDpb8ppiq+y20Nehpebo+awSwXDkVbqldYkKsWI1PqjIL+Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PPJk9Yyx; arc=none smtp.client-ip=209.85.210.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A0C171C0DCA;
+	Tue, 18 Jun 2024 09:13:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.52.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1718702016; cv=fail; b=DUfOD5Xls2dZeh+7/SHtDshoRcHLn7ID1PHlqKrj52rS8fk4a1wDzx1Yndgz6iu1dIS6r0xHx8XgEs+0XPdnq+SkmQa1IBhNckS7IQriUYjsyHbrpxzfnfwNOk3TVUdn++hQY0fEtSB6D5+zTeEvm3r8SXstwG/djCaIBUKDNe4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1718702016; c=relaxed/simple;
+	bh=TWLNgfZUZURetCZ2suMVo0RyVd+BZx4upR+vPimkY18=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=K74BLOX+cZwjsrMu3WEjU+WrXWvELdGn5NuPqsrdKo8A5midKFflY+Uybqfi0RVzHdinqvRWGszWFrf/Wn42YTHm3EYz2zmclH6H8xLfOfHnD2elpu8qkhAG7Y6rX9WOfylXZBqIGfsSwsOsHkdMVRtn1fvx0Ryl4oQWJ1Nvlhs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=cskm53nT; arc=fail smtp.client-ip=40.92.52.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PPJk9Yyx"
-Received: by mail-ot1-f53.google.com with SMTP id 46e09a7af769-6f986b92acaso2973853a34.2;
-        Tue, 18 Jun 2024 01:39:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718699970; x=1719304770; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=fcoMCm+enNSGbUuJXoL2d96+fYWSHPTojOmLTIxiMc4=;
-        b=PPJk9YyxdrgzyAPjoaudZS4nn30J56Yip3AZP7FPaPpJ3IZGpqxfzi5aWCNK/byuQI
-         kaBzBxTH/TIyLtQiAnVgc8r0LTkAaGi6a70jt6anabW6AVmnY/Z7+KxQQeCrL5nlSx7B
-         IwwQB9m8XNqX7zBT4O1miL/yToYXwFMtX3AKzq5mS1uS2sxZV/j0u7v4bNVtNOb5vwPW
-         5O2pW7AnYaUpH358eO9YfZbJB4bYeJQoWYU9Bu4gBICFglkxnNwh9HDy0S5OdfXj7DOR
-         qEIRsFQfluiAN64IAoKpjv/iebNVHbobvZ01k93DqaGboB92lzPwN6PuuAnHQMIMI890
-         uOBg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718699970; x=1719304770;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=fcoMCm+enNSGbUuJXoL2d96+fYWSHPTojOmLTIxiMc4=;
-        b=qtqxz4rVEZVvCa01wWRVFVbNtvo8tLJh3wbC/Itu0cZIvB2IXXHSbWt5h4M3zyWxqz
-         XOfncTvQhWVwEJq0sEPly8ZCR2byY0eTPkQAhVSaD9YXG4hwXE9/nzUNaLoXDIySjYgX
-         zoaOqFyNoAcIXWPrs/XcdG+6GFyctTBzzrpoTdZ5gnh5LvGnhCIGY0UqlU9Qym631wf2
-         iknDETBsIDzXqaQ9Oa44G1hO4niefIl3cjXgUC6PHGhyMgx/RWPCQW9bu2+5GM/vSS1p
-         HwGXm7/NcScNhjXq3uZWTvhqICsqt9wmcX6IEZhbeJLaeLjHY7iyAvVqr66qgSWnrzt7
-         VbUw==
-X-Forwarded-Encrypted: i=1; AJvYcCWNnkasyr37sjBu4Z9gzfoKOvS8TLzxCJJihv2vkhl2aOpFGzJSIr+5wCRWb/ZRqwCMXhz9KMw21U1IJPdDLshtQKvI3gm7+veLY9zEIB0mGxDom2CNFyTKVP9i3JbIuWCb0SlJxajZByhWga6MNJZtUuR2RRBVIwiAh/yEVD/kM7EhuA==
-X-Gm-Message-State: AOJu0YxG8mo6WPIYVxL66ivhTG2rlA7VuCBL/hx8+F4VLjeoaKUQ21KN
-	EqPO8MQp8Rc768NsL0Kco1cChdbuGhUw45492HYYBQsARU5rewC6
-X-Google-Smtp-Source: AGHT+IFcy1nbT2issyZB1cEgm/lfGKAVteBPOb6Fg8eo1DnNX6U9jgGHQwHqqALGVpgz4hatJydTPA==
-X-Received: by 2002:a05:6830:43a9:b0:6f9:90ba:6646 with SMTP id 46e09a7af769-6fb939f328bmr15303711a34.26.1718699969712;
-        Tue, 18 Jun 2024 01:39:29 -0700 (PDT)
-Received: from localhost.localdomain ([122.8.183.87])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-6fb5b75563csm1770804a34.66.2024.06.18.01.39.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jun 2024 01:39:28 -0700 (PDT)
-From: Chen Wang <unicornxw@gmail.com>
-To: adrian.hunter@intel.com,
-	aou@eecs.berkeley.edu,
-	conor+dt@kernel.org,
-	guoren@kernel.org,
-	inochiama@outlook.com,
-	jszhang@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org,
-	palmer@dabbelt.com,
-	paul.walmsley@sifive.com,
-	robh@kernel.org,
-	ulf.hansson@linaro.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-riscv@lists.infradead.org,
-	chao.wei@sophgo.com,
-	haijiao.liu@sophgo.com,
-	xiaoguang.xing@sophgo.com,
-	tingzhu.wang@sophgo.com
-Cc: Chen Wang <unicorn_wang@outlook.com>
-Subject: [PATCH v4 4/4] riscv: dts: add mmc controllers for Sophgo SG2042 SoC
-Date: Tue, 18 Jun 2024 16:39:20 +0800
-Message-Id: <e2d3b19e06fa29116b8032addc70c8dc1ec3866e.1718697954.git.unicorn_wang@outlook.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1718697954.git.unicorn_wang@outlook.com>
-References: <cover.1718697954.git.unicorn_wang@outlook.com>
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="cskm53nT"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=OIVa0Z2tNplPVqIgJWCCol0npMeSkhquBHRlWCmIKG+Xyvx9UUSwldELvw+WJvUGuSGc3SBMT0XDO3jBFkAGSfEsz2ld1N0SVb4L771MWGivH1kDHjXQZIRAJKyjjBKVNwi9zXuDiYzZaGjS8I3rpZiN0fyYgf0OgTvTM8ybWXOId7OQ0+iYOqesF+2HRHkiQLdM9ZsUqndIpP0uruY+616liuzxc7D2MwJIMPGGJ/CKAAHgT8f3IXntz+EI/waIr+nDS5i88s4W2j85vXB1m16g7E5Rikft+maeJKUEqEU6fzwK/uhnIohtLEEVPUqksEoAjhpRgbr/ajnSWoWozQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Q3q/xC8quHmijQsE2iVF3t0ohwpu0uSfV91YVOmdtM4=;
+ b=NYlf7MdH+agcJkaKYq+oQcQOeJ4hoxQ227sPoBN4qzMU4KpuSESoJchlsxAzsOs8MVi02/a5PNAfQCneFPhhMAYonSVy7RzOKVodSenxCKgoBV1NUfZ5fmozM61jIhrWaC/0PXMi9mA/fa40daB1PPuiLgOOrg90joTWi2eWfgOX861svt7To8IkW7wgfWqSRz/lCNcRvbv/z1RyKHu9mScJeTfhhaf2NfJ1UWkyJcXr4ZR0J5YcOz46IM8H6RFHVXoXf2u7Z7tx4kR9zG5itR0i8w2TGOBRkYE/21y/GxlD79YkOCCI4mi6pRBpT63u56CNBhQKMAhszw+36QFWMQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Q3q/xC8quHmijQsE2iVF3t0ohwpu0uSfV91YVOmdtM4=;
+ b=cskm53nT0oF8jICL6KKZDNzttmba/hIHaWVzlHzPjpyj6lCYfD4Bgnu4r3bKVn0EM6rXZq5cUZqxs+O0YqJK+ZxqhD90+yuyC7AOv7OeGolksOmQUgFI9oLNWWvCMKXlsJee0Jw9JaTy/mb2RC6agkcJiUsVa9B3ddpABiT9U7ReJJPCvlHNxgHAgNUERVKjkon2jCvdLNdEjbo4StYZiSXyDvz32KOkMt8G88dzOjnvB5SD2fxfu0zEZdqZ+eqBbo9RKQjzp9Ggr0/QX4dWZjKThfE0jO0fBEyILCoUPqtSn2HWtkE7oqJROPEn/jHrrmtiTOuPOuvjUEyWMEPgMg==
+Received: from SEYPR01MB4221.apcprd01.prod.exchangelabs.com
+ (2603:1096:101:56::12) by SEYPR01MB4976.apcprd01.prod.exchangelabs.com
+ (2603:1096:101:b3::12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7677.31; Tue, 18 Jun
+ 2024 09:13:31 +0000
+Received: from SEYPR01MB4221.apcprd01.prod.exchangelabs.com
+ ([fe80::b674:8f70:6e29:3756]) by SEYPR01MB4221.apcprd01.prod.exchangelabs.com
+ ([fe80::b674:8f70:6e29:3756%4]) with mapi id 15.20.7677.030; Tue, 18 Jun 2024
+ 09:13:31 +0000
+Date: Tue, 18 Jun 2024 09:13:17 +0000
+From: Haylen Chu <heylenay@outlook.com>
+To: Jisheng Zhang <jszhang@kernel.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: Use inverted-wp quirk for CV18xx
+ and SG200x SoCs
+Message-ID:
+ <TYZPR01MB4211B26AEA487D9FB4D0731ED7CE2@TYZPR01MB4211.apcprd01.prod.exchangelabs.com>
+References: <SEYPR01MB42219753E4388009470D958DD7FC2@SEYPR01MB4221.apcprd01.prod.exchangelabs.com>
+ <Zmrt-dcPR_ZXlYH-@xhacker>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Zmrt-dcPR_ZXlYH-@xhacker>
+X-TMN: [eevGCR/Bd4NaFashmkaLanuDecTAj2Ee]
+X-ClientProxiedBy: SI2PR02CA0027.apcprd02.prod.outlook.com
+ (2603:1096:4:195::14) To TYZPR01MB4211.apcprd01.prod.exchangelabs.com
+ (2603:1096:400:1c4::13)
+X-Microsoft-Original-Message-ID: <ZnFPrWJ-K7T5UCMC@ketchup>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SEYPR01MB4221:EE_|SEYPR01MB4976:EE_
+X-MS-Office365-Filtering-Correlation-Id: dc2a687f-b064-4c39-3671-08dc8f76ea82
+X-Microsoft-Antispam: BCL:0;ARA:14566002|461199025|3412199022|440099025;
+X-Microsoft-Antispam-Message-Info:
+	XQrAp1hoZPt/ozPkB0w5/em+TZ4LZaT3ev4jDhwK/AL3n1NZq1MHWneJDgfDwPEHsk86vAT9pRolE0rCKF3JxD7sQFYmMHTVMxHJ5PzZxMpAWVyEShwrivio0uloiq4xqzuCL6qg2/B78N9/v1tS2+rNv9hSSx7tRAT3Fh/WOWb+8v629dZDKfsaFr5gaUEX+OUeYV4zmaaxDjdgjMKN5FrcVuA8TUvvazYyjSVOA5c26cu3LBXQLAaDrz4YLxNvThskUR9XtgQehKZmwwlBTlsfkbqzq3Tee46/m8K263IEvcb9VQgFux9tiuLp/BLfrSH+sq5r8j4SEnNAannvr63KuQIQC7CydPU7QxyCd8vqOCWRbEkoa8Y2XMBUGOLqqj44f+MSFlOp43Tmr9BA9SsEq8VzPIqS+rUohCoLHrqV0J+uylaN+L9qiSSJMwjkla4jGhkov/9ZPqLgSxYzO3JxVOvbZ6Q4RwRHirVZGbrvvhS1nB8T0R5D2AKHgT0mabsI41nFyTOlLojjkycjEQ9JzMM4VbER6n5xwHtH4ilf/AfUYIMR0Lddd2+g8svZ
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?81x+KtTHBWVONZNmcpdamWiQ5iSJxG4JXGwrBeZpRvlekmBNx6sUTaNF9YmZ?=
+ =?us-ascii?Q?RUtXQ/1TBu43UbkKxRo47MlpFEUk+nJhaKd6wi31sHDAgD6KxSfLyDtDqS/h?=
+ =?us-ascii?Q?jUu16pZthgepg1NyCOniN95w5ObZhgfZX8CWC0GOMDC7b/+hLNfigSoTJuz2?=
+ =?us-ascii?Q?9xyZmRWb/dxgfPI06ap10rI24VcKExTDrIf3t1/A3pEJsMucLXQ3KzUBzX4q?=
+ =?us-ascii?Q?gm0XwOMIS9nmlbh5oSyXNk4An3s0Fs+mWnEHqF8au40CtZbwGGS4Hkk3wmfQ?=
+ =?us-ascii?Q?K7F+E7THLmDUk9ml24QTD2djRAP/WCp1U1J/9zjimo7QBNynfH2DPdW63PQk?=
+ =?us-ascii?Q?hQmaPBwWOxkjy0fNaobZa1ABnhN/0i/dW2DcyHElYcyJbCF56qM/U7t+HERx?=
+ =?us-ascii?Q?PjlKjiFKFoO9u7hET8c2DZi9jxhlT1LbU0RDaCIOpTbwsU7i1Za5l+qP1D9q?=
+ =?us-ascii?Q?tZhYgfUm/9B6kCJaUJReszHTWMQCHTkVktwPQprmsoWy9sMnmYneityGiH8O?=
+ =?us-ascii?Q?8drbNhCE6BLj8Iry6scGwoVWEZdiNgH76BrzZ+kvuU1Mv8w7OO1QmgIwX3Q7?=
+ =?us-ascii?Q?F0t4nv2iSTG4zqda9MoiVtiMScR1l3EdxdW4Q4ytWPGY0dwwfUmpdmmeCIyV?=
+ =?us-ascii?Q?9Tu8avlTDXWD/ANX2IVXgehKQ44Opeg6V6S6ySpVsrC8gVsDZeUkMoT7XwnS?=
+ =?us-ascii?Q?1bRoPs3KKYWD19RSIuXJDcRZqay8TDb63p4bVfk7ArleHF4Loo8nDtS/5GBf?=
+ =?us-ascii?Q?T/uqOSUCODTBs0rQcXon2M6lR4WzpYpr8uT261TzHGPNEpSUIG1ZRXK7VaRP?=
+ =?us-ascii?Q?VL0dB3IBbvGQQEfY2uOW5PxDdDB8Oi1qkbO8Pu9sDWafdPnGJtGX6A1Klg0O?=
+ =?us-ascii?Q?3TFaSiIQuFUcS/yt0+l7LR4Vur/OFILicnlsL/L7eXEjszmsFlPDSCOGYf7c?=
+ =?us-ascii?Q?uXzGVr4KZVvKsQDYUS1q2RpPz66fkep8y3wcCYtb4ZIKmUAZx0tyYLXIiKdP?=
+ =?us-ascii?Q?eBIKgBn9nB2facxR8F/LjeipqkjrKdfFEyKT6CFTL3mDzKYNeH11PXbSfDhU?=
+ =?us-ascii?Q?VrlwkWhQt7F2vty8PHSsAD866F0hVrdj9fIqHa/DB0lmZzMW5OBw+D512pMT?=
+ =?us-ascii?Q?j8GGoy64BF7LB6tOrgUcoxvqXEDc7HVujsxLO4panGroi2As9vE6an8Lhl01?=
+ =?us-ascii?Q?+3VpReAbdZZytxPhrYH6cU9tkmbxOEBX8HCtXRsuwbjG11Rj89Z2OYGIj10?=
+ =?us-ascii?Q?=3D?=
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc2a687f-b064-4c39-3671-08dc8f76ea82
+X-MS-Exchange-CrossTenant-AuthSource: TYZPR01MB4211.apcprd01.prod.exchangelabs.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jun 2024 09:13:31.2600
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
+	00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SEYPR01MB4976
 
-From: Chen Wang <unicorn_wang@outlook.com>
+On Thu, Jun 13, 2024 at 09:03:20PM +0800, Jisheng Zhang wrote:
+> On Fri, May 31, 2024 at 02:13:47PM +0000, Haylen Chu wrote:
+> > MMC controller integrated in Sophgo CV18xx and SG200x SoCs has an
+> > inverted write-protect flag, causing SDCards misdetected as read-only.
+> > So set SDHCI_QURIK_INVERTED_WRITE_PROTECT to make write protection work
+> > correctly.
+> 
+> No, I would rather set cd-inverted property in dts.
 
-SG2042 has two MMC controller, one for emmc, another for sd-card.
+Okay, I will fix it it in dts instead.
 
-Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
----
- .../boot/dts/sophgo/sg2042-milkv-pioneer.dts  | 17 ++++++++++
- arch/riscv/boot/dts/sophgo/sg2042.dtsi        | 32 +++++++++++++++++++
- 2 files changed, 49 insertions(+)
-
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-index 49b4b9c2c101..164db23586e0 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-+++ b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-@@ -14,6 +14,23 @@ chosen {
- 	};
- };
- 
-+&emmc {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-sd;
-+	non-removable;
-+	wp-inverted;
-+	status = "okay";
-+};
-+
-+&sd {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-mmc;
-+	wp-inverted;
-+	status = "okay";
-+};
-+
- &uart0 {
- 	status = "okay";
- };
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042.dtsi b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-index 81fda312f988..bfdfd6f32912 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-+++ b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-@@ -346,5 +346,37 @@ uart0: serial@7040000000 {
- 			resets = <&rstgen RST_UART0>;
- 			status = "disabled";
- 		};
-+
-+		emmc: mmc@704002a000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002A000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <134 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks =
-+				<&clkgen GATE_CLK_AXI_EMMC>,
-+				<&clkgen GATE_CLK_100K_EMMC>,
-+				<&clkgen GATE_CLK_EMMC_100M>;
-+			clock-names =
-+				"core",
-+				"timer",
-+				"card";
-+			status = "disabled";
-+		};
-+
-+		sd: mmc@704002b000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002B000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <136 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks =
-+				<&clkgen GATE_CLK_AXI_SD>,
-+				<&clkgen GATE_CLK_100K_SD>,
-+				<&clkgen GATE_CLK_SD_100M>;
-+			clock-names =
-+				"core",
-+				"timer",
-+				"card";
-+			status = "disabled";
-+		};
- 	};
- };
--- 
-2.25.1
-
+Thanks,
+Haylen Chu
