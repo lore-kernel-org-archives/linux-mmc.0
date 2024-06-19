@@ -1,198 +1,97 @@
-Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com [209.85.208.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7EC574C1B
-	for <linux-mmc@vger.kernel.org>; Wed, 19 Jun 2024 07:12:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 263D217583;
+	Wed, 19 Jun 2024 07:16:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718781149; cv=none; b=N42KjH3wdYHDx7SRU5Fe2ChDR/ceQQptw5zpj2fyGQFRLv7Vp0XvVKXxMPDFQ+JamBkgwLAbM6aSmruxQJOT1JutwK1T2sZ+7wvKPayk/I0kNTyJhzb25cHqIV2oYATlCIiQnz5mLAs2N+nwI9rIbmmVFZaUrjforVU5ZrrXcL0=
+	t=1718781385; cv=none; b=g+xiCiYF+Na62VqTIHIPHZIWj92B0Zupy7M+jGzD0Ufzd2IXRvihLd8ozypTcMay6XwCzpGKaoI+R34F0xKX7/teRvR2kjQdqIEd7AYOXZvaeTjcHnk5xCzSrmi8Fa/AfxLWsIdFH5xtiXRIwyF7mpuRN/PnmezOg9x53dx9Gtg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718781149; c=relaxed/simple;
-	bh=8W4LbrWm1kYw0GsZppHHivzVKYF4UoUJF3V4pnFaxRU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kB3whk3q3J9ppPO5trEoCTVq2Kag75nRP27ncU9i1VNs2yFSWlDryYQgZLTJ5f/6J5s6fWPZIkgEVo7ZPoxFNDyhNHw6o/gNiXepY0V22985PiFGWs5KVlPPo71mECZEwaXDcckFdO8+bYDn+oRFj9VhVWfwOaAqNpeqPrANQpQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=A2n5ZnzA; arc=none smtp.client-ip=209.85.208.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1718781385; c=relaxed/simple;
+	bh=1SeX6DYpTe78Qp9u9466EckMez+yd1/EEOQ8w2vo0i8=;
+	h=Date:Content-Type:MIME-Version:From:To:Cc:In-Reply-To:References:
+	 Message-Id:Subject; b=o5TXI8A5AkHfiN+YOLvYoj5JUzYShEmSDc2kYk3lRM7GTyUAPKkmq5yjtHYn3039Lq0lWsEs8DHP4CBOySa+pwHp+F1C71K7wBkUTatecoYYcTD/ZbbL5PhvrPmN12L9ZDKOSohbgZ6I4dJzFVFQEI/LjpUwSe1y9212EbMqyHI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uJm1iY6C; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="A2n5ZnzA"
-Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-2ebf961e504so67887041fa.2
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Jun 2024 00:12:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718781145; x=1719385945; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=rNkt80zZ5bRZ67g3R3x+4enPR3S8kwJm33iEuDlFGnk=;
-        b=A2n5ZnzARZlvW3uQmbTxuwOUg9R0C0RirylD22Hs3E3xYZ4u3ikwbQFexZBwqfHpHH
-         X4QLBA4kDok5/hzmmA9joMgQMp1VMkF6QwHMIJtWdrjy38JQvFC+PDwdeUMV6mcCacKz
-         LEa156GkvRRtnUA+eVurd/wgiSY2M627TZinJxIovYj/d1rU67pkarHEC1nUJYQ8IndW
-         SuNmkaM/JX/1Or1FihQ5XQ+H+8Z8w3d4NFsnoHbkn3Uf4mzg9Q1zmIrP1jwI3+mJ1wPP
-         hbOdKgDzRH9KmNg7PBTs5MpL1HvAfoJFggZmaXMOAlm87FMIMqCJb5KbTT2qZGBuMamx
-         h3Jg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718781145; x=1719385945;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=rNkt80zZ5bRZ67g3R3x+4enPR3S8kwJm33iEuDlFGnk=;
-        b=lXyxQSteevDvpD/V1+ygP6k6cpOdfEDKzVpIIByWwcVa8AKN4JZQsQIfK4/J1b/nbm
-         iINaAon5CaAMAzDPmZ9USVBnAn/oiIOrMUHV2ERjkn7oJYCRNK732O3Qx/xXDK4Kv2XV
-         Mpr+U55HlqSEHBoJqX3WL/xYAHLH1Ao/4p8VfVrfh3rQv1uItLPVkJWLWx8WcK8uZjUO
-         YA+b9bd57wv/v7m7XmOkE8lX38yWJBuieG7wq8Yf7J73cBQrKbxA1s9QrRiS0JHvpi0B
-         6JN8R+kWCBOSoinBU1liCAtEifbA+Ewsb3tnr1wm9gWIWbcU4ti/RmeZs1nHaocKg97i
-         h4cA==
-X-Forwarded-Encrypted: i=1; AJvYcCWKkiKJawPozVpvT/moAY2c90I5Iv+E3L5mL3zYPU/J7dZNDSyDfc/FVj0fBussWOJBYQym0cTs+hx1GoVsBFgXtBgEs4pIIU5W
-X-Gm-Message-State: AOJu0YxYqwQ72ExAJzAja5CzCzLWCvpUXk4z7iQV8J8ubgT5n0EF5Aef
-	hyB5jnodapufY6mPZiWABYWrsO4toH/mPLQ6j1FFoiIo/wYgtwZ2hmNjy5EeAH4=
-X-Google-Smtp-Source: AGHT+IGldqIFYgyHuslG1CMTYyN0h1G1iCdYZZcpRlsRiqTgyMA+KWZnaXAKWv96mTUsoZGXaQFBlg==
-X-Received: by 2002:a2e:9153:0:b0:2ec:17a9:ce95 with SMTP id 38308e7fff4ca-2ec3ce9a91cmr13378821fa.5.1718781144791;
-        Wed, 19 Jun 2024 00:12:24 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:982:cbb0:cd29:2431:ff2f:880b? ([2a01:e0a:982:cbb0:cd29:2431:ff2f:880b])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3607509c9absm16285621f8f.46.2024.06.19.00.12.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 19 Jun 2024 00:12:24 -0700 (PDT)
-Message-ID: <22121526-c6c7-4667-af82-76725ad72888@linaro.org>
-Date: Wed, 19 Jun 2024 09:12:21 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uJm1iY6C"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8848EC2BBFC;
+	Wed, 19 Jun 2024 07:16:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1718781383;
+	bh=1SeX6DYpTe78Qp9u9466EckMez+yd1/EEOQ8w2vo0i8=;
+	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
+	b=uJm1iY6CBbwXF8+kYSJCKVVxnMvXF2gJdFeIXwy0bBppV+iQLSkh0tR75Gl9AZM8e
+	 L8ph0vEZ/YUllDATVOBZfyz3PO7XV34/mVKUfWtPmdNcVKEIUgAB3aOTZm+jymZS97
+	 8iPSHPu6R/lIN0ywnvtcVxJGWF86hRQXMmNQxPl+KGZRa6THDqXfXJRILJjxjIDHkF
+	 z9xCmvBOgs09DJb7FP3qD5L7wzGR2R+hEdgu7vS33NMZyhQMFLD37LDIBBhgOfdVPk
+	 9kgDy63QbTR8dX75uiIAxr/RivtGacRJrj2oGszHym8M4ecg93ckRqsJmbgmwQkwTc
+	 ZVq4Z+y+3ynww==
+Date: Wed, 19 Jun 2024 01:16:22 -0600
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 04/15] soc: qcom: ice: add hwkm support in ice
-To: "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>,
- "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
- "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
- "andersson@kernel.org" <andersson@kernel.org>,
- "ebiggers@google.com" <ebiggers@google.com>,
- "srinivas.kandagatla" <srinivas.kandagatla@linaro.org>,
- "krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
- "conor+dt@kernel.org" <conor+dt@kernel.org>,
- "robh+dt@kernel.org" <robh+dt@kernel.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
- kernel <kernel@quicinc.com>,
- "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>,
- "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
- "Om Prakash Singh (QUIC)" <quic_omprsing@quicinc.com>,
- "Bao D. Nguyen (QUIC)" <quic_nguyenb@quicinc.com>,
- "bartosz.golaszewski" <bartosz.golaszewski@linaro.org>,
- "konrad.dybcio@linaro.org" <konrad.dybcio@linaro.org>,
- "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
- "jejb@linux.ibm.com" <jejb@linux.ibm.com>,
- "martin.petersen@oracle.com" <martin.petersen@oracle.com>,
- "mani@kernel.org" <mani@kernel.org>,
- "davem@davemloft.net" <davem@davemloft.net>,
- "herbert@gondor.apana.org.au" <herbert@gondor.apana.org.au>,
- Prasad Sodagudi <psodagud@quicinc.com>, Sonal Gupta <sonalg@quicinc.com>
-References: <20240617005825.1443206-1-quic_gaurkash@quicinc.com>
- <20240617005825.1443206-5-quic_gaurkash@quicinc.com>
- <ad7f22f5-21e4-4411-88f3-7daa448d2c83@linaro.org>
- <51a930fdf83146cb8a3e420a11f1252b@quicinc.com>
-Content-Language: en-GB
-From: Neil Armstrong <neil.armstrong@linaro.org>
-In-Reply-To: <51a930fdf83146cb8a3e420a11f1252b@quicinc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Shan-Chun Hung <shanchun1218@gmail.com>
+Cc: prabhakar.mahadev-lad.rj@bp.renesas.com, serghox@gmail.com, 
+ krzk+dt@kernel.org, ychuang3@nuvoton.com, ulf.hansson@linaro.org, 
+ devicetree@vger.kernel.org, pbrobinson@gmail.com, mcgrof@kernel.org, 
+ schung@nuvoton.com, linux-kernel@vger.kernel.org, forbidden405@outlook.com, 
+ tmaimon77@gmail.com, conor+dt@kernel.org, 
+ linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com, 
+ andy.shevchenko@gmail.com, p.zabel@pengutronix.de, 
+ linux-mmc@vger.kernel.org
+In-Reply-To: <20240619054641.277062-2-shanchun1218@gmail.com>
+References: <20240619054641.277062-1-shanchun1218@gmail.com>
+ <20240619054641.277062-2-shanchun1218@gmail.com>
+Message-Id: <171878138268.711122.13293312471456423483.robh@kernel.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document
+ MA35D1 SDHCI controller
 
-Le 19/06/2024 à 00:08, Gaurav Kashyap (QUIC) a écrit :
-> Hello Neil,
-> 
-> On 06/18/2024 12:14 AM PDT, Neil Armstrong wrote:
->> On 17/06/2024 02:50, Gaurav Kashyap wrote:
->>> Qualcomm's ICE (Inline Crypto Engine) contains a proprietary key
->>> management hardware called Hardware Key Manager (HWKM).
->>> This patch integrates HWKM support in ICE when it is available. HWKM
->>> primarily provides hardware wrapped key support where the ICE
->>> (storage) keys are not available in software and protected in
->>> hardware.
->>>
->>> When HWKM software support is not fully available (from Trustzone),
->>> there can be a scenario where the ICE hardware supports HWKM, but it
->>> cannot be used for wrapped keys. In this case, standard keys have to
->>> be used without using HWKM. Hence, providing a toggle controlled by a
->>> devicetree entry to use HWKM or not.
->>>
->>> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
->>> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
->>> ---
->>>    drivers/soc/qcom/ice.c | 153
->> +++++++++++++++++++++++++++++++++++++++--
->>>    include/soc/qcom/ice.h |   1 +
->>>    2 files changed, 150 insertions(+), 4 deletions(-)
->>>
->>> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c index
->>> 6f941d32fffb..d5e74cf2946b 100644
->>> --- a/drivers/soc/qcom/ice.c
->>> +++ b/drivers/soc/qcom/ice.c
->>> @@ -26,6 +26,40 @@
->>
->> <snip>
->>
->>> +
->>>    static struct qcom_ice *qcom_ice_create(struct device *dev,
->>>                                        void __iomem *base)
->>>    {
->>> @@ -239,6 +382,8 @@ static struct qcom_ice *qcom_ice_create(struct
->> device *dev,
->>>                engine->core_clk = devm_clk_get_enabled(dev, NULL);
->>>        if (IS_ERR(engine->core_clk))
->>>                return ERR_CAST(engine->core_clk);
->>> +     engine->use_hwkm = of_property_read_bool(dev->of_node,
->>> +                                              "qcom,ice-use-hwkm");
->>
->> Please drop this property and instead add an scm function calling:
->>
->> __qcom_scm_is_call_available(QCOM_SCM_SVC_ES,
->> QCOM_SCM_ES_DERIVE_SW_SECRET)
->>
->> like
->>
->> bool qcom_scm_derive_sw_secret_available(void)
->> {
->>          if (!__qcom_scm_is_call_available(__scm->dev, QCOM_SCM_SVC_ES,
->>                                            QCOM_SCM_ES_DERIVE_SW_SECRET))
->>                  return false;
->>
->>          return true;
->> }
->>
->> You may perhaps only call qcom_scm_derive_sw_secret_available() for
->> some ICE versions.
->>
->> Neil
-> 
-> The issue here is that for the same ICE version, based on the chipset,
-> there might be different configurations.
 
-So use a combination of a list of compatible strings + qcom_scm_derive_sw_secret_available()
-to enable hwkm.
+On Wed, 19 Jun 2024 13:46:40 +0800, Shan-Chun Hung wrote:
+> Add binding for Nuvoton MA35D1 SDHCI controller.
+> 
+> Signed-off-by: schung <schung@nuvoton.com>
+> ---
+>  .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml    | 106 ++++++++++++++++++
+>  1 file changed, 106 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
+> 
 
-Neil
+My bot found errors running 'make dt_binding_check' on your patch:
 
-> 
-> Is it acceptable to use the addressable size from DTSI instead?
-> Meaning, if it 0x8000, it would take the legacy route, and only when it has been
-> updated to 0x10000, we would use HWKM and wrapped keys.
-> 
->>
->>>
->>>        if (!qcom_ice_check_supported(engine))
->>>                return ERR_PTR(-EOPNOTSUPP); diff --git
->>> a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h index
->>> 9dd835dba2a7..1f52e82e3e1c 100644
->>> --- a/include/soc/qcom/ice.h
->>> +++ b/include/soc/qcom/ice.h
->>> @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
->>>                         const struct blk_crypto_key *bkey,
->>>                         u8 data_unit_size, int slot);
->>>    int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
->>> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
->>>    struct qcom_ice *of_qcom_ice_get(struct device *dev);
->>>    #endif /* __QCOM_ICE_H__ */
-> 
-> Regards,
-> Gaurav
+yamllint warnings/errors:
+./Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml:77:1: [error] syntax error: found character '\t' that cannot start any token (syntax)
+
+dtschema/dtc warnings/errors:
+make[2]: *** Deleting file 'Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.example.dts'
+Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml:77:1: found a tab character where an indentation space is expected
+make[2]: *** [Documentation/devicetree/bindings/Makefile:26: Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.example.dts] Error 1
+make[2]: *** Waiting for unfinished jobs....
+./Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml:77:1: found a tab character where an indentation space is expected
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml: ignoring, error parsing file
+make[1]: *** [/builds/robherring/dt-review-ci/linux/Makefile:1430: dt_binding_check] Error 2
+make: *** [Makefile:240: __sub-make] Error 2
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20240619054641.277062-2-shanchun1218@gmail.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
 
