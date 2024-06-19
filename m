@@ -1,185 +1,103 @@
-Received: from mail-oa1-f49.google.com (mail-oa1-f49.google.com [209.85.160.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.web.de (mout.web.de [217.72.192.78])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9CCF1534E6;
-	Wed, 19 Jun 2024 16:19:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF4EB155738;
+	Wed, 19 Jun 2024 16:19:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.72.192.78
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718813968; cv=none; b=LG36XMr3AvtslOy+fHIlBZf1qYtsl6s0tR9DklmTkPVCXuPbL+RuKDxsjRMDmEFjlHOdHXnIPaCbYPNVtp64/4zElc0rrz1Oq3SPixQwUjkeXO5fI5wguFVdlrjsnji3q2v4wJndoSgMo3gBeU7DRkrYtUMAJTzLy+wYXG1N8bA=
+	t=1718813974; cv=none; b=comwZLZgYABrC0KvUxKkg93fprPBdV9yGvE4FY/Da7uvFL1FXMZbPR/EY5K188Xs6RUORIBVKnFnn7pz/6DK9sPTLbZmmI1UF3fOEXrjytZXNGU+Ib1z6QEl1/KQIrOspHLAeRrTCs3Qf+WRxjFQrGSU/UqNGDHfP0iUBTyA7Ro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718813968; c=relaxed/simple;
-	bh=UMgouaT6S/IixEQF8EjbaOo9Ec9dIFnfX3ko37uhAoM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=A2NSkeqTfi4IFJqqWNgZaY7qEoYxRDjxorjl3j+ttNLOIXtDNxCaZlYzSAcPhNZOc3fafNVnKPTJsCuvblsfed42YV3/zxDZHUixGDC9q18g+7qzuKqc/gn9kVUxAizBnka3od/4+h9gMdmSvXRCKOjFVaj0oENd99mMm/p9jV4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gxrQ7+Ho; arc=none smtp.client-ip=209.85.160.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1718813974; c=relaxed/simple;
+	bh=VDk4rIFbETubK9ufRR/9SYfLygy4F1eGvRvkr/vRtuE=;
+	h=Message-ID:Date:MIME-Version:To:Cc:References:Subject:From:
+	 In-Reply-To:Content-Type; b=BFYxwduYtgQ1PCGNPlbw1LLTOV/Mm8nm/eT2YLO/VvOFXq2LVccQdOhEtgFm0QSthfxb9GDSp4YQS47QC+VcRUxzeERhbJlr/jwyTRBpezUQHdMGaYYEdaT4tl/4kctkpmmIe3FpYMNj28Zs4BrBSvGSLXHazvwiJJbvYodq0gY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=ldydWDIM; arc=none smtp.client-ip=217.72.192.78
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gxrQ7+Ho"
-Received: by mail-oa1-f49.google.com with SMTP id 586e51a60fabf-25488f4e55aso19694fac.0;
-        Wed, 19 Jun 2024 09:19:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718813965; x=1719418765; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=vFTtLiupNQjUDm5wJ7kx2VnTWJ/TIurLfPXStd+BLtA=;
-        b=gxrQ7+HoV/6xifISWjvwpbsC7cY44G4DGahaMD8NXHngr5/YHeUWA9Y4aU9jVZ5Pqw
-         /voMBbL0IELciBUgDnWGEtqQP0X7Qk90cq7Hib/ZLFfaZb8HDwY/WnDtzx6suRXfDpsa
-         7MIjHsZOndJe6axUuh9NMjRVsSLhKy1kyzbcjFAxoKJo0ZG146cO2HQq+9azqwlKORko
-         6aa3fcD/yd/oFmSUkPtO5GEkhztpylzNGBqi/h2cQkyjKW89rPo3Wx7L5gC9zvRt36GN
-         m8giRC3xXRgyiwds13fUyyqU7ulzwjoXMHwBceCsR09nRmvU5xB0JAjGjTE4X4JSqfFp
-         5OHA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718813965; x=1719418765;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=vFTtLiupNQjUDm5wJ7kx2VnTWJ/TIurLfPXStd+BLtA=;
-        b=Sa/qZcsMJiehhDkK38PZIbgaiPh6Fr210i/kRV4lx0GGUjCY/m2rUoUs7chuemoDKr
-         yu0ma1L3TAnSVAiLf0ricHXNuzyoUepgzB11zV3rx36TTzwukTwol+rPTFJToL5Dkf/9
-         ItdJDsVpNJ2WpVzo6kYxevmKCzDgiaoqTXuf2gB5G0SZJ/LrG07Wy/uryQYRZexTBtMi
-         AFhT0v10/9GOait4NUTdH6lkNpD43qTFmUj8L6T6tY09ZZMxT6Ipr82d3ZpkdqOXBzUh
-         2p2jLsMHps8kUwGISCCpmZZ3TmmEU3zJZ+IPB/aEut0WvvDmHujO4O4h+W45qYqGdfaS
-         3cgw==
-X-Forwarded-Encrypted: i=1; AJvYcCUtGniZNGRuozn42BXvGcsVOvmWwvvOjQZ1sQGC1XMsYeyBLTi2YmWjDeTMGi5lR5sxQhQKLUMQc46gukJm7awdqrZd79W46K2vEy1NVAnGBnxGsmVpf9ACXbjVRiMSg4vaI19UMbcVgZhu7v7gbh/K0FxZp8BiHT7TeZ4WalINkiYD4q6teBhfYekf
-X-Gm-Message-State: AOJu0YwN+55EB/E2NS4DUFXW06c6kjmOHzNLdhtXawHG36z0ZW1aYMY7
-	x1IGWjSb4GxC2HUT1CvWzeu2Cj5i78OkNpJ3VuG/PY9UDThmVNxvViEU1O14FqigyjVdKj9qvvF
-	ikoPvcY5DgSQ0+pQN6e4Zb+MryJ8=
-X-Google-Smtp-Source: AGHT+IG8lcFqoVxgi4qmEwYOa2FXhJDu1cbELTejcdqT7shjKmkU/mTPDTR+dr1wTP2oazD7SaMIDyBEPwcu4hTw8Zg=
-X-Received: by 2002:a05:6870:5247:b0:254:956f:ff9a with SMTP id
- 586e51a60fabf-25c94a1f1b3mr3499722fac.32.1718813964714; Wed, 19 Jun 2024
- 09:19:24 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="ldydWDIM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
+	s=s29768273; t=1718813935; x=1719418735; i=markus.elfring@web.de;
+	bh=VDk4rIFbETubK9ufRR/9SYfLygy4F1eGvRvkr/vRtuE=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:Cc:References:
+	 Subject:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:
+	 cc:content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=ldydWDIMr/+ZTOUv80YzDchYNj80VlFbTjqKtGwOkA8Kb2nK2dovWSqlWbroLjNn
+	 ZWBZ9wSVfkW+tUBGNtXej0B5icbTHgMIGzy3AvKZNkq/k3ZL8n8hNoCGLTuI2On+B
+	 JD3Vw5gBlJzxGUXnWppQuoVCVqFfa/ol92CkKFquKRspqr3rDyD0ZoScoZkIEdHYI
+	 FnwWpb3y/3gClyRZVYKf5H166ejmO4g0k+UEoQKw4XenWyyEMOckWN+6gL/8oBUkl
+	 I+mobzF+tNqZU47tJzgt+LTJnbQaaceqEbr1bjD27Bp0NRkgbrvB7Z8a61+o8qyt+
+	 ml0FFCq6QPZB5ERm+Q==
+X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
+Received: from [192.168.178.21] ([94.31.83.95]) by smtp.web.de (mrweb105
+ [213.165.67.124]) with ESMTPSA (Nemesis) id 1Mf3qK-1sqa171o3W-00iYBG; Wed, 19
+ Jun 2024 18:18:55 +0200
+Message-ID: <af302db1-1d97-4974-9c97-de4a10100d20@web.de>
+Date: Wed, 19 Jun 2024 18:18:51 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240613091721.525266-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240613091721.525266-4-prabhakar.mahadev-lad.rj@bp.renesas.com> <prdvmtsp35yy2naohivbrya3go6vh5ji2cdjoebw3ovditcujo@bhck6tca6mhj>
-In-Reply-To: <prdvmtsp35yy2naohivbrya3go6vh5ji2cdjoebw3ovditcujo@bhck6tca6mhj>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Wed, 19 Jun 2024 17:18:58 +0100
-Message-ID: <CA+V-a8u6KAFp1pox+emszjCHqvNRYrkOPpsv5XBdkAVJQMxjmA@mail.gmail.com>
-Subject: Re: [RFC PATCH v2 3/3] mmc: renesas_sdhi: Add support for RZ/V2H(P) SoC
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, Conor Dooley <conor+dt@kernel.org>, 
-	devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Biju Das <biju.das.jz@bp.renesas.com>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Prabhakar <prabhakar.csengg@gmail.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, linux-renesas-soc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+To: Shan-Chun Hung <schung@nuvoton.com>, devicetree@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: Shan-Chun Hung <shanchun1218@gmail.com>,
+ LKML <linux-kernel@vger.kernel.org>, Adrian Hunter
+ <adrian.hunter@intel.com>, Andy Shevchenko <andy.shevchenko@gmail.com>,
+ Conor Dooley <conor+dt@kernel.org>, Dragan Simic <dsimic@manjaro.org>,
+ Jacky Huang <ychuang3@nuvoton.com>, Krzysztof Kozlowski
+ <krzk+dt@kernel.org>, Lad Prabhakar
+ <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+ Luis Chamberlain <mcgrof@kernel.org>, Peter Robinson <pbrobinson@gmail.com>,
+ Philipp Zabel <p.zabel@pengutronix.de>, Rob Herring <robh@kernel.org>,
+ Sergey Khimich <serghox@gmail.com>, Tomer Maimon <tmaimon77@gmail.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Yang Xiwen <forbidden405@outlook.com>
+References: <20240619054641.277062-3-shanchun1218@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI driver
+Content-Language: en-GB
+From: Markus Elfring <Markus.Elfring@web.de>
+In-Reply-To: <20240619054641.277062-3-shanchun1218@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:k1mrJAOcJlXuocLqX1OhI2UrV6TlyIsnFPINC8gLzbZQuSpL7NS
+ 7gOhTksQpP3Ai2KvZJ+OhNvD+kbvQHcGyebKgQzbNLI8jt+thHRUwALEnapcl84EAn+Cu6t
+ aHlkXwlOiuZHeShyqandEHPTG9Xvy5uTfAuaA1wUkL5U8Ujm55C0aR3QEBcy1hLvl/g7kQr
+ bTVOIPl2+emK9TWgUz2Nw==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:yZhy6m7gbJ8=;Efza5QPFGR+Cc2f63d0wb4eAO9D
+ et0vonfRbECF6iozz6cmZSKqw/IqtSgzQ+LbC2hPSyfPfhV5SOcGOQBXFu2WcQSFKWC8kF14m
+ HJNcJdsI1pLlz6K0fDEdGz+fjS8PmokklKGUari0rkbleJeUM+lt2ZgG24rTXiiSByoYJe0Gt
+ zUpFtLIS9/aTm6Flim7banE1SvIpkWnIo25Nzxlj1sJDNjJSApuRXPn8pgjISeomj5Dp5H4vB
+ Q0hTB/loEPa9HHjmiZKvPP8u+DAMtna8ifT6oYlln2TaUSA7BZ8jFSkofAGVChXXwD6bRkRX1
+ hKUiqhi6pJuHEMTLb0efQVrTe5epQu49xweRUlFUO+MpMnmuvqo3ZVQjTIVDG1IEr92T4Hl61
+ ghKBpWpv2GtbCkOJESkOutUgBtcVfLb6iuHdA4pEvijLHvcqHC4ntLD884WZ1m/y13IC7witS
+ ykbZl+0KegaUhxJIynt+kcaV8YKl+VvCQu8aqveOek2EDC4X0xRz/OR1I3VOXXNqMaPjbqpd1
+ w+rZKRXW3ilnXW6pSPG/ZB2iGehJglBTK3GMDs7U9aDiIOxKefHaYx8pPCHQjxrh/9hvCLF8p
+ oOsbup1S662vVE98svDUOtOaihSz7H64Vp7vSRjY2xHiXrBhCMePYH6O0L+9uBftlWjBrd001
+ eY+PbctvJIN2UH0NCIfZQGf++yJ1OGvy0PyWrqhQ4ZJsWvV8DTzbYRXA1YwopedqMuEEk7vKh
+ I3UNUCFj1fVggW1/0w5JdEuJ21U7kg+CLxoIRqTMhItlFCvpmQEcooJHsKcGwX1Fc9fLWMwZW
+ WuPzhgQxclcbGh5twh84tZabzLF7tcIVPHDVvC8+TYCNQN4nK96qRaiy3IS7kHbPlt
 
-Hi Wolfram,
+=E2=80=A6
+> Signed-off-by: schung <schung@nuvoton.com>
 
-Thank you for the review.
+Can an other personal name eventually be more appropriate here
+(according to the Developer's Certificate of Origin)?
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Do=
+cumentation/process/submitting-patches.rst?h=3Dv6.10-rc4#n438
 
-On Mon, Jun 17, 2024 at 9:31=E2=80=AFAM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> Hi Prabhakar,
->
-> > - Ive modelled the regulator now to control the PWEN aswell.
->
-> Yay, this looks much better. Good work!
->
-> > - I have still kept regulator bits in quirks I was wondering if I shoul=
-d
-> >   move this to renesas_sdhi_of_data instead?
->
-> I think so. An internal regulator is not a quirk.
->
-Agreed.
 
-> > - I still need to add checks if the internal regulator used and
-> >   only then call regulator_enable/regulator_set_voltage. ATM I am still
-> >   unclear on differentiating if internal/external regulator is used.
->
-> When it comes to re-enabling the regulator in sdhi_reset, I think this
-> can be a sdhi_flag like SDHI_FLAG_ENABLE_REGULATOR_IN_RESET or alike.
->
-OK.
+=E2=80=A6
+> +++ b/drivers/mmc/host/sdhci-of-ma35d1.c
+> @@ -0,0 +1,297 @@
+=E2=80=A6
+> +MODULE_AUTHOR("shanchun1218@google.com");
+=E2=80=A6
 
-> When it comes to the regulator, I wonder if it wouldn't be clearer to
-> replace renesas_sdhi_internal_dmac_register_regulator() with a proper
-> probe function and a dedicated compatible value for it. We could use
-> platform_driver_probe() to instantiate the new driver within the SDHI
-> probe function. This will ensure that the regulator driver will only be
-> started once the main driver got all needed resources (mapped
-> registers).
->
-I did give it a try with platform_driver_probe() and failed.
+How do you think about to improve such information another bit?
 
-- Firstly I had to move the regulator node outside the SDHI node for
-platform_driver_probe() to succeed or else it failed with -ENODEV (at
-https://elixir.bootlin.com/linux/latest/source/drivers/base/platform.c#L953=
-)
-- In Renesas SoCs we have multiple instances of SDHI, the problem
-being for each instance we are calling platform_driver_probe(). Which
-causes a problem as the regulator node will use the first device.
-
-Let me know if I have missed something obvious here.
-
-> My gut feeling is that it will pay off if the internal regulator will be
-> described in DT as any other regulator. Like, we could name the
-> regulator in DT as always etc...
->
-> More opinions on this idea are welcome, though...
->
-> > --- a/drivers/mmc/host/renesas_sdhi.h
-> > +++ b/drivers/mmc/host/renesas_sdhi.h
-> > @@ -11,6 +11,9 @@
-> >
-> >  #include <linux/dmaengine.h>
-> >  #include <linux/platform_device.h>
-> > +#include <linux/regmap.h>
->
-> Regmap can luckily go now.
->
-Agreed.
-
-> > +#include <linux/regulator/driver.h>
-> > +#include <linux/regulator/machine.h>
-> >  #include "tmio_mmc.h"
-> >
-> >  struct renesas_sdhi_scc {
-> > @@ -49,6 +52,9 @@ struct renesas_sdhi_quirks {
-> >       bool manual_tap_correction;
-> >       bool old_info1_layout;
-> >       u32 hs400_bad_taps;
-> > +     bool internal_regulator;
-> > +     struct regulator_desc *rdesc;
-> > +     struct regulator_init_data *reg_init_data;
-> >       const u8 (*hs400_calib_table)[SDHI_CALIB_TABLE_MAX];
-> >  };
-> >
-> > @@ -93,6 +99,8 @@ struct renesas_sdhi {
-> >       unsigned int tap_set;
-> >
-> >       struct reset_control *rstc;
-> > +
-> > +     struct regulator_dev *sd_status;
->
-> This is a strange name for the regulater. Especially given that you have
-> as well the more fitting 'u32 sd_status' in the code later.
->
-I will update it.
-
-> ...
->
-> > +static struct regulator_init_data r9a09g057_regulator_init_data =3D {
-> > +     .constraints =3D {
-> > +             .valid_ops_mask =3D REGULATOR_CHANGE_STATUS,
->
-> Don't we need REGULATOR_CHANGE_VOLTAGE here as well? Or is this implicit
-> because of REGULATOR_VOLTAGE? Can't find this, though.
->
-I will investigate it.
-
-Cheers,
-Prabhakar
+Regards,
+Markus
