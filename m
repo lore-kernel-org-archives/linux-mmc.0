@@ -1,441 +1,172 @@
-Received: from mail-pg1-f174.google.com (mail-pg1-f174.google.com [209.85.215.174])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2004F6F2E5;
-	Wed, 19 Jun 2024 05:47:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32EA14405
+	for <linux-mmc@vger.kernel.org>; Wed, 19 Jun 2024 06:16:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718776049; cv=none; b=iXHBGyEgaYCUC4kN81OpEbmMpXG9mLD6pv7Qe97BtiPpF6mdKgFKqXnaNOvis6fD1lKAWvcsjAWwtDGdvh7FgeV2Q0wIw+89P4UUYCn+JKPtrxb1xfExin+ywhTOUc3lMrdcFeyTEUpLcYQFRtNti32AE64oE8QH2LsIc6mxi64=
+	t=1718777790; cv=none; b=dCxqTUDhZG9pUeNSFXrgHcZJue/1Xi09OxPSr+HfD/OktMlDYkDrLTeOWT1t0DWUyLPsTGoPnXKlfbHfwjnzLNRgOzdDY0M2duXmYpi9R4Nn8EVXCyzLYTZXKgo3gpoqHAQBnf0HZjBApKgL3C3MjMQ7eW2DOivOOtukErlH03s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718776049; c=relaxed/simple;
-	bh=jIyUyFmEbUfJG255cLmfW9oVXsufKJMLqE7IHhkBd7E=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=XeLuTcv9bLVEd8yVf7mNz93weWyPbefpjz4217oLv0TwK2bcYHqqFxU+jF0O0XqVtmvA9diylOXcV+SxUATMmQGSyguYhq1tA9ocrGa9Kx7ZhZvtTWjEZuNPTR5u+Oj5l2MTyzbvRwLOZhYLVgPyrjK9iIVprV/kfiDmjdzWJgk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=doRjCW4+; arc=none smtp.client-ip=209.85.215.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1718777790; c=relaxed/simple;
+	bh=HmALoiOZXD8RmuBlLWFa9XW7kpD9+YUbF6c3+pBJ1NA=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=H4zUwhcV7AqTjFfzGBpDjoQIVUO3MqFiK9EdcDDYqa07WoPcMZD97lixg7x0qsuwa0FWAxqa+B2/pPbMbQvL0SPag8nkisNskI/FVishZBng8UStH5p10Ojx0/AFoGzKDMU8r58w+h815Okcv7bK8WQgwXbo3sTy6ZxAdLx0lPI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oWsXm6zx; arc=none smtp.client-ip=209.85.167.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="doRjCW4+"
-Received: by mail-pg1-f174.google.com with SMTP id 41be03b00d2f7-6e9f52e99c2so4540797a12.1;
-        Tue, 18 Jun 2024 22:47:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oWsXm6zx"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-52bc274f438so6648079e87.0
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Jun 2024 23:16:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718776047; x=1719380847; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=YaqFTHj+TNawNCMcQbpSWxNdJ7LtFLM11UUPVkjfoaE=;
-        b=doRjCW4+K/lXi291Y3l0zHuOTaK6GpDJTzIHaVR2ddKNvvBJHND8Bc0NnDw4d+Jerg
-         KrvNmVXzbJw3qiXDmAazzanci3Jty0l6WQdByoLjNs0OKlJwDFuaM0/RH6ixzNhL/FHK
-         PCSqh0nCzKSdBgCEjsbH422VTroX+JfD3/+W4PnjgEnpQBIo4QvXVVknnigpM/USQLsg
-         6WwXokhrWQ9zRYzj164PqkLTGY0wTqKS1ItaQQZ9jetz0LIULRZmm6lTZQx36SWH3g2C
-         JWfHI7Nn1rA/AoRDWJkBVA9XkduYBcmxOSI33TUSudawDx7MS1ZA9tBA2nm+mRA01uW4
-         lOgA==
+        d=linaro.org; s=google; t=1718777787; x=1719382587; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
+         :from:references:cc:to:subject:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=Kw7mI8ZZ9ryljDx1iXt4/P0lnrwZ2kbFwklwwXXoBL0=;
+        b=oWsXm6zxJu6RvbDXoxbz5sRa/Kz6YmKjItFFfgkqKstZ0KA/fog22dG9mIu9OlS6wG
+         t2ZhbB75QnPBxxSL16gIhB77Jkckbgc6HAPexfDDGPSWgWiPIwd+l14kCW2LDl2WerNS
+         Up5+CcDnyfUqbJsOk+yqmjfNerSAy021PUVj9gKeYVBu+Z4eCCXbJW4f1D0pTFSeBy10
+         djyNma6Of2oUphOlEvsw+xf0zXbzUE9HhsxSIVlhQKHXok8oOpYk/NZ5/X+rgKcNp44H
+         W/ke7TsgXZpsXXSzlJj63/9jt9tnaiVhSuSr5T9Y7mPApvz6mRQAZbaVy81CVCLe6Ek5
+         pEAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718776047; x=1719380847;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=YaqFTHj+TNawNCMcQbpSWxNdJ7LtFLM11UUPVkjfoaE=;
-        b=dsPnsHqbhej5NhgDUMwvDJf50bzkULYf/d5N75uK+6zK2aF0FhNG26G0e5myeSvO81
-         cTavS3IB9AAr4ouHuRZTEYdzL6h5uHlKZiIHb+FWIddBVKhtifqBu/pdma+LnM+7MjCg
-         WjoCgMO7FJEt3rFp65j/5/g+Yb1+AFqoaR6rRz2F6rfAylA+z3oFXVantI+2WtaHty0I
-         7SSGNLLuHrTIpI5KJafbj10P/6y/jD1Yob3ltyyp7TOAAh0otuqu0gHQbEP1BjSZNI/x
-         URpAL/XhAm3kqQOr6BfWVJ0aR/haqeEJHjd93o81qx8XA5SpURRSK/LImGTP0FsX/UGC
-         1vsQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVEObLlik1RZVvMaZlDkPvBh5fXvkqt7LkoHgWK1Lg0U1+8S0hZ3zTI3Vp7ZRdNxv9W2jRPHbM4kSgdU2DtiUgnvE4/L6d4y9yIY7caCo5E3CLXuwfgFCcag60ej6CoQ2bFBYQr655IPopuyceJRW5KX0jvuTCLBhIys/2wYt9+1lReqg==
-X-Gm-Message-State: AOJu0YzY79BJwRqB0u4XEZ8PqzmEh4KAKvuEDqiuUmb+0VCcRRFDOcz0
-	5MgP9FcaZsp8l4jafQlZdJHoULC1af/OllP6ekbW/2DLgg94qHwB
-X-Google-Smtp-Source: AGHT+IGfw8H9n9oYYnaXQbM7kC8bFdTUXDXgHrTKPzZTqrYob3kC+2upHCXWabvlgTBh873xdoqlvA==
-X-Received: by 2002:a05:6a20:3f8f:b0:1b8:622a:cf76 with SMTP id adf61e73a8af0-1bcbb65421bmr1487477637.48.1718776047318;
-        Tue, 18 Jun 2024 22:47:27 -0700 (PDT)
-Received: from localhost.localdomain (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f855f598bfsm107487865ad.300.2024.06.18.22.47.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jun 2024 22:47:26 -0700 (PDT)
-From: Shan-Chun Hung <shanchun1218@gmail.com>
-To: ulf.hansson@linaro.org,
-	robh@kernel.org,
-	krzk+dt@kernel.org,
-	conor+dt@kernel.org,
-	adrian.hunter@intel.com,
-	p.zabel@pengutronix.de,
-	pbrobinson@gmail.com,
-	serghox@gmail.com,
-	mcgrof@kernel.org,
-	prabhakar.mahadev-lad.rj@bp.renesas.com,
-	forbidden405@outlook.com,
-	tmaimon77@gmail.com,
-	andy.shevchenko@gmail.com,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: ychuang3@nuvoton.com,
-	schung@nuvoton.com,
-	Shan-Chun Hung <shanchun1218@gmail.com>
-Subject: [PATCH 2/2] mmc: sdhci-of-ma35d1: Add Novoton MA35D1 SDHCI driver
-Date: Wed, 19 Jun 2024 13:46:41 +0800
-Message-Id: <20240619054641.277062-3-shanchun1218@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20240619054641.277062-1-shanchun1218@gmail.com>
-References: <20240619054641.277062-1-shanchun1218@gmail.com>
+        d=1e100.net; s=20230601; t=1718777787; x=1719382587;
+        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
+         :from:references:cc:to:subject:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Kw7mI8ZZ9ryljDx1iXt4/P0lnrwZ2kbFwklwwXXoBL0=;
+        b=HnpGgBV84954m1rjrevlt4KfzKefMq6kCrh8S/8fdnhaH26HhPlAGVLiXKyt+lwSgR
+         9udLZCM4sGrgYRCkBz1FwMDdKIN6CyejhwlnlZyoglKWr8FfaCMOSxhLbQLNdJSGI4me
+         FwR0wdD7DF7pJM7q/T6oTq02dppiAER9s4eT+ZBLwoerL35BTazvfB+xJUK74hjKqu2U
+         Fqsf1osAWb1kE0Qtch/pY1wAdqICRnfGGFb36RpFe4GnnX0qc7kfMUg20waSQkMYYnTE
+         L0EQiCjN9NGb2kqp3RzHdPWJYMVGFqe6oe6zCK31gF5R3tfpYTesANuKxXweVnulX+gG
+         +B1Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVpXcEuaf5WvxYwQXUeUTUmXpEcaU2rhfUOrmalNRz/ahtQcF4B33YkGJdVgSASBl7tMkaOzDfBn+G/J4Yciaf2UX3nLnBHBhja
+X-Gm-Message-State: AOJu0YyiGV/3749X9869PLEbS4qGZm93tN6CN+iRVallhQu0VxfcxWlD
+	xbKLqZmCbO4Hva54uD8eIJ6SASMAGmjyBToKXnldwnShce4I2GMblytfqqPtdaY=
+X-Google-Smtp-Source: AGHT+IHGQclRSNRutPS/KbJ3xsp7bZH4jdxQ4yXIF4VyoP/1csyD85UXN5aradU513i57pv87BSV4g==
+X-Received: by 2002:a05:6512:208c:b0:52c:af5d:75be with SMTP id 2adb3069b0e04-52ccaa627f5mr963042e87.30.1718777786395;
+        Tue, 18 Jun 2024 23:16:26 -0700 (PDT)
+Received: from [192.168.1.20] ([178.197.219.137])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-423034f4129sm208470515e9.14.2024.06.18.23.16.24
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 18 Jun 2024 23:16:25 -0700 (PDT)
+Message-ID: <24276cd6-df21-4592-85df-2779c6c30d51@linaro.org>
+Date: Wed, 19 Jun 2024 08:16:23 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 04/15] soc: qcom: ice: add hwkm support in ice
+To: "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>,
+ "neil.armstrong@linaro.org" <neil.armstrong@linaro.org>,
+ "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+ "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+ "andersson@kernel.org" <andersson@kernel.org>,
+ "ebiggers@google.com" <ebiggers@google.com>,
+ "srinivas.kandagatla" <srinivas.kandagatla@linaro.org>,
+ "krzysztof.kozlowski+dt@linaro.org" <krzysztof.kozlowski+dt@linaro.org>,
+ "conor+dt@kernel.org" <conor+dt@kernel.org>,
+ "robh+dt@kernel.org" <robh+dt@kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ kernel <kernel@quicinc.com>,
+ "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>,
+ "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+ "Om Prakash Singh (QUIC)" <quic_omprsing@quicinc.com>,
+ "Bao D. Nguyen (QUIC)" <quic_nguyenb@quicinc.com>,
+ "bartosz.golaszewski" <bartosz.golaszewski@linaro.org>,
+ "konrad.dybcio@linaro.org" <konrad.dybcio@linaro.org>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "jejb@linux.ibm.com" <jejb@linux.ibm.com>,
+ "martin.petersen@oracle.com" <martin.petersen@oracle.com>,
+ "mani@kernel.org" <mani@kernel.org>,
+ "davem@davemloft.net" <davem@davemloft.net>,
+ "herbert@gondor.apana.org.au" <herbert@gondor.apana.org.au>,
+ Prasad Sodagudi <psodagud@quicinc.com>, Sonal Gupta <sonalg@quicinc.com>
+References: <20240617005825.1443206-1-quic_gaurkash@quicinc.com>
+ <20240617005825.1443206-5-quic_gaurkash@quicinc.com>
+ <ad7f22f5-21e4-4411-88f3-7daa448d2c83@linaro.org>
+ <51a930fdf83146cb8a3e420a11f1252b@quicinc.com>
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Content-Language: en-US
+Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
+ 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
+ D2GYIS41Kv4Isx2dEFh+/Q==
+In-Reply-To: <51a930fdf83146cb8a3e420a11f1252b@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-This adds the SDHCI driver for the MA35 series SoC. It is based upon the
-SDHCI interface, but requires some extra initialization.
+On 19/06/2024 00:08, Gaurav Kashyap (QUIC) wrote:
+>>
+>> You may perhaps only call qcom_scm_derive_sw_secret_available() for
+>> some ICE versions.
+>>
+>> Neil
+> 
+> The issue here is that for the same ICE version, based on the chipset,
+> there might be different configurations.
 
-Signed-off-by: schung <schung@nuvoton.com>
----
- drivers/mmc/host/Kconfig           |  13 ++
- drivers/mmc/host/Makefile          |   1 +
- drivers/mmc/host/sdhci-of-ma35d1.c | 297 +++++++++++++++++++++++++++++
- 3 files changed, 311 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
+That's not what your DTS said. To remind: your DTS said that all SM8550
+and all SM8650 have it. Choice is obvious then: it's deducible from
+compatible.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index bb0d4fb0892a..e993901ebedd 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -252,6 +252,19 @@ config MMC_SDHCI_OF_SPARX5
+I still do not understand why your call cannot return you correct
+"configuration".
 
-	  If unsure, say N.
+> 
+> Is it acceptable to use the addressable size from DTSI instead?
+> Meaning, if it 0x8000, it would take the legacy route, and only when it has been
+> updated to 0x10000, we would use HWKM and wrapped keys.
 
-+config MMC_SDHCI_OF_MA35D1
-+	tristate "SDHCI OF support for the MA35D1 SDHCI controller"
-+	depends on ARCH_A35 || COMPILE_TEST
-+	depends on MMC_SDHCI_PLTFM
-+	depends on OF && COMMON_CLK
-+	help
-+	  This selects the MA35D1 Secure Digital Host Controller Interface.
-+
-+	  If you have a controller with this interface, say Y or M here. You
-+	  also need to enable an appropriate bus interface.
-+
-+	  If unsure, say N.
-+
- config MMC_SDHCI_CADENCE
-	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
-	depends on MMC_SDHCI_PLTFM
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index f53f86d200ac..3ccffebbe59b 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -88,6 +88,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
- obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
- obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
- obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)	+= sdhci-of-sparx5.o
-+obj-$(CONFIG_MMC_SDHCI_OF_MA35D1)	+= sdhci-of-ma35d1.o
- obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
- obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
- obj-$(CONFIG_MMC_SDHCI_NPCM)		+= sdhci-npcm.o
-diff --git a/drivers/mmc/host/sdhci-of-ma35d1.c b/drivers/mmc/host/sdhci-of-ma35d1.c
-new file mode 100644
-index 000000000000..7714a5ab463d
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-of-ma35d1.c
-@@ -0,0 +1,297 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2024 Nuvoton Technology Corp.
-+ *
-+ * Author: Shan-Chun Hung <shanchun1218@gmail.com>
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/dma-mapping.h>
-+#include <linux/mfd/syscon.h>
-+#include <linux/module.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/pinctrl/consumer.h>
-+#include <linux/regmap.h>
-+#include <linux/reset.h>
-+#include <linux/slab.h>
-+#include "sdhci-pltfm.h"
-+
-+#define MA35_SYS_MISCFCR0	0x070
-+#define MA35_SDHCI_MSHCCTL	0x508
-+#define MA35_SDHCI_MBIUCTL	0x510
-+
-+#define MA35_SDHCI_CMD_CONFLICT_CHK	BIT(0)
-+#define MA35_SDHCI_INCR_MSK		GENMASK(3, 0)
-+#define MA35_SDHCI_INCR16		BIT(3)
-+#define MA35_SDHCI_INCR8		BIT(2)
-+
-+#define BOUNDARY_OK(addr, len) \
-+	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
-+
-+struct ma35_priv {
-+	struct regmap		*regmap;
-+	struct reset_control	*rst;
-+	struct pinctrl		*pinctrl;
-+	struct pinctrl_state	*pins_uhs;
-+	struct pinctrl_state	*pins_default;
-+};
-+
-+struct ma35_restore_data {
-+	u32	reg;
-+	u32	width;
-+};
-+
-+static const struct ma35_restore_data restore_data[] = {
-+	{ SDHCI_CLOCK_CONTROL,		32},
-+	{ SDHCI_BLOCK_SIZE,		32},
-+	{ SDHCI_INT_ENABLE,		32},
-+	{ SDHCI_SIGNAL_ENABLE,		32},
-+	{ SDHCI_AUTO_CMD_STATUS,	32},
-+	{ SDHCI_HOST_CONTROL,		32},
-+	{ SDHCI_TIMEOUT_CONTROL,	 8},
-+	{ MA35_SDHCI_MSHCCTL,		32},
-+	{ MA35_SDHCI_MBIUCTL,		32},
-+};
-+
-+/*
-+ * If DMA addr spans 128MB boundary, we split the DMA transfer into two
-+ * so that each DMA transfer doesn't exceed the boundary.
-+ */
-+static void ma35_adma_write_desc(struct sdhci_host *host, void **desc,
-+				  dma_addr_t addr, int len, unsigned int cmd)
-+{
-+	int tmplen, offset;
-+
-+	if (likely(!len || BOUNDARY_OK(addr, len))) {
-+		sdhci_adma_write_desc(host, desc, addr, len, cmd);
-+		return;
-+	}
-+
-+	offset = addr & (SZ_128M - 1);
-+	tmplen = SZ_128M - offset;
-+	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-+
-+	addr += tmplen;
-+	len -= tmplen;
-+	sdhci_adma_write_desc(host, desc, addr, len, cmd);
-+}
-+
-+static void ma35_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	u32 ctl;
-+
-+	/* If the clock frequency exceeds MMC_HIGH_52_MAX_DTR,
-+	 *	disable command conflict check.
-+	 */
-+	ctl = sdhci_readw(host, MA35_SDHCI_MSHCCTL);
-+	if (clock > MMC_HIGH_52_MAX_DTR)
-+		ctl &= ~MA35_SDHCI_CMD_CONFLICT_CHK;
-+	else
-+		ctl |= MA35_SDHCI_CMD_CONFLICT_CHK;
-+	sdhci_writew(host, ctl, MA35_SDHCI_MSHCCTL);
-+
-+	sdhci_set_clock(host, clock);
-+}
-+
-+static int ma35_start_signal_voltage_switch(struct mmc_host *mmc,
-+					      struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct ma35_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_uhs))
-+			pinctrl_select_state(priv->pinctrl, priv->pins_uhs);
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_default))
-+			pinctrl_select_state(priv->pinctrl, priv->pins_default);
-+		break;
-+	default:
-+		dev_err(mmc_dev(host->mmc), "Unsupported signal voltage!\n");
-+		return -EINVAL;
-+	}
-+
-+	return sdhci_start_signal_voltage_switch(mmc, ios);
-+}
-+
-+static void ma35_voltage_switch(struct sdhci_host *host)
-+{
-+	/* Wait for 5ms after set 1.8V signal enable bit */
-+	usleep_range(5000, 5500);
-+}
-+
-+static int ma35_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct ma35_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	/* Limitations require a reset SD/eMMC before tuning. */
-+	if (!IS_ERR(priv->rst)) {
-+		int idx;
-+		u32 *val;
-+
-+		val = kmalloc(ARRAY_SIZE(restore_data), GFP_KERNEL);
-+		for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
-+			if (restore_data[idx].width == 32)
-+				val[idx] = sdhci_readl(host, restore_data[idx].reg);
-+			else if (restore_data[idx].width == 8)
-+				val[idx] = sdhci_readb(host, restore_data[idx].reg);
-+		}
-+
-+		reset_control_assert(priv->rst);
-+		reset_control_deassert(priv->rst);
-+
-+		for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
-+			if (restore_data[idx].width == 32)
-+				sdhci_writel(host, val[idx], restore_data[idx].reg);
-+			else if (restore_data[idx].width == 8)
-+				sdhci_writeb(host, val[idx], restore_data[idx].reg);
-+		}
-+
-+		kfree(val);
-+	}
-+
-+	return sdhci_execute_tuning(mmc, opcode);
-+}
-+
-+static const struct sdhci_ops sdhci_ma35_ops = {
-+	.set_clock		= ma35_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-+	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-+	.reset			= sdhci_reset,
-+	.adma_write_desc	= ma35_adma_write_desc,
-+	.voltage_switch	= ma35_voltage_switch,
-+};
-+
-+static const struct sdhci_pltfm_data sdhci_ma35_pdata = {
-+	.ops = &sdhci_ma35_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN | SDHCI_QUIRK2_BROKEN_DDR50 |
-+		   SDHCI_QUIRK2_ACMD23_BROKEN,
-+};
-+
-+static int ma35_probe(struct platform_device *pdev)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	struct ma35_priv *priv;
-+	int err;
-+	u32 extra, ctl;
-+
-+	host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata,
-+				sizeof(struct ma35_priv));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	/*
-+	 * extra adma table cnt for cross 128M boundary handling.
-+	 */
-+	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
-+	if (extra > SDHCI_MAX_SEGS)
-+		extra = SDHCI_MAX_SEGS;
-+	host->adma_table_cnt += extra;
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	if (dev->of_node) {
-+		pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
-+		if (IS_ERR(pltfm_host->clk)) {
-+			err = PTR_ERR(pltfm_host->clk);
-+			dev_err(&pdev->dev, "failed to get clk: %d\n", err);
-+			goto free_pltfm;
-+		}
-+		err = clk_prepare_enable(pltfm_host->clk);
-+		if (err)
-+			goto free_pltfm;
-+	}
-+
-+	err = mmc_of_parse(host->mmc);
-+	if (err)
-+		goto err_clk;
-+
-+	priv->rst = devm_reset_control_get(&pdev->dev, NULL);
-+
-+	sdhci_get_of_property(pdev);
-+
-+	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
-+	if (!IS_ERR(priv->pinctrl)) {
-+		priv->pins_default = pinctrl_lookup_state(priv->pinctrl, "default");
-+		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
-+		pinctrl_select_state(priv->pinctrl, priv->pins_default);
-+	}
-+
-+	if (!(host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)) {
-+		u32 reg;
-+
-+		priv->regmap = syscon_regmap_lookup_by_phandle(
-+				pdev->dev.of_node, "nuvoton,sys");
-+
-+		if (!IS_ERR(priv->regmap)) {
-+			/* Enable SDHCI voltage stable for 1.8V */
-+			regmap_read(priv->regmap, MA35_SYS_MISCFCR0, &reg);
-+			reg |= BIT(17);
-+			regmap_write(priv->regmap, MA35_SYS_MISCFCR0, reg);
-+		}
-+
-+		host->mmc_host_ops.start_signal_voltage_switch =
-+					ma35_start_signal_voltage_switch;
-+	}
-+
-+	host->mmc_host_ops.execute_tuning = ma35_execute_tuning;
-+
-+	err = sdhci_add_host(host);
-+	if (err)
-+		goto err_clk;
-+
-+	/* Enable INCR16 and INCR8 */
-+	ctl = sdhci_readw(host, MA35_SDHCI_MBIUCTL);
-+	ctl &= ~MA35_SDHCI_INCR_MSK;
-+	ctl |= MA35_SDHCI_INCR16|MA35_SDHCI_INCR8;
-+	sdhci_writew(host, ctl, MA35_SDHCI_MBIUCTL);
-+
-+	return 0;
-+
-+err_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+free_pltfm:
-+	sdhci_pltfm_free(pdev);
-+	return err;
-+}
-+
-+static int ma35_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	sdhci_remove_host(host, 0);
-+	clk_disable_unprepare(pltfm_host->clk);
-+	sdhci_pltfm_free(pdev);
-+
-+	return 0;
-+}
-+
-+static const struct of_device_id sdhci_ma35_dt_ids[] = {
-+	{ .compatible = "nuvoton,ma35d1-sdhci" },
-+	{}
-+};
-+
-+static struct platform_driver sdhci_ma35_driver = {
-+	.driver	= {
-+		.name	= "sdhci-ma35",
-+		.of_match_table = sdhci_ma35_dt_ids,
-+	},
-+	.probe	= ma35_probe,
-+	.remove = ma35_remove,
-+};
-+module_platform_driver(sdhci_ma35_driver);
-+
-+MODULE_DESCRIPTION("SDHCI platform driver for Nuvoton ma35d1");
-+MODULE_AUTHOR("shanchun1218@google.com");
-+MODULE_LICENSE("GPL v2");
---
-2.25.1
+No.
+
+Best regards,
+Krzysztof
+
