@@ -1,57 +1,57 @@
-Received: from mail-pl1-f178.google.com (mail-pl1-f178.google.com [209.85.214.178])
+Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C01E1AD3F0;
-	Thu, 20 Jun 2024 10:46:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D1B61AD41F;
+	Thu, 20 Jun 2024 10:46:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718880372; cv=none; b=EABFM2QulhUTwcdBRNJgxGCY4Slq/N7SLQDVNpL5q3i+RG1wO41daf3rWPwKN0L2lWuSaZ5j86OUN94mn3/PMcpEsObf508WA2M1Y06AahcJpKzEkNRgyRlUCmcjYND08na+loHtIvvskGLJ99tQNYiCf3ZPaN2K2P/St22ctBU=
+	t=1718880376; cv=none; b=nUuZ6yTYZmPe9rtbY8y4IfWF0MZuaGYnZGPEsfwRU6A4TeHHpu03ELnudz54YzTZOfrDHVfL3eIHTgkw9q/udwzkEyqQJcgCldquC5jmthmbE46fEpoUiO6qfYh6z/45tXAegd/OsfGLzqDSDfYihV9pypw6sd229UJrGH3olGA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718880372; c=relaxed/simple;
-	bh=S9sJ2EpZ4lhKLN6lOhKjm3V6c5BDb3OqO1TMnwXZ4ZI=;
+	s=arc-20240116; t=1718880376; c=relaxed/simple;
+	bh=ArtHWtS7L6AE4A11elThcteWl1u3Qx1hmTmpR2EUIAE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=tNn0KJto8hTIntV+aEKNBaDewQ0vNKhrpuulgr08OJisiKH85Ekwp6LvHsH4UHXblLrHgBAggfLxXP5BKvSW1CVeFRo4kv3XUt8wsVQf/Mp6wNKrZJAwpCpCAn+6Bx2lDxJa2F34RTSFEPjF62N8apjN4BJcorGbunkyPjj/Vio=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=XUwRj1BP; arc=none smtp.client-ip=209.85.214.178
+	 MIME-Version; b=Vb9sBQdt1ZWRs03f3M61DXBGXln4X27pn3yLD2/DlK1QQGvIWyG8xwFL0xSvQ2Tx2k+bj3I4MsCxRryWUepj2HsqQG+H3cw7G9EJPdtV+oJoFubDu5PnhMRjITNByQXgCVDpyS1yG3FHMHHJSTLHf8BsfDqpAL5/3qhh9PAgRdc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=L7rbPt0Z; arc=none smtp.client-ip=209.85.214.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XUwRj1BP"
-Received: by mail-pl1-f178.google.com with SMTP id d9443c01a7336-1f9b364faddso6173855ad.3;
-        Thu, 20 Jun 2024 03:46:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L7rbPt0Z"
+Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-1f44b45d6abso5915855ad.0;
+        Thu, 20 Jun 2024 03:46:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718880371; x=1719485171; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1718880375; x=1719485175; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8swW2OiBWO8iEiTd4+ToO1rrxW7MWmDO62LW2ZZz5Nc=;
-        b=XUwRj1BPL0n2CTjh93LH+VLeMBFwW/ucvYVUcfxbhQP4VKxJTf+iqF0HRsW2uA7dSU
-         DFv2ykiU8f5oohwpl73eX0UXL8+sNUv2EH60Bt7WYKBB3TfmikOBN3gSBU5J8PyXPbGg
-         GDWxTfpyTH89jbYvN9spoa0IaCMrR9o9s1qdMa0uD5BM1+VCdvbFjVSsiovH3K9qvp7j
-         yBQOyUnECXrBlCFVCwtdRlevFPgqYMVI+MfRpwxrw0xYOOTWV9twg59Ew7DoMA6vELLk
-         Us7LetuGKUNviOPHlUWa32FSdqX6b6SNFMq3ETB4Up14RYAMSiSnOoh8GPHY5QU3KdNa
-         bKig==
+        bh=bZEKIw6wgi6G3NicKe6SYWsy2FIoj6x/c+3UOgoXT1w=;
+        b=L7rbPt0Z0YMXBJA5npukLCXrBKfJq9g/sD34lJKQoQPuadMiM6hSi+O+qOJI4zZ28D
+         o1aGSTqKzgAPc8Ax+BtJN+AjHn7y2WFp0Xl0eA/5wmrOT9qohcuiwj6T76aGOZQ5QTG5
+         6qP6fh2ekFJ9CUfcj3zrNwybRo0wMiimgmMVOqAaojfHPWKXjcl3dNj17prx57aCjuK2
+         Y7bDpO22o8MK/s0uQwt9d9qaEQjAAPBiCKMQ/uRui1e784w5uSB5V/6jg+RvvMcINiro
+         m0vv6kCaFZv+cN0ZvLjl7I6VSJEEEZydj48nuBDCg4WN2O0xHejV4GGc5e7aJJZ7hRsx
+         ms0w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718880371; x=1719485171;
+        d=1e100.net; s=20230601; t=1718880375; x=1719485175;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=8swW2OiBWO8iEiTd4+ToO1rrxW7MWmDO62LW2ZZz5Nc=;
-        b=AfeLrcP4ngEMUaIRG36AERlBwgSH0XxqHswaRk6SQDtr02NVtbbgCWLrgYnH36jvnP
-         FzljmPUm2oaO8SeCeIu60+TJix2V+7HtRVrTZeCeCtkcfk6I3+p+Na658aqjglynuRGV
-         Bp/ILqGFkQG6UVo6XnUnd658ppSKOzW+wiZF8Yy6jQVRJuykshhep6K+nw7xaw6S1g5M
-         onU5vPjA8FLvvKeaMCEjV8Yauaom2h1nIlOM0lAw6bsEUsbKKbi36CZoKa1TA/8lT7bE
-         f9jv2C5ChqkxntN1mRgxoQmFT72q4xFxwFIw6M61b2nVMTCcMmuQHh421DbqS+8zXZq1
-         7WRw==
-X-Forwarded-Encrypted: i=1; AJvYcCUpNzL78+4P+GRlAR1ssD3gFgFh9zYr6C1AO9YN/evc72MsUww2GqpWGSzU3Fl2soxlFuyPATcxyf5tBU00T6au+GN0ovKz8aJ8EAt2
-X-Gm-Message-State: AOJu0YyWAqrKdEc7O+0jb2pNrXkpLm+p2zJcgyhMfdXYo35n0GErcssb
-	Cm4lCFJo5QCtZMBPzkQ8gldS1MQJgjqQjAuPmv54d03x2nEc9lon
-X-Google-Smtp-Source: AGHT+IFNGNrAWi5GTxFdTBhjTM6vS8QwvN5xMvOgqOXwucuhFMMoHwC8NpG1XgEdXAUeNknuYlWQvw==
-X-Received: by 2002:a17:902:e747:b0:1f9:8cd9:96cb with SMTP id d9443c01a7336-1f9aa45eb15mr60443425ad.43.1718880370718;
-        Thu, 20 Jun 2024 03:46:10 -0700 (PDT)
+        bh=bZEKIw6wgi6G3NicKe6SYWsy2FIoj6x/c+3UOgoXT1w=;
+        b=jHWFL29zus1qeGpVtptOD0J5YaC1VLShBHXAitEfgO3q5J5jyOQV6FzbFdK75GHFQo
+         EcuRlbBFAj11ETUJgBdh2dxhcSrCDkm5BRsk7JA4K98bw71gUYbnGAP0w64rRXklSyVB
+         iOJ3chtA6u6MocbvZm3Bm/TvUm4Xs5mdNhTb+uucBVqzKXCQ1vBu2HDV5lwwa3sjKvEL
+         2swF5wrJy2XIpMP4DJ3Jv9Iy9V+UyFPxN/O4ZzHnOnIR8SUwA7f0d3ggvM7Ziip8pkW0
+         kpH1K3Wbcpt4We/29zEoUS4yqip1ZSIevolFwav+wvDEtXpUgK/pIDvaSRCH3nBe0vF6
+         +NKw==
+X-Forwarded-Encrypted: i=1; AJvYcCUGpDUNS5VAJEaipUDxMLwfAIu+aLBzWAtpGF1A+rcmzg2R3K6einz8518XJmhFWQgNNbwFy7wyhbA+9wdYaDSA7ISxeMSQmLrzwcNv
+X-Gm-Message-State: AOJu0YwKnNXwN2gWPkvbCcsVQ3nVfngGIDCtk2HHkgYewptKag4AJE9J
+	sUCuvL7Ks0LahAOgJ4UcQAKZw0FKTj9x4PUzQRKdAoO47iP8LGtw
+X-Google-Smtp-Source: AGHT+IHm+jTXqaLn6RnN0Y2yToz7QibS3ncYvdjwmjp8hNph3nd2JftR/cAM3/5A1KSAAMuTCwSeAw==
+X-Received: by 2002:a17:902:da86:b0:1f3:cb7:b0ef with SMTP id d9443c01a7336-1f9aa450652mr61163485ad.51.1718880374558;
+        Thu, 20 Jun 2024 03:46:14 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e28a-abbc-b19b-27f2-8368-202e.emome-ip6.hinet.net. [2001:b400:e28a:abbc:b19b:27f2:8368:202e])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f855e55ca1sm134007805ad.49.2024.06.20.03.46.07
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f855e55ca1sm134007805ad.49.2024.06.20.03.46.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Jun 2024 03:46:10 -0700 (PDT)
+        Thu, 20 Jun 2024 03:46:14 -0700 (PDT)
 From: Victor Shih <victorshihgli@gmail.com>
 To: ulf.hansson@linaro.org,
 	adrian.hunter@intel.com
@@ -65,9 +65,9 @@ Cc: linux-mmc@vger.kernel.org,
 	Victor Shih <victorshihgli@gmail.com>,
 	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
 	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V17 20/22] mmc: sdhci-pci: add UHS-II support framework
-Date: Thu, 20 Jun 2024 18:44:42 +0800
-Message-Id: <20240620104444.5862-21-victorshihgli@gmail.com>
+Subject: [PATCH V17 21/22] mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
+Date: Thu, 20 Jun 2024 18:44:43 +0800
+Message-Id: <20240620104444.5862-22-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240620104444.5862-1-victorshihgli@gmail.com>
 References: <20240620104444.5862-1-victorshihgli@gmail.com>
@@ -81,99 +81,329 @@ Content-Transfer-Encoding: 8bit
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-This patch prepares for adding UHS-II support at a specific UHS-II
-capable sdhci-pci controller, GL9755 for now.
+Changes are:
+ * Disable GL9755 overcurrent interrupt when power on/off on UHS-II.
+ * Enable the internal clock when do reset on UHS-II mode.
+ * Increase timeout value before detecting UHS-II interface.
+ * Add vendor settings fro UHS-II mode.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
+
+Updates in V17:
+ - Rname gl9755_overcurrent_event_enable() to
+   sdhci_gli_overcurrent_event_enable().
+
+Updates in V15:
+ - Adjust gl9755_vendor_init() to the correct function.
+
+Updates in V13:
+ - Ues uhs2_sd_tran to stead MMC_UHS2_SD_TRAN.
+
+Updates in V9:
+ - Rename gl9755_pre_detect_init() to sdhci_gli_pre_detect_init().
+ - Rename gl9755_uhs2_reset_sd_tran() to sdhci_gli_uhs2_reset_sd_tran().
 
 Updates in V8:
- - Add config select MMC_SDHCI_UHS2 in Kconfig.
+ - Use sdhci_get_vdd_value() to simplify code in gl9755_set_power().
+ - Use read_poll_timeout_atomic() to simplify code in
+   sdhci_wait_clock_stable().
+ - Use read_poll_timeout_atomic() to simplify code in sdhci_gl9755_reset().
+
+Updates in V7:
+ - Drop using gl9755_post_attach_sd().
 
 ---
 
- drivers/mmc/host/Kconfig          |  1 +
- drivers/mmc/host/sdhci-pci-core.c | 16 +++++++++++++++-
- drivers/mmc/host/sdhci-pci.h      |  3 +++
- 3 files changed, 19 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-gli.c | 232 ++++++++++++++++++++++++++++++-
+ 1 file changed, 231 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 342bbc3ef577..7bd2f3c94e48 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -111,6 +111,7 @@ config MMC_SDHCI_PCI
- 	tristate "SDHCI support on PCI bus"
- 	depends on MMC_SDHCI && PCI
- 	select MMC_CQHCI
-+	select MMC_SDHCI_UHS2
- 	select IOSF_MBI if X86
- 	select MMC_SDHCI_IO_ACCESSORS
- 	help
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 23e6ba70144c..96b6fa831714 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -40,6 +40,7 @@
- #include "sdhci.h"
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 0f81586a19df..a4164948de81 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -18,6 +18,7 @@
  #include "sdhci-cqhci.h"
  #include "sdhci-pci.h"
+ #include "cqhci.h"
 +#include "sdhci-uhs2.h"
  
- static void sdhci_pci_hw_reset(struct sdhci_host *host);
+ /*  Genesys Logic extra registers */
+ #define SDHCI_GLI_9750_WT         0x800
+@@ -139,9 +140,36 @@
  
-@@ -2164,7 +2165,10 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	if (scratch == (u32)-1)
- 		dead = 1;
+ #define PCI_GLI_9755_PLLSSC        0x68
+ #define   PCI_GLI_9755_PLLSSC_PPM    GENMASK(15, 0)
++#define   PCI_GLI_9755_PLLSSC_RTL             BIT(24)
++#define   GLI_9755_PLLSSC_RTL_VALUE           0x1
++#define   PCI_GLI_9755_PLLSSC_TRANS_PASS      BIT(27)
++#define   GLI_9755_PLLSSC_TRANS_PASS_VALUE    0x1
++#define   PCI_GLI_9755_PLLSSC_RECV            GENMASK(29, 28)
++#define   GLI_9755_PLLSSC_RECV_VALUE          0x0
++#define   PCI_GLI_9755_PLLSSC_TRAN            GENMASK(31, 30)
++#define   GLI_9755_PLLSSC_TRAN_VALUE          0x3
++
++#define PCI_GLI_9755_UHS2_PLL            0x6C
++#define   PCI_GLI_9755_UHS2_PLL_SSC        GENMASK(9, 8)
++#define   GLI_9755_UHS2_PLL_SSC_VALUE      0x0
++#define   PCI_GLI_9755_UHS2_PLL_DELAY      BIT(18)
++#define   GLI_9755_UHS2_PLL_DELAY_VALUE    0x1
++#define   PCI_GLI_9755_UHS2_PLL_PDRST      BIT(27)
++#define   GLI_9755_UHS2_PLL_PDRST_VALUE    0x1
  
--	sdhci_remove_host(slot->host, dead);
-+	if (slot->chip->fixes && slot->chip->fixes->remove_host)
-+		slot->chip->fixes->remove_host(slot, dead);
+ #define PCI_GLI_9755_SerDes  0x70
++#define   PCI_GLI_9755_UHS2_SERDES_INTR       GENMASK(2, 0)
++#define   GLI_9755_UHS2_SERDES_INTR_VALUE     0x3
++#define   PCI_GLI_9755_UHS2_SERDES_ZC1        BIT(3)
++#define   GLI_9755_UHS2_SERDES_ZC1_VALUE      0x0
++#define   PCI_GLI_9755_UHS2_SERDES_ZC2        GENMASK(7, 4)
++#define   GLI_9755_UHS2_SERDES_ZC2_DEFAULT    0xB
++#define   GLI_9755_UHS2_SERDES_ZC2_SANDISK    0x0
+ #define PCI_GLI_9755_SCP_DIS   BIT(19)
++#define   PCI_GLI_9755_UHS2_SERDES_TRAN       GENMASK(27, 24)
++#define   GLI_9755_UHS2_SERDES_TRAN_VALUE     0xC
++#define   PCI_GLI_9755_UHS2_SERDES_RECV       GENMASK(31, 28)
++#define   GLI_9755_UHS2_SERDES_RECV_VALUE     0xF
+ 
+ #define PCI_GLI_9755_MISC	    0x78
+ #define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
+@@ -779,6 +807,200 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+ 	gl9755_wt_off(pdev);
+ }
+ 
++static void gl9755_vendor_init(struct sdhci_host *host)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	u32 serdes;
++	u32 pllssc;
++	u32 uhs2_pll;
++
++	gl9755_wt_on(pdev);
++
++	pci_read_config_dword(pdev, PCI_GLI_9755_SerDes, &serdes);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_TRAN;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_TRAN,
++			     GLI_9755_UHS2_SERDES_TRAN_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_RECV;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_RECV,
++			     GLI_9755_UHS2_SERDES_RECV_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_INTR;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_INTR,
++			     GLI_9755_UHS2_SERDES_INTR_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC1;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC1,
++			     GLI_9755_UHS2_SERDES_ZC1_VALUE);
++	serdes &= ~PCI_GLI_9755_UHS2_SERDES_ZC2;
++	serdes |= FIELD_PREP(PCI_GLI_9755_UHS2_SERDES_ZC2,
++			     GLI_9755_UHS2_SERDES_ZC2_DEFAULT);
++	pci_write_config_dword(pdev, PCI_GLI_9755_SerDes, serdes);
++
++	pci_read_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, &uhs2_pll);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_SSC;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_SSC,
++			  GLI_9755_UHS2_PLL_SSC_VALUE);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_DELAY;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_DELAY,
++			  GLI_9755_UHS2_PLL_DELAY_VALUE);
++	uhs2_pll &= ~PCI_GLI_9755_UHS2_PLL_PDRST;
++	uhs2_pll |= FIELD_PREP(PCI_GLI_9755_UHS2_PLL_PDRST,
++			  GLI_9755_UHS2_PLL_PDRST_VALUE);
++	pci_write_config_dword(pdev, PCI_GLI_9755_UHS2_PLL, uhs2_pll);
++
++	pci_read_config_dword(pdev, PCI_GLI_9755_PLLSSC, &pllssc);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_RTL;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RTL,
++			  GLI_9755_PLLSSC_RTL_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_TRANS_PASS;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRANS_PASS,
++			  GLI_9755_PLLSSC_TRANS_PASS_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_RECV;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_RECV,
++			  GLI_9755_PLLSSC_RECV_VALUE);
++	pllssc &= ~PCI_GLI_9755_PLLSSC_TRAN;
++	pllssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_TRAN,
++			  GLI_9755_PLLSSC_TRAN_VALUE);
++	pci_write_config_dword(pdev, PCI_GLI_9755_PLLSSC, pllssc);
++
++	gl9755_wt_off(pdev);
++}
++
++static void sdhci_gli_pre_detect_init(struct sdhci_host *host)
++{
++	/* Need more time on UHS2 detect flow */
++	sdhci_writeb(host, 0xA7, SDHCI_UHS2_TIMER_CTRL);
++}
++
++static void sdhci_gli_overcurrent_event_enable(struct sdhci_host *host, bool enable)
++{
++	u32 mask;
++
++	mask = sdhci_readl(host, SDHCI_SIGNAL_ENABLE);
++	if (enable)
++		mask |= SDHCI_INT_BUS_POWER;
 +	else
-+		sdhci_remove_host(slot->host, dead);
- 
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
-@@ -2172,6 +2176,16 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	sdhci_free_host(slot->host);
- }
- 
-+int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot)
-+{
-+	return sdhci_uhs2_add_host(slot->host);
++		mask &= ~SDHCI_INT_BUS_POWER;
++
++	sdhci_writel(host, mask, SDHCI_SIGNAL_ENABLE);
++
++	mask = sdhci_readl(host, SDHCI_INT_ENABLE);
++	if (enable)
++		mask |= SDHCI_INT_BUS_POWER;
++	else
++		mask &= ~SDHCI_INT_BUS_POWER;
++
++	sdhci_writel(host, mask, SDHCI_INT_ENABLE);
 +}
 +
-+void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead)
++static void gl9755_set_power(struct sdhci_host *host, unsigned char mode,
++			     unsigned short vdd)
 +{
-+	sdhci_uhs2_remove_host(slot->host, dead);
++	u8 pwr = 0;
++
++	if (mode != MMC_POWER_OFF) {
++		pwr = sdhci_get_vdd_value(vdd);
++		if (!pwr)
++			WARN(1, "%s: Invalid vdd %#x\n", mmc_hostname(host->mmc), vdd);
++		pwr |= SDHCI_VDD2_POWER_180;
++	}
++
++	if (host->pwr == pwr)
++		return;
++
++	host->pwr = pwr;
++
++	if (pwr == 0) {
++		sdhci_gli_overcurrent_event_enable(host, false);
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++	} else {
++		sdhci_gli_overcurrent_event_enable(host, false);
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++
++		pwr |= (SDHCI_POWER_ON | SDHCI_VDD2_POWER_ON);
++
++		sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
++		/* wait stable */
++		mdelay(5);
++		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		/* wait stable */
++		mdelay(5);
++		sdhci_gli_overcurrent_event_enable(host, true);
++	}
 +}
 +
- static void sdhci_pci_runtime_pm_allow(struct device *dev)
++static bool sdhci_wait_clock_stable(struct sdhci_host *host)
++{
++	u16 clk = 0;
++
++	if (read_poll_timeout_atomic(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
++				     10, 20000, false, host, SDHCI_CLOCK_CONTROL)) {
++		pr_err("%s: Internal clock never stabilised.\n", mmc_hostname(host->mmc));
++		sdhci_dumpregs(host);
++		return false;
++	}
++	return true;
++}
++
++static void sdhci_gli_uhs2_reset_sd_tran(struct sdhci_host *host)
++{
++	/* do this on UHS2 mode */
++	if (host->mmc->uhs2_sd_tran) {
++		sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
++		sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
++		sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
++		sdhci_uhs2_clear_set_irqs(host,
++					  SDHCI_INT_ALL_MASK,
++					  SDHCI_UHS2_INT_ERROR_MASK);
++	}
++}
++
++static void sdhci_gl9755_reset(struct sdhci_host *host, u8 mask)
++{
++	u16 clk_ctrl;
++	u16 ctrl2;
++	u8 rst;
++
++	/* need internal clock */
++	if (mask & SDHCI_RESET_ALL) {
++		ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		clk_ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++		if ((ctrl2 & SDHCI_CTRL_V4_MODE) &&
++		    (ctrl2 & SDHCI_CTRL_UHS2_ENABLE)) {
++			sdhci_writew(host,
++				     SDHCI_CLOCK_INT_EN,
++				     SDHCI_CLOCK_CONTROL);
++		} else {
++			sdhci_writew(host,
++				     SDHCI_CLOCK_INT_EN,
++				     SDHCI_CLOCK_CONTROL);
++			sdhci_wait_clock_stable(host);
++			sdhci_writew(host,
++				     SDHCI_CTRL_V4_MODE,
++				     SDHCI_HOST_CONTROL2);
++		}
++	}
++
++	sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
++
++	/* reset sd-tran on UHS2 mode if need to reset cmd/data */
++	if ((mask & SDHCI_RESET_CMD) | (mask & SDHCI_RESET_DATA))
++		sdhci_gli_uhs2_reset_sd_tran(host);
++
++	if (mask & SDHCI_RESET_ALL)
++		host->clock = 0;
++
++	/* hw clears the bit when it's done */
++	if (read_poll_timeout_atomic(sdhci_readb, rst, !(rst & mask),
++				     10, 100000, false, host, SDHCI_SOFTWARE_RESET)) {
++		pr_err("%s: Reset 0x%x never completed.\n", mmc_hostname(host->mmc), (int)mask);
++		sdhci_dumpregs(host);
++		/* manual clear */
++		sdhci_writeb(host, 0, SDHCI_SOFTWARE_RESET);
++		return;
++	}
++}
++
+ static inline void gl9767_vhs_read(struct pci_dev *pdev)
  {
- 	pm_suspend_ignore_children(dev, 1);
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 153704f812ed..e807c039a8b1 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -145,6 +145,7 @@ struct sdhci_pci_fixes {
- 	int			(*probe_slot) (struct sdhci_pci_slot *);
- 	int			(*add_host) (struct sdhci_pci_slot *);
- 	void			(*remove_slot) (struct sdhci_pci_slot *, int);
-+	void			(*remove_host) (struct sdhci_pci_slot *, int);
+ 	u32 vhs_enable;
+@@ -1086,6 +1308,7 @@ static int gli_probe_slot_gl9755(struct sdhci_pci_slot *slot)
+ 	gli_pcie_enable_msi(slot);
+ 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+ 	sdhci_enable_v4_mode(host);
++	gl9755_vendor_init(host);
  
- #ifdef CONFIG_PM_SLEEP
- 	int			(*suspend) (struct sdhci_pci_chip *);
-@@ -189,6 +190,8 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
- 	return (void *)slot->private;
+ 	return 0;
  }
+@@ -1524,17 +1747,24 @@ static const struct sdhci_ops sdhci_gl9755_ops = {
+ 	.read_w			= sdhci_gli_readw,
+ 	.read_b			= sdhci_gli_readb,
+ 	.set_clock		= sdhci_gl9755_set_clock,
++	.set_power		= gl9755_set_power,
+ 	.enable_dma		= sdhci_pci_enable_dma,
+ 	.set_bus_width		= sdhci_set_bus_width,
+-	.reset			= sdhci_reset,
++	.reset			= sdhci_gl9755_reset,
+ 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+ 	.voltage_switch		= sdhci_gli_voltage_switch,
++	.dump_uhs2_regs		= sdhci_uhs2_dump_regs,
++	.set_timeout		= sdhci_uhs2_set_timeout,
++	.irq			= sdhci_uhs2_irq,
++	.uhs2_pre_detect_init   = sdhci_gli_pre_detect_init,
+ };
  
-+int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot);
-+void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead);
+ const struct sdhci_pci_fixes sdhci_gl9755 = {
+ 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+ 	.quirks2	= SDHCI_QUIRK2_BROKEN_DDR50,
+ 	.probe_slot	= gli_probe_slot_gl9755,
++	.add_host	= sdhci_pci_uhs2_add_host,
++	.remove_host	= sdhci_pci_uhs2_remove_host,
+ 	.ops            = &sdhci_gl9755_ops,
  #ifdef CONFIG_PM_SLEEP
- int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
- #endif
+ 	.resume         = sdhci_pci_gli_resume,
 -- 
 2.25.1
 
