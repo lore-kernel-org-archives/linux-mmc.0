@@ -1,143 +1,131 @@
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D06F1AC229
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 12:29:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 942AE1AC453
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 12:39:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718886572; cv=none; b=FIAw88wYJMqSJcc30zzp5XdzLfBN0LtZk/dSN6oPBM01l5ODL+KT+VVhKLhv8rKuSZUHalgCTQF7s6v+FzwFrOxlFx30um+0J1zKDU+Szapb+4jvGUWXFp4dTvYrYlzxpPodeenZnQ/KV7WHbalt377CUnC8l37W6BtPjPF5c+c=
+	t=1718887151; cv=none; b=ptKMAEXBQwnvEzFiTujxNiROTbAug25yBW3fFDjyjy046D796NzfWN+Xz+Kxy12jceZMfr1fqp0uMQQa97b6duArxxE3WRNhOs7hG4eQIsdVZopsQyCwjhtivdm+RuwqBfp7O7YDm37xrhwckpBG4/1sXNlq0WzlQ16AmyAO65g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718886572; c=relaxed/simple;
-	bh=38qWKyVoWoDAeaYRBfca/el/bUnwJnMh4XRLXYw0OEI=;
-	h=From:Date:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rZMhgZgqwady69Bmvv+7F8LbW19kgB9FvEDX4XU9dagLmFE4eHx1Uir21EfWzMqTpS/nrlOfBirybiqNfFe9veBbs/ZbVUfcymlpnY6NPNEa2czLnivOoe/W9X5ElYL/0zfjfI5HpwEnmkRZEKWGGAbHs6L0vIavtulI3xB/ztE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com; spf=pass smtp.mailfrom=suse.com; dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b=dH+BE3nI; arc=none smtp.client-ip=209.85.218.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=suse.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.com
+	s=arc-20240116; t=1718887151; c=relaxed/simple;
+	bh=+MKb0d6kGQXFAfTFxGeErEGjvV5X6Fkm4QbR7GkA4DA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UeAifmGEDq2WQK+XLbEThFDRO66SP0un3LWYdtM3tWpbTzs9edcdsKH2ynjvskNomAaQhJLqfCWN4DLLG+gL0jZniFkGDFXw1TJ/tRlKeyaZ04bGRHN7CSEbs2CsGGH/HcGzeKUQuoKe53SosxGPW4EKG5uKCnH5sA3gToI6gR0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Mb22D8YR; arc=none smtp.client-ip=209.85.219.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=suse.com header.i=@suse.com header.b="dH+BE3nI"
-Received: by mail-ej1-f43.google.com with SMTP id a640c23a62f3a-a6fc30e3237so75840166b.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 05:29:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Mb22D8YR"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e0272692096so787508276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 05:39:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=suse.com; s=google; t=1718886569; x=1719491369; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=812oi9ttGdSZvdMnnqNdJPwV4ZnipqaADPcKVJvQSFI=;
-        b=dH+BE3nIoM6j/MPFdYhR0Hls9iPcjRiph85fO66J1Fy6Q6Jr6SfiSeRFPZB3buzmsG
-         /mPAzhrD0+wpHHRDt2dO2Uj2JkUAXJYcfH5w2fidmJmruKvNzHhWIm+cF80pljeHkPGh
-         +GZHn1so+kkNL5dq0oAtdpWEsIfNNmTr0DFKbcaXEID0thOEqi24s27n/JxuMofDd8Hm
-         gDDR8hXbqMRSPcE+QrF7cDigs4U6GAd1jApLDvf/oSUiEWqHYh7zjkmvjfADgVXwgu8W
-         xLqxFDWBeyhBplPzHxOkMwTLFz5Hbrtvp3drFsXCxMr74VIbdm4LbJpDa/YG6l69A3ry
-         VgIw==
+        d=linaro.org; s=google; t=1718887148; x=1719491948; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=MXrsS2mpejDFsFEi94Ftqe+sXeL8FdVZSl2zE7uQvoQ=;
+        b=Mb22D8YRuTPzJ5VOL8QVtTezWAOlNvo/yOxcuK7bRE4S5Yfh2dnSPSdKSH3ewLtpYm
+         SIde8O1cGxCqrgqwuKTEHBwfL/7NYIIMx61WV4oaZpPcfgn/gqLPvmD0uNcZ/HgTxQXl
+         Dm9XSGiHBFtRiTuHXZmV6rvc8E9Hw0FUHox0GG5N3BI1tyFi9u5Gv/wTA1106LfpE0o3
+         rVbOp+W0glASHYdGqv8fjN2mLHxSN1OIcjgwlH3pAKLNoyZCoJoc65OCzYl41IZX6sVp
+         tium8weJl+yTWxVah7BI9bHSaIyua7UoIAcHnY1nh2cjoJ0J5vVBr3716svOMr73QNz9
+         fD5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718886569; x=1719491369;
-        h=in-reply-to:content-disposition:mime-version:references
-         :mail-followup-to:message-id:subject:cc:to:date:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=812oi9ttGdSZvdMnnqNdJPwV4ZnipqaADPcKVJvQSFI=;
-        b=tBMcbBLR0hl03HEFQXb14PbhKnp40iIJq6ny1Hbkhz0SkbAtRPF6dIG8q62ruYldIV
-         vTKEwMPUx78++SaMJSVemu2Rq5f4jj+yoM2TtHylhmOQi8amw6ViahOEdf5dZgBWXYsj
-         +DVB+fFjaSrNNLDD0WEVM+UzoIkuD1Q8Sz97riCyZgi3JxY8I/5udr7GS5GFwZMytX3a
-         8ihkUuPfXu/DOvbF+rjXKjqeB5jupF8tZBPp8sdlzo2GNWQNk+0kFOlWWPlC7mC97g3P
-         AiDk3JgL+EKrcd7GhD2fzDWqjb5MnGEmygyuZNbOsO0KySi6Yq6t+HXoNeU0dGQzAn3A
-         USlw==
-X-Gm-Message-State: AOJu0YzpYlRnmka0Dv/6WLe397sryORWsyKtLs3z0GaabO6Kt8J98PcT
-	RauNmDlV72Sxl2q3UbzDun7ApspwtjbNih1n/ZXuGFInjdZbI1ED11mCxs5gyb8=
-X-Google-Smtp-Source: AGHT+IEcb44WWVE0fUrpL5V8J52hlNsEKUwTphFUd3zrDyWyC67nuuTnnM+POuLf4yuOG9Mv+4ORAQ==
-X-Received: by 2002:a17:906:7253:b0:a6f:4f3f:e6d8 with SMTP id a640c23a62f3a-a6fab617aa6mr347004866b.20.1718886568544;
-        Thu, 20 Jun 2024 05:29:28 -0700 (PDT)
-Received: from localhost (host-62-211-197-135.pool62211.interbusiness.it. [62.211.197.135])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a6f56f41071sm777420566b.149.2024.06.20.05.29.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Jun 2024 05:29:28 -0700 (PDT)
-From: Andrea della Porta <andrea.porta@suse.com>
-X-Google-Original-From: Andrea della Porta <aporta@suse.de>
-Date: Thu, 20 Jun 2024 14:29:44 +0200
-To: Peter Robinson <pbrobinson@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Andrea della Porta <andrea.porta@suse.com>,
-	Stefan Wahren <wahrenst@gmx.net>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add ARCH_BCM2835 option
-Message-ID: <ZnQguA8P81h3MsQX@apocalypse>
-Mail-Followup-To: Peter Robinson <pbrobinson@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	Andrea della Porta <andrea.porta@suse.com>,
-	Stefan Wahren <wahrenst@gmx.net>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-References: <20240620074248.152353-1-pbrobinson@gmail.com>
- <ZnQb1_K1Ctvhtngy@apocalypse>
- <CALeDE9Oub0=wCd7s1Nx5fwU94cFbUKdmXu1GTb4cKu8fMiqOAg@mail.gmail.com>
+        d=1e100.net; s=20230601; t=1718887148; x=1719491948;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=MXrsS2mpejDFsFEi94Ftqe+sXeL8FdVZSl2zE7uQvoQ=;
+        b=T2h7GcO3qoHeyZWr37Zv2dyTH8YOLNa0oWHm0WLrh4gUm4m+pNJEz8SFP/9KxN3kMk
+         VCTYQ2kpTn8O0Nw9JBULu+1wzF+r/FzPi+g3DgQo7tYeyu0Tmde9xp72aAyEou8t3Abz
+         DFiQvRcFQ3wvhQKY8FhmHY/GV5i7BQKhQOnmmGRtLSDlN2r/JO0X5kZkT4+Ma5mc93pr
+         AIq6mcWGMcftcoRr0VTTqrrc23v30GoEmd+FXtKhsHDPgE6TF14bpLG774RgRt9lAdX+
+         l2iSQJP023gFoqXGpjENXJmXg1pBXNR363eF907l7kX9u4Oz0yU1jpjRtufKWOOc1o3D
+         /kDw==
+X-Gm-Message-State: AOJu0YwSto9CJiFhX6eOl+v4Y/RGiwJPkMruayzfSVLt1GxSzbrOosvJ
+	RjL5IG2v851Z3kid/TxGN2MaFglNGFtAd2D5iYfMZbOy7IzfqJh/1EchmVMBA1VuSjE8iACZMOL
+	ON8AIZlXWtBD/+BQhhb32BHcGfqAWT126k0+1uMRs2aozbzonlRE=
+X-Google-Smtp-Source: AGHT+IGfsRIK8F1k8cecBYpiUgwdL4yHwEhbBpx6cYhEB2iRzrL7VfrwSoALfmBAfls/toiZCfz2rMSHqgmq0xwcXu0=
+X-Received: by 2002:a25:b02:0:b0:dff:1a17:dcbc with SMTP id
+ 3f1490d57ef6-e02be0fc880mr5444939276.2.1718887148379; Thu, 20 Jun 2024
+ 05:39:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CALeDE9Oub0=wCd7s1Nx5fwU94cFbUKdmXu1GTb4cKu8fMiqOAg@mail.gmail.com>
+References: <20240606131222.1131880-1-linux-mmc@danman.eu>
+In-Reply-To: <20240606131222.1131880-1-linux-mmc@danman.eu>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 20 Jun 2024 14:38:32 +0200
+Message-ID: <CAPDyKFpuJexp_1hgKhJ3b8VCx+PwwhAQscbJT5-44Re0xmbxrg@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
+To: linux-mmc@danman.eu
+Cc: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Peter,
+On Thu, 6 Jun 2024 at 15:12, <linux-mmc@danman.eu> wrote:
+>
+> From: Daniel Kucera <linux-mmc@danman.eu>
+>
+> Locked SD card will not reply to SEND_SCR or SD_STATUS commands
+> so it was failing to initialize previously. When skipped,
+> the card will get initialized and CMD42 can be sent using
+> ioctl to unlock the card or remove password protection.
+> For eMMC, this is not necessary because all initialization
+> commands are allowed in locked state.
+> Until unlocked, all read/write calls will timeout.
 
-On 13:22 Thu 20 Jun     , Peter Robinson wrote:
-> Hi Andrea,
-> 
-> > On 08:42 Thu 20 Jun     , Peter Robinson wrote:
-> > > The Raspberry Pi devices have to date all used ARCH_BCM2835
-> > > as their SoC arch dependency so configurations that use this
-> > > and not BRCMSTB won't end up with this module in their config.
-> >
-> > AFAIK the BCM2712 (RPi5) is the only SoC of the Raspberry family
-> > that has an MMC host controller that is more or less like the one
-> > present on the STB line silicon. Adding ARCH_BCM2835 to the dependency
-> > will then allow RPi<=4 to use this driver for which they do not
-> > have the relevant hw.
-> 
-> It won't use the driver due to the different compatibles, it just
-> allows the driver to be available. The various different gens of RPi
-> now have around 4 different types of MMC controller in use.
+Skipping the commands above, only means the card gets partially
+initialized. Leaving a card in that state seems fragile. What will
+happen to upper block layers and filesystems when trying to access it?
 
-True, so why make a driver available if I can't use it anyway? No other
-SoC served by ARCH_BCM2835 have that hw, but as you said, every one of them 
-have different controllers best served by anything else but SDHCI_BRCMSTB.
+Several years ago Al Cooper made an attempt [1] to manage the
+unlocking of the card during initialization, by finding the password
+through the "keys" subsystem. The series didn't really make it to the
+upstream kernel, but overall the approach seemed to make sense to me.
+It should allow us to complete the initialization of the card inside
+the kernel and prevent unnecessary complexity for userspace to manage.
+Perhaps you can have a closer look at that series and see if it's
+possible to update it?
 
-Thanks,
-Andrea
+Kind regards
+Uffe
 
-> 
-> > If I'm correct about the aforementioned point, I'd be inclined to
-> > avoid this change, then.
-> >
-> > Many thanks,
-> > Andrea
-> >
-> > >
-> > > Cc: Andrea della Porta <andrea.porta@suse.com>
-> > > Cc: Stefan Wahren <wahrenst@gmx.net>
-> > > Cc: Adrian Hunter <adrian.hunter@intel.com>
-> > > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> > > Fixes: 40f22df5269e6 ("mmc: sdhci-brcmstb: Add BCM2712 support")
-> > > Signed-off-by: Peter Robinson <pbrobinson@gmail.com>
-> > > ---
-> > >  drivers/mmc/host/Kconfig | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > > index bb0d4fb0892ae..eb3ecfe055910 100644
-> > > --- a/drivers/mmc/host/Kconfig
-> > > +++ b/drivers/mmc/host/Kconfig
-> > > @@ -1016,7 +1016,7 @@ config MMC_SDHCI_MICROCHIP_PIC32
-> > >
-> > >  config MMC_SDHCI_BRCMSTB
-> > >       tristate "Broadcom SDIO/SD/MMC support"
-> > > -     depends on ARCH_BRCMSTB || BMIPS_GENERIC || COMPILE_TEST
-> > > +     depends on ARCH_BRCMSTB || ARCH_BCM2835 || BMIPS_GENERIC || COMPILE_TEST
-> > >       depends on MMC_SDHCI_PLTFM
-> > >       select MMC_CQHCI
-> > >       default ARCH_BRCMSTB || BMIPS_GENERIC
-> > > --
-> > > 2.45.2
-> > >
+[1]
+https://lore.kernel.org/linux-mmc/1433526147-25941-1-git-send-email-alcooperx@gmail.com/
+
+>
+> Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
+> ---
+>  drivers/mmc/core/sd.c | 13 ++++++++++++-
+>  1 file changed, 12 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 1c8148cdd..ae821df7d 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -928,8 +928,19 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+>         bool reinit)
+>  {
+>         int err;
+> +       u32 card_status;
+>
+> -       if (!reinit) {
+> +       err = mmc_send_status(card, &card_status);
+> +       if (err){
+> +               pr_err("%s: unable to get card status\n", mmc_hostname(host));
+> +               return err;
+> +       }
+> +
+> +       if (card_status & R1_CARD_IS_LOCKED){
+> +               pr_warn("%s: card is locked\n", mmc_hostname(host));
+> +       }
+> +
+> +       if (!reinit && !(card_status & R1_CARD_IS_LOCKED)) {
+>                 /*
+>                  * Fetch SCR from card.
+>                  */
+> --
+> 2.34.1
+>
