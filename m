@@ -1,99 +1,83 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 9793E1BF53
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 15:31:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [195.130.137.89])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B01941B0100
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 15:39:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.137.89
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718897470; cv=none; b=tBD3Uadn0970Y/F/4Gf7DcelHi0t9PmmR1RDrj4shlDl7P+Wl7Zsxl1FP1t4/d4Vb08UTzNdx/7lKPcTRCQcAGN8Jo/gfzvZoMP6NNgWhlebjRd3IX1O4l18v8pav+weXZJ0H11C3SS4jCTF8CaFci4nVNn5gHDd6r/xFaVhIeo=
+	t=1718897999; cv=none; b=empArxnZ8Sh2SZu4rivVm5cWmzot6Vf/OT5E/KaJrT3gYnRk5JXNykVcy4MgnVJiOo7KZVIv4AEDeNGqtteZh4oBgdNWOHc1e7y6/isqHLe5y+SAy9M7km6x49AW8Q8qKBJN8Ma1AMasUZncBflEPFVUz3eMjAf86hKnSCaebO0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718897470; c=relaxed/simple;
-	bh=epawaL7YtAOR416OhZF8hMy3BYtfY+G3FdfjGIWengo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LHQ3GYv8iwuTWiwAMScQGYXzJHWwUd126d3+45iQe5jpqLcKmO4C67ZnF+2w7sgIMv6rmTxJUaVegDhwBOq02mZaXKYWpOSFBmAzb1sLX0/7iIfPhkuTvEeM4lNblQMN3nNODQ21tjT6AOpQPfKD6Waxp3hhlGC580/cURPQ7Wc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 6CB4DDA7;
-	Thu, 20 Jun 2024 08:31:31 -0700 (PDT)
-Received: from [10.1.27.54] (e127648.arm.com [10.1.27.54])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 027553F73B;
-	Thu, 20 Jun 2024 08:31:05 -0700 (PDT)
-Message-ID: <cf863ebd-df9c-4088-a273-26408c7c132a@arm.com>
-Date: Thu, 20 Jun 2024 16:31:03 +0100
+	s=arc-20240116; t=1718897999; c=relaxed/simple;
+	bh=EGan0DPRyj1iH/qlzBQ+qSQPs0ak1SMhLvLNyPKTR4s=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=o3jwfCr6jHc2VS//WudkRV1m4gSRG3I5Gmiq8MWEsmMqf92yAEehJbut/PBrUhvoC1eQz1Xal5kkcQwjvyrwTyaSRIUNh+lv4fwPcc24kjGhz1dW7qiDKxaG3trBRRMFYnJ2SgoGB2qP6YEkm62nwom4DjSbdmw1n0RTtWKu54k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.137.89
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux-m68k.org
+Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed80:260f:cd5c:91b1:523c])
+	by laurent.telenet-ops.be with bizsmtp
+	id drfo2C00R0Y0hZi01rfocP; Thu, 20 Jun 2024 17:39:49 +0200
+Received: from rox.of.borg ([192.168.97.57])
+	by ramsan.of.borg with esmtp (Exim 4.95)
+	(envelope-from <geert@linux-m68k.org>)
+	id 1sKJt6-0005LW-Oa;
+	Thu, 20 Jun 2024 17:39:48 +0200
+Received: from geert by rox.of.borg with local (Exim 4.95)
+	(envelope-from <geert@linux-m68k.org>)
+	id 1sKJt6-000LnR-Le;
+	Thu, 20 Jun 2024 17:39:48 +0200
+From: Geert Uytterhoeven <geert+renesas@glider.be>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Lee Jones <lee@kernel.org>,
+	Arnd Bergmann <arnd@arndb.de>,
+	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+Cc: linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH 0/2] mmc: tmio: Remove obsolete callbacks
+Date: Thu, 20 Jun 2024 17:39:44 +0200
+Message-Id: <cover.1718897545.git.geert+renesas@glider.be>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
-To: Ulf Hansson <ulf.hansson@linaro.org>, Daniel Kucera <linux-mmc@danman.eu>
-Cc: linux-mmc@vger.kernel.org
-References: <20240606131222.1131880-1-linux-mmc@danman.eu>
- <CAPDyKFpuJexp_1hgKhJ3b8VCx+PwwhAQscbJT5-44Re0xmbxrg@mail.gmail.com>
- <c89d8a0c170fa3bc8593bfde25b07e4d@danman.eu>
- <CAPDyKFpLkmU-vjAaM=QDkc+3F3tMNjViOdnYSFNqyDduyfBm1g@mail.gmail.com>
-Content-Language: en-US
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <CAPDyKFpLkmU-vjAaM=QDkc+3F3tMNjViOdnYSFNqyDduyfBm1g@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 6/20/24 15:32, Ulf Hansson wrote:
-> On Thu, 20 Jun 2024 at 14:59, Daniel Kucera <linux-mmc@danman.eu> wrote:
->>
->> On 2024-06-20 14:38, Ulf Hansson wrote:
->>> On Thu, 6 Jun 2024 at 15:12, <linux-mmc@danman.eu> wrote:
->>>>
->>>> From: Daniel Kucera <linux-mmc@danman.eu>
->>>>
->>>> Locked SD card will not reply to SEND_SCR or SD_STATUS commands
->>>> so it was failing to initialize previously. When skipped,
->>>> the card will get initialized and CMD42 can be sent using
->>>> ioctl to unlock the card or remove password protection.
->>>> For eMMC, this is not necessary because all initialization
->>>> commands are allowed in locked state.
->>>> Until unlocked, all read/write calls will timeout.
->>>
->>> Skipping the commands above, only means the card gets partially
->>> initialized.
->>
->> Correct, but it's an improvement in comparison to current state.
-> 
-> Not sure I agree with that, sorry.
-> 
->>
->>> Leaving a card in that state seems fragile.
->>
->> Fragile in what sense? Nothing can happen to the card as it is locked.
-> 
-> We may end up having a card half-way initialized that we can't really
-> communicate with in a stable manner. From a system point of view, I
-> would be worried.
-> 
-> I would rather just power off the card if initialization fails and
-> remove its corresponding device from the system.
-> 
->>
->>> What will
->>> happen to upper block layers and filesystems when trying to access it?
->>
->> Everything will simply time-out.
-> 
-> Yes, but it's uncertain what that could lead to?
-> 
-> What will happen with power consumption and power management support,
-> for example.
+	Hi all,
 
-Definitely an aspect that needs to be considered, probably even just
-powering it off after 10ish seconds would be better, then you still
-get the chance of unlocking it without having a locked card unknowingly
-consuming power.
-Having a saved key and sending that to any card being plugged in seems
-wrong if you consider security, then again if you consider security
-you should probably somewhere else than the SD/MMC LOCK/UNLOCK ;)
+This patch series removes two unused callbacks from the tmio_mmc_data
+structure, and related infrastructure code.
+  - The first patch touches only the MFD subsystem.
+  - The second patch touches both the MMC and MFD subsystems, and has a
+    contextual dependency on the first patch.  If really needed, it can
+    be split in an MMC and MFD part, but the MFD part depends on the MMC
+    part anyway.
 
-Kind Regards,
-Christian
+Thanks for your comments!
 
+Geert Uytterhoeven (2):
+  mfd: tmio: Remove obsolete .set_clk_div() callback
+  mmc: tmio: Remove obsolete .set_pwr() callback()
+
+ drivers/mmc/host/tmio_mmc.h      | 3 ---
+ drivers/mmc/host/tmio_mmc_core.c | 8 --------
+ include/linux/mfd/tmio.h         | 2 --
+ 3 files changed, 13 deletions(-)
+
+-- 
+2.34.1
+
+Gr{oetje,eeting}s,
+
+						Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+							    -- Linus Torvalds
