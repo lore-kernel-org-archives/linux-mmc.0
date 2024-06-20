@@ -1,158 +1,92 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4B29A38389
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 18:46:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03D3B171A5
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 20:05:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718909202; cv=none; b=ucyIyvtnlqm3rK18thffhrEtrgfQaXYAARrjz2/GDtXIkcqKTKJDm9urVutkEzT0x+mKBxrOn9r7NBiGQP73O8RoGxzIf2rbsTLOJ3gPvisBR6OA/IY0zpMiQURGBP1WAlr0U6ZaBMa+L32kp31JAJ+17psLvXwkmtNunmpqLRc=
+	t=1718913951; cv=none; b=WpnbipBOYy1zVCu0L2z90KY72v0zv83+Ywi0eh9DHeTvhCOjVHOw6SalWVe0RX4odpEjNyFSz08LEZe5EdKqIE3+lGdRYkDU/dEsxDN/V/KMdQ3Kh/3zze7jlQ4daRAmJGkdcLOCxeTJ8OPvDpefRB7pfdHGjpYVqN9T+02vUxA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718909202; c=relaxed/simple;
-	bh=c/wF2cYPFBGpxQdakAkYX1eiUZfBZatIO9yZbUFel4Y=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AkyB8bu6MGNrYfcde1Cr2mUhEIqZXSj/vsxhDPBgJMRkUFfiPX5qPOfE3IrUGaYWd2o3JycPOnDtB/86B7wY8XrzLvfsYYmGybk02ptd/qGnqdw/wgU0o034+kj9pSABTlxcUw6/W8N6yQ2Ry1/Fpw1fj8FKi+fcO5Uvun05NSU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 0E6B6DA7;
-	Thu, 20 Jun 2024 11:47:03 -0700 (PDT)
-Received: from [10.57.69.158] (unknown [10.57.69.158])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id DF35B3F6A8;
-	Thu, 20 Jun 2024 11:46:36 -0700 (PDT)
-Message-ID: <c20f1134-468c-4d5c-aa70-0562d24c36ac@arm.com>
-Date: Thu, 20 Jun 2024 19:46:34 +0100
+	s=arc-20240116; t=1718913951; c=relaxed/simple;
+	bh=WQVXoqUv11YINPHRUM6Bz/ijbfTuHJQj0JCz4T1nshA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CdrvcUICeCopB1ULo2pPLvFDinKdl2yEQI1z1o+aUCysG+glxaeY1dV7aHoXBHTcRTPfaN8ZgoiyK3c0XdYtqqPJGrr6Eo8BeVXd8V5ahhJQnjPajjAr+qCqB90uPlZmzPALmt3abG1AdDe/QRSq6RKtJZjrgylAPCpeDAQm3VI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=lNiLjWGj; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="lNiLjWGj"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=WQVX
+	oqUv11YINPHRUM6Bz/ijbfTuHJQj0JCz4T1nshA=; b=lNiLjWGj7d6d/NkFZeg/
+	dfMjzrAFuvKeip7Fd3xsUogRT9BftzUviSxIgv4z0cxi/wrpyvLpE4d/4r/ZHnBi
+	a1ydlqz7UrlF49c7XqbN2PX7/A1ezOJHXnqKxo0jL3dvDuZCU3P8//FAuigKxTON
+	yYFo53Kib0gXu5d/NYN8c2ofpNt1EvLCsbgPmSQm8KBn2MnbB1OCJKkyWxb8+uxJ
+	eOA2m2FDhixwwNnapiJJ7rNpFh0GCWW+Z3yC7sMlPHmDnkcIMLuAKXUv4esBTanF
+	4xc/hjKqsWynodNeQhq1kU9JQ0B6njaTE3Yx1fX+nIV7lJKu30YUrdGDXBqaIw4E
+	Pg==
+Received: (qmail 1134172 invoked from network); 20 Jun 2024 22:05:45 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 Jun 2024 22:05:45 +0200
+X-UD-Smtp-Session: l3s3148p1@7XUX11cbGttehh9j
+Date: Thu, 20 Jun 2024 22:05:44 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH 1/2] mfd: tmio: Remove obsolete .set_clk_div() callback
+Message-ID: <7iq2xtasjbhpef4g5tfycnjdvtgjwxhjyhwgpkrhy3g34lvd6z@l7h5pihpt2cg>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+References: <cover.1718897545.git.geert+renesas@glider.be>
+ <e0fa98f138a7b2836128178f8b3a757978517307.1718897545.git.geert+renesas@glider.be>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: obscure microsd detection issue between U-Boot and kernel
-To: Tim Harvey <tharvey@gateworks.com>, Michael Walle <michael@walle.cc>
-Cc: u-boot <u-boot@lists.denx.de>, Peng Fan <peng.fan@nxp.com>,
- Jaehoon Chung <jh80.chung@samsung.com>,
- Linux MMC List <linux-mmc@vger.kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>
-References: <CAJ+vNU3Ns0RVtROcChGAhfO=XbpnzwQv1SehexbgHX6ST6-Piw@mail.gmail.com>
- <e0f38bc9-bcc2-4476-a5d4-4f2efaebc0c1@arm.com>
- <CAJ+vNU0jiVb4caYeQ5HYKZ-dqxcdG1K5pPisJZpfL4q7Sc3zvA@mail.gmail.com>
- <50bfdbf9-2ab0-4111-bf2e-abe4c9ed86fb@arm.com>
- <D1R2ZW5Q12QQ.OU52AZIYS68O@walle.cc>
- <CAJ+vNU2zu5jwr_jScDN3Xs9-PV0yKyPVqOLBK504i79veAu+Lw@mail.gmail.com>
-Content-Language: en-US
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <CAJ+vNU2zu5jwr_jScDN3Xs9-PV0yKyPVqOLBK504i79veAu+Lw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="vokds4cbxec2k4qd"
+Content-Disposition: inline
+In-Reply-To: <e0fa98f138a7b2836128178f8b3a757978517307.1718897545.git.geert+renesas@glider.be>
 
-On 6/20/24 17:48, Tim Harvey wrote:
-> On Tue, Jun 4, 2024 at 1:14 AM Michael Walle <michael@walle.cc> wrote:
->>
->> On Tue Jun 4, 2024 at 9:47 AM CEST, Christian Loehle wrote:
->>> On 6/3/24 22:28, Tim Harvey wrote:
->>>> On Mon, Jun 3, 2024 at 1:18 AM Christian Loehle
->>>> <christian.loehle@arm.com> wrote:
->>>>>
->>>>> On 5/31/24 21:47, Tim Harvey wrote:
->>>>>> Greetings,
->>>>>>
->>>>>> I'm seeing an issue on an imx8mm board (imx8mm-venice-gw73xx) where
->>>>>> for a specific set of microsd cards if I have accessed the microsd in
->>>>>> U-Boot with UHS/1.8V the kernel will not recognize that microsd when
->>>>>> scanning.
->>>>>>
->>>>>> The issue does not occur with all microsd cards but seems to appear
->>>>>> with a large sample size of a specific card/model (Kingston SDC32 32GB
->>>>>> SDR104 card). I do not see a signal integrity issue on the scope.
->>>>>>
->>>>>> Instrumenting the kernel the issue is that the host reports a CRC
->>>>>> error as soon as the first mmc_send_if_cond call which occurs in
->>>>>> mmc_rescan_try_freq.
->>>>>>
->>>>>> I can avoid the issue by either not accessing the microsd in U-Boot or
->>>>>> by disabling UHS/1.8V mode in U-Boot therefore what I think is
->>>>>> happening is that U-Boot leaves the card in UHS/1.8V signalling mode
->>>>>> and when the kernel scans it sets the voltage back to 3.3V
->>>>>> standard/default and default timings then issues its clock cycles to
->>>>>> 'reset' the card and the card does not recognize the reset. I'm
->>>>>> wondering if this is because the reset is done via clock cycles after
->>>>>> the kernel has set the I/O voltage back to 3.3V when perhaps the card
->>>>>> is still in 1.8V mode (although I don't see how that would cause an
->>>>>> issue)?
->>>>>
->>>>> It will cause an issue for many cards and might break some cards.
->>>>>
->>>>>>
->>>>>> Is there some sort of MMC 'reset' I can/should do in U-Boot before
->>>>>> booting the kernel? Has anyone encountered anything like this before?
->>>>>
->>>>> There is no 'switching back' to 3.3V signalling from UHS 1.8V.
->>>>> The only way this can be done is therefore a full power-off.
->>>>> Is that done correctly for your system?
->>>>> AFAIR spec dictates 500ms of <0.5V on VCC. Note that  driving CLK/signal
->>>>> lines can also sustain the card somewhat, as leakage is only limited
->>>>> within operating voltage.
->>>>
->>>> Hi Christian,
->>>>
->>>> Are you saying the only way to properly reset from 1.8V is to have a
->>>> VDD supply on the microSD card that can be turned off before booting
->>>> to Linux? We have never had that before and never encountered
->>>> something like this.
->>>
->>> Yes, the only safe way to use UHS-I really anyway.
->>
->> I can second that. And also keep in mind that the actual supply
->> voltage must be below that threshold. Thus, the power-off time also
->> depends on the capacitance on that supply line after the power load
->> switch. There are switches with dedicated output discharge circuits
->> built-in.
->>
->> That being said, from my experience there are cards which will work
->> when switching back from 1V8 to 3V3 signalling and some don't. I
->> haven't digged deeper into that topic, though.
->>
->> -michael
->>
->>> You could disable UHS for u-boot but that still leaves (potentially)
->>> problematic warm-reboots of the board.
->>> Having a (software-controlled) switchable regulator on SD VCC is pretty
->>> common for this reason and you should be able to find it in most dts
->>> for host controllers with sd-uhs-* property.
->>> I'm afraid that the relevant spec section isn't available in the
->>> simplified version.
->>>
->>> Kind Regards,
->>> Christian
->>
-> 
-> Thanks for both of your responses here!
-> 
-> I have a situation where I can re-create a problem switching from 1.8V
-> back to 3.3V with a specific card on a board that has ESD protection
-> between the IMX8MM host and the microSD connector (Semtech
-> ECLAMP2410P.TCT [1]) but works just fine on a previous revision of
-> that same PCB that does not have the ESD protection added. Boards with
-> proper ESD protection are the first time I've seen this issue occur.
-> Does this make sense at all?
 
-I have some hypothesis but that isn't even worth sharing, see below.
+--vokds4cbxec2k4qd
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
-> I believe that the MMC device is 'reset' via a series of CLK cycles
-> with CMD/DAT non-asserted so I'm having a difficult time understanding
-> how this wouldn't work if the host has been reset to 3.3V.
+On Thu, Jun 20, 2024 at 05:39:45PM GMT, Geert Uytterhoeven wrote:
+> Commit bef64d2908e825c5 ("mmc: remove tmio_mmc driver") removed the last
+> user of the .set_clk_div() callback in the tmio_mmc_data structure.
+>=20
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-My answer is simple but not very satisfying:
-It is out of spec.
-After the CMD11 UHS voltage switch anything on CMD, DAT and CLK you
-drive from the host at 3.3V without a proper powercycle is out of spec,
-the card's behavior isn't covered by the SD spec and the card isn't to
-blame.
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-If you want a really detailed answer try asking your SD card vendor,
-my guess would be their answer is "the host is out of spec".
 
-Kind Regards,
-Christian
+--vokds4cbxec2k4qd
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmZ0i5gACgkQFA3kzBSg
+KbaJ3hAAqVmveXSykFPc5VUFjfB/buFe5/bm4QfpGU+iRMWygB4M0e3T9I3898TH
+Vn1nc7cbI72OgLOYqFD1C9ws5m6YQHqj7FsWRMQxgOPlRa3cWxD/IlLrzeqpMeVD
+tWj14K3VEJcpi6eploE2myuKsM98HQNPI7IlFJ1qowUJB7YBriNAyWviMAK6vuBN
+ebLvC1ypqz1NoW+e3G5oQ/bX09w9wwMpv3S/yBx8t9oPliytgUXGzIGHo0hJBs6X
+N/xrauss4Xvtudu64ScV1iv8VtGV/O4k8Y1/sWaYLRKVPooJz+4NfgD8jHEY18Xu
+KOzggxmicwXnbTrTYMoYizT8/kXXqXkHLKvnjxUL7Xt5hlZtS35Ua9DZW1q/BqEM
+pCemvWhaKnxN3AfGr9uYs2z3ZBfipOBq+O627U5s7gVrcUsF9qe2V3DnmyLPhRbr
+ROgPXXhvkdC+hViYm5nlZOX3Esj9666L4nmErnlYBE94GaOsakT70WJW8zPiVs25
+5LA/Slc1XxHC55UcMzJHN/NtmLg+oAX/ntZwc1HAeDMS8sw9+QojZQtxghpBIm3f
+RU+ew/7VusmYmrW/G4Jv/fmwf0avaqW7RHYLeKEGOAWJrHeaJRpnSYm1z5bnjNyz
+6HsvK0bpj2DzRmdRz4rQHyLJo2R4Fenkv5YonKKXJY4USfGB34k=
+=Agmg
+-----END PGP SIGNATURE-----
+
+--vokds4cbxec2k4qd--
