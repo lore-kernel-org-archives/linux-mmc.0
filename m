@@ -1,55 +1,55 @@
-Received: from mail-vs1-f48.google.com (mail-vs1-f48.google.com [209.85.217.48])
+Received: from mail-ua1-f43.google.com (mail-ua1-f43.google.com [209.85.222.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 278921AB347;
-	Thu, 20 Jun 2024 10:39:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A9061AAE35;
+	Thu, 20 Jun 2024 10:39:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718879981; cv=none; b=lA5NTRp5YyvgbJD7wrH3pcKNQXOYmU7sk3Xm9KHt+FkfQx7tWeSXTQqTtFYS18tvF/VGzuuWFMHtRo0cHcwDltzwpFvnmFXsw0IZtac7z3zOkLfie0EqexLhU2uOWB5q9IIzGT4mKScMUNuUHz0cMeOgD8ltVuh/kZ6pboZrgi8=
+	t=1718879988; cv=none; b=Y9OLqb/r33QAr895jbztteW3JbbBHHXohmOm9i3oxs5dt6J+BBe3EqCq/P9qGly+gYWqEvBfJPSCKQuUz7Bk4mfDYZI8nb5SHu/OZLcxtvtQHvt46wmWeFAML/q/tRO6yMgz7rsYBlmuFiBHoOiBmP//wBFRJrUs4txNd7pCIDs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718879981; c=relaxed/simple;
-	bh=mzZqfq5EGLj0QXIsly1UVvh4WuR4eWVpo86AJS+l82I=;
+	s=arc-20240116; t=1718879988; c=relaxed/simple;
+	bh=PtAQdVoP5V6ppx4dYLrQWFm0fTfaQMfiUnjujw567kA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jXf3oIiVmlGcZ/rYKf4nAHaT2AMrpnaxOuv4RfmvjNRBU+l5wVYxRZLYqdRgtrkN3EUBsoUBd+B36HRmCEg3XcS9tK58nbEZWuUN2/z1YmQ6b1tcytlNg6M8+SIOQF06WFgWk+CcMB8Z+6Xnq0oH/AfAys0UU9JCBCYdVFYM2N0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=eyWtcOfP; arc=none smtp.client-ip=209.85.217.48
+	 To:Cc:Content-Type; b=I9u49rrqRBW3WUg4Jh0yV7okA6lWCl8ietIhFb4QxoFIbLZjmFAf++c2PI0TBLzYVYIXeyqEHlUlPwZ6lgl0p1dgfLWHaQjlf7WGc4b6OfhkFbG69PGuwFU3RCHLBhO+2lReLkIFuTD2OAmMuiFXUxv6I5OfFccEp8OMU5AJfhE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dpiHOR4c; arc=none smtp.client-ip=209.85.222.43
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eyWtcOfP"
-Received: by mail-vs1-f48.google.com with SMTP id ada2fe7eead31-48e56ae9ac7so270649137.3;
-        Thu, 20 Jun 2024 03:39:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dpiHOR4c"
+Received: by mail-ua1-f43.google.com with SMTP id a1e0cc1a2514c-80f59ebd021so249346241.3;
+        Thu, 20 Jun 2024 03:39:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718879978; x=1719484778; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1718879985; x=1719484785; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SulDcIf+7pnwPtcIwb496ZskwuswYg1gvhnNTncFzpk=;
-        b=eyWtcOfPea3kohd/IWE0dotkfR59FDPXm+pcVgDJK9IkR4RF6JGamPo8O51ScY/c6/
-         HnCHi9QRn4b1aFOPc5/dj8OIqKtB/Nz2J9pxf+s5iOg7P3aOVBFLIi1Amgaw6Hy6AaTj
-         sBHaFqCiaxEvZHjy6P8fPSTWy6E0Tk63zjJ3kUArKCQiOCm9WW8UqFRFZZgAgagG0ZGi
-         1omXli/wDURn6pTJOxkxSOVd/hCn4Ga6IIUCv/z8iwh1FuCwVkVttsSuMNgbSvZjyThP
-         HRmS1OLJ1CK31A3s3FKU2wvEpJ04qltKovylcnNsqNBPVKT8p/3XVXxtcokp6x37jKTJ
-         tJng==
+        bh=uYSuT6vUkK3TGV0GDL1F1U8u2DRFOjpO2c/fFNT9tGo=;
+        b=dpiHOR4cKMEjpKTfcT7CBZijq/nSlVS9wIgVkyIfvqu7VkMUrACssiEmDZlRdXOCw8
+         REphq4EtOOA34hQBq+T3Ahle6qNUdi5JauS9ixUMhOGJr+65rwF5H0SjjWbkaP5jIZ8i
+         5mtCyywzWIJoIRRKQfDKL80SS3elW1kCuHTRHv04QMPIOQgWrqpSQGBhFGg5FCwJ8bXs
+         4q53tmOMdBMsV0Hh6nTjHe8W3RDrNGqaYkCa46EjqlkwNto1p9svBoj1u33KlbuqBMyY
+         xmbLqBl0CKxmrG/QkE8GNN/uFHFnBm88bJOT1dt4inwdeRWFPQugDjIQTeL5X6HWLMwV
+         mthA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718879978; x=1719484778;
+        d=1e100.net; s=20230601; t=1718879985; x=1719484785;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=SulDcIf+7pnwPtcIwb496ZskwuswYg1gvhnNTncFzpk=;
-        b=qDcbKIQ8jkB0wfjfxDFnPmJ9T0sFBDBHzbxo+S2lo99OkmJIqLDlN3YmHYjUByROpq
-         sCf3GI+8tHEo5u4Q+QVnNItZIY+KsI3Rzq4G0FTTAppNHLreQ5oeUUMwmcP6TeSmW4Lm
-         2nVcw+xmkBj9s4CYqncVn5VllJ0LspHyKjfE+Vf26MBz4kEd4S0xaA2YOJyRpJaee41p
-         VidWChLepWoZWZte7Uca2vl/x53jd7DDdbmMIb3kavpGtVNQCUkBMhU2c2Mph1smO7mB
-         zdPE6W3lXtI47nB83xhgSXqsvKamhHWb+mf2eQqKd+dgJPUOXHtaYY58Sa0XTOaJYCnC
-         q69g==
-X-Forwarded-Encrypted: i=1; AJvYcCXr+rjqPXVkYx2WSPWumuPAC6aAvemUR6ayWVZSlYAhmv4vlZaWpnwuxEC88a+kkcPdyn5shxzmX5/VHaQrkx8nsaHJR79qUCk7tBlY
-X-Gm-Message-State: AOJu0Yyt6JrCl6knUA6vfT+Y3NfL5KMGWUms8qfe6sjOKIrlzN+t7kvI
-	rj8FmvXaT3GkpPJ1dZSG5k/mYQL1r0GRnWB3Bi9OIcTkZZY+qOyaAhVEm57qSjk1h/WNojzt/zT
-	LEgohanxt8STmoplI81n9ml5fNLE=
-X-Google-Smtp-Source: AGHT+IHl2Dz+wMLFuiK21QaqHlnfxwKsMmUSvqbIHlKGUPqQx/5w5T+oFeOKmNYKmqv4VxTIcwjy61aVT9IS8WsBmRk=
-X-Received: by 2002:a67:e31a:0:b0:48f:24ae:80d3 with SMTP id
- ada2fe7eead31-48f24ae8432mr1493130137.12.1718879977975; Thu, 20 Jun 2024
- 03:39:37 -0700 (PDT)
+        bh=uYSuT6vUkK3TGV0GDL1F1U8u2DRFOjpO2c/fFNT9tGo=;
+        b=aHrLY6aWcJUo4kpicVawNg6Rqj+2QZKk2g3is8ZD/28A8AexBnjlLpEWpfc86vRTaH
+         pStlIU1+57wl/XNyZDlxXwRqTd/Q6nu5rzBKv43K52dClk5pBuQHm33NPB7eby+FegTd
+         42wh605jYUzIBiCVUU2U+UZVs9RIQMa/JOn30zvQoP+TzMKXNdLaBBZUDBh40EuzKsZh
+         aONzNpqxz3Pf95ylLNtdGZ/Y5uOv1NsjMoYnxnuSS2cfRggw0TP4j9mg+b0xCbqQrPBv
+         RqCgJtfahquL2hPSKltHBNlAt9AVicweHSfdb4wHCrnVbB5oh6ynfyWCPUvLm12ApUr9
+         rKLA==
+X-Forwarded-Encrypted: i=1; AJvYcCUpAn9/YKpxGKqY5mPwgRbJ7tMB4+BMtiImyZ1XfuxdNLWb0uVmW7swr4SWu11jnUY+5HV1wpKXz7RK7gmz8LDlZISxgHTg7G5dFLjw
+X-Gm-Message-State: AOJu0Yyj5i7Ot4T7ZWNRFgIgzO4gBNwkPPOH3WN0kCZmDzZzg4JFFuYY
+	0rBOpX/mQyG1Px6YwfNTGL2k1oWCnDHVHtOJJXrSl1mXckxpdphdSMIHaQYqpq70s4YtUHiZOZ/
+	SoaDjZIvW1lxbkPtuz9z9QE/P+uw=
+X-Google-Smtp-Source: AGHT+IEQDEXYMQXxLKTm5IOrOOeMgFR4QHup6ekVangCK6/sqvM7Etnj8rTnLS9gj/bppKrQymFBu/9U1vX7MkDYQvE=
+X-Received: by 2002:a05:6102:184c:b0:48f:22d2:3b65 with SMTP id
+ ada2fe7eead31-48f22d23c9amr2118517137.25.1718879985318; Thu, 20 Jun 2024
+ 03:39:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,11 +57,11 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20240522110909.10060-1-victorshihgli@gmail.com>
- <20240522110909.10060-24-victorshihgli@gmail.com> <75bc82b1-4a2b-4274-b55e-06288af6dc7a@intel.com>
-In-Reply-To: <75bc82b1-4a2b-4274-b55e-06288af6dc7a@intel.com>
+ <20240522110909.10060-24-victorshihgli@gmail.com> <81adac4f-edc5-4e3d-8c74-68a33183c3e3@intel.com>
+In-Reply-To: <81adac4f-edc5-4e3d-8c74-68a33183c3e3@intel.com>
 From: Victor Shih <victorshihgli@gmail.com>
-Date: Thu, 20 Jun 2024 18:39:26 +0800
-Message-ID: <CAK00qKA-4m=YhgFNZ_G1J9ec05inm0zhng=0r5azRU45aJoWZg@mail.gmail.com>
+Date: Thu, 20 Jun 2024 18:39:33 +0800
+Message-ID: <CAK00qKDn46y59q9EFDSWBezrc5sbe5660xKzKsXs7eT1bj3DBQ@mail.gmail.com>
 Subject: Re: [PATCH V16 23/23] mmc: sdhci-pci-gli: enable UHS-II mode for GL9767
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
@@ -72,7 +72,7 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, May 24, 2024 at 1:08=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
+On Fri, May 24, 2024 at 1:09=E2=80=AFAM Adrian Hunter <adrian.hunter@intel.=
 com> wrote:
 >
 > On 22/05/24 14:09, Victor Shih wrote:
@@ -187,18 +187,6 @@ lot *slot)
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_A_HD ||
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B ||
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B_HD) {
->
-> That is the same as:
->
->         if (mmc_card_uhs2(host->mmc)) {
->
-
-Hi, Adrian
-
-I will update this in patch series v17.
-
-Thanks, Victor Shih
-
 > > +             /* need internal clock */
 > > +             if (mask & SDHCI_RESET_ALL) {
 > > +                     ctrl2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
@@ -218,17 +206,6 @@ HCI_HOST_CONTROL2);
 > > +                     }
 > > +             }
 > > +             if ((mask & SDHCI_RESET_CMD) | (mask & SDHCI_RESET_DATA))
->
-> Simpler:
->                 if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA))
->
-
-Hi, Adrian
-
-I will update this in patch series v17.
-
-Thanks, Victor Shih
-
 > > +                     sdhci_gli_uhs2_reset_sd_tran(host);
 > > +
 > > +             sdhci_uhs2_reset(host, mask);
@@ -312,18 +289,6 @@ har mode,      unsigned short vdd)
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_A_HD ||
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B ||
 > > +         host->mmc->ios.timing =3D=3D MMC_TIMING_UHS2_SPEED_B_HD) {
->
-> That is the same as:
->
->         if (mmc_card_uhs2(host->mmc)) {
->
-
-Hi, Adrian
-
-I will update this in patch series v17.
-
-Thanks, Victor Shih
-
 > > +             gl9767_vhs_write(pdev);
 > > +
 > > +             pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_C=
@@ -410,6 +375,16 @@ r mode, unsigned short vdd)
 > >       }
 > >  }
 > > +EXPORT_SYMBOL_GPL(sdhci_uhs2_set_power);
+>
+> Might as well export sdhci_uhs2_set_power() when it is first added
+>
+
+Hi, Adrian
+
+I will update this in patch series v17.
+
+Thanks, Victor Shih
+
 > >
 > >  static u8 sdhci_calc_timeout_uhs2(struct sdhci_host *host, u8 *cmd_res=
 , u8 *dead_lock)
