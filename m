@@ -1,146 +1,148 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EA4E1AD3F5
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 14:33:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 32BEA1AE84E;
+	Thu, 20 Jun 2024 14:52:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718894009; cv=none; b=THPzUK8FdMKvCKduYsp5jJqqJEIDk2xLDOjTlY2X/WDzkn0FUjSXdNfzll25A2IkqFKyQj6Iv1aWo1JKoyHiPbKGFgPfjgQYPW6sSGyNmR6znPQy934esJMQ1qVmwm30NxtTRgxFWa5fgRJHAzIplAjXYPRO3dLcV11QGwZ4kW4=
+	t=1718895148; cv=none; b=ZHugzqmokr+hZXysotWWZ/CL/tk5p9c2P4nESMgEnXPzbcE9j57+phoXkpvdwywnHfldFK2XgSfcbNgZCC5UINJhveUi7dRO64A6Oo8F26IHIThNoNziyAf2RKZCEOki7QRtTsv0k1mIYphkywafZ41Tch/fnqKlNzO19VNPLvg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718894009; c=relaxed/simple;
-	bh=grrLR5UA8Ko4qkIvunWXLJpxL8GpmTY8TRHFqKM8aCU=;
+	s=arc-20240116; t=1718895148; c=relaxed/simple;
+	bh=quHvdMGXD+OF+Vmvo6ZchqeF+v17FJP9dNrIZBXrvGc=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HX21ZA/nO+icSNs2mut2VHvlbJld11I2bX7UGevw9FoOQ2Z0irgiGVn9DIKSkK6np63BDfUEWHw0kM8Z3yqJHLhDJxeGwXCflF4XnNEvejg1GrQk2NIvhM1fLTVVMFhDCMjAE6Z3QipxeHkIKJhdd6mIbIeUpy5hKzoPsjMbSKw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=q75BJXLx; arc=none smtp.client-ip=209.85.128.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="q75BJXLx"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-62f3ccc877eso15147927b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 07:33:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718894007; x=1719498807; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=grrLR5UA8Ko4qkIvunWXLJpxL8GpmTY8TRHFqKM8aCU=;
-        b=q75BJXLxfQ2sSGJ1vunT4PXqtHJNff66P4LCQLfYDolSPObjulZS7bSKVvQDyFmeAX
-         rbtwgXYySCTtNew4BDlB3ynvi9lJMG33NMgt3VSNHDfYNFdPaKojy6LGMw0SBARotz6b
-         lE8ATSJlU0afwtBLrdV6pQH44G0zAQFZ9goNgQKoQD1GcIET6Ilwsv90iu1IZ5xECMBk
-         hQIj+LWzIs63pI4ZgTTsiUnHAKyaGq9aEheh82hAW72JzLMFEKEcgXgRIF0MXgZsN6Hm
-         V4IH3Czu3jECY7pcE+/YBAjqwCkmIZR/J0f2Jl9G33THzx4FPJ51ikpvrWHF5AmVaITK
-         AWZA==
+	 To:Cc:Content-Type; b=sMvQz3V37yeUl5LLHfleUR5r8uMdLy30IAYK5WAYiBVI1fUobedpHpH8yS6KTf+fHlY96Iz8slKJ32dT2YSyKQ6JKcAQY59JgQKX88sZ3XZHDhJ4q4Tmb5ZdoBLLfLe/8Faye0o5Xa3p13gnalRCh7oHYNc/xBRPPVmfNhfGzM8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dfe81d54db9so973713276.2;
+        Thu, 20 Jun 2024 07:52:26 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718894007; x=1719498807;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=grrLR5UA8Ko4qkIvunWXLJpxL8GpmTY8TRHFqKM8aCU=;
-        b=GVu3XC2PLboOUkGRik2b8JpRHMz6xhFF4u68YkPfDXkAq9QSPI4S3KYiEAMKW+dk79
-         8rfbZWjs+qvMCoBOkIG40CBMF+jX5gveIB/qAnV42YOGG/JZdUKqfw47wg7y5WyGqCHa
-         F/hMUlYaadJ0LueFsXrMB0pf4Es1UHE2eGBZUJotmX8LDRYX8o6l/rJ0/KCU2IvI+j2P
-         HhOIamJJRiOOT9bfsWiGq1zYztTV07uBRq81zRTPGYYUyYrLIkU3wxcFEbHOit4+z65i
-         kU09QsZS2UxmGBTtUv+VBoCZ9pPnDqZFubmgIsBK65O/ifbwrFQMmdN0iY/V8XO2Wp6G
-         x/lw==
-X-Gm-Message-State: AOJu0YzWa5hBkfL9LhvtW6sLCfCkNc8yrro84YhplvDTn2ZPg7dqkvjA
-	4EeDysey54rBE1hjNrNaNOEqLyZdGNzd0zMvWY18huzqSr+Jhw9qKpn1pWqYMKgeFzAS67aitIs
-	1rX48wWoLT8jDvWeI2nF5DdkjPOSiRxgW5HR9R3ps99Js1UKR
-X-Google-Smtp-Source: AGHT+IEKZdxSG+rKl8atDm+Bd0wE+qLojVgljkBIPB7wZImMYGy6/MhtAcMFjNHWHvCEkBcrwIbnaKLR6O6Gr0Iv/gg=
-X-Received: by 2002:a25:d8d7:0:b0:dfa:fec6:464c with SMTP id
- 3f1490d57ef6-e02be24b13cmr3912996276.27.1718894007078; Thu, 20 Jun 2024
- 07:33:27 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1718895144; x=1719499944;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=qicnrKvU4izSAdjyf++mWnVsSY0UBkYb5drVYCcA5wY=;
+        b=cdeJnu6fScTZbDDJ5VBiclJX/d3DAxzRVw1+ZUziR2PktI4AezKkSWoXDLIZEJLPol
+         DZRNiOTkKhrWktzkK5ws/uvmoqnn771pNsuAOA2GmkNUwT/9QqA7Y18epbeCFeG1Gd5s
+         6eGSBJtSpNWqNQMFySRx3linrkSsPkoyTG2ktwX+AhEuhey3i6kR0vZOmb3xZej2t4/R
+         Rmg9HRUaf7hVvBnF7RSHN4MDSXEc4zb+68MuRRFezoeMYyzqjmUvx0BhnEXrLUDUK28U
+         PSuiCdTtEGZqSNMfsxKhHpvxop5CzFriNQpM4gr8T6jV/0L6l4FaBrOcR9sU16fYPtJN
+         If8g==
+X-Forwarded-Encrypted: i=1; AJvYcCV7e4QvIb6nn+VQV5HyGYRxivCCbSVrA2r5DiUkuVJPXOFdPiYoTOfoqaAy5zGar+K4TdZj+rhv1Fg5E4wv9Js4Xa1COSKRxxBD+7/edyVcrqhi9zICXo+75imgtf5AsU7YM9POLMTOL3tNbv6moj260D2FFp0N10MO0ETTQfuJK7Fhk1OZCSx+DFKcP/dkpFJ4B7WqTdtYPwvNUoHJ1jiUd2iy+F8Q
+X-Gm-Message-State: AOJu0Yw9Uav9DpyxEIi3k4BSYPlQK2l3YgRfjFGv0994QCuYVM+wPujX
+	/kgfNGoBbHMxXv2z7t2G8ADchrJxSWYAOtevkrnIOvjEbO/paEwt6Pw+jVmF
+X-Google-Smtp-Source: AGHT+IHa726p4LBUgJ4pKzqdMzHgOlyRn0z7kg86RymTqqoueBuhne4yq1OJUzSFpV67LGh1zg0C2A==
+X-Received: by 2002:a25:d653:0:b0:dff:745:2303 with SMTP id 3f1490d57ef6-e02be225ddemr4959097276.57.1718895144153;
+        Thu, 20 Jun 2024 07:52:24 -0700 (PDT)
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com. [209.85.219.171])
+        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e02ce311570sm987321276.15.2024.06.20.07.52.23
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 20 Jun 2024 07:52:23 -0700 (PDT)
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dfe81d54db9so973676276.2;
+        Thu, 20 Jun 2024 07:52:23 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCW8Jv9p9FcgyzdRMxyQg94hd8/iEvpkOQYFU9ir04GVpGuNBboPAeVyCFaBAjkEXnBFckDFQqpCd1biv/VRksTFljKHglTDAplzpIyqr0bcpE9HJUpcSiThl5VLfDFi8RZE9KWrC2M4W8AHJeVpoAl+bTgGgPxPNwHz9K1ekVFQKlQF+ARxO3d9+cF/sRdxv4uBkq2AXV32mgC4vLxgmWX42YBYmgEa
+X-Received: by 2002:a25:8403:0:b0:e02:b7ee:5354 with SMTP id
+ 3f1490d57ef6-e02be138271mr5993985276.20.1718895143516; Thu, 20 Jun 2024
+ 07:52:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240606131222.1131880-1-linux-mmc@danman.eu> <CAPDyKFpuJexp_1hgKhJ3b8VCx+PwwhAQscbJT5-44Re0xmbxrg@mail.gmail.com>
- <c89d8a0c170fa3bc8593bfde25b07e4d@danman.eu>
-In-Reply-To: <c89d8a0c170fa3bc8593bfde25b07e4d@danman.eu>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 20 Jun 2024 16:32:50 +0200
-Message-ID: <CAPDyKFpLkmU-vjAaM=QDkc+3F3tMNjViOdnYSFNqyDduyfBm1g@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
-To: Daniel Kucera <linux-mmc@danman.eu>
-Cc: linux-mmc@vger.kernel.org
+References: <20240605074936.578687-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <20240605074936.578687-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20240605074936.578687-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Thu, 20 Jun 2024 16:52:11 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdW5J087M=xD95R87XsP-xTqiaenzJ9WVq8x_d2_+67J1A@mail.gmail.com>
+Message-ID: <CAMuHMdW5J087M=xD95R87XsP-xTqiaenzJ9WVq8x_d2_+67J1A@mail.gmail.com>
+Subject: Re: [RFC PATCH 2/4] regulator: core: Add regulator_map_voltage_descend()
+ API
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Wolfram Sang <wsa+renesas@sang-engineering.com>, Liam Girdwood <lgirdwood@gmail.com>, 
+	Mark Brown <broonie@kernel.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, Biju Das <biju.das.jz@bp.renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 20 Jun 2024 at 14:59, Daniel Kucera <linux-mmc@danman.eu> wrote:
+Hi Prabhakar,
+
+On Wed, Jun 5, 2024 at 9:49=E2=80=AFAM Prabhakar <prabhakar.csengg@gmail.co=
+m> wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 >
-> On 2024-06-20 14:38, Ulf Hansson wrote:
-> > On Thu, 6 Jun 2024 at 15:12, <linux-mmc@danman.eu> wrote:
-> >>
-> >> From: Daniel Kucera <linux-mmc@danman.eu>
-> >>
-> >> Locked SD card will not reply to SEND_SCR or SD_STATUS commands
-> >> so it was failing to initialize previously. When skipped,
-> >> the card will get initialized and CMD42 can be sent using
-> >> ioctl to unlock the card or remove password protection.
-> >> For eMMC, this is not necessary because all initialization
-> >> commands are allowed in locked state.
-> >> Until unlocked, all read/write calls will timeout.
-> >
-> > Skipping the commands above, only means the card gets partially
-> > initialized.
+> Similarly to regulator_map_voltage_ascend() api add
+> regulator_map_voltage_descend() api and export it.
 >
-> Correct, but it's an improvement in comparison to current state.
-
-Not sure I agree with that, sorry.
-
+> Drivers that have descendant voltage list can use this as their
+> map_voltage() operation.
 >
-> > Leaving a card in that state seems fragile.
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+
+Thanks for your patch!
+
+> --- a/drivers/regulator/helpers.c
+> +++ b/drivers/regulator/helpers.c
+> @@ -368,6 +368,37 @@ int regulator_map_voltage_ascend(struct regulator_de=
+v *rdev,
+>  }
+>  EXPORT_SYMBOL_GPL(regulator_map_voltage_ascend);
 >
-> Fragile in what sense? Nothing can happen to the card as it is locked.
+> +/**
+> + * regulator_map_voltage_descend - map_voltage() for descendant voltage =
+list
+> + *
+> + * @rdev: Regulator to operate on
+> + * @min_uV: Lower bound for voltage
+> + * @max_uV: Upper bound for voltage
+> + *
+> + * Drivers that have descendant voltage list can use this as their
+> + * map_voltage() operation.
+> + */
+> +int regulator_map_voltage_descend(struct regulator_dev *rdev,
+> +                                 int min_uV, int max_uV)
+> +{
+> +       int i, ret;
+> +
+> +       for (i =3D rdev->desc->n_voltages - 1; i >=3D 0 ; i--) {
+> +               ret =3D rdev->desc->ops->list_voltage(rdev, i);
+> +               if (ret < 0)
+> +                       continue;
+> +
+> +               if (ret > min_uV)
 
-We may end up having a card half-way initialized that we can't really
-communicate with in a stable manner. From a system point of view, I
-would be worried.
+I know this patch is superseded, but shouldn't this be "<"?
 
-I would rather just power off the card if initialization fails and
-remove its corresponding device from the system.
+> +                       break;
+> +
+> +               if (ret >=3D min_uV && ret <=3D max_uV)
+> +                       return i;
+> +       }
+> +
+> +       return -EINVAL;
+> +}
+> +EXPORT_SYMBOL_GPL(regulator_map_voltage_descend);
+> +
+>  /**
+>   * regulator_map_voltage_linear - map_voltage() for simple linear mappin=
+gs
+>   *
 
->
-> > What will
-> > happen to upper block layers and filesystems when trying to access it?
->
-> Everything will simply time-out.
+Gr{oetje,eeting}s,
 
-Yes, but it's uncertain what that could lead to?
+                        Geert
 
-What will happen with power consumption and power management support,
-for example.
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
->
-> >
-> > Several years ago Al Cooper made an attempt [1] to manage the
-> > unlocking of the card during initialization, by finding the password
-> > through the "keys" subsystem. The series didn't really make it to the
-> > upstream kernel, but overall the approach seemed to make sense to me.
-> > It should allow us to complete the initialization of the card inside
-> > the kernel and prevent unnecessary complexity for userspace to manage.
->
-> Yes, he did a great work but obviously no-one got too excited to
-> review/merge
-> his work. His solution was complex.
-
-It's quite some amount of code. On the other hand, it seemed quite
-straight forward, not that complex to me.
-
->
-> Mine targets the smallest change possible to make it work at least.
-> I wanted to avoid a solution that would be hard to test, review and
-> maintain.
-> Especially when there is only a small interest in the feature.
->
-> > Perhaps you can have a closer look at that series and see if it's
-> > possible to update it?
->
-> I don't think I have the skills to revive his work.
-
-I see, maybe we should ping Al and other interested folkz to see if
-there still is some interest to move this forward?
-
-[...]
-
-Kind regards
-Uffe
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
