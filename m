@@ -1,131 +1,112 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 942AE1AC453
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 12:39:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A06391AC78C
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 12:50:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718887151; cv=none; b=ptKMAEXBQwnvEzFiTujxNiROTbAug25yBW3fFDjyjy046D796NzfWN+Xz+Kxy12jceZMfr1fqp0uMQQa97b6duArxxE3WRNhOs7hG4eQIsdVZopsQyCwjhtivdm+RuwqBfp7O7YDm37xrhwckpBG4/1sXNlq0WzlQ16AmyAO65g=
+	t=1718887855; cv=none; b=V44baKO8uPyKspxtu2G8KwQIHmS1WDc4YSPrr11JrNKCYtQaiMw5AGeqypFFjHJWMp10hVtzOOS7Sd37/BTvgz+Vl0Z48O9AsaWELic/IKnnHSurbnYe2KNemalpe9OBkJiwMiE4Zzs3fjS+SItk4n+X61+sxawOth8KR0D83Rk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718887151; c=relaxed/simple;
-	bh=+MKb0d6kGQXFAfTFxGeErEGjvV5X6Fkm4QbR7GkA4DA=;
+	s=arc-20240116; t=1718887855; c=relaxed/simple;
+	bh=2HmyC/8aoZ2nPJoKWEKLwCfkQSZpd1ixf1AoMQ48fKk=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UeAifmGEDq2WQK+XLbEThFDRO66SP0un3LWYdtM3tWpbTzs9edcdsKH2ynjvskNomAaQhJLqfCWN4DLLG+gL0jZniFkGDFXw1TJ/tRlKeyaZ04bGRHN7CSEbs2CsGGH/HcGzeKUQuoKe53SosxGPW4EKG5uKCnH5sA3gToI6gR0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Mb22D8YR; arc=none smtp.client-ip=209.85.219.176
+	 To:Cc:Content-Type; b=nEqd3GNss6CGZve4DVkPEYpiWdDZ6aFLvDryKLPcd0yKT8itmcrOTxqvG4kG2EZMG2L04UuWrcmu/jXkbYpXPxm0A6KXKUk40KFALvnaDBUjL7QipNooJt3TyXXBgfHgtqPzPged8UsHJuZH8DZUYqXeCtSP0+gePhcqZZvicRc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VA1Nm0sg; arc=none smtp.client-ip=209.85.219.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Mb22D8YR"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e0272692096so787508276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 05:39:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VA1Nm0sg"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-dfef5980a69so824916276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Jun 2024 05:50:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1718887148; x=1719491948; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1718887852; x=1719492652; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=MXrsS2mpejDFsFEi94Ftqe+sXeL8FdVZSl2zE7uQvoQ=;
-        b=Mb22D8YRuTPzJ5VOL8QVtTezWAOlNvo/yOxcuK7bRE4S5Yfh2dnSPSdKSH3ewLtpYm
-         SIde8O1cGxCqrgqwuKTEHBwfL/7NYIIMx61WV4oaZpPcfgn/gqLPvmD0uNcZ/HgTxQXl
-         Dm9XSGiHBFtRiTuHXZmV6rvc8E9Hw0FUHox0GG5N3BI1tyFi9u5Gv/wTA1106LfpE0o3
-         rVbOp+W0glASHYdGqv8fjN2mLHxSN1OIcjgwlH3pAKLNoyZCoJoc65OCzYl41IZX6sVp
-         tium8weJl+yTWxVah7BI9bHSaIyua7UoIAcHnY1nh2cjoJ0J5vVBr3716svOMr73QNz9
-         fD5A==
+        bh=V7Ui2B3eiuQfY6kcWseFEWEENplZ5Qoq4XUDUnDKk3A=;
+        b=VA1Nm0sg5UJAsKD6JV6BkbBZ5eCWivY8rCu8G5tU3I07UHRKOBMejLNz5Fq0Hsc0ZU
+         CiiCC1bKRnIbRZ0tiFie+ov6PhsWVAhr/oEcUNQ1crM9vT068Wg1W4F0ZjBv8ilqb/Kn
+         PS5QSWnd8/uhqydzS+J0rFpE8AhErg6QozuQf776qnWhkCc1vNKuzuvqJn95YgPAMJjm
+         AY+3je9Y+6vCdVh9z/OM53FH3PEPPaFcLK3MT0cD+Fk90htAUTn9NXNTbZjhYukmx1ni
+         aG537yNuavJ8wKetDfo+d3iG0/S8ckBm2Uxnjpx3Ean9djNdFyaS0MDnCcG8N5k/Gt5d
+         G+0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718887148; x=1719491948;
+        d=1e100.net; s=20230601; t=1718887852; x=1719492652;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=MXrsS2mpejDFsFEi94Ftqe+sXeL8FdVZSl2zE7uQvoQ=;
-        b=T2h7GcO3qoHeyZWr37Zv2dyTH8YOLNa0oWHm0WLrh4gUm4m+pNJEz8SFP/9KxN3kMk
-         VCTYQ2kpTn8O0Nw9JBULu+1wzF+r/FzPi+g3DgQo7tYeyu0Tmde9xp72aAyEou8t3Abz
-         DFiQvRcFQ3wvhQKY8FhmHY/GV5i7BQKhQOnmmGRtLSDlN2r/JO0X5kZkT4+Ma5mc93pr
-         AIq6mcWGMcftcoRr0VTTqrrc23v30GoEmd+FXtKhsHDPgE6TF14bpLG774RgRt9lAdX+
-         l2iSQJP023gFoqXGpjENXJmXg1pBXNR363eF907l7kX9u4Oz0yU1jpjRtufKWOOc1o3D
-         /kDw==
-X-Gm-Message-State: AOJu0YwSto9CJiFhX6eOl+v4Y/RGiwJPkMruayzfSVLt1GxSzbrOosvJ
-	RjL5IG2v851Z3kid/TxGN2MaFglNGFtAd2D5iYfMZbOy7IzfqJh/1EchmVMBA1VuSjE8iACZMOL
-	ON8AIZlXWtBD/+BQhhb32BHcGfqAWT126k0+1uMRs2aozbzonlRE=
-X-Google-Smtp-Source: AGHT+IGfsRIK8F1k8cecBYpiUgwdL4yHwEhbBpx6cYhEB2iRzrL7VfrwSoALfmBAfls/toiZCfz2rMSHqgmq0xwcXu0=
-X-Received: by 2002:a25:b02:0:b0:dff:1a17:dcbc with SMTP id
- 3f1490d57ef6-e02be0fc880mr5444939276.2.1718887148379; Thu, 20 Jun 2024
- 05:39:08 -0700 (PDT)
+        bh=V7Ui2B3eiuQfY6kcWseFEWEENplZ5Qoq4XUDUnDKk3A=;
+        b=dq2ylbXM7SyhTpWbseLQFTC96G+fx6271/sV2nSQuI7n3TPjKufzhrL5T3mtcVq0NK
+         thj8GSooSvwmR5/F+toDvQJBG/M1q/aFhBZab+vZy5LsI8T4xCX6RNmeCpIz4H+JncPa
+         f5kSWF1SSFUcvzsO0Xc1bA7jZIMTJD0igILwDJUmWfIlsSwcIkhCd04a2/tDyQNCMMsv
+         +x1io47hA/0D3MXW7iVyv67J5BjPJpopAcsX634ZvFEgDDfK5fMsnrYxSW69xMoWp4Sw
+         02O4XrhgkktaBL+iqGctCxF8IxQcDQrDocPbZFjzyPZZylfdammUYXU5z8AiCizkIsFL
+         NNmA==
+X-Gm-Message-State: AOJu0YznadCyKFRMf13O5uvsQTgfe2qzxoYk/OfZ5nzwP6k4i6U6dwWw
+	jbWPTB3JqrarTuusm5KH3Eoxu8fcTxIE35DQ7uMHzcQRUAwR1XMTuOnjGLULlVkaeJCzFe7jjPV
+	ptcTjp4ReDSKDfe3L9OR4X+8ywnwyjdkeV9taPg==
+X-Google-Smtp-Source: AGHT+IFzwmTlSm83S3zIQ/NDj8ijWnvuzYb+Ls9TCG0adu2HJouriCBzHm65cuenwHGzeYmKw4gbmsjLNgVHCs5ygNw=
+X-Received: by 2002:a25:81c6:0:b0:e02:b580:d0b with SMTP id
+ 3f1490d57ef6-e02be203e4dmr5411315276.40.1718887852518; Thu, 20 Jun 2024
+ 05:50:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240606131222.1131880-1-linux-mmc@danman.eu>
-In-Reply-To: <20240606131222.1131880-1-linux-mmc@danman.eu>
+References: <20240612-brigade-shell-1f626e7e592f@spud> <20240612-dense-resample-563f07c30185@spud>
+In-Reply-To: <20240612-dense-resample-563f07c30185@spud>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 20 Jun 2024 14:38:32 +0200
-Message-ID: <CAPDyKFpuJexp_1hgKhJ3b8VCx+PwwhAQscbJT5-44Re0xmbxrg@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
-To: linux-mmc@danman.eu
-Cc: linux-mmc@vger.kernel.org
+Date: Thu, 20 Jun 2024 14:50:15 +0200
+Message-ID: <CAPDyKFozcUPuMooDHVSBZomHTGKzseVf9F=YBY_uQejh9o3x7g@mail.gmail.com>
+Subject: Re: [RFC v1 1/3] mmc: mmc_spi: allow for spi controllers incapable of
+ getting as low as 400k
+To: Conor Dooley <conor@kernel.org>
+Cc: linux-mmc@vger.kernel.org, Conor Dooley <conor.dooley@microchip.com>, 
+	cyril.jean@microchip.com, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, 
+	linux-riscv@lists.infradead.org, linux-spi@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 6 Jun 2024 at 15:12, <linux-mmc@danman.eu> wrote:
+On Wed, 12 Jun 2024 at 17:48, Conor Dooley <conor@kernel.org> wrote:
 >
-> From: Daniel Kucera <linux-mmc@danman.eu>
+> From: Conor Dooley <conor.dooley@microchip.com>
 >
-> Locked SD card will not reply to SEND_SCR or SD_STATUS commands
-> so it was failing to initialize previously. When skipped,
-> the card will get initialized and CMD42 can be sent using
-> ioctl to unlock the card or remove password protection.
-> For eMMC, this is not necessary because all initialization
-> commands are allowed in locked state.
-> Until unlocked, all read/write calls will timeout.
+> Some controllers may not be able to reach a bus clock as low as 400 KHz
+> due to a lack of sufficient divisors. In these cases, the SD card slot
+> becomes non-functional as Linux continuously attempts to set the bus
+> clock to 400 KHz. If the controller is incapable of getting that low,
+> set its minimum frequency instead. While this may eliminate some SD
+> cards, it allows those capable of operating at the controller's minimum
+> frequency to be used.
+>
+> Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
 
-Skipping the commands above, only means the card gets partially
-initialized. Leaving a card in that state seems fragile. What will
-happen to upper block layers and filesystems when trying to access it?
-
-Several years ago Al Cooper made an attempt [1] to manage the
-unlocking of the card during initialization, by finding the password
-through the "keys" subsystem. The series didn't really make it to the
-upstream kernel, but overall the approach seemed to make sense to me.
-It should allow us to complete the initialization of the card inside
-the kernel and prevent unnecessary complexity for userspace to manage.
-Perhaps you can have a closer look at that series and see if it's
-possible to update it?
+Looks reasonable to me. I assume you intend to send a non-RFC for
+this, that I can pick up?
 
 Kind regards
 Uffe
 
-[1]
-https://lore.kernel.org/linux-mmc/1433526147-25941-1-git-send-email-alcooperx@gmail.com/
-
->
-> Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
 > ---
->  drivers/mmc/core/sd.c | 13 ++++++++++++-
->  1 file changed, 12 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mmc_spi.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 1c8148cdd..ae821df7d 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -928,8 +928,19 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->         bool reinit)
->  {
->         int err;
-> +       u32 card_status;
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 09d7a6a0dc1a..c9caa1ece7ef 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1208,7 +1208,10 @@ static int mmc_spi_probe(struct spi_device *spi)
+>          * that's the only reason not to use a few MHz for f_min (until
+>          * the upper layer reads the target frequency from the CSD).
+>          */
+> -       mmc->f_min = 400000;
+> +       if (spi->controller->min_speed_hz > 400000)
+> +               dev_warn(&spi->dev,"Controller unable to reduce bus clock to 400 KHz\n");
+> +
+> +       mmc->f_min = max(spi->controller->min_speed_hz, 400000);
+>         mmc->f_max = spi->max_speed_hz;
 >
-> -       if (!reinit) {
-> +       err = mmc_send_status(card, &card_status);
-> +       if (err){
-> +               pr_err("%s: unable to get card status\n", mmc_hostname(host));
-> +               return err;
-> +       }
-> +
-> +       if (card_status & R1_CARD_IS_LOCKED){
-> +               pr_warn("%s: card is locked\n", mmc_hostname(host));
-> +       }
-> +
-> +       if (!reinit && !(card_status & R1_CARD_IS_LOCKED)) {
->                 /*
->                  * Fetch SCR from card.
->                  */
+>         host = mmc_priv(mmc);
 > --
-> 2.34.1
+> 2.43.0
 >
