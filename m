@@ -1,170 +1,141 @@
-Received: from mail-vk1-f181.google.com (mail-vk1-f181.google.com [209.85.221.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A813C1C02;
-	Fri, 21 Jun 2024 09:01:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4996916F84C
+	for <linux-mmc@vger.kernel.org>; Fri, 21 Jun 2024 09:53:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718960512; cv=none; b=SHBLOXi8VT+QsypTyzSvdO72BtXIfCJWWtUTnZl+k8avOQ3FDoCeOkQMLjP6usDG5mPLmIDS12cCSUVNUvdgt9JqEwU1UrkBJGdGo1pxQe9XAjzWEtazocJ/uUCeNIEeRWc+nindp3hMdfvUu5ilrkksVqDPqY4uGUXLxhoq1pc=
+	t=1718963629; cv=none; b=L1jFvZwK+19F3rRh5dBTyoyhAWDOxl55xSzqr++8+ILNcEgRgy7mimzDUjf4b0Jy70A1j04jBMScV8zoop/RuI7dLY21xmMGsYckhYA46BWXhKBv3k5LP661YZkpMn9JQxnJyQKP39bgYBShWSyHxwSu/tnkPpN5jOnEv3J5gr4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718960512; c=relaxed/simple;
-	bh=lbb3RlxiVSN5An+lcWwXEDj1fEY7J50BbOUre3XLuP8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=KLkruo7rxw5CPCpsX1zgk//WHRJj0qf3CWumXAnuLyAwi/TajDmiLBCiZ5VY70ffEXcHKUA7ClHL1C4oIdtS2Sb1FQDJknMK2eyq47jw6oiFQQNevM1JzvcdrKMX5AhwORLhoP9A0GEU9rbnhbUtFKv7njBYgZwIW2hipYb86kQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VCRJt1Je; arc=none smtp.client-ip=209.85.221.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1718963629; c=relaxed/simple;
+	bh=9X27kAi88t13JEAFL9myOVAMxXzM/vgQYLhQyo43drE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ndhRsg+sbdlxWx6ZiTloaGAXvVqvjkQsysVl+nC8IASGJJ5MFfMBKn3hO+VGEBD77JGxHMPCVeWFWUFTZUfURygoC07uk3OsHmPLyooG3AeGjeyoZNGWuEl8Q2ZgXkaSNMqXipzFD9UGQWyZRGUb9Zbf8EElyNFLKWdC65lF/vA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=JfJzCQK0; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VCRJt1Je"
-Received: by mail-vk1-f181.google.com with SMTP id 71dfb90a1353d-4ecf11aa0d6so567740e0c.3;
-        Fri, 21 Jun 2024 02:01:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718960509; x=1719565309; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=h8crjU+EtnhctEnFUJbd2boW5EyfjEiu3bDRE8jkR0I=;
-        b=VCRJt1JeXMQkFljrzTXn7H9gaZKYbIXB/AIdP5HVD/cIBnXxDRoXYX+wLqJlolqTRb
-         PXn1w6Yv2hM+pBRVNZhQ9aFiH+SBWvaD/W4JpqvZUzPDtF2g65LPp4fTSnmqmwcG2hOp
-         V2krUdumZpOoB6kQYpOGogTKtYpHXHVuz4UC67aSKIyaWYy9gA2jKBsA+roewYJk1sSp
-         eKvd8wMMTQ3Cw83IYrjwMt09EHwtPwVtiyuyT02BIt/vRSUuhJJYz5u5O6Nl9b0JtPZD
-         b1ujz2wowSKT3ceSpo5JX2CkzZxirDaVk9mL7lfXxnZfccQfSpMia8h8tYOeyGb7KREq
-         CO5Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718960509; x=1719565309;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=h8crjU+EtnhctEnFUJbd2boW5EyfjEiu3bDRE8jkR0I=;
-        b=QPM3D18bLgsodf5IsguVsZZp1OnT6EsltDEu9Xh0yblOwqFZKC8hzXyEq4dyPkEzSv
-         CUih0sMZCBc319kL5oOR9E5fnXaxFdcgF9NeoRKbbcssihd2VgoaGYl9PidLL1hiyKWd
-         OriOKrz6zT8UkKCUE9UF7T1Ap47U9DLBp1zmDVEhKwetV83bQ4+qx3MfFp8IfCHnsCuh
-         aWMgcEKIY0kJHpgKDWOuuXxakkZSihMkYmy7p5y4pWUI9G78vpMsvr2D2nnNT2CB79Fk
-         QTZ9+O2cXLaFvo240+kFWleiekoemlbqrQoY5oHkgpE0g72MEJA4pM12hhVD9w/fwpeA
-         1/YA==
-X-Forwarded-Encrypted: i=1; AJvYcCWn9u3A0y0JMx20WkE/4f8I0gucZwvG2J4z+ouVBP8lsEt/dN12tuL5N4xuZPIE65K6g5DgRTC2w9PerB+mvNYTW7Tay8I+SZybBBg2B6Jr4JakiQqqw5lUmpISzVDDuVsDEAX3Pj6OZeTn0aE=
-X-Gm-Message-State: AOJu0YxeYzmurHYBczcbItsiph0e5f4L4YflwpYgsAmwxjruEq7mDH/Z
-	VKUOnRo8SK4ro4jcdy4ODbHQ0qt7PolHcIhGtqaG9NotUyKq8ASXimTIMzti0ZT97pcNZZV7rcH
-	bCEZyvRYgDbwFXyA7CcT/jF/tgB8=
-X-Google-Smtp-Source: AGHT+IG0DMI2JXtnG2IQ0Z4GYCA31lk28r1AN9eOxXEJ7zK6hGuurqdOzOeHD+9STeRj6+FppoRGMWt2rDHHbeg3TlU=
-X-Received: by 2002:a05:6122:3184:b0:4df:1a3f:2ec1 with SMTP id
- 71dfb90a1353d-4ef27665f61mr7900622e0c.1.1718960509510; Fri, 21 Jun 2024
- 02:01:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="JfJzCQK0"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=RPfT
+	8u6a3+40tK3oCZZfl86nwYXzLiH9ajhehJvBjqs=; b=JfJzCQK0ozaPEuqmU/lq
+	8h/+hfxTrqCfF0yKoNf5BY1by4bKOrS3weHMmmqAD2hCgk9zoWs/etD3B3iTVI7j
+	qYLp9HRiCzt0qgaosA1jZz2oYj33/h4EriTTD0c/ziUWCJgIgiL0QqvVsnxxLbbP
+	Kzj0oF0UdKzsCG2ntXXe/AuL6erfPPSJQA0hdgf8MIPulqO6Umd1GPAWb3bV5ZXj
+	zABGh8fc0vEBOKAddFTf8k9tiLeiINDjk7ViMnMRtndwfdHLilDztl4EKlsKUkOQ
+	sSi9Z+2s9e3UGLXgOt3t0SsCJLfr0Up+yFOuq4MD1+EA3fzcCh+JHh2lS8szanCs
+	ww==
+Received: (qmail 1326092 invoked from network); 21 Jun 2024 11:53:44 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Jun 2024 11:53:44 +0200
+X-UD-Smtp-Session: l3s3148p1@6DcuaGMbKqogAwDPXzjQABqqX1QYyOSW
+Date: Fri, 21 Jun 2024 11:53:43 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Allen Pais <allen.lkml@gmail.com>
+Cc: Aubin Constans <aubin.constans@microchip.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, 
+	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
+	Manuel Lauss <manuel.lauss@gmail.com>, =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
+	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
+	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
+	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH v3] mmc: Convert from tasklet to BH workqueue
+Message-ID: <gw6adkoy3ndjdjufti2gs2gnk3xdgylt6tnia2zha76hsgdwtq@dr3czbxjij66>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Allen Pais <allen.lkml@gmail.com>, Aubin Constans <aubin.constans@microchip.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, 
+	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
+	Manuel Lauss <manuel.lauss@gmail.com>, =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
+	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
+	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
+	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+References: <20240618225210.825290-1-allen.lkml@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1718897545.git.geert+renesas@glider.be> <fbbc13ddd19df2c40933ffa3b82fb14841bf1d4c.1718897545.git.geert+renesas@glider.be>
-In-Reply-To: <fbbc13ddd19df2c40933ffa3b82fb14841bf1d4c.1718897545.git.geert+renesas@glider.be>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Fri, 21 Jun 2024 10:01:06 +0100
-Message-ID: <CA+V-a8uAS9vHrVZpfyUUQvE7DConmbWH2yPkPM9N0Wb7Rd33Gg@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: tmio: Remove obsolete .set_pwr() callback()
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Lee Jones <lee@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
-	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="gq4kufue4w3vtipq"
+Content-Disposition: inline
+In-Reply-To: <20240618225210.825290-1-allen.lkml@gmail.com>
+
+
+--gq4kufue4w3vtipq
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Jun 20, 2024 at 4:40=E2=80=AFPM Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
->
-> Commit ca78476e4888f1f1 ("mfd: Remove toshiba tmio drivers") removed the
-> last users of the .set_pwr() callback in the tmio_mmc_data structure.
-> Remove the callback, and all related infrastructure.
->
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> ---
-> Laurent tried this before in commit 3af9d15c719017fe
-> ("mmc: tmio-mmc: Remove .set_pwr() callback from platform data"),
-> but it had to be reverted in commit 9d731e7539713acc ("Revert
-> "mmc: tmio-mmc: Remove .set_pwr() callback from platform data"")
-> because there were still users at that time.
-> ---
->  drivers/mmc/host/tmio_mmc.h      | 3 ---
->  drivers/mmc/host/tmio_mmc_core.c | 8 --------
->  include/linux/mfd/tmio.h         | 1 -
->  3 files changed, 12 deletions(-)
->
-Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Hi,
 
-Cheers,
-Prabhakar
+On Tue, Jun 18, 2024 at 03:52:07PM GMT, Allen Pais wrote:
+> The only generic interface to execute asynchronously in the BH context is
+> tasklet; however, it's marked deprecated and has some design flaws. To
+> replace tasklets, BH workqueue support was recently added. A BH workqueue
+> behaves similarly to regular workqueues except that the queued work items
+> are executed in the BH context.
+>=20
+> This patch converts drivers/mmc/* from tasklet to BH workqueue.
+>=20
+> Based on the work done by Tejun Heo <tj@kernel.org>
 
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index de56e6534aeaaa10..2af5730c21f4a98d 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -139,9 +139,6 @@ struct tmio_mmc_host {
->         struct mmc_host         *mmc;
->         struct mmc_host_ops     ops;
->
-> -       /* Callbacks for clock / power control */
-> -       void (*set_pwr)(struct platform_device *host, int state);
-> -
->         /* pio related stuff */
->         struct scatterlist      *sg_ptr;
->         struct scatterlist      *sg_orig;
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc=
-_core.c
-> index 93e912afd3ae5aa0..7b4256f0cbe77028 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -880,9 +880,6 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *h=
-ost, unsigned short vdd)
->
->         /* .set_ios() is returning void, so, no chance to report an error=
- */
->
-> -       if (host->set_pwr)
-> -               host->set_pwr(host->pdev, 1);
-> -
->         if (!IS_ERR(mmc->supply.vmmc)) {
->                 ret =3D mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd)=
-;
->                 /*
-> @@ -916,9 +913,6 @@ static void tmio_mmc_power_off(struct tmio_mmc_host *=
-host)
->
->         if (!IS_ERR(mmc->supply.vmmc))
->                 mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> -
-> -       if (host->set_pwr)
-> -               host->set_pwr(host->pdev, 0);
->  }
->
->  static unsigned int tmio_mmc_get_timeout_cycles(struct tmio_mmc_host *ho=
-st)
-> @@ -1160,8 +1154,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host=
-)
->         if (pdata->flags & TMIO_MMC_USE_BUSY_TIMEOUT && !_host->get_timeo=
-ut_cycles)
->                 _host->get_timeout_cycles =3D tmio_mmc_get_timeout_cycles=
-;
->
-> -       _host->set_pwr =3D pdata->set_pwr;
-> -
->         ret =3D tmio_mmc_init_ocr(_host);
->         if (ret < 0)
->                 return ret;
-> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> index aca74ac1ff69e6f7..8c09d14a3a286ca0 100644
-> --- a/include/linux/mfd/tmio.h
-> +++ b/include/linux/mfd/tmio.h
-> @@ -100,7 +100,6 @@ struct tmio_mmc_data {
->         dma_addr_t                      dma_rx_offset;
->         unsigned int                    max_blk_count;
->         unsigned short                  max_segs;
-> -       void (*set_pwr)(struct platform_device *host, int state);
->  };
->
->  /*
-> --
-> 2.34.1
->
->
+Has this been fully build-tested?
+
+=3D=3D=3D
+drivers/mmc/host/renesas_sdhi_internal_dmac.c: In function =E2=80=98renesas=
+_sdhi_internal_dmac_complete_work_fn=E2=80=99:
+=2E/include/linux/container_of.h:20:54: error: =E2=80=98struct tmio_mmc_hos=
+t=E2=80=99 has no member named =E2=80=98dma_complete=E2=80=99
+=3D=3D=3D
+
+In deed, 'dma_complete' is only in 'struct renesas_sdhi_dma'. From
+there, we can get to the parent 'struct renesas_sdhi' using
+container_of. But then, I don't see a way to go to 'struct
+tmio_mmc_host' from there. The other way around is possible because
+there is the pointer 'struct tmio_mmc_data *pdata' in the TMIO struct
+pointing to the data contained in 'struct renesas_sdhi'. 'host_to_priv()'
+does the math. But I don't see a path the other way around.
+
+So, it doesn't look like the workqueue interface can provide a
+generic pointer like tasklets could do? This means we have to add a
+pointer from 'struct renesas_sdhi' to 'struct tmio_mmc_host'?
+
+All the best,
+
+   Wolfram
+
+
+--gq4kufue4w3vtipq
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmZ1TaMACgkQFA3kzBSg
+KbanVQ//dqEZ+e/wVpBJ/SIXoF0cFcPn3VByooLZaUBcc7mmkHJCynUy3IleRLG2
+zyPZXbb4367ZgKpi4MtZ9xFVQB2l1+Vwcag8Si0wn6HT6uJfAZpzICet+yovlam/
+alBGpZQBCQbiRNXakttLhByw9+KHIcQHMQQlsdzW5V8L8w1LZYgr/N2vxnz3Bwqv
+c3XSf1Cpvyc5r2Ztce6d2GXKxPsmWTCcGCAAnj5oPe2FkyMpmZeStL1RZYc/spTa
+YjEDtOMrckbNpCXoLu5OjvZRv4NFicsuRojKCtbFScaj9uSS654P6JJY8rfSWJp4
+rWOuidtkkkKlE6y+rT79fnPikKc4UoMMKsf6D9EWETKBP9jEIsO3Vr1kz0/wME0R
+iolEdaUwvOC6EHmE86tEleFEmYZIK3RF7NpmyVofqy2kMAsNj5dIAuvPyxXN1vOh
+bXM9JLI0Io+YxwYfoW2ycYMZTFVIQXdsWefZmFoTQnPND5aE21UwQYX4bCE2vz+x
+eCcUo0hTOAnz1quoiDuyr7eNLXyGTfyhkQ/VHgE9dez7hFUtNxVcGunp38fd6Zbh
+KFXGX7wtIkVPHLvls7WsellcB6Bz6mckcW0UwThPUYjEkw4G28nm14FRUwGJLj6L
+qXTveQ7e7fp720pxFi7JCuf1dl/rL/uS7ub1hjkEi/8/3UZKEg0=
+=CZvf
+-----END PGP SIGNATURE-----
+
+--gq4kufue4w3vtipq--
