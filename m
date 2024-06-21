@@ -1,698 +1,349 @@
-Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16A8712C46F;
-	Fri, 21 Jun 2024 02:31:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
+Received: from m15.mail.126.com (m15.mail.126.com [45.254.50.223])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4E8D9126F2A
+	for <linux-mmc@vger.kernel.org>; Fri, 21 Jun 2024 03:05:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.254.50.223
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718937096; cv=none; b=BvDvDHNcGo8Z6KTC8kI3ixO1ln0Hm2q9P68uIvW3XHoM18U5d5X8oy0uoyHPPxRSqyfJfA3lwpz/CtDKC+WaNvuCV/6vLk/gn+PlR9kgnr327AbsExDJdUPphAmkNFjv4WAvhFbhQ0PuMONEGb35h79h5e0iodDB8U2xcnTS7L8=
+	t=1718939163; cv=none; b=c2zMXM2l6f2IbNfP+St+fl5aSS1xkB/Ug/286ovgCDr/YcqVkm3HTKx4JQHswP482i110UzC7NNghB/6nfkyDtHXGDHH9D7Dak4a/Vf4oMwsQNiE6NI6g2sO7OWYtuBqbpexyF6jSjS2glWlHt0ufRft7dRlJNT43M990C6GT14=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718937096; c=relaxed/simple;
-	bh=q/LxFNhik+DWDPQ9VEh44vfHwyUOugEXvPVUFIPj7jw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BQJh1VS79Ll9t3qlSYEj1g6Sc+0Fd3xtU0uLS9c15pgto+jkSUlbYLs3oqsKwdRkgNn2UOwOP1VQ3HyukfsAv1AZqM7xlZCcbEYx6DuWVdAgbayiqlUJXogVsET19c9if1YQV5WRb396qNXpfiKMEd/X9DHBjxGvZ0Pvhdq3Sqc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nhoqeDde; arc=none smtp.client-ip=209.85.218.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1718939163; c=relaxed/simple;
+	bh=YTUv50mF+8O2ZEJS+DzUGR/H+SlocJhtSkTx2mzjVV4=;
+	h=Date:From:To:Subject:Content-Type:MIME-Version:Message-ID; b=CrRsLsm9Re0SjHzfoQn+nyR6Mx+OMy1TrFpIN66i0uiJ2nMD7zQM+gYSKj2ZSKfJgSHO8wfdW1+GgKQBhTossNgijPOdPpqAXsRr7Dmi/B8nQVF8Ux4RkzLxBaOFEu0scEOXC8PkhGkYhBNGkqPSwSft2vYB9SQJDp5N/1tTyFI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com; spf=pass smtp.mailfrom=126.com; dkim=fail (1024-bit key) header.d=126.com header.i=@126.com header.b=AHOx3cH+ reason="signature verification failed"; arc=none smtp.client-ip=45.254.50.223
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=126.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=126.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nhoqeDde"
-Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-a6ef64b092cso169910066b.1;
-        Thu, 20 Jun 2024 19:31:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1718937091; x=1719541891; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JyHpd5T6+uz22Iwq0ar8KfwFU7mqYCVeTdoWGzEly8Q=;
-        b=nhoqeDdeICi7cnG0YULmadg6KSUDCY+TUgq+DpXve/s+sQJM9i+JNYT4zn7ymJdLEZ
-         kDKIQzQploNXXrXlsBu4ntiEQSAI3aq74EW9CwCY7wZZNrwy0pAbDs/egLBlRX+b43W/
-         pTvvIPYODeKn7R7aCZ1fmmbqidSOshbykTBnd+6SLQ0Iwn1JondBtRmiXsTl7KPbohnA
-         qz66X+rbr5BFeSVtmlEWeK38L9wu80a3lHDPYYmMs2X1tec24kNRQctIeXqSOt5wo5fZ
-         J6QbqfbfcPhxi4D3VBNzt/Nbzq44XfMKYSqglh6nMm9D65ssD89eErSN7/RoMWkPIC+G
-         E2CQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1718937091; x=1719541891;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JyHpd5T6+uz22Iwq0ar8KfwFU7mqYCVeTdoWGzEly8Q=;
-        b=vuqRMS4fWZ1wT6yXnAxIIz0tE+OateC7j+tObEiIsArEuwVOOq35Uh/2kfUbPuB72i
-         4QTjWyTcILfk3A9wTu3hR4vPdGMLG1c2ONdccbELfOpyKH6yTf3V9OcnoMlEUTXqOwxS
-         kGNaCybtku3QgNgAhXmVhkTvuKoWVJhBukVkOMnHwKk3OsPfdS3cs4y7PFjokmmdsPEK
-         9Io1bD9J4aeHWdOCTCTFauUM39nCvf1hzqn5CsNnM3KoZrcHXvFifccPnYcO5Kt2khoB
-         l8EB7iHFZIdRjqS1vRw7uEfuqSbBoseH93Xw/2QWodvSg+yvqGmA1uux7gKYlGENisMa
-         t9PA==
-X-Forwarded-Encrypted: i=1; AJvYcCUPwvRhqCdanhPVY9J5+Fq0qc3eeNKytO8Z0ZfVY0OLAiLDhS6NCvCZ58ISdzBooLD6h6nOwdCx25iSgZDSraJ3YzCe4om9Dj2UevB+I9PujyrxgbiYwC8d0z7UWIjBZBbsCifp00sm
-X-Gm-Message-State: AOJu0Yx+PfFm+EEals2+lx8CT22nOMu6/BBwZ/T2H9nLbCXkXVpAm9w0
-	SUeVSq9LtC0zFt+RL0av81Sd/i8v+K9AK0kNK/EN3IjBCvXr2zZ1Ol85DB1tFFFPywXaHhIq+Tm
-	+CtiB8KdCFijrnqIbB/R2kpQodfs=
-X-Google-Smtp-Source: AGHT+IEE2zKtFe/CVBwchZdHF1VuvqWoqJvNQs5qFPOZjml57WKP1pvhcN7NCAd48BsVznKXdLNPpw+OuB7WrBWKLTc=
-X-Received: by 2002:a17:906:682:b0:a6f:86fd:72b8 with SMTP id
- a640c23a62f3a-a6fab648c90mr447950166b.42.1718937090562; Thu, 20 Jun 2024
- 19:31:30 -0700 (PDT)
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=126.com header.i=@126.com header.b="AHOx3cH+"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
+	s=s110527; h=Date:From:Subject:Content-Type:MIME-Version:
+	Message-ID; bh=X4LwHFDw9Pfz99c8KaAOYmOvX+uEUTlXMobi6GUi1EY=; b=A
+	HOx3cH+Ks617ft3m9JbvCzeNjiVXcD7+Vt6ScVwmaAx2p/1FricBb67ZFSWDOkEJ
+	zfgyqumcaoVLqiKkcM4ue6+JOC8viQAQJ4gIlFvzgmyR05KYg3w8qi18n+euAu4e
+	/YdR9RraOfSKbc7t8DRAF2u5RhUECkLVqHvVmDkKvU=
+Received: from xiaoya901109$126.com ( [112.20.110.225] ) by
+ ajax-webmail-wmsvr-41-117 (Coremail) ; Fri, 21 Jun 2024 11:05:48 +0800
+ (CST)
+Date: Fri, 21 Jun 2024 11:05:48 +0800 (CST)
+From: Yang <xiaoya901109@126.com>
+To: linux-mmc@vger.kernel.org
+Subject: Help: How to use the slab debug log message
+X-Priority: 3
+X-Mailer: Coremail Webmail Server Version XT5.0.14 build 20230109(dcb5de15)
+ Copyright (c) 2002-2024 www.mailtech.cn 126com
+X-NTES-SC: AL_Qu2aCvWYtkkv7imfbOkfm0YWgOk3Wcayufsu3o9SP5t8jA7j9xoGYXBnFF7Z79KTCxijrzyzUz1sw/5nVoBARKIgVkgJkg3m4BtbumBORcr/rw==
+Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=GBK
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240620104444.5862-1-victorshihgli@gmail.com> <20240620104444.5862-18-victorshihgli@gmail.com>
-In-Reply-To: <20240620104444.5862-18-victorshihgli@gmail.com>
-From: Ben Chuang <benchuanggli@gmail.com>
-Date: Fri, 21 Jun 2024 10:31:16 +0800
-Message-ID: <CACT4zj9visXkZDqeEAhbaDPJ5N1muasrj=Y_fNN=Zuze8F-inw@mail.gmail.com>
-Subject: Re: [PATCH V17 17/22] mmc: sdhci-uhs2: add irq() and others
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, HL.Liu@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org, dlunev@chromium.org, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Message-ID: <1f6ce8eb.3641.19038c1e2b8.Coremail.xiaoya901109@126.com>
+X-Coremail-Locale: zh_CN
+X-CM-TRANSID:_____wD3nw8N7nRm2OcWAA--.34156W
+X-CM-SenderInfo: 50ld05zdzqiiiqz6ij2wof0z/1tbiGBEFIWVLb5oFHwAFsp
+X-Coremail-Antispam: 1U5529EdanIXcx71UUUUU7vcSsGvfC2KfnxnUU==
 
-Hi Victor,
-
-On Thu, Jun 20, 2024 at 6:46=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
-m> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> This is a UHS-II version of sdhci's request() operation.
-> It handles UHS-II related command interrupts and errors.
->
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> ---
->
-> Updates in V17:
->  - Add sdhci_uhs2_reset_cmd_data() and sdhci_uhs2_needs_reset() to
->    resolve the data error or cmd error.
->
-> Updates in V14:
->  - Use mmc_card_uhs2() to stead sdhci_uhs2_mode() in the
->    sdhci_uhs2_complete_work(), sdhci_uhs2_irq() and
->    sdhci_uhs2_thread_irq().
->
-> Updates in V13:
->  - Re-order function to avoid declaration.
->  - Remove unnecessary definitions.
->
-> Updates in V9:
->  - Cancel export state of sdhci_set_mrq_done() function.
->
-> Updates in V8:
->  - Forward declare struct mmc_request in sdhci_uhs2.h.
->  - Remove forward declaration of sdhci_send_command().
->  - Use mmc_dev() to simplify code in sdhci_request_done_dma().
->
-> Updates in V7:
->  - Remove unnecessary functions.
->  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_irq().
->  - Modify descriptions in sdhci_uhs2_irq().
->  - Cancel export state of some functions.
->
-> Updates in V6:
->  - Remove unnecessary functions.
->  - Add sdhci_uhs2_mode() in sdhci_uhs2_complete_work().
->  - Add sdhci_uhs2_mode() in sdhci_uhs2_thread_irq().
->
-> ---
->
->  drivers/mmc/host/sdhci-uhs2.c | 237 ++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-uhs2.h |   2 +
->  drivers/mmc/host/sdhci.c      | 102 ++++++++-------
->  drivers/mmc/host/sdhci.h      |   5 +
->  4 files changed, 300 insertions(+), 46 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.=
-c
-> index 31486e28496d..2ed00c8abe88 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -106,6 +106,19 @@ void sdhci_uhs2_reset(struct sdhci_host *host, u16 m=
-ask)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
->
-> +static void sdhci_uhs2_reset_cmd_data(struct sdhci_host *host)
-> +{
-> +       sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-
-Can the SDHCI_RESET_DATA bit be used in UHS-II mode?
-Because you put it here it means that the sdhci_uhs2_reset_cmd_data()
-can be used with other vendor chips in addition to GL9755/GL9767.
-In order to have no side effects for all, please help check the Spec.
-
-Best regards,
-Ben Chuang
-
-> +
-> +       if (mmc_card_uhs2(host->mmc)) {
-> +               sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
-> +
-> +               sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> +               sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> +               sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI=
-_UHS2_INT_ERROR_MASK);
-> +       }
-> +}
-> +
->  void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, u=
-nsigned short vdd)
->  {
->         struct mmc_host *mmc =3D host->mmc;
-> @@ -904,6 +917,230 @@ static void sdhci_uhs2_request(struct mmc_host *mmc=
-, struct mmc_request *mrq)
->         spin_unlock_irqrestore(&host->lock, flags);
->  }
->
-> +/***********************************************************************=
-******\
-> + *                                                                      =
-     *
-> + * Request done                                                         =
-     *
-> + *                                                                      =
-     *
-> +\***********************************************************************=
-******/
-> +
-> +static bool sdhci_uhs2_needs_reset(struct sdhci_host *host, struct mmc_r=
-equest *mrq)
-> +{
-> +       return sdhci_needs_reset(host, mrq) ||
-> +              (!(host->flags & SDHCI_DEVICE_DEAD) && mrq->data && mrq->d=
-ata->error);
-> +}
-> +
-> +static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-> +{
-> +       unsigned long flags;
-> +       struct mmc_request *mrq;
-> +       int i;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +
-> +       for (i =3D 0; i < SDHCI_MAX_MRQS; i++) {
-> +               mrq =3D host->mrqs_done[i];
-> +               if (mrq)
-> +                       break;
-> +       }
-> +
-> +       if (!mrq) {
-> +               spin_unlock_irqrestore(&host->lock, flags);
-> +               return true;
-> +       }
-> +
-> +       /*
-> +        * Always unmap the data buffers if they were mapped by
-> +        * sdhci_prepare_data() whenever we finish with a request.
-> +        * This avoids leaking DMA mappings on error.
-> +        */
-> +       if (host->flags & SDHCI_REQ_USE_DMA)
-> +               sdhci_request_done_dma(host, mrq);
-> +
-> +       /*
-> +        * The controller needs a reset of internal state machines
-> +        * upon error conditions.
-> +        */
-> +       if (sdhci_uhs2_needs_reset(host, mrq)) {
-> +               /*
-> +                * Do not finish until command and data lines are availab=
-le for
-> +                * reset. Note there can only be one other mrq, so it can=
-not
-> +                * also be in mrqs_done, otherwise host->cmd and host->da=
-ta_cmd
-> +                * would both be null.
-> +                */
-> +               if (host->cmd || host->data_cmd) {
-> +                       spin_unlock_irqrestore(&host->lock, flags);
-> +                       return true;
-> +               }
-> +
-> +               if (mrq->cmd->error || mrq->data->error)
-> +                       sdhci_uhs2_reset_cmd_data(host);
-> +               else
-> +                       sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET);
-> +               host->pending_reset =3D false;
-> +       }
-> +
-> +       host->mrqs_done[i] =3D NULL;
-> +
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       if (host->ops->request_done)
-> +               host->ops->request_done(host, mrq);
-> +       else
-> +               mmc_request_done(host->mmc, mrq);
-> +
-> +       return false;
-> +}
-> +
-> +static void sdhci_uhs2_complete_work(struct work_struct *work)
-> +{
-> +       struct sdhci_host *host =3D container_of(work, struct sdhci_host,
-> +                                              complete_work);
-> +
-> +       if (!mmc_card_uhs2(host->mmc)) {
-> +               sdhci_complete_work(work);
-> +               return;
-> +       }
-> +
-> +       while (!sdhci_uhs2_request_done(host))
-> +               ;
-> +}
-> +
-> +/***********************************************************************=
-******\
-> + *                                                                      =
-     *
-> + * Interrupt handling                                                   =
-     *
-> + *                                                                      =
-     *
-> +\***********************************************************************=
-******/
-> +
-> +static void __sdhci_uhs2_irq(struct sdhci_host *host, u32 uhs2mask)
-> +{
-> +       struct mmc_command *cmd =3D host->cmd;
-> +
-> +       DBG("*** %s got UHS2 error interrupt: 0x%08x\n",
-> +           mmc_hostname(host->mmc), uhs2mask);
-> +
-> +       if (uhs2mask & SDHCI_UHS2_INT_CMD_ERR_MASK) {
-> +               if (!host->cmd) {
-> +                       pr_err("%s: Got cmd interrupt 0x%08x but no cmd.\=
-n",
-> +                              mmc_hostname(host->mmc),
-> +                              (unsigned int)uhs2mask);
-> +                       sdhci_dumpregs(host);
-> +                       return;
-> +               }
-> +               host->cmd->error =3D -EILSEQ;
-> +               if (uhs2mask & SDHCI_UHS2_INT_CMD_TIMEOUT)
-> +                       host->cmd->error =3D -ETIMEDOUT;
-> +       }
-> +
-> +       if (uhs2mask & SDHCI_UHS2_INT_DATA_ERR_MASK) {
-> +               if (!host->data) {
-> +                       pr_err("%s: Got data interrupt 0x%08x but no data=
-.\n",
-> +                              mmc_hostname(host->mmc),
-> +                              (unsigned int)uhs2mask);
-> +                       sdhci_dumpregs(host);
-> +                       return;
-> +               }
-> +
-> +               if (uhs2mask & SDHCI_UHS2_INT_DEADLOCK_TIMEOUT) {
-> +                       pr_err("%s: Got deadlock timeout interrupt 0x%08x=
-\n",
-> +                              mmc_hostname(host->mmc),
-> +                              (unsigned int)uhs2mask);
-> +                       host->data->error =3D -ETIMEDOUT;
-> +               } else if (uhs2mask & SDHCI_UHS2_INT_ADMA_ERROR) {
-> +                       pr_err("%s: ADMA error =3D 0x %x\n",
-> +                              mmc_hostname(host->mmc),
-> +                              sdhci_readb(host, SDHCI_ADMA_ERROR));
-> +                       host->data->error =3D -EIO;
-> +               } else {
-> +                       host->data->error =3D -EILSEQ;
-> +               }
-> +       }
-> +
-> +       if (host->data && host->data->error)
-> +               sdhci_uhs2_finish_data(host);
-> +       else
-> +               sdhci_finish_mrq(host, cmd->mrq);
-> +}
-> +
-> +u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask)
-> +{
-> +       u32 mask =3D intmask, uhs2mask;
-> +
-> +       if (!mmc_card_uhs2(host->mmc))
-> +               goto out;
-> +
-> +       if (intmask & SDHCI_INT_ERROR) {
-> +               uhs2mask =3D sdhci_readl(host, SDHCI_UHS2_INT_STATUS);
-> +               if (!(uhs2mask & SDHCI_UHS2_INT_ERROR_MASK))
-> +                       goto cmd_irq;
-> +
-> +               /* Clear error interrupts */
-> +               sdhci_writel(host, uhs2mask & SDHCI_UHS2_INT_ERROR_MASK,
-> +                            SDHCI_UHS2_INT_STATUS);
-> +
-> +               /* Handle error interrupts */
-> +               __sdhci_uhs2_irq(host, uhs2mask);
-> +
-> +               /* Caller, sdhci_irq(), doesn't have to care about UHS-2 =
-errors */
-> +               intmask &=3D ~SDHCI_INT_ERROR;
-> +               mask &=3D SDHCI_INT_ERROR;
-> +       }
-> +
-> +cmd_irq:
-> +       if (intmask & SDHCI_INT_CMD_MASK) {
-> +               /* Clear command interrupt */
-> +               sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK, SDHCI_IN=
-T_STATUS);
-> +
-> +               /* Handle command interrupt */
-> +               if (intmask & SDHCI_INT_RESPONSE)
-> +                       sdhci_uhs2_finish_command(host);
-> +
-> +               /* Caller, sdhci_irq(), doesn't have to care about UHS-2 =
-commands */
-> +               intmask &=3D ~SDHCI_INT_CMD_MASK;
-> +               mask &=3D SDHCI_INT_CMD_MASK;
-> +       }
-> +
-> +       /* Clear already-handled interrupts. */
-> +       sdhci_writel(host, mask, SDHCI_INT_STATUS);
-> +
-> +out:
-> +       return intmask;
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_irq);
-> +
-> +static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
-> +{
-> +       struct sdhci_host *host =3D dev_id;
-> +       struct mmc_command *cmd;
-> +       unsigned long flags;
-> +       u32 isr;
-> +
-> +       if (!mmc_card_uhs2(host->mmc))
-> +               return sdhci_thread_irq(irq, dev_id);
-> +
-> +       while (!sdhci_uhs2_request_done(host))
-> +               ;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +
-> +       isr =3D host->thread_isr;
-> +       host->thread_isr =3D 0;
-> +
-> +       cmd =3D host->deferred_cmd;
-> +       if (cmd && !sdhci_uhs2_send_command_retry(host, cmd, flags))
-> +               sdhci_finish_mrq(host, cmd->mrq);
-> +
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       if (isr & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
-> +               struct mmc_host *mmc =3D host->mmc;
-> +
-> +               mmc->ops->card_event(mmc);
-> +               mmc_detect_change(mmc, msecs_to_jiffies(200));
-> +       }
-> +
-> +       return IRQ_HANDLED;
-> +}
-> +
->  /***********************************************************************=
-******\
->   *                                                                      =
-     *
->   * Driver init/exit                                                     =
-     *
-> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.=
-h
-> index f6649a518842..077a2c7a6cb0 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.h
-> +++ b/drivers/mmc/host/sdhci-uhs2.h
-> @@ -176,11 +176,13 @@
->
->  struct sdhci_host;
->  struct mmc_command;
-> +struct mmc_request;
->
->  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
->  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
->  void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, u=
-nsigned short vdd);
->  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command =
-*cmd);
->  void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 s=
-et);
-> +u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
->
->  #endif /* __SDHCI_UHS2_H */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 4eff8a9f6b9a..7c9d475eacb7 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -235,7 +235,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_reset);
->
-> -static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
-> +bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
->  {
->         if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
->                 struct mmc_host *mmc =3D host->mmc;
-> @@ -248,6 +248,7 @@ static bool sdhci_do_reset(struct sdhci_host *host, u=
-8 mask)
->
->         return true;
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_do_reset);
->
->  static void sdhci_reset_for_all(struct sdhci_host *host)
->  {
-> @@ -1497,7 +1498,7 @@ static void sdhci_set_transfer_mode(struct sdhci_ho=
-st *host,
->         sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
->  }
->
-> -static bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_reques=
-t *mrq)
-> +bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)
->  {
->         return (!(host->flags & SDHCI_DEVICE_DEAD) &&
->                 ((mrq->cmd && mrq->cmd->error) ||
-> @@ -1505,6 +1506,7 @@ static bool sdhci_needs_reset(struct sdhci_host *ho=
-st, struct mmc_request *mrq)
->                  (mrq->data && mrq->data->stop && mrq->data->stop->error)=
- ||
->                  (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST)));
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_needs_reset);
->
->  static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_reque=
-st *mrq)
->  {
-> @@ -3113,6 +3115,53 @@ static const struct mmc_host_ops sdhci_ops =3D {
->   *                                                                      =
-     *
->  \***********************************************************************=
-******/
->
-> +void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_request =
-*mrq)
-> +{
-> +       struct mmc_data *data =3D mrq->data;
-> +
-> +       if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
-> +               if (host->bounce_buffer) {
-> +                       /*
-> +                        * On reads, copy the bounced data into the
-> +                        * sglist
-> +                        */
-> +                       if (mmc_get_dma_dir(data) =3D=3D DMA_FROM_DEVICE)=
- {
-> +                               unsigned int length =3D data->bytes_xfere=
-d;
-> +
-> +                               if (length > host->bounce_buffer_size) {
-> +                                       pr_err("%s: bounce buffer is %u b=
-ytes but DMA claims to have transferred %u bytes\n",
-> +                                              mmc_hostname(host->mmc),
-> +                                              host->bounce_buffer_size,
-> +                                              data->bytes_xfered);
-> +                                       /* Cap it down and continue */
-> +                                       length =3D host->bounce_buffer_si=
-ze;
-> +                               }
-> +                               dma_sync_single_for_cpu(mmc_dev(host->mmc=
-),
-> +                                                       host->bounce_addr=
-,
-> +                                                       host->bounce_buff=
-er_size,
-> +                                                       DMA_FROM_DEVICE);
-> +                               sg_copy_from_buffer(data->sg,
-> +                                                   data->sg_len,
-> +                                                   host->bounce_buffer,
-> +                                                   length);
-> +                       } else {
-> +                               /* No copying, just switch ownership */
-> +                               dma_sync_single_for_cpu(mmc_dev(host->mmc=
-),
-> +                                                       host->bounce_addr=
-,
-> +                                                       host->bounce_buff=
-er_size,
-> +                                                       mmc_get_dma_dir(d=
-ata));
-> +                       }
-> +               } else {
-> +                       /* Unmap the raw data */
-> +                       dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> +                                    data->sg_len,
-> +                                    mmc_get_dma_dir(data));
-> +               }
-> +               data->host_cookie =3D COOKIE_UNMAPPED;
-> +       }
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_request_done_dma);
-> +
->  static bool sdhci_request_done(struct sdhci_host *host)
->  {
->         unsigned long flags;
-> @@ -3177,48 +3226,7 @@ static bool sdhci_request_done(struct sdhci_host *=
-host)
->                         sdhci_set_mrq_done(host, mrq);
->                 }
->
-> -               if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
-> -                       if (host->bounce_buffer) {
-> -                               /*
-> -                                * On reads, copy the bounced data into t=
-he
-> -                                * sglist
-> -                                */
-> -                               if (mmc_get_dma_dir(data) =3D=3D DMA_FROM=
-_DEVICE) {
-> -                                       unsigned int length =3D data->byt=
-es_xfered;
-> -
-> -                                       if (length > host->bounce_buffer_=
-size) {
-> -                                               pr_err("%s: bounce buffer=
- is %u bytes but DMA claims to have transferred %u bytes\n",
-> -                                                      mmc_hostname(host-=
->mmc),
-> -                                                      host->bounce_buffe=
-r_size,
-> -                                                      data->bytes_xfered=
-);
-> -                                               /* Cap it down and contin=
-ue */
-> -                                               length =3D host->bounce_b=
-uffer_size;
-> -                                       }
-> -                                       dma_sync_single_for_cpu(
-> -                                               mmc_dev(host->mmc),
-> -                                               host->bounce_addr,
-> -                                               host->bounce_buffer_size,
-> -                                               DMA_FROM_DEVICE);
-> -                                       sg_copy_from_buffer(data->sg,
-> -                                               data->sg_len,
-> -                                               host->bounce_buffer,
-> -                                               length);
-> -                               } else {
-> -                                       /* No copying, just switch owners=
-hip */
-> -                                       dma_sync_single_for_cpu(
-> -                                               mmc_dev(host->mmc),
-> -                                               host->bounce_addr,
-> -                                               host->bounce_buffer_size,
-> -                                               mmc_get_dma_dir(data));
-> -                               }
-> -                       } else {
-> -                               /* Unmap the raw data */
-> -                               dma_unmap_sg(mmc_dev(host->mmc), data->sg=
-,
-> -                                            data->sg_len,
-> -                                            mmc_get_dma_dir(data));
-> -                       }
-> -                       data->host_cookie =3D COOKIE_UNMAPPED;
-> -               }
-> +               sdhci_request_done_dma(host, mrq);
->         }
->
->         host->mrqs_done[i] =3D NULL;
-> @@ -3233,7 +3241,7 @@ static bool sdhci_request_done(struct sdhci_host *h=
-ost)
->         return false;
->  }
->
-> -static void sdhci_complete_work(struct work_struct *work)
-> +void sdhci_complete_work(struct work_struct *work)
->  {
->         struct sdhci_host *host =3D container_of(work, struct sdhci_host,
->                                                complete_work);
-> @@ -3241,6 +3249,7 @@ static void sdhci_complete_work(struct work_struct =
-*work)
->         while (!sdhci_request_done(host))
->                 ;
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_complete_work);
->
->  static void sdhci_timeout_timer(struct timer_list *t)
->  {
-> @@ -3702,7 +3711,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->         return result;
->  }
->
-> -static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
-> +irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
->  {
->         struct sdhci_host *host =3D dev_id;
->         struct mmc_command *cmd;
-> @@ -3732,6 +3741,7 @@ static irqreturn_t sdhci_thread_irq(int irq, void *=
-dev_id)
->
->         return IRQ_HANDLED;
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_thread_irq);
->
->  /***********************************************************************=
-******\
->   *                                                                      =
-     *
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 3a68fd1e4bd3..d3098d231122 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -833,6 +833,7 @@ bool sdhci_data_line_cmd(struct mmc_command *cmd);
->  void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq, u=
-nsigned long timeout);
->  void sdhci_initialize_data(struct sdhci_host *host, struct mmc_data *dat=
-a);
->  void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data);
-> +bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)=
-;
->  void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq=
-);
->  void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
->  void __sdhci_finish_data_common(struct sdhci_host *host, bool defer_rese=
-t);
-> @@ -854,6 +855,7 @@ void sdhci_request(struct mmc_host *mmc, struct mmc_r=
-equest *mrq);
->  int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->  void sdhci_set_bus_width(struct sdhci_host *host, int width);
->  void sdhci_reset(struct sdhci_host *host, u8 mask);
-> +bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
->  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
-> @@ -863,6 +865,9 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_i=
-os *ios);
->  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->                                       struct mmc_ios *ios);
->  void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
-> +void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_request =
-*mrq);
-> +void sdhci_complete_work(struct work_struct *work);
-> +irqreturn_t sdhci_thread_irq(int irq, void *dev_id);
->  void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
->                            dma_addr_t addr, int len, unsigned int cmd);
->
-> --
-> 2.25.1
->
+CkhpIGFsbDoKClNvcnJ5IHRvIGJvdGhlciBldmVyeW9uZS4KCldoZW4gSSB3YXMgd3JpdGluZyBh
+IG1tYyBob3N0IGRyaXZlciwgYW4gdW5hbGlnbmVkIGFjY2VzcyB3YXMgdHJpZ2dlcmVkLiBJIHRy
+aWVkIHRvIHR1cm4gb24gc2x1YiBkZWJ1ZyBhbmQgZ290IHRoZSBmb2xsb3dpbmcgCmluZm9ybWF0
+aW9uOgoKVGhlIGtlcm5lbCB2ZXJzaW9uIGlzIHY2LjEwLXJjMSwgYWxzbyBJIHRlc3QgaXQgaW4g
+djYuOSwgaXQgaXMgc2FtZS4KClsgICAgNS4zMTMwMDNdIHJhdyBkYXRhIG1hbGxvYzogOTAwMDAw
+MDEwNThlYzBlODogNmIgNmIgNmIgNmIgNmIgNmIgNmIgYTUgY2MgY2MgY2MgY2MgY2MgY2MgY2Mg
+Y2MgIGtra2tra2suLi4uLi4uLi4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgClsgICAgNS4zMjMyNjhdIHJhdyBkYXRhIG1h
+bGxvYzogOTAwMDAwMDEwNThlYzBmODogNTggYzEgOGUgMDUgMDEgMDAgMDAgOTAgNjggZmEgMmQg
+MDQgMDAgMDAgMDAgOTAgIFguLi4uLi4uaC4tLi4uLi4gClsgICAgNS4zMzM1MjBdIG1tYzA6IHN0
+YXJ0aW5nIENNRDUxIGFyZyAwMDAwMDAwMCBmbGFncyAwMDAwMDBiNSAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgClsgICAgNS4zMzky
+MjFdIG1tYzA6ICAgICBibGtzeiA4IGJsb2NrcyAxIGZsYWdzIDAwMDAwMjAwIHRzYWMgMTAwIG1z
+IG5zYWMgMCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjM4MTU1M10gbW1j
+MDogcmVxIGRvbmUgKENNRDUxKTogMDogMDAwMDA5MjAgNWY1YTgzYmUgZjZkYmRmZmYgOGE4MDQw
+MzUgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1
+LjM4ODQ4M10gbW1jMDogICAgIDggYnl0ZXMgdHJhbnNmZXJyZWQ6IDAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAKWyAgICA1LjM5MjgwOV0gcmF3IGRhdGEgZnJlZTogOTAwMDAwMDEwNThlYzBlODogMDAg
+MDAgYTUgMDIgNmIgNmIgNmIgYTUgY2MgY2MgY2MgY2MgY2MgY2MgY2MgY2MgIC4uLi5ra2suLi4u
+Li4uLi4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAKWyAgICA1LjQwMjg5OF0gcmF3IGRhdGEgZnJlZTogOTAwMDAwMDEw
+NThlYzBmODogNTggYzEgOGUgMDUgMDAgMDAgMDAgMDAgNjggZmEgMmQgMDQgMDAgMDAgMDAgOTAg
+IFguLi4uLi4uaC4tLi4uLi4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQxMjk5MV0gPT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQyMTIyN10g
+QlVHIGttYWxsb2MtOCAoTm90IHRhaW50ZWQpOiBGcmVlcG9pbnRlciBjb3JydXB0ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAg
+ICA1LjQyNjkyMF0gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAKWyAgICA1LjQyNjkyMF0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQzNjY1MF0gQWxsb2NhdGVkIGluIG1tY19hcHBf
+c2VuZF9zY3IrMHhlOC8weDI0MCBhZ2U9MzEgY3B1PTEgcGlkPTI0ICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ0MzQwOV0gIGttYWxsb2Nf
+dHJhY2Vfbm9wcm9mKzB4MTI4LzB4MzQwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ0Nzgw
+OV0gIG1tY19hcHBfc2VuZF9zY3IrMHhlNC8weDI0MCAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK
+WyAgICA1LjQ1MTc2NV0gIG1tY19zZF9zZXR1cF9jYXJkKzB4MTU0LzB4NjgwICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAKWyAgICA1LjQ1NTg5NV0gIG1tY19zZF9pbml0X2NhcmQrMHgxNWMvMHhjYzAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ1OTkzOF0gIG1tY19hdHRhY2hfc2QrMHgx
+MGMvMHgxZTAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ2MzcxOV0gIG1tY19y
+ZXNjYW4rMHgzYmMvMHg0ODAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ2
+NzI0NF0gIHByb2Nlc3Nfb25lX3dvcmsrMHgxN2MvMHgzMjAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAKWyAgICA1LjQ3MTI4OV0gIHdvcmtlcl90aHJlYWQrMHgzODQvMHg0ZTAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAKWyAgICA1LjQ3NTA3MV0gIGt0aHJlYWQrMHgxM2MvMHgxNjAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ3ODMzN10gIHJldF9mcm9tX2tlcm5l
+bF90aHJlYWQrMHg4LzB4YTQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ4MjY0Ml0gRnJl
+ZWQgaW4gbXBpX2ZyZWUrMHgzNC8weGEwIGFnZT0xMTggY3B1PTAgcGlkPTEwMCAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1
+LjQ4ODQ0MF0gIG1waV9mcmVlKzB4MzAvMHhhMCAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAKWyAgICA1LjQ5MTYxM10gIHJzYV9kZWMrMHgxODgvMHgyNjAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAKWyAgICA1LjQ5NDg3NV0gIHRlc3RfYWtjaXBoZXJfb25lKzB4NzU4
+LzB4OGMwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjQ5OTAwN10gIGFsZ190ZXN0X2Fr
+Y2lwaGVyKzB4YTgvMHgxNDAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjUwMzA1MV0g
+IGFsZ190ZXN0KzB4MTgwLzB4NzgwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAg
+ICA1LjUwNjM5N10gIGNyeXB0b21ncl90ZXN0KzB4MWMvMHg0MCAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAKWyAgICA1LjUxMDA5MV0gIGt0aHJlYWQrMHgxM2MvMHgxNjAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjUxMzM1NF0gIHJldF9mcm9tX2tlcm5lbF90aHJl
+YWQrMHg4LzB4YTQKWyAgICA1LjUxNzY1N10gU2xhYiAweGZmZmZmZmZmMDEwNThlYzAgb2JqZWN0
+cz0xNDYgdXNlZD0zIGZwPTB4OTAwMDAwMDEwNThlYzE1OCBmbGFncz0weDFmZmZmMDAwMDAwMDIw
+MCh3b3JraW5nc2V0fG5vZGU9MHx6b25lPTF8bGFzdGNwdXBpZD0weGZmZmYpICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjUzMDY5Ml0gT2JqZWN0IDB4OTAwMDAwMDEw
+NThlYzBlOCBAb2Zmc2V0PTIzMiBmcD0weDAwMDAwMDAwMDU4ZWMxNTggICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjUzMDY5Ml0gICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjUz
+ODg0MF0gUmVkem9uZSAgOTAwMDAwMDEwNThlYzBlMDogY2MgY2MgY2MgY2MgY2MgY2MgY2MgY2Mg
+ICAgICAgICAgICAgICAgICAgICAgICAgIC4uLi4uLi4uICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAKWyAgICA1LjU0NzY4NV0gT2JqZWN0ICAgOTAwMDAwMDEwNThlYzBlODogMDAgMDAgYTUgMDIg
+NmIgNmIgNmIgYTUgICAgICAgICAgICAgICAgICAgICAgICAgIC4uLi5ra2suICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAKWyAgICA1LjU1NjUzMF0gUmVkem9uZSAgOTAwMDAwMDEwNThlYzBmMDog
+Y2MgY2MgY2MgY2MgY2MgY2MgY2MgY2MgICAgICAgICAgICAgICAgICAgICAgICAgIC4uLi4uLi4u
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjU2NTM3NF0gUGFkZGluZyAgOTAwMDAw
+MDEwNThlYzE0NDogNWEgNWEgNWEgNWEgNWEgNWEgNWEgNWEgNWEgNWEgNWEgNWEgICAgICAgICAg
+ICAgIFpaWlpaWlpaWlpaWiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjU3NDU3MF0gQ1BV
+OiAxIFBJRDogMjQgQ29tbToga3dvcmtlci8xOjAgTm90IHRhaW50ZWQgNi4xMC4wLXJjMisgIzIz
+NyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1
+LjU4MTQwMF0gV29ya3F1ZXVlOiBldmVudHNfZnJlZXphYmxlIG1tY19yZXNjYW4gICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAKWyAgICA1LjU4NjI0MV0gU3RhY2sgOiA5MDAwMDAwMTAwMDk5M2IwIDAwMDAwMDAwMDAw
+MDAwMDAgOTAwMDAwMDAwMzJmMzcyNCA5MDAwMDAwMTAwMjljMDAwICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAKWyAgICA1LjU5NDMyNF0gICAgICAgICA5MDAwMDAwMTAwMjlmODIw
+IDkwMDAwMDAxMDAyOWY4MjggMDAwMDAwMDAwMDAwMDAwMCAwMDAwMDAwMDAwMDAwMDAwICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjYwMjQwM10gICAgICAgICA5MDAw
+MDAwMTAwMjlmODI4IDAwMDAwMDAwMDAwMDAwMDEgOTAwMDAwMDE4MDI5ZjU0NyA5MDAwMDAwMTAw
+MjlmM2QwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjYxMDQ4MV0g
+ICAgICAgICBmZmZmZmZmZmZmZmZmZmZmIDkwMDAwMDAxMDAyOWY4MjggYjVmYzA4ODI3NTkxZjMz
+MCA5MDAwMDAwMTAwMjM5MDQwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAg
+ICA1LjYxODU1OF0gICAgICAgICAwMDAwMDAwMDAwMDAwMjZmIDAwMDAwMDAwMDAwMDAwMDEgMDAw
+MDAwMDAwMDAwMDAwMCAwMDAwMDAwMDAwMDAwMDAzICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAKWyAgICA1LjYyNjYzNV0gICAgICAgICAwMDAwMDAwMDAwMDAxNmE4IDAwMDAwMDAw
+MDAwOGRmMTggMDAwMDAwMDAwODgyYzAwMCA5MDAwMDAwMDA1Y2Y0MDAwICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjYzNDcxM10gICAgICAgICAwMDAwMDAwMDAwMDAw
+MDAwIDAwMDAwMDAwMDAwMDAwMDAgOTAwMDAwMDAwNGVkNThmMCA5MDAwMDAwMDA1MDY1MDAwICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY0Mjc5MV0gICAgICAgICAw
+MDAwMDAwMDAwMDAwMDAwIDkwMDAwMDAxMDU4ZWMwZjAgMDAwMDAwMDAwMDAwMDAwMSA5MDAwMDAw
+MTAwMDA0NjQwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY1MDg2
+OF0gICAgICAgICA5MDAwMDAwMTA1OGVjMGU4IDAwMDAwMDAwMDAwMDAwMDAgOTAwMDAwMDAwMzJm
+Mzc0NCAwMDAwMDAwMDAwMDAwMDAwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK
+WyAgICA1LjY1ODk0NV0gICAgICAgICAwMDAwMDAwMDAwMDAwMGIwIDAwMDAwMDAwMDAwMDAwMDQg
+MDAwMDAwMDAwMDAwMDAwMCAwMDAwMDAwMDAwMDcxYzFkICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAKWyAgICA1LjY2NzAyM10gICAgICAgICAuLi4gICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY2OTQ5Nl0gQ2FsbCBUcmFjZTogICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY2OTUwMV0gWzw5MDAw
+MDAwMDAzMmYzNzQ0Pl0gc2hvd19zdGFjaysweDY0LzB4MWEwICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY3
+NzE0NV0gWzw5MDAwMDAwMDA0NzI5ZWY0Pl0gZHVtcF9zdGFja19sdmwrMHg3NC8weGIwICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAKWyAgICA1LjY4MjU4NV0gWzw5MDAwMDAwMDA0NzBmNTk4Pl0gb2JqZWN0X2VycisweDNjLzB4
+NjAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAKWyAgICA1LjY4NzY4MV0gWzw5MDAwMDAwMDAzNThiM2Q0Pl0gY2hlY2tf
+b2JqZWN0KzB4NGI0LzB4NGUwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY5MzEyMV0gWzw5MDAwMDAwMDAzNThi
+ZDE0Pl0gZnJlZV90b19wYXJ0aWFsX2xpc3QrMHgxZjQvMHg2YTAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjY5OTI1OF0gWzw5
+MDAwMDAwMDAzNThjYWU4Pl0ga2ZyZWUrMHgxODgvMHgzNDAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1
+LjcwNDA4OF0gWzw5MDAwMDAwMDA0MmRmYjVjPl0gbW1jX2FwcF9zZW5kX3NjcisweDFkYy8weDI0
+MCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAKWyAgICA1LjcwOTg3NV0gWzw5MDAwMDAwMDA0MmRkYjk0Pl0gbW1jX3NkX3NldHVwX2Nh
+cmQrMHgxNTQvMHg2ODAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAKWyAgICA1LjcxNTc0OV0gWzw5MDAwMDAwMDA0MmRlMjFjPl0gbW1j
+X3NkX2luaXRfY2FyZCsweDE1Yy8weGNjMCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjcyMTUzNV0gWzw5MDAwMDAwMDA0
+MmRmMDJjPl0gbW1jX2F0dGFjaF9zZCsweDEwYy8weDFlMCAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1LjcyNzA2MF0g
+Wzw5MDAwMDAwMDA0MmQyZDdjPl0gbW1jX3Jlc2NhbisweDNiYy8weDQ4MCAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAg
+ICA1LjczMjMyNV0gWzw5MDAwMDAwMDAzMzM5NjVjPl0gcHJvY2Vzc19vbmVfd29yaysweDE3Yy8w
+eDMyMCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAKWyAgICA1LjczODExMV0gWzw5MDAwMDAwMDAzMzNhM2E0Pl0gd29ya2VyX3RocmVh
+ZCsweDM4NC8weDRlMCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAKWyAgICA1Ljc0MzYzNV0gWzw5MDAwMDAwMDAzMzQ1YjljPl0g
+a3RocmVhZCsweDEzYy8weDE2MCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1Ljc0ODY0MV0gWzw5MDAwMDAw
+MDAzMmYxNDQ0Pl0gcmV0X2Zyb21fa2VybmVsX3RocmVhZCsweDgvMHhhNCAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKWyAgICA1Ljc1NDY4
+OF0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAK
+WyAgICA1Ljc1NjE5N10gRGlzYWJsaW5nIGxvY2sgZGVidWdnaW5nIGR1ZSB0byBrZXJuZWwgdGFp
+bnQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAKWyAgICA1Ljc2MTU0MF0gRklYIGttYWxsb2MtODogT2JqZWN0IGF0IDB4OTAw
+MDAwMDEwNThlYzBlOCBub3QgZnJlZWQKCkJ1dCBJIGRvbid0IGtub3cgaG93IHRvIHByb2NlZWQs
+IGJlY2F1c2UgdGhlIHR3byBmdW5jdGlvbnMgb2YgYWxsb2MgYW5kIGZyZWUgaW4gdGhlIGxvZyBo
+YXZlIG5vdGhpbmcgdG8gZG8gd2l0aCBlYWNoIG90aGVyLiBUaGVuLCBob3cgY2FuIEkgdHJhY2Ug
+dGhlIHNsYWIgb2JqZWN0IDB4OTAwMDAwMDEwNThlYzBlOD8KCkkgdHJpZWQgdG8gYW5hbHl6ZSBt
+bWNfYXBwX3NlbmRfc2NyKCkgYW5kIHJzYV9kZWMoKSwgYnV0IHRvIG5vIGF2YWlsLgoKSWYgYW55
+b25lIGlzIGNvbnZlbmllbnQsIHBsZWFzZSBnaXZlIG1lIHNvbWUgYWR2aWNlIG9uIGhvdyB0byBj
+b250aW51ZSBkZWJ1Z2dpbmcuCgpUaGFua3MuCllhbmcK
