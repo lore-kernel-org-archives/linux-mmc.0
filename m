@@ -1,181 +1,360 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ot1-f41.google.com (mail-ot1-f41.google.com [209.85.210.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45986176FA7
-	for <linux-mmc@vger.kernel.org>; Fri, 21 Jun 2024 07:54:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D090616D4C7;
+	Fri, 21 Jun 2024 08:06:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1718956470; cv=none; b=VaQ2jWIqoA8u2m5nhNV8sL3xttTCA11u99GU8vx/y/sj8eStFbhlCHGPH2hOgcojYRP2xMpM93iIzQBZd4W/IcqBBtNUyf+AnMvH5/IqDkh/U5vEoCQhhfFK+Gmt6yaxSQkfr4TYjH3TPqJfgj81ZZZTXLqeZETUuK57hwOPFQ8=
+	t=1718957217; cv=none; b=uzkMpGWBoAw49Nd+p7RUxLSM6b5YD9wIZ4ShwXGMGHDsJFuBwj8TiZjvyYQn8SHeiTs4rPe55j6IkBIHZ0jXsPvNIwLJA+aJKcSH0v4ECNAEb86wkwHMxECNAgvi0K1tUmIObOrCybRuY3eUleYcpx+PBKzmJNFs8KvC2hy+ZZ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1718956470; c=relaxed/simple;
-	bh=Qiu2cnuLE3bINgaUTy01KWZeDAWULRjFMg9Ap2rFhOk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EM6q8eKWEUwWh8GK7mk86beJuQ1oTew+jrbvbf0aEEIceGYJLLOzpizYS+d3lPZZ47K+RAgxpo2BzdTyNQYAQmCR3VL1HxFSZdyQeajhDyoURVu2w0Na0vhYS7fBmBvsP99sKqbjd4Ek9jla+Pi5oh+Z6tSapoIXx8LCUZgf7HM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=aN/W6cN0; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1718957217; c=relaxed/simple;
+	bh=YU7O6AGOx12tvKfqFO4NbDrfDBd6CzF/8qv8GE1w1uM=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=LvKwPDehe8zA7R9VNLl0kkQ46D8N8IUlp+jlJmJcSDMnMMmLV3sfj01QOrHxdkO35m1UglKCKl3liZCt2oC8lAdKmbtvpPathQ7zFGofjMKSZgi4G5qNoMsh+JXILWobsrguFaiN2IHQrKzIzJIormrCMj/jYqLF563oa2tmRgg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bsFWwRLO; arc=none smtp.client-ip=209.85.210.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="aN/W6cN0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=G+I7
-	Dy46Mrza8gu4LYO3j9ILWX+nGJyhLuq4M5ObIbo=; b=aN/W6cN0p5nSicAwI5OR
-	yW0sh78BFW0hvhjyiFZmnUfCmXusxuHOy31n/kO2gueaSVtcbmoorzc58OAeckcB
-	jHZH5S9mg+EqMB79lHB8g16caw760vUbQsLP9gBlFwyfjijEqnd36IdzaQY+Qtza
-	/BHueCZaIJfBtMKvlmxiuJDJvIStUhln2ETpG53zYW4/5gy4daTBDdo4X+D0D708
-	25LeFdUEUtzT07ULqXzMi/ySdFLf1VHky9uUxavDTR57u9xkvMzoJNJ6eIQ2TtJG
-	/fgGFahNR7p0nkDjDo2Pxd8YWDw5cUR/qBmE/7LM3Tdy6gWwwptdNWO+kaDo0o9b
-	uw==
-Received: (qmail 1287368 invoked from network); 21 Jun 2024 09:54:26 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Jun 2024 09:54:26 +0200
-X-UD-Smtp-Session: l3s3148p1@QYWHvWEbCucgAwDPXzjQABqqX1QYyOSW
-Date: Fri, 21 Jun 2024 09:54:25 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, linux-kernel@vger.kernel.org, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, linux-renesas-soc@vger.kernel.org, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Biju Das <biju.das.jz@bp.renesas.com>, Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org, 
-	Conor Dooley <conor+dt@kernel.org>
-Subject: Re: [RFC PATCH v2 3/3] mmc: renesas_sdhi: Add support for RZ/V2H(P)
- SoC
-Message-ID: <4lypqqf4o2wk22kzpyutlaarare5kurdrlokbm6mb4re3mstam@qo7c3d4tcpll>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	"Lad, Prabhakar" <prabhakar.csengg@gmail.com>, Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, linux-kernel@vger.kernel.org, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, linux-renesas-soc@vger.kernel.org, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Biju Das <biju.das.jz@bp.renesas.com>, Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org, 
-	Conor Dooley <conor+dt@kernel.org>
-References: <20240613091721.525266-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240613091721.525266-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <prdvmtsp35yy2naohivbrya3go6vh5ji2cdjoebw3ovditcujo@bhck6tca6mhj>
- <CA+V-a8u6KAFp1pox+emszjCHqvNRYrkOPpsv5XBdkAVJQMxjmA@mail.gmail.com>
- <o7tswznmyk6gxoqfqvbvzxdndvf5ggkyc54nwafypquxjlvdrv@3ncwl5i5wyy3>
- <CA+V-a8spwd82a3BTS-u-w-JY859YCRxCi0Os6XRn27-mkWz6WA@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bsFWwRLO"
+Received: by mail-ot1-f41.google.com with SMTP id 46e09a7af769-6f8ef63714cso982426a34.1;
+        Fri, 21 Jun 2024 01:06:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1718957215; x=1719562015; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=AvWL0wj3A/i0gS74gMUgMtb/mv9EjdRvYDNJx0i61hc=;
+        b=bsFWwRLOoGwn7cQVnNAJ0n6TgW0c5vwN17m4Nv8SQJeroSwsem08qjRX59tUAf45GN
+         4ve1vJ6O/blElvedr6tFGm+Z08giN0loIKNHwrRnmJAE6GMIbLLcDsiHE+G6Hp3VjIcO
+         89L0+rrRzNFCB4MEtPSLd87a8vJcaNichNSx19KRme70LgBoQg8NHM14G+Neym6LF6QL
+         0t1Wb5rDraflLzDR7FY42HpIi9nJEtifoW4vOZgpJeSy7BAFDVkq8T81y5Y+7ZMXSdMI
+         C1QdVVVQ01CVjCEtUmQgEsJDH1hGi/CkZPzy2UqT7lWcuekP0nXFrjMzmjJC9q9SH6bv
+         5Qgg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1718957215; x=1719562015;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=AvWL0wj3A/i0gS74gMUgMtb/mv9EjdRvYDNJx0i61hc=;
+        b=bbtDPveuSOf5q/HlX15orrVG7gWTygTEo5A8y6BY+LSQKlW5PFHM/jwBgCMeQfazOh
+         qn8m4kYPg0804S+Dw0yDbjY+Q7S1IG5LiYhNZyO5JvLhdS4GvZUrtlHh2RNnauLv4t40
+         +OCwOyEbXMNUqa7HLio58uz9eg81l3WM/IhbD9TkMvAggAh3+O0R75x0oC5iuejTAMRo
+         apnXdLzxjRNKSAL1OwiOMrrALm1Ltkwf6NpcfLaymh4VJWMC5IWRJZl5pwhyQ3N3FdtM
+         KdVbYn8yj1X5/s08745C0mLyxi0ZaxdPzT7Hw/xR/JZugnOcwn7AvSNWwVyuC8jrdKTa
+         Y3fQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV8xXHpyaSxPbNCqrDP0gqF9DEwVAipCZYUcfbblOp5B9YdsK7f787QG/JbRtTZzUX0cbBuOhycF2m0pCtOlvKlEXzt1O8ACQrT2RuJN8uL07ItoCYbcyzkLAXJDh/lJYbl/BxPR+9gM2pUVF5BGNQWMaWjtFq1/RBtT6VTt6R+loQa9w==
+X-Gm-Message-State: AOJu0YynFqaWMtKb0P4MXYLOGOMwHXS0071ER7E/esy5Ls8jhXbRCx9p
+	EjtfnS9CPeC1VE21YDKd6uSz2f6T1gTAoQOLMpO9paCtsnjIaEoi
+X-Google-Smtp-Source: AGHT+IGNxn3y66ounzSsDGs7VdmSG+BnCQ7CjXvUV2vuZifwOgwlSEySSHcFYeSH0KDy0+wtbHUz3A==
+X-Received: by 2002:a05:6870:c14f:b0:258:42c1:2523 with SMTP id 586e51a60fabf-25c94a67c23mr8415683fac.18.1718957214669;
+        Fri, 21 Jun 2024 01:06:54 -0700 (PDT)
+Received: from [172.19.1.51] (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70651192a4csm824304b3a.54.2024.06.21.01.06.51
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 21 Jun 2024 01:06:54 -0700 (PDT)
+Message-ID: <1e249c77-def1-4ffc-bbd6-d64f7e95b0ac@gmail.com>
+Date: Fri, 21 Jun 2024 16:06:49 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="v6w6c2dqsjx426ws"
-Content-Disposition: inline
-In-Reply-To: <CA+V-a8spwd82a3BTS-u-w-JY859YCRxCi0Os6XRn27-mkWz6WA@mail.gmail.com>
+User-Agent: Mozilla Thunderbird
+From: Shan-Chun Hung <shanchun1218@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-ma35d1: Add Novoton MA35D1 SDHCI driver
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, adrian.hunter@intel.com, p.zabel@pengutronix.de,
+ pbrobinson@gmail.com, serghox@gmail.com, mcgrof@kernel.org,
+ prabhakar.mahadev-lad.rj@bp.renesas.com, forbidden405@outlook.com,
+ tmaimon77@gmail.com, linux-arm-kernel@lists.infradead.org,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, ychuang3@nuvoton.com, schung@nuvoton.com
+References: <20240619054641.277062-1-shanchun1218@gmail.com>
+ <20240619054641.277062-3-shanchun1218@gmail.com>
+ <CAHp75VcJGoDaAbD7vWin8yTGarrLZbVQqucHs+M9rAAS0BZd9g@mail.gmail.com>
+Content-Language: en-US
+In-Reply-To: <CAHp75VcJGoDaAbD7vWin8yTGarrLZbVQqucHs+M9rAAS0BZd9g@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
+Dear Andy,
 
---v6w6c2dqsjx426ws
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thanks for your review.
 
-Hi Prabhakar,
+On 2024/6/20 上午 03:09, Andy Shevchenko wrote:
+> On Wed, Jun 19, 2024 at 7:47 AM Shan-Chun Hung<shanchun1218@gmail.com>  wrote:
+>> This adds the SDHCI driver for the MA35 series SoC. It is based upon the
+>> SDHCI interface, but requires some extra initialization.
+>>
+>> Signed-off-by: schung<schung@nuvoton.com>
+> Even I agree with Markus' remarks, so please correct your SoB by using
+> something similar to the From line.
+I will fix it.
+>
+> ...
+>
+>> +config MMC_SDHCI_OF_MA35D1
+>> +       tristate "SDHCI OF support for the MA35D1 SDHCI controller"
+>> +       depends on ARCH_A35 || COMPILE_TEST
+>> +       depends on MMC_SDHCI_PLTFM
+>> +       depends on OF && COMMON_CLK
+> OF is not compile dependency AFAICS, if you want make it functional, use
+>
+>    depends on OF || COMPILE_TEST
+>
+> ...
+>
+> You are missing a lot of header inclusions, please follow IWYU principle.
+I am not familiar with IWYU yet, but I will learn it and use it for 
+checks later on.
 
-> Based on the feedback from Rob I have now changed it to below, i.e.
-> the regulator now probes based on regulator-compatible property value
-> "vqmmc-r9a09g057-regulator" instead of regulator node name as the
-> driver has of_match in regulator_desc.
+For new, I am adding these header files.
 
-I like this a lot! One minor comment.
+> + array_size.h
+> + bits.h
+>
+>> +#include <linux/clk.h>
+> + device.h
+>
+>> +#include <linux/dma-mapping.h>
+> + err.h
+>
+>> +#include <linux/mfd/syscon.h>
+> + math.h
+> + mod_devicetable.h
+>
+>> +#include <linux/module.h>
+>> +#include <linux/mmc/mmc.h>
+>> +#include <linux/pinctrl/consumer.h>
+> + platform_device.h
+>
+>> +#include <linux/regmap.h>
+>> +#include <linux/reset.h>
+>> +#include <linux/slab.h>
+> + types.h
+> ...
+>
+>> +#define BOUNDARY_OK(addr, len) \
+>> +       ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+> Besides sizes.h being missed, this can be done with help of ALIGN()
+> macro (or alike). So, kill this and use the globally defined macro
+> inline.
+I will add sizes.h and directly apply globally defined  ALIGN() macro 
+instead
+> ...
+>
+>> +       /* If the clock frequency exceeds MMC_HIGH_52_MAX_DTR,
+>> +        *      disable command conflict check.
+>> +        */
+>    /*
+>     * The comment style is wrong and
+>     * the indentation in the second line.
+>     * Fix it as in this example.
+>     */
+>
+> ...
+I will fix it.
+>> +static void ma35_voltage_switch(struct sdhci_host *host)
+>> +{
+>> +       /* Wait for 5ms after set 1.8V signal enable bit */
+>> +       usleep_range(5000, 5500);
+> Use fsleep()
+I will use fsleep() instead of usleep_range().
+>> +}
+>> +
+>> +static int ma35_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>> +{
+>> +       struct sdhci_host *host = mmc_priv(mmc);
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       struct ma35_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +       /* Limitations require a reset SD/eMMC before tuning. */
+>> +       if (!IS_ERR(priv->rst)) {
+> It's way too big for indentation, moreover it uses an unusual pattern,
+> usually we check for an error case first. So, invert the conditional
+> and this all code will become much better.
+I will fix it.
+>> +               int idx;
+>> +               u32 *val;
+>> +
+>> +               val = kmalloc(ARRAY_SIZE(restore_data), GFP_KERNEL);
+>> +               for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
+>> +                       if (restore_data[idx].width == 32)
+> sizeof(u32) ?
+Your idea is better, I will change it.
+>> +                               val[idx] = sdhci_readl(host, restore_data[idx].reg);
+>> +                       else if (restore_data[idx].width == 8)
+> sizeof(u8) ?
+I will fix it.
+>> +                               val[idx] = sdhci_readb(host, restore_data[idx].reg);
+>> +               }
+>> +
+>> +               reset_control_assert(priv->rst);
+>> +               reset_control_deassert(priv->rst);
+>> +
+>> +               for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
+>> +                       if (restore_data[idx].width == 32)
+>> +                               sdhci_writel(host, val[idx], restore_data[idx].reg);
+>> +                       else if (restore_data[idx].width == 8)
+>> +                               sdhci_writeb(host, val[idx], restore_data[idx].reg);
+> As per above?
+I will fix it.
+>> +               }
+>> +
+>> +               kfree(val);
+>> +       }
+>> +
+>> +       return sdhci_execute_tuning(mmc, opcode);
+>> +}
+> ...
+>
+>> +static int ma35_probe(struct platform_device *pdev)
+>> +{
+>> +       struct device *dev = &pdev->dev;
+> Since you have it, use it!
+I will use "dev" instead of "&pdev->dev".
+>> +       struct sdhci_pltfm_host *pltfm_host;
+>> +       struct sdhci_host *host;
+>> +       struct ma35_priv *priv;
+>> +       int err;
+>> +       u32 extra, ctl;
+>> +
+>> +       host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata,
+>> +                               sizeof(struct ma35_priv));
+> One line?
+I will fix it.
+>> +       if (IS_ERR(host))
+>> +               return PTR_ERR(host);
+>> +
+>> +       /*
+>> +        * extra adma table cnt for cross 128M boundary handling.
+>> +        */
+> Wrong comment style.
+I will fix it.
+>> +       extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+>> +       if (extra > SDHCI_MAX_SEGS)
+>> +               extra = SDHCI_MAX_SEGS;
+> min() ? clamp() ?
+I will use min() macro to fix it
+>> +       host->adma_table_cnt += extra;
+>> +       pltfm_host = sdhci_priv(host);
+>> +       priv = sdhci_pltfm_priv(pltfm_host);
+>> +       if (dev->of_node) {
+> Why?
+I will remove the "if ..."
+>> +               pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+>> +               if (IS_ERR(pltfm_host->clk)) {
+>> +                       err = PTR_ERR(pltfm_host->clk);
+>> +                       dev_err(&pdev->dev, "failed to get clk: %d\n", err);
+> Use
+>
+>    return dev_err_probe(...);
+I will use dev_err_probe() instead of dev_err()
+>> +                       goto free_pltfm;
+> This is wrong. You may not call non-devm before devm ones, otherwise
+> it makes a room for subtle mistakes on remove-probe or unbind-bind
+> cycles. Have you tested that?
+I have tested it, there is no error messages during driver initial process.
 
-> static struct regulator_desc r9a09g057_vqmmc_regulator =3D {
->     .of_match    =3D of_match_ptr("vqmmc-r9a09g057-regulator"),
->     .owner        =3D THIS_MODULE,
->     .type        =3D REGULATOR_VOLTAGE,
->     .ops        =3D &r9a09g057_regulator_voltage_ops,
->     .volt_table    =3D r9a09g057_vqmmc_voltages,
->     .n_voltages    =3D ARRAY_SIZE(r9a09g057_vqmmc_voltages),
-> };
->=20
-> SoC DTSI:
->         sdhi1: mmc@15c10000 {
->             compatible =3D "renesas,sdhi-r9a09g057";
->             reg =3D <0x0 0x15c10000 0 0x10000>;
->             interrupts =3D <GIC_SPI 737 IRQ_TYPE_LEVEL_HIGH>,
->                      <GIC_SPI 738 IRQ_TYPE_LEVEL_HIGH>;
->             clocks =3D <&cpg CPG_MOD 167>,
->                  <&cpg CPG_MOD 169>,
->                  <&cpg CPG_MOD 168>,
->                  <&cpg CPG_MOD 170>;
->             clock-names =3D "core", "clkh", "cd", "aclk";
->             resets =3D <&cpg 168>;
->             power-domains =3D <&cpg>;
->             status =3D "disabled";
->=20
->             vqmmc_sdhi1: vqmmc-regulator {
->                 regulator-compatible =3D "vqmmc-r9a09g057-regulator";
->                 regulator-name =3D "vqmmc-regulator";
+My thought is that sdhci_pltfm_init and sdhci_pltfm_free are used together.
 
-This should have "sdhi<X>" somewhere in the name?
+If there's any error after the successful execution of sdhci_pltfm_init, 
+I'll use sdhci_pltfm_free.
 
->                 regulator-min-microvolt =3D <1800000>;
->                 regulator-max-microvolt =3D <3300000>;
->                 status =3D "disabled";
->             };
->         };
->=20
-> Board DTS:
->=20
-> &sdhi1 {
->     pinctrl-0 =3D <&sdhi1_pins>;
->     pinctrl-1 =3D <&sdhi1_pins>;
->     pinctrl-names =3D "default", "state_uhs";
->     vmmc-supply =3D <&reg_3p3v>;
->     vqmmc-supply =3D <&vqmmc_sdhi1>;
->     bus-width =3D <4>;
->     sd-uhs-sdr50;
->     sd-uhs-sdr104;
->     status =3D "okay";
-> };
->=20
-> &vqmmc_sdhi1 {
->     status =3D "okay";
-> };
+I am not entirely sure if this answers your question.
 
-Again, I like this. It looks like proper HW description to me.
+>> +               }
+>> +               err = clk_prepare_enable(pltfm_host->clk);
+>> +               if (err)
+>> +                       goto free_pltfm;
+> Use _enabled variant of devm_clk_get() instead.
+I will use devm_clk_get_optional_enabled() instead.
+>> +       }
+>> +
+>> +       err = mmc_of_parse(host->mmc);
+>> +       if (err)
+>> +               goto err_clk;
+>> +
+>> +       priv->rst = devm_reset_control_get(&pdev->dev, NULL);
+> No error check?!
+I will add an error check.
+>> +       sdhci_get_of_property(pdev);
+>> +
+>> +       priv->pinctrl = devm_pinctrl_get(&pdev->dev);
+>> +       if (!IS_ERR(priv->pinctrl)) {
+>> +               priv->pins_default = pinctrl_lookup_state(priv->pinctrl, "default");
+>> +               priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
+>> +               pinctrl_select_state(priv->pinctrl, priv->pins_default);
+>> +       }
+>> +
+>> +       if (!(host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)) {
+>> +               u32 reg;
+>> +
+>> +               priv->regmap = syscon_regmap_lookup_by_phandle(
+>> +                               pdev->dev.of_node, "nuvoton,sys");
+> dev_of_node(dev)
+I will fix it.
+>> +
+>> +               if (!IS_ERR(priv->regmap)) {
+>> +                       /* Enable SDHCI voltage stable for 1.8V */
+>> +                       regmap_read(priv->regmap, MA35_SYS_MISCFCR0, &reg);
+>> +                       reg |= BIT(17);
+>> +                       regmap_write(priv->regmap, MA35_SYS_MISCFCR0, reg);
+>> +               }
+>> +
+>> +               host->mmc_host_ops.start_signal_voltage_switch =
+>> +                                       ma35_start_signal_voltage_switch;
+>> +       }
+>> +
+>> +       host->mmc_host_ops.execute_tuning = ma35_execute_tuning;
+>> +
+>> +       err = sdhci_add_host(host);
+>> +       if (err)
+>> +               goto err_clk;
+>> +
+>> +       /* Enable INCR16 and INCR8 */
+>> +       ctl = sdhci_readw(host, MA35_SDHCI_MBIUCTL);
+>> +       ctl &= ~MA35_SDHCI_INCR_MSK;
+>> +       ctl |= MA35_SDHCI_INCR16|MA35_SDHCI_INCR8;
+>> +       sdhci_writew(host, ctl, MA35_SDHCI_MBIUCTL);
+>> +
+>> +       return 0;
+>> +err_clk:
+>> +       clk_disable_unprepare(pltfm_host->clk);
+> This will go with the _enabled variant being used.
+I will use devm_clk_get_optional_enabled, so I will remove it.
+>> +free_pltfm:
+>> +       sdhci_pltfm_free(pdev);
+> This should go to be correct in ordering.
 
-> Based on the feedback provided Geert ie to use set_pwr callback to set
-> PWEN bit and handle IOVS bit in voltage switch callback by dropping
-> the regulator altogether. In this case we will have to introduce just
-> a single "use-internal-regulator" property and if set make the vqmmc
-> regulator optional?
+I am not entirely sure if it is a similar to "goto free_pltfm;" issue.
 
-Let's discuss with Geert. But I am quite convinced of your approach
-above.
+>> +       return err;
+>> +}
+>> +
+>> +static int ma35_remove(struct platform_device *pdev)
+> Use remove_new callback.
+I will fix it.
+>> +{
+>> +       struct sdhci_host *host = platform_get_drvdata(pdev);
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +
+>> +       sdhci_remove_host(host, 0);
+>> +       clk_disable_unprepare(pltfm_host->clk);
+>> +       sdhci_pltfm_free(pdev);
+> At least these two will go away as per probe error path.
+I will use sdhci_pltfm_remove instead of  the ma35_remove.
+>> +       return 0;
+>> +}
+> ...
+>
+>> +MODULE_AUTHOR("shanchun1218@google.com");
+> Needs to be fixed as Markus said.
+I will fix it.
 
-> > > Let me know if I have missed something obvious here.
-> >
-> > Nope, all good.
+Best Regards,
 
-Don't give up, I think we are close...
+Shan-Chun
 
-All the best,
-
-   Wolfram
-
-
---v6w6c2dqsjx426ws
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmZ1MbEACgkQFA3kzBSg
-KbZmzhAAhikx9DCJzN4RjY8IXdukZFrLpplVN2YzG4v2JaPtx3Io/CWxE/x0uqbf
-PBHqYGBG4cZSJxeRj05fmMNuQ3bWFPa7b66JzcboFked+yhEg6ZoSflK/N4zNAXD
-xZcriyJWSLbLRJu9/qoA+92KoB1OHEg5eetJETOcp0ipQLQcZA9mUQQ78b2VrlHj
-EaHQeQoIotN9dKbBLOwWFu6G60QI+oKwXvp4LNerh/4DJTiHzQ3olpZPJQGDPmcT
-8o55f60f4r1D75Wnvurx2Hodrd/POHCeEQI4dE5Gjljz1aQ3+5Eh1qVTgoYXUQbA
-E9d3uWDrMGGiLYD3q0HWuRtyN7Da3HhqlRodHG5erIYJ7dmefukEYIi6ghdrnsTY
-BcaKi+R+531wyhpqOXFw0mINfU1YlMTkn0RZNUJiUhctY2BFKHp/I/xvSy0saZbZ
-/2z9KWM1MqpfYwuXUH7YVLoqmvmiJ8LhpLubZ0i9OgsfOv/crv6osY+pxXHNfC9J
-C3sC+4Ybd5RrtJTRKCFe+ANFdYrWW3IkD041qs+HmFlRcN9XUMkrL5/+fGrjt/gQ
-uKw3fhpr3mvBYIA35hxPMjnIriFM7NTTH6qUW2uOgRLW4tTBszcfrkU1AJzRgxis
-gdOOjwfqn/Acov8nmXE8GDNPgjayH5XfJhbwgc02ZQYlwUtTg84=
-=hH6Q
------END PGP SIGNATURE-----
-
---v6w6c2dqsjx426ws--
