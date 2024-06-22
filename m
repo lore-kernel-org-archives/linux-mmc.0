@@ -1,97 +1,157 @@
-Received: from mail-vk1-f176.google.com (mail-vk1-f176.google.com [209.85.221.176])
+Received: from mail-pl1-f173.google.com (mail-pl1-f173.google.com [209.85.214.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A143016E899;
-	Fri, 21 Jun 2024 23:09:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CD832904;
+	Sat, 22 Jun 2024 09:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719011363; cv=none; b=D+L8rWPrJ1jRp8R7FksjjC1VmWK3HiIYmfUoE6g+RmFpNv1taTo04qtiGCmsqkj2tfxuHe/0HtWpCIh2IPpfgSj3qzPl66itEauX82ptd3o+DkP4lD61pQc2HuAZv0kCWF8Pv1muYx2WveGnrh5WbbZfKzj65Lj5MWTjm5HlrEs=
+	t=1719047732; cv=none; b=M9MAG8GB99Sazg6e8MmSzTRgZs2VHmt3bM9y0yOrFmwDk9/FDy255NkfGPhCG7l/uB2oYXgrGcus5YB3RYFJobYF4RhfwMJB/Qy44bAELfxA0ExLYD5zwAurlyyDCyQhPXwCCs5BK+U5Mq4etbCGCq8baNcp6Dq1BiAomswn66s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719011363; c=relaxed/simple;
-	bh=eE6wk2WcgUirEjGrFDuCEdYbMtZqyDAgK266lQRZ0aM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Content-Type; b=moZCQuy88AtgRskaz+3DmEvvTTyFlGv6EbrrZX4TqKKTtUlpCBVUoZAPw71RBvX6MRljPtnQVL7kugLms1aOBrB5N1buiNr5vSJtGI+/CkZonhc3VorTGE+yoY/0wzM2FtvpSWzUL4Wn5BqLCwq0S4FYog3Nvw01Rjfzo3Tns/A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JSvtMzvW; arc=none smtp.client-ip=209.85.221.176
+	s=arc-20240116; t=1719047732; c=relaxed/simple;
+	bh=QGmovqxe/ZZvpyV8EpE1WhgzuX8/X+ep9bNe33O6b7k=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=mSXjtOlvq9C3zbP8hXLcdIO/tQJo3+j3MtpoXqmX1PO1K1xjW9OON9jLsYuS1jaQ1E33ZEmGvf1slOIo42uxdfsqiqNbgCMjj5xsCanXInMLGQtoXDPpUjoMuBcshn+Sz8W1RIV7GMeG2kxYGOfM9ERx+YFOoxU10lN+ody28Ns=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=B6NaVLXc; arc=none smtp.client-ip=209.85.214.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JSvtMzvW"
-Received: by mail-vk1-f176.google.com with SMTP id 71dfb90a1353d-4ed083c2874so777887e0c.2;
-        Fri, 21 Jun 2024 16:09:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B6NaVLXc"
+Received: by mail-pl1-f173.google.com with SMTP id d9443c01a7336-1fa07e4f44eso4714005ad.2;
+        Sat, 22 Jun 2024 02:15:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719011360; x=1719616160; darn=vger.kernel.org;
-        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=ffVmrRu08ej+BDuHCXTDWvHdM6rvJCW4tQU3Nw8xcMk=;
-        b=JSvtMzvWa2LKFHU9u0Jxe62BZA3TXAOoEgdvx1emjHtOHv6YlxU+HmqZ2sIwWUrvbM
-         WZ6CAZzDu8jeQgZWvef99zhb0aycBGiqauASnoFilE1/ttYPmZO6hl00gzsRwqJ4XwhC
-         pBXFAvwYRHCGaeIhqRP43vbVHMDDvGY8xBIPfLtKWt4OeeDlYEyEIOMRAoG8IN8P8MZI
-         YSKsuoACM6UKy7KnAQmx+NUsNY+1ZDYrXYie49FNQrOPG2n+4NIkkUfDKXiZrzfbgin9
-         h19BxvBeZfJZ4v4zcGepkPfutC3KPFYWIztHrgPdqcyMSvF1zhf2AUZ7M3Ftwt+UqG7w
-         pwsw==
+        d=gmail.com; s=20230601; t=1719047730; x=1719652530; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=E+Wro17/2T3M6H3Hb7/cNYPT10OFFiTg+saReZEKGL8=;
+        b=B6NaVLXcWO+TNJ8InKGSth5xkCIM8kkUw6DrZJdpPVd479dLkQrkI5G8AEsRLG4G6V
+         61LUMs6tJjYPgE5NZYJ+yYiwSz4tP4Ug0Hhj8lGx2Qu4MJXEZmRh6Y1ZHaK/sjn4BrVy
+         PL+WIdvswJHkLzNx2FlHblw9lOZK9KuUtrBEhtPw/RUYUYcZ9kefNIQTEtHY4lkapkR9
+         wfo10+3/ZdAo69Kki0YfhGvgMkuWdSw7dm55/bhban6giqFdpZF8b3WDZroG1cnU3ICb
+         J9QzyKL8hY3TEW9gv13cRCthSF8V8KNuFpsf+ijTchDjlcDQI8sQArVkeu9KVWbXTNHQ
+         y77w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719011360; x=1719616160;
-        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+        d=1e100.net; s=20230601; t=1719047730; x=1719652530;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ffVmrRu08ej+BDuHCXTDWvHdM6rvJCW4tQU3Nw8xcMk=;
-        b=nZkzru43M1DntM3IMzocHQoGU565t55wNNIOj1TidCgJpOpVxCW31IdMSJutagG1PX
-         h99SNtfkTgYIjZMAI+w211h+TV1lVKZwx2VE8wmZGPkHuzc3qwS/Br+Rle27SUFIyTF7
-         /7X612qT6i4xlTJk/MCL8AsircJ9I+HHu8t5CJEDScsrmHfIcr7CXtQq5VNPwh7NGWaF
-         MmbCoj27vi9AZs9DyBN5LvBoAGleR5VF5uDdsIrgLn3vyt8/HFCSCjZdvusBPVsjQIUV
-         ujEC7dv7ar/gQqZsJqPxvj7tgEs9dwb5/vVkspoYEIJ8CSbvJDsjVANykF6DJXjzr2yv
-         eQgA==
-X-Forwarded-Encrypted: i=1; AJvYcCVGqcpiBmtxtiPTDWF+CAfRn/3VaTLxXdCdOYiOYU/VerwtAGh7+GUGXZVFRLl1L1Q+eBP43l5Kslh6BCXPs1qoGNiusv0ZhSarJZRrE2kzhPUQ6GkmtDMcOaAkr0REF22YhHFwdYAXEf2EtcDqlJTXjp8GXvyE86yJq3S3HmpNgoMP6bqkkvOeabt0O0sk59FSkaCtRW8ZTT3fr/uZ4kuCj8UUzyOi
-X-Gm-Message-State: AOJu0Yy/0ku8T/06Fy4XnvfMuy9SMlID2UuXny+Y+N+pN7nlyDKJ2ZI+
-	5sgy4tT39ZACKc1V7dzwXDMNhKxft3cQkt13XYhBEcC3xZ5LBf8mf33XxchxejLVz4q91oUcaI9
-	WjO33dUs14Kh1P8nPPr3mdR/XsDQ=
-X-Google-Smtp-Source: AGHT+IESVQ1b8mSEZmU/iC2jwDkrBtMQpwgCegx3ps6DqYKI06zcBCoE0lL/xZmB5gHlyCLozXFF42oe68Km7lhczgg=
-X-Received: by 2002:a05:6122:181f:b0:4ef:5b2c:df41 with SMTP id
- 71dfb90a1353d-4ef5b2ce485mr1141412e0c.9.1719011360451; Fri, 21 Jun 2024
- 16:09:20 -0700 (PDT)
+        bh=E+Wro17/2T3M6H3Hb7/cNYPT10OFFiTg+saReZEKGL8=;
+        b=b6k5ApM/rrkKO5REE9Tym7oMdNJG6wmmRIGKI8p4hnPdJk5JX8PsKI2Dbeg6g7/W8l
+         CWMxZkeB4geoAA22BRZE3TbMTm+sv0lcKvTcoo/Q+Wa1pddElBo/uUgkgQZjMIeirVx9
+         ifhQsJ4Bg2qNkhG3J1Ev1BqGsZ0gZOtA/lTDqJudxDyCnKYNWioAAwLFUZ4+FOU4ULfw
+         5MJqDzPaMSEymuE4GypFOgvhivB3eDHhQx1EYf7gUSFSq+Nr91bYmM2bIZWhPQ7oi/V9
+         tXPh+LkBFVbjqYtBe4lU4/EstAPMlFm07R/gpdHaP7rWkB5X10+jKxmXOnq0SIC8nvzq
+         f3Pg==
+X-Forwarded-Encrypted: i=1; AJvYcCUlB8xTYDOcuaClDZ3euTyw5sGZZKgOGTiKO/gUJlG1DNiaq43nAcooUNjX6gDTWIzzNoXyGFHNhsw7ga5mx5AzY2MKhM/NvcFoDecTYudIvCMLGhD2eNx0OyNy6GMIC+/2hkh7ET3PqpJrimh+QE7N2uzKp/XSBcvrSHxxynla7XXZVQ==
+X-Gm-Message-State: AOJu0YznxKFSbxse/UBRB1amY2SpGqJUDqjy9+TTGkMc8aEbuffSH5QC
+	s30t3umVNcxB95m+kSmU6alNmT7jTY7JxpghtmiRpvz3ZLUELydf
+X-Google-Smtp-Source: AGHT+IFCAGCzvCfBKH6kQY85vrf8JsQcixQ15Dk3MpSL0kWK12ZJS4GFjOJTc01K7wzCRuSgudiSZg==
+X-Received: by 2002:a17:903:191:b0:1f9:ccd0:2abb with SMTP id d9443c01a7336-1f9ccd02d58mr85004575ad.58.1719047730306;
+        Sat, 22 Jun 2024 02:15:30 -0700 (PDT)
+Received: from [172.19.1.51] (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-1f9eb9bffdasm26812535ad.237.2024.06.22.02.15.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 22 Jun 2024 02:15:29 -0700 (PDT)
+Message-ID: <3c4e0d8f-8d1e-4667-87c3-f070f3649a2c@gmail.com>
+Date: Sat, 22 Jun 2024 17:15:24 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240618225210.825290-1-allen.lkml@gmail.com> <gw6adkoy3ndjdjufti2gs2gnk3xdgylt6tnia2zha76hsgdwtq@dr3czbxjij66>
- <CAOMdWS+p4Dt2xDGWvwoXtWinsRZintLwPmADddbsmaEfLvRQkw@mail.gmail.com> <ay2rpumtfxtvx4qgkgal7a7z46dbtwjnq4ctik55neseirkhfk@gkylcwud6vry>
-In-Reply-To: <ay2rpumtfxtvx4qgkgal7a7z46dbtwjnq4ctik55neseirkhfk@gkylcwud6vry>
-From: Allen <allen.lkml@gmail.com>
-Date: Fri, 21 Jun 2024 16:09:08 -0700
-Message-ID: <CAOMdWSKzd1nt832+FHtwcMLO1rtgEC99Xz-wvNWGtXiyA8uK7w@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: Convert from tasklet to BH workqueue
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Allen <allen.lkml@gmail.com>, 
-	Aubin Constans <aubin.constans@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Nicolas Ferre <nicolas.ferre@microchip.com>, 
-	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
-	Manuel Lauss <manuel.lauss@gmail.com>, =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
-	Jaehoon Chung <jh80.chung@samsung.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <florian.fainelli@broadcom.com>, 
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
-	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
-	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, linux-mmc@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+From: Shan-Chun Hung <shanchun1218@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-of-ma35d1: Add Novoton MA35D1 SDHCI driver
+To: Philipp Zabel <p.zabel@pengutronix.de>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ adrian.hunter@intel.com, pbrobinson@gmail.com, serghox@gmail.com,
+ mcgrof@kernel.org, prabhakar.mahadev-lad.rj@bp.renesas.com,
+ forbidden405@outlook.com, tmaimon77@gmail.com, andy.shevchenko@gmail.com,
+ linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ychuang3@nuvoton.com, schung@nuvoton.com
+References: <20240619054641.277062-1-shanchun1218@gmail.com>
+ <20240619054641.277062-3-shanchun1218@gmail.com>
+ <bd0e85f42ef74f6f927020cbee6879351d1c3e9e.camel@pengutronix.de>
+Content-Language: en-US
+In-Reply-To: <bd0e85f42ef74f6f927020cbee6879351d1c3e9e.camel@pengutronix.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
+Dear Philipp,
+
+Thanks for your review.
+
+On 2024/6/21 下午 07:45, Philipp Zabel wrote:
+> On Mi, 2024-06-19 at 13:46 +0800, Shan-Chun Hung wrote:
+>> This adds the SDHCI driver for the MA35 series SoC. It is based upon the
+>> SDHCI interface, but requires some extra initialization.
+>>
+>> Signed-off-by: schung<schung@nuvoton.com>
+>> ---
+>>   drivers/mmc/host/Kconfig           |  13 ++
+>>   drivers/mmc/host/Makefile          |   1 +
+>>   drivers/mmc/host/sdhci-of-ma35d1.c | 297 +++++++++++++++++++++++++++++
+>>   3 files changed, 311 insertions(+)
+>>   create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
+>>
+> [...]
+>> diff --git a/drivers/mmc/host/sdhci-of-ma35d1.c b/drivers/mmc/host/sdhci-of-ma35d1.c
+>> new file mode 100644
+>> index 000000000000..7714a5ab463d
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-of-ma35d1.c
+>> @@ -0,0 +1,297 @@
+> [...]
+>> +static int ma35_probe(struct platform_device *pdev)
+>> +{
+>> +	struct device *dev = &pdev->dev;
+>> +	struct sdhci_pltfm_host *pltfm_host;
+>> +	struct sdhci_host *host;
+>> +	struct ma35_priv *priv;
+>> +	int err;
+>> +	u32 extra, ctl;
+>> +
+>> +	host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata,
+>> +				sizeof(struct ma35_priv));
+>> +	if (IS_ERR(host))
+>> +		return PTR_ERR(host);
+>> +
+>> +	/*
+>> +	 * extra adma table cnt for cross 128M boundary handling.
+>> +	 */
+>> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+>> +	if (extra > SDHCI_MAX_SEGS)
+>> +		extra = SDHCI_MAX_SEGS;
+>> +	host->adma_table_cnt += extra;
+>> +	pltfm_host = sdhci_priv(host);
+>> +	priv = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (dev->of_node) {
+>> +		pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+>> +		if (IS_ERR(pltfm_host->clk)) {
+>> +			err = PTR_ERR(pltfm_host->clk);
+>> +			dev_err(&pdev->dev, "failed to get clk: %d\n", err);
+>> +			goto free_pltfm;
+>> +		}
+>> +		err = clk_prepare_enable(pltfm_host->clk);
+>> +		if (err)
+>> +			goto free_pltfm;
+>> +	}
+>> +
+>> +	err = mmc_of_parse(host->mmc);
+>> +	if (err)
+>> +		goto err_clk;
+>> +
+>> +	priv->rst = devm_reset_control_get(&pdev->dev, NULL);
+> Please use devm_reset_control_get_exclusive() instead.
 >
-> > If introducing the pointer is the only way forward and is an
-> > acceptable solution,
-> > I can send out a draft.
->
-> My proposal is that I take over the SDHI part of your series. I know the
-> code pretty well and I can test the solution right away. Your draft
-> seems in the wrong layer (conceptually, technically it should work), but
-> I need to play around a little. Is that okay with you?
->
+> regards
+> Philipp
+OK, I will fix it.
 
+Best Regards
 
-  Sure, happy to help if needed.
+Shan-Chun
 
-Thanks.
-
--- 
-       - Allen
