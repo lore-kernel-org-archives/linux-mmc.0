@@ -1,78 +1,98 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E46613B2B0;
-	Mon, 24 Jun 2024 13:46:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E04619AD5A
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 14:38:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719236766; cv=none; b=SpF5axdLEp9AzpzBeURIZBR3CmA1dxfsGR1X+Hr0sv7f/SWUKDyr9C+mN9/WF/FC1Lt2dOJFjXtjyE+ygf0V048HQcSI4jE9ADlvkPI4N3ryie3J9ypnw8TEDA04UFD6EOk90tvJGx+OnwAoaOlprPqpJlm8RGidJl0+ZrpFucA=
+	t=1719239931; cv=none; b=tvGWLdzgeZn8YRBq+ErsX1d1OCJmgr5jtLh2KWns5KzZ3omlExqTEGkDurJ1l0wkWiGSKDS/wskX1jUCsB5CPorqG509T8PIfORogDn0q1cI01vNmPuFiQfTKdgiU3F8S61chpM/mII7B6a8r1VQ98k4iJvgRmkzrHA359Ic2+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719236766; c=relaxed/simple;
-	bh=nEbRkmLliGbrhN7a0dFrrROolzsUWf2ymgDG1frRQgc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=eEW8Wz1MLztNVP6xhib0ihhmR+XMABexFlF4485GT1pTkzreghBz9inI4U0UsXaI/XA0U9+Nv+/Ec/2SW1+/KwDV9bHYXLCUj5nAw/9kRKwrPpG9nvdNxwIhK/iO9NnER2s1cGBNSAfkAtsxgGbGQJPxs3L6iEP16W/KCC+mcRg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HPvBUv03; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1719239931; c=relaxed/simple;
+	bh=oRKALiFLGbNbRt30ag38bGBsAVNenwShpYyG66qM/JM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=iLI0D0l/UgCJTmAajKVugCUEtzBrO1PvN+ry//YMFzq7FXMf6RNRWAG/PTw/RAII8aP+0H1N+ZtASX+FVg1E1TGyOB7VqwDDGTNoWVLoFo+vWW6ai0tWdvT65C37KKdKminrEgQyUrxJ93UMcBE/bGTPTn84vFurM2D408dDG+g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JbFBAi65; arc=none smtp.client-ip=209.85.219.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HPvBUv03"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C6A4C32782;
-	Mon, 24 Jun 2024 13:45:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719236766;
-	bh=nEbRkmLliGbrhN7a0dFrrROolzsUWf2ymgDG1frRQgc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=HPvBUv03t5fHmHl5Vdhl5NNvWh/1rmgJmDIUT78BrhNjkekMyiHBemsXBtITKK+pk
-	 Ph9y6SGv/k+x5Jl2xhlIMX2sddEfv5ScOkESPGjMaDvg1ZXM5kaST/YeMPDuDVXpgg
-	 iH6h0sucNAo73sjXdAnuoapZ6RfRXTSWnSxyRGyPeNDve4kUinDBuUenLUefA9rCqX
-	 54StG+jluCv5aLHX9mMsHCk5XhZuGMG20N2tbjRRxE9agT2YFzShKRFvN/weyUUZ99
-	 p5MaDhc41zpO0i44wkIP3EtvIWnOiXRYHg0365/uFE0+rIV0Jq+m7pwvM4OmoBjW+O
-	 CdaoXjn9E8fNg==
-Date: Mon, 24 Jun 2024 15:45:57 +0200
-From: Niklas Cassel <cassel@kernel.org>
-To: Christoph Hellwig <hch@lst.de>
-Cc: kernel test robot <oliver.sang@intel.com>, oe-lkp@lists.linux.dev,
-	lkp@intel.com, Jens Axboe <axboe@kernel.dk>,
-	Damien Le Moal <dlemoal@kernel.org>, Hannes Reinecke <hare@suse.de>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, ying.huang@intel.com,
-	feng.tang@intel.com, fengwei.yin@intel.com
-Subject: Re: [axboe-block:for-next] [block]  bd4a633b6f: fsmark.files_per_sec
- -64.5% regression
-Message-ID: <Znl4lXRmK2ukDB7r@ryzen.lan>
-References: <202406241546.6bbd44a7-oliver.sang@intel.com>
- <20240624083537.GA19941@lst.de>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JbFBAi65"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e02c4983bfaso4199841276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 07:38:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1719239928; x=1719844728; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=vmMnfd32jVoXr5W/j7cUFMoGzSIMEJh5cwe9OGAkiAQ=;
+        b=JbFBAi65dsi1wngLW7gJK08pnX2HhVUw3+aMXCGPmm+u1ZFm6ufRvaUX3xr7oPrHkU
+         I9kWvPrgP8cVNS6at+cMvG/Cd3+EEzusQdTc6Is+Rs7JqeMQb8IlAMYcQ8lqLFhTZoX6
+         3iXgukQongvBD+rFwnI8aI4iXE/Bjiuq9IzdqDQ2AFuNwLM33K1Csf+gMgPmZQQ6hv4d
+         JCFuaAkN6Ooay38gTNDB4bpPsF7bt/tzLSJ0m1xA6A/TCQKwErXgf8DLFaGIyuIFUaN+
+         CbWHf6Bf2kSTNvQLvQuTjsjgtVT24FmfbmTKilU43WDf3e0YJeQ6egWodSctqjCxLpdS
+         UMBA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719239928; x=1719844728;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=vmMnfd32jVoXr5W/j7cUFMoGzSIMEJh5cwe9OGAkiAQ=;
+        b=Vw8KwMqhJphPS1t/Z+u/tf9x4n+bV8eBzMeDQoAviFWsR6BzGCtELbmNRuE+/yEZpM
+         4rhr+2h63AJHVYWr4gnv1K7hpkTE41NfQeLVj+0/PBAOKQpuwLYNnr/GkzN+g72ESLIV
+         HgxR0ri7IQJUMI0Eb3RCr5HjQeZavhTQLFvNgEdp3fRb7aHIVo3DykO1OVavC4KlKEn9
+         P2JRu3dvLS7XyaVnALg8Ur25u5zPm10/hviVOwAqSiRNpfBabaPNe+0Zmhkb7ktr44AK
+         VTEBpEK8ndh/DYmtX/pWA97m8+R1oS1h/SxKXceBqMjt/QLerU4D+3EWKhPQlSvpIdMZ
+         OH+g==
+X-Forwarded-Encrypted: i=1; AJvYcCXgDWNaeUN7rS/NaP61cQzmPBfLGmOzNmlbG75eTbdrlK3qO35YDQOOuD/4jZuskBhROzugn9mU3r9AquFarTACBdFMMZfoXM7t
+X-Gm-Message-State: AOJu0Yw+vXD3vGR2M5EaAV6mMuedHwDTTz4EhqVu/wqFnntBpCMIqrjv
+	TCrDGtEIaQkymsUci+dgPj6BIAlCRDKBbWBuU8Tyce/7Gn/rjnRrKzyFrZ0ETQzpXNh99pRFA3T
+	JRtIz93V4phNxXN06JbNmY78+LYGp8gTqrP+Idg==
+X-Google-Smtp-Source: AGHT+IE/9NE30FYdzg/te3IbXAUnABFqsCL6nY9cqP8UhgfpAkBO2Zzgf3XzPDINQfT8cqy63IvhfFUGNCqohKUmsfk=
+X-Received: by 2002:a25:8042:0:b0:e02:9b7b:8706 with SMTP id
+ 3f1490d57ef6-e0300f7c64dmr4992968276.30.1719239928611; Mon, 24 Jun 2024
+ 07:38:48 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240624083537.GA19941@lst.de>
+References: <20240618225210.825290-1-allen.lkml@gmail.com> <gw6adkoy3ndjdjufti2gs2gnk3xdgylt6tnia2zha76hsgdwtq@dr3czbxjij66>
+ <CAOMdWS+p4Dt2xDGWvwoXtWinsRZintLwPmADddbsmaEfLvRQkw@mail.gmail.com>
+ <ay2rpumtfxtvx4qgkgal7a7z46dbtwjnq4ctik55neseirkhfk@gkylcwud6vry> <CAOMdWSKzd1nt832+FHtwcMLO1rtgEC99Xz-wvNWGtXiyA8uK7w@mail.gmail.com>
+In-Reply-To: <CAOMdWSKzd1nt832+FHtwcMLO1rtgEC99Xz-wvNWGtXiyA8uK7w@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 24 Jun 2024 16:38:12 +0200
+Message-ID: <CAPDyKFqwq59x1tsut0gQiAd_sOqJcFk10-ytFYD41gx=Wb-q_g@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: Convert from tasklet to BH workqueue
+To: Allen <allen.lkml@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Christian Loehle <christian.loehle@arm.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Jun 24, 2024 at 10:35:37AM +0200, Christoph Hellwig wrote:
-> This is odd to say at least.  Any chance you can check the value
-> of /sys/block/$DEVICE/queue/rotational for the relevant device before
-> and after this commit?  And is this an ATA or NVMe SSD?
-> 
+On Sat, 22 Jun 2024 at 01:09, Allen <allen.lkml@gmail.com> wrote:
+>
+> >
+> > > If introducing the pointer is the only way forward and is an
+> > > acceptable solution,
+> > > I can send out a draft.
+> >
+> > My proposal is that I take over the SDHI part of your series. I know the
+> > code pretty well and I can test the solution right away. Your draft
+> > seems in the wrong layer (conceptually, technically it should work), but
+> > I need to play around a little. Is that okay with you?
+> >
+>
+>
+>   Sure, happy to help if needed.
+>
+> Thanks.
 
-Seems to be ATA SSD:
-https://download.01.org/0day-ci/archive/20240624/202406241546.6bbd44a7-oliver.sang@intel.com/job.yaml
+Okay, so I have dropped the patch for now.
 
-ssd_partitions: "/dev/disk/by-id/ata-INTEL_SSDSC2BG012T4_BTHC428201ZX1P2OGN-part1"
+Awaiting a patch from Allen for everything but sdhi, which I then
+expect Wolfram is going to send a patch for.
 
-Most likely btrfs does something different depending on the nonrot flag
-being set or not. (And like you are suggesting, most likely the value of
-the nonrot flag is somehow different after commit bd4a633b6f)
+Kind regards
+Uffe
 
-
-Kind regards,
-Niklas
+>
+> --
+>        - Allen
