@@ -1,73 +1,166 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 22464179AA;
-	Mon, 24 Jun 2024 17:24:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2733D7604D;
+	Mon, 24 Jun 2024 17:27:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719249873; cv=none; b=MonmfCOVaPENEDPYRRpqFcFFc8Q/6f1jOOIgFUHDbJfOTYZ+QWeD8u54EpM/JTqQxw1tX/BEz+4HGdQJKLCZZMEMyeAaldj6JU/VKjrlME1Tl14BvtFzuic64FiKnXUMbK9t+NTFsrgzM8MJQr7/e36ZbNvd/+4QiIjbfQiCuxU=
+	t=1719250047; cv=none; b=scue1CFX49MHeaZQvWeGthUA+YVlgeHXdXvfaHO5Qf9lR6K3UZR9rDS3oNMTLqn/TQRJlP1rBif/FkaOnYe6i7WwP0sQEru+Wz1Ldo6c24AMy8T5euslh2jLUrTYqRx8sN9bgPqk0ObTwwpIXiRs1nqzcAtvjRPvT8rFm1QSJO8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719249873; c=relaxed/simple;
-	bh=Wvl2MwWd2bNh218wqWUwpSQ56SgdkqJNMfdLUDqfsvw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pk3Dfd44fPeH4d2Oob0dK/g087ZwTfkYqYHbsLSlRy/JuCpqShEJRFQ3fvGkjB7Uy93nzVUPlSixARi7/0WSaZLcTvISs+pW2MOV+X7nvhg9vUe1rybDN7cAo9hiAaRTB+BIPc/WNTXDM0yn23aA/e4GEezhVdf8NPyhjmuG3qk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id C072868CFE; Mon, 24 Jun 2024 19:24:25 +0200 (CEST)
-Date: Mon, 24 Jun 2024 19:24:25 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Keith Busch <kbusch@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?iso-8859-1?Q?B=F6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>,
-	Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
-	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org,
-	Damien Le Moal <dlemoal@kernel.org>
-Subject: Re: [PATCH 14/26] block: move the nonrot flag to queue_limits
-Message-ID: <20240624172425.GB22044@lst.de>
-References: <20240617060532.127975-1-hch@lst.de> <20240617060532.127975-15-hch@lst.de> <ZnmoANp0TgpxWuF-@kbusch-mbp.dhcp.thefacebook.com>
+	s=arc-20240116; t=1719250047; c=relaxed/simple;
+	bh=2rcPwoShgJdmSyVCPpy8glYPvtkJajNKVhG219tP3jQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=bFNq5dDKF4vad9TdGrz5YShCMFLAtSLpWxTtBQYXn9L3lZtwd6pi2u2b0zm+fD/ezQ6nKzeaDS9VHoxxQ7QDAw/oWzifZqgkpZuhfhCnXBEhDuVzES5NC7PyQqbhIOZ40a1iGZmRnlW7RumBwlZgc5Mu55+CSJqeY9xoxxvWUDA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nmdgNRmQ; arc=none smtp.client-ip=209.85.219.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nmdgNRmQ"
+Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-6b505f11973so39857516d6.1;
+        Mon, 24 Jun 2024 10:27:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1719250045; x=1719854845; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=yMdi8tUy/m0VYQvA5cPdOSnqaZAhOWgJFYMqqkliSqU=;
+        b=nmdgNRmQ1JqXak2MKBZ+AfxYsB45Dep6mS50eGSU8DQJJSXLBjUtNE2hEKXE0F0m3y
+         K+Ru9t2mWTO+rw0LoPItRbYtINNYMrp57nLSL7+9iR7ZIZ2U1mcfPEEsk1O+aiznawCV
+         SOKQi/a9DY3PbHAd1olph0dDReQazL0vVrg7dhSVDS2A+WQlfDQyB4nULrJIKreb0QEI
+         HX7xy6Ye2WgnPE7TgJL1URjDk+E4GUwur3qU/wiAKTD9lxUQX0GyP34FpDaq7QQwX3Lf
+         y+eFFSRcPfhDaxg08ky0EhT7vJrxUpl+YYMqxNLqRlH+WmD2B6WAJAUIyMQSYPNgXCBr
+         6/jQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719250045; x=1719854845;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=yMdi8tUy/m0VYQvA5cPdOSnqaZAhOWgJFYMqqkliSqU=;
+        b=c6Y1VqUxSp1Y7A/KIquSm0nhJNpXi4gIquLx1yHn12tgn2hl3Rrc2i3l6sfEuNFWA1
+         JmTEyhCkAbFDaTfBW4D1nGBxu1w4kQKXN3nbU5OnLg+bNOGDoUdIV7qEGF5Rb+Xm2C6d
+         1DQfuXXE7Kx8N6e7uSMHjLVuqFnG7pnERJhbSkrtMuWagl6Q882PhatiCCOCOJx+NPXX
+         asvUSNfbQEXGEw/kQ9/Q2xpoavk3f6l1cSsGOtROHM9gDamVfc0JlmRuejDxW9d/kP3q
+         6+tr6bqjEYOLQuJ8XlhAIhYDLDt9v7LpMBbkWyafHdrRmpq5zg1BF3oZUrt+114lYixN
+         R/wQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW5GJuf+x0dP1+mXnfnuC3gELndsaAH/iXxgYeEm7iCv1fSwRKtzaSkIt6rqPiM/nZL+HhZDTucx6HXMqkfkMv6cN9BGIRydDFmW+8gfXZCm4lMmguzLINlzASzyYcLVyLbl99sBx/hUmFoCz8jTPM1tj/I/JkPEsJSeoPd/m+ZZ0xUivsOLcIlSGr91Op7cFrvqy1aaRtPSnxmX+reXxkG3z1PW9yS
+X-Gm-Message-State: AOJu0YyLnactMfVYM9A7vBPb3uNLhbU0fsKAGRZdVSHiEJm1m7Nh/N3A
+	hM11lMdyc+6CxdnCwJDpbLVgPemP+AJV8Cr37gmNHQpD8VjT+t2igcf1HQQ7ACzJDzqiJUK1y0K
+	8GIV44tcYpICG7l85I+s00XFEEjc=
+X-Google-Smtp-Source: AGHT+IFGHDsqhHq9XnFXeklHI5Ipm8OA/hVOwcHjiGnUcm/aw67ox19AqnUEdu/1vVvOeF0GAqvmx5+ew7vXn6HzvNQ=
+X-Received: by 2002:ad4:4ee7:0:b0:6b5:2aa3:3a7f with SMTP id
+ 6a1803df08f44-6b53223157dmr97187856d6.20.1719250045001; Mon, 24 Jun 2024
+ 10:27:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZnmoANp0TgpxWuF-@kbusch-mbp.dhcp.thefacebook.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+References: <20240624153229.68882-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240624153229.68882-2-prabhakar.mahadev-lad.rj@bp.renesas.com> <20240624-request-demeanor-d66965d27935@spud>
+In-Reply-To: <20240624-request-demeanor-d66965d27935@spud>
+From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date: Mon, 24 Jun 2024 18:26:58 +0100
+Message-ID: <CA+V-a8vJ_fCONw1wpsGB1qqd-FReqhLR1JhLgM4RneeC5=eShQ@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: renesas,sdhi: Document RZ/V2H(P) support
+To: Conor Dooley <conor@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Geert Uytterhoeven <geert+renesas@glider.be>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jun 24, 2024 at 11:08:16AM -0600, Keith Busch wrote:
-> On Mon, Jun 17, 2024 at 08:04:41AM +0200, Christoph Hellwig wrote:
-> > -#define blk_queue_nonrot(q)	test_bit(QUEUE_FLAG_NONROT, &(q)->queue_flags)
-> > +#define blk_queue_nonrot(q)	((q)->limits.features & BLK_FEAT_ROTATIONAL)
-> 
-> This is inverted. Should be:
-> 
->  #define blk_queue_nonrot(q)	(!((q)->limits.features & BLK_FEAT_ROTATIONAL))
+Hi Conor,
 
-Ah yes.  And the sysfs attribute doesn't go through the macro and
-won't show the effect.  I'll send a fixup.
+Thank you for the review.
 
+On Mon, Jun 24, 2024 at 5:39=E2=80=AFPM Conor Dooley <conor@kernel.org> wro=
+te:
+>
+> On Mon, Jun 24, 2024 at 04:32:27PM +0100, Prabhakar wrote:
+> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> >
+> > The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to that
+> > of the R-Car Gen3, but it has some differences:
+> > - HS400 is not supported.
+> > - It supports the SD_IOVS bit to control the IO voltage level.
+> > - It supports fixed address mode.
+> >
+> > To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g05=
+7'
+> > compatible string is added.
+> >
+> > A 'vqmmc-regulator' object is introduced to handle the power enable (PW=
+EN)
+> > and voltage level switching for the SD/MMC.
+> >
+> > Additionally, the 'renesas,sdhi-use-internal-regulator' flag is introdu=
+ced
+> > to indicate that an internal regulator is used instead of a
+> > GPIO-controlled regulator. This flag will help configure the internal
+> > regulator and avoid special handling when GPIO is used for voltage
+> > regulation instead of the SD_(IOVS/PWEN) pins.
+> >
+> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > ---
+> > v2->v3
+> > - Renamed vqmmc-r9a09g057-regulator object to vqmmc-regulator
+> > - Added regulator-compatible property for vqmmc-regulator
+> > - Added 'renesas,sdhi-use-internal-regulator' property
+> >
+> > v1->v2
+> > - Moved vqmmc object in the if block
+> > - Updated commit message
+> > ---
+> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 30 ++++++++++++++++++-
+> >  1 file changed, 29 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/=
+Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > index 3d0e61e59856..20769434a422 100644
+> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > @@ -18,6 +18,7 @@ properties:
+> >            - renesas,sdhi-r7s9210 # SH-Mobile AG5
+> >            - renesas,sdhi-r8a73a4 # R-Mobile APE6
+> >            - renesas,sdhi-r8a7740 # R-Mobile A1
+> > +          - renesas,sdhi-r9a09g057 # RZ/V2H(P)
+> >            - renesas,sdhi-sh73a0  # R-Mobile APE6
+> >        - items:
+> >            - enum:
+> > @@ -118,7 +119,9 @@ allOf:
+> >        properties:
+> >          compatible:
+> >            contains:
+> > -            const: renesas,rzg2l-sdhi
+> > +            enum:
+> > +              - renesas,sdhi-r9a09g057
+> > +              - renesas,rzg2l-sdhi
+> >      then:
+> >        properties:
+> >          clocks:
+> > @@ -204,6 +207,31 @@ allOf:
+> >          sectioned off to be run by a separate second clock source to a=
+llow
+> >          the main core clock to be turned off to save power.
+> >
+> > +  - if:
+> > +      properties:
+> > +        compatible:
+> > +          contains:
+> > +            const: renesas,sdhi-r9a09g057
+> > +    then:
+> > +      properties:
+>
+> Please define properties at the top level and constrain then per
+> compatible.
+>
+Ok, I'll move them to the top level.
 
+Cheers,
+Prabhakar
