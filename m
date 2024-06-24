@@ -1,54 +1,54 @@
-Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40C4A19FA68
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 17:47:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C4461A00EF
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 18:11:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719251281; cv=none; b=LKJPmMbx1fwE8YxiHVJEysfD842QowRHNsdrJlOK7+uQTC7UziUIaJBXtvnupF2lbS8zFFSnw4urpS0GeBMGVg0Ic4Fdklj9rCOp0s+FH2Zxf3+72fqwsAwZy9aTFV6y5A6fXFgmCl2p7HHuV8vA/S4oKy1wT3Zr4e28mPadlCw=
+	t=1719252678; cv=none; b=AqC5PySxJjaajpmWOr9N4ebpQ7Tt0Brr/Fb4y9xRklk/+M9ovI3Qw2FcORQkyUo7C2lQf2hbwYYLnic5HC6LGJ16sX2s8yC46DteSHsB88Oroh9jQmxLcZ47OaDSFf4dtKgJIM1H4v0ORKIxwq32uyCGAeN1yFK+DQzvlHvWa6w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719251281; c=relaxed/simple;
-	bh=P1jGE0yj+W9MBcCc+1zGVoDh+/I8AA93BhngLeHVOT8=;
+	s=arc-20240116; t=1719252678; c=relaxed/simple;
+	bh=nIUdy22oglBfUryv7MbqxD7BiJz15+mnbfSouo20eE4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Kq34c6s7cbKfaryTGXagWVL/bXCpwbWv1rsD0cq0e5IxXECfo0CMGZuvTRYY2SfX4jgnYI5RTK88VkWFWQP83hHWY9RO014UMJzqRu0UEeM8FYxeoK3AM0bc52BR+XUcuvGeiYoAan0ndMSYU6ogHuo6zCG4CBXMPjHaXbNC1vs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=Rh/zq9wI; arc=none smtp.client-ip=209.85.219.179
+	 To:Cc:Content-Type; b=WUONbxVSefsRHBDNajDtJDIBAsXxfDuTUrQItXvFzA2vHaI12B1ULA3IITBV1pbDCisl8Guo5V5VGjpY7ZVvigOSdvrA9zKSpNytfX3R8SD+GjbzgLlsG2euBzbZf1zbs5aiqMtRUBLGMqjKtJsETdtoRM9JWka4m8+npxpD5XI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=sQS08B5U; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="Rh/zq9wI"
-Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-df481bf6680so4268299276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 10:47:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="sQS08B5U"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-63bca8ce700so45417737b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 11:11:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=raspberrypi.com; s=google; t=1719251278; x=1719856078; darn=vger.kernel.org;
+        d=raspberrypi.com; s=google; t=1719252675; x=1719857475; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=GD6JszPohU81NGGS/aKdIrLNqexC1KvwW9h5dgcZ2tY=;
-        b=Rh/zq9wItMzkrJJuiqb+MSt3M5QW+41ZoEoUXas+4gioNtQwzsK3SIYcxhJL3rNSJF
-         TQR2cdKS+zUzwj3x7bxg8YYZQgy0IZRUYpfrLV7OICmCQygCwBS6xzaRXMOXXXi3vaqM
-         Mno0Cc1eje/5fGObXUHPsL47Y8mRnsEr+BM28Ev/ZLtr1IUfNcUp2ZXu545AK52TgVE7
-         LRYHyTvjwB2wTgh2u814jzx+8/zMGUdJ+05llRDB1UQWuga70Yyi8DzLOKX3A9bnMB34
-         yPExxQWM9vRZgxLwjalGzLzmjOPXtQ5liu3j22/c4IZmw/lVmPyGH4Dy4jtaDyzY6fIU
-         yEoQ==
+        bh=5jGR9g/Bb8Va571zVMLt5UXvxDZ++mFdkIqRAoUvAic=;
+        b=sQS08B5UMSb+22J6GNJ5ErP7KnMW9h8n6ml0sPCi3JxLUevLqlfHukKB4+MNafmjFr
+         Zvu8x2tY5+hDkZd2xiVhyE6A7h6+YsbTDhvGf9FVq3c/4Ykxp1wBQoMp/hDQzN/zyIvM
+         MgqCiNEyS/+6hejeKqWCB2FtGJe35f++BaaIto0tLABzGT3kL62KJcXKqYG4Dm5iYtMN
+         Gpo6gOCiOYAyW3PLT55pqqDgh1CeDU0BCKREBK8EzYNt6pykUYsltNSkYowCb3Xh2udu
+         iW/izwf4f486KNpMOoKQEgO/QrrkYc3e/CHa1ML8WBOaeJ/VJ8vqoubs1ARqEmbzUhRl
+         Zhjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719251278; x=1719856078;
+        d=1e100.net; s=20230601; t=1719252675; x=1719857475;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=GD6JszPohU81NGGS/aKdIrLNqexC1KvwW9h5dgcZ2tY=;
-        b=uUCP6cRO7yrzx8nCNupVsG/bcQmVOQdSCaV3xhNCrW+ureeNH1Abg3NuKcP2gIxX1c
-         wTcGb7q/rDjkBGVg6w7gZ2cHdAph9b/4hQCzu7i0rsNsG1zixEu5yXjKXFJB+xD7BXCv
-         T/MxZE7HkyLtQAbmF7df6cEEkMHminKh7qYRTuSLOIi/4vLXShRgkspj9IdM0beQ9qcN
-         skVEPDYmeaQWAYNQXKoOepEUlMzJvMonUagx0hVwQVHb1g1cIXlic9PLEVqG56HpVpQM
-         FKsbjAE7BwHaUWOfRqgINm9dz7bUR4YqXsHvw/3ORvN4fw32tNPxM6HrRAvn488eSddB
-         o4Mg==
-X-Forwarded-Encrypted: i=1; AJvYcCWXyIkFmQd+Y9/icWt0mJgZDuzkuO9Gb/UbrBtFZragCsXHdpArI3tSFZ2kBxJUyZ7i8caS3Bj5cWTYiw343SnA0ERzQYNX4UzF
-X-Gm-Message-State: AOJu0YyuX6TtBBPla9pvvW9VbZZOgTzAztP7Al7Tj3XYS9PSgI6XEdRy
-	CC3FSJCBrhPBnooU7QuTMGcWTDWFi5Wnd7+/nSpLBYrjCo8aisfClXXc1l83LRIBcOctNQZreWc
-	qVrkVZPpNs8YHkjWs0G0YdFI2nra+ILZOpaO+TA==
-X-Google-Smtp-Source: AGHT+IEam62Ke7h6aMEIOfZkOn8q0O/x65GpW/b4zmed/2bsjgtR1QeT3Q2l3hKiUKoRuWDKy+pcqMjQukMAFKYFW9Y=
-X-Received: by 2002:a25:291:0:b0:df4:f2d2:fcd6 with SMTP id
- 3f1490d57ef6-e0303fe9b62mr4805338276.44.1719251277992; Mon, 24 Jun 2024
- 10:47:57 -0700 (PDT)
+        bh=5jGR9g/Bb8Va571zVMLt5UXvxDZ++mFdkIqRAoUvAic=;
+        b=T5/zi8xezt9JDqQDMcKpTWFfs3aIq7+81OLL8xTB41Or5lnmaZTzVihoSrRHy5tQMr
+         rZI5C5O8X5TU56PLMR3GkQjD04ixHtBuCxRv2OSDFQNrN0oTGI31SnkNnT9hcYGkUkMy
+         ekLupd75kUQXkNqMAogmm9HJshY8zzjkSItjMw1zGXGcfPiN5/uCQre1YjQFMe0OHMke
+         fISj+zg85a5yMXupl3Zi/5BOozbhIU+yZPSq2svRUFoy8vnZHxLnwGl8V1sYqO1Kgv3s
+         Ux/K36U+F7K4cA/uz8c80WXnNBmP1/T+fdRjGHMr+5s674Ee+w0rszQ1Xnx5aBI5nZEz
+         CLyw==
+X-Forwarded-Encrypted: i=1; AJvYcCXrHPQoIuN13IlWPlgyfz+SYzkGlmzqkI9o1usBbFm5TMEtHqud1qjSeFUoNGACIdEK3qlpOvBNg2M1HAH5XzD+jyV03LgIophk
+X-Gm-Message-State: AOJu0Yx0oahxzYjZThZhBIQzRfsd86rpLBBXewU0yEZ+qWBWR6ZIwQZ5
+	VeGfYjhlNvFGFqlXqMV4Xn2mc3IwbKwNcvGEvhcM1+Pult6DEnQP7E3bWobdJxXDVoworzp3Bpu
+	Ft6raLRDIk0h7hBFdcWbYBDjW/AuBnOQiQnk6ig==
+X-Google-Smtp-Source: AGHT+IFaAqmhNPlm6MCoDVgffhkfuksOWP1wIZM8AnbBnkW6RDpNrHr6R7v3rNj3Wz45MorU/sgEZjJu5xv7+4bnw1s=
+X-Received: by 2002:a25:c54d:0:b0:e02:bf87:7cd4 with SMTP id
+ 3f1490d57ef6-e0303fea2bdmr5469380276.53.1719252675064; Mon, 24 Jun 2024
+ 11:11:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -56,12 +56,12 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
- <20240524182702.1317935-7-dave.stevenson@raspberrypi.com> <ZmCl7LXbdCwJm/wJ@lizhi-Precision-Tower-5810>
-In-Reply-To: <ZmCl7LXbdCwJm/wJ@lizhi-Precision-Tower-5810>
+ <20240524182702.1317935-9-dave.stevenson@raspberrypi.com> <ZmCo4IfRhEzMf9gs@lizhi-Precision-Tower-5810>
+In-Reply-To: <ZmCo4IfRhEzMf9gs@lizhi-Precision-Tower-5810>
 From: Dave Stevenson <dave.stevenson@raspberrypi.com>
-Date: Mon, 24 Jun 2024 18:47:41 +0100
-Message-ID: <CAPY8ntCUzU=T_RgJPGvunYXM2Zmd39Kei-qFaoM37-Vc62TyUQ@mail.gmail.com>
-Subject: Re: [PATCH 06/18] dmaengine: bcm2835: make address increment platform independent
+Date: Mon, 24 Jun 2024 19:10:58 +0100
+Message-ID: <CAPY8ntBNz5tGfVz7FJ0wvzxWZ+AyjbTn7JbDFX=cNq-EN2Vu5A@mail.gmail.com>
+Subject: Re: [PATCH 08/18] dmaengine: bcm2835: pass dma_chan to generic functions
 To: Frank Li <Frank.li@nxp.com>
 Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
 	Conor Dooley <conor+dt@kernel.org>, Florian Fainelli <florian.fainelli@broadcom.com>, 
@@ -82,111 +82,132 @@ Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	linux-sound@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>
 Content-Type: text/plain; charset="UTF-8"
 
-Hi Frank
+Hi Frank.
 
-Thanks for the review, and sorry for the delay in coming back to this.
-
-On Wed, 5 Jun 2024 at 18:53, Frank Li <Frank.li@nxp.com> wrote:
+On Wed, 5 Jun 2024 at 19:05, Frank Li <Frank.li@nxp.com> wrote:
 >
-> On Fri, May 24, 2024 at 07:26:50PM +0100, Dave Stevenson wrote:
+> On Fri, May 24, 2024 at 07:26:52PM +0100, Dave Stevenson wrote:
 > > From: Stefan Wahren <stefan.wahren@i2se.com>
 > >
-> > Actually the criteria to increment source & destination address doesn't
-> > based on platform specific bits. It's just the DMA transfer direction which
-> > is translated into the info bits. So introduce two new helper functions
-> > and get the rid of these platform specifics.
-> >
+> > In preparation to support more platforms pass the dma_chan to the
+> > generic functions. This provides access to the DMA device and possible
+> > platform specific data.
 >
-> Fix increment source & destination address depend on the platform drvdata.
+> why need this change? you can easy convert between dma_chan and
+> bcm2835_chan.
 
-This is not platform drvdata.
+These patches are leading to adding a bcm2711_chan structure for a new
+(but very closely related) variant of the DMA controller.
 
-The code was converting from the generic DMA transfer direction enum
-into the hardware specific bitmask, and then looking at that for
-whether it was using an address increment or not.
-It's more readable, and easier to add in the newer variant of the
-hardware, if we check the generic transfer direction.
-
-I've reworded it for V2 as
-
-"The criteria for whether an address increment is required is based
-solely on the DMA transfer direction. The driver was converting from
-direction into the hardware's "info" bitmask and using that, which
-is therefore dependent on the hardware variant.
-
-Change to using the DMA transfer direction via helper functions
-to remove this hardware specific dependency."
-
-Hopefully makes the situation clearer.
-
-> It should be depend on dma_transfer_direction.
->
-> look like it is bug fixes. Can you add fixes tag.
-
-No, as described above, it's not a bug fix.
+dma_chan is the generic structure, therefore we can keep more
+commonality between the variants if we use that wherever possible.
 
   Dave
 
+> >
 > > Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 > > Signed-off-by: Dave Stevenson <dave.stevenson@raspberrypi.com>
 > > ---
-> >  drivers/dma/bcm2835-dma.c | 28 ++++++++++++++++++++++------
-> >  1 file changed, 22 insertions(+), 6 deletions(-)
+> >  drivers/dma/bcm2835-dma.c | 24 ++++++++++++++----------
+> >  1 file changed, 14 insertions(+), 10 deletions(-)
 > >
 > > diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
-> > index ef452ebb3c15..d6c5a2762a46 100644
+> > index e2f9c8692e6b..aefaa1f01d7f 100644
 > > --- a/drivers/dma/bcm2835-dma.c
 > > +++ b/drivers/dma/bcm2835-dma.c
-> > @@ -252,6 +252,24 @@ static u32 bcm2835_dma_prepare_cb_extra(struct bcm2835_chan *c,
-> >       return result;
+> > @@ -288,12 +288,13 @@ static void bcm2835_dma_desc_free(struct virt_dma_desc *vd)
 > >  }
 > >
-> > +static inline bool need_src_incr(enum dma_transfer_direction direction)
-> > +{
-> > +     return direction != DMA_DEV_TO_MEM;
-> > +}
-> > +
-> > +static inline bool need_dst_incr(enum dma_transfer_direction direction)
-> > +{
-> > +     switch (direction) {
-> > +     case DMA_MEM_TO_MEM:
-> > +     case DMA_DEV_TO_MEM:
-> > +             return true;
-> > +     default:
-> > +             break;
-> > +     }
-> > +
-> > +     return false;
-> > +}
-> > +
-> >  static void bcm2835_dma_free_cb_chain(struct bcm2835_desc *desc)
+> >  static bool
+> > -bcm2835_dma_create_cb_set_length(struct bcm2835_chan *chan,
+> > +bcm2835_dma_create_cb_set_length(struct dma_chan *chan,
+> >                                struct bcm2835_dma_cb *control_block,
+> >                                size_t len, size_t period_len,
+> >                                size_t *total_len)
 > >  {
-> >       size_t i;
-> > @@ -336,10 +354,8 @@ static inline size_t bcm2835_dma_count_frames_for_sg(
-> >   * @cyclic:         it is a cyclic transfer
-> >   * @info:           the default info bits to apply per controlblock
-> >   * @frames:         number of controlblocks to allocate
-> > - * @src:            the src address to assign (if the S_INC bit is set
-> > - *                  in @info, then it gets incremented)
-> > - * @dst:            the dst address to assign (if the D_INC bit is set
-> > - *                  in @info, then it gets incremented)
-> > + * @src:            the src address to assign
-> > + * @dst:            the dst address to assign
-> >   * @buf_len:        the full buffer length (may also be 0)
-> >   * @period_len:     the period length when to apply @finalextrainfo
-> >   *                  in addition to the last transfer
-> > @@ -408,9 +424,9 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
-> >                       d->cb_list[frame - 1].cb->next = cb_entry->paddr;
+> > -     size_t max_len = bcm2835_dma_max_frame_length(chan);
+> > +     struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+> > +     size_t max_len = bcm2835_dma_max_frame_length(c);
 > >
-> >               /* update src and dst and length */
-> > -             if (src && (info & BCM2835_DMA_S_INC))
-> > +             if (src && need_src_incr(direction))
-> >                       src += control_block->length;
-> > -             if (dst && (info & BCM2835_DMA_D_INC))
-> > +             if (dst && need_dst_incr(direction))
-> >                       dst += control_block->length;
+> >       /* set the length taking lite-channel limitations into account */
+> >       control_block->length = min_t(u32, len, max_len);
+> > @@ -417,7 +418,7 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
+> >               /* set up length in control_block if requested */
+> >               if (buf_len) {
+> >                       /* calculate length honoring period_length */
+> > -                     if (bcm2835_dma_create_cb_set_length(c, control_block,
+> > +                     if (bcm2835_dma_create_cb_set_length(chan, control_block,
+> >                                                            len, period_len,
+> >                                                            &total_len)) {
+> >                               /* add extrainfo bits in info */
+> > @@ -485,8 +486,9 @@ static void bcm2835_dma_fill_cb_chain_with_sg(
+> >       }
+> >  }
 > >
-> >               /* Length of total transfer */
+> > -static void bcm2835_dma_abort(struct bcm2835_chan *c)
+> > +static void bcm2835_dma_abort(struct dma_chan *chan)
+> >  {
+> > +     struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+> >       void __iomem *chan_base = c->chan_base;
+> >       long int timeout = 10000;
+> >
+> > @@ -513,8 +515,9 @@ static void bcm2835_dma_abort(struct bcm2835_chan *c)
+> >       writel(BCM2835_DMA_RESET, chan_base + BCM2835_DMA_CS);
+> >  }
+> >
+> > -static void bcm2835_dma_start_desc(struct bcm2835_chan *c)
+> > +static void bcm2835_dma_start_desc(struct dma_chan *chan)
+> >  {
+> > +     struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+> >       struct virt_dma_desc *vd = vchan_next_desc(&c->vc);
+> >       struct bcm2835_desc *d;
+> >
+> > @@ -533,7 +536,8 @@ static void bcm2835_dma_start_desc(struct bcm2835_chan *c)
+> >
+> >  static irqreturn_t bcm2835_dma_callback(int irq, void *data)
+> >  {
+> > -     struct bcm2835_chan *c = data;
+> > +     struct dma_chan *chan = data;
+> > +     struct bcm2835_chan *c = to_bcm2835_dma_chan(chan);
+> >       struct bcm2835_desc *d;
+> >       unsigned long flags;
+> >
+> > @@ -566,7 +570,7 @@ static irqreturn_t bcm2835_dma_callback(int irq, void *data)
+> >                       vchan_cyclic_callback(&d->vd);
+> >               } else if (!readl(c->chan_base + BCM2835_DMA_ADDR)) {
+> >                       vchan_cookie_complete(&c->desc->vd);
+> > -                     bcm2835_dma_start_desc(c);
+> > +                     bcm2835_dma_start_desc(chan);
+> >               }
+> >       }
+> >
+> > @@ -594,7 +598,7 @@ static int bcm2835_dma_alloc_chan_resources(struct dma_chan *chan)
+> >       }
+> >
+> >       return request_irq(c->irq_number, bcm2835_dma_callback,
+> > -                        c->irq_flags, "DMA IRQ", c);
+> > +                        c->irq_flags, "DMA IRQ", chan);
+> >  }
+> >
+> >  static void bcm2835_dma_free_chan_resources(struct dma_chan *chan)
+> > @@ -682,7 +686,7 @@ static void bcm2835_dma_issue_pending(struct dma_chan *chan)
+> >
+> >       spin_lock_irqsave(&c->vc.lock, flags);
+> >       if (vchan_issue_pending(&c->vc) && !c->desc)
+> > -             bcm2835_dma_start_desc(c);
+> > +             bcm2835_dma_start_desc(chan);
+> >
+> >       spin_unlock_irqrestore(&c->vc.lock, flags);
+> >  }
+> > @@ -846,7 +850,7 @@ static int bcm2835_dma_terminate_all(struct dma_chan *chan)
+> >       if (c->desc) {
+> >               vchan_terminate_vdesc(&c->desc->vd);
+> >               c->desc = NULL;
+> > -             bcm2835_dma_abort(c);
+> > +             bcm2835_dma_abort(chan);
+> >       }
+> >
+> >       vchan_get_all_descriptors(&c->vc, &head);
 > > --
 > > 2.34.1
 > >
