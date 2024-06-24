@@ -1,166 +1,192 @@
-Received: from mail-qv1-f48.google.com (mail-qv1-f48.google.com [209.85.219.48])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2733D7604D;
-	Mon, 24 Jun 2024 17:27:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40C4A19FA68
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 17:47:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719250047; cv=none; b=scue1CFX49MHeaZQvWeGthUA+YVlgeHXdXvfaHO5Qf9lR6K3UZR9rDS3oNMTLqn/TQRJlP1rBif/FkaOnYe6i7WwP0sQEru+Wz1Ldo6c24AMy8T5euslh2jLUrTYqRx8sN9bgPqk0ObTwwpIXiRs1nqzcAtvjRPvT8rFm1QSJO8=
+	t=1719251281; cv=none; b=LKJPmMbx1fwE8YxiHVJEysfD842QowRHNsdrJlOK7+uQTC7UziUIaJBXtvnupF2lbS8zFFSnw4urpS0GeBMGVg0Ic4Fdklj9rCOp0s+FH2Zxf3+72fqwsAwZy9aTFV6y5A6fXFgmCl2p7HHuV8vA/S4oKy1wT3Zr4e28mPadlCw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719250047; c=relaxed/simple;
-	bh=2rcPwoShgJdmSyVCPpy8glYPvtkJajNKVhG219tP3jQ=;
+	s=arc-20240116; t=1719251281; c=relaxed/simple;
+	bh=P1jGE0yj+W9MBcCc+1zGVoDh+/I8AA93BhngLeHVOT8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bFNq5dDKF4vad9TdGrz5YShCMFLAtSLpWxTtBQYXn9L3lZtwd6pi2u2b0zm+fD/ezQ6nKzeaDS9VHoxxQ7QDAw/oWzifZqgkpZuhfhCnXBEhDuVzES5NC7PyQqbhIOZ40a1iGZmRnlW7RumBwlZgc5Mu55+CSJqeY9xoxxvWUDA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=nmdgNRmQ; arc=none smtp.client-ip=209.85.219.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=Kq34c6s7cbKfaryTGXagWVL/bXCpwbWv1rsD0cq0e5IxXECfo0CMGZuvTRYY2SfX4jgnYI5RTK88VkWFWQP83hHWY9RO014UMJzqRu0UEeM8FYxeoK3AM0bc52BR+XUcuvGeiYoAan0ndMSYU6ogHuo6zCG4CBXMPjHaXbNC1vs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=Rh/zq9wI; arc=none smtp.client-ip=209.85.219.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nmdgNRmQ"
-Received: by mail-qv1-f48.google.com with SMTP id 6a1803df08f44-6b505f11973so39857516d6.1;
-        Mon, 24 Jun 2024 10:27:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="Rh/zq9wI"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-df481bf6680so4268299276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 10:47:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719250045; x=1719854845; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=yMdi8tUy/m0VYQvA5cPdOSnqaZAhOWgJFYMqqkliSqU=;
-        b=nmdgNRmQ1JqXak2MKBZ+AfxYsB45Dep6mS50eGSU8DQJJSXLBjUtNE2hEKXE0F0m3y
-         K+Ru9t2mWTO+rw0LoPItRbYtINNYMrp57nLSL7+9iR7ZIZ2U1mcfPEEsk1O+aiznawCV
-         SOKQi/a9DY3PbHAd1olph0dDReQazL0vVrg7dhSVDS2A+WQlfDQyB4nULrJIKreb0QEI
-         HX7xy6Ye2WgnPE7TgJL1URjDk+E4GUwur3qU/wiAKTD9lxUQX0GyP34FpDaq7QQwX3Lf
-         y+eFFSRcPfhDaxg08ky0EhT7vJrxUpl+YYMqxNLqRlH+WmD2B6WAJAUIyMQSYPNgXCBr
-         6/jQ==
+        d=raspberrypi.com; s=google; t=1719251278; x=1719856078; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=GD6JszPohU81NGGS/aKdIrLNqexC1KvwW9h5dgcZ2tY=;
+        b=Rh/zq9wItMzkrJJuiqb+MSt3M5QW+41ZoEoUXas+4gioNtQwzsK3SIYcxhJL3rNSJF
+         TQR2cdKS+zUzwj3x7bxg8YYZQgy0IZRUYpfrLV7OICmCQygCwBS6xzaRXMOXXXi3vaqM
+         Mno0Cc1eje/5fGObXUHPsL47Y8mRnsEr+BM28Ev/ZLtr1IUfNcUp2ZXu545AK52TgVE7
+         LRYHyTvjwB2wTgh2u814jzx+8/zMGUdJ+05llRDB1UQWuga70Yyi8DzLOKX3A9bnMB34
+         yPExxQWM9vRZgxLwjalGzLzmjOPXtQ5liu3j22/c4IZmw/lVmPyGH4Dy4jtaDyzY6fIU
+         yEoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719250045; x=1719854845;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=yMdi8tUy/m0VYQvA5cPdOSnqaZAhOWgJFYMqqkliSqU=;
-        b=c6Y1VqUxSp1Y7A/KIquSm0nhJNpXi4gIquLx1yHn12tgn2hl3Rrc2i3l6sfEuNFWA1
-         JmTEyhCkAbFDaTfBW4D1nGBxu1w4kQKXN3nbU5OnLg+bNOGDoUdIV7qEGF5Rb+Xm2C6d
-         1DQfuXXE7Kx8N6e7uSMHjLVuqFnG7pnERJhbSkrtMuWagl6Q882PhatiCCOCOJx+NPXX
-         asvUSNfbQEXGEw/kQ9/Q2xpoavk3f6l1cSsGOtROHM9gDamVfc0JlmRuejDxW9d/kP3q
-         6+tr6bqjEYOLQuJ8XlhAIhYDLDt9v7LpMBbkWyafHdrRmpq5zg1BF3oZUrt+114lYixN
-         R/wQ==
-X-Forwarded-Encrypted: i=1; AJvYcCW5GJuf+x0dP1+mXnfnuC3gELndsaAH/iXxgYeEm7iCv1fSwRKtzaSkIt6rqPiM/nZL+HhZDTucx6HXMqkfkMv6cN9BGIRydDFmW+8gfXZCm4lMmguzLINlzASzyYcLVyLbl99sBx/hUmFoCz8jTPM1tj/I/JkPEsJSeoPd/m+ZZ0xUivsOLcIlSGr91Op7cFrvqy1aaRtPSnxmX+reXxkG3z1PW9yS
-X-Gm-Message-State: AOJu0YyLnactMfVYM9A7vBPb3uNLhbU0fsKAGRZdVSHiEJm1m7Nh/N3A
-	hM11lMdyc+6CxdnCwJDpbLVgPemP+AJV8Cr37gmNHQpD8VjT+t2igcf1HQQ7ACzJDzqiJUK1y0K
-	8GIV44tcYpICG7l85I+s00XFEEjc=
-X-Google-Smtp-Source: AGHT+IFGHDsqhHq9XnFXeklHI5Ipm8OA/hVOwcHjiGnUcm/aw67ox19AqnUEdu/1vVvOeF0GAqvmx5+ew7vXn6HzvNQ=
-X-Received: by 2002:ad4:4ee7:0:b0:6b5:2aa3:3a7f with SMTP id
- 6a1803df08f44-6b53223157dmr97187856d6.20.1719250045001; Mon, 24 Jun 2024
- 10:27:25 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1719251278; x=1719856078;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=GD6JszPohU81NGGS/aKdIrLNqexC1KvwW9h5dgcZ2tY=;
+        b=uUCP6cRO7yrzx8nCNupVsG/bcQmVOQdSCaV3xhNCrW+ureeNH1Abg3NuKcP2gIxX1c
+         wTcGb7q/rDjkBGVg6w7gZ2cHdAph9b/4hQCzu7i0rsNsG1zixEu5yXjKXFJB+xD7BXCv
+         T/MxZE7HkyLtQAbmF7df6cEEkMHminKh7qYRTuSLOIi/4vLXShRgkspj9IdM0beQ9qcN
+         skVEPDYmeaQWAYNQXKoOepEUlMzJvMonUagx0hVwQVHb1g1cIXlic9PLEVqG56HpVpQM
+         FKsbjAE7BwHaUWOfRqgINm9dz7bUR4YqXsHvw/3ORvN4fw32tNPxM6HrRAvn488eSddB
+         o4Mg==
+X-Forwarded-Encrypted: i=1; AJvYcCWXyIkFmQd+Y9/icWt0mJgZDuzkuO9Gb/UbrBtFZragCsXHdpArI3tSFZ2kBxJUyZ7i8caS3Bj5cWTYiw343SnA0ERzQYNX4UzF
+X-Gm-Message-State: AOJu0YyuX6TtBBPla9pvvW9VbZZOgTzAztP7Al7Tj3XYS9PSgI6XEdRy
+	CC3FSJCBrhPBnooU7QuTMGcWTDWFi5Wnd7+/nSpLBYrjCo8aisfClXXc1l83LRIBcOctNQZreWc
+	qVrkVZPpNs8YHkjWs0G0YdFI2nra+ILZOpaO+TA==
+X-Google-Smtp-Source: AGHT+IEam62Ke7h6aMEIOfZkOn8q0O/x65GpW/b4zmed/2bsjgtR1QeT3Q2l3hKiUKoRuWDKy+pcqMjQukMAFKYFW9Y=
+X-Received: by 2002:a25:291:0:b0:df4:f2d2:fcd6 with SMTP id
+ 3f1490d57ef6-e0303fe9b62mr4805338276.44.1719251277992; Mon, 24 Jun 2024
+ 10:47:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240624153229.68882-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20240624153229.68882-2-prabhakar.mahadev-lad.rj@bp.renesas.com> <20240624-request-demeanor-d66965d27935@spud>
-In-Reply-To: <20240624-request-demeanor-d66965d27935@spud>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Mon, 24 Jun 2024 18:26:58 +0100
-Message-ID: <CA+V-a8vJ_fCONw1wpsGB1qqd-FReqhLR1JhLgM4RneeC5=eShQ@mail.gmail.com>
-Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: renesas,sdhi: Document RZ/V2H(P) support
-To: Conor Dooley <conor@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
+ <20240524182702.1317935-7-dave.stevenson@raspberrypi.com> <ZmCl7LXbdCwJm/wJ@lizhi-Precision-Tower-5810>
+In-Reply-To: <ZmCl7LXbdCwJm/wJ@lizhi-Precision-Tower-5810>
+From: Dave Stevenson <dave.stevenson@raspberrypi.com>
+Date: Mon, 24 Jun 2024 18:47:41 +0100
+Message-ID: <CAPY8ntCUzU=T_RgJPGvunYXM2Zmd39Kei-qFaoM37-Vc62TyUQ@mail.gmail.com>
+Subject: Re: [PATCH 06/18] dmaengine: bcm2835: make address increment platform independent
+To: Frank Li <Frank.li@nxp.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
+	Scott Branden <sbranden@broadcom.com>, Vinod Koul <vkoul@kernel.org>, 
+	Maxime Ripard <mripard@kernel.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, 
+	Christoph Hellwig <hch@lst.de>, Marek Szyprowski <m.szyprowski@samsung.com>, 
+	Robin Murphy <robin.murphy@arm.com>, Liam Girdwood <lgirdwood@gmail.com>, 
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
+	Vladimir Murzin <vladimir.murzin@arm.com>, Phil Elwell <phil@raspberrypi.com>, 
+	Stefan Wahren <wahrenst@gmx.net>, Serge Semin <Sergey.Semin@baikalelectronics.ru>, 
+	devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+	linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, iommu@lists.linux.dev, 
+	linux-sound@vger.kernel.org, Stefan Wahren <stefan.wahren@i2se.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-Hi Conor,
+Hi Frank
 
-Thank you for the review.
+Thanks for the review, and sorry for the delay in coming back to this.
 
-On Mon, Jun 24, 2024 at 5:39=E2=80=AFPM Conor Dooley <conor@kernel.org> wro=
-te:
+On Wed, 5 Jun 2024 at 18:53, Frank Li <Frank.li@nxp.com> wrote:
 >
-> On Mon, Jun 24, 2024 at 04:32:27PM +0100, Prabhakar wrote:
-> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> On Fri, May 24, 2024 at 07:26:50PM +0100, Dave Stevenson wrote:
+> > From: Stefan Wahren <stefan.wahren@i2se.com>
 > >
-> > The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to that
-> > of the R-Car Gen3, but it has some differences:
-> > - HS400 is not supported.
-> > - It supports the SD_IOVS bit to control the IO voltage level.
-> > - It supports fixed address mode.
+> > Actually the criteria to increment source & destination address doesn't
+> > based on platform specific bits. It's just the DMA transfer direction which
+> > is translated into the info bits. So introduce two new helper functions
+> > and get the rid of these platform specifics.
 > >
-> > To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g05=
-7'
-> > compatible string is added.
-> >
-> > A 'vqmmc-regulator' object is introduced to handle the power enable (PW=
-EN)
-> > and voltage level switching for the SD/MMC.
-> >
-> > Additionally, the 'renesas,sdhi-use-internal-regulator' flag is introdu=
-ced
-> > to indicate that an internal regulator is used instead of a
-> > GPIO-controlled regulator. This flag will help configure the internal
-> > regulator and avoid special handling when GPIO is used for voltage
-> > regulation instead of the SD_(IOVS/PWEN) pins.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+>
+> Fix increment source & destination address depend on the platform drvdata.
+
+This is not platform drvdata.
+
+The code was converting from the generic DMA transfer direction enum
+into the hardware specific bitmask, and then looking at that for
+whether it was using an address increment or not.
+It's more readable, and easier to add in the newer variant of the
+hardware, if we check the generic transfer direction.
+
+I've reworded it for V2 as
+
+"The criteria for whether an address increment is required is based
+solely on the DMA transfer direction. The driver was converting from
+direction into the hardware's "info" bitmask and using that, which
+is therefore dependent on the hardware variant.
+
+Change to using the DMA transfer direction via helper functions
+to remove this hardware specific dependency."
+
+Hopefully makes the situation clearer.
+
+> It should be depend on dma_transfer_direction.
+>
+> look like it is bug fixes. Can you add fixes tag.
+
+No, as described above, it's not a bug fix.
+
+  Dave
+
+> > Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> > Signed-off-by: Dave Stevenson <dave.stevenson@raspberrypi.com>
 > > ---
-> > v2->v3
-> > - Renamed vqmmc-r9a09g057-regulator object to vqmmc-regulator
-> > - Added regulator-compatible property for vqmmc-regulator
-> > - Added 'renesas,sdhi-use-internal-regulator' property
+> >  drivers/dma/bcm2835-dma.c | 28 ++++++++++++++++++++++------
+> >  1 file changed, 22 insertions(+), 6 deletions(-)
 > >
-> > v1->v2
-> > - Moved vqmmc object in the if block
-> > - Updated commit message
-> > ---
-> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 30 ++++++++++++++++++-
-> >  1 file changed, 29 insertions(+), 1 deletion(-)
+> > diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
+> > index ef452ebb3c15..d6c5a2762a46 100644
+> > --- a/drivers/dma/bcm2835-dma.c
+> > +++ b/drivers/dma/bcm2835-dma.c
+> > @@ -252,6 +252,24 @@ static u32 bcm2835_dma_prepare_cb_extra(struct bcm2835_chan *c,
+> >       return result;
+> >  }
 > >
-> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/=
-Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > index 3d0e61e59856..20769434a422 100644
-> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > @@ -18,6 +18,7 @@ properties:
-> >            - renesas,sdhi-r7s9210 # SH-Mobile AG5
-> >            - renesas,sdhi-r8a73a4 # R-Mobile APE6
-> >            - renesas,sdhi-r8a7740 # R-Mobile A1
-> > +          - renesas,sdhi-r9a09g057 # RZ/V2H(P)
-> >            - renesas,sdhi-sh73a0  # R-Mobile APE6
-> >        - items:
-> >            - enum:
-> > @@ -118,7 +119,9 @@ allOf:
-> >        properties:
-> >          compatible:
-> >            contains:
-> > -            const: renesas,rzg2l-sdhi
-> > +            enum:
-> > +              - renesas,sdhi-r9a09g057
-> > +              - renesas,rzg2l-sdhi
-> >      then:
-> >        properties:
-> >          clocks:
-> > @@ -204,6 +207,31 @@ allOf:
-> >          sectioned off to be run by a separate second clock source to a=
-llow
-> >          the main core clock to be turned off to save power.
+> > +static inline bool need_src_incr(enum dma_transfer_direction direction)
+> > +{
+> > +     return direction != DMA_DEV_TO_MEM;
+> > +}
+> > +
+> > +static inline bool need_dst_incr(enum dma_transfer_direction direction)
+> > +{
+> > +     switch (direction) {
+> > +     case DMA_MEM_TO_MEM:
+> > +     case DMA_DEV_TO_MEM:
+> > +             return true;
+> > +     default:
+> > +             break;
+> > +     }
+> > +
+> > +     return false;
+> > +}
+> > +
+> >  static void bcm2835_dma_free_cb_chain(struct bcm2835_desc *desc)
+> >  {
+> >       size_t i;
+> > @@ -336,10 +354,8 @@ static inline size_t bcm2835_dma_count_frames_for_sg(
+> >   * @cyclic:         it is a cyclic transfer
+> >   * @info:           the default info bits to apply per controlblock
+> >   * @frames:         number of controlblocks to allocate
+> > - * @src:            the src address to assign (if the S_INC bit is set
+> > - *                  in @info, then it gets incremented)
+> > - * @dst:            the dst address to assign (if the D_INC bit is set
+> > - *                  in @info, then it gets incremented)
+> > + * @src:            the src address to assign
+> > + * @dst:            the dst address to assign
+> >   * @buf_len:        the full buffer length (may also be 0)
+> >   * @period_len:     the period length when to apply @finalextrainfo
+> >   *                  in addition to the last transfer
+> > @@ -408,9 +424,9 @@ static struct bcm2835_desc *bcm2835_dma_create_cb_chain(
+> >                       d->cb_list[frame - 1].cb->next = cb_entry->paddr;
 > >
-> > +  - if:
-> > +      properties:
-> > +        compatible:
-> > +          contains:
-> > +            const: renesas,sdhi-r9a09g057
-> > +    then:
-> > +      properties:
->
-> Please define properties at the top level and constrain then per
-> compatible.
->
-Ok, I'll move them to the top level.
-
-Cheers,
-Prabhakar
+> >               /* update src and dst and length */
+> > -             if (src && (info & BCM2835_DMA_S_INC))
+> > +             if (src && need_src_incr(direction))
+> >                       src += control_block->length;
+> > -             if (dst && (info & BCM2835_DMA_D_INC))
+> > +             if (dst && need_dst_incr(direction))
+> >                       dst += control_block->length;
+> >
+> >               /* Length of total transfer */
+> > --
+> > 2.34.1
+> >
