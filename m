@@ -1,53 +1,111 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com [209.85.219.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98EE441C62;
-	Mon, 24 Jun 2024 08:35:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C300745E2;
+	Mon, 24 Jun 2024 09:05:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719218150; cv=none; b=lR7rjpSzd5kYBo9lnTJgxrbiGAbGMqp6Qkjgi1qCfIctfwi773YaM39ITItE4qands6uaZFCgMy+ZxeV5k46B4Rf46vJiQ+7pKxiQ3/6FGRRSJFHKHFX5SE0drdgD21v0u6CYoif3ge3ZneZmf4x7AYlu0OxnLnWJUKCMV5rbnU=
+	t=1719219934; cv=none; b=NzyBYjGjP/YRnxMStrMJUF995jbeTggbUGrBlxpJj4kGMRzYzADcrwr1hm8LlVRkXp3/ororprc3e5v/OGUWflkuepC0LmnHEC841KuyCPQMGoKYFqYIndtPUGu/BltBa55ftttnVKcnt9ZEbU/TzQZS/cU93Ei1Ak/JUwP2mtA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719218150; c=relaxed/simple;
-	bh=iQaPBQWjPOQlK9q4eiAviREeWvCKzzUxahs3Qk1DZfw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cr4SKa/xXVMwIQmKS8LrVhqppz2AaIQFOMgkIV217iOar1wWvK0VMeK5HRDPgcDY9x1RgY410jwXaqF4ipiFw8fsauOvWCgGf5Cz6Ld4YwYQEMNlrHVgjoNIsAVsk9eKyy3ryZKMfdPX0+kJJZhSj1vzrHVcasRXyf1MSDGC5fk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id 7971768B05; Mon, 24 Jun 2024 10:35:38 +0200 (CEST)
-Date: Mon, 24 Jun 2024 10:35:37 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: kernel test robot <oliver.sang@intel.com>
-Cc: Christoph Hellwig <hch@lst.de>, oe-lkp@lists.linux.dev, lkp@intel.com,
-	Jens Axboe <axboe@kernel.dk>, Damien Le Moal <dlemoal@kernel.org>,
-	Hannes Reinecke <hare@suse.de>, linux-m68k@lists.linux-m68k.org,
-	linux-um@lists.infradead.org, linux-kernel@vger.kernel.org,
-	linux-block@vger.kernel.org, drbd-dev@lists.linbit.com,
-	nbd@other.debian.org, linuxppc-dev@lists.ozlabs.org,
-	ceph-devel@vger.kernel.org, virtualization@lists.linux.dev,
-	xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
-	dm-devel@lists.linux.dev, linux-raid@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-	nvdimm@lists.linux.dev, linux-nvme@lists.infradead.org,
-	linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-	ying.huang@intel.com, feng.tang@intel.com, fengwei.yin@intel.com
-Subject: Re: [axboe-block:for-next] [block]  bd4a633b6f:
- fsmark.files_per_sec -64.5% regression
-Message-ID: <20240624083537.GA19941@lst.de>
-References: <202406241546.6bbd44a7-oliver.sang@intel.com>
+	s=arc-20240116; t=1719219934; c=relaxed/simple;
+	bh=MGIQ9hvtO+tnV3qgcrXDb5AHL+aW+bXZP0Z9UKeMuls=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ibGUd9mhjfTuxMV9133R4z8GTQZI4HWEFtv8wkBUDxLw5tKe0w9lUbWO4WnD3s9nSXaJbvoUW1+z1G7BU6aDWqhSTdnabk9qLc1akNWxly3ZTImoIo7sVeNgEjDNGs6h1MEzzfzx6FuWPuyCSRM/dBRHPVrUPXve5qHY1eKsTgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-df4d5d0b8d0so3589906276.2;
+        Mon, 24 Jun 2024 02:05:32 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719219931; x=1719824731;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2Sn3OTxIINTayKCLeb6KU6Cc1bWOZasndj+qX/CG+k4=;
+        b=LQEmKak4sDK/YE6ls8WS7RlQAi+lkauTK8kJnO2Ff9ktZmhHjKLrWcAFgn3qYWZ21R
+         f/fvqbvlbqr11ewxQdtXnQGor0vvEX0wmNUSSfSOhKJDFoLeO7jMEiqRaPyiqr9JOI4V
+         3IiN3UUO95TsKhMhIlMfMEBcdKfQ0s0J/5COtUqj2H6fFSc9mq7JfHlA2s5RaSEmdz7b
+         sk6kiLwfNlchGiXij7a2MzXzMHuf6QAw7QhivHa2XnONHEtHiWblaH3ZMivMQDjCVNkz
+         venrpoqR6KuEBGAW008DaGcicrlsHFX9fBYefcq2FkU+/FjbrMME1v+iBn1GJCI53oKb
+         t/FQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUdc4LE96aaT7018K+ntCTRi9C4I9+6pEZnEF/ttQvDca7dArEiRmjdF4Nb1urNCyUaiWMWjVQ7mabGCIlkAk0ivFw2cfe5HFZsOEbTk3oeCT+fBn0g36xwiqKC+IDV/MeCY3JDnrUYIkNxG3s=
+X-Gm-Message-State: AOJu0Yyll63Gu6TnMmDmNtbdUrrPciERNJuyZnEfUhn/nu16Irb1dyxL
+	INv9SziD4YYpHfQ0Lzcd2ltVe9cyPSnIgvk83DAzVG0LcCrJrvAi5KT/ylwD
+X-Google-Smtp-Source: AGHT+IEoVtCOi+aBuI1L6GG9NH0xQEhH/fL2u6JCjRFfntGn6Sj7xMjpUnJQuIERP/7JuyCyShHRew==
+X-Received: by 2002:a5b:7cb:0:b0:dff:806:1388 with SMTP id 3f1490d57ef6-e0303fea2c9mr3674973276.46.1719219930944;
+        Mon, 24 Jun 2024 02:05:30 -0700 (PDT)
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com. [209.85.128.178])
+        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e02e623d1c0sm3117950276.20.2024.06.24.02.05.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 24 Jun 2024 02:05:30 -0700 (PDT)
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6439f6cf79dso9097237b3.0;
+        Mon, 24 Jun 2024 02:05:30 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCW6jLTBIhV5vkyiBm5986BjDELhV7l4rIfkVPi9cwCKyP+jWeQgm8MMCFFpWqqv8TCnSQQTdJ7cZiHOT0b6BomwjT0wC23Iavrv4lgbnQafNvxOg5yfCWALhvqEP5HJBlybFAjTRMklhYQ+v+c=
+X-Received: by 2002:a05:690c:6e0c:b0:617:cbc7:26fe with SMTP id
+ 00721157ae682-643a9fcecb1mr40763937b3.16.1719219930598; Mon, 24 Jun 2024
+ 02:05:30 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <202406241546.6bbd44a7-oliver.sang@intel.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+References: <cover.1718897545.git.geert+renesas@glider.be> <e0fa98f138a7b2836128178f8b3a757978517307.1718897545.git.geert+renesas@glider.be>
+ <20240620170814.GW3029315@google.com>
+In-Reply-To: <20240620170814.GW3029315@google.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 24 Jun 2024 11:05:18 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVdTusWYK0cD_Ez5bv21iKVF2MOT24+_VR+94W3iqDK5A@mail.gmail.com>
+Message-ID: <CAMuHMdVdTusWYK0cD_Ez5bv21iKVF2MOT24+_VR+94W3iqDK5A@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mfd: tmio: Remove obsolete .set_clk_div() callback
+To: Lee Jones <lee@kernel.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-This is odd to say at least.  Any chance you can check the value
-of /sys/block/$DEVICE/queue/rotational for the relevant device before
-and after this commit?  And is this an ATA or NVMe SSD?
+Hi Lee,
 
+On Thu, Jun 20, 2024 at 7:08=E2=80=AFPM Lee Jones <lee@kernel.org> wrote:
+> On Thu, 20 Jun 2024, Geert Uytterhoeven wrote:
+> > Commit bef64d2908e825c5 ("mmc: remove tmio_mmc driver") removed the las=
+t
+> > user of the .set_clk_div() callback in the tmio_mmc_data structure.
+> >
+> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> > ---
+> >  include/linux/mfd/tmio.h | 1 -
+> >  1 file changed, 1 deletion(-)
+> >
+> > diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+> > index eace8ea6cda05a3d..aca74ac1ff69e6f7 100644
+> > --- a/include/linux/mfd/tmio.h
+> > +++ b/include/linux/mfd/tmio.h
+> > @@ -101,7 +101,6 @@ struct tmio_mmc_data {
+> >       unsigned int                    max_blk_count;
+> >       unsigned short                  max_segs;
+> >       void (*set_pwr)(struct platform_device *host, int state);
+> > -     void (*set_clk_div)(struct platform_device *host, int state);
+>
+> Any ramifications for just hoovering this up?
+
+I am sorry, I am not familiar with that expression.
+Can you please elaborate?
+Thanks!
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
+
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
