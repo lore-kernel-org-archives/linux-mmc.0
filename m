@@ -1,107 +1,101 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA90119DFAC
-	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 14:56:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D98219AD7F
+	for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 14:56:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719240971; cv=none; b=CbcVB5AkmAmcMf0QrBcQBGZRXdOUUOKPklq3sEaBqdj4/BRbfBOCoa7mkCK1ZDNqSUz8exs7MdagnA5d7zQ/LKr9YGX6ecJepNhGq+U0ufsgtdkl+bKzP+F0hPCb+RvhUwMclB7CpFNYtqyQLYmc8ygCdEiAS5Zk7kw/0GXhj2k=
+	t=1719240981; cv=none; b=CR1J+T/ul5Y2EpP6+4oqWbN841SKnbDGaVRkwSiAs4YwtlQUwYKWiUODI764D5OmgXt8vPnHamedElBCRpBQh3ibFBST9NovU60lUPW3PxsL43G1l8zubvng+8y7TIy3UyJtcPndUurKlh/Sul0CZpUeU7u3gl4yYvZe++CShOg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719240971; c=relaxed/simple;
-	bh=/rcuYfsC9eMXg7bGCQ9A+y4XcLw5FONtQZwoyuilmr4=;
+	s=arc-20240116; t=1719240981; c=relaxed/simple;
+	bh=ZBQar48FYlhHIVt6aU4MGvLcuwBzjjSKj8HeP0rbQkU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=tkVZ9ureejCAXMWSyQ+KLCyAwBR+k74jyXpR3D/dfu1pBPqzqzANz5eHutVyEBUFCU6sVnA1A2OG1aYNWh7NGHQkHI0DPTgii+DiQKlZrK/qLu6bZbHzqYezADfb8Z7p15hJL5r80NzRjD++7RYTtEh9/5R92oqP3txyPcnKSz8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=aXO1cnfT; arc=none smtp.client-ip=209.85.128.175
+	 To:Cc:Content-Type; b=Mo2y1PYEU1eUvFkY2EYsjCnlMUxEaEiAJBiM11GhYO2kVYB6hCFRoU0QwsL6vECUm+AdGhF3VlMRvNISiHDoA0GayrsUjEuemQSP+aNT5axsqRgfAqAUywHGIk/cvwq3my8adoFV6AXIioOFbme9JxipoDfs8/89iTCMMlTbNVA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Pz94EVUx; arc=none smtp.client-ip=209.85.128.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aXO1cnfT"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-630daaec9c7so40558497b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 07:56:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Pz94EVUx"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-646645f1387so1195207b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jun 2024 07:56:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1719240967; x=1719845767; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1719240977; x=1719845777; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=AuAYxiWC4TvD0a3p6GxU9uZDqvQlp2MZzMqiBjXKRCU=;
-        b=aXO1cnfTtCDoEN1mcriM7q1p8LuGuAaGz+KTVSBILcM9gnBoMCo76bBltZKpaE9AvT
-         XZsr87/+gFYTwiQSfGxG1fUfDmuo22w4BEFMrplvMNoT9o2BSUObkKzNKfcnIKXDf1Bz
-         uTJBcmixEYLKw0PR36PCFVB+aM7zEZTKimx5V+gFPE4qjVkcWU3g9K9mXIGFWB0RGL4l
-         x/Rp+cw6O4xxdx8m1vl8ZHyKm7SdMPJy7rhm0XTRGuMzyoh5TgB+z/63VcJx6+eCgPyY
-         thVgMECFwlDk/gdc9JEI7VTEEeoqkmKG6l9t44Qr5onLq1GNFZ2XkL8UHl9KF9wzXuG2
-         Y+dA==
+        bh=DVtwamYooPBNNQk9uWsNEvfA2DRpVaUFH92khkxMBaM=;
+        b=Pz94EVUxwYNXIDWoZBemK9mzb9QpD8eGTieTsBWA0Br6tli+OYom9vX1MRVIjrnCY4
+         IxrDl91/6tQdWTuYyqXlMWQfm0+atonkn4W99tyIH8+pF3fJGODfR482YiIX5H0a+niy
+         nss/6ctn9pFJBT+0CooBasOb6dENknGMuJ4qLmuKarq8rajRQGbEDn84MA8pWzbn3HFH
+         NZsuFdjqaCcYheAvA/SzP7WsrOBDX+NZ/PxKOpVYB8Xmhatoktzzqt/KkPuXYM3hb5bJ
+         M4HlCb3f2SIvWX8bBqawYIKPsUrOT5cxin1egz6XD5JM/910omtR30oA63uVtvTvm6Er
+         w2cA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719240967; x=1719845767;
+        d=1e100.net; s=20230601; t=1719240977; x=1719845777;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=AuAYxiWC4TvD0a3p6GxU9uZDqvQlp2MZzMqiBjXKRCU=;
-        b=U6qQK6puoTMrK7G5pTmWFptk7gkxNidmmIRL/46j5zdY1FsSBhbW449vDnUliwurop
-         Bzuri1m8mLhEqwQ3Wj3MkKSV0zf8RfMcSlG1yQ9VT9EG+5XbzYRSwGrlQQhlTXLMsLlv
-         R2JJXOStJSaffFUxMc+J2v+jPD1eGaBImIRuL/Al+VNbwvgqyJ8hsP60qzoZcCo4GoWk
-         /AdZu0R6Aqul/PPOzapTaqo0L58P4+wkj9iF88VJBIIH7nV5aAPnUyKvLBCGVJSqefnU
-         dEJDWYI387mIkxY7ptt3J/q5UVR4J8PR3OzC1X6HEEI41qXOa4SmN3wCyXpcL5qA83eZ
-         1olg==
-X-Forwarded-Encrypted: i=1; AJvYcCUXOcsgef73rxdEG1rvh+4k4qeRjglR8qID5FpPbInZHJu56PrnNCaryA4m6SBFwGxB6iPRqkUKPXE8x56qw4CU5RWG8wU2l9Sf
-X-Gm-Message-State: AOJu0YzH75X7AiH2XCJHyOMegXFuVA6sB/MW4iB9O0ARti2L2AysvNlb
-	nsFF8Y/mq3bimV+G5hpTbhlSJMwamLiJnAIDwaY4jDUFCxfGRWoj+PVdEE91kksYJbvbLSaxojz
-	fVzxy63z7yuv4HHyuD0pOOl6vya+uBqYiLEWUKQ==
-X-Google-Smtp-Source: AGHT+IGbNOJ6QDZx9hqjAHMWcJWpOtmqUWrF8dHeHS0GosTP6j1Yhpc3k6MDGo6NH7cJ/CXWiA1aGC4mzCnhS4X8Tz8=
-X-Received: by 2002:a25:aa87:0:b0:e02:9c87:d291 with SMTP id
- 3f1490d57ef6-e0303f52695mr5166865276.18.1719240966752; Mon, 24 Jun 2024
- 07:56:06 -0700 (PDT)
+        bh=DVtwamYooPBNNQk9uWsNEvfA2DRpVaUFH92khkxMBaM=;
+        b=wf5+KG/xUtIt9IyvdVP9prDbIoXZFJE7EohN+pdsqfzK45h5if2TysZwWFRCwhrIvw
+         UeXbuDNyhiWiPBkQ3WPio0iUSeD1prICT/91VlK+ZiN2p1G5fukGECMkJ3Bo4/wcSrgI
+         2fvwBjwkZs5/BtQ3RO/c3rEfYT2Y3y6LtNGBi+3RxwLw8pPTG77Ut0yRI98Lw3sxm4qp
+         YvAglWJuNpkeFDWyLFc6a/nq8QW730hYcuffCECDpNSWrbm03rxLfU7qO2SQJ+kDj8Yd
+         SdNzG0nNKrueQPIdO2nFjFt6TMc/Z22b2apZAS7aCcweA0Qm6Dv0h1EYGv0DQWoGXidI
+         rzEA==
+X-Forwarded-Encrypted: i=1; AJvYcCWObICi4oQQaqKuzNYpLq2g42A6TjligoFPonDxaqPX4I0kraKgDUWkM4GBYg48sbSwpLNAEcdm+WFNwnqKIAPyHd85syLwiIvH
+X-Gm-Message-State: AOJu0YzscGzXKKHgH1G+GY0IxwQOvoA2Z9OmIhiKrISwAtzGD97hAiwd
+	uqX0JZjr97sQxEvblwmO9C51RDHpcZEOI78T5RzNuYf8NqTE1cLF+ASS6fIQaRIRy4fOrTkOI76
+	b0OAh7Qipjg46cQFsrtOlaVF5VQ0KdCAjz9bNjQ==
+X-Google-Smtp-Source: AGHT+IEbc5hc3/yxmZ3c7nr0SAMAXIEOiWKqkNHDXYZk/t2/ZjYEJo4kq6fQVQv1uhCgQ0NrpNYbn1L23nDXChNfGqQ=
+X-Received: by 2002:a25:86c3:0:b0:e02:b594:51cf with SMTP id
+ 3f1490d57ef6-e0303f2b043mr4275615276.18.1719240977135; Mon, 24 Jun 2024
+ 07:56:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240621101833.24703-2-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20240621101833.24703-2-wsa+renesas@sang-engineering.com>
+References: <cover.1718897545.git.geert+renesas@glider.be>
+In-Reply-To: <cover.1718897545.git.geert+renesas@glider.be>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 24 Jun 2024 16:55:31 +0200
-Message-ID: <CAPDyKFoeYd6PZQ8+tKTyX68Fh7M+6ZMCAGZ+SNKrDU=ePQpZ0Q@mail.gmail.com>
-Subject: Re: [PATCH] MAINTAINERS: drop entry for VIA SD/MMC controller
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 24 Jun 2024 16:55:41 +0200
+Message-ID: <CAPDyKFoJiXLaXGg8_ykgFsda-sNkGC8gTL67yyDb+Lnpb0n7sg@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: tmio: Remove obsolete callbacks
+To: Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, Lee Jones <lee@kernel.org>, 
+	Arnd Bergmann <arnd@arndb.de>, 
+	Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>, linux-mmc@vger.kernel.org, 
+	linux-renesas-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 21 Jun 2024 at 12:20, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Thu, 20 Jun 2024 at 17:39, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 >
-> EMail addresses of both maintainers bounce. Since there have been only
-> cleanups for the last 10 years, let it fall back to the default MMC
-> entry.
+>         Hi all,
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> This patch series removes two unused callbacks from the tmio_mmc_data
+> structure, and related infrastructure code.
+>   - The first patch touches only the MFD subsystem.
+>   - The second patch touches both the MMC and MFD subsystems, and has a
+>     contextual dependency on the first patch.  If really needed, it can
+>     be split in an MMC and MFD part, but the MFD part depends on the MMC
+>     part anyway.
+>
+> Thanks for your comments!
+>
+> Geert Uytterhoeven (2):
+>   mfd: tmio: Remove obsolete .set_clk_div() callback
+>   mmc: tmio: Remove obsolete .set_pwr() callback()
+>
+>  drivers/mmc/host/tmio_mmc.h      | 3 ---
+>  drivers/mmc/host/tmio_mmc_core.c | 8 --------
+>  include/linux/mfd/tmio.h         | 2 --
+>  3 files changed, 13 deletions(-)
+>
+> --
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-> ---
->  MAINTAINERS | 6 ------
->  1 file changed, 6 deletions(-)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index cf9c9221c388..5ef1e83e0fd7 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -23645,12 +23645,6 @@ M:     Kevin Brace <kevinbrace@bracecomputerlab.com>
->  S:     Maintained
->  F:     drivers/net/ethernet/via/via-rhine.c
->
-> -VIA SD/MMC CARD CONTROLLER DRIVER
-> -M:     Bruce Chang <brucechang@via.com.tw>
-> -M:     Harald Welte <HaraldWelte@viatech.com>
-> -S:     Maintained
-> -F:     drivers/mmc/host/via-sdmmc.c
-> -
->  VIA UNICHROME(PRO)/CHROME9 FRAMEBUFFER DRIVER
->  M:     Florian Tobias Schandinat <FlorianSchandinat@gmx.de>
->  L:     linux-fbdev@vger.kernel.org
-> --
-> 2.43.0
->
->
