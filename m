@@ -1,106 +1,144 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA35516F26B;
-	Tue, 25 Jun 2024 12:34:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D20116D323
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Jun 2024 16:21:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719318857; cv=none; b=hcBhAX5tNbkYDdpyUjH5eihCPQo+nwKamIvAXkrj4Ew5qrxrjnz7itTEE0VUMSNpAqMF/us7/nZcq1TWW1QUb6cssIgmnA1RVNnEUlP29O5pOD+Y30dtZzuo5BHjESmCRxl1JjduVq2DsGBS1zTF8GdfDc09r2+h9L/TgNFkV8A=
+	t=1719332491; cv=none; b=JHdTkNmXEx7NsnqKo4zQAqKtIn06V7wDGK/HjxfsiJhs3DGI2Pyb1nxQMlpUZT10YJsduafK7WqUjFmtH5wtZK1PLJAHSyaf+ekKdl/iYM/dJU5zjADkm4mcySfDlT+QwcI47/aqZYMdWY/jRMeun+pb7DiCcHmBHT+ljwwkrmg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719318857; c=relaxed/simple;
-	bh=h64D8fpBD1lKfgd7DANWqsP5wNcgHjfFMPaZVfLP9w4=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=UJ3gD1XM7tM631qugdCKeS1o3LBaPb5tQQJT8ubQVN4pi1Odm38EwGRno28LKPpdiOwC+O6NpbA9/3wxPGLG81iy7uW2peazytVJUvghx/a9jchRSkkdv0n2cxBl6YERgIkxmKoDPpvRMmS42HekcO20ZSZ+bB31IsKympcx4Sw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=P0xrSaMp; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1719332491; c=relaxed/simple;
+	bh=CqABDJyIvigPOHjeJkgCNT3v9E386/0PkbPOtvexrmk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=VCi5NrHsGRgMm3vOXqQIgq4rCeM0+e5ca3BaSaGjYZXr22RUFW0x9gl7fL36LCusA01Z8jp6q7/ddoMHPouEgJJQvw008rHKLkHoymo5do/tZybPzSoc3VWo8xTUu2vFyeJ3vtbCyoOAg67QdbCUh99TxXVBN8EZ59fRSpcUavI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com; spf=pass smtp.mailfrom=raspberrypi.com; dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b=fS4b1QOw; arc=none smtp.client-ip=209.85.219.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=raspberrypi.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=raspberrypi.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="P0xrSaMp"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1719318856; x=1750854856;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=h64D8fpBD1lKfgd7DANWqsP5wNcgHjfFMPaZVfLP9w4=;
-  b=P0xrSaMpyxVJ4XREOE2mSHNXAWulGwlSbWGTte6YCONdvUiF0nlRWmtM
-   qYr4hg2sUEII8g066Pgi9Pa3lazs7/kck6H8VqfroB75LbYGemnJB7piD
-   6I4V3H171Y3MSFwy1SyYeieserxdKCmW0t4uBQ2QT48rbqtkrZ2ITEVeE
-   NXn6BXasrhd6+EMrZj2DlgcGm4lftPELMAoQGw0ajguavINQTNg+lpUE/
-   +sAo0nMpIOphCT3W1iAeNJeZq7Uz+bt2tYwO7wWvP5DGb+Ysup2UxXqWc
-   kyMYrCUVc4WkftHc5tIO/A3rMPdMwnh/RCC9noMGulU6Ffcnlq5uwd7PT
-   Q==;
-X-CSE-ConnectionGUID: XriPB4ONTrq6zgOQXS01lw==
-X-CSE-MsgGUID: iYJuNYuDTuy+amZy3+QVBA==
-X-IronPort-AV: E=Sophos;i="6.08,264,1712646000"; 
-   d="scan'208";a="28472536"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa3.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Jun 2024 05:34:15 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Tue, 25 Jun 2024 05:33:44 -0700
-Received: from wendy.microchip.com (10.10.85.11) by chn-vm-ex02.mchp-main.com
- (10.10.85.144) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
- Transport; Tue, 25 Jun 2024 05:33:43 -0700
-From: Conor Dooley <conor.dooley@microchip.com>
-To: <linux-kernel@vger.kernel.org>
-CC: <conor@kernel.org>, <conor.dooley@microchip.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Cyril Jean <cyril.jean@microchip.com>,
-	<linux-mmc@vger.kernel.org>
-Subject: [PATCH v2] mmc: mmc_spi: allow for spi controllers incapable of getting as low as 400k
-Date: Tue, 25 Jun 2024 13:33:21 +0100
-Message-ID: <20240625-gigantic-frown-1ef4afa3e6fa@wendy>
-X-Mailer: git-send-email 2.43.2
+	dkim=pass (2048-bit key) header.d=raspberrypi.com header.i=@raspberrypi.com header.b="fS4b1QOw"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-dff305df675so6210917276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jun 2024 09:21:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=raspberrypi.com; s=google; t=1719332489; x=1719937289; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=qb2E6wZdQOD4FpB99oMUsAKBgWpj20AwfW8pSsc6D5k=;
+        b=fS4b1QOwgMlQUSHPstioQam5Mc1zkmTwNGxybwB+TmbBaqEULmHCf5adr5a5aFqaIB
+         JzDnfVj4Uj0WLgHnSKH8yxlwfyEKIeMqzESqglDVlxVF5ZWjsqmg0aJlCLquwuIkdSP0
+         2fUR+fdp18dONH7HpSpt38Lxv3BV0p9ra4Tx0q9EN5OpaRv4ZEik7RV3TWGn5LTmu8Qc
+         sHpehnSNLOEKeYgJpwjqY9jKGcdyI/CpU8mUTpzvfIXQX5KeWh2Mc+w1xfnpcjsbwjLu
+         XdrTuLW/u/C9Ca5jfT9BT2eRDv4TUYsAdTdQBdFVzO0veB/cI6ox86isdXLXFM/mWl8/
+         /FTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719332489; x=1719937289;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=qb2E6wZdQOD4FpB99oMUsAKBgWpj20AwfW8pSsc6D5k=;
+        b=YxC/L5gz4ETlZIZM9u6uEO5zyJIvq2RzdAKe5LkqMDCSwPXYnfyj+dIb6bhWjU5Gjh
+         ba0RvTkQ8ocslJeLN/19hv0Hg0e2ZTY55nx0P2qXiYIQH7ESbdCFlxTjiPHvA+apFIwL
+         PoI2JHuyqLRWGnFwJXq+O7Ph5nGXsTqB4Ln1DzeGqPiA7dUhuxNh9YqVDJ3TUjJoF1ve
+         hLuhNLN8EnMSLQmKg4e1MNAzJTKgmEJgzxUlTMp4pHvqb31NwQJa3L4LDz4v6oguZXeN
+         8XTIt6awTGCTiICY4pqeeqxPADQ0cApDfpcub6mBqGW0b4CeuZsGTfXpjjF1gvdR8NMe
+         wTPw==
+X-Forwarded-Encrypted: i=1; AJvYcCXurWAsz7w6fS3oPdAS1VUHAzTBm7nYKvQe8CKyhlukFmCpVKL8gov/yM2f1HtDyLwcI76An6F+HZCEFXHIGj1CW0g6M7RAD4AJ
+X-Gm-Message-State: AOJu0YyLHqsJy7F0+oh/0+B87iPTCBfHSRaRfy5zFy36MRmA5locGcgc
+	flkj29di6/+ajGXGlUl5d7HkHkH+lie1gBYuP+y79ju+BZv681QreX4oNyCkXaBS3yp0br9JMuc
+	UzcZP77CvYGuOkRo6/OwNQlrsyY9um0ign0HMxg==
+X-Google-Smtp-Source: AGHT+IFvJFRMGLkvlz90nUmrwbH4uLb1Am8e4l5s0tWHQCH+l8Gv5Qv98MQC7wZStmOIUJKeQ6T13TtnSRScfn8cC/s=
+X-Received: by 2002:a25:28b:0:b0:e02:bd27:ffa0 with SMTP id
+ 3f1490d57ef6-e0303ff97e2mr7397168276.47.1719332489288; Tue, 25 Jun 2024
+ 09:21:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1574; i=conor.dooley@microchip.com; h=from:subject:message-id; bh=h64D8fpBD1lKfgd7DANWqsP5wNcgHjfFMPaZVfLP9w4=; b=owGbwMvMwCFWscWwfUFT0iXG02pJDGlVOwU3cm5oCFlWnv3X8f7s60VqYjd0fiqm6N08/F7y0Iev RdJ3OkpZGMQ4GGTFFFkSb/e1SK3/47LDuectzBxWJpAhDFycAjCRL2sYGabPdTw6W+x8cVRUuJ8Zyx aBcObLL/6+P8Z645jSpDcsaacYGT7cuF6dZCdikviw4Nea/nnM15TnflmuWnzMxuf8E5YsWW4A
-X-Developer-Key: i=conor.dooley@microchip.com; a=openpgp; fpr=F9ECA03CF54F12CD01F1655722E2C55B37CF380C
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+References: <20240524182702.1317935-1-dave.stevenson@raspberrypi.com>
+ <20240524182702.1317935-2-dave.stevenson@raspberrypi.com> <20240528063332.GA30051@lst.de>
+In-Reply-To: <20240528063332.GA30051@lst.de>
+From: Dave Stevenson <dave.stevenson@raspberrypi.com>
+Date: Tue, 25 Jun 2024 17:21:12 +0100
+Message-ID: <CAPY8ntDuKjD08Q0Y8uukpd7ep85y2qoGDv8hPFxu3QPmL8+wew@mail.gmail.com>
+Subject: Re: [PATCH 01/18] dma-direct: take dma-ranges/offsets into account in
+ resource mapping
+To: Christoph Hellwig <hch@lst.de>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
+	Scott Branden <sbranden@broadcom.com>, Vinod Koul <vkoul@kernel.org>, 
+	Maxime Ripard <mripard@kernel.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, 
+	Marek Szyprowski <m.szyprowski@samsung.com>, Robin Murphy <robin.murphy@arm.com>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
+	Vladimir Murzin <vladimir.murzin@arm.com>, Phil Elwell <phil@raspberrypi.com>, 
+	Stefan Wahren <wahrenst@gmx.net>, Serge Semin <Sergey.Semin@baikalelectronics.ru>, 
+	devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org, 
+	linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org, iommu@lists.linux.dev, 
+	linux-sound@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Some controllers may not be able to reach a bus clock as low as 400 KHz
-due to a lack of sufficient divisors. In these cases, the SD card slot
-becomes non-functional as Linux continuously attempts to set the bus
-clock to 400 KHz. If the controller is incapable of getting that low,
-set its minimum frequency instead. While this may eliminate some SD
-cards, it allows those capable of operating at the controller's minimum
-frequency to be used.
+Hi Christoph
 
-Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
----
+Sorry for the delay in coming back to you.
 
-Without the RFC tag, but otherwise unchanged.
+On Tue, 28 May 2024 at 07:33, Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Fri, May 24, 2024 at 07:26:45PM +0100, Dave Stevenson wrote:
+> > From: Serge Semin <Sergey.Semin@baikalelectronics.ru>
+> >
+> > A basic device-specific linear memory mapping was introduced back in
+> > commit ("dma: Take into account dma_pfn_offset") as a single-valued offset
+> > preserved in the device.dma_pfn_offset field, which was initialized for
+> > instance by means of the "dma-ranges" DT property. Afterwards the
+> > functionality was extended to support more than one device-specific region
+> > defined in the device.dma_range_map list of maps. But all of these
+> > improvements concerned a single pointer, page or sg DMA-mapping methods,
+> > while the system resource mapping function turned to miss the
+> > corresponding modification. Thus the dma_direct_map_resource() method now
+> > just casts the CPU physical address to the device DMA address with no
+> > dma-ranges-based mapping taking into account, which is obviously wrong.
+> > Let's fix it by using the phys_to_dma_direct() method to get the
+> > device-specific bus address from the passed memory resource for the case
+> > of the directly mapped DMA.
+>
+> My memory is getting a little bad, but as dma_direct_map_resource is
+> mostly used for (non-PCIe) peer to peer transfers, any kind of mapping
+> from the host address should be excluded.
 
-rfc/v1: https://lore.kernel.org/all/20240612-dense-resample-563f07c30185@spud/
+Could you elaborate on mapping from the host address being excluded?
+On BCM283x DMA address != CPU physical address, so some mapping has to occur.
 
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Cyril Jean <cyril.jean@microchip.com>
-CC: linux-mmc@vger.kernel.org
-CC: linux-kernel@vger.kernel.org
----
- drivers/mmc/host/mmc_spi.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Robin Murphy directed us at dma_map_resource() in [1], and referenced
+this patch as necessary because dma_map_resource() didn't currently
+use dma-ranges mappings.
+Mark Brown also hadn't corrected/objected to the statement that
+dma_map_resource() was the correct call when I was querying how to
+tackle this historic mismatch in [2].
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 09d7a6a0dc1aa..c9caa1ece7ef9 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -1208,7 +1208,10 @@ static int mmc_spi_probe(struct spi_device *spi)
- 	 * that's the only reason not to use a few MHz for f_min (until
- 	 * the upper layer reads the target frequency from the CSD).
- 	 */
--	mmc->f_min = 400000;
-+	if (spi->controller->min_speed_hz > 400000)
-+		dev_warn(&spi->dev,"Controller unable to reduce bus clock to 400 KHz\n");
-+
-+	mmc->f_min = max(spi->controller->min_speed_hz, 400000);
- 	mmc->f_max = spi->max_speed_hz;
- 
- 	host = mmc_priv(mmc);
--- 
-2.43.2
+I'll happily defer to the experts on DMA (I would never classify
+myself as such), but I'm not clear on the direction you want here.
 
+[1] https://lore.kernel.org/lkml/ee19a95d-fe1e-4f3f-bc81-bdef38475469@arm.com/
+[2] https://lore.kernel.org/linux-arm-kernel/CAPY8ntBua=wPVUj+SM0WGcUL0fT56uEHo8YZUTMB8Z54X_aPRw@mail.gmail.com/T/
+
+> (dma_direct_map_resource in general is a horrible interface and I'd
+> prefer everyone to switch to the map_sg based P2P support, but we
+> have plenty of users for it unfortunately)
+
+Is that applicable for mapping device addresses with DMA_DEV_TO_MEM or
+DMA_MEM_TO_DEV transfers?
+Example use case on BCM283x is HDMI audio where the HDMI driver should
+be passing in the CPU physical address of the audio FIFO, and that
+needs to be mapped to the DMA address for the DMA controller. How do I
+get a sglist for the peripheral address?
+
+As noted in the cover letter for this series, if this isn't the
+approved mechanism, then please let me know what is.
+
+Many thanks
+  Dave
