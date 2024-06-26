@@ -1,126 +1,133 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25D6D10F4
-	for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 06:37:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C0311534F8
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 07:46:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719383826; cv=none; b=pLdOLQYipLUQ5mxovOd84HhMX29s0zlJjLSRURaSM+gs3dRxNJqib89ueUECX+swQtMHAJzr1g8msSh9icDf994RRsu3NW9SvdTLBYRo5L2HVEf+GAzoolzDGxwrb1cNAbwFqPdn9WBvSyVgEIxLA9M8H1+lPUhtmy42U4jcO5Q=
+	t=1719387966; cv=none; b=bcHQ+FbEzx5T3gPGxiNcskzA3TA35DOI9As+cDJ/X0tQIZWXEmqr7rZ6XYoAeuTxlzQUQG6WpZ5epgU6JAiAPBDazTNTHJEs7T4Nd1uxaiWhIjzaDZcQC5Y3wYTI4YRe1P3yuVTwLJPL2oQ76n2LK1bnkP/0RiuPVphaC5S8mXQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719383826; c=relaxed/simple;
-	bh=8HlxFlayCO5Q2Dfn73N1VcmYhkr9Os/QNdTYULmauYE=;
-	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=f9aebe0Yk1fZphBJpK8585lTMMDDNkIeoeSojJSRNmstyxLh3XcLxG1djFepqHA5dP9TSjVNupji8LVYNF/uZegh1m+3t0eNVejYhX6cxac7eRd9cWWcXrZ4SeEPF4HWuCOnDY/pX0LP1re+or6tyuZrwpygYlAfU2IVYu4c51U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=FnPZ2Q/U; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1719387966; c=relaxed/simple;
+	bh=+S/ZylBo7OkDhqSowKwWFObaRLnN9nAxnObxD0rGb+Y=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fEQ88RrYQt2EJ2+eOJHG94PrBR5ZSFsYNkLRX7m3V4+ChmutnAw0Sie712NhVmD9dzcjsxBvsLAex3iTeCKZQ8inyi0blzIrB+Nu5p9V6w4p5e+SMU5th/a6kbqekIU+4ancTVHNQYIGYv9PcZhc147Z2z/9eHSO+n/eA+02DkE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=PDRuAxX5; arc=none smtp.client-ip=209.85.167.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="FnPZ2Q/U"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=XG6W
-	uG1CYZoEaFrNfdf57P8XrLm7RnivnO3dyvLzvcc=; b=FnPZ2Q/U1oAia+ECkCSI
-	e2Vf+z1lM930cF5/n1xjmcnndQTOAyPRdB5gTPRSb1xzfF3b7YVeBDcjV8rnnwVu
-	QX3hJHRnDcHXPT4WSPjqTCKsFXIjL5gKYTgn0BJTw/w5XzSG4X6tW0eQD9cgFS2V
-	Ch4Zh29SLzOHdfYT6wAy0NCQpFx+h6zgqprSRPz/M8pgwtrUs0qM0gFhLylKX4qf
-	7rm8CdqI558UzyWj7Nzk0Q0Tkas0S6CMKLD49RH4Yhf1l74WS9vOEZh0nP361Z9M
-	PKOeUZ4al3pjv63JX9suLLTzUY0SY2+0TxtJIGrcAGUQFmOzpYBOGFPXZBtwPyE5
-	Hw==
-Received: (qmail 466193 invoked from network); 26 Jun 2024 08:37:01 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 26 Jun 2024 08:37:01 +0200
-X-UD-Smtp-Session: l3s3148p1@UUrgPcUb4pkgAwDPX0AHAIitiwsdozO7
-Date: Wed, 26 Jun 2024 08:37:00 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Allen Pais <allen.lkml@gmail.com>, 
-	Aubin Constans <aubin.constans@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni <alexandre.belloni@bootlin.com>, 
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>, Manuel Lauss <manuel.lauss@gmail.com>, 
-	=?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
-	Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
-	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
-	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, 
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH v4] mmc: Convert from tasklet to BH workqueue
-Message-ID: <rddr35qidcxfemy24lcqnz7fo6ogltlffizwbf7evtdoz5qgsu@tva3pf6e2isb>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Allen Pais <allen.lkml@gmail.com>, Aubin Constans <aubin.constans@microchip.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@microchip.com>, 
-	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
-	Manuel Lauss <manuel.lauss@gmail.com>, =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
-	Jaehoon Chung <jh80.chung@samsung.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <florian.fainelli@broadcom.com>, 
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
-	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
-	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
-	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
-	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, 
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-References: <20240625170938.2579372-1-allen.lkml@gmail.com>
- <racc3a2kmhu5275xcb6bght5j2bbg5ujlowdbfqeiwputmygei@ckscwafglafl>
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="PDRuAxX5"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-52bbf73f334so5031492e87.2
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 00:46:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=tuxon.dev; s=google; t=1719387962; x=1719992762; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=6nCZo+jWMRZ6cgUq9Mxe++DtYRLBTMuxAvEuWj2mzpc=;
+        b=PDRuAxX5PEoFRCnLtzb8Qail2JRo6XlJkOioQfY/45Q2Pe5Q4H1J/Zu/9KyxNujnRg
+         S2J0xUcVG4F+oPIm4+Eu5LhVZAYM5/fLmUMAhuzLqeTy2ImN1BIrqO4aFYIdDLNui4Ee
+         zQwemIPBseh0/06zstorqGL/VsXG0M2rI5dIFNewRRQ+MN4PyT+wGyhK3+hg98tvrBf2
+         Kjm82niL0hF4Qi1ELGQKJACSn83OG1GjL5s6SuIM5WoCHD+9AX/c1sNt/uOr1n/dWFfU
+         aPE+pPHRQPFLSxyks5E72AX50YoeEwEQaoLgAOcnFB0JxhNyMd1pAuBqXBcOVL6kbRkv
+         xG1Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719387962; x=1719992762;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6nCZo+jWMRZ6cgUq9Mxe++DtYRLBTMuxAvEuWj2mzpc=;
+        b=Xc1TMDUpnruI36pA36DAxXHZZzLipqgvw7NAPyxYYN2MBKCNUZJoi8mruHywKCTyCU
+         zQ+GLAeEzwIw2UxTRdM/Z1a+WE+XhZ24tE4dX6FZVZJ9CVg9+bkB52D5hCKYZ78StN2L
+         7DFOYZm6JrW8s/yizgoAPNM53fByasdyCq3iyHr8NHBI9tVgHDVY73CdBQ9/Budj4G/z
+         OxgbS76Mhtd7PX30mSIRXs5NikncHHxrTizlHssc/J97MKWlims/0lJ5esAEK1JV7T9+
+         XEvCxhdZO3fZzcV9g1snAyvLoyUhhJKm9MXyU0RiLspo8fa+sSja7bRc6yXPRwrI/bkd
+         R5Rg==
+X-Forwarded-Encrypted: i=1; AJvYcCUU0opEmjHj3bNCCy3Ye62YAfzvHvWklCoXBPILJIho7uOxvVmRAN3Qz2MTc2Mi05SIuMemgmk5DWqfPQJ6Jfxb0uiAc4e8EQUL
+X-Gm-Message-State: AOJu0Yz0GC97BXR9O+WAw4dtvdfWA9u5QmghCtey4s8YtFEuSJmyaZiP
+	/s3TjPmJCIymADy7TDtHS79buY95dnT8F65yghd02xKU15RXMXiC9REp5DnyfzY=
+X-Google-Smtp-Source: AGHT+IGQX0elEmsIgSgrE2SLocb/u9Th6sLY7fmx7i7FDBNC/6k6+LF/g+fLJC0OABw8GNYDkrkA2Q==
+X-Received: by 2002:a05:6512:138a:b0:52c:f521:b1c6 with SMTP id 2adb3069b0e04-52d3ad9e8efmr2137151e87.30.1719387961780;
+        Wed, 26 Jun 2024 00:46:01 -0700 (PDT)
+Received: from [192.168.50.4] ([82.78.167.70])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-424c8246b1dsm15205005e9.6.2024.06.26.00.46.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 26 Jun 2024 00:46:00 -0700 (PDT)
+Message-ID: <76fc0a6c-b20c-4ae0-bb4f-0023cb66962a@tuxon.dev>
+Date: Wed, 26 Jun 2024 10:45:59 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="d35bwx5hanml5js2"
-Content-Disposition: inline
-In-Reply-To: <racc3a2kmhu5275xcb6bght5j2bbg5ujlowdbfqeiwputmygei@ckscwafglafl>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 2/3] mmc: tmio: Use MMC core APIs to control the vqmmc
+ regulator
+Content-Language: en-US
+To: Prabhakar <prabhakar.csengg@gmail.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>,
+ Geert Uytterhoeven <geert+renesas@glider.be>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Magnus Damm <magnus.damm@gmail.com>,
+ linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-renesas-soc@vger.kernel.org, Biju Das <biju.das.jz@bp.renesas.com>,
+ Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+ Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20240624153229.68882-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240624153229.68882-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: claudiu beznea <claudiu.beznea@tuxon.dev>
+In-Reply-To: <20240624153229.68882-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
 
---d35bwx5hanml5js2
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jun 26, 2024 at 08:31:05AM GMT, Wolfram Sang wrote:
-> Hi Allen,
->=20
-> >    - dropped changes to renasas sdhci(dma_complete)
-> >    - Wolfram to send a patch for it.
->=20
-> It is still there.
+On 24.06.2024 18:32, Prabhakar wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> 
+> Use the mmc_regulator_enable_vqmmc() and mmc_regulator_disable_vqmmc() APIs
+> to enable/disable the vqmmc regulator.
+> 
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>\
 
-With build errors (forgot to say that):
+Tested-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com> # on RZ/G3S
 
-drivers/mmc/host/renesas_sdhi_internal_dmac.c: In function =E2=80=98renesas=
-_sdhi_internal_dmac_request_dma=E2=80=99:
-drivers/mmc/host/renesas_sdhi_internal_dmac.c:551:22: error: =E2=80=98renes=
-as_sdhi_internal_dmac_issue_bh_work_fn=E2=80=99 undeclared (first use in th=
-is function); did you mean =E2=80=98renesas_sdhi_internal_dmac_issue_work_f=
-n=E2=80=99?
-  551 |                      renesas_sdhi_internal_dmac_issue_bh_work_fn);
-      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Please let me handle TMIO/SDHI completely. You will get the credit,
-still.
-
-
---d35bwx5hanml5js2
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmZ7twwACgkQFA3kzBSg
-KbbwqQ/+NEsWVmbIE12XppdwgrT28RGTfbagMcWDMvCLQBszNbFraLrclztth842
-CRPQ5KawhKp7DPEO7y/7EEqNJfbTZeoUnQHPdGAJ8VCXiV7on3ikUYRaBIvuR/nW
-bQxKCUQZUPmzT0bvOgoiL8ERhwOEbuXxz0G8E0RNObpXj/fhA17gJ5rOx2OjuQ9U
-C3M/EI/+NCnW7WKD4fJ/7RXrFctcJoSDIb3ev1s0eJ/3uqRHPKtyzGDjqIw20VzS
-i0WaEuU38TfgCabDxzSQbbhWAvxay0XeOweIdliKhAnYWJvDceFpRKqdx1qf56fF
-l5dQW/OPbCmnjiXRJKvZIsjqarIAjTHumoGzfLBnGFshN/WyshGf310BxhXZgAgb
-YpRtrTR/mkhweojaI5yn7RWRkgsTRLd/+ShTIMujC1t5/3u9bFPVVyMp3xLjK7HO
-Enie/iNOWuhcscaWleriZuYlB+yYs601IqazjBYJ+u/52aBLm8PqeVQDZ2ZvPeBx
-/WcCP6P3Ea4lEsc5r9pE+D4JxHv4NBNazCz/y1or3RHjexb88mtN2L7U2iEMIoRs
-sy2Kz0Qaie9vhqG2+/rPf6ORzOTOtQL5I1deVB2CAqTvxtbCClYIleQFFRPGv8EF
-Ui464tJmhd7k9izfr+WYmRSEL9g5lCs4L5t4RnnRx6lpZhxZeO4=
-=SPOe
------END PGP SIGNATURE-----
-
---d35bwx5hanml5js2--
+> ---
+> v2->v3
+> - Included RB tags
+> 
+> v1->v2
+> - New patch
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 7 +++----
+>  1 file changed, 3 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 93e912afd3ae..2ec1a74c85bc 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -897,8 +897,8 @@ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+>  	 * It seems, VccQ should be switched on after Vcc, this is also what the
+>  	 * omap_hsmmc.c driver does.
+>  	 */
+> -	if (!IS_ERR(mmc->supply.vqmmc) && !ret) {
+> -		ret = regulator_enable(mmc->supply.vqmmc);
+> +	if (!ret) {
+> +		ret = mmc_regulator_enable_vqmmc(mmc);
+>  		usleep_range(200, 300);
+>  	}
+>  
+> @@ -911,8 +911,7 @@ static void tmio_mmc_power_off(struct tmio_mmc_host *host)
+>  {
+>  	struct mmc_host *mmc = host->mmc;
+>  
+> -	if (!IS_ERR(mmc->supply.vqmmc))
+> -		regulator_disable(mmc->supply.vqmmc);
+> +	mmc_regulator_disable_vqmmc(mmc);
+>  
+>  	if (!IS_ERR(mmc->supply.vmmc))
+>  		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
