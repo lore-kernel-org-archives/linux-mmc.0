@@ -1,59 +1,59 @@
-Received: from mail-il1-f174.google.com (mail-il1-f174.google.com [209.85.166.174])
+Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96122192B74
-	for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 20:09:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E5A819007E
+	for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 20:23:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719432571; cv=none; b=GbVlluZCB/Wt8hwRgqfBz7ZC5e6GWW1Rk+5LRqk0rBS0AMYzjeNolW63gb/jr8qYTGhIwwF9ZZKQx9BiuPZKS2BAJ0TE50K/Xrp7FJoXEGgi8DrvNPZ/nJrlkBhy2NXvlIDYsxn3DSGGwIMTpXcc/MtXUwmO7ucrgKJYv5eR3Vo=
+	t=1719433398; cv=none; b=DspJelz2OETNUTeIjE+BFCAOTBnuct7S/r4F5jA86PXqahRwFHNSJgDQ5BSrw1w8PGFi2Fg1x1Y7B24tTbPYj4feO1V1d8usO10kbkBNQwUBklGA28jZbvS0HpdcG7qFHsp4HnTgMVIuWs/r0BxiBgo8uAYgTD+neJ7BX0RMP3c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719432571; c=relaxed/simple;
-	bh=WQSAWrkLj4K2WmJ8sjI4muU+NasCNdjh36VyrdZLgjc=;
+	s=arc-20240116; t=1719433398; c=relaxed/simple;
+	bh=pjaYCE9P3KcLxKQVApYlU5lmhCHt4CpxTxocoZolkXw=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Lyg7jOaSrpY2ycZJB2mfsv1gfhyq74T1He2epHqIlezKGK0NxuSe9eNCZEW1e1UzTlJc4WM7i/gVGDfltBI8jMVZGJfjwcTtfK/Sq8ONbi/UwjdJTiJgC8/+jbKjsZi9LjL25Vbj1pnKsQ1FCfCepy3d1KNfhYUvIbhYBIi2xUE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=ZuQnqL3N; arc=none smtp.client-ip=209.85.166.174
+	 In-Reply-To:Content-Type; b=RsLGWR5srL8pi9Oysf7bbYvc0D3eKZSfqRxQNQd1VO9RD5n4xuynE+RtaJNsa5KEOUWFzz3i/VpBbvJNdbEOPloa4Ukk3aNOLuEVtzhN2kr9OeS++m7CRYCt8zLZmnCy2DgUMvMPRGVQ6UoMHSWtxhzyakzJ9NNMSmFIfYohYH0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=GQ2a9n5E; arc=none smtp.client-ip=209.85.216.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="ZuQnqL3N"
-Received: by mail-il1-f174.google.com with SMTP id e9e14a558f8ab-3762c84e120so3048875ab.2
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 13:09:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="GQ2a9n5E"
+Received: by mail-pj1-f51.google.com with SMTP id 98e67ed59e1d1-2c8b5a236daso372506a91.1
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Jun 2024 13:23:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1719432568; x=1720037368; darn=vger.kernel.org;
+        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1719433396; x=1720038196; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=XFoBjCaXOuAuWDxpGYUmcGmS4rl71MBSo9IrE9Xx5Dc=;
-        b=ZuQnqL3NOOwKAVZeFtlKVibvHrgKMkwRvjWf2xU4Q8rbKaarFxs2oeN3bNsh4UHrb4
-         EO29YP4nj+tcsiJ5oOrOEvKfFEuTFxjlDrJfC7cO1mlTjIRsEX5T8iFviDC7AUKFthRb
-         UzFMDjfH2zudIQzR9vAXFbe5zQuWRcyiwUPoGobzIrD/EBe9zqvLWAbqwbQ63+9ASxSk
-         6/1tvuUOSoiZ/LWLlzpGpoN5GDJFzIVsJ0vkkVpcd9bDjAhwuVu8ThrGLYxmtIedJe7S
-         BRu8iLQf1enj+aypNuQR3DIoAEf//c+4p5KYDvY6YG6HTxB2zcXVE0JchYeLTwKqJ8WD
-         i/WA==
+        bh=iIcm1wgz2PYFRvSTmfKBCviM4vc4rUoi0KEFtYyxgkk=;
+        b=GQ2a9n5E14Rox3b1vGNF9B9BApqx6cRB2VqEgOBQdL98y0JowbptMH6W0WW8g/je4K
+         upUhgi4PV1n1Qe1hFULEGF33J8B3rbBe/oq3HjYpxWmbtG0V+RnXxPv/GS0QcgVnDEmK
+         QkxS3/Mja24xc95yzlkWp+FUAb29hHXjduHrz/wKPbGK4OXERit8GwHz56d+iBsXDYJY
+         YXBIojPq5zjFTsEGS2QSgWOYIikfTDG+p/OaPBRqhDv9pFauIZjMiBqd0sED6M0XOgNi
+         5/0a00JTHyBsInXQ+Y25VZ+lrMb6c3GTjI4jhrYVLYnxF4QXNHpciW9F8Xw8EYfGN4Vb
+         W1PA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719432568; x=1720037368;
+        d=1e100.net; s=20230601; t=1719433396; x=1720038196;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XFoBjCaXOuAuWDxpGYUmcGmS4rl71MBSo9IrE9Xx5Dc=;
-        b=iQeV9rmpivjduGIoCw6EIEjjZLG7TcAPdfePt6M2n/AbF1YtaGIUCcsLTi+WPiMFvd
-         Gih7ypFsPwkmBIiYwg2OPA3Cx9KSDeUDH+mSgdCTgyFX6rNzLj8x1KRMXYg5SVQOh8UF
-         GdzQCcGgCAZLgebzZh5YH25u+HenEjBhD9fC8JEO4NB0KSCjPdvgmO8NdnYowgdMw3ba
-         t5UL2BaJDxLhowPBz8tv1Cxt6W9bKTLmqCIU9wPXGuit8hkt5ghESCkbXxXncwcmXcC0
-         qQkQgnxt3JrSwfCWArnKnETaF3b+B/bmirsPa7iNqne2f8Y//4UNozKJIiLd8X8IIKLp
-         cFEg==
-X-Forwarded-Encrypted: i=1; AJvYcCVns949EfG8QsvlseuRCG1MqRqs6F/7u2Q1pGJY5Pw/D+qEM1lbwLx3KewAND8HytGUlz7GneiEAigWiBlNEPRfMJyvveeHOMni
-X-Gm-Message-State: AOJu0YzNFEhxAorECFxPVc5YN79XqAUjrnV2w0F1HO6EqNzD7e2hQSEo
-	gYlKSNDsUw+vfj5pyWzb0Z7eA0MjaXomtzOO2RhOfMYHbFIAjSX+/QJqm41yVaQ=
-X-Google-Smtp-Source: AGHT+IFd8ycHFY0EV3fQ/ysqJ31z0UTdeJK8CX1EFtFBpVl3MeFi4xbYR0M2X9flhqcvpPKYIGhIkg==
-X-Received: by 2002:a05:6e02:13a5:b0:376:3918:c50 with SMTP id e9e14a558f8ab-37639180e02mr150373115ab.0.1719432567747;
-        Wed, 26 Jun 2024 13:09:27 -0700 (PDT)
+        bh=iIcm1wgz2PYFRvSTmfKBCviM4vc4rUoi0KEFtYyxgkk=;
+        b=sJooFQESxEt5PqMR8vxb/n5W+C+ckPiR01BXLQHLkYpadKjQ2oyxklSqsOfUpnQ5A3
+         PsWS4f7VXEtIX8m4rOGv06MFByOr80j1bt2o6iIXbpHGgNRW6RChX2osF/Cv1aMjxkc8
+         GlP9gHJQ9FbmW4qinSFVBI2Dst6n+zkumVLRsNKsrDNQvYlEWjajxhtHZjymr80xJhdN
+         h9lmUw4rxt6u5BO0KSwEkSlZ4pL/KVWcxq2V9XrzSXc0oCH/5aM2G+dcKAj6BAwEXEPc
+         yTsJ0Od2w1GHekSAYWadRJ7qZpwtoAfPIa5hlxTNmMTYjD+MJX0SfmWFxvf6YjxW41ni
+         DLaQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUXDTlBoqNR/3XVL4WOrWOg/gVwexBWm4roIh9mtEEC3wDBZo2FTvqGuB5c7cu4CCo6M2O7odrex+zzasy07YetqQC9EBx3QesX
+X-Gm-Message-State: AOJu0YyqPi4HfuA4Zn5R8QOyZjP6pzFj41KXD5IA0Ah5sMrB5z1bYOph
+	6Ip7GvVbq/wH1SKaXssIb3O2H+uSeAAzulIKqW0rfLXugkyzPqPpWxW56Ku7AIE=
+X-Google-Smtp-Source: AGHT+IFUV/CC3j75a0T0PXjx4ENsuqkALCaXlO0FPDNbASuOiUQMX2EszVxk+ODevu1oCp9dGOE/SQ==
+X-Received: by 2002:a17:90b:e90:b0:2bf:eddc:590b with SMTP id 98e67ed59e1d1-2c84599bf83mr12008481a91.1.1719433396219;
+        Wed, 26 Jun 2024 13:23:16 -0700 (PDT)
 Received: from [192.168.1.150] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-71acc0424cfsm5855973a12.26.2024.06.26.13.09.25
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2c8d808f874sm2095000a91.50.2024.06.26.13.23.13
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 26 Jun 2024 13:09:26 -0700 (PDT)
-Message-ID: <1233bf3c-335c-497a-ba08-cd52362f3723@kernel.dk>
-Date: Wed, 26 Jun 2024 14:09:24 -0600
+        Wed, 26 Jun 2024 13:23:15 -0700 (PDT)
+Message-ID: <f533a5d6-94da-4ede-8d9f-e40df2425698@kernel.dk>
+Date: Wed, 26 Jun 2024 14:23:13 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,7 +61,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/4] block: partitions: populate fwnode
+Subject: Re: [PATCH v3 3/4] block: add support for notifications
 To: Daniel Golle <daniel@makrotopia.org>
 Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
@@ -81,74 +81,80 @@ Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
  linux-block@vger.kernel.org
 References: <cover.1719368448.git.daniel@makrotopia.org>
- <afa870ec6ac1027561d1c002205ab1e05358a46c.1719368448.git.daniel@makrotopia.org>
- <2de992b3-d71c-40f2-ad68-76a9f48338d4@kernel.dk>
- <Znxy0BJNTE79MrCq@makrotopia.org>
+ <609f654800583feb016d96d9c3fc2f029f0f460a.1719368448.git.daniel@makrotopia.org>
+ <58cc9e3a-bb69-4205-9f11-d262f811ea9a@kernel.dk>
+ <ZnxyQgYyM31Xq2xV@makrotopia.org>
 Content-Language: en-US
 From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <Znxy0BJNTE79MrCq@makrotopia.org>
+In-Reply-To: <ZnxyQgYyM31Xq2xV@makrotopia.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 6/26/24 1:58 PM, Daniel Golle wrote:
-> On Wed, Jun 26, 2024 at 01:43:49PM -0600, Jens Axboe wrote:
->> On 6/25/24 8:50 PM, Daniel Golle wrote:
->>> diff --git a/block/partitions/core.c b/block/partitions/core.c
->>> index ab76e64f0f6c..f88829e254e6 100644
->>> --- a/block/partitions/core.c
->>> +++ b/block/partitions/core.c
->>> @@ -10,6 +10,8 @@
->>>  #include <linux/ctype.h>
->>>  #include <linux/vmalloc.h>
->>>  #include <linux/raid/detect.h>
->>> +#include <linux/property.h>
->>> +
->>>  #include "check.h"
->>>  
->>>  static int (*const check_part[])(struct parsed_partitions *) = {
->>> @@ -281,6 +283,42 @@ static ssize_t whole_disk_show(struct device *dev,
->>>  }
->>>  static const DEVICE_ATTR(whole_disk, 0444, whole_disk_show, NULL);
->>>  
->>> +static struct fwnode_handle *find_partition_fwnode(struct block_device *bdev)
+On 6/26/24 1:55 PM, Daniel Golle wrote:
+> Hi Jens,
+> 
+> thanks a lot for the review!
+> 
+> On Wed, Jun 26, 2024 at 01:46:50PM -0600, Jens Axboe wrote:
+>> On 6/25/24 8:51 PM, Daniel Golle wrote:
+>>> +static int blk_call_notifier_add(struct device *dev)
 >>> +{
->>> +	struct fwnode_handle *fw_parts, *fw_part;
->>> +	struct device *ddev = disk_to_dev(bdev->bd_disk);
->>> +	const char *partname, *uuid;
->>> +	u32 partno;
+>>> +	struct blk_device_list *new_blkdev;
 >>> +
->>> +	fw_parts = device_get_named_child_node(ddev, "partitions");
->>> +	if (!fw_parts)
->>> +		fw_parts = device_get_named_child_node(ddev->parent, "partitions");
+>>> +	new_blkdev = kmalloc(sizeof(*new_blkdev), GFP_KERNEL);
+>>> +	if (!new_blkdev)
+>>> +		return -ENOMEM;
 >>> +
->>> +	if (!fw_parts)
->>> +		return NULL;
->>
->> That last if check should to inside the previous one.
-> 
-> Actually the previous one should have been removed entirely. I somehow
-> forgot to 'git add' that change.
-> 
->>
->>> +	fwnode_for_each_child_node(fw_parts, fw_part) {
->>> +		if (!fwnode_property_read_string(fw_part, "uuid", &uuid) &&
->>> +		    (!bdev->bd_meta_info || strlen(uuid) > PARTITION_META_INFO_UUIDLTH ||
->>> +		     strncmp(uuid, bdev->bd_meta_info->uuid, PARTITION_META_INFO_UUIDLTH)))
->>> +			continue;
+>>> +	new_blkdev->dev = dev;
+>>> +	mutex_lock(&blk_notifier_lock);
+>>> +	list_add_tail(&new_blkdev->list, &blk_devices);
+>>> +	raw_notifier_call_chain(&blk_notifier_list, BLK_DEVICE_ADD, dev);
+>>> +	mutex_unlock(&blk_notifier_lock);
 >>> +
->>> +		if (!fwnode_property_read_string(fw_part, "partname", &partname) &&
->>> +		    (!bdev->bd_meta_info || strlen(uuid) > PARTITION_META_INFO_VOLNAMELTH ||
->>> +		     strncmp(partname, bdev->bd_meta_info->volname,
->>> +			     PARTITION_META_INFO_VOLNAMELTH)))
->>> +			continue;
+>>> +	return 0;
+>>> +}
 >>
->> This is pretty hard to make sense of...
+>> Nit: redundant newline.
 > 
-> I'll add comments explaining it. Or should I use another syntax, e.g. several
-> nested if-clauses, instead?
+> I'll remove the newline before the 'return' statement then, right?
 
-Maybe some kind of helpers for these instead, with comments? Nobody can
-read the above.
+Yup
+
+>>> +device_initcall(blk_notifications_init);
+>>> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+>>> index b2f1362c4681..8d22ba03e3e1 100644
+>>> --- a/include/linux/blkdev.h
+>>> +++ b/include/linux/blkdev.h
+>>> @@ -1687,4 +1687,12 @@ static inline bool bdev_can_atomic_write(struct block_device *bdev)
+>>>  
+>>>  #define DEFINE_IO_COMP_BATCH(name)	struct io_comp_batch name = { }
+>>>  
+>>> +
+>>> +#ifdef CONFIG_BLOCK_NOTIFIERS
+>>
+>> #if defined(CONFIG_BLOCK_NOTIFIERS)
+>>
+>>> +#define BLK_DEVICE_ADD		1
+>>> +#define BLK_DEVICE_REMOVE	2
+>>> +void blk_register_notify(struct notifier_block *nb);
+>>> +void blk_unregister_notify(struct notifier_block *nb);
+>>> +#endif
+>>
+>> Surely these helpers should have a !CONFIG_BLOCK_NOTIFIERS failure case
+>> definition? Either that, or dummies. As it stands, any caller would need
+>> to check if it's enabled or not.
+> 
+> Makes sense. I'll add dummies to the header and always define
+> the macros for notification types.
+
+Exactly
+
+> Note that what I'm planning to do is to have the block nvmem provider
+> select CONFIG_BLOCK_NOTIFIERS in Kconfig, as without that it simply
+> won't work at all.
+
+Right, but then someone else uses them for something else, and then
+we'll need it anyway.
 
 -- 
 Jens Axboe
