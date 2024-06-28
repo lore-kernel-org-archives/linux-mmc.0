@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0C102D05E;
-	Fri, 28 Jun 2024 07:30:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE523F519;
+	Fri, 28 Jun 2024 07:31:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719559801; cv=none; b=tFupC6/hjL2kcRYfWjtRGdVLD6/fjb5CcGbMgjsjNcbKNY95D9z8r0b6GeFWbI9t/iNhWUpvMPdQrAwDb1J9YE6onkSIJTONMN+JpwZtIZtdkBFZtor3gQCa1fxeIjLzhuOclEXlWMaqBDPVqAc6x/Cbcn96Gily2h5+EZB6WFg=
+	t=1719559870; cv=none; b=jlzbFOqEqLhR78iCgmgHLhwfYCbxfXWqb3WrY+lQ8HrxKqXArD+di6I4j2MIypuDoOmsccDJ7AyYzEcsx7ZVf7U06EDlGV4gOG7IykTkl+SVvpdmPFMUUj/VbuV0f83GOeJxwQ87R+fJV55zasG6HAFAVLP99edym2tR+k91utM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719559801; c=relaxed/simple;
-	bh=v7HCpoRE++zio/wxE3XZnrIfncfD7RXHvoaxUiF9O8k=;
+	s=arc-20240116; t=1719559870; c=relaxed/simple;
+	bh=Nhu4vITwG68Td8Y4N60nUtMEr6DEXhwrVURy84rRJYE=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kAE5qWyrL5evpxdDV19UAE36fCGAVXNoJ/5uajKxphCA2oiDht4QovWQTAVC8bjsOo0fwBFx1OWJHEmqpcuyvjHMgV1lEDlxU8I+f2IfhO4k+ZMD2A9m+BiQOyZa66ZyJbv5Vmfb3KaiKKmc+RyrST1c+Dz5dh7bwDV4BoNyZgk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UtEoMJkU; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=CUh49FG861jjip/TfH06m6aF30454es4WJgxN2pMznjDPCt5uAQW2p5UpPaUS9LPUAQWAlIPYoYRN7u/+1ZCfyLLmHMMHsny8a3TinY8779vSLTxhecXWJl72VngdxkoRv9JZ3KPEIERRP3mX65u/LTqc98CGnJxlph3ZV3uzmo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=VXMSb6an; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UtEoMJkU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD58BC116B1;
-	Fri, 28 Jun 2024 07:29:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="VXMSb6an"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C9417C116B1;
+	Fri, 28 Jun 2024 07:31:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719559800;
-	bh=v7HCpoRE++zio/wxE3XZnrIfncfD7RXHvoaxUiF9O8k=;
+	s=k20201202; t=1719559869;
+	bh=Nhu4vITwG68Td8Y4N60nUtMEr6DEXhwrVURy84rRJYE=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=UtEoMJkUhbvPcX7xbb0iBOrd96ZqMmhHwG2TLpnByf6UNa9mt9TYlcAJ9wPJHLdE/
-	 sTA3lxxpvMsiXON+/ZXaMo/Vftl4DW5azdoRL+naK4MA/jaFYDm7C6xiTucbp85eva
-	 scuVeNuFFkd6CQdl5lQh5lMnrYA2AS02WW18V1NxHHFFSEYGXhkDZSkDUlWM9bAQCv
-	 oTQfdu0UBjG4kToSiul4alsE6dd1IqdwGJiGDvfbDOkNAfF3Kkp6/1aCeIG0mh0ne0
-	 UmiNEDElpScpCBSb3ze3Uw0gKiSq9diYKKl/XK1GceGJVsfSrk9diAj21isIjqeVK0
-	 xyfM8rYdB2ZTQ==
-Message-ID: <ccf4c88c-50ba-46ad-9af7-b9e0d72f2ec2@kernel.org>
-Date: Fri, 28 Jun 2024 09:29:52 +0200
+	b=VXMSb6anbJdRYHWSQ2jlfDNTT3aPmtmb9tZ3EPQjlT1crbdQriZqfQwMw4ZqoRFbT
+	 gUR7rT2rTasorFKm5OjMiUIBZ3WLYWWkd//XnJ1vFuBHdnfWslNDPRM1vMNiDb/EXl
+	 e8XhDzZkKNI+sAzb4ES1MCGZzNNvsuZyAZZS6hISiMzKqsHqF+jX5cyAjsXFg/T0yD
+	 py5n3M9LwPhqYw58W8Rkx55K80FPdhyf10M8KuEYpuUipHTE86lfIsTQRnl0kYQ4T2
+	 +kDfTaDoalRYcbTJLKRjX9GagTcKTts6l+icSmhE+JbLiSxe1HN/8xDRdRW8CxU+Pm
+	 yNqBizhHiTqCg==
+Message-ID: <0cc0aab1-f7bf-4a87-af5a-22cf842fbf80@kernel.org>
+Date: Fri, 28 Jun 2024 09:31:01 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document
- MA35D1 SDHCI controller
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI
+ driver
 To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
  robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
  adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com,
@@ -47,9 +47,9 @@ To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: ychuang3@nuvoton.com, schung@nuvoton.com
 References: <20240626094900.581552-1-shanchun1218@gmail.com>
- <20240626094900.581552-2-shanchun1218@gmail.com>
-Content-Language: en-US
+ <20240626094900.581552-3-shanchun1218@gmail.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
  xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
  cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
@@ -93,42 +93,56 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
  7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
  5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
-In-Reply-To: <20240626094900.581552-2-shanchun1218@gmail.com>
+In-Reply-To: <20240626094900.581552-3-shanchun1218@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 26/06/2024 11:48, Shan-Chun Hung wrote:
+On 26/06/2024 11:49, Shan-Chun Hung wrote:
+> Add the SDHCI driver for the MA35D1 platform. It is based upon the
+> SDHCI interface, but requires some extra initialization.
+> 
 
-> +    soc {
-> +        #address-cells = <2>;
-> +        #size-cells = <2>;
-> +        mmc@40190000 {
-> +            compatible = "nuvoton,ma35d1-sdhci";
-> +            reg = <0x0 0x40190000 0x0 0x2000>;
-> +            interrupts = <GIC_SPI 31 IRQ_TYPE_LEVEL_HIGH>;
-> +            clocks = <&clk SDH1_GATE>;
-> +            pinctrl-names = "default", "state_uhs";
-> +            pinctrl-0 = <&pinctrl_sdhci1>;
-> +            pinctrl-1 = <&pinctrl_sdhci1_uhs>;
-> +            resets = <&sys MA35D1_RESET_SDH1>;
-> +            nuvoton,sys = <&sys>;
-> +            vqmmc-supply = <&sdhci1_vqmmc_regulator>;
-> +            bus-width = <8>;
-> +            max-frequency = <200000000>;
-> +            status = "disabled";
 
-Again: Drop
+> +static int ma35_probe(struct platform_device *pdev)
+> +{
+> +	struct device *dev = &pdev->dev;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct sdhci_host *host;
+> +	struct ma35_priv *priv;
+> +	int err;
+> +	u32 extra, ctl;
+> +
+> +	host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata, sizeof(struct ma35_priv));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	err = devm_add_action_or_reset(dev, ma35_sdhci_pltfm_free, pdev);
+> +	if (err)
+> +		return dev_err_probe(dev, err, "Failed to register sdhci_pltfm_free action\n");
+> +
+> +	/* Extra adma table cnt for cross 128M boundary handling. */
+> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(dev), SZ_128M);
+> +	extra = min(extra, SDHCI_MAX_SEGS);
+> +
+> +	host->adma_table_cnt += extra;
+> +	pltfm_host = sdhci_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	pltfm_host->clk = devm_clk_get_optional_enabled(dev, NULL);
+> +	if (IS_ERR(pltfm_host->clk))
+> +		return dev_err_probe(dev, IS_ERR(pltfm_host->clk), "failed to get clk\n");
 
-<form letter>
-This is a friendly reminder during the review process.
+Ykes, you cannot return IS_ERR.
 
-It seems my or other reviewer's previous comments were not fully
-addressed. Maybe the feedback got lost between the quotes, maybe you
-just forgot to apply it. Please go back to the previous discussion and
-either implement all requested changes or keep discussing them.
-
-Thank you.
-</form letter>
+> +
+> +	err = mmc_of_parse(host->mmc);
+> +	if (err)
+> +		return err;
+> +
+> +	priv->rst = devm_reset_control_get_exclusive(dev, NULL);
+> +	if (IS_ERR(priv->rst))
+> +		return dev_err_probe(dev, PTR_ERR(priv->rst), "failed to get reset control\n");
+> +
 
 
 Best regards,
