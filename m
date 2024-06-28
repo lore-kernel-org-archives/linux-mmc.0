@@ -1,59 +1,33 @@
-Received: from mail-oi1-f175.google.com (mail-oi1-f175.google.com [209.85.167.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B739D7EF10;
-	Fri, 28 Jun 2024 07:17:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0C102D05E;
+	Fri, 28 Jun 2024 07:30:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719559081; cv=none; b=gT2fyoUXCk8nNEBJlBUq9k4YxtFzX4ZYcpOSYQKDd4L2d66FIka5D/KcehQtez8h3pLrxAbzd9vRuVG286/AUo2MoF2J7jn/gx1hI1jo72vISKF5vVlYGyueyi1Jm5Ge93lUa0MMqD6Zgidvdiyunl6gqpKcoCxeyLPC7BoX5iE=
+	t=1719559801; cv=none; b=tFupC6/hjL2kcRYfWjtRGdVLD6/fjb5CcGbMgjsjNcbKNY95D9z8r0b6GeFWbI9t/iNhWUpvMPdQrAwDb1J9YE6onkSIJTONMN+JpwZtIZtdkBFZtor3gQCa1fxeIjLzhuOclEXlWMaqBDPVqAc6x/Cbcn96Gily2h5+EZB6WFg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719559081; c=relaxed/simple;
-	bh=0RZPHCsU4i+1vrvYWab6QVG+YOkmC5+uqu8sWSbOTvw=;
+	s=arc-20240116; t=1719559801; c=relaxed/simple;
+	bh=v7HCpoRE++zio/wxE3XZnrIfncfD7RXHvoaxUiF9O8k=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kdJxMHyJnUm1+Uhz6S6p9yklB8uTODM80Chmf+76qXgV15eqG464nvfze5v+H/k7+f5zBtJSIrp6oiu3w0duhmXWXb+zgsq/o5vUs/v/Eei/d0sptpxRtObD+lictVjnFCRrBskaf+NNP986Ibl8I7FIvt3OFd2nlzipWX4zpPQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SpmUfmU3; arc=none smtp.client-ip=209.85.167.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 In-Reply-To:Content-Type; b=kAE5qWyrL5evpxdDV19UAE36fCGAVXNoJ/5uajKxphCA2oiDht4QovWQTAVC8bjsOo0fwBFx1OWJHEmqpcuyvjHMgV1lEDlxU8I+f2IfhO4k+ZMD2A9m+BiQOyZa66ZyJbv5Vmfb3KaiKKmc+RyrST1c+Dz5dh7bwDV4BoNyZgk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UtEoMJkU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SpmUfmU3"
-Received: by mail-oi1-f175.google.com with SMTP id 5614622812f47-3d55e963db5so169594b6e.2;
-        Fri, 28 Jun 2024 00:17:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719559079; x=1720163879; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=ihtavBzq8pdcbr377xAX4xq7trLirF46FWhb4Rl5dvA=;
-        b=SpmUfmU3tMZSwaoq7fHjk/Oa3vLuIW2qPCvN85FPREz9OjTWRa9X5eSZVN5sr5ndpU
-         TvPEm/LIlkSBl/lV43r+iCkeMmfXwNqCRe0pwp7BAF+PUebahLU/J8wmY9qItU9Un3rh
-         qOOXag2sJMBTJlARZiLbVFnmbzpKeLj3o2x7AO0E1Ra+RxEGM457+kO4EtbhKPnMqH3H
-         tWQfKRdCOTD28pmav1R502HM26tGV9BAXDK/gFH2jvTdRrjr3aXtBVpyDnZSRQoV23Kk
-         MIregEd/8WNGuO0PL41/15iZ3b22Aq7HWHn/bhi2LdSuxUzAJ39KGmWBYYM+r8upMEYy
-         pwOA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719559079; x=1720163879;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ihtavBzq8pdcbr377xAX4xq7trLirF46FWhb4Rl5dvA=;
-        b=ENIHzG11tHjRsTC9smjOrlIEMYAF7+GDYM9QT7Ryaad3BqViwzkRelPGNZEeeAly0N
-         kgtaQElFvqap12KqG1idg8FxMe2RzB5G8JZFOci7YQ0JYAttsltyIndbGIJPyc9PppRO
-         Udzr4n05pBNDEluBU+MUvJ33xeOtjdE8/Lh+iD6xr7NWjVFp6D1baFobKkAjqKp5XYN/
-         JToeexarP+RR+D1VS29SN8WYGKNgpjPg6GF7kQGN4h1/Aka9LNfQrg1H2O7zO0n8tW8g
-         CYivdP+WNrP8Ca85IN+Y2Os9TYdfZIQzAwf/6e3Z7xicrfylZdyUHhXQ9epj+RwRqiVT
-         ntoA==
-X-Forwarded-Encrypted: i=1; AJvYcCX/Y1Mwm3uUzw1uIMjLzT3iQj93a9urPjU8nWoadAm7Sjkar8g7in25X5Y0BjqnGMlMDB5Ix03aBxn4V9Ct5i6SOzXSAXqLyl/uEoIX0gaFlu6DW02Hgvqlp+tX7Pdwc3lFXfqvE0gyQXLiI54a3eQHvf3PtO+dRSl2vdfqi1ENjI3Yaw==
-X-Gm-Message-State: AOJu0Yyhne3PBOdYhwU9grqvlQggfLLRV8nJbQ9S0RnK3ks8D51+V+1x
-	H3w662fDJ283TYN6sAV9g6RujzJ8Mo1wHfz6oC9AxuN603GUpS5jvVVXHb+9r9c=
-X-Google-Smtp-Source: AGHT+IFRIoBQG3lK79wL64nahydZiVGcshjIkJCabX0xCJPwNakHf8vLho5MT+pOLeZP9d8Q05SeWQ==
-X-Received: by 2002:a05:6808:1287:b0:3d5:5f49:86ea with SMTP id 5614622812f47-3d55f498a3dmr10255017b6e.22.1719559078686;
-        Fri, 28 Jun 2024 00:17:58 -0700 (PDT)
-Received: from [172.19.1.51] (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70803ecf9d0sm876772b3a.115.2024.06.28.00.17.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Jun 2024 00:17:58 -0700 (PDT)
-Message-ID: <bc609725-9201-49e7-bb34-3b3b4077c0e6@gmail.com>
-Date: Fri, 28 Jun 2024 15:17:53 +0800
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UtEoMJkU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AD58BC116B1;
+	Fri, 28 Jun 2024 07:29:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1719559800;
+	bh=v7HCpoRE++zio/wxE3XZnrIfncfD7RXHvoaxUiF9O8k=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=UtEoMJkUhbvPcX7xbb0iBOrd96ZqMmhHwG2TLpnByf6UNa9mt9TYlcAJ9wPJHLdE/
+	 sTA3lxxpvMsiXON+/ZXaMo/Vftl4DW5azdoRL+naK4MA/jaFYDm7C6xiTucbp85eva
+	 scuVeNuFFkd6CQdl5lQh5lMnrYA2AS02WW18V1NxHHFFSEYGXhkDZSkDUlWM9bAQCv
+	 oTQfdu0UBjG4kToSiul4alsE6dd1IqdwGJiGDvfbDOkNAfF3Kkp6/1aCeIG0mh0ne0
+	 UmiNEDElpScpCBSb3ze3Uw0gKiSq9diYKKl/XK1GceGJVsfSrk9diAj21isIjqeVK0
+	 xyfM8rYdB2ZTQ==
+Message-ID: <ccf4c88c-50ba-46ad-9af7-b9e0d72f2ec2@kernel.org>
+Date: Fri, 28 Jun 2024 09:29:52 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -61,55 +35,102 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI
- driver
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org,
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document
+ MA35D1 SDHCI controller
+To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
  robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- p.zabel@pengutronix.de, pbrobinson@gmail.com, serghox@gmail.com,
- mcgrof@kernel.org, prabhakar.mahadev-lad.rj@bp.renesas.com,
- forbidden405@outlook.com, tmaimon77@gmail.com, andy.shevchenko@gmail.com,
+ adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com,
+ serghox@gmail.com, mcgrof@kernel.org,
+ prabhakar.mahadev-lad.rj@bp.renesas.com, forbidden405@outlook.com,
+ tmaimon77@gmail.com, andy.shevchenko@gmail.com,
  linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: ychuang3@nuvoton.com, schung@nuvoton.com
 References: <20240626094900.581552-1-shanchun1218@gmail.com>
- <20240626094900.581552-3-shanchun1218@gmail.com>
- <216059e5-2160-4797-b431-b391ff69cd2c@intel.com>
- <f0ae92ec-ae2c-418d-9cfd-199e312e2c23@gmail.com>
- <8e633bf9-4891-4e5c-acac-187c7e7249f5@intel.com>
+ <20240626094900.581552-2-shanchun1218@gmail.com>
 Content-Language: en-US
-From: Shan-Chun Hung <shanchun1218@gmail.com>
-In-Reply-To: <8e633bf9-4891-4e5c-acac-187c7e7249f5@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240626094900.581552-2-shanchun1218@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Dear Adrian,
+On 26/06/2024 11:48, Shan-Chun Hung wrote:
 
-Yes, that is correct. It relates to the AHB bus DMA burst size.
+> +    soc {
+> +        #address-cells = <2>;
+> +        #size-cells = <2>;
+> +        mmc@40190000 {
+> +            compatible = "nuvoton,ma35d1-sdhci";
+> +            reg = <0x0 0x40190000 0x0 0x2000>;
+> +            interrupts = <GIC_SPI 31 IRQ_TYPE_LEVEL_HIGH>;
+> +            clocks = <&clk SDH1_GATE>;
+> +            pinctrl-names = "default", "state_uhs";
+> +            pinctrl-0 = <&pinctrl_sdhci1>;
+> +            pinctrl-1 = <&pinctrl_sdhci1_uhs>;
+> +            resets = <&sys MA35D1_RESET_SDH1>;
+> +            nuvoton,sys = <&sys>;
+> +            vqmmc-supply = <&sdhci1_vqmmc_regulator>;
+> +            bus-width = <8>;
+> +            max-frequency = <200000000>;
+> +            status = "disabled";
 
-     /*
-      * Split data into chunks of 16 or 8 bytes for sending.
-      * Each chunk transfer is guaranteed to be uninterrupted on the bus.
-      * This likely corresponds to the AHB bus DMA burst size.
-      */
+Again: Drop
 
-Best Regards,
+<form letter>
+This is a friendly reminder during the review process.
 
-Shan-Chun
+It seems my or other reviewer's previous comments were not fully
+addressed. Maybe the feedback got lost between the quotes, maybe you
+just forgot to apply it. Please go back to the previous discussion and
+either implement all requested changes or keep discussing them.
 
-On 2024/6/28 下午 02:59, Adrian Hunter wrote:
-> On 28/06/24 09:30, Shan-Chun Hung wrote:
->> On 2024/6/27 下午 05:40, Adrian Hunter wrote:
->>> On 26/06/24 12:49, Shan-Chun Hung wrote:
->>>> +    /* Enable INCR16 and INCR8 */
->>> Comment would be more useful if it said what INCR16 and
->>> INCR8 are
->> I will modify as follows:
->>
->> /*
->>   * Split data into chunks of 16 or 8 bytes for sending.
->>   * Each chunk transfer is guaranteed to be uninterrupted on the bus.
->>   */
->>
-> AFAICT, it relates to AHB bus DMA burst size, so maybe add
-> that if it is correct.
->
+Thank you.
+</form letter>
+
+
+Best regards,
+Krzysztof
+
