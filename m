@@ -1,140 +1,93 @@
-Received: from mail-ot1-f49.google.com (mail-ot1-f49.google.com [209.85.210.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2C3A2558B9;
-	Fri, 28 Jun 2024 07:50:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9A0D1DFF7;
+	Fri, 28 Jun 2024 12:16:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.142.180.65
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719561030; cv=none; b=oG0lwZorJG1TyQFdY6vMLEoLE3MHY241REu1jJv6DbRPRZz1HeSRR1LFrcJsqd3fMVkMOhhOGi/A+QALe6wJeZEDz+vgKGL8bFR7VsDTFa6EKBjI47KO4g3mAg+Y0npqU7u8FIDXICFx0YiTTjWeYasLvhKeFKqXTJ28lfxEx6Y=
+	t=1719577024; cv=none; b=ng/pf89OhO9TaAGd1e+XKLtgUzBi5GQa3tWBaQ5CTC9Fwh09b/Kg58zVq+hX3Zr0uoeF54d7kLaSAMuLekAJ+smx6Moxgruy7FAS3Qs1uoPEf3tR4d3nmwCuo4xJqH+Mf3jwPKt8n++mHJulgKYR/F7Ku2NIQc8KaemtgnWY8YU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719561030; c=relaxed/simple;
-	bh=kpNKN5IrnV1df46CTDwJWgiWoENWRsYsWyLgRfk3dY4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QZt6M+/nlPGchf9vLfeTXJJf4jytpibt80KamKFvoAZgN2uMB+LrVAm9JhJ0sGOELb9Sic7XENZozYpfyaH2bKUIulw+m5e2UaazqpMmvxlkI8T4vKezJSAlAnhkCz1OaNoEJH3APClEo5WkAb93P1iJH8mBt3KiQGJpohoSv3c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lFT7dJ7D; arc=none smtp.client-ip=209.85.210.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lFT7dJ7D"
-Received: by mail-ot1-f49.google.com with SMTP id 46e09a7af769-701f227c256so167993a34.3;
-        Fri, 28 Jun 2024 00:50:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719561028; x=1720165828; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=4Ut43npliJLjCO5SImS5MkBvEx66ZUngy2TmpPvYaKw=;
-        b=lFT7dJ7D/6qUihLdUx83jTQbSnUVb3kiiPXNBsVNSenjpvW3+uyoljt62S16YxzhIT
-         /eJBFPu68L2psKjyaRn8f7CbWq2hcwMbs7O2rFPOfnNaIKXf63EAaGCAnzyU0S29WvGv
-         UrDoiqIndVtT8aiAD2WgpuuiGVRHvv/w+KE9XOZ0w5G1r5cFpgX1OMbbQiaewJi3Pt58
-         fuvQZwDpapY1NBNTe/wGjBaoTRRA+wFqMH9+D1TL7cPs3K0d4kfZx/fnbdzbln3faIgV
-         zHfAzRs64MvghavtdQEYTuptqVfBpWcIjYM2olafg7AlJ2k+6vrVp0jW8uzacllh5PJ5
-         ZUcg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719561028; x=1720165828;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=4Ut43npliJLjCO5SImS5MkBvEx66ZUngy2TmpPvYaKw=;
-        b=hl+elCtEpmf0sFooB3UoIezz/H/fsQkzNcmA8J3kxaH5w4ORoMeXNWCLSEtal8ZxOj
-         pTAqeecBOYrRrdXw4+pURZHraUBwxmHRyWHyAJv+Wko0lKl7qxQk8Ue0NEsp+si7zHWn
-         vY92usu9UqmuMSQjeGIn0oT/yaCieso4NLQ+r65doorLxsP4T/2RkSCGLFI5MEWdCq2R
-         VcqUQjS8M0vuBVFtOLJHL6ANWq8vJUPamKofGDOhNQP14dDPpVHQfLkhcztksWi4fqvE
-         m4Gh/9tOFedxGF8wjb05BnMq+31GAp1C77Cr22inmMGoubVX6ZtKxyP2/I9JILydmOyR
-         QOng==
-X-Forwarded-Encrypted: i=1; AJvYcCWar9fc7zBTk8XGgB7tucEsBi9WJKMGexoAK6W1arrWtj/yZxqYDlHnrtBdICALVRrECC2XT8S2Utby6fwUZTKgfWut7vk8naxsaXG99VewIdcsJZWcs3xTVHI3GFuVhYEQg3/2AcF9OSZY/SFoYdAOkqryUgF966rqoJvXqeHnyNQzog==
-X-Gm-Message-State: AOJu0YxyKnUh+SFd5VHSAeS8AJJca6XcZYtaEfp1l1AXB8/ZEXBwQwt7
-	rWlqoq0mJEvE7EUAGYjKSoMMukhnHGG+lFeiZjnGwHHqszh2/0Gs
-X-Google-Smtp-Source: AGHT+IG81TXv6cpLvn9mvPZPAsNd0RQHEY0Ddu8BPsGbU1z/qydncY5VMcfNUGc+bNg5CBr8gzQCLg==
-X-Received: by 2002:a05:6358:310a:b0:19f:436b:f6b0 with SMTP id e5c5f4694b2df-1a23fafaf3dmr1881852955d.4.1719561028040;
-        Fri, 28 Jun 2024 00:50:28 -0700 (PDT)
-Received: from [172.19.1.51] (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-72c6a3139f1sm810210a12.20.2024.06.28.00.50.24
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Jun 2024 00:50:27 -0700 (PDT)
-Message-ID: <d5875415-07a6-475c-959a-4703f5d4e559@gmail.com>
-Date: Fri, 28 Jun 2024 15:50:22 +0800
+	s=arc-20240116; t=1719577024; c=relaxed/simple;
+	bh=TFtNw1QJxkB2xWynZD+N88ma/reysTzvF3rsH+P5DIs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aDfCgGJg6Ht1ohNMVJl7mbtJGrUpZqOeoVzKxHLNLeCF0+d7lr8qfCm2su/vxma1BRzDJWLG/pm6iV61TntMNX+MsjShefnpqRo72XNKpASq/DzE4yRmr3tGy5MVI+opRI8xTf+KZ1XHiNRTuwbgJBv7dON3xwQiaEEK3farfZ0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org; spf=pass smtp.mailfrom=makrotopia.org; arc=none smtp.client-ip=185.142.180.65
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=makrotopia.org
+Received: from local
+	by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
+	 (Exim 4.97.1)
+	(envelope-from <daniel@makrotopia.org>)
+	id 1sNAWa-000000002oo-2LIO;
+	Fri, 28 Jun 2024 12:16:20 +0000
+Date: Fri, 28 Jun 2024 13:16:13 +0100
+From: Daniel Golle <daniel@makrotopia.org>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
+	Hauke Mehrtens <hauke@hauke-m.de>, Felix Fietkau <nbd@nbd.name>,
+	Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+	Dave Chinner <dchinner@redhat.com>, Jan Kara <jack@suse.cz>,
+	Christian Brauner <brauner@kernel.org>,
+	Thomas =?iso-8859-1?Q?Wei=DFschuh?= <linux@weissschuh.net>,
+	Al Viro <viro@zeniv.linux.org.uk>,
+	Li Lingfeng <lilingfeng3@huawei.com>,
+	Christian Heusel <christian@heusel.eu>,
+	Min Li <min15.li@samsung.com>, Avri Altman <avri.altman@wdc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Hannes Reinecke <hare@suse.de>,
+	Mikko Rapeli <mikko.rapeli@linaro.org>, Yeqi Fu <asuk4.q@gmail.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+	Li Zhijian <lizhijian@fujitsu.com>,
+	"Ricardo B. Marliere" <ricardo@marliere.net>,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
+Subject: Re: [PATCH v4 2/4] block: partitions: populate fwnode
+Message-ID: <Zn6pje4DcAYEk6Kw@makrotopia.org>
+References: <cover.1719520771.git.daniel@makrotopia.org>
+ <6acc459a392d562abc58f7e55c6f04dba8073257.1719520771.git.daniel@makrotopia.org>
+ <Zn4_rMJVm6cpIEZV@infradead.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI
- driver
-To: Krzysztof Kozlowski <krzk@kernel.org>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com,
- serghox@gmail.com, mcgrof@kernel.org,
- prabhakar.mahadev-lad.rj@bp.renesas.com, forbidden405@outlook.com,
- tmaimon77@gmail.com, andy.shevchenko@gmail.com,
- linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ychuang3@nuvoton.com, schung@nuvoton.com
-References: <20240626094900.581552-1-shanchun1218@gmail.com>
- <20240626094900.581552-3-shanchun1218@gmail.com>
- <0cc0aab1-f7bf-4a87-af5a-22cf842fbf80@kernel.org>
-Content-Language: en-US
-From: Shan-Chun Hung <shanchun1218@gmail.com>
-In-Reply-To: <0cc0aab1-f7bf-4a87-af5a-22cf842fbf80@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Zn4_rMJVm6cpIEZV@infradead.org>
 
-Dear Krzysztof,
+Hi Christoph,
 
-Thanks for your review.
+thank you for reviewing.
 
-On 2024/6/28 下午 03:31, Krzysztof Kozlowski wrote:
-> On 26/06/2024 11:49, Shan-Chun Hung wrote:
->> Add the SDHCI driver for the MA35D1 platform. It is based upon the
->> SDHCI interface, but requires some extra initialization.
->>
->
->> +static int ma35_probe(struct platform_device *pdev)
->> +{
->> +	struct device *dev = &pdev->dev;
->> +	struct sdhci_pltfm_host *pltfm_host;
->> +	struct sdhci_host *host;
->> +	struct ma35_priv *priv;
->> +	int err;
->> +	u32 extra, ctl;
->> +
->> +	host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata, sizeof(struct ma35_priv));
->> +	if (IS_ERR(host))
->> +		return PTR_ERR(host);
->> +
->> +	err = devm_add_action_or_reset(dev, ma35_sdhci_pltfm_free, pdev);
->> +	if (err)
->> +		return dev_err_probe(dev, err, "Failed to register sdhci_pltfm_free action\n");
->> +
->> +	/* Extra adma table cnt for cross 128M boundary handling. */
->> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(dev), SZ_128M);
->> +	extra = min(extra, SDHCI_MAX_SEGS);
->> +
->> +	host->adma_table_cnt += extra;
->> +	pltfm_host = sdhci_priv(host);
->> +	priv = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	pltfm_host->clk = devm_clk_get_optional_enabled(dev, NULL);
->> +	if (IS_ERR(pltfm_host->clk))
->> +		return dev_err_probe(dev, IS_ERR(pltfm_host->clk), "failed to get clk\n");
-> Ykes, you cannot return IS_ERR.
-I will fix it to PTR_ERR.
->> +
->> +	err = mmc_of_parse(host->mmc);
->> +	if (err)
->> +		return err;
->> +
->> +	priv->rst = devm_reset_control_get_exclusive(dev, NULL);
->> +	if (IS_ERR(priv->rst))
->> +		return dev_err_probe(dev, PTR_ERR(priv->rst), "failed to get reset control\n");
->> +
->
-> Best regards,
-> Krzysztof
+On Thu, Jun 27, 2024 at 09:44:28PM -0700, Christoph Hellwig wrote:
+> On Thu, Jun 27, 2024 at 09:50:39PM +0100, Daniel Golle wrote:
+> > +		/*
+> > +		 * In case 'uuid' is defined in the partitions firmware node require
+> > +		 * partition meta info being present and the specified uuid to match.
+> > +		 */
+> 
+> Overly long lines, which is really annyoing for block comments.
 
-Best Regards,
+Should I use 80 chars as limit everywhere?
 
-Shan-Chun
+> 
+> > +		got_uuid = !fwnode_property_read_string(fw_part, "uuid", &uuid);
+> > +		if (got_uuid && (!bdev->bd_meta_info ||
+> > +				 !part_meta_match(uuid, bdev->bd_meta_info->uuid,
+> > +						  PARTITION_META_INFO_UUIDLTH)))
+> 
+> Can we please not use the crazy part_meta stuff for anything new?
+> We should never have merge it, and right now it is at least isolated
+> to the boot time root dev_t partsing, and I'd really prefer to keep it
+> in that corner.
+> 
 
+At least up to my understanding there isn't any other to know a
+partitions UUID or volume name.
+
+If there is another way to access this information I'd happily make
+use of it, but I couldn't find any.
