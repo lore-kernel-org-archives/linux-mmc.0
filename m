@@ -1,63 +1,96 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ua1-f49.google.com (mail-ua1-f49.google.com [209.85.222.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88C3A1EB2C;
-	Sat, 29 Jun 2024 16:31:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B40710F2;
+	Sun, 30 Jun 2024 19:18:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719678663; cv=none; b=WQBYDWggSHGTLY0fdGEN1gUO63c4PLHmjBpSuJzuIVuiwLbzKLIkWMyZ08SyOxQ7rsBSm7r8sVRx7DLC3kKPLWOCy3VWJfIY2/zSxksRXBU1no5YtOpFw3a7rZ1nBBkz+SvVsCJlGaChgpRVDLZGZbBG+ZYeCkOhcaLYUb9wzE4=
+	t=1719775128; cv=none; b=uq9TYY91/F1Wx7/BjCbDRNP/UA9qnmsEdwekuaRX5/4Z14ex5cI9WozhPChT7Ci+SkDgtn9exap73nd+DQQIEjwvlOfcxqJl6zpPJWpx/B41oIu2YtTMJScAFn2yRdYnX5Jo9i0atv07Y1LNIxCOtMc3RpaoOf9Ar6g5ZE5qpmU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719678663; c=relaxed/simple;
-	bh=1bx0Gd6tLvtGTVGndqLPE9DkNcQ85hggMZPDdcDq4Ag=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=l6TRRmH0UvMZMKFBlqGKHbmi2MPIj0PcymKRm4sEs1dXIF2300SbIYmXD+ANwUZni0D6NYdMslCdRKPAMbOpSaLxwIhe6/LncY2VfwVX6/qoeH0DC0YNUOZ9Ce0q8GEKrJNkzGGv4Hbcb2P38AQi6WC3V0Zg15GocJwyryu7cjc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aeHrv/7L; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1719775128; c=relaxed/simple;
+	bh=SIyzBUuqYC/Uv6iGqHtSBPjyKkR1Nq7Rna0Dkfcg4vM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Content-Type; b=heKzu/hqGu9O3mbqGJr9KT5hUu+CPIaMA9mpswOvchygzxoem9pwge6nPIxJDE9iIv5YBw/JXetQMyUlkP9N6FdtBBJJNdzEC4HSmvwdhOvuCGRTDEZmVQAJxzAHDqq+9eaRJRajlGzcMHBPcCdnCFI0SD9aHIwChOWHtOgVJb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MInC2OSd; arc=none smtp.client-ip=209.85.222.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aeHrv/7L"
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 0C2FFC2BD10;
-	Sat, 29 Jun 2024 16:31:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719678663;
-	bh=1bx0Gd6tLvtGTVGndqLPE9DkNcQ85hggMZPDdcDq4Ag=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=aeHrv/7LJ4eLTZICOZ9jFLS54laqVk8Mj8PM6teMt+H+pMe8c/+VLZytcNt8knd7l
-	 pjTZptw4XbhAOfzH/ZBJAtFvpkNfX3oAGh++AgV3iB2Ykl4CH0dNl0fq4OppO7o6/v
-	 8R8to+IDDMZhLScmjxTYUEZdn2xkMMHzhAd7nggB4V4Ne6HbI1pNFDa2Esauniymqc
-	 ptYTw+s94XPAJoxdY4CE6T/zZUPf8H+wzE/xAVRUtK34rPSSB0tqAVVo25HNU+LgJa
-	 ujHhGAWu9CH1ga8d7yb2PeO/6bbS8qBukvuEtKX4QacYqA+2U01nkXvcANkPF52+QM
-	 425aPklccyWEA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id F393CC433E9;
-	Sat, 29 Jun 2024 16:31:02 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.10-rc6
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20240629092348.8191-1-ulf.hansson@linaro.org>
-References: <20240629092348.8191-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20240629092348.8191-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10-rc4
-X-PR-Tracked-Commit-Id: ab069ce125965a5e282f7b53b86aee76ab32975c
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: a89385800edd98f06c6e36c043167b873671c1c9
-Message-Id: <171967866298.13026.9545290367465242324.pr-tracker-bot@kernel.org>
-Date: Sat, 29 Jun 2024 16:31:02 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MInC2OSd"
+Received: by mail-ua1-f49.google.com with SMTP id a1e0cc1a2514c-80f81080239so718230241.1;
+        Sun, 30 Jun 2024 12:18:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1719775126; x=1720379926; darn=vger.kernel.org;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=LROBc5Cn3AHvEzFbrvvny5v7Q2aOnPA043oI17JubXU=;
+        b=MInC2OSdhrrz7aiv3uS3EB8fO1o25YbMnz1kApD7za/LB4c023IE4sf4FEtZybWasV
+         VM8USmocQBNS7Q/qxPv6w/3ERRyGsqXC3OfykikvJwJqBQoOq+XMlmDyiX7HAtEcWnOC
+         TxD4yAOucdtDrVK+4FCgwErhEcMZkAJDb7ZDQ6QfLViM2rA3l/We5NCSiypATZBgHFe5
+         R81WT8plgCNxgXgQK7IRPrskWjIiRe6XfMktuf8TGDYjKxMW60XB+BdC/EJh9qioDm6D
+         EQOU3LBBRPQiI5zX1ys7bJUFtRzfzFBcMKpqjDTa8gWzFk+jiTNjyv4azL9DPit4IJU+
+         Jm7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1719775126; x=1720379926;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=LROBc5Cn3AHvEzFbrvvny5v7Q2aOnPA043oI17JubXU=;
+        b=jftg2W1GWTCDTkwUVaeaXvJEAXAdYmisKhn3+/5utYk96W6woppGJEJmLmAkCrwQkb
+         7gRYGP+PvXYQqDIJ147/9NZ6uNcZr8TYQzy3JgUN5O1fn9KYUvFRCryMaam4FkTdpOZl
+         nKm7rRrLyUfyoB5C2/9WjLoy6HngrUiARB4vPGfV6P7/6H8uJrSrkbEtWersL8OQmqRf
+         YTY+pA6ekHft7QKwhqtycC9kr/68yFwv0574X9Tfn1EGsUME6xvl5jmtx0q3gY4nXLoi
+         FrEQUJXI/HR1Pbxr5g6+SP4fXr1VdtiqYt1G+Zk3JdDXTJwDFsIvUwb1hkcylmvwS6sR
+         anHQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWpw5tkX04iYE1jzXQvP9Iawui7kraoEKzSlQui1ZDz1uLfAFoi297g+uVlxof6XE4iNx2BZJNnrD5rVJjUIvZBVA+fuA0VAodNhQPjGU5XFFUJLfyQlhdXpR2MwT63fE+V6T6hM7JWPEtz+1hmV4Oa/P7e4AKuN4kJNpJO84Whsz7Ov5m8vy9Y3OCuPQAWgGwrbHkXiiDYxcc33YkF/+nMGD2Q1jIk
+X-Gm-Message-State: AOJu0YxwTAfJ+LQCfFEC2TCfOwFcEnJvffWT4mMEx1kdjEu0lsaoGfY6
+	QHyyJwuM+agLJsuAPYIzxi9yI6lsLNm/pCdVU5PAhsn6JnauJLAUej9XvEF3cbf859bRvFbC2yt
+	BIwxpmEzuHP3/JueP31GOm4YuYiU=
+X-Google-Smtp-Source: AGHT+IHgXhi2h52NtLmNbTtFIUCqAOSczB+xkST86qS4TfxzvyFy0Gcmgp6HzPHOYCP2gE0K0vx6dS/AhjgLGdIaoO8=
+X-Received: by 2002:a05:6102:4c12:b0:48f:461b:c9ac with SMTP id
+ ada2fe7eead31-48faf08f6ccmr4121074137.14.1719775126006; Sun, 30 Jun 2024
+ 12:18:46 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+References: <20240626121551.3127032-1-allen.lkml@gmail.com> <dc7hnzrxtrtvlnkfxnqfn46ulx4gq3so235tibohb54zwvjbcx@4s5osl4sjrb7>
+In-Reply-To: <dc7hnzrxtrtvlnkfxnqfn46ulx4gq3so235tibohb54zwvjbcx@4s5osl4sjrb7>
+From: Allen <allen.lkml@gmail.com>
+Date: Sun, 30 Jun 2024 12:18:35 -0700
+Message-ID: <CAOMdWSKh3+HXFuYVx-GHC93iqEPskRKLti9KHKLHs5RYy-mcjg@mail.gmail.com>
+Subject: Re: [PATCH v5] mmc: Convert from tasklet to BH workqueue
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Allen Pais <allen.lkml@gmail.com>, 
+	Aubin Constans <aubin.constans@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Nicolas Ferre <nicolas.ferre@microchip.com>, 
+	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
+	Manuel Lauss <manuel.lauss@gmail.com>, =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
+	Jaehoon Chung <jh80.chung@samsung.com>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <florian.fainelli@broadcom.com>, 
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, 
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>, Alex Dubov <oakad@yahoo.com>, 
+	Kunihiko Hayashi <hayashi.kunihiko@socionext.com>, Masami Hiramatsu <mhiramat@kernel.org>, 
+	Bruce Chang <brucechang@via.com.tw>, Harald Welte <HaraldWelte@viatech.com>, 
+	Pierre Ossman <pierre@ossman.eu>, Christian Loehle <christian.loehle@arm.com>, linux-mmc@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-The pull request you sent on Sat, 29 Jun 2024 11:23:48 +0200:
+> > v5:
+> >    - completely dropped renasas changes from this series.
+>
+> It seems you need to read mails more carefully. In v4 I said that...
+>
+> >  drivers/mmc/host/tmio_mmc.h       |  3 +-
+> >  drivers/mmc/host/tmio_mmc_core.c  |  4 +-
+>
+> ... these need to go as well.
+>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10-rc4
+My apologies, I have been out sick and wanted to unblock Ulf and
+in the process missed reading your feedback. Will have it fixed and sent out.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/a89385800edd98f06c6e36c043167b873671c1c9
-
-Thank you!
+Thanks.
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+       - Allen
