@@ -1,65 +1,80 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from NAM12-DM6-obe.outbound.protection.outlook.com (mail-dm6nam12on2058.outbound.protection.outlook.com [40.107.243.58])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A524B13D61A;
-	Mon,  1 Jul 2024 12:07:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719835637; cv=none; b=JWdKqLaktFk8IClZ2SMeFkRbD7+iKSTLapC0xNAs+aYAKwb0e5684JsyDk57fZsIW+Uds8hFUsWhv54hvF0Q2A2gFRFsJu5PrCU896a7Muan347vwMv8epNJr1JflXcYaFS7Grdg5n4HgLmLPrxXsJKx74u7kEwS6aE00R78kXY=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719835637; c=relaxed/simple;
-	bh=WEqgwiJL4AgHm9RFyD2B+/GN8B2LwoYp8qyKJWDHSMY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=c9ipj2YHTjvMH7aRRwoVwQo3q58CtqrH+tY7fFcPUKO6qGb3iS/S2vP8r81V0p+2yzHKrW9jcPrsEAcTJTw2efuWheeZHBfiMRpUcffd10fcokCHoyzabzLVKOtCD85RRf3B11AVHkqHmC5E4lvkGSKWwA8bT1eLHWvstiLHTkA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Bbf1qXP6; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1055828F1;
+	Mon,  1 Jul 2024 15:13:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.243.58
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1719846787; cv=fail; b=k8/t79suV4legF9d2dW5KrbHMzuVV5iEPH788xc5Jqj8tZYXRkR3AkuCfWT5sMYR15YNh1Uh2dOIxGYp36s5Cz/C/xCtdr2KEMH6hEmVCHvYPXAi+nisCR71ORZZuRHt2RA6tULgiLwb1LVKRCVhq7DIvhaVlcDYN/CB0wXXxr0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1719846787; c=relaxed/simple;
+	bh=VzsrYVXigtjIrSguaul1Jv0jA7NwtHHUT5gVwhXmW74=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=eSDhAcISg7Urv7gWD91etE0mXZM8ettSeHpJKns22kfyf6JTCGFsmRGeRCskW49WHrdh83pX3Qne3xSuhUvzmNM7xC4L0BZQKPoeUqdUdePyaVH22gvv+1KIGLR/6tFQH0HIRGLoNQWyiODuqGBs8ubh1Rh1BVsyH8oR0Ox0eAk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com; spf=fail smtp.mailfrom=nvidia.com; dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b=qmmaXEjP; arc=fail smtp.client-ip=40.107.243.58
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nvidia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nvidia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bbf1qXP6"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-52ce674da85so3134811e87.2;
-        Mon, 01 Jul 2024 05:07:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719835633; x=1720440433; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=FzWJ6PJpGMeRR+vNNCKFpzuvLIUp4qYOq0s9qfzZzPM=;
-        b=Bbf1qXP6LTf1pJ/MZMzSLNslO8GqXWrAF/+26DdbYQjSxq08Wd/g63IHC7GqSOnoFD
-         lK5BFMwmK8LT6XxRpZz14HD09I3lBHqL1m/nXNWGiz7cji22K1QeB1t4UxHdsWMZnCtL
-         YgU5M+2xUVyt3JUuPEbI0yLPpQFE2ueEOjqWrGhWDLxQ6/uKot4VLqYQF+byqxc7Awty
-         VZNc4cX6PONynHgAboDLRAG9317imT9BNB0HySviKSUkAXGdVclGK6BmHPCOmqcKA9yv
-         8ON0/Q+x2wWfumYAiRJWKrFtFsfJwoFTQYbV0BYAZ7hmhD+BEs26jWSUTMNOr6XhYpJI
-         rdxA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719835633; x=1720440433;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=FzWJ6PJpGMeRR+vNNCKFpzuvLIUp4qYOq0s9qfzZzPM=;
-        b=XYN59HacutDtjsjSuF/B4pL9TWQGLcw86tA6qHwSFxbbf0LWKcP+6pP2y1lWHvItuV
-         6guI2izYZIx94nt+hbyMcshhsYbR+wWsRs4zWBdKf2L6VLZupzt6zV7F9CWUyZN37yX+
-         G2cLBHXMkwuLkY5uSxCRnybKAm1tE7isa2Yb6bMMiH17Hh7Krk9k+h9vlOQpHGUhRbN3
-         dX0iS9kig+9Xr52WCCK/Epd2EZSxBt4xuAwspo49fe3j4h39EJr7JVqRy7gz5kl9VsNb
-         4DWN8JQ7SMugyM2eoS1dfwHlLPygAIkpmPpAYi4e4bbo5BDof5oztuhhl3ueWbI9Krl1
-         Q0vw==
-X-Forwarded-Encrypted: i=1; AJvYcCWopXwqS3Gy5q3KuH6MpjH8IVmHVnBpgzARYN+2jdLY4XjTz2RbtEybku/eQageYKSLrRAB42tiBypsMXmMrI/2InUb6QJBKp61
-X-Gm-Message-State: AOJu0Yw0cxNgUVPVs+PthNMO6L2EZPtq11C3MCQ/J6e6DXwiOV4PcRVT
-	ePCyWdIRtnBlqa7tikd2+aNwqOKT2LBiUlvdRvxKnpPil8f/z0dlt8klW3TJ
-X-Google-Smtp-Source: AGHT+IEz+td6Pt75zfqjEaiKa9YSArLmgdiP1EZ/38p8OdxrOm+20jFf7JOGxpUX5KVJhxxfNqSwJg==
-X-Received: by 2002:a05:6512:6ca:b0:52c:db76:1c2d with SMTP id 2adb3069b0e04-52e8274ad30mr3908154e87.63.1719835632883;
-        Mon, 01 Jul 2024 05:07:12 -0700 (PDT)
-Received: from localhost.localdomain ([94.25.177.16])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-52e7ab3c3eesm1397088e87.304.2024.07.01.05.07.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Jul 2024 05:07:12 -0700 (PDT)
-From: Mikhail Krasheninnikov <krashmisha@gmail.com>
-To: linux-kernel@vger.kernel.org
-Cc: Mikhail Krasheninnikov <krashmisha@gmail.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org,
-	Matwey Kornilov <matwey.kornilov@gmail.com>
-Subject: [PATCH] mmc/virtio: Add virtio MMC driver for QEMU emulation
-Date: Mon,  1 Jul 2024 12:06:42 +0000
-Message-Id: <20240701120642.30001-1-krashmisha@gmail.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=Nvidia.com header.i=@Nvidia.com header.b="qmmaXEjP"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Vgj0cTAwSCfY55ip56KhyIXyeX8rA/Rony2YKFxp8grHPyCAi31w0rnczTWuXob35BQhbyoolAtQSLMbYRLGcLBBgcPbfEhwfNYRGqN4PUEqlz3Yx+AZWfr82u1M7IAk99tBlAB5t7BQFwe+JtKMniibPUXX2HXgix2le2xhUu0CIot9YQtU8MZRRXn+sHg1TKsrpdQayMmvKPl9hkubvnpQSFOTSSFEA8EVoMvd3rgKoOzdMl/pfqA93+xx8CZtnzvxk9Oxs2FmPW16OSp7LVj/qxoDNRFkp17gCkaH1YApBj3vIxRkEBBpaxuwnGNCRdv5B0krYieBKO7arSHjXw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Z8vSOII11PeDEwyafZW00PUFtAiuMLKXJbl28oxROgE=;
+ b=cqxnjXIN7AMdk1Xeg7Tqel7bLzH6CKleexc73oG3D27mMvm8wg/etWX9qz01gSKDY3gxjtukaBPWRxDN3d7a/FL7WpvBCf8vaNJpXrUwHMYIg4uL8it+QdF3yCj7G+OWsLdIL5mD8NG+xpuUA2dxZMd1Iw2Qi0Sn6gUk240M79trfG3NIBW+AQZK39OoLRO4USgire/c4b7Ye1ZKbjyk9f47XvdpTaYfIuBVDgOCG5b6Wl8heY/GkQs78QqXCUzgTlU5ncHmNk4u/Z3DObRgvH3i+l/U47jvzOxZ4j8mMtEY3b7Dt/Y4+qskV6xA683wHtf+OzKtRfUxlK7ff/zdlA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.118.232) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Z8vSOII11PeDEwyafZW00PUFtAiuMLKXJbl28oxROgE=;
+ b=qmmaXEjPrrTx2ffeRTtWFInS2ODYtxf2z4DKOK03sL5fGEO1nu/z09nz4T9kKm8j0rwtp6rElsBfxD+WrpSNEn5soI0uv89nECZ/4XDeeMgpfrBVSbGPWV6IdWUBaetV7sBfDb+3PC0StRBshR2HxA9NR8Wb154x3k+bjtEjWLLC60sJnK/BwS0Ptrhpw49IKSeYAhod3eZXk7FePPmENFgFqaTNmpylRiPC+I29SIl08dO6vm7cjcw5FIYeGqhf4JAaJ0ee8iAN/tGqSvrgOYkNpvhgXMhTQJTxT6xDOdmY/HB/dvoX6F853xrtXHrpzKDbhKkJDsFRSQaouzrgXA==
+Received: from MN0P220CA0001.NAMP220.PROD.OUTLOOK.COM (2603:10b6:208:52e::29)
+ by DM6PR12MB4217.namprd12.prod.outlook.com (2603:10b6:5:219::24) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7719.33; Mon, 1 Jul
+ 2024 15:13:03 +0000
+Received: from BL6PEPF0001AB75.namprd02.prod.outlook.com
+ (2603:10b6:208:52e:cafe::60) by MN0P220CA0001.outlook.office365.com
+ (2603:10b6:208:52e::29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7719.33 via Frontend
+ Transport; Mon, 1 Jul 2024 15:13:02 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.232)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.118.232 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.118.232; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.118.232) by
+ BL6PEPF0001AB75.mail.protection.outlook.com (10.167.242.168) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.7741.18 via Frontend Transport; Mon, 1 Jul 2024 15:13:02 +0000
+Received: from drhqmail201.nvidia.com (10.126.190.180) by mail.nvidia.com
+ (10.127.129.5) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.4; Mon, 1 Jul 2024
+ 08:12:44 -0700
+Received: from drhqmail203.nvidia.com (10.126.190.182) by
+ drhqmail201.nvidia.com (10.126.190.180) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.4; Mon, 1 Jul 2024 08:12:43 -0700
+Received: from BUILDSERVER-IO-L4T.nvidia.com (10.127.8.13) by mail.nvidia.com
+ (10.126.190.182) with Microsoft SMTP Server id 15.2.1544.4 via Frontend
+ Transport; Mon, 1 Jul 2024 08:12:38 -0700
+From: Krishna Yarlagadda <kyarlagadda@nvidia.com>
+To: <linux-tegra@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-doc@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
+	<linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC: <thierry.reding@gmail.com>, <jonathanh@nvidia.com>, <robh@kernel.org>,
+	<krzk+dt@kernel.org>, <conor+dt@kernel.org>, <corbet@lwn.net>,
+	<andi.shyti@kernel.org>, <wsa+renesas@sang-engineering.com>,
+	<ulf.hansson@linaro.org>, <adrian.hunter@intel.com>, <digetx@gmail.com>,
+	<ldewangan@nvidia.com>, <kyarlagadda@nvidia.com>, <mkumard@nvidia.com>
+Subject: [RFC PATCH V2 00/12] Introduce Tegra register config settings
+Date: Mon, 1 Jul 2024 20:42:18 +0530
+Message-ID: <20240701151231.29425-1-kyarlagadda@nvidia.com>
+X-Mailer: git-send-email 2.43.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -67,417 +82,137 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-NV-OnPremToCloud: ExternallySecured
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BL6PEPF0001AB75:EE_|DM6PR12MB4217:EE_
+X-MS-Office365-Filtering-Correlation-Id: cd69193a-a603-461c-52d8-08dc99e04d4d
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|82310400026|376014|7416014|36860700013;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?ThGk3DPzK4fsYBRST2UB52I67/dOYFKS7TTYVNMahwYNmy/vw9/EH+x6LOIn?=
+ =?us-ascii?Q?YKy2aNKuWQ87wqRezrj1R7vKWnKa7/dl+WAB+nhjexlf66h6yLRyrKjr2jFd?=
+ =?us-ascii?Q?73T1GR44mcNoxs2Vzj8iBfBPYSyyyTENuuaWA4pOShvOVUyAExdkPx+DUWAl?=
+ =?us-ascii?Q?Cff8sXx7sZbKJKN5uMIY+S9EJBw8KlTCQ2LUgYMv1vNtywjG5iT1r+fmmMBR?=
+ =?us-ascii?Q?uq4mwGAL2f679ECkdobYNb62mvzvXFe5SueDrAOoFcUyUnF61C7F1Gf3UlSb?=
+ =?us-ascii?Q?WxVeGoMNPWr0c5f4Tr0/vs6sRsM7xFofanZvDOWuQVk7WN0M5Ib1cM6uypVT?=
+ =?us-ascii?Q?hYhCoMSXzCWJ6w7e7TP1fW9a16iNLLfcixrJ7Rl8uU4PraHOYFImptmikdWE?=
+ =?us-ascii?Q?2zG6Ulddf4It/KzIY/2fsnBxWr3ZJXSYJOW9R+YCs+euHaHHvO6EjlcQD3wY?=
+ =?us-ascii?Q?X8dJ3VuSgvRpcwJT132cTGp1QbmTA0GCSJjun69DrH+YSeahOiSrJ5lo098U?=
+ =?us-ascii?Q?viXVWauTYmZfH9jBPUkkwHrgb9HnIuo706JqxtqlMAANkOGkCHTvOYFojGK9?=
+ =?us-ascii?Q?bt07LxtbOWVby2p6wztGc1eAzgpKXv/j5pjz2ZWOcdNtkI4Ne3jhq114FwSW?=
+ =?us-ascii?Q?zWt3OV318kbX9KICh5NGRDlS/l75M+Dv9U9lFYZqJo4ioTjfD4Jv1p75Yutq?=
+ =?us-ascii?Q?Ni9P1tWyjxcjRA6NZu72N5OSd4t/uRuJNd/UD+sPClg59WwEgdXLDWRfLSUb?=
+ =?us-ascii?Q?kvedYo4sNK1XMRebMxx/LTda0r+meVEiFGli0C5fZDlbbcSSTP2utktB/0QZ?=
+ =?us-ascii?Q?2GaT6cEdU3LEUBcMUISkwFu6rzfjx9/rp39kVM8WYbjf7taUVKpluQCM+5rK?=
+ =?us-ascii?Q?KsC3oPd3EdvSra9Yc+IhWFQM4nHMKFpzkN+XNp5ZdXQTyLTUbvPo/hz5saMM?=
+ =?us-ascii?Q?2hPxQLnz73aGDObYscxRKmu3iccV7rGqk3NfK+OK6nXCfq8nVsFnABuK0jjs?=
+ =?us-ascii?Q?IcbWnAQwdwlejlStjaKCAApkewU+vc/ZZeiTDL/eIvhZyoilI3GabMwB5Pci?=
+ =?us-ascii?Q?j2g++3V7PTxfsrJxFmU50FxfDJg5qHElGyeTo6fO1cRfOlBfRyAVS1C/Nw2Z?=
+ =?us-ascii?Q?WWkrURfiTgXVXzGKhJZVCNAvUWxbsMpScfunpU6jBQ9K/UG9I0eudPayDrBO?=
+ =?us-ascii?Q?TI0Ij4QPe2k5z/AzmG8pdHIrbPMEWIVjkv47K09kTlklxz/75b7JI+1XA+5J?=
+ =?us-ascii?Q?NdGgwsvJ3QFs6YGSt8PDuy3JcnG26kHkkov0DMhDXE+1SNl/NMskn9sDMfDE?=
+ =?us-ascii?Q?eaS6yraPswWuGScithmTBbFsriv5gxEhQeA9DMWPw9h/NJlRQ/btrxgNnrW6?=
+ =?us-ascii?Q?ixLWEg1UCy7ns1Nb9JoNLE3avLtV8MpGvBSOAJGkLTjARzRXcw4/Lq8oxd4u?=
+ =?us-ascii?Q?kFaSQG+kCESFKpXkNxkuxQBxTsxX5TIn?=
+X-Forefront-Antispam-Report:
+	CIP:216.228.118.232;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge1.nvidia.com;CAT:NONE;SFS:(13230040)(1800799024)(82310400026)(376014)(7416014)(36860700013);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Jul 2024 15:13:02.6373
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: cd69193a-a603-461c-52d8-08dc99e04d4d
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.232];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	BL6PEPF0001AB75.namprd02.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4217
 
-Introduce a new virtio MMC driver to enable virtio SD/MMC card
-emulation with QEMU. This driver allows emulating MMC cards in
-virtual environments, enhancing functionality and testing
-capabilities within QEMU.
+This is a request for comments on high level design of Tegra config
+settings.
 
-Link to the QEMU patch: https://lists.nongnu.org/archive/html/qemu-block/2024-06/msg00664.html
+NVIDIA Tegra SoCs have various I/O controllers and these controllers require
+specific register configurations based on:
+ - Functional mode (eg. speed)
+ - Interface properties (eg. signal timings)
+ - Manufacturing characteristics (eg. process/package)
+ - Thermal characteristics
+ - Board characteristics
 
-No changes to existing dependencies or documentation.
+Some of the configurations can be provided by device specific standard DT
+properties like speed of interface in I2C, rising/falling timing etc. However,
+there are more device specific configurations required to tune the interface
+based on execution mode or other runtime parameters. All such configurations are
+defined as 'config' settings of the device. This configures a device to operate
+with the optimal settings for a particular mode to improve performance,
+stability or reduce power.
 
-Signed-off-by: Mikhail Krasheninnikov <krashmisha@gmail.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: linux-mmc@vger.kernel.org
-CC: Matwey Kornilov <matwey.kornilov@gmail.com>
----
- drivers/mmc/core/mmc_ops.c      |   2 +
- drivers/mmc/host/Kconfig        |  14 ++
- drivers/mmc/host/Makefile       |   2 +
- drivers/mmc/host/virtio-mmc.c   | 266 ++++++++++++++++++++++++++++++++
- drivers/mmc/host/virtio-mmc.h   |  42 +++++
- include/uapi/linux/virtio_ids.h |   1 +
- 6 files changed, 327 insertions(+)
- create mode 100644 drivers/mmc/host/virtio-mmc.c
- create mode 100644 drivers/mmc/host/virtio-mmc.h
+Add the mechanism to provide the configuration parameters from the device tree
+called "config setting via Device Tree".
+This series capture the device tree details, common parser code for Tegra SOC
+and the usage in I/O controllers I2C, SPI.
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 3b3adbddf664..4e663140048a 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -5,6 +5,7 @@
-  *  Copyright 2006-2007 Pierre Ossman
-  */
- 
-+#include "linux/printk.h"
- #include <linux/slab.h>
- #include <linux/export.h>
- #include <linux/types.h>
-@@ -459,6 +460,7 @@ int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal)
- 
- static int mmc_busy_cb(void *cb_data, bool *busy)
- {
-+	pr_info("mmc_busy_cb\n");
- 	struct mmc_busy_data *data = cb_data;
- 	struct mmc_host *host = data->card->host;
- 	u32 status = 0;
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 554e67103c1a..eb0b0e80250d 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1069,3 +1069,17 @@ config MMC_LITEX
- 	  module will be called litex_mmc.
- 
- 	  If unsure, say N.
-+
-+config MMC_VIRTIO
-+	tristate "VirtIO MMC Host Controller support"
-+	depends on VIRTIO
-+	help
-+	  This enables support for the Virtio MMC driver, which allows the
-+	  kernel to interact with MMC devices over Virtio. Virtio is a
-+	  virtualization standard for network and disk device drivers,
-+	  providing a common API for virtualized environments.
-+
-+	  Enable this option if you are running the kernel in a virtualized
-+	  environment and need MMC support via Virtio.
-+
-+	  If unsure, say N.
-\ No newline at end of file
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index a693fa3d3f1c..d53493d0a692 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -108,3 +108,5 @@ endif
- 
- obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
- sdhci-xenon-driver-y		+= sdhci-xenon.o sdhci-xenon-phy.o
-+
-+obj-$(CONFIG_MMC_VIRTIO)	+= virtio-mmc.o
-\ No newline at end of file
-diff --git a/drivers/mmc/host/virtio-mmc.c b/drivers/mmc/host/virtio-mmc.c
-new file mode 100644
-index 000000000000..b192bd0b9ffd
---- /dev/null
-+++ b/drivers/mmc/host/virtio-mmc.c
-@@ -0,0 +1,266 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/*
-+ *  VirtIO SD/MMC driver
-+ *
-+ *  Author: Mikhail Krasheninnikov <krashmisha@gmail.com>
-+ */
-+
-+#include "virtio-mmc.h"
-+#include "asm-generic/int-ll64.h"
-+#include "linux/completion.h"
-+#include "linux/kern_levels.h"
-+#include "linux/mmc/core.h"
-+#include "linux/mmc/host.h"
-+#include "linux/printk.h"
-+#include "linux/scatterlist.h"
-+#include "linux/types.h"
-+#include "linux/virtio_config.h"
-+#include <linux/virtio.h>
-+#include <linux/cdev.h>
-+#include <linux/device.h>
-+#include <linux/fs.h>
-+
-+struct mmc_req {
-+	u32 opcode;
-+	u32 arg;
-+};
-+
-+struct virtio_mmc_request {
-+	u8 flags;
-+
-+#define VIRTIO_MMC_REQUEST_DATA BIT(1)
-+#define VIRTIO_MMC_REQUEST_WRITE BIT(2)
-+#define VIRTIO_MMC_REQUEST_STOP BIT(3)
-+#define VIRTIO_MMC_REQUEST_SBC BIT(4)
-+
-+	struct mmc_req request;
-+
-+	u8 buf[4096];
-+	size_t buf_len;
-+
-+	struct mmc_req stop_req;
-+	struct mmc_req sbc_req;
-+};
-+
-+struct virtio_mmc_response {
-+	u32 cmd_resp[4];
-+	int cmd_resp_len;
-+	u8 buf[4096];
-+};
-+
-+struct virtio_mmc_host {
-+	struct virtio_device *vdev;
-+	struct mmc_host *mmc;
-+	struct virtqueue *vq;
-+	struct mmc_request *current_request;
-+
-+	struct virtio_mmc_request virtio_request;
-+	struct virtio_mmc_response virtio_response;
-+
-+	struct completion request_handled;
-+};
-+
-+static void virtio_mmc_vq_callback(struct virtqueue *vq)
-+{
-+	unsigned int len;
-+	struct mmc_host *mmc;
-+	struct virtio_mmc_host *host;
-+	struct virtio_mmc_request *virtio_request;
-+	struct virtio_mmc_response *virtio_response;
-+	struct mmc_request *mrq;
-+
-+	mmc = vq->vdev->priv;
-+	host = mmc_priv(mmc);
-+	mrq = host->current_request;
-+	virtio_request = &host->virtio_request;
-+
-+	virtio_response = virtqueue_get_buf(vq, &len);
-+
-+	memcpy(mrq->cmd->resp, virtio_response->cmd_resp,
-+	       virtio_response->cmd_resp_len);
-+
-+	if (virtio_request->flags & VIRTIO_MMC_REQUEST_DATA) {
-+		if (!(virtio_request->flags & VIRTIO_MMC_REQUEST_WRITE)) {
-+			sg_copy_from_buffer(mrq->data->sg, mrq->data->sg_len,
-+					    virtio_response->buf,
-+					    virtio_request->buf_len);
-+		}
-+		mrq->data->bytes_xfered = virtio_request->buf_len;
-+	}
-+
-+	host->current_request = NULL;
-+	mmc_request_done(mmc, mrq);
-+	complete(&host->request_handled);
-+}
-+
-+static void virtio_mmc_send_request_to_qemu(struct virtio_mmc_host *data)
-+{
-+	struct scatterlist sg_out_linux, sg_in_linux;
-+
-+	sg_init_one(&sg_out_linux, &data->virtio_request,
-+		    sizeof(struct virtio_mmc_request));
-+	sg_init_one(&sg_in_linux, &data->virtio_response,
-+		    sizeof(struct virtio_mmc_response));
-+
-+	struct scatterlist *request[] = { &sg_out_linux, &sg_in_linux };
-+
-+	if (virtqueue_add_sgs(data->vq, request, 1, 1, &data->virtio_response,
-+			      GFP_KERNEL) < 0) {
-+		dev_crit(&data->vdev->dev, "virtio_mmc: Failed to add sg\n");
-+		return;
-+	}
-+
-+	virtqueue_kick(data->vq);
-+	wait_for_completion(&data->request_handled);
-+}
-+
-+static inline size_t __calculate_len(struct mmc_data *data)
-+{
-+	size_t len = 0;
-+
-+	for (int i = 0; i < data->sg_len; i++)
-+		len += data->sg[i].length;
-+	return len;
-+}
-+
-+/* MMC layer callbacks */
-+
-+static void virtio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct virtio_mmc_host *host;
-+	struct virtio_mmc_request *virtio_req;
-+	struct mmc_data *mrq_data;
-+
-+	host = mmc_priv(mmc);
-+	host->current_request = mrq; // Saving the request for the callback
-+
-+	virtio_req = &host->virtio_request;
-+	memset(virtio_req, 0, sizeof(struct virtio_mmc_request));
-+
-+	virtio_req->request.opcode = mrq->cmd->opcode;
-+	virtio_req->request.arg = mrq->cmd->arg;
-+
-+	mrq_data = mrq->data;
-+	if (mrq_data) {
-+		virtio_req->flags |= VIRTIO_MMC_REQUEST_DATA;
-+
-+		virtio_req->buf_len = __calculate_len(mrq->data);
-+
-+		virtio_req->flags |= ((mrq_data->flags & MMC_DATA_WRITE) ?
-+					      VIRTIO_MMC_REQUEST_WRITE :
-+					      0);
-+		if (virtio_req->flags & VIRTIO_MMC_REQUEST_WRITE) {
-+			sg_copy_to_buffer(mrq_data->sg, mrq_data->sg_len,
-+					  virtio_req->buf, virtio_req->buf_len);
-+		}
-+	}
-+
-+	if (mrq->stop) {
-+		virtio_req->flags |= VIRTIO_MMC_REQUEST_STOP;
-+
-+		virtio_req->stop_req.opcode = mrq->stop->opcode;
-+		virtio_req->stop_req.arg = mrq->stop->arg;
-+	}
-+
-+	if (mrq->sbc) {
-+		virtio_req->flags |= VIRTIO_MMC_REQUEST_SBC;
-+
-+		virtio_req->sbc_req.opcode = mrq->sbc->opcode;
-+		virtio_req->sbc_req.arg = mrq->sbc->arg;
-+	}
-+
-+	virtio_mmc_send_request_to_qemu(host);
-+}
-+
-+static void virtio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+}
-+
-+static int virtio_mmc_get_ro(struct mmc_host *mmc)
-+{
-+	return 0;
-+}
-+
-+static int virtio_mmc_get_cd(struct mmc_host *mmc)
-+{
-+	return 1;
-+}
-+
-+static const struct mmc_host_ops virtio_mmc_host_ops = {
-+	.request = virtio_mmc_request,
-+	.set_ios = virtio_mmc_set_ios,
-+	.get_ro = virtio_mmc_get_ro,
-+	.get_cd = virtio_mmc_get_cd,
-+};
-+
-+static inline void __fill_host_attr(struct mmc_host *host)
-+{
-+	host->ops = &virtio_mmc_host_ops;
-+	host->f_min = 300000;
-+	host->f_max = 500000;
-+	host->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+	host->caps = MMC_CAP_SD_HIGHSPEED;
-+	host->caps2 = MMC_CAP2_NO_SDIO | MMC_CAP2_NO_MMC | MMC_CAP2_HS400;
-+}
-+
-+static int create_host(struct virtio_device *vdev)
-+{
-+	int err;
-+	struct mmc_host *mmc;
-+	struct virtio_mmc_host *host;
-+
-+	mmc = mmc_alloc_host(sizeof(struct virtio_mmc_host), &vdev->dev);
-+	if (!mmc) {
-+		pr_err("virtio_mmc: Failed to allocate host\n");
-+		return -ENOMEM;
-+	}
-+
-+	__fill_host_attr(mmc);
-+
-+	vdev->priv = mmc;
-+
-+	host = mmc_priv(mmc);
-+
-+	init_completion(&host->request_handled);
-+
-+	host->vq =
-+		virtio_find_single_vq(vdev, virtio_mmc_vq_callback, "vq_name");
-+	if (!host->vq) {
-+		pr_err("virtio_mmc: Failed to find virtqueue\n");
-+		mmc_free_host(mmc);
-+		return -ENODEV;
-+	}
-+
-+	err = mmc_add_host(mmc);
-+	if (err) {
-+		pr_err("virtio_mmc: Failed to add host\n");
-+		mmc_free_host(mmc);
-+		return err;
-+	}
-+
-+	return 0;
-+}
-+
-+static int virtio_mmc_probe(struct virtio_device *vdev)
-+{
-+	int err;
-+
-+	err = create_host(vdev);
-+	if (err)
-+		pr_err("virtio_mmc: Failed to make host\n");
-+
-+	return 0;
-+}
-+
-+static void remove_host(struct mmc_host *host)
-+{
-+	mmc_remove_host(host);
-+	mmc_free_host(host);
-+}
-+
-+static void virtio_mmc_remove(struct virtio_device *vdev)
-+{
-+	struct mmc_host *host = vdev->priv;
-+
-+	remove_host(host);
-+}
-diff --git a/drivers/mmc/host/virtio-mmc.h b/drivers/mmc/host/virtio-mmc.h
-new file mode 100644
-index 000000000000..086f33307f84
---- /dev/null
-+++ b/drivers/mmc/host/virtio-mmc.h
-@@ -0,0 +1,42 @@
-+/* SPDX-License-Identifier: GPL-2.0-or-later
-+ *
-+ *  VirtIO SD/MMC driver
-+ *
-+ *  Author: Mikhail Krasheninnikov <krashmisha@gmail.com>
-+ */
-+
-+#ifndef _VIRTIO_MMC_H
-+#define _VIRTIO_MMC_H
-+
-+#include <linux/virtio.h>
-+#include <linux/virtio_ids.h>
-+
-+#define VIRTIO_MMC_DEV_ID 42
-+
-+static int virtio_mmc_probe(struct virtio_device *vdev);
-+
-+static void virtio_mmc_remove(struct virtio_device *vdev);
-+
-+static const struct virtio_device_id id_table[] = {
-+	{ VIRTIO_MMC_DEV_ID, VIRTIO_DEV_ANY_ID },
-+	{ 0 },
-+};
-+
-+static struct virtio_driver virtio_mmc_driver = {
-+	.driver = {
-+		.name	= KBUILD_MODNAME,
-+		.owner	= THIS_MODULE,
-+	},
-+	.id_table	= id_table,
-+	.probe		= virtio_mmc_probe,
-+	.remove		= virtio_mmc_remove,
-+};
-+
-+module_virtio_driver(virtio_mmc_driver);
-+MODULE_DEVICE_TABLE(virtio, id_table);
-+
-+MODULE_AUTHOR("Mikhail Krasheninnikov");
-+MODULE_DESCRIPTION("VirtIO SD/MMC driver");
-+MODULE_LICENSE("GPL");
-+
-+#endif
-diff --git a/include/uapi/linux/virtio_ids.h b/include/uapi/linux/virtio_ids.h
-index 7aa2eb766205..9c8a09b0f004 100644
---- a/include/uapi/linux/virtio_ids.h
-+++ b/include/uapi/linux/virtio_ids.h
-@@ -68,6 +68,7 @@
- #define VIRTIO_ID_AUDIO_POLICY		39 /* virtio audio policy */
- #define VIRTIO_ID_BT			40 /* virtio bluetooth */
- #define VIRTIO_ID_GPIO			41 /* virtio gpio */
-+#define VIRTIO_ID_MMC           42 /* virtio mmc */
- 
- /*
-  * Virtio Transitional IDs
+ Patch 01: Documentation about the device tree binding for common config framework.
+ Patch 02: Device tree binding documentation for config setting.
+ Patch 03: Common parser of the device tree config setting node for Tegra SoC.
+ Patch 04: Device tree binding documentation for the I2C config setting.
+ Patch 05: Add phandle reference for the I2C config setting.
+ Patch 06: Move clock initialization code into new methods
+ Patch 07: Using config settings in Tegra I2C driver for interface timing registers.
+ Patch 08: Add Tegra234 I2C config settings in DT.
+ Patch 09: Device tree binding documentation for the SDHCI config setting.
+ Patch 10: Add phandle reference for the SDHCI config setting.
+ Patch 11: Using config settings in Tegra SDHCI driver for tuning iteration.
+ Patch 12: Add Tegra234 SDHCI config settings in DT.
+
+Changes in V2:
+- Move config settings to a new node
+- Use phandles to refer config settings in device node
+- Update subject of dt patches
+
+Open to review:
+- All config settings are field (bits) entries and input in hex format.
+  This would allow parsing and updating registers easier.
+
+Krishna Yarlagadda (12):
+  Documentation: Introduce config settings framework
+  dt-bindings: misc: Tegra configuration settings
+  soc: tegra: Add config setting framework
+  dt-bindings: misc: tegra-i2c: config settings
+  dt-bindings: i2c: tegra-i2c: reference to config
+  i2c: tegra: split clock initialization code
+  i2c: tegra: config settings for interface timings
+  arm64: tegra: I2C interface timings
+  dt-bindings: misc: tegra-sdhci: config settings
+  dt-bindings: mmc: tegra-sdhci: reference to config
+  mmc: host: tegra: config settings for timing
+  arm64: tegra: SDHCI timing settings
+
+ .../bindings/i2c/nvidia,tegra20-i2c.yaml      |   5 +
+ .../misc/nvidia,tegra-config-settings.yaml    | 158 ++++++
+ .../bindings/mmc/nvidia,tegra20-sdhci.yaml    |   4 +
+ Documentation/misc-devices/tegra-cfg.rst      | 133 +++++
+ MAINTAINERS                                   |  10 +
+ arch/arm64/boot/dts/nvidia/tegra234-cfg.dtsi  | 501 ++++++++++++++++++
+ .../dts/nvidia/tegra234-p3701-0000-cfg.dtsi   | 107 ++++
+ .../boot/dts/nvidia/tegra234-p3701-0000.dtsi  |   1 +
+ drivers/i2c/busses/i2c-tegra.c                | 257 +++++++--
+ drivers/mmc/host/sdhci-tegra.c                |  84 +++
+ drivers/soc/tegra/Makefile                    |   1 +
+ drivers/soc/tegra/tegra-cfg.c                 | 147 +++++
+ include/soc/tegra/tegra-cfg.h                 |  87 +++
+ 13 files changed, 1442 insertions(+), 53 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/misc/nvidia,tegra-config-settings.yaml
+ create mode 100644 Documentation/misc-devices/tegra-cfg.rst
+ create mode 100644 arch/arm64/boot/dts/nvidia/tegra234-cfg.dtsi
+ create mode 100644 arch/arm64/boot/dts/nvidia/tegra234-p3701-0000-cfg.dtsi
+ create mode 100644 drivers/soc/tegra/tegra-cfg.c
+ create mode 100644 include/soc/tegra/tegra-cfg.h
+
 -- 
-2.34.1
+2.43.2
 
