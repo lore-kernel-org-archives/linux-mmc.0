@@ -1,47 +1,60 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B47E42A1D3;
-	Mon,  1 Jul 2024 17:42:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 06BC074047;
+	Tue,  2 Jul 2024 07:32:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719855749; cv=none; b=mn/EA+J2WkkOPbaFQXO2oixrIo08jRtaJi5vqfqaNjp/JGdUcsoVSLQb3OHMlBZYwX3+wM0RkSzJ8YZC93pBVLMEGlmjHzTHxuB/b6tHXYeOwVfmuvj1x/wIYnvOfVeh/JCiJpMR+sKXYql4FN5TYTz9sRQG6IpvtoSCBld6R7k=
+	t=1719905532; cv=none; b=OvO62cmax8M2GKtAhZTpx9uYAp1LE5T0i5QOMKQKt82Eu7XVrUikK8vPHYl4XLzfTAx6yZ0ZA6X9b6iNH7QdXsAC4p0NtgpGCGOxfX3+tImdOSMlk5o28pxMgDoUxd6ZEJwaVEY/B3KabdPI4RkpGgRGUQoEjFfgSNoRiMbEx0Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719855749; c=relaxed/simple;
-	bh=kGobKE6YPSAtDU0yZCkJD4Zf1Y01NAAOF9patzKGseU=;
+	s=arc-20240116; t=1719905532; c=relaxed/simple;
+	bh=+sMR8Y+fELBV98VkEZAmEYgkVwqnEdYtSXSzNoB2jX0=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=thZNyhgR5MZwIHZ2RZVEK5Vym2USUhKLMvfJI89F+Bq4+jYsE0W7Mekie6bVvb6yVNzYdZpE0bOzF5nl+HOTWWUvYQ0XIKXw6t09lTyEzvldDw0QYosTDvCoxQma0wHRF0ND8CI3i8iFPgWk3L8kxsWlalGSJtb9zgRPmiId34Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uFFaeB79; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=lEgNYpEfVRJpi3fpemItYdBPZC818qgDpHPv++lA20MSyP3ZtHMJxN7DJLhv41LQOGinttCvLdRvuQls6x06GeWz5hPzqtcO96aPbabEizIAQMVGY3qJdn7dGDh7E7qygiHavAq8eeyRPdOJLjcn9a4pPGFFvm1/ysaGMTzY3DQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=nxBkkv55; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uFFaeB79"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23CAAC116B1;
-	Mon,  1 Jul 2024 17:42:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1719855749;
-	bh=kGobKE6YPSAtDU0yZCkJD4Zf1Y01NAAOF9patzKGseU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=uFFaeB79x4Q5Q6wP8OEQ2Rhg9iZ1DipWUjM31+Yj65NCxeB9wAVT2uicuJWmyrzLQ
-	 LzQsDHTX63fzuRnmEqLNe/IsiSE2fR+tJTb1P4H5WM/x74eEf/QkXcDDGK4zL+LwTp
-	 +7HHZyW7CKY+xVBX83r/9j4rVGQOgNRHguEQB8IHKA3u8K+eLPGRZ0Dwd8gV5WI8nn
-	 BXBSUC6W3ajSXick61nAnMFpnFNxZYkA2Q7F9KBnZFNdFhI9ubGYN7SE1cvctNn5tb
-	 lY4rWyOM0OIqTK6OxWbhkt4HUm0ZbK2ioTpU9SQ8gHMrVCauI5CphSFdmDv0+ihJWJ
-	 CYUYOL116LLxg==
-Date: Mon, 1 Jul 2024 11:42:27 -0600
-From: Rob Herring <robh@kernel.org>
-To: Krishna Yarlagadda <kyarlagadda@nvidia.com>
-Cc: linux-tegra@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-doc@vger.kernel.org, linux-i2c@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	thierry.reding@gmail.com, jonathanh@nvidia.com, krzk+dt@kernel.org,
-	conor+dt@kernel.org, corbet@lwn.net, andi.shyti@kernel.org,
-	wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org,
-	adrian.hunter@intel.com, digetx@gmail.com, ldewangan@nvidia.com,
-	mkumard@nvidia.com
-Subject: Re: [RFC PATCH V2 04/12] dt-bindings: misc: tegra-i2c: config
- settings
-Message-ID: <20240701174227.GA148633-robh@kernel.org>
-References: <20240701151231.29425-1-kyarlagadda@nvidia.com>
- <20240701151231.29425-5-kyarlagadda@nvidia.com>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="nxBkkv55"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=yRJduJ4b13YGEVnBaImf8MBMoj+rPcyZfPfJ5uybrn0=; b=nxBkkv5533e0ibSUtWu/FWqca9
+	T02UNeMXerA742jTnmxcJDpprQYJhN+AB5mjSyF1tkFtaC9NWv/DI0JPbLwQgi37wPeed5cA37c0e
+	+2f4q+qCCkqKwjebfWNgYqdh3KcmHS4SeimB2eXIojre3wqBiKfJ74iCTIY0nzAi/62xdvvQQ9QVV
+	ggumCBVJg78P9RdScYdX17RSGD42SxwMGXnk/F0Te2sI20BEGRBsqQOtoGA/KEqDDyMxAk9wtOs1O
+	z/1WMLlWsZ6latPxKW85ISPYOrT1dPDdYNH/mzAspCJntQyhFPayqTd56frrg1OjYGXYjfO03yN/a
+	E+Zh4hIw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.97.1 #2 (Red Hat Linux))
+	id 1sOXzk-00000005s56-0D5a;
+	Tue, 02 Jul 2024 07:32:08 +0000
+Date: Tue, 2 Jul 2024 00:32:07 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Oliver Sang <oliver.sang@intel.com>
+Cc: Christoph Hellwig <hch@infradead.org>, oe-lkp@lists.linux.dev,
+	lkp@intel.com, Jens Axboe <axboe@kernel.dk>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Damien Le Moal <dlemoal@kernel.org>, Hannes Reinecke <hare@suse.de>,
+	linux-block@vger.kernel.org, linux-um@lists.infradead.org,
+	drbd-dev@lists.linbit.com, nbd@other.debian.org,
+	linuxppc-dev@lists.ozlabs.org, virtualization@lists.linux.dev,
+	xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
+	dm-devel@lists.linux.dev, linux-raid@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+	nvdimm@lists.linux.dev, linux-nvme@lists.infradead.org,
+	linux-scsi@vger.kernel.org, ying.huang@intel.com,
+	feng.tang@intel.com, fengwei.yin@intel.com
+Subject: Re: [axboe-block:for-next] [block]  1122c0c1cc:  aim7.jobs-per-min
+ 22.6% improvement
+Message-ID: <ZoOs9wdR1yBPB-7J@infradead.org>
+References: <202406250948.e0044f1d-oliver.sang@intel.com>
+ <ZnqGf49cvy6W-xWf@infradead.org>
+ <Znt4qTr/NdeIPyNp@xsang-OptiPlex-9020>
+ <ZnuNhkH26nZi8fz6@infradead.org>
+ <ZnzP+nUrk8+9bANK@xsang-OptiPlex-9020>
+ <ZnzwbYSaIlT0SIEy@infradead.org>
+ <ZoJnO09LBj6kApY7@xsang-OptiPlex-9020>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,15 +63,14 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240701151231.29425-5-kyarlagadda@nvidia.com>
+In-Reply-To: <ZoJnO09LBj6kApY7@xsang-OptiPlex-9020>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Mon, Jul 01, 2024 at 08:42:22PM +0530, Krishna Yarlagadda wrote:
-> I2C interface timing registers are configured using config setting
-> framework. List available field properties for Tegra I2C controllers.
+On Mon, Jul 01, 2024 at 04:22:19PM +0800, Oliver Sang wrote:
+> from below, it seems the patchset doesn't introduce any performance improvement
+> but a regression now. is this expected?
 
-How is I2C bus timing parameters specific to NVIDIA? Just because you 
-have more controls? No. That's no reason to invent a whole new way to 
-specify parameters. Extend what's already there and make it work for 
-anyone.
+Not having the improvement at least alleviate my concerns about data
+integrity.  I'm still curious where it comes from as it isn't exactly
+expected.
 
-Rob
