@@ -1,130 +1,118 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9063D374F5;
-	Tue,  2 Jul 2024 10:29:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 629D913B5A5
+	for <linux-mmc@vger.kernel.org>; Wed,  3 Jul 2024 09:36:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1719916172; cv=none; b=DVnpELo9GPmRKcm2t45mZwcxy7Y+obY1q8ATNU0rsu9/L9ZNZbq3OE2Kb1+cxBsOVNFTjoWQFOX0859XXjSG/wMnsddQf4ozWOmDtCaB2PNgBSMlyEyGeVSuvyFdoKLvlu+Isryast33cQ1PbyFBcy2x1FOHbzoyjpg9UyKLyVc=
+	t=1719999374; cv=none; b=qsXqEMUD/1X/YOkNFQxANKJi3P3JjPAWoANqPkyXsYglqT3rQfrGE7fK3JO8pKOWTDQOifwGALP8W1vhe1cSXf9xS6AGPqc2+RjG5CHRGiu/cjBbLAUk9qGGr3gEaWvAYx6K4CqXsLW5DzKJ2oEoP56AbLu3TC1mxJaD1Az3oVo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1719916172; c=relaxed/simple;
-	bh=H2/3ABc6eBv29cZXj/nd74OqEp38o2YnlcZ74Uiskbg=;
+	s=arc-20240116; t=1719999374; c=relaxed/simple;
+	bh=n+jdkbPPtgEx0i+SGDSpmHywksKyQTsmVlAtf+FJmu4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pWZQkY63cWOo1xSnprliRGAek9/Ll2QmHnGDw159XrFgMONakT+5AXXEmMO911PCoHnS3yoq7mnEjwy5bZkYjVEpJHDP7GwPBUYFDnGciw64S26PqiYGfMIHVRObb9QRfAlvUHEsxd6ga9zxwHlkKtd/E8UDZf6MhNn93taSGMo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gvHys8v2; arc=none smtp.client-ip=209.85.167.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=IyGW7dhJkHElbpLiAJmuF9Mk1hnl2fwO1IA+2jtbzqnOtSYRJYddWf6PDcHojpqmscIdpo0pYO/q2EhL5Xi5qwrm96ZPHmt+479KrSZhQZ+KoH37QeFNh51Y2wr6Wi0YrzXIyWSZH5SwXpfgctEFFBzdkBJ58/fQr7mwUdEUdgE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=eCTY/vzi; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gvHys8v2"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-52ce6c8db7bso6042791e87.1;
-        Tue, 02 Jul 2024 03:29:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1719916169; x=1720520969; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=H2/3ABc6eBv29cZXj/nd74OqEp38o2YnlcZ74Uiskbg=;
-        b=gvHys8v265Cu0EfcvikWMzEnBoEi+tbRyMy0v+WXvyEPTmE9DKzfLHZyIY7KKidy5H
-         FDRAZFw9UST1RcfRlcwBiozc8LJGKJ1qPnPh8suXhwsjaxA4s97/tNC69/FuDm32WENV
-         7i4uPwtYPA7a/bHQlHvTl8x+Xv4zXf/lyNpNbJQzErAyT8XMOkE9X0OWruDiRPaCdCfB
-         sVDPiTBHpv20JVC0rU6UsfCtSi0jvtFtzUCWt8+YwW/yfGBcnrO/scKyl6IHUOuGthgN
-         Eo7+jBCdiVJJsM4dMnWPs3NTV6gnhjhFhybQDz7FYbNfV9bT9a6hCqM8cihmZMqA1DCp
-         z/MA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1719916169; x=1720520969;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=H2/3ABc6eBv29cZXj/nd74OqEp38o2YnlcZ74Uiskbg=;
-        b=sIs6WBSGV80QX3SydlJN1sk9Eek5PkArVC2kIL2aMB7NYcER2ydFvO9od6Ev2c0fJY
-         95NZQYszfCkr5xyIK4f+BwvhZdj0JXYGOqWT2JnNgjSM9JQ+j0HwLDFrWs99LfeYQfVO
-         6YypWSG6df5TZ2w2agOhv+fbFr26YLdlQHw2zYZ+G2dSfNRvzfgTWTcVZi0BAJbB3epk
-         NrMMbroRDp7KtVdsYjC/6ynfDS7QzdUF5xB3ublNhEcMBHqz9kvX4zIXeuM1qnKFqCxA
-         BYSWzk1MhmdvPhrniEhiQQ1SzNj1n99yjp0fSp0tXM6ZOnbKKGbEo/r3U1qlNP8Ivsgx
-         Z91g==
-X-Forwarded-Encrypted: i=1; AJvYcCX04wP670fQD1utgxIfPOktzmcC8fA69e68hLTUVlYy1WNJhdoS4LlmPPO+WkohTYmK8iG6Cl9IYCEdjfSHjO6q1H/iHCAfcDJ0DoUbk4MfoXPbcK42LZXrFXq6U8mwFfYjAWbP9JzJ0H/7vzfnYIvv923ouxnmCZV0JoFusrwiVmM2z2+lDw8ebJgLhzhjkeRC4Q5lzYvwarfZddveumoKNan60gVcKmtL5e6mg71bg18VfG+5L5oEIZWWYVoXZAcgJZUjkCDkOJa8vqN2a3Qyhf2tTJtF
-X-Gm-Message-State: AOJu0YzswhKI+A7mMUOUxHun+8NjGbAVFJKVZ0sB8fINaO7vliq0K5ic
-	mWmBQKusUQF6lcboYxs/qMmIrMvdrzbTPaK14Hp0XNROulDdVT8j
-X-Google-Smtp-Source: AGHT+IH+UZ+cnnKf87ciV6pECjzYY5dFmRwXwK7sPq0mN/njl3BqGEi3ofEaZkVKjtvBMh44Emakkg==
-X-Received: by 2002:a05:6512:3996:b0:52c:a1ad:18bd with SMTP id 2adb3069b0e04-52e82651a88mr6168223e87.6.1719916168007;
-        Tue, 02 Jul 2024 03:29:28 -0700 (PDT)
-Received: from orome (p200300e41f162000f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f16:2000:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4256d664052sm182632065e9.27.2024.07.02.03.29.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Jul 2024 03:29:27 -0700 (PDT)
-Date: Tue, 2 Jul 2024 12:29:25 +0200
-From: Thierry Reding <thierry.reding@gmail.com>
-To: Rob Herring <robh@kernel.org>
-Cc: Krishna Yarlagadda <kyarlagadda@nvidia.com>, 
-	linux-tegra@vger.kernel.org, devicetree@vger.kernel.org, linux-doc@vger.kernel.org, 
-	linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	jonathanh@nvidia.com, krzk+dt@kernel.org, conor+dt@kernel.org, corbet@lwn.net, 
-	andi.shyti@kernel.org, wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org, 
-	adrian.hunter@intel.com, digetx@gmail.com, ldewangan@nvidia.com, mkumard@nvidia.com
-Subject: Re: [RFC PATCH V2 04/12] dt-bindings: misc: tegra-i2c: config
- settings
-Message-ID: <hqlckp6hxvxwkkbiagdb5pm4eo5efu55hwuupdal6lojxj2xu5@5zibskqdbdju>
-References: <20240701151231.29425-1-kyarlagadda@nvidia.com>
- <20240701151231.29425-5-kyarlagadda@nvidia.com>
- <20240701174227.GA148633-robh@kernel.org>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="eCTY/vzi"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=n+jd
+	kbPPtgEx0i+SGDSpmHywksKyQTsmVlAtf+FJmu4=; b=eCTY/vziGeBWFSGGmnGQ
+	SsrHwfthg+k5WuVTs92U0CxkTK2zlJlRBPyu8J4nbuWsRvd2J7rFlt5CIJH8+DiA
+	EIrhoMraVKz+1w282FC10g1Tu7GMiJKzdl14lhgOl6SmxVo5yRcVvilMOKKGbgfV
+	gnhgwSWvZwb/egtlgRtPVtxa+2i8VnbqIQLe19Ir4ieoZyB5kFR9HVLJeki362qw
+	wZu7VgPPRFMYA/YDQm4DjVAkmzNcqfMRCX9PM8pITzVrhJNHUDYTQrJPeh32eNJH
+	BONWS4QlbmnGw45l4vCB6hUXYWBPcCyQe/vPl3wX+qumf+VWTcKk34kOhQESbVuT
+	Jg==
+Received: (qmail 2756515 invoked from network); 3 Jul 2024 11:36:08 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Jul 2024 11:36:08 +0200
+X-UD-Smtp-Session: l3s3148p1@Uoxgj1Qc2N5ehhrb
+Date: Wed, 3 Jul 2024 11:36:08 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: Prabhakar <prabhakar.csengg@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: Re: [PATCH v4 3/3] mmc: renesas_sdhi: Add support for RZ/V2H(P) SoC
+Message-ID: <ZoUbiEy0AJ_JVVd8@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+References: <20240626132341.342963-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240626132341.342963-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <TYCPR01MB11332F92C1D1987336FA316FD86D72@TYCPR01MB11332.jpnprd01.prod.outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="vtzv7b6agyajbvep"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="oqjJyTnaIZISeIV4"
 Content-Disposition: inline
-In-Reply-To: <20240701174227.GA148633-robh@kernel.org>
+In-Reply-To: <TYCPR01MB11332F92C1D1987336FA316FD86D72@TYCPR01MB11332.jpnprd01.prod.outlook.com>
 
 
---vtzv7b6agyajbvep
+--oqjJyTnaIZISeIV4
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, Jul 01, 2024 at 11:42:27AM GMT, Rob Herring wrote:
-> On Mon, Jul 01, 2024 at 08:42:22PM +0530, Krishna Yarlagadda wrote:
-> > I2C interface timing registers are configured using config setting
-> > framework. List available field properties for Tegra I2C controllers.
->=20
-> How is I2C bus timing parameters specific to NVIDIA? Just because you=20
-> have more controls? No. That's no reason to invent a whole new way to=20
-> specify parameters. Extend what's already there and make it work for=20
-> anyone.
 
-This may be applicable to a subset of this, and yes, maybe we can find
-generalizations for some of these parameters.
+> If I understand correctly,
+> VMMC(Always on 3.3V) for card detection -->PWEN pin
+> Vqmmc(1.8v-3.3V) for UHS operation for voltage switch-->IOVS pin
 
-However, we're also looking for feedback specifically on these config
-nodes that go beyond individual timing parameters. For example in the
-case of I2C, how should parameters for different operating modes be
-described?
+If these assumptions are correct, then I am sorry to have missed it. I
+thougaht PWEN is for vqmmc. If it is not, then we need two regulators,
+one for vmmc and one for vqmmc. This is what the TMIO core expects and
+already handles correctly on its own, or? Except for the reset handling
+where we need to preserve some value in the SDHI core.
 
-Would you agree with something along the lines provided in this series?
-Do you have any better suggestions?
 
-Thanks,
-Thierry
-
---vtzv7b6agyajbvep
+--oqjJyTnaIZISeIV4
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmaD1oMACgkQ3SOs138+
-s6EUWQ//d69gXBtNSFP7l+KPjDhDZ598cE4CgLGFB1MCw5CciuHjfQ0+hCmcttn9
-uX9wbBufhK4HfhZibObvUSCRQMWASt8xovXIpwQ14fYvQHDZTACjBbrOYvKRjMXS
-go95WVp45nVUe5vtvOMwkY2l7fJ7ooH4kRfsg6P3HHbAUIewyohXaVQxdjzosd7I
-uQ4HtxHrQEVyS0i9ifbUHP/+1H89rBuXOgAbZ9hgXRh6X1uAKTBxdeMP3vC/2UDf
-EUD8lPkAphVeLwOld4SOUtq9wS/MmoxEqr+vh+HNK2R7fHXbGxzyPgX8MhgYDddP
-PjADI5XFQbc4CXpZRsVsgEfR3iOxNhOhqySEP0rMR9/M4/R9PluK2XrbgswwnKnT
-Vn1mRRKDbcDIjyc35OMxB6bqLMLQNmYWAN8Abzkx8UY8VvVk2RSoS+SG/qR+xTZU
-tNCq36PQN6dUnQ9fdq1/DJEtWNEGXJUMMZzGKF9UOg2x9dLap15nCgzB091vkURw
-rnsQ4/3ff1nyVv+3gjOcIuYFuqvMz7SzvthZ8801PO811noTmblYVD9pVxhA/U0V
-C9pmgSQDzRUeJWV+MoeGH7csaUrcSDBzuGLiH2dTLTCoLQQIiMfVSMrPjxMQ3BOb
-ow4FkVuyyKsMuSSPB7RjPsplJ7PN/F0Emo+PoTlRmreN071u4Gg=
-=egWb
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmaFG4QACgkQFA3kzBSg
+KbYGrA/8DqG9qnspQS5905afzuTyGnGosgKWmjE9tk5S9QIv2QTGIm9Fjqb0X9km
+fy601hmq3CbiU11VwlbZzZF7YhMDCv2EsGCGA+HUnJNTUHUTVaFmhn3oTX+o4uoi
+yeukc0GgBLCD6si6xJ8WvuKcz4XqZN/wAGzSCIUO6OsRRAGQivjV5HzqUDFsoKqo
+kZZIHqrRQwYcNj9mpVQr0MXTvmTphKD2UVA8VmuT22a+NG9j9c+K1yd2Hn8n+gIC
+rKCFEDcdlpItNJ76iMvmOYzF3snsLZ7lrnLxoohih0K9rfX0WOsniisAiZ6mNleJ
+vuz7hGXqwXPxT71BrsgN5yNtGWwkhuKjGYIJtgjyj1tmz5vpO3DMKOfiLCjIzDpg
+b24P2SKOXdzt+UQUUr+TjXlCFMXneusgoosZ2gDQK3yRHJyCbQdLRUguuPmvgDM/
+RPUdKfRqF7GgJ9iuhdf1GPO8yZtqngHa8oTfdugF95Zt0JFr/GE1TjMiRbD2WlCT
+ai00rIYm10TLDl0Ge085zfIvvQVv/WxyAYLURAI5NdxfW/q+YhHJSOLJ9djNBPfF
+yjEMuTJsnPOryHwRQ3wdhqO96HrgXCm/l/pTBZDcJwdyxO4gJsuD/n81UXdRp7Ea
+AYyEpP4F4aWFL4PVY1jNX1rWeEsE6O1ggDXuEza7VvxJGgeFQU4=
+=RiwX
 -----END PGP SIGNATURE-----
 
---vtzv7b6agyajbvep--
+--oqjJyTnaIZISeIV4--
