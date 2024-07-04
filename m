@@ -1,130 +1,200 @@
-Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+Received: from mail-vk1-f173.google.com (mail-vk1-f173.google.com [209.85.221.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D6EB1ABCC0;
-	Thu,  4 Jul 2024 11:11:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 677311ACE67;
+	Thu,  4 Jul 2024 15:58:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720091482; cv=none; b=eylKD1niaP1W3FMc0uwiCrQneWoM+/d5rG2JM51pyIzNF0gnU3cM7adUeH2X7Q+E47+ofDkfJwr7sQLmuNh8PVBc1GSdHSKsmJ9IBtnndrY1fWZU9gZWwflSc0vAESmvNsZg/7cC2cWEOF0PFFbPSLW4KPoii6SSSEuNfIy7tIQ=
+	t=1720108692; cv=none; b=o6xzWEqFc+4tKtKaAGYvmxL+oZu+QaLIV90aAAj0GTMUEp4kkWgTWGYZzzEPPblAeJ8+Gq3Vz1tyWb03+zbh+eCGnYljpugTuF54+mAT/2T4zxO65fkoctLrOzR+NjqOzRCFsPzrzS7UoIHm+sP6RoMAwnCMR2HQsbq9nj8oWvw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720091482; c=relaxed/simple;
-	bh=TwoVc/A5cvcKyYqBk85IeSoXm8WueZBsy4xxLnttTxM=;
-	h=Content-Type:Mime-Version:Subject:From:In-Reply-To:Date:Cc:
-	 Message-Id:References:To; b=tmwlqUlopYjHTOcnxa3V9+3j8EqLLbnYgx82qagPMZLyfpFxuBeT4b/djFcZQayRN9XbAO3OIG9al09zvhY24BWYjfvlsbnk/BATtaNP8UBqgVk4wONiv1uu7h3Ylgvui80xSvJ7coyAtAs0Y1bIDclyRnYsnEG/h0YvJ6WcyxM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DVwMuNkq; arc=none smtp.client-ip=209.85.221.48
+	s=arc-20240116; t=1720108692; c=relaxed/simple;
+	bh=wJE7HlCPQ2VZ9sr7/loD0hwkFhbboA9WmXEnW4+ChsQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=orgkQGoQCEx7Ffkguj34NQy7tQWkLxTfo9ebzOtFShuNqrcgGqMIDQd44+QVcVLKvCbwTDvdva7ZmTqE74F0GyYDEMikDmjKMYwILtF4E0yKgIces+tEhfsSGOQh5Fyp4j356eZx/4pX1SsP/0rniwo9W+mz80trEcDzQPAA+qY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fzah5f2j; arc=none smtp.client-ip=209.85.221.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DVwMuNkq"
-Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-36786081ac8so349222f8f.0;
-        Thu, 04 Jul 2024 04:11:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fzah5f2j"
+Received: by mail-vk1-f173.google.com with SMTP id 71dfb90a1353d-4ef6c8e3602so326850e0c.0;
+        Thu, 04 Jul 2024 08:58:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1720091479; x=1720696279; darn=vger.kernel.org;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:from:to:cc:subject:date
+        d=gmail.com; s=20230601; t=1720108689; x=1720713489; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=qwBmB9TZGFjcG5R2+2N2tz93DvezoEGxh6PsIk8IO/w=;
-        b=DVwMuNkqn+2XTBypJEguND4yU8ZLt/XCn2Rvvwjwn91IWH1oe1bp5nF7YelyIo6Aof
-         PGzrkUJnD/afC5RbxYs0jxQOCW15tG8pCg5zJ+ojuyIOTmkn3P8zdLKbWKqPYYnFNmtJ
-         3ZCTjLm1HcilZKiDwLpk2UPxvNY66g6DH5nYYf8GITmrmNiesvpDlUJVIkG8NEyVVom8
-         kAPftQeFsPA1tCPbALMUCe5WurN0VVxrJVxSSVOvTyPD65adG8ML73VRBjk0VlY6G8Ez
-         tX70faa2b6tdI/78pXvVP8ub7qRieBucgNTvNZ38S4R9NoLgoHTvD+O70rxLUJGHKE6z
-         hAlA==
+        bh=n97CqCq+SpioBUdMovQEEVaZXmKGUSWX+N+6ZspvJ5Y=;
+        b=fzah5f2jPp6xeoFelee2+jl1Jn3hKibubDigkvbQsHgv5GzFC0+nFQris9eZwQ+NOv
+         C8r4OwujqbDFBfGp5PuYGdFVygq9IjqdKzsZhOn6MarqHKJHmQI8OVZYjfXf4u+d0e/A
+         niNupZ9nwSJa1XuVz78JbSbP/4X7322uh8tfjRZpbSkkYcN2mde8al0O0GS6auW89S7X
+         XrME3v8yxfjby9iiEEcmFuKbxEFVY+nl+iPNCiiVN72FldRTEedUwDc9eSvE+zmPaLvK
+         YjakGdyZD3zLSWeOY7JftCVArKFCuq4qOmda6m7TNJrRhW854H1JGVf37RpktRXFOPyT
+         vmvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720091479; x=1720696279;
-        h=to:references:message-id:content-transfer-encoding:cc:date
-         :in-reply-to:from:subject:mime-version:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20230601; t=1720108689; x=1720713489;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=qwBmB9TZGFjcG5R2+2N2tz93DvezoEGxh6PsIk8IO/w=;
-        b=GOgGX4KiCmxV4F2434WjNsNGyyz3RKdNgB1Pf3Bv6uyGfgGOkM8Pb+yVWffU8IWLSi
-         8E2NSwHBV+1GDQ17f7ukqMI2a7nOJU35e9n6lEqV8eAGdTA3BJ6skutgZIrhmg8HIgKa
-         dQ5bMCO3oqQMaR3lZxHMcQUwbwP9qzYSow5H/jeiCqcBHwR7IGtxz+b5WNTz6WCqE6pK
-         KdxwkyPI3bPwTpAV201Q9UHx7lpf5FSeYavrQabkEOHnEaVZcE1LAWFrLhLR+UfiT8zj
-         SaektvU9KQa5J7yXuEt0SQO5TM0GAakpU9gFAbbMvc8wv49SdRLcQrmhz8KwNRelqBHT
-         67aA==
-X-Forwarded-Encrypted: i=1; AJvYcCUq+56FaN0zIJqcWsJmItbCW58aH2Jh97TYBkd5ZYdzi0qAkwg7X69KwUe/hcwmKhVtsPpob/ttD5MxA2+xKuGXBlsZdbcx3mDZbpV8ihWUaaMhYnI696CL+OUFoRdzMlyLc49PgQs/tVeneEiKYn2B/8oqHlpboQXgB2764v1/DdydYE1F2UvrY+ruLkYXcghX7QmHlbbBH9HSHCRN3ETZ4vY/t+hpK0VUF5GuRym/Vr54VzSwowORbKFpLKLIaYmX+nVm0EG9X5U4iTtRKESQHVHoAPXxn7ApXZaZVQr+Jvlj2lE6/axS2DZma1VlSO8BrF6U
-X-Gm-Message-State: AOJu0YwW4QvKglXPMHCvZZYtBkq0dlKbQXsnkYd9AavBo4Er98F+EmXF
-	2rXxBQI73GGXs85q0pSbBLqf9Wvyzdm87kXqQ9A/4bMWtdskHK7p
-X-Google-Smtp-Source: AGHT+IFEzvL2jC2faLe/uaMvaq/UCJ26KrH1XFm9Ol6h8w0Rebt6hjx4X+gdY7pIVUfbtqQYexMuPw==
-X-Received: by 2002:a5d:5712:0:b0:367:94e7:958a with SMTP id ffacd0b85a97d-3679dd17ec1mr1153338f8f.6.1720091479417;
-        Thu, 04 Jul 2024 04:11:19 -0700 (PDT)
-Received: from [10.14.0.2] ([139.28.176.164])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-36787db4d12sm6821051f8f.110.2024.07.04.04.11.17
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 04 Jul 2024 04:11:18 -0700 (PDT)
-Content-Type: text/plain;
-	charset=us-ascii
+        bh=n97CqCq+SpioBUdMovQEEVaZXmKGUSWX+N+6ZspvJ5Y=;
+        b=c47otx7njgEewVCWLFfCNjnj+cPMLfUatpFJK9a7D/ra1IX9FtyEWg9YBTl3XblmoV
+         lBqz0sw0iI70GJK5xmxP8F9oJF1x8GqKSMowfybKSePAbpCy4hst8KRVE2aZLDke4/ft
+         zIjqFxVqjO9rLnS7pOR7dT78hvM4KGmEisP3Zqni4aa4GhGXnYNALUIrfkmqaQdvK+pD
+         7mofMNUIIS1i119+MmLkvU+3VqXl26ChyB8Y2pi+dtI8UGzHUJ1PLxHOMDgAPKo0vYZO
+         sE/1gJLyfLI4oJfCPyf6eSS2jkl7XBv6RueKhOwy1/IP7mmxF6zbB9sLDMGgUcoxcnTY
+         USLA==
+X-Forwarded-Encrypted: i=1; AJvYcCUPnMaayVI6UqPSkxl/wWWdcUDZmXaVfjhjGJEgDNfLOthlhUZaQFGu/CGFjd+/cvRMGq11Y2DVpyAYv+Uf1u4qKTeYLJ/qzf3hqqvtHD8BBZnVr6qvylWV7zrnecE8A2r/9gpsuViln+EYorvAuShD+rNNeVmFfnB30Sl72QWDFeFnsEVjpgE0JPLTf5qlNreQEZRKYaw31oNqC1j0+z3GYAk6b9B/
+X-Gm-Message-State: AOJu0Yw0vS/g5Zst0KfddZGebQi5AmWoBPDhKvM/euNn54qeBbTvkD9e
+	y6XLeEWTtndTw4u6rlx96s64GewRznvOTreCrHzJ/t5kxBt+Ow0cvLnGO4WN0rF5bCUX0o08RO1
+	zhuzpqqDaMV9J1LKg7ZVwlK/BBq4=
+X-Google-Smtp-Source: AGHT+IFZ1AIkhnIlR1F2PajHwGmAM3QHm7zYfUYNlGkAcCt+TyLYZj4pGDx0Qw5zZbScstvZjUXz2fAMKekKDEkjrCQ=
+X-Received: by 2002:a05:6122:3887:b0:4ef:4b35:896f with SMTP id
+ 71dfb90a1353d-4f2f3e9ea73mr2621613e0c.7.1720108688497; Thu, 04 Jul 2024
+ 08:58:08 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0 (Mac OS X Mail 13.4 \(3608.120.23.2.7\))
-Subject: Re: [PATCH 14/26] block: move the nonrot flag to queue_limits
-From: Simon Fernandez <fernandez.simon@gmail.com>
-In-Reply-To: <ZnmoANp0TgpxWuF-@kbusch-mbp.dhcp.thefacebook.com>
-Date: Thu, 4 Jul 2024 12:11:16 +0100
-Cc: Christoph Hellwig <hch@lst.de>,
- Jens Axboe <axboe@kernel.dk>,
- Geert Uytterhoeven <geert@linux-m68k.org>,
- Richard Weinberger <richard@nod.at>,
- Philipp Reisner <philipp.reisner@linbit.com>,
- Lars Ellenberg <lars.ellenberg@linbit.com>,
- =?utf-8?Q?Christoph_B=C3=B6hmwalder?= <christoph.boehmwalder@linbit.com>,
- Josef Bacik <josef@toxicpanda.com>,
- Ming Lei <ming.lei@redhat.com>,
- "Michael S. Tsirkin" <mst@redhat.com>,
- Jason Wang <jasowang@redhat.com>,
- =?utf-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
- Alasdair Kergon <agk@redhat.com>,
- Mike Snitzer <snitzer@kernel.org>,
- Mikulas Patocka <mpatocka@redhat.com>,
- Song Liu <song@kernel.org>,
- Yu Kuai <yukuai3@huawei.com>,
- Vineeth Vijayan <vneethv@linux.ibm.com>,
- "Martin K. Petersen" <martin.petersen@oracle.com>,
- linux-m68k@lists.linux-m68k.org,
- linux-um@lists.infradead.org,
- drbd-dev@lists.linbit.com,
- nbd@other.debian.org,
- linuxppc-dev@lists.ozlabs.org,
- ceph-devel@vger.kernel.org,
- virtualization@lists.linux.dev,
- xen-devel@lists.xenproject.org,
- linux-bcache@vger.kernel.org,
- dm-devel@lists.linux.dev,
- linux-raid@vger.kernel.org,
- linux-mmc@vger.kernel.org,
- linux-mtd@lists.infradead.org,
- nvdimm@lists.linux.dev,
- linux-nvme@lists.infradead.org,
- linux-s390@vger.kernel.org,
- linux-scsi@vger.kernel.org,
- linux-block@vger.kernel.org,
- Damien Le Moal <dlemoal@kernel.org>
+MIME-Version: 1.0
+References: <20240626132341.342963-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240626132341.342963-4-prabhakar.mahadev-lad.rj@bp.renesas.com> <ZoUdUyrld2kZorvU@shikoro>
+In-Reply-To: <ZoUdUyrld2kZorvU@shikoro>
+From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date: Thu, 4 Jul 2024 16:56:56 +0100
+Message-ID: <CA+V-a8v5VcBRjp-kPGp2pKXZ2RhCSXHdsL9X5YDOxjL6W1Mg=Q@mail.gmail.com>
+Subject: Re: [PATCH v4 3/3] mmc: renesas_sdhi: Add support for RZ/V2H(P) SoC
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Rob Herring <robh@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>, 
+	Prabhakar <prabhakar.csengg@gmail.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, Biju Das <biju.das.jz@bp.renesas.com>, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	Magnus Damm <magnus.damm@gmail.com>, Conor Dooley <conor+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-Message-Id: <78BDDF6A-1FC7-4DD7-AABF-E0B055772CBF@gmail.com>
-References: <20240617060532.127975-1-hch@lst.de>
- <20240617060532.127975-15-hch@lst.de>
- <ZnmoANp0TgpxWuF-@kbusch-mbp.dhcp.thefacebook.com>
-To: Keith Busch <kbusch@kernel.org>
-X-Mailer: Apple Mail (2.3608.120.23.2.7)
 
-Hi folks, how can I unsubscribe from this group.?
-Thanks in advance.
+Hi Wolfram,
+
+Thank you for the review.
+
+On Wed, Jul 3, 2024 at 10:43=E2=80=AFAM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> Hi Prabhakar,
+>
+> On Wed, Jun 26, 2024 at 02:23:41PM +0100, Prabhakar wrote:
+> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> >
+> > The SDHI/eMMC IPs found in the RZ/V2H(P) (a.k.a. r9a09g057) are very
+> > similar to those found in R-Car Gen3. However, they are not identical,
+> > necessitating an SoC-specific compatible string for fine-tuning driver
+> > support.
+> >
+> > Key features of the RZ/V2H(P) SDHI/eMMC IPs include:
+> > - Voltage level control via the IOVS bit.
+> > - PWEN pin support via SD_STATUS register.
+> > - Lack of HS400 support.
+> > - Fixed address mode operation.
+> >
+> > internal regulator support is added to control the voltage levels of SD
+> > pins via sd_iovs/sd_pwen bits in SD_STATUS register.
+> >
+> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> > Tested-by: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com> # on RZ/G3=
 S
+> > ---
+> > v3->v4
+> > - Dropped using 'renesas,sdhi-use-internal-regulator' property
+> > - Now using of_device_is_available() to check if regulator is available=
+ and enabled
+> > - Dropped extra spaces during operations
+> > - Included tested by tag from Claudiu
+> > - Rebased patch on top of https://patchwork.kernel.org/project/linux-re=
+nesas-soc/patch/20240626085015.32171-2-wsa+renesas@sang-engineering.com/
+> >
+> > v2->v3
+> > - Moved regulator info to renesas_sdhi_of_data instead of quirks
+> > - Added support to configure the init state of regulator
+> > - Added function pointers to configure regulator
+> > - Added REGULATOR_CHANGE_VOLTAGE mask
+> >
+> > v1->v2
+> > - Now controlling PWEN bit get/set_voltage
+> > ---
+> >  drivers/mmc/host/renesas_sdhi.h               |  13 ++
+> >  drivers/mmc/host/renesas_sdhi_core.c          |  98 ++++++++++++
+> >  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 147 ++++++++++++++++++
+> >  drivers/mmc/host/tmio_mmc.h                   |   5 +
+> >  4 files changed, 263 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas=
+_sdhi.h
+> > index f12a87442338..cd509e7142ba 100644
+> > --- a/drivers/mmc/host/renesas_sdhi.h
+> > +++ b/drivers/mmc/host/renesas_sdhi.h
+> > @@ -11,6 +11,8 @@
+> >
+> >  #include <linux/dmaengine.h>
+> >  #include <linux/platform_device.h>
+> > +#include <linux/regulator/driver.h>
+> > +#include <linux/regulator/machine.h>
+> >  #include <linux/workqueue.h>
+> >  #include "tmio_mmc.h"
+> >
+> > @@ -36,6 +38,12 @@ struct renesas_sdhi_of_data {
+> >       unsigned int max_blk_count;
+> >       unsigned short max_segs;
+> >       unsigned long sdhi_flags;
+> > +     struct regulator_desc *rdesc;
+> > +     struct regulator_init_data *reg_init_data;
+> > +     bool regulator_init_state;
+> > +     unsigned int regulator_init_voltage;
+> > +     int (*regulator_force_endis)(struct regulator_dev *rdev, bool ena=
+ble);
+> > +     int (*regulator_force_voltage)(struct regulator_dev *rdev, unsign=
+ed int voltage);
+>
+> I am open for discussing this but maybe here only
+>
+> +       struct renesas_sdhi_regulator *internal_regulator
+>
+> or something and create the new struct with the additions above?
+>
+> > +     int (*regulator_force_endis)(struct regulator_dev *rdev, bool ena=
+ble);
+> > +     int (*regulator_force_voltage)(struct regulator_dev *rdev, unsign=
+ed int voltage);
+>
+> Do we need these functions because the regulator framework cannot force
+> these actions because it caches the old state? I wonder if we can avoid
+> these functions...
+>
+Yes, for the voltage setting, it caches the values. However, for the
+regulator enable/disable, we can use is_enabled(), which probes the
+hardware.
 
-> On 24 Jun 2024, at 18:08, Keith Busch <kbusch@kernel.org> wrote:
->=20
-> On Mon, Jun 17, 2024 at 08:04:41AM +0200, Christoph Hellwig wrote:
->> -#define blk_queue_nonrot(q)	test_bit(QUEUE_FLAG_NONROT, =
-&(q)->queue_flags)
->> +#define blk_queue_nonrot(q)	((q)->limits.features & =
-BLK_FEAT_ROTATIONAL)
->=20
-> This is inverted. Should be:
->=20
-> #define blk_queue_nonrot(q)	(!((q)->limits.features & =
-BLK_FEAT_ROTATIONAL))
->=20
+The reset value for PWEN is 1. The regulator_force_endis() callback is
+mainly added for a scenario where, consider a code flow where the
+regulator is disabled (using regulator_disable()) and now we land in
+the reset callback (i.e., renesas_sdhi_reset()). Here, after issuing
+the reset, the PWEN value will be 1, but we need to restore it back.
+Hence, this callback is necessary. Note that is_enabled() cannot be
+used, as it probes the hardware when it switches states after a reset.
 
+The reset value for IOVS is 3.3V. Below is the scenario for which
+regulator_force_voltage() is added:
+
+-----> Current value: 1.8V (cached by the regulator)
+--------------> After reset:
+------------------> Hardware has 3.3V, but the regulator core cache
+still has 1.8V.
+----------------------> When requested to switch to 1.8V from MMC
+core: The regulator core returns success, as it sees 1.8V in the
+cached state.
+----------------------------> As a result, the SD card won't work.
+
+Cheers,
+Prabhakar
