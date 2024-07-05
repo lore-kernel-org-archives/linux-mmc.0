@@ -1,108 +1,97 @@
-Received: from mail-lf1-f44.google.com (mail-lf1-f44.google.com [209.85.167.44])
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0892175BE
-	for <linux-mmc@vger.kernel.org>; Fri,  5 Jul 2024 06:53:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F4DD1448DF
+	for <linux-mmc@vger.kernel.org>; Fri,  5 Jul 2024 07:03:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720162428; cv=none; b=drDjXlejIxvf3mW/FVo+TiDprM/UKE+UpEBs1rOdPzt7pGjML9Sez/goWkuNR6wh58tN6HnXg1OVJEh1lu4NhtLq1jQ5QVGSxtl54v5MSkv+riz/nliQEhOjfRrB/1gPqlOhcqQST2xV88vVBaggkLmYeNrMxt7Q1nIYkEryhZ0=
+	t=1720162993; cv=none; b=Ts5d06QJC0hhojIWqCdEZpusSEoEDIxVGk0L+hbrW3UyQFE2N9fxg7NH435HhJjFCldIML/2AOU11LNT4qUBf4rZfUXnwvvlAywQHZAAqK9PcTWG5uZix0wy9I5IoWRDiZNeZ2Owe5OpJcFpypp5VMHMgcTasmA2/qbxWjDYFLY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720162428; c=relaxed/simple;
-	bh=4jf1tFaStZgMkcMzqTL6XYQMKykcRb2/mzg7mktiEmw=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=iYJOsI0JanANRBdQX/07gk/Z+SwTaF5e2S4rspTfvvDeZBAMvSNCMZ4AhtPkDn3TkpqVYxsJhN0/i6ViNJz5m7Xws0d6y9MZDP7ZuWM5/drpA1mMNcA4Ed1JP1Zcdp7RvHEUZyoJEKRUxtSp9fRjFJTegFYWLIFlURGAdMSp4XI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=eW8rNNJd; arc=none smtp.client-ip=209.85.167.44
+	s=arc-20240116; t=1720162993; c=relaxed/simple;
+	bh=rxaavTr2I9nl3fSrmr6ylQi37pJsR83Anc77isEaRlk=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=P8S+lG1QeZ809/PvoCWtwBoM6nHSNT1sU3vqD9/pmxZrhBMEZCmGCsDswED3vVyM3n2w6yxXr/xEbxgecJUdvsU9LpHFsyLMXz+YHkJ6Clp4nu5ZwJC6lRA1a1doWP8SCpCzhfIbJrJ2/tBiwhSS5iDQYSe1vAkNf/9yTZ6VwQk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=mkfzFs1m; arc=none smtp.client-ip=209.85.167.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="eW8rNNJd"
-Received: by mail-lf1-f44.google.com with SMTP id 2adb3069b0e04-52ea333534cso82830e87.3
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Jul 2024 23:53:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="mkfzFs1m"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-52e954d7bd5so75094e87.2
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Jul 2024 00:03:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1720162425; x=1720767225; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=M7Z4x0yivXPXPEQUo6hw4ab/l5O+fZbFelcOZbk2dRc=;
-        b=eW8rNNJdvk4XVMO1LJeq3E3LcRRqRX/6yaH1cu75d/RwgCkorM51wcy4yKWwtyJr+J
-         keKUyMKARcIQLAiBRLkkJihOKOV89m5H/Rxv3wXGiIO+h2UOtdy62fqfeE9SAYfUNSqn
-         4REhhFQayxd4kBl78bTWIuwRAGcDbGfBzLr5o4caSwqLerQEcQD+b0NEwXOGiYT0MtIN
-         c+7uups375o0Q17rXc3OCG2JViB8TMgUd2ATrbmf9/CvDm3PlqcCSEAHH+SOA8nEQiQF
-         N9WSqMnWpVhNH40ePmY0aY0txdPwUYXHwbkeEBhxju8jV2THP19Ta8seJa+X/EBG4VLI
-         SZJw==
+        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1720162989; x=1720767789; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=tGYR6LV3kb22UuES5i/CxEB1mMcG3Owc6N4vso5tYIQ=;
+        b=mkfzFs1mDaQokkMSY4Qhf2AddThOlGqX74mE66v8GbyRr0FwVf2YzoQDPSMN0WtOHM
+         7RxfCDCUcT0KBz2dCebXnoZJU8MoJRqmb72qKceYljOwsmuSxcWUgWRigatAKw7JOQEc
+         OUdYTpgKrGOmxxgi5cBU2nMvu3sejYrvYEcVyJPa+7ZIc5a1I5sF8YhuOSSuAw+ph545
+         P1c94ikXeLFl2J2syZgOIvxz2XESESC252HZ9QsP1xDGEnvHV+e67rcuabFuqntImEdD
+         hFmnV6pcvLbjfFzl55+4y3ggZ8IowgQdSHBD9aM5xo+tN4Ol6n8ELBkGmtmDfCJNrwHU
+         ThoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720162425; x=1720767225;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=M7Z4x0yivXPXPEQUo6hw4ab/l5O+fZbFelcOZbk2dRc=;
-        b=Rv7zZi1WvEiRLtQze1L+RaBNPsDJSTflXtYOtxvDW1GXZi+cwWS+I1ALl0o357r1KJ
-         9rZdCq+EPMGGlRsUjzvbCWX55R8iBpzTEjTUF7ylRF0U6ibcDvbqYRZvrG9sFhMA9NmH
-         WPsVYX2KqTNtfFuaJimDBvZUQOeyunfgw5/+dJuOyOFciBDRcBxhsyAijMv+UGmkMH8w
-         +i0q4q3EDXRw5tJFCHdfHSyBBVfHAVxNAqhBK/lkQRVgdU0xNO3wV6VhJBggqdmymR09
-         Zvsa91gj34bgvgnXR14WRKITRrnAfnwd8F7ZlgSOpU+V5VIGOa/W0iADDqJ3V9Kp2nxm
-         SqTg==
-X-Forwarded-Encrypted: i=1; AJvYcCW1yq0Pcth7av4VQ43RMwkOAGiX2HVIblup0s4GbfSghVSiPIeI8IJxWOg3w1hcxjvK2Kkc06SPPqxf6Np0KTeVPteR4rlp/1Do
-X-Gm-Message-State: AOJu0YzYeBFWyI+/x/A+nOfVuTP9spSbah9HuDvHEf/PoXN1WPJw5yhr
-	xPBBZuZ+wePFIZSGtLaK6ejiPJ7W06keLYJF39NpBBGbTL1Mnk1uH+I+hbZPz0w=
-X-Google-Smtp-Source: AGHT+IFNfczTdv82eTZ+LXF4VCvbd5GD/iOKJOT+F5id4a0Gm8xm5UmFmV8h6VwvKjkr+VMnWcCeLQ==
-X-Received: by 2002:a19:4308:0:b0:52c:ce28:82bf with SMTP id 2adb3069b0e04-52ea075dd8bmr2005667e87.5.1720162425042;
-        Thu, 04 Jul 2024 23:53:45 -0700 (PDT)
-Received: from [127.0.0.1] (87-52-80-167-dynamic.dk.customer.tdc.net. [87.52.80.167])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-52e930e0696sm1013105e87.94.2024.07.04.23.53.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Jul 2024 23:53:44 -0700 (PDT)
-From: Jens Axboe <axboe@kernel.dk>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Keith Busch <kbusch@kernel.org>, Conrad Meyer <conradmeyer@meta.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
- linux-block@vger.kernel.org
-In-Reply-To: <20240701165219.1571322-1-hch@lst.de>
-References: <20240701165219.1571322-1-hch@lst.de>
-Subject: Re: (subset) make secure erase and write zeroes ioctls
- interruptible as well
-Message-Id: <172016242389.244840.16151813125838031053.b4-ty@kernel.dk>
-Date: Fri, 05 Jul 2024 00:53:43 -0600
+        d=1e100.net; s=20230601; t=1720162989; x=1720767789;
+        h=content-transfer-encoding:in-reply-to:content-language:references
+         :cc:to:subject:from:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=tGYR6LV3kb22UuES5i/CxEB1mMcG3Owc6N4vso5tYIQ=;
+        b=p7KC6MqRdB4tuEgbvdo0n+YFbOTqpdmchm1NsNxoOiB08EQpbAWgZibKnUud4mWvpx
+         ZvJ2kbkTDn4HVrVsViiTPt69yCnDkY4BqKB+vUL0V7tsW22Ouim6SNApo7DaJMFsmAMB
+         CP7pApBq15WYRTPTaYPbt7nRjUYfOAv/6U6UpnD99PThr0FeQMbT4bqZFpnoRZZq331h
+         Rh9Zvcp6pQdeIDi5je9VJIOd9rxoGJbZx2pA4/wp7/GhoEVfdk+Vya54tWcfWx4p4LFh
+         Hap/Jf6xG9KvcSvRHWTdZQbvqYGyf59uRRUR+rcGIenVA4ERoAst/Dg1QjHj2Lcy4PqE
+         HnLA==
+X-Forwarded-Encrypted: i=1; AJvYcCUBq6j9wkHt3hH6NRagzv2m6YzhyyQTspToSOQzi7lXxxdrzLYyvG1eIUEAOw1jfBBMCsRemr5sF5167TyNIQkafTCDwkPncWBa
+X-Gm-Message-State: AOJu0YyOYIY1IchOC+gGLr0U/PbH1X4uZGx1oD3/FYH1USgq0VSaf4wN
+	hJbKExI+Dl6prRIKRRXb4XcAm5fnjbKX+SBZ50nSazp+2jrvj7U0EehAOoGwrBQ=
+X-Google-Smtp-Source: AGHT+IGnWKiTVywt8pQ6SRb7v9O5oNkOKR3YWTKskwtBydCui5N9lMxR7u1GI9ud38OZAu9sDGe+TQ==
+X-Received: by 2002:a19:6b1a:0:b0:52e:93d9:8f39 with SMTP id 2adb3069b0e04-52ea06bca91mr2289303e87.3.1720162989347;
+        Fri, 05 Jul 2024 00:03:09 -0700 (PDT)
+Received: from [192.168.1.68] (87-52-80-167-dynamic.dk.customer.tdc.net. [87.52.80.167])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-52e7ab3b1f3sm2740066e87.256.2024.07.05.00.03.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 05 Jul 2024 00:03:08 -0700 (PDT)
+Message-ID: <5364ce86-1222-4f30-bb8b-42e68846a2e5@kernel.dk>
+Date: Fri, 5 Jul 2024 01:03:07 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+From: Jens Axboe <axboe@kernel.dk>
+Subject: Re: make secure erase and write zeroes ioctls interruptible as well
+To: Christoph Hellwig <hch@lst.de>
+Cc: Christoph Hellwig <hch@lst.de>, Keith Busch <kbusch@kernel.org>,
+ Conrad Meyer <conradmeyer@meta.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
+References: <20240701165219.1571322-1-hch@lst.de>
+ <b4940767-b5ba-477d-98c6-a9671b2bc290@kernel.dk>
+ <20240705065053.GA12771@lst.de>
+Content-Language: en-US
+In-Reply-To: <20240705065053.GA12771@lst.de>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.0
 
+On Fri, Jul 5, 2024 at 12:50?AM Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Fri, Jul 05, 2024 at 12:45:08AM -0600, Jens Axboe wrote:
+> > In lieu of that, qemu does support mmc it looks like?
+>
+> Hmm, I can take a look.
+>
+> > Wanted to get this queued up, but would probably be best to have
+> > that tested first.
+>
+> The write zeroes patches do not depend on the secure erase patches, and
+> they are what people really care about.  Maybe just skip the secure
+> erase patches and apply the rest for now?
 
-On Mon, 01 Jul 2024 18:51:10 +0200, Christoph Hellwig wrote:
-> Following discard in the last merge window, this series also makes secure
-> erase and discard interruptible by fatal signals.
-> 
-> The secure erase side is a straight port of the discard support.
-> Unfortunately I don't have a way to test it, so I'm adding the eMMC
-> maintainer as that is where the support originated so maybe they can
-> give it a spin?  (just do a blkdiscard -f -s /dev/<dev> and then Ctrl+C)
-> 
-> [...]
+Done - please just resend the secure erase bits when the mmc side is
+happy.
 
-Applied, thanks!
-
-[05/10] block: factor out a blk_write_zeroes_limit helper
-        commit: 73a768d5f95533574bb8ace34eb683a88c40509e
-[06/10] block: remove the LBA alignment check in __blkdev_issue_zeroout
-        commit: ff760a8f0d09f4ba7574ae2ca8be987854f5246d
-[07/10] block: move read-only and supported checks into (__)blkdev_issue_zeroout
-        commit: f6eacb26541ad1eabc40d7e9f5cd86bae7dc0b46
-[08/10] block: refacto blkdev_issue_zeroout
-        commit: 99800ced26b9d87a918aa9824881bdb90a3c1b03
-[09/10] block: limit the Write Zeroes to manually writing zeroes fallback
-        commit: 39722a2f2bcd82bdecc226711412d88b54fcb05b
-[10/10] blk-lib: check for kill signal in ioctl BLKZEROOUT
-        commit: bf86bcdb40123ee99669ee91b67e023669433a1a
-
-Best regards,
 -- 
 Jens Axboe
-
-
 
