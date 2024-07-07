@@ -1,211 +1,550 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com [209.85.208.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC0411AACA
-	for <linux-mmc@vger.kernel.org>; Sun,  7 Jul 2024 10:45:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720349111; cv=fail; b=I8nHnTvjIS8vOogTwpN7+SajD94dor0vh2bm6VjbXIlGRabv2zckUZZWsv/Hnj7unTkGrEmopWjangHn/DyuR7C2CK1m0rapxIpa4Sfu8LhMOAavUyWULoCQyM5rcQlmG83FrwjdacuA5riFR1V9g1WYdKkxKg6vffzUQ8Qp+xg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720349111; c=relaxed/simple;
-	bh=g4SRQJcJMAO1A1Ag2uTta9tGVJZCLDMZS5kwdaJjg1U=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=bctJLfYArfKZ8wZhGtyuDgfRF1OdDqeCZ1dljY/2GAxGshuWsY0HQxQhWfRpwFMOs70G4iJRNQm9sk4yAuKfR7YI2X+McUUP/Qhn2WoMDRO/HVFAcfPoAle7NfZJzN2vWQuiX1XzmNIB1Z7BDdZApu5s3ogRSu0T5KwHitk+rCo=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=R+ccisJo; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=q+nsqNBt; arc=fail smtp.client-ip=216.71.154.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB08DEDC;
+	Sun,  7 Jul 2024 16:06:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.170
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1720368398; cv=none; b=bJynVETBnk+TAXuEFGL/JdIbdi9zq0UDUmsbz5FyY+PD7SB2RwRn2noeaRfiRhZ/R+Yap+L3SHQcciTRGJufe35k0Y7ncEcPiOzMOl/8Zg7YWIrT9zQv/Q0yZne6CYBDwcW+pxurnRXq4Xar25hxlldyk1eSpXc2UY742xIKvMw=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1720368398; c=relaxed/simple;
+	bh=qmGFeqIVRtl5jDHfaj0Y735c93t8wRQZkdRzBL0WRt4=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=lVjiTZo8cz1XESw+UF5MdWW5S1c3e14dZCKxkLm2KoFds3pocuBOtXdIXdOHGkB4Filx8PRDCqaeEF9XdXXcTHpLNPnnNdJDjchxRbM9YiYn9stqyvC3EV/tM5c10zM4d3EciJkB+1Gqcy8zxAxBLQUdgockCnOkixSPm5sFt58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MOeIyuB3; arc=none smtp.client-ip=209.85.208.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="R+ccisJo";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="q+nsqNBt"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1720349109; x=1751885109;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=g4SRQJcJMAO1A1Ag2uTta9tGVJZCLDMZS5kwdaJjg1U=;
-  b=R+ccisJoeTQ2EegnXu2vmGYDqVgFaqigQWEzul8ZBN399+R/RR/M/b9e
-   HegnMJeWdX72c3ymCg0QzWSznXnAhgS+qo/GUn9HS3590Jdxn//4z+O3U
-   FfmiVAvYlPhWvW8VP3Fug7r2lw6cbZnFBB/OJNlARaNdf8rY/NACkhEAN
-   lp1KSoqA4GMLKDfCv6KXGVL/BelwwsSt0xRlo6+lVifXK+Zes9IljTal+
-   X4MP4cmFa9JZGUTDGXr8UsT6zKFfoKmbOeORKmnTchuHF0RorrrTdz8QP
-   EaNVEoCv4nkn8PYiQWfFZH5/nBILitAwU9M6+tWylgHL3h87WhFrSN46Y
-   w==;
-X-CSE-ConnectionGUID: HKYeCL8oR3+M6CPxVJigrA==
-X-CSE-MsgGUID: z7TD3kplRmeDMtKU4Iyf0A==
-X-IronPort-AV: E=Sophos;i="6.09,189,1716220800"; 
-   d="scan'208";a="20268395"
-Received: from mail-eastus2azlp17010000.outbound.protection.outlook.com (HELO BN1PR04CU002.outbound.protection.outlook.com) ([40.93.12.0])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2024 18:45:08 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=F4dIRObvaRNm5YBNanrGZ6D6JsNspOItFVl2B+QYPWGL90yOB0/f89mxPSbfkP8oCRWF74ydvsebmDWLjDBsDUH0ym9E6sOwWG5e3pcGPtLKC6/5njAaXxQfMXT8IwV50p3JDr4prc4zfo+eNGCRqMCKb5ejMzuj85ZXBT5AwQA4Tq2mr7wiAq3J0XuE474yZIw5L70MKJ3hqE7TgKVbQRFreSUQ3v1ZDQ+U2p4cp1TlnosOHqvF9w1E6d3juZuxcyUrhAYKCRKmR8N2hBXYjj6xhFG5W8BNW5l6VpsyOcX2QpWwNXcmuHbxUPWLlLDjTwFP4TrEnaywYFTGS1b14g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=bnpu+AOpdGVlxAcRw+fZ1Jt749lxeRD4ah/j+PvxWZE=;
- b=Z1ipDQKZEZZtlCgLQqwb7UpXpSQF9/xUHJE6nv8+RQ6mzvla2hIT6bD4fZKfNHkhDqg+cL8Nh2ntLCFpleh7mNPX8WWrhraPMLF2msQkkyCfzO/I4WEJ6eIcgynDTwR3fUnelsg755tgbMxTl6+Top5xcqkiMVBfovJ6+PHVTkI4ON226Pf+zfqvnv1yB/4MPMWbWCFJUemmcCXG6xIuin7S9nonXy2lAXDkDMjtQIk0UAO4qluo1+qGcCw1Exzh3TIXUAQXe2BhMW4T5FSAsca2WjjuNZyM5TD91Mf1V27z0a5Gl0VmTxg1Ojpd2o54vmHP8Ks7QrEn9/DEP6NabQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MOeIyuB3"
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-2ee910d6aaeso34791721fa.1;
+        Sun, 07 Jul 2024 09:06:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=bnpu+AOpdGVlxAcRw+fZ1Jt749lxeRD4ah/j+PvxWZE=;
- b=q+nsqNBtRzsNhauEeEMXmplpcl0hS7Db/bhtAogtPbnnC/dvlWBZWAR8HX6uTECAQwxxIZ6/KewYvmnQBX9eNAK4AgUQfnBSLfNI8rZEzXmvWm0hrg8zj1r6HngM5H16BXHkyqNr7nCTv6zpkha0Habpu8E4kpDRulf2rAbDMd8=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM8PR04MB7941.namprd04.prod.outlook.com (2603:10b6:8:e::12) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.7741.34; Sun, 7 Jul 2024 10:45:06 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f%5]) with mapi id 15.20.7741.033; Sun, 7 Jul 2024
- 10:45:06 +0000
-From: Avri Altman <Avri.Altman@wdc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH 0/2] mmc-utils: Elaborate Documentation
-Thread-Topic: [PATCH 0/2] mmc-utils: Elaborate Documentation
-Thread-Index: AQHaxilKlldzZ7h0mUSAfBCCmT0GTbHrKPUw
-Date: Sun, 7 Jul 2024 10:45:06 +0000
-Message-ID:
- <DM6PR04MB6575BA2E06B17E2F6B25FD68FCD92@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20240624112542.25657-1-avri.altman@wdc.com>
-In-Reply-To: <20240624112542.25657-1-avri.altman@wdc.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|DM8PR04MB7941:EE_
-x-ms-office365-filtering-correlation-id: 0e3e54e3-e2a1-46ac-bd50-08dc9e71dd52
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?iepR/6Uud6rVcBsNuuR1radshqG2ULqQXWPlGdBNcxxp1I/gSqgpsIuPINap?=
- =?us-ascii?Q?nHdGI2J0rPJgH5xYWZct92NH4xzbiDzNb/c9y01HZT2P8UYHActkR7czQW7z?=
- =?us-ascii?Q?93+vCvTtPBBEpPjHKcidDBEVuapGGa+FB+CiF/w8qjDAZdr08hKks964vxRL?=
- =?us-ascii?Q?dWuURv6tWMiWDUvjal8DxidHqlHpkdl/37aqTJYjkjMndEpwbrzuWrbOVhXe?=
- =?us-ascii?Q?+GnAswYSmVzf0MFsZizxEwDFtsGwe3fQHMXkD9eNcrzIT6LxVXdKjkiJ/zsu?=
- =?us-ascii?Q?RCJ5VIqpAqhUpv8VzE70seQQ3i0pRnkq84GrqnIe5wn5pnUdY398oMCnEAG3?=
- =?us-ascii?Q?28BrE/g/Kh9atP3Vgn2+gF0Mg6zI8Vbwlsgy50oSpIMvNg81I/dPT09bHhHG?=
- =?us-ascii?Q?32mSYfNDWWn/+luqtjMTf3KiZuAcRs3OVp4g/OJ70OZ6CPXDL+IgskG3Vrii?=
- =?us-ascii?Q?mpKzDN6RdsSnE8JpnZYBvZQ6MmQqwM+eeplPiTpqUpo7CGEZRWs2Jvnh9Lot?=
- =?us-ascii?Q?Eu07SUmOcwCdfJfLsu5zIWlcqO23tXo4AGGfsl801Sc3I7AAguFfgsa+khJk?=
- =?us-ascii?Q?MTLnHm1D4m/bk6pqNYLCVvE2b7YRdHIoXzP7nXjmAlLvNKO1c1nBK2aIqc0C?=
- =?us-ascii?Q?jeldIOh71I1DpK67UnG5FpuFLjkvTcvLvBwVf723MYSS0MJi8PxiDB3xxEwk?=
- =?us-ascii?Q?IoHJt8jAO1+rrX3xWpNJ0ayE0e1g8tf+HocmkzkpTU4Is3ghdXCeHd4QhFlS?=
- =?us-ascii?Q?z3ibfRUMrAdsjt1HdJEYep6ZsIG0Bh3L8N+UGHVhgmnxnafF74MXMJCIWb4K?=
- =?us-ascii?Q?QyoaJ0mf/qbNllCy0yb9rTWsuatgvupzUI7sitzyxU4/fDpWLrDIIEGlGaI+?=
- =?us-ascii?Q?P1EJgUwsWATRP0Hq8Djcy5m++7O1PPtCxzpzO3DuEP2wdXe0KwJqqns5DOO/?=
- =?us-ascii?Q?AIMLwcbYvTIsw5250QJ1Fi/UbRjNzTemESN8wHOOBRq7eSFh/2AGzkgCX0za?=
- =?us-ascii?Q?2VXzUNr8RxEmAlhB2ZYgaZkzaNJ3c+uLARwyjGgZMcjww+GfcDnsqkBvtgH4?=
- =?us-ascii?Q?+yOjf6XhZf05TkJc3LG1qyzdGisnDrkELywbIB8qBZxU8Z3AwVjPH9iRAduv?=
- =?us-ascii?Q?KAC2sb4WzFMsiBLocTL4qbheuqWjPcMYMWy6LHRAPI8dbeJLwz9rgQvyPSUX?=
- =?us-ascii?Q?DyuWgMMd/YDmBFcm0b6F6F5zQUm9NrRfXk9jx9uv0iNyvLsziMHMHmvFiNzl?=
- =?us-ascii?Q?Kog9WGUVZoHpl0KIoR2j82MMSRaMoqFI6VjOL9lUkOPj+pPtrHfpMllytenR?=
- =?us-ascii?Q?mlikNOHRKq4a+rY5kL8EyteKjYkneETJP5RpMPugtgz17qr8urQV6HuONC07?=
- =?us-ascii?Q?L16I+Ys=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?QauzivGKdwDh4tCjk/1MBKCHKPEpWNqv4goj+40TW9e5Ey9sKhmTGi/BoVgx?=
- =?us-ascii?Q?XsLgQI9kI7CjluALtkO7mUcqqQhHE3qFz/23vrExJ8L26/OrlpMG3wAR6d2e?=
- =?us-ascii?Q?JYq1v0SI9Yz4XpG/iKdZZMkpw6z3LbqcZ6zc0jQtlCMBDCdRG0VKYGYX5qg/?=
- =?us-ascii?Q?GbOYM8+H2bT/ZeM1zxT69MydWpBntsT2RCwlKTwzU4Whm9Xb4YBXTQGdKhim?=
- =?us-ascii?Q?J3BHWvOODjgBI80VjmWCnEgEEpBmcv8h18F7mhkCLHNLWYLJJOikosErnGlu?=
- =?us-ascii?Q?JWE5f5ER5c4rD/EYEEmlcpSJ9DWEfjkABMeE0DFbectgoQy1Nx/0LC9xDz4L?=
- =?us-ascii?Q?rzsWD24EqYoS6+bbJNYWfsJzec+VjpJPNPOr/7lgtveZtZz0Cq7xMjgpa5yc?=
- =?us-ascii?Q?2WOeXjc74LsraRja9zOYIUNHAYQPMDAWYD7OhZo1CFLH6nCp5frck5QwZ5mF?=
- =?us-ascii?Q?P6ov2FA0Ul9mEbPHZosmOx7LD4C9ZMxcjmaiIw+jmRj7SVlqX/vbvULRu9ga?=
- =?us-ascii?Q?ogo6f0Cc7gymq7xM5FS9ccY5w49YTdrcaxAKpCqXYI6KpvT3titcgJFilHFS?=
- =?us-ascii?Q?7RNs4C8K2HQ9SxYtX/m3BWQL1eJV2x0Rx417RVQxiHbydhaxCBMeM6dQUFQw?=
- =?us-ascii?Q?u6pmGhsQj/4DDsRghiYSYAk3x1/RE0W8dXWzaB/jQFIELwUZgs51EY639+Ok?=
- =?us-ascii?Q?AibHn4RBEkENvxCiouGODTpI9ujTdnothVHx1jnJS/JKYSwaJsJhU1etVgo0?=
- =?us-ascii?Q?Jk486BqBlZDehGQgWoSHCKpI9fTj8hzwdOZLA3dVsDBNnrnRLvObsFMiq3oQ?=
- =?us-ascii?Q?na2bc6sz6yjpPVuljrJt4R3A2uLdQDEacOAxRRoL4rdtv2oTiY1AozviqFK9?=
- =?us-ascii?Q?Y16uzFIxGKHts8Tp+zPPm2nGcjD4mNvSk2onJ5d42vzOMO9+ArWCBtiqZ4LV?=
- =?us-ascii?Q?ZLnIPwtA3Pipx1Q1oSC65BxAUtXRjNkC9WzEGA43x+E+/LE3E91BeoYXIHVA?=
- =?us-ascii?Q?VmDW5El9zSm+pMxlcRcQpPtR0tfSSGlZw45HRLDfx2nZ/Jr7B2EkbpmzD88s?=
- =?us-ascii?Q?7dmGLsAdZqYcvhAqhadkRPiS4v9UVt95OM8WGlY+964mGzDzTNaNb9LascIy?=
- =?us-ascii?Q?rZo50jtKcWnWC9feuoSYztoT+EnuaPYelVW/Xg9ybHmq3OitOQ00ozS80lS1?=
- =?us-ascii?Q?yf492jie8ZT5qo12BX/ms9YcLlk31+WrQU8SOdF+FWB+LZMIJCwev4Pb0Xaw?=
- =?us-ascii?Q?25tSHcZ9FrBtJwHzQLb65A9Jsw3gkm2eLqW+32zVSr5ElAmFi4GUGBMVnLfD?=
- =?us-ascii?Q?nY4/xs2lkCHnb0CIqKoqWe6JeNckupwxUzCbdejjSF2ofQRxrnpMVLQxiqQu?=
- =?us-ascii?Q?pGjNXgCYDQnYXrlkKEbS0EGx1xK+iEJ1abjSLDqQyMnByaH1xX1N/fNGkOUh?=
- =?us-ascii?Q?o96tExtqbhpDnnmqEmOiA8gUBQG6Ukk1+Sc2h3GkETfxQUidJu6pqL6KFcX8?=
- =?us-ascii?Q?ui3viS6aPtgqYQqz3JN5w/+9tSvbL9Hphv4NZ73Qvo4jO9c8UVaUfJ7+Tpg3?=
- =?us-ascii?Q?DJJ75xqrpE925IW6ixt8rFvyMUHEnNfPenWdpSVV?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20230601; t=1720368394; x=1720973194; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=3/HhqMkLGKu3CQaSHjV4RBU6xYguRPqmHbickJ7CSiE=;
+        b=MOeIyuB3txOu1ZREUYaOqI8tiWvMNpa+H5TVJUdxheC8aFUSWawHq5AkEmvwTIX4Sc
+         x0f9g0+8LtGCSeo/heJVzX1ey7nEiFdZcHbISL4+iYy3xzxFYLJ0Olni8GJUmKIp27TA
+         FF5RWWUaUM4LMKy+9b9H5bubJFwZvfehRwqYrHJrPC4wKK6GkBSrKbMCTnvSiHhj9E2u
+         1h1QNM3TpSZX1nAo4psCDVrfpGzezCGDgj5yIo14YYxTVxP1SLFFl+nz7qLxpmwnMvbq
+         47JSI1i3WO3tMhgTCeytnnmd/1zlv+LTRc5VLDByDkDv0rgoTowhlAbFXovVNsVcT759
+         4HbQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1720368394; x=1720973194;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3/HhqMkLGKu3CQaSHjV4RBU6xYguRPqmHbickJ7CSiE=;
+        b=Z5gUPALHe4sRioKK2TWigAmBepWzRbNI0c/hffT1RvyqVfp9I/0Kkr7YLr+KrPv9O5
+         UTxet/l5/Hl/B+4dR8stJTfgBBwLmKcEvKzEmk8TpNXLh4hjhrSa+QpXsSQUfBDIAsMh
+         zvsIXuaMYMru1qA+wHU8YTrCPwgBHKs8JRa9Ge+qN1jClA6b2xcvq1MIAe8L+OWPgep3
+         FI6VyM2k0XgmCSfeP0DbUHvoEYGNXMf/DM3lLY3mh9RtRVLdZb8GNPJzNBh2L2umKhk8
+         rfv+yjhiR1SgaF9AUjGcqKedgT5CIjwmMvgAauc7bhDWDto/IlYm/1OqwAbMcBlVRPgb
+         2r+Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVZnzu8qhJV/tFrE8a6liOUW1+plGDoqjykqAKlZ08DAFFrJwodDRbrV5LWThcTqrLQ7iAKU3UQDJ2jOhHosKRJCq5wqzGzOSQB
+X-Gm-Message-State: AOJu0YwCi2fSw+IoIgkcrJwT92O2dk3q+EEHdI1nwfSg5/U+7t3Fpha0
+	bby3utz61lC5VCoZZBFcczH8hPRUvqGLvF8IGiVBVoKLb5EX5Y3tPs7KDjOs4x0=
+X-Google-Smtp-Source: AGHT+IFJSW37MHNz7AelfnqDiXzYq5LprGNfj8wWYP+ZRjdVn9Y3BBHMdVaW4fab9GjZ4VU1VDOlUw==
+X-Received: by 2002:a2e:a316:0:b0:2ee:7c37:a5d5 with SMTP id 38308e7fff4ca-2ee8ed879fbmr64520731fa.25.1720368393993;
+        Sun, 07 Jul 2024 09:06:33 -0700 (PDT)
+Received: from localhost.localdomain ([176.194.243.4])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2ee962b0f11sm6429581fa.34.2024.07.07.09.06.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 07 Jul 2024 09:06:33 -0700 (PDT)
+From: Mikhail Krasheninnikov <krashmisha@gmail.com>
+To: linux-kernel@vger.kernel.org
+Cc: Mikhail Krasheninnikov <krashmisha@gmail.com>,
+	Matwey Kornilov <matwey.kornilov@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org,
+	"Michael S. Tsirkin" <mst@redhat.com>,
+	Jason Wang <jasowang@redhat.com>,
+	Paolo Bonzini <pbonzini@redhat.com>,
+	Stefan Hajnoczi <stefanha@redhat.com>,
+	Xuan Zhuo <xuanzhuo@linux.alibaba.com>,
+	virtualization@lists.linux-foundation.org
+Subject: [PATCH RFC v2] mmc/virtio: Add virtio MMC driver for QEMU emulation
+Date: Sun,  7 Jul 2024 16:05:55 +0000
+Message-Id: <20240707160555.78062-1-krashmisha@gmail.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	aqMWPfIH14MwzjpVBVgvd1MfxbBRF/3Dky/5zrsUzVULy1snFBB707Ws0GDkaUsMI2mKfOFn0mkdIOPQ+la0eK4bat61a2zcy4qh+Xl0Zaw8LGT3omtTcBWaSnuylR0wn4lCymOsw7Pwd6QqXVAvO8zU7KPDNVRRJjQ3LtgZOy7a0FY0bwE6mOofWXzjoaXjkV/bl4wIytlDD+kGuVx0/wLRwmNBbEm7CLlE1FBWbviDLxh2QUdJ9fMC8BHwmrDaHBKKheE1t6XTjpawT2GSqOT6RC4Xu/1dji3B/lzDNcb1ksCX683CnADapteX7aMJtd6cS9fffqHKBjQcoAQ8X7eWlUvlnSLqi0XELXZBg8V1WXKhflgpbQxaBDiasweyxH2iMR+N0PWiaZnV5+IQxGGRmfiiROGCemZGz2vtNTZFCHlYZASTG8SKyXtD/dk9cKUcO5bOqNzRXz2R4SFFNtXzLOUPK4Kg+0QNtnumERyha4B4nHHVYqWOVvaXDmum+N8iI2nsZ1iJp8uDLPjPEx4zM3ZSGowRuqn62GvDNyDC8en1+NTpNiGxff20rhEMvcWGy8tUo+FWC7fKSNG16gGcM1gy+a+MWNiyeW2BEcBjA+LAHMyUkRoW5LqAKhO6
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0e3e54e3-e2a1-46ac-bd50-08dc9e71dd52
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2024 10:45:06.1144
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: MQEYDE3nWYiyN1LY8BavJIAMCSIOFDFheOWwrkjJUiIDOk/AV59wd4WzNyZY5rRBF/C7l69HPjKBSP6IvAcXdA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM8PR04MB7941
+Content-Transfer-Encoding: 8bit
 
-A gentle ping.
+Introduce a new virtio MMC driver to enable virtio SD/MMC card
+emulation with QEMU. This driver allows emulating MMC cards in
+virtual environments, enhancing functionality and testing
+capabilities within QEMU.
 
-Thanks,
-Avri
+Link to the QEMU patch:
+https://lists.nongnu.org/archive/html/qemu-block/2024-07/msg00221.html
 
-> Here is an elaboration of documentations to pair up with the recent
-> addition of mmc-utils man page. It adds a public page:
-> https://mmc-utils.readthedocs.io/en/latest/.
->=20
-> Shamefully, I recently became aware that Marcus Folkesson already added
-> a man page quite some time ago, so this time I double-checked that
-> Read-the-Docs doesn't already have a mmc-utils page.
->=20
-> One thing that can greatly improve this page is an "examples" section.
-> A good practice would be for field application and validation engineers
-> that uses the tool daily to share their use-cases and practice.
->=20
-> Keeping the documentation page updated, I created a github repo to
-> mirror mmc-utils official repo and can be imported and re-built -
-> https://github.com/avri-altman-wdc/mmc-utils.
->=20
-> Avri Altman (2):
->   mmc-utils: Add documentation section
->   mmc-utils: Add Read-the-Docs configuration
->=20
->  .gitignore            |  1 +
->  .readthedocs.yaml     | 17 ++++++++++
->  Makefile              |  5 +++
->  README                |  6 +++-
->  docs/HOWTO.rst        | 67 ++++++++++++++++++++++++++++++++++++++
->  docs/Makefile         | 20 ++++++++++++
->  docs/README.rst       | 76 +++++++++++++++++++++++++++++++++++++++++++
->  docs/conf.py          | 53 ++++++++++++++++++++++++++++++
->  docs/index.rst        | 17 ++++++++++
->  docs/requirements.txt |  2 ++
->  10 files changed, 263 insertions(+), 1 deletion(-)
->  create mode 100644 .readthedocs.yaml
->  create mode 100644 docs/HOWTO.rst
->  create mode 100644 docs/Makefile
->  create mode 100644 docs/README.rst
->  create mode 100644 docs/conf.py
->  create mode 100644 docs/index.rst
->  create mode 100644 docs/requirements.txt
->=20
-> --
-> 2.34.1
+No changes to existing dependencies or documentation.
+
+Signed-off-by: Mikhail Krasheninnikov <krashmisha@gmail.com>
+CC: Matwey Kornilov <matwey.kornilov@gmail.com>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: linux-mmc@vger.kernel.org
+CC: "Michael S. Tsirkin" <mst@redhat.com>
+CC: Jason Wang <jasowang@redhat.com>
+CC: Paolo Bonzini <pbonzini@redhat.com>
+CC: Stefan Hajnoczi <stefanha@redhat.com>
+CC: Xuan Zhuo <xuanzhuo@linux.alibaba.com>
+CC: virtualization@lists.linux-foundation.org
+
+---
+Changes from v1:
+ - Add MAINTAINERS entry
+ - Refactor includes
+ - Change CPU endian format to little endian for device communication
+ - Move structs that belonged to uapi
+ - Validate multiple fields
+ - Introduce mutexes for safe request handling
+ - Call virtio_device_ready before adding host
+ - Fix removal of the device
+
+ MAINTAINERS                       |  15 ++
+ drivers/mmc/host/Kconfig          |  14 ++
+ drivers/mmc/host/Makefile         |   2 +
+ drivers/mmc/host/virtio-sdhci.c   | 258 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/virtio-sdhci.h   |  40 +++++
+ include/uapi/linux/virtio-sdhci.h |  39 +++++
+ include/uapi/linux/virtio_ids.h   |   1 +
+ 7 files changed, 369 insertions(+)
+ create mode 100644 drivers/mmc/host/virtio-sdhci.c
+ create mode 100644 drivers/mmc/host/virtio-sdhci.h
+ create mode 100644 include/uapi/linux/virtio-sdhci.h
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index dd5de540ec0b..be86156cd66c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -22907,6 +22907,21 @@ S:	Maintained
+ F:	drivers/nvdimm/nd_virtio.c
+ F:	drivers/nvdimm/virtio_pmem.c
+ 
++VIRTIO SDHCI DRIVER
++M:	Mikhail Krasheninnikov <krashmisha@gmail.com>
++M:	"Michael S. Tsirkin" <mst@redhat.com>
++M:	Jason Wang <jasowang@redhat.com>
++M:	Paolo Bonzini <pbonzini@redhat.com>
++M:	Stefan Hajnoczi <stefanha@redhat.com>
++M:	Xuan Zhuo <xuanzhuo@linux.alibaba.com>
++L:	virtualization@lists.linux-foundation.org
++L:	linux-mmc@vger.kernel.org
++L:	OASIS-virtio@ConnectedCommunity.org
++S:	Maintained
++F:	drivers/mmc/host/virtio-sdhci.c
++F:	drivers/mmc/host/virtio-sdhci.h
++F:	include/uapi/linux/virtio-sdhci.h
++
+ VIRTIO SOUND DRIVER
+ M:	Anton Yakovlev <anton.yakovlev@opensynergy.com>
+ M:	"Michael S. Tsirkin" <mst@redhat.com>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 554e67103c1a..d62d669ee117 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -1069,3 +1069,17 @@ config MMC_LITEX
+ 	  module will be called litex_mmc.
+ 
+ 	  If unsure, say N.
++
++config SDHCI_VIRTIO
++	tristate "VirtIO SDHCI Host Controller support"
++	depends on VIRTIO
++	help
++	  This enables support for the Virtio SDHCI driver, which allows the
++	  kernel to interact with SD/MMC devices over Virtio. Virtio is a
++	  virtualization standard for network and disk device drivers,
++	  providing a common API for virtualized environments.
++
++	  Enable this option if you are running the kernel in a virtualized
++	  environment and need SD/MMC support via Virtio.
++
++	  If unsure, say N.
+\ No newline at end of file
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index a693fa3d3f1c..f9b05a07c6db 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -108,3 +108,5 @@ endif
+ 
+ obj-$(CONFIG_MMC_SDHCI_XENON)	+= sdhci-xenon-driver.o
+ sdhci-xenon-driver-y		+= sdhci-xenon.o sdhci-xenon-phy.o
++
++obj-$(CONFIG_SDHCI_VIRTIO)	+= virtio-sdhci.o
+\ No newline at end of file
+diff --git a/drivers/mmc/host/virtio-sdhci.c b/drivers/mmc/host/virtio-sdhci.c
+new file mode 100644
+index 000000000000..1a637ab5e010
+--- /dev/null
++++ b/drivers/mmc/host/virtio-sdhci.c
+@@ -0,0 +1,258 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ *  VirtIO SD/MMC driver
++ *
++ *  Author: Mikhail Krasheninnikov <krashmisha@gmail.com>
++ */
++
++#include "virtio-sdhci.h"
++#include "linux/mmc/host.h"
++#include "linux/virtio.h"
++#include "linux/virtio_config.h"
++#include "linux/completion.h"
++#include "uapi/linux/virtio-sdhci.h"
++
++struct virtio_sdhci_host {
++	struct virtio_device *vdev;
++	struct mmc_host *mmc;
++	struct virtqueue *vq;
++	struct mmc_request *current_request;
++
++	struct virtio_mmc_request virtio_request;
++	struct virtio_mmc_response virtio_response;
++
++	struct completion request_handled;
++	spinlock_t handling_request;
++};
++
++static void virtio_sdhci_vq_callback(struct virtqueue *vq)
++{
++	unsigned int len;
++	struct mmc_host *mmc;
++	struct virtio_sdhci_host *host;
++	struct virtio_mmc_request *virtio_request;
++	struct virtio_mmc_response *virtio_response;
++	struct mmc_request *mrq;
++
++	mmc = vq->vdev->priv;
++	host = mmc_priv(mmc);
++	mrq = host->current_request;
++	virtio_request = &host->virtio_request;
++
++	virtio_response = virtqueue_get_buf(vq, &len);
++
++	if (!virtio_response)
++		return;
++
++	memcpy(mrq->cmd->resp, virtio_response->cmd_resp,
++	       min(4 * (int)sizeof(u32), virtio_response->cmd_resp_len));
++
++	if (virtio_request->flags & VIRTIO_MMC_REQUEST_DATA) {
++		mrq->data->bytes_xfered =
++			min((unsigned int)virtio_request->buf_len,
++			    mmc->max_blk_size);
++
++		if (!(virtio_request->flags & VIRTIO_MMC_REQUEST_WRITE)) {
++			sg_copy_from_buffer(mrq->data->sg, mrq->data->sg_len,
++					    virtio_response->buf,
++					    mrq->data->bytes_xfered);
++		}
++	}
++
++	complete(&host->request_handled);
++}
++
++static void virtio_sdhci_send_and_recv_request_from_qemu(struct virtio_sdhci_host *data)
++{
++	struct scatterlist sg_out_linux, sg_in_linux;
++
++	sg_init_one(&sg_out_linux, &data->virtio_request,
++		    sizeof(struct virtio_mmc_request));
++	sg_init_one(&sg_in_linux, &data->virtio_response,
++		    sizeof(struct virtio_mmc_response));
++
++	struct scatterlist *request[] = { &sg_out_linux, &sg_in_linux };
++
++	if (virtqueue_add_sgs(data->vq, request, 1, 1, &data->virtio_response,
++			      GFP_KERNEL) < 0) {
++		dev_crit(&data->vdev->dev, "Failed to add sg\n");
++		return;
++	}
++
++	virtqueue_kick(data->vq);
++	wait_for_completion(&data->request_handled);
++}
++
++static inline size_t __calculate_len(struct mmc_data *data)
++{
++	size_t len = 0;
++
++	for (int i = 0; i < data->sg_len; i++)
++		len += data->sg[i].length;
++	return len;
++}
++
++/* MMC layer callbacks */
++
++static void virtio_sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct virtio_sdhci_host *host;
++	struct virtio_mmc_request *virtio_req;
++	struct mmc_data *mrq_data;
++
++	host = mmc_priv(mmc);
++
++	spin_lock(&host->handling_request);
++
++	WARN_ON(host->current_request != NULL);
++
++	host->current_request = mrq; // Saving the request for the callback
++
++	virtio_req = &host->virtio_request;
++	memset(virtio_req, 0, sizeof(struct virtio_mmc_request));
++
++	virtio_req->request.opcode = mrq->cmd->opcode;
++	virtio_req->request.arg = mrq->cmd->arg;
++
++	mrq_data = mrq->data;
++	if (mrq_data) {
++		virtio_req->flags |= VIRTIO_MMC_REQUEST_DATA;
++
++		virtio_req->buf_len = __calculate_len(mrq->data);
++
++		virtio_req->flags |= ((mrq_data->flags & MMC_DATA_WRITE) ?
++					      VIRTIO_MMC_REQUEST_WRITE :
++					      0);
++		if (virtio_req->flags & VIRTIO_MMC_REQUEST_WRITE) {
++			sg_copy_to_buffer(mrq_data->sg, mrq_data->sg_len,
++					  virtio_req->buf, virtio_req->buf_len);
++		}
++	}
++
++	if (mrq->stop) {
++		virtio_req->flags |= VIRTIO_MMC_REQUEST_STOP;
++
++		virtio_req->stop_req.opcode = mrq->stop->opcode;
++		virtio_req->stop_req.arg = mrq->stop->arg;
++	}
++
++	if (mrq->sbc) {
++		virtio_req->flags |= VIRTIO_MMC_REQUEST_SBC;
++
++		virtio_req->sbc_req.opcode = mrq->sbc->opcode;
++		virtio_req->sbc_req.arg = mrq->sbc->arg;
++	}
++
++	virtio_sdhci_send_and_recv_request_from_qemu(host);
++
++	host->current_request = NULL;
++	spin_unlock(&host->handling_request);
++	mmc_request_done(mmc, mrq);
++}
++
++static void virtio_sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++}
++
++static int virtio_sdhci_get_ro(struct mmc_host *mmc)
++{
++	return 0;
++}
++
++static int virtio_sdhci_get_cd(struct mmc_host *mmc)
++{
++	return 1;
++}
++
++static const struct mmc_host_ops virtio_sdhci_host_ops = {
++	.request = virtio_sdhci_request,
++	.set_ios = virtio_sdhci_set_ios,
++	.get_ro = virtio_sdhci_get_ro,
++	.get_cd = virtio_sdhci_get_cd,
++};
++
++static inline void __fill_host_attr(struct mmc_host *host)
++{
++	host->ops = &virtio_sdhci_host_ops;
++	host->f_min = 300000;
++	host->f_max = 500000;
++	host->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++	host->caps = MMC_CAP_SD_HIGHSPEED;
++	host->caps2 = MMC_CAP2_NO_SDIO | MMC_CAP2_NO_MMC | MMC_CAP2_HS400;
++	host->max_blk_size = 4096;
++}
++
++static int create_host(struct virtio_device *vdev)
++{
++	int err;
++	struct mmc_host *mmc;
++	struct virtio_sdhci_host *host;
++
++	mmc = mmc_alloc_host(sizeof(struct virtio_sdhci_host), &vdev->dev);
++	if (!mmc) {
++		pr_err("virtio_mmc: Failed to allocate host\n");
++		return -ENOMEM;
++	}
++
++	__fill_host_attr(mmc);
++
++	vdev->priv = mmc;
++
++	host = mmc_priv(mmc);
++	host->vdev = vdev;
++
++	spin_lock_init(&host->handling_request);
++	init_completion(&host->request_handled);
++
++	host->vq =
++		virtio_find_single_vq(vdev, virtio_sdhci_vq_callback, "vq_name");
++	if (!host->vq) {
++		pr_err("virtio_mmc: Failed to find virtqueue\n");
++		mmc_free_host(mmc);
++		return -ENODEV;
++	}
++
++	virtio_device_ready(vdev);
++
++	err = mmc_add_host(mmc);
++	if (err) {
++		pr_err("virtio_mmc: Failed to add host\n");
++		mmc_free_host(mmc);
++		return err;
++	}
++
++	return 0;
++}
++
++static int virtio_sdhci_probe(struct virtio_device *vdev)
++{
++	int err;
++
++	err = create_host(vdev);
++	if (err)
++		pr_err("virtio_mmc: Failed to make host\n");
++
++	return 0;
++}
++
++static void remove_mmc_host(struct mmc_host *host)
++{
++	/*
++	 * Host is claimed while removing, so all ongoing
++	 * requests would be handled before removal and no
++	 * additional control is required
++	 */
++	mmc_remove_host(host);
++	mmc_free_host(host);
++}
++
++static void virtio_sdhci_remove(struct virtio_device *vdev)
++{
++	struct mmc_host *mmc = vdev->priv;
++	struct virtio_sdhci_host *host = mmc_priv(mmc);
++
++	complete(&host->request_handled);
++	remove_mmc_host(mmc);
++	virtio_reset_device(vdev);
++	vdev->config->del_vqs(vdev);
++}
+diff --git a/drivers/mmc/host/virtio-sdhci.h b/drivers/mmc/host/virtio-sdhci.h
+new file mode 100644
+index 000000000000..db35268e7b64
+--- /dev/null
++++ b/drivers/mmc/host/virtio-sdhci.h
+@@ -0,0 +1,40 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later
++ *
++ *  VirtIO SD/MMC driver
++ *
++ *  Author: Mikhail Krasheninnikov <krashmisha@gmail.com>
++ */
++
++#ifndef _VIRTIO_MMC_H
++#define _VIRTIO_MMC_H
++
++#include <linux/virtio.h>
++#include <linux/virtio_ids.h>
++
++static int virtio_sdhci_probe(struct virtio_device *vdev);
++
++static void virtio_sdhci_remove(struct virtio_device *vdev);
++
++static const struct virtio_device_id id_table[] = {
++	{ VIRTIO_ID_SDHCI, VIRTIO_DEV_ANY_ID },
++	{ 0 },
++};
++
++static struct virtio_driver virtio_sdhci_driver = {
++	.driver = {
++		.name	= KBUILD_MODNAME,
++		.owner	= THIS_MODULE,
++	},
++	.id_table	= id_table,
++	.probe		= virtio_sdhci_probe,
++	.remove		= virtio_sdhci_remove,
++};
++
++module_virtio_driver(virtio_sdhci_driver);
++MODULE_DEVICE_TABLE(virtio, id_table);
++
++MODULE_AUTHOR("Mikhail Krasheninnikov");
++MODULE_DESCRIPTION("VirtIO SD/MMC driver");
++MODULE_LICENSE("GPL");
++
++#endif
+diff --git a/include/uapi/linux/virtio-sdhci.h b/include/uapi/linux/virtio-sdhci.h
+new file mode 100644
+index 000000000000..751ed215bc61
+--- /dev/null
++++ b/include/uapi/linux/virtio-sdhci.h
+@@ -0,0 +1,39 @@
++/* SPDX-License-Identifier: GPL-2.0-or-later
++ *
++ *  VirtIO SD/MMC driver
++ *
++ *  Author: Mikhail Krasheninnikov <krashmisha@gmail.com>
++ */
++#ifndef _LINUX_VIRTIO_MMC_H
++#define _LINUX_VIRTIO_MMC_H
++#include <linux/types.h>
++
++struct mmc_req {
++	__le32 opcode;
++	__le32 arg;
++};
++
++struct virtio_mmc_request {
++	u8 flags;
++
++#define VIRTIO_MMC_REQUEST_DATA BIT(1)
++#define VIRTIO_MMC_REQUEST_WRITE BIT(2)
++#define VIRTIO_MMC_REQUEST_STOP BIT(3)
++#define VIRTIO_MMC_REQUEST_SBC BIT(4)
++
++	struct mmc_req request;
++
++	u8 buf[4096];
++	__le32 buf_len;
++
++	struct mmc_req stop_req;
++	struct mmc_req sbc_req;
++};
++
++struct virtio_mmc_response {
++	__le32 cmd_resp[4];
++	int cmd_resp_len;
++	u8 buf[4096];
++};
++
++#endif /* _LINUX_VIRTIO_MMC_H */
+diff --git a/include/uapi/linux/virtio_ids.h b/include/uapi/linux/virtio_ids.h
+index 7aa2eb766205..6de8d432db7f 100644
+--- a/include/uapi/linux/virtio_ids.h
++++ b/include/uapi/linux/virtio_ids.h
+@@ -68,6 +68,7 @@
+ #define VIRTIO_ID_AUDIO_POLICY		39 /* virtio audio policy */
+ #define VIRTIO_ID_BT			40 /* virtio bluetooth */
+ #define VIRTIO_ID_GPIO			41 /* virtio gpio */
++#define VIRTIO_ID_SDHCI         42 /* virtio mmc */
+ 
+ /*
+  * Virtio Transitional IDs
+-- 
+2.34.1
 
