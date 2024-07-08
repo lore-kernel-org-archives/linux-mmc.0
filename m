@@ -1,121 +1,129 @@
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFEE71386BF
-	for <linux-mmc@vger.kernel.org>; Mon,  8 Jul 2024 13:43:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA17225745;
+	Mon,  8 Jul 2024 14:19:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720446220; cv=none; b=MPpMBTsakpTZ1jxJQk02I5cR14Z5y824lXpGDBPs5rLqlL3DnYgM9VmCVRa4z2N9M5wPZnZPV+3R4yZ+sXgBIjgaimTrxYVq1Wmg2b7dK476B+eirAsK7spZVwfQckz6zDuLBbpIKyK+iBlHap7TzWoHj7pSB1+gS1UEopvass0=
+	t=1720448361; cv=none; b=RG4ilEGOhJczA7qjIzAdBA2K4ZX0VsR4WTv37RaT924H1e0BWKb7lUS9eYducOsYu9WwlSyc2r8Cf9/FrpzRXLHRxo08JzyPrcr6NtYm7zx5+xsv6UPVLAPJqqOLKjD8HMdoAsvEh1SrvbjkbBFSyYmqe2CbXYKxE+EgN5q9QAQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720446220; c=relaxed/simple;
-	bh=PoZpE4mLEJ9RRHcFaQ/S2FCQqRb7izLgnvLDLnKlrhs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JFW2dsW+6PbpRIKHtggR+fbtiF1cCyuHnwQ5UdF05aLo0qBKDJ62TXiSSIhp3Iyi8uQ0wXzfUPrdnZpfxJipTgLj7uOPbE1DWAw3LMt+UIVjC/T8rNMO08IxaZm30mvKdyIG1zNZh6519u0tAcEKsj6jLvwcnv0I/KPEQJtL6O4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=m+BT+UGw; arc=none smtp.client-ip=209.85.219.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1720448361; c=relaxed/simple;
+	bh=zxDS7ZUzuVyJRAnDAenP+Tt2MHcowuCTzWPQAP8b5bU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=GmNUHjOQ/LjwGcOUu5fsuu1MmpGiC+AoB7iTJcs2grrw7FtpEkQZTuknBdGbN8UaO4TkatgL1Dmb+kDuL5xbvB3qKj3ZxS0W7PQtZpbH7molV+TXXzz752jkcSNggazVwnHIzql3eoHu1Umn6yJlQhwBs8o9SAmmA4EnRZVxXFw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rr8PHOkB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m+BT+UGw"
-Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e04196b7603so135410276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jul 2024 06:43:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1720446218; x=1721051018; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=OYa3dMigYX1AmuvCTpji/dSfuY3QuxLjFAYr4cKdF78=;
-        b=m+BT+UGwpTvIfwuTJ9wmyNuZIjgRfvk0xcxFYUi4MneOc7BYLyoTsih0EqC1dXsmb2
-         1SE+SdUjlnL4l00bOjxFUDz2T4JGyqYNvdQYyuMr8qVYAzezXE5O5qTVhil0oFe+9dnP
-         JKmjPqsZW3fYjcMviKjWms0n6SAG6nDrvK2IZxJ7f33mUPWA/ZX2wdowWpd0BUuPBOei
-         W9TDye06CRramTU67Wzj2Z56A9ent+wsiJKUFOnp1Bqe2/L0JOQB9c7MI5rr3ZYmQbKk
-         JspOf4kXerrZ0SDN/fNI1vr3Nz7Do4TT6dH5DG8QcrMy2THL5NeH0YOAi4JTQBe13MxA
-         fO2Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720446218; x=1721051018;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=OYa3dMigYX1AmuvCTpji/dSfuY3QuxLjFAYr4cKdF78=;
-        b=i08Aq5Dm4PsdOP9BQ8HKZ3d8x4qm0eBGHk1pgSk2TY7QtLdGSi5otMjQoxZB1wr0fu
-         Bz3Tp9eixOQU09dq3jjZjnDhewLqIkioSdFe5TrJVmaoJBVKri8o992fNJbgm9p2OHKi
-         eqgaSZJcfmgMPkQ1tn2ogu86iRNoCAmJBVsynuaRl7X3AYTYvYqyzUDcd+P3xJ+zJ7AA
-         Hepb4rVUmDyBomV9H27VYKqKoqUAA3nhRtcCkMzcnemn3Sqinu/NJG9H8+8X5n2hoHhd
-         vreCkqSLW12SbOUt1DgPdud74LZILAXetRn01XD9o4AtQCiJj1yOUwjc0Kq0bbIXlk8I
-         im9g==
-X-Gm-Message-State: AOJu0Yyoi8dH4Xg9HhB0jZTPvo2T4ErcvKf/fwFnFOpMts5kcUwJflJO
-	+fhcb7+vsD8v0KzBhP9ucJT5Ypwg+qY9uhTOowaJK/owyg6PS0HZmK1+u5cFHizgTGBnqNqkkfj
-	83moo5wam94kKi1wKoJALYlMx0uduUeje1KLrdLCggZDnBg8/aSo=
-X-Google-Smtp-Source: AGHT+IFc3mWh7gxNXmE3E5G7zuiaEOtAZNNw9xQnIuhAedRezjxysj3wovHBcA9OaW8s4N/+ZHR5iSI82PSCYgMAc6Q=
-X-Received: by 2002:a25:aa72:0:b0:e03:5abd:4b9b with SMTP id
- 3f1490d57ef6-e03c1bc8f81mr12245391276.59.1720446217935; Mon, 08 Jul 2024
- 06:43:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rr8PHOkB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CAA38C116B1;
+	Mon,  8 Jul 2024 14:19:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1720448360;
+	bh=zxDS7ZUzuVyJRAnDAenP+Tt2MHcowuCTzWPQAP8b5bU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=rr8PHOkBA+MypK2Sd8j0QxA+3OGVV+8iHxKhsADOGIJBGZxz0mugTsM384G65pjEe
+	 pfXtTNUQh25QwUGxrt9U0ct6JKQhDew3luY7P1BJTc4b5iKF6uzdLE3qVnjhbLvkfn
+	 PhLjimxafdmBLkdxrwFCHgX8obUuE2pAPszhnhMw8YQVcFE3ymT6P9UqBAEsnYgUPs
+	 SvTGpHWdcTOGDU/v/WKbnT4v1KMUAZtNbTeWKG5ECbDgsg7jC0aB2gFjFmr/CYwByO
+	 QOnLMxuCEMj3G7UvI+if3KntCBy2iWy7Fva+qKxPUBcqbWt8GQiI2Q3ku7HZXPLmTd
+	 T2VZwRYPEKzxw==
+Message-ID: <d1422b93-b111-41f6-8537-a837a48e5743@kernel.org>
+Date: Mon, 8 Jul 2024 16:19:11 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240606131222.1131880-1-linux-mmc@danman.eu>
-In-Reply-To: <20240606131222.1131880-1-linux-mmc@danman.eu>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 8 Jul 2024 15:43:01 +0200
-Message-ID: <CAPDyKFpvPaBwKdadCBC2LHTFGaEEjRN3ZrOC+PXp16aZKgPY=A@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
-To: linux-mmc@danman.eu
-Cc: linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document
+ MA35D1 SDHCI controller
+To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com,
+ serghox@gmail.com, mcgrof@kernel.org,
+ prabhakar.mahadev-lad.rj@bp.renesas.com, forbidden405@outlook.com,
+ tmaimon77@gmail.com, andy.shevchenko@gmail.com,
+ linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ychuang3@nuvoton.com, schung@nuvoton.com
+References: <20240704062623.1480062-1-shanchun1218@gmail.com>
+ <20240704062623.1480062-2-shanchun1218@gmail.com>
+Content-Language: en-US
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240704062623.1480062-2-shanchun1218@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Thu, 6 Jun 2024 at 15:12, <linux-mmc@danman.eu> wrote:
->
-> From: Daniel Kucera <linux-mmc@danman.eu>
->
-> Locked SD card will not reply to SEND_SCR or SD_STATUS commands
-> so it was failing to initialize previously. When skipped,
-> the card will get initialized and CMD42 can be sent using
-> ioctl to unlock the card or remove password protection.
-> For eMMC, this is not necessary because all initialization
-> commands are allowed in locked state.
-> Until unlocked, all read/write calls will timeout.
->
-> Signed-off-by: Daniel Kucera <linux-mmc@danman.eu>
+On 04/07/2024 08:26, Shan-Chun Hung wrote:
+> Add binding for Nuvoton MA35D1 SDHCI controller.
+> 
+> Signed-off-by: Shan-Chun Hung <shanchun1218@gmail.com>
 > ---
->  drivers/mmc/core/sd.c | 13 ++++++++++++-
->  1 file changed, 12 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 1c8148cdd..ae821df7d 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -928,8 +928,19 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->         bool reinit)
->  {
->         int err;
-> +       u32 card_status;
->
-> -       if (!reinit) {
-> +       err = mmc_send_status(card, &card_status);
-> +       if (err){
-> +               pr_err("%s: unable to get card status\n", mmc_hostname(host));
-> +               return err;
-> +       }
-> +
-> +       if (card_status & R1_CARD_IS_LOCKED){
-> +               pr_warn("%s: card is locked\n", mmc_hostname(host));
-> +       }
 
-If I understand correctly, there is no point in sending the CMD13
-above, unless this is the first attempt to initialize the card.
-Therefore, it's better to move the whole part above, inside the below
-if-clause too, otherwise we would end up sending a CMD13 in cases when
-it's not needed.
 
 > +
-> +       if (!reinit && !(card_status & R1_CARD_IS_LOCKED)) {
->                 /*
->                  * Fetch SCR from card.
->                  */
-> --
-> 2.34.1
->
+> +  nuvoton,sys:
+> +    $ref: /schemas/types.yaml#/definitions/phandle
+> +    description: phandle to access GCR (Global Control Register) registers.
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - pinctrl-names
+> +  - pinctrl-0
+> +  - resets
+> +  - nuvoton,sys
 
-Kind regards
-Uffe
+Keep the same order as in list of properties.
+
+Normally I would give conditional review tag, but not that case because
+in the past you kept ignoring review comments.
+
+Best regards,
+Krzysztof
+
