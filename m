@@ -1,108 +1,183 @@
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
+Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com [209.85.219.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD94913A407
-	for <linux-mmc@vger.kernel.org>; Mon,  8 Jul 2024 12:24:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C1F83FB2C
+	for <linux-mmc@vger.kernel.org>; Mon,  8 Jul 2024 13:16:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720441486; cv=none; b=hDaZNpN3ZqiOXOOhL5VAExCz/KPNIDtojDw77MTdq92+PGD9wUGRjgLGx9Bl5oF0Huofa/uXtOhcdP3KTJ8FN63z3JRRSv0cHbPzq1y8RNYVb8ojeXlSj7gNHYTvkHHlkSla7zNWBWHpm59OOLMVA08wB5uECda/RlakIFBrxJo=
+	t=1720444582; cv=none; b=A/FPDQYNJYxtZYP0YCe8v+WqmcU2RGAeXz1ngemn88DxOMFhLz694ZMwATUZMKNL+mdHfih4HJo77PaPYg1vsmcGe3r3cnr6WyTsra+IWjAQb+QxpUF2OMRixp9rfqqMge2RDaL2HXzXxJcBywID/hs4EbxPvUhoAhxJfQMoh+8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720441486; c=relaxed/simple;
-	bh=9dx+1t0EH+JyvUfSEueYnrqzhW9tjyVNxMt4fmD8BkY=;
+	s=arc-20240116; t=1720444582; c=relaxed/simple;
+	bh=Pk3uDbdnBhzSMKDQEpbcS/aYip4O9HKB9AJVi7KIBRI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Lv2k/588XuG9qrFxyxJW8s6eKl1YuaTccCEAR3vvJKOBPiuxg4gRugthATXslinKkW7T6U60FxCDs5pTls63KMKXJ6nwmx6KGPb5qe2m+dgs/sb7SSewUEvL1K00df5Xt6icWF74Mkg5JPe7ldc3309nMwuFCBzZz08NGnGbwX8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=V2Y4Zg3f; arc=none smtp.client-ip=209.85.219.169
+	 To:Cc:Content-Type; b=FNoosgEivLS71X/C+Ka9ZnQf5mjgNSBxoxC8cduju/xIEEyXvForPGxaXVgGrtKyMhSLU75Whiv/psbFXkXyJEdJkqgX0ybKrlIufYSTjXpmea2Yb6hvIW3NO+DaoSaYufrLc4VzLqwfAy5OKi+XSCGv/Hs891BkulKjD4VjyZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DYIKBDVW; arc=none smtp.client-ip=209.85.219.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V2Y4Zg3f"
-Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e036d1ce4f7so2570431276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Jul 2024 05:24:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DYIKBDVW"
+Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-e036eabc97dso3821927276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jul 2024 06:16:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1720441483; x=1721046283; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1720444580; x=1721049380; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6eRPNGTqIoXzzDaZTM/Tr50ep2o9S4rIQJljxJPqpqo=;
-        b=V2Y4Zg3fUP7QQJbxLn8eIOSSBqQEB96ZxPf2Ymm6QgQUD67OA7M1d96CFwuSkfKyR1
-         GSHEnWO4uTo2lHcQhgz8+vGYRwI93+mRFuZQbWbWTh/VK3PiVODpCwrI3/eCq5NVwqdJ
-         Xy/5NrC/dEYEtXpG0uXpeBGLThdHpTl7WLfpXlwX1Sq40ggAQfVSCh/cgiHo2GasSupp
-         eVtePL+5KpVJMQyfMTiXdbpwcZ0hJBjENIwWjDqXC+GmNda7/NVbXwTBDeVV8RWqskjQ
-         HNw4pC6T/UZjWV5bPb4V8IJ3k8IxJW9I9r/t1W/ebiMcGUCGpFMk9h8qAUEXVCQ7bapX
-         qVJw==
+        bh=CbfiZHX8yMoYqE/2GWwgS7it6nWDSORmbr7HWPP/rrg=;
+        b=DYIKBDVW/l+dKeVl59pnu6ekwQjJmuXYScr7VQuhtZJEE50Y8xSdpWaRpqbr9mCoVY
+         9VSrei43W63ca1OzfazbrFzjMfnVoRum15oo8b5LY3d4Dhb9ApRzzUPOCrGJzDAbLvTm
+         wjRkzvWgSfn513Rjyk6qVLvTf7anTYcSOW2LvzVL9KWHfG4S11e3QA6CcbET0gg91VCA
+         +Q1ts8+GGVKzoP02yS9zv+aFlsPj9wa2SRJg5hYGeOUG8kUZ0EBPyPa8wvq5ToJzp3Pw
+         mXt43RKmoUyyiiThhjlWz0XPx7wuOcQnjGtaXlsqv7sgZoLstKdi1XNOle5EgrCYZIq2
+         /nRg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720441483; x=1721046283;
+        d=1e100.net; s=20230601; t=1720444580; x=1721049380;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=6eRPNGTqIoXzzDaZTM/Tr50ep2o9S4rIQJljxJPqpqo=;
-        b=IaBuqe08D8f1pe15GG9Qp9wpIjEClMPzVEzfHtwyKfg1bEF6K6FxtO18eLSX0SKM3+
-         B0CcxzoUwNFDIeiL/n5LwJWHCJACd8dLbifWzgQviW7zbl5KLAqapAa10TEO9PwdY5bI
-         XhutQrmJyyXn1MIODqTUi7QjKVXY5fqmqpRrKkT4SCSsnZBrGu/JghSa3O4h8iolAPpA
-         VOM+q9JXCz1tBKRLM1MlZ2qYbNXbkCyfU3b5ucbwkfaD2aZz2+LrTMK6V5zLnx9LRs3a
-         nHRTtv4eAFWryD2DkJrNmaA8JoRF+TdXRFIG0g62sAbIb9mdqyMovoIqQ1a5Hj+u2Zko
-         uKWw==
-X-Forwarded-Encrypted: i=1; AJvYcCW4Z1KtXj4d+1x+m1djQMOKkbZwRBOWE+trUBXtNNR+MV0+IkItfcKwnakl2OG1TYS2JMEVpoAWQrGdh0CsHYvAHdHcFWgKPmj3
-X-Gm-Message-State: AOJu0YxspoKn9CDetD9HiwPEgzAZ5xRbUcmowZSiMbQXUDWbAYAGvXEu
-	YloDOH6y1UFFu82GpPp3le1zjfWiuqHQp1zUkIzunRY348DBQmDzMygJuxfZyP2p4c5ngV5h5Wk
-	CE21LctJr4dZXMpbU8jhtuU29819VyxF1oBmWaQ==
-X-Google-Smtp-Source: AGHT+IHl3b/Ar3/pE/PZjIf5qiMkFEnQS3z5ng1Yvah7bFG+Q0Vdpj1Y/cyeF92Xic9N7Tkw5LUBVLrQqCOtgisQjOI=
-X-Received: by 2002:a25:e90c:0:b0:e03:4f13:75da with SMTP id
- 3f1490d57ef6-e03c289a18dmr8025908276.7.1720441482828; Mon, 08 Jul 2024
- 05:24:42 -0700 (PDT)
+        bh=CbfiZHX8yMoYqE/2GWwgS7it6nWDSORmbr7HWPP/rrg=;
+        b=OabFEwBPfPTP+D97VuCP6VPUXG7JySvG3UP2lUdncXB/4WfS4QXKfP8oylsuIoqkUy
+         gTCfVmtzgK4cQf2UMZQQ2WCJFkHAbUubehe6uk/KWHNvRsN0M/Q8qw66OqwI78fTlUuf
+         xwok9eWzj/Z3vDWPCTcrkU5fvay9NICVuEp/GewDvp7sVTRI3UyS7OWurbc1+kG1LTNL
+         DljAe6GDfYGo1rc7ClwmnB7pV4/g3If/iwG9cO85OK+NqGzMx8SY4SFw9UL3WU8KtDth
+         0ppisMDzD7xZHS00kak/n+x9gmTfKrLLxo9/5OmUzpSLYxPWDqeQZTwdXYwx4cBGF0z2
+         1s1Q==
+X-Forwarded-Encrypted: i=1; AJvYcCWy1LH1pkFCcEKz5zbqD3WzTfml2ggdQwulgS3v+oDr/LzAgpukX5BWgi6EuslDXkSHqdJzI3L+Jn8x9a+l33BFYrCzPj6rGu2N
+X-Gm-Message-State: AOJu0Yz91XE8EiyctvBcZC+CkwA7v12J+R6YGqp1ne5sa2FFAvBMs8LC
+	nXY4Pme/NiaWBPDlNzITJrhVdM/ZJxpRFc6cAKn0pkdR0EbbMsocfecW7Njlw8yNB5IWsiNwUqp
+	vOdtTv+SONAm1uDZPLLPWmLqDtq8U2OHw6vKjTw==
+X-Google-Smtp-Source: AGHT+IESZNqaZhad1TzrScFyCiXEebpAqCPGG8pUyqeGhyCL5To0pcDYwzf396OVCrYMoMFUdYg/8Laoi+7Ogl/+x14=
+X-Received: by 2002:a25:dc87:0:b0:dff:883:cac3 with SMTP id
+ 3f1490d57ef6-e03c190c094mr13271686276.14.1720444579965; Mon, 08 Jul 2024
+ 06:16:19 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240705-sdhci_am654-const-regmap_config-v1-1-c166a8d48a66@gmail.com>
-In-Reply-To: <20240705-sdhci_am654-const-regmap_config-v1-1-c166a8d48a66@gmail.com>
+References: <cover.1718213918.git.limings@nvidia.com> <2c459196c6867e325f9386ec0559efea464cfdd6.1718213918.git.limings@nvidia.com>
+ <CAPDyKFqXZ3JdQBMpTM1ccAFqUSsqUcZ2fn+Ste2aG-APS2dt2w@mail.gmail.com> <BN9PR12MB506861D155E2BFC6B8B61252D3D52@BN9PR12MB5068.namprd12.prod.outlook.com>
+In-Reply-To: <BN9PR12MB506861D155E2BFC6B8B61252D3D52@BN9PR12MB5068.namprd12.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 8 Jul 2024 14:24:06 +0200
-Message-ID: <CAPDyKFq3axtXAsPfZsowEjE0rJ-YJvxO_1XM8okoZyCFN9+Ksg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci_am654: Constify struct regmap_config
-To: Javier Carrasco <javier.carrasco.cruz@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 8 Jul 2024 15:15:43 +0200
+Message-ID: <CAPDyKFpkxqxeCmWHhw9e1gDUQtGUDJxyFe1JVUhf0DTCcjNCMw@mail.gmail.com>
+Subject: Re: [PATCH v1 2/2] dw_mmc-bluefield: add hw_reset() support
+To: Liming Sun <limings@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, David Thompson <davthompson@nvidia.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 5 Jul 2024 at 12:51, Javier Carrasco
-<javier.carrasco.cruz@gmail.com> wrote:
+On Tue, 25 Jun 2024 at 21:13, Liming Sun <limings@nvidia.com> wrote:
 >
-> `sdhci_am654_regmap_config` is not modified and can be declared as const
-> to move its data to a read-only section.
+> Thanks, Uffe. Please see some comments/questions below.
 >
-> Signed-off-by: Javier Carrasco <javier.carrasco.cruz@gmail.com>
+> > -----Original Message-----
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
+> > Sent: Thursday, June 20, 2024 10:22 AM
+> > To: Liming Sun <limings@nvidia.com>
+> > Cc: Adrian Hunter <adrian.hunter@intel.com>; David Thompson
+> > <davthompson@nvidia.com>; linux-mmc@vger.kernel.org; linux-
+> > kernel@vger.kernel.org
+> > Subject: Re: [PATCH v1 2/2] dw_mmc-bluefield: add hw_reset() support
+> >
+> > On Thu, 13 Jun 2024 at 00:53, Liming Sun <limings@nvidia.com> wrote:
+> > >
+> > > The eMMC RST_N register is implemented as secure register on
+> > > BlueField SoC and controlled by ATF. This commit sends SMC call
+> > > to ATF for the eMMC HW reset.
+> >
+> > Just to make sure I get this correctly. Asserting the eMMC reset line
+> > is managed through a secure register? Or is this about resetting the
+> > eMMC controller?
+>
+> Yes, asserting the eMMC reset line (RST_N) is managed through a secure register.
+> It's the same register but implemented as secure and can only be written in ATF.
 
-Applied for next, thanks!
+Okay, thanks for clarifying!
+
+>
+> >
+> > No matter what, it looks to me that it should be implemented as a
+> > reset provider.
+>
+> Do you mean that ' hw_reset()' should implement the whole function instead of just the toggling the RST_N?
+
+Sorry, for being very unclear from my side! I was thinking of
+modelling it as a GPIO pin that we can assert/deassert to manage the
+reset.
+
+However, after a second thought, it looks to me that it would be
+unnecessarily complicated. That said, I decided to apply patch 1 and
+patch 2, as is. While applying I took the liberty of clarifying the
+commit messages a bit, please let me know if it doesn't look okay to
+you.
 
 Kind regards
 Uffe
 
 
-> ---
->  drivers/mmc/host/sdhci_am654.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+
 >
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 17ad32cfc0c3..64e10f7c9faa 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -90,7 +90,7 @@
->  /* Command Queue Host Controller Interface Base address */
->  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
->
-> -static struct regmap_config sdhci_am654_regmap_config = {
-> +static const struct regmap_config sdhci_am654_regmap_config = {
->         .reg_bits = 32,
->         .val_bits = 32,
->         .reg_stride = 4,
->
-> ---
-> base-commit: 0b58e108042b0ed28a71cd7edf5175999955b233
-> change-id: 20240705-sdhci_am654-const-regmap_config-f97903ce0e7f
->
-> Best regards,
-> --
-> Javier Carrasco <javier.carrasco.cruz@gmail.com>
->
+> >
+> > Kind regards
+> > Uffe
+> >
+> > >
+> > > Reviewed-by: David Thompson <davthompson@nvidia.com>
+> > > Signed-off-by: Liming Sun <limings@nvidia.com>
+> > > ---
+> > >  drivers/mmc/host/dw_mmc-bluefield.c | 18 +++++++++++++++++-
+> > >  1 file changed, 17 insertions(+), 1 deletion(-)
+> > >
+> > > diff --git a/drivers/mmc/host/dw_mmc-bluefield.c
+> > b/drivers/mmc/host/dw_mmc-bluefield.c
+> > > index 4747e5698f48..24e0b604b405 100644
+> > > --- a/drivers/mmc/host/dw_mmc-bluefield.c
+> > > +++ b/drivers/mmc/host/dw_mmc-bluefield.c
+> > > @@ -3,6 +3,7 @@
+> > >   * Copyright (C) 2018 Mellanox Technologies.
+> > >   */
+> > >
+> > > +#include <linux/arm-smccc.h>
+> > >  #include <linux/bitfield.h>
+> > >  #include <linux/bitops.h>
+> > >  #include <linux/mmc/host.h>
+> > > @@ -20,6 +21,9 @@
+> > >  #define BLUEFIELD_UHS_REG_EXT_SAMPLE   2
+> > >  #define BLUEFIELD_UHS_REG_EXT_DRIVE    4
+> > >
+> > > +/* SMC call for RST_N */
+> > > +#define BLUEFIELD_SMC_SET_EMMC_RST_N   0x82000007
+> > > +
+> > >  static void dw_mci_bluefield_set_ios(struct dw_mci *host, struct mmc_ios
+> > *ios)
+> > >  {
+> > >         u32 reg;
+> > > @@ -34,8 +38,20 @@ static void dw_mci_bluefield_set_ios(struct dw_mci
+> > *host, struct mmc_ios *ios)
+> > >         mci_writel(host, UHS_REG_EXT, reg);
+> > >  }
+> > >
+> > > +static void dw_mci_bluefield_hw_reset(struct dw_mci *host)
+> > > +{
+> > > +               struct arm_smccc_res res = { 0 };
+> > > +
+> > > +               arm_smccc_smc(BLUEFIELD_SMC_SET_EMMC_RST_N, 0, 0, 0, 0, 0,
+> > 0, 0,
+> > > +                             &res);
+> > > +
+> > > +               if (res.a0)
+> > > +                       pr_err("RST_N failed.\n");
+> > > +}
+> > > +
+> > >  static const struct dw_mci_drv_data bluefield_drv_data = {
+> > > -       .set_ios                = dw_mci_bluefield_set_ios
+> > > +       .set_ios                = dw_mci_bluefield_set_ios,
+> > > +       .hw_reset               = dw_mci_bluefield_hw_reset
+> > >  };
+> > >
+> > >  static const struct of_device_id dw_mci_bluefield_match[] = {
+> > > --
+> > > 2.30.1
+> > >
