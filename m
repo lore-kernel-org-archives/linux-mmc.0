@@ -1,192 +1,769 @@
-Received: from EUR02-DB5-obe.outbound.protection.outlook.com (mail-db5eur02on2040.outbound.protection.outlook.com [40.107.249.40])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4EE7B145332;
-	Mon,  8 Jul 2024 12:10:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.249.40
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720440642; cv=fail; b=rKhiZcS2OqugTxSa7VEO8q+XVfxti4J5OfC4eBT9OMlXTyMV5kF+Gpg3HqPUBAfc93ifLT1zPdXeuEsIo+/6mHbVvM5Eg94DqLM7+1MhzdoLr5VmQCz7NyDEGP5tgSdtQxMPpG2Fkcj85A6aSwgTphfObefnrbHdySotHtmxUNQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720440642; c=relaxed/simple;
-	bh=UvJ//py6u04igD8qG8neO2Kzkeg3fYEFwQSQ2MmZYw0=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=GpDYdwYACKGKog2v1+dvWmha71NrvwpEpqD95fCx+FHFWZ3OwUSjN2O2Bg3TeTwp87Bm4j+FmUNBB6YzpbxaGooZ2Spfwf0PVfPFjreXEQkF9nHNFt0MGfdr+vbTGwB0coMGf/CjXISB3maGqrkbgj5GiiDo7gmdGhDkxRp4nHk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com; spf=pass smtp.mailfrom=oss.nxp.com; dkim=pass (1024-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b=S2ZxmEkd; arc=fail smtp.client-ip=40.107.249.40
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=oss.nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24D4B12D76C
+	for <linux-mmc@vger.kernel.org>; Mon,  8 Jul 2024 12:24:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1720441450; cv=none; b=TgEEPpsUk88di/JgFACl/b1XgjIX3GQY9mg6nld89kR1IoKkU2vDHllT+2D+AMfv8/PVLSrjmhvQj9iiHiCpVordszK3eq3s8E2pKrJvf2d9VLvW33kMsDNtseEh4xZmchk71ggFI5pGopTg+ppSal/JFhJxG4hYEvBv1V+vmdc=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1720441450; c=relaxed/simple;
+	bh=5FYDlATbJb0YCF7c6awpQk5K60ZsGBo4H+YpeitQUBo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UPbnRdlNRpKW4Hj7BWnJx7eNpEdW+2be9vsUtZ46pgPYgq1HMaVj1njOO4DZjrob2c5N4SxWUDEVuLXzhdroUZ6rjJsA4wfMm4kFkci/mkOVeQRwfa05im3Dcu+yClbJ9NJDqxHdADTZyxahEMlsZyUsB8LZ6CzUzSCJFxlTiww=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=cWVugA0M; arc=none smtp.client-ip=209.85.219.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=NXP1.onmicrosoft.com header.i=@NXP1.onmicrosoft.com header.b="S2ZxmEkd"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DqeP+LmeM4ZWVnZpLclvgp2wek7OvnaZ6zAY1EiyV4L1P3EOX3lQsCNy2TqsdTQOMOMnaiGY3yQ49leIUcd5yhm4RS3OBZjeFFvCDzLAoCkOnj98Jr4pzNHC9Y1rltdCNe4ZB3p9hTYOkkwhO6Z0NljKgmOauVLoCcnWLAf+rgesH2iyE/QkJX2QR5EucOCDvT6iCxd4Iz8A5KR6gO9SNDwTQ9l632CaTSiMHkQM1AUTYJMOQu4yCul++wM8VAUI20QxuCQ4pRW9zFfxED3YAR9AgdA5/j3x6HlJ9XCCU04GYv4nG7achT0UDH9ph0UOCpOHR3cG1U5jbK5z9b5s3Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=nmzi7pzRdCyBH91BfJgTLrJfH9xHWssBPfiXsqupkYg=;
- b=gXdLbmzSsoQiMo/dRCdUqNdbwikQSrZp1pg+TsSwGkzkbMX9QTS1AnAfb4j9qjJNKAekNp9x0U0r3yOyck/ax/UMXgmJ4qf9FBfW00aRdXRFwakALdoUQaLL2gao1ajyk6PUHli32fuiEYzRczeknzP4Lg5EPIAN2pNdkswyu0uvO4nN0O0uIq1iSO5fJSbjAnAZ1jlC1J88B1BA6hlCH4VcGEfYFNcWMUYIH2V6TJgE0ZmAZEc3pbR9FhIUbiNuZRfj5wfAM7BQDV8/CPrBeHH0ZfZD0c64H9A01IzTkk1mBeQx0xwIlRDrk9sokOHlg2U147vpmMcZp7r5EdeDQQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector2-NXP1-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nmzi7pzRdCyBH91BfJgTLrJfH9xHWssBPfiXsqupkYg=;
- b=S2ZxmEkd8LEvbLsILTRkaeOaQkgAP3f6nN/V9P39+kUAV26+hFU1TPn21ta2ybMncIKiNVyZzUBhIN5OjJWbCNV0jLqMIZBVeNaxOEDOGR4zPbNBU9lCZD9c359pYyNE6R89aAOINI0sU4Favi24Ll0K/3upFlrXs7bnbmgvDgY=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from DU0PR04MB9251.eurprd04.prod.outlook.com (2603:10a6:10:352::15)
- by VI0PR04MB10614.eurprd04.prod.outlook.com (2603:10a6:800:260::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7741.35; Mon, 8 Jul
- 2024 12:10:27 +0000
-Received: from DU0PR04MB9251.eurprd04.prod.outlook.com
- ([fe80::708f:69ee:15df:6ebd]) by DU0PR04MB9251.eurprd04.prod.outlook.com
- ([fe80::708f:69ee:15df:6ebd%5]) with mapi id 15.20.7741.033; Mon, 8 Jul 2024
- 12:10:27 +0000
-From: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>
-To: Haibo Chen <haibo.chen@nxp.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>
-Cc: linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	imx@lists.linux.dev,
-	linux-arm-kernel@lists.infradead.org,
-	s32@nxp.com,
-	Ciprian Costea <ciprianmarian.costea@oss.nxp.com>
-Subject: [PATCH 3/3] MAINTAINERS: add 's32@nxp.com' as relevant mailing list for 'sdhci-esdhc-imx' driver
-Date: Mon,  8 Jul 2024 15:10:18 +0300
-Message-ID: <20240708121018.246476-4-ciprianmarian.costea@oss.nxp.com>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20240708121018.246476-1-ciprianmarian.costea@oss.nxp.com>
-References: <20240708121018.246476-1-ciprianmarian.costea@oss.nxp.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: AS4P190CA0003.EURP190.PROD.OUTLOOK.COM
- (2603:10a6:20b:5de::8) To DU0PR04MB9251.eurprd04.prod.outlook.com
- (2603:10a6:10:352::15)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cWVugA0M"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-e03a6c1741eso3815027276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Jul 2024 05:24:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1720441446; x=1721046246; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=CFqPdRqU3Poj0hcUh7IHNeJ+OmQqWKj4ar2BlFBdixc=;
+        b=cWVugA0MLp4/KZ+Wx8ZfCvh67KK3KJ66DFVL3DDeHP0m8AlL8J2WtnOGuKP5ZDSOqN
+         9ET/a9Pc2qyh2Fr5Wr2vfPgt/161VVWljL6Y4P8oHqWiVjvDkU5jQq+cP3XD6Jx2JcvF
+         cNSs/Eiv7DeNCgTaxNtYUEj0gSywMRiLDM8FmkrHGgoTiPSQ73iiLv2crbDjtp9W1Ubh
+         7TG8qUhw36VbC455PJu7pks75CgcT4Wz0VKHNB+mqOOqqz9DrMnl3/sZDH4FDLs80I7O
+         CZR+7kxy3PtCmnAJhsmwprjuJKPb+Foen/Zcm6fftiCnWPvbMHwx9vORATsuu9rcGtdi
+         8dOA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1720441446; x=1721046246;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=CFqPdRqU3Poj0hcUh7IHNeJ+OmQqWKj4ar2BlFBdixc=;
+        b=JbVTeI8+rONebsiA+eXpwZ9oBiMdwjKRAkHfp4jib0QSQkPb71EQYAiTyyI7hAwQ/G
+         IDVUBe6y6Itu+omr01mo9InBx0jBHTCg0aEA1LfhzcwvPu1Zxtt7xCbrC9wWhR9QgUez
+         H8GYD9YbxJrQOgB2hF/aKYcLhADLAlRqI3RfJR6p2iORqC81uRUAf0NmkcAo2+M7che0
+         9EuHpWG+46mwh2w2vR/XxXnJX0wM1sd+/avDFs6LRtzuaFIMOkxHVXn8QUCrmKnKP/om
+         G0GP8eaNuEMBV/zOB8IWI+/gpFDdlTB95Gd+ZDAkCoBPLLpM2xbG4cEp9bPrkmKFGUQK
+         uUVw==
+X-Forwarded-Encrypted: i=1; AJvYcCW4E2yLB+l/sa/qZ2mkpgLmsXb1m6pAgVFGeIBXQIGhmlhbum1ptWr+lfDpPmjMtUwlec4T+w11BLX/00JVNflKT8rK5uP9iBDa
+X-Gm-Message-State: AOJu0YwFfRMfkzKmnpCvxyXGx3MGBg6YPxbPhF02120cZPttKHJZ6WMm
+	P5Ds99vIO226zyUeojTyQMvF7rJj9pYl9Y+9heSP6byEaeODe8gOfm15hS5gwVd+lpyZLJH+Dx3
+	RRMu7s8GLcec8jk3u5baVGvfwnl3EOkvx0oMQa0CFXI84aSOI
+X-Google-Smtp-Source: AGHT+IEWF8L0Tbj/qyUNcVHPI+nf/n/X1yNwbW7HsV5SY0xlJBUk3wx/C+aF8Wmu93VX1ThxHhlnIInljWoxS8oU0OE=
+X-Received: by 2002:a25:6948:0:b0:e02:bd25:9ac8 with SMTP id
+ 3f1490d57ef6-e03c1964681mr12731507276.18.1720441445990; Mon, 08 Jul 2024
+ 05:24:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU0PR04MB9251:EE_|VI0PR04MB10614:EE_
-X-MS-Office365-Filtering-Correlation-Id: a72d173e-cc8d-48f9-f2e5-08dc9f46f42f
-X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|7416014|376014|1800799024|366016;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?UUYzN3FtOTdpWmt1QVVRbUQwcHpveVpBNkpLcEVKMldUckRtQ3pFNDlXWHhE?=
- =?utf-8?B?eVE5SERCT09HcDQzQTh6RndKcWVlR3BFUzExMmZ6cTlXMFhWaE1YNm96U1RP?=
- =?utf-8?B?KzdVSDRlZXJGcU9CakxLTW1OOWc4VjNkMTRMNXZVUVBaNUtqeUxWRWVmejYx?=
- =?utf-8?B?bVFTSExNQ0xWOVNRamx4cTd2MUw2QkFQNFd6KzJYejN2bG1FT01vWVBmckxD?=
- =?utf-8?B?WUlJTW1TOGh1TWY4bzNEaElOZWs1YldMNmtJaFRpRHEwaGxJZVRRNkx3OU5p?=
- =?utf-8?B?VUt1akFaM2pWMlpyM001ZktZbFVSRVJOeXJTOXFjaWo2MnZCcXpqSyt3ZzVO?=
- =?utf-8?B?ZHBNZldJcFRGaHp0WXNOdEp0Y0ZsTkt1TGU0cjVveVJic294bG01c3F0MzZB?=
- =?utf-8?B?eU12OUt5Y1kyRTJwZVMxb2VVWG9jRS9TcExQMDRrUS9tczBzaW5yRXJKaEdu?=
- =?utf-8?B?blVxUWc0RUhJTmw0Nk1sNnNqVnFEWUFpZWc2MDFWK29FcVFBYXV2U3FxY3NW?=
- =?utf-8?B?dVA5eUh5bkd2MXVTVnpEMzNWaGMyeFhiUXJmMi9vdG15Z0UyUFJLR3N6cTVU?=
- =?utf-8?B?ZEZjZFJJaGVBU3M2clFjbXlyVURXREhxbmsxbllJc0ZTSUFoZHIzZUJraEhx?=
- =?utf-8?B?Qm1SQmgxQlUyL2VvQzlZNEpMWUtlS0ZuTE42a1QxZTZiT3lRN1pEV3h6VHpM?=
- =?utf-8?B?VjhkL0hDVGtnbG9RWXVIUk95enJOUHZobGxtQWlDSDRQMk5ycmo2T2x4ZklP?=
- =?utf-8?B?ZTRJQ284bHpEbjlWNTZFbHhRQ0IzTVlYZEViOWRyNEdRUW5mdjF1R0dDSzcy?=
- =?utf-8?B?Si9aTTJaM01mcDhLc1AvZWdhTFFFZmdCbm8wK09CeWIxZW0xUEQ1OVQyb2F0?=
- =?utf-8?B?a0RJZXo5Q0FHbXcxYmMrYit4UVB6Z1dMRlJuQUE5Nm9ZVFdWVUdwblBaaUk4?=
- =?utf-8?B?ZmRQZnI1cVhVeGhvUUtWVFJVSDUzOEx1N1N0aTkwcHRCdldEQjdKUnQ1Q0hC?=
- =?utf-8?B?UXRTa3VQVDlPdTZGODhBZncweEs1bzBwemh3bi8rNU5jRTBSdFYrdmM2VWxw?=
- =?utf-8?B?SDF3MVlMOFQ1YVRHWE41cXZlNzhZeXMxekFqMlR0bmJnRWNJeWtXWGZLQTRz?=
- =?utf-8?B?QTBpb0hxSTBMV09TaHZweEl3cjJSRmUyOFVYSHpYMm5QSzdWaWwwVmNUZ0ZW?=
- =?utf-8?B?Y2tVRk9aTWxNcGRRa1hjY25BWC9HNEtWMFdtaytPTzVzcWlieTdpUEFxVElB?=
- =?utf-8?B?UXlvNERVVGMyNXl2N0pTWG52MkRIVUROVFJzODFYaXVXNkFSOHNrcXpiZmpT?=
- =?utf-8?B?aGpDbUE1TG8rWnBENk1wc1Y0QkVsc0M1M0w2Q20vR3ZjODlpSG5uT25kNEFI?=
- =?utf-8?B?VHA2Y0syVnVJQ2loVTQyRng5dVZrK2RWVXMrK0RXZGxTdUpHY1VZODR6R0h3?=
- =?utf-8?B?Q3ZPSU4yaVpuc3BiMXZEQXdsN21rd21JR2w0WWFtZGhUMWFkK29yZzdjZDVO?=
- =?utf-8?B?R3FzTGNnWHVMaG9QODhVdVlSWVlHQzJBaW5ab1hlbzQvOHJaZWowT2xaRFhB?=
- =?utf-8?B?N3hJYUxmWUJyRUp6MVY2YWpPMGoyRXNZOFFFWHdyaFBBVE5pc0NNVEdGcENw?=
- =?utf-8?B?dXQyR3NiRGJCaUpvcWE4bkdYZVdETmkzYmRtK01KNEYzQm0yQUpYZmVtWWNi?=
- =?utf-8?B?eDJXd2Z1YXI2UzVvc08xTlVXckZwb1VGNFE2VUNSdFpIbVEvUGlxU1d5RVpq?=
- =?utf-8?B?bGJoM0c2bFFJMmFWZU95QThIL1NSRjErSThZemdYWVlGQ25CUHV5dEd0ZXhu?=
- =?utf-8?B?T2Z5T2l1UHlhUUF5aytjZz09?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9251.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(1800799024)(366016);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?TEo2ZXJmRVNQRXJ5UmZidnFMc1FNUGdlelpZZzNpL2VjZHRTNGhlSzNta20v?=
- =?utf-8?B?NHZCN0FJNHNTV2NobnpwVGpWaG5HRmlmcGNkWEowc1U1MXNadlVrQ3Rsc1Fp?=
- =?utf-8?B?MktvWUZoZkNDbFJsZDJxSURwaVg5aDVGSVJwK3lRL2dmeHEvL0xuYUhFMm9t?=
- =?utf-8?B?VUxuWHd1MzVqeCtRVXlCQkpnR3d5WEdxNmh6VHNYUDdYWTd6alNPb3htVnkz?=
- =?utf-8?B?N3ZjM2x0elN6eUs4UUhCb1h6OGlSWGJMOUMrRlkwSjY0NGZtY01Kc2JqaTlv?=
- =?utf-8?B?QnNWc3JhUllBdy9oNjN3QU03SXJmWmN3RjhWZUVndWUrSldxeUZhZHBKVnNz?=
- =?utf-8?B?M0pMaVJEZGliRlI1bHMwbGY4OW1lbWpjeURpbFlUeGF4R1lQMGhkLzM3R2pO?=
- =?utf-8?B?eFlLdEVlTjFNMTlXTjVYR2pwZk1SV2xScVdscmtOcjQ5RXhxYlVaQlBPNnVp?=
- =?utf-8?B?Z0MxSG5uSytzTXE0YitUVFU4NmNLYlcwVktoWlZzaUkvaEYzeFNoSVgwcXZP?=
- =?utf-8?B?cFQwQUVSSkVMMmg1MzNnU1BKeXQwSndoZ3RDT1NkZHN6U3h4WFU5QmJaWUJX?=
- =?utf-8?B?YmxPWFdodTRJVEYvRGt5Mk1tRjk4MThVR0dqQ2owcnpwL1pTRko2dGczQ0F6?=
- =?utf-8?B?enlFQ2M1cjJVT2ZhcytjK0NDNHM2dmZRZEQ1TFpBcTlvNjN2WlZkdmQwVjAr?=
- =?utf-8?B?WnRyanY5QzcwMVJSUXQ1bUZ6Umg4Kyt0bjV6U3k4R0txVjRGQlFqYjl4Qjdq?=
- =?utf-8?B?YWpVV0VxQ1YwSi9iTm44cjRkMFQyeFF2LzBtV04vMks4Zk1rZWlTMGVpaXN1?=
- =?utf-8?B?dlRWeFM2TE1IQlYyWk53R05TL1o0K2RkeFROOE5GRUI4Ty9zWEpoZ21heGVz?=
- =?utf-8?B?MUVMdnordTlpUWk3NlhTem1BM2duR2N3dHpDWDBsNEx6aW5yR21oaGYyeEFu?=
- =?utf-8?B?OVdzL1V1L1FYeC9TaEZKYWIvMURvSFZoSDBDMHdqYUdzSnh1VW9IUDEvUmtI?=
- =?utf-8?B?QmRyVzRSNVdZNUtLTStVTnlINTE1NnIyZk1BNGh1MkZXbTdhaUdTdlQvV0h1?=
- =?utf-8?B?M0F1RU13UDZGOUtkQW9UNDl5NzYzbHRxa2VLUTE5TFloRlJ4a0ZyU2s3ZVM1?=
- =?utf-8?B?M2tRT1BHcWd3THBYcVhrVEZDQmI4dCtENTh2SFVXcVMxOFhqdXM3SU9nUTI5?=
- =?utf-8?B?WDBtN21MUGNtY2kxTkUzS2NKdzVudm5xT1AwR1RPZm1ISDN6ckdHQVRXcnFn?=
- =?utf-8?B?clpPK00wa0h0TWs1Zm5raHk2a3dTUW1UNUhha3E0Z2MweFI2Y2laQW4xb0w4?=
- =?utf-8?B?YkRCL05ndUpRTVVFaE1BdmhHRGtUdTNrSHlRTEtpUG12YVRRMVhTVzZhQ3lB?=
- =?utf-8?B?bmMvVENodjc2aDVMRE93aGtNU1BzNzNmbzJsanhNOW5QTExadjlWUVRlTHE3?=
- =?utf-8?B?WmhwZkJqeWo5VkZwK0VVNk1GazgwOTA1aVVCZTltWm5LckZLeG9LaU0zcEdJ?=
- =?utf-8?B?V2FnTG9UcUFWbzdEMnZrV1Y5RnNxVTZxTDRrOG55a3lWenBKbzd5Wm8rYmRu?=
- =?utf-8?B?RDdORHp6czU1QStHMXBrZmJSMWh0NG9ybFJzTVAyc3pTL0syUmMySEJ4ZGFr?=
- =?utf-8?B?NWdMSkdyZEQvclp3UUlTQmVOREdkWHZVV3NSdkRGYkd5QlFNMnBCekRMdHBG?=
- =?utf-8?B?SEtvSTNTZ0VWM3BDU3FkQTNMMC9SWDE1SGN6U2FWMzdNQmVoVEcwVDR2Y1Y0?=
- =?utf-8?B?N1hKZXl2cmFtbGQrVGJFTjV4eHh2YjNVeVhjYVNDYmdaSGlWRzI5MjZDSGp6?=
- =?utf-8?B?YTlhaUVwSHZLNVFkNEhRNjVjdnFaY0xkYTU2dWVsWjhwOUhlSFhhUzh2Vm1j?=
- =?utf-8?B?NWo0UWUrZGp6SE82WTBEcnNXUlVyOUJNUUtJNU81QjRMRGU4dUpjTjlIL0NS?=
- =?utf-8?B?akRrQUI1ME8xK0NzbHozQkRqUkdSd2VId1I2eEdyL1RsbEFqRCtiRVlQNm9Y?=
- =?utf-8?B?QUxrbk5vN3hvdkd5bVVUN2txZktTS2pUOUo2Qk5CbFNxZ1VSeGJZd1pzcmpw?=
- =?utf-8?B?YlJkWDBzOURBbXpYcFlWa2IrcHdhTXpmeFBJWDh5aGZuVVNKTkltQkhZQU1j?=
- =?utf-8?B?MGh6OEVNU3BiVmhwUWZjZW1PcEp2UzBBdzF0K2dxZkdDMXZXR2k2U1FXY0t3?=
- =?utf-8?B?bUE9PQ==?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a72d173e-cc8d-48f9-f2e5-08dc9f46f42f
-X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9251.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Jul 2024 12:10:27.4168
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: JPJXPW9rY+HUPGCgN4gSKVxLbtYBin0bFXUdq90NVjF2AsHUXABpdMIghbNpFklUE3yJM3wGPD3QYrbroLJajViWTBIeoL3TOXBrJICZifo=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI0PR04MB10614
+References: <20240620031159.142637-1-kai.heng.feng@canonical.com>
+In-Reply-To: <20240620031159.142637-1-kai.heng.feng@canonical.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 8 Jul 2024 14:23:29 +0200
+Message-ID: <CAPDyKFp=vCwSWLrvUvg_wR2ekY0eh32Cf7jMgoVsKnhiU+mQdg@mail.gmail.com>
+Subject: Re: [PATCH] memstick: rtsx_pci_ms: Remove Realtek PCI memstick driver
+To: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Cc: maximlevitsky@gmail.com, oakad@yahoo.com, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Since NXP S32G2 and S32G3 SoCs share the SDHCI controller with
-I.MX platforms it would be valuable to add 's32@nxp.com' as a
-relevant mailing list in this area.
+On Thu, 20 Jun 2024 at 05:12, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
+>
+> Commit c0e5f4e73a71 ("misc: rtsx: Add support for RTS5261") silently
+> removed RTSX_MS_CARD from its MFD cell, so rtsx_pci_ms isn't used
+> by any driver anymore.
+>
+> Since there doesn't seem to any complaint, hence drop the driver.
+>
+> Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
 
-Signed-off-by: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>
----
- MAINTAINERS | 1 +
- 1 file changed, 1 insertion(+)
+Applied for next, thanks!
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index a39c237edb95..26b1ec2ba094 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -20098,6 +20098,7 @@ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) NXP i.MX DRIVER
- M:	Haibo Chen <haibo.chen@nxp.com>
- L:	imx@lists.linux.dev
- L:	linux-mmc@vger.kernel.org
-+L:	s32@nxp.com
- S:	Maintained
- F:	drivers/mmc/host/sdhci-esdhc-imx.c
- 
--- 
-2.45.2
+Kind regards
+Uffe
 
+
+> ---
+>  drivers/memstick/host/Kconfig       |  10 -
+>  drivers/memstick/host/Makefile      |   1 -
+>  drivers/memstick/host/rtsx_pci_ms.c | 638 ----------------------------
+>  3 files changed, 649 deletions(-)
+>  delete mode 100644 drivers/memstick/host/rtsx_pci_ms.c
+>
+> diff --git a/drivers/memstick/host/Kconfig b/drivers/memstick/host/Kconfig
+> index 4113343da056..fcd2c2cc3cb4 100644
+> --- a/drivers/memstick/host/Kconfig
+> +++ b/drivers/memstick/host/Kconfig
+> @@ -44,16 +44,6 @@ config MEMSTICK_R592
+>           To compile this driver as a module, choose M here: the module will
+>           be called r592.
+>
+> -config MEMSTICK_REALTEK_PCI
+> -       tristate "Realtek PCI-E Memstick Card Interface Driver"
+> -       depends on MISC_RTSX_PCI
+> -       help
+> -         Say Y here to include driver code to support Memstick card interface
+> -         of Realtek PCI-E card reader
+> -
+> -         To compile this driver as a module, choose M here: the module will
+> -         be called rtsx_pci_ms.
+> -
+>  config MEMSTICK_REALTEK_USB
+>         tristate "Realtek USB Memstick Card Interface Driver"
+>         depends on MISC_RTSX_USB
+> diff --git a/drivers/memstick/host/Makefile b/drivers/memstick/host/Makefile
+> index 1abaa03ee68c..0c90df33165d 100644
+> --- a/drivers/memstick/host/Makefile
+> +++ b/drivers/memstick/host/Makefile
+> @@ -6,5 +6,4 @@
+>  obj-$(CONFIG_MEMSTICK_TIFM_MS)         += tifm_ms.o
+>  obj-$(CONFIG_MEMSTICK_JMICRON_38X)     += jmb38x_ms.o
+>  obj-$(CONFIG_MEMSTICK_R592)            += r592.o
+> -obj-$(CONFIG_MEMSTICK_REALTEK_PCI)     += rtsx_pci_ms.o
+>  obj-$(CONFIG_MEMSTICK_REALTEK_USB)     += rtsx_usb_ms.o
+> diff --git a/drivers/memstick/host/rtsx_pci_ms.c b/drivers/memstick/host/rtsx_pci_ms.c
+> deleted file mode 100644
+> index 980a54513e6c..000000000000
+> --- a/drivers/memstick/host/rtsx_pci_ms.c
+> +++ /dev/null
+> @@ -1,638 +0,0 @@
+> -// SPDX-License-Identifier: GPL-2.0-or-later
+> -/* Realtek PCI-Express Memstick Card Interface driver
+> - *
+> - * Copyright(c) 2009-2013 Realtek Semiconductor Corp. All rights reserved.
+> - *
+> - * Author:
+> - *   Wei WANG <wei_wang@realsil.com.cn>
+> - */
+> -
+> -#include <linux/module.h>
+> -#include <linux/highmem.h>
+> -#include <linux/delay.h>
+> -#include <linux/platform_device.h>
+> -#include <linux/memstick.h>
+> -#include <linux/rtsx_pci.h>
+> -#include <asm/unaligned.h>
+> -
+> -struct realtek_pci_ms {
+> -       struct platform_device  *pdev;
+> -       struct rtsx_pcr         *pcr;
+> -       struct memstick_host    *msh;
+> -       struct memstick_request *req;
+> -
+> -       struct mutex            host_mutex;
+> -       struct work_struct      handle_req;
+> -
+> -       u8                      ssc_depth;
+> -       unsigned int            clock;
+> -       unsigned char           ifmode;
+> -       bool                    eject;
+> -};
+> -
+> -static inline struct device *ms_dev(struct realtek_pci_ms *host)
+> -{
+> -       return &(host->pdev->dev);
+> -}
+> -
+> -static inline void ms_clear_error(struct realtek_pci_ms *host)
+> -{
+> -       rtsx_pci_write_register(host->pcr, CARD_STOP,
+> -                       MS_STOP | MS_CLR_ERR, MS_STOP | MS_CLR_ERR);
+> -}
+> -
+> -#ifdef DEBUG
+> -
+> -static void ms_print_debug_regs(struct realtek_pci_ms *host)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       u16 i;
+> -       u8 *ptr;
+> -
+> -       /* Print MS host internal registers */
+> -       rtsx_pci_init_cmd(pcr);
+> -       for (i = 0xFD40; i <= 0xFD44; i++)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
+> -       for (i = 0xFD52; i <= 0xFD69; i++)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, i, 0, 0);
+> -       rtsx_pci_send_cmd(pcr, 100);
+> -
+> -       ptr = rtsx_pci_get_cmd_data(pcr);
+> -       for (i = 0xFD40; i <= 0xFD44; i++)
+> -               dev_dbg(ms_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
+> -       for (i = 0xFD52; i <= 0xFD69; i++)
+> -               dev_dbg(ms_dev(host), "0x%04X: 0x%02x\n", i, *(ptr++));
+> -}
+> -
+> -#else
+> -
+> -#define ms_print_debug_regs(host)
+> -
+> -#endif
+> -
+> -static int ms_power_on(struct realtek_pci_ms *host)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       int err;
+> -
+> -       rtsx_pci_init_cmd(pcr);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SELECT, 0x07, MS_MOD_SEL);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SHARE_MODE,
+> -                       CARD_SHARE_MASK, CARD_SHARE_48_MS);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_CLK_EN,
+> -                       MS_CLK_EN, MS_CLK_EN);
+> -       err = rtsx_pci_send_cmd(pcr, 100);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       err = rtsx_pci_card_pull_ctl_enable(pcr, RTSX_MS_CARD);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       err = rtsx_pci_card_power_on(pcr, RTSX_MS_CARD);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       /* Wait ms power stable */
+> -       msleep(150);
+> -
+> -       err = rtsx_pci_write_register(pcr, CARD_OE,
+> -                       MS_OUTPUT_EN, MS_OUTPUT_EN);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       return 0;
+> -}
+> -
+> -static int ms_power_off(struct realtek_pci_ms *host)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       int err;
+> -
+> -       rtsx_pci_init_cmd(pcr);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_CLK_EN, MS_CLK_EN, 0);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_OE, MS_OUTPUT_EN, 0);
+> -
+> -       err = rtsx_pci_send_cmd(pcr, 100);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       err = rtsx_pci_card_power_off(pcr, RTSX_MS_CARD);
+> -       if (err < 0)
+> -               return err;
+> -
+> -       return rtsx_pci_card_pull_ctl_disable(pcr, RTSX_MS_CARD);
+> -}
+> -
+> -static int ms_transfer_data(struct realtek_pci_ms *host, unsigned char data_dir,
+> -               u8 tpc, u8 cfg, struct scatterlist *sg)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       int err;
+> -       unsigned int length = sg->length;
+> -       u16 sec_cnt = (u16)(length / 512);
+> -       u8 val, trans_mode, dma_dir;
+> -       struct memstick_dev *card = host->msh->card;
+> -       bool pro_card = card->id.type == MEMSTICK_TYPE_PRO;
+> -
+> -       dev_dbg(ms_dev(host), "%s: tpc = 0x%02x, data_dir = %s, length = %d\n",
+> -                       __func__, tpc, (data_dir == READ) ? "READ" : "WRITE",
+> -                       length);
+> -
+> -       if (data_dir == READ) {
+> -               dma_dir = DMA_DIR_FROM_CARD;
+> -               trans_mode = pro_card ? MS_TM_AUTO_READ : MS_TM_NORMAL_READ;
+> -       } else {
+> -               dma_dir = DMA_DIR_TO_CARD;
+> -               trans_mode = pro_card ? MS_TM_AUTO_WRITE : MS_TM_NORMAL_WRITE;
+> -       }
+> -
+> -       rtsx_pci_init_cmd(pcr);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TPC, 0xFF, tpc);
+> -       if (pro_card) {
+> -               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_SECTOR_CNT_H,
+> -                               0xFF, (u8)(sec_cnt >> 8));
+> -               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_SECTOR_CNT_L,
+> -                               0xFF, (u8)sec_cnt);
+> -       }
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, IRQSTAT0,
+> -                       DMA_DONE_INT, DMA_DONE_INT);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC3, 0xFF, (u8)(length >> 24));
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC2, 0xFF, (u8)(length >> 16));
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC1, 0xFF, (u8)(length >> 8));
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC0, 0xFF, (u8)length);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
+> -                       0x03 | DMA_PACK_SIZE_MASK, dma_dir | DMA_EN | DMA_512);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> -                       0x01, RING_BUFFER);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANSFER,
+> -                       0xFF, MS_TRANSFER_START | trans_mode);
+> -       rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, MS_TRANSFER,
+> -                       MS_TRANSFER_END, MS_TRANSFER_END);
+> -
+> -       rtsx_pci_send_cmd_no_wait(pcr);
+> -
+> -       err = rtsx_pci_transfer_data(pcr, sg, 1, data_dir == READ, 10000);
+> -       if (err < 0) {
+> -               ms_clear_error(host);
+> -               return err;
+> -       }
+> -
+> -       rtsx_pci_read_register(pcr, MS_TRANS_CFG, &val);
+> -       if (pro_card) {
+> -               if (val & (MS_INT_CMDNK | MS_INT_ERR |
+> -                               MS_CRC16_ERR | MS_RDY_TIMEOUT))
+> -                       return -EIO;
+> -       } else {
+> -               if (val & (MS_CRC16_ERR | MS_RDY_TIMEOUT))
+> -                       return -EIO;
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+> -static int ms_write_bytes(struct realtek_pci_ms *host, u8 tpc,
+> -               u8 cfg, u8 cnt, u8 *data, u8 *int_reg)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       int err, i;
+> -
+> -       dev_dbg(ms_dev(host), "%s: tpc = 0x%02x\n", __func__, tpc);
+> -
+> -       if (!data)
+> -               return -EINVAL;
+> -
+> -       rtsx_pci_init_cmd(pcr);
+> -
+> -       for (i = 0; i < cnt; i++)
+> -               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
+> -                               PPBUF_BASE2 + i, 0xFF, data[i]);
+> -       if (cnt % 2)
+> -               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD,
+> -                               PPBUF_BASE2 + i, 0xFF, 0xFF);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TPC, 0xFF, tpc);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_BYTE_CNT, 0xFF, cnt);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> -                       0x01, PINGPONG_BUFFER);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANSFER,
+> -                       0xFF, MS_TRANSFER_START | MS_TM_WRITE_BYTES);
+> -       rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, MS_TRANSFER,
+> -                       MS_TRANSFER_END, MS_TRANSFER_END);
+> -       if (int_reg)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, MS_TRANS_CFG, 0, 0);
+> -
+> -       err = rtsx_pci_send_cmd(pcr, 5000);
+> -       if (err < 0) {
+> -               u8 val;
+> -
+> -               rtsx_pci_read_register(pcr, MS_TRANS_CFG, &val);
+> -               dev_dbg(ms_dev(host), "MS_TRANS_CFG: 0x%02x\n", val);
+> -
+> -               if (int_reg)
+> -                       *int_reg = val & 0x0F;
+> -
+> -               ms_print_debug_regs(host);
+> -
+> -               ms_clear_error(host);
+> -
+> -               if (!(tpc & 0x08)) {
+> -                       if (val & MS_CRC16_ERR)
+> -                               return -EIO;
+> -               } else {
+> -                       if (!(val & 0x80)) {
+> -                               if (val & (MS_INT_ERR | MS_INT_CMDNK))
+> -                                       return -EIO;
+> -                       }
+> -               }
+> -
+> -               return -ETIMEDOUT;
+> -       }
+> -
+> -       if (int_reg) {
+> -               u8 *ptr = rtsx_pci_get_cmd_data(pcr) + 1;
+> -               *int_reg = *ptr & 0x0F;
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+> -static int ms_read_bytes(struct realtek_pci_ms *host, u8 tpc,
+> -               u8 cfg, u8 cnt, u8 *data, u8 *int_reg)
+> -{
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       int err, i;
+> -       u8 *ptr;
+> -
+> -       dev_dbg(ms_dev(host), "%s: tpc = 0x%02x\n", __func__, tpc);
+> -
+> -       if (!data)
+> -               return -EINVAL;
+> -
+> -       rtsx_pci_init_cmd(pcr);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TPC, 0xFF, tpc);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_BYTE_CNT, 0xFF, cnt);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANS_CFG, 0xFF, cfg);
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> -                       0x01, PINGPONG_BUFFER);
+> -
+> -       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, MS_TRANSFER,
+> -                       0xFF, MS_TRANSFER_START | MS_TM_READ_BYTES);
+> -       rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, MS_TRANSFER,
+> -                       MS_TRANSFER_END, MS_TRANSFER_END);
+> -       for (i = 0; i < cnt - 1; i++)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, PPBUF_BASE2 + i, 0, 0);
+> -       if (cnt % 2)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, PPBUF_BASE2 + cnt, 0, 0);
+> -       else
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD,
+> -                               PPBUF_BASE2 + cnt - 1, 0, 0);
+> -       if (int_reg)
+> -               rtsx_pci_add_cmd(pcr, READ_REG_CMD, MS_TRANS_CFG, 0, 0);
+> -
+> -       err = rtsx_pci_send_cmd(pcr, 5000);
+> -       if (err < 0) {
+> -               u8 val;
+> -
+> -               rtsx_pci_read_register(pcr, MS_TRANS_CFG, &val);
+> -               dev_dbg(ms_dev(host), "MS_TRANS_CFG: 0x%02x\n", val);
+> -
+> -               if (int_reg)
+> -                       *int_reg = val & 0x0F;
+> -
+> -               ms_print_debug_regs(host);
+> -
+> -               ms_clear_error(host);
+> -
+> -               if (!(tpc & 0x08)) {
+> -                       if (val & MS_CRC16_ERR)
+> -                               return -EIO;
+> -               } else {
+> -                       if (!(val & 0x80)) {
+> -                               if (val & (MS_INT_ERR | MS_INT_CMDNK))
+> -                                       return -EIO;
+> -                       }
+> -               }
+> -
+> -               return -ETIMEDOUT;
+> -       }
+> -
+> -       ptr = rtsx_pci_get_cmd_data(pcr) + 1;
+> -       for (i = 0; i < cnt; i++)
+> -               data[i] = *ptr++;
+> -
+> -       if (int_reg)
+> -               *int_reg = *ptr & 0x0F;
+> -
+> -       return 0;
+> -}
+> -
+> -static int rtsx_pci_ms_issue_cmd(struct realtek_pci_ms *host)
+> -{
+> -       struct memstick_request *req = host->req;
+> -       int err = 0;
+> -       u8 cfg = 0, int_reg;
+> -
+> -       dev_dbg(ms_dev(host), "%s\n", __func__);
+> -
+> -       if (req->need_card_int) {
+> -               if (host->ifmode != MEMSTICK_SERIAL)
+> -                       cfg = WAIT_INT;
+> -       }
+> -
+> -       if (req->long_data) {
+> -               err = ms_transfer_data(host, req->data_dir,
+> -                               req->tpc, cfg, &(req->sg));
+> -       } else {
+> -               if (req->data_dir == READ) {
+> -                       err = ms_read_bytes(host, req->tpc, cfg,
+> -                                       req->data_len, req->data, &int_reg);
+> -               } else {
+> -                       err = ms_write_bytes(host, req->tpc, cfg,
+> -                                       req->data_len, req->data, &int_reg);
+> -               }
+> -       }
+> -       if (err < 0)
+> -               return err;
+> -
+> -       if (req->need_card_int && (host->ifmode == MEMSTICK_SERIAL)) {
+> -               err = ms_read_bytes(host, MS_TPC_GET_INT,
+> -                               NO_WAIT_INT, 1, &int_reg, NULL);
+> -               if (err < 0)
+> -                       return err;
+> -       }
+> -
+> -       if (req->need_card_int) {
+> -               dev_dbg(ms_dev(host), "int_reg: 0x%02x\n", int_reg);
+> -
+> -               if (int_reg & MS_INT_CMDNK)
+> -                       req->int_reg |= MEMSTICK_INT_CMDNAK;
+> -               if (int_reg & MS_INT_BREQ)
+> -                       req->int_reg |= MEMSTICK_INT_BREQ;
+> -               if (int_reg & MS_INT_ERR)
+> -                       req->int_reg |= MEMSTICK_INT_ERR;
+> -               if (int_reg & MS_INT_CED)
+> -                       req->int_reg |= MEMSTICK_INT_CED;
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+> -static void rtsx_pci_ms_handle_req(struct work_struct *work)
+> -{
+> -       struct realtek_pci_ms *host = container_of(work,
+> -                       struct realtek_pci_ms, handle_req);
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       struct memstick_host *msh = host->msh;
+> -       int rc;
+> -
+> -       mutex_lock(&pcr->pcr_mutex);
+> -
+> -       rtsx_pci_start_run(pcr);
+> -
+> -       rtsx_pci_switch_clock(host->pcr, host->clock, host->ssc_depth,
+> -                       false, true, false);
+> -       rtsx_pci_write_register(pcr, CARD_SELECT, 0x07, MS_MOD_SEL);
+> -       rtsx_pci_write_register(pcr, CARD_SHARE_MODE,
+> -                       CARD_SHARE_MASK, CARD_SHARE_48_MS);
+> -
+> -       if (!host->req) {
+> -               do {
+> -                       rc = memstick_next_req(msh, &host->req);
+> -                       dev_dbg(ms_dev(host), "next req %d\n", rc);
+> -
+> -                       if (!rc)
+> -                               host->req->error = rtsx_pci_ms_issue_cmd(host);
+> -               } while (!rc);
+> -       }
+> -
+> -       mutex_unlock(&pcr->pcr_mutex);
+> -}
+> -
+> -static void rtsx_pci_ms_request(struct memstick_host *msh)
+> -{
+> -       struct realtek_pci_ms *host = memstick_priv(msh);
+> -
+> -       dev_dbg(ms_dev(host), "--> %s\n", __func__);
+> -
+> -       if (rtsx_pci_card_exclusive_check(host->pcr, RTSX_MS_CARD))
+> -               return;
+> -
+> -       schedule_work(&host->handle_req);
+> -}
+> -
+> -static int rtsx_pci_ms_set_param(struct memstick_host *msh,
+> -               enum memstick_param param, int value)
+> -{
+> -       struct realtek_pci_ms *host = memstick_priv(msh);
+> -       struct rtsx_pcr *pcr = host->pcr;
+> -       unsigned int clock = 0;
+> -       u8 ssc_depth = 0;
+> -       int err;
+> -
+> -       dev_dbg(ms_dev(host), "%s: param = %d, value = %d\n",
+> -                       __func__, param, value);
+> -
+> -       err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_MS_CARD);
+> -       if (err)
+> -               return err;
+> -
+> -       switch (param) {
+> -       case MEMSTICK_POWER:
+> -               if (value == MEMSTICK_POWER_ON)
+> -                       err = ms_power_on(host);
+> -               else if (value == MEMSTICK_POWER_OFF)
+> -                       err = ms_power_off(host);
+> -               else
+> -                       return -EINVAL;
+> -               break;
+> -
+> -       case MEMSTICK_INTERFACE:
+> -               if (value == MEMSTICK_SERIAL) {
+> -                       clock = 19000000;
+> -                       ssc_depth = RTSX_SSC_DEPTH_500K;
+> -
+> -                       err = rtsx_pci_write_register(pcr, MS_CFG, 0x58,
+> -                                       MS_BUS_WIDTH_1 | PUSH_TIME_DEFAULT);
+> -                       if (err < 0)
+> -                               return err;
+> -               } else if (value == MEMSTICK_PAR4) {
+> -                       clock = 39000000;
+> -                       ssc_depth = RTSX_SSC_DEPTH_1M;
+> -
+> -                       err = rtsx_pci_write_register(pcr, MS_CFG,
+> -                                       0x58, MS_BUS_WIDTH_4 | PUSH_TIME_ODD);
+> -                       if (err < 0)
+> -                               return err;
+> -               } else {
+> -                       return -EINVAL;
+> -               }
+> -
+> -               err = rtsx_pci_switch_clock(pcr, clock,
+> -                               ssc_depth, false, true, false);
+> -               if (err < 0)
+> -                       return err;
+> -
+> -               host->ssc_depth = ssc_depth;
+> -               host->clock = clock;
+> -               host->ifmode = value;
+> -               break;
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+> -#ifdef CONFIG_PM
+> -
+> -static int rtsx_pci_ms_suspend(struct platform_device *pdev, pm_message_t state)
+> -{
+> -       struct realtek_pci_ms *host = platform_get_drvdata(pdev);
+> -       struct memstick_host *msh = host->msh;
+> -
+> -       dev_dbg(ms_dev(host), "--> %s\n", __func__);
+> -
+> -       memstick_suspend_host(msh);
+> -       return 0;
+> -}
+> -
+> -static int rtsx_pci_ms_resume(struct platform_device *pdev)
+> -{
+> -       struct realtek_pci_ms *host = platform_get_drvdata(pdev);
+> -       struct memstick_host *msh = host->msh;
+> -
+> -       dev_dbg(ms_dev(host), "--> %s\n", __func__);
+> -
+> -       memstick_resume_host(msh);
+> -       return 0;
+> -}
+> -
+> -#else /* CONFIG_PM */
+> -
+> -#define rtsx_pci_ms_suspend NULL
+> -#define rtsx_pci_ms_resume NULL
+> -
+> -#endif /* CONFIG_PM */
+> -
+> -static void rtsx_pci_ms_card_event(struct platform_device *pdev)
+> -{
+> -       struct realtek_pci_ms *host = platform_get_drvdata(pdev);
+> -
+> -       memstick_detect_change(host->msh);
+> -}
+> -
+> -static int rtsx_pci_ms_drv_probe(struct platform_device *pdev)
+> -{
+> -       struct memstick_host *msh;
+> -       struct realtek_pci_ms *host;
+> -       struct rtsx_pcr *pcr;
+> -       struct pcr_handle *handle = pdev->dev.platform_data;
+> -       int rc;
+> -
+> -       if (!handle)
+> -               return -ENXIO;
+> -
+> -       pcr = handle->pcr;
+> -       if (!pcr)
+> -               return -ENXIO;
+> -
+> -       dev_dbg(&(pdev->dev),
+> -                       ": Realtek PCI-E Memstick controller found\n");
+> -
+> -       msh = memstick_alloc_host(sizeof(*host), &pdev->dev);
+> -       if (!msh)
+> -               return -ENOMEM;
+> -
+> -       host = memstick_priv(msh);
+> -       host->pcr = pcr;
+> -       host->msh = msh;
+> -       host->pdev = pdev;
+> -       platform_set_drvdata(pdev, host);
+> -       pcr->slots[RTSX_MS_CARD].p_dev = pdev;
+> -       pcr->slots[RTSX_MS_CARD].card_event = rtsx_pci_ms_card_event;
+> -
+> -       mutex_init(&host->host_mutex);
+> -
+> -       INIT_WORK(&host->handle_req, rtsx_pci_ms_handle_req);
+> -       msh->request = rtsx_pci_ms_request;
+> -       msh->set_param = rtsx_pci_ms_set_param;
+> -       msh->caps = MEMSTICK_CAP_PAR4;
+> -
+> -       rc = memstick_add_host(msh);
+> -       if (rc) {
+> -               memstick_free_host(msh);
+> -               return rc;
+> -       }
+> -
+> -       return 0;
+> -}
+> -
+> -static void rtsx_pci_ms_drv_remove(struct platform_device *pdev)
+> -{
+> -       struct realtek_pci_ms *host = platform_get_drvdata(pdev);
+> -       struct rtsx_pcr *pcr;
+> -       struct memstick_host *msh;
+> -       int rc;
+> -
+> -       pcr = host->pcr;
+> -       pcr->slots[RTSX_MS_CARD].p_dev = NULL;
+> -       pcr->slots[RTSX_MS_CARD].card_event = NULL;
+> -       msh = host->msh;
+> -       host->eject = true;
+> -       cancel_work_sync(&host->handle_req);
+> -
+> -       mutex_lock(&host->host_mutex);
+> -       if (host->req) {
+> -               dev_dbg(&(pdev->dev),
+> -                       "%s: Controller removed during transfer\n",
+> -                       dev_name(&msh->dev));
+> -
+> -               rtsx_pci_complete_unfinished_transfer(pcr);
+> -
+> -               host->req->error = -ENOMEDIUM;
+> -               do {
+> -                       rc = memstick_next_req(msh, &host->req);
+> -                       if (!rc)
+> -                               host->req->error = -ENOMEDIUM;
+> -               } while (!rc);
+> -       }
+> -       mutex_unlock(&host->host_mutex);
+> -
+> -       memstick_remove_host(msh);
+> -       memstick_free_host(msh);
+> -
+> -       dev_dbg(&(pdev->dev),
+> -               ": Realtek PCI-E Memstick controller has been removed\n");
+> -}
+> -
+> -static struct platform_device_id rtsx_pci_ms_ids[] = {
+> -       {
+> -               .name = DRV_NAME_RTSX_PCI_MS,
+> -       }, {
+> -               /* sentinel */
+> -       }
+> -};
+> -MODULE_DEVICE_TABLE(platform, rtsx_pci_ms_ids);
+> -
+> -static struct platform_driver rtsx_pci_ms_driver = {
+> -       .probe          = rtsx_pci_ms_drv_probe,
+> -       .remove_new     = rtsx_pci_ms_drv_remove,
+> -       .id_table       = rtsx_pci_ms_ids,
+> -       .suspend        = rtsx_pci_ms_suspend,
+> -       .resume         = rtsx_pci_ms_resume,
+> -       .driver         = {
+> -               .name   = DRV_NAME_RTSX_PCI_MS,
+> -       },
+> -};
+> -module_platform_driver(rtsx_pci_ms_driver);
+> -
+> -MODULE_LICENSE("GPL");
+> -MODULE_AUTHOR("Wei WANG <wei_wang@realsil.com.cn>");
+> -MODULE_DESCRIPTION("Realtek PCI-E Memstick Card Host Driver");
+> --
+> 2.43.0
+>
