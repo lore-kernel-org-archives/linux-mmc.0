@@ -1,104 +1,118 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 454FC1DDC5
-	for <linux-mmc@vger.kernel.org>; Wed, 10 Jul 2024 13:26:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04D78195804;
+	Wed, 10 Jul 2024 18:09:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720618000; cv=none; b=QOk5pUS8pL1fWeu7n1hCgW5HPRcmfEGMTzRk/54vH4x94KR7+iUjWlI3X5Eig2hpwriKzIRcJ6Kb2cyZsIpuZzS3Sqv1iw1J7sJ4NHnArmRzyssICkag3qMyw1nxeJjiHjKDfSX7aggklP6xGx5mNUjJ5TE2Z4jE7CbLKIeU/o4=
+	t=1720634991; cv=none; b=pTdQNdI6Ij1DbhKC+f2eSSHSbsPR+iqI6ATAvRrqc3OyRtdZlQRyJCcXwPev1pJ+5jDg7Vf42rD/gBq5AjFoQl0oyj7O+ZYH9g6wE5dq2D1gve1yHm5LBFIMTiI3Pg7dh4g0Ap4A6NkU+O4I6Zgf+nkJOXFjdxHwYk8YqEZEpmM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720618000; c=relaxed/simple;
-	bh=Extl/nJxyYBWOkv3yGgV1wCAbbkUKIFOuvVKtqQkyTY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=YnBrVk0M+si4yWR7JOAZ1ep4nVfs+H8+FbUR0BmBMgVsBpT2MxkpXcDLx1onNhIOY+a9V63gFGY86OENPRC/CoeZRJZxeKtu8Uq8t/Cte2AYPfB4B2wiT5XCL8aLnXJjrEhd3XEIVDRji1eic4oe/vOEdaI+iocxlwGTpUisf+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=NUIbteBN; arc=none smtp.client-ip=209.85.219.177
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1720634991; c=relaxed/simple;
+	bh=sEpV/pgR7MWqeVR7wICs5wfW6eRxE/2XRev3rKrlris=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=dU1WB3O7c8QYAoSe/kHQdyj6i+mjFJHTd1veRBEbHw71yWKBAtJPX3FHa/7xzDn6BYcoqPepXdifH0G87HcPM9eoj3KPQ2Hy96xSRaYWV0rpydvuC3mhEZCNB9nX4psQNariFfJwbQ41LXNX4zM81L/bzb6e7+T1BLMNM9P4Zww=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FIlHVebE; arc=none smtp.client-ip=198.175.65.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NUIbteBN"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-e036d1ce4f7so686901276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Jul 2024 06:26:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1720617997; x=1721222797; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=BJEvKRRIck7D/aS4yZ5jzW+8W+HeRyeNNdVmA0gkAqg=;
-        b=NUIbteBNwvEogAgkh/2DU9REBig8lFrRWXo2lNSA4K40LCIGjMO1rfHXjf81nsO9JR
-         xAo0Ysy+F7QdYVtgtYM/H4TsfmG+IPxFsjk4kNAG0Ih3wOfBMEGWkEMmtC+C+GAxIwsN
-         pK8N+kuNAz50aEeuCXfijb+y59Jxh9JKLruJrsGHsZLiUzPq7tHyyh/5jGfSZvS1W3rq
-         LYCwC5fH5AuJWTadp34evpAQ7wI531mEKf44jTWfU4TZb9BwJaA/bODh70KoRtDPgQJx
-         nCrLXH7nvcYJj7s3FCSkOv2xl6PL+2r3Yib4iWYv0kLsNwyclpRkz2P+hhDSffIaFoxT
-         6gKA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720617997; x=1721222797;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=BJEvKRRIck7D/aS4yZ5jzW+8W+HeRyeNNdVmA0gkAqg=;
-        b=bd+y5CqL7Lm6m0pKbb9rTAYSAD3bUwVo1ZI0etXFbI5Ivu96bOqACAYtpsDYIjYiXS
-         d0T9wFpNEb89477LeP7BQdp3cMFCPiLkfsLw7Pr8TU1D/xHxaV0o9vJ2IMfSUipAnTj/
-         Zg+p2gTZEE7PcfMs1DFj/QMKfmAp09QUK0y7g9nOad1/TLHYJDhTPmVrE9NYjTKOMp2/
-         bfQcO2ycDfjx4z5CvJMwLUm7Mg3rEuBUOmJtPCEODrNKKjKl1C2mqtvNsEgWWKWwnIFt
-         ppwrkDPF+xkCjI3JCLf8s3BkDE8p2pmTLRJl5NJssLjy4+gCfDV60Buu5t4HIXDYObg7
-         n2TQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXVJdeSQIwwezl8RvWd1uVnCwWgaW0gRt2WayJrJ24NSQxDyU2SX+MyspVtm98Ed0NsSfUiMPBFjdNrWK0XR4AJ3GU0E9+2uTB7
-X-Gm-Message-State: AOJu0YyB5jkJVHAQ9jvJ4Pt/xyJoBkJS2frPUbs1so4Lc0PVd4UwNZ8q
-	7F+TBB0FwhUOp1JsNg06XtQR2NR/GHTBjTlipeAY/lFrI3lCEdi6CqYsCMRGqeTd0BzKSZ/vIKY
-	9bhnvp6MyQCs0LKaiHEYyMTMRzyzS27S5ZtPl8Q==
-X-Google-Smtp-Source: AGHT+IGCxIGtZokN+teJKPPhHkfxqw9OlhyDEFwYyLLG0/YrIEAfkHlPw/Ek4wKjBBV+f7KQyzOKeh1viBFb7s/cooU=
-X-Received: by 2002:a25:bc92:0:b0:e03:5505:5b5b with SMTP id
- 3f1490d57ef6-e041d05ae92mr3583037276.0.1720617997036; Wed, 10 Jul 2024
- 06:26:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FIlHVebE"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1720634989; x=1752170989;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=sEpV/pgR7MWqeVR7wICs5wfW6eRxE/2XRev3rKrlris=;
+  b=FIlHVebE7JIhPqTS9x83V7r2EmJpFuO+Ex1XtqIRkupPPzBYtqs+JmVn
+   HOZmDvlrfwzf4r+nv3C0HDIo7AW+EJ8nDfegsMrOeB7QK7cLc9oHR6J1g
+   gKAd9gUSmyJ1XbSvMvfEwfP05gWdoufT7tl+8UcAKUioPJ6pXGD2U0ggp
+   gqBokcIdCK/tTXvZ/UFF4EMUSScKYLyvpBA3XoZMEr4+xEQ9esS/f4/ub
+   22TRMMdU6TacHPiJ7ssvJA9RrqPB9RyJlzy4v8VDacTYv7Vs1UuVyqUZ/
+   8UUbs9zcFSTGQe+Moz8OMsIK3fhtBN0hVxyvfRKXMnQ1l9GfdHE7pqJz1
+   w==;
+X-CSE-ConnectionGUID: 2tgrAU2LRradzGqBg9c3sA==
+X-CSE-MsgGUID: YWJdzfX6QHiqwFHMY3bCvA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11129"; a="18113581"
+X-IronPort-AV: E=Sophos;i="6.09,198,1716274800"; 
+   d="scan'208";a="18113581"
+Received: from fmviesa004.fm.intel.com ([10.60.135.144])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Jul 2024 11:08:07 -0700
+X-CSE-ConnectionGUID: iMI9jiccRrGXkJO1tbTBAg==
+X-CSE-MsgGUID: R1zrt6xeQ46mjPtbi5wxyA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.09,198,1716274800"; 
+   d="scan'208";a="52898195"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO localhost.localdomain) ([10.246.49.253])
+  by fmviesa004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Jul 2024 11:08:03 -0700
+From: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jon Hunter <jonathanh@nvidia.com>,
+	Christoph Hellwig <hch@lst.de>,
+	Jens Axboe <axboe@kernel.dk>,
+	Thierry Reding <thierry.reding@gmail.com>,
+	linux-tegra@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: sdhci: Fix max_seg_size for 64KiB PAGE_SIZE
+Date: Wed, 10 Jul 2024 21:07:37 +0300
+Message-Id: <20240710180737.142504-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240606131222.1131880-1-linux-mmc@danman.eu> <CAPDyKFpvPaBwKdadCBC2LHTFGaEEjRN3ZrOC+PXp16aZKgPY=A@mail.gmail.com>
- <DM6PR04MB65756BE6093A5173C58CE9E4FCDB2@DM6PR04MB6575.namprd04.prod.outlook.com>
- <dc3524328a701be1ac3206af24b4a185@danman.eu>
-In-Reply-To: <dc3524328a701be1ac3206af24b4a185@danman.eu>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 10 Jul 2024 15:26:00 +0200
-Message-ID: <CAPDyKFrQc610OB+VaG=cKQys7+3pyB4m1DA4BZXeGT5WgRYQ=A@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: core: allow detection of locked cards
-To: Daniel Kucera <linux-mmc@danman.eu>
-Cc: Avri Altman <Avri.Altman@wdc.com>, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 
-On Wed, 10 Jul 2024 at 07:21, Daniel Kucera <linux-mmc@danman.eu> wrote:
->
-> On 2024-07-09 22:06, Avri Altman wrote:
-> >> If I understand correctly, there is no point in sending the CMD13
-> >> above, unless
-> >> this is the first attempt to initialize the card.
-> >> Therefore, it's better to move the whole part above, inside the below
-> >> if-clause
-> >> too, otherwise we would end up sending a CMD13 in cases when it's not
-> >> needed.
-> > R1_CARD_IS_LOCKED is CMD13 response, but already in CMD7 response as
-> > well,
-> > So theoretically you want to skip mmc_sd_setup_card altogether.
->
-> Do you mean to modify:
-> mmc_select_card(struct mmc_card *card)
-> to somehow return or save the R1 response to card struct?
+blk_queue_max_segment_size() ensured:
 
-I quite like this, as it avoids us from sending an unnecessary command
-during initialization.
+	if (max_size < PAGE_SIZE)
+		max_size = PAGE_SIZE;
 
-A suggestion is to let  _mmc_select_card() take an additional
-out-parameter to provide the card's status. Then we can let
-mmc_select_card() parse the status - and if it finds that the card is
-locked, it can set a new state in card->state (similar to how we use
-MMC_STATE_BLOCKADDR, for example).
+whereas:
 
-In another future step, we may also want to keep track of whether a
-locked card becomes unlocked. Using the card->state should work fine
-for that too, I think.
+blk_validate_limits() makes it an error:
 
-[...]
+	if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
+		return -EINVAL;
 
-Kind regards
-Uffe
+The change from one to the other, exposed sdhci which was setting maximum
+segment size too low in some circumstances.
+
+Fix the maximum segment size when it is too low.
+
+Fixes: 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk")
+Cc: stable@vger.kernel.org
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index a20df9383b20..4b91c9e96635 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4708,6 +4708,21 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		if (host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC) {
+ 			host->max_adma = 65532; /* 32-bit alignment */
+ 			mmc->max_seg_size = 65535;
++			/*
++			 * sdhci_adma_table_pre() expects to define 1 DMA
++			 * descriptor per segment, so the maximum segment size
++			 * is set accordingly. SDHCI allows up to 64KiB per DMA
++			 * descriptor (16-bit field), but some controllers do
++			 * not support "zero means 65536" reducing the maximum
++			 * for them to 65535. That is a problem if PAGE_SIZE is
++			 * 64KiB because the block layer does not support
++			 * max_seg_size < PAGE_SIZE, however
++			 * sdhci_adma_table_pre() has a workaround to handle
++			 * that case, and split the descriptor. Refer also
++			 * comment in sdhci_adma_table_pre().
++			 */
++			if (mmc->max_seg_size < PAGE_SIZE)
++				mmc->max_seg_size = PAGE_SIZE;
+ 		} else {
+ 			mmc->max_seg_size = 65536;
+ 		}
+-- 
+2.34.1
+
