@@ -1,121 +1,101 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from cstnet.cn (smtp84.cstnet.cn [159.226.251.84])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B1D684A5B;
-	Wed, 10 Jul 2024 09:26:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D6DD918FA26;
+	Wed, 10 Jul 2024 10:59:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.84
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720603574; cv=none; b=rACnbm6IOg6uFbFKV+GNff8WjgO6nCjDv7RzoAyCY/mejfO2Ik/am9f0txcnzj5wV5Hx6RksrmI+m7jwaaN4zgBrezTBqarI0bwaCp633I7FenYiLoawjLMnpJ8pde/U2rjglFP2imbdKdQ9H39E23U6VIc6meYxD0nJLqvgAk4=
+	t=1720609175; cv=none; b=pgZdL7DNt4P6X8iQ1dtsG9RvD1PNBaFPtVMEbgEAEBYFWYiMZlqnl3U12OQd4GMVTksS4KvWmNwqNhiTLUKAZoYSYVO5YZ/BNZwkGgbLOeA8Y6CDUE1pSdo0tEZ6CMkxJyy7KXiesmG1UeKfc6ZDAJjZasbTfZFSqBvbmhnFhaY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720603574; c=relaxed/simple;
-	bh=EzM+QQuPvXYqipkCKXA/ADx49Lc0KveRdc2IsyP5wb0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ZBJL5XfaNIym/b7jLXBA7JDfPuwufBQPSkUK1i6SywRuvG1YQBCbe4DkxNzwKhzxn3ESHIS2OE4z9DFUIoB+xKxaN2EjlypUMr3KxDArq7w4G3oMeTFISrXAx7qmhZlifsWft3Ndv7QtGMYoqoQxRQd+TgIAMJV/zfDVc88kzZU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gmM0zSHW; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gmM0zSHW"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1720603572; x=1752139572;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=EzM+QQuPvXYqipkCKXA/ADx49Lc0KveRdc2IsyP5wb0=;
-  b=gmM0zSHWvaQEKp/BXTO4iGyqw+I0nwFKFVL6NbuLKHVSN/k9yUfxp8S4
-   dovhvgm46imsc9Zb0E/vBRuxK0vsMHtSY6PRlMCR13dqdV6fylcPE6mVL
-   ydvQddJiCHj9DIBnqutkkzJhRmCQjG+EPV0DX4XdBQ2M4CT5lNpw+fdTO
-   RnR/+Q5A6Mnprw7JvLsbwwO8MjUj5a/JtYxcszamuXRFAgapU7FnvP+rr
-   HHhrTsQdTeatRpwfkcZsluN5Z8L+YIX+eKwQ+8QEkbZcusDuhXt0gIVxD
-   LGw7nEopTA88aEAfQSuUxra+kDNz0ncsVooCmIQn318+JH2W4WCjlq5Em
-   Q==;
-X-CSE-ConnectionGUID: s0v9eu3RQl6Gae2SX0oP3Q==
-X-CSE-MsgGUID: dHBQIe/+QXGY9vaudgVSwg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11128"; a="18017238"
-X-IronPort-AV: E=Sophos;i="6.09,197,1716274800"; 
-   d="scan'208";a="18017238"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Jul 2024 02:26:11 -0700
-X-CSE-ConnectionGUID: qvEQbwiDT9qu8ZygTKhhrA==
-X-CSE-MsgGUID: zuQvFWvCRFi3E4z3B1FB/w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.09,197,1716274800"; 
-   d="scan'208";a="48057791"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.49.253])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Jul 2024 02:26:10 -0700
-Message-ID: <ed01edf2-f3d6-4a93-884d-08525ddaac03@intel.com>
-Date: Wed, 10 Jul 2024 12:26:04 +0300
+	s=arc-20240116; t=1720609175; c=relaxed/simple;
+	bh=E/a4FQDoam0Lp6sh3PoMJFMZ/7+BWLYYRATRzpVRUQI=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Fvh35rgpeVAkLyYmQqPak1c+xqIrl++dIO34VDzwXVZ6g0peMbJBK8AYBQxVXEfo3OmnAMAExdPEWCHyae3k6IsDcWQU2USWduMI1sHrhgza2IFKCtfna+DimwR3Wc5scUjIdynaKx+VDC9Qs04ZYqkrTy3hBSL0b3FydcqMXoY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.84
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
+Received: from icess-ProLiant-DL380-Gen10.. (unknown [183.174.60.14])
+	by APP-05 (Coremail) with SMTP id zQCowADn7+eAaY5mo5mNAg--.50742S2;
+	Wed, 10 Jul 2024 18:59:23 +0800 (CST)
+From: Ma Ke <make24@iscas.ac.cn>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	thomas.petazzoni@free-electrons.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Ma Ke <make24@iscas.ac.cn>
+Subject: [PATCH v2] mmc: sdhci-pxav3: Fix potential NULL dereference in sdhci_pxav3_probe
+Date: Wed, 10 Jul 2024 18:59:11 +0800
+Message-Id: <20240710105911.2076942-1-make24@iscas.ac.cn>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-pxav3: Fix potential NULL dereference in
- sdhci_pxav3_probe
-To: Ma Ke <make24@iscas.ac.cn>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20240710070039.318658-1-make24@iscas.ac.cn>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240710070039.318658-1-make24@iscas.ac.cn>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:zQCowADn7+eAaY5mo5mNAg--.50742S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7ZF13Kw4UJw4rtF43GF1Utrb_yoW8Ary8pa
+	n8XrW5KrWrJr4rGa4ku3s8u3WakF1Yv3y29FZ7Jw1S9FZ5tryqqan7CFyrtr1UZrWUG3W3
+	XFnrZ348CrykXwUanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+	9KBjDU0xBIdaVrnRJUUUkG14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+	rVWUuVWrJwAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+	1l84ACjcxK6xIIjxv20xvE14v26r1j6r1xM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r1j
+	6r4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
+	Cq3wAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
+	0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr
+	1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IE
+	rcIFxwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14
+	v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1lIxkG
+	c2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI
+	0_Jr0_Gr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4U
+	MIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUq-erUUU
+	UU=
+X-CM-SenderInfo: ppdnvj2u6l2u1dvotugofq/
 
-On 10/07/24 10:00, Ma Ke wrote:
-> In sdhci_pxav3_probe(), mv_mbus_dram_info() returns NULL if
-> CONFIG_PLAT_ORION macro is not defined. Fix this bug by adding NULL check.
+In sdhci_pxav3_probe(), mv_mbus_dram_info() returns NULL if
+CONFIG_PLAT_ORION macro is not defined[1]. Fix this bug by adding NULL 
+check.
 
-Looks like mv_conf_mbus_windows() in sdhci-pxav3.c already checks
-for NULL i.e.
+Fixes: aa8165f91442 ("mmc: sdhci-pxav3: do the mbus window configuration after enabling clocks")
+Signed-off-by: Ma Ke <make24@iscas.ac.cn>
+---
+Changes in v2:
+- refined the vulnerability description;
+- provided similar vulnerability's reference link[2].
+Reference link:
+[1] https://github.com/torvalds/linux/blob/34afb82a3c67f869267a26f593b6f8fc6bf35905/include/linux/mbus.h#L65
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=d48d0c5fd733bd6d8d3ddb2ed553777ab4724169
+---
+ drivers/mmc/host/sdhci-pxav3.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-static int mv_conf_mbus_windows(struct platform_device *pdev,
-				const struct mbus_dram_target_info *dram)
-{
-	int i;
-	void __iomem *regs;
-	struct resource *res;
-
-	if (!dram) {
-		dev_err(&pdev->dev, "no mbus dram info\n");
-		return -EINVAL;
-	}
-
-
-> 
-> Fixes: aa8165f91442 ("mmc: sdhci-pxav3: do the mbus window configuration after enabling clocks")
-> Signed-off-by: Ma Ke <make24@iscas.ac.cn>
-> ---
->  drivers/mmc/host/sdhci-pxav3.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 3af43ac05825..ac89cb2eb9f6 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -375,6 +375,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->  	struct sdhci_host *host = NULL;
->  	struct sdhci_pxa *pxa = NULL;
->  	const struct of_device_id *match;
-> +	const struct mbus_dram_target_info *dram;
->  	int ret;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, sizeof(*pxa));
-> @@ -406,7 +407,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->  		ret = armada_38x_quirks(pdev, host);
->  		if (ret < 0)
->  			goto err_mbus_win;
-> -		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-> +		dram = mv_mbus_dram_info();
-> +		if (!dram) {
-> +			ret = 0;
-> +			goto err_mbus_win;
-> +		}
-> +		ret = mv_conf_mbus_windows(pdev, dram);
->  		if (ret < 0)
->  			goto err_mbus_win;
->  	}
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3af43ac05825..ac89cb2eb9f6 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -375,6 +375,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host = NULL;
+ 	struct sdhci_pxa *pxa = NULL;
+ 	const struct of_device_id *match;
++	const struct mbus_dram_target_info *dram;
+ 	int ret;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, sizeof(*pxa));
+@@ -406,7 +407,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		ret = armada_38x_quirks(pdev, host);
+ 		if (ret < 0)
+ 			goto err_mbus_win;
+-		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
++		dram = mv_mbus_dram_info();
++		if (!dram) {
++			ret = 0;
++			goto err_mbus_win;
++		}
++		ret = mv_conf_mbus_windows(pdev, dram);
+ 		if (ret < 0)
+ 			goto err_mbus_win;
+ 	}
+-- 
+2.25.1
 
