@@ -1,59 +1,73 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from relay2-d.mail.gandi.net (relay2-d.mail.gandi.net [217.70.183.194])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C5FA374CB;
-	Thu, 11 Jul 2024 06:48:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D72E413C90E;
+	Thu, 11 Jul 2024 08:18:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.194
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720680490; cv=none; b=oRZj/qBOr4pnDQ+DFVGLajXY5js0y6aqKyR0+fxOHqLArlK7FLg+l+eGyetupPcMO4mr0HdmHJGcBSgtToA5dWpU6mgKyLo0oc/7j8WBsOL5r1UKyvXeRb4upS0UqjDtG3i2eX+l7LQPmLtiO78Iryz4OuPyIqaVkYzZJ6nAK2M=
+	t=1720685931; cv=none; b=SvINjVSqgmFzsBCiqhsPhMIE8zRZC2fAwjSHw2DNHJNWEN6tfKRtk+y1JnRLhmHp+eeU7CMrdq1KloCzc4YkrGkcJ0E3p/rpPCLR5GxyseIt15IcOGQs1ewyDSgz21uDEMAisvc9mHJHb00rQSI63z9wrcwq7NoexGbBkUimJAA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720680490; c=relaxed/simple;
-	bh=eyHqnoYpZ27ALrk4B1zAXQaAgOCz4+kg1dODV+2Ro9o=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=tsktT3z8sW9WIb1SxK3DkT6h2pwK0gIZd3uEYqNNqlNk5tChWq/0mf3UFxWQF8KtC1VJgc9FvW+90usN0S8uLixeC9eWd9oGwiWtrvpX3fpMc41Rj4uCOtcypkscF5Np/nqS6PQU+D0kBTvJ+KKKuXWa8Hi0UVidD1GEa8Tlk0I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id D30D368AA6; Thu, 11 Jul 2024 08:48:03 +0200 (CEST)
-Date: Thu, 11 Jul 2024 08:48:03 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>,
-	Jon Hunter <jonathanh@nvidia.com>, Jens Axboe <axboe@kernel.dk>,
-	Thierry Reding <thierry.reding@gmail.com>,
-	linux-tegra@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci: Fix max_seg_size for 64KiB PAGE_SIZE
-Message-ID: <20240711064803.GA6313@lst.de>
-References: <20240710180737.142504-1-adrian.hunter@intel.com> <20240711040133.GB2556@lst.de> <44a4c774-c312-48d7-a627-19a7b86a3bf5@intel.com>
+	s=arc-20240116; t=1720685931; c=relaxed/simple;
+	bh=Pzi4xFSDzIRrUXKxpVsB3bYPtOAlT6ekdmSgaX69xZ4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=M9rx0ro/afu2Kc2dUR9Nymn7nHjTzz/b0u39DhKOy98ojaArbaklRi2NsZ5eDo2s8dWVEDTEQU0z6ja4b2eLk6QVvNXdF9/dzN1TGCoNpDgW7TTKEsxSpUKHPSciF8hoLmuf/FCkJwEmUkv/Wa4RngMGzNQuiTRy6E7gyZB+wUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=Kv5X8Wbs; arc=none smtp.client-ip=217.70.183.194
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="Kv5X8Wbs"
+Received: by mail.gandi.net (Postfix) with ESMTPA id 5DD7B40005;
+	Thu, 11 Jul 2024 08:18:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+	t=1720685920;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=osTRi2KSbmV+Tob6/3aGnNAqMqlljsPQGyTbLqh2kKU=;
+	b=Kv5X8WbsXzm/9vkM2YTJnvUYCKj4GzYDknk9g++tN/jF8MH+IPbbp9J3CephSTOcdGLGgM
+	wSMPppr/N8+zGDirsK3lcpPEW75y5FkML5gGuKZOZi3uLFi0jHOXderidFDTt2l1T8pNfC
+	4vGR14cAzte2sVYBjPB/jMHdv7lSs8y1uhgoU1jD/HC6fo5uPSOkqbPjEXwRfqAPWLb6r0
+	wKUCg4htgx5DnJaJGguHNSJTcGnxDC+ziPLilbtWHVMaWZHtShLcAfL4CN3mpX/js48ih2
+	YHTPpmXX7OB6cE6PmNepU2dUhjOIrBs9ieCtbrYBPU9sRZSl2n55n9H4yjxYfg==
+From: Bastien Curutchet <bastien.curutchet@bootlin.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Linus Walleij <linus.walleij@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Thomas Petazzoni <thomas.petazzoni@bootlin.com>,
+	Herve Codina <herve.codina@bootlin.com>,
+	Christopher Cordahi <christophercordahi@nanometrics.ca>,
+	Bastien Curutchet <bastien.curutchet@bootlin.com>
+Subject: [PATCH 0/2] mmc: davinci_mmc: Fix v6.9 regression
+Date: Thu, 11 Jul 2024 10:18:36 +0200
+Message-ID: <20240711081838.47256-1-bastien.curutchet@bootlin.com>
+X-Mailer: git-send-email 2.45.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <44a4c774-c312-48d7-a627-19a7b86a3bf5@intel.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
+X-GND-Sasl: bastien.curutchet@bootlin.com
 
-On Thu, Jul 11, 2024 at 08:17:47AM +0300, Adrian Hunter wrote:
-> On 11/07/24 07:01, Christoph Hellwig wrote:
-> > On Wed, Jul 10, 2024 at 09:07:37PM +0300, Adrian Hunter wrote:
-> >> blk_queue_max_segment_size() ensured:
-> >>
-> >> 	if (max_size < PAGE_SIZE)
-> >> 		max_size = PAGE_SIZE;
-> > 
-> > This is a bit misleading, as it also warned about it and papered over it
-> > with the above as it had no way to return errors.  Any everyone seeing
-> > these problems now ignored the warnings before, probably for years..
-> 
-> Was there a warning, since the message in blk_queue_max_segment_size()
-> was:
-> 
-> 		pr_info("%s: set to minimum %u\n", __func__, max_size);
+Hi all,
 
-It stated out as a plain printk and became an info later, but yes,
-not the big warning sign it was supposed to be.
+v6.9 introduced a small regression by removing a needed size check
+while inserting the use of the scatterlist memory iterator.
+
+The first patch fixes this regression.
+
+The second patch improves probe's trace to report every supported bus
+width
+
+Bastien Curutchet (2):
+  mmc: davinci_mmc: Prevent transmitted data size from exceeding sgm's
+    length
+  mmc: davinci_mmc: report all possible bus widths
+
+ drivers/mmc/host/davinci_mmc.c | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+-- 
+2.45.0
 
