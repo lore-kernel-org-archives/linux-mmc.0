@@ -1,107 +1,63 @@
-Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ACD31172780
-	for <linux-mmc@vger.kernel.org>; Fri, 12 Jul 2024 14:45:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39BA429D1C;
+	Fri, 12 Jul 2024 19:12:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1720795503; cv=none; b=kD7fN9116brQME6MHpfAIIzk8A93gw41751vquarjX3GrPErKO8KwY516G/wsL+6mmt4vf3koqTjejVdLTyZGTfGR8uCHDX0Cucq3tdb1TrB8y1tdknPC4i00uYam7wJ/wQGXq/z9un9vrDVLPw07E40H/enfumhJZ8fh1idD4E=
+	t=1720811561; cv=none; b=CLGB0KRpSBjl1yItZXJU4GQNYVSGS9j4UfpIXVeqSJwPB4VwYKV5BsD19iykDy7cUzQMuMGlrIZNYRvVFzHnoLXqC6jor37abdSSI/d8yvKfYx1ISLevmlqy1o/iCVuNMynsbe8vKvaEpLgAxpmabMpGIwxZwZPbJQsFFUDQdso=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1720795503; c=relaxed/simple;
-	bh=+YtTtxGbBziQHCzvi1efpwobTUyygckgfzKma2ANla0=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=dV+HxVFT7MH5z583DtPsANIX8PSzcp8wr5oF10YOnkf6ndOkOA5OthsAYLACP/ClqqpayBSchQuv44K4+du+1f/UqM8yMHS9nWwpn91U4bZoR+EKhu8HYrZ3wuU+zBdMpt1sY2Smf1jHbKhL85OiqiTECRrrnef+H5Sf9ico63U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=synOcHlc; arc=none smtp.client-ip=209.85.167.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1720811561; c=relaxed/simple;
+	bh=6HrSjXeu1/ONauaE0JaLnK/nAkgGdmypVik+25fhvWo=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=T0BRYVuz3zVMsbf/pkgbtY3vaY6fvbDgMrx69IW01ZhSoWly5JyeRLM2QRXDillEgUtkd0cDyHwGeUjHSUAyf0iGv5pYWWpd4H7+bz0n3LrhXF6BsjyPWQuNdvOOkf+5ijwzOZnR9626kBU2aDGR1WFZnHF3SNQ/yX0TDHJS6HE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H40o4Me8; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="synOcHlc"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-52ea5dc3c79so3003730e87.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Jul 2024 07:45:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1720795500; x=1721400300; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=DHPNyb/tJ1VWWeymMmdH4zoCwAXbQXpyF4Qjg1xHg1Q=;
-        b=synOcHlcnT58Lgj4kLkkPAwdqnEZ4+c14qb0s41H+Pw7yVE9NqGUy+KFyNhvQcL/UD
-         UHPTUSulAcv262xIu6NzRmk2ypx8jYUhYuTtunWAiLoRfNn6D5mXOSyC4odSpJtMUMnn
-         qCGbi+FBQJALGpa4tzUeJ3lXvmUQFMiP2sHHCgZ3lwNAbv/4ZWRaeJnynHAyighvx+/T
-         0t2tlPYT/9AaLFSfyofXfilRaOnP+2t+HzQZsTDj/OuO3AGFoVQCSdaxIYRyV/DFMdof
-         PSlr9UR8I01QA9cQae/Rf09iKNG2z3/8uKiByWqSjRHD/Hc4gohUjgFdSmoNRilK+plU
-         yd+Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1720795500; x=1721400300;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=DHPNyb/tJ1VWWeymMmdH4zoCwAXbQXpyF4Qjg1xHg1Q=;
-        b=hUlpCHkyu0o3tIi+8T2CChyWx0UTtpuA7kqmGrbxj9AphFzAaPzVPBFVU9lQc8j805
-         4JZjK2vOsmK02v1yR+aybbDvj6lrB6nsWNmjS3UaMX+gLXK2ox8avb6d/MNXVWOgbvnI
-         qNyp/Qf1LdNn/OhT7RjFe2VJPqIgS5lN8m2We3BiB4gQaqL7RNIY2Wr5Af0HTQpRWI3z
-         2CPSUWq9JpzZzXC7O1UVpRUU2xw2qGs/0+Icpy2brSSHFEN2Q85u4yVsaj9LFFdcu1Os
-         xQ4epwBmWg+53aoRuF0oIhuiGO0MAarb8iwZEtdpTgY+BFNM9WtRcH9aL0pHHwsyKE0w
-         hKNQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVBU6n4gCPRNwbyADyo5iMd2pgFWjttT/YTHzArrvD6LUgSzdYcLvzTFCq1QAatt+DOpiBwZwsa3JmEZf6IAu1UYK17CUcdhhLs
-X-Gm-Message-State: AOJu0YzrDXoIEcvpUgRYLhmq/iBF1UKAvHGKg2o4U7JDVGfgeOLk0mBf
-	PN535TbaBoH8O5LC9stQ8qYQyRx4ct4XJGEQ8wKMLfjC62Kb2+Wml5/IZqAVkDg=
-X-Google-Smtp-Source: AGHT+IGzE/OcadTjDAGe2TP8Cuo9c94sqsqcU4eLkqtdPUECgrzsl+GfWxtdin0klh12Cy8BNzpK3Q==
-X-Received: by 2002:ac2:46e5:0:b0:52e:7684:a385 with SMTP id 2adb3069b0e04-52eb99d3265mr6232252e87.52.1720795499568;
-        Fri, 12 Jul 2024 07:44:59 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-52eb906e739sm1293862e87.252.2024.07.12.07.44.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Jul 2024 07:44:59 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.10-rc8
-Date: Fri, 12 Jul 2024 16:44:57 +0200
-Message-Id: <20240712144457.169093-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H40o4Me8"
+Received: by smtp.kernel.org (Postfix) with ESMTPS id C6D2FC4AF09;
+	Fri, 12 Jul 2024 19:12:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1720811560;
+	bh=6HrSjXeu1/ONauaE0JaLnK/nAkgGdmypVik+25fhvWo=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=H40o4Me8G3+3ygzTe/aBsYrnXL77F0mUyiZm1iLAC76NXsIjQz7BMBhWIwnQ/m3GS
+	 iUlpbdkoZot/KFo1YTRX6kVY/1Kzke2a6Z9TWuL5OltMeZiVBV9eN3KbQs6PS4Ba77
+	 fAzGUdaRFM98OMdEUS4kRAeyS7IVO5y6hzD8E+12hPvkFyMhOUi3uXtvYvpmCGJPNN
+	 3qOsM9dTBWcFDpRidpqEAKNs3CQX4rELHP9su0Qo1gHmBO8cGb6quz0pbVNNEAQblL
+	 qH8xpundjiEIA+f5NJ2IPv7LAtsLtulms+pSuFUDdAseSn8JI+pNWKxv/oe91jreKp
+	 +dYKGdWasJZCQ==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+	by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id BBB52C43153;
+	Fri, 12 Jul 2024 19:12:40 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.10-rc8
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20240712144457.169093-1-ulf.hansson@linaro.org>
+References: <20240712144457.169093-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20240712144457.169093-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10-rc4-2
+X-PR-Tracked-Commit-Id: 16198eef11c1929374381d7f6271b4bf6aa44615
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 01ec3bb6ea6a9e5cbe18600e8613c717508b0a71
+Message-Id: <172081156076.20584.10673710867064842388.pr-tracker-bot@kernel.org>
+Date: Fri, 12 Jul 2024 19:12:40 +0000
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 
-Hi Linus,
+The pull request you sent on Fri, 12 Jul 2024 16:44:57 +0200:
 
-Here's a PR with a couple of MMC fixes intended for v6.10-rc8. Details about the
-highlights are as usual found in the signed tag.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10-rc4-2
 
-Please pull this in!
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/01ec3bb6ea6a9e5cbe18600e8613c717508b0a71
 
-Kind regards
-Ulf Hansson
+Thank you!
 
-
-The following changes since commit ab069ce125965a5e282f7b53b86aee76ab32975c:
-
-  mmc: sdhci: Do not lock spinlock around mmc_gpio_get_ro() (2024-06-20 16:42:30 +0200)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.10-rc4-2
-
-for you to fetch changes up to 16198eef11c1929374381d7f6271b4bf6aa44615:
-
-  mmc: davinci_mmc: Prevent transmitted data size from exceeding sgm's length (2024-07-11 17:48:54 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - davinci_mmc: Prevent transmitted data size from exceeding sgm's length
- - sdhci: Fix max_seg_size for 64KiB PAGE_SIZE
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci: Fix max_seg_size for 64KiB PAGE_SIZE
-
-Bastien Curutchet (1):
-      mmc: davinci_mmc: Prevent transmitted data size from exceeding sgm's length
-
- drivers/mmc/host/davinci_mmc.c |  3 +++
- drivers/mmc/host/sdhci.c       | 15 +++++++++++++++
- 2 files changed, 18 insertions(+)
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
