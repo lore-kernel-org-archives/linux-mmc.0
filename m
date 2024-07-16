@@ -1,106 +1,109 @@
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C1DDF17C2;
-	Tue, 16 Jul 2024 01:37:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.61.82.184
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF983208A5;
+	Tue, 16 Jul 2024 06:19:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721093846; cv=none; b=Q43Ga5bDP91BpZYAsCltEy2rDuj1O0i4b7+/cjh4qTWkorF45o2YBGJdbv/VXCntYa9WMNNmS+wBkyoHSmfz64y/K2OXIkD5hJEggsPANbj1GwWZyd1OIvDCrmyCzzIO+WAadj7M1VzxIXQvUn8dK5pUM0hUDHF71da2FDFMNVc=
+	t=1721110767; cv=none; b=myWFXlQwPbL0OaQAjaogPrl0Ih+aDEdGdKNzA9JAMHt215pWqLlLFiz7UZfxmN6PNDnrs6U5qF/3EP5hjWVxjJtjwe2dKP2n0mUllSKGAlsnKd2BFTbGxWmWFxDqpxgbzzkx9rdCLBKuDV2JOem8h5sAr64stFtCxu8CUitR7nY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721093846; c=relaxed/simple;
-	bh=q/n6ksZvJBJKfymbsjwlp7qF2wHA7VSx9k3YM3Da6yQ=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=ZXuV++y7C7yDpFkJEPKPgVPKZC/xswXw1eApqAu+nyQrfX6yQ/GuhirYA+hUn/ycdVXvlj9zPm3WUftWU1bRaps341xp2Z/EJbQFuoFXAaCUYe6brXRBSsx70e02jyX3y3vapwS3hqoK03E3bh2bEO1v3jM2KNYoUj9vdA9Byg0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=nEO5P307; arc=none smtp.client-ip=210.61.82.184
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1721110767; c=relaxed/simple;
+	bh=0+LR9B7rSDTvnbSE3g6hXnn9CfREqW1WuTsRnkZ/5kU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=cB4yUYAY3i9bbMc1M0ZrmSsojerRSORJP/tD8ZiMTZvKVAsjWghP4s6HFxQC+21oYFymyZKhiz8RFc/JFA0u1Pjx/ZcqQXKebd8+qG4eyKj0bm0gxXepu+BJT/VXySmbDZaDbDBIAyuykyRXD1/m2owZuKRwsedPqDdDWpqq2xE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NQTUVqRQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="nEO5P307"
-X-UUID: edcefd30431311ef87684b57767b52b1-20240716
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=ecczJKhQmZrvgk6AQTQATT11lmeJ+vbOQtxp2jxvHEM=;
-	b=nEO5P307u69mZl6rmZ1EyoHzC45LoCh5rewn0HUlKAopIJK9jTgnLHGMrfAu+gPoDzw8ODlP2K9NnqoaEl8HR/ImIrSe67KQLVH0F7W9+t2IE1F0nnlGZCIw7RcgNU8ts9dP89Osgl1GoBI7ttGcKnmW+q1h0jxrpbCB6rdyLIc=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.40,REQID:865add97-d7f6-4ec0-a40b-c8fa563a372b,IP:0,U
-	RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
-	N:release,TS:-25
-X-CID-META: VersionHash:ba885a6,CLOUDID:830085d1-436f-4604-ad9d-558fa44a3bbe,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-	RL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,
-	SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR
-X-UUID: edcefd30431311ef87684b57767b52b1-20240716
-Received: from mtkmbs11n2.mediatek.inc [(172.21.101.187)] by mailgw02.mediatek.com
-	(envelope-from <mengqi.zhang@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 458508838; Tue, 16 Jul 2024 09:37:14 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Tue, 16 Jul 2024 09:37:14 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Tue, 16 Jul 2024 09:37:14 +0800
-From: Mengqi Zhang <mengqi.zhang@mediatek.com>
-To: <ulf.hansson@linaro.org>, <chaotian.jing@mediatek.com>,
-	<matthias.bgg@gmail.com>, <angelogioacchino.delregno@collabora.com>,
-	<wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-mediatek@lists.infradead.org>, <linux-kernel@vger.kernel.org>, Mengqi
- Zhang <mengqi.zhang@mediatek.com>, <stable@vger.stable.com>
-Subject: [v1, 1/1] mmc: mtk-sd: receive cmd8 data when hs400 tuning fail
-Date: Tue, 16 Jul 2024 09:37:04 +0800
-Message-ID: <20240716013704.10578-1-mengqi.zhang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NQTUVqRQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FB30C116B1;
+	Tue, 16 Jul 2024 06:19:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721110767;
+	bh=0+LR9B7rSDTvnbSE3g6hXnn9CfREqW1WuTsRnkZ/5kU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=NQTUVqRQXSxbHLJ6TcVOWJ0VG4R7KUeylEOWOcL4Yj2/owbQfiRp+eXeyFPueBBie
+	 KSKbfbBB1Ni7A6/pfeCRdPyyQI2mgux14eSVu4twAvLwmLkBhHLnXNTBdSHw8HmPBo
+	 zNDd3xyCmJ5vTmAFuLXAcoB8L+c2N+3LS6anIFOjuIPhvhL53RcdxwOm/jhR4otRNA
+	 hCLRDOT/2Y/WaRzDw1o8MUZYUXPO+a/7dhsy+kBdhguwY6ctMG/XwlYVZcklv3eeJa
+	 OJgi/1fKvrJVoifZaBK9QNGVGQD/d7mY2UJKftv26qhFFyPjKjRsKzfDkJ/jlXqrPt
+	 69Sgbp6SKFhRQ==
+Message-ID: <833e112a-f490-4a89-931b-44f806fe043e@kernel.org>
+Date: Tue, 16 Jul 2024 08:19:18 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document
+ MA35D1 SDHCI controller
+To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com,
+ serghox@gmail.com, mcgrof@kernel.org,
+ prabhakar.mahadev-lad.rj@bp.renesas.com, forbidden405@outlook.com,
+ tmaimon77@gmail.com, andy.shevchenko@gmail.com,
+ linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ychuang3@nuvoton.com, schung@nuvoton.com
+References: <20240716004527.20378-1-shanchun1218@gmail.com>
+ <20240716004527.20378-2-shanchun1218@gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
+ cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
+ JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
+ gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
+ J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
+ NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
+ BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
+ vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
+ Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
+ TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
+ S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
+ FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJgPO8PBQkUX63hAAoJEBuTQ307
+ QWKbBn8P+QFxwl7pDsAKR1InemMAmuykCHl+XgC0LDqrsWhAH5TYeTVXGSyDsuZjHvj+FRP+
+ gZaEIYSw2Yf0e91U9HXo3RYhEwSmxUQ4Fjhc9qAwGKVPQf6YuQ5yy6pzI8brcKmHHOGrB3tP
+ /MODPt81M1zpograAC2WTDzkICfHKj8LpXp45PylD99J9q0Y+gb04CG5/wXs+1hJy/dz0tYy
+ iua4nCuSRbxnSHKBS5vvjosWWjWQXsRKd+zzXp6kfRHHpzJkhRwF6ArXi4XnQ+REnoTfM5Fk
+ VmVmSQ3yFKKePEzoIriT1b2sXO0g5QXOAvFqB65LZjXG9jGJoVG6ZJrUV1MVK8vamKoVbUEe
+ 0NlLl/tX96HLowHHoKhxEsbFzGzKiFLh7hyboTpy2whdonkDxpnv/H8wE9M3VW/fPgnL2nPe
+ xaBLqyHxy9hA9JrZvxg3IQ61x7rtBWBUQPmEaK0azW+l3ysiNpBhISkZrsW3ZUdknWu87nh6
+ eTB7mR7xBcVxnomxWwJI4B0wuMwCPdgbV6YDUKCuSgRMUEiVry10xd9KLypR9Vfyn1AhROrq
+ AubRPVeJBf9zR5UW1trJNfwVt3XmbHX50HCcHdEdCKiT9O+FiEcahIaWh9lihvO0ci0TtVGZ
+ MCEtaCE80Q3Ma9RdHYB3uVF930jwquplFLNF+IBCn5JRzsFNBFVDXDQBEADNkrQYSREUL4D3
+ Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
+ MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
+ OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
+ GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
+ 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
+ YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
+ 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
+ BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
+ JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
+ 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
+ YpsFAmA872oFCRRflLYACgkQG5NDfTtBYpvScw/9GrqBrVLuJoJ52qBBKUBDo4E+5fU1bjt0
+ Gv0nh/hNJuecuRY6aemU6HOPNc2t8QHMSvwbSF+Vp9ZkOvrM36yUOufctoqON+wXrliEY0J4
+ ksR89ZILRRAold9Mh0YDqEJc1HmuxYLJ7lnbLYH1oui8bLbMBM8S2Uo9RKqV2GROLi44enVt
+ vdrDvo+CxKj2K+d4cleCNiz5qbTxPUW/cgkwG0lJc4I4sso7l4XMDKn95c7JtNsuzqKvhEVS
+ oic5by3fbUnuI0cemeizF4QdtX2uQxrP7RwHFBd+YUia7zCcz0//rv6FZmAxWZGy5arNl6Vm
+ lQqNo7/Poh8WWfRS+xegBxc6hBXahpyUKphAKYkah+m+I0QToCfnGKnPqyYIMDEHCS/RfqA5
+ t8F+O56+oyLBAeWX7XcmyM6TGeVfb+OZVMJnZzK0s2VYAuI0Rl87FBFYgULdgqKV7R7WHzwD
+ uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
+ 7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
+ 5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
+In-Reply-To: <20240716004527.20378-2-shanchun1218@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-When we use cmd8 as the tuning command in hs400 mode, the command
-response sent back by some eMMC devices cannot be correctly sampled
-by MTK eMMC controller at some weak sample timing. In this case,
-command timeout error may occur. So we must receive the following
-data to make sure the next cmd8 send correctly.
+On 16/07/2024 02:45, Shan-Chun Hung wrote:
+> Add binding for Nuvoton MA35D1 SDHCI controller.
+> 
+> Signed-off-by: Shan-Chun Hung <shanchun1218@gmail.com>
 
-Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
-Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
-Cc: stable@vger.stable.com
----
- drivers/mmc/host/mtk-sd.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index a94835b8ab93..e386f78e3267 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1230,7 +1230,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 	}
- 
- 	if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
--		if (events & MSDC_INT_CMDTMO ||
-+		if ((events & MSDC_INT_CMDTMO && !host->hs400_tuning) ||
- 		    (!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning))
- 			/*
- 			 * should not clear fifo/interrupt as the tune data
-@@ -1323,9 +1323,9 @@ static void msdc_start_command(struct msdc_host *host,
- static void msdc_cmd_next(struct msdc_host *host,
- 		struct mmc_request *mrq, struct mmc_command *cmd)
- {
--	if ((cmd->error &&
--	    !(cmd->error == -EILSEQ &&
--	      (mmc_op_tuning(cmd->opcode) || host->hs400_tuning))) ||
-+	if ((cmd->error && !host->hs400_tuning &&
-+	     !(cmd->error == -EILSEQ &&
-+	     mmc_op_tuning(cmd->opcode))) ||
- 	    (mrq->sbc && mrq->sbc->error))
- 		msdc_request_done(host, mrq);
- 	else if (cmd == mrq->sbc)
--- 
-2.25.1
+Best regards,
+Krzysztof
 
