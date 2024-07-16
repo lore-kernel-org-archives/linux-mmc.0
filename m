@@ -1,55 +1,57 @@
-Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
+Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A432191;
-	Tue, 16 Jul 2024 00:45:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 044B64C9F;
+	Tue, 16 Jul 2024 00:45:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721090738; cv=none; b=GOlbmSDR/lkDP4GZPgj5EZ5u4f8MYit1+jyUprb974FIWQeqF71wrkD//d3Fn9mtYB5FGKi9X7eQkXeBNDnHVe3lvacaDLQL5/YBIuDPbDJ5o3KiYLoUS5IkL8fksfX29Ui3GGhSGJ8PbwiHZloY4Sy8i2ggEKTFklu94RmDJX8=
+	t=1721090741; cv=none; b=sM8CkpU6en+zbUHJ/xygcvKbP4xiX7Drq/tYRbmpWoH81PPQFR71BjyFzclx7yYj27/v16ksQ1gy7DiK1ke3LY0NXRQqwOyYawtHDFTZwlEIVGdZ/ukUpUSW2TzuBHcaOu/h3H+zisEz/ItUGHAnd7z1STnfZwTLGdClaWc8NS0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721090738; c=relaxed/simple;
-	bh=xmVWODUyxNQoM7cdwnSoUDFS3lg0SBkGXihzRMl/Yeg=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=P/stl5KplMmi6dXZXyGmqkV3haai2ekDzhZklIBlPGGPsNUJhKlQ+7yG6LS2LIn1u8RhdC6zD1XqqEriInZhd/zGzrRnvQDYz/Jh2u3XXWr6IjDAY3YjgU+kQo3tDHmuy9bsLI6H7cQBppZRnw2BRASb9X1l5rBGkSJlWc99lXk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mc53gINu; arc=none smtp.client-ip=209.85.160.41
+	s=arc-20240116; t=1721090741; c=relaxed/simple;
+	bh=Vd0wsIBAbBA7tzrd9GnsC9bwycR4Woyl1jLX3Ma8kps=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=O+TAEsQhM3HMxdovhTP2GyjuuQnu/Zw0uAhTJSi1NGmz9NsBoraO/KAp0xYiDoUt/rit57oWm3an7XTLsDDtyvpiQYImsr84FfzH6hakb7Q9gsajEDJDpDuDa/yt7yR6vWKgaMueYEP67SV2XmFqkDEJh89WE2WcQhcXcrqTOKU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JOu763Iu; arc=none smtp.client-ip=209.85.215.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mc53gINu"
-Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-25e150603a6so2451884fac.3;
-        Mon, 15 Jul 2024 17:45:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JOu763Iu"
+Received: by mail-pg1-f176.google.com with SMTP id 41be03b00d2f7-78512d44a13so3306715a12.1;
+        Mon, 15 Jul 2024 17:45:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1721090735; x=1721695535; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=LnXr0eXuAv0hZrIz9mCHMK0FQq9j8VZolcsUM4NL5QA=;
-        b=mc53gINuCn000kv6jnW3Ymzvu5Gb7p70ypVEVUlPBB3rWl/prXi8BAWNRdzGLy/Rap
-         EEbIJZQvy3ogfpWXc2J+w9qMeDQbwicbKxePXmdRHHrONQG1i3fpmg3tgUTflhjVs7Jt
-         GtaqvQJ5q1q8m+wzjNu3eAxK0CRk3GNDYK7gVaH29ZqxqrzXA0ZrM7MVgPIlHOUwvujZ
-         zzSvEzYLKH23B6TUFOVVEpj1cz12Cgf3rgnAoSg/mfYe7BEexT67474l4UWxzKrZGv6Z
-         GGA3FDjBMuxfvYaGDGCzk8JyVLjJPR0WJHe9LU3lkPbUQ37OKU5SSGQA/htIig0ecw9K
-         HpTQ==
+        d=gmail.com; s=20230601; t=1721090739; x=1721695539; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DmRt58sujYbUWl42YDpTmjrb8UaUan/GZPrgtBml3ig=;
+        b=JOu763IuWiZSqlilxzvusab7qQDWpwBs++2wZbmXhVlGVPEInk1dik02a8M7ZES22D
+         7VjmSgfGXEVQQtrsAcqBieg5CfqtV903bSwJz8H77KN0mWOlxz0tbfLDGU/X73ZbiwwN
+         0VPIaNflURM8l9daUN6Yjx1pYPU+Cw5fxt6K5GHq/Ryub2Sxqb8joEPTMUy6eHRBx5KB
+         0xAcfiqOGOSUwZIzzS7/lbtWUC9IEZdQ40893RB6sGy8vHj6DWhoPZEuGat07YhtytR6
+         JhCtQJ8D7lii9OdXUL/G3X/k5i0owzXec+IvuRl7/kXLbd26fc39jo6Ydjns+Iq0LK2v
+         +kcg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721090735; x=1721695535;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=LnXr0eXuAv0hZrIz9mCHMK0FQq9j8VZolcsUM4NL5QA=;
-        b=mOTMm1Lp/LE+VvgM9vWPEhEX2iiczCYML2iTESg3/i4r4W+jRcGx88Cwj2XxbCGflG
-         YJVsvdm0ioLaKrUHGwBJEnbKkcEsc0/TuEsRqKM2VQ6ru7rzRIXylEAe8VpYDuK7ofT1
-         GEKLl5I6MnVu87oxr6AHec/fAxtfIZs3yEhub4SlSyUqdo/+/1FDF9//kQLc4cV8wfar
-         oDDu14L8N7OG5qQvxNwEOm6l+tb27qTZYA9CDGWF5y8tnGWJo6qYlhU45dGQDkEhs+BG
-         0GdqKWlWnSEMGXvMS0mYUnnWY5j/RHcb1ORa9+t0Pp4ESWuLvS46aLbNWPayfmycJ380
-         fXvQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVESk459zjwW8zpEZq3jgJu0Ykx8dPbOlt1TGKNqCGNI5mVH9U5vIKtIu3HNIPv5r7euQFQ2lZ5xAGNJPfr3DN4tu9L1/N3YlZK9oxPQ3zAIGSOqBOMhs3M2AhWdBV09/cDgmwq9rVGuwJZod1Y1mw5Y90cSmVsUxa5DWkqK9IxRzgCXQ==
-X-Gm-Message-State: AOJu0YzneNkT4+iZYLaQmV63L5usbZkZysIkFE/m9UAwq9pSDvTjQXUq
-	XrAxM6U6xJuzcu128qThnLWhERXoDZJEHofC8CUsK8kiNgGn05CVJjILA1DxFQM=
-X-Google-Smtp-Source: AGHT+IHhID7gzwliNwSDimSOwWCZnoturptY/gWrbZpRJF5QjxmXeZcq2t1YrqRjdEUztNfviDcFRA==
-X-Received: by 2002:a05:6870:64ab:b0:25d:f1f6:8a2c with SMTP id 586e51a60fabf-260bdfbed6bmr400179fac.39.1721090735456;
-        Mon, 15 Jul 2024 17:45:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1721090739; x=1721695539;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=DmRt58sujYbUWl42YDpTmjrb8UaUan/GZPrgtBml3ig=;
+        b=IsS4/pe2zm0IvOMtZg7GKMY5ZAEUqNF8zIecQwQodx5e0CKnRWFvXJc2ONI7jIEyL+
+         q/GCEwZCiF9MATLzg1VK1vQvFlAUGAY5rRyLmYzmbabdZ4H6On7eeuP+Opi5PWAg6sB6
+         nF+IgC0b+RwjPyzjFIroONpJnTWgef0e5B4qEyN/zybAi+L3/Iq6AHh6+FXkYR87TkyG
+         0SU2Pqgs3zPRQ8xZhYyaGqnotVNJFwgUq6rQiF4HrCMZGSLjKQxv9u4kF34MSCZM6rug
+         /Di/YfI1EKmO8PtTSHgj+WiWMcsvLWjsBZG3E0TXM9nBSQ+4J0XK329HQ8AF//9qo7Ld
+         YYpw==
+X-Forwarded-Encrypted: i=1; AJvYcCWd4eJ4Q3tQHIVjCHtC5yAyKsYPLnJlSl10eIGXIxHp5zIw1ax9SuYtvwCUJzLUVwUgNCStHF/r8CHQgMk11B5w8e9a3YVAPvALowHAnQChta6JBXqk3oefGo+GvDemu0BHLyiYKa4coWtXOsAJ+jRiymuOnOp+QkXcXV/O5FFBIWw5vA==
+X-Gm-Message-State: AOJu0YxEyXlUVc1lF8Wlmxh7Ay0HJ7jVkbzIwfnFOzJpamDmejZfCvHM
+	cIxeE+InE2Cw3Z8c0BI5Rxr88f2IiNDu2hZmqEJeYQKQ7wJLPvwl
+X-Google-Smtp-Source: AGHT+IExNQ8d8O1Br2OEiWhuTGusLH/+AIojQSEobbpnnMfqRPjLszj29y30WBCQjhY6/ceoTs5nZw==
+X-Received: by 2002:a05:6a20:914b:b0:1be:d1bf:a371 with SMTP id adf61e73a8af0-1c3f124bf62mr782710637.33.1721090739092;
+        Mon, 15 Jul 2024 17:45:39 -0700 (PDT)
 Received: from localhost.localdomain (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7eca758fsm5000949b3a.162.2024.07.15.17.45.31
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7eca758fsm5000949b3a.162.2024.07.15.17.45.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Jul 2024 17:45:34 -0700 (PDT)
+        Mon, 15 Jul 2024 17:45:38 -0700 (PDT)
 From: Shan-Chun Hung <shanchun1218@gmail.com>
 To: ulf.hansson@linaro.org,
 	robh@kernel.org,
@@ -71,10 +73,12 @@ To: ulf.hansson@linaro.org,
 Cc: ychuang3@nuvoton.com,
 	schung@nuvoton.com,
 	Shan-Chun Hung <shanchun1218@gmail.com>
-Subject: [PATCH v5 0/2] Add support for Nuvoton MA35D1 SDHCI
-Date: Tue, 16 Jul 2024 08:45:25 +0800
-Message-Id: <20240716004527.20378-1-shanchun1218@gmail.com>
+Subject: [PATCH v5 1/2] dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document MA35D1 SDHCI controller
+Date: Tue, 16 Jul 2024 08:45:26 +0800
+Message-Id: <20240716004527.20378-2-shanchun1218@gmail.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20240716004527.20378-1-shanchun1218@gmail.com>
+References: <20240716004527.20378-1-shanchun1218@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -83,60 +87,107 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This patch adds the SDHCI driver and DT binding documentation
-for the Nuvoton MA35D1 platform.
+Add binding for Nuvoton MA35D1 SDHCI controller.
 
-This MA35D1 SDHCI driver has been tested on the MA35D1 SOM board with
-Linux 6.10
-
-v5:
-  - Update to nuvoton,ma35d1-sdhci.yaml
-    - Fixing the same orders as in the list of properties.
-  - Update ma35d1 sdhci driver
-    - Fixing the error path syntax to err = dev_err_probe().
-
-v4:
-  - Update to nuvoton,ma35d1-sdhci.yaml
-    - Fixing overlooked issues.
-
-v3:
-  - Update ma35d1 sdhci driver
-    - Fixing "Alignment" and "spaces preferred around".
-    - Fixing style for multi-line comments.
-    - Fixing double call to sdhci_pltfm_free().
-
-v2:
-  - Update to nuvoton,ma35d1-sdhci.yaml
-    - Remove some redundant descriptions.
-    - Replace 'minitem' with 'maxitem' in the clock settings.
-    - Make corrections to nuvoton,sys description.
-    - Add sdhci-common.yaml.
-    - Remove '|' except where necessary to be preserved.
-    - Keeping one example is sufficient.
-    - Add regulators in the example.
-  - Update ma35d1 sdhci driver
-    - Refer to 'include what you use' to modify included header files.
-    - Replace the number 8 with sizeof(u8), and similarly for others.
-    - Use "dev" instead of "&pdev->dev".
-    - Use the min() macro to improve the code.
-    - Use dev_err_probe() instead of dev_err().
-    - Implement an error reset check mechanism.
-    - Add devm_add_action_or_reset() to help with sdhci_pltfm_free().
-    - Use devm_reset_control_get_exclusive() instead of devm_reset_control_get().
-
-Shan-Chun Hung (2):
-  dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document MA35D1 SDHCI
-    controller
-  mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI driver
-
- .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml    |  87 +++++
- drivers/mmc/host/Kconfig                      |  12 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/sdhci-of-ma35d1.c            | 314 ++++++++++++++++++
- 4 files changed, 414 insertions(+)
+Signed-off-by: Shan-Chun Hung <shanchun1218@gmail.com>
+---
+ .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml    | 87 +++++++++++++++++++
+ 1 file changed, 87 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
- create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
 
+diff --git a/Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml b/Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
+new file mode 100644
+index 000000000000..4d787147c300
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
+@@ -0,0 +1,87 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/nuvoton,ma35d1-sdhci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Nuvoton MA35D1 SD/SDIO/MMC Controller
++
++maintainers:
++  - Shan-Chun Hung <shanchun1218@gmail.com>
++
++allOf:
++  - $ref: sdhci-common.yaml#
++
++properties:
++  compatible:
++    enum:
++      - nuvoton,ma35d1-sdhci
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  pinctrl-names:
++    minItems: 1
++    items:
++      - const: default
++      - const: state_uhs
++
++  pinctrl-0:
++    description:
++      Should contain default/high speed pin ctrl.
++    maxItems: 1
++
++  pinctrl-1:
++    description:
++      Should contain uhs mode pin ctrl.
++    maxItems: 1
++
++  resets:
++    maxItems: 1
++
++  nuvoton,sys:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description: phandle to access GCR (Global Control Register) registers.
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - pinctrl-names
++  - pinctrl-0
++  - resets
++  - nuvoton,sys
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    #include <dt-bindings/clock/nuvoton,ma35d1-clk.h>
++    #include <dt-bindings/reset/nuvoton,ma35d1-reset.h>
++
++    soc {
++        #address-cells = <2>;
++        #size-cells = <2>;
++        mmc@40190000 {
++            compatible = "nuvoton,ma35d1-sdhci";
++            reg = <0x0 0x40190000 0x0 0x2000>;
++            interrupts = <GIC_SPI 31 IRQ_TYPE_LEVEL_HIGH>;
++            clocks = <&clk SDH1_GATE>;
++            pinctrl-names = "default", "state_uhs";
++            pinctrl-0 = <&pinctrl_sdhci1>;
++            pinctrl-1 = <&pinctrl_sdhci1_uhs>;
++            resets = <&sys MA35D1_RESET_SDH1>;
++            nuvoton,sys = <&sys>;
++            vqmmc-supply = <&sdhci1_vqmmc_regulator>;
++            bus-width = <8>;
++            max-frequency = <200000000>;
++        };
++    };
 --
 2.25.1
 
