@@ -1,65 +1,80 @@
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C60E0187345
-	for <linux-mmc@vger.kernel.org>; Mon, 15 Jul 2024 10:42:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A432191;
+	Tue, 16 Jul 2024 00:45:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721040136; cv=none; b=uK9QhAjnVMxo1qlkTYtEexrADP2ctMd4kUOYiIAoTY2ovevpWI4BaUs1str47yhYXvbeA0FGkB4vjLnuJZvB6aPOlO2A6akaVBw6Pr47NL1zeuREDSy1BAfrNtkS28ML7llbzS/Co4TxDpI1Gz9mGzF4ZM5Vsz6Q6q0jdjceqgU=
+	t=1721090738; cv=none; b=GOlbmSDR/lkDP4GZPgj5EZ5u4f8MYit1+jyUprb974FIWQeqF71wrkD//d3Fn9mtYB5FGKi9X7eQkXeBNDnHVe3lvacaDLQL5/YBIuDPbDJ5o3KiYLoUS5IkL8fksfX29Ui3GGhSGJ8PbwiHZloY4Sy8i2ggEKTFklu94RmDJX8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721040136; c=relaxed/simple;
-	bh=bUUlr5c2Y/b9ETzfRJTM3uGHLh+IJTm19dqPlt8KFAc=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=UeHgokqMSv0P96Ye7MajDSQMvAblC6DGvnPd+Ili6PL2UW3xhjBKu5oRU9LQMJ4+eJg7qkHYkYHlmZz9rG5ep+vbtHQF8c7bIskUxNv6vNDzHuRSVo1rJQmJcLjCV9TsN+0Bp/uLcxc/zRJImt65/n0AycpPejrejLzgAlRKCcE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rNDXX7vt; arc=none smtp.client-ip=209.85.208.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1721090738; c=relaxed/simple;
+	bh=xmVWODUyxNQoM7cdwnSoUDFS3lg0SBkGXihzRMl/Yeg=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=P/stl5KplMmi6dXZXyGmqkV3haai2ekDzhZklIBlPGGPsNUJhKlQ+7yG6LS2LIn1u8RhdC6zD1XqqEriInZhd/zGzrRnvQDYz/Jh2u3XXWr6IjDAY3YjgU+kQo3tDHmuy9bsLI6H7cQBppZRnw2BRASb9X1l5rBGkSJlWc99lXk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mc53gINu; arc=none smtp.client-ip=209.85.160.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rNDXX7vt"
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-2eec7e431d9so52398401fa.2
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Jul 2024 03:42:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mc53gINu"
+Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-25e150603a6so2451884fac.3;
+        Mon, 15 Jul 2024 17:45:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1721040131; x=1721644931; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1721090735; x=1721695535; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=yDBDdSaTsIScMjDczsi/TPg8Dl1/nhZKeEyHmoSCz7k=;
-        b=rNDXX7vtYOa8jIMJcWx8YFHEmshQkSJSc6J6HZXXcEGKLEL9u4QoaGJSq6bTCffyLW
-         /PYuqIDCg8YA8mJ40+yC22UHYh9T2oUpySn8ITZqfjhMLjF9O7RefidHxJ89NGdFx3dP
-         W33Amf9QdLIfFg+uOVfgrb4M22MUgekHo11ConkbE7yNpYC/E7uZFMLp1qi9sdfdrf4O
-         Tngsa67VUSIA1NDzI6yrCP5zj3PaaTf172AElWHYSGJ2+MdKAss3QGOENDd0+9+tffQS
-         lPsehCQWaDJTfhGkaL9h1ID5IHL7VHYBr7lt1b9R0qpzk44RO/v6GdDfhQylGcxwO+U3
-         G8UA==
+        bh=LnXr0eXuAv0hZrIz9mCHMK0FQq9j8VZolcsUM4NL5QA=;
+        b=mc53gINuCn000kv6jnW3Ymzvu5Gb7p70ypVEVUlPBB3rWl/prXi8BAWNRdzGLy/Rap
+         EEbIJZQvy3ogfpWXc2J+w9qMeDQbwicbKxePXmdRHHrONQG1i3fpmg3tgUTflhjVs7Jt
+         GtaqvQJ5q1q8m+wzjNu3eAxK0CRk3GNDYK7gVaH29ZqxqrzXA0ZrM7MVgPIlHOUwvujZ
+         zzSvEzYLKH23B6TUFOVVEpj1cz12Cgf3rgnAoSg/mfYe7BEexT67474l4UWxzKrZGv6Z
+         GGA3FDjBMuxfvYaGDGCzk8JyVLjJPR0WJHe9LU3lkPbUQ37OKU5SSGQA/htIig0ecw9K
+         HpTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721040131; x=1721644931;
+        d=1e100.net; s=20230601; t=1721090735; x=1721695535;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=yDBDdSaTsIScMjDczsi/TPg8Dl1/nhZKeEyHmoSCz7k=;
-        b=JeMibHESq5nSxBVhLj+JvIUlFl4iVq1Cl8k88z5FJJBgxwGewMsVzZIF+uH3WtmAdO
-         en51Ifcc5a3R53i6lOcQR87V4YhrLqGvdgcwV93yUd4BO30jFRrxR7/eZ1dT2oqHsOFv
-         Sg9wPxGZ1nFUB7CpK3sCct5PBUa1KgEI16Dvf3fQFYsAiT0AZwertczrHQ3BUJp+oIPm
-         aAb7BBBVHCC7B/kEuMpgzAM+0ZOA+FaSMYyp0+jOaQF9dmP7YWD1BbYAaU8M+HlNAVgf
-         fVNOotghS5LYTc0gqkhZXsTGzi3iy92IaXX+n2P7g7GXkk317NM10066SS4x4aFKZ3hv
-         AujA==
-X-Forwarded-Encrypted: i=1; AJvYcCUIyZEMU+DXicjvHgFzoKVTGoF7jEfqHsojW5J4OUefxOrB10m4185J5E0ZLftx4vq6O63afj1p4tmsFZc97SfY6+JcrOabTBNc
-X-Gm-Message-State: AOJu0YwOBHP4F/B3L74T0eSGyf+sGalI5eXDBFLgGJkK8u5Lk/K5/Fnm
-	k5b6Rr1FgPQNsajRSYOkBJ8Kjy9ZL8yfkWq8zGghWQsFVOqdqr5BCG1BddRYb1E0sOD/cORTC9E
-	0
-X-Google-Smtp-Source: AGHT+IEl8e4sHhD2Ze4AU3LrChP1A0SLmG+ooB5oN5pZc9KeFQr0EPcLXb2erYuWFIJ8V7w/XkyQdg==
-X-Received: by 2002:a2e:980b:0:b0:2ee:8749:d4a1 with SMTP id 38308e7fff4ca-2eeb30b9b69mr122007621fa.10.1721040130871;
-        Mon, 15 Jul 2024 03:42:10 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2eee18bed4bsm7715921fa.69.2024.07.15.03.42.10
+        bh=LnXr0eXuAv0hZrIz9mCHMK0FQq9j8VZolcsUM4NL5QA=;
+        b=mOTMm1Lp/LE+VvgM9vWPEhEX2iiczCYML2iTESg3/i4r4W+jRcGx88Cwj2XxbCGflG
+         YJVsvdm0ioLaKrUHGwBJEnbKkcEsc0/TuEsRqKM2VQ6ru7rzRIXylEAe8VpYDuK7ofT1
+         GEKLl5I6MnVu87oxr6AHec/fAxtfIZs3yEhub4SlSyUqdo/+/1FDF9//kQLc4cV8wfar
+         oDDu14L8N7OG5qQvxNwEOm6l+tb27qTZYA9CDGWF5y8tnGWJo6qYlhU45dGQDkEhs+BG
+         0GdqKWlWnSEMGXvMS0mYUnnWY5j/RHcb1ORa9+t0Pp4ESWuLvS46aLbNWPayfmycJ380
+         fXvQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVESk459zjwW8zpEZq3jgJu0Ykx8dPbOlt1TGKNqCGNI5mVH9U5vIKtIu3HNIPv5r7euQFQ2lZ5xAGNJPfr3DN4tu9L1/N3YlZK9oxPQ3zAIGSOqBOMhs3M2AhWdBV09/cDgmwq9rVGuwJZod1Y1mw5Y90cSmVsUxa5DWkqK9IxRzgCXQ==
+X-Gm-Message-State: AOJu0YzneNkT4+iZYLaQmV63L5usbZkZysIkFE/m9UAwq9pSDvTjQXUq
+	XrAxM6U6xJuzcu128qThnLWhERXoDZJEHofC8CUsK8kiNgGn05CVJjILA1DxFQM=
+X-Google-Smtp-Source: AGHT+IHhID7gzwliNwSDimSOwWCZnoturptY/gWrbZpRJF5QjxmXeZcq2t1YrqRjdEUztNfviDcFRA==
+X-Received: by 2002:a05:6870:64ab:b0:25d:f1f6:8a2c with SMTP id 586e51a60fabf-260bdfbed6bmr400179fac.39.1721090735456;
+        Mon, 15 Jul 2024 17:45:35 -0700 (PDT)
+Received: from localhost.localdomain (60-250-192-107.hinet-ip.hinet.net. [60.250.192.107])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-70b7eca758fsm5000949b3a.162.2024.07.15.17.45.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Jul 2024 03:42:10 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
+        Mon, 15 Jul 2024 17:45:34 -0700 (PDT)
+From: Shan-Chun Hung <shanchun1218@gmail.com>
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	adrian.hunter@intel.com,
+	p.zabel@pengutronix.de,
+	pbrobinson@gmail.com,
+	serghox@gmail.com,
+	mcgrof@kernel.org,
+	prabhakar.mahadev-lad.rj@bp.renesas.com,
+	forbidden405@outlook.com,
+	tmaimon77@gmail.com,
+	andy.shevchenko@gmail.com,
+	linux-arm-kernel@lists.infradead.org,
 	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v6.11
-Date: Mon, 15 Jul 2024 12:42:09 +0200
-Message-Id: <20240715104209.177921-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+Cc: ychuang3@nuvoton.com,
+	schung@nuvoton.com,
+	Shan-Chun Hung <shanchun1218@gmail.com>
+Subject: [PATCH v5 0/2] Add support for Nuvoton MA35D1 SDHCI
+Date: Tue, 16 Jul 2024 08:45:25 +0800
+Message-Id: <20240716004527.20378-1-shanchun1218@gmail.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,166 +83,60 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hi Linus,
+This patch adds the SDHCI driver and DT binding documentation
+for the Nuvoton MA35D1 platform.
 
-Here's the pull-request for MMC and MEMSTICK for v6.11. Details about the
-highlights are as usual found in the signed tag.
+This MA35D1 SDHCI driver has been tested on the MA35D1 SOM board with
+Linux 6.10
 
-Please pull this in!
+v5:
+  - Update to nuvoton,ma35d1-sdhci.yaml
+    - Fixing the same orders as in the list of properties.
+  - Update ma35d1 sdhci driver
+    - Fixing the error path syntax to err = dev_err_probe().
 
-Kind regards
-Ulf Hansson
+v4:
+  - Update to nuvoton,ma35d1-sdhci.yaml
+    - Fixing overlooked issues.
 
+v3:
+  - Update ma35d1 sdhci driver
+    - Fixing "Alignment" and "spaces preferred around".
+    - Fixing style for multi-line comments.
+    - Fixing double call to sdhci_pltfm_free().
 
-The following changes since commit 16198eef11c1929374381d7f6271b4bf6aa44615:
+v2:
+  - Update to nuvoton,ma35d1-sdhci.yaml
+    - Remove some redundant descriptions.
+    - Replace 'minitem' with 'maxitem' in the clock settings.
+    - Make corrections to nuvoton,sys description.
+    - Add sdhci-common.yaml.
+    - Remove '|' except where necessary to be preserved.
+    - Keeping one example is sufficient.
+    - Add regulators in the example.
+  - Update ma35d1 sdhci driver
+    - Refer to 'include what you use' to modify included header files.
+    - Replace the number 8 with sizeof(u8), and similarly for others.
+    - Use "dev" instead of "&pdev->dev".
+    - Use the min() macro to improve the code.
+    - Use dev_err_probe() instead of dev_err().
+    - Implement an error reset check mechanism.
+    - Add devm_add_action_or_reset() to help with sdhci_pltfm_free().
+    - Use devm_reset_control_get_exclusive() instead of devm_reset_control_get().
 
-  mmc: davinci_mmc: Prevent transmitted data size from exceeding sgm's length (2024-07-11 17:48:54 +0200)
+Shan-Chun Hung (2):
+  dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document MA35D1 SDHCI
+    controller
+  mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI driver
 
-are available in the Git repository at:
+ .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml    |  87 +++++
+ drivers/mmc/host/Kconfig                      |  12 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/sdhci-of-ma35d1.c            | 314 ++++++++++++++++++
+ 4 files changed, 414 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.11
+--
+2.25.1
 
-for you to fetch changes up to b85e021853976aaebd3788e7e721020570754199:
-
-  MAINTAINERS: add 's32@nxp.com' as relevant mailing list for 'sdhci-esdhc-imx' driver (2024-07-12 11:07:54 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - Convert from using tasklet to the BH workqueue
- - dw_mmc-bluefield: Add support for eMMC HW reset
- - mmc_spi: Allow spi controllers incapable of lower than 400kHz
- - sdhci: Rework code to eliminate SDHCI_QUIRK_UNSTABLE_RO_DETECT
- - sdhci-brcmstb: Add support for the BCM2712 variant
- - sdhci-esdhc-imx: Disable card-detect as system wakeup on S32G platforms
- - sdhci-msm: Add support for the SDX75 variant
- - sdhci-of-dwcmshc: Enable CQE support for some Rockchip variants
- - sdhci-of-esdhc: Convert DT-bindings to yaml
- - sdhci-sprd: Convert DT-bindings to yaml
-
-MEMSTICK:
- - rtsx_pci_ms: Remove the unused Realtek PCI memstick driver
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci: Eliminate SDHCI_QUIRK_UNSTABLE_RO_DETECT
-
-Allen Pais (2):
-      mmc: sdhi: Convert from tasklet to BH workqueue
-      mmc: Convert from tasklet to BH workqueue
-
-Andrea della Porta (3):
-      dt-bindings: arm: bcm: Add BCM2712 SoC support
-      dt-bindings: mmc: Add support for BCM2712 SD host controller
-      mmc: sdhci-brcmstb: Add BCM2712 support
-
-Bastien Curutchet (1):
-      mmc: davinci_mmc: report all possible bus widths
-
-Ciprian Costea (3):
-      mmc: sdhci-esdhc-imx: disable card detect wake for S32G based platforms
-      mmc: sdhci-esdhc-imx: obtain the 'per' clock rate after its enablement
-      MAINTAINERS: add 's32@nxp.com' as relevant mailing list for 'sdhci-esdhc-imx' driver
-
-Conor Dooley (1):
-      mmc: mmc_spi: allow for spi controllers incapable of getting as low as 400k
-
-Frank Li (2):
-      dt-bindings: mmc: mmc-spi-slot: Change voltage-ranges to uint32-matrix
-      dt-bindings: mmc: Convert fsl-esdhc.txt to yaml
-
-Geert Uytterhoeven (2):
-      mfd: tmio: Remove obsolete .set_clk_div() callback
-      mmc: tmio: Remove obsolete .set_pwr() callback()
-
-Heiko Stuebner (1):
-      mmc: sdhci-of-dwcmshc: set CQE irq-handler for rockchip variants
-
-Javier Carrasco (1):
-      mmc: sdhci_am654: Constify struct regmap_config
-
-Jeff Johnson (1):
-      mmc: add missing MODULE_DESCRIPTION() macros
-
-Kai-Heng Feng (1):
-      memstick: rtsx_pci_ms: Remove Realtek PCI memstick driver
-
-Liming Sun (2):
-      mmc: dw_mmc: Add support for platform specific eMMC HW reset
-      mmc: dw_mmc-bluefield: Add support for eMMC HW reset
-
-Naina Mehta (1):
-      dt-bindings: mmc: sdhci-msm: Document the SDX75 compatible
-
-Neil Armstrong (1):
-      dt-bindings: mmc: meson-gx: add optional power-domains
-
-Peter Robinson (1):
-      mmc: sdhci-brcmstb: Add ARCH_BCM2835 option
-
-Stanislav Jakubek (1):
-      dt-bindings: mmc: sdhci-sprd: convert to YAML
-
-Ulf Hansson (3):
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-      mmc: Merge branch fixes into next
-
-Wolfram Sang (1):
-      MAINTAINERS: drop entry for VIA SD/MMC controller
-
- .../devicetree/bindings/arm/bcm/bcm2835.yaml       |   6 +
- .../bindings/mmc/amlogic,meson-gx-mmc.yaml         |   3 +
- .../bindings/mmc/brcm,sdhci-brcmstb.yaml           |   1 +
- .../devicetree/bindings/mmc/fsl,esdhc.yaml         | 105 ++++
- .../devicetree/bindings/mmc/fsl-esdhc.txt          |  52 --
- .../devicetree/bindings/mmc/mmc-spi-slot.yaml      |  16 +-
- .../devicetree/bindings/mmc/sdhci-msm.yaml         |   1 +
- .../devicetree/bindings/mmc/sdhci-sprd.txt         |  67 ---
- .../devicetree/bindings/mmc/sprd,sdhci-r11.yaml    | 112 ++++
- MAINTAINERS                                        |   7 +-
- drivers/memstick/host/Kconfig                      |  10 -
- drivers/memstick/host/Makefile                     |   1 -
- drivers/memstick/host/rtsx_pci_ms.c                | 638 ---------------------
- drivers/mmc/core/core.c                            |   1 +
- drivers/mmc/core/pwrseq_emmc.c                     |   1 +
- drivers/mmc/core/pwrseq_sd8787.c                   |   1 +
- drivers/mmc/core/pwrseq_simple.c                   |   1 +
- drivers/mmc/core/sdio_uart.c                       |   1 +
- drivers/mmc/host/Kconfig                           |   2 +-
- drivers/mmc/host/atmel-mci.c                       |  35 +-
- drivers/mmc/host/au1xmmc.c                         |  37 +-
- drivers/mmc/host/cb710-mmc.c                       |  14 +-
- drivers/mmc/host/cb710-mmc.h                       |   3 +-
- drivers/mmc/host/davinci_mmc.c                     |  11 +-
- drivers/mmc/host/dw_mmc-bluefield.c                |  18 +-
- drivers/mmc/host/dw_mmc.c                          |  30 +-
- drivers/mmc/host/dw_mmc.h                          |  11 +-
- drivers/mmc/host/mmc_spi.c                         |   5 +-
- drivers/mmc/host/of_mmc_spi.c                      |   1 +
- drivers/mmc/host/omap.c                            |  17 +-
- drivers/mmc/host/renesas_sdhi.h                    |   4 +-
- drivers/mmc/host/renesas_sdhi_core.c               |   3 +
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |  26 +-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   9 +-
- drivers/mmc/host/sdhci-bcm-kona.c                  |   2 +-
- drivers/mmc/host/sdhci-brcmstb.c                   |  60 ++
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  16 +-
- drivers/mmc/host/sdhci-of-dwcmshc.c                |   1 +
- drivers/mmc/host/sdhci-pci-core.c                  |  27 +-
- drivers/mmc/host/sdhci.c                           |  31 +-
- drivers/mmc/host/sdhci.h                           |   3 +-
- drivers/mmc/host/sdhci_am654.c                     |   2 +-
- drivers/mmc/host/tifm_sd.c                         |  15 +-
- drivers/mmc/host/tmio_mmc.h                        |   6 +-
- drivers/mmc/host/tmio_mmc_core.c                   |  13 +-
- drivers/mmc/host/uniphier-sd.c                     |  12 +-
- drivers/mmc/host/via-sdmmc.c                       |  25 +-
- drivers/mmc/host/wbsd.c                            |  74 +--
- drivers/mmc/host/wbsd.h                            |  10 +-
- include/linux/mfd/tmio.h                           |   2 -
- 50 files changed, 556 insertions(+), 993 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/fsl,esdhc.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
- delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sprd.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/sprd,sdhci-r11.yaml
- delete mode 100644 drivers/memstick/host/rtsx_pci_ms.c
