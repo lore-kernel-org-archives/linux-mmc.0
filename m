@@ -1,448 +1,290 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+Received: from IND01-MAX-obe.outbound.protection.outlook.com (mail-maxind01olkn2102.outbound.protection.outlook.com [40.92.102.102])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9CEB6196;
-	Tue, 16 Jul 2024 07:03:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721113429; cv=none; b=ofalyPClkO0W7l2q2JvxpNH2tjxybtPGZobq6fPADeYG69LZPle6d2O6OCL7r4MpUHMJzObBQzu6WIED1ETSRoac0Rgji8Mzj7ipPFslg9bfQgYaks05o8AcM5qMuX3jbJhG2LkN1agIFXeDyOAVGLjImP3aW10mbSFgYPmHmBs=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721113429; c=relaxed/simple;
-	bh=kb4BLUFgOrXwORd9OqvI1kr/TaikVBCAK64a4eBA/ws=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=K3vPnGB6+ZQTQ6OPYSnkuK5M0wVYfNVCV/ygiLD1+o65inP/U0Xk/8KzKM8QYXtBqqT65EDU7rMwNEhtj+Ohuq28XeJmlhbAZZLrL3dbxIxjwfhR8esyVL5/t5bi1OWjzkm9jpv77MMZZqQ6ngpdymh3PE/OK480O6bMz3bC3kI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WvkNDN9p; arc=none smtp.client-ip=192.198.163.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D48C8249E5;
+	Wed, 17 Jul 2024 08:01:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.102.102
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1721203305; cv=fail; b=TqK0D/E6wr4oBAoUm7BNvlF6dt2xknBgWmGjandka3+B3pBBBi7heXLBr3P2q95YdGRXbZky+/sTIgkIaH7mXXdqeO3GiJAx84CUgndZu0l/Ge19fdkMkSS/P+Q6LlAGGtqsGkcf68+zlK4X7bZyJ8Jagc54MxymwotVYJCNYN4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1721203305; c=relaxed/simple;
+	bh=J/yVuQaemQ+B81Ld89PuW0JmRpN7VDQH+o8cCNZnLjw=;
+	h=Message-ID:Date:Subject:To:References:From:Cc:In-Reply-To:
+	 Content-Type:MIME-Version; b=N776tik4ec2dZEKPd4IdXLO5jejZolUiIbtDc42VRWn+vRVdd0YW4YcJoOmpHA1nPzEgkG/71V4FrCc93/rm9J10Q4Xg4bxWzYxX4LpukKKqDM7/AgIt4SbK3qswVtaaKSjYgehcT2Aaeb+18II64x9CHNxSlpV6Z1nduVr0GRQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=CJQegKmH; arc=fail smtp.client-ip=40.92.102.102
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WvkNDN9p"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1721113428; x=1752649428;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=kb4BLUFgOrXwORd9OqvI1kr/TaikVBCAK64a4eBA/ws=;
-  b=WvkNDN9pzqRrOJparANmigi661+e1OIuIf4AExuYHavjH2LuPUb+mCdG
-   9tWoLo2nTrWAnX7saNnlkMcqMex703MRnG3UO0jw7ILcaIv+9+ovHl3FV
-   YH0Cs6U76oodbKBNRPvR5BjteRnvGgiECxCI22BrSJ87xGeWK890AL0oA
-   JNZLhvYK71tZftItKdC5g68NUXGxG6rtTAx7vnI+T8cC1km/tTN++EWoS
-   WgDhW+u6e3r453hIm6Jzg0ew+il6eBN9B+lqJVQAOMC2fqDiKscJq3CwB
-   JmCNjMdXhCDykAbUbLWiMurYwxaJRqy8O3Nrj1fj/6DHQkrqNnCPZyek2
-   g==;
-X-CSE-ConnectionGUID: NBGOfBwwTUaUqu+qEhs6UQ==
-X-CSE-MsgGUID: MI+LQKNNTEK+CvnWL/aQDQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11134"; a="29206655"
-X-IronPort-AV: E=Sophos;i="6.09,211,1716274800"; 
-   d="scan'208";a="29206655"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2024 00:03:46 -0700
-X-CSE-ConnectionGUID: 39z+WceyQWyviCcHjTEOYA==
-X-CSE-MsgGUID: AcCfRfahTcuxTe1TZvmqpw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.09,211,1716274800"; 
-   d="scan'208";a="49787694"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.49.253])
-  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jul 2024 00:03:40 -0700
-Message-ID: <935aedd8-0a7a-4e3a-a89d-e1f134ab7fd0@intel.com>
-Date: Tue, 16 Jul 2024 10:03:35 +0300
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="CJQegKmH"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=TQtoK6CyuCeODK7rzFOMQrywkLthAv/LZM8uDf6/CWB1j74oWyo+WwOR2v2dOLkiLJRDu8GZUHASpHVqvC3tJrfLMuhX5rX1Yv9lWCHzHilqoQUWHpC5zumIrCpUTN/65j1Lp6sJ3681CyUQYfdgkpQPK7ej2MCUzuNXadwKm+R+J3iVfFNRfORc1fVZpNLLRndroC4uH5Ng6WS6sIjV6jphRJt0Egjv/dpouxVTuiwcHfhR4l7r/Sq7rijIHs1f5NiMJJzom8f9p4th701h6NUC6DLXg/IVCnXH5f6uUsb7cJqoHZ7w7ccZPFPJDrrPMts2VRSjhSf1vUb5z2IBBQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=lcAvOZ5KykyLXTcVGYP3iEsMppJhskQ77dqNrKmtY/s=;
+ b=A7ZcLUhCNF3/wzp4lTgEqk/BIYR+5X7kimWbRmyfCSJs9cmgK1rPHxO4Vr9olrwxqYNei07LoCkrQ0zx3FVlGx1gUUCpYZlT3vcXBVcm9E6tHp0aNArVLG9sCW4ymR+69vBkiGrQ2x3Rkpi2Wa1FPTZFX+b5RGjjctY6vgsSEtYdBPBS7gr8lVcFWulJPRmj0eXTyxhoxr4ASc+ELaym+B51MFkelG0Xz8QSFno+xlKge36FcEuuO2p+VZ75QtOgrNOk3A7UVoJnGDQddzU2M1FelSss7hqwQ6MxkETQckK0pAXBPHA11w4mRUHJlbDGK6kgqH5b5/nSQjNYyR5DgA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=lcAvOZ5KykyLXTcVGYP3iEsMppJhskQ77dqNrKmtY/s=;
+ b=CJQegKmHWSeQPOB5oj+cy1cGsorQkiYF3/gK3Yq1qg9UpkbHgCYw7AIKKbjZSZD1ATKfNzqAe58svwoIhRHLwLj5wmDbWOf6dasFE3RIFo8aK9S7U7qgd/dssVrevKDkF2bhvu3K0JKUCkMO0Xi0XIsNs+TnKNGuwc+lj4gPlE1Mowke2MKhreRDqCLkAR3aO9OuRMi/dUzcknuoxwBKeH6N4g27oVWS4QIYMYtDxEfI/sS1jTJkgfoh7D0fFGj4eV72R4vNOesB5hIkx8xdVbNDuyDNKRQh1rzpz6X8nSALAi8807nNY9pBblHOdZ+sqYuAuQGhW5AhTkZ6Ca/Biw==
+Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:138::5)
+ by PN0P287MB0591.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:161::8) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7784.16; Wed, 17 Jul
+ 2024 08:01:33 +0000
+Received: from MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ ([fe80::a94:ad0a:9071:806c]) by MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ ([fe80::a94:ad0a:9071:806c%6]) with mapi id 15.20.7784.016; Wed, 17 Jul 2024
+ 08:01:32 +0000
+Message-ID:
+ <MA0P287MB2822C4FB66C0CD31BED2E3B8FEA32@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
+Date: Wed, 17 Jul 2024 16:01:25 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 2/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo
+ SG2042 support
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+References: <cover.1718697954.git.unicorn_wang@outlook.com>
+ <dcc060c3ada7a56eda02b586c16c47f0a0905c61.1718697954.git.unicorn_wang@outlook.com>
+ <6e5ad808-f4ee-45c3-a1cc-009f2f1010b9@linaro.org>
+From: Chen Wang <unicorn_wang@outlook.com>
+Cc: Chen Wang <unicornxw@gmail.com>, adrian.hunter@intel.com,
+ aou@eecs.berkeley.edu, conor+dt@kernel.org, guoren@kernel.org,
+ inochiama@outlook.com, jszhang@kernel.org,
+ krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
+ paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
+ chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
+ tingzhu.wang@sophgo.com
+In-Reply-To: <6e5ad808-f4ee-45c3-a1cc-009f2f1010b9@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-TMN: [nqNLfbJsekHi2+9ZrmilL7fL0dHLrvd4]
+X-ClientProxiedBy: SG2PR01CA0166.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:28::22) To MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+ (2603:1096:a01:138::5)
+X-Microsoft-Original-Message-ID:
+ <ad173e81-6485-4c40-98e6-93d9787ddfb8@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 2/2] mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI
- driver
-To: Shan-Chun Hung <shanchun1218@gmail.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- p.zabel@pengutronix.de, pbrobinson@gmail.com, serghox@gmail.com,
- mcgrof@kernel.org, prabhakar.mahadev-lad.rj@bp.renesas.com,
- forbidden405@outlook.com, tmaimon77@gmail.com, andy.shevchenko@gmail.com,
- linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ychuang3@nuvoton.com, schung@nuvoton.com
-References: <20240716004527.20378-1-shanchun1218@gmail.com>
- <20240716004527.20378-3-shanchun1218@gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240716004527.20378-3-shanchun1218@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: MA0P287MB2822:EE_|PN0P287MB0591:EE_
+X-MS-Office365-Filtering-Correlation-Id: f72fe459-1193-460a-4231-08dca636ab8e
+X-Microsoft-Antispam:
+	BCL:0;ARA:14566002|19110799003|8060799006|461199028|1602099012|440099028|3412199025|4302099013;
+X-Microsoft-Antispam-Message-Info:
+	bIfhdjntK3d7ZhpyTG0AY8csJADn5x34EDGIKAyBtvzsDCggKh3KER1bR65aiuIp4Bwg5P2Xr2eTZWdWVSVvoOmmlHdx1uS5BJ7bjmBvVE8ptpVsAYViMmPbcMnDQlezVd7P3E0ILrJxu9WbuU99S6LJZjH/hW4iV528joFK/Sdxd+8TJGC7LveTrqZAxKFfCGAMdTMemvYli5A7JidRDQuAmB2bGaUGjNEUFSwzt3roclQGx38cW0ENZLtd9Quwc/AiGMNbEKlXu/IymCuNb3CpVUufCVIrk3W2MeHRkU3f6bvYtkObLWKHl0iKq/kF1fYwnYVPdmQpzuPtUZDC9XXaY0D9p+j28lkNvgZDZI2mpn5iYWXWvz8L7oBsZrOpGYDVBhVWp1MFifCWOJBHGvMgoLTMevfcOc6hwkJX1LKZPGxGg2//yDKhySoCiuKO0NYKiRl7O5tX1Z8e/lefkxVt/alExMz2oRd12EydSjTeKY83L/X4RM5GWUK9C/4ZTPXVcpP2nC3fcO3tY1z00Qvx0NSUo5RWYJosLPWyo9QQH9HU9B3mwj6QFVpDvKaz9Rbr+F5rmdSKJYXrIjxxuooKfxk4FfSvmJnOObzuddUG8fv5xGoHV8kkxNgBYNTBGJNqi02XhF3kCSl/9Bx9e7RoTQ6eSFT4yduCVczS+zNNVvARmDylcMuhAOkG4nneV4sNgT7KnB5LjFcQM/sKR8dk2ZqM0Q1hmngsALGUn7GtAfpm7jyBjEgBF6WoSIal
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?UnNZQlhaVU4xNTN4MUFiNWRZYm83TEEwYXFab0pzNEdscWkyOXdGWEF2TFpR?=
+ =?utf-8?B?TlRjUjB5VkZhRkVXbmN6Qis4bkUrUFQvQUR5Qkowa2dNOE9ZNWp2S2lCamtI?=
+ =?utf-8?B?N25uU05OQmNwMVBaNTRLMWtkVm05bmRWM1JXbmFiSzFBdVV5UU05Z1dLTW1o?=
+ =?utf-8?B?L0FTekJoU0xqbW5HUFRjK2VMSjYzWG16eHdNbER1RTlHVnNNaXI3Q3QyVEM5?=
+ =?utf-8?B?bWVWZjlkVDNVTTJqVXJPRjRxV2EvTTZacTF5Y29tckZVdjJmSlNkcEEwaDc0?=
+ =?utf-8?B?Z2IybWNEdG8rdGpyUWVjZ20xVDJSTzI0Y2NRWjI3eS9XUWtqRlpKRlJiblBM?=
+ =?utf-8?B?b1cvZGg4bDJQa1o3dTA2MzdUY1hlTWttMlpyTWZVRGJVNHVHVVE2U2FZSjVZ?=
+ =?utf-8?B?YXRGeVFYNzYycVFTd2VsTm9uRTJnVFpQY2hQRWNhNGJOVFo2SmFxc0ZTSllV?=
+ =?utf-8?B?QXI3QU9CMy9NUWl1UVFqRlo0T3pwSEZNRE5hUjMvUUx2bktCVHkvYjkzcmND?=
+ =?utf-8?B?OFUwWmlHSll6SXhLOWU1ZXh6Q0JTbWVJTm5jc1RzM1FZbnl0TFlXZ1AzRHFF?=
+ =?utf-8?B?K1V5bElTcllwNjl1RWtQN2krbVNwcUYvZ3JKMXQxakNFcjRXNXozQnRucm9y?=
+ =?utf-8?B?MVpCMlZ4SHdrc2RuL0Z6aUlnYWNudnBJYzRZNDAwZ2QxRk1kRVJZa3lkUjly?=
+ =?utf-8?B?bGhFdW5FWGUwNTAxT0JuTXFuUFBubmxwdlZYMGIxeEszMGtZZm42Z3FxREE3?=
+ =?utf-8?B?YVdEak1EbGo3WE43SkVPZ0ZWSS9TdEU1WmJUa0VCaDhIRE01Y0djUWlKVHpX?=
+ =?utf-8?B?TXdsd3BJODgrdG1VcC9ZdEl1K1k2WStlSi9sSDh1b1lkY2pEREFDM1pnVWhr?=
+ =?utf-8?B?SU10SS91c3FSemhnRERVSDlqMGk2NGkxdkM3OWNselpPK0ExZkdGZzhpRU9T?=
+ =?utf-8?B?em9yVXpSTEg1R1RrY0tBYlEyMFdiNWkyMUMzUm51bVdkTEV0bXc0cnlYZUVT?=
+ =?utf-8?B?bFltQW03SUM2ZkVDTTFtaVhmRldpVWo1dSsyUG5VRlhFQ2JLZ1lrWkRrbWtp?=
+ =?utf-8?B?Q1pPdVNrMmlHVlZ3MVh0enk2bkFFc1hRQkppSk1qb24xYzY5T202bncvZU8x?=
+ =?utf-8?B?NlRyY25GMXdUNTIvNmVXcWkyamdpVzZsU0orVGk3WVEzUVcyTms1YlhPdXU5?=
+ =?utf-8?B?eSt6bGRQVXljd1IweEJndHoxem8rRXVHeWJMdVRuRmJKeW9ZNDk4b1lldlo5?=
+ =?utf-8?B?NDNjdktUM1JYSW9GRi9YWS9aUlJqZ1pKS2tmZHUyeHdzMUVteFU4MzJuL0pi?=
+ =?utf-8?B?dUtmRnFBUzRmZWZsZXp5aTA5NDIvdVpGdDMyOFc4T0hUL0ZicGpRU0lLVHky?=
+ =?utf-8?B?T2xPWnIzZ1B2QkdMQmlmREJ5VHZIcTlrMlo0bFF6bnNvTHdTVWJmK08zQURh?=
+ =?utf-8?B?Q3U1Wlk3ZzZySnVrQjZ5YUtDZEhtSi9RWmU4Y3FhcVUvVVNrWkhjSVpUSVMw?=
+ =?utf-8?B?S1BHdjBmRENzNzNjSllpOWZkcnVNNkNRZHZKc1pRZ1ZvR1FUc2M2d29uNnl2?=
+ =?utf-8?B?dzYxUGg0M0Njc3dyRUliSUVhdWQvUzQyblBHOTE4SnJLcFhqcEsyMGRERys5?=
+ =?utf-8?B?b0hxb1VPR0NBbWg3VW9WcGk1eTNDMFVsemJ2NEl4WXFZeWVuczFDMzNsbVNz?=
+ =?utf-8?Q?mxEAuiam4gW/nr7O9Oof?=
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f72fe459-1193-460a-4231-08dca636ab8e
+X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2822.INDP287.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 17 Jul 2024 08:01:31.8478
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
+	00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN0P287MB0591
 
-On 16/07/24 03:45, Shan-Chun Hung wrote:
-> Add the SDHCI driver for the MA35D1 platform. It is based upon the
-> SDHCI interface, but requires some extra initialization.
-> 
-> Signed-off-by: Shan-Chun Hung <shanchun1218@gmail.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On 2024/6/18 17:39, Krzysztof Kozlowski wrote:
+> On 18/06/2024 10:38, Chen Wang wrote:
+>> From: Chen Wang <unicorn_wang@outlook.com>
+>>
+>> SG2042 use Synopsys dwcnshc IP for SD/eMMC controllers.
+>>
+>> SG2042 defines 3 clocks for SD/eMMC controllers.
+>> - AXI_EMMC/AXI_SD for aclk/hclk(Bus interface clocks in DWC_mshc)
+>>    and blck(Core Base Clock in DWC_mshc), these 3 clocks share one
+>>    source, so reuse existing "core".
+>> - 100K_EMMC/100K_SD for cqetmclk(Timer clocks in DWC_mshc), so reuse
+>>    existing "timer" which was added for rockchip specified.
+>> - EMMC_100M/SD_100M for cclk(Card clocks in DWC_mshc), add new "card".
+>>
+>> Adding example for sg2042.
+>>
+>> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
+>> ---
+>>   .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 69 +++++++++++++------
+>>   1 file changed, 49 insertions(+), 20 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>> index 4d3031d9965f..b53f20733f79 100644
+>> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>> @@ -21,6 +21,7 @@ properties:
+>>         - snps,dwcmshc-sdhci
+>>         - sophgo,cv1800b-dwcmshc
+>>         - sophgo,sg2002-dwcmshc
+>> +      - sophgo,sg2042-dwcmshc
+>>         - thead,th1520-dwcmshc
+>>   
+>>     reg:
+>> @@ -29,25 +30,6 @@ properties:
+>>     interrupts:
+>>       maxItems: 1
+>>   
+>> -  clocks:
+> Widest constraints stay here.
+>
+>> -    minItems: 1
+>> -    items:
+>> -      - description: core clock
+>> -      - description: bus clock for optional
+>> -      - description: axi clock for rockchip specified
+>> -      - description: block clock for rockchip specified
+>> -      - description: timer clock for rockchip specified
+>> -
+>> -
+>> -  clock-names:
+>> -    minItems: 1
+> Widest constraints stay here.
 
-> ---
->  drivers/mmc/host/Kconfig           |  12 ++
->  drivers/mmc/host/Makefile          |   1 +
->  drivers/mmc/host/sdhci-of-ma35d1.c | 314 +++++++++++++++++++++++++++++
->  3 files changed, 327 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index bb0d4fb0892a..aa6922ff4210 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -252,6 +252,18 @@ config MMC_SDHCI_OF_SPARX5
-> 
->  	  If unsure, say N.
-> 
-> +config MMC_SDHCI_OF_MA35D1
-> +	tristate "SDHCI OF support for the MA35D1 SDHCI controller"
-> +	depends on ARCH_MA35 || COMPILE_TEST
-> +	depends on MMC_SDHCI_PLTFM
-> +	help
-> +	  This selects the MA35D1 Secure Digital Host Controller Interface.
-> +	  The controller supports SD/MMC/SDIO devices.
-> +
-> +	  If you have a controller with this interface, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_CADENCE
->  	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
->  	depends on MMC_SDHCI_PLTFM
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index f53f86d200ac..3ccffebbe59b 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -88,6 +88,7 @@ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
->  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
->  obj-$(CONFIG_MMC_SDHCI_OF_DWCMSHC)	+= sdhci-of-dwcmshc.o
->  obj-$(CONFIG_MMC_SDHCI_OF_SPARX5)	+= sdhci-of-sparx5.o
-> +obj-$(CONFIG_MMC_SDHCI_OF_MA35D1)	+= sdhci-of-ma35d1.o
->  obj-$(CONFIG_MMC_SDHCI_BCM_KONA)	+= sdhci-bcm-kona.o
->  obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
->  obj-$(CONFIG_MMC_SDHCI_NPCM)		+= sdhci-npcm.o
-> diff --git a/drivers/mmc/host/sdhci-of-ma35d1.c b/drivers/mmc/host/sdhci-of-ma35d1.c
-> new file mode 100644
-> index 000000000000..b84c2927bd4a
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-of-ma35d1.c
-> @@ -0,0 +1,314 @@
-> +// SPDX-License-Identifier: GPL-2.0+
-> +/*
-> + * Copyright (C) 2024 Nuvoton Technology Corp.
-> + *
-> + * Author: Shan-Chun Hung <shanchun1218@gmail.com>
-> + */
-> +
-> +#include <linux/align.h>
-> +#include <linux/array_size.h>
-> +#include <linux/bits.h>
-> +#include <linux/build_bug.h>
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/dev_printk.h>
-> +#include <linux/device.h>
-> +#include <linux/dma-mapping.h>
-> +#include <linux/err.h>
-> +#include <linux/math.h>
-> +#include <linux/mfd/syscon.h>
-> +#include <linux/minmax.h>
-> +#include <linux/mmc/card.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mod_devicetable.h>
-> +#include <linux/module.h>
-> +#include <linux/pinctrl/consumer.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/regmap.h>
-> +#include <linux/reset.h>
-> +#include <linux/sizes.h>
-> +#include <linux/types.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +#include "sdhci.h"
-> +
-> +#define MA35_SYS_MISCFCR0	0x070
-> +#define MA35_SDHCI_MSHCCTL	0x508
-> +#define MA35_SDHCI_MBIUCTL	0x510
-> +
-> +#define MA35_SDHCI_CMD_CONFLICT_CHK	BIT(0)
-> +#define MA35_SDHCI_INCR_MSK		GENMASK(3, 0)
-> +#define MA35_SDHCI_INCR16		BIT(3)
-> +#define MA35_SDHCI_INCR8		BIT(2)
-> +
-> +struct ma35_priv {
-> +	struct reset_control	*rst;
-> +	struct pinctrl		*pinctrl;
-> +	struct pinctrl_state	*pins_uhs;
-> +	struct pinctrl_state	*pins_default;
-> +};
-> +
-> +struct ma35_restore_data {
-> +	u32	reg;
-> +	u32	width;
-> +};
-> +
-> +static const struct ma35_restore_data restore_data[] = {
-> +	{ SDHCI_CLOCK_CONTROL,		sizeof(u32)},
-> +	{ SDHCI_BLOCK_SIZE,		sizeof(u32)},
-> +	{ SDHCI_INT_ENABLE,		sizeof(u32)},
-> +	{ SDHCI_SIGNAL_ENABLE,		sizeof(u32)},
-> +	{ SDHCI_AUTO_CMD_STATUS,	sizeof(u32)},
-> +	{ SDHCI_HOST_CONTROL,		sizeof(u32)},
-> +	{ SDHCI_TIMEOUT_CONTROL,	sizeof(u8) },
-> +	{ MA35_SDHCI_MSHCCTL,		sizeof(u16)},
-> +	{ MA35_SDHCI_MBIUCTL,		sizeof(u16)},
-> +};
-> +
-> +/*
-> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
-> + * so that each DMA transfer doesn't exceed the boundary.
-> + */
-> +static void ma35_adma_write_desc(struct sdhci_host *host, void **desc, dma_addr_t addr, int len,
-> +				 unsigned int cmd)
-> +{
-> +	int tmplen, offset;
-> +
-> +	if (likely(!len || (ALIGN(addr, SZ_128M) == ALIGN(addr + len - 1, SZ_128M)))) {
-> +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +		return;
-> +	}
-> +
-> +	offset = addr & (SZ_128M - 1);
-> +	tmplen = SZ_128M - offset;
-> +	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-> +
-> +	addr += tmplen;
-> +	len -= tmplen;
-> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +}
-> +
-> +static void ma35_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +	u32 ctl;
-> +
-> +	/*
-> +	 * If the clock frequency exceeds MMC_HIGH_52_MAX_DTR,
-> +	 * disable command conflict check.
-> +	 */
-> +	ctl = sdhci_readw(host, MA35_SDHCI_MSHCCTL);
-> +	if (clock > MMC_HIGH_52_MAX_DTR)
-> +		ctl &= ~MA35_SDHCI_CMD_CONFLICT_CHK;
-> +	else
-> +		ctl |= MA35_SDHCI_CMD_CONFLICT_CHK;
-> +	sdhci_writew(host, ctl, MA35_SDHCI_MSHCCTL);
-> +
-> +	sdhci_set_clock(host, clock);
-> +}
-> +
-> +static int ma35_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct ma35_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	switch (ios->signal_voltage) {
-> +	case MMC_SIGNAL_VOLTAGE_180:
-> +		if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_uhs))
-> +			pinctrl_select_state(priv->pinctrl, priv->pins_uhs);
-> +		break;
-> +	case MMC_SIGNAL_VOLTAGE_330:
-> +		if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_default))
-> +			pinctrl_select_state(priv->pinctrl, priv->pins_default);
-> +		break;
-> +	default:
-> +		dev_err(mmc_dev(host->mmc), "Unsupported signal voltage!\n");
-> +		return -EINVAL;
-> +	}
-> +
-> +	return sdhci_start_signal_voltage_switch(mmc, ios);
-> +}
-> +
-> +static void ma35_voltage_switch(struct sdhci_host *host)
-> +{
-> +	/* Wait for 5ms after set 1.8V signal enable bit */
-> +	fsleep(5000);
-> +}
-> +
-> +static int ma35_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct ma35_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int idx;
-> +	u32 regs[ARRAY_SIZE(restore_data)] = {};
-> +
-> +	/*
-> +	 * Limitations require a reset of SD/eMMC before tuning and
-> +	 * saving the registers before resetting, then restoring
-> +	 * after the reset.
-> +	 */
-> +	for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
-> +		if (restore_data[idx].width == sizeof(u32))
-> +			regs[idx] = sdhci_readl(host, restore_data[idx].reg);
-> +		else if (restore_data[idx].width == sizeof(u16))
-> +			regs[idx] = sdhci_readw(host, restore_data[idx].reg);
-> +		else if (restore_data[idx].width == sizeof(u8))
-> +			regs[idx] = sdhci_readb(host, restore_data[idx].reg);
-> +	}
-> +
-> +	reset_control_assert(priv->rst);
-> +	reset_control_deassert(priv->rst);
-> +
-> +	for (idx = 0; idx < ARRAY_SIZE(restore_data); idx++) {
-> +		if (restore_data[idx].width == sizeof(u32))
-> +			sdhci_writel(host, regs[idx], restore_data[idx].reg);
-> +		else if (restore_data[idx].width == sizeof(u16))
-> +			sdhci_writew(host, regs[idx], restore_data[idx].reg);
-> +		else if (restore_data[idx].width == sizeof(u8))
-> +			sdhci_writeb(host, regs[idx], restore_data[idx].reg);
-> +	}
-> +
-> +	return sdhci_execute_tuning(mmc, opcode);
-> +}
-> +
-> +static const struct sdhci_ops sdhci_ma35_ops = {
-> +	.set_clock		= ma35_set_clock,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-> +	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-> +	.reset			= sdhci_reset,
-> +	.adma_write_desc	= ma35_adma_write_desc,
-> +	.voltage_switch		= ma35_voltage_switch,
-> +};
-> +
-> +static const struct sdhci_pltfm_data sdhci_ma35_pdata = {
-> +	.ops = &sdhci_ma35_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN | SDHCI_QUIRK2_BROKEN_DDR50 |
-> +		   SDHCI_QUIRK2_ACMD23_BROKEN,
-> +};
-> +
-> +static int ma35_probe(struct platform_device *pdev)
-> +{
-> +	struct device *dev = &pdev->dev;
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct sdhci_host *host;
-> +	struct ma35_priv *priv;
-> +	int err;
-> +	u32 extra, ctl;
-> +
-> +	host = sdhci_pltfm_init(pdev, &sdhci_ma35_pdata, sizeof(struct ma35_priv));
-> +	if (IS_ERR(host))
-> +		return PTR_ERR(host);
-> +
-> +	/* Extra adma table cnt for cross 128M boundary handling. */
-> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(dev), SZ_128M);
-> +	extra = min(extra, SDHCI_MAX_SEGS);
-> +
-> +	host->adma_table_cnt += extra;
-> +	pltfm_host = sdhci_priv(host);
-> +	priv = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	pltfm_host->clk = devm_clk_get_optional_enabled(dev, NULL);
-> +	if (IS_ERR(pltfm_host->clk)) {
-> +		err = dev_err_probe(dev, PTR_ERR(pltfm_host->clk), "failed to get clk\n");
-> +		goto err_sdhci;
-> +	}
-> +
-> +	err = mmc_of_parse(host->mmc);
-> +	if (err)
-> +		goto err_sdhci;
-> +
-> +	priv->rst = devm_reset_control_get_exclusive(dev, NULL);
-> +	if (IS_ERR(priv->rst)) {
-> +		err = dev_err_probe(dev, PTR_ERR(priv->rst), "failed to get reset control\n");
-> +		goto err_sdhci;
-> +	}
-> +
-> +	sdhci_get_of_property(pdev);
-> +
-> +	priv->pinctrl = devm_pinctrl_get(dev);
-> +	if (!IS_ERR(priv->pinctrl)) {
-> +		priv->pins_default = pinctrl_lookup_state(priv->pinctrl, "default");
-> +		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
-> +		pinctrl_select_state(priv->pinctrl, priv->pins_default);
-> +	}
-> +
-> +	if (!(host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)) {
-> +		struct regmap	*regmap;
-> +		u32		reg;
-> +
-> +		regmap = syscon_regmap_lookup_by_phandle(dev_of_node(dev), "nuvoton,sys");
-> +		if (!IS_ERR(regmap)) {
-> +			/* Enable SDHCI voltage stable for 1.8V */
-> +			regmap_read(regmap, MA35_SYS_MISCFCR0, &reg);
-> +			reg |= BIT(17);
-> +			regmap_write(regmap, MA35_SYS_MISCFCR0, reg);
-> +		}
-> +
-> +		host->mmc_host_ops.start_signal_voltage_switch =
-> +					ma35_start_signal_voltage_switch;
-> +	}
-> +
-> +	host->mmc_host_ops.execute_tuning = ma35_execute_tuning;
-> +
-> +	err = sdhci_add_host(host);
-> +	if (err)
-> +		goto err_sdhci;
-> +
-> +	/*
-> +	 * Split data into chunks of 16 or 8 bytes for transmission.
-> +	 * Each chunk transfer is guaranteed to be uninterrupted on the bus.
-> +	 * This likely corresponds to the AHB bus DMA burst size.
-> +	 */
-> +	ctl = sdhci_readw(host, MA35_SDHCI_MBIUCTL);
-> +	ctl &= ~MA35_SDHCI_INCR_MSK;
-> +	ctl |= MA35_SDHCI_INCR16 | MA35_SDHCI_INCR8;
-> +	sdhci_writew(host, ctl, MA35_SDHCI_MBIUCTL);
-> +
-> +	return 0;
-> +
-> +err_sdhci:
-> +	sdhci_pltfm_free(pdev);
-> +	return err;
-> +}
-> +
-> +static void ma35_disable_card_clk(struct sdhci_host *host)
-> +{
-> +	u16 ctrl;
-> +
-> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +	if (ctrl & SDHCI_CLOCK_CARD_EN) {
-> +		ctrl &= ~SDHCI_CLOCK_CARD_EN;
-> +		sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
-> +	}
-> +}
-> +
-> +static void ma35_remove(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = platform_get_drvdata(pdev);
-> +
-> +	sdhci_remove_host(host, 0);
-> +	ma35_disable_card_clk(host);
-> +	sdhci_pltfm_free(pdev);
-> +}
-> +
-> +static const struct of_device_id sdhci_ma35_dt_ids[] = {
-> +	{ .compatible = "nuvoton,ma35d1-sdhci" },
-> +	{}
-> +};
-> +
-> +static struct platform_driver sdhci_ma35_driver = {
-> +	.driver	= {
-> +		.name	= "sdhci-ma35",
-> +		.of_match_table = sdhci_ma35_dt_ids,
-> +	},
-> +	.probe	= ma35_probe,
-> +	.remove_new = ma35_remove,
-> +};
-> +module_platform_driver(sdhci_ma35_driver);
-> +
-> +MODULE_DESCRIPTION("SDHCI platform driver for Nuvoton MA35");
-> +MODULE_AUTHOR("Shan-Chun Hung <shanchun1218@gmail.com>");
-> +MODULE_LICENSE("GPL");
-> --
-> 2.25.1
-> 
+hi, Krzysztof,
+
+Please ask you a question about this widest constraints, I write 
+bindings as below:
+
+```yaml
+
+properties:
+
+......
+
+   clocks:
+     minItems: 1
+
+   clock-names:
+     minItems: 1
+......
+
+allOf:
+   - $ref: mmc-controller.yaml#
+
+   - if:
+       properties:
+         compatible:
+           contains:
+             const: sophgo,sg2042-dwcmshc
+
+     then:
+       properties:
+         clocks:
+           minItems: 1
+           items:
+             - description: core clock
+             - description: bus clock
+             - description: timer
+         clock-names:
+           minItems: 1
+           items:
+             - const: core
+             - const: bus
+             - const: timer
+     else:
+       properties:
+         clocks:
+           minItems: 1
+           items:
+             - description: core clock
+             - description: bus clock for optional
+             - description: axi clock for rockchip specified
+             - description: block clock for rockchip specified
+             - description: timer clock for rockchip specified
+         clock-names:
+           minItems: 1
+           items:
+             - const: core
+             - const: bus
+             - const: axi
+             - const: block
+             - const: timer
+
+```
+
+and with DTS as below:
+
+```dts
+
+sd: mmc@704002b000 {
+             compatible = "sophgo,sg2042-dwcmshc";
+             reg = <0x70 0x4002b000 0x0 0x1000>;
+             interrupt-parent = <&intc>;
+             interrupts = <136 IRQ_TYPE_LEVEL_HIGH>;
+             clocks = <&clkgen GATE_CLK_SD_100M>,
+                  <&clkgen GATE_CLK_AXI_SD>,
+                  <&clkgen GATE_CLK_100K_SD>;
+             clock-names = "core",
+                       "bus",
+                       "timer";
+             status = "disabled";
+         };
+
+```
+
+dtb check will report error:
+
+```
+
+.../arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dtb: mmc@704002b000: 
+clocks: [[84, 38], [84, 64], [84, 76]] is too long
+     from schema $id: 
+http://devicetree.org/schemas/mmc/snps,dwcmshc-sdhci.yaml#
+.../arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dtb: mmc@704002b000: 
+clock-names: ['core', 'bus', 'timer'] is too long
+     from schema $id: 
+http://devicetree.org/schemas/mmc/snps,dwcmshc-sdhci.yaml#
+```
+
+After I removed the widest constraints from the binding file, dtb check 
+passes.
+
+Not sure if my understanding is wrong. Do you know what's the problem 
+here? Seems the widest constraints is not needed,
+
+Thanks,
+
+Chen
+
+
+[......]
 
