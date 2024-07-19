@@ -1,210 +1,117 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9484C566A
-	for <linux-mmc@vger.kernel.org>; Wed, 17 Jul 2024 13:55:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7285A46434;
+	Fri, 19 Jul 2024 05:33:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721224543; cv=none; b=gufAlQ9NyJybh3mzYpxoFF7h8mdufBzbueMU46moGYso2YYnIvZ3172BgifOicJm2QorTED/LMG6P/YsuSS9DqdkJK3IwodUvB+ZhsSJOEQbo7nnxV6Wvxm4gUsZqkVc8fUUGAa2tRYq3FUN3O9B0xKrpQ6+0DTMLBNZ5myXoT0=
+	t=1721367229; cv=none; b=DFvsDZZYRW0Rho5bVOd6LU5ANP+38B6sPgUUQdbN2hjN/63eXwSXAkJ5Nm4ODGAZpKOuaXMEGt6nWGdBZJPMJ7CO7jbFVvcbxFdwxu8UBiECDQgaKPJGK9RoSi1xuvcnB4NtQ5puY9XtwBznia2EnlfBJe/dQRooyQRHpWIWJhw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721224543; c=relaxed/simple;
-	bh=+gjrXwaLbg5dyM9XbloxcRlPhV5n8Y3acUiDKTctzWo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YH1Z1GWmSIEntusc1ihtVDUQIN+Ko7dL8AHBFt6UBFzVQwmbdDkyHTPDn5C7HYNhXH3FZV1zyaglgxqtD0C2YqND7DObBjae2M+5VlM9CqyvTJX+KvUsP/vaF3hp/+Aw+ltpARH2iDQQrHGO8xc8PxjZqKk1ZFrOV5oB0N7uiGk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oHPuvcCt; arc=none smtp.client-ip=209.85.128.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1721367229; c=relaxed/simple;
+	bh=IXINu2CBzjud7p80mQWRPpw54y7xsaLZ0272piMASJo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=H3a1IvLwovKWT/Q1uzdYHfDQ2PVZLQJXUGl6K3mZuctx8nvy+/KoC6HN99bwBWxJNdgrU7MS1LPtL7X73TDFdBdGzi9Q3Ldw5LhptB5MPdzFfSj/hd8Pxf1wTd4clfmZUqKRCg4XlfVvZjVnf3MGjAoakW1t7Evxg6MzupAm7Zc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=F5cZU+8P; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oHPuvcCt"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-42797289c8bso51453595e9.0
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Jul 2024 06:55:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1721224540; x=1721829340; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :from:references:cc:to:subject:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=Y83H8RmAx7QVV9p+l8NUc1S/UNvUCiNXkhTxZU2ZpRc=;
-        b=oHPuvcCtvwEla13wL8dP7/hWMLoL7Ugk7pe5X/b8VOA4Kew0Ok5fplEew4W7Y4sAey
-         04REuvZBoIhngqowTlnR8zrbxaKud/oulKpDBaSUuhbmMeF7qq8Q+/44nD5686rPdpbY
-         dr//9TIdayy0hQV5RpmMUTgDJPAm8KwhbMuIcxujXZ82I+Xy8TRVMyHpybE0QSl32rr/
-         y/sg1y3kTy5NTSsyHzA6dA4d5Gy6ZKYqOEkxunvdSG21JQWl4AQ4rhoDUbFFsBI7TuOp
-         Gr6drk+Yz8JoPWHCga/Rzitel3MhZUIFsdpilJWF3rrlTKitPdHfxRtJHK9I2Rc7DBIU
-         bx0w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721224540; x=1721829340;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :from:references:cc:to:subject:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Y83H8RmAx7QVV9p+l8NUc1S/UNvUCiNXkhTxZU2ZpRc=;
-        b=jMGuQNTVeMktLMEXb+6PClBTV1ySgaZC7PB1m0LaIUkdSsKUbbEp9euCyTEyv0tC0Y
-         d5hbs/03unoTR7Z3XwRjwj5o2LGiax7jeusDQ1SZ1+vj2OYWeA5PhZ5HRAqEUv3x8OkX
-         Jy/tqf4FnALCX2zYibY0kgSZDLx+PgZceTnTuSJUmJRXe0IXTXo1Qh0Nk/uCNOz0adsC
-         zHZLHTf+yI/QerHuFMaOmJMyaJ+rPF6mAGwoP9ozGDgDANOwnxMIEvik7xZyJ7fzMu2Z
-         JxelvFkcNaAOJJyMH0EgiVo2V7JUIDDKlYEhRmwQrhOHg1u4+vCSksdHJR2UPDVWMFHu
-         Xx9g==
-X-Forwarded-Encrypted: i=1; AJvYcCWLvlhQLUjuECRnFspVgKjSRi+Yx/QlWt9jKUHeFNTNawfBu+6CfJKS3T7yfSITN9hFZyKz/pExwipi+b8wwjMc4HdCEc9TOV7K
-X-Gm-Message-State: AOJu0YwNA3f3WJumg4JfxXSbjGi0BfcyJj1C2yT4ilf21J3JDPDZ4lOX
-	9SEx4tLh/cs0OhvdNoalmHmufQs2PvVtOPoXDT4gZ+uKHc6Xswaqov3140aD4bE=
-X-Google-Smtp-Source: AGHT+IEOn6Lwjz9UGc6Bd48U+gnMDgs3sLUKiAjRWOATS2nwM6Fo4EkCFno7qAwuBenAB7Azyt3kyQ==
-X-Received: by 2002:a05:600c:19c7:b0:426:61f6:2e38 with SMTP id 5b1f17b1804b1-427c2d0fc43mr12890225e9.35.1721224539936;
-        Wed, 17 Jul 2024 06:55:39 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.219.137])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-427a5edb449sm172590745e9.35.2024.07.17.06.55.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 17 Jul 2024 06:55:39 -0700 (PDT)
-Message-ID: <38be7954-5274-4c30-ab99-c076cfc5c563@linaro.org>
-Date: Wed, 17 Jul 2024 15:55:37 +0200
+	dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="F5cZU+8P"
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 46J5XLzuC148356, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=realtek.com; s=dkim;
+	t=1721367201; bh=IXINu2CBzjud7p80mQWRPpw54y7xsaLZ0272piMASJo=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:
+	 Content-Transfer-Encoding:Content-Type;
+	b=F5cZU+8P2C8qkfWRyfrhOyQUv6Y+lo+RlmV7+2ChqoHC6Wq5xyoH9ZRS6H3/p+A2K
+	 bXhx2RHyAF63pZYwo78xes0FdmB4EZ2DirpGCiZf5c84ChZ0aU8ARViJwIResSkVrR
+	 mUjYIoF6i1hpckry3SLKrnPmqUvou6yA6lNstkaznuQgazjVtkqiYdYHFG066bVcD3
+	 P8suTuGs+Et89gzRZ/TKVfxSQ1yZ0VUREoGV72XJ5wq97sw2zv/iykQ3HBW9wL3LCn
+	 HZz4iPtw/BEfFTEea/mJjku3fefkgKcE84BRrWcG05WJfhvmYzFLjWO5xk71Oli6Gb
+	 rSob1TUkMmsag==
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/3.02/5.92) with ESMTPS id 46J5XLzuC148356
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 19 Jul 2024 13:33:21 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Fri, 19 Jul 2024 13:33:21 +0800
+Received: from localhost (172.22.81.102) by RTEXMBS01.realtek.com.tw
+ (172.21.6.94) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.35; Fri, 19 Jul
+ 2024 13:33:21 +0800
+From: Ricky Wu <ricky_wu@realtek.com>
+To: <ricky_wu@realtek.com>, <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <ricardo@marliere.net>, <gregkh@linuxfoundation.org>, <arnd@arndb.de>
+Subject: [PATCH 0/4] Add support SDUC for Realtek card readers
+Date: Fri, 19 Jul 2024 13:33:10 +0800
+Message-ID: <20240719053314.1636649-1-ricky_wu@realtek.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 2/4] dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo
- SG2042 support
-To: Chen Wang <unicorn_wang@outlook.com>
-Cc: Chen Wang <unicornxw@gmail.com>, adrian.hunter@intel.com,
- aou@eecs.berkeley.edu, conor+dt@kernel.org, guoren@kernel.org,
- inochiama@outlook.com, jszhang@kernel.org,
- krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
- paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
- chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
- tingzhu.wang@sophgo.com
-References: <cover.1718697954.git.unicorn_wang@outlook.com>
- <dcc060c3ada7a56eda02b586c16c47f0a0905c61.1718697954.git.unicorn_wang@outlook.com>
- <6e5ad808-f4ee-45c3-a1cc-009f2f1010b9@linaro.org>
- <MA0P287MB2822C4FB66C0CD31BED2E3B8FEA32@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Content-Language: en-US
-Autocrypt: addr=krzysztof.kozlowski@linaro.org; keydata=
- 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
- D2GYIS41Kv4Isx2dEFh+/Q==
-In-Reply-To: <MA0P287MB2822C4FB66C0CD31BED2E3B8FEA32@MA0P287MB2822.INDP287.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: RTEXH36505.realtek.com.tw (172.21.6.25) To
+ RTEXMBS01.realtek.com.tw (172.21.6.94)
+X-KSE-ServerInfo: RTEXMBS01.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On 17/07/2024 10:01, Chen Wang wrote:
-> 
-> On 2024/6/18 17:39, Krzysztof Kozlowski wrote:
->> On 18/06/2024 10:38, Chen Wang wrote:
->>> From: Chen Wang <unicorn_wang@outlook.com>
->>>
->>> SG2042 use Synopsys dwcnshc IP for SD/eMMC controllers.
->>>
->>> SG2042 defines 3 clocks for SD/eMMC controllers.
->>> - AXI_EMMC/AXI_SD for aclk/hclk(Bus interface clocks in DWC_mshc)
->>>    and blck(Core Base Clock in DWC_mshc), these 3 clocks share one
->>>    source, so reuse existing "core".
->>> - 100K_EMMC/100K_SD for cqetmclk(Timer clocks in DWC_mshc), so reuse
->>>    existing "timer" which was added for rockchip specified.
->>> - EMMC_100M/SD_100M for cclk(Card clocks in DWC_mshc), add new "card".
->>>
->>> Adding example for sg2042.
->>>
->>> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
->>> ---
->>>   .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 69 +++++++++++++------
->>>   1 file changed, 49 insertions(+), 20 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> index 4d3031d9965f..b53f20733f79 100644
->>> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> @@ -21,6 +21,7 @@ properties:
->>>         - snps,dwcmshc-sdhci
->>>         - sophgo,cv1800b-dwcmshc
->>>         - sophgo,sg2002-dwcmshc
->>> +      - sophgo,sg2042-dwcmshc
->>>         - thead,th1520-dwcmshc
->>>   
->>>     reg:
->>> @@ -29,25 +30,6 @@ properties:
->>>     interrupts:
->>>       maxItems: 1
->>>   
->>> -  clocks:
->> Widest constraints stay here.
->>
->>> -    minItems: 1
->>> -    items:
->>> -      - description: core clock
->>> -      - description: bus clock for optional
->>> -      - description: axi clock for rockchip specified
->>> -      - description: block clock for rockchip specified
->>> -      - description: timer clock for rockchip specified
->>> -
->>> -
->>> -  clock-names:
->>> -    minItems: 1
->> Widest constraints stay here.
-> 
-> hi, Krzysztof,
-> 
-> Please ask you a question about this widest constraints, I write 
-> bindings as below:
-> 
-> ```yaml
-> 
-> properties:
-> 
-> ......
-> 
->    clocks:
->      minItems: 1
-> 
->    clock-names:
->      minItems: 1
+Summary:
+this patch is for mmc to support SDUC(Secure Digital Ultra Capacity)
+and add Realtek Cardreaders to support it 
 
-So 1000 clocks is correct? You can always look at helpful examples from
-my slides... or another example:
+About SDUC:
+SDUC is defined in SD7.0 spec, it support the max capacity is 128TB[1]
 
-https://elixir.bootlin.com/linux/v6.8/source/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml#L132
+Roughly implemented functions by this patch:
+1.Mutual identification of SDUC in ACMD41 initialization (5.2.1[2])
+2.SDUC card user area capacity calculation (5.2.2[2])
+3.Memory read/write commands sequence (5.2.3[2])
+4.Erase Commands Sequence (5.2.4[2])
 
-Best regards,
-Krzysztof
+patches:
+patch#1: Defined functions and modified some type of parameter
+patch#2: For mmc to support SDUC
+patch#3: Add Realtek sdmmc host to support SDUC
+patch#4: Add Realtek card readers to support SDUC 
 
+Reference:
+[1] SD Specifications Part 1 Physical Layer Specification Version 7.00
+[2] SD Specifications SDUC Host Implementation Guideline Version 1.00
+
+Ricky Wu(4):
+ mmc: core: some definitions and type modifications for SDUC
+ mmc: core: add SDUC init rw erase flow to mmc
+ mmc: rtsx: make Realtek sdmmc to support SDUC
+ misc: rtsx: add Realtek card readers to support SDUC
+
+ drivers/misc/cardreader/rts5227.c |  1 +
+ drivers/misc/cardreader/rts5228.c |  1 +
+ drivers/misc/cardreader/rts5249.c |  1 +
+ drivers/misc/cardreader/rts5260.c |  1 +
+ drivers/misc/cardreader/rts5261.c |  1 +
+ drivers/misc/cardreader/rts5264.c |  2 +-
+ drivers/mmc/core/block.c          | 13 +++++++--
+ drivers/mmc/core/bus.c            |  4 ++-
+ drivers/mmc/core/card.h           |  3 ++
+ drivers/mmc/core/core.c           | 38 +++++++++++++++++--------
+ drivers/mmc/core/core.h           |  6 ++--
+ drivers/mmc/core/host.h           |  5 ++++
+ drivers/mmc/core/queue.h          |  1 +
+ drivers/mmc/core/sd.c             | 47 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/rtsx_pci_sdmmc.c |  6 ++++
+ include/linux/mmc/card.h          |  2 +-
+ include/linux/mmc/core.h          |  1 +
+ include/linux/mmc/host.h          |  1 +
+ include/linux/mmc/sd.h            |  5 ++++
+ include/linux/rtsx_pci.h          |  1 +
+ 20 files changed, 121 insertions(+), 19 deletions(-)
+
+
+-- 
+2.25.1
