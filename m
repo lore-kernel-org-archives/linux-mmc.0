@@ -1,57 +1,57 @@
-Received: from mail-oo1-f46.google.com (mail-oo1-f46.google.com [209.85.161.46])
+Received: from mail-oo1-f45.google.com (mail-oo1-f45.google.com [209.85.161.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 589F66FBF;
-	Fri, 19 Jul 2024 08:45:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D8CA6FBF;
+	Fri, 19 Jul 2024 08:46:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721378750; cv=none; b=Hi1TOI91WtsCdsOJcQ3Jwt8k4qByjBreZFGuFH8mwPBo9qlmR3wtszzpqAhb9PHP0RCgEFAdsgH2O9jPvZzg0/TgQFTYmDEzPjVBQSdJOyV3iTcGPqtGsXW3Zs7Y443A0Fdq7PAPbe/IscWbG6kcHh8pLle3HbyNx/l2BCAqbMk=
+	t=1721378768; cv=none; b=UYdBoS4uDIrsBImu8WLNa1pWgA3qH37fjA+bmqGGOdyogLPtYCFE5Sj9HYW2GcxL0gIqvnnBuIOZ2AwfZUGkaQVsoHQySmdsOQtjtO+VS1xJtpThQC6s/9lCuLJFQc/MY92vf6Iqzbd+8bPvcH8ui9xJlZa69oe7e7jVX+NaTQY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721378750; c=relaxed/simple;
-	bh=nNoc3/cP1tijMwGy0aKfr+zIHNN+M8a3TCPwlGft7sI=;
+	s=arc-20240116; t=1721378768; c=relaxed/simple;
+	bh=O9lJG+k+tksg6Q8u/j+wl+xaVG8aDV4tvD5LsSXZ0zE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=bt6dHEPNpyxuShsSZGjcgBKIWleoV1rwf+O+KWVhTXLQgi2Jx0Lnwrk4F6x+ZYtVNJD3dD5tfk1AFuZgzm6ZWDOGoRlamGP/tAkvwmno5y81NlmtrKnaodIP/WF4IQjkYicHEL82/0nhC7S+8ZgyCWoBXCsjVIhQJR1zOF9pepo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=F3XgR0CO; arc=none smtp.client-ip=209.85.161.46
+	 MIME-Version; b=u4Dc10ACtMw5EcCPW1WyJfSW7/StlKV+ebh6Vdii1IUSKJiujAatd/H/+il1x4gqa5YMUAVM9bVcenY2xrXxiodLd5ZYkYXNNr+SeRKRJ/Wx+XTaMWkYfiKllKPHLK3pr+NecQveZO7lbk6sqt5vn6fbx0M4ZDc17cA2cGvl9pI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HjUMK6xI; arc=none smtp.client-ip=209.85.161.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="F3XgR0CO"
-Received: by mail-oo1-f46.google.com with SMTP id 006d021491bc7-5cebd3bd468so847771eaf.1;
-        Fri, 19 Jul 2024 01:45:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HjUMK6xI"
+Received: by mail-oo1-f45.google.com with SMTP id 006d021491bc7-5c667b28c82so764129eaf.1;
+        Fri, 19 Jul 2024 01:46:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1721378748; x=1721983548; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1721378766; x=1721983566; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6uqvBP32xV6qRefoyJcm+diCLzvCyHwlNjo5p8QbsSQ=;
-        b=F3XgR0CO3yMg3TX0BGz7BicCip1/1V+lMDkClMACCOClRQYWB+BskMyZNm4jZ3N2Rq
-         amq8NO1XU+SHrpgEpbAN2HQGct2B0pWgVeyLdUM9Xtw1b6e5M5piiqFVR+pt9ynMbjYs
-         KP//nvZ8hwtDWQPvg924xka16gLAOC4Uv9NRMg3Iv522529WM1G+m4EWa6C5u6mzpnLs
-         y7fwsqReVPKbWN6JZt+RJbeqZdDgXo48JZisHmWk6ZZlc0iP/INTJ/wSVnjDwsfV2hph
-         8ibdrHK5PxvNeE+/22nPeRi2pHxLsgIRCcqp0mCqQtcca2z8PUeKeAD1lYQL7M/5qh0q
-         SJVQ==
+        bh=oydJeqRMAIcWXHWtFSpsEnC22p0yugXf58j/ILvTUj4=;
+        b=HjUMK6xIiiHUrootYW8QPTj9sttIEJvYn9rTD6h83wmo0AfyhUFYt8u66nsLXetVlf
+         VdjQuICDCtkyzRIjBKy4ToWsLV59o+nJ8xCg/EsyyaTE0GyCiKGFskIR/ML6db+l6A0s
+         woVecmZmj14+KTaMnv22iGdLE7PMFDaVRZPqTCEw1IFYQzxCudo+kWQBj6pN67rAf7Ve
+         dvcfcs65/gAIDYsjElHQKCYwYYRnsYqYl8F1FdRvYVo7H+rsv/IHYhbz0EPfnKK4YYAP
+         H4DljwDJvq4YumaO9ZisAqS7UAHIirb0CigRqnAUqs6o8Jb9Z5F1YuHJp3KPK3x1eduo
+         T59g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721378748; x=1721983548;
+        d=1e100.net; s=20230601; t=1721378766; x=1721983566;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=6uqvBP32xV6qRefoyJcm+diCLzvCyHwlNjo5p8QbsSQ=;
-        b=C3dMGGzmBCPo3kOll31iMW5Ro0urjUzdqGoD9ESKwERobSbkEO3hu9c/JeqUt6b5zB
-         uXcRBehiIIQ9JGc4XsaqqouV0v2ps9jFfEl6Blda12ZEfGYzzQCtnXKlGQkLWVYN8jF/
-         ZEmBfZKNpcqBoluNLQJi791jJQNzCGePXG0/0FrpAa+BNVk494Ggb0fK/6z4d9eVtPd6
-         x/1ThfgU/60+V/YsPntNk8XI2Amz0U6D7hbguy0AjC9ORd4ZkhCa7y4cweJAUIHRtD/e
-         nxKcmgT8xI9HnQfLCRWWIY2dXM+ezy+Jiy0oh+vK0Fgck3aqp5aiwG/Fpvt+GA7jXGip
-         hVVA==
-X-Forwarded-Encrypted: i=1; AJvYcCXwxBKj6pF8joKmOgLqNi7iYWTitqAJWEdVipUYnk5nAkUO5m9QyHg/+J7rZYI7MEog6gfIw2z+Rtza33U0LUJ0RmbHe3bgn79VjOFx/sXK2ELL1cNBRsUCNf6rVkXxfg/fZ92qNzDIsA9swEViBh4WnkrBVSfDqmwylzwb+LJB0BjmXg==
-X-Gm-Message-State: AOJu0YxbMQi8caosx5PZUiis4xoj5oGBWzdsYJvQsiguG4MMLODYy4u7
-	R10ZG1tSIXmNePkX/FfjUl1ciH0ofW4/zv+Pt9OqGWCr0q90lfd1
-X-Google-Smtp-Source: AGHT+IHXTA/zgkdr+H1RuzNCjWddediAA0SHwbiJ+VeYitWvUf/Oywvo4d5FAaFRIYS1Lp9cmPpbZA==
-X-Received: by 2002:a05:6820:270f:b0:5cd:2e7:cc6 with SMTP id 006d021491bc7-5d41cade049mr8811826eaf.8.1721378748386;
-        Fri, 19 Jul 2024 01:45:48 -0700 (PDT)
+        bh=oydJeqRMAIcWXHWtFSpsEnC22p0yugXf58j/ILvTUj4=;
+        b=Mw4CBTFnG3FphwbswDLEAAVe+nx+vxsAYnp7HNcQ1RVU1xh8zsvYbi/8pts/DtzKuh
+         ikBJPjTr05eY2k2x4QMu2ApdDefC/XoZI+5eqFu8ObZ0t82tM/9PoZedf/7hp2jK3tUZ
+         MNY2KlN6WNBvNJdr1BkbGT7ss/PwQ50Zf/TjzaRokHwR5+sJ6jg2boqWqL4QFXeILgLO
+         0rvx0PR3+pZ9p+eHw+rq8sSN5IOEpVCh+v/hFL4hi/djmznuqh7ZU55PuAtSWijy8E/r
+         hYF3Phk+dtdo3ZRgFgBDrDV8SQLPTLl6kSTKHYXMycrHixO5Nt4+D2Dr1EfnS21Igq0u
+         B54Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUQH07ZSFhkHa1Zsf+to7sYrhSoXGwomq0BenTOuhDT2SM7fVGdOFiqBlP2Oi4hndk/s0NTgr9JwT7lD7odGw1ojdVUORzmcL3WhITR1bPvyq4ZnDc/Bj0K/q+vIi9EPxYBJQ6vb9PfyaUZyfhfHgfs1VTsfgT7LT4jE0qLnftD6pXDAw==
+X-Gm-Message-State: AOJu0YzWwmtDQ+hK9CzBVNamNEPp+FMCapd7X6VCq8DJMiNkh3yHxcpx
+	dSkC6dMx31pf2u/TrOh09GEhwCq25cP7IQOx1ifbaKXkj3i+ll8F
+X-Google-Smtp-Source: AGHT+IHn4qha4kbRrWIiX+a0mGhPKxilYgIXp1gDMiIDeE58q68IhDxPbZIJpjFtfNBe92nq4RZ4Hg==
+X-Received: by 2002:a4a:d018:0:b0:5c2:260b:305d with SMTP id 006d021491bc7-5d51f967addmr2896107eaf.2.1721378766628;
+        Fri, 19 Jul 2024 01:46:06 -0700 (PDT)
 Received: from localhost.localdomain ([122.8.183.87])
-        by smtp.gmail.com with ESMTPSA id 006d021491bc7-5d55a7fa65esm179536eaf.5.2024.07.19.01.45.46
+        by smtp.gmail.com with ESMTPSA id 006d021491bc7-5d55a7fa3a6sm177640eaf.9.2024.07.19.01.46.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Jul 2024 01:45:48 -0700 (PDT)
+        Fri, 19 Jul 2024 01:46:06 -0700 (PDT)
 From: Chen Wang <unicornxw@gmail.com>
 To: adrian.hunter@intel.com,
 	aou@eecs.berkeley.edu,
@@ -73,9 +73,9 @@ To: adrian.hunter@intel.com,
 	xiaoguang.xing@sophgo.com,
 	tingzhu.wang@sophgo.com
 Cc: Chen Wang <unicorn_wang@outlook.com>
-Subject: [PATCH v5 2/8] mmc: sdhci-of-dwcmshc: move two rk35xx functions
-Date: Fri, 19 Jul 2024 16:45:41 +0800
-Message-Id: <ebfe6fb90fb85a0f203d9816211eccd23d5a5330.1721377374.git.unicorn_wang@outlook.com>
+Subject: [PATCH v5 3/8] mmc: sdhci-of-dwcmshc: factor out code for th1520_init()
+Date: Fri, 19 Jul 2024 16:45:59 +0800
+Message-Id: <b774f2b62d68edab2d95d9dbd1f55cac50c6abff.1721377374.git.unicorn_wang@outlook.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <cover.1721377374.git.unicorn_wang@outlook.com>
 References: <cover.1721377374.git.unicorn_wang@outlook.com>
@@ -89,126 +89,85 @@ Content-Transfer-Encoding: 8bit
 
 From: Chen Wang <unicorn_wang@outlook.com>
 
-This patch just move dwcmshc_rk35xx_init() and
-dwcmshc_rk35xx_postinit() to put the functions
-of rk35xx together as much as possible.
+Different socs have initialization operations in
+the probe process, which are summarized as functions.
 
-This change is an intermediate process before
-further modification.
+This patch first factor out init function for th1520.
 
 Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 90 ++++++++++++++---------------
- 1 file changed, 45 insertions(+), 45 deletions(-)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 51 +++++++++++++++++------------
+ 1 file changed, 30 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index fb4076c19ed5..903fe06050e4 100644
+index 903fe06050e4..bb0adc2ee325 100644
 --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
 +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -711,6 +711,51 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
+@@ -830,6 +830,35 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	}
  }
  
-+static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
++static int th1520_init(struct device *dev,
++		       struct sdhci_host *host,
++		       struct dwcmshc_priv *dwc_priv)
 +{
-+	static const char * const clk_ids[] = {"axi", "block", "timer"};
-+	struct rk35xx_priv *priv = dwc_priv->priv;
-+	int err;
++	dwc_priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
 +
-+	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
-+	if (IS_ERR(priv->reset)) {
-+		err = PTR_ERR(priv->reset);
-+		dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
-+		return err;
++	if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
++	    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
++	    device_property_read_bool(dev, "mmc-hs400-1_8v"))
++		dwc_priv->flags |= FLAG_IO_FIXED_1V8;
++	else
++		dwc_priv->flags &= ~FLAG_IO_FIXED_1V8;
++
++	/*
++	 * start_signal_voltage_switch() will try 3.3V first
++	 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
++	 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
++	 * in sdhci_start_signal_voltage_switch().
++	 */
++	if (dwc_priv->flags & FLAG_IO_FIXED_1V8) {
++		host->flags &= ~SDHCI_SIGNALING_330;
++		host->flags |=  SDHCI_SIGNALING_180;
 +	}
 +
-+	err = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
-+					    ARRAY_SIZE(clk_ids), clk_ids);
-+	if (err)
-+		return err;
-+
-+	if (of_property_read_u8(mmc_dev(host->mmc)->of_node, "rockchip,txclk-tapnum",
-+				&priv->txclk_tapnum))
-+		priv->txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
-+
-+	/* Disable cmd conflict check */
-+	sdhci_writel(host, 0x0, dwc_priv->vendor_specific_area1 + DWCMSHC_HOST_CTRL3);
-+	/* Reset previous settings */
-+	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
-+	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
++	sdhci_enable_v4_mode(host);
 +
 +	return 0;
 +}
 +
-+static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-+{
-+	/*
-+	 * Don't support highspeed bus mode with low clk speed as we
-+	 * cannot use DLL for this condition.
-+	 */
-+	if (host->mmc->f_max <= 52000000) {
-+		dev_info(mmc_dev(host->mmc), "Disabling HS200/HS400, frequency too low (%d)\n",
-+			 host->mmc->f_max);
-+		host->mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400);
-+		host->mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR);
-+	}
-+}
-+
- static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
+ static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
  {
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -1064,51 +1109,6 @@ static void dwcmshc_cqhci_init(struct sdhci_host *host, struct platform_device *
- 	host->mmc->caps2 &= ~(MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD);
- }
+@@ -1231,27 +1260,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	}
  
--static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
--{
--	static const char * const clk_ids[] = {"axi", "block", "timer"};
--	struct rk35xx_priv *priv = dwc_priv->priv;
--	int err;
+ 	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+-		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
 -
--	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
--	if (IS_ERR(priv->reset)) {
--		err = PTR_ERR(priv->reset);
--		dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
--		return err;
--	}
+-		if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
+-		    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
+-		    device_property_read_bool(dev, "mmc-hs400-1_8v"))
+-			priv->flags |= FLAG_IO_FIXED_1V8;
+-		else
+-			priv->flags &= ~FLAG_IO_FIXED_1V8;
 -
--	err = dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
--					    ARRAY_SIZE(clk_ids), clk_ids);
--	if (err)
--		return err;
+-		/*
+-		 * start_signal_voltage_switch() will try 3.3V first
+-		 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
+-		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
+-		 * in sdhci_start_signal_voltage_switch().
+-		 */
+-		if (priv->flags & FLAG_IO_FIXED_1V8) {
+-			host->flags &= ~SDHCI_SIGNALING_330;
+-			host->flags |=  SDHCI_SIGNALING_180;
+-		}
 -
--	if (of_property_read_u8(mmc_dev(host->mmc)->of_node, "rockchip,txclk-tapnum",
--				&priv->txclk_tapnum))
--		priv->txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
--
--	/* Disable cmd conflict check */
--	sdhci_writel(host, 0x0, dwc_priv->vendor_specific_area1 + DWCMSHC_HOST_CTRL3);
--	/* Reset previous settings */
--	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
--	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
--
--	return 0;
--}
--
--static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
--{
--	/*
--	 * Don't support highspeed bus mode with low clk speed as we
--	 * cannot use DLL for this condition.
--	 */
--	if (host->mmc->f_max <= 52000000) {
--		dev_info(mmc_dev(host->mmc), "Disabling HS200/HS400, frequency too low (%d)\n",
--			 host->mmc->f_max);
--		host->mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400);
--		host->mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR);
--	}
--}
--
- static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
- 	{
- 		.compatible = "rockchip,rk3588-dwcmshc",
+-		sdhci_enable_v4_mode(host);
++		th1520_init(dev, host, priv);
+ 	}
+ 
+ #ifdef CONFIG_ACPI
 -- 
 2.34.1
 
