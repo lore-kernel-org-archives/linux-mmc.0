@@ -1,141 +1,114 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-pg1-f175.google.com (mail-pg1-f175.google.com [209.85.215.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7710A16B722;
-	Wed, 24 Jul 2024 18:22:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C215A13AD23
+	for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2024 21:09:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721845375; cv=none; b=pW15o6DxHGhIVuXnsJmrR9/zeQFz7hJbF1P+q3N2xx80A5WZlb8cRAOL6jJ6fo+MWYTmTXS+yemAvSw1olkImTlZLVAwJEvTqKanuFUvYeITCwG1tue6YZizU6xtRjyzpgJ84K2AZpwuV9CUS3o4WzwWNA61/bQ5EjJm+KDwdqQ=
+	t=1721855379; cv=none; b=HppCwk4csU6pTdAmRLJFmN9UXTEWCMAdtQzOk9lxTzrPOMOZGp23fR4wvFvCXJWbhX+6633t1pkDkqvHmgd/4BsRbmVkQ9vKayl5qEWWDhEQ7r9H8qCgN0NvReis8ttG0LzNg9wJkFtHOMU9bM/qT9PebS7usWiR6SeoLYyzbuc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721845375; c=relaxed/simple;
-	bh=Z4Cg2TnJwYE1DhCcNn4gkS8Vcn8aJDytk1xPw1gfdgM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Z+U7D7un/z8QEP1+DUwKsKMdwQ4Hn9hGyV9I8u4UcGkogL/p45WM+5LID2mBK+7KqQ+LaCpFVimVS5APEa8hDA5EbXsPFLPSOHuGpAHwgZ427RVonOk5jMRWX3rnlNdEtEOcuefmaw9kh0cveEocLGUIPfz1T+4hnwzSSwrnBnM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GLesQd+c; arc=none smtp.client-ip=209.85.128.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1721855379; c=relaxed/simple;
+	bh=uxLT9f9IqbyPnZuQ+zIPpBsbmcvHuBGoUjbzjkQd7MY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hfPXEzDjJxlJ+MTmIDI0aGkzQ6k+xqWH2Du4gE9WO220+DF3AyfZun4uyscoF+rcJC0v92u4l2sQt+iYiSavNdwUGQVSM3pB4P+1X+0f6lx3WNtY14zoLkPlE45j7zFLjIYLaoL2QpnOPeGYXejNf8DXcvKfnZDyD+F1oeLZ+hs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pdp7.com; spf=none smtp.mailfrom=pdp7.com; dkim=pass (2048-bit key) header.d=pdp7-com.20230601.gappssmtp.com header.i=@pdp7-com.20230601.gappssmtp.com header.b=uci4zWRU; arc=none smtp.client-ip=209.85.215.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pdp7.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=pdp7.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GLesQd+c"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-42797289c8bso666555e9.0;
-        Wed, 24 Jul 2024 11:22:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=pdp7-com.20230601.gappssmtp.com header.i=@pdp7-com.20230601.gappssmtp.com header.b="uci4zWRU"
+Received: by mail-pg1-f175.google.com with SMTP id 41be03b00d2f7-7a103ac7be3so164927a12.3
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2024 14:09:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1721845372; x=1722450172; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=TVCfTE0NROhZ28TaZGaiQuIpHQXct/DwD9UUx7joZTQ=;
-        b=GLesQd+cpZ7ZLLTFCN+jysRMVaXUrmoEwAlotcWLoOHGAJDKVX6NbPJC+PF7XSIVry
-         cb0wcJ7t2TTj8WgSB78n96ALXUnNvVaJIavFmJGcprDRDpELmlU8Ssgz1lUzuKIfV1jx
-         Az8eGJAVOdtbVbAMoGKBsKA8QcZhLdjkaU2HxI77O3WVPUwX4dyAKEvVzLkp3Qy3gjO5
-         a8HdyJQMPEMcjwcRIIAth0DcDbfnxUCk0ZEwB6z65132Rtp3aSDjOrhq/pgGFmCOvg19
-         v2UqwTE0TJsdOcCWOpKGdYSbbt1FFGQBx1eJuhdYL7ogCzuD1K+neShQkwWHgE6WLv4r
-         Flsw==
+        d=pdp7-com.20230601.gappssmtp.com; s=20230601; t=1721855377; x=1722460177; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=JW5RrNNJxqjwuGLo9kHT95SO/33HKB3UwhgKtE5uUyM=;
+        b=uci4zWRUJHPci5CRF9ySjTerFEOcxDfVw9V/YWr9KvfI9wngJRe5S03o3FlFagZJg8
+         tvjsDjhEeOVY2uQhBHi4cDJUJjQQFH8Zlkpj3jBn72E77Z4ZfgSmE/JYgXiTZIvkIPKp
+         Wb0+bkm7zWjeba8hm5xE2KDFy04r8TXTSgjs2x9c6dy+T0PzUIs6KbO/iFAyTBGkZSCG
+         l5q1mZi7ND4MQ/S1D9pLx9iLXMXKnCkoMkVyCQxdoywZP90F2xBUgGXFFsSrb4ApnF2f
+         cEDJAt0RKfUTE8o3/sCZOPkqycUpsayALvBvb1c5g8aTt9LE4nJQAq2I4Dj1apGDd29s
+         C7nw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721845372; x=1722450172;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=TVCfTE0NROhZ28TaZGaiQuIpHQXct/DwD9UUx7joZTQ=;
-        b=s+he/4IXhK5TgowM81uWhndef1rwuNefP4fc/I+ynRJwH4+i2O9AxSejMtAAKQD8ZO
-         6KY7+wFqjw1XLrGf1afFK0786Pv5mAOpvpZ+yZZrzWPI8SqVIkpfEaqr1KnubaqIzKPn
-         xLLokiP+bcOB2UeQ7tSPEdeGHw9qiROCEXfn9U2UNPGv3KyCzEwu7psmMDrouTBD9o6D
-         74oCfJ4Os7fo9o7JjRnht+pFY3ecXJ0GuPb1oE04bacAWaUt4xP4KEuUiTzp2C0EFXFC
-         +Cjq3rvegzAufSgoAZ1ew21q48O2OBEMD8t2jG/PwqL38QNXsAcCvgfYg0HDmqXDA7sN
-         ryXA==
-X-Forwarded-Encrypted: i=1; AJvYcCXJQVOppUfUF7Bmql0IczWfaq6fRLRIRPgVX6SowMsmyoB01aveWDgLYaBjjhc4+LT6ySU5SGb0w2+N0NDqEt187l7aK++qGiL8B48NcLn40zRQWZDkr4Docd7j1SRDV+NxJAmHn20qjnfQOUgBI9/dcbu7bf6MP2JK+3qc8hxyWrtjoKq5Z1XGy+8+
-X-Gm-Message-State: AOJu0YzKZYfZpTXWF7kq+RMGaUp9G4+9wrUACveu+poD9THmhmwL2DJv
-	MsVyYEpncYlrxUBZ7fRaijDQ+Drr25G8WTvoq+51/7sTuEcJ2qve
-X-Google-Smtp-Source: AGHT+IFCEhSdnrVOIE8vJ1FPGPxhox+YI1nRJa9GWRRVVmzaw1A79Giz7J/3ENdOdIGJv0HOfOUjyA==
-X-Received: by 2002:a05:600c:1d04:b0:427:d8f2:332 with SMTP id 5b1f17b1804b1-427f954c3b8mr21405895e9.7.1721845371735;
-        Wed, 24 Jul 2024 11:22:51 -0700 (PDT)
-Received: from prasmi.home ([2a00:23c8:2500:a01:2595:4364:d152:dff3])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3687868b5fdsm14909882f8f.38.2024.07.24.11.22.50
+        d=1e100.net; s=20230601; t=1721855377; x=1722460177;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=JW5RrNNJxqjwuGLo9kHT95SO/33HKB3UwhgKtE5uUyM=;
+        b=gdA3JN1S8KtZohBcSFtut0EzrSFOcnnXJrViTeNRFToOGmq4Itod6UbeNsNt4SnDNO
+         VbZgh4jKFWzR/QxkrDBgBG4lCra9IFmVqLiEvM4RWO/6WhUdNLR85aQCZTSx/+1y1kI1
+         FMS5QNGLeLvHp3lEsvVQOD+SsCUUuCRhEAsYdxMTzKDT2KRMUIO8DhSkPtdjbzT5gEbi
+         jxXJVAW86LqvFX8OeZ8eDx+eioLgGUVBUGm2jdEnmtZyrTt7Np7gucl1q0ALAmnrh7HX
+         atojXgYQlzAjguN2vFgOKnLtsJn1xnPIGGJGKDSKSle1JSlRDKehNJwlZLYnobi2DoLu
+         6mgw==
+X-Forwarded-Encrypted: i=1; AJvYcCVVbSBCjr2FmqFXQ4euyOowFWyjRp/sdmTI9rQS+lY1bAnghBnZ79SEeiOeRE7/lv9QSLCBloI4Cy0onmbwETz6Ff4warBhGGK/
+X-Gm-Message-State: AOJu0YyPP4c9c7ZrEDUttW9u+kBXA3uhcNaG6/IrxFw5bEWV5dHtYsNP
+	H/aIgsmaRIctSKHpT8GDVSVi+zeBD2ItP3Vofc4BopvuI6g09d6iFSmqbi20L/vk0IfykFtlaGj
+	8Jpw=
+X-Google-Smtp-Source: AGHT+IGELhs314KqDpmVaOF4YhHiDvPSIICIdBh1kBNNnVk36MClFKGOKcaWxOApghMkCWpIwy05HA==
+X-Received: by 2002:a05:6a21:3396:b0:1c3:b267:4261 with SMTP id adf61e73a8af0-1c472830996mr1583265637.12.1721855376943;
+        Wed, 24 Jul 2024 14:09:36 -0700 (PDT)
+Received: from x1 ([2601:1c2:1802:170:8821:4dd1:578:cc09])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2cdb738bb33sm2164778a91.4.2024.07.24.14.09.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Jul 2024 11:22:50 -0700 (PDT)
-From: Prabhakar <prabhakar.csengg@gmail.com>
-X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To: Geert Uytterhoeven <geert+renesas@glider.be>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Magnus Damm <magnus.damm@gmail.com>
-Cc: linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Prabhakar <prabhakar.csengg@gmail.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH v5 3/3] mmc: renesas_sdhi: Add RZ/V2H(P) compatible string
-Date: Wed, 24 Jul 2024 19:21:19 +0100
-Message-Id: <20240724182119.652080-4-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20240724182119.652080-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20240724182119.652080-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+        Wed, 24 Jul 2024 14:09:36 -0700 (PDT)
+Date: Wed, 24 Jul 2024 14:09:34 -0700
+From: Drew Fustini <drew@pdp7.com>
+To: Chen Wang <unicornxw@gmail.com>
+Cc: adrian.hunter@intel.com, aou@eecs.berkeley.edu, conor+dt@kernel.org,
+	guoren@kernel.org, inochiama@outlook.com, jszhang@kernel.org,
+	krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
+	paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
+	chao.wei@sophgo.com, haijiao.liu@sophgo.com,
+	xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
+	Chen Wang <unicorn_wang@outlook.com>
+Subject: Re: [PATCH v5 0/8] mmc: sdhci-of-dwcmshc: Add Sophgo SG2042 support
+Message-ID: <ZqFtjpxXv7pRpZHV@x1>
+References: <cover.1721377374.git.unicorn_wang@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1721377374.git.unicorn_wang@outlook.com>
 
-From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On Fri, Jul 19, 2024 at 04:44:38PM +0800, Chen Wang wrote:
+> From: Chen Wang <unicorn_wang@outlook.com>
+> 
+> This patchset is composed of two parts:
+> - one is the improvement of the sdhci-of-dwcmshc framework,
+> - the other is the support for sg2042 based on the improvement of the
+>   framework.
+> The reason for merging the two parts into one patchset is mainly to
+> facilitate review, especially to facilitate viewing why we need to
+> improve the framework and what benefits it will bring to us.
+> 
+> When I tried to add a new soc(SG2042) to sdhci-of-dwcmshc, I found
+> that the existing driver code could be optimized to facilitate expansion
+> for the new soc. Patch 1 ~ Patch 5 is for this.
+> 
+> Patch 6 ~ 7 are adding support for the mmc controller for Sophgo SG2042.
+> Adding corresponding new compatible strings, and implement
+> custom callbacks for SG2042 based on new framework.
+> 
+> Patch 8 is the change for DTS.
+> 
+> By the way, although I believe this patch only optimizes the framework
+> of the code and does not change the specific logic, simple verification
+> is certainly better. Since I don't have rk35xx/th1520 related hardware,
+> it would be greatly appreciated if someone could help verify it.
+> Note, the DTS change has dependency on clock changes for SG2042, which
+> has not been merged in master/upstream, so if you want to test this
+> new sdhci-of-dwcmshc driver for other hardware except SG2042, don't
+> pick patch 8.
 
-The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to that
-of the R-Car Gen3, but it has some differences:
-- HS400 is not supported.
-- It has additional SD_STATUS register to control voltage,
-  power enable and reset.
-- It supports fixed address mode.
+I have tested this on the LicheePi 4a and found no issues.
 
-To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g057'
-compatible string is added.
+Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
 
-Note for RZ/V2H(P), we are using the `of_rzg2l_compatible` OF data as it
-already handles no HS400 and fixed address mode support. Since the SDxIOVS
-and SDxPWEN pins can always be used as GPIO pins on the RZ/V2H(P) SoC, no
-driver changes are done to control the SD_STATUS register.
-
-Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
----
-v4->v5
-- Dropped handling of regulator
-
-v3->v4
-- Dropped using 'renesas,sdhi-use-internal-regulator' property
-- Now using of_device_is_available() to check if regulator is available and enabled
-- Dropped extra spaces during operations 
-- Included tested by tag from Claudiu
-- Rebased patch on top of https://patchwork.kernel.org/project/linux-renesas-soc/patch/20240626085015.32171-2-wsa+renesas@sang-engineering.com/
-
-v2->v3
-- Moved regulator info to renesas_sdhi_of_data instead of quirks
-- Added support to configure the init state of regulator
-- Added function pointers to configure regulator
-- Added REGULATOR_CHANGE_VOLTAGE mask
-
-v1->v2
-- Now controlling PWEN bit get/set_voltage
----
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 422fa63a2e99..6b858393f19f 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -284,6 +284,7 @@ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r8a77990", .data = &of_r8a77990_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a77995", .data = &of_rcar_gen3_nohs400_compatible, },
- 	{ .compatible = "renesas,sdhi-r9a09g011", .data = &of_rzg2l_compatible, },
-+	{ .compatible = "renesas,sdhi-r9a09g057", .data = &of_rzg2l_compatible, },
- 	{ .compatible = "renesas,rzg2l-sdhi", .data = &of_rzg2l_compatible, },
- 	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
- 	{ .compatible = "renesas,rcar-gen4-sdhi", .data = &of_rcar_gen3_compatible, },
--- 
-2.34.1
-
+-Drew
