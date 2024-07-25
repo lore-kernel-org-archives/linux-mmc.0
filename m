@@ -1,121 +1,91 @@
-Received: from lounge.grep.be (lounge.grep.be [144.76.219.42])
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A24523C3C;
-	Thu, 25 Jul 2024 11:57:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=144.76.219.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B036E199EBE;
+	Thu, 25 Jul 2024 12:17:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721908683; cv=none; b=T6O4KC99b08b+g+WWGqY8FZEe1qOcoUmJTNxAJ/eFLguczN5rReawo91ht6N+gMpbapMr3Z/1oLF3T4TSaKk8a0NLq581AgTnMLn34hQQYHI5GRs+Mq4bm6DNlYnzn8ykfKaYWmnGZlrA82BESQZV0eRdR80xtcXCF/sp6Y6EYQ=
+	t=1721909839; cv=none; b=KV5RPUdifJIfbz0e4DXJENThtRrFyo5u10XkOKg98hdrXvSxrIy23mI4vrOXK5FaijZU2euxfnz3o1KRk1r8VzZY+a3zHz9tv5jGcnz0mBelphHX6ZTE2ck4kqCAzUyfQeO4Cvwt4PNw0LLV88QUOzcPZ7hPOICGJpUOPgvdVpY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721908683; c=relaxed/simple;
-	bh=SUGuNHYDGosNycUsgB3AByvAAi9UaKUxeW+YSC9jcyw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KzvJeReR8fKFPiAdwy7sdOG8OAge3ZGHb2wvDKg/Mn/0ZT2/9jLKDKf+Et4HXwrocgFXzVI+z1wKxI3qApuSwv7OMqmBQFUG3aqzhkybfMhIfgaZIUNc4JsFM6N0smbKlZJ87az7v80bQYCL71QMyB7cGTto17V914xdsLGAHaE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uter.be; spf=pass smtp.mailfrom=uter.be; dkim=pass (2048-bit key) header.d=uter.be header.i=@uter.be header.b=HRSnzfY+; arc=none smtp.client-ip=144.76.219.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=uter.be
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=uter.be
+	s=arc-20240116; t=1721909839; c=relaxed/simple;
+	bh=N+lYGR9N7GxV/0gdIJYmJecSRf14UADZAk4S0TeqCRQ=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=iz25IDYVRdm5f/4THXvgCSY7vCmyMBqPQbyT6UJzDZm7OBa7078TPnJz6rJTcKdtBN45sy4P/M6qgo9kDgFgUajJ5Ivf1fG85kBOUPejMXpJWdzXVOjab0el8in2vBkt8HheFGvIJ6CPd2uagDxXASlBSYfyT8i6J3qYDMdgXEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=gtCRw9a7; arc=none smtp.client-ip=68.232.154.123
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=uter.be header.i=@uter.be header.b="HRSnzfY+"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=uter.be;
-	s=2021.lounge; h=In-Reply-To:Content-Type:MIME-Version:References:Message-ID:
-	Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=A2VuDAKeSGGGRwdNEgASvdRePK2jE6LTgdknFzfGiVg=; b=HRSnzfY+SxqUo9lzjJBHswdyNO
-	izEqhcP/7tFCFgJJGzzhTZHV+hkIJ95lvet5keDsrZB2SVJh4LM2TT0rY+nfGtvBDiOATcCiQ/ZZp
-	NX14nRCfBdImELKCJsEds0YwtB87PNneYsFwhe69klvX8hKaVd3bPAdUOO5oKLpwqsdI1TpEV3xHA
-	zPeruYumASMydrGBh8+RD0p+DiFqZyJ0vUaImcbHlwd7Aik2LDO+RgK3xJUkwPiJj9pwJIeGrrPKF
-	y3yZwQEUsA40VBWzlQvQ+rZPVwPFNOT65DR9yRxPQziuObFSyUbJuGiw7PBH1R7FTtIfgagxi0sHi
-	wC/6XZ8A==;
-Received: from [102.39.153.168] (helo=pc220518)
-	by lounge.grep.be with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <w@uter.be>)
-	id 1sWwlF-001dJr-31;
-	Thu, 25 Jul 2024 13:35:53 +0200
-Received: from wouter by pc220518 with local (Exim 4.98)
-	(envelope-from <w@uter.be>)
-	id 1sWwl8-00000002sGZ-0mps;
-	Thu, 25 Jul 2024 13:35:46 +0200
-Date: Thu, 25 Jul 2024 13:35:46 +0200
-From: Wouter Verhelst <w@uter.be>
-To: Christoph Hellwig <hch@lst.de>
-Cc: Jens Axboe <axboe@kernel.dk>, Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?iso-8859-1?Q?B=F6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>,
-	Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
-	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org,
-	Damien Le Moal <dlemoal@kernel.org>
-Subject: Re: [PATCH 14/26] block: move the nonrot flag to queue_limits
-Message-ID: <ZqI4kosy20WkLC2P@pc220518.home.grep.be>
-References: <20240617060532.127975-1-hch@lst.de>
- <20240617060532.127975-15-hch@lst.de>
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="gtCRw9a7"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1721909837; x=1753445837;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=N+lYGR9N7GxV/0gdIJYmJecSRf14UADZAk4S0TeqCRQ=;
+  b=gtCRw9a7XTA+kEKSOwMq4F0qXIN/6Iyn8NSJqm8v4DKwNZN++8NjiUxg
+   DKfYdOpLUdmdUOciIQWb9tBl1AwP+PISaxSQst91/Jzf/PMpoeMTmQygP
+   9Dh8Rcsccwg/t2Ti1gB5NbndvAgUaw6XTG4vblKUYdzflnY4clmna2Yln
+   CEx06pGsQIoCSfZ6Lcza4jgt7UcKF1OGvd2bL2dEsLdyn1waNN1bxpfiM
+   DG5xFoFDVJN3RE3dN/BbM6G/Sq17dkxvPpQtKB+Xb12fJFaEpt5vHTjOC
+   CKfp1lGaRX97o8z/u08cYRFx3T4TWZYBcvkijioMrAqqu8C1A7YMM9QPm
+   w==;
+X-CSE-ConnectionGUID: FjEJXt1iShuJypsmHj+1Bw==
+X-CSE-MsgGUID: AwuTO3CBT86BSfO5ZcXImA==
+X-IronPort-AV: E=Sophos;i="6.09,235,1716274800"; 
+   d="scan'208";a="29650435"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa4.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 25 Jul 2024 05:17:16 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35; Thu, 25 Jul 2024 05:16:45 -0700
+Received: from ph-emdalo.microchip.com (10.10.85.11) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
+ 15.1.2507.35 via Frontend Transport; Thu, 25 Jul 2024 05:16:43 -0700
+From: <pierre-henry.moussay@microchip.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+	Masahiro Yamada <yamada.masahiro@socionext.com>
+CC: Pierre-Henry Moussay <pierre-henry.moussay@microchip.com>,
+	<linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>
+Subject: [PATCH 11/17] dt-bindings: mmc: cdns: document Microchip PIC64GX MMC/SDHCI controller
+Date: Thu, 25 Jul 2024 13:16:03 +0100
+Message-ID: <20240725121609.13101-12-pierre-henry.moussay@microchip.com>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20240725121609.13101-1-pierre-henry.moussay@microchip.com>
+References: <20240725121609.13101-1-pierre-henry.moussay@microchip.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240617060532.127975-15-hch@lst.de>
-X-Speed: Gates' Law: Every 18 months, the speed of software halves.
-Organization: none
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-On Mon, Jun 17, 2024 at 08:04:41AM +0200, Christoph Hellwig wrote:
-> Use the chance to switch to defaulting to non-rotational and require
-> the driver to opt into rotational, which matches the polarity of the
-> sysfs interface.
-[...]
-> diff --git a/drivers/block/nbd.c b/drivers/block/nbd.c
-> index cb1c86a6a3fb9d..6cddf5baffe02a 100644
-> --- a/drivers/block/nbd.c
-> +++ b/drivers/block/nbd.c
-> @@ -1867,11 +1867,6 @@ static struct nbd_device *nbd_dev_add(int index, unsigned int refs)
->  		goto out_err_disk;
->  	}
->  
-> -	/*
-> -	 * Tell the block layer that we are not a rotational device
-> -	 */
-> -	blk_queue_flag_set(QUEUE_FLAG_NONROT, disk->queue);
-> -
->  	mutex_init(&nbd->config_lock);
->  	refcount_set(&nbd->config_refs, 0);
->  	/*
+From: Pierre-Henry Moussay <pierre-henry.moussay@microchip.com>
 
-NBD actually exports a flag for rotational devices; it's defined in
-nbd.h in the NBD userland source as
+PIC64GX is compatible with cdns,sd4hc without any additional feature
 
-#define NBD_FLAG_ROTATIONAL     (1 << 4)        /* Use elevator algorithm - rotational media */
+Signed-off-by: Pierre-Henry Moussay <pierre-henry.moussay@microchip.com>
+---
+ Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-which is passed in the same flags field which also contains the
-NBD_FLAG_SEND_FLUSH and NBD_FLAG_SEND_FUA flags.
-
-Perhaps we might want to look at that flag and set the device to
-rotational if it is specified?
-
+diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+index 6c40611405a0..ee3a838f7f06 100644
+--- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+@@ -15,6 +15,7 @@ properties:
+       - enum:
+           - amd,pensando-elba-sd4hc
+           - microchip,mpfs-sd4hc
++          - microchip,pic64gx-sd4hc
+           - socionext,uniphier-sd4hc
+       - const: cdns,sd4hc
+ 
 -- 
-     w@uter.{be,co.za}
-wouter@{grep.be,fosdem.org,debian.org}
+2.30.2
 
-I will have a Tin-Actinium-Potassium mixture, thanks.
