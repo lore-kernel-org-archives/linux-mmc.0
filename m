@@ -1,52 +1,50 @@
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3196613B5AD;
-	Thu, 25 Jul 2024 13:00:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=213.95.11.211
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51DBD1DA4D;
+	Thu, 25 Jul 2024 13:48:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721912428; cv=none; b=rP7mEuVWh5fSv4uCNuy2meKHYwX1J912s5ywg6MU/ay/zY+7SIa6pe5vW1p/75NSlWhdYp2pERdPYpUVTZLNOdAVUNcMW5IKvNrdZJ/xAmjiUp7SiIQdmn9Sj42rCdbVosa0nmuPY+d7Kbknd3Olr68XHGrLv2HyWfLIL6suzOY=
+	t=1721915297; cv=none; b=tjaQmuE0iPjoihqFB2GNPM9oy5itWUA5Eno9eyloQVo1566J6uT32gPqDqVIC8lIAxKZCrh585mYtv8B4NqpD+m9cpWrR0Ms2gFnQKrgNWXEKu+Q403jI/3CqyVjFNOtMhsZXvRcxp6imSjGHza1Nq4S/GCdzGfDpCNTagahz70=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721912428; c=relaxed/simple;
-	bh=PsfRIOEWhAwEg2ifRiPfWEr2fzxq7OMgmm0RVDf/xgA=;
+	s=arc-20240116; t=1721915297; c=relaxed/simple;
+	bh=B0+N0R0oO64HJHIWBCEG3XspO07DEgkcIacwNkawAzc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ACmbGduUEu36bFYD3lUffChKvhWCw+bXkGoqSgV+EexzL+YFAt5gwTR4rgr2rtEc2T9szhGL69Yl8+V7nJTud+PViNWsArVkpXVo/Z0wFrcrsShnxEE78Rg5dcPXtqUVohygbThLmTZ8oyhpObLXyiQzKdrjSm9Ghw2YxcflwVo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de; spf=pass smtp.mailfrom=lst.de; arc=none smtp.client-ip=213.95.11.211
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=lst.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=lst.de
-Received: by verein.lst.de (Postfix, from userid 2407)
-	id C4CD1227A8E; Thu, 25 Jul 2024 15:00:09 +0200 (CEST)
-Date: Thu, 25 Jul 2024 15:00:08 +0200
-From: Christoph Hellwig <hch@lst.de>
-To: Wouter Verhelst <w@uter.be>
-Cc: Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Richard Weinberger <richard@nod.at>,
-	Philipp Reisner <philipp.reisner@linbit.com>,
-	Lars Ellenberg <lars.ellenberg@linbit.com>,
-	Christoph =?iso-8859-1?Q?B=F6hmwalder?= <christoph.boehmwalder@linbit.com>,
-	Josef Bacik <josef@toxicpanda.com>, Ming Lei <ming.lei@redhat.com>,
-	"Michael S. Tsirkin" <mst@redhat.com>,
-	Jason Wang <jasowang@redhat.com>,
-	Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
-	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
-	Mikulas Patocka <mpatocka@redhat.com>, Song Liu <song@kernel.org>,
-	Yu Kuai <yukuai3@huawei.com>,
-	Vineeth Vijayan <vneethv@linux.ibm.com>,
-	"Martin K. Petersen" <martin.petersen@oracle.com>,
-	linux-m68k@lists.linux-m68k.org, linux-um@lists.infradead.org,
-	drbd-dev@lists.linbit.com, nbd@other.debian.org,
-	linuxppc-dev@lists.ozlabs.org, ceph-devel@vger.kernel.org,
-	virtualization@lists.linux.dev, xen-devel@lists.xenproject.org,
-	linux-bcache@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-mtd@lists.infradead.org, nvdimm@lists.linux.dev,
-	linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org,
-	Damien Le Moal <dlemoal@kernel.org>
-Subject: Re: [PATCH 14/26] block: move the nonrot flag to queue_limits
-Message-ID: <20240725130008.GA22625@lst.de>
-References: <20240617060532.127975-1-hch@lst.de> <20240617060532.127975-15-hch@lst.de> <ZqI4kosy20WkLC2P@pc220518.home.grep.be>
+	 Content-Type:Content-Disposition:In-Reply-To; b=SVYy8ip1VM/zOSsq/IJJsKYnKC3F3jT+7aRGMC/wEf5cs33cYqK8/ZbB6ka6PrSoVlJ+z3cqEHs8BT2HR5uCCCfXpwwOF5buSNgQKDzDl6Tb8wNhyfc5nEANhvu5YFBsmTNuHzc0hZrzAbRWX7oVbo8ERwp/MfRhPC+tr8c8IUk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O4k1BNqH; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O4k1BNqH"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DBA60C32782;
+	Thu, 25 Jul 2024 13:48:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1721915297;
+	bh=B0+N0R0oO64HJHIWBCEG3XspO07DEgkcIacwNkawAzc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=O4k1BNqHVdR5cRpUkI8jFRZQYF6Jh3v6M4jW0IsJ83omCCEglNqA+s3T/C39jT7qk
+	 juNBLZExrbTFQM8hWN7TUaiOGsdi0kFiAqS8HMhbwSa3d+17M16C4VXgJtHofKz4Wg
+	 2+1sLqsq/2DlaDg6dQ8dXQTX63dJmcixz4iystEc7TtU0hq3bJ7COp90uDMJc9uXmU
+	 3NYxo4WGVSW2/1p48QNW+fGt0sa5oBgI8HxtHkFo4c7RTk43r0/vNq4imnRgie9gKz
+	 VHbdT3IamZ7GaTJYyq+LS4XbepkdCcohnoLkv3p8xWyYrHruUCg74MNPHN6YTez+DM
+	 m8tD4XNAfVPXg==
+Date: Thu, 25 Jul 2024 08:48:15 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: linux-kernel@vger.kernel.org,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: Re: [PATCH v5 1/3] dt-bindings: mmc: renesas,sdhi: Document
+ RZ/V2H(P) support
+Message-ID: <172191529451.1986364.4998552420592163246.robh@kernel.org>
+References: <20240724182119.652080-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20240724182119.652080-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,20 +53,43 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZqI4kosy20WkLC2P@pc220518.home.grep.be>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <20240724182119.652080-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-On Thu, Jul 25, 2024 at 01:35:46PM +0200, Wouter Verhelst wrote:
-> NBD actually exports a flag for rotational devices; it's defined in
-> nbd.h in the NBD userland source as
-> 
-> #define NBD_FLAG_ROTATIONAL     (1 << 4)        /* Use elevator algorithm - rotational media */
-> 
-> which is passed in the same flags field which also contains the
-> NBD_FLAG_SEND_FLUSH and NBD_FLAG_SEND_FUA flags.
-> 
-> Perhaps we might want to look at that flag and set the device to
-> rotational if it is specified?
 
-Yes, that sounds good.  Can you send a patch?
+On Wed, 24 Jul 2024 19:21:17 +0100, Prabhakar wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> 
+> The SD/MMC block on the RZ/V2H(P) ("R9A09G057") SoC is similar to that
+> of the R-Car Gen3, but it has some differences:
+> - HS400 is not supported.
+> - It has additional SD_STATUS register to control voltage,
+>   power enable and reset.
+> - It supports fixed address mode.
+> 
+> To accommodate these differences, a SoC-specific 'renesas,sdhi-r9a09g057'
+> compatible string is added.
+> 
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> ---
+> v4->v5
+> - Dropped regulator node.
+> 
+> v3->v4
+> - Dropped 'renesas,sdhi-use-internal-regulator' property
+> - Moved 'vqmmc-regulator' to the top level
+> 
+> v2->v3
+> - Renamed vqmmc-r9a09g057-regulator object to vqmmc-regulator
+> - Added regulator-compatible property for vqmmc-regulator
+> - Added 'renesas,sdhi-use-internal-regulator' property
+> 
+> v1->v2
+> - Moved vqmmc object in the if block
+> - Updated commit message
+> ---
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
 
