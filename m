@@ -1,169 +1,168 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from IND01-MAX-obe.outbound.protection.outlook.com (mail-maxind01olkn2062.outbound.protection.outlook.com [40.92.102.62])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E39F913AD1C
-	for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2024 21:09:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1721855395; cv=none; b=IGrxRg3sHPU8woc5YjuLD5kAcrBAZgjs6hQUNRTYB8KHRgGg/83Y9MxIqi9DqcVESjbGvTmx5F/0WQczgZCqvdVIF/wdv+C9hBBM5hQFRJkkhP+Yhzu9v6l/SlwxIQpr/SPB7GCS2gI53uG9/mD48eCGvYwofqJTp/ksCPs9Ge8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1721855395; c=relaxed/simple;
-	bh=vNmljDyxuQJbPcfceCzjBq3nfY3t4pyOZRfftitc5Ak=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=QhSku+MsAJH/VIkDT61o4OraoppZhMwRfSFzGWnyiw8GtKE9CoNnVok4Dz2AhyxZfDears4jWk7Fm7Lt9WqhbjLxcjD1owcOxu6mqbGj1Uj12On4dJ+sRizH3d9ISuUv8V7fquUpWLUXN8hwX4pvaFYiR2bdAo/RpmnDQkYf0ZY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pdp7.com; spf=none smtp.mailfrom=pdp7.com; dkim=pass (2048-bit key) header.d=pdp7-com.20230601.gappssmtp.com header.i=@pdp7-com.20230601.gappssmtp.com header.b=ZhDNfDcR; arc=none smtp.client-ip=209.85.210.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pdp7.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=pdp7.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE24120EB;
+	Thu, 25 Jul 2024 01:36:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.102.62
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1721871389; cv=fail; b=AQmixh6G7vG5mn6S4xmnEShf/3QXmK2n9H1w1oFshqV5ho+UCuTWRQkP6MoX6jrVBsmauf7i2fhpqzJyoqzKEdD74oJlg1KPrHFw8Jp6sfMqwLhNizFzA5YO85vtCLz+fCND1+JIyDjXr65EC/3eE9Mkevky0r6XosJlW5U+o0E=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1721871389; c=relaxed/simple;
+	bh=hNLQV1XRxqsrVRBvyJZx2OpGqeUlY8DQZGbvukwiYXY=;
+	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=Jdt3wR9fQxqjIKr54pUGcBhl5VJhW3BHaSFlPjggzDhAXQ3vhdshlkKLVODlpZys8qjTzsCvUdppMBlf1O+6N53uHujs2GJTkaukx9H/xPxaOjpKXMVTEgx2EOHAWElAlaUEhlVo5a3kOR9mwWbd7cfOvQuRi553aKIHP9wmB8w=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=X0y962t9; arc=fail smtp.client-ip=40.92.102.62
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=pdp7-com.20230601.gappssmtp.com header.i=@pdp7-com.20230601.gappssmtp.com header.b="ZhDNfDcR"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-70d1fb6c108so208521b3a.3
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Jul 2024 14:09:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pdp7-com.20230601.gappssmtp.com; s=20230601; t=1721855393; x=1722460193; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=vjbueeIIyUEroZshkKxdpKEriHR9zWClHjFGUbNFoy8=;
-        b=ZhDNfDcRVlFwdFAesKPXjzZ3pK1M2FBD/fm5ws2xMSgkPEaLLpz4id7A/jO0lEJMko
-         vDqx9zm7r1iZkovGkMpbAPccCNzAXfj4UbqGQ1dr10MwTkyR9Qmv04ARH+3PD5fjWFBO
-         8uEbzTqkZSdvQidEA3foJhLPLEMllTRk/YQVO8bdwF70zQds2Lw/YxUwNMQyzru32Usx
-         TU3h65Mmv/Nm7gCGfvzOG/JWgQpw1+JnZLwC8axP/0/y8u2OduEXfEvYkl9hi1mJFh+a
-         vcI8tEBMB1QiD+phBKXlA89YP9Z1RJ8E3JA1Qmqx5xWiFtf3VDxZplrHbwthSqbc8ypi
-         lREQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1721855393; x=1722460193;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=vjbueeIIyUEroZshkKxdpKEriHR9zWClHjFGUbNFoy8=;
-        b=C37Oj+pQVu2W0j0c2ZZvtGg7N1WGxAaT2ccC871edW1kP8jz9nh1CZzsZJTPU05K2G
-         SJkUJkWDri+kGQ4wPEk21To8eV59ngYMEANTMasHRgBjNnEiQf+7sN6z3Pdd7XpomS9T
-         GsgaK3muNx+TVkMB1gmhN27+y+KFPWuZl3Skk70Xmi3Vkq3ppM7X/IqlpJdghA4KrQbd
-         w6+R4CAuUVCDOIV7SjGGtL5S2cEKvEuOQmqijl/909PfSsHwJqTJtoaH19izycvHAd6y
-         sEgjWvJ2DoXLcVCLGVZHE2Ak/xx6S70aLTzNfodHDGsSypi+Ex/fi942suin5wJZz3aq
-         4i4w==
-X-Forwarded-Encrypted: i=1; AJvYcCV9482ZTV4rIo+k5O6UmoWUGeMwA0Wp5BG+B/e5hsZ2OlotUYYXgY9n8vgnRGRlyJsp603jVhFnsYr9LvpKQ0PeKN+lWBc9Kpr7
-X-Gm-Message-State: AOJu0Yz3FkeetQB+dWqG+AftgBVx+veh+A1DiKTO5nEIW82cYtMTx/i1
-	gKHvkqBtX9UULoUOMajez+opCP0WkDi6pTpNSOactjB2tsXyJSbPgKoat0k+j4egJXTAVIDHub2
-	gPPA=
-X-Google-Smtp-Source: AGHT+IEKt/RfkCtSA9CPOxPqJF0r1UmC/bt2fLfDSdr/8Y2DnQGu8cJz8hAe2wzxaa0eNCpkvzktFQ==
-X-Received: by 2002:a05:6a20:7f95:b0:1be:d5e9:b444 with SMTP id adf61e73a8af0-1c4725173a1mr1458314637.0.1721855393189;
-        Wed, 24 Jul 2024 14:09:53 -0700 (PDT)
-Received: from x1 ([2601:1c2:1802:170:8821:4dd1:578:cc09])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2cdb74e8730sm2128580a91.38.2024.07.24.14.09.52
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Jul 2024 14:09:52 -0700 (PDT)
-Date: Wed, 24 Jul 2024 14:09:50 -0700
-From: Drew Fustini <drew@pdp7.com>
-To: Chen Wang <unicornxw@gmail.com>
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="X0y962t9"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=x0andETyCfF9DbI/CUvfwRkgAx6rTLvsa4OTt0++5Tc0K8WQoajxvHdaqJOb3fr3mB+Ihb3rhW+vjcN37C4S8OkNYvwtghlJG/nDQ/oXqfijESOl5opSmf4dLNpVGN7eVjB7lOHZyJaZYN4ut/fEN3ShPQaokHPBICyw9qK0D16aV9jhpNJZMP1+lEoQVbZ3FwBJ2B1K3MJTP6LTG6H33vbHlLUVXqp/GMwPOLgeOY9PkPM0s90svumDhkmRabbTickEzSFBigt8xaj2PPiPnOXwEWIsOOMioQ0JEaiCJVsw1RwZg0wIldF3q/aIrD+3hfEQN1AGp3+O5Cwn/JQOvA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=SWBmIMvfSBptJwrZshjGIiQHwknJvw1TZAruUiKWRFU=;
+ b=xxFSsK5/wdlTt7i4g2rCEb0Zlf/OEfglGL7ADiIY0zWkAGZonw6zso7XM5NKhyCRUdB50eb2sWA6rrGQ7hOiwtBFIp2AqQ90F39Tq0IU6hWZQ7BzNte4Q0CMg8jY/L7MBcceSrb//DvRY3JWw1mSEcb4gPuYb2mcpKdVqCUcQBs058xmL3Tj4YMHfc0eIxCX0yM+JjyRO1FDIXRl3vfJRcxeDbXI8hxZ5zLNlqV9wR12bf/i57Pos57NTc7stqaDihXtshU6INYifXku8IMmMKdCNH28CzSEJYCwoiGqCN4aki62Cv/5/yWHbev4fIW6RTnBTY2BefzryFPc+VeIAg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=SWBmIMvfSBptJwrZshjGIiQHwknJvw1TZAruUiKWRFU=;
+ b=X0y962t93Akf881DCFFBLJdwmDzUctsglHJbov7dsUIw+XO1rlYWTGIiC59tc2oDi3MkYGeC8o8sICBsrQeiLDQ4ZplnJLIMSMJOXJztVLeodZh5uVJnq2Dzycg/5nPhWeG/iNwiqN32uGuII4VWgxCNSOpk6eQHGFUlrXoey4fOD9RDA8r3WasxDEFO1IlohHZBtxlOmcUbpilHbBDqSujWg/+wpu/AK75geRynDRJn6FNUBgALw0dXFL0g0ItgorcuWiZuk6ubftxrCYUrf0beIIpm9PNqK4y9IsZKm7fi48jFpgRU5Z0ZR/qNyTUffljJ+YWQbxFMkDVPx87CIA==
+Received: from PN1P287MB2818.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:214::7)
+ by PN3P287MB1446.INDP287.PROD.OUTLOOK.COM (2603:1096:c01:1a0::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7784.20; Thu, 25 Jul
+ 2024 01:36:18 +0000
+Received: from PN1P287MB2818.INDP287.PROD.OUTLOOK.COM
+ ([fe80::5a8a:9e40:a4e8:3e2d]) by PN1P287MB2818.INDP287.PROD.OUTLOOK.COM
+ ([fe80::5a8a:9e40:a4e8:3e2d%3]) with mapi id 15.20.7784.020; Thu, 25 Jul 2024
+ 01:36:18 +0000
+Message-ID:
+ <PN1P287MB281813D2CE721D2D8E697A52FEAB2@PN1P287MB2818.INDP287.PROD.OUTLOOK.COM>
+Date: Thu, 25 Jul 2024 09:36:07 +0800
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5 0/8] mmc: sdhci-of-dwcmshc: Add Sophgo SG2042 support
+To: Drew Fustini <drew@pdp7.com>, Chen Wang <unicornxw@gmail.com>
 Cc: adrian.hunter@intel.com, aou@eecs.berkeley.edu, conor+dt@kernel.org,
-	guoren@kernel.org, inochiama@outlook.com, jszhang@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
-	paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
-	chao.wei@sophgo.com, haijiao.liu@sophgo.com,
-	xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com,
-	Chen Wang <unicorn_wang@outlook.com>
-Subject: Re: [PATCH v5 3/8] mmc: sdhci-of-dwcmshc: factor out code for
- th1520_init()
-Message-ID: <ZqFtntMl9aw4OBDS@x1>
+ guoren@kernel.org, inochiama@outlook.com, jszhang@kernel.org,
+ krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
+ paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
+ chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
+ tingzhu.wang@sophgo.com
 References: <cover.1721377374.git.unicorn_wang@outlook.com>
- <b774f2b62d68edab2d95d9dbd1f55cac50c6abff.1721377374.git.unicorn_wang@outlook.com>
+ <ZqFtjpxXv7pRpZHV@x1>
+From: Chen Wang <unicorn_wang@outlook.com>
+In-Reply-To: <ZqFtjpxXv7pRpZHV@x1>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-TMN: [3nD3x9RLGdE9FTv8MBdkQqQWN0wWl3Kq]
+X-ClientProxiedBy: SG2PR02CA0121.apcprd02.prod.outlook.com
+ (2603:1096:4:188::21) To PN1P287MB2818.INDP287.PROD.OUTLOOK.COM
+ (2603:1096:c01:214::7)
+X-Microsoft-Original-Message-ID:
+ <c8364838-598a-4fe9-a8d4-711cf0b9a5bd@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b774f2b62d68edab2d95d9dbd1f55cac50c6abff.1721377374.git.unicorn_wang@outlook.com>
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PN1P287MB2818:EE_|PN3P287MB1446:EE_
+X-MS-Office365-Filtering-Correlation-Id: 06904d1b-3e1b-4ca2-168e-08dcac4a2d39
+X-Microsoft-Antispam:
+	BCL:0;ARA:14566002|8060799006|461199028|19110799003|3412199025|440099028;
+X-Microsoft-Antispam-Message-Info:
+	h2U3y7jt8jMWABEVOJRfFd4yAAkd9qqV+2vW1Eu1jV4X7mDANp9sSwee3sk/5kekLViWoiU+V+UrWt5QCzj0EMAAyWc/nP+vauHaFjN0jKSKCnKDhEIv6XTjuT2UyVkyJxzHLOq9yWewz4fUooyDl3Nc7u7RYrfrBDmyVZknaqmNu1tw9txRhD6l7mpaZzBCyFnPDuqkFSHsDrDABUk1Xq1MEupsy2XMNK2J/IpvguGLWt15/qMzTapNa+sB8e42rYEuFPcqT1emATNk5QwzzqHlk5opi+6Jdxa8GLzJp+az2iHwvQyIoQu0ZkKcODAR1rGqxm9LD5PEkPAvQxwt29j6sdn7mbcTFTwajW6IZjqsF8nZy9M51Rk3Zb9bww1KRz6jXeqMbYFGWlEnP2gPoIuVxnphK7VO8I+OMq05dJHL+vYN4CnLNNsGozGEf0225uCtPFbkroLl0lz31YEv1TFzmjgob8imewfUNEYVFOVBeYTu5pBOf1yRQBktNKGe/EoBIncuT89jk3v/moBpqhhqz83NsjvLCZhJZ3k8tBHZ/cvME0D24CkC/4GKAwVkk51O2gWFazk9uw/FvBnSvO3CQV5RhVFBPNR6b14Wtb94vxoiv1I6V62v8Gs+d25A+zCdhHUXChY/EKw3/Wnxnw==
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?utf-8?B?eS9Yby9Ec0V4cnVpTXZHY3VZSVc5aFYzbVBxMVBYZklTMlBxNjY1a1VpSU1m?=
+ =?utf-8?B?YzZGZ3BYcFp5Q3V1UGQwc08zbGNob28yOVNFSU9PV3poSE1NMStwN0tlTTJl?=
+ =?utf-8?B?bUtYRXRxRnJEYmVFQXNCWlA5d0Y0RzRueGhKTjN6bFBBR1BhZkZpM2hvTTVD?=
+ =?utf-8?B?QlpSY3ZEY3E1UWpydVlwTWJWZmNIZzhRTHNhWDFKWGc4dGdtdTBDR245ZUpU?=
+ =?utf-8?B?YjdrNTZqZ3lDWTkrSVZIQ0dZZDdybTV6WDl1bDhjcTNRandkOUlmTHltZVhy?=
+ =?utf-8?B?RGVXaUt6eXRwZUtlVzFHV1NuUE9VWTJOMmwreHI4RE1TVVAyOUtMa3YrS1NT?=
+ =?utf-8?B?cjFVTWRKOUpSNXJTZ2JuSVFiZDI2N1V5UXY2bGtQTEhHQWJzZEduTEsyT1pk?=
+ =?utf-8?B?TWJlYXBoTUJNM3BSNHE2aWdpdmFiRUNhUjNMRnphRWVXaVFtNldlbjJva2N0?=
+ =?utf-8?B?ZkcrRzVBeFlOdGdYRHVnMGVVanR5ZzRiamZBb1hGQXhnK3NhMjQxdG92ZWR5?=
+ =?utf-8?B?bHkrVVVBdUF1L3QxeDIvYkFDLzFQNEZ5UElSUVFlVElVVTJSdEZtWERXeHRZ?=
+ =?utf-8?B?R3RWejNzaEVnUjg5LzNJVTd3RUZqRU0vNlRtem02T3pIOFZ0eTY4Zm1NNXdQ?=
+ =?utf-8?B?QVBaMDNhNWJEZVpSSEpxbytnWDJhU3NLeEJ6dFJMeVdDMnBLUmxUK2pVMjZh?=
+ =?utf-8?B?anJlQkswT1BhL1haWXdSOWV3YUtKb1ZvUXAyVkpyS0xmWGg4WWRveDljYXZL?=
+ =?utf-8?B?VGpGcit2WUw5VHB4Mmt2ZFRSdzVCYW9KWDFKb2dqL09qVkVDOWlrMnVKOFV3?=
+ =?utf-8?B?aEpyaFMya2w3SlV5V3BlcVBFazdnTnZ3N3lmbUFwNkdMclc0RDVvQzB6blpr?=
+ =?utf-8?B?MkZEbEsyN01sMkJjckhVcXA0dHFzdUdGcTBHMzB6TGRZVnkvejVtbW9LaEh2?=
+ =?utf-8?B?b2VLVEhZVHFuUExqZ210a3lTVzBhaFFUYzdScXVsZlNlTDNKRll4UlhxVFE3?=
+ =?utf-8?B?Y0tJaTBULzg0d3Jma0V6UXNMdk9CQ2JyMlNlLzRybTVGejNLbW50MHZOT29y?=
+ =?utf-8?B?MElXeFZDc2JTbXJiTjU5TmY4ZUhsc2ttY0JjZnQ1bk05YmZQN3FRa0hsSE84?=
+ =?utf-8?B?QWUrVVpnbFFkRU1SWW4wZmVhU0xUZ25NSzB1dmtyUkdkWURSVzJwa2RHSWZk?=
+ =?utf-8?B?clU5RndESXlPUUNKMWdFQ1Y2ZlZhaWM0emJVeGVLdzJROGVrWFBUZmZSZk4x?=
+ =?utf-8?B?T3lkQi8yV3FSa0VoT1Fla2FWOU9hWW9UNlREblYzY1RqL3hEbkMvZDdlY3Vh?=
+ =?utf-8?B?K3NiTk0xVkZ0aXlsRUdxcHdGdlAwblpCY3IwdDJBSFhmQW05cjVaNlRqQ0Vk?=
+ =?utf-8?B?N1NHZFFiSFp3YkxBaGpzQjVSYmMyTTJ5K1hzbTE2UFFEY2luVEJlNVpRanph?=
+ =?utf-8?B?VmF6Mnp6TkgxOS80Qm84a1RRejJobGRsK2o0bXdETWl1ajlhR000OStRY0dR?=
+ =?utf-8?B?TUFFMUZIa3pHZFlKeXhMaGN2YUlvc3FmWUJRVExxclJpdC9BY1FSa2UwZDZ0?=
+ =?utf-8?B?L3JKQWZjaW5EdlRhKzVYcmdWSnhaU3hBNTVDRU4wZ0taK1pYUVJjQzNzcnBU?=
+ =?utf-8?B?MVRBdGpNcHkyMDNjeGIrbmRJdDNnVE4wSHpXeFpWUVY0ejFacE9la2xucVA4?=
+ =?utf-8?Q?P5XuT3afC20U1W2wb4Rq?=
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 06904d1b-3e1b-4ca2-168e-08dcac4a2d39
+X-MS-Exchange-CrossTenant-AuthSource: PN1P287MB2818.INDP287.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Jul 2024 01:36:18.2967
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
+	00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PN3P287MB1446
 
-On Fri, Jul 19, 2024 at 04:45:59PM +0800, Chen Wang wrote:
-> From: Chen Wang <unicorn_wang@outlook.com>
-> 
-> Different socs have initialization operations in
-> the probe process, which are summarized as functions.
-> 
-> This patch first factor out init function for th1520.
-> 
-> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 51 +++++++++++++++++------------
->  1 file changed, 30 insertions(+), 21 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 903fe06050e4..bb0adc2ee325 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -830,6 +830,35 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	}
->  }
->  
-> +static int th1520_init(struct device *dev,
-> +		       struct sdhci_host *host,
-> +		       struct dwcmshc_priv *dwc_priv)
-> +{
-> +	dwc_priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> +
-> +	if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> +		dwc_priv->flags |= FLAG_IO_FIXED_1V8;
-> +	else
-> +		dwc_priv->flags &= ~FLAG_IO_FIXED_1V8;
-> +
-> +	/*
-> +	 * start_signal_voltage_switch() will try 3.3V first
-> +	 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> +	 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> +	 * in sdhci_start_signal_voltage_switch().
-> +	 */
-> +	if (dwc_priv->flags & FLAG_IO_FIXED_1V8) {
-> +		host->flags &= ~SDHCI_SIGNALING_330;
-> +		host->flags |=  SDHCI_SIGNALING_180;
-> +	}
-> +
-> +	sdhci_enable_v4_mode(host);
-> +
-> +	return 0;
-> +}
-> +
->  static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1231,27 +1260,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	}
->  
->  	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> -		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> -
-> -		if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> -			priv->flags |= FLAG_IO_FIXED_1V8;
-> -		else
-> -			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> -
-> -		/*
-> -		 * start_signal_voltage_switch() will try 3.3V first
-> -		 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> -		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> -		 * in sdhci_start_signal_voltage_switch().
-> -		 */
-> -		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> -			host->flags &= ~SDHCI_SIGNALING_330;
-> -			host->flags |=  SDHCI_SIGNALING_180;
-> -		}
-> -
-> -		sdhci_enable_v4_mode(host);
-> +		th1520_init(dev, host, priv);
->  	}
->  
->  #ifdef CONFIG_ACPI
-> -- 
-> 2.34.1
-> 
 
-Reviewd-by: Drew Fustini <drew@pdp7.com>
+On 2024/7/25 5:09, Drew Fustini wrote:
+> On Fri, Jul 19, 2024 at 04:44:38PM +0800, Chen Wang wrote:
+>> From: Chen Wang <unicorn_wang@outlook.com>
+>>
+>> This patchset is composed of two parts:
+>> - one is the improvement of the sdhci-of-dwcmshc framework,
+>> - the other is the support for sg2042 based on the improvement of the
+>>    framework.
+>> The reason for merging the two parts into one patchset is mainly to
+>> facilitate review, especially to facilitate viewing why we need to
+>> improve the framework and what benefits it will bring to us.
+>>
+>> When I tried to add a new soc(SG2042) to sdhci-of-dwcmshc, I found
+>> that the existing driver code could be optimized to facilitate expansion
+>> for the new soc. Patch 1 ~ Patch 5 is for this.
+>>
+>> Patch 6 ~ 7 are adding support for the mmc controller for Sophgo SG2042.
+>> Adding corresponding new compatible strings, and implement
+>> custom callbacks for SG2042 based on new framework.
+>>
+>> Patch 8 is the change for DTS.
+>>
+>> By the way, although I believe this patch only optimizes the framework
+>> of the code and does not change the specific logic, simple verification
+>> is certainly better. Since I don't have rk35xx/th1520 related hardware,
+>> it would be greatly appreciated if someone could help verify it.
+>> Note, the DTS change has dependency on clock changes for SG2042, which
+>> has not been merged in master/upstream, so if you want to test this
+>> new sdhci-of-dwcmshc driver for other hardware except SG2042, don't
+>> pick patch 8.
+> I have tested this on the LicheePi 4a and found no issues.
+>
+> Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
+>
+> -Drew
+
+Thank you Drew，you are always the best! :)
+
+Regards,
+
+Chen
+
 
