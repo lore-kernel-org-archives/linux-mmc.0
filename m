@@ -1,143 +1,112 @@
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FD9ABA20
-	for <linux-mmc@vger.kernel.org>; Sun, 28 Jul 2024 08:14:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7603DBA20
+	for <linux-mmc@vger.kernel.org>; Sun, 28 Jul 2024 08:14:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722154444; cv=none; b=cMWfb7LiaST9c0wz+VVGKNEfKCBMuAtvdzx5OH2/Ek0sbMPKlbMN9lp8z86MKoyphS73Q/ilUJQhcliDQs4eM+REswiMHiO9b0VL0owmcz+rsolbS0MwCqE6/Bxc6Lw80i1gG/zBAwCsRHoN6wcD/zFE5n65zbyw+OzmHLlEXq8=
+	t=1722154464; cv=none; b=Dp+xyfVZGJp0Szf51fj4rVm121iu2udSNKreRe7IwDxRgsgfVtJ51fvHlZ6FScUYB9LSya8RbJZmtImtXA6Fl2wnH+u2WEDq6xpqj9nOaPMKHoXfM6HXgUaVtrj2zvRbwTPs4CsukNX1FTXfm8NOGoCyWKwaRguWsZ0DOkrtHIU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722154444; c=relaxed/simple;
-	bh=+w4oSb3yz6ee+7ajXZSShcLSd9D1+IKCm4KjM0VdI5E=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=XaDQtgTTleej81xVBANHf4phjMphwH5bLntZ/Gvx74dgrRnwPnUj7UooChY+/UfwoPtc8Ex2orx27kI7+kSfm4TWvseqhiGQjPqZOj2UMM35Rtc8YXuqKD6GyCyfWc73RNt1sIAVXgjkjvNHFWQGrxZPWk/DoFmiDtp7KDSeFR0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=mwzNDlDK; arc=none smtp.client-ip=216.71.154.45
+	s=arc-20240116; t=1722154464; c=relaxed/simple;
+	bh=bberpaHDxRjxBqgdbZ6qk/txqF9t3Ob757DlMckQS6o=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=hQOeCtTPm6BT5+6G5iEeA2XeTx2sqbkncfIxB0caQVgioEH2FgtCxMcDtZTNiDN2moqz6uszhl7huXYeDFgJHWhWu8OmmkazzsAPmfj0bOSLM2h7RBIjaQId3T/LldHLtp8CVIM0r9Mqjd/K9lUAA2UdhERXV9OKRIZNl7nxl+Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=DNBmisKJ; arc=none smtp.client-ip=216.71.154.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="mwzNDlDK"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="DNBmisKJ"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1722154442; x=1753690442;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=+w4oSb3yz6ee+7ajXZSShcLSd9D1+IKCm4KjM0VdI5E=;
-  b=mwzNDlDKmYMZaL0ABOxpd520C/96oVJ37fjo9+eleXwayizY5luc30x7
-   XkZGU2FOAaYOBEyR0eBrKe6nsTdwih9tXrv6nXr58vF/VBOG8mYggk6gh
-   kijWh0ZRu/Si4cXmrOK+sRSDt6KQ8o0TqJlSpWvYakrOzoCtLJdrmAeUM
-   rQcLKbvaajd+Qf3yYTgRg43dd1x/HR/QpXlEA+9k9HWEakgvfiKhutmqZ
-   MhQUrBq1lPeJuXnrVewWPTwBEOwgoHAxfpSqZUxI+2lTDm/LlfgTysb77
-   H/N3ZDjNXgj5zDIyyukmsKuFz9ibeYAEnEb8pQ48hEshOBKX6zdAbrqrI
-   Q==;
-X-CSE-ConnectionGUID: 2ZSkAENCS9uCwkEEiRa1bQ==
-X-CSE-MsgGUID: vrnXyI2uRBOhRAGu5qr3qg==
+  t=1722154462; x=1753690462;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=bberpaHDxRjxBqgdbZ6qk/txqF9t3Ob757DlMckQS6o=;
+  b=DNBmisKJJvJ2W4VZW/Omn9eAlrT4vcBVedZTkUhr5MShSA8CnClztL0B
+   DxFpU9o/6v8/CJVkvu2BTzahjb3Fyv0L4ClbEM7UGnZ8GmZIdelhr4aBd
+   dUUdvADHkMsW5I/foWwGm8usJnYK3X21rYH2sR+1XL2cFQ79nxs8vhNgf
+   XX74HTe2uTIzLf7MDSFbCJlxIuN+kbIEyu4JHYFPKl53txbQmuDoFaX1G
+   Z1LDfS4NHza+/a907I9WTGXWjm0GpI4Ew65xPwEcH7c2wlrNqd/ytjq10
+   prrL0yNciHZVlQMo8oPdjhm6FlKQAL9cWsuPi7YKSm2PrFf+ydGwax6u4
+   A==;
+X-CSE-ConnectionGUID: WOQnrwbuS0u4oVKp8xV1bw==
+X-CSE-MsgGUID: CPEueodTSGqI/kDpJj4TnQ==
 X-IronPort-AV: E=Sophos;i="6.09,243,1716220800"; 
-   d="scan'208";a="22909135"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 28 Jul 2024 16:14:02 +0800
-IronPort-SDR: 66a5f130_mEtiD63Q9LBa4IWxIl5ImALQ+qivT2cDeeCOaqFgAqu72Qa
- ZxdevP2gF32LMpjgVUYRqisr5IutAFfjDn9/yIA==
+   d="scan'208";a="22256096"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 28 Jul 2024 16:13:13 +0800
+IronPort-SDR: 66a5f0ff_CubcsRibkXS0tQFtv7hBs5uUDmmMNHCcaMPRhhyJOjb8IyO
+ sO7bPFiZ/eWeJBdfgY1yklZIOJHodZRl4saQZzQ==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Jul 2024 00:20:17 -0700
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Jul 2024 00:19:28 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Jul 2024 01:14:00 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Jul 2024 01:13:12 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Ricky WU <ricky_wu@realtek.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH 10/10] mmc: core: Adjust ACMD22 to SDUC
-Date: Sun, 28 Jul 2024 11:11:54 +0300
-Message-Id: <20240728081154.1782120-11-avri.altman@wdc.com>
+Subject: [PATCH 00/10] Add SDUC Support
+Date: Sun, 28 Jul 2024 11:11:44 +0300
+Message-Id: <20240728081154.1782120-1-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20240728081154.1782120-1-avri.altman@wdc.com>
-References: <20240728081154.1782120-1-avri.altman@wdc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-ACMD22 is used to verify the previously write operation.  Normally, it
-returns the number of written sectors as u32.  SDUC, however, returns it
-as u64.  This is a superfluous requirement, as the previously write
-operation could not be more than the block layer limits, just make room
-for a u64 and ignore the 2nd dword.
+Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+cards support capacity larger than 2TB and up to including 128TB. Thus,
+the address range of the card expands beyond the 32-bit command
+argument. To that end, a new command - CMD22 is defined, to carry the
+extra 6-bit upper part of the 38-bit block address that enable access to
+128TB memory space.
 
-Moreover, SD cards expect to be allowed the full 500msec busy period
-post write operations.  This is true for standard capacity SD, and even
-more so for high volume SD cards, specifically SDUC.  If CMD13 return an
-error bit, the recovery flow is entered regardless of the busy period.
-Thus, better enforce the busy period for SDUC, otherwise it might return
-a bogus bytes written.
+SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+as SDXC.
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/block.c | 26 +++++++++++++++++++++-----
- 1 file changed, 21 insertions(+), 5 deletions(-)
+The spec defines several extensions/modifications to the current SDXC
+cards, which we address in patches 1 - 10.  Otherwise requirements are
+out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+Extension for Video Speed Class (CMD20).
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index db171f496117..59fdc6f964f1 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -948,13 +948,20 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	int err;
- 	u32 result;
- 	__be32 *blocks;
--
-+	u8 resp_sz;
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
--
- 	struct scatterlist sg;
- 
-+	/*
-+	 * SD cards, specifically high volume cards, expect to be allowed with the
-+	 * full 500msec busy period post write. Otherwise, they may not indicate
-+	 * correctly the number of bytes written.
-+	 */
-+	if (mmc_card_is_sduc(card->host))
-+		mmc_delay(500);
-+
- 	err = mmc_app_cmd(card->host, card);
- 	if (err)
- 		return err;
-@@ -963,7 +970,16 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
- 
--	data.blksz = 4;
-+	/*
-+	 * Normally, ACMD22 returns the number of written sectors as u32.
-+	 * SDUC, however, returns it as u64.  This is a superfluous
-+	 * requirement, as the previously write operation could not be more
-+	 * than the block layer limits, just make room for a u64 and ignore
-+	 * the 2nd dword.
-+	 */
-+	resp_sz = mmc_card_is_sduc(card->host) ? 8 : 4;
-+
-+	data.blksz = resp_sz;
- 	data.blocks = 1;
- 	data.flags = MMC_DATA_READ;
- 	data.sg = &sg;
-@@ -973,11 +989,11 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
- 
--	blocks = kmalloc(4, GFP_KERNEL);
-+	blocks = kmalloc(resp_sz, GFP_KERNEL);
- 	if (!blocks)
- 		return -ENOMEM;
- 
--	sg_init_one(&sg, blocks, 4);
-+	sg_init_one(&sg, blocks, resp_sz);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
+First publication of SDUC was in [1].  This series was developed and
+tested separately from [1] and does not borrow from it.
+
+[1] https://lwn.net/Articles/982566/
+
+Avri Altman (10):
+  mmc: sd: SDUC Support Recognition
+  mmc: sd: Add SD CSD version 3.0
+  mmc: sd: Add Extension memory addressing
+  mmc: core: Add open-ended Ext memory addressing
+  mmc: host: Always use manual-cmd23 in SDUC
+  mmc: core: Add close-ended Ext memory addressing
+  mmc: host: Add close-ended Ext memory addressing
+  mmc: core: Allow mmc erase to carry large addresses
+  mmc: core: Add Ext memory addressing for erase
+  mmc: core: Adjust ACMD22 to SDUC
+
+ drivers/mmc/core/block.c  | 47 ++++++++++++++++++++++++++++------
+ drivers/mmc/core/bus.c    |  4 ++-
+ drivers/mmc/core/card.h   |  3 +++
+ drivers/mmc/core/core.c   | 54 +++++++++++++++++++++++++++++++--------
+ drivers/mmc/core/core.h   |  2 +-
+ drivers/mmc/core/queue.h  |  1 +
+ drivers/mmc/core/sd.c     | 16 ++++++++----
+ drivers/mmc/core/sd_ops.c | 33 +++++++++++++++++++++---
+ drivers/mmc/core/sd_ops.h |  4 +++
+ drivers/mmc/host/sdhci.c  | 38 ++++++++++++++++++++++-----
+ include/linux/mmc/card.h  |  2 +-
+ include/linux/mmc/core.h  |  1 +
+ include/linux/mmc/host.h  |  6 +++++
+ include/linux/mmc/sd.h    |  4 +++
+ 14 files changed, 179 insertions(+), 36 deletions(-)
+
 -- 
 2.25.1
 
