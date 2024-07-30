@@ -1,239 +1,119 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 142157174F
-	for <linux-mmc@vger.kernel.org>; Sun, 28 Jul 2024 15:58:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E57316848F;
+	Tue, 30 Jul 2024 11:58:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722182294; cv=none; b=pDC1mixVl/6OzZaYIMdgvogIYydfcgxnPspynI6Q/rlgJjd5yi/FCvCX6whWlfioF93GlTPCIqphPf0YlOeoT7mbRKwIaUmDGor0be/2jnkJgBphCNjhNbQ9CYkBhT9nscWyJ3ki7aRx19Gf7GB8j2/vX6ZmnNAJk81ZXwz0yzM=
+	t=1722340741; cv=none; b=KgYSQSEVwcesji9poQZ4xoInbFxoYL1/P9t5ZiqLBWbGESRu6XYpuQOUYdH5onU9fe2BlVktAumst72DdJQHhlajpfEGSZ514021pZQ0WWoxQ42uJyXRX5KpU5shlt92QLllLKy3BVmummVKpTKkexSGWsRYiF4UAkhD0a2zzEg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722182294; c=relaxed/simple;
-	bh=SjT42p438Cma/Y0VAQ7zyhTXcN9MspFdpA/0x+DZJ1U=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=CfXUw5JccqawMPWVvhHB6jG8zc+wH7zCuh3EPVHrHUGdXTErFbKxsBdnOhYKRGnVoa/ocTqlzLS7EQMppHuV3DJGtLU1AiKOqNMjA2+rKez5nVtMCBajzUNPJSt2Z8QV1TB/f3M0vaKEOlWbKpSfMCkcNVBU5ria/kBIeCZyqPI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=kznwtBFE; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1722340741; c=relaxed/simple;
+	bh=yKBdz5Zmx9XTlT53m7cV/ZjnWsBQOD52PsQOduj5Wh0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=hXy0opypnwbVg9NNNNJ3938Q2WgPAmXv0i76iu4MPYBK1scggUW1OKO0BFhxv4F2W2pK9GX+8j8+mWe3omqu+2sAEfApCJr2MuXK5DcN9e3G7fxEu8z3TvFpZGUPkDUJX/Wp40o9yTISmVh5dOwnZA2Pe7uDVuir6tyVauYlnYk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=b9At4KSZ; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="kznwtBFE"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1722182291; x=1753718291;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=SjT42p438Cma/Y0VAQ7zyhTXcN9MspFdpA/0x+DZJ1U=;
-  b=kznwtBFEzemzjffOEtq695dyjSgl4xZMWIHUN2NUCY3QLyMhSHlI3vkC
-   bq0IMStlGP+NPIihhiwfBCUTFti3Z6iYEZf2mvDwvgMQLoomlNzfyCIQb
-   ymY9gLbteGqc5bFVxwH3JIqG1f2tEWlex/2pQfDC2IKcfBKhUxVFWOPO3
-   4xQzB19RAcsMrsgyXe+gfzmgwu5bL81nLrfH2mD47su1Hir9RKNhFipKc
-   TzkbYJQLsIvNaCXe7U/DTY/Wp1XoVNlRB9FrCdo+tm2ngK7uU6TxQMI/r
-   CD9D7EjU1kGKyvDCJBvIyJ9hmm6u1oOBjtATz5qVA6S+wF2wEf/BBD8fh
-   g==;
-X-CSE-ConnectionGUID: kfzsc6aDSBG+tVl7SQ4wjA==
-X-CSE-MsgGUID: OK9hO3TaSRegxagtZspzeQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11147"; a="12753723"
-X-IronPort-AV: E=Sophos;i="6.09,244,1716274800"; 
-   d="scan'208";a="12753723"
-Received: from fmviesa004.fm.intel.com ([10.60.135.144])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Jul 2024 08:58:11 -0700
-X-CSE-ConnectionGUID: TtBAlootS26LfXxxrmRgiQ==
-X-CSE-MsgGUID: Z6lqw8cdRh+21NyjXQ5Q6w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.09,244,1716274800"; 
-   d="scan'208";a="58319812"
-Received: from lkp-server01.sh.intel.com (HELO 68891e0c336b) ([10.239.97.150])
-  by fmviesa004.fm.intel.com with ESMTP; 28 Jul 2024 08:58:09 -0700
-Received: from kbuild by 68891e0c336b with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1sY6He-000qvm-21;
-	Sun, 28 Jul 2024 15:58:06 +0000
-Date: Sun, 28 Jul 2024 23:57:45 +0800
-From: kernel test robot <lkp@intel.com>
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev, Ricky WU <ricky_wu@realtek.com>,
-	Avri Altman <avri.altman@wdc.com>
-Subject: Re: [PATCH 04/10] mmc: core: Add open-ended Ext memory addressing
-Message-ID: <202407282317.uYbf4apc-lkp@intel.com>
-References: <20240728081154.1782120-5-avri.altman@wdc.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="b9At4KSZ"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 46U9wGva013120;
+	Tue, 30 Jul 2024 11:58:46 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:in-reply-to:message-id
+	:mime-version:references:subject:to; s=qcppdkim1; bh=h+Rc/PWn+N3
+	/sHkvf/5fqeZX8DStJQW4ihDR2Wtrys0=; b=b9At4KSZMscZvlfbXGuBFgjaUhU
+	kh0dC1H+2SODaWCPqXfzTJgRfCUXMu+4N/QMd7mJWqRoNp+FBRRyKF1XmLPThKbo
+	1DQJMuMQT6QjbtfCe1Suwm/TDlLVTHHclcGIg8k+GWV9TQvpUz0F+0WyKuF3U8J6
+	MYncFb8M1QoLoNPKSrVDQAE10RXDZALsttB5WAIYGInfPjcc3vs4AEeKmI8UoYas
+	rzlWWcksC5sxq/ah4wxVIMBMWeJoe1MG9c/wloNzaiKohOQb8z08o7IzgypOU2w4
+	HlRlRHzjQJVJxJeNqS3G3/opfWLhiZp6VNbIhBt2lK5JGAk8uIsRMqtD3Sg==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 40mpkeybf5-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 30 Jul 2024 11:58:45 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.17.1.19/8.17.1.19) with ESMTP id 46UBwfww001361;
+	Tue, 30 Jul 2024 11:58:41 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 40msykdx65-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 30 Jul 2024 11:58:41 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 46UBwfdt001324;
+	Tue, 30 Jul 2024 11:58:41 GMT
+Received: from hu-devc-blr-u22-a.qualcomm.com (hu-mdalam-blr.qualcomm.com [10.131.36.157])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 46UBwfBa001317
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 30 Jul 2024 11:58:41 +0000
+Received: by hu-devc-blr-u22-a.qualcomm.com (Postfix, from userid 466583)
+	id C173741258; Tue, 30 Jul 2024 17:28:40 +0530 (+0530)
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+To: axboe@kernel.dk, agk@redhat.com, snitzer@kernel.org, mpatocka@redhat.com,
+        adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
+        ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org,
+        konrad.dybcio@linaro.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org, dm-devel@lists.linux.dev,
+        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_viswanat@quicinc.com, quic_srichara@quicinc.com,
+        quic_varada@quicinc.com
+Cc: quic_mdalam@quicinc.com
+Subject: [PATCH 4/6] md: dm-crypt: Add additional algo modes for inline encryption
+Date: Tue, 30 Jul 2024 17:28:36 +0530
+Message-Id: <20240730115838.3507302-5-quic_mdalam@quicinc.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20240730115838.3507302-1-quic_mdalam@quicinc.com>
+References: <20240730115838.3507302-1-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240728081154.1782120-5-avri.altman@wdc.com>
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: 2qGbf_Y2RMaP2ShcVZy_UPIpyMIgd7xT
+X-Proofpoint-GUID: 2qGbf_Y2RMaP2ShcVZy_UPIpyMIgd7xT
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.28.16
+ definitions=2024-07-30_11,2024-07-30_01,2024-05-17_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 bulkscore=0
+ mlxlogscore=999 priorityscore=1501 impostorscore=0 malwarescore=0
+ lowpriorityscore=0 spamscore=0 phishscore=0 adultscore=0 mlxscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2407110000 definitions=main-2407300084
 
-Hi Avri,
+Add support for AES-XTS-128, AES-CBC-128 and AES-CBC-256 algo
+modes for inline encryption.
 
-kernel test robot noticed the following build errors:
+Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
+---
+ drivers/md/dm-crypt.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v6.10 next-20240726]
-[cannot apply to ulf-hansson-mmc-mirror/next]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Avri-Altman/mmc-sd-SDUC-Support-Recognition/20240728-161645
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20240728081154.1782120-5-avri.altman%40wdc.com
-patch subject: [PATCH 04/10] mmc: core: Add open-ended Ext memory addressing
-config: arm-s5pv210_defconfig (https://download.01.org/0day-ci/archive/20240728/202407282317.uYbf4apc-lkp@intel.com/config)
-compiler: arm-linux-gnueabi-gcc (GCC) 14.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240728/202407282317.uYbf4apc-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202407282317.uYbf4apc-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-      50 |         BUILD_BUG_ON_MSG(condition, "BUILD_BUG_ON failed: " #condition)
-         |         ^~~~~~~~~~~~~~~~
-   include/linux/build_bug.h:21:9: note: in expansion of macro 'BUILD_BUG_ON'
-      21 |         BUILD_BUG_ON(((n) & ((n) - 1)) != 0)
-         |         ^~~~~~~~~~~~
-   include/linux/bitfield.h:75:17: note: in expansion of macro '__BUILD_BUG_ON_NOT_POWER_OF_2'
-      75 |                 __BUILD_BUG_ON_NOT_POWER_OF_2((_mask) +                 \
-         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   include/linux/bitfield.h:76:56: note: in expansion of macro '__bf_shf'
-      76 |                                               (1ULL << __bf_shf(_mask))); \
-         |                                                        ^~~~~~~~
-   include/linux/bitfield.h:155:17: note: in expansion of macro '__BF_FIELD_CHECK'
-     155 |                 __BF_FIELD_CHECK(_mask, _reg, 0U, "FIELD_GET: ");       \
-         |                 ^~~~~~~~~~~~~~~~
-   drivers/mmc/core/block.c:1717:31: note: in expansion of macro 'FIELD_GET'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                               ^~~~~~~~~
-   include/linux/bits.h:35:38: note: in expansion of macro '__GENMASK'
-      35 |         (GENMASK_INPUT_CHECK(h, l) + __GENMASK(h, l))
-         |                                      ^~~~~~~~~
-   drivers/mmc/core/sd_ops.h:14:28: note: in expansion of macro 'GENMASK'
-      14 | #define SDUC_ADDR_EXT_MASK GENMASK(37, 32)
-         |                            ^~~~~~~
-   drivers/mmc/core/block.c:1717:41: note: in expansion of macro 'SDUC_ADDR_EXT_MASK'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                                         ^~~~~~~~~~~~~~~~~~
-   In file included from arch/arm/include/asm/ptrace.h:13,
-                    from arch/arm/include/asm/irqflags.h:7,
-                    from include/linux/irqflags.h:18,
-                    from arch/arm/include/asm/bitops.h:28,
-                    from include/linux/bitops.h:68,
-                    from include/linux/kernel.h:23,
-                    from include/linux/moduleparam.h:7,
-                    from drivers/mmc/core/block.c:21:
-   include/uapi/linux/bits.h:8:31: warning: left shift count >= width of type [-Wshift-count-overflow]
-       8 |         (((~_UL(0)) - (_UL(1) << (l)) + 1) & \
-         |                               ^~
-   include/linux/bitfield.h:156:44: note: in definition of macro 'FIELD_GET'
-     156 |                 (typeof(_mask))(((_reg) & (_mask)) >> __bf_shf(_mask)); \
-         |                                            ^~~~~
-   include/linux/bits.h:35:38: note: in expansion of macro '__GENMASK'
-      35 |         (GENMASK_INPUT_CHECK(h, l) + __GENMASK(h, l))
-         |                                      ^~~~~~~~~
-   drivers/mmc/core/sd_ops.h:14:28: note: in expansion of macro 'GENMASK'
-      14 | #define SDUC_ADDR_EXT_MASK GENMASK(37, 32)
-         |                            ^~~~~~~
-   drivers/mmc/core/block.c:1717:41: note: in expansion of macro 'SDUC_ADDR_EXT_MASK'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                                         ^~~~~~~~~~~~~~~~~~
-   include/uapi/linux/bits.h:9:19: warning: right shift count is negative [-Wshift-count-negative]
-       9 |          (~_UL(0) >> (__BITS_PER_LONG - 1 - (h))))
-         |                   ^~
-   include/linux/bitfield.h:156:44: note: in definition of macro 'FIELD_GET'
-     156 |                 (typeof(_mask))(((_reg) & (_mask)) >> __bf_shf(_mask)); \
-         |                                            ^~~~~
-   include/linux/bits.h:35:38: note: in expansion of macro '__GENMASK'
-      35 |         (GENMASK_INPUT_CHECK(h, l) + __GENMASK(h, l))
-         |                                      ^~~~~~~~~
-   drivers/mmc/core/sd_ops.h:14:28: note: in expansion of macro 'GENMASK'
-      14 | #define SDUC_ADDR_EXT_MASK GENMASK(37, 32)
-         |                            ^~~~~~~
-   drivers/mmc/core/block.c:1717:41: note: in expansion of macro 'SDUC_ADDR_EXT_MASK'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                                         ^~~~~~~~~~~~~~~~~~
-   include/uapi/linux/bits.h:8:31: warning: left shift count >= width of type [-Wshift-count-overflow]
-       8 |         (((~_UL(0)) - (_UL(1) << (l)) + 1) & \
-         |                               ^~
-   include/linux/bitfield.h:45:38: note: in definition of macro '__bf_shf'
-      45 | #define __bf_shf(x) (__builtin_ffsll(x) - 1)
-         |                                      ^
-   drivers/mmc/core/block.c:1717:31: note: in expansion of macro 'FIELD_GET'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                               ^~~~~~~~~
-   include/linux/bits.h:35:38: note: in expansion of macro '__GENMASK'
-      35 |         (GENMASK_INPUT_CHECK(h, l) + __GENMASK(h, l))
-         |                                      ^~~~~~~~~
-   drivers/mmc/core/sd_ops.h:14:28: note: in expansion of macro 'GENMASK'
-      14 | #define SDUC_ADDR_EXT_MASK GENMASK(37, 32)
-         |                            ^~~~~~~
-   drivers/mmc/core/block.c:1717:41: note: in expansion of macro 'SDUC_ADDR_EXT_MASK'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                                         ^~~~~~~~~~~~~~~~~~
-   include/uapi/linux/bits.h:9:19: warning: right shift count is negative [-Wshift-count-negative]
-       9 |          (~_UL(0) >> (__BITS_PER_LONG - 1 - (h))))
-         |                   ^~
-   include/linux/bitfield.h:45:38: note: in definition of macro '__bf_shf'
-      45 | #define __bf_shf(x) (__builtin_ffsll(x) - 1)
-         |                                      ^
-   drivers/mmc/core/block.c:1717:31: note: in expansion of macro 'FIELD_GET'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                               ^~~~~~~~~
-   include/linux/bits.h:35:38: note: in expansion of macro '__GENMASK'
-      35 |         (GENMASK_INPUT_CHECK(h, l) + __GENMASK(h, l))
-         |                                      ^~~~~~~~~
-   drivers/mmc/core/sd_ops.h:14:28: note: in expansion of macro 'GENMASK'
-      14 | #define SDUC_ADDR_EXT_MASK GENMASK(37, 32)
-         |                            ^~~~~~~
-   drivers/mmc/core/block.c:1717:41: note: in expansion of macro 'SDUC_ADDR_EXT_MASK'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                                         ^~~~~~~~~~~~~~~~~~
->> include/linux/compiler_types.h:510:45: error: call to '__compiletime_assert_290' declared with attribute error: FIELD_GET: mask is zero
-     510 |         _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
-         |                                             ^
-   include/linux/compiler_types.h:491:25: note: in definition of macro '__compiletime_assert'
-     491 |                         prefix ## suffix();                             \
-         |                         ^~~~~~
-   include/linux/compiler_types.h:510:9: note: in expansion of macro '_compiletime_assert'
-     510 |         _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
-         |         ^~~~~~~~~~~~~~~~~~~
-   include/linux/build_bug.h:39:37: note: in expansion of macro 'compiletime_assert'
-      39 | #define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(!(cond), msg)
-         |                                     ^~~~~~~~~~~~~~~~~~
-   include/linux/bitfield.h:67:17: note: in expansion of macro 'BUILD_BUG_ON_MSG'
-      67 |                 BUILD_BUG_ON_MSG((_mask) == 0, _pfx "mask is zero");    \
-         |                 ^~~~~~~~~~~~~~~~
-   include/linux/bitfield.h:155:17: note: in expansion of macro '__BF_FIELD_CHECK'
-     155 |                 __BF_FIELD_CHECK(_mask, _reg, 0U, "FIELD_GET: ");       \
-         |                 ^~~~~~~~~~~~~~~~
-   drivers/mmc/core/block.c:1717:31: note: in expansion of macro 'FIELD_GET'
-    1717 |                 u8 ext_addr = FIELD_GET(SDUC_ADDR_EXT_MASK, blk_rq_pos(req));
-         |                               ^~~~~~~~~
-
-
-vim +/__compiletime_assert_290 +510 include/linux/compiler_types.h
-
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  496  
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  497  #define _compiletime_assert(condition, msg, prefix, suffix) \
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  498  	__compiletime_assert(condition, msg, prefix, suffix)
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  499  
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  500  /**
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  501   * compiletime_assert - break build and emit msg if condition is false
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  502   * @condition: a compile-time constant condition to check
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  503   * @msg:       a message to emit if condition is false
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  504   *
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  505   * In tradition of POSIX assert, this macro will break the build if the
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  506   * supplied condition is *false*, emitting the supplied error message if the
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  507   * compiler has support to do so.
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  508   */
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  509  #define compiletime_assert(condition, msg) \
-eb5c2d4b45e3d2 Will Deacon 2020-07-21 @510  	_compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
-eb5c2d4b45e3d2 Will Deacon 2020-07-21  511  
-
+diff --git a/drivers/md/dm-crypt.c b/drivers/md/dm-crypt.c
+index c0257d961968..884cf76fc4c6 100644
+--- a/drivers/md/dm-crypt.c
++++ b/drivers/md/dm-crypt.c
+@@ -2482,8 +2482,14 @@ static int crypt_select_inline_crypt_mode(struct dm_target *ti, char *cipher,
+ {
+ 	struct crypt_config *cc = ti->private;
+ 
+-	if (strcmp(cipher, "xts(aes)") == 0) {
++	if (strcmp(cipher, "xts(aes128)") == 0) {
++		cc->crypto_mode = BLK_ENCRYPTION_MODE_AES_128_XTS;
++	} else if (strcmp(cipher, "xts(aes256)") == 0) {
+ 		cc->crypto_mode = BLK_ENCRYPTION_MODE_AES_256_XTS;
++	} else if (strcmp(cipher, "cbc(aes128)") == 0) {
++		cc->crypto_mode = BLK_ENCRYPTION_MODE_AES_128_CBC;
++	} else if (strcmp(cipher, "cbc(aes256)") == 0) {
++		cc->crypto_mode = BLK_ENCRYPTION_MODE_AES_256_CBC;
+ 	} else {
+ 		ti->error = "Invalid cipher for inline_crypt";
+ 		return -EINVAL;
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.34.1
+
