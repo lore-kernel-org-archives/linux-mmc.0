@@ -1,224 +1,166 @@
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12olkn2096.outbound.protection.outlook.com [40.92.21.96])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f54.google.com (mail-ed1-f54.google.com [209.85.208.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2316182C3;
-	Wed, 31 Jul 2024 08:00:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.92.21.96
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722412849; cv=fail; b=aBYCoqhVb/KkhN4EgT+wAuOUPWfKO6ILK89VcLtarudvjAcIxc8qv1E7umrasjKZjwARMGujSoOf/DxGsOn7beW/o+B9DaEigntejDJ+7NG+9TwYi7LNavmu2SlQauMcNC9wCzj6F0aW1M9uUJbhCn6+nddIjuOnxkBt71uejd8=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722412849; c=relaxed/simple;
-	bh=fviT0ZjPvGOu0OwuHlmvK+M1Du0d//in8ouG3Zuy/jY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
-	 Content-Disposition:In-Reply-To:MIME-Version; b=asrTLjsNhIWQOsQSuBLm1jUCtlyz4j6fx3oabix85v7OI1Eu3UaOPIkBFJGQhSLOjPKb/iyvfa6d8UgliptndfiAdnRxK++/YaAxlwoJGSbNM1RwG2a8Ot/9rs6/DOwjD5HZVirYAkqttR6lHeWyGTDfXuAcGzkMaIwD2He0TN8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=kATbARDc; arc=fail smtp.client-ip=40.92.21.96
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3678A1B0136;
+	Wed, 31 Jul 2024 12:41:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.54
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1722429679; cv=none; b=TJHWQ5Ht3boXQuo6BHJsAvZPJRFgnLNAZna5Fb5CY/gIy7BGux2DArK0OoE4rmASlZKVW7awpmwpICxHPQbAbynNxpesvQZ3CVlcNS1+8bKnBaCiJps4ffKTGLuNbALdQbSn+7JquLqtQC93rcd1rVQjSF0IsNcINUf5BAGEFGE=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1722429679; c=relaxed/simple;
+	bh=hWzgiXWVrjpTN1nVuyODYR9+OxLdhgMRH76UuMtK06A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=liyZuKhPxQYehGpOHftJq2d5j54jorD0uCjWnWK99gcs2TmROq/T4a/vsc0Bncp/tkuv4KZTsSjqm6MVvdESZKqEHjlg9/2xUSJ7wQK0BYCFMSQ7PJil8JOrtmt+Bqt7WuRWeBRRC5CraCiJ/9BJ/oQ6bu1zJlzVvJIAQjLGMZ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=EaR84pAJ; arc=none smtp.client-ip=209.85.208.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="kATbARDc"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=G+CKEqNSSlgie8UV+Ddlz+5FVF6Ha4ufMuG2lPHxEDpKZPVKkebvwhAFBUQCeazGyZfG08W8uZ04SSeP78j4N0KTHfmAlbiNujQZsjIj9uy/dhl6fXxkruk/cUw43joT2+/tEGj9eRQVCqO0gTPZbiXryqPe+E/74D/jkABe9cyttK+zo2yq54LIxLAg6Ge7U0yuLBufgq+jP5D6Re6oUpm6oS6feqAFGRBKLMjj5cnDHPaPzaBUGI+LimuggHyr5ct6GzAdkCsPZqwiFVsaxipdvAcec3OYZCywMyxWdt4nRswrv8KkLi0MgVAbk29lRs5b0kWZYUhRHiagZwumsA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=14E4mJUMdh2edbqXXonlNXbiBxXgTYFvdR8YA3kr9a0=;
- b=UMmBk+3Dl8sZ1+UMUMTecf8AqCbbRj1AdxlLUMKiMa0Yj2vkTE2djLaW+esjepCQ1bCZOHi96QR+5uaIkf1BaEt1S0f8hKRYFNLCe2/xuaKslUTETykmfyu58OEK0jYrUuq20mAj3FihKwjj6zyxHdrLNFRmP8GsFKNvqGx1WV+CSxzgZdiE5NOQg7yMXTYTFL/z5bsyAja0TgSTNFt/704JEIsmbMvKNI0mKOhCRpFPXoTfU9c1M5vMSbq8ik8FORkiVlWNtKzDzZhRI9GDDDyvGQUgRQwQ0Wi8AG8SGsWxX8PFSS5fKg6dx0V8UhCklPVif5etJmmANUw4it8J3Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=14E4mJUMdh2edbqXXonlNXbiBxXgTYFvdR8YA3kr9a0=;
- b=kATbARDcqywFc6eeGvPAnwDbivfXXJxp6VgMl5Yfh1soUeqEPLYaGlSYkp6mc5IJOJwU26YNzk4YhLxFn6JT7h9Wbkv/wbSiBsjmmWhn7sl5qdzeVobEgh/hjOLfgHX3aPt51OkRFEvnzDrMFT/iMxXIfFsr9nYCSp1XJxM1eKw1i52/1yUU1sVkWdVzzhsIlnK8naWgWwnCiAvHkC9W/95J4a8VgCP4byTSRi3x0TOszAm3YG123tj76bd2YXBtExg4Fc+bnpk8lnwry2zGQ8AaXiDKTvXQNDFy7WokA1HlLq6RLYoSuo5eBWmdZMRPMgMd1iQdF07gFLc7NjrBZA==
-Received: from IA1PR20MB4953.namprd20.prod.outlook.com (2603:10b6:208:3af::19)
- by LV3PR20MB7123.namprd20.prod.outlook.com (2603:10b6:408:1b6::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.7807.27; Wed, 31 Jul
- 2024 08:00:44 +0000
-Received: from IA1PR20MB4953.namprd20.prod.outlook.com
- ([fe80::ab0b:c0d3:1f91:d149]) by IA1PR20MB4953.namprd20.prod.outlook.com
- ([fe80::ab0b:c0d3:1f91:d149%5]) with mapi id 15.20.7807.026; Wed, 31 Jul 2024
- 08:00:44 +0000
-Date: Wed, 31 Jul 2024 16:00:13 +0800
-From: Inochi Amaoto <inochiama@outlook.com>
-To: Chen Wang <unicornxw@gmail.com>, adrian.hunter@intel.com, 
-	aou@eecs.berkeley.edu, conor+dt@kernel.org, guoren@kernel.org, inochiama@outlook.com, 
-	jszhang@kernel.org, krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com, 
-	paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, chao.wei@sophgo.com, haijiao.liu@sophgo.com, 
-	xiaoguang.xing@sophgo.com, tingzhu.wang@sophgo.com
-Cc: Chen Wang <unicorn_wang@outlook.com>
-Subject: Re: [PATCH v5 0/8] mmc: sdhci-of-dwcmshc: Add Sophgo SG2042 support
-Message-ID:
- <IA1PR20MB49539C30076AB6D14B20BD57BBB12@IA1PR20MB4953.namprd20.prod.outlook.com>
-References: <cover.1721377374.git.unicorn_wang@outlook.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cover.1721377374.git.unicorn_wang@outlook.com>
-X-TMN: [mY44jRH/hZm8Zkl/DnPdqz2GV+ZOXfQ9u3x7dfA7G34=]
-X-ClientProxiedBy: PS2PR02CA0010.apcprd02.prod.outlook.com
- (2603:1096:300:41::22) To IA1PR20MB4953.namprd20.prod.outlook.com
- (2603:10b6:208:3af::19)
-X-Microsoft-Original-Message-ID:
- <d76gtjvcgqqk4v5lbjxappq5ii7c32vk5fxtgoplyy7qbwlike@z63fvzr2fdat>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EaR84pAJ"
+Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-5a15c2dc569so4948712a12.3;
+        Wed, 31 Jul 2024 05:41:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1722429676; x=1723034476; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=/Q2l7kPRbHfPSAmXr8/i+HQUpkMV0CfBoozBQvEj2VM=;
+        b=EaR84pAJg5DRWkyDdcKFNR5Cob0cUS6MwUrIcKjfohzB4s0FyeExBRMrIGH5W9W25L
+         uFe9uD+C9kuVZU0QPljWA9C7y+X9fHEdQJjhtN5UorSyYmS8rxrXEz8Ywe9nN+JmYKZP
+         Gb4n8URbNmW5DhS1zi33jxb+QY3fLV4hAsfA+tI2nLX51A0SGc+lw17U3s6qbOqE319W
+         AYc7E1WdNVozp6R6ZGZszcGW1vrLILwQVfc57Nsga/kkimnIVVG3FzGhxkF5ni1x3pLO
+         ZXCyZu9b/PsJ70AmcDerVEMiA42YuP81rH40ttVkO3p2x42wJwKkFjqS240dDb0HnghC
+         dJIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1722429676; x=1723034476;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:to:subject:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=/Q2l7kPRbHfPSAmXr8/i+HQUpkMV0CfBoozBQvEj2VM=;
+        b=TrYxjXiEUiy87haG4hpVHfuxdh5MIpez2mHGKld+HUW872NkqJlXIEBe/Qv8H7HGGA
+         g/txP6sWPih+/VHeJHo9wpAs6kf09h3Im5DbiXl3G48fIcj1eY8GEOEK7St7P91YkfNi
+         k3yCIsEEIDDWIGNUUNAB5S2FEUm2VTq8JnkuRG8gr6VFOHR6is6xOXTOX11sxjS3KJSK
+         3503nlIC4G6xiH60CQE+uwQ/O8NWr2AnerTplQUpm7Bg59wiCLWGMBIVG5qhYnsKikx3
+         QbFEgPendAp66S1LEbJ+NTRSIj1nDud69gBiIFRjlpDE2DcNwuvXyX++DB7aNCy+9UfA
+         KD+w==
+X-Forwarded-Encrypted: i=1; AJvYcCWSa8MHW9ex/6X5a6vGHhWnHFvlNZ9mgU8X1vlayaqX7iVlt8IrjZEXnfOlw4v9YfJAEVcTShjnxpL6O2hrL+ddwFno6xyrtZvboI3uRB939+Z7v+/gjRjvD+L8Snu8izll0bNi2ja/lwBV0rNQPOGrRkL1/gN5rzqJb95nOzrlxBi5xQn9L3wHEI+9S/wBBjynI+eaptwqCDGH5Ffqbqp5kedT
+X-Gm-Message-State: AOJu0Yx5YVRw3G8dxI4ehw53c7X9De0BL3oCJ4fDwZKPykTWI5vRqe4k
+	YUfazOPHe5OYrHr06/JWVUgCph1+j6s+9xv2GLxcDyx+g/YdZGpoxGZiDnsM
+X-Google-Smtp-Source: AGHT+IH12mfwgxzN+nLyjdSXs3/FhfTaWeWx6KdoyfAElTnn/87OsFBoXHWcj137YDoCOE8gXgpMKg==
+X-Received: by 2002:a50:f68d:0:b0:5a2:8f7d:aff4 with SMTP id 4fb4d7f45d1cf-5b021f0dd2amr11840822a12.20.1722429676231;
+        Wed, 31 Jul 2024 05:41:16 -0700 (PDT)
+Received: from [147.251.42.107] (laomedon.fi.muni.cz. [147.251.42.107])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5b52ab8f09dsm1604442a12.26.2024.07.31.05.41.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 31 Jul 2024 05:41:15 -0700 (PDT)
+Message-ID: <c897b521-0520-429e-9e94-ba7da74a921f@gmail.com>
+Date: Wed, 31 Jul 2024 14:41:13 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: IA1PR20MB4953:EE_|LV3PR20MB7123:EE_
-X-MS-Office365-Filtering-Correlation-Id: ccae09bd-0fde-47e4-cc6f-08dcb136e0f6
-X-Microsoft-Antispam:
-	BCL:0;ARA:14566002|461199028|8060799006|5072599009|19110799003|440099028|3412199025|4302099013|56899033|1602099012|1710799026;
-X-Microsoft-Antispam-Message-Info:
-	JC5moDJkMIbWkUFr72jmWtmbogk5B2FyCEwFGD62GvmGbR7COItp1YTtvdwSWsdqKNN1GptIUZ8kO0O9PKHuzDVBmJ8Rj+l4EB/937eb90T8zlxRgDPUsCHPfW/bYYqLYWmuKlF6CQuDQLrPhFeT8D5tD7/wv1AKhe7mV5r/feoYmvSkXQ+fDjauPU8OoS9dYkoo3vTMgyLm/HkHQ9D4RSDtscCcqe5ZHnXseCA9MSoWmSbOcHvlpJoUkL2zrjHpLjBkW0gQSLHSE06Pj9bS1eAi7h0NL4TLm/Dr9LHK4O+GvyQVUHGq/YC4u5d1ic8cwvwpsJmPNMS8I5yzjDpMiGsvniuwttOpknTl1K8QudvEexSCRdderHLueW6Wx4DKxpmD5f07aPXcTT44O7rqhCv0GW46adZUkL1kY09YwSr5BDjanQvH0kTnG8zPsMp7IpKmxAwdKi5KvsnbmUWUOfpeDSCVaAPClwmsD8GVxep4wxsTozHNIQCZG6maLrN7cAZPwBDuGlgJyDRxhzxWmeeC9VXaxuPR94K59WFgMdAaMHb2LI+/8T/xUtjDUZ1n/XlkWS4dbhLx9my+V88kNelGsMAj7SK2D0DI2jn6UJuOBYdokLDFg2JWJy54mMqPL9weEq+/UaW6kJyTE9LejKfXWycBVdMZCUX6ngZpPWntAtSoiFZ+GTnG7+48zLzXfsoV20JTA7vCkBdl0ONjtQZmKmlxCUo/fj7UfNrckttXddvc4NbUYQ99ro1EMMl4lMI8QotiHcVPtQUj1TdSaXWnvNGrRWUWevKyymALf0boVOTj78d9VklXLFZ66w4J
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?UAEeMTxE+okO+bsBWQZ/iFzSldY3jHDUTDnBc6scW5+S7GEpXnMvnXozmnr9?=
- =?us-ascii?Q?kK/ZsZ58nppUHvOdCdopqGxnLZeAKmQ23PWZa4lunU7yq1OaCbm8QrE3TynN?=
- =?us-ascii?Q?ZmwjnHhmir/9m1Xce8KJEw7iGfolJf2rbbeWEjPjLPTMwFUxoZb8hOesVZ1s?=
- =?us-ascii?Q?Hy6GXjS0C0Z54OGOwALR0zmWfYcPjGom1dX8Ow652KRYKYmGEij+7lQFKjmC?=
- =?us-ascii?Q?fvVliHAvlXHNsgFi3jw/XqZu9GZPW3ru3PP6PeTKxQszBRpieOgz3ntnIU8L?=
- =?us-ascii?Q?fjAZIfJ9Jo6v4wmztOt7OMxevwuet+lrrbwFygzGbzVh40oJCI+B61oIJAP8?=
- =?us-ascii?Q?BhclRCG6qu6MWiIQjdhQopG8KCurnM0NePkxCol2k4JRHZ3FYyr9YOP7Oyni?=
- =?us-ascii?Q?Ol25fACAo12XH26/AaUWUy1sKLHjLEe8FZqI/aDcmeGbpmIyBDFZ59I1RXhI?=
- =?us-ascii?Q?knb1wb85UBAdtk62hZBOQGSRxoPKKRHnHmxaCfLx44aXLTfWuRRLxwJ/yT32?=
- =?us-ascii?Q?5Vqvq9Utgs/YTMOwptzjzUcBlPCAeBszsDsVMsOjSZgHwbwd2HCPUXWgFqty?=
- =?us-ascii?Q?eVtqTsHV9ch+IteLE0sakYD1eybdKU1MOpAPEv0RWfUJgZYRAEk3ki7pHZSi?=
- =?us-ascii?Q?7n8LECNxEM0mvF6IjgaW7cvZapgwth9ddm8QsMX02i3qBJ6vFGmyq5QdDP3B?=
- =?us-ascii?Q?zr4YbhG7U3FuDW3ZQO42Zh1Un8tPYXJLpMFp0FMfL12TSlyuathyWbTrv4yk?=
- =?us-ascii?Q?MSzOXY+Th9TuovQ1/SfJ5cu2BzM3GP8lGxSee5T656dXUak8lQFw0Q0I0OMT?=
- =?us-ascii?Q?QsIFMe4jgWl8uK4tctv29lofqlLZIlwf34sWrxeArBngabs6MBZto0VsNFLU?=
- =?us-ascii?Q?cTREPPSHE+2fl/+FejMrrsGC/FODU4Lx+BTYRN3gEMDd9laHzT27S+fimCXT?=
- =?us-ascii?Q?RlUMON1lODFjG6SHhj3Uqzhbqusa+2c4cJPBH0Zo0TUolXhasxHV2RaPgX5K?=
- =?us-ascii?Q?5vvZlOOkAvaF/1g0wzmVxfuMIeKUNMsPq5quiYfqBYyWu4IYwaDzvJruSjeU?=
- =?us-ascii?Q?ryMnxyHJ8NyQSt4hDrn0mvLCxmjM+CIEg6OfusEWeYvRyY6ciSz+aeG1V5z1?=
- =?us-ascii?Q?VFuqDpFJDs1SniyZVkwwzlwf5+j4kgHSdKgpCQtdGW+SXh6qWqWcyZSd8US+?=
- =?us-ascii?Q?QHxn1stPcySF421T3s1JulhBKVGYLG3SazFpUudXpZ0O4OQjmkgNdUlT3l5t?=
- =?us-ascii?Q?/6TY5TVQy4lnFibN9go1?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ccae09bd-0fde-47e4-cc6f-08dcb136e0f6
-X-MS-Exchange-CrossTenant-AuthSource: IA1PR20MB4953.namprd20.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Jul 2024 08:00:44.2193
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: LV3PR20MB7123
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/6] md: dm-crypt: Set cc->iv_size to 4 bytes
+To: Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk, agk@redhat.com,
+ snitzer@kernel.org, mpatocka@redhat.com, adrian.hunter@intel.com,
+ quic_asutoshd@quicinc.com, ritesh.list@gmail.com, ulf.hansson@linaro.org,
+ andersson@kernel.org, konrad.dybcio@linaro.org, linux-block@vger.kernel.org,
+ linux-kernel@vger.kernel.org, dm-devel@lists.linux.dev,
+ linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ quic_viswanat@quicinc.com, quic_srichara@quicinc.com, quic_varada@quicinc.com
+References: <20240730115838.3507302-1-quic_mdalam@quicinc.com>
+ <20240730115838.3507302-3-quic_mdalam@quicinc.com>
+Content-Language: en-US
+From: Milan Broz <gmazyland@gmail.com>
+Autocrypt: addr=gmazyland@gmail.com; keydata=
+ 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
+In-Reply-To: <20240730115838.3507302-3-quic_mdalam@quicinc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Fri, Jul 19, 2024 at 04:44:38PM GMT, Chen Wang wrote:
-> From: Chen Wang <unicorn_wang@outlook.com>
+On 7/30/24 1:58 PM, Md Sadre Alam wrote:
+> Set cc->iv_size to 4 bytes instead of 8 bytes, since
+> this cc->iv_size is passing as data unit bytes to
+> blk_crypto_init_key(). Since CQHCI driver having
+> limitation for data unit bytes to 32-bit only.
+
+In dm-crypt, plain64 IV is defined as "little-endian 64bit IV"
+and was introduced to fix security problem when 32bit "plain" IV
+overflows and IV is reused.
+
+In that case you can move ciphertext sector between places with
+the same IV (but different offsets) and these will be still
+correctly decrypted.
+
+If I understand it correctly, this reintroduces the same problem here.
+If you have 32bit only, just use "plain" and do not support plain64 here.
+
+(In general, I do not understand why you are sending patches
+for dm-crypt code that is clearly not upstream.
+I hope this code will never be accepted.)
+
+Milan
+
 > 
-> This patchset is composed of two parts:
-> - one is the improvement of the sdhci-of-dwcmshc framework,
-> - the other is the support for sg2042 based on the improvement of the
->   framework.
-> The reason for merging the two parts into one patchset is mainly to
-> facilitate review, especially to facilitate viewing why we need to
-> improve the framework and what benefits it will bring to us.
-> 
-> When I tried to add a new soc(SG2042) to sdhci-of-dwcmshc, I found
-> that the existing driver code could be optimized to facilitate expansion
-> for the new soc. Patch 1 ~ Patch 5 is for this.
-> 
-> Patch 6 ~ 7 are adding support for the mmc controller for Sophgo SG2042.
-> Adding corresponding new compatible strings, and implement
-> custom callbacks for SG2042 based on new framework.
-> 
-> Patch 8 is the change for DTS.
-> 
-> By the way, although I believe this patch only optimizes the framework
-> of the code and does not change the specific logic, simple verification
-> is certainly better. Since I don't have rk35xx/th1520 related hardware,
-> it would be greatly appreciated if someone could help verify it.
-> Note, the DTS change has dependency on clock changes for SG2042, which
-> has not been merged in master/upstream, so if you want to test this
-> new sdhci-of-dwcmshc driver for other hardware except SG2042, don't
-> pick patch 8.
-> 
-> Clocks changes for SG2042 are expected to be in 6.11-rc1 soon, I will
-> do catch up with that when it is relased and provide a new revision,
-> but anyway please feel free review this version and welcome your comments.
-> 
+> Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
 > ---
+>   drivers/md/dm-crypt.c | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> Changes in v5:
-> 
->   The patch series is based on latest 'next' branch of [mmc-git].
-> 
->   - Based on Adrian's suggestion, split the first part of the patch into 5.
->   - Updated bindings and DTS as per suggestion from Krzysztof, Jisheng and Conor.
-> 
-> Changes in v4:
-> 
->   The patch series is based on latest 'next' branch of [mmc-git]. You can simply
->   review or test the patches at the link [4].
-> 
->   Improved the dirvier code as per comments from Adrian Hunter, drop moving
->   position and renaming for some helper functions.
-> 
->   Put the sg2042 support as part of this series, improve the bindings and code
->   as per comments from last review.
-> 
-> Changes in v3:
+> diff --git a/drivers/md/dm-crypt.c b/drivers/md/dm-crypt.c
+> index 37add222b169..c0257d961968 100644
+> --- a/drivers/md/dm-crypt.c
+> +++ b/drivers/md/dm-crypt.c
+> @@ -2490,7 +2490,7 @@ static int crypt_select_inline_crypt_mode(struct dm_target *ti, char *cipher,
+>   	}
 >   
->   The patch series is based on latest 'next' branch of [mmc-git]. You can simply
->   review or test the patches at the link [3].
-> 
->   Improved the dirvier code as per comments from Adrian Hunter.
->   Define new structure for dwcmshc platform data/ops. In addition, I organized
->   the code and classified the helper functions.
-> 
->   Since the file changes were relatively large (though the functional logic did
->   not change much), I split the original patch into four for the convenience of
->   review.
-> 
-> Changes in v2:
-> 
->   Rebased on latest 'next' branch of [mmc-git]. You can simply review or test the
->   patches at the link [2].
-> 
-> Changes in v1:
-> 
->   The patch series is based on v6.9-rc1. You can simply review or test the
->   patches at the link [1].
-> 
-> Link: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git [mmc-git]
-> Link: https://lore.kernel.org/linux-mmc/cover.1713257181.git.unicorn_wang@outlook.com/ [1]
-> Link: https://lore.kernel.org/linux-mmc/cover.1714270290.git.unicorn_wang@outlook.com/ [2]
-> Link: https://lore.kernel.org/linux-mmc/cover.1718241495.git.unicorn_wang@outlook.com/ [3]
-> Link: https://lore.kernel.org/linux-mmc/cover.1718697954.git.unicorn_wang@outlook.com/ [4]
-> 
-> ---
-> 
-> Chen Wang (8):
->   mmc: sdhci-of-dwcmshc: add common bulk optional clocks support
->   mmc: sdhci-of-dwcmshc: move two rk35xx functions
->   mmc: sdhci-of-dwcmshc: factor out code for th1520_init()
->   mmc: sdhci-of-dwcmshc: factor out code into dwcmshc_rk35xx_init
->   mmc: sdhci-of-dwcmshc: add dwcmshc_pltfm_data
->   dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo SG2042 support
->   mmc: sdhci-of-dwcmshc: Add support for Sophgo SG2042
->   riscv: sophgo: dts: add mmc controllers for SG2042 SoC
-> 
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |  60 ++-
->  .../boot/dts/sophgo/sg2042-milkv-pioneer.dts  |  17 +
->  arch/riscv/boot/dts/sophgo/sg2042.dtsi        |  28 ++
->  drivers/mmc/host/sdhci-of-dwcmshc.c           | 459 ++++++++++++------
->  4 files changed, 391 insertions(+), 173 deletions(-)
-> 
-> 
-> base-commit: b85e021853976aaebd3788e7e721020570754199
-> -- 
-> 2.34.1
-> 
+>   	if (ivmode == NULL || (strcmp(ivmode, "plain64") == 0)) {
+> -		cc->iv_size = 8;
+> +		cc->iv_size = 4;
+>   	} else {
+>   		ti->error = "Invalid IV mode for inline_crypt";
+>   		return -EINVAL;
 
-Work on both Duo and Huashan Pi. Both sd and emmc are fine.
-
-Tested-by: Inochi Amaoto <inochiama@outlook.com>
