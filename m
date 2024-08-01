@@ -1,135 +1,104 @@
-Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E8541662F1
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Aug 2024 11:01:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCD5F18453A
+	for <linux-mmc@vger.kernel.org>; Thu,  1 Aug 2024 11:01:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722510102; cv=none; b=VvnWeTpA0W2cJphpxQMSCtQcF+SyEJzGhoK/0szCCTALQn8Ky0jauQGzR3on0eYr1uGoURsW44UpjBfgDMUUxToRNd0A1igPwdopnYT4BSgVXvMrSqBqlzDXwnjoqMTNpFLtz7gd/zoBVVFJS/xF+RBOztAU0G3OLaMA+RzvKSE=
+	t=1722510105; cv=none; b=Hz4j51qGswajT091nccgFr3fiupBpOSho3OgWG/Jr5RVYyZ4wYkZBP94BEM2nwFu+F7xAxMkqPx4VST0EGBVwvlvei6dSVyFgUL2gOvyZPpzMaUoSJ9/0PZKss3fB+z+SDM2UTeZKkwkof911MU7ckd34c9VYga7dOFIgzSvgLU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722510102; c=relaxed/simple;
-	bh=R05DKqS1w9uIVMFcvpKFDclE86k9lkrCoWmX9bfJe1Y=;
+	s=arc-20240116; t=1722510105; c=relaxed/simple;
+	bh=MRvLSRflFY9cBgACqddCPno2qFWCVu9cH8/xiZokPPQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OZo5ykUO0mtpGXMBEPyPjYMtgtquF+ZF9QN6qxnmrTpb5OwOTQBM0OCg7UorZKN17snErMpETHo6ns1wXpO5Wc+T9/vbuQtlxM2bnOhyWn6HDu5060i8yyPF3dKN1KGCQDkqoctzpPsOTHoQ3p4khd1IZ3aG73tbArOEWn56fkM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=UIPTLMv1; arc=none smtp.client-ip=209.85.219.179
+	 To:Cc:Content-Type; b=JtZHxxrFNmCll4QxpSl76/7nX0T8w0FanQByCkLygZlNPMt/lzy8VIvU9y6eF9QP2rHvXnPwUjg2BRYMga6w0AsjVZP501f5AZ8n76+FR/ykFOuy1UPw70DucbFaMG3QheRQZuZtZwMTnNTTYEY8YRlqB5F5Hce0L8lJgoCR08Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=keGqqvan; arc=none smtp.client-ip=209.85.128.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UIPTLMv1"
-Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-e03caab48a2so1677550276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2024 04:01:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="keGqqvan"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-65fdfd7b3deso54402497b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2024 04:01:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1722510099; x=1723114899; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1722510103; x=1723114903; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=hvEVInb3XjDTInVG42ARV/26R6ebE2gUOo+RJ8/4wBc=;
-        b=UIPTLMv13scF61MazmIeN3uyvRfzpFNDGGju0d60AEmK17qr3p+FZ8cSyN8+0/Ta6w
-         fI4UwhdxfJCQNhPPPJQtescLMDR9j9TOPQv6H/SmoKQmuZm3JMaxUPSNiX8iJttEmIIq
-         5ODOIePiPbxkEnoDknaA7awyC1J9z5Ri0P7e8RxAMnjZE0iUatwsEYr8J50nbAVzFZ2l
-         DA7OK1xBJejpL04ovA11VxV4MvIQIixNKQGmAxG4gieH7+8MO8q7AkkWLf35zLiJKfdR
-         PuNR5OUPKIOAj8pbDAEod0vWPe+q1MjXCuUi4Mr43uVMO3DeAB/db05QjIPJSAZdd2WJ
-         oSRw==
+        bh=4trUpMv/W8d4ikbqlUsjU17uBaeiu1bYnhrDFMlu+YY=;
+        b=keGqqvanqm6LvUvP+Ai8ITi8u0IMZYvfFGxvJMp0JBVHD/yi2jtmx8UrbdDX/NYNUe
+         G/lsvPki4XCyDyeKuFkrfyPSX6mEow8fJxoXnCKrsS+rcCjUJ7GIwe3a8HdoNFR7rW7p
+         ZlQhURQNN5OxYQ0v/o2StjIxETiH/QUPjkWoH7QGS8UesrrXGzMhtOdV2euphyvC9J4z
+         f+p0bk76nqoWGB4IO8/OVzsV4acoFL1u6BIrrjH2oln23/dDEYINLP5QpJWb+2DQuwh7
+         bNqGOS2p/Vy2KS4J4ACWZpfqK7BvzFjdkrchUkmXV3yTuvTa3+HmgnpxZ9MFadu5Iqmh
+         lKDw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722510099; x=1723114899;
+        d=1e100.net; s=20230601; t=1722510103; x=1723114903;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=hvEVInb3XjDTInVG42ARV/26R6ebE2gUOo+RJ8/4wBc=;
-        b=Vy53ODR/yp53aVNTrdYtQFKoiNM0hu7ij6eHxd8xPUfyMdfP5y/gKcNa9b1EG0p7TH
-         gULn+W1B4IDF9CLBBTIE7loI35MI1N/YLvvdoiartIwZv131M01LO6LLJU1vWBx+O4Zh
-         qnVxbvyj42i6uUsM3Zjlp3nGox7kk1SzRoFzoN7n8t0lLBLqEh3PAT9bqkWXGEGbJixG
-         2Ep16BbY8iz5il+ov4cazAvaQCvRqw8tv9V4hkabjDLEtemlYy9+6qM4AFFZCSkH8M/l
-         /T7Mk3HIsKV6avg3q+T2LfmqGLyC6BhTFTIN7FLhVWtBdqUTZ1FZDGCw3Tj7pGPlSImW
-         +dQg==
-X-Forwarded-Encrypted: i=1; AJvYcCVFRoV6KD58hFUXklyX0ygeAr0GwaBALaoJaYARhw+FhbuWXSRIA3HOPfBswj8QpH91E6cq5anMd8ySHlG1x+JZ/BuwhKioTA65
-X-Gm-Message-State: AOJu0Yxy1MaQytUn217jigB9aQB8vsVNEcsXuTko+vPgHazOCFHbQvmm
-	qylV3L33dI8luG7iOdJa0lcVNO4pP7Re4G8MmN2oL+aMO/B6hOeEyehyycgd7vWrF4NWrnwo0wy
-	VxskBhKQ2jmKx8/4He3PvMAGCQOepOVfGUTW/GQ==
-X-Google-Smtp-Source: AGHT+IEMWWDuLSCLxVuVMb2OSeIqnvFCckIeIsKnFAFjoQOPspTTLeiCkBU/fF7EcmInj8+0rp1IhGoCa55ZCvPHsDo=
-X-Received: by 2002:a25:90f:0:b0:e0b:bc8f:293 with SMTP id 3f1490d57ef6-e0bd5420f5bmr615793276.0.1722510099291;
- Thu, 01 Aug 2024 04:01:39 -0700 (PDT)
+        bh=4trUpMv/W8d4ikbqlUsjU17uBaeiu1bYnhrDFMlu+YY=;
+        b=mAyGZ/rI25m7P0F/8dBXjPVkaO+/PS6NujUhqXKRJMUtJCg2KBU5fyHNrZo9DSdaRg
+         q+iP0Dyx4RloJww6w738nu5BSXWkFeCXwoD2kICwFB40/+WtPgcJP2pC8o7TvEJNkC5w
+         rL7eiKDfWRIDVGMCgRYcTRRRuD2fToESb9ET1p4bAsyhRnCC5eAkXSyF2BrTRTnuG07R
+         XUINvwphPxfvBZOa2E75Rs1gQEtQtCm/TCSSX80/TuogX8NFRyk7Wixh10iLmJ9rbb9W
+         tNEJq0v0TGJOCzsarmTft+/7v8tTsx65cWfhJR33zC/CHHzYhxCyuuibxs4lOnZy0v+v
+         PtFQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVp1EtdvHzDet1r8JpHVlt91ubX1Riho2XP49HBxcxubldz95BgLW3HAXRBEebXJ+whIUgfvkL+oBdZsNVzxpbS3TEHhLtViR/q
+X-Gm-Message-State: AOJu0Yy6dB/nbVQdnYp1V1LZxLIz7jMVxkjHDnwUcJXLlkdK5+rCl/h4
+	tNKKdfbC+Z/wW9BQPGc4kjG9su3RpMywE9CV0XkRICU1nifafMJ8Bpcs0t4FVN8taBjsyeFHNcd
+	iCOUWel8leV/mRNqxWsMSHaibo6JQEdCzlVy3hg==
+X-Google-Smtp-Source: AGHT+IGsJtr765trHWKToCgzsb+QNQeokpwLn93TcvWJ2oyDkYmYJl8bttv2EoecCGf3CWCYpquOz6J3evhCbjRj0fY=
+X-Received: by 2002:a05:6902:1582:b0:e0b:d6aa:43e3 with SMTP id
+ 3f1490d57ef6-e0bd6aa45acmr624829276.17.1722510102849; Thu, 01 Aug 2024
+ 04:01:42 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240716004527.20378-1-shanchun1218@gmail.com>
-In-Reply-To: <20240716004527.20378-1-shanchun1218@gmail.com>
+References: <20240714155510.48880-1-doug@schmorgal.com>
+In-Reply-To: <20240714155510.48880-1-doug@schmorgal.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 1 Aug 2024 13:01:03 +0200
-Message-ID: <CAPDyKFreG39wJ85Mz=9MnkG-u=hDFCppsgfmv_mzpPbT3rxpmw@mail.gmail.com>
-Subject: Re: [PATCH v5 0/2] Add support for Nuvoton MA35D1 SDHCI
-To: Shan-Chun Hung <shanchun1218@gmail.com>
-Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	adrian.hunter@intel.com, p.zabel@pengutronix.de, pbrobinson@gmail.com, 
-	serghox@gmail.com, mcgrof@kernel.org, prabhakar.mahadev-lad.rj@bp.renesas.com, 
-	forbidden405@outlook.com, tmaimon77@gmail.com, andy.shevchenko@gmail.com, 
-	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	ychuang3@nuvoton.com, schung@nuvoton.com
+Date: Thu, 1 Aug 2024 13:01:07 +0200
+Message-ID: <CAPDyKFoa2s_L4T-SKkfNwBv0_p1jQDkJh_RAWOCOw_MiH69Nuw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pxav2: Remove unnecessary null pointer check
+To: Doug Brown <doug@schmorgal.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	Dan Carpenter <dan.carpenter@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 16 Jul 2024 at 02:45, Shan-Chun Hung <shanchun1218@gmail.com> wrote:
+On Sun, 14 Jul 2024 at 17:57, Doug Brown <doug@schmorgal.com> wrote:
 >
-> This patch adds the SDHCI driver and DT binding documentation
-> for the Nuvoton MA35D1 platform.
+> There is no need to check for a null mrq->cmd in pxav1_request_done.
+> mmc_request_done already assumes it's not null, and it's always called
+> in this path by every SDHCI driver. This was caught by Smatch.
 >
-> This MA35D1 SDHCI driver has been tested on the MA35D1 SOM board with
-> Linux 6.10
->
-> v5:
->   - Update to nuvoton,ma35d1-sdhci.yaml
->     - Fixing the same orders as in the list of properties.
->   - Update ma35d1 sdhci driver
->     - Fixing the error path syntax to err = dev_err_probe().
->
-> v4:
->   - Update to nuvoton,ma35d1-sdhci.yaml
->     - Fixing overlooked issues.
->
-> v3:
->   - Update ma35d1 sdhci driver
->     - Fixing "Alignment" and "spaces preferred around".
->     - Fixing style for multi-line comments.
->     - Fixing double call to sdhci_pltfm_free().
->
-> v2:
->   - Update to nuvoton,ma35d1-sdhci.yaml
->     - Remove some redundant descriptions.
->     - Replace 'minitem' with 'maxitem' in the clock settings.
->     - Make corrections to nuvoton,sys description.
->     - Add sdhci-common.yaml.
->     - Remove '|' except where necessary to be preserved.
->     - Keeping one example is sufficient.
->     - Add regulators in the example.
->   - Update ma35d1 sdhci driver
->     - Refer to 'include what you use' to modify included header files.
->     - Replace the number 8 with sizeof(u8), and similarly for others.
->     - Use "dev" instead of "&pdev->dev".
->     - Use the min() macro to improve the code.
->     - Use dev_err_probe() instead of dev_err().
->     - Implement an error reset check mechanism.
->     - Add devm_add_action_or_reset() to help with sdhci_pltfm_free().
->     - Use devm_reset_control_get_exclusive() instead of devm_reset_control_get().
->
-> Shan-Chun Hung (2):
->   dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document MA35D1 SDHCI
->     controller
->   mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI driver
->
->  .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml    |  87 +++++
->  drivers/mmc/host/Kconfig                      |  12 +
->  drivers/mmc/host/Makefile                     |   1 +
->  drivers/mmc/host/sdhci-of-ma35d1.c            | 314 ++++++++++++++++++
->  4 files changed, 414 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
->  create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
->
-> --
-> 2.25.1
+> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+> Closes: https://lore.kernel.org/all/9ddaef2a-05bb-4fe7-98c5-da40a0813027@stanley.mountain/
+> Signed-off-by: Doug Brown <doug@schmorgal.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-pxav2.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index b75cbea88b40..7b957f6d5588 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -126,7 +126,7 @@ static void pxav1_request_done(struct sdhci_host *host, struct mmc_request *mrq)
+>         struct sdhci_pxav2_host *pxav2_host;
+>
+>         /* If this is an SDIO command, perform errata workaround for silicon bug */
+> -       if (mrq->cmd && !mrq->cmd->error &&
+> +       if (!mrq->cmd->error &&
+>             (mrq->cmd->opcode == SD_IO_RW_DIRECT ||
+>              mrq->cmd->opcode == SD_IO_RW_EXTENDED)) {
+>                 /* Reset data port */
+> --
+> 2.34.1
+>
