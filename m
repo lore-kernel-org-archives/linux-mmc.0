@@ -1,104 +1,122 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DCD5F18453A
-	for <linux-mmc@vger.kernel.org>; Thu,  1 Aug 2024 11:01:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4601F184529
+	for <linux-mmc@vger.kernel.org>; Thu,  1 Aug 2024 11:01:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722510105; cv=none; b=Hz4j51qGswajT091nccgFr3fiupBpOSho3OgWG/Jr5RVYyZ4wYkZBP94BEM2nwFu+F7xAxMkqPx4VST0EGBVwvlvei6dSVyFgUL2gOvyZPpzMaUoSJ9/0PZKss3fB+z+SDM2UTeZKkwkof911MU7ckd34c9VYga7dOFIgzSvgLU=
+	t=1722510109; cv=none; b=bg21qBIP6fLuwyyrwOod14NnBFzutHTEC31S/5e+Cf3dM896C2oTd19uMfsad9vmg/Ofk4TM3oEv6WTTCIITwbDOkNHX6KUTyGEbAwvHCejFnWqLkqUlCN2TV9uDoNCnjgadSZJFxoa+EIURVVQ+MUNyAF5gU09qnGNpfUlP0qE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722510105; c=relaxed/simple;
-	bh=MRvLSRflFY9cBgACqddCPno2qFWCVu9cH8/xiZokPPQ=;
+	s=arc-20240116; t=1722510109; c=relaxed/simple;
+	bh=o3DMQQxGo3x39I7djsSUQeIpjlb4LUUbCkAOfJFGf1E=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JtZHxxrFNmCll4QxpSl76/7nX0T8w0FanQByCkLygZlNPMt/lzy8VIvU9y6eF9QP2rHvXnPwUjg2BRYMga6w0AsjVZP501f5AZ8n76+FR/ykFOuy1UPw70DucbFaMG3QheRQZuZtZwMTnNTTYEY8YRlqB5F5Hce0L8lJgoCR08Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=keGqqvan; arc=none smtp.client-ip=209.85.128.170
+	 To:Cc:Content-Type; b=u7mmdqkUVJwivL3FmmwWj9icr64t8Tfl6ftOSOQXbr2fk9JxjGRxhlRds7rQbtk/xaxQEMRmEgS5uspajJphvYGpnpQYZriISmE1iIGIXkB/KB7OUqCU3T888VdPnG4FPpBLbQ7560qukCu58RzSJNRbzTv/8H7vSbtKPJums7A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=guHNDVh2; arc=none smtp.client-ip=209.85.219.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="keGqqvan"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-65fdfd7b3deso54402497b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2024 04:01:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="guHNDVh2"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e0b2d2e7dc9so5594544276.2
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Aug 2024 04:01:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1722510103; x=1723114903; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1722510107; x=1723114907; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=4trUpMv/W8d4ikbqlUsjU17uBaeiu1bYnhrDFMlu+YY=;
-        b=keGqqvanqm6LvUvP+Ai8ITi8u0IMZYvfFGxvJMp0JBVHD/yi2jtmx8UrbdDX/NYNUe
-         G/lsvPki4XCyDyeKuFkrfyPSX6mEow8fJxoXnCKrsS+rcCjUJ7GIwe3a8HdoNFR7rW7p
-         ZlQhURQNN5OxYQ0v/o2StjIxETiH/QUPjkWoH7QGS8UesrrXGzMhtOdV2euphyvC9J4z
-         f+p0bk76nqoWGB4IO8/OVzsV4acoFL1u6BIrrjH2oln23/dDEYINLP5QpJWb+2DQuwh7
-         bNqGOS2p/Vy2KS4J4ACWZpfqK7BvzFjdkrchUkmXV3yTuvTa3+HmgnpxZ9MFadu5Iqmh
-         lKDw==
+        bh=m/lBUEuHtZhYH9hMMltxd6FYM94een14SRBxxIIu5uM=;
+        b=guHNDVh2d+8xwoK5wKYC/qmSDhV47aQFbaYcr5OE+wD0dEbADgpfGTWClpKyIChpMY
+         ct6LU4Ib6SnPWw8niFnl6AYLwwjM3n0yG+uuGgIcHnWv0FQsG8fdOafq0qnNGygHoxjS
+         SYMjNoMI1NLjqDFZ87ED5Uhb5c/65OXRBuG061P7Aj7Z16PRISing8OyzyBxRf6gbcR+
+         wVbwpgAnEuTCBD3GBV+36kySo9+J0vptSFL3r1ZXTpgrswEQVdf9clANi5S0eK9b9vFF
+         mniW3kz38ZDs6Bt8OCsGNC8K00JmSuCTu7V8dPAZEWei36/wjKhL5cTBkH4dCAtr9U3v
+         vnSQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722510103; x=1723114903;
+        d=1e100.net; s=20230601; t=1722510107; x=1723114907;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=4trUpMv/W8d4ikbqlUsjU17uBaeiu1bYnhrDFMlu+YY=;
-        b=mAyGZ/rI25m7P0F/8dBXjPVkaO+/PS6NujUhqXKRJMUtJCg2KBU5fyHNrZo9DSdaRg
-         q+iP0Dyx4RloJww6w738nu5BSXWkFeCXwoD2kICwFB40/+WtPgcJP2pC8o7TvEJNkC5w
-         rL7eiKDfWRIDVGMCgRYcTRRRuD2fToESb9ET1p4bAsyhRnCC5eAkXSyF2BrTRTnuG07R
-         XUINvwphPxfvBZOa2E75Rs1gQEtQtCm/TCSSX80/TuogX8NFRyk7Wixh10iLmJ9rbb9W
-         tNEJq0v0TGJOCzsarmTft+/7v8tTsx65cWfhJR33zC/CHHzYhxCyuuibxs4lOnZy0v+v
-         PtFQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVp1EtdvHzDet1r8JpHVlt91ubX1Riho2XP49HBxcxubldz95BgLW3HAXRBEebXJ+whIUgfvkL+oBdZsNVzxpbS3TEHhLtViR/q
-X-Gm-Message-State: AOJu0Yy6dB/nbVQdnYp1V1LZxLIz7jMVxkjHDnwUcJXLlkdK5+rCl/h4
-	tNKKdfbC+Z/wW9BQPGc4kjG9su3RpMywE9CV0XkRICU1nifafMJ8Bpcs0t4FVN8taBjsyeFHNcd
-	iCOUWel8leV/mRNqxWsMSHaibo6JQEdCzlVy3hg==
-X-Google-Smtp-Source: AGHT+IGsJtr765trHWKToCgzsb+QNQeokpwLn93TcvWJ2oyDkYmYJl8bttv2EoecCGf3CWCYpquOz6J3evhCbjRj0fY=
-X-Received: by 2002:a05:6902:1582:b0:e0b:d6aa:43e3 with SMTP id
- 3f1490d57ef6-e0bd6aa45acmr624829276.17.1722510102849; Thu, 01 Aug 2024
- 04:01:42 -0700 (PDT)
+        bh=m/lBUEuHtZhYH9hMMltxd6FYM94een14SRBxxIIu5uM=;
+        b=H/571pZa89SXycgknLNSOWGCu0OQ17B2h7LC9h2XLNKVKCBiq2v2sZ3T2jm+h6XbI3
+         sXwAdomORMSBUf7jTVGu7jZg5u4qbS5XUQBtzeoRe1HJvigXTHh0z2wJ3mr+Fmz7vsg4
+         6JHqykMi+EJ6SUX7iQCQXT4x89p2eHZqMHnobPYv5EjQumqfct0OBcl15YbazfLuv7Xw
+         G783JpX3w/y3Ka/fkzkV7XUDImtU5zNeY8UbV56rthDq4E5DHxO7/3Mcd1mNGCUiz8Sk
+         T33Q1HSo7sNE7ozn8KDQeShPZlFvp5YtFl/qmW+zIJR7+ZC0A+D6pDLUGNRjO/HDuwlg
+         vIaw==
+X-Forwarded-Encrypted: i=1; AJvYcCWDD9KzVoPWEjxo7N0exyGPQa4mKwS7jD0asp12X9WczppOHu3S+rNnOqJ2NwiaXz/K+mk12DxkXIyzbKn7s8eXh29KJ61Gud8f
+X-Gm-Message-State: AOJu0YzC2js0d1zFUwfPSozVaoGz35XN8rTesinJxfNLioUbvjbfzhEH
+	1FJ/Ac7/Y29MOpLfVRHWHG9mQ6xQuZCm8AHVVkP0SCBRNxA7V0A5bmKag4EoCOyw6wQfAlcfurd
+	K5Mh4eT5yMT27cmweFRA2KHqHn8impc+HZe0ptQ==
+X-Google-Smtp-Source: AGHT+IFNMTUyuraUOe17RSwLCsQl2Heh5eaqrtk7oyS7ocUH1DnCdcUeW8y+TayZq1Ii/rIMs7hczcO3KQE8rJP/Pyk=
+X-Received: by 2002:a05:6902:1209:b0:e08:6055:9f3c with SMTP id
+ 3f1490d57ef6-e0bcd2b587amr2051515276.31.1722510107179; Thu, 01 Aug 2024
+ 04:01:47 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240714155510.48880-1-doug@schmorgal.com>
-In-Reply-To: <20240714155510.48880-1-doug@schmorgal.com>
+References: <20240716013704.10578-1-mengqi.zhang@mediatek.com>
+In-Reply-To: <20240716013704.10578-1-mengqi.zhang@mediatek.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 1 Aug 2024 13:01:07 +0200
-Message-ID: <CAPDyKFoa2s_L4T-SKkfNwBv0_p1jQDkJh_RAWOCOw_MiH69Nuw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pxav2: Remove unnecessary null pointer check
-To: Doug Brown <doug@schmorgal.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	Dan Carpenter <dan.carpenter@linaro.org>
+Date: Thu, 1 Aug 2024 13:01:11 +0200
+Message-ID: <CAPDyKFqK7CwGF2CitFtHUE_8hRxMr92KmWQzdO4kWRa7kYqHuQ@mail.gmail.com>
+Subject: Re: [v1, 1/1] mmc: mtk-sd: receive cmd8 data when hs400 tuning fail
+To: Mengqi Zhang <mengqi.zhang@mediatek.com>
+Cc: chaotian.jing@mediatek.com, matthias.bgg@gmail.com, 
+	angelogioacchino.delregno@collabora.com, wenbin.mei@mediatek.com, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	stable@vger.stable.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 14 Jul 2024 at 17:57, Doug Brown <doug@schmorgal.com> wrote:
+On Tue, 16 Jul 2024 at 03:37, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
 >
-> There is no need to check for a null mrq->cmd in pxav1_request_done.
-> mmc_request_done already assumes it's not null, and it's always called
-> in this path by every SDHCI driver. This was caught by Smatch.
+> When we use cmd8 as the tuning command in hs400 mode, the command
+> response sent back by some eMMC devices cannot be correctly sampled
+> by MTK eMMC controller at some weak sample timing. In this case,
+> command timeout error may occur. So we must receive the following
+> data to make sure the next cmd8 send correctly.
 >
-> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
-> Closes: https://lore.kernel.org/all/9ddaef2a-05bb-4fe7-98c5-da40a0813027@stanley.mountain/
-> Signed-off-by: Doug Brown <doug@schmorgal.com>
+> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+> Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
+> Cc: stable@vger.stable.com
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-pxav2.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/mtk-sd.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-> index b75cbea88b40..7b957f6d5588 100644
-> --- a/drivers/mmc/host/sdhci-pxav2.c
-> +++ b/drivers/mmc/host/sdhci-pxav2.c
-> @@ -126,7 +126,7 @@ static void pxav1_request_done(struct sdhci_host *host, struct mmc_request *mrq)
->         struct sdhci_pxav2_host *pxav2_host;
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index a94835b8ab93..e386f78e3267 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1230,7 +1230,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+>         }
 >
->         /* If this is an SDIO command, perform errata workaround for silicon bug */
-> -       if (mrq->cmd && !mrq->cmd->error &&
-> +       if (!mrq->cmd->error &&
->             (mrq->cmd->opcode == SD_IO_RW_DIRECT ||
->              mrq->cmd->opcode == SD_IO_RW_EXTENDED)) {
->                 /* Reset data port */
+>         if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
+> -               if (events & MSDC_INT_CMDTMO ||
+> +               if ((events & MSDC_INT_CMDTMO && !host->hs400_tuning) ||
+>                     (!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning))
+>                         /*
+>                          * should not clear fifo/interrupt as the tune data
+> @@ -1323,9 +1323,9 @@ static void msdc_start_command(struct msdc_host *host,
+>  static void msdc_cmd_next(struct msdc_host *host,
+>                 struct mmc_request *mrq, struct mmc_command *cmd)
+>  {
+> -       if ((cmd->error &&
+> -           !(cmd->error == -EILSEQ &&
+> -             (mmc_op_tuning(cmd->opcode) || host->hs400_tuning))) ||
+> +       if ((cmd->error && !host->hs400_tuning &&
+> +            !(cmd->error == -EILSEQ &&
+> +            mmc_op_tuning(cmd->opcode))) ||
+>             (mrq->sbc && mrq->sbc->error))
+>                 msdc_request_done(host, mrq);
+>         else if (cmd == mrq->sbc)
 > --
-> 2.34.1
+> 2.25.1
 >
