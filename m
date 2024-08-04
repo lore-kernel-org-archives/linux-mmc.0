@@ -1,57 +1,57 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
+Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DB8A13B7BC;
-	Sun,  4 Aug 2024 17:44:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A4CE13C684;
+	Sun,  4 Aug 2024 17:44:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722793481; cv=none; b=d50AfIpeTcaezsHYubgLIdr71j06xiXVjsHcX3ZkXABXGzvX43MvyAlJXVeD7T+ZKmvgn/aE0t1qxdMZtuO1vaA1MgT5HkB00NoDAP7ad7sY8pXm+69H2xKy4c/vftG0mCPwCqMoFQsviF8XgYetJ36fHWwC/CErxIyWaW+mF90=
+	t=1722793483; cv=none; b=UXzMpBy0mtSRk9k3o6mjLBDGPmt5S3HHqZ751Tn5XR87Iv0fDuxv3QInun0LJ5Sxh+8cjgeJyh98UBGPXB5/oO4Igw6bN4Tu8z0ZU9NkJJphj/zMd2xbRzosEbPW8Hs6AB6cv1Ke/1gxxN0ND4+x+zQtiJXscXna6c9W1hcyh1A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722793481; c=relaxed/simple;
-	bh=i39wCXbk/q1Tvo8ZjWFPqjdA9TSVJhHTaL2sBpHLfj4=;
+	s=arc-20240116; t=1722793483; c=relaxed/simple;
+	bh=oX/ZKMzDsgeqI5cjVzfnGmIF6ySpnog9LxLFYO3bQKE=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=MoRqJ5jQbgLkjQmG+dtMDVKgrj7uvFX1hWEvc0tTQbrHwcxZ3abPmC3MNmcMv0cqz0LT3H3DNR+Z1W5HeRPUEe4g/l++9FAAVKyhnLJBRUlQ9bRHRsJkRtaOYqnCu4gkNoybgdzrvuwTBiIhHf3bfuW5H7UHBtF6GLV6pIBZCSQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hk49D1FB; arc=none smtp.client-ip=209.85.208.181
+	 MIME-Version; b=PYhod9c9RjVt4o0ho5ykA+ezkqsd4hxoh2eecgf/2AEqLLf2u95VjpHrDlKdDp3s9DfWKynbcEzPj3wAS+JdeLP2JMYNTScTGBYnrbLjQPLeS0xMyNrtob/H7eDmZhjmV6uf/x2181LagPMGKmaQ8PeFoo21HMfvBP7IZXJqkC0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TalXd8I4; arc=none smtp.client-ip=209.85.208.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hk49D1FB"
-Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-2ef2d96164aso108270761fa.3;
-        Sun, 04 Aug 2024 10:44:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TalXd8I4"
+Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-2f025b94e07so123614351fa.0;
+        Sun, 04 Aug 2024 10:44:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1722793477; x=1723398277; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1722793480; x=1723398280; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=1AwITVf2WPGSBxmw93SjsOJVEu1oqZyIKeUGfTrfzs4=;
-        b=hk49D1FBGKjjF1vX1GuJooQ8x8VaIsrLZ02BZ4M2WbCCr0yHJ73aP5rf9Ygf6SZOjH
-         aAwIxlsGH69L+Vf4dPslpA8rXpFBLCwiPYCZGkivlPC+nzybYnImHk0VV10ZlJJf12pZ
-         ABFQZcU3JamDWpm78UQpxzhbMs2RihO+aUH8h2XSg1iM1PRvtGG5uvJXNxD4YwpNKppM
-         pVZ5G0K1p13Eo+RNMVP1QcAdrV6G7hw7jQnl+mL5bGKlDHpUWXmIWNHyjDZCyLycBxnS
-         +dYG1/cvhbTrQwAv5LTxgK+Uzwq2UNXB+lQU4opoCccwwySb+b2HQppqa4etGBlBVuxv
-         E/Yg==
+        bh=fvAc4YhKm/u3S+4O+Aw+vXQgk5wKoMLQshnx93IPvPo=;
+        b=TalXd8I4fK4eWg9LprzcT2+zwz7GlJ/v0k5zMZQDB9zT9xcU/kS7h3wyZbXQckUdIM
+         8Ns6YebrOiunGPFFMtRHqccQVDDhbVyfiqx1mUXquutwaGkPMUn/DkVL20XjQWDD4Y20
+         n8vQg1sN3ufaYkK2MhUseBWmJV48e1hba+VrKrbuyhEQoa/uTmCpt1yKOfkUS9wusblB
+         LXBGVpDuQm3K/h/OMMRU9A/KWGWehShom7SGiWk7jEM1aWs51V2Fcxv+zbSeXhGTj8/p
+         uRBS0WavuX+0sifFhryCJprs8EyscGsWN3FZ1kF43T1z/giC9nvRmLhZVcAqooNWe728
+         Wn9Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722793477; x=1723398277;
+        d=1e100.net; s=20230601; t=1722793480; x=1723398280;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=1AwITVf2WPGSBxmw93SjsOJVEu1oqZyIKeUGfTrfzs4=;
-        b=eZCdUhLejz07H10G+KfLPz2U3ydv19Wnn/dbhEzcnq+KBXSxRjKF5vkqzpaLCpunVN
-         VdTG6Ij09kpRtPL9ynOi1xYERiKO3q3C7d/qkPPp7dmoLKsYwbfuWuzkuVQUydoLLvq8
-         i2Haw6ttrgEgk6FZL3McRhP2Dzcrx/4NUR8X+lopamXoSzUGidYe2BIw/n4kAZx0HWCY
-         QQcS8UY7JOKYwv0BPwvldQvIubGQw+Q9fQeY7pLBXlmILj5D9tjxjaEsAYlWXxTmj0Cq
-         5MpFmMSY5sY9oI7nk5YD77FB0NwvmLQPCHMovYfWlHP3C/nYe5rrYv88swjlgqqjIcLZ
-         cm4g==
-X-Forwarded-Encrypted: i=1; AJvYcCUL16gbz07YwOUBF9wZoSmRvrk9b+oueGWnM8royWCz6QWI7hBZa9T7cD5BNkTn9+5zkjk7xIabU9MP5PBSKkZ8s7Jee5NgxScBrSM9rQ7tf47QSdX6x/r0ByFvYjR3rsrgMRKae+zldFKMyg+zc3oHISo8QFHgG5HeDHvNZm149nUeGA==
-X-Gm-Message-State: AOJu0YyFPPci09rs3kwKdbS3GvQOcEYjqsNA8iVX6QX2R3ipR3n1uQ2H
-	LhJMeX2Lk6rOXArXZbzy5r1rRPsfxmq1OwAvuLgrdYTEHJpxhsCV
-X-Google-Smtp-Source: AGHT+IHwTmhJSwb0UG1rOpSRK6ekgmxd5y81uHXMaKyWlIHKHAQERVOHMSA2nnFtlJccl0EgNbQB/Q==
-X-Received: by 2002:a05:651c:213:b0:2f0:1ead:b72d with SMTP id 38308e7fff4ca-2f15aaa3e9amr61952151fa.12.1722793477247;
-        Sun, 04 Aug 2024 10:44:37 -0700 (PDT)
+        bh=fvAc4YhKm/u3S+4O+Aw+vXQgk5wKoMLQshnx93IPvPo=;
+        b=Q33EQYqOOtEwKfMjzh7ifED8AehH2G0LpAjnMZS3YI66MZ0nMdk1I1Rh538lq2o23v
+         7S+dmwhT3O4bi3qlIIPIzRrM2IccDZj1ihDD5Rcf4N/enS+OJbFu2mNzEt2/t3LnsfpM
+         vAO7A8RMMl4fLE+zVXsqBW4ls9GLqfjysp6erE6aD6R68LznDlkOIvrAPB0vKtJPqeS/
+         iA2TNZ/b+gCH1A7Z/rTOOX8qJYv7Rh2QBiFFDGlaV2qYYeEiuSnVtc5mNU/KGRwRgacH
+         zn5/zdfIP2AEDuSt4aa0o3NMahtmFdEDWFYgyYALMAN+JmBnd0Jzo/43XJYBWXacoEgy
+         ugPg==
+X-Forwarded-Encrypted: i=1; AJvYcCWD45zabf+dITj3EAYN4MwF4oO0UgL01kDCcTrbqQDnFqIz7iKyYCGoWg/Py5Id67k/8f/hXFlZ6IcxnMNK3m2jzoL5pDhXT/UsOHuhJUyoG8kUx4GGUKda0Ph+1GH5QM5tZ2tXTLD1VW2AAWu/VUb+gA1iFGovbE9M3tgQ+zId6S5vPQ==
+X-Gm-Message-State: AOJu0YxIDOrfPu9W5Og6rRmBOZ3/negzzA0N0EFUPh4NglDBC4q1p0eF
+	vTka5VDaP8lk122VtoPk3vLTnh2zwMzvlWOK0tQkwnQJaHtqH3kt
+X-Google-Smtp-Source: AGHT+IFU8AJjmTAyV92JRJYtOdqk61Rt6Gt62ZAN8oIR6M3nrfeJsTuXcuqLW4SL5nh2FbVIg6bieg==
+X-Received: by 2002:a2e:9794:0:b0:2ef:284e:1d07 with SMTP id 38308e7fff4ca-2f15aa97d16mr69060581fa.13.1722793479648;
+        Sun, 04 Aug 2024 10:44:39 -0700 (PDT)
 Received: from localhost.localdomain (host-87-6-196-30.retail.telecomitalia.it. [87.6.196.30])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e0357asm109530485e9.12.2024.08.04.10.44.34
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e0357asm109530485e9.12.2024.08.04.10.44.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Aug 2024 10:44:36 -0700 (PDT)
+        Sun, 04 Aug 2024 10:44:39 -0700 (PDT)
 From: Christian Marangi <ansuelsmth@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -74,9 +74,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-kernel@vger.kernel.org,
 	linux-mtd@lists.infradead.org,
 	linux-nvme@lists.infradead.org
-Subject: [PATCH v2 4/6] block2mtd: attach device OF node to MTD device
-Date: Sun,  4 Aug 2024 19:44:08 +0200
-Message-ID: <20240804174414.18171-5-ansuelsmth@gmail.com>
+Subject: [PATCH v2 5/6] dt-bindings: mtd: Add Documentation for Airoha fixed-partitions
+Date: Sun,  4 Aug 2024 19:44:09 +0200
+Message-ID: <20240804174414.18171-6-ansuelsmth@gmail.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20240804174414.18171-1-ansuelsmth@gmail.com>
 References: <20240804174414.18171-1-ansuelsmth@gmail.com>
@@ -88,61 +88,110 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Attach device OF node to MTD device if defined and the root blockdev is
-being used to add support for partitions defined in DT node.
+Add Documentation for Airoha fixed-partitions compatibles.
 
-This permits the usage of fixed-partition or alternative parser with the
-use of block2mtd module.
+Airoha based SoC declare a dedicated partition at the end of the flash to
+store calibration and device specific data, in addition to fixed
+partitions.
+The offset of this special partition is not well defined as it depends on
+flash bad block management that might require reserving additional space
+at the end of the flash.
+
+This binding allows defining all fixed partitions and marking the last one
+to detect the correct offset.
 
 Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
 ---
- drivers/mtd/devices/block2mtd.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ .../partitions/airoha,fixed-partitions.yaml   | 80 +++++++++++++++++++
+ 1 file changed, 80 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
 
-diff --git a/drivers/mtd/devices/block2mtd.c b/drivers/mtd/devices/block2mtd.c
-index b06c8dd51562..8ff9787edc24 100644
---- a/drivers/mtd/devices/block2mtd.c
-+++ b/drivers/mtd/devices/block2mtd.c
-@@ -265,6 +265,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
- 	struct file *bdev_file;
- 	struct block_device *bdev;
- 	struct block2mtd_dev *dev;
-+	struct device *ddev;
- 	loff_t size;
- 	char *name;
- 
-@@ -324,6 +325,15 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
- 	dev->mtd.priv = dev;
- 	dev->mtd.owner = THIS_MODULE;
- 
-+	/*
-+	 * Check if we are using root blockdev.
-+	 * If it's the case, connect the MTD of_node to the ddev parent
-+	 * to support providing partition in DT node.
-+	 */
-+	ddev = disk_to_dev(bdev->bd_disk);
-+	if (ddev == &bdev->bd_device)
-+		dev->mtd.dev.of_node = of_node_get(ddev->parent->of_node);
+diff --git a/Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml b/Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
+new file mode 100644
+index 000000000000..8d7221561f51
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
+@@ -0,0 +1,80 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mtd/partitions/airoha,fixed-partitions.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
- 	if (mtd_device_register(&dev->mtd, NULL, 0)) {
- 		/* Device didn't get added, so free the entry */
- 		goto err_destroy_mutex;
-@@ -337,6 +347,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
- 	return dev;
- 
- err_destroy_mutex:
-+	of_node_put(dev->mtd.dev.of_node);
- 	mutex_destroy(&dev->write_mutex);
- err_free_block2mtd:
- 	block2mtd_free_device(dev);
-@@ -515,6 +526,7 @@ static void block2mtd_exit(void)
- 		struct block2mtd_dev *dev = list_entry(pos, typeof(*dev), list);
- 		block2mtd_sync(&dev->mtd);
- 		mtd_device_unregister(&dev->mtd);
-+		of_node_put(dev->mtd.dev.of_node);
- 		mutex_destroy(&dev->write_mutex);
- 		pr_info("mtd%d: [%s] removed\n",
- 			dev->mtd.index,
++title: Airoha SoC partitioning
++
++description: |
++  Airoha based SoC declare a dedicated partition at the end of the flash to
++  store calibration and device specific data, in addition to fixed partitions.
++  The offset of this special partition is not well defined as it depends on
++  flash bad block management that might require reserving additional space at the
++  end of the flash.
++
++  This binding allows defining all fixed partitions and marking the last one to
++  detect the correct offset.
++
++maintainers:
++  - Christian Marangi <ansuelsmth@gmail.com>
++
++select: false
++
++properties:
++  compatible:
++    const: airoha,fixed-partitions
++
++  "#address-cells":
++    enum: [ 1, 2 ]
++
++  "#size-cells":
++    enum: [ 1, 2 ]
++
++patternProperties:
++  "^partition@[0-9a-f]+$":
++    $ref: partition.yaml#
++    properties:
++      compatible:
++        const: airoha,dynamic-art
++    unevaluatedProperties: false
++
++required:
++  - "#address-cells"
++  - "#size-cells"
++
++additionalProperties: false
++
++examples:
++  - |
++    partitions {
++        compatible = "airoha,fixed-partitions";
++        #address-cells = <1>;
++        #size-cells = <1>;
++
++        partition@0 {
++          label = "bootloader";
++          reg = <0x00000000 0x00080000>;
++        };
++
++        partition@80000 {
++          label = "tclinux";
++          reg = <0x00080000 0x02800000>;
++        };
++
++        partition@2880000 {
++          label = "tclinux_slave";
++          reg = <0x02880000 0x02800000>;
++        };
++
++        partition@5080000 {
++          label = "rootfs_data";
++          reg = <0x5080000 0x00800000>;
++        };
++
++        partition@ffffffff {
++          compatible = "airoha,dynamic-art";
++          label = "art";
++          reg = <0xffffffff 0x00300000>;
++        };
++    };
 -- 
 2.45.2
 
