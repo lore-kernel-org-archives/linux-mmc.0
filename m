@@ -1,57 +1,57 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 830D113AD29;
-	Sun,  4 Aug 2024 17:44:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DB8A13B7BC;
+	Sun,  4 Aug 2024 17:44:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722793478; cv=none; b=ZSbwp0SowJLTeKbjTCnH2XoKemsLexqFQiYHDErWbUeGiCRJM5mpMRPnlr8b2rsXe96SexcwC8PdbB1Tdev5xIS/iuMWfZIxqvfeNU3dupABoc3vdwoAvPFYw/C2DyOzPVJ0OzLwl/D0GqdP1oTi8icn1wBaUGyuqVAqNia8Zek=
+	t=1722793481; cv=none; b=d50AfIpeTcaezsHYubgLIdr71j06xiXVjsHcX3ZkXABXGzvX43MvyAlJXVeD7T+ZKmvgn/aE0t1qxdMZtuO1vaA1MgT5HkB00NoDAP7ad7sY8pXm+69H2xKy4c/vftG0mCPwCqMoFQsviF8XgYetJ36fHWwC/CErxIyWaW+mF90=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722793478; c=relaxed/simple;
-	bh=0sysWhwNmnNKfHFiwRVWuNqKt3+jxEFZ3zFpJ5/W2Kg=;
+	s=arc-20240116; t=1722793481; c=relaxed/simple;
+	bh=i39wCXbk/q1Tvo8ZjWFPqjdA9TSVJhHTaL2sBpHLfj4=;
 	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=U8BL7HzWOW3gqJO3nIGXMmLuhAfmFHWQ2LMN3P/O/ubgJGnSZP4GF9zWYZL/bgL5NzkI7QjxZgAARI2qFDEE5WK/sl8zl6Pn9fOTdXxlz0KxjmbWz33L0/h1HOLEGEgvHcU9odjVRXsoxwMcMBVA8+ucPF+JCo3L60ZUs6iAerY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jTAeNyHE; arc=none smtp.client-ip=209.85.128.49
+	 MIME-Version; b=MoRqJ5jQbgLkjQmG+dtMDVKgrj7uvFX1hWEvc0tTQbrHwcxZ3abPmC3MNmcMv0cqz0LT3H3DNR+Z1W5HeRPUEe4g/l++9FAAVKyhnLJBRUlQ9bRHRsJkRtaOYqnCu4gkNoybgdzrvuwTBiIhHf3bfuW5H7UHBtF6GLV6pIBZCSQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hk49D1FB; arc=none smtp.client-ip=209.85.208.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jTAeNyHE"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-428163f7635so66246455e9.2;
-        Sun, 04 Aug 2024 10:44:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hk49D1FB"
+Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-2ef2d96164aso108270761fa.3;
+        Sun, 04 Aug 2024 10:44:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1722793475; x=1723398275; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1722793477; x=1723398277; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=zJtL0MfF3HGZoWE7QS0/OcrDoRKxdV59VhkJ0rmXwsw=;
-        b=jTAeNyHEc6Oi3acm0BHrbQeMVAx1dtSkUcfpiasWxd1BKMe1Ibr46XVgvtu4YWIJfJ
-         nsntfXXa+7LCcTALQKnqzc8/CautyJTtjHHERLvbY4DDc7PvQusnDSSIyt3fL/RAKwqR
-         +rDtl+BrBiN/ch7DnJrt2gopn3QddBGLBoGE+uEw9gh5TFM4fqeBUAeCszIQVpmvxZV0
-         vJHurBiDPmpNLzVC5QqruKgOA4Jzd4z0dXEU63j9YeYoN/Suov/vkbk2N9RcswF6sV7d
-         3d8aaWanwjZTbEgZxJpE5lY0+5/NYh3dSaHuj+SQSDzVMqlNucWllvSl7xSf5UFhzGK0
-         uVoQ==
+        bh=1AwITVf2WPGSBxmw93SjsOJVEu1oqZyIKeUGfTrfzs4=;
+        b=hk49D1FBGKjjF1vX1GuJooQ8x8VaIsrLZ02BZ4M2WbCCr0yHJ73aP5rf9Ygf6SZOjH
+         aAwIxlsGH69L+Vf4dPslpA8rXpFBLCwiPYCZGkivlPC+nzybYnImHk0VV10ZlJJf12pZ
+         ABFQZcU3JamDWpm78UQpxzhbMs2RihO+aUH8h2XSg1iM1PRvtGG5uvJXNxD4YwpNKppM
+         pVZ5G0K1p13Eo+RNMVP1QcAdrV6G7hw7jQnl+mL5bGKlDHpUWXmIWNHyjDZCyLycBxnS
+         +dYG1/cvhbTrQwAv5LTxgK+Uzwq2UNXB+lQU4opoCccwwySb+b2HQppqa4etGBlBVuxv
+         E/Yg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722793475; x=1723398275;
+        d=1e100.net; s=20230601; t=1722793477; x=1723398277;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=zJtL0MfF3HGZoWE7QS0/OcrDoRKxdV59VhkJ0rmXwsw=;
-        b=c7ESUf0785QkR2VsVaoxawqHNjclLeNUzAkwI2avJDVDZ9hV2etZTCgQ9RmkFQWDF9
-         HMQjIeHqAOMJ7GTEzGQCslNzinKolHKlXEn+LmO2QLmYieQCVdmomQED4Fur4wQmjfNR
-         sVg4xrGkv18gLcgtmZbm73QJiB0TyoEeUIZHftKVZsoOjhbysuvwaW3Uoz3isIBxj0AX
-         gR1HIcnnZ+o7OWAYNRXCUtysv6S7Ms1rDgQ6dSI1n6Aj6gOmBQ6IO5/J3hZI8l8QEqc9
-         ZZ0X2P9uMM8G/6ms1jVbGOIo8bdf4uvFc8DXOFNuEB1/42TlBXRa0pGX5pcryl+w41Tp
-         XMVA==
-X-Forwarded-Encrypted: i=1; AJvYcCUrW/l2uM6ua3l75y+CZYy8D/m08D16gzkoOwRaf8Oxtq6eJTr4lDT/UMK28D+bpUC9Y+SAy/94SScQD25dAsPreCGLZUHM2TH/wYIM0mBk5R5h4i3U8zJl5hyrdtxcOgfEPTgdm0tVeam3rG5JBWoNo5yYB+afR4l0Wo1ZX+EkVgpbrw==
-X-Gm-Message-State: AOJu0YzwPb1QQ2pu7HIt+iAU4GhgS6YQ94e2D1TY8Ie5SjU7grRVTr3u
-	/yNM2b4uGJEMHztY9gkYJjwo7eV/FQWMAI+SIHDYJSFpK2xrSXco
-X-Google-Smtp-Source: AGHT+IFN8eD9eeHRek82k2yYE+fWbJDyGcXBovLeKVHyNRAcWSy58vdincZxAdx4fAZXLwmahnfYCg==
-X-Received: by 2002:a05:600c:3acc:b0:426:5f7d:addc with SMTP id 5b1f17b1804b1-428e6b8380dmr57122375e9.37.1722793474565;
-        Sun, 04 Aug 2024 10:44:34 -0700 (PDT)
+        bh=1AwITVf2WPGSBxmw93SjsOJVEu1oqZyIKeUGfTrfzs4=;
+        b=eZCdUhLejz07H10G+KfLPz2U3ydv19Wnn/dbhEzcnq+KBXSxRjKF5vkqzpaLCpunVN
+         VdTG6Ij09kpRtPL9ynOi1xYERiKO3q3C7d/qkPPp7dmoLKsYwbfuWuzkuVQUydoLLvq8
+         i2Haw6ttrgEgk6FZL3McRhP2Dzcrx/4NUR8X+lopamXoSzUGidYe2BIw/n4kAZx0HWCY
+         QQcS8UY7JOKYwv0BPwvldQvIubGQw+Q9fQeY7pLBXlmILj5D9tjxjaEsAYlWXxTmj0Cq
+         5MpFmMSY5sY9oI7nk5YD77FB0NwvmLQPCHMovYfWlHP3C/nYe5rrYv88swjlgqqjIcLZ
+         cm4g==
+X-Forwarded-Encrypted: i=1; AJvYcCUL16gbz07YwOUBF9wZoSmRvrk9b+oueGWnM8royWCz6QWI7hBZa9T7cD5BNkTn9+5zkjk7xIabU9MP5PBSKkZ8s7Jee5NgxScBrSM9rQ7tf47QSdX6x/r0ByFvYjR3rsrgMRKae+zldFKMyg+zc3oHISo8QFHgG5HeDHvNZm149nUeGA==
+X-Gm-Message-State: AOJu0YyFPPci09rs3kwKdbS3GvQOcEYjqsNA8iVX6QX2R3ipR3n1uQ2H
+	LhJMeX2Lk6rOXArXZbzy5r1rRPsfxmq1OwAvuLgrdYTEHJpxhsCV
+X-Google-Smtp-Source: AGHT+IHwTmhJSwb0UG1rOpSRK6ekgmxd5y81uHXMaKyWlIHKHAQERVOHMSA2nnFtlJccl0EgNbQB/Q==
+X-Received: by 2002:a05:651c:213:b0:2f0:1ead:b72d with SMTP id 38308e7fff4ca-2f15aaa3e9amr61952151fa.12.1722793477247;
+        Sun, 04 Aug 2024 10:44:37 -0700 (PDT)
 Received: from localhost.localdomain (host-87-6-196-30.retail.telecomitalia.it. [87.6.196.30])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e0357asm109530485e9.12.2024.08.04.10.44.32
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e0357asm109530485e9.12.2024.08.04.10.44.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Aug 2024 10:44:34 -0700 (PDT)
+        Sun, 04 Aug 2024 10:44:36 -0700 (PDT)
 From: Christian Marangi <ansuelsmth@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -74,9 +74,9 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-kernel@vger.kernel.org,
 	linux-mtd@lists.infradead.org,
 	linux-nvme@lists.infradead.org
-Subject: [PATCH v2 3/6] dt-bindings: mmc: add property for partitions node in mmc-card node
-Date: Sun,  4 Aug 2024 19:44:07 +0200
-Message-ID: <20240804174414.18171-4-ansuelsmth@gmail.com>
+Subject: [PATCH v2 4/6] block2mtd: attach device OF node to MTD device
+Date: Sun,  4 Aug 2024 19:44:08 +0200
+Message-ID: <20240804174414.18171-5-ansuelsmth@gmail.com>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20240804174414.18171-1-ansuelsmth@gmail.com>
 References: <20240804174414.18171-1-ansuelsmth@gmail.com>
@@ -88,71 +88,61 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add property for defining partitions node in mmc-card node to define
-partitions in DT by the use of the block2mtd module to use block
-devices as MTD.
+Attach device OF node to MTD device if defined and the root blockdev is
+being used to add support for partitions defined in DT node.
+
+This permits the usage of fixed-partition or alternative parser with the
+use of block2mtd module.
 
 Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
 ---
- .../devicetree/bindings/mmc/mmc-card.yaml     | 40 +++++++++++++++++++
- 1 file changed, 40 insertions(+)
+ drivers/mtd/devices/block2mtd.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-index fd347126449a..0f32d24417bc 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-@@ -26,6 +26,9 @@ properties:
-       Use this to indicate that the mmc-card has a broken hpi
-       implementation, and that hpi should not be used.
+diff --git a/drivers/mtd/devices/block2mtd.c b/drivers/mtd/devices/block2mtd.c
+index b06c8dd51562..8ff9787edc24 100644
+--- a/drivers/mtd/devices/block2mtd.c
++++ b/drivers/mtd/devices/block2mtd.c
+@@ -265,6 +265,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	struct file *bdev_file;
+ 	struct block_device *bdev;
+ 	struct block2mtd_dev *dev;
++	struct device *ddev;
+ 	loff_t size;
+ 	char *name;
  
-+  partitions:
-+    $ref: /schemas/mtd/partitions/partitions.yaml
-+
- required:
-   - compatible
-   - reg
-@@ -45,4 +48,41 @@ examples:
-         };
-     };
+@@ -324,6 +325,15 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	dev->mtd.priv = dev;
+ 	dev->mtd.owner = THIS_MODULE;
  
-+    mmc1 {
-+        #address-cells = <1>;
-+        #size-cells = <0>;
++	/*
++	 * Check if we are using root blockdev.
++	 * If it's the case, connect the MTD of_node to the ddev parent
++	 * to support providing partition in DT node.
++	 */
++	ddev = disk_to_dev(bdev->bd_disk);
++	if (ddev == &bdev->bd_device)
++		dev->mtd.dev.of_node = of_node_get(ddev->parent->of_node);
 +
-+        card@0 {
-+            compatible = "mmc-card";
-+            reg = <0>;
-+            broken-hpi;
-+
-+            partitions {
-+                compatible = "fixed-partitions";
-+                #address-cells = <1>;
-+                #size-cells = <1>;
-+
-+                bootloader@0 {
-+                  label = "bootloader";
-+                  reg = <0x00000000 0x00080000>;
-+                };
-+
-+                tclinux@80000 {
-+                  label = "tclinux";
-+                  reg = <0x00080000 0x02800000>;
-+                };
-+
-+                tclinux_slave@2880000 {
-+                  label = "tclinux_slave";
-+                  reg = <0x02880000 0x02800000>;
-+                };
-+
-+                rootfs_data@5080000 {
-+                  label = "rootfs_data";
-+                  reg = <0x5080000 0x00800000>;
-+                };
-+            };
-+        };
-+    };
-+
- ...
+ 	if (mtd_device_register(&dev->mtd, NULL, 0)) {
+ 		/* Device didn't get added, so free the entry */
+ 		goto err_destroy_mutex;
+@@ -337,6 +347,7 @@ static struct block2mtd_dev *add_device(char *devname, int erase_size,
+ 	return dev;
+ 
+ err_destroy_mutex:
++	of_node_put(dev->mtd.dev.of_node);
+ 	mutex_destroy(&dev->write_mutex);
+ err_free_block2mtd:
+ 	block2mtd_free_device(dev);
+@@ -515,6 +526,7 @@ static void block2mtd_exit(void)
+ 		struct block2mtd_dev *dev = list_entry(pos, typeof(*dev), list);
+ 		block2mtd_sync(&dev->mtd);
+ 		mtd_device_unregister(&dev->mtd);
++		of_node_put(dev->mtd.dev.of_node);
+ 		mutex_destroy(&dev->write_mutex);
+ 		pr_info("mtd%d: [%s] removed\n",
+ 			dev->mtd.index,
 -- 
 2.45.2
 
