@@ -1,146 +1,139 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BAA52374C;
-	Sun,  4 Aug 2024 09:55:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3EE4C2557A;
+	Sun,  4 Aug 2024 11:41:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722765343; cv=none; b=FFiJLPuJIlgcIznj6QS7Znn2xy99jkv3FkjVKefB2vt/5vIvB/K03y6emgKQRtICr9EeHRZxbdevnzQp4AwXK1fgZfK29Run7gtqPjgjk/LK+QOCgHmJ0NJ6RiBe0dtM2dVpmtJPOqD50M7w69V2hRCwoZ7r2bRdntRRCbztz9k=
+	t=1722771714; cv=none; b=CtpmqxJ4DQo5Cnw1FIuxHggNHa+bQ1aYM1DipIO+JvER/1XN8qF5WEY9inN8ENKlvvo8jmgKzm5YV9RCs5gO5OUEU0C6vpYEEByhPiyYO0UaqFHwiek+kn8kHVMcToATdRf/GeflMvqyPak2+YwrwDkia7IVSKQRV4vNEAG32xw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722765343; c=relaxed/simple;
-	bh=iDQYfTwgRwN0YxYUGGYjIwC2RqnR8g//QEUjJupMQQU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UFkgy78/V1KJS1vrO/dxFO3roCQ/98t260XJGO9ElAtUf/2KjllUMz6WBOKaKjDSM80VT060ncC/BjlB8/FgQUUAzAIh/SdEG9Acsb3XKpXD8l01DnYNVbK7SHVFCSuoWv5jwWfevt5iCUafTWMQuD2/1525LrRuzZJcswrgSrw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=b0MBFEuA; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1722771714; c=relaxed/simple;
+	bh=JEcyACUaJFGodv9vunRI6bw4Xqlmc41fmwuaisBEX94=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=DZn+1avIrPcZyV5DcCDggakNPmzoXRt8S46NhZEGUiDBAIF4i/k3T45ijeUUNiLMNqthWp8PbrFAIXAxMEqWdxVsT+myZd3S5J4dxC56YAZ4RWNZcd4kZtLl2RaUjo+PaWNTlyP7Y3Nu+C51yNPZ8dGUJw8Tybt+XrurlwLi2lA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cjePufQu; arc=none smtp.client-ip=209.85.208.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="b0MBFEuA"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F0F6AC32786;
-	Sun,  4 Aug 2024 09:55:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1722765342;
-	bh=iDQYfTwgRwN0YxYUGGYjIwC2RqnR8g//QEUjJupMQQU=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=b0MBFEuA+lBoXwqZkyIw0za9Cowkx+SWAsuy9MFDgv9o4aAg1aSgz5xZdJ6F264Ed
-	 Hbp3zqSRIrFteVHEXZNTfi4JqZmoS616l0myqtoKy+B2q73FRMSLPIZRL5gtynLnf8
-	 sei1OGMuOUc1nXF1dVWatFm789ouMWo51Ruw4yhDXzc7QdeLjOENNq/XitYkZYICEc
-	 S6uiy4NKrKtgELWKyAUHSlXuo+lJr0sBchyDzCLzusQRiuaPUVhHLS6meqbMGZG0zr
-	 g1ih9eH6t09BubenSIbkQi6ksFI99c3b5EPS9Aa4Yf/oDCF4Z+8HyfJuvz7KOPgjIH
-	 UfboQ8K0Pbffg==
-Message-ID: <4df372a7-38ad-4e74-963c-bcdf2eb4ea33@kernel.org>
-Date: Sun, 4 Aug 2024 11:55:35 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cjePufQu"
+Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-2ef2cb7d562so121133411fa.3;
+        Sun, 04 Aug 2024 04:41:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1722771711; x=1723376511; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=uWf5gTHI+JT/SQK1TNIP2OxNSLbRQh1nvSdD+ourA08=;
+        b=cjePufQu4dkbcRhNmxBdllmggt4uQD0M5xvuL7nvjPPjqetdMIylBtJd849nnvT3ta
+         FT+fOU9gWXKZgUvZyIsWupYwF9hLA123EC7GCSpl7+19G6s2s86yUxbOJx1Kbkm1pGAK
+         oZQLeq4XtzWuzyPOO3JsT7+zHaL7l0ZhdXxHSkoaxddLkc8/pQoMGBhDqGunqB44aqTR
+         S6e3nKGnEPPLEzB25UxuF7OVwE9L07AnlbnK1AsY61W9kYFf/+hRaEXHqllleotReUwq
+         ImUzYGF6k4Zpj4CUiMJiy3d3vbCOZVOUciizvZZAy9PRYdtvHi1I5mU3XSQbH5DzPdDH
+         jUSw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1722771711; x=1723376511;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=uWf5gTHI+JT/SQK1TNIP2OxNSLbRQh1nvSdD+ourA08=;
+        b=ZjGCkWbFW00NuULPFJ5+9BuqWPCynmBXn+O63n3vs0FHkgKIzeuqfA2Q/AcY/JTwHY
+         iGHl6FYAmLuK9RrAXwP7Ec2Ksyrkoh9xiPN67FAvy6iYHnsn8vV3rSzi4ptWVAbEety2
+         5/yk7HWodqnVW6O91iHuX19duFjbQha/an1/14/WiQv7A8GmQKMoaXP7+ouNM5C2dqgp
+         UNYT4czHyACCWQyCVCKF3yCpbKWWl0H3gM2AmhYSmk5hKNQ7qHYW6p/TFvjiiB7XhGSN
+         zqGp8/PGRRQcUww1j6glF52+yS2/BAbVt4JAB7wAKMaa8OV7Bo85WDBgOcw0Krz3kmvL
+         At9A==
+X-Forwarded-Encrypted: i=1; AJvYcCU/FjUZh/tNvCrC2zKDCQqxRKIxvxB4SfOuycDTT2j0ffT1YK9XT+OZEsUq5N3Xzy334Edo47lAshauoYyY0eSBxldmq/xSQcSwYCv3aeodJVnB+BNIszybfoIYHqwdg1v2NmwP80Vq0/SvpcGvq9rY9Yu0LI5JQKvkMlDI8zKWQQ5xEw==
+X-Gm-Message-State: AOJu0YxyQwhvCIKnmMAACTwVTlkLkqEkqErNN+qnoFP0laMuj0rOV6ws
+	hHNsoaErN8cHndkRCCsIHjoyorIBex8ofMFgOhloOggsttFCeCxA
+X-Google-Smtp-Source: AGHT+IFQ4ywEK+Nr05gDozWWIKvELkaPNu9X1hjfL7jSZE7JaOVmh+yHXQJ/j3NTm9CnUOJtPHdoxg==
+X-Received: by 2002:a2e:a409:0:b0:2ef:296d:1dd5 with SMTP id 38308e7fff4ca-2f15a9fd29cmr61440031fa.0.1722771710561;
+        Sun, 04 Aug 2024 04:41:50 -0700 (PDT)
+Received: from localhost.localdomain ([109.52.148.115])
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-36bbd01eff1sm6635130f8f.44.2024.08.04.04.41.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 04 Aug 2024 04:41:50 -0700 (PDT)
+From: Christian Marangi <ansuelsmth@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Richard Weinberger <richard@nod.at>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Joern Engel <joern@lazybastard.org>,
+	Keith Busch <kbusch@kernel.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Christoph Hellwig <hch@lst.de>,
+	Sagi Grimberg <sagi@grimberg.me>,
+	Christian Marangi <ansuelsmth@gmail.com>,
+	Florian Fainelli <f.fainelli@gmail.com>,
+	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mtd@lists.infradead.org,
+	linux-nvme@lists.infradead.org
+Subject: [PATCH 0/6] mtd: improve block2mtd + airoha parser
+Date: Sun,  4 Aug 2024 13:41:00 +0200
+Message-ID: <20240804114108.1893-1-ansuelsmth@gmail.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/3] dt-bindings: pinctrl: Add rk3576 dw-mshc bindings
-To: Detlev Casanova <detlev.casanova@collabora.com>,
- linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org
-References: <20240802153609.296197-1-detlev.casanova@collabora.com>
- <20240802153609.296197-2-detlev.casanova@collabora.com>
-Content-Language: en-US
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Autocrypt: addr=krzk@kernel.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJgPO8PBQkUX63hAAoJEBuTQ307
- QWKbBn8P+QFxwl7pDsAKR1InemMAmuykCHl+XgC0LDqrsWhAH5TYeTVXGSyDsuZjHvj+FRP+
- gZaEIYSw2Yf0e91U9HXo3RYhEwSmxUQ4Fjhc9qAwGKVPQf6YuQ5yy6pzI8brcKmHHOGrB3tP
- /MODPt81M1zpograAC2WTDzkICfHKj8LpXp45PylD99J9q0Y+gb04CG5/wXs+1hJy/dz0tYy
- iua4nCuSRbxnSHKBS5vvjosWWjWQXsRKd+zzXp6kfRHHpzJkhRwF6ArXi4XnQ+REnoTfM5Fk
- VmVmSQ3yFKKePEzoIriT1b2sXO0g5QXOAvFqB65LZjXG9jGJoVG6ZJrUV1MVK8vamKoVbUEe
- 0NlLl/tX96HLowHHoKhxEsbFzGzKiFLh7hyboTpy2whdonkDxpnv/H8wE9M3VW/fPgnL2nPe
- xaBLqyHxy9hA9JrZvxg3IQ61x7rtBWBUQPmEaK0azW+l3ysiNpBhISkZrsW3ZUdknWu87nh6
- eTB7mR7xBcVxnomxWwJI4B0wuMwCPdgbV6YDUKCuSgRMUEiVry10xd9KLypR9Vfyn1AhROrq
- AubRPVeJBf9zR5UW1trJNfwVt3XmbHX50HCcHdEdCKiT9O+FiEcahIaWh9lihvO0ci0TtVGZ
- MCEtaCE80Q3Ma9RdHYB3uVF930jwquplFLNF+IBCn5JRzsFNBFVDXDQBEADNkrQYSREUL4D3
- Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
- MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
- OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
- GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
- 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
- YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
- 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
- BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
- JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
- 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
- YpsFAmA872oFCRRflLYACgkQG5NDfTtBYpvScw/9GrqBrVLuJoJ52qBBKUBDo4E+5fU1bjt0
- Gv0nh/hNJuecuRY6aemU6HOPNc2t8QHMSvwbSF+Vp9ZkOvrM36yUOufctoqON+wXrliEY0J4
- ksR89ZILRRAold9Mh0YDqEJc1HmuxYLJ7lnbLYH1oui8bLbMBM8S2Uo9RKqV2GROLi44enVt
- vdrDvo+CxKj2K+d4cleCNiz5qbTxPUW/cgkwG0lJc4I4sso7l4XMDKn95c7JtNsuzqKvhEVS
- oic5by3fbUnuI0cemeizF4QdtX2uQxrP7RwHFBd+YUia7zCcz0//rv6FZmAxWZGy5arNl6Vm
- lQqNo7/Poh8WWfRS+xegBxc6hBXahpyUKphAKYkah+m+I0QToCfnGKnPqyYIMDEHCS/RfqA5
- t8F+O56+oyLBAeWX7XcmyM6TGeVfb+OZVMJnZzK0s2VYAuI0Rl87FBFYgULdgqKV7R7WHzwD
- uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
- 7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
- 5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
-In-Reply-To: <20240802153609.296197-2-detlev.casanova@collabora.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 02/08/2024 17:31, Detlev Casanova wrote:
-> Add the compatible string for rockchip,rk3576-dw-mshc and add support
-> for the rockchip,use-v2-tuning flag, a new feature of this core.
-> 
-> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
+This small series handle 2 problems.
 
-A nit, subject: drop second/last, redundant "bindings". The
-"dt-bindings" prefix is already stating that these are bindings.
-See also:
-https://elixir.bootlin.com/linux/v6.7-rc8/source/Documentation/devicetree/bindings/submitting-patches.rst#L18
+It does try to ""standardize"" the usage of block2mtd module with
+MTD OF nodes.
 
-> ---
->  .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml     | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index 211cd0b0bc5f3..dd8d1e773bb38 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -39,6 +39,7 @@ properties:
->                - rockchip,rk3368-dw-mshc
->                - rockchip,rk3399-dw-mshc
->                - rockchip,rk3568-dw-mshc
-> +              - rockchip,rk3576-dw-mshc
->                - rockchip,rk3588-dw-mshc
->                - rockchip,rv1108-dw-mshc
->                - rockchip,rv1126-dw-mshc
-> @@ -95,6 +96,16 @@ properties:
->        If not specified, the host will do tuning for 360 times,
->        namely tuning for each degree.
->  
-> +  rockchip,use-v2-tuning:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      If present, use tuning version 2.
-> +      v2 tuning will inherit pre-stage loader's phase settings for the first
-> +      time, and do re-tune if necessary.
-> +      Re-tune will still try the rough degrees, for instance, 90, 180, 270,
-> +      360 but continue to do the fine tuning if sample window isn't good
-> +      enough.
+It is very easy to add support for MTD parser by just adding an
+OF node to the mtd created for block2mtd.
 
-You described the desired Linux feature or behavior, not the actual
-hardware. The bindings are about the latter, so instead you need to
-rephrase the property and its description to match actual hardware
-capabilities/features/configuration etc.
+This apply only if the root block is used for block2mtd to allow
+scenario where the full eMMC or an NVME is used for MTD and it doesn't
+have any partition table.
 
-Best regards,
-Krzysztof
+To also support NVME, similar to how it's done with eMMC, we introduce
+a subnode to the NVME controller that needs to have the "nvme-card"
+compatible where a dev can define fixed-paritions for MTD parser usage.
+
+This series also add support for the Airoha partition table where
+the last partition is always ART and is placed at the end of the flash.
+
+This require dynamic calculation of the offset as some dedicated
+driver for bad block management might be used that reserve some space
+at the end of the flash for block accounting.
+
+New aarch64 Airoha SoC make use of this partition table and use block2mtd
+for eMMC to treat them as MTD with custom bad block management and block
+tracking.
+
+Christian Marangi (6):
+  dt-bindings: nvme: Document nvme-card compatible
+  nvme: assign of_node to nvme device
+  dt-bindings: mmc: add property for partitions node in mmc-card node
+  block2mtd: attach device OF node to MTD device
+  dt-bindings: mtd: Add Documentation for Airoha fixed-partitions
+  mtd: parser: add support for Airoha parser
+
+ .../devicetree/bindings/mmc/mmc-card.yaml     | 40 ++++++++++
+ .../partitions/airoha,fixed-partitions.yaml   | 80 +++++++++++++++++++
+ .../devicetree/bindings/nvme/nvme-card.yaml   | 78 ++++++++++++++++++
+ drivers/mtd/devices/block2mtd.c               | 11 +++
+ drivers/mtd/parsers/Kconfig                   | 10 +++
+ drivers/mtd/parsers/Makefile                  |  1 +
+ drivers/mtd/parsers/ofpart_airoha.c           | 56 +++++++++++++
+ drivers/mtd/parsers/ofpart_airoha.h           | 18 +++++
+ drivers/mtd/parsers/ofpart_core.c             |  6 ++
+ drivers/nvme/host/core.c                      |  3 +
+ 10 files changed, 303 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
+ create mode 100644 Documentation/devicetree/bindings/nvme/nvme-card.yaml
+ create mode 100644 drivers/mtd/parsers/ofpart_airoha.c
+ create mode 100644 drivers/mtd/parsers/ofpart_airoha.h
+
+-- 
+2.45.2
 
