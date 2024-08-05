@@ -1,168 +1,105 @@
-Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99DA114F9D4;
-	Mon,  5 Aug 2024 09:19:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DE0C1547DB
+	for <linux-mmc@vger.kernel.org>; Mon,  5 Aug 2024 10:04:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722849593; cv=none; b=WeN7uRJYWKkVbuWnG62PIIpoG7GbF0rQLvIDZrtmGCdXq5vbr+w4TNO5Ez0sH0IbIGXqwCB9ZqR2T+Nufa05t2Y/c7Bbh79wtoMJRpd1/ESDQuTkh9n3axByYUrbA/z6cIZW+TL5CwKI6DtwRBSb0e2fTgPaQPmhWPCCKocOsFU=
+	t=1722852287; cv=none; b=JB+p29dBuLNcD+pIP/FiMMShrieB10u4M+ruInurC0+ZBW2XbooNZcyEl+Op/sBn7D/BPU+dEBIta/iOh+4n/WcmQiQKD5tLxHSXLzgXmPune7N140hPTqPNtUeN9zIWRLudc534eBgGSlj8A9TcQAsA41WMde+E4fl7TAIy4jo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722849593; c=relaxed/simple;
-	bh=OcG6l4XKFmePQVwp6PRs5BvS9biFtJr4B9ey1kRGDJA=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=hkXhaaTC055lYDjbp4167NXRtEoeO+eXoXRZW9xmze1qui+n7dI29KuIWK+z5A59ERDOmfyhkLmHfOr352ZHr0oIqWDnkGVFONg3BRVaknO0ApKdITOJBSzBmNm/VUAQHEFD9nT8dSBdJ0iEqSuhMpvml8LMwrvvX3ZLGzq/2iM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SssipjaT; arc=none smtp.client-ip=209.85.167.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1722852287; c=relaxed/simple;
+	bh=NrP89VFBY7rsx7EbXcSXKLeYzXolWV8BMUaTDdNiuIc=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=r49LSYb/7KS3q4UBRKVKh3UvUVFJYRNZjtDXbSvxRUs4WwF27YqE83Zdpp1P9LCxk7eOaT7t0/OqMkNO94+z4GgdIs4azZ2CFjeS8UYK7pamFKYadBtodHlWE6fw/5ShyhtigCzaZC7BH/hUxKWFg/hxbGI8NT7ocUtS05lPGHM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=O3TTsa+D; arc=none smtp.client-ip=209.85.219.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SssipjaT"
-Received: by mail-oi1-f182.google.com with SMTP id 5614622812f47-3db23a6085aso2822304b6e.1;
-        Mon, 05 Aug 2024 02:19:51 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="O3TTsa+D"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e08a538bf7bso4047288276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Aug 2024 03:04:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1722849591; x=1723454391; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wTqIbxxugoDxIZS+wlCgd6QZms9qOuPLg9XDgZyFHpw=;
-        b=SssipjaTpZrFOUr+LFu4fKqMFowycrrS71523oY8hu721SgiLmO+lUPc3Bb1QngE4I
-         EQuAhX6zEHICvE1/T8X1IGBWO7cUSJlRq77xoICFcUV0yItFvZHW+eiEsgp9lVo5FnkU
-         23RKLWB6o1R/Zgge9KUQd8TkcB94QK7Tnk75nSntcYl3zopKmg4FCOLcE2PQ+2kGHL2Y
-         gPl9LKe0oBn6pS/t6/fXL0kOlvx9KOqSaLBZffs6Zf9KAxA1JsNgbeNNWGG6fhJIuGo+
-         azvc9RvsrQSnX0Ny8eRUr2iJD+n1vyni/bZnTaNv5RVJPHxNelMtumJYJOawAXJiIjVj
-         v7ng==
+        d=linaro.org; s=google; t=1722852284; x=1723457084; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=hSYGTPrpLH+BuhVL/Q/2E8uLKhl1KfRAsEdIshJ8Sjg=;
+        b=O3TTsa+DOEhyRzwzJxdy1IBqByszFg6gCQwqgUQD/YS+eunwj3Okal63tnHQD3gFzS
+         mklCASjot+6W+j97Q9xgl+oMyXSXffRPE8CpBS1WTM+6tDBfIZtqdT/xazSIL7wGnYi1
+         z/lmgqcTj2hExLsPZ2dWUEHuNUmiVHEG1MlLjr0hxpxldcYNbiO+ACcjROcraZAdg8Av
+         yEItCOtmHBCJCIez6ao8zHGxGWnbKuWU0un2VLkYOIVqKmybvzwzrIW6SvPANNZvR1v0
+         Bn+AEWvutwS8jgZmVCDuKX0NDvqLA+PLLQDqsqk0KYPRn+J13KxhyrK/KuKNSL//s/tU
+         kMiw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722849591; x=1723454391;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wTqIbxxugoDxIZS+wlCgd6QZms9qOuPLg9XDgZyFHpw=;
-        b=C6Tl3+0XZBT7k2zitxoxrop9k07KYTsmdATc4kCH1xJ2lvY/8jdwWcQ7YXmzKzj+9x
-         p2i8ftUcfEdzepC40rc44YLFeiwI8h05a9jdd/foVI34LwM01u8xUfjpatMwmAqIKhAi
-         LvMoygkDSQkIP7h5AkR9ZDhlO07oDN6WFMzI/nmfps6EwSsNtkrSL2WLn4Y1kvce9Ltu
-         ecJneDC2NWnnWvhRjnGYxkVBh/CXBF4DhXucsdaKFTN+FhuNq0ZGm34JtUgILRICoSGp
-         orRBROSEtOjRRp1UDIo+ZGfW69SCBgyKDZrQYnlAZXTc8CUyVdVJ2HtjRonGOu7K8EJV
-         vKxQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUAqgoLeT8y8sze8vH7U1uKr1aKBTkPSNTRpOP0dDHrJmjGezja5IZN9lvPEIIpc0CqmQaHGi3arEQHUDAe+8sE7qsud93J4t0oj470YM6ujytErd9U+zJqqBNvjo/Mjz7QBimm238M/hwQltHeJ4PaZVgJJ6Rpi/8IPGuQEhak22ct0w==
-X-Gm-Message-State: AOJu0YwicMTB6JDc8SR5EScVhWQuTTqZaedEZhGH9ArbkZAtitv4IjCO
-	rvZ0c5YblbvDED6wF/b0fz/8L9/v1DlS30Cr0UD6YZIKUwmiFz7C
-X-Google-Smtp-Source: AGHT+IGQn28apZPLjY/cEqCd5i6fKpWv0taDd9wpuFCfINNuy5KX2wH7As+1leEZiltafu5WJpLcAA==
-X-Received: by 2002:a05:6808:f0a:b0:3d2:95f:da8c with SMTP id 5614622812f47-3db5381638dmr5222260b6e.18.1722849590714;
-        Mon, 05 Aug 2024 02:19:50 -0700 (PDT)
-Received: from localhost.localdomain ([122.8.183.87])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-70a31d9dd1asm2875838a34.9.2024.08.05.02.19.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Aug 2024 02:19:50 -0700 (PDT)
-From: Chen Wang <unicornxw@gmail.com>
-To: adrian.hunter@intel.com,
-	aou@eecs.berkeley.edu,
-	conor+dt@kernel.org,
-	guoren@kernel.org,
-	inochiama@outlook.com,
-	jszhang@kernel.org,
-	krzysztof.kozlowski+dt@linaro.org,
-	palmer@dabbelt.com,
-	paul.walmsley@sifive.com,
-	robh@kernel.org,
-	ulf.hansson@linaro.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-riscv@lists.infradead.org,
-	chao.wei@sophgo.com,
-	haijiao.liu@sophgo.com,
-	xiaoguang.xing@sophgo.com,
-	tingzhu.wang@sophgo.com
-Cc: Chen Wang <unicorn_wang@outlook.com>
-Subject: [PATCH v6 8/8] riscv: sophgo: dts: add mmc controllers for SG2042 SoC
-Date: Mon,  5 Aug 2024 17:19:43 +0800
-Message-Id: <03ac9ec9c23bbe4c3b30271e76537bdbe5638665.1722847198.git.unicorn_wang@outlook.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1722847198.git.unicorn_wang@outlook.com>
-References: <cover.1722847198.git.unicorn_wang@outlook.com>
+        d=1e100.net; s=20230601; t=1722852284; x=1723457084;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hSYGTPrpLH+BuhVL/Q/2E8uLKhl1KfRAsEdIshJ8Sjg=;
+        b=wYIYW9PtVldP3cIVqIOCMogfDmdQxZ6/PUlGwXzuD5BFl/+zNtN4Jc5SXKUsYdLi0y
+         1HuZYLb2N1vCnd+mPV2kGUU4WsWw8FKECnEf+Dx4pteR0YOj5PLzoAEd1iTHaqGxmMsQ
+         iQorN5lZC/G41lHsKDH8ODu+/owcXNgJlv+akC0qI+pXxdmceUr9N7ukDlk4OLoq39aI
+         SszggySoVyPUnzItLrpTSAcJUgLaAOZi3GR56f0B/1IRy71o5GUcwtNPUxR9+hEwSjk+
+         8iX/BeaN4nREx1kiDMmbX375QaeNjS6/RwlxaDkZh6WP+7mhGvritrgbflrkxabseOex
+         kOMg==
+X-Forwarded-Encrypted: i=1; AJvYcCV37e49FPfHtpuvGg0G8qLrJKNR2sNpOCHzd8qD6y3TUeQGjJothFTROncW2ZXRA5cw8SaCJn2nRiuYpJffWEAl/+4hot6cd957
+X-Gm-Message-State: AOJu0YzNGA6LQm+QW0RZgZh2FRzNXa/TkL9TlyfKukBhYoYNZbPHWOvL
+	hOmVUWCCD2owvCDwKJnXSU2XuMqSm44p+2LgAGnQQCTXAPbxsBHJrvrCx+mw2Tx0ex8WPbn22BN
+	evchQMmdXGoyJuCEBzazarRBq/NLPHwZcFQz/Cg==
+X-Google-Smtp-Source: AGHT+IE28QvjYWO5xF3nlYl96xgvVqGoKpL4LpWlRu2pROebD4A3WQjuKfY14W5cvKLlfjChMzAEUCdDmxnejwKRHho=
+X-Received: by 2002:a05:6902:2b0d:b0:e0b:bf20:4fdd with SMTP id
+ 3f1490d57ef6-e0bde8ee6f3mr10631170276.1.1722852284031; Mon, 05 Aug 2024
+ 03:04:44 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20240805040131.450412-1-felix@kaechele.ca> <20240805040131.450412-2-felix@kaechele.ca>
+In-Reply-To: <20240805040131.450412-2-felix@kaechele.ca>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 5 Aug 2024 12:04:07 +0200
+Message-ID: <CAPDyKFqyRevbmPy6h8BsiTLBi6=J+9uRmSib43bzzZHFEmDSVg@mail.gmail.com>
+Subject: Re: [PATCH 1/4] mmc: sdio: add Qualcomm QCA9379-3 SDIO id
+To: Felix Kaechele <felix@kaechele.ca>
+Cc: Marcel Holtmann <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Kalle Valo <kvalo@kernel.org>, Jeff Johnson <jjohnson@kernel.org>, 
+	Balakrishna Godavarthi <quic_bgodavar@quicinc.com>, Rocky Liao <quic_rjliao@quicinc.com>, 
+	linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-wireless@vger.kernel.org, ath10k@lists.infradead.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-From: Chen Wang <unicorn_wang@outlook.com>
+On Mon, 5 Aug 2024 at 06:01, Felix Kaechele <felix@kaechele.ca> wrote:
+>
+> Adds the id for Qualcomm QCA9379-3 SDIO based cards such as
+> the LITEON WCBN3510A and Silex SX-SDMAC2.
+>
+> Signed-off-by: Felix Kaechele <felix@kaechele.ca>
 
-SG2042 has two MMC controller, one for emmc, another for sd-card.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
----
- .../boot/dts/sophgo/sg2042-milkv-pioneer.dts  | 17 +++++++++++
- arch/riscv/boot/dts/sophgo/sg2042.dtsi        | 28 +++++++++++++++++++
- 2 files changed, 45 insertions(+)
+Kind regards
+Uffe
 
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-index 80cb017974d8..da6596e9192e 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-+++ b/arch/riscv/boot/dts/sophgo/sg2042-milkv-pioneer.dts
-@@ -26,6 +26,23 @@ &cgi_dpll1 {
- 	clock-frequency = <25000000>;
- };
- 
-+&emmc {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-sd;
-+	non-removable;
-+	wp-inverted;
-+	status = "okay";
-+};
-+
-+&sd {
-+	bus-width = <4>;
-+	no-sdio;
-+	no-mmc;
-+	wp-inverted;
-+	status = "okay";
-+};
-+
- &uart0 {
- 	status = "okay";
- };
-diff --git a/arch/riscv/boot/dts/sophgo/sg2042.dtsi b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-index 34c802bd3f9b..f0ccefecc9c3 100644
---- a/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-+++ b/arch/riscv/boot/dts/sophgo/sg2042.dtsi
-@@ -399,5 +399,33 @@ uart0: serial@7040000000 {
- 			resets = <&rstgen RST_UART0>;
- 			status = "disabled";
- 		};
-+
-+		emmc: mmc@704002a000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002a000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <134 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&clkgen GATE_CLK_EMMC_100M>,
-+				 <&clkgen GATE_CLK_AXI_EMMC>,
-+				 <&clkgen GATE_CLK_100K_EMMC>;
-+			clock-names = "core",
-+				      "bus",
-+				      "timer";
-+			status = "disabled";
-+		};
-+
-+		sd: mmc@704002b000 {
-+			compatible = "sophgo,sg2042-dwcmshc";
-+			reg = <0x70 0x4002b000 0x0 0x1000>;
-+			interrupt-parent = <&intc>;
-+			interrupts = <136 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&clkgen GATE_CLK_SD_100M>,
-+				 <&clkgen GATE_CLK_AXI_SD>,
-+				 <&clkgen GATE_CLK_100K_SD>;
-+			clock-names = "core",
-+				      "bus",
-+				      "timer";
-+			status = "disabled";
-+		};
- 	};
- };
--- 
-2.34.1
-
+> ---
+>  include/linux/mmc/sdio_ids.h | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 7cddfdac2f57..63000a8f4b13 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -52,6 +52,7 @@
+>  #define SDIO_DEVICE_ID_ATHEROS_AR6004_19       0x0419
+>  #define SDIO_DEVICE_ID_ATHEROS_AR6005          0x050A
+>  #define SDIO_DEVICE_ID_ATHEROS_QCA9377         0x0701
+> +#define SDIO_DEVICE_ID_ATHEROS_QCA9379         0x0801
+>
+>  #define SDIO_VENDOR_ID_BROADCOM                        0x02d0
+>  #define SDIO_DEVICE_ID_BROADCOM_NINTENDO_WII   0x044b
+> --
+> 2.45.2
+>
