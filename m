@@ -1,57 +1,57 @@
 Received: from mail-oo1-f47.google.com (mail-oo1-f47.google.com [209.85.161.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0391F139D12;
-	Mon,  5 Aug 2024 09:18:32 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21706139D12;
+	Mon,  5 Aug 2024 09:18:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722849514; cv=none; b=MWJ7tfdxYCv0s/F2pKluSBrrezBwmEvseAAbJNbDKDHL0+ptiW1SnyG/AXu/vfyqLPxthB5S+zet2RKIuXVP5RAMLm/Wdzk7TZcw/HW7WvsE5wVTY5yNCeIh9yZFISUxS1huCXNGQCandOOSX6QInSRckZnTcUFnVpg0GBllz+w=
+	t=1722849532; cv=none; b=oPgmgvmb3xbaeqgXk1BYrwbaiTobJouxkcY8nweirVZXkYwZJWLsTsFILTszwQcgNclHNeTO1gM/BL9G/ykxI6oQiL8626dS3JyE5GNsUpuWNr0cKhGm3jNDrooOwt0BdWEubRXeFSctgp1LmhaK52sZTUo9u0KQEMouMTIBHk0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722849514; c=relaxed/simple;
-	bh=eTuZ+aHAhbkq+3UlCiBExwS6jgikSXjl2/uk3rc3Ps0=;
+	s=arc-20240116; t=1722849532; c=relaxed/simple;
+	bh=OT1PAQFI1kISeEB6/Mju0shxPjUb/FrP6MLwj+WGzpQ=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=PTUsfQAJgFZsFztNf4HKK4+O2sA3S1nNiiQ68/9tdbEm7gPj19uIgczzBnWu9uyZ8fx11cGMdQiy83nAvDrRlmvx6SMApMN/0msMaxUUZRD7VyNwyPc0Te6TFxdQ6mrc4l7kuWdIa/GM040drzxvg+0wwIGEYSZAmJuMJwG0HpY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kI0cu6Re; arc=none smtp.client-ip=209.85.161.47
+	 MIME-Version; b=fUYpqhDaugBoLsKLAyD+PhZOYiXQsnfA+guG29yeN9CjepXtl1NThkFlcw8lJe05o5y8jL1nZ0e+isYwTG+TCQxIVgSj17kagxiIvyZ+lNlzFwLfaxrNGdqGoUq6pHtgb3pbp6R3zPSt3NsKg5qoLJt6LcP3RZMxNe70zu6N+Fo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=C9GVT82P; arc=none smtp.client-ip=209.85.161.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kI0cu6Re"
-Received: by mail-oo1-f47.google.com with SMTP id 006d021491bc7-5d5de0e47b9so4283623eaf.0;
-        Mon, 05 Aug 2024 02:18:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="C9GVT82P"
+Received: by mail-oo1-f47.google.com with SMTP id 006d021491bc7-5d5e97b8a22so4566127eaf.2;
+        Mon, 05 Aug 2024 02:18:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1722849512; x=1723454312; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1722849530; x=1723454330; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=zmKZrnXukkShyh9UMVBbKCtUheE+m0Zm5Rm16FZ9/eQ=;
-        b=kI0cu6Re6AG6f1FRjIMtIqsrxzR9/1r564myr4JjFStjkvKxAzDnGxdeE436jbTHhc
-         zrsM77E8s+9o0Fn+rchd5q3mEXaH8Aga0/5awWhh59t2/SJK+x+ykJd4bCV3SYm15ZhW
-         B5whEYi6+opiOZrl4mnlvI3WyiaYt8tos/2ta/yoa9xA5EFtIKeHx+dnHEjjj+INSmAR
-         QlXS02bSDZFnSndx8fNwh3m8gmzG5qp2ZOGwae5DcDPNxj3NWQD6oPDvK0IuvNqY54yW
-         DEa0Yg/6dGDRC8OAoKDVzlbwECG4iW01E0uzvkrgz8NAv/mC1lDpu+J8UNVxPI//unRS
-         IGNg==
+        bh=T1MnlW12Z5yHzYi9o0JgUJzJS63Qd/F5nfYcYQI4OPQ=;
+        b=C9GVT82P/0r/zjOMqsfEdDhXM0CaQp+R0Jg1lq/eMa4zp+vcWBPNZYb5KhgwvC3UDz
+         VjKfjEILdewMWDDK2ioHLbrHqCrSvrOjverSi3KvBYt0x3hqef7wZB7GipaCgYQTewhj
+         Lmyd07SldVVii11fvQiSDoudHuAORB0Y4QcofChT4Xk2H9RdRvvYrz+THtXwLO3UQ8g4
+         UX9KMCfS78b4quAUxSWqb2EmUfbrA1oRTHnserCZg51NlibT4McEyuF3d88rXk0TNiuY
+         wHbT6kKca+ypzwrVA7CdylE1sOCcBJCchB6gfc+TGUcni5H5uvnImkk/NPgJPETVXn1V
+         pQ0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722849512; x=1723454312;
+        d=1e100.net; s=20230601; t=1722849530; x=1723454330;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=zmKZrnXukkShyh9UMVBbKCtUheE+m0Zm5Rm16FZ9/eQ=;
-        b=KnYJljxHYAd0EL+4T5v0gKWDvIWC6Q6FXK80s/jHAJcUuCMmIHQ1Wykc+RqQOrWPIj
-         BDmqlVbhTORK4WYjVojwVM3oqcJxMjiRK4o+pZBY4xoI/xKsETVxLvq2hfHGVDqyQio8
-         U+a4j8KDC2WOSS24chKJuVIcJWggcPQdER9BjnRULLx+LCz88B8ucZUwNhWl1rktOi8q
-         iJBIjoF7nuhiUtbPaqQhPY5GHirvowuqqJoVPFwTfuWQIN1ViBDOa2QMFFvMTB6hvulH
-         b4jbXi+T9WTl6+oZxOTDVOKwBCBeUd/s9ImyCFMDQotMUqoxu0ThUEBUMuKDdJ8cGj8q
-         4VwA==
-X-Forwarded-Encrypted: i=1; AJvYcCX4Ffn7nOOm08wbm/enxhDb2N3nB+qS9VFhICm0xOSNAFT8GEKzrvkPag16L4hLuAOCZdMLcSi+oWFr+v4zfP3TfPSirmdRx3YG67A2UTth2hRsukE+S9IhBig6MP0rM6E8y04z/sHBvlJdK6ZryWr7SN6n8MMiS3kq8tVs7ghZ1/QGpA==
-X-Gm-Message-State: AOJu0YzCgDKNCvTR3lwdCFAOQzU6ZtHpsDxbK576JvLSrMIuaeC+OKBU
-	oXHrmAqL86C+DEZDjM7Jh73MxX68E6IlMF+s9vgiRdUT8M8gbYGB
-X-Google-Smtp-Source: AGHT+IHt5AjerbbszibT04CTu+Jr9V86wxjhGeMFu/4kABcPnvtNQ1BSOPHfj2k8UNkcshgOsmiD1Q==
-X-Received: by 2002:a05:6820:1504:b0:5d5:d5ad:35f8 with SMTP id 006d021491bc7-5d67155434dmr12279312eaf.8.1722849511973;
-        Mon, 05 Aug 2024 02:18:31 -0700 (PDT)
+        bh=T1MnlW12Z5yHzYi9o0JgUJzJS63Qd/F5nfYcYQI4OPQ=;
+        b=Zd7Fopx7oRjuA+qvsYInOG57tZ5ugCPkkEu24XwsLDE9Q/HZPP9EdcH0Poj8EX71n6
+         rLRfWvxNRtjtMXm6I91XjIbTsGu8MDWiWv+ODRuvS/fXAq5ybqrN8cFzIvtcM7RXjGl9
+         uWrJrmCarzTs5bL5dnT/OUvt2UoOCo8l5BuY1K6WMgJKYyKKYfLU0OV4Y2l8M6s6YrrV
+         JZDs/cdeM4gQnR2wfpicvzP86hdXckTUkQM0vS63HThZxPnqIuWiWII2TdyvrezwsuNa
+         s5CzuY/OdhJLCSfOIqQYE9Z70+BsMfMoLHHDupxHv79g87v7wp9ve2PeWzfK8Ysh8Svu
+         9tiQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUI6adqCCP0YJt/7s+XP58gVNu+cR8z3w78+mncjCLa1bfghOYW8ohBaq636qhvQKNlgPalQVnYucP/8ODdj6+gyiWer2zpfDpffYzgrb+DO/ZPZPW/xm/6d0kpoHA46yC8G80S6B1r+MQZk5ZrB9sJ4t6dazgbl4IWq65FSDgRuEfeSg==
+X-Gm-Message-State: AOJu0YzVzkdzvWC/hqJ5A/pAFMXlCXlkLK3Oof1lTZKowzhKViRyQdyH
+	f/sfKv5KhMirAGqkpG2vSIW9WysliLDSgu11fOaqsU4dZM+QAB/z
+X-Google-Smtp-Source: AGHT+IE18FzxH3OoOcp5Zlherg/5bQthq69s9/T1LwkgOuOQJapvfIy1Z+YEqkBwYqUzxhpHCy3F+g==
+X-Received: by 2002:a05:6820:2228:b0:5c4:7b18:b8eb with SMTP id 006d021491bc7-5d6553365f8mr13200926eaf.2.1722849530205;
+        Mon, 05 Aug 2024 02:18:50 -0700 (PDT)
 Received: from localhost.localdomain ([122.8.183.87])
-        by smtp.gmail.com with ESMTPSA id 006d021491bc7-5d762052c46sm1902121eaf.27.2024.08.05.02.18.30
+        by smtp.gmail.com with ESMTPSA id 006d021491bc7-5d76261a27fsm1901822eaf.39.2024.08.05.02.18.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Aug 2024 02:18:31 -0700 (PDT)
+        Mon, 05 Aug 2024 02:18:49 -0700 (PDT)
 From: Chen Wang <unicornxw@gmail.com>
 To: adrian.hunter@intel.com,
 	aou@eecs.berkeley.edu,
@@ -74,9 +74,9 @@ To: adrian.hunter@intel.com,
 	tingzhu.wang@sophgo.com
 Cc: Chen Wang <unicorn_wang@outlook.com>,
 	Drew Fustini <drew@pdp7.com>
-Subject: [PATCH v6 4/8] mmc: sdhci-of-dwcmshc: factor out code into dwcmshc_rk35xx_init
-Date: Mon,  5 Aug 2024 17:18:19 +0800
-Message-Id: <4f1f2fa403ce7f0b4d79afb7d7e8a1690cde5d6c.1722847198.git.unicorn_wang@outlook.com>
+Subject: [PATCH v6 5/8] mmc: sdhci-of-dwcmshc: add dwcmshc_pltfm_data
+Date: Mon,  5 Aug 2024 17:18:43 +0800
+Message-Id: <cb2c68c594286e9588c53acb76163e60c140c02b.1722847198.git.unicorn_wang@outlook.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <cover.1722847198.git.unicorn_wang@outlook.com>
 References: <cover.1722847198.git.unicorn_wang@outlook.com>
@@ -90,92 +90,157 @@ Content-Transfer-Encoding: 8bit
 
 From: Chen Wang <unicorn_wang@outlook.com>
 
-Continue factor out code fron probe into dwcmshc_rk35xx_init.
+Abstract dwcmshc_pltfm_data to hold the sdhci_pltfm_data
+plus some comoon operations of soc such as init/postinit.
 
 Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
 Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
 Tested-by: Inochi Amaoto <inochiama@outlook.com> # Duo and Huashan Pi
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 34 ++++++++++++++---------------
- 1 file changed, 16 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 81 +++++++++++++++++------------
+ 1 file changed, 48 insertions(+), 33 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index b272ec2ab232..55fba5ef37ba 100644
+index 55fba5ef37ba..16f420994519 100644
 --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
 +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -711,12 +711,22 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_reset(host, mask);
- }
+@@ -218,6 +218,12 @@ struct dwcmshc_priv {
+ 	u16 flags;
+ };
  
--static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-+static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
-+			       struct dwcmshc_priv *dwc_priv)
- {
- 	static const char * const clk_ids[] = {"axi", "block", "timer"};
--	struct rk35xx_priv *priv = dwc_priv->priv;
-+	struct rk35xx_priv *priv;
- 	int err;
- 
-+	priv = devm_kzalloc(dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
-+	if (!priv)
-+		return -ENOMEM;
++struct dwcmshc_pltfm_data {
++	const struct sdhci_pltfm_data pdata;
++	int (*init)(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
++	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
++};
 +
-+	if (of_device_is_compatible(dev->of_node, "rockchip,rk3588-dwcmshc"))
-+		priv->devtype = DWCMSHC_RK3588;
-+	else
-+		priv->devtype = DWCMSHC_RK3568;
-+
- 	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
- 	if (IS_ERR(priv->reset)) {
- 		err = PTR_ERR(priv->reset);
-@@ -739,6 +749,8 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
- 	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
- 	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
+ static int dwcmshc_get_enable_other_clks(struct device *dev,
+ 					 struct dwcmshc_priv *priv,
+ 					 int num_clks,
+@@ -1048,39 +1054,52 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
+ 	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
+ };
  
-+	dwc_priv->priv = priv;
-+
- 	return 0;
- }
+-static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+-	.ops = &sdhci_dwcmshc_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	},
+ };
  
-@@ -1184,7 +1196,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ #ifdef CONFIG_ACPI
+-static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+-	.ops = &sdhci_dwcmshc_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+-		   SDHCI_QUIRK2_ACMD23_BROKEN,
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_bf3_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			   SDHCI_QUIRK2_ACMD23_BROKEN,
++	},
+ };
+ #endif
+ 
+-static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+-	.ops = &sdhci_dwcmshc_rk35xx_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+-		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+-		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_rk35xx_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++	},
++	.init = dwcmshc_rk35xx_init,
++	.postinit = dwcmshc_rk35xx_postinit,
+ };
+ 
+-static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+-	.ops = &sdhci_dwcmshc_th1520_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_th1520_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	},
++	.init = th1520_init,
+ };
+ 
+-static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
+-	.ops = &sdhci_dwcmshc_cv18xx_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_cv18xx_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	},
+ };
+ 
+ static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+@@ -1196,7 +1215,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
  	struct sdhci_pltfm_host *pltfm_host;
  	struct sdhci_host *host;
  	struct dwcmshc_priv *priv;
--	struct rk35xx_priv *rk_priv = NULL;
- 	const struct sdhci_pltfm_data *pltfm_data;
+-	const struct sdhci_pltfm_data *pltfm_data;
++	const struct dwcmshc_pltfm_data *pltfm_data;
  	int err;
  	u32 extra, caps;
-@@ -1241,20 +1252,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 
+@@ -1206,7 +1225,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 		return -ENODEV;
+ 	}
+ 
+-	host = sdhci_pltfm_init(pdev, pltfm_data,
++	host = sdhci_pltfm_init(pdev, &pltfm_data->pdata,
+ 				sizeof(struct dwcmshc_priv));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -1251,16 +1270,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
  	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
  
- 	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
--		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
--		if (!rk_priv) {
--			err = -ENOMEM;
--			goto err_clk;
--		}
--
--		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
--			rk_priv->devtype = DWCMSHC_RK3588;
--		else
--			rk_priv->devtype = DWCMSHC_RK3568;
--
--		priv->priv = rk_priv;
--
--		err = dwcmshc_rk35xx_init(host, priv);
-+		err = dwcmshc_rk35xx_init(dev, host, priv);
+-	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+-		err = dwcmshc_rk35xx_init(dev, host, priv);
++	if (pltfm_data->init) {
++		err = pltfm_data->init(&pdev->dev, host, priv);
  		if (err)
  			goto err_clk;
  	}
-@@ -1290,7 +1288,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 
+-	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+-		th1520_init(dev, host, priv);
+-	}
+-
+ #ifdef CONFIG_ACPI
+ 	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
+ 		sdhci_enable_v4_mode(host);
+@@ -1288,8 +1303,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
  		dwcmshc_cqhci_init(host, pdev);
  	}
  
--	if (rk_priv)
-+	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata)
- 		dwcmshc_rk35xx_postinit(host, priv);
+-	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata)
+-		dwcmshc_rk35xx_postinit(host, priv);
++	if (pltfm_data->postinit)
++		pltfm_data->postinit(host, priv);
  
  	err = __sdhci_add_host(host);
+ 	if (err)
 -- 
 2.34.1
 
