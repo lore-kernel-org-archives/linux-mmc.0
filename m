@@ -1,33 +1,50 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B1681BC07C;
-	Tue,  6 Aug 2024 05:55:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72E9CF4FA;
+	Tue,  6 Aug 2024 07:31:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722923716; cv=none; b=k3IiUJ4l479VAOAw3ubQSLvyzmjVq5ZXN8GioPWoiQ9EJHUp7Opi2jXgViy5JUiIulqbsOLInEyfmRDEpRENq+twuK1CWtq6iwnkZS0ieaYuqP5lWVHXV0mOOz4cA+3WJffgZDmlOAIqaa4VwmneS56ImULhfYP+fQR08/EGv9U=
+	t=1722929495; cv=none; b=TVIaPFtsglS6kxfMg0Sd2/3YtRgBpvmNd1ZiC/cpzWJWwNhDvnrpi5OmbFC1nPr2QcyRYnlOKfVmLCl7gCYaeDL19bnEDAGhUOJ+qVnshMPCdL7OxC84u8o0s7q0LjPlEZ1BQI5k8DmaLcGwpVAV075l3CKB0r3GFVtYNxYKzT0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722923716; c=relaxed/simple;
-	bh=NQmXkhU3Hn2ExUohpNXfA1yRwH+B9cNfk9UPZJPR8RE=;
+	s=arc-20240116; t=1722929495; c=relaxed/simple;
+	bh=bbYqh0nJ+Cb4KE9wqOrGAYpZ3SiWXxZmVwwuA5Whp+I=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DyQeoCWM1maWEtGF0dwVzNGxnUdQKnhi1HJzYCAhQPRtvSMIM4wyVyFYnuzVu2SRJWD0k+3x/akHJWRdtea8FHgqzlYEGbpeMZ4u1EnBFzhklgtJjBPZYl+QbyU7N46b/L8lBlnTzlB8RcfDaRE7uILzw6OGpJrsWgjvr1+6g4o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=D1RuLWcg; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=htBemdhFmccsL6P1kg0NF33yT+v+LZ7p7BOG3wUo5gZHpXcFetOFO7+ZZEbQyeAoMK9AusXrsPGRJZpXm/gDQN+rDB3DIUdNJqo5DIHIo+YYHuxPHWslb/dIaQyoyBN+N+Og3Q9VaCCwCGAfRJhYASzNtT83eoSdNHIFqPwcUfI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=XwPPlXpJ; arc=none smtp.client-ip=198.175.65.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="D1RuLWcg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FFCBC32786;
-	Tue,  6 Aug 2024 05:55:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1722923715;
-	bh=NQmXkhU3Hn2ExUohpNXfA1yRwH+B9cNfk9UPZJPR8RE=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=D1RuLWcgqM03gIay4o1t2zYO9kWYs9TAOObGk4AI7TgOlA2oU2lLC5nLNlz4XIl4u
-	 dlG1zAwoNJaGBOxh76GvQY4v/dAlHX6JYFyOkN4EdWvxkPq1FJfAftAJ1VvgStqyTx
-	 Ez0atdB3zRGkFk2XVZrfP8gdYJ7zjyuONKzz4TbM9fB3zSv1AY4P1uzFQAb7QyjH2q
-	 k7oFptWu9xUXcRYkon1cPwVdf+ZyJy/qPBjusEHErz1wugMMZ81L06Q+t+1kU0GA0f
-	 1p+hdRLZiRLE86scjOgcyNRxVZozHlqxrY2tv9DWd6SiXIzj84j7z9b0YQB2GOZOEe
-	 g2+6/wvpLePjg==
-Message-ID: <9f459583-3530-4d5b-a6a5-d5fc1450af40@kernel.org>
-Date: Tue, 6 Aug 2024 07:55:08 +0200
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="XwPPlXpJ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1722929494; x=1754465494;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=bbYqh0nJ+Cb4KE9wqOrGAYpZ3SiWXxZmVwwuA5Whp+I=;
+  b=XwPPlXpJligf+V0pRPTw6mxzIsXt6ult4jbSh5oy3F7CkZQwHkZJYw2p
+   yTAr8cftGrsxWWPjKBhHIRrn/v1Bi/XvFYlf225FKjyQSMSzGWzXosrKC
+   gt+p9e4atafS2Tv3G0YOq+ILqtNATDNjV6gPwOO0ucdCJR2ZdQTXU/GSK
+   tx0pwIPIhZCnVKfRjAO8ERWa1gmHgD0Gj4jg1pQKshOzMktzZ8sL5Kelo
+   PIsfclqg/IhGUo3aioVN7VntWzNt8XYzrF3yksm37CSsr1wVx7NKpFZgh
+   wnPnBSQVJdVwiyOQfHRQeaDCHF/xNNmp5ApAFF98Iu8BoszgpMOu8K0y8
+   A==;
+X-CSE-ConnectionGUID: 2JDLwuyvQleDLGT3zCkh9w==
+X-CSE-MsgGUID: oE4bkI2uQFuB5BQDlWpW8Q==
+X-IronPort-AV: E=McAfee;i="6700,10204,11155"; a="21076479"
+X-IronPort-AV: E=Sophos;i="6.09,267,1716274800"; 
+   d="scan'208";a="21076479"
+Received: from orviesa006.jf.intel.com ([10.64.159.146])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2024 00:31:32 -0700
+X-CSE-ConnectionGUID: q9CoV/m9SCaOYLD+pgoAPg==
+X-CSE-MsgGUID: rDGs3TWNTdGOhwfzEV74/w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.09,267,1716274800"; 
+   d="scan'208";a="56637543"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.94.248.17])
+  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2024 00:31:28 -0700
+Message-ID: <dcde3b9f-ccc8-4e1e-8737-74768193f0af@intel.com>
+Date: Tue, 6 Aug 2024 10:31:22 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,79 +52,101 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Remove duplicate
- compatible and add clock checks
-To: Prabhakar <prabhakar.csengg@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Geert Uytterhoeven <geert+renesas@glider.be>,
- Magnus Damm <magnus.damm@gmail.com>,
- Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
- Biju Das <biju.das.jz@bp.renesas.com>,
- Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
- Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
- Geert Uytterhoeven <geert@linux-m68k.org>
-References: <20240805211257.61099-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: mmc0: Got data interrupt 0x04000000 even though no data operation
+ was in progress.
+To: Gratian Crisan <gratian.crisan@ni.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede
+ <hdegoede@redhat.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <87jzgur32p.fsf@ni.com>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20240805211257.61099-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <87jzgur32p.fsf@ni.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 05/08/2024 23:12, Prabhakar wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On 6/08/24 00:33, Gratian Crisan wrote:
+> Hi all,
 > 
-> Remove the duplicate compatible entry `renesas,sdhi-r9a09g057` and add a
-> restriction for clocks and clock-names for the RZ/V2H(P) SoC, which has
-> four clocks similar to the RZ/G2L SoC.
+> We are getting the following splat on latest 6.11.0-rc2-00002-gc813111d19e6 (and
+> older) kernel(s):
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Do you know a kernel version that does not get an error?
 
-Best regards,
-Krzysztof
+> 
+> [    4.792991] mmc0: new ultra high speed DDR50 SDHC card at address 0001
+> [    4.793550]   with environment:
+> [    4.793786]     HOME=/
+> [    4.793985]     TERM=linux
+> [    4.794201]     BOOT_IMAGE=/runmode/bzImage
+> [    4.794485]     sys_reset=false
+> [    4.795791] mmcblk0: mmc0:0001 0016G 15.2 GiB
+> [    5.333153] mmc0: Got data interrupt 0x04000000 even though no data operation was in progress.
+> [    5.333676] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    5.334069] mmc0: sdhci: Sys addr:  0x12454200 | Version:  0x0000b502
+> [    5.334464] mmc0: sdhci: Blk size:  0x00007040 | Blk cnt:  0x00000001
+> [    5.334860] mmc0: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+> [    5.335253] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000016
+> [    5.335648] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [    5.336040] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+> [    5.336432] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+> [    5.336824] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    5.337214] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> [    5.337605] mmc0: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000004
+> [    5.337997] mmc0: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+> [    5.338389] mmc0: sdhci: Resp[0]:   0x00400900 | Resp[1]:  0x00000000
+> [    5.338780] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [    5.339170] mmc0: sdhci: Host ctl2: 0x0000000c
+> [    5.339468] mmc0: sdhci: ADMA Err:  0x00000003 | ADMA Ptr: 0x12454200
+> [    5.339859] mmc0: sdhci: ============================================
+> [    5.340293] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 0
+> [    5.344663] Buffer I/O error on dev mmcblk0, logical block 0, async page read
+> [    5.346127]  mmcblk0: p1 p2
+> 
+> This is on an Intel Bay Trail based system: NI cRIO-9053 using an Atom E3805.
+> 
+> The issue appears related to the one fixed by commit b3855668d98c ("mmc: sdhci:
+> Add support for "Tuning Error" interrupts") and discussed here[1].
+
+Does reverting that commit help?
+
+> 
+> After adding some debug prints it appears that in our case we get a tuning error
+> interrupt during a MMC_SEND_STATUS (13) sdhci cmd which has no 'host->data'
+> associated with it (leading to the splat):
+> 
+> [    4.893298] mmc0: new ultra high speed DDR50 SDHC card at address 0001
+> [    4.896489] mmcblk0: mmc0:0001 0016G 15.2 GiB
+> [    4.906048] mmc0: tuning err irq, sdhci cmd: 18, host->cmd: 0000000003b39249, host->data: 00000000c0b4ad8a
+> [    4.963027] mmc0: tuning err irq, sdhci cmd: 18, host->cmd: 0000000003b39249, host->data: 00000000c0b4ad8a
+> [    5.384960] mmc0: tuning err irq, sdhci cmd: 17, host->cmd: 0000000003b39249, host->data: 00000000c0b4ad8a
+> [    5.442877] mmc0: tuning err irq, sdhci cmd: 13, host->cmd: 00000000e1669bad, host->data: 0000000000000000
+> [    5.443463] mmc0: Got data interrupt 0x04000000 even though no data operation was in progress.
+> 
+> I am new to this area of the kernel so I would appreciate any suggestions on the
+> direction to take here:
+> 
+>   - Should the tuning error interrupts be handled in common code in sdhci_irq()
+>     (or at least before the !host->data check in sdhci_data_irq())?
+> 
+>   - Is this more of an issue with tuning not happening when is expected or
+>     taking too long, since at first we do get the error during data transfer
+>     commands? Suggestions on what I should debug/trace next appreciated.
+
+SDHCI driver does not enable the "Tuning Error" interrupt, refer
+the kernel messages above:
+
+	Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+
+but it happens anyway, so the "fix" was to handle it anyway.
+
+But it begs the question, wasn't the error happening already?
+
+> 
+> Thanks,
+>     Gratian
+> 
+> [1] https://lore.kernel.org/r/20240410191639.526324-3-hdegoede@redhat.com
 
