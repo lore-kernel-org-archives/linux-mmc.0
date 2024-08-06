@@ -1,54 +1,57 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 876801C2324;
-	Tue,  6 Aug 2024 11:41:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 100ED1C379B;
+	Tue,  6 Aug 2024 11:41:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1722944490; cv=none; b=ZGd1OZus2LB5uwIQIPqBfSwJEzQl82FXAilM4ynqC09b9KyOGgkiObMXZVbxYPLfShQXBpHNBFeUi1y6sSK3yR1sibIWA0jC5eoE5INMGyWk8QO+j35sMAjhLOGCPAYa7kbPKBtPC0LJoDOD99RQXaitHIVScvnd22qBhMtNmOg=
+	t=1722944491; cv=none; b=qWM0NQO+UVj03WZSIwfWJYyZva32876u51+Odmf/vnvh9FWpQXElmnriU+okkKTIkwlUBN078ndWc6bOlW7Bwa/AQo4KL38Rvusb5VydaGnSZD4LazfwD+6FwgShrKnPw6oBbZEsr7D/dUCo7DkFisSywcyHciHIa2ArJjHuAkY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1722944490; c=relaxed/simple;
-	bh=0cuXlLqNV1nI6qmvoA149YGaAWIEPfuv5YFddNUum0o=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version; b=jm0CPdpsxJqS4xQcdzHlEMAOMn4SB1+caI+4qSx0E39OAejDE7m8ouWuHeemtEHgokXYAjSk7qSkTBlw9bTmQ85Pnt5xM5UB9NQCH7Vv3EU+/bN1jP9ol8XhE7RV45X8UQ2R3mCV1X27APuWjhRi5tZDF3tpOJfuxpGE0dRz9E8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=kK+tBEwV; arc=none smtp.client-ip=209.85.128.49
+	s=arc-20240116; t=1722944491; c=relaxed/simple;
+	bh=5LbPMzmNGfuxlauoWeKMsm0e6brfLsdQfHcfl/8nZRs=;
+	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=PcnY/LcRZHlIXbkwDmOj8s0Jd04thTFnx4TQCU5a+QK9AxT/7bShSre4n4/dXy1LA0KlWr1LoDFJGspUqtdGkjCJynemKwPs6a/C4ygVIZ5XcrG8E/s8LlJhNn8F1bd0lnZMDF1vdM4h2C8zZxoQiEQVeri+bQJM0ZWtrBGDsoI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SfYlrGrv; arc=none smtp.client-ip=209.85.128.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kK+tBEwV"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-42808071810so3186965e9.1;
-        Tue, 06 Aug 2024 04:41:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SfYlrGrv"
+Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-428ec6c190eso4174025e9.1;
+        Tue, 06 Aug 2024 04:41:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1722944487; x=1723549287; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=YpfYwGb98vUIAZ4eOkYm143SZkEFj932lYgjUfhnx5I=;
-        b=kK+tBEwVWjLsogOkiZgAcEgEQiyfmYNHkgMJN1i+Bkxcof7TAr4Bc6SmvvDp4QpLQe
-         /tNuv5uLPjSdqUWw4AeA0I2fQlDJpHNrYOPM11VOPSuWs2z8hydciUDJS5oy65LW9k7d
-         hRmg9QYYd0Ov3rB4f49NIsCRnVZ0iglNbNUzXL59800S/3l6xrsPEZjey2GiVZHFx7ig
-         kehri+AkEE6VBp4nnXGkYCkWRbFvNXkw6QrgH/uVGjdB/D0CdY0uVk3xYqdZUwQ+LmOn
-         D9kd2B6sU8GfFZ+P2hEAWN833FadMXdwutyBvOYkwxu6b+vzmAvg5G5K6zPqtxCQXus5
-         FWeg==
+        d=gmail.com; s=20230601; t=1722944488; x=1723549288; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=N4Tqx/xl+do4nmfv0ZFIXdX55krJHtI/dy8e3uyNR1Y=;
+        b=SfYlrGrv9pOqbDSGHmgF4N5PrTk48HWGv2flq8QJdvaGbbX7YBTro1ZCkiVgBSCw9E
+         +8y/CaA+JXDfNOLE0oC0oNHLszUjRp+qyuUWzTFPj+6Y8NB2lj6Wpj85uAgidYWNhYAl
+         qJQR7/wRWQypwA1x8eWetAEotB6MAwxoDcnP5JWQGeCLTr6WOd4xhWFFBgzxM73URpdE
+         y72lbp5XAFSt+VwOTm+vmrw8v6p1ynDZv3D5Zl5DaV3EEvNTzqseZo9Cmr/Q7rpRz7Qd
+         dvcDjx7QcwBmDRuMvqQYbkEHdz74hSgq72t0uauo6MvbKq6Gsta2inPWqstJXGO5imNT
+         heIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1722944487; x=1723549287;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=YpfYwGb98vUIAZ4eOkYm143SZkEFj932lYgjUfhnx5I=;
-        b=wXznGtA8xnFd9NNU+TiC9YgJ6FCrr0U1LxZ8j5CLcSTGFuZw+HJlLUJla2rzDjp1G3
-         lCMUR8IYGA0M1bEIfVx8oowWyZU0WQbdPBex4y2qB/9IvWzhKmNVMex7zeXD18E+J3YM
-         RqCIvG8ZFEGwHGJ++4ZSLYrqlexJMouVfClix0UrAFryp5j8KnVf9DWn7FaxdLsSODFa
-         ODVk47Oo86BUrXj5LMjQVrp+pOZuVJIThyormFMPWsmYgC04kHIBfkU2asp+WUA3xZR1
-         Xh+tFKqUCQNNPSaR//tlGu8PokosYwQ3ueCMf3l8K32h6mpXwS7X76YoeHwpfKSTO9Y/
-         d/cQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXDxXEGEH9qXYMVkakzLjCcku9snvgiIMCHPG1MYvFb89Anq8vc/fZTR7jsufIjoHenEoHvp3MTWj83nlzGYsp6tqAhvFVgjpnW6+44wTnSGeS3mgGe3D4kVCSbtxKOZ8jLafgxyMqTrMqsyH6JPBfBV0b2HpyqC0dWd/7A2TaJI20amQ==
-X-Gm-Message-State: AOJu0Yw8F6rWAVQDin9yBFK17OG1pW5ColgefwlGarjNSgTDJV73Xibp
-	zIwKTUNj1OL6SRv6WwdOVJ2vowmG/9X3hjIvz/Qn49m7IEd3arlo
-X-Google-Smtp-Source: AGHT+IH3bACCHKh1gLb1eYfDR32vW4Ay/HBQR1YwSGOa4TNKvGPiVuBbrwRDssiyzifL5Rm50ofl/w==
-X-Received: by 2002:a05:600c:4f4b:b0:426:614b:1a72 with SMTP id 5b1f17b1804b1-428e6b07ea1mr107971085e9.17.1722944486415;
-        Tue, 06 Aug 2024 04:41:26 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1722944488; x=1723549288;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=N4Tqx/xl+do4nmfv0ZFIXdX55krJHtI/dy8e3uyNR1Y=;
+        b=eEk8RvPyd39thDwTnz8bkCDWixE3aBlLX0ZiQfFk40U8XbPzOX9yMIThW36kN2a2qt
+         cjJk9R7IyVReylhDe2BsAOIe3627KeUcBdEJIShHAoh7Bbsvd6fK4pTQphKLjNmTQKZW
+         jXXz/mkA+I5pDkRqMl3X50eVdOR1JVz5KSLkLbB7o4T8scgC8MQXEHX/82XP8pwk9Dkh
+         1UdBRb+9Altd/voe5F87cngvvsmLsIG0uEb+8CysjQZddKdF/QyPlh+ebjMAG+4g4KgR
+         I0shgBsBlGsUx8fonO4/prLnJwP544AuUwGf01/FcvglC9GccFnBHdQokfre4U0Xl9Pf
+         CWrA==
+X-Forwarded-Encrypted: i=1; AJvYcCVfc4qKFFTTsgsf2iVDB0aGVnFxH1pe6q2Hg47pSSglRGWiF2RdWLDzglRiRVE4j63pKFyIr15EAi8mQ48iOAV1/dLWQhEVAL/PcaZWfYGPocVP6eKB26AO+6A2DAa434tgRCLsJpEhkANUXTIvLUV63LMI/P/VOnnc/98l/ZH8HxSB8A==
+X-Gm-Message-State: AOJu0YxuPHLwJhrgSbvc5w7XFIN2nPeU0+FLzBvi3NrO0Woqn7Z36Ebr
+	RrArElpGkkZJFibXf5aiV+7WzLi1Pxwao+3Gwrp+kib3s61PEY1w
+X-Google-Smtp-Source: AGHT+IG9k8L6rRkA1Va2sD8UO032mLhZSWZwsxwXlldLySXDGaw0sRlChwet0LU+bpg2jQOFstrw/Q==
+X-Received: by 2002:a05:600c:4f0c:b0:426:6099:6eaa with SMTP id 5b1f17b1804b1-428e6b7c61emr101771725e9.26.1722944488151;
+        Tue, 06 Aug 2024 04:41:28 -0700 (PDT)
 Received: from localhost.localdomain (host-87-6-196-30.retail.telecomitalia.it. [87.6.196.30])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e7cce6sm176105845e9.31.2024.08.06.04.41.24
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-428e6e7cce6sm176105845e9.31.2024.08.06.04.41.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 06 Aug 2024 04:41:26 -0700 (PDT)
+        Tue, 06 Aug 2024 04:41:27 -0700 (PDT)
 From: Christian Marangi <ansuelsmth@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -71,10 +74,12 @@ To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-kernel@vger.kernel.org,
 	linux-mtd@lists.infradead.org,
 	linux-nvme@lists.infradead.org
-Subject: [PATCH v3 0/6] mtd: improve block2mtd + airoha parser
-Date: Tue,  6 Aug 2024 13:41:10 +0200
-Message-ID: <20240806114118.17198-1-ansuelsmth@gmail.com>
+Subject: [PATCH v3 1/6] dt-bindings: nvme: Document nvme-card compatible
+Date: Tue,  6 Aug 2024 13:41:11 +0200
+Message-ID: <20240806114118.17198-2-ansuelsmth@gmail.com>
 X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20240806114118.17198-1-ansuelsmth@gmail.com>
+References: <20240806114118.17198-1-ansuelsmth@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -83,66 +88,99 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This small series handle 2 problems.
+Document new nvme-card compatible to permit defining fixed-partition in
+DT by the use of the block2mtd module to use block devices as MTD.
 
-It does try to ""standardize"" the usage of block2mtd module with
-MTD OF nodes.
-
-It is very easy to add support for MTD parser by just adding an
-OF node to the mtd created for block2mtd.
-
-This apply only if the root block is used for block2mtd to allow
-scenario where the full eMMC or an NVME is used for MTD and it doesn't
-have any partition table.
-
-To also support NVME, similar to how it's done with eMMC, we introduce
-a subnode to the NVME controller that needs to have the "nvme-card"
-compatible where a dev can define fixed-paritions for MTD parser usage.
-
-This series also add support for the Airoha partition table where
-the last partition is always ART and is placed at the end of the flash.
-
-This require dynamic calculation of the offset as some dedicated
-driver for bad block management might be used that reserve some space
-at the end of the flash for block accounting.
-
-New aarch64 Airoha SoC make use of this partition table and use block2mtd
-for eMMC to treat them as MTD with custom bad block management and block
-tracking.
-
-Changes v3:
-- Fix compilation error for missing slab.h header
-- Add compatible to partitions.yaml
-Changes v2:
-- Fix typo in DT patch
-- Fix compilation error for non-OF platform
-- Fix compilation error due to recent changes in block2mtd module
-
-Christian Marangi (6):
-  dt-bindings: nvme: Document nvme-card compatible
-  nvme: assign of_node to nvme device
-  dt-bindings: mmc: add property for partitions node in mmc-card node
-  block2mtd: attach device OF node to MTD device
-  dt-bindings: mtd: Add Documentation for Airoha fixed-partitions
-  mtd: parser: add support for Airoha parser
-
- .../devicetree/bindings/mmc/mmc-card.yaml     | 40 ++++++++++
- .../partitions/airoha,fixed-partitions.yaml   | 80 +++++++++++++++++++
- .../bindings/mtd/partitions/partitions.yaml   |  1 +
- .../devicetree/bindings/nvme/nvme-card.yaml   | 78 ++++++++++++++++++
- drivers/mtd/devices/block2mtd.c               | 12 +++
- drivers/mtd/parsers/Kconfig                   | 10 +++
- drivers/mtd/parsers/Makefile                  |  1 +
- drivers/mtd/parsers/ofpart_airoha.c           | 57 +++++++++++++
- drivers/mtd/parsers/ofpart_airoha.h           | 18 +++++
- drivers/mtd/parsers/ofpart_core.c             |  6 ++
- drivers/nvme/host/core.c                      |  4 +
- 11 files changed, 307 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
+Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+---
+ .../devicetree/bindings/nvme/nvme-card.yaml   | 78 +++++++++++++++++++
+ 1 file changed, 78 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/nvme/nvme-card.yaml
- create mode 100644 drivers/mtd/parsers/ofpart_airoha.c
- create mode 100644 drivers/mtd/parsers/ofpart_airoha.h
 
+diff --git a/Documentation/devicetree/bindings/nvme/nvme-card.yaml b/Documentation/devicetree/bindings/nvme/nvme-card.yaml
+new file mode 100644
+index 000000000000..20e9a877fac4
+--- /dev/null
++++ b/Documentation/devicetree/bindings/nvme/nvme-card.yaml
+@@ -0,0 +1,78 @@
++# SPDX-License-Identifier: GPL-2.0 OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/nvme/nvme-card.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: NVME Card
++
++maintainers:
++  - Christian Marangi <ansuelsmth@gmail.com>
++
++description: |
++  This documents describes the devicetree bindings for a NVME controller
++  child node describing a nvme-card.
++
++properties:
++  compatible:
++    const: nvme-card
++
++  partitions:
++    $ref: /schemas/mtd/partitions/partitions.yaml
++
++required:
++  - compatible
++
++additionalProperties: false
++
++examples:
++  - |
++    pcie {
++        #address-cells = <3>;
++        #size-cells = <2>;
++
++        bridge@0,0 {
++            reg = <0x00000000 0 0 0 0>;
++            #address-cells = <3>;
++            #size-cells = <2>;
++            ranges;
++
++            nvme@1,0 {
++                compatible = "pci144d,a809";
++
++                reg = <0x00010000 0 0 0 0>;
++                #address-cells = <1>;
++                #size-cells = <1>;
++
++                card {
++                    compatible = "nvme-card";
++
++                    partitions {
++                        compatible = "fixed-partitions";
++                        #address-cells = <1>;
++                        #size-cells = <1>;
++
++                        bootloader@0 {
++                          label = "bootloader";
++                          reg = <0x00000000 0x00080000>;
++                        };
++
++                        tclinux@80000 {
++                          label = "tclinux";
++                          reg = <0x00080000 0x02800000>;
++                        };
++
++                        tclinux_slave@2880000 {
++                          label = "tclinux_slave";
++                          reg = <0x02880000 0x02800000>;
++                        };
++
++                        rootfs_data@5080000 {
++                          label = "rootfs_data";
++                          reg = <0x5080000 0x00800000>;
++                        };
++                    };
++                };
++            };
++        };
++    };
 -- 
 2.45.2
 
