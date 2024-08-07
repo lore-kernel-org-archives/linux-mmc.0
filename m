@@ -1,55 +1,55 @@
 Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77EAD198E85
-	for <linux-mmc@vger.kernel.org>; Wed,  7 Aug 2024 06:04:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 98A8E198E85
+	for <linux-mmc@vger.kernel.org>; Wed,  7 Aug 2024 06:04:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723010692; cv=none; b=BmgTZTfVgTOwAZLihf6QSxBqpy5j1zP1RzHp1zcLI4uGLto+FjTKOlibo7Msdi4vTEHfw6kxQlYsPfsvcWZ7ge9iEEkrxU6q4lqauO3mNgwzpiHNJTV3R0FU9Zcdb7tojF2BwvcaBColXLxAPr/wxPewGrxOuSuFogKCqSbg4sA=
+	t=1723010695; cv=none; b=IoOX3LRKjQQQCBOf0rWef7Z6aGQ35RF0BQ34YvAgQuW5474gW5gLQBTWMke7pmSyNtbTvyac5vfzTBaQ/TREr21/D9UfCBnxQBhWm9+DkGXMKvp8iT7q5KK8VYUb7ONY0AEEsRH9oSlYGpawjU2JPaMyyn6/0VQc55zz0x7jJqI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723010692; c=relaxed/simple;
-	bh=nJNXYdnwmHYmdGbpumUlSgWKZYS31MO/Iex+/scdqws=;
+	s=arc-20240116; t=1723010695; c=relaxed/simple;
+	bh=MHFndB2QnUNxORquhxbFIL559YwED7RczyN5weD7NGA=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=dqmZfuuyO56e7C7F2eXDsMHh+KtObQ78RUFWjMK4xZ4gdIAXGobaPd5dz2NxP13K20imH4bRy1UiCDRjxKh07qlVbsUFvPykHAId+LCnODlDx9ET4bpa2mU3ye1X53L1rZ8ogo653imJL1r4i0zL+a7b4jDQZqNBIRlBWkUdrhY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Wh+OlKh3; arc=none smtp.client-ip=216.71.154.42
+	 MIME-Version; b=ta+FPX1ekuzPw1zC+wt49W9dSNPmkUVblvdXnwUIgiRJOgo5wKI0B7ZI/1Ll4N5kjDHo4vXr9pr6UVLE2/Y/CndazUbEphza36WXCFYP0zrxlsdjL3ne9tF8qbSFQKDa5l0y9SEJkFGhtIv8yPEoLsdaGUUDu6Cm3YtBpvypY2c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=OfcbR8Jp; arc=none smtp.client-ip=216.71.154.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Wh+OlKh3"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="OfcbR8Jp"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1723010690; x=1754546690;
+  t=1723010693; x=1754546693;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=nJNXYdnwmHYmdGbpumUlSgWKZYS31MO/Iex+/scdqws=;
-  b=Wh+OlKh3Uj+o/M8H2L5yUZvFpoXLBj9RcX9QJJtPJwpcMcpRb4LaTp45
-   doKPW8WHwzcF4bCVBh89O1rfOb4V/YNsCM5KRAZhdcpLxvZ4KqOzs2tIu
-   VxgF7J/fRBDClO9QEVYbIAgyTnlPh2NKBMvTAo8XaKMtNMRef5q7nCt7n
-   IudoPV8ekpuBnNatGbrb8ixwoq7H4VwvWLhf/QqVs2YkBIv8TxdkTCnn+
-   owIhbvMX1EqViTisEJDsLWVN0uv4vhno+62WNP64dTjpzYJKrOHVElPOP
-   VwK3ZMQB3mSnlumYVPv1niqrppzqNdcqdizBbj8y0o8XEA/faCDefF2m4
-   w==;
-X-CSE-ConnectionGUID: 5yT+521pRWO9OiCeKjGrdg==
-X-CSE-MsgGUID: BFlG8zlKTyGVcA76lvYbBg==
+  bh=MHFndB2QnUNxORquhxbFIL559YwED7RczyN5weD7NGA=;
+  b=OfcbR8JpiTYdmfYMqIxZJQPajWdees1Y1meIMvrP7/3iXIhqR5Ss2pEZ
+   LH92a//4o4a1J8USPir9D66LSSEfxXMFEKEQA7GcLEOde3DxG704EbgKB
+   u29GZ3pTShq0K2cg6olPU9iGSYJItIlrCTqn64+Z3UxyfqholF+sHB0iH
+   FdN4V7/5A1LNmGdGxCNcuoH4bgKb1Zx2I5r+r7gvC0EgPyoUGTKt4az0S
+   3GjvhYgtETp8m8wqKjY43dP+e9s18zo/lzTn7Q5zG2Hv28Dbj7XsnVvoj
+   Br8i/3c5iBfrj6CY/xgEbfhAUTpcXZepZunr9A8pSTBQbdpFqDZSk0v21
+   g==;
+X-CSE-ConnectionGUID: 5+xjMRaoSK6PQMzp2s5PCw==
+X-CSE-MsgGUID: rZJX4PSaQHa6+05pwvOMNg==
 X-IronPort-AV: E=Sophos;i="6.09,269,1716220800"; 
-   d="scan'208";a="23039297"
+   d="scan'208";a="23039305"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Aug 2024 14:04:50 +0800
-IronPort-SDR: 66b30088_UNPtFJWS4XWi36TdFYsA0dyyC2eHWb8LwR1mgptQbAa+oo+
- 0ZxsoyLktHHE1GWmwx3TfkSZTFm7Qpp0ukXEo4w==
+  by ob1.hgst.iphmx.com with ESMTP; 07 Aug 2024 14:04:53 +0800
+IronPort-SDR: 66b3008b_9PK0d7kqjssOuJNcDLbMPNT1413bdOpEPUiQRBRO5Iacij9
+ ghNgzgg3DAfWVmJYegOov5OgZ7LBi35QNGZiCRA==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 06 Aug 2024 22:05:12 -0700
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 06 Aug 2024 22:05:15 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 06 Aug 2024 23:04:49 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 06 Aug 2024 23:04:53 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Ricky WU <ricky_wu@realtek.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v2 03/10] mmc: sd: Add Extension memory addressing
-Date: Wed,  7 Aug 2024 09:03:02 +0300
-Message-Id: <20240807060309.2403023-4-avri.altman@wdc.com>
+Subject: [PATCH v2 04/10] mmc: core: Add open-ended Ext memory addressing
+Date: Wed,  7 Aug 2024 09:03:03 +0300
+Message-Id: <20240807060309.2403023-5-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240807060309.2403023-1-avri.altman@wdc.com>
 References: <20240807060309.2403023-1-avri.altman@wdc.com>
@@ -61,75 +61,45 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-SDUC memory addressing spans beyond 2TB and up to 128TB.  Therefore, 38
-bits are required to access the entire memory space of all sectors.
-Those extra 6 bits are to be carried by CMD22 prior of sending
-read/write/erase commands: CMD17, CMD18, CMD24, CMD25, CMD32, and CMD33.
-
-CMD22 will carry the higher order 6 bits, and must precedes any of the
-above commands even if it targets sector < 2TB.
-
-No error related to address or length is indicated in CMD22 but rather
-in the read/write command itself.
+For open-ended read/write - just send CMD22 before issuing the command.
+While at it, make sure that the rw command arg is properly casting the
+lower 32 bits, as it can be larger now.
 
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/sd_ops.c | 15 +++++++++++++++
- drivers/mmc/core/sd_ops.h |  1 +
- include/linux/mmc/sd.h    |  3 +++
- 3 files changed, 19 insertions(+)
+ drivers/mmc/core/block.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 7f6963dac873..8b69129d7b61 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -199,6 +199,21 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 	return 0;
- }
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 367509b5b646..392621232ad8 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -180,6 +180,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+ static int mmc_spi_err_check(struct mmc_card *card);
+ static int mmc_blk_busy_cb(void *cb_data, bool *busy);
++static int mmc_blk_wait_for_idle(struct mmc_queue *mq, struct mmc_host *host);
  
-+int mmc_send_ext_addr(struct mmc_host *host, sector_t addr)
-+{
-+	struct mmc_command cmd = {
-+		.opcode = SD_ADDR_EXT,
-+		.arg = (u32)((addr >> 32) & 0x3F),
-+		.flags = MMC_RSP_R1 | MMC_CMD_AC,
-+	};
-+
-+	if (!mmc_card_is_sduc(host))
-+		return 0;
-+
-+	return mmc_wait_for_cmd(host, &cmd, 0);
-+}
-+EXPORT_SYMBOL_GPL(mmc_send_ext_addr);
-+
- static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
- 			      u32 *resp)
+ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
  {
-diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-index 7667fc223b74..462efd43acfa 100644
---- a/drivers/mmc/core/sd_ops.h
-+++ b/drivers/mmc/core/sd_ops.h
-@@ -21,6 +21,7 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
- int mmc_app_send_scr(struct mmc_card *card);
- int mmc_app_sd_status(struct mmc_card *card, void *ssr);
- int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card);
-+int mmc_send_ext_addr(struct mmc_host *host, sector_t addr);
+@@ -1664,7 +1665,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
  
- #endif
+ 	brq->mrq.cmd = &brq->cmd;
  
-diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-index 865cc0ca8543..af5fc70e09a2 100644
---- a/include/linux/mmc/sd.h
-+++ b/include/linux/mmc/sd.h
-@@ -15,6 +15,9 @@
- #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7  */
- #define SD_SWITCH_VOLTAGE         11  /* ac                      R1  */
- 
-+/* Class 2 */
-+#define SD_ADDR_EXT		 22   /* ac   [5:0]              R1  */
-+
-   /* class 10 */
- #define SD_SWITCH                 6   /* adtc [31:0] See below   R1  */
+-	brq->cmd.arg = blk_rq_pos(req);
++	brq->cmd.arg = blk_rq_pos(req) & 0xFFFFFFFF;
+ 	if (!mmc_card_blockaddr(card))
+ 		brq->cmd.arg <<= 9;
+ 	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+@@ -1712,6 +1713,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+ 			(do_data_tag ? (1 << 29) : 0);
+ 		brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+ 		brq->mrq.sbc = &brq->sbc;
++	} else if (mmc_card_is_sduc(card->host)) {
++		mmc_blk_wait_for_idle(mq, card->host);
++		mmc_send_ext_addr(card->host, blk_rq_pos(req));
+ 	}
+ }
  
 -- 
 2.25.1
