@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A668188000;
-	Thu,  8 Aug 2024 07:20:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79EA373466;
+	Thu,  8 Aug 2024 09:47:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723101602; cv=none; b=PEAZauGLIkATw2URHkWW/iKBRfH3k+mxCx9Q/XmF3kJxaU5ktFwA+Ha/zQBdZLC/wYRLhnzRY65uuOqwl6dlVGx0hGfYHbQ3NOzzu6intW5pLVzyg+WFsshsgfCldb0P8KK7vQBruJwAzaxelmHQnrZZIDO0hwmYPSDTcH2NsVc=
+	t=1723110462; cv=none; b=ogotp7vqDuLb9Oad+xcOloM4T90Q9UxDD/WHhi9/rUQwxCTJXgSEeNVoX6azEuLy/zPVg5n5Y9MeckS1v387pMXVsfBtd13y47yMT9LrPgxoM78099FZl4mvxUJWfTxtJb1sHm4UJ1NoUhOqrmMKejnpCJ+NynDqUU0dVbjv94g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723101602; c=relaxed/simple;
-	bh=wxcgCBOimKAD4jUkdWEqChnDm5Iep6D0bqcnGk9a604=;
+	s=arc-20240116; t=1723110462; c=relaxed/simple;
+	bh=MGdoEFtRggCclD8PChFBmTqeJSblL4Hi36NwkAEyY48=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ugQUe4j51c24xETN+6RijLRrutmK2qjja8lkOEhNics6mTSnGadPwhLQwb5i795R+yf/tW8vJVyMG5CedO8o59xSZSJosC2RC4g1MT2SQHojImfghTrgSO8IkG9IG7efbTCPJquP+dJAn1fgpkV4PzQ8g693gbc4MzMa74q+zSc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Ren4Jb1b; arc=none smtp.client-ip=192.198.163.8
+	 In-Reply-To:Content-Type; b=tl6vdeBXvr2crVh/aKXqGsiGVQ6tnqrS+BJFh9YYuhCVj10eapGc9TKIW0dx4IW45kf057GvGjpwYwPTH92t/GtxzQ9hVDlm53KLGhvuR6tlpelbDbuFtp/cE2aY9tDjrFpts4H9XhqV0h5XucU5vrGH4JFg4L/GD/FkiE6jmrQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Sf5tMkAT; arc=none smtp.client-ip=192.198.163.14
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Ren4Jb1b"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Sf5tMkAT"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1723101601; x=1754637601;
+  t=1723110461; x=1754646461;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=wxcgCBOimKAD4jUkdWEqChnDm5Iep6D0bqcnGk9a604=;
-  b=Ren4Jb1b6zT+Wxxh7+jDCbpf1g77lFx5G7iPvxjRt/iAvCRJ4zfiahE5
-   H/mJC3uJen2//4XA36J1mmQqYiwWbfhaZOLqa4ARQB+MfeebqOGyTe/uA
-   Eyy7WDHUXnsuxNu5N+HS4bzZQYo/abNbkX5cNMYfexl5QCpP0LW7NfUgg
-   sPCzfEbqPSyPrPzovD/yNOh549aAdU1Qmm6YWdUV0J03DhyGOkBOuB9rN
-   LZGaTdVxPha8oEwXMJTQb9fx6fsrUmbTyh4O1/jUmz5kNHKXvSMhbhx7D
-   HU9dLHXD/x0r2V0OS9j/DWdWNTwaK8I7Q0c3ClnX8G06aDuXWJRtPE+E/
+  bh=MGdoEFtRggCclD8PChFBmTqeJSblL4Hi36NwkAEyY48=;
+  b=Sf5tMkATrwyMjOeGD3Llq4DQknCGbaLh0+J2E1s7nxMnceg/5Oq98gkP
+   Be+pHDy4E63aNus0pLtRg3b78/vCCCbxejLs9aCYBqoYloajyB4PE4DRT
+   CN+I00l/okuoamQP+UudGUbGS94lL59Qyp+u9Tyu2c7LKh5mutTJacGyD
+   cAfyx9Ml6vfsQtqn3EPHCWIQQj0kvBAf+AqF89xejOm/yQeFcDGa1jB53
+   nV8AfYfDcKmDUOfIEI66CyRVd5qXlUO+Qlz1H2L0HBzXpBBAuVW0joPEw
+   AMUL7+ZxZ6xgJW1+5tuob1iyNzmxRh5EfcRcIj5TC3v6VNMfcWJ8cPHzH
    g==;
-X-CSE-ConnectionGUID: F9S6K2jCQWusx10uRNdgzA==
-X-CSE-MsgGUID: VvxXbhXKRoWZJWXBkbS/fg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="38717159"
+X-CSE-ConnectionGUID: pR9XuCXwQ2uNK1IsyZd2Iw==
+X-CSE-MsgGUID: tiDLi5EdTfWHGPL8aK610w==
+X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="21393220"
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="38717159"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:20:00 -0700
-X-CSE-ConnectionGUID: ZN4ej1yBTdiS48l9s30F4w==
-X-CSE-MsgGUID: qNA912EzR/2GnojYfNPF5A==
+   d="scan'208";a="21393220"
+Received: from fmviesa006.fm.intel.com ([10.60.135.146])
+  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 02:47:40 -0700
+X-CSE-ConnectionGUID: QCPxD7T3TUOjeJx/4r9PXA==
+X-CSE-MsgGUID: mNkm1e5YS1+j4XnIQrhwmQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="57365976"
+   d="scan'208";a="56847830"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.150.149])
-  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:52 -0700
-Message-ID: <41fd12ad-a341-45c1-8760-9ac712564c56@intel.com>
-Date: Thu, 8 Aug 2024 10:19:45 +0300
+  by fmviesa006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 02:47:37 -0700
+Message-ID: <f4f5d6bd-86d3-46d4-b0cb-765d4a6b2a26@intel.com>
+Date: Thu, 8 Aug 2024 12:47:30 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,227 +52,184 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 7/8] mmc: sdhci-of-dwcmshc: Add support for Sophgo
- SG2042
-To: Chen Wang <unicornxw@gmail.com>, aou@eecs.berkeley.edu,
- conor+dt@kernel.org, guoren@kernel.org, inochiama@outlook.com,
- jszhang@kernel.org, krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
- paul.walmsley@sifive.com, robh@kernel.org, ulf.hansson@linaro.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-riscv@lists.infradead.org,
- chao.wei@sophgo.com, haijiao.liu@sophgo.com, xiaoguang.xing@sophgo.com,
- tingzhu.wang@sophgo.com
-Cc: Chen Wang <unicorn_wang@outlook.com>
-References: <cover.1722847198.git.unicorn_wang@outlook.com>
- <eb21847528a6487af54bb80f1ce94adff289cdb0.1722847198.git.unicorn_wang@outlook.com>
+Subject: Re: mmc0: Got data interrupt 0x04000000 even though no data operation
+ was in progress.
+To: Gratian Crisan <gratian.crisan@ni.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede
+ <hdegoede@redhat.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <87jzgur32p.fsf@ni.com>
+ <dcde3b9f-ccc8-4e1e-8737-74768193f0af@intel.com> <87frrhqn8n.fsf@ni.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <eb21847528a6487af54bb80f1ce94adff289cdb0.1722847198.git.unicorn_wang@outlook.com>
+In-Reply-To: <87frrhqn8n.fsf@ni.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 5/08/24 12:19, Chen Wang wrote:
-> From: Chen Wang <unicorn_wang@outlook.com>
+On 7/08/24 00:35, Gratian Crisan wrote:
 > 
-> Add support for the mmc controller of Sophgo SG2042.
+> Adrian Hunter <adrian.hunter@intel.com> writes:
+>> On 6/08/24 00:33, Gratian Crisan wrote:
+>>>
+>>> We are getting the following splat on latest 6.11.0-rc2-00002-gc813111d19e6 (and
+>>> older) kernel(s):
+>>
+>> Do you know a kernel version that does not get an error?
+>>
 > 
-> SG2042 uses Synopsys PHY the same as TH1520 so we reuse the tuning
-> logic from TH1520. Besides this, this patch implement some SG2042
-> specific work, such as clocks and reset ops.
+> Sorry for not being more clear in my original email - this is not a new issue. I
+> believe this Bay Trail hardware always had an issue with receiving "Tuning
+> Error" interrupts with certain SD cards. At least as far back as 4.9.47.
 > 
-> Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
+> Up until commit b3855668d98c ("mmc: sdhci: Add support for "Tuning Error"
+> interrupts") these resulted in a "mmc0: Unexpected interrupt 0x04000000" splat,
+> which b3855668d98c fixed.
+> 
+> However, now that "Tuning Error" interrupts are treated as data interrupts and
+> handled in sdhci_data_irq() we are hitting a corner case where that tuning error
+> interrupt comes in after a MMC_SEND_STATUS command with no 'host->data'
+> associated resulting in the new splat.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Ok, thanks for clarifying.
 
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 125 ++++++++++++++++++++++++++--
->  1 file changed, 118 insertions(+), 7 deletions(-)
+> Hence the question in my previous email: Should the tuning error interrupts be
+> handled in common code in sdhci_irq()?
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 16f420994519..ba8960d8b2d4 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -113,12 +113,15 @@
->  #define DWC_MSHC_PTR_PHY_R	0x300
->  
->  /* PHY general configuration */
-> -#define PHY_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x00)
-> -#define PHY_CNFG_RSTN_DEASSERT	0x1  /* Deassert PHY reset */
-> -#define PHY_CNFG_PAD_SP_MASK	GENMASK(19, 16) /* bits [19:16] */
-> -#define PHY_CNFG_PAD_SP		0x0c /* PMOS TX drive strength */
-> -#define PHY_CNFG_PAD_SN_MASK	GENMASK(23, 20) /* bits [23:20] */
-> -#define PHY_CNFG_PAD_SN		0x0c /* NMOS TX drive strength */
-> +#define PHY_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x00)
-> +#define PHY_CNFG_RSTN_DEASSERT		0x1  /* Deassert PHY reset */
-> +#define PHY_CNFG_PHY_PWRGOOD_MASK	BIT_MASK(1) /* bit [1] */
-> +#define PHY_CNFG_PAD_SP_MASK		GENMASK(19, 16) /* bits [19:16] */
-> +#define PHY_CNFG_PAD_SP			0x0c /* PMOS TX drive strength */
-> +#define PHY_CNFG_PAD_SP_SG2042		0x09 /* PMOS TX drive strength for SG2042 */
-> +#define PHY_CNFG_PAD_SN_MASK		GENMASK(23, 20) /* bits [23:20] */
-> +#define PHY_CNFG_PAD_SN			0x0c /* NMOS TX drive strength */
-> +#define PHY_CNFG_PAD_SN_SG2042		0x08 /* NMOS TX drive strength for SG2042 */
->  
->  /* PHY command/response pad settings */
->  #define PHY_CMDPAD_CNFG_R	(DWC_MSHC_PTR_PHY_R + 0x04)
-> @@ -147,10 +150,12 @@
->  #define PHY_PAD_TXSLEW_CTRL_P		0x3 /* Slew control for P-Type pad TX */
->  #define PHY_PAD_TXSLEW_CTRL_N_MASK	GENMASK(12, 9) /* bits [12:9] */
->  #define PHY_PAD_TXSLEW_CTRL_N		0x3 /* Slew control for N-Type pad TX */
-> +#define PHY_PAD_TXSLEW_CTRL_N_SG2042	0x2 /* Slew control for N-Type pad TX for SG2042 */
->  
->  /* PHY CLK delay line settings */
->  #define PHY_SDCLKDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x1d)
-> -#define PHY_SDCLKDL_CNFG_UPDATE	BIT(4) /* set before writing to SDCLKDL_DC */
-> +#define PHY_SDCLKDL_CNFG_EXTDLY_EN	BIT(0)
-> +#define PHY_SDCLKDL_CNFG_UPDATE		BIT(4) /* set before writing to SDCLKDL_DC */
->  
->  /* PHY CLK delay line delay code */
->  #define PHY_SDCLKDL_DC_R		(DWC_MSHC_PTR_PHY_R + 0x1e)
-> @@ -158,10 +163,14 @@
->  #define PHY_SDCLKDL_DC_DEFAULT		0x32 /* default delay code */
->  #define PHY_SDCLKDL_DC_HS400		0x18 /* delay code for HS400 mode */
->  
-> +#define PHY_SMPLDL_CNFG_R		(DWC_MSHC_PTR_PHY_R + 0x20)
-> +#define PHY_SMPLDL_CNFG_BYPASS_EN	BIT(1)
-> +
->  /* PHY drift_cclk_rx delay line configuration setting */
->  #define PHY_ATDL_CNFG_R			(DWC_MSHC_PTR_PHY_R + 0x21)
->  #define PHY_ATDL_CNFG_INPSEL_MASK	GENMASK(3, 2) /* bits [3:2] */
->  #define PHY_ATDL_CNFG_INPSEL		0x3 /* delay line input source */
-> +#define PHY_ATDL_CNFG_INPSEL_SG2042	0x2 /* delay line input source for SG2042 */
->  
->  /* PHY DLL control settings */
->  #define PHY_DLL_CTRL_R			(DWC_MSHC_PTR_PHY_R + 0x24)
-> @@ -1013,6 +1022,85 @@ static int cv18xx_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
->  	return ret;
->  }
->  
-> +static inline void sg2042_sdhci_phy_init(struct sdhci_host *host)
-> +{
-> +	u32 val;
-> +
-> +	/* Asset phy reset & set tx drive strength */
-> +	val = sdhci_readl(host, PHY_CNFG_R);
-> +	val &= ~PHY_CNFG_RSTN_DEASSERT;
-> +	val |= FIELD_PREP(PHY_CNFG_PHY_PWRGOOD_MASK, 1);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP_SG2042);
-> +	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN_SG2042);
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +
-> +	/* Configure phy pads */
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N_SG2042);
-> +	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> +	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N_SG2042);
-> +	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> +
-> +	val = PHY_PAD_RXSEL_3V3;
-> +	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> +	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N_SG2042);
-> +	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> +
-> +	/* Configure delay line */
-> +	/* Enable fixed delay */
-> +	sdhci_writeb(host, PHY_SDCLKDL_CNFG_EXTDLY_EN, PHY_SDCLKDL_CNFG_R);
-> +	/*
-> +	 * Set delay line.
-> +	 * Its recommended that bit UPDATE_DC[4] is 1 when SDCLKDL_DC is being written.
-> +	 * Ensure UPDATE_DC[4] is '0' when not updating code.
-> +	 */
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val |= PHY_SDCLKDL_CNFG_UPDATE;
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +	/* Add 10 * 70ps = 0.7ns for output delay */
-> +	sdhci_writeb(host, 10, PHY_SDCLKDL_DC_R);
-> +	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> +	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> +	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +
-> +	/* Set SMPLDL_CNFG, Bypass */
-> +	sdhci_writeb(host, PHY_SMPLDL_CNFG_BYPASS_EN, PHY_SMPLDL_CNFG_R);
-> +
-> +	/* Set ATDL_CNFG, tuning clk not use for init */
-> +	val = FIELD_PREP(PHY_ATDL_CNFG_INPSEL_MASK, PHY_ATDL_CNFG_INPSEL_SG2042);
-> +	sdhci_writeb(host, val, PHY_ATDL_CNFG_R);
-> +
-> +	/* Deasset phy reset */
-> +	val = sdhci_readl(host, PHY_CNFG_R);
-> +	val |= PHY_CNFG_RSTN_DEASSERT;
-> +	sdhci_writel(host, val, PHY_CNFG_R);
-> +}
-> +
-> +static void sg2042_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	sdhci_reset(host, mask);
-> +
-> +	if (mask & SDHCI_RESET_ALL)
-> +		sg2042_sdhci_phy_init(host);
-> +}
-> +
-> +static int sg2042_init(struct device *dev, struct sdhci_host *host,
-> +		       struct dwcmshc_priv *dwc_priv)
-> +{
-> +	static const char * const clk_ids[] = {"timer"};
-> +
-> +	return dwcmshc_get_enable_other_clks(mmc_dev(host->mmc), dwc_priv,
-> +					     ARRAY_SIZE(clk_ids), clk_ids);
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -1054,6 +1142,16 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
->  	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
->  };
->  
-> +static const struct sdhci_ops sdhci_dwcmshc_sg2042_ops = {
-> +	.set_clock		= sdhci_set_clock,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-> +	.get_max_clock		= dwcmshc_get_max_clock,
-> +	.reset			= sg2042_sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +	.platform_execute_tuning = th1520_execute_tuning,
-> +};
-> +
->  static const struct dwcmshc_pltfm_data sdhci_dwcmshc_pdata = {
->  	.pdata = {
->  		.ops = &sdhci_dwcmshc_ops,
-> @@ -1102,6 +1200,15 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
->  	},
->  };
->  
-> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_sg2042_pdata = {
-> +	.pdata = {
-> +		.ops = &sdhci_dwcmshc_sg2042_ops,
-> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +	},
-> +	.init = sg2042_init,
-> +};
-> +
->  static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
->  	.enable		= dwcmshc_sdhci_cqe_enable,
->  	.disable	= sdhci_cqe_disable,
-> @@ -1194,6 +1301,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->  		.compatible = "thead,th1520-dwcmshc",
->  		.data = &sdhci_dwcmshc_th1520_pdata,
->  	},
-> +	{
-> +		.compatible = "sophgo,sg2042-dwcmshc",
-> +		.data = &sdhci_dwcmshc_sg2042_pdata,
-> +	},
->  	{},
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
+>>>
+>>> [    4.792991] mmc0: new ultra high speed DDR50 SDHC card at address 0001
+>>> [    4.793550]   with environment:
+>>> [    4.793786]     HOME=/
+>>> [    4.793985]     TERM=linux
+>>> [    4.794201]     BOOT_IMAGE=/runmode/bzImage
+>>> [    4.794485]     sys_reset=false
+>>> [    4.795791] mmcblk0: mmc0:0001 0016G 15.2 GiB
+>>> [    5.333153] mmc0: Got data interrupt 0x04000000 even though no data operation was in progress.
+>>> [    5.333676] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+>>> [    5.334069] mmc0: sdhci: Sys addr:  0x12454200 | Version:  0x0000b502
+>>> [    5.334464] mmc0: sdhci: Blk size:  0x00007040 | Blk cnt:  0x00000001
+>>> [    5.334860] mmc0: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+>>> [    5.335253] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000016
+>>> [    5.335648] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+>>> [    5.336040] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+>>> [    5.336432] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+>>> [    5.336824] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+>>> [    5.337214] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>>> [    5.337605] mmc0: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000004
+>>> [    5.337997] mmc0: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+>>> [    5.338389] mmc0: sdhci: Resp[0]:   0x00400900 | Resp[1]:  0x00000000
+>>> [    5.338780] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+>>> [    5.339170] mmc0: sdhci: Host ctl2: 0x0000000c
+>>> [    5.339468] mmc0: sdhci: ADMA Err:  0x00000003 | ADMA Ptr: 0x12454200
+>>> [    5.339859] mmc0: sdhci: ============================================
+>>> [    5.340293] I/O error, dev mmcblk0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 0
+>>> [    5.344663] Buffer I/O error on dev mmcblk0, logical block 0, async page read
+>>> [    5.346127]  mmcblk0: p1 p2
+>>>
+>>> This is on an Intel Bay Trail based system: NI cRIO-9053 using an Atom E3805.
+>>>
+>>> The issue appears related to the one fixed by commit b3855668d98c ("mmc: sdhci:
+>>> Add support for "Tuning Error" interrupts") and discussed here[1].
+>>
+>> Does reverting that commit help?
+>>
+> 
+> Reverting the commit brings back the original splat that commit fixed (albeit
+> without the I/O error):
+> 
+> [    4.893032] mmc0: new ultra high speed DDR50 SDHC card at address 0001
+> [    4.896238] mmcblk0: mmc0:0001 0016G 15.2 GiB
+> [    4.905944] mmc0: Unexpected interrupt 0x04000000.
+> [    4.906272] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [    4.906664] mmc0: sdhci: Sys addr:  0x126e6200 | Version:  0x0000b502
+> [    4.907059] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> [    4.907451] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x0000003b
+> [    4.907842] mmc0: sdhci: Present:   0x01ff0206 | Host ctl: 0x00000016
+> [    4.908234] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> [    4.908625] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000107
+> [    4.909015] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000002
+> [    4.909408] mmc0: sdhci: Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+> [    4.909800] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000001
+> [    4.910193] mmc0: sdhci: Caps:      0x076864b2 | Caps_1:   0x00000004
+> [    4.910581] mmc0: sdhci: Cmd:       0x0000123a | Max curr: 0x00000000
+> [    4.910976] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00400900
+> [    4.911371] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00400900
+> [    4.911765] mmc0: sdhci: Host ctl2: 0x0000000c
+> [    4.912064] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x126e6200
+> [    4.912456] mmc0: sdhci: ============================================
+> [    4.913301]  mmcblk0: p1 p2
+> [    6.401855] EXT4-fs (mmcblk1p2): mounted filesystem d57a3d3c-a1f9-4f8e-8cbc-19dc5bb4fc4c r/w with ordered data mode. Quota mode: disabled.
+> 
+>>> I am new to this area of the kernel so I would appreciate any suggestions on the
+>>> direction to take here:
+>>>
+>>>   - Should the tuning error interrupts be handled in common code in sdhci_irq()
+>>>     (or at least before the !host->data check in sdhci_data_irq())?
+>>>
+>>>   - Is this more of an issue with tuning not happening when is expected or
+>>>     taking too long, since at first we do get the error during data transfer
+>>>     commands? Suggestions on what I should debug/trace next appreciated.
+>>
+>> SDHCI driver does not enable the "Tuning Error" interrupt, refer
+>> the kernel messages above:
+>>
+>> 	Int enab:  0x03ff008b | Sig enab: 0x03ff008b
+>>
+>> but it happens anyway, so the "fix" was to handle it anyway.
+>>
+>> But it begs the question, wasn't the error happening already?
+>>
+> 
+> Kind of: Before we were getting "mmc0: Unexpected interrupt 0x04000000", but
+> somehow it didn't result in a I/O error. That may be just lucky timing.
+> 
+> Now we're getting "mmc0: Got data interrupt 0x04000000 even though no data operation was in
+> progress." followed by an I/O error on READ.
+> 
+> I appreciate your reply. I'm happy to work on a patch or test things if I'm
+> pointed in the right direction.
+
+Note that neither "Got data interrupt ... even though no data
+operation was in progress" nor "Unexpected interrupt ..." messages
+result in I/O errors directly, but indicate that the host controller
+is not behaving as expected.
+
+However, according to the spec. "Tuning Error" interrupt status is
+an unrecoverable error, so commit b3855668d98c ("mmc: sdhci: Add
+support for "Tuning Error" interrupts") began treating it that way
+and causing a re-tune and retry, as Hans reported that it made things
+work for his devices.
+
+You should first get a better idea of what circumstances errors are
+occurring.  Enabling debug messages should help, but it will cause
+a very large number of messages and you may also want to increase
+the kernel message buffer size (CONFIG_LOG_BUF_SHIFT)
+
+Dynamic debug for mmc:
+
+    Kernel must be configured:
+
+        CONFIG_DYNAMIC_DEBUG=y
+
+    To enable mmc debug via sysfs:
+
+        echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control
+        echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control
+
+    To enable mmc debug via kernel command line:
+
+        dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
+
+    To disable mmc debug:
+
+        echo 'file drivers/mmc/core/* -p' > /sys/kernel/debug/dynamic_debug/control
+        echo 'file drivers/mmc/host/* -p' > /sys/kernel/debug/dynamic_debug/control
+
+    More general information in kernel documentation in kernel tree:
+
+        Documentation/admin-guide/dynamic-debug-howto.rst
+
+
+
 
