@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 183D5188CA5;
-	Thu,  8 Aug 2024 07:18:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6FFE188CBC;
+	Thu,  8 Aug 2024 07:19:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723101538; cv=none; b=kM+57KqdbtNK0hp6auNhb6Fa/JnnqYY8ohL3wSn4Dsn7TZqDdaWI49RlVjq7/WsjS61X2+9fXML2K4s4h7Nsx3cBI8uC046S8DY399SE8fFqIUgiImuo3Ik7AnFRw8oJfKDTgj64i3kMM4gp/TCJspWj26gB2hRvK8TnuCzQVMY=
+	t=1723101566; cv=none; b=FroyeV2IIMW2DVpU20G//Nl/8375IIZhO6RUADHNEruLQ2H3atGVqjPInWildtCUkl6QneNcHY1ElZzPbnMfaTy9tyAa29cfnllw0fwR3FDEN+7EHFgXkeY0wcmGTtXxgpAOHZXpnZcoxz4i/GgQdGAzxQKWGG4Pwd1rMusIRqc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723101538; c=relaxed/simple;
-	bh=O9EZaWrR7lNuaqrZDuypfiO/KHWaclbwiwKXa26AQEs=;
+	s=arc-20240116; t=1723101566; c=relaxed/simple;
+	bh=9Nbhk6CfRrxq7qd08hKcyo0cO/UojxpBoqL9e0BRuqo=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=kl4xoleYmc87zggqy/+s0sNK8Ithn3WdErVcXO1euSNQaF/tDwEPXDZ4tFubB1jDT+Iw8g9VlREBtPLv31CbSEbkMggq4IUx51WBSOGK+S9RcRyM+Ky3i6gczRIYMrcwcSI58dFsrom4TT3Sff8rtsuibGvraUwtha/lsUOlvPM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dK8luZ64; arc=none smtp.client-ip=198.175.65.18
+	 In-Reply-To:Content-Type; b=RlIUlVsEiT+CLSCczEpAqFgUwHQJEdTuDFAeEzF+41nGFXbEZuJjBHFTtz0XpjAgoYmkhv4NSbIJpJ3Rf1fZYVsOofhoSDw3uVU3BlcGqj1HZ/b4LxvsYM/ORWal0Vj19cBr/5IXUsf+KQBZLN9cW53l7T7kV/kAT3HoZ1jHJ4M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fbOmeOly; arc=none smtp.client-ip=198.175.65.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dK8luZ64"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fbOmeOly"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1723101538; x=1754637538;
+  t=1723101566; x=1754637566;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=O9EZaWrR7lNuaqrZDuypfiO/KHWaclbwiwKXa26AQEs=;
-  b=dK8luZ64b2543lp+uJJX7mq4r7sno8SGgPmkCsLt4psVke1wZ4w2cEnh
-   CIRE7F+C4ZtNtjkLwTTAgifgIjaNilDsf3y+tgpstAM0ZAhGeZqIS4yoR
-   zBRN5P3hgzNH+8DeqG9/tsbCLMtmpuwojBJujASbVT34M7cPsW4cmyPg/
-   npd1x/h/TZPQsa+RAYciduE/mkfHrau5cpRpBXLdEMahllG6gQow1e9gH
-   Kg67Z9dWfwI3nFpZCHvEFftB3XkAHrMfmuQ/R4vJQbrIbXvtCRTSZxYqP
-   n9J8CHFVXHSEUsZTtXDDcGVK5ZxK3XjFEulY39WdufdNBGPY8fTjLlM7b
-   Q==;
-X-CSE-ConnectionGUID: kWVBN2h6TjGFvD0zRdIu9w==
-X-CSE-MsgGUID: hRm594DOQGykDMrry/Rt2Q==
-X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="21352183"
+  bh=9Nbhk6CfRrxq7qd08hKcyo0cO/UojxpBoqL9e0BRuqo=;
+  b=fbOmeOlybPZqMYs5s24xKSqo95XJGd8ZNk1oCeRZXGwWTXOw7YpIqQKp
+   F5twH9Ey2O1BVSdWmkax73S4xp0Ul+WxH844Qj8z9WmnpbOktEHsgqQkg
+   VV5gmNINvz62Sazl1OXB81+dys3PBAut0hw7JVnagB+RRr9SVGc4HwGTs
+   GXQa8zHCM1+e17+qxEqwPJYRBJiwPyECvkZkyYCOJLO2xz8CTTxvxsZtK
+   ZchQIfFF6CKDTHG7qHPepCcAQGhF2N+kCagQHS0pbGXGxLFh9VzMTFSTa
+   omNKzj11Ai8NcxnPFFsyD/V4i4LdxBhhD3E1miLpqF5jTHCsaNekd/8tC
+   A==;
+X-CSE-ConnectionGUID: Y80RILrPQeKEsCDjt1mtCQ==
+X-CSE-MsgGUID: LImpsg7xS/mTHHj76gm8cw==
+X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="21352345"
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="21352183"
+   d="scan'208";a="21352345"
 Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:18:57 -0700
-X-CSE-ConnectionGUID: 0qYkdXa/TDaj7eKCGJDHow==
-X-CSE-MsgGUID: ipnaZQBPQ26KZpo/IBK4DA==
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:25 -0700
+X-CSE-ConnectionGUID: CmF79l6JRrC3hhHl10QrTQ==
+X-CSE-MsgGUID: LKuBe3YdQCGqBCxG5kIgLA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="80357202"
+   d="scan'208";a="80357473"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.150.149])
-  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:18:48 -0700
-Message-ID: <bb92e3b0-302f-4e43-9905-2d9fa709ab25@intel.com>
-Date: Thu, 8 Aug 2024 10:18:42 +0300
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:17 -0700
+Message-ID: <b87fb5fe-63e1-4f4e-bc7c-92a91becf61e@intel.com>
+Date: Thu, 8 Aug 2024 10:19:10 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,8 +52,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 3/8] mmc: sdhci-of-dwcmshc: factor out code for
- th1520_init()
+Subject: Re: [PATCH v6 4/8] mmc: sdhci-of-dwcmshc: factor out code into
+ dwcmshc_rk35xx_init
 To: Chen Wang <unicornxw@gmail.com>, aou@eecs.berkeley.edu,
  conor+dt@kernel.org, guoren@kernel.org, inochiama@outlook.com,
  jszhang@kernel.org, krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
@@ -64,101 +64,105 @@ To: Chen Wang <unicornxw@gmail.com>, aou@eecs.berkeley.edu,
  tingzhu.wang@sophgo.com
 Cc: Chen Wang <unicorn_wang@outlook.com>, Drew Fustini <drew@pdp7.com>
 References: <cover.1722847198.git.unicorn_wang@outlook.com>
- <23c6a81052a6dd3660d60348731229d60a209b32.1722847198.git.unicorn_wang@outlook.com>
+ <4f1f2fa403ce7f0b4d79afb7d7e8a1690cde5d6c.1722847198.git.unicorn_wang@outlook.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <23c6a81052a6dd3660d60348731229d60a209b32.1722847198.git.unicorn_wang@outlook.com>
+In-Reply-To: <4f1f2fa403ce7f0b4d79afb7d7e8a1690cde5d6c.1722847198.git.unicorn_wang@outlook.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 5/08/24 12:17, Chen Wang wrote:
+On 5/08/24 12:18, Chen Wang wrote:
 > From: Chen Wang <unicorn_wang@outlook.com>
 > 
-> Different socs have initialization operations in
-> the probe process, which are summarized as functions.
-> 
-> This patch first factor out init function for th1520.
+> Continue factor out code fron probe into dwcmshc_rk35xx_init.
 > 
 > Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
-> Reviewed-by: Drew Fustini <drew@pdp7.com>
 > Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
 > Tested-by: Inochi Amaoto <inochiama@outlook.com> # Duo and Huashan Pi
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 51 +++++++++++++++++------------
->  1 file changed, 30 insertions(+), 21 deletions(-)
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 34 ++++++++++++++---------------
+>  1 file changed, 16 insertions(+), 18 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index a002636d51fd..b272ec2ab232 100644
+> index b272ec2ab232..55fba5ef37ba 100644
 > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
 > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -830,6 +830,35 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	}
+> @@ -711,12 +711,22 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+>  	sdhci_reset(host, mask);
 >  }
 >  
-> +static int th1520_init(struct device *dev,
-> +		       struct sdhci_host *host,
-> +		       struct dwcmshc_priv *dwc_priv)
-> +{
-> +	dwc_priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> +
-> +	if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> +	    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> +		dwc_priv->flags |= FLAG_IO_FIXED_1V8;
-> +	else
-> +		dwc_priv->flags &= ~FLAG_IO_FIXED_1V8;
-> +
-> +	/*
-> +	 * start_signal_voltage_switch() will try 3.3V first
-> +	 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> +	 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> +	 * in sdhci_start_signal_voltage_switch().
-> +	 */
-> +	if (dwc_priv->flags & FLAG_IO_FIXED_1V8) {
-> +		host->flags &= ~SDHCI_SIGNALING_330;
-> +		host->flags |=  SDHCI_SIGNALING_180;
-> +	}
-> +
-> +	sdhci_enable_v4_mode(host);
-> +
-> +	return 0;
-> +}
-> +
->  static void cv18xx_sdhci_reset(struct sdhci_host *host, u8 mask)
+> -static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+> +static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
+> +			       struct dwcmshc_priv *dwc_priv)
 >  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1231,27 +1260,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	}
+>  	static const char * const clk_ids[] = {"axi", "block", "timer"};
+> -	struct rk35xx_priv *priv = dwc_priv->priv;
+> +	struct rk35xx_priv *priv;
+>  	int err;
 >  
->  	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
-> -		priv->delay_line = PHY_SDCLKDL_DC_DEFAULT;
-> -
-> -		if (device_property_read_bool(dev, "mmc-ddr-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs200-1_8v") ||
-> -		    device_property_read_bool(dev, "mmc-hs400-1_8v"))
-> -			priv->flags |= FLAG_IO_FIXED_1V8;
-> -		else
-> -			priv->flags &= ~FLAG_IO_FIXED_1V8;
-> -
-> -		/*
-> -		 * start_signal_voltage_switch() will try 3.3V first
-> -		 * then 1.8V. Use SDHCI_SIGNALING_180 rather than
-> -		 * SDHCI_SIGNALING_330 to avoid setting voltage to 3.3V
-> -		 * in sdhci_start_signal_voltage_switch().
-> -		 */
-> -		if (priv->flags & FLAG_IO_FIXED_1V8) {
-> -			host->flags &= ~SDHCI_SIGNALING_330;
-> -			host->flags |=  SDHCI_SIGNALING_180;
+> +	priv = devm_kzalloc(dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
+> +	if (!priv)
+> +		return -ENOMEM;
+> +
+> +	if (of_device_is_compatible(dev->of_node, "rockchip,rk3588-dwcmshc"))
+> +		priv->devtype = DWCMSHC_RK3588;
+> +	else
+> +		priv->devtype = DWCMSHC_RK3568;
+> +
+>  	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
+>  	if (IS_ERR(priv->reset)) {
+>  		err = PTR_ERR(priv->reset);
+> @@ -739,6 +749,8 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
+>  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
+>  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
+>  
+> +	dwc_priv->priv = priv;
+> +
+>  	return 0;
+>  }
+>  
+> @@ -1184,7 +1196,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_host *host;
+>  	struct dwcmshc_priv *priv;
+> -	struct rk35xx_priv *rk_priv = NULL;
+>  	const struct sdhci_pltfm_data *pltfm_data;
+>  	int err;
+>  	u32 extra, caps;
+> @@ -1241,20 +1252,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
+>  
+>  	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+> -		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
+> -		if (!rk_priv) {
+> -			err = -ENOMEM;
+> -			goto err_clk;
 > -		}
 > -
-> -		sdhci_enable_v4_mode(host);
-> +		th1520_init(dev, host, priv);
+> -		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
+> -			rk_priv->devtype = DWCMSHC_RK3588;
+> -		else
+> -			rk_priv->devtype = DWCMSHC_RK3568;
+> -
+> -		priv->priv = rk_priv;
+> -
+> -		err = dwcmshc_rk35xx_init(host, priv);
+> +		err = dwcmshc_rk35xx_init(dev, host, priv);
+>  		if (err)
+>  			goto err_clk;
+>  	}
+> @@ -1290,7 +1288,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  		dwcmshc_cqhci_init(host, pdev);
 >  	}
 >  
->  #ifdef CONFIG_ACPI
+> -	if (rk_priv)
+> +	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata)
+>  		dwcmshc_rk35xx_postinit(host, priv);
+>  
+>  	err = __sdhci_add_host(host);
 
