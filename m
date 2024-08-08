@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6FFE188CBC;
-	Thu,  8 Aug 2024 07:19:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A861187FFE;
+	Thu,  8 Aug 2024 07:19:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723101566; cv=none; b=FroyeV2IIMW2DVpU20G//Nl/8375IIZhO6RUADHNEruLQ2H3atGVqjPInWildtCUkl6QneNcHY1ElZzPbnMfaTy9tyAa29cfnllw0fwR3FDEN+7EHFgXkeY0wcmGTtXxgpAOHZXpnZcoxz4i/GgQdGAzxQKWGG4Pwd1rMusIRqc=
+	t=1723101585; cv=none; b=MgXx4A9pPJbYr09YgZWkADrVUmXjJQKJblABz/M2hCM8AXDtqGII0Pom+q/DEAQkIKSSSq1TBJj9IPSGriDo9drkTs3r7R9oko30gs/q3UxtWhEhReilV3tIXSlO0qHtYIkrR4zBYv12CK6pexWtHFgwilfYnr9Ex4y+fvlML8g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723101566; c=relaxed/simple;
-	bh=9Nbhk6CfRrxq7qd08hKcyo0cO/UojxpBoqL9e0BRuqo=;
+	s=arc-20240116; t=1723101585; c=relaxed/simple;
+	bh=PVtOav9zUh20di99gvdMdPF1Gj/k3H6ZvBRF5Axq+SM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RlIUlVsEiT+CLSCczEpAqFgUwHQJEdTuDFAeEzF+41nGFXbEZuJjBHFTtz0XpjAgoYmkhv4NSbIJpJ3Rf1fZYVsOofhoSDw3uVU3BlcGqj1HZ/b4LxvsYM/ORWal0Vj19cBr/5IXUsf+KQBZLN9cW53l7T7kV/kAT3HoZ1jHJ4M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fbOmeOly; arc=none smtp.client-ip=198.175.65.18
+	 In-Reply-To:Content-Type; b=RIEXD64EE+Ns2EpL3Uxbs6SdEmbfPzP9kzfaGJTwKZ6dhZsCC1swZ/FDKXDTOe7JGlsCS5kx65ccMadWous+njp91l9zfepBY29Pzps6g8NLI7ecFFqZtnTf2HAdvQyO6W9cAIdBuncXZQwgnslRcT7i+ApNmku39Av56Sjfc4E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=k0m3n93N; arc=none smtp.client-ip=198.175.65.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fbOmeOly"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="k0m3n93N"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1723101566; x=1754637566;
+  t=1723101581; x=1754637581;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=9Nbhk6CfRrxq7qd08hKcyo0cO/UojxpBoqL9e0BRuqo=;
-  b=fbOmeOlybPZqMYs5s24xKSqo95XJGd8ZNk1oCeRZXGwWTXOw7YpIqQKp
-   F5twH9Ey2O1BVSdWmkax73S4xp0Ul+WxH844Qj8z9WmnpbOktEHsgqQkg
-   VV5gmNINvz62Sazl1OXB81+dys3PBAut0hw7JVnagB+RRr9SVGc4HwGTs
-   GXQa8zHCM1+e17+qxEqwPJYRBJiwPyECvkZkyYCOJLO2xz8CTTxvxsZtK
-   ZchQIfFF6CKDTHG7qHPepCcAQGhF2N+kCagQHS0pbGXGxLFh9VzMTFSTa
-   omNKzj11Ai8NcxnPFFsyD/V4i4LdxBhhD3E1miLpqF5jTHCsaNekd/8tC
-   A==;
-X-CSE-ConnectionGUID: Y80RILrPQeKEsCDjt1mtCQ==
-X-CSE-MsgGUID: LImpsg7xS/mTHHj76gm8cw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="21352345"
+  bh=PVtOav9zUh20di99gvdMdPF1Gj/k3H6ZvBRF5Axq+SM=;
+  b=k0m3n93Na7qepdv5sYnnlEVxuWH5eP1RKBKK0IAmjrYBLyK2uGgZs1kb
+   5pZv1YKA4S3dMX28HT0lfBXxjE/gg8nY93qRJub9B2MvdGTJg3aBg1cQE
+   jkTxQgVNIZFmB2R9NH4dcEk5exVaXhicpxZsbW4Y8nB+6W5M7EvyCrn3R
+   B+/qzijj8cPIT0sC8pXtdjdqLL87zG9X57B67r4L6bm1tLJfiCIvx6m0D
+   u+5p7f2VnmRWyWVSB0XPXGqQhHi/sNtga5X11BX4RvbDL+JfgSOACpgO6
+   wVBy3NTNLrOTumUDnFDiIFki0UCF6yBAxRQX8zdGXH3w4h9x4FhxzIElz
+   Q==;
+X-CSE-ConnectionGUID: p8QpSTzLQ16zhD+VCyrAgw==
+X-CSE-MsgGUID: p+/iJ2pnR0iyiU6TufEfxA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11157"; a="21352469"
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="21352345"
+   d="scan'208";a="21352469"
 Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:25 -0700
-X-CSE-ConnectionGUID: CmF79l6JRrC3hhHl10QrTQ==
-X-CSE-MsgGUID: LKuBe3YdQCGqBCxG5kIgLA==
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:38 -0700
+X-CSE-ConnectionGUID: UtC07s92R2WspH7mozGuaQ==
+X-CSE-MsgGUID: A6mLcPBsTX6rDCVjTqxIsg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.09,272,1716274800"; 
-   d="scan'208";a="80357473"
+   d="scan'208";a="80357595"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.150.149])
-  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:17 -0700
-Message-ID: <b87fb5fe-63e1-4f4e-bc7c-92a91becf61e@intel.com>
-Date: Thu, 8 Aug 2024 10:19:10 +0300
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2024 00:19:29 -0700
+Message-ID: <787c7de4-04a3-42ac-97c5-ab0d9a71c07f@intel.com>
+Date: Thu, 8 Aug 2024 10:19:25 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,8 +52,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 4/8] mmc: sdhci-of-dwcmshc: factor out code into
- dwcmshc_rk35xx_init
+Subject: Re: [PATCH v6 5/8] mmc: sdhci-of-dwcmshc: add dwcmshc_pltfm_data
 To: Chen Wang <unicornxw@gmail.com>, aou@eecs.berkeley.edu,
  conor+dt@kernel.org, guoren@kernel.org, inochiama@outlook.com,
  jszhang@kernel.org, krzysztof.kozlowski+dt@linaro.org, palmer@dabbelt.com,
@@ -64,19 +63,20 @@ To: Chen Wang <unicornxw@gmail.com>, aou@eecs.berkeley.edu,
  tingzhu.wang@sophgo.com
 Cc: Chen Wang <unicorn_wang@outlook.com>, Drew Fustini <drew@pdp7.com>
 References: <cover.1722847198.git.unicorn_wang@outlook.com>
- <4f1f2fa403ce7f0b4d79afb7d7e8a1690cde5d6c.1722847198.git.unicorn_wang@outlook.com>
+ <cb2c68c594286e9588c53acb76163e60c140c02b.1722847198.git.unicorn_wang@outlook.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <4f1f2fa403ce7f0b4d79afb7d7e8a1690cde5d6c.1722847198.git.unicorn_wang@outlook.com>
+In-Reply-To: <cb2c68c594286e9588c53acb76163e60c140c02b.1722847198.git.unicorn_wang@outlook.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 5/08/24 12:18, Chen Wang wrote:
 > From: Chen Wang <unicorn_wang@outlook.com>
 > 
-> Continue factor out code fron probe into dwcmshc_rk35xx_init.
+> Abstract dwcmshc_pltfm_data to hold the sdhci_pltfm_data
+> plus some comoon operations of soc such as init/postinit.
 > 
 > Signed-off-by: Chen Wang <unicorn_wang@outlook.com>
 > Tested-by: Drew Fustini <drew@pdp7.com> # TH1520
@@ -85,84 +85,148 @@ On 5/08/24 12:18, Chen Wang wrote:
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 34 ++++++++++++++---------------
->  1 file changed, 16 insertions(+), 18 deletions(-)
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 81 +++++++++++++++++------------
+>  1 file changed, 48 insertions(+), 33 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index b272ec2ab232..55fba5ef37ba 100644
+> index 55fba5ef37ba..16f420994519 100644
 > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
 > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -711,12 +711,22 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->  	sdhci_reset(host, mask);
->  }
+> @@ -218,6 +218,12 @@ struct dwcmshc_priv {
+>  	u16 flags;
+>  };
 >  
-> -static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> +static int dwcmshc_rk35xx_init(struct device *dev, struct sdhci_host *host,
-> +			       struct dwcmshc_priv *dwc_priv)
->  {
->  	static const char * const clk_ids[] = {"axi", "block", "timer"};
-> -	struct rk35xx_priv *priv = dwc_priv->priv;
-> +	struct rk35xx_priv *priv;
->  	int err;
->  
-> +	priv = devm_kzalloc(dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
-> +	if (!priv)
-> +		return -ENOMEM;
+> +struct dwcmshc_pltfm_data {
+> +	const struct sdhci_pltfm_data pdata;
+> +	int (*init)(struct device *dev, struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+> +	void (*postinit)(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv);
+> +};
 > +
-> +	if (of_device_is_compatible(dev->of_node, "rockchip,rk3588-dwcmshc"))
-> +		priv->devtype = DWCMSHC_RK3588;
-> +	else
-> +		priv->devtype = DWCMSHC_RK3568;
-> +
->  	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
->  	if (IS_ERR(priv->reset)) {
->  		err = PTR_ERR(priv->reset);
-> @@ -739,6 +749,8 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
->  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
->  	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
+>  static int dwcmshc_get_enable_other_clks(struct device *dev,
+>  					 struct dwcmshc_priv *priv,
+>  					 int num_clks,
+> @@ -1048,39 +1054,52 @@ static const struct sdhci_ops sdhci_dwcmshc_cv18xx_ops = {
+>  	.platform_execute_tuning = cv18xx_sdhci_execute_tuning,
+>  };
 >  
-> +	dwc_priv->priv = priv;
-> +
->  	return 0;
->  }
+> -static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+> -	.ops = &sdhci_dwcmshc_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	},
+>  };
 >  
-> @@ -1184,7 +1196,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  #ifdef CONFIG_ACPI
+> -static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+> -	.ops = &sdhci_dwcmshc_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> -		   SDHCI_QUIRK2_ACMD23_BROKEN,
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +			   SDHCI_QUIRK2_ACMD23_BROKEN,
+> +	},
+>  };
+>  #endif
+>  
+> -static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+> -	.ops = &sdhci_dwcmshc_rk35xx_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> -		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> -		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_rk35xx_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+> +	},
+> +	.init = dwcmshc_rk35xx_init,
+> +	.postinit = dwcmshc_rk35xx_postinit,
+>  };
+>  
+> -static const struct sdhci_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+> -	.ops = &sdhci_dwcmshc_th1520_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_th1520_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	},
+> +	.init = th1520_init,
+>  };
+>  
+> -static const struct sdhci_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
+> -	.ops = &sdhci_dwcmshc_cv18xx_ops,
+> -	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_cv18xx_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_cv18xx_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	},
+>  };
+>  
+>  static const struct cqhci_host_ops dwcmshc_cqhci_ops = {
+> @@ -1196,7 +1215,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
 >  	struct sdhci_pltfm_host *pltfm_host;
 >  	struct sdhci_host *host;
 >  	struct dwcmshc_priv *priv;
-> -	struct rk35xx_priv *rk_priv = NULL;
->  	const struct sdhci_pltfm_data *pltfm_data;
+> -	const struct sdhci_pltfm_data *pltfm_data;
+> +	const struct dwcmshc_pltfm_data *pltfm_data;
 >  	int err;
 >  	u32 extra, caps;
-> @@ -1241,20 +1252,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  
+> @@ -1206,7 +1225,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  		return -ENODEV;
+>  	}
+>  
+> -	host = sdhci_pltfm_init(pdev, pltfm_data,
+> +	host = sdhci_pltfm_init(pdev, &pltfm_data->pdata,
+>  				sizeof(struct dwcmshc_priv));
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+> @@ -1251,16 +1270,12 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
 >  	host->mmc_host_ops.execute_tuning = dwcmshc_execute_tuning;
 >  
->  	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
-> -		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
-> -		if (!rk_priv) {
-> -			err = -ENOMEM;
-> -			goto err_clk;
-> -		}
-> -
-> -		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
-> -			rk_priv->devtype = DWCMSHC_RK3588;
-> -		else
-> -			rk_priv->devtype = DWCMSHC_RK3568;
-> -
-> -		priv->priv = rk_priv;
-> -
-> -		err = dwcmshc_rk35xx_init(host, priv);
-> +		err = dwcmshc_rk35xx_init(dev, host, priv);
+> -	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
+> -		err = dwcmshc_rk35xx_init(dev, host, priv);
+> +	if (pltfm_data->init) {
+> +		err = pltfm_data->init(&pdev->dev, host, priv);
 >  		if (err)
 >  			goto err_clk;
 >  	}
-> @@ -1290,7 +1288,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  
+> -	if (pltfm_data == &sdhci_dwcmshc_th1520_pdata) {
+> -		th1520_init(dev, host, priv);
+> -	}
+> -
+>  #ifdef CONFIG_ACPI
+>  	if (pltfm_data == &sdhci_dwcmshc_bf3_pdata)
+>  		sdhci_enable_v4_mode(host);
+> @@ -1288,8 +1303,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
 >  		dwcmshc_cqhci_init(host, pdev);
 >  	}
 >  
-> -	if (rk_priv)
-> +	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata)
->  		dwcmshc_rk35xx_postinit(host, priv);
+> -	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata)
+> -		dwcmshc_rk35xx_postinit(host, priv);
+> +	if (pltfm_data->postinit)
+> +		pltfm_data->postinit(host, priv);
 >  
 >  	err = __sdhci_add_host(host);
+>  	if (err)
 
