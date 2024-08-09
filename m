@@ -1,148 +1,154 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E9C0190693
-	for <linux-mmc@vger.kernel.org>; Fri,  9 Aug 2024 09:54:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C8CE2232A;
+	Fri,  9 Aug 2024 23:02:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723197248; cv=none; b=my86ikAWhQ4Qm5aSH09eMqL2K2vzmtjACWb1AX/YqcrTSoeedv/zpL/i3ew4XxCps1P0TKo+Wslay5CCGrx2yRKy+7SgpQoCdlO/DwGCyvwgJQQKnx2nvxh2/78TUOIPUVoG3kNkr/7sdeO8objSuGD0P9H18RNndcS6F/x1/Vw=
+	t=1723244549; cv=none; b=pguIC+TvCxyo76siFP5/+laRfFxc0kBMkWb5AC5u0tNxLy81t7xcir6PWr3RLwoRqans26+WG2aNgEl3+gJuL8073YL+1P/yscPw16VjrQI7A7/S39srWvUjSKEliigT5M2OERYGyXi5zjVQczuRemDX73tMW2bzeHyufCPvuNw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723197248; c=relaxed/simple;
-	bh=TTLyWM2pf3GLdzjQofESBPppuOs+zN0Xg4I3gtlGsb0=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=p0+tWDVtH2jS3H5GsoHnusVbOU1LEiMXc8X9tZxcO7GeUt7AbUtdoxiTLApreJGM/IDfqYUesh5c02FQONRVqx1lhVGHzk4hYG3ppPJyDVc1tmqVf8/ypYD5cL4TJW41fIxlvJg14Dy6Az79uFYEuROoRsm/9hyp+F/xcsxquYE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=XW6AGMU+; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+	s=arc-20240116; t=1723244549; c=relaxed/simple;
+	bh=RvTbMp33rkaKJUsrR0AK0iMSWIXeFbpaWs9RMYiB9DQ=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=F4a2/5ugE+vDfQeAEa4Fkta+1BmTfBfZgT2B8VTM7Ac9ztOGBH8p8PdYrez9OT649+SDXrm+8OSxa2ncVGyJO7mZn6svJasZ5Z6xE8zRZ0yU6laQJ5TZMS+qYHqGfedSm8c1qmqzuZxzfOfoLqL4q2w1bg3PAYuZYgykLYnLWbk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=g7pmf7OV; arc=none smtp.client-ip=209.85.128.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="XW6AGMU+"
-X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 4799s2apD647749, This message is accepted by code: ctloc85258
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=realtek.com; s=dkim;
-	t=1723197242; bh=TTLyWM2pf3GLdzjQofESBPppuOs+zN0Xg4I3gtlGsb0=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:MIME-Version;
-	b=XW6AGMU+YnWFuj/cBMSVIxlUahmqXumfJ/hX7vuK6nxfl4/CamOWBTZFuWwWM6RyI
-	 E7ohip70O0jnnsMlj0lkbsqcg707RBMmkNjj7T/Ly4NVyBOvIkoIVd2+Rs3jbhB0fT
-	 Mwk/REZPWvC+xr//vAcdyBAw9r19lwJBOECuBEB1t9qtS1AbEGdwjE0psTxcgPIHYw
-	 DDg2tN+lbXdCw2iceUzsRHgULlNqO8XuN8quAHSnihmJHwSG+d8JFMvM5hGoH62XuV
-	 hQnNt8CJNTWNIW6qr9xWKux+q1FW9SlMaV08zltME5mgz5ONNmEBG2JroDhpVpxOmy
-	 //RindCBGOtbg==
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/3.02/5.92) with ESMTPS id 4799s2apD647749
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 9 Aug 2024 17:54:02 +0800
-Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.39; Fri, 9 Aug 2024 17:54:03 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Fri, 9 Aug 2024 17:54:02 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::2c08:7dc1:82be:6c38]) by
- RTEXMBS01.realtek.com.tw ([fe80::2c08:7dc1:82be:6c38%5]) with mapi id
- 15.01.2507.035; Fri, 9 Aug 2024 17:54:02 +0800
-From: Ricky WU <ricky_wu@realtek.com>
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH v2 03/10] mmc: sd: Add Extension memory addressing
-Thread-Topic: [PATCH v2 03/10] mmc: sd: Add Extension memory addressing
-Thread-Index: AQHa6I+3SZy1GmYJBkiUztDYYyeimbIerijA
-Date: Fri, 9 Aug 2024 09:54:02 +0000
-Message-ID: <94bfdd1ab7bb4e998097bb4575b2a821@realtek.com>
-References: <20240807060309.2403023-1-avri.altman@wdc.com>
- <20240807060309.2403023-4-avri.altman@wdc.com>
-In-Reply-To: <20240807060309.2403023-4-avri.altman@wdc.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="g7pmf7OV"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-428f5c0833bso20614245e9.0;
+        Fri, 09 Aug 2024 16:02:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1723244546; x=1723849346; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=wODkYjjXLHu7LoIUK6vdyDoix1Qpc0/A1JJtwyuj/Us=;
+        b=g7pmf7OV0d7/x7Mii16uOSM2mNL95/3XIXENnFS2duHfR3SMZGkhxuzCICnSjUzXap
+         572fNsKiY65wQKAm1asXIBoe3rtQRT3La43MBy9lPbS8x0KJG+PLwCpbHU1IPQuIQEnM
+         UWIhTFN8gwvwy9HcgebSioUhKvU7mENogv9xHWs9o2wCOp8xNiwa/cGF0AjY+T5uRB/S
+         7pTywvz3rUs9078Oks0tC3inoqyPsaOiBu/WInAcAcjbYdkjyng07gn/DAQOn8dMHjra
+         zGGdBspPAKUYD/mNQfY4zYn84pJW44887Vni4mxu5YlUCdD6T2t0Qn81mz0EcJMCoj28
+         tUkw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1723244546; x=1723849346;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=wODkYjjXLHu7LoIUK6vdyDoix1Qpc0/A1JJtwyuj/Us=;
+        b=XUkNyH4h0C+hJHa1CgCSM6jp/p6e0bnZX1t/vZxzJvBrZiEcN5ATccBW1XvFKczXgE
+         5j+tXTO5gH3BxXu6KFdMJqKQhGsEykNfV0YLGnO7tWokblHUGgYle3whjilL9KOyTpoN
+         ezPVM9Xx8iNmZKgncdyONNkj+2+xkXYIbPB7Aet4Q3F+4C8NUIAlV6HY9W1/HkRLzZfh
+         W4qBMYeLFfkpyyiJvBSf06OrWKbZw6TeWtp3CWs062EzYCHh93NOGFmxtjyajKYbp5PR
+         47Ot+sZkZarIv/GLyrGjXifipXnafnCDYn7PekMxL/qW0G4FRy05mhf4pdAY6cPT/ZM1
+         QBHQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVRG2/7s4y7jUdvQkl+WNeO/aEe0WtYQXOp1NYY4//+OAJK5m0TRDczeFKFCMn1sSv9QoOOVmhgvhI0o9x3sfiHpV7SHyISMpi34uMXOSwwmvqP0yssHtc71NKDdpUIt7V6R7IJBu7wqUrsGMH5AeteXUK0HlO9plMMnHJfSi2Wa8wAHg==
+X-Gm-Message-State: AOJu0Yzk2VCkhQAejR5xATvI8cWbRAFGMVpydN5lZvLAGGUb6d0P7jYl
+	DrZOmGXV3TiwJUXQm61CF4+l0rcLFoqZKAi+fnx8Fvu53wEVC+mp
+X-Google-Smtp-Source: AGHT+IGgtArHY1Ccvu81bZyYnJJ7slG0Epa/7R5YAnQKAsSgIp4DXcbt2NtFFMJrnz0a9ioEQ+VSXg==
+X-Received: by 2002:a05:600c:1c92:b0:428:b4a:7001 with SMTP id 5b1f17b1804b1-429c847ffb9mr1527355e9.15.1723244545925;
+        Fri, 09 Aug 2024 16:02:25 -0700 (PDT)
+Received: from localhost.localdomain (host-87-10-253-138.retail.telecomitalia.it. [87.10.253.138])
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-429c75044a8sm7987485e9.9.2024.08.09.16.02.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Aug 2024 16:02:25 -0700 (PDT)
+From: Christian Marangi <ansuelsmth@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Richard Weinberger <richard@nod.at>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Joern Engel <joern@lazybastard.org>,
+	Keith Busch <kbusch@kernel.org>,
+	Jens Axboe <axboe@kernel.dk>,
+	Christoph Hellwig <hch@lst.de>,
+	Sagi Grimberg <sagi@grimberg.me>,
+	Saravana Kannan <saravanak@google.com>,
+	Christian Marangi <ansuelsmth@gmail.com>,
+	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Florian Fainelli <f.fainelli@gmail.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mtd@lists.infradead.org,
+	linux-nvme@lists.infradead.org
+Subject: [PATCH v4 0/7] mtd: improve block2mtd + airoha parser
+Date: Fri,  9 Aug 2024 19:20:58 +0200
+Message-ID: <20240809172106.25892-1-ansuelsmth@gmail.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-> SDUC memory addressing spans beyond 2TB and up to 128TB.  Therefore, 38
-> bits are required to access the entire memory space of all sectors.
-> Those extra 6 bits are to be carried by CMD22 prior of sending
-> read/write/erase commands: CMD17, CMD18, CMD24, CMD25, CMD32, and
-> CMD33.
->=20
-> CMD22 will carry the higher order 6 bits, and must precedes any of the ab=
-ove
-> commands even if it targets sector < 2TB.
->=20
-> No error related to address or length is indicated in CMD22 but rather in=
- the
-> read/write command itself.
->=20
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
-> ---
->  drivers/mmc/core/sd_ops.c | 15 +++++++++++++++
-> drivers/mmc/core/sd_ops.h |  1 +
->  include/linux/mmc/sd.h    |  3 +++
->  3 files changed, 19 insertions(+)
->=20
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c index
-> 7f6963dac873..8b69129d7b61 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -199,6 +199,21 @@ int mmc_send_app_op_cond(struct mmc_host *host,
-> u32 ocr, u32 *rocr)
->         return 0;
->  }
->=20
-> +int mmc_send_ext_addr(struct mmc_host *host, sector_t addr) {
-> +       struct mmc_command cmd =3D {
-> +               .opcode =3D SD_ADDR_EXT,
-> +               .arg =3D (u32)((addr >> 32) & 0x3F),
-> +               .flags =3D MMC_RSP_R1 | MMC_CMD_AC,
-> +       };
-> +
-> +       if (!mmc_card_is_sduc(host))
-> +               return 0;
-> +
-I think here can be removed, all mmc_send_ext_addr caller are have if-state=
-ment to check the card is SDUC
+This small series handle 2 problems.
 
-> +       return mmc_wait_for_cmd(host, &cmd, 0); }
-> +EXPORT_SYMBOL_GPL(mmc_send_ext_addr);
-> +
->  static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bi=
-ts,
->                               u32 *resp)  { diff --git
-> a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h index
-> 7667fc223b74..462efd43acfa 100644
-> --- a/drivers/mmc/core/sd_ops.h
-> +++ b/drivers/mmc/core/sd_ops.h
-> @@ -21,6 +21,7 @@ int mmc_send_relative_addr(struct mmc_host *host,
-> unsigned int *rca);  int mmc_app_send_scr(struct mmc_card *card);  int
-> mmc_app_sd_status(struct mmc_card *card, void *ssr);  int
-> mmc_app_cmd(struct mmc_host *host, struct mmc_card *card);
-> +int mmc_send_ext_addr(struct mmc_host *host, sector_t addr);
->=20
->  #endif
->=20
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h index
-> 865cc0ca8543..af5fc70e09a2 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> @@ -15,6 +15,9 @@
->  #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7
-> */
->  #define SD_SWITCH_VOLTAGE         11  /* ac
-> R1  */
->=20
-> +/* Class 2 */
-> +#define SD_ADDR_EXT             22   /* ac   [5:0]
-> R1  */
-> +
->    /* class 10 */
->  #define SD_SWITCH                 6   /* adtc [31:0] See below   R1
-> */
->=20
-> --
-> 2.25.1
+It does try to ""standardize"" the usage of block2mtd module with
+MTD OF nodes.
+
+It is very easy to add support for MTD parser by just adding an
+OF node to the mtd created for block2mtd.
+
+This apply only if the root block is used for block2mtd to allow
+scenario where the full eMMC or an NVME is used for MTD and it doesn't
+have any partition table.
+
+To also support NVME, similar to how it's done with eMMC, we introduce
+a subnode to the NVME controller that needs to have the "nvme-card"
+compatible where a dev can define fixed-paritions for MTD parser usage.
+
+This series also add support for the Airoha partition table where
+the last partition is always ART and is placed at the end of the flash.
+
+This require dynamic calculation of the offset as some dedicated
+driver for bad block management might be used that reserve some space
+at the end of the flash for block accounting.
+
+New aarch64 Airoha SoC make use of this partition table and use block2mtd
+for eMMC to treat them as MTD with custom bad block management and block
+tracking.
+
+Changes v4:
+- Add additional patch for ofpart kmod with of_update_property
+  not exported
+Changes v3:
+- Fix compilation error for missing slab.h header
+- Add compatible to partitions.yaml
+Changes v2:
+- Fix typo in DT patch
+- Fix compilation error for non-OF platform
+- Fix compilation error due to recent changes in block2mtd module
+
+Christian Marangi (7):
+  dt-bindings: nvme: Document nvme-card compatible
+  nvme: assign of_node to nvme device
+  dt-bindings: mmc: add property for partitions node in mmc-card node
+  block2mtd: attach device OF node to MTD device
+  of: also export of_update_property
+  dt-bindings: mtd: Add Documentation for Airoha fixed-partitions
+  mtd: parser: add support for Airoha parser
+
+ .../devicetree/bindings/mmc/mmc-card.yaml     | 40 ++++++++++
+ .../partitions/airoha,fixed-partitions.yaml   | 80 +++++++++++++++++++
+ .../bindings/mtd/partitions/partitions.yaml   |  1 +
+ .../devicetree/bindings/nvme/nvme-card.yaml   | 78 ++++++++++++++++++
+ drivers/mtd/devices/block2mtd.c               | 12 +++
+ drivers/mtd/parsers/Kconfig                   | 10 +++
+ drivers/mtd/parsers/Makefile                  |  1 +
+ drivers/mtd/parsers/ofpart_airoha.c           | 57 +++++++++++++
+ drivers/mtd/parsers/ofpart_airoha.h           | 18 +++++
+ drivers/mtd/parsers/ofpart_core.c             |  6 ++
+ drivers/nvme/host/core.c                      |  4 +
+ drivers/of/base.c                             |  1 +
+ 12 files changed, 308 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mtd/partitions/airoha,fixed-partitions.yaml
+ create mode 100644 Documentation/devicetree/bindings/nvme/nvme-card.yaml
+ create mode 100644 drivers/mtd/parsers/ofpart_airoha.c
+ create mode 100644 drivers/mtd/parsers/ofpart_airoha.h
+
+-- 
+2.45.2
 
