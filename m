@@ -1,125 +1,149 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A3171178375;
-	Mon, 12 Aug 2024 11:55:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B96C917276D;
+	Mon, 12 Aug 2024 12:10:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723463728; cv=none; b=V+fRq2CNQgp2gvxQ0bJB2OowpjS2cTDJ11IankXv6iAGkHYr65tuLOUieTM2LMnoca7gtrSGYPlga9jEuGJLpOz7vxbZ/rHEBWaMgNXWo2OchQ0VWiNfJyn+ftZBo7N82+DO5ZuaLv/YoyyXKSbA/W0OAzETpu/ZHB8UMmwvoI8=
+	t=1723464633; cv=none; b=iZ4zQSacHH6wOGmzbtizuhYLbEgit2oHqsOA3qkU1QEqZg5rh4peGcS63JAeTJCcVQ/DQBAH5vn+WfswDvG1ZqLikmBXP5ZNGKcKTd7aQ4RAtxq8vrIOSGdsDjD7kJjD5oHYMwSbgfc9m98ouHOkiLefrsloTKylbY9HslGV05A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723463728; c=relaxed/simple;
-	bh=D+7bmUBmPf9R1lZOFP6pwp2kl3GgyVARNY9iPApW6Wo=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=s6NvlSZQVGtASQJAy0uibvlreBSeDHCilz29fZsF2dujGQVH6cK7iECbgFaX9JxOZNVZDDh0ivMzo4K5wkh327NAnis9wxRtIQgDVY+y9V7iHtcUkT+kckAgaK+Re8GvqN2heDVpg6F4IJAhLLDiBdm3p984UKm7Yq1IHhuhy94=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BpfBTSkg; arc=none smtp.client-ip=209.85.128.53
+	s=arc-20240116; t=1723464633; c=relaxed/simple;
+	bh=Kf8udl+RPQSi7axWxfKiTe4EjZPZKVepns9CIQZinkE=;
+	h=Message-ID:Date:From:To:Cc:Subject:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=NBE1zdR3XttNavegrBVkBXFaq0KQd16fXBh07HT3raThJlvZXHtY1PJBLlx4H/H5yFnJpEvuD3tCz8mDCWsaIlJKJAZJb/vlYPpzHotWiY8A8IP7SwWm+jtD+mMTV3OCUTJr9gRuPSmwFRhwa04w8JUmBmWPVZ1QflUxCZVA5og=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Actt2aat; arc=none smtp.client-ip=209.85.221.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BpfBTSkg"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-428141be2ddso31696825e9.2;
-        Mon, 12 Aug 2024 04:55:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Actt2aat"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-36bd70f6522so2318382f8f.1;
+        Mon, 12 Aug 2024 05:10:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1723463724; x=1724068524; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=nGqwTPLmyEyMz26JbF1oTN1ZIomEQ9CX54wEGKF1mH0=;
-        b=BpfBTSkgkFXs34AsGBWVKXYlJX0uwSwmBqaksrzNwCS7mvNmb3MZ+pvE79mkM7ozfS
-         V+cfJI5zZoh5CS809/fzW1BMtv9XfSC1Fa1umMPvDU8AGy6j1PEmgtHCHWmeF5ZPxkGB
-         WSe30+tBbs1I/z6xioTuIB8qKFlRMSwVVygC8jHSniWDFuTQ2xEPiwwps3O3eF+oB5Ot
-         dJZHtRjIlj42wP4cK+Ghu2yrNkLBDXE1Z/tPbB7Sg1TcGJEhRwUt/PeVEqi+QAfTMo03
-         6ene8ctzSPohirC9ZO5hYJuJsXAb/NYtREIUb4kFlO9q900iaImlfT6eBrMKGXRR77XH
-         quNQ==
+        d=gmail.com; s=20230601; t=1723464629; x=1724069429; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=iqYcq999gsKKejZxZSj4pJ4zXAJ4qw8TpEhYqcXSNdM=;
+        b=Actt2aatPPohW/NJ58gob8yQvfQof8OVmofjrxbYHFcf/0EzVlGT//hKkSR8VJJQFI
+         LnN8Y8z+oOmNsvtvn8BwCplQkmdMW36TrXe4Tnom2N/tn6y2t4gNvwh25MO4OH1RiFkj
+         ogBZocELVt/3PVJqOwXdge2WhAGCzBnDmgR5GYcieBENBALxZCaktHT7srdo3EGlfpQy
+         CnCKyWbhgkRo7OSXea9f0b00o7ZcBwgmaTx2fFMGLEl2mxCdvBwU7uzJ571I7Oa3C+nV
+         lUp/Cgb/Peohyw4FYxNHP3LwGqv0UBD0/oG6VI605BchtMLLnFTkvJnke6hivZCYxwGU
+         ZLaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723463724; x=1724068524;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nGqwTPLmyEyMz26JbF1oTN1ZIomEQ9CX54wEGKF1mH0=;
-        b=SC8XSYA1IT3DdJYyaojHlcVk8DAjnW1sCSZh17KvRtOO7RafHvdAasl5SUmdIiFzO4
-         RwL34ymslSKCzoiglIcfBcj2TcTyfvM2fv5pFVCtbxXmEwWUfxrrB6ALSK5BWwtiSgsS
-         7GsRLHJe3RsH8U0+c8dAw6uBBUGgYwHWfL1LGoFgCHJr8TJJeNlG98M0nD0Jfs2RkpHE
-         6M7cXLXgLj+JIKJ9ACDk/hWRcphRp2Z+9n5o28N5w6FRcIKHTscFcMAhzvX1EYDAFUuA
-         1+SDoCb0fLrxftR0tT/1emOFpSia6zPVucjr0Iu/WrlpbMvaJaK4fkDFEffDnAXn2Gv2
-         /dHQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUePQeJZsDv/y6IqbiiSeWqQQs3o/vwJ28ZTfKLYQTqfDl+HtJxAZyxzt/pTATPbnnSF83RtqZXQKTeDkZW+svVNUJAqyjIcaY0NLxk2khWEQDI4AUFBw87CkMds5B6lBfqxa0jiHSSxqeIvtdEV7SZl7qdWVrfDJ6jwj06JCJJ
-X-Gm-Message-State: AOJu0YzLzFlHwg3Kiw3Ta/v/ZsF3PtBQP6hgpm/VL3JNggggZl/8qw+x
-	ynzHCr1KiMK6MF+oS5wWD3iKEFevVo6LvhnbVyoi4hEDc/KFenbvwIVS5w==
-X-Google-Smtp-Source: AGHT+IEzjMxUddGepYwSs+gi2qqbMIT/TW4uXG/465a39anmmtS9nzyhnaPu4fhSF0pZShiTU2DVEw==
-X-Received: by 2002:a05:600c:1d21:b0:428:3b5:816b with SMTP id 5b1f17b1804b1-429d47f19ffmr1249145e9.3.1723463723486;
-        Mon, 12 Aug 2024 04:55:23 -0700 (PDT)
-Received: from localhost.localdomain (host-79-52-250-20.retail.telecomitalia.it. [79.52.250.20])
-        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-36e4c937b23sm7261602f8f.35.2024.08.12.04.55.22
+        d=1e100.net; s=20230601; t=1723464629; x=1724069429;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=iqYcq999gsKKejZxZSj4pJ4zXAJ4qw8TpEhYqcXSNdM=;
+        b=dsZ9KCI6lTP/tGN92hljq0Isq1+sMriC9gHI9MWeW3S80w8UtH+jHlasCKzN/avten
+         KiDPuWbtmTjRW6AQW2oCiTItJojOE9rOxXlmlKM9OiKA4klABpctVzRJmTSakU0D5p7S
+         mYlu4nNe9ocSkWtqRaOnDehKlgRXeuVlGVLv1oNyFrzH1rAusSnnn3x2LN6OvZ42tFlW
+         zzuerZCFihofqgY4oFEEA5/vrcKH72nIJsPPXJgWdSciGHBqEnS/XeFnqRuKyudN9LdR
+         O3/DYNq/4BATJsE40qkU08Mhv/cPSzXK27dHvC/8VhQgFdd65b81De2HSxyzP6cpsGHH
+         313w==
+X-Forwarded-Encrypted: i=1; AJvYcCVFBZRb3h/q/lKmpIZSyCkobUwLUO3EuG0lDzSBEzNdfL7TXPTvJQZo8R60FIQxYmnR/GFW2R7tcA+F@vger.kernel.org, AJvYcCWOMvc/BBuxSFebtxsPS1SBvSif3KBcNOjeHnKZWtmTOZVexD+Lecj7w3osx8UncuJ4BCrBPTZ3qeSytGFM@vger.kernel.org, AJvYcCXh9lIQRnLoPiQRhtvobJQ0x+Rc6Wj1YicQn3vgtItxnVNC0Drs1EdnBsOdmcEv+TkO2vJsn9O1tEWq@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy1x7e8HSRyxwOhC29bHdIYN02mfKL9JECiMEFbedEsQCbSQYNm
+	baWBmzZyCGb7kkjajx39YBD20NVqPQgfJY+pNmY6AXFskDqyEh2l
+X-Google-Smtp-Source: AGHT+IFSR5C1hi+8j8Ydkfy62l96VSbCD6ttYmxsw3lESIi7Z9k7B2B1FgWmEng6FK8xhpk8Hz2Qyg==
+X-Received: by 2002:adf:f902:0:b0:367:91d8:a1d2 with SMTP id ffacd0b85a97d-3716ccfc64dmr97552f8f.30.1723464628820;
+        Mon, 12 Aug 2024 05:10:28 -0700 (PDT)
+Received: from Ansuel-XPS. (host-79-52-250-20.retail.telecomitalia.it. [79.52.250.20])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-36e4e51ea82sm7362857f8f.72.2024.08.12.05.10.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Aug 2024 04:55:23 -0700 (PDT)
+        Mon, 12 Aug 2024 05:10:28 -0700 (PDT)
+Message-ID: <66b9fbb4.df0a0220.3bee6e.1e99@mx.google.com>
+X-Google-Original-Message-ID: <Zrn7tHHev-ydxq8n@Ansuel-XPS.>
+Date: Mon, 12 Aug 2024 14:10:28 +0200
 From: Christian Marangi <ansuelsmth@gmail.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-amlogic@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Cc: Christian Marangi <ansuelsmth@gmail.com>,
-	stable@vger.kernel.org
-Subject: [PATCH] mmc: meson-gx: fix wrong conversion of __bf_shf to __ffs
-Date: Mon, 12 Aug 2024 13:55:10 +0200
-Message-ID: <20240812115515.20158-1-ansuelsmth@gmail.com>
-X-Mailer: git-send-email 2.45.2
+To: Christoph Hellwig <hch@lst.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Richard Weinberger <richard@nod.at>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Joern Engel <joern@lazybastard.org>,
+	Keith Busch <kbusch@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+	Sagi Grimberg <sagi@grimberg.me>,
+	Saravana Kannan <saravanak@google.com>,
+	Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Florian Fainelli <f.fainelli@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org
+Subject: Re: [PATCH v4 2/7] nvme: assign of_node to nvme device
+References: <20240809172106.25892-1-ansuelsmth@gmail.com>
+ <20240809172106.25892-3-ansuelsmth@gmail.com>
+ <20240812111205.GC14300@lst.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240812111205.GC14300@lst.de>
 
-Commit 795c633f6093 ("mmc: meson-gx: fix __ffsdi2 undefined on arm32")
-changed __bf_shf to __ffs to fix a compile error on 32bit arch that have
-problems with __ffsdi2. This comes from the fact that __bf_shf use
-__builtin_ffsll and on 32bit __ffsdi2 is missing.
+On Mon, Aug 12, 2024 at 01:12:05PM +0200, Christoph Hellwig wrote:
+> On Fri, Aug 09, 2024 at 07:21:00PM +0200, Christian Marangi wrote:
+> > Introduce support for a dedicated node for a nvme card. This will be a
+> > subnode of the nvme controller node that will have the "nvme-card"
+> > compatible.
+> 
+> FYI, there really is no such thing as an NVMe card.  There is an
+> NVMe Namespace, which is the entity that contains the block data,
+> the Controller which corresponds to the pci_dev for NVMe-PCIe, and
+> the NVMe Subsystem, which contains Controllers and Namespaces.
+>
 
-Problem is that __bf_shf is defined as
+The chosen name was arbritrary just to follow eMMC ones. Can totally
+change if problematic.
 
-  #define __bf_shf(x) (__builtin_ffsll(x) - 1)
+> > This follow a similar implementation done for mmc where the specific mmc
+> > card have a dedicated of_node.
+> 
+> That's not a good explanation to be honest.  Most eMMC host controllers
+> are OF probed devices, so of course they'll have an of_node.
+> 
+> Binding PCIe functions to of_nodes seems completely weird to me, and
+> you'll need to explain what this totally non-obvious thing makes sense.
+> Maybe it does, but it needs to be backed up with a very good rationale
+> that is very clearly documented.
+> 
 
-but the patch doesn't account for the - 1.
+But support of OF for PCIe is already a thing for a long time. (it all
+works by setting the compatible of the PCIe ID card) and used in wifi
+card at assign MAC address, calibration data, disable frequency.
 
-Fix this by using the __builtin_ffs and add the - 1 to reflect the
-original implementation.
+In this context we would do a similar thing with declaring the NVMe with
+the PCIe ID card (already supported) and we add support for defining an
+additional subnode for usage of block2mtd.
 
-The commit also converted other entry of __bf_shf in the code but those
-got dropped in later patches.
+The subnode is needed to keep consistency in how the disk struct are
+defined with all the parenting levels.
 
-Fixes: 795c633f6093 ("mmc: meson-gx: fix __ffsdi2 undefined on arm32")
-Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-Cc: stable@vger.kernel.org # see patch description, needs adjustements for < 5.2
----
- drivers/mmc/host/meson-gx-mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Just to stress it more... This is really for consistency as PCIe OF node
+are already a thing and on block2mtd (for example) the same thing can be
+done with something like
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index c7c067b9415a..8f64083a08fa 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -464,7 +464,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	init.num_parents = MUX_CLK_NUM_PARENTS;
- 
- 	mux->reg = host->regs + SD_EMMC_CLOCK;
--	mux->shift = __ffs(CLK_SRC_MASK);
-+	mux->shift = __builtin_ffs(CLK_SRC_MASK) - 1;
- 	mux->mask = CLK_SRC_MASK >> mux->shift;
- 	mux->hw.init = &init;
- 
-@@ -486,7 +486,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	init.num_parents = 1;
- 
- 	div->reg = host->regs + SD_EMMC_CLOCK;
--	div->shift = __ffs(CLK_DIV_MASK);
-+	div->shift = __builtin_ffs(CLK_DIV_MASK) - 1;
- 	div->width = __builtin_popcountl(CLK_DIV_MASK);
- 	div->hw.init = &init;
- 	div->flags = CLK_DIVIDER_ONE_BASED;
+disk->parent->parent.of_node (as it would point, if present, to the OF node
+of the PCIe card (the NVMe))
+
+With eMMC with the mmc-card subnode we would have to use
+
+disk->parent.of_node
+
+Not having this well organized and consistent schema in DT will result
+in additional condition in the drivers...
+
+Also consider that if the card is not detected, nothing is probed so
+those additional node won't cause any harm.
+
+If these 2 patch are problematic I can totally drop from the series but
+it was really to add consistency in NVMe and eMMC. The real important
+part is eMMC that is becoming the de-facto replacement for NAND/NOR on
+high tier devices (mostly wifi6/7 consumer router)
+
 -- 
-2.45.2
-
+	Ansuel
