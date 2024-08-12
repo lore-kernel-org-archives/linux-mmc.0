@@ -1,118 +1,106 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from relay7-d.mail.gandi.net (relay7-d.mail.gandi.net [217.70.183.200])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5D5D11CAB;
-	Sun, 11 Aug 2024 21:23:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 144B715217F;
+	Mon, 12 Aug 2024 08:50:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.200
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723411401; cv=none; b=TXyizmmqVOJWoZMdHe7SY4fWlAoXour52VHlj9ngeijKljFgTt0h3qjutm1n1g2TKjwV5TJSnRa/ErNuR/yvhAzroHOE3XtzQphqfC3cV2BbyV6UFWWr97mfbyBOPIJXlz5vTRD/rdPaGZWZKRuZJ5T4tkGJWPW2//+Lt9VQrDo=
+	t=1723452609; cv=none; b=f7mNUJP+dmHNTTm/gmNRDOI26EcVYEwfbZrngzSUIAUmk+A8Fjc7Zof8mbHIcTHJzLoxldgfNsNU66mxWUHOxx7h0Vf9NTlhU8Th1bC0gSERLEp8O2KDh2gYpPI9qYzEq6lw6ktHAyvIYzL3vMXQy36EM1oxmRYJzf6Qangb3rQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723411401; c=relaxed/simple;
-	bh=6/tog7AijmFSbbOb9Kja2sdd1448VG0rlEkqmCpSCDM=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XsWTckkYJsMxTCa4X3Y1kIGQEQasRKfQiLfQ9SRU0AcXMhvANuREfxV7taXHg+LA+D3cZnamJKWjPwNz/ELpeTKgkI4suwpO6bPjflnuDjF48hbLErKZ8jOBAAzTWbHf7vepY6tKIN3pIo1T1Pu1Ape8RglyjIHaDtJFFcG2+vk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PjZAefh0; arc=none smtp.client-ip=209.85.128.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1723452609; c=relaxed/simple;
+	bh=bn9/o/w9h70XTKRovlpwhdS5d/DKUDih333jFZm8c+0=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=DCZ71PXTKSuKb4+vrz/zjKuFEPA5qyrlRy2uffVIJ3CqA0uIdH/oIXRS5MnjaRTi5IKME6hUJQCq1XW+GOb7idHJp+BHvaPP7rHkkHd7k3RlpiHWKqihduqWszlqS+xeK7/BsBt52NuRLgUAUFn8i+fFCTFrsjW/+SSt4nqQgO0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=hsUZH/C8; arc=none smtp.client-ip=217.70.183.200
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PjZAefh0"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-4280b3a7efaso27444145e9.0;
-        Sun, 11 Aug 2024 14:23:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1723411398; x=1724016198; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:sender:from:to:cc:subject:date:message-id:reply-to;
-        bh=dmUwrUSfBQFzrajL1iOaEwCXFsL0O8je4zmGdZPIH2c=;
-        b=PjZAefh0bUroSgu5lqRiKADtaSQugX7bIgA58snsSkA/RU7MLKQQCmt4UrYhL08NNr
-         Q3JBjsj9uAUeVZFVMquTaeYONMzBYXMM0UDTkSU35s//k9DJdJ1fuo6v2v5qJRV556FG
-         Sm2VaER9nCNzBAltGyAIp4bKYBXsEEGoTBLMlB2FHaXYX2mfby4xD0tiCCToVqeJcWgg
-         EIjBGG1z1CV2U1TcDuAEL8mJ8ne+pvymq2693OwPSu6dOkJ458pqOZTVqkwHPBvumiDF
-         8tZvSRYodGjm4z0gRRg9PMR+P84FU/R3PWJUKMBsD0mS7F07Z9xpy7O06QXDnV6eHArk
-         uKHA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723411398; x=1724016198;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:sender:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dmUwrUSfBQFzrajL1iOaEwCXFsL0O8je4zmGdZPIH2c=;
-        b=RZUxVtApK2SS3shTI3vSmHbBMzCYEZNnUV45jV04q5+K9sF5sDxWDF8osG8WWuV/YB
-         8gRy99rkO7nv4bM1lD15J98KU5HHxSgQWq6RU3BeYVp5S7NAAemAksZoJT/TM3f8P90e
-         bs2M7YLVfMJLk89SjISodpfS0UZUdO5Gs2m8hqGSHlvQ/ZChPLT7mgeRqkA1idcLNJL+
-         0cpGQWB2UBvBEqXsU9seqV/D0DclgxFWKCurqP+Vehci/FL66KeCtmQIhkYI9yBDewK6
-         8Txzu0X0F6FiCONo8RbMWMX3jurQFwx1bJ769y4o0WQUVLdG5ZU+z4uC0M3sze60kkhs
-         Q5sQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUa9l9zL3abQW0s+ouIRg6ER5BHpq5gR14tOm7rs0pgwLQoRT3A0A5ppmpDclXgsz8Dowc2zlKEw9jk3ZzswQKDWHjphYVwFXfJ2u7rF+L9PO8wMY63GHAz/NVtbcbN7EEJAUdfm+At
-X-Gm-Message-State: AOJu0YxW8LsljZyeZFmIG1GMgMh+uGpBUO04yXOf1jcxS1oJiLCxayk2
-	ZTFmYrF9AfDC1ATO3aNGKqOUNXVAazrAubkEAKUFw0+1JJk/R0cY
-X-Google-Smtp-Source: AGHT+IGW0Kze6LJc/d+J5WO+J39Y2BxDIECNkFysAwtV+9+tJFsfxjXFDm9zsFDDcvbd/gcxwbZqHA==
-X-Received: by 2002:a05:600c:4591:b0:428:18d9:9963 with SMTP id 5b1f17b1804b1-429c3a28c24mr52406255e9.22.1723411397653;
-        Sun, 11 Aug 2024 14:23:17 -0700 (PDT)
-Received: from Lappy.lan ([193.223.71.20])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4290c74aa5dsm163846605e9.26.2024.08.11.14.23.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 11 Aug 2024 14:23:17 -0700 (PDT)
-Sender: Ben Whitten <benwhitten@gmail.com>
-From: Ben Whitten <ben.whitten@gmail.com>
-To: Jaehoon Chung <jh80.chung@samsung.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Will Newton <will.newton@imgtec.com>,
-	Thomas Abraham <thomas.abraham@linaro.org>,
-	Abhilash Kesavan <a.kesavan@samsung.com>,
-	Chris Ball <cjb@laptop.org>
-Cc: Hauke Mehrtens <hauke@hauke-m.de>,
-	Ben Whitten <ben.whitten@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: dw_mmc: allow biu and ciu clocks to defer
-Date: Sun, 11 Aug 2024 22:22:11 +0100
-Message-ID: <20240811212212.123255-1-ben.whitten@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="hsUZH/C8"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id A7AE420007;
+	Mon, 12 Aug 2024 08:49:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+	t=1723452599;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=73GvcgdSLrMZXGcYPjAJiYsspT+yFL38vgOcQSxgjFk=;
+	b=hsUZH/C8PXrcNQJubX+GqA3kU3D3BCLoUqm0Nuwf/7zwdpBWAhom6I5lp+UeuskT4/kWmz
+	ftrP1rxNG10SZ4ErGuXCdc33Wl9LPw6QSB++RRHH3gFDd/uYKExSJGihp9k5EO5DGpZRWS
+	Vhug+ZdnbZCC7T/doh7pjomhBB0v6AthvjEYPTC1WEKTeV+zjEPFpeqqEOmZKcIVzCdP9N
+	VckV7vn4nKMrx12x2qerZAXsz4COE8RZhfbTGbMmn5Dhhlo7SqFwIws17BKJcODEQDwM+P
+	bJ4gepsVvcU/1x3lF6f4fU2YKzRk3W0mow+kBu19yQpGsDh6BtkWPN96iehkMw==
+Date: Mon, 12 Aug 2024 10:49:54 +0200
+From: Miquel Raynal <miquel.raynal@bootlin.com>
+To: Christian Marangi <ansuelsmth@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Richard Weinberger <richard@nod.at>, Vignesh
+ Raghavendra <vigneshr@ti.com>, Joern Engel <joern@lazybastard.org>, Keith
+ Busch <kbusch@kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig
+ <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, Saravana Kannan
+ <saravanak@google.com>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>, Florian Fainelli
+ <f.fainelli@gmail.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org
+Subject: Re: [PATCH v4 0/7] mtd: improve block2mtd + airoha parser
+Message-ID: <20240812104954.1e8d55f7@xps-13>
+In-Reply-To: <20240809172106.25892-1-ansuelsmth@gmail.com>
+References: <20240809172106.25892-1-ansuelsmth@gmail.com>
+Organization: Bootlin
+X-Mailer: Claws Mail 4.2.0 (GTK 3.24.41; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-GND-Sasl: miquel.raynal@bootlin.com
 
-Fix a race condition if the clock provider comes up after mmc is probed,
-this causes mmc to fail without retrying.
-When given the DEFER error from the clk source, pass it on up the chain.
+Hi Christian,
 
-Fixes: f90a0612f0e1 ("mmc: dw_mmc: lookup for optional biu and ciu clocks")
+ansuelsmth@gmail.com wrote on Fri,  9 Aug 2024 19:20:58 +0200:
 
-Signed-off-by: Ben Whitten <ben.whitten@gmail.com>
----
- drivers/mmc/host/dw_mmc.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+> This small series handle 2 problems.
+>=20
+> It does try to ""standardize"" the usage of block2mtd module with
+> MTD OF nodes.
+>=20
+> It is very easy to add support for MTD parser by just adding an
+> OF node to the mtd created for block2mtd.
+>=20
+> This apply only if the root block is used for block2mtd to allow
+> scenario where the full eMMC or an NVME is used for MTD and it doesn't
+> have any partition table.
+>=20
+> To also support NVME, similar to how it's done with eMMC, we introduce
+> a subnode to the NVME controller that needs to have the "nvme-card"
+> compatible where a dev can define fixed-paritions for MTD parser usage.
+>=20
+> This series also add support for the Airoha partition table where
+> the last partition is always ART and is placed at the end of the flash.
+>=20
+> This require dynamic calculation of the offset as some dedicated
+> driver for bad block management might be used that reserve some space
+> at the end of the flash for block accounting.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2333ef4893ee..e9f6e4e62290 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3299,6 +3299,10 @@ int dw_mci_probe(struct dw_mci *host)
- 	host->biu_clk = devm_clk_get(host->dev, "biu");
- 	if (IS_ERR(host->biu_clk)) {
- 		dev_dbg(host->dev, "biu clock not available\n");
-+		ret = PTR_ERR(host->biu_clk);
-+		if (ret == -EPROBE_DEFER)
-+			return ret;
-+
- 	} else {
- 		ret = clk_prepare_enable(host->biu_clk);
- 		if (ret) {
-@@ -3310,6 +3314,10 @@ int dw_mci_probe(struct dw_mci *host)
- 	host->ciu_clk = devm_clk_get(host->dev, "ciu");
- 	if (IS_ERR(host->ciu_clk)) {
- 		dev_dbg(host->dev, "ciu clock not available\n");
-+		ret = PTR_ERR(host->ciu_clk);
-+		if (ret == -EPROBE_DEFER)
-+			goto err_clk_biu;
-+
- 		host->bus_hz = host->pdata->bus_hz;
- 	} else {
- 		ret = clk_prepare_enable(host->ciu_clk);
+Who is reserving this space? And this is not reflected anywhere in the
+partition table?
 
-base-commit: 5189dafa4cf950e675f02ee04b577dfbbad0d9b1
--- 
-2.43.0
+> New aarch64 Airoha SoC make use of this partition table and use block2mtd
+> for eMMC to treat them as MTD with custom bad block management and block
+> tracking.
 
+I am sorry, I am not used to such use cases, and I really fail getting
+why you would like to use mtd with an eMMC. Can you explain a little
+bit more what is not available in the block world that you really need
+from mtd?
+
+Also, did you consider nvmem layouts instead to detect and define the
+ART area? (just asking).
+
+Thanks,
+Miqu=C3=A8l
