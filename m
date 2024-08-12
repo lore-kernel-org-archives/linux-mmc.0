@@ -1,137 +1,165 @@
-Received: from mail-wm1-f54.google.com (mail-wm1-f54.google.com [209.85.128.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from relay7-d.mail.gandi.net (relay7-d.mail.gandi.net [217.70.183.200])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9388017A581
-	for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2024 12:23:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 839261D699;
+	Mon, 12 Aug 2024 13:17:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.200
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723465435; cv=none; b=Dm1IYCny88kSxxfDGZRD0qMb1yHbc2Yug87TUt91Yd1xSoUW6Aq9MgzxtqPchksB85IXhZksh9M4KZDQ4qSKNTurrDb8OWWKQ+vDo3LCxSO35e/ynrSODWkm8d5ORjsx8Fq0lrXTNm/GZrcujFvGXVoIzHxUoQ/cKBUYP+TCMOM=
+	t=1723468682; cv=none; b=AKTqgzUPzmMeHyFktSRAagmuz37fZ6YFvYDVc+h/hCB954v7y+uao88AQcQg9OP3icn4GHksRN12ar/ZiWTntJ+jP5AHvoOihfuEQfJxTyxQleokJgvo5S9S2U2YS6WUn1IG2w7FsWhrW4d1q7DvJBRqnR3x3+Sp1wryB2CmSmo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723465435; c=relaxed/simple;
-	bh=jGosGmNqg+3CGldQhIO8Q9Yl5xt8JrZV5L5omlJeBwA=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=ds/8v4W+VPRvQcAoOCEnHKcQJBwGV8i7Nn1ADED/Ni9PiHmZmwEj3DS4WSzeN+xpEhNRWSpBUo7QcM7p2qgCjZU8YyguIf3zfiD83iRRydJogs/2N6ia9Rfklgil0TuY7vOxLBfoptRXsF3Dt4idXJABT5sNT8wu3wPxpmff8uY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=K5IAu3Na; arc=none smtp.client-ip=209.85.128.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1723468682; c=relaxed/simple;
+	bh=aoEG7LVugUDhTzLFYA5r9vLpssJzwnJp6xpB5GyAH0Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=qWXTZiIh+wmlUjrPiiTMaAnUAPmOWjXJx22aKk908i7oOd0yEUcNruVN3Nroq0ueuSoxQaTnSjRG9kpbRko0ELwzDn9addDMU08ZTvzToGJdySTkEqEv/d3nVnrcZSPjwPwkxi5ECVWr5WiiZLJFK6w2RNnwn41/ZlEgpdj50as=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=T1DGM4+f; arc=none smtp.client-ip=217.70.183.200
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="K5IAu3Na"
-Received: by mail-wm1-f54.google.com with SMTP id 5b1f17b1804b1-428ec6c190eso32599105e9.1
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Aug 2024 05:23:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1723465430; x=1724070230; darn=vger.kernel.org;
-        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
-         :from:from:to:cc:subject:date:message-id:reply-to;
-        bh=XehwAsVHbXNGMp5RdCTcg+jS1mcwWOdOd2oDmc3/TGI=;
-        b=K5IAu3NaZSfFJo/Ug25gkdnHhcrxc6Gf7bVzfcHY37cpY1KVuDPj6Fu1KZBnJXOX6c
-         vaNaZBNtnG7N//fUwFWZIyOcrG4cTvqUu3G9HI8p/y7mC4N6G0dBbyO46KWxVDhkoD6w
-         zY+4WRu5wmPFK3sNEzZlYbcpTBIV6pdjYOLmVgUkH5Tradch/X4MHWypFS2wJNxWoC2t
-         AFNv8e+FJC796/NJAqeW6pAOlKtD/RCSZbgA9DjOkiDGgOmdXdb0XFYuYVmlHQK5vDp+
-         Ekjb6UEOYZot/l9fAovsgIBnMbhIeZdeRH5llcDJqClMGaaJKV2QCMyKDzP5qrIdjoQn
-         NxkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723465430; x=1724070230;
-        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
-         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XehwAsVHbXNGMp5RdCTcg+jS1mcwWOdOd2oDmc3/TGI=;
-        b=pXlheJ+AyLonQHnsGDFHMfAGMs7wnr7AfQAlekebjQuWUGJL+pAxqr779XzJ1Dr0Mh
-         5RFcnR/iT6zi+CsINQNY+bH0yDBsAP0PivjttBTuM17Qe3E/jWuDpiYVdxfiiAEQGm1J
-         Fd49kUw5HTt+bY89/oY7IHz567yZMfWYcnz2FigVR0ldGk4e+HOfXI6mWjm943VF0bM/
-         xi66pb/wRBZsRJCyBoxva5x31Bf6lEOPog4v3WOEEvEtoR/hVQWL12ySYzElKnwLs6/Z
-         Jr9J5P7sFC3sy0TE8g/U99USjw92Yy2NsrUdsLSxh5X9eGfNWJMH+gQPCumXst4DCPhB
-         2DMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU/6p1f57i59Yse47fviobhbUQ5q9FpfADkFACmyedlqi7cP5bpOxiEtsykqQ3ULUqvQzZIAGIPExCVPig/LXwkjRXkHhw0fe5/
-X-Gm-Message-State: AOJu0YxtY2MCz7X+SwV8/eeEn9f+xJzGzKeQmT4TtNwJpFfY/lFOY4jG
-	QGth91yCKuVFeKI9M6q3gI/YaUp4/5vfGfSAUj5kKEiLhPbAtiFEPAnCS0QJ9gY=
-X-Google-Smtp-Source: AGHT+IG8N1oZwbzivFuOXMO8KjI25Y2SXPR/dyyxOki85347hWjVPqJg+oatclhLoGiEpsJJCbZ3lw==
-X-Received: by 2002:a05:600c:468d:b0:426:55a3:71af with SMTP id 5b1f17b1804b1-429d4894febmr1580465e9.33.1723465429768;
-        Mon, 12 Aug 2024 05:23:49 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:e555:6809:45b3:2496])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-429c775e0e8sm100690605e9.41.2024.08.12.05.23.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Aug 2024 05:23:49 -0700 (PDT)
-From: Jerome Brunet <jbrunet@baylibre.com>
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="T1DGM4+f"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 41E7620002;
+	Mon, 12 Aug 2024 13:17:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+	t=1723468677;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=JdcV2kRk9M7GFAK/D+USec3altBfiWngrF1bMZJR0h0=;
+	b=T1DGM4+ftpehFe4HTk9kRVwPAVKw3AXm0nD1T1JMZhEdelkbXoOfgy4NgYAKj95rVaLvIp
+	nZnomFB1XkmKUg7BHzwy2Zpp7FfDaMYjbRXKCK5jVbxGkA4HSJ1kb6ERXFei+u8THVVKQK
+	AB7ydR869hd6hCgePz3L2ncJBB48RgAJbw3nqvRXWZ2bnwmJrOyzsbOyD1LgGLVygbOXe1
+	h2sXickvc/8OCgBUceYdm1WA7UmkQX6+A8msWci8Mu3YNPv7JKtz5mpXi+/Z91kCss8Pbp
+	noYDmTyhdrsEflAz5id8Ax4oD5XfbGH/ORmkMLDhKex9GquwQMFbGoeyrW6ljA==
+Date: Mon, 12 Aug 2024 15:17:55 +0200
+From: Miquel Raynal <miquel.raynal@bootlin.com>
 To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,  Neil Armstrong
- <neil.armstrong@linaro.org>,  Kevin Hilman <khilman@baylibre.com>,  Martin
- Blumenstingl <martin.blumenstingl@googlemail.com>,
-  linux-mmc@vger.kernel.org,  linux-arm-kernel@lists.infradead.org,
-  linux-amlogic@lists.infradead.org,  linux-kernel@vger.kernel.org,
-  stable@vger.kernel.org
-Subject: Re: [PATCH] mmc: meson-gx: fix wrong conversion of __bf_shf to __ffs
-In-Reply-To: <20240812115515.20158-1-ansuelsmth@gmail.com> (Christian
-	Marangi's message of "Mon, 12 Aug 2024 13:55:10 +0200")
-References: <20240812115515.20158-1-ansuelsmth@gmail.com>
-Date: Mon, 12 Aug 2024 14:23:48 +0200
-Message-ID: <1j8qx2x73f.fsf@starbuckisacylon.baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Richard Weinberger <richard@nod.at>, Vignesh
+ Raghavendra <vigneshr@ti.com>, Joern Engel <joern@lazybastard.org>, Keith
+ Busch <kbusch@kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig
+ <hch@lst.de>, Sagi Grimberg <sagi@grimberg.me>, Saravana Kannan
+ <saravanak@google.com>, Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+ Wolfram Sang <wsa+renesas@sang-engineering.com>, Florian Fainelli
+ <f.fainelli@gmail.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org
+Subject: Re: [PATCH v4 0/7] mtd: improve block2mtd + airoha parser
+Message-ID: <20240812151755.0feab4b2@xps-13>
+In-Reply-To: <66b9df7c.050a0220.3574aa.d5bb@mx.google.com>
+References: <20240809172106.25892-1-ansuelsmth@gmail.com>
+	<20240812104954.1e8d55f7@xps-13>
+	<66b9df7c.050a0220.3574aa.d5bb@mx.google.com>
+Organization: Bootlin
+X-Mailer: Claws Mail 4.2.0 (GTK 3.24.41; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-
-On Mon 12 Aug 2024 at 13:55, Christian Marangi <ansuelsmth@gmail.com> wrote:
-
-> Commit 795c633f6093 ("mmc: meson-gx: fix __ffsdi2 undefined on arm32")
-> changed __bf_shf to __ffs to fix a compile error on 32bit arch that have
-> problems with __ffsdi2. This comes from the fact that __bf_shf use
-> __builtin_ffsll and on 32bit __ffsdi2 is missing.
->
-> Problem is that __bf_shf is defined as
->
->   #define __bf_shf(x) (__builtin_ffsll(x) - 1)
->
-> but the patch doesn't account for the - 1.
->
-> Fix this by using the __builtin_ffs and add the - 1 to reflect the
-> original implementation.
->
-> The commit also converted other entry of __bf_shf in the code but those
-> got dropped in later patches.
->
-> Fixes: 795c633f6093 ("mmc: meson-gx: fix __ffsdi2 undefined on arm32")
-> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-GND-Sasl: miquel.raynal@bootlin.com
 
 Hi Christian,
 
-Are you fixing an actual problem you've seen with the platform and or
-this solely based on the original commit description ?
+ansuelsmth@gmail.com wrote on Mon, 12 Aug 2024 12:10:03 +0200:
 
-If I dump the shift values with what we have right now, on sm1 at least
-* Mux shift is 6
-* Div shift is 0
+> On Mon, Aug 12, 2024 at 10:49:54AM +0200, Miquel Raynal wrote:
+> > Hi Christian,
+> >=20
+> > ansuelsmth@gmail.com wrote on Fri,  9 Aug 2024 19:20:58 +0200:
+> >  =20
+> > > This small series handle 2 problems.
+> > >=20
+> > > It does try to ""standardize"" the usage of block2mtd module with
+> > > MTD OF nodes.
+> > >=20
+> > > It is very easy to add support for MTD parser by just adding an
+> > > OF node to the mtd created for block2mtd.
+> > >=20
+> > > This apply only if the root block is used for block2mtd to allow
+> > > scenario where the full eMMC or an NVME is used for MTD and it doesn't
+> > > have any partition table.
+> > >=20
+> > > To also support NVME, similar to how it's done with eMMC, we introduce
+> > > a subnode to the NVME controller that needs to have the "nvme-card"
+> > > compatible where a dev can define fixed-paritions for MTD parser usag=
+e.
+> > >=20
+> > > This series also add support for the Airoha partition table where
+> > > the last partition is always ART and is placed at the end of the flas=
+h.
+> > >=20
+> > > This require dynamic calculation of the offset as some dedicated
+> > > driver for bad block management might be used that reserve some space
+> > > at the end of the flash for block accounting. =20
+> >=20
+> > Who is reserving this space? And this is not reflected anywhere in the
+> > partition table?
+> > =20
+>=20
+> To be more precise Mediatek use a custom way to handle bad blocks called
+> BMT where they reserve and store data at the end of the nand. This is
+> loaded before the flash driver controller so when MTD is init, the size
+> is already reduced. The reserved space can change and it really depends
+> on the tuned values hence it may change.
 
-This is aligned with the datasheet and has been working for while now.
+Is this supported in mainline Linux? MTD handles the bad blocks and the
+bad block tables, so I don't understand how this hardware feature can
+live together with MTD.
 
-> Cc: stable@vger.kernel.org # see patch description, needs adjustements for < 5.2
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index c7c067b9415a..8f64083a08fa 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -464,7 +464,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->  	init.num_parents = MUX_CLK_NUM_PARENTS;
->  
->  	mux->reg = host->regs + SD_EMMC_CLOCK;
-> -	mux->shift = __ffs(CLK_SRC_MASK);
-> +	mux->shift = __builtin_ffs(CLK_SRC_MASK) - 1;
->  	mux->mask = CLK_SRC_MASK >> mux->shift;
->  	mux->hw.init = &init;
->  
-> @@ -486,7 +486,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
->  	init.num_parents = 1;
->  
->  	div->reg = host->regs + SD_EMMC_CLOCK;
-> -	div->shift = __ffs(CLK_DIV_MASK);
-> +	div->shift = __builtin_ffs(CLK_DIV_MASK) - 1;
->  	div->width = __builtin_popcountl(CLK_DIV_MASK);
->  	div->hw.init = &init;
->  	div->flags = CLK_DIVIDER_ONE_BASED;
+Anyway, you are talking about MMCs, I don't understand why there are
+bad blocks, nor what is checking them and when. This is all still very
+fuzzy to me, I'm sorry.
 
--- 
-Jerome
+> > > New aarch64 Airoha SoC make use of this partition table and use block=
+2mtd
+> > > for eMMC to treat them as MTD with custom bad block management and bl=
+ock
+> > > tracking. =20
+> >=20
+> > I am sorry, I am not used to such use cases, and I really fail getting
+> > why you would like to use mtd with an eMMC. Can you explain a little
+> > bit more what is not available in the block world that you really need
+> > from mtd? =20
+>=20
+> Since vendor needs more space and doesn't want to adapt to block world,
+> they are starting to use eMMC or block devices in general unpartitioned
+> and raw=20
+
+Okay, why not, it's easier for ROMs to access it I guess.
+
+> and using block2mtd to simulate it.
+
+This is what I don't understand. You can very well access your block
+device by offset, why do you need the mtd interface at all?
+
+> They don't care about the
+> performance penalities as it's something read at boot time and only new
+> firmware or some config files are written.
+>=20
+> Is it more clear now?
+
+I still don't understand the need for going through MTD tbh.
+
+> > Also, did you consider nvmem layouts instead to detect and define the
+> > ART area? (just asking).
+> >  =20
+>=20
+> They still need a MTD partition
+
+Why?
+
+> and most of the time userspace tool are
+> used on the ART partition. Using block2mtd and DT support will permit
+> the use of nvmem cell as a side effect (and that is a missive bonus
+> point of this honestly)
+
+MTD also registers into NVMEM, so this is nice if you need both, but if
+what you need is some NVMEM area derived dynamically and you register
+into MTD for that, then no, I'm sorry, that's not the correct approach.
+
+Thanks,
+Miqu=C3=A8l
