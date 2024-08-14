@@ -1,134 +1,124 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 36BBE77F11;
-	Wed, 14 Aug 2024 06:14:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BD8D54F8C
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Aug 2024 07:31:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723616077; cv=none; b=GUTf8cGeZGwqHxJdxqDxryPqs3oyzm2+ZnjXACeO8Zc30SaQKL/lP5Z1RHRe2acAEf2tAw4GI1I2mnI8YjaewWMmpC+T0tjcXroPIwh/i0RxryQFtN1NEu+zjBzzVPNTO5gAZbIZrav1mgUz+w6Qm70antk01nr685B7JQXI2HQ=
+	t=1723620672; cv=none; b=ClB7UyY7LzQc/SxDLtOl3sGFleeGMOqXjOr8lpTJGKBedZCygTotg4dQL1NACcI3gA7jz4jkhokYgXYI1XCVpy5o/j8d6J1ynJd0JVuKfQArAGmBiz7Ps91Qz8r75HZk3tazSGnRZkWvyUxo6a+Vo/Now9qih1PMcqrPDiYXh+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723616077; c=relaxed/simple;
-	bh=DlYJNSBGA6tUTVu+Z6JtO34CDRzygC+vKhA7dQZQvfw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=V8QVRTYnmMDubulpgsWeH9hYSbFFFhh5vkxOyadBrtZ6FX5z4yC1T64eV0+KRrWrYuPYd+SXI/mZX68l4cbKlRvPMCJw/a5euMe0SKdQEXuOia6xELWX0VIkI3YA8gk6IQmUQztWpcjgYK337UYfqex3RNThm4PeXu+Y5ySacJI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Lzq4aCZ3; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1723620672; c=relaxed/simple;
+	bh=MQVUWySMSuSNhEV1m4vMyD334XjzoKaDQq2vOd/nNpc=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=DQBeQJXxOrzn7bTkj3pq2bFVMezGyKRREn4CVnuPyplk0h1I4ZPTaIexk8ap1JS0EAsOjXfeTGnNZ8PK8yQFlsINtioI8xS8pRrQb2kl/olQmKZ0pb1gg2v3MHGMll/q/LseXO/vVEJWb186pngJfQ08SWqCxKrms0igmXRxgDo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=URxjGwBx; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Lzq4aCZ3"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C18C2C32786;
-	Wed, 14 Aug 2024 06:14:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1723616076;
-	bh=DlYJNSBGA6tUTVu+Z6JtO34CDRzygC+vKhA7dQZQvfw=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Lzq4aCZ3TiVmSIHUEW4tnHs6dVDSxOtgaP1M8Uc8lBRyXIQfn4cVuymcIMDx9ozbj
-	 PunzJtAX+/2IT9+l+/PQOfkmOLi78BsyB6SRb5Uzjl2LG/gZTDyppnos3j09+gzdFq
-	 Qar46Uq9eFM3A7EcieLju/jWP2DgKVYnxHI1DQGCgAG4k4c/tnooT0kmUw/CLoKSOP
-	 5HgHuYbuKRKAbGEgOnGzdm3kOYKKgdjU7xijbeocp72bAQ7Qq+FRoqVArJOdGSQXx1
-	 Wk44FfqImhg+HBefd1wICZsWAj/ur/4Qu9f6ntcJqCS4SLB/hyVxttdb5jSyZrNPy2
-	 rnRgy/kTaWhTw==
-Message-ID: <3350aae1-a4a2-4a7c-a075-c29c8f67f5a2@kernel.org>
-Date: Wed, 14 Aug 2024 08:14:28 +0200
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="URxjGwBx"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1723620670; x=1755156670;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=MQVUWySMSuSNhEV1m4vMyD334XjzoKaDQq2vOd/nNpc=;
+  b=URxjGwBx+PVtqtRAojz0TEME6F8FiA4cw8dyprIaq4EJcvmg6CbyerAC
+   sjjwvKr99g2g2ASxHWcCgVGxtglogCq2yDeTCssLqUiE0dT+thjJLCCou
+   5DYTQagV5GnK5b3ZvjQjnJn2GMTmbG777lfa1WCxgTjBJco7UYyzy58x+
+   935bpXLozUZoDb7HR7NQ4/pxhT7kWF84ZBNsioNkEYWmEiIEersnI+ss5
+   3S6crtYFssHYGWgTPwaxQNoDwBYy3fBY1AhY/1oEXDejV5Q9VDQFnw+JJ
+   Ul8jdf2r9Y7q1Oa97KAZvPKbyHDPAUEuXtpvPhC2l0cfMJVWxrQj+bgLu
+   g==;
+X-CSE-ConnectionGUID: 9jp9KOedT1ObRwHsPEV1OA==
+X-CSE-MsgGUID: ntwShZC1QTaB/pLMSX0ATA==
+X-IronPort-AV: E=Sophos;i="6.09,288,1716220800"; 
+   d="scan'208";a="23625068"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 14 Aug 2024 15:31:07 +0800
+IronPort-SDR: 66bc4f38_5nDoeovK+/LvJMgRbHcTMcz6xrFwf+3J2qlkOMFZ4lAkIM4
+ HbloQPJX2cFrepcAd+1OZTkWoboAioPWOYjvMXQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Aug 2024 23:31:20 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Aug 2024 00:31:05 -0700
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Ricky WU <ricky_wu@realtek.com>,
+	Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v3 00/10] Add SDUC Support
+Date: Wed, 14 Aug 2024 10:29:24 +0300
+Message-Id: <20240814072934.2559911-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/4] dt-bindings: net: bluetooth: qualcomm: add QCA9379
- compatible
-To: Felix Kaechele <felix@kaechele.ca>, Marcel Holtmann
- <marcel@holtmann.org>, Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Kalle Valo <kvalo@kernel.org>,
- Jeff Johnson <jjohnson@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Balakrishna Godavarthi <quic_bgodavar@quicinc.com>,
- Rocky Liao <quic_rjliao@quicinc.com>
-Cc: linux-bluetooth@vger.kernel.org, netdev@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-wireless@vger.kernel.org, ath10k@lists.infradead.org,
- linux-mmc@vger.kernel.org
-References: <20240805040131.450412-1-felix@kaechele.ca>
- <20240805040131.450412-4-felix@kaechele.ca>
- <645ae5c7-5421-4bf2-9aac-8151b7db4e0b@kernel.org>
- <3f16cd19-7609-4f97-bacd-9ab307bd8533@kaechele.ca>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <3f16cd19-7609-4f97-bacd-9ab307bd8533@kaechele.ca>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 14/08/2024 00:11, Felix Kaechele wrote:
-> Thanks for taking a look, Krzysztof.
-> 
-> In this case I think it would be easiest to just use the existing 
-> qca9377 fallback and drop his part of the patchset.
+Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+cards support capacity larger than 2TB and up to including 128TB. Thus,
+the address range of the card expands beyond the 32-bit command
+argument. To that end, a new command - CMD22 is defined, to carry the
+extra 6-bit upper part of the 38-bit block address that enable access to
+128TB memory space.
 
-You need then other patchset documenting new compatible with fallback.
-Compatibles are always specific.
+SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+as SDXC.
 
-https://elixir.bootlin.com/linux/v6.10-rc1/source/Documentation/devicetree/bindings/writing-bindings.rst
+The spec defines several extensions/modifications to the current SDXC
+cards, which we address in patches 1 - 10.  Otherwise requirements are
+out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+Extension for Video Speed Class (CMD20).
 
-> 
-> As for the supplies: For the particular module I am working with the 
-> supplies are mostly shared with the WiFi side. So it "just works" 
-> without taking care of supplies on the BT side.
+First publication of SDUC was in [1].  This series was developed and
+tested separately from [1] and does not borrow from it.
 
-You still should describe the hardware.
+[1] https://lwn.net/Articles/982566/
 
-> 
-> But I agree it would be more correct to add and handle these as well. 
-> The documentation I have access to through the FCC filing of this module 
-> is not really conclusive of how to correctly name them in this context.
-> I would rather avoid submitting a patch with incorrect supply names.
+---
+Changes in v3:
+ - Some more kernel test robot fixes
+ - Fix a typo in a commit log (Ricky WU)
+ - Fix ACMD22 returned value
+ - Add 'Tested-by' tag for the whole series (Ricky WU)
 
-OK
+Changes in v2:
+ - Attend kernel test robot warnings
 
+---
 
+Avri Altman (10):
+  mmc: sd: SDUC Support Recognition
+  mmc: sd: Add SD CSD version 3.0
+  mmc: sd: Add Extension memory addressing
+  mmc: core: Add open-ended Ext memory addressing
+  mmc: host: Always use manual-cmd23 in SDUC
+  mmc: core: Add close-ended Ext memory addressing
+  mmc: host: Add close-ended Ext memory addressing
+  mmc: core: Allow mmc erase to carry large addresses
+  mmc: core: Add Ext memory addressing for erase
+  mmc: core: Adjust ACMD22 to SDUC
 
-Best regards,
-Krzysztof
+ drivers/mmc/core/block.c  | 62 ++++++++++++++++++++++++++++++++------
+ drivers/mmc/core/bus.c    |  4 ++-
+ drivers/mmc/core/card.h   |  3 ++
+ drivers/mmc/core/core.c   | 63 ++++++++++++++++++++++++++++-----------
+ drivers/mmc/core/core.h   | 14 +++++++--
+ drivers/mmc/core/queue.h  |  1 +
+ drivers/mmc/core/sd.c     | 16 ++++++----
+ drivers/mmc/core/sd_ops.c | 34 ++++++++++++++++++---
+ drivers/mmc/core/sd_ops.h |  1 +
+ drivers/mmc/host/sdhci.c  | 38 +++++++++++++++++++----
+ include/linux/mmc/card.h  |  2 +-
+ include/linux/mmc/core.h  |  1 +
+ include/linux/mmc/host.h  |  6 ++++
+ include/linux/mmc/sd.h    |  4 +++
+ 14 files changed, 204 insertions(+), 45 deletions(-)
+
+-- 
+2.25.1
 
