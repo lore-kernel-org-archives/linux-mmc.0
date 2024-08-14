@@ -1,55 +1,55 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A5C326AC6
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 371093BBF4
 	for <linux-mmc@vger.kernel.org>; Wed, 14 Aug 2024 07:32:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723620724; cv=none; b=s0Uf+SO7SLx2pulao6APlH1HByG73MxWVlrmDSnzxL0Quosw9LW/qTapRIoGJXpYJiy8eqo5ZeGaAk8FxVN7ZxtRWOWPWtUS6j9WSFf5Bk35D9qQZnRix3d58NTWET9wSEHkrmf9g0DwZx/nndeZfPHVTTiNioIllGXLDXARXl0=
+	t=1723620725; cv=none; b=m5onA+ljD1yI95/Dcw8qxhUO/Bpy6WrUgAbkbVNsmEZ6C8l714Vd0g6W5rPi0zOSf7VnPGCvleggXJ9VQTAY4X6Tmc8Eyh/TmFK1iiBlI7PZsla9TjmGN/ghTzNL/8EV08nFbr2Rhv9t/OPHMtA7ykMg3AbAizWdYlKKAz7sHJM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723620724; c=relaxed/simple;
-	bh=7XEihxW0L1AkZEU7mqoDETJl6uIMK+bfuS8qzxIkS38=;
+	s=arc-20240116; t=1723620725; c=relaxed/simple;
+	bh=oxJxGzIlf3xyO+cEDi9I22/OxExVma7Zqlp/fL7tJcw=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=eUO9YsFwDNtJl0E0KfIBsDhxgG9O2P/7wfuUkKZh36wfgtN+Qu1eshUCvGiBT9mQvnZscOVp49sGaO3hVTabU9lKKBRmnVgl9Nnb5uWbs+vn/xL2JfEX0tMF5JKt28Jt+FUYEfeYd/bhb/vZpNH0KiqU2z5iUv+DU2KNuqThCAs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Y1sFa+AX; arc=none smtp.client-ip=216.71.154.42
+	 MIME-Version; b=BrwJGKqgSYkE1i9UnBYuzPrJ6uvJT3aI1we+yT5pie4q8zAS5YvsD7kLrTUhrcLkQ8q9sZ7vO9UA74k7LUc7c8ACMhOvKdlkB20HTpWHUoKOzSw9K1pzXSO9cdX/XBvOZrPPOCa0oP6bJiVdLguPzSfB5C1ZOpC/q0KNKvHCxgs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=WvalVBVH; arc=none smtp.client-ip=216.71.153.141
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Y1sFa+AX"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="WvalVBVH"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1723620722; x=1755156722;
+  t=1723620723; x=1755156723;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=7XEihxW0L1AkZEU7mqoDETJl6uIMK+bfuS8qzxIkS38=;
-  b=Y1sFa+AXyEvUNDiODMF0CjREUwwFakT8Q/e/9sjqcvsoKy3GHU6K+BQ/
-   tjXBfWrJGrX/zfIoI2vh5e/b4nncsOSMimJnf9FrEPhfFYZrbz775yQ9A
-   TWWUzxBfv0MD3+V98DWjlsRm5waDDMmS4vjWvbrkq640yOna+jr9b5rXQ
-   fbhkWI2INZx/3ABIiOCB/BbxASN8gWUKXhO85YSYUamKZcBskj6nAFt1C
-   JbDVSEFwHeUg/2Gcm9ZqeqhC4pRrTzMF3dd+oqMOayMB+Ko36momQbX1f
-   UkkT95u3jOFP5zlABgUKlufR4EFuVJlDJzXWj4Gio6AAfjNCheB78uRM7
-   Q==;
-X-CSE-ConnectionGUID: O9KhZ6pLSmmqQ12JFKcl0Q==
-X-CSE-MsgGUID: RDaTL6XTTeO4JR7KUnv0AA==
+  bh=oxJxGzIlf3xyO+cEDi9I22/OxExVma7Zqlp/fL7tJcw=;
+  b=WvalVBVHQwJJyWR5F6hU5x3p80ul1um/6PxUZUzo1jsWV1Uo/QOSpgWe
+   UEVhHbPiQhIU9aJAwOM2ZGFzwBR6Wo4a46YtSyZNbsje7R1LmporJH/Yc
+   CH3d2PaBEy22mZwwN+jAWB7mcX5wTpgMOz/6q0IgUYgpobYp3/KtF6zyo
+   w2Kr1CdYF+YdZH9uXrs/tocxxgEYYPXX+3u7SjgtCW3aXwIxepHhPQXEn
+   z1rLDum0P30cb+hitG+u9wiSuWFPFpDiQdaVIjNiMhIIZL3AYc1tQbn39
+   gOMphG5YrYFlkO1QL5LDB/uGAwNgSW41USMh3KPHfv5PcOejIiMIwtyqD
+   w==;
+X-CSE-ConnectionGUID: 6EwDspRUQYGVz9sG2t40WQ==
+X-CSE-MsgGUID: tkEQlgkzSkKlSk/oQhbRtA==
 X-IronPort-AV: E=Sophos;i="6.09,288,1716220800"; 
-   d="scan'208";a="23625177"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 14 Aug 2024 15:32:01 +0800
-IronPort-SDR: 66bc50c3_nIJV0PBrnY+r3I0GWfgyymmnZXLv4iNaII000nxEhvW2pp3
- k47IhTQQAq21Rc0iX4/JxfHzFWqC7OGycjoryfA==
+   d="scan'208";a="24218487"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 14 Aug 2024 15:31:56 +0800
+IronPort-SDR: 66bc4f69_X3cbeR3bf73bglWgdZdRRwpaIb8hzXpyGNrun8vCUCohVZr
+ xOe4MKrbwI7xy6MY/Sqer6cqeTnRm9wncQzv1xg==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Aug 2024 23:37:55 -0700
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Aug 2024 23:32:10 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Aug 2024 00:32:00 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Aug 2024 00:31:55 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Ricky WU <ricky_wu@realtek.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3 10/10] mmc: core: Adjust ACMD22 to SDUC
-Date: Wed, 14 Aug 2024 10:29:34 +0300
-Message-Id: <20240814072934.2559911-11-avri.altman@wdc.com>
+Subject: [PATCH v3 09/10] mmc: core: Add Ext memory addressing for erase
+Date: Wed, 14 Aug 2024 10:29:33 +0300
+Message-Id: <20240814072934.2559911-10-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240814072934.2559911-1-avri.altman@wdc.com>
 References: <20240814072934.2559911-1-avri.altman@wdc.com>
@@ -61,111 +61,47 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ACMD22 is used to verify the previously write operation.  Normally, it
-returns the number of written sectors as u32.  SDUC, however, returns it
-as u64.  This is not a superfluous requirement, because SDUC writes may
-exceeds 2TB.  For Linux mmc however, the previously write operation
-could not be more than the block layer limits, thus we make room for a
-u64 and cast the returning value to u32.
+CMD22 shall precede CMD32 and CMD33 to configure 38-bit erase start
+address and 38 bit erase stop address.
 
-Moreover, SD cards expect to be allowed the full 500msec busy period
-post write operations.  This is true for standard capacity SD, and even
-more so for high volume SD cards, specifically SDUC.  If CMD13 return an
-error bit, the recovery flow is entered regardless of the busy period.
-Thus, better enforce the busy period for SDUC, otherwise it might return
-a bogus bytes written.
-
+Tested-by: Ricky WU <ricky_wu@realtek.com>
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c | 43 ++++++++++++++++++++++++++++++++++------
- 1 file changed, 37 insertions(+), 6 deletions(-)
+ drivers/mmc/core/core.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 30cb8b0d5742..cc5ec94a4be1 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -48,6 +48,7 @@
- #include <linux/mmc/sd.h>
- 
- #include <linux/uaccess.h>
-+#include <asm/unaligned.h>
- 
- #include "queue.h"
- #include "block.h"
-@@ -948,13 +949,20 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	int err;
- 	u32 result;
- 	__be32 *blocks;
--
-+	u8 resp_sz;
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
--
- 	struct scatterlist sg;
- 
-+	/*
-+	 * SD cards, specifically high volume cards, expect to be allowed with the
-+	 * full 500msec busy period post write. Otherwise, they may not indicate
-+	 * correctly the number of bytes written.
-+	 */
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 07aa249c227b..a982ead0c8af 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1660,8 +1660,12 @@ static int mmc_do_erase(struct mmc_card *card, sector_t from,
+ 		cmd.opcode = SD_ERASE_WR_BLK_START;
+ 	else
+ 		cmd.opcode = MMC_ERASE_GROUP_START;
+-	cmd.arg = from;
++	cmd.arg = from & 0xFFFFFFFF;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++
 +	if (mmc_card_is_sduc(card->host))
-+		mmc_delay(500);
++		mmc_send_ext_addr(card->host, from);
 +
- 	err = mmc_app_cmd(card->host, card);
- 	if (err)
- 		return err;
-@@ -963,7 +971,14 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
- 
--	data.blksz = 4;
-+	/*
-+	 * Normally, ACMD22 returns the number of written sectors as u32.
-+	 * SDUC, however, returns it as u64.  This is not a superfluous
-+	 * requirement, because SDUC writes may exceed 2TB.
-+	 */
-+	resp_sz = mmc_card_is_sduc(card->host) ? 8 : 4;
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+ 		pr_err("mmc_erase: group start error %d, "
+@@ -1675,8 +1679,12 @@ static int mmc_do_erase(struct mmc_card *card, sector_t from,
+ 		cmd.opcode = SD_ERASE_WR_BLK_END;
+ 	else
+ 		cmd.opcode = MMC_ERASE_GROUP_END;
+-	cmd.arg = to;
++	cmd.arg = to & 0xFFFFFFFF;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
 +
-+	data.blksz = resp_sz;
- 	data.blocks = 1;
- 	data.flags = MMC_DATA_READ;
- 	data.sg = &sg;
-@@ -973,15 +988,31 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
- 
--	blocks = kmalloc(4, GFP_KERNEL);
-+	blocks = kmalloc(resp_sz, GFP_KERNEL);
- 	if (!blocks)
- 		return -ENOMEM;
- 
--	sg_init_one(&sg, blocks, 4);
-+	sg_init_one(&sg, blocks, resp_sz);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
--	result = ntohl(*blocks);
-+	if (mmc_card_is_sduc(card->host)) {
-+		u64 blocks_64 = get_unaligned_be64(blocks);
-+		/*
-+		 * For Linux mmc however, the previously write operation could
-+		 * not be more than the block layer limits, thus just make room
-+		 * for a u64 and cast the response back to u32.
-+		 */
++	if (mmc_card_is_sduc(card->host))
++		mmc_send_ext_addr(card->host, to);
 +
-+		if (blocks_64 > UINT_MAX) {
-+			/* avoid any test robot warnings */
-+			result = UINT_MAX;
-+		} else {
-+			result = (u32)blocks_64;
-+		}
-+	} else {
-+		result = ntohl(*blocks);
-+	}
- 	kfree(blocks);
- 
- 	if (cmd.error || data.error)
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+ 		pr_err("mmc_erase: group end error %d, status %#x\n",
 -- 
 2.25.1
 
