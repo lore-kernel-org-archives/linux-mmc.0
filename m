@@ -1,124 +1,158 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BD8D54F8C
-	for <linux-mmc@vger.kernel.org>; Wed, 14 Aug 2024 07:31:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E48EAEA4
+	for <linux-mmc@vger.kernel.org>; Wed, 14 Aug 2024 07:31:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723620672; cv=none; b=ClB7UyY7LzQc/SxDLtOl3sGFleeGMOqXjOr8lpTJGKBedZCygTotg4dQL1NACcI3gA7jz4jkhokYgXYI1XCVpy5o/j8d6J1ynJd0JVuKfQArAGmBiz7Ps91Qz8r75HZk3tazSGnRZkWvyUxo6a+Vo/Now9qih1PMcqrPDiYXh+I=
+	t=1723620689; cv=none; b=QZEcIzxdKg6+fQ4xN667rlTpJu4hxAuPuBF4/GZ5W+ZIGYPOXUDb9m5zdH9eDX+bCR1dSUP3KZ+quAuO/grB412Hgd4nx7WrwxueYZLMOY2LLBmxx8oIKiDi+4h2ips0IRrB9VM3jpa6+aKGcTjmk4xc65YkBcQw6VdKEOfxgP4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723620672; c=relaxed/simple;
-	bh=MQVUWySMSuSNhEV1m4vMyD334XjzoKaDQq2vOd/nNpc=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=DQBeQJXxOrzn7bTkj3pq2bFVMezGyKRREn4CVnuPyplk0h1I4ZPTaIexk8ap1JS0EAsOjXfeTGnNZ8PK8yQFlsINtioI8xS8pRrQb2kl/olQmKZ0pb1gg2v3MHGMll/q/LseXO/vVEJWb186pngJfQ08SWqCxKrms0igmXRxgDo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=URxjGwBx; arc=none smtp.client-ip=216.71.154.42
+	s=arc-20240116; t=1723620689; c=relaxed/simple;
+	bh=OSRuQRkaXfIZCB34lkDpVYh7O6NYm8LaeRZiVsWtOdQ=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=P1SlKQ/wBjptHW0EvBff07fxEuzv2mFELRflWUD26VvJNmSFbvVTs5H6n6R9UDZo8umkgS+OYHDRvhpMa/BBw/gqaiBNIx7Banx3vevZ4WbtKOGIwljl6NtYU9czxCJqHZOBQwsEPffn2veiHFmfvrf0qUnrJV5J2Kt3qSTK8EM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=dtuZrxLj; arc=none smtp.client-ip=68.232.141.245
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="URxjGwBx"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="dtuZrxLj"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1723620670; x=1755156670;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=MQVUWySMSuSNhEV1m4vMyD334XjzoKaDQq2vOd/nNpc=;
-  b=URxjGwBx+PVtqtRAojz0TEME6F8FiA4cw8dyprIaq4EJcvmg6CbyerAC
-   sjjwvKr99g2g2ASxHWcCgVGxtglogCq2yDeTCssLqUiE0dT+thjJLCCou
-   5DYTQagV5GnK5b3ZvjQjnJn2GMTmbG777lfa1WCxgTjBJco7UYyzy58x+
-   935bpXLozUZoDb7HR7NQ4/pxhT7kWF84ZBNsioNkEYWmEiIEersnI+ss5
-   3S6crtYFssHYGWgTPwaxQNoDwBYy3fBY1AhY/1oEXDejV5Q9VDQFnw+JJ
-   Ul8jdf2r9Y7q1Oa97KAZvPKbyHDPAUEuXtpvPhC2l0cfMJVWxrQj+bgLu
-   g==;
-X-CSE-ConnectionGUID: 9jp9KOedT1ObRwHsPEV1OA==
-X-CSE-MsgGUID: ntwShZC1QTaB/pLMSX0ATA==
+  t=1723620687; x=1755156687;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=OSRuQRkaXfIZCB34lkDpVYh7O6NYm8LaeRZiVsWtOdQ=;
+  b=dtuZrxLjvwRhIOKrN5T0qy3/3KV+mbqPIJHr/6wl4EJgf2CaQ3Eh4EEZ
+   f6qQ71HR6ciWSCJo/WP28XNRq/aV9JxTg/0yt5lZW63vI30J1dviKmwAG
+   pqhizkRIGzgrBRUtYnT2/5LR9s01HkAq+I+aZmul5WWqnwx+eyj6vF8OO
+   CgLu1owXz6XnWjB7jLGcXAk4DBEvVtE2XRLVbWNsMvc6hqzItY3uUxQLf
+   5tHb/wsXAP/fQiJiKNZDQuAtRcXecHa/yUMCN+l1OOJU1kfJGmN86Re20
+   YzIvS7EBZr/i8xp8p0l9ARGBwfK43Smc3hfnc8bTfByCPo94IZc/eko9g
+   Q==;
+X-CSE-ConnectionGUID: p60w2gNxSweswvCZ/RqrgA==
+X-CSE-MsgGUID: ydbuvjLhRVy8U/xz7R65SQ==
 X-IronPort-AV: E=Sophos;i="6.09,288,1716220800"; 
-   d="scan'208";a="23625068"
+   d="scan'208";a="24957137"
 Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 14 Aug 2024 15:31:07 +0800
-IronPort-SDR: 66bc4f38_5nDoeovK+/LvJMgRbHcTMcz6xrFwf+3J2qlkOMFZ4lAkIM4
- HbloQPJX2cFrepcAd+1OZTkWoboAioPWOYjvMXQ==
+  by ob1.hgst.iphmx.com with ESMTP; 14 Aug 2024 15:31:19 +0800
+IronPort-SDR: 66bc4f44_KHB0XhsAs0Iq61HtWhRYXFRSKHPwzxxtnZrAKOsKHaCIgg/
+ 5g8+fqoPFNT0ONNpgvMN6KC0Dm7GeONejMm7+gA==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Aug 2024 23:31:20 -0700
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 13 Aug 2024 23:31:33 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Aug 2024 00:31:05 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 14 Aug 2024 00:31:18 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Ricky WU <ricky_wu@realtek.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3 00/10] Add SDUC Support
-Date: Wed, 14 Aug 2024 10:29:24 +0300
-Message-Id: <20240814072934.2559911-1-avri.altman@wdc.com>
+Subject: [PATCH v3 01/10] mmc: sd: SDUC Support Recognition
+Date: Wed, 14 Aug 2024 10:29:25 +0300
+Message-Id: <20240814072934.2559911-2-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20240814072934.2559911-1-avri.altman@wdc.com>
+References: <20240814072934.2559911-1-avri.altman@wdc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
-cards support capacity larger than 2TB and up to including 128TB. Thus,
-the address range of the card expands beyond the 32-bit command
-argument. To that end, a new command - CMD22 is defined, to carry the
-extra 6-bit upper part of the 38-bit block address that enable access to
-128TB memory space.
+ACMD41 was extended to support the host-card handshake during
+initialization.  The card expects that the HCS & HO2T bits to be set in
+the command argument, and sets the applicable bits in the R3 returned
+response.  On the contrary, if a SDUC card is inserted to a
+non-supporting host, it will never respond to this ACMD41 until
+eventually, the host will timed out and give up.
 
-SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
-as SDXC.
-
-The spec defines several extensions/modifications to the current SDXC
-cards, which we address in patches 1 - 10.  Otherwise requirements are
-out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
-Extension for Video Speed Class (CMD20).
-
-First publication of SDUC was in [1].  This series was developed and
-tested separately from [1] and does not borrow from it.
-
-[1] https://lwn.net/Articles/982566/
-
+Tested-by: Ricky WU <ricky_wu@realtek.com>
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
-Changes in v3:
- - Some more kernel test robot fixes
- - Fix a typo in a commit log (Ricky WU)
- - Fix ACMD22 returned value
- - Add 'Tested-by' tag for the whole series (Ricky WU)
+ drivers/mmc/core/sd_ops.c | 19 +++++++++++++++----
+ include/linux/mmc/host.h  |  6 ++++++
+ include/linux/mmc/sd.h    |  1 +
+ 3 files changed, 22 insertions(+), 4 deletions(-)
 
-Changes in v2:
- - Attend kernel test robot warnings
-
----
-
-Avri Altman (10):
-  mmc: sd: SDUC Support Recognition
-  mmc: sd: Add SD CSD version 3.0
-  mmc: sd: Add Extension memory addressing
-  mmc: core: Add open-ended Ext memory addressing
-  mmc: host: Always use manual-cmd23 in SDUC
-  mmc: core: Add close-ended Ext memory addressing
-  mmc: host: Add close-ended Ext memory addressing
-  mmc: core: Allow mmc erase to carry large addresses
-  mmc: core: Add Ext memory addressing for erase
-  mmc: core: Adjust ACMD22 to SDUC
-
- drivers/mmc/core/block.c  | 62 ++++++++++++++++++++++++++++++++------
- drivers/mmc/core/bus.c    |  4 ++-
- drivers/mmc/core/card.h   |  3 ++
- drivers/mmc/core/core.c   | 63 ++++++++++++++++++++++++++++-----------
- drivers/mmc/core/core.h   | 14 +++++++--
- drivers/mmc/core/queue.h  |  1 +
- drivers/mmc/core/sd.c     | 16 ++++++----
- drivers/mmc/core/sd_ops.c | 34 ++++++++++++++++++---
- drivers/mmc/core/sd_ops.h |  1 +
- drivers/mmc/host/sdhci.c  | 38 +++++++++++++++++++----
- include/linux/mmc/card.h  |  2 +-
- include/linux/mmc/core.h  |  1 +
- include/linux/mmc/host.h  |  6 ++++
- include/linux/mmc/sd.h    |  4 +++
- 14 files changed, 204 insertions(+), 45 deletions(-)
-
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 8b9b34286ef3..7f6963dac873 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -168,12 +168,16 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 		.cmd = &cmd
+ 	};
+ 	int err;
++	u32 sduc_arg = SD_OCR_CCS | SD_OCR_2T;
+ 
+ 	cmd.opcode = SD_APP_OP_COND;
++	cmd.arg = ocr;
++
+ 	if (mmc_host_is_spi(host))
+-		cmd.arg = ocr & (1 << 30); /* SPI only defines one bit */
++		cmd.arg &= (1 << 30); /* SPI only defines one bit */
+ 	else
+-		cmd.arg = ocr;
++		cmd.arg |= sduc_arg;
++
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+ 	err = __mmc_poll_for_busy(host, SD_APP_OP_COND_PERIOD_US,
+@@ -182,8 +186,15 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	if (err)
+ 		return err;
+ 
+-	if (rocr && !mmc_host_is_spi(host))
+-		*rocr = cmd.resp[0];
++	if (!mmc_host_is_spi(host)) {
++		if (rocr)
++			*rocr = cmd.resp[0];
++
++		if ((cmd.resp[0] & sduc_arg) == sduc_arg)
++			host->caps2 |= MMC_CAP2_SD_SDUC;
++		else
++			host->caps2 &= ~MMC_CAP2_SD_SDUC;
++	}
+ 
+ 	return 0;
+ }
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 88c6a76042ee..a9c36a3e1a10 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -427,6 +427,7 @@ struct mmc_host {
+ #define MMC_CAP2_CRYPTO		0
+ #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
++#define MMC_CAP2_SD_SDUC	(1 << 29)	/* SD over 2TB */
+ 
+ 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
+ 
+@@ -638,6 +639,11 @@ static inline int mmc_card_uhs(struct mmc_card *card)
+ 		card->host->ios.timing <= MMC_TIMING_UHS_DDR50;
+ }
+ 
++static inline int mmc_card_is_sduc(struct mmc_host *host)
++{
++	return host->caps2 & MMC_CAP2_SD_SDUC;
++}
++
+ void mmc_retune_timer_stop(struct mmc_host *host);
+ 
+ static inline void mmc_retune_needed(struct mmc_host *host)
+diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
+index 6727576a8755..865cc0ca8543 100644
+--- a/include/linux/mmc/sd.h
++++ b/include/linux/mmc/sd.h
+@@ -36,6 +36,7 @@
+ /* OCR bit definitions */
+ #define SD_OCR_S18R		(1 << 24)    /* 1.8V switching request */
+ #define SD_ROCR_S18A		SD_OCR_S18R  /* 1.8V switching accepted by card */
++#define SD_OCR_2T		(1 << 27)    /* HO2T/CO2T - SDUC support */
+ #define SD_OCR_XPC		(1 << 28)    /* SDXC power control */
+ #define SD_OCR_CCS		(1 << 30)    /* Card Capacity Status */
+ 
 -- 
 2.25.1
 
