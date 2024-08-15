@@ -1,56 +1,68 @@
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f54.google.com (mail-wr1-f54.google.com [209.85.221.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96E73BA53;
-	Thu, 15 Aug 2024 21:08:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 046D14D8BC
+	for <linux-mmc@vger.kernel.org>; Thu, 15 Aug 2024 23:46:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723756115; cv=none; b=Fq5X9nSOEOSL3gHy6qBELSxCoDV+F7Xfk5CiR3tD/9sWjwY60iohphOld4cLwLH2YSLNK8FYhtt7SbaHpyL1MQ9B0q3yTu5CKiFnRnLo/b4So9oAZ92ayyLfxr2dfl3Pc91/kN7aRKgJ34NWgTLrZYJhFFSHvvlkfurMz8L52vs=
+	t=1723765583; cv=none; b=uAxP7Ag2gnKH1n+0U+Dk82y7KVom/NKbQ7xgDfFtaUIllaPSCTcaaRRjG0qd9x3sEw0tnsRN9aP5jWovIUSEB50mzbRRZyVMRLFCr5QpBoiSOmh77AiyOyXbyNkQbGNLz8vB56yB2CJoyJ/zyYO7GG0IvAa30itHKoKx9NRu65o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723756115; c=relaxed/simple;
-	bh=GLiguvi+Oc7qhZf5JLKTVp2qI4hQHEY+a2IAsZDCO2Q=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=qfgZTBh8yTXdoHM4b8LOmYnJN3zvjcNnoRDhuNlF2fEtc186hAtrBqS/sV7LXM+e4bD7+vI4dqHOaBSBz3hquADQrUbULz4k6IEoxXCG71sHLVaQ/BJCHRi/hDPaIVRkpBNYReywmfJrOEotRjHxwO5QTyjlfQVxuuh7+dHOWgs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Qa2/50BP; arc=none smtp.client-ip=198.47.23.249
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1723765583; c=relaxed/simple;
+	bh=pWOZpiEJi5e99UmqBc55zlFkPy0c6UxaE8RS1MSPNxk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Q4OSdVNqv3CnbgxwxPzD+5wxSyMzgGmhn6TQEiqvwbeAr+yhrHFAzdmJj/GzI+zhGv+bSCO6jeKKURT9bbp3lbHIDvIkVc8erQXgLOjFxtXLl36aDvaRiYEcK8ZbIoL/guXxWk7rjC8cjp5jqfgP0Hz6zcKJcDGad00H96igsWg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com; spf=none smtp.mailfrom=toblux.com; dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b=Excd90TN; arc=none smtp.client-ip=209.85.221.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toblux.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Qa2/50BP"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 47FKFgqm117132;
-	Thu, 15 Aug 2024 15:15:42 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1723752942;
-	bh=YpGC73jsmUszzsJBGs09ehK2XNm+XOZJx7psclHG2co=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=Qa2/50BP9eCZCL/UvxXKSvbpxd9Sv5awwHgTdu8n+b9XFil/tNpeZ1j+sEdifoKrA
-	 w6GrwDUQoSgbiXOqYGNqoxynJFsoRd2DWXgViYfmbpdLlvNFpZvmoLkErRWetXtjeb
-	 2IBP59Gb7nGFPvGGnGvwh0tyFh5+qGz5YtHGGkWU=
-Received: from DLEE103.ent.ti.com (dlee103.ent.ti.com [157.170.170.33])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 47FKFg9F024293
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Thu, 15 Aug 2024 15:15:42 -0500
-Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE103.ent.ti.com
- (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 15
- Aug 2024 15:15:42 -0500
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE115.ent.ti.com
- (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Thu, 15 Aug 2024 15:15:42 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 47FKFgok018925;
-	Thu, 15 Aug 2024 15:15:42 -0500
-From: Judith Mendez <jm@ti.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH 2/2] mmc: sdhci_am654: Add tuning debug prints
-Date: Thu, 15 Aug 2024 15:15:42 -0500
-Message-ID: <20240815201542.421653-3-jm@ti.com>
-X-Mailer: git-send-email 2.46.0
-In-Reply-To: <20240815201542.421653-1-jm@ti.com>
-References: <20240815201542.421653-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b="Excd90TN"
+Received: by mail-wr1-f54.google.com with SMTP id ffacd0b85a97d-37196681d3bso27709f8f.3
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Aug 2024 16:46:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=toblux-com.20230601.gappssmtp.com; s=20230601; t=1723765580; x=1724370380; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=owfkJECpaU/TFCIUAu7JVj1qFv5CTRrdg2Hqzlw/ab8=;
+        b=Excd90TNlfxH0bAYz11PrIDAs7N+BLYGPEXq5XS8yedcsxGNWQAN53xSo/ETeMPvbb
+         FSBkoz4UBB3eJPKUxlxIMLvj9Jj66z+89vKwadtLY1rFoE6GBP9GCUzLfcYWt3UXJ7UX
+         W+n8tOI6Bq/nN4vNA5vOzcPcsAG23EDSqs0+9NuhioiFK60DzxbuDGpSLmeJS3pNTJvN
+         SdppHkak0FrFQpP+oLGxr3Na35T4PLKKVxk1E2upmuDkVqVqL5NlvYcIHk1XKdhf0mX6
+         QVRf3KVyEChVBDnjnDT2VBu8MYtepI6r6U2DPSQ0aK13k2mtrUsIy9RmeR3vLAv5nT4H
+         GNpw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1723765580; x=1724370380;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=owfkJECpaU/TFCIUAu7JVj1qFv5CTRrdg2Hqzlw/ab8=;
+        b=tGgM3vkX6CUy4y8oZGwxbq9QL7FI/lvfpGTb8IOWMvHp8SL2WfDkS7oh6ZhX21UM6S
+         rY4tFt9ZaV1QUey6334kQ+j0OYgd17igPexfQGRurIBouvj9V4sws65waxdSv8ZF0pHP
+         znbbUwVdM4Irp/Bpofxr1e3tqWsjPPTKMGXMn7HXN/w1sQbxnrfLTVfPTPp3QQ7UGFxc
+         Ft2YndEJvMK3VgD2QI5M5zf2vtAcg6QcTVLO6DHIx3Jy0fu5uH4LUPuS4/xYodiptWUq
+         US+O5QD1wkl1IzxS1ljtAZjvO9WJt8MuzjqZ9DGyoHBe4QQXfWL908pK0rAOpgfuH44Q
+         vzeA==
+X-Gm-Message-State: AOJu0YwLvj0T7dbY8zDuorzw1juQgWgq6cKVdPpYK19TCCLmb1ngjCio
+	nnTRKdlGUHen6qQS88rEbH3Y+l1Q5emAD1KFApzxy5ki1MknNBzSgYjc/kir/98=
+X-Google-Smtp-Source: AGHT+IGDOw20u2BycUtGW9QSZG1vTwRyRmCNITyrrhP1+I6Jo05H/XiNgtOc7qVePSMPxECpCzgS9Q==
+X-Received: by 2002:a5d:604f:0:b0:368:5858:826e with SMTP id ffacd0b85a97d-371946c6a66mr635372f8f.59.1723765579991;
+        Thu, 15 Aug 2024 16:46:19 -0700 (PDT)
+Received: from debian.fritz.box. (aftr-62-216-208-163.dynamic.mnet-online.de. [62.216.208.163])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-429ded180dcsm60907175e9.4.2024.08.15.16.46.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 15 Aug 2024 16:46:19 -0700 (PDT)
+From: Thorsten Blum <thorsten.blum@toblux.com>
+To: chaotian.jing@mediatek.com,
+	ulf.hansson@linaro.org,
+	matthias.bgg@gmail.com,
+	angelogioacchino.delregno@collabora.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org,
+	Thorsten Blum <thorsten.blum@toblux.com>
+Subject: [PATCH] mmc: mtk-sd: Improve data type in msdc_timeout_cal()
+Date: Fri, 16 Aug 2024 01:46:02 +0200
+Message-Id: <20240815234602.59684-1-thorsten.blum@toblux.com>
+X-Mailer: git-send-email 2.39.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -58,57 +70,61 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Add debug prints to tuning algorithm for debugging.
+The local variable clk_ns uses at most 32 bits and can be a u32.
 
-Signed-off-by: Judith Mendez <jm@ti.com>
+Since do_div() casts the divisor to u32 anyway, changing the data type
+of clk_ns to u32 also removes the following Coccinelle/coccicheck
+warning reported by do_div.cocci:
+
+  WARNING: do_div() does a 64-by-32 division, please consider using div64_u64 instead
+
+Use max_t(u32,,) to simplify the code and improve its readability.
+
+Signed-off-by: Thorsten Blum <thorsten.blum@toblux.com>
 ---
- drivers/mmc/host/sdhci_am654.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/mtk-sd.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index c3d485bd4d553..a909f8de0eabe 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -457,11 +457,13 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index a94835b8ab93..329d7b3616b6 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -795,13 +795,13 @@ static void msdc_unprepare_data(struct msdc_host *host, struct mmc_data *data)
+ static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
+ {
+ 	struct mmc_host *mmc = mmc_from_priv(host);
+-	u64 timeout, clk_ns;
+-	u32 mode = 0;
++	u64 timeout;
++	u32 clk_ns, mode = 0;
  
- 	if (!num_fails) {
- 		/* Retry tuning */
-+		dev_err(dev, "No failing region found, retry tuning\n");
- 		return -1;
- 	}
- 
- 	if (fail_window->length == ITAPDLY_LENGTH) {
- 		/* Retry tuning */
-+		dev_err(dev, "No passing ITAPDLY, retry tuning\n");
- 		return -1;
- 	}
- 
-@@ -505,6 +507,7 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
- 	unsigned char timing = host->mmc->ios.timing;
- 	struct window fail_window[ITAPDLY_LENGTH];
-+	struct device *dev = mmc_dev(host->mmc);
- 	u8 curr_pass, itap;
- 	u8 fail_index = 0;
- 	u8 prev_pass = 1;
-@@ -542,12 +545,14 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 
- 	if (ret >= 0) {
- 		itap = ret;
-+		dev_dbg(dev, "Final ITAPDLY=%d\n", itap);
- 		sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+ 	if (mmc->actual_clock == 0) {
+ 		timeout = 0;
  	} else {
- 		if (sdhci_am654->tuning_loop < RETRY_TUNING_MAX) {
- 			sdhci_am654->tuning_loop++;
- 			sdhci_am654_platform_execute_tuning(host, opcode);
- 		} else {
-+			dev_err(dev, "Failed to find ITAPDLY, fail tuning\n");
- 			return -1;
- 		}
- 	}
+-		clk_ns  = 1000000000ULL;
++		clk_ns  = 1000000000U;
+ 		do_div(clk_ns, mmc->actual_clock);
+ 		timeout = ns + clk_ns - 1;
+ 		do_div(timeout, clk_ns);
+@@ -831,7 +831,7 @@ static void msdc_set_timeout(struct msdc_host *host, u64 ns, u64 clks)
+ 
+ 	timeout = msdc_timeout_cal(host, ns, clks);
+ 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC,
+-		      (u32)(timeout > 255 ? 255 : timeout));
++		      max_t(u32, timeout, 255));
+ }
+ 
+ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+@@ -840,7 +840,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+ 
+ 	timeout = msdc_timeout_cal(host, ns, clks);
+ 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_WRDTOC,
+-		      (u32)(timeout > 8191 ? 8191 : timeout));
++		      max_t(u32, timeout, 8191));
+ }
+ 
+ static void msdc_gate_clock(struct msdc_host *host)
 -- 
-2.46.0
+2.39.2
 
