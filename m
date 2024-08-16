@@ -1,33 +1,30 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail-m127166.xmail.ntesmail.com (mail-m127166.xmail.ntesmail.com [115.236.127.166])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0A0C13A256;
-	Fri, 16 Aug 2024 08:23:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E677A13B286;
+	Fri, 16 Aug 2024 08:59:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.236.127.166
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723796627; cv=none; b=m3j1QhoCwHJ+1sh0RNplsOvuZC2Jl6//1xj52CWTtBwasuGVxDrkg67f52hXf8/7tTr6K+s+SsfSosvNCoLHt3j0D2prHGpfJzpp/SCOpslH/lUEzJLsXaznV+HYQGu2+O8cJl/Qhu2/M16qlfxaTrVoXOXxOY8NEERqAnBUfXs=
+	t=1723798784; cv=none; b=HYqxLXGd+tMLU5QFoF2IbD5vPdyIOTy5TFXtHQShoaTpaT9T3Fr3chKOe+z6E4vm7RH3yAjjRq4bMOpl4r5CrjmzxfJmCNTgVCxVgcf7P0TWVnmwdWOj86QcllCDjOuluMOreVqK6Xq2mN7YoUpU/cFvP60ePsqEkjzzmBIQoFo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723796627; c=relaxed/simple;
-	bh=I4jD9noy6kedXXh1u+n1aRGJn3cGj+nV2MzUS/dZpUA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LZm2QzuPLxTcsrzhtgXdHA/jK5A2CX1fJ4VHsuLqO4c2b+CmltDG2eix9frr5y+RB2pUwe0M7a/MAjQB0ZC4IOHJryZej8ntvMzImM6I+2a48VR6RoZas6COk+c3CcTgZtJVNUjYnwEEFbKgNeJKy/jSlHmmmVFnruibOQoQYL4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ePRWQodI; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1723798784; c=relaxed/simple;
+	bh=Xm3fx8Xa4ANe/iABtyTd5CMBETIZxfcy+1hfSJGJ0ys=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=kMNhZ+1xUjqKzAjKQ+4ZOgnw5vG+1fkxv94UdEW21+dWNiRDhvRqMNO2hcLtni2/A2JAYXIyN2k41b+O2+w5Y5oVb1oI+vl52iMC3qPViIorE8eXJyGrrHnllZEd49gmDL9ihLKDGir24trLrYo2+fa5rZ840sXk8Cy4Zuj91Jw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=J1UE/ruN; arc=none smtp.client-ip=115.236.127.166
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ePRWQodI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 14379C32782;
-	Fri, 16 Aug 2024 08:23:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1723796627;
-	bh=I4jD9noy6kedXXh1u+n1aRGJn3cGj+nV2MzUS/dZpUA=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=ePRWQodI9pMQX6TxlQGcEXCnJzzDxmoakBwJ0ioiW16SNeldu9o0ZJsQ+kf8KGUHw
-	 6OjE21a8NLjN1zZNjtVJklssrI22rMz2G15NcGoGg37zFp9eBeHYon5hiBE5XLE/29
-	 NQ+k+REciR6WKeWx7T/l+GM68YmcMvoDg5nsiPfDwbLHU56MXywa5Bdm1oD78ERGaT
-	 JrWKdP3IGwbFsjQNFkstZmtSB/IrtIe/JkCDDnMFrZ48wGy1zXfTB+bDo9MKPw3n4u
-	 Xl0S4FXj0lFH5JJeXKvwHc6qudhDLqlPlCGJtIpuM0/dhP9cKgL8nt5mh7YcwQrZSp
-	 rHYQ8CsXQKbMA==
-Message-ID: <20e1c51c-0231-40de-919e-664df906a724@kernel.org>
-Date: Fri, 16 Aug 2024 10:23:40 +0200
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="J1UE/ruN"
+DKIM-Signature: a=rsa-sha256;
+	b=J1UE/ruNV7QGyM0y41B5pMuLmVchxWYjJmDqZINeHWDXSansizu6IXSpjUkqLTeg0zS80Lun+gWCHGetcKil7Fke8S4LBE+E9/7vJnGaLhogGWazpVCLFnj7bym4QBZTzXHPIc/4FgWcBAQluFsWtl6xSPjbmdHvK2V2bcaruyA=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=iL3g7hzaLQ+rrYtLHSAvIW1379wSOIx3YsifSBddCrY=;
+	h=date:mime-version:subject:message-id:from;
+Received: from [172.16.12.45] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTPA id E30FD4601FE;
+	Fri, 16 Aug 2024 08:43:48 +0800 (CST)
+Message-ID: <2517e284-88d0-4cf3-97cf-55567f35eb82@rock-chips.com>
+Date: Fri, 16 Aug 2024 08:43:48 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,139 +32,89 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: Add support for rk3576 dw-mshc
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
- linux-kernel@vger.kernel.org, Detlev Casanova <detlev.casanova@collabora.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org,
- kernel@collabora.com
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
+ Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, kernel@collabora.com
+Subject: Re: [PATCH v3 2/3] mmc: dw_mmc-rockchip: Add v2 tuning support
+To: Detlev Casanova <detlev.casanova@collabora.com>,
+ linux-kernel@vger.kernel.org
 References: <20240814223555.3695-1-detlev.casanova@collabora.com>
- <5057223.82XvGhxQ46@diego> <e640cbc4-6870-4607-a91e-0af41dd76df9@kernel.org>
- <2504176.W2GruxG5Vl@diego>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <2504176.W2GruxG5Vl@diego>
-Content-Type: text/plain; charset=UTF-8
+ <20240814223555.3695-3-detlev.casanova@collabora.com>
+ <5dc82aa2-82a0-4778-b598-88775d5f791c@rock-chips.com>
+ <2742918.mvXUDI8C0e@trenzalore>
+Content-Language: en-GB
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <2742918.mvXUDI8C0e@trenzalore>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkNMSVZPShlLSx5OGUMaTx9WFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSUhCSE
+	JVSktLVUpCS0tZBg++
+X-HM-Tid: 0a9158a4051103aekunme30fd4601fe
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6KyI6OTo6CDIrSzoCNiktTFY#
+	MVEKFA9VSlVKTElITE1CS0hLSENIVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUhCSE43Bg++
 
-On 16/08/2024 09:45, Heiko Stübner wrote:
-> Am Freitag, 16. August 2024, 08:52:04 CEST schrieb Krzysztof Kozlowski:
->> On 15/08/2024 15:49, Heiko Stübner wrote:
->>> Am Donnerstag, 15. August 2024, 00:34:00 CEST schrieb Detlev Casanova:
->>>> Add the compatible string for rockchip,rk3576-dw-mshc and add support
->>>> for the rockchip,v2-tuning flag, a new feature of this core.
->>>>
->>>> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
->>>> ---
->>>>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
->>>>  1 file changed, 1 insertion(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
->>>> index 211cd0b0bc5f3..0543cdb51c657 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
->>>> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
->>>> @@ -39,6 +39,7 @@ properties:
->>>>                - rockchip,rk3368-dw-mshc
->>>>                - rockchip,rk3399-dw-mshc
->>>>                - rockchip,rk3568-dw-mshc
->>>> +              - rockchip,rk3576-dw-mshc
->>>>                - rockchip,rk3588-dw-mshc
->>>>                - rockchip,rv1108-dw-mshc
->>>>                - rockchip,rv1126-dw-mshc
->>>
->>> this would mark the rk3576-dw-mshc as being the "same" as the
+在 2024/8/15 21:23, Detlev Casanova 写道:
+> On Wednesday, 14 August 2024 20:55:37 EDT Shawn Lin wrote:
+>> Hi Detlev
 >>
->> Not the same, but compatible.
->>
->>> core rk3288 variant. rk3288 was the first controller introducing the
->>> clock tuning for higher speeds. with the clocks being part of the CRU.
+>> 在 2024/8/15 6:34, Detlev Casanova 写道:
+>>> From: Shawn Lin <shawn.lin@rock-chips.com>
 >>>
->>> As we can see in later patches, this rk3576 though changes that
->>> setup with moving the tunable clock configurations into the controller
->>> itself.
+>>> v2 tuning will inherit pre-stage loader's phase settings for the first
+>>> time, and do re-tune if necessary.
+>>> Re-tune will still try the rough degrees, for instance, 90, 180, 270,
+>>> 360 but continue to do the fine tuning if sample window isn't good
+>>> enough.
 >>>
->>> So please don't claim to be compatible to the 3288, but instead start
->>> a new block for this new set of controllers:
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
+>>> ---
+>>>
+>>>    drivers/mmc/host/dw_mmc-rockchip.c | 49 ++++++++++++++++++++++++++++++
+>>>    1 file changed, 49 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+>>> b/drivers/mmc/host/dw_mmc-rockchip.c index b07190ba4b7ac..367633f4e8892
+>>> 100644
+>>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> 
+> [...]
+> 
+>>>    		
+>>>    		priv->default_sample_phase = 0;
+>>>
+>>> +	priv->use_v2_tuning =
+>>> +		of_device_is_compatible(host->dev->of_node,
+>>> +					"rockchip,rk3576-dw-
+> mshc");
+>>> +
 >>
->> The question is can new device work with old compatible (without new
->> features)?
+>> v2 is a kind of software decision instead of hardware dependency.
+>> So in theory, any SoC can claim to use it via DT.
 > 
-> the rk3288 and following have their clock phase tuning for hs-modes in
-> the main soc's clock controller. Hence you have the "ciu-drive" and
-> "ciu-sample" clocks [0].
+> Yes but from my tests, only rk3576 won't work without it. So it makes sense to
+> only use v2 for this SoC (and other future ones not supported yet)
 > 
-> On the rk3576 (and probably following) those clock phase settings moved
-> inside the mmc controller itself. So there are no external phase clocks
-> anymore.
-> 
-> So right now we have two types in the binding, the rk2928 type [1],
-> used on the old rk3066 and rk3188 socs, that did not support mmc hs-modes
-> and the rk3288-type which introduced phase tuning via clocks from the
-> main clock controller.
-> 
-> The rk3576 now switches to having phase tuning in the mmc controller
-> itself. So throwing that on unmodified code for the rk3288 will get you
-> degraded functionality, because the tuning won't work because there are
-> no "ciu-drive" and "ciu-sample" anymore .
 
-One could still argue that rest of programming model is the same, thus
-"degraded" mode counts as compatibility, but I do not insist on that.
+However from both of the IC design POV and the test from my side,
+we just need internal phase support patch, and rk3576 could
+work.
 
+>>
+>>>    	priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
+>>>    	if (IS_ERR(priv->drv_clk))
+>>>    	
+>>>    		dev_dbg(host->dev, "ciu-drive not available\n");
 > 
 > 
-> And with that separate compatible we could also "tighten" the binding
-> a bit to make those additional clocks more explicit for the rk3288 type.
-This you can, and actually should, do with existing binding. Maybe just
-a bit more tricky/complicated code.
-
-Anyway, fine with both compatibility-approaches.
-
-Best regards,
-Krzysztof
-
+> Detlev.
+> 
+> 
