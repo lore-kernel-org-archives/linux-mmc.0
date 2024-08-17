@@ -1,120 +1,203 @@
-Received: from mail-m127166.xmail.ntesmail.com (mail-m127166.xmail.ntesmail.com [115.236.127.166])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E677A13B286;
-	Fri, 16 Aug 2024 08:59:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.236.127.166
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CE19149E1A;
+	Sat, 17 Aug 2024 11:36:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723798784; cv=none; b=HYqxLXGd+tMLU5QFoF2IbD5vPdyIOTy5TFXtHQShoaTpaT9T3Fr3chKOe+z6E4vm7RH3yAjjRq4bMOpl4r5CrjmzxfJmCNTgVCxVgcf7P0TWVnmwdWOj86QcllCDjOuluMOreVqK6Xq2mN7YoUpU/cFvP60ePsqEkjzzmBIQoFo=
+	t=1723894602; cv=none; b=gae3tUCjNyVS2FKuB1MjIz2NHNJSW1vuwoJFwsgaf1FjEAnFM5yv09J7DQpPNKl1FNApy8QuRmeraz5BhwgY57EzD4oGyPGCV+Db6Ht6RURQWgGuOD7odTJxKM7I3R7Hhq+UD25CsnOJIjo8VLH+kBGiwjFw2Y3gJkxRJsHZYzc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723798784; c=relaxed/simple;
-	bh=Xm3fx8Xa4ANe/iABtyTd5CMBETIZxfcy+1hfSJGJ0ys=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=kMNhZ+1xUjqKzAjKQ+4ZOgnw5vG+1fkxv94UdEW21+dWNiRDhvRqMNO2hcLtni2/A2JAYXIyN2k41b+O2+w5Y5oVb1oI+vl52iMC3qPViIorE8eXJyGrrHnllZEd49gmDL9ihLKDGir24trLrYo2+fa5rZ840sXk8Cy4Zuj91Jw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=J1UE/ruN; arc=none smtp.client-ip=115.236.127.166
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1723894602; c=relaxed/simple;
+	bh=9yTAN+FJALJO5RPttZwsbiiUQgEuBJUfPRhzN5sTCz8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=IcnzcncdQ4gyrogwUGNgfeL6utCsTZB2zpyx653FZJMOUCp3SUJNELNWT7HPpl84JU4zoyMFqIZms0QJGnOdLs7r+GpSQ/kfnIyjOpHdNvKHtAJCn1DvY+2f/KGCyQDGILHqcN8Kf71REzuVWodOWW7Uxo+6oKh99fZzPju1/P0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=hwyUr8lc; arc=none smtp.client-ip=198.175.65.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="J1UE/ruN"
-DKIM-Signature: a=rsa-sha256;
-	b=J1UE/ruNV7QGyM0y41B5pMuLmVchxWYjJmDqZINeHWDXSansizu6IXSpjUkqLTeg0zS80Lun+gWCHGetcKil7Fke8S4LBE+E9/7vJnGaLhogGWazpVCLFnj7bym4QBZTzXHPIc/4FgWcBAQluFsWtl6xSPjbmdHvK2V2bcaruyA=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=iL3g7hzaLQ+rrYtLHSAvIW1379wSOIx3YsifSBddCrY=;
-	h=date:mime-version:subject:message-id:from;
-Received: from [172.16.12.45] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTPA id E30FD4601FE;
-	Fri, 16 Aug 2024 08:43:48 +0800 (CST)
-Message-ID: <2517e284-88d0-4cf3-97cf-55567f35eb82@rock-chips.com>
-Date: Fri, 16 Aug 2024 08:43:48 +0800
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="hwyUr8lc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1723894601; x=1755430601;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=9yTAN+FJALJO5RPttZwsbiiUQgEuBJUfPRhzN5sTCz8=;
+  b=hwyUr8lcy+xDKuXK4EIQphe2uqfQeD6HPMXd5Z/5LusoXTnfjfvIljy6
+   ySBwBqSN7YuF9Z/edwf8uWAjzZqmwmFWp+X+fgno3zFKFR+DoWq6M050d
+   tD+v/YZlHCMyC54Fei71qT2841wNUWFyWS1dUQ1PvuOvHAXP8y/lg14Iy
+   GdzPALvi89TMU/mhPDAVfu6TpHAW8+QwJjpvB1Yr4zk6UnMOTJ1SOFxvb
+   l7KraaTjB0vzpiYy6k8Laf4mfMLlZX/np+UX6qojjUmb7LdTjpJ2GlYCl
+   7kDW/eoRPEPPZ4DKzqagkjDd0MYBmioOnmcDo7kCInP4BR0BWUUtt0mPu
+   A==;
+X-CSE-ConnectionGUID: USnarbtbSsqAkPEAZ1YqwQ==
+X-CSE-MsgGUID: VwGhbQylT6qjsbMjUQVacA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11166"; a="22325217"
+X-IronPort-AV: E=Sophos;i="6.10,154,1719903600"; 
+   d="scan'208";a="22325217"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Aug 2024 04:36:38 -0700
+X-CSE-ConnectionGUID: ozeieMuATguo4VUGdbJcow==
+X-CSE-MsgGUID: Llap0mEITnuubxdbbocKcA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,154,1719903600"; 
+   d="scan'208";a="60471721"
+Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
+  by orviesa007.jf.intel.com with ESMTP; 17 Aug 2024 04:36:34 -0700
+Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1sfHjU-0007Oy-1B;
+	Sat, 17 Aug 2024 11:36:32 +0000
+Date: Sat, 17 Aug 2024 19:36:32 +0800
+From: kernel test robot <lkp@intel.com>
+To: Thorsten Blum <thorsten.blum@toblux.com>, chaotian.jing@mediatek.com,
+	ulf.hansson@linaro.org, matthias.bgg@gmail.com,
+	angelogioacchino.delregno@collabora.com
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org,
+	Thorsten Blum <thorsten.blum@toblux.com>
+Subject: Re: [PATCH] mmc: mtk-sd: Improve data type in msdc_timeout_cal()
+Message-ID: <202408171942.A1TKwW7h-lkp@intel.com>
+References: <20240815234602.59684-1-thorsten.blum@toblux.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com
-Subject: Re: [PATCH v3 2/3] mmc: dw_mmc-rockchip: Add v2 tuning support
-To: Detlev Casanova <detlev.casanova@collabora.com>,
- linux-kernel@vger.kernel.org
-References: <20240814223555.3695-1-detlev.casanova@collabora.com>
- <20240814223555.3695-3-detlev.casanova@collabora.com>
- <5dc82aa2-82a0-4778-b598-88775d5f791c@rock-chips.com>
- <2742918.mvXUDI8C0e@trenzalore>
-Content-Language: en-GB
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <2742918.mvXUDI8C0e@trenzalore>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkNMSVZPShlLSx5OGUMaTx9WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSUhCSE
-	JVSktLVUpCS0tZBg++
-X-HM-Tid: 0a9158a4051103aekunme30fd4601fe
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6KyI6OTo6CDIrSzoCNiktTFY#
-	MVEKFA9VSlVKTElITE1CS0hLSENIVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUhCSE43Bg++
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240815234602.59684-1-thorsten.blum@toblux.com>
 
-在 2024/8/15 21:23, Detlev Casanova 写道:
-> On Wednesday, 14 August 2024 20:55:37 EDT Shawn Lin wrote:
->> Hi Detlev
->>
->> 在 2024/8/15 6:34, Detlev Casanova 写道:
->>> From: Shawn Lin <shawn.lin@rock-chips.com>
->>>
->>> v2 tuning will inherit pre-stage loader's phase settings for the first
->>> time, and do re-tune if necessary.
->>> Re-tune will still try the rough degrees, for instance, 90, 180, 270,
->>> 360 but continue to do the fine tuning if sample window isn't good
->>> enough.
->>>
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
->>> ---
->>>
->>>    drivers/mmc/host/dw_mmc-rockchip.c | 49 ++++++++++++++++++++++++++++++
->>>    1 file changed, 49 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
->>> b/drivers/mmc/host/dw_mmc-rockchip.c index b07190ba4b7ac..367633f4e8892
->>> 100644
->>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> 
-> [...]
-> 
->>>    		
->>>    		priv->default_sample_phase = 0;
->>>
->>> +	priv->use_v2_tuning =
->>> +		of_device_is_compatible(host->dev->of_node,
->>> +					"rockchip,rk3576-dw-
-> mshc");
->>> +
->>
->> v2 is a kind of software decision instead of hardware dependency.
->> So in theory, any SoC can claim to use it via DT.
-> 
-> Yes but from my tests, only rk3576 won't work without it. So it makes sense to
-> only use v2 for this SoC (and other future ones not supported yet)
-> 
+Hi Thorsten,
 
-However from both of the IC design POV and the test from my side,
-we just need internal phase support patch, and rk3576 could
-work.
+kernel test robot noticed the following build errors:
 
->>
->>>    	priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
->>>    	if (IS_ERR(priv->drv_clk))
->>>    	
->>>    		dev_dbg(host->dev, "ciu-drive not available\n");
-> 
-> 
-> Detlev.
-> 
-> 
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.11-rc3 next-20240816]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Thorsten-Blum/mmc-mtk-sd-Improve-data-type-in-msdc_timeout_cal/20240816-102400
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20240815234602.59684-1-thorsten.blum%40toblux.com
+patch subject: [PATCH] mmc: mtk-sd: Improve data type in msdc_timeout_cal()
+config: hexagon-allmodconfig (https://download.01.org/0day-ci/archive/20240817/202408171942.A1TKwW7h-lkp@intel.com/config)
+compiler: clang version 20.0.0git (https://github.com/llvm/llvm-project 26670e7fa4f032a019d23d56c6a02926e854e8af)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240817/202408171942.A1TKwW7h-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202408171942.A1TKwW7h-lkp@intel.com/
+
+All error/warnings (new ones prefixed by >>):
+
+   In file included from drivers/mmc/host/mtk-sd.c:11:
+   In file included from include/linux/dma-mapping.h:11:
+   In file included from include/linux/scatterlist.h:8:
+   In file included from include/linux/mm.h:2228:
+   include/linux/vmstat.h:514:36: warning: arithmetic between different enumeration types ('enum node_stat_item' and 'enum lru_list') [-Wenum-enum-conversion]
+     514 |         return node_stat_name(NR_LRU_BASE + lru) + 3; // skip "nr_"
+         |                               ~~~~~~~~~~~ ^ ~~~
+   In file included from drivers/mmc/host/mtk-sd.c:11:
+   In file included from include/linux/dma-mapping.h:11:
+   In file included from include/linux/scatterlist.h:9:
+   In file included from arch/hexagon/include/asm/io.h:328:
+   include/asm-generic/io.h:548:31: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     548 |         val = __raw_readb(PCI_IOBASE + addr);
+         |                           ~~~~~~~~~~ ^
+   include/asm-generic/io.h:561:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     561 |         val = __le16_to_cpu((__le16 __force)__raw_readw(PCI_IOBASE + addr));
+         |                                                         ~~~~~~~~~~ ^
+   include/uapi/linux/byteorder/little_endian.h:37:51: note: expanded from macro '__le16_to_cpu'
+      37 | #define __le16_to_cpu(x) ((__force __u16)(__le16)(x))
+         |                                                   ^
+   In file included from drivers/mmc/host/mtk-sd.c:11:
+   In file included from include/linux/dma-mapping.h:11:
+   In file included from include/linux/scatterlist.h:9:
+   In file included from arch/hexagon/include/asm/io.h:328:
+   include/asm-generic/io.h:574:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     574 |         val = __le32_to_cpu((__le32 __force)__raw_readl(PCI_IOBASE + addr));
+         |                                                         ~~~~~~~~~~ ^
+   include/uapi/linux/byteorder/little_endian.h:35:51: note: expanded from macro '__le32_to_cpu'
+      35 | #define __le32_to_cpu(x) ((__force __u32)(__le32)(x))
+         |                                                   ^
+   In file included from drivers/mmc/host/mtk-sd.c:11:
+   In file included from include/linux/dma-mapping.h:11:
+   In file included from include/linux/scatterlist.h:9:
+   In file included from arch/hexagon/include/asm/io.h:328:
+   include/asm-generic/io.h:585:33: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     585 |         __raw_writeb(value, PCI_IOBASE + addr);
+         |                             ~~~~~~~~~~ ^
+   include/asm-generic/io.h:595:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     595 |         __raw_writew((u16 __force)cpu_to_le16(value), PCI_IOBASE + addr);
+         |                                                       ~~~~~~~~~~ ^
+   include/asm-generic/io.h:605:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+     605 |         __raw_writel((u32 __force)cpu_to_le32(value), PCI_IOBASE + addr);
+         |                                                       ~~~~~~~~~~ ^
+>> drivers/mmc/host/mtk-sd.c:805:3: warning: comparison of distinct pointer types ('typeof ((clk_ns)) *' (aka 'unsigned int *') and 'uint64_t *' (aka 'unsigned long long *')) [-Wcompare-distinct-pointer-types]
+     805 |                 do_div(clk_ns, mmc->actual_clock);
+         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/asm-generic/div64.h:222:28: note: expanded from macro 'do_div'
+     222 |         (void)(((typeof((n)) *)0) == ((uint64_t *)0));  \
+         |                ~~~~~~~~~~~~~~~~~~ ^  ~~~~~~~~~~~~~~~
+>> drivers/mmc/host/mtk-sd.c:805:3: error: incompatible pointer types passing 'u32 *' (aka 'unsigned int *') to parameter of type 'uint64_t *' (aka 'unsigned long long *') [-Werror,-Wincompatible-pointer-types]
+     805 |                 do_div(clk_ns, mmc->actual_clock);
+         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/asm-generic/div64.h:238:22: note: expanded from macro 'do_div'
+     238 |                 __rem = __div64_32(&(n), __base);       \
+         |                                    ^~~~
+   include/asm-generic/div64.h:213:38: note: passing argument to parameter 'dividend' here
+     213 | extern uint32_t __div64_32(uint64_t *dividend, uint32_t divisor);
+         |                                      ^
+>> drivers/mmc/host/mtk-sd.c:805:3: warning: shift count >= width of type [-Wshift-count-overflow]
+     805 |                 do_div(clk_ns, mmc->actual_clock);
+         |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/asm-generic/div64.h:234:25: note: expanded from macro 'do_div'
+     234 |         } else if (likely(((n) >> 32) == 0)) {          \
+         |                                ^  ~~
+   include/linux/compiler.h:76:40: note: expanded from macro 'likely'
+      76 | # define likely(x)      __builtin_expect(!!(x), 1)
+         |                                             ^
+   9 warnings and 1 error generated.
+
+
+vim +805 drivers/mmc/host/mtk-sd.c
+
+208489032bdd8d Chaotian Jing              2015-06-15  794  
+557011b6b8c87c Chun-Hung Wu               2020-07-20  795  static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
+208489032bdd8d Chaotian Jing              2015-06-15  796  {
+0caf60c4b110b5 Amey Narkhede              2020-09-18  797  	struct mmc_host *mmc = mmc_from_priv(host);
+d5c9ac0e2eb203 Thorsten Blum              2024-08-16  798  	u64 timeout;
+d5c9ac0e2eb203 Thorsten Blum              2024-08-16  799  	u32 clk_ns, mode = 0;
+208489032bdd8d Chaotian Jing              2015-06-15  800  
+0caf60c4b110b5 Amey Narkhede              2020-09-18  801  	if (mmc->actual_clock == 0) {
+208489032bdd8d Chaotian Jing              2015-06-15  802  		timeout = 0;
+208489032bdd8d Chaotian Jing              2015-06-15  803  	} else {
+d5c9ac0e2eb203 Thorsten Blum              2024-08-16  804  		clk_ns  = 1000000000U;
+0caf60c4b110b5 Amey Narkhede              2020-09-18 @805  		do_div(clk_ns, mmc->actual_clock);
+557011b6b8c87c Chun-Hung Wu               2020-07-20  806  		timeout = ns + clk_ns - 1;
+557011b6b8c87c Chun-Hung Wu               2020-07-20  807  		do_div(timeout, clk_ns);
+557011b6b8c87c Chun-Hung Wu               2020-07-20  808  		timeout += clks;
+208489032bdd8d Chaotian Jing              2015-06-15  809  		/* in 1048576 sclk cycle unit */
+4fe54318496004 AngeloGioacchino Del Regno 2021-12-16  810  		timeout = DIV_ROUND_UP(timeout, BIT(20));
+762d491a8bff7a Chaotian Jing              2017-10-16  811  		if (host->dev_comp->clk_div_bits == 8)
+762d491a8bff7a Chaotian Jing              2017-10-16  812  			sdr_get_field(host->base + MSDC_CFG,
+762d491a8bff7a Chaotian Jing              2017-10-16  813  				      MSDC_CFG_CKMOD, &mode);
+762d491a8bff7a Chaotian Jing              2017-10-16  814  		else
+762d491a8bff7a Chaotian Jing              2017-10-16  815  			sdr_get_field(host->base + MSDC_CFG,
+762d491a8bff7a Chaotian Jing              2017-10-16  816  				      MSDC_CFG_CKMOD_EXTRA, &mode);
+208489032bdd8d Chaotian Jing              2015-06-15  817  		/*DDR mode will double the clk cycles for data timeout */
+208489032bdd8d Chaotian Jing              2015-06-15  818  		timeout = mode >= 2 ? timeout * 2 : timeout;
+208489032bdd8d Chaotian Jing              2015-06-15  819  		timeout = timeout > 1 ? timeout - 1 : 0;
+208489032bdd8d Chaotian Jing              2015-06-15  820  	}
+557011b6b8c87c Chun-Hung Wu               2020-07-20  821  	return timeout;
+557011b6b8c87c Chun-Hung Wu               2020-07-20  822  }
+557011b6b8c87c Chun-Hung Wu               2020-07-20  823  
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
