@@ -1,69 +1,73 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0F51E1BC3C
-	for <linux-mmc@vger.kernel.org>; Sun, 18 Aug 2024 14:23:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B92A154452
+	for <linux-mmc@vger.kernel.org>; Sun, 18 Aug 2024 17:29:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1723991035; cv=none; b=TNo4xZjKTSX+lxT9J57ne5kYbHP7a9Wkp9K42CZDlKCe8BrNk4O/jUfZHbASiz58Lr7I4wOBVF0PE0a6vNd1KukIMxAq2fkLuNjr7eaKpC/yuB+LCtsIjPYfTuzL/J61GlN1F5af9lBra2BhGknLw/2531XgWv7u4yyriAJxRzU=
+	t=1724002171; cv=none; b=ryGEj41wdHqaLUVamjcsppu3XwMhzvjv0vGDI5T1KpWl+zJnmY/FsWj9O7USS/a1Fx4QdZYcghYf1WW761aHJTtisx1ezDq0aIJb7Jb43Gi9gob8Gwjzy8VCE38Ld+mNXmYEitjVJ0jlcbb8RitIBinsXYDddMJTiuHWRWKMPwo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1723991035; c=relaxed/simple;
-	bh=GKnvc5j9d3UGQN/RmRiNw1hnAhh8yCXMvbd2GnUbKL0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=AKOnG/R6r9LpLyCse/tMfFQXGatUlFpM1SO8xMQNErdpCYIBOAO/1U4e9q7zAeHPCoqMOlgIagp8CTVA2lQ7h1sZOrXJACBL0sQlyVWuU2JAXmtrSs7fc2OloH6qB3FYiAR6EV8GHYW0eAj/30BIA0w5cTMg8fEPdYFVAPKY958=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com; spf=none smtp.mailfrom=toblux.com; dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b=bQbdcC6e; arc=none smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=toblux.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=toblux.com
+	s=arc-20240116; t=1724002171; c=relaxed/simple;
+	bh=IzXNmmwt+Tl+gyDcsho6rwUZ4oeczOxFCQboMpLHreM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=W9h78YZLcp4zpjIujrFD4zHNzXjVrhFFXu8buStWnTeXQOYG5Hjh9HsQJPgsTdmuOIpfdNxrjNPeI999S4Fki5jLIEBCO0Pg6ms8Ocs9xLLgtL4VsYrs4sOGBIi9iZSk6byqlxT2/5fE2qIrd12lNl8Gue5fAhhpRz6NXe+3tRA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IfeksvOZ; arc=none smtp.client-ip=209.85.221.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=toblux-com.20230601.gappssmtp.com header.i=@toblux-com.20230601.gappssmtp.com header.b="bQbdcC6e"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a7b2dbd81e3so489504866b.1
-        for <linux-mmc@vger.kernel.org>; Sun, 18 Aug 2024 07:23:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IfeksvOZ"
+Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-371afae614aso834935f8f.0
+        for <linux-mmc@vger.kernel.org>; Sun, 18 Aug 2024 10:29:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=toblux-com.20230601.gappssmtp.com; s=20230601; t=1723991032; x=1724595832; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1724002168; x=1724606968; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=84N+5XgwWf1nwoq814fYSNnKDtDJw7Qd1tBkSaBztTo=;
-        b=bQbdcC6e9MlohmJhxfy3W29nBlUm3cQ8eaKyEO7NcX4yLAgu8qlQF915rqFw3mYmK8
-         KbeP71lZzVj/XMPLBRQiNY+JefVoy+df5Mu6Esu2UIWdFkOxlf60khlShHMCS2h4RRGz
-         Xb6dYjJ57pOBwUvXPDf+tGgI4r3oUFqPHyIJOrm72vCeu48XAwGoefq5V1nEnW0rPv3U
-         NFUBqZd9SrKoorwIDghF8nEamu0p2OHbRFSYsozLl1QuEayBF+FYG3twaB/Kz5LnxsQT
-         3PmLQJ09J6/UgIzh9WJTOvLJ2i5JtTslpebA2R2nx0x/67pIaV2IgfGOhbjbEuR/vixs
-         1e6A==
+        bh=g/9tQ897SoJoKRxcHTwzo+1/+UNdl3vt4A49QU5zusg=;
+        b=IfeksvOZtwNT5btuATgDA0tsYSBomnilgSzmwbH5CDJaiGO3Wb3HEg2MZ0f+sbRsqF
+         Q+teI2WvW1dR7UWue4phvCZIolR+dzqL/pp3W3L9+fRGgUfQ7VmDFSYVEKX8ExwNwc1I
+         cTlP9BnKCV9ltLoo3mLmmCWitfyhexsTkV1jlkOKZNd8t9e/4lUyDpeylU3gFmxjZsOE
+         nmDhOP/SxJXl8IqZbGOpOSwFVlQ0q3kXP3CbGS+/Z6uAf1fdpmzjAeiGPEaWSSDmVNs4
+         nqq/VNEtdCzyM4ibdL9xix/r8Hi9DxZQ6vF0FhZzYEvUwQOpVW4JRmV1t2onUtBIZCTL
+         QGvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1723991032; x=1724595832;
+        d=1e100.net; s=20230601; t=1724002168; x=1724606968;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=84N+5XgwWf1nwoq814fYSNnKDtDJw7Qd1tBkSaBztTo=;
-        b=VaOYcHfjjOM0V/Amm4fq1kByOYRIWVbsc/D+uZj7Ee5UOhl85dse6cZIx0qglTtNMX
-         BoItO0QnvI9ItTSLHX2bR7/RiLSHzmBiYZ5UsKTou06VUP1Q9OjAv6F4pzfQLNxaG6Y0
-         o84b/kbzGcY/cTFfS5/lwSSUcs6flZEdbgarxxS41ITpkz9m9JE9mq04/qK4iFbHgf7p
-         OCRJ7cE5iQcIf/i+OI3vpWxNBaG2YimzOsBVcJ9oS3cJYncEnLKVUPX3WEUbUU0SJ3tv
-         hqQKdBySitELxDqV5Z0y56eqkriBrhymt60uIToNBx36mEBbmn9uArvFyx3LknXeeHjp
-         X+TQ==
-X-Gm-Message-State: AOJu0Yyk9OjHp8yS39PBya0KqWP8hOnNwq4LqSG+O56TFlJY1aU2oZ4u
-	YnZOrBhKogImyuapLgbs1/Qg8uQMX4F3byA279aa0Pb6dPh89AmANcV+Q08nOe/MuUt3FDTWaeb
-	FpU4=
-X-Google-Smtp-Source: AGHT+IGf2pCDxIA75jH/7/L+NTnSfTLwTcnLAynOVUmTnc/INCAsrC+TWCaYgIwOf2GFYNoBXz2Lfw==
-X-Received: by 2002:a17:907:f1dc:b0:a7a:a89e:e230 with SMTP id a640c23a62f3a-a839295469fmr583647666b.30.1723991032263;
-        Sun, 18 Aug 2024 07:23:52 -0700 (PDT)
-Received: from fedora.fritz.box (aftr-62-216-208-163.dynamic.mnet-online.de. [62.216.208.163])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a83838d023dsm519702566b.64.2024.08.18.07.23.51
+        bh=g/9tQ897SoJoKRxcHTwzo+1/+UNdl3vt4A49QU5zusg=;
+        b=gXbswTOZa4pE7aIJeTZoCgkNNaC/IzIz/4AzwdpVasFlHnQy5llL3ciSF9NxZTnxYj
+         62Ade1/Cvl/+TLrSCj17Dc0IvikfkyjcRj5JTZi8fsmfwB2dT8uLTR2C7dlUYBe212pj
+         dXBvM9vMehFsa/UzHyqLrGFK2rR+35ZPUjFZbNztXBvqkbFbWgu9W4rhCa+gAsw6mJGE
+         afwD8Ym95n/ZpUmZBr1ojig0ovqOegAdsFYdg4qOtsfXcTGdG/CIk8RYHMbZooHkyFSR
+         wV2vxzMN9/aMDYOZtlIKdm9FW3+UZ2EIMKwV014fGy3UpNQoE8wknYAEIOYuWcaCp6WN
+         gIBg==
+X-Forwarded-Encrypted: i=1; AJvYcCWtCzPVHKpELzrKqcDZV6o8I4vb3iVNrXB6a8cKoh6nReI8XD2MIPuthvfx+TQ66AwcE/mYsyGxND+gMcERV35PDfsuSNubYIXS
+X-Gm-Message-State: AOJu0YzQDRGARhc6KMCMns7WUOHIcYsMRBDq+Bpb4NvJWGYR9IzGnehT
+	flphPrU6MgU+e0xZwvasVN63LTyXwoDlsobnSP+fE3gAlq/5ZpZ7MIT8wURCog58cwP4Felpb0P
+	F
+X-Google-Smtp-Source: AGHT+IGiYgeRZDRiz4IGj84gIL7b9E6DsEXj2RlYhiQqBRKLtHy9lgTwn3H/JttaoyXN0G/AZU5nFw==
+X-Received: by 2002:a5d:69cc:0:b0:371:8711:4b23 with SMTP id ffacd0b85a97d-3719464c461mr6360403f8f.26.1724002167672;
+        Sun, 18 Aug 2024 10:29:27 -0700 (PDT)
+Received: from krzk-bin.. ([178.197.215.209])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-429ed785708sm81742005e9.37.2024.08.18.10.29.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Aug 2024 07:23:51 -0700 (PDT)
-From: Thorsten Blum <thorsten.blum@toblux.com>
-To: chaotian.jing@mediatek.com,
-	ulf.hansson@linaro.org,
-	matthias.bgg@gmail.com,
-	angelogioacchino.delregno@collabora.com
-Cc: linux-mmc@vger.kernel.org,
+        Sun, 18 Aug 2024 10:29:27 -0700 (PDT)
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mediatek@lists.infradead.org,
-	Thorsten Blum <thorsten.blum@toblux.com>
-Subject: [PATCH v3] mmc: mtk-sd: Improve data type in msdc_timeout_cal()
-Date: Sun, 18 Aug 2024 16:23:01 +0200
-Message-ID: <20240818142300.64156-2-thorsten.blum@toblux.com>
-X-Mailer: git-send-email 2.46.0
+	linux-renesas-soc@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: add top-level constraints
+Date: Sun, 18 Aug 2024 19:29:23 +0200
+Message-ID: <20240818172923.121867-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,72 +76,36 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The local variable clk_ns uses at most 32 bits and can be a u32.
+Properties with variable number of items per each device are expected to
+have widest constraints in top-level "properties:" block and further
+customized (narrowed) in "if:then:".  Add missing top-level constraints
+for clocks.
 
-Replace the 64-by-32 do_div() division with a standard divison.
-
-Since do_div() casts the divisor to u32 anyway, changing the data type
-of clk_ns to u32 also removes the following Coccinelle/coccicheck
-warning reported by do_div.cocci:
-
-  WARNING: do_div() does a 64-by-32 division, please consider using div64_u64 instead
-
-Use min_t(u32,,) to simplify the code and improve its readability.
-
-Signed-off-by: Thorsten Blum <thorsten.blum@toblux.com>
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
-Changes in v2:
-- Address kernel test robot feedback and replace do_div() with a
- standard division
-- Link to v1: https://lore.kernel.org/linux-kernel/20240815234602.59684-1-thorsten.blum@toblux.com/
+ Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-Changes in v3:
-- Use min_t() instead of max_t()
-- Link to v2: https://lore.kernel.org/linux-kernel/20240817170726.350339-2-thorsten.blum@toblux.com/
----
- drivers/mmc/host/mtk-sd.c | 11 +++++------
- 1 file changed, 5 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index a94835b8ab93..edeab9a4a83b 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -795,14 +795,13 @@ static void msdc_unprepare_data(struct msdc_host *host, struct mmc_data *data)
- static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
- {
- 	struct mmc_host *mmc = mmc_from_priv(host);
--	u64 timeout, clk_ns;
--	u32 mode = 0;
-+	u64 timeout;
-+	u32 clk_ns, mode = 0;
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+index 1155b1d79df5..6d4a1faa1c4b 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -77,9 +77,13 @@ properties:
+     minItems: 1
+     maxItems: 3
  
- 	if (mmc->actual_clock == 0) {
- 		timeout = 0;
- 	} else {
--		clk_ns  = 1000000000ULL;
--		do_div(clk_ns, mmc->actual_clock);
-+		clk_ns = 1000000000U / mmc->actual_clock;
- 		timeout = ns + clk_ns - 1;
- 		do_div(timeout, clk_ns);
- 		timeout += clks;
-@@ -831,7 +830,7 @@ static void msdc_set_timeout(struct msdc_host *host, u64 ns, u64 clks)
+-  clocks: true
++  clocks:
++    minItems: 1
++    maxItems: 4
  
- 	timeout = msdc_timeout_cal(host, ns, clks);
- 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_DTOC,
--		      (u32)(timeout > 255 ? 255 : timeout));
-+		      min_t(u32, timeout, 255));
- }
+-  clock-names: true
++  clock-names:
++    minItems: 1
++    maxItems: 4
  
- static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
-@@ -840,7 +839,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
- 
- 	timeout = msdc_timeout_cal(host, ns, clks);
- 	sdr_set_field(host->base + SDC_CFG, SDC_CFG_WRDTOC,
--		      (u32)(timeout > 8191 ? 8191 : timeout));
-+		      min_t(u32, timeout, 8191));
- }
- 
- static void msdc_gate_clock(struct msdc_host *host)
+   dmas:
+     minItems: 4
 -- 
-2.46.0
+2.43.0
 
