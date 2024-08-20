@@ -1,123 +1,161 @@
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23FF618FC70
-	for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2024 11:50:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C67B018F2E3
+	for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2024 11:57:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724154645; cv=none; b=GjpvqUNHr1ZvUDPX1HHNQ+p/KvdXt4BFRC4P1Q2SUAV/nrhkGSVL1ORsLm7cOHQv13WCrcAAAOFJUhhsnqnC4oGNfqB8iDb3vvPvVARY2L2h89YLLw7OfA7pOj/Uan8aMwDFgNphsIEwc7tzaYW3l348KJlFKcT7dqbOTFl0JaU=
+	t=1724155040; cv=none; b=vCou+rhXyb7RtQxajLqLWDfrQlTo5QuYh82uuIxD8cRuI/Ol/5oibxH5dKCHz6vUzyY6erDlta50btpBGyIqaHdohZfJJZvF0u1KVVVKlh342gn9bHT/jVjr5NKHiSU1sNAzFPw4wqvCILMP+MxtVn4CBjYKkSVS/NwZgCJolqs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724154645; c=relaxed/simple;
-	bh=+N0fCfo75321OdOJcVcEyAnRKFBXqAIaZvFl/KyVYCA=;
+	s=arc-20240116; t=1724155040; c=relaxed/simple;
+	bh=vldmY9TwpGQTnAayMgS2+WrfIRlpGIRE50G9nkaFwR0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Vx4qo2liSlNzUtqWQeKR+gf3iBLUg6gDmZK9KRJZNA0qTM8LXRV7FQnsoYdafA4Vto2vez2CdrVjtNoAEoKSN6QMwTWvRVD+VzEnTgr1x7o4de3O53PtmxsJhAyEeqNdbIxC/Nzgtq3m7B6hQy2GXSvRn0j1hfpeEow70zAEvKM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=naH22V54; arc=none smtp.client-ip=209.85.219.182
+	 To:Cc:Content-Type; b=RTI1mPjxYn84GGRgwuukFE3qJF2dqiIoUdjfvV3vaPT2zyOQxD+N0qelCTrccJ3c5QxHS/9GBmxmlqDaCbg2by3CgyAvAmtWPMJHLYX1pd74ur5XJ29FvmzoOGKB1czh68DUu9biaE237ZHD+Bpqm9DwviAfWoM0HAc+CQew1GM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IP37sffO; arc=none smtp.client-ip=209.85.219.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="naH22V54"
-Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-dff1ccdc17bso5975441276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2024 04:50:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IP37sffO"
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e02b79c6f21so5800270276.2
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Aug 2024 04:57:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724154643; x=1724759443; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=9DVd0Gefl7PHpJ5IcyG9GzUh0GMs/G2HRBX2T94h5zQ=;
-        b=naH22V54vnmnpUC0mBpyC/NRdrlRbT6takB5P5dnQm3rOJKXC+Nd70ThDge7XAccan
-         AeB1X+7eFglWcQjxhwmrpaRgRXvYWKr3nyllQlzsJ244GspXZfGy7BaareRy0GalWyQd
-         yfKpEox6sIs1qfKPp/Gr9KEK1T1JMbNwva1Hkris63try70xC3L9HETl/7kcM9U31kis
-         ILSPsWJP9wTxRgSGV14jKCFmDwGpp3IEwxHZMnCkmtsvO8bSFcTg8vEiZWPvHVJEBJMt
-         qHnQmGL2D3SJm7SZBUqvxSoQlat9uvDsSOtjRX8E7M2WpB8CRyrd6zBlZbn0oYNTnxx8
-         yVUA==
+        d=linaro.org; s=google; t=1724155037; x=1724759837; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=qHgKXmFQM/pgtpmlbe84jYboMFFbc+30nVBykAeuVY8=;
+        b=IP37sffOsgXp1eO6OZNHN+hntS4J15AARaGBteVUEDII1eWoD0gKaMgOY7IFic3WOi
+         oYxJRQNh6DEaJTYD0EYc0IcoVDxN2cxBRwRXdByyjrOz+xT6GYwcRTJSFA7GCpL37DP7
+         k8HNCgA1KJnS1kohJlgNp6Va4vpNw2muNirstMFQkeEZTTTTkejTJiC6HbN6daf4ZlaS
+         8+2Nyu/jaGj6hWP2jvDB/AqDVpRr28JqlC3s/gxaQVwICrt/if1FCf58ywt9XvM3V238
+         jomvL3eBHqWXcmA3kcNm2ds2ObDt60HgWd3K0J4ce3RZw6D+ZJedfF3nV4XnczP99dB3
+         6vxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724154643; x=1724759443;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=9DVd0Gefl7PHpJ5IcyG9GzUh0GMs/G2HRBX2T94h5zQ=;
-        b=HDUDIbKQqou+Q4d+0N0tjlzGh0heLdaDkUbN60SJ0+kgAgTisUQfvZxeK1mAaE94KC
-         3sEklq3n+AC8Z6BtZTMhqaxagUmABWnKjRL9MlhxGCJMocLzbyQv4xq3WbRZYAHIKARW
-         /zbblIi0SWwdKAIAMyBDaKytMlSkm0djBSsiHULs8hIp7n793uw86z1B0ig8jgRPBFjU
-         V//9f+hE2Nw/rDL9DLCF2TWxOM1efX7RFPN07G8w9oDIaYUUGXTo5a5rxYu4HV1gqFcZ
-         NwjgLblwjs8gHQmPCfaSDSvRCLk+nhLx40eNuPmcDrzjQ9C/992SeVaJAnqH1i9AjDP1
-         /ghg==
-X-Forwarded-Encrypted: i=1; AJvYcCULicE3e1u86E4PRYYOs3z1Ij4qWN41xXPj8iGSDv2mfF5mUDou2NGjlhxZBN8M8ZPHVWafWKVClt4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwWGWmCiBzRe9B2UL1Rs/ZNBFABGkCSlQOzxGhuwXJGfFA3ptO+
-	EboghJt1H/v42t+0xkO5Nr3hK9EM1AC3lpqDxrixbdfIm83oBt4SEL5fkocYg+uUqprmhB5Fw4L
-	ZRJv1sVUROEZZhqUt3VLNO1RYBSUijSshb2UcIw==
-X-Google-Smtp-Source: AGHT+IEMB3TMQoKoMENuYx3+vgX9Vhmt9+GFb4+PSf+bt1316IqMO95UvkjliFqkRrK+xxXvuI3QTNie11Iwttdbqgk=
-X-Received: by 2002:a05:6902:e10:b0:e0b:eb96:fd95 with SMTP id
- 3f1490d57ef6-e1650d3fd97mr1995243276.19.1724154643077; Tue, 20 Aug 2024
- 04:50:43 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1724155037; x=1724759837;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=qHgKXmFQM/pgtpmlbe84jYboMFFbc+30nVBykAeuVY8=;
+        b=WOLUOFiBKbC+GAP/yG11PhTon1NVxoAsWxKxxVLeLuoO3JFIHXLozBMhzayoZN8YWG
+         C8BzwCeDovBDk0jlfHJ8DRZOIEUhmrD60BbeSveyeYEbjjkEF8CNsb+YoWclPytOviaS
+         uU7dJt3tISXqBKTqrjZzPy3FL0fQZKba15EBqQ98ZKOTt8x8cGu9e+buHc/YPrD2PDXc
+         +X0oBbkzDh03B9Ot7JbHhV74l5U8Rz2RuYYI3meugYp6vbVgbHihQWIkKxthmIxsADkw
+         4skcHJRj8MF8xpRkcVEsT9giehHtk5eQvfqxgdwf0itNTNVtWnUYEse4/xh8zomIdPlB
+         nItg==
+X-Gm-Message-State: AOJu0YxbYAb1BKrIget2QKckKByh7IkBFR/kEPcFCRonLw68QlLZzpgx
+	a31gnkRx7/3GDKK8LQ3FZm24WrZclfcxJ0hAHraObqxysjUi+YLbnco+ACWSGqDTKHfyM5lrze0
+	sTKIUGl6oWOi3HeBGto3BJHWFmzCKnF2D2JtUzA==
+X-Google-Smtp-Source: AGHT+IH084TQLlYBGOvXhEHe3flxk+W/oYMrkV6d7sKsNBNmWB+KA/P9GYd/x53vgmaaf2hNI1/uwJdUGOeFN+MdmqY=
+X-Received: by 2002:a05:6902:144b:b0:e08:5f0c:97c8 with SMTP id
+ 3f1490d57ef6-e1180fc610amr14694366276.57.1724155037595; Tue, 20 Aug 2024
+ 04:57:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <8c90be28-67b4-4b0d-a105-034dc72a0b31@stanley.mountain>
-In-Reply-To: <8c90be28-67b4-4b0d-a105-034dc72a0b31@stanley.mountain>
+References: <20240814072934.2559911-1-avri.altman@wdc.com> <DM6PR04MB65758FAE9750D94B73B17587FC8C2@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB65758FAE9750D94B73B17587FC8C2@DM6PR04MB6575.namprd04.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 20 Aug 2024 13:50:07 +0200
-Message-ID: <CAPDyKFrdNWTsP_cKM4+RmmL-j=nu+r2HktFRxGxhcOhPcSt8vA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc_test: Fix NULL dereference on allocation failure
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: Pierre Ossman <drzeus@drzeus.cx>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org
+Date: Tue, 20 Aug 2024 13:56:40 +0200
+Message-ID: <CAPDyKFqV-CkbOMxE5uymbr4icsoanFvQ7K6aH0kJNxifjW4FTQ@mail.gmail.com>
+Subject: Re: [PATCH v3 00/10] Add SDUC Support
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ricky WU <ricky_wu@realtek.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 20 Aug 2024 at 10:44, Dan Carpenter <dan.carpenter@linaro.org> wrote:
+On Mon, 19 Aug 2024 at 07:46, Avri Altman <Avri.Altman@wdc.com> wrote:
 >
-> If the "test->highmem = alloc_pages()" allocation fails then calling
-> __free_pages(test->highmem) will result in a NULL dereference.  Also
-> change the error code to -ENOMEM instead of returning success.
->
-> Fixes: 2661081f5ab9 ("mmc_test: highmem tests")
-> Signed-off-by: Dan Carpenter <dan.carpenter@linaro.org>
+> Ulf, could you please take a look at this?
+> Not sure it will make it to 6.12 merge window, but I was hoping to start =
+making progress.
 
-Applied for fixes, thanks!
+Yes, sorry for the delay.
+
+I will look at this and the RPMB series from Jens the next couple of days.
 
 Kind regards
 Uffe
 
-
-> ---
-> This code is from 2008 so it must not be that much of an issue in real
-> life.
 >
->  drivers/mmc/core/mmc_test.c | 9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
+> Thanks,
+> Avri
 >
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 8f7f587a0025..b7f627a9fdea 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -3125,13 +3125,13 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->         test->buffer = kzalloc(BUFFER_SIZE, GFP_KERNEL);
->  #ifdef CONFIG_HIGHMEM
->         test->highmem = alloc_pages(GFP_KERNEL | __GFP_HIGHMEM, BUFFER_ORDER);
-> +       if (!test->highmem) {
-> +               count = -ENOMEM;
-> +               goto free_test_buffer;
-> +       }
->  #endif
->
-> -#ifdef CONFIG_HIGHMEM
-> -       if (test->buffer && test->highmem) {
-> -#else
->         if (test->buffer) {
-> -#endif
->                 mutex_lock(&mmc_test_lock);
->                 mmc_test_run(test, testcase);
->                 mutex_unlock(&mmc_test_lock);
-> @@ -3139,6 +3139,7 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->
->  #ifdef CONFIG_HIGHMEM
->         __free_pages(test->highmem, BUFFER_ORDER);
-> +free_test_buffer:
->  #endif
->         kfree(test->buffer);
->         kfree(test);
-> --
-> 2.43.0
+> > -----Original Message-----
+> > From: Avri Altman <avri.altman@wdc.com>
+> > Sent: Wednesday, August 14, 2024 10:29 AM
+> > To: Ulf Hansson <ulf.hansson@linaro.org>; linux-mmc@vger.kernel.org
+> > Cc: Ricky WU <ricky_wu@realtek.com>; Avri Altman <Avri.Altman@wdc.com>
+> > Subject: [PATCH v3 00/10] Add SDUC Support
+> >
+> > Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those =
+cards
+> > support capacity larger than 2TB and up to including 128TB. Thus, the a=
+ddress
+> > range of the card expands beyond the 32-bit command argument. To that e=
+nd, a
+> > new command - CMD22 is defined, to carry the extra 6-bit upper part of =
+the 38-
+> > bit block address that enable access to 128TB memory space.
+> >
+> > SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II =E2=
+=80=93 Same as
+> > SDXC.
+> >
+> > The spec defines several extensions/modifications to the current SDXC c=
+ards,
+> > which we address in patches 1 - 10.  Otherwise requirements are out-of-=
+scope of
+> > this change.  Specifically, CMDQ (CMD44+CMD45), and Extension for Video=
+ Speed
+> > Class (CMD20).
+> >
+> > First publication of SDUC was in [1].  This series was developed and te=
+sted
+> > separately from [1] and does not borrow from it.
+> >
+> > [1] https://lwn.net/Articles/982566/
+> >
+> > ---
+> > Changes in v3:
+> >  - Some more kernel test robot fixes
+> >  - Fix a typo in a commit log (Ricky WU)
+> >  - Fix ACMD22 returned value
+> >  - Add 'Tested-by' tag for the whole series (Ricky WU)
+> >
+> > Changes in v2:
+> >  - Attend kernel test robot warnings
+> >
+> > ---
+> >
+> > Avri Altman (10):
+> >   mmc: sd: SDUC Support Recognition
+> >   mmc: sd: Add SD CSD version 3.0
+> >   mmc: sd: Add Extension memory addressing
+> >   mmc: core: Add open-ended Ext memory addressing
+> >   mmc: host: Always use manual-cmd23 in SDUC
+> >   mmc: core: Add close-ended Ext memory addressing
+> >   mmc: host: Add close-ended Ext memory addressing
+> >   mmc: core: Allow mmc erase to carry large addresses
+> >   mmc: core: Add Ext memory addressing for erase
+> >   mmc: core: Adjust ACMD22 to SDUC
+> >
+> >  drivers/mmc/core/block.c  | 62 ++++++++++++++++++++++++++++++++------
+> >  drivers/mmc/core/bus.c    |  4 ++-
+> >  drivers/mmc/core/card.h   |  3 ++
+> >  drivers/mmc/core/core.c   | 63 ++++++++++++++++++++++++++++-----------
+> >  drivers/mmc/core/core.h   | 14 +++++++--
+> >  drivers/mmc/core/queue.h  |  1 +
+> >  drivers/mmc/core/sd.c     | 16 ++++++----
+> >  drivers/mmc/core/sd_ops.c | 34 ++++++++++++++++++---
+> > drivers/mmc/core/sd_ops.h |  1 +  drivers/mmc/host/sdhci.c  | 38
+> > +++++++++++++++++++----  include/linux/mmc/card.h  |  2 +-
+> > include/linux/mmc/core.h  |  1 +  include/linux/mmc/host.h  |  6 ++++
+> >  include/linux/mmc/sd.h    |  4 +++
+> >  14 files changed, 204 insertions(+), 45 deletions(-)
+> >
+> > --
+> > 2.25.1
 >
