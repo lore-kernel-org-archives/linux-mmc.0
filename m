@@ -1,48 +1,48 @@
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
+Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC7711862;
-	Tue, 20 Aug 2024 20:17:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2600F18E35A;
+	Tue, 20 Aug 2024 20:19:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724185076; cv=none; b=qgqa7EldCgzaDPuanJkHc+aFjQBJiPaQPS5q9/PhTN6dFkPXq9wRtaIwbnL2gY/3/uFThh4BjhkcjcqESg5PKL5owMW4j9zfQbpue5yP0df01M705heYqScWuJM/eYjOCiXtfLzzgDuyuc3Hhsx93hZyxy+sA+1P4s5M2lBufl8=
+	t=1724185145; cv=none; b=kvUS36/frlvpvIdePAhtUT0KhtBPCI4E2N5SWoij6Hc0uwliWoeEoLsV6Q6ln7fIWy/ZC9/0/ILocIONQ/dMDSObm3rwI6GA4+YZ2iBju1wbD2FkWGV8eWu8HUbrZaY4j3jMWsgLLjtF4V/YGcwHlZBWIEUfHeMj37YqlFw5liA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724185076; c=relaxed/simple;
-	bh=zNkTj2ONdT+YIIgcflqyZRIDXJCRIU/9yZu8uEEuhRk=;
+	s=arc-20240116; t=1724185145; c=relaxed/simple;
+	bh=BBmZRw8XGnIVsZlql2+guNN2tFNIKdf5k5USymr8+FU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=qgX8+VMK5q2n5HAYq7/AUJ20SrowLZQANdpfkb/jMoXNlMvWkgjdGS/hSHZMkduQKFNhi0/9vyjpOWPqcnAtDLXBRjEI+VHx/6XkrwW7yxR1PY/1yQNt82gSBo+gQa5/AlD9vX5kZcvLppJYjTeiHv3SKv9TeIZkaueMe2UPoCA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=qDSEFonB; arc=none smtp.client-ip=198.47.23.249
+	 In-Reply-To:Content-Type; b=KaKmBdeF4Vy45FYs10FBtucTSDCRmYvwG1vGgGLb9J/aHcPlGJpbMnPcivsPYImplcU2E1/obLMqf7VsQnWrmqItiq16WtcMcv7KPv8dw61Tl6UIX+8TEwxw4WDbzGIROn5dThW/kaiNCDrQ7UWB9RHJKRrmJH+dIOND+lQoYnY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=YZ7h5EV5; arc=none smtp.client-ip=198.47.23.248
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="qDSEFonB"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 47KKHn3O040772;
-	Tue, 20 Aug 2024 15:17:49 -0500
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="YZ7h5EV5"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 47KKIwHR019206;
+	Tue, 20 Aug 2024 15:18:58 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1724185069;
-	bh=JssVpm1+7QeQwBFb9zZV+4dPocHbmkvDKb8l4/dubas=;
+	s=ti-com-17Q1; t=1724185138;
+	bh=xhPiJBJF/pJk4ZqYkKbMkYRj6Mueld3n53SQzUDWC+M=;
 	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=qDSEFonBwxjyvK4OsuBn75sCtTQS94eZDeSYVIoxsEAYnrMK69GBUUd5O3YaIcGoG
-	 /JTFWo7O69vLRG5pw9SpUHdMM7M1SziFvuHAvowiB25tFMxGoOPzAVJb6T0hU6mnby
-	 cWsjYccLTW0ExuhOBz2w/zDVzZ8UolEnnqIC/C0k=
-Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 47KKHnEb016243
+	b=YZ7h5EV5Cex3bs6Ilru+zNQ/wqWW5Y27XEEk2aES5QhHMB80uMD5JXY0HZ0tymELt
+	 usDIcFYT9ihP2IpO9V7PZ9UzdzvX9FpuihKmg7Is0K5824w3ZkdU2X/A4Ady7uaHSE
+	 ICBEUd60t3t2fCn9JQoebA/2DpvchN/x3QaNLbtM=
+Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 47KKIw2W081146
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Tue, 20 Aug 2024 15:17:49 -0500
-Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
+	Tue, 20 Aug 2024 15:18:58 -0500
+Received: from DLEE114.ent.ti.com (157.170.170.25) by DLEE109.ent.ti.com
+ (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Tue, 20
- Aug 2024 15:17:48 -0500
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE107.ent.ti.com
- (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ Aug 2024 15:18:58 -0500
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE114.ent.ti.com
+ (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Tue, 20 Aug 2024 15:17:48 -0500
+ Frontend Transport; Tue, 20 Aug 2024 15:18:58 -0500
 Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 47KKHmpV105652;
-	Tue, 20 Aug 2024 15:17:48 -0500
-Message-ID: <6a8fd4ac-4322-4031-90c7-9ebb23796a4c@ti.com>
-Date: Tue, 20 Aug 2024 15:17:48 -0500
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 47KKIwkr128464;
+	Tue, 20 Aug 2024 15:18:58 -0500
+Message-ID: <6ae1d786-1a7e-4375-b1b4-db378fa2c1ac@ti.com>
+Date: Tue, 20 Aug 2024 15:18:58 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -65,9 +65,6 @@ In-Reply-To: <CAPDyKFoekvs1XLGVewB8vA=rsGN4ikB9uw80AVw6NVRF-rgffA@mail.gmail.com
 Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
-
-
-Hi Ulf Hansson,
 
 On 8/20/24 10:03 AM, Ulf Hansson wrote:
 > On Tue, 20 Aug 2024 at 16:41, Judith Mendez <jm@ti.com> wrote:
@@ -118,19 +115,6 @@ On 8/20/24 10:03 AM, Ulf Hansson wrote:
 > we end up running it in some degraded mode?
 > 
 > If the latter a dev_warn, the former a dev_err(). Does that make sense?
-
-What was happening was, we enumerated to HS200, but then cqe error was
-triggered and this re-triggers the tuning algo repeatedly until the
-failing region was found.
-
-After thinking about this some more, I think I will switch to dev_dbg,
-if we fail to find failing region and we re-run the tuning algorithm,
-don't want to confuse people by printing error logs if we are re-running
-the tuning algo anyways. Thanks so much for your feedback!
-
-~ Judith
-
-
 > 
 >>
 >>>
@@ -150,6 +134,11 @@ the tuning algo anyways. Thanks so much for your feedback!
 > 
 > This sounds like dev_dbg to me. We are not really failing, as we are
 > making a re-try and will most likely succeed then, right?
+
+Yes absolutely right, will fix for v2, thanks.
+
+~ Judith
+
 > 
 >>
 >>
