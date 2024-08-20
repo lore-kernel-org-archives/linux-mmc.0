@@ -1,180 +1,136 @@
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
+Received: from jpms-ob02.noc.sony.co.jp (jpms-ob02.noc.sony.co.jp [211.125.140.165])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2600F18E35A;
-	Tue, 20 Aug 2024 20:19:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8A6192C18C;
+	Tue, 20 Aug 2024 23:16:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.125.140.165
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724185145; cv=none; b=kvUS36/frlvpvIdePAhtUT0KhtBPCI4E2N5SWoij6Hc0uwliWoeEoLsV6Q6ln7fIWy/ZC9/0/ILocIONQ/dMDSObm3rwI6GA4+YZ2iBju1wbD2FkWGV8eWu8HUbrZaY4j3jMWsgLLjtF4V/YGcwHlZBWIEUfHeMj37YqlFw5liA=
+	t=1724195811; cv=none; b=QJdny/+7XBZvoMwKGn96zAJkKtBbOjWQ28M0OE7wi++a2gXmZjuzMatzMHKkcgXHJahjTFG7z6fXEK65jNP8pGrUtIFZeP/f+OUuDSm1W3w22AXiq50BTzHhIWILF9NY5Qps+Ix6ELmm0AVw4W0gG6JAa8aBUTfbg39AObT6PSQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724185145; c=relaxed/simple;
-	bh=BBmZRw8XGnIVsZlql2+guNN2tFNIKdf5k5USymr8+FU=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=KaKmBdeF4Vy45FYs10FBtucTSDCRmYvwG1vGgGLb9J/aHcPlGJpbMnPcivsPYImplcU2E1/obLMqf7VsQnWrmqItiq16WtcMcv7KPv8dw61Tl6UIX+8TEwxw4WDbzGIROn5dThW/kaiNCDrQ7UWB9RHJKRrmJH+dIOND+lQoYnY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=YZ7h5EV5; arc=none smtp.client-ip=198.47.23.248
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1724195811; c=relaxed/simple;
+	bh=zeU4HrFafNLYsq2SivKsBE9YqKJ+AS//oehwW6doPHU=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=oakSwpCvnTIIbHr2KbJz/VS3a7DDMqkoVSLXGGqsh8RR1rNA43yWHd7dGnYRS9mp5JSUF1CztNjOvrPG7n4Mg188uFQhry+am9htI/CC2A0kyMqbQl/IJEDHmcuCUkSRy7T1FcFBlz79AcTRhcMMBZ0osoA+LgRSa5CMGmkvPlc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=Nmzpv2e+; arc=none smtp.client-ip=211.125.140.165
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="YZ7h5EV5"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 47KKIwHR019206;
-	Tue, 20 Aug 2024 15:18:58 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1724185138;
-	bh=xhPiJBJF/pJk4ZqYkKbMkYRj6Mueld3n53SQzUDWC+M=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=YZ7h5EV5Cex3bs6Ilru+zNQ/wqWW5Y27XEEk2aES5QhHMB80uMD5JXY0HZ0tymELt
-	 usDIcFYT9ihP2IpO9V7PZ9UzdzvX9FpuihKmg7Is0K5824w3ZkdU2X/A4Ady7uaHSE
-	 ICBEUd60t3t2fCn9JQoebA/2DpvchN/x3QaNLbtM=
-Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 47KKIw2W081146
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Tue, 20 Aug 2024 15:18:58 -0500
-Received: from DLEE114.ent.ti.com (157.170.170.25) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Tue, 20
- Aug 2024 15:18:58 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE114.ent.ti.com
- (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Tue, 20 Aug 2024 15:18:58 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 47KKIwkr128464;
-	Tue, 20 Aug 2024 15:18:58 -0500
-Message-ID: <6ae1d786-1a7e-4375-b1b4-db378fa2c1ac@ti.com>
-Date: Tue, 20 Aug 2024 15:18:58 -0500
+	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="Nmzpv2e+"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=sony.com; s=s1jp; t=1724195809; x=1755731809;
+  h=date:from:to:cc:subject:message-id:mime-version;
+  bh=L3lUyrPnTOOQ769Uhh4sneNYG63qlS/SqSYwEuVsHA8=;
+  b=Nmzpv2e+PQXCxQVcsBEwwdGBXbm6rhkHxs+UtGAVafRCS5jkHzuoBsSH
+   zTjJZFXmRwcxFu7CSqcG0KN/Z5XPTU4ZHIfWOm5VWFus91Bx3J6ybOdQH
+   Af6FpkeslJV72qFH0YEeKV+kglRuInuqga5mECv9UOvegAk+SHdej4U5m
+   MeQYddCxb8a3jmCSVXtIam3Lx3V86kTAeOGO0vdk64911cpXEwbvTD0JW
+   fZlnBtgoTvjcvTCzbn+zmhj6cqJSwwiv6SCUfzV060fVeY8k+pa16DwR0
+   EJWezgDan4T4erqFy0kN1NfbMj8S5a6sbVzNT75cEpuFMlGfkbno+mqn7
+   Q==;
+Received: from unknown (HELO jpmta-ob1.noc.sony.co.jp) ([IPv6:2001:cf8:0:6e7::6])
+  by jpms-ob02.noc.sony.co.jp with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Aug 2024 08:06:39 +0900
+X-IronPort-AV: E=Sophos;i="6.10,163,1719846000"; 
+   d="scan'208";a="448857791"
+Received: from unknown (HELO LXJ00013846) ([IPv6:2001:cf8:1:1611:9e7b:efff:fe46:27de])
+  by jpmta-ob1.noc.sony.co.jp with ESMTP; 21 Aug 2024 08:06:39 +0900
+Date: Wed, 21 Aug 2024 08:06:31 +0900
+From: Keita Aihara <keita.aihara@sony.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jonathan Bell <jonathan@raspberrypi.com>, Tim.Bird@sony.com,
+	Shingo.Takeuchi@sony.com, Masaya.Takahashi@sony.com,
+	keita.aihara@sony.com, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: core: apply SD quirks earlier during probe
+Message-ID: <20240820230631.GA436523@sony.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] mmc: sdhci_am654: Add tuning debug prints
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20240815201542.421653-1-jm@ti.com>
- <20240815201542.421653-3-jm@ti.com>
- <CAPDyKFpb0o2w9=nRp98XnqoLKtFOCDssJzy+53mg1bW8y0UmUw@mail.gmail.com>
- <acbf7997-6989-4de6-bf25-3b5589ad2eb9@ti.com>
- <CAPDyKFoekvs1XLGVewB8vA=rsGN4ikB9uw80AVw6NVRF-rgffA@mail.gmail.com>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <CAPDyKFoekvs1XLGVewB8vA=rsGN4ikB9uw80AVw6NVRF-rgffA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On 8/20/24 10:03 AM, Ulf Hansson wrote:
-> On Tue, 20 Aug 2024 at 16:41, Judith Mendez <jm@ti.com> wrote:
->>
->> Hi Ulf Hansson,
->>
->> On 8/20/24 6:33 AM, Ulf Hansson wrote:
->>> On Thu, 15 Aug 2024 at 22:15, Judith Mendez <jm@ti.com> wrote:
->>>>
->>>> Add debug prints to tuning algorithm for debugging.
->>>>
->>>> Signed-off-by: Judith Mendez <jm@ti.com>
->>>> ---
->>>>    drivers/mmc/host/sdhci_am654.c | 5 +++++
->>>>    1 file changed, 5 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->>>> index c3d485bd4d553..a909f8de0eabe 100644
->>>> --- a/drivers/mmc/host/sdhci_am654.c
->>>> +++ b/drivers/mmc/host/sdhci_am654.c
->>>> @@ -457,11 +457,13 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->>>>
->>>>           if (!num_fails) {
->>>>                   /* Retry tuning */
->>>> +               dev_err(dev, "No failing region found, retry tuning\n");
->>>
->>> A dev_err seems to be too heavy, but I am not sure at what frequency
->>> this could occur?
->>
->> Having no failing region is what we call a corner case, it rarely
->> happens. The one case where it did happen, it took a good amount
->> of time to discover there were no failing regions found. The tuning
->> algorithm had to be looped 3 times before finding a failing itapdly.
->>
->>>
->>> Why isn't a dev_dbg sufficient?
->>
->> I thought about using dev_dbg, but based on some feedback after coming
->> upon this issue on a board bring up case, we think it would help
->> enormously if we make it as obvious as possible when no failing region
->> is found.
->>
->> The one case where this came up, the dev_err print would only print 3
->> times... Now this is only one case and we are not aware of any more
->> cases like this, also we cannot replicate on TI EVM's.
-> 
-> What happens if/when we fail here? Do we fail to detect the card or do
-> we end up running it in some degraded mode?
-> 
-> If the latter a dev_warn, the former a dev_err(). Does that make sense?
-> 
->>
->>>
->>>>                   return -1;
->>>>           }
->>>>
->>>>           if (fail_window->length == ITAPDLY_LENGTH) {
->>>>                   /* Retry tuning */
->>>> +               dev_err(dev, "No passing ITAPDLY, retry tuning\n");
->>>
->>> Ditto.
->>
->> Same idea as above..
->>
->> But with this print, the maximum amount of prints that could be printed
->> is 20, is this too many prints in your opinion?
-> 
-> This sounds like dev_dbg to me. We are not really failing, as we are
-> making a re-try and will most likely succeed then, right?
+From: Jonathan Bell <jonathan@raspberrypi.com>
 
-Yes absolutely right, will fix for v2, thanks.
+Applying MMC_QUIRK_BROKEN_SD_CACHE is broken, as the card's SD quirks
+are referenced in sd_parse_ext_reg_perf() prior to the quirks being
+initialized in mmc_blk_probe().
 
-~ Judith
+Split this out into a SD-specific list of quirks and apply in
+mmc_sd_init_card() instead.
 
-> 
->>
->>
->>>
->>>>                   return -1;
->>>>           }
->>>>
->>>> @@ -505,6 +507,7 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->>>>           struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>>>           unsigned char timing = host->mmc->ios.timing;
->>>>           struct window fail_window[ITAPDLY_LENGTH];
->>>> +       struct device *dev = mmc_dev(host->mmc);
->>>>           u8 curr_pass, itap;
->>>>           u8 fail_index = 0;
->>>>           u8 prev_pass = 1;
->>>> @@ -542,12 +545,14 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->>>>
->>>>           if (ret >= 0) {
->>>>                   itap = ret;
->>>> +               dev_dbg(dev, "Final ITAPDLY=%d\n", itap);
->>>>                   sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
->>>>           } else {
->>>>                   if (sdhci_am654->tuning_loop < RETRY_TUNING_MAX) {
->>>>                           sdhci_am654->tuning_loop++;
->>>>                           sdhci_am654_platform_execute_tuning(host, opcode);
->>>>                   } else {
->>>> +                       dev_err(dev, "Failed to find ITAPDLY, fail tuning\n");
->>>
->>> The commit message only talks about debug messages, but this is an
->>> error message. Perhaps update the commit message a bit?
->>
->> Sure will do, after we conclude the discussion above and in v2.
->>
->> Thanks so much for reviewing.
->>
-> 
-> Kind regards
-> Uffe
+Fixes: c467c8f08185 ("mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston Canvas Go Plus from 11/2019")
+Signed-off-by: Jonathan Bell <jonathan@raspberrypi.com>
+Co-developed-by: Keita Aihara <keita.aihara@sony.com>
+Signed-off-by: Keita Aihara <keita.aihara@sony.com>
+---
+ drivers/mmc/core/quirks.h | 22 +++++++++++++---------
+ drivers/mmc/core/sd.c     |  4 ++++
+ 2 files changed, 17 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index cca71867bc4a..92905fc46436 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -15,6 +15,19 @@
+
+ #include "card.h"
+
++static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
++	/*
++	 * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
++	 * This has so far only been observed on cards from 11/2019, while new
++	 * cards from 2023/05 do not exhibit this behavior.
++	 */
++	_FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
++		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
++		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
++
++	END_FIXUP
++};
++
+ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ #define INAND_CMD38_ARG_EXT_CSD  113
+ #define INAND_CMD38_ARG_ERASE    0x00
+@@ -53,15 +66,6 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_BLK_NO_CMD23),
+
+-	/*
+-	 * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
+-	 * This has so far only been observed on cards from 11/2019, while new
+-	 * cards from 2023/05 do not exhibit this behavior.
+-	 */
+-	_FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
+-		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+-		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
+-
+ 	/*
+ 	 * Some SD cards lockup while using CMD23 multiblock transfers.
+ 	 */
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 1c8148cdda50..ee37ad14e79e 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -26,6 +26,7 @@
+ #include "host.h"
+ #include "bus.h"
+ #include "mmc_ops.h"
++#include "quirks.h"
+ #include "sd.h"
+ #include "sd_ops.h"
+
+@@ -1475,6 +1476,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 			goto free_card;
+ 	}
+
++	/* Apply quirks prior to card setup */
++	mmc_fixup_device(card, mmc_sd_fixups);
++
+ 	err = mmc_sd_setup_card(host, card, oldcard != NULL);
+ 	if (err)
+ 		goto free_card;
+--
+2.43.2
 
