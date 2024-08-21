@@ -1,160 +1,170 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 89AB41799D;
-	Wed, 21 Aug 2024 05:30:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1D1F167DA8;
+	Wed, 21 Aug 2024 05:37:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724218218; cv=none; b=ud8kQTKfZd5lRlXFzSzYVb5wrsX04AqS9BprBHLMIgWQShB/i/rq8MEd90xfhZdavuBio2geGtEmVzlicnSH4NZAqpT6cPWzkYBZKOkcv3T1zIQFb3hrim1Z9yOrU987m/rBXQhL7MDs++qwNpNHEjencu9Ny3rVKH3yGceSKwM=
+	t=1724218634; cv=none; b=U30ZFdIo8OKqlscRUy7j9L+oJAIr77wowUYYoEHq9uUA/J+kSX2Ny74kjTXQfkITIPG+NbNDLFS8BVT/39O5szxQ6Egdm3WQnyjmY6OEcAt28xw9nMbcEc7syoUJou2Cc0/O09IGTeHmoVV9JwYcHLX9h12ove5g52mbeahQkrA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724218218; c=relaxed/simple;
-	bh=+hY+QvjNHcUaXmFIYgfl8JfiNk5GJ48nq6gt5nfRKh0=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=qw4ySbha+do2CZkpymIZ0R6lHvcTnVghGw7SMf2rVgXZuZEVC0fU+gigsyNyYMkXDjJqgTyzGQJUIQkXK++vxoOFdJzvK4BmN64chpUgdOiaWKeiJQLlwjof0N/1H+0uwwbg5ajG4IZlkq/JaY8pqk4ADi5xgLcsS6vqDa4cQbQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=MdscqpLD; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1724218634; c=relaxed/simple;
+	bh=x5UTJZX0ZLH5C/Dce7T1iODn22VWI1qir06qAOV+O6o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oakjF8ypcFYQi/AcC/1Swf/57XBciuAedOACKfv1bgyv6BDKSOkutdi7Wg2Lp9WFiJBw3RItlqHa4SfRTcDQBHa8Udaf9AoIni4LT6HE+8cdGMOlaqhIRctT5lblCn+GK0BR1ixd3e4atYufGr+tPtMDAWYJff02Fdcr6XvMHaQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=cdInEfxT; arc=none smtp.client-ip=192.198.163.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="MdscqpLD"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="cdInEfxT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1724218633; x=1755754633;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=x5UTJZX0ZLH5C/Dce7T1iODn22VWI1qir06qAOV+O6o=;
+  b=cdInEfxTW2BnNOudVnPaIgQDm1zUFWMtdMefAxxaMdu7ZVSY+4tUqQPz
+   nw4k356geAq3GTkD9UBYcmPKXedAAwZRfrwq4pwkspZ9jJzQSzK/Sudyy
+   wqA/fBmib487JraMl8hua9LB+GoGLpxEfk7RtjTTeqJ/tFi45XKBiNELE
+   CtY7vZTyenPJ2cv9irMg1KV7KLJjVKy3z8Xikvm7vdH+4wMOjbbZDnUFx
+   DNQzkVA5/Kx6wvlA6SkBfI0LaUB10l0QUI6EFPwnhgWbCMDqR9nPBNZf7
+   63VfOzzCJT+u3HfBwiGgSWKFkxCiVoC9J1H2tAvbTzgINXZC8BKWrgQuj
+   g==;
+X-CSE-ConnectionGUID: nkdZQHhyRx29WIn+67KyNQ==
+X-CSE-MsgGUID: xfZQddbkQmSki2eS9WJpuw==
+X-IronPort-AV: E=McAfee;i="6700,10204,11170"; a="13126445"
+X-IronPort-AV: E=Sophos;i="6.10,164,1719903600"; 
+   d="scan'208";a="13126445"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2024 22:37:12 -0700
+X-CSE-ConnectionGUID: /rJ6b9s3R6KXd0bHBmvDqg==
+X-CSE-MsgGUID: nbM3ILkZQ86jVvJ9vTHyNg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,164,1719903600"; 
+   d="scan'208";a="91759872"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2024 22:37:10 -0700
+Message-ID: <4a563aad-e9b3-43af-8ce5-5d30dace2dd8@intel.com>
+Date: Wed, 21 Aug 2024 08:37:07 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1724218213;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=qBPROWVCNA4kqd3RClKZ9ReWU1kkOK9WhAfFVNb34EU=;
-	b=MdscqpLD3jMUizYkxQz0m9LfFNo4CqMjeTm20byi8pcdgPea6XlyR7Z41YA6kVUoFQ1N4E
-	/xRc2wBgwzlMewFEEcHmaq/jQmdVEuxCACj8DjGXOrT9jZTOGDhkvzcK/CFzI9aokTf8uL
-	oJA9LnhUTVOaHTNWKDFG7nINiyj6BZrwW3tPgjWN9tIKOlhNNFLiRvOQIffoLl+JSa09st
-	YCz2PWLoRF8pU37NimdLgVUEVExqTieICl7EYvxkm2i3yH4XgBZ3yD+rUPdjkIRSna7hog
-	w+NR6z7y92nrXilJOBIcuT+DCMSZwMmVVKAAYfAmLNDu+GhQZew4WNSb43h+cQ==
-Date: Wed, 21 Aug 2024 07:30:12 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Keita Aihara <keita.aihara@sony.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jonathan Bell
- <jonathan@raspberrypi.com>, Tim.Bird@sony.com, Shingo.Takeuchi@sony.com,
- Masaya.Takahashi@sony.com, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: core: apply SD quirks earlier during probe
-In-Reply-To: <14df2287d76a66927bd74d4c4dcb5c6d@manjaro.org>
-References: <20240820230631.GA436523@sony.com>
- <14df2287d76a66927bd74d4c4dcb5c6d@manjaro.org>
-Message-ID: <e2a523f474ea1a4e800c8a19a185ff5e@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] mmc: sdhci_am654: Add retry tuning
+To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20240815201542.421653-1-jm@ti.com>
+ <20240815201542.421653-2-jm@ti.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240815201542.421653-2-jm@ti.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-On 2024-08-21 07:17, Dragan Simic wrote:
-> Hello Keita,
+On 15/08/24 23:15, Judith Mendez wrote:
+> Add retry tuning up to 10 times if we fail to find
+> a failing region or no passing itapdly. This is
+> necessary since some eMMC's have been observed to never
+> find a failing itapdly on the first couple of tuning
+> iterations, but eventually do. It been observed that the
+> tuning algorithm does not need to loop more than 10 times
+> before finding a failing itapdly.
 > 
-> On 2024-08-21 01:06, Keita Aihara wrote:
->> From: Jonathan Bell <jonathan@raspberrypi.com>
->> 
->> Applying MMC_QUIRK_BROKEN_SD_CACHE is broken, as the card's SD quirks
->> are referenced in sd_parse_ext_reg_perf() prior to the quirks being
->> initialized in mmc_blk_probe().
->> 
->> Split this out into a SD-specific list of quirks and apply in
->> mmc_sd_init_card() instead.
->> 
->> Fixes: c467c8f08185 ("mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston
->> Canvas Go Plus from 11/2019")
->> Signed-off-by: Jonathan Bell <jonathan@raspberrypi.com>
->> Co-developed-by: Keita Aihara <keita.aihara@sony.com>
->> Signed-off-by: Keita Aihara <keita.aihara@sony.com>
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 30 +++++++++++++++++++++++-------
+>  1 file changed, 23 insertions(+), 7 deletions(-)
 > 
-> Looking good to me.  This fix allows sd_read_ext_regs() to have the
-> available information for not assigning the SD_EXT_PERF_CACHE as one
-> of the (un)supported features, which in turn allows mmc_sd_init_card()
-> to properly skip execution of sd_enable_cache().
-> 
-> Reviewed-by: Dragan Simic <dsimic@manjaro.org>
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 64e10f7c9faa3..c3d485bd4d553 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -86,6 +86,7 @@
+>  
+>  #define CLOCK_TOO_SLOW_HZ	50000000
+>  #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
+> +#define RETRY_TUNING_MAX	10
+>  
+>  /* Command Queue Host Controller Interface Base address */
+>  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+> @@ -151,6 +152,7 @@ struct sdhci_am654_data {
+>  	u32 flags;
+>  	u32 quirks;
+>  	bool dll_enable;
+> +	u32 tuning_loop;
+>  
+>  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>  };
+> @@ -453,12 +455,14 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+>  	int prev_fail_end = -1;
+>  	u8 i;
+>  
+> -	if (!num_fails)
+> -		return ITAPDLY_LAST_INDEX >> 1;
+> +	if (!num_fails) {
+> +		/* Retry tuning */
+> +		return -1;
+> +	}
+>  
+>  	if (fail_window->length == ITAPDLY_LENGTH) {
+> -		dev_err(dev, "No passing ITAPDLY, return 0\n");
+> -		return 0;
+> +		/* Retry tuning */
+> +		return -1;
+>  	}
+>  
+>  	first_fail_start = fail_window->start;
+> @@ -504,6 +508,7 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>  	u8 curr_pass, itap;
+>  	u8 fail_index = 0;
+>  	u8 prev_pass = 1;
+> +	int ret;
+>  
+>  	memset(fail_window, 0, sizeof(fail_window));
+>  
+> @@ -532,10 +537,20 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>  	if (fail_window[fail_index].length != 0)
+>  		fail_index++;
+>  
+> -	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+> -					  sdhci_am654->dll_enable);
+> +	ret = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+> +					 sdhci_am654->dll_enable);
+>  
+> -	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+> +	if (ret >= 0) {
+> +		itap = ret;
+> +		sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+> +	} else {
+> +		if (sdhci_am654->tuning_loop < RETRY_TUNING_MAX) {
+> +			sdhci_am654->tuning_loop++;
+> +			sdhci_am654_platform_execute_tuning(host, opcode);
 
-Sorry, forgot to mention that this patch should, in my opinion, be also
-submitted for inclusion into stable kernels.
+The kernel uses very small stack size, so recursive function calls
+should not be used.  It would be better to put the loop in a separate
+function, or add a retry: label and goto retry.
 
->> ---
->>  drivers/mmc/core/quirks.h | 22 +++++++++++++---------
->>  drivers/mmc/core/sd.c     |  4 ++++
->>  2 files changed, 17 insertions(+), 9 deletions(-)
->> 
->> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
->> index cca71867bc4a..92905fc46436 100644
->> --- a/drivers/mmc/core/quirks.h
->> +++ b/drivers/mmc/core/quirks.h
->> @@ -15,6 +15,19 @@
->> 
->>  #include "card.h"
->> 
->> +static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
->> +	/*
->> +	 * Kingston Canvas Go! Plus microSD cards never finish SD cache 
->> flush.
->> +	 * This has so far only been observed on cards from 11/2019, while 
->> new
->> +	 * cards from 2023/05 do not exhibit this behavior.
->> +	 */
->> +	_FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
->> +		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
->> +		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
->> +
->> +	END_FIXUP
->> +};
->> +
->>  static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
->>  #define INAND_CMD38_ARG_EXT_CSD  113
->>  #define INAND_CMD38_ARG_ERASE    0x00
->> @@ -53,15 +66,6 @@ static const struct mmc_fixup __maybe_unused
->> mmc_blk_fixups[] = {
->>  	MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, 
->> add_quirk_mmc,
->>  		  MMC_QUIRK_BLK_NO_CMD23),
->> 
->> -	/*
->> -	 * Kingston Canvas Go! Plus microSD cards never finish SD cache 
->> flush.
->> -	 * This has so far only been observed on cards from 11/2019, while 
->> new
->> -	 * cards from 2023/05 do not exhibit this behavior.
->> -	 */
->> -	_FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
->> -		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
->> -		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
->> -
->>  	/*
->>  	 * Some SD cards lockup while using CMD23 multiblock transfers.
->>  	 */
->> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->> index 1c8148cdda50..ee37ad14e79e 100644
->> --- a/drivers/mmc/core/sd.c
->> +++ b/drivers/mmc/core/sd.c
->> @@ -26,6 +26,7 @@
->>  #include "host.h"
->>  #include "bus.h"
->>  #include "mmc_ops.h"
->> +#include "quirks.h"
->>  #include "sd.h"
->>  #include "sd_ops.h"
->> 
->> @@ -1475,6 +1476,9 @@ static int mmc_sd_init_card(struct mmc_host
->> *host, u32 ocr,
->>  			goto free_card;
->>  	}
->> 
->> +	/* Apply quirks prior to card setup */
->> +	mmc_fixup_device(card, mmc_sd_fixups);
->> +
->>  	err = mmc_sd_setup_card(host, card, oldcard != NULL);
->>  	if (err)
->>  		goto free_card;
->> --
->> 2.43.2
+> +		} else {
+> +			return -1;
+> +		}
+> +	}
+>  
+>  	/* Save ITAPDLY */
+>  	sdhci_am654->itap_del_sel[timing] = itap;
+> @@ -908,6 +923,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>  		goto err_pltfm_free;
+>  	}
+>  
+> +	sdhci_am654->tuning_loop = 0;
+
+So this is 10 retries ever, since sdhci_am654->tuning_loop is never
+set back to 0.  Is that the intention?
+
+>  	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+>  
+>  	pm_runtime_get_noresume(dev);
+
