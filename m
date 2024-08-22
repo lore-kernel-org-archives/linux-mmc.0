@@ -1,151 +1,120 @@
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
+Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 145ED1C93B2
-	for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2024 11:53:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 931AC26AF6
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2024 12:24:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724327587; cv=none; b=QHKuhI/z+W39uRGJoHVw/3NP3Cnh1LcUJ4fEX0hVjg3FlDYQkUBMqhufKdD2yzgZvh9FtngKZYKOgXQdrWh1XoD1lvILg6raltCd7blpXTNGaIfIPXHbl6y+Dhz9yM8HZzXHQ1WG8/j9XSFrSPODfRN7y9SbKrDzgNkocopST8E=
+	t=1724329443; cv=none; b=M0WgwU70Q4n3B32+suHQSBdFkFM0e5S++vhCQXm5njPlauIq9njYZwZ+G7GxnPZ3YTVgwl+Z4+nsa/JjWeNltOWE9RPN6JS8iLzwkvvz5raZaFMm6ZXwE+OObE8cbGoXa8cNe8XAb99mn3CZ1Ss5v1KFGeuaqWaJXpot0fzpSq4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724327587; c=relaxed/simple;
-	bh=C+kNv2237qOL+rsOONunOS+e582/xAnI7+4M+Owlmrs=;
+	s=arc-20240116; t=1724329443; c=relaxed/simple;
+	bh=ybhG4ImimEgIuGWcMaLhWQ3JJz7eDGdejVmihNSIaTM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=H4si1u4d6vIcOywEzByTfIm479Zf+avDsxJZyA0HFI/SZsCFYHxmRlucJLP/ojsMQV+u/fzMFxRVUHbv/gzr7BLPJCVQMp5mqG1oo9lTiqBV12TVdTLzTl6PznjWh0EQNxa5rS7vsFqDllJFtWEtUhkJpZ5MKoXuCJtHwLMdWFA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Iy1opJRv; arc=none smtp.client-ip=209.85.219.174
+	 To:Cc:Content-Type; b=YJVajshSfwLmcwbtqh/gsblPLeI7MDrUfV25Tv87qhcNR9knjNzwa4M3DSScISh7XMRJoXqmC5M2JStBgh9W8ZVvWzH62OuAGxybxGsQk38uA6JZrh1W7GRqKD3CzgZQi2M6e1wMRXXUvypAo27/syIuQoBTnPUvWeMcRYLvw78=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=l/pshPjG; arc=none smtp.client-ip=209.85.219.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Iy1opJRv"
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e1161ee54f7so821353276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2024 04:53:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="l/pshPjG"
+Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e13c23dbabdso733405276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2024 05:24:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724327585; x=1724932385; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1724329440; x=1724934240; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=+4xiglxxiaxUidUD2tLbGcF5hIfbs7sd/+hFSmPwUKw=;
-        b=Iy1opJRvl5+LO1tfeImZMknDrV2JzKCvIHVVqOg8eqFlywI4vrQRuTjsxkXa6c/3IY
-         pziui+duQLrIdtPPv7yQwnhMxz7Jp6blXwJ77FLcBYwy94ixTFrfKKik4zIYhK2gBU1A
-         w8DFWYPPBpwXic00043XD4amqcyIEsTA2Cl8XAT+MHeRxvQXC2KEHT5Qd/wWB4y1qK5P
-         Xv6JMZyWz2MhNox3uIh0NH/IvKfoxzFPsBo0JxrKvGxB9KSBWBLN3b8Z32Rpb4pvEj9R
-         bUF9/jNSWmw4Z1ZZJscYsNaUsxwiNHRxf3em5wzTojM5QpAKIgfxzMtxawInsGFTdFkB
-         OwHw==
+        bh=5yYPsIY5Ub0GbvKRvMFn/0esYiLu3y7uZpwj3JsMvkU=;
+        b=l/pshPjGPQ50witDhv3SrkP92ZePlyc3Ybheb0Z1UV+Sm3pzVhSPIJ+Rx9tBaGZXww
+         c/m2Jxx+59oGWHcNx9+PmcgiM1fUo8MsmZ7ldOgnfvaLIxJnU33t9Kc3Fd+0/aXa/Mt0
+         t8vHcLLHCgCXowN9pink+eaBDJj0XajDFroEIJ5PF9gl4BbqBTSnve7aOYNoDGnsY38B
+         EU/JhtezMcie9vqEClEFyO6ou7q746hqiFox+rySHygaNZyeiOLzOU7Re4UKLRxAZAnL
+         T+kbjhU05V9pATdAQWDGFNyIZnHDLWr7CXuE7L+d50pgbFWs53L1f+uDqwGlVK0VIuOl
+         QJTw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724327585; x=1724932385;
+        d=1e100.net; s=20230601; t=1724329440; x=1724934240;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=+4xiglxxiaxUidUD2tLbGcF5hIfbs7sd/+hFSmPwUKw=;
-        b=QzNFdMWaw34NLyTkdBlamFnEVM59iffuovitMyPOnY47dJiZvvBLAF25Afoky0R2nf
-         van+A96lP7qgGPptUFoXLr/FqYW8u7SWLKXLL1m1NyfjXcmUVrUJtJO87/xWBUziXHWZ
-         3hngzH+QMErCFJrvxbb8WKfyQSnAJxOnEcmnSdsXFy1tujNnCJw3kOdrzSYsERhO7DJg
-         +2UsYZXOS6hSnaFNMOvMp1kQ6bBjD34p3UAig0/5oCc4UR/cZqlHDYcwspKCxpQKW/ax
-         vupfoD8sToX4yfusmHHTKoNYltshv/MdrRemS4oNtZlzbPY2RDZJ23v9xwAPmPyUTN0v
-         opvw==
-X-Gm-Message-State: AOJu0YyfV60ZEELMVoNjpu5yv6FHLwAp6YIAE+S9AaRyiimiAY4oEjsx
-	mheGMuyieGTjT/7jsYEslWc+KI5362b/PiUDur1nqzaK99Wr7PZDL/TRKBNTKeqcDunRu7Ipdql
-	F/nX7EXyG+ZglWY1zE9jte7+JFUsIMkt6K3UTtg==
-X-Google-Smtp-Source: AGHT+IGHPCw3W7RgjLYkUhbPPw8zTQVZvm/uRMY9JyAcTrvwPDMCfiNxXeIQ5aVjOfPKFB2PZMozqXhruHrz0m+Rxxg=
-X-Received: by 2002:a05:6902:2002:b0:e0b:1191:3cb3 with SMTP id
- 3f1490d57ef6-e16666b2978mr5768182276.38.1724327584987; Thu, 22 Aug 2024
- 04:53:04 -0700 (PDT)
+        bh=5yYPsIY5Ub0GbvKRvMFn/0esYiLu3y7uZpwj3JsMvkU=;
+        b=S8P2i8FCNayq3FvP/RdnG09BtgNNZcmWGVW4/7Ify1y0TEZrTZt4YpcHum5tkN4ThY
+         El4++rqn7mxWtpDSnvEHoApKOzbXvclfJtQHFSwl6pLVZMzBwJivQbzFrzVdBRUvZRZb
+         URXX6RRtU6nbb9lQlFEKjTTnnQHK37jZpXNck1AhKVIxMXgCXQgP44GDBkWB6e1RGdon
+         WtQRp/8x1Z5XsXgrXsGP9r8ALGkDuXmgaJgCg3trM2IiRca6h7xFkAe3mLlIB19+I0J8
+         S+EqLaMH/8rjGBV6/nD31juDEpc6RIx3guzBWQjHcEQdj6IcRxXXT+sMD6ITITCOV0fj
+         TdPA==
+X-Gm-Message-State: AOJu0YzQJXCk1SSVwRognfeo/1IQNoGW1ExBGhX8hjM9P5PE1IsxMdlR
+	MBaPT42Hrs0o5gBQ/qjRaR1H6zO5vtlDugLafTq1pKlkCAtRIRHBqjEMPwZX03pJ4DoyFdf43Fr
+	/JenB0jY6ssnzXukBD8xa0GVhmDedc6Zp+f7frA==
+X-Google-Smtp-Source: AGHT+IGkIgTyCOPIqV7+GNGW6MoebXPmVC8K46j+rl5z7LKJe8liLfvw+oUc7uu0weOSVwnULsIzBTa4sC0bKtRmzxE=
+X-Received: by 2002:a05:6902:1b81:b0:e0b:b2d6:f551 with SMTP id
+ 3f1490d57ef6-e17903c78c3mr1798038276.37.1724329440565; Thu, 22 Aug 2024
+ 05:24:00 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240814072934.2559911-1-avri.altman@wdc.com> <20240814072934.2559911-4-avri.altman@wdc.com>
-In-Reply-To: <20240814072934.2559911-4-avri.altman@wdc.com>
+References: <20240814072934.2559911-1-avri.altman@wdc.com> <20240814072934.2559911-5-avri.altman@wdc.com>
+In-Reply-To: <20240814072934.2559911-5-avri.altman@wdc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 22 Aug 2024 13:52:28 +0200
-Message-ID: <CAPDyKFqboXgBtK8uEV+17r5N+4GWgvL6e_wgLBztCaBDs2Ws9w@mail.gmail.com>
-Subject: Re: [PATCH v3 03/10] mmc: sd: Add Extension memory addressing
+Date: Thu, 22 Aug 2024 14:23:24 +0200
+Message-ID: <CAPDyKFpNCZi6biSaCLUFKaB-Xc4Kg4Z1NjzjW5vcY4TeLKDD4g@mail.gmail.com>
+Subject: Re: [PATCH v3 04/10] mmc: core: Add open-ended Ext memory addressing
 To: Avri Altman <avri.altman@wdc.com>
 Cc: linux-mmc@vger.kernel.org, Ricky WU <ricky_wu@realtek.com>
 Content-Type: text/plain; charset="UTF-8"
 
 On Wed, 14 Aug 2024 at 09:31, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> SDUC memory addressing spans beyond 2TB and up to 128TB.  Therefore, 38
-> bits are required to access the entire memory space of all sectors.
-> Those extra 6 bits are to be carried by CMD22 prior of sending
-> read/write/erase commands: CMD17, CMD18, CMD24, CMD25, CMD32, and CMD33.
->
-> CMD22 will carry the higher order 6 bits, and must precedes any of the
-> above commands even if it targets sector < 2TB.
->
-> No error related to address or length is indicated in CMD22 but rather
-> in the read/write command itself.
+> For open-ended read/write - just send CMD22 before issuing the command.
+> While at it, make sure that the rw command arg is properly casting the
+> lower 32 bits, as it can be larger now.
 >
 > Tested-by: Ricky WU <ricky_wu@realtek.com>
 > Signed-off-by: Avri Altman <avri.altman@wdc.com>
 > ---
->  drivers/mmc/core/sd_ops.c | 15 +++++++++++++++
->  drivers/mmc/core/sd_ops.h |  1 +
->  include/linux/mmc/sd.h    |  3 +++
->  3 files changed, 19 insertions(+)
+>  drivers/mmc/core/block.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 7f6963dac873..8b69129d7b61 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -199,6 +199,21 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
->         return 0;
->  }
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 2c9963248fcb..1129f4e1a268 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -180,6 +180,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+>  static int mmc_spi_err_check(struct mmc_card *card);
+>  static int mmc_blk_busy_cb(void *cb_data, bool *busy);
+> +static int mmc_blk_wait_for_idle(struct mmc_queue *mq, struct mmc_host *host);
 >
-> +int mmc_send_ext_addr(struct mmc_host *host, sector_t addr)
-> +{
-> +       struct mmc_command cmd = {
-> +               .opcode = SD_ADDR_EXT,
-> +               .arg = (u32)((addr >> 32) & 0x3F),
-> +               .flags = MMC_RSP_R1 | MMC_CMD_AC,
-> +       };
-> +
-> +       if (!mmc_card_is_sduc(host))
-> +               return 0;
-> +
-> +       return mmc_wait_for_cmd(host, &cmd, 0);
-> +}
-> +EXPORT_SYMBOL_GPL(mmc_send_ext_addr);
-
-Why is this exported?
-
-I was thinking that it should only be the mmc core (not the mmc block
-device driver) that needs to keep track of how the card should be
-addressed. In that case, why is the EXPORT_SYMBOL_GPL needed?
-
-Oh well, I guess I need to look at the following patches in the series
-to understand better.
-
-> +
->  static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
->                               u32 *resp)
+>  static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
 >  {
-> diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-> index 7667fc223b74..462efd43acfa 100644
-> --- a/drivers/mmc/core/sd_ops.h
-> +++ b/drivers/mmc/core/sd_ops.h
-> @@ -21,6 +21,7 @@ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
->  int mmc_app_send_scr(struct mmc_card *card);
->  int mmc_app_sd_status(struct mmc_card *card, void *ssr);
->  int mmc_app_cmd(struct mmc_host *host, struct mmc_card *card);
-> +int mmc_send_ext_addr(struct mmc_host *host, sector_t addr);
+> @@ -1664,7 +1665,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 >
->  #endif
+>         brq->mrq.cmd = &brq->cmd;
 >
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> index 865cc0ca8543..af5fc70e09a2 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> @@ -15,6 +15,9 @@
->  #define SD_SEND_IF_COND           8   /* bcr  [11:0] See below   R7  */
->  #define SD_SWITCH_VOLTAGE         11  /* ac                      R1  */
->
-> +/* Class 2 */
-> +#define SD_ADDR_EXT             22   /* ac   [5:0]              R1  */
-> +
->    /* class 10 */
->  #define SD_SWITCH                 6   /* adtc [31:0] See below   R1  */
+> -       brq->cmd.arg = blk_rq_pos(req);
+> +       brq->cmd.arg = blk_rq_pos(req) & 0xFFFFFFFF;
+>         if (!mmc_card_blockaddr(card))
+>                 brq->cmd.arg <<= 9;
+>         brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+> @@ -1712,6 +1713,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>                         (do_data_tag ? (1 << 29) : 0);
+>                 brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+>                 brq->mrq.sbc = &brq->sbc;
+> +       } else if (mmc_card_is_sduc(card->host)) {
+> +               mmc_blk_wait_for_idle(mq, card->host);
+
+If I understand correctly, this means the async request mechanism will
+not be disabled for SDUC cards.
+
+Maybe this is the easiest way to move this forward for now, but it's
+still a bit sad if we can't keep using it for SDUC cards too.
+
+No matter what, can you please elaborate why you have chosen this approach?
+
+> +               mmc_send_ext_addr(card->host, blk_rq_pos(req));
+>         }
+>  }
 >
 > --
 > 2.25.1
