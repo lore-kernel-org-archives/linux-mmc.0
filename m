@@ -1,213 +1,168 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from mail-vs1-f47.google.com (mail-vs1-f47.google.com [209.85.217.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CBDB17A931
-	for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2024 21:54:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 455E743AC4
+	for <linux-mmc@vger.kernel.org>; Thu, 22 Aug 2024 05:12:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724277274; cv=none; b=KUsv6eL3X/Zh6IW61WhrN9QpBF3KSvT1/G42l9Z4ASHpW2wWMnfFJVk29MJTitv+Wb1ZZc50Jk5FFZ9TyJT9PRe4JPISUs499ZsUYxPEqWAD8ySFe2qLGTYNZCLWhDEDSdReLKOH9634EM87CO2LRcCjOOej9USj2c9Nijtg9UU=
+	t=1724303532; cv=none; b=OL0OTjCqhPgYcAjAddxDEWx4Ds40rb5rO34G6ny7DbozD/le1uEAH5P8b+rYpXZPks7UvGZH0769BsA3UjSJslylLSnP98osW9ilhh/dheQZDcSAFDWWStGeoR3LzeDA06SI7Q3JGQiqruDfUHKu/OnH0lSHiNmYMUgOlJ2Ir38=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724277274; c=relaxed/simple;
-	bh=OWEY/Oe8ge2ZZVlPSGKPWDKhRL3cgLiz+mCQB5vlko8=;
+	s=arc-20240116; t=1724303532; c=relaxed/simple;
+	bh=M1SZgw4DFujc0wbsSJr0giJJPNvF9UEkZx+8mzZwYfU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=J73AS+PWiK+sidXe8nFSSn50zvrWbi8vr+TCLjAin4UZInx+eecJp2Y3TEkXAzfbkXTRdowMgONxEDVVaxGoTQ5vlpoxxWdwV39kXOsjrTHRU7J8tnnIyhHGf9eBTk8Jj6L9scLcO2f2Rk6OBEZDy5JKp2AtHIRFblWne4lfRwk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TVe3qpBh; arc=none smtp.client-ip=209.85.219.173
+	 To:Cc:Content-Type; b=dMFSQC9I3iNN/NLXMqAYIFsJ1+TMxHYngezXXNgUnVDKYkuXxECkklyYZPiOQltZl9FtUMCT2Bumw11PEZYmg6BWZYpZoLB3O48fNghokfPSrcsw0s2kQhJ+CjJCk3KEcadrpnx3wKw/RALTq4VWYYpuPkh7kh4MlqEgc3161Fk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mk5QC/Nx; arc=none smtp.client-ip=209.85.217.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TVe3qpBh"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e165825ebfdso224942276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2024 14:54:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mk5QC/Nx"
+Received: by mail-vs1-f47.google.com with SMTP id ada2fe7eead31-498d14e7965so213498137.0
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Aug 2024 22:12:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724277271; x=1724882071; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1724303528; x=1724908328; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=qkHIbzE1O2+lqb74KEvCCR6BaqXgelXIBZ+AgizTxyA=;
-        b=TVe3qpBhHS5f8rwa3OT/pfJg7+6r7LxqcP20m1BEnV6S13fb73IoPyFZjvtbpkSEy6
-         /rLRCR3KsMJ9xHBLzhQjSfyFbh2L1ro/x20b8LYD+NsiWy5NJEJQIK+MzfTrWR4BJ2Qj
-         iPx4WfGBKADbQflgjSYYjKYeXup1Tb+4+cHZr/iDB2CxGyewdYK65e+cpskK0Xd0zG6o
-         +lUVn0iKhFELOLbPKcSUyh7DixmgbGmPk6UacI5nyWVvprVgj/I1uIU0BCmWax4AYVX/
-         OZKu05vxjdYiwVPAwl7lsSteoBiO0ftnKti6XqERbP1AB7bmRWl0ecHBI3BGGqz3Ma4R
-         888Q==
+        bh=k2AfdT/qUVnYEmVWqwh27YziwYiSG6ZtaTZWiB/2UCU=;
+        b=mk5QC/Nxa5K/zPEE/WNJApi1b7NEI43/fdtvfSqWaL+8eD+fq+WB2e0y+Lgu1XUvZG
+         ajecKYXkNTsn56OXqqneJmSy9SpZLI78EGSnPSREIgpjQMD6ti5jRvqaA7FV33gojQwF
+         dE+0COvwUyAe5ZnBnxn53GtyyIFO5Axv2A0FdJzVLLEesSfmuTZKf2P6uh2cdBIUht8u
+         DB3OHxQ9X2RP91KvJ788ML+McV4rMM9QyWLwzWlbDh0G14UBJuf37MyvbidTDoHacrVt
+         TIsPmEnjBP+Ujaji5xv3MYLduRYHVh9qlFsxu6lyPAtr8hw4v89P3wq/kgWqOWo8rqSH
+         kzAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724277271; x=1724882071;
+        d=1e100.net; s=20230601; t=1724303528; x=1724908328;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=qkHIbzE1O2+lqb74KEvCCR6BaqXgelXIBZ+AgizTxyA=;
-        b=qf9cCnQ8HppghIcBu54yfMqg7aw/nCspH7KNOnDIx8I2+jRT09Z+qo2NGs1IVOGesW
-         ooM0s2P7yjF3c51CVGM4RBwauiKb8j0PaNb679muuN9k+AViYOl1XUlnTNIDuPfJHt3m
-         DHRuS8N4Rw/6rk9jwkwrCDuCe3AuGN6gF8fdxzoAKq9hE+BPmRow4TQfZaX/s0mNfQUl
-         9Z9cXtiuts4Q3KTBP7NbMHp/jNx0le9z7n6FbU/92x0E+/NUNytYklG8UEKGrMe04/pf
-         S2p5YSD0EToY6xnQr/VuMrgO+MsUOPKEark/xlWZW0CG5AZoUbNYOc3DJpQLhOawpD1y
-         whKQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWAs1CU8P5TPM63qmHMcqfwZLdBakBFP1TqMLkKCmJaW3phD8VyG+F65sAfY+RxjrYuYlpIqyjs4LQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwXmYGig/sK1sco0VQOjBlTK2VvAk418/NIrNbboX05rHiLq9w/
-	K/mcSeFIXcQOJMz7Tr0EdxZpdYOOeVelsTTcXEYo3TjSQHH1J8WBpfG6S6sNzH0jMNi3PDPh1wT
-	7ozkwZHOn7y3YLFmjigUgrEo4zQLsUbUCYXL65ltBBQmlyoTa
-X-Google-Smtp-Source: AGHT+IEbLEfHwFyYNcri3t1w7o7tWbS6oBaWx4DQWVSFv0w407zJOJ7W0eTL+KNzshnbYP+06yOh2I/iVUNvpj/p1kQ=
-X-Received: by 2002:a05:6902:1444:b0:e0b:28ce:6156 with SMTP id
- 3f1490d57ef6-e166556617cmr4277142276.55.1724277271228; Wed, 21 Aug 2024
- 14:54:31 -0700 (PDT)
+        bh=k2AfdT/qUVnYEmVWqwh27YziwYiSG6ZtaTZWiB/2UCU=;
+        b=Yj0tQrw3C0Fn8kXFyyLcRhQrc1yQ4lGRRkaslzVPwRQ/gkfIAu6Z6mQ+bxuINfN1fy
+         iPHc/ZnG3Q6pWSrGf0RQyk3PK/9k6N5M1rOFSHT1M7pEwLW15sAdocwpyWZqVpfiYnYr
+         4TtnAIEP1dQSX8pjaO/9RKP2arFecBZ+8Tpn583sRl8vCWzTLs1qq6dP5LwE4pvYrijp
+         OkhMRIjqr2F8dZ6iqcDx0C2akzKXOVDG6A9y5UI3cvM+kd+PO9h5Qga5i8nCoJ4d1LHH
+         5LXjMQxG86CAVbmQxepuUT7keKtGeaK56UlYz3CqFdGMABrFLC1SUkVMQSxQveOONkR7
+         QKIw==
+X-Forwarded-Encrypted: i=1; AJvYcCWPCb4++ejmYUP29FzjeEo1EFpWZec8hI8k28k1IYVUlQTo3D3Gp7EnCO7JdAtFZty9mjacOwM4hAw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxqigvNFALHfnXYme7CMK87JFfGE9uoi9VCt8y7FB0PQqSon7ow
+	fNjLbhj5Og5cvXVy8dvECIZ3OLS9RdUFd8mQDIh2X6iKJphxolL7ylrLBrnzPPtFkzMzt/TBLku
+	leto2OxOnaRwwCJEj1aDlWi32QZR5dp8YQ3BhIA==
+X-Google-Smtp-Source: AGHT+IE/xWmCfL8EynZ8t+uIxYk/r+mrN6h/hspk9c8WP9FVtEPbRdI2QkUqEKvc3cosufaBc/oafG+hBaPdR/iFgvA=
+X-Received: by 2002:a05:6102:dce:b0:495:c34d:ab5d with SMTP id
+ ada2fe7eead31-498e22d94c7mr984589137.13.1724303527859; Wed, 21 Aug 2024
+ 22:12:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240809172106.25892-1-ansuelsmth@gmail.com> <20240809172106.25892-4-ansuelsmth@gmail.com>
- <20240813200734.GA1659224-robh@kernel.org> <66c5b8ec.5d0a0220.11ef1f.b572@mx.google.com>
- <CAPDyKFq0cR10d1jUc5gnoUR5P=cbDEZy2iA-HOq9oNcWZevbDg@mail.gmail.com> <66c62d4f.df0a0220.3305f1.f86c@mx.google.com>
-In-Reply-To: <66c62d4f.df0a0220.3305f1.f86c@mx.google.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 21 Aug 2024 23:53:54 +0200
-Message-ID: <CAPDyKFpHaWar9Mbdg74CGgrwqkoLwt5HjvVOtUDU+z+sg9aT3g@mail.gmail.com>
-Subject: Re: [PATCH v4 3/7] dt-bindings: mmc: add property for partitions node
- in mmc-card node
-To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Miquel Raynal <miquel.raynal@bootlin.com>, 
-	Richard Weinberger <richard@nod.at>, Vignesh Raghavendra <vigneshr@ti.com>, Joern Engel <joern@lazybastard.org>, 
-	Keith Busch <kbusch@kernel.org>, Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>, 
-	Sagi Grimberg <sagi@grimberg.me>, Saravana Kannan <saravanak@google.com>, 
-	Thomas Bogendoerfer <tsbogend@alpha.franken.de>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	Florian Fainelli <f.fainelli@gmail.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org
+References: <20240814153558.708365-1-jens.wiklander@linaro.org> <20240814153558.708365-4-jens.wiklander@linaro.org>
+In-Reply-To: <20240814153558.708365-4-jens.wiklander@linaro.org>
+From: Sumit Garg <sumit.garg@linaro.org>
+Date: Thu, 22 Aug 2024 10:41:56 +0530
+Message-ID: <CAFA6WYM4qmfitWdVUtJoyyeV1S2mTAA4KGZ87tUhf6prMts+2w@mail.gmail.com>
+Subject: Re: [PATCH v9 3/4] tee: add tee_device_set_dev_groups()
+To: Jens Wiklander <jens.wiklander@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	op-tee@lists.trustedfirmware.org, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Linus Walleij <linus.walleij@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>, 
+	Manuel Traut <manut@mecka.net>, Mikko Rapeli <mikko.rapeli@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 21 Aug 2024 at 20:09, Christian Marangi <ansuelsmth@gmail.com> wrote:
+On Wed, 14 Aug 2024 at 21:06, Jens Wiklander <jens.wiklander@linaro.org> wrote:
 >
-> On Wed, Aug 21, 2024 at 03:14:29PM +0200, Ulf Hansson wrote:
-> > On Wed, 21 Aug 2024 at 11:52, Christian Marangi <ansuelsmth@gmail.com> wrote:
-> > >
-> > > On Tue, Aug 13, 2024 at 02:07:34PM -0600, Rob Herring wrote:
-> > > > On Fri, Aug 09, 2024 at 07:21:01PM +0200, Christian Marangi wrote:
-> > > > > Add property for defining partitions node in mmc-card node to define
-> > > > > partitions in DT by the use of the block2mtd module to use block
-> > > > > devices as MTD.
-> > > >
-> > > > You justified patch 1 saying eMMC already supported this, but then here
-> > > > you add support.
-> > > >
-> > > > Both are a NAK for me as both already have a way to describe partitions
-> > > > with GPT.
-> > > >
-> > >
-> > > I think this got a bit confused and hope we can find a way to add
-> > > support for this.
-> > >
-> > > What is "already supported" is assigning an OF node so driver can
-> > > reference it. This patch was just adding the nodes in the schema to say
-> > > that partitions can be defined.
-> > >
-> > > I think what is not clear is that block devices might be used as raw
-> > > devices without a partition table defined in the device. In such case
-> > > it's the kernel that define a fixed partition table.
-> > >
-> > > One example is [1] where the partition table is provided by cmdline.
-> > > Similar to cmdlinepart MTD parser.
-> > >
-> > > The use of block2mtd is just to make use of the MTD parser system.
-> > >
-> > > Considering
-> > > - eMMC is soldered to the device (no dynamic scan)
-> > > - cmdline might be not tunable and hardcoding it might also be
-> > >   problematic (as some cmdline needs to be used)
-> > > - concept of fixed partition for block device is already a thing and
-> > >   used a lot (android AFAIK)
-> >
-> > Sorry for sidestepping your discussion, but I just wanted to add a few comments.
-> >
-> > It's not clear to me why we need something different than what we
-> > already have today.
+> Add tee_device_set_dev_groups() to TEE drivers to supply driver specific
+> attribute groups. The class specific attributes are from now on added
+> via the tee_class, which currently only consist of implementation_id.
 >
-> It's really adding a missing feature. We have cmdline but we don't have
-> DT. And in emebedded many times cmdline can't be changed.
+> Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
+> ---
+>  drivers/tee/tee_core.c   | 19 +++++++++++++------
+>  include/linux/tee_core.h | 12 ++++++++++++
+>  2 files changed, 25 insertions(+), 6 deletions(-)
 >
-> >
-> > If it's a partuuid/uuid/label or a fixed block-partition from the
-> > command line, we still need to know what partition we shall use for
-> > what. So why is this problem different from how we manage filesystem
-> > mounts, for example?
->
-> In the context of eMMC there isn't any partition table and the cmdline
-> is hardcoded by the bootloader. The cmdline might provide the root
-> partition to use but doesn't declare the partition table (with cmdline)
->
-> And the bootloader with the hardcoded cmdline might provide a different
-> root partition in dual-boot-partition implementation on switching the
-> boot partition. (this is used a lot with bootloader using a env variable
-> and a different cmdline passed based on the variable to signal what
-> partition to use for root)
->
-> >
-> > >
-> > > I think it should be acceptable to introduce in DT support for defining
-> > > fixed partition for block devices and some kind of parser system similar
-> > > to MTD. What do you think? Would this be more acceptable? Idea is to
-> > > just have a DT schema that makes use of the values that can be set in
-> > > [1].
-> >
-> > In DT we can describe that there is an eMMC card soldered to the
-> > board, because it's a description of the HW. But describing what
-> > stored inside the eMMC-flash doesn't belong in DT.
-> >
->
-> Why? This conflicts with how it's done on MTD. Also consider the fact
-> that eMMC might contain calibration partition used for NVMEM.
 
-Because what is stored in the flash (eMMC) can be dynamically updated.
-It's not a description of the HW as such, but I guess it depends on
-how you see it. No matter what, you need to convince the DT
-maintainers that this is the way to do it.
+Reviewed-by: Sumit Garg <sumit.garg@linaro.org>
 
-In my opinion, I think it would be better to invest our time to try a
-different path.
+-Sumit
 
+> diff --git a/drivers/tee/tee_core.c b/drivers/tee/tee_core.c
+> index d52e879b204e..d113679b1e2d 100644
+> --- a/drivers/tee/tee_core.c
+> +++ b/drivers/tee/tee_core.c
+> @@ -40,10 +40,7 @@ static const uuid_t tee_client_uuid_ns = UUID_INIT(0x58ac9ca0, 0x2086, 0x4683,
+>  static DECLARE_BITMAP(dev_mask, TEE_NUM_DEVICES);
+>  static DEFINE_SPINLOCK(driver_lock);
 >
-> Describing fixed partition on a soldered eMMC that the bootloader
-> expects at a fixed offset and won't ever change (or it will result in a
-> brick) sounds like describing the HW to me. (it's the same principle of
-> MTD just applied to block devices)
-
-I guess it's somewhat a greyzone in this kind of case, assuming you
-are referring to a bootloader that is stored in some ROM code that
-can't be updated.
-
+> -static const struct class tee_class = {
+> -       .name = "tee",
+> -};
+> -
+> +static const struct class tee_class;
+>  static dev_t tee_devt;
 >
-> (I know it sound strange as block devices are expected to have a
-> partition table in MBR or GPT but reality is that it's not always the
-> case)
-
-I fully understand that but there are different ways to deal with that
-too. Maybe enforce to write an MBR/GPT when flashing, assuming it
-doesn't overwrite some data that is needed.
-
-Another option is to let the bootloader parse some platform specific
-data in the flash (unless it's hard coded in there too) and then make
-it update the block-devparts for the kernel command line, for example.
-
+>  struct tee_context *teedev_open(struct tee_device *teedev)
+> @@ -965,6 +962,13 @@ struct tee_device *tee_device_alloc(const struct tee_desc *teedesc,
+>  }
+>  EXPORT_SYMBOL_GPL(tee_device_alloc);
 >
-> > >
-> > > Hope we can find a solution to this, I'm totally OK for dropping NVMe as
-> > > I understand it's PCIe stuff and very dynamic but OEM are making lots of
-> > > use of eMMC and are starting to use these strange way (block2mtd) as we
-> > > currently don't give a proper and easy solution for the task.
-> >
-> > I certainly appreciate that you are trying to solve the fragmentation
-> > issue around this, but it looks like we need a different approach than
-> > using DT to describe partitions.
-> >
+> +void tee_device_set_dev_groups(struct tee_device *teedev,
+> +                              const struct attribute_group **dev_groups)
+> +{
+> +       teedev->dev.groups = dev_groups;
+> +}
+> +EXPORT_SYMBOL_GPL(tee_device_set_dev_groups);
+> +
+>  static ssize_t implementation_id_show(struct device *dev,
+>                                       struct device_attribute *attr, char *buf)
+>  {
+> @@ -983,6 +987,11 @@ static struct attribute *tee_dev_attrs[] = {
 >
-> Well it's either DT that can be tweaked and is part of the image or
-> cmdline that have tons of limitation due to bootloader having fun
-> hardcoding it or also actually requiring the bootloader cmdline and
-> adding overlay on it. Honestly as I said adding DT support is really
-> compleating the feature of the cmdline implementation.
-
-Another option is also to parse the platform specific data in some way
-and create partitions by using initramfs.
-
-Kind regards
-Uffe
+>  ATTRIBUTE_GROUPS(tee_dev);
+>
+> +static const struct class tee_class = {
+> +       .name = "tee",
+> +       .dev_groups = tee_dev_groups,
+> +};
+> +
+>  /**
+>   * tee_device_register() - Registers a TEE device
+>   * @teedev:    Device to register
+> @@ -1001,8 +1010,6 @@ int tee_device_register(struct tee_device *teedev)
+>                 return -EINVAL;
+>         }
+>
+> -       teedev->dev.groups = tee_dev_groups;
+> -
+>         rc = cdev_device_add(&teedev->cdev, &teedev->dev);
+>         if (rc) {
+>                 dev_err(&teedev->dev,
+> diff --git a/include/linux/tee_core.h b/include/linux/tee_core.h
+> index efd16ed52315..a38494d6b5f4 100644
+> --- a/include/linux/tee_core.h
+> +++ b/include/linux/tee_core.h
+> @@ -154,6 +154,18 @@ int tee_device_register(struct tee_device *teedev);
+>   */
+>  void tee_device_unregister(struct tee_device *teedev);
+>
+> +/**
+> + * tee_device_set_dev_groups() - Set device attribute groups
+> + * @teedev:    Device to register
+> + * @dev_groups: Attribute groups
+> + *
+> + * Assigns the provided @dev_groups to the @teedev to be registered later
+> + * with tee_device_register(). Calling this function is optional, but if
+> + * it's called it must be called before tee_device_register().
+> + */
+> +void tee_device_set_dev_groups(struct tee_device *teedev,
+> +                              const struct attribute_group **dev_groups);
+> +
+>  /**
+>   * tee_session_calc_client_uuid() - Calculates client UUID for session
+>   * @uuid:              Resulting UUID
+> --
+> 2.34.1
+>
