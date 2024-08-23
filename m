@@ -1,278 +1,126 @@
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E030E1925B9;
-	Fri, 23 Aug 2024 20:44:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF7D1195
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 22:59:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724445851; cv=none; b=dh5Mqg3WI/lQ6itru/U123ybONwXhthxhqPQoVX7kgbaN4a0Y2sYRQw4TpRwLPVYBafgvC7q0CoZKHYT3QjX6jq1cztosjpup2XG+VK+gPxFk9RiBROnuT6aR9ScktB2cj6FZidqouizuLOPJfNmPTxRyYEcACaQhCJtQa8ZSvk=
+	t=1724453973; cv=none; b=QnncYVzRs/XpUn9+a0jjWsFkE/G6vY+fjOYHAHXJx8dgBf7wgkJ81sbiHUha3ueZ2flwIKM70Zn2Zx7bgtjMzz694wFTw4euI2zqssrqmq2wu/vHpwq1WxUElWOUPhrLh9gs3MT+yYYAS7wxgdAS6/AZoWlCL8/bcU5g/ix/UA4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724445851; c=relaxed/simple;
-	bh=mY3ZlZr4LGd16AFsJBkwi3pqwy2Dk9HleHVv62NxpnQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=ByfCD5s5Dll7R8SdDXwxSWnd+x+lNX84BtMJsIp0xm87v3zI57vAm+7Xes+1hcq+BvdnL9s9UI/unC5x2tAV/PC7tBnE/E+lIY//ZXyR8dKOszjGJO9HUOIQOmFyfT1eqh8tP1qPgaBcqoRM0Vm5RRhpEEH/XkNMyPVU2IWJ3lo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=IZCX53sM; arc=none smtp.client-ip=198.47.19.142
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1724453973; c=relaxed/simple;
+	bh=DAwuQD6g0FEnAtIfzL8gqpFnaT6RQ4762pmnu9tmjDo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Dn0/eqiCJ4eUFxBQhCGchZCjV79Jk+vcofzx1YCfr5E0RM7NrTXuLfTlZlQHE6RH3c6+HaoFM/fWaoQfyqLOQvffX8Vq/mWupu1wlgmy4ouZT8HJhd7DtL0Ky9/LVMPds197hV6i/avDzXU0eYSdB+jwts87/JaQe/3UGXnymNM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=a/bbT3Qq; arc=none smtp.client-ip=209.85.208.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="IZCX53sM"
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 47NKi0gP024462;
-	Fri, 23 Aug 2024 15:44:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1724445840;
-	bh=UgT1CQV66JpbZILH2YaDRh4UGWeqfWk110ZStUenq+w=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=IZCX53sMWKs2CfjBxR/YeQihIjcTtndCS2xpyeouxaRo02qOIvVK0Zw5nRGbtnUsr
-	 jxLjDxRO7p7D9qdnxh3lJ3uYb+Ra9j3zmZkwa5pbnIvEEFsMgu2gl6FZ8fIa6FkXlY
-	 01C6Wvwlr/ViI42798TwQAsL/z1xIit8yJxhrDko=
-Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
-	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 47NKi0Ga018820
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Fri, 23 Aug 2024 15:44:00 -0500
-Received: from DFLE102.ent.ti.com (10.64.6.23) by DFLE115.ent.ti.com
- (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 23
- Aug 2024 15:44:00 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE102.ent.ti.com
- (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Fri, 23 Aug 2024 15:44:00 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 47NKi0ZW056531;
-	Fri, 23 Aug 2024 15:44:00 -0500
-Message-ID: <feee18cc-e75b-49d9-ac09-a0afbb0b00ca@ti.com>
-Date: Fri, 23 Aug 2024 15:44:00 -0500
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="a/bbT3Qq"
+Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-2f402830d19so3965241fa.0
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 15:59:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1724453970; x=1725058770; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cG1jaCotG4tiQAZrWKuoJsqJjXXS0R7KCH2OwILQsRY=;
+        b=a/bbT3QqLiLi/vCbd5k0+LBM/hzREiK5Gwnoda9abLC72IwVdBIurDekbz0ES1Bwa3
+         XkR3aHQSnixzYk6fEdDoWZ+q5HQL5SilKwhf4Oe92wZXLHDAzXxelhZd0bpXMYgfv5oB
+         TvhDmk6zixa/HTiGyz7jtOIrnGfH/fTkyRzD4uxX1Bkozm8wv5MRqa9vNL3U7IaANMJn
+         dEdwlFJQZkRsU/wPbIF5DrPCQtItjWLam/OVnUsHFyiGB/REX00eRuvAW585wYn6zOwe
+         6s7ys+zBPDgy25j7E54qouML2PmWdaKzsfs1F/8fKl4aXFzkKPyWfDIwQnkYjEIlc5xS
+         SIew==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1724453970; x=1725058770;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=cG1jaCotG4tiQAZrWKuoJsqJjXXS0R7KCH2OwILQsRY=;
+        b=h+MioJsrb+hi1PQgLFJKTiTk6QCEKhMwXNehRlfASvtPbf1+pYWc8wsx3RG9P9u5QP
+         6Tf+sBatai200caHpqfZDZsLJx3ogTi7ensFdUJtptz/pByyphuIq62gNNUbU/Qou9gF
+         4Xe/WDgkT/S9Hfwz9wYHFOuYUNsCClKVQLz297ohy8DJ0W2KAPePjjmxKxk62Anm4ZbE
+         Ngj6m0xtinxxF7281Kxz5zunLXASEEEiAohYuDj4ISTtJAUt36E6RJ78vgTxI7oZxE6W
+         6cvMJKNLo0h6RUtF26GA/mIZNTMVpDyDa236BwCgQ52ESa+2oFE95Ql6xSK6sPnxDOYT
+         zGCg==
+X-Gm-Message-State: AOJu0YwZanDdI1aAdJui/+yppZXcoxTG5dX9YRvRURMjf79SEsEIxL+M
+	eYTJ9AAspdgeCpeV+q42UfCayetiSgkcvDenBSlWAmXJv3BILhk0BJpq8exsZdo=
+X-Google-Smtp-Source: AGHT+IFIFb1DJqSrlsysQsCcTB7Cgl0kQyEkdfFKWea+iiiB2+DQ7rV8DH8HIvDuuQh3IJMafup23Q==
+X-Received: by 2002:a05:6512:3b0b:b0:52e:ccf5:7c40 with SMTP id 2adb3069b0e04-534387c4084mr1522155e87.9.1724453969802;
+        Fri, 23 Aug 2024 15:59:29 -0700 (PDT)
+Received: from localhost.localdomain (88-112-131-206.elisa-laajakaista.fi. [88.112.131.206])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5334ea8996asm680034e87.291.2024.08.23.15.59.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 Aug 2024 15:59:29 -0700 (PDT)
+From: Vladimir Zapolskiy <vladimir.zapolskiy@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: core: remove left-over data structure declarations
+Date: Sat, 24 Aug 2024 01:59:17 +0300
+Message-ID: <20240823225917.2826156-1-vladimir.zapolskiy@linaro.org>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/2] mmc: sdhci_am654: Add retry tuning
-To: Adrian Hunter <adrian.hunter@intel.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20240821192435.1619271-1-jm@ti.com>
- <20240821192435.1619271-2-jm@ti.com>
- <47ed0a0b-dfaa-40e1-825a-9a42e66b887e@intel.com>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <47ed0a0b-dfaa-40e1-825a-9a42e66b887e@intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 8bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-Hi Adrian,
+The last users of 'enum mmc_blk_status' and 'struct mmc_async_req'
+were removed by commit 126b62700386 ("mmc: core: Remove code no longer
+needed after the switch to blk-mq") in 2017, remove these two left-over
+data structures.
 
-On 8/23/24 8:45 AM, Adrian Hunter wrote:
-> On 21/08/24 22:24, Judith Mendez wrote:
->> Add retry tuning up to 10 times if we fail to find
->> a failing region or no passing itapdly. This is
->> necessary since some eMMC has been observed to never
->> find a failing itapdly on the first couple of tuning
->> iterations, but eventually does. It has been observed that
->> the tuning algorithm does not need to loop more than 10
->> times before finding a failing itapdly.
->>
->> Signed-off-by: Judith Mendez <jm@ti.com>
-> 
-> Seems to have compile errors. Looks like 'dev' lines belong in
-> next patch.
-> 
-> drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_calculate_itap’:
-> drivers/mmc/host/sdhci_am654.c:453:24: error: unused variable ‘dev’ [-Werror=unused-variable]
->    453 |         struct device *dev = mmc_dev(host->mmc);
->        |                        ^~~
-> drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_do_tuning’:
-> drivers/mmc/host/sdhci_am654.c:508:24: error: unused variable ‘dev’ [-Werror=unused-variable]
->    508 |         struct device *dev = mmc_dev(host->mmc);
->        |                        ^~~
-> drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_platform_execute_tuning’:
-> drivers/mmc/host/sdhci_am654.c:553:24: error: unused variable ‘dev’ [-Werror=unused-variable]
->    553 |         struct device *dev = mmc_dev(host->mmc);
->        |                        ^~~
-> cc1: all warnings being treated as errors
+Signed-off-by: Vladimir Zapolskiy <vladimir.zapolskiy@linaro.org>
+---
+Build-tested only.
 
-ok, will move to second patch.
+ include/linux/mmc/core.h | 12 ------------
+ include/linux/mmc/host.h | 10 ----------
+ 2 files changed, 22 deletions(-)
 
-> 
->> ---
->> Changes since v1:
->> - Change logic in patch 1/2 from using recursive aproach
->>    to calling a function iteratively for retuning
->> ---
->>   drivers/mmc/host/sdhci_am654.c | 54 ++++++++++++++++++++++++++--------
->>   1 file changed, 42 insertions(+), 12 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->> index 64e10f7c9faa3..612f29fd7dfef 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -86,6 +86,7 @@
->>   
->>   #define CLOCK_TOO_SLOW_HZ	50000000
->>   #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
->> +#define RETRY_TUNING_MAX	10
->>   
->>   /* Command Queue Host Controller Interface Base address */
->>   #define SDHCI_AM654_CQE_BASE_ADDR 0x200
->> @@ -151,6 +152,7 @@ struct sdhci_am654_data {
->>   	u32 flags;
->>   	u32 quirks;
->>   	bool dll_enable;
->> +	u32 tuning_loop;
-> 
-> Could use a comment explaining tuning_loop usage.
-
-Sure no problem, will add.
-> 
->>   
->>   #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>   };
->> @@ -453,12 +455,14 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->>   	int prev_fail_end = -1;
->>   	u8 i;
->>   
->> -	if (!num_fails)
->> -		return ITAPDLY_LAST_INDEX >> 1;
->> +	if (!num_fails) {
->> +		/* Retry tuning */
->> +		return -1;
->> +	}
->>   
->>   	if (fail_window->length == ITAPDLY_LENGTH) {
->> -		dev_err(dev, "No passing ITAPDLY, return 0\n");
->> -		return 0;
->> +		/* Retry tuning */
->> +		return -1;
->>   	}
->>   
->>   	first_fail_start = fail_window->start;
->> @@ -494,16 +498,18 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->>   	return (itap > ITAPDLY_LAST_INDEX) ? ITAPDLY_LAST_INDEX >> 1 : itap;
->>   }
->>   
->> -static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->> -					       u32 opcode)
->> +static int sdhci_am654_do_tuning(struct sdhci_host *host,
->> +				 u32 opcode)
->>   {
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>   	unsigned char timing = host->mmc->ios.timing;
->>   	struct window fail_window[ITAPDLY_LENGTH];
->> +	struct device *dev = mmc_dev(host->mmc);
->>   	u8 curr_pass, itap;
->>   	u8 fail_index = 0;
->>   	u8 prev_pass = 1;
->> +	int ret = 0;
->>   
->>   	memset(fail_window, 0, sizeof(fail_window));
->>   
->> @@ -532,15 +538,38 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->>   	if (fail_window[fail_index].length != 0)
->>   		fail_index++;
->>   
->> -	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
->> -					  sdhci_am654->dll_enable);
->> +	ret = sdhci_am654_calculate_itap(host, fail_window, fail_index,
->> +					 sdhci_am654->dll_enable);
->>   
->> -	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
->> +	return ret;
-> 
-> Kernel style is to return directly i.e.
-> 
-> 	return sdhci_am654_calculate_itap(host, fail_window, fail_index, sdhci_am654->dll_enable);
-> 
-> then don't need ret.
-
-Will fix.
-
-> 
->> +}
->>   
->> -	/* Save ITAPDLY */
->> -	sdhci_am654->itap_del_sel[timing] = itap;
->> +static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->> +					       u32 opcode)
->> +{
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->> +	unsigned char timing = host->mmc->ios.timing;
->> +	struct device *dev = mmc_dev(host->mmc);
->> +	int itapdly;
->> +	int ret = 0;
->>   
->> -	return 0;
->> +	itapdly = sdhci_am654_do_tuning(host, opcode);
->> +
->> +	while (sdhci_am654->tuning_loop < RETRY_TUNING_MAX && itapdly < 0) {
->> +		sdhci_am654->tuning_loop++;
->> +		itapdly = sdhci_am654_do_tuning(host, opcode);
->> +	}
-> 
-> Better to try to have sdhci_am654_do_tuning() appear only once
-> e.g. something like:
-> 
-> 	do {
-> 		itapdly = sdhci_am654_do_tuning(host, opcode);
-> 		if (itapdly >= 0)
-> 			break;
-> 	} while (++sdhci_am654->tuning_loop < RETRY_TUNING_MAX);
-> 
-
-I generally do not like using do while loops, but in this case
-it is the more appropriate solution, thanks, will fix.
-
-> 
->> +
->> +	if (itapdly >= 0) {
->> +		sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
->> +		/* Save ITAPDLY */
->> +		sdhci_am654->itap_del_sel[timing] = itapdly;
->> +	} else {
->> +		ret = -1;
->> +	}
-> 
-> It is easier to read if the error path is separate e.g.
-> 
-> 	if (itapdly < 0)
-> 		return -1;
-> 
-> 	sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
-> 	/* Save ITAPDLY */
-> 	sdhci_am654->itap_del_sel[timing] = itapdly;
-> 
-> 	return 0;
-> 
-> Doesn't need ret then either.
-
-
-ok, yes this looks cleaner, thanks.
-
-> 
->> +
->> +	return ret;
->>   }
->>   
->>   static const struct sdhci_ops sdhci_am654_ops = {
->> @@ -908,6 +937,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
->>   		goto err_pltfm_free;
->>   	}
->>   
->> +	sdhci_am654->tuning_loop = 0;
-> 
-> It is a bit arbitrary having this at probe time.  Something like
-> putting it in an mmc card_init callback might make more sense?
-
-Sure I can move this. Thanks for reviewing!
-~ Judith
-
-> 
->>   	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
->>   
->>   	pm_runtime_get_noresume(dev);
-> 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 2c7928a50907..f0ac2e469b32 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -11,18 +11,6 @@
+ struct mmc_data;
+ struct mmc_request;
+ 
+-enum mmc_blk_status {
+-	MMC_BLK_SUCCESS = 0,
+-	MMC_BLK_PARTIAL,
+-	MMC_BLK_CMD_ERR,
+-	MMC_BLK_RETRY,
+-	MMC_BLK_ABORT,
+-	MMC_BLK_DATA_ERR,
+-	MMC_BLK_ECC_ERR,
+-	MMC_BLK_NOMEDIUM,
+-	MMC_BLK_NEW_REQUEST,
+-};
+-
+ struct mmc_command {
+ 	u32			opcode;
+ 	u32			arg;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 88c6a76042ee..21e5534ddbe6 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -264,16 +264,6 @@ struct mmc_cqe_ops {
+ 	void	(*cqe_recovery_finish)(struct mmc_host *host);
+ };
+ 
+-struct mmc_async_req {
+-	/* active mmc request */
+-	struct mmc_request	*mrq;
+-	/*
+-	 * Check error status of completed mmc request.
+-	 * Returns 0 if success otherwise non zero.
+-	 */
+-	enum mmc_blk_status (*err_check)(struct mmc_card *, struct mmc_async_req *);
+-};
+-
+ /**
+  * struct mmc_slot - MMC slot functions
+  *
+-- 
+2.45.2
 
