@@ -1,122 +1,189 @@
 Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D34446556;
-	Fri, 23 Aug 2024 13:58:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E182B188904;
+	Fri, 23 Aug 2024 15:00:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724421496; cv=pass; b=lvEwZrQKK4Qcah6wiMWtSkPlKS/RuxwHJ/+OCLez9RNumxJx4G4nPWx1yo+OgfUblgGEL9M3t1noSBPFC+N5x37O22s/5/MIjIQM9t5t5cqcYFlM6uDnE8FEMSyKrSLt1nFpk6hsPbL54eO9Nsd8lBkAxNNgIiLMTgfV3ghYp3w=
+	t=1724425260; cv=pass; b=DXX/Q7rVXd0E/8MVeV9OpUOn8mWNprDfFfkmwrbFuhhnnVp3og1ZaoRHlyOrJhXqSow784QybGiq1+mbVr5RJoVqoziP3CeL1aL+MbvMDWk6iEGT3lU7HSyeC449gScWrnZ2t//5aX76XvbzNvawgo7cmr/hm7XN9pst9WmWUoI=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724421496; c=relaxed/simple;
-	bh=8uXcFSMv87HBxfxi406lOYcJB7H9WTB9xyeIwa9mp4o=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=tMkkivGXjq+G/wCDY6g+LvVDAhh71WtPCNGnQFwnJaEFb7sQc3IvaFv5m/ubjcjqGiRsAqytz8bEZsIchfGUEojHW3QYR3wqQeDMBOQFrCqxp76R3EoHzPjcSYubwXAR0dcELE/UVLaRgbFXDGmsitxG9Q8FlOVpyHDHWJVZrCY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=Lxj52fyB; arc=pass smtp.client-ip=136.143.188.112
+	s=arc-20240116; t=1724425260; c=relaxed/simple;
+	bh=JNCrHEnz2TTmX50Fdf5y/m97VRuA1bJpbf1mLzwmkN4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Tdtzj/3gb1m9gYQMAhvowTF5TVaR1ND+PXnaL6QecW6bK5TLdpLXN76TFtcrSQfZkhzHSvbX1pgZSizhpmnVDBT6n0/pi58YuLIT1nZGN8jQQNqu2bZqJMjomboFBFHYKkpONcTnEUbSLLDl0G0srYW+v6t1oy4ld7Ddy88m8yM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=f02wVC+j; arc=pass smtp.client-ip=136.143.188.112
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="Lxj52fyB"
-ARC-Seal: i=1; a=rsa-sha256; t=1724421470; cv=none; 
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="f02wVC+j"
+ARC-Seal: i=1; a=rsa-sha256; t=1724425169; cv=none; 
 	d=zohomail.com; s=zohoarc; 
-	b=GDPz/g/0PE8TsvUffPhJb5xFnnvYmh8NHidQtwVVNtGwqQN6y+hmvZh4opApLAoKcHlwg8DP6IQBbQzFXaEBT6JvdkUULvaUNDE8qlF0ILzvI9n5LWSw5gVnF2ldH7q+DIDx7Ek432XYRZI3yIMcYtfX8dR23s2nRrJsMP/Nvy0=
+	b=no39V9NnxnwNc1WnPDgoT+p7ZUw/z+a8UCFwGESfjxBCX0x5SsSVkOk9X4TFmR1hL+PE+YnwdK75h2b6OfkEtUt154I2/y0YUJ7iiUl139TmSeyE+WOFpKUncU9OT1aZ5j9vgv/+VZGzDXgC0reK6Z0WzzXGZ6dlVDCOMq2GS+o=
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1724421470; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=kuZvVtZXyDgNs8GUeQXGg1EUr2Zv7tffNce03fa0RVg=; 
-	b=bOcATYv7i3aqBVyDW1uyhoqEUm0COFA9aXUWP7RDeUIB1+YSpNU7RCoGywCCfuwWtimjK56LHL7DtvGNNqEDHL+U3WNDVigd/uiFw9QtYwLLlj+fjO/RXYWHbBNn853ofnVLGL71/2hqSfO6LWcv7/v/BgJ/gk0gIOVR5lMeedc=
+	t=1724425169; h=Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=TwlvOdJ7MjOFHk4+IGiyU7dJ6E4gYxvsaSn7FY9AvBU=; 
+	b=Pdj+aCDgE4m2PkeUiGx1NRHxbuHRUmEujM+JMIaSk9iI+XRa4d1L0CGBYZ9HXk8C5vfVY1wT2eaBxd5L3gkDzdVLaagQZXH5pK8fnKYiBXTaRQGzHFUomMwGSau3to/5Us7OCAo2uiDZyngd2GwfzTnMwC0Qf4C7zhD0Ol9llJw=
 ARC-Authentication-Results: i=1; mx.zohomail.com;
 	dkim=pass  header.i=collabora.com;
 	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
 	dmarc=pass header.from=<detlev.casanova@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724421470;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724425169;
 	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=kuZvVtZXyDgNs8GUeQXGg1EUr2Zv7tffNce03fa0RVg=;
-	b=Lxj52fyBvT1b5O4j4mkPGnjNytR8FSVteU4N+BujCzwLHEG8okCTf3gBhIlxvMSL
-	FhqIZ88M6vBg0nwdCRl9CXxjJiq/K/pvzjgxFRGV7gGpI1h3FskAF3p0k70Vknvhcwk
-	hLCi1W2H4o7Zksa4aCJGPdS4w4L0DxEEt1Z9kBFg=
-Received: by mx.zohomail.com with SMTPS id 1724421468552780.7042801261449;
-	Fri, 23 Aug 2024 06:57:48 -0700 (PDT)
+	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:MIME-Version:Content-Transfer-Encoding:Message-Id:Reply-To;
+	bh=TwlvOdJ7MjOFHk4+IGiyU7dJ6E4gYxvsaSn7FY9AvBU=;
+	b=f02wVC+jsUJd5qWnUikwuktjSRUkeIjtwaq8U702xiDXQJOSNH2RvrYXx/yR2Lts
+	U9nSj0Q+Ar6fGYYuD1bQLxLS/W5Ik06iid5vmf3i1yzjD19MRoHxyLSO/6Y4ORWPl00
+	UDpxVmcQqdgpsgqSVq2pEVKou2AfpFThfHDDD84w=
+Received: by mx.zohomail.com with SMTPS id 1724425168680168.96164896631421;
+	Fri, 23 Aug 2024 07:59:28 -0700 (PDT)
 From: Detlev Casanova <detlev.casanova@collabora.com>
-To: Dragan Simic <dsimic@manjaro.org>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com,
- Shawn Lin <shawn.lin@rock-chips.com>
-Subject:
- Re: [PATCH v4 3/4] mmc: dw_mmc-rockchip: Skip all phases bigger than 270
- degrees
-Date: Fri, 23 Aug 2024 09:59:29 -0400
-Message-ID: <1894989.tdWV9SEqCh@trenzalore>
-In-Reply-To: <711f2561ac3d84bcd5bbe26723869b47@manjaro.org>
-References:
- <20240822212418.982927-1-detlev.casanova@collabora.com>
- <20240822212418.982927-4-detlev.casanova@collabora.com>
- <711f2561ac3d84bcd5bbe26723869b47@manjaro.org>
+To: linux-kernel@vger.kernel.org
+Cc: Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	David Airlie <airlied@gmail.com>,
+	Daniel Vetter <daniel@ffwll.ch>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	Lee Jones <lee@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Mark Brown <broonie@kernel.org>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	Guenter Roeck <linux@roeck-us.net>,
+	Chris Morgan <macromorgan@hotmail.com>,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Tim Lunn <tim@feathertop.org>,
+	Chukun Pan <amadeus@jmu.edu.cn>,
+	Andy Yan <andyshrk@163.com>,
+	Muhammed Efe Cetin <efectn@protonmail.com>,
+	Jagan Teki <jagan@edgeble.ai>,
+	Dragan Simic <dsimic@manjaro.org>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Ondrej Jirman <megi@xff.cz>,
+	Michael Riesch <michael.riesch@wolfvision.net>,
+	Jimmy Hon <honyuenkwun@gmail.com>,
+	Alexey Charkov <alchark@gmail.com>,
+	Elon Zhang <zhangzj@rock-chips.com>,
+	Elaine Zhang <zhangqing@rock-chips.com>,
+	Yifeng Zhao <yifeng.zhao@rock-chips.com>,
+	Finley Xiao <finley.xiao@rock-chips.com>,
+	Liang Chen <cl@rock-chips.com>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Jamie Iles <jamie@jamieiles.com>,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
+	dri-devel@lists.freedesktop.org,
+	linux-i2c@vger.kernel.org,
+	linux-iio@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-serial@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	linux-watchdog@vger.kernel.org,
+	kernel@collabora.com
+Subject: [PATCH v2 00/12] Add device tree for ArmSoM Sige 5 board
+Date: Fri, 23 Aug 2024 10:52:27 -0400
+Message-ID: <20240823150057.56141-1-detlev.casanova@collabora.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 X-ZohoMailClient: External
 
-Hi Dragan,
+Add device tree for ArmSoM Sige 5 board
 
-On Friday, 23 August 2024 01:45:07 EDT Dragan Simic wrote:
-> Hello Detlev,
-> 
-> On 2024-08-22 23:15, Detlev Casanova wrote:
-> > From: Shawn Lin <shawn.lin@rock-chips.com>
-> > 
-> > Per design recommendation, it'd better not try to use any phase
-> > which is bigger than 270. Let's officially follow this.
-> 
-> Would it be possible to provide a reference to the actual design
-> specification?  This change affects all users of the dw_mmc-rockchip
-> driver, so in case any regressions are found later, having as much
-> detail as possible can only be beneficial.
+Add the rk3576-armsom-sige5 device tree as well as its rk3576.dtsi base
+and pinctrl information in rk3576-pinctrl.dtsi.
 
-I don't have the reference and only trusting rockchip on this. This could be 
-specific to rockchip hardware.
-Anyway, the drivers works well on my side on my rk3576 armsom sige5 without 
-this patch, so I'm willing to drop it completely.
-
-> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> > (cherry picked from commit 2a53aab5cfa43065b2e979959d727332a8a03c03)
-> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
-> > ---
-> > 
-> >  drivers/mmc/host/dw_mmc-rockchip.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
-> > b/drivers/mmc/host/dw_mmc-rockchip.c
-> > index 2748f9bf2691..1458cb5fd5c7 100644
-> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > @@ -310,6 +310,9 @@ static int dw_mci_rk3288_execute_tuning(struct
-> > dw_mci_slot *slot, u32 opcode)
-> > 
-> >  	/* Try each phase and extract good ranges */
-> >  	for (i = 0; i < priv->num_phases; ) {
-> > 
-> > +		/* Cannot guarantee any phases larger than 270 would 
-work well */
-> > +		if (TUNING_ITERATION_TO_PHASE(i, priv->num_phases) > 
-270)
-> > +			break;
-> > 
-> >  		rockchip_mmc_set_phase(host, true,
-> >  		
-> >  				       TUNING_ITERATION_TO_PHASE(
-> >  						
-> >  						i,
+The other commits add DT bindings documentation for the devices that
+already work with the current corresponding drivers.
 
 
+Note that as is, the rockchip gpio driver needs the gpio nodes
+to be children of the pinctrl node, even though this is deprecated.
 
+When the driver supports it, they can be moved out of the pinctrl node.
+
+The power-domain@RK3576_PD_USB is a child of power-domain@RK3576_PD_VOP.
+That looks strange but it seems to be how the hardware is.
+There has been no confirmation from Rockchip yet.
+
+The other bindings and driver implementations are in other patch sets:
+- PMIC: https://lore.kernel.org/all/20240802134736.283851-1-detlev.casanova@collabora.com/ (applied on next)
+- CRU: https://lore.kernel.org/all/20240822194956.918527-1-detlev.casanova@collabora.com/
+- PINCTRL: https://lore.kernel.org/all/20240822195706.920567-1-detlev.casanova@collabora.com/
+- PM DOMAIN: https://lore.kernel.org/all/20240814222824.3170-1-detlev.casanova@collabora.com/ (applied on next)
+- DW-MMC: https://lore.kernel.org/all/20240822212418.982927-1-detlev.casanova@collabora.com/
+- GMAC: https://lore.kernel.org/all/20240823141318.51201-1-detlev.casanova@collabora.com/
+
+Changes since v1:
+- Add eMMC support
+- Add gpu node
+- Add rtc node
+- Add spi compatible dt-bindings
+- Add watchdog support
+- Dropped timer compatible commit (applied in [0])
+- Move ethernet aliases to board dt
+- Move mmio nodes to soc node
+- Removed cru grf phandle
+- Removed gpio aliases
+- Removed grf compatibles (applied in [1])
+- Removed pinctrl php-grf phandle
+- Removed v2-tuning for sdcard
+- Renamed clock nodes
+- Renamed regulators do match regulator-vcc-<voltage>-<name>
+- Renamed the rkvdec_sram node to vdec_sram to match prior generations
+- Reorder fields consistently in nodes
+- Use correct #power-domain-cells values
+
+[0]: https://lore.kernel.org/all/918bb9e4-02d9-4dca-bed2-28bb123bdc10@linaro.org/
+[1]: https://lore.kernel.org/all/172441646605.877570.8075942261050000.b4-ty@sntech.de/
+
+Detlev.
+
+Detlev Casanova (12):
+  dt-bindings: arm: rockchip: Add ArmSoM Sige 5
+  dt-bindings: arm: rockchip: Add rk3576 compatible string to pmu.yaml
+  dt-bindings: i2c: i2c-rk3x: Add rk3576 compatible
+  dt-bindings: iio: adc: Add rockchip,rk3576-saradc string
+  dt-bindings: mfd: syscon: Add rk3576 QoS register compatible
+  dt-bindings: serial: snps-dw-apb-uart: Add Rockchip RK3576
+  dt-bindings: mmc: Add support for rk3576 eMMC
+  dt-bindings: gpu: Add rockchip,rk3576-mali compatible
+  dt-bindings: watchdog: Add rockchip,rk3576-wdt compatible
+  dt-bindings: spi: Add rockchip,rk3576-spi compatible
+  arm64: dts: rockchip: Add rk3576 SoC base DT
+  arm64: dts: rockchip: Add rk3576-armsom-sige5 board
+
+ .../devicetree/bindings/arm/rockchip.yaml     |    5 +
+ .../devicetree/bindings/arm/rockchip/pmu.yaml |    2 +
+ .../bindings/gpu/arm,mali-bifrost.yaml        |    1 +
+ .../devicetree/bindings/i2c/i2c-rk3x.yaml     |    1 +
+ .../bindings/iio/adc/rockchip-saradc.yaml     |    3 +
+ .../devicetree/bindings/mfd/syscon.yaml       |    2 +
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |   32 +-
+ .../bindings/serial/snps-dw-apb-uart.yaml     |    1 +
+ .../devicetree/bindings/spi/spi-rockchip.yaml |    1 +
+ .../bindings/watchdog/snps,dw-wdt.yaml        |    1 +
+ arch/arm64/boot/dts/rockchip/Makefile         |    1 +
+ .../boot/dts/rockchip/rk3576-armsom-sige5.dts |  651 ++
+ .../boot/dts/rockchip/rk3576-pinctrl.dtsi     | 5775 +++++++++++++++++
+ arch/arm64/boot/dts/rockchip/rk3576.dtsi      | 1710 +++++
+ 14 files changed, 8177 insertions(+), 9 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3576-armsom-sige5.dts
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3576-pinctrl.dtsi
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3576.dtsi
+
+-- 
+2.46.0
 
