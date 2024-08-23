@@ -1,139 +1,257 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CACE14387B;
-	Fri, 23 Aug 2024 13:33:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724420025; cv=pass; b=LgVWLfLI4eW8zV2S9oLUB7fTUG9QS19irnT/okNizxN/enOryTc0A8j5E1SY7aMlFZVDejcFoPhqu7B22f+T17MCEFik3/l6ZMNWyhmXTcKPPwBhfF0eAXOo7XncO54bhBYyrm4DQeObAw1irQPMbP+luNywNFVVNaDzMxQnn44=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724420025; c=relaxed/simple;
-	bh=rRdCwS48CKNkgj97i9qRE+e39eqwYIb8ICcM+jB4j2c=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=OUQvW7CeKE6Itbzu4rX56gQtESXep1njr28DwngF/pzuc8CWWrqQ64KiqWSDgh2GTpxFtwE6HWqcIYs7d9m30NogiY4q1dl+DSy4Rp9fgbXa9HyrWyoV/7PNwPLzv2+Ja2uSzRz8zuaEHnA6b8pWtw2kqiG/oRlceyZkSuKulvQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=atFOtoGt; arc=pass smtp.client-ip=136.143.188.112
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 262CD1DA23;
+	Fri, 23 Aug 2024 13:45:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1724420752; cv=none; b=bMSXWrtwXZ6bHKMNFvD6SD/UmAeRxW0pg5PGQMz3Jkx2gxs1LoFWLPCi+b7Fk7pilVkpBHuBFV+TYo9neMbiejFtlJ1dyAYkIA7aGp/CWBJPMGYePbYAaW/IOzpRRPASIs6Os53gvJjMlmhrBsfNFRDYJoTjqn94OEfUVPnnG4Q=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1724420752; c=relaxed/simple;
+	bh=R/xkkX2hUZsj94OumiLVIhS4A5KWcMOJtBZpo2RJTrI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=PA5S8kiVGDF3NwK+Hb6dhFeRPXsV7wriRPtjLzcbBh2njRBs1BH4hJgKji5hRi/se33O70QRs/XomkMI/udOe1d8hkhE+hmZi54q/1Z0TfZOi4oATByYtfApTSaYHSTFii6pNu4ORSHD6Aa8SrlZ4etCVVpSSmVZ/3c8A1c/AOg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WiIncQkn; arc=none smtp.client-ip=192.198.163.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="atFOtoGt"
-ARC-Seal: i=1; a=rsa-sha256; t=1724419992; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=R4FmA1PJAod74vUer+LedjDR/DrbscZNJjJCxClrTvSD6Pe1MnSad3t0X2faZAtdU711LbKuuvISuQJESxUIR6cB4iPTPysyyADzwN9ol+qfeHI/s3NC//h1zMkpkiQQOH2LNYvVCFidzn2zVc72LpUI3crHZ5U3sP4+rRR1wZI=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1724419992; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=M10075zfY7i2BB74kKfhInpO04SsOI2soxqTCP1Y90g=; 
-	b=fWl0pLJKKPN4z7+vDhEmY7K6YTjyFauWo0zpspqnPtXWeljEkaPDi195N5b7ooV2F2PAHUrUXbsMOQ1efKOl7w8oAnKAcWDdEg1M04bjxdNjVdk+5klBtVfJ7jm433BLnJTREGT9AVjycgJPSpDcppuJNk4s3kTNSTCHMANPm4c=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
-	dmarc=pass header.from=<detlev.casanova@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724419992;
-	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=M10075zfY7i2BB74kKfhInpO04SsOI2soxqTCP1Y90g=;
-	b=atFOtoGtDJiU1h6/drb7a8qsRPpqeM32vczPd2jgUlErfqHbB1Uw0K4ofmM1UaXb
-	Ho0ED0thMuDlgZAc+qyt2/ySCak77SSyc0XLswp53PCYomuMuQkkl+6vFgT3rGVinjL
-	v0itjv+26cUgw4564uUzIRmjiNMRSJliG7e0XPHg=
-Received: by mx.zohomail.com with SMTPS id 1724419991555189.99931184256172;
-	Fri, 23 Aug 2024 06:33:11 -0700 (PDT)
-From: Detlev Casanova <detlev.casanova@collabora.com>
-To: Dragan Simic <dsimic@manjaro.org>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com,
- Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4 2/4] mmc: dw_mmc-rockchip: Add internal phase support
-Date: Fri, 23 Aug 2024 09:34:52 -0400
-Message-ID: <4943132.31r3eYUQgx@trenzalore>
-In-Reply-To: <f0f5dec4a5403616fa25c6ed754f6050@manjaro.org>
-References:
- <20240822212418.982927-1-detlev.casanova@collabora.com>
- <20240822212418.982927-3-detlev.casanova@collabora.com>
- <f0f5dec4a5403616fa25c6ed754f6050@manjaro.org>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WiIncQkn"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1724420750; x=1755956750;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=R/xkkX2hUZsj94OumiLVIhS4A5KWcMOJtBZpo2RJTrI=;
+  b=WiIncQknYX33hPIWdIbj+dHumZZY3o98iOm8ZNI0UC6XUMHwFeCEvO5Q
+   UtYllduEwNRop0ZNyti6qme3lKgWzy6iQttDxSEJO8xyRyndtVxIks0jP
+   bjxJpkW3Jx2V9HdMUBMZ+w+dSj8NsIcTttnRAKq8Xp7YGZ5W3qQsfJOm1
+   9jZT/WmI10GlrM8gyvOMHrIMe0sa/BOG8Vj/0sXQTVlaWZRKzsRHjPPRg
+   zZPXar45g2S7UfXaPyFCGdS7mymciMBMt5TYxvcUUpZuQmI6uRNrFTk5U
+   xdwmfPwi1DifsR+SkqVpeuKuZiaV+Ai/O7yvg3NlJkBosWE7dggAw5hSt
+   Q==;
+X-CSE-ConnectionGUID: KpiUf8eFTgGHwiUHeD8zmw==
+X-CSE-MsgGUID: uWMVGszHRgm/RjvLf/j/XA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11172"; a="22410452"
+X-IronPort-AV: E=Sophos;i="6.10,170,1719903600"; 
+   d="scan'208";a="22410452"
+Received: from orviesa005.jf.intel.com ([10.64.159.145])
+  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Aug 2024 06:45:49 -0700
+X-CSE-ConnectionGUID: cPnlL1GMRCCqHG5CnNTHBQ==
+X-CSE-MsgGUID: 16RWvN6OTKazFjkrTNbsQg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,170,1719903600"; 
+   d="scan'208";a="66723568"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.96.163])
+  by orviesa005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Aug 2024 06:45:47 -0700
+Message-ID: <47ed0a0b-dfaa-40e1-825a-9a42e66b887e@intel.com>
+Date: Fri, 23 Aug 2024 16:45:41 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
-X-ZohoMailClient: External
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/2] mmc: sdhci_am654: Add retry tuning
+To: Judith Mendez <jm@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20240821192435.1619271-1-jm@ti.com>
+ <20240821192435.1619271-2-jm@ti.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240821192435.1619271-2-jm@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Hi Dragan,
-
-On Friday, 23 August 2024 01:41:44 EDT Dragan Simic wrote:
-> Hello Detlev,
+On 21/08/24 22:24, Judith Mendez wrote:
+> Add retry tuning up to 10 times if we fail to find
+> a failing region or no passing itapdly. This is
+> necessary since some eMMC has been observed to never
+> find a failing itapdly on the first couple of tuning
+> iterations, but eventually does. It has been observed that
+> the tuning algorithm does not need to loop more than 10
+> times before finding a failing itapdly.
 > 
-> Please see a comment below.
+> Signed-off-by: Judith Mendez <jm@ti.com>
+
+Seems to have compile errors. Looks like 'dev' lines belong in
+next patch.
+
+drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_calculate_itap’:
+drivers/mmc/host/sdhci_am654.c:453:24: error: unused variable ‘dev’ [-Werror=unused-variable]
+  453 |         struct device *dev = mmc_dev(host->mmc);
+      |                        ^~~
+drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_do_tuning’:
+drivers/mmc/host/sdhci_am654.c:508:24: error: unused variable ‘dev’ [-Werror=unused-variable]
+  508 |         struct device *dev = mmc_dev(host->mmc);
+      |                        ^~~
+drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_platform_execute_tuning’:
+drivers/mmc/host/sdhci_am654.c:553:24: error: unused variable ‘dev’ [-Werror=unused-variable]
+  553 |         struct device *dev = mmc_dev(host->mmc);
+      |                        ^~~
+cc1: all warnings being treated as errors
+
+> ---
+> Changes since v1:
+> - Change logic in patch 1/2 from using recursive aproach
+>   to calling a function iteratively for retuning
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 54 ++++++++++++++++++++++++++--------
+>  1 file changed, 42 insertions(+), 12 deletions(-)
 > 
-> On 2024-08-22 23:15, Detlev Casanova wrote:
-> > From: Shawn Lin <shawn.lin@rock-chips.com>
-> > 
-> > Some Rockchip devices put the phase settings into the dw_mmc
-> > controller.
-> > 
-> > When the feature is present, the ciu-drive and ciu-sample clocks are
-> > not used and the phase configuration is done directly through the mmc
-> > controller.
-> > 
-> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
-> > Acked-by: Shawn Lin <shawn.lin@rock-chips.com>
-> > ---
-> > 
-> >  drivers/mmc/host/dw_mmc-rockchip.c | 171 +++++++++++++++++++++++++++--
-> >  1 file changed, 160 insertions(+), 11 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
-> > b/drivers/mmc/host/dw_mmc-rockchip.c
-> > index b07190ba4b7a..2748f9bf2691 100644
-> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > @@ -15,7 +15,17 @@
-> > 
-> >  #include "dw_mmc.h"
-> >  #include "dw_mmc-pltfm.h"
-> > 
-> > -#define RK3288_CLKGEN_DIV	2
-> > +#define RK3288_CLKGEN_DIV		2
-> > +#define SDMMC_TIMING_CON0		0x130
-> > +#define SDMMC_TIMING_CON1		0x134
-> > +#define ROCKCHIP_MMC_DELAY_SEL		BIT(10)
-> > +#define ROCKCHIP_MMC_DEGREE_MASK	0x3
-> > +#define ROCKCHIP_MMC_DEGREE_OFFSET	1
-> > +#define ROCKCHIP_MMC_DELAYNUM_OFFSET	2
-> > +#define ROCKCHIP_MMC_DELAYNUM_MASK	(0xff <<
-> > ROCKCHIP_MMC_DELAYNUM_OFFSET)
-> > +#define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC	60
-> > +#define HIWORD_UPDATE(val, mask, shift) \
-> > +		((val) << (shift) | (mask) << ((shift) + 16))
-> > 
-> >  static const unsigned int freqs[] = { 100000, 200000, 300000, 400000
-> > 
-> > };
-> > 
-> > @@ -24,8 +34,143 @@ struct dw_mci_rockchip_priv_data {
-> > 
-> >  	struct clk		*sample_clk;
-> >  	int			default_sample_phase;
-> >  	int			num_phases;
-> > 
-> > +	int			internal_phase;
-> > 
-> >  };
-> 
-> It might be good to declare internal_phase as "unsigned int
-> internal_phase:1",
-> i.e. as a bit field, which isn't going to save some memory in this
-> particular
-> case, but it would show additional attention to detail.
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 64e10f7c9faa3..612f29fd7dfef 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -86,6 +86,7 @@
+>  
+>  #define CLOCK_TOO_SLOW_HZ	50000000
+>  #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
+> +#define RETRY_TUNING_MAX	10
+>  
+>  /* Command Queue Host Controller Interface Base address */
+>  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+> @@ -151,6 +152,7 @@ struct sdhci_am654_data {
+>  	u32 flags;
+>  	u32 quirks;
+>  	bool dll_enable;
+> +	u32 tuning_loop;
 
-In that case, I would go with a bool instead of int, that makes things even 
-clearer.
+Could use a comment explaining tuning_loop usage.
+
+>  
+>  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+>  };
+> @@ -453,12 +455,14 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+>  	int prev_fail_end = -1;
+>  	u8 i;
+>  
+> -	if (!num_fails)
+> -		return ITAPDLY_LAST_INDEX >> 1;
+> +	if (!num_fails) {
+> +		/* Retry tuning */
+> +		return -1;
+> +	}
+>  
+>  	if (fail_window->length == ITAPDLY_LENGTH) {
+> -		dev_err(dev, "No passing ITAPDLY, return 0\n");
+> -		return 0;
+> +		/* Retry tuning */
+> +		return -1;
+>  	}
+>  
+>  	first_fail_start = fail_window->start;
+> @@ -494,16 +498,18 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
+>  	return (itap > ITAPDLY_LAST_INDEX) ? ITAPDLY_LAST_INDEX >> 1 : itap;
+>  }
+>  
+> -static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+> -					       u32 opcode)
+> +static int sdhci_am654_do_tuning(struct sdhci_host *host,
+> +				 u32 opcode)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+>  	unsigned char timing = host->mmc->ios.timing;
+>  	struct window fail_window[ITAPDLY_LENGTH];
+> +	struct device *dev = mmc_dev(host->mmc);
+>  	u8 curr_pass, itap;
+>  	u8 fail_index = 0;
+>  	u8 prev_pass = 1;
+> +	int ret = 0;
+>  
+>  	memset(fail_window, 0, sizeof(fail_window));
+>  
+> @@ -532,15 +538,38 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+>  	if (fail_window[fail_index].length != 0)
+>  		fail_index++;
+>  
+> -	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+> -					  sdhci_am654->dll_enable);
+> +	ret = sdhci_am654_calculate_itap(host, fail_window, fail_index,
+> +					 sdhci_am654->dll_enable);
+>  
+> -	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
+> +	return ret;
+
+Kernel style is to return directly i.e.
+
+	return sdhci_am654_calculate_itap(host, fail_window, fail_index, sdhci_am654->dll_enable);
+
+then don't need ret.
+
+> +}
+>  
+> -	/* Save ITAPDLY */
+> -	sdhci_am654->itap_del_sel[timing] = itap;
+> +static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+> +					       u32 opcode)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +	unsigned char timing = host->mmc->ios.timing;
+> +	struct device *dev = mmc_dev(host->mmc);
+> +	int itapdly;
+> +	int ret = 0;
+>  
+> -	return 0;
+> +	itapdly = sdhci_am654_do_tuning(host, opcode);
+> +
+> +	while (sdhci_am654->tuning_loop < RETRY_TUNING_MAX && itapdly < 0) {
+> +		sdhci_am654->tuning_loop++;
+> +		itapdly = sdhci_am654_do_tuning(host, opcode);
+> +	}
+
+Better to try to have sdhci_am654_do_tuning() appear only once
+e.g. something like:
+
+	do {
+		itapdly = sdhci_am654_do_tuning(host, opcode);
+		if (itapdly >= 0)
+			break;
+	} while (++sdhci_am654->tuning_loop < RETRY_TUNING_MAX);
 
 
+> +
+> +	if (itapdly >= 0) {
+> +		sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
+> +		/* Save ITAPDLY */
+> +		sdhci_am654->itap_del_sel[timing] = itapdly;
+> +	} else {
+> +		ret = -1;
+> +	}
+
+It is easier to read if the error path is separate e.g.
+
+	if (itapdly < 0)
+		return -1;
+
+	sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
+	/* Save ITAPDLY */
+	sdhci_am654->itap_del_sel[timing] = itapdly;
+
+	return 0;
+
+Doesn't need ret then either.
+
+> +
+> +	return ret;
+>  }
+>  
+>  static const struct sdhci_ops sdhci_am654_ops = {
+> @@ -908,6 +937,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>  		goto err_pltfm_free;
+>  	}
+>  
+> +	sdhci_am654->tuning_loop = 0;
+
+It is a bit arbitrary having this at probe time.  Something like
+putting it in an mmc card_init callback might make more sense?
+
+>  	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+>  
+>  	pm_runtime_get_noresume(dev);
 
