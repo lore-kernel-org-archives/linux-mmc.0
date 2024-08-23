@@ -1,114 +1,119 @@
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ED64F17C211
-	for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 10:53:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B73E13541B
+	for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 11:01:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724410386; cv=none; b=H9jEY/TTTSP/YzjofT3FeyaXAvLxanDml8OG8+ir/7x+X7SfJI8o9dK3NIQzUTmtUfdBtqR1QNYMDhn2zvBzEzPCl++YKp7AdJgIH+jJiJphVDbSbKD5T+D0yMzvwNG8MwsUZQC4hmejWFx288/5A6L73EIBF/FWxxgH2WBkJUc=
+	t=1724410882; cv=none; b=ZyWD5iYjuX4lFeQChkDfcbjk1wOP2P5A6eUoDb+6Zk8/YkRBswApO63VMxWFFxcUPs4S4bPDhkK5xnYTAALvzYrea6g7WCXANVnCC4WegMbclRlnJaYtNTCKClqdIFByGQlJDX03NywRo9xrqRcfiXwTBouyL2/fQbyXUSH50c0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724410386; c=relaxed/simple;
-	bh=biQL3DxblkB3rCUDzcXxatNSH4ag1B0YP2dqEt64H1g=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=PJQbicqyYrftyu7xb0b2HsPnTNK6xcG1810pIK5C0E8ixeCl5EfpUuDIVEobdmaZo3RQ1T5YVWH3Cv4E5Yh+AuBtA0J+vE4U8GY9L4oXeRpuGaxZ9MylKFG/7p3PmYnFv/dtubDu9/OmPab+Jz3287nqLCEgA4Zp2jxDc9u20bw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kmts5GRU; arc=none smtp.client-ip=209.85.208.179
+	s=arc-20240116; t=1724410882; c=relaxed/simple;
+	bh=jCGcYJC3DcdlK/VJvH61PlRhurr+EMpSesr1zeYyMyk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hLUQo62+7Dax3DtIYilPwHS1kILMckwDVpOGZt38PGLExVsO46nPQvuNRKmS7GWx6xaMhmcBmXDXph/DGOSm1evMZQlOJ/eU2iAoZNIZUG5L16wdFP6xuEzHf4b/SJA06UA6/OxbO09tQf1YsYsc7Wb6XR/i06IzUsFfypR9MIg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=dThpBYkL; arc=none smtp.client-ip=209.85.219.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kmts5GRU"
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-2f4f8742138so3937801fa.0
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 03:53:04 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dThpBYkL"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e16582cb9f9so1424604276.0
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Aug 2024 04:01:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724410383; x=1725015183; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=mJwKU3pM+fSGw8xlV5Hp191/V1knUQHDFEo0lS32CeM=;
-        b=kmts5GRUXdgIQ8+hRh6T6Ljv1bNM3QtUThYYmBauctI6FA67Vp73SXPj5hmETdsMcY
-         9o0SDQcHmIyc15kF2GlcSxf4zTbSYfHF0fmk6XVJ25UoFxiqWp6/S0Uwv7wK3m3tAveg
-         Vp4hOGHhy3rEwcqZONJcPz69dANhURlv5eApS6m8j1Iq9fdSOHAVqZAh9Z1ujyHtgILk
-         5wk/dzXCH6jV51uU+Bu9tckkjTA0Iph6w4/t54fO1uRX74HXtSqSCYaFTZJs9hLUU8QA
-         jsoV8Jp53rqQXjrSpgYedfIy1P5Mj7lUQm74k1tvTPLEym3IlThaHnN6OcXoMWG2xWZT
-         86uw==
+        d=linaro.org; s=google; t=1724410879; x=1725015679; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=Etw9lAfOptH5bhz4rHuyZG/BeS9l3H1TyR0g0f0YHgo=;
+        b=dThpBYkLrk15e3uITe6scEzGmQwLja/lXQOY6fECwjIzqgHPeP7+6aLPxkLQhYDcJG
+         uflbgPnchpShL8hrmkdc+9DrIwpong3FX6fn4u9vPPFKRA7+YyLkFrSROssJO4zj6W8+
+         zIqcsaD+L/VEHLSp2SPPmQUYNosnYQuEFBrXREutHfHXv14nnR1qjV2+cpGNxXHu0kwU
+         P1f/V2AQ6ntvgcTMcDWlsLQhL8RRxPdmXPtylBOcc2BlqeLK8G9UY74nTdZXtFYiYpYq
+         maHiLoq6AI1KlCKnQRY77p/BwYHKf1Osu9iatm+DtRzWDhxIOhdKZODRk+ycF3rBceJO
+         WRoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724410383; x=1725015183;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1724410879; x=1725015679;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mJwKU3pM+fSGw8xlV5Hp191/V1knUQHDFEo0lS32CeM=;
-        b=ukcnA3jODxv1GQ0H/i3GYm8QSlWx6NkM2Sq03Sj7vI3V/DMGcILENBag9Ic7wxzSmu
-         UKvlBirTp5a9nZScUvsVQYPLDFaSe9imnaaTNKa1QzxiJMSGW14k9WoC7XR1Jm0y0Zzr
-         yqRCXUJVDKftFLXWNpyBirl9L+Cb3z/MdN8sOTRzitzeSQe/j2Zr47Fx7qw972Mbt7gi
-         sXaJuvBPLCWouZLgJBjlSEHx1G3LG6MkD3add74gUeKoW6cFxjkYKOi4dpVLcs0cWQy/
-         kY3ughQ0uk1pP97IKx9lI4GtOXatU2VEFt95XxBKdJWcKuOFxaDq+LAFRjbY0V6susGS
-         kaLw==
-X-Forwarded-Encrypted: i=1; AJvYcCUgljsuhnKKKhUmzj8p/rltbWILWiqVfzO5nttsUV0m4cda3ei4QgVoUZkfEZC++yCMGQCdcaK7XwI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz3MXMT1M9N6/8GfPTnZgVNZTGhZpSQNSv9Pw92fe6i8NDn67nQ
-	QkZWofHGhxcE8kYi5sIqdbGMRvuW2aj6Qm/IlbvKWhR+LEkbn/09OJdiYu0pjMg=
-X-Google-Smtp-Source: AGHT+IEan/GnR/OKjKnkJkJvShhmZs9A9iwIWvtwinNMbLwzGGPZOx7tGcSf6waNVy1TKMCbtcWO7w==
-X-Received: by 2002:a2e:4e12:0:b0:2ee:4dc6:fe28 with SMTP id 38308e7fff4ca-2f4f49423e9mr12196731fa.40.1724410382750;
-        Fri, 23 Aug 2024 03:53:02 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2f4048acb0bsm4623061fa.125.2024.08.23.03.53.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Aug 2024 03:53:02 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.11-rc5
-Date: Fri, 23 Aug 2024 12:53:01 +0200
-Message-Id: <20240823105301.397397-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        bh=Etw9lAfOptH5bhz4rHuyZG/BeS9l3H1TyR0g0f0YHgo=;
+        b=KFjfH4XyFgeyz+SrcgIJkD5I3ZZT5ydACsRkXXNDICYTpcKScLrq6ypRNL7Zde0RCQ
+         fYALxRmThyXxtSTBxoJq8+d2ZbTRrdCcMllPlZBjcKfSOqaB20jiq5QIfbj8Y4I6SyZf
+         JHgdKhVCvzA30QHS3N026nT+AmornJ+/VrFpJMcRzHiznGO7fGo7ZikR+vX6Hor3X6Vn
+         lZA+kaAN/f+6P5hZiV/zQdh23TeYWHXqh+lcEirlgJ/X1HOc4tSyTHV3eyCZkMGJR2h9
+         +yBeLvSRJ0JAQR2cp6j/J9qFKizXy6QYId99567ZYqyJc71p0mG3ChbdCrohMOwlmXL3
+         vG+A==
+X-Forwarded-Encrypted: i=1; AJvYcCVENf18RUIXh8yZ4pquGQs+kdjnD0QX8Hzw5f1MLClpo1z4mCVlpNa1QQD/CPDOhtGZPtunQajn9p0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw1Nb0V2AS0VxWPw8qN/wXGwVI9sBywZmaIdlj6u1TdenMJyiZ8
+	L4bgGC9FQCX+85391x/eFtN48XvtjdOYXPRS4RItmQc6U+e2ca4a7tqYKL4s/MXSDqIE8gR6762
+	1uPKbYGfcrbZNzdpJ3MgXbf6ajFSVD+4U0JHEk4zLVgwTiT9Vx7A=
+X-Google-Smtp-Source: AGHT+IGuTAUXYGuoFczcZ9F/O/HV4ODtqiVstn6XEgheiBsiZuK98u0eN9pDPYlFkhTi88W5GaiKyT/7b2gDM+Hwqys=
+X-Received: by 2002:a25:6608:0:b0:e16:7070:97e6 with SMTP id
+ 3f1490d57ef6-e17764c6e59mr5879394276.9.1724410877637; Fri, 23 Aug 2024
+ 04:01:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <CGME20240823071040epcas1p1309967537fb6286a9e67a38e598ce104@epcas1p1.samsung.com>
+ <20240823071025.15410-1-sh8267.baek@samsung.com>
+In-Reply-To: <20240823071025.15410-1-sh8267.baek@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 23 Aug 2024 13:00:40 +0200
+Message-ID: <CAPDyKFpSf8GZppkqJCs1r990QXDJMHWHAbVXS2XoffCLQdgSug@mail.gmail.com>
+Subject: Re: [PATCH] mmc : fix for check cqe halt.
+To: Seunghwan Baek <sh8267.baek@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	ritesh.list@gmail.com, grant.jung@samsung.com, jt77.jang@samsung.com, 
+	junwoo80.lee@samsung.com, dh0421.hwang@samsung.com, jangsub.yi@samsung.com, 
+	sh043.lee@samsung.com, cw9316.lee@samsung.com, wkon.kim@samsung.com
+Content-Type: text/plain; charset="UTF-8"
 
-Hi Linus,
+On Fri, 23 Aug 2024 at 09:10, Seunghwan Baek <sh8267.baek@samsung.com> wrote:
+>
+> To check if mmc cqe is in halt state, need to check
+> set/clear of CQHCI_HALT bit. At this time, we need to
+> check with &, not &&. Therefore, code to check whether
+> cqe is in halt state is modified to cqhci_halted,
+> which has already been implemented.
+>
+> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
 
-Here's a PR with a couple of MMC fixes intended for v6.11-rc5. Details about the
-highlights are as usual found in the signed tag.
+Hi Seunghwan,
 
-Please pull this in!
+Please re-post to include some additional and needed maintainers.
+./scripts/get_maintainer.pl drivers/mmc/host/cqhci-core.c should give
+you the needed information.
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 8400291e289ee6b2bf9779ff1c83a291501f017b:
-
-  Linux 6.11-rc1 (2024-07-28 14:19:55 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.11-rc1
-
-for you to fetch changes up to a1e627af32ed60713941cbfc8075d44cad07f6dd:
-
-  mmc: mmc_test: Fix NULL dereference on allocation failure (2024-08-20 13:47:36 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix NULL dereference for mmc_test on allocation failure
-
-MMC host:
- - dw_mmc: Fix support for deferred probe for biu/ciu clocks
- - mtk-sd: Fix CMD8 support when fragile tuning settings
-
-----------------------------------------------------------------
-Ben Whitten (1):
-      mmc: dw_mmc: allow biu and ciu clocks to defer
-
-Dan Carpenter (1):
-      mmc: mmc_test: Fix NULL dereference on allocation failure
-
-Mengqi Zhang (1):
-      mmc: mtk-sd: receive cmd8 data when hs400 tuning fail
-
- drivers/mmc/core/mmc_test.c | 9 +++++----
- drivers/mmc/host/dw_mmc.c   | 8 ++++++++
- drivers/mmc/host/mtk-sd.c   | 8 ++++----
- 3 files changed, 17 insertions(+), 8 deletions(-)
+> ---
+>  drivers/mmc/host/cqhci-core.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index c14d7251d0bb..3d5bcb92c78e 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -282,7 +282,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+>
+>         cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+>
+> -       if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
+> +       if (cqhci_halted(cq_host))
+>                 cqhci_writel(cq_host, 0, CQHCI_CTL);
+>
+>         mmc->cqe_on = true;
+> @@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 cqhci_writel(cq_host, 0, CQHCI_CTL);
+>                 mmc->cqe_on = true;
+>                 pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+> -               if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
+> +               if (cqhci_halted(cq_host)) {
+>                         pr_err("%s: cqhci: CQE failed to exit halt state\n",
+>                                mmc_hostname(mmc));
+>                 }
+> --
+> 2.17.1
+>
