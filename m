@@ -1,21 +1,21 @@
 Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
 	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 960C653E22;
-	Fri, 23 Aug 2024 05:45:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D747110953;
+	Fri, 23 Aug 2024 07:00:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724391912; cv=none; b=PQYaNQQyIyN/yTJPub8wNLX+jOpBII4fSLNGXgzGvRQSISCr5l1AJn9B0uDhz+xSui7sQT0K+/NJZofpA/fGrv1Jk+h5cn4Uc/G/E8EBoLAJ4TSCAoKmUO+EFCVuT1NvgO2x2YhttsMdkKyK+fHLJ3Vxa5vJJLiJ82/w7FdAYD4=
+	t=1724396462; cv=none; b=Fld3gaqIk+JdKQE++MBuyJX31mKzJUXEqEGyqZShtzKpxd+FBgN9xBHXl2gzs5BDKbI4TckJx0gT+mjMrKeFMNuC6QwWFgPo6WijRETLJ/PI8hz8+oVexjgXyGInY0wKlj3940mteaO8r3cMIiefQcra92dTArZ5BgpyH15hz/s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724391912; c=relaxed/simple;
-	bh=BV0kpuGN/cRjmSy21+EeAfWWxCJM1PG8dWGztrew96I=;
+	s=arc-20240116; t=1724396462; c=relaxed/simple;
+	bh=jGshhhvgJvPItJvLyz9xeVPpG2akmVY+mzhE2S2mbXI=;
 	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=iPhDijfip5aL12YqG73Jmy7SuYFxzX+T9Nxx4JXpXDXmknOFOHL7gKbDYsb9Q5N/vpRSTnMbJi3YSz0L5NRAucS0zjadMI8DUIaJwdhw5mQ6juT7D8yWdmfIk+Ajf6exiJmTJjiwGAYU9KFbG+fa3j6ikBsbfRdqetIIeP1aMNs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=uYz9Sx82; arc=none smtp.client-ip=116.203.91.91
+	 Message-ID:Content-Type; b=HM0BzLgD8PsnDi7IyzUQDTnqNdZC5PQSEQI6282YA8SXME8AxM0kZ5dmVd0twz1Kqc/7QR2P1jJd3hnZNPmYTG/3QjQ6zN1Y4FAZBP4xpS9ODRg5pYGovwm98nUrV9qcXKO9HCAPYy4biKMf3PihxGppUsRyR+wlXSI60CfhtIU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=NDs+9ZSx; arc=none smtp.client-ip=116.203.91.91
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="uYz9Sx82"
+	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="NDs+9ZSx"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -23,18 +23,18 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1724391908;
+	t=1724396457;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=9GwKuNVlfgC5W+9zlKT/gn1CtvwJSC/hAS1+oQKVxL0=;
-	b=uYz9Sx82KEjltSgj9k7p7gTmj84l82XVbz/+FrOV2fchA3LAlio2d1irfHFJS/SwyyQlN+
-	N/0zOPE0OAxzPvygvTWDdFI2IovwVFUuhxvN/bB7aPvs2EUTUZXpwpllTvfFB8mSEg1Pkw
-	naIZYOiLI+cQ343I3ol0sODHlpVO/5kbiMUwfB08wkz/R52G8Ex9ps0myU63vbz4KMGsIy
-	kQsD2+oACdrNxF1wsY9igmgWoPqFkKNL+E9SBFmfPQ5qrfeIy5YKMpNqTQY8xHBtRCe31R
-	WnLGyHemK7YtRV53my1aupiRFMpfQYePBuUyDsEiqwJZKksjLz1iN8kyQza1hg==
-Date: Fri, 23 Aug 2024 07:45:07 +0200
+	bh=FPZmmM60tSAujVzmtKbajvXbMMgpiHTPo/2dvKyDtNI=;
+	b=NDs+9ZSxY/ek6dPLsXqeuOJwsBeoXV7+MBLiCrJILOstP+qpC9oJCnYApU8E9VQTBKQTiA
+	SzzLCqknuhMjQaZOfkGQ7OymI3u66L7WTuHgNAKkBtGF+6DOujeCaz/il9mGWaVfxFs7rd
+	4+mKHEVDbJeWypUJeELQzBCMCLgB5a9OZ77fBuVt9A+5smmmVU0+qDKMe2ABjTFasXzpEN
+	oYUBKaEn2f49AYOvIVXEYRU64f6GeFPpE09zT/vsfq0SYbiv/xgb4maPHljXE+f32M6HBI
+	4xJQo+08F2rxCgrrVe71jq8S9XMc4AHxKFaRKQ6GyN0BODyvntXF9iFChi42FA==
+Date: Fri, 23 Aug 2024 09:00:57 +0200
 From: Dragan Simic <dsimic@manjaro.org>
 To: Detlev Casanova <detlev.casanova@collabora.com>
 Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Rob
@@ -42,14 +42,12 @@ Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Rob
  Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon
  Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com, Shawn Lin
- <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4 3/4] mmc: dw_mmc-rockchip: Skip all phases bigger than
- 270 degrees
-In-Reply-To: <20240822212418.982927-4-detlev.casanova@collabora.com>
+ linux-rockchip@lists.infradead.org, kernel@collabora.com
+Subject: Re: [PATCH v4 4/4] mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
+In-Reply-To: <20240822212418.982927-5-detlev.casanova@collabora.com>
 References: <20240822212418.982927-1-detlev.casanova@collabora.com>
- <20240822212418.982927-4-detlev.casanova@collabora.com>
-Message-ID: <711f2561ac3d84bcd5bbe26723869b47@manjaro.org>
+ <20240822212418.982927-5-detlev.casanova@collabora.com>
+Message-ID: <26fe259f390a8015c3f08c6dc027711c@manjaro.org>
 X-Sender: dsimic@manjaro.org
 Content-Type: text/plain; charset=US-ASCII;
  format=flowed
@@ -59,37 +57,122 @@ Authentication-Results: ORIGINATING;
 
 Hello Detlev,
 
+Please see a comment below.
+
 On 2024-08-22 23:15, Detlev Casanova wrote:
-> From: Shawn Lin <shawn.lin@rock-chips.com>
+> On rk3576 the tunable clocks are inside the controller itself, removing
+> the need for the "ciu-drive" and "ciu-sample" clocks.
 > 
-> Per design recommendation, it'd better not try to use any phase
-> which is bigger than 270. Let's officially follow this.
-
-Would it be possible to provide a reference to the actual design
-specification?  This change affects all users of the dw_mmc-rockchip
-driver, so in case any regressions are found later, having as much
-detail as possible can only be beneficial.
-
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> (cherry picked from commit 2a53aab5cfa43065b2e979959d727332a8a03c03)
+> That makes it a new type of controller that has its own dt_parse 
+> function.
+> 
 > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
 > ---
->  drivers/mmc/host/dw_mmc-rockchip.c | 3 +++
->  1 file changed, 3 insertions(+)
+>  drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++++----
+>  1 file changed, 43 insertions(+), 5 deletions(-)
 > 
 > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
 > b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 2748f9bf2691..1458cb5fd5c7 100644
+> index 1458cb5fd5c7..7c8ccf5e71bc 100644
 > --- a/drivers/mmc/host/dw_mmc-rockchip.c
 > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -310,6 +310,9 @@ static int dw_mci_rk3288_execute_tuning(struct
+> @@ -410,7 +410,7 @@ static int dw_mci_rk3288_execute_tuning(struct
 > dw_mci_slot *slot, u32 opcode)
+>  	return ret;
+>  }
 > 
->  	/* Try each phase and extract good ranges */
->  	for (i = 0; i < priv->num_phases; ) {
-> +		/* Cannot guarantee any phases larger than 270 would work well */
-> +		if (TUNING_ITERATION_TO_PHASE(i, priv->num_phases) > 270)
-> +			break;
->  		rockchip_mmc_set_phase(host, true,
->  				       TUNING_ITERATION_TO_PHASE(
->  						i,
+> -static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+> +static int dw_mci_common_parse_dt(struct dw_mci *host)
+>  {
+>  	struct device_node *np = host->dev->of_node;
+>  	struct dw_mci_rockchip_priv_data *priv;
+> @@ -420,13 +420,29 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci 
+> *host)
+>  		return -ENOMEM;
+> 
+>  	if (of_property_read_u32(np, "rockchip,desired-num-phases",
+> -					&priv->num_phases))
+> +				 &priv->num_phases))
+>  		priv->num_phases = 360;
+> 
+>  	if (of_property_read_u32(np, "rockchip,default-sample-phase",
+> -					&priv->default_sample_phase))
+> +				 &priv->default_sample_phase))
+>  		priv->default_sample_phase = 0;
+> 
+> +	host->priv = priv;
+> +
+> +	return 0;
+> +}
+> +
+> +static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+> +{
+> +	struct dw_mci_rockchip_priv_data *priv;
+> +	int err;
+> +
+> +	err = dw_mci_common_parse_dt(host);
+> +	if (err)
+> +		return err;
+> +
+> +	priv = host->priv;
+> +
+>  	priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
+>  	if (IS_ERR(priv->drv_clk))
+>  		dev_dbg(host->dev, "ciu-drive not available\n");
+> @@ -435,13 +451,25 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci 
+> *host)
+>  	if (IS_ERR(priv->sample_clk))
+>  		dev_dbg(host->dev, "ciu-sample not available\n");
+> 
+> -	host->priv = priv;
+> -
+>  	priv->internal_phase = false;
+> 
+>  	return 0;
+>  }
+> 
+> +static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+> +{
+> +	struct dw_mci_rockchip_priv_data *priv;
+> +	int err = dw_mci_common_parse_dt(host);
+> +	if (err)
+> +		return err;
+> +
+> +	priv = host->priv;
+> +
+> +	priv->internal_phase = true;
+
+Defining priv, assigning it and using it seems rather redundant,
+when all that's needed is simple "host->priv->internal_phase = true"
+assignment instead.
+
+> +
+> +	return 0;
+> +}
+> +
+>  static int dw_mci_rockchip_init(struct dw_mci *host)
+>  {
+>  	int ret, i;
+> @@ -483,11 +511,21 @@ static const struct dw_mci_drv_data 
+> rk3288_drv_data = {
+>  	.init			= dw_mci_rockchip_init,
+>  };
+> 
+> +static const struct dw_mci_drv_data rk3576_drv_data = {
+> +	.common_caps		= MMC_CAP_CMD23,
+> +	.set_ios		= dw_mci_rk3288_set_ios,
+> +	.execute_tuning		= dw_mci_rk3288_execute_tuning,
+> +	.parse_dt		= dw_mci_rk3576_parse_dt,
+> +	.init			= dw_mci_rockchip_init,
+> +};
+> +
+>  static const struct of_device_id dw_mci_rockchip_match[] = {
+>  	{ .compatible = "rockchip,rk2928-dw-mshc",
+>  		.data = &rk2928_drv_data },
+>  	{ .compatible = "rockchip,rk3288-dw-mshc",
+>  		.data = &rk3288_drv_data },
+> +	{ .compatible = "rockchip,rk3576-dw-mshc",
+> +		.data = &rk3576_drv_data },
+>  	{},
+>  };
+>  MODULE_DEVICE_TABLE(of, dw_mci_rockchip_match);
