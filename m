@@ -1,41 +1,41 @@
-Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+Received: from sender3-op-o18.zoho.com (sender3-op-o18.zoho.com [136.143.184.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6597D188A03;
-	Fri, 23 Aug 2024 15:01:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D0481188CD5;
+	Fri, 23 Aug 2024 15:01:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.184.18
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724425262; cv=pass; b=u7WSqaX3mbMnmyNQsCfsrUdDYgH4K2ILwjztY+Fk38hB60H6s0HVunYkq6gwnpJVM1XqUqfUDPycj6kZaWgRFNmTXcC32PPP3YuqQO9fEnLe28EyzumZzS9IQlGDlZjYAj00rO+84ZJFxaopYUGVwq4qQqzpPKbcDu5687fR6+A=
+	t=1724425264; cv=pass; b=E83687XJyExjUZtXjtcjxmdrfE7xAfZDbJs7cUOuT+Y9Poufg7Nd4G4brXnwE74o0pFbg45tZYkHf5mFmEci5aJNagtcTzOFIh5dDazD+OTBStrV/JbZmgoHGDtzh5UQN/xFXSFJ5Mp3CO46mmTGkiobA4ukGxnVO3PtGjTwZqo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724425262; c=relaxed/simple;
-	bh=z2SUvqe63SJS2CE9p3BAbkn6k0MB7WbzeBcqpXPi0Fc=;
+	s=arc-20240116; t=1724425264; c=relaxed/simple;
+	bh=DIBbdgugoaqGS/xcZzNmp1wXRRm9H3rZ0QCzTmjaoTM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Z1/DcoF+i8QNPOwC4uE9GbV6wu5weL6p6bxHRKcsCToACbEqUPUl57C9XFcj0Thbp7CC+McTEWT/ht5rNsshnXVbjCqUKH+vFEzQI1cIG8JX2/M7kAJZi0UjmF7yBoNNhE/Ul2ksoXttg6hnNbzH0D8QaB2nIax8r2EGgtmPpok=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=DWX7qBb3; arc=pass smtp.client-ip=136.143.188.12
+	 MIME-Version; b=bwKRxjWltXWH6YW9cRrtrfN6zsrDufUcR71gw3kCTR9w1V+joaS83/DubpHgcdrW4SXg6xfJS1xApuUiveeAzaUzU+WHS7wVCGrQtLoFJZwHWavxCpKVCMtjOfopixYo5ATH/nqkn9mSAbZNy3dyjdqUnd/4Zs3Zxlo58LcOvig=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=C/Pj66kB; arc=pass smtp.client-ip=136.143.184.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="DWX7qBb3"
-ARC-Seal: i=1; a=rsa-sha256; t=1724425175; cv=none; 
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="C/Pj66kB"
+ARC-Seal: i=1; a=rsa-sha256; t=1724425183; cv=none; 
 	d=zohomail.com; s=zohoarc; 
-	b=V058mtWqfMNDjNrAC+8DcayYvMgJRA162Wx7goubjYNDwbjvW1YzgT088AFV273Z5mIL+9+r0V6X+BNe+9HIOsLfQn8i5UtiH5VvE4cS5gHATYvguKQ4n6TcpD4PbJ2zQuGG3Nlqzh7H9csXbWMTIIbNmRQ+xDzxzb2xjltIzxQ=
+	b=NOuj9tpyJlyuHNz4wlzP7V1Smwo33AHMkg2mH06IVZ9JEDA39zF+BCSVsfEmHkbKwkBRz7K4ypW5qWFE80m7mQ7QJASGh4ZvL6D3qulRIhxmd+CNrgSnxn2Lo3oSekPhuAPkbOpzdnta8jB6sJwl93Vh+70wZMZHkl3M+KFM+8I=
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1724425175; h=Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=R/iXHj9XRAj21UA46LKyISi4VV83aGdjDzXvd1VkqnI=; 
-	b=VXK+jAouPWKABAvyYyURLx1U1Qj89Ug5+ald6pNB1USC5OJy6AhuCx47Y5PG13/49FzQoHD8AdPUx8Rb73rqzkgjmnJ26WvVZKasS4SMti5aBnWi6WqjWVzpsx/DLw7VQWL/PNz1NQXT1yUVcZpDLA1gcPM40ry47oNo1yC4dtg=
+	t=1724425183; h=Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=n+lT+lQFXtyQN13g3p7lMw4uLgeQnD+T0M87znJXoWw=; 
+	b=QOpNCsv/xjrAKxjNEaF79SkDQR5FBbFXQDXPcMLRRaqawCuxL+q8sfG6Iz6WyrDCGYjaKAoxC//Skm6UYB4dZXVqqttm8wO5LQ18vR6CdD5Lq3ZFiI1o7224w0nsCf/kLWTXAI94WRdq+/mxedqPloWqqz6PdUDiz41YfC/V/bw=
 ARC-Authentication-Results: i=1; mx.zohomail.com;
 	dkim=pass  header.i=collabora.com;
 	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
 	dmarc=pass header.from=<detlev.casanova@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724425175;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724425183;
 	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
 	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Message-Id:Reply-To;
-	bh=R/iXHj9XRAj21UA46LKyISi4VV83aGdjDzXvd1VkqnI=;
-	b=DWX7qBb3qsEMDTCyIi8k169xFK0MknKIpRmZ3w7RXStWr7jSJLXZdjqCS6jWztNu
-	7QR3345vczOQtx3SJTO0F5q5JguXtrTqnW2qCe3sm/I0PgxD7sV5tkdM2LZ8cSH3Rwz
-	fR0+/K3GrOyhfMZSMb+kOAQrXbsiRQdJfrnYt3jI=
-Received: by mx.zohomail.com with SMTPS id 1724425173443655.5992718442818;
-	Fri, 23 Aug 2024 07:59:33 -0700 (PDT)
+	bh=n+lT+lQFXtyQN13g3p7lMw4uLgeQnD+T0M87znJXoWw=;
+	b=C/Pj66kBlDJVORm/apB2s6G7GhSkOOhUwz8/L88Lj2ynXIxfIV2UX59HCneWYeKE
+	OBJTffSe/vezVV7vtrLPMKjjONzQyR0qV2RLd2RhMJUtmjZzn8c8U76o1Nryzai/15F
+	EGd8qJesXciDY30JEEreLPk9yb45vVCWpnOAED5w=
+Received: by mx.zohomail.com with SMTPS id 172442518287180.79396950462285;
+	Fri, 23 Aug 2024 07:59:42 -0700 (PDT)
 From: Detlev Casanova <detlev.casanova@collabora.com>
 To: linux-kernel@vger.kernel.org
 Cc: Rob Herring <robh@kernel.org>,
@@ -89,9 +89,9 @@ Cc: Rob Herring <robh@kernel.org>,
 	linux-watchdog@vger.kernel.org,
 	kernel@collabora.com,
 	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v2 01/12] dt-bindings: arm: rockchip: Add ArmSoM Sige 5
-Date: Fri, 23 Aug 2024 10:52:28 -0400
-Message-ID: <20240823150057.56141-2-detlev.casanova@collabora.com>
+Subject: [PATCH v2 03/12] dt-bindings: i2c: i2c-rk3x: Add rk3576 compatible
+Date: Fri, 23 Aug 2024 10:52:30 -0400
+Message-ID: <20240823150057.56141-4-detlev.casanova@collabora.com>
 X-Mailer: git-send-email 2.46.0
 In-Reply-To: <20240823150057.56141-1-detlev.casanova@collabora.com>
 References: <20240823150057.56141-1-detlev.casanova@collabora.com>
@@ -104,30 +104,28 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-ZohoMailClient: External
 
-Add devicetree binding for the ArmSoM Sige 5 board.
+Just like RK356x and RK3588, RK3576 is compatible to the existing
+rk3399 binding.
 
 Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
 Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
 ---
- Documentation/devicetree/bindings/arm/rockchip.yaml | 5 +++++
- 1 file changed, 5 insertions(+)
+ Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
-index 1ef09fbfdfaf5..c3449d9646591 100644
---- a/Documentation/devicetree/bindings/arm/rockchip.yaml
-+++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
-@@ -49,6 +49,11 @@ properties:
-               - anbernic,rg-arc-s
-           - const: rockchip,rk3566
- 
-+      - description: ArmSoM Sige5 board
-+        items:
-+          - const: armsom,sige5
-+          - const: rockchip,rk3576
-+
-       - description: ArmSoM Sige7 board
-         items:
-           - const: armsom,sige7
+diff --git a/Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml b/Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml
+index 82b9d6682297b..a9dae5b52f286 100644
+--- a/Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml
++++ b/Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml
+@@ -38,6 +38,7 @@ properties:
+               - rockchip,rk3308-i2c
+               - rockchip,rk3328-i2c
+               - rockchip,rk3568-i2c
++              - rockchip,rk3576-i2c
+               - rockchip,rk3588-i2c
+               - rockchip,rv1126-i2c
+           - const: rockchip,rk3399-i2c
 -- 
 2.46.0
 
