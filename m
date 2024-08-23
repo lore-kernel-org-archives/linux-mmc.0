@@ -1,41 +1,41 @@
 Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 981E518A94F;
-	Fri, 23 Aug 2024 15:01:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A384418A94F;
+	Fri, 23 Aug 2024 15:01:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724425267; cv=pass; b=ox+Kxu2Xrk9F9lfz+OkEjiiLeBYE9g7opI7/Xa0evGmQQbwb5z/d5B/yANuPp1x6vzr2D1u5XpsxvsMebkggPmeyaPAnM5GZQlVbbSYG7oBBuhjiaoRtZvrf/HkRnB4lxjWdo/+6Mh05wSSej7QHD1Og7VTgxbU4yKdKIpZFngQ=
+	t=1724425272; cv=pass; b=jVlJJcfOH/b8NHJ44BOq1MUKjpcJnR2l4XC08C0H3KV2EQpnkbXx8upTsmwfUpjdlFYgTakRs/hvYnIsv1KXYq0qrPXTYdY1ogGRArn1gkwH9IdKcTpy8YYx+J0JixYR6oEOu4MIBERWUIW5lMt5DL340g2cG/jdA2Mzp1iC7Kk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724425267; c=relaxed/simple;
-	bh=WoxSM+k+cuevYDguM4MWkRGwCDOOhDcmxwW0zbfkaZ4=;
+	s=arc-20240116; t=1724425272; c=relaxed/simple;
+	bh=m3TyT+VMNTcZXHRsQYzqaiW8pAH1HRv7e4XuPh7QtP0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=UslAn3xkRIZKyfebnWIq2r/sn4mLaszfiGhbu8/MrQvPN1yFnMBsrpXx7twEYVTY9Xs8yyxGC4mCB9iOr4Zzakdi9SQtyzFqCd1DDnPyUfecqRPzNrWTl4BbWddcIHPdy5cI1gxFdqikU/M66np8UuYvQKbB+rVfrij7UvlLf8U=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=e5098YGn; arc=pass smtp.client-ip=136.143.188.12
+	 MIME-Version; b=Guw4fDhvmoUr/TKhpIppIsZV8e8gEXYsJOTx4nIXmFJ/LyQXbuzdt/Gcm7nPHvKLhiRyUh49FPSNVBtWt19i1uJZHUUs+MbsFxuqVO+txiUUmef7Nbk6aFprWOq2O4uhYrkGfjIV84F3JRa0cOKjK382Nq+rhoDFlhOdVE1w9Ww=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=N/fwxotj; arc=pass smtp.client-ip=136.143.188.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="e5098YGn"
-ARC-Seal: i=1; a=rsa-sha256; t=1724425179; cv=none; 
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="N/fwxotj"
+ARC-Seal: i=1; a=rsa-sha256; t=1724425189; cv=none; 
 	d=zohomail.com; s=zohoarc; 
-	b=DsAul3WDdchZ4uZ5AlZTxQxzkGNpoIlnoKZrAFwvA6BRCfst6gFWToRCsCYamg0GsSZH/K4mdy8I0BkWGkCSjVO+68xkTBjO0on/AV2BwL3Wk7ktHWpQC7nqKoDAXK56Ej1wmKlxN7nR6rCZ/3Or/G7oAF0eGOFZm/8ktdFCFJg=
+	b=LgIcx5p6wD9hOLbHxWYJAm4BFAoLoevlU3iP6VjiIJwkrziOFsIKmH6Goa/MylleKe8oA3F+bXMtOwL/0uGcMtPcA+dDeKqH/KU9XFv5Jyj0EJecvm/5vm/cLfKq16g1uIRYJqoP4mzbOI9OzelnmIkOEUQzX0NPBT0kTIhWW7Y=
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1724425179; h=Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=6ajTO7IZ6dJnI29NzkSoxfUKtlwc97L8eOrSr1cciEo=; 
-	b=U9UUO0/4H8TlUni80jLQEMy/LIIE7+n3Q309Q+lXKE5AEERZSNqO7VjbGuZXvQc0dEXeut8w1Qe18nEHqiHBBCrEUzzflFHvGlbb1zLawFMSCNKlCl0Z2JcymvgqhJWBnsWQtz9oTCFCAI19Wb28O2Z9UW76ifQbKG/MD3Bp1z4=
+	t=1724425189; h=Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=mdnBGIhQBYoBW+X6afozEXBo8GSP0k2RnpEEvLsjO1w=; 
+	b=kpVfYztzlNMSltKWpAaKuCEWM3bl/fv2P1WtfkUzFOcNE1T96ZWBJ1I2tWhZiP+wbbYDdBwwMOrdq53k0kpQhFbK16UPHMrVHANd9uUcTeh8CIxkCMf3MpE94ijQYDe9M+Mb+IzUAtQ7SnIygCWaQ4WomOAPYYa5DYtpa4nUQfY=
 ARC-Authentication-Results: i=1; mx.zohomail.com;
 	dkim=pass  header.i=collabora.com;
 	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
 	dmarc=pass header.from=<detlev.casanova@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724425179;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724425189;
 	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
 	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Message-Id:Reply-To;
-	bh=6ajTO7IZ6dJnI29NzkSoxfUKtlwc97L8eOrSr1cciEo=;
-	b=e5098YGnBU7nMrejFEsZyhYexCJ3KmfF/CyYaNwrrjbmewbLFXEYAnCymG5ZrxKa
-	Whes1tcwtWDXzhfIjtc6c7fj7Qb1g2AKOmrPfIv0naALWRZetuc1269UH6GhzQswjmD
-	0GXf/ngWnAUJLuyVDav1r1I8sasgpErDTA3zgL9Q=
-Received: by mx.zohomail.com with SMTPS id 1724425178195358.9270958384599;
-	Fri, 23 Aug 2024 07:59:38 -0700 (PDT)
+	bh=mdnBGIhQBYoBW+X6afozEXBo8GSP0k2RnpEEvLsjO1w=;
+	b=N/fwxotjELTMxNkAQ74RvewcOni4xIt8f6D+w71TBd1ATP0rlCZoeiPoo1qYlQyA
+	XXq1w7qIaDMK0AKmWrerf/fJlTpdw91hpPh7RSX0hLhNeaj3cGJZthWPS2KHj2gC9KW
+	2+xWc0UuzzIfU1mj+qZxg57CMga0vU5aMVirgeqk=
+Received: by mx.zohomail.com with SMTPS id 1724425187513187.44987912681415;
+	Fri, 23 Aug 2024 07:59:47 -0700 (PDT)
 From: Detlev Casanova <detlev.casanova@collabora.com>
 To: linux-kernel@vger.kernel.org
 Cc: Rob Herring <robh@kernel.org>,
@@ -89,9 +89,9 @@ Cc: Rob Herring <robh@kernel.org>,
 	linux-watchdog@vger.kernel.org,
 	kernel@collabora.com,
 	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v2 02/12] dt-bindings: arm: rockchip: Add rk3576 compatible string to pmu.yaml
-Date: Fri, 23 Aug 2024 10:52:29 -0400
-Message-ID: <20240823150057.56141-3-detlev.casanova@collabora.com>
+Subject: [PATCH v2 04/12] dt-bindings: iio: adc: Add rockchip,rk3576-saradc string
+Date: Fri, 23 Aug 2024 10:52:31 -0400
+Message-ID: <20240823150057.56141-5-detlev.casanova@collabora.com>
 X-Mailer: git-send-email 2.46.0
 In-Reply-To: <20240823150057.56141-1-detlev.casanova@collabora.com>
 References: <20240823150057.56141-1-detlev.casanova@collabora.com>
@@ -104,34 +104,31 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-ZohoMailClient: External
 
-Add the compatible for the pmu mfd on rk3576.
+Add rockchip,rk3576-saradc compatible string.
+The saradc on RK3576 is compatible with the one on RK3588, so they are
+used together in an arm of the oneOf.
 
 Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Acked-by: Heiko Stuebner <heiko@sntech.de>
 ---
- Documentation/devicetree/bindings/arm/rockchip/pmu.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ Documentation/devicetree/bindings/iio/adc/rockchip-saradc.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/arm/rockchip/pmu.yaml b/Documentation/devicetree/bindings/arm/rockchip/pmu.yaml
-index b79c81cd9f0e6..932f981265ccb 100644
---- a/Documentation/devicetree/bindings/arm/rockchip/pmu.yaml
-+++ b/Documentation/devicetree/bindings/arm/rockchip/pmu.yaml
-@@ -26,6 +26,7 @@ select:
-           - rockchip,rk3368-pmu
-           - rockchip,rk3399-pmu
-           - rockchip,rk3568-pmu
-+          - rockchip,rk3576-pmu
-           - rockchip,rk3588-pmu
-           - rockchip,rv1126-pmu
- 
-@@ -43,6 +44,7 @@ properties:
-           - rockchip,rk3368-pmu
-           - rockchip,rk3399-pmu
-           - rockchip,rk3568-pmu
-+          - rockchip,rk3576-pmu
-           - rockchip,rk3588-pmu
-           - rockchip,rv1126-pmu
-       - const: syscon
+diff --git a/Documentation/devicetree/bindings/iio/adc/rockchip-saradc.yaml b/Documentation/devicetree/bindings/iio/adc/rockchip-saradc.yaml
+index aa24b841393c0..fd93ed3991e05 100644
+--- a/Documentation/devicetree/bindings/iio/adc/rockchip-saradc.yaml
++++ b/Documentation/devicetree/bindings/iio/adc/rockchip-saradc.yaml
+@@ -16,6 +16,9 @@ properties:
+       - const: rockchip,rk3066-tsadc
+       - const: rockchip,rk3399-saradc
+       - const: rockchip,rk3588-saradc
++      - items:
++          - const: rockchip,rk3576-saradc
++          - const: rockchip,rk3588-saradc
+       - items:
+           - enum:
+               - rockchip,px30-saradc
 -- 
 2.46.0
 
