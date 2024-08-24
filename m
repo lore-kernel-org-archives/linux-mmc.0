@@ -1,34 +1,34 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A42E14D6E9;
-	Sat, 24 Aug 2024 05:18:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC5FF156C63;
+	Sat, 24 Aug 2024 05:18:29 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724476706; cv=none; b=bx6nKEfCCMXercvncMLPWH6LLr4Acmmx+mhylb94OaOavni+BGnntWj8BI0Od6F3+RWvpj9peXell94rF3EHpVePgluozOEvP0DKupqYZ58WfIW3LPI+dzMvWHrgTaSNTQoK9nF5w0dfXE7WdKLb3+pzs9f0ohV4475AWAgADXI=
+	t=1724476709; cv=none; b=ukyH6r/hqtF0Le0DoFVqbWQa5uK2a7xkXxgRYCMzmsL7Uy+EM7FFOqN4SSbZTKQIZE5usFlBdFbZJ/59otSVxr8xsCa8xOUW150rs3aTrF9UW23T/A6xnVrxXajHqx6Ljqs9+rbA/TAgk5zmc36XITYLIjd5rnX6GFq3ny/2eaI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724476706; c=relaxed/simple;
-	bh=O1B7+CmSHgW5HOIQKy1tylg4RwfZLOU9zyiktNWEhuM=;
+	s=arc-20240116; t=1724476709; c=relaxed/simple;
+	bh=g4EMx2RE+RHxp7QbzUJInN+TXL/ZyIDsFo+GFa8RueE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=kuwHwxuiZS1iivnjoTfKeNPDrC+Kc73gRpPA7F574dTH2IrKCbjAvKHqqQ6w/35pmANU4Zf0OZ2bhJzpKCN4B2i7oAPANcbawmooXzq/7U6oRH0uE5jEgcbEa1lvFEJeBotX3YC8b6lcvV1lPk59b7PDcu18ze887gg909hcmtY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=GyVegh1T; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=u9NCBJPPjkGwgkuo+iU/9tPqLogMnxjbGcP3k71QN1xg8xhakcgYYDpuaISeVxh+lPrfk9B8uQXAg596xOErV3Far5ha5h93ekSfrJWj3g3v9TGjHylQrOsL9TXG2zkg5ELplc+xpwolCVaUnj8iLm2uBOf83brNDBwFw8eHLNc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b=tEzT3y3r; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="GyVegh1T"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A1BEBC32781;
-	Sat, 24 Aug 2024 05:18:25 +0000 (UTC)
+	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="tEzT3y3r"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FF64C4AF11;
+	Sat, 24 Aug 2024 05:18:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-	s=korg; t=1724476706;
-	bh=O1B7+CmSHgW5HOIQKy1tylg4RwfZLOU9zyiktNWEhuM=;
+	s=korg; t=1724476709;
+	bh=g4EMx2RE+RHxp7QbzUJInN+TXL/ZyIDsFo+GFa8RueE=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=GyVegh1TQfQYO2n/6SrgHILMFuu/1wuXh2XhuVD7OwJDNY0p02JvTVRZHAlJfAZm6
-	 G71zAD5P88vdUeihb9eMM1v7o5k2YoGZSjKA6pJst9viFIcYrAoY0CKDYE6ovgPGj+
-	 RzyzsNNIa1yhddCzsmPDAutoeQkZm7E0zQo29iLw=
-Date: Sat, 24 Aug 2024 11:13:12 +0800
+	b=tEzT3y3rA5pcNXrPB9WaU4GC2axnnSNaaM19k4xOqVkH4hoBDgR74xjEuVTfTzQO+
+	 3xi+dshn+YiINI+PYVhAZpl0A5vqgD9eB++ep+PCkRKAx0jOmYm/B4RA1UMFxkUNOM
+	 FUFYXTfLwglgzwxdwiwXjUMeWoXJSi+k/6Y4p4SQ=
+Date: Sat, 24 Aug 2024 11:13:29 +0800
 From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To: Jens Wiklander <jens.wiklander@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-	op-tee@lists.trustedfirmware.org,
-	Ulf Hansson <ulf.hansson@linaro.org>,
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jens Wiklander <jens.wiklander@linaro.org>,
+	Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org,
 	Shyam Saini <shyamsaini@linux.microsoft.com>,
 	Linus Walleij <linus.walleij@linaro.org>,
 	Jerome Forissier <jerome.forissier@linaro.org>,
@@ -36,53 +36,48 @@ Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
 	Ilias Apalodimas <ilias.apalodimas@linaro.org>,
 	Bart Van Assche <bvanassche@acm.org>,
 	Randy Dunlap <rdunlap@infradead.org>,
-	Ard Biesheuvel <ardb@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-	Manuel Traut <manut@mecka.net>,
-	Mikko Rapeli <mikko.rapeli@linaro.org>,
-	Tomas Winkler <tomas.winkler@intel.com>,
-	Alex =?iso-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>
-Subject: Re: [PATCH v9 1/4] rpmb: add Replay Protected Memory Block (RPMB)
- subsystem
-Message-ID: <2024082403-preseason-preacher-a709@gregkh>
+	Ard Biesheuvel <ardb@kernel.org>, Manuel Traut <manut@mecka.net>,
+	Mikko Rapeli <mikko.rapeli@linaro.org>
+Subject: Re: [PATCH v9 0/4] Replay Protected Memory Block (RPMB) subsystem
+Message-ID: <2024082414-doily-camisole-b5c7@gregkh>
 References: <20240814153558.708365-1-jens.wiklander@linaro.org>
- <20240814153558.708365-2-jens.wiklander@linaro.org>
+ <CAPDyKFqBuQ8uUdeThRaJtd2CYNWMmpLCEDxfO+znhwjPamH+Gg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20240814153558.708365-2-jens.wiklander@linaro.org>
+In-Reply-To: <CAPDyKFqBuQ8uUdeThRaJtd2CYNWMmpLCEDxfO+znhwjPamH+Gg@mail.gmail.com>
 
-On Wed, Aug 14, 2024 at 05:35:55PM +0200, Jens Wiklander wrote:
-> A number of storage technologies support a specialised hardware
-> partition designed to be resistant to replay attacks. The underlying
-> HW protocols differ but the operations are common. The RPMB partition
-> cannot be accessed via standard block layer, but by a set of specific
-> RPMB commands. Such a partition provides authenticated and replay
-> protected access, hence suitable as a secure storage.
+On Wed, Aug 21, 2024 at 11:23:03PM +0200, Ulf Hansson wrote:
+> On Wed, 14 Aug 2024 at 17:36, Jens Wiklander <jens.wiklander@linaro.org> wrote:
+> >
+> > Hi,
+> >
+> > This patch set is getting ready to be queued for the next merge window. The
+> > issues reported by Mikka in the v7 patch set has been resolved, the issues
+> > turned out to be outside of the v7 patch set relating to configuration in
+> > the secure world. I'm planning a pull request to arm-soc, but before that
+> > I'd rather have acks or at least an OK for:
+> > - "rpmb: add Replay Protected Memory Block (RPMB) subsystem" by Greg
+> > - "mmc: block: register RPMB partition with the RPMB subsystem" by Ulf
+> >
+> > Arnd, please let me know if anything else is missing.
 > 
-> The initial aim of this patch is to provide a simple RPMB driver
-> interface which can be accessed by the optee driver to facilitate early
-> RPMB access to OP-TEE OS (secure OS) during the boot time.
+> Greg, Jens,
 > 
-> A TEE device driver can claim the RPMB interface, for example, via
-> rpmb_interface_register() or rpmb_dev_find_device(). The RPMB driver
-> provides a callback to route RPMB frames to the RPMB device accessible
-> via rpmb_route_frames().
+> To help out with the merging strategy, I don't mind queuing this whole
+> series via my mmc tree. It would also be nice to let it cook in
+> linux-next for while, via my next branch.
 > 
-> The detailed operation of implementing the access is left to the TEE
-> device driver itself.
-> 
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
-> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
-> Signed-off-by: Jens Wiklander <jens.wiklander@linaro.org>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Tested-by: Manuel Traut <manut@mecka.net>
-> ---
+>  From my point of view this looks good to me now, but please let me
+> know if you prefer a different route or if you have any further
+> comments.
 
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+No objection from me, please take it through your tree, makes it simpler
+for me :)
+
+greg k-h
