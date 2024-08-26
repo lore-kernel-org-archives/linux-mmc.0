@@ -1,167 +1,135 @@
-Received: from sender4-op-o14.zoho.com (sender4-op-o14.zoho.com [136.143.188.14])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 609327F7FC;
-	Mon, 26 Aug 2024 18:45:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.14
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724697915; cv=pass; b=MvwlzpyzxAXDFFjy1C43kKkuBGf+TjZ9BKOe46oCL1Y3S+muse0afAOFNBBrPJRuIOODsTQeRttdlfCd/FHzXAmrrYzPa0ZCLXO26TqQVTPFeDFSs1eCLZFWkIONnmdpi11x+/zxvuWsxOSgEIIf2XwAYG+01weB58t39ezBUrs=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724697915; c=relaxed/simple;
-	bh=iwXcvEdMp95hUF7bQpTZJXgamO6d4IeH0JOuuyaviW8=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=UBHZXIcwy1tqTFoeOgRWCM+pBrVnWJVt82YQF8CrmJGTK17Q/CWWuU4bfm1qNefYRzxQAEllpbxcpkW5ifEjmE8lyOImIRfWxhQphdZvveYSVsm19HbXnwF2d/Kc+VpqN4nYkXSeazAnthjQyq4/uLHk6XQXeBBXldbKfkwTKNQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=QOFT4k+Z; arc=pass smtp.client-ip=136.143.188.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BB1F2B9C5
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 19:32:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1724700750; cv=none; b=QfGR5AfpHh6SiCZPufILH3bFUaJTJRnZkh7xJtJJ8Vy/YLQnK1l3ajItU27iFtmPzRSmZtmCDYChbwW08ZrPjh6lrEuGd/H81BW/ddoosHDVhFF5QdvYBcm7DsvWwPq0nA+wcen6NuvfM3pzjwJysBMMw0DMtXVshFY9KdVRaeI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1724700750; c=relaxed/simple;
+	bh=0d3e3xnQARHBnzJ3/KT8Z3pjx81V4NfO7llFRCrEoDE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=YUmRzfEE8/Q7bUgDqanfSzgTFLQDFjSnnGroDeOJfzVDMVlHuetFiBZJrWiIifl3RNdjz6oYtpN406I3HtN3jaOVrezHx/BC1FJiNzWsyP9MAb495padJUDwAMVt8pQlo1T7da/29P1l992QQFsPxK8RJCYr4jnsU8rLzmt3Dq0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=iagpFL7/; arc=none smtp.client-ip=192.198.163.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="QOFT4k+Z"
-ARC-Seal: i=1; a=rsa-sha256; t=1724697879; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=bgQwwXn15Aoufd+BzwNeginJ3mhUEPOciGcomXfAvREr2GMq/xAv7D1LEyhS8YFautIqkFkJZ1KeT7tdIVDwkmktmut5MwAlHlsx+GXw9WV145sVCs+CjXzqDb0OfPeYppW5lts6l6usoLa5uGhrqxZ7cSmEDbSAbwpPJP2nfwo=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1724697879; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=mlnYUtGPIbd9GPhhmlk+YwVhJr5+Jj0FaWL8g6QYGw8=; 
-	b=L5emk3qgbcXwjbvIy5cjN2Lw/xK8eQqkVSiyLGtGcz16XGNGwyRWF5A71fdxVZ/pMOGr3VAi1c5YKYqjuaIG3ajwLbDRv1i+c49dWs9S/6xttUCs+FhePz3q31ADQvx/T39x4g3RAoval1VybBY30tf98wjCMoWTUQ/omBzgdS4=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
-	dmarc=pass header.from=<detlev.casanova@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724697879;
-	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=mlnYUtGPIbd9GPhhmlk+YwVhJr5+Jj0FaWL8g6QYGw8=;
-	b=QOFT4k+ZE6zA8KdK0rDSS8lu2HnhpP6tbxo+AU3GzG+c/C1fvz5juyyXxAe1YDke
-	Wspd5eYM/u3H437m7kRjNe+hSNqw9mhf+USIVhtTLhiDjn6lt5WVYltwxi99PMwTuvD
-	Dq2GGn04YSJK2wOHMvtqkM0E4bEtFdsnQaG9Iy18=
-Received: by mx.zohomail.com with SMTPS id 1724697878497938.876702576403;
-	Mon, 26 Aug 2024 11:44:38 -0700 (PDT)
-From: Detlev Casanova <detlev.casanova@collabora.com>
-To: Dragan Simic <dsimic@manjaro.org>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com,
- Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4 2/4] mmc: dw_mmc-rockchip: Add internal phase support
-Date: Mon, 26 Aug 2024 14:44:36 -0400
-Message-ID: <1999169.usQuhbGJ8B@bootstrap>
-In-Reply-To: <b57017bca1a4a5fe558556142a9cec3d@manjaro.org>
-References:
- <20240822212418.982927-1-detlev.casanova@collabora.com>
- <4943132.31r3eYUQgx@trenzalore>
- <b57017bca1a4a5fe558556142a9cec3d@manjaro.org>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="iagpFL7/"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1724700747; x=1756236747;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=0d3e3xnQARHBnzJ3/KT8Z3pjx81V4NfO7llFRCrEoDE=;
+  b=iagpFL7/RHEUNe+xMxHz1VM6eGi8Cpatngh/0my2ayOREucpPikgvklh
+   FkV7SstbOFqMJVWuoGJfYssdHE1d8WNwln1+XaOxd+L+gUdqXh+gbOuwf
+   96uVS4QxUqDGCnSzj5Fq5yDSV3M1xv3ubLgU2PyTvXjEsXiO/f20W5EDL
+   dUvfaNFP8wO44OTuljbdAy5OxmexR5SYoy8uhxIDpGxNPrFn3rO2l8VEN
+   Nbm6QM4xB/EMlnjYgg5Z9q9fd2d2UbXFu9LmmY0+SjS3cjKSZ5PNOHCDR
+   /Wl9XHnK43tjFb0uRZJiwQ2iHyhUu1dc0nI6NFc22bojzscEiteyNk/9l
+   Q==;
+X-CSE-ConnectionGUID: jUWGYhTYSyy0LWwvNbrkEg==
+X-CSE-MsgGUID: 7dWcjKW3QwqDjUE6JN95ww==
+X-IronPort-AV: E=McAfee;i="6700,10204,11176"; a="40649627"
+X-IronPort-AV: E=Sophos;i="6.10,178,1719903600"; 
+   d="scan'208";a="40649627"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 12:32:26 -0700
+X-CSE-ConnectionGUID: 4JvIRGm7T5ux+8XFPNxewA==
+X-CSE-MsgGUID: QONRKAcHScKhmvGz6J6xLA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,178,1719903600"; 
+   d="scan'208";a="62668840"
+Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
+  by fmviesa009.fm.intel.com with ESMTP; 26 Aug 2024 12:32:25 -0700
+Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1sifRv-000HXM-0j;
+	Mon, 26 Aug 2024 19:32:23 +0000
+Date: Tue, 27 Aug 2024 03:31:33 +0800
+From: kernel test robot <lkp@intel.com>
+To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: oe-kbuild-all@lists.linux.dev, Adrian Hunter <adrian.hunter@intel.com>,
+	Ricky WU <ricky_wu@realtek.com>, Avri Altman <avri.altman@wdc.com>
+Subject: Re: [PATCH v4 6/9] mmc: host: Add close-ended Ext memory addressing
+Message-ID: <202408270315.TTjSYp25-lkp@intel.com>
+References: <20240825074141.3171549-7-avri.altman@wdc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
-X-ZohoMailClient: External
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240825074141.3171549-7-avri.altman@wdc.com>
 
-On Monday, 26 August 2024 10:39:58 EDT Dragan Simic wrote:
-> Hello Detlev,
-> 
-> On 2024-08-23 15:34, Detlev Casanova wrote:
-> > On Friday, 23 August 2024 01:41:44 EDT Dragan Simic wrote:
-> >> Hello Detlev,
-> >> 
-> >> Please see a comment below.
-> >> 
-> >> On 2024-08-22 23:15, Detlev Casanova wrote:
-> >> > From: Shawn Lin <shawn.lin@rock-chips.com>
-> >> > 
-> >> > Some Rockchip devices put the phase settings into the dw_mmc
-> >> > controller.
-> >> > 
-> >> > When the feature is present, the ciu-drive and ciu-sample clocks are
-> >> > not used and the phase configuration is done directly through the mmc
-> >> > controller.
-> >> > 
-> >> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> >> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
-> >> > Acked-by: Shawn Lin <shawn.lin@rock-chips.com>
-> >> > ---
-> >> > 
-> >> >  drivers/mmc/host/dw_mmc-rockchip.c | 171 +++++++++++++++++++++++++++--
-> >> >  1 file changed, 160 insertions(+), 11 deletions(-)
-> >> > 
-> >> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
-> >> > b/drivers/mmc/host/dw_mmc-rockchip.c
-> >> > index b07190ba4b7a..2748f9bf2691 100644
-> >> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> >> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> >> > @@ -15,7 +15,17 @@
-> >> > 
-> >> >  #include "dw_mmc.h"
-> >> >  #include "dw_mmc-pltfm.h"
-> >> > 
-> >> > -#define RK3288_CLKGEN_DIV	2
-> >> > +#define RK3288_CLKGEN_DIV		2
-> >> > +#define SDMMC_TIMING_CON0		0x130
-> >> > +#define SDMMC_TIMING_CON1		0x134
-> >> > +#define ROCKCHIP_MMC_DELAY_SEL		BIT(10)
-> >> > +#define ROCKCHIP_MMC_DEGREE_MASK	0x3
-> >> > +#define ROCKCHIP_MMC_DEGREE_OFFSET	1
-> >> > +#define ROCKCHIP_MMC_DELAYNUM_OFFSET	2
-> >> > +#define ROCKCHIP_MMC_DELAYNUM_MASK	(0xff <<
-> >> > ROCKCHIP_MMC_DELAYNUM_OFFSET)
-> >> > +#define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC	60
-> >> > +#define HIWORD_UPDATE(val, mask, shift) \
-> >> > +		((val) << (shift) | (mask) << ((shift) + 16))
-> >> > 
-> >> >  static const unsigned int freqs[] = { 100000, 200000, 300000, 400000
-> >> > 
-> >> > };
-> >> > 
-> >> > @@ -24,8 +34,143 @@ struct dw_mci_rockchip_priv_data {
-> >> > 
-> >> >  	struct clk		*sample_clk;
-> >> >  	int			default_sample_phase;
-> >> >  	int			num_phases;
-> >> > 
-> >> > +	int			internal_phase;
-> >> > 
-> >> >  };
-> >> 
-> >> It might be good to declare internal_phase as "unsigned int
-> >> internal_phase:1",
-> >> i.e. as a bit field, which isn't going to save some memory in this
-> >> particular
-> >> case, but it would show additional attention to detail.
-> > 
-> > In that case, I would go with a bool instead of int, that makes things
-> > even clearer.
-> 
-> My suggestion to use "unsigned int internal_phase:1" actually takes
-> inspiration from the ASoC code, in which such bit fields are used
-> quite a lot, even when using them actually doesn't save space.
-> 
-> In this particular case, using plain bool would make sense, but I
-> still think that using an "unsigned int internal_phase:1" bit field
-> would fit better, because it would show the intention to possibly
-> save a bit of RAM at some point.  OTOH, I don't think that using
-> bool with such bit fields would actually work cleanly, because bool
-> actually resolves to int that's a signed type.
+Hi Avri,
 
-I wouldn't use bool with a bit field of course. I've always considered using 
-bit fileds only for structs that must have a certain format, like a header 
-format definition.
+kernel test robot noticed the following build errors:
 
-For me, it is better to use "bool internal_phase" so that it is obvious that 
-the feature can be on or off when reading the code.
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.11-rc5 next-20240826]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-When using bit fields with a struct that is not marked as "__packed", I 
-immediately think that there could be a bug there and wonder why the bit field 
-is used, not really thinking "the dev wanted to show they cared about memory 
-usage".
-But I guess that is all about preferences. In the end, it won't change how it 
-works.
+url:    https://github.com/intel-lab-lkp/linux/commits/Avri-Altman/mmc-sd-SDUC-Support-Recognition/20240826-161527
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20240825074141.3171549-7-avri.altman%40wdc.com
+patch subject: [PATCH v4 6/9] mmc: host: Add close-ended Ext memory addressing
+config: arc-randconfig-002-20240827 (https://download.01.org/0day-ci/archive/20240827/202408270315.TTjSYp25-lkp@intel.com/config)
+compiler: arceb-elf-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240827/202408270315.TTjSYp25-lkp@intel.com/reproduce)
 
-Detlev.
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202408270315.TTjSYp25-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   drivers/mmc/host/sdhci.c: In function 'sdhci_get_sbc_ext':
+>> drivers/mmc/host/sdhci.c:1797:24: error: implicit declaration of function 'mmc_card_ult_capacity' [-Werror=implicit-function-declaration]
+    1797 |         bool is_sduc = mmc_card_ult_capacity(host->mmc->card);
+         |                        ^~~~~~~~~~~~~~~~~~~~~
+   cc1: some warnings being treated as errors
 
 
+vim +/mmc_card_ult_capacity +1797 drivers/mmc/host/sdhci.c
+
+  1793	
+  1794	static struct mmc_command *sdhci_get_sbc_ext(struct sdhci_host *host,
+  1795						     struct mmc_command *cmd)
+  1796	{
+> 1797		bool is_sduc = mmc_card_ult_capacity(host->mmc->card);
+  1798	
+  1799		if (is_sduc) {
+  1800			/*  Finished CMD22, now send actual command */
+  1801			if (cmd == cmd->mrq->ext)
+  1802				return cmd->mrq->cmd;
+  1803		}
+  1804	
+  1805		/* Finished CMD23 */
+  1806		if (cmd == cmd->mrq->sbc) {
+  1807			if (is_sduc) {
+  1808				/* send CMD22 after CMD23 */
+  1809				if (WARN_ON(!cmd->mrq->ext))
+  1810					return NULL;
+  1811				else
+  1812					return cmd->mrq->ext;
+  1813			} else {
+  1814				/* Finished CMD23, now send actual command */
+  1815				return cmd->mrq->cmd;
+  1816			}
+  1817		}
+  1818	
+  1819		return NULL;
+  1820	}
+  1821	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
