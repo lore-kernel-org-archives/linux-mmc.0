@@ -1,206 +1,190 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D90702E414;
-	Mon, 26 Aug 2024 10:16:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8CF11482E3;
+	Mon, 26 Aug 2024 11:36:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724667409; cv=none; b=QpjjkhC787tbsiPxcKzeBITDjGwZ4obZEych4ig12LMXrdIuTNI9RGZFncDXWaJgMiGRqqdL+JoVPyOBYAszXpsBhO6ambzb8q8aj/rrP5J6kYoP2we18RYRv4wvxsVR3NyGldBIuxMXqafXGn/gHbz0Jytm7ZEpR6+EaCSzuFU=
+	t=1724672166; cv=none; b=EtlAgo33VArRfnECt/hfBuP8d8kdDhTcbZ10/MYQ+/xMj1kbP9P22vTv6yIblSQo6tR5ZlnzmBvUuJknzzr0xoFbaktef2MAY85U7ImNAXmpurw2cIaPw6N6ux7tfQqt4e2z6Cm7xS/Jd/hsW2ov6SIjCHy1t0mg+ZMM7e8XeTo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724667409; c=relaxed/simple;
-	bh=s/mlalkLPncv8zb+gxPeAG4H30+mUKO0o7jjrS/xTFE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=mZ+XmAWI3nJjojt00zDcPBwh1C1Y7TRbh+fFTk421JgcpFJqfqGwoBzh1zbg0KlgmS4i5NdwbW/5PsSd3yfIL5SV1+D40G6X5kAIlVUpMLarrNSpwt60YeXNsFTFvNnrM3GzjcLSP0djjn6E8lkkamWMI4GQXbvRRPSyszcj0Is=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YGAI2jN0; arc=none smtp.client-ip=192.198.163.12
+	s=arc-20240116; t=1724672166; c=relaxed/simple;
+	bh=5sAkNko9+nQJZifSZ42etJ+PTBpZ7HtaPHbIKOOPcRM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=eQthDEMmjAsEtNLc3W9taqOlpZ/VrcTkVi6pOYjD0GXNyPu9DWuBXEKJQ7B8DV/xvhlhPdDPrZLybJr20pozPcdy4AbybBHJ8CbdvMM1oURlNviUDE1BPZ7OBSCz5nRXu0fUyc6S0AsYQILHY3835/5IFVUC92uHjMLIv6K0f6Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=RSDmglr9; arc=none smtp.client-ip=192.198.163.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YGAI2jN0"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="RSDmglr9"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1724667408; x=1756203408;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=s/mlalkLPncv8zb+gxPeAG4H30+mUKO0o7jjrS/xTFE=;
-  b=YGAI2jN0gCpKlEFfSGk3c/6F+JvVSAQ3EsNp2V4p46cEos98CjbOvIrL
-   R/GbbHoJ2FaNHVhlBuqHU00Ea71nBEAVcVwAd88/1dwCGSlz45vcRr1Kc
-   3wzQBuuSKPClQ0BTWm9/0DkbpCoxFhbOCXKdjwn7wh7uDKfkRTjnYJUWz
-   F58+3xDiBjJxMzQ6+3uNNfXZwO4PgwwvYiy/3UQmwOG+IIsM/lSiu7ggH
-   iy1FwnttEpXbz5ZBkntKR6b3HJegNsZ/LeLlei7NBVFWSupK2ESH04miW
-   qu7MXP9BeVQ6hNMWsjltBYRi1gzFX2XNoDd9JniHlTX6rdik5oL85/heH
-   g==;
-X-CSE-ConnectionGUID: 6kY8azfCTnagIgfkjl1c4Q==
-X-CSE-MsgGUID: iC1qSvv2T7KjneAvLlB5/Q==
-X-IronPort-AV: E=McAfee;i="6700,10204,11175"; a="26958882"
+  t=1724672164; x=1756208164;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=5sAkNko9+nQJZifSZ42etJ+PTBpZ7HtaPHbIKOOPcRM=;
+  b=RSDmglr9DHoGRMnuzdet9mQsUZVSbhPzsqGgbW1PqPjoCnQnk5vuS2EB
+   2GXPL9wtgUdn4HGI7N2eDvBSqah6WbI2by1SFeB9RcwsUYvPYOPYJXlRm
+   lOehfUQPExSOK15OtlI5uG0sXPDY11h04qmudkQR2TajQpn1nwLgjV1D5
+   Rl+vmvm9FJT3KRZYEezqhmvxF8ktH26H8eMu2CWaDGo01uYurANpdwClY
+   IwzC+sfowVEI+elwZwqPwuobOuvJi4R7Sq0dCpdoL/zZABKXo0Ft8MVoR
+   FPANBm7uOE1BrUSrbvPJqvij7+Xs/sYKJG7LU5vzg1htI5ari1Ju0YhsV
+   w==;
+X-CSE-ConnectionGUID: dqnqcCeTSqClv0w2jhIiRA==
+X-CSE-MsgGUID: zNFwDVa6R66WotyDnfNSnQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11175"; a="22675392"
 X-IronPort-AV: E=Sophos;i="6.10,177,1719903600"; 
-   d="scan'208";a="26958882"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 03:16:47 -0700
-X-CSE-ConnectionGUID: qiuDoSOWRZm66UGurmcwRw==
-X-CSE-MsgGUID: SMrORHslRt29RE1wq9cdvg==
+   d="scan'208";a="22675392"
+Received: from orviesa003.jf.intel.com ([10.64.159.143])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 04:36:03 -0700
+X-CSE-ConnectionGUID: Q6C1UERGSW2Car//bibTDw==
+X-CSE-MsgGUID: qzzorrm7ROqJiPtdBxyfsw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.10,177,1719903600"; 
-   d="scan'208";a="62160977"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
-  by fmviesa007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 03:16:42 -0700
-Message-ID: <7164bfde-3c43-495f-8e1f-83b998ff17e2@intel.com>
-Date: Mon, 26 Aug 2024 13:16:37 +0300
+   d="scan'208";a="67297721"
+Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
+  by orviesa003.jf.intel.com with ESMTP; 26 Aug 2024 04:36:00 -0700
+Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1siY0r-000Gzp-28;
+	Mon, 26 Aug 2024 11:35:57 +0000
+Date: Mon, 26 Aug 2024 19:35:36 +0800
+From: kernel test robot <lkp@intel.com>
+To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+	ritesh.list@gmail.com
+Cc: oe-kbuild-all@lists.linux.dev, grant.jung@samsung.com,
+	jt77.jang@samsung.com, junwoo80.lee@samsung.com,
+	dh0421.hwang@samsung.com, jangsub.yi@samsung.com,
+	sh043.lee@samsung.com, cw9316.lee@samsung.com,
+	sh8267.baek@samsung.com, wkon.kim@samsung.com
+Subject: Re: [PATCH] mmc : fix for check cqe halt.
+Message-ID: <202408261932.pcT0dqsD-lkp@intel.com>
+References: <20240823071025.15410-1-sh8267.baek@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 2/2] mmc : fix for check cqe halt.
-To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, ritesh.list@gmail.com,
- quic_asutoshd@quicinc.com
-Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com,
- dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com,
- cw9316.lee@samsung.com, wkon.kim@samsung.com, stable@vger.kernel.org
-References: <CGME20240826091726epcas1p19797d2dd890feef6f9c4b83e9156341a@epcas1p1.samsung.com>
- <20240826091703.14631-1-sh8267.baek@samsung.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240826091703.14631-1-sh8267.baek@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240823071025.15410-1-sh8267.baek@samsung.com>
 
-On 26/08/24 12:17, Seunghwan Baek wrote:
+Hi Seunghwan,
 
-The subject starts with "[Patch 2/2]" but is there another patch?
-Did you mean "[Patch v2] ..."?
+kernel test robot noticed the following build errors:
 
-> To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
-> bit. At this time, we need to check with &, not &&. Therefore, code to> check whether cqe is in halt state is modified to cqhci_halted, which has
-> already been implemented.
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.11-rc5 next-20240823]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Doesn't compile:
+url:    https://github.com/intel-lab-lkp/linux/commits/Seunghwan-Baek/mmc-fix-for-check-cqe-halt/20240826-130042
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20240823071025.15410-1-sh8267.baek%40samsung.com
+patch subject: [PATCH] mmc : fix for check cqe halt.
+config: arc-randconfig-001-20240826 (https://download.01.org/0day-ci/archive/20240826/202408261932.pcT0dqsD-lkp@intel.com/config)
+compiler: arc-elf-gcc (GCC) 13.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240826/202408261932.pcT0dqsD-lkp@intel.com/reproduce)
 
-drivers/mmc/host/cqhci-core.c: In function ‘__cqhci_enable’:
-drivers/mmc/host/cqhci-core.c:285:13: error: implicit declaration of function ‘cqhci_halted’; did you mean ‘cqhci_writel’? [-Werror=implicit-function-declaration]
-  285 |         if (cqhci_halted(cq_host))
-      |             ^~~~~~~~~~~~
-      |             cqhci_writel
-drivers/mmc/host/cqhci-core.c: At top level:
-drivers/mmc/host/cqhci-core.c:956:13: error: conflicting types for ‘cqhci_halted’; have ‘bool(struct cqhci_host *)’ {aka ‘_Bool(struct cqhci_host *)’}
-  956 | static bool cqhci_halted(struct cqhci_host *cq_host)
-      |             ^~~~~~~~~~~~
-drivers/mmc/host/cqhci-core.c:285:13: note: previous implicit declaration of ‘cqhci_halted’ with type ‘int()’
-  285 |         if (cqhci_halted(cq_host))
-      |             ^~~~~~~~~~~~
-cc1: all warnings being treated as errors
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202408261932.pcT0dqsD-lkp@intel.com/
 
-Not only should it compile, but you must test it!
+All errors (new ones prefixed by >>):
 
-Probably better to make 2 patches:
-1. Just the fix, cc stable i.e.
-
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index c14d7251d0bb..a02da26a1efd 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		cqhci_writel(cq_host, 0, CQHCI_CTL);
- 		mmc->cqe_on = true;
- 		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
--		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
-+		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
- 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
- 			       mmc_hostname(mmc));
- 		}
-
-2. Tidy up, no cc stable
-
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index a02da26a1efd..178277d90c31 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -33,6 +33,11 @@ struct cqhci_slot {
- #define CQHCI_HOST_OTHER	BIT(4)
- };
- 
-+static bool cqhci_halted(struct cqhci_host *cq_host)
-+{
-+	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
-+}
-+
- static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag)
- {
- 	return cq_host->desc_base + (tag * cq_host->slot_sz);
-@@ -282,7 +287,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
- 
- 	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
- 
--	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
-+	if (cqhci_halted(cq_host))
- 		cqhci_writel(cq_host, 0, CQHCI_CTL);
- 
- 	mmc->cqe_on = true;
-@@ -617,7 +622,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		cqhci_writel(cq_host, 0, CQHCI_CTL);
- 		mmc->cqe_on = true;
- 		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
--		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
-+		if (cqhci_halted(cq_host)) {
- 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
- 			       mmc_hostname(mmc));
- 		}
-@@ -953,11 +958,6 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
- 	return ret;
- }
- 
--static bool cqhci_halted(struct cqhci_host *cq_host)
--{
--	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
--}
--
- static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
- {
- 	struct cqhci_host *cq_host = mmc->cqe_private;
+   In file included from include/asm-generic/div64.h:27,
+                    from ./arch/arc/include/generated/asm/div64.h:1,
+                    from include/linux/math.h:6,
+                    from include/linux/delay.h:22,
+                    from drivers/mmc/host/cqhci-core.c:5:
+   drivers/mmc/host/cqhci-core.c: In function '__cqhci_enable':
+>> drivers/mmc/host/cqhci-core.c:285:13: error: implicit declaration of function 'cqhci_halted'; did you mean 'cqhci_writel'? [-Werror=implicit-function-declaration]
+     285 |         if (cqhci_halted(cq_host))
+         |             ^~~~~~~~~~~~
+   include/linux/compiler.h:57:52: note: in definition of macro '__trace_if_var'
+      57 | #define __trace_if_var(cond) (__builtin_constant_p(cond) ? (cond) : __trace_if_value(cond))
+         |                                                    ^~~~
+   drivers/mmc/host/cqhci-core.c:285:9: note: in expansion of macro 'if'
+     285 |         if (cqhci_halted(cq_host))
+         |         ^~
+   drivers/mmc/host/cqhci-core.c: At top level:
+>> drivers/mmc/host/cqhci-core.c:956:13: error: conflicting types for 'cqhci_halted'; have 'bool(struct cqhci_host *)' {aka '_Bool(struct cqhci_host *)'}
+     956 | static bool cqhci_halted(struct cqhci_host *cq_host)
+         |             ^~~~~~~~~~~~
+   drivers/mmc/host/cqhci-core.c:285:13: note: previous implicit declaration of 'cqhci_halted' with type 'int()'
+     285 |         if (cqhci_halted(cq_host))
+         |             ^~~~~~~~~~~~
+   include/linux/compiler.h:57:52: note: in definition of macro '__trace_if_var'
+      57 | #define __trace_if_var(cond) (__builtin_constant_p(cond) ? (cond) : __trace_if_value(cond))
+         |                                                    ^~~~
+   drivers/mmc/host/cqhci-core.c:285:9: note: in expansion of macro 'if'
+     285 |         if (cqhci_halted(cq_host))
+         |         ^~
+   cc1: some warnings being treated as errors
 
 
+vim +285 drivers/mmc/host/cqhci-core.c
 
-> 
-> Fixes: 0653300224a6 ("mmc: cqhci: rename cqhci.c to cqhci-core.c")
+   245	
+   246	static void __cqhci_enable(struct cqhci_host *cq_host)
+   247	{
+   248		struct mmc_host *mmc = cq_host->mmc;
+   249		u32 cqcfg;
+   250	
+   251		cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
+   252	
+   253		/* Configuration must not be changed while enabled */
+   254		if (cqcfg & CQHCI_ENABLE) {
+   255			cqcfg &= ~CQHCI_ENABLE;
+   256			cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   257		}
+   258	
+   259		cqcfg &= ~(CQHCI_DCMD | CQHCI_TASK_DESC_SZ);
+   260	
+   261		if (mmc->caps2 & MMC_CAP2_CQE_DCMD)
+   262			cqcfg |= CQHCI_DCMD;
+   263	
+   264		if (cq_host->caps & CQHCI_TASK_DESC_SZ_128)
+   265			cqcfg |= CQHCI_TASK_DESC_SZ;
+   266	
+   267		if (mmc->caps2 & MMC_CAP2_CRYPTO)
+   268			cqcfg |= CQHCI_CRYPTO_GENERAL_ENABLE;
+   269	
+   270		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   271	
+   272		cqhci_writel(cq_host, lower_32_bits(cq_host->desc_dma_base),
+   273			     CQHCI_TDLBA);
+   274		cqhci_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
+   275			     CQHCI_TDLBAU);
+   276	
+   277		cqhci_writel(cq_host, cq_host->rca, CQHCI_SSC2);
+   278	
+   279		cqhci_set_irqs(cq_host, 0);
+   280	
+   281		cqcfg |= CQHCI_ENABLE;
+   282	
+   283		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   284	
+ > 285		if (cqhci_halted(cq_host))
+   286			cqhci_writel(cq_host, 0, CQHCI_CTL);
+   287	
+   288		mmc->cqe_on = true;
+   289	
+   290		if (cq_host->ops->enable)
+   291			cq_host->ops->enable(mmc);
+   292	
+   293		/* Ensure all writes are done before interrupts are enabled */
+   294		wmb();
+   295	
+   296		cqhci_set_irqs(cq_host, CQHCI_IS_MASK);
+   297	
+   298		cq_host->activated = true;
+   299	}
+   300	
 
-Fixes tag should be the commit that introduced the code, not one
-that moved it.  In this case, it has been there since the beginning:
-
-Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
-
-Looks like the offending code kinda worked which explains why it
-wasn't noticed sooner.
-
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
-> ---
->  drivers/mmc/host/cqhci-core.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index c14d7251d0bb..3d5bcb92c78e 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -282,7 +282,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
->  
->  	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
->  
-> -	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
-> +	if (cqhci_halted(cq_host))
->  		cqhci_writel(cq_host, 0, CQHCI_CTL);
->  
->  	mmc->cqe_on = true;
-> @@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		cqhci_writel(cq_host, 0, CQHCI_CTL);
->  		mmc->cqe_on = true;
->  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
-> -		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
-> +		if (cqhci_halted(cq_host)) {
->  			pr_err("%s: cqhci: CQE failed to exit halt state\n",
->  			       mmc_hostname(mmc));
->  		}
-
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
