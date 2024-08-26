@@ -1,136 +1,179 @@
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A654316F84A
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 11:39:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C55115444D;
+	Mon, 26 Aug 2024 11:47:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724672365; cv=none; b=ndjFYcut7mtoVN00GjC4SPcenoYGAq6Xlw57QpPAWetI1si5XNEH45ZjshF0Q7w+YrG/ExL+wkyTcUFN64nAs6PgPJ0a9Q8fPh1d5YEaOd1xWBW/s9j3jEB1I13UPfXrXbTO/tw81ETbm9kCOTzx/MRy6HOl8ER6YevnuwFJaLw=
+	t=1724672825; cv=none; b=nkzY5JSJdqy6CkYaN20LqdXdB2OkuwvqGfJ0DRQuYzrb84B58olOjTZVPYie/cruBX96x7/2nUAk0CIpmhTq2J4gP9x5QDcIRi2hyA4FNf3eqXAbcSig+9QJSucLUbkyKUL9YKxtxzDNPaLLPQsdhee2iEVC4PdcXHnh/KFOMZM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724672365; c=relaxed/simple;
-	bh=wbnW/xOQAvjNSl8IjbdASCZ6CTlenb0hgbaw1Wm+0ys=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bRgDggGN0mZsOE0m/u0INYLdp3/Rzk6G8z9n0w9jIKPJ9ewAh46sHwLUMcjMowXrQsuWQ/coXwnqKI3w1MvpaWk2hijObK1vH4XnDUk+rJFuel1jXkoin2oQboYxPxpouD8U4W8osyf+dZceSZUn0vL6OucLyeyOIW0PFK4BJcU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HHpjpFGf; arc=none smtp.client-ip=209.85.219.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1724672825; c=relaxed/simple;
+	bh=m8gm4trIc5OF849HsBviFelskC5meruIa0Uk7SfyYhs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pMkr2xfjLtk/LPTNgdcrjW8noTDwpMdmfb4O5QE8075Yu5fziXmUAmQZdwuaK3//rLKMpoWiL2iZttjJZ3jWQT5+qgsKW+77Q2l3q1Zp9JEm1kLiXjAefmTxfiphlIFBEV6mZlqnvBUgo6MbTN1HsDFfonzaPr0n/GE0JyeASeo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ETJ5ENAM; arc=none smtp.client-ip=198.175.65.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HHpjpFGf"
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e1659e9a982so4585964276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 04:39:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724672363; x=1725277163; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=yAEEYq6QuPWziF+MTaV7RKYiwHKZRlAPBPaklGhEI3U=;
-        b=HHpjpFGfZJV/mkcdabohTw3TSA8ddU8otqtOCOvUIP7JSbjIQh99KaXEjuZ75dvB8E
-         u/gtrFnf0A7/B98i5RvLZw79nn/mcQUzBIVHADW3BeQ/p1GBS8UqHjhDWi3jkp1AgyaL
-         JLxPVELYagSun7xlskaw/SuPzMlBzZ+ox817WDSNtjdfjlA9HHHZsSoP9DbMdTl74xnR
-         hwuJfo/O5nOmi1cUr/tzXP7o1kmaK9USFVk+t+0VPV3Nk5ORV4eD4suuOn9obQnlyslO
-         ufLEy4L7attYsHXB9RgKG/psW236Sg7FttnVHeCGzZ5lGQ0zeIDqg4/TniFsBoktsx0v
-         MtaQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724672363; x=1725277163;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=yAEEYq6QuPWziF+MTaV7RKYiwHKZRlAPBPaklGhEI3U=;
-        b=pfSbTPxmzTUlkpKhLrZNBdqpTL14Vh6kKBDv4hcgZnpHOl3ytEgNZDuJg5ax4NcTHv
-         U1UryscZYziYuUnb36vtZ/2v5ULmEcKiPN3UVDzMdkFQ15CRjvFpjvRVRwEaOaOBrf3s
-         aU3ZDg2TbYqi9zw4CejbsnzDlgDbi2bVmTZadU1AXHQlMCmUACGADQOf/QBpm3Poaofw
-         KkR0yy0BvZXljG7ldDzRJufYvtVUeCszxdrusgQdnph5nK8Cilyv3X3UrrAR9uetAOud
-         ay3JXqn2vPUE1PtSGwHyDvp0wGtbMUuqOpVov9+5/knDM5Xnz+hOs+7UHZFSIQN8xHWt
-         5gkA==
-X-Gm-Message-State: AOJu0YxUE08IOJ8uddRXXHkyUouux6XOPATpWUeZF4WdbzOqnl/S3eeQ
-	810B3oKF8+cbFgA3LEnep2LtJwNfRVrINMLRfblMthsmtA40rA7N7WF6N00FEIprn6K0otze5SV
-	sKJCZx0hrkH8hdeZsUV8C90JV7dg6odvcniwICg/rn/XQo+eK
-X-Google-Smtp-Source: AGHT+IGOenqQYRk7F+kXpJd/pPy7WAd5Kwv/luVVWGXZc2L5bI719G7h7qg3xoUBl+Qbh0gAXZDvXiseHLY1s9FNCMs=
-X-Received: by 2002:a05:6902:2192:b0:e0b:b2a7:d145 with SMTP id
- 3f1490d57ef6-e17a8682cc2mr10270741276.55.1724672362708; Mon, 26 Aug 2024
- 04:39:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ETJ5ENAM"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1724672824; x=1756208824;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=m8gm4trIc5OF849HsBviFelskC5meruIa0Uk7SfyYhs=;
+  b=ETJ5ENAMPEDgGSLgkZX+z/pEogCOcfD5kRVq8apslTYL73Lq9nIv47M8
+   bvZHjXl317FwfGPzeVM7Rk4y+tZ+pTcT5+sMo2y5VdOkvgWJ9wXKNGuLc
+   J9U/+yhWnqv7nzOgiVo2zgjCWqXrPtHjHS5S7xKhwLj3Vf2OkBbWPQJ84
+   3q5pXELgD7Q9eG/DrPSKOpH7XukCcZXRmMYTdCLKWzQboRW+VKa9H2MTB
+   kPHTvUJar01XiIrscLHoe8KvOyelTVCX/S5pOEinb+QAnaF2LQM47I3np
+   8KgHrr+76Sbp1cXKs8ry13F3Pxf3IBEPWcgT7N3WClKTCT2n7/J+K0ncD
+   g==;
+X-CSE-ConnectionGUID: MaFJMenhTa+u+OwIVRCXvg==
+X-CSE-MsgGUID: AgDhQbRWQAK8R2uk3gf8Vg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11175"; a="26880342"
+X-IronPort-AV: E=Sophos;i="6.10,177,1719903600"; 
+   d="scan'208";a="26880342"
+Received: from fmviesa008.fm.intel.com ([10.60.135.148])
+  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 04:47:04 -0700
+X-CSE-ConnectionGUID: oRQw2gM3RWGnUgmtBv6YTg==
+X-CSE-MsgGUID: QBUyms3lQrOki8Y7LD8KsQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,177,1719903600"; 
+   d="scan'208";a="62460070"
+Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
+  by fmviesa008.fm.intel.com with ESMTP; 26 Aug 2024 04:47:00 -0700
+Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1siYBV-000H0H-31;
+	Mon, 26 Aug 2024 11:46:57 +0000
+Date: Mon, 26 Aug 2024 19:46:22 +0800
+From: kernel test robot <lkp@intel.com>
+To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+	ritesh.list@gmail.com
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	grant.jung@samsung.com, jt77.jang@samsung.com,
+	junwoo80.lee@samsung.com, dh0421.hwang@samsung.com,
+	jangsub.yi@samsung.com, sh043.lee@samsung.com,
+	cw9316.lee@samsung.com, sh8267.baek@samsung.com,
+	wkon.kim@samsung.com
+Subject: Re: [PATCH] mmc : fix for check cqe halt.
+Message-ID: <202408261926.P72BWMr0-lkp@intel.com>
+References: <20240823071025.15410-1-sh8267.baek@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240823225917.2826156-1-vladimir.zapolskiy@linaro.org>
-In-Reply-To: <20240823225917.2826156-1-vladimir.zapolskiy@linaro.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 26 Aug 2024 13:38:46 +0200
-Message-ID: <CAPDyKFpGRDOc2fL9ndzH0BMQeoe+q0FbscgAa_MWe5s69MfixQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: remove left-over data structure declarations
-To: Vladimir Zapolskiy <vladimir.zapolskiy@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240823071025.15410-1-sh8267.baek@samsung.com>
 
-On Sat, 24 Aug 2024 at 00:59, Vladimir Zapolskiy
-<vladimir.zapolskiy@linaro.org> wrote:
->
-> The last users of 'enum mmc_blk_status' and 'struct mmc_async_req'
-> were removed by commit 126b62700386 ("mmc: core: Remove code no longer
-> needed after the switch to blk-mq") in 2017, remove these two left-over
-> data structures.
->
-> Signed-off-by: Vladimir Zapolskiy <vladimir.zapolskiy@linaro.org>
+Hi Seunghwan,
 
-Applied for next, thanks!
+kernel test robot noticed the following build errors:
 
-Kind regards
-Uffe
+[auto build test ERROR on linus/master]
+[also build test ERROR on v6.11-rc5 next-20240826]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Seunghwan-Baek/mmc-fix-for-check-cqe-halt/20240826-130042
+base:   linus/master
+patch link:    https://lore.kernel.org/r/20240823071025.15410-1-sh8267.baek%40samsung.com
+patch subject: [PATCH] mmc : fix for check cqe halt.
+config: i386-buildonly-randconfig-003-20240826 (https://download.01.org/0day-ci/archive/20240826/202408261926.P72BWMr0-lkp@intel.com/config)
+compiler: clang version 18.1.5 (https://github.com/llvm/llvm-project 617a15a9eac96088ae5e9134248d8236e34b91b1)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240826/202408261926.P72BWMr0-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202408261926.P72BWMr0-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+>> drivers/mmc/host/cqhci-core.c:285:6: error: call to undeclared function 'cqhci_halted'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+     285 |         if (cqhci_halted(cq_host))
+         |             ^
+   drivers/mmc/host/cqhci-core.c:285:6: note: did you mean 'cqhci_writel'?
+   drivers/mmc/host/cqhci.h:301:20: note: 'cqhci_writel' declared here
+     301 | static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
+         |                    ^
+   drivers/mmc/host/cqhci-core.c:620:7: error: call to undeclared function 'cqhci_halted'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+     620 |                 if (cqhci_halted(cq_host)) {
+         |                     ^
+>> drivers/mmc/host/cqhci-core.c:956:13: error: static declaration of 'cqhci_halted' follows non-static declaration
+     956 | static bool cqhci_halted(struct cqhci_host *cq_host)
+         |             ^
+   drivers/mmc/host/cqhci-core.c:285:6: note: previous implicit declaration is here
+     285 |         if (cqhci_halted(cq_host))
+         |             ^
+   3 errors generated.
 
 
-> ---
-> Build-tested only.
->
->  include/linux/mmc/core.h | 12 ------------
->  include/linux/mmc/host.h | 10 ----------
->  2 files changed, 22 deletions(-)
->
-> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-> index 2c7928a50907..f0ac2e469b32 100644
-> --- a/include/linux/mmc/core.h
-> +++ b/include/linux/mmc/core.h
-> @@ -11,18 +11,6 @@
->  struct mmc_data;
->  struct mmc_request;
->
-> -enum mmc_blk_status {
-> -       MMC_BLK_SUCCESS = 0,
-> -       MMC_BLK_PARTIAL,
-> -       MMC_BLK_CMD_ERR,
-> -       MMC_BLK_RETRY,
-> -       MMC_BLK_ABORT,
-> -       MMC_BLK_DATA_ERR,
-> -       MMC_BLK_ECC_ERR,
-> -       MMC_BLK_NOMEDIUM,
-> -       MMC_BLK_NEW_REQUEST,
-> -};
-> -
->  struct mmc_command {
->         u32                     opcode;
->         u32                     arg;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 88c6a76042ee..21e5534ddbe6 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -264,16 +264,6 @@ struct mmc_cqe_ops {
->         void    (*cqe_recovery_finish)(struct mmc_host *host);
->  };
->
-> -struct mmc_async_req {
-> -       /* active mmc request */
-> -       struct mmc_request      *mrq;
-> -       /*
-> -        * Check error status of completed mmc request.
-> -        * Returns 0 if success otherwise non zero.
-> -        */
-> -       enum mmc_blk_status (*err_check)(struct mmc_card *, struct mmc_async_req *);
-> -};
-> -
->  /**
->   * struct mmc_slot - MMC slot functions
->   *
-> --
-> 2.45.2
->
+vim +/cqhci_halted +285 drivers/mmc/host/cqhci-core.c
+
+   245	
+   246	static void __cqhci_enable(struct cqhci_host *cq_host)
+   247	{
+   248		struct mmc_host *mmc = cq_host->mmc;
+   249		u32 cqcfg;
+   250	
+   251		cqcfg = cqhci_readl(cq_host, CQHCI_CFG);
+   252	
+   253		/* Configuration must not be changed while enabled */
+   254		if (cqcfg & CQHCI_ENABLE) {
+   255			cqcfg &= ~CQHCI_ENABLE;
+   256			cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   257		}
+   258	
+   259		cqcfg &= ~(CQHCI_DCMD | CQHCI_TASK_DESC_SZ);
+   260	
+   261		if (mmc->caps2 & MMC_CAP2_CQE_DCMD)
+   262			cqcfg |= CQHCI_DCMD;
+   263	
+   264		if (cq_host->caps & CQHCI_TASK_DESC_SZ_128)
+   265			cqcfg |= CQHCI_TASK_DESC_SZ;
+   266	
+   267		if (mmc->caps2 & MMC_CAP2_CRYPTO)
+   268			cqcfg |= CQHCI_CRYPTO_GENERAL_ENABLE;
+   269	
+   270		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   271	
+   272		cqhci_writel(cq_host, lower_32_bits(cq_host->desc_dma_base),
+   273			     CQHCI_TDLBA);
+   274		cqhci_writel(cq_host, upper_32_bits(cq_host->desc_dma_base),
+   275			     CQHCI_TDLBAU);
+   276	
+   277		cqhci_writel(cq_host, cq_host->rca, CQHCI_SSC2);
+   278	
+   279		cqhci_set_irqs(cq_host, 0);
+   280	
+   281		cqcfg |= CQHCI_ENABLE;
+   282	
+   283		cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+   284	
+ > 285		if (cqhci_halted(cq_host))
+   286			cqhci_writel(cq_host, 0, CQHCI_CTL);
+   287	
+   288		mmc->cqe_on = true;
+   289	
+   290		if (cq_host->ops->enable)
+   291			cq_host->ops->enable(mmc);
+   292	
+   293		/* Ensure all writes are done before interrupts are enabled */
+   294		wmb();
+   295	
+   296		cqhci_set_irqs(cq_host, CQHCI_IS_MASK);
+   297	
+   298		cq_host->activated = true;
+   299	}
+   300	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
