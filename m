@@ -1,135 +1,158 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
+Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BB1F2B9C5
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 19:32:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724700750; cv=none; b=QfGR5AfpHh6SiCZPufILH3bFUaJTJRnZkh7xJtJJ8Vy/YLQnK1l3ajItU27iFtmPzRSmZtmCDYChbwW08ZrPjh6lrEuGd/H81BW/ddoosHDVhFF5QdvYBcm7DsvWwPq0nA+wcen6NuvfM3pzjwJysBMMw0DMtXVshFY9KdVRaeI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724700750; c=relaxed/simple;
-	bh=0d3e3xnQARHBnzJ3/KT8Z3pjx81V4NfO7llFRCrEoDE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YUmRzfEE8/Q7bUgDqanfSzgTFLQDFjSnnGroDeOJfzVDMVlHuetFiBZJrWiIifl3RNdjz6oYtpN406I3HtN3jaOVrezHx/BC1FJiNzWsyP9MAb495padJUDwAMVt8pQlo1T7da/29P1l992QQFsPxK8RJCYr4jnsU8rLzmt3Dq0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=iagpFL7/; arc=none smtp.client-ip=192.198.163.8
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D3FD1990AD;
+	Mon, 26 Aug 2024 19:39:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1724701196; cv=pass; b=eA6nnB9zI9PbDpS0A5BVlxXOeM5jHXxfkDR+7VsCCdzI4nzhfgckXQVbEDNmDuGCbb0HK/t5Y74F15HRCil+1uo9i77YvXndTfZyWlgaXsVh0XtVE6/VPyR7Kj2T4l6W3AqdCM2jboGfDOx41pQmWipslQYmY6HrdqbvCoWGZi0=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1724701196; c=relaxed/simple;
+	bh=od6fy+3S+nzYLljRoQHr8oqNUdaDpZC207RnMbTjVc4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=EXxqDCon0UhLF+lFnkSgmrcsxuXvJijYvE36sUfHRRDBhgWTWcZ0D7wImrSjRGLGFW/Zyqst9eRYQIQAijC5//IhzJ3REbLckeD0R/BbWilC7o994mQ8BERUbtiVmYbp6M3OSOa2rV8QOavk9hkxPSD81AU93bUrQiUBL8dNByA=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=ca0roMD4; arc=pass smtp.client-ip=136.143.188.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="iagpFL7/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1724700747; x=1756236747;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=0d3e3xnQARHBnzJ3/KT8Z3pjx81V4NfO7llFRCrEoDE=;
-  b=iagpFL7/RHEUNe+xMxHz1VM6eGi8Cpatngh/0my2ayOREucpPikgvklh
-   FkV7SstbOFqMJVWuoGJfYssdHE1d8WNwln1+XaOxd+L+gUdqXh+gbOuwf
-   96uVS4QxUqDGCnSzj5Fq5yDSV3M1xv3ubLgU2PyTvXjEsXiO/f20W5EDL
-   dUvfaNFP8wO44OTuljbdAy5OxmexR5SYoy8uhxIDpGxNPrFn3rO2l8VEN
-   Nbm6QM4xB/EMlnjYgg5Z9q9fd2d2UbXFu9LmmY0+SjS3cjKSZ5PNOHCDR
-   /Wl9XHnK43tjFb0uRZJiwQ2iHyhUu1dc0nI6NFc22bojzscEiteyNk/9l
-   Q==;
-X-CSE-ConnectionGUID: jUWGYhTYSyy0LWwvNbrkEg==
-X-CSE-MsgGUID: 7dWcjKW3QwqDjUE6JN95ww==
-X-IronPort-AV: E=McAfee;i="6700,10204,11176"; a="40649627"
-X-IronPort-AV: E=Sophos;i="6.10,178,1719903600"; 
-   d="scan'208";a="40649627"
-Received: from fmviesa009.fm.intel.com ([10.60.135.149])
-  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 12:32:26 -0700
-X-CSE-ConnectionGUID: 4JvIRGm7T5ux+8XFPNxewA==
-X-CSE-MsgGUID: QONRKAcHScKhmvGz6J6xLA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,178,1719903600"; 
-   d="scan'208";a="62668840"
-Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
-  by fmviesa009.fm.intel.com with ESMTP; 26 Aug 2024 12:32:25 -0700
-Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1sifRv-000HXM-0j;
-	Mon, 26 Aug 2024 19:32:23 +0000
-Date: Tue, 27 Aug 2024 03:31:33 +0800
-From: kernel test robot <lkp@intel.com>
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: oe-kbuild-all@lists.linux.dev, Adrian Hunter <adrian.hunter@intel.com>,
-	Ricky WU <ricky_wu@realtek.com>, Avri Altman <avri.altman@wdc.com>
-Subject: Re: [PATCH v4 6/9] mmc: host: Add close-ended Ext memory addressing
-Message-ID: <202408270315.TTjSYp25-lkp@intel.com>
-References: <20240825074141.3171549-7-avri.altman@wdc.com>
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="ca0roMD4"
+ARC-Seal: i=1; a=rsa-sha256; t=1724701104; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=Y8CvhF/MJMpIU8xUcXwDaR/0I/ZSweEEmXPq80aazFOnaFJYtKwl4bAoircq8YmuV6hXbjY/LG7ggwynibvQhGHfnA3ZxeJcjwFUFCvznyYbFk7aW61rIiOqUerkxcHHMLSrs42ET9t8PNTNaKsv5xPHKyWqwnZ6a6qTKIkYIe0=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1724701104; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=o/g/+7cY7f/H3JMgXb+3Ce2wa+YsyQzpWO4kehk64OE=; 
+	b=MUqYc1cFentcZXmMJg9AdlCdo8ojnSpq+vXAcb2Dy54wHiwWIOuJtTW6vVH4gpcV7uwcxMqELFKzkobFHCCb5EQOSXAiE16kMmMVa2SpQ7ZwzZfhgDdL75k4Q6T+BeMWw6EJYM/LEBPkdYRHZYc9FRT7i9Z7tpBAymCig84p9kg=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
+	dmarc=pass header.from=<detlev.casanova@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724701104;
+	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
+	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
+	bh=o/g/+7cY7f/H3JMgXb+3Ce2wa+YsyQzpWO4kehk64OE=;
+	b=ca0roMD4CCh2C6YxOlrU6DoQDhY/6r1S4aQEcvOV4tFUBCMSGleXec7uvWP4kkRv
+	3tCHEJS1EM6ENk3vDrDuiM8rdiwTt9v6/9xC9v7IICGYmXiIINAfTSOzJBk3Dql+Dvd
+	Cuvg2in63RexEjBhe2pp9MOB8TUQpI9kWJ45Y4VQ=
+Received: by mx.zohomail.com with SMTPS id 1724701102774210.66353128633466;
+	Mon, 26 Aug 2024 12:38:22 -0700 (PDT)
+From: Detlev Casanova <detlev.casanova@collabora.com>
+To: Chukun Pan <amadeus@jmu.edu.cn>
+Cc: airlied@gmail.com, alchark@gmail.com, amadeus@jmu.edu.cn,
+ andi.shyti@kernel.org, andyshrk@163.com, broonie@kernel.org,
+ cl@rock-chips.com, conor+dt@kernel.org, daniel@ffwll.ch,
+ devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
+ dsimic@manjaro.org, efectn@protonmail.com, finley.xiao@rock-chips.com,
+ gregkh@linuxfoundation.org, heiko@sntech.de, honyuenkwun@gmail.com,
+ jagan@edgeble.ai, jamie@jamieiles.com, jic23@kernel.org,
+ jirislaby@kernel.org, jonas@kwiboo.se, jszhang@kernel.org,
+ kernel@collabora.com, krzk+dt@kernel.org, lars@metafoo.de, lee@kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
+ linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
+ linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+ linux-watchdog@vger.kernel.org, linux@roeck-us.net,
+ maarten.lankhorst@linux.intel.com, macromorgan@hotmail.com, megi@xff.cz,
+ michael.riesch@wolfvision.net, mripard@kernel.org, robh@kernel.org,
+ tim@feathertop.org, tzimmermann@suse.de, ulf.hansson@linaro.org,
+ wim@linux-watchdog.org
+Subject:
+ Re: [PATCH v2 12/12] arm64: dts: rockchip: Add rk3576-armsom-sige5 board
+Date: Mon, 26 Aug 2024 15:38:18 -0400
+Message-ID: <2622447.Lt9SDvczpP@bootstrap>
+In-Reply-To: <20240825142509.201943-1-amadeus@jmu.edu.cn>
+References:
+ <4367745.ejJDZkT8p0@trenzalore> <20240825142509.201943-1-amadeus@jmu.edu.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240825074141.3171549-7-avri.altman@wdc.com>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+X-ZohoMailClient: External
 
-Hi Avri,
+Hi Chukun,
 
-kernel test robot noticed the following build errors:
+On Sunday, 25 August 2024 10:25:09 EDT Chukun Pan wrote:
+> Hi,
+> 
+> > --- /dev/null
+> > +++ b/arch/arm64/boot/dts/rockchip/rk3576-armsom-sige5.dts
+> > ...
+> > +	leds: leds {
+> > +		compatible = "gpio-leds";
+> 
+> Maybe there should be a blank line.
+> 
+> > +		work_led: work-led {
+> > +			gpios = <&gpio0 RK_PB4 GPIO_ACTIVE_HIGH>;
+> > +			linux,default-trigger = "heartbeat";
+> > +		};
+> > +	};
+> 
+> Is the color missing?
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v6.11-rc5 next-20240826]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Actually, after rechecking, this is wrong. There are 2 LEDs on &gpio4:
+ - PB2: Green
+ - PB1: Red
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Avri-Altman/mmc-sd-SDUC-Support-Recognition/20240826-161527
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20240825074141.3171549-7-avri.altman%40wdc.com
-patch subject: [PATCH v4 6/9] mmc: host: Add close-ended Ext memory addressing
-config: arc-randconfig-002-20240827 (https://download.01.org/0day-ci/archive/20240827/202408270315.TTjSYp25-lkp@intel.com/config)
-compiler: arceb-elf-gcc (GCC) 13.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240827/202408270315.TTjSYp25-lkp@intel.com/reproduce)
+I can set the green one as heartbeat and the red one as default-on.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202408270315.TTjSYp25-lkp@intel.com/
+> > ...
+> > +	vcc_3v3_rtc_s5: regulator-vcc-3v3-rtc-s5 {
+> > +		compatible = "regulator-fixed";
+> > +		regulator-name = "vcc_3v3_rtc_s5";
+> > +		regulator-boot-on;
+> > +		regulator-always-on;
+> > +		regulator-min-microvolt = <3300000>;
+> > +		regulator-max-microvolt = <3300000>;
+> > +		vin-supply = <&vcc_5v0_sys>;
+> > +	};
+> 
+> Missing blank line.
+> 
+> > +	vcc_1v8_s0: regulator-vcc-1v8-s0 {
+> > +		compatible = "regulator-fixed";
+> > +		regulator-name = "vcc_1v8_s0";
+> > +		regulator-boot-on;
+> > +		regulator-always-on;
+> > +		regulator-min-microvolt = <1800000>;
+> > +		regulator-max-microvolt = <1800000>;
+> > +		vin-supply = <&vcc_1v8_s3>;
+> > +	};
+> > ...
+> > +&gmac0 {
+> > +	phy-mode = "rgmii-rxid";
+> 
+> Can we use "rgmii-id" and remove tx_delay here?
 
-All errors (new ones prefixed by >>):
+Indeed, that's better.
 
-   drivers/mmc/host/sdhci.c: In function 'sdhci_get_sbc_ext':
->> drivers/mmc/host/sdhci.c:1797:24: error: implicit declaration of function 'mmc_card_ult_capacity' [-Werror=implicit-function-declaration]
-    1797 |         bool is_sduc = mmc_card_ult_capacity(host->mmc->card);
-         |                        ^~~~~~~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
+> > ...
+> > +&sdmmc {
+> > +	bus-width = <4>;
+> > +	cap-mmc-highspeed;
+> > +	cap-sd-highspeed;
+> > +	disable-wp;
+> > +	max-frequency = <200000000>;
+> > +	no-sdio;
+> > +	no-mmc;
+> > +	non-removable;
+> > +	sd-uhs-sdr104;
+> > +        vmmc-supply = <&vcc_3v3_s3>;
+> 
+> Indentation error.
+> 
+> > +	vqmmc-supply = <&vccio_sd_s0>;
+> > +	status = "okay";
+> > +};
+> > ...
+> 
+> Thanks,
+> Chukun
 
 
-vim +/mmc_card_ult_capacity +1797 drivers/mmc/host/sdhci.c
 
-  1793	
-  1794	static struct mmc_command *sdhci_get_sbc_ext(struct sdhci_host *host,
-  1795						     struct mmc_command *cmd)
-  1796	{
-> 1797		bool is_sduc = mmc_card_ult_capacity(host->mmc->card);
-  1798	
-  1799		if (is_sduc) {
-  1800			/*  Finished CMD22, now send actual command */
-  1801			if (cmd == cmd->mrq->ext)
-  1802				return cmd->mrq->cmd;
-  1803		}
-  1804	
-  1805		/* Finished CMD23 */
-  1806		if (cmd == cmd->mrq->sbc) {
-  1807			if (is_sduc) {
-  1808				/* send CMD22 after CMD23 */
-  1809				if (WARN_ON(!cmd->mrq->ext))
-  1810					return NULL;
-  1811				else
-  1812					return cmd->mrq->ext;
-  1813			} else {
-  1814				/* Finished CMD23, now send actual command */
-  1815				return cmd->mrq->cmd;
-  1816			}
-  1817		}
-  1818	
-  1819		return NULL;
-  1820	}
-  1821	
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
