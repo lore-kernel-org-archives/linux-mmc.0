@@ -1,322 +1,161 @@
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3804B1547C4
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 11:36:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F204714EC77
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 11:39:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724672209; cv=none; b=POySZJsjsgrNFPJTL2mpyK0XvYrQQZXNzX1daGuSubORt9iq5vG87Y7PYBeYO0Qnrt0nuQ1oFOb4CVUvXFQsC8tyhFS6r6l8ew7mfJwWBaaRwyQZodpI0HwtFzJOEZVX4tAr9K8za2XgeYhyObnl/BQzzshZ9BTqwiRK+jX4vE4=
+	t=1724672349; cv=none; b=LBSwV9MXWxSyudccKTyWq3eT3JODvA6gELFeJNm8i7mdcxUJypLM5RSjc6JHBXfBPaHyCdK7RKU0MzDOJnIpkqYTZH1VVMT5xCveVpllzEf28W9uQOYyFZrf1YOR6iJbrsAgJVun9KSnavPN5o7Nio/dHPxo0MEfVUjgMCE/Bvc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724672209; c=relaxed/simple;
-	bh=viPyuROUTeekllWPMisGYV8X++jFkeZ4J5mNBK4kLyU=;
+	s=arc-20240116; t=1724672349; c=relaxed/simple;
+	bh=o5xw0tRSQ4rmfrAINXdq3owKChOG/qM0A/XglSLP1KI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HsFmKCycKFCHvztXti54XpY+LDlfgG2ItpUf3jCz95AS9OkNWTpB+8KDqj2+s+3Sp2JH0dIM8yeUuU2bZOhlntNbAR7lGdqtkgfd9CQD9rEgXuY7wE8jIEjHQod8NpZXHMm8Rr+f0EyGTjciEWHSJjOWM8Ub+44lgiteYrT2ZJI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=BAXJr0Nn; arc=none smtp.client-ip=209.85.219.174
+	 To:Cc:Content-Type; b=o1FHJVyPGvpU9jPScZavEhFXaDGkJ9fGAeTwChcU4GDu15tJ+67WPmmP+grfl5HwUx4mvpdLxU+MzYDUvcmWXQM2e3y5ytoTs3ZnbpRjAdw+HY9K0Ppa1Rj28eLnSjj6Oq3eRpmBG9m8pGzn+Yj7R7tit0+jhaNaCeajfL6gezA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=T58HEKMU; arc=none smtp.client-ip=209.85.219.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="BAXJr0Nn"
-Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e115c8aa51fso4133306276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 04:36:47 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="T58HEKMU"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-dff1ccdc17bso4256918276.0
+        for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 04:39:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724672206; x=1725277006; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1724672347; x=1725277147; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=3WuBkNkQq7ncBHhLfidrPpVIWONY2++qBbCcAKeFG0A=;
-        b=BAXJr0NnQt/nTG1VcshDZQi0Hq6UYXabOEZlYaIz4BmgmNdfocXBrVtcY8EzK8IxJ3
-         rjSaTGd+9sbOcIwJIDR/sijgLDcyXL59mThzEyVP/LFtlOkehYA7+FxNoHPAIcJSmsea
-         d1yrHnIBWvC3oU6QDaq8rc+cJFqpoZEKPCPSx79yX2cZsKR9ojsyXAuJhz149ekf8o7H
-         UL6xsDPwOCXT36HSWGowg16VT/TIsFBeub28Aw5I4eailpHYFyBDMtW1qsYeuQWv5iaj
-         5NqKXDRqU6vZU6ChIyG7r1POllhtJ6VtYqPSRMY7cJtwU4WI97e9pvh8HwWKAaDQ9wX4
-         ufNw==
+        bh=JAElfL7iEWs0FR6f0b+aqkORTm6zYAiodbIi2kSgpzM=;
+        b=T58HEKMUdRbYW9V1JmyMzRl29QILInPX8v2yYdeCZQWSbD7AUNvhDOVCndOWl85u8E
+         jVlAclwm8kSDpFyYd0aASY9d6vpg0Oa6ef/CjXkNI0fGOiKM+IifWm79eqRfy+jaQDmK
+         HCF5gcn4CqokfHIOCnoqmcReV3ebWJmCkAX5EDNlmy5Qi3cgIG9XCI1AGrmL0ZhaMh5z
+         5BoTQBTh1klpnSAKEwF/tLV9OiFTPm/gneHzhg1x22e/M9yJtT+q4OpXos49mhZUEdtr
+         +B09mKik8GvfVo2AwBoF8as6K/TKyiIj4+a4nuOT8NZZwcE9vt9owJ0DTxsZQK0k0F+K
+         chFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724672206; x=1725277006;
+        d=1e100.net; s=20230601; t=1724672347; x=1725277147;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=3WuBkNkQq7ncBHhLfidrPpVIWONY2++qBbCcAKeFG0A=;
-        b=OABFjww1jkeqFxL9/dyTVZu4b4V8xjiIGR/PZhfvnX9wYlN6NglPhY63NWKdGhgNZG
-         nV2OojEnzwK0h7FwUxaWjYK7GFw0sTDwzMr6Ts2bK1Brmt/3pflePgJloZUlYl2bRUHa
-         dKribYWlmiI09z82LS6fHOogDmRiKETxxY+S9CtQ1/CTK0ndFKtbnSsR8Vxl0HPOfcGZ
-         eJZfG0/LguJ5w2BMHTHIiNL3GtxO18fJlIKr3+4LhkrekHrtcau8QVf/Xrc1jTgEjvq6
-         E58eWJUHZjLojWi2psf41Y4fyVe8JE5q52NCEO5YevsnPtzGk0/DPec1FoYWQxr/TK6p
-         3/Bg==
-X-Forwarded-Encrypted: i=1; AJvYcCX7BwVNAn8YHmtmv6M5w0/YNaFZnSz+F8lXRotC3mm9CPH2pL8nVlFM8fz8tkxVjWbMijZPpJIv0qw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz3fGcxWECnPA/W0FEbFiq4qOGFobzV79rbv/I1rt39kvvzmfi6
-	kj7uH1Y8fZnQoBQS1TdHor+nCbPVNlQ4rwakUru/dN9Sjn5d5Y4HXZoOX4Mi1hAT+lRofxidOgQ
-	XpP7p9e7u8ZbeU/4dqhucNNlk/DfDqkDI5XXWTg==
-X-Google-Smtp-Source: AGHT+IFTmCOXbkWFVjFKxNQjfliOW8Z+x4s+zXNlqgxkRfvBAgPO0UAeheCBnSP89lF7epHbxvk3ur82nxWQLLc8Og4=
-X-Received: by 2002:a05:6902:1a46:b0:e0b:4045:ada0 with SMTP id
- 3f1490d57ef6-e17a83d45d4mr9340283276.23.1724672206061; Mon, 26 Aug 2024
- 04:36:46 -0700 (PDT)
+        bh=JAElfL7iEWs0FR6f0b+aqkORTm6zYAiodbIi2kSgpzM=;
+        b=kPwYejXGIL2BQwVS49v5kwCwRKM8NIkD/a95GrtvOIHq/CWuA1KUa8P93BaDKaz6uC
+         twTk/UqowjXaIP5+f0WlbSzILbhL0QBFY1hLl9a4WJGnF5+sCPGynSFUwIZI4Hh6OJLf
+         RSGRKC1AzGHJoi/snajijYmEV5dOicJJd0oUAdUEvm4dQ1jAhSxx84DyfeRVHWK5i11U
+         jjmNtfpix1pJFZEa2vHXMU4GhcMqoUg8u+lC7gpEoE+/XGOOWSDMk3QgzRkoRW0FomTQ
+         8D457F91HiowPGPjd/EpgAXQrMzb0p+Er+NZHyj5NKwITasl5EN9EZ84uUJrAedQimd2
+         42Dg==
+X-Forwarded-Encrypted: i=1; AJvYcCXqf8OLA3P8vw+sItwgld7Zy+xfLMp49dGcI+m2ilGBSIWuaT65hyL4Lr+PiDnmnH7qnNtv8ccxkiA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxN5awVTagxgklWLHKr9BS1SMzzog7ifB8ugO2OQ2fT6/qX0zKN
+	FkYNcNJ5//Z2VHLdaKCVZIjuUlVftOKdXvK3urtnhvlg95GLaw+u7q/rGLjiOWMug1mvhnJfJJc
+	57GDrO/NPxV+A1uyo5SXYIAesSS119a16obgk5w==
+X-Google-Smtp-Source: AGHT+IEwIfWKhZC0rCg5R0yqklaYcLcfxKowVHyn5uOUNIXJoiHSy78zrAfh27vJj2IcDPtOnE2yasosYEnXX2xracY=
+X-Received: by 2002:a05:6902:1547:b0:e13:cb77:5fda with SMTP id
+ 3f1490d57ef6-e17a83b29f5mr10549191276.12.1724672346952; Mon, 26 Aug 2024
+ 04:39:06 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240824034925.1163244-1-hch@lst.de> <20240824034925.1163244-5-hch@lst.de>
-In-Reply-To: <20240824034925.1163244-5-hch@lst.de>
+References: <20240820230631.GA436523@sony.com>
+In-Reply-To: <20240820230631.GA436523@sony.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 26 Aug 2024 13:36:09 +0200
-Message-ID: <CAPDyKFrnP5uZ8H3CL5P7bwjRnPwNPDF-U7amm1fwGeob63GYmw@mail.gmail.com>
-Subject: Re: [PATCH 4/4] dma-mapping: don't return errors from dma_set_max_seg_size
-To: Christoph Hellwig <hch@lst.de>
-Cc: iommu@lists.linux.dev, "Martin K. Petersen" <martin.petersen@oracle.com>, 
-	Robin Murphy <robin.murphy@arm.com>, Marek Szyprowski <m.szyprowski@samsung.com>, 
-	linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, dri-devel@lists.freedesktop.org, 
-	dmaengine@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com, 
-	linux-hyperv@vger.kernel.org, netdev@vger.kernel.org
+Date: Mon, 26 Aug 2024 13:38:31 +0200
+Message-ID: <CAPDyKFpryBDxAcuGd_AsoOJRr84kfvbXgM=eTaMjOBPGXhohsw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: apply SD quirks earlier during probe
+To: Keita Aihara <keita.aihara@sony.com>
+Cc: Jonathan Bell <jonathan@raspberrypi.com>, Tim.Bird@sony.com, Shingo.Takeuchi@sony.com, 
+	Masaya.Takahashi@sony.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 24 Aug 2024 at 05:51, Christoph Hellwig <hch@lst.de> wrote:
+On Wed, 21 Aug 2024 at 01:06, Keita Aihara <keita.aihara@sony.com> wrote:
 >
-> A NULL dev->dma_parms indicates either a bus that is not DMA capable or
-> grave bug in the implementation of the bus code.
+> From: Jonathan Bell <jonathan@raspberrypi.com>
 >
-> There isn't much the driver can do in terms of error handling for either
-> case, so just warn and continue as DMA operations will fail anyway.
+> Applying MMC_QUIRK_BROKEN_SD_CACHE is broken, as the card's SD quirks
+> are referenced in sd_parse_ext_reg_perf() prior to the quirks being
+> initialized in mmc_blk_probe().
 >
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> Reviewed-by: Robin Murphy <robin.murphy@arm.com>
-> ---
->  drivers/accel/qaic/qaic_drv.c                         |  4 +---
->  drivers/dma/idma64.c                                  |  4 +---
->  drivers/dma/pl330.c                                   |  5 +----
->  drivers/dma/qcom/bam_dma.c                            |  6 +-----
->  drivers/dma/sh/rcar-dmac.c                            |  4 +---
->  drivers/dma/ste_dma40.c                               |  6 +-----
->  drivers/gpu/drm/mediatek/mtk_drm_drv.c                |  6 +-----
->  drivers/media/common/videobuf2/videobuf2-dma-contig.c |  3 +--
->  drivers/media/pci/intel/ipu6/ipu6.c                   |  4 +---
->  drivers/mmc/host/mmci_stm32_sdmmc.c                   |  3 ++-
->  drivers/net/ethernet/microsoft/mana/gdma_main.c       |  6 +-----
->  drivers/scsi/lpfc/lpfc_init.c                         |  7 +------
->  include/linux/dma-mapping.h                           | 10 ++++------
->  13 files changed, 17 insertions(+), 51 deletions(-)
+> Split this out into a SD-specific list of quirks and apply in
+> mmc_sd_init_card() instead.
+>
+> Fixes: c467c8f08185 ("mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston Canvas Go Plus from 11/2019")
+> Signed-off-by: Jonathan Bell <jonathan@raspberrypi.com>
+> Co-developed-by: Keita Aihara <keita.aihara@sony.com>
+> Signed-off-by: Keita Aihara <keita.aihara@sony.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
+Applied for fixes and by adding a stable-tag, thanks!
 
 Kind regards
 Uffe
 
+
+> ---
+>  drivers/mmc/core/quirks.h | 22 +++++++++++++---------
+>  drivers/mmc/core/sd.c     |  4 ++++
+>  2 files changed, 17 insertions(+), 9 deletions(-)
 >
-> diff --git a/drivers/accel/qaic/qaic_drv.c b/drivers/accel/qaic/qaic_drv.c
-> index 580b29ed190217..bf10156c334e71 100644
-> --- a/drivers/accel/qaic/qaic_drv.c
-> +++ b/drivers/accel/qaic/qaic_drv.c
-> @@ -447,9 +447,7 @@ static int init_pci(struct qaic_device *qdev, struct pci_dev *pdev)
->         ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
->         if (ret)
->                 return ret;
-> -       ret = dma_set_max_seg_size(&pdev->dev, UINT_MAX);
-> -       if (ret)
-> -               return ret;
-> +       dma_set_max_seg_size(&pdev->dev, UINT_MAX);
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index cca71867bc4a..92905fc46436 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -15,6 +15,19 @@
 >
->         qdev->bar_0 = devm_ioremap_resource(&pdev->dev, &pdev->resource[0]);
->         if (IS_ERR(qdev->bar_0))
-> diff --git a/drivers/dma/idma64.c b/drivers/dma/idma64.c
-> index e3505e56784b1a..1398814d8fbb63 100644
-> --- a/drivers/dma/idma64.c
-> +++ b/drivers/dma/idma64.c
-> @@ -598,9 +598,7 @@ static int idma64_probe(struct idma64_chip *chip)
+>  #include "card.h"
 >
->         idma64->dma.dev = chip->sysdev;
+> +static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
+> +       /*
+> +        * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
+> +        * This has so far only been observed on cards from 11/2019, while new
+> +        * cards from 2023/05 do not exhibit this behavior.
+> +        */
+> +       _FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
+> +                  0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+> +                  MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
+> +
+> +       END_FIXUP
+> +};
+> +
+>  static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+>  #define INAND_CMD38_ARG_EXT_CSD  113
+>  #define INAND_CMD38_ARG_ERASE    0x00
+> @@ -53,15 +66,6 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+>         MMC_FIXUP("MMC32G", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
+>                   MMC_QUIRK_BLK_NO_CMD23),
 >
-> -       ret = dma_set_max_seg_size(idma64->dma.dev, IDMA64C_CTLH_BLOCK_TS_MASK);
-> -       if (ret)
-> -               return ret;
-> +       dma_set_max_seg_size(idma64->dma.dev, IDMA64C_CTLH_BLOCK_TS_MASK);
->
->         ret = dma_async_device_register(&idma64->dma);
->         if (ret)
-> diff --git a/drivers/dma/pl330.c b/drivers/dma/pl330.c
-> index 60c4de8dac1d2a..82a9fe88ad54c9 100644
-> --- a/drivers/dma/pl330.c
-> +++ b/drivers/dma/pl330.c
-> @@ -3163,10 +3163,7 @@ pl330_probe(struct amba_device *adev, const struct amba_id *id)
->          * This is the limit for transfers with a buswidth of 1, larger
->          * buswidths will have larger limits.
->          */
-> -       ret = dma_set_max_seg_size(&adev->dev, 1900800);
-> -       if (ret)
-> -               dev_err(&adev->dev, "unable to set the seg size\n");
+> -       /*
+> -        * Kingston Canvas Go! Plus microSD cards never finish SD cache flush.
+> -        * This has so far only been observed on cards from 11/2019, while new
+> -        * cards from 2023/05 do not exhibit this behavior.
+> -        */
+> -       _FIXUP_EXT("SD64G", CID_MANFID_KINGSTON_SD, 0x5449, 2019, 11,
+> -                  0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+> -                  MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
 > -
-> +       dma_set_max_seg_size(&adev->dev, 1900800);
->
->         init_pl330_debugfs(pl330);
->         dev_info(&adev->dev,
-> diff --git a/drivers/dma/qcom/bam_dma.c b/drivers/dma/qcom/bam_dma.c
-> index 5e7d332731e0c1..368ffaa4003789 100644
-> --- a/drivers/dma/qcom/bam_dma.c
-> +++ b/drivers/dma/qcom/bam_dma.c
-> @@ -1325,11 +1325,7 @@ static int bam_dma_probe(struct platform_device *pdev)
->
->         /* set max dma segment size */
->         bdev->common.dev = bdev->dev;
-> -       ret = dma_set_max_seg_size(bdev->common.dev, BAM_FIFO_SIZE);
-> -       if (ret) {
-> -               dev_err(bdev->dev, "cannot set maximum segment size\n");
-> -               goto err_bam_channel_exit;
-> -       }
-> +       dma_set_max_seg_size(bdev->common.dev, BAM_FIFO_SIZE);
->
->         platform_set_drvdata(pdev, bdev);
->
-> diff --git a/drivers/dma/sh/rcar-dmac.c b/drivers/dma/sh/rcar-dmac.c
-> index 40482cb73d798a..1094a2f821649c 100644
-> --- a/drivers/dma/sh/rcar-dmac.c
-> +++ b/drivers/dma/sh/rcar-dmac.c
-> @@ -1868,9 +1868,7 @@ static int rcar_dmac_probe(struct platform_device *pdev)
->
->         dmac->dev = &pdev->dev;
->         platform_set_drvdata(pdev, dmac);
-> -       ret = dma_set_max_seg_size(dmac->dev, RCAR_DMATCR_MASK);
-> -       if (ret)
-> -               return ret;
-> +       dma_set_max_seg_size(dmac->dev, RCAR_DMATCR_MASK);
->
->         ret = dma_set_mask_and_coherent(dmac->dev, DMA_BIT_MASK(40));
->         if (ret)
-> diff --git a/drivers/dma/ste_dma40.c b/drivers/dma/ste_dma40.c
-> index 2c489299148eee..d52e1685aed53f 100644
-> --- a/drivers/dma/ste_dma40.c
-> +++ b/drivers/dma/ste_dma40.c
-> @@ -3632,11 +3632,7 @@ static int __init d40_probe(struct platform_device *pdev)
->         if (ret)
->                 goto destroy_cache;
->
-> -       ret = dma_set_max_seg_size(base->dev, STEDMA40_MAX_SEG_SIZE);
-> -       if (ret) {
-> -               d40_err(dev, "Failed to set dma max seg size\n");
-> -               goto destroy_cache;
-> -       }
-> +       dma_set_max_seg_size(base->dev, STEDMA40_MAX_SEG_SIZE);
->
->         d40_hw_init(base);
->
-> diff --git a/drivers/gpu/drm/mediatek/mtk_drm_drv.c b/drivers/gpu/drm/mediatek/mtk_drm_drv.c
-> index 77b50c56c124ce..3e807195a0d03a 100644
-> --- a/drivers/gpu/drm/mediatek/mtk_drm_drv.c
-> +++ b/drivers/gpu/drm/mediatek/mtk_drm_drv.c
-> @@ -559,11 +559,7 @@ static int mtk_drm_kms_init(struct drm_device *drm)
->          * Configure the DMA segment size to make sure we get contiguous IOVA
->          * when importing PRIME buffers.
->          */
-> -       ret = dma_set_max_seg_size(dma_dev, UINT_MAX);
-> -       if (ret) {
-> -               dev_err(dma_dev, "Failed to set DMA segment size\n");
-> -               goto err_component_unbind;
-> -       }
-> +       dma_set_max_seg_size(dma_dev, UINT_MAX);
->
->         ret = drm_vblank_init(drm, MAX_CRTC);
->         if (ret < 0)
-> diff --git a/drivers/media/common/videobuf2/videobuf2-dma-contig.c b/drivers/media/common/videobuf2/videobuf2-dma-contig.c
-> index 3d4fd4ef53107c..bb0b7fa67b539a 100644
-> --- a/drivers/media/common/videobuf2/videobuf2-dma-contig.c
-> +++ b/drivers/media/common/videobuf2/videobuf2-dma-contig.c
-> @@ -854,8 +854,7 @@ int vb2_dma_contig_set_max_seg_size(struct device *dev, unsigned int size)
->                 return -ENODEV;
->         }
->         if (dma_get_max_seg_size(dev) < size)
-> -               return dma_set_max_seg_size(dev, size);
-> -
-> +               dma_set_max_seg_size(dev, size);
->         return 0;
->  }
->  EXPORT_SYMBOL_GPL(vb2_dma_contig_set_max_seg_size);
-> diff --git a/drivers/media/pci/intel/ipu6/ipu6.c b/drivers/media/pci/intel/ipu6/ipu6.c
-> index bbd646378ab3ed..83e70c692d957f 100644
-> --- a/drivers/media/pci/intel/ipu6/ipu6.c
-> +++ b/drivers/media/pci/intel/ipu6/ipu6.c
-> @@ -576,9 +576,7 @@ static int ipu6_pci_probe(struct pci_dev *pdev, const struct pci_device_id *id)
->         if (ret)
->                 return dev_err_probe(dev, ret, "Failed to set DMA mask\n");
->
-> -       ret = dma_set_max_seg_size(dev, UINT_MAX);
-> -       if (ret)
-> -               return dev_err_probe(dev, ret, "Failed to set max_seg_size\n");
-> +       dma_set_max_seg_size(dev, UINT_MAX);
->
->         ret = ipu6_pci_config_setup(pdev, isp->hw_ver);
->         if (ret)
-> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> index f5da7f9baa52d4..9dc51859c2e51e 100644
-> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> @@ -213,7 +213,8 @@ static int sdmmc_idma_setup(struct mmci_host *host)
->                 host->mmc->max_seg_size = host->mmc->max_req_size;
->         }
->
-> -       return dma_set_max_seg_size(dev, host->mmc->max_seg_size);
-> +       dma_set_max_seg_size(dev, host->mmc->max_seg_size);
-> +       return 0;
->  }
->
->  static int sdmmc_idma_start(struct mmci_host *host, unsigned int *datactrl)
-> diff --git a/drivers/net/ethernet/microsoft/mana/gdma_main.c b/drivers/net/ethernet/microsoft/mana/gdma_main.c
-> index ddb8f68d80a206..ca4ed58f1206dd 100644
-> --- a/drivers/net/ethernet/microsoft/mana/gdma_main.c
-> +++ b/drivers/net/ethernet/microsoft/mana/gdma_main.c
-> @@ -1496,11 +1496,7 @@ static int mana_gd_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
->         if (err)
->                 goto release_region;
->
-> -       err = dma_set_max_seg_size(&pdev->dev, UINT_MAX);
-> -       if (err) {
-> -               dev_err(&pdev->dev, "Failed to set dma device segment size\n");
-> -               goto release_region;
-> -       }
-> +       dma_set_max_seg_size(&pdev->dev, UINT_MAX);
->
->         err = -ENOMEM;
->         gc = vzalloc(sizeof(*gc));
-> diff --git a/drivers/scsi/lpfc/lpfc_init.c b/drivers/scsi/lpfc/lpfc_init.c
-> index e1dfa96c2a553a..50620918becd59 100644
-> --- a/drivers/scsi/lpfc/lpfc_init.c
-> +++ b/drivers/scsi/lpfc/lpfc_init.c
-> @@ -13861,12 +13861,7 @@ lpfc_get_sli4_parameters(struct lpfc_hba *phba, LPFC_MBOXQ_t *mboxq)
->         if (sli4_params->sge_supp_len > LPFC_MAX_SGE_SIZE)
->                 sli4_params->sge_supp_len = LPFC_MAX_SGE_SIZE;
->
-> -       rc = dma_set_max_seg_size(&phba->pcidev->dev, sli4_params->sge_supp_len);
-> -       if (unlikely(rc)) {
-> -               lpfc_printf_log(phba, KERN_INFO, LOG_INIT,
-> -                               "6400 Can't set dma maximum segment size\n");
-> -               return rc;
-> -       }
-> +       dma_set_max_seg_size(&phba->pcidev->dev, sli4_params->sge_supp_len);
->
 >         /*
->          * Check whether the adapter supports an embedded copy of the
-> diff --git a/include/linux/dma-mapping.h b/include/linux/dma-mapping.h
-> index 6bd1333dbacb9b..1524da363734af 100644
-> --- a/include/linux/dma-mapping.h
-> +++ b/include/linux/dma-mapping.h
-> @@ -524,13 +524,11 @@ static inline unsigned int dma_get_max_seg_size(struct device *dev)
->         return SZ_64K;
->  }
+>          * Some SD cards lockup while using CMD23 multiblock transfers.
+>          */
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 1c8148cdda50..ee37ad14e79e 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -26,6 +26,7 @@
+>  #include "host.h"
+>  #include "bus.h"
+>  #include "mmc_ops.h"
+> +#include "quirks.h"
+>  #include "sd.h"
+>  #include "sd_ops.h"
 >
-> -static inline int dma_set_max_seg_size(struct device *dev, unsigned int size)
-> +static inline void dma_set_max_seg_size(struct device *dev, unsigned int size)
->  {
-> -       if (dev->dma_parms) {
-> -               dev->dma_parms->max_segment_size = size;
-> -               return 0;
-> -       }
-> -       return -EIO;
-> +       if (WARN_ON_ONCE(!dev->dma_parms))
-> +               return;
-> +       dev->dma_parms->max_segment_size = size;
->  }
+> @@ -1475,6 +1476,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>                         goto free_card;
+>         }
 >
->  static inline unsigned long dma_get_seg_boundary(struct device *dev)
+> +       /* Apply quirks prior to card setup */
+> +       mmc_fixup_device(card, mmc_sd_fixups);
+> +
+>         err = mmc_sd_setup_card(host, card, oldcard != NULL);
+>         if (err)
+>                 goto free_card;
 > --
-> 2.43.0
->
+> 2.43.2
 >
