@@ -1,107 +1,119 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f44.google.com (mail-oa1-f44.google.com [209.85.160.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7869161FEA
-	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 07:35:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47983139579
+	for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 07:38:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724657706; cv=none; b=qqwAHW3O6tbnRfH3/m4z1AiaziADVsg2u5N8OB/DMgshOIUna2jOVwVr8QTgObhn41j2eX+yl4NDGERZnqbc/SsyK4XdnWA0t6p1WlFD9V+N/SKozfhEsZr+x3Y8uVsQhE/iAhne8NrlhRLGxKBqMeRyNHv79uy13TA+qf0sPbg=
+	t=1724657921; cv=none; b=Jo0MBmb1D+pjuqd4ZeddQN3yfTgGkTAqN70S8A02s0DAt47aG4CCPcS+bbFw/7Cv5YW63NGAEeufF6bqeMCKbpW7j1mppjR0U1FUQM+JvI6H3nDjeknRRtHbHesqxo0+YarXD0oD4FuWeDyuX77nwPVyhNnaoJe7cqWnBSEn1Pg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724657706; c=relaxed/simple;
-	bh=ITyfnwGN2BoltRYjbHCUcLuGVQGBW/GiBTjPWYBG4o8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CxxImASOqhS1+AUkcXnB4QwxG2juGRxElNoNCNuSn50eANOj4tnZTbEQoZbHatV04WOSrQigtSc6f2j3kFEUFxAX3f2jzEg10PBVpz7oJuI42pl+eHGaFSsWGHiTsd6Y3WVWJdPgQ0QgD4GAVax9/gL+EtP10pycf/uby32Sbq4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=hmpq8p+b; arc=none smtp.client-ip=198.175.65.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1724657921; c=relaxed/simple;
+	bh=+r4KwkPF56YUwM+jpmfwdS9lGM/2/YCwHdaYZ+XtylY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Dt6dtweZb1jGDETnYLEM6Q0xVfEgxk4KvioET9dopnVeQT9/Gs2M7llxMKuKBwMTIgrE6m2Ph9VK84DPSqjtOz3CUjVU5GPU2HzlzWwMKjaW7+PcxkVuEwFsNTQnnbngHWcPnyJgfqo6jV/+5u+Sn3wz+20kAwZ9Lo5kkD2Be+E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=dIpOao+B; arc=none smtp.client-ip=209.85.160.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="hmpq8p+b"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1724657705; x=1756193705;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ITyfnwGN2BoltRYjbHCUcLuGVQGBW/GiBTjPWYBG4o8=;
-  b=hmpq8p+b+NqOl9gvbZsoxnb9oSPnR3qyILhB2SzHP9HNcx/YkfXgv1h+
-   j6f+rNGXmv2a7qd9yL0m9ys0AgjGg+nU5wOtyIQ6IvRNgFQA0mo4jfL29
-   3JV0aEpo5t3ZGLR4ud7hNXYcsXjhpSzPmDs5zWQg0ef7FqpvhGdVLng7A
-   KUyNYEe+Dwt0cSwH0A0rgnEy8DVaenuhCS1sJ5T4ds9nk9rLcXSAI+gT0
-   z7nWoFbWVHalAzbt2CX34N61ryLS1QNYqB6NZiWKfXYXJUNfPpdzManRT
-   bbp/diSKsYUh0su1ESvn1CvXstvh+E8BvHbglajeAxOI40wDooh20PAMX
-   w==;
-X-CSE-ConnectionGUID: xBz1OFLDRZmKMmfQzx9+yQ==
-X-CSE-MsgGUID: Lp0ZJivBQ76nmRR4oTmlkQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11175"; a="34437209"
-X-IronPort-AV: E=Sophos;i="6.10,176,1719903600"; 
-   d="scan'208";a="34437209"
-Received: from fmviesa003.fm.intel.com ([10.60.135.143])
-  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 00:35:04 -0700
-X-CSE-ConnectionGUID: tWat6IK5QkmCZjgXuiVKRg==
-X-CSE-MsgGUID: oiMAf0DpTbyGszeTysYJaw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,176,1719903600"; 
-   d="scan'208";a="66600008"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
-  by fmviesa003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Aug 2024 00:35:01 -0700
-Message-ID: <21353874-2384-47f7-9a9a-bdaeec1ba13c@intel.com>
-Date: Mon, 26 Aug 2024 10:34:57 +0300
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dIpOao+B"
+Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-2700d796019so2737393fac.2
+        for <linux-mmc@vger.kernel.org>; Mon, 26 Aug 2024 00:38:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1724657919; x=1725262719; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=GDZNyfBrMFfaLFVLKV7IGwwjfLMSPx3nMeg3fzbktXM=;
+        b=dIpOao+B7IwT8APODqv4uOlSrO6lTcnRFNWLZGXDxAz2Zi/ToscUMCsaXw2hurMEoP
+         Rdsgg9/EL8NoMAMCVpsY948s080PdE2tO0NIxweUVIhwt3Y9fqn8N932mzXhgWsQjLMW
+         y6W6YPnji6SI0/7OQLEBkUG0N7doRqpolcIoI5Y9z0kKbz/ty0Dyg/VusJzMA9rrCsi1
+         NvTiOqwl04GTD5kWMEbiwzFuwlHGuf3ozwarnKHjbluhGUViwc2LwjkiYmLG3JeVyWwR
+         QXbrQK1QkGwZQka4QkIgJybIuhkyD8uOFFXObkufhaC34EwzQ5I/Myz0E/AokVUV1d3P
+         83cg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1724657919; x=1725262719;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=GDZNyfBrMFfaLFVLKV7IGwwjfLMSPx3nMeg3fzbktXM=;
+        b=Uy7XdcMKKprBI5zpXPJ2ljyMmWYA4ec7SiUtuoSodqfibHLjyYgnDyP7pDmXtxqMdZ
+         8nvfwTz0qk+3/XW0cY4hEU3LvfbCT+zlUyS9tN7fW0s/3lXhJ5Vrl4dGKn/Fy4hpAGmK
+         tEUZs1tybTZEcZEPUTPEhDvetsOd/4BlvuBgN7rYgPW4SrjRj5QrgDYQ6Pjrmbgywd6H
+         agYVnQvGp9MQbdVQ+hjTIkurvtOHwoQgG36AoX2T0IctR5XJwt/BSVWnVYdKTa1cB2FS
+         XFwJoLB6iq3wTRAtwsgJ/GF7wy10qRSK+1Fg4P5q6t0m6sGXUNGi34MjHn75EzYIiKhJ
+         I+PA==
+X-Forwarded-Encrypted: i=1; AJvYcCWYcUhNOa88zpNfnnR/5MtJcDR57lXy4R1ZvD7TEdpanzELO2Dxhf+SBviN6wVV5R0BldcZYxXyYsM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwiBhQr6PtCRROYBG+CQhI326vzBEpSnWueCKjJx2+oS4471GB0
+	9mXb+KkiFsspdTSGWwdosTBCTPrn9e6nEgJcSUgeNXEHFXXbeWjRub4irCkud1J6+4xHGGceg9q
+	eAI2CjSZUA/Ilg8vWUqAzbWa0aUGlnsKWEnTuOQ==
+X-Google-Smtp-Source: AGHT+IFc6Mj0Tgj0XqyDn+SsU43dIjPUaGWD2bukfLuYi7jP12SKM8BJS+t3+Mvw0Ibj0o4W3JcieCw8qj6WJHQBfpQ=
+X-Received: by 2002:a05:6870:8292:b0:25d:ff4c:bc64 with SMTP id
+ 586e51a60fabf-273e6469d5dmr10239625fac.6.1724657919407; Mon, 26 Aug 2024
+ 00:38:39 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 9/9] mmc: core: Adjust ACMD22 to SDUC
-To: Avri Altman <Avri.Altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>
-References: <20240825074141.3171549-1-avri.altman@wdc.com>
- <20240825074141.3171549-10-avri.altman@wdc.com>
- <9e2bf183-17a6-42a0-ba60-4a2384e53ca8@intel.com>
- <DM6PR04MB6575F070F4F18224617209EAFC8B2@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <DM6PR04MB6575F070F4F18224617209EAFC8B2@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240814153558.708365-1-jens.wiklander@linaro.org>
+ <CAPDyKFqBuQ8uUdeThRaJtd2CYNWMmpLCEDxfO+znhwjPamH+Gg@mail.gmail.com> <2024082414-doily-camisole-b5c7@gregkh>
+In-Reply-To: <2024082414-doily-camisole-b5c7@gregkh>
+From: Jens Wiklander <jens.wiklander@linaro.org>
+Date: Mon, 26 Aug 2024 09:38:27 +0200
+Message-ID: <CAHUa44E0bLYHzoGs3onu6sK5dwXB=1t-GsFWt096z+u4aN6R1g@mail.gmail.com>
+Subject: Re: [PATCH v9 0/4] Replay Protected Memory Block (RPMB) subsystem
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, op-tee@lists.trustedfirmware.org, 
+	Shyam Saini <shyamsaini@linux.microsoft.com>, Linus Walleij <linus.walleij@linaro.org>, 
+	Jerome Forissier <jerome.forissier@linaro.org>, Sumit Garg <sumit.garg@linaro.org>, 
+	Ilias Apalodimas <ilias.apalodimas@linaro.org>, Bart Van Assche <bvanassche@acm.org>, 
+	Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ardb@kernel.org>, Manuel Traut <manut@mecka.net>, 
+	Mikko Rapeli <mikko.rapeli@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 26/08/24 10:26, Avri Altman wrote:
->>> +     /*
->>> +      * SD cards, specifically high volume cards, expect to be allowed with the
->>> +      * full 500msec busy period post write. Otherwise, they may not indicate
->>> +      * correctly the number of bytes written.
->>> +      */
->>> +     if (mmc_card_ult_capacity(card))
->>> +             mmc_delay(500);
->>
->> To get here, it should have had to go through:
->>
->>         /* Try to get back to "tran" state */
->>         if (!mmc_host_is_spi(mq->card->host) &&
->>             (err || !mmc_ready_for_data(status)))
->>                 err = mmc_blk_fix_state(mq->card, req);
->>
->> which would mean the card is not indicating "busy".
->> Either that is not working, or it seems like an issue with the card, in which case
->> it could be a card quirk perhaps.
-> I was getting here on a setup with micro-to-SD adapter - I guess because of phy errors on one of the early card versions.
-> On my other setups, the recovery flow wasn't triggered.
-> What was happening is:
-> mmc_blk_mq_req_done
-> 	mmc_blk_mq_complete_prev_req
-> 		mmc_blk_mq_poll_completion
-> 			CMD13: 0: 00080900 00000000 00000000 00000000 = READY_FOR_DATA + ERROR
-> 			mmc_blk_mq_rw_recovery
-> 				mmc_sd_num_wr_blocks - bytes_xfered = 0
-> 
-> Consulting with our SD system guys, the 500msec must-have write timeout brought up,
-> And fixed that.
-> Shawn was interested in this as well - see the discussion in V3.
+On Sat, Aug 24, 2024 at 7:18=E2=80=AFAM Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
+>
+> On Wed, Aug 21, 2024 at 11:23:03PM +0200, Ulf Hansson wrote:
+> > On Wed, 14 Aug 2024 at 17:36, Jens Wiklander <jens.wiklander@linaro.org=
+> wrote:
+> > >
+> > > Hi,
+> > >
+> > > This patch set is getting ready to be queued for the next merge windo=
+w. The
+> > > issues reported by Mikka in the v7 patch set has been resolved, the i=
+ssues
+> > > turned out to be outside of the v7 patch set relating to configuratio=
+n in
+> > > the secure world. I'm planning a pull request to arm-soc, but before =
+that
+> > > I'd rather have acks or at least an OK for:
+> > > - "rpmb: add Replay Protected Memory Block (RPMB) subsystem" by Greg
+> > > - "mmc: block: register RPMB partition with the RPMB subsystem" by Ul=
+f
+> > >
+> > > Arnd, please let me know if anything else is missing.
+> >
+> > Greg, Jens,
+> >
+> > To help out with the merging strategy, I don't mind queuing this whole
+> > series via my mmc tree. It would also be nice to let it cook in
+> > linux-next for while, via my next branch.
+> >
+> >  From my point of view this looks good to me now, but please let me
+> > know if you prefer a different route or if you have any further
+> > comments.
+>
+> No objection from me, please take it through your tree, makes it simpler
+> for me :)
 
-The spec reads like the timeout is for card busy.  If the card is
-not indicating busy when it is busy, then that is an issue with
-the card.
+Same here, Ulf please take it through your tree.
 
+Thanks for helping and reviewing this.
+
+Cheers,
+Jens
