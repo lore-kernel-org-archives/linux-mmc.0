@@ -1,120 +1,162 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 997DE1885AB;
-	Mon, 26 Aug 2024 14:52:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724683951; cv=none; b=sKwpnGP/r13RHYGabrkBzxOXVTkIpHSOQJeicvyPi4XOtxBlNpey6AO5x1Y/Qzr2l9JIYSUR3yZe8hs9/DEuglbjrfkRcs/S5wVwf8+FTxvLj5Gk2XjgiOcJhxNlmeTZNEHaZrQBIE3pTghrJanoWeOWrR0wi4Veqi9JPp2f+5U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724683951; c=relaxed/simple;
-	bh=/9EeEP59BswQPSml+vUqcK0oINO/fcMcdI7TpggEe9I=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=rC9YbJEZ6PxUPb6Iwxse8VK13jVgcFNRB5P6GuI2DRPQ+wKBjPavTsr1fM2/Kb9s+KZvs/Wnu5CoMdXj8jom8jE+JKqPnkdNw7JYJ3ZZXiFQkGwB3bEb5rlj8nd6l2G/MnIsbliOHgEvp2UMmgOkjRaab5gXbiueA86DFqy7Pr4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=KRxz8lzt; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6255192D72;
+	Mon, 26 Aug 2024 15:46:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1724687189; cv=pass; b=uk2TWap3q7S7uZ0e2aSY1gBKahLbKEhgJxNxB83P1BZlQqLNQ22UBWFAKAPWKNhakRM2nHoGhYv1Ak+PFFQq2uE5GdjmxUzd2KFBSrQtoPdaqmy1vJJ1ygAgcAsYvZSRlf4qbnjWcnKelLi05ayWlrZ0JvH7YiOfUPLwUQeRxU4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1724687189; c=relaxed/simple;
+	bh=Do/+VwEJy4aWUGWjEXhuMvlmv5HouVa8Jk5LAZfggUQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=F8SIIL6l9XcIsRIX01ZadzElhNB8aHVyOvnf1TcT/43mMjxryLJtkk82Fm/VyM5QnyEpaHMLkeMnWqQqz6WZwxPauxBYpW1uIFmOZunKwDPs4iZNAoXnAqUB7wkvb55TqsbyM5vRBiGfzZODfbEbQRjbSLM8rKgCnoyas7X1JsQ=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b=LqkQDUsf; arc=pass smtp.client-ip=136.143.188.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="KRxz8lzt"
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=detlev.casanova@collabora.com header.b="LqkQDUsf"
+ARC-Seal: i=1; a=rsa-sha256; t=1724687153; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=NSgXOg6pf4JTqCqBfaJlETE1ElqADA9SVLQWBaTLNnLv8aaUYzY2wN3OZmLIQDFpOk8gkdZN7hhG2j0/vKC7QChgmuu7O2vgQ4JnhQe5+JcioXS/0GvGuHa5izNnNOEcUUXuOHmh58Whvkrve4BvvExUbLG+Dmi6vC0W91B8bAo=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1724687153; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=zb074lKrTAv50HX1CILzyo6P0szhW30i/SFCvBy70Lk=; 
+	b=a+PNdjk2Ikz8JSGRfSPu9uRgnrY4Z6SXSoMtp1CmhnfWCvZiv5Zl/xLkVZplKNx6tDMpsmnMncbAfoWbwwi3gbfvcyuxmcw+IMA435ShP6VNtP8f/ZfJ8cP2I/fN4gPjrU3F3VZGXzouX5biSAWFdfQWC43gGGH/fzlAgKMjDzc=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=detlev.casanova@collabora.com;
+	dmarc=pass header.from=<detlev.casanova@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1724687153;
+	s=zohomail; d=collabora.com; i=detlev.casanova@collabora.com;
+	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
+	bh=zb074lKrTAv50HX1CILzyo6P0szhW30i/SFCvBy70Lk=;
+	b=LqkQDUsf/LZqRncbELqVpYqBjZmUZkn4+1sPZ7OmW5TWlkzZw52pQyEAJAh47NOe
+	7eguSKUZhr8IB1Pg+Y3Gb1+4h6ecDm1ONzIj29ScB78qRhlY1qsUt1xBA2a6vaUIJNz
+	gkFaCSLvnyrusBKjAU1Ilrkivai6hO6uHRgWw3j0=
+Received: by mx.zohomail.com with SMTPS id 1724687151652297.5430112358182;
+	Mon, 26 Aug 2024 08:45:51 -0700 (PDT)
+From: Detlev Casanova <detlev.casanova@collabora.com>
+To: Dragan Simic <dsimic@manjaro.org>
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
+ Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, kernel@collabora.com
+Subject: Re: [PATCH v4 4/4] mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
+Date: Mon, 26 Aug 2024 11:45:49 -0400
+Message-ID: <2196769.irdbgypaU6@bootstrap>
+In-Reply-To: <dc77f6dbdfc68369d02005763143cdea@manjaro.org>
+References:
+ <20240822212418.982927-1-detlev.casanova@collabora.com>
+ <5808226.DvuYhMxLoT@trenzalore>
+ <dc77f6dbdfc68369d02005763143cdea@manjaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1724683947;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=zsLtJ21GMVO6oT89oMRfFsmwIaUm0tSl7H1ZIrPPfoM=;
-	b=KRxz8lztdXHXbtlweF6zWPEUz3/LYc5LCCYGpTLWet9hzCUGjVOSHLYu4qybICQEuaY9sB
-	LUbubrSZmp8tX6JmvyVNLgq7T6VgCznLzlGLjgSRRVrwTLtP7LepB5icYthDXO/OgMo8NY
-	ym9WDi8UAiNyYV39jrkE1vP+gLhH6KL9I9+LVFO01XT1zV8IUC3dG3Kyk4I+fLHAKRTVH/
-	AaqXcbVlmRZ+fAvSumcRJPJRuhZPSYuNqg+KPqbeU6XXgAMQo4gEQntJkF29tj/eKdYiKm
-	4J3U02Hx8av6IURlPGOEylBjk3yjWNpJEJSqiD9YVZGNC9efCtWJP9HSCsFtFA==
-Date: Mon, 26 Aug 2024 16:52:26 +0200
-From: Dragan Simic <dsimic@manjaro.org>
-To: Detlev Casanova <detlev.casanova@collabora.com>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Rob
- Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor
- Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon
- Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, kernel@collabora.com, Shawn Lin
- <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4 3/4] mmc: dw_mmc-rockchip: Skip all phases bigger than
- 270 degrees
-In-Reply-To: <1894989.tdWV9SEqCh@trenzalore>
-References: <20240822212418.982927-1-detlev.casanova@collabora.com>
- <20240822212418.982927-4-detlev.casanova@collabora.com>
- <711f2561ac3d84bcd5bbe26723869b47@manjaro.org>
- <1894989.tdWV9SEqCh@trenzalore>
-Message-ID: <38952ff6affa5929612aaabbae3ca996@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="utf-8"
+X-ZohoMailClient: External
 
-Hello Detlev,
+Hi Dragan,
 
-On 2024-08-23 15:59, Detlev Casanova wrote:
-> On Friday, 23 August 2024 01:45:07 EDT Dragan Simic wrote:
->> Hello Detlev,
->> 
->> On 2024-08-22 23:15, Detlev Casanova wrote:
->> > From: Shawn Lin <shawn.lin@rock-chips.com>
->> >
->> > Per design recommendation, it'd better not try to use any phase
->> > which is bigger than 270. Let's officially follow this.
->> 
->> Would it be possible to provide a reference to the actual design
->> specification?  This change affects all users of the dw_mmc-rockchip
->> driver, so in case any regressions are found later, having as much
->> detail as possible can only be beneficial.
+On Monday, 26 August 2024 10:07:49 EDT Dragan Simic wrote:
+> Hello Detlev,
 > 
-> I don't have the reference and only trusting rockchip on this. This 
-> could be
-> specific to rockchip hardware.
-> Anyway, the drivers works well on my side on my rk3576 armsom sige5 
-> without
-> this patch, so I'm willing to drop it completely.
+> On 2024-08-23 15:20, Detlev Casanova wrote:
+> > On Friday, 23 August 2024 03:00:57 EDT Dragan Simic wrote:
+> >> Hello Detlev,
+> >> 
+> >> Please see a comment below.
+> >> 
+> >> On 2024-08-22 23:15, Detlev Casanova wrote:
+> >> > On rk3576 the tunable clocks are inside the controller itself, removing
+> >> > the need for the "ciu-drive" and "ciu-sample" clocks.
+> >> > 
+> >> > That makes it a new type of controller that has its own dt_parse
+> >> > function.
+> >> > 
+> >> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
+> >> > ---
+> >> > 
+> >> >  drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++++----
+> >> >  1 file changed, 43 insertions(+), 5 deletions(-)
+> >> > 
+> >> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+> >> > b/drivers/mmc/host/dw_mmc-rockchip.c
+> >> > index 1458cb5fd5c7..7c8ccf5e71bc 100644
+> >> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> >> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> > 
+> > [...]
+> > 
+> >> > @@ -435,13 +451,25 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci
+> >> > *host)
+> >> > 
+> >> >  	if (IS_ERR(priv->sample_clk))
+> >> >  	
+> >> >  		dev_dbg(host->dev, "ciu-sample not available\n");
+> >> > 
+> >> > -	host->priv = priv;
+> >> > -
+> >> > 
+> >> >  	priv->internal_phase = false;
+> >> >  	
+> >> >  	return 0;
+> >> >  
+> >> >  }
+> >> > 
+> >> > +static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+> >> > +{
+> >> > +	struct dw_mci_rockchip_priv_data *priv;
+> >> > +	int err = dw_mci_common_parse_dt(host);
+> >> > +	if (err)
+> >> > +		return err;
+> >> > +
+> >> > +	priv = host->priv;
+> >> > +
+> >> > +	priv->internal_phase = true;
+> >> 
+> >> Defining priv, assigning it and using it seems rather redundant,
+> >> when all that's needed is simple "host->priv->internal_phase = true"
+> >> assignment instead.
+> > 
+> > Yes, that's what I did at first, but host->priv is declared as void*,
+> > which
+> > means it needs to be cast to struct dw_mci_rockchip_priv_data * and I
+> > felt
+> > that
+> > 
+> > ((struct dw_mci_rockchip_priv_data *)host->priv)->internal_phase =
+> > true;
+> > 
+> > is not very pretty and harder to read.
+> 
+> Ah, you're right, and I somehow managed to ignore that.
+> 
+> I agree with your conclusions, although I'd suggest something like
+> this, for slightly improved readability:
+> 
+>   +static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+>   +{
+>   +	struct dw_mci_rockchip_priv_data *priv = host->priv;
+>   +	int err;
+>   +
+>   +	err = dw_mci_common_parse_dt(host);
+>   +	if (err)
+>   +		return err;
+>   +
+>   +	priv->internal_phase = true;
+>   +
+>   +	return 0;
+>   +}
 
-I think it would be better if you'd drop it in this series, and submit
-it later separately, as a follow-up patch, to reduce the chances for any
-possible regressions.  Maybe we'll also have more background information
-available by then, who knows.
+That won't work either, because host->priv is initialized in 
+dw_mci_common_parse_dt.
 
->> > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> > (cherry picked from commit 2a53aab5cfa43065b2e979959d727332a8a03c03)
->> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
->> > ---
->> >
->> >  drivers/mmc/host/dw_mmc-rockchip.c | 3 +++
->> >  1 file changed, 3 insertions(+)
->> >
->> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
->> > b/drivers/mmc/host/dw_mmc-rockchip.c
->> > index 2748f9bf2691..1458cb5fd5c7 100644
->> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> > @@ -310,6 +310,9 @@ static int dw_mci_rk3288_execute_tuning(struct
->> > dw_mci_slot *slot, u32 opcode)
->> >
->> >  	/* Try each phase and extract good ranges */
->> >  	for (i = 0; i < priv->num_phases; ) {
->> >
->> > +		/* Cannot guarantee any phases larger than 270 would
-> work well */
->> > +		if (TUNING_ITERATION_TO_PHASE(i, priv->num_phases) >
-> 270)
->> > +			break;
->> >
->> >  		rockchip_mmc_set_phase(host, true,
->> >
->> >  				       TUNING_ITERATION_TO_PHASE(
->> >
->> >  						i,
+
+
