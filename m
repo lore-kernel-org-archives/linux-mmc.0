@@ -1,69 +1,146 @@
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
+	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C9C6E155727;
-	Mon, 26 Aug 2024 12:57:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=45.249.212.255
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EEE9C17E01E;
+	Mon, 26 Aug 2024 14:07:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724677026; cv=none; b=MyA5KSEgK/g2pl9i62MrrB7LG6Eg+X+cwc79VX7yd1uWS1zXpd155kKNSdf8v90JCUKLB+WFJWg2d4kaMjRdh6sR81bf6rrs+g36K6gAKQ58hFc60z4/F8RMTNdtTwxwlJtsJyL8RhBHrfe5yrJ/QTYnjgRE2IEJDVvFTaxYHpM=
+	t=1724681276; cv=none; b=rjFYTFa+gqQ1Ff/m+Bp+IJFEX4BZtAEYeNTiCFpAdH6+2OwiqtPIZTEw/fU0AzXD/AGYc7qsxzCQj+Pq3x5XwTqIaPI/z1gjPqmMqabYDBzvyuTtPDZILGcHQw6Ae7C8QBtBe6cAtlnBt9bh93c/3XldyT2VYWg1QHRJX/0rHZ4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724677026; c=relaxed/simple;
-	bh=/5B8H7qfi9GW2W9Wpi79TnVvt5efYx3P5wIeU8M22XM=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=PnV47JYOGta45F8xaZnL48EN46ZBWQs/O2DU5Tam6i+cbbCShEQ2WwsOAFmWPh4R0ESY7G0eq/e4A669jWceAbNdxcVW2HwFTphd1GzKmMCjW7HGWgpsz59bOTpden68cun8IG+IPFv6dB9dq5Ud2RpeABw3s+wUzgj49vZEu5Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com; spf=pass smtp.mailfrom=huawei.com; arc=none smtp.client-ip=45.249.212.255
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=huawei.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=huawei.com
-Received: from mail.maildlp.com (unknown [172.19.163.48])
-	by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4WsrJx2GScz146qY;
-	Mon, 26 Aug 2024 20:56:17 +0800 (CST)
-Received: from dggpemm500020.china.huawei.com (unknown [7.185.36.49])
-	by mail.maildlp.com (Postfix) with ESMTPS id F069818006C;
-	Mon, 26 Aug 2024 20:57:02 +0800 (CST)
-Received: from huawei.com (10.67.174.77) by dggpemm500020.china.huawei.com
- (7.185.36.49) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.1.2507.39; Mon, 26 Aug
- 2024 20:57:02 +0800
-From: Liao Chen <liaochen4@huawei.com>
-To: <linux-aspeed@lists.ozlabs.org>, <openbmc@lists.ozlabs.org>,
-	<linux-mmc@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-kernel@vger.kernel.org>
-CC: <andrew@codeconstruct.com.au>, <adrian.hunter@intel.com>,
-	<ulf.hansson@linaro.org>, <joel@jms.id.au>
-Subject: [PATCH -next] mmc: sdhci-of-aspeed: fix module autoloading
-Date: Mon, 26 Aug 2024 12:48:51 +0000
-Message-ID: <20240826124851.379759-1-liaochen4@huawei.com>
-X-Mailer: git-send-email 2.34.1
+	s=arc-20240116; t=1724681276; c=relaxed/simple;
+	bh=xOgBRZPXDCPk/4kGTj33xlReBqvcCW/HiawLg1Vxuww=;
+	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
+	 Message-ID:Content-Type; b=hqkBxlaqWaIZyosnz9jQUE4joQRnYk2ztQ+WmVV6JttzaQzosm2lBXNvv62D7KEhbG4N/LUu2vVghJLEh8m1oby2Ad1NiZFLREBH59rMWeKL0EOknICio9e76QzI/xT/vHFxgAV+xHMo2CjtGQjVBm6UbxYS+3jDCq19YiJceCw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=Lv3hQkmY; arc=none smtp.client-ip=116.203.91.91
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="Lv3hQkmY"
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpemm500020.china.huawei.com (7.185.36.49)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
+	t=1724681270;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=U7u0W5LEnkH2sOZAmNO6zvSkVtZ3dx2voJoTAm3CKcA=;
+	b=Lv3hQkmYGvuYXN9u4Feb//n8y/X8fQ8+7IjGikFSRN2GITBI4A51wFxRxvusbItAi1ANzR
+	hcQtZDPR48ipibhiEKTtqBmOFIT7yzCeE8LBBfUCJjH6TplQ7fXJx+KiWFO2j+9oK0PckK
+	hbEBoCMEB5AuPTOgswitAkUy2mp4my4abNHxWSPG5dQcbrAizx01SgcTuMBYnESx2ZmwvA
+	Mb6tIfySWTjzhdQBDc3aIho8JflI1rp/8dxcWhrBzDqAnPczZDmJiIq+SBOgAym7l3ZO0Q
+	W4W+bHqzV73jVcTutQDJyTrXAs+UdN77LwevsssYvieOZkW0Tlb3O1uQcZ9CFA==
+Date: Mon, 26 Aug 2024 16:07:49 +0200
+From: Dragan Simic <dsimic@manjaro.org>
+To: Detlev Casanova <detlev.casanova@collabora.com>
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Rob
+ Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor
+ Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, Jaehoon
+ Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, kernel@collabora.com
+Subject: Re: [PATCH v4 4/4] mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
+In-Reply-To: <5808226.DvuYhMxLoT@trenzalore>
+References: <20240822212418.982927-1-detlev.casanova@collabora.com>
+ <20240822212418.982927-5-detlev.casanova@collabora.com>
+ <26fe259f390a8015c3f08c6dc027711c@manjaro.org>
+ <5808226.DvuYhMxLoT@trenzalore>
+Message-ID: <dc77f6dbdfc68369d02005763143cdea@manjaro.org>
+X-Sender: dsimic@manjaro.org
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Authentication-Results: ORIGINATING;
+	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-Add MODULE_DEVICE_TABLE(), so modules could be properly autoloaded
-based on the alias from of_device_id table.
+Hello Detlev,
 
-Signed-off-by: Liao Chen <liaochen4@huawei.com>
----
- drivers/mmc/host/sdhci-of-aspeed.c | 1 +
- 1 file changed, 1 insertion(+)
+On 2024-08-23 15:20, Detlev Casanova wrote:
+> On Friday, 23 August 2024 03:00:57 EDT Dragan Simic wrote:
+>> Hello Detlev,
+>> 
+>> Please see a comment below.
+>> 
+>> On 2024-08-22 23:15, Detlev Casanova wrote:
+>> > On rk3576 the tunable clocks are inside the controller itself, removing
+>> > the need for the "ciu-drive" and "ciu-sample" clocks.
+>> >
+>> > That makes it a new type of controller that has its own dt_parse
+>> > function.
+>> >
+>> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
+>> > ---
+>> >
+>> >  drivers/mmc/host/dw_mmc-rockchip.c | 48 ++++++++++++++++++++++++++----
+>> >  1 file changed, 43 insertions(+), 5 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+>> > b/drivers/mmc/host/dw_mmc-rockchip.c
+>> > index 1458cb5fd5c7..7c8ccf5e71bc 100644
+>> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> [...]
+>> > @@ -435,13 +451,25 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci
+>> > *host)
+>> >
+>> >  	if (IS_ERR(priv->sample_clk))
+>> >
+>> >  		dev_dbg(host->dev, "ciu-sample not available\n");
+>> >
+>> > -	host->priv = priv;
+>> > -
+>> >
+>> >  	priv->internal_phase = false;
+>> >
+>> >  	return 0;
+>> >
+>> >  }
+>> >
+>> > +static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+>> > +{
+>> > +	struct dw_mci_rockchip_priv_data *priv;
+>> > +	int err = dw_mci_common_parse_dt(host);
+>> > +	if (err)
+>> > +		return err;
+>> > +
+>> > +	priv = host->priv;
+>> > +
+>> > +	priv->internal_phase = true;
+>> 
+>> Defining priv, assigning it and using it seems rather redundant,
+>> when all that's needed is simple "host->priv->internal_phase = true"
+>> assignment instead.
+> 
+> Yes, that's what I did at first, but host->priv is declared as void*, 
+> which
+> means it needs to be cast to struct dw_mci_rockchip_priv_data * and I 
+> felt
+> that
+> 
+> ((struct dw_mci_rockchip_priv_data *)host->priv)->internal_phase = 
+> true;
+> 
+> is not very pretty and harder to read.
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index 430c1f90037b..37240895ffaa 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -510,6 +510,7 @@ static const struct of_device_id aspeed_sdhci_of_match[] = {
- 	{ .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_pdata, },
- 	{ }
- };
-+MODULE_DEVICE_TABLE(of, aspeed_sdhci_of_match);
- 
- static struct platform_driver aspeed_sdhci_driver = {
- 	.driver		= {
--- 
-2.34.1
+Ah, you're right, and I somehow managed to ignore that.
 
+I agree with your conclusions, although I'd suggest something like
+this, for slightly improved readability:
+
+  +static int dw_mci_rk3576_parse_dt(struct dw_mci *host)
+  +{
+  +	struct dw_mci_rockchip_priv_data *priv = host->priv;
+  +	int err;
+  +
+  +	err = dw_mci_common_parse_dt(host);
+  +	if (err)
+  +		return err;
+  +
+  +	priv->internal_phase = true;
+  +
+  +	return 0;
+  +}
