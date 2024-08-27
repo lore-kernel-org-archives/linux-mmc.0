@@ -1,50 +1,25 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ABF41A00F7
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 11:30:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C41F91A08BC;
+	Tue, 27 Aug 2024 12:19:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724758259; cv=none; b=BW4PwJOaArV0+YCuxpam/X/zkywM/kPVJ3TgCqjpTQ8erovOEda6g51XkGY1geIlWcXrXxoMalcW1YsNq6aVBgSSQ8aqCUR3iBW+fnd5rfm9f4I8WCEmo3HX4RU6wSh7I/HUYxPJWRs+ehiXEb240vMnvHgt1MobOyQW+YImNAo=
+	t=1724761160; cv=none; b=Jvd69gsN/OtqLAZau6Imr0weTyJT4PVoYrNg9m6uKq8Z6S+HnNMerW0WAVcNlguwc48R/w7Seqm6NzAaqXdEq5yFqk++rRVmDeUuy1ixocoIu9VHZnhCW5tyPWJM5vJ2ahYD9b5wEDywrBcs2Dsy2dKYcpYQ4HdUNvcr+pZKa8c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724758259; c=relaxed/simple;
-	bh=0mCdzwXsoSHL4gcfUZrUAxV51fYBpt8jbO43HiFo0YM=;
+	s=arc-20240116; t=1724761160; c=relaxed/simple;
+	bh=PY/odrZ7HFMDFloiTo+2Oa6vUtHjnrzFME+/EnQwvEM=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=QQoSwQZ58fouu3QUwLiA4Lju18IDB215mTtONLXLC/cNw5OPgJvu35Hpk92YaRMucHW9uDLKUkeYM4OgSmXCKLlUV2RKJlodI11lhY9q3c8GMAcUMUHeBofV5NRFlxkbH3o4IthK0PT/eYeLJgTTkM0nnmF+1J6fo0USRzzRT3Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Fs0em1UQ; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Fs0em1UQ"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1724758256; x=1756294256;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=0mCdzwXsoSHL4gcfUZrUAxV51fYBpt8jbO43HiFo0YM=;
-  b=Fs0em1UQ1zhwG238EXZB3kBfmLbk5LlNUIsS5lhl6GYslEks1hKD9Rxf
-   MaDqUrL6gqFAyuGsgbUgq7OZFdxfAoxnaxrrqM4h/Ip9F34Q4oeCs0ZGE
-   4dtNHSHl1K9gmA8H5Id67QfvqF6DwTzZCS6qKlG7C4TX+8o/yX/kxWjzD
-   52Kr4YIeEaiq/GCzjEeC872st0pxbQx0wPJyqx5Vc4c4iTc/fsMSXD6Xx
-   VBDSMNBRK6HAms8umPbDEqF9KVIAMbrRjSmApsH2S8inpj9tLSJfUTqnw
-   suT/kCQ74iKfEcF/UleNM/WHcNlExuVR8NK0OIU8gHBbmHKcVUGjIfV6S
-   g==;
-X-CSE-ConnectionGUID: DWOe0e7nSh+9w0alqlcsJg==
-X-CSE-MsgGUID: ycLbNs4USYmqqohzUk2X8Q==
-X-IronPort-AV: E=McAfee;i="6700,10204,11176"; a="27025382"
-X-IronPort-AV: E=Sophos;i="6.10,180,1719903600"; 
-   d="scan'208";a="27025382"
-Received: from orviesa009.jf.intel.com ([10.64.159.149])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Aug 2024 04:30:56 -0700
-X-CSE-ConnectionGUID: zl+PGR+CQoi3+uwTKHj8NA==
-X-CSE-MsgGUID: PgaRgJEzRaWCWtvAWFd7yA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,180,1719903600"; 
-   d="scan'208";a="62802623"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
-  by orviesa009-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Aug 2024 04:30:54 -0700
-Message-ID: <e43f6f0a-19b9-4fc3-bd6a-80c12a053021@intel.com>
-Date: Tue, 27 Aug 2024 14:30:48 +0300
+	 In-Reply-To:Content-Type; b=cPLJ1L3C7RjbXxvnrTUI3w+PQguu6WaWmK+n5wB5+Zg8MMN3xPdkelAx1at2sit9xTdjbBNycx9Gq9JLcB5UMNPzdJDM4i6CvIaNeENrk+m/6C+zgdOD5aMwVLNM969fjmm4uJ6VQtFcG+f62qq2eBw20mBXTBd01ehpPIKEP4o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 6D0DCDA7;
+	Tue, 27 Aug 2024 05:19:43 -0700 (PDT)
+Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 185FF3F762;
+	Tue, 27 Aug 2024 05:19:14 -0700 (PDT)
+Message-ID: <92ebdc16-7938-462a-bb0e-4d5d368c5eb1@arm.com>
+Date: Tue, 27 Aug 2024 13:19:13 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,72 +27,61 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/9] Add SDUC Support
-To: Avri Altman <Avri.Altman@wdc.com>
-Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <20240825074141.3171549-1-avri.altman@wdc.com>
- <3d7a9953-afed-4b45-a209-b797634e6bd8@intel.com>
- <DM6PR04MB65756CEE03C15524EF646C3BFC8B2@DM6PR04MB6575.namprd04.prod.outlook.com>
- <DM6PR04MB65751048E9B35CFED478F180FC942@DM6PR04MB6575.namprd04.prod.outlook.com>
- <cb9c225c-b5c2-43ba-a6d5-843dc2790fd4@intel.com>
- <DM6PR04MB657568FC857DA6877F2BA7FFFC942@DM6PR04MB6575.namprd04.prod.outlook.com>
- <DM6PR04MB65752FFC3CB355F2FC704C16FC942@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <DM6PR04MB65752FFC3CB355F2FC704C16FC942@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH 1/4] scsi: check that busses support the DMA API before
+ setting dma parameters
+To: Christoph Hellwig <hch@lst.de>, iommu@lists.linux.dev
+Cc: "Martin K. Petersen" <martin.petersen@oracle.com>,
+ Marek Szyprowski <m.szyprowski@samsung.com>, linux-scsi@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ dri-devel@lists.freedesktop.org, dmaengine@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org,
+ linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-stm32@st-md-mailman.stormreply.com, linux-hyperv@vger.kernel.org,
+ netdev@vger.kernel.org
+References: <20240824034925.1163244-1-hch@lst.de>
+ <20240824034925.1163244-2-hch@lst.de>
+From: Robin Murphy <robin.murphy@arm.com>
+Content-Language: en-GB
+In-Reply-To: <20240824034925.1163244-2-hch@lst.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On 27/08/24 13:58, Avri Altman wrote:
->>> On 27/08/24 10:45, Avri Altman wrote:
->>>>>> On 25/08/24 10:41, Avri Altman wrote:
->>>>>>> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.
->>>>>>> Those cards support capacity larger than 2TB and up to including 128TB.
->>>>>>> Thus, the address range of the card expands beyond the 32-bit
->>>>>>> command argument. To that end, a new command - CMD22 is defined,
->>>>>>> to carry the extra 6-bit upper part of the 38-bit block address
->>>>>>> that enable access to 128TB memory space.
->>>>>>>
->>>>>>> SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II
->>>>>>> – Same as SDXC.
->>>>>>>
->>>>>>> The spec defines several extensions/modifications to the current
->>>>>>> SDXC cards, which we address in patches 1 - 10.  Otherwise
->>>>>>> requirements are out-of-scope of this change.  Specifically, CMDQ
->>>>>>> (CMD44+CMD45), and Extension for Video Speed Class (CMD20).
->>>>>>>
->>>>>>> First publication of SDUC was in [1].  This series was developed
->>>>>>> and tested separately from [1] and does not borrow from it.
->>>>>>>
->>>>>>> [1] https://lwn.net/Articles/982566/
->>>>>>
->>>>>> Perhaps add support for mmc_test
->>>> Actually, I am not sure what should be added to mmc_test as far as
->>>> SDUC
->>> indication:
->>>> from dmesg we have:
->>>> [ 4253.922220] mmc0: new ultra high speed SDR104 SDUC card at
->>>> address
->>>> d555 [ 4253.922409] mmcblk0: mmc0:d555 SR04T 3.72 TiB
->>>>
->>>> Additionally, we have the card size sysfs entry:
->>>> # cat /sys/block/mmcblk0/size
->>>> 7999258624
->>>>
->>>> As well as the csd which implies its capacity:
->>>> # cd /sys/class/mmc_host/mmc0/mmc0:* && cat csd
->>>> 800e0032db79007732bf7f800a404001
->>>>
->>>> What test did you had in mind?
->>>
->>> Doesn't all the I/O need CMD22 first?
-> So I tried to add it, and it looks like I'll be needing 2 - 3 patches to enable mmc_test for sduc.
-> How about disable it for now, planning to ameliorate it in the very near future?
+On 24/08/2024 4:49 am, Christoph Hellwig wrote:
+> We'll start throwing warnings soon when dma_set_seg_boundary and
+> dma_set_max_seg_size are called on devices for buses that don't fully
+> support the DMA API.  Prepare for that by making the calls in the SCSI
+> midlayer conditional.
 
-Ok by me.
+Just thinking ahead, might it be worth a logical "are SG segment limits 
+relevant?" wrapper around the dev->dma_parms reference? Not a big deal 
+for now if we think this site is the only user, so either way,
 
+Reviewed-by: Robin Murphy <robin.murphy@arm.com>
 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>   drivers/scsi/scsi_lib.c | 11 +++++++++--
+>   1 file changed, 9 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
+> index 3958a6d14bf457..7f0394c4492033 100644
+> --- a/drivers/scsi/scsi_lib.c
+> +++ b/drivers/scsi/scsi_lib.c
+> @@ -1988,8 +1988,15 @@ void scsi_init_limits(struct Scsi_Host *shost, struct queue_limits *lim)
+>   	if (shost->no_highmem)
+>   		lim->features |= BLK_FEAT_BOUNCE_HIGH;
+>   
+> -	dma_set_seg_boundary(dev, shost->dma_boundary);
+> -	dma_set_max_seg_size(dev, shost->max_segment_size);
+> +	/*
+> +	 * Propagate the DMA formation properties to the dma-mapping layer as
+> +	 * a courtesy service to the LLDDs.  This needs to check that the buses
+> +	 * actually support the DMA API first, though.
+> +	 */
+> +	if (dev->dma_parms) {
+> +		dma_set_seg_boundary(dev, shost->dma_boundary);
+> +		dma_set_max_seg_size(dev, shost->max_segment_size);
+> +	}
+>   }
+>   EXPORT_SYMBOL_GPL(scsi_init_limits);
+>   
