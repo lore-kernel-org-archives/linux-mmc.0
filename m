@@ -1,87 +1,137 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id C41F91A08BC;
-	Tue, 27 Aug 2024 12:19:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05EA41B4C29
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 12:25:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724761160; cv=none; b=Jvd69gsN/OtqLAZau6Imr0weTyJT4PVoYrNg9m6uKq8Z6S+HnNMerW0WAVcNlguwc48R/w7Seqm6NzAaqXdEq5yFqk++rRVmDeUuy1ixocoIu9VHZnhCW5tyPWJM5vJ2ahYD9b5wEDywrBcs2Dsy2dKYcpYQ4HdUNvcr+pZKa8c=
+	t=1724761530; cv=none; b=swFOGYGOZbncd2EXOqDUfCuPJxZIsCBFoROs9Y85YY+ZODq2fXih3VcxvefVK1ro9FCZTdFJ91i7hK1mG1kWHVKPbAHc6fMjwOQkFSCJlq4277p/K5k9GmtmrzJa4OBQIBGLanA9xt9+jcTHIzfHxy3L5Yis4aE074VHAhFzcWI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724761160; c=relaxed/simple;
-	bh=PY/odrZ7HFMDFloiTo+2Oa6vUtHjnrzFME+/EnQwvEM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cPLJ1L3C7RjbXxvnrTUI3w+PQguu6WaWmK+n5wB5+Zg8MMN3xPdkelAx1at2sit9xTdjbBNycx9Gq9JLcB5UMNPzdJDM4i6CvIaNeENrk+m/6C+zgdOD5aMwVLNM969fjmm4uJ6VQtFcG+f62qq2eBw20mBXTBd01ehpPIKEP4o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 6D0DCDA7;
-	Tue, 27 Aug 2024 05:19:43 -0700 (PDT)
-Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 185FF3F762;
-	Tue, 27 Aug 2024 05:19:14 -0700 (PDT)
-Message-ID: <92ebdc16-7938-462a-bb0e-4d5d368c5eb1@arm.com>
-Date: Tue, 27 Aug 2024 13:19:13 +0100
+	s=arc-20240116; t=1724761530; c=relaxed/simple;
+	bh=lJp5sMgDCbo6dVohB9EqVCi9ISLOXAM22iB+4We7xeE=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=uPMayu9BXzHUnr8Q7jB2l8HVtLdjvnCoD5Nu/CZuMq67XOXPUMVXr7fJbv8oQ0In/wue2odmLkDYuyLOlsebVbef8IUy3vhdd4JNhUqIqE7Hs0K5E0sIw8M8NAyc9vwXM4Pksm37aVVyF0OqvNIaya9zAYmDlRntlHl19bIwrXc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=lyp4M5/s; arc=none smtp.client-ip=68.232.141.245
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="lyp4M5/s"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1724761527; x=1756297527;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=lJp5sMgDCbo6dVohB9EqVCi9ISLOXAM22iB+4We7xeE=;
+  b=lyp4M5/sPW9+U/uycN4BHkq3UFi6qMlcWGf4mN+N0ZUb/4iRAReKtwo8
+   VgLnAnC7eF3Kw79Q3OZOTIDl8FcxBJzBK++3ZfNtTBVK79i8hY0fRGKlF
+   Xqbd0ivZBK7lOsD0GjL0vMPmvvlhqXGSqrTr1+wcyxB1Vjm5OnklXXrUj
+   ThdkKKt6QJQkMbchfa3ZLkVUYfX1OS1HKSWo172G4WhTPrRPZBPDjkuyW
+   6n4umci0zyerKqGPwGtTVtnv014DqNlqyerb4TpbTZgKbhsQsUyUH9n9p
+   KGIqIn5qsYPDbUinzsT0eHoZEgOR0i7fw6b9JGW/BMZUYqy6HFQ/5RkfT
+   A==;
+X-CSE-ConnectionGUID: Qqp0v30PTpSq4FD/nzNeFw==
+X-CSE-MsgGUID: 9DrlrSnSTdmYP3WsJsmmgg==
+X-IronPort-AV: E=Sophos;i="6.10,180,1719849600"; 
+   d="scan'208";a="26066768"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 27 Aug 2024 20:25:21 +0800
+IronPort-SDR: 66cdb79e_C8Gie14Pz7lfDwEetjHTVyz9Xy8v0Z2jccZ3wDpeP7sJyw2
+ 09aUaPo8SjJYAoKPhfHJLnz9vWurODBSdUy2bFQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 04:25:18 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 05:25:19 -0700
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ricky WU <ricky_wu@realtek.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v5 0/9] Add SDUC Support
+Date: Tue, 27 Aug 2024 15:23:33 +0300
+Message-Id: <20240827122342.3314173-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/4] scsi: check that busses support the DMA API before
- setting dma parameters
-To: Christoph Hellwig <hch@lst.de>, iommu@lists.linux.dev
-Cc: "Martin K. Petersen" <martin.petersen@oracle.com>,
- Marek Szyprowski <m.szyprowski@samsung.com>, linux-scsi@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- dri-devel@lists.freedesktop.org, dmaengine@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org,
- linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-stm32@st-md-mailman.stormreply.com, linux-hyperv@vger.kernel.org,
- netdev@vger.kernel.org
-References: <20240824034925.1163244-1-hch@lst.de>
- <20240824034925.1163244-2-hch@lst.de>
-From: Robin Murphy <robin.murphy@arm.com>
-Content-Language: en-GB
-In-Reply-To: <20240824034925.1163244-2-hch@lst.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On 24/08/2024 4:49 am, Christoph Hellwig wrote:
-> We'll start throwing warnings soon when dma_set_seg_boundary and
-> dma_set_max_seg_size are called on devices for buses that don't fully
-> support the DMA API.  Prepare for that by making the calls in the SCSI
-> midlayer conditional.
+Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+cards support capacity larger than 2TB and up to including 128TB. Thus,
+the address range of the card expands beyond the 32-bit command
+argument. To that end, a new command - CMD22 is defined, to carry the
+extra 6-bit upper part of the 38-bit block address that enable access to
+128TB memory space.
 
-Just thinking ahead, might it be worth a logical "are SG segment limits 
-relevant?" wrapper around the dev->dma_parms reference? Not a big deal 
-for now if we think this site is the only user, so either way,
+SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+as SDXC.
 
-Reviewed-by: Robin Murphy <robin.murphy@arm.com>
+The spec defines several extensions/modifications to the current SDXC
+cards, which we address in patches 1 - 10.  Otherwise requirements are
+out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+Extension for Video Speed Class (CMD20).
 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->   drivers/scsi/scsi_lib.c | 11 +++++++++--
->   1 file changed, 9 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
-> index 3958a6d14bf457..7f0394c4492033 100644
-> --- a/drivers/scsi/scsi_lib.c
-> +++ b/drivers/scsi/scsi_lib.c
-> @@ -1988,8 +1988,15 @@ void scsi_init_limits(struct Scsi_Host *shost, struct queue_limits *lim)
->   	if (shost->no_highmem)
->   		lim->features |= BLK_FEAT_BOUNCE_HIGH;
->   
-> -	dma_set_seg_boundary(dev, shost->dma_boundary);
-> -	dma_set_max_seg_size(dev, shost->max_segment_size);
-> +	/*
-> +	 * Propagate the DMA formation properties to the dma-mapping layer as
-> +	 * a courtesy service to the LLDDs.  This needs to check that the buses
-> +	 * actually support the DMA API first, though.
-> +	 */
-> +	if (dev->dma_parms) {
-> +		dma_set_seg_boundary(dev, shost->dma_boundary);
-> +		dma_set_max_seg_size(dev, shost->max_segment_size);
-> +	}
->   }
->   EXPORT_SYMBOL_GPL(scsi_init_limits);
->   
+First publication of SDUC was in [1].  This series was developed and
+tested separately from [1] and does not borrow from it.
+
+[1] https://lwn.net/Articles/982566/
+
+---
+Changes in v5:
+ - leave out the mask in mmc_send_ext_addr (Adrian)
+ - leave out close-ended SDUC support
+ - remove 500msec write delay as there is no busy indication (Adrian)
+ - disable mmc-test for SDUC
+ - move enabling SDUC to the last patch (Adrian)
+
+Changes in v4:
+ - Squash patches 1 & 2 (Ulf)
+ - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
+ - Use card state instead of caps2 (Ricky & Ulf)
+ - Switch patches 5 & 6 (Ulf)
+
+Changes in v3:
+ - Some more kernel test robot fixes
+ - Fix a typo in a commit log (Ricky WU)
+ - Fix ACMD22 returned value
+ - Add 'Tested-by' tag for the whole series (Ricky WU)
+
+Changes in v2:
+ - Attend kernel test robot warnings
+
+---
+
+Avri Altman (9):
+  mmc: sd: SDUC Support Recognition
+  mmc: sd: Add Extension memory addressing
+  mmc: core: Add open-ended Ext memory addressing
+  mmc: core: Don't use close-ended rw for SDUC
+  mmc: core: Allow mmc erase to carry large addresses
+  mmc: core: Add Ext memory addressing for erase
+  mmc: core: Adjust ACMD22 to SDUC
+  mmc: core: Disable SDUC for mmc_test
+  mmc: core: Enable SDUC
+
+ drivers/mmc/core/block.c    | 43 ++++++++++++++++++++++++++---------
+ drivers/mmc/core/bus.c      |  4 +++-
+ drivers/mmc/core/card.h     |  3 +++
+ drivers/mmc/core/core.c     | 45 +++++++++++++++++++++++--------------
+ drivers/mmc/core/core.h     | 16 +++++++++----
+ drivers/mmc/core/mmc_test.c |  7 ++++++
+ drivers/mmc/core/sd.c       | 36 +++++++++++++++++++----------
+ drivers/mmc/core/sd.h       |  2 +-
+ drivers/mmc/core/sd_ops.c   | 16 +++++++++++++
+ drivers/mmc/core/sd_ops.h   |  1 +
+ drivers/mmc/core/sdio.c     |  2 +-
+ include/linux/mmc/card.h    |  2 +-
+ include/linux/mmc/sd.h      |  4 ++++
+ 13 files changed, 134 insertions(+), 47 deletions(-)
+
+-- 
+2.25.1
+
