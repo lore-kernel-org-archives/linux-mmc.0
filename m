@@ -1,63 +1,64 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 407C91C57B7;
-	Tue, 27 Aug 2024 15:12:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5BE381BC9FE;
+	Tue, 27 Aug 2024 15:42:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724771578; cv=none; b=EjSoGOKH54qn/1EojkvSe0EuhnalZHM3FfBe5AuWKg7AeUYiQ93+BrQzkNvWQ7XaSjk0OLIR8cs3IFdNExY6JSAqZDXTjzaN9hhKQ3qBGgNRRxPZjSFLr3Vnu+r9sLLNxyB3pvsv5s/hXVLYeLaYF2Sil9fCL3IT4WIcl8WolfE=
+	t=1724773380; cv=none; b=K53hqwl/rmZBAZIUJY8E0v9qz6wuq2X2K98UkpUR/NB79yAus+KR+f7WwqgF9BG5+NtrI+H+IJIYkWox0xqvu400B8vtddYkcLHSnSqZT3tEWn91AaH0ueKgBmeXcUHeQ9ZWyqPQJzVeRZjSG52WOr1qgueZAKZ+LMfpw7oX6ro=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724771578; c=relaxed/simple;
-	bh=FEk+B3LW5G85h/aXD2cDtqY3+o7ZLu3lhovxEZ2IoBI=;
+	s=arc-20240116; t=1724773380; c=relaxed/simple;
+	bh=lXCedQeonAV55TDDmc5vnK1OKuPMO7LuzMDVk2Kdgbk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qpniZo6XLfNQccRpm+mhb2O3xZFwJIQ2T4QIWdpAp+jLI1uo9unACrpSp+xYSSAPoDUL/UR4PUsHGye253t0URTEQwIeo77Lo7K9i5MuFJ4V76sDflA4ulP1t0HvaZvhGhZZDARiAGSM6Ec1ZLC1mxjRqiuonojsTGLHc9RiQQs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=QBbPVbZA; arc=none smtp.client-ip=198.175.65.10
+	 Content-Type:Content-Disposition:In-Reply-To; b=erej98KyGFV033iDV97jGo7T4eX/WGQ1SXgLQ7gnoHJSnRzwhImM3Lct8kzXMMCW9QdVVUaPuiqdy+/djNsx7blSzEneIAMfW4C5m64TbVbDsVElhAlFBVs6mJm3oTnEy2Oz7knTIGr+DHZWE+X3Q/1e49pRBdAucVQRL6kCI7w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=YaVSKF5O; arc=none smtp.client-ip=198.175.65.18
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="QBbPVbZA"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="YaVSKF5O"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1724771576; x=1756307576;
+  t=1724773378; x=1756309378;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=FEk+B3LW5G85h/aXD2cDtqY3+o7ZLu3lhovxEZ2IoBI=;
-  b=QBbPVbZAhyQGDIBBAV2LrKH0vg6epKrPDIo7J5LJZ00ySQjpMGgiuodC
-   PELSzKsszTaC6fKtAFgQJj25FJNeOPmcdbrhjK2ZmSytiJuRvKfrmZKHX
-   FALZ5MrRC+l8CbkCE1nv0KsxY/Tj/CCex2q9fBqoZzxJfOEg/Rsfa1whm
-   50gQhy/KBJ8bRCJyEYuGmtqK7Cr+HMTaQS4I4ptK7O3sCKrCegaXtOJ27
-   HKCVpTDWXCm6InGRyLWrGtzrv0oVl2LgOGCsopdXnQqqAFuXnr4Xw/DCD
-   WmTBju2RcYMze6oRLGlb54C+99Kxw/t5jRJ0wAMLKHd655hZcmtmy+nHU
-   w==;
-X-CSE-ConnectionGUID: iLOWoGrsRT6rtJrXB8BnTA==
-X-CSE-MsgGUID: T1+624vURwSPOEsUbUEL4w==
-X-IronPort-AV: E=McAfee;i="6700,10204,11177"; a="40729092"
+  bh=lXCedQeonAV55TDDmc5vnK1OKuPMO7LuzMDVk2Kdgbk=;
+  b=YaVSKF5OUgZUxwiFagK1W8Cr2ek+3S+gK8/apL/fsIMRZhDKMAOgAPnh
+   X54y6sXAJzyvYhDNHUb/cKZ6OelndvEMiGpE32r9nDT8ryf4iuycx2lF0
+   D2bxjFFNFYOcoUlXOcCE70dGkFlkdWs3C1aA/oDCZeK0cpVlHLFPmNKvj
+   BF39MnByiP6O9XnTRditdHHuSlmSYJYLDtOox/gr8BadN3epeLWNGZBmS
+   elnVDhq6DGL2T8fLqkdD8zqs//HOq8qLvXkHrJHN99qs+9XC9DNZMWHeK
+   XJKgnzGp48qbh3ZAIyyvzhBcF9P4m8p9YblBbOHRAs/nnQkosuUjFiFjg
+   A==;
+X-CSE-ConnectionGUID: 8ARYH27iTn+3y3u3n0hN/A==
+X-CSE-MsgGUID: WKjFP5OqSfW5mysTpAKyFg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11177"; a="23411400"
 X-IronPort-AV: E=Sophos;i="6.10,180,1719903600"; 
-   d="scan'208";a="40729092"
-Received: from fmviesa004.fm.intel.com ([10.60.135.144])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Aug 2024 08:12:42 -0700
-X-CSE-ConnectionGUID: XVIDEVmfSfeobkgIKCkRHA==
-X-CSE-MsgGUID: aoa9OdGxQRul5UVtZ423rg==
+   d="scan'208";a="23411400"
+Received: from fmviesa003.fm.intel.com ([10.60.135.143])
+  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Aug 2024 08:42:58 -0700
+X-CSE-ConnectionGUID: yLodD4IjRfWxap87X5kFmA==
+X-CSE-MsgGUID: FMvoO2WnRRW6Dkw0m4K1CA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.10,180,1719903600"; 
-   d="scan'208";a="67598318"
+   d="scan'208";a="67055166"
 Received: from lkp-server01.sh.intel.com (HELO 9a732dc145d3) ([10.239.97.150])
-  by fmviesa004.fm.intel.com with ESMTP; 27 Aug 2024 08:12:40 -0700
+  by fmviesa003.fm.intel.com with ESMTP; 27 Aug 2024 08:42:56 -0700
 Received: from kbuild by 9a732dc145d3 with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1sixs5-000JJC-2K;
-	Tue, 27 Aug 2024 15:12:37 +0000
-Date: Tue, 27 Aug 2024 23:11:44 +0800
+	id 1siyLN-000JkY-1j;
+	Tue, 27 Aug 2024 15:42:53 +0000
+Date: Tue, 27 Aug 2024 23:42:43 +0800
 From: kernel test robot <lkp@intel.com>
 To: Liming Sun <limings@nvidia.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	David Thompson <davthompson@nvidia.com>
-Cc: oe-kbuild-all@lists.linux.dev, Liming Sun <limings@nvidia.com>,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	Liming Sun <limings@nvidia.com>, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
 Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Add hw_reset() support for
  BlueField-3 SoC
-Message-ID: <202408272252.lAVSmMBR-lkp@intel.com>
+Message-ID: <202408272323.10IOsTV8-lkp@intel.com>
 References: <73703c853e36f3cd61114e4ac815926d94a1a802.1724695127.git.limings@nvidia.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -83,20 +84,28 @@ url:    https://github.com/intel-lab-lkp/linux/commits/Liming-Sun/mmc-sdhci-of-d
 base:   linus/master
 patch link:    https://lore.kernel.org/r/73703c853e36f3cd61114e4ac815926d94a1a802.1724695127.git.limings%40nvidia.com
 patch subject: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: Add hw_reset() support for BlueField-3 SoC
-config: loongarch-allmodconfig (https://download.01.org/0day-ci/archive/20240827/202408272252.lAVSmMBR-lkp@intel.com/config)
-compiler: loongarch64-linux-gcc (GCC) 14.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240827/202408272252.lAVSmMBR-lkp@intel.com/reproduce)
+config: riscv-defconfig (https://download.01.org/0day-ci/archive/20240827/202408272323.10IOsTV8-lkp@intel.com/config)
+compiler: clang version 20.0.0git (https://github.com/llvm/llvm-project 08e5a1de8227512d4774a534b91cb2353cef6284)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240827/202408272323.10IOsTV8-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202408272252.lAVSmMBR-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202408272323.10IOsTV8-lkp@intel.com/
 
 All warnings (new ones prefixed by >>):
 
->> drivers/mmc/host/sdhci-of-dwcmshc.c:919:31: warning: 'sdhci_dwcmshc_bf3_ops' defined but not used [-Wunused-const-variable=]
+   In file included from drivers/mmc/host/sdhci-of-dwcmshc.c:14:
+   In file included from include/linux/dma-mapping.h:11:
+   In file included from include/linux/scatterlist.h:8:
+   In file included from include/linux/mm.h:2228:
+   include/linux/vmstat.h:517:36: warning: arithmetic between different enumeration types ('enum node_stat_item' and 'enum lru_list') [-Wenum-enum-conversion]
+     517 |         return node_stat_name(NR_LRU_BASE + lru) + 3; // skip "nr_"
+         |                               ~~~~~~~~~~~ ^ ~~~
+>> drivers/mmc/host/sdhci-of-dwcmshc.c:919:31: warning: unused variable 'sdhci_dwcmshc_bf3_ops' [-Wunused-const-variable]
      919 | static const struct sdhci_ops sdhci_dwcmshc_bf3_ops = {
          |                               ^~~~~~~~~~~~~~~~~~~~~
+   2 warnings generated.
 
 
 vim +/sdhci_dwcmshc_bf3_ops +919 drivers/mmc/host/sdhci-of-dwcmshc.c
