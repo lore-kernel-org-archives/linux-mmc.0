@@ -1,47 +1,47 @@
 Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAD981B3F15
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 12:25:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D1831B3F15
+	for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 12:25:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724761548; cv=none; b=K1F38DYMhC/mhOymPBcx/0PkxnJ6jpuupd9NAhCiLKWMexgyCzXD1buBzFjNqNVQ0/KQnmsUZ0g0vHpKzLCgX8Vqr1YjXgygCKoV57od3hYpsk9IsAuyd3jOE3YMr2XTwaYC6DL3KLd/t3w0MIHhKWzK7yFzVgE9rsHRwUDY3hc=
+	t=1724761555; cv=none; b=rbxwY7WJauR1tna7QitEO5US2pKLe/abzSZSMDCKz66kiHGtRwYZ/JWsg/W2judKqiryP1NoqF48/+q84TgG1bAP+2s+JiMsP5Ee8iH5+ZbjTGW8uVKuNEtBOjlPMoqvYmW+yfW+FkfCxpx2Jg7qUKct/McQRtU4ZFnB8NYw1MM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724761548; c=relaxed/simple;
-	bh=ZLyjzcUKugHnS1Slh2DK9RwpcyMhxM2y8sQJo0560PQ=;
+	s=arc-20240116; t=1724761555; c=relaxed/simple;
+	bh=2w3lXFsm8iyuCgRvGOVoP2GOXWlNzN5mGRAn5vXNM0M=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=pTJyLEPydW+olpELpITODGHeNfDx2g2EIklC6MpEfBxt8RcCQIKlDPFwTKnAyn/2jKMajFQXqwZ9QVv5CKE5EB8xpP6A/7uGEmEWz3i678UUQFqvcxQrKhpqlp2eZzENn4Sg9PVgDuNZIIQkEoTEBMK7zldFEm4hhgsbEOr3li0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=dlHkAbuN; arc=none smtp.client-ip=216.71.154.45
+	 MIME-Version; b=oDqWUfPaZILPTycl+n5P3HavO2S8Sl2Peu8OicwQ5B3T9w8kiohLB0OIjbazvgWghp0gC9PagjTzK8xeU15ckGREKLDS4B/1YHlV4XJEuPTylmBNoeXvubHHH8iAQHnOLS8R1wfpW9X77MO9hWtPdYml6d4Rx+OqZas0mjlk0Zc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Eutn0rNd; arc=none smtp.client-ip=216.71.154.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="dlHkAbuN"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Eutn0rNd"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1724761546; x=1756297546;
+  t=1724761553; x=1756297553;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=ZLyjzcUKugHnS1Slh2DK9RwpcyMhxM2y8sQJo0560PQ=;
-  b=dlHkAbuNw5Lxs8D13atmZheZ3jc2SIskWqzwX/m8Z4rlFT0eRE9rLKoT
-   FonFNMfRVUGKo735GZvCD7DZs3PiF7hKKBpXDGyaUqvEXb2Vc22O6Kt3G
-   3tTsBHZ3N+hlO/r8yO05vCr26DOEm+hi6sSncF+jV0dABMQCebxbcAUIb
-   5PGf6TAULjRAddzlUjLKwWa9IsUruFeReDJneShFlFlZXXSV13Iu1tlxF
-   nsx6OL2FAPdYSgQppby1Y68iZwOZ9uDoA4Xqk+azKYf1X+gS5MlVAxjID
-   62/MIRrITqrKb5DJCp32Y3ws9iEh/lgT20cpa5JFCS3DCWyJyl+XzCD+d
-   A==;
-X-CSE-ConnectionGUID: Gxf0GnUER7uiQ0oqLJTmlQ==
-X-CSE-MsgGUID: NiMt7NEyR+eCK8tFyfSN9Q==
+  bh=2w3lXFsm8iyuCgRvGOVoP2GOXWlNzN5mGRAn5vXNM0M=;
+  b=Eutn0rNdb24BpUIeC0+k8SvX2rZip28NrB0pecCk9iJ3RFbsAk0m616B
+   k+fIJKAA7TRYWz3Y6wbj9iYt4t250TlAUNRI8AO+OYn4HiLa+NHylSsdj
+   GCPGs+XKnqSvGMfxV17X4Z+OiSj+CoZ/EgmnUTwvRwJzHcGFoYu16uwIj
+   eHrg/lEiEAEf/VzXdGS/tlmCJiId+XdQp4BTL78hUAb8zD2joSkgS6MTI
+   H7nMUxxp6Qv4Gz/AsfOJrfSQ8oTSlT/7zTe3ZhbTPxUzzIIkHPAaf5RK/
+   4lHLZQG7JmVb6FaEhQ8QoQAT88RgHKcNZfk7+hM8EJhpETyUZuU008Hwt
+   Q==;
+X-CSE-ConnectionGUID: 5RwoswySR+OoPbZ2hPX5Fw==
+X-CSE-MsgGUID: qqpO/mhBQsueJe1XED9y6Q==
 X-IronPort-AV: E=Sophos;i="6.10,180,1719849600"; 
-   d="scan'208";a="25318694"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 27 Aug 2024 20:25:46 +0800
-IronPort-SDR: 66cdb7b7_1PqbajG1LKyZidell0y/xSctJ0HaG2Q9fUMqdfLr0tOOjSL
- OwQ9v/zDSQHR/nPZw1uEaXG3RaVjfY1f/AGC/6Q==
+   d="scan'208";a="25318704"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 27 Aug 2024 20:25:53 +0800
+IronPort-SDR: 66cdb912_xYUxuqihdigG5BIBR9wqHaS7meopef/MQ0mT1LYpcfv+bx/
+ 3U0lrgf8S9DK57/hHeG2VK41tGrloIQpKVo6rWw==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 04:25:44 -0700
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 04:31:31 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 05:25:45 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Aug 2024 05:25:51 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
@@ -49,9 +49,9 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	Ricky WU <ricky_wu@realtek.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v5 3/9] mmc: core: Add open-ended Ext memory addressing
-Date: Tue, 27 Aug 2024 15:23:36 +0300
-Message-Id: <20240827122342.3314173-4-avri.altman@wdc.com>
+Subject: [PATCH v5 4/9] mmc: core: Don't use close-ended rw for SDUC
+Date: Tue, 27 Aug 2024 15:23:37 +0300
+Message-Id: <20240827122342.3314173-5-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240827122342.3314173-1-avri.altman@wdc.com>
 References: <20240827122342.3314173-1-avri.altman@wdc.com>
@@ -63,47 +63,33 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-For open-ended read/write - just send CMD22 before issuing the command.
-While at it, make sure that the rw command arg is properly casting the
-lower 32 bits, as it can be larger now.
+The SDUC spec expects CMD22 to get squeezed between CMD23 and the
+read/write command, e.g. CMD23->CMD22->CMD18 and CMD23->CMD22->CMD25.
+At this early stage of adoption, we want to avoid an amid stream of
+fixes & quirks of bogus hw, that tends to apply extra logic specifically
+around auto-cmd12 & auto-cmd23.
 
-Tested-by: Ricky WU <ricky_wu@realtek.com>
+Let's leave close-ended out for now, and re-consider this should those
+cards become ubiquitous, if any.
+
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 2c9963248fcb..8816b3f0a312 100644
+index 8816b3f0a312..713b22eced72 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -180,6 +180,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
- static int mmc_spi_err_check(struct mmc_card *card);
- static int mmc_blk_busy_cb(void *cb_data, bool *busy);
-+static int mmc_blk_wait_for_idle(struct mmc_queue *mq, struct mmc_host *host);
- 
- static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
- {
-@@ -1664,7 +1665,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 
- 	brq->mrq.cmd = &brq->cmd;
- 
--	brq->cmd.arg = blk_rq_pos(req);
-+	brq->cmd.arg = blk_rq_pos(req) & 0xFFFFFFFF;
- 	if (!mmc_card_blockaddr(card))
- 		brq->cmd.arg <<= 9;
- 	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-@@ -1712,6 +1713,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			(do_data_tag ? (1 << 29) : 0);
- 		brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 		brq->mrq.sbc = &brq->sbc;
-+	} else if (mmc_card_ult_capacity(card)) {
-+		mmc_blk_wait_for_idle(mq, card->host);
-+		mmc_send_ext_addr(card->host, blk_rq_pos(req));
+@@ -2505,7 +2505,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	if (mmc_host_cmd23(card->host)) {
+ 		if ((mmc_card_mmc(card) &&
+ 		     card->csd.mmca_vsn >= CSD_SPEC_VER_3) ||
+-		    (mmc_card_sd(card) &&
++		    (mmc_card_sd(card) && !mmc_card_ult_capacity(card) &&
+ 		     card->scr.cmds & SD_SCR_CMD23_SUPPORT))
+ 			md->flags |= MMC_BLK_CMD23;
  	}
- }
- 
 -- 
 2.25.1
 
