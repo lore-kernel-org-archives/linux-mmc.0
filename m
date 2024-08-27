@@ -1,105 +1,157 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+Received: from fout1-smtp.messagingengine.com (fout1-smtp.messagingengine.com [103.168.172.144])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D7C4C133;
-	Tue, 27 Aug 2024 07:20:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69EA014F9FF;
+	Tue, 27 Aug 2024 07:27:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.144
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724743211; cv=none; b=NrVwi+c3OggbasqBbSCeSIpi03savLKgmWM65SCMQAgAo1gVDFgErL4MQqFmPEIxbjWZvTIKPD96H7YEcXDCRbexIivtwJ+uCWTc0xAeEkW00Yx7bwlSHp6Bxap/+A9Ur6eJqwwTGRQoFZTITVUdTpH16HTJ7Of+G5OWsiPsR+I=
+	t=1724743679; cv=none; b=HcVsx464LCLWMQPQq1EykkppJP6I/eudCX9ExojOmhrelyWla9k3Xhb9jxZ+ZyvHRmkwC4ds2J0QJ7APLNKf0croYbO+OH2wqhhwNGqB/oLT6qZdBC0AgNiFoUUpsoB8a687Sk+aVz42BtvBa09MhOaE621PccyN2k57jGt7mRw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724743211; c=relaxed/simple;
-	bh=UxbCS3FMoRTnuzOgeRB2zFoKc565Z0XgcZjXDsYoiTI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Gbwh2eubgz+WZ5spdrelDxjMT1txL0BNbvGwe7Yl9EAV4ppW/NQiEWECANzqw2pag8nEAVFfuoWJoQGyWz5xKjR+MaSrgMfZXqsQIcpTbl2h76cxfLOx5vy7j3QYcuSZnDcwzChz7dGxQA5mtDVQmu68EQlf7yxq3l1uq01CuZg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=Pe2KCEui; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	s=arc-20240116; t=1724743679; c=relaxed/simple;
+	bh=BZyZ2cvkrIUZObBp8WGC/AhGz5F/J0FSqyr/3/Xjn4w=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=iYABzZ8j5rABPeZm3eBV59wYCPg5jl5xX6TmMlxThwyeZTPZpUtsuljhUymSwjbpLW3ICOJGY1dfRzkQQuUScju76zJOfkpXC37uapmT72hDpd99Wfv862AiZVDOriq7pMyFOW9Uue7SqI0IjsgwjwvXxT4pU2Xrv0IkbGr6h7A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=Mdlew4i0; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=MYaZn9YM; arc=none smtp.client-ip=103.168.172.144
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="Pe2KCEui"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=YQZzVyWVHE64bLZ1bNm/sY3lX5QgmzBQtyCayOMnPw0=; b=Pe2KCEuid72Nb2ilWVbtO+eL40
-	+LKqbEnDDknPL5kNc1fhWZbDWHOXOzepeQPSTzDoeh63sa6m0nhjABdhLG0jSV3l5f9mD1cG6tEjX
-	n/3nirx4yDnEUY/3GIAEGUucD84WaKDEyl1zqe5TapXTOiM3JZQVJBahKKRvtvE2lTbAilqsKdH+S
-	85UBNG2N1BWEYrmpN+XLY0nXUyiY19q+DzrTky3jCvikxf7nKxax4l4mVH+DuvHjdVaLCUYiRcLJM
-	9T2hO/2m2iSDS2pyz4aQI/l8E1xjHfdtb8i/5XoztZ7MqJw/jEbRLaW1Bp9V3yoc2wNJC4ao+uA/O
-	KWaD/wKw==;
-Received: from i53875b81.versanet.de ([83.135.91.129] helo=diego.localnet)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1siqTy-00042K-2t; Tue, 27 Aug 2024 09:19:14 +0200
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-To: Detlev Casanova <detlev.casanova@collabora.com>,
- Guenter Roeck <linux@roeck-us.net>
-Cc: linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>,
- Andi Shyti <andi.shyti@kernel.org>, Jonathan Cameron <jic23@kernel.org>,
- Lars-Peter Clausen <lars@metafoo.de>, Lee Jones <lee@kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jiri Slaby <jirislaby@kernel.org>, Mark Brown <broonie@kernel.org>,
- Wim Van Sebroeck <wim@linux-watchdog.org>,
- Chris Morgan <macromorgan@hotmail.com>, Jonas Karlman <jonas@kwiboo.se>,
- Tim Lunn <tim@feathertop.org>, Chukun Pan <amadeus@jmu.edu.cn>,
- Andy Yan <andyshrk@163.com>, Muhammed Efe Cetin <efectn@protonmail.com>,
- Jagan Teki <jagan@edgeble.ai>, Dragan Simic <dsimic@manjaro.org>,
- Ondrej Jirman <megi@xff.cz>, Michael Riesch <michael.riesch@wolfvision.net>,
- Jimmy Hon <honyuenkwun@gmail.com>, Alexey Charkov <alchark@gmail.com>,
- Elon Zhang <zhangzj@rock-chips.com>, Elaine Zhang <zhangqing@rock-chips.com>,
- Yifeng Zhao <yifeng.zhao@rock-chips.com>,
- Finley Xiao <finley.xiao@rock-chips.com>, Liang Chen <cl@rock-chips.com>,
- Jisheng Zhang <jszhang@kernel.org>, Jamie Iles <jamie@jamieiles.com>,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, dri-devel@lists.freedesktop.org,
- linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
- linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org,
- kernel@collabora.com
-Subject:
- Re: [PATCH v2 09/12] dt-bindings: watchdog: Add rockchip,rk3576-wdt
- compatible
-Date: Tue, 27 Aug 2024 09:20:15 +0200
-Message-ID: <3262963.l52yBJDM9G@diego>
-In-Reply-To: <612a447c-8a74-48c1-8470-280dddca8d19@roeck-us.net>
-References:
- <20240823150057.56141-1-detlev.casanova@collabora.com>
- <20240823150057.56141-10-detlev.casanova@collabora.com>
- <612a447c-8a74-48c1-8470-280dddca8d19@roeck-us.net>
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="Mdlew4i0";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="MYaZn9YM"
+Received: from phl-compute-04.internal (phl-compute-04.nyi.internal [10.202.2.44])
+	by mailfout.nyi.internal (Postfix) with ESMTP id 5C9F4138FC5A;
+	Tue, 27 Aug 2024 03:27:56 -0400 (EDT)
+Received: from phl-imap-11 ([10.202.2.101])
+  by phl-compute-04.internal (MEProxy); Tue, 27 Aug 2024 03:27:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm3; t=1724743676;
+	 x=1724830076; bh=Esk86+10YT5N76WYsSmhYI74I1I6jgp/wldSeqEhXAw=; b=
+	Mdlew4i0/RqAzlKb/M+bHo6td4N5mGnr/6Ps19zfwrX7zzKjv43jG5Yj4yR/dAAk
+	2pOyj0ZVoaHVLE6P64WgYFc8xRr+EillYWcnkUh9MD56JRTuYObwEpayqQidOOpt
+	tVJ7MmHF1wCSJTgPJm1ApNHwIXdTu94AkeWvSGeFry55EaqTd+WNdp3w8dZGY9Em
+	o6UhNqG9wkfw2xy+W1WL6elsWGy4u9BcuMLcKoUVxtFvZPW8M6HwYvcn18denHOi
+	7vXpOq3cya4QTyxTQO1aK5OPhTTBsjcuHN1WW4PfFVLhSmeMhdGMINxy7DbS578i
+	3Iu1u9jJi7s9CAqGWlpO2w==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1724743676; x=
+	1724830076; bh=Esk86+10YT5N76WYsSmhYI74I1I6jgp/wldSeqEhXAw=; b=M
+	YaZn9YMUpc0IG7KhLZ20GSAxbkaOSuNIlbX82L5vYPEtwOCL/nHKITetgq28nD+P
+	FLRgolvRyFgzz2penuFVTVzT3xw7CXwKhBP//ZSkaCXBlQLkWDzj/0sNMaSf5WTq
+	nlaxL+8TxxJc3zDHwPbwy06lqOuGj3CzHbo1y053tO600z9Ts6+BO2z11wm803kS
+	0yU2T7NlOvWgbPKp59dP8aNNfUWaZ4A+fAHGauQ2l9nYU5BNmfByD9WejrZ10GPc
+	lBZIduAQSctFKsyZgtG8nGQsiEqZ0T84lmnurDSy+xTR0hnZAwySxKKYpwDL0jUa
+	bJMcKpovMN88kZA2DJX5g==
+X-ME-Sender: <xms:-n_NZpxxTRjjrMe8yWdmKLpuCL4dvV4pg7JyPvMUR3PA5SAwaiPk0A>
+    <xme:-n_NZpSj0Thd97RCCmt9MKk0i_NtGxVIc4JzIpoig2jzU7kuXaWfCR_BlRAsu-UPc
+    H5Jskkhc0CJy6508vo>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeftddruddvledguddulecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdp
+    uffrtefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivg
+    hnthhsucdlqddutddtmdenucfjughrpefoggffhffvvefkjghfufgtgfesthhqredtredt
+    jeenucfhrhhomhepfdetrhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusg
+    druggvqeenucggtffrrghtthgvrhhnpedvhfdvkeeuudevfffftefgvdevfedvleehvddv
+    geejvdefhedtgeegveehfeeljeenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmh
+    epmhgrihhlfhhrohhmpegrrhhnugesrghrnhgusgdruggvpdhnsggprhgtphhtthhopedu
+    iedpmhhouggvpehsmhhtphhouhhtpdhrtghpthhtohepmhgrthhtsegtohhnshholhgvqd
+    hpihhmphhsrdhorhhgpdhrtghpthhtohepfihilhhlrdhnvgifthhonhesghhmrghilhdr
+    tghomhdprhgtphhtthhopegrgigsohgvsehkvghrnhgvlhdrughkpdhrtghpthhtohepsg
+    hrrghunhgvrheskhgvrhhnvghlrdhorhhgpdhrtghpthhtoheptghjsgeslhgrphhtohhp
+    rdhorhhgpdhrtghpthhtoheprghnuggvrhhsrdhrohigvghllheslhhinhgrrhhordhorh
+    hgpdhrtghpthhtohepuggrnhdrtggrrhhpvghnthgvrheslhhinhgrrhhordhorhhgpdhr
+    tghpthhtohepnhgrrhgvshhhrdhkrghmsghojhhusehlihhnrghrohdrohhrghdprhgtph
+    htthhopehsvghmvghnrdhprhhothhsvghnkhhosehlihhnrghrohdrohhrgh
+X-ME-Proxy: <xmx:-n_NZjX2CabCPD6zOP2HTZNKYxS_6XuTYuQ7iY6caY4Au8QENbTA0Q>
+    <xmx:-n_NZrjeMNmKLmMV3z7wx_iqS6lWRQr4_xpC706pu53gUcNXABMf5g>
+    <xmx:-n_NZrDoy3_GN-4pTDkxXaOqaRvuAHqyG6iRb-4MN1GKUR7r32LZag>
+    <xmx:-n_NZkLPBkB6pVK57b3-k-baKbWI8bSnlEm8_rRKd5WViWVfnHbiAg>
+    <xmx:_H_NZtTQ16KJybkantfaoavmKB9nXMXz0xSIHBI4RfR9d-Xm5KjM5MPa>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+	id C2AAC222006F; Tue, 27 Aug 2024 03:27:54 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Date: Tue, 27 Aug 2024 09:27:34 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Sam Protsenko" <semen.protsenko@linaro.org>
+Cc: "jh80.chung" <jh80.chung@samsung.com>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>, "Christoph Hellwig" <hch@lst.de>,
+ "Chris Ball" <cjb@laptop.org>, "Will Newton" <will.newton@gmail.com>,
+ "Matt Fleming" <matt@console-pimps.org>,
+ "Christian Brauner" <brauner@kernel.org>, "Jens Axboe" <axboe@kernel.dk>,
+ "Sumit Semwal" <sumit.semwal@linaro.org>,
+ "Dan Carpenter" <dan.carpenter@linaro.org>,
+ "Anders Roxell" <anders.roxell@linaro.org>,
+ "Naresh Kamboju" <naresh.kamboju@linaro.org>,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
+Message-Id: <bd334314-25f7-4e87-bcab-e3baed9a7ab5@app.fastmail.com>
+In-Reply-To: 
+ <CAPLW+4=NcjOFRd14ecYd8sMsiJXH9c+ZXse7BVMCWe5ZbMmKMQ@mail.gmail.com>
+References: <20240306232052.21317-1-semen.protsenko@linaro.org>
+ <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com>
+ <CAPLW+4=NcjOFRd14ecYd8sMsiJXH9c+ZXse7BVMCWe5ZbMmKMQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 
-Hi Guenter,
+On Tue, Aug 27, 2024, at 03:28, Sam Protsenko wrote:
+> On Thu, Mar 7, 2024 at 1:52=E2=80=AFAM Arnd Bergmann <arnd@arndb.de> w=
+rote:
 
-Am Samstag, 24. August 2024, 18:44:29 CEST schrieb Guenter Roeck:
-> On Fri, Aug 23, 2024 at 10:52:36AM -0400, Detlev Casanova wrote:
-> > It is compatible with the other rockchip SoCs.
-> > 
-> > Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
-> 
-> Acked-by: Guenter Roeck <linux@roeck-us.net>
+>>
+>> The change looks good to me.
+>>
+>> I see that the host->ring_size depends on PAGE_SIZE as well:
+>>
+>> #define DESC_RING_BUF_SZ        PAGE_SIZE
+>> host->ring_size =3D DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64add=
+r);
+>> host->sg_cpu =3D dmam_alloc_coherent(host->dev,
+>>                DESC_RING_BUF_SZ, &host->sg_dma, GFP_KERNEL);
+>>
+>> I don't see any reason for the ring buffer size to be tied to
+>> PAGE_SIZE at all, it was probably picked as a reasonable
+>> default in the initial driver but isn't necessarily ideal.
+>>
+>> From what I can see, the number of 4KB elements in the
+>> ring can be as small as 128 (4KB pages, 64-bit addresses)
+>> or as big as 4096 (64KB pages, 32-bit addresses), which is
+>> quite a difference. If you are still motivated to drill
+>> down into this, could you try changing DESC_RING_BUF_SZ
+>> to a fixed size of either 4KB or 64KB and test again
+>> with the opposite page size, to see if that changes the
+>> throughput?
+>>
+>
+> Sorry for the huge delay. Just ran the tests:
+>
+> - 4K pages, DESC_RING_BUF_SZ =3D 4K: 97 MB/s
+> - 4K pages, DESC_RING_BUF_SZ =3D 16K: 98 MB/s
+> - 4K pages, DESC_RING_BUF_SZ =3D 64K: 97 MB/s
+> - 16K pages, DESC_RING_BUF_SZ =3D 4K: 123 MB/s
+> - 16K pages, DESC_RING_BUF_SZ =3D 16K: 125 MB/s
+> - 16K pages, DESC_RING_BUF_SZ =3D 64K: 124 MB/s
+> - 64K pages, DESC_RING_BUF_SZ =3D 4K: 137 MB/s
+> - 64K pages, DESC_RING_BUF_SZ =3D 16K: 135 MB/s
+> - 64K pages, DESC_RING_BUF_SZE =3D 64K: 138 MB/s
 
-For my understanding, does this Ack mean you expect the patch to go in
-with the other patches?
+Thanks!
 
-Because in theory this patch could also be picked and go through the
-watchdog tree, similar to how the saradc binding went into the
-iio tree already.
+> From what you said, it looks like it may make a sense to reduce
+> DESC_RING_BUF_SZ down to 4 KiB? If so, I'd suggest we do that in a
+> separate patch, as this one actually fixes kernel panic when 16k/64k
+> pages are enabled. Please let me know what you think.
 
-Thanks
-Heiko
+Agreed, sounds good to me.
 
-
+     Arnd
