@@ -1,139 +1,175 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-pj1-f41.google.com (mail-pj1-f41.google.com [209.85.216.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84FD0DDAB
-	for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 17:00:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 595881D31A0;
+	Tue, 27 Aug 2024 19:38:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.216.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724778034; cv=none; b=gPZQrscHpyH6iGJxPDLn5HnWygKtvWnUMeQh5ECqcEvHHPzbZ+Trjk1WlGgBMqSnKY1J1synSpMystRSFuXBtY8bNDq2iWc0TG5wfR5TV/rswQVnBJaSAtirKbVJVczsbdyPpLTTvIdzwN0sO1OlqHP8ZH1M09/HUK9tbHs+8aE=
+	t=1724787522; cv=none; b=pEsQxX17KzliVtO2HNYq2zgBeHFiJpK4a+oBDfQ8wW4MvQOCQSn1qQjiW5NEivQiMCBO/JlZHJwrOXCcRXQ8chjvxFo09d/dnlThL4yC3fy6jPYakcfLAMFph5zKKM6oIhrA31O5lgwFwvx7Y1HCzQvNo9KGwbF5RyOSQRu+qr0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724778034; c=relaxed/simple;
-	bh=o/36KuuzkZWjaEASkl/Ljq0NVD2Apf8lC7arMzKvLdY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=be2OyVyBlX59mJ0fx2QCXsMn+qI5/wu7gGi05mIuJsI2FUnV9FgpJ9KULRmrAI/gBfohCSW3lfU6YGE1DcUOU05LTDEtGhQlSkPClozkO0gNRgCCb31lpsTsmr+R/Ag9yi47/cvJfdDJXsHZt94PNExzDxcHi+ErxHR17I3DIUg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=K82UE5l7; arc=none smtp.client-ip=209.85.128.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1724787522; c=relaxed/simple;
+	bh=yFZuU75O2a3XWtAo8iThaGrJalFhpiVVScFMeOOAXcY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=RpLak7s4D8INWFWO6gpkWc+CaKiTOAiId9xWaE98gGoh5CwvNb/p/NP99NIOF51T0JGnzE1oOzJM8HS865Oxf2oieMVMc6T1rlC6F1YN2njqsP0dZUSauKDpaHsVY7fSeozmvRFMCv0VCmGnkiPQjlwngFVuxMuEXCzfVPQ48NI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SUeOSPql; arc=none smtp.client-ip=209.85.216.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K82UE5l7"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-6b6b9867f81so48210567b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Aug 2024 10:00:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SUeOSPql"
+Received: by mail-pj1-f41.google.com with SMTP id 98e67ed59e1d1-2d3c9a67eaeso4333729a91.2;
+        Tue, 27 Aug 2024 12:38:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724778031; x=1725382831; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2Fi8ox7pRszODxLsH//F7Js7GnpcRgiT9DScTVMAqaM=;
-        b=K82UE5l7iOzQfRIj/a8X5mfQkUgLuRuiakHC8mgINbsnVkPQMLPgyv7ULZ4BR5Y69f
-         LQ/7RACJZBLCLBHqKeTEkumz3mzBY9/+SDGrFzy/CY5vjcfduX+5Wm2z+ki37xDC5sQ8
-         JZcAreHpfYe8qXZqgL7UdTaCEABFEtpnrE+6PG0VdncqjyU7D2O5K8iBA7ck+ZsXkSci
-         1SUb5VIHagw8I5evwffWxifzO7UxnFjnf0se2j3vtIdRiTNxNqA51eblclvHnRAXKmLE
-         dqwMX4v9iu8m4zjB0t/bge9I4TVdlM///YdQ6pYs3koI8wWPRxlDpoGlkE2slYMCmug4
-         lCng==
+        d=gmail.com; s=20230601; t=1724787519; x=1725392319; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:sender:from:to:cc:subject:date:message-id:reply-to;
+        bh=oVOXvpyxwdjOnesfGfT0Q7QN6OLcbJzHuSO6UMrackY=;
+        b=SUeOSPqlnLjgTgD2pJqKA+eBCyH/AGc3zqLQAR70697wg0eZH/UIvpO6yNK0iAqqFY
+         45kzcFlqt6o8qRGi2UiRNs5afb49sVZwxOrIXnt2NwuKFgUQjv9nCh/eutnhuonRFJEe
+         q+S64auGUGwcCiPEwPH1SEL855Vy8ZH79K5GWxpsq8G2ZkZNfKJuKNA4cAxlCEFLU+NQ
+         tfmTUdKSmcw2JuXNFLKLqf3yR/SMvvUWWEUaSDZRnLe/T48DiXUAhL7Qyr9C9uH+VcRy
+         4hUfKcW2aZpOO1l2IMPMhW13/bFtdc7CkZ4iw5XYbiKaW9pc7PXUvpIXh88r6po6hGn0
+         Jh6g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724778031; x=1725382831;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2Fi8ox7pRszODxLsH//F7Js7GnpcRgiT9DScTVMAqaM=;
-        b=l3CyAdIPiKqev0YoTr4GxQ+1+Cfz2j7872g6oPhnVsjLpJ3aF+JqvSUDOa682IZu/x
-         sMpZ+BAmG9KFnSbOLtft7jXJpAdIB10lc10uPeDsObTboDpbpRX3C2OFIcPpfRGpGU66
-         cUhav0lnoFTjsBgD+qvolFOPa4JnurCByiPXYDL3c0RjJtgC6MfWaiAfevxt4IBapY+9
-         9BX5jY2lzDVDTRsDP5xH1Wi++CiQndR/zRhkfHFtxlHwIc4ZW9BzlALPZG47fI1h3TEB
-         4a8wunCuZTx/idgbwKqHczpbhJdBbN5tZRcVI3OJTR55U09hscWkIwLca8UDzZ79RkB7
-         xTZQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVCa3BP0mZ/E+ri82H/qVB247LomqhvS5M7OlJBWjcP0JMCVVDnMy+NQJz7JKZipjzNknNYWCpWoqY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzYn61SLstluDPoD+Z1Mg0tCj8TcBpdZr83BpPrscwY4JXKvyHL
-	SjYxDxadX4US2Ccd098W9594VnVTp36u4whzWNBOwnUmlAraOMincFH6AvaHnZHlmzfBe2c9Mo4
-	37pnu6NUjnf2acUmxXedWRUTZPT3+l7xkHCTLPA==
-X-Google-Smtp-Source: AGHT+IGmbSYxYyIspbSsfa9hoBtIp7ns0PaGV0NrZpzLhufVXheexcEWJMYHo0i/aJn3LcDf04Blwkm+zF5thUq4N8k=
-X-Received: by 2002:a05:690c:fd1:b0:6be:28ab:d874 with SMTP id
- 00721157ae682-6c6249dd326mr160767197b3.2.1724778031329; Tue, 27 Aug 2024
- 10:00:31 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1724787519; x=1725392319;
+        h=content-transfer-encoding:in-reply-to:autocrypt:from
+         :content-language:references:cc:to:subject:user-agent:mime-version
+         :date:message-id:sender:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=oVOXvpyxwdjOnesfGfT0Q7QN6OLcbJzHuSO6UMrackY=;
+        b=DcU4f9RzPnWn+IOz7RJop97hbQZKGfuWJTz+yQN7zyTP1524gS7RbKXyE2khS2E4hn
+         QtftSUJNtaUmT5hbLj/CghO3xPFHLz0KU+ySVGwgFV99wCPtMTIACP2rdQejeyJ7aea8
+         W81TUcZJ9oZzBbMfG5brkMVUA+2p0uk8mfK/0sulhpGObn9B8yUVPJ3zS/0x7bpXn1DD
+         3PJmbNIqPAB+bf8tORvKLzVDCCBcfeD0rcyJOuq3C56gCpoYFiiNefwqS77437XOhjXf
+         RLx1N8bVvfqO7qfW2HpxNw9mifYUEDdonYyzuTDdRTGtOGnGJ637hnILHfLAXWujenPx
+         KtZg==
+X-Forwarded-Encrypted: i=1; AJvYcCU9s7AJumj3oqdsgMxbrnD8durJji+wDoK+VILM5WiGQsqVF+lI7jYhFgaYwM4eSFFD+sg6FB/IVkbU@vger.kernel.org, AJvYcCUPr7iS4+N7LJiqRuJDJYdGzTQkZRdOm505//ATdV4KXzF+r+B7mZswla8OJHYL31MOLvwuC6zZCeghwLJwQMk=@vger.kernel.org, AJvYcCV+Ho+sDEuKKmfX0PnSF6rGrTi79HmpyTtNtyezGh6IuUDa2XdrWGUrK1DQyBDfX+qf3QzYY5lRbt9S@vger.kernel.org, AJvYcCV4RaveAVDoxYkDujP16WIooh+xSP3e/2axdCeyYrRhsirXFwOlHKBYamO+DnPded2lyHKnWoHNrvEu@vger.kernel.org, AJvYcCWCIE54qVI32zOGzVMSde0ffuViKTuhX5rS9Yf/w0lRpd4asnZ6CSMyU6pvwm7zBvklWpSQGyGwIYth@vger.kernel.org, AJvYcCWEEgiaM472iCBK1TBn8GI8Cx47jn7bez/w+4GLQhKY78kv7/qTeGFhc7xUwZ+2Awb5i4/ZtPBmJiAw@vger.kernel.org, AJvYcCXvD5di5VknW6nn29J7nmTXkQkORm7+IBEpHZ/QZt+jNpnDEX4bOUrWag2eu2KEhVdNKds/5YHJbvyLhJ8G@vger.kernel.org
+X-Gm-Message-State: AOJu0YzaF5WwU9grZH0zwWo3wkZjx5WNWZvRZzRVGg/Y4rx4VWpF64JS
+	wrcsJWN1B0FcYAlX/aB3iL+TbYJHqCwq9iAl9nXl7ypvGpKyOPfv
+X-Google-Smtp-Source: AGHT+IFjNqODR2yVRuTuQyHMcuWfTgB8LTsosBTWw0X6poYpFrx4jThi3iXVZldpKoOk5Dlv8j+37w==
+X-Received: by 2002:a17:90a:564c:b0:2d8:40be:263a with SMTP id 98e67ed59e1d1-2d840be26b5mr824041a91.34.1724787519426;
+        Tue, 27 Aug 2024 12:38:39 -0700 (PDT)
+Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2d5eb8cf61bsm15010475a91.9.2024.08.27.12.38.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 27 Aug 2024 12:38:38 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Message-ID: <5254cf14-65d1-4ffa-a1fb-265a51dda37d@roeck-us.net>
+Date: Tue, 27 Aug 2024 12:38:35 -0700
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240306232052.21317-1-semen.protsenko@linaro.org>
- <8896bcc5-09b1-4886-9081-c8ce0afc1c40@app.fastmail.com> <CAPLW+4=NcjOFRd14ecYd8sMsiJXH9c+ZXse7BVMCWe5ZbMmKMQ@mail.gmail.com>
- <bd334314-25f7-4e87-bcab-e3baed9a7ab5@app.fastmail.com>
-In-Reply-To: <bd334314-25f7-4e87-bcab-e3baed9a7ab5@app.fastmail.com>
-From: Sam Protsenko <semen.protsenko@linaro.org>
-Date: Tue, 27 Aug 2024 12:00:20 -0500
-Message-ID: <CAPLW+4=EJ4qw4u34bvJ2KPhkEObodB5y-YjnsQmLwHhKpfPvsw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "jh80.chung" <jh80.chung@samsung.com>, Christoph Hellwig <hch@lst.de>, Chris Ball <cjb@laptop.org>, 
-	Will Newton <will.newton@gmail.com>, Matt Fleming <matt@console-pimps.org>, 
-	Christian Brauner <brauner@kernel.org>, Jens Axboe <axboe@kernel.dk>, 
-	Sumit Semwal <sumit.semwal@linaro.org>, Dan Carpenter <dan.carpenter@linaro.org>, 
-	Anders Roxell <anders.roxell@linaro.org>, Naresh Kamboju <naresh.kamboju@linaro.org>, 
-	"linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>, 
-	linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 09/12] dt-bindings: watchdog: Add rockchip,rk3576-wdt
+ compatible
+To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+ Detlev Casanova <detlev.casanova@collabora.com>
+Cc: linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Maarten Lankhorst
+ <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>,
+ Thomas Zimmermann <tzimmermann@suse.de>, David Airlie <airlied@gmail.com>,
+ Daniel Vetter <daniel@ffwll.ch>, Andi Shyti <andi.shyti@kernel.org>,
+ Jonathan Cameron <jic23@kernel.org>, Lars-Peter Clausen <lars@metafoo.de>,
+ Lee Jones <lee@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Jiri Slaby <jirislaby@kernel.org>, Mark Brown <broonie@kernel.org>,
+ Wim Van Sebroeck <wim@linux-watchdog.org>,
+ Chris Morgan <macromorgan@hotmail.com>, Jonas Karlman <jonas@kwiboo.se>,
+ Tim Lunn <tim@feathertop.org>, Chukun Pan <amadeus@jmu.edu.cn>,
+ Andy Yan <andyshrk@163.com>, Muhammed Efe Cetin <efectn@protonmail.com>,
+ Jagan Teki <jagan@edgeble.ai>, Dragan Simic <dsimic@manjaro.org>,
+ Ondrej Jirman <megi@xff.cz>, Michael Riesch <michael.riesch@wolfvision.net>,
+ Jimmy Hon <honyuenkwun@gmail.com>, Alexey Charkov <alchark@gmail.com>,
+ Elon Zhang <zhangzj@rock-chips.com>, Elaine Zhang
+ <zhangqing@rock-chips.com>, Yifeng Zhao <yifeng.zhao@rock-chips.com>,
+ Finley Xiao <finley.xiao@rock-chips.com>, Liang Chen <cl@rock-chips.com>,
+ Jisheng Zhang <jszhang@kernel.org>, Jamie Iles <jamie@jamieiles.com>,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, dri-devel@lists.freedesktop.org,
+ linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
+ linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org,
+ kernel@collabora.com
+References: <20240823150057.56141-1-detlev.casanova@collabora.com>
+ <20240823150057.56141-10-detlev.casanova@collabora.com>
+ <612a447c-8a74-48c1-8470-280dddca8d19@roeck-us.net>
+ <3262963.l52yBJDM9G@diego>
+Content-Language: en-US
+From: Guenter Roeck <linux@roeck-us.net>
+Autocrypt: addr=linux@roeck-us.net; keydata=
+ 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
+ mDW4+i+XlNFUPUYMrIKi9joBhu18ssf5i5Q=
+In-Reply-To: <3262963.l52yBJDM9G@diego>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Hi Ulf,
+On 8/27/24 00:20, Heiko Stübner wrote:
+> Hi Guenter,
+> 
+> Am Samstag, 24. August 2024, 18:44:29 CEST schrieb Guenter Roeck:
+>> On Fri, Aug 23, 2024 at 10:52:36AM -0400, Detlev Casanova wrote:
+>>> It is compatible with the other rockchip SoCs.
+>>>
+>>> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
+>>
+>> Acked-by: Guenter Roeck <linux@roeck-us.net>
+> 
+> For my understanding, does this Ack mean you expect the patch to go in
+> with the other patches?
+> 
+Yes
 
-On Tue, Aug 27, 2024 at 2:27=E2=80=AFAM Arnd Bergmann <arnd@arndb.de> wrote=
-:
->
-> On Tue, Aug 27, 2024, at 03:28, Sam Protsenko wrote:
-> > On Thu, Mar 7, 2024 at 1:52=E2=80=AFAM Arnd Bergmann <arnd@arndb.de> wr=
-ote:
->
-> >>
-> >> The change looks good to me.
-> >>
-> >> I see that the host->ring_size depends on PAGE_SIZE as well:
-> >>
-> >> #define DESC_RING_BUF_SZ        PAGE_SIZE
-> >> host->ring_size =3D DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr=
-);
-> >> host->sg_cpu =3D dmam_alloc_coherent(host->dev,
-> >>                DESC_RING_BUF_SZ, &host->sg_dma, GFP_KERNEL);
-> >>
-> >> I don't see any reason for the ring buffer size to be tied to
-> >> PAGE_SIZE at all, it was probably picked as a reasonable
-> >> default in the initial driver but isn't necessarily ideal.
-> >>
-> >> From what I can see, the number of 4KB elements in the
-> >> ring can be as small as 128 (4KB pages, 64-bit addresses)
-> >> or as big as 4096 (64KB pages, 32-bit addresses), which is
-> >> quite a difference. If you are still motivated to drill
-> >> down into this, could you try changing DESC_RING_BUF_SZ
-> >> to a fixed size of either 4KB or 64KB and test again
-> >> with the opposite page size, to see if that changes the
-> >> throughput?
-> >>
-> >
-> > Sorry for the huge delay. Just ran the tests:
-> >
-> > - 4K pages, DESC_RING_BUF_SZ =3D 4K: 97 MB/s
-> > - 4K pages, DESC_RING_BUF_SZ =3D 16K: 98 MB/s
-> > - 4K pages, DESC_RING_BUF_SZ =3D 64K: 97 MB/s
-> > - 16K pages, DESC_RING_BUF_SZ =3D 4K: 123 MB/s
-> > - 16K pages, DESC_RING_BUF_SZ =3D 16K: 125 MB/s
-> > - 16K pages, DESC_RING_BUF_SZ =3D 64K: 124 MB/s
-> > - 64K pages, DESC_RING_BUF_SZ =3D 4K: 137 MB/s
-> > - 64K pages, DESC_RING_BUF_SZ =3D 16K: 135 MB/s
-> > - 64K pages, DESC_RING_BUF_SZE =3D 64K: 138 MB/s
->
-> Thanks!
->
-> > From what you said, it looks like it may make a sense to reduce
-> > DESC_RING_BUF_SZ down to 4 KiB? If so, I'd suggest we do that in a
-> > separate patch, as this one actually fixes kernel panic when 16k/64k
-> > pages are enabled. Please let me know what you think.
->
-> Agreed, sounds good to me.
->
+> Because in theory this patch could also be picked and go through the
+> watchdog tree, similar to how the saradc binding went into the
+> iio tree already.
+> 
 
-Can you please take this patch? It should apply fine without the need
-to rebase it. It fixes a kernel panic when big pages are enabled, so
-it's an important fix for us. As discussed with Arnd, the
-DESC_RING_BUF_SZ change can be made later as a separate patch.
+I thought it was all supposed to be pushed together.
 
-Thanks!
+Guenter
+
+
