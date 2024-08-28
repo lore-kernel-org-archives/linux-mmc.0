@@ -1,120 +1,102 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 118F71AB532
-	for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 15:11:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4D6AA13BC1E
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 15:23:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724857907; cv=none; b=YbPosgb8D6NODRBq4qJj7YpP1Khr0Hf+WPOHkZY1AlSvsTlcP28lkeXQjBiZFgEEZ1T5ZFJKNE0YuDS8q7ZwJbUGzi1aXcIknNXzhtPZEtXf47CcNZOX4UTD515DL8dlQ2hw0xzGz5und4hBefemhRP6u2o74lD9/X/DePu4onM=
+	t=1724858639; cv=none; b=OavAAXMFUGP2WivbA31gbVopvpTL55Gaw7yAmPsfy+j6t975wtsZMhn3r/XcqzTkgWhlaEqfEOjXpo71QI/s/Nc+Ph2xaOVDI9u2m+2CTpdI4pzjiKuCz+OpQwJhEEovDoqqzW0+/ZaajV1YtCGpTeDcg7DiZSvcymKpR6jsg+o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724857907; c=relaxed/simple;
-	bh=QpYhBzV+yaoDBMQ/fcOQAAYHC+gX2LXKD1fp6vi2ZHg=;
+	s=arc-20240116; t=1724858639; c=relaxed/simple;
+	bh=xq5eFf2qa1PgRByiVODCaCeUJJgqbvf9h2fyL1gcrUs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=kh6UaMu5PzngoCDbLgjFnTcXcYVbMfk1ANb1EwT2Y/zc0OIIwvHsVXTzr9NRe6IoiX7kP8+q7sWZpX8UX4P9UPfTm5Ytou8Oedj3OUNW6L/72tDsSsJzHBc/TANo6icNCNvhRVrbtSboCPpvgypyppAw+ZcPcvFVjT2gShpAVmA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=meTAqnNk; arc=none smtp.client-ip=209.85.219.180
+	 To:Cc:Content-Type; b=G1QD4HO0fzcX2pGm5JPfKZFtSfdMAYwG10y0sMU9DducfbQwc3FGi5hYHr+T9ZKv3Y3BHRxheSDk4SAa9me9EbE2MW6+ezzTFROhRH9SKCmJccznnEe23H99uXswgpmAQf4DyhAVVreYI/9IuE+isARW/sKP1kDVlpsj6EKXQAY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wa9kQkFG; arc=none smtp.client-ip=209.85.219.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="meTAqnNk"
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e13e11b23faso6813702276.3
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 08:11:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wa9kQkFG"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e1161ee54f7so7445996276.2
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 08:23:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1724857905; x=1725462705; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1724858637; x=1725463437; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dpwE48l/IMh8SOpKCeyLL7/+QtmITVgAbzW4ivc7bD4=;
-        b=meTAqnNkRGepbBwLFrXocK+AsCzDenOFcmh8Cdie03n5XkbyRiwvjbW++N2zEnE1xO
-         UhnUvIBBC3uzzk6jqdAwFIg/QAYFLNe435SmdOSh9F56/NhUua4QgL/dYzlTpNQFH/TD
-         b3PEpLytTLfSPVrAWkdsMKDmRWHzALrgef6Tyk0EI21QpConft3WRGczAdDd44S5G5UB
-         aoSA7L81+Dzx5riHz3+ZRFmLRPk3bTlyW+LXyZtRghnYAr9z3r4CKNLEBVNLXswhjG9+
-         WEhM+D1ULv2H5in7uXgcMDnk/nh/gJKbZvHGZ5TJBPZiXkb+truPZ06qwJanTFwsYanw
-         Ofqg==
+        bh=CG4oTPD0zwywYFWX0Kb6mWWmoLCq85f/1yiRy7yIqc8=;
+        b=wa9kQkFGKTDn/NViaH7ZTwagL2INsQc2P40Kdv/4xggvs/9+zh7a7vEOSGdP7NV+0d
+         i7FrzwDSlSjuX2bALKHVRME4x73TKCiDkXR87fzeMM9wP6M5M4YmXs1/E3ip7jQwKxS0
+         CXtSBErUHLdbodg9f2FOFszBc5xIIFN23HxMY+6il4maPKQtBY6UpzvmkYB8QhXHfPiE
+         RxJn99TgFaBKGKYT9r0a3Fiav4pX4Z7IC+1EGlotmvBx0tdkVfloOgc8SxvVz79cDcUU
+         HenSMj/u+c1o24WAJZDu+6+2qVE2hjBk67K/PQFvc46R5KHQHHqCpoytCGTe7W9IWNd/
+         ymkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724857905; x=1725462705;
+        d=1e100.net; s=20230601; t=1724858637; x=1725463437;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=dpwE48l/IMh8SOpKCeyLL7/+QtmITVgAbzW4ivc7bD4=;
-        b=qSB4OOLiwIuwcLtpxtmjMrOcIMxOMo4LnMlXPMNiov0ae0zWCGYRhqRa6aMlXJheNw
-         fBMoiUHBhjS5LlFruHJTkb8Pa1XEgwpdlme3/2pm2QcIEAwox9eTLp1z/HDLUT+bYYbM
-         IkC57R0TaOlohWYG1gWh+mWwDg4msl9Jq3/VWoecql/QZgR9Mctdy3EXOUB+TnH0aED8
-         RVKI3nTem4lPh0PCkEfcPXubRkx1Ds3NZjc4mGhjfEw6FeHan2ifQY2ho4qZKGuRwE3D
-         +IYDxpMyc2YWtpfXg3BUgk8QXBsMIjhJRoit2A33ewfdaejGZeudiGQgGE5Ts5PhHmb4
-         5jfw==
-X-Forwarded-Encrypted: i=1; AJvYcCWT64unKkr/YMNGxMDTFiZsYaeqXxLR+X1Di9B4bZN5bhbFN/tTk8rwQxZEXors+kyoBPKU0uhNOD4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyhlasZusupXf8k2/jLsf80xhTlwyoum8JVrfxpdRrluCNm49af
-	/FUvadx5eFoDHXHzYzq6eBj0dFodwEf7d6R05t+Ql7Qh6BaOcZ3lCm6Td4R7n4rvx9O9kpex1oC
-	pvAXx1mzQ47LtzNtCHX2/tKDHykh9Gc4FD/2tcw==
-X-Google-Smtp-Source: AGHT+IE7CB9ls1GFKOjrUzbw5hOqUHyf+hifGdDexmkraaeqpfoek/di3j2sJAd4cp3CeBhWE+mU/vMmQSms6tlNdzU=
-X-Received: by 2002:a05:6902:1683:b0:e0b:3c9d:12bb with SMTP id
- 3f1490d57ef6-e17a83bcb51mr19054563276.12.1724857905103; Wed, 28 Aug 2024
- 08:11:45 -0700 (PDT)
+        bh=CG4oTPD0zwywYFWX0Kb6mWWmoLCq85f/1yiRy7yIqc8=;
+        b=Ihe0xY8+2C1A5DZmUdr2UVtm3frOxrcb7GYK9PUupSvF7Igy080UaDE6C5UGys2lRf
+         2pMZInwaZt8j4R+xk3qpJSH1u5bA0GM0JctQAy4Mbk/dSRIhJoixWEeg+6vTYiU9d4Wh
+         8PNSqToL8BmLtO+YqR5GOBREhjQBJv1cA+slNHDux7s4zna2hM9kw5zRq7CMETbCF2ZX
+         7VPTHAiWYas3asfPCLnH+o23m0eiHPs0xpPVCE0b+so4FTXV8s9l4nyNEFkuwO423tOZ
+         J/LUNZ+lbypmu9t/VK9qap59mTslQ2XLp+JctS64GEVOHLY5aNTsbyL1yDP3dqWB9sfx
+         R1Lw==
+X-Forwarded-Encrypted: i=1; AJvYcCXDMwM7QzIbdNgf1evmW07w57Hw/TUNIYMeYK9q7g/b6WtxSJmSARzPxXJC/Nifgsi2luM2FDKJTEM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyDimUHVUREPS/80jK9r64q2yF/3G8BMhQ/DIm0sc6cHjEHdy3q
+	4X1+FZW2/0tEA2UnIZdEUSKSkqS0otWvFSnEV9REMF0h2LJo7XhqlGsxoFUc3iu24J1nx5WMIR2
+	G0RNR6ZwXelKHNo2PM3kPE/2CwzBaWLXoZRUAhA==
+X-Google-Smtp-Source: AGHT+IGrQ8fIZASydEMTPgJtn6QAWdCuqrWbDh+r3EcwsMgb2mqXieOzplvqVupD9INUYmMzBF4NNL8ZwfYeKBgNa8Y=
+X-Received: by 2002:a05:6902:2847:b0:e1a:43fb:12e6 with SMTP id
+ 3f1490d57ef6-e1a43fb14c7mr3278001276.35.1724858637220; Wed, 28 Aug 2024
+ 08:23:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240827074857.2671808-1-xirui.zhang@vivo.com>
-In-Reply-To: <20240827074857.2671808-1-xirui.zhang@vivo.com>
+References: <20240826124851.379759-1-liaochen4@huawei.com>
+In-Reply-To: <20240826124851.379759-1-liaochen4@huawei.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 28 Aug 2024 17:11:08 +0200
-Message-ID: <CAPDyKFrN9L+u_X7Ur+j--i-tewd31EXzwCojOP+Sxuyxpk4Phg@mail.gmail.com>
-Subject: Re: [PATCH 0/9] mmc: convert to devm_clk_get_enabled() API
-To: zhangxirui <xirui.zhang@vivo.com>
-Cc: Robert Richter <rric@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Nicolas Pitre <nico@fluxnic.net>, Shawn Guo <shawnguo@kernel.org>, 
-	Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix Kernel Team <kernel@pengutronix.de>, 
-	Fabio Estevam <festevam@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Taichi Sugaya <sugaya.taichi@socionext.com>, Takao Orito <orito.takao@socionext.com>, 
-	Michal Simek <michal.simek@amd.com>, Linus Walleij <linus.walleij@linaro.org>, 
-	Bastien Curutchet <bastien.curutchet@bootlin.com>, 
-	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, imx@lists.linux.dev, 
-	linux-arm-kernel@lists.infradead.org
+Date: Wed, 28 Aug 2024 17:23:20 +0200
+Message-ID: <CAPDyKFoFH+=Q+h8zuiuopi+f4p63QUoj_qEn83YVBinh8PnKBA@mail.gmail.com>
+Subject: Re: [PATCH -next] mmc: sdhci-of-aspeed: fix module autoloading
+To: Liao Chen <liaochen4@huawei.com>
+Cc: linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org, andrew@codeconstruct.com.au, 
+	adrian.hunter@intel.com, joel@jms.id.au
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 27 Aug 2024 at 09:34, zhangxirui <xirui.zhang@vivo.com> wrote:
+On Mon, 26 Aug 2024 at 14:57, Liao Chen <liaochen4@huawei.com> wrote:
 >
-> This series use devm_clk_get_enabled() to simplify code
-> and avoids the calls to clk_disable_unprepare()
+> Add MODULE_DEVICE_TABLE(), so modules could be properly autoloaded
+> based on the alias from of_device_id table.
+>
+> Signed-off-by: Liao Chen <liaochen4@huawei.com>
 
-I agree that it simplifies code - but it also changes the behaviour,
-in which order clocks are getting unprepared/disabled during the
-->remove() phase. In other words, this needs to be thoroughly tested
-and not just considered as a trivial cleanup series.
-
-For example, if there is a PM domain attached to the mmc host device,
-is it really okay to allow powering-off the PM domain before the
-clocks are being gated? This could potentially happen if we apply the
-$subject series.
+Applied for fixes, by adding fixes/stable tag, thanks!
 
 Kind regards
 Uffe
 
+
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> zhangxirui (9):
->   mmc: cavium-thunderx: Use devm_clk_get_enabled() helpers
->   mmc: davinci_mmc: Use devm_clk_get_enabled() helpers
->   mmc: dw_mmc-hi3798cv200: Use devm_clk_get_enabled() helpers
->   mmc: mvsdio: Use devm_clk_get_enabled() helpers
->   mmc: mxcmmc: Use devm_clk_get_enabled() helpers
->   mmc: mxs-mmc: Use devm_clk_get_enabled() helpers
->   mmc: sdhci: milbeaut: Use devm_clk_get_enabled() helpers
->   mmc: sdhci-of-arasan: Use devm_clk_get_enabled() helpers
->   mmc: sdhci_f_sdh30: Use devm_clk_get_enabled() helpers
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index 430c1f90037b..37240895ffaa 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -510,6 +510,7 @@ static const struct of_device_id aspeed_sdhci_of_match[] = {
+>         { .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_pdata, },
+>         { }
+>  };
+> +MODULE_DEVICE_TABLE(of, aspeed_sdhci_of_match);
 >
->  drivers/mmc/host/cavium-thunderx.c    |  7 +-----
->  drivers/mmc/host/davinci_mmc.c        |  8 +-----
->  drivers/mmc/host/dw_mmc-hi3798cv200.c | 28 +++------------------
->  drivers/mmc/host/mvsdio.c             | 13 +++-------
->  drivers/mmc/host/mxcmmc.c             | 25 +++----------------
->  drivers/mmc/host/mxs-mmc.c            | 13 +++-------
->  drivers/mmc/host/sdhci-milbeaut.c     | 25 +++----------------
->  drivers/mmc/host/sdhci-of-arasan.c    | 31 ++++-------------------
->  drivers/mmc/host/sdhci_f_sdh30.c      | 36 ++++++++-------------------
->  9 files changed, 35 insertions(+), 151 deletions(-)
->
+>  static struct platform_driver aspeed_sdhci_driver = {
+>         .driver         = {
 > --
-> 2.25.1
+> 2.34.1
 >
