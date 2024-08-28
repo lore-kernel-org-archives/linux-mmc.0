@@ -1,110 +1,169 @@
-Received: from mail-pf1-f179.google.com (mail-pf1-f179.google.com [209.85.210.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A5F712E1D9;
-	Wed, 28 Aug 2024 05:01:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CABFD14B945
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 06:07:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724821295; cv=none; b=efvBHiHhpjgiztxmwpyXyP8mPmhsoQ2Kaa5ikaipF9JKQOcf6eq6WEC2Cwjt9IGIT2YZNfNtHnCghm2nlrQ5GC49YEhivxLmKzIwBBLUq9rBq1MciMuBRQVkXNhJpVdjy8nOd5P3fBP/LL6GQc0H7CSwbZYsHyJm/UwP3exgVrs=
+	t=1724825245; cv=none; b=MaS9ia3dFnLjViam7CRYsQH0Du9FQghmbE22uPmJLfC7POY7gLo32f5B701cyuM+R5xfDvROiwqHvpX8bvJONPU/b2UlDLbOo1r/8GMLErPZjVRb89tiAV8j2ZwZR3FHbKoAql86oM/xJOGcAniuy8VMehfE7dqkx71lZYkeL3E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724821295; c=relaxed/simple;
-	bh=PdiqneyM8iE8PXtWCYkdMmfe3vycXqgv6iFjUSeis2E=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=UPNVYUnpCW/yq3bjGZ5AHZpE68dZKuvD7a5P2VRYjL5qqZhEAYEwNoN1iB+e02HaTDJxVCEb9jBORqRre5irbHqXj+MjAjG95Ez6KgmmC+W7olyZZ3kl6Xbf3LqqeUbZT1PYDvU15wKNBeIlnyuNbOiGmNJg+eCd7JGjF+Iu0Os=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=cmjeAq0n; arc=none smtp.client-ip=209.85.210.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1724825245; c=relaxed/simple;
+	bh=fcEodSy0TjEbdvSJs/d/MvMuD1g2v7TaY9sL8tjpaDQ=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:References; b=ahBSEh+Ric25kBp0o3lOgMAn+REitLh0g+ulT4rtIcqFO9FNJ9KYC6eU+5DPGoW9tcXe21eDQzibwe8vRbHdLyy1dNI0gFIE8dCwDC1TNkLnLUwYeFA8idVD2Alf0D0NJENM7fnHUpVPLlSLFfzEYIZIYs4ZOA4mCBiorSFAfnM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=UQ5LkAaK; arc=none smtp.client-ip=203.254.224.34
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="cmjeAq0n"
-Received: by mail-pf1-f179.google.com with SMTP id d2e1a72fcca58-7106cf5771bso5284076b3a.2;
-        Tue, 27 Aug 2024 22:01:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1724821292; x=1725426092; darn=vger.kernel.org;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=d1PBFufZFXO8pjeAWoGsRYBpwPpPunHh/3BSVN2umgc=;
-        b=cmjeAq0nBTSZ5PX6x7km2Hb3b5SQbIy+sXqbXAoNjqlMIiL6tKDCjrXotkLuZ8knbo
-         LwqJ9+Ixohw2D9H10PX3ZltCnNRoobpcTHloCdRQaL6cG2Dy10KTYM9t35gPmdiP88UQ
-         TT/ifz6XLdbcxFMI4br9zWuZUfQ+hTMO1IBE0qBH3EbXi7ISFt91AXu1eqwi4FqJQU15
-         EL7J7CuzkN0SYZuKgaspMMAaZGWOP50o6OojeRl4iP5RjGptrGW0uYtDEARs2U/gLKSy
-         9LzfuskTFSGQCFO0Yd91QRKrflWEiHfvgEfszyJfKG6gkGDlzDFdfox6QmUw3xSe1G4N
-         r09g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724821292; x=1725426092;
-        h=references:message-id:date:in-reply-to:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=d1PBFufZFXO8pjeAWoGsRYBpwPpPunHh/3BSVN2umgc=;
-        b=gyPnnhWgZW52SXVdZ20RqG/EBE9stLG+g32pt4Fm9NDxElUjDO+ka180qKmmlGmF4s
-         stpybI7RtreGCMHuBvAhDXVaJA8qo+VO7vq3jqF4jb7jzgbvEgAlaOSz/cLv9aplbUhN
-         Vt0sYIkd2fOwQOfaKc5zNlkHEwAJbYw7BfVV5gigt1a2CNpMSzR2eCbND2qtKgnOEqsc
-         Mxo39om3edKZ2hplYsYAjjD1FhED59u165/TH09aNaiWOKg3RzlGGH+V8OboTLnj25mm
-         GsYjLnMWWH78jKp5J1G8IkQeo+u3hiNQcpgNJBUrGJWQZESrTzuujKYTlpx1eIGl0581
-         GjNw==
-X-Forwarded-Encrypted: i=1; AJvYcCUgLe6Nr/zoqP6xji/WmmADpRez1YMcVHHQ+iyGUwdcMrh9nuyar+3mmmbCEtvEHEu/emdZnGsR8aov@vger.kernel.org, AJvYcCUsB7a4PnOQYPLaA8KFMexXyAZK7d7diRPqhbtK1kwFnuzdD51EfOiGZlRXX/Y21U+wFsRGp5vN@vger.kernel.org, AJvYcCX7fx7unPN8oi1EBgckfhGoa5+4kSyFZ1FpXU9lxGMDHLm0EoPU2zUBsNkK4HMC997xDU/T3PFDiIW/GEE=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx783kCHopIaK9RQ/62pk15Suat6x/lRwyoZZ0Lfikhfp1nDWa5
-	4ExinbYoIYpiewk7SCzwWGwcKfPGGjqX7cahtXs4gXwbjGJB/Q049wLe7g==
-X-Google-Smtp-Source: AGHT+IF2KgaD0NeJKmnO4N/sw/3XO0DoFTEUk+46Y7as5ee+90XLeTe1s1OjxM5p+jIzCRQphjCLNQ==
-X-Received: by 2002:a05:6a20:9c93:b0:1c8:fdc7:8813 with SMTP id adf61e73a8af0-1cc89dbac1bmr16921128637.23.1724821291577;
-        Tue, 27 Aug 2024 22:01:31 -0700 (PDT)
-Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-2d84461411asm536131a91.24.2024.08.27.22.01.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Aug 2024 22:01:30 -0700 (PDT)
-From: Ritesh Harjani <ritesh.list@gmail.com>
-To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, quic_asutoshd@quicinc.com, adrian.hunter@intel.com
-Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com, dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com, cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com, stable@vger.kernel.org
-Subject: Re: [PATCH] mmc : fix for check cqe halt.
-In-Reply-To: <20240828042647.18983-1-sh8267.baek@samsung.com>
-Date: Wed, 28 Aug 2024 10:27:07 +0530
-Message-ID: <874j75s0rg.fsf@gmail.com>
-References: <CGME20240828042653epcas1p1952b6cee9484b53d86727dd0e041a0b5@epcas1p1.samsung.com> <20240828042647.18983-1-sh8267.baek@samsung.com>
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="UQ5LkAaK"
+Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
+	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20240828060714epoutp04ad24845f403d09038f92940169c4c49d~vz2meWggS3100131001epoutp04V
+	for <linux-mmc@vger.kernel.org>; Wed, 28 Aug 2024 06:07:14 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20240828060714epoutp04ad24845f403d09038f92940169c4c49d~vz2meWggS3100131001epoutp04V
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1724825234;
+	bh=Q5KRJpV/+Wu0orUI+p+Nc2R0NSxvbe7jBlAEVQTUhQw=;
+	h=From:To:Cc:Subject:Date:References:From;
+	b=UQ5LkAaKB53p7Uv5B5vDofYwWxeJ6Io0Z24+R13RTCkV6bYfl1SUspUaMLRou1PUo
+	 7HzQzJAF4+NWBCQDsKJn2GEDt3F1TMgCissRdcOSi3I6stzhXocdSPiXlRmpsVJou1
+	 JX+85p7EVFfqu4f/xSQd4EJWR8gGWHmU+6C5eoEc=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+	epcas1p4.samsung.com (KnoxPortal) with ESMTP id
+	20240828060714epcas1p4e1c2dcd122e01b6aae0e484646bd373e~vz2lsc8wg3141131411epcas1p4A;
+	Wed, 28 Aug 2024 06:07:14 +0000 (GMT)
+Received: from epsmges1p3.samsung.com (unknown [182.195.36.225]) by
+	epsnrtp2.localdomain (Postfix) with ESMTP id 4Wtv814Qlxz4x9Pw; Wed, 28 Aug
+	2024 06:07:13 +0000 (GMT)
+Received: from epcas1p4.samsung.com ( [182.195.41.48]) by
+	epsmges1p3.samsung.com (Symantec Messaging Gateway) with SMTP id
+	7E.80.09725.19EBEC66; Wed, 28 Aug 2024 15:07:13 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+	epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
+	20240828060713epcas1p4ff8b4f345747eeb7e581385a62d07879~vz2k9nRKo2831028310epcas1p4n;
+	Wed, 28 Aug 2024 06:07:13 +0000 (GMT)
+Received: from epsmgms1p2new.samsung.com (unknown [182.195.42.42]) by
+	epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+	20240828060713epsmtrp1144a6d6e8a18aa0477e56e148d01b0f4~vz2k8wc-d2568125681epsmtrp1V;
+	Wed, 28 Aug 2024 06:07:13 +0000 (GMT)
+X-AuditID: b6c32a37-a8ce5a80000025fd-3f-66cebe915d03
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+	epsmgms1p2new.samsung.com (Symantec Messaging Gateway) with SMTP id
+	A7.39.08456.09EBEC66; Wed, 28 Aug 2024 15:07:13 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.98.171]) by
+	epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+	20240828060712epsmtip2f099b6e35db06efdd56767e3255d2ad2~vz2ksGEaW1504715047epsmtip2L;
+	Wed, 28 Aug 2024 06:07:12 +0000 (GMT)
+From: Seunghwan Baek <sh8267.baek@samsung.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	ulf.hansson@linaro.org, ritesh.list@gmail.com, quic_asutoshd@quicinc.com,
+	adrian.hunter@intel.com
+Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com,
+	dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com,
+	cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com
+Subject: [PATCH 2/2] mmc : fix for check cqe halt.
+Date: Wed, 28 Aug 2024 15:07:08 +0900
+Message-Id: <20240828060708.20807-1-sh8267.baek@samsung.com>
+X-Mailer: git-send-email 2.17.1
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrIKsWRmVeSWpSXmKPExsWy7bCmge7EfefSDF7uVrQ4+WQNm8WMU22s
+	FvuunWS3+PV3PbtFx9bJTBY7np9ht9j1t5nJ4vKuOWwWR/73M1os7JjLYnHwVAe7RdOffSwW
+	186cYLU4vjbcYvOlbywO/B47Z91l91i85yWTx51re9g8Ju6p8+jbsorR4/MmuQC2qGybjNTE
+	lNQihdS85PyUzLx0WyXv4HjneFMzA0NdQ0sLcyWFvMTcVFslF58AXbfMHKCLlRTKEnNKgUIB
+	icXFSvp2NkX5pSWpChn5xSW2SqkFKTkFZgV6xYm5xaV56Xp5qSVWhgYGRqZAhQnZGd+2TWMr
+	6OGvePnsJ3MD4z6eLkZODgkBE4kDv18zdzFycQgJ7GCUWPj2MhtIQkjgE6PEvu0REIlvjBJv
+	brQwwnTMv7OcESKxl1Fi5tNzUO2fGSV+bP/FDFLFJqAn8ar9MBtIQkRgEaPE3h93wKqYBe4z
+	Suw/+AdslrCAkcSp9ffBbBYBVYk1ffvZQWxeARuJo5MnsUHsk5dYveEAWLOEwFd2ifNHnkIl
+	XCReHd3OCmELS7w6voUdwpaSeNnfBmUXSyzcOIkFormFUeL68j9QX9hLNLc2Aw3iADpJU2L9
+	Ln2QMLMAn8S7rz2sIGEJAV6JjjYhiGpViVMbtkJ1Sktcb26AWush8bT7OzTAYiXutb9mncAo
+	Mwth6AJGxlWMYqkFxbnpqcWGBcbwuEnOz93ECE57WuY7GKe9/aB3iJGJg/EQowQHs5II74nj
+	Z9OEeFMSK6tSi/Lji0pzUosPMZoCA2kis5Rocj4w8eaVxBuaWBqYmBmZWBhbGpspifOeuVKW
+	KiSQnliSmp2aWpBaBNPHxMEp1cCUaiBQ6na0vMj68pubTm06t0Nj3RYzMgQsubK99r3NQ61b
+	n06ICu59O/3WXJFT35MXu7buP718ku/9g6t+nVSuX7prrcDGCs+YrZqtftestvpPnJ63blbr
+	dM4Jv5hy16SZ2Dw17pVgvnk9QpdhVtGvDR7964uuHmE+aV+6+ogi9/zni4SieWwv3bLef/F9
+	drSd1AU7iQuf3t48sszjx6qHjQf36f+5sb4z4LeN72KDDAPZjX4TWbxi59edPRu76j/LS2fh
+	+HUcnx8HpfR+7Pune3eNuVjgz+WlDy2k5XV+Gcyf1rI44lUQ74Tt5/tXR7XMM4/vdmqo5u/R
+	SecLWv6xTFzo2cTnGplTpunfTq3UV2Ipzkg01GIuKk4EAHRxvgIEBAAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrJLMWRmVeSWpSXmKPExsWy7bCSvO7EfefSDK6/Z7I4+WQNm8WMU22s
+	FvuunWS3+PV3PbtFx9bJTBY7np9ht9j1t5nJ4vKuOWwWR/73M1os7JjLYnHwVAe7RdOffSwW
+	186cYLU4vjbcYvOlbywO/B47Z91l91i85yWTx51re9g8Ju6p8+jbsorR4/MmuQC2KC6blNSc
+	zLLUIn27BK6Mb9umsRX08Fe8fPaTuYFxH08XIyeHhICJxPw7yxm7GLk4hAR2M0p0/XzOApGQ
+	lnh84CVQggPIFpY4fLgYJCwk8JFRYuJrHxCbTUBP4lX7YTaQXhGBFYwSM5dPZQZJMAu8Bhp0
+	IQLEFhYwkji1/j4jiM0ioCqxpm8/O4jNK2AjcXTyJDaIXfISqzccYJ7AyLOAkWEVo2RqQXFu
+	em6xYYFRXmq5XnFibnFpXrpecn7uJkZwaGpp7WDcs+qD3iFGJg7GQ4wSHMxKIrwnjp9NE+JN
+	SaysSi3Kjy8qzUktPsQozcGiJM777XVvipBAemJJanZqakFqEUyWiYNTqoFJcrtHovLaM1XO
+	L+7sMCrzOR767fQUkQNl2fGbAt6qeXIz7d4YnWG3q1ChIYlBYduvJTmMC5I+R9d9PNS4WkPa
+	9M7Ss7p51gvZmvVtm26LmGSLxqzNeXBq0c7Y3tMzkw6oFu0Rlch9fiTduei/R5qKwzXbPwq/
+	POesXxJ62qJco4WB9XNCmf6xdx5vzDn3d+wUY5gRL3JFadXUlXbaZi29m0Nepxx7cX9z0jKm
+	e91/F67U/udqe0Dn2p/f3SEZW8J8pZnvzbt29XnPkal2xy4sfSgVcOiEiRlTPn/prVd5rUfW
+	X1Tl1p5ha98/f3rRy2sn/2b53Y5/N8l864Ebc47svMN6+8VP7Tde3Hovkr7GK7EUZyQaajEX
+	FScCABQWmxW8AgAA
+X-CMS-MailID: 20240828060713epcas1p4ff8b4f345747eeb7e581385a62d07879
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20240828060713epcas1p4ff8b4f345747eeb7e581385a62d07879
+References: <CGME20240828060713epcas1p4ff8b4f345747eeb7e581385a62d07879@epcas1p4.samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-Seunghwan Baek <sh8267.baek@samsung.com> writes:
+Code to check whether cqe is in halt state is modified to cqhci_halted,
+which has already been implemented.
 
-> To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
-> bit. At this time, we need to check with &, not &&.
->
-> Fixes: 0653300224a6 ("mmc: cqhci: rename cqhci.c to cqhci-core.c")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
-> ---
->  drivers/mmc/host/cqhci-core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
+---
+ drivers/mmc/host/cqhci-core.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-Thanks for fixing it!
-Small suggestion below. But this still looks good to me, so either ways- 
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index a02da26a1efd..178277d90c31 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -33,6 +33,11 @@ struct cqhci_slot {
+ #define CQHCI_HOST_OTHER	BIT(4)
+ };
+ 
++static bool cqhci_halted(struct cqhci_host *cq_host)
++{
++	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
++}
++
+ static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag)
+ {
+ 	return cq_host->desc_base + (tag * cq_host->slot_sz);
+@@ -282,7 +287,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+ 
+ 	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+ 
+-	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
++	if (cqhci_halted(cq_host))
+ 		cqhci_writel(cq_host, 0, CQHCI_CTL);
+ 
+ 	mmc->cqe_on = true;
+@@ -617,7 +622,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		cqhci_writel(cq_host, 0, CQHCI_CTL);
+ 		mmc->cqe_on = true;
+ 		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+-		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
++		if (cqhci_halted(cq_host)) {
+ 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
+ 			       mmc_hostname(mmc));
+ 		}
+@@ -953,11 +958,6 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
+ 	return ret;
+ }
+ 
+-static bool cqhci_halted(struct cqhci_host *cq_host)
+-{
+-	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
+-}
+-
+ static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
+ {
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
+-- 
+2.17.1
 
-Reviewed-by: Ritesh Harjani <ritesh.list@gmail.com>
-
-
->
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index c14d7251d0bb..a02da26a1efd 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		cqhci_writel(cq_host, 0, CQHCI_CTL);
->  		mmc->cqe_on = true;
->  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
-> -		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
-> +		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
-
-There is already a helper cqhci_halted(). Maybe we could use that.
-
-static bool cqhci_halted(struct cqhci_host *cq_host)
-{
-	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
-}
-
-
->  			pr_err("%s: cqhci: CQE failed to exit halt state\n",
->  			       mmc_hostname(mmc));
->  		}
-> -- 
-> 2.17.1
-
--ritesh
