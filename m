@@ -1,135 +1,95 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-pg1-f177.google.com (mail-pg1-f177.google.com [209.85.215.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC5F35A79B;
-	Wed, 28 Aug 2024 06:41:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7A17156C76;
+	Wed, 28 Aug 2024 06:46:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724827295; cv=none; b=H/5zbeY9nquxSD1n9spar5VfZdF073D2suTD7H++3/u7UUWc65FF1K8C6Qrx9QvmWKqgo/Y3AuThDgq7txzKEILEjl+6RsKS7K38khBYdCXg3KmbaOVCIY64hWclmP6GdVUuQ0dAQlJsjwtYr0zAAALZtGac8tCTIh3BQzfFQ6o=
+	t=1724827576; cv=none; b=Y2kGsskS95+P8zQ49KMJ3HiQNVl24AchoiPdbRSQ4+O/+KieL5mtn1KIyNyHJ7+GvHxcaoC6tRuSHiGHu/4a9GPExEDD7MrHfxgFGwNVhCooe8b8z7xajFcB8rQ+Sy2mHpWKZuLb0PBBrT24tIKauJkkRNzBvv2nl984g3M9ZLQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724827295; c=relaxed/simple;
-	bh=oNobC8h5dVqhl9uEOpyU134ulI+DdueZlcJwC6uExXw=;
-	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=b32jQs6pz3sY/q1hB4dGHMF1kWJ+JenTuu8uA1CmTCX3WE9+Shn1/ZsZ60bNzhrYl9u4+UiBgQ8LVsXO1jqvnARwvWmDV1DG6xL7SxXBo6+oyM4whI2NhXVwuAXs+CkZ77SgerkHyJ0nvcnWUAKhV5TtXS26EH8Lfr4ToxEQmtY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OH4zoj/v; arc=none smtp.client-ip=209.85.214.180
+	s=arc-20240116; t=1724827576; c=relaxed/simple;
+	bh=ceQ9ve7FkIE5RldllOc4Y92N4eSThFv9EbJwRov8QJg=;
+	h=From:To:Cc:Subject:In-Reply-To:Date:Message-ID:References; b=OLffbdlLtx+YDNv0d08cjTdpmTJUkj+/O+DFSR7WuuD/2g0CH1axD1cNLA0PbH5WGcdOkVNJujgYLQcNk5MT/feHvUMtOmShEtO3ueVbJqevNkTrIiJh4W/5FVTHmdxtqT2vawbsTgIiXA69wrmgDJcIKk6pAz8phcFCG0bIU5w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HqCliIIj; arc=none smtp.client-ip=209.85.215.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OH4zoj/v"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-2021c03c13aso2458785ad.1;
-        Tue, 27 Aug 2024 23:41:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HqCliIIj"
+Received: by mail-pg1-f177.google.com with SMTP id 41be03b00d2f7-7ae3d7222d4so4724678a12.3;
+        Tue, 27 Aug 2024 23:46:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1724827293; x=1725432093; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1724827573; x=1725432373; darn=vger.kernel.org;
         h=references:message-id:date:in-reply-to:subject:cc:to:from:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=Vjxy1ZZo2xCcgaLJDeDKhMOnGHqoBddskdGj4omc7ts=;
-        b=OH4zoj/vZij71mWVCQ/lpxMMCfARGNJUcOjTs3ay1jj8hGPpN5Hrsdf8hSBW7pUYY8
-         lyz7xTOjhdZxutG5bB8h/e2ftvbQMPa55oKl3D33LSfQ9S3iL6vHS1cSNv6RmL01PCrp
-         /2PoxpesbASvSVjpON6T3LR2VpfJzN9JVMYp2fE0+Jz/GhF3PZJwZ/5Hjc6Jxya4b3Z4
-         ndFIdss6TFkdQOgzFL50UoeGnxqifQKulrFoVvbFTDJsbBuCb8KD8U4LTB3L0cq6GHyN
-         zFNAbGrIk/aPp/f1a615sHG7U9Ch/cL9Zh+KKP94t5K5qBRYM0uWniZCc/XNRganpmDu
-         jzxQ==
+        bh=24MQir3mu9HfGly2MDnOstXsOhraZUtPd53vlZyA9h4=;
+        b=HqCliIIj1LTWvRrW5SXKmI9s1tAYD+N42IU34qisDyiQ3OUc+IYwdnpscU8GPQp9Ua
+         o4F3GQ35NSkmrPtZ0+X2QmURJgCBcIBq+NmWnbiNOw5Hxm70zwzz9BK+pRs/7BqfJZlM
+         oBs58gKUBmIy/JNxQnKw2XU9bcDTIdy1fr+EA+oLlquzTq3R8wXhUjVPD9W7vOFHRjml
+         S8+/XQSncynStEofDfvBErlEzVe0dCdFwL4WFs+uaZHg3IOuiaWo3K+7GsBL26tQgedh
+         uNr+txAVHJzfDt8YZLOYCO8LlyeAkjexJxXDbZ1r0JviO0Nd/DvVtrsG/UJpevjIrsO1
+         BsIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724827293; x=1725432093;
+        d=1e100.net; s=20230601; t=1724827573; x=1725432373;
         h=references:message-id:date:in-reply-to:subject:cc:to:from
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Vjxy1ZZo2xCcgaLJDeDKhMOnGHqoBddskdGj4omc7ts=;
-        b=TzJWu3a9Oa/XdCtXm/FF0QFtCEIrqVdC2cey3rlQoJlIxSrkMFRvy7mjozox6YDy9H
-         xueSdmqn6DFEwzOkj6tH938xG2hgRkXynxSFD33MYJkvqjkeQFok3UC8Y9R336xDynl+
-         cNJFfJ8Q02fBNXaX9d5UvSpGshhlrMw5BTtcDkp/h5lL5v2xpwuXS/96xEqgZNlBgiWo
-         QjsL7GkdpykNqzmMVngNP3T8aRQQqcBp2tQZwyU8/4Ifctd7eZTtuWBj9924/SigUMqu
-         S3HRBmh2wy0S7+1SAFU3zhtj1QeyENsjmt2+0OrChHF8WXe/c808zUfVlFeCiWG4A0bQ
-         VOIg==
-X-Forwarded-Encrypted: i=1; AJvYcCVKRe8zVb9r10Sgl44M8tf8hq1wLa5SeVa0FG3oPHr8Dd2NMi1tiuACxkyynn2F/BzBjWvnT5Y9svon@vger.kernel.org, AJvYcCXoDNiegX41L/ddBHGBxlw28BkW0O6j1ymPBUioUN3GYp2B0EhYucUONs5u+1B6BZ1D77z51Ecdwwj8OZI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxyDBKPwwC6amNzlDKf44nb4DWOFECWnDXBrFs4GLPXF3xcOiUU
-	sV+rKqvdNVKNS/5e11wHxMCIyuZu40LYBIeN/uBAeKd3vDXIQA7A
-X-Google-Smtp-Source: AGHT+IFs5b6fXG276iUXoEFxJ0d9IBx+yOx87n53Q1tJLP006ZOOZ/hULu7fACO7sCJj408VFJ9HJw==
-X-Received: by 2002:a17:903:1c6:b0:204:e471:8f06 with SMTP id d9443c01a7336-204f9c30059mr17375835ad.17.1724827293035;
-        Tue, 27 Aug 2024 23:41:33 -0700 (PDT)
+        bh=24MQir3mu9HfGly2MDnOstXsOhraZUtPd53vlZyA9h4=;
+        b=M4FQ//uy7m0T8myOOOIlJGVG7cMBWaXcboeEQpwa9hgal0CxUwQaskvLRChpfcxXbv
+         A7TQGl4VNAQ+2UA2acXz5KRv49kCHSjLks1nx71rQYRoQFR1Mr/PU6+kM1yMB+mVVFu/
+         a2+u+tLWfcB94wnkBrmIjTU4481fmWOvDPtXEcNDK0CEksmYM1PQFIVnc8EWsw24jFS0
+         /EcIuB+cP4B2Aze3QSfMXR3wLu4a+QJB4XRIf/kJRL1t43N2tU/cCaLJqdwiFxeYKmNO
+         +SjxgX18PDbYMyWvpePrXD+YCldMWIwgexGyB2vW1+L3dxx7gty4Gp4JlyatDOp0Y7RL
+         CRoA==
+X-Forwarded-Encrypted: i=1; AJvYcCUJB4cWbStdjts+m/9+eE+58vxYJDaIWJqCKdKHTvnQzqFsPvK3uxLdXUYKfdq57gUH4MLw7qng2Hr76T4=@vger.kernel.org, AJvYcCVRWjmJ/WBm0O7djom6mBh1nrCXMCJn8u2XkjpZS/jbj3dXb51Z8Ef4n9Tbd5dl8N/Sm/2g63az@vger.kernel.org, AJvYcCX5KHog75aG1WlzyiPl6Wt994CoO2puWgDCB/oImP1ogEjXsfTRTKg5Hb4ia0iJVKBac2LJboezraX0@vger.kernel.org
+X-Gm-Message-State: AOJu0YxQGziCDl+DvoogWJvA9oSRoE+jWpJv9wZTHkpKbLLMMnc6komu
+	82xDTH86edxnqsqgjSguwoYFixdUGH/DxQ3csW/zfqnq8rFpVW4IDnTP8Q==
+X-Google-Smtp-Source: AGHT+IHHhhy8aDMecJm2IBluMWQ+P9b7AX4oGfQIN9F080PhQA8xqt65f3JLuOeTjbzLb4JSmY+N0w==
+X-Received: by 2002:a05:6a21:6802:b0:1cc:da14:316a with SMTP id adf61e73a8af0-1ccda143292mr24309637.20.1724827573161;
+        Tue, 27 Aug 2024 23:46:13 -0700 (PDT)
 Received: from dw-tp ([49.205.218.89])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-20385567907sm93431465ad.12.2024.08.27.23.41.27
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7cd9ad56c9fsm8819712a12.64.2024.08.27.23.46.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Aug 2024 23:41:32 -0700 (PDT)
+        Tue, 27 Aug 2024 23:46:12 -0700 (PDT)
 From: Ritesh Harjani <ritesh.list@gmail.com>
 To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, quic_asutoshd@quicinc.com, adrian.hunter@intel.com
-Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com, dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com, cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com
-Subject: Re: [PATCH 2/2] mmc : fix for check cqe halt.
-In-Reply-To: <20240828060708.20807-1-sh8267.baek@samsung.com>
-Date: Wed, 28 Aug 2024 12:02:12 +0530
-Message-ID: <87zfoxqhsj.fsf@gmail.com>
-References: <CGME20240828060713epcas1p4ff8b4f345747eeb7e581385a62d07879@epcas1p4.samsung.com> <20240828060708.20807-1-sh8267.baek@samsung.com>
+Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com, dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com, cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com, stable@vger.kernel.org
+Subject: Re: [PATCH] mmc : fix for check cqe halt.
+In-Reply-To: <874j75s0rg.fsf@gmail.com>
+Date: Wed, 28 Aug 2024 12:11:51 +0530
+Message-ID: <87y14hqhcg.fsf@gmail.com>
+References: <CGME20240828042653epcas1p1952b6cee9484b53d86727dd0e041a0b5@epcas1p1.samsung.com> <20240828042647.18983-1-sh8267.baek@samsung.com> <874j75s0rg.fsf@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-Seunghwan Baek <sh8267.baek@samsung.com> writes:
+Ritesh Harjani <ritesh.list@gmail.com> writes:
 
-> Code to check whether cqe is in halt state is modified to cqhci_halted,
-> which has already been implemented.
+> Seunghwan Baek <sh8267.baek@samsung.com> writes:
 >
-> Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+>> To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
+>> bit. At this time, we need to check with &, not &&.
+>>
+>> Fixes: 0653300224a6 ("mmc: cqhci: rename cqhci.c to cqhci-core.c")
 
-Few obsevations/corrections - 
-1. This is not a fix patch. So don't add "Fixes" tag
-2. Commit subject needs correction... maybe- "cqhci-core: Make use cqhci_halted() routine"
-3. This fix tag should be added to your previous patch which fixes a
-bug. I later noticed that the tag mentioned in previous patch is incorrect.
-4. The commit subject says [PATCH 2/2], but the mails were not linked properly, I guess.
+Correction. This should be: 
+Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+
+Subject can be:
+mmc: cqhci: Fix checking of CQHCI_HALT state
 
 
-> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
-> ---
->  drivers/mmc/host/cqhci-core.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
+>> Cc: stable@vger.kernel.org
+>> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
+>> ---
+>>  drivers/mmc/host/cqhci-core.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index a02da26a1efd..178277d90c31 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -33,6 +33,11 @@ struct cqhci_slot {
->  #define CQHCI_HOST_OTHER	BIT(4)
->  };
->  
-> +static bool cqhci_halted(struct cqhci_host *cq_host)
-> +{
-> +	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
-> +}
-> +
->  static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag)
->  {
->  	return cq_host->desc_base + (tag * cq_host->slot_sz);
-> @@ -282,7 +287,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
->  
->  	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
->  
-> -	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
-> +	if (cqhci_halted(cq_host))
->  		cqhci_writel(cq_host, 0, CQHCI_CTL);
->  
->  	mmc->cqe_on = true;
-> @@ -617,7 +622,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		cqhci_writel(cq_host, 0, CQHCI_CTL);
->  		mmc->cqe_on = true;
->  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
-> -		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
-> +		if (cqhci_halted(cq_host)) {
->  			pr_err("%s: cqhci: CQE failed to exit halt state\n",
->  			       mmc_hostname(mmc));
->  		}
-> @@ -953,11 +958,6 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
->  	return ret;
->  }
->  
-> -static bool cqhci_halted(struct cqhci_host *cq_host)
-> -{
-> -	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
-> -}
-> -
->  static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
->  {
->  	struct cqhci_host *cq_host = mmc->cqe_private;
-> -- 
-> 2.17.1
+> Thanks for fixing it!
+> Small suggestion below. But this still looks good to me, so either ways- 
+>
+> Reviewed-by: Ritesh Harjani <ritesh.list@gmail.com>
+
+With above changes please feel free to add RVB.
 
 -ritesh
