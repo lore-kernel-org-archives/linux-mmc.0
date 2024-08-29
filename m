@@ -1,142 +1,171 @@
 Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C6FD158A13
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Aug 2024 06:18:49 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7DCE015B0E4
+	for <linux-mmc@vger.kernel.org>; Thu, 29 Aug 2024 06:18:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.34
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724912331; cv=none; b=BzroGqrEL6HjRfQhYFVTrEX+Po8RMXdQ1zYoZYOsVNEst1QPr5HsQGnf13UBzcikpTbATvQfv2DE/BO1HoPjld6V9ACZwnYAqaM8kXFwCWkr6dv2milJA+YdxiVV+oNMoMWtcq37gO6Wyol8pxKjPuukpQAZ9w4hmRKEZ/y6q2E=
+	t=1724912333; cv=none; b=lqfWYNuy9byFjxq3xOBtnWiobb97rGI1dZu97v4TTm1V2z09EG2yLsTQ7W8m+gXDmJnew4+WU0/Qna5rKBrWKg6ayF892aNiAlbTyTNvRGVwWyjHF11H4jU9oMKROa1wp+7zwcE0eIhZ//rNQOqKXlC9lcYA07nazZ6U1Fd9DNY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724912331; c=relaxed/simple;
-	bh=ON2KdJqCjfOJ6h/0KCc/uwlLMP9C6/PHlN3zCR1uQbM=;
+	s=arc-20240116; t=1724912333; c=relaxed/simple;
+	bh=FqSYeuLZIBhiTp2ZRKzZa7zmTuIUAt4v6EvyDsXyqkk=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:Content-Type:
-	 References; b=MIRWiDScoeDeOTZCofVQB/+YPHfjA3xvTj9dEe91AJN0lC+o7LFnETytkOLkspWkFxpUJHyZQA9qIg2cVAwC/pPD5w9wD2pAcNkbhbFfwsTOw6RKndMSyUO+a7WRXldmYWPtUmbXCAYpmgGEX4JVjPSpHHp4cO1xVaE/PhUC6oY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=ebrsS3p+; arc=none smtp.client-ip=203.254.224.34
+	 References; b=KuP9xMGFHEDUGTQFMqM/api0L3rEqNo3QRBXQ/1OdW4YQLSqC/t8MXIBL39WAq7MVhhro/kQ2XRw/H6c1wCVoVtaMNuux/bCUGiGo+zs2BiMdm4l4l36YZsdqkpB8D6b3DIvGmNV74wXc0bb/vNjqVl6XhAhGBgM7tSTDxlQ0LE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=jJ2FeHHS; arc=none smtp.client-ip=203.254.224.34
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="ebrsS3p+"
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
-	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20240829061842epoutp045842fdc07a2b1a8ff9dfeb159dcb56ac~wHp44MW-U2307623076epoutp04M
-	for <linux-mmc@vger.kernel.org>; Thu, 29 Aug 2024 06:18:42 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20240829061842epoutp045842fdc07a2b1a8ff9dfeb159dcb56ac~wHp44MW-U2307623076epoutp04M
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="jJ2FeHHS"
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+	by mailout4.samsung.com (KnoxPortal) with ESMTP id 20240829061844epoutp04bf28aa32ca47677ee5ef5bcfd8d350a8~wHp6mGtma2281222812epoutp04n
+	for <linux-mmc@vger.kernel.org>; Thu, 29 Aug 2024 06:18:44 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20240829061844epoutp04bf28aa32ca47677ee5ef5bcfd8d350a8~wHp6mGtma2281222812epoutp04n
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1724912322;
-	bh=wzxQZoT4E2amf/9RHfF7VilfQ3lQHIJbyWrsBbwl7K0=;
+	s=mail20170921; t=1724912324;
+	bh=05HK0zcy0FyN3BaTxiMDVVrkR8ylzfzdyy7lQoAPCSA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ebrsS3p+gn3wXivxoxQlzqKcuZ9z5uMOt2NFZtH8BhGNnI6aWLcIo1uk9p1r9KgfI
-	 1bY8avBS2wF8Mahvnjc6qIGq6JD1vs2B9PLWLOi1LK89yrMmZEMfBBGyRTfnZhroUt
-	 lSwuSjG7z6jhdlTLvqheuf4sS1Bc9W1OHhi7m2NU=
-Received: from epsnrtp4.localdomain (unknown [182.195.42.165]) by
+	b=jJ2FeHHSeTM2Oajyh3oattUIs2TxU9vQgSx6Hr5+2Dksw4ykAl9uIPh8tctnX1LC+
+	 rBqNaI05f7QLI/RLwiWX5tCpAbUClUzPUhifeNHo1ptXrxU6tzmhOCbgYjRQwiK7O3
+	 Uh6fT6EEeBc1YjeQvTGMsIA3pPbJ1ODul9H84XiU=
+Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
 	epcas1p4.samsung.com (KnoxPortal) with ESMTP id
-	20240829061841epcas1p46c8a01a709b940ec49c39116267058ae~wHp4SCFrU0905209052epcas1p4o;
-	Thu, 29 Aug 2024 06:18:41 +0000 (GMT)
-Received: from epsmgec1p1-new.samsung.com (unknown [182.195.38.241]) by
-	epsnrtp4.localdomain (Postfix) with ESMTP id 4WvWLn18Ysz4x9Q6; Thu, 29 Aug
-	2024 06:18:41 +0000 (GMT)
-Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
-	epsmgec1p1-new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	44.DA.19509.1C210D66; Thu, 29 Aug 2024 15:18:41 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-	epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
-	20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee~wHp3eZAvj1419814198epcas1p4a;
-	Thu, 29 Aug 2024 06:18:40 +0000 (GMT)
-Received: from epsmgmc1p1new.samsung.com (unknown [182.195.42.40]) by
-	epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-	20240829061840epsmtrp1299267cdd5240786f5fce0c3e413f8be~wHp3da2ei0803708037epsmtrp11;
-	Thu, 29 Aug 2024 06:18:40 +0000 (GMT)
-X-AuditID: b6c32a4c-17bc070000004c35-b7-66d012c17f0a
+	20240829061843epcas1p40df225e595c277836b5bd765925b5b24~wHp514kuF1419814198epcas1p4v;
+	Thu, 29 Aug 2024 06:18:43 +0000 (GMT)
+Received: from epsmges1p5.samsung.com (unknown [182.195.36.225]) by
+	epsnrtp3.localdomain (Postfix) with ESMTP id 4WvWLp61Twz4x9Q7; Thu, 29 Aug
+	2024 06:18:42 +0000 (GMT)
+Received: from epcas1p2.samsung.com ( [182.195.41.46]) by
+	epsmges1p5.samsung.com (Symantec Messaging Gateway) with SMTP id
+	60.90.09734.2C210D66; Thu, 29 Aug 2024 15:18:42 +0900 (KST)
+Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
+	epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20240829061842epcas1p25b97a685d0946c360338adf716bfaf2b~wHp5GGgvL2336223362epcas1p2d;
+	Thu, 29 Aug 2024 06:18:42 +0000 (GMT)
+Received: from epsmgmcp1.samsung.com (unknown [182.195.42.82]) by
+	epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
+	20240829061842epsmtrp24e90446c4207b3d0c24951b8787742ae~wHp5FPud70481804818epsmtrp2j;
+	Thu, 29 Aug 2024 06:18:42 +0000 (GMT)
+X-AuditID: b6c32a39-b5dfa70000002606-6a-66d012c2d982
 Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-	epsmgmc1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	56.05.07567.0C210D66; Thu, 29 Aug 2024 15:18:40 +0900 (KST)
+	epsmgmcp1.samsung.com (Symantec Messaging Gateway) with SMTP id
+	8A.57.19367.2C210D66; Thu, 29 Aug 2024 15:18:42 +0900 (KST)
 Received: from localhost.localdomain (unknown [10.253.98.171]) by
 	epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20240829061840epsmtip247e5235c17c6704249fee056562bc10c~wHp3Nc-a42307423074epsmtip2J;
-	Thu, 29 Aug 2024 06:18:40 +0000 (GMT)
+	20240829061842epsmtip22fd3ded2f32e288805936a346745ee98~wHp41_HE62307423074epsmtip2P;
+	Thu, 29 Aug 2024 06:18:42 +0000 (GMT)
 From: Seunghwan Baek <sh8267.baek@samsung.com>
 To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
 	ulf.hansson@linaro.org, ritesh.list@gmail.com, quic_asutoshd@quicinc.com,
 	adrian.hunter@intel.com
 Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com,
 	dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com,
-	cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com,
-	stable@vger.kernel.org
-Subject: [PATCH v2 1/2] mmc: cqhci: Fix checking of CQHCI_HALT state
-Date: Thu, 29 Aug 2024 15:18:22 +0900
-Message-Id: <20240829061823.3718-2-sh8267.baek@samsung.com>
+	cw9316.lee@samsung.com, sh8267.baek@samsung.com, wkon.kim@samsung.com
+Subject: [PATCH v2 2/2] cqhci-core: Make use cqhci_halted() routine
+Date: Thu, 29 Aug 2024 15:18:23 +0900
+Message-Id: <20240829061823.3718-3-sh8267.baek@samsung.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20240829061823.3718-1-sh8267.baek@samsung.com>
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpnk+LIzCtJLcpLzFFi42LZdlhTX/eg0IU0gxOrWCxOPlnDZjHjVBur
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrHKsWRmVeSWpSXmKPExsWy7bCmnu4hoQtpBs0/dS1OPlnDZjHjVBur
 	xb5rJ9ktfv1dz27RsXUyk8WO52fYLXb9bWayuLxrDpvFkf/9jBYLO+ayWBw81cFu0fRnH4vF
-	tTMnWC0WbHzEaHF8bbjF5kvfWBwEPHbOusvusXjPSyaPO9f2sHlM3FPn0bdlFaPH501yAWxR
-	2TYZqYkpqUUKqXnJ+SmZeem2St7B8c7xpmYGhrqGlhbmSgp5ibmptkouPgG6bpk5QGcrKZQl
-	5pQChQISi4uV9O1sivJLS1IVMvKLS2yVUgtScgrMCvSKE3OLS/PS9fJSS6wMDQyMTIEKE7Iz
-	TlzZylTwg72i5c5MxgbGE2xdjJwcEgImEgc+LmLqYuTiEBLYwyix5eg3VgjnE6PE4kdboZxv
-	jBJfTj9lgWk5sucZI0RiL6PE029LmCGcz4wSS8+1MIFUsQnoSbxqP8wGkhARWMQosffHHbAq
-	ZoGfjBLvrx9kB6kSFnCR2Dr/OjOIzSKgKvF22RGwbl4Ba4mZdzezQuyTl1i94QBYDaeAjURD
-	azPYVAmBiRwS01oWMkIUuUjMmDyXCcIWlnh1fAs7hC0l8bK/Dcoulli4cRILRHMLo8T15X+g
-	mu0lmsGmcgCdpymxfpc+SJhZgE/i3dceVpCwhACvREebEES1qsSpDVuhOqUlrjc3QN3pIXHp
-	eQ/YCUIC/YwSF3/nTmCUnYUwdAEj4ypGqdSC4tz01GTDAkPdvNRyeGQl5+duYgSnSC2fHYzf
-	1//VO8TIxMF4iFGCg1lJhPfE8bNpQrwpiZVVqUX58UWlOanFhxhNgYE2kVlKNDkfmKTzSuIN
-	TSwNTMyMTCyMLY3NlMR5z1wpSxUSSE8sSc1OTS1ILYLpY+LglGpgqnThuq7rP+dmRPORtW+D
-	KtyurT914jmXlGKYyfNWBbUliUdaPhoen72pL8qNmf2C1rZfl020j9icKVY16+JLPFWTsVQ7
-	SC4jTy1ga1jj5uZiWyXdm3FfJ8U4S5fe/+E9R6r1Xp2768283JaHF1Qa0l1rFiw1q/8Zc+Cf
-	aqF6n++H2vzOPdUZlp5iKbsva1+YefGeWd0h2fVMe/nnG3rMm2aS3xCfuKtnSe0p35WNgnM4
-	n6+R+iqrmym94qPL2fQ1s6R3n+y5G3Wgc4l4zf7LqVPXl0ye9ey7zNFnYWEHiwTUi3qs8x89
-	X3p10ud29xr72CLG3g8X9z55eeWlktH7rK1Z9uc73d+5fy39um63EktxRqKhFnNRcSIAJ3pB
-	nRoEAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrBLMWRmVeSWpSXmKPExsWy7bCSvO4BoQtpBtu2KlmcfLKGzWLGqTZW
-	i33XTrJb/Pq7nt2iY+tkJosdz8+wW+z628xkcXnXHDaLI//7GS0WdsxlsTh4qoPdounPPhaL
-	a2dOsFos2PiI0eL42nCLzZe+sTgIeOycdZfdY/Gel0wed67tYfOYuKfOo2/LKkaPz5vkAtii
-	uGxSUnMyy1KL9O0SuDJOXNnKVPCDvaLlzkzGBsYTbF2MnBwSAiYSR/Y8Y+xi5OIQEtjNKLHj
-	31EmiIS0xOMDL4ESHEC2sMThw8UQNR8ZJV6susoOUsMmoCfxqv0wG0hCRGAFo8TM5VOZQRxm
-	gVYmiXNb28AmCQu4SGydf50ZxGYRUJV4u+wIWJxXwFpi5t3NrBDb5CVWbzgAVsMpYCPR0NoM
-	dp4QUM2nFSfZJzDyLWBkWMUomVpQnJuem2xYYJiXWq5XnJhbXJqXrpecn7uJERzYWho7GO/N
-	/6d3iJGJg/EQowQHs5II74njZ9OEeFMSK6tSi/Lji0pzUosPMUpzsCiJ8xrOmJ0iJJCeWJKa
-	nZpakFoEk2Xi4JRqYIr2/RES9bp81oT5PSnn2Jx1g+7sLP5cVVrJ55f3SHpquJzg27N9gqGf
-	dcXEVPSWPYlzWH1YvIFX44qvj6/A110zN2y54Pjp3jfWt4s1uk6UH5WQqG4PV7HjC9APc6pd
-	UrCw3Gm1w4zvWRqxluLZMzezhuqt80nMylSYfWbdNo5Npv8fhjydmLTuja1u6MUun9Ckbk8B
-	SzHlg/dvHwnTWTAngneiyPbk+CvZTQGzrpqenvfg22elD41qMf/sb7wLMpZpCRYWdM97Zrzr
-	BXfW/xNFRSYtfKmOzvXtXQ2iUWeXmiYo2/iIbXBYe6xhhn/p6a0b+O0qMk9dzfbaq3ZwiRJD
-	5NElSzZO7tktfGCiEktxRqKhFnNRcSIAmDF9H9sCAAA=
-X-CMS-MailID: 20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee
+	tTMnWC2Orw232HzpG4sDv8fOWXfZPRbvecnkcefaHjaPiXvqPPq2rGL0+LxJLoAtKtsmIzUx
+	JbVIITUvOT8lMy/dVsk7ON453tTMwFDX0NLCXEkhLzE31VbJxSdA1y0zB+hiJYWyxJxSoFBA
+	YnGxkr6dTVF+aUmqQkZ+cYmtUmpBSk6BWYFecWJucWleul5eaomVoYGBkSlQYUJ2xuKN/SwF
+	B/gqWn7eYmxg/MvdxcjJISFgIrHgznKWLkYuDiGBHYwSS3peMUM4nxgl+jacZ4Nz7k9dxgLT
+	8uJfFyNEYiejxLTmTiaQhJDAZ0aJXTuqQGw2AT2JV+2HwbpFBBYxSuz9cQdsLrPAfUaJ/Qf/
+	MIJUCQs4S7y9cpsdxGYRUJVoab0CZvMKWEssO3iDCWKdvMTqDQeYQWxOARuJhtZmsKkSAq0c
+	Eu8X3WSEKHKRmNRwBKpBWOLV8S3sELaUxOd3e9kg7GKJhRsnsUA0tzBKXF/+B6rZXqIZbCoH
+	0HmaEut36YOEmQX4JN597WEFCUsI8Ep0tAlBVKtKnNqwFapTWuJ6cwMrhO0h8fDDYiZIsPQz
+	Sqw9eoxtAqPsLISpCxgZVzGKpRYU56anFhsWmMIjKjk/dxMjOCFqWe5gnP72g94hRiYOxkOM
+	EhzMSiK8J46fTRPiTUmsrEotyo8vKs1JLT7EaAoMsYnMUqLJ+cCUnFcSb2hiaWBiZmRiYWxp
+	bKYkznvmSlmqkEB6YklqdmpqQWoRTB8TB6dUA1OR8ZLaU0uDpcyWT1zXzud09sirljKPwqz0
+	Sb160vavWF5xJC5Sm/Bdzm4O+5Rip6KJAqITdO26tKS1TdZc0Pxz8H8CR1r+YbMjGi9Oc/lf
+	PHH2Xn/i3+3rJyzZ57q4pEezdMnFOHZrHpspy7eU8/hxNl/91SV1qWrf7Q8S52R0Hsuc13r9
+	NujTIf9Ht27cmu1fLZn6c3vqmw3uCQ8uMieoqyssWL/klrPjqnkP/3ZkqoXPO72z2Gt23vy/
+	t8M3vYqZludlemGjrrzYZLdDZ3QLGucUHXp5+YrYvvK9PAdLk0wXmqws1+4JMWhPU+hJfH1f
+	blW112tWJZ5Jgh8Fj4ne+G8+SWeX7qpXh94/qIpVYinOSDTUYi4qTgQAf7LbkhEEAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrHLMWRmVeSWpSXmKPExsWy7bCSvO4hoQtpBic7BCxOPlnDZjHjVBur
+	xb5rJ9ktfv1dz27RsXUyk8WO52fYLXb9bWayuLxrDpvFkf/9jBYLO+ayWBw81cFu0fRnH4vF
+	tTMnWC2Orw232HzpG4sDv8fOWXfZPRbvecnkcefaHjaPiXvqPPq2rGL0+LxJLoAtissmJTUn
+	syy1SN8ugStj8cZ+loIDfBUtP28xNjD+5e5i5OSQEDCRePGvi7GLkYtDSGA7o8TiGYtYIRLS
+	Eo8PvARKcADZwhKHDxdD1HxklLi1cCEjSA2bgJ7Eq/bDbCAJEYEVjBIzl09lBkkwC7xmlOi6
+	EAFiCws4S7y9cpsdxGYRUJVoab0CZvMKWEssO3iDCWKZvMTqDQfAejkFbCQaWpvZQGwhoJpP
+	K06yT2DkW8DIsIpRNLWgODc9N7nAUK84Mbe4NC9dLzk/dxMjOIi1gnYwLlv/V+8QIxMH4yFG
+	CQ5mJRHeE8fPpgnxpiRWVqUW5ccXleakFh9ilOZgURLnVc7pTBESSE8sSc1OTS1ILYLJMnFw
+	SjUw2e9WerTPw+JerHXvq9O8GSkL4+arsfIxsk39smPu5dIVdSrLusPPLOXa85+V0W/bBhuR
+	puRPzQfP9Os3rlS7l2R2eYVMjePHVO2jU+/Hz9L+nXiv8mVKzc4qp52C5ufdghf5HC0Tdpgd
+	dWGv7IV9VcLMfi9uawuuVl+2qFfmc+jeKzzfl+WWrnkQZLWi59iqiy28e6XLDm+3/zExZEun
+	rIZwV7fYH9ny3cpTLVd+XvT4YbrkekvHrHlHzUUX7unZrf045Nu9V0wKAqsP7eZwc7SeEJa7
+	Ss7S6+xz5br4Ha1H8ifsn/zrxOXJfayfX9u2hqraZ7yJOmF/9+i6sGWmIqf2P6+5fCB3ilqJ
+	qtRpLiWW4oxEQy3mouJEAPswO0HRAgAA
+X-CMS-MailID: 20240829061842epcas1p25b97a685d0946c360338adf716bfaf2b
 X-Msg-Generator: CA
 Content-Type: text/plain; charset="utf-8"
 CMS-TYPE: 101P
 DLP-Filter: Pass
 X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee
+X-CMS-RootMailID: 20240829061842epcas1p25b97a685d0946c360338adf716bfaf2b
 References: <20240829061823.3718-1-sh8267.baek@samsung.com>
-	<CGME20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee@epcas1p4.samsung.com>
+	<CGME20240829061842epcas1p25b97a685d0946c360338adf716bfaf2b@epcas1p2.samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
-bit. At this time, we need to check with &, not &&.
+Code to check whether cqe is in halt state is modified to cqhci_halted,
+which has already been implemented.
 
-Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
-Cc: stable@vger.kernel.org
 Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
 ---
- drivers/mmc/host/cqhci-core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/cqhci-core.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index c14d7251d0bb..a02da26a1efd 100644
+index a02da26a1efd..178277d90c31 100644
 --- a/drivers/mmc/host/cqhci-core.c
 +++ b/drivers/mmc/host/cqhci-core.c
-@@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+@@ -33,6 +33,11 @@ struct cqhci_slot {
+ #define CQHCI_HOST_OTHER	BIT(4)
+ };
+ 
++static bool cqhci_halted(struct cqhci_host *cq_host)
++{
++	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
++}
++
+ static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag)
+ {
+ 	return cq_host->desc_base + (tag * cq_host->slot_sz);
+@@ -282,7 +287,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+ 
+ 	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
+ 
+-	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
++	if (cqhci_halted(cq_host))
+ 		cqhci_writel(cq_host, 0, CQHCI_CTL);
+ 
+ 	mmc->cqe_on = true;
+@@ -617,7 +622,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
  		cqhci_writel(cq_host, 0, CQHCI_CTL);
  		mmc->cqe_on = true;
  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
--		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
-+		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
+-		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
++		if (cqhci_halted(cq_host)) {
  			pr_err("%s: cqhci: CQE failed to exit halt state\n",
  			       mmc_hostname(mmc));
  		}
+@@ -953,11 +958,6 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
+ 	return ret;
+ }
+ 
+-static bool cqhci_halted(struct cqhci_host *cq_host)
+-{
+-	return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
+-}
+-
+ static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
+ {
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
 -- 
 2.17.1
 
