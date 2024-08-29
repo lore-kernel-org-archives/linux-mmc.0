@@ -1,57 +1,57 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
+Received: from mail-pf1-f174.google.com (mail-pf1-f174.google.com [209.85.210.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 26BDF19148A;
-	Thu, 29 Aug 2024 10:16:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2705E18EFE2;
+	Thu, 29 Aug 2024 10:16:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724926596; cv=none; b=eecx7W8uhK0hBLeUhUi+w8RYm3H3D9lnS4gc17n41QNEGvRW/s2zW0u6B/g1QCq7AmIb429zdIanQ3sBObsuBoqWOE6uJtEYA2aJMGlZUq4EvhS9rRopSeCqx0uKvlG9CYmI4j0+4IPJWaDjK5GnVt5QaWI8vXLJJkgvKhzSH3E=
+	t=1724926600; cv=none; b=U6ECYHc8xmLBeDpUJns5NQnlZPa3QvVZzkwmTaKgzJqTNU3M/ApBzwEO4orBEjkcL4Xein+ktr6JH30mkanb4hFuEzzGiQud3J88/U5MFdk8eYOMnrzV/DHElF+yorEF9AzWYOdPt6wHfX5JnnWr9m00P5QRzZvlPPH8TD/xkig=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724926596; c=relaxed/simple;
-	bh=tNWL2yxo2uDQa0iyKVclsZm+e2qhVUxxzq34g14C8ts=;
+	s=arc-20240116; t=1724926600; c=relaxed/simple;
+	bh=ZXGEzaz3HiWknyeUmK9tPtLjvRCZ9IuLbN+IF8lFSPs=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=kIhtqylrHUH+RSoyLoO9ATnehSdCQ9FZEf9YeoTWeuIB+LcUGqEAei8MIahvpAyerQjNkz8dw69N7wEtmb4TZb2nKSo1Yda73hFhylZnDNTYfwCrm5UOLBueWhH2fL2pzabtYGTdCnesDUBg44eurMQGP11Xxw9aGGnnB7t6g6U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TzPTQcHD; arc=none smtp.client-ip=209.85.210.175
+	 MIME-Version; b=DkjcIRKEpoQnsq+PR32fc4BaLGGSA/d1qb9Vs/vsq2SUTfc0cDmKvZ89pzOGhyvm6YcxaOLUIbHirE9ZFuad/WxE4N9js62+4tNm1wm+H9479TEGCIQKIgR1ksnTD5Fk7wycU7zM+44Zo1BMnAkfUo8xw0casiGv7FIlUFrqyjY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=aF53NTv9; arc=none smtp.client-ip=209.85.210.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TzPTQcHD"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-715abede256so357629b3a.3;
-        Thu, 29 Aug 2024 03:16:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aF53NTv9"
+Received: by mail-pf1-f174.google.com with SMTP id d2e1a72fcca58-7142e4dddbfso381679b3a.0;
+        Thu, 29 Aug 2024 03:16:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1724926594; x=1725531394; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1724926598; x=1725531398; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2u5k+9P7fnLwaL1GZATBK9ZKcQNGMTg+CrJ1EQReTio=;
-        b=TzPTQcHDW37Zu+78W4Uq8uBqMwvaaYdyP2TcjVRCMqziSwZiiJnNf/8cn/IHIaSQJh
-         kuZhwVR8tCWAz0OvRQa73jy4UxMRNKxp19YqazczN2+qtEpVpPF8TIiDfkQ12pBRWqgK
-         iGuIoEti9DWDIz9oHqYw7I+mlMIgbTlVV+uqWTsInZURjf6l5z4eHK0Z2GSHcxz/h8HX
-         xyyY2Wd2W8A9GzE2QRY9tX4lTlI3Ob6Otf7oOYNtl4puSuAXshUktwlipyQSlnQ9KG+K
-         tqrD0dV7RnC5IWAcfpqNkgCwS6BXBbCYRVupVZHTlvLtw5VwYwvK4Ui70csdP0FO+xYk
-         jDHQ==
+        bh=frHRewf0pkcu1synjclcnqgZV+fZOIZRmQD7b9toY3A=;
+        b=aF53NTv9kQ0iWwz24UCQHzdvKj/dmm5tl7UXRw1nWWc5Nt9MU9r9+X1ayzk5CXPZ4e
+         ndEStkDl91GzUeTCJIgnPjGBHo5T2Pp8AAb7EW92L/RQgWaJuj5e51R1XmEtc6TpsxLE
+         snITmdzkvZmST3FULhe8XjtTMxrmcfPyjoS+M7+ZzwTebQ36kMO4ciWoOsYlFdc6TbRd
+         TnFkoifYKPHmuWKGuCkSbTxtThTFfTo0jkN/t0HamcW1ts6KUvA2gJQ8XqY6/Vd0p6Un
+         t6NHzbu72x3ICKcuLGduU0MmoxO8zA+HWJRrOuArN1dQcPKRX/LEkfNHZnBIQ7VVjT8d
+         P0Jg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724926594; x=1725531394;
+        d=1e100.net; s=20230601; t=1724926598; x=1725531398;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=2u5k+9P7fnLwaL1GZATBK9ZKcQNGMTg+CrJ1EQReTio=;
-        b=U1W90iTc2Z4hbOvJv0uCbtkITkXeIXUxRbl+pAhDampDUAQi79MtxxPKWWqXK7PHkz
-         N6KoT78c2NENaePWAu2OMH4wNQqETFuXbkReTZCAUfLHUYP2ULjInwlXy+XQVC1MaRPq
-         HJ522ehzb+El1ae8rSSRtT0fqFAPDXgw73U5L0MI1TwpgizdlWsU870IMXZs+ovtjj17
-         QBR6oDMj2nTkUkBOxXdWRp3UDDLOoryNIRnebpZH4JPqOFBS3inZTP0VgWfQvw1rORY9
-         a+7Pvi3aIsftlpYADRnA7YP7zexKYSkGlpgUzxsnokU+uEjg7V8aVo1ChijW5CBZ6Elh
-         W/Zg==
-X-Forwarded-Encrypted: i=1; AJvYcCUH7o+jllOehJqeKG83rB4yo5uSCzXcez040Q1RXeMvbA7+z0l4cUdbdJHI9tLBCNgL1Y2EUq5JJUYzvrc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz4E1JYk8BteiI7bgQZF05aK/+gQWwjgghvdaCi3YFm1ZbsI6r0
-	zqF+fHnhUfh+z6vGf3Dr77z5vM/8heDpjLNvK5kIcFPToFAzjvekQFFDFzBq
-X-Google-Smtp-Source: AGHT+IHIEVF0QL5T/fIojGr4YJfvf2ZxagumUKkkbzpLuhc5c4RvqGLQ0xOIbAznt5IpL00M4Ho4ig==
-X-Received: by 2002:a05:6a00:2789:b0:713:f127:ad5c with SMTP id d2e1a72fcca58-715dfcc91a7mr2752029b3a.28.1724926594320;
-        Thu, 29 Aug 2024 03:16:34 -0700 (PDT)
+        bh=frHRewf0pkcu1synjclcnqgZV+fZOIZRmQD7b9toY3A=;
+        b=XEHFtlf2414zzoUPW4LAuv42fR31J7XLZWMYNnigA91RDUoAJcgJ7k+8qhcAbjzSEX
+         KP/IlOQ/K5OOI2y6Jcxk/0u8Dv9ehjcHgx5zCBad8SvR67LzwPWCtq/bwo/qJ4Chznk4
+         jmRi5LPY9b4uvol8hv7dSqeEPnov9plhxb0p9IyJxhfFBY8cMSVlUAKwg2ZUAya954l0
+         uzTmvqYKD2/k6HjgroQDdzWrEcEWFh3B5dCZdz28lbNt3uR4UfJY9x2yR66dBYlkesux
+         6M5KxZH7+wFna6rV7a1jA57DyzzTV7pJYyJO3tWWxRW9ztLPjD6/wI5b3oH64+fOqqKq
+         Iw8w==
+X-Forwarded-Encrypted: i=1; AJvYcCUp7PeEycUoTTZA4CetaSYPcm2bm6C67HSAFwio8xSx6cS6kGqKNrxZ9dJqSR8rrT/JaEguEYWCeVag8Ps=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzL74KtQM2Z1CnJA6h4zzHuGFqXICn+m1lBX8WjdY2yvMjcLMia
+	1pEZwDWkJWNSc+NEXVmPSy8w3+UVqcQV7j7OVlfxT8I5s7/FQUhU
+X-Google-Smtp-Source: AGHT+IFK/i7bn2Yt77POAH51pVuNcZOONgmRKvhi6e++nBApAqvWTW8lFaDdEbgPkrmpIjKRozAVzQ==
+X-Received: by 2002:a05:6a21:164a:b0:1be:c86e:7a4d with SMTP id adf61e73a8af0-1cce111c7ddmr2374927637.53.1724926598283;
+        Thu, 29 Aug 2024 03:16:38 -0700 (PDT)
 Received: from localhost.localdomain ([2402:7500:479:a52:632f:b914:4ddf:273])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-715e56d77eesm816577b3a.153.2024.08.29.03.16.30
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-715e56d77eesm816577b3a.153.2024.08.29.03.16.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Aug 2024 03:16:34 -0700 (PDT)
+        Thu, 29 Aug 2024 03:16:38 -0700 (PDT)
 From: Victor Shih <victorshihgli@gmail.com>
 To: ulf.hansson@linaro.org,
 	adrian.hunter@intel.com
@@ -66,9 +66,9 @@ Cc: linux-mmc@vger.kernel.org,
 	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
 	AKASHI Takahiro <takahiro.akashi@linaro.org>,
 	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V19 11/22] mmc: sdhci-uhs2: add reset function
-Date: Thu, 29 Aug 2024 18:15:28 +0800
-Message-Id: <20240829101539.5058-12-victorshihgli@gmail.com>
+Subject: [PATCH V19 12/22] mmc: sdhci-uhs2: add set_power() to support vdd2
+Date: Thu, 29 Aug 2024 18:15:29 +0800
+Message-Id: <20240829101539.5058-13-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240829101539.5058-1-victorshihgli@gmail.com>
 References: <20240829101539.5058-1-victorshihgli@gmail.com>
@@ -82,7 +82,9 @@ Content-Transfer-Encoding: 8bit
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Sdhci_uhs2_reset() does a UHS-II specific reset operation.
+This is a UHS-II version of sdhci's set_power operation.
+Use sdhci_uhs2_set_power() to set VDD2 for support UHS2 interface.
+VDD2, as well as VDD, is handled here.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
@@ -90,109 +92,217 @@ Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
 
 Updates in V17:
- - Move the sdhci_uhs2_reset_cmd_data() to the other patch it was used
-   for the first time.
-
-Updates in V16:
- - Add sdhci_uhs2_reset_cmd_data() function.
-
-Updates in V15:
- - Refer the SD Host Controller Standard Specification Section 3.10
-   to add reset command data mechanism.
-
-Updates in V14:
- - Since mmc_card_uhs2() is the same as sdhci_uhs2_mode(), so drop
-   sdhci_uhs2_mode() and use mmc_card_uhs2() instead of sdhci_uhs2_mode().
+ - Export sdhci_uhs2_set_power() function.
 
 Updates in V13:
- - Use ios timing to stead MMC_UHS2_SUPPORT for indicate the UHS2 mode.
+ - Drop use vmmc2.
+ - Modify comment message.
+
+Updates in V10:
+ - Move some definitions of PatchV9[05/23] to PatchV10[11/23].
+
+Updates in V9:
+ - Modify annotations in sdhci_get_vdd_value().
 
 Updates in V8:
  - Adjust the position of matching brackets.
+ - Add the initial value of the pwr in sdhci_uhs2_set_power().
+
+Updates in V7:
+ - Add clear the power reg before setting a new value
+   in sdhci_uhs2_set_power().
+ - Add MMC_VDD_34_35 case and MMC_VDD_35_36 case in sdhci_get_vdd_value().
+ - Drop pwr variable in sdhci_get_vdd_value().
 
 Updates in V6:
- - Remove unnecessary functions and simplify code.
+ - Add mmc_opt_regulator_set_ocr().
+ - Remove unnecessary functions.
 
 ---
 
- drivers/mmc/host/sdhci-uhs2.c | 37 +++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-uhs2.c | 49 ++++++++++++++++++++++++++++
  drivers/mmc/host/sdhci-uhs2.h |  1 +
- 2 files changed, 38 insertions(+)
+ drivers/mmc/host/sdhci.c      | 61 +++++++++++++++++++----------------
+ drivers/mmc/host/sdhci.h      |  1 +
+ 4 files changed, 84 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 9cb0f1b2a37d..3d16f1ef9344 100644
+index 3d16f1ef9344..0cfe9a3f91f7 100644
 --- a/drivers/mmc/host/sdhci-uhs2.c
 +++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -10,7 +10,9 @@
-  *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
-  */
+@@ -59,6 +59,13 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+  *                                                                           *
+ \*****************************************************************************/
  
-+#include <linux/delay.h>
- #include <linux/module.h>
-+#include <linux/iopoll.h>
- 
- #include "sdhci.h"
- #include "sdhci-uhs2.h"
-@@ -21,6 +23,8 @@
- #define SDHCI_UHS2_DUMP(f, x...) \
- 	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
- 
-+#define UHS2_RESET_TIMEOUT_100MS		100000
-+
- void sdhci_uhs2_dump_regs(struct sdhci_host *host)
- {
- 	if (!(mmc_card_uhs2(host->mmc)))
-@@ -49,6 +53,39 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
- }
- EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
- 
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Low level functions                                                       *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+/**
-+ * sdhci_uhs2_reset - invoke SW reset
-+ * @host: SDHCI host
-+ * @mask: Control mask
-+ *
-+ * Invoke SW reset, depending on a bit in @mask and wait for completion.
-+ */
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
++static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
++					    struct regulator *supply,
++					    unsigned short vdd_bit)
 +{
-+	u32 val;
++	return IS_ERR_OR_NULL(supply) ? 0 : mmc_regulator_set_ocr(mmc, supply, vdd_bit);
++}
 +
-+	sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
+ /**
+  * sdhci_uhs2_reset - invoke SW reset
+  * @host: SDHCI host
+@@ -86,6 +93,48 @@ void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
+ }
+ EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
+ 
++void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, unsigned short vdd)
++{
++	struct mmc_host *mmc = host->mmc;
++	u8 pwr = 0;
 +
-+	if (mask & SDHCI_UHS2_SW_RESET_FULL)
-+		host->clock = 0;
++	if (mode != MMC_POWER_OFF) {
++		pwr = sdhci_get_vdd_value(vdd);
++		if (!pwr)
++			WARN(1, "%s: Invalid vdd %#x\n",
++			     mmc_hostname(host->mmc), vdd);
++		pwr |= SDHCI_VDD2_POWER_180;
++	}
 +
-+	/* hw clears the bit when it's done */
-+	if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
-+				     UHS2_RESET_TIMEOUT_100MS, true, host, SDHCI_UHS2_SW_RESET)) {
-+		pr_warn("%s: %s: Reset 0x%x never completed. %s: clean reset bit.\n", __func__,
-+			mmc_hostname(host->mmc), (int)mask, mmc_hostname(host->mmc));
-+		sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
++	if (host->pwr == pwr)
 +		return;
++	host->pwr = pwr;
++
++	if (pwr == 0) {
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++
++		mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++		mmc_regulator_set_vqmmc2(mmc, &mmc->ios);
++	} else {
++		mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		/* support 1.8v only for now */
++		mmc_regulator_set_vqmmc2(mmc, &mmc->ios);
++
++		/* Clear the power reg before setting a new value */
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++
++		/* vdd first */
++		pwr |= SDHCI_POWER_ON;
++		sdhci_writeb(host, pwr & 0xf, SDHCI_POWER_CONTROL);
++		mdelay(5);
++
++		pwr |= SDHCI_VDD2_POWER_ON;
++		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
++		mdelay(5);
 +	}
 +}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
++EXPORT_SYMBOL_GPL(sdhci_uhs2_set_power);
 +
  /*****************************************************************************\
   *                                                                           *
   * Driver init/exit                                                          *
 diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index 2bfe18d29bca..caaf9fba4975 100644
+index caaf9fba4975..3efa8dd690bf 100644
 --- a/drivers/mmc/host/sdhci-uhs2.h
 +++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -177,5 +177,6 @@
- struct sdhci_host;
+@@ -178,5 +178,6 @@ struct sdhci_host;
  
  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
+ void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
++void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, unsigned short vdd);
  
  #endif /* __SDHCI_UHS2_H */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 5a5fe3528bb4..366c3d30dba6 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -23,7 +23,7 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/of.h>
+-
++#include <linux/bug.h>
+ #include <linux/leds.h>
+ 
+ #include <linux/mmc/mmc.h>
+@@ -2061,41 +2061,46 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+ }
+ 
++unsigned short sdhci_get_vdd_value(unsigned short vdd)
++{
++	switch (1 << vdd) {
++	case MMC_VDD_165_195:
++	/*
++	 * Without a regulator, SDHCI does not support 2.0v
++	 * so we only get here if the driver deliberately
++	 * added the 2.0v range to ocr_avail. Map it to 1.8v
++	 * for the purpose of turning on the power.
++	 */
++	case MMC_VDD_20_21:
++		return SDHCI_POWER_180;
++	case MMC_VDD_29_30:
++	case MMC_VDD_30_31:
++		return SDHCI_POWER_300;
++	case MMC_VDD_32_33:
++	case MMC_VDD_33_34:
++	/*
++	 * 3.4V ~ 3.6V are valid only for those platforms where it's
++	 * known that the voltage range is supported by hardware.
++	 */
++	case MMC_VDD_34_35:
++	case MMC_VDD_35_36:
++		return SDHCI_POWER_330;
++	default:
++		return 0;
++	}
++}
++EXPORT_SYMBOL_GPL(sdhci_get_vdd_value);
++
+ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 			   unsigned short vdd)
+ {
+ 	u8 pwr = 0;
+ 
+ 	if (mode != MMC_POWER_OFF) {
+-		switch (1 << vdd) {
+-		case MMC_VDD_165_195:
+-		/*
+-		 * Without a regulator, SDHCI does not support 2.0v
+-		 * so we only get here if the driver deliberately
+-		 * added the 2.0v range to ocr_avail. Map it to 1.8v
+-		 * for the purpose of turning on the power.
+-		 */
+-		case MMC_VDD_20_21:
+-			pwr = SDHCI_POWER_180;
+-			break;
+-		case MMC_VDD_29_30:
+-		case MMC_VDD_30_31:
+-			pwr = SDHCI_POWER_300;
+-			break;
+-		case MMC_VDD_32_33:
+-		case MMC_VDD_33_34:
+-		/*
+-		 * 3.4 ~ 3.6V are valid only for those platforms where it's
+-		 * known that the voltage range is supported by hardware.
+-		 */
+-		case MMC_VDD_34_35:
+-		case MMC_VDD_35_36:
+-			pwr = SDHCI_POWER_330;
+-			break;
+-		default:
++		pwr = sdhci_get_vdd_value(vdd);
++		if (!pwr) {
+ 			WARN(1, "%s: Invalid vdd %#x\n",
+ 			     mmc_hostname(host->mmc), vdd);
+-			break;
+ 		}
+ 	}
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 66ab90bd4017..0f78708d0c70 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -836,6 +836,7 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
+ 				     unsigned char mode,
+ 				     unsigned short vdd);
++unsigned short sdhci_get_vdd_value(unsigned short vdd);
+ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 			   unsigned short vdd);
+ int sdhci_get_cd_nogpio(struct mmc_host *mmc);
 -- 
 2.25.1
 
