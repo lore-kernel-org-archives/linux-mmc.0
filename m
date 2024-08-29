@@ -1,55 +1,55 @@
-Received: from mail-vk1-f171.google.com (mail-vk1-f171.google.com [209.85.221.171])
+Received: from mail-vk1-f180.google.com (mail-vk1-f180.google.com [209.85.221.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D93218DF68;
-	Thu, 29 Aug 2024 09:22:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19A1B18DF89;
+	Thu, 29 Aug 2024 09:22:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1724923344; cv=none; b=JEPiHfEI5HJGoK+d4DM5lnd9KxvZ0cq8e3NpsWcXYeSTpg9bWh7lQBLxACv9fqcpHfM+noFeW+yWbsMt/YrXeVqfMtIsYMG/PVgXvV9mYBq/WcwtjhjU/gyAKyZF5kYQL+fZ9H6rTrk4d1U/S+WMoa1ubkKCHINDF5Y8arjLsgo=
+	t=1724923348; cv=none; b=IUxOFfkgnOI/LFA/sohFxqE6s0PPOnRfjNm3+Z9/0reodtUED5ADGIkOfgToc623TdMHCPZN9M5PKAN3qof8daaHkYOmErcKk5i9dl4bYnS2Ga7uF63HPI00lLEHVnnfjUs8moQ4pUrPL1X1XiwmogWgNDYBzJq2Lv6TZBSRK5E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1724923344; c=relaxed/simple;
-	bh=2+aOxuqNbAW3W20Nin81sIpvL61zUCMSk1x5LqBfuyk=;
+	s=arc-20240116; t=1724923348; c=relaxed/simple;
+	bh=2qJeJuWEGgKEL+op8XdX/ZVZpQE5/F4rMwMmkIYdSxI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Ewnd7HyFRw/plPbJD0uCt+TY0bWGCF034lrmkU37NeUXFgEJHPZxuKf+3i/AhRJw0lyHsNnR/PUz4kxFuREJNuJwTygIjhcSLvPKEzTOIFVU3LkeSD4ML0JpTptSIPSpANsz6FH47u/cZXr1+dW+dEJ6Q/imkpGhfReDL0iezOM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CJvPuYc/; arc=none smtp.client-ip=209.85.221.171
+	 To:Cc:Content-Type; b=eDYHcaNME/7QDVJ+aACNU+pO65mC02jQvLTqQ2PFkeZSqxDPomH6Bw5DehOAR8MLMqoH4lFQJ5svtrBAd4EAW3x1ZwVuccCo+yxUfhZK2Sgt06BTzQ8TrxRDgy9uSatlIijAPpuznwtllcSK+8Gb3LTkRVW74Omx4LY01goRPJM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TJ9ptFII; arc=none smtp.client-ip=209.85.221.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CJvPuYc/"
-Received: by mail-vk1-f171.google.com with SMTP id 71dfb90a1353d-4fd01b38dd7so197358e0c.0;
-        Thu, 29 Aug 2024 02:22:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TJ9ptFII"
+Received: by mail-vk1-f180.google.com with SMTP id 71dfb90a1353d-4fcf4ae95dbso195120e0c.0;
+        Thu, 29 Aug 2024 02:22:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1724923341; x=1725528141; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1724923345; x=1725528145; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=twRBYkOONX0wlD5mmd98ubanboiDWGmAa6bHWXyyDQc=;
-        b=CJvPuYc/kQ9M9LFPku8PNYcUYO9Dotq/BmuYlJhPUYR/A6KzcnXqNngR98PWldOpy8
-         Yb3zjduPXOTms9PEYqjQ/9gFuTErgSKd6G4a6LXSB4V40yd/6KY7T4cLkRdYTuL84mZv
-         maWUr9WuY3VPAOKddOqcIuHwueVdbZpqidKoONFU87K8qA7hJTfGCN2IzfqprmIhOKVU
-         paID7d3gbhAHUjMoAVgbrcW0K1e/tUpvABPqNGCfVgO/YsHRKhCWvhr3Wc+rTWG2aXF/
-         +ieoLcpdf0N5omsvn0hLWNgmtV93m/mYvHX+n18bneKFrmkd45Kmy9/SpXtXrBXYWij5
-         9ptg==
+        bh=RSl2ovaivwnTSTlfxzsVM7kAV63t3rvKKAijhEcDkl4=;
+        b=TJ9ptFII6do1YobnQKPYCiCQwUZaSqgVnz0sPOZcGgOD+0OzBYrQclljzxa3ErxTQ1
+         bWQ4DikdC/k49knkJ6/9wRJu58YiUSZjPqeuEkt2fc8bCWaeVjgOzCOdqZMz9rYGTK89
+         CcHKml8Yymtm3AbwdVjsOwylbyXVHAgsVsZSieKSe7jYlSa23PjnJ1RW5E57jSHyz33u
+         RnBk7r0AJxzlAurQY+SP+GmHBpVkdZoa2+7r7GbXzQlXqyQX5CMxV9azFoZeeIFzk0We
+         Yx6ZNJma4N/+Vnea60hsYZGi5bnBsPSOBsMe82KZCWL7lI8nAIVRCBRMnuoVK8sXTTd1
+         2uMg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1724923341; x=1725528141;
+        d=1e100.net; s=20230601; t=1724923345; x=1725528145;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=twRBYkOONX0wlD5mmd98ubanboiDWGmAa6bHWXyyDQc=;
-        b=ryU8w9Zd0+cBQj+ELlEp8uRW7sHi0GebB5J0GG/DPuhyEtOXivvpDPXf/MABxPmGC1
-         tC+8SLMf7P1iZPem4J2zj7UD2RIbgtQFRxM6zGdWbg4UWPkfRMHqgL5cPNBn5k24dT1M
-         ogTtt7PEPyoWg4Q+muf/efIltha5wd83UcJbs1y40yKBhr5BR1rOc+ip6d1Sr8fG0eFo
-         jfYnDXo47wK7/tgYKwzPmbA0U/Ods9/96qMdGPDeOhzVwi1zM47lNfzz1XFNQITTjFSX
-         CDm99wOMqYxMu0fDcvPLXTtYBlj1dO6q5P/tKqKmq8NSEMAZgXRMipMlNsYCcatoWrQv
-         EE1g==
-X-Forwarded-Encrypted: i=1; AJvYcCU0kb7+MbRi5H0fh2L1kb0zaFZH6EsLZ7ZcdD/zN3wMxTpNTbyN6LjyINdZ3XZrkI6jFsclBZN2wYh1E0s=@vger.kernel.org, AJvYcCVVMg6wnFxjF9DUo7NJz+ynxoU415jPYhqHNFS6er5nUR0EzQmTia7DvBZnKasBrTAJJW9sU4hlIpG2@vger.kernel.org
-X-Gm-Message-State: AOJu0YykiqWGLHeoO80z5zb+NaeMCH2FJ8/XhogsV8k9VG1heJKRVuRu
-	fA/d3eSEfUcZbUaVmnocC5EaBiPL62JJawNc3qytv3/B2v4+G0zveuAHrcZjVJJ3PeiopKXeb/j
-	bRwMbdC8zW6wPdz+mPXvT7c3rzBY=
-X-Google-Smtp-Source: AGHT+IFJkjQvXr6VQAjOPJQmvSjxANkfDvlmAjUwQ8RI1iRPH2IYd+btq0nvysOsN6lNq41vIzroRk/bqDbMBB2f7Ec=
-X-Received: by 2002:a05:6122:2017:b0:4f2:a973:8ae with SMTP id
- 71dfb90a1353d-4ffe4a7d640mr2461906e0c.5.1724923340885; Thu, 29 Aug 2024
- 02:22:20 -0700 (PDT)
+        bh=RSl2ovaivwnTSTlfxzsVM7kAV63t3rvKKAijhEcDkl4=;
+        b=t8fan/h6pv667U2sNz0I8ftVGKpeO3WIiVnIWknS/k9qiHrtMSIv5QoQFRzHeHmXjU
+         AEPs2YBYCk9jdSPpl/MqAstPMXl9aeQHABMVn1OzuCNCBqpBAYUaiIwACabe2yvMCags
+         co+2IWYveapzScP3hRiCONG3ubpLrIvRhb33DBfdybUg+v10RRdn8jDNOS4yfd8IgPkc
+         5vbzw90afelA6O/V2/fzWR/cI6dohABLYrU2KEcT9KG5gXci+tSIXhCLZESmf0lXX6DA
+         FBzHZ33UPZbntGl2vxeykMTt8jACOIolcaogjiR8cRZH2m0V9km192doeK/YT7lq9+th
+         ntDQ==
+X-Forwarded-Encrypted: i=1; AJvYcCU4rrXVrTqH93G1ZpSRcNGo9Ogdjf4lg+7EldvhFtR3wBx5kVmZ37hsOSBoY5IUiolKvMaMkG7KRqh8@vger.kernel.org, AJvYcCVFM28rtdTqgZAix0I/kdPid/7ltPw8vtguVfsjjAhlL9Urw82YUf92vD7mTTEiAYO7cwDnqAyEL6PDNG0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwnXxSTQr4u6QcfF8EgGhOD4gHc6KmH5I8DxKdeQeLlL2Wdk6pK
+	u/uGrF79ZIp/ke5MaXYgo6bPwB3uvNGsqUfJ1R7zic3UXuuag9D+RmAzE8nRDsRrG0scK3R7nus
+	hqJ9ReabzAMrrgu2hbBQ0LUH9syg=
+X-Google-Smtp-Source: AGHT+IF7Us3zYBzirqlMO/EDflk6MgIBFZc3g3tzDRZIzDRI8J0kwiJ1SoG6KcjJsB9d7PmiI8L2NJgAlh6NJiaBsQs=
+X-Received: by 2002:a05:6122:a08:b0:4f5:28e3:5a5a with SMTP id
+ 71dfb90a1353d-4ffe4a7bfabmr2353262e0c.4.1724923344880; Thu, 29 Aug 2024
+ 02:22:24 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,12 +57,12 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <20240802102229.10204-1-victorshihgli@gmail.com>
- <20240802102229.10204-18-victorshihgli@gmail.com> <a1ed46af-cd9d-4f5d-8780-80349318cb9b@intel.com>
-In-Reply-To: <a1ed46af-cd9d-4f5d-8780-80349318cb9b@intel.com>
+ <20240802102229.10204-23-victorshihgli@gmail.com> <7b68185d-6847-4482-b1c2-403bf5fa78d5@intel.com>
+In-Reply-To: <7b68185d-6847-4482-b1c2-403bf5fa78d5@intel.com>
 From: Victor Shih <victorshihgli@gmail.com>
-Date: Thu, 29 Aug 2024 17:22:02 +0800
-Message-ID: <CAK00qKD25EFJ2EJ8uJThhNpTH-4paBu67NWG77RmuCNidZ19dQ@mail.gmail.com>
-Subject: Re: [PATCH V18 17/22] mmc: sdhci-uhs2: add irq() and others
+Date: Thu, 29 Aug 2024 17:22:05 +0800
+Message-ID: <CAK00qKDMZQkwFq3Eovmzht1cGNQm_S954tEm2xOo6P2aj6Anxg@mail.gmail.com>
+Subject: Re: [PATCH V18 22/22] mmc: sdhci-pci-gli: enable UHS-II mode for GL9767
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
 	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
@@ -73,169 +73,179 @@ Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, Aug 23, 2024 at 8:44=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+On Fri, Aug 23, 2024 at 8:41=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
 com> wrote:
 >
 > On 2/08/24 13:22, Victor Shih wrote:
 > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
 > >
-> > This is a UHS-II version of sdhci's request() operation.
-> > It handles UHS-II related command interrupts and errors.
+> > Changes are:
+> >  * Enable the internal clock when do reset on UHS-II mode.
+> >  * Increase timeout value before detecting UHS-II interface.
+> >  * Add vendor settings for UHS-II mode.
 > >
 > > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 > > ---
 > >
 > > Updates in V18:
-> >  - Modify the judgment condition in the sdhci_uhs2_reset_cmd_data() and
-> >    replace it from mmc_card_uhs2() to host->mmc->uhs2_sd_tran flag.
+> >  - Add new register settings for gl9767.
+> >  - Add card_event in the sdhci_ops for gl9767.
+> >  - Add sdhci_gl9767_set_card_detect_debounce_time()
+> >    to configure the gl9767.
+> >  - Adjust the sdhci_gl9767_reset() process for gl9767.
 > >
 > > Updates in V17:
-> >  - Add sdhci_uhs2_reset_cmd_data() and sdhci_uhs2_needs_reset() to
-> >    resolve the data error or cmd error.
+> >  - Use mmc_card_uhs2() to simplify the code in the sdhci_gl9767_reset()=
+.
+> >  - Use mmc_card_uhs2() to simplify the code in the
+> >    sdhci_gl9767_set_power().
+> >  - Add sdhci_gli_overcurrent_event_enable() to sdhci_gl9767_set_power()=
+.
 > >
-> > Updates in V14:
-> >  - Use mmc_card_uhs2() to stead sdhci_uhs2_mode() in the
-> >    sdhci_uhs2_complete_work(), sdhci_uhs2_irq() and
-> >    sdhci_uhs2_thread_irq().
-> >
-> > Updates in V13:
-> >  - Re-order function to avoid declaration.
-> >  - Remove unnecessary definitions.
-> >
-> > Updates in V9:
-> >  - Cancel export state of sdhci_set_mrq_done() function.
-> >
-> > Updates in V8:
-> >  - Forward declare struct mmc_request in sdhci_uhs2.h.
-> >  - Remove forward declaration of sdhci_send_command().
-> >  - Use mmc_dev() to simplify code in sdhci_request_done_dma().
-> >
-> > Updates in V7:
-> >  - Remove unnecessary functions.
-> >  - Use sdhci_uhs2_mode() to simplify code in sdhci_uhs2_irq().
-> >  - Modify descriptions in sdhci_uhs2_irq().
-> >  - Cancel export state of some functions.
-> >
-> > Updates in V6:
-> >  - Remove unnecessary functions.
-> >  - Add sdhci_uhs2_mode() in sdhci_uhs2_complete_work().
-> >  - Add sdhci_uhs2_mode() in sdhci_uhs2_thread_irq().
+> > Updates in V15:
+> >  - Add gl9767 to support uhs2 function.
 > >
 > > ---
 > >
-> >  drivers/mmc/host/sdhci-uhs2.c | 237 ++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci-uhs2.h |   2 +
-> >  drivers/mmc/host/sdhci.c      | 102 ++++++++-------
-> >  drivers/mmc/host/sdhci.h      |   5 +
-> >  4 files changed, 300 insertions(+), 46 deletions(-)
+> >  drivers/mmc/host/sdhci-pci-gli.c | 214 ++++++++++++++++++++++++++++++-
+> >  1 file changed, 212 insertions(+), 2 deletions(-)
 > >
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
-2.c
-> > index 31486e28496d..c9bd438e9c26 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.c
-> > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > @@ -106,6 +106,19 @@ void sdhci_uhs2_reset(struct sdhci_host *host, u16=
- mask)
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
+pci-gli.c
+> > index a4164948de81..26f7cf4cb109 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -174,6 +174,15 @@
+> >  #define PCI_GLI_9755_MISC        0x78
+> >  #define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
+> >
+> > +#define SDHCI_GLI_9767_SD_HOST_OPERATION_CTL                         0=
+x508
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_CMD_CONFLICT_CHECK     =
+ BIT(0)
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE               =
+         GENMASK(21, 16)
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_PLUG_IN_VALUE =
+         0x05
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_PLUG_OUT_VALUE=
+         0x3F
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_SCALE         =
+         GENMASK(23, 22)
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_SCALE_1MS     =
+ 0x2
+> > +#define   SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_SCALE_10MS    =
+ 0x3
+> > +
+> >  #define SDHCI_GLI_9767_GM_BURST_SIZE                 0x510
+> >  #define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET          BIT(8)
+> >
+> > @@ -210,6 +219,13 @@
+> >  #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF            BIT(21)
+> >  #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN     BIT(30)
+> >
+> > +#define PCIE_GLI_9767_RESET_REG                              0x8E4
+> > +#define   PCIE_GLI_9767_RESET_REG_SD_HOST_SW_RESET     BIT(0)
+> > +
+> > +#define PCIE_GLI_9767_UHS2_PHY_SET_REG1                              0=
+x90C
+> > +#define   PCIE_GLI_9767_UHS2_PHY_SET_REG1_SERDES_INTR                 =
+ GENMASK(31, 29)
+> > +#define   PCIE_GLI_9767_UHS2_PHY_SET_REG1_SERDES_INTR_VALUE    0x3
+> > +
+> >  #define PCIE_GLI_9767_SDHC_CAP                       0x91C
+> >  #define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT   BIT(5)
+> >
+> > @@ -228,9 +244,15 @@
+> >  #define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE         BIT(1)
+> >
+> >  #define PCIE_GLI_9767_SD_DATA_MULTI_CTL                              0=
+x944
+> > +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_SELECT_UHS2                 =
+ BIT(5)
+> > +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_UHS2_SWITCH_CTL      BIT(8)
+> >  #define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME      GENMASK=
+(23, 16)
+> >  #define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE       =
+ 0x64
+> >
+> > +#define PCIE_GLI_9767_UHS2_PHY_SET_REG2                               =
+       0x948
+> > +#define   PCIE_GLI_9767_UHS2_PHY_SET_REG2_SSC_PPM_SETTING             =
+ GENMASK(22, 21)
+> > +#define   PCIE_GLI_9767_UHS2_PHY_SET_REG2_SSC_PPM_SETTING_VALUE       =
+         0x0
+> > +
+> >  #define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2                     0=
+x950
+> >  #define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE      =
+ BIT(0)
+> >
+> > @@ -240,6 +262,28 @@
+> >  #define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2                   =
+       0x958
+> >  #define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SI=
+GNAL_EN          BIT(0)
+> >
+> > +#define PCIE_GLI_9767_UHS2_CTL1                              0x95C
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_TRANS_PASS           BIT(5)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_TRANS_PASS_VALUE     0x1
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DECODING_CTL                 BIT(6)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DECODING_CTL_VALUE   0x1
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_SERDES_TRAN                  GENMASK=
+(10, 7)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_SERDES_TRAN_VALUE    0x3
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_SERDES_RECV                  GENMASK=
+(14, 11)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_SERDES_RECV_VALUE    0xf
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DIR_TRANS            GENMASK(16, 15)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DIR_TRANS_VALUE      0x0
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DIR_RECV             GENMASK(18, 17)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_DIR_RECV_VALUE       0x0
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_PDRST                        BIT(25)
+> > +#define   PCIE_GLI_9767_UHS2_CTL1_PDRST_VALUE                  0x1
+> > +
+> > +#define PCIE_GLI_9767_UHS2_CTL2                      0x964
+> > +#define   PCIE_GLI_9767_UHS2_CTL2_ZC           GENMASK(3, 0)
+> > +#define   PCIE_GLI_9767_UHS2_CTL2_ZC_VALUE     0xb
+> > +#define   PCIE_GLI_9767_UHS2_CTL2_ZC_CTL       BIT(6)
+> > +#define   PCIE_GLI_9767_UHS2_CTL2_ZC_CTL_VALUE         0x1
+> > +
+> >  #define GLI_MAX_TUNING_LOOP 40
+> >
+> >  /* Genesys Logic chipset */
+> > @@ -1152,6 +1196,31 @@ static void sdhci_gl9767_set_clock(struct sdhci_=
+host *host, unsigned int clock)
+> >       gl9767_vhs_read(pdev);
 > >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
 > >
-> > +static void sdhci_uhs2_reset_cmd_data(struct sdhci_host *host)
+> > +static void sdhci_gl9767_set_card_detect_debounce_time(struct sdhci_ho=
+st *host)
 > > +{
-> > +     sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> > +     u32 value;
 > > +
-> > +     if (host->mmc->uhs2_sd_tran) {
-> > +             sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
-> > +
-> > +             sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
-> > +             sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
-> > +             sdhci_uhs2_clear_set_irqs(host, SDHCI_INT_ALL_MASK, SDHCI=
-_UHS2_INT_ERROR_MASK);
-> > +     }
-> > +}
-> > +
-> >  void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,=
- unsigned short vdd)
-> >  {
-> >       struct mmc_host *mmc =3D host->mmc;
-> > @@ -904,6 +917,230 @@ static void sdhci_uhs2_request(struct mmc_host *m=
-mc, struct mmc_request *mrq)
-> >       spin_unlock_irqrestore(&host->lock, flags);
-> >  }
-> >
-> > +/*********************************************************************=
-********\
-> > + *                                                                    =
-       *
-> > + * Request done                                                       =
-       *
-> > + *                                                                    =
-       *
-> > +\*********************************************************************=
-********/
-> > +
-> > +static bool sdhci_uhs2_needs_reset(struct sdhci_host *host, struct mmc=
-_request *mrq)
-> > +{
-> > +     return sdhci_needs_reset(host, mrq) ||
-> > +            (!(host->flags & SDHCI_DEVICE_DEAD) && mrq->data && mrq->d=
-ata->error);
-> > +}
-> > +
-> > +static bool sdhci_uhs2_request_done(struct sdhci_host *host)
-> > +{
-> > +     unsigned long flags;
-> > +     struct mmc_request *mrq;
-> > +     int i;
-> > +
-> > +     spin_lock_irqsave(&host->lock, flags);
-> > +
-> > +     for (i =3D 0; i < SDHCI_MAX_MRQS; i++) {
-> > +             mrq =3D host->mrqs_done[i];
-> > +             if (mrq)
-> > +                     break;
-> > +     }
-> > +
-> > +     if (!mrq) {
-> > +             spin_unlock_irqrestore(&host->lock, flags);
-> > +             return true;
-> > +     }
-> > +
-> > +     /*
-> > +      * Always unmap the data buffers if they were mapped by
-> > +      * sdhci_prepare_data() whenever we finish with a request.
-> > +      * This avoids leaking DMA mappings on error.
-> > +      */
-> > +     if (host->flags & SDHCI_REQ_USE_DMA)
-> > +             sdhci_request_done_dma(host, mrq);
-> > +
-> > +     /*
-> > +      * The controller needs a reset of internal state machines
-> > +      * upon error conditions.
-> > +      */
-> > +     if (sdhci_uhs2_needs_reset(host, mrq)) {
-> > +             /*
-> > +              * Do not finish until command and data lines are availab=
-le for
-> > +              * reset. Note there can only be one other mrq, so it can=
-not
-> > +              * also be in mrqs_done, otherwise host->cmd and host->da=
-ta_cmd
-> > +              * would both be null.
-> > +              */
-> > +             if (host->cmd || host->data_cmd) {
-> > +                     spin_unlock_irqrestore(&host->lock, flags);
-> > +                     return true;
-> > +             }
-> > +
-> > +             if (mrq->cmd->error || mrq->data->error)
-> > +                     sdhci_uhs2_reset_cmd_data(host);
-> > +             else
-> > +                     sdhci_uhs2_reset(host, SDHCI_UHS2_SW_RESET);
+> > +     value =3D sdhci_readl(host, SDHCI_GLI_9767_SD_HOST_OPERATION_CTL)=
+;
+> > +     value &=3D ~(SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE |
+> > +                SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_DEBOUNCE_SCALE);
+> > +     if (host->mmc->ops->get_cd(host->mmc))
 >
-> sdhci_uhs2_reset() 2nd parameter is mask but SDHCI_UHS2_SW_RESET
-> is the register offset
+> This is OK from the ->card_event() path but not from others like:
+>
+> sdhci_gl9767_reset() -> gli_set_9767() -> sdhci_gl9767_set_card_detect_de=
+bounce_time()
+>         o Reset can be called in atomic context (under spin lock), but
+>         host->mmc->ops->get_cd() can be reading a card detect GPIO which
+>         might sleep.
+>
+> gli_probe_slot_gl9767() -> gli_set_9767() -> sdhci_gl9767_set_card_detect=
+_debounce_time()
+>         o gli_probe_slot_gl9767() gets called before card detect GPIO
+>         is set up in sdhci-pci-core.c
+>
+> However, presumably you are always using SDHCI_PRESENT_STATE register
+> for card detect (hence the debounce settings on the controller), so
+> it would be better to just read SDHCI_PRESENT_STATE here.
 >
 
 Hi, Adrian
@@ -244,466 +254,282 @@ I will correct this issue in the next version.
 
 Thanks, Victor Shih
 
-> > +             host->pending_reset =3D false;
-> > +     }
-> > +
-> > +     host->mrqs_done[i] =3D NULL;
-> > +
-> > +     spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +     if (host->ops->request_done)
-> > +             host->ops->request_done(host, mrq);
+> > +             value |=3D FIELD_PREP(SDHCI_GLI_9767_SD_HOST_OPERATION_CT=
+L_DEBOUNCE,
+> > +                                 SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_PLUG_IN_VALUE) |
+> > +                      FIELD_PREP(SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_SCALE,
+> > +                                 SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_SCALE_1MS);
 > > +     else
-> > +             mmc_request_done(host->mmc, mrq);
-> > +
-> > +     return false;
+> > +             value |=3D FIELD_PREP(SDHCI_GLI_9767_SD_HOST_OPERATION_CT=
+L_DEBOUNCE,
+> > +                                 SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_PLUG_OUT_VALUE) |
+> > +                      FIELD_PREP(SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_SCALE,
+> > +                                 SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_=
+DEBOUNCE_SCALE_10MS);
+> > +     sdhci_writel(host, value, SDHCI_GLI_9767_SD_HOST_OPERATION_CTL);
 > > +}
 > > +
-> > +static void sdhci_uhs2_complete_work(struct work_struct *work)
+> > +static void sdhci_gl9767_card_event(struct sdhci_host *host)
 > > +{
-> > +     struct sdhci_host *host =3D container_of(work, struct sdhci_host,
-> > +                                            complete_work);
-> > +
-> > +     if (!mmc_card_uhs2(host->mmc)) {
-> > +             sdhci_complete_work(work);
-> > +             return;
-> > +     }
-> > +
-> > +     while (!sdhci_uhs2_request_done(host))
-> > +             ;
+> > +     sdhci_gl9767_set_card_detect_debounce_time(host);
 > > +}
 > > +
-> > +/*********************************************************************=
-********\
-> > + *                                                                    =
-       *
-> > + * Interrupt handling                                                 =
-       *
-> > + *                                                                    =
-       *
-> > +\*********************************************************************=
-********/
+> >  static void gli_set_9767(struct sdhci_host *host)
+> >  {
+> >       u32 value;
+> > @@ -1159,6 +1228,12 @@ static void gli_set_9767(struct sdhci_host *host=
+)
+> >       value =3D sdhci_readl(host, SDHCI_GLI_9767_GM_BURST_SIZE);
+> >       value &=3D ~SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET;
+> >       sdhci_writel(host, value, SDHCI_GLI_9767_GM_BURST_SIZE);
 > > +
-> > +static void __sdhci_uhs2_irq(struct sdhci_host *host, u32 uhs2mask)
-> > +{
-> > +     struct mmc_command *cmd =3D host->cmd;
+> > +     value =3D sdhci_readl(host, SDHCI_GLI_9767_SD_HOST_OPERATION_CTL)=
+;
+> > +     value &=3D ~SDHCI_GLI_9767_SD_HOST_OPERATION_CTL_CMD_CONFLICT_CHE=
+CK;
+> > +     sdhci_writel(host, value, SDHCI_GLI_9767_SD_HOST_OPERATION_CTL);
 > > +
-> > +     DBG("*** %s got UHS2 error interrupt: 0x%08x\n",
-> > +         mmc_hostname(host->mmc), uhs2mask);
+> > +     sdhci_gl9767_set_card_detect_debounce_time(host);
+> >  }
+> >
+> >  static void gl9767_hw_setting(struct sdhci_pci_slot *slot)
+> > @@ -1197,8 +1272,54 @@ static void gl9767_hw_setting(struct sdhci_pci_s=
+lot *slot)
+> >
+> >  static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
+> >  {
+> > -     sdhci_reset(host, mask);
+> > -     gli_set_9767(host);
+> > +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
+> > +     struct pci_dev *pdev =3D slot->chip->pdev;
+> > +     u32 value;
+> > +     u16 clk_ctrl;
+> > +     u16 ctrl2;
 > > +
-> > +     if (uhs2mask & SDHCI_UHS2_INT_CMD_ERR_MASK) {
-> > +             if (!host->cmd) {
-> > +                     pr_err("%s: Got cmd interrupt 0x%08x but no cmd.\=
-n",
-> > +                            mmc_hostname(host->mmc),
-> > +                            (unsigned int)uhs2mask);
-> > +                     sdhci_dumpregs(host);
+> > +     /* need internal clock */
+> > +     if (mask & SDHCI_RESET_ALL) {
+> > +             ctrl2 =3D sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > +             clk_ctrl =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > +
+> > +             if ((ctrl2 & SDHCI_CTRL_V4_MODE) && (ctrl2 & SDHCI_CTRL_U=
+HS2_ENABLE)) {
+> > +                     sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOC=
+K_CONTROL);
+> > +             } else {
+> > +                     sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOC=
+K_CONTROL);
+> > +                     sdhci_wait_clock_stable(host);
+> > +                     sdhci_writew(host, SDHCI_CTRL_V4_MODE, SDHCI_HOST=
+_CONTROL2);
+> > +             }
+>
+> Same code is in sdhci_gl9755_reset(), so could factor it out into
+> a separate function.
+>
+
+Hi, Adrian
+
+I will correct this issue in the next version.
+
+Thanks, Victor Shih
+
+> > +
+> > +             gl9767_vhs_write(pdev);
+> > +
+> > +             pci_read_config_dword(pdev, PCIE_GLI_9767_RESET_REG, &val=
+ue);
+> > +             value &=3D ~PCIE_GLI_9767_RESET_REG_SD_HOST_SW_RESET;
+> > +             pci_write_config_dword(pdev, PCIE_GLI_9767_RESET_REG, val=
+ue);
+> > +
+> > +             if (read_poll_timeout_atomic(pci_read_config_dword, value=
+,
+> > +                                          !(value & PCIE_GLI_9767_RESE=
+T_REG_SD_HOST_SW_RESET),
+> > +                                          1, 5, true, pdev, PCIE_GLI_9=
+767_RESET_REG, &value)) {
+> > +                     pr_warn("%s: %s: Reset SDHC AHB and TL-AMBA failu=
+re.\n",
+> > +                             __func__, mmc_hostname(host->mmc));
 > > +                     return;
 > > +             }
-> > +             host->cmd->error =3D -EILSEQ;
-> > +             if (uhs2mask & SDHCI_UHS2_INT_CMD_TIMEOUT)
-> > +                     host->cmd->error =3D -ETIMEDOUT;
+> > +
+> > +             gl9767_vhs_read(pdev);
 > > +     }
 > > +
-> > +     if (uhs2mask & SDHCI_UHS2_INT_DATA_ERR_MASK) {
-> > +             if (!host->data) {
-> > +                     pr_err("%s: Got data interrupt 0x%08x but no data=
-.\n",
-> > +                            mmc_hostname(host->mmc),
-> > +                            (unsigned int)uhs2mask);
-> > +                     sdhci_dumpregs(host);
-> > +                     return;
-> > +             }
-> > +
-> > +             if (uhs2mask & SDHCI_UHS2_INT_DEADLOCK_TIMEOUT) {
-> > +                     pr_err("%s: Got deadlock timeout interrupt 0x%08x=
-\n",
-> > +                            mmc_hostname(host->mmc),
-> > +                            (unsigned int)uhs2mask);
-> > +                     host->data->error =3D -ETIMEDOUT;
-> > +             } else if (uhs2mask & SDHCI_UHS2_INT_ADMA_ERROR) {
-> > +                     pr_err("%s: ADMA error =3D 0x %x\n",
-> > +                            mmc_hostname(host->mmc),
-> > +                            sdhci_readb(host, SDHCI_ADMA_ERROR));
-> > +                     host->data->error =3D -EIO;
+> > +     if (mmc_card_uhs2(host->mmc)) {
+> > +             if (mask & (SDHCI_RESET_CMD | SDHCI_RESET_DATA)) {
+> > +                     sdhci_writeb(host, mask, SDHCI_SOFTWARE_RESET);
+>
+> Don't you need to wait for that reset at some point?
+>
+
+Hi, Adrian
+
+I will correct this issue in the next version.
+
+Thanks, Victor Shih
+
+> > +                     sdhci_gli_uhs2_reset_sd_tran(host);
 > > +             } else {
-> > +                     host->data->error =3D -EILSEQ;
+> > +                     sdhci_uhs2_reset(host, mask);
 > > +             }
+> > +             gli_set_9767(host);
+> > +     } else {
+> > +             sdhci_reset(host, mask);
+> > +             gli_set_9767(host);
 > > +     }
-> > +
-> > +     if (host->data && host->data->error)
-> > +             sdhci_uhs2_finish_data(host);
-> > +     else
-> > +             sdhci_finish_mrq(host, cmd->mrq);
-> > +}
-> > +
-> > +u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask)
+>
+> gli_set_9767() is always called, so could be moved here.
+>
+
+Hi, Adrian
+
+I will correct this issue in the next version.
+
+Thanks, Victor Shih
+
+> >  }
+> >
+> >  static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios=
+ *ios)
+> > @@ -1288,6 +1409,86 @@ static int gl9767_init_sd_express(struct mmc_hos=
+t *mmc, struct mmc_ios *ios)
+> >       return 0;
+> >  }
+> >
+> > +static void gl9767_vendor_init(struct sdhci_host *host)
 > > +{
-> > +     u32 mask =3D intmask, uhs2mask;
+> > +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
+> > +     struct pci_dev *pdev =3D slot->chip->pdev;
+> > +     u32 value;
 > > +
-> > +     if (!mmc_card_uhs2(host->mmc))
-> > +             goto out;
+> > +     gl9767_vhs_write(pdev);
 > > +
-> > +     if (intmask & SDHCI_INT_ERROR) {
-> > +             uhs2mask =3D sdhci_readl(host, SDHCI_UHS2_INT_STATUS);
-> > +             if (!(uhs2mask & SDHCI_UHS2_INT_ERROR_MASK))
-> > +                     goto cmd_irq;
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_PHY_SET_REG1, &val=
+ue);
+> > +     value |=3D FIELD_PREP(PCIE_GLI_9767_UHS2_PHY_SET_REG1_SERDES_INTR=
+,
+> > +                         PCIE_GLI_9767_UHS2_PHY_SET_REG1_SERDES_INTR_V=
+ALUE);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_PHY_SET_REG1, val=
+ue);
 > > +
-> > +             /* Clear error interrupts */
-> > +             sdhci_writel(host, uhs2mask & SDHCI_UHS2_INT_ERROR_MASK,
-> > +                          SDHCI_UHS2_INT_STATUS);
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_PHY_SET_REG2, &val=
+ue);
+> > +     value |=3D FIELD_PREP(PCIE_GLI_9767_UHS2_PHY_SET_REG2_SSC_PPM_SET=
+TING,
+> > +                         PCIE_GLI_9767_UHS2_PHY_SET_REG2_SSC_PPM_SETTI=
+NG_VALUE);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_PHY_SET_REG2, val=
+ue);
 > > +
-> > +             /* Handle error interrupts */
-> > +             __sdhci_uhs2_irq(host, uhs2mask);
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL1, &value);
+> > +     value |=3D FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_TRANS_PASS,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_TRANS_PASS_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_DECODING_CTL,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_DECODING_CTL_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_SERDES_TRAN,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_SERDES_TRAN_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_SERDES_RECV,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_SERDES_RECV_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_DIR_TRANS,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_DIR_TRANS_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_DIR_RECV,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_DIR_RECV_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL1_PDRST,
+> > +                         PCIE_GLI_9767_UHS2_CTL1_PDRST_VALUE);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL1, value);
 > > +
-> > +             /* Caller, sdhci_irq(), doesn't have to care about UHS-2 =
-errors */
-> > +             intmask &=3D ~SDHCI_INT_ERROR;
-> > +             mask &=3D SDHCI_INT_ERROR;
-> > +     }
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, &value);
+> > +     value |=3D FIELD_PREP(PCIE_GLI_9767_UHS2_CTL2_ZC,
+> > +                         PCIE_GLI_9767_UHS2_CTL2_ZC_VALUE) |
+> > +              FIELD_PREP(PCIE_GLI_9767_UHS2_CTL2_ZC_CTL,
+> > +                         PCIE_GLI_9767_UHS2_CTL2_ZC_CTL_VALUE);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_UHS2_CTL2, value);
 > > +
-> > +cmd_irq:
-> > +     if (intmask & SDHCI_INT_CMD_MASK) {
-> > +             /* Clear command interrupt */
-> > +             sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK, SDHCI_IN=
-T_STATUS);
-> > +
-> > +             /* Handle command interrupt */
-> > +             if (intmask & SDHCI_INT_RESPONSE)
-> > +                     sdhci_uhs2_finish_command(host);
-> > +
-> > +             /* Caller, sdhci_irq(), doesn't have to care about UHS-2 =
-commands */
-> > +             intmask &=3D ~SDHCI_INT_CMD_MASK;
-> > +             mask &=3D SDHCI_INT_CMD_MASK;
-> > +     }
-> > +
-> > +     /* Clear already-handled interrupts. */
-> > +     sdhci_writel(host, mask, SDHCI_INT_STATUS);
-> > +
-> > +out:
-> > +     return intmask;
+> > +     gl9767_vhs_read(pdev);
 > > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_uhs2_irq);
 > > +
-> > +static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
+> > +static void sdhci_gl9767_set_power(struct sdhci_host *host, unsigned c=
+har mode,      unsigned short vdd)
 > > +{
-> > +     struct sdhci_host *host =3D dev_id;
-> > +     struct mmc_command *cmd;
-> > +     unsigned long flags;
-> > +     u32 isr;
+> > +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
+> > +     struct pci_dev *pdev =3D slot->chip->pdev;
+> > +     u32 value;
 > > +
-> > +     if (!mmc_card_uhs2(host->mmc))
-> > +             return sdhci_thread_irq(irq, dev_id);
+> > +     if (mmc_card_uhs2(host->mmc)) {
+> > +             gl9767_vhs_write(pdev);
 > > +
-> > +     while (!sdhci_uhs2_request_done(host))
-> > +             ;
+> > +             pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_C=
+TL, &value);
+> > +             value |=3D PCIE_GLI_9767_SD_DATA_MULTI_CTL_SELECT_UHS2 |
+> > +                      PCIE_GLI_9767_SD_DATA_MULTI_CTL_UHS2_SWITCH_CTL;
+> > +             pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_=
+CTL, value);
 > > +
-> > +     spin_lock_irqsave(&host->lock, flags);
+> > +             gl9767_vhs_read(pdev);
 > > +
-> > +     isr =3D host->thread_isr;
-> > +     host->thread_isr =3D 0;
+> > +             sdhci_gli_overcurrent_event_enable(host, false);
+> > +             sdhci_uhs2_set_power(host, mode, vdd);
+> > +             sdhci_gli_overcurrent_event_enable(host, true);
+> > +     } else {
+> > +             gl9767_vhs_write(pdev);
 > > +
-> > +     cmd =3D host->deferred_cmd;
-> > +     if (cmd && !sdhci_uhs2_send_command_retry(host, cmd, flags))
-> > +             sdhci_finish_mrq(host, cmd->mrq);
+> > +             pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_C=
+TL, &value);
+> > +             value &=3D ~(PCIE_GLI_9767_SD_DATA_MULTI_CTL_SELECT_UHS2 =
+|
+> > +                        PCIE_GLI_9767_SD_DATA_MULTI_CTL_UHS2_SWITCH_CT=
+L);
+> > +             pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_=
+CTL, value);
 > > +
-> > +     spin_unlock_irqrestore(&host->lock, flags);
+> > +             gl9767_vhs_read(pdev);
 > > +
-> > +     if (isr & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
-> > +             struct mmc_host *mmc =3D host->mmc;
-> > +
-> > +             mmc->ops->card_event(mmc);
-> > +             mmc_detect_change(mmc, msecs_to_jiffies(200));
-> > +     }
-> > +
-> > +     return IRQ_HANDLED;
-> > +}
-> > +
-> >  /*********************************************************************=
-********\
-> >   *                                                                    =
-       *
-> >   * Driver init/exit                                                   =
-       *
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs=
-2.h
-> > index f6649a518842..077a2c7a6cb0 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.h
-> > +++ b/drivers/mmc/host/sdhci-uhs2.h
-> > @@ -176,11 +176,13 @@
-> >
-> >  struct sdhci_host;
-> >  struct mmc_command;
-> > +struct mmc_request;
-> >
-> >  void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-> >  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
-> >  void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,=
- unsigned short vdd);
-> >  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_comman=
-d *cmd);
-> >  void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32=
- set);
-> > +u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
-> >
-> >  #endif /* __SDHCI_UHS2_H */
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index a43a3b8d7b8b..442a89234b54 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -235,7 +235,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_reset);
-> >
-> > -static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
-> > +bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
-> >  {
-> >       if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
-> >               struct mmc_host *mmc =3D host->mmc;
-> > @@ -248,6 +248,7 @@ static bool sdhci_do_reset(struct sdhci_host *host,=
- u8 mask)
-> >
-> >       return true;
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_do_reset);
-> >
-> >  static void sdhci_reset_for_all(struct sdhci_host *host)
-> >  {
-> > @@ -1497,7 +1498,7 @@ static void sdhci_set_transfer_mode(struct sdhci_=
-host *host,
-> >       sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
-> >  }
-> >
-> > -static bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_requ=
-est *mrq)
-> > +bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mr=
-q)
-> >  {
-> >       return (!(host->flags & SDHCI_DEVICE_DEAD) &&
-> >               ((mrq->cmd && mrq->cmd->error) ||
-> > @@ -1505,6 +1506,7 @@ static bool sdhci_needs_reset(struct sdhci_host *=
-host, struct mmc_request *mrq)
-> >                (mrq->data && mrq->data->stop && mrq->data->stop->error)=
- ||
-> >                (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST)));
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_needs_reset);
-> >
-> >  static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_req=
-uest *mrq)
-> >  {
-> > @@ -3097,6 +3099,53 @@ static const struct mmc_host_ops sdhci_ops =3D {
-> >   *                                                                    =
-       *
-> >  \*********************************************************************=
-********/
-> >
-> > +void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_reques=
-t *mrq)
-> > +{
-> > +     struct mmc_data *data =3D mrq->data;
-> > +
-> > +     if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
-> > +             if (host->bounce_buffer) {
-> > +                     /*
-> > +                      * On reads, copy the bounced data into the
-> > +                      * sglist
-> > +                      */
-> > +                     if (mmc_get_dma_dir(data) =3D=3D DMA_FROM_DEVICE)=
- {
-> > +                             unsigned int length =3D data->bytes_xfere=
-d;
-> > +
-> > +                             if (length > host->bounce_buffer_size) {
-> > +                                     pr_err("%s: bounce buffer is %u b=
-ytes but DMA claims to have transferred %u bytes\n",
-> > +                                            mmc_hostname(host->mmc),
-> > +                                            host->bounce_buffer_size,
-> > +                                            data->bytes_xfered);
-> > +                                     /* Cap it down and continue */
-> > +                                     length =3D host->bounce_buffer_si=
-ze;
-> > +                             }
-> > +                             dma_sync_single_for_cpu(mmc_dev(host->mmc=
-),
-> > +                                                     host->bounce_addr=
-,
-> > +                                                     host->bounce_buff=
-er_size,
-> > +                                                     DMA_FROM_DEVICE);
-> > +                             sg_copy_from_buffer(data->sg,
-> > +                                                 data->sg_len,
-> > +                                                 host->bounce_buffer,
-> > +                                                 length);
-> > +                     } else {
-> > +                             /* No copying, just switch ownership */
-> > +                             dma_sync_single_for_cpu(mmc_dev(host->mmc=
-),
-> > +                                                     host->bounce_addr=
-,
-> > +                                                     host->bounce_buff=
-er_size,
-> > +                                                     mmc_get_dma_dir(d=
-ata));
-> > +                     }
-> > +             } else {
-> > +                     /* Unmap the raw data */
-> > +                     dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-> > +                                  data->sg_len,
-> > +                                  mmc_get_dma_dir(data));
-> > +             }
-> > +             data->host_cookie =3D COOKIE_UNMAPPED;
+> > +             sdhci_gli_overcurrent_event_enable(host, false);
+> > +             sdhci_set_power(host, mode, vdd);
+> > +             sdhci_gli_overcurrent_event_enable(host, true);
 > > +     }
 > > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_request_done_dma);
 > > +
-> >  static bool sdhci_request_done(struct sdhci_host *host)
+> >  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
 > >  {
-> >       unsigned long flags;
-> > @@ -3161,48 +3210,7 @@ static bool sdhci_request_done(struct sdhci_host=
- *host)
-> >                       sdhci_set_mrq_done(host, mrq);
-> >               }
+> >       struct sdhci_host *host =3D slot->host;
+> > @@ -1324,6 +1525,7 @@ static int gli_probe_slot_gl9767(struct sdhci_pci=
+_slot *slot)
+> >       host->mmc->caps2 |=3D MMC_CAP2_SD_EXP;
+> >       host->mmc_host_ops.init_sd_express =3D gl9767_init_sd_express;
+> >       sdhci_enable_v4_mode(host);
+> > +     gl9767_vendor_init(host);
 > >
-> > -             if (data && data->host_cookie =3D=3D COOKIE_MAPPED) {
-> > -                     if (host->bounce_buffer) {
-> > -                             /*
-> > -                              * On reads, copy the bounced data into t=
-he
-> > -                              * sglist
-> > -                              */
-> > -                             if (mmc_get_dma_dir(data) =3D=3D DMA_FROM=
-_DEVICE) {
-> > -                                     unsigned int length =3D data->byt=
-es_xfered;
-> > -
-> > -                                     if (length > host->bounce_buffer_=
-size) {
-> > -                                             pr_err("%s: bounce buffer=
- is %u bytes but DMA claims to have transferred %u bytes\n",
-> > -                                                    mmc_hostname(host-=
->mmc),
-> > -                                                    host->bounce_buffe=
-r_size,
-> > -                                                    data->bytes_xfered=
-);
-> > -                                             /* Cap it down and contin=
-ue */
-> > -                                             length =3D host->bounce_b=
-uffer_size;
-> > -                                     }
-> > -                                     dma_sync_single_for_cpu(
-> > -                                             mmc_dev(host->mmc),
-> > -                                             host->bounce_addr,
-> > -                                             host->bounce_buffer_size,
-> > -                                             DMA_FROM_DEVICE);
-> > -                                     sg_copy_from_buffer(data->sg,
-> > -                                             data->sg_len,
-> > -                                             host->bounce_buffer,
-> > -                                             length);
-> > -                             } else {
-> > -                                     /* No copying, just switch owners=
-hip */
-> > -                                     dma_sync_single_for_cpu(
-> > -                                             mmc_dev(host->mmc),
-> > -                                             host->bounce_addr,
-> > -                                             host->bounce_buffer_size,
-> > -                                             mmc_get_dma_dir(data));
-> > -                             }
-> > -                     } else {
-> > -                             /* Unmap the raw data */
-> > -                             dma_unmap_sg(mmc_dev(host->mmc), data->sg=
-,
-> > -                                          data->sg_len,
-> > -                                          mmc_get_dma_dir(data));
-> > -                     }
-> > -                     data->host_cookie =3D COOKIE_UNMAPPED;
-> > -             }
-> > +             sdhci_request_done_dma(host, mrq);
-> >       }
-> >
-> >       host->mrqs_done[i] =3D NULL;
-> > @@ -3217,7 +3225,7 @@ static bool sdhci_request_done(struct sdhci_host =
-*host)
-> >       return false;
+> >       return 0;
 > >  }
+> > @@ -1827,12 +2029,20 @@ static const struct sdhci_ops sdhci_gl9767_ops =
+=3D {
+> >       .reset                   =3D sdhci_gl9767_reset,
+> >       .set_uhs_signaling       =3D sdhci_set_uhs_signaling,
+> >       .voltage_switch          =3D sdhci_gl9767_voltage_switch,
+> > +     .dump_uhs2_regs          =3D sdhci_uhs2_dump_regs,
+> > +     .set_timeout             =3D sdhci_uhs2_set_timeout,
+> > +     .irq                     =3D sdhci_uhs2_irq,
+> > +     .set_power               =3D sdhci_gl9767_set_power,
+> > +     .uhs2_pre_detect_init    =3D sdhci_gli_pre_detect_init,
+> > +     .card_event              =3D sdhci_gl9767_card_event,
+> >  };
 > >
-> > -static void sdhci_complete_work(struct work_struct *work)
-> > +void sdhci_complete_work(struct work_struct *work)
-> >  {
-> >       struct sdhci_host *host =3D container_of(work, struct sdhci_host,
-> >                                              complete_work);
-> > @@ -3225,6 +3233,7 @@ static void sdhci_complete_work(struct work_struc=
-t *work)
-> >       while (!sdhci_request_done(host))
-> >               ;
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_complete_work);
-> >
-> >  static void sdhci_timeout_timer(struct timer_list *t)
-> >  {
-> > @@ -3686,7 +3695,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_i=
-d)
-> >       return result;
-> >  }
-> >
-> > -static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
-> > +irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
-> >  {
-> >       struct sdhci_host *host =3D dev_id;
-> >       struct mmc_command *cmd;
-> > @@ -3716,6 +3725,7 @@ static irqreturn_t sdhci_thread_irq(int irq, void=
- *dev_id)
-> >
-> >       return IRQ_HANDLED;
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_thread_irq);
-> >
-> >  /*********************************************************************=
-********\
-> >   *                                                                    =
-       *
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index ff53ad592d85..941723cea698 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -831,6 +831,7 @@ bool sdhci_data_line_cmd(struct mmc_command *cmd);
-> >  void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,=
- unsigned long timeout);
-> >  void sdhci_initialize_data(struct sdhci_host *host, struct mmc_data *d=
-ata);
-> >  void sdhci_prepare_dma(struct sdhci_host *host, struct mmc_data *data)=
-;
-> > +bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mr=
-q);
-> >  void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *m=
-rq);
-> >  void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq=
-);
-> >  void __sdhci_finish_data_common(struct sdhci_host *host, bool defer_re=
-set);
-> > @@ -853,6 +854,7 @@ void sdhci_request(struct mmc_host *mmc, struct mmc=
-_request *mrq);
-> >  int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq=
-);
-> >  void sdhci_set_bus_width(struct sdhci_host *host, int width);
-> >  void sdhci_reset(struct sdhci_host *host, u8 mask);
-> > +bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
-> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)=
-;
-> >  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-> >  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
-> > @@ -862,6 +864,9 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc=
-_ios *ios);
-> >  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> >                                     struct mmc_ios *ios);
-> >  void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
-> > +void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_reques=
-t *mrq);
-> > +void sdhci_complete_work(struct work_struct *work);
-> > +irqreturn_t sdhci_thread_irq(int irq, void *dev_id);
-> >  void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
-> >                          dma_addr_t addr, int len, unsigned int cmd);
-> >
+> >  const struct sdhci_pci_fixes sdhci_gl9767 =3D {
+> >       .quirks         =3D SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+> >       .quirks2        =3D SDHCI_QUIRK2_BROKEN_DDR50,
+> >       .probe_slot     =3D gli_probe_slot_gl9767,
+> > +     .add_host       =3D sdhci_pci_uhs2_add_host,
+> > +     .remove_host    =3D sdhci_pci_uhs2_remove_host,
+> >       .ops            =3D &sdhci_gl9767_ops,
+> >  #ifdef CONFIG_PM_SLEEP
+> >       .resume         =3D sdhci_pci_gli_resume,
 >
