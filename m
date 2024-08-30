@@ -1,52 +1,51 @@
 Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3936D13D53E;
-	Fri, 30 Aug 2024 08:20:06 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB57516D4C2;
+	Fri, 30 Aug 2024 08:20:21 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725006008; cv=none; b=Glj++0ywd6FiMUxWKl6l3eEj9X10RW7/WvZkBgE5f/0E5TJCVGmSyK5dVLZO+Dh6F7YYGd5IRQ/co4InX+18euz9PS5gJj0WITxMH86OGXFBySFItjyBFKiYwYgOZITVNj2wap3EGkEHckRA6n5YGFDBpvTA44W2Mig/slzwzjc=
+	t=1725006023; cv=none; b=MmBBricEHTH3EkT6rp0yIYfKcaatBkJCYAIpXabwyT5/UbURLNIdm3mZ8Kjdc/PCUSZCetzeAIq4alqFgrtI48u6yamarwvhh8cSDcHjEUjuwHhFh7Eu00BITP5LCmJiVeoo6y8stLfplLr0mYVw48GNgyAcG882xQH+ThZULgE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725006008; c=relaxed/simple;
-	bh=zeiNe3RDjxa0ANwXXvSkRZhe0L3aObfW49MAHahbOCs=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:References:
-	 In-Reply-To:To:CC; b=amBOu2/t8fAmbzzf9kdl2WDlatcaRmSf12qQabTMDcX9+JdiElvHmvnjHna5cZxD584sb44GvIyHax/TKQlTXCUe3RojDHQT5UaCdeNqoeh3F6+4AC/lxQ0IPf7yWF6bcOXcr8UNnytZH5qfyXzBLhPimIc/TiL1feTp1B8TAmA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=MXIUC3hB; arc=none smtp.client-ip=68.232.153.233
+	s=arc-20240116; t=1725006023; c=relaxed/simple;
+	bh=zcDaQYsKqxlDjCEArmeEbW9uCc+0/XUnK3g3iK7DY7U=;
+	h=From:Subject:Date:Message-ID:MIME-Version:Content-Type:To:CC; b=BCyZ/3AHvzCpD50OWfryLs/bHZJIYWtbZPvqhYOv1urwyPoP3rDlSn/YqbtOpqxjSUlS9iCIertbeZTQxkM4K2/eBpPWxDUEEq7YZvss6nyXdwclZoj/WMrLdbGkrGFIQq4lLlNH6HPJX3FCzG1pD4T44hIpcESUgNcAVEm+D8A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=fCGmlhIf; arc=none smtp.client-ip=68.232.153.233
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="MXIUC3hB"
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="fCGmlhIf"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1725006007; x=1756542007;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=zeiNe3RDjxa0ANwXXvSkRZhe0L3aObfW49MAHahbOCs=;
-  b=MXIUC3hBG7mahGsQxslqTuMCMPUsCMOGJDRHdbf5m6MN94ujFzti6FOW
-   vcpBf1dxxQYJPy4rgb64yb5lfNlMoz7AgzP6gNUXAE+eQfCJOmGRGG8hf
-   h8RdKr2x3Ys9IxoorIH8FUdD1m0pMx+CAINhn4ewVoYDuO3oV6PRqTtOl
-   6ZVKn5ku9FVq4x4UGOp7JmSi1UvCLne0GkDjc83fFCDH94jisLnncknE4
-   61lKGWCzp3N+cucE5c0wVWhFQuZ3tjdRBUpXxxScm6Qk/Yfs3oU6KKdE3
-   r3VTK1Win+nI5jPqVQaRB4W89soys3dYHEE+bykJ4e+mrBtsWQmzbzK3d
+  t=1725006022; x=1756542022;
+  h=from:subject:date:message-id:mime-version:
+   content-transfer-encoding:to:cc;
+  bh=zcDaQYsKqxlDjCEArmeEbW9uCc+0/XUnK3g3iK7DY7U=;
+  b=fCGmlhIfbRD6w5k4UMsuy9XoeTU9UJYx92kuL0kwCPTSYeE6KtukH1g4
+   IvgWAlpVDxOwPvRKUAwtcZtkWBPOheuzIxAshNnRiJpNnM3QIfHhTf/fn
+   vXhvmrE2X9H2SlhwImVzUG1kzAFr0LB6375G/vsHTEUROIs0J5JPjxUTl
+   AWtPNSk/SpwINymOd2oLtlvwiQ1/DCr++k3RDY3W9ALeLjqEVpj4A06i6
+   4brDuZRHjwpdexoJAo5eWBbvda3Qz2NRUZ2ppd2Pn66gEXzBs6VHEe/aV
+   VqtZcV3MSPW07ZVyHd6KVR6edsSj8+aSRUJo1xerV+bdol/o1X2aA2o4n
    g==;
-X-CSE-ConnectionGUID: UTJOvnZHRjSQL+I5bPdPIQ==
-X-CSE-MsgGUID: dvHOL8cNQt+/McnANW+RSw==
+X-CSE-ConnectionGUID: Ea7i2hfpR3mZRIVK2YOgEg==
+X-CSE-MsgGUID: qihJpKHzQdmQo7OiSVUscA==
 X-IronPort-AV: E=Sophos;i="6.10,188,1719903600"; 
-   d="scan'208";a="34150018"
+   d="scan'208";a="262037837"
 X-Amp-Result: SKIPPED(no attachment in message)
 Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa1.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 30 Aug 2024 01:20:05 -0700
+  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 30 Aug 2024 01:20:21 -0700
 Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Fri, 30 Aug 2024 01:20:04 -0700
+ 15.1.2507.35; Fri, 30 Aug 2024 01:19:54 -0700
 Received: from che-lt-i70843lx.mchp-main.com (10.10.85.11) by
  chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.35 via Frontend Transport; Fri, 30 Aug 2024 01:20:00 -0700
+ 15.1.2507.35 via Frontend Transport; Fri, 30 Aug 2024 01:19:50 -0700
 From: Dharma Balasubiramani <dharma.b@microchip.com>
-Date: Fri, 30 Aug 2024 13:49:43 +0530
-Subject: [PATCH v2 2/2] dt-bindings: mmc: atmel,sama5d2-sdhci: Add sama7d65
- compatible
+Subject: [PATCH v2 0/2] Update sdhci-atmel dt-binding documentation
+Date: Fri, 30 Aug 2024 13:49:41 +0530
+Message-ID: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,9 +54,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-ID: <20240830-atmel-sdhci-v2-2-b7f58973f3fc@microchip.com>
-References: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
-In-Reply-To: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
+X-B4-Tracking: v=1; b=H4sIAJ2A0WYC/23MQQrCMBCF4auUWRuZpEETV95DuojT0QzYpiSlK
+ KV3N3bt8n/wvhUKZ+ECl2aFzIsUSWMNc2iAYhifrKSvDQaNRdeiCvPAL1X6SKLIB2/uZ40nY6E
+ +pswPee/arasdpcwpf3Z80b/1v7NohQo1t0yOvEN7HYRyoijTkdIA3bZtX9qSv+uqAAAA
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
 	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
@@ -67,38 +66,37 @@ CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
 	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
 	Dharma Balasubiramani <dharma.b@microchip.com>
 X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1725005989; l=903;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1725005989; l=951;
  i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
- bh=zeiNe3RDjxa0ANwXXvSkRZhe0L3aObfW49MAHahbOCs=;
- b=I7+5YXaFh01UaSu1Dkd8REhCZqUEK0Sj4J8i/YlblfbJvMRXQT5HpUI/5lqWOmYAKUxTIoDqP
- 0pTJint7khzAcuRnBhYOeB82dawSgFDW5czhl3X5Cer9TScCg3rKG5s
+ bh=zcDaQYsKqxlDjCEArmeEbW9uCc+0/XUnK3g3iK7DY7U=;
+ b=n0k7q+AZo3h4KmBpuC28AGMrUoqMMKvIdbmisIO1NzAlIDNzQQQMX6VmGww+LBYTjsT1l7A3h
+ Q4lbItekQu4DVYqEGCxAOw0b4kCChJG4dWlhQQ6tKgigry419CBTPwI
 X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
  pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
 
-Add mmc binding documentation for sama7d65.
+This patch series converts the sdhci-atmel dt-binding to yaml format and adds
+the sama7d65,sama7g5 compatibles to the list.
 
 Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
 ---
- Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml | 5 +++++
- 1 file changed, 5 insertions(+)
+Changes in v2:
+- Add missing deleted file to the patch 
+"Documentation/devicetree/bindings/mmc/sdhci-atmel.txt"
+- Link to v1: https://lore.kernel.org/r/20240830-atmel-sdhci-v1-0-01e3ec8c9804@microchip.com
 
-diff --git a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-index 91d18b2545e1..31b3c719b3e2 100644
---- a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-@@ -25,6 +25,11 @@ properties:
-           - enum:
-               - microchip,sama7g5-sdhci
-           - const: microchip,sam9x60-sdhci
-+      - items:
-+          - enum:
-+              - microchip,sama7d65-sdhci
-+          - const: microchip,sama7g5-sdhci
-+          - const: microchip,sam9x60-sdhci
- 
-   reg:
-     maxItems: 1
+---
+Dharma Balasubiramani (2):
+      dt-bindings: mmc: sdhci-atmel: Convert to json schema
+      dt-bindings: mmc: atmel,sama5d2-sdhci: Add sama7d65 compatible
 
+ .../bindings/mmc/atmel,sama5d2-sdhci.yaml          | 103 +++++++++++++++++++++
+ .../devicetree/bindings/mmc/sdhci-atmel.txt        |  35 -------
+ 2 files changed, 103 insertions(+), 35 deletions(-)
+---
+base-commit: 985bf40edf4343dcb04c33f58b40b4a85c1776d4
+change-id: 20240830-atmel-sdhci-c9a92b710624
+
+Best regards,
 -- 
-2.43.0
+Dharma Balasubiramani <dharma.b@microchip.com>
 
