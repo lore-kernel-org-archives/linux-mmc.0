@@ -1,52 +1,67 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0513D16C85D;
-	Fri, 30 Aug 2024 08:20:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94A2514F13A;
+	Fri, 30 Aug 2024 08:30:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725006025; cv=none; b=uIkGTe5y+lk1Hsgq9PCHD5R6DtLVWGAuuSvDJtnFvoLzbtPj0m8ZHq9VBoNOPMGgkDxEAAj9INCpeH+ey9zKy8uCZKa/lHWK9xPcT1ruxswGC5PRhhPwBg9e+O+gMUi0n0EQGN5ZV3SsatvG6wwUSWjJE9ZfkqzMNlH/wOhl5yk=
+	t=1725006617; cv=none; b=SlNdlHqH7U2FKGQhEk2Q0UPfNWrGaHH/eEX2S3fvUkXv/BakBkYSxE/KGe7+BTVmYHn7C8bgzKVcnKboiiLxbePSyHGTd8TVrbQMiHCnvmnWGuY6S+WAXlU3n5k3fHuDVtdtxOed7TY56gxmvXzJ/vSODTCg7XfLEXCBefXavog=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725006025; c=relaxed/simple;
-	bh=UzbISEjJbeJYIzdRh5vu4UtMWF3hngm+ARmtvyIeqms=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:References:
-	 In-Reply-To:To:CC; b=NsOYrS1B9aGNoURk+urm9+jTWHFLisF1QwLMV7cmM3IrTPVoeQSS1oDTyd5oOcZNVk1gwTHXZ3ZbPJtRWV09tgNz+YKTfR7nK3Drd4klBU/iJr9VEBfEyg2sK3W3PhJXRafaTre1PJ1OKWb8MY6odWpXoVQ3NyhUebbs4oeK5zc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=CY/Bv5ID; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1725006617; c=relaxed/simple;
+	bh=+qWkkkxG743ImM/aahK9UM7XRQPRK07QH/l7Lrn/2g4=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=QLA2jMZC7TtrZ845uPtYsmT1I9L9tEthhxCaC/M2X7no9RcVqSgonYO4n3KxvhjPwhx/sdYH8VlD2TYje42vTPbZz1qh/b82M8yxivM2NfpzmnrqktOiSS/ptzlnTEsO8GstPxoetU2GAHHa94IgHNJQuezCu/I8FoWY2MKaWNI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=n87VcqIl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="CY/Bv5ID"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1725006024; x=1756542024;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=UzbISEjJbeJYIzdRh5vu4UtMWF3hngm+ARmtvyIeqms=;
-  b=CY/Bv5IDZ4YohKRI7KkUjWJ2pkaQ19Ve01aKocP5MO4o7/S4WdYIjTh0
-   ogw9Eq0QJAz+sBySBJnX89b45T6D2WkUfUs+q2q8juykfWv945m+i18/4
-   U+RLJ/uidZcW6Ljuwt4W6z88B7XDWGJdLd15AubRQc9m7UL8SEgNIdd6h
-   JVxvOeHKAZxjA8S8/EuJwwZWfIY/McBx22+bTyEH3vWrBSjKJqyx5izB/
-   YCDlJs8+x1aasBRNqp7YwYwcLXrPU83yv7wl+kW4Xsp5B/5ZYtYN1BLRh
-   qCLs7UghVwhRpCYBwQawtvFkK2tntZpKKoDOVukPmHPuJ+jo21hkBDgUK
-   g==;
-X-CSE-ConnectionGUID: Ea7i2hfpR3mZRIVK2YOgEg==
-X-CSE-MsgGUID: zqTxmHW8Szeuc7+Ss1tooA==
-X-IronPort-AV: E=Sophos;i="6.10,188,1719903600"; 
-   d="scan'208";a="262037840"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 30 Aug 2024 01:20:22 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Fri, 30 Aug 2024 01:19:59 -0700
-Received: from che-lt-i70843lx.mchp-main.com (10.10.85.11) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.35 via Frontend Transport; Fri, 30 Aug 2024 01:19:55 -0700
-From: Dharma Balasubiramani <dharma.b@microchip.com>
-Date: Fri, 30 Aug 2024 13:49:42 +0530
-Subject: [PATCH v2 1/2] dt-bindings: mmc: sdhci-atmel: Convert to json
- schema
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="n87VcqIl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1355C4CEC2;
+	Fri, 30 Aug 2024 08:30:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1725006617;
+	bh=+qWkkkxG743ImM/aahK9UM7XRQPRK07QH/l7Lrn/2g4=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=n87VcqIld4h3oj7jmm7RfOPl4zckDOEs8srTmVTODlJPFoBWJTdLkpxKb/TTrDPNI
+	 RpHdWXpgebIFMc/qPmm4qzLIU/IUXikZBg9fEljw5P/AOGdNBkoPI9gH5NVY29Dhxj
+	 0X1uhyjUZT+Aui4Sd6KyzejiYNza+LZ5CXen9SIXDTegOWyX/nTpdat55CRq0o5GTY
+	 kwc8M8dElgz1oXzLOA1CYsDOeadPufbX+4woWWT7nRP10Yqzc9IYsRuD24HA4Io+QG
+	 F5nYBaRSeP36LV/Z3WWPzyZZZEr6rtTbrq62Rxt/JKgxUcvItsy5MM3zN18fyGINmP
+	 7xquAQuP5GK1g==
+From: Lee Jones <lee@kernel.org>
+To: linux-kernel@vger.kernel.org, 
+ Detlev Casanova <detlev.casanova@collabora.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, 
+ David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ Andi Shyti <andi.shyti@kernel.org>, Lee Jones <lee@kernel.org>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, 
+ Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
+ Jiri Slaby <jirislaby@kernel.org>, Mark Brown <broonie@kernel.org>, 
+ Wim Van Sebroeck <wim@linux-watchdog.org>, 
+ Guenter Roeck <linux@roeck-us.net>, Chris Morgan <macromorgan@hotmail.com>, 
+ Jonas Karlman <jonas@kwiboo.se>, Tim Lunn <tim@feathertop.org>, 
+ Chukun Pan <amadeus@jmu.edu.cn>, Muhammed Efe Cetin <efectn@protonmail.com>, 
+ Andy Yan <andyshrk@163.com>, Jagan Teki <jagan@edgeble.ai>, 
+ Dragan Simic <dsimic@manjaro.org>, Ondrej Jirman <megi@xff.cz>, 
+ Jimmy Hon <honyuenkwun@gmail.com>, Elon Zhang <zhangzj@rock-chips.com>, 
+ Finley Xiao <finley.xiao@rock-chips.com>, 
+ Elaine Zhang <zhangqing@rock-chips.com>, Liang Chen <cl@rock-chips.com>, 
+ Yifeng Zhao <yifeng.zhao@rock-chips.com>, 
+ Jisheng Zhang <jszhang@kernel.org>, Jamie Iles <jamie@jamieiles.com>, 
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, dri-devel@lists.freedesktop.org, 
+ linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, 
+ linux-watchdog@vger.kernel.org, kernel@collabora.com, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <01020191998a2fd4-4d7b091c-9c4c-4067-b8d9-fe7482074d6d-000000@eu-west-1.amazonses.com>
+References: <20240828151028.41255-1-detlev.casanova@collabora.com>
+ <01020191998a2fd4-4d7b091c-9c4c-4067-b8d9-fe7482074d6d-000000@eu-west-1.amazonses.com>
+Subject: Re: (subset) [PATCH v3 04/11] dt-bindings: mfd: syscon: Add rk3576
+ QoS register compatible
+Message-Id: <172500660860.97285.13837050366813522297.b4-ty@kernel.org>
+Date: Fri, 30 Aug 2024 09:30:08 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -54,185 +69,19 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-ID: <20240830-atmel-sdhci-v2-1-b7f58973f3fc@microchip.com>
-References: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
-In-Reply-To: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
-	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Aubin Constans <aubin.constans@microchip.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-	Dharma Balasubiramani <dharma.b@microchip.com>
+Content-Transfer-Encoding: 8bit
 X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1725005989; l=4972;
- i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
- bh=UzbISEjJbeJYIzdRh5vu4UtMWF3hngm+ARmtvyIeqms=;
- b=f4Gg2dkfLysB4IWisSN8yeAX4xXLjipH9Pu9Z0IDs5H3V8e+6+utcfh+8hYaQHzLKpNS3+oHj
- F093w/S88BqCijqrgkSb6a/VrmS256kojJMtUk1y3Cw1FFNL1dyaOdT
-X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
- pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
 
-Convert sdhci-atmel documentation to yaml format. The new file will inherit
-from sdhci-common.yaml.
+On Wed, 28 Aug 2024 15:10:55 +0000, Detlev Casanova wrote:
+> Document rk3576 compatible for QoS registers.
+> 
+> 
 
-Note: Add microchip,sama7g5-sdhci to compatible list as we already use it
-in the DT.
+Applied, thanks!
 
-Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
----
- .../bindings/mmc/atmel,sama5d2-sdhci.yaml          | 98 ++++++++++++++++++++++
- .../devicetree/bindings/mmc/sdhci-atmel.txt        | 35 --------
- 2 files changed, 98 insertions(+), 35 deletions(-)
+[04/11] dt-bindings: mfd: syscon: Add rk3576 QoS register compatible
+        commit: 2f9709b8541dc742235743d19b8a6e2baa2e81d4
 
-diff --git a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-new file mode 100644
-index 000000000000..91d18b2545e1
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-@@ -0,0 +1,98 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/atmel,sama5d2-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Atmel SDHCI controller
-+
-+maintainers:
-+  - Aubin Constans <aubin.constans@microchip.com>
-+  - Nicolas Ferre <nicolas.ferre@microchip.com>
-+
-+description:
-+  Bindings for the SDHCI controller found in Atmel/Microchip SoCs.
-+
-+properties:
-+  compatible:
-+    oneOf:
-+      - enum:
-+          - atmel,sama5d2-sdhci
-+          - atmel,sama5d3-sdhci
-+          - atmel,sama5d4-sdhci
-+          - microchip,sam9x60-sdhci
-+      - items:
-+          - enum:
-+              - microchip,sama7g5-sdhci
-+          - const: microchip,sam9x60-sdhci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 2
-+    maxItems: 3
-+    description: |
-+      The sama5d2 family includes three clocks: `hclock`, `multclk`, and `baseclk`.
-+      For other families, including sam9x60 and sam9x7, only `hclock` and `multclk` are used.
-+
-+  clock-names:
-+    minItems: 2
-+    maxItems: 3
-+
-+  microchip,sdcal-inverted:
-+    type: boolean
-+    description:
-+      When present, polarity on the SDCAL SoC pin is inverted.
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - atmel,sama5d2-sdhci
-+    then:
-+      properties:
-+        clocks:
-+          maxItems: 3
-+        clock-names:
-+          items:
-+            - const: hclock
-+            - const: multclk
-+            - const: baseclk
-+    else:
-+      properties:
-+        clocks:
-+          maxItems: 2
-+        clock-names:
-+          items:
-+            - const: hclock
-+            - const: multclk
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/clock/at91.h>
-+    mmc@a0000000 {
-+        compatible = "atmel,sama5d2-sdhci";
-+        reg = <0xa0000000 0x300>;
-+        interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
-+        clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
-+        clock-names = "hclock", "multclk", "baseclk";
-+        assigned-clocks = <&sdmmc0_gclk>;
-+        assigned-clock-rates = <480000000>;
-+    };
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt b/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-deleted file mode 100644
-index a9fb0a91245f..000000000000
---- a/Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
-+++ /dev/null
-@@ -1,35 +0,0 @@
--* Atmel SDHCI controller
--
--This file documents the differences between the core properties in
--Documentation/devicetree/bindings/mmc/mmc.txt and the properties used by the
--sdhci-of-at91 driver.
--
--Required properties:
--- compatible:		Must be "atmel,sama5d2-sdhci" or "microchip,sam9x60-sdhci"
--			or "microchip,sam9x7-sdhci", "microchip,sam9x60-sdhci".
--- clocks:		Phandlers to the clocks.
--- clock-names:		Must be "hclock", "multclk", "baseclk" for
--			"atmel,sama5d2-sdhci".
--			Must be "hclock", "multclk" for "microchip,sam9x60-sdhci".
--			Must be "hclock", "multclk" for "microchip,sam9x7-sdhci".
--
--Optional properties:
--- assigned-clocks:	The same with "multclk".
--- assigned-clock-rates	The rate of "multclk" in order to not rely on the
--			gck configuration set by previous components.
--- microchip,sdcal-inverted: when present, polarity on the SDCAL SoC pin is
--  inverted. The default polarity for this signal is described in the datasheet.
--  For instance on SAMA5D2, the pin is usually tied to the GND with a resistor
--  and a capacitor (see "SDMMC I/O Calibration" chapter).
--
--Example:
--
--mmc0: sdio-host@a0000000 {
--	compatible = "atmel,sama5d2-sdhci";
--	reg = <0xa0000000 0x300>;
--	interrupts = <31 IRQ_TYPE_LEVEL_HIGH 0>;
--	clocks = <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
--	clock-names = "hclock", "multclk", "baseclk";
--	assigned-clocks = <&sdmmc0_gclk>;
--	assigned-clock-rates = <480000000>;
--};
-
--- 
-2.43.0
+--
+Lee Jones [李琼斯]
 
