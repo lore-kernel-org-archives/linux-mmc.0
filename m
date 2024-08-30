@@ -1,154 +1,213 @@
-Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com [209.85.219.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5979D18E376
-	for <linux-mmc@vger.kernel.org>; Fri, 30 Aug 2024 10:28:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CA461758F;
+	Fri, 30 Aug 2024 13:48:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725013682; cv=none; b=dMd6I71U1pVnIY2s/8fGFI/wFbbsR1o7vbuEv7YhkkLGtFYzbKqDYis59/mbteij1LavddFxrfvpLe+Fv12fFjOW5ajci98pGldkaCqjGpwts475TY22dXxsyejvqgUiODCMP9+PDleZDXy0CB2gVNyx5rqMTWzelniy1CcZycw=
+	t=1725025708; cv=none; b=P7XfsXxNxKgZ/HWcQOFAEL8YOHXUz+K2ndJW/lRrVQedaLLK+LYGoED2fD7Xf0ZzznyXoDKF+8Vt0SAgP04iHPweYt2nlddfm9OYP+LNJoKs+084MNYCQDRAl2HjM8ntO1xzPWNMmshD2M9NXqqcjL0uFNMljt8Fpcqa+ptArF0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725013682; c=relaxed/simple;
-	bh=pMI90KbqudBvHNSXSKjN0yDaohkTey7HoNjDb2rpmqE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=d0ExZkqcVLDzp0E8B5WAKAtO9/nrRDu+9j0WyUwFsaSdp/sZLR0Mx9ibWv+wKH2pCMMlyqvA2jHrvibbnix/jzRB0GZG3quw/iNsv85kZnGgAAAkWTg6G1SF7IhTcMFiHraMrA0nIJQ6vx2Pqs1xj5i8nKQFo7AoKwslhIiIrdk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Q9WYMPUR; arc=none smtp.client-ip=209.85.219.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1725025708; c=relaxed/simple;
+	bh=C7SzgnZQ5XbL0Poy8QlUNW6+CVwAR6aH2vrX/N/Txxw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EgtWmrL8WjpJwuWJrtW+T1oCAHRqvFiIYJmkJ9+0/bZEt6K31bw7kf4/VtBIJHdT8jvbV78wp7aRvjwt7s4kZ9TZYxyPuuKT7khs8LReze6sIb31+bY6vS43m7iy+UUX0QbzKk0VUp2S5saf98H+xJj2TTo2u394JhieXkaVcMY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=kKvebFtR; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Q9WYMPUR"
-Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-e165ab430e7so1670533276.2
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Aug 2024 03:28:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725013679; x=1725618479; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RaANdRMqGTHrITO34e72PLfanbHHgulA2aOEsmQ72uE=;
-        b=Q9WYMPURyM8Ubb9lD8vs2Jav/ZAp9c+7ozzBICLaS008jTIXxvcG/UBUbAc50gA8jK
-         5CAu8zDktm1XPSUS+Xr0lf85OWtnD6Rutq6qlmNxaFRnmlfcWJk8DQA19BAvSvkJn8wW
-         dUdpydn081mPKLdVdGp4YZpl2KbLZ28sQQcWslzWQcSM0vSFqNvj/vrnub2fRrrFdqeY
-         vt8+PwwQSY21ZekMMjgmzqw0+h8mzuo15VTNmICSkcLcvtc/2W+ZEGzuee7ReFutCdGh
-         apQ9LSzP5QhhpBR0kA2HjXexKfwAC1wWTK7i1sOypVpDNiYUeiZ3Csaxzt4iPkMw9k4G
-         +fTQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725013679; x=1725618479;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RaANdRMqGTHrITO34e72PLfanbHHgulA2aOEsmQ72uE=;
-        b=UGsBoLV+oQ/004HePgvbxkvGM5jlXJKDRBGKKj0RjC92vrOU0ikiOkEyGbk8QXinNW
-         PU6O07WoQeBWMYHmlIK0EkvYwFr9o8HgfYFB8gAoHgcEs1GsmWCWHGRW2zSOdotYeUXz
-         0WqiCQ5ieIITLlJaXvHvLZ6P/K5JcN2yYb2UGrr6futzuolbFumR+4odNBNtoVpS198C
-         hH5xjfMMotO/3i46x6vh8APV2DgVU71T8wMA5qeSLaVrZiVlFwvwA1BrM1Si3aSoip9z
-         X0zUqGPK6SPVxOsT4yxVXf30ghxIBPkbWs+mcDYisY2zpexU9TUlqhYooRKrFh60hJcc
-         eJYQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXGm45GizvZbEFa7wOdaqRQBFVusSmXFEYag+lk8oZO218kteZK2S1+SkDxJDH0PKRvN1iek9nUvYg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwHmdqeKMWec+BE2zzoYRBYho51sbMKLZFuNQa2ZKyDmjXVEVYx
-	Fi6u4m401TVD9xblH0pcW46+MzALaBqR1W6Hg5mmBI7CBMYMGM++WbD+ejdL6ctOUaX2wGzBkag
-	sXLcWYRPZBTm5D00uei9KaZyI23UONm6jGuT7VA==
-X-Google-Smtp-Source: AGHT+IHD0Ca1b20qhfzhusSSGfDPMwq7sv7n4QQ2HQLit3WnJLdBel3AT0b+UM+MqPCx/P4KLADReUQAYSd3jSFYE1k=
-X-Received: by 2002:a05:6902:2b09:b0:e0e:877b:2792 with SMTP id
- 3f1490d57ef6-e1a7a0091d2mr1858033276.17.1725013679204; Fri, 30 Aug 2024
- 03:27:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="kKvebFtR"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8895EC4CEC2;
+	Fri, 30 Aug 2024 13:48:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1725025708;
+	bh=C7SzgnZQ5XbL0Poy8QlUNW6+CVwAR6aH2vrX/N/Txxw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=kKvebFtRV+e4c4onP/eArXUHfNnw+SSvW4ORRbhw1Rjjg3fMsXfAr4B+w3zJt+E3+
+	 6WQykcEprwYkvPJOmEoRoIEu7lWKUhIL68FNSgE57SF5I631cRIdoy4hz8OlElR3Hl
+	 hRlAC2IJFcPyR5GMgsgGE25vQOZyFxBiocdP9H/SMrscBNjggBl9LK3zVRLoav5Yg+
+	 aJRV11RhcN+9scvQI/STiYvV9p4zW+uoJFenWbw0wKEk/5RHUoMKcDxBte1jJkuyUn
+	 5Xgznb6ICztJcLc/qKHX8usYgssCOEPn8dlgEbR+RIWt8M/8y4IHgp4MFvGghYHQOY
+	 EjGGbyRsNiLdg==
+Date: Fri, 30 Aug 2024 14:48:23 +0100
+From: Conor Dooley <conor@kernel.org>
+To: Dharma Balasubiramani <dharma.b@microchip.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Aubin Constans <aubin.constans@microchip.com>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: sdhci-atmel: Convert to json
+ schema
+Message-ID: <20240830-satisfy-dislike-27ed075138b3@spud>
+References: <20240830-atmel-sdhci-v2-0-b7f58973f3fc@microchip.com>
+ <20240830-atmel-sdhci-v2-1-b7f58973f3fc@microchip.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAPDyKFrN9L+u_X7Ur+j--i-tewd31EXzwCojOP+Sxuyxpk4Phg@mail.gmail.com>
- <20240830024750.2908738-1-xirui.zhang@vivo.com>
-In-Reply-To: <20240830024750.2908738-1-xirui.zhang@vivo.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 30 Aug 2024 12:27:23 +0200
-Message-ID: <CAPDyKFrBSOwzn--m321VhRKM-J-9x9BkoPw7+TBWcOE5LpS4HQ@mail.gmail.com>
-Subject: Re: [PATCH 0/9] mmc: convert to devm_clk_get_enabled() API
-To: zhangxirui <xirui.zhang@vivo.com>, Stephen Boyd <sboyd@kernel.org>
-Cc: adrian.hunter@intel.com, bastien.curutchet@bootlin.com, festevam@gmail.com, 
-	imx@lists.linux.dev, jh80.chung@samsung.com, kernel@pengutronix.de, 
-	linus.walleij@linaro.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, michal.simek@amd.com, 
-	nico@fluxnic.net, orito.takao@socionext.com, rric@kernel.org, 
-	s.hauer@pengutronix.de, shawnguo@kernel.org, sugaya.taichi@socionext.com, 
-	u.kleine-koenig@pengutronix.de
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="BDXgFad7zf52Vic3"
+Content-Disposition: inline
+In-Reply-To: <20240830-atmel-sdhci-v2-1-b7f58973f3fc@microchip.com>
+
+
+--BDXgFad7zf52Vic3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-+ Stephen
+On Fri, Aug 30, 2024 at 01:49:42PM +0530, Dharma Balasubiramani wrote:
+> Convert sdhci-atmel documentation to yaml format. The new file will inher=
+it
+> from sdhci-common.yaml.
+>=20
+> Note: Add microchip,sama7g5-sdhci to compatible list as we already use it
+> in the DT.
+>=20
+> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+> ---
+>  .../bindings/mmc/atmel,sama5d2-sdhci.yaml          | 98 ++++++++++++++++=
+++++++
+>  .../devicetree/bindings/mmc/sdhci-atmel.txt        | 35 --------
+>  2 files changed, 98 insertions(+), 35 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.ya=
+ml b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
+> new file mode 100644
+> index 000000000000..91d18b2545e1
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
+> @@ -0,0 +1,98 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/atmel,sama5d2-sdhci.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Atmel SDHCI controller
+> +
+> +maintainers:
+> +  - Aubin Constans <aubin.constans@microchip.com>
+> +  - Nicolas Ferre <nicolas.ferre@microchip.com>
+> +
+> +description:
+> +  Bindings for the SDHCI controller found in Atmel/Microchip SoCs.
+> +
+> +properties:
+> +  compatible:
+> +    oneOf:
+> +      - enum:
+> +          - atmel,sama5d2-sdhci
+> +          - atmel,sama5d3-sdhci
+> +          - atmel,sama5d4-sdhci
+> +          - microchip,sam9x60-sdhci
+> +      - items:
+> +          - enum:
+> +              - microchip,sama7g5-sdhci
+> +          - const: microchip,sam9x60-sdhci
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    minItems: 2
+> +    maxItems: 3
+> +    description: |
+> +      The sama5d2 family includes three clocks: `hclock`, `multclk`, and=
+ `baseclk`.
+> +      For other families, including sam9x60 and sam9x7, only `hclock` an=
+d `multclk` are used.
 
-On Fri, 30 Aug 2024 at 04:32, zhangxirui <xirui.zhang@vivo.com> wrote:
->
-> On Wed, 28 Aug 2024 at 17:11, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> > On Tue, 27 Aug 2024 at 09:34, zhangxirui <xirui.zhang@vivo.com> wrote:
-> > >
-> > > This series use devm_clk_get_enabled() to simplify code
-> > > and avoids the calls to clk_disable_unprepare()
-> >
-> > I agree that it simplifies code - but it also changes the behaviour,
-> > in which order clocks are getting unprepared/disabled during the
-> > ->remove() phase. In other words, this needs to be thoroughly tested
-> > and not just considered as a trivial cleanup series.
-> >
-> > For example, if there is a PM domain attached to the mmc host device,
-> > is it really okay to allow powering-off the PM domain before the
-> > clocks are being gated? This could potentially happen if we apply the
-> > $subject series.
->
-> Thanks for the reply, are you saying that merging the above patch will
-> lead to the following issue?
->
-> before=EF=BC=9A
-> bus_remove -> driver_remove -> clk unprepare
->            -> dev_pm_domain_detach
->            -> device_unbind_cleanup
-> after=EF=BC=9A
-> bus_remove -> driver_remove (delete clk unprepare)
->            -> dev_pm_domain_detach
->            -> device_unbind_cleanup (devm_clk_get_enbaled ->relase(clk un=
-prepare))
+This should instead be an items list, rather than a text based
+description.
 
-Correct!
+> +
+> +  clock-names:
+> +    minItems: 2
+> +    maxItems: 3
 
->
-> But I think this issue is not only specific to the MMC host, it will also
-> occur with other devices, if there is a PM domain attachded an use devm_c=
-lk_get_enbaled API.
+We prefer that you describe the entries at this level, and constrain
+them in the conditional bits below. IOW, move the items list here,
+and only use minItems/maxItems below.
 
-Right. Which kind of questions whether the API is really that useful,
-from a cleanup point of view.
+> +
+> +  microchip,sdcal-inverted:
+> +    type: boolean
+> +    description:
+> +      When present, polarity on the SDCAL SoC pin is inverted.
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +
+> +allOf:
+> +  - $ref: sdhci-common.yaml#
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - atmel,sama5d2-sdhci
+> +    then:
+> +      properties:
+> +        clocks:
+> +          maxItems: 3
 
->
-> So, can we solve this problem by swap device_ubind_cleanup and dev_pm_dom=
-ain_detach ?
-> clk unprepare -> power off not power off -> clk unprepare
+maxItems: 3 or minItems: 3? Your answer will depend on whether or not
+baseclk is optional on sama5d2.
 
-That may work, I don't know.
+Cheers,
+Conor.
 
-Another option is simply to avoid using devm_clk_get_enabled(), unless
-you know that the HW can cope with the potentially changed behaviour.
+> +        clock-names:
+> +          items:
+> +            - const: hclock
+> +            - const: multclk
+> +            - const: baseclk
+> +    else:
+> +      properties:
+> +        clocks:
+> +          maxItems: 2
+> +        clock-names:
+> +          items:
+> +            - const: hclock
+> +            - const: multclk
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/clock/at91.h>
+> +    mmc@a0000000 {
+> +        compatible =3D "atmel,sama5d2-sdhci";
+> +        reg =3D <0xa0000000 0x300>;
+> +        interrupts =3D <31 IRQ_TYPE_LEVEL_HIGH 0>;
+> +        clocks =3D <&sdmmc0_hclk>, <&sdmmc0_gclk>, <&main>;
+> +        clock-names =3D "hclock", "multclk", "baseclk";
+> +        assigned-clocks =3D <&sdmmc0_gclk>;
+> +        assigned-clock-rates =3D <480000000>;
+> +    };
 
-I have looped in Stephen to allow him to provide us his thoughts
-around this too.
+--BDXgFad7zf52Vic3
+Content-Type: application/pgp-signature; name="signature.asc"
 
->
-> bus_remove -> driver_remove
->            -> device_unbind_cleanup
->            -> dev_pm_domain_detach
->
-> Thanks.
->
-> > >
-> > > zhangxirui (9):
-> > >   mmc: cavium-thunderx: Use devm_clk_get_enabled() helpers
-> > >   mmc: davinci_mmc: Use devm_clk_get_enabled() helpers
-> > >   mmc: dw_mmc-hi3798cv200: Use devm_clk_get_enabled() helpers
-> > >   mmc: mvsdio: Use devm_clk_get_enabled() helpers
-> > >   mmc: mxcmmc: Use devm_clk_get_enabled() helpers
-> > >   mmc: mxs-mmc: Use devm_clk_get_enabled() helpers
-> > >   mmc: sdhci: milbeaut: Use devm_clk_get_enabled() helpers
-> > >   mmc: sdhci-of-arasan: Use devm_clk_get_enabled() helpers
-> > >   mmc: sdhci_f_sdh30: Use devm_clk_get_enabled() helpers
+-----BEGIN PGP SIGNATURE-----
 
-Kind regards
-Uffe
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZtHNpwAKCRB4tDGHoIJi
+0hybAQDUlIVOHIEiR1wC9Pruszi99jufighJpzE4S1psUqavTAEA2IlB4SSTQg7j
+Ypqt/472eU2lCY9H6m0T51AJB5hbzw8=
+=bSGL
+-----END PGP SIGNATURE-----
+
+--BDXgFad7zf52Vic3--
