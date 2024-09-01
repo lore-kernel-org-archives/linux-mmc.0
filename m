@@ -1,130 +1,97 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f48.google.com (mail-oo1-f48.google.com [209.85.161.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D4C315227;
-	Sat, 31 Aug 2024 13:41:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87FF728387;
+	Sun,  1 Sep 2024 17:33:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725111714; cv=none; b=YhMn9xLHRCAIODFCdxZA/xCll6X9qccaADIsLNfLj15fJ0tIl2QDh6cv44ZJ1xxyViUxksJE3JzrJT2fWhWvwe++XytYndX32zbg0lLgO0S5b3cDqya4WO31+1ba0T8EQQDUFZWiPDUfngc/YmEKZhNT6rdApKA0hCZIWxXrvLg=
+	t=1725212000; cv=none; b=XJLXUs9LebSDK7S/Hk2EQ7VkvN20cz3bmIRe+g1RO7fJ33SfVCgJhmxWr4f0MAwd1kCzXkNNWCsxUwwpoY4cknmTekkrTMLkFqBOdRAmA23f0JbUNSJIlDQWvuNglM5pPBmibwdW4fPIA7G4GLHACf4gu93KR2l4ryqpJK/GthE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725111714; c=relaxed/simple;
-	bh=D790fmU++LXGigB/nynf6Ty+7FxWeIFhF+oDs5HgLwM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=oK9AUwPfM5TKCV0g8UfOMEIYWpaCPOQPWdAiYNrM+JJV78+HuWPTnJD+bRCL7G4Wo7loCxvwx40zTCMsNtKYSi+qiIK58nHJLC/agg07E+ASBecQwTtRX7rFhLQoEv7A7J3IkMezVLXMv6LZFiDCIS9hJdqhH0juo961sHv3HHM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qkmU2rBu; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1725212000; c=relaxed/simple;
+	bh=N2AjIuHTcLBgR/IBzold+V312lKsHhv8qHXKrNzaaao=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=oXt8se1C/CwoSKbc1nGl1Z/+C4zSCfmQ92OXSsN5SJD4xB1jq+pTZUQgUhCYbcXPPJQqTFpR8fWdDSgQqs1WxqYQaONrweHbIvh7Eu2P48GFy+9q4rWeYU4F5swt2NwmFhPqeeaulQzPWIRYIgwmdRGxxupQKY9tCTDkZsrVGzg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Oi0XBwDZ; arc=none smtp.client-ip=209.85.161.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qkmU2rBu"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8F0F1C4CEC0;
-	Sat, 31 Aug 2024 13:41:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1725111713;
-	bh=D790fmU++LXGigB/nynf6Ty+7FxWeIFhF+oDs5HgLwM=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=qkmU2rBu3AKAUqe/NEscu9x19RFPpJ9NBfI7Ng7W1TL2dol8I55tmCVYXqci66tTg
-	 vmhf6chOh127xAiQWssu8no8InMGc72qJPO79ira+5Om/r5rnpBCVVDJTMa6kgaocf
-	 rAP/ZZqKxpIieDnsD3fZp/uYxi1su8y/h3sg8kiy3pmi5/3o6UXrOJ0yw3BZ9p8jCw
-	 WMYtzBaBMBOMUqWqFkVoB6pIPcvuWzabJfdRsj4YbqXCkBYYfszdwpky2hQGOytgyb
-	 mEhbrEazZH8tAzKyNA088zHUZmxq7DoAMPP1Gj2U/vf2qM0zK+bXVIyKskQfCwkZgj
-	 6A3/FiL97L5ng==
-Message-ID: <d275ea37-735a-4203-bb17-f0cd2320df07@kernel.org>
-Date: Sat, 31 Aug 2024 15:41:46 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Oi0XBwDZ"
+Received: by mail-oo1-f48.google.com with SMTP id 006d021491bc7-5dfad5a9c21so1519553eaf.0;
+        Sun, 01 Sep 2024 10:33:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1725211998; x=1725816798; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Q6bXJHG6lWckj73XUa4LXT2Ji7chAifQ0hvSuTg50kg=;
+        b=Oi0XBwDZ+GliRjo0n7QYRo1Ip+KTMEKoV+v2YCq793b2UcNS3U9b4Kp1MANKQqaAfq
+         eOLYA3lwpVuLvZRXPf8NiN0sLY8YAyvjgQ8dyKF2l9vkflgDc1LM1Q4sCTWtVROg9wxj
+         Pzn3VmHj9KuwVb8/tmWdn9ypp9e8h4WOd+K4td+ZZl5wK9T0I0fEi8iWjbuYkXJs4n8m
+         8/G0L3elpubCStiPyLM/PCGsE9w0SqJRM3XEHYZG3XQ4PGrwGgFpn+hc7U1mcj807nu2
+         ixeoKmegm9PtReHXNn9moRB6JlB4/4KX6knh8+XWFr9LFa6K4UCVkOZzcXkZB06zC0YN
+         wtJw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725211998; x=1725816798;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Q6bXJHG6lWckj73XUa4LXT2Ji7chAifQ0hvSuTg50kg=;
+        b=XypZLHlGed4AaQCTTs42qeBxmsMuGM+Ks4CfP6hgVy6041pJpKMyt5B5UCGazAP0Ql
+         LHPjLBWw8Ge31XBtg2MrSTT3YaS80BpQjlszliTIfWJOHdRl/WcIhfK4gqciDHjDmJwc
+         EZZAxxSaEJ9lqG6OnpKFMGSxyLZ7fh46yZMfJRrPybkBzff8PpaAfRqpOwwDrQQRnl4n
+         F1yt4OLrdv2QQOgxrUMt9w3lYPcKOqBfm8QLrKtc1F2mtQ4VmQK3J9/AqLqYREIKVz+w
+         c8rEVkqNwHMRcyKzXbhOCjWpJmEWLKkTDKfnsWYzMIezQ2c0eV/NrUdH1BcnsM6AvzYb
+         HOrw==
+X-Forwarded-Encrypted: i=1; AJvYcCUqZSmH0I3fhaTWAXBz+8gdQ1TnOYaKFVEdvdTpc5WRERF9NjfyJJZpLJCzKKDZp628Yiqw4aZibvnjbZ0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwzH1W1k13Gb8diQjUKeXGRfWXIOufAnsMjOFl6E98NukAzzisH
+	CX2sy/h3CUE8kIgzS1QAdLa8sPdf5lM78thBJgxUAQwJ4blDUpj38ljfi+4CKfk=
+X-Google-Smtp-Source: AGHT+IG1nXzzkcfCirW606WgsV86rXonsxVrwoawWMRLRyDPHBMv3CjetlCpWfolzH/UFtwH9PKyMw==
+X-Received: by 2002:a05:6358:9986:b0:1b3:93b8:8c1e with SMTP id e5c5f4694b2df-1b603bebef8mr1321169955d.2.1725211998435;
+        Sun, 01 Sep 2024 10:33:18 -0700 (PDT)
+Received: from fedora.. ([106.219.167.196])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-715e55a596csm5572029b3a.81.2024.09.01.10.33.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 01 Sep 2024 10:33:17 -0700 (PDT)
+From: Riyan Dhiman <riyandhiman14@gmail.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Riyan Dhiman <riyandhiman14@gmail.com>
+Subject: [PATCH] mmc: core: Calculate size from pointer
+Date: Sun,  1 Sep 2024 23:03:09 +0530
+Message-ID: <20240901173309.7124-1-riyandhiman14@gmail.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/2] dt-bindings: mmc: atmel,sama5d2-sdhci: Add
- sama7d65 compatible
-To: Dharma.B@microchip.com
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, Nicolas.Ferre@microchip.com,
- alexandre.belloni@bootlin.com, claudiu.beznea@tuxon.dev,
- Aubin.Constans@microchip.com, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org
-References: <20240830-atmel-sdhci-v3-0-7c97a0872af4@microchip.com>
- <20240830-atmel-sdhci-v3-2-7c97a0872af4@microchip.com>
- <3wysn3i3syox3n7howwnewuy6h7457goeafbrilptewxyuqitr@cdyjlzp5s7bu>
- <44e7a3a4-52f9-4985-b2dd-2bcf35d34737@microchip.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <44e7a3a4-52f9-4985-b2dd-2bcf35d34737@microchip.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 31/08/2024 09:51, Dharma.B@microchip.com wrote:
-> Hi Krzysztof,
-> 
-> On 31/08/24 11:50 am, Krzysztof Kozlowski wrote:
->> EXTERNAL EMAIL: Do not click links or open attachments unless you know the content is safe
->>
->> On Fri, Aug 30, 2024 at 08:21:21PM +0530, Dharma Balasubiramani wrote:
->>> Add mmc binding documentation for sama7d65.
->>>
->>> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
->>> ---
->>>   Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml | 5 +++++
->>>   1 file changed, 5 insertions(+)
->>>
->>
->> Where is any user of this? Why are you adding bindings without users?
-> 
-> We will upstream the sama7d65 board dts files soon, hence adding support 
-> for it before hand in bindings.
-> 
+Calculate the size from pointer instead of
+struct to adhere to linux kernel coding style.
 
-Not soon. Two of your other postings are clearly wrongly split, so I
-don't trust this one either.
+Issue reported by checkpatch.
 
-Post everything. Your drivers with their bindings. Your DTS goes with
-board bindings, in separate patchset (one!) with lore link to the driver
-bindings so we can verify it.
+This commit has no functional changes.
 
-Best regards,
-Krzysztof
+Signed-off-by: Riyan Dhiman <riyandhiman14@gmail.com>
+---
+ drivers/mmc/core/block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 2c9963248fcb..dfd495e86985 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2484,7 +2484,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 		return ERR_PTR(devidx);
+ 	}
+ 
+-	md = kzalloc(sizeof(struct mmc_blk_data), GFP_KERNEL);
++	md = kzalloc(sizeof(*md), GFP_KERNEL);
+ 	if (!md) {
+ 		ret = -ENOMEM;
+ 		goto out;
+-- 
+2.46.0
 
