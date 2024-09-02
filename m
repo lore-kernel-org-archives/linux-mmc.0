@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE0BE13B5A1;
-	Mon,  2 Sep 2024 10:20:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CEE91420B6;
+	Mon,  2 Sep 2024 10:28:31 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.12
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725272418; cv=none; b=TobE9oFaq96HZpwXudM70UxISDPeC8V5A3jBNiVcm3yNx/OvtfmEbDR/Ogt11lOpKIWYQEvkgAo8Pk5Ylu5yQBxkSJfei3Je4fNhtazq7dcAKJgyMH0N5013Hpnvk6jjBEoXF17o60ysHlsgcifnGv3t3g9amkNOgScO0zMJQ5s=
+	t=1725272914; cv=none; b=CqkhZyXK5S1v4j+ia5OurSt1bfRlzqGW53/j0SNuWtSqmaSgaOTlAbOSbD9q7Jsmm9L0P5EQfbjc7or+WGjB6Ym6+l+g0Ary34RDhztfZWVvM7fpkeh/mAcSlqoW/kafrm3dpESetmIWxwCdYFD20+xI43GPL6Rbd7n05YoMGxc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725272418; c=relaxed/simple;
-	bh=V9IewD54Zu/07gNpQ40Oz2Kkoe9Qhos7HCLxIX7/ozQ=;
+	s=arc-20240116; t=1725272914; c=relaxed/simple;
+	bh=o49/VfeHx/55xDTE8RkgShWImK7IhvTHRkQEAshuhMk=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=g6Y+m3DnGIYH/ulw15ebbbo1tLu4FeiDN73xH9ejJtMPtGCH+kzbYJDhAx75piP+KhW+Zu52cx4PAfeV+EFMR0OYslCOOzez8YuGYpqjHQAneSYMBNn5+GPSB4uCvTIs6TQfibXTltihX/hMO1CG0VVYozWxqTlNAkI5qMWJLp4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=fXRFEDkR; arc=none smtp.client-ip=198.175.65.12
+	 In-Reply-To:Content-Type; b=Dgck9h4XUy4F6Yw6dtCaNpuHRnWWdYPtUB4AhjdOyGgwzv61C9jE5KD4PIdtmXD6fnpDaOcDLfW2RTb5oo1GsRnYfT1IMI9H5kfxSsaWgqu+le7kcekwegEo/dvgkNOnA+oeSfWe1ypWqYM0ed1odWdt2KaISrSffatf34ZbFe0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Pb+rmYci; arc=none smtp.client-ip=198.175.65.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="fXRFEDkR"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Pb+rmYci"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725272417; x=1756808417;
+  t=1725272913; x=1756808913;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=V9IewD54Zu/07gNpQ40Oz2Kkoe9Qhos7HCLxIX7/ozQ=;
-  b=fXRFEDkRJuUr5dkw2UwuDZ2WSeC/R6udVrv4RNeqqhG2Sw8R2pAtA0zY
-   JSZMxYveQ+b6zLpYWcpX5t1k8NFzeJrCJkVm861JJ4dP94WfoJOJOEtvi
-   R2KaSxNiRzAgG+If2X1LKfNtUELZt1vhxt8pG+AmM5VJQ1djqrmpzWOZo
-   UYPuWF+oo9kIL4qyf6Vclab653wibR4//TFlbqAxTTOQcilD1hXxuBzaE
-   G7MZH/Xa6aWkt2Eh62jdNTdyK36YjptWJYYcxkkYpa6fD/Qu4HtHfjnVP
-   I412jKv6/5pWp5XVtpebtIGrRSq1OaQvBkDa04vq5c4zHYBUVyrMj057k
-   w==;
-X-CSE-ConnectionGUID: RMsagRkCQWiyKRCR/1m2jQ==
-X-CSE-MsgGUID: GYmK68qeQtWdEbK915Uo0Q==
-X-IronPort-AV: E=McAfee;i="6700,10204,11182"; a="35211910"
+  bh=o49/VfeHx/55xDTE8RkgShWImK7IhvTHRkQEAshuhMk=;
+  b=Pb+rmYcirWJr8dMR2aXc6AG0UoP0dLKMnujbf1eaMg0gBd1UstjzzDNR
+   GG/ue6OUnR5uB9VQgnSualFi6OEqTAGj60bmqUzKa4MeKwMHrTvBzFv7k
+   UF8SBzVY8TGDqIF+CESajSN7E9TqswEXslzUQxZRnZ76Gj9cd5Od+7WeX
+   WOwLAJAIYkKAFvkDqgD5o/arweuOSA1pBffoQE9CAxNc7TV6oKZFRuBP+
+   3V9nPoAbTih9yZ6qxlzZkilc2SuI5u1GPDXlw0W4Hel8k5yuAfgrDjD2b
+   o79h8x4y5Dcgj7VF96Hfwbyq/14oj0mMgrQ52vrRuHmYdC7D9EJUUkNKr
+   A==;
+X-CSE-ConnectionGUID: Hl1mh1rMRR+GyU1LsGEGZQ==
+X-CSE-MsgGUID: ULn6hUKpTXK0rrbecOMWsA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11182"; a="35212552"
 X-IronPort-AV: E=Sophos;i="6.10,195,1719903600"; 
-   d="scan'208";a="35211910"
+   d="scan'208";a="35212552"
 Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Sep 2024 03:20:17 -0700
-X-CSE-ConnectionGUID: s8irNmHUTmaepMz97nM/5Q==
-X-CSE-MsgGUID: /S9ewjWnQ8yGPjOJXuP98Q==
+  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Sep 2024 03:28:31 -0700
+X-CSE-ConnectionGUID: Wc7OZ2yRTDCpjdhgK2f/gg==
+X-CSE-MsgGUID: n9tgonAsSpu3UO8zxaXCnA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.10,195,1719903600"; 
-   d="scan'208";a="64572489"
+   d="scan'208";a="64574120"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
-  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Sep 2024 03:20:14 -0700
-Message-ID: <cddc7c8c-c6d9-4c84-973b-06be282b4081@intel.com>
-Date: Mon, 2 Sep 2024 13:19:19 +0300
+  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Sep 2024 03:28:25 -0700
+Message-ID: <f348f927-ada2-4c85-93e9-e2c3a99df33a@intel.com>
+Date: Mon, 2 Sep 2024 13:27:31 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,155 +52,49 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/2] mmc: sdhci_am654: Add retry tuning
-To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20240826210454.3928033-1-jm@ti.com>
- <20240826210454.3928033-2-jm@ti.com>
+Subject: Re: [PATCH v2 1/2] mmc: cqhci: Fix checking of CQHCI_HALT state
+To: Seunghwan Baek <sh8267.baek@samsung.com>, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, ritesh.list@gmail.com,
+ quic_asutoshd@quicinc.com
+Cc: grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com,
+ dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com,
+ cw9316.lee@samsung.com, wkon.kim@samsung.com, stable@vger.kernel.org
+References: <20240829061823.3718-1-sh8267.baek@samsung.com>
+ <CGME20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee@epcas1p4.samsung.com>
+ <20240829061823.3718-2-sh8267.baek@samsung.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240826210454.3928033-2-jm@ti.com>
+In-Reply-To: <20240829061823.3718-2-sh8267.baek@samsung.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
-On 27/08/24 00:04, Judith Mendez wrote:
-> Add retry tuning up to 10 times if we fail to find
-> a failing region or no passing itapdly. This is
-> necessary since some eMMC has been observed to never
-> find a failing itapdly on the first couple of tuning
-> iterations, but eventually does. Keep count of current
-> tuning iteration using tuning_loop. It has been observed
-> that the tuning algorithm does not need to loop more
-> than 10 times before finding a failing itapdly.
+On 29/08/24 09:18, Seunghwan Baek wrote:
+> To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
+> bit. At this time, we need to check with &, not &&.
 > 
-> Signed-off-by: Judith Mendez <jm@ti.com>
-
-Still doesn't compile:
-
-  CC [M]  drivers/mmc/host/sdhci_am654.o
-drivers/mmc/host/sdhci_am654.c: In function ‘sdhci_am654_calculate_itap’:
-drivers/mmc/host/sdhci_am654.c:453:24: error: unused variable ‘dev’ [-Werror=unused-variable]
-  453 |         struct device *dev = mmc_dev(host->mmc);
-      |                        ^~~
-cc1: all warnings being treated as errors
-
-Fix that and you can add:
+> Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> Changes since v2:
-> - Use do while loop instead of while in patch 1/2
-> - Move initialization of tuning_loop to sdhci_am654_init
-> - Separate error path in patch 1/2
-> ---
->  drivers/mmc/host/sdhci_am654.c | 46 ++++++++++++++++++++++++++--------
->  1 file changed, 35 insertions(+), 11 deletions(-)
+>  drivers/mmc/host/cqhci-core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 64e10f7c9faa3..13da003363e1d 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -86,6 +86,7 @@
->  
->  #define CLOCK_TOO_SLOW_HZ	50000000
->  #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
-> +#define RETRY_TUNING_MAX	10
->  
->  /* Command Queue Host Controller Interface Base address */
->  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
-> @@ -151,6 +152,7 @@ struct sdhci_am654_data {
->  	u32 flags;
->  	u32 quirks;
->  	bool dll_enable;
-> +	u32 tuning_loop;
->  
->  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->  };
-> @@ -443,7 +445,7 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  #define ITAPDLY_LENGTH 32
->  #define ITAPDLY_LAST_INDEX (ITAPDLY_LENGTH - 1)
->  
-> -static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
-> +static int sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->  			  *fail_window, u8 num_fails, bool circular_buffer)
->  {
->  	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
-> @@ -453,12 +455,14 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->  	int prev_fail_end = -1;
->  	u8 i;
->  
-> -	if (!num_fails)
-> -		return ITAPDLY_LAST_INDEX >> 1;
-> +	if (!num_fails) {
-> +		/* Retry tuning */
-> +		return -1;
-> +	}
->  
->  	if (fail_window->length == ITAPDLY_LENGTH) {
-> -		dev_err(dev, "No passing ITAPDLY, return 0\n");
-> -		return 0;
-> +		/* Retry tuning */
-> +		return -1;
->  	}
->  
->  	first_fail_start = fail_window->start;
-> @@ -494,8 +498,8 @@ static u32 sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
->  	return (itap > ITAPDLY_LAST_INDEX) ? ITAPDLY_LAST_INDEX >> 1 : itap;
->  }
->  
-> -static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
-> -					       u32 opcode)
-> +static int sdhci_am654_do_tuning(struct sdhci_host *host,
-> +				 u32 opcode)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> @@ -532,13 +536,30 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
->  	if (fail_window[fail_index].length != 0)
->  		fail_index++;
->  
-> -	itap = sdhci_am654_calculate_itap(host, fail_window, fail_index,
-> -					  sdhci_am654->dll_enable);
-> +	return sdhci_am654_calculate_itap(host, fail_window, fail_index,
-> +					 sdhci_am654->dll_enable);
-> +}
->  
-> -	sdhci_am654_write_itapdly(sdhci_am654, itap, sdhci_am654->itap_del_ena[timing]);
-> +static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
-> +					       u32 opcode)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +	unsigned char timing = host->mmc->ios.timing;
-> +	int itapdly;
->  
-> +	do {
-> +		itapdly = sdhci_am654_do_tuning(host, opcode);
-> +		if (itapdly >= 0)
-> +			break;
-> +	} while (++sdhci_am654->tuning_loop < RETRY_TUNING_MAX);
-> +
-> +	if (itapdly < 0)
-> +		return -1;
-> +
-> +	sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
->  	/* Save ITAPDLY */
-> -	sdhci_am654->itap_del_sel[timing] = itap;
-> +	sdhci_am654->itap_del_sel[timing] = itapdly;
->  
->  	return 0;
->  }
-> @@ -742,6 +763,9 @@ static int sdhci_am654_init(struct sdhci_host *host)
->  	regmap_update_bits(sdhci_am654->base, CTL_CFG_3, TUNINGFORSDR50_MASK,
->  			   TUNINGFORSDR50_MASK);
->  
-> +	/* Use to re-execute tuning */
-> +	sdhci_am654->tuning_loop = 0;
-> +
->  	ret = sdhci_setup_host(host);
->  	if (ret)
->  		return ret;
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index c14d7251d0bb..a02da26a1efd 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		cqhci_writel(cq_host, 0, CQHCI_CTL);
+>  		mmc->cqe_on = true;
+>  		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+> -		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
+> +		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
+>  			pr_err("%s: cqhci: CQE failed to exit halt state\n",
+>  			       mmc_hostname(mmc));
+>  		}
 
