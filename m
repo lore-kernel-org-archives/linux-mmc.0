@@ -1,192 +1,123 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 361DC1C9841
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:10:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE7CA1A0BCB
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725365427; cv=none; b=SjLLu/4YAa4ksfMpiUmNUmtQu0hfhZ4TRcRcjmMOg80Awl4YgNemWVbs2MxAEY7rIMwOoKwVIPTlD2+oOKmJEtIYgteA27l1BYuI2zVCYiptzuBQaCts4g6ralKxmzsHPHAVZcVWG8pQcRerL5MqfgipbuvsABtf794s+plEXXs=
+	t=1725367066; cv=none; b=VF/RTR1ND3KwqWKqJAlnAll/CnYH1aWHrPs4NmxjAxJjZmn1CHYfEuVqZ2kroYeX2cN1jm7GL+6l5zUA/yN8ZENsstGCRwZMaIc8xZGkF+ndStwc0chEQH9I9JJM0BhGE9GXu3gyj98XrTPXjE6CSuZpUWyv3y2jBGGIpxPeE9o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725365427; c=relaxed/simple;
-	bh=znd28+CqTJ4ghTxFrhF5A7Pb6/pnoUS7WGw5WGe/JFo=;
+	s=arc-20240116; t=1725367066; c=relaxed/simple;
+	bh=w0NDR4g3yWZcVdllP+36hvrmByCu7wczMm3XTMj/jGM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=prPJmwSPMetjEd+HoR4/4neLTWDul/yVbSKZgHY6aRMCOiNEKtq/A6ZOSarfL3c+XGcsAz3QBt6u7oAJYyck6BC2xaiN33D02PwJCN+AfsYfLD4RTacNIMY35kQvPWIwMDMqFaJOQiqgquiQGqZaV2R3ficWN6+9Q8gMfnK6pgo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SQQFb0/3; arc=none smtp.client-ip=209.85.219.173
+	 To:Cc:Content-Type; b=a/wCE/yFR6rNsgWMwZKdMbJM7rFBPhCqtulO9Qfzgae4Q5WfO87xXaxDAtm6FFC5XcrycXV44Y9IX7ww+OWE596lTNsc/6ulSOBwsumx2XyFWf/bDS1JUh6wT4hs0jAm+mDZJvr4ik3Kb8hJGH5PX8Z3Xaswi5Ki5b6+qgWtCns=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=B4TNSYdR; arc=none smtp.client-ip=209.85.219.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SQQFb0/3"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e03caab48a2so4012734276.1
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:10:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="B4TNSYdR"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e116a5c3922so4991197276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725365424; x=1725970224; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1725367064; x=1725971864; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=4An20D90YPhjOzkwF+Hg8QYD3SJoIXYWy8cZWiHm4HE=;
-        b=SQQFb0/3adlLAu/pdNV9dt0/K4hdwnFZS1vR5KUwk/lQY1jXbaPD5o7B+DqPVpWI0f
-         CtFcltEL1sm1k/gaGds7efULROhFaLIM2tAoGBjQHbxcrqDJDveMsS4z1UbLUy/Js0aD
-         j3B7mqCY6w+HZKjlMmjqw5yXDop3IJIvdx5BCQkI5nez0BMN2Qc5msFI74KTzAdv0mMh
-         VxursKcGeYWsgXgmRy/LOfOG4xyBxOA9swXLcUCxJePCGRgwqH3zG5q1Chnxk8cxgpLG
-         dEpfVlS/jygBW9v4o6HvQ429OSyO/iOVJbS2HVkfENZIHqA6+t+NJTGGePVIJxJrmV1Y
-         a//A==
+        bh=xRSvMnDTMDKxhA7VhtYh7uLTsocsLyQdi8v0n2nl6pk=;
+        b=B4TNSYdROzfSRY2GSYbhWSiTJ2y+IProWkB1BIpcDNtrVd8Vg8k38hVWC3aoFTjSZd
+         B1U5eIWJZ3QRkNkowCgI5SVw6csdua6+V6O91OmPrSsiNjtjUa1OCVFc0AKuRRNOmAI3
+         rQ+QwqN7MrpYOmE2ogJjEkrKYuEjniKLiPcm4IOCceNM3UZx27C1EDr1saEKbzmux6uf
+         R7KoerIEh7R7v5timvpeMMnjiyJezffBhktxJ3gr2iQBGMy5qfm5hEWtuU7XxDDwe03K
+         0qpxeeP/BQOEWKVTThAxpZMFn5D4xzkxUQsWcjCCxkc8LOivTFrS2hbwS7ZaaaS8nPoI
+         pABg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725365424; x=1725970224;
+        d=1e100.net; s=20230601; t=1725367064; x=1725971864;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=4An20D90YPhjOzkwF+Hg8QYD3SJoIXYWy8cZWiHm4HE=;
-        b=bmC0D34k371FuTa3Ll3d4Qwnh1winZ3wmypisTHmqVccNZTJCJC9Go6kc61HzBNQNO
-         w9+6bVROyxYKafnvy/71Xu0tKAVynR+6HcevUHhJgF17xoVoOoyh9MVcLzHAX+qnuJ/J
-         D6WdbcFSagnndITctok1R8G3qWoaMxmc3cxxSRKA0AEczpkRaOi39owoqjYrKJtUTAPn
-         8ZDVY5QQsd20J/NiPyNFN7Vq/P//Boa1IRtFISZP6pd3vZokqmVGSgdvqvkM1yxGGxGC
-         zW+c7rJKWIVAz/zKx46xNcR02ZjaysV40oWYazxqQZmLJr9Y54CR7QGD5QjG0AzoCTWA
-         Ru5Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWCRPsyzNHSJyodTX8enPL0TjypYortb0K4f6C2Y9X1k3/riQ639y9ZfTDBVGtoRutH8v2262TXIws=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzyZ9g8XXIBq6oYWWI5a4olwRKPS972OlHmVOBMWtS0BUxpiIWF
-	An0An7ohSSnBHm8gk5p6mDom1GUFlOnngJoUGtEHzdGV52Y7vagtkYrodHG+0eL6pLR0ydQtE7t
-	NZ+fq3+UHxFJPrWMwxBWp729eXoimkJk9kB9kyA==
-X-Google-Smtp-Source: AGHT+IFX1MKd7/CniZfZMCZVstNgR+E8MEOhVGOhXHV1ehVIWPMeYpmWq3hGrzVCf5n6CzgXPAzIGrO6KiCqLNwVX0w=
-X-Received: by 2002:a05:6902:1002:b0:e03:c692:c8b5 with SMTP id
- 3f1490d57ef6-e1a7a1d20camr11923156276.19.1725365424176; Tue, 03 Sep 2024
- 05:10:24 -0700 (PDT)
+        bh=xRSvMnDTMDKxhA7VhtYh7uLTsocsLyQdi8v0n2nl6pk=;
+        b=btW91246FG/3S47EAvIXIyRxsvQ7Zj55mb1YPd2X0EbqS+orix+YVLXfr6w7EZeZfS
+         tahzFKJviWsXDDuHyFmEP5jJlP1UFvX7q7ptrSQ4efpXZpfCfcZBagN5yORDKBqGtFXH
+         9ZSKGtEt9MyQm7P/LW+OB8VNZfuF37+GPyUKRh/7ERfKu8hsP/BG89BHGb/oVBA88JuL
+         nhNAjG8LxfuSPNXpTzRyNFh+PdT/uoN2GMssYid4v0s+vfz5xB23XSI308bXORkVJi54
+         Hky5eyB82pa3sNlickz0CyAiZUpW2usD4DjB57d9EXQgfS8ZbwNVIf2QAUiBSl+FLoxC
+         5uYQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXhHt8cuu/+lIeF+8Oowl2mfszt/nZlmuRl5a3ZiPbvd5wwKH6x4/Q0uvgKCfjvbgFaCF+awj48HBg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxC51SrbSFmKUD1EVt7uXk2EEpEaehpLwsOUW6SFmzTlD1pWhwa
+	8IJ8ce+DG4ki1fODfJ/0u4YumbpG8rdOg+j4fMZ0XgPcz2nitooV8y1mNiXZhbezQzFg+tHI+KX
+	VoaiRIRzojvNRBTe7X1KgZSmYkKp4vC316mPC4Q==
+X-Google-Smtp-Source: AGHT+IFQF8b0/Dxwwp4pWzLNZOOlIYeobiuC9YLSQvh3EAc6u9FMJheFaNSQtuz4xhHdNlC0iKN7ML0RWiRLCHQ408U=
+X-Received: by 2002:a05:6902:1b8c:b0:e13:c6ec:2a7d with SMTP id
+ 3f1490d57ef6-e1a7a1a1cdemr15286662276.37.1725367063845; Tue, 03 Sep 2024
+ 05:37:43 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240828151028.41255-1-detlev.casanova@collabora.com> <01020191998a55a9-697c3a2c-237e-49bb-b3dd-45762198d74f-000000@eu-west-1.amazonses.com>
-In-Reply-To: <01020191998a55a9-697c3a2c-237e-49bb-b3dd-45762198d74f-000000@eu-west-1.amazonses.com>
+References: <010201919996ef8a-db8bbe89-3c18-4dc3-bd0c-6498f09d978a-000000@eu-west-1.amazonses.com>
+In-Reply-To: <010201919996ef8a-db8bbe89-3c18-4dc3-bd0c-6498f09d978a-000000@eu-west-1.amazonses.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 3 Sep 2024 14:09:47 +0200
-Message-ID: <CAPDyKFoJoqwNTKvpK93QtK1wA9vzVUTzCrP32s_HEZcrujN2Mg@mail.gmail.com>
-Subject: Re: [PATCH v3 06/11] dt-bindings: mmc: Add support for rk3576 eMMC
+Date: Tue, 3 Sep 2024 14:37:07 +0200
+Message-ID: <CAPDyKFrZKq69yHnA1w813b6nwy1Bn_A=1c133CSk9scO1qMxEg@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] Add dw_mmc support for rk3576
 To: Detlev Casanova <detlev.casanova@collabora.com>
 Cc: linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>, 
 	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Heiko Stuebner <heiko@sntech.de>, David Airlie <airlied@gmail.com>, Daniel Vetter <daniel@ffwll.ch>, 
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
-	Thomas Zimmermann <tzimmermann@suse.de>, Andi Shyti <andi.shyti@kernel.org>, Lee Jones <lee@kernel.org>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jirislaby@kernel.org>, 
-	Mark Brown <broonie@kernel.org>, Wim Van Sebroeck <wim@linux-watchdog.org>, 
-	Guenter Roeck <linux@roeck-us.net>, Chris Morgan <macromorgan@hotmail.com>, 
-	Jonas Karlman <jonas@kwiboo.se>, Tim Lunn <tim@feathertop.org>, Chukun Pan <amadeus@jmu.edu.cn>, 
-	Muhammed Efe Cetin <efectn@protonmail.com>, Andy Yan <andyshrk@163.com>, Jagan Teki <jagan@edgeble.ai>, 
-	Dragan Simic <dsimic@manjaro.org>, Ondrej Jirman <megi@xff.cz>, Jimmy Hon <honyuenkwun@gmail.com>, 
-	Elon Zhang <zhangzj@rock-chips.com>, Finley Xiao <finley.xiao@rock-chips.com>, 
-	Elaine Zhang <zhangqing@rock-chips.com>, Liang Chen <cl@rock-chips.com>, 
-	Yifeng Zhao <yifeng.zhao@rock-chips.com>, Jisheng Zhang <jszhang@kernel.org>, 
-	Jamie Iles <jamie@jamieiles.com>, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, 
-	dri-devel@lists.freedesktop.org, linux-i2c@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, 
-	linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org, 
-	kernel@collabora.com, Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+	Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-rockchip@lists.infradead.org, kernel@collabora.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 28 Aug 2024 at 17:11, Detlev Casanova
+On Wed, 28 Aug 2024 at 17:24, Detlev Casanova
 <detlev.casanova@collabora.com> wrote:
 >
-> The device is compatible with rk3588, so add an entry for the 2
-> compatibles together.
+> The SD card controller on the rk3576 SoC stores the phase settings into
+> the dw_mmc controller, so the code has to be adapted to implement that.
 >
-> The rk3576 device has a power-domain that needs to be on for the eMMC to
-> be used. Add it as a requirement.
+> Although the feature can be detected through the USRID register value, the
+> decision to use it is based on the compatible.
 >
-> Signed-off-by: Detlev Casanova <detlev.casanova@collabora.com>
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> The compatible for rk3576 is added in its own group of compatible to mark
+> that all devices compatible with rk3576 have internal phase settings and
+> don't have the ciu-drive and ciu-sample clocks.
+>
+> Changes since v4:
+> - Drop commit that ignores phase above 270 degrees
+> - Use a bool instead of int for internal_phase field
+> - Fix pahse typo
+>
+> Changes since v3:
+> - Remove internal phase auto detection
+> - Set compatible in own block, with own dt_parse function
+> - Add internal_phase variable
+> - Use function to set clock parameters based on internal_phase variable
+>   instead of multiple ifs
+> - Use different commit for skipping phases higher than 270
+>
+> Changes since v2:
+> - Drop rockchip,v2-tuning and use compatible-based detection
+> - Fix coding style
+>
+> Changes since v1:
+> - Renamed use-v2-tuning to v2-tuning
+> - Rewrite v2-tuning description as the hardware feature
+>
+> Detlev.
+>
+> Detlev Casanova (2):
+>   dt-bindings: mmc: Add support for rk3576 dw-mshc
+>   mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
+>
+> Shawn Lin (1):
+>   mmc: dw_mmc-rockchip: Add internal phase support
+>
+>  .../bindings/mmc/rockchip-dw-mshc.yaml        |   2 +
+>  drivers/mmc/host/dw_mmc-rockchip.c            | 217 ++++++++++++++++--
+>  2 files changed, 204 insertions(+), 15 deletions(-)
+>
 
-This one doesn't apply as I have other changes queued up.
-
-Can you please re-base and post a new version based upon
-git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next.
+The series applied for next, thanks!
 
 Kind regards
 Uffe
-
-> ---
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml      | 38 +++++++++++++------
->  1 file changed, 26 insertions(+), 12 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index 4d3031d9965f..aff8106ec361 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -10,18 +10,19 @@ maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
->    - Jisheng Zhang <Jisheng.Zhang@synaptics.com>
->
-> -allOf:
-> -  - $ref: mmc-controller.yaml#
-> -
->  properties:
->    compatible:
-> -    enum:
-> -      - rockchip,rk3568-dwcmshc
-> -      - rockchip,rk3588-dwcmshc
-> -      - snps,dwcmshc-sdhci
-> -      - sophgo,cv1800b-dwcmshc
-> -      - sophgo,sg2002-dwcmshc
-> -      - thead,th1520-dwcmshc
-> +    oneOf:
-> +      - items:
-> +          - const: rockchip,rk3576-dwcmshc
-> +          - const: rockchip,rk3588-dwcmshc
-> +      - enum:
-> +          - rockchip,rk3568-dwcmshc
-> +          - rockchip,rk3588-dwcmshc
-> +          - snps,dwcmshc-sdhci
-> +          - sophgo,cv1800b-dwcmshc
-> +          - sophgo,sg2002-dwcmshc
-> +          - thead,th1520-dwcmshc
->
->    reg:
->      maxItems: 1
-> @@ -38,7 +39,6 @@ properties:
->        - description: block clock for rockchip specified
->        - description: timer clock for rockchip specified
->
-> -
->    clock-names:
->      minItems: 1
->      items:
-> @@ -48,6 +48,9 @@ properties:
->        - const: block
->        - const: timer
->
-> +  power-domains:
-> +    maxItems: 1
-> +
->    resets:
->      maxItems: 5
->
-> @@ -63,7 +66,6 @@ properties:
->      description: Specify the number of delay for tx sampling.
->      $ref: /schemas/types.yaml#/definitions/uint8
->
-> -
->  required:
->    - compatible
->    - reg
-> @@ -71,6 +73,18 @@ required:
->    - clocks
->    - clock-names
->
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: rockchip,rk3576-dwcmshc
-> +    then:
-> +      properties:
-> +        power-domains:
-> +          minItems: 1
-> +
->  unevaluatedProperties: false
->
->  examples:
-> --
-> 2.46.0
->
