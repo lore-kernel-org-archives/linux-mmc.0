@@ -1,193 +1,139 @@
 Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 726F81D0958
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 426031D0492
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725367076; cv=none; b=AGiYDf2gD3j8BvwPYmUXhqPgj8nZDeV8gz8O6C9qXdxepMBNi5D1wwMkVPOSbRzwpAbljtM/yrc5qI4heS8gkf/mfzTa8K+LIR3hVcKMiIUt+xoTofB6ACIe2+dbVSdPywD09HsjDhutDvlv11BBVeXvkS0JQA3/c2dsiX69sxc=
+	t=1725367076; cv=none; b=g+SOdmgPYsZ+KCsGuUfGLmyFPP4ZlIKBOuIemkJ2//+jM2QkM1uWz7YYeHsbHTw9PZzsLgQ4MZMKlCRU+ZiPEYKHbkT34V6rxwpq4ixZKyBf2sQoE4nrRObIyt8tbFQDDRg2U+vIu7ZYl17mzooFOUbVqARxn6+q+gc08vrzzv8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1725367076; c=relaxed/simple;
-	bh=ZIRFzy8O/JFEsQSefz4z/A5D21hKvmWKwaIPahrMiZQ=;
+	bh=B9GQaZHEH+VhKCVUh+CkMNjIC0n6Uvue3Y1ZCqmBrTo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WFVDC7blJvTU9uE3HN5VBNkMPyaMVkMVPGESK1clwvyvQosozUke4nb3ikYfk/QdO7PuRiOnGowxBo+efmSZoTg4F+zUoovlUMJ/mhZnps9MUGd7PPY5sIvPjCphq0oACCkVTzMU68YoPpWHoIzFy/3wlbqXz0IwoGAbLDWcnOI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=L+6+HTbL; arc=none smtp.client-ip=209.85.219.173
+	 To:Cc:Content-Type; b=aHyYYD8yFwNrtvJOjzgvKfUzYTAfYJVi0dR8Ai0A1nFyYbmXfskeJs4f07Jg8KrvxkYpJ+sFiRbmqqN7TR6xJ0xNCxHmIJFW5a4YZLXHKnBkXr+R1hCfldoRUfPVeDvu5SKXYug4IUVyD2MiSV2nvpJKn4wn/59ztSZl8rmEKCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=p1FTf6oU; arc=none smtp.client-ip=209.85.219.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="L+6+HTbL"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e03caab48a2so4035214276.1
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:54 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="p1FTf6oU"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e1a8ae00f5eso3368594276.0
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725367073; x=1725971873; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1725367074; x=1725971874; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bowRaP9KnP0kRw4rrPkc8McUFkoLeQptHo1hDde4lEk=;
-        b=L+6+HTbLPCN/uX4X5CiLPL3GlOD2peWBawL6ChdIJVm7nX1h0acsP41YytQQPqi/rA
-         5Ewf50ZzDedyKYQoB2HN2G7IItQlJ/kaAa6hfbM7fEyL2dJxD3X3CsHfhEgb0AAC3qKr
-         LzFmu6vc7fa3gi6SSi6RPoDPTUYFCETMZ/9ujyQCN2QlB8bQiQ83reBlHaxkZ0sAzZ7x
-         RdKjIPMwC0YtCR1hYeh+8BSDoSOgfexCr+/Sa1T76mUKc+BECN0O2mMmPXkDJMmv71oo
-         /xYXfiVQVlUNfw50VZ8S9sWk94SBEgILyp9R0hujcaCeQuWOkoJJvu0f2oqdbhkybgtt
-         uqLg==
+        bh=ZnaiTsQJeVNyMyP3bsJIPbb/u/YgFuRtKmzebQGwg4k=;
+        b=p1FTf6oU/nIanxYl6Iqq1YXkhSc/Tlh3l0Z8M9zIAV9k+Z/r/aG3GUXaMfVtK4Cift
+         BgFfqOsN6uEFVkSrVQMtxOlvSQGo9m6Pd/q4mvcNYNnPQSYpX/syJqIVkL0n++P2niCV
+         zZ2RMgoa7KwplpGxiVS4ykLQap+YiVcZxaxLpWTgQWXe2rD0vb10zBVxp+ApBUjkpYdk
+         PMmkVEHflXrkn+WNR5oRybLE4nroZise+6t8ES7fTewP0yC36KDtJuKPfAh2kzm7gD5W
+         MtYis8PsV85o2H+1jWSkNjK1x+BskTntWSS+T8dQbxKJwawI6G5qNQ0hkdtQq/3CCIOb
+         rQHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725367073; x=1725971873;
+        d=1e100.net; s=20230601; t=1725367074; x=1725971874;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=bowRaP9KnP0kRw4rrPkc8McUFkoLeQptHo1hDde4lEk=;
-        b=caBQuvH0aKvn1rlCUb6ISF14N8QlNX9jromeHUFkqM1DPP72+Pg+E9pdvNC4RA6f57
-         s1DxmX0EHnyc2dBbmADdjEr2cvzyTv7rIjhfQJsF2o9G0elPZ1y2RtqrJWwFUA9sqsZb
-         5KoiWjuWWyLEcHLz0P/p7q8AvwiW33Bho9YUFA8fNYhU05WcvwJzYWZPgUy44edJrauU
-         4oTG6NJ+CgsvcB2vatFEBcV2uqAfIQEB9qFm5V/EyD9fsPzmrTx2/QnrO3Z6KxwM3JYM
-         xCRfqVMbVVoOkHwvKjc+ZXFLvqIIn3syw8cSFAswHiuGlbFk4yhbLpX9oWH5jbncH+Z9
-         Y2/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVDyM+kH2SOtK+j+SD2dzhwEEqlA/wZxUSfMtu5UUNFHf1zk5k0xTO3vosZrOtIqQmsvroFOBIJHS4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx9bAAtcDHfrAYVgi3paCBcBouHzI0XVU9sFWYdjJfC1eJofNqn
-	9ubqGwIv+cbEz3IqSihbfqjPNWA+hIwURfwcDokJ2NR4CYNjlVV3+gGPKBdtW34qpopHttKkcZL
-	eCwVNTV9JAObxog5WCjYggb0TaQZnXBuLF2eg0m81OkT/C5Q2
-X-Google-Smtp-Source: AGHT+IEaowgdIJ3AzaGZI6j/OEXNzDMqgE0yQw9WffqvnjW3A9WpWnsw2p2fKeOMZaFS9fN+AIIW+6GY8wPVS5fO5fQ=
-X-Received: by 2002:a25:8583:0:b0:e1a:89d7:9271 with SMTP id
- 3f1490d57ef6-e1a89d79563mr8359242276.21.1725367067352; Tue, 03 Sep 2024
- 05:37:47 -0700 (PDT)
+        bh=ZnaiTsQJeVNyMyP3bsJIPbb/u/YgFuRtKmzebQGwg4k=;
+        b=i80thMnnxhgAQXkf8DBCe+fvxYlIti7HqbQ5HFFc8jR54BueOh7d1YQlFsQeY4XXDK
+         L5xf/3LS1VErKotlckj3+U5qEuJptorsO/E7HKuxPEL+EMUmbxhXeM1HJU8ozckHshuc
+         JS8QbZ97EwtglDjFs54PEe6fBJE8xoS5WBAiE0cshgoudTLI/t87hsMBwuvLMSmb/rek
+         UoYyGqjpmVCAZJr1FAbCJLatx+O4NQ6dvN12NmSVsBBu/2akewdz2TWff7ybYqvhRmoG
+         r9FN4j0IsV61kH084sXyq4p0kF6Dmh2MmLu/ExH8KMVLR16BaeXlRTDTxt26RgIOxTjI
+         vt3w==
+X-Forwarded-Encrypted: i=1; AJvYcCWe0GdgzaOOQSJMCEU3T4yo7AS/IKSzXtzyP+WY/FsZyTqv6Be8WACEnORgo4JrZV+kE0XBAlAupkM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxyY5lkZYDUhDl3KS2n/CvoMPpStw70fRwuSIP1KYy0+6nLOAes
+	j0SJBZi5Ylte1ppOgC6TeWf84LcTqBkV9LuNFilR063FZzYPel60h5tR+o3Qvmdp/NUhvjbba8z
+	4Drip2i6RU7H1T85neEtHl5s0+WmLKqMR9HcfbQ/59k8+6FVu
+X-Google-Smtp-Source: AGHT+IG17HynGU3mjtWr4zoUdmkHjFCO/zDNCMk5KVQ8L8Ku8TSYbAHSHm4n94LAVjR69BcrXhgysMejjLj105b0f30=
+X-Received: by 2002:a05:6902:150f:b0:e16:6feb:e615 with SMTP id
+ 3f1490d57ef6-e1a7a1d2633mr15093173276.48.1725367074096; Tue, 03 Sep 2024
+ 05:37:54 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CGME20240829024728epcas1p2847ea2802d1cc4edeb74559c67925622@epcas1p2.samsung.com>
- <20240829024709.402285-1-cw9316.lee@samsung.com>
-In-Reply-To: <20240829024709.402285-1-cw9316.lee@samsung.com>
+References: <CGME20240829061842epcas1p25b97a685d0946c360338adf716bfaf2b@epcas1p2.samsung.com>
+ <20240829061823.3718-1-sh8267.baek@samsung.com> <20240829061823.3718-3-sh8267.baek@samsung.com>
+In-Reply-To: <20240829061823.3718-3-sh8267.baek@samsung.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 3 Sep 2024 14:37:11 +0200
-Message-ID: <CAPDyKFqPq3QOj948WfARerU3fByaVoAsfeu5kEdEhHHV6iVCEw@mail.gmail.com>
-Subject: Re: [PATCH] mmc:sd:Replace the argument of mmc_sd_switch with the
- already declared define
-To: Chanwoo Lee <cw9316.lee@samsung.com>
-Cc: ricardo@marliere.net, avri.altman@wdc.com, dsimic@manjaro.org, 
-	jonathan@raspberrypi.com, xiaokeqinhealth@126.com, linux-mmc@vger.kernel.org
+Date: Tue, 3 Sep 2024 14:37:18 +0200
+Message-ID: <CAPDyKFonYhKdJuFN_v=S-MCyRHUJ8015fxuJ7xeG7jQtX-9xCw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] cqhci-core: Make use cqhci_halted() routine
+To: Seunghwan Baek <sh8267.baek@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	ritesh.list@gmail.com, quic_asutoshd@quicinc.com, adrian.hunter@intel.com, 
+	grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com, 
+	dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com, 
+	cw9316.lee@samsung.com, wkon.kim@samsung.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 29 Aug 2024 at 04:47, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
+On Thu, 29 Aug 2024 at 08:18, Seunghwan Baek <sh8267.baek@samsung.com> wrote:
 >
-> Replace with already defined values for readability.
-> And since the value of the 'mode' parameter is only used as 0 or 1,
-> I changed the data type from 'int' to 'bool'.
+> Code to check whether cqe is in halt state is modified to cqhci_halted,
+> which has already been implemented.
 >
-> --------------------------------------------------
-> /sd.h
-> /*
->  * SD_SWITCH argument format:
->  *      [31] Check (0) or switch (1)
-> ...
->
-> /*
->  * SD_SWITCH mode
->  */
->   define SD_SWITCH_CHECK         0
->   define SD_SWITCH_SET           1
-> -------------------------------------------------
->
-> Signed-off-by: Chanwoo Lee <cw9316.lee@samsung.com>
+> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
 
-Applied for next, thanks!
+Applied for next (and by amending the commit message according to
+suggestions from Adrian), thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/sd.c     | 13 ++++++++-----
->  drivers/mmc/core/sd_ops.c |  3 +--
->  include/linux/mmc/host.h  |  3 ++-
->  3 files changed, 11 insertions(+), 8 deletions(-)
+>  drivers/mmc/host/cqhci-core.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ee37ad14e79e..d7318c2647da 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -346,7 +346,7 @@ static int mmc_read_switch(struct mmc_card *card)
->          * The argument does not matter, as the support bits do not
->          * change with the arguments.
->          */
-> -       err = mmc_sd_switch(card, 0, 0, 0, status);
-> +       err = mmc_sd_switch(card, SD_SWITCH_CHECK, 0, 0, status);
->         if (err) {
->                 /*
->                  * If the host or the card can't do the switch,
-> @@ -402,7 +402,8 @@ int mmc_sd_switch_hs(struct mmc_card *card)
->         if (!status)
->                 return -ENOMEM;
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index a02da26a1efd..178277d90c31 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -33,6 +33,11 @@ struct cqhci_slot {
+>  #define CQHCI_HOST_OTHER       BIT(4)
+>  };
 >
-> -       err = mmc_sd_switch(card, 1, 0, HIGH_SPEED_BUS_SPEED, status);
-> +       err = mmc_sd_switch(card, SD_SWITCH_SET, 0,
-> +                       HIGH_SPEED_BUS_SPEED, status);
->         if (err)
->                 goto out;
->
-> @@ -434,7 +435,8 @@ static int sd_select_driver_type(struct mmc_card *card, u8 *status)
->                                                    card_drv_type, &drv_type);
->
->         if (drive_strength) {
-> -               err = mmc_sd_switch(card, 1, 2, drive_strength, status);
-> +               err = mmc_sd_switch(card, SD_SWITCH_SET, 2,
-> +                               drive_strength, status);
->                 if (err)
->                         return err;
->                 if ((status[15] & 0xF) != drive_strength) {
-> @@ -514,7 +516,7 @@ static int sd_set_bus_speed_mode(struct mmc_card *card, u8 *status)
->                 return 0;
->         }
->
-> -       err = mmc_sd_switch(card, 1, 0, card->sd_bus_speed, status);
-> +       err = mmc_sd_switch(card, SD_SWITCH_SET, 0, card->sd_bus_speed, status);
->         if (err)
->                 return err;
->
-> @@ -605,7 +607,8 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->                 current_limit = SD_SET_CURRENT_LIMIT_200;
->
->         if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
-> -               err = mmc_sd_switch(card, 1, 3, current_limit, status);
-> +               err = mmc_sd_switch(card, SD_SWITCH_SET, 3,
-> +                               current_limit, status);
->                 if (err)
->                         return err;
->
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 8b9b34286ef3..f93c392040ae 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -336,14 +336,13 @@ int mmc_app_send_scr(struct mmc_card *card)
->         return 0;
->  }
->
-> -int mmc_sd_switch(struct mmc_card *card, int mode, int group,
-> +int mmc_sd_switch(struct mmc_card *card, bool mode, int group,
->         u8 value, u8 *resp)
+> +static bool cqhci_halted(struct cqhci_host *cq_host)
+> +{
+> +       return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
+> +}
+> +
+>  static inline u8 *get_desc(struct cqhci_host *cq_host, u8 tag)
 >  {
->         u32 cmd_args;
+>         return cq_host->desc_base + (tag * cq_host->slot_sz);
+> @@ -282,7 +287,7 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
 >
->         /* NOTE: caller guarantees resp is heap-allocated */
+>         cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
 >
-> -       mode = !!mode;
->         value &= 0xF;
->         cmd_args = mode << 31 | 0x00FFFFFF;
->         cmd_args &= ~(0xF << (group * 4));
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7140e1a7edb4..8fc2b328ec4d 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -649,7 +649,8 @@ static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
->         host->err_stats[stat] += 1;
+> -       if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
+> +       if (cqhci_halted(cq_host))
+>                 cqhci_writel(cq_host, 0, CQHCI_CTL);
+>
+>         mmc->cqe_on = true;
+> @@ -617,7 +622,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 cqhci_writel(cq_host, 0, CQHCI_CTL);
+>                 mmc->cqe_on = true;
+>                 pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+> -               if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
+> +               if (cqhci_halted(cq_host)) {
+>                         pr_err("%s: cqhci: CQE failed to exit halt state\n",
+>                                mmc_hostname(mmc));
+>                 }
+> @@ -953,11 +958,6 @@ static bool cqhci_clear_all_tasks(struct mmc_host *mmc, unsigned int timeout)
+>         return ret;
 >  }
 >
-> -int mmc_sd_switch(struct mmc_card *card, int mode, int group, u8 value, u8 *resp);
-> +int mmc_sd_switch(struct mmc_card *card, bool mode, int group,
-> +               u8 value, u8 *resp);
->  int mmc_send_status(struct mmc_card *card, u32 *status);
->  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
->  int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+> -static bool cqhci_halted(struct cqhci_host *cq_host)
+> -{
+> -       return cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT;
+> -}
+> -
+>  static bool cqhci_halt(struct mmc_host *mmc, unsigned int timeout)
+>  {
+>         struct cqhci_host *cq_host = mmc->cqe_private;
 > --
-> 2.34.1
+> 2.17.1
 >
