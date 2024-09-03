@@ -1,123 +1,107 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE7CA1A0BCB
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D64C91D0492
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725367066; cv=none; b=VF/RTR1ND3KwqWKqJAlnAll/CnYH1aWHrPs4NmxjAxJjZmn1CHYfEuVqZ2kroYeX2cN1jm7GL+6l5zUA/yN8ZENsstGCRwZMaIc8xZGkF+ndStwc0chEQH9I9JJM0BhGE9GXu3gyj98XrTPXjE6CSuZpUWyv3y2jBGGIpxPeE9o=
+	t=1725367074; cv=none; b=rX3E4avunbmAWgive1EmosclT4XNZEbcvDh4rSx0uVxYO44yayoJIN8hZ7LT2gn3J5j7AWqCgpo54P3fxzzkBAF3QoYDw/zz8im7DTeEeDyCx+wAHwzTQr+G5OHpqTZ4YLT07sCFEfvD7RaroaCSzPl8eASR9OwE/vdVsQm6dYM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725367066; c=relaxed/simple;
-	bh=w0NDR4g3yWZcVdllP+36hvrmByCu7wczMm3XTMj/jGM=;
+	s=arc-20240116; t=1725367074; c=relaxed/simple;
+	bh=vAJYUB1JYAdTSCX3IiQu6MnRzSD3ZDq0H7nrMseKveQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=a/wCE/yFR6rNsgWMwZKdMbJM7rFBPhCqtulO9Qfzgae4Q5WfO87xXaxDAtm6FFC5XcrycXV44Y9IX7ww+OWE596lTNsc/6ulSOBwsumx2XyFWf/bDS1JUh6wT4hs0jAm+mDZJvr4ik3Kb8hJGH5PX8Z3Xaswi5Ki5b6+qgWtCns=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=B4TNSYdR; arc=none smtp.client-ip=209.85.219.178
+	 To:Cc:Content-Type; b=Ay2uaADvYuHN4ijW95gvvFpk43cFRI3mNur5JFVh+fm0hTMj2+VmZxjwsrVf0Fo9zCC8dGT5k0xKSmkiV9UQffWgN/ZKjEf06J5WJwMB7vPyziwO5JfBCR5fGdyD7r5VEHTvlyzoPj1FbAy7aV3pZG1lEFQZlF19dhcnnHQc31o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DSHOxEmR; arc=none smtp.client-ip=209.85.219.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="B4TNSYdR"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e116a5c3922so4991197276.1
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:44 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DSHOxEmR"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e1a74ee4c75so4171993276.3
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725367064; x=1725971864; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1725367071; x=1725971871; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=xRSvMnDTMDKxhA7VhtYh7uLTsocsLyQdi8v0n2nl6pk=;
-        b=B4TNSYdROzfSRY2GSYbhWSiTJ2y+IProWkB1BIpcDNtrVd8Vg8k38hVWC3aoFTjSZd
-         B1U5eIWJZ3QRkNkowCgI5SVw6csdua6+V6O91OmPrSsiNjtjUa1OCVFc0AKuRRNOmAI3
-         rQ+QwqN7MrpYOmE2ogJjEkrKYuEjniKLiPcm4IOCceNM3UZx27C1EDr1saEKbzmux6uf
-         R7KoerIEh7R7v5timvpeMMnjiyJezffBhktxJ3gr2iQBGMy5qfm5hEWtuU7XxDDwe03K
-         0qpxeeP/BQOEWKVTThAxpZMFn5D4xzkxUQsWcjCCxkc8LOivTFrS2hbwS7ZaaaS8nPoI
-         pABg==
+        bh=gDo+yVD+3RYI+5zJwy/WNiTtLCeqz/kJT8uN33xHNmA=;
+        b=DSHOxEmRM+WOqbDOk8xdSm/1Rg8Rdt4NVzNc5xWfnTKdbAscy4IchfB7kEvG4/BXzT
+         Z8kEnjYRDRJvr1kQvAxLvNJ/Rkhtv8odHEeLM15wHFZrjVGbRtuB7fY1gp5ipUQELxMc
+         lWkDZVkYhLSnLxMXy3UvZL2g3OqC5AlFS16L0a4bvXNs/Z+Erasrclayn5VxJc+lbrGR
+         aFsvrIO79DyOFJNKEWVq3bB2Oy84bfp7UdlP/9YQYrI3yK6KSDuqEQbX9TOfiSGYekLR
+         5SssdRf9nRrOY0jzzeaM0E1uYVNWTTFjyPwrevp7dw8A/7Sd+DnvPbs7NUKrOqIvUGbq
+         OCgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725367064; x=1725971864;
+        d=1e100.net; s=20230601; t=1725367071; x=1725971871;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=xRSvMnDTMDKxhA7VhtYh7uLTsocsLyQdi8v0n2nl6pk=;
-        b=btW91246FG/3S47EAvIXIyRxsvQ7Zj55mb1YPd2X0EbqS+orix+YVLXfr6w7EZeZfS
-         tahzFKJviWsXDDuHyFmEP5jJlP1UFvX7q7ptrSQ4efpXZpfCfcZBagN5yORDKBqGtFXH
-         9ZSKGtEt9MyQm7P/LW+OB8VNZfuF37+GPyUKRh/7ERfKu8hsP/BG89BHGb/oVBA88JuL
-         nhNAjG8LxfuSPNXpTzRyNFh+PdT/uoN2GMssYid4v0s+vfz5xB23XSI308bXORkVJi54
-         Hky5eyB82pa3sNlickz0CyAiZUpW2usD4DjB57d9EXQgfS8ZbwNVIf2QAUiBSl+FLoxC
-         5uYQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXhHt8cuu/+lIeF+8Oowl2mfszt/nZlmuRl5a3ZiPbvd5wwKH6x4/Q0uvgKCfjvbgFaCF+awj48HBg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxC51SrbSFmKUD1EVt7uXk2EEpEaehpLwsOUW6SFmzTlD1pWhwa
-	8IJ8ce+DG4ki1fODfJ/0u4YumbpG8rdOg+j4fMZ0XgPcz2nitooV8y1mNiXZhbezQzFg+tHI+KX
-	VoaiRIRzojvNRBTe7X1KgZSmYkKp4vC316mPC4Q==
-X-Google-Smtp-Source: AGHT+IFQF8b0/Dxwwp4pWzLNZOOlIYeobiuC9YLSQvh3EAc6u9FMJheFaNSQtuz4xhHdNlC0iKN7ML0RWiRLCHQ408U=
-X-Received: by 2002:a05:6902:1b8c:b0:e13:c6ec:2a7d with SMTP id
- 3f1490d57ef6-e1a7a1a1cdemr15286662276.37.1725367063845; Tue, 03 Sep 2024
- 05:37:43 -0700 (PDT)
+        bh=gDo+yVD+3RYI+5zJwy/WNiTtLCeqz/kJT8uN33xHNmA=;
+        b=jzTN+m7Kjfc/m6RbqTcyDEbP9UCYxcfjBStMMF+++NxDjGQtismhA6+pr+rh5eu3Kb
+         EdTXfyf2/OlobNdGiGqXF8h50ByXJhcibfJ14o3oCaM9KHSMrdsESYi7nmQQV6nQ32hi
+         gOhi7K82EI6zPzOpffMKNkbIizXCCS6gw1HPirVVR1YK8qNLOteQDPk6azZF7Nc2wgPU
+         l3z2fvaFRwLcnxuIFVWwJCHAU4nmpd+km1Hs5gv7II3yvKmWXKDIfdEfQ2i4hHNR9SEl
+         lLl/mi4w5UUqLG+qoJJWMfICvl3ayU9iYgZxS1KbvbqlCDX5h7eq+HJvc+pKxu/TaT3s
+         vLpA==
+X-Forwarded-Encrypted: i=1; AJvYcCVdxzPsqJwSivniGDzbtkp7tF2Kp4g/w6Uckke1eynyltsX3kyx2Q34SphuFbu0Qnk5HzvM/Td0YQM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwdyJUiMKp1xOx9IxzjKK80vzsM1+DsUSAA3MALjUaiuRZA3h+2
+	vj0UaB3c9Uy5xUU2sbhPV9uj/PHSSzXxWa7LApEYmCNbc6z/vJ0f/Vsz3A489SkKzjE10WhI5YQ
+	8VUvSJabqr2Mqay70UDHC6z2RODUe/UlSGwSGRQ==
+X-Google-Smtp-Source: AGHT+IG7wVWvBwVm8d9fEbO3Oflgii2VupDav0zWIgeWSdeL76IOqUTeZJcnUewS4XpCOBcCGjv00I2YWnT5Qsdy31k=
+X-Received: by 2002:a05:6902:2493:b0:e11:7850:ac6e with SMTP id
+ 3f1490d57ef6-e1a7a1d0785mr13896773276.50.1725367070896; Tue, 03 Sep 2024
+ 05:37:50 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <010201919996ef8a-db8bbe89-3c18-4dc3-bd0c-6498f09d978a-000000@eu-west-1.amazonses.com>
-In-Reply-To: <010201919996ef8a-db8bbe89-3c18-4dc3-bd0c-6498f09d978a-000000@eu-west-1.amazonses.com>
+References: <CGME20240829061840epcas1p4ceeaea9b00a34cae0c2e82652be0d0ee@epcas1p4.samsung.com>
+ <20240829061823.3718-1-sh8267.baek@samsung.com> <20240829061823.3718-2-sh8267.baek@samsung.com>
+In-Reply-To: <20240829061823.3718-2-sh8267.baek@samsung.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 3 Sep 2024 14:37:07 +0200
-Message-ID: <CAPDyKFrZKq69yHnA1w813b6nwy1Bn_A=1c133CSk9scO1qMxEg@mail.gmail.com>
-Subject: Re: [PATCH v5 0/3] Add dw_mmc support for rk3576
-To: Detlev Casanova <detlev.casanova@collabora.com>
-Cc: linux-kernel@vger.kernel.org, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Heiko Stuebner <heiko@sntech.de>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-rockchip@lists.infradead.org, kernel@collabora.com
+Date: Tue, 3 Sep 2024 14:37:15 +0200
+Message-ID: <CAPDyKFrpLoV_X0cp4ycEeEj_Vhv0+1nmQ87+QVNV-o+Z0YEgmw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: cqhci: Fix checking of CQHCI_HALT state
+To: Seunghwan Baek <sh8267.baek@samsung.com>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	ritesh.list@gmail.com, quic_asutoshd@quicinc.com, adrian.hunter@intel.com, 
+	grant.jung@samsung.com, jt77.jang@samsung.com, junwoo80.lee@samsung.com, 
+	dh0421.hwang@samsung.com, jangsub.yi@samsung.com, sh043.lee@samsung.com, 
+	cw9316.lee@samsung.com, wkon.kim@samsung.com, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 28 Aug 2024 at 17:24, Detlev Casanova
-<detlev.casanova@collabora.com> wrote:
+On Thu, 29 Aug 2024 at 08:18, Seunghwan Baek <sh8267.baek@samsung.com> wrote:
 >
-> The SD card controller on the rk3576 SoC stores the phase settings into
-> the dw_mmc controller, so the code has to be adapted to implement that.
+> To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
+> bit. At this time, we need to check with &, not &&.
 >
-> Although the feature can be detected through the USRID register value, the
-> decision to use it is based on the compatible.
->
-> The compatible for rk3576 is added in its own group of compatible to mark
-> that all devices compatible with rk3576 have internal phase settings and
-> don't have the ciu-drive and ciu-sample clocks.
->
-> Changes since v4:
-> - Drop commit that ignores phase above 270 degrees
-> - Use a bool instead of int for internal_phase field
-> - Fix pahse typo
->
-> Changes since v3:
-> - Remove internal phase auto detection
-> - Set compatible in own block, with own dt_parse function
-> - Add internal_phase variable
-> - Use function to set clock parameters based on internal_phase variable
->   instead of multiple ifs
-> - Use different commit for skipping phases higher than 270
->
-> Changes since v2:
-> - Drop rockchip,v2-tuning and use compatible-based detection
-> - Fix coding style
->
-> Changes since v1:
-> - Renamed use-v2-tuning to v2-tuning
-> - Rewrite v2-tuning description as the hardware feature
->
-> Detlev.
->
-> Detlev Casanova (2):
->   dt-bindings: mmc: Add support for rk3576 dw-mshc
->   mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
->
-> Shawn Lin (1):
->   mmc: dw_mmc-rockchip: Add internal phase support
->
->  .../bindings/mmc/rockchip-dw-mshc.yaml        |   2 +
->  drivers/mmc/host/dw_mmc-rockchip.c            | 217 ++++++++++++++++--
->  2 files changed, 204 insertions(+), 15 deletions(-)
->
+> Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
 
-The series applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/cqhci-core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index c14d7251d0bb..a02da26a1efd 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -617,7 +617,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 cqhci_writel(cq_host, 0, CQHCI_CTL);
+>                 mmc->cqe_on = true;
+>                 pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+> -               if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
+> +               if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
+>                         pr_err("%s: cqhci: CQE failed to exit halt state\n",
+>                                mmc_hostname(mmc));
+>                 }
+> --
+> 2.17.1
+>
