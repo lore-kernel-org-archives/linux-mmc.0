@@ -1,77 +1,81 @@
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
+Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3C3E1D86FB
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:37:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B0EF1DA0F7
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Sep 2024 12:38:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725367080; cv=none; b=FUHQABapgjGwcU94mI0eqy3VnK+0GC2xms5ZsJXJfiWUjrFwrLzKp4+9boSAO8aeDJGte0dvc9Kw+r008I4OP9syAjGg9w/V6vmOiYdEmQsufQd6tuyGi6Uzk5WvUSAz7x5AeqhzLUW6EBDf4Y4hQ2WzmuX7gEay/na9VHgl+9A=
+	t=1725367083; cv=none; b=LtmX4pXRb85fxPlCuZ62Wa0LiywonhQjwhfWmCcLG7CJjYlhAkvcu6LQ3Brv6TEx9/ITjBwlIcxCOBqT4ULvk9JMNjFsOmhJBdYwuLu5T1D1hPAeyKYFaGftktYmIh31XhXEPhZ8LWke66HfDA5lQXWc5R1SzOG24x4BvjJZZeA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725367080; c=relaxed/simple;
-	bh=uu6Yoeqi+RNoig3ATUPsT67nAJWUqDSiEcB/mI869tk=;
+	s=arc-20240116; t=1725367083; c=relaxed/simple;
+	bh=so07fhMMxdSs5dvGJCXgXpjSzTunUkiCXhADIMW4sUA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=X2PdpvkCBiTuDfel8BGfbJKtZSQ68n4AHxT0tbCeA9x87oeRnSiQHD5dGP0Tf/ql4P8fpfIofFLL0n6sxT+PUer0x4EddKhyiq/VZMn3s0qo/Wbj+ECjGxkazI4197yJl+Lpiv3YPAgdiiO9queTdBVkZ/GGwZ2pYmC5fMYDTE4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VS3kc797; arc=none smtp.client-ip=209.85.219.170
+	 To:Cc:Content-Type; b=f2OWXvO8cDPR0FoNHM8XPn+lIC+FiK0jf9CZHjB75CoruLRVDzHT5Z8oNbWrEDnlDi8RxMG6QPm98WGiTRcg1f7C36Os/ZnPBUICMP7XSzL9zhScaEWrM5GSJf/SEEUWucXfIxODKPvyCcftMEIHgWcaRdlQLPgG+XYQ5SQMmsM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rS52qQI3; arc=none smtp.client-ip=209.85.219.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VS3kc797"
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e17c1881a52so4423742276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:37:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rS52qQI3"
+Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e1a819488e3so3851979276.3
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Sep 2024 05:38:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725367078; x=1725971878; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1725367081; x=1725971881; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=/ttVzkkd4yGmrGeqOJ869ESzGGtHpDRb7/D4IC8eBd4=;
-        b=VS3kc797SAsXs7KxZFv1Ynhn/mC3GBHrU5vSBcwkET2YsMClY5NZDIftw1/GF76o5R
-         5c53yBYiw9M3Ak/M/JTbIcPYaGNmXX63DjRSCW/dsnwXaBtYu5nt5Z7kUQiiBwH0/k5I
-         lJITqAur9HDLJvD+nSzPtbR/2gTCRZ95sgfr4iyjgKoPFX0WtjfQ7PTFZOO2G0StoFRe
-         bddtq1K94RtRKPghvfpXW9Tvsblyr9O8eT/R3cE7Y/3jLffrUg8I3KOIpkRHMfWR+1xs
-         c/2utaYQzxw+Oc3ZK+8iJuyBaBkzqb8TkxsT04ZVkL0fp0+AZl+uMKOko85J24SiW7ei
-         MGsw==
+        bh=A/GPlpR6N9raBXPZjYRGmkOR7a/Tjc3UpicaLb0zTl8=;
+        b=rS52qQI3D1xu2JBgaSxEWPuftqx9Sc2QgWxce0CHVLpP8oPbSuHLgYfmawRtZXa5B3
+         /rbxEG5zkMNqTkIOpTywCmAAjAjc/6Yaj6uRmD5uN+04wUrcopV2to7+pIJqaL5bDp+B
+         e4+SLru1YH+fsYzRXmcHGdDTJxu4CpIJ/DCU5Sh190V2hfCEOzmI9tPNH+/FpCjoe9MP
+         wkdo7byrzmgq+48woTpK5oagDbwWHycMIQPPJWjy2DlYVUwj1vjS9YNxG5VvKy3c+wbI
+         vbxvkDHjzyzT8jlWdeRciMJgur3ZDzdMhCFKafOi/ZoFqxs4xb0MN5w5lTtSR8bIEhUC
+         zxdQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725367078; x=1725971878;
+        d=1e100.net; s=20230601; t=1725367081; x=1725971881;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=/ttVzkkd4yGmrGeqOJ869ESzGGtHpDRb7/D4IC8eBd4=;
-        b=eWn3GzCR25Y/Lt3d572G1eK36bpu4JmqpDfYvDwDOyIWMU2LfELaqChMD3RhffO2vB
-         vy6CB4hOl9YTNdgNKP6B9234ynAehaA8H/v+rH47FyEFfgihrvbjeH1L+5FvI+aKyPlS
-         +4iMHg4Eh5QZyzPzPS9IZbLG/5RrGZfSQNe0TbhuhPLQpRq+oTdwuz8Q4sY2ORjw86NL
-         9ZAg5Ozt0ev7T29dIXCmin9PzRoU5wIW3SVBK1/kmoev+/eeWXSuymEiKWGcas5QX6cP
-         in3OIcjXXhKwal9sZIEm9OrgRU9n2VB+uTDY9XM0kbCiVUslrUnnzd2h2N0chm/y3WgA
-         XHgg==
-X-Gm-Message-State: AOJu0YznTYcRdnjr1mhlQqsqTORXZ9yiOzpIvcX6/oco4LBxGJOrZ/Hy
-	of0xKxoN8PM7qmVDVSWpFhcCQN5LaVawJLJhRb3ee7O0nwbevnL22p72k5CsyF47rUro5YfCyWl
-	G/wkCtrEcWzSxXkKVFEptfXcGkehLVbBjcmFaPQ==
-X-Google-Smtp-Source: AGHT+IHHBkaojbuJ6rcO32k08NkULZE8JcrC5eAZHxo6A82M/tYG2W17RLlunsSJO2ZGGq1x90VJ7lCRhqfhEMPtblE=
-X-Received: by 2002:a25:8312:0:b0:e16:5174:fdaf with SMTP id
- 3f1490d57ef6-e1a5c613ad4mr15597080276.1.1725367077643; Tue, 03 Sep 2024
- 05:37:57 -0700 (PDT)
+        bh=A/GPlpR6N9raBXPZjYRGmkOR7a/Tjc3UpicaLb0zTl8=;
+        b=Z4nv+W31DOQ0D2iGUzFas1ebEZDqN92us8DvvAmpjG9OEw6QLGVDna4pGyJL1urxKQ
+         kYpLs+I3n53/xe2xPvb46lEKZu8t8MQ5Petib93pcLvI5tbqgXxop0Pmc2gBMNmXodxr
+         3ZTPcH64xNnLMgDvekGOaafOycGUGHI24sbCSIepsWH/eH70G83pT11QgIzd6DwcKoAq
+         genF3ahQOcsy4Iin3MAetVSyvRs+v602Td9zB0OeUxHLSwVmBubEHbUwMgJm4/iys4It
+         odAGHTGEWEqxVppgtBnbJzOuUnVfjEou8I2xhCea2uvVHxLc/MijIdvg8JBh3RzTOoRn
+         BmRA==
+X-Gm-Message-State: AOJu0Yy+/KHMg1hI+lQYA73GGXyPO0TrqAH9yDJHRRHsok6otCstiCX9
+	kSOSVyGqUeeBrBhLxSVg4NPSrsZ/IKLRQvmdVTOlNgNypywo3xxo0DVzlU08g/hN6lLFFPPLySc
+	zSJ4Z8FCanMFT0qYG4GRpkBIiyl2jzwPX8OKW9w==
+X-Google-Smtp-Source: AGHT+IEjte3d2I7iHlCrFM55Q6V1uxJf1u47/kPDXpSXZgFMB17aGufprFsCA9FCvY15MVqgrv9KtM+/VSWPoSdQk3o=
+X-Received: by 2002:a05:6902:c06:b0:e16:19f7:9702 with SMTP id
+ 3f1490d57ef6-e1a7a01cc00mr16390835276.24.1725367081048; Tue, 03 Sep 2024
+ 05:38:01 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240901173309.7124-1-riyandhiman14@gmail.com>
-In-Reply-To: <20240901173309.7124-1-riyandhiman14@gmail.com>
+References: <20240901182244.45543-1-riyandhiman14@gmail.com>
+In-Reply-To: <20240901182244.45543-1-riyandhiman14@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 3 Sep 2024 14:37:22 +0200
-Message-ID: <CAPDyKFoFZEKwhAgC4UT7NP1ZaVBj1BjLk79LcUmTg-wSDs7Y+Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Calculate size from pointer
+Date: Tue, 3 Sep 2024 14:37:25 +0200
+Message-ID: <CAPDyKFqdu07MwGyoJ8oMmpFw2u2=1zc8m6LCais8Wva58uTcug@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: convert simple_stroul to kstroul
 To: Riyan Dhiman <riyandhiman14@gmail.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 1 Sept 2024 at 19:33, Riyan Dhiman <riyandhiman14@gmail.com> wrote:
+On Sun, 1 Sept 2024 at 20:22, Riyan Dhiman <riyandhiman14@gmail.com> wrote:
 >
-> Calculate the size from pointer instead of
-> struct to adhere to linux kernel coding style.
+> simple_strtoul() is obsolete and lacks proper error handling, making it
+> unsafe for converting strings to unsigned long values. Replace it with
+> kstrtoul(), which provides robust error checking and better safety.
 >
-> Issue reported by checkpatch.
+> This change improves the reliability of the string-to-integer conversion
+> and aligns with current kernel coding standards. Error handling is added
+> to catch conversion failures, returning -EINVAL when input is invalid.
 >
-> This commit has no functional changes.
+> Issue reported by checkpatch:
+> - WARNING: simple_strtoul is obsolete, use kstrtoul instead
 >
 > Signed-off-by: Riyan Dhiman <riyandhiman14@gmail.com>
 
@@ -82,22 +86,27 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/block.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/core/block.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 2c9963248fcb..dfd495e86985 100644
+> index 2c9963248fcb..140d2b3504b3 100644
 > --- a/drivers/mmc/core/block.c
 > +++ b/drivers/mmc/core/block.c
-> @@ -2484,7 +2484,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->                 return ERR_PTR(devidx);
->         }
->
-> -       md = kzalloc(sizeof(struct mmc_blk_data), GFP_KERNEL);
-> +       md = kzalloc(sizeof(*md), GFP_KERNEL);
->         if (!md) {
->                 ret = -ENOMEM;
+> @@ -307,10 +307,10 @@ static ssize_t force_ro_store(struct device *dev, struct device_attribute *attr,
+>                               const char *buf, size_t count)
+>  {
+>         int ret;
+> -       char *end;
+>         struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+> -       unsigned long set = simple_strtoul(buf, &end, 0);
+> -       if (end == buf) {
+> +       unsigned long set;
+> +
+> +       if (kstrtoul(buf, 0, &set)) {
+>                 ret = -EINVAL;
 >                 goto out;
+>         }
 > --
 > 2.46.0
 >
