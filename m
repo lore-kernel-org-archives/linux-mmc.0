@@ -1,133 +1,142 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E30031DC198;
-	Wed,  4 Sep 2024 14:26:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A0911DC07C
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Sep 2024 14:54:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725459962; cv=none; b=qFTbWHbw8Gu8ddYKUm/6dtmqU5T9urHwMEmC+wmeXpTXRO0rd2pEMf3lCqhRCKGGYMYABQMr+0RfOOPU+TjrwKik9CG0iC+Y83jHyvAMpDKJrYZdl9QEH7S1MMjGNYTwgwT2Em5HegJhNhNgGZmWUkfziX2z6EDGLmkbhvpd/Jo=
+	t=1725461680; cv=none; b=NSwgMhGGxZyqDnY0774JhiEIPiQf8cBnl8B/yWef5AtuzE+UpwD3F/VSrJmgNSNcglGHHeXd+O6fs5HEYlrKe8ccvHBD3sRN3U0U78S+XTHYiO0gwCqsDQcghM9O7mPSuCag4aw/Y3suOrKAsm9FnZ53XX8T84oWpR1FVNwtB7I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725459962; c=relaxed/simple;
-	bh=IWU/5vUW/co70eztiWwvLMjG3Rr6wvuy04MQhdILmFA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Jmcv51kUDmflYC2vLXh2G5MH27i4Vic8/2RW7ajCPLPaWUo6EpjGi28NGXevlF571sGScRsOomcb7NxOZrSmzKNmWtoXUUrznXqFmA2GaaT54rcEUe9iDN99Rw93MMDNbRBSG4oCcTtZ+6YK1hzvXAbNl1cK/x7IEkk6y5wxyjo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lBozVtzi; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1725461680; c=relaxed/simple;
+	bh=6B5qNYBBWXDzIWUXBlL8rLsSFcIl7KCzo59Rce5aQQ8=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=tfhdlIihztLEJn/vyr4/PIeTrBETNttzzVK0y66LdZgAYywhfGEBbvsb7Jn8chH0lH5r6CRzLI94+ypvtVVFVPYVJoebIwPm6NdfzvOgqh4dAOg4Bgn25C9RnkHVu14sE2iTk67O/IuyYtMwuSgN/eGuD0wXKZKbDJcRVyDEOAo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=ndcpu+LS; arc=none smtp.client-ip=216.71.153.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lBozVtzi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C796C4CEC2;
-	Wed,  4 Sep 2024 14:25:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1725459961;
-	bh=IWU/5vUW/co70eztiWwvLMjG3Rr6wvuy04MQhdILmFA=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=lBozVtzive0diJ/t/qMDqf/mXXvlmnA48DTrNJYvgqkkbvffLerAvZYhyJvTePFhk
-	 rEmHm7FOfnp/RPbgt2CjTfvjbo1ulSeo5lrRCgTItSDJJLClmBzLChD60UPa4ni6X+
-	 g2b7SX3kjvpIvtDZIEkTS+cjlMOlVmyM+12QjqKZ8MtEUF2MK3eyzmZ0zf8mK57WWe
-	 IGIt/RMejt6+0z1cp0+XsWUXcQ6A6+8kLiPH7SmOG15431iiOT3oMc7xGIurMG+yhg
-	 g7T8FQsJ7vsMh/UlIDJdCejRwBC76xGC+abrjn2QpSwwSGyS0TX540deIU1DhENHjQ
-	 USM/q+fF0Lvdw==
-Message-ID: <26d8ecbe-0d85-4be2-a142-861088e43918@kernel.org>
-Date: Wed, 4 Sep 2024 16:25:54 +0200
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="ndcpu+LS"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1725461679; x=1756997679;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=6B5qNYBBWXDzIWUXBlL8rLsSFcIl7KCzo59Rce5aQQ8=;
+  b=ndcpu+LSpHlKhpXRz5+uLBhs7dfXlfQgxDV26q5Wb0TeBd0PmRod3B74
+   5Nrp+npX97BPf07P5Yrn09uPvVPk8KQ8E1xYgNg6c/+ggClVhOUhUEuc1
+   0DptN+OG1SSRD844dM7xELQiS08z6MkVBgA4cPWMdmWZ/WQ96teESHuKs
+   BEUX0VBDPARmj7nLgIS1ATmS1kJJnf9dZpHC3f9oogj9hloZ+PA6/BXZk
+   haQ2zM6ZJSLPtSAZlrMZ02uuWNy2UOGrJ/OuXeaNwhfNfRt7Z/zfSRM++
+   t3uZ2OIlycpHSSU1fhgKnopjB0LBG3swBONUEsTdc7cLwm2ue93WKERcM
+   g==;
+X-CSE-ConnectionGUID: kKIO8DWqTwWnuAiY1IwPng==
+X-CSE-MsgGUID: YDp/y/kATcKelAOFhOfXCA==
+X-IronPort-AV: E=Sophos;i="6.10,202,1719849600"; 
+   d="scan'208";a="25915017"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 04 Sep 2024 22:54:38 +0800
+IronPort-SDR: 66d86690_pgAWnVDm5jlY9qbiu2QHOB7dFUAxw01MZSoba9/p6Elzw/P
+ BD86qsmzrtz+Av9HjXQpnSplEXFAvPQXVqq/tmA==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 06:54:24 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 07:54:36 -0700
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ricky WU <ricky_wu@realtek.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v6 0/9] Add SDUC Support
+Date: Wed,  4 Sep 2024 17:52:47 +0300
+Message-Id: <20240904145256.3670679-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: Add support for rk3576 eMMC
-To: Detlev Casanova <detlev.casanova@collabora.com>,
- Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Jisheng Zhang <jszhang@kernel.org>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, kernel@collabora.com
-References: <20240903145615.9302-1-detlev.casanova@collabora.com>
- <6077666.lOV4Wx5bFT@trenzalore>
- <0d4d40cc-9885-4933-a6d6-933e4705a68c@linaro.org>
- <1896150.tdWV9SEqCh@trenzalore>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <1896150.tdWV9SEqCh@trenzalore>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 04/09/2024 16:20, Detlev Casanova wrote:
->>>>> +      properties:
->>>>> +        power-domains:
->>>>> +          minItems: 1
->>>>
->>>> Why minItems? This does not look right. I don't get what you are trying
->>>> to say here.
->>>
->>> I'm saying that for the rockchip,rk3576-dwcmshc compatible, 1 power-domain
->>> node has to be set.
->>
->> The top-level property already says this. You need to disallow it for
->> other variants (:false).
-> 
-> Ok, something like this:
-> 
-> allOf:
->   - if:
->       properties:
->         compatible:
->           contains:
->             const: rockchip,rk3576-dwcmshc
-> 
->     then:
->       required:
->         - power-domains
-> 
->     else:
->       properties:
->         power-domains: false
+Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+cards support capacity larger than 2TB and up to including 128TB. Thus,
+the address range of the card expands beyond the 32-bit command
+argument. To that end, a new command - CMD22 is defined, to carry the
+extra 6-bit upper part of the 38-bit block address that enable access to
+128TB memory space.
 
-Yes, if they are required. Otherwise use "if: not:" and just disallow them.
+SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+as SDXC.
 
-Best regards,
-Krzysztof
+The spec defines several extensions/modifications to the current SDXC
+cards, which we address in patches 1 - 10.  Otherwise requirements are
+out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+Extension for Video Speed Class (CMD20).
+
+First publication of SDUC was in [1].  This series was developed and
+tested separately from [1] and does not borrow from it.
+
+[1] https://lwn.net/Articles/982566/
+
+---
+Changes in v6:
+ - Remove Ricky's tested-by tag - the series has changed greatly
+ - Call mmc_send_ext_addr from mmc_start_request (Adrian)
+
+Changes in v5:
+ - leave out the mask in mmc_send_ext_addr (Adrian)
+ - leave out close-ended SDUC support
+ - remove 500msec write delay as there is no busy indication (Adrian)
+ - disable mmc-test for SDUC
+ - move enabling SDUC to the last patch (Adrian)
+
+Changes in v4:
+ - Squash patches 1 & 2 (Ulf)
+ - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
+ - Use card state instead of caps2 (Ricky & Ulf)
+ - Switch patches 5 & 6 (Ulf)
+
+Changes in v3:
+ - Some more kernel test robot fixes
+ - Fix a typo in a commit log (Ricky WU)
+ - Fix ACMD22 returned value
+ - Add 'Tested-by' tag for the whole series (Ricky WU)
+
+Changes in v2:
+ - Attend kernel test robot warnings
+
+---
+
+Avri Altman (9):
+  mmc: sd: SDUC Support Recognition
+  mmc: sd: Add Extension memory addressing
+  mmc: core: Add open-ended Ext memory addressing
+  mmc: core: Don't use close-ended rw for SDUC
+  mmc: core: Allow mmc erase to carry large addresses
+  mmc: core: Add Ext memory addressing for erase
+  mmc: core: Adjust ACMD22 to SDUC
+  mmc: core: Disable SDUC for mmc_test
+  mmc: core: Enable SDUC
+
+ drivers/mmc/core/block.c    | 43 +++++++++++++++++++++++-------
+ drivers/mmc/core/bus.c      |  4 ++-
+ drivers/mmc/core/card.h     |  3 +++
+ drivers/mmc/core/core.c     | 52 +++++++++++++++++++++++++------------
+ drivers/mmc/core/core.h     | 16 +++++++++---
+ drivers/mmc/core/mmc_test.c |  7 +++++
+ drivers/mmc/core/sd.c       | 36 ++++++++++++++++---------
+ drivers/mmc/core/sd.h       |  2 +-
+ drivers/mmc/core/sd_ops.c   | 16 ++++++++++++
+ drivers/mmc/core/sd_ops.h   |  1 +
+ drivers/mmc/core/sdio.c     |  2 +-
+ include/linux/mmc/card.h    |  2 +-
+ include/linux/mmc/core.h    |  5 ++++
+ include/linux/mmc/sd.h      |  4 +++
+ 14 files changed, 146 insertions(+), 47 deletions(-)
+
+-- 
+2.25.1
 
