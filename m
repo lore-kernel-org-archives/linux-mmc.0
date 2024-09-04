@@ -1,47 +1,47 @@
-Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E3D561DC195
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Sep 2024 14:55:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25E721DC187
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Sep 2024 14:55:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725461722; cv=none; b=amZUz05IaR9bBiapQjzBuf531o6NoFkAAIXrjOIbweISbMHUkDwktr/ThmjGf7If30NrmigpgiLseAB+soyEON5eLVE0DdZ3OTPOhyF4+LStSYcRoZySfYhFC8uTGAO4pC9HLiWymQGq1TP1qDoTI12Se+yjP3jkPbGRITgJLPg=
+	t=1725461726; cv=none; b=NhFrGHdVf9uATBlfbZ3UBvIL7rGNJDb7QFw2nEDQH7zF+sr6iJlNpww9hgMSBwMiw39ja3Cug3MugEmDVqsLDZfSs5JdEQPXGDwrYu5XTJC3quuj7DyKJnBsXv5Mqr3YrTAAZZem0iXRHb2FxvPFU1T2PAqaHwicnLx/Zm8u2Y0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725461722; c=relaxed/simple;
-	bh=J7BRimgDTB3gQ7GzelloksKWPPZjlzVNXO/zTu+7qRg=;
+	s=arc-20240116; t=1725461726; c=relaxed/simple;
+	bh=KhLw2cIeU26Njm3pIvs0KiFLLn7t2hzqXdK9b6qDqJI=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=LrFovzThTda6AB9RDdZRB/m2GpFCW2abrZqPUdF+7TRyYECRMu8lD9++hzBQRBouunWufEfNuiqzt+XEuf+OVwAaaRryke8ltK+vscZNfOL8bN7N5S/GD5aP8sE0PGVg19JME6t8mtKh/tBzRs/9/oVSu3EEmM0ARIW3/yeQUzU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=eFbku2XO; arc=none smtp.client-ip=68.232.141.245
+	 MIME-Version; b=M3wj/Mhvi70vhbTSkjoa8aRnSFoYhMHvKNRchoTn4XNNgb+0uynRv4ecMSV+NaRpy6Y7DDto4u/RnDdrai2G3Yy8nDrLpOAaGhioI2bzYYo3HZPMgPB9YytT5EiWOqC2WSXAgGPX1hyw8gFUtI3Xxef99JcBzu9dgAg3f5tczts=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=o0WbgFtY; arc=none smtp.client-ip=216.71.153.144
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="eFbku2XO"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="o0WbgFtY"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1725461720; x=1756997720;
+  t=1725461725; x=1756997725;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=J7BRimgDTB3gQ7GzelloksKWPPZjlzVNXO/zTu+7qRg=;
-  b=eFbku2XOL0rcBujjMp09686Y0lZC/riqONqv4f1vCsll4nZbODy87h0o
-   fiMwKcl4J2sgiQSkjKqL0QU1JDPWmtbvjnt5LzcnWB5Ud2CQx3UJvJ6eZ
-   NTOH1Uli51JCeQihjiH7lp7y1O5xmL0Cf9hqdGbe3IeQXX4lj4OpNCIgL
-   BZQeLng68pWGYwkdIEriZ44dGV3nO1JuXl+hwoksDpA156TZHlqbmeZiK
-   azs/uGPJoWDFhXnKScFioDaegVlT7dfcUJvW3vGAN7yfpyB+NazAHHgLP
-   nSgVRzzoi8k1EP8iNROY+SzSHmKSbrzWlb0dq+3cFyAdoca9TqKli2NA9
-   w==;
-X-CSE-ConnectionGUID: 30++wD6eT0qMiJ3GuIQk+w==
-X-CSE-MsgGUID: ZkEfpjS3So6xDI0kwwnUgg==
+  bh=KhLw2cIeU26Njm3pIvs0KiFLLn7t2hzqXdK9b6qDqJI=;
+  b=o0WbgFtYusRNIWAj5VMZPCaCGqbDQ64MWcxFFGjNuUscDCn2rHDtjJK8
+   RCZu7jbinVrHQvqTYPSrs8pUh1l34TZ3kwolGn483SrqUfYTwY9ysc0AU
+   dRv0FkFTQ1KlDwZ+crbdQPvLFtPSb6xgkIpPh/KpDHEjjaLHQFRUM7H1+
+   tzfHciavWdSQ89fm5532M7sJSY0f4R1I4WPz2b2UyMlKkFq+KOBIlDlOH
+   cu5Bnt81yQOr/cvdaw4YTYtGWI77LCtvRoywwaWJNafGns9gxBs533YqQ
+   VH7y9rd5Gwu0LA1EV3qXdxP7iAfdkSwjRvfOctcOXrXcgLgDgby4xTGCy
+   g==;
+X-CSE-ConnectionGUID: JWhPXHZbTP+R2zpSK+Ybow==
+X-CSE-MsgGUID: VDbWEoCISuS6YR+zcQvzvQ==
 X-IronPort-AV: E=Sophos;i="6.10,202,1719849600"; 
-   d="scan'208";a="26723706"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 04 Sep 2024 22:55:17 +0800
-IronPort-SDR: 66d866b7_brdmg1Ep9xH1pTW9HHYbhE/w/lcRHjn3hDN/GD5qqqRLbew
- EDW3ZqqX9+YrifgIOnJCVw6WxCqixtc50wFf8qQ==
+   d="scan'208";a="26933752"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 04 Sep 2024 22:55:24 +0800
+IronPort-SDR: 66d866bf_7DyYjbyXevmgD3seP7512ylArjIt5gHb05Wm8O4xpxL7J55
+ GhufWTrWmW1uJ9EULNyi+K/VEg2f84b3UNkf3/g==
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 06:55:03 -0700
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 06:55:11 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 07:55:15 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 04 Sep 2024 07:55:21 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
@@ -49,9 +49,9 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	Ricky WU <ricky_wu@realtek.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v6 7/9] mmc: core: Adjust ACMD22 to SDUC
-Date: Wed,  4 Sep 2024 17:52:54 +0300
-Message-Id: <20240904145256.3670679-8-avri.altman@wdc.com>
+Subject: [PATCH v6 8/9] mmc: core: Disable SDUC for mmc_test
+Date: Wed,  4 Sep 2024 17:52:55 +0300
+Message-Id: <20240904145256.3670679-9-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240904145256.3670679-1-avri.altman@wdc.com>
 References: <20240904145256.3670679-1-avri.altman@wdc.com>
@@ -63,88 +63,31 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-ACMD22 is used to verify the previously write operation.  Normally, it
-returns the number of written sectors as u32.  SDUC, however, returns it
-as u64.  This is not a superfluous requirement, because SDUC writes may
-exceeds 2TB.  For Linux mmc however, the previously write operation
-could not be more than the block layer limits, thus we make room for a
-u64 and cast the returning value to u32.
+Panning to ameliorate it in the very near future.
 
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c | 29 +++++++++++++++++++++++------
- 1 file changed, 23 insertions(+), 6 deletions(-)
+ drivers/mmc/core/mmc_test.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 50d37c4f5a50..f36611512a1d 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -50,6 +50,7 @@
- #include <linux/mmc/sd.h>
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index b7f627a9fdea..a28e1a1aded3 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -3218,6 +3218,13 @@ static int mmc_test_register_dbgfs_file(struct mmc_card *card)
  
- #include <linux/uaccess.h>
-+#include <asm/unaligned.h>
+ 	mutex_lock(&mmc_test_lock);
  
- #include "queue.h"
- #include "block.h"
-@@ -994,11 +995,10 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	int err;
- 	u32 result;
- 	__be32 *blocks;
--
-+	u8 resp_sz;
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
--
- 	struct scatterlist sg;
- 
- 	err = mmc_app_cmd(card->host, card);
-@@ -1009,7 +1009,14 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
- 
--	data.blksz = 4;
-+	/*
-+	 * Normally, ACMD22 returns the number of written sectors as u32.
-+	 * SDUC, however, returns it as u64.  This is not a superfluous
-+	 * requirement, because SDUC writes may exceed 2TB.
-+	 */
-+	resp_sz = mmc_card_ult_capacity(card) ? 8 : 4;
-+
-+	data.blksz = resp_sz;
- 	data.blocks = 1;
- 	data.flags = MMC_DATA_READ;
- 	data.sg = &sg;
-@@ -1019,15 +1026,25 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
- 
--	blocks = kmalloc(4, GFP_KERNEL);
-+	blocks = kmalloc(resp_sz, GFP_KERNEL);
- 	if (!blocks)
- 		return -ENOMEM;
- 
--	sg_init_one(&sg, blocks, 4);
-+	sg_init_one(&sg, blocks, resp_sz);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
--	result = ntohl(*blocks);
 +	if (mmc_card_ult_capacity(card)) {
-+		u64 blocks_64 = get_unaligned_be64(blocks);
-+		/*
-+		 * For Linux mmc however, the previously write operation could
-+		 * not be more than the block layer limits, thus just make room
-+		 * for a u64 and cast the response back to u32.
-+		 */
-+		result = blocks_64 > UINT_MAX ? UINT_MAX : (u32)blocks_64;
-+	} else {
-+		result = ntohl(*blocks);
++		pr_info("%s: mmc-test currently UNSUPPORTED for SDUC\n",
++			mmc_hostname(card->host));
++		ret = -EOPNOTSUPP;
++		goto err;
 +	}
- 	kfree(blocks);
- 
- 	if (cmd.error || data.error)
++
+ 	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
+ 		&mmc_test_fops_test);
+ 	if (ret)
 -- 
 2.25.1
 
