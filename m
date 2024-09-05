@@ -1,140 +1,103 @@
-Received: from lelv0143.ext.ti.com (lelv0143.ext.ti.com [198.47.23.248])
+Received: from omta38.uswest2.a.cloudfilter.net (omta38.uswest2.a.cloudfilter.net [35.89.44.37])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA0081865F5;
-	Wed,  4 Sep 2024 23:25:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.248
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 895F91361
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Sep 2024 00:16:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=35.89.44.37
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725492324; cv=none; b=GaOi+Eu3+MNCymwRTXvRL11h/4ZbhUTtrqjCcSlG8m9ZCYpVAlc1jJfymvFvy2pqyMWdoFumq0aiHsSinFjYfjZa9XXhqTjxLvdfV4/sNy3D4rgkIvGInlarHmCuJjdaZQ5mx4OIJ0UDxuIX9fnjOJTy0TH38xgfohd95DRBFS4=
+	t=1725495421; cv=none; b=my38ekaqZIe/It+dQM4l4M4CYaMGdq6MmKLoa8+Q2LLj+0syx7kTpRO0f/mhCTJhTui+YTgW8HrdsUetNiM2phZNSRRsAAH0ZEILpuO8iSxwU3i6IbLo4n2SbY8pedSxoeTRkg8cncb1hrdai/hj/p0CcMSQhR6yW9Z4aSman0Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725492324; c=relaxed/simple;
-	bh=Fi0B3Y0549zjJnrIJat3Yio26WbiKmV5I0o8rKpg7gA=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=oxqXK+Scx9XVPvZzNC18j3CYjCH+BIkHmpZ3aU6e2kOhIv4Fi4E5/xXOfs8qTUkm2//nXmkxN0T8eHkQXaA7zUFv/q1vRHqkomDSeJoyoK9SZ6n1fSZkBoW7D6GIEiZM9gd9J55DDaaTZhFrhi9LeeCgJ2/fiRLr9J7C71Cbv6A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=hN1glBpJ; arc=none smtp.client-ip=198.47.23.248
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1725495421; c=relaxed/simple;
+	bh=z4hwOPo5qMRWD/RRoCd7kHi664YWzL63fCRv/1dnaOI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=NuypfKW3bq41eQIrIGSRZXt1SdeaiOFJ7Jalo9lzRWCXBnvxM/gnhaefJKCZ5iZ2lLZvEmsp5+uLzLL2dQe9fsxyu16h3AFoIZqUxCr3wr8jdqj5AcDmqJyB36D8aHabFI3Q7yUe0q75bvpUdjfIFEs0DhDjnJr2yKNI5SDvrEs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=embeddedor.com; spf=pass smtp.mailfrom=embeddedor.com; dkim=pass (2048-bit key) header.d=embeddedor.com header.i=@embeddedor.com header.b=Yaz4Bq5E; arc=none smtp.client-ip=35.89.44.37
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=embeddedor.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=embeddedor.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="hN1glBpJ"
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-	by lelv0143.ext.ti.com (8.15.2/8.15.2) with ESMTP id 484NPDCk026818;
-	Wed, 4 Sep 2024 18:25:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1725492313;
-	bh=2cfizvyqwdchamKOXy/vhvCQP6YTFBdTClb2OBdg214=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=hN1glBpJiIF4SN9UjF1qY8FZG0XyTWIky/gyOxmqnmMKiohauEal330EPNH75CGRY
-	 W/j2TOgR8Kdahf1zgoSwfrnGXiysYeFWRlswMDww2vdMa/C4RhTK7KIh9dZ9dAajLV
-	 4uGn3Nl9s18iEfd0PuxUuhCh7jiRDnpK7g0YsmLg=
-Received: from DLEE114.ent.ti.com (dlee114.ent.ti.com [157.170.170.25])
-	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 484NPDVO006185
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 4 Sep 2024 18:25:13 -0500
-Received: from DLEE109.ent.ti.com (157.170.170.41) by DLEE114.ent.ti.com
- (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 4
- Sep 2024 18:25:13 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 4 Sep 2024 18:25:13 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 484NPD9P003973;
-	Wed, 4 Sep 2024 18:25:13 -0500
-From: Judith Mendez <jm@ti.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH v4 2/2] mmc: sdhci_am654: Add prints to tuning algorithm
-Date: Wed, 4 Sep 2024 18:25:12 -0500
-Message-ID: <20240904232512.830778-3-jm@ti.com>
-X-Mailer: git-send-email 2.46.0
-In-Reply-To: <20240904232512.830778-1-jm@ti.com>
-References: <20240904232512.830778-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=embeddedor.com header.i=@embeddedor.com header.b="Yaz4Bq5E"
+Received: from eig-obgw-5010a.ext.cloudfilter.net ([10.0.29.199])
+	by cmsmtp with ESMTPS
+	id ly33sgdO9umtXm0BGsWitc; Thu, 05 Sep 2024 00:16:59 +0000
+Received: from gator4166.hostgator.com ([108.167.133.22])
+	by cmsmtp with ESMTPS
+	id m0BFsnEq0r1Jum0BGsCwag; Thu, 05 Sep 2024 00:16:58 +0000
+X-Authority-Analysis: v=2.4 cv=VPjbncPX c=1 sm=1 tr=0 ts=66d8f87a
+ a=1YbLdUo/zbTtOZ3uB5T3HA==:117 a=frY+GlAHrI6frpeK1MvySw==:17
+ a=IkcTkHD0fZMA:10 a=EaEq8P2WXUwA:10 a=7T7KSl7uo7wA:10 a=VwQbUJbxAAAA:8
+ a=QyXUC8HyAAAA:8 a=BvawdAvfLtWoXhSBC6EA:9 a=QEXdDO2ut3YA:10
+ a=Xt_RvD8W3m28Mn_h3AK8:22
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=embeddedor.com; s=default; h=Content-Transfer-Encoding:Content-Type:
+	In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender
+	:Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
+	Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
+	List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=VJwTMiyYhSmnvnSQwhZpCJmhNaRCnkDEKdkuXTvWVFs=; b=Yaz4Bq5Eq7hvYxwcG9DtEHmxIp
+	hf6SuFUkoSaA9f3Db5VC4Q3ZcU9Vpkkhd9EqPb6Xhbqf5vZySHN77CNP0QO+ncTtnOBnk9Zr7Dtxf
+	nSTddWL9S+jCjPRqNS/g3Jfd4lQvCxzL3+LcxGfrl80RqbXw+k2euSYC5FSnDkEWPYSWnN+ThZhRP
+	McwJJnSab7xJ+hViZtESpH+CFYzkqd/bpGQi/AYB1kod/hE/FpNkgjztv+f9pv3GGnseXwmRZxlt5
+	VClrGEyyBFXNUfPTblv8Jll6TNCLIM97qrppE8R0z27uyuShw+VZnr+W8oKy2jP0jMg6yimYyiO6o
+	ISMRSOvg==;
+Received: from [201.172.173.139] (port=36672 helo=[192.168.15.5])
+	by gator4166.hostgator.com with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+	(Exim 4.96.2)
+	(envelope-from <gustavo@embeddedor.com>)
+	id 1sm0BF-004GQk-0D;
+	Wed, 04 Sep 2024 19:16:57 -0500
+Message-ID: <42492aed-9b94-47cf-a5c2-a3fd44247f80@embeddedor.com>
+Date: Wed, 4 Sep 2024 18:16:55 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH -next] mmc: sdhci-cadence: Annotate struct
+ sdhci_cdns_phy_param with __counted_by()
+To: Hongbo Li <lihongbo22@huawei.com>, adrian.hunter@intel.com,
+ ulf.hansson@linaro.org, kees@kernel.org, gustavoars@kernel.org
+Cc: linux-mmc@vger.kernel.org, linux-hardening@vger.kernel.org
+References: <20240904014636.2033138-1-lihongbo22@huawei.com>
+Content-Language: en-US
+From: "Gustavo A. R. Silva" <gustavo@embeddedor.com>
+In-Reply-To: <20240904014636.2033138-1-lihongbo22@huawei.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - gator4166.hostgator.com
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - embeddedor.com
+X-BWhitelist: no
+X-Source-IP: 201.172.173.139
+X-Source-L: No
+X-Exim-ID: 1sm0BF-004GQk-0D
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-Source-Sender: ([192.168.15.5]) [201.172.173.139]:36672
+X-Source-Auth: gustavo@embeddedor.com
+X-Email-Count: 2
+X-Org: HG=hgshared;ORG=hostgator;
+X-Source-Cap: Z3V6aWRpbmU7Z3V6aWRpbmU7Z2F0b3I0MTY2Lmhvc3RnYXRvci5jb20=
+X-Local-Domain: yes
+X-CMAE-Envelope: MS4xfLSWiKR+gH21A0w/ORL7OYgiuJr5mj9G7KDfOZZuesXBL88JJ0gg0M3/2Iwg/fyYXaYGt5QbAhhZAeYbrBTbg3tl96NRkXmwO1+UKdT8kWBHWLMvAERl
+ KRCu6TNE7dRQ+EA3UIbjBb+XNJGb4vSIm4YUFd7LeR+9qCKEcMS83SKf85zSEbk4JjVtNIngPNBXkRIvqDlac96jKJCgJtqcGjw=
 
-Add debug prints to tuning algorithm for debugging.
-Also add error print if we fail tuning.
+[..]
 
-Signed-off-by: Judith Mendez <jm@ti.com>
----
-Changes since v3:
-- Fix compile warnings
----
- drivers/mmc/host/sdhci_am654.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+> -	struct sdhci_cdns_phy_param phy_params[];
+> +	struct sdhci_cdns_phy_param phy_params[] __counted_by(count);
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 8eb6ce9f3b173..0aa3c40ea6ed8 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -450,17 +450,20 @@ static int sdhci_am654_calculate_itap(struct sdhci_host *host, struct window
- {
- 	u8 itap = 0, start_fail = 0, end_fail = 0, pass_length = 0;
- 	u8 first_fail_start = 0, last_fail_end = 0;
-+	struct device *dev = mmc_dev(host->mmc);
- 	struct window pass_window = {0, 0, 0};
- 	int prev_fail_end = -1;
- 	u8 i;
- 
- 	if (!num_fails) {
- 		/* Retry tuning */
-+		dev_dbg(dev, "No failing region found, retry tuning\n");
- 		return -1;
- 	}
- 
- 	if (fail_window->length == ITAPDLY_LENGTH) {
- 		/* Retry tuning */
-+		dev_dbg(dev, "No passing itapdly, retry tuning\n");
- 		return -1;
- 	}
- 
-@@ -504,6 +507,7 @@ static int sdhci_am654_do_tuning(struct sdhci_host *host,
- 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
- 	unsigned char timing = host->mmc->ios.timing;
- 	struct window fail_window[ITAPDLY_LENGTH];
-+	struct device *dev = mmc_dev(host->mmc);
- 	u8 curr_pass, itap;
- 	u8 fail_index = 0;
- 	u8 prev_pass = 1;
-@@ -524,6 +528,7 @@ static int sdhci_am654_do_tuning(struct sdhci_host *host,
- 		if (!curr_pass) {
- 			fail_window[fail_index].end = itap;
- 			fail_window[fail_index].length++;
-+			dev_dbg(dev, "Failed itapdly=%d\n", itap);
- 		}
- 
- 		if (curr_pass && !prev_pass)
-@@ -545,6 +550,7 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
- 	unsigned char timing = host->mmc->ios.timing;
-+	struct device *dev = mmc_dev(host->mmc);
- 	int itapdly;
- 
- 	do {
-@@ -553,9 +559,12 @@ static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
- 			break;
- 	} while (++sdhci_am654->tuning_loop < RETRY_TUNING_MAX);
- 
--	if (itapdly < 0)
-+	if (itapdly < 0) {
-+		dev_err(dev, "Failed to find itapdly, fail tuning\n");
- 		return -1;
-+	}
- 
-+	dev_dbg(dev, "Passed tuning, final itapdly=%d\n", itapdly);
- 	sdhci_am654_write_itapdly(sdhci_am654, itapdly, sdhci_am654->itap_del_ena[timing]);
- 	/* Save ITAPDLY */
- 	sdhci_am654->itap_del_sel[timing] = itapdly;
--- 
-2.46.0
+It seems there is no such `count` member in the structure[1].
 
+Since `counted_by` hasn't been released in GCC yet. Please, make
+sure to build-test any `counted_by` patches with Clang 18+.
+
+Thanks
+--
+Gustavo
+
+[1] https://lore.kernel.org/linux-hardening/202409042358.dwEQMShp-lkp@intel.com/
