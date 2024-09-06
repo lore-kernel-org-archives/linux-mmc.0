@@ -1,148 +1,205 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2638B158866
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Sep 2024 11:10:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 80D811D45FC;
+	Fri,  6 Sep 2024 17:50:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.142
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725621051; cv=none; b=EuaIzChAeciwOVXalmrh+ESs4jXCni9tE6nqSPABh6I1YN/n+poPXPlZllNLCHN4MltSed1KkzgF+dk0js+G5id6ZUpPMXoGxDAfn0TTL8AJkCiyHViRSVxRkh6ktaX8uEuzkJ8mwJQqpqU6bb79k2LB1Z/YRXCk2n43yqWTCnI=
+	t=1725645044; cv=none; b=MXZ2MkeDAesQpkTNrvz19rgXf1uoSSYkLFL6Wgvnb1ftBZ0+IszuHs7fUUeKVp3CrMwAz1YTasOQzlP/gkcK0mauA6AurA7Nz2RnBAZpGOV/Bc1PNzMoXYgSh3dCrRozJ2A7rDmoDJDEcJhCBx3ST/i1CPNSr2UH4lVTxCLCQAI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725621051; c=relaxed/simple;
-	bh=fzaDyZLxwbBlqiI8n+RtUW0JyXyXvcBfJdT9ZQt4Lp8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=eWTxZwIe45RwV70kZBuLlKq5nrSuyG9br7YiLo+t7L/aG+w1MY8QKrQgEirfPx6ibudDCa6QfYVjsm9ndJ7tZVcpxrZfUwP0njQ3GlKqqlL29Pug2k7k74TZInJTVeLYw30iZjXPPzPgSVCk/efVfS2kFhfbQVl0sJ6XWtLpLAM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=cpM13lcy; arc=none smtp.client-ip=192.198.163.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1725645044; c=relaxed/simple;
+	bh=qnM8hlhU35M3xtiCRyv3k0FxZWw3r79XUzia8TXb2Io=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=hoje6Yj6nBxT5Fwnx/Ww+3zPzSJEgy5tfhQX0kNeoB4x3jtB/zTB/HnxGPAm/BF6XEUschkjBSRX/82gudQ7wtFxxbeO327RFsxFCd1yJYg8HhrGi2xIFePtuW8Hybf0CujryHfBXEMU3u5DzFYSN3mE4druAJfKAvXxlA0yZ5Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Ds5Cidgf; arc=none smtp.client-ip=198.47.19.142
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="cpM13lcy"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725621049; x=1757157049;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=fzaDyZLxwbBlqiI8n+RtUW0JyXyXvcBfJdT9ZQt4Lp8=;
-  b=cpM13lcyn/Suv5OCE+T9y3EXx4AJSqAlH8LTnhxgrs1ei583hM7dkVN8
-   jjmChY1MiC15yiPBNJxd7JJZ+LRCDiDXUIRrZCJuqlqMSy6cTEx5am+X0
-   isb31b0E9GwluuEq7WLoDuxSI49fRr6XStEqCLIx9I6bKnDxuK/QlmGav
-   hwwrJUls/8Cj22hcNeVX7aCLXTXuTE8p11mRdviD4DIHNRhE32ImEM8h2
-   O7pL02GEEwckjfnt1aIoSGwyW95Ez4TFVg973vW/W3HMeQ6qIcmgT1VBH
-   YhEwNR30eQA5ZdptV2wkkmIy4zQocau4LsuhTnEIlDWBV3l9yp8QABNaB
-   A==;
-X-CSE-ConnectionGUID: qxjBwPtZQsSoPPnv6FEAIw==
-X-CSE-MsgGUID: xBPJcopbTkOZRwJ6wDzLrA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11186"; a="35045191"
-X-IronPort-AV: E=Sophos;i="6.10,207,1719903600"; 
-   d="scan'208";a="35045191"
-Received: from orviesa003.jf.intel.com ([10.64.159.143])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Sep 2024 04:10:30 -0700
-X-CSE-ConnectionGUID: 7y/iFM3vSbezk3AxS3/x6A==
-X-CSE-MsgGUID: c/2o6rIFRYGOX5tVpdk2EA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,207,1719903600"; 
-   d="scan'208";a="70715561"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.115.59])
-  by ORVIESA003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Sep 2024 04:10:28 -0700
-Message-ID: <1eee4711-7a42-4c9c-a092-9bb6f69ee3a9@intel.com>
-Date: Fri, 6 Sep 2024 14:10:22 +0300
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Ds5Cidgf"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 486HoWTO023850;
+	Fri, 6 Sep 2024 12:50:32 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1725645032;
+	bh=YxjEcHGuRXhYWOYUfSPSYWTdKQah+2cnC/OEfC3+NwU=;
+	h=From:To:CC:Subject:Date;
+	b=Ds5CidgfJOXF1f8tKxzQeGf3EgnVwQSxtiPefw/hqGDG/VRIIMuXdF7S99SVg07n/
+	 kk737joX7cVovSESEl7QNtm57FN5RuW/eZi+YSXXA1yMPsASNsyB1japnVu9wE2kBl
+	 RbMoV4O+JOyv7yUvsMVj/tVm+1gWSfAmewqviMLI=
+Received: from DFLE104.ent.ti.com (dfle104.ent.ti.com [10.64.6.25])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 486HoWlG003332
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Fri, 6 Sep 2024 12:50:32 -0500
+Received: from DFLE113.ent.ti.com (10.64.6.34) by DFLE104.ent.ti.com
+ (10.64.6.25) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 6
+ Sep 2024 12:50:32 -0500
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE113.ent.ti.com
+ (10.64.6.34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Fri, 6 Sep 2024 12:50:32 -0500
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 486HoWwD096056;
+	Fri, 6 Sep 2024 12:50:32 -0500
+From: Judith Mendez <jm@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v1] mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch
+Date: Fri, 6 Sep 2024 12:50:32 -0500
+Message-ID: <20240906175032.1580281-1-jm@ti.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 0/9] Add SDUC Support
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org
-Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>
-References: <20240904145256.3670679-1-avri.altman@wdc.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240904145256.3670679-1-avri.altman@wdc.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-On 4/09/24 17:52, Avri Altman wrote:
-> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
-> cards support capacity larger than 2TB and up to including 128TB. Thus,
-> the address range of the card expands beyond the 32-bit command
-> argument. To that end, a new command - CMD22 is defined, to carry the
-> extra 6-bit upper part of the 38-bit block address that enable access to
-> 128TB memory space.
-> 
-> SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
-> as SDXC.
-> 
-> The spec defines several extensions/modifications to the current SDXC
-> cards, which we address in patches 1 - 10.  Otherwise requirements are
-> out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
-> Extension for Video Speed Class (CMD20).
-> 
-> First publication of SDUC was in [1].  This series was developed and
-> tested separately from [1] and does not borrow from it.
-> 
-> [1] https://lwn.net/Articles/982566/
-> 
-> ---
-> Changes in v6:
->  - Remove Ricky's tested-by tag - the series has changed greatly
->  - Call mmc_send_ext_addr from mmc_start_request (Adrian)
-> 
-> Changes in v5:
->  - leave out the mask in mmc_send_ext_addr (Adrian)
->  - leave out close-ended SDUC support
->  - remove 500msec write delay as there is no busy indication (Adrian)
->  - disable mmc-test for SDUC
->  - move enabling SDUC to the last patch (Adrian)
-> 
-> Changes in v4:
->  - Squash patches 1 & 2 (Ulf)
->  - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
->  - Use card state instead of caps2 (Ricky & Ulf)
->  - Switch patches 5 & 6 (Ulf)
-> 
-> Changes in v3:
->  - Some more kernel test robot fixes
->  - Fix a typo in a commit log (Ricky WU)
->  - Fix ACMD22 returned value
->  - Add 'Tested-by' tag for the whole series (Ricky WU)
-> 
-> Changes in v2:
->  - Attend kernel test robot warnings
-> 
-> ---
-> 
-> Avri Altman (9):
->   mmc: sd: SDUC Support Recognition
->   mmc: sd: Add Extension memory addressing
->   mmc: core: Add open-ended Ext memory addressing
->   mmc: core: Don't use close-ended rw for SDUC
->   mmc: core: Allow mmc erase to carry large addresses
->   mmc: core: Add Ext memory addressing for erase
->   mmc: core: Adjust ACMD22 to SDUC
->   mmc: core: Disable SDUC for mmc_test
->   mmc: core: Enable SDUC
-> 
->  drivers/mmc/core/block.c    | 43 +++++++++++++++++++++++-------
->  drivers/mmc/core/bus.c      |  4 ++-
->  drivers/mmc/core/card.h     |  3 +++
->  drivers/mmc/core/core.c     | 52 +++++++++++++++++++++++++------------
->  drivers/mmc/core/core.h     | 16 +++++++++---
->  drivers/mmc/core/mmc_test.c |  7 +++++
->  drivers/mmc/core/sd.c       | 36 ++++++++++++++++---------
->  drivers/mmc/core/sd.h       |  2 +-
->  drivers/mmc/core/sd_ops.c   | 16 ++++++++++++
->  drivers/mmc/core/sd_ops.h   |  1 +
->  drivers/mmc/core/sdio.c     |  2 +-
->  include/linux/mmc/card.h    |  2 +-
->  include/linux/mmc/core.h    |  5 ++++
->  include/linux/mmc/sd.h      |  4 +++
->  14 files changed, 146 insertions(+), 47 deletions(-)
-> 
+The sdhci_start_signal_voltage_switch function sets
+V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
+V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
+edge or pos edge of clock.
 
-I made a few comments, but this looks good
-otherwise.
+Due to some eMMC and SD failures seen across am62x platform,
+do not set V1P8_SIGNAL_ENA by default, only enable the bit
+for devices that require this bit in order to switch to 1v8
+voltage for uhs modes.
+
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 86 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 86 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 0aa3c40ea6ed8..fb6232e56606b 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -155,6 +155,7 @@ struct sdhci_am654_data {
+ 	u32 tuning_loop;
+ 
+ #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
++#define SDHCI_AM654_QUIRK_SET_V1P8_ENA BIT(1)
+ };
+ 
+ struct window {
+@@ -356,6 +357,79 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	sdhci_set_clock(host, clock);
+ }
+ 
++int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc,
++					    struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
++	u16 ctrl;
++	int ret;
++
++	if (host->version < SDHCI_SPEC_300)
++		return 0;
++
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
++		if (!(host->flags & SDHCI_SIGNALING_330))
++			return -EINVAL;
++
++		ctrl &= ~SDHCI_CTRL_VDD_180;
++		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
++
++		if (!IS_ERR(mmc->supply.vqmmc)) {
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
++			if (ret < 0) {
++				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
++					mmc_hostname(mmc));
++				return -EIO;
++			}
++		}
++
++		usleep_range(5000, 5500);
++
++		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++		if (!(ctrl & SDHCI_CTRL_VDD_180))
++			return 0;
++
++		pr_warn("%s: 3.3V regulator output did not become stable\n",
++			mmc_hostname(mmc));
++
++		return -EAGAIN;
++
++	case MMC_SIGNAL_VOLTAGE_180:
++		if (!(host->flags & SDHCI_SIGNALING_180))
++			return -EINVAL;
++
++		if (!IS_ERR(mmc->supply.vqmmc)) {
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
++			if (ret < 0) {
++				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
++					mmc_hostname(mmc));
++				return -EIO;
++			}
++		}
++
++		if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_SET_V1P8_ENA) {
++			ctrl |= SDHCI_CTRL_VDD_180;
++			sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
++
++			ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++			if (ctrl & SDHCI_CTRL_VDD_180)
++				return 0;
++
++			pr_warn("%s: 1.8V regulator output did not become stable\n",
++				mmc_hostname(mmc));
++
++			return -EAGAIN;
++		}
++		return 0;
++
++	default:
++		return 0;
++	}
++}
++
+ static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
+ {
+ 	writeb(val, host->ioaddr + reg);
+@@ -801,6 +875,8 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 					struct sdhci_am654_data *sdhci_am654)
+ {
+ 	struct device *dev = &pdev->dev;
++	struct device_node *np = dev->of_node;
++	struct device_node *node;
+ 	int drv_strength;
+ 	int ret;
+ 
+@@ -844,6 +920,15 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
+ 		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
+ 
++	node = of_parse_phandle(np, "vmmc-supply", 0);
++
++	if (node) {
++		node = of_parse_phandle(np, "vqmmc-supply", 0);
++
++		if (!node)
++			sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SET_V1P8_ENA;
++	}
++
+ 	sdhci_get_of_property(pdev);
+ 
+ 	return 0;
+@@ -940,6 +1025,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+ 
+ 	pm_runtime_get_noresume(dev);
+
+base-commit: cf6444ba528f043398b112ac36e041a4d8685cb1
+-- 
+2.46.0
 
