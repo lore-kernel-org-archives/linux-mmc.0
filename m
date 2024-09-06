@@ -1,50 +1,50 @@
 Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA89CA48
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Sep 2024 06:39:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 856B015699E
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Sep 2024 08:02:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725604793; cv=none; b=RjTvcwA2IStoscYMaakCA1cmJo4Z+wC5M+BKiF8VyaKzToxXpxIPSZ2favgt6/+LocGoCgjLLPP85S9y1ZALdNX56HloVN+AY991rcKscXp4x3Mq2OYFqSmfgwVkv335xkLjgVTudlQ9BZr6hCgpoTnp0jICUS7BiLVbAAjuPfo=
+	t=1725609781; cv=none; b=TeZTnT3c5TbPatQx+YM0AOUScrnumX12CamSJ7On9yitOTmFrPftbxD0BA5vQ30Fdluitmhkk2AvGTzUOB/3R1uZiG83Ef2RqGyxUhU8rSlqUDb2STscGKNyfh7viGBIGulYvvYiERBR0iXlXltuUcncL2qxKvTaxlwSlHs9atc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725604793; c=relaxed/simple;
-	bh=DyMdFq7AUDs2MA2+Nuf1hwi2H3w1U9UsrFV/T33/BH8=;
+	s=arc-20240116; t=1725609781; c=relaxed/simple;
+	bh=yD2INolfcaNHhi9RInezNLr9gus1Z1lICnJKqTXlQNg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=llYTH6gMbBmsHuGp6LrLYmQ+cZNxYeFBJetBE8veoGtLDGPUeAvqYcZrYrQCEjLNzzPNwyzg+5nU5HOYPhrYgeZ7/jBRev4l5ibZ9XD4LqeDqke/o2mq2U6+o2qYfvMcoj7BTD4v5Me1JanE5nP1g5YN7R43vp8DO9iMGbDf5yM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=H2ek6Gvw; arc=none smtp.client-ip=198.175.65.13
+	 In-Reply-To:Content-Type; b=lzfCNWCwGDdggb3qY6TwJGXxhA311scTyL1HrooL2JHrcUeK6zEGGtm093rAY7jG4c0pNz3wtF4ldsFemmM+gLKRgut+fRGqN2linrRv6faqlUnFM+mYbu+coB96yFCiGQFAE6WaVAydJpb2aBMWg8zuAePAZOUPkNLnIPd3O4k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WHbFAuDK; arc=none smtp.client-ip=198.175.65.13
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="H2ek6Gvw"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WHbFAuDK"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725604792; x=1757140792;
+  t=1725609778; x=1757145778;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=DyMdFq7AUDs2MA2+Nuf1hwi2H3w1U9UsrFV/T33/BH8=;
-  b=H2ek6GvwVjYL5OqXutwAGmotQre2o1tEk4Ba3F6qUtpn2O6TrvqtJ9L0
-   HI7U9fFL6Ok3kqQ/UDE4cV27nvn5KZ1rGnNrjRL2EWHjaWjXxVQ0eBUdm
-   BX4fTKEGUCDxyiPaye75TBwS36532V2KWJ2XvEjx24uQsELPFs/LFM6hr
-   rKk+Fjjz+luIVX4LaXCuXgyPIX7QUHyOAczsqURHT5ehN7OXQmBYLlUqK
-   qKdkTblSsul5ohFOiOWTYeJfu6nSDVmu9wYE0tclJDZXFDCbQ5RSuZ5LE
-   EmDgIUWOd1WVmaUCwbZIoD9lSLgZo7ySY2RfVV34rhhyAzyRyyiIJ3l6M
+  bh=yD2INolfcaNHhi9RInezNLr9gus1Z1lICnJKqTXlQNg=;
+  b=WHbFAuDKyeHHbSY6yOpzf+hcepP8UucycHulsz30W508FXjHu2VuqvP/
+   yYWgRbM+AZtzWx/UBn/udAZN3M8CFw1mjE8FHhbL24vOvnmThd2riR8Wg
+   uq1H5P9zo12liMDu+QTi8P3oZWeczgWk2hco9SLgLtkdHqgMG8lTo7A8v
+   UJ1EisWhphIrIcXvGO28bpX1MQY2y5PnbFbcgD3oHavw279gH/MmFfvUc
+   i+FPZRxn6yKtRLlxzrY6k7Nts4umFDzIc2gFSrpQPwHguaFgqqdb+Y13G
+   8m+M1pA+4syrQsFTzuOKdRr20ROe7bc1+RLg51t/a7uJP8i14PdtO1ADz
    g==;
-X-CSE-ConnectionGUID: gU2+4Vi7SdaznDhbSyrPpQ==
-X-CSE-MsgGUID: SoqFRCZgQCSeJYu71si9fA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11186"; a="35502381"
+X-CSE-ConnectionGUID: S1YohuSaSiOIfbX4o8yU8A==
+X-CSE-MsgGUID: qHnbWBumT3yeKdjUoWVKTg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11186"; a="35508798"
 X-IronPort-AV: E=Sophos;i="6.10,207,1719903600"; 
-   d="scan'208";a="35502381"
+   d="scan'208";a="35508798"
 Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2024 23:39:51 -0700
-X-CSE-ConnectionGUID: cf+kfSsaRhOKBqXXAuVvHw==
-X-CSE-MsgGUID: yvSXYKGmRDqYnEhEwSh6fw==
+  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Sep 2024 01:02:57 -0700
+X-CSE-ConnectionGUID: yZPvHzsaR0a6lbDjnhv/zg==
+X-CSE-MsgGUID: fCqwqg8hRDqXpfBCZjgZrg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.10,207,1719903600"; 
-   d="scan'208";a="70794678"
+   d="scan'208";a="70817501"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.115.59])
-  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Sep 2024 23:39:49 -0700
-Message-ID: <d43f5407-fb88-437b-9f43-661de0245363@intel.com>
-Date: Fri, 6 Sep 2024 09:39:44 +0300
+  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Sep 2024 01:02:56 -0700
+Message-ID: <fc704a6e-962e-4294-9d97-ca43144adbc6@intel.com>
+Date: Fri, 6 Sep 2024 11:02:50 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,253 +52,108 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 1/9] mmc: sd: SDUC Support Recognition
+Subject: Re: [PATCH v6 3/9] mmc: core: Add open-ended Ext memory addressing
 To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
  linux-mmc@vger.kernel.org
 Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>
 References: <20240904145256.3670679-1-avri.altman@wdc.com>
- <20240904145256.3670679-2-avri.altman@wdc.com>
+ <20240904145256.3670679-4-avri.altman@wdc.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240904145256.3670679-2-avri.altman@wdc.com>
+In-Reply-To: <20240904145256.3670679-4-avri.altman@wdc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 4/09/24 17:52, Avri Altman wrote:
-> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
-> cards support capacity larger than 2TB and up to including 128TB.
+> For open-ended read/write - just send CMD22 before issuing the command.
+> While at it, make sure that the rw command arg is properly casting the
+> lower 32 bits, as it can be larger now.
 > 
-> ACMD41 was extended to support the host-card handshake during
-> initialization.  The card expects that the HCS & HO2T bits to be set in
-> the command argument, and sets the applicable bits in the R3 returned
-> response.  On the contrary, if a SDUC card is inserted to a
-> non-supporting host, it will never respond to this ACMD41 until
-> eventually, the host will timed out and give up.
-> 
-> Also, add SD CSD version 3.0 - designated for SDUC, and properly parse
-> the csd register as the c_size field got expanded to 28 bits.
-> 
-> Do not enable SDUC for now - leave it to the last patch in the series.
-> 
-> Tested-by: Ricky WU <ricky_wu@realtek.com>
 > Signed-off-by: Avri Altman <avri.altman@wdc.com>
 > ---
->  drivers/mmc/core/bus.c   |  4 +++-
->  drivers/mmc/core/card.h  |  3 +++
->  drivers/mmc/core/sd.c    | 33 +++++++++++++++++++++------------
->  drivers/mmc/core/sd.h    |  2 +-
->  drivers/mmc/core/sdio.c  |  2 +-
->  include/linux/mmc/card.h |  2 +-
->  include/linux/mmc/sd.h   |  1 +
->  7 files changed, 31 insertions(+), 16 deletions(-)
+>  drivers/mmc/core/block.c | 6 +++++-
+>  drivers/mmc/core/core.c  | 3 +++
+>  include/linux/mmc/core.h | 5 +++++
+>  3 files changed, 13 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 0ddaee0eae54..30763b342bd3 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -321,7 +321,9 @@ int mmc_add_card(struct mmc_card *card)
->  	case MMC_TYPE_SD:
->  		type = "SD";
->  		if (mmc_card_blockaddr(card)) {
-> -			if (mmc_card_ext_capacity(card))
-> +			if (mmc_card_ult_capacity(card))
-> +				type = "SDUC";
-> +			else if (mmc_card_ext_capacity(card))
->  				type = "SDXC";
->  			else
->  				type = "SDHC";
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index b7754a1b8d97..64dcb463a4f4 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -23,6 +23,7 @@
->  #define MMC_CARD_SDXC		(1<<3)		/* card is SDXC */
->  #define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
->  #define MMC_STATE_SUSPENDED	(1<<5)		/* card is suspended */
-> +#define MMC_CARD_SDUC		(1<<6)		/* card is SDUC */
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index cc7318089cf2..54469261bc25 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -226,6 +226,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+>  static int mmc_spi_err_check(struct mmc_card *card);
+>  static int mmc_blk_busy_cb(void *cb_data, bool *busy);
+> +static int mmc_blk_wait_for_idle(struct mmc_queue *mq, struct mmc_host *host);
+
+Not using mmc_blk_wait_for_idle() anymore.
+
 >  
->  #define mmc_card_present(c)	((c)->state & MMC_STATE_PRESENT)
->  #define mmc_card_readonly(c)	((c)->state & MMC_STATE_READONLY)
-> @@ -30,11 +31,13 @@
->  #define mmc_card_ext_capacity(c) ((c)->state & MMC_CARD_SDXC)
->  #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
-> +#define mmc_card_ult_capacity(c) ((c)->state & MMC_CARD_SDUC)
->  
->  #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
->  #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
->  #define mmc_card_set_blockaddr(c) ((c)->state |= MMC_STATE_BLOCKADDR)
->  #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
-> +#define mmc_card_set_ult_capacity(c) ((c)->state |= MMC_CARD_SDUC)
->  #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
->  #define mmc_card_set_suspended(c) ((c)->state |= MMC_STATE_SUSPENDED)
->  #define mmc_card_clr_suspended(c) ((c)->state &= ~MMC_STATE_SUSPENDED)
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ee37ad14e79e..eb9990d9db56 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -114,7 +114,7 @@ void mmc_decode_cid(struct mmc_card *card)
->  /*
->   * Given a 128-bit response, decode to our card CSD structure.
->   */
-> -static int mmc_decode_csd(struct mmc_card *card)
-> +static int mmc_decode_csd(struct mmc_card *card, bool is_sduc)
+>  static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
 >  {
->  	struct mmc_csd *csd = &card->csd;
->  	unsigned int e, m, csd_struct;
-> @@ -158,9 +158,10 @@ static int mmc_decode_csd(struct mmc_card *card)
->  			mmc_card_set_readonly(card);
->  		break;
->  	case 1:
-> +	case 2:
->  		/*
-> -		 * This is a block-addressed SDHC or SDXC card. Most
-> -		 * interesting fields are unused and have fixed
-> +		 * This is a block-addressed SDHC, SDXC or SDUC card.
-> +		 * Most interesting fields are unused and have fixed
->  		 * values. To avoid getting tripped by buggy cards,
->  		 * we assume those fixed values ourselves.
->  		 */
-> @@ -173,14 +174,19 @@ static int mmc_decode_csd(struct mmc_card *card)
->  		e = UNSTUFF_BITS(resp, 96, 3);
->  		csd->max_dtr	  = tran_exp[e] * tran_mant[m];
->  		csd->cmdclass	  = UNSTUFF_BITS(resp, 84, 12);
-> -		csd->c_size	  = UNSTUFF_BITS(resp, 48, 22);
+> @@ -1710,7 +1711,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 >  
-> -		/* SDXC cards have a minimum C_SIZE of 0x00FFFF */
-> -		if (csd->c_size >= 0xFFFF)
-> +		if (csd_struct == 1)
-> +			m = UNSTUFF_BITS(resp, 48, 22);
-> +		else
-> +			m = UNSTUFF_BITS(resp, 48, 28);
-> +		csd->c_size = m;
-> +
-> +		if (csd->c_size >= 0x400000 && is_sduc)
-> +			mmc_card_set_ult_capacity(card);
-> +		else if (csd->c_size >= 0xFFFF)
->  			mmc_card_set_ext_capacity(card);
+>  	brq->mrq.cmd = &brq->cmd;
 >  
-> -		m = UNSTUFF_BITS(resp, 48, 22);
-> -		csd->capacity     = (1 + m) << 10;
-> +		csd->capacity     = (1 + (typeof(sector_t))m) << 10;
->  
->  		csd->read_blkbits = 9;
->  		csd->read_partial = 0;
-> @@ -841,8 +847,11 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->  	 * block-addressed SDHC cards.
->  	 */
->  	err = mmc_send_if_cond(host, ocr);
-> -	if (!err)
-> +	if (!err) {
->  		ocr |= SD_OCR_CCS;
-> +		/* Set HO2T as well - SDUC card won't respond otherwise */
-> +		ocr |= SD_OCR_2T;
+> -	brq->cmd.arg = blk_rq_pos(req);
+> +	brq->cmd.arg = blk_rq_pos(req) & 0xFFFFFFFF;
 
-Wouldn't that be better to leave for the last patch.
+arg is 32 bits so not needed
 
-> +	}
->  
->  	/*
->  	 * If the host supports one of UHS-I modes, request the card
-> @@ -887,7 +896,7 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->  	return err;
+>  	if (!mmc_card_blockaddr(card))
+>  		brq->cmd.arg <<= 9;
+>  	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+> @@ -1758,6 +1759,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  			(do_data_tag ? (1 << 29) : 0);
+>  		brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+>  		brq->mrq.sbc = &brq->sbc;
+> +	} else if (mmc_card_ult_capacity(card)) {
+
+The 'else' isn't actually needed, is it?  Might as well keep sbc
+and ext_addr separate in this patch.
+
+> +		brq->cmd.ext_addr = (blk_rq_pos(req) >> 32) & 0x3F;
+
+'& 0x3f' should not be needed. i.e. we either validate blk_rq_pos(req)
+(no point) or we assume it is valid.
+
+> +		brq->cmd.has_ext_addr = 1;
+
+If you switch to bool, that could use 'true' instead of '1'
+
+>  	}
 >  }
 >  
-> -int mmc_sd_get_csd(struct mmc_card *card)
-> +int mmc_sd_get_csd(struct mmc_card *card, bool is_sduc)
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d6c819dd68ed..a0b2999684b3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -336,6 +336,9 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 >  {
 >  	int err;
 >  
-> @@ -898,7 +907,7 @@ int mmc_sd_get_csd(struct mmc_card *card)
->  	if (err)
->  		return err;
+> +	if (mrq->cmd && mrq->cmd->has_ext_addr)
+> +		mmc_send_ext_addr(host, mrq->cmd->ext_addr);
+> +
+>  	init_completion(&mrq->cmd_completion);
 >  
-> -	err = mmc_decode_csd(card);
-> +	err = mmc_decode_csd(card, is_sduc);
->  	if (err)
->  		return err;
+>  	mmc_retune_hold(host);
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index f0ac2e469b32..41c21c216584 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -76,6 +76,11 @@ struct mmc_command {
+>   */
+>  #define mmc_cmd_type(cmd)	((cmd)->flags & MMC_CMD_MASK)
 >  
-> @@ -1453,7 +1462,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->  	}
->  
->  	if (!oldcard) {
-> -		err = mmc_sd_get_csd(card);
-> +		err = mmc_sd_get_csd(card, false);
->  		if (err)
->  			goto free_card;
->  
-
-Also need to prevent Host Software Queue from enabling
-for SDUC.  Something like:
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 8d77a49357aa..769cd8b9f49c 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1578,7 +1578,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 			goto free_card;
- 	}
- 
--	if (host->cqe_ops && !host->cqe_enabled) {
-+	if (!mmc_card_ult_capacity(card) && host->cqe_ops && !host->cqe_enabled) {
- 		err = host->cqe_ops->cqe_enable(host, card);
- 		if (!err) {
- 			host->cqe_enabled = true;
-
-Ideally try to get testing / feedback from HSQ users though.
-
-
-> diff --git a/drivers/mmc/core/sd.h b/drivers/mmc/core/sd.h
-> index fe6dd46927a4..7e8beface2ca 100644
-> --- a/drivers/mmc/core/sd.h
-> +++ b/drivers/mmc/core/sd.h
-> @@ -10,7 +10,7 @@ struct mmc_host;
->  struct mmc_card;
->  
->  int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr);
-> -int mmc_sd_get_csd(struct mmc_card *card);
-> +int mmc_sd_get_csd(struct mmc_card *card, bool is_sduc);
->  void mmc_decode_cid(struct mmc_card *card);
->  int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
->  	bool reinit);
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 4fb247fde5c0..9566837c9848 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -769,7 +769,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
->  	 * Read CSD, before selecting the card
->  	 */
->  	if (!oldcard && mmc_card_sd_combo(card)) {
-> -		err = mmc_sd_get_csd(card);
-> +		err = mmc_sd_get_csd(card, false);
->  		if (err)
->  			goto remove;
->  
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index f34407cc2788..f39bce322365 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -35,7 +35,7 @@ struct mmc_csd {
->  	unsigned int		wp_grp_size;
->  	unsigned int		read_blkbits;
->  	unsigned int		write_blkbits;
-> -	unsigned int		capacity;
-> +	sector_t		capacity;
->  	unsigned int		read_partial:1,
->  				read_misalign:1,
->  				write_partial:1,
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> index 6727576a8755..865cc0ca8543 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> @@ -36,6 +36,7 @@
->  /* OCR bit definitions */
->  #define SD_OCR_S18R		(1 << 24)    /* 1.8V switching request */
->  #define SD_ROCR_S18A		SD_OCR_S18R  /* 1.8V switching accepted by card */
-> +#define SD_OCR_2T		(1 << 27)    /* HO2T/CO2T - SDUC support */
->  #define SD_OCR_XPC		(1 << 28)    /* SDXC power control */
->  #define SD_OCR_CCS		(1 << 30)    /* Card Capacity Status */
+> +	/* for SDUC */
+> +	u8 has_ext_addr;
+> +	u8 ext_addr;
+> +	u16 reserved;
+> +
+>  	unsigned int		retries;	/* max number of retries */
+>  	int			error;		/* command error */
 >  
 
