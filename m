@@ -1,63 +1,199 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C88F1D7E53;
-	Fri,  6 Sep 2024 19:12:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7E9015921B
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Sep 2024 22:07:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725649961; cv=none; b=rHW/zv10TfQs4BZCWRn7NZGP51yo2FSfEoo8J+Hy8tX1wEmiCQ7LwfmO1fkF6vxA3brfqUTwWBwWix2//C6mxwhMn33IN7IzDtPzRTALTW4ryRN8niKj9VACIJ2U3CPYg9PCYGThOMel2lKc/iFO0zjffpe2YU412dVFZ2X64iY=
+	t=1725660443; cv=none; b=YXRcmqLxS5s0aG7JWo0rKu6RLJJ8tUPALOX9/24Uy0lo/bq3bjb2qjG62geSAec1ZKdpa1nGsxukOQBv5CIVDsrq3FJCgIaNACqpvPMFzTjj3/5WGcG7cO/X/639H6IoW/8NfSCK2Wl8kLYdnvCnO+6IA7suvymh1GCJ0RRAlpo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725649961; c=relaxed/simple;
-	bh=szmDR7S0Un0/8RGo+4PXlfuzN6lriqZDzI4be7YgroQ=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=CyYh0dHyIt38Celd1//x+4uSMPPF9PQmV/eKeh1TNfAaWsfh/qnKFDveNOCa38M4QlxN7kzeCNsM2anJsesfphZVPYzHdQvbxsA2WVu3n1PMPooYG7VcNvLPOuKIWUjIBAyoRXJJzXd81KuFnC+lYaMfEJFWABGrHfV/0Ya/7+s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kfv0/719; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1725660443; c=relaxed/simple;
+	bh=DMDXUtr2tKydRZROnQMaVv9GRGluLW3xfbvWKrH84YM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=MNOTl/KwXNpx2Vn20T23VIUusccbtUvEd5oIKAiWIkyZbECuKGf8h83zLhdidPSzvefA+j8UlCdZn/TemdIKtxJWqU1Y6YjXtk5nEC3+vuh2CfLYKnqW6WeJ1mceP9cTxUkIGKl4lzBDh7iTmAnGea+RpwQwFlbgoqKSouLPzpo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kaQN6uA+; arc=none smtp.client-ip=209.85.167.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kfv0/719"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C76EC4CEC7;
-	Fri,  6 Sep 2024 19:12:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1725649961;
-	bh=szmDR7S0Un0/8RGo+4PXlfuzN6lriqZDzI4be7YgroQ=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=Kfv0/7199D17M7JIPV5wCJHRe4x7RKd/zfhmghSlUkSEB48EXNZxBgAX7dH5JN7N8
-	 R3moBHhK+cOe+TyEynJo4iPd0pLf57NahUseBitmNkh+r/pcXdj5uzVU9Jgy7bHeWK
-	 1UYU6ZB+WI9tJnQ/kMHrND50TRT86oDcAI+ns7KqvgbiygTyRKof/QqpRkD5pjd/eo
-	 87hrqQD2EcsUoFLJRvSnkEywWaigOQCP8DS8SAlg8vmc7BLZiY4ykO+Khles+WVy97
-	 dIG2VqfFqD99DdjPwMypGD3ceFmh++JVPG2zizXE5P/jwjt0rGbU5mA2vCRMFTZSL+
-	 itZKVN3a2rNUg==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 70CD93806644;
-	Fri,  6 Sep 2024 19:12:43 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.11-rc7
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20240906101456.198887-1-ulf.hansson@linaro.org>
-References: <20240906101456.198887-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20240906101456.198887-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.11-rc5
-X-PR-Tracked-Commit-Id: aea62c744a9ae2a8247c54ec42138405216414da
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: c3af2256adda212e3c3ff4773623a19a972eaf39
-Message-Id: <172564996193.2497610.9264208111525615856.pr-tracker-bot@kernel.org>
-Date: Fri, 06 Sep 2024 19:12:41 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kaQN6uA+"
+Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-5365cf5de24so480358e87.1
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Sep 2024 15:07:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1725660439; x=1726265239; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=6HOhtyEYYt7rA6jCBX+L1mlm8hngGJHlfFCxxooVTC4=;
+        b=kaQN6uA+5cYL38uaZLKBGyobZmQgr12YaaCLn80DRzBTFtLrZuxB9OfNnowN+YWS0/
+         EZ0gQ3vWXINxF5r6dptQxWlxL/HsAJSIa84VDdlUnGPTF5YbPo+W6DfbkDoaMcVR15/x
+         wFYLJhsb3PRYorSk0ZQaKryX5jPKwfekTUBAabltz/SA2X/sfyn5OaZMVJMgh/Apcdek
+         61nJUyQ2IXVMaSJKQdyr/p+3t8Q8WSzxqpGCL6dBAsHVzmADYQ/vBUUrEnRy0xC9jOc6
+         5SFk5FiKfO6nWnqqYh04CF4UcyB1vemf2TMzQb4F5yBJ+klIumSK8vzj0NAZAjlnccDI
+         J2dw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725660439; x=1726265239;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=6HOhtyEYYt7rA6jCBX+L1mlm8hngGJHlfFCxxooVTC4=;
+        b=P5/qB++Flr/bRZ7iFQC3PsIMqOeseP3A8WpWJeNJ/adTp7fjSREdwCT215wtDDPgfd
+         9MZY+XbtRYW9l4vru3G3fB/AUWUbQ/Ti4r32YpHqCVloHYaUnIaYY6zZpRBnprTpwzUg
+         5vD7DInKhHOvsWxcoXjiHbn5BY/dtP04UHYqhfvOZruzeq9SxQcsEC3qPoydkJKX7wjd
+         en6NWshbrbxmpXocLTAMP4+3WH3bbDBuYA9TYUE6GhrEjaAJwNOlaW9MdtqaN9xuLxXs
+         JBftE2soBkQN/IR0MbOPxvO2RdV7wwXnHciZnBeVf2KtZGu6lff8rAhvjlHUr939BbF3
+         YVWw==
+X-Forwarded-Encrypted: i=1; AJvYcCUkrLBVPvqz6REJ2oX/AW5DclpCF6usMz/oaeGdjKqk5hXyOx7sTzrzh5ttUVoRjL5RvK13pqrGoxo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyS/C0P5uQwPNrDF9MTJ+fB5k2bURkBrOsqSEa+ddHQ69I58Ios
+	6ThquwFEB28W5YwykNXPqtv3k2bH9xL8uXnBcX4WF6nDvPQOLg2CSCRLNrwWn+E=
+X-Google-Smtp-Source: AGHT+IGo5Rf50EbBmOUBUAeWLcQnh0sLqD8vtwGBMm3Zld7y3VkY79ttTtwoqkfdSYGppGMy/IXnlA==
+X-Received: by 2002:a05:6512:280d:b0:530:ba4b:f65d with SMTP id 2adb3069b0e04-536587b4b74mr2903071e87.28.1725660438133;
+        Fri, 06 Sep 2024 15:07:18 -0700 (PDT)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-536536a12f4sm529135e87.230.2024.09.06.15.07.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Sep 2024 15:07:17 -0700 (PDT)
+Date: Sat, 7 Sep 2024 01:07:16 +0300
+From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Bartosz Golaszewski <brgl@bgdev.pl>
+Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>, 
+	Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>, 
+	Mikulas Patocka <mpatocka@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Asutosh Das <quic_asutoshd@quicinc.com>, Ritesh Harjani <ritesh.list@gmail.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, 
+	Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>, 
+	"James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, 
+	Eric Biggers <ebiggers@kernel.org>, "Theodore Y. Ts'o" <tytso@mit.edu>, 
+	Jaegeuk Kim <jaegeuk@kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>, 
+	Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konradybcio@kernel.org>, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>, Neil Armstrong <neil.armstrong@linaro.org>, 
+	linux-block@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	dm-devel@lists.linux.dev, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Subject: Re: [PATCH v6 09/17] soc: qcom: ice: add HWKM support to the ICE
+ driver
+Message-ID: <7uoq72bpiqmo2olwpnudpv3gtcowpnd6jrifff34ubmfpijgc6@k6rmnalu5z4o>
+References: <20240906-wrapped-keys-v6-0-d59e61bc0cb4@linaro.org>
+ <20240906-wrapped-keys-v6-9-d59e61bc0cb4@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240906-wrapped-keys-v6-9-d59e61bc0cb4@linaro.org>
 
-The pull request you sent on Fri,  6 Sep 2024 12:14:56 +0200:
+On Fri, Sep 06, 2024 at 08:07:12PM GMT, Bartosz Golaszewski wrote:
+> From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> 
+> Qualcomm's ICE (Inline Crypto Engine) contains a proprietary key
+> management hardware called Hardware Key Manager (HWKM). Add HWKM support
+> to the ICE driver if it is available on the platform. HWKM primarily
+> provides hardware wrapped key support where the ICE (storage) keys are
+> not available in software and instead protected in hardware.
+> 
+> When HWKM software support is not fully available (from Trustzone), there
+> can be a scenario where the ICE hardware supports HWKM, but it cannot be
+> used for wrapped keys. In this case, raw keys have to be used without
+> using the HWKM. We query the TZ at run-time to find out whether wrapped
+> keys support is available.
+> 
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+> ---
+>  drivers/soc/qcom/ice.c | 152 +++++++++++++++++++++++++++++++++++++++++++++++--
+>  include/soc/qcom/ice.h |   1 +
+>  2 files changed, 149 insertions(+), 4 deletions(-)
+> 
+>  int qcom_ice_enable(struct qcom_ice *ice)
+>  {
+> +	int err;
+> +
+>  	qcom_ice_low_power_mode_enable(ice);
+>  	qcom_ice_optimization_enable(ice);
+>  
+> -	return qcom_ice_wait_bist_status(ice);
+> +	if (ice->use_hwkm)
+> +		qcom_ice_enable_standard_mode(ice);
+> +
+> +	err = qcom_ice_wait_bist_status(ice);
+> +	if (err)
+> +		return err;
+> +
+> +	if (ice->use_hwkm)
+> +		qcom_ice_hwkm_init(ice);
+> +
+> +	return err;
+>  }
+>  EXPORT_SYMBOL_GPL(qcom_ice_enable);
+>  
+> @@ -150,6 +282,10 @@ int qcom_ice_resume(struct qcom_ice *ice)
+>  		return err;
+>  	}
+>  
+> +	if (ice->use_hwkm) {
+> +		qcom_ice_enable_standard_mode(ice);
+> +		qcom_ice_hwkm_init(ice);
+> +	}
+>  	return qcom_ice_wait_bist_status(ice);
+>  }
+>  EXPORT_SYMBOL_GPL(qcom_ice_resume);
+> @@ -157,6 +293,7 @@ EXPORT_SYMBOL_GPL(qcom_ice_resume);
+>  int qcom_ice_suspend(struct qcom_ice *ice)
+>  {
+>  	clk_disable_unprepare(ice->core_clk);
+> +	ice->hwkm_init_complete = false;
+>  
+>  	return 0;
+>  }
+> @@ -206,6 +343,12 @@ int qcom_ice_evict_key(struct qcom_ice *ice, int slot)
+>  }
+>  EXPORT_SYMBOL_GPL(qcom_ice_evict_key);
+>  
+> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice)
+> +{
+> +	return ice->use_hwkm;
+> +}
+> +EXPORT_SYMBOL_GPL(qcom_ice_hwkm_supported);
+> +
+>  static struct qcom_ice *qcom_ice_create(struct device *dev,
+>  					void __iomem *base)
+>  {
+> @@ -240,6 +383,7 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
+>  		engine->core_clk = devm_clk_get_enabled(dev, NULL);
+>  	if (IS_ERR(engine->core_clk))
+>  		return ERR_CAST(engine->core_clk);
+> +	engine->use_hwkm = qcom_scm_has_wrapped_key_support();
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.11-rc5
+This still makes the decision on whether to use HW-wrapped keys on
+behalf of a user. I suppose this is incorrect. The user must be able to
+use raw keys even if HW-wrapped keys are available on the platform. One
+of the examples for such use-cases is if a user prefers to be able to
+recover stored information in case of a device failure (such recovery
+will be impossible if SoC is damaged and HW-wrapped keys are used).
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/c3af2256adda212e3c3ff4773623a19a972eaf39
-
-Thank you!
+>  
+>  	if (!qcom_ice_check_supported(engine))
+>  		return ERR_PTR(-EOPNOTSUPP);
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 9dd835dba2a7..1f52e82e3e1c 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>  			 const struct blk_crypto_key *bkey,
+>  			 u8 data_unit_size, int slot);
+>  int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
+>  struct qcom_ice *of_qcom_ice_get(struct device *dev);
+>  #endif /* __QCOM_ICE_H__ */
+> 
+> -- 
+> 2.43.0
+> 
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+With best wishes
+Dmitry
