@@ -1,47 +1,47 @@
 Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43A0A14F9F3
-	for <linux-mmc@vger.kernel.org>; Sun,  8 Sep 2024 10:22:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C68961509AB
+	for <linux-mmc@vger.kernel.org>; Sun,  8 Sep 2024 10:22:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725790942; cv=none; b=V606R/t2bQrNTRt/WJfFAruuZHY9bKFzHiGHI+hqfthB0WPoT2ZsIavaOoTVkwCd+I9RjXXMnz6AVhpCoNOCtFMSYIdJYuGc1ltLWHYxJdGr31CbI+/sKgcpsOFt6FYe9pU9RxrPcsUR8bguEO7pyeUYKMH9K3PVCwQ+Qmg9n0w=
+	t=1725790947; cv=none; b=nmmOekev6xhNNCcGkW3lDZtW2DaZrrHG8Co1urigfEhqSdWJB87J1e++Rl2UlSPPsCgM19vDjxunmNW+t2aH8t1RBlrLvmaK/TtE8mMUhsw5TXpMsl3Sb+1Z+FDWn3tUBLjibk+JCc8u1962I4C9wWfUGE3Xm8zjfAHcSE/ya68=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725790942; c=relaxed/simple;
-	bh=V0H1R/07QQ0AdlV4nx+kg5YIDmVJWtgRKA8iwpqbBIc=;
+	s=arc-20240116; t=1725790947; c=relaxed/simple;
+	bh=S9guqvYMk5c6ZwJVPgLpKRpVeRtiXruAFQ0wflreZyY=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=loGGMSpC9LL1AWxoYiLsp2nhJWn/nlcczyHkTjtq3t3F37NaidtSDUxFsTA/Wc9s/my63H9XAHzJB0823w0QYkZn8aMMF6++u1eW9mPgJazGVDts0UfBoFeM6H8Z/VguyOX3IlUNEKeZ3y0/4GCLQ71GntcZXPelIGXXOJiXi/A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=hsP/TXLa; arc=none smtp.client-ip=216.71.154.42
+	 MIME-Version; b=lpjPtBTd2AjWJuMY5kGh5uiey6EAXQWtokBbG9bv3XP1GdyoPP0wt6D7AUem9uMoPqWRub/xasmqZLt+otHtdWGl2xIyJK+L7+2tL707Kvar6hy37lpekY1K79KXxgx/ZSjQ8zId4VLr/t3KOOzd/6i3Yw/lRyjAp0utE7zD9WI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=BdwhJeHQ; arc=none smtp.client-ip=216.71.154.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="hsP/TXLa"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="BdwhJeHQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1725790941; x=1757326941;
+  t=1725790946; x=1757326946;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=V0H1R/07QQ0AdlV4nx+kg5YIDmVJWtgRKA8iwpqbBIc=;
-  b=hsP/TXLaNGDMo31ThPwdy3PcigFLGIgOhPZLrerzXdfdBWqcGm1tK+fN
-   qFqWPlyE7FN9wgbaZTN31L9UoNHwqdvtTCyU8wNyg2J3gt7/SPvtj1/G6
-   3FSyj8UmibiM7jQV1vRvgmAZI3eGbhjbbF1W9N170JwJBsxXAFIjaxEzT
-   aMx/gdqrZAALG6j9ab/wkOO2YjM7C6TKiH4w+nVOXoGa9S3wbn/9QwPnw
-   1g0Qzug08AjXk7CvTG8OeyRyC+PwDGzLiuNoNICKGoQLtVbx59GjhdCrp
-   uXvesgVGrqrI9SGqz27oD2rnnnYtceRPwqxiMi4jCUbWnOD3AZ80SXNjd
-   Q==;
-X-CSE-ConnectionGUID: ON2Sf1EwQAGYDwde8+5vOg==
-X-CSE-MsgGUID: uTNKOudKRgajxvyUcYXxAw==
+  bh=S9guqvYMk5c6ZwJVPgLpKRpVeRtiXruAFQ0wflreZyY=;
+  b=BdwhJeHQF1Dq+1xWrSpHM+SV1q/8qjI1bgtIhdpupYhNdin+nz0cAwyB
+   Sw9baUqDCwDmxG1NnBEac/kuJToQvCbWo6/8/gBEr7z0/Z5jDlagrLcrm
+   mI/EclzsLtFnNKa8fsFHyNtrNkz3u2bZfgFjh5AzkE6O6j7gKhLeHewo6
+   xrmlCR32DMik17hBeZpU4BIRqD8b9p49tfEe6uxl/tYsB/ntGafceH+bd
+   LYOkm3+BkFaV3IPUhNI9WwgFckkH49BgCIHR0I+Y3sQTBaW29ekJmtsJC
+   B9kcIzJKiquiUtWg6hWiyXNrZccube29m+WBGepJJ9aXECi8LqRgZ2QaI
+   g==;
+X-CSE-ConnectionGUID: 5WBnEGa7QIC3zeZ2Ds1Hqw==
+X-CSE-MsgGUID: /EAnv0xHRWCakLbM+K31Zw==
 X-IronPort-AV: E=Sophos;i="6.10,212,1719849600"; 
-   d="scan'208";a="25553873"
+   d="scan'208";a="25553875"
 Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 08 Sep 2024 18:22:21 +0800
-IronPort-SDR: 66dd6e01_AvhU7/i8qrr40r4khOEk8lLqAuSzldxgrbtjkjjycMA+d0+
- LzaDM00QcBTCyF/72sqjln2VsJgHTFOqgY0u51Q==
+  by ob1.hgst.iphmx.com with ESMTP; 08 Sep 2024 18:22:25 +0800
+IronPort-SDR: 66dd6e06_EEQxyOyGn5jlRS/lf/UHjFyEdcQ0pxMxugtkgrxmTLTZLXX
+ XVOtKKkJfuehoHqzmFx4/yx4MIKOZPnWtlOu81g==
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 02:27:30 -0700
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 02:27:34 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 03:22:19 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 03:22:23 -0700
 From: Avri Altman <avri.altman@wdc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
@@ -50,9 +50,9 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	Shawn Lin <shawn.lin@rock-chips.com>,
 	Christian Loehle <christian.loehle@arm.com>,
 	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v7 04/10] mmc: core: Add open-ended Ext memory addressing
-Date: Sun,  8 Sep 2024 13:20:12 +0300
-Message-Id: <20240908102018.3711527-5-avri.altman@wdc.com>
+Subject: [PATCH v7 05/10] mmc: core: Allow mmc erase to carry large addresses
+Date: Sun,  8 Sep 2024 13:20:13 +0300
+Message-Id: <20240908102018.3711527-6-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20240908102018.3711527-1-avri.altman@wdc.com>
 References: <20240908102018.3711527-1-avri.altman@wdc.com>
@@ -64,62 +64,186 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-For open-ended read/write - just send CMD22 before issuing the command.
+Preparing for SDUC, Allow the erase address to be larger beyond a 32 bit
+address.
 
+Tested-by: Ricky WU <ricky_wu@realtek.com>
 Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c | 5 +++++
- drivers/mmc/core/core.c  | 3 +++
- include/linux/mmc/core.h | 5 +++++
- 3 files changed, 13 insertions(+)
+ drivers/mmc/core/block.c |  6 ++++--
+ drivers/mmc/core/core.c  | 33 ++++++++++++++++++---------------
+ drivers/mmc/core/core.h  | 16 ++++++++++++----
+ 3 files changed, 34 insertions(+), 21 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 05a7745c2a68..ba2ed413be5c 100644
+index ba2ed413be5c..308d7c1dd0b0 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1759,6 +1759,11 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 		brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 		brq->mrq.sbc = &brq->sbc;
- 	}
-+
-+	if (mmc_card_ult_capacity(card)) {
-+		brq->cmd.ext_addr = blk_rq_pos(req) >> 32;
-+		brq->cmd.has_ext_addr = true;
-+	}
- }
+@@ -1199,7 +1199,8 @@ static void mmc_blk_issue_erase_rq(struct mmc_queue *mq, struct request *req,
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+-	unsigned int from, nr;
++	unsigned int nr;
++	sector_t from;
+ 	int err = 0;
+ 	blk_status_t status = BLK_STS_OK;
  
- #define MMC_MAX_RETRIES		5
+@@ -1254,7 +1255,8 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+-	unsigned int from, nr, arg;
++	unsigned int nr, arg;
++	sector_t from;
+ 	int err = 0, type = MMC_BLK_SECDISCARD;
+ 	blk_status_t status = BLK_STS_OK;
+ 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d6c819dd68ed..a0b2999684b3 100644
+index a0b2999684b3..06f63fbaadfb 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -336,6 +336,9 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+@@ -1601,8 +1601,8 @@ static unsigned int mmc_erase_timeout(struct mmc_card *card,
+ 		return mmc_mmc_erase_timeout(card, arg, qty);
+ }
+ 
+-static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+-			unsigned int to, unsigned int arg)
++static int mmc_do_erase(struct mmc_card *card, sector_t from,
++			sector_t to, unsigned int arg)
  {
+ 	struct mmc_command cmd = {};
+ 	unsigned int qty = 0, busy_timeout = 0;
+@@ -1633,8 +1633,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	else if (mmc_card_sd(card))
+ 		qty += to - from + 1;
+ 	else
+-		qty += ((to / card->erase_size) -
+-			(from / card->erase_size)) + 1;
++		qty += (mmc_sector_div(to, card->erase_size) -
++			mmc_sector_div(from, card->erase_size)) + 1;
+ 
+ 	if (!mmc_card_blockaddr(card)) {
+ 		from <<= 9;
+@@ -1703,18 +1703,19 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ }
+ 
+ static unsigned int mmc_align_erase_size(struct mmc_card *card,
+-					 unsigned int *from,
+-					 unsigned int *to,
++					 sector_t *from,
++					 sector_t *to,
+ 					 unsigned int nr)
+ {
+-	unsigned int from_new = *from, nr_new = nr, rem;
++	sector_t from_new = *from;
++	unsigned int nr_new = nr, rem;
+ 
+ 	/*
+ 	 * When the 'card->erase_size' is power of 2, we can use round_up/down()
+ 	 * to align the erase size efficiently.
+ 	 */
+ 	if (is_power_of_2(card->erase_size)) {
+-		unsigned int temp = from_new;
++		sector_t temp = from_new;
+ 
+ 		from_new = round_up(temp, card->erase_size);
+ 		rem = from_new - temp;
+@@ -1726,7 +1727,7 @@ static unsigned int mmc_align_erase_size(struct mmc_card *card,
+ 
+ 		nr_new = round_down(nr_new, card->erase_size);
+ 	} else {
+-		rem = from_new % card->erase_size;
++		rem = mmc_sector_mod(from_new, card->erase_size);
+ 		if (rem) {
+ 			rem = card->erase_size - rem;
+ 			from_new += rem;
+@@ -1759,10 +1760,12 @@ static unsigned int mmc_align_erase_size(struct mmc_card *card,
+  *
+  * Caller must claim host before calling this function.
+  */
+-int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
++int mmc_erase(struct mmc_card *card, sector_t from, unsigned int nr,
+ 	      unsigned int arg)
+ {
+-	unsigned int rem, to = from + nr;
++	unsigned int rem;
++	sector_t to = from + nr;
++
  	int err;
  
-+	if (mrq->cmd && mrq->cmd->has_ext_addr)
-+		mmc_send_ext_addr(host, mrq->cmd->ext_addr);
-+
- 	init_completion(&mrq->cmd_completion);
+ 	if (!(card->csd.cmdclass & CCC_ERASE))
+@@ -1783,7 +1786,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 		return -EOPNOTSUPP;
  
- 	mmc_retune_hold(host);
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index f0ac2e469b32..c86df8443a88 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -96,6 +96,11 @@ struct mmc_command {
- 	unsigned int		busy_timeout;	/* busy detect timeout in ms */
- 	struct mmc_data		*data;		/* data segment associated with cmd */
- 	struct mmc_request	*mrq;		/* associated request */
-+
-+	/* for SDUC */
-+	bool has_ext_addr;
-+	u8 ext_addr;
-+	u16 reserved;
- };
+ 	if (arg == MMC_SECURE_ERASE_ARG) {
+-		if (from % card->erase_size || nr % card->erase_size)
++		if (mmc_sector_mod(from, card->erase_size) || nr % card->erase_size)
+ 			return -EINVAL;
+ 	}
  
- struct mmc_data {
+@@ -1807,7 +1810,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	 * and call mmc_do_erase() twice if necessary. This special case is
+ 	 * identified by the card->eg_boundary flag.
+ 	 */
+-	rem = card->erase_size - (from % card->erase_size);
++	rem = card->erase_size - mmc_sector_mod(from, card->erase_size);
+ 	if ((arg & MMC_TRIM_OR_DISCARD_ARGS) && card->eg_boundary && nr > rem) {
+ 		err = mmc_do_erase(card, from, from + rem - 1, arg);
+ 		from += rem;
+@@ -1866,12 +1869,12 @@ int mmc_can_secure_erase_trim(struct mmc_card *card)
+ }
+ EXPORT_SYMBOL(mmc_can_secure_erase_trim);
+ 
+-int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
++int mmc_erase_group_aligned(struct mmc_card *card, sector_t from,
+ 			    unsigned int nr)
+ {
+ 	if (!card->erase_size)
+ 		return 0;
+-	if (from % card->erase_size || nr % card->erase_size)
++	if (mmc_sector_mod(from, card->erase_size) || nr % card->erase_size)
+ 		return 0;
+ 	return 1;
+ }
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 37091a6589ed..fc9d5e9620b1 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -116,15 +116,13 @@ bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq);
+ 
+-int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+-		unsigned int arg);
++int mmc_erase(struct mmc_card *card, sector_t from, unsigned int nr, unsigned int arg);
+ int mmc_can_erase(struct mmc_card *card);
+ int mmc_can_trim(struct mmc_card *card);
+ int mmc_can_discard(struct mmc_card *card);
+ int mmc_can_sanitize(struct mmc_card *card);
+ int mmc_can_secure_erase_trim(struct mmc_card *card);
+-int mmc_erase_group_aligned(struct mmc_card *card, unsigned int from,
+-			unsigned int nr);
++int mmc_erase_group_aligned(struct mmc_card *card, sector_t from, unsigned int nr);
+ unsigned int mmc_calc_max_discard(struct mmc_card *card);
+ 
+ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen);
+@@ -199,4 +197,14 @@ static inline int mmc_flush_cache(struct mmc_host *host)
+ 	return 0;
+ }
+ 
++static inline unsigned int mmc_sector_div(sector_t dividend, u32 divisor)
++{
++	return div_u64(dividend, divisor);
++}
++
++static inline unsigned int mmc_sector_mod(sector_t dividend, u32 divisor)
++{
++	return sector_div(dividend, divisor);
++}
++
+ #endif
 -- 
 2.25.1
 
