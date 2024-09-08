@@ -1,106 +1,75 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54E781531D1
-	for <linux-mmc@vger.kernel.org>; Sun,  8 Sep 2024 10:22:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id B082118C22
+	for <linux-mmc@vger.kernel.org>; Sun,  8 Sep 2024 12:04:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725790970; cv=none; b=WrUFfPVMUq1dnbDpSsKNAh9zTbL6HF5SsYhdHSlMezD7JnXZd4TI4QOc4b6WDdMadMKNJa0H8p/f0IIHAt3Hi+57TkvWVNj0tfeJYJEjJbf1L7Uv4k1EkIYgWcuhGv1GWaW4XrBCsKha6YwtdEyhbOJyoFNojonSl8l6QQsG1lc=
+	t=1725797091; cv=none; b=iazDC16POdqJ50IG0QJukKMYzwqyVxat2dLA0ucEVHB2+ODBC4Ff+qLIqm/Z+5gjDD7yKU9yFStIhgKNb1s4qBEAt2TtUGXPgZzK0r5W8bCbnzbQy1QiDpIbDhQ8jiT0gUzhyKhX2TODIwQXPCoVpkvb216WwHP0hnazpI4uO9Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725790970; c=relaxed/simple;
-	bh=U563Mhh0q1723MHDkGoEkWrVPGt30/RE8nUI/CW64Fc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=eSd/FOO1rbQ8pyolskxjjccI6zGi+kj02+VQewXhQ1nHMaGa+xydKEfybWuKX3gQam2mE4ZGuVxjOSj6uDiTgbug/nWSF+qXHWp5HF/n1aUZtUzpyZMjAYNRsZK64aqNjGubEh1SDnVV6oAl/Su1YICCre2cuJ1pwiCOMR6sZwk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=lAsYGRTO; arc=none smtp.client-ip=216.71.154.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="lAsYGRTO"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1725790968; x=1757326968;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=U563Mhh0q1723MHDkGoEkWrVPGt30/RE8nUI/CW64Fc=;
-  b=lAsYGRTOzupvb+b8dbrmH0ux8l073EDucvIUM/Nsw5SgYislK/NsFsnD
-   TYUHM/K542OAc5vQK9wqPw9LXHHK62YpH6B1QfkNEVUW4KMI6VDF2hwAs
-   gwO1E/E9VbDMsHEr40p35VwQDu9MNQCeHNWN+RZhHzWlJ2FlfCqQAwLHw
-   EaW4DFmgbF8VUqoM6Hx5GTMKeXwidjacuK8F73beWEAgHjMsBrZiqWvfx
-   vbNmBftihI8hi8BSVC4wGJhbVwX3YUdMM/s9At3RDmLRK7oR6wKxsFu3p
-   v+YLp7R3gNtESNXeZoHVyLJBHOXpzVFxLCm9GPHSiq/0a9ukRg42GSlG+
-   A==;
-X-CSE-ConnectionGUID: Jsxe9BNgRGuMnnyb2wTvQw==
-X-CSE-MsgGUID: L+kA3hdwQByx6dEB33GkSA==
-X-IronPort-AV: E=Sophos;i="6.10,212,1719849600"; 
-   d="scan'208";a="25553894"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 08 Sep 2024 18:22:48 +0800
-IronPort-SDR: 66dd6e1c_f0CqIGIKsWIdiBvxFW2wkEoY7GK/zm0GkKUdwO0g2lWBH11
- ojjRnwyALH+3umxy7n2rU7BhWSQlAddeQOldDSQ==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 02:27:57 -0700
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 03:22:46 -0700
-From: Avri Altman <avri.altman@wdc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-	Ricky WU <ricky_wu@realtek.com>,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Christian Loehle <christian.loehle@arm.com>,
-	Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v7 10/10] mmc: core: Enable SDUC
-Date: Sun,  8 Sep 2024 13:20:18 +0300
-Message-Id: <20240908102018.3711527-11-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20240908102018.3711527-1-avri.altman@wdc.com>
-References: <20240908102018.3711527-1-avri.altman@wdc.com>
+	s=arc-20240116; t=1725797091; c=relaxed/simple;
+	bh=hjbOxk7ILgWGOkrRhzgnNH2YjEQZrpZcm3IXOb6UD4o=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=MYnPMcurtQ6DOqiajrYztsiWpK7g56lWHdqkU6oXnOwVnGH/Lc77yMFYO2D6XLm9uqPgkaavIAPIwh71hGkuYxvTMJLLdouXtv5yTBZi1HrvqtX3iGWeW50xiHdfJCSdGVb3vmUJ1CUx9BaQ96KJjglOqiuAhy/2MlxWHc0g3fY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 938BD113E;
+	Sun,  8 Sep 2024 05:05:09 -0700 (PDT)
+Received: from [192.168.0.16] (usa-sjc-mx-foss1.foss.arm.com [172.31.20.19])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 4D32B3F66E;
+	Sun,  8 Sep 2024 05:04:40 -0700 (PDT)
+Message-ID: <6cb63826-e6b4-4e3b-92e3-5a5c912eedea@arm.com>
+Date: Sun, 8 Sep 2024 13:04:38 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v7 09/10] mmc: core: Prevent HSQ from enabling for SDUC
+To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ linux-mmc@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ricky WU <ricky_wu@realtek.com>,
+ Shawn Lin <shawn.lin@rock-chips.com>
+References: <20240908102018.3711527-1-avri.altman@wdc.com>
+ <20240908102018.3711527-10-avri.altman@wdc.com>
+Content-Language: en-US
+From: Christian Loehle <christian.loehle@arm.com>
+In-Reply-To: <20240908102018.3711527-10-avri.altman@wdc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Enable SDUC if the card responded to ACMD41 with HCS & HO2T bits set.
+On 9/8/24 11:20, Avri Altman wrote:
+> Prevent Host Software Queue from enabling for SDUC. In SDUC, CMD44 is
+> modified to include 6-bit upper address by utilizing its reserved bits.
+> Exclude hsq for SDUC for now.
 
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/sd.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+The message here is misleading, actually hsq has nothing to do with the
+actual CQ as in CMD44, it's just a hack to present itself to the mmc
+subsystem as such to then get more in-flight requests from mmc core,
+which can be prepared in advance and be issued asynchronously to
+the completion of the preceding request (in atomic context). So the card
+is completely oblivious to hsq.
+This is presumably broken though by the mandatory CMD22 for SDUC.
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 5d35fc8802c7..0ee89e3e8f94 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -836,8 +836,11 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
- 	 * block-addressed SDHC cards.
- 	 */
- 	err = mmc_send_if_cond(host, ocr);
--	if (!err)
-+	if (!err) {
- 		ocr |= SD_OCR_CCS;
-+		/* Set HO2T as well - SDUC card won't respond otherwise */
-+		ocr |= SD_OCR_2T;
-+	}
- 
- 	/*
- 	 * If the host supports one of UHS-I modes, request the card
-@@ -1448,7 +1451,10 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 	}
- 
- 	if (!oldcard) {
--		err = mmc_sd_get_csd(card, false);
-+		u32 sduc_arg = SD_OCR_CCS | SD_OCR_2T;
-+		bool is_sduc = (rocr & sduc_arg) == sduc_arg;
-+
-+		err = mmc_sd_get_csd(card, is_sduc);
- 		if (err)
- 			goto free_card;
- 
--- 
-2.25.1
+> 
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> ---
+>  drivers/mmc/core/sd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 1d09f0f2e769..5d35fc8802c7 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1558,7 +1558,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+>  			goto free_card;
+>  	}
+>  
+> -	if (host->cqe_ops && !host->cqe_enabled) {
+> +	if (!mmc_card_ult_capacity(card) && host->cqe_ops && !host->cqe_enabled) {
+>  		err = host->cqe_ops->cqe_enable(host, card);
+>  		if (!err) {
+>  			host->cqe_enabled = true;
 
