@@ -1,244 +1,152 @@
-Received: from mail.kaechele.ca (mail.kaechele.ca [54.39.219.105])
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B15E1AD58;
-	Sun,  8 Sep 2024 01:38:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=54.39.219.105
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCFED14EC66
+	for <linux-mmc@vger.kernel.org>; Sun,  8 Sep 2024 10:22:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725759487; cv=none; b=jlnig0lQ5Yk990WBznd5IqwcgRVGwCVBJ0cNzbkUWonF0EsmaV+A6NbfjYEM/0nMkXPplIio2UAusTe0DiwiaJvT6Fet9dU01fm3kF/qN4IS019Iosugq2RQyPjQdlMCqPiypYlTV51KopSiWNwnz1d0ZIsC2LuP4NVxqLhNfF8=
+	t=1725790930; cv=none; b=hcFKCjb73COX7WyyNVL0ERdEJlbDWAe5GzULbtxB+yUkyWAKB/mhgDJj/DMZENDeDqHYkbFQjjidWtByTKompZR3hVr4xsYNbUBVU83R9hs0BznyiXDRLbYQfH9G/zChcA++LVEoiGi+1G0FeBFTjRhsWqii5trion3H4+QszPM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725759487; c=relaxed/simple;
-	bh=cKur2q1H4Fp8CU1WwGO5kiQmlLK0EZaG7F+Q1MIAcMk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=tGv7f1qcDvQQ692fjAsz9SlR0v3UBGkLYR0hIgWPMJHG3cyOpjBh0GimdQ4DNKAXOikPK5DIo5kVlT+6552339K7ElHmsP2lwKV60WJVWfxd0uPmsADcrgsQWucspSnLYyUJsK+DBoQ3SFMx3pL91K2Ys4hrHOJYu5R+ln9gl08=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=kaechele.ca; spf=pass smtp.mailfrom=kaechele.ca; dkim=pass (1024-bit key) header.d=kaechele.ca header.i=@kaechele.ca header.b=A7L4Y+FZ; arc=none smtp.client-ip=54.39.219.105
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=kaechele.ca
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kaechele.ca
+	s=arc-20240116; t=1725790930; c=relaxed/simple;
+	bh=ySPUle5m2pJ0gniDR31n5O4DDGl/QSdoQ9wO08WGFNs=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=bArPsHyV3uYZ6brOIvGFN/cXYz7zLC20Xck8BPNANLrLiACZRd0HHQlNejkb7tFkKgg6wcIxsfWcFk4K4E6VPk1M4HAUbDMVzxump/pYQX1jamtdCAL8RLPaW/HPbDziYneuTpFmwfdZrzoUIhDRifGmSOb4kb4nNIhPV9fisqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=TAXF+cvv; arc=none smtp.client-ip=216.71.153.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=kaechele.ca header.i=@kaechele.ca header.b="A7L4Y+FZ"
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 7B7E3C006E;
-	Sat,  7 Sep 2024 21:34:19 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kaechele.ca; s=201907;
-	t=1725759259; h=from:subject:date:message-id:to:cc:mime-version:
-	 content-transfer-encoding:in-reply-to:references;
-	bh=8JhlNFjotRe07qdRg8Zljx1TcJ9iAGtjWJxLaciU8lA=;
-	b=A7L4Y+FZTZLlVHhkCu7ZKrizMxZwdm/Hc2V4DdVozR5La6FUwmCQUiE0v4hmCWzDinI661
-	GSQVyBrWMgJ5CSmXyL5+fGvnFA7PowhK9v/W41fKas4O2zb7Cu56ujPcKGyfxpUGyks8ol
-	vlDDyAVLbnQ6LITJo1PeJD6o4XBeEbo=
-From: Felix Kaechele <felix@kaechele.ca>
-To: ath10k@lists.infradead.org
-Cc: linux-wireless@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="TAXF+cvv"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1725790929; x=1757326929;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ySPUle5m2pJ0gniDR31n5O4DDGl/QSdoQ9wO08WGFNs=;
+  b=TAXF+cvvmeGDKN0k1b4Ex1S4wM8d6Nlk4LTcwRPw97rNX6pF1MbCCpli
+   iuhC9rixX6+jCWgLIB3qFMU52JEvoXuPH9MykJ3kh/WIFeVfuEEaO+0lY
+   yf38CVHVkOB4JxMQps739eKn2TlOelt/hia3m2y2YxnAqiE8/PuzqqPTs
+   /W8ghnTBo6uOVWXIA3LhzKIGG+syD4o5naGpquqGki3rWyC7t+nPTsk4B
+   XGfxJmT8C8ftwf4A4G/mVULc5Pc4GqbgjxRopXalmdy/liQGYktGva5nj
+   HHP1xvNOqckhpDMsHyOVOsvHjcj5KrOWGmbtj2raQZ20vFwrPlSPh3V2Q
+   w==;
+X-CSE-ConnectionGUID: Yzbkf/3cTBmpIcl3ryvlkg==
+X-CSE-MsgGUID: /n7Ax/xQTbqqTtc1RoUfYw==
+X-IronPort-AV: E=Sophos;i="6.10,212,1719849600"; 
+   d="scan'208";a="26168367"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 08 Sep 2024 18:22:02 +0800
+IronPort-SDR: 66dd6def_UTlY4r50n49u9pP8MIoQT9E1SPPQdyCracUQ4aQSh31uLQA
+ 7OfuVz7tMci7aTcAZCef5kvQXu+SxXw7KBZ3f4A==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 02:27:11 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Sep 2024 03:22:00 -0700
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH v2 2/2] wifi: ath10k: add support for QCA9379 hw1.0 SDIO
-Date: Sat,  7 Sep 2024 21:32:44 -0400
-Message-ID: <20240908013244.496382-3-felix@kaechele.ca>
-X-Mailer: git-send-email 2.46.0
-In-Reply-To: <20240908013244.496382-1-felix@kaechele.ca>
-References: <20240908013244.496382-1-felix@kaechele.ca>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Ricky WU <ricky_wu@realtek.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Christian Loehle <christian.loehle@arm.com>,
+	Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v7 00/10] Add SDUC Support
+Date: Sun,  8 Sep 2024 13:20:08 +0300
+Message-Id: <20240908102018.3711527-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Last-TLS-Session-Version: TLSv1.3
 
-This adds support for the QCA9379-3 SDIO SoC. It is part of the
-QCA6174 SDIO family.
+Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+cards support capacity larger than 2TB and up to including 128TB. Thus,
+the address range of the card expands beyond the 32-bit command
+argument. To that end, a new command - CMD22 is defined, to carry the
+extra 6-bit upper part of the 38-bit block address that enable access to
+128TB memory space.
 
-While the device is generally working, there are some remaining issues:
-- the card will perform a full reconnect upon expiry of the Group Key
-  renewal interval
-- rx rates are not reported correctly (i.e. always show as 6.0 MBit/s)
+SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+as SDXC.
 
-More debugging would need to be done on these, preferably by people with
-access to proper documentation.
+The spec defines several extensions/modifications to the current SDXC
+cards, which we address in patches 1 - 10.  Otherwise requirements are
+out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+Extension for Video Speed Class (CMD20).
 
-This change was tested on a device that uses a LITEON WCBN3510A module.
-The module was tested in WPA2 and WPA3 Personal scenarios using iperf3.
-Performance was comparable to the same device using the vendor driver in
-the same environment.
+First publication of SDUC was in [1].  This series was developed and
+tested separately from [1] and does not borrow from it.
 
-Tested-on: QCA9379 hw1.0 SDIO WLAN.NPL.1.6-00163-QCANPLSWPZ-1
+[1] https://lwn.net/Articles/982566/
 
-Signed-off-by: Felix Kaechele <felix@kaechele.ca>
 ---
- drivers/net/wireless/ath/ath10k/core.c      | 37 +++++++++++++++++++++
- drivers/net/wireless/ath/ath10k/hw.h        | 10 ++++++
- drivers/net/wireless/ath/ath10k/pci.c       |  2 ++
- drivers/net/wireless/ath/ath10k/sdio.c      |  5 ++-
- drivers/net/wireless/ath/ath10k/targaddrs.h |  3 ++
- 5 files changed, 56 insertions(+), 1 deletion(-)
+Changes in v7:
+ - Minimizes the padding further in mmc_command (Christian)
+ - Set the SD_OCR_2T when enabling SDUC (Adrian)
+ - Remove unnecessary casting (Adrian)
+ - Remove redundant else and switch patches 3 & 4 (Adrian)
+ - Add patch to prevent HSQ from enabling (Adrian)
+ - Remove redundant variable and make use of clamp_val (Adrian)
 
-diff --git a/drivers/net/wireless/ath/ath10k/core.c b/drivers/net/wireless/ath/ath10k/core.c
-index b3294287bce1..32d5d4be8830 100644
---- a/drivers/net/wireless/ath/ath10k/core.c
-+++ b/drivers/net/wireless/ath/ath10k/core.c
-@@ -661,6 +661,42 @@ static const struct ath10k_hw_params ath10k_hw_params_list[] = {
- 		.delay_unmap_buffer = false,
- 		.mcast_frame_registration = false,
- 	},
-+	{
-+		.id = QCA9379_HW_1_0_DEV_VERSION,
-+		.dev_id = QCA9379_1_0_DEVICE_ID,
-+		.bus = ATH10K_BUS_SDIO,
-+		.name = "qca9379 hw1.0 sdio",
-+		.patch_load_addr = QCA9379_HW_1_0_PATCH_LOAD_ADDR,
-+		.uart_pin = 19,
-+		.otp_exe_param = 0,
-+		.channel_counters_freq_hz = 88000,
-+		.max_probe_resp_desc_thres = 0,
-+		.cal_data_len = 0,
-+		.fw = {
-+			.dir = QCA9379_HW_1_0_FW_DIR,
-+			.board_size = QCA9379_BOARD_DATA_SZ,
-+			.board_ext_size = QCA9379_BOARD_EXT_DATA_SZ,
-+		},
-+		.rx_desc_ops = &qca988x_rx_desc_ops,
-+		.hw_ops = &qca6174_sdio_ops,
-+		.hw_clk = qca6174_clk,
-+		.target_cpu_freq = 176000000,
-+		.decap_align_bytes = 4,
-+		.n_cipher_suites = 8,
-+		.num_peers = 10,
-+		.ast_skid_limit = 0x10,
-+		.num_wds_entries = 0x20,
-+		.uart_pin_workaround = true,
-+		.tx_stats_over_pktlog = false,
-+		.credit_size_workaround = true,
-+		.bmi_large_size_download = true,
-+		.supports_peer_stats_info = false,
-+		.dynamic_sar_support = false,
-+		.hw_restart_disconnect = false,
-+		.use_fw_tx_credits = true,
-+		.delay_unmap_buffer = false,
-+		.mcast_frame_registration = false,
-+	},
- 	{
- 		.id = QCA4019_HW_1_0_DEV_VERSION,
- 		.dev_id = 0,
-@@ -3602,6 +3638,7 @@ struct ath10k *ath10k_core_create(size_t priv_size, struct device *dev,
- 		break;
- 	case ATH10K_HW_QCA6174:
- 	case ATH10K_HW_QCA9377:
-+	case ATH10K_HW_QCA9379:
- 		ar->regs = &qca6174_regs;
- 		ar->hw_ce_regs = &qcax_ce_regs;
- 		ar->hw_values = &qca6174_values;
-diff --git a/drivers/net/wireless/ath/ath10k/hw.h b/drivers/net/wireless/ath/ath10k/hw.h
-index 442091c6dfd2..419fa1888e75 100644
---- a/drivers/net/wireless/ath/ath10k/hw.h
-+++ b/drivers/net/wireless/ath/ath10k/hw.h
-@@ -30,6 +30,7 @@ enum ath10k_bus {
- #define QCA9888_2_0_DEVICE_ID	(0x0056)
- #define QCA9984_1_0_DEVICE_ID	(0x0046)
- #define QCA9377_1_0_DEVICE_ID   (0x0042)
-+#define QCA9379_1_0_DEVICE_ID   (0x0042)
- #define QCA9887_1_0_DEVICE_ID   (0x0050)
- 
- /* QCA988X 1.0 definitions (unsupported) */
-@@ -59,6 +60,9 @@ enum ath10k_bus {
- #define QCA9377_HW_1_0_DEV_VERSION	0x05020000
- #define QCA9377_HW_1_1_DEV_VERSION	0x05020001
- 
-+/* QCA9379 target BMI version signatures */
-+#define QCA9379_HW_1_0_DEV_VERSION	0x05040000
-+
- enum qca6174_pci_rev {
- 	QCA6174_PCI_REV_1_1 = 0x11,
- 	QCA6174_PCI_REV_1_3 = 0x13,
-@@ -115,6 +119,10 @@ enum qca9377_chip_id_rev {
- #define QCA9377_HW_1_0_FW_DIR          ATH10K_FW_DIR "/QCA9377/hw1.0"
- #define QCA9377_HW_1_0_PATCH_LOAD_ADDR	0x1234
- 
-+/* QCA9379 1.0 definitions */
-+#define QCA9379_HW_1_0_FW_DIR		ATH10K_FW_DIR "/QCA9379/hw1.0"
-+#define QCA9379_HW_1_0_PATCH_LOAD_ADDR	0x1234
-+
- /* QCA4019 1.0 definitions */
- #define QCA4019_HW_1_0_DEV_VERSION     0x01000000
- #define QCA4019_HW_1_0_FW_DIR          ATH10K_FW_DIR "/QCA4019/hw1.0"
-@@ -230,6 +238,7 @@ enum ath10k_hw_rev {
- 	ATH10K_HW_QCA9888,
- 	ATH10K_HW_QCA9984,
- 	ATH10K_HW_QCA9377,
-+	ATH10K_HW_QCA9379,
- 	ATH10K_HW_QCA4019,
- 	ATH10K_HW_QCA9887,
- 	ATH10K_HW_WCN3990,
-@@ -401,6 +410,7 @@ int ath10k_hw_diag_fast_download(struct ath10k *ar,
- #define QCA_REV_9888(ar) ((ar)->hw_rev == ATH10K_HW_QCA9888)
- #define QCA_REV_9984(ar) ((ar)->hw_rev == ATH10K_HW_QCA9984)
- #define QCA_REV_9377(ar) ((ar)->hw_rev == ATH10K_HW_QCA9377)
-+#define QCA_REV_9379(ar) ((ar)->hw_rev == ATH10K_HW_QCA9379)
- #define QCA_REV_40XX(ar) ((ar)->hw_rev == ATH10K_HW_QCA4019)
- #define QCA_REV_WCN3990(ar) ((ar)->hw_rev == ATH10K_HW_WCN3990)
- 
-diff --git a/drivers/net/wireless/ath/ath10k/pci.c b/drivers/net/wireless/ath/ath10k/pci.c
-index c52a16f8078f..6fee3d52d808 100644
---- a/drivers/net/wireless/ath/ath10k/pci.c
-+++ b/drivers/net/wireless/ath/ath10k/pci.c
-@@ -1899,6 +1899,7 @@ void ath10k_pci_irq_msi_fw_mask(struct ath10k *ar)
- 		 *  to mask irq/MSI.
- 		 */
- 		break;
-+	case ATH10K_HW_QCA9379:
- 	case ATH10K_HW_WCN3990:
- 		break;
- 	}
-@@ -1927,6 +1928,7 @@ static void ath10k_pci_irq_msi_fw_unmask(struct ath10k *ar)
- 		 *  to unmask irq/MSI.
- 		 */
- 		break;
-+	case ATH10K_HW_QCA9379:
- 	case ATH10K_HW_WCN3990:
- 		break;
- 	}
-diff --git a/drivers/net/wireless/ath/ath10k/sdio.c b/drivers/net/wireless/ath/ath10k/sdio.c
-index 08a6f36a6be9..24123d23ad5a 100644
---- a/drivers/net/wireless/ath/ath10k/sdio.c
-+++ b/drivers/net/wireless/ath/ath10k/sdio.c
-@@ -1105,6 +1105,7 @@ static void ath10k_sdio_set_mbox_info(struct ath10k *ar)
- 				ATH10K_HIF_MBOX0_EXT_WIDTH_ROME_2_0;
- 		break;
- 	case (SDIO_DEVICE_ID_ATHEROS_QCA9377 & 0x0F00):
-+	case (SDIO_DEVICE_ID_ATHEROS_QCA9379 & 0x0F00):
- 		mbox_info->ext_info[0].htc_ext_sz =
- 			ATH10K_HIF_MBOX0_EXT_WIDTH_ROME_2_0;
- 		break;
-@@ -2597,7 +2598,8 @@ static int ath10k_sdio_probe(struct sdio_func *func,
- 
- 	dev_id_base = (id->device & 0x0F00);
- 	if (dev_id_base != (SDIO_DEVICE_ID_ATHEROS_AR6005 & 0x0F00) &&
--	    dev_id_base != (SDIO_DEVICE_ID_ATHEROS_QCA9377 & 0x0F00)) {
-+	    dev_id_base != (SDIO_DEVICE_ID_ATHEROS_QCA9377 & 0x0F00) &&
-+	    dev_id_base != (SDIO_DEVICE_ID_ATHEROS_QCA9379 & 0x0F00)) {
- 		ret = -ENODEV;
- 		ath10k_err(ar, "unsupported device id %u (0x%x)\n",
- 			   dev_id_base, id->device);
-@@ -2656,6 +2658,7 @@ static void ath10k_sdio_remove(struct sdio_func *func)
- static const struct sdio_device_id ath10k_sdio_devices[] = {
- 	{SDIO_DEVICE(SDIO_VENDOR_ID_ATHEROS, SDIO_DEVICE_ID_ATHEROS_AR6005)},
- 	{SDIO_DEVICE(SDIO_VENDOR_ID_ATHEROS, SDIO_DEVICE_ID_ATHEROS_QCA9377)},
-+	{SDIO_DEVICE(SDIO_VENDOR_ID_ATHEROS, SDIO_DEVICE_ID_ATHEROS_QCA9379)},
- 	{},
- };
- 
-diff --git a/drivers/net/wireless/ath/ath10k/targaddrs.h b/drivers/net/wireless/ath/ath10k/targaddrs.h
-index ba37e6c7ced0..1a0f71126683 100644
---- a/drivers/net/wireless/ath/ath10k/targaddrs.h
-+++ b/drivers/net/wireless/ath/ath10k/targaddrs.h
-@@ -481,6 +481,9 @@ struct host_interest {
- #define QCA9377_BOARD_DATA_SZ     QCA6174_BOARD_DATA_SZ
- #define QCA9377_BOARD_EXT_DATA_SZ 0
- 
-+#define QCA9379_BOARD_DATA_SZ     QCA6174_BOARD_DATA_SZ
-+#define QCA9379_BOARD_EXT_DATA_SZ 0
-+
- #define QCA99X0_BOARD_DATA_SZ	  12288
- #define QCA99X0_BOARD_EXT_DATA_SZ 0
- 
+Changes in v6:
+ - Remove Ricky's tested-by tag - the series has changed greatly
+ - Call mmc_send_ext_addr from mmc_start_request (Adrian)
+
+Changes in v5:
+ - leave out the mask in mmc_send_ext_addr (Adrian)
+ - leave out close-ended SDUC support
+ - remove 500msec write delay as there is no busy indication (Adrian)
+ - disable mmc-test for SDUC
+ - move enabling SDUC to the last patch (Adrian)
+
+Changes in v4:
+ - Squash patches 1 & 2 (Ulf)
+ - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
+ - Use card state instead of caps2 (Ricky & Ulf)
+ - Switch patches 5 & 6 (Ulf)
+
+Changes in v3:
+ - Some more kernel test robot fixes
+ - Fix a typo in a commit log (Ricky WU)
+ - Fix ACMD22 returned value
+ - Add 'Tested-by' tag for the whole series (Ricky WU)
+
+Changes in v2:
+ - Attend kernel test robot warnings
+
+---
+
+Avri Altman (10):
+  mmc: sd: SDUC Support Recognition
+  mmc: sd: Add Extension memory addressing
+  mmc: core: Don't use close-ended rw for SDUC
+  mmc: core: Add open-ended Ext memory addressing
+  mmc: core: Allow mmc erase to carry large addresses
+  mmc: core: Add Ext memory addressing for erase
+  mmc: core: Adjust ACMD22 to SDUC
+  mmc: core: Disable SDUC for mmc_test
+  mmc: core: Prevent HSQ from enabling for SDUC
+  mmc: core: Enable SDUC
+
+ drivers/mmc/core/block.c    | 37 +++++++++++++++++++++-------
+ drivers/mmc/core/bus.c      |  4 +++-
+ drivers/mmc/core/card.h     |  3 +++
+ drivers/mmc/core/core.c     | 48 +++++++++++++++++++++++++------------
+ drivers/mmc/core/core.h     | 16 +++++++++----
+ drivers/mmc/core/mmc_test.c |  6 +++++
+ drivers/mmc/core/sd.c       | 38 +++++++++++++++++++----------
+ drivers/mmc/core/sd.h       |  2 +-
+ drivers/mmc/core/sd_ops.c   | 16 +++++++++++++
+ drivers/mmc/core/sd_ops.h   |  1 +
+ drivers/mmc/core/sdio.c     |  2 +-
+ include/linux/mmc/card.h    |  2 +-
+ include/linux/mmc/core.h    |  5 ++++
+ include/linux/mmc/sd.h      |  4 ++++
+ 14 files changed, 139 insertions(+), 45 deletions(-)
+
 -- 
-2.46.0
+2.25.1
 
