@@ -1,213 +1,166 @@
-Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F322F1B2ED5
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Sep 2024 09:44:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0639B5733A
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Sep 2024 10:37:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725875049; cv=none; b=kIILuWXeChmBr9zMtkUj80r1anLMMK6A5rpo6YTCclnHR0fyl7wPRyCCLe/EZOPNnwGiU1vvCN8ZLKDX1DZ9Nqed215mwoSnhoXQQTrlCf2sj1InYoVLZlN5LmXkZQGNCI+NrV14kbN3x5hGY1lTRSGpoc0lUthaxV3jC90zHgY=
+	t=1725878227; cv=none; b=AECXJ8+WB+yB3hsqFOAJNYA3KEB9XInaOuXk/wX56VtuOZ8gVWZWZto6x61Zh6Ws4l7Hz6tDE4YG/UCuhlh4tIsD/ReIp17NZlO8DvuFDXCrd1FvHvlmgp8ad0Ob0RLxL1Js58YAdVGIuqbkWetIkSuMP8qK4AmoTYI4AjrUt5w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725875049; c=relaxed/simple;
-	bh=bX5jM3kyQKkVdtMEpnz0qCHRxu0QYubOxMm9Z4e9e5I=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ZmaPe7rrX3bjmDw0RNF4jkhSdmRwY98K0Ky7YxffPlyXRBsaqqE5CJCSnR83HT3Yg3/tJpI9/lgWE5OvDcq7v+UFMZw+XBcdMPl1Olle5L0J5mr8XcLVmdCOtiSZMyBGELyeHU7BSeYtFeFc2KPVbQCieYgZC/L4jOQ8ITYuboM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=erF4b8WV; arc=none smtp.client-ip=209.85.208.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1725878227; c=relaxed/simple;
+	bh=a3X6g+r1k1SIuERnQC2a1ML2jFsiyREvYeDpvfgDQ2I=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=J/KzK/1Vhlnj8F8LfSlrd3Pos8dRHcgqi0pWal5Mj9TPM035Tn/xAwlf8AdECYKs7DsVsmdmVFYU9qQ8y6AISs5EgwPrDs2SVTUie4kLjUFfKvTmjE3VdWKyfST9jMPqkzJz2E1g6bTgDIOTIFeOsbCSR0Tr3RbJSs8Rk+5cDdY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jprQI5PT; arc=none smtp.client-ip=198.175.65.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="erF4b8WV"
-Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-2f75aa08a96so26031271fa.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Sep 2024 02:44:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1725875045; x=1726479845; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ayxt9tW30pARsBtY4uNjtVx6woJrfLpJGoVganqLqLs=;
-        b=erF4b8WVYYjPBBInFSA5pdPTCmm8ktqbUjqKsGrppLo+LC/gX4YB7cVT4dQW2zbSEF
-         DJOPr4Ckb++NmzuVVxl68oxyc/taBSqCauZCybvuWvTWOXye+G1jDEkGV91kse94tmFm
-         1lX1V4F78W789A4wMYkQjlnji0+hQd6E6UgzqPZO9DXTLhBAU73OFA1JwyJtBR8GTahL
-         Lw5Y7XjgZNses3QmN47MGQwHcQa0rqLOvbU7MwF0QVhuw7Rmu+UCS7/+kpsZLGkklWH7
-         2/wSiLvpXI4WdvIXhtBPeWMO7EZDAiH8TsD24RbVyl8wq6uvQzoyenekgvRmY/D9uG2/
-         8bXA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1725875045; x=1726479845;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ayxt9tW30pARsBtY4uNjtVx6woJrfLpJGoVganqLqLs=;
-        b=DcZTmt/Y1DgXBN2S6APEdsK+jrjby+ALQx7mKpGmoHgHqZ9gyfCP8Auxv9KMu+UHKd
-         Tu78jwl6sndDFV4mEYhVmaXCIoxncJPBK3jb1WLyn1xZWu4EfOxMD+S+x3MF456vMIhI
-         1AnctDQBXmLem3qreJFA8QpE5TT3OgqnOQUTrlEloSMjshLR198ht9jurolzC6qG5G/Z
-         UHiIvWomSwPYcWVdZHjH2KlaH6fGGgnNbg6Hu4Cg8mwRHK3bGq3/T1AHf4Ln4Xk1V/Cj
-         IWhsCnmjREs9GDgqURVeB3UPhYWPwt+yuCeg9kNMKEpO0daqQIbkd5VPHk47AL24fa0b
-         gppA==
-X-Forwarded-Encrypted: i=1; AJvYcCXPRp/oKEgzX2xBH/wSt+Sp7d66nY+bv/WC9YF3bO+NM6xnZyOf9np152xAPxyOph+nzD0SllMLdGM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw8MzTXGmQ241Eb/6ymo97e/VX1Pmesii0hGKQnzDZLxde/r4c6
-	kIMjLzH0V2u0WFd/fx6+4zdqMgZ6AFDskrKjQ9TIDw4OlkCotXh0Ucl7TvbE68Q=
-X-Google-Smtp-Source: AGHT+IFfJZf4aCicpleqZE+fxLlnGBGZEfKHivmNdx0kcBfFkbzhf0hjKD5P+CTHE0X5P4PgDl4WVQ==
-X-Received: by 2002:a05:651c:211e:b0:2ef:251f:785 with SMTP id 38308e7fff4ca-2f751eb30d8mr74440981fa.1.1725875044071;
-        Mon, 09 Sep 2024 02:44:04 -0700 (PDT)
-Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2f75c098cd3sm7416661fa.113.2024.09.09.02.44.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Sep 2024 02:44:03 -0700 (PDT)
-Date: Mon, 9 Sep 2024 12:44:02 +0300
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Neil Armstrong <neil.armstrong@linaro.org>
-Cc: Bartosz Golaszewski <brgl@bgdev.pl>, Jens Axboe <axboe@kernel.dk>, 
-	Jonathan Corbet <corbet@lwn.net>, Alasdair Kergon <agk@redhat.com>, 
-	Mike Snitzer <snitzer@kernel.org>, Mikulas Patocka <mpatocka@redhat.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Asutosh Das <quic_asutoshd@quicinc.com>, 
-	Ritesh Harjani <ritesh.list@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Alim Akhtar <alim.akhtar@samsung.com>, Avri Altman <avri.altman@wdc.com>, 
-	Bart Van Assche <bvanassche@acm.org>, "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>, 
-	"Martin K. Petersen" <martin.petersen@oracle.com>, Eric Biggers <ebiggers@kernel.org>, 
-	"Theodore Y. Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, 
-	Alexander Viro <viro@zeniv.linux.org.uk>, Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>, 
-	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
-	linux-block@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	dm-devel@lists.linux.dev, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-Subject: Re: [PATCH v6 09/17] soc: qcom: ice: add HWKM support to the ICE
- driver
-Message-ID: <ivibs6qqxhbikaevys3iga7s73xq6dzq3u43gwjri3lozkrblx@jxlmwe5wiq7e>
-References: <20240906-wrapped-keys-v6-0-d59e61bc0cb4@linaro.org>
- <20240906-wrapped-keys-v6-9-d59e61bc0cb4@linaro.org>
- <7uoq72bpiqmo2olwpnudpv3gtcowpnd6jrifff34ubmfpijgc6@k6rmnalu5z4o>
- <66953e65-2468-43b8-9ccf-54671613c4ab@linaro.org>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jprQI5PT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1725878225; x=1757414225;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=a3X6g+r1k1SIuERnQC2a1ML2jFsiyREvYeDpvfgDQ2I=;
+  b=jprQI5PTCCKxkWRP5IFctEq5pSNbpAqBYGXNMgQBvvgjVBi+n9e6GfaD
+   QOV5msxBTiZicPfVyrAGWEq8txvmJJF2dF2Sowfr7aPVdTYN5c1HyURkb
+   27B0XE8i8m9J7amjVean049wITKWUFTO16l3jntliOCEgrVqcDsPYEwLr
+   b47DQc3ca2wjAIADAelZGND3wSc9Gc5UrFpl38sjplVc/yv2yy1U8XitR
+   QyKaGpS+jsKLCMMDyJLMCcrLH+fP8wvCmaukkxMij4XKXdGigjTgnUxaR
+   GKvAgFollVpaHy9+6oh8zFE/tZnCwXturRF6SleX8wl8avrCo8aUHbz5w
+   A==;
+X-CSE-ConnectionGUID: 773SuzuLQz6zjTcAXV6deA==
+X-CSE-MsgGUID: MSFkwdhORQa6Yiu3Pi0hNg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11189"; a="42044973"
+X-IronPort-AV: E=Sophos;i="6.10,214,1719903600"; 
+   d="scan'208";a="42044973"
+Received: from orviesa004.jf.intel.com ([10.64.159.144])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 03:37:04 -0700
+X-CSE-ConnectionGUID: VnOksyMWR06j+ek3Rq1e2g==
+X-CSE-MsgGUID: XhcUGEzYQg+JIsbtS+nTgA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,214,1719903600"; 
+   d="scan'208";a="71583993"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.96.163])
+  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 03:37:02 -0700
+Message-ID: <e157fc58-a571-4e57-b885-e011b7abdf28@intel.com>
+Date: Mon, 9 Sep 2024 13:36:55 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <66953e65-2468-43b8-9ccf-54671613c4ab@linaro.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v7 00/10] Add SDUC Support
+To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ linux-mmc@vger.kernel.org
+Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>,
+ Christian Loehle <christian.loehle@arm.com>,
+ Michael Wu <michael@allwinnertech.com>,
+ Wenchao Chen <wenchao.chen@unisoc.com>
+References: <20240908102018.3711527-1-avri.altman@wdc.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240908102018.3711527-1-avri.altman@wdc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Mon, Sep 09, 2024 at 10:58:30AM GMT, Neil Armstrong wrote:
-> On 07/09/2024 00:07, Dmitry Baryshkov wrote:
-> > On Fri, Sep 06, 2024 at 08:07:12PM GMT, Bartosz Golaszewski wrote:
-> > > From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> > > 
-> > > Qualcomm's ICE (Inline Crypto Engine) contains a proprietary key
-> > > management hardware called Hardware Key Manager (HWKM). Add HWKM support
-> > > to the ICE driver if it is available on the platform. HWKM primarily
-> > > provides hardware wrapped key support where the ICE (storage) keys are
-> > > not available in software and instead protected in hardware.
-> > > 
-> > > When HWKM software support is not fully available (from Trustzone), there
-> > > can be a scenario where the ICE hardware supports HWKM, but it cannot be
-> > > used for wrapped keys. In this case, raw keys have to be used without
-> > > using the HWKM. We query the TZ at run-time to find out whether wrapped
-> > > keys support is available.
-> > > 
-> > > Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
-> > > Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> > > Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-> > > ---
-> > >   drivers/soc/qcom/ice.c | 152 +++++++++++++++++++++++++++++++++++++++++++++++--
-> > >   include/soc/qcom/ice.h |   1 +
-> > >   2 files changed, 149 insertions(+), 4 deletions(-)
-> > > 
-> > >   int qcom_ice_enable(struct qcom_ice *ice)
-> > >   {
-> > > +	int err;
-> > > +
-> > >   	qcom_ice_low_power_mode_enable(ice);
-> > >   	qcom_ice_optimization_enable(ice);
-> > > -	return qcom_ice_wait_bist_status(ice);
-> > > +	if (ice->use_hwkm)
-> > > +		qcom_ice_enable_standard_mode(ice);
-> > > +
-> > > +	err = qcom_ice_wait_bist_status(ice);
-> > > +	if (err)
-> > > +		return err;
-> > > +
-> > > +	if (ice->use_hwkm)
-> > > +		qcom_ice_hwkm_init(ice);
-> > > +
-> > > +	return err;
-> > >   }
-> > >   EXPORT_SYMBOL_GPL(qcom_ice_enable);
-> > > @@ -150,6 +282,10 @@ int qcom_ice_resume(struct qcom_ice *ice)
-> > >   		return err;
-> > >   	}
-> > > +	if (ice->use_hwkm) {
-> > > +		qcom_ice_enable_standard_mode(ice);
-> > > +		qcom_ice_hwkm_init(ice);
-> > > +	}
-> > >   	return qcom_ice_wait_bist_status(ice);
-> > >   }
-> > >   EXPORT_SYMBOL_GPL(qcom_ice_resume);
-> > > @@ -157,6 +293,7 @@ EXPORT_SYMBOL_GPL(qcom_ice_resume);
-> > >   int qcom_ice_suspend(struct qcom_ice *ice)
-> > >   {
-> > >   	clk_disable_unprepare(ice->core_clk);
-> > > +	ice->hwkm_init_complete = false;
-> > >   	return 0;
-> > >   }
-> > > @@ -206,6 +343,12 @@ int qcom_ice_evict_key(struct qcom_ice *ice, int slot)
-> > >   }
-> > >   EXPORT_SYMBOL_GPL(qcom_ice_evict_key);
-> > > +bool qcom_ice_hwkm_supported(struct qcom_ice *ice)
-> > > +{
-> > > +	return ice->use_hwkm;
-> > > +}
-> > > +EXPORT_SYMBOL_GPL(qcom_ice_hwkm_supported);
-> > > +
-> > >   static struct qcom_ice *qcom_ice_create(struct device *dev,
-> > >   					void __iomem *base)
-> > >   {
-> > > @@ -240,6 +383,7 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
-> > >   		engine->core_clk = devm_clk_get_enabled(dev, NULL);
-> > >   	if (IS_ERR(engine->core_clk))
-> > >   		return ERR_CAST(engine->core_clk);
-> > > +	engine->use_hwkm = qcom_scm_has_wrapped_key_support();
-> > 
-> > This still makes the decision on whether to use HW-wrapped keys on
-> > behalf of a user. I suppose this is incorrect. The user must be able to
-> > use raw keys even if HW-wrapped keys are available on the platform. One
-> > of the examples for such use-cases is if a user prefers to be able to
-> > recover stored information in case of a device failure (such recovery
-> > will be impossible if SoC is damaged and HW-wrapped keys are used).
+On 8/09/24 13:20, Avri Altman wrote:
+> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
+> cards support capacity larger than 2TB and up to including 128TB. Thus,
+> the address range of the card expands beyond the 32-bit command
+> argument. To that end, a new command - CMD22 is defined, to carry the
+> extra 6-bit upper part of the 38-bit block address that enable access to
+> 128TB memory space.
 > 
-> Isn't that already the case ? the BLK_CRYPTO_KEY_TYPE_HW_WRAPPED size is
-> here to select HW-wrapped key, otherwise the ol' raw key is passed.
-> Just look the next patch.
+> SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
+> as SDXC.
 > 
-> Or did I miss something ?
+> The spec defines several extensions/modifications to the current SDXC
+> cards, which we address in patches 1 - 10.  Otherwise requirements are
+> out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
+> Extension for Video Speed Class (CMD20).
+> 
+> First publication of SDUC was in [1].  This series was developed and
+> tested separately from [1] and does not borrow from it.
+> 
+> [1] https://lwn.net/Articles/982566/
 
-That's a good question. If use_hwkm is set, ICE gets programmed to use
-hwkm (see qcom_ice_hwkm_init() call above). I'm not sure if it is
-expected to work properly if after such a call we pass raw key.
+I didn't actually give my Reviewed-by in v6, but I guess it can
+stand for those patches.
+
+For "mmc: core: Prevent HSQ from enabling for SDUC" it needs
+feedback from HSQ users - cc'ed Michael Wu and Wenchao Chen
+
+Otherwise I have no further comments for now.
 
 > 
-> Neil
+> ---
+> Changes in v7:
+>  - Minimizes the padding further in mmc_command (Christian)
+>  - Set the SD_OCR_2T when enabling SDUC (Adrian)
+>  - Remove unnecessary casting (Adrian)
+>  - Remove redundant else and switch patches 3 & 4 (Adrian)
+>  - Add patch to prevent HSQ from enabling (Adrian)
+>  - Remove redundant variable and make use of clamp_val (Adrian)
 > 
-> > 
-> > >   	if (!qcom_ice_check_supported(engine))
-> > >   		return ERR_PTR(-EOPNOTSUPP);
-> > > diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
-> > > index 9dd835dba2a7..1f52e82e3e1c 100644
-> > > --- a/include/soc/qcom/ice.h
-> > > +++ b/include/soc/qcom/ice.h
-> > > @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
-> > >   			 const struct blk_crypto_key *bkey,
-> > >   			 u8 data_unit_size, int slot);
-> > >   int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
-> > > +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
-> > >   struct qcom_ice *of_qcom_ice_get(struct device *dev);
-> > >   #endif /* __QCOM_ICE_H__ */
-> > > 
-> > > -- 
-> > > 2.43.0
-> > > 
-> > 
+> Changes in v6:
+>  - Remove Ricky's tested-by tag - the series has changed greatly
+>  - Call mmc_send_ext_addr from mmc_start_request (Adrian)
+> 
+> Changes in v5:
+>  - leave out the mask in mmc_send_ext_addr (Adrian)
+>  - leave out close-ended SDUC support
+>  - remove 500msec write delay as there is no busy indication (Adrian)
+>  - disable mmc-test for SDUC
+>  - move enabling SDUC to the last patch (Adrian)
+> 
+> Changes in v4:
+>  - Squash patches 1 & 2 (Ulf)
+>  - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
+>  - Use card state instead of caps2 (Ricky & Ulf)
+>  - Switch patches 5 & 6 (Ulf)
+> 
+> Changes in v3:
+>  - Some more kernel test robot fixes
+>  - Fix a typo in a commit log (Ricky WU)
+>  - Fix ACMD22 returned value
+>  - Add 'Tested-by' tag for the whole series (Ricky WU)
+> 
+> Changes in v2:
+>  - Attend kernel test robot warnings
+> 
+> ---
+> 
+> Avri Altman (10):
+>   mmc: sd: SDUC Support Recognition
+>   mmc: sd: Add Extension memory addressing
+>   mmc: core: Don't use close-ended rw for SDUC
+>   mmc: core: Add open-ended Ext memory addressing
+>   mmc: core: Allow mmc erase to carry large addresses
+>   mmc: core: Add Ext memory addressing for erase
+>   mmc: core: Adjust ACMD22 to SDUC
+>   mmc: core: Disable SDUC for mmc_test
+>   mmc: core: Prevent HSQ from enabling for SDUC
+>   mmc: core: Enable SDUC
+> 
+>  drivers/mmc/core/block.c    | 37 +++++++++++++++++++++-------
+>  drivers/mmc/core/bus.c      |  4 +++-
+>  drivers/mmc/core/card.h     |  3 +++
+>  drivers/mmc/core/core.c     | 48 +++++++++++++++++++++++++------------
+>  drivers/mmc/core/core.h     | 16 +++++++++----
+>  drivers/mmc/core/mmc_test.c |  6 +++++
+>  drivers/mmc/core/sd.c       | 38 +++++++++++++++++++----------
+>  drivers/mmc/core/sd.h       |  2 +-
+>  drivers/mmc/core/sd_ops.c   | 16 +++++++++++++
+>  drivers/mmc/core/sd_ops.h   |  1 +
+>  drivers/mmc/core/sdio.c     |  2 +-
+>  include/linux/mmc/card.h    |  2 +-
+>  include/linux/mmc/core.h    |  5 ++++
+>  include/linux/mmc/sd.h      |  4 ++++
+>  14 files changed, 139 insertions(+), 45 deletions(-)
 > 
 
--- 
-With best wishes
-Dmitry
