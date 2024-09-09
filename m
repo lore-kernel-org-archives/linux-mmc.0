@@ -1,50 +1,33 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0639B5733A
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Sep 2024 10:37:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EBF21AF4E4;
+	Mon,  9 Sep 2024 11:23:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725878227; cv=none; b=AECXJ8+WB+yB3hsqFOAJNYA3KEB9XInaOuXk/wX56VtuOZ8gVWZWZto6x61Zh6Ws4l7Hz6tDE4YG/UCuhlh4tIsD/ReIp17NZlO8DvuFDXCrd1FvHvlmgp8ad0Ob0RLxL1Js58YAdVGIuqbkWetIkSuMP8qK4AmoTYI4AjrUt5w=
+	t=1725881033; cv=none; b=aAQnIIIJZzudhpLL1BrY2wHeUFhITBw4JqxxO1z79R1A/C8IHC77QS2poP3Vcuvh2FQW8T3clhbxTfHfU5vxZtkHQIAi1Z4zwS45rRiPyR9RCGPUWvlae8KkGB4BuclkORdG0Myvttx5clDh8Cy0xK+rwi5TYmlWzvNXKNwZUYI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725878227; c=relaxed/simple;
-	bh=a3X6g+r1k1SIuERnQC2a1ML2jFsiyREvYeDpvfgDQ2I=;
+	s=arc-20240116; t=1725881033; c=relaxed/simple;
+	bh=AQzT3bAV2JDDv98lxn2LYC9mXTmymBsjkG6LCRpyPxU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=J/KzK/1Vhlnj8F8LfSlrd3Pos8dRHcgqi0pWal5Mj9TPM035Tn/xAwlf8AdECYKs7DsVsmdmVFYU9qQ8y6AISs5EgwPrDs2SVTUie4kLjUFfKvTmjE3VdWKyfST9jMPqkzJz2E1g6bTgDIOTIFeOsbCSR0Tr3RbJSs8Rk+5cDdY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jprQI5PT; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 In-Reply-To:Content-Type; b=gVZttwQ8tMcHh9fKPkulXvK/6ruxXE/VKglyyEKUkAr85jIpNTU1klaEgQDyGt9z/wMCzEE0SEzab4AJA4M44M45T/3IMwMUXxR0RYaoaWvokRBYvsCnpPwwv+iSo/EqPCYeZymUTMZ7GjDdSNtFTGtgK8QOTjqs+vQU507MhaQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fIxa7MfC; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jprQI5PT"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725878225; x=1757414225;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=a3X6g+r1k1SIuERnQC2a1ML2jFsiyREvYeDpvfgDQ2I=;
-  b=jprQI5PTCCKxkWRP5IFctEq5pSNbpAqBYGXNMgQBvvgjVBi+n9e6GfaD
-   QOV5msxBTiZicPfVyrAGWEq8txvmJJF2dF2Sowfr7aPVdTYN5c1HyURkb
-   27B0XE8i8m9J7amjVean049wITKWUFTO16l3jntliOCEgrVqcDsPYEwLr
-   b47DQc3ca2wjAIADAelZGND3wSc9Gc5UrFpl38sjplVc/yv2yy1U8XitR
-   QyKaGpS+jsKLCMMDyJLMCcrLH+fP8wvCmaukkxMij4XKXdGigjTgnUxaR
-   GKvAgFollVpaHy9+6oh8zFE/tZnCwXturRF6SleX8wl8avrCo8aUHbz5w
-   A==;
-X-CSE-ConnectionGUID: 773SuzuLQz6zjTcAXV6deA==
-X-CSE-MsgGUID: MSFkwdhORQa6Yiu3Pi0hNg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11189"; a="42044973"
-X-IronPort-AV: E=Sophos;i="6.10,214,1719903600"; 
-   d="scan'208";a="42044973"
-Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 03:37:04 -0700
-X-CSE-ConnectionGUID: VnOksyMWR06j+ek3Rq1e2g==
-X-CSE-MsgGUID: XhcUGEzYQg+JIsbtS+nTgA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,214,1719903600"; 
-   d="scan'208";a="71583993"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.96.163])
-  by orviesa004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 03:37:02 -0700
-Message-ID: <e157fc58-a571-4e57-b885-e011b7abdf28@intel.com>
-Date: Mon, 9 Sep 2024 13:36:55 +0300
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fIxa7MfC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 23E05C4CEC5;
+	Mon,  9 Sep 2024 11:23:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1725881032;
+	bh=AQzT3bAV2JDDv98lxn2LYC9mXTmymBsjkG6LCRpyPxU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=fIxa7MfCpT2NrhKQOzTCEcsR2Jj//3XNpMa32fzJWiV2Se2PY0rkOeaEEQI9zn5Cd
+	 bVsbJiFRXl6JbG9+j1hSknxLqbm5Igqm0wLyebgDU+ilL1yFpOEshwYSpF8xphZ0fO
+	 pNrGlj1uDMqDVJ2+SwefLeb3jg3dR9LLurP23ztS+FGFZfkneaPXMHZPiagCedVUCM
+	 Bex8xTF362cqZPzzT3DONjUW0lcaPkrjok9ogTrD3B9FWo2oEKB49ixdHuLsEY61OU
+	 Z3O+NUB4VeUdkFz666hVip30pCIEHrNJ0BJcP3eQLCGXlwkvY65VmEio0tued3SUtz
+	 dyippi+O8W0Kg==
+Message-ID: <fc780dc2-5a69-48d8-8caa-ca2ee97d10ef@kernel.org>
+Date: Mon, 9 Sep 2024 13:23:38 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,115 +35,137 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v7 00/10] Add SDUC Support
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org
-Cc: Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>,
- Christian Loehle <christian.loehle@arm.com>,
- Michael Wu <michael@allwinnertech.com>,
- Wenchao Chen <wenchao.chen@unisoc.com>
-References: <20240908102018.3711527-1-avri.altman@wdc.com>
+Subject: Re: [PATCH v6 06/17] firmware: qcom: scm: add a call for deriving the
+ software secret
+To: Bartosz Golaszewski <brgl@bgdev.pl>, Jens Axboe <axboe@kernel.dk>,
+ Jonathan Corbet <corbet@lwn.net>, Alasdair Kergon <agk@redhat.com>,
+ Mike Snitzer <snitzer@kernel.org>, Mikulas Patocka <mpatocka@redhat.com>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Asutosh Das <quic_asutoshd@quicinc.com>,
+ Ritesh Harjani <ritesh.list@gmail.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>,
+ Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ Eric Biggers <ebiggers@kernel.org>, "Theodore Y. Ts'o" <tytso@mit.edu>,
+ Jaegeuk Kim <jaegeuk@kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>,
+ Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+ Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+ Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+ Neil Armstrong <neil.armstrong@linaro.org>
+Cc: linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, dm-devel@lists.linux.dev,
+ linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+ linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+ linux-arm-msm@vger.kernel.org,
+ Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+References: <20240906-wrapped-keys-v6-0-d59e61bc0cb4@linaro.org>
+ <20240906-wrapped-keys-v6-6-d59e61bc0cb4@linaro.org>
 Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240908102018.3711527-1-avri.altman@wdc.com>
+From: Konrad Dybcio <konradybcio@kernel.org>
+In-Reply-To: <20240906-wrapped-keys-v6-6-d59e61bc0cb4@linaro.org>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
-On 8/09/24 13:20, Avri Altman wrote:
-> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
-> cards support capacity larger than 2TB and up to including 128TB. Thus,
-> the address range of the card expands beyond the 32-bit command
-> argument. To that end, a new command - CMD22 is defined, to carry the
-> extra 6-bit upper part of the 38-bit block address that enable access to
-> 128TB memory space.
+On 6.09.2024 8:07 PM, Bartosz Golaszewski wrote:
+> From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
 > 
-> SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II – Same
-> as SDXC.
+> Inline storage encryption may require deriving a software secret from
+> storage keys added to the kernel.
 > 
-> The spec defines several extensions/modifications to the current SDXC
-> cards, which we address in patches 1 - 10.  Otherwise requirements are
-> out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
-> Extension for Video Speed Class (CMD20).
+> For raw keys, this can be directly done in the kernel as keys are not
+> encrypted in memory.
 > 
-> First publication of SDUC was in [1].  This series was developed and
-> tested separately from [1] and does not borrow from it.
+> However, hardware wrapped keys can only be unwrapped by the HW wrapping
+> entity. In case of Qualcomm's wrapped key solution, this is done by the
+> Hardware Key Manager (HWKM) from Trustzone.
 > 
-> [1] https://lwn.net/Articles/982566/
-
-I didn't actually give my Reviewed-by in v6, but I guess it can
-stand for those patches.
-
-For "mmc: core: Prevent HSQ from enabling for SDUC" it needs
-feedback from HSQ users - cc'ed Michael Wu and Wenchao Chen
-
-Otherwise I have no further comments for now.
-
+> Add a new SCM call which provides a hook to the software secret crypto
+> profile API provided by the block layer.
 > 
+> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> Reviewed-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 > ---
-> Changes in v7:
->  - Minimizes the padding further in mmc_command (Christian)
->  - Set the SD_OCR_2T when enabling SDUC (Adrian)
->  - Remove unnecessary casting (Adrian)
->  - Remove redundant else and switch patches 3 & 4 (Adrian)
->  - Add patch to prevent HSQ from enabling (Adrian)
->  - Remove redundant variable and make use of clamp_val (Adrian)
+>  drivers/firmware/qcom/qcom_scm.c       | 65 ++++++++++++++++++++++++++++++++++
+>  drivers/firmware/qcom/qcom_scm.h       |  1 +
+>  include/linux/firmware/qcom/qcom_scm.h |  2 ++
+>  3 files changed, 68 insertions(+)
 > 
-> Changes in v6:
->  - Remove Ricky's tested-by tag - the series has changed greatly
->  - Call mmc_send_ext_addr from mmc_start_request (Adrian)
-> 
-> Changes in v5:
->  - leave out the mask in mmc_send_ext_addr (Adrian)
->  - leave out close-ended SDUC support
->  - remove 500msec write delay as there is no busy indication (Adrian)
->  - disable mmc-test for SDUC
->  - move enabling SDUC to the last patch (Adrian)
-> 
-> Changes in v4:
->  - Squash patches 1 & 2 (Ulf)
->  - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
->  - Use card state instead of caps2 (Ricky & Ulf)
->  - Switch patches 5 & 6 (Ulf)
-> 
-> Changes in v3:
->  - Some more kernel test robot fixes
->  - Fix a typo in a commit log (Ricky WU)
->  - Fix ACMD22 returned value
->  - Add 'Tested-by' tag for the whole series (Ricky WU)
-> 
-> Changes in v2:
->  - Attend kernel test robot warnings
-> 
-> ---
-> 
-> Avri Altman (10):
->   mmc: sd: SDUC Support Recognition
->   mmc: sd: Add Extension memory addressing
->   mmc: core: Don't use close-ended rw for SDUC
->   mmc: core: Add open-ended Ext memory addressing
->   mmc: core: Allow mmc erase to carry large addresses
->   mmc: core: Add Ext memory addressing for erase
->   mmc: core: Adjust ACMD22 to SDUC
->   mmc: core: Disable SDUC for mmc_test
->   mmc: core: Prevent HSQ from enabling for SDUC
->   mmc: core: Enable SDUC
-> 
->  drivers/mmc/core/block.c    | 37 +++++++++++++++++++++-------
->  drivers/mmc/core/bus.c      |  4 +++-
->  drivers/mmc/core/card.h     |  3 +++
->  drivers/mmc/core/core.c     | 48 +++++++++++++++++++++++++------------
->  drivers/mmc/core/core.h     | 16 +++++++++----
->  drivers/mmc/core/mmc_test.c |  6 +++++
->  drivers/mmc/core/sd.c       | 38 +++++++++++++++++++----------
->  drivers/mmc/core/sd.h       |  2 +-
->  drivers/mmc/core/sd_ops.c   | 16 +++++++++++++
->  drivers/mmc/core/sd_ops.h   |  1 +
->  drivers/mmc/core/sdio.c     |  2 +-
->  include/linux/mmc/card.h    |  2 +-
->  include/linux/mmc/core.h    |  5 ++++
->  include/linux/mmc/sd.h      |  4 ++++
->  14 files changed, 139 insertions(+), 45 deletions(-)
-> 
+> diff --git a/drivers/firmware/qcom/qcom_scm.c b/drivers/firmware/qcom/qcom_scm.c
+> index 10986cb11ec0..ad3f9e9ed35d 100644
+> --- a/drivers/firmware/qcom/qcom_scm.c
+> +++ b/drivers/firmware/qcom/qcom_scm.c
+> @@ -1252,6 +1252,71 @@ int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
+>  }
+>  EXPORT_SYMBOL_GPL(qcom_scm_ice_set_key);
+>  
+> +/**
+> + * qcom_scm_derive_sw_secret() - Derive software secret from wrapped key
+> + * @wkey: the hardware wrapped key inaccessible to software
+> + * @wkey_size: size of the wrapped key
+> + * @sw_secret: the secret to be derived which is exactly the secret size
+> + * @sw_secret_size: size of the sw_secret
+> + *
+> + * Derive a software secret from a hardware wrapped key for software crypto
+> + * operations.
+> + * For wrapped keys, the key needs to be unwrapped, in order to derive a
+> + * software secret, which can be done in the hardware from a secure execution
+> + * environment.
+> + *
+> + * For more information on sw secret, please refer to "Hardware-wrapped keys"
+> + * section of Documentation/block/inline-encryption.rst.
+> + *
+> + * Return: 0 on success; -errno on failure.
+> + */
+> +int qcom_scm_derive_sw_secret(const u8 *wkey, size_t wkey_size,
+> +			      u8 *sw_secret, size_t sw_secret_size)
+> +{
+> +	struct qcom_scm_desc desc = {
+> +		.svc = QCOM_SCM_SVC_ES,
+> +		.cmd =  QCOM_SCM_ES_DERIVE_SW_SECRET,
+> +		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
+> +					 QCOM_SCM_VAL, QCOM_SCM_RW,
+> +					 QCOM_SCM_VAL),
+> +		.args[1] = wkey_size,
+> +		.args[3] = sw_secret_size,
+> +		.owner = ARM_SMCCC_OWNER_SIP,
+> +	};
+> +
+> +	int ret;
+> +
+> +	void *wkey_buf __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+> +							    wkey_size,
+> +							    GFP_KERNEL);
+> +	if (!wkey_buf)
+> +		return -ENOMEM;
+> +
+> +	void *secret_buf __free(qcom_tzmem) = qcom_tzmem_alloc(__scm->mempool,
+> +							       sw_secret_size,
+> +							       GFP_KERNEL);
+> +	if (!secret_buf) {
+> +		ret = -ENOMEM;
+> +		goto out_free_wrapped;
+> +	}
+> +
+> +	memcpy(wkey_buf, wkey, wkey_size);
+> +	desc.args[0] = qcom_tzmem_to_phys(wkey_buf);
+> +	desc.args[2] = qcom_tzmem_to_phys(secret_buf);
+> +
+> +	ret = qcom_scm_call(__scm->dev, &desc, NULL);
+> +	if (!ret)
+> +		memcpy(sw_secret, secret_buf, sw_secret_size);
+> +
+> +	memzero_explicit(secret_buf, sw_secret_size);
+> +
+> +out_free_wrapped:
 
+Is there a reason to zero out the buffer that's being zero-allocated?
+
+Konrad
+
+> +	memzero_explicit(wkey_buf, wkey_size);
