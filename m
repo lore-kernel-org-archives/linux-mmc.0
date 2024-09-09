@@ -1,50 +1,61 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEEE1172BD0;
-	Mon,  9 Sep 2024 08:08:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C7DE21B29CF
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Sep 2024 08:58:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1725869282; cv=none; b=X+OrBtIQrsr5glAg3Sk+f78DODJo8jSQ+1izjxRGJTyIK0gN4HBtyfCjcyNiki73bc1ZG1L2LRJctNnxn89bZbHmRtfJGDtCya5B7R+vJRlHlMcWibs+QKBa4vVY5SStWEByZztQihIDhY7UOCDPv0lEyxeaaiaIXaa3mRPWgdM=
+	t=1725872319; cv=none; b=hU0YR04BbQZCBODJ3sCvSPpGLTiNpEVKK7dIETn85ZiV2SfE/OQYrFDWmecta7ztQ268QBdDUtkUBlI4E9LoDqikaVCPdFXuAJictdyiftiUqk4CCWqkWmKeuuQa8VUOzWRU70lT0HpoXrkm73zq9yUpk7hVXo4GcnbQhU72WCo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1725869282; c=relaxed/simple;
-	bh=aF5/5BPPgM/TawCheDaRdSEei35GEIPJdxqVNj690HA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=P6aQbdXXVvddFq8g+HAvMFVVK0SG6USSHTcrlCebh/9tiqZgzWDleq0hCtCxS9JI0sIrQ4whYp56doOcWZkAD2e/qzxGkUlX/1LIKpTbvYD4BDRKrABft6mhtlJRz+tt/DSmOpm1OUdcrPADqPelpKWfTqZROA+x9397r8IJJXU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=aO6wWTq0; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1725872319; c=relaxed/simple;
+	bh=hMgy8bX6Ok+Sly2wQ3k/uCmFxdR1J21buj1Oj+8Tu2k=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=ez/8CBFLz4YJ7ufdakaSONeCcLQRTpOa5ZBQfpPza/hA1hDOskO2iMSBUjzvoOSqI0bE2lyNBFILab4PoTkm5o0UTiemuUdSwKrvQc76yOGf0th5B0tsYYa/p7t9IlWHFWDIaPQ8O/gNo87zV/EykcHtm+7PzyiG7qB/k2NcWl8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=d5MHBE/6; arc=none smtp.client-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="aO6wWTq0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1725869281; x=1757405281;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=aF5/5BPPgM/TawCheDaRdSEei35GEIPJdxqVNj690HA=;
-  b=aO6wWTq0yGGU/sbGLTOyAhbJI+BdkBIRc8UtUy3+CfVaFUwG/RtbAgh3
-   QMlj/jkY9Ylx2ZR63fSXUXjeJXY9AjaCS0sn4nYXT1D8DjAyXFtFvVhYJ
-   n0sG+vBomw5/lATsd0VG6gmFILAolO/3P5GqjTqaFUvaGAVPNRkmQo+dz
-   G7hKOitzu86AHO2UZ4/RPxb3e3j/P1M4ESeXxFDQ/mSGQpYnoYyhPNstP
-   iwIwBy6LtqvId7l0+yIDYltFegYvCZ4sWgl74Ob74OJH5vj2XwoSP2sFo
-   IZ0UCv4UvJ/9/L+3+4BaNNzk1Zoj+N3yjuKVj8t3VGRIuM7gxAWnVQDVY
-   A==;
-X-CSE-ConnectionGUID: bpW1ZlLdTyiXek3azmDA8w==
-X-CSE-MsgGUID: E/Ykfh9lRT6hDoTG1J3FyA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11189"; a="24697708"
-X-IronPort-AV: E=Sophos;i="6.10,213,1719903600"; 
-   d="scan'208";a="24697708"
-Received: from orviesa002.jf.intel.com ([10.64.159.142])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 01:08:01 -0700
-X-CSE-ConnectionGUID: icxGtOJVTKeViG9prbMkyQ==
-X-CSE-MsgGUID: wGxXBdLqTgW7YcfP7CQUMQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,213,1719903600"; 
-   d="scan'208";a="97303042"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.96.163])
-  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Sep 2024 01:07:57 -0700
-Message-ID: <12073898-a98b-46dd-ad68-5d58340a7952@intel.com>
-Date: Mon, 9 Sep 2024 11:07:51 +0300
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="d5MHBE/6"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-42ba9b47f4eso23089125e9.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Sep 2024 01:58:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1725872314; x=1726477114; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PMvHs5Ab7mHAlvlrWenHe3/+itZxK87jYym+SorE/SA=;
+        b=d5MHBE/6nV+q3S16jwp9mTU0YKD+3PL9RxdDFilnfCN/sOL49WpQqSGFjp9mHijrqZ
+         tUJ6Bqi5A/qSqJMJ9rZAN89zezDJkGTapOpIWrbZekkWsUUEGcuV4lJ3yUmdfu5Nrn3A
+         OuPFDb1O/BCL8Fq09KwiIQXoYHCwWZCAL2Pu8yF1ypVLz8Nf7OgO6+MBiabzU4nTsC4r
+         IdGvmNbwl5Rswb88gxKHjUo+vwYYI/0n6jX9ErZqraaQ96ws/0MOlqybPi8ZWVXFjkiI
+         4HVO6B9QP4pnDVl91nPIk4v7HJwNqIF3qseXJg9mlimPEix/a8XejffrsL/nkMhiG4Ew
+         BMFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1725872314; x=1726477114;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=PMvHs5Ab7mHAlvlrWenHe3/+itZxK87jYym+SorE/SA=;
+        b=DHTYR/aqkJgIu4Kmq1LyWK7Df9jU7vzqkPtgcVSIXmP2DwNSQRAZQb9YByDcQXDtg9
+         Q+qXpZsl1rFk04A6QSJb1t9JOpn7vgKuKxNqOwP6PfFhydttxoPrs9xkhnNc6SYoExi1
+         bUG1OKKAE2u4ITISn0AbDKOD5umW1JafmLz9mQN4BBKAx6U1zfbqa9BGKMy8aZZlNCrY
+         vFtWbclPAAYnUTMhq961vwKXEkxCUV2CpZDo81OlDX0FtW5xu/TqDYqLZf4Vd7uUbA7x
+         XFqbnUWvq4FJI7WbvfC7jo8SDUihzGP2OyN3DUtgqMenZrNPzBMOlYfMgtWFm3DkcAVx
+         L9IQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVWviP8ZS9vasdIj/Pwv4Zb9Ck5NKCDzrwzuaUVl4nK3QqphiAKZ9usE2wh+cSU+UQlWfpO5oBMEpw=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxuq36aR5qPVIChOtbdcWzaiudKqJJx75yFOBojgMvGoABUHwWF
+	R85IEZW5O4JFagRX0dPbu70xmKXRZ5S9O85Q6yAwEF4bNQra6EObV5kYc2v5F4A=
+X-Google-Smtp-Source: AGHT+IG6v8/1xNArCrOhm5mi79N9gIxXGtQTCtPLSsLWPvDJATIAkCocS/kMp98RIRO0ro21ssL4Yw==
+X-Received: by 2002:a05:600c:468a:b0:428:b4a:7001 with SMTP id 5b1f17b1804b1-42c95be865emr103023695e9.15.1725872313704;
+        Mon, 09 Sep 2024 01:58:33 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:982:cbb0:63a3:6883:a358:b850? ([2a01:e0a:982:cbb0:63a3:6883:a358:b850])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-378956654f4sm5446815f8f.43.2024.09.09.01.58.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 09 Sep 2024 01:58:33 -0700 (PDT)
+Message-ID: <66953e65-2468-43b8-9ccf-54671613c4ab@linaro.org>
+Date: Mon, 9 Sep 2024 10:58:30 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,326 +63,184 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V21 14/22] mmc: sdhci-uhs2: add set_ios()
-To: Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- benchuanggli@gmail.com, Lucas.Lai@genesyslogic.com.tw,
- HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
- dlunev@chromium.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- AKASHI Takahiro <takahiro.akashi@linaro.org>,
- Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20240906102049.7059-1-victorshihgli@gmail.com>
- <20240906102049.7059-15-victorshihgli@gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240906102049.7059-15-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v6 09/17] soc: qcom: ice: add HWKM support to the ICE
+ driver
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+ Bartosz Golaszewski <brgl@bgdev.pl>
+Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
+ Alasdair Kergon <agk@redhat.com>, Mike Snitzer <snitzer@kernel.org>,
+ Mikulas Patocka <mpatocka@redhat.com>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Asutosh Das <quic_asutoshd@quicinc.com>,
+ Ritesh Harjani <ritesh.list@gmail.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>,
+ Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>,
+ "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ Eric Biggers <ebiggers@kernel.org>, "Theodore Y. Ts'o" <tytso@mit.edu>,
+ Jaegeuk Kim <jaegeuk@kernel.org>, Alexander Viro <viro@zeniv.linux.org.uk>,
+ Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+ Gaurav Kashyap <quic_gaurkash@quicinc.com>, linux-block@vger.kernel.org,
+ linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ dm-devel@lists.linux.dev, linux-mmc@vger.kernel.org,
+ linux-scsi@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+ linux-fsdevel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+References: <20240906-wrapped-keys-v6-0-d59e61bc0cb4@linaro.org>
+ <20240906-wrapped-keys-v6-9-d59e61bc0cb4@linaro.org>
+ <7uoq72bpiqmo2olwpnudpv3gtcowpnd6jrifff34ubmfpijgc6@k6rmnalu5z4o>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <7uoq72bpiqmo2olwpnudpv3gtcowpnd6jrifff34ubmfpijgc6@k6rmnalu5z4o>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On 6/09/24 13:20, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On 07/09/2024 00:07, Dmitry Baryshkov wrote:
+> On Fri, Sep 06, 2024 at 08:07:12PM GMT, Bartosz Golaszewski wrote:
+>> From: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+>>
+>> Qualcomm's ICE (Inline Crypto Engine) contains a proprietary key
+>> management hardware called Hardware Key Manager (HWKM). Add HWKM support
+>> to the ICE driver if it is available on the platform. HWKM primarily
+>> provides hardware wrapped key support where the ICE (storage) keys are
+>> not available in software and instead protected in hardware.
+>>
+>> When HWKM software support is not fully available (from Trustzone), there
+>> can be a scenario where the ICE hardware supports HWKM, but it cannot be
+>> used for wrapped keys. In this case, raw keys have to be used without
+>> using the HWKM. We query the TZ at run-time to find out whether wrapped
+>> keys support is available.
+>>
+>> Tested-by: Neil Armstrong <neil.armstrong@linaro.org>
+>> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+>> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+>> ---
+>>   drivers/soc/qcom/ice.c | 152 +++++++++++++++++++++++++++++++++++++++++++++++--
+>>   include/soc/qcom/ice.h |   1 +
+>>   2 files changed, 149 insertions(+), 4 deletions(-)
+>>
+>>   int qcom_ice_enable(struct qcom_ice *ice)
+>>   {
+>> +	int err;
+>> +
+>>   	qcom_ice_low_power_mode_enable(ice);
+>>   	qcom_ice_optimization_enable(ice);
+>>   
+>> -	return qcom_ice_wait_bist_status(ice);
+>> +	if (ice->use_hwkm)
+>> +		qcom_ice_enable_standard_mode(ice);
+>> +
+>> +	err = qcom_ice_wait_bist_status(ice);
+>> +	if (err)
+>> +		return err;
+>> +
+>> +	if (ice->use_hwkm)
+>> +		qcom_ice_hwkm_init(ice);
+>> +
+>> +	return err;
+>>   }
+>>   EXPORT_SYMBOL_GPL(qcom_ice_enable);
+>>   
+>> @@ -150,6 +282,10 @@ int qcom_ice_resume(struct qcom_ice *ice)
+>>   		return err;
+>>   	}
+>>   
+>> +	if (ice->use_hwkm) {
+>> +		qcom_ice_enable_standard_mode(ice);
+>> +		qcom_ice_hwkm_init(ice);
+>> +	}
+>>   	return qcom_ice_wait_bist_status(ice);
+>>   }
+>>   EXPORT_SYMBOL_GPL(qcom_ice_resume);
+>> @@ -157,6 +293,7 @@ EXPORT_SYMBOL_GPL(qcom_ice_resume);
+>>   int qcom_ice_suspend(struct qcom_ice *ice)
+>>   {
+>>   	clk_disable_unprepare(ice->core_clk);
+>> +	ice->hwkm_init_complete = false;
+>>   
+>>   	return 0;
+>>   }
+>> @@ -206,6 +343,12 @@ int qcom_ice_evict_key(struct qcom_ice *ice, int slot)
+>>   }
+>>   EXPORT_SYMBOL_GPL(qcom_ice_evict_key);
+>>   
+>> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice)
+>> +{
+>> +	return ice->use_hwkm;
+>> +}
+>> +EXPORT_SYMBOL_GPL(qcom_ice_hwkm_supported);
+>> +
+>>   static struct qcom_ice *qcom_ice_create(struct device *dev,
+>>   					void __iomem *base)
+>>   {
+>> @@ -240,6 +383,7 @@ static struct qcom_ice *qcom_ice_create(struct device *dev,
+>>   		engine->core_clk = devm_clk_get_enabled(dev, NULL);
+>>   	if (IS_ERR(engine->core_clk))
+>>   		return ERR_CAST(engine->core_clk);
+>> +	engine->use_hwkm = qcom_scm_has_wrapped_key_support();
 > 
-> This is a sdhci version of mmc's set_ios operation.
-> THis is used to handle basic IO bus setting.
-> It covers both UHS-I and UHS-II.
-> 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> This still makes the decision on whether to use HW-wrapped keys on
+> behalf of a user. I suppose this is incorrect. The user must be able to
+> use raw keys even if HW-wrapped keys are available on the platform. One
+> of the examples for such use-cases is if a user prefers to be able to
+> recover stored information in case of a device failure (such recovery
+> will be impossible if SoC is damaged and HW-wrapped keys are used).
 
-Doesn't seem to compile:
+Isn't that already the case ? the BLK_CRYPTO_KEY_TYPE_HW_WRAPPED size is
+here to select HW-wrapped key, otherwise the ol' raw key is passed.
+Just look the next patch.
 
-drivers/mmc/host/sdhci-uhs2.c:275:12: error: ‘sdhci_uhs2_set_ios’ defined but not used [-Werror=unused-function]
-  275 | static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-      |            ^~~~~~~~~~~~~~~~~~
-cc1: all warnings being treated as errors
-make[5]: *** [scripts/Makefile.build:244: drivers/mmc/host/sdhci-uhs2.o] Error 1
-make[4]: *** [scripts/Makefile.build:485: drivers/mmc/host] Error 2
-make[3]: *** [scripts/Makefile.build:485: drivers/mmc] Error 2
-make[2]: *** [scripts/Makefile.build:485: drivers] Error 2
-make[1]: *** [/home/ahunter/git/review/Makefile:1925: .] Error 2
-make: *** [Makefile:224: __sub-make] Error 2
+Or did I miss something ?
 
+Neil
 
-Please check all patches compile.
-
-
-> ---
 > 
-> Updates in V14:
->  - Use mmc_card_uhs2() to stead sdhci_uhs2_mode() in the
->    sdhci_uhs2_set_ios().
+>>   
+>>   	if (!qcom_ice_check_supported(engine))
+>>   		return ERR_PTR(-EOPNOTSUPP);
+>> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+>> index 9dd835dba2a7..1f52e82e3e1c 100644
+>> --- a/include/soc/qcom/ice.h
+>> +++ b/include/soc/qcom/ice.h
+>> @@ -34,5 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>>   			 const struct blk_crypto_key *bkey,
+>>   			 u8 data_unit_size, int slot);
+>>   int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+>> +bool qcom_ice_hwkm_supported(struct qcom_ice *ice);
+>>   struct qcom_ice *of_qcom_ice_get(struct device *dev);
+>>   #endif /* __QCOM_ICE_H__ */
+>>
+>> -- 
+>> 2.43.0
+>>
 > 
-> Updates in V13:
->  - Add judgment condition for power mode in the __sdhci_uhs2_set_ios().
->  - Modify comment message.
-> 
-> Updates in V9:
->  - Simplity the turning_on_clk in sdhci_set_ios().
-> 
-> Updates in V8:
->  - Add the judgment formula for MMC_TIMING_SPEED_A_HD, MMC_TIMING_SPEED_B
->    and MMC_TIMING_SPEED_B_HD in __sdhci_uhs2_set_ios().
->  - Add the switch case for MMC_TIMING_SPEED_A_HD, MMC_TIMING_SPEED_B
->    and MMC_TIMING_SPEED_B_HD in sdhci_get_preset_value().
->  - mmc_opt_regulator_set_ocr() to instead of mmc_regulator_set_ocr()
->    in sdhci_uhs2_set_ios().
-> 
-> Updates in V7:
->  - Remove unnecessary functions.
-> 
-> Updates in V6:
->  - Modify return value in some functions.
->  - Remove unnecessary functions.
-> 
-> ---
-> 
->  drivers/mmc/host/sdhci-uhs2.c | 95 +++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-uhs2.h |  1 +
->  drivers/mmc/host/sdhci.c      | 55 ++++++++++++--------
->  drivers/mmc/host/sdhci.h      |  2 +
->  4 files changed, 132 insertions(+), 21 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> index 8bd2baa79d76..abb56ab8f916 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.c
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -207,6 +207,101 @@ void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_uhs2_set_timeout);
->  
-> +/**
-> + * sdhci_uhs2_clear_set_irqs - set Error Interrupt Status Enable register
-> + * @host:	SDHCI host
-> + * @clear:	bit-wise clear mask
-> + * @set:	bit-wise set mask
-> + *
-> + * Set/unset bits in UHS-II Error Interrupt Status Enable register
-> + */
-> +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set)
-> +{
-> +	u32 ier;
-> +
-> +	ier = sdhci_readl(host, SDHCI_UHS2_INT_STATUS_ENABLE);
-> +	ier &= ~clear;
-> +	ier |= set;
-> +	sdhci_writel(host, ier, SDHCI_UHS2_INT_STATUS_ENABLE);
-> +	sdhci_writel(host, ier, SDHCI_UHS2_INT_SIGNAL_ENABLE);
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_uhs2_clear_set_irqs);
-> +
-> +static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u8 cmd_res, dead_lock;
-> +	u16 ctrl_2;
-> +
-> +	/* UHS2 Timeout Control */
-> +	sdhci_calc_timeout_uhs2(host, &cmd_res, &dead_lock);
-> +
-> +	/* change to use calculate value */
-> +	cmd_res |= FIELD_PREP(SDHCI_UHS2_TIMER_CTRL_DEADLOCK_MASK, dead_lock);
-> +
-> +	sdhci_uhs2_clear_set_irqs(host,
-> +				  SDHCI_UHS2_INT_CMD_TIMEOUT |
-> +				  SDHCI_UHS2_INT_DEADLOCK_TIMEOUT,
-> +				  0);
-> +	sdhci_writeb(host, cmd_res, SDHCI_UHS2_TIMER_CTRL);
-> +	sdhci_uhs2_clear_set_irqs(host, 0,
-> +				  SDHCI_UHS2_INT_CMD_TIMEOUT |
-> +				  SDHCI_UHS2_INT_DEADLOCK_TIMEOUT);
-> +
-> +	/* UHS2 timing. Note, UHS2 timing is disabled when powering off */
-> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +	if (ios->power_mode != MMC_POWER_OFF &&
-> +	    (ios->timing == MMC_TIMING_UHS2_SPEED_A ||
-> +	     ios->timing == MMC_TIMING_UHS2_SPEED_A_HD ||
-> +	     ios->timing == MMC_TIMING_UHS2_SPEED_B ||
-> +	     ios->timing == MMC_TIMING_UHS2_SPEED_B_HD))
-> +		ctrl_2 |= SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE;
-> +	else
-> +		ctrl_2 &= ~(SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE);
-> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> +	host->timing = ios->timing;
-> +
-> +	if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
-> +		sdhci_enable_preset_value(host, true);
-> +
-> +	if (host->ops->set_power)
-> +		host->ops->set_power(host, ios->power_mode, ios->vdd);
-> +	else
-> +		sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
-> +
-> +	sdhci_set_clock(host, host->clock);
-> +}
-> +
-> +static int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +	pr_debug("%s: clock %uHz powermode %u Vdd %u timing %u\n",
-> +		 mmc_hostname(mmc), ios->clock, ios->power_mode, ios->vdd, ios->timing);
-> +
-> +	if (!mmc_card_uhs2(mmc)) {
-> +		sdhci_set_ios(mmc, ios);
-> +		return 0;
-> +	}
-> +
-> +	if (ios->power_mode == MMC_POWER_UNDEFINED)
-> +		return 0;
-> +
-> +	if (host->flags & SDHCI_DEVICE_DEAD) {
-> +		if (ios->power_mode == MMC_POWER_OFF) {
-> +			mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> +			mmc_regulator_set_vqmmc2(mmc, ios);
-> +		}
-> +		return -1;
-> +	}
-> +
-> +	sdhci_set_ios_common(mmc, ios);
-> +
-> +	__sdhci_uhs2_set_ios(mmc, ios);
-> +
-> +	return 0;
-> +}
-> +
->  /*****************************************************************************\
->   *                                                                           *
->   * Driver init/exit                                                          *
-> diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-> index 9bd3f610cf8c..f6649a518842 100644
-> --- a/drivers/mmc/host/sdhci-uhs2.h
-> +++ b/drivers/mmc/host/sdhci-uhs2.h
-> @@ -181,5 +181,6 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host);
->  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
->  void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode, unsigned short vdd);
->  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
-> +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
->  
->  #endif /* __SDHCI_UHS2_H */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 366c3d30dba6..63fa1714930a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -47,8 +47,6 @@
->  static unsigned int debug_quirks = 0;
->  static unsigned int debug_quirks2;
->  
-> -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> -
->  static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd);
->  
->  void sdhci_dumpregs(struct sdhci_host *host)
-> @@ -1877,6 +1875,12 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
->  	case MMC_TIMING_MMC_HS400:
->  		preset = sdhci_readw(host, SDHCI_PRESET_FOR_HS400);
->  		break;
-> +	case MMC_TIMING_UHS2_SPEED_A:
-> +	case MMC_TIMING_UHS2_SPEED_A_HD:
-> +	case MMC_TIMING_UHS2_SPEED_B:
-> +	case MMC_TIMING_UHS2_SPEED_B_HD:
-> +		preset = sdhci_readw(host, SDHCI_PRESET_FOR_UHS2);
-> +		break;
->  	default:
->  		pr_warn("%s: Invalid UHS-I mode selected\n",
->  			mmc_hostname(host->mmc));
-> @@ -2323,24 +2327,9 @@ static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_i
->  	       (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
->  }
->  
-> -void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
->  	struct sdhci_host *host = mmc_priv(mmc);
-> -	bool reinit_uhs = host->reinit_uhs;
-> -	bool turning_on_clk = false;
-> -	u8 ctrl;
-> -
-> -	host->reinit_uhs = false;
-> -
-> -	if (ios->power_mode == MMC_POWER_UNDEFINED)
-> -		return;
-> -
-> -	if (host->flags & SDHCI_DEVICE_DEAD) {
-> -		if (!IS_ERR(mmc->supply.vmmc) &&
-> -		    ios->power_mode == MMC_POWER_OFF)
-> -			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> -		return;
-> -	}
->  
->  	/*
->  	 * Reset the chip on each power off.
-> @@ -2357,8 +2346,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  		sdhci_enable_preset_value(host, false);
->  
->  	if (!ios->clock || ios->clock != host->clock) {
-> -		turning_on_clk = ios->clock && !host->clock;
-> -
->  		host->ops->set_clock(host, ios->clock);
->  		host->clock = ios->clock;
->  
-> @@ -2374,6 +2361,31 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  			mmc->max_busy_timeout /= host->timeout_clk;
->  		}
->  	}
-> +}
-> +EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
-> +
-> +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	bool reinit_uhs = host->reinit_uhs;
-> +	bool turning_on_clk;
-> +	u8 ctrl;
-> +
-> +	host->reinit_uhs = false;
-> +
-> +	if (ios->power_mode == MMC_POWER_UNDEFINED)
-> +		return;
-> +
-> +	if (host->flags & SDHCI_DEVICE_DEAD) {
-> +		if (!IS_ERR(mmc->supply.vmmc) &&
-> +		    ios->power_mode == MMC_POWER_OFF)
-> +			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> +		return;
-> +	}
-> +
-> +	turning_on_clk = ios->clock != host->clock && ios->clock && !host->clock;
-> +
-> +	sdhci_set_ios_common(mmc, ios);
->  
->  	if (host->ops->set_power)
->  		host->ops->set_power(host, ios->power_mode, ios->vdd);
-> @@ -2942,7 +2954,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
->  
-> -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
-> +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
->  {
->  	/* Host Controller v3.00 defines preset value registers */
->  	if (host->version < SDHCI_SPEC_300)
-> @@ -2970,6 +2982,7 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
->  		host->preset_enabled = enable;
->  	}
->  }
-> +EXPORT_SYMBOL_GPL(sdhci_enable_preset_value);
->  
->  static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
->  				int err)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0f78708d0c70..5c66927210bd 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -848,6 +848,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask);
->  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->  int __sdhci_execute_tuning(struct sdhci_host *host, u32 opcode);
-> +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios);
->  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
->  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->  				      struct mmc_ios *ios);
 
