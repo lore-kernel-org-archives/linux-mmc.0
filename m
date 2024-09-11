@@ -1,300 +1,278 @@
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B94271A302C;
-	Wed, 11 Sep 2024 14:34:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.249
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8CAF71AB6DD
+	for <linux-mmc@vger.kernel.org>; Wed, 11 Sep 2024 15:20:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726065264; cv=none; b=iokmq8FW0GYwPHR6uWFWjDC2Gv1R+qsl/CR3dT1QMBFtRBLM9QZ3pfqxZ4989AU1HWHxIPL7R6R1i+F4rRmVEf2lKs1OP4rjWEAuYHmYB7fIIMjNYy6qMN04gv1/adCIJHLL9m76cGYI6pVErVEvdrqE1i+clsyynAJWS1dw460=
+	t=1726068053; cv=none; b=fVpXNwcUPZPok9yUsPxpj1YMxVdzQxZFIfFo7gIbwb7/YNFOxUutS0O7tDQbSSOT4vxV0ili23kdOH7IQ/ICZjBgXJbhzC3G5+ZZEIE4xqduouNFVp5t2DClrllN1oY8g2rc4HZp89J7hz2cOpG4kRJVpSsfoNp+9rSoe4mUihk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726065264; c=relaxed/simple;
-	bh=kGMNMbsdtI/Td/R/etzIT6Mtsyt0uxPTgnh5Weutbqs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=NY/OYUw0HaSF/SDQxCvn9uSjb9RYFjXM4iGdSGUN5CYdP42JesrnsORxM9iVD92rHlZRnwMbgJ2j3GtnapnEeAYLV1B8DA+laBoRr6dRYkh/MuX5N4D7tz3YHvk31xLTRJdSItpHEf+HitHNSq+Wk4QIJ4StPUG7UbXEmdiG1Jg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=cJc0332n; arc=none smtp.client-ip=198.47.23.249
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1726068053; c=relaxed/simple;
+	bh=vIrwLFn0Lj1NqOwB9QQ9/zFKyKXRywCPsQ36/qGl6Zo=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=W92id7+8sfFsR/0gy34uR55+gCG75JokwxWkmjbfOelYQzVXUVBHurlp+uLzSylMyecjEvDXL3yeql97kdBsX5HCIKRGd0LOv3BrsWOnFft7tQIG41d9cg7SCvmwgPYy2+CT6dXjXtTJhIPIOJy6Hp5n/LTF+Q2PypGpeQjknk0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iUb+Vgi+; arc=none smtp.client-ip=209.85.128.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="cJc0332n"
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-	by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 48BEYCjh127054;
-	Wed, 11 Sep 2024 09:34:12 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1726065252;
-	bh=GheB2vtmOOF3bRfgJtOuX0KHFhkymAURM8K2SnfqvzM=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=cJc0332nQibh/bKf+ifGu8Rxe4Bo7v+WOhwvRFeIkqqSQkurAhd4RLRvgqdDnV5LD
-	 riIew3NhuLe9pUpAesi0d9/JWLcV6mo5jd2U7/sF4Th4HnSl0dz40RhOBlM4ynp/ua
-	 7v74iTgLVpRqvLEtPTKqoyfoi6thGyRZijo8XBC4=
-Received: from DFLE103.ent.ti.com (dfle103.ent.ti.com [10.64.6.24])
-	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 48BEYCIa001968
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 11 Sep 2024 09:34:12 -0500
-Received: from DFLE102.ent.ti.com (10.64.6.23) by DFLE103.ent.ti.com
- (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 11
- Sep 2024 09:34:11 -0500
-Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE102.ent.ti.com
- (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 11 Sep 2024 09:34:11 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 48BEYBxa083039;
-	Wed, 11 Sep 2024 09:34:11 -0500
-Message-ID: <9c5e5c33-9fac-4240-8e30-de401e781324@ti.com>
-Date: Wed, 11 Sep 2024 09:34:11 -0500
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iUb+Vgi+"
+Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-42cbc38a997so6890195e9.1
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Sep 2024 08:20:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1726068050; x=1726672850; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=fpwVKYxub2BR6rBdSQr/mUsVWo46XLcAlWmWzYZ00ME=;
+        b=iUb+Vgi+HVRQuYtSEfA4PmWCWa6yLPfYV9YYhYF3e//5lvonJoT1t/N8HC+Gpluy2V
+         eXeZdn57W/Q+YZzJZHdiATiKy9JrE4uKEXmV248l4MCnb+v/H3NoHVWo+bG9ukS4QTJc
+         XX+qH0HnAntntGM9SPNi7nY1gVVC33Vd1UCY8w/CK+XzoXLT4LjvCG9bPpnpeZe2GE5C
+         xkpaKSIpn1yGmK3I8jn7YgYO/OV4krmAnt7mtHc9eAZ6Yl94wRtwXa4KYOMpptkTyen3
+         h1ts4BKu8Ke99yQ9VnCbcN/PjkcgmTYeOjxVTc0TTG2Na60DoMHxWOeSF1qzQC6Hr6C1
+         JEgA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726068050; x=1726672850;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=fpwVKYxub2BR6rBdSQr/mUsVWo46XLcAlWmWzYZ00ME=;
+        b=hOp4i3SEHih+wUJwQreV4EBA42aVsnDOnlS6mG1diAbAWmEWjD4Tmo9ldKiLLNhZBP
+         XF63eRK6JQ7BKdxuJtvevgWnTyObCh0UNWgB8DI/nXaOo7D9fTatFgmd1C3RgwqusX1g
+         BY21ydrg91dXN4LX8x+8b1Xj56lwLFiEYjuimzZr3HQrRaSgj08NY2HTF9LoJhgiRFI0
+         bimsPhtsRKShrvKdbAZBVTd0UgGBQdilBQ94NYH0b6rwMrFN2yqv24DusWxQsPejcBqS
+         7rOFAI7MS7QpRSyTqo7yD/hG+GmXTK9zqo1I4lgLQ6X8mOW7r6XbVAtW4wCgXw7xMnnY
+         iJZQ==
+X-Gm-Message-State: AOJu0YyB+eElK1NO4u8AS1f3rVT8zXfx94EQcqghgMYnS55GtwA/ra0E
+	icw7UEm1+e74StPtp5r4f5tsOAFjIzleAIFUQjchtFpJT7isrONtgYvOmNAiF7Q=
+X-Google-Smtp-Source: AGHT+IGGHpq+zYMTZocGCaMvv+5XJ+vHhPUzGJxZgnG3MkplItlhUXqG56ppM3UlODyWrOknNfFn6A==
+X-Received: by 2002:a05:600c:1ca7:b0:42c:baf1:4c7 with SMTP id 5b1f17b1804b1-42cbddb8169mr41928635e9.4.1726068049344;
+        Wed, 11 Sep 2024 08:20:49 -0700 (PDT)
+Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:52eb:f6ff:feb3:451a])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42caeb45c81sm146751395e9.28.2024.09.11.08.20.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 11 Sep 2024 08:20:48 -0700 (PDT)
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Date: Wed, 11 Sep 2024 17:20:47 +0200
+Subject: [PATCH] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt to
+ dtschema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1] mmc: sdhci_am654: Add
- sdhci_am654_start_signal_voltage_switch
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-References: <20240906175032.1580281-1-jm@ti.com>
- <068093ed-1ab5-40d6-b709-cd6810825ba3@intel.com>
- <cce6ec2f-3293-4f08-a965-76dece0ddfab@ti.com>
- <b154b9b3-cb74-4a51-953c-d4328f992898@intel.com>
- <091d7920-e197-4e14-af0c-8932af92a9dd@ti.com>
- <a1370ddf-febd-40fd-8f17-bc70e7fa850c@intel.com>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <a1370ddf-febd-40fd-8f17-bc70e7fa850c@intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org>
+X-B4-Tracking: v=1; b=H4sIAE614WYC/x2NywrCMBAAf6Xk7EISa338SvGQxzYumAfZWAql/
+ 270NAwMzC4YKyGLx7CLiisx5dRFnQbhXiYFBPLdhZZ6lHeloOVCDkx85/BjjWcNn8KtoolgKXl
+ KgWGhDRlcTivWBhE5J4gbsKcM02Ku8jJOaO1N9E+p+M/7Zn4exxc2NRjlkwAAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
+ Jerome Brunet <jbrunet@baylibre.com>, 
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
+ linux-kernel@vger.kernel.org, Neil Armstrong <neil.armstrong@linaro.org>
+X-Mailer: b4 0.14.1
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5413;
+ i=neil.armstrong@linaro.org; h=from:subject:message-id;
+ bh=vIrwLFn0Lj1NqOwB9QQ9/zFKyKXRywCPsQ36/qGl6Zo=;
+ b=owEBbQKS/ZANAwAKAXfc29rIyEnRAcsmYgBm4bVQ6s636OA1QDaFeqg/34xI/mWJKr6MuE3M7Zhi
+ v87vz1qJAjMEAAEKAB0WIQQ9U8YmyFYF/h30LIt33NvayMhJ0QUCZuG1UAAKCRB33NvayMhJ0UAlD/
+ wLOjPu8CVqo/B/qHbOv2nTEdvk/O9OJpRlcXMqjxlX2GXOHUCSUwNl63rFacIetDsizjCcQBzQut/B
+ u7KheQKIuLlwDf1NP3x43crtnKg4OK/yfLZZWkcIBzWKU5NCszYo0BVPGLidw2fvac1TkcqdWiEZrg
+ LN9urOmmo3l6cfrpoIjDLcdMocfWoDeita3l+YvCeGsLRnye7kYTxvoWpx58V+PukMLWlKtnRSrqVn
+ z1TShFUGbFE9UGfJK+Qle3B9zVrcdAdQaCyIg3qzERfn9lDfo5XAnfil1H0rUmTUtseOx0e9E5Vt2Q
+ FmBFOWlA/EvTuzvYwYk8X9i6mvjrX7DO6D3bdM+cQfsJ7kU3Y+fupdmLegcqw1bKwXZWNbLYqWix4I
+ NdYogZY+vZFRVb/kruoCRVYRbXFGlFXolQBVoWcYPH229+GOZjZ4mXsrlVJeLhJVwmT5kMGbkv63Cw
+ uFWL9IwGMkoE3OzVGxjgdI/Rls3YR7SluHXdsI/I7aCY6Km1mfwvpF0EpKXeQ8etXWAuQXX1V0FA9p
+ Anq7FfQb7ZPEJ4SUKkuftTfMBGN5020hwyvI7xeKloLS5V6wxtfG85ClzKcLC5ubFoISLxCd22wWPo
+ dbRzJpSNqVcsgwS/BwdOwYC2w6hIJ8n+inJOaYe3pxVosaadIdeocSrJXiEw==
+X-Developer-Key: i=neil.armstrong@linaro.org; a=openpgp;
+ fpr=89EC3D058446217450F22848169AB7B1A4CFF8AE
 
-Hi Adrian,
+Convert the Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+bindings to dt-schema.
 
-On 9/11/24 12:17 AM, Adrian Hunter wrote:
-> On 11/09/24 02:22, Judith Mendez wrote:
->> Hi Adrian,
->>
->> On 9/10/24 12:10 PM, Adrian Hunter wrote:
->>> On 10/09/24 17:30, Judith Mendez wrote:
->>>> Hi Adrian,
->>>>
->>>> On 9/9/24 1:26 AM, Adrian Hunter wrote:
->>>>> On 6/09/24 20:50, Judith Mendez wrote:
->>>>>> The sdhci_start_signal_voltage_switch function sets
->>>>>> V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
->>>>>> V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
->>>>>> edge or pos edge of clock.
->>>>>>
->>>>>> Due to some eMMC and SD failures seen across am62x platform,
->>>>>> do not set V1P8_SIGNAL_ENA by default, only enable the bit
->>>>>> for devices that require this bit in order to switch to 1v8
->>>>>> voltage for uhs modes.
->>>>>>
->>>>>> Signed-off-by: Judith Mendez <jm@ti.com>
->>>>>> ---
->>>>>>     drivers/mmc/host/sdhci_am654.c | 86 ++++++++++++++++++++++++++++++++++
->>>>>>     1 file changed, 86 insertions(+)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->>>>>> index 0aa3c40ea6ed8..fb6232e56606b 100644
->>>>>> --- a/drivers/mmc/host/sdhci_am654.c
->>>>>> +++ b/drivers/mmc/host/sdhci_am654.c
->>>>>> @@ -155,6 +155,7 @@ struct sdhci_am654_data {
->>>>>>         u32 tuning_loop;
->>>>>>       #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>>>>> +#define SDHCI_AM654_QUIRK_SET_V1P8_ENA BIT(1)
->>>>>
->>>>> It would be better for the quirk to represent the deviation
->>>>> from normal i.e.
->>>>>
->>>>> #define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
->>>>>
->>>>>>     };
->>>>>>       struct window {
->>>>>> @@ -356,6 +357,79 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
->>>>>>         sdhci_set_clock(host, clock);
->>>>>>     }
->>>>>>     +int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc,
->>>>>> +                        struct mmc_ios *ios)
->>>>>
->>>>> Simpler to call sdhci_start_signal_voltage_switch() for the normal
->>>>> case e.g.
->>>>
->>>> This is simpler, so sure will use thanks.
->>>>
->>>>>
->>>>> static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->>>>> {
->>>>>       struct sdhci_host *host = mmc_priv(mmc);
->>>>>       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>>>>
->>>>>
->>>>>       if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
->>>>>           ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
->>>>>           ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>>>           if (ret < 0) {
->>>>>               pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
->>>>>                   mmc_hostname(mmc));
->>>>>               return -EIO;
->>>>>           }
->>>>>           return 0;
->>>>>       }
->>>>>
->>>>>       return sdhci_start_signal_voltage_switch(mmc, ios);
->>>>> }
->>>>>
->>>>>> +{
->>>>>> +    struct sdhci_host *host = mmc_priv(mmc);
->>>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>> +    struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>>>>> +    u16 ctrl;
->>>>>> +    int ret;
->>>>>> +
->>>>>> +    if (host->version < SDHCI_SPEC_300)
->>>>>> +        return 0;
->>>>>> +
->>>>>> +    switch (ios->signal_voltage) {
->>>>>> +    case MMC_SIGNAL_VOLTAGE_330:
->>>>>> +        if (!(host->flags & SDHCI_SIGNALING_330))
->>>>>> +            return -EINVAL;
->>>>>> +
->>>>>> +        ctrl &= ~SDHCI_CTRL_VDD_180;
->>>>>> +        sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>>>>> +
->>>>>> +        if (!IS_ERR(mmc->supply.vqmmc)) {
->>>>>> +            ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>>>> +            if (ret < 0) {
->>>>>> +                pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
->>>>>> +                    mmc_hostname(mmc));
->>>>>> +                return -EIO;
->>>>>> +            }
->>>>>> +        }
->>>>>> +
->>>>>> +        usleep_range(5000, 5500);
->>>>>> +
->>>>>> +        ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>>>>> +        if (!(ctrl & SDHCI_CTRL_VDD_180))
->>>>>> +            return 0;
->>>>>> +
->>>>>> +        pr_warn("%s: 3.3V regulator output did not become stable\n",
->>>>>> +            mmc_hostname(mmc));
->>>>>> +
->>>>>> +        return -EAGAIN;
->>>>>> +
->>>>>> +    case MMC_SIGNAL_VOLTAGE_180:
->>>>>> +        if (!(host->flags & SDHCI_SIGNALING_180))
->>>>>> +            return -EINVAL;
->>>>>> +
->>>>>> +        if (!IS_ERR(mmc->supply.vqmmc)) {
->>>>>> +            ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>>>> +            if (ret < 0) {
->>>>>> +                pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
->>>>>> +                    mmc_hostname(mmc));
->>>>>> +                return -EIO;
->>>>>> +            }
->>>>>> +        }
->>>>>> +
->>>>>> +        if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_SET_V1P8_ENA) {
->>>>>> +            ctrl |= SDHCI_CTRL_VDD_180;
->>>>>> +            sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>>>>> +
->>>>>> +            ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>>>>> +            if (ctrl & SDHCI_CTRL_VDD_180)
->>>>>> +                return 0;
->>>>>> +
->>>>>> +            pr_warn("%s: 1.8V regulator output did not become stable\n",
->>>>>> +                mmc_hostname(mmc));
->>>>>> +
->>>>>> +            return -EAGAIN;
->>>>>> +        }
->>>>>> +        return 0;
->>>>>> +
->>>>>> +    default:
->>>>>> +        return 0;
->>>>>> +    }
->>>>>> +}
->>>>>> +
->>>>>>     static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
->>>>>>     {
->>>>>>         writeb(val, host->ioaddr + reg);
->>>>>> @@ -801,6 +875,8 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->>>>>>                         struct sdhci_am654_data *sdhci_am654)
->>>>>>     {
->>>>>>         struct device *dev = &pdev->dev;
->>>>>> +    struct device_node *np = dev->of_node;
->>>>>> +    struct device_node *node;
->>>>>>         int drv_strength;
->>>>>>         int ret;
->>>>>>     @@ -844,6 +920,15 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->>>>>>         if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
->>>>>>             sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
->>>>>>     +    node = of_parse_phandle(np, "vmmc-supply", 0);
->>>>>> +
->>>>>> +    if (node) {
->>>>>> +        node = of_parse_phandle(np, "vqmmc-supply", 0);
->>>>>> +
->>>>>> +        if (!node)
->>>>>> +            sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SET_V1P8_ENA;
->>>>>> +    }
->>>>>
->>>>> It would be simpler without 'np' and 'node'.  Not sure
->>>>> what the rule is meant to be, but it could be something like:
->>>>>
->>>>>       if (of_parse_phandle(dev->of_node, "vmmc-supply", 0) &&
->>>>>           of_parse_phandle(dev->of_node, "vqmmc-supply", 0)
->>>>>           sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
->>>>
->>>> My issue with this is that I also need the quirk (SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) for eMMC. DT node for eMMC does
->>>> not include vmmc and vqmmc supplies. That is why I had the quirk logic
->>>> inverted.
->>>
->>> Ideally there would be a more direct way to distinguish eMMC, but
->>> otherwise, having both supplies or neither would be:
->>>
->>>      if (!!of_parse_phandle(dev->of_node, "vmmc-supply", 0) ==
->>>          !!of_parse_phandle(dev->of_node, "vqmmc-supply", 0))
->>>          sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
->>
->>
->> Not sure I love the double NOT, but ok, I can use this, will fix for v2.
-> 
-> It could use a comment, including about the eMMC thing.
+Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+---
+ .../bindings/mmc/amlogic,meson-mx-sdio.txt         |  54 -----------
+ .../bindings/mmc/amlogic,meson-mx-sdio.yaml        | 101 +++++++++++++++++++++
+ 2 files changed, 101 insertions(+), 54 deletions(-)
 
+diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+deleted file mode 100644
+index 8765c605e6bc..000000000000
+--- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
++++ /dev/null
+@@ -1,54 +0,0 @@
+-* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+-
+-The highspeed MMC host controller on Amlogic SoCs provides an interface
+-for MMC, SD, SDIO and SDHC types of memory cards.
+-
+-Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+-as the speed of SD standard 2.0.
+-
+-The hardware provides an internal "mux" which allows up to three slots
+-to be controlled. Only one slot can be accessed at a time.
+-
+-Required properties:
+- - compatible : must be one of
+-	- "amlogic,meson8-sdio"
+-	- "amlogic,meson8b-sdio"
+-	along with the generic "amlogic,meson-mx-sdio"
+- - reg : mmc controller base registers
+- - interrupts : mmc controller interrupt
+- - #address-cells : must be 1
+- - size-cells : must be 0
+- - clocks : phandle to clock providers
+- - clock-names : must contain "core" and "clkin"
+-
+-Required child nodes:
+-A node for each slot provided by the MMC controller is required.
+-NOTE: due to a driver limitation currently only one slot (= child node)
+-      is supported!
+-
+-Required properties on each child node (= slot):
+- - compatible : must be "mmc-slot" (see mmc.txt within this directory)
+- - reg : the slot (or "port") ID
+-
+-Optional properties on each child node (= slot):
+- - bus-width : must be 1 or 4 (8-bit bus is not supported)
+- - for cd and all other additional generic mmc parameters
+-   please refer to mmc.txt within this directory
+-
+-Examples:
+-	mmc@c1108c20 {
+-		compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
+-		reg = <0xc1108c20 0x20>;
+-		interrupts = <0 28 1>;
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-		clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
+-		clock-names = "core", "clkin";
+-
+-		slot@1 {
+-			compatible = "mmc-slot";
+-			reg = <1>;
+-
+-			bus-width = <4>;
+-		};
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+new file mode 100644
+index 000000000000..4d1142d2ff02
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+@@ -0,0 +1,101 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/amlogic,meson-mx-sdio.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
++
++description:
++  The highspeed MMC host controller on Amlogic SoCs provides an interface
++  for MMC, SD, SDIO and SDHC types of memory cards.
++  Supported maximum speeds are the ones of the eMMC standard 4.41 as well
++  as the speed of SD standard 2.0.
++  The hardware provides an internal "mux" which allows up to three slots
++  to be controlled. Only one slot can be accessed at a time.
++
++maintainers:
++  - Neil Armstrong <neil.armstrong@linaro.org>
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - amlogic,meson8-sdio
++          - amlogic,meson8b-sdio
++      - const: amlogic,meson-mx-sdio
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 2
++
++  clock-names:
++    items:
++      - const: core
++      - const: clkin
++
++  "#address-cells":
++    const: 1
++
++  "#size-cells":
++    const: 0
++
++
++patternProperties:
++  "slot@[a-f0-9]+$":
++    $ref: mmc-controller.yaml#
++    description:
++      A node for each slot provided by the MMC controller
++    properties:
++      compatible:
++        const: mmc-slot
++
++      reg:
++        description:
++          the slot (or "port") ID
++        maxItems: 1
++
++      bus-width:
++        enum: [1, 4]
++
++    required:
++      - compatible
++      - reg
++
++    unevaluatedProperties: false
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++  - "#address-cells"
++  - "#size-cells"
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    mmc@c1108c20 {
++        compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
++        reg = <0xc1108c20 0x20>;
++        interrupts = <GIC_SPI 28 IRQ_TYPE_EDGE_RISING>;
++        clocks = <&clk_core>, <&clk_in>;
++        clock-names = "core", "clkin";
++        #address-cells = <1>;
++        #size-cells = <0>;
++
++        slot@1 {
++            compatible = "mmc-slot";
++            reg = <1>;
++            bus-width = <4>;
++        };
++    };
 
-Sure, will add. Thanks.
+---
+base-commit: 47ac09b91befbb6a235ab620c32af719f8208399
+change-id: 20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-6fa70546ebb8
 
-> 
->>
->> Thanks for your suggestion!
->>
->> ~ Judith
->>
->>>
->>>
->>>>
->>>> This patch fixes timing issues with both eMMC and SD. (:
->>>>
->>>> ~ Judith
->>>>
->>>>
->>>>>
->>>>>> +
->>>>>>         sdhci_get_of_property(pdev);
->>>>>>           return 0;
->>>>>> @@ -940,6 +1025,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
->>>>>>             goto err_pltfm_free;
->>>>>>         }
->>>>>>     +    host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
->>>>>>         host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
->>>>>>           pm_runtime_get_noresume(dev);
->>>>>>
->>>>>> base-commit: cf6444ba528f043398b112ac36e041a4d8685cb1
->>>>>
->>>>>
->>>>
->>>
->>
-> 
+Best regards,
+-- 
+Neil Armstrong <neil.armstrong@linaro.org>
 
