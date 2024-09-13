@@ -1,57 +1,58 @@
 Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CD171DA613
-	for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 12:52:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56D301DA601
+	for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 12:53:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726231952; cv=none; b=cABx+kAIY8qpEPkDiXiRUam28AktW9XfedmabOiQbLiXZ/4MBChMRRwTIXozP4iKPNYROIrQZ5UunK9806O4EFFCHz3nblDYf9/TuwHbrNvZCd4W4J3wfOOYy8R/o9VEY2Pr7YWSVqsGTlQxqBHQz8IBDqg56wjf5jiMZOUKweI=
+	t=1726232001; cv=none; b=o4jkJWLgpkCX8cJv81jiqqZqO6GtO7PE4KEtNILVAFjQY4fIdnCJGuycgDKbFXbvS9wjpWJ1Uss4Mmz5p/zGfroiEtuFgxZNnBGt4qaIzOaI1IyVNOWbUD9kNuw4X18LmtjsrHE3gEuaMKMMLv4idbVyMhvYkLNk0bozITN5Crg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726231952; c=relaxed/simple;
-	bh=InmcLJVGxQRnbxZW7WSOAZsO/nLv0XDRjt5TobLxhWI=;
+	s=arc-20240116; t=1726232001; c=relaxed/simple;
+	bh=C6SsqUkpTyfLzyYxGxgCFwe8trUiuCmZPYRrNQEXuRg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TDdGbDpCkIhCd67/uKd8ccTdgLzyCM36+XRHAlxxvrMGJ3kg0665oDMqWsJ/AXWV0rH/2l7h1oqrN6vdUW6I7qD0CEEDIg3HbZ2kOd/GYnEYXg7mSXF6/Wr72Iag3McsVL3eZqjvmuliUU9wMFvEqNPGX8QCXF1itNq0+xdI6MQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=I+ZgIEeG; arc=none smtp.client-ip=209.85.167.46
+	 Content-Type:Content-Disposition:In-Reply-To; b=USaOfXcC5lioaN6+8pyInpd/ZWyTYjKNhAk2mlxvy3sx7L+INjN5ggQ7tTkbmSA22Aqyrn2AhMqfFWuirKDTnGU4JEnwyTbMT1nBkg9fjIIAOpuyk75pgqk7yr5YuRcVhJ2RhL6tAptqvIAtQfKPLHjNKwckb3lEZduRsptDFPI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oC/7ZtWo; arc=none smtp.client-ip=209.85.167.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I+ZgIEeG"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-5365b6bd901so2486766e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 05:52:29 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oC/7ZtWo"
+Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-5365d3f9d34so1082045e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 05:53:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1726231948; x=1726836748; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1726231998; x=1726836798; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=dfsHGYsyQ8o6DYwl/1dPx06pLpMTes7M/zHj5Ag9L2c=;
-        b=I+ZgIEeGmCUYXkjiUgfibgs3ml+QjaFfxGNf3K8K9Ss9LKUsxlsio8mW2jhNY2LRZz
-         lryGfs5ULtd2XFUalUmHU8cEsquaCTQiB+N+p9cKtVz2QGFOLorue/3pna1E3b39pp1U
-         3Ehv7kGjVxkncgCjvlAUqt2pvrzONj9SJ5IU4iMjwCv775jcIWZfMNBVfUZ2D8eaakpE
-         ypa/r53mPns2zmCKh+SxCIiOTlr03irpJX50WoK9aXlUppxytt3wNLyg+T4sSekteE3o
-         1ZOUBkQX+B0423VGCLIOwUJHHpht1z2GWwS+T4/m3SXJvkd45Cti07a46R+Yv7imVtWI
-         ET8Q==
+        bh=ulKGIPWaoiiyEGEWVD2HKaFFVOQIntGXX/Asbla3YVM=;
+        b=oC/7ZtWo0dg9LdpFzgnrUMyy2wTeGf/imTYJmkCJyyYnFDdWVRXkfAjXOgBB9X3Al3
+         fE1XnTZln+7ja2oDbt72GcBafquB8EJVer8vUngqeygoqXfdwFT75SYZd2IkZPWS4o9o
+         8bPHpcMo5DV6ZhkVa8UXtcfmqSEKNCN1arJ5ntefLV3Pwq/ONbmQv1x/SRMEJQd7OhhL
+         JJutA367edrexZHextWRTpHqxDaiSEYYUlrlmdj6fXVl5vajIikN/zQiObtdLtxJ7BVa
+         z/ZfvGkvmgbMiZmnu/V8sptOKV4Nbc/apGG8jatbBOMda4eacLGDKexFgY8yfgeQnNpe
+         LBXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726231948; x=1726836748;
+        d=1e100.net; s=20230601; t=1726231998; x=1726836798;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=dfsHGYsyQ8o6DYwl/1dPx06pLpMTes7M/zHj5Ag9L2c=;
-        b=cG/o8OziYPfnnm4UAwUXceoTpMuBemIunod+4xE0k3GrmJDHRwEg8RQCwpJ59PvY8Y
-         dVq9/YzB+Ive043GAqNa31O0azx7R+WJi05IZXXC5ISC++/1Ey4G+d80oYnZkuneyJMx
-         rSgdbHWRrX5i2vhNZip0KShSDT8jIk6KyPef+Tu7Ad5LB1dDCpuOXuMw9ucxsYDccsaO
-         U7wr5xGLJyE14me0oT8r5gvkq7WTttGrM/JcCw+kekbf73wl0xLY01R143rc6BJ731wE
-         vW0XdWLmo/8whrNfornWB7yXZmicNLOWSDvkaXAeGWUVXZmxkT+Dn8/hZJpWX6S1LMHB
-         3xIA==
-X-Forwarded-Encrypted: i=1; AJvYcCXaRQncF7YMIHsS5eRtDTm8Trnafk8rv5J8cAaPnP3a3Xl0RtB+ZjkiE7B51+eR/oMVZefG53jr7RU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzUU9kk54iW4qDmyq4CICAHGu92i9DAGK561x3pMqmoxmKdWns2
-	OjIteJBPwNTV+PjpC9+Eq5zKLE8ID5fHK9xhZN83/xVNj1iBFvawwJ5264XvGCQ=
-X-Google-Smtp-Source: AGHT+IFZHpEGkLLJwdevguvnweP9iazHighjUx5MclCe4J7sJn6hkapWZpl1EO/Gkf6bJ8/rWfRtcg==
-X-Received: by 2002:a05:6512:12c4:b0:52c:db0a:a550 with SMTP id 2adb3069b0e04-53678feb66dmr3929927e87.42.1726231947275;
-        Fri, 13 Sep 2024 05:52:27 -0700 (PDT)
+        bh=ulKGIPWaoiiyEGEWVD2HKaFFVOQIntGXX/Asbla3YVM=;
+        b=aKV5wi6/l+/2EXbcWLouJ6cm9WIwa1VsBKwY3vbWB3kR0wulibdc6kKKSyVALIeSuS
+         Emsgt+u5totZcSxhEcDY4PFgtCE4iIEIosrNeuVpPjhCEYMCaTvsREWNMQUGsv015CpB
+         p71q2FKCBU6LV6leAKIUguV160zLtHuxAkKt1ktDwEvNNFQE6fYT3GJVrdmAHXlE2cgE
+         bTt8XCZvLRIkjlnbk5ChWYHsJ2lb4CYHdjyMJdXjTorTfPagkGJf0rWhhfTQJymla3IH
+         xsRGDsjInl3FyPxbOaSF488g8ZKLKgf5xuU0g5f2/82ptFsle6bhCq1lgfrZsuYN6rTh
+         kcrw==
+X-Forwarded-Encrypted: i=1; AJvYcCUVSOehjnEhvNmX1L753awJ8t+0YH15QehjL6c/yOSuxcNlKJ0SnzSL4gdAzmJesnQfI0IHKHcohhI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxZ1FCdAKR6o/TW98ZczPUScu7EAncH5LXUhWjdyt2cEhGqw0bH
+	dTJuiCskEBWdFZ8KiFdeuAqr0SUBVfhAjZI5afUh8eM1HqEtPcRbluFPrDkz9DOTV0ZAuQWSgBr
+	d
+X-Google-Smtp-Source: AGHT+IGMrI1iP0NSdtqsSAApfYvR65iW6wVAWhHwP/sGM4okfHDWoDQvz4JwneKed7XnN5mSPcy7Yg==
+X-Received: by 2002:a05:6512:4020:b0:536:533c:c460 with SMTP id 2adb3069b0e04-5367ff295a6mr1358763e87.50.1726231998229;
+        Fri, 13 Sep 2024 05:53:18 -0700 (PDT)
 Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5365f8cb67dsm2265791e87.129.2024.09.13.05.52.26
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5365f90d482sm2280238e87.262.2024.09.13.05.53.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Sep 2024 05:52:26 -0700 (PDT)
-Date: Fri, 13 Sep 2024 15:52:25 +0300
+        Fri, 13 Sep 2024 05:53:17 -0700 (PDT)
+Date: Fri, 13 Sep 2024 15:53:16 +0300
 From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 To: Sricharan R <quic_srichara@quicinc.com>
 Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org, 
@@ -61,11 +62,10 @@ Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org,
 	linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
 	linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
 	linux-arm-kernel@lists.infradead.org, quic_varada@quicinc.com
-Subject: Re: [PATCH 7/8] arm64: dts: qcom: add IPQ5424 SoC and rdp466 board
- support
-Message-ID: <fyoh72in62sfmsw3syqswr2p3pcv26zoce2tvlx53mu4lpoakx@ixyvy4oylms3>
+Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
+Message-ID: <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
 References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-8-quic_srichara@quicinc.com>
+ <20240913121250.2995351-9-quic_srichara@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -74,429 +74,46 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240913121250.2995351-8-quic_srichara@quicinc.com>
+In-Reply-To: <20240913121250.2995351-9-quic_srichara@quicinc.com>
 
-On Fri, Sep 13, 2024 at 05:42:49PM GMT, Sricharan R wrote:
+On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
 > From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > 
-> Add initial device tree support for the Qualcomm IPQ5424 SoC and
-> rdp466 board.
+> Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
+
+Please name the device rather than the platform. The defconfig affects
+all users, so it should be justified.
+
 > 
+> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
 > Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+
+Usual comment.
+
 > ---
->  arch/arm64/boot/dts/qcom/Makefile           |   1 +
->  arch/arm64/boot/dts/qcom/ipq5424-rdp466.dts |  63 +++++
->  arch/arm64/boot/dts/qcom/ipq5424.dtsi       | 294 ++++++++++++++++++++
->  3 files changed, 358 insertions(+)
->  create mode 100644 arch/arm64/boot/dts/qcom/ipq5424-rdp466.dts
->  create mode 100644 arch/arm64/boot/dts/qcom/ipq5424.dtsi
+>  arch/arm64/configs/defconfig | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
-> index 197ab325c0b9..46c4eb758799 100644
-> --- a/arch/arm64/boot/dts/qcom/Makefile
-> +++ b/arch/arm64/boot/dts/qcom/Makefile
-> @@ -16,6 +16,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-rdp441.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-rdp442.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-rdp468.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-rdp474.dtb
-> +dtb-$(CONFIG_ARCH_QCOM)	+= ipq5424-rdp466.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq6018-cp01-c1.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq8074-hk01.dtb
->  dtb-$(CONFIG_ARCH_QCOM)	+= ipq8074-hk10-c1.dtb
-> diff --git a/arch/arm64/boot/dts/qcom/ipq5424-rdp466.dts b/arch/arm64/boot/dts/qcom/ipq5424-rdp466.dts
-> new file mode 100644
-> index 000000000000..c8597a9ba175
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/qcom/ipq5424-rdp466.dts
-> @@ -0,0 +1,63 @@
-> +// SPDX-License-Identifier: GPL-2.0+ OR BSD-3-Clause
-> +/*
-> + * IPQ5018 MP03.1-C2 board device tree source
-> + *
-> + * Copyright (c) 2023 The Linux Foundation. All rights reserved.
-> + */
-> +
-> +/dts-v1/;
-> +
-> +#include "ipq5424.dtsi"
-> +
-> +/ {
-> +	model = "Qualcomm Technologies, Inc. IPQ5424 RDP466";
-> +	compatible = "qcom,ipq5424-rdp466", "qcom,ipq5424";
-> +
-> +	aliases {
-> +		serial0 = &uart1;
-> +	};
-> +
-> +	chosen	{
-> +		stdout-path = "serial0:115200n8";
-> +	};
-
-Drop
-
-> +};
-> +
-> +&tlmm {
-> +	sdc_default_state: sdc-default-state {
-> +		clk-pins {
-> +			pins = "gpio5";
-> +			function = "sdc_clk";
-> +			drive-strength = <8>;
-> +			bias-disable;
-> +		};
-> +
-> +		cmd-pins {
-> +			pins = "gpio4";
-> +			function = "sdc_cmd";
-> +			drive-strength = <8>;
-> +			bias-pull-up;
-> +		};
-> +
-> +		data-pins {
-> +			pins = "gpio0", "gpio1", "gpio2", "gpio3";
-> +			function = "sdc_data";
-> +			drive-strength = <8>;
-> +			bias-pull-up;
-> +		};
-> +	};
-> +};
-> +
-> +&uart1 {
-> +	pinctrl-0 = <&uart1_pins>;
-> +	pinctrl-names = "default";
-> +	status = "okay";
-> +};
-> +
-> +&sleep_clk {
-
-sleep comes between tlmm and uart1
-
-> +	clock-frequency = <32000>;
-> +};
-> +
-> +&xo_board {
-> +	clock-frequency = <24000000>;
-> +};
-> +
-> diff --git a/arch/arm64/boot/dts/qcom/ipq5424.dtsi b/arch/arm64/boot/dts/qcom/ipq5424.dtsi
-> new file mode 100644
-> index 000000000000..b6c08fac9482
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/qcom/ipq5424.dtsi
-> @@ -0,0 +1,294 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
-> +/*
-> + * IPQ5424 device tree source
-> + *
-> + * Copyright (c) 2020-2021 The Linux Foundation. All rights reserved.
-> + * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
-> + */
-> +
-> +#include <dt-bindings/interrupt-controller/arm-gic.h>
-> +#include <dt-bindings/clock/qcom,ipq5424-gcc.h>
-> +#include <dt-bindings/reset/qcom,ipq5424-gcc.h>
-> +#include <dt-bindings/gpio/gpio.h>
-> +
-> +/ {
-> +	#address-cells = <2>;
-> +	#size-cells = <2>;
-> +	interrupt-parent = <&intc>;
-> +
-> +	clocks {
-> +		xo_board: xo-board-clk {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +		};
-> +
-> +		sleep_clk: sleep-clk {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +		};
-
-I think Krzysztof lately suggested moving these clocks to board DT
-files.
-
-> +	};
-> +
-> +	cpus: cpus {
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +
-> +		CPU0: cpu@0 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			reg = <0x0>;
-> +			enable-method = "psci";
-> +			next-level-cache = <&L2_0>;
-> +			L2_0: l2-cache {
-
-lowercase all labels
-
-> +				compatible = "cache";
-> +				cache-level = <2>;
-> +				cache-unified;
-> +				next-level-cache = <&L3_0>;
-
-empty line (here and afterwards, before new subnodes.
-
-> +				L3_0: l3-cache {
-> +					compatible = "cache";
-> +					cache-level = <3>;
-> +					cache-unified;
-> +				};
-> +			};
-> +		};
-> +
-> +		CPU1: cpu@100 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			enable-method = "psci";
-> +			reg = <0x100>;
-> +			next-level-cache = <&L2_100>;
-> +			L2_100: l2-cache {
-> +				compatible = "cache";
-> +				cache-level = <2>;
-> +				cache-unified;
-> +				next-level-cache = <&L3_0>;
-> +			};
-> +		};
-> +
-> +		CPU2: cpu@200 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			enable-method = "psci";
-> +			reg = <0x200>;
-> +			next-level-cache = <&L2_200>;
-> +			L2_200: l2-cache {
-> +				compatible = "cache";
-> +				cache-level = <2>;
-> +				cache-unified;
-> +				next-level-cache = <&L3_0>;
-> +			};
-> +		};
-> +
-> +		CPU3: cpu@300 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			enable-method = "psci";
-> +			reg = <0x300>;
-> +			next-level-cache = <&L2_300>;
-> +			L2_300: l2-cache {
-> +				compatible = "cache";
-> +				cache-level = <2>;
-> +				cache-unified;
-> +				next-level-cache = <&L3_0>;
-> +			};
-> +		};
-> +	};
-> +
-> +	memory@80000000 {
-> +		device_type = "memory";
-> +		/* We expect the bootloader to fill in the size */
-> +		reg = <0x0 0x80000000 0x0 0x0>;
-> +	};
-> +
-> +	pmu {
-> +		compatible = "arm,cortex-a55-pmu";
-> +		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
-
-I don't think you need CPU_MASK for GICv3 hosts.
-
-> +	};
-> +
-> +	pmu-v7 {
-> +		compatible = "arm,cortex-a7-pmu";
-> +		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
-> +	};
-> +
-> +	dsu-pmu {
-> +		compatible = "arm,dsu-pmu";
-> +		interrupts = <GIC_SPI 50 IRQ_TYPE_EDGE_RISING>;
-> +		cpus = <&CPU0>, <&CPU1>, <&CPU2>, <&CPU3>;
-> +		status = "okay";
-> +	};
-> +
-> +	psci {
-> +		compatible = "arm,psci-1.0";
-> +		method = "smc";
-> +	};
-> +
-> +	reserved-memory {
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
-> +
-> +		tz@8a600000 {
-> +			reg = <0x0 0x8a600000 0x0 0x200000>;
-> +			no-map;
-> +		};
-> +	};
-> +
-> +	soc@0 {
-> +		compatible = "simple-bus";
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges = <0 0 0 0 0x10 0>;
-> +
-> +		tlmm: pinctrl@1000000 {
-> +			compatible = "qcom,ipq5424-tlmm";
-> +			reg = <0 0x01000000 0 0x300000>;
-> +			interrupts = <GIC_SPI 84 IRQ_TYPE_LEVEL_HIGH>;
-> +			gpio-controller;
-> +			#gpio-cells = <2>;
-> +			gpio-ranges = <&tlmm 0 0 50>;
-> +			interrupt-controller;
-> +			#interrupt-cells = <2>;
-> +
-> +			uart1_pins: uart1-state {
-> +				pins = "gpio43", "gpio44";
-> +				function = "uart1";
-> +				drive-strength = <8>;
-> +				bias-pull-up;
-> +			};
-> +		};
-> +
-> +		gcc: clock-controller@1800000 {
-> +			compatible = "qcom,ipq5424-gcc";
-> +			reg = <0 0x01800000 0 0x40000>;
-> +			clocks = <&xo_board>,
-> +				 <&sleep_clk>,
-> +				 <0>,
-> +				 <0>,
-> +				 <0>;
-> +			#clock-cells = <1>;
-> +			#reset-cells = <1>;
-> +			#interconnect-cells = <1>;
-> +		};
-> +
-> +		qupv3: geniqup@1ac0000 {
-> +			compatible = "qcom,geni-se-qup";
-> +			reg = <0 0x01ac0000 0 0x2000>;
-> +			clocks = <&gcc GCC_QUPV3_AHB_MST_CLK>,
-> +				 <&gcc GCC_QUPV3_AHB_SLV_CLK>;
-> +			clock-names = "m-ahb", "s-ahb";
-> +			ranges;
-> +			#address-cells = <2>;
-> +			#size-cells = <2>;
-> +
-> +			status = "okay";
-> +
-> +			uart1: serial@1a84000 {
-> +				compatible = "qcom,geni-debug-uart";
-> +				reg = <0 0x01a84000 0 0x4000>;
-> +				clocks = <&gcc GCC_QUPV3_UART1_CLK>;
-> +				clock-names = "se";
-> +				interrupts = <GIC_SPI 340 IRQ_TYPE_LEVEL_HIGH>;
-> +				status = "okay";
-> +			};
-> +		};
-> +
-> +		intc: interrupt-controller@f200000 {
-> +			compatible = "arm,gic-v3";
-> +			reg = <0 0xf200000 0 0x10000>, /* GICD */
-> +			      <0 0xf240000 0 0x80000>; /* GICR * 4 regions */
-> +			#interrupt-cells = <0x3>;
-> +			interrupt-controller;
-> +			#redistributor-regions = <1>;
-> +			redistributor-stride = <0x0 0x20000>;
-> +			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
-> +			mbi-ranges = <672 128>;
-> +			msi-controller;
-
-No ITS?
-
-> +		};
-> +
-> +		sdhc: mmc@7804000 {
-> +			compatible = "qcom,ipq5424-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0 0x07804000 0 0x1000>, <0 0x07805000 0 0x1000>;
-
-Please sort all nodes following the device addresses.
-
-> +			reg-names = "hc", "cqhci";
-> +
-> +			interrupts = <GIC_SPI 116 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 119 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
-> +				 <&xo_board>;
-> +			clock-names = "iface", "core", "xo";
-> +
-> +			status = "disabled";
-> +		};
-> +
-> +		timer@f420000 {
-> +			compatible = "arm,armv7-timer-mem";
-> +			reg = <0 0xf420000 0 0x1000>;
-> +			ranges = <0 0 0 0x10000000>;
-> +			#address-cells = <1>;
-> +			#size-cells = <1>;
-> +
-> +			frame@f421000 {
-> +				reg = <0xf421000 0x1000>,
-> +				      <0xf422000 0x1000>;
-> +				interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>,
-> +					     <GIC_SPI 6 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <0>;
-> +			};
-> +
-> +			frame@f423000 {
-> +				reg = <0xf423000 0x1000>;
-> +				interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <1>;
-> +				status = "disabled";
-> +			};
-> +
-> +			frame@f425000 {
-> +				reg = <0xf425000 0x1000>,
-> +				      <0xf426000 0x1000>;
-> +				interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <2>;
-> +				status = "disabled";
-> +			};
-> +
-> +			frame@f427000 {
-> +				reg = <0xf427000 0x1000>;
-> +				interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <3>;
-> +				status = "disabled";
-> +			};
-> +
-> +			frame@f429000 {
-> +				reg = <0xf429000 0x1000>;
-> +				interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <4>;
-> +				status = "disabled";
-> +			};
-> +
-> +			frame@f42b000 {
-> +				reg = <0xf42b000 0x1000>;
-> +				interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <5>;
-> +				status = "disabled";
-> +			};
-> +
-> +			frame@f42d000 {
-> +				reg = <0xf42d000 0x1000>;
-> +				interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
-> +				frame-number = <6>;
-> +				status = "disabled";
-> +			};
-> +		};
-> +
-> +	};
-> +
-> +	timer {
-> +		compatible = "arm,armv8-timer";
-> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 12 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>;
-> +	};
-> +};
+> diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+> index 81ca46e3ab4b..f1043a40846a 100644
+> --- a/arch/arm64/configs/defconfig
+> +++ b/arch/arm64/configs/defconfig
+> @@ -595,6 +595,7 @@ CONFIG_PINCTRL_IMX93=y
+>  CONFIG_PINCTRL_MSM=y
+>  CONFIG_PINCTRL_IPQ5018=y
+>  CONFIG_PINCTRL_IPQ5332=y
+> +CONFIG_PINCTRL_IPQ5424=y
+>  CONFIG_PINCTRL_IPQ8074=y
+>  CONFIG_PINCTRL_IPQ6018=y
+>  CONFIG_PINCTRL_IPQ9574=y
+> @@ -1304,6 +1305,7 @@ CONFIG_IPQ_APSS_6018=y
+>  CONFIG_IPQ_APSS_5018=y
+>  CONFIG_IPQ_GCC_5018=y
+>  CONFIG_IPQ_GCC_5332=y
+> +CONFIG_IPQ_GCC_5424=y
+>  CONFIG_IPQ_GCC_6018=y
+>  CONFIG_IPQ_GCC_8074=y
+>  CONFIG_IPQ_GCC_9574=y
 > -- 
 > 2.34.1
 > 
