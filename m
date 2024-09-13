@@ -1,92 +1,148 @@
-Received: from mout.web.de (mout.web.de [217.72.192.78])
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D22092D052;
-	Fri, 13 Sep 2024 16:42:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.72.192.78
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC5C582D70;
+	Fri, 13 Sep 2024 18:54:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726245754; cv=none; b=m0hUmKwK9X9tnxVxOjjQCVBti8eCDCxba0e99Todwm7s+FTU9mlJfw1V3eq5XSti7g4j5um+IGyMdpvXcht6P+IlgxMiK+IrfmDc4e/HH45RZq3ld/xiLbzE/t9BAW9JLvSW3rlAOw43ceouX0fpalkW6K83klHcoxqX5L9fQOc=
+	t=1726253654; cv=none; b=t7TFFIGQuJafrynIO5/ugYaUqu5aDB+DYpoQ2NYhTko8xdloOMKDrL+QXa9MlNrJPFVQbeu7YiCSbi3rQ/q6ABx97Si724CIM5Ui07JOmzDbHQu1lhQvqvIoxFnldcO/9e2xka09BE/Ymb8enMU1l64RQxcg7k568WznBQlxXBI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726245754; c=relaxed/simple;
-	bh=HXIfKdnG22exxAV+fSAOXl1qXmyMtKHpkEy00UN8v14=;
-	h=Message-ID:Date:MIME-Version:To:Cc:References:Subject:From:
-	 In-Reply-To:Content-Type; b=cvBbdhCXN3ATwOlKhJUWhKgGGyNCy+7Nh+rcXQE52T2xC79bO76mkpPV6bryKRb0tVbO75sVwtPg6yj331pbxI/h9iI00pbpZBhOJcDTNkEh2cBt/bJhGrmEM8/Zm8jdBy258oZpKE+09FIomGMJciXSswY1g6JJNILD15voF94=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=p7dwqn5h; arc=none smtp.client-ip=217.72.192.78
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
+	s=arc-20240116; t=1726253654; c=relaxed/simple;
+	bh=2umMFuyC59HJUchrynLNf3a9oiPhTTsMl8Qhzz8cPXs=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=ss4l+c2aZ3trvmJ1kAnN004nRQvIr8udO+bnZMLl/knrBs9AC9/8MshCLQIGjs6N9MeTNPNFcJUUvb22pN7YOjFAHpuAp0H2kfoKfz/MnzHbU2dt9hVYnz+dqGjts+9Q3aS0uqL79pztcIjNVR576EAyVK+a/nWsjBrcJYOA7i4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=iZ25hX07; arc=none smtp.client-ip=198.47.19.141
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="p7dwqn5h"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
-	s=s29768273; t=1726245740; x=1726850540; i=markus.elfring@web.de;
-	bh=HXIfKdnG22exxAV+fSAOXl1qXmyMtKHpkEy00UN8v14=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:Cc:References:
-	 Subject:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:
-	 cc:content-transfer-encoding:content-type:date:from:message-id:
-	 mime-version:reply-to:subject:to;
-	b=p7dwqn5hOfV2UKVvdOg+cfcAVvzWZVvi9tMRnTVq0DQJorx7zgx9XXW8XZj054Vt
-	 EiTUbLD5liumry+Dpv9w9Opkcswg/4ZqZv0RzBhGPNtIqBg2Zk/zxAMNZ0DNMEJu4
-	 43CbwE705LyQ1SINoWOFhYeIy7TwhfPY1RtofcEP8+jYWDnGlsF9nGGfuWpXUqmMT
-	 w8V0cIvgIi7/JBidxH0A6CgY1lffQxBXbrvWa8A3bwzWxMhnlViNM4R/ehncKemqX
-	 hIWR5k/bSpw4lSAtQzKKfGCsCAXVACCP+XWgRoeZDbV/oQPgrb2wW20tGZdJJJA+x
-	 psZ9nUM7BUi1qHGIBQ==
-X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
-Received: from [192.168.178.21] ([94.31.88.95]) by smtp.web.de (mrweb106
- [213.165.67.124]) with ESMTPSA (Nemesis) id 1MDvDi-1sfDjs29jg-004tLo; Fri, 13
- Sep 2024 18:42:20 +0200
-Message-ID: <1016953e-3bab-4acc-a167-27656073feda@web.de>
-Date: Fri, 13 Sep 2024 18:42:16 +0200
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="iZ25hX07"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 48DIs3hI097808;
+	Fri, 13 Sep 2024 13:54:03 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1726253644;
+	bh=9NplcwqAcUBPdkGVhuqmZ/8tZIV84nJKWo9I13pK8GQ=;
+	h=From:To:CC:Subject:Date;
+	b=iZ25hX07GExWlzx6dNmFiRuYev7waBJFqD72RHGqq2jgB5oRqv4JL+O2N87+pb4S3
+	 KxCYoeAKD92XCr9cWMOScmim4GbSqBxuQEic2hqZqBp3zbmiqITGu+J4+/eb+mBCEQ
+	 6lthyKVVBOenTfV5t+UmPti7hSoQNINe7y+ILY/A=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 48DIs30J031793
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Fri, 13 Sep 2024 13:54:03 -0500
+Received: from DLEE106.ent.ti.com (157.170.170.36) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 13
+ Sep 2024 13:54:03 -0500
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE106.ent.ti.com
+ (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Fri, 13 Sep 2024 13:54:03 -0500
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 48DIs3km008526;
+	Fri, 13 Sep 2024 13:54:03 -0500
+From: Judith Mendez <jm@ti.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v2] mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch
+Date: Fri, 13 Sep 2024 13:54:03 -0500
+Message-ID: <20240913185403.1339115-1-jm@ti.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-To: Akashi Takahiro <takahiro.akashi@linaro.org>,
- Ben Chuang <ben.chuang@genesyslogic.com.tw>,
- Victor Shih <victor.shih@genesyslogic.com.tw>, linux-mmc@vger.kernel.org,
- Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Ben Chuang <benchuanggli@gmail.com>,
- Daniil Lunev <dlunev@chromium.org>, Greg Tu <greg.tu@genesyslogic.com.tw>,
- HL.Liu@genesyslogic.com.tw, Lucas Lai <Lucas.Lai@genesyslogic.com.tw>
-References: <20240913102836.6144-10-victorshihgli@gmail.com>
-Subject: Re: [PATCH V22 09/22] mmc: sdhci: add UHS-II module and add a kernel
- configuration
-Content-Language: en-GB
-From: Markus Elfring <Markus.Elfring@web.de>
-In-Reply-To: <20240913102836.6144-10-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:QeA4gMO8b1UNSDpdTs7WI+aozQyDW3a6pLGEyD8WxSbigZW6j13
- L9OjZzChwA5QUbA0jSRakA9iRjlC92EG9/iA9JwLnC+LRNOF9elTCyHQdrH8zV7JGBUZlX7
- yXE4NA0uCBeRKTP0FgRYPB7PPBSSrMjQuPXkU9vbxwZcUQfsznCS8pr3aHXhbxwtN834SCu
- HRwM/Yjnq8F6dD0ok6IRw==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:taiSzN5xeAU=;3sn3Db6WJaEEEysbldXsOBecBgM
- bha4cX8+Y4Kxt4IB925Hrf5KZfKFbEOlwowtJYCIOI2lQVewRoxwzxL3fYmW0PFCAy/DCQxZA
- W74yeNO2ejPL0wtFQwHdA9a+pZVoGuFpoaoMqaunFYdoSzlYv0ooVb7qYkOU91xV02g0bWFYN
- p6dN1EIeb5+rRB3tAA41LhLsWl6T5Wp08rhTL/jwDKleeBiD5GTRXIHT7LdF0dRgKGm18CCjj
- /CnKTY8AjKd+u7ojk1+J/OCQpL9JlBALIq3OU8awcfeGwtIdriYdUnwjtJZcRZ2BRUWKG7lbr
- 7mPUKjXpgCV8j8otmxKU2/BpwSJRmsxqOPg597za+F0dha6Br+ZtH6MRPYbKkW99sOFooAXvr
- rNnOXakN/SZA7VmVOmSft8SIId8CvIheC5pUh5kjU4NrkgbaaHBV57nXxPXPopPgAsyXKW6yJ
- CC3Y58WoY/OWnoMegNK51r0DWAe19XA8w66QplsWtpXyjwgW9AIVhXro+v4Bc6xR3MfZ+bpN9
- aqVfx4yEmt/DrnpX+4n3dfThM2SfkhO85ot/bvrE4VhM00yI5oq6rrfMxFJXVBT9NsB9LZrJg
- J/1YVWVE68qG1Km727mcLUnAooWW2EOxZRg2p4Ga4c92O/ZMqdKosNqyCfWNIJFHh7PNTmioi
- QpJBo+tV5D1RqJQRnNE3GMtGK63ZJUW9mG0QMA3jzb058nd0sicTXayUGqDkIN3Bi0m3+NGo7
- 6D9s9OKwjk9++UPWMfeeRNH4A7xljNTWkiRplx7JVMbEkmNGS8vrzHWCSCBbcY3c8NcNRmX7J
- pQklyhZJgXNIgGWIsLS/OWGw==
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 
-=E2=80=A6
-> +++ b/drivers/mmc/host/sdhci-uhs2.c
-> @@ -0,0 +1,41 @@
-=E2=80=A6
-> +MODULE_AUTHOR("Intel, Genesys Logic, Linaro");
-=E2=80=A6
+The sdhci_start_signal_voltage_switch function sets
+V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
+V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
+edge or pos edge of clock.
 
-Would you like to reconsider the structure for such provided information o=
-nce more?
-https://elixir.bootlin.com/linux/v6.11-rc7/source/include/linux/module.h#L=
-239
+Due to some eMMC and SD failures seen across am62x platform,
+do not set V1P8_SIGNAL_ENA by default, only enable the bit
+for devices that require this bit in order to switch to 1v8
+voltage for uhs modes.
 
-Regards,
-Markus
+Signed-off-by: Judith Mendez <jm@ti.com>
+---
+Changes since v1:
+- Invert quirk logic
+- Simplify sdhci_am654_start_signal_voltage_switch() and call
+  sdhci_start_signal_voltage_switch() when the quirk does not apply
+- Simply logic when detecting when quirk should be applied
+---
+ drivers/mmc/host/sdhci_am654.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 0aa3c40ea6ed8..9ff07aadb2d91 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -155,6 +155,7 @@ struct sdhci_am654_data {
+ 	u32 tuning_loop;
+ 
+ #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
++#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
+ };
+ 
+ struct window {
+@@ -356,6 +357,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	sdhci_set_clock(host, clock);
+ }
+ 
++static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
++	    ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		if (!IS_ERR(mmc->supply.vqmmc)) {
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
++			if (ret < 0) {
++				pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
++				       mmc_hostname(mmc));
++				return -EIO;
++			}
++		}
++		return 0;
++	}
++
++	return sdhci_start_signal_voltage_switch(mmc, ios);
++}
++
+ static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
+ {
+ 	writeb(val, host->ioaddr + reg);
+@@ -844,6 +868,11 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
+ 		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
+ 
++	/* Suppress v1p8 ena for eMMC and SD with vqmmc supply */
++	if (!!of_parse_phandle(dev->of_node, "vmmc-supply", 0) ==
++	    !!of_parse_phandle(dev->of_node, "vqmmc-supply", 0))
++		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
++
+ 	sdhci_get_of_property(pdev);
+ 
+ 	return 0;
+@@ -940,6 +969,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+ 
+ 	pm_runtime_get_noresume(dev);
+
+base-commit: cf6444ba528f043398b112ac36e041a4d8685cb1
+-- 
+2.46.0
+
