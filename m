@@ -1,123 +1,99 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.web.de (mout.web.de [212.227.17.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56D301DA601
-	for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 12:53:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8FDB2BE6F;
+	Fri, 13 Sep 2024 15:17:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726232001; cv=none; b=o4jkJWLgpkCX8cJv81jiqqZqO6GtO7PE4KEtNILVAFjQY4fIdnCJGuycgDKbFXbvS9wjpWJ1Uss4Mmz5p/zGfroiEtuFgxZNnBGt4qaIzOaI1IyVNOWbUD9kNuw4X18LmtjsrHE3gEuaMKMMLv4idbVyMhvYkLNk0bozITN5Crg=
+	t=1726240681; cv=none; b=oCs4j2+x2KcdY9qQO6SKcV6bh9ObgHq4QrkgVqVLBV8d+O1PutDjOr0hCtp3B1xYdw/vDx+SieeZfvR/fQws5h0Sm7MenMrxJ0yUVRZ44lyYLlIQp4GfwxsQbneU2Z+WSslxKk/8DVKqw2ruavcR1BYFE+Q1qP6wM5OWdh3xPEo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726232001; c=relaxed/simple;
-	bh=C6SsqUkpTyfLzyYxGxgCFwe8trUiuCmZPYRrNQEXuRg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=USaOfXcC5lioaN6+8pyInpd/ZWyTYjKNhAk2mlxvy3sx7L+INjN5ggQ7tTkbmSA22Aqyrn2AhMqfFWuirKDTnGU4JEnwyTbMT1nBkg9fjIIAOpuyk75pgqk7yr5YuRcVhJ2RhL6tAptqvIAtQfKPLHjNKwckb3lEZduRsptDFPI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oC/7ZtWo; arc=none smtp.client-ip=209.85.167.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1726240681; c=relaxed/simple;
+	bh=HdARxft5lo/WwL7MdcchDvg7lHX7sYr4osFJymFGL3w=;
+	h=Message-ID:Date:MIME-Version:To:Cc:References:Subject:From:
+	 In-Reply-To:Content-Type; b=IET8SAmMu5OAlNLB7I5vmom5CepRzmM0+73z6r8qWLXLcF1tUITIX023Qdgdatb/k81eKv1tkqPZT2GEWNuI9232JDyNRdfxcyg2IkdYQIOsuwyxdzFnv64d6ZGY0GGFdtZhKT4NReF2T2dtyn38W2uDfqljZ8ZmHH9hvmRGdY8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=D4tqCtsc; arc=none smtp.client-ip=212.227.17.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oC/7ZtWo"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-5365d3f9d34so1082045e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Sep 2024 05:53:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1726231998; x=1726836798; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ulKGIPWaoiiyEGEWVD2HKaFFVOQIntGXX/Asbla3YVM=;
-        b=oC/7ZtWo0dg9LdpFzgnrUMyy2wTeGf/imTYJmkCJyyYnFDdWVRXkfAjXOgBB9X3Al3
-         fE1XnTZln+7ja2oDbt72GcBafquB8EJVer8vUngqeygoqXfdwFT75SYZd2IkZPWS4o9o
-         8bPHpcMo5DV6ZhkVa8UXtcfmqSEKNCN1arJ5ntefLV3Pwq/ONbmQv1x/SRMEJQd7OhhL
-         JJutA367edrexZHextWRTpHqxDaiSEYYUlrlmdj6fXVl5vajIikN/zQiObtdLtxJ7BVa
-         z/ZfvGkvmgbMiZmnu/V8sptOKV4Nbc/apGG8jatbBOMda4eacLGDKexFgY8yfgeQnNpe
-         LBXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726231998; x=1726836798;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ulKGIPWaoiiyEGEWVD2HKaFFVOQIntGXX/Asbla3YVM=;
-        b=aKV5wi6/l+/2EXbcWLouJ6cm9WIwa1VsBKwY3vbWB3kR0wulibdc6kKKSyVALIeSuS
-         Emsgt+u5totZcSxhEcDY4PFgtCE4iIEIosrNeuVpPjhCEYMCaTvsREWNMQUGsv015CpB
-         p71q2FKCBU6LV6leAKIUguV160zLtHuxAkKt1ktDwEvNNFQE6fYT3GJVrdmAHXlE2cgE
-         bTt8XCZvLRIkjlnbk5ChWYHsJ2lb4CYHdjyMJdXjTorTfPagkGJf0rWhhfTQJymla3IH
-         xsRGDsjInl3FyPxbOaSF488g8ZKLKgf5xuU0g5f2/82ptFsle6bhCq1lgfrZsuYN6rTh
-         kcrw==
-X-Forwarded-Encrypted: i=1; AJvYcCUVSOehjnEhvNmX1L753awJ8t+0YH15QehjL6c/yOSuxcNlKJ0SnzSL4gdAzmJesnQfI0IHKHcohhI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxZ1FCdAKR6o/TW98ZczPUScu7EAncH5LXUhWjdyt2cEhGqw0bH
-	dTJuiCskEBWdFZ8KiFdeuAqr0SUBVfhAjZI5afUh8eM1HqEtPcRbluFPrDkz9DOTV0ZAuQWSgBr
-	d
-X-Google-Smtp-Source: AGHT+IGMrI1iP0NSdtqsSAApfYvR65iW6wVAWhHwP/sGM4okfHDWoDQvz4JwneKed7XnN5mSPcy7Yg==
-X-Received: by 2002:a05:6512:4020:b0:536:533c:c460 with SMTP id 2adb3069b0e04-5367ff295a6mr1358763e87.50.1726231998229;
-        Fri, 13 Sep 2024 05:53:18 -0700 (PDT)
-Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5365f90d482sm2280238e87.262.2024.09.13.05.53.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Sep 2024 05:53:17 -0700 (PDT)
-Date: Fri, 13 Sep 2024 15:53:16 +0300
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Sricharan R <quic_srichara@quicinc.com>
-Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org, 
-	krzk+dt@kernel.org, conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org, 
-	ulf.hansson@linaro.org, linus.walleij@linaro.org, catalin.marinas@arm.com, 
-	p.zabel@pengutronix.de, geert+renesas@glider.be, neil.armstrong@linaro.org, 
-	linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, quic_varada@quicinc.com
-Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
-Message-ID: <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-9-quic_srichara@quicinc.com>
+	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="D4tqCtsc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
+	s=s29768273; t=1726240662; x=1726845462; i=markus.elfring@web.de;
+	bh=RnKqKkU5ax07eav2EVa2dS7EwG10YlWPtNLoGqh3bH4=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:Cc:References:
+	 Subject:From:In-Reply-To:Content-Type:Content-Transfer-Encoding:
+	 cc:content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=D4tqCtscxIhQoVsyq3ZjCr/heR8Sxwrl9CdSHVdZrbLm3TCiR5cAnwipTn8gccz6
+	 4h7M2bo9j8B1W+EhchvIibvww7vq/ZWki/LCED5NaR8Y4N7rw1IYZ4outWAQtm2Hc
+	 KVp86KzQOynVSGPu+JjTkMvaQdy7MT2hg9rhTpUZBNFvQ7owwU/xD7aE5ibL7WXKW
+	 1FKGiyn2DYbUXf7n1DEn1NiM7U3Py73AmtLpIbN1f849SbgOgFxIa8wGKjTkFzvXj
+	 vng9NvyFI6K55KT4NHKk+6f1QlCklh1qEp9PqieDa2AW6Vh6O62o8C7FcIEVePUfe
+	 77bT4g0VsqxasVObhA==
+X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
+Received: from [192.168.178.21] ([94.31.88.95]) by smtp.web.de (mrweb105
+ [213.165.67.124]) with ESMTPSA (Nemesis) id 1N9LEU-1rsujS1TQy-014dYn; Fri, 13
+ Sep 2024 17:17:42 +0200
+Message-ID: <973892ec-d905-4524-a024-d506099290ea@web.de>
+Date: Fri, 13 Sep 2024 17:17:17 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240913121250.2995351-9-quic_srichara@quicinc.com>
+User-Agent: Mozilla Thunderbird
+To: Akashi Takahiro <takahiro.akashi@linaro.org>,
+ Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+ Victor Shih <victor.shih@genesyslogic.com.tw>, linux-mmc@vger.kernel.org,
+ Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, Ben Chuang <benchuanggli@gmail.com>,
+ Daniil Lunev <dlunev@chromium.org>, Greg Tu <greg.tu@genesyslogic.com.tw>,
+ HL.Liu@genesyslogic.com.tw, Lucas Lai <Lucas.Lai@genesyslogic.com.tw>
+References: <20240913102836.6144-18-victorshihgli@gmail.com>
+Subject: Re: [PATCH V22 17/22] mmc: sdhci-uhs2: add irq() and others
+Content-Language: en-GB
+From: Markus Elfring <Markus.Elfring@web.de>
+In-Reply-To: <20240913102836.6144-18-victorshihgli@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:6gIqQ0bFKBlIcJgZ73wRNhc1GcKsyI4tYhuXKDQ/FUmsLFAxV7G
+ mkTccOSDa9lqUwTokxxOfYIkMlspGHR2FN8nUoVBGrNgMW1iw+eAqRkd+2SDkG0dCJsePqh
+ wnGVK87SMDEv+gLB93BKkWclpzVgZ7aR276yk3AdGLwl3SG19hSRLY9gs9KREpQ0vffIajH
+ P9OL/+a5Sg0MaWxhObehA==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:2YAwxqnx5mw=;SMPcOF5Br0swl+g+TLEel6MDUMu
+ 83v9QwbYH4jjEOu+cWk8v3Vu/4QAbGxno8v54qwjMRUyN+xHOpzQyEJ+Dr37Z15GxEd2qqd7b
+ lUdepGSvx0PSfRtts2XdWvvVxJ9Vy6+7D477YiX7h65BhE1kuS7f3RyPdjLZl5pWyFa65s2dG
+ 33BywuGPntxfEWEKOcoSq3glmOuUrb2QTvHnz24t4s/ab4u4L9RVSST64xhkdnsadKPacT8JW
+ kI0hVp+jWY8WD7hit2kZBZWUHa9Copn1JHxRxBco5xhkI3JMB9+V+gYuRf0CWq3KvMk9CbAfC
+ dRRzfFI7qLvpi5I0G3SH2DpAOPc1o9vfaoQ+7COtSOVsNNewVigZ2xGXpUf4k/+C5ZIhf9ci3
+ eHI090EPuEso1s3NSbQ4l2E73FBaBficirzQdmMYFVnlirn1vQb6UIPhwA+A+PLmkRJWPX+Io
+ RY7xL94YpxHfU/tXSzW4kz/b35uP2/PgjC4U2D70Yy0crwrv9C6c4/6NNOCJVY06d09CXM6lu
+ YtiFB7RzfIUxwfo+RU/TjSfxlk6y3lRNTGopIipF8QERi1IhbVDNngrfv9Gv/21Y6gRj8R+9y
+ Pykv/wJBs8994sx6ptXparZzT5P/ZZxo7WF2HDeA4JSxHymbpO4Cg+06oE2cBxy+IqPPXwSxG
+ vRApcpxxgEUzoEcEaW2daox1gieb19vs5VX2B8n82hI41HuhndEJrGY1tplUqa3cLV4lD0nwL
+ 1nJJGu38kvKMCCv0zSeQHMJ3OVfCLqxN7Y/ZfQzcZvw49EEj6lVlvghMgYfFyV1RYMUIaIdXv
+ bXpbuTfS3jwYaPRgogN22N2g==
 
-On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
-> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-> 
-> Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
+=E2=80=A6
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
+=E2=80=A6
+> +static bool sdhci_uhs2_request_done(struct sdhci_host *host)
+> +{
+=E2=80=A6
+> +	int i;
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+=E2=80=A6
+> +	host->mrqs_done[i] =3D NULL;
+> +
+> +	spin_unlock_irqrestore(&host->lock, flags);
+=E2=80=A6
 
-Please name the device rather than the platform. The defconfig affects
-all users, so it should be justified.
+Under which circumstances would you become interested to apply a statement
+like =E2=80=9Cguard(spinlock_irqsave)(&host->lock);=E2=80=9D?
+https://elixir.bootlin.com/linux/v6.11-rc7/source/include/linux/spinlock.h=
+#L572
 
-> 
-> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-
-Usual comment.
-
-> ---
->  arch/arm64/configs/defconfig | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-> index 81ca46e3ab4b..f1043a40846a 100644
-> --- a/arch/arm64/configs/defconfig
-> +++ b/arch/arm64/configs/defconfig
-> @@ -595,6 +595,7 @@ CONFIG_PINCTRL_IMX93=y
->  CONFIG_PINCTRL_MSM=y
->  CONFIG_PINCTRL_IPQ5018=y
->  CONFIG_PINCTRL_IPQ5332=y
-> +CONFIG_PINCTRL_IPQ5424=y
->  CONFIG_PINCTRL_IPQ8074=y
->  CONFIG_PINCTRL_IPQ6018=y
->  CONFIG_PINCTRL_IPQ9574=y
-> @@ -1304,6 +1305,7 @@ CONFIG_IPQ_APSS_6018=y
->  CONFIG_IPQ_APSS_5018=y
->  CONFIG_IPQ_GCC_5018=y
->  CONFIG_IPQ_GCC_5332=y
-> +CONFIG_IPQ_GCC_5424=y
->  CONFIG_IPQ_GCC_6018=y
->  CONFIG_IPQ_GCC_8074=y
->  CONFIG_IPQ_GCC_9574=y
-> -- 
-> 2.34.1
-> 
-
--- 
-With best wishes
-Dmitry
+Regards,
+Markus
