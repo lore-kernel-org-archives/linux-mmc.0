@@ -1,155 +1,229 @@
-Received: from jpms-ob02.noc.sony.co.jp (jpms-ob02.noc.sony.co.jp [211.125.140.165])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f177.google.com (mail-vk1-f177.google.com [209.85.221.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B90981BF80A;
-	Fri, 13 Sep 2024 09:54:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.125.140.165
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BCCFC1C2459;
+	Fri, 13 Sep 2024 10:18:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726221262; cv=none; b=V9/Vp44ylSgm9nJqCEnZvyFkWM1EKCJ2vXSkxU1xzSjov50QGqoXM/51ao6nU1kmZHmti53mYZ1lILcszuT6X37gMuDDFJJ5261mcT09+bfErFEdDOQyHG66Lq7uEBoTPu+Ye1UKQjf8KdZgUgevIwhIKZNFBEqvHvBToKUJFrg=
+	t=1726222699; cv=none; b=f/XvxZ3Zxf6hiA8V8Q7x8CF8nanhw23jPXqPOMzvLj0P/f6MWepGIYvt8kcttSu4EwBf+NAogiGVfMUlflXTMF0Op7Gy1NcJ1W4rMwy/zWWt0LKISRLebBV1JDH5KHtwl4iACd++ALDUpCRkdkc+YpOyE+LEZArB66bGXzGmYA0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726221262; c=relaxed/simple;
-	bh=3NySOhN8tIyTQeVoM1cOrpN+m5XhCOeause4jLVzmlw=;
-	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
-	 Content-Disposition; b=qCH8Lt9Lw2wXh5sUOSAOIpNS7tG3PpqkN9RNRliLif9QPPz3dQJ6rWVB/INinJynh3oJi9QMlXdpLpfIsBifN79KgaIS7OwT+dHrcPRJTOhomNHCCY3dPYEkwQoW7r2l7ot/KnBx8WitoW3RpvJ/AHHyVA/vBhwpxWcOty0nNuI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com; spf=pass smtp.mailfrom=sony.com; dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b=Pb/kDjCT; arc=none smtp.client-ip=211.125.140.165
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sony.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sony.com
+	s=arc-20240116; t=1726222699; c=relaxed/simple;
+	bh=H86TmwR5hlm4agsriix5lyIe7ekoAvAlzPGik5tNXCM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=US2J0/OpuVsE0FOnHkFX4+1AQApIxOPk5U/RN/uNU/QZ4QVvM27sencyUurGjmT7oJqeEA3Y2Q1tqVQeOayLEKyglg3iTlHaW5Sf7lDR/GBqy9lPM1ByFUoMuNsytKrDKtwItmnaIyDLJg9rPohY6rmHOqTDoiiNiW0VYT4kJ4I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=U9ch+CeR; arc=none smtp.client-ip=209.85.221.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sony.com header.i=@sony.com header.b="Pb/kDjCT"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="U9ch+CeR"
+Received: by mail-vk1-f177.google.com with SMTP id 71dfb90a1353d-50108b3749aso203365e0c.2;
+        Fri, 13 Sep 2024 03:18:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=sony.com; s=s1jp; t=1726221260; x=1757757260;
-  h=date:from:to:cc:subject:message-id:mime-version;
-  bh=XfQN1XjkZ04wMNvQJ2XtvKDX88UIqJceQHOlUBeObdM=;
-  b=Pb/kDjCTJgbo/DvL1CSGDAuFo/XFwhQkEVdrF95zUUIg4wslWXKABF5W
-   EJ6SytzHyEM/VhbyAhwLd9zSWAeHLKKvo67JH3yB9zGbgu3aJmjWkl9wc
-   bJXJjYbWilKLbJCow6ynY8kXhOho+z7KZYQ4eb2awCUy9l4EfincKRxoc
-   i8JIsEDrttCXwzludVLayjjXDYhu0XSkau8NtdimcIWzGj8cbTW+8Cm9z
-   KElReNsUfjbwtkb4gBZed8NShlj66fFE9iUg2e4E7BruNPsH5u8i0gX/X
-   NZBHfu1M8bFsThtKlwjvBWiuunGNKgMzWZlwn8VNVEqI0pCVTvRA9Psyi
-   Q==;
-Received: from unknown (HELO jpmta-ob02.noc.sony.co.jp) ([IPv6:2001:cf8:0:6e7::7])
-  by jpms-ob02.noc.sony.co.jp with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Sep 2024 18:44:11 +0900
-X-IronPort-AV: E=Sophos;i="6.10,225,1719846000"; 
-   d="scan'208";a="435457486"
-Received: from unknown (HELO LXJ00013846) ([IPv6:2001:cf8:1:1611:9e7b:efff:fe46:27de])
-  by jpmta-ob02.noc.sony.co.jp with ESMTP; 13 Sep 2024 18:44:10 +0900
-Date: Fri, 13 Sep 2024 18:44:17 +0900
-From: Keita Aihara <keita.aihara@sony.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shingo.Takeuchi@sony.com, Masaya.Takahashi@sony.com,
-	keita.aihara@sony.com, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [RFC PATCH] mmc: core: Add SD card quirk for broken poweroff
- notification
-Message-ID: <20240913094417.GA4191647@sony.com>
+        d=gmail.com; s=20230601; t=1726222696; x=1726827496; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ahw9DFRn9vWzH+ctFf8kXiCPP1Wa2CPdWOklcIMfD8Q=;
+        b=U9ch+CeRVrTRcND99OEVrZSv7dRFmZopoYUGEk1MfCFvZ8RunDErekCXOfvmYUgxHW
+         bIk57zNSQQwUzUhD6rxnMWFAAKFOTR2a8cDZbYruejAJECWSoFjfHB7N9eC7uR6uSIdu
+         T4IqTIkGDtcpxp95mEgQlTWd8CkRAXZmnFhVZKSZF092CjyZ8YfdmWPVooN9BBPq/Bs7
+         S0qSgwFgBWgDFfFCjypjtjyyNft5f2+eRhS1SSy/EbiGgmgviXsOISMbOJ2NgUe699xs
+         Kxs4nFm7zq/9WWMrfzQXRJGnR4IktCHmfLGdlTw7z+BnNQQ/la07ZiN4I7AkSYGlqIWR
+         L+kg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726222696; x=1726827496;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ahw9DFRn9vWzH+ctFf8kXiCPP1Wa2CPdWOklcIMfD8Q=;
+        b=cvTiRaZN62T7ho0AnrjZA8arCABXQ5gu/QzGz2+0vhn5I6/SxjvOssDIG+73Ga1+ma
+         THu8R7NdwHf4CfY+To1mYvvb1o7/i7iu/zxn93K7IIf6TxC4R6UwQXfINqcZ98X0lr+X
+         phoQjRW10o8eIRirrO3u2lGB8wPqDyff6IU0vWlULyt03/8K3BlNysWqReqEYYPgaLYM
+         xdvljL3DBbWet6PMX9/cmEay2hXZlEjkh48CPLj3b/ca75Kb1dvzuiQTWKbEU+3mNjfi
+         w1YsURAMUBODyyejmSZJ8hzdX09ST9TckMUC+JwoY4qFpghdE+iu5gYSlMYpubq9WfCP
+         pEKA==
+X-Forwarded-Encrypted: i=1; AJvYcCUobdPtZm+mUWQ0fH/RqGN6d4qxQQHZAMKyQxvgUPgebh2lefL1AQaBi0UnTTyzbngtlgUnFAw7cMbsYjo=@vger.kernel.org, AJvYcCWJAcIflZkuigvLFkWJH+3TiN7YuWmkj7L3xenRcrE74PW8GPJCQcodP9tZv6LYPyhoIru7L9jUaZQn@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx745fvdWSVnZC9Vsu/HVnZeO8uOoeZckPNcjbqaLAVev8BKhau
+	nUjMccNH3eB7T9TTM+s2LV8/O/m7DPynOUo+6IlQUro7h9Mj4/fxIhHkSE1/MP2vEeQGCeFkLA8
+	8AsKDJ1Vpy5DIhMgk4efVZWYd35M=
+X-Google-Smtp-Source: AGHT+IH7eRwb9LItLEud7I/9W0DqQXv6KuHd8imhcTkH9PLW3IJF9Cp9ER5M6ubFW0Dvs85r38aKdghiGcL2LgaHAOs=
+X-Received: by 2002:a05:6122:3690:b0:501:3b5:ae01 with SMTP id
+ 71dfb90a1353d-50344b91d4bmr1134880e0c.5.1726222696391; Fri, 13 Sep 2024
+ 03:18:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20240906102049.7059-1-victorshihgli@gmail.com>
+ <20240906102049.7059-10-victorshihgli@gmail.com> <5ab812d6-da62-4337-8495-3a906c60a2a0@intel.com>
+In-Reply-To: <5ab812d6-da62-4337-8495-3a906c60a2a0@intel.com>
+From: Victor Shih <victorshihgli@gmail.com>
+Date: Fri, 13 Sep 2024 18:18:00 +0800
+Message-ID: <CAK00qKADqSd3UO0axYuCoNgyqEVjgRv3ozU4u5Cz2n=9dwsBeg@mail.gmail.com>
+Subject: Re: [PATCH V21 09/22] mmc: sdhci: add UHS-II module and add a kernel configuration
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	Lucas.Lai@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
+	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
+	AKASHI Takahiro <takahiro.akashi@linaro.org>, Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-GIGASTONE Gaming Plus microSD cards manufactured on 02/2022 report that
-they support poweroff notification and cache, but they are not working
-correctly.
+On Mon, Sep 9, 2024 at 4:06=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.c=
+om> wrote:
+>
+> On 6/09/24 13:20, Victor Shih wrote:
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > This patch adds sdhci-uhs2.c as a module for UHS-II support.
+> > This is a skeleton for further development in this patch series.
+> >
+> > This kernel configuration, CONFIG_MMC_SDHCI_UHS2, will be used
+> > in the following commits to indicate UHS-II specific code in sdhci
+> > controllers.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>
+> Doesn't compile:
+>
+> drivers/mmc/host/sdhci-uhs2.c:28:12: error: =E2=80=98sdhci_uhs2_host_ops_=
+init=E2=80=99 defined but not used [-Werror=3Dunused-function]
+>    28 | static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+>       |            ^~~~~~~~~~~~~~~~~~~~~~~~
+> cc1: all warnings being treated as errors
+> make[5]: *** [scripts/Makefile.build:244: drivers/mmc/host/sdhci-uhs2.o] =
+Error 1
+> make[4]: *** [scripts/Makefile.build:485: drivers/mmc/host] Error 2
+> make[3]: *** [scripts/Makefile.build:485: drivers/mmc] Error 2
+> make[3]: *** Waiting for unfinished jobs....
+> make[2]: *** [scripts/Makefile.build:485: drivers] Error 2
+> make[1]: *** [/home/ahunter/git/review/Makefile:1925: .] Error 2
+> make: *** [Makefile:224: __sub-make] Error 2
+>
 
-Flush Cache bit never gets cleared in sd_flush_cache() and Poweroff
-Notification Ready bit also never gets set to 1 within 1 second from the
-end of busy of CMD49 in sd_poweroff_notify().
+Hi, Adrian
 
-This leads to I/O error and runtime PM error state.
+I will correct this issue in the next version.
 
-I observed that the same card manufactured on 01/2024 works as expected.
+Thanks, Victor Shih
 
-This problem seems similar to the Kingston cards fixed with
-commit c467c8f08185 ("mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston
-Canvas Go Plus from 11/2019") and should be handled using quirks.
-
-CID for the problematic card is here.
-12345641535443002000000145016200
-
-Manufacturer ID is 0x12 and defined as CID_MANFID_GIGASTONE as of now,
-but would like comments on what naming is appropriate because MID list
-is not public and not sure it's right.
-
-Signed-off-by: Keita Aihara <keita.aihara@sony.com>
----
- drivers/mmc/core/card.h   | 7 +++++++
- drivers/mmc/core/quirks.h | 9 +++++++++
- drivers/mmc/core/sd.c     | 2 +-
- include/linux/mmc/card.h  | 1 +
- 4 files changed, 18 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index b7754a1b8d97..8476754b1b17 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -82,6 +82,7 @@ struct mmc_fixup {
- #define CID_MANFID_SANDISK_SD   0x3
- #define CID_MANFID_ATP          0x9
- #define CID_MANFID_TOSHIBA      0x11
-+#define CID_MANFID_GIGASTONE    0x12
- #define CID_MANFID_MICRON       0x13
- #define CID_MANFID_SAMSUNG      0x15
- #define CID_MANFID_APACER       0x27
-@@ -284,4 +285,10 @@ static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
- {
- 	return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
- }
-+
-+static inline int mmc_card_broken_sd_poweroff_notify(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY;
-+}
-+
- #endif
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 92905fc46436..89b512905be1 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -25,6 +25,15 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
- 		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
- 		   MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
- 
-+	/*
-+	 * GIGASTONE Gaming Plus microSD cards manufactured on 02/2022 never
-+	 * clear Flush Cache bit and set Poweroff Notification Ready bit.
-+	 */
-+	_FIXUP_EXT("ASTC", CID_MANFID_GIGASTONE, 0x3456, 2022, 2,
-+		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
-+		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
-+		   EXT_CSD_REV_ANY),
-+
- 	END_FIXUP
- };
- 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index ee37ad14e79e..0ec550ad5651 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1118,7 +1118,7 @@ static int sd_parse_ext_reg_power(struct mmc_card *card, u8 fno, u8 page,
- 	card->ext_power.rev = reg_buf[0] & 0xf;
- 
- 	/* Power Off Notification support at bit 4. */
--	if (reg_buf[1] & BIT(4))
-+	if ((reg_buf[1] & BIT(4)) && !mmc_card_broken_sd_poweroff_notify(card))
- 		card->ext_power.feature_support |= SD_EXT_POWER_OFF_NOTIFY;
- 
- 	/* Power Sustenance support at bit 5. */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index f34407cc2788..543446392776 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -294,6 +294,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
- #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
- #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
-+#define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
- 
- 	bool			written_flag;	/* Indicates eMMC has been written since power on */
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
--- 
-2.46.0
-
+> > ---
+> >
+> > Updates in V9:
+> >  - Modify the commit message.
+> >
+> > Updates in V8:
+> >  - Modify MODULE_LICENSE from "GPL v2" to "GPL".
+> >
+> > Updates in V6:
+> >  - Merage V5 of patch[7] and patch[9] in to V6 of patch[8].
+> >
+> > ---
+> >
+> >  drivers/mmc/host/Kconfig      |  9 +++++++
+> >  drivers/mmc/host/Makefile     |  1 +
+> >  drivers/mmc/host/sdhci-uhs2.c | 46 +++++++++++++++++++++++++++++++++++
+> >  3 files changed, 56 insertions(+)
+> >  create mode 100644 drivers/mmc/host/sdhci-uhs2.c
+> >
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index 7199cb0bd0b9..f636af8a98df 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -98,6 +98,15 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+> >
+> >         This is the case for the Nintendo Wii SDHCI.
+> >
+> > +config MMC_SDHCI_UHS2
+> > +     tristate "UHS2 support on SDHCI controller"
+> > +     depends on MMC_SDHCI
+> > +     help
+> > +       This option is selected by SDHCI controller drivers that want t=
+o
+> > +       support UHS2-capable devices.
+> > +
+> > +       If you have a controller with this feature, say Y or M here.
+> > +
+> >  config MMC_SDHCI_PCI
+> >       tristate "SDHCI support on PCI bus"
+> >       depends on MMC_SDHCI && PCI
+> > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> > index 3ccffebbe59b..5147467ec825 100644
+> > --- a/drivers/mmc/host/Makefile
+> > +++ b/drivers/mmc/host/Makefile
+> > @@ -11,6 +11,7 @@ obj-$(CONFIG_MMC_PXA)               +=3D pxamci.o
+> >  obj-$(CONFIG_MMC_MXC)                +=3D mxcmmc.o
+> >  obj-$(CONFIG_MMC_MXS)                +=3D mxs-mmc.o
+> >  obj-$(CONFIG_MMC_SDHCI)              +=3D sdhci.o
+> > +obj-$(CONFIG_MMC_SDHCI_UHS2) +=3D sdhci-uhs2.o
+> >  obj-$(CONFIG_MMC_SDHCI_PCI)  +=3D sdhci-pci.o
+> >  sdhci-pci-y                  +=3D sdhci-pci-core.o sdhci-pci-o2micro.o=
+ sdhci-pci-arasan.o \
+> >                                  sdhci-pci-dwc-mshc.o sdhci-pci-gli.o
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
+2.c
+> > new file mode 100644
+> > index 000000000000..608f8ad5aaed
+> > --- /dev/null
+> > +++ b/drivers/mmc/host/sdhci-uhs2.c
+> > @@ -0,0 +1,46 @@
+> > +// SPDX-License-Identifier: GPL-2.0-or-later
+> > +/*
+> > + *  linux/drivers/mmc/host/sdhci_uhs2.c - Secure Digital Host Controll=
+er
+> > + *  Interface driver
+> > + *
+> > + *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
+> > + *  Copyright (C) 2020 Genesys Logic, Inc.
+> > + *  Authors: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > + *  Copyright (C) 2020 Linaro Limited
+> > + *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > + */
+> > +
+> > +#include <linux/module.h>
+> > +
+> > +#include "sdhci.h"
+> > +#include "sdhci-uhs2.h"
+> > +
+> > +#define DRIVER_NAME "sdhci_uhs2"
+> > +#define DBG(f, x...) \
+> > +     pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
+> > +
+> > +/*********************************************************************=
+********\
+> > + *                                                                    =
+       *
+> > + * Driver init/exit                                                   =
+       *
+> > + *                                                                    =
+       *
+> > +\*********************************************************************=
+********/
+> > +
+> > +static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+> > +{
+> > +     return 0;
+> > +}
+> > +
+> > +static int __init sdhci_uhs2_mod_init(void)
+> > +{
+> > +     return 0;
+> > +}
+> > +module_init(sdhci_uhs2_mod_init);
+> > +
+> > +static void __exit sdhci_uhs2_mod_exit(void)
+> > +{
+> > +}
+> > +module_exit(sdhci_uhs2_mod_exit);
+> > +
+> > +MODULE_AUTHOR("Intel, Genesys Logic, Linaro");
+> > +MODULE_DESCRIPTION("MMC UHS-II Support");
+> > +MODULE_LICENSE("GPL");
+>
