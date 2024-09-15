@@ -1,151 +1,118 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 92B741482F3;
-	Sat, 14 Sep 2024 11:52:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F74F11CA0;
+	Sun, 15 Sep 2024 04:25:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726314765; cv=none; b=ayPmPWdKgE8uApKBoMiGOTpHJj/RkgUbXEHVpcgzw3OLJY5VEJnG2p4vx+jwYXLSLPSclxxZbSUH2DNrQll2TaAwH4nJmQh+nEU2NMbDA4gHJUE5yxpl51/ZENmeyfWC5WIAWSne7uc6EXsmnAV8KC67p6IqmQW1haccBYJjEhs=
+	t=1726374314; cv=none; b=EiNQcQqZGpdTupblH69W00wjaRVVar8yhVJdr9tIsJVa0NaN3xxJfz24sdYkpwxR6UQ7NYFrquDwXtRpYzEFMR2txmZM+0TgVj2nYl1RjHhTj+/3lc5jb40MJHbv1teoWNlzcYJ/UF5HNJYCHBKj8KxNYTw2Y84V30dehj3R96E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726314765; c=relaxed/simple;
-	bh=PseeGydaW7P7gcDIexeJPYFC9+KYnfOcDOJjNIwz30g=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=B+Yjm8DhJ6LRDS5Rz3mOXQ9pPArqJFRRRMOWdMyqJPZrsDY8cfnB/veqHvV5l+Bfy6iOXFzeYEvoh1v/HrVvsFohrg4lAD2dheFA9UPMWNuDG71GsFRGLVaRlaTarj1pTlChpZC5CzbGUJbTEpLS2YWRwThYedwpKj+RYlkIoGc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=JlJIyRWL; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	s=arc-20240116; t=1726374314; c=relaxed/simple;
+	bh=Hs3A/0NgMdrdsVPIXyw3hBiawKKXZLwpEf6kATB+HVg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=OXiMROAxODCBvTlydI1IP+iqx+mYLyEDJWIEAvoJBtgc66w0zZC+r3TgOWulT7ro1Uen7O9/c1NPSbDYT+9zb8fQi9qfviYV1bFR5lynOx9mZk3HIVB8IpgO9wWR52vUGj65evExJZjePd/up7vWCa5fdFILIhA+jZhn/zEkbtU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=amkJhq5b; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="JlJIyRWL"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=JMlYom8FcCA2dWJkTLSCkHY6YrKnhlwr8nNq9Iy+Jik=; b=JlJIyRWLqr5n+VG1fxF1P4qHWc
-	tLrfVEw4jDFiCMDfrKcbLa0gF0LOiKZxmDmvCi2uYck1Wy2ZRz4eUKrdx44pmSSmw7ukc6oMHCuHd
-	WFiMEg6zWT1e+mGl4F4806ujcawN5w+I6ifuVqDYhAD3pHuvraC72dIY7IoKnxDjRWaj07JQcU9EJ
-	QIAyc4BsJjzJsIZFpvEQvRgBUBGKiw0kwJoqDl47Z8UmQRaVBI+ioVw/hy2fwF/V5pnZCffdWa/EF
-	HDE+LF6qxhlCrmgu5xhhm8nAc43OH9bSJioM5CtoHGEPodM2EAEwlQzCUf5VunTdaLqpcnma0e0Yh
-	9VyZv2oA==;
-Received: from i53875af6.versanet.de ([83.135.90.246] helo=diego.localnet)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1spRKK-0003Qy-U9; Sat, 14 Sep 2024 13:52:32 +0200
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-To: Kever Yang <kever.yang@rock-chips.com>
-Cc: linux-rockchip@lists.infradead.org,
- Kever Yang <kever.yang@rock-chips.com>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org
-Subject:
- Re: [PATCH] mmc: dw_mmc: rockchip: Keep controller working for card detect
-Date: Sat, 14 Sep 2024 13:52:32 +0200
-Message-ID: <4920950.GXAFRqVoOG@diego>
-In-Reply-To:
- <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
-References:
- <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="amkJhq5b"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48F40F18024744;
+	Sun, 15 Sep 2024 04:24:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	1Di0Oqdi4xGJgoL6vNrrVyWlC/CcTvosN/PQueUb9K8=; b=amkJhq5bbK41F5hj
+	wCdJVIXbdBku5mFAUvKq1ZvjUBux2X0pTe1pHfQJnXNcNPArMnK8wk96Outuq4Rm
+	9EahMgreag/zyAKNceMWspsWi+k5uI2QjLgChL2z4U/+NpIS1inwXvba67p3zBsh
+	b9JIto8jvu0xCgWqY40urgdD/zneQi9fm3Ost00g8gmTabDSyFnzaEkWgCEnJ0El
+	tWhXkrH0ZL0y9G39q5f++mD6dB5Zreq1fKN6ArzCUxJRv/b0zKb/pVYnsld/g5lK
+	xmXX47ZAsPJ/1jOgcdP6s1kR/Q0VOTyutV9z2gelfqHnNqdVRfVYeYiWbzK1tNAQ
+	Ir1OTw==
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41n4hf9dd4-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 15 Sep 2024 04:24:40 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA03.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48F4OdNG016839
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 15 Sep 2024 04:24:39 GMT
+Received: from [10.50.62.96] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Sat, 14 Sep
+ 2024 21:24:28 -0700
+Message-ID: <306acd78-cb7d-4fd2-9bdd-540426bac50d@quicinc.com>
+Date: Sun, 15 Sep 2024 09:54:29 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 4/8] pinctrl: qcom: Introduce IPQ5424 TLMM driver
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
+        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
+        <neil.armstrong@linaro.org>, <linux-arm-msm@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <quic_varada@quicinc.com>
+References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
+ <20240913121250.2995351-5-quic_srichara@quicinc.com>
+ <rp6hhamsqwtneyfrf6lwrchd4p35blaqzgiq66wfkn66xofbar@7dgexti4qs4u>
+Content-Language: en-US
+From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <rp6hhamsqwtneyfrf6lwrchd4p35blaqzgiq66wfkn66xofbar@7dgexti4qs4u>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: vah4GJY3KHbLBr0dESlP-hYGzFbTr_1K
+X-Proofpoint-ORIG-GUID: vah4GJY3KHbLBr0dESlP-hYGzFbTr_1K
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ clxscore=1015 phishscore=0 malwarescore=0 mlxlogscore=777 mlxscore=0
+ impostorscore=0 adultscore=0 suspectscore=0 lowpriorityscore=0 spamscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2408220000 definitions=main-2409150030
 
-Am Donnerstag, 12. September 2024, 09:26:14 CEST schrieb Kever Yang:
-> In order to make the SD card hotplug working we need the card detect
-> function logic inside the controller always working. The runtime PM will
-> gate the clock and the power domain, which stops controller working when
-> no data transfer happen.
+
+
+On 9/13/2024 6:09 PM, Dmitry Baryshkov wrote:
+> On Fri, Sep 13, 2024 at 05:42:46PM GMT, Sricharan R wrote:
+>> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>>
+>> The IPQ5424 SoC comes with a TLMM block, like all other Qualcomm
+>> platforms, so add a driver for it.
+>>
+>> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > 
-> So lets skip enable runtime PM when the card needs to detected by the
-> controller and the card is removable.
+> The order of trailers is strange. It lists you as an author, but then
+> Varadarajan's SoB comes first and yours (authors) comes afterwards. If
+> it was a joing effort, please use Co-developed-by tag in addition to SoB.
 > 
-> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
+  ok, will add the co-developed.
 
-So for the change itself this looks good, i.e. it fixes an issue for baords relying
-on the on-chip-card-detect.
-
-
-But for boards doing that, the controller will be running _all the time_
-even if there is never any card inserted.
-
-So relying on the on-soc card-detect will effectively increase the power-
-consumption of the board - even it it'll never use any sd-card?
-
-> ---
+>> ---
+>>   drivers/pinctrl/qcom/Kconfig.msm       |   9 +
+>>   drivers/pinctrl/qcom/Makefile          |   1 +
+>>   drivers/pinctrl/qcom/pinctrl-ipq5424.c | 792 +++++++++++++++++++++++++
+>>   3 files changed, 802 insertions(+)
+>>   create mode 100644 drivers/pinctrl/qcom/pinctrl-ipq5424.c
 > 
->  drivers/mmc/host/dw_mmc-rockchip.c | 23 +++++++++++++++++------
->  1 file changed, 17 insertions(+), 6 deletions(-)
+> The rest LGTM
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index b07190ba4b7a..df91205f9cd3 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -345,28 +345,39 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
->  	const struct dw_mci_drv_data *drv_data;
->  	const struct of_device_id *match;
->  	int ret;
-> +	bool use_rpm = true;
->  
->  	if (!pdev->dev.of_node)
->  		return -ENODEV;
->  
-> +	if (!device_property_read_bool(&pdev->dev, "non-removable") &&
-
-It would be nice to add a comment here about the fact that this will
-disable power-management for the controller.
-
-Also shouldn't non-removable already work, making the case above not
-necessary?
-
-
 Thanks
-Heiko
 
-> +	     !device_property_read_bool(&pdev->dev, "cd-gpios"))
-> +		use_rpm = false;
-> +
->  	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
->  	drv_data = match->data;
->  
->  	pm_runtime_get_noresume(&pdev->dev);
->  	pm_runtime_set_active(&pdev->dev);
-> -	pm_runtime_enable(&pdev->dev);
-> -	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> -	pm_runtime_use_autosuspend(&pdev->dev);
-> +
-> +	if (use_rpm) {
-> +		pm_runtime_enable(&pdev->dev);
-> +		pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +		pm_runtime_use_autosuspend(&pdev->dev);
-> +	}
->  
->  	ret = dw_mci_pltfm_register(pdev, drv_data);
->  	if (ret) {
-> -		pm_runtime_disable(&pdev->dev);
-> -		pm_runtime_set_suspended(&pdev->dev);
-> +		if (use_rpm) {
-> +			pm_runtime_disable(&pdev->dev);
-> +			pm_runtime_set_suspended(&pdev->dev);
-> +		}
->  		pm_runtime_put_noidle(&pdev->dev);
->  		return ret;
->  	}
->  
-> -	pm_runtime_put_autosuspend(&pdev->dev);
-> +	if (use_rpm)
-> +		pm_runtime_put_autosuspend(&pdev->dev);
->  
->  	return 0;
->  }
-> 
-
-
-
-
+Regards,
+  Sricharan
