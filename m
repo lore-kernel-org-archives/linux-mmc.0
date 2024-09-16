@@ -1,64 +1,65 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 031AB149DF7;
-	Mon, 16 Sep 2024 09:03:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F632157E61
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Sep 2024 14:53:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726477418; cv=none; b=r1pDXRyp7bzTaL+kPz2COtKRm3t4N9lPY+YtBDtRgJpHI3SSktagI/AdaNZUkt9N3lspqjEL9vRImCKC0YSNytBBaN2S0nKffwlC2pOaQalRamVdk88fTziX9Anhfh73AbmVbeihp6a/7/RQO1dviDUptrZ4zXqppwq3lx28lRY=
+	t=1726498438; cv=none; b=CjzvUTIsaUsZrfkWbQnZmoRbLfkryhHnMbMF0o3ggKW0J566KehUEQWp1/X22HoJ5XwPw8nviYbbvMMkUzumEYosbAXAN615TOpjQVL0E0A5sMqkqy5axGwcck2jIOFlGYhNSggyWE8AvCn5sQJg7/7DFUmhRV5wAEoQwo/u83w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726477418; c=relaxed/simple;
-	bh=yJDaWyE+xctHez5TzRUkNngyP/Cv5T8JPeZ4t0s/EYE=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=n+Dm3GO1m+s2LWd+sD4HzctgoaBKLPs+wDdFsMKNnUqnKOwBCF1gqbaBceYQPTi9pj0rjAv3pQ3GKgw3XSCl/lfdG0jWDZHqOlkuRNxwQRt2AILPdAKCSr6oeapGs+B2Ao4dEws+6AgbiUgYOgNUuy/EnGblOWg9aWaWT/HjGNo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=iCNePA7U; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1726498438; c=relaxed/simple;
+	bh=Mjmos+lFXDQrHLZGm3QtPep32MMtVA3+jp+sLiL6FV0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=b03EY0njLSr0UFldxntmje2vLKka2iGUB7JFx5/99rTgIFQP9spBqvORddMS+cvMgU75wNiu4/u5CWu4+X/9PltnowLjivxJAnhxsBJwr9OQDuq+qxY7ted/cPkbhIA4rXTdHa6kPYqOL9gCkwBUwETBjsYl0391BujLF/4sdaE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PvMcrIpm; arc=none smtp.client-ip=209.85.167.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="iCNePA7U"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48G0Qr2N022323;
-	Mon, 16 Sep 2024 08:58:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	ucdUq9BZoE+qA79oygzpCCBfuQCsCjujEnF8FPE5/lE=; b=iCNePA7U5HBVUseO
-	wkNLCvKZXI67FN8f87SNBFe3ahZC30u5xLCoVuZhyF8d2NHDNRadOprjpJRWW+jc
-	nscl532E5xtuENTC1MnhyrZmdjVxFjoh18oHUOuPMZzWAKHoh5TzbSBX2Db6VXvx
-	p7fB++7Mm6fE2faBM1C9+YP/m37yrt5rM6urJqNGmwYv5WZ3gbGtzBwyrR6PKAsD
-	zeElla9acS6ReUi5BanifXmLpZPwnLrtS0Bsy+5WOLrAV1ztOt4b00aH00B3Y8Hc
-	diWHupRHEwpG3WizpSIGnSTeXbZZdg+8j08q1vA24pGOjGspjsipOq12H5B3uhRY
-	ymWOMg==
-Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41n4gcudr5-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 16 Sep 2024 08:58:18 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48G8wHET005029
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 16 Sep 2024 08:58:17 GMT
-Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
- nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Mon, 16 Sep 2024 01:58:10 -0700
-From: Md Sadre Alam <quic_mdalam@quicinc.com>
-To: <axboe@kernel.dk>, <song@kernel.org>, <yukuai3@huawei.com>,
-        <agk@redhat.com>, <snitzer@kernel.org>, <mpatocka@redhat.com>,
-        <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
-        <ritesh.list@gmail.com>, <ulf.hansson@linaro.org>,
-        <andersson@kernel.org>, <konradybcio@kernel.org>, <kees@kernel.org>,
-        <gustavoars@kernel.org>, <linux-block@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-raid@vger.kernel.org>,
-        <dm-devel@lists.linux.dev>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-hardening@vger.kernel.org>
-CC: <quic_srichara@quicinc.com>, <quic_varada@quicinc.com>,
-        <quic_mdalam@quicinc.com>
-Subject: [PATCH v2 2/3] mmc: cqhci: Add additional algo mode for inline encryption
-Date: Mon, 16 Sep 2024 14:27:40 +0530
-Message-ID: <20240916085741.1636554-3-quic_mdalam@quicinc.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PvMcrIpm"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5365b6bd901so5075192e87.2
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Sep 2024 07:53:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1726498434; x=1727103234; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=hYQsqWRG/KA6HCUSesfPALyKBlmIx+m+eouyHIxt56E=;
+        b=PvMcrIpmoQpF7GhJVWx/9ze0RTgNVvhIuObVpAnFJQmHPPUtUX3JB8faXpQJvmmM+d
+         F6/smaXp20Snv3I1KC0mGzDtWSRsN94j3GwKyVBXh2/ME93z6q9qyo0WHAKC2FtfQjkJ
+         NSt4rK7L++aFj1Cr7bwUgBq7vcDyKZQ0imeDXgA0DZg3lOpPWBFFpf2eft0Vb514gOn5
+         9WE67QwEts4bnL6/qxJkltV+jdmnG8kzgKEA+SXpIdjFfP2By+ffi2F22dcdxpQchN54
+         Zc57DAtX3FgAyUCSeEQebV2hCZR4V8SNwCPCBINK7wG8nZbxK33P9FzFmh3iYzpcaRXf
+         UBWA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726498434; x=1727103234;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hYQsqWRG/KA6HCUSesfPALyKBlmIx+m+eouyHIxt56E=;
+        b=tXUSVFvXq4fc/KcK3M6JUHBFT5pDm6OOxlob3lOdRza8d3tlhaGr+2JLvIQ4UKMky3
+         ANU3NyYFEfh3D7K9GeO5s7MISPIWDX2//uHmzMGfl0IcB51V7d2SMCdd0RAo56gLKEEa
+         Ov1w+8lXvkVd7yQFtY28NXfuyBXStzSOHzhFMp06fkG6YuKikzBpMMMxtM268Gzx3YZ5
+         /Ag0sQDOCx9/NtRMGMoh4kI3oGR9lFGhsKzMKnAmUWBWrTL99krLQBULbYKxPCfnEoK3
+         QMd6O0ycEg/LsWkex5FIaPAOryvZZpTPJDuWYTAFgmYPzwuLSs4z9CrK9MTUHWzhMUjD
+         Yrpg==
+X-Forwarded-Encrypted: i=1; AJvYcCWathxEZK3GDNEoUaS/1N/f5Me2cfgPr5vKT5ZbNcPBEP5od37b/itx43gcC1yZ40jK9hoQAmkut/Y=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxY8wMmBdDDPTILdf4QSxJHE6PwmzZqpvl/JWruyZDjUBFfbBeB
+	RP6BazbePS388Yemz0CMncThts/xwXhIqC0HgbwcXI6OkynuFWWjZZBSXttaKuZukGRAuOpUkDo
+	y
+X-Google-Smtp-Source: AGHT+IG+u7aKNdd/Yo34zgdyrEIYgD/ChDvyvccnDp+AHTvIcGB+POpqFRdpI5r8Jx5MDpavLi9QfQ==
+X-Received: by 2002:a05:6512:1052:b0:533:508f:edf1 with SMTP id 2adb3069b0e04-53678ff4e66mr6943853e87.60.1726498434345;
+        Mon, 16 Sep 2024 07:53:54 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5368704688bsm902054e87.57.2024.09.16.07.53.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Sep 2024 07:53:53 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for v6.12
+Date: Mon, 16 Sep 2024 16:53:52 +0200
+Message-Id: <20240916145352.388340-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
-References: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -66,67 +67,195 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: FNt9voizb3GxUjTkHeCzJhGcvKywj3kB
-X-Proofpoint-GUID: FNt9voizb3GxUjTkHeCzJhGcvKywj3kB
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
- bulkscore=0 clxscore=1015 spamscore=0 adultscore=0 lowpriorityscore=0
- mlxlogscore=999 impostorscore=0 mlxscore=0 priorityscore=1501 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2408220000
- definitions=main-2409160056
 
-Add support for AES-XTS-256, AES-CBC-128 and AES-CBC-256 in
-cqhci_crypto_algs for inline encryption.
+Hi Linus,
 
-Signed-off-by: Md Sadre Alam <quic_mdalam@quicinc.com>
----
+Here's the pull-request for MMC v6.12.
 
-Change in [v2]
+Please note, this pull-request also introduces a new subsystem for so called
+Replay Protected Memory Block (RPMB) in drivers/misc/. The first provider
+that implements RPMB support is the MMC subsystem for eMMC cards, while the
+consumer is the tee/optee subsystem.
 
-* No change
+More details are available in the commit message that introduces the RPMB
+subsystem along with the usual highlights for MMC in the signed tag.
 
-Change in [v1]
+Please pull this in!
 
-* Added alog mode AES-XTS-256, AES-CBC-128, AES-CBC-256 in 
-  cqhci
+Kind regards
+Ulf Hansson
 
- drivers/mmc/host/cqhci-crypto.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+The following changes since commit aea62c744a9ae2a8247c54ec42138405216414da:
 
-diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
-index d5f4b6972f63..85ab7bb87886 100644
---- a/drivers/mmc/host/cqhci-crypto.c
-+++ b/drivers/mmc/host/cqhci-crypto.c
-@@ -16,10 +16,22 @@ static const struct cqhci_crypto_alg_entry {
- 	enum cqhci_crypto_alg alg;
- 	enum cqhci_crypto_key_size key_size;
- } cqhci_crypto_algs[BLK_ENCRYPTION_MODE_MAX] = {
-+	[BLK_ENCRYPTION_MODE_AES_128_XTS] = {
-+		.alg = CQHCI_CRYPTO_ALG_AES_XTS,
-+		.key_size = CQHCI_CRYPTO_KEY_SIZE_128,
-+	},
- 	[BLK_ENCRYPTION_MODE_AES_256_XTS] = {
- 		.alg = CQHCI_CRYPTO_ALG_AES_XTS,
- 		.key_size = CQHCI_CRYPTO_KEY_SIZE_256,
- 	},
-+	[BLK_ENCRYPTION_MODE_AES_128_CBC] = {
-+		.alg = CQHCI_CRYPTO_ALG_BITLOCKER_AES_CBC,
-+		.key_size = CQHCI_CRYPTO_KEY_SIZE_128,
-+	},
-+	[BLK_ENCRYPTION_MODE_AES_256_CBC] = {
-+		.alg = CQHCI_CRYPTO_ALG_BITLOCKER_AES_CBC,
-+		.key_size = CQHCI_CRYPTO_KEY_SIZE_256,
-+	},
- };
- 
- static inline struct cqhci_host *
--- 
-2.34.1
+  mmc: cqhci: Fix checking of CQHCI_HALT state (2024-09-03 14:20:51 +0200)
 
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.12
+
+for you to fetch changes up to cd3689b6772fbc1a4513934a5204fd2fa5b4426b:
+
+  mmc: core: Use dev_err_probe for deferred regulators (2024-09-13 14:09:29 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Add documentation for the mmc-test driver
+ - Register the eMMC RPMB partition with the RPMB subsystem
+ - Some various cleanups
+
+MMC host:
+ - dw_mmc-rockchip: Add support for the RK3576 variant
+ - renesas_sdhi: Add support for the RZ/V2H(P) variant
+ - sdhci_am654: Add a retry mechanism for tuning
+ - sdhci-atmel: Convert DT bindings to json schema
+ - sdhci-of-dwcmshc: Add eMMC HW reset support for BlueField-3 SoC
+ - sdhci-of-dwcmshc: Add support for the RK3576 variant
+ - sdhci-of-dwcmshc: Add support for the Sophgo SG2042 variant
+ - sdhci-of-ma35d1: Add new driver for the Nuvoton MA35D1 SDHCI
+
+Misc/Tee:
+ - Add Replay Protected Memory Block (RPMB) subsystem
+ - Let optee probe RPMB device using RPMB subsystem
+
+----------------------------------------------------------------
+Alexander Stein (1):
+      mmc: core: Use dev_err_probe for deferred regulators
+
+Avri Altman (2):
+      mmc: core Convert UNSTUFF_BITS macro to inline function
+      Documentation: mmc: Add mmc-test doc
+
+Chanwoo Lee (1):
+      mmc: core: Replace the argument of mmc_sd_switch() with defines
+
+Chen Wang (7):
+      mmc: sdhci-of-dwcmshc: add common bulk optional clocks support
+      mmc: sdhci-of-dwcmshc: move two rk35xx functions
+      mmc: sdhci-of-dwcmshc: factor out code for th1520_init()
+      mmc: sdhci-of-dwcmshc: factor out code into dwcmshc_rk35xx_init
+      mmc: sdhci-of-dwcmshc: add dwcmshc_pltfm_data
+      dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo SG2042 support
+      mmc: sdhci-of-dwcmshc: Add support for Sophgo SG2042
+
+Christophe JAILLET (1):
+      mmc: core: Remove struct mmc_context_info
+
+Dan Carpenter (1):
+      optee: Fix a NULL vs IS_ERR() check
+
+Detlev Casanova (3):
+      dt-bindings: mmc: Add support for rk3576 dw-mshc
+      mmc: dw_mmc-rockchip: Add support for rk3576 SoCs
+      dt-bindings: mmc: Add support for rk3576 eMMC
+
+Dharma Balasubiramani (1):
+      dt-bindings: mmc: sdhci-atmel: Convert to json schema
+
+Doug Brown (1):
+      mmc: sdhci-pxav2: Remove unnecessary null pointer check
+
+Jens Wiklander (7):
+      rpmb: add Replay Protected Memory Block (RPMB) subsystem
+      mmc: block: register RPMB partition with the RPMB subsystem
+      tee: add tee_device_set_dev_groups()
+      optee: probe RPMB device using RPMB subsystem
+      mmc: block: add RPMB dependency
+      optee: add RPMB dependency
+      rpmb: fix error path in rpmb_dev_register()
+
+Judith Mendez (2):
+      mmc: sdhci_am654: Add retry tuning
+      mmc: sdhci_am654: Add prints to tuning algorithm
+
+Krzysztof Kozlowski (1):
+      dt-bindings: mmc: renesas,sdhi: add top-level constraints
+
+Lad Prabhakar (4):
+      dt-bindings: mmc: renesas,sdhi: Document RZ/V2H(P) support
+      mmc: tmio: Use MMC core APIs to control the vqmmc regulator
+      mmc: renesas_sdhi: Add RZ/V2H(P) compatible string
+      dt-bindings: mmc: renesas,sdhi: Remove duplicate compatible and add clock checks
+
+Liming Sun (1):
+      mmc: sdhci-of-dwcmshc: Add hw_reset() support for BlueField-3 SoC
+
+Riyan Dhiman (2):
+      mmc: core: Calculate size from pointer
+      mmc: core: Convert simple_stroul to kstroul
+
+Seunghwan Baek (1):
+      mmc: cqhci: Make use of cqhci_halted() routine
+
+Shan-Chun Hung (2):
+      dt-bindings: mmc: nuvoton,ma35d1-sdhci: Document MA35D1 SDHCI controller
+      mmc: sdhci-of-ma35d1: Add Nuvoton MA35D1 SDHCI driver
+
+Shawn Lin (1):
+      mmc: dw_mmc-rockchip: Add internal phase support
+
+Thorsten Blum (1):
+      mmc: mtk-sd: Improve data type in msdc_timeout_cal()
+
+Ulf Hansson (3):
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+
+Vladimir Zapolskiy (1):
+      mmc: core: remove left-over data structure declarations
+
+ Documentation/ABI/testing/sysfs-class-tee          |  15 +
+ .../bindings/mmc/atmel,sama5d2-sdhci.yaml          |  92 ++++
+ .../bindings/mmc/nuvoton,ma35d1-sdhci.yaml         |  87 ++++
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |  13 +-
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  |   2 +
+ .../devicetree/bindings/mmc/sdhci-atmel.txt        |  35 --
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |  95 ++--
+ Documentation/driver-api/mmc/index.rst             |   1 +
+ Documentation/driver-api/mmc/mmc-test.rst          | 299 +++++++++++++
+ MAINTAINERS                                        |   8 +
+ drivers/misc/Kconfig                               |  10 +
+ drivers/misc/Makefile                              |   1 +
+ drivers/misc/rpmb-core.c                           | 231 ++++++++++
+ drivers/mmc/core/Kconfig                           |   1 +
+ drivers/mmc/core/block.c                           | 250 ++++++++++-
+ drivers/mmc/core/mmc.c                             | 106 ++---
+ drivers/mmc/core/mmc_ops.h                         |  14 +
+ drivers/mmc/core/regulator.c                       |   8 +-
+ drivers/mmc/core/sd.c                              | 133 +++---
+ drivers/mmc/core/sd_ops.c                          |   3 +-
+ drivers/mmc/host/Kconfig                           |  12 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/cqhci-core.c                      |  14 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 | 217 +++++++++-
+ drivers/mmc/host/mtk-sd.c                          |  11 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   1 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c                | 478 ++++++++++++++-------
+ drivers/mmc/host/sdhci-of-ma35d1.c                 | 314 ++++++++++++++
+ drivers/mmc/host/sdhci-pxav2.c                     |   2 +-
+ drivers/mmc/host/sdhci_am654.c                     |  54 ++-
+ drivers/mmc/host/tmio_mmc_core.c                   |   7 +-
+ drivers/tee/optee/Kconfig                          |   1 +
+ drivers/tee/optee/core.c                           |  96 ++++-
+ drivers/tee/optee/device.c                         |   7 +
+ drivers/tee/optee/ffa_abi.c                        |  14 +
+ drivers/tee/optee/optee_ffa.h                      |   2 +
+ drivers/tee/optee/optee_private.h                  |  26 +-
+ drivers/tee/optee/optee_rpc_cmd.h                  |  35 ++
+ drivers/tee/optee/optee_smc.h                      |   2 +
+ drivers/tee/optee/rpc.c                            | 177 ++++++++
+ drivers/tee/optee/smc_abi.c                        |  14 +
+ drivers/tee/tee_core.c                             |  19 +-
+ include/linux/mmc/core.h                           |  12 -
+ include/linux/mmc/host.h                           |  27 +-
+ include/linux/rpmb.h                               | 123 ++++++
+ include/linux/tee_core.h                           |  12 +
+ 46 files changed, 2633 insertions(+), 449 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-tee
+ create mode 100644 Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
+ create mode 100644 Documentation/devicetree/bindings/mmc/nuvoton,ma35d1-sdhci.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-atmel.txt
+ create mode 100644 Documentation/driver-api/mmc/mmc-test.rst
+ create mode 100644 drivers/misc/rpmb-core.c
+ create mode 100644 drivers/mmc/host/sdhci-of-ma35d1.c
+ create mode 100644 include/linux/rpmb.h
