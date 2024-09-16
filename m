@@ -1,388 +1,157 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08C191339B1;
-	Mon, 16 Sep 2024 07:51:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC03B1459F6;
+	Mon, 16 Sep 2024 08:58:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726473065; cv=none; b=XKrAP/GfDmc5S6mdVahGmMxTzrsO9i9wmSfo7feVBMxhjmEGodG+HApNNTahFsYgnGaCWQPasl8ljJlDxv9NIwJ8L0pZwPxC+XIFLaqLQXvPtUviLb3H3FCoi3vDWEFUMvWO9j0QeOf5M0NJJW5emx7aKEMjh46Rkfhdh4xPx7E=
+	t=1726477105; cv=none; b=V57q+fcn9TFGotq4/oms0tiCRLphLzsM5J4549surwZDmz+AoH+69eeX7BryBt0xJ8HeSBI5X0sox3Z0IB/XivqJ95mGJ27Hci1SfeLo3oWEhrNlCeYXHMxGf/52EHCo8l7l59gtTJ77LwBLShFVc8SDz48I6fjTGVGxn+Oxe3E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726473065; c=relaxed/simple;
-	bh=Z9uIWG2PKf2KyhsARs6C+a8hCyFUNF7z+oDNfDWyUlI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=X30wxTdhmpOySvugy7czh9QD45L9AVgwds0DhSqTZTBB2bwOVaVwgEITid+Lykq6nAzR/pQ+8apLiFyLVxheAVY/tFJ5EOGN9GRZcMKRP4UsKe9iAz+ZIHKY1gJBX3YjvlYfMXqHaiOg4gkLhaFD31OdU2/YY7faH0+bLwYzywA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=LxF5/PLI; arc=none smtp.client-ip=205.220.168.131
+	s=arc-20240116; t=1726477105; c=relaxed/simple;
+	bh=xBA+E4KTUuwEoEWvQDGK5J1hbYvnFYe3rBLV0t3JzyQ=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=In7n7FDvZSbCxE//TL7ARpkGxVpasLruXZgH2iHux6XONabcLQlJt1XTB2rY8JnA6kxjc5jvsgjsUnr9XWxA8YxWqlOFK+XZDfMPGnQ0g9cixaexhEhBbV02LZIZdquPyo+8J4MegVy+GEZd4wWUIEHpmXDBcHYQg4ol5SDRDTM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=hGsUr3Yg; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="LxF5/PLI"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48FNmwBA024426;
-	Mon, 16 Sep 2024 07:50:35 GMT
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="hGsUr3Yg"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48FNARGM015144;
+	Mon, 16 Sep 2024 08:58:04 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	gBgmFYIDtjCkjwPRAQZ3OnNLyodUiCbqaDvzxqA+Jog=; b=LxF5/PLIqnNscV1V
-	h5fsKk2lNKyAB+/1ODBuwJa29nB1U10CeqfixNcxascuUhmI7KAzaphLLU43jtBb
-	4MENoySc0b7apl5JuzSo5LADUyYXKsptKy64B/iMkCXPBDEK6yzUcjY5hb35QWip
-	4NcICcQYFSvDSWYREEpsvvlsb/sFdRV8OwZBTb7/D3f+zbwIgyoGWpKj7O7el10e
-	PFVF2OT7fhJrZakDFjJkkRTJCQ8IY22EX/rZ2ROVA1glSOAMfPF0h+i6qQiI16ww
-	vaDQpJJzet2nDxk94/4iu/Adr+uZA0LXvTkTSjmTTCMDY8nxVuu848nJiD2UnfNU
-	bSJ4Zg==
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41n4gcu60a-1
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=kb0B4norh/6bbwZZZg795m
+	MCaKhwSmMy8XzMHe3AEy0=; b=hGsUr3Yg1txBHSMSCILP4NEo623VFL9KmtskLh
+	MtEsaG+BsPOGuIG3rPrgETHWeE6yxbMley0mMfjnKpQuU2fU1urH7BmbeL6xiaOs
+	FNPBdO6F5k6XW4KzHQosZ+F3YlyPYlx0fvBB7P/e8BHxMET0+QujJFzLVqlTN0yI
+	mOkPuF/neJqhdKrv67sTadxfeoNJmOyOJXBwOD8bO84SXSJcVn95jQTpp7VoeB2H
+	flxGe8MsPDgbPJrAtwzY+/RPsQsvbRLzcj+EQw0iMIOpeDlyOmi1oCyue7PYvaLD
+	tMWUHDmJdU7EEnr2UO3ADsa0GidjQIqlt7jC8Z4j4vt8dfeQ==
+Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41n4ge3cmh-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 16 Sep 2024 07:50:34 +0000 (GMT)
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-	by NALASPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48G7oXGF012618
+	Mon, 16 Sep 2024 08:58:04 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48G8w3El004510
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 16 Sep 2024 07:50:33 GMT
-Received: from [10.151.37.100] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Mon, 16 Sep
- 2024 00:50:27 -0700
-Message-ID: <f9126534-3a46-4d01-9026-58e0b65c08d2@quicinc.com>
-Date: Mon, 16 Sep 2024 13:20:24 +0530
+	Mon, 16 Sep 2024 08:58:03 GMT
+Received: from hu-mdalam-blr.qualcomm.com (10.80.80.8) by
+ nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Mon, 16 Sep 2024 01:57:56 -0700
+From: Md Sadre Alam <quic_mdalam@quicinc.com>
+To: <axboe@kernel.dk>, <song@kernel.org>, <yukuai3@huawei.com>,
+        <agk@redhat.com>, <snitzer@kernel.org>, <mpatocka@redhat.com>,
+        <adrian.hunter@intel.com>, <quic_asutoshd@quicinc.com>,
+        <ritesh.list@gmail.com>, <ulf.hansson@linaro.org>,
+        <andersson@kernel.org>, <konradybcio@kernel.org>, <kees@kernel.org>,
+        <gustavoars@kernel.org>, <linux-block@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-raid@vger.kernel.org>,
+        <dm-devel@lists.linux.dev>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-hardening@vger.kernel.org>
+CC: <quic_srichara@quicinc.com>, <quic_varada@quicinc.com>,
+        <quic_mdalam@quicinc.com>
+Subject: [PATCH v2 0/3] Add inline encryption support
+Date: Mon, 16 Sep 2024 14:27:38 +0530
+Message-ID: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 5/8] clk: qcom: add Global Clock controller (GCC) driver
- for IPQ5424 SoC
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
-        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
-        <neil.armstrong@linaro.org>, <linux-arm-msm@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <quic_varada@quicinc.com>
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-6-quic_srichara@quicinc.com>
- <glkvcne5eius5l7dro7gzd7hyztc6vc4eekcbbxz6c4wwolwqy@aoj66qbrxezg>
-Content-Language: en-US
-From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <glkvcne5eius5l7dro7gzd7hyztc6vc4eekcbbxz6c4wwolwqy@aoj66qbrxezg>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
+ nasanex01a.na.qualcomm.com (10.52.223.231)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: lGQJOmdExYP4olx6XnTSFvayGnhWWGDd
-X-Proofpoint-GUID: lGQJOmdExYP4olx6XnTSFvayGnhWWGDd
+X-Proofpoint-GUID: Ym74qACMiDUgz6EKJwdNdumFaOfWLRvb
+X-Proofpoint-ORIG-GUID: Ym74qACMiDUgz6EKJwdNdumFaOfWLRvb
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
- bulkscore=0 clxscore=1015 spamscore=0 adultscore=0 lowpriorityscore=0
- mlxlogscore=999 impostorscore=0 mlxscore=0 priorityscore=1501 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2408220000
- definitions=main-2409160048
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
+ mlxlogscore=999 impostorscore=0 bulkscore=0 clxscore=1011
+ lowpriorityscore=0 adultscore=0 phishscore=0 suspectscore=0
+ priorityscore=1501 mlxscore=0 spamscore=0 classifier=spam adjust=0
+ reason=mlx scancount=1 engine=8.19.0-2408220000
+ definitions=main-2409160056
+
+QCOM SDCC controller having Inline Crypto Engine support
+Inline Crypto Engine do encryption/decryption on fly.
+dm-inlinecrypt driver will be use to do encryption/decryption
+with Inline Crypto Engine. 
+
+v2:
+ * Added new driver dm-inlinecrypt
+ * Dropped patch "md: dm-crypt: Set cc->iv_size to 4 bytes"
+ * squash patch "blk-crypto: Add additional algo modes for Inline"
+   encryption and patch "md: dm-crypt: Add additional algo modes for
+   inline encryption" to the dm-inlinecrypt driver.
+ * tested with dmsetup command as below
+   dmsetup create test-crypt --table '0 251904 inline-crypt aes128-xts-
+   plain a7f67ad520bd83b9725df6ebd76c3eeea7f67ad520bd83b9725df6ebd76c3eee 
+   0 /dev/mmcblk0p27 0 1'
+
+   dd if=/dev/urandom of=/tmp/data bs=1M count=1
+   dd if=/tmp/data of=/dev/mapper/test-crypt bs=1M count=1
+   dd of=/tmp/data1 if=/dev/mapper/test-crypt bs=1M count=1
+   dd of=/tmp/data2 if=/dev/mmcblk0p27 bs=1M count=1
+   md5sum /tmp/data*
+   b45d728bfb499b6de9b12c98fbb652dd  /tmp/data
+   b45d728bfb499b6de9b12c98fbb652dd  /tmp/data1
+   bc4107e19cf6fc012c5b997bdd3f0de4  /tmp/data2
+   dmsetup remove /dev/mapper/test-crypt
+
+v1:
+ * This series of patches add additional modes for inline encryption
+   This series of patches depends on [1] Add inline encryption support for
+   dm-crypt
+   [1]: https://lore.kernel.org/all/b45d3b40-2587-04dc-9601-a9251dacf806@opensource.wdc.com/T/#ma01f08a941107217c93680fa25e96e8d406df790
+
+ * These patches tested on IPQ9574 with eMMC ICE for raw partition
+   encryption/decryption.
+
+   e.g:
+
+   dmsetup create test-crypt --table '0 251904 crypt aes128-xts-plain64
+   a7f67ad520bd83b9725df6ebd76c3eeea7f67ad520bd83b9725df6ebd76c3eee 0
+   /dev/mmcblk0p27 0 1 inline_crypt'
+
+  dd if=/dev/urandom of=/tmp/data bs=1M count=1
+
+  dd if=/tmp/data of=/dev/mapper/test-crypt bs=1M count=1
+
+  dd of=/tmp/data1 if=/dev/mapper/test-crypt bs=1M count=1
+
+  dd of=/tmp/data2 if=/dev/mmcblk0p27 bs=1M count=1
+
+  md5sum /tmp/data*
+  b45d728bfb499b6de9b12c98fbb652dd  /tmp/data
+  b45d728bfb499b6de9b12c98fbb652dd  /tmp/data1
+  bc4107e19cf6fc012c5b997bdd3f0de4  /tmp/data2
+
+  dmsetup remove /dev/mapper/test-crypt
 
 
+Md Sadre Alam (3):
+  dm-inlinecrypt: Add inline encryption support
+  mmc: cqhci: Add additional algo mode for inline encryption
+  mmc: sdhci-msm: Add additional algo mode for inline encryption
 
-On 9/13/2024 6:16 PM, Dmitry Baryshkov wrote:
-> On Fri, Sep 13, 2024 at 05:42:47PM GMT, Sricharan R wrote:
->> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->>
->> Add support for the global clock controller found on IPQ5424 SoC.
->>
->> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-> 
-> Same comment regarding tags.
-> 
-ok
->> ---
->>   drivers/clk/qcom/Kconfig       |    7 +
->>   drivers/clk/qcom/Makefile      |    1 +
->>   drivers/clk/qcom/gcc-ipq5424.c | 3333 ++++++++++++++++++++++++++++++++
->>   3 files changed, 3341 insertions(+)
->>   create mode 100644 drivers/clk/qcom/gcc-ipq5424.c
->>
->> diff --git a/drivers/clk/qcom/Kconfig b/drivers/clk/qcom/Kconfig
->> index a3e2a09e2105..c41e3318c2a7 100644
->> --- a/drivers/clk/qcom/Kconfig
->> +++ b/drivers/clk/qcom/Kconfig
->> @@ -213,6 +213,13 @@ config IPQ_GCC_5332
->>   	  Say Y if you want to use peripheral devices such as UART, SPI,
->>   	  i2c, USB, SD/eMMC, etc.
->>   
->> +config IPQ_GCC_5424
->> +	tristate "IPQ5424 Global Clock Controller"
->> +	help
->> +	  Support for the global clock controller on ipq5424 devices.
->> +	  Say Y if you want to use peripheral devices such as UART, SPI,
->> +	  i2c, USB, SD/eMMC, etc.
->> +
->>   config IPQ_GCC_6018
->>   	tristate "IPQ6018 Global Clock Controller"
->>   	help
->> diff --git a/drivers/clk/qcom/Makefile b/drivers/clk/qcom/Makefile
->> index 2b378667a63f..d58ba0f9a482 100644
->> --- a/drivers/clk/qcom/Makefile
->> +++ b/drivers/clk/qcom/Makefile
->> @@ -32,6 +32,7 @@ obj-$(CONFIG_IPQ_APSS_6018) += apss-ipq6018.o
->>   obj-$(CONFIG_IPQ_GCC_4019) += gcc-ipq4019.o
->>   obj-$(CONFIG_IPQ_GCC_5018) += gcc-ipq5018.o
->>   obj-$(CONFIG_IPQ_GCC_5332) += gcc-ipq5332.o
->> +obj-$(CONFIG_IPQ_GCC_5424) += gcc-ipq5424.o
->>   obj-$(CONFIG_IPQ_GCC_6018) += gcc-ipq6018.o
->>   obj-$(CONFIG_IPQ_GCC_806X) += gcc-ipq806x.o
->>   obj-$(CONFIG_IPQ_GCC_8074) += gcc-ipq8074.o
->> diff --git a/drivers/clk/qcom/gcc-ipq5424.c b/drivers/clk/qcom/gcc-ipq5424.c
->> new file mode 100644
->> index 000000000000..72d2c9bfa986
->> --- /dev/null
->> +++ b/drivers/clk/qcom/gcc-ipq5424.c
->> @@ -0,0 +1,3333 @@
->> +// SPDX-License-Identifier: GPL-2.0
->> +/*
->> + * Copyright (c) 2018,2020 The Linux Foundation. All rights reserved.
->> + * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
->> + */
->> +
->> +#include <linux/clk-provider.h>
->> +#include <linux/kernel.h>
->> +#include <linux/module.h>
->> +#include <linux/of.h>
->> +#include <linux/platform_device.h>
->> +#include <linux/regmap.h>
->> +
->> +#include <dt-bindings/clock/qcom,ipq5424-gcc.h>
->> +#include <dt-bindings/reset/qcom,ipq5424-gcc.h>
->> +
->> +#include "clk-alpha-pll.h"
->> +#include "clk-branch.h"
->> +#include "clk-rcg.h"
->> +#include "clk-regmap.h"
->> +#include "clk-regmap-divider.h"
->> +#include "clk-regmap-mux.h"
->> +#include "clk-regmap-phy-mux.h"
->> +#include "common.h"
->> +#include "reset.h"
->> +
->> +enum {
->> +	DT_XO,
->> +	DT_SLEEP_CLK,
->> +	DT_PCIE30_PHY0_PIPE_CLK,
->> +	DT_PCIE30_PHY1_PIPE_CLK,
->> +	DT_PCIE30_PHY2_PIPE_CLK,
->> +	DT_PCIE30_PHY3_PIPE_CLK,
->> +	DT_USB_PCIE_WRAPPER_PIPE_CLK,
-> 
-> This doesn't seem to match bindings.
-> 
-ok, will fix
->> +};
->> +
->> +enum {
->> +	P_GCC_GPLL0_OUT_MAIN_DIV_CLK_SRC,
->> +	P_GPLL0_OUT_AUX,
->> +	P_GPLL0_OUT_MAIN,
->> +	P_GPLL2_OUT_AUX,
->> +	P_GPLL2_OUT_MAIN,
->> +	P_GPLL4_OUT_AUX,
->> +	P_GPLL4_OUT_MAIN,
->> +	P_SLEEP_CLK,
->> +	P_XO,
->> +	P_USB3PHY_0_PIPE,
->> +};
->> +
->> +static const struct clk_parent_data gcc_parent_data_xo = { .index = DT_XO };
->> +
->> +static struct clk_alpha_pll gpll0 = {
->> +	.offset = 0x20000,
->> +	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_DEFAULT_EVO],
->> +	.clkr = {
->> +		.enable_reg = 0xb000,
->> +		.enable_mask = BIT(0),
->> +		.hw.init = &(const struct clk_init_data) {
->> +			.name = "gpll0",
->> +			.parent_data = &gcc_parent_data_xo,
->> +			.num_parents = 1,
->> +			.ops = &clk_alpha_pll_ops,
->> +			.flags = CLK_IS_CRITICAL,
-> 
-> This deserves a comment
-> 
-ok will add
->> +		},
->> +	},
->> +};
->> +
->> +static struct clk_fixed_factor gpll0_div2 = {
->> +	.mult = 1,
->> +	.div = 2,
->> +	.hw.init = &(const struct clk_init_data) {
->> +		.name = "gpll0_div2",
->> +		.parent_hws = (const struct clk_hw *[]) {
->> +			&gpll0.clkr.hw
->> +		},
->> +		.num_parents = 1,
->> +		.ops = &clk_fixed_factor_ops,
->> +	},
->> +};
->> +
->> +static struct clk_alpha_pll gpll2 = {
->> +	.offset = 0x21000,
->> +	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_NSS_HUAYRA],
->> +	.clkr = {
->> +		.enable_reg = 0xb000,
->> +		.enable_mask = BIT(1),
->> +		.hw.init = &(const struct clk_init_data) {
->> +			.name = "gpll2",
->> +			.parent_data = &gcc_parent_data_xo,
->> +			.num_parents = 1,
->> +			.ops = &clk_alpha_pll_ops,
->> +		},
->> +	},
->> +};
->> +
->> +static const struct clk_div_table post_div_table_gpll2_out_main[] = {
->> +	{ 0x1, 2 },
->> +	{ }
->> +};
->> +
->> +static struct clk_alpha_pll_postdiv gpll2_out_main = {
->> +	.offset = 0x21000,
->> +	.post_div_table = post_div_table_gpll2_out_main,
->> +	.num_post_div = ARRAY_SIZE(post_div_table_gpll2_out_main),
->> +	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_NSS_HUAYRA],
->> +	.clkr.hw.init = &(const struct clk_init_data) {
->> +		.name = "gpll2_out_main",
->> +		.parent_hws = (const struct clk_hw*[]) {
->> +			&gpll2.clkr.hw,
->> +		},
->> +		.num_parents = 1,
->> +		.ops = &clk_alpha_pll_postdiv_ro_ops,
->> +	},
->> +};
->> +
->> +static struct clk_alpha_pll gpll4 = {
->> +	.offset = 0x22000,
->> +	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_DEFAULT_EVO],
->> +	.clkr = {
->> +		.enable_reg = 0xb000,
->> +		.enable_mask = BIT(2),
->> +		.hw.init = &(const struct clk_init_data) {
->> +			.name = "gpll4",
->> +			.parent_data = &gcc_parent_data_xo,
->> +			.num_parents = 1,
->> +			.flags = CLK_IS_CRITICAL,
-> 
-> Comment, please.
-> 
-ok, will add
->> +			.ops = &clk_alpha_pll_ops,
->> +		},
->> +	},
->> +};
->> +
-> 
-> [skipped]
-> 
->> +
->> +static struct clk_rcg2 gcc_pcnoc_bfdcd_clk_src = {
->> +	.cmd_rcgr = 0x31004,
->> +	.mnd_width = 0,
->> +	.hid_width = 5,
->> +	.parent_map = gcc_parent_map_0,
->> +	.freq_tbl = ftbl_gcc_pcnoc_bfdcd_clk_src,
->> +	.clkr.hw.init = &(const struct clk_init_data) {
->> +		.name = "gcc_pcnoc_bfdcd_clk_src",
->> +		.parent_data = gcc_parent_data_0,
->> +		.num_parents = ARRAY_SIZE(gcc_parent_data_0),
->> +		.flags = CLK_IS_CRITICAL,
-> 
-> Comment
-> 
-ok
->> +		.ops = &clk_rcg2_ops,
->> +	},
->> +};
->> +
-> 
-> [skipped]
-> 
->> +
->> +static struct clk_branch gcc_qdss_dap_clk = {
->> +	.halt_reg = 0x2d058,
->> +	.clkr = {
->> +		.enable_reg = 0x2d058,
->> +		.enable_mask = BIT(0),
->> +		.hw.init = &(const struct clk_init_data) {
->> +			.name = "gcc_qdss_dap_clk",
->> +			.parent_hws = (const struct clk_hw *[]) {
->> +				&gcc_qdss_dap_sync_clk_src.hw
->> +			},
->> +			.num_parents = 1,
->> +			.flags = CLK_SET_RATE_PARENT | CLK_IS_CRITICAL,
-> 
-> Comment
-> 
-ok
->> +			.ops = &clk_branch2_ops,
->> +		},
->> +	},
->> +};
->> +
->> +static struct clk_branch gcc_qdss_at_clk = {
->> +	.halt_reg = 0x2d034,
->> +	.clkr = {
->> +		.enable_reg = 0x2d034,
->> +		.enable_mask = BIT(0),
->> +		.hw.init = &(const struct clk_init_data) {
->> +			.name = "gcc_qdss_at_clk",
->> +			.parent_hws = (const struct clk_hw *[]) {
->> +				&gcc_qdss_at_clk_src.clkr.hw
->> +			},
->> +			.num_parents = 1,
->> +			.flags = CLK_SET_RATE_PARENT | CLK_IS_CRITICAL,
-> 
-> Comment
-> 
-ok
->> +			.ops = &clk_branch2_ops,
->> +		},
->> +	},
->> +};
->> +
-> 
-> [skipped]
-> 
->> +
->> +static int gcc_ipq5424_probe(struct platform_device *pdev)
->> +{
->> +	struct regmap *regmap;
->> +	struct qcom_cc_desc ipq5424_desc = gcc_ipq5424_desc;
->> +	int ret;
->> +
->> +	regmap = qcom_cc_map(pdev, &ipq5424_desc);
->> +	if (IS_ERR(regmap))
->> +		return PTR_ERR(regmap);
->> +
->> +	ret = qcom_cc_really_probe(&pdev->dev, &ipq5424_desc, regmap);
->> +	if (ret) {
->> +		dev_err(&pdev->dev, "Failed to register GCC clocks ret=%d\n", ret);
->> +		return ret;
->> +	}
->> +
->> +	dev_info(&pdev->dev, "Registered GCC clocks\n");
->> +
->> +	return ret;
-> 
-> Drop all the cruft and use qcom_cc_probe() directly.
-> 
-ok
+ block/blk-crypto.c              |  21 +++
+ drivers/md/Kconfig              |   8 +
+ drivers/md/Makefile             |   1 +
+ drivers/md/dm-inline-crypt.c    | 316 ++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci-crypto.c |  12 ++
+ drivers/mmc/host/sdhci-msm.c    |  10 +-
+ drivers/soc/qcom/ice.c          |  65 ++++++-
+ include/linux/blk-crypto.h      |   3 +
+ 8 files changed, 419 insertions(+), 17 deletions(-)
+ create mode 100644 drivers/md/dm-inline-crypt.c
 
-Regards,
-  Sricharan
+-- 
+2.34.1
 
