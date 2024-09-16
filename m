@@ -1,83 +1,202 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from omta34.uswest2.a.cloudfilter.net (omta34.uswest2.a.cloudfilter.net [35.89.44.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F2CCB381AF;
-	Sun, 15 Sep 2024 19:19:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC8B4381AF
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Sep 2024 06:10:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=35.89.44.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726427970; cv=none; b=t51bAqQs7JO1yAX7dtNyiKpC+XgU4bhNoVeI+/lJRFDedYLklgyB9WX0uCOR+wp/JrLlKVdIKM8Pu7FxW1cWHah0dbiDkmSs8KYQPnS2eB5YuYvves/DPB/4WycD8m1gXBUnCTeKaIetMVfAyuVsYY5VLn9JSYrBsAL4Z+1lQbE=
+	t=1726467004; cv=none; b=O1C9jtO7O6yxc0wDQUG6nXAV0gTvn278aP79SY8ZXe5ymrFJcJ2AoHfjzfjRIXIv8OEhbT2HWhO8HCr/j4wwr+BMWrmqy6bfMPgWtcc1mW0WMILGN5GUQb6z0Rjbtgo29Vf34ZJE5C2t+GashNVxkntltZvs/g6OgBV+G8XUD6M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726427970; c=relaxed/simple;
-	bh=id5/AGqbytBVi15XvL5fitIelC5kOd0OzYrA5y5db5E=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=VetwvDa9+A/ckccA6AxmVkA2rXAdylm46N9JaTMqs4rJH78WvqmY7k4j/EFkanxdaChnbhTaNVIJ7x487jdXewQcrBX3YH2+bLOcwNPOpFAJtkwoOJUhoxZyxJor6Q+5Ob3bijmHXvFGDxfliyqCufG7bxx6uZn/fnRgjkvwuC0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=DPAoraz0; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	s=arc-20240116; t=1726467004; c=relaxed/simple;
+	bh=mCDMZtNJOo6xRBtcL3MU946yWGoACKA6TxVv86RGU0Q=;
+	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+	 In-Reply-To:Content-Type; b=Q3iinvjP+dXJ+ArwYvlEW42iaJH8xJJ07SAJWIIRlc2lC7FB2eABQOkMQFlUbilXDWQE5KNPiTcL/hxadgS5StCSyhCuZ0xoPCpD8/2gSpIYh5iVQA0d2FmLqj7l3hWCnunhEno2BSGPcDbHAi4kWeQoymxDXJ7brkhwBP2gtFg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=w6rz.net; spf=pass smtp.mailfrom=w6rz.net; dkim=pass (2048-bit key) header.d=w6rz.net header.i=@w6rz.net header.b=WT2X9Rce; arc=none smtp.client-ip=35.89.44.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=w6rz.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=w6rz.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="DPAoraz0"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-2059204f448so33336565ad.0;
-        Sun, 15 Sep 2024 12:19:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1726427968; x=1727032768; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=id5/AGqbytBVi15XvL5fitIelC5kOd0OzYrA5y5db5E=;
-        b=DPAoraz0crK2DU24SqrlF6rwDk8rTiriRDOOf6nNq/JPn6iU/ze7yRtCxsrrgjmt6+
-         odOnxvkiUF1aRvutPbNHbL85hK49TaDXmk7w0ZxKTkLOLRMG8Opf10L3fSzwPk3iGr2F
-         dhaCC7B84OzJzM2TkEuYoECh2B5qE6D9SJVCINVserBcf0jL0b9KRMXSE7hRW5D02e1P
-         izQJb7dpbvzSuO95ol4Etlq/H14Ki0JKhHXbVTwf9ha9a4g51FGTgHA/n0wEdEtufAbd
-         r4DeTLVzCPQPObC1/GIAbC4tgMnHc3jUAAOluHDfSD63tg0EDnL/7d7UM2DCK27dElFg
-         JT9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1726427968; x=1727032768;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=id5/AGqbytBVi15XvL5fitIelC5kOd0OzYrA5y5db5E=;
-        b=qkNZnBZu4Wck1+e0t07PH7ME4a5YEi/cjICakmTQR9/3wJIe+CHj36dx8YNQyrXRcW
-         JPbGTpAGb4nAyZT1vq/RyDNBNcIzpihBjgm9CYNtlB2ffDNMos/awAf4XITw64m0gBDp
-         4/XXZ4pV7ZPY9MsKO9Yupeae1/M4A/QE6jwAq5hAIzGt2WTTLf262f5DftOksQ770akU
-         6h2VDN4Iu7heDfaVqNw/cDVdGxAUkjJLhiYZ2jY4tnN6sC32rCtGt4jqJRqoLc9Rs1JN
-         NAzygyQMovbwXkdzeF43wZtFQx2er2I7hyF/IjzujsOrtnXMec8INAC0SinKrzHtqswM
-         /GJA==
-X-Forwarded-Encrypted: i=1; AJvYcCUtPTaCvTt/6+uRfcRPVAUE33XKDb/MhGlsFIYmYud5c3I/EsD92+rc9UhmmuLKdPxmdZ4C/eGhmDkPGiI9@vger.kernel.org, AJvYcCVZlmjRBLqGrHRirGACpAiGwkw28icyGrEJ4PsHDPsLAOyuDIP1MXCf0zJ2mVjbLIf4rFmGBJJuiTQ8@vger.kernel.org, AJvYcCXjnPfQYj3dU8fi5IQsiuaAvARArLcsemSAgFODQ4o6N6uCWR8w3fnJ6ET5RlqUpYXVh0APiNrfm8Ua@vger.kernel.org
-X-Gm-Message-State: AOJu0YxSPyfIqj1LfIJmJ4f27pMXf6sV4wpKryBPaSKsjrxAMdEkmSzA
-	aqUrTCRyDkewcuwm21VI84CP2LuSr4K6+OongBpe2+NpTrmJIQS8/zpuxbl2PVhQzKxn7IMYlkH
-	PS61Inx50+4JTLfTHDzxHGYSMzi04iIfy
-X-Google-Smtp-Source: AGHT+IFkurQMP33FEcivDJJ8MmLrS9yGUWMN30dEY9NxYuXboTp1DuJN8lrZ8lg/1kSF+tWfwp75fP5k8hE1B5IUKXA=
-X-Received: by 2002:a17:903:22c1:b0:207:3a5e:8809 with SMTP id
- d9443c01a7336-2076e43efbbmr235208145ad.49.1726427968171; Sun, 15 Sep 2024
- 12:19:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=w6rz.net header.i=@w6rz.net header.b="WT2X9Rce"
+Received: from eig-obgw-6004a.ext.cloudfilter.net ([10.0.30.197])
+	by cmsmtp with ESMTPS
+	id pt8msrXOjVpzpq4vwsLypd; Mon, 16 Sep 2024 06:10:00 +0000
+Received: from box5620.bluehost.com ([162.241.219.59])
+	by cmsmtp with ESMTPS
+	id q4vvsJWQlks1Pq4vvsWndw; Mon, 16 Sep 2024 06:09:59 +0000
+X-Authority-Analysis: v=2.4 cv=Ud+aS7SN c=1 sm=1 tr=0 ts=66e7cbb7
+ a=30941lsx5skRcbJ0JMGu9A==:117 a=30941lsx5skRcbJ0JMGu9A==:17
+ a=IkcTkHD0fZMA:10 a=EaEq8P2WXUwA:10 a=7vwVE5O1G3EA:10 a=VwQbUJbxAAAA:8
+ a=KKAkSRfTAAAA:8 a=pGLkceISAAAA:8 a=4wIeQxAJSnUt7UKOCtYA:9 a=QEXdDO2ut3YA:10
+ a=cvBusfyB2V15izCimMoJ:22 a=hTR6fmoedSdf3N0JiVF8:22
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=w6rz.net;
+	s=default; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:MIME-Version:
+	Date:Message-ID:From:References:Cc:To:Subject:Sender:Reply-To:Content-ID:
+	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
+	List-Post:List-Owner:List-Archive;
+	bh=BPRUcNg/CdKy6c0htTAEtda7PXWeXWX6j6CF6eawafs=; b=WT2X9RceGB/cwaf13LEn73C4U2
+	25h/x2UxLN1KrfCM7/MHBszvw2RB8Z7qVg+3269ywDfZM8Dhe12CmDF54wMfprHKCeqjXHCSb/fgo
+	n83XVjuVsGbrgqC/KzL7ePU9S4T2/950efZqKkxSz+hvs4LK+Uto9jcfQ0J2eFUjyjpA7LCWXH52K
+	9M1KngqRu1KvWz3E3oEBO3sm5MFXpXxyrBrnVxMo3RUufswLNgk58SCje8LIlCyNpj+ODKX5N/HCy
+	yS78ztQHiSiy+azp8BUWGCUnwdWP76AX0/P2+oSUPOX2cwlPJH+w51Sxk9FyZV9w8wlrV2kprFPQG
+	IF0cresA==;
+Received: from c-73-223-253-157.hsd1.ca.comcast.net ([73.223.253.157]:40654 helo=[10.0.1.47])
+	by box5620.bluehost.com with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+	(Exim 4.96.2)
+	(envelope-from <re@w6rz.net>)
+	id 1sq4vu-004CJQ-0m;
+	Mon, 16 Sep 2024 00:09:58 -0600
+Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than
+ 4K
+To: Sam Protsenko <semen.protsenko@linaro.org>,
+ Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>,
+ Christoph Hellwig <hch@lst.de>
+Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>,
+ Matt Fleming <matt@console-pimps.org>, Christian Brauner
+ <brauner@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+ Sumit Semwal <sumit.semwal@linaro.org>,
+ Dan Carpenter <dan.carpenter@linaro.org>,
+ Anders Roxell <anders.roxell@linaro.org>,
+ Naresh Kamboju <naresh.kamboju@linaro.org>, linux-mmc@vger.kernel.org,
+ linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
+References: <20240306232052.21317-1-semen.protsenko@linaro.org>
+From: Ron Economos <re@w6rz.net>
+Message-ID: <614692b4-1dbe-31b8-a34d-cb6db1909bb7@w6rz.net>
+Date: Sun, 15 Sep 2024 23:09:55 -0700
+User-Agent: Mozilla/5.0 (X11; Linux armv7l; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org>
-In-Reply-To: <20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org>
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Sun, 15 Sep 2024 21:19:17 +0200
-Message-ID: <CAFBinCAq=D4EqBODiutKjx6EoQK_KPe4x9ATjCkby3CXS8cZGA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt to dtschema
-To: Neil Armstrong <neil.armstrong@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20240306232052.21317-1-semen.protsenko@linaro.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - box5620.bluehost.com
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - w6rz.net
+X-BWhitelist: no
+X-Source-IP: 73.223.253.157
+X-Source-L: No
+X-Exim-ID: 1sq4vu-004CJQ-0m
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-Source-Sender: c-73-223-253-157.hsd1.ca.comcast.net ([10.0.1.47]) [73.223.253.157]:40654
+X-Source-Auth: re@w6rz.net
+X-Email-Count: 15
+X-Org: HG=bhshared;ORG=bluehost;
+X-Source-Cap: d3NpeHJ6bmU7d3NpeHJ6bmU7Ym94NTYyMC5ibHVlaG9zdC5jb20=
+X-Local-Domain: yes
+X-CMAE-Envelope: MS4xfJinAdT24IWsnrVzmc+yRQPOF9W+IqH+IhzjY9caOtEk+3XPkcnd/fxzqRVEDMjHO3nt6tGPcyQDdrSRyNlJ5fhm1BJQl1Su4BaNUcWLJTcNJnYoy7s3
+ dKzRzTdWZSvQ3g7RbsmrWdJpjQc8315EjMdV+YnIEUnBvagN1SdAfbT0rh6FSwNUrb8Ys4s1IzcIKZC4AFcYr/+lKju3U6Z/ZWc=
 
-Thank you Neil!
+On 3/6/24 3:20 PM, Sam Protsenko wrote:
+> Commit 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk") [1]
+> revealed the long living issue in dw_mmc.c driver, existing since the
+> time when it was first introduced in commit f95f3850f7a9 ("mmc: dw_mmc:
+> Add Synopsys DesignWare mmc host driver."), also making kernel boot
+> broken on platforms using dw_mmc driver with 16K or 64K pages enabled,
+> with this message in dmesg:
+>
+>      mmcblk: probe of mmc0:0001 failed with error -22
+>
+> That's happening because mmc_blk_probe() fails when it calls
+> blk_validate_limits() consequently, which returns the error due to
+> failed max_segment_size check in this code:
+>
+>      /*
+>       * The maximum segment size has an odd historic 64k default that
+>       * drivers probably should override.  Just like the I/O size we
+>       * require drivers to at least handle a full page per segment.
+>       */
+>      ...
+>      if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
+>          return -EINVAL;
+>
+> In case when IDMAC (Internal DMA Controller) is used, dw_mmc.c always
+> sets .max_seg_size to 4 KiB:
+>
+>      mmc->max_seg_size = 0x1000;
+>
+> The comment in the code above explains why it's incorrect. Arnd
+> suggested setting .max_seg_size to .max_req_size to fix it, which is
+> also what some other drivers are doing:
+>
+>     $ grep -rl 'max_seg_size.*=.*max_req_size' drivers/mmc/host/ | \
+>       wc -l
+>     18
+>
+> This change is not only fixing the boot with 16K/64K pages, but also
+> leads to a better MMC performance. The linear write performance was
+> tested on E850-96 board (eMMC only), before commit [1] (where it's
+> possible to boot with 16K/64K pages without this fix, to be able to do
+> a comparison). It was tested with this command:
+>
+>      # dd if=/dev/zero of=somefile bs=1M count=500 oflag=sync
+>
+> Test results are as follows:
+>
+>    - 4K pages,  .max_seg_size = 4 KiB:                   94.2 MB/s
+>    - 4K pages,  .max_seg_size = .max_req_size = 512 KiB: 96.9 MB/s
+>    - 16K pages, .max_seg_size = 4 KiB:                   126 MB/s
+>    - 16K pages, .max_seg_size = .max_req_size = 2 MiB:   128 MB/s
+>    - 64K pages, .max_seg_size = 4 KiB:                   138 MB/s
+>    - 64K pages, .max_seg_size = .max_req_size = 8 MiB:   138 MB/s
+>
+> Unfortunately, SD card controller is not enabled in E850-96 yet, so it
+> wasn't possible for me to run the test on some cheap SD cards to check
+> this patch's impact on those. But it's possible that this change might
+> also reduce the writes count, thus improving SD/eMMC longevity.
+>
+> All credit for the analysis and the suggested solution goes to Arnd.
+>
+> [1] https://lore.kernel.org/all/20240215070300.2200308-18-hch@lst.de/
+>
+> Fixes: f95f3850f7a9 ("mmc: dw_mmc: Add Synopsys DesignWare mmc host driver.")
+> Suggested-by: Arnd Bergmann <arnd@arndb.de>
+> Reported-by: Linux Kernel Functional Testing <lkft@linaro.org>
+> Closes: https://lore.kernel.org/all/CA+G9fYtddf2Fd3be+YShHP6CmSDNcn0ptW8qg+stUKW+Cn0rjQ@mail.gmail.com/
+> Signed-off-by: Sam Protsenko <semen.protsenko@linaro.org>
+> ---
+>   drivers/mmc/host/dw_mmc.c | 4 ++--
+>   1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 8e2d676b9239..cccd5633ff40 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2951,8 +2951,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>   	if (host->use_dma == TRANS_MODE_IDMAC) {
+>   		mmc->max_segs = host->ring_size;
+>   		mmc->max_blk_size = 65535;
+> -		mmc->max_seg_size = 0x1000;
+> -		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+> +		mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
+> +		mmc->max_seg_size = mmc->max_req_size;
+>   		mmc->max_blk_count = mmc->max_req_size / 512;
+>   	} else if (host->use_dma == TRANS_MODE_EDMAC) {
+>   		mmc->max_segs = 64;
 
-On Wed, Sep 11, 2024 at 5:20=E2=80=AFPM Neil Armstrong
-<neil.armstrong@linaro.org> wrote:
->
-> Convert the Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-> bindings to dt-schema.
->
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
-Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Unfortunately, this patch creates side effects for the RISC-V StarFive 
+VisionFive2 board (which uses the DesignWare controller). The following 
+swiotlb buffer warnings are produced at boot:
+
+2024-09-15T17:54:27.194101-07:00 visionfive kernel: dwmmc_starfive 
+16020000.mmc: swiotlb buffer is full (sz: 352256 bytes), total 32768 
+(slots), used 222 (slots)
+2024-09-15T17:54:27.194107-07:00 visionfive kernel: dwmmc_starfive 
+16020000.mmc: swiotlb buffer is full (sz: 352256 bytes), total 32768 
+(slots), used 222 (slots)
+2024-09-15T17:54:27.194123-07:00 visionfive kernel: dwmmc_starfive 
+16020000.mmc: swiotlb buffer is full (sz: 524288 bytes), total 32768 
+(slots), used 110 (slots)
+2024-09-15T17:54:27.194129-07:00 visionfive kernel: dwmmc_starfive 
+16020000.mmc: swiotlb buffer is full (sz: 524288 bytes), total 32768 
+(slots), used 110 (slots)
+
