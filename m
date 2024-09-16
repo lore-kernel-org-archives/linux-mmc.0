@@ -1,202 +1,157 @@
-Received: from omta34.uswest2.a.cloudfilter.net (omta34.uswest2.a.cloudfilter.net [35.89.44.33])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC8B4381AF
-	for <linux-mmc@vger.kernel.org>; Mon, 16 Sep 2024 06:10:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=35.89.44.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6BB84381B1;
+	Mon, 16 Sep 2024 06:14:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726467004; cv=none; b=O1C9jtO7O6yxc0wDQUG6nXAV0gTvn278aP79SY8ZXe5ymrFJcJ2AoHfjzfjRIXIv8OEhbT2HWhO8HCr/j4wwr+BMWrmqy6bfMPgWtcc1mW0WMILGN5GUQb6z0Rjbtgo29Vf34ZJE5C2t+GashNVxkntltZvs/g6OgBV+G8XUD6M=
+	t=1726467281; cv=none; b=fLwNY72CYGHa11EOocfaOboPGPERKJmAIkRpIyzvmklp2dkyyFQh0/mtrHAyLjdFW/FamRJV1t9hG+hRNCKEUb/AqEQtvD17kYxZUSCGEPnkkyUUAIZKH1qcvXrUrVurbeQ55J/u1i1kOUPRqbv1IrnX8j384HOIbQAUmiBbeKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726467004; c=relaxed/simple;
-	bh=mCDMZtNJOo6xRBtcL3MU946yWGoACKA6TxVv86RGU0Q=;
-	h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
-	 In-Reply-To:Content-Type; b=Q3iinvjP+dXJ+ArwYvlEW42iaJH8xJJ07SAJWIIRlc2lC7FB2eABQOkMQFlUbilXDWQE5KNPiTcL/hxadgS5StCSyhCuZ0xoPCpD8/2gSpIYh5iVQA0d2FmLqj7l3hWCnunhEno2BSGPcDbHAi4kWeQoymxDXJ7brkhwBP2gtFg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=w6rz.net; spf=pass smtp.mailfrom=w6rz.net; dkim=pass (2048-bit key) header.d=w6rz.net header.i=@w6rz.net header.b=WT2X9Rce; arc=none smtp.client-ip=35.89.44.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=w6rz.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=w6rz.net
+	s=arc-20240116; t=1726467281; c=relaxed/simple;
+	bh=u9HtB7G1aej2/1qKTIOY/GVnpLPVCv89gNSFOJl/2tI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=YiduLn1XSd7Qm0xSLzRAUCS7VxrayR391JNsTg/iOjxMdHSBWTfAbqmhAz8uih5k+bIWj3uqv4XRZUt4M+PKtkFM1/Ofowu0c5SerM2y/tYqb8RSxbbhAcL/L8XrH1YQRr03oB1Ee4lhZGjN0HAW1ym/1p+CbyjowoYiYa7om+c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ZVdNDIvN; arc=none smtp.client-ip=198.175.65.16
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=w6rz.net header.i=@w6rz.net header.b="WT2X9Rce"
-Received: from eig-obgw-6004a.ext.cloudfilter.net ([10.0.30.197])
-	by cmsmtp with ESMTPS
-	id pt8msrXOjVpzpq4vwsLypd; Mon, 16 Sep 2024 06:10:00 +0000
-Received: from box5620.bluehost.com ([162.241.219.59])
-	by cmsmtp with ESMTPS
-	id q4vvsJWQlks1Pq4vvsWndw; Mon, 16 Sep 2024 06:09:59 +0000
-X-Authority-Analysis: v=2.4 cv=Ud+aS7SN c=1 sm=1 tr=0 ts=66e7cbb7
- a=30941lsx5skRcbJ0JMGu9A==:117 a=30941lsx5skRcbJ0JMGu9A==:17
- a=IkcTkHD0fZMA:10 a=EaEq8P2WXUwA:10 a=7vwVE5O1G3EA:10 a=VwQbUJbxAAAA:8
- a=KKAkSRfTAAAA:8 a=pGLkceISAAAA:8 a=4wIeQxAJSnUt7UKOCtYA:9 a=QEXdDO2ut3YA:10
- a=cvBusfyB2V15izCimMoJ:22 a=hTR6fmoedSdf3N0JiVF8:22
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=w6rz.net;
-	s=default; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:MIME-Version:
-	Date:Message-ID:From:References:Cc:To:Subject:Sender:Reply-To:Content-ID:
-	Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-	:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:List-Subscribe:
-	List-Post:List-Owner:List-Archive;
-	bh=BPRUcNg/CdKy6c0htTAEtda7PXWeXWX6j6CF6eawafs=; b=WT2X9RceGB/cwaf13LEn73C4U2
-	25h/x2UxLN1KrfCM7/MHBszvw2RB8Z7qVg+3269ywDfZM8Dhe12CmDF54wMfprHKCeqjXHCSb/fgo
-	n83XVjuVsGbrgqC/KzL7ePU9S4T2/950efZqKkxSz+hvs4LK+Uto9jcfQ0J2eFUjyjpA7LCWXH52K
-	9M1KngqRu1KvWz3E3oEBO3sm5MFXpXxyrBrnVxMo3RUufswLNgk58SCje8LIlCyNpj+ODKX5N/HCy
-	yS78ztQHiSiy+azp8BUWGCUnwdWP76AX0/P2+oSUPOX2cwlPJH+w51Sxk9FyZV9w8wlrV2kprFPQG
-	IF0cresA==;
-Received: from c-73-223-253-157.hsd1.ca.comcast.net ([73.223.253.157]:40654 helo=[10.0.1.47])
-	by box5620.bluehost.com with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-	(Exim 4.96.2)
-	(envelope-from <re@w6rz.net>)
-	id 1sq4vu-004CJQ-0m;
-	Mon, 16 Sep 2024 00:09:58 -0600
-Subject: Re: [PATCH] mmc: dw_mmc: Fix IDMAC operation with pages bigger than
- 4K
-To: Sam Protsenko <semen.protsenko@linaro.org>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>,
- Christoph Hellwig <hch@lst.de>
-Cc: Chris Ball <cjb@laptop.org>, Will Newton <will.newton@gmail.com>,
- Matt Fleming <matt@console-pimps.org>, Christian Brauner
- <brauner@kernel.org>, Jens Axboe <axboe@kernel.dk>,
- Sumit Semwal <sumit.semwal@linaro.org>,
- Dan Carpenter <dan.carpenter@linaro.org>,
- Anders Roxell <anders.roxell@linaro.org>,
- Naresh Kamboju <naresh.kamboju@linaro.org>, linux-mmc@vger.kernel.org,
- linux-block <linux-block@vger.kernel.org>, linux-kernel@vger.kernel.org
-References: <20240306232052.21317-1-semen.protsenko@linaro.org>
-From: Ron Economos <re@w6rz.net>
-Message-ID: <614692b4-1dbe-31b8-a34d-cb6db1909bb7@w6rz.net>
-Date: Sun, 15 Sep 2024 23:09:55 -0700
-User-Agent: Mozilla/5.0 (X11; Linux armv7l; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ZVdNDIvN"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1726467279; x=1758003279;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=u9HtB7G1aej2/1qKTIOY/GVnpLPVCv89gNSFOJl/2tI=;
+  b=ZVdNDIvNVo1fabt1r3rNnG3U7nk4WHePFpWDGRF1SlNGKn+4uPrplrF3
+   A/Qmiik3Fj1I5UBEKYvzyUjlJJwR3atozQ4zBq/9yBxGx8EDI0+emRW6J
+   1Aah2moCWyJlQqxo2aJTejuH6SSvHKdddLodWt28ObXcm6zgBZKiTF3H/
+   4ELSdApq1Uns4AWR5ImJWivL5JW5qt46stibOh48W3t9g4YguWqKO+30O
+   NRMPgbApqWfeN50eFEaZBQDOkWoRRANaGWsb6jd8BG+4ZQWflmu6lyomM
+   v4aCzwCJUFEjxZVCQ6SBaMjF3L/y2ycEQxrZ4Dqw7lE7Rra6usIxswj0P
+   w==;
+X-CSE-ConnectionGUID: okjPL7WIRCmF25LEACqFAA==
+X-CSE-MsgGUID: cLQYKkS1T1ifs4w8EyD6zQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11196"; a="25381533"
+X-IronPort-AV: E=Sophos;i="6.10,232,1719903600"; 
+   d="scan'208";a="25381533"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Sep 2024 23:14:39 -0700
+X-CSE-ConnectionGUID: Gqz0449aTfarOfCAqvWr1A==
+X-CSE-MsgGUID: RyykI/LeQHu0KE6QgMXlHw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.10,232,1719903600"; 
+   d="scan'208";a="73158561"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
+  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Sep 2024 23:14:37 -0700
+Message-ID: <7d3fb0a8-96a1-48cc-97ce-c25d19ded4e7@intel.com>
+Date: Mon, 16 Sep 2024 09:14:33 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20240306232052.21317-1-semen.protsenko@linaro.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] mmc: sdhci_am654: Add
+ sdhci_am654_start_signal_voltage_switch
+To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20240913185403.1339115-1-jm@ti.com>
 Content-Language: en-US
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - box5620.bluehost.com
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - w6rz.net
-X-BWhitelist: no
-X-Source-IP: 73.223.253.157
-X-Source-L: No
-X-Exim-ID: 1sq4vu-004CJQ-0m
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: c-73-223-253-157.hsd1.ca.comcast.net ([10.0.1.47]) [73.223.253.157]:40654
-X-Source-Auth: re@w6rz.net
-X-Email-Count: 15
-X-Org: HG=bhshared;ORG=bluehost;
-X-Source-Cap: d3NpeHJ6bmU7d3NpeHJ6bmU7Ym94NTYyMC5ibHVlaG9zdC5jb20=
-X-Local-Domain: yes
-X-CMAE-Envelope: MS4xfJinAdT24IWsnrVzmc+yRQPOF9W+IqH+IhzjY9caOtEk+3XPkcnd/fxzqRVEDMjHO3nt6tGPcyQDdrSRyNlJ5fhm1BJQl1Su4BaNUcWLJTcNJnYoy7s3
- dKzRzTdWZSvQ3g7RbsmrWdJpjQc8315EjMdV+YnIEUnBvagN1SdAfbT0rh6FSwNUrb8Ys4s1IzcIKZC4AFcYr/+lKju3U6Z/ZWc=
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20240913185403.1339115-1-jm@ti.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On 3/6/24 3:20 PM, Sam Protsenko wrote:
-> Commit 616f87661792 ("mmc: pass queue_limits to blk_mq_alloc_disk") [1]
-> revealed the long living issue in dw_mmc.c driver, existing since the
-> time when it was first introduced in commit f95f3850f7a9 ("mmc: dw_mmc:
-> Add Synopsys DesignWare mmc host driver."), also making kernel boot
-> broken on platforms using dw_mmc driver with 16K or 64K pages enabled,
-> with this message in dmesg:
->
->      mmcblk: probe of mmc0:0001 failed with error -22
->
-> That's happening because mmc_blk_probe() fails when it calls
-> blk_validate_limits() consequently, which returns the error due to
-> failed max_segment_size check in this code:
->
->      /*
->       * The maximum segment size has an odd historic 64k default that
->       * drivers probably should override.  Just like the I/O size we
->       * require drivers to at least handle a full page per segment.
->       */
->      ...
->      if (WARN_ON_ONCE(lim->max_segment_size < PAGE_SIZE))
->          return -EINVAL;
->
-> In case when IDMAC (Internal DMA Controller) is used, dw_mmc.c always
-> sets .max_seg_size to 4 KiB:
->
->      mmc->max_seg_size = 0x1000;
->
-> The comment in the code above explains why it's incorrect. Arnd
-> suggested setting .max_seg_size to .max_req_size to fix it, which is
-> also what some other drivers are doing:
->
->     $ grep -rl 'max_seg_size.*=.*max_req_size' drivers/mmc/host/ | \
->       wc -l
->     18
->
-> This change is not only fixing the boot with 16K/64K pages, but also
-> leads to a better MMC performance. The linear write performance was
-> tested on E850-96 board (eMMC only), before commit [1] (where it's
-> possible to boot with 16K/64K pages without this fix, to be able to do
-> a comparison). It was tested with this command:
->
->      # dd if=/dev/zero of=somefile bs=1M count=500 oflag=sync
->
-> Test results are as follows:
->
->    - 4K pages,  .max_seg_size = 4 KiB:                   94.2 MB/s
->    - 4K pages,  .max_seg_size = .max_req_size = 512 KiB: 96.9 MB/s
->    - 16K pages, .max_seg_size = 4 KiB:                   126 MB/s
->    - 16K pages, .max_seg_size = .max_req_size = 2 MiB:   128 MB/s
->    - 64K pages, .max_seg_size = 4 KiB:                   138 MB/s
->    - 64K pages, .max_seg_size = .max_req_size = 8 MiB:   138 MB/s
->
-> Unfortunately, SD card controller is not enabled in E850-96 yet, so it
-> wasn't possible for me to run the test on some cheap SD cards to check
-> this patch's impact on those. But it's possible that this change might
-> also reduce the writes count, thus improving SD/eMMC longevity.
->
-> All credit for the analysis and the suggested solution goes to Arnd.
->
-> [1] https://lore.kernel.org/all/20240215070300.2200308-18-hch@lst.de/
->
-> Fixes: f95f3850f7a9 ("mmc: dw_mmc: Add Synopsys DesignWare mmc host driver.")
-> Suggested-by: Arnd Bergmann <arnd@arndb.de>
-> Reported-by: Linux Kernel Functional Testing <lkft@linaro.org>
-> Closes: https://lore.kernel.org/all/CA+G9fYtddf2Fd3be+YShHP6CmSDNcn0ptW8qg+stUKW+Cn0rjQ@mail.gmail.com/
-> Signed-off-by: Sam Protsenko <semen.protsenko@linaro.org>
+On 13/09/24 21:54, Judith Mendez wrote:
+> The sdhci_start_signal_voltage_switch function sets
+> V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
+> V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
+> edge or pos edge of clock.
+> 
+> Due to some eMMC and SD failures seen across am62x platform,
+> do not set V1P8_SIGNAL_ENA by default, only enable the bit
+> for devices that require this bit in order to switch to 1v8
+> voltage for uhs modes.
+> 
+> Signed-off-by: Judith Mendez <jm@ti.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->   drivers/mmc/host/dw_mmc.c | 4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 8e2d676b9239..cccd5633ff40 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2951,8 +2951,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
->   	if (host->use_dma == TRANS_MODE_IDMAC) {
->   		mmc->max_segs = host->ring_size;
->   		mmc->max_blk_size = 65535;
-> -		mmc->max_seg_size = 0x1000;
-> -		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
-> +		mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
-> +		mmc->max_seg_size = mmc->max_req_size;
->   		mmc->max_blk_count = mmc->max_req_size / 512;
->   	} else if (host->use_dma == TRANS_MODE_EDMAC) {
->   		mmc->max_segs = 64;
-
-Unfortunately, this patch creates side effects for the RISC-V StarFive 
-VisionFive2 board (which uses the DesignWare controller). The following 
-swiotlb buffer warnings are produced at boot:
-
-2024-09-15T17:54:27.194101-07:00 visionfive kernel: dwmmc_starfive 
-16020000.mmc: swiotlb buffer is full (sz: 352256 bytes), total 32768 
-(slots), used 222 (slots)
-2024-09-15T17:54:27.194107-07:00 visionfive kernel: dwmmc_starfive 
-16020000.mmc: swiotlb buffer is full (sz: 352256 bytes), total 32768 
-(slots), used 222 (slots)
-2024-09-15T17:54:27.194123-07:00 visionfive kernel: dwmmc_starfive 
-16020000.mmc: swiotlb buffer is full (sz: 524288 bytes), total 32768 
-(slots), used 110 (slots)
-2024-09-15T17:54:27.194129-07:00 visionfive kernel: dwmmc_starfive 
-16020000.mmc: swiotlb buffer is full (sz: 524288 bytes), total 32768 
-(slots), used 110 (slots)
+> Changes since v1:
+> - Invert quirk logic
+> - Simplify sdhci_am654_start_signal_voltage_switch() and call
+>   sdhci_start_signal_voltage_switch() when the quirk does not apply
+> - Simply logic when detecting when quirk should be applied
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 30 ++++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 0aa3c40ea6ed8..9ff07aadb2d91 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -155,6 +155,7 @@ struct sdhci_am654_data {
+>  	u32 tuning_loop;
+>  
+>  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
+> +#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
+>  };
+>  
+>  struct window {
+> @@ -356,6 +357,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+>  	sdhci_set_clock(host, clock);
+>  }
+>  
+> +static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +	int ret;
+> +
+> +	if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
+> +	    ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
+> +		if (!IS_ERR(mmc->supply.vqmmc)) {
+> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+> +			if (ret < 0) {
+> +				pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
+> +				       mmc_hostname(mmc));
+> +				return -EIO;
+> +			}
+> +		}
+> +		return 0;
+> +	}
+> +
+> +	return sdhci_start_signal_voltage_switch(mmc, ios);
+> +}
+> +
+>  static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
+>  {
+>  	writeb(val, host->ioaddr + reg);
+> @@ -844,6 +868,11 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+>  	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
+>  		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
+>  
+> +	/* Suppress v1p8 ena for eMMC and SD with vqmmc supply */
+> +	if (!!of_parse_phandle(dev->of_node, "vmmc-supply", 0) ==
+> +	    !!of_parse_phandle(dev->of_node, "vqmmc-supply", 0))
+> +		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
+> +
+>  	sdhci_get_of_property(pdev);
+>  
+>  	return 0;
+> @@ -940,6 +969,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>  		goto err_pltfm_free;
+>  	}
+>  
+> +	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
+>  	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+>  
+>  	pm_runtime_get_noresume(dev);
+> 
+> base-commit: cf6444ba528f043398b112ac36e041a4d8685cb1
 
