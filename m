@@ -1,228 +1,336 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E9493B1A2;
-	Tue, 17 Sep 2024 06:38:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E8C214D435
+	for <linux-mmc@vger.kernel.org>; Tue, 17 Sep 2024 07:13:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726555139; cv=none; b=citjyUXYpWLO4JCCgzxJxwK2pdKxz2rIlsBzyOnhgUQCuzFHA6WfBS1YCWsgTbpY74/eI+eQTQ1N2fvYaXHnCD0jDftpZMmQJUdjTEXdGcZUtXJdub30eX+MkIQOML3ZN1jvjoXRmZYbdgnnF2e2ny4LG8e3E+tCJm1X9+Vz4Xo=
+	t=1726557205; cv=none; b=V7O3auvncASvX7C6IBZoaEMEzgPTDT/QizkInAGKgXTN24ehm3kS4SYyiY4W0JRKg32SsSQUl7t/2rpdvcDGPWcmCtGZsrHlqcJEnJ/ojgC/pZzqANKRAOl/7E8AxeigiVcF6vx+SLoMSUdYcDDnzYak9ebeASXTRWm7ppCPJB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726555139; c=relaxed/simple;
-	bh=XnDdcAYgUkXwdHYhr7LavMOrnmdRQitkG7WdHLSiYP4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pAYVNW4W+dLAsNT67agIDRPbngfowLQqHwSz6J6+rN72yf0CA/710EEmpFXFWNpCE63rxP8G3tWk/oPdSpO9KFjkxw0Se2MGcF9NagCHXagUDLJOq4NATvmo4oVxSWERscCYHiXfQRQ2z61OCQWGhm3nW/sf5ucnajrG2LYDgEE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=cueBtm+8; arc=none smtp.client-ip=192.198.163.15
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1726557205; c=relaxed/simple;
+	bh=swNKLDkS2SD8YNTNI87RH+xrjb7mM6lIq0Tjir43pOY=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=dzQpu4jvLCFtVkvCzrbsVdyqnoSn/JuQNGTyobJv8Is92PWTmSDFN9CLvnVDe1VkwyEEw5KVbZVUu/P6Wu86pQocMfsALCVEF5gVPmJ7uHOs+AxJYeTllH3tX6e61oPkVVOKNtSBkXMdZUMuICyGOdaU9v1OGkYia1BNUHfW/mE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nFaD8EDW; arc=none smtp.client-ip=209.85.221.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="cueBtm+8"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1726555136; x=1758091136;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=XnDdcAYgUkXwdHYhr7LavMOrnmdRQitkG7WdHLSiYP4=;
-  b=cueBtm+8w5NSb6SKrpSH+ml+w8XmGq1tGP2K9ZDYK5cpIim8dcsBxo0C
-   grCqAh32HAqkZS6IA3uTJj4vc+3kJJmIldWM6v64xLij+cbt149ZjtgJh
-   VwCIAm3zh9tIloixffe6nGQPRduqK3kl7ctFXHWisCxwsgwYC0Txziymo
-   YJsM3QiNG2/ujoeiZ7n5VVcVYqHFsLBBYcwB31geKS1n+lkSynpo1B17v
-   d0R+yXH6ba9FTzybyu0BHsBxQRf+7Pv5toeu74XZ66wKYPi/p3/DmHFVm
-   To59bjvvX2fP4CeFPRlaeWaRMJU54VU0WRWMLFZH1D55DKUUaHgGfX78U
-   g==;
-X-CSE-ConnectionGUID: 0gK2a0a7Q4KbY5AMWt370A==
-X-CSE-MsgGUID: S6lqnWikR9qJQkuZuaUdRg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11197"; a="25555130"
-X-IronPort-AV: E=Sophos;i="6.10,234,1719903600"; 
-   d="scan'208";a="25555130"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Sep 2024 23:38:55 -0700
-X-CSE-ConnectionGUID: BfL39eQ1SDKBh37aW8qZcw==
-X-CSE-MsgGUID: cKKZaTReQmm5HK/CUj8/Rg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.10,234,1719903600"; 
-   d="scan'208";a="69321099"
-Received: from lkp-server01.sh.intel.com (HELO 53e96f405c61) ([10.239.97.150])
-  by fmviesa010.fm.intel.com with ESMTP; 16 Sep 2024 23:38:50 -0700
-Received: from kbuild by 53e96f405c61 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1sqRrM-000ArC-0l;
-	Tue, 17 Sep 2024 06:38:48 +0000
-Date: Tue, 17 Sep 2024 14:38:30 +0800
-From: kernel test robot <lkp@intel.com>
-To: Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk,
-	song@kernel.org, yukuai3@huawei.com, agk@redhat.com,
-	snitzer@kernel.org, mpatocka@redhat.com, adrian.hunter@intel.com,
-	quic_asutoshd@quicinc.com, ritesh.list@gmail.com,
-	ulf.hansson@linaro.org, andersson@kernel.org,
-	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org,
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-hardening@vger.kernel.org
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	quic_srichara@quicinc.com, quic_varada@quicinc.com,
-	quic_mdalam@quicinc.com
-Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
-Message-ID: <202409171440.qx2iOkY3-lkp@intel.com>
-References: <20240916085741.1636554-2-quic_mdalam@quicinc.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nFaD8EDW"
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-3780c8d689aso3925452f8f.0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Sep 2024 00:13:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1726557199; x=1727161999; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=C+HBEKsxJcqP81WkAW4sAI0iZg0KYU8heYcnB9a8jAU=;
+        b=nFaD8EDWAwZy1DnM+y3V/l69v4xPAOaxxvG39vGF0YWb16YweLYwLLaglMPl9A+Ksl
+         /zEBSHYuEdKgBbioTDD+aKObYRwHihZEdVKSq6PLt5/2r0HOfPE9QEQjcW+iN5hu7E/i
+         M+DsJEM1NZZL5fGX+YS+gx2dwZ3F7kJSjnn6OPH0Gksxav+BI3OGUM/07GGhTqcfYOx5
+         63fi7u89lz2f6GBlcU+hx/K1NCWFMc8eEMOTIi/OL/RYeTFYWod/0h2MKUvoCr7g49NG
+         LJrKTwOlwvFCoBmwKui06DDsqjGPA+MsxFe5ADZ/UFv/fl9oizUoB1NkZ1Z1Ewqws9D6
+         TFWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726557199; x=1727161999;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=C+HBEKsxJcqP81WkAW4sAI0iZg0KYU8heYcnB9a8jAU=;
+        b=JbcJUqVq3+w/1oWn2aUSy5SrAe/CI0UuIe4BgDC/vxWONj5McQTStJim3qM5LyB8mT
+         xO1ZFFTpsbi5H5TVdwvE3sIOvJuEgfbIfOgZR7qUxH+8FeJQ7MYgujrw5GQAI/eWPN2P
+         tV/nQv+AVRwfR16vrMpWYFxryjGmQxtm4DFOoT/iwDCQIDJxZ4lwXedC6GukxQsT8+VD
+         oj3Ip1nBGfXuorNhVmpDTlFKuhU+miUD6lntgUojYbhdH0UseXvtquGQ87pluLainzDk
+         /Agezl2dbFw0IO2FyU9VLvhQKwt6DC1TxQzGM452WE6wXIYXMo27bzKdZdiDOnyE6UrV
+         /brA==
+X-Forwarded-Encrypted: i=1; AJvYcCXNynh4T0sKQn9ip1lXEjpPIh0TQzAfz88JIQNzDJm8LKjBqJJwFgZTbka9UN2eq9CSodaozC62TMw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwKsNk/X5wWwOGw7bX8at5UoYODDby6MrX0MOBnRgxMSMCsxGSD
+	ovsP+oyMVWyLnqb+OWCox5h8jWqVlcB2cXJFW1qqP2ahcOUnnf9Qq4po5jSvGjw=
+X-Google-Smtp-Source: AGHT+IFGpq/+J4ssPTXSy5MwONJpkzTKPo1IEOJH30s3xB5j9inEc2DszWR139tQAfWBSHi5+GrDYQ==
+X-Received: by 2002:adf:efc9:0:b0:371:8a91:9e72 with SMTP id ffacd0b85a97d-378c2d119f7mr11727570f8f.30.1726557198613;
+        Tue, 17 Sep 2024 00:13:18 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:982:cbb0:e5df:ee06:f22e:a8cf? ([2a01:e0a:982:cbb0:e5df:ee06:f22e:a8cf])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42d9b193f2dsm128955935e9.39.2024.09.17.00.13.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 17 Sep 2024 00:13:17 -0700 (PDT)
+Message-ID: <9394d785-5954-4d44-8ad0-9b57fbecde25@linaro.org>
+Date: Tue, 17 Sep 2024 09:13:16 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240916085741.1636554-2-quic_mdalam@quicinc.com>
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt to
+ dtschema
+To: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>,
+ Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ linux-kernel@vger.kernel.org
+References: <20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org>
+ <20240916174030.GA835203-robh@kernel.org>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20240916174030.GA835203-robh@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Hi Md,
+Hi Rob,
 
-kernel test robot noticed the following build warnings:
+On 16/09/2024 19:40, Rob Herring wrote:
+> On Wed, Sep 11, 2024 at 05:20:47PM +0200, Neil Armstrong wrote:
+>> Convert the Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+>> bindings to dt-schema.
+>>
+>> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+>> ---
+>>   .../bindings/mmc/amlogic,meson-mx-sdio.txt         |  54 -----------
+>>   .../bindings/mmc/amlogic,meson-mx-sdio.yaml        | 101 +++++++++++++++++++++
+>>   2 files changed, 101 insertions(+), 54 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+>> deleted file mode 100644
+>> index 8765c605e6bc..000000000000
+>> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
+>> +++ /dev/null
+>> @@ -1,54 +0,0 @@
+>> -* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+>> -
+>> -The highspeed MMC host controller on Amlogic SoCs provides an interface
+>> -for MMC, SD, SDIO and SDHC types of memory cards.
+>> -
+>> -Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+>> -as the speed of SD standard 2.0.
+>> -
+>> -The hardware provides an internal "mux" which allows up to three slots
+>> -to be controlled. Only one slot can be accessed at a time.
+>> -
+>> -Required properties:
+>> - - compatible : must be one of
+>> -	- "amlogic,meson8-sdio"
+>> -	- "amlogic,meson8b-sdio"
+>> -	along with the generic "amlogic,meson-mx-sdio"
+>> - - reg : mmc controller base registers
+>> - - interrupts : mmc controller interrupt
+>> - - #address-cells : must be 1
+>> - - size-cells : must be 0
+>> - - clocks : phandle to clock providers
+>> - - clock-names : must contain "core" and "clkin"
+>> -
+>> -Required child nodes:
+>> -A node for each slot provided by the MMC controller is required.
+>> -NOTE: due to a driver limitation currently only one slot (= child node)
+>> -      is supported!
+>> -
+>> -Required properties on each child node (= slot):
+>> - - compatible : must be "mmc-slot" (see mmc.txt within this directory)
+>> - - reg : the slot (or "port") ID
+>> -
+>> -Optional properties on each child node (= slot):
+>> - - bus-width : must be 1 or 4 (8-bit bus is not supported)
+>> - - for cd and all other additional generic mmc parameters
+>> -   please refer to mmc.txt within this directory
+>> -
+>> -Examples:
+>> -	mmc@c1108c20 {
+>> -		compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
+>> -		reg = <0xc1108c20 0x20>;
+>> -		interrupts = <0 28 1>;
+>> -		#address-cells = <1>;
+>> -		#size-cells = <0>;
+>> -		clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
+>> -		clock-names = "core", "clkin";
+>> -
+>> -		slot@1 {
+>> -			compatible = "mmc-slot";
+>> -			reg = <1>;
+>> -
+>> -			bus-width = <4>;
+>> -		};
+>> -	};
+>> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+>> new file mode 100644
+>> index 000000000000..4d1142d2ff02
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+>> @@ -0,0 +1,101 @@
+>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/mmc/amlogic,meson-mx-sdio.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
+>> +
+>> +description:
+>> +  The highspeed MMC host controller on Amlogic SoCs provides an interface
+>> +  for MMC, SD, SDIO and SDHC types of memory cards.
+>> +  Supported maximum speeds are the ones of the eMMC standard 4.41 as well
+>> +  as the speed of SD standard 2.0.
+>> +  The hardware provides an internal "mux" which allows up to three slots
+>> +  to be controlled. Only one slot can be accessed at a time.
+> 
+> You need '|' or this is treated as 1 paragraph. If it is 1 paragraph,
+> then format it that way.
+> 
+> But really if you want 3 paragraphs, then you should use '>' and put 2
+> CR's between each paragraph.
 
-[auto build test WARNING on device-mapper-dm/for-next]
-[also build test WARNING on axboe-block/for-next linus/master song-md/md-next v6.11 next-20240916]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Ack
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Md-Sadre-Alam/dm-inlinecrypt-Add-inline-encryption-support/20240916-170452
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git for-next
-patch link:    https://lore.kernel.org/r/20240916085741.1636554-2-quic_mdalam%40quicinc.com
-patch subject: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
-config: x86_64-allyesconfig (https://download.01.org/0day-ci/archive/20240917/202409171440.qx2iOkY3-lkp@intel.com/config)
-compiler: clang version 18.1.8 (https://github.com/llvm/llvm-project 3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20240917/202409171440.qx2iOkY3-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202409171440.qx2iOkY3-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> drivers/md/dm-inline-crypt.c:198:6: warning: variable 'ret' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
-     198 |         if ((sscanf(argv[2], "%llu%c", &tmpll, &dummy) != 1) ||
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     199 |             (tmpll & ((cc->sector_size >> SECTOR_SHIFT) - 1))) {
-         |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/md/dm-inline-crypt.c:250:9: note: uninitialized use occurs here
-     250 |         return ret;
-         |                ^~~
-   drivers/md/dm-inline-crypt.c:198:2: note: remove the 'if' if its condition is always false
-     198 |         if ((sscanf(argv[2], "%llu%c", &tmpll, &dummy) != 1) ||
-         |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     199 |             (tmpll & ((cc->sector_size >> SECTOR_SHIFT) - 1))) {
-         |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     200 |                 ti->error = "Invalid iv_offset sector";
-         |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     201 |                 goto bad;
-         |                 ~~~~~~~~~
-     202 |         }
-         |         ~
->> drivers/md/dm-inline-crypt.c:198:6: warning: variable 'ret' is used uninitialized whenever '||' condition is true [-Wsometimes-uninitialized]
-     198 |         if ((sscanf(argv[2], "%llu%c", &tmpll, &dummy) != 1) ||
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/md/dm-inline-crypt.c:250:9: note: uninitialized use occurs here
-     250 |         return ret;
-         |                ^~~
-   drivers/md/dm-inline-crypt.c:198:6: note: remove the '||' if its condition is always false
-     198 |         if ((sscanf(argv[2], "%llu%c", &tmpll, &dummy) != 1) ||
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/md/dm-inline-crypt.c:178:9: note: initialize the variable 'ret' to silence this warning
-     178 |         int ret;
-         |                ^
-         |                 = 0
-   2 warnings generated.
+> 
+>> +
+>> +maintainers:
+>> +  - Neil Armstrong <neil.armstrong@linaro.org>
+>> +
+>> +properties:
+>> +  compatible:
+>> +    items:
+>> +      - enum:
+>> +          - amlogic,meson8-sdio
+>> +          - amlogic,meson8b-sdio
+>> +      - const: amlogic,meson-mx-sdio
+>> +
+>> +  reg:
+>> +    maxItems: 1
+>> +
+>> +  interrupts:
+>> +    maxItems: 1
+>> +
+>> +  clocks:
+>> +    maxItems: 2
+>> +
+>> +  clock-names:
+>> +    items:
+>> +      - const: core
+>> +      - const: clkin
+>> +
+>> +  "#address-cells":
+>> +    const: 1
+>> +
+>> +  "#size-cells":
+>> +    const: 0
+>> +
+>> +
+>> +patternProperties:
+>> +  "slot@[a-f0-9]+$":
+> 
+> Are you going to add 'slot' to nodename in mmc-controller.yaml?
 
 
-vim +198 drivers/md/dm-inline-crypt.c
+Hmm, well slot should not be a valid nodename for a direct mmc-controller,
+so how to solve that ?
 
-   168	
-   169	static int inlinecrypt_ctr(struct dm_target *ti, unsigned int argc, char **argv)
-   170	{
-   171		struct inlinecrypt_config *cc;
-   172		char *cipher_api = NULL;
-   173		char *cipher, *chainmode;
-   174		unsigned long long tmpll;
-   175		char *ivmode;
-   176		int key_size;
-   177		char dummy;
-   178		int ret;
-   179	
-   180		if (argc < 5) {
-   181			ti->error = "Not enough arguments";
-   182			return -EINVAL;
-   183		}
-   184	
-   185		key_size = strlen(argv[1]) >> 1;
-   186	
-   187		cc = kzalloc(struct_size(cc, key, key_size), GFP_KERNEL);
-   188		if (!cc) {
-   189			ti->error = "Cannot allocate encryption context";
-   190			return -ENOMEM;
-   191		}
-   192		cc->key_size = key_size;
-   193		cc->sector_size = (1 << SECTOR_SHIFT);
-   194		cc->sector_shift = 0;
-   195	
-   196		ti->private = cc;
-   197	
- > 198		if ((sscanf(argv[2], "%llu%c", &tmpll, &dummy) != 1) ||
-   199		    (tmpll & ((cc->sector_size >> SECTOR_SHIFT) - 1))) {
-   200			ti->error = "Invalid iv_offset sector";
-   201			goto bad;
-   202		}
-   203		cc->iv_offset = tmpll;
-   204	
-   205		ret = dm_get_device(ti, argv[3], dm_table_get_mode(ti->table),
-   206				    &cc->dev);
-   207		if (ret) {
-   208			ti->error = "Device lookup failed";
-   209			goto bad;
-   210		}
-   211	
-   212		ret = -EINVAL;
-   213		if (sscanf(argv[4], "%llu%c", &tmpll, &dummy) != 1 ||
-   214		    tmpll != (sector_t)tmpll) {
-   215			ti->error = "Invalid device sector";
-   216			goto bad;
-   217		}
-   218	
-   219		cc->start = tmpll;
-   220	
-   221		cipher = strsep(&argv[0], "-");
-   222		chainmode = strsep(&argv[0], "-");
-   223		ivmode = strsep(&argv[0], "-");
-   224	
-   225		cipher_api = kmalloc(CRYPTO_MAX_ALG_NAME, GFP_KERNEL);
-   226		if (!cipher_api)
-   227			goto bad;
-   228	
-   229		ret = snprintf(cipher_api, CRYPTO_MAX_ALG_NAME,
-   230			       "%s(%s)", chainmode, cipher);
-   231		if (ret < 0 || ret >= CRYPTO_MAX_ALG_NAME) {
-   232			kfree(cipher_api);
-   233			ret = -ENOMEM;
-   234			goto bad;
-   235		}
-   236	
-   237		ret = crypt_select_inline_crypt_mode(ti, cipher_api, ivmode);
-   238	
-   239		/* Initialize and set key */
-   240		ret = inlinecrypt_set_key(cc, argv[1]);
-   241		if (ret < 0) {
-   242			ti->error = "Error decoding and setting key";
-   243			return ret;
-   244		}
-   245	
-   246		return 0;
-   247	bad:
-   248		ti->error = "Error in inlinecrypt mapping";
-   249		inlinecrypt_dtr(ti);
-   250		return ret;
-   251	}
-   252	
+> 
+>> +    $ref: mmc-controller.yaml#
+>> +    description:
+>> +      A node for each slot provided by the MMC controller
+> 
+> blank line
+> 
+>> +    properties:
+>> +      compatible:
+>> +        const: mmc-slot
+> 
+> This is also used by the Cavium controller. Should be common.
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Right but the cavium one isn't in dtschema, is it worth doing a
+common yaml for that ?
+
+> 
+>> +
+>> +      reg:
+>> +        description:
+>> +          the slot (or "port") ID
+>> +        maxItems: 1
+> 
+> Aren't there limits in the number of slots the h/w can support?
+
+Good question, let me check
+
+> 
+>> +
+>> +      bus-width:
+>> +        enum: [1, 4]
+>> +
+>> +    required:
+>> +      - compatible
+>> +      - reg
+>> +
+>> +    unevaluatedProperties: false
+>> +
+>> +required:
+>> +  - compatible
+>> +  - reg
+>> +  - interrupts
+>> +  - clocks
+>> +  - clock-names
+>> +  - "#address-cells"
+>> +  - "#size-cells"
+>> +
+>> +additionalProperties: false
+>> +
+>> +examples:
+>> +  - |
+>> +    #include <dt-bindings/interrupt-controller/irq.h>
+>> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+>> +    mmc@c1108c20 {
+>> +        compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
+>> +        reg = <0xc1108c20 0x20>;
+>> +        interrupts = <GIC_SPI 28 IRQ_TYPE_EDGE_RISING>;
+>> +        clocks = <&clk_core>, <&clk_in>;
+>> +        clock-names = "core", "clkin";
+>> +        #address-cells = <1>;
+>> +        #size-cells = <0>;
+>> +
+>> +        slot@1 {
+>> +            compatible = "mmc-slot";
+>> +            reg = <1>;
+>> +            bus-width = <4>;
+>> +        };
+>> +    };
+>>
+>> ---
+>> base-commit: 47ac09b91befbb6a235ab620c32af719f8208399
+>> change-id: 20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-6fa70546ebb8
+>>
+>> Best regards,
+>> -- 
+>> Neil Armstrong <neil.armstrong@linaro.org>
+>>
+
+Thanks,
+Neil
