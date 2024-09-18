@@ -1,153 +1,127 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.15])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33CE2DF6C;
-	Wed, 18 Sep 2024 04:47:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.15
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13CDE13792B;
+	Wed, 18 Sep 2024 05:09:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726634843; cv=none; b=Z0aRv0jjtcZFrVytsw8FNf/p1akXrDJSWkK0c+JHsnkLKUbZtZQpdmMzZdLgLiIMSLHjqp34jTG/UutYfj1GrVAmgpYhnElAIi4DAa4cIjgCmbcyXY8fUZtFrtLpgDVKl3ehwqfNHIJoMrr7KudA2cXfa0+Ec1meVt+EZl4ZL18=
+	t=1726636146; cv=none; b=j6GSes9crPFJzvI0owhXqO8yxCEc5LRkjDBYVAanEy4wRf8z7wBUr9IcAbvN2/x/7wLNhFcLNRAct1GIFu4AcVr/FepUAml8bNxNijg0ybgjL2/YjGCUBX1pjQTxpNmKYd30ZSW5J+tZ8QxkPqDpIsyj+psC5iLaCpgJI6+NZxI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726634843; c=relaxed/simple;
-	bh=lfe6CIfsEmIhyxvtIKmf4VMGfqsG/BCrr0mgzjINUGg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=OWlclMzZSVTuacTAAhx+86fASPRZASdTn9I00sChq0LtDRFrwIyLa2EdfhdRH4FfDxxIw4xo2ViJDOiNGW+X3qbLcqjxSp0THvVQLe60I5flrE7dzZ+Xa1S98b4Wvzj/IlqxQh+1UeOubgr9PluMn8YQmklP/yuxldPeI1VmJzE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FgXzLo3B; arc=none smtp.client-ip=198.175.65.15
+	s=arc-20240116; t=1726636146; c=relaxed/simple;
+	bh=As9YAcSfIVcVorbigO5cjdtcP7FT++p9qmX0oJ0wRCQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ai9KcWU7PkYVb8AaP8RRY4jF5HCr3ixZjZuopr/zaAKrs8zFwdfSomBrAQhkFxw7fqmqdjwSExY7ZWk9S0ZdwqmT5tBI35rMSu5zAKHZAXoeNZW29wB1iETwLN6j9axUwSIo0cMG0JKQ3VJnyb7AHmiVTej7Rih6LA95OA3mExg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=eAG1H8us; arc=none smtp.client-ip=198.175.65.17
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FgXzLo3B"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="eAG1H8us"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1726634842; x=1758170842;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=lfe6CIfsEmIhyxvtIKmf4VMGfqsG/BCrr0mgzjINUGg=;
-  b=FgXzLo3BrRwz0qEV+ZXXnorGVisUsMQHaZesWG9b6uGtgwEUTWweSBxs
-   hCxt3wespuxx19SAoIlieWvVJ5jrS6/23dY0QZNfR9SNUJzMHvpzE/e5n
-   TdXbPBTfrddKQcbVtklXBDOEGnAkFmVCa/Ht2CVlrQJX/kXOdBEGSgyRy
-   CJ2+43iuTnnhXlsY2ncIRVtjlVvDPG1MLFM2z2JuGMioVt3lD/twkSWOA
-   LjdxrBhT2OIIlW3qFScMLVpT2dzagICLzVQMszYOUKGz3EInrRtpfSK5B
-   HTPuF43cmf31uE3OFl3D89h5IV2JwPCJlo0tgvkukFz+W+zKqGNdKUK3+
-   A==;
-X-CSE-ConnectionGUID: SksGDqzvT/egTCuj3xMQqw==
-X-CSE-MsgGUID: c9vvA5XtSNSt6f7kNIwwbg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11198"; a="29270354"
+  t=1726636145; x=1758172145;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=As9YAcSfIVcVorbigO5cjdtcP7FT++p9qmX0oJ0wRCQ=;
+  b=eAG1H8usHg8/n08bFZ85faWQwSPOc6SFKKlvbHy+1KW5/8FIhKDKCEsI
+   CL9TqV/6l42dXQGFz3co2W4xg0cB0Z9VlbBcGou8FXd6hsBKH0VbQv2bS
+   RNuWEHkpk1BeGo8wmfmg4EQ/snlG/71HNHbHN84rVdoXV6YPP/VwcODoa
+   M+7a/YFGXMuv4vCGRFa3rK5H7oRw0m5n0HmNtozYmAQqOVC5XZ2sBLR4a
+   GNd9suj1PiXi75gF95jkgCgAo/RxtPUM65OPT7pbcvNm91F8GQ05eLeOq
+   NbD8uPF4ta0mmm4GRlnRBq2O4I8AF2JEaUasy1TvTuXxI+1ol41tEwqf8
+   w==;
+X-CSE-ConnectionGUID: /7d10skPSn2rAIic22H4LA==
+X-CSE-MsgGUID: hqym9ymLTX+24XfwvNo9Fw==
+X-IronPort-AV: E=McAfee;i="6700,10204,11198"; a="25685993"
 X-IronPort-AV: E=Sophos;i="6.10,235,1719903600"; 
-   d="scan'208";a="29270354"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by orvoesa107.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2024 21:47:21 -0700
-X-CSE-ConnectionGUID: Qc0nLWXrTpW1wpXlQiI0rA==
-X-CSE-MsgGUID: y+21O7oWTeK2JR19Ufk3BA==
+   d="scan'208";a="25685993"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2024 22:09:04 -0700
+X-CSE-ConnectionGUID: Cy3mqgGyTzamROZvS8CXGw==
+X-CSE-MsgGUID: fdUzLaH/TGeu2Fmg+0hK+w==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.10,235,1719903600"; 
-   d="scan'208";a="70216233"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
-  by orviesa008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Sep 2024 21:47:17 -0700
-Message-ID: <dfde5172-c1b7-4c22-94ab-87a1d5d5ee9d@intel.com>
-Date: Wed, 18 Sep 2024 07:47:12 +0300
+   d="scan'208";a="73779548"
+Received: from lkp-server01.sh.intel.com (HELO 53e96f405c61) ([10.239.97.150])
+  by fmviesa005.fm.intel.com with ESMTP; 17 Sep 2024 22:08:58 -0700
+Received: from kbuild by 53e96f405c61 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1sqmvv-000Bt8-24;
+	Wed, 18 Sep 2024 05:08:55 +0000
+Date: Wed, 18 Sep 2024 13:08:09 +0800
+From: kernel test robot <lkp@intel.com>
+To: Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk,
+	song@kernel.org, yukuai3@huawei.com, agk@redhat.com,
+	snitzer@kernel.org, mpatocka@redhat.com, adrian.hunter@intel.com,
+	quic_asutoshd@quicinc.com, ritesh.list@gmail.com,
+	ulf.hansson@linaro.org, andersson@kernel.org,
+	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org,
+	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+	linux-hardening@vger.kernel.org
+Cc: oe-kbuild-all@lists.linux.dev, quic_srichara@quicinc.com,
+	quic_varada@quicinc.com, quic_mdalam@quicinc.com
+Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+Message-ID: <202409181233.1FrQNVtU-lkp@intel.com>
+References: <20240916085741.1636554-2-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V22 00/22] Add support UHS-II for GL9755 and GL9767
-To: Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- benchuanggli@gmail.com, Lucas.Lai@genesyslogic.com.tw,
- HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
- dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
-References: <20240913102836.6144-1-victorshihgli@gmail.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20240913102836.6144-1-victorshihgli@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240916085741.1636554-2-quic_mdalam@quicinc.com>
 
-On 13/09/24 13:28, Victor Shih wrote:
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> 
-> Summary
-> =======
-> These patches[1] support UHS-II and fix GL9755 and GL9767
-> UHS-II compatibility.
-> 
-> About UHS-II, roughly deal with the following three parts:
-> 1) A UHS-II detection and initialization:
-> - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup
->   Sequence[2]).
-> - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence
->   [2]).
-> - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include
->   Section 3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II
->   Setting Register Setup Sequence.
-> 
-> 2) Send Legacy SD command through SD-TRAN
-> - Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy
->   SD compatibility and preserve Legacy SD infrastructures (Section 7.1.1
->   Packet Types and Format Overview[3]).
-> - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
->   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
-> 
-> 3) UHS-II Interrupt
-> - Except for UHS-II error interrupts, most interrupts share the original
->   interrupt registers.
-> 
-> Patch structure
-> ===============
-> patch#1-#7:  for core
-> patch#8-#20: for sdhci
-> patch#21:    for GL9755
-> patch#22:    for GL9767
-> 
-> Tests
-> =====
-> Ran 'dd' command to evaluate the performance 3 times:
-> (SanDisk UHS-II card on GL9755 controller)
->                              Read    Write
-> UHS-II disabled (UHS-I): 85.5MB/s 56.3MB/s
-> UHS-II enabled         :  182MB/s 75.5MB/s
->                              Read    Write
-> UHS-II disabled (UHS-I): 86.7MB/s 52.1MB/s
-> UHS-II enabled         :  179MB/s 77.6MB/s
->                              Read    Write
-> UHS-II disabled (UHS-I): 85.8MB/s 49.1MB/s
-> UHS-II enabled         :  181MB/s 89.8MB/s
-> (SanDisk UHS-II card on GL9767 controller)
->                              Read    Write
-> UHS-II disabled (UHS-I): 81.9MB/s 49.0MB/s
-> UHS-II enabled         :  186MB/s 87.9MB/s
->                              Read    Write
-> UHS-II disabled (UHS-I): 80.8MB/s 53.5MB/s
-> UHS-II enabled         :  192MB/s 87.3MB/s
->                              Read    Write
-> UHS-II disabled (UHS-I): 81.0MB/s 53.9MB/s
-> UHS-II enabled         :  199MB/s 73.6MB/s
-> 
-> Test command
-> =====
-> Read: dd if=/dev/mmcxxx of=/dev/null bs=4096k count=2000 iflag=direct
-> Write:dd if=/dev/zero of=/dev/mmcxxx bs=4096k count=2000 oflag=direct
-> 
-> Changes in v22 (September. 13, 2024)
-> * Rebase on latest mmc/next.
-> * Adjust patch order to avoid defined but nt used warnings:
->   v21 patch#18 to v22 patch#14.
->   v21 patch#14 to v22 patch#15.
->   v21 patch#15 to v22 patch#16.
->   v21 patch#16 to v22 patch#18.
-> * Patch#14: Remove unnecessary code to avoid defined but not used warnings.
-> * Patch#15: Add necessary code to avoid defined but not used warnings.
-> * Patch#16: Remove unnecessary code to avoid defined but not used warnings.
->             Modify commit message.
-> * Patch#17: Remove unnecessary code to avoid defined but not used warnings.
-> * Patch#18: Add necessary code to avoid defined but not used warnings.
+Hi Md,
 
-For SDHCI:
+kernel test robot noticed the following build warnings:
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+[auto build test WARNING on device-mapper-dm/for-next]
+[also build test WARNING on axboe-block/for-next linus/master song-md/md-next v6.11 next-20240917]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
+url:    https://github.com/intel-lab-lkp/linux/commits/Md-Sadre-Alam/dm-inlinecrypt-Add-inline-encryption-support/20240916-170452
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git for-next
+patch link:    https://lore.kernel.org/r/20240916085741.1636554-2-quic_mdalam%40quicinc.com
+patch subject: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+config: csky-randconfig-r111-20240918 (https://download.01.org/0day-ci/archive/20240918/202409181233.1FrQNVtU-lkp@intel.com/config)
+compiler: csky-linux-gcc (GCC) 14.1.0
+reproduce: (https://download.01.org/0day-ci/archive/20240918/202409181233.1FrQNVtU-lkp@intel.com/reproduce)
 
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202409181233.1FrQNVtU-lkp@intel.com/
+
+sparse warnings: (new ones prefixed by >>)
+>> drivers/md/dm-inline-crypt.c:120:26: sparse: sparse: cast to restricted __le64
+   drivers/md/dm-inline-crypt.c:214:32: sparse: sparse: self-comparison always evaluates to false
+
+vim +120 drivers/md/dm-inline-crypt.c
+
+   109	
+   110	static void crypt_inline_encrypt_submit(struct dm_target *ti, struct bio *bio)
+   111	{
+   112		struct inlinecrypt_config *cc = ti->private;
+   113		u64 dun[BLK_CRYPTO_DUN_ARRAY_SIZE];
+   114	
+   115		bio_set_dev(bio, cc->dev->bdev);
+   116		if (bio_sectors(bio)) {
+   117			memset(dun, 0, BLK_CRYPTO_MAX_IV_SIZE);
+   118			bio->bi_iter.bi_sector = cc->start +
+   119				dm_target_offset(ti, bio->bi_iter.bi_sector);
+ > 120			dun[0] = le64_to_cpu(bio->bi_iter.bi_sector + cc->iv_offset);
+   121			bio_crypt_set_ctx(bio, cc->blk_key, dun, GFP_KERNEL);
+   122		}
+   123	
+   124		submit_bio_noacct(bio);
+   125	}
+   126	
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
