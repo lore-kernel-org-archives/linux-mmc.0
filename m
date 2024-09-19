@@ -1,130 +1,95 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f177.google.com (mail-pl1-f177.google.com [209.85.214.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3F8EE19B3E3;
-	Thu, 19 Sep 2024 12:31:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5664C19CC13;
+	Thu, 19 Sep 2024 16:33:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726749104; cv=none; b=tsYU3Kpt/NTJnHl5BrCtf3nyS+MLVCITMjxk252rlFP1PLnzh/m0D+OyzSoCjyn1QIqvsFhvlorxj76NemlOHO1APhov2ruFJ/Q7t2xkY3pKiSKZemMwxxYgrzQVGiWzmGxTRZToIwYbAdJNKSPIzWIYlTs2/4nH/WpNeolk93k=
+	t=1726763597; cv=none; b=qSCUS3+GtHHDykqmwdIFfuzhD4SqgOoF2k7Pbhu2WujGL3UxCyV4eFPB+JYiFtsJEEuj2jxZN85IGlg2PSTvnA7BrRZA0jPCCL62eLqoI4XAv7JHTgkY0bEoK+vK0dH7O932vgrPca4qX5xDPgP9bSOA5im02p49bVXv2oiVY7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726749104; c=relaxed/simple;
-	bh=Y+lqYF/Ng0G7yZGMjhbQ8WgJL8U2eedtCQjr6g7E1KY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cOCY0EwZkjoRcPEGPpBEYxw8HRXessjTyw5+nPrD6XyQM7h9PWh7hJWd2toljZFRJZS5eGY1BPClNJOPgGMp6ZGyP/apvaztXYxoYYtalPBIuxvHrOQTJSeUmIVYSh/IUjm21sVRWYkxiweC7oiDEsCftwNcuzTyFZMpaxqZJDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=DSXDN+XT; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1726763597; c=relaxed/simple;
+	bh=HKL1Vwgta/Q+VYoEnVgVolNDsQ74Lz33y1YBfi5LOpk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qCzkxCN4ijjiQodDObBRKyfgV1XfGIn/pUCeGotsgpjcVpx4D+8L/PRCSWwwezHocDVFB776x41IVrO7L++l8JB1unWlIlR2OVxu6uwH58/CLR1tdJQRS2VEOxjcO0ZzdBFB14xuJA+YAtVgj3jtif/JXYmRhL1tzUubeRxIEtY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=l3ujPAi3; arc=none smtp.client-ip=209.85.214.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="DSXDN+XT"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37F9AC4CEC6;
-	Thu, 19 Sep 2024 12:31:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1726749103;
-	bh=Y+lqYF/Ng0G7yZGMjhbQ8WgJL8U2eedtCQjr6g7E1KY=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=DSXDN+XTfpUvavhJqdwbMhRnFjNt5cdtPQXJh4g7CpObXM0EYy36uosth0YuSiVqj
-	 zH1qIPXoydAuXWSHpNH2vfuSnWdwLqWPTDh3h7PNQj/nRk7CwqbCCqrpxCtcff+g+1
-	 nRQ8cPHFLKd72uhu5BNkw3KyPvaSVZCLleppE9yXA5Y6wc6Bij8zjFmRlxDyPIQcXd
-	 eqQBHxyubQy9eCWevE/2ooS3tY/NRp+thP4BIJ6ymUYimF+8wjnFffNCVyV0bUvR3y
-	 JsM/FdCwF9GwTiddBMuySXtE7hxg5FNI00Cv1/h37bRPjGqqp2IutYSjVajuMM6P1o
-	 fTOnWkJxrQppw==
-Message-ID: <10887d65-e643-4ab2-a9e7-af0f829e88ec@kernel.org>
-Date: Thu, 19 Sep 2024 14:31:34 +0200
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="l3ujPAi3"
+Received: by mail-pl1-f177.google.com with SMTP id d9443c01a7336-2053525bd90so11635315ad.0;
+        Thu, 19 Sep 2024 09:33:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20230601; t=1726763596; x=1727368396; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dD7ZAd80cIK9QgGYjEIVdPif7fITvc0jkxvVyO4K/Sw=;
+        b=l3ujPAi3Hu6XX8ZKuuZdPbeLkCb5HQj8c7Gig7dZ4QRWXXcGvx3EjZvlIEXjgymjHt
+         xEXkI7IBU1fFipoxIB2u2x09YqnJsdf8zPn0wZ3LHanAtVp/gXew33OW85m7oy9xO0+s
+         1m/RLxu0+JVDmiUSVgnAMH4koGKFaFBqwE7KdUZf3U+eJo0FYF0EguQ8lrT2utY5/MrS
+         jkMG5rcP719yJD0AWfhm3QtkT98643h4Ue4nn5M/3pjQUB+C9Akt92zWxcue0mf57LoN
+         6oyQCNEiw65K3egqNy46tlihzdbeNoSX+6QgW1fu2m3zBrGtkRpwreENDKMkMGp1n3F+
+         OsLg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1726763596; x=1727368396;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=dD7ZAd80cIK9QgGYjEIVdPif7fITvc0jkxvVyO4K/Sw=;
+        b=fSZGf0XFjSMZsGs+LX3J1bn9HkePmllnpUCxk+EEJ9Lxb2sRs1/zk3Pgosu+C3NPlm
+         1KY+9CIAKrPBtGKcqDffiGoQAKOnLhtpBlftlwOj95sPuMxnzGIryRtmP8zx9pNG8xSk
+         kq/qS3QiL+aDae8BlbnAz1y0IhLd/trpTwBvpv215U1cX8qckzoOxJDcRneFiLv3+pJm
+         Lb2MJv7mRu0BLbzYl7NI0QpseFEDvu+tZKj15F4pTmeVq9l2jqGRmc6bztkFSRollZOx
+         64Ocb+PM8UEW/CJR5wC+6ZDbObZnr5GiBiPdm/37R5ZUtSnytRonfUAUg8i20eD93Szk
+         na1A==
+X-Forwarded-Encrypted: i=1; AJvYcCVDM3zWcL+ewPC+G0jI5KVrffXzZ8Xgy3QGlLiJIoC/JB51h5AGSe952jZkG4AO7cEaBVxa0LMOqK3T@vger.kernel.org, AJvYcCVXEPxjs/bZALwdPJaIJUlqjm1IZ1Ks1SAI+AYYhA9inml48YDCao4PV4Eb48No+Wc5uJMe7bZw0NiK@vger.kernel.org, AJvYcCXxwIhWQRHTwsc6k3iZ0wUwxvjHjvFmhB4mp1Y4Oy2Ams2LidsEgc8yogS+N2vIvIJW7oD6OVkJlgfb19zX@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx8R/XyCfs1py9l+b3JBurYtSnuNzZwD+5PoEpCc+BNtjCRBhV5
+	BZyTKUllzZNAAR0W0nKL6hKX3uNFkh9Ut16+oVtgvs2AHS93+sSE2rpevf/tZRsge4W3xAnvhxc
+	p84Ibdn75/swHW+8P3WSWtfijGcg=
+X-Google-Smtp-Source: AGHT+IEU0APxNlhgv3ZdHwNLnDsF63SfYAQ6+7TBUScvnPkZdQTFY8GHqsE1myEcFodpaTrBXEoAgJdKAo+Ihc2AQX8=
+X-Received: by 2002:a17:902:ebcd:b0:206:93e7:5845 with SMTP id
+ d9443c01a7336-20782b85109mr295593555ad.59.1726763595653; Thu, 19 Sep 2024
+ 09:33:15 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 7/8] arm64: dts: qcom: add IPQ5424 SoC and rdp466 board
- support
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
- Sricharan R <quic_srichara@quicinc.com>
-Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org,
- krzk+dt@kernel.org, conor+dt@kernel.org, mturquette@baylibre.com,
- sboyd@kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org,
- catalin.marinas@arm.com, p.zabel@pengutronix.de, geert+renesas@glider.be,
- neil.armstrong@linaro.org, linux-arm-msm@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- quic_varada@quicinc.com
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-8-quic_srichara@quicinc.com>
- <fyoh72in62sfmsw3syqswr2p3pcv26zoce2tvlx53mu4lpoakx@ixyvy4oylms3>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <fyoh72in62sfmsw3syqswr2p3pcv26zoce2tvlx53mu4lpoakx@ixyvy4oylms3>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org>
+ <20240916174030.GA835203-robh@kernel.org> <9394d785-5954-4d44-8ad0-9b57fbecde25@linaro.org>
+In-Reply-To: <9394d785-5954-4d44-8ad0-9b57fbecde25@linaro.org>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date: Thu, 19 Sep 2024 18:33:04 +0200
+Message-ID: <CAFBinCAbb5rh4GZZhjFA1jSGJAPNC80vnUY+PC9AdaApLZphmA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt to dtschema
+To: neil.armstrong@linaro.org
+Cc: Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 13/09/2024 14:52, Dmitry Baryshkov wrote:
-> On Fri, Sep 13, 2024 at 05:42:49PM GMT, Sricharan R wrote:
+Hi Neil,
 
->> +	#address-cells = <2>;
->> +	#size-cells = <2>;
->> +	interrupt-parent = <&intc>;
->> +
->> +	clocks {
->> +		xo_board: xo-board-clk {
->> +			compatible = "fixed-clock";
->> +			#clock-cells = <0>;
->> +		};
->> +
->> +		sleep_clk: sleep-clk {
->> +			compatible = "fixed-clock";
->> +			#clock-cells = <0>;
->> +		};
-> 
-> I think Krzysztof lately suggested moving these clocks to board DT
-> files.
-> 
+On Tue, Sep 17, 2024 at 9:13=E2=80=AFAM Neil Armstrong
+<neil.armstrong@linaro.org> wrote:
+[...]
+> >> +      reg:
+> >> +        description:
+> >> +          the slot (or "port") ID
+> >> +        maxItems: 1
+> >
+> > Aren't there limits in the number of slots the h/w can support?
+>
+> Good question, let me check
+allowed values are: 0, 1, 2
 
-The node can stay. Just the frequency goes to DTSI. See also DTS coding
-style document.
+For the remaining questions: I also don't know - so let's see what
+Rob's suggestion is going to be.
+
 
 Best regards,
-Krzysztof
-
+Martin
