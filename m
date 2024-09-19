@@ -1,70 +1,169 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD8E9135417;
-	Wed, 18 Sep 2024 15:59:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA5E119DF5C;
+	Thu, 19 Sep 2024 12:26:44 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1726675195; cv=none; b=rKqOkslc4FNvsIFNf8OOJJiD4p+Jc8wWNMt9yJVHs7K6vASh7709YsJFyZXnVLrYy2roDU5JSmxdMIu6XfBoYoAm9PwUMFXagqETpkb6CxC2CP31aYHntEUv4b559hOvrPtgW1sYIjDM0HvvPDWjWfYTfHBfGJuvNyHHD+lYOyk=
+	t=1726748805; cv=none; b=uZwOXdHAL3l91SrqzjuucVb0HXY0BUvVrEGcHxM1Jr0AEkA4VeWdwwUEW9NmxVhllLstx9rWrorpdqa7xPQAsp9COWlT32xrrHfyso/ROuAIVPr3JHkde7KyMORz0ztRrpP/u+ez7NUHh2oCWmfUtPiFt1eil7FSadPCVCVVW1g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1726675195; c=relaxed/simple;
-	bh=ssd4E4Wy2aozCylFzBRUOCL2VKurwdQ1PJbDrTEpjTQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=UkZ2SQwcz/Bb4M76aF5gnrhLQv0dgkYYLMz4IhZDI8QssHsOTdL2yxjhRbjfFpmVByJEAi5o48PUQvN3VGxHm1yhKAeRiC1YD3Fp7HphQXsXJl56Ubdw/JlaPhHyt/0EOcAv2DtQNegwvYQUhKUyMLiUSge9y5vw6ZbiRsabwHw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CKFxjwIr; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1726748805; c=relaxed/simple;
+	bh=leQyPxL1L0sSQwR1ysuxz2pWw20dOuldUQKtP+h8zwM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ME0FN9yEm1iNCXkAwpAwUPYEcLPq+LieOmMeA6CwZUv/iJBbm594XoVOcGCv8dGZrxOUmKT+NVT+TF1ujLr8KCIYnpj2JQ70aYesi85rUnqYVbFMjVYfsvPZuNRmJ4nB8klA9RQXRmoFne1RTtntvn2EiA3L9gwrGUKPd7hQoIE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gg4nAtjE; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CKFxjwIr"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37B47C4CEC2;
-	Wed, 18 Sep 2024 15:59:54 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gg4nAtjE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD97DC4DE1D;
+	Thu, 19 Sep 2024 12:26:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1726675194;
-	bh=ssd4E4Wy2aozCylFzBRUOCL2VKurwdQ1PJbDrTEpjTQ=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CKFxjwIrRk78SIysyYh0LjyrBjd3sXgIx2aSLXxNVQT1dtaivS6GrNlIDiAgZ/UJb
-	 duIyBPDsm4/GwEjuPd4eaDCPcwYPpbKrdjWMKB8go8dApxsk4Z3vwNxDx+tb+239dl
-	 jEsVl11vj9YcLSg4Q8DkRyE1ipkSPO/I6hzgaSM/LjXrcdjquPXaBzgQ7rW/7Nf0/w
-	 eBEVkEj768XVN3WrQxe5/TSvQYfogGg7Wo0f0xe/W3I8EjTVBWcOu0YcgCRLPcYpv2
-	 X+/7l3vwtp4ujGpc+v8LOg1MXF0c6p8AB4aMu3KgWrn/IyugTegejAK3RxhblaVNHf
-	 U9VficBLfsfZw==
-Date: Wed, 18 Sep 2024 10:59:53 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Sricharan R <quic_srichara@quicinc.com>
-Cc: linux-arm-kernel@lists.infradead.org, konradybcio@kernel.org,
-	linux-gpio@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	sboyd@kernel.org, ulf.hansson@linaro.org, catalin.marinas@arm.com,
-	neil.armstrong@linaro.org, p.zabel@pengutronix.de,
-	quic_varada@quicinc.com, linux-clk@vger.kernel.org,
-	geert+renesas@glider.be, krzk+dt@kernel.org, conor+dt@kernel.org,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linus.walleij@linaro.org, devicetree@vger.kernel.org,
-	mturquette@baylibre.com, andersson@kernel.org,
-	dmitry.baryshkov@linaro.org
-Subject: Re: [PATCH 3/8] dt-bindings: mmc: sdhci-msm: add IPQ5424 compatible
-Message-ID: <172667519255.1651891.3292301883331382762.robh@kernel.org>
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-4-quic_srichara@quicinc.com>
+	s=k20201202; t=1726748804;
+	bh=leQyPxL1L0sSQwR1ysuxz2pWw20dOuldUQKtP+h8zwM=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=gg4nAtjEGTTihQgTuabTMGp4krUy09H22B4e9WWY5uZCMWIfG8ld2gagyWgBrbA2X
+	 uqWdSwUAF4RmDDCmK3cPd3uOCg5xVJtek+Joq8ZsPvtdrulZGjeOepvUwKE+PCjxx1
+	 ROiQfMxA8bn++XQpYvHQHQZDvIgCE2EqZTO/7Xu8t5LNVhA10eB6erN6dZqZ2HbEqK
+	 cngQqW/75zt2LRK+UwNwOs5VeR7/Ww0Taa3xSnhDVqFdPH0cIGpLEAG3G+GTKtPFLa
+	 CfKkWcDctfmRBwoWF89w17cI/kU3MTaBxMbj/qBnc7am2HC5GDLtMtvCIYSYs7aLML
+	 ARMV6LVgn1kfw==
+Message-ID: <5c61af2f-9f7f-4351-a973-7d08612c50c3@kernel.org>
+Date: Thu, 19 Sep 2024 14:26:35 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240913121250.2995351-4-quic_srichara@quicinc.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 2/8] dt-bindings: pinctrl: qcom: add IPQ5332 pinctrl
+To: Sricharan R <quic_srichara@quicinc.com>, andersson@kernel.org,
+ konradybcio@kernel.org, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org,
+ ulf.hansson@linaro.org, linus.walleij@linaro.org, catalin.marinas@arm.com,
+ p.zabel@pengutronix.de, geert+renesas@glider.be,
+ dmitry.baryshkov@linaro.org, neil.armstrong@linaro.org,
+ linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org
+Cc: quic_varada@quicinc.com
+References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
+ <20240913121250.2995351-3-quic_srichara@quicinc.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20240913121250.2995351-3-quic_srichara@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-
-On Fri, 13 Sep 2024 17:42:45 +0530, Sricharan R wrote:
+On 13/09/2024 14:12, Sricharan R wrote:
 > From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > 
-> The IPQ5424 supports eMMC with an SDHCI controller. Add the appropriate
-> compatible to the documentation.
+> Add device tree bindings for IPQ5332 TLMM block.
 > 
 > Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  .../bindings/pinctrl/qcom,ipq5424-tlmm.yaml   | 115 ++++++++++++++++++
+>  1 file changed, 115 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5424-tlmm.yaml
 > 
+> diff --git a/Documentation/devicetree/bindings/pinctrl/qcom,ipq5424-tlmm.yaml b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5424-tlmm.yaml
+> new file mode 100644
+> index 000000000000..a16d9725e368
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5424-tlmm.yaml
+> @@ -0,0 +1,115 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/pinctrl/qcom,ipq5424-tlmm.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Qualcomm IPQ5424 TLMM pin controller
+> +
+> +maintainers:
+> +  - Bjorn Andersson <andersson@kernel.org>
+> +  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
+Sorry, not me. I don't have this hardware.
+
+> +
+> +description: |
+
+Drop |
+
+> +  Top Level Mode Multiplexer pin controller in Qualcomm IPQ5424 SoC.
+> +
+> +allOf:
+> +  - $ref: /schemas/pinctrl/qcom,tlmm-common.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    const: qcom,ipq5424-tlmm
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  gpio-reserved-ranges:
+> +    minItems: 1
+> +    maxItems: 26
+
+25, I believe is the max in such case
+
+> +
+> +  gpio-line-names:
+> +    maxItems: 50
+> +
+
+
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+
+Best regards,
+Krzysztof
 
