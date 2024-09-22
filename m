@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 818C94A15
-	for <linux-mmc@vger.kernel.org>; Sun, 22 Sep 2024 13:35:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1C2A4A3E
+	for <linux-mmc@vger.kernel.org>; Sun, 22 Sep 2024 13:35:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727012115; cv=none; b=R2p8k6raOXNQh+bIylTmO42CFFkhaWug/y5IDuba3sK7FxEuj6eQo6wSt7o950poHLC7E3KxvrGbRKDo4y4RBdDUCRXhjmz51ki1bE7XU2vmTH+MsDeSMQLRCF1BA7o8fNhoBZOBpAF62eV9J0C7WlUDjQIvEBZqIwLT1J3lAkQ=
+	t=1727012117; cv=none; b=lbCErVfq7eKxYVMg3qZLq0kwejrQ0a+ACfJEggl2SDbfkoNOqHPAQhCUaHWIhLMJxIudPUvCWLt2FC+NCTjCn1lCGTM1KCqvihtjMrOw/MFGwiHft1pPRTDzGZHV+NDHxugB/HT6HmOHSAcek3oB4Zq9lLdht02jEio4XZdOwJM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727012115; c=relaxed/simple;
-	bh=xjBU4L0aHIkqZSkwBqdq8zAnqtUz7GIZA6VxF2jF3iY=;
+	s=arc-20240116; t=1727012117; c=relaxed/simple;
+	bh=G3Jne/s1Ww8bwtfK0Q4npEhQ/sdI5eIKyV41pJHo7RQ=;
 	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=Vq5Xe2m+VvO1ZBdqdMs2IcVA0lxftUJAM4GkpWyuKK40KVk0AH7lRE1V3qY8vPjok5rUVO4vzN0ZoEfnkboPRmo85qT1bBcYxJ5uGBHcfeLAc09MV92qC6kyO+t121890Fuh8tTOzcE1EVHKbodVA5eZvLnfKJ3ngxN7kK2n36s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=siEqCQu8; arc=none smtp.client-ip=10.30.226.201
+	 References:Subject; b=pAwwqkLWL+D/5F4HZxs3DK3TT8OZy2PirJjUhRG5pQEFySnN4SXi14/il6pfX2T14i70FeM8cDxX632Qg+7fTFA7QjbRsdXRmZuT7njJ5gyqvTozM5ulwgRJSRpKq8sk1W8uHkoKtaoMP1rPebiYYG2LEDEf+cXCsNhUY1tcldQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H2dz8cMF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="siEqCQu8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F01BAC4CEC3;
-	Sun, 22 Sep 2024 13:35:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H2dz8cMF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41201C4CEC3;
+	Sun, 22 Sep 2024 13:35:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727012115;
-	bh=xjBU4L0aHIkqZSkwBqdq8zAnqtUz7GIZA6VxF2jF3iY=;
+	s=k20201202; t=1727012117;
+	bh=G3Jne/s1Ww8bwtfK0Q4npEhQ/sdI5eIKyV41pJHo7RQ=;
 	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=siEqCQu8xlwXJHmDBQT5+n/UwKCB/2LxVoUT5gTRD2iG34iz2C6sXT4mJgwPikJwq
-	 ZFIAzEIOakTLeYgY+6IqclMRI+YWKpk5YWUUKMloUzxDKr01S4zINtIJFRyMOMXJC4
-	 assLmdWaStMCLuip4Sjz9bITPCZUeN/Lj5sBOAAW0UAbHkbmlA2vy672EhLDP7c5A+
-	 Xr6syGHkrVnOoJ28qUsGsr3U1vCMiosx/OSmuDIy42xn/tNrJQ55dJ2gnoqgicf5Q5
-	 TI8Tb6F3v2wHTpYUujTECIrmKzs25kpvcNAelpfrFI2oSV8mWfZyjuQWQt/bNjPP2Q
-	 gPcOvOgpoIDEA==
+	b=H2dz8cMF7V9HPkf/eFZ2tAHtk5Wb+0Yk/2zAOuhFVknKTk0iIb2g9fIAHw4lERpsk
+	 9AGzDPM7x8t0RoZzHTpFOk4VDetuKc1qGcpWDl+rjITA77elKWrvmm3SYOL/CR/kil
+	 av9do1ILb9DBnDiXRcuUABnVdO8l0ziIujuG1Q7z/1nmcqr4FCa+Wq5gGA7uhhQPXl
+	 0W/9QjlqeuIw48jNhw0Llm0Wv+IrGvZqhxgRAyNaAXG1sFEsx6et94lNwQyq04p3Xq
+	 bigEi2130Lf6lmfIcxW6ebRyKenV72+H/GF3x1KWTWg2cxFoRVsYix6cmaPGNW8ADH
+	 VbwlzWDj0/8jw==
 Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 7130C3806655;
-	Sun, 22 Sep 2024 13:35:18 +0000 (UTC)
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id ADD543806655;
+	Sun, 22 Sep 2024 13:35:20 +0000 (UTC)
 From: Thomas Haschka via Bugspray Bot <bugbot@kernel.org>
-Date: Sun, 22 Sep 2024 13:35:11 +0000
+Date: Sun, 22 Sep 2024 13:35:12 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Message-ID: <20240922-b218821c4-637a3f6d7112@bugzilla.kernel.org>
+Message-ID: <20240922-b218821c5-3e174e22b99f@bugzilla.kernel.org>
 In-Reply-To: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
 References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
 Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
@@ -49,40 +49,17 @@ X-Bugzilla-Product: Drivers
 X-Bugzilla-Component: MMC/SD
 X-Mailer: bugspray 0.1-dev
 
-Thomas Haschka writes via Kernel.org Bugzilla:
+Thomas Haschka added an attachment on Kernel.org Bugzilla:
 
-The problem starts already at kernel 6.6, at least at 6.6.52
+Created attachment 306908
+kernel config with working mmc driver as of kernel 6.5.5
 
-I also tried to modify: 
-
-drivers/mmc/core/core.c
-
-essentially reverting it back to it's 6.5.5 state:
-
-diff linux-6.5.5-gentoo/drivers/mmc/core/core.c linux-6.6.52-gentoo/drivers/mmc/core/core.c 
-554c554,556
-<       mmc_wait_for_cmd(host, &cmd, 0);
+File: 6.5.5-config (text/plain)
+Size: 161.60 KiB
+Link: https://bugzilla.kernel.org/attachment.cgi?id=306908
 ---
->       mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-> 
->       mmc_poll_for_busy(host->card, MMC_CQE_RECOVERY_TIMEOUT, true,
->       MMC_BUSY_IO);
-562c564
-<       err = mmc_wait_for_cmd(host, &cmd, 0);
----
->       err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-564a567,569
-> 
->       if (err)
->               err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
+kernel config with working mmc driver as of kernel 6.5.5
 
-doing this I was semi successful, as
-
-mmc0: error -95 doing runtime resume
-
-still showed up, but after around 1 minute of waiting the driver seemed to have recovered and continued working, until failing again a few minutes later. Which causes large long stalls on when trying to use the card.
-
-View: https://bugzilla.kernel.org/show_bug.cgi?id=218821#c4
 You can reply to this message to join the discussion.
 -- 
 Deet-doot-dot, I am a bot.
