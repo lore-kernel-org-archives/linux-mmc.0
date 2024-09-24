@@ -1,152 +1,116 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 41FAE1527BB;
-	Tue, 24 Sep 2024 09:18:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4464218C325;
+	Tue, 24 Sep 2024 10:17:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727169508; cv=none; b=JrguPa2LfbpmHM+SH+prN9018Bx3yTZwXCqnH0TDPNsKbP2sFy2mn/DkC3XdNpXI490KTFtZUMXX66LwgDjkyiNwcDZTyEKCEuG4sOE2Qd3lNrdbNn7UWEh9996UHOzcGZ0MK061e+wIxUkXFnbwp0uFnhHwk5+zd58mqzs0SFU=
+	t=1727173064; cv=none; b=ku3MAo/HSPeG69CMJlcnJOtLzKOXrr8FXMYICAFIfRpWrtTwiqvEbWRlfvmnsKs/QPkD8IMgHv+2KVn65sZ6+di7LBVN1Fb3NnaBCB6KkukH4GSXTQKc1CnTFIRhjO25tlfGKxz3xIIprfi2Y+mjsHK7Tk7ms1nJAmQysf2X6iE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727169508; c=relaxed/simple;
-	bh=pN30MXgNTMZzoPVWBePwvf9D4eXRBCcLLbOa8I8Cew0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Kbn3yPgCmJOYQSFDDf2XaHdem/w3k8NV7r675Ls1ahksLApN/Ie31uevmHbpL43WjBbJIAJxf63k2ezyQkUiSn+NMHm/ocFI9TuQ6x2iZlfftQiNDOu4pfaAhMtw+M/j10GI5xS0XjMLi3MxcmJgxjTynKsPsAKfxoMOOvSFkJk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HEflUu9N; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1727173064; c=relaxed/simple;
+	bh=MOrv/PO4+p/q2gx2H/jXlnLEDH+f3OEGh0lgTFRI7QQ=;
+	h=Message-ID:Date:From:To:Cc:Subject:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=VCmewtgXF0Sfi9Dz194/EUoMXXDnPF4/MWnhMWGd5ILy++e3UqwdrmeqDlRhcsdDmw0cNEXq8qkbvH7WfuzQRhPvKpO8xt1PM61wJEm2OTP58Lm0CdeS1Y4fcU8bb/eK2HJF28Ab+LcX0pYXoxAeGD6uLmaPJVlTMwvt24uC/jU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Z38oR2E1; arc=none smtp.client-ip=209.85.128.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HEflUu9N"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0DCF8C4CEC5;
-	Tue, 24 Sep 2024 09:18:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727169507;
-	bh=pN30MXgNTMZzoPVWBePwvf9D4eXRBCcLLbOa8I8Cew0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=HEflUu9Ndq28Rb1X+YLgRa/Jabxwf9wTMs2iBS3b6ERa7ny6Gjo17THqNzWiXZEXi
-	 glkjl132IGbmFozdqvKpFWCFCuQgGVdjB3inDKNBfgatfoxcA23wNlEFSW8G5hRSMf
-	 8LIYv8IK4uNhW+2gF6v/00nP+eGH7eC0Wr7WVtcUqpoHL2SiKAUXWrhXRlJhOWZ8pr
-	 /a+pXkI2Nz2EJepVEkhkbddQ/AvPHe5J7gg3sgD/xvyHPhtiHHDbuvYACOE7ckNN9V
-	 JNVzU2vI8ns4ClKmEn9zYcnmrJ+RP0mV009AB7mD19N2oiCKbpHp1+CSbV6E5fm8Lk
-	 jlOv0mh2rYZ4w==
-Date: Tue, 24 Sep 2024 11:18:24 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Neil Armstrong <neil.armstrong@linaro.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, 
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: convert
- amlogic,meson-mx-sdio.txt to dtschema
-Message-ID: <mbc2cacow73vmwn3w42aucq6x6xijbpgustkv3v6etgv35xih7@truf2rbgf3vo>
-References: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org>
- <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-3-5aa8bdfe01af@linaro.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Z38oR2E1"
+Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-42e5e1e6d37so53307635e9.3;
+        Tue, 24 Sep 2024 03:17:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1727173061; x=1727777861; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=Y6yq/DwFQfx4tBwrb6K58nwBTecQ5jjhs54hsQLsb9E=;
+        b=Z38oR2E1dsCG6CNYo51evLlunqZ20cOYS4Ppt1yoZVdkMgZrKv9J02i7f5MIJIy3pz
+         lkMSfpTAA+vi4j8rfgTcRDMV+pyNivEHEFEYEqdquoD3s8nsx/y5A+aAAjWzaMBHac4t
+         E/5hCXTtnNjJzomGLqD4TxFpbifNJn8rSyb7+K38wTOIEW46cHHxZZ2NKG06dh0f8Em5
+         8Rd9iAdTJTUz8BeDl7k/zz2K8LNPkScGNJOCVnr9Q8TmsEIp/pOqTVg+6f7NKQXGNcbq
+         uJHAtmOB1kddFNtYL3xiRil60W2owfkiSgiuo0LSZquyrcget57b+cYAhhaDz41yfVKH
+         aoYQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727173061; x=1727777861;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Y6yq/DwFQfx4tBwrb6K58nwBTecQ5jjhs54hsQLsb9E=;
+        b=p0e9xjdoPsHRZPsvLGPtoL7c+9HW0mIRFQ0DfQp7DsGV2QHIwIC+OfWqKlCj09uFCq
+         S53SaAHP/GA40dSSx09SjuQ9ewmcpSwQcvDnfTWKl6i+d/J85kUIUKuo0x/L3LVarJk1
+         T79DBzMRdfLfP4Gvc/RNJF6Tl3cVHuPIkBEii7MWqTDQRsUTR99MpBcbvzUgdeYIqUT2
+         INwiq1IvSasrxkREH/v2cExy393TRXrVL42VvotAhKPzbLLuNHBa3nupUzmVD/ZI7xOz
+         ko5VhnIwLADCBbfpNcXV1v0tQyX5EoUWnH+6vXXpzDpKxr/Ee+g7G6RM3mgSvNH+wso8
+         F92A==
+X-Forwarded-Encrypted: i=1; AJvYcCUa5DXOhQ05b3n85NeKxyw8XLhlYJxl1eC3Wxft4BM8JzWajpiS4jB3BJTZ1IcBgzoFguOgkATuuOOp@vger.kernel.org, AJvYcCUqk/Ob0M8x0mpUd7P/rRkUcpbceFVHAvz0O9e8Fgvptzhn0T2QSGO14lw8W69JnOhx91cvlvWIFXcMrbg=@vger.kernel.org, AJvYcCXLURe4W8R/yDkprd9Riobm0dbO62aJaGr5xjDChiLLOcCiPc/r+5iEmV2kGdUUE39xiPfBOveSxXnddbRT@vger.kernel.org, AJvYcCXNIb06qukqmiqIWrPdgxOXYO3sivBKaTUPf4WnTfPODG6d4f00N3CmMMsLvu8BmdIPcrmy3yEmkV5X@vger.kernel.org, AJvYcCXq5PWCz4UTjuTyBHUUT6/nR76i3EONd3Tm6KQeMODH9JRzt7i0FeRon9nb4ryv7wBmYUYNkbSJ6ra+@vger.kernel.org
+X-Gm-Message-State: AOJu0YyS0dClzAe7bRGqyUWI6NAWJjOaBxkHuYJq+jW0fXInORs1tMP1
+	18a0C0YVGdkDuzSs1e8OlPytss/7XUNjUuCoib/1/8Ugb9jwNyy+
+X-Google-Smtp-Source: AGHT+IE83mnLUuf+4WZRfrPw50LD+lxqX8rWtjINgvgK2vW5eLA5p3k20e4sMLnXxjQweQjgZ91oYA==
+X-Received: by 2002:a5d:4488:0:b0:377:9867:9028 with SMTP id ffacd0b85a97d-37a431ad4dbmr7918215f8f.44.1727173061365;
+        Tue, 24 Sep 2024 03:17:41 -0700 (PDT)
+Received: from Ansuel-XPS. (93-34-90-105.ip49.fastwebnet.it. [93.34.90.105])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-37cbc2c1ef1sm1188238f8f.35.2024.09.24.03.17.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 24 Sep 2024 03:17:41 -0700 (PDT)
+Message-ID: <66f291c5.5d0a0220.328e5a.2c9e@mx.google.com>
+X-Google-Original-Message-ID: <ZvKRwI3zrXURbYKS@Ansuel-XPS.>
+Date: Tue, 24 Sep 2024 12:17:36 +0200
+From: Christian Marangi <ansuelsmth@gmail.com>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	INAGAKI Hiroshi <musashino.open@gmail.com>,
+	Daniel Golle <daniel@makrotopia.org>,
+	Christian Brauner <brauner@kernel.org>,
+	Al Viro <viro@zeniv.linux.org.uk>, Ming Lei <ming.lei@redhat.com>,
+	Li Lingfeng <lilingfeng3@huawei.com>,
+	Christian Heusel <christian@heusel.eu>, linux-block@vger.kernel.org,
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Lorenzo Bianconi <lorenzo@kernel.org>
+Subject: Re: [RFC PATCH 3/4] block: add support for partition table defined
+ in OF
+References: <20240923105937.4374-1-ansuelsmth@gmail.com>
+ <20240923105937.4374-4-ansuelsmth@gmail.com>
+ <ZvJdjRpFaPUuFhIO@infradead.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-3-5aa8bdfe01af@linaro.org>
+In-Reply-To: <ZvJdjRpFaPUuFhIO@infradead.org>
 
-On Fri, Sep 20, 2024 at 10:38:05AM +0200, Neil Armstrong wrote:
-> Convert the Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-> bindings to dt-schema.
+On Mon, Sep 23, 2024 at 11:34:53PM -0700, Christoph Hellwig wrote:
+> On Mon, Sep 23, 2024 at 12:59:32PM +0200, Christian Marangi wrote:
+> > +#define BOOT0_STR	"boot0"
+> > +#define BOOT1_STR	"boot1"
+> > +
 > 
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+> This boot0/1 stuff looks like black magic, so it should probably be
+> documented at very least.
+>
 
-...
+It is but from what I have read in the spec for flash in general (this
+is not limited to eMMC but also apply to UFS) these are hardware
+partition. If the version is high enough these are always present and
+have boot0 and boot1 name hardcoded by the driver.
 
-> +properties:
-> +  compatible:
-> +    items:
-> +      - enum:
-> +          - amlogic,meson8-sdio
-> +          - amlogic,meson8b-sdio
-> +      - const: amlogic,meson-mx-sdio
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 2
-> +
-> +  clock-names:
-> +    items:
-> +      - const: core
-> +      - const: clkin
-> +
-> +  "#address-cells":
-> +    const: 1
-> +
-> +  "#size-cells":
-> +    const: 0
-> +
-> +patternProperties:
-> +  "slot@[0-2]+$":
+> > +	partitions_np = get_partitions_node(disk_np,
+> > +					    state->disk->disk_name);
+> 
+> disk->disk_name is not a stable identifier and can change from boot to
+> boot due to async probing.  You'll need to check a uuid or label instead.
 
-^slot@[0-2]$
+This is really for the 2 special partition up to check the suffix, we
+don't really care about the name. I guess it's acceptable to use
+unstable identifier?
 
-(because foo-slot@22 is wrong)
+Thanks a lot for the review!
 
-
-> +    $ref: mmc-slot.yaml#
-> +    description:
-> +      A node for each slot provided by the MMC controller
-> +
-> +    properties:
-> +      reg:
-> +        description:
-> +          the slot (or "port") ID
-
-Drop description. Should be rather part of mmc-slot.yaml.
-
-> +        enum: [0, 1, 2]
-> +
-> +      bus-width:
-> +        enum: [1, 4]
-> +
-> +    unevaluatedProperties: false
-
-Hm, I wonder why not all slots are defined in your DTS? Why not all of
-them are required? I assume the slots are there always, as part of the
-controller.
-
-Is this because of driver limitation mentioned in the old binding?
-
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +  - "#address-cells"
-> +  - "#size-cells"
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    mmc@c1108c20 {
-> +        compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
-> +        reg = <0xc1108c20 0x20>;
-> +        interrupts = <GIC_SPI 28 IRQ_TYPE_EDGE_RISING>;
-> +        clocks = <&clk_core>, <&clk_in>;
-> +        clock-names = "core", "clkin";
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +
-> +        slot@1 {
-> +            compatible = "mmc-slot";
-> +            reg = <1>;
-> +            bus-width = <4>;
-
-Best regards,
-Krzysztof
-
+-- 
+	Ansuel
