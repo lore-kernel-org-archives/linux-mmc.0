@@ -1,107 +1,109 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 746594AEF2;
-	Wed, 25 Sep 2024 17:29:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 081FB24B21;
+	Wed, 25 Sep 2024 19:05:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727285378; cv=none; b=cBulvPFmJVYU/6yojM7z7pL8qQzXvhMNk5fJNYcFXbaw810CvdEWdOY1dYuIY1XYsppW62ZNhFyW9fGp0yPEr3KskzzV4efsLCjQeT8laOdJcnWKp5N1UPgoATW3Pg0XaKygJ5ptH/Pv6k12jESGusWA/Z6XfGja9DyvBCZ3paE=
+	t=1727291129; cv=none; b=NJrYvwAX32tUKlJN7hwYuke3jjOGWpm24ZTQGuAKZ6sGJSN8Wz1hKKT6urxxO35MZ67DvHWkzDzKQilGRFMmqM3vgI+5E3C9WDVIB1jt85uEzuRfzuzB3UjZTfHSH1rAX2j82QDZeeBOrQfJDktGb9WzYqw2T+Jkho7BAmbgXh4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727285378; c=relaxed/simple;
-	bh=TPOpswsdijw5gm3RbX6cBpr2bSe4KFnYCCRVAKV7fBE=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OGgWCde8pjCx/LXSMnmWnkBa8G3z2BvqZBnWBEDULp1t8my2aL6NJpUKN0+Je8RUiAP6PqGwTbtP3svhTfxV+GipWcKjbQ5Pr0iB05ZEJjbLOFhljjcfNAsUucceNEqGrHOuYaCRYTYGLEzX8IuImLBKTf3evcMi+O5QnFMbSwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=ZCH7+8Rm; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	s=arc-20240116; t=1727291129; c=relaxed/simple;
+	bh=qVyuQ6fOCy7zVhuYfHZM/BSnMq7CmNDmuS9VNsG6Fus=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=aAs0LPWJpYJXzyDvnL6LPtQCY52xMX+27qYQ+yfJ/k3AHhZy4VtkK0VUXbUmY9jbQkoVWS3N+htHuWpFe3+BD6cnXu7fPRJwQCb1x/pXRdoDMun5PhvufC4++u4lhu/Xf5aYvljKSSonZBK9lR2HzAEcg0QiaYKldn32TWf8+lU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=gPzsKG+p; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="ZCH7+8Rm"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-206aee40676so472375ad.0;
-        Wed, 25 Sep 2024 10:29:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1727285377; x=1727890177; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=76c1gfIJ44N/4frQpedFLzuDh4DDf4ytBF5LgFjIvvY=;
-        b=ZCH7+8Rm+cr8Q4ZBhABe/IrjKKsJhGXxpwCUuKvgCF8//Ja4aADmPGC3M/VV9H+Uyx
-         YFcSbAK+6DKQAtALAAP8OZ9nXc77W8f17RR/G3e6HCJiIJZAdDLCggZa5ouhj0gKJaEo
-         u6OOk9ZRrCExcZqbfsasNei82Gd6BzqJHbZObOk6C2CTmxKber05e1PF+qOLXGUsGJig
-         3ZTLJELwq/lVXBmO0OM60ePfCGzeEkeW3VBfd1D7XJlJrhKb/ykBXPJYVjhwZRB5iB0l
-         F5X1T4wrStj8kqie3OzOQv5BUxa27LUSZ/AVAHmGo9g6TsYikSJreKxBGrMjiyc4ujcq
-         qMjA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727285377; x=1727890177;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=76c1gfIJ44N/4frQpedFLzuDh4DDf4ytBF5LgFjIvvY=;
-        b=qgulJGd0OpsEdjPdjIyRXFHDQKLy5n3Yhchv/mh7ofCUHEsjKHmSEjp3cmRz84mdQX
-         Pvgu3AVa9+SNHmqzzLa28q/K4n1oRQvUvrOoD2JPZN2YC7phyN1m8SuMyL9jF7N+OYDD
-         WbKSEvmzA4PTad3jGKzrRzTuHhMBdtKersBX3/HXwYKxv2WyRursp1Hf9827YUH2Takb
-         XtC9d4ZG/2p4NlYl8z9jkva8zuCuKF8XOgSUOypyPVlV5PLhYWyVBOPg6i2PhpJ8P322
-         AE8HmbsrLcMUMTjlkD/P/7wxFizEJmIWaVtJDhrnt585J5m24D64pRXotc5WGZDcpJD3
-         Rqdg==
-X-Forwarded-Encrypted: i=1; AJvYcCVkL417E1b1+evUQEamco0dXbYj4etnKZNsj7XbsBvtJK3yJnpMElufM1U2MCLtyGSe65mbcSfFLmvi@vger.kernel.org, AJvYcCWmrWcL5rZdVkE1YmPPXeA2CbOgrhOSS2l+wOu72/IJeCSJ85bhni70mPmTIZgRL35BeMxh4aZznxm6@vger.kernel.org, AJvYcCXcp0q0ujHcxUxSTaWcEII/onzrFGItRmpgpouSlBr+hi60cZnl3oEPgS7ncQs0ZbozkirQQR8p7FspnYrZ@vger.kernel.org
-X-Gm-Message-State: AOJu0YwOHNqsIFihRNQXWUKz9ArKLs49lkfNg1+iQFcSSoXHmigWNF3t
-	I18MdUqDsuPYFjPbBkSqaMQdga4DGkNM+eWMiLpLo/ScUDd71WKA35TACSbfZVgmzphftW5Etrw
-	ENQj1IiRQ1MULonWlh5O54a2DqP0=
-X-Google-Smtp-Source: AGHT+IGL8Tarnw4aOxyngiyyJMw2bFTvc8HSfobctrnuSaGxAiJN+XPoCfQJeAeS5waKELhDrIf1ZNEdC7ArTM2uMQA=
-X-Received: by 2002:a17:902:f707:b0:206:8f25:a3e with SMTP id
- d9443c01a7336-20afc60958amr46716805ad.53.1727285376595; Wed, 25 Sep 2024
- 10:29:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="gPzsKG+p"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48PH5Cu6027637;
+	Wed, 25 Sep 2024 19:05:11 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	wpseR5rYPGLdp3ACOwGjh50SXZEk1xxy1xMTOQ/DvPs=; b=gPzsKG+pSfX1KG4l
+	9EIvIw4VF7/CWfkK5H8T+A5SId10xkCQYVa9bVW2adl5E6GIRbSRpxqB4YEJJg15
+	RcDbea19Gfi7eseiFhVJm7Pl45asCO4Q9hBIwswwAcceSgZgUxALMD6Njx48TT2I
+	ilUOqwJUYKcbtlVU7dXdc/sKlY1/jJZ/3FG2mq5SurRjFDbZo0NK1R9QdYNHXj85
+	fTJd4niXcEnWKROIJELhPMYPUkHPFKljbAdyT/P8Ly+HVL0oAVzC+ccmDuy3N+zY
+	t4qEhROMvqcwXjCmmfc2Dx6zoDyUyDvJzSrUyIOnmWScaeYmh0bYfZ//yyBNH5Qz
+	IU8xQQ==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41spc2w3jx-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 25 Sep 2024 19:05:10 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48PJ59if010435
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 25 Sep 2024 19:05:09 GMT
+Received: from [10.50.63.248] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Wed, 25 Sep
+ 2024 12:05:00 -0700
+Message-ID: <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
+Date: Thu, 26 Sep 2024 00:34:56 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org>
- <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-3-5aa8bdfe01af@linaro.org>
- <mbc2cacow73vmwn3w42aucq6x6xijbpgustkv3v6etgv35xih7@truf2rbgf3vo>
-In-Reply-To: <mbc2cacow73vmwn3w42aucq6x6xijbpgustkv3v6etgv35xih7@truf2rbgf3vo>
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Wed, 25 Sep 2024 19:29:25 +0200
-Message-ID: <CAFBinCDu0P8QEvxrUdXXSVCn-1061fjyhYd2nve9QCCvXmoe5Q@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt
- to dtschema
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Neil Armstrong <neil.armstrong@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-Hi Krzysztof,
-
-On Tue, Sep 24, 2024 at 11:18=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.o=
-rg> wrote:
-[...]
-> > +        enum: [0, 1, 2]
-> > +
-> > +      bus-width:
-> > +        enum: [1, 4]
-> > +
-> > +    unevaluatedProperties: false
->
-> Hm, I wonder why not all slots are defined in your DTS? Why not all of
-> them are required? I assume the slots are there always, as part of the
-> controller.
->
-> Is this because of driver limitation mentioned in the old binding?
-The MMC core (still) has a limitation of only supporting one slot per
-controller - so a limitation will stay in place.
-
-However, the driver (drivers/mmc/host/meson-mx-sdio.c) uses
-of_get_compatible_child(), meaning it will also pick the first child
-node with the correct compatible string, even if it has status =3D
-"disabled".
-I can send a patch to reduce the scope of this limitation: all slots
-can be defined but only the first enabled one is used.
-What do you think?
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
+        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
+        <neil.armstrong@linaro.org>, <linux-arm-msm@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <quic_varada@quicinc.com>
+References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
+ <20240913121250.2995351-9-quic_srichara@quicinc.com>
+ <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
+Content-Language: en-US
+From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: csX6H1xMjELLFnLE93bvSt3TXFmGLJf0
+X-Proofpoint-ORIG-GUID: csX6H1xMjELLFnLE93bvSt3TXFmGLJf0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015
+ priorityscore=1501 suspectscore=0 lowpriorityscore=0 spamscore=0
+ impostorscore=0 malwarescore=0 adultscore=0 phishscore=0 mlxlogscore=561
+ bulkscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2408220000 definitions=main-2409250135
 
 
-Best regards,
-Martin
+
+On 9/13/2024 6:23 PM, Dmitry Baryshkov wrote:
+> On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
+>> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>>
+>> Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
+> 
+> Please name the device rather than the platform. The defconfig affects
+> all users, so it should be justified.
+> 
+Sorry, to understand correctly, you mean to use the board name here ?
+
+>>
+>> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> 
+> Usual comment.
+ok, will fix.
+
+Regards,
+  Sricharan
