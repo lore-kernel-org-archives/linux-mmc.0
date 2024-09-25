@@ -1,111 +1,175 @@
-Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
+Received: from mail-wm1-f45.google.com (mail-wm1-f45.google.com [209.85.128.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35A80145B25
-	for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2024 21:31:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE0C81534FB;
+	Wed, 25 Sep 2024 21:46:41 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727299905; cv=none; b=iRips9Fgo3QKlrsGPpk6o3FmOdSch9ClSmdU85YKD9MY5XAhpb4xsZDxUBQj73+FULEmlqboswGlJ1POVTXM0qlN0BqJmd1XDoUf6KND1Kh5F4clIyOjBU3kbzabHJ0ShYDAVBIyvxKY/2jWBArrpUWGCawVfwj3kM5bSQdrLn0=
+	t=1727300803; cv=none; b=aKkP9gUnF3uFaspMRK+FetUmj68rofdt5s1yMd1gxvw0TFUPlGCrbSNm33ou2DG6SesFXFdGc+NYwKhtMlWP8GjPS6WJLFcXBTngns+n2xjyqotf/N5RjTeUcFSt9alC7/MdVk4qNMLsyniQRd5iyclIfJeJcPBB8QSilTMlSdQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727299905; c=relaxed/simple;
-	bh=q1hnfW/UYENj/VV96bgSolK/g/2vdQSz2wVyhQteCPs=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Sb7AJoe0k60T2qv3giRnnzlhDtLk79+x8VtmeefzM6a6tw0EJVwGZcnmHG6PKaoSUyrqq1+pt/iBZTEYfFyFQGisNhgqwFbxvS00B/b4KX8Dr2LMGeOU+WhCLqPahX/kcFgm4bAGv73h+7JVynEiLggDSAXMdJu09b0+SGebQAU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vpHxw83B; arc=none smtp.client-ip=209.85.167.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1727300803; c=relaxed/simple;
+	bh=hKPqj54rfSZOJYhQlr4OrA/L/22OYdi+JxkaqQ4JVug=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=FI/haenZMUE84LnXBrD4j9FbGZ9+h8iDMD3d2FhBQ25WFAgI82d14t7pWmf4Y2F44S+U2KannmPkrcucgm4V2EfWE0E18rGVAaYcDuNqCzuML9yFkTMmNa41vOQAKPAj+kdZwseGIcYYNgZBQPiF7GTQkOAUcPeLmYw1tAneGUI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Dii5f39l; arc=none smtp.client-ip=209.85.128.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vpHxw83B"
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-5365aec6fc1so353784e87.3
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2024 14:31:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Dii5f39l"
+Received: by mail-wm1-f45.google.com with SMTP id 5b1f17b1804b1-42cc8782869so2334405e9.2;
+        Wed, 25 Sep 2024 14:46:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1727299902; x=1727904702; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=g2gRWXk6um8ssZG0dTYz3h8O6sPux+vtNyTeziNQM+4=;
-        b=vpHxw83BEcxXUiXAHcwannMowZ5Cp/Zm0//e9txywTNF+VvbYNu8F1jTKNov+mH/Ns
-         5hHQflIjhKUl5G/IPTQ1QlYBoyLU+pl1Qt4Mx572kqq6ImpdtT9nvn7R1iEEZdIHMOxB
-         SzftUfPVRDvh/dh4iGooNg+6fQdfSwKqC2XOKsnIbMuGDmC0MWWgUrNTgHl0q+YB/QjH
-         E6TDD2eqeFktH3aKA7aTMaEBEEEm2Bnp4OTeVI5cdWgWqIyT1MrP4YYAq9UO8Q2phjMl
-         Cl+YWdmPf1FQZtaE2nhr2VGc1ZXKepGxtu0tMXMKlhUgIh3yLSandXdoVQjX1kgBeB6r
-         TSUA==
+        d=gmail.com; s=20230601; t=1727300800; x=1727905600; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=GVmVgaclLf08yTC2h5OjCOTI7DSU5jBV3Cn+WzQVxUs=;
+        b=Dii5f39lmEUHDJoMMFW7d2zFhiH4bEGYeUw0AQ03txVdJgV/wZHsw8Eb1zdDZ671jK
+         eEbYk3dvpgwfDsKPYNUgM4jMcsHvHqWFHYeH7bMaowIEWDXhAjlOxCjvCxNZ5ix3iT6u
+         Xj9SG/rPpjIOGRFgzhO9wxkJMpDp7wmxHXL37FPVmjaQlkO0+D/6zEBSA/kU3nstbpjh
+         jMsI07Dzcgee7ZLZXxSPev7okgUmvFU1j9JZUh4wvqeN7VFOZA+B5uy4/Bf5xqzM2Ucs
+         xFkFh6Jxhx5OH6wK0MLnFroyEB8mbTrqIkTJbTzSCYCcVvPoZexjDgvXS5jS1VVmtLyS
+         Yabw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727299902; x=1727904702;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=g2gRWXk6um8ssZG0dTYz3h8O6sPux+vtNyTeziNQM+4=;
-        b=FGjXkZbEN2W8RVgl52R+FBlTYiryI1s5DeGBToCnSZONa38RZdhpEIDE07ZeSQ+7xr
-         KICSPoIYVAv4ouXv2cyVBn61NB5EJY9IaY4xr7raUeymucv71O/Xu6GmYVcaxx+AaDNo
-         Lg90Ti1j8UcCXg0+4jqIPoYp2NIw8jl+oeMtSmv5A2aF1fFU9QPU/YqY7kDQGics/vPX
-         89VebhLyG9x7fwnjD7DNVyJ1U7Xo6fDGQsUBRa3DSAW9xViQ3wk2K0I31K9oLj5M2VCo
-         KkHH+IVj++jvwucbO6+fburx2oevNumiDro8d547Nvw68ZlAYhWDZ/nmZX0IrA05DjZH
-         AJ6A==
-X-Forwarded-Encrypted: i=1; AJvYcCUDmutXf9gdjjgNWX4ZpmLaJh4PIbactnrEb9KZw9z8dI8W5vCmgiMQ+70oxB9qnkIDZZ2j1HlcrzA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzlS/s5aKV9UzxyG+lJ1TdZ7FE+9l7fm4gL8siHdUNaErTtdw9G
-	OVy0Vr+OjQOI2fOISehnZnowusW8kuN24HvZtz4WH6OQ0YmLDK+WlDr3suW70Kc=
-X-Google-Smtp-Source: AGHT+IGRtxkMp3x13jBkNmqIgOxnVIpZ0WovylKJsjpSzFGlmQuJwR6WMxOTZoa6v7kxp+tzwKvB6Q==
-X-Received: by 2002:a05:6512:3a8f:b0:536:536f:c663 with SMTP id 2adb3069b0e04-538704986fcmr2778800e87.22.1727299902152;
-        Wed, 25 Sep 2024 14:31:42 -0700 (PDT)
-Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--b8c.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-537a86408dasm623111e87.144.2024.09.25.14.31.41
+        d=1e100.net; s=20230601; t=1727300800; x=1727905600;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=GVmVgaclLf08yTC2h5OjCOTI7DSU5jBV3Cn+WzQVxUs=;
+        b=WZlRRHvdm9JSsqQ3PeIggFHmiwlZrUs2m8MuVkKFz9DSP6M3db5WDy9gloEQeysz4q
+         7ilNvLRHJ5QZXytyMxKq+19QXkMl2wa3DdGl5xRJPNj8gdpcI3hA6NeXTp04tLAJYQUY
+         pXH5TcIFo/UpNkexRzApz4CA9prgNAPU2D7ZWLzXXz+mmBEF7oNl/WEGkO79DGKiYLg1
+         LNV/zE64NbF16uoIU3Uk3p54a1lMcIbpTePoMdSxQQenWAVx9c7NR6FfIU1L1xZSR5z4
+         lKr7RdvTNPxxrpkZfWK/YSYAGJ4TxdLpqFE6aVQXho7O+jQ/08hHfOR6kftjP/dC69c4
+         NYSg==
+X-Forwarded-Encrypted: i=1; AJvYcCUOupihU0UFPV36FS1lQbmY0azguJTkCSnHjWbekPaykEyZgWkoE0b7E5Q6DKVOKk05IzikxLd4oY++LLLY@vger.kernel.org, AJvYcCVeJecL9SS7e0WLUg/cemVAoUVQeOpEZ8r/qbXluA7Mw/PhFZub08b6jw1msoQ+S67nAT4zOdv1az3H@vger.kernel.org, AJvYcCW1dyNr0xH/p3/s3XhwmTyn170B/S0DV2AjaZHs7hilBFa3zqyLZZRQSKz5ds1bfEGH8oyZjZNm9+7p@vger.kernel.org, AJvYcCWhw7QnnJ+IeM0pzLN+abVSphra+5zMs3Xgk7Wc5qLfC53kJq0pvTlND2Bht7ZJe1cIXHHIFMN+eMelC3s=@vger.kernel.org, AJvYcCXjGleRSv/Ud9PiFJLWJOKh24VtPBCvzZN4/nqYuqD6MFRvlCn+gXFWQaW79e8agi6R0oCzy3kwg0VH@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywe60CHDYPBRUsvGMEn90r4HMsRngnC4hqOxsVFmGt/SO+Ogb8c
+	JnfsOxH8OXbQCPfiT2XRi0jOmbnWLLa5KxlWjt9D2J9NCT58Jic9
+X-Google-Smtp-Source: AGHT+IFLnDQbe1OOtOZOCODKOAoHYW+yOXDMI3pVNSMriwEKjgwO+0xQ1+cxh4UpT8hlWIhtMosbxQ==
+X-Received: by 2002:a05:600c:3107:b0:42c:b995:20d9 with SMTP id 5b1f17b1804b1-42e9613634fmr31493025e9.28.1727300799582;
+        Wed, 25 Sep 2024 14:46:39 -0700 (PDT)
+Received: from localhost.localdomain (93-34-90-105.ip49.fastwebnet.it. [93.34.90.105])
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-42e96a1f2aasm28802565e9.45.2024.09.25.14.46.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Sep 2024 14:31:41 -0700 (PDT)
-Date: Thu, 26 Sep 2024 00:31:40 +0300
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org, 
-	krzk+dt@kernel.org, conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org, 
-	ulf.hansson@linaro.org, linus.walleij@linaro.org, catalin.marinas@arm.com, 
-	p.zabel@pengutronix.de, geert+renesas@glider.be, neil.armstrong@linaro.org, 
-	linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, quic_varada@quicinc.com
-Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
-Message-ID: <h6ajhgv5rqabxupove4ge4253ywzbjyxoqq75c7ojmauudd3z5@hhhkbbzfmved>
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-9-quic_srichara@quicinc.com>
- <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
- <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
+        Wed, 25 Sep 2024 14:46:39 -0700 (PDT)
+From: Christian Marangi <ansuelsmth@gmail.com>
+To: Jens Axboe <axboe@kernel.dk>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Richard Weinberger <richard@nod.at>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Christian Marangi <ansuelsmth@gmail.com>,
+	Simon Glass <sjg@chromium.org>,
+	INAGAKI Hiroshi <musashino.open@gmail.com>,
+	Daniel Golle <daniel@makrotopia.org>,
+	Al Viro <viro@zeniv.linux.org.uk>,
+	Christian Brauner <brauner@kernel.org>,
+	Li Lingfeng <lilingfeng3@huawei.com>,
+	Christian Heusel <christian@heusel.eu>,
+	=?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <rafal@milecki.pl>,
+	linux-block@vger.kernel.org,
+	linux-doc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-mtd@lists.infradead.org,
+	Lorenzo Bianconi <lorenzo@kernel.org>
+Subject: [RFC PATCH v2 0/5] block: partition table OF support
+Date: Wed, 25 Sep 2024 23:45:20 +0200
+Message-ID: <20240925214544.6114-1-ansuelsmth@gmail.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 26, 2024 at 12:34:56AM GMT, Sricharan Ramabadhran wrote:
-> 
-> 
-> On 9/13/2024 6:23 PM, Dmitry Baryshkov wrote:
-> > On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
-> > > From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-> > > 
-> > > Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
-> > 
-> > Please name the device rather than the platform. The defconfig affects
-> > all users, so it should be justified.
-> > 
-> Sorry, to understand correctly, you mean to use the board name here ?
+Hi,
+this is an initial proposal to complete support for manually defining
+partition table.
 
-Yes, the board which is generally accessible, if possible. You are
-increasing kernel size for everybody using defconfig, so at least it
-should be obvious, who is benefiting from that.
+Some background on this. Many OEM on embedded device (modem, router...)
+are starting to migrate from NOR/NAND flash to eMMC. The reason for this
+is that OEM are starting to require more and more space for the firmware
+and price difference is becoming so little that using eMMC is only benefits
+and no cons.
 
-> 
-> > > 
-> > > Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> > > Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-> > 
-> > Usual comment.
-> ok, will fix.
-> 
-> Regards,
->  Sricharan
+Given these reason, OEM are also using very custom way to provide a
+partition table and doesn't relay on common method like writing a table
+on the eMMC.
+
+One way that is commonly used is to hardcode the partition table and
+pass it to the system via various way (cmdline, special glue driver,
+block2mtd...)
+This way is also used on Android where the partition table
+is passed from the bootloader via cmdline.
+
+One reason to use this method is to save space on the device and to
+permit more flexibility on partition handling.
+
+What this series does is complete support for this feature.
+It's possible to use the cmdline to define a partition table similar
+to how it's done for MTD but this is problematic for a number of device
+where tweaking the cmdline is not possible. This series adds OF support
+to make it possible to define a partition table in the Device Tree.
+
+We implement a similar schema to the MTD fixed-partition, where we define
+a "label" and a "reg" with "offset" and "size".
+
+A new block partition parser is introduced that check if the block device
+have an OF node attached and check if a fixed-partition table is defined.
+
+If a correct node is found, then partition table is filled. cmdline will
+still have priority to this new parser.
+
+Some block device also implement boot1 and boot2 additional disk. Similar
+to the cmdline parser, these disk can have OF support using the
+"partitions-boot0" and "partitions-boot1" additional node.
+
+It's also completed support for declaring partition as read-only as this
+feature was introduced but never finished in the cmdline parser.
+
+Posting as RFC for any comments or additional checks on OF parser code.
+
+I hope this solution is better accepted as downstream this is becoming
+a real problem with a growing number of strange solution for the simple
+task of providing a fixed partition table.
+
+Changes v2:
+- Reference bytes in DT instead of Sector Size
+- Validate offset and size after Sector Size conversion
+- Limit boot0 and boot1 to eMMC and add comments about JEDEC spec
+- Generalize MTD partition schema and introduce block partitions schema
+- Add missing code to actually attach the OF parser to block partition core
+- Add reviewed by tag for read-only patch
+
+Christian Marangi (5):
+  block: add support for defining read-only partitions
+  docs: block: Document support for read-only partition in cmdline part
+  block: add support for partition table defined in OF
+  dt-bindings: block: Generalize and introduce property for partitions
+  dt-bindings: mmc: Document support for partition table in mmc-card
+
+ Documentation/block/cmdline-partition.rst     |   5 +-
+ .../bindings/block/partitions/partition.yaml  |  33 ++++
+ .../bindings/block/partitions/partitions.yaml |  27 ++++
+ .../devicetree/bindings/mmc/mmc-card.yaml     |  57 +++++++
+ .../bindings/mtd/partitions/partition.yaml    |  10 +-
+ block/blk.h                                   |   1 +
+ block/partitions/Kconfig                      |   8 +
+ block/partitions/Makefile                     |   1 +
+ block/partitions/check.h                      |   1 +
+ block/partitions/cmdline.c                    |   3 +
+ block/partitions/core.c                       |   6 +
+ block/partitions/of.c                         | 144 ++++++++++++++++++
+ 12 files changed, 287 insertions(+), 9 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/block/partitions/partition.yaml
+ create mode 100644 Documentation/devicetree/bindings/block/partitions/partitions.yaml
+ create mode 100644 block/partitions/of.c
 
 -- 
-With best wishes
-Dmitry
+2.45.2
+
