@@ -1,48 +1,33 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 081FB24B21;
-	Wed, 25 Sep 2024 19:05:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C1FF1D5ABE;
+	Wed, 25 Sep 2024 19:31:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727291129; cv=none; b=NJrYvwAX32tUKlJN7hwYuke3jjOGWpm24ZTQGuAKZ6sGJSN8Wz1hKKT6urxxO35MZ67DvHWkzDzKQilGRFMmqM3vgI+5E3C9WDVIB1jt85uEzuRfzuzB3UjZTfHSH1rAX2j82QDZeeBOrQfJDktGb9WzYqw2T+Jkho7BAmbgXh4=
+	t=1727292687; cv=none; b=cfiuEcXeguqoKQJHti09Tt+ErOeTyuJT8XX2swO7HIan71f4XW5SjcqqoxkcbBk/lvRyVkBeEYO4E4HLyfd8SrLU0rpopeOUBwXLx+5uZsy2cIKZ3JVvBfyy3yYM3qpwYsUe2AQJk9MK/pe96cR95kId6amHZKUEJLD5UN17x/M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727291129; c=relaxed/simple;
-	bh=qVyuQ6fOCy7zVhuYfHZM/BSnMq7CmNDmuS9VNsG6Fus=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=aAs0LPWJpYJXzyDvnL6LPtQCY52xMX+27qYQ+yfJ/k3AHhZy4VtkK0VUXbUmY9jbQkoVWS3N+htHuWpFe3+BD6cnXu7fPRJwQCb1x/pXRdoDMun5PhvufC4++u4lhu/Xf5aYvljKSSonZBK9lR2HzAEcg0QiaYKldn32TWf8+lU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=gPzsKG+p; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1727292687; c=relaxed/simple;
+	bh=Zw8NRhd8Kj3Wp7zD5zXcK8TNN/qjT42LyVLnuxRSETM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=AVrteezevOecWC1JVKKjnpUrviFgbo+kTbv8wCGiOXx7mH160/+i7ZyhYXk4qRx0he20G4kzW6gmW5yy2mUnnpJ/NSoN9yaSgxoEOEKG4iTuBKUfWIaSAPkEhqC8PBhfOm5Ar97Jju8Y7FvKgaJw+v5HvDRc18qikxdpEQrjik4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezqRXrmU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="gPzsKG+p"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 48PH5Cu6027637;
-	Wed, 25 Sep 2024 19:05:11 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	wpseR5rYPGLdp3ACOwGjh50SXZEk1xxy1xMTOQ/DvPs=; b=gPzsKG+pSfX1KG4l
-	9EIvIw4VF7/CWfkK5H8T+A5SId10xkCQYVa9bVW2adl5E6GIRbSRpxqB4YEJJg15
-	RcDbea19Gfi7eseiFhVJm7Pl45asCO4Q9hBIwswwAcceSgZgUxALMD6Njx48TT2I
-	ilUOqwJUYKcbtlVU7dXdc/sKlY1/jJZ/3FG2mq5SurRjFDbZo0NK1R9QdYNHXj85
-	fTJd4niXcEnWKROIJELhPMYPUkHPFKljbAdyT/P8Ly+HVL0oAVzC+ccmDuy3N+zY
-	t4qEhROMvqcwXjCmmfc2Dx6zoDyUyDvJzSrUyIOnmWScaeYmh0bYfZ//yyBNH5Qz
-	IU8xQQ==
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 41spc2w3jx-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 25 Sep 2024 19:05:10 +0000 (GMT)
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 48PJ59if010435
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 25 Sep 2024 19:05:09 GMT
-Received: from [10.50.63.248] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Wed, 25 Sep
- 2024 12:05:00 -0700
-Message-ID: <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
-Date: Thu, 26 Sep 2024 00:34:56 +0530
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezqRXrmU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36D22C4CEC3;
+	Wed, 25 Sep 2024 19:31:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727292685;
+	bh=Zw8NRhd8Kj3Wp7zD5zXcK8TNN/qjT42LyVLnuxRSETM=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=ezqRXrmU476GNOoLcrgM5RmFHqTyDDa+JjHTgd+rnzSaSaodmLwLUupuu5qN2f+kQ
+	 A0a0UU6+j/IlWSswt9juu7QfXKuz5e92fbmjgdFg1YbJMKOiF3FlFxCnglq0cCI2O/
+	 f8Y5Ya6z+Wgb6AsdjNMkX3YiLqQkNJBDPD1qfOYYvC+UEiXVv+w8weBsiB7hYQsX6Z
+	 7NNMOXVaQWHDu3lVk3sYSvlScK+KuVTrsZjQIPFXmBPS/Qz1pSKYDrs/bn4UhX10zk
+	 AWyTVKhe2+MUqe28uCNyeiZc3U+JtlmZ8j3hoJbxz3ZrVb8R/L1XI/DFQq7cwx8Frb
+	 blf1qBViyo9QA==
+Message-ID: <a3777c1f-b01d-41eb-acd3-61b0814668a2@kernel.org>
+Date: Wed, 25 Sep 2024 21:31:19 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,60 +35,100 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
-        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
-        <neil.armstrong@linaro.org>, <linux-arm-msm@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <quic_varada@quicinc.com>
-References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
- <20240913121250.2995351-9-quic_srichara@quicinc.com>
- <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
+Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: convert
+ amlogic,meson-mx-sdio.txt to dtschema
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Neil Armstrong <neil.armstrong@linaro.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>,
+ Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org>
+ <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-3-5aa8bdfe01af@linaro.org>
+ <mbc2cacow73vmwn3w42aucq6x6xijbpgustkv3v6etgv35xih7@truf2rbgf3vo>
+ <CAFBinCDu0P8QEvxrUdXXSVCn-1061fjyhYd2nve9QCCvXmoe5Q@mail.gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: csX6H1xMjELLFnLE93bvSt3TXFmGLJf0
-X-Proofpoint-ORIG-GUID: csX6H1xMjELLFnLE93bvSt3TXFmGLJf0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015
- priorityscore=1501 suspectscore=0 lowpriorityscore=0 spamscore=0
- impostorscore=0 malwarescore=0 adultscore=0 phishscore=0 mlxlogscore=561
- bulkscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2408220000 definitions=main-2409250135
+Autocrypt: addr=krzk@kernel.org; keydata=
+ xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
+ cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
+ JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
+ gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
+ J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
+ NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
+ BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
+ vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
+ Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
+ TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
+ S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
+ FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJgPO8PBQkUX63hAAoJEBuTQ307
+ QWKbBn8P+QFxwl7pDsAKR1InemMAmuykCHl+XgC0LDqrsWhAH5TYeTVXGSyDsuZjHvj+FRP+
+ gZaEIYSw2Yf0e91U9HXo3RYhEwSmxUQ4Fjhc9qAwGKVPQf6YuQ5yy6pzI8brcKmHHOGrB3tP
+ /MODPt81M1zpograAC2WTDzkICfHKj8LpXp45PylD99J9q0Y+gb04CG5/wXs+1hJy/dz0tYy
+ iua4nCuSRbxnSHKBS5vvjosWWjWQXsRKd+zzXp6kfRHHpzJkhRwF6ArXi4XnQ+REnoTfM5Fk
+ VmVmSQ3yFKKePEzoIriT1b2sXO0g5QXOAvFqB65LZjXG9jGJoVG6ZJrUV1MVK8vamKoVbUEe
+ 0NlLl/tX96HLowHHoKhxEsbFzGzKiFLh7hyboTpy2whdonkDxpnv/H8wE9M3VW/fPgnL2nPe
+ xaBLqyHxy9hA9JrZvxg3IQ61x7rtBWBUQPmEaK0azW+l3ysiNpBhISkZrsW3ZUdknWu87nh6
+ eTB7mR7xBcVxnomxWwJI4B0wuMwCPdgbV6YDUKCuSgRMUEiVry10xd9KLypR9Vfyn1AhROrq
+ AubRPVeJBf9zR5UW1trJNfwVt3XmbHX50HCcHdEdCKiT9O+FiEcahIaWh9lihvO0ci0TtVGZ
+ MCEtaCE80Q3Ma9RdHYB3uVF930jwquplFLNF+IBCn5JRzsFNBFVDXDQBEADNkrQYSREUL4D3
+ Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
+ MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
+ OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
+ GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
+ 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
+ YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
+ 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
+ BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
+ JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
+ 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
+ YpsFAmA872oFCRRflLYACgkQG5NDfTtBYpvScw/9GrqBrVLuJoJ52qBBKUBDo4E+5fU1bjt0
+ Gv0nh/hNJuecuRY6aemU6HOPNc2t8QHMSvwbSF+Vp9ZkOvrM36yUOufctoqON+wXrliEY0J4
+ ksR89ZILRRAold9Mh0YDqEJc1HmuxYLJ7lnbLYH1oui8bLbMBM8S2Uo9RKqV2GROLi44enVt
+ vdrDvo+CxKj2K+d4cleCNiz5qbTxPUW/cgkwG0lJc4I4sso7l4XMDKn95c7JtNsuzqKvhEVS
+ oic5by3fbUnuI0cemeizF4QdtX2uQxrP7RwHFBd+YUia7zCcz0//rv6FZmAxWZGy5arNl6Vm
+ lQqNo7/Poh8WWfRS+xegBxc6hBXahpyUKphAKYkah+m+I0QToCfnGKnPqyYIMDEHCS/RfqA5
+ t8F+O56+oyLBAeWX7XcmyM6TGeVfb+OZVMJnZzK0s2VYAuI0Rl87FBFYgULdgqKV7R7WHzwD
+ uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
+ 7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
+ 5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
+In-Reply-To: <CAFBinCDu0P8QEvxrUdXXSVCn-1061fjyhYd2nve9QCCvXmoe5Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-
-
-On 9/13/2024 6:23 PM, Dmitry Baryshkov wrote:
-> On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
->> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+On 25/09/2024 19:29, Martin Blumenstingl wrote:
+> Hi Krzysztof,
+> 
+> On Tue, Sep 24, 2024 at 11:18 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> [...]
+>>> +        enum: [0, 1, 2]
+>>> +
+>>> +      bus-width:
+>>> +        enum: [1, 4]
+>>> +
+>>> +    unevaluatedProperties: false
 >>
->> Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
-> 
-> Please name the device rather than the platform. The defconfig affects
-> all users, so it should be justified.
-> 
-Sorry, to understand correctly, you mean to use the board name here ?
-
+>> Hm, I wonder why not all slots are defined in your DTS? Why not all of
+>> them are required? I assume the slots are there always, as part of the
+>> controller.
 >>
->> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>> Is this because of driver limitation mentioned in the old binding?
+> The MMC core (still) has a limitation of only supporting one slot per
+> controller - so a limitation will stay in place.
 > 
-> Usual comment.
-ok, will fix.
+> However, the driver (drivers/mmc/host/meson-mx-sdio.c) uses
+> of_get_compatible_child(), meaning it will also pick the first child
+> node with the correct compatible string, even if it has status =
+> "disabled".
+> I can send a patch to reduce the scope of this limitation: all slots
+> can be defined but only the first enabled one is used.
+> What do you think?
 
-Regards,
-  Sricharan
+For the conversion it can stay as is. Follow-up patches allowing
+multiple slots, adding them in DTC etc. are nice, but not necessary here.
+
+Best regards,
+Krzysztof
+
