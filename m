@@ -1,134 +1,111 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C1FF1D5ABE;
-	Wed, 25 Sep 2024 19:31:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35A80145B25
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2024 21:31:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727292687; cv=none; b=cfiuEcXeguqoKQJHti09Tt+ErOeTyuJT8XX2swO7HIan71f4XW5SjcqqoxkcbBk/lvRyVkBeEYO4E4HLyfd8SrLU0rpopeOUBwXLx+5uZsy2cIKZ3JVvBfyy3yYM3qpwYsUe2AQJk9MK/pe96cR95kId6amHZKUEJLD5UN17x/M=
+	t=1727299905; cv=none; b=iRips9Fgo3QKlrsGPpk6o3FmOdSch9ClSmdU85YKD9MY5XAhpb4xsZDxUBQj73+FULEmlqboswGlJ1POVTXM0qlN0BqJmd1XDoUf6KND1Kh5F4clIyOjBU3kbzabHJ0ShYDAVBIyvxKY/2jWBArrpUWGCawVfwj3kM5bSQdrLn0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727292687; c=relaxed/simple;
-	bh=Zw8NRhd8Kj3Wp7zD5zXcK8TNN/qjT42LyVLnuxRSETM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AVrteezevOecWC1JVKKjnpUrviFgbo+kTbv8wCGiOXx7mH160/+i7ZyhYXk4qRx0he20G4kzW6gmW5yy2mUnnpJ/NSoN9yaSgxoEOEKG4iTuBKUfWIaSAPkEhqC8PBhfOm5Ar97Jju8Y7FvKgaJw+v5HvDRc18qikxdpEQrjik4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ezqRXrmU; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1727299905; c=relaxed/simple;
+	bh=q1hnfW/UYENj/VV96bgSolK/g/2vdQSz2wVyhQteCPs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Sb7AJoe0k60T2qv3giRnnzlhDtLk79+x8VtmeefzM6a6tw0EJVwGZcnmHG6PKaoSUyrqq1+pt/iBZTEYfFyFQGisNhgqwFbxvS00B/b4KX8Dr2LMGeOU+WhCLqPahX/kcFgm4bAGv73h+7JVynEiLggDSAXMdJu09b0+SGebQAU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vpHxw83B; arc=none smtp.client-ip=209.85.167.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ezqRXrmU"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 36D22C4CEC3;
-	Wed, 25 Sep 2024 19:31:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727292685;
-	bh=Zw8NRhd8Kj3Wp7zD5zXcK8TNN/qjT42LyVLnuxRSETM=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=ezqRXrmU476GNOoLcrgM5RmFHqTyDDa+JjHTgd+rnzSaSaodmLwLUupuu5qN2f+kQ
-	 A0a0UU6+j/IlWSswt9juu7QfXKuz5e92fbmjgdFg1YbJMKOiF3FlFxCnglq0cCI2O/
-	 f8Y5Ya6z+Wgb6AsdjNMkX3YiLqQkNJBDPD1qfOYYvC+UEiXVv+w8weBsiB7hYQsX6Z
-	 7NNMOXVaQWHDu3lVk3sYSvlScK+KuVTrsZjQIPFXmBPS/Qz1pSKYDrs/bn4UhX10zk
-	 AWyTVKhe2+MUqe28uCNyeiZc3U+JtlmZ8j3hoJbxz3ZrVb8R/L1XI/DFQq7cwx8Frb
-	 blf1qBViyo9QA==
-Message-ID: <a3777c1f-b01d-41eb-acd3-61b0814668a2@kernel.org>
-Date: Wed, 25 Sep 2024 21:31:19 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vpHxw83B"
+Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-5365aec6fc1so353784e87.3
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2024 14:31:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1727299902; x=1727904702; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=g2gRWXk6um8ssZG0dTYz3h8O6sPux+vtNyTeziNQM+4=;
+        b=vpHxw83BEcxXUiXAHcwannMowZ5Cp/Zm0//e9txywTNF+VvbYNu8F1jTKNov+mH/Ns
+         5hHQflIjhKUl5G/IPTQ1QlYBoyLU+pl1Qt4Mx572kqq6ImpdtT9nvn7R1iEEZdIHMOxB
+         SzftUfPVRDvh/dh4iGooNg+6fQdfSwKqC2XOKsnIbMuGDmC0MWWgUrNTgHl0q+YB/QjH
+         E6TDD2eqeFktH3aKA7aTMaEBEEEm2Bnp4OTeVI5cdWgWqIyT1MrP4YYAq9UO8Q2phjMl
+         Cl+YWdmPf1FQZtaE2nhr2VGc1ZXKepGxtu0tMXMKlhUgIh3yLSandXdoVQjX1kgBeB6r
+         TSUA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727299902; x=1727904702;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=g2gRWXk6um8ssZG0dTYz3h8O6sPux+vtNyTeziNQM+4=;
+        b=FGjXkZbEN2W8RVgl52R+FBlTYiryI1s5DeGBToCnSZONa38RZdhpEIDE07ZeSQ+7xr
+         KICSPoIYVAv4ouXv2cyVBn61NB5EJY9IaY4xr7raUeymucv71O/Xu6GmYVcaxx+AaDNo
+         Lg90Ti1j8UcCXg0+4jqIPoYp2NIw8jl+oeMtSmv5A2aF1fFU9QPU/YqY7kDQGics/vPX
+         89VebhLyG9x7fwnjD7DNVyJ1U7Xo6fDGQsUBRa3DSAW9xViQ3wk2K0I31K9oLj5M2VCo
+         KkHH+IVj++jvwucbO6+fburx2oevNumiDro8d547Nvw68ZlAYhWDZ/nmZX0IrA05DjZH
+         AJ6A==
+X-Forwarded-Encrypted: i=1; AJvYcCUDmutXf9gdjjgNWX4ZpmLaJh4PIbactnrEb9KZw9z8dI8W5vCmgiMQ+70oxB9qnkIDZZ2j1HlcrzA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzlS/s5aKV9UzxyG+lJ1TdZ7FE+9l7fm4gL8siHdUNaErTtdw9G
+	OVy0Vr+OjQOI2fOISehnZnowusW8kuN24HvZtz4WH6OQ0YmLDK+WlDr3suW70Kc=
+X-Google-Smtp-Source: AGHT+IGRtxkMp3x13jBkNmqIgOxnVIpZ0WovylKJsjpSzFGlmQuJwR6WMxOTZoa6v7kxp+tzwKvB6Q==
+X-Received: by 2002:a05:6512:3a8f:b0:536:536f:c663 with SMTP id 2adb3069b0e04-538704986fcmr2778800e87.22.1727299902152;
+        Wed, 25 Sep 2024 14:31:42 -0700 (PDT)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--b8c.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-537a86408dasm623111e87.144.2024.09.25.14.31.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Sep 2024 14:31:41 -0700 (PDT)
+Date: Thu, 26 Sep 2024 00:31:40 +0300
+From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org, 
+	krzk+dt@kernel.org, conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org, 
+	ulf.hansson@linaro.org, linus.walleij@linaro.org, catalin.marinas@arm.com, 
+	p.zabel@pengutronix.de, geert+renesas@glider.be, neil.armstrong@linaro.org, 
+	linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, quic_varada@quicinc.com
+Subject: Re: [PATCH 8/8] arm64: defconfig: Enable IPQ5424 SoC base configs
+Message-ID: <h6ajhgv5rqabxupove4ge4253ywzbjyxoqq75c7ojmauudd3z5@hhhkbbzfmved>
+References: <20240913121250.2995351-1-quic_srichara@quicinc.com>
+ <20240913121250.2995351-9-quic_srichara@quicinc.com>
+ <4dxqbm4uuuuht5db7kt6faz2pdeodn224hd34np322divs22ba@dzmjveze3b4f>
+ <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 3/3] dt-bindings: mmc: convert
- amlogic,meson-mx-sdio.txt to dtschema
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Neil Armstrong <neil.armstrong@linaro.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>,
- Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org>
- <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-3-5aa8bdfe01af@linaro.org>
- <mbc2cacow73vmwn3w42aucq6x6xijbpgustkv3v6etgv35xih7@truf2rbgf3vo>
- <CAFBinCDu0P8QEvxrUdXXSVCn-1061fjyhYd2nve9QCCvXmoe5Q@mail.gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <CAFBinCDu0P8QEvxrUdXXSVCn-1061fjyhYd2nve9QCCvXmoe5Q@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2a16d5a2-17a5-4988-8a25-34ac10ff3d08@quicinc.com>
 
-On 25/09/2024 19:29, Martin Blumenstingl wrote:
-> Hi Krzysztof,
+On Thu, Sep 26, 2024 at 12:34:56AM GMT, Sricharan Ramabadhran wrote:
 > 
-> On Tue, Sep 24, 2024 at 11:18 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
-> [...]
->>> +        enum: [0, 1, 2]
->>> +
->>> +      bus-width:
->>> +        enum: [1, 4]
->>> +
->>> +    unevaluatedProperties: false
->>
->> Hm, I wonder why not all slots are defined in your DTS? Why not all of
->> them are required? I assume the slots are there always, as part of the
->> controller.
->>
->> Is this because of driver limitation mentioned in the old binding?
-> The MMC core (still) has a limitation of only supporting one slot per
-> controller - so a limitation will stay in place.
 > 
-> However, the driver (drivers/mmc/host/meson-mx-sdio.c) uses
-> of_get_compatible_child(), meaning it will also pick the first child
-> node with the correct compatible string, even if it has status =
-> "disabled".
-> I can send a patch to reduce the scope of this limitation: all slots
-> can be defined but only the first enabled one is used.
-> What do you think?
+> On 9/13/2024 6:23 PM, Dmitry Baryshkov wrote:
+> > On Fri, Sep 13, 2024 at 05:42:50PM GMT, Sricharan R wrote:
+> > > From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> > > 
+> > > Enable the clock and pinctrl configs for Qualcomm IPQ5332 SoC
+> > 
+> > Please name the device rather than the platform. The defconfig affects
+> > all users, so it should be justified.
+> > 
+> Sorry, to understand correctly, you mean to use the board name here ?
 
-For the conversion it can stay as is. Follow-up patches allowing
-multiple slots, adding them in DTC etc. are nice, but not necessary here.
+Yes, the board which is generally accessible, if possible. You are
+increasing kernel size for everybody using defconfig, so at least it
+should be obvious, who is benefiting from that.
 
-Best regards,
-Krzysztof
+> 
+> > > 
+> > > Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+> > > Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> > 
+> > Usual comment.
+> ok, will fix.
+> 
+> Regards,
+>  Sricharan
 
+-- 
+With best wishes
+Dmitry
