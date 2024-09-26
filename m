@@ -1,85 +1,161 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 23DD9156C40;
-	Thu, 26 Sep 2024 15:56:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E5911581F3;
+	Thu, 26 Sep 2024 16:13:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727366187; cv=none; b=aPZ8pBkkfbP1DvcRrGQDrMD7SbV1qpwcs+DoIvTOaTpw6rdcqrPlRolYBHMCeIr1Tj8MF2aiXFk2OwFli8UahKHcBGk2fiKz1WqOsomMc3WfLSsVgvjnX+00aj91wDCv4FYRx3gbaNf46md5q8k2pL+OrPmT9XuGNigKNRfBErk=
+	t=1727367240; cv=none; b=Xrn3WVGgJUn5X/Yb9l7ZVuOKPit4WhKfeNdxm8QR0yMYjgmcDFUZON/cs2IEZ8Zr3VsBg4aae9mz5+H3UD0O/jLUBWAuFU5BQF31GXu9gDrhOBfPVSww5jeTTi36BCY8JS136V95jAO9Uhv3e2ss7O3uU/22MTcgBq+FAHM6zeU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727366187; c=relaxed/simple;
-	bh=WBnnx5zlorm4kEs0yeAw44dctNIiEVNABaauurFcP0U=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UNHRQYEUJ6d8/BfiRwFsFzydWNfnqe3Kt/DH8VvfNOAOqUkuODJTULJ4lUHZcwTUiHl+Z5Gf0cIHm+6a7nQ13hxwp4dsLbaPUENWc6SFTJXg61qZ0P90YfRj+7EuIpA2jaspGQW/MB0tZIuh77foVgawOwCHlC9AWHW3PhOUYN4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7924D14BF;
-	Thu, 26 Sep 2024 08:56:47 -0700 (PDT)
-Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id BE13E3F587;
-	Thu, 26 Sep 2024 08:56:16 -0700 (PDT)
-Message-ID: <c9100637-663a-4307-9d59-deebcf9ad34c@arm.com>
-Date: Thu, 26 Sep 2024 16:56:15 +0100
+	s=arc-20240116; t=1727367240; c=relaxed/simple;
+	bh=7vn8F+i4bEeKF3b0bUuklVycjsEm0yuEh18P9WeIlLc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=S+F+6REWmGGtfbbSD86+sLxLI9grBE9P1RZG0pybkvzClZytVSGxxX9jymbFfUbiDutouQDMjejnReVezgWUPUtl0qMy5/9VX53jWoqoRLz6mu0QNMcuKa8GPPs2l0HFEhyWHFpdPdBMeVEVoj7YknVkNukXLNAAPHj75LuFXQk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=efMmBCXC; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="efMmBCXC"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66511C4CEC5;
+	Thu, 26 Sep 2024 16:13:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1727367239;
+	bh=7vn8F+i4bEeKF3b0bUuklVycjsEm0yuEh18P9WeIlLc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=efMmBCXCAt1k+tJ4J0c/ZlREBJtvswL3y3/vVBLcHSZTL9+uM0q+u9ekHfDC6Ax1N
+	 WUqY3S66gL3mnDjul84umvldE8zXjRdmgR3AK5EUlgUT+1058rPS+jDh39+D2im9Tw
+	 v5QVVtWC4R+a/zNPyVgmMDo7w9xrJCQvM3QMpJBMRiIBveZAz8RbQL6OOB0gxzRnlC
+	 sF6TaBckQw7KgwCKQgQfkUHevZc8SzRyCGntesISjkGJkNeWcS53ExkdamzUj7qfYl
+	 u1lDUL4nktfZJ/2IdUT8TYGuD75MYFzwHovmvD6iyYKsP0a+jBNQVrNa1SfSY1kRPb
+	 OJVlmVuK3UnAg==
+Date: Thu, 26 Sep 2024 17:13:55 +0100
+From: Conor Dooley <conor@kernel.org>
+To: Andy-ld Lu <andy-ld.lu@mediatek.com>
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+	matthias.bgg@gmail.com, wenbin.mei@mediatek.com,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: mtk-sd: Add support for MT8196
+Message-ID: <20240926-footprint-faster-4263120d0b83@spud>
+References: <20240926070405.20212-1-andy-ld.lu@mediatek.com>
+ <20240926070405.20212-3-andy-ld.lu@mediatek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: core: Only set maximum DMA segment size if DMA is
- supported
-To: Guenter Roeck <linux@roeck-us.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Paul Walmsley <paul.walmsley@sifive.com>,
- Samuel Holland <samuel.holland@sifive.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
- Christoph Hellwig <hch@lst.de>
-References: <20240924210123.2288529-1-linux@roeck-us.net>
-From: Robin Murphy <robin.murphy@arm.com>
-Content-Language: en-GB
-In-Reply-To: <20240924210123.2288529-1-linux@roeck-us.net>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="rTdKX9h0An540zaG"
+Content-Disposition: inline
+In-Reply-To: <20240926070405.20212-3-andy-ld.lu@mediatek.com>
 
-On 24/09/2024 10:01 pm, Guenter Roeck wrote:
-> Since upstream commit 334304ac2bac ("dma-mapping: don't return errors
-> from dma_set_max_seg_size") calling dma_set_max_seg_size() on a device
-> not supporting DMA results in a warning traceback. This is seen when
-> booting the sifive_u machine from SD. The underlying SPI controller
-> (sifive,spi0 compatible) explicitly sets dma_mask to NULL.
 
-Hmm, that driver probably shouldn't be doing that, but either way it's 
-not actually relevant to this check - what's significant is that when 
-the MMC host device is an "mmc-spi-slot" instance, its mmc_dev() ends up 
-being the SPI *device* itself, not the grandparent SPI controller.
+--rTdKX9h0An540zaG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thus the patch itself is appropriate on the basis that MMC hosts may 
-exist on non-DMA-capable buses, so the subsystem needs to consider that.
-
-Reviewed-by: Robin Murphy <robin.murphy@arm.com>
-
-> Avoid the backtrace by only calling dma_set_max_seg_size() if DMA is
-> supported.
-> 
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: Robin Murphy <robin.murphy@arm.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+On Thu, Sep 26, 2024 at 03:03:18PM +0800, Andy-ld Lu wrote:
+> Extend the devicetree bindings to include the MT8196 mmc controller
+> by adding the compatible string 'mediatek,msdc-v2', which could be
+> also used for future compatible SoCs that support new tx/rx.
+>=20
+> Add three properties for MT8196 settings:
+> - 'mediatek,prohibit-gate-cg', indicate if the source clock CG could
+>   be disabled when CPU access IP registers.
+>=20
+> - 'mediatek,stop-dly-sel', configure read data clock stops at block gap.
+>=20
+> - 'mediatek,pop-en-cnt', configure the margins of write and read
+>   pointers while begin to pop data transfer.
+>=20
+> Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
 > ---
->   drivers/mmc/core/queue.c | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index d0b3ca8a11f0..4d6844261912 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -388,7 +388,8 @@ static struct gendisk *mmc_alloc_disk(struct mmc_queue *mq,
->   
->   	blk_queue_rq_timeout(mq->queue, 60 * HZ);
->   
-> -	dma_set_max_seg_size(mmc_dev(host), queue_max_segment_size(mq->queue));
-> +	if (mmc_dev(host)->dma_parms)
-> +		dma_set_max_seg_size(mmc_dev(host), queue_max_segment_size(mq->queue));
->   
->   	INIT_WORK(&mq->recovery_work, mmc_mq_recovery_handler);
->   	INIT_WORK(&mq->complete_work, mmc_blk_mq_complete_work);
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 26 +++++++++++++++++++
+>  1 file changed, 26 insertions(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Document=
+ation/devicetree/bindings/mmc/mtk-sd.yaml
+> index c532ec92d2d9..82d1a9fac67c 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -25,6 +25,7 @@ properties:
+>            - mediatek,mt8173-mmc
+>            - mediatek,mt8183-mmc
+>            - mediatek,mt8516-mmc
+> +          - mediatek,msdc-v2
+>        - items:
+>            - const: mediatek,mt7623-mmc
+>            - const: mediatek,mt2701-mmc
+> @@ -154,6 +155,30 @@ properties:
+>      enum: [32, 64]
+>      default: 32
+> =20
+> +  mediatek,stop-dly-sel:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      Some SoCs need to set appropriate stop-dly-sel to configure read d=
+ata clock
+> +      stops at block gap. The valid range is from 0 to 0xf.
+
+If you used a specific compatible for these devices, which you should,
+you would not require either this or "pop-en-cnt".
+
+> +    minimum: 0
+> +    maximum: 0xf
+> +
+> +  mediatek,pop-en-cnt:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      Some SoCs need to set appropriate pop-en-cnt to configure the marg=
+ins of write
+> +      and read pointers while begin to pop data transfer. The valid rang=
+e is from 0
+> +      to 0xf.
+> +    minimum: 0
+> +    maximum: 0xf
+> +
+> +  mediatek,prohibit-gate-cg:
+
+This is also probably detectable from a specific compatible, if you had
+one?
+TL;DR specific compatibles please, non of this "msdc-v2" stuff, sorry.
+
+Thanks,
+Conor.
+
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Decide if source clock CG could be disabled when CPU access IP reg=
+isters.
+> +      If present, source clock CG could not be disabled.
+> +      If not present, source clock CG could be disabled.
+> +
+>    resets:
+>      maxItems: 1
+> =20
+> @@ -191,6 +216,7 @@ allOf:
+>              - mediatek,mt8188-mmc
+>              - mediatek,mt8195-mmc
+>              - mediatek,mt8516-mmc
+> +            - mediatek,msdc-v2
+>      then:
+>        properties:
+>          clocks:
+> --=20
+> 2.46.0
+>=20
+>=20
+
+--rTdKX9h0An540zaG
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZvWIQwAKCRB4tDGHoIJi
+0p62AQC7zWy8sxC+DpKsViZDlAuVYx19RGJZLpxLCCMrqTjtggEA47f0DiCOzh8l
+0cDhA/a8DytL3SRUlW08RURFaOLoWAo=
+=qF+N
+-----END PGP SIGNATURE-----
+
+--rTdKX9h0An540zaG--
