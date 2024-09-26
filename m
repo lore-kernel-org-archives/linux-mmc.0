@@ -1,96 +1,84 @@
-Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com [209.85.208.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3BC4A1D5AB1
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Sep 2024 06:16:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 006C0139B;
+	Thu, 26 Sep 2024 07:04:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727331370; cv=none; b=sxnzfFMNB8ODXv69Y3tkDvAYtYmZA6wnAZmxGnaYQyCH0cAX5LxNRs4yPyOGkpavxBQEg7x7hzVvmoXSNsAEwLEBgqZ/C5pIYYuk6iac9ficL/zi5agM2nYfXwLok6sf51YEmtIN2yzgQlgaBz1yo8DgH2R4jOhS2svmS8gFZnQ=
+	t=1727334275; cv=none; b=c2z3c/pzej4scXjY4uzCbeivI6WuwbheQciKDUwM/uscrVhj3W0jknqSqHocPJCG8iuKgebg0lJydO3NmWGEFMWY93FktQkx7CisoOyYfp0qIyotG5bcgzJQhR2LhttC8i52iLAm3j8PykonWVWIBP9+ghcpC3CmCOL38Ek5Xwo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727331370; c=relaxed/simple;
-	bh=ykLbmLKr0QoC7hIm3VMPmhy29bEPVTyVZXowJRn3s9Y=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Content-Type; b=HovocacgQ7X/QNfZylR9OYxO+L8D3TMmSKYYX97Ongg90eBsEPxABTnON2al4h3eeh1+zG8HC8PE8ZINRhGNyi5RIPNFt3PN8Ry1HLYtox4+ggLhkq5VX54Db7lPULenirfOKA36PHJGr7dG+0htlMugEZX0WUTcHD1W3yRIKFo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DOsx3qAB; arc=none smtp.client-ip=209.85.208.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1727334275; c=relaxed/simple;
+	bh=1XOIqL/2SpN3XIWVOjWZEKZ21s2pnEm2BRcsqxkaxFs=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=m7GPcTeDQWYpK6aeGSDKXBIH/pt9M7g4tgFUUQmabsvHFdxD8dJI9NIuQaThshPHKp6VHs/englGrwqwxaj3oxHj2kTkXVwghHfUn1dTVPm9s8VHvd6RNFe+X+jtN6bZFlCj9+j3D0EI+eJACKxuQdioyIPtND6tge1nyGyByvY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=ZBl8siqX; arc=none smtp.client-ip=60.244.123.138
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DOsx3qAB"
-Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-2f75428b9f8so7613681fa.3
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Sep 2024 23:16:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1727331366; x=1727936166; darn=vger.kernel.org;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ykLbmLKr0QoC7hIm3VMPmhy29bEPVTyVZXowJRn3s9Y=;
-        b=DOsx3qABmMZ3g6mYO7FQzKkz7LEF6Vhgqv1H53z526XL5tymvfotwZkQOGLjrzYRK4
-         bINSrJzyvf1LkzONQT3EZGK+IIMLKImUy6MQU9LFW75GxG3a36M3AXp0aMARyFq/A36/
-         W8u2hED7aubqoeHxWqHwjo6mY9UNK5SpmXdVqwbrJL2aozjG6nO3ELSnRrTNtg3pdyEm
-         Dy28aroHzhhHEZM6k4QU8F9sTYGSa84I0e5CkrxVKZpcSpv5mvplnHghGw4HvUSJ19Eh
-         0D9r7etH88ojpkkBQhyYU583DmSCQAjF0+6dp6rPlqSkmuNWHNT0jQ6QLn6jSYwA9O5P
-         GR1w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727331366; x=1727936166;
-        h=content-transfer-encoding:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ykLbmLKr0QoC7hIm3VMPmhy29bEPVTyVZXowJRn3s9Y=;
-        b=oBoskNWz0+ZqfRZOL31vR8CDxUEqpI2AJelP+wvXQebm7IDB4nw5vajZOwx5x72XWO
-         YlYQ/07+9c66e5hg/utZyauV1pyzEv6MDHWu05eAhskUvkOpa2riE7nvumMMxD4K0IXp
-         ae5qlwpRIcqMZo0aln0WXp2vAxlQRNGli/sMNZh5BT2UNeDf+QOU6IbCEZkvABt1RFD4
-         BwBMoRsJzO0JRIHlzag12AFGmoH7AZoeugO2Sb++Yq3MeL9hV0Px9XqQUALEme/DmoOE
-         esQ7ftEd+31xb8lo1rd8mXKZmR3F9BXTPWdPCFyJBc77G443BjuZro+5rjIpzK54D3c2
-         PjJA==
-X-Forwarded-Encrypted: i=1; AJvYcCXZ7B1o4SXE+AGn+HZ2RHfeCOelhtwQYoRFRjWDFvcv6NFSku7jUxpEJXJtfujcvlxSJ9YcnmQ72LM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy7tXMd2eLEZ7YMNx3hSfZ2GKt7rupGL9M6+wON/kpCFKqTWMYw
-	zKFaxp/eUnrOG0o587io0SnjmENzHcTrimSRD0fmSmZlMiDFi3CGWTTSoK4tzsSs1a+gFeTCo9t
-	uSQ2bJoBHVO1v/1BodA7q3R2V/qRZBSrO0qiGJCGnppJMT6goY1w=
-X-Google-Smtp-Source: AGHT+IHbrtLrapShRABtlKmDwtmluNLT7K7CH6P2+rWdEGHx0b0RzOZCW26rtsum1GA0Htk4idVWjkz4WalwP/9NiEc=
-X-Received: by 2002:a2e:a985:0:b0:2f3:cb70:d447 with SMTP id
- 38308e7fff4ca-2f91ca44935mr42636091fa.40.1727331366162; Wed, 25 Sep 2024
- 23:16:06 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="ZBl8siqX"
+X-UUID: 91ad1c767bd511efb66947d174671e26-20240926
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=u2VyllAmx1eNrj4fBWbMCyugVwolephg65owyjKq1Jk=;
+	b=ZBl8siqXvwMQ0KYfY5y0untMcqNsed9PH0PtmapdYDVaaXbXNH3ZeIbV3aN5hwux6ZFAaWKBwfVefAUpZgefFc5RCXF6PV3iQlzxn/EcwfQtBfDLNpDCb8Wqs71b8NuDsh3uxP//BTPeNuUQiQUSHMzr+WdAMbwduSlpmoKrBVI=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.41,REQID:e54bff40-6095-4f1f-abf9-e11d573064d7,IP:0,U
+	RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
+	:release,TS:-5
+X-CID-META: VersionHash:6dc6a47,CLOUDID:4156979e-8e9a-4ac1-b510-390a86b53c0a,B
+	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+	RL:0,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,
+	SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 0
+X-CID-BAS: 0,_,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR
+X-UUID: 91ad1c767bd511efb66947d174671e26-20240926
+Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw01.mediatek.com
+	(envelope-from <andy-ld.lu@mediatek.com>)
+	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+	with ESMTP id 1415652439; Thu, 26 Sep 2024 15:04:27 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Thu, 26 Sep 2024 15:04:26 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs11n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Thu, 26 Sep 2024 15:04:25 +0800
+From: Andy-ld Lu <andy-ld.lu@mediatek.com>
+To: <ulf.hansson@linaro.org>, <robh@kernel.org>, <krzk+dt@kernel.org>,
+	<matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-mediatek@lists.infradead.org>, Andy-ld Lu <andy-ld.lu@mediatek.com>
+Subject: [PATCH 0/2] Add mtk-sd support for MT8196
+Date: Thu, 26 Sep 2024 15:03:16 +0800
+Message-ID: <20240926070405.20212-1-andy-ld.lu@mediatek.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <BioRa6CRWURE7RrciZ65F5D8BT3HUSyNkK6cPbtojVjybSwdSmQ64gnhK_-4EpxtINCXBw_NuXahXlT2oNZ0jsRnaO0NnnaMHyFBovzR-V8=@protonmail.com>
-In-Reply-To: <BioRa6CRWURE7RrciZ65F5D8BT3HUSyNkK6cPbtojVjybSwdSmQ64gnhK_-4EpxtINCXBw_NuXahXlT2oNZ0jsRnaO0NnnaMHyFBovzR-V8=@protonmail.com>
-From: Linus Walleij <linus.walleij@linaro.org>
-Date: Thu, 26 Sep 2024 08:15:55 +0200
-Message-ID: <CACRpkdbXvk7wda304UECgOP3=QgcbR0KW7tindtOfPm=DPpS9Q@mail.gmail.com>
-Subject: Re: kirkwood marvell sdio and commit 2761822c00e8
-To: g4sra <g4sra@protonmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-On Wed, Sep 25, 2024 at 8:02=E2=80=AFPM g4sra <g4sra@protonmail.com> wrote:
+There are some new features for Mediatek SoC MT8196, which include new
+command/data transmitting and receiving path (abbreviated as tx/rx), and
+a new bus design that prevents the CPU from accessing the IP registers
+unless the source clock control gate is enabled. Furthermore, some register
+settings are also modified.
 
-> I am using a Marvell Kirkwood SoC plug device (the chip also used in
-> some NAS devices) which only has 512MB of memory.
-> The distribution I am running is based on Debian which is on kernel
-> version 6.1.0.
->
-> However I use a custom kernel for efficiency.
->
-> I cannot use anything above Kernel v6.7.9 as I get the following error
-> on mounting the rootfs filesystem which is f2fs on SDHC.
->
-> mvsdio f1090000.mvsdio: ran out of scatter segments
->
-> This appears to be related to your commit.
+The driver code has to be adapted to implement the above changes, and the
+compatible 'mediatek,msdc-v2' is added to driver and devicetree bindings,
+for MT8196 and future compatible SoCs that support new tx/rx.
 
-Do you mean:
-commit 2761822c00e8c271f10a10affdbd4917d900d7ea
-"mmc: mvsdio: Use sg_miter for PIO"
+Andy-ld Lu (2):
+  mmc: mtk-sd: Add support for MT8196
+  dt-bindings: mmc: mtk-sd: Add support for MT8196
 
-> Can you please provide me with some guidance as how to troubleshoot
-> your changes.
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |  26 +++
+ drivers/mmc/host/mtk-sd.c                     | 179 +++++++++++++++---
+ 2 files changed, 182 insertions(+), 23 deletions(-)
 
-Can you try to just revert the commit and rebuild and test the
-kernel without it? What happens?
+-- 
+2.46.0
 
-Yours,
-Linus Walleij
