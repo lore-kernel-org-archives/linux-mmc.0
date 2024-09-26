@@ -1,37 +1,25 @@
-Received: from mail.tuxedocomputers.com (mail.tuxedocomputers.com [157.90.84.7])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5E2026AD3;
-	Thu, 26 Sep 2024 15:31:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=157.90.84.7
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 23DD9156C40;
+	Thu, 26 Sep 2024 15:56:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727364723; cv=none; b=HaoC1vt06DUwuaCNXXmYRN97sDU5ewA9+GDj/GQNQWRKV13hEFVSkQNy7M8J0TcgdUePNzYcAn/STFqyodPlsZYG6/kE5ItiZKKkXS6beKd3JjGiPjfuP6nDUAuRC9gL341N2bk1MKF+16/s42TRt2abABdFPzH4k6DTyo3OKqc=
+	t=1727366187; cv=none; b=aPZ8pBkkfbP1DvcRrGQDrMD7SbV1qpwcs+DoIvTOaTpw6rdcqrPlRolYBHMCeIr1Tj8MF2aiXFk2OwFli8UahKHcBGk2fiKz1WqOsomMc3WfLSsVgvjnX+00aj91wDCv4FYRx3gbaNf46md5q8k2pL+OrPmT9XuGNigKNRfBErk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727364723; c=relaxed/simple;
-	bh=ElQI735mmSW/cb2a57ES5/GLkNMwZurWVJDC/EHiA/E=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=mu/mIwUS+AM1fpf2tyfVHtxKKji8WJdyhV0fHnmf3nUEVeE+9lcTAz9uE6SzdJrIQmhc8uoL6KYgDQTKvpM2vIpd7K1FscfMGYiBG3jnckZCc9ozatUtFYs+CkIYzTS7yNsLae9c8zmbRdXV0W2VbjIHnnx/GcoddCjTVxCv2+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tuxedocomputers.com; spf=pass smtp.mailfrom=tuxedocomputers.com; dkim=pass (1024-bit key) header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.b=c23tO8aD; arc=none smtp.client-ip=157.90.84.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tuxedocomputers.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxedocomputers.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.b="c23tO8aD"
-Received: from [192.168.178.76] (business-24-134-207-61.pool2.vodafone-ip.de [24.134.207.61])
-	(Authenticated sender: g.gottleuber@tuxedocomputers.com)
-	by mail.tuxedocomputers.com (Postfix) with ESMTPSA id 32F3C2FC004A;
-	Thu, 26 Sep 2024 17:31:49 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=tuxedocomputers.com;
-	s=default; t=1727364712;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=6PGKOprAPhoSd4R3DZyQL+gtBIZBj4rbnu5yfritEW8=;
-	b=c23tO8aDBI/ZJPU/Zgv+tkf03Azm6mpz1K1YD7lBhPAWqjmML4+joF51J3VU/A/KgtNvrQ
-	e1OogNy8ht2XtpGdacvR6uMjRREaEzzgCDOr5TCT2Mu0+eL0W841BEEWYQb0it+iF0Yv5b
-	tJN60EI+Mj/yeSqn37WsFhSr5yHhcxo=
-Authentication-Results: mail.tuxedocomputers.com;
-	auth=pass smtp.auth=g.gottleuber@tuxedocomputers.com smtp.mailfrom=ggo@tuxedocomputers.com
-Message-ID: <8235497b-421c-4af7-90e4-95ad4e271ead@tuxedocomputers.com>
-Date: Thu, 26 Sep 2024 17:31:48 +0200
+	s=arc-20240116; t=1727366187; c=relaxed/simple;
+	bh=WBnnx5zlorm4kEs0yeAw44dctNIiEVNABaauurFcP0U=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UNHRQYEUJ6d8/BfiRwFsFzydWNfnqe3Kt/DH8VvfNOAOqUkuODJTULJ4lUHZcwTUiHl+Z5Gf0cIHm+6a7nQ13hxwp4dsLbaPUENWc6SFTJXg61qZ0P90YfRj+7EuIpA2jaspGQW/MB0tZIuh77foVgawOwCHlC9AWHW3PhOUYN4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 7924D14BF;
+	Thu, 26 Sep 2024 08:56:47 -0700 (PDT)
+Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id BE13E3F587;
+	Thu, 26 Sep 2024 08:56:16 -0700 (PDT)
+Message-ID: <c9100637-663a-4307-9d59-deebcf9ad34c@arm.com>
+Date: Thu, 26 Sep 2024 16:56:15 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -39,37 +27,59 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: Georg Gottleuber <ggo@tuxedocomputers.com>
-Cc: victor.shih@genesyslogic.com.tw, Lucas.Lai@genesyslogic.com.tw,
- Greg.tu@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw,
- adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org
-From: Georg Gottleuber <ggo@tuxedocomputers.com>
-Subject: sdhci_pci module is blocking low power s0ix sleep with GL9767
+Subject: Re: [PATCH] mmc: core: Only set maximum DMA segment size if DMA is
+ supported
+To: Guenter Roeck <linux@roeck-us.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Paul Walmsley <paul.walmsley@sifive.com>,
+ Samuel Holland <samuel.holland@sifive.com>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org,
+ Christoph Hellwig <hch@lst.de>
+References: <20240924210123.2288529-1-linux@roeck-us.net>
+From: Robin Murphy <robin.murphy@arm.com>
+Content-Language: en-GB
+In-Reply-To: <20240924210123.2288529-1-linux@roeck-us.net>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-Hello,
+On 24/09/2024 10:01 pm, Guenter Roeck wrote:
+> Since upstream commit 334304ac2bac ("dma-mapping: don't return errors
+> from dma_set_max_seg_size") calling dma_set_max_seg_size() on a device
+> not supporting DMA results in a warning traceback. This is seen when
+> booting the sifive_u machine from SD. The underlying SPI controller
+> (sifive,spi0 compatible) explicitly sets dma_mask to NULL.
 
-I have a problem with s0ix sleep on a laptop with GL9767 SD card reader.
+Hmm, that driver probably shouldn't be doing that, but either way it's 
+not actually relevant to this check - what's significant is that when 
+the MMC host device is an "mmc-spi-slot" instance, its mmc_dev() ends up 
+being the SPI *device* itself, not the grandparent SPI controller.
 
-The device is a TUXEDO InfinityBook Pro 14 Gen9 Intel laptop and 
-consumes 6 watts in s2idle (not reaching s0ix). If I blacklist sdhci_pci 
-in /etc/modprobe.d/blacklist.conf then the device sleeps with 1.2 watts 
-(this is not super good, but OK). Unfortunately unloading and reloading 
-does not work either. Once the module has been loaded, the high power 
-consumption remains, even after a rmmod.
+Thus the patch itself is appropriate on the basis that MMC hosts may 
+exist on non-DMA-capable buses, so the subsystem needs to consider that.
 
-I tested this behavior with linux mainline 6.11, 
-6.11.0-rc7-next-20240909. Kernel mmc/next does not work either.
+Reviewed-by: Robin Murphy <robin.murphy@arm.com>
 
-In an AMD device (InfinityBook Pro 14 Gen9 AMD), however, the same card 
-reader sleeps without any problems.
-
-Link https://bugzilla.kernel.org/show_bug.cgi?id=219284
-
-Any ideas?
-
-Kind regards
-Georg Gottleuber
+> Avoid the backtrace by only calling dma_set_max_seg_size() if DMA is
+> supported.
+> 
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: Robin Murphy <robin.murphy@arm.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+> ---
+>   drivers/mmc/core/queue.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index d0b3ca8a11f0..4d6844261912 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -388,7 +388,8 @@ static struct gendisk *mmc_alloc_disk(struct mmc_queue *mq,
+>   
+>   	blk_queue_rq_timeout(mq->queue, 60 * HZ);
+>   
+> -	dma_set_max_seg_size(mmc_dev(host), queue_max_segment_size(mq->queue));
+> +	if (mmc_dev(host)->dma_parms)
+> +		dma_set_max_seg_size(mmc_dev(host), queue_max_segment_size(mq->queue));
+>   
+>   	INIT_WORK(&mq->recovery_work, mmc_mq_recovery_handler);
+>   	INIT_WORK(&mq->complete_work, mmc_blk_mq_complete_work);
