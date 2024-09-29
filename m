@@ -1,166 +1,171 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C567617A5BD;
-	Sun, 29 Sep 2024 13:14:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D725F9CB;
+	Sun, 29 Sep 2024 14:08:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727615643; cv=none; b=kvTkJgN6YrDAM2lROCNAX+uw+2rh/JmbRfGDuklLvXsDiwnmfIQKcZ7fjuU1h+2PstEq06J3K3sgZukeanhOQVOfXgp++K0OhO1Dxw2yN6+ZSG/+BODO/fTzla55U0AyjcN2vNa5VX+qc1n8iGK5tw236pikL7BqdXL9/vfkTEg=
+	t=1727618897; cv=none; b=ZZr1+bHGfenhXr09mJFAj4t61vMGLK+bHg3zsM/Zw4BoyAVWOhV2fZDiK2op8XgCqlsQP7hPKvvGNfx5iuQpYPUlBZMZIqra4J7OzUv3y5gm/vxSUP+w8SKvnw+yFOEghkXkXnFXj+F0NmesHm6YPrx7/C8le/IT2TgRqqZI19A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727615643; c=relaxed/simple;
-	bh=j0dKc3yhBOgL2knFOA/0CV+Tdfh+N5XOfQDFyGorQSg=;
-	h=Message-ID:Date:From:To:Cc:Subject:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=u3/AY76p/Ak7Nh82lOWKbkkI2Ramt7MoNILjT+/i+HDhLeplqwb9/OZVhkE4EhoFsGEjuCo8LhSp5TBLgUHniXot9e4KcZsJNJ4OLLaxp3xdM4ahefks4N+73iXDxLcdHkn7Ai/srjhPKQSPOcpRofJWJQoO07KomgccZqoCo8U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hHXR6RXf; arc=none smtp.client-ip=209.85.128.48
+	s=arc-20240116; t=1727618897; c=relaxed/simple;
+	bh=ftB5EISWBZiCT+QCmocovh6Hf2Gur5hrEprFTTKUDDM=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=ZQmzk8H3iktS2U69HL1tfsdkqTilx0HBcpezO/wgjhF5nrDNrnIzNVRF38kgFnnjDHxjApt+SWJhXLKwF3+AOKaGFUGj2ROLNsoFD9iApLjN0PxOVnyrHSEDhdDvkKby460R5cUZFauagVAv0PZEnDA8CPx/CpOG8kloEE3hkuY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BRsmcoAV; arc=none smtp.client-ip=209.85.128.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hHXR6RXf"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-42e7b7bef42so28422425e9.3;
-        Sun, 29 Sep 2024 06:14:01 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BRsmcoAV"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-42cb7a2e4d6so31398265e9.0;
+        Sun, 29 Sep 2024 07:08:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1727615640; x=1728220440; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=tIfkI/k5mUOou3QQlG3Flb+/Aulbsc0ROAg9MJCB1rA=;
-        b=hHXR6RXfDmkkVBZ2EESD5RTiLgWSU5PX0UyBhzsxmeJw0+WmbcLU+Tk6CvQHWS0sfp
-         9rRprdCeSc04lAUTbuphtRQXwPd92JgCRdEHl2nNqev++NhenikKjcxuMHOa8OotUAoR
-         jjsVsCKzTVXVR+p0ZZ66KwY6FUsej+vjiOs5JUDOV0P79BVSVtVt1gbHq6tKhEf3asC/
-         w7EoYWVcjaD2OdUzOL/bNSUZOLFZL6xKexU+PtImpdD3Cam5Ee5RDwiwj9DPLjG35605
-         XJmK2XGkx0Hdsy6o0PxcZ5Dz+C1BX/l7d/H7N7Nqg9yvpnQg1Y4CRA/vp6n++XLr1kWU
-         6cVA==
+        d=gmail.com; s=20230601; t=1727618894; x=1728223694; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=zxiCM0bbtgYKLaDvgbQd9GQXp8QrE6bw3MQSKeJbJXY=;
+        b=BRsmcoAVqaWTlGtWdspJG3Nf1lKN8uLnHhp1e+nxzIzo1M3SQJOCBsQN+7WMqZEKBc
+         o85yuu1M+VBMYifXCoCzL2XeeNpfHpNZW+oz2iqSYHqoU7j/wZkq7dy+suCquIHMbXFc
+         c2Vtd1xijB0DaJWqyxkZuziG/4f4Q2RzvH1OZfuCxIZS7pRCNl/USc1gNeZnPx2zq2De
+         60e+sgSBtOvwZzykFK8ifcJz+lP5cmhDpFNy1rim/VBNlpt8oNagV2P8d8bEZij55VWv
+         dnnPhI5y4juD5kH63EmN5Z3wvhUy7y4NmbB/BLGbAffkkZ4q+Xud3BDBoVB7rS8Amd8A
+         2EsA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727615640; x=1728220440;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=tIfkI/k5mUOou3QQlG3Flb+/Aulbsc0ROAg9MJCB1rA=;
-        b=nVP8uxE3SOh7pVj7T6epgjVW73ExOf1NZjyVk3jhSliVkNAwifVSFRWoxRlgjWZPuy
-         DvsOQnpbh0zGof1GiZIrfpjZMG8Pj39W/TUk0HL9oQ5ZsxO6ytsDw4K3rS6TiH6fr7nE
-         EGZWi6oWtzLQcE52eSLY7lg0YsxazEV/wRlTwQXfuUNdD/hgN1EbTM9aJ7WKD2yCO0Tg
-         8rEjRnf5V7rV5WFOgdAr31b5BaSCXV6bhzBfWjYXRp+eTZPRWSkAW5M6kI1PuEy4Yep3
-         MZlWwJjOFO3ih/GrAuxCioN8F5/qXhMM67tMOybkgRYCb8vQZV/jVxOzeVKBxkt6WbNS
-         Xqcw==
-X-Forwarded-Encrypted: i=1; AJvYcCUPpnfeszDbos3GRYXz3r5fje5Dd94Lr4fraTnxFqgr931tmuO/MgLvJHawlNmjgfY/j4UdKreCt5xH@vger.kernel.org, AJvYcCUmzMFi81PjoHyulZarn8x8uqIqkoE83zuBahMT0pbkTZ72OexaZnCf4U2/TpRvkUxx83kUp57w2oYc@vger.kernel.org, AJvYcCVC27liEDlnCaPEAAcZWgHHVUCaMN8xXvRtwB8K8FYSGueepX2/gRcty8+cNrkWFeJyAZNdWuiZEmCh@vger.kernel.org, AJvYcCVFoicfwm60pA1gz54fXggDh46k6TjA2dXtsd6zoOjQOD8hRBf8GSIiHfZkGzBFyIZKS4+AI4Hrzq2IV+oe@vger.kernel.org, AJvYcCWDDfPQoFLfGD91rEz5+BfSDPd/2IjD4FvdScqVlhfPKu3X6xubRJG6ui6E8mteoQEvh9TeniCGOxw5cj0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyFhk2TaQwhkvrp3YpLMTPDB7XHvqtBruKRjJtDfR/nkGvSR307
-	u1iyE4eHKa4+J3w/npXbu/+/tqE01RYfIerkPStXPlcBv8P/ZiNn
-X-Google-Smtp-Source: AGHT+IHaZE8qeiri03N0inPTGys9IBvkOvGroq5f+OgTAi0LQdMR6CD7GKs6HkbHM02iugLdROZ+NA==
-X-Received: by 2002:a05:600c:3552:b0:426:6eac:8314 with SMTP id 5b1f17b1804b1-42f5840ef00mr71570555e9.1.1727615639673;
-        Sun, 29 Sep 2024 06:13:59 -0700 (PDT)
-Received: from Ansuel-XPS. (93-34-90-105.ip49.fastwebnet.it. [93.34.90.105])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-37cd56e6875sm6837684f8f.55.2024.09.29.06.13.57
+        d=1e100.net; s=20230601; t=1727618894; x=1728223694;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=zxiCM0bbtgYKLaDvgbQd9GQXp8QrE6bw3MQSKeJbJXY=;
+        b=SE7hJoKmB+hc+KAU33LE8JhGCu9/3gqoew7HMBUPdm5K/0Gy/AiBLunZK/xhf7Y/Gm
+         1M8oNPUf002DSLx2bbLku7ESIjO3dXQgoy5xLyLtmjN/AkRTpV2i15jxeYDDzyfB0sAa
+         7vPoWg65AYKiesbTpx2BuswtJn2Jf4h9KuEkqNLajEdtBKrSty80LipeyYLk+5eGmgBj
+         sDphH98xIqz7hsTtWH6t4CeOruytwgGeLhiiTdYlf9SA0TWRyH78nSP6LYdeAGjN7tew
+         qUsHyGhg+MqZZKUW5sZBSy1qobLo6GuwAlykyQnIpSI4dijyIrfJ0B2zCWCUP1hT+Qvz
+         +ktw==
+X-Forwarded-Encrypted: i=1; AJvYcCUzksA9e3YsUndyvGLQ2SDZG1qUmO7Mc1GLIxAZb5zxqLNQumFOxv32O123Xctev0BdnhBzZ04ldSrbWxaI@vger.kernel.org, AJvYcCVbIZWkEpNcr/YEfYOq/PoPqUHx4E0OOge1iZilE3ctQeo4FKHGgOZPst7VOiKr1EDA6ywbIf2Hp1hh@vger.kernel.org, AJvYcCW4FULSj8MbdH2U4unDerYKQHATJv81SMUpGt7SFsoARjJHmIhIDv/SzllnklSquUqLPjZXozsQVmmK@vger.kernel.org, AJvYcCX7tz7ah/SBO9SncWnIY0i+snOJZl+iKmehHPH+CNDpV/x+KQxnE/zbTcuerp+F03L32fe6S8xDurlY@vger.kernel.org, AJvYcCXxYp8wgtgWnHoFmjlwwsVDW5KDoCQNQpbTOzlVfl+A4RJ8Zy7nX0t8za6ub9dXasXCAcQznRY9ShjQGjw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzPDAEeLVgNgCFQrwIuPGXsIVH5s/LX82myluNVEYNe0bJINFqv
+	BfxX5meEvywHacwL0e1oDDUehILXV/0+93tI1/N4fVLVYFq0JxJD
+X-Google-Smtp-Source: AGHT+IE/JYgZQz1MkME+bh2fy1sSJl5BniRbrO4Qg7lwQZpjBnyGre/nNMwhzmyStG3YOmG/JYzKxQ==
+X-Received: by 2002:a05:600c:1549:b0:42c:ac9f:b505 with SMTP id 5b1f17b1804b1-42f58490e62mr75614675e9.31.1727618894119;
+        Sun, 29 Sep 2024 07:08:14 -0700 (PDT)
+Received: from localhost.localdomain (93-34-90-105.ip49.fastwebnet.it. [93.34.90.105])
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-42f57dd3106sm77856005e9.7.2024.09.29.07.08.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Sep 2024 06:13:59 -0700 (PDT)
-Message-ID: <66f95297.050a0220.221772.5da3@mx.google.com>
-X-Google-Original-Message-ID: <ZvlSkRi60iluQduI@Ansuel-XPS.>
-Date: Sun, 29 Sep 2024 15:13:53 +0200
+        Sun, 29 Sep 2024 07:08:13 -0700 (PDT)
 From: Christian Marangi <ansuelsmth@gmail.com>
-To: Rob Herring <robh@kernel.org>
-Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
+To: Jens Axboe <axboe@kernel.dk>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Richard Weinberger <richard@nod.at>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Simon Glass <sjg@chromium.org>,
+	Christian Marangi <ansuelsmth@gmail.com>,
 	INAGAKI Hiroshi <musashino.open@gmail.com>,
 	Daniel Golle <daniel@makrotopia.org>,
-	Al Viro <viro@zeniv.linux.org.uk>,
 	Christian Brauner <brauner@kernel.org>,
+	Al Viro <viro@zeniv.linux.org.uk>,
+	Jan Kara <jack@suse.cz>,
 	Li Lingfeng <lilingfeng3@huawei.com>,
 	Christian Heusel <christian@heusel.eu>,
-	=?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <rafal@milecki.pl>,
-	linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-	Lorenzo Bianconi <lorenzo@kernel.org>
-Subject: Re: [RFC PATCH v2 5/5] dt-bindings: mmc: Document support for
- partition table in mmc-card
-References: <20240925214544.6114-1-ansuelsmth@gmail.com>
- <20240925214544.6114-6-ansuelsmth@gmail.com>
- <20240926141541.GA2625953-robh@kernel.org>
+	linux-block@vger.kernel.org,
+	linux-doc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Lorenzo Bianconi <lorenzo@kernel.org>,
+	upstream@airoha.com
+Subject: [PATCH v3 0/4] block: partition table OF support
+Date: Sun, 29 Sep 2024 16:06:16 +0200
+Message-ID: <20240929140713.6883-1-ansuelsmth@gmail.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240926141541.GA2625953-robh@kernel.org>
+Content-Transfer-Encoding: 8bit
 
-On Thu, Sep 26, 2024 at 09:15:41AM -0500, Rob Herring wrote:
-> On Wed, Sep 25, 2024 at 11:45:25PM +0200, Christian Marangi wrote:
-> > Document support for defining a partition table in the mmc-card node.
-> > 
-> > This is needed if the eMMC doesn't have a partition table written and
-> > the bootloader of the device load data by using absolute offset of the
-> > block device. This is common on embedded device that have eMMC installed
-> > to save space and have non removable block devices.
-> > 
-> > If an OF partition table is detected, any partition table written in the
-> > eMMC will be ignored and won't be parsed.
-> > 
-> > eMMC provide a generic disk for user data and if supported (JEDEC 4.4+)
-> > also provide two additional disk ("boot0" and "boot1") for special usage
-> > of boot operation where normally is stored the bootloader or boot info.
-> > 
-> > Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-> > ---
-> >  .../devicetree/bindings/mmc/mmc-card.yaml     | 57 +++++++++++++++++++
-> >  1 file changed, 57 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> > index fd347126449a..58b6593a0f60 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> > @@ -13,6 +13,10 @@ description: |
-> >    This documents describes the devicetree bindings for a mmc-host controller
-> >    child node describing a mmc-card / an eMMC.
-> >  
-> > +  It's possible to define a fixed partition table for an eMMC for the user
-> > +  partition and one of the 2 boot partition (boot0/boot1) if supported by the
-> > +  eMMC.
-> > +
-> >  properties:
-> >    compatible:
-> >      const: mmc-card
-> > @@ -26,6 +30,30 @@ properties:
-> >        Use this to indicate that the mmc-card has a broken hpi
-> >        implementation, and that hpi should not be used.
-> >  
-> > +  "#address-cells":
-> > +    const: 0
-> > +
-> > +  "#size-cells":
-> > +    const: 0
-> 
-> Don't need these properties.
-> 
-> > +
-> > +patternProperties:
-> > +  "^partitions(-boot[01])?$":
-> > +    $ref: /schemas/block/partitions/partitions.yaml
-> > +
-> > +    patternProperties:
-> > +      "^partition@[0-9a-f]+$":
-> > +        $ref: /schemas/block/partitions/partition.yaml
-> > +
-> > +        properties:
-> > +          reg:
-> > +            multipleOf: 512
-> 
-> I was going to suggest this, but I think it won't actually work because 
-> it could be 2 cells for address and/or size.
->
+Hi,
+this is an initial proposal to complete support for manually defining
+partition table.
 
-While checking I was surprised for this multipleOf and was very happy to
-have something like this but I also had some fear it didn't work due to
-the 2 cell thing... Very sad. I will add a description to it.
+Some background on this. Many OEM on embedded device (modem, router...)
+are starting to migrate from NOR/NAND flash to eMMC. The reason for this
+is that OEM are starting to require more and more space for the firmware
+and price difference is becoming so little that using eMMC is only benefits
+and no cons.
 
-The driver will validate the values anyway, at least on that part we are
-on the safe side.
+Given these reason, OEM are also using very custom way to provide a
+partition table and doesn't relay on common method like writing a table
+on the eMMC.
+
+One way that is commonly used is to hardcode the partition table and
+pass it to the system via various way (cmdline, special glue driver,
+block2mtd...)
+This way is also used on Android where the partition table
+is passed from the bootloader via cmdline.
+
+One reason to use this method is to save space on the device and to
+permit more flexibility on partition handling.
+
+What this series does is complete support for this feature.
+It's possible to use the cmdline to define a partition table similar
+to how it's done for MTD but this is problematic for a number of device
+where tweaking the cmdline is not possible. This series adds OF support
+to make it possible to define a partition table in the Device Tree.
+
+We implement a similar schema to the MTD fixed-partition, where we define
+a "label" and a "reg" with "offset" and "size".
+
+A new block partition parser is introduced that check if the block device
+have an OF node attached and check if a fixed-partition table is defined.
+
+If a correct node is found, then partition table is filled. cmdline will
+still have priority to this new parser.
+
+Some block device also implement boot1 and boot2 additional disk. Similar
+to the cmdline parser, these disk can have OF support using the
+"partitions-boot0" and "partitions-boot1" additional node.
+
+It's also completed support for declaring partition as read-only as this
+feature was introduced but never finished in the cmdline parser.
+
+Posting as RFC for any comments or additional checks on OF parser code.
+
+I hope this solution is better accepted as downstream this is becoming
+a real problem with a growing number of strange solution for the simple
+task of providing a fixed partition table.
+
+Changes v3:
+- Out of RFC
+- Drop partition schema generalization and simplify it
+- Require fixed-partitions compatible to adapt to MTD schema
+- Make label property optional and fallback to node name
+Changes v2:
+- Reference bytes in DT instead of Sector Size
+- Validate offset and size after Sector Size conversion
+- Limit boot0 and boot1 to eMMC and add comments about JEDEC spec
+- Generalize MTD partition schema and introduce block partitions schema
+- Add missing code to actually attach the OF parser to block partition core
+- Add reviewed by tag for read-only patch
+
+Christian Marangi (4):
+  block: add support for defining read-only partitions
+  docs: block: Document support for read-only partition in cmdline part
+  block: add support for partition table defined in OF
+  dt-bindings: mmc: Document support for partition table in mmc-card
+
+ Documentation/block/cmdline-partition.rst     |   5 +-
+ .../devicetree/bindings/mmc/mmc-card.yaml     |  52 ++++++
+ block/blk.h                                   |   1 +
+ block/partitions/Kconfig                      |   8 +
+ block/partitions/Makefile                     |   1 +
+ block/partitions/check.h                      |   1 +
+ block/partitions/cmdline.c                    |   3 +
+ block/partitions/core.c                       |   6 +
+ block/partitions/of.c                         | 151 ++++++++++++++++++
+ 9 files changed, 227 insertions(+), 1 deletion(-)
+ create mode 100644 block/partitions/of.c
 
 -- 
-	Ansuel
+2.45.2
+
