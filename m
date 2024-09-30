@@ -1,113 +1,86 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C00A9191F7E
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2024 14:37:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 99F1117B516;
+	Mon, 30 Sep 2024 22:49:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727707044; cv=none; b=r+ikSn3noxe3e9cI+HJFw6RGvxWspLRnVodosa2XqteXmqXZen+qofNjhS31qZKYEposkGUNK74Rdmbx/5mnP52AElT7UtwZfZYteSBIhD1OQFq14J9mrNpreu2OM0Xjt2s3xRoA+6JlrXk6NGVzeLDU+6lysrkrr72m0RfxagM=
+	t=1727736563; cv=none; b=MVnqwM6ZHPAdyZMu57oIBxBb7YpC6b/PpASS3/PO6utRVkY1W6VFbwFTsdhblnsBTpBNeFrEvZiMLz+2tUUyKW3Q8pQbYJJB4FJpPB/ygX7Yeid9d5IRaDbCUwpZwfQwaf3KHRtlHmv2waxxvgvf12TUJiaud2CPy5ZnRfGRtnk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727707044; c=relaxed/simple;
-	bh=AnlyzTiNs+aGRIyZqJQiVjzw/6jEntJOZ/hZst273aY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=YC2GVYdFzlEJf+NI3wooXKiZabyeSBNZLxJP1Z+OlIbcCeGQ51O5g29EV4pkgYwVBfNzFNIIn2M50kns5intxZucelxWKb2RRKowMehe1W2MAQEjFTGsnksWb6XbwBSlYWy8qmNX80jWhRpVvStxOwmVvYmPF2Bn+PPy9pWNidA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=igTPfVp5; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1727736563; c=relaxed/simple;
+	bh=Qqh/hGu2mFPMEXD/hLAjyaD03WXmExxiqqz+q1V/oDw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=WM3hDQQIApBuaPVl7lZy3A8t1mRLzd36W7xyhhyebKah2IURYJCIZO398iCIpFggD/Wq+WrDqjD1RIdvFzH7aSx9xHkJD8QREqgF9ug5JpQnKhZ29jALHnWrNNdgasUdyTEXq1ucUwW+bNpy0z8qozHiv+Orqve7UsuGY9NMBPM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mA1pZUsE; arc=none smtp.client-ip=209.85.210.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="igTPfVp5"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=D6Yp
-	ugZQT8wxo4OSt9rxdy5dXI80Qzx7/TWlFhYK5NI=; b=igTPfVp5pAjz/cDtjbyJ
-	Po4UKOjvt1Ms8MTgVFiZU1KY+k89pqN/ycxSo+HXulZU5h47PAeU5VndJykJpn/3
-	TMBCo0/ESUOWwhuak8Si7HuSI49oGkAs0zPuBYOQcTNRlL/IayR9SG9rV2pdneEJ
-	k6TkNi/oqs5SXKbjBvHVHdlGpas8s3m2CVLAHgL5P8O80tAoNRY04jgk0PcotEYH
-	HPDpXM6QgQy4PPXusl4JrrWAUTPg2eywQPOl0muuLCeLo2u4toLzArEk6Vp4NahU
-	fwQEGaAUWMhveLpoBpzq1cvZBUFTYFVIKBRStyXS7m4EXta0DVBAg6at4hzhH3+S
-	FA==
-Received: (qmail 2217038 invoked from network); 30 Sep 2024 16:37:17 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Sep 2024 16:37:17 +0200
-X-UD-Smtp-Session: l3s3148p1@MRszJFcjSoQujnsJ
-Date: Mon, 30 Sep 2024 16:37:16 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: sh_mmcif: correctly report success when obtaining
- DMA channels
-Message-ID: <Zvq3nCIz0Rv0I4El@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	linux-renesas-soc@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-References: <20240928094454.3592-2-wsa+renesas@sang-engineering.com>
- <CAMuHMdX6tv-Z2ZisYg3ridB5M28+vnGzEyC9CReeUWRUQJPA1g@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mA1pZUsE"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-7179069d029so3495208b3a.2;
+        Mon, 30 Sep 2024 15:49:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1727736562; x=1728341362; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0xszBDXhCdb0aB17XDm2OeZTEXlfiZ1uBmMn3tuJfbM=;
+        b=mA1pZUsECBdUA+TxPbbjl5y6J8R4kgU7Ffa7aprciKsZ35JgX1lW1OWPbJtsnp/GMY
+         mC6/iVOELbvRUQamcj5wyPMetdUbrAZL/HSRfKXs7B2dXMpaaACUX8ICWCC81+ud3iIn
+         DrMhTZ4CM2GeXpCHW7K044xZlZTUExY8mE76DvcicCM7waCZRMgT/5YcNhX98ZQLRDXP
+         A8XYWeo16mBzI7nLcv/L1VdgUe+5bzMsXVsHVuNoi1+7nmroqnAre+I13x4bV5e12LrM
+         8sv2U3xlp+xmSvG43vsMKHBsSDOCnJEKcWDC+PeX0LhYxpYgmi7GjVmZhXmHjrnkl6cJ
+         wiHg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727736562; x=1728341362;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0xszBDXhCdb0aB17XDm2OeZTEXlfiZ1uBmMn3tuJfbM=;
+        b=v77jhQ62rYBT2tSVbj1HyTIdlq9mdglHFF/g6X5Q/jg5YUwsE6R85in661qUy1CDfq
+         rJ9pWoJHetRdGw8AukrT4QhvOTnpADn9DA7MzPKFUzeid2JcHBW0B28IciPuw0XDMDsC
+         XGyY6XUPGSXGy2A61FfoWsFbf3AI2l8dFTSEYzoC+8lNgNaQahOWuNo5Xk8jALbjAoDX
+         ZmhPoFGdFaK+sllBANIs1owjrU7xzS9ESzd2UiLqhE+KveyMBgrytG2gfOgARkCTtlIM
+         eGwU1/kd+e6slEPFE4xb3WJ2mTZ0bmjXhu1lVL4yTHAz+EwyMkkretO4UQFfdEUNACvn
+         EIJA==
+X-Forwarded-Encrypted: i=1; AJvYcCWR5EdmeGt80bxNgNPWRXvHYghiy9fp6El2+1ANr3j64Q3qrxItbmvrun3jqsCzxJi51lluuhnkGM2uAVY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyEfGziqkd3iKwEEHIPeIlPWrdwBcBBDcE6HWl9fCcBTpZHZAZy
+	l9ljgMcWZIZdf1OazUHWpsLzQV6aq0vm4e4VeTbMJCnAaT+sQMTZ30EdjGdG
+X-Google-Smtp-Source: AGHT+IEf4AX2/OJSd2OKQmIQAQNVzsNBaD7ptWjOXjS3029g3K4oYPIoj4Pii6mnziS2Ebog8LIKTg==
+X-Received: by 2002:a05:6a20:d805:b0:1cf:4d4e:532b with SMTP id adf61e73a8af0-1d4fa806e2dmr18891455637.43.1727736561727;
+        Mon, 30 Sep 2024 15:49:21 -0700 (PDT)
+Received: from ryzen.lan ([2601:644:8200:dab8::a86])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7e6db2b391bsm7029528a12.22.2024.09.30.15.49.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 30 Sep 2024 15:49:21 -0700 (PDT)
+From: Rosen Penev <rosenp@gmail.com>
+To: linux-mmc@vger.kernel.org
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	linux-kernel@vger.kernel.org (open list:ARM/Mediatek SoC support),
+	linux-arm-kernel@lists.infradead.org (moderated list:ARM/Mediatek SoC support),
+	linux-mediatek@lists.infradead.org (moderated list:ARM/Mediatek SoC support)
+Subject: [PATCH 0/3] mmc: mtk-sd: add some devm
+Date: Mon, 30 Sep 2024 15:49:16 -0700
+Message-ID: <20240930224919.355359-1-rosenp@gmail.com>
+X-Mailer: git-send-email 2.46.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="2KszUysdaZ8IUNiX"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdX6tv-Z2ZisYg3ridB5M28+vnGzEyC9CReeUWRUQJPA1g@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 
+Simplifies the code. Also a bugfix with devm_clk_get_optional.
 
---2KszUysdaZ8IUNiX
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Rosen Penev (3):
+  mmc: mtk-sd: use devm_mmc_alloc_host
+  mmc: mtd-sd: use devm_platform_ioremap_resource
+  mmc: mtk-sd: fix devm_clk_get_optional usage
 
+ drivers/mmc/host/mtk-sd.c | 70 ++++++++++++++-------------------------
+ 1 file changed, 25 insertions(+), 45 deletions(-)
 
-> > -       dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->c=
-han_tx,
-> > -               host->chan_rx);
->=20
-> This was not a real success indicator, which could indeed confuse
-> people, but an obfuscated NULL-pointer still prints as NULL, right?
+-- 
+2.46.2
 
-Well...
-
->=20
-> >         if (!host->chan_tx || !host->chan_rx ||
-> >             sh_mmcif_dma_slave_config(host, host->chan_tx, DMA_MEM_TO_D=
-EV) ||
-> >             sh_mmcif_dma_slave_config(host, host->chan_rx, DMA_DEV_TO_M=
-EM))
-> >                 goto error;
-> >
-> > +       dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->c=
-han_tx,
-> > +               host->chan_rx);
->=20
-> This means we no longer see a debug message in case only one DMA
-> channel could be requested, thus requiring manual addition of more code
-> to find out what was really wrong?
-
-=2E.. you can simply enable basic DMA debugging to find this out. I don't
-see value in adding a separate debug printout in the driver.
-
-
---2KszUysdaZ8IUNiX
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmb6t5gACgkQFA3kzBSg
-KbZpzQ/+Pb92Cs32hvwM+2+5wza02LPD0BKrDGyJiKTnBlLpLMGT1eWQhmSsAoci
-/63skssYbjE2dR+iJs2Zl4aTeF1Ve7uXowBQS4PDz1ChdOSKmNlI7E+PFCUzVTAY
-R0dfhiVUSF2kdm5sZGOX+DrzgfyoQMmw5D5VBnZ1U825g2XAHEV+E9J6xLqB5qto
-N7HmpCFQW9MLxEuto+SeD3gxBc9XWUVgXOWS9XmtogQM+uB+lANP5woJy1bX13wP
-6upv4jYKjnUQiED1GJnQP74AH+/SVlLVveDVf0EYuaGYrxWXGWnNt2wVS0nWbCs9
-KkI52vE7mBc9/5KKr+D7iMh1/c0qiS/0z88f26c1QkivMPulHCXg9p5p5JCfLx9O
-Ks9iv+/kZ4pDhxKaqgNnmNAnKUCct2ROBtC7qTx0oEI7aYECh99Sp56STxS4cByW
-jgrKvlLzIQQ0IurcpzjYaiNVMrp0lFWiSuyTCnQV8MbkpgIlxqyqpTJMha7rJdWT
-bGCUTPMxJk3EGus3grj18Tgwud0VGAbtmsDXmsJs0Yy/r9JnlhMyoJTBRgya+7Eg
-KnrYsNPClpnRF7ayR4cUh2tDfZnD+BAQ0aC8ipwt5Km9RGOp5KazZeb9WtfCZVcs
-DLQ2fnPY1NXtbSRJzhuVCDGPY1wHrkmTS6R8ZWMcnWdtiJsUEGQ=
-=NkiM
------END PGP SIGNATURE-----
-
---2KszUysdaZ8IUNiX--
