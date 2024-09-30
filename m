@@ -1,140 +1,127 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6E73192D94
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2024 14:00:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3886217C22F;
+	Mon, 30 Sep 2024 14:17:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727704811; cv=none; b=scjPSuHCdtvT3mrPhlaC8HmTkf/DE4BVfyGHjTV/GIo7N370IAOFiqabmXfYHQsv+KkO6dDTusirc8IwWyEyFx8zbgNCpQ87Z816C3jWrFppC+JjtKUvCwi/9qc2CfXA1RjGlEcNDT+g1UeESwMFQCoDJHQWcBBJWDjzn/Wax1s=
+	t=1727705878; cv=none; b=uN8a5+ypd4P21tcO4gUo8/FbPN4ZYk3RJmz9eBkMgll8cADQt6yiIJ4a7nd3pt9aURyK9nhWWiDSjpFljujJds71Q6VySByQM3F4soo7fnQ2H2wsApZLGVm04XFjz3P061lZaycXYGm6zxKNwt1UFO4kBNYbjUSHlS0LLLNuCRw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727704811; c=relaxed/simple;
-	bh=3ijB4GlXO+25BXCSGu/vsofAjiikfjurTHWwB9A1V40=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=ax+ny3aYLLbVSrq8U/JQo2lxlnBKRc9kVWYfVU9r3gnPTSTYBJuoovQiyOWpZJ9lU8YFCLU1g8yUGTf5a6xWWhfbEX+/r0PIaPj0VHZqcDSRcj7XNrNeetUGm2egl3EJ+imNTV7LxnZn3QnTe00KPWx297NO03ycLZ7KSQV9Ng8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rasmusvillemoes.dk; spf=pass smtp.mailfrom=rasmusvillemoes.dk; dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b=Rt3Lqz4X; arc=none smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rasmusvillemoes.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rasmusvillemoes.dk
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b="Rt3Lqz4X"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-53995380bb3so1111525e87.1
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2024 07:00:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=rasmusvillemoes.dk; s=google; t=1727704808; x=1728309608; darn=vger.kernel.org;
-        h=mime-version:user-agent:message-id:date:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=GUVJY0IXomTgT+0Kh65kRbP76txfvO137vhXRmIMRvY=;
-        b=Rt3Lqz4XgiL7D7bZ0SIfI8aBV6Eu8GO4FH52yelW3pR6okq/L/tK08af8uCtSp1+0E
-         74lFjpua28iIw8uN6EN4fhKfn1Ab5WahH6FiiFshnUNwCj9KaFh5ORDk4t1RMuj6J5zu
-         Ta3qKuFKLDApCpg7lq/M7n55oOdIXJFd/wdn4=
+	s=arc-20240116; t=1727705878; c=relaxed/simple;
+	bh=y/F1NBCTnAB3UuPVjUX5FuS5if9jSL5+KRpqoTut+kk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ng1Jiu0Aqidi7mI4jz7eSDtWtvBORwDwLvYG8Wu3qHbNkxDcMWn0uPnBuUwBx6mXhvjEaR7TL5VoLnUsrOF7a7WqmtWpSSYxiPbU4dkB7ECGDn4kzPmpCMnIJb/RtuQtl11IeS+lmEh6XtnSz0nQCW6J9Uwtj81yD80kWTr22os=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.219.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e25d405f255so3644667276.2;
+        Mon, 30 Sep 2024 07:17:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727704808; x=1728309608;
-        h=mime-version:user-agent:message-id:date:references:in-reply-to
-         :subject:cc:to:from:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GUVJY0IXomTgT+0Kh65kRbP76txfvO137vhXRmIMRvY=;
-        b=EuZp9dsy2QHfEdWlUZbz+5otkweLVoaXv4oMRbpp7DmmgmiL9bJZyPD0n9DK7ZM2Ug
-         k7PBr0MS1JSEjEsf2+eEDkriQDsezC1yfbCewb4C2EAU9oBgqxCplGblhwipR4SBYpdU
-         1w1YQ6cNcS2YRBDf/IWQ+MMUsuD0XO/eZ5yZVbAujY/yHVEZUf16nrREzZ0McDWz4NAR
-         aJTrUs49h95s/YXyscOv+ROvtYkn4LaHR/Olp1XWbj9MGcN0GhRMPZ83GGdhrdlZ6YEC
-         EssL1i+yNuV2GrJaCnOaJFrj82j1pVsg36ZPsrgN/2P+3Ee+8j2n+srpd0ijqU2AXkmW
-         Ycmg==
-X-Forwarded-Encrypted: i=1; AJvYcCWgMXPLKdDCkFj9bM9RoVrWNxFqIFYfT3TQqMwTGdu6brRCGeRDHaureefLZrNhkKye67tzPlkoOTk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwIeaqdsRhdqF0tn+ElVeGA2sXuabOB4jr5+O1SC0DjG1lLz9do
-	IrxKsfdSs/Ak2JfKtdm9hLTofzBtpyq8PqYPXCXHQuYfT7KfWKUa/z+GD3xp68U=
-X-Google-Smtp-Source: AGHT+IEKI7Weq7GjSrmgYABMSBw8sViHYEBtfUq5wTxEWLE74jtGdVLHWUX/PFqWZwy723EiPNA5iQ==
-X-Received: by 2002:a05:6512:398d:b0:530:daeb:c1d4 with SMTP id 2adb3069b0e04-5389fc35936mr5226141e87.12.1727704807805;
-        Mon, 30 Sep 2024 07:00:07 -0700 (PDT)
-Received: from localhost ([81.216.59.226])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5389fd5df47sm1233224e87.78.2024.09.30.07.00.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Sep 2024 07:00:07 -0700 (PDT)
-From: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>,  Jens Axboe
- <axboe@kernel.dk>,  Jonathan Corbet <corbet@lwn.net>,  Ulf Hansson
- <ulf.hansson@linaro.org>,  Rob Herring <robh@kernel.org>,  Krzysztof
- Kozlowski <krzk+dt@kernel.org>,  Conor Dooley <conor+dt@kernel.org>,  Kees
- Cook <kees@kernel.org>,  Andy Shevchenko <andy@kernel.org>,  Daniel Golle
- <daniel@makrotopia.org>,  INAGAKI Hiroshi <musashino.open@gmail.com>,
-  Christian Brauner <brauner@kernel.org>,  Al Viro
- <viro@zeniv.linux.org.uk>,  Li Lingfeng <lilingfeng3@huawei.com>,  Ming
- Lei <ming.lei@redhat.com>,  Christian Heusel <christian@heusel.eu>,
-  linux-block@vger.kernel.org,  linux-doc@vger.kernel.org,
-  linux-kernel@vger.kernel.org,  linux-mmc@vger.kernel.org,
-  devicetree@vger.kernel.org,  linux-hardening@vger.kernel.org,  Miquel
- Raynal <miquel.raynal@bootlin.com>,  Lorenzo Bianconi
- <lorenzo@kernel.org>,  upstream@airoha.com
-Subject: Re: [PATCH v4 5/5] dt-bindings: mmc: Document support for partition
- table in mmc-card
-In-Reply-To: <66fa9810.050a0220.3b136f.bc29@mx.google.com> (Christian
-	Marangi's message of "Mon, 30 Sep 2024 14:22:32 +0200")
-References: <20240930113045.28616-1-ansuelsmth@gmail.com>
-	<20240930113045.28616-6-ansuelsmth@gmail.com>
-	<87y139jpx5.fsf@prevas.dk>
-	<66fa9810.050a0220.3b136f.bc29@mx.google.com>
-Date: Mon, 30 Sep 2024 16:00:10 +0200
-Message-ID: <87ikudjl79.fsf@prevas.dk>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+        d=1e100.net; s=20230601; t=1727705875; x=1728310675;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=9vsPdt8dp1EhWLsYJbbEjP53Z7pKpAwdym21sKtiHvQ=;
+        b=obuNrdPKdSX13FiwmsiPNqpPB3FRKy1WQupEdz5SHAkqAwGfFAkKBNibQOam2SX/1S
+         Tdips8Bj5PcMJISnCCvgToRxLz/ZCujx6XCwk3HOYEQV27X4X0zItibAzrzrPXATq8BG
+         ifHUqSzA45Eu0uMc6jXFqY0laO7/vVOQIlMAUNx8xs5qL0FVGGuB56rfbk8JZguUtbQo
+         6wq7dgkox96ezj4aQoMaF0nvPxB5a0g5Mx66tYnUw4b+i2UpYoSohsyQCThYsfIgpzEh
+         22xHI/kiLCyKn9CFLLB7wHR5OvHpiz10T2YI40OZIsGt9J+wiMS4/oBsMaZhE5mr1FGY
+         ez8g==
+X-Forwarded-Encrypted: i=1; AJvYcCUPYs438X7HtSaIIEQK9WdI/P5rt6SPTGshH5SY287RQzu3HBxUaOYdmDErklLVrDfxfHlMBWkm7po=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyQTj44svzVX6/vasPtLmzR2zYNnYVpUnRES9k16h3UBq2ggW2y
+	Jogae1YDn3SSv7u5bvCpgWiofJn9u0yjTiHBy5llJhLtnv6eEfr4+OpFC+K7
+X-Google-Smtp-Source: AGHT+IEX5gRaVm5hFOGP8R3g4dlZBZR063j5AwtYNY88TL6va0wndk7rRwKmTXHLWNayou6bza8Otg==
+X-Received: by 2002:a05:6902:18c6:b0:e26:d31:7b8c with SMTP id 3f1490d57ef6-e260d317c5amr5933819276.57.1727705874674;
+        Mon, 30 Sep 2024 07:17:54 -0700 (PDT)
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com. [209.85.128.170])
+        by smtp.gmail.com with ESMTPSA id 3f1490d57ef6-e25e4015fe9sm2342323276.26.2024.09.30.07.17.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 30 Sep 2024 07:17:54 -0700 (PDT)
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-6c3f1939d12so35744027b3.2;
+        Mon, 30 Sep 2024 07:17:54 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWF8NC0YTIXwxGcI+a3wjCXxMXsb3ovgID3Km8K7aPUy3xmuJwRwKp/QOI3bzEdgv2PAAWy/0byk0k=@vger.kernel.org
+X-Received: by 2002:a05:690c:dd1:b0:6e2:636:d9ba with SMTP id
+ 00721157ae682-6e267118e38mr43153857b3.3.1727705873617; Mon, 30 Sep 2024
+ 07:17:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20240928094454.3592-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20240928094454.3592-2-wsa+renesas@sang-engineering.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Mon, 30 Sep 2024 16:17:40 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdX6tv-Z2ZisYg3ridB5M28+vnGzEyC9CReeUWRUQJPA1g@mail.gmail.com>
+Message-ID: <CAMuHMdX6tv-Z2ZisYg3ridB5M28+vnGzEyC9CReeUWRUQJPA1g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: correctly report success when obtaining
+ DMA channels
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Christian Marangi <ansuelsmth@gmail.com> writes:
+Hi Wolfram,
 
-> On Mon, Sep 30, 2024 at 02:18:14PM +0200, Rasmus Villemoes wrote:
->> Christian Marangi <ansuelsmth@gmail.com> writes:
->> 
->> > Document support for defining a partition table in the mmc-card node.
->> >
->> > This is needed if the eMMC doesn't have a partition table written and
->> > the bootloader of the device load data by using absolute offset of the
->> > block device. This is common on embedded device that have eMMC installed
->> > to save space and have non removable block devices.
->> >
->> > If an OF partition table is detected, any partition table written in the
->> > eMMC will be ignored and won't be parsed.
->> >
->> > eMMC provide a generic disk for user data and if supported (JEDEC 4.4+)
->> > also provide two additional disk ("boot0" and "boot1") for special usage
->> > of boot operation where normally is stored the bootloader or boot info.
->> >
->> 
->> This looks quite useful.
->> 
->> Could this be extended to also be applicable to the four "general
->> purpose" hardware partitions, i.e. what is exposed as /dev/mmcblkXgpY ?
->> These would often also contain some fundamental boot data at various
->> offsets but also, as for the boot partitions, often without a regular
->> partition table.
->> 
->> The eMMC spec consistently refers to the boot partitions as "boot
->> partition 1" and "boot partition 2"; the boot0/boot1 naming is kind of a
->> linux'ism. Similarly, the general purpose partitions are _almost_
->> exclusively referred to as 1 through 4, except (at least in my copy),
->> the heading for 7.4.89 says GP_SIZE_MULT_GP0 - GP_SIZE_MULT_GP3, but
->> then goes on to describe GP_SIZE_MULT_1_y through GP_SIZE_MULT_4_y. So I
->> wonder if on the binding level one should use partitions-{boot1,boot2}
->> and, if implemented, partitions-{gp1,gp2,gp3,gp4} ?
->>
+On Sat, Sep 28, 2024 at 11:45=E2=80=AFAM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> The debug message could still report success when getting the channels
+> was OK but configuring them failed. This actually caused a minor detour
+> when debugging DMA problems, so make sure the success is only reported
+> when the channels are really ready-to-use.
 >
-> Just to make sure, they are exposed as disk or char device? This is the
-> case of rpmb.
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Thanks for your patch!
+
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -439,14 +439,15 @@ static void sh_mmcif_request_dma(struct sh_mmcif_ho=
+st *host)
+>                 if (IS_ERR(host->chan_rx))
+>                         host->chan_rx =3D NULL;
+>         }
+> -       dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->cha=
+n_tx,
+> -               host->chan_rx);
+
+This was not a real success indicator, which could indeed confuse
+people, but an obfuscated NULL-pointer still prints as NULL, right?
+
+>         if (!host->chan_tx || !host->chan_rx ||
+>             sh_mmcif_dma_slave_config(host, host->chan_tx, DMA_MEM_TO_DEV=
+) ||
+>             sh_mmcif_dma_slave_config(host, host->chan_rx, DMA_DEV_TO_MEM=
+))
+>                 goto error;
 >
+> +       dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->cha=
+n_tx,
+> +               host->chan_rx);
 
-They are block devices, just as the so-called "user area" (the main
-mmcblkX) and the boot partitions.
+This means we no longer see a debug message in case only one DMA
+channel could be requested, thus requiring manual addition of more code
+to find out what was really wrong?
 
-> Adding support for this should be no-brainer as it's just a matter of
-> more case of the strends and more regex case on the binding.
+> +
+>         return;
+>
+>  error:
 
-Yes, that's what I thought as well.
+Gr{oetje,eeting}s,
 
-> I also notice the conflicting names, to adapt to JEDEC naming I will rename
-> the property to boot1 and boot2.
+                        Geert
 
-Thanks,
-Rasmus
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
+
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
