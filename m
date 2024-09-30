@@ -1,332 +1,247 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B86C17332B
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Sep 2024 08:14:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 108DB183CA9;
+	Mon, 30 Sep 2024 09:02:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727684098; cv=none; b=ROSPSGSRvYDcVLtgkmTYzSzv2lyQ42mRhIdme9Nv73SBx7LVb76BhYQ7f2nKoVm41kvC071XS1sBIWvFtPYCa4RkLxsu0YvrfQZBwFTTgZr+OjrWSJejHd9lDvbs3uC0he73Ov9gE0thshR6amGIHU3KT9XeNzrEilvdWc0Dkng=
+	t=1727686923; cv=none; b=A1ReW2SqnylgwUBhMW5i8egZ3zmx0UNdWCTs2blbw6JAClPGx8N1YkSsbMtvl5Ls3ldmn1jdwcSJ7HAgFytk3tagTgpVhvmikqZtRxOZF5Eix64cCLr/50ag3Z4f1UWDaIIMKsY3Nb68LW6CFZb2j/YPcvk3x/veWsI6T7HTM8Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727684098; c=relaxed/simple;
-	bh=Ceu/nVD+ZRhjdNGaopzqvLqPyVf9Z+iuNWVvvy/ZI78=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=DuloMIGuaurYq6u6r76V+3xtJ12WcMry3LVbcJ9XR4NwzH6tOdnPBrdqaZh2hIB0FZBbdjvlGjkLWv+UbT/g0W8fEZZw19Vu9Tz/ShCOydJWZeGfJ8pG10uoOLuc6KuX3UEfjPWoW+5fTrmnCGyIkzoQbn1iGXpnmp1r/9w9pRw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <sha@pengutronix.de>)
-	id 1svBY9-0007aq-P2; Mon, 30 Sep 2024 10:14:33 +0200
-Received: from [2a0a:edc0:2:b01:1d::c5] (helo=pty.whiteo.stw.pengutronix.de)
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <sha@pengutronix.de>)
-	id 1svBY3-002aWI-LV; Mon, 30 Sep 2024 10:14:27 +0200
-Received: from sha by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <sha@pengutronix.de>)
-	id 1svBY3-0030yV-1k;
-	Mon, 30 Sep 2024 10:14:27 +0200
-Date: Mon, 30 Sep 2024 10:14:27 +0200
-From: Sascha Hauer <s.hauer@pengutronix.de>
-To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	INAGAKI Hiroshi <musashino.open@gmail.com>,
-	Daniel Golle <daniel@makrotopia.org>,
-	Christian Brauner <brauner@kernel.org>,
-	Al Viro <viro@zeniv.linux.org.uk>, Jan Kara <jack@suse.cz>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Christian Heusel <christian@heusel.eu>, linux-block@vger.kernel.org,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Lorenzo Bianconi <lorenzo@kernel.org>, upstream@airoha.com
-Subject: Re: [PATCH v3 3/4] block: add support for partition table defined in
- OF
-Message-ID: <Zvpd48oOYletv7Ko@pengutronix.de>
-References: <20240929140713.6883-1-ansuelsmth@gmail.com>
- <20240929140713.6883-4-ansuelsmth@gmail.com>
+	s=arc-20240116; t=1727686923; c=relaxed/simple;
+	bh=rMDQbP5iTbg0VsicK08jB1/II/2Q6c4i6sQerb2hk/U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=cPrRnZBDYCrEAVIirMv/lm0TQ3m34LGcB2+SjCGupVE93ZZ+g1azSI/W63Q2DXWT203zFCR0/QkJ76bWq62eqJ5uYzL8y8gXaE/jx9kLUteBlwyFpoUB7S/J7YOcBeoQf/6sCSalw4+V8iG3xgEw0EcrWX/AO7cnPabAdPi8B3A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=ed8HAkKp; arc=none smtp.client-ip=148.251.105.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="ed8HAkKp"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1727686919;
+	bh=rMDQbP5iTbg0VsicK08jB1/II/2Q6c4i6sQerb2hk/U=;
+	h=From:To:Cc:Subject:Date:From;
+	b=ed8HAkKpFNF2T0XxspKs7CbT8mlDzbZUZLPXsQdbi7e7Uvpuk88JfeWA2mNXeobC4
+	 a/DJUNI9n15h3AMgmPp3keX7jPdZ3S/AKElZP4IBumWNXbSeANstR7p7GHtLAmUkTR
+	 HvY9cYpWumELAzyuIBYRO96bz0kIRHVEM/ApfBoVc2+7CltWl2YKRJRdhEEJ9Lw/Wb
+	 60m7pZWV7WO+rqRyhAHXyEWa1N1biowtqQuwKthXrSDQ3Rcc9CCdE/AHNoWGgWrqj9
+	 HGG3+SQc6A4zvCBrwCDDV+IO0w+oUBIqh4ZNWxqnYzgVk9za+mIWSjaKOK5aI92XKB
+	 AlwBmJy1BGC1Q==
+Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id 12C4317E0EA8;
+	Mon, 30 Sep 2024 11:01:59 +0200 (CEST)
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+To: chaotian.jing@mediatek.com
+Cc: ulf.hansson@linaro.org,
+	matthias.bgg@gmail.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org,
+	kernel@collabora.com,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Subject: [PATCH v2] mmc: mtk-sd: Implement Host Software Queue for eMMC and SD Card
+Date: Mon, 30 Sep 2024 11:01:56 +0200
+Message-ID: <20240930090156.33537-1-angelogioacchino.delregno@collabora.com>
+X-Mailer: git-send-email 2.46.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240929140713.6883-4-ansuelsmth@gmail.com>
-X-Sent-From: Pengutronix Hildesheim
-X-URL: http://www.pengutronix.de/
-X-Accept-Language: de,en
-X-Accept-Content-Type: text/plain
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: sha@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 
-Hi Christian,
+Add support for Host Software Queue (HSQ) and enable it when the
+controller instance does not have Command Queue Engine HW support.
 
-Thanks for working on this, it will be useful for me as well.
-Some comments inside.
+It was chosen to enable HSQ only for eMMC and SD/MicroSD cards
+and not for SDIO as performance improvements are seen only for
+the former.
 
-On Sun, Sep 29, 2024 at 04:06:19PM +0200, Christian Marangi wrote:
-> Add support for partition table defined in Device Tree. Similar to how
-> it's done with MTD, add support for defining a fixed partition table in
-> device tree.
-> 
-> A common scenario for this is fixed block (eMMC) embedded devices that
-> have no MBR or GPT partition table to save storage space. Bootloader
-> access the block device with absolute address of data.
-> 
-> This is to complete the functionality with an equivalent implementation
-> with providing partition table with bootargs, for case where the booargs
-> can't be modified and tweaking the Device Tree is the only solution to
-> have an usabe partition table.
-> 
-> The implementation follow the fixed-partitions parser used on MTD
-> devices where a "partitions" node is expected to be declared with
-> "fixed-partitions" compatible in the OF node of the disk device
-> (mmc-card for eMMC for example) and each child node declare a label
-> and a reg with offset and size. If label is not declared, the node name
-> is used as fallback. Eventually is also possible to declare the read-only
-> property to flag the partition as read-only.
-> 
-> For eMMC block, driver scan the disk name and check if it's suffixed with
-> "boot0" or "boot1".
-> This is to handle the additional disk provided by eMMC as supported in
-> JEDEC 4.4+. If this suffix is detected, "partitions-boot0" or
-> "partitions-boot1" are used instead of the generic "partitions" for the
-> relevant disk.
-> 
-> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-> ---
->  block/partitions/Kconfig  |   8 ++
->  block/partitions/Makefile |   1 +
->  block/partitions/check.h  |   1 +
->  block/partitions/core.c   |   3 +
->  block/partitions/of.c     | 151 ++++++++++++++++++++++++++++++++++++++
->  5 files changed, 164 insertions(+)
->  create mode 100644 block/partitions/of.c
-> 
-> diff --git a/block/partitions/Kconfig b/block/partitions/Kconfig
-> index 7aff4eb81c60..8534f7544f26 100644
-> --- a/block/partitions/Kconfig
-> +++ b/block/partitions/Kconfig
-> @@ -270,4 +270,12 @@ config CMDLINE_PARTITION
->  	  Say Y here if you want to read the partition table from bootargs.
->  	  The format for the command line is just like mtdparts.
->  
-> +config OF_PARTITION
-> +	bool "Command line partition support" if PARTITION_ADVANCED
+Performance was measured with a SanDisk Extreme Ultra A2 MicroSD
+card in a MediaTek MT8195T Acer Chromebook Spin 513 (CP513-2H),
+by running FIO (bs=4k) on an ArchLinux userspace.
 
-Should be "device tree partition support".
+.... Summarizing ....
+Random read:     +24.28% IOPS, +24.29% BW
+Sequential read: +3.14%  IOPS, +3.49%  BW
+Random RW (avg): +50.53% IOPS, +50.68% BW
 
-> +	depends on OF
-> +	help
-> +	  Say Y here if you want to enable support for partition table
-> +	  defined in Device Tree. (mainly for eMMC)
-> +	  The format for the command line is just like MTD fixed-partition schema.
-> +
->  endmenu
+Below, more data from the benchmarks.
 
-[...]
+Before:
+ - Random read: IOPS=1643, BW=6574KiB/s
+   bw (  KiB/s): min= 4578, max= 7440, per=99.95%, avg=6571.55, stdev=74.16, samples=953
+   iops        : min= 1144, max= 1860, avg=1642.14, stdev=18.54, samples=953
+   lat (msec)  : 100=0.01%, 250=0.12%, 500=0.38%, 750=97.89%, 1000=1.44%, 2000=0.16%
+ - Sequential read: IOPS=19.1k, BW=74.4MiB/s
+   bw (  KiB/s): min=12288, max=118483, per=100.00%, avg=76293.38, stdev=1971.42, samples=956
+   iops        : min= 3072, max=29620, avg=19072.14, stdev=492.87, samples=956
+   lat (msec)  : 4=0.01%, 10=0.01%, 20=0.21%, 50=23.95%, 100=75.67%, 250=0.05%, 500=0.03%, 750=0.08%
+ - Random R/W: read: IOPS=282, BW=1129KiB/s (1156kB/s)  write: IOPS=284, BW=1136KiB/s
+   read bw (  KiB/s): min=   31, max= 3496, per=100.00%, avg=1703.67, stdev=155.42, samples=630
+   read iops        : min=    7, max=  873, avg=425.22, stdev=38.85, samples=630
+   wri  bw (  KiB/s): min=   31, max= 3443, per=100.00%, avg=1674.27, stdev=164.23, samples=644
+   wri  iops        : min=    7, max=  860, avg=417.87, stdev=41.03, samples=644
+   lat (msec)   : 250=0.13%, 500=0.44%, 750=0.84%, 1000=22.29%, 2000=74.01%, >=2000=2.30%
 
-> diff --git a/block/partitions/of.c b/block/partitions/of.c
-> new file mode 100644
-> index 000000000000..bc6200eb86b3
-> --- /dev/null
-> +++ b/block/partitions/of.c
-> @@ -0,0 +1,151 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +
-> +#include <linux/blkdev.h>
-> +#include <linux/major.h>
-> +#include <linux/of.h>
-> +#include "check.h"
-> +
-> +#define BOOT0_STR	"boot0"
-> +#define BOOT1_STR	"boot1"
-> +
-> +static struct device_node *get_partitions_node(struct device_node *disk_np,
-> +					       struct gendisk *disk)
-> +{
-> +	const char *node_name = "partitions";
-> +
-> +	/*
-> +	 * JEDEC specification 4.4 for eMMC introduced 3 additional partition
-> +	 * present on every eMMC. These additional partition are always hardcoded
-> +	 * from the eMMC driver as boot0, boot1 and rpmb. While rpmb is used to
-> +	 * store keys and exposed as a char device, the other 2 are exposed as
-> +	 * real separate disk with the boot0/1 appended to the disk name.
-> +	 *
-> +	 * Here we parse the disk_name in search for such suffix and select
-> +	 * the correct partition node.
-> +	 */
-> +	if (disk->major == MMC_BLOCK_MAJOR) {
-> +		const char *disk_name = disk->disk_name;
-> +
-> +		if (!memcmp(disk_name + strlen(disk_name) - strlen(BOOT0_STR),
-> +			    BOOT0_STR, sizeof(BOOT0_STR)))
-> +			node_name = "partitions-boot0";
-> +		if (!memcmp(disk_name + strlen(disk_name) - strlen(BOOT1_STR),
-> +			    BOOT1_STR, sizeof(BOOT1_STR)))
-> +			node_name = "partitions-boot1";
-> +	}
-> +
-> +	return of_get_child_by_name(disk_np, node_name);
-> +}
-> +
-> +static int validate_of_partition(struct device_node *np, int slot)
-> +{
-> +	int a_cells, s_cells;
-> +	const __be32 *reg;
-> +	u64 offset, size;
-> +	int len;
-> +
-> +	reg = of_get_property(np, "reg", &len);
-> +
-> +	a_cells = of_n_addr_cells(np);
-> +	s_cells = of_n_size_cells(np);
-> +
+After:
+ - Random read: IOPS=2042, BW=8171KiB/s
+   bw (  KiB/s): min= 4907, max= 9072, per=99.94%, avg=8166.80, stdev=93.77, samples=954
+   iops        : min= 1226, max= 2268, avg=2040.78, stdev=23.41, samples=954
+   lat (msec)   : 100=0.03%, 250=0.13%, 500=52.88%, 750=46.64%, 1000=0.32%
+ - Sequential read: IOPS=19.7k, BW=77.0MiB/s
+   bw (  KiB/s): min=67980, max=94248, per=100.00%, avg=78894.27, stdev=1475.07, samples=956
+   iops        : min=16994, max=23562, avg=19722.45, stdev=368.76, samples=956
+   lat (msec)   : 4=0.01%, 10=0.01%, 20=0.05%, 50=28.78%, 100=71.14%, 250=0.01%, 500=0.02%
+ - Random R/W: read: IOPS=424, BW=1699KiB/s  write: IOPS=428, BW=1714KiB/s
+   read bw (  KiB/s): min=  228, max= 2856, per=100.00%, avg=1796.60, stdev=112.59, samples=901
+   read iops        : min=   54, max=  712, avg=447.81, stdev=28.21, samples=901
+   wri  bw (  KiB/s): min=   28, max= 2904, per=100.00%, avg=1780.11, stdev=128.27, samples=916
+   wri  iops        : min=    4, max=  724, avg=443.69, stdev=32.14, samples=916
 
-The corresponding mtd ofpart parser validates a_cells + s_cells against
-len, like this:
+Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+---
 
-	if (len / 4 != a_cells + s_cells) {
-		pr_debug("%s: ofpart partition %pOF (%pOF) error parsing reg property.\n",
-			 master->name, pp,
-			 mtd_node);
-		goto ofpart_fail;
-	}
+Changes in v2:
+ - Added missing `select MMC_HSQ` for MMC_MTK Kconfig
 
-I think you should do it here as well.
+ drivers/mmc/host/Kconfig  |  1 +
+ drivers/mmc/host/mtk-sd.c | 49 +++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 48 insertions(+), 2 deletions(-)
 
-> +	/*
-> +	 * Validate offset conversion from bytes to sectors.
-> +	 * Only the first partition is allowed to have offset 0.
-> +	 */
-
-Where is this constraint coming from? I would put the partitions in
-order into the device tree as well, but the binding doesn't enforce it
-and I see no reason to do so.
-
-> +	offset = of_read_number(reg, a_cells);
-> +	if (do_div(offset, SECTOR_SIZE) ||
-
-How about (offset % SECTOR_SIZE) or (offset & (SECTOR_SIZE - 1))? Might
-be a bit more intuitive to read.
-
-> +	    (slot > 1 && !offset))
-> +		return -EINVAL;
-> +
-> +	/* Validate size conversion from bytes to sectors */
-> +	size = of_read_number(reg + a_cells, s_cells);
-> +	if (do_div(size, SECTOR_SIZE) || !size)
-> +		return -EINVAL;
-> +
-> +	return 0;
-> +}
-> +
-> +static void add_of_partition(struct parsed_partitions *state, int slot,
-> +			     struct device_node *np)
-> +{
-> +	struct partition_meta_info *info;
-> +	char tmp[sizeof(info->volname) + 4];
-> +	int a_cells, s_cells;
-> +	const char *partname;
-> +	const __be32 *reg;
-> +	u64 offset, size;
-> +	int len;
-> +
-> +	reg = of_get_property(np, "reg", &len);
-> +
-> +	a_cells = of_n_addr_cells(np);
-> +	s_cells = of_n_size_cells(np);
-> +
-> +	/* Convert bytes to sector size */
-> +	offset = of_read_number(reg, a_cells) / SECTOR_SIZE;
-> +	size = of_read_number(reg + a_cells, s_cells) / SECTOR_SIZE;
-> +
-> +	put_partition(state, slot, offset, size);
-> +
-> +	if (of_property_read_bool(np, "read-only"))
-> +		state->parts[slot].flags |= ADDPART_FLAG_READONLY;
-> +
-> +	/*
-> +	 * Follow MTD label logic, search for label property,
-> +	 * fallback to node name if not found.
-> +	 */
-> +	info = &state->parts[slot].info;
-> +	partname = of_get_property(np, "label", &len);
-> +	if (!partname)
-> +		partname = of_get_property(np, "name", &len);
-> +	strscpy(info->volname, partname, sizeof(info->volname));
-> +
-> +	snprintf(tmp, sizeof(tmp), "(%s)", info->volname);
-> +	strlcat(state->pp_buf, tmp, PAGE_SIZE);
-> +}
-> +
-> +int of_partition(struct parsed_partitions *state)
-> +{
-> +	struct device_node *disk_np, *partitions_np, *np;
-> +	struct device *ddev = disk_to_dev(state->disk);
-> +	int slot;
-> +
-> +	disk_np = of_node_get(ddev->parent->of_node);
-> +	if (!disk_np)
-> +		return 0;
-> +
-> +	partitions_np = get_partitions_node(disk_np, state->disk);
-> +	if (!partitions_np ||
-> +	    !of_device_is_compatible(partitions_np, "fixed-partitions"))
-> +		return 0;
-
-of_node_put(disk_np) missing here before return.
-
-> +
-> +	/* Check if child are over the limit */
-> +	slot = of_get_child_count(partitions_np);
-> +	if (slot >= state->limit)
-> +		goto err;
-
-Other partition parsers just silently ignore the partitions
-exceeding state->limit instead of throwing an error. Maybe do the same
-here?
-
-> +
-> +	slot = 1;
-> +	/* Validate parition offset and size */
-> +	for_each_child_of_node(partitions_np, np) {
-> +		if (validate_of_partition(np, slot))
-> +			goto err;
-> +
-> +		slot++;
-> +	}
-> +
-> +	slot = 1;
-> +	for_each_child_of_node(partitions_np, np) {
-> +		add_of_partition(state, slot, np);
-> +
-> +		slot++;
-> +	}
-> +
-> +	strlcat(state->pp_buf, "\n", PAGE_SIZE);
-> +
-> +	return 1;
-> +err:
-> +	of_node_put(partitions_np);
-> +	of_node_put(disk_np);
-
-You should put the nodes for the non error case as well.
-
-Sascha
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 7199cb0bd0b9..0ba5a9f769fb 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -1009,6 +1009,7 @@ config MMC_MTK
+ 	depends on COMMON_CLK
+ 	select REGULATOR
+ 	select MMC_CQHCI
++	select MMC_HSQ
+ 	help
+ 	  This selects the MediaTek(R) Secure digital and Multimedia card Interface.
+ 	  If you have a machine with a integrated SD/MMC card reader, say Y or M here.
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 5165a33bf74b..a9a554bd3f44 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -33,6 +33,7 @@
+ #include <linux/mmc/slot-gpio.h>
+ 
+ #include "cqhci.h"
++#include "mmc_hsq.h"
+ 
+ #define MAX_BD_NUM          1024
+ #define MSDC_NR_CLOCKS      3
+@@ -473,6 +474,7 @@ struct msdc_host {
+ 	bool hs400_tuning;	/* hs400 mode online tuning */
+ 	bool internal_cd;	/* Use internal card-detect logic */
+ 	bool cqhci;		/* support eMMC hw cmdq */
++	bool hsq_en;		/* Host Software Queue is enabled */
+ 	struct msdc_save_para save_para; /* used when gate HCLK */
+ 	struct msdc_tune_para def_tune_para; /* default tune setting */
+ 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+@@ -1170,7 +1172,9 @@ static void msdc_track_cmd_data(struct msdc_host *host, struct mmc_command *cmd)
+ 
+ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ {
++	struct mmc_host *mmc = mmc_from_priv(host);
+ 	unsigned long flags;
++	bool hsq_req_done;
+ 
+ 	/*
+ 	 * No need check the return value of cancel_delayed_work, as only ONE
+@@ -1178,6 +1182,27 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ 	 */
+ 	cancel_delayed_work(&host->req_timeout);
+ 
++	/*
++	 * If the request was handled from Host Software Queue, there's almost
++	 * nothing to do here, and we also don't need to reset mrq as any race
++	 * condition would not have any room to happen, since HSQ stores the
++	 * "scheduled" mrqs in an internal array of mrq slots anyway.
++	 * However, if the controller experienced an error, we still want to
++	 * reset it as soon as possible.
++	 *
++	 * Note that non-HSQ requests will still be happening at times, even
++	 * though it is enabled, and that's what is going to reset host->mrq.
++	 * Also, msdc_unprepare_data() is going to be called by HSQ when needed
++	 * as HSQ request finalization will eventually call the .post_req()
++	 * callback of this driver which, in turn, unprepares the data.
++	 */
++	hsq_req_done = host->hsq_en ? mmc_hsq_finalize_request(mmc, mrq) : false;
++	if (hsq_req_done) {
++		if (host->error)
++			msdc_reset_hw(host);
++		return;
++	}
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	host->mrq = NULL;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -1187,7 +1212,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ 		msdc_unprepare_data(host, mrq->data);
+ 	if (host->error)
+ 		msdc_reset_hw(host);
+-	mmc_request_done(mmc_from_priv(host), mrq);
++	mmc_request_done(mmc, mrq);
+ 	if (host->dev_comp->recheck_sdio_irq)
+ 		msdc_recheck_sdio_irq(host);
+ }
+@@ -1347,7 +1372,7 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 
+ 	host->error = 0;
+-	WARN_ON(host->mrq);
++	WARN_ON(!host->hsq_en && host->mrq);
+ 	host->mrq = mrq;
+ 
+ 	if (mrq->data)
+@@ -2916,6 +2941,19 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		mmc->max_seg_size = 64 * 1024;
+ 		/* Reduce CIT to 0x40 that corresponds to 2.35us */
+ 		msdc_cqe_cit_cal(host, 2350);
++	} else if (mmc->caps2 & MMC_CAP2_NO_SDIO) {
++		/* Use HSQ on eMMC/SD (but not on SDIO) if HW CQE not supported */
++		struct mmc_hsq *hsq = devm_kzalloc(&pdev->dev, sizeof(*hsq), GFP_KERNEL);
++		if (!hsq) {
++			ret = -ENOMEM;
++			goto release;
++		}
++
++		ret = mmc_hsq_init(hsq, mmc);
++		if (ret)
++			goto release;
++
++		host->hsq_en = true;
+ 	}
+ 
+ 	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+@@ -3043,6 +3081,9 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 
++	if (host->hsq_en)
++		mmc_hsq_suspend(mmc);
++
+ 	msdc_save_reg(host);
+ 
+ 	if (sdio_irq_claimed(mmc)) {
+@@ -3073,6 +3114,10 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
+ 		pinctrl_select_state(host->pinctrl, host->pins_uhs);
+ 		enable_irq(host->irq);
+ 	}
++
++	if (host->hsq_en)
++		mmc_hsq_resume(mmc);
++
+ 	return 0;
+ }
+ 
 -- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+2.46.1
+
