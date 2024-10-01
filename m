@@ -1,142 +1,100 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 832811C6F61;
-	Tue,  1 Oct 2024 14:34:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E09D8282F7;
+	Tue,  1 Oct 2024 14:51:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727793269; cv=none; b=KTYUFCv5RRlNo2QHwex2XhFYXJ53tY7Uuh4ajM/ACbDj1yHoVvfoCmnHvRv/exEKNYlvZrssDfcMLaJ0jMKqZBnozI7X3KhnNQVWCIV4X/fjJjeOL5ARhuhnFtfMiG1+uHsuX+JOvzhtlPIUpUUi53I52RAIPl/iQ/K723QbjLI=
+	t=1727794313; cv=none; b=CoDol/cazka104FRwV/QrloYuIDxnKsPR/3+67s3TLU59uiFFIfYZ1S6DOGumo4uhUYfED3wVYQTs2m+zrwIrOLQ87w4HNj/0F9m/Xn8M9oplL7fAI15u1rsK3SvADlDf/4TZCDBQxHKmUiPH9Z8AweUVCc3Jirjrf7e51drXi4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727793269; c=relaxed/simple;
-	bh=MJJbugmM7odwoRbXpKB1hsqqSBdhArseeVwNZ793jek=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Tw7gA5M7A68s/6SHAJNl4BEVBZ6N3/lB7kRN1fKIXx2bEh1RZIyYBu+d5ZCCioHRvZYSd6udObCM5E+3e/ohdkMTMEhtKtWOupla32PWt5lHbHyEZqyVzR0CgdsyA+Htht1wq1IXDqxfvZXgF1M8PZNpGjHVDkA8IB9eqStTrKU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=KLe3oRNz; arc=none smtp.client-ip=198.175.65.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="KLe3oRNz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1727793267; x=1759329267;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=MJJbugmM7odwoRbXpKB1hsqqSBdhArseeVwNZ793jek=;
-  b=KLe3oRNzuFPj3ibEJJxp25cwVNcXaqcb199SGi1qGt6gZtfXghXHvBMa
-   RuuW33yFGrcEtMngy5EeYdNek56aFKIMY11mMhEHZLGLY6w2uqaRmAl3N
-   sknMi8PgIiXMY4AL9b1C0TUaUYlgiGfykzlFILY4BPiy9DvL+knVy6Euf
-   CeMJq4Nd1AdmhBVTA7tV6tMC6lr7isLIMBONVnSqECZjFahhVsQBKfZmm
-   QvXIdK3P7k/ojmxn+Q4y+U2eUTaDIl6u4y3HZR2YuBsRlD731mRsoy5D/
-   ntoa0231Q98Q7EPLaffHYF/YcyTyk3GfRpOC13vX/vJ2hWuVMWdXuzSp0
-   g==;
-X-CSE-ConnectionGUID: ZGwKFmycRbCU+PG1Sa1wyg==
-X-CSE-MsgGUID: WwXdaCDgTc6maVo+UIoZzw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11212"; a="49453565"
-X-IronPort-AV: E=Sophos;i="6.11,167,1725346800"; 
-   d="scan'208";a="49453565"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2024 07:34:26 -0700
-X-CSE-ConnectionGUID: IfogJOA3T2SDDvZ2ZGNcTA==
-X-CSE-MsgGUID: AqoDEJpFQFauxKQ5jPkGDA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,167,1725346800"; 
-   d="scan'208";a="78439207"
-Received: from lkp-server01.sh.intel.com (HELO 53e96f405c61) ([10.239.97.150])
-  by orviesa005.jf.intel.com with ESMTP; 01 Oct 2024 07:34:20 -0700
-Received: from kbuild by 53e96f405c61 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1svdxC-000Qmb-0m;
-	Tue, 01 Oct 2024 14:34:18 +0000
-Date: Tue, 1 Oct 2024 22:33:24 +0800
-From: kernel test robot <lkp@intel.com>
-To: Christian Marangi <ansuelsmth@gmail.com>, Jens Axboe <axboe@kernel.dk>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Kees Cook <kees@kernel.org>,
-	Andy Shevchenko <andy@kernel.org>,
-	Daniel Golle <daniel@makrotopia.org>,
-	INAGAKI Hiroshi <musashino.open@gmail.com>,
-	Christian Brauner <brauner@kernel.org>,
-	Al Viro <viro@zeniv.linux.org.uk>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Ming Lei <ming.lei@redhat.com>,
-	Christian Heusel <christian@heusel.eu>, linux-block@vger.kernel.org,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-hardening@vger.kernel.org,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Lorenzo Bianconi <lorenzo@kernel.org>, upstream@airoha.com
-Cc: oe-kbuild-all@lists.linux.dev,
-	Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: Re: [PATCH v4 3/5] string: add strends() helper to check if a string
- ends with a suffix
-Message-ID: <202410012202.g0GogVZR-lkp@intel.com>
-References: <20240930113045.28616-4-ansuelsmth@gmail.com>
+	s=arc-20240116; t=1727794313; c=relaxed/simple;
+	bh=DX0t+v7hvE+aAD2YbuWKEGmvmwhdywdlL/zZzrB1iA8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=n1HH5EoO6H1os8KoErEFegfsE02I7mEMsTtSvDia+8FTrWSe86n61HViWsq9OQgtuUrMGSK3JKNCym1nviKpAqwPiMQBVUN8C3jdoM7n3eA/n1kjaNCYDmVEN1FUhJc8M7CSpq8Y3chR2/RWK442GGqpeTtloYv782gwTgqi7b0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-6dbb24ee2ebso51555907b3.1;
+        Tue, 01 Oct 2024 07:51:50 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727794309; x=1728399109;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SNruZBGCuXHJI2C/Fv8WrfBhkuB98dRgPlwbcD0yhng=;
+        b=Tpd4gexzKtxitfos9jNyxsPfRUbk3Wzj1ZClY0b3EFumRBGAbF8jcuNnLIlSfmuTl1
+         Y3X8Ijb9zYJJbN/4YzTfvXuFdGvI17c/G3MoeXG+mzNCr+xa3wk46JDlIhaZduAQe7mG
+         gb+FIhkERa/w02QXsGkk1ESW4CRQ1tGQjBSs4mdouQeS8pNDYfzu822kv15zdpLtmyGv
+         h/2xye+RuSor/zzAZFsxPbrywn4/pQ1lwJ8pRbDcMyhkMzQ+MrQa8x0HoBqxFGOVYY6J
+         UFqstt6OpbLezj6HBdZQiQN+LO6RpsF3jRVbjgO6jsNsnEuo3mRrB9b8x7CZ9/IbqF0L
+         cVZg==
+X-Forwarded-Encrypted: i=1; AJvYcCVUP1DXTum+dQGxokETYgYsy/cznLMLYhuk90Lj8g1QTctFKvq6aWKW/gAQxOc8jUsQJdfTQMPZo/4yLUs=@vger.kernel.org, AJvYcCXb4idLVfOIfq9Qg1PkLY4q9PxCqb4qM4TvoBgVuatmgDeS0ixk5VYBga2UCeeSl4sVuwjNKuTNulX3@vger.kernel.org
+X-Gm-Message-State: AOJu0YyjJ4oHQyMXt3NTkTWxvY7Ch/Pzrtvmu5DjVYJ3cJsQaU/Y5LuI
+	lXPYji14RMsJErkdCWXcNrJpF4Mp402zOyMWjPDeujw7PKSq8LqaLiYmigMs
+X-Google-Smtp-Source: AGHT+IGlkvhxje+V3kN7Fvw61w+LusQp3KxZXM4+b21WcZqtrbbJStte5ANBOiIEXMRcW/BdCSDOvg==
+X-Received: by 2002:a05:690c:680e:b0:6e2:63e:f087 with SMTP id 00721157ae682-6e28b54ca50mr45326597b3.42.1727794309440;
+        Tue, 01 Oct 2024 07:51:49 -0700 (PDT)
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com. [209.85.128.176])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-6e245395f09sm19578847b3.114.2024.10.01.07.51.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 01 Oct 2024 07:51:48 -0700 (PDT)
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6da395fb97aso40906457b3.0;
+        Tue, 01 Oct 2024 07:51:48 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVBUPbgPuR9AO0GezFL+m6FWlY7bv8ofVzH2CReOT5Lmdb6c8B9ndVguz2fosUF+yFXZ4BrQ8Mg2dcpWBs=@vger.kernel.org, AJvYcCVU8gd9QVLWlwz4n9AnHfx/uI4ES2I+jTRgJKNVE71mMr9YtwRWUPUXMZhksdkDlnrDWwvlHDzV42HE@vger.kernel.org
+X-Received: by 2002:a05:690c:112:b0:6e2:985:f4df with SMTP id
+ 00721157ae682-6e24dc9c710mr105345037b3.44.1727794308335; Tue, 01 Oct 2024
+ 07:51:48 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20240930113045.28616-4-ansuelsmth@gmail.com>
+References: <20240924210123.2288529-1-linux@roeck-us.net>
+In-Reply-To: <20240924210123.2288529-1-linux@roeck-us.net>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Tue, 1 Oct 2024 16:51:35 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXQEAwVHDzsqypisOB_n4PcXMD+4UHgxjZMwvdKfWutAQ@mail.gmail.com>
+Message-ID: <CAMuHMdXQEAwVHDzsqypisOB_n4PcXMD+4UHgxjZMwvdKfWutAQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Only set maximum DMA segment size if DMA is supported
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Paul Walmsley <paul.walmsley@sifive.com>, 
+	Samuel Holland <samuel.holland@sifive.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
+	Christoph Hellwig <hch@lst.de>, Robin Murphy <robin.murphy@arm.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Christian,
+On Tue, Sep 24, 2024 at 11:01=E2=80=AFPM Guenter Roeck <linux@roeck-us.net>=
+ wrote:
+> Since upstream commit 334304ac2bac ("dma-mapping: don't return errors
+> from dma_set_max_seg_size") calling dma_set_max_seg_size() on a device
+> not supporting DMA results in a warning traceback. This is seen when
+> booting the sifive_u machine from SD. The underlying SPI controller
+> (sifive,spi0 compatible) explicitly sets dma_mask to NULL.
 
-kernel test robot noticed the following build errors:
+Thanks, seeing the same with mmc_spi on SiPeed MAIX BiT.
 
-[auto build test ERROR on axboe-block/for-next]
-[also build test ERROR on kees/for-next/hardening robh/for-next lwn/docs-next linus/master v6.12-rc1 next-20241001]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+> Avoid the backtrace by only calling dma_set_max_seg_size() if DMA is
+> supported.
+>
+> Cc: Christoph Hellwig <hch@lst.de>
+> Cc: Robin Murphy <robin.murphy@arm.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Christian-Marangi/block-add-support-for-defining-read-only-partitions/20240930-193609
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux-block.git for-next
-patch link:    https://lore.kernel.org/r/20240930113045.28616-4-ansuelsmth%40gmail.com
-patch subject: [PATCH v4 3/5] string: add strends() helper to check if a string ends with a suffix
-config: s390-randconfig-001-20241001 (https://download.01.org/0day-ci/archive/20241001/202410012202.g0GogVZR-lkp@intel.com/config)
-compiler: s390-linux-gcc (GCC) 14.1.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20241001/202410012202.g0GogVZR-lkp@intel.com/reproduce)
+Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202410012202.g0GogVZR-lkp@intel.com/
+Gr{oetje,eeting}s,
 
-All errors (new ones prefixed by >>):
+                        Geert
 
-   In file included from arch/s390/purgatory/../lib/string.c:16,
-                    from arch/s390/purgatory/string.c:3:
-   include/linux/string.h: In function 'strends':
->> include/linux/string.h:366:27: error: implicit declaration of function 'memcmp' [-Wimplicit-function-declaration]
-     366 |         return n >= m && !memcmp(str + n - m, suffix, m);
-         |                           ^~~~~~
-   include/linux/string.h:65:1: note: 'memcmp' is defined in header '<string.h>'; this is probably fixable by adding '#include <string.h>'
-      64 | #include <asm/string.h>
-     +++ |+#include <string.h>
-      65 | 
+--=20
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
+.org
 
-
-vim +/memcmp +366 include/linux/string.h
-
-   355	
-   356	/**
-   357	 * strends - does @str end with @suffix?
-   358	 * @str: string to examine
-   359	 * @suffix: suffix to look for.
-   360	 */
-   361	static inline bool strends(const char *str, const char *suffix)
-   362	{
-   363		size_t n = strlen(str);
-   364		size_t m = strlen(suffix);
-   365	
- > 366		return n >= m && !memcmp(str + n - m, suffix, m);
-   367	}
-   368	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+In personal conversations with technical people, I call myself a hacker. Bu=
+t
+when I'm talking to journalists I just say "programmer" or something like t=
+hat.
+                                -- Linus Torvalds
