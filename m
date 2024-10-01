@@ -1,155 +1,138 @@
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.54])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5256D2B9A5
-	for <linux-mmc@vger.kernel.org>; Tue,  1 Oct 2024 20:50:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.54
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727815845; cv=pass; b=XnOvQYqtV1/ffBkcXKcKwNasE5iJkhseYbH0AiM2UQJiU0zCzfqo3f1Cspi4II8FfL0pRb/htuOnkuY3lTpx7MYGGnMcTILYEYu4fxQBQxah3mg5Bx2Kt8+BHeBfgs9um4/wrwwwO0nCDXpdkcM02BUtERi8JcUcsJ/sbYCNpTQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727815845; c=relaxed/simple;
-	bh=XWoZ5M9IJgvG7TVKVlYl5y7VxImpaDUWws/n3Lju9o0=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=C9bj4COG0q/cI9dSAafaoJ0WM4Y+nLowvOYToBNl6MXzW9loqnhwjtQEdttnosPOQPvSiVT8xrBWTiAIR6i3QoDA3n8RXVYEAY5+7dDx94M5/MJDKhMXwuZ8HNcZMat3E27+aH7h/MXWEWei7lZHmDIglh1dy2C6447zprZhHpI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=oS1Qh0ei; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=96okupII; arc=pass smtp.client-ip=85.215.255.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A14B199FCE;
+	Tue,  1 Oct 2024 21:48:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.11
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1727819296; cv=none; b=VeQoCbVshKH+fTwTsmA+rdS+bGdGWkc3j5Kt20iT0Uz9vZ8lW5Kv5H+fGEdsn+mHKvHo9nPQ3/V0osP1yEZ1M9mtQbrcqN+CJcOf0Rdu4qlt4nai2YR0Ih/PEocTTC/FPBKsCTT00XOKsTf+I5ZzWaE1u0P7oT60XTFWADYw+LM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1727819296; c=relaxed/simple;
+	bh=mMUExZQ+EvnU7XLWDsD1aa5LRPKUL7dBR3emnkPwhDE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ppNZFCZkp+762i44xosNGmfoFWq1LFp5QZ4cW89xxsH3B0ZKY/dwa4+ODHciDDX+fNmu/EwemvJuiPLQlLL6RLQIqyH7MIw7veccN/HPxZDHIir3HmdmvSjh7dwTHaV28tLTfdQx+P2yN7cdtcA1k4aKibGlMwEfu1J62+Rf8QQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=l9weqt/R; arc=none smtp.client-ip=198.175.65.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="oS1Qh0ei";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="96okupII"
-ARC-Seal: i=1; a=rsa-sha256; t=1727815120; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=hyTAEG5R2WtkUjAAqOOYd1sL+TEzOE5Uaymw0SCMqXfT2aURYsZMkGafVm2pJERpj1
-    lDDeiI4pcm9au7NYkATLdGzytcM+TaQfAp7lFjuwkQ/QBir8GZpIhusdYfdV91CmyaIP
-    jvXl9WLsTX7ZXTTSKnUytp+PFs07mFxyGnA78CVRXH0Oar4flf3ACI6rAI0R5LRKCO2J
-    DBIBJszAtVzpfATMq4zRiAo3s6p6QNjuN8M7rpiebPT5kWcPUQfjQjDDEGP9iCqiX9m2
-    5bNqCMlLIjvLNZfBWL8CfMnuqB3nVS9IVEcl2f/jzHFqNrxYuWMC/H1271387lNA8XkR
-    3trQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1727815120;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=4txe+iD50pMDpThtrvaW5COT5g0xJ1mL6n/zbUfQoYQ=;
-    b=FmeRDb1k6UdM8zF6z1ToDU5ep6qVBlguMqsTPgQiyWX6NNFy5P+64NqWGznRS/Iecu
-    3UhnKAhSMttVFZa7VbkF1eJuwcJn841eXj/zGT9c4qaMk5nnGbr7TzkMz0fO5T42LivY
-    xaV81Kqip65yfynYKh8BeUwUxExsPJjny7XeC/6E8esae0YwwcZ+5dMQBWU8gV0NbmPU
-    BYKkTTznLMBQhp7ErusIL+o5Z2MyTM1BLKN+uhXs4kV4q6RGEJX8LuRW3ZEMJjngDBxF
-    5tPU6dgLpgtTAG6+yLm8ioS2DlKElf6Xl3gTVEbdIGcYuAeUxei2yGmGlhZMOXjFEu89
-    JFRw==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo01
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1727815120;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=4txe+iD50pMDpThtrvaW5COT5g0xJ1mL6n/zbUfQoYQ=;
-    b=oS1Qh0eipSjs5gAdKJc+aIbmZyEBkBgVF6RKSAh5UYWa/EE8ZtRM8rMbROSAIZkP63
-    mqKV6NpxStppKDijMA+xXi8mR8R3AoxEfG7VVwzX08dNe8V0fsdJI3ZXWp/ijWCIoOfx
-    y3eoO76srsvJAdX2ouV3HeGPBeNXbytY2Jjlj7861iTxVUecP9NNjzsk1zb4+1g24x3s
-    +Dc78JfvmX5J+fDmaWo+67AjlJeKPRIqOLv+3MhlnHHkBZVMR6gyPqcyKs89C5r1/02t
-    4Ctrd1zNu1a0YEng6ph3fP7eP3d5g6l/kVoQeKNry6BrpVKzEPWG16pmGoQsCKUNiPyI
-    DTpg==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1727815120;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
-    From:Subject:Sender;
-    bh=4txe+iD50pMDpThtrvaW5COT5g0xJ1mL6n/zbUfQoYQ=;
-    b=96okupIIVqqdCNWL6s10ZtTqJSnr9n/L6mkWruqPYi3arTuZ4slcDZQJaqUOOdHi5D
-    UTo0j1tfp0CprHfgIMAw==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RD06ISTv80p2D11QFwNypsTi9pEHpqtUzGQwQ=="
-Received: from Munilab01-lab.speedport.ip
-    by smtp.strato.de (RZmta 51.2.8 AUTH)
-    with ESMTPSA id z0e6b0091Kcecdh
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Tue, 1 Oct 2024 22:38:40 +0200 (CEST)
-From: Bean Huo <beanhuo@iokpp.de>
-To: avri.altman@wdc.com,
-	ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org
-Cc: Bean Huo <beanhuo@micron.com>
-Subject: [PATCH v1 3/5] mmc-utils: Add new FFU mode using CMD25+CMD12 for Open-ended write download FW
-Date: Tue,  1 Oct 2024 22:38:09 +0200
-Message-Id: <20241001203811.26279-4-beanhuo@iokpp.de>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20241001203811.26279-1-beanhuo@iokpp.de>
-References: <20241001203811.26279-1-beanhuo@iokpp.de>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="l9weqt/R"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1727819295; x=1759355295;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=mMUExZQ+EvnU7XLWDsD1aa5LRPKUL7dBR3emnkPwhDE=;
+  b=l9weqt/Rl7Fr/uirgRGXXlURxJQQ8lvryO5rAlFhc+o9PGyFzHIQRLOr
+   jJZtnIifLnmXw6KPgt4PMCHrZszc28xWDWriURGlqcWv5G8fSZSjuUaIE
+   ghzrj2oGV0fgSTHsshg4hyEZfty8OuLQlcbTbERrHHdTeffTP9URvrOdC
+   gLrrScYBMMq0Gbr6G6eMLUA2IQeemHRwMNGGhaMF3f4f7zMfK3wQoShmk
+   mwjDJLIE55xin1wIeSK+CKs6upOz3ze/s950QQntG9kTzpwLiX5N9PYwK
+   zgw29M5fogThr+dLhMfRgxwHmECDe6bBc9ESinzIowpZoigDSFjjSqKjl
+   A==;
+X-CSE-ConnectionGUID: 7MdkgM5qSv6XBwVBhQOmqA==
+X-CSE-MsgGUID: HtHeXpiWSFa7DMe620vrUQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11212"; a="37536479"
+X-IronPort-AV: E=Sophos;i="6.11,169,1725346800"; 
+   d="scan'208";a="37536479"
+Received: from orviesa003.jf.intel.com ([10.64.159.143])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2024 14:48:14 -0700
+X-CSE-ConnectionGUID: y2fAfsQlTzuDYDQiHGjUJA==
+X-CSE-MsgGUID: Zj22m4xJSb+txgUc2smUsQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.11,169,1725346800"; 
+   d="scan'208";a="78671028"
+Received: from lkp-server01.sh.intel.com (HELO 53e96f405c61) ([10.239.97.150])
+  by orviesa003.jf.intel.com with ESMTP; 01 Oct 2024 14:48:08 -0700
+Received: from kbuild by 53e96f405c61 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1svkiz-000RDN-23;
+	Tue, 01 Oct 2024 21:48:05 +0000
+Date: Wed, 2 Oct 2024 05:47:11 +0800
+From: kernel test robot <lkp@intel.com>
+To: Christian Marangi <ansuelsmth@gmail.com>, Jens Axboe <axboe@kernel.dk>,
+	Jonathan Corbet <corbet@lwn.net>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>, Kees Cook <kees@kernel.org>,
+	Andy Shevchenko <andy@kernel.org>,
+	Daniel Golle <daniel@makrotopia.org>,
+	INAGAKI Hiroshi <musashino.open@gmail.com>,
+	Christian Brauner <brauner@kernel.org>,
+	Al Viro <viro@zeniv.linux.org.uk>,
+	Li Lingfeng <lilingfeng3@huawei.com>,
+	Ming Lei <ming.lei@redhat.com>,
+	Christian Heusel <christian@heusel.eu>, linux-block@vger.kernel.org,
+	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-hardening@vger.kernel.org,
+	Miquel Raynal <miquel.raynal@bootlin.com>,
+	Lorenzo Bianconi <lorenzo@kernel.org>, upstream@airoha.com
+Cc: oe-kbuild-all@lists.linux.dev,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Subject: Re: [PATCH v4 3/5] string: add strends() helper to check if a string
+ ends with a suffix
+Message-ID: <202410020546.DL6BnsOs-lkp@intel.com>
+References: <20240930113045.28616-4-ansuelsmth@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20240930113045.28616-4-ansuelsmth@gmail.com>
 
-From: Bean Huo <beanhuo@micron.com>
+Hi Christian,
 
-Introduced a new FFU mode leveraging CMD25+CMD12 for Open-ended Multiple-block write to
-download the firmware bundle.
+kernel test robot noticed the following build errors:
 
-Signed-off-by: Bean Huo <beanhuo@micron.com>
----
- mmc.c     | 3 ++-
- mmc.h     | 1 +
- mmc_ffu.c | 9 ++++++++-
- 3 files changed, 11 insertions(+), 2 deletions(-)
+[auto build test ERROR on axboe-block/for-next]
+[also build test ERROR on kees/for-next/hardening robh/for-next lwn/docs-next linus/master v6.12-rc1 next-20241001]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-diff --git a/mmc.c b/mmc.c
-index 0a22f2e..73b694d 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -234,7 +234,8 @@ static struct Command commands[] = {
- 		"should be in decimal bytes and sector aligned.\n"
- 		"[-m <ffu_mode>] Optional, provides five firmware bundle download command modes:\n"
- 		" -m 1: Default mode (CMD6+CMD23+CMD25+CMD6 repeated), may exit FFU mode if the firmware size exceeds chunk size.\n"
--		" -m 2: FFU mode 2 (enter FFU mode, CMD23+CMD25 repeated, exit FFU mode), stays in FFU mode until firmware download completes.\n",
-+		" -m 2: FFU mode 2 (enter FFU mode, CMD23+CMD25 repeated, exit FFU mode), stays in FFU mode until firmware download completes.\n"
-+		" -m 3: FFU mode 3 (enter FFU mode, CMD25+CMD12 repeated, exit FFU mode), stays in FFU mode until firmware download completes.\n",
- 	  NULL
- 	},
- 	{ do_erase, -4,
-diff --git a/mmc.h b/mmc.h
-index 6f1bf3e..78cc140 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -27,6 +27,7 @@
- #define MMC_BOOT_INITIATION_ARG		0xFFFFFFFA
- #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
- #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
-+#define MMC_STOP_TRANSMISSION	12	/* ac				R1b */
- #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
- #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
-diff --git a/mmc_ffu.c b/mmc_ffu.c
-index ac65130..239d3b0 100644
---- a/mmc_ffu.c
-+++ b/mmc_ffu.c
-@@ -48,6 +48,13 @@ static void set_ffu_download_cmd(struct mmc_ioc_multi_cmd *multi_cmd, __u8 *ext_
- 		multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
- 		set_single_cmd(&multi_cmd->cmds[1], MMC_WRITE_MULTIPLE_BLOCK, 1, bytes / 512, arg);
- 		mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf + offset);
-+	} else if (ffu_mode == 3) {
-+		set_single_cmd(&multi_cmd->cmds[0], MMC_WRITE_MULTIPLE_BLOCK, 1, bytes / 512, arg);
-+		multi_cmd->cmds[0].flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+		mmc_ioc_cmd_set_data(multi_cmd->cmds[0], buf + offset);
-+		set_single_cmd(&multi_cmd->cmds[1], MMC_STOP_TRANSMISSION, 0, 0, 0);
-+		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+
- 	}
- }
- 
-@@ -231,7 +238,7 @@ int do_ffu(int nargs, char **argv)
- 			break;
- 		case 'm':
- 			ffu_mode = atoi(optarg);
--			if (ffu_mode > 2) {
-+			if (ffu_mode > 3) {
- 				fprintf(stderr, "Unsupported ffu mode `%d'.\n", ffu_mode);
- 				abort();
- 			}
+url:    https://github.com/intel-lab-lkp/linux/commits/Christian-Marangi/block-add-support-for-defining-read-only-partitions/20240930-193609
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux-block.git for-next
+patch link:    https://lore.kernel.org/r/20240930113045.28616-4-ansuelsmth%40gmail.com
+patch subject: [PATCH v4 3/5] string: add strends() helper to check if a string ends with a suffix
+config: s390-randconfig-r061-20241001 (https://download.01.org/0day-ci/archive/20241002/202410020546.DL6BnsOs-lkp@intel.com/config)
+compiler: clang version 20.0.0git (https://github.com/llvm/llvm-project 7773243d9916f98ba0ffce0c3a960e4aa9f03e81)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20241002/202410020546.DL6BnsOs-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202410020546.DL6BnsOs-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   In file included from arch/s390/purgatory/string.c:3:
+   In file included from arch/s390/purgatory/../lib/string.c:16:
+>> include/linux/string.h:366:20: error: call to undeclared function 'memcmp'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+     366 |         return n >= m && !memcmp(str + n - m, suffix, m);
+         |                           ^
+   1 error generated.
+
+
+vim +/memcmp +366 include/linux/string.h
+
+   355	
+   356	/**
+   357	 * strends - does @str end with @suffix?
+   358	 * @str: string to examine
+   359	 * @suffix: suffix to look for.
+   360	 */
+   361	static inline bool strends(const char *str, const char *suffix)
+   362	{
+   363		size_t n = strlen(str);
+   364		size_t m = strlen(suffix);
+   365	
+ > 366		return n >= m && !memcmp(str + n - m, suffix, m);
+   367	}
+   368	
+
 -- 
-2.34.1
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
