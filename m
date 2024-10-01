@@ -1,100 +1,156 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.162])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E09D8282F7;
-	Tue,  1 Oct 2024 14:51:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727794313; cv=none; b=CoDol/cazka104FRwV/QrloYuIDxnKsPR/3+67s3TLU59uiFFIfYZ1S6DOGumo4uhUYfED3wVYQTs2m+zrwIrOLQ87w4HNj/0F9m/Xn8M9oplL7fAI15u1rsK3SvADlDf/4TZCDBQxHKmUiPH9Z8AweUVCc3Jirjrf7e51drXi4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727794313; c=relaxed/simple;
-	bh=DX0t+v7hvE+aAD2YbuWKEGmvmwhdywdlL/zZzrB1iA8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n1HH5EoO6H1os8KoErEFegfsE02I7mEMsTtSvDia+8FTrWSe86n61HViWsq9OQgtuUrMGSK3JKNCym1nviKpAqwPiMQBVUN8C3jdoM7n3eA/n1kjaNCYDmVEN1FUhJc8M7CSpq8Y3chR2/RWK442GGqpeTtloYv782gwTgqi7b0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.128.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-6dbb24ee2ebso51555907b3.1;
-        Tue, 01 Oct 2024 07:51:50 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727794309; x=1728399109;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=SNruZBGCuXHJI2C/Fv8WrfBhkuB98dRgPlwbcD0yhng=;
-        b=Tpd4gexzKtxitfos9jNyxsPfRUbk3Wzj1ZClY0b3EFumRBGAbF8jcuNnLIlSfmuTl1
-         Y3X8Ijb9zYJJbN/4YzTfvXuFdGvI17c/G3MoeXG+mzNCr+xa3wk46JDlIhaZduAQe7mG
-         gb+FIhkERa/w02QXsGkk1ESW4CRQ1tGQjBSs4mdouQeS8pNDYfzu822kv15zdpLtmyGv
-         h/2xye+RuSor/zzAZFsxPbrywn4/pQ1lwJ8pRbDcMyhkMzQ+MrQa8x0HoBqxFGOVYY6J
-         UFqstt6OpbLezj6HBdZQiQN+LO6RpsF3jRVbjgO6jsNsnEuo3mRrB9b8x7CZ9/IbqF0L
-         cVZg==
-X-Forwarded-Encrypted: i=1; AJvYcCVUP1DXTum+dQGxokETYgYsy/cznLMLYhuk90Lj8g1QTctFKvq6aWKW/gAQxOc8jUsQJdfTQMPZo/4yLUs=@vger.kernel.org, AJvYcCXb4idLVfOIfq9Qg1PkLY4q9PxCqb4qM4TvoBgVuatmgDeS0ixk5VYBga2UCeeSl4sVuwjNKuTNulX3@vger.kernel.org
-X-Gm-Message-State: AOJu0YyjJ4oHQyMXt3NTkTWxvY7Ch/Pzrtvmu5DjVYJ3cJsQaU/Y5LuI
-	lXPYji14RMsJErkdCWXcNrJpF4Mp402zOyMWjPDeujw7PKSq8LqaLiYmigMs
-X-Google-Smtp-Source: AGHT+IGlkvhxje+V3kN7Fvw61w+LusQp3KxZXM4+b21WcZqtrbbJStte5ANBOiIEXMRcW/BdCSDOvg==
-X-Received: by 2002:a05:690c:680e:b0:6e2:63e:f087 with SMTP id 00721157ae682-6e28b54ca50mr45326597b3.42.1727794309440;
-        Tue, 01 Oct 2024 07:51:49 -0700 (PDT)
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com. [209.85.128.176])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-6e245395f09sm19578847b3.114.2024.10.01.07.51.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 01 Oct 2024 07:51:48 -0700 (PDT)
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6da395fb97aso40906457b3.0;
-        Tue, 01 Oct 2024 07:51:48 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVBUPbgPuR9AO0GezFL+m6FWlY7bv8ofVzH2CReOT5Lmdb6c8B9ndVguz2fosUF+yFXZ4BrQ8Mg2dcpWBs=@vger.kernel.org, AJvYcCVU8gd9QVLWlwz4n9AnHfx/uI4ES2I+jTRgJKNVE71mMr9YtwRWUPUXMZhksdkDlnrDWwvlHDzV42HE@vger.kernel.org
-X-Received: by 2002:a05:690c:112:b0:6e2:985:f4df with SMTP id
- 00721157ae682-6e24dc9c710mr105345037b3.44.1727794308335; Tue, 01 Oct 2024
- 07:51:48 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA7CA1925B8
+	for <linux-mmc@vger.kernel.org>; Tue,  1 Oct 2024 20:38:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.162
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1727815128; cv=pass; b=m7+4ynf6MdZqXnCDEs2yQ/WzMFJSDVq+fUvyUsVOi8bHWZkdN/8Bjx+vUwiZzK3qQaxzaMBq8u1baYgk2AXTVXAp8sN0ZANn/jx1AwtaLJimOJNki23e46pun1rk4kQ3gMHPo8OjIXyO8lCcnKBhx7CXuZHU+kIYMpBRsu8Rjtc=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1727815128; c=relaxed/simple;
+	bh=NN1uCxL4oLFrkNxAnqe2CtwkGcA21is/x6A1k0z2Iww=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=X5nLEXfqHgAqvmBrQ744Oa5SstVB8nV+n3X+FKh3ZLgEkOgZ7nEJEanTCLKlTj7tOBAMcBauh59i2P0Wu+CSJCEKDIBbryFHYLMXql0m7wTyKKdRT3kV9GQ73m3ygKQrrAWn+RRHSTxCvpS0lbqNnL7ECZGhAiANH/1s/Lw8yqk=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=jo3lavxi; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=PELgMyf1; arc=pass smtp.client-ip=81.169.146.162
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="jo3lavxi";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="PELgMyf1"
+ARC-Seal: i=1; a=rsa-sha256; t=1727815117; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=QzWC/19ofDazhglI8GD2991sJ9W9JvD5cwXCf0I8LLmV/z/MMwfJDBo4KqqKSydluU
+    p42m55+MAUSh8CB8TfF4ZgUT6CQ2g9bcriI/4UEhI30VcGYQBF/Sl2IZDX60tE2gIYuT
+    lH6+kduzbdh+JqfB/T31B/GJsa/ZNQOl3GS09A3ya8s1Te/ZkVp9sHzl70bhrJaoMJKw
+    Q9H41SDKzQuY58/PKldJra8YaetRowE62lXHpBII45mYIbGjH7RP6Bkmv2UXGqGM7re2
+    lg8hDoTYEvlOKKZ9zwjiL24EVeME4NolK4wgxzERjjAbH5D8deHT1TgdXAFNnEXh+h61
+    dfSw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1727815117;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=EOvoEoI8tl/sFkVKGKczc/LBsgAbH/X8NGeraq3oRaE=;
+    b=ez3w81bv5cG0pV/GVrxGH1BFb6oYGTdeFbd641uRXcW0p5Lbi8s3gYPzxh0oHRDYuk
+    svo+QQwgGf+04e0C4iG0MizDsJ0Y0ha6TG8PPel4zvuzCw412qGqdXI/9cJ3M57fzxLa
+    2NNQiH8s5NE4hjZNUIP/46ew4po9VDMORgLo3JoDfaByb4CvrASh6Xlf1zmF8lfCyxUp
+    uoc49qX5ZDbXkJPhlZed1LNvT0fFhnkK14QT4uAe8UvOKyUavckU1pJCYemPC4bd7pyO
+    SuKCS5dnC56VVPWTS2rUFxm6xKl5hGDvnYSzk5W/UrIsuP3DlPIb9QPD0n8QhMk32CHH
+    sPgg==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1727815117;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=EOvoEoI8tl/sFkVKGKczc/LBsgAbH/X8NGeraq3oRaE=;
+    b=jo3lavxiHnSO/dcEi8iuJBuHG7J+3mnmBLMfyQJb2FPCTv/TORWKbXZg90yTLCHKxM
+    gUL2eLF0d+eKtTPr5Ahg8g5PHCt9CY0R9GF++zv3EgbTiLw7eqkk+HDxS5cSIZ3tnf1W
+    gOhOp0Fox0s+zMjrDith+m9sLYC9qPX6C+xrngszSQJQxVn/phM81+/u9HOKdbXzwJJu
+    q05RCrN2SimAtdbJTA6OiCpXliEmHTvbExC/yN+U1frDAFcJ2X8CBPnv5iuQgc2+dU3Q
+    Ed1XU950dvA6C8HU6jLZOr4N+al8KCUBjRu5PEfR5Ujemjm1DBqJ0My+crGV8ftXVzAC
+    ISoQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1727815117;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=EOvoEoI8tl/sFkVKGKczc/LBsgAbH/X8NGeraq3oRaE=;
+    b=PELgMyf1ppOPPjtmfsyYln1nzc2bPWFsae1vvl0IhFZKcuIQ8FkBBGRh7vGfx0radm
+    6+RC6ctsu0JkekOfdDBw==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RD06ISTv80p2D11QFwNypsTi9pEHpqtUzGQwQ=="
+Received: from Munilab01-lab.speedport.ip
+    by smtp.strato.de (RZmta 51.2.8 AUTH)
+    with ESMTPSA id z0e6b0091Kcbcde
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Tue, 1 Oct 2024 22:38:37 +0200 (CEST)
+From: Bean Huo <beanhuo@iokpp.de>
+To: avri.altman@wdc.com,
+	ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org
+Cc: Bean Huo <beanhuo@iokpp.de>
+Subject: [PATCH v1 0/5] Add multiple FFU modes based on eMMC specification 6.6.18 for flexible firmware updates
+Date: Tue,  1 Oct 2024 22:38:06 +0200
+Message-Id: <20241001203811.26279-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240924210123.2288529-1-linux@roeck-us.net>
-In-Reply-To: <20240924210123.2288529-1-linux@roeck-us.net>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Tue, 1 Oct 2024 16:51:35 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXQEAwVHDzsqypisOB_n4PcXMD+4UHgxjZMwvdKfWutAQ@mail.gmail.com>
-Message-ID: <CAMuHMdXQEAwVHDzsqypisOB_n4PcXMD+4UHgxjZMwvdKfWutAQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Only set maximum DMA segment size if DMA is supported
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Paul Walmsley <paul.walmsley@sifive.com>, 
-	Samuel Holland <samuel.holland@sifive.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
-	Christoph Hellwig <hch@lst.de>, Robin Murphy <robin.murphy@arm.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Tue, Sep 24, 2024 at 11:01=E2=80=AFPM Guenter Roeck <linux@roeck-us.net>=
- wrote:
-> Since upstream commit 334304ac2bac ("dma-mapping: don't return errors
-> from dma_set_max_seg_size") calling dma_set_max_seg_size() on a device
-> not supporting DMA results in a warning traceback. This is seen when
-> booting the sifive_u machine from SD. The underlying SPI controller
-> (sifive,spi0 compatible) explicitly sets dma_mask to NULL.
+Hi Avri,
 
-Thanks, seeing the same with mmc_spi on SiPeed MAIX BiT.
+Based on our discussion during 2024 ALPSS, here are the patches for eMMC FFU.
 
-> Avoid the backtrace by only calling dma_set_max_seg_size() if DMA is
-> supported.
->
-> Cc: Christoph Hellwig <hch@lst.de>
-> Cc: Robin Murphy <robin.murphy@arm.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+This patch series introduces several new FFU modes, as outlined in the eMMC specification 6.6.18,
+to enhance the flexibility and reliability of firmware downloads to eMMC devices in the filed.
 
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+The purpose of these patches is to offer different FFU modes to compatible with different vendors,
+allowing for various command sequences to optimize for different operational needs, ensuring both
+atomicity and smoothness of firmware updates. These additional FFU modes provide multiple options
+for performing firmware updates under different circumstances:
 
-Gr{oetje,eeting}s,
+1, The host can choose between different update strategies depending on the device’s capabilities
+and the size of the firmware bundle.
+2, Ensuring that firmware downloads are treated as a single operation, preventing partial updates
+that could leave the device in an unstable state.
+3, Some modes are designed to keep the device in FFU mode throughout the entire process, minimizing
+the risk of premature exits or failures during updates.
 
-                        Geert
+By supporting these modes, we aim to enhance the robustness and flexibility of the FFU process,
+accommodating a wider range of firmware sizes and ensuring smoother, more reliable FFU in the field.
 
---=20
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k=
-.org
 
-In personal conversations with technical people, I call myself a hacker. Bu=
-t
-when I'm talking to journalists I just say "programmer" or something like t=
-hat.
-                                -- Linus Torvalds
+Summary of Changes:
+
+FFU mode 1:
+Uses CMD6 to enter FFU mode, CMD23 to set the block count, CMD25 for multiple-block write, and
+CMD6 to exit FFU mode. This mode may exit FFU mode during the download if the firmware size exceeds
+the chunk size.
+
+FFU mode 2:
+Similar to mode 1, but repeats CMD23+CMD25 for each chunk, ensuring FFU mode is maintained
+throughout the firmware download. FFU mode is only exited after the entire firmware has been
+successfully downloaded.
+
+FFU mode 3: use CMD25+CMD12 for open-ended multiple-block write
+Introduces a method using CMD25 for open-ended multiple-block writes followed by CMD12 to stop
+the transmission. This allows for a smoother and more continuous firmware bundle download.
+
+FFU mode 4: use CMD6 and CMD24 for single-block write
+A new mode that uses CMD6 to enter FFU mode, CMD24 for single-block writes, and CMD6 to exit FFU
+mode after each write cycle. This ensures granular control over each block but may introduce more
+frequent mode transitions.
+
+FFU mode 5: use CMD6 and repeated CMD24 sequence
+In this mode, CMD6 is used to enter FFU mode, followed by repeated CMD24 single-block writes.
+After all firmware data is written, CMD6 is used to exit FFU mode, ensuring an atomic and
+uninterrupted download process.
+
+Kind regards,
+Bean
+
+
+Bean Huo (5):
+  mmc_utils: Extract FFU code to mmc_ffu.c for future FFU mode expansion
+  mmc-utils: Add FFU mode 2
+  mmc-utils: Add new FFU mode using CMD25+CMD12 for Open-ended write
+    download FW
+  mmc-utils: Added FFU mode 4 that uses CMD6 and CMD24 for single-block
+    firmware download
+  mmc-utils: add FFU mode 5 for firmware download using CMD6 and
+    repeated CMD24 commands
+
+ Makefile   |   1 +
+ mmc.c      |  14 +-
+ mmc.h      |   1 +
+ mmc_cmds.c | 274 --------------------------------------
+ mmc_cmds.h |  52 ++++++++
+ mmc_ffu.c  | 385 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 6 files changed, 449 insertions(+), 278 deletions(-)
+ create mode 100644 mmc_ffu.c
+
+-- 
+2.34.1
+
