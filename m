@@ -1,97 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B57B1D1E60;
-	Wed,  2 Oct 2024 21:07:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB8372F22
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 21:56:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727903250; cv=none; b=Fbj6ixs1L6g0O1TxDh9UVe1ICw2ypn2/bGCe8yVdtHpGxVm1q2z8/vdO/ImI0/1Z27WYesTXbHu7CB9+u/nzR0U9tzqscLIXopeUH5c0UOjDTineqwEfK9+RCSA09Za/2d76BorK0337x6UvvRvxyh/0h4emJe0ydfeS0O2hTfg=
+	t=1727906169; cv=none; b=OYRV3p1FelxCo1KZ3VMYTzM+TZ1fVZ1Ei6CdiJi5ix0qNEWmc9RvuF6gK6ZIox/OftjDP9vmKJUMPjSae+yy8hJDZiCuPE4rkMNqOmrFC1+wQBqLMy1dEduOHqBB1EEYFnaO1VUoQv9+6+8yBU3lX/InBnxUh5OHtK/SQah8TCc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727903250; c=relaxed/simple;
-	bh=QlKXgfdBzCjAMlafbWFDRc/1QG/qB5nvbcq+O867xZY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=vEsOC0OpT56cVpftlGm+wQnpIi80JFknxPVaGN3lQvSMllYYkTpvis7XPwlEkzCNTHJEx3jeJe6SwQ9IkkktY9z+TnyXqDyhe2Glv2l3HhhjEH44Q8kjk1WWlzyzW1tUTeyQUY4Q0vMu0sxisIuMArdnqKsMhFvitwhBQd55B4I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=MdspXwWl; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1727906169; c=relaxed/simple;
+	bh=h0EBJ5lNu/jJJVuBHSnFz5qqW/dBFft5gPiqC+7OkQE=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=c6g9W6bsNwxf7H1YmSsyoJVwLeTptSjwP0AkoAkkQkNTE/lbjo4Dz0kdQtz+w0chPFbtWs8fCLzVfIXmmk+dy5Fu7i2J7BMjhjbvi8g7AtWMdK1sWYHx4YUNgcmmjvuTw1hE4KohSg3aCJ721a5i6twUMOXDIq+4crGhcmDWBAA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=q4bu//2Q; arc=none smtp.client-ip=209.85.219.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="MdspXwWl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7BABFC4CEC2;
-	Wed,  2 Oct 2024 21:07:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1727903249;
-	bh=QlKXgfdBzCjAMlafbWFDRc/1QG/qB5nvbcq+O867xZY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=MdspXwWlB6+f09ApuSoqDL0TGh5k/C1upAfixu5CMyKZXkjodpKG+YztyrM8FB51Q
-	 U6XPxBARwaqpmD1dCz1Pbn9+8mJ6mUdzlpOrIvutVSDeAGLP7/TZ9RY5IwNZ72BswK
-	 6o45z2MKlqjR/idiZe+LDMRtl7kwM5w9RqHQoeyOtEOCcVfnRp/KspgKP9X8S6hvWa
-	 pPVruRrg0bA59TcwHFRuD3yFUt5Im/PJf24ApRoxiLR2hKyVRUehnc/ihNJm4yzCkT
-	 TDfYjJLhzKPEpUpf4kKysNxfonMjY4HOg/C3yHY0t8f80TySGvo6lTU9GoiIvcXomY
-	 9NYO2RKrdqMxw==
-Date: Wed, 2 Oct 2024 16:07:28 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: upstream@airoha.com, Mikko Rapeli <mikko.rapeli@linaro.org>,
-	linux-kernel@vger.kernel.org,
-	INAGAKI Hiroshi <musashino.open@gmail.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Dominique Martinet <dominique.martinet@atmark-techno.com>,
-	Riyan Dhiman <riyandhiman14@gmail.com>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Conor Dooley <conor+dt@kernel.org>, Jan Kara <jack@suse.cz>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Jorge Ramirez-Ortiz <jorge@foundries.io>,
-	linux-block@vger.kernel.org,
-	Jens Wiklander <jens.wiklander@linaro.org>,
-	Li Zhijian <lizhijian@fujitsu.com>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	Jens Axboe <axboe@kernel.dk>, linux-doc@vger.kernel.org,
-	Lorenzo Bianconi <lorenzo@kernel.org>,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Ming Lei <ming.lei@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>,
-	Christian Heusel <christian@heusel.eu>,
-	Jonathan Corbet <corbet@lwn.net>, linux-mmc@vger.kernel.org,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <avri.altman@wdc.com>, devicetree@vger.kernel.org,
-	Daniel Golle <daniel@makrotopia.org>,
-	Christian Brauner <brauner@kernel.org>
-Subject: Re: [PATCH v5 6/6] dt-bindings: mmc: Document support for partition
- table in mmc-card
-Message-ID: <172790324832.1315949.14972458101989474417.robh@kernel.org>
-References: <20241001221931.9309-1-ansuelsmth@gmail.com>
- <20241001221931.9309-7-ansuelsmth@gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="q4bu//2Q"
+Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e1651f48c31so317442276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 14:56:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1727906166; x=1728510966; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=h0EBJ5lNu/jJJVuBHSnFz5qqW/dBFft5gPiqC+7OkQE=;
+        b=q4bu//2QEzekr8PdvgB+0ggdBmBW5s3lZ68DqkbVIITSuhzkq7z17Yhw2l4EdgArA+
+         dGu3F9maZWxmiYl1zPB0dyngFv305oL4mLtb9BkhxL5sGOtCcQHklC3uVMaFb8JbANaA
+         CBF8W3D72s/M04BmDAEypfKYy/zHEjC/XtxrnylNW9aNhoH0Cl2iXvnZxhVwqQLOnWn6
+         U8QJ+wAgsrcolCpsaFCt7a12ZvqOmvreTgxrkkWbp7CFrDEZK1b+RuTNo1xw/OGzqZOq
+         MRDaIJS1+PHNJ6GKsj4Xabk9M0lvsEOoWTCaUzMXPc8qpwGSiymoa37EqSL7ChfWhTHK
+         0efw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727906166; x=1728510966;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=h0EBJ5lNu/jJJVuBHSnFz5qqW/dBFft5gPiqC+7OkQE=;
+        b=qAklOsum8OxsOBPUo0OHiI+hQXZtKvF//o5Oq5beceGEmm3hebtUVQMcF+2YjPMBAv
+         gBt/XB3VGstfm45IHH6bz8LjrFbYhLyeqTr64bsvZKOXjxIc75RCCrwGxn1FEV85tEwd
+         eBU3nq/77WC2FwcTHi3PPJN2RBu5271i6ZhEtZVsItGozoUXWANNcy4zlu1xmBum8z+P
+         bhTTwGmVin8ECc/2K1XeyhnLUP9JMppVigJJ12Jn33D6dxkmW0KVKQxyKg5OTOrdnSar
+         c+rrdQjxgjdaFzps2cJHc53DZf/+6VTlNOstiI0fLxrnKspLv0Rfk2s/xUyrK2FwwZZ7
+         iYFQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUtgzjFjowDekLvTHDU/5zARov8SyckKlfOMQ/hjpCvO3f9UJ3o+3VC9KRiXswlXNol2kKqN9d5T90=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzsHuqdUDZYK0veANJS72N675ng0GRHbwaKRr47jQcIiaVlB1ec
+	ThJBS4uvsZoft43G4SCBSfkfjBl0NCjnv0jA/yNXzN4AAILms+A9YbTmSkKGx8yHv76cR9qJO4k
+	lDp9q0NhtUMqk0bWOabedf8mLwv1nEeeNZtbLTg==
+X-Google-Smtp-Source: AGHT+IFRD5Rwum9K8DL674IifKjdfllmqQlH2FJ5zW9tVqEuOQNeCWTFnfrU70tmiCM2rMmiZ5ejF92CDM0MocFZHCE=
+X-Received: by 2002:a05:6902:1b8e:b0:e25:fc6f:9cc0 with SMTP id
+ 3f1490d57ef6-e2638385365mr3826517276.9.1727906165882; Wed, 02 Oct 2024
+ 14:56:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241001221931.9309-7-ansuelsmth@gmail.com>
+References: <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
+ <4920950.GXAFRqVoOG@diego>
+In-Reply-To: <4920950.GXAFRqVoOG@diego>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 2 Oct 2024 23:55:29 +0200
+Message-ID: <CAPDyKFosf_+m9j8YgHa-PsC2SV8+Aou2O6bTbMfzGBpQ2sY8YA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: rockchip: Keep controller working for card detect
+To: Kever Yang <kever.yang@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
+Cc: linux-rockchip@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Sat, 14 Sept 2024 at 13:52, Heiko St=C3=BCbner <heiko@sntech.de> wrote:
+>
+> Am Donnerstag, 12. September 2024, 09:26:14 CEST schrieb Kever Yang:
+> > In order to make the SD card hotplug working we need the card detect
+> > function logic inside the controller always working. The runtime PM wil=
+l
+> > gate the clock and the power domain, which stops controller working whe=
+n
+> > no data transfer happen.
+> >
+> > So lets skip enable runtime PM when the card needs to detected by the
+> > controller and the card is removable.
+> >
+> > Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
+>
+> So for the change itself this looks good, i.e. it fixes an issue for baor=
+ds relying
+> on the on-chip-card-detect.
+>
+>
+> But for boards doing that, the controller will be running _all the time_
+> even if there is never any card inserted.
+>
+> So relying on the on-soc card-detect will effectively increase the power-
+> consumption of the board - even it it'll never use any sd-card?
 
-On Wed, 02 Oct 2024 00:18:58 +0200, Christian Marangi wrote:
-> Document support for defining a partition table in the mmc-card node.
-> 
-> This is needed if the eMMC doesn't have a partition table written and
-> the bootloader of the device load data by using absolute offset of the
-> block device. This is common on embedded device that have eMMC installed
-> to save space and have non removable block devices.
-> 
-> If an OF partition table is detected, any partition table written in the
-> eMMC will be ignored and won't be parsed.
-> 
-> eMMC provide a generic disk for user data and if supported (JEDEC 4.4+)
-> also provide two additional disk ("boot1" and "boot2") for special usage
-> of boot operation where normally is stored the bootloader or boot info.
-> New JEDEC version also supports up to 4 GP partition for other usage
-> called "gp1", "gp2", "gp3", "gp4".
-> 
-> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-> ---
->  .../devicetree/bindings/mmc/mmc-card.yaml     | 52 +++++++++++++++++++
->  1 file changed, 52 insertions(+)
-> 
+Good point! A better option is to use a polling based mechanism - and
+we have MMC_CAP_NEEDS_POLL for exactly that.
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+Moreover, on DT based platforms one can even use the "broken-cd"
+property to indicate this.
 
+[...]
+
+Kind regards
+Uffe
