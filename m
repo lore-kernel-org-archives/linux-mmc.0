@@ -1,204 +1,182 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B323F19F42F;
-	Wed,  2 Oct 2024 22:13:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EB4519F49C
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 23:36:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727907240; cv=none; b=kmBn5CvaRqq2B1cza0uSPisDVIFAo2qnLTBpMt4rE6+bjMFGXNNjEwLhFAjFfRWc3QAJV1vyMFiJgIQuCrSvVC8jn2tODxj7vfGocoIXfjFKHaJ4foZeicmh2JPT4COYRDTlOrRlE7H1VFoTBMvGhxNe2ozlvsXmlX1mMfSIkXY=
+	t=1727912197; cv=none; b=WKXKwtQloZnqG0dKrlZQnpEm8gqAup1mR0zieTNpyt3HGDj/a1akzuR0DyebnfhgIfNURLmNuANBWvZVOU4Bq41y0jigjpON2yVjm1cmh0tCe7SlwjxSao1F3LGu5whiVDF1N8BkfjhR294UaqxcEUGG4dylGtZODgDwvUqhRfw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727907240; c=relaxed/simple;
-	bh=jgKRogDhouHxgHp3uWFozI93Z/lGip8Zz1ZZk0ZOOnw=;
-	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=sK/9ch4ABcjOgR2CTBe6cYyXWGEO6hSsY/thZDCFVzstFvwa1t1/PsRh61/TCq2Ym9YNY2ZJLO7bX3Km/F3Lwtfo+yqc7omRREa8PkXq8qG4QI65VKfkIenq8fCtsmFr8p9+z6U8oMFrbbxPdSLHUS2U/AfmPtt4T9roBzkYRMo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TrAELc5d; arc=none smtp.client-ip=209.85.128.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1727912197; c=relaxed/simple;
+	bh=A+qFnPt9D/9gVc/JF2nEvVquuZPa62SSA+JrYrIOKhQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qOFQtxxUnUYoTjqgrf46iRqP6bDpWPer6WkHnZ5iNakDCAaIUD62H4cUpGGKsjA03lqkHEsGda1Qo2+NtFbflDafnQXvUv0lfeXFcBbt0sUB+u61QxpiCVJXZDKFR1+5Z4T/1A68lE0JI5Hf0kTbfgMSzpDQ4muiNGqIX46CZ78=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lYmSacAN; arc=none smtp.client-ip=209.85.219.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TrAELc5d"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-42cba8340beso8290635e9.1;
-        Wed, 02 Oct 2024 15:13:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lYmSacAN"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e04196b7603so323449276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 16:36:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1727907237; x=1728512037; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=2PlY4kQjRGMW2mhTFZj4kRJ1PV/IGOaEuiYkQi7f2Dg=;
-        b=TrAELc5dqbz/9IrH77Z/Rz1yY0xt0k4mnc0eLfyPGvXkEYcP5AkLBEAR47aNTkSsHL
-         r4E0QKsaAPfvCMSFyOWCjhqvhOwQw77IjuRkpjumIlEkanbD+j8jiJujGYRkufSFnB5f
-         7HkrbMi4P6j76+0BLlRQES05BUlFJ6hwpnxpvZjL49WpQ+Ni6TvPbFVCzhlITWIpYBTJ
-         BQGLuXqnh8jU29JEHauYNm1+GtlDqanLoQtjLRHNWoT/SBhSWyQd4E+45M6V63ze0OiN
-         IFYwPirysahtDcChiX8V1Jlqkm6XUACHrs+LbYWorpGFlu3elH4et32sap8gQEb7Kva/
-         5zdg==
+        d=linaro.org; s=google; t=1727912194; x=1728516994; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=IWOS2bD95bK1T8Q/YyC4ORqcYOXARw/FqRSAbvGy4IE=;
+        b=lYmSacANCVwTZd7sy2yXY5n+o8McOFVJ1F0WZWOc3XhXTYNC4AlBrr8FHBXnPu7KtB
+         N89QY3mhVKlSHkJUG5StOKMce/WDVT46pygOCU+zN5dmFmPThiVU8zIwf+5f5YCQuF/F
+         HFlE73TivV2GW/5TVLGcmKZuZyh8h8kxhGmQfoArzrqewB02DXg9bNCOHtmDS7p+yGKI
+         /rQ79Xngjbk9BlGY6AoFEKwmP83Mr1RBoAyL96cO/SuMBpC7Z0OYVmaV+yPgJtfn9hb2
+         lbj9HWrUjYuk3qIl0nkm6YtOaTlsNKXcvPRHfPUnuKAwIG0sEhQ7sDE7anuCGXAC5FeK
+         U3+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727907237; x=1728512037;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2PlY4kQjRGMW2mhTFZj4kRJ1PV/IGOaEuiYkQi7f2Dg=;
-        b=vjeD2K0Ia8hrXtRq7DmBlGeRDkF7bC4qx+jIZjE44sPOrocgElNBxUW2zbT9C06p4J
-         TdLpPVtA7TKJkzhCpyZe3TLdtXgXPA76dx9sCgP6wCRYk9M98NaIHLc4EJ70R+K/ruJG
-         cznORo/YoGoc41E3vQFPl4XgIAPY5+E22afiOFUHz3ZmN1zsZfYY1XYR+idPnD9sYemn
-         ZyIDiUppTsThvd7m9S2kxiHE279zrWydbbSTaa/BHWIxagWO6ZmbJjoUF46T1jI7yt8m
-         c/an6ouuWNRhtjx6DITha/Zf6rtJ2Xweo8dJRSMR3CpwBlBuZfYteNCZ7K3ajROe0AWD
-         G7fw==
-X-Forwarded-Encrypted: i=1; AJvYcCUa/OEVRopwRdZUuxFpNTUEgzy+f2QxyjJF8h/uszaU5fHrXaHmQHwGjDl8UyH2Q9wMuJfhJVI3pFKCVn8=@vger.kernel.org, AJvYcCVrOC3WyoVyLfoXRMSwHWgNLt0ttpDV91srsNQpW3iShJAe5Azv0rFW/ieDhUVxTGRC0nxdek1bjfyF@vger.kernel.org, AJvYcCWhNj7g0+o46KFu5zX73R2K5ahv75Z3djsDSD/tF2X8Xa+retbOKQoFXO2BjB1DEebFrZAeVmKlk4Lz@vger.kernel.org, AJvYcCWl+hmdxXWuiHXZA/NeDO5MAxfa4LZMxJO3Ruzvd90peLUfJm7pclIyDxPFshpIzpNxzAWUkcs6rUuV@vger.kernel.org, AJvYcCWyCTzmGI0b1yaqRuajNjHYcDJFcVXnM5Vart12cBRwga1Ksp4Ct1C3Sx4qk8/lXayZbn4lJ40/tNMD1b5U@vger.kernel.org
-X-Gm-Message-State: AOJu0YyxLocMpE8eCWI70kuLnuq95vj+L8eUxVNI0EwsqN6emvdaMMZu
-	husiy6wIbA+jiBNBe6QqNAbSvFcQU8Kc56IjVmGhWNM1fQXaVVq7
-X-Google-Smtp-Source: AGHT+IHxkMPF8AkGmoyyfCpyi4PkUp9zju0olvxSD6e2eh/QKcym1EZg6VPGiPFOKaJOPN5w/UF6bg==
-X-Received: by 2002:a5d:5b85:0:b0:374:c33d:377d with SMTP id ffacd0b85a97d-37d04a7b2f1mr571448f8f.28.1727907236933;
-        Wed, 02 Oct 2024 15:13:56 -0700 (PDT)
-Received: from localhost.localdomain (93-34-90-105.ip49.fastwebnet.it. [93.34.90.105])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-42f79ead1absm29218245e9.17.2024.10.02.15.13.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Oct 2024 15:13:55 -0700 (PDT)
-From: Christian Marangi <ansuelsmth@gmail.com>
-To: Jens Axboe <axboe@kernel.dk>,
-	Jonathan Corbet <corbet@lwn.net>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Christian Marangi <ansuelsmth@gmail.com>,
-	Daniel Golle <daniel@makrotopia.org>,
-	INAGAKI Hiroshi <musashino.open@gmail.com>,
-	Christian Brauner <brauner@kernel.org>,
-	Al Viro <viro@zeniv.linux.org.uk>,
-	Ming Lei <ming.lei@redhat.com>,
-	Li Lingfeng <lilingfeng3@huawei.com>,
-	Christian Heusel <christian@heusel.eu>,
-	Avri Altman <avri.altman@wdc.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Riyan Dhiman <riyandhiman14@gmail.com>,
-	Mikko Rapeli <mikko.rapeli@linaro.org>,
-	Jorge Ramirez-Ortiz <jorge@foundries.io>,
-	Li Zhijian <lizhijian@fujitsu.com>,
-	Dominique Martinet <dominique.martinet@atmark-techno.com>,
-	Jens Wiklander <jens.wiklander@linaro.org>,
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-	linux-block@vger.kernel.org,
-	linux-doc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	Lorenzo Bianconi <lorenzo@kernel.org>,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	upstream@airoha.com,
-	Christoph Hellwig <hch@infradead.org>
-Subject: [PATCH v6 6/6] dt-bindings: mmc: Document support for partition table in mmc-card
-Date: Thu,  3 Oct 2024 00:11:46 +0200
-Message-ID: <20241002221306.4403-7-ansuelsmth@gmail.com>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20241002221306.4403-1-ansuelsmth@gmail.com>
-References: <20241002221306.4403-1-ansuelsmth@gmail.com>
+        d=1e100.net; s=20230601; t=1727912194; x=1728516994;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=IWOS2bD95bK1T8Q/YyC4ORqcYOXARw/FqRSAbvGy4IE=;
+        b=RnZ68KhqVjeDb4Gkre+KE0NhUNlhcFJhqL3vN0ow/F+THku7x7T+HW8L5ytNT+jV0K
+         Ad7zX02Wj8uJL5dykixSFSOasBaRqaGMZys2zm374MFuETeo0Krwsd/4IoXZo/p4x6Z8
+         Bwy8QKFNQimwrAIptC5jzZZuh0RVpwss0JkusIiTEbmredgDE6PtZkqb9bhilYKb2qSX
+         X+k7Uhtp1URn7eCXMZ/x4QNxagNPt/tA4zHPj4MOE9YkBLRJN5ZKRRPKQSAMSu70iGvg
+         i0eHDhfojKkGib1iJZoQdyCh5S1VfaT3KTiYoUhtQp60OLuhQCtgM0maIFNgTysFbImH
+         pv5A==
+X-Forwarded-Encrypted: i=1; AJvYcCVh1klSQy0CtDimbZx0kSbxG2e4M5q6ti+h5riPcgaJVUAifj5jBGkrv1IwKsnwRkwDjhrpukNHqPI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzvitdwazVpkMWnyfLsrODWYz2cNEtaSve0deuf7IS6ra62ZHLn
+	l31Uf3C/9FpXVpedGFwL+uBcB7II09VQHzE5686fBYldobuv/BtNFXp2NERrqNDDwGABAKhOh9y
+	/Qx6mx80eLvXo1yyFB9Aw7XGP2e2U7DfRi2kiEA==
+X-Google-Smtp-Source: AGHT+IH5DbK8t4u+fqY69or4ZhoLaKJTJeX4dseIXd3rMYim2wNDkeW+gHu6OsD+10Y9dgp4xQjmkza7EshwtneEVUc=
+X-Received: by 2002:a05:6902:2289:b0:e25:cdc2:ed93 with SMTP id
+ 3f1490d57ef6-e26383da70cmr3862834276.30.1727912193971; Wed, 02 Oct 2024
+ 16:36:33 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20240913094417.GA4191647@sony.com>
+In-Reply-To: <20240913094417.GA4191647@sony.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 3 Oct 2024 01:35:57 +0200
+Message-ID: <CAPDyKFpiM5O06YEjyE22jFY2vV3RDPnR=uHmUPUEvRF7AQhxQw@mail.gmail.com>
+Subject: Re: [RFC PATCH] mmc: core: Add SD card quirk for broken poweroff notification
+To: Keita Aihara <keita.aihara@sony.com>
+Cc: Shingo.Takeuchi@sony.com, Masaya.Takahashi@sony.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Document support for defining a partition table in the mmc-card node.
+On Fri, 13 Sept 2024 at 11:44, Keita Aihara <keita.aihara@sony.com> wrote:
+>
+> GIGASTONE Gaming Plus microSD cards manufactured on 02/2022 report that
+> they support poweroff notification and cache, but they are not working
+> correctly.
+>
+> Flush Cache bit never gets cleared in sd_flush_cache() and Poweroff
+> Notification Ready bit also never gets set to 1 within 1 second from the
+> end of busy of CMD49 in sd_poweroff_notify().
+>
+> This leads to I/O error and runtime PM error state.
+>
+> I observed that the same card manufactured on 01/2024 works as expected.
+>
+> This problem seems similar to the Kingston cards fixed with
+> commit c467c8f08185 ("mmc: Add MMC_QUIRK_BROKEN_SD_CACHE for Kingston
+> Canvas Go Plus from 11/2019") and should be handled using quirks.
+>
+> CID for the problematic card is here.
+> 12345641535443002000000145016200
+>
+> Manufacturer ID is 0x12 and defined as CID_MANFID_GIGASTONE as of now,
+> but would like comments on what naming is appropriate because MID list
+> is not public and not sure it's right.
+>
+> Signed-off-by: Keita Aihara <keita.aihara@sony.com>
 
-This is needed if the eMMC doesn't have a partition table written and
-the bootloader of the device load data by using absolute offset of the
-block device. This is common on embedded device that have eMMC installed
-to save space and have non removable block devices.
+Since the MI list isn't public and there is nobody using 0x12 for now,
+we might as well use it. At least I don't have a better suggestion.
 
-If an OF partition table is detected, any partition table written in the
-eMMC will be ignored and won't be parsed.
+That said, I have applied this for next, thanks!
 
-eMMC provide a generic disk for user data and if supported (JEDEC 4.4+)
-also provide two additional disk ("boot1" and "boot2") for special usage
-of boot operation where normally is stored the bootloader or boot info.
-New JEDEC version also supports up to 4 GP partition for other usage
-called "gp1", "gp2", "gp3", "gp4".
+Kind regards
+Uffe
 
-Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
----
- .../devicetree/bindings/mmc/mmc-card.yaml     | 52 +++++++++++++++++++
- 1 file changed, 52 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-index fd347126449a..1d91d4272de0 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-@@ -13,6 +13,10 @@ description: |
-   This documents describes the devicetree bindings for a mmc-host controller
-   child node describing a mmc-card / an eMMC.
- 
-+  It's possible to define a fixed partition table for an eMMC for the user
-+  partition, the 2 BOOT partition (boot1/2) and the 4 GP (gp1/2/3/4) if supported
-+  by the eMMC.
-+
- properties:
-   compatible:
-     const: mmc-card
-@@ -26,6 +30,24 @@ properties:
-       Use this to indicate that the mmc-card has a broken hpi
-       implementation, and that hpi should not be used.
- 
-+patternProperties:
-+  "^partitions(-boot[12]|-gp[14])?$":
-+    $ref: /schemas/mtd/partitions/partitions.yaml
-+
-+    patternProperties:
-+      "^partition@[0-9a-f]+$":
-+        $ref: /schemas/mtd/partitions/partition.yaml
-+
-+        properties:
-+          reg:
-+            description: Must be multiple of 512 as it's converted
-+              internally from bytes to SECTOR_SIZE (512 bytes)
-+
-+        required:
-+          - reg
-+
-+        unevaluatedProperties: false
-+
- required:
-   - compatible
-   - reg
-@@ -42,6 +64,36 @@ examples:
-             compatible = "mmc-card";
-             reg = <0>;
-             broken-hpi;
-+
-+            partitions {
-+                compatible = "fixed-partitions";
-+
-+                #address-cells = <1>;
-+                #size-cells = <1>;
-+
-+                partition@0 {
-+                    label = "kernel"; /* Kernel */
-+                    reg = <0x0 0x2000000>; /* 32 MB */
-+                };
-+
-+                partition@2000000 {
-+                    label = "rootfs";
-+                    reg = <0x2000000 0x40000000>; /* 1GB */
-+                };
-+            };
-+
-+            partitions-boot1 {
-+                compatible = "fixed-partitions";
-+
-+                #address-cells = <1>;
-+                #size-cells = <1>;
-+
-+                partition@0 {
-+                    label = "bl";
-+                    reg = <0x0 0x2000000>; /* 32MB */
-+                    read-only;
-+                };
-+            };
-         };
-     };
- 
--- 
-2.45.2
-
+> ---
+>  drivers/mmc/core/card.h   | 7 +++++++
+>  drivers/mmc/core/quirks.h | 9 +++++++++
+>  drivers/mmc/core/sd.c     | 2 +-
+>  include/linux/mmc/card.h  | 1 +
+>  4 files changed, 18 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index b7754a1b8d97..8476754b1b17 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -82,6 +82,7 @@ struct mmc_fixup {
+>  #define CID_MANFID_SANDISK_SD   0x3
+>  #define CID_MANFID_ATP          0x9
+>  #define CID_MANFID_TOSHIBA      0x11
+> +#define CID_MANFID_GIGASTONE    0x12
+>  #define CID_MANFID_MICRON       0x13
+>  #define CID_MANFID_SAMSUNG      0x15
+>  #define CID_MANFID_APACER       0x27
+> @@ -284,4 +285,10 @@ static inline int mmc_card_broken_cache_flush(const struct mmc_card *c)
+>  {
+>         return c->quirks & MMC_QUIRK_BROKEN_CACHE_FLUSH;
+>  }
+> +
+> +static inline int mmc_card_broken_sd_poweroff_notify(const struct mmc_card *c)
+> +{
+> +       return c->quirks & MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY;
+> +}
+> +
+>  #endif
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index 92905fc46436..89b512905be1 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -25,6 +25,15 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
+>                    0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+>                    MMC_QUIRK_BROKEN_SD_CACHE, EXT_CSD_REV_ANY),
+>
+> +       /*
+> +        * GIGASTONE Gaming Plus microSD cards manufactured on 02/2022 never
+> +        * clear Flush Cache bit and set Poweroff Notification Ready bit.
+> +        */
+> +       _FIXUP_EXT("ASTC", CID_MANFID_GIGASTONE, 0x3456, 2022, 2,
+> +                  0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+> +                  MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
+> +                  EXT_CSD_REV_ANY),
+> +
+>         END_FIXUP
+>  };
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index ee37ad14e79e..0ec550ad5651 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1118,7 +1118,7 @@ static int sd_parse_ext_reg_power(struct mmc_card *card, u8 fno, u8 page,
+>         card->ext_power.rev = reg_buf[0] & 0xf;
+>
+>         /* Power Off Notification support at bit 4. */
+> -       if (reg_buf[1] & BIT(4))
+> +       if ((reg_buf[1] & BIT(4)) && !mmc_card_broken_sd_poweroff_notify(card))
+>                 card->ext_power.feature_support |= SD_EXT_POWER_OFF_NOTIFY;
+>
+>         /* Power Sustenance support at bit 5. */
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f34407cc2788..543446392776 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -294,6 +294,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
+>  #define MMC_QUIRK_BROKEN_SD_CACHE      (1<<15) /* Disable broken SD cache support */
+>  #define MMC_QUIRK_BROKEN_CACHE_FLUSH   (1<<16) /* Don't flush cache until the write has occurred */
+> +#define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY    (1<<17) /* Disable broken SD poweroff notify support */
+>
+>         bool                    written_flag;   /* Indicates eMMC has been written since power on */
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+> --
+> 2.46.0
+>
