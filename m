@@ -1,84 +1,83 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 03B2E1A08A0
-	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 23:36:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C449219EEBD
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 23:36:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727912201; cv=none; b=haZNBNtLIn0SFrA4v5Unit4Za1swJgAo58IEXnSYJDFF9fwOgtUOLoKPxLq7VaSqq1yRS7YgwtdE4diogKyjqXIZspMDzpBaQJ0R/QpojWFmOfPtogRqRrA0KDKtPjA3SxsW/SgGTHICBFjSoJODn9OPizcobnPxgaF4uNezriw=
+	t=1727912207; cv=none; b=IT4WN1wKLj1gPJIal7+rG3sVw3l2PiiBX5w3LEzKwm/R9LTehsEdrRXj05bdjRY9bUCmhbuq7F9BRaO4EWOGWoxfRF5QEJLpvHej+76ykVrbiNLoGxXft952LsVx3VyM6bpURNkohJ/gxly5fPwFQGfe+wWN60TPqLnerrWOt9I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727912201; c=relaxed/simple;
-	bh=5s9fgEJJm3vIqJWWqzj827Opu4XIE8ALgS6t+bs8cdg=;
+	s=arc-20240116; t=1727912207; c=relaxed/simple;
+	bh=rOZgG+gsXianEKZTK5XyYy1qU43hBALX2PDyvo7vO2U=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DA9bPx/gdHA55EL9SyEaSJgI98uIrHoNo5Jd3+mD+TNDawKb2Iy6aYobFeTnzR42FBvzy2iQhiAJDJOeNzbtNMdjZ8yxlQDerbPFGxxomztO24dDl6C/dFvdq5akRKiDyTbCrfsHh0fsUmwF6ZJ/AUsVkA9167EHonu4858/Ces=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=g5iqB3AX; arc=none smtp.client-ip=209.85.219.175
+	 To:Cc:Content-Type; b=aDmV6DgdRBzLp3lo6kHyWwUOTj9N6uO6xB1lqykcHzrXnNA2krvV7WBphexQMz5BGRDhfhqrpNF6IeaMNUUpVHPHD7T42OenTD6MRNkpNfD0fgB/pROUDwiOjy+J/AMJBSO5CNp62yNHasTk4/oe6YCSGbu2Iz/KsHMBNEa7C5g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rWgx7/wP; arc=none smtp.client-ip=209.85.219.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="g5iqB3AX"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e260b747fdcso356703276.3
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 16:36:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rWgx7/wP"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e260b266805so338068276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 16:36:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1727912198; x=1728516998; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1727912204; x=1728517004; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CpxVnqiBvGUz/tZ0CRcfx8m431yx70f+LHljar+QbKE=;
-        b=g5iqB3AXFiGAKb2jSh8B88vA9GaZ3xmwQs4eXyXp1d+IZzfQsRRA9LBkXZWdL9ElbZ
-         lJFjfYPnAiGm8BLNs0cbJ3uXPmqjzkZmu0OEWC7/0UX3cp95PT4VNIG+cMk7iksGO3vN
-         YOK2buUr38GJg8Mh0kCZLMNLPvGAfLkDC2Rzbg3MN7mZMdqGJ2ABAYb+/VS9UCUfJuTH
-         qVBw2fFx+z8qVRW030ZNHvpp7nnUcZbz0biZt9ZzDFukrP2Z9LveSdTo9KZ5OGpRj4IK
-         VwKq3RENDE0FeqBUfaRxo6wtbCqi0loucwmMXz+JraPBZ1pFu0xpDvz9yxW18Nn+mzJi
-         eH1A==
+        bh=X024ptzefyB8VQ2TszNaeDmPmn0oYGPKjzQobGj4E0Q=;
+        b=rWgx7/wPe1zK7A5YNRIEeyqBqenXF+ZVPUxCJnENjW3etWv95bS/qAKmujRMkTJk7G
+         5z6EWVefC4cKbYcgahu7aOdr1nUNJqFecpGPbCbbxFRjwLb37yWUvXaTwu2JC2rwUnfp
+         vI2a/XNc1Zj5YZojcf7i+BBdnT8DcbceeiDNUvxi51+VxLKSztjyRGRiqcQve24ony71
+         UaUUvFIFkxA+hryLWPeRRHy7vqC9da8w9kEIguYQpZZwaT5iny4D8fU8WyTvLT65hNFw
+         +rszm+H5yGpZ+6kwuaYWmZNrDl9MeK8X52OPFrCPaKIZphlt0nLfsZGkl0L8dAHsQ5ZA
+         fQqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727912198; x=1728516998;
+        d=1e100.net; s=20230601; t=1727912204; x=1728517004;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CpxVnqiBvGUz/tZ0CRcfx8m431yx70f+LHljar+QbKE=;
-        b=ih3O/knjLU+tryPZu8FZjpPudVQDd7BrGJzwoQKvlXpK5s/XpS5fnJ77NzTvV0pmqx
-         GK6KLX8GYO8G9ncJC+Hu2Zg7JwA72mGi4Rj/T0rND+i2JbrckzmEnHKJj23LuLPk8mze
-         +utL0otgYvfdnNJmDfi5dMqsyQNZgH5jodr1y9tH1ci+eBSrXqW0CEG5SJ4Lxgm4FHvl
-         WMs8bg/nOHOTmpbt/yl3ge8cDdapXuozXSdxKhi6bRDjQ18oeQHbXnZ5uxQz7G9DanVy
-         A0jWonJ8gAT4S9qw7BBu1gLiOJS16RCrxK8PViwiSkdj8rtWoC/YJ1bEa+Nak2pQjFaw
-         sNQg==
-X-Forwarded-Encrypted: i=1; AJvYcCXRY1O80KtbGCyk6Q/i43qUcgwAEIbpIIA08Q6EdvMBs2kKcMnIO2kWAZAPeK7lXA1LHmgn27xzCUI=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz751eBLa57iKiwA0iTMNQQ8MA9Xc+Pc9LQ0iKyKJJI2A7c/9nE
-	Pg/KeTEdr033d71ENEOtvP6nWTGclHdofT910psFR4ank6o6Sdg0nRdO680Le2BG3aakJlKxyNY
-	pmJcyXmOqwjqWoZD2hOr1JT/3kGrIfTxKV7DvsdiF3pVvcblv
-X-Google-Smtp-Source: AGHT+IH76/6CNpsmHNwM+J2W33bu6H3fzHw03x8vBTe5b7vd4XavJEUFRNUtBXeEFfIHN2Lb52888Jci5N0uiu6ms6I=
-X-Received: by 2002:a05:6902:2209:b0:e1d:9338:a4d7 with SMTP id
- 3f1490d57ef6-e2638416e6dmr3933856276.44.1727912198556; Wed, 02 Oct 2024
- 16:36:38 -0700 (PDT)
+        bh=X024ptzefyB8VQ2TszNaeDmPmn0oYGPKjzQobGj4E0Q=;
+        b=h3SSq8G7doQq8RPAxB3akiORhW3bcnTl8/RB3m+Pi806rI3LVzp/Q6AbgJ1yPjuMbs
+         akGb8iKrzwRfbQJvgaheouFPeyoBGu69CKUny/bIUaJb6r+EKwdm0q05Vinr4yvwP9I9
+         FCHlJd+A+HmIXQiH8Yld1yOt9xg0wSuoiW0HfM8Wk8xfAYm77AszZtdUpWqeeVxWF7Vz
+         YJnFMIPrVWaMTdlEIUqjgIfXLUHp5ovKg+NX2CHAfCQw8kxAxDA7wF5Rty7C8gBHNe2R
+         F35YxHVSRc/xVHnA3KRqUzn7WDhXQolxwbtq1jZP5Y3SchACu0XaywHwvtgZLr5NzdjV
+         2cZA==
+X-Forwarded-Encrypted: i=1; AJvYcCUt0vTsvDMY54CtkrLT/aDdrbtWIq2VPuFYsOBe6fC2QgSc979CIcKYCoihb9tJ0QGojidK0CxclaI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YybPrAyv/Vez35687N/GyU2N12m7czjYTgEKTz6V09LRcHYNOvl
+	D8PrnkrAm/HS4ICYXTJIUxMRNpFixZIq5jKtOUhsXJ5A8CSsEzm/X+5uAnbvkNIk/CthCF0Gwv7
+	mdfvccWXcbkzOwze/O162LQVX4lDu0/kjt/ccZg==
+X-Google-Smtp-Source: AGHT+IHhVLQwoAzI5exBQTwAX41kCwO1IgOgu326ohmJA+OTKU337eKS6j3/2WCTqoct9eNB6s7naZI4VA/F9HAIrwo=
+X-Received: by 2002:a05:6902:2389:b0:e26:c80:d3ab with SMTP id
+ 3f1490d57ef6-e2638442094mr3736927276.57.1727912204640; Wed, 02 Oct 2024
+ 16:36:44 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240913185403.1339115-1-jm@ti.com>
-In-Reply-To: <20240913185403.1339115-1-jm@ti.com>
+References: <20240918081640.1493847-1-yujiaoliang@vivo.com>
+In-Reply-To: <20240918081640.1493847-1-yujiaoliang@vivo.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Oct 2024 01:36:02 +0200
-Message-ID: <CAPDyKFrPWdNWoG5uxdH3yE8uT1KKV-mZ7iSfw57sinm909xeBg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch
-To: Judith Mendez <jm@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Thu, 3 Oct 2024 01:36:09 +0200
+Message-ID: <CAPDyKFqOT_C0hBp1QLNrxFWK1-ig1_zbWevcE5Koro+P5feoUw@mail.gmail.com>
+Subject: Re: [PATCH v1] memstick: Fix typo in comment
+To: Yu Jiaoliang <yujiaoliang@vivo.com>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, 
+	Jens Axboe <axboe@kernel.dk>, John Garry <john.g.garry@oracle.com>, 
+	Ming Lei <ming.lei@redhat.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	opensource.kernel@vivo.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 13 Sept 2024 at 20:54, Judith Mendez <jm@ti.com> wrote:
+On Wed, 18 Sept 2024 at 10:17, Yu Jiaoliang <yujiaoliang@vivo.com> wrote:
 >
-> The sdhci_start_signal_voltage_switch function sets
-> V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
-> V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
-> edge or pos edge of clock.
+> Fix typos:
+> exectly->exactly,
+> cylynders->cylinders,
+> intersting->interesting,
+> inteface->interface.
 >
-> Due to some eMMC and SD failures seen across am62x platform,
-> do not set V1P8_SIGNAL_ENA by default, only enable the bit
-> for devices that require this bit in order to switch to 1v8
-> voltage for uhs modes.
->
-> Signed-off-by: Judith Mendez <jm@ti.com>
+> Signed-off-by: Yu Jiaoliang <yujiaoliang@vivo.com>
 
 Applied for next, thanks!
 
@@ -87,79 +86,54 @@ Uffe
 
 
 > ---
-> Changes since v1:
-> - Invert quirk logic
-> - Simplify sdhci_am654_start_signal_voltage_switch() and call
->   sdhci_start_signal_voltage_switch() when the quirk does not apply
-> - Simply logic when detecting when quirk should be applied
-> ---
->  drivers/mmc/host/sdhci_am654.c | 30 ++++++++++++++++++++++++++++++
->  1 file changed, 30 insertions(+)
+>  drivers/memstick/core/ms_block.c | 6 +++---
+>  drivers/memstick/host/r592.c     | 2 +-
+>  2 files changed, 4 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index 0aa3c40ea6ed8..9ff07aadb2d91 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -155,6 +155,7 @@ struct sdhci_am654_data {
->         u32 tuning_loop;
->
->  #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
-> +#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
->  };
->
->  struct window {
-> @@ -356,6 +357,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
->         sdhci_set_clock(host, clock);
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+> index 47a314a4eb6f..c0383959dbb2 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -996,7 +996,7 @@ static int msb_verify_block(struct msb_data *msb, u16 pba,
+>         return 0;
 >  }
 >
-> +static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
-> +           ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-> +               if (!IS_ERR(mmc->supply.vqmmc)) {
-> +                       ret = mmc_regulator_set_vqmmc(mmc, ios);
-> +                       if (ret < 0) {
-> +                               pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
-> +                                      mmc_hostname(mmc));
-> +                               return -EIO;
-> +                       }
-> +               }
-> +               return 0;
-> +       }
-> +
-> +       return sdhci_start_signal_voltage_switch(mmc, ios);
-> +}
-> +
->  static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
+> -/* Writes exectly one block + oob */
+> +/* Writes exactly one block + oob */
+>  static int msb_write_block(struct msb_data *msb,
+>                         u16 pba, u32 lba, struct scatterlist *sg, int offset)
 >  {
->         writeb(val, host->ioaddr + reg);
-> @@ -844,6 +868,11 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->         if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
->                 sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
+> @@ -1684,7 +1684,7 @@ static int msb_cache_read(struct msb_data *msb, int lba,
+>   */
 >
-> +       /* Suppress v1p8 ena for eMMC and SD with vqmmc supply */
-> +       if (!!of_parse_phandle(dev->of_node, "vmmc-supply", 0) ==
-> +           !!of_parse_phandle(dev->of_node, "vqmmc-supply", 0))
-> +               sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
-> +
->         sdhci_get_of_property(pdev);
+>  static const struct chs_entry chs_table[] = {
+> -/*        size sectors cylynders  heads */
+> +/*        size sectors cylinders heads */
+>         { 4,    16,    247,       2  },
+>         { 8,    16,    495,       2  },
+>         { 16,   16,    495,       4  },
+> @@ -1729,7 +1729,7 @@ static int msb_init_card(struct memstick_dev *card)
 >
->         return 0;
-> @@ -940,6 +969,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
->                 goto err_pltfm_free;
->         }
+>         boot_block = &msb->boot_page[0];
 >
-> +       host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
->         host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+> -       /* Save intersting attributes from boot page */
+> +       /* Save interesting attributes from boot page */
+>         msb->block_count = boot_block->attr.number_of_blocks;
+>         msb->page_size = boot_block->attr.page_size;
 >
->         pm_runtime_get_noresume(dev);
+> diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+> index 461f5ffd02bc..544a31ff46e5 100644
+> --- a/drivers/memstick/host/r592.c
+> +++ b/drivers/memstick/host/r592.c
+> @@ -675,7 +675,7 @@ static irqreturn_t r592_irq(int irq, void *data)
+>         return ret;
+>  }
 >
-> base-commit: cf6444ba528f043398b112ac36e041a4d8685cb1
+> -/* External inteface: set settings */
+> +/* External interface: set settings */
+>  static int r592_set_param(struct memstick_host *host,
+>                         enum memstick_param param, int value)
+>  {
 > --
-> 2.46.0
+> 2.34.1
 >
