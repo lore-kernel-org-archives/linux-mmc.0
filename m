@@ -1,125 +1,107 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
+Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com [209.85.208.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 370B1195B1A
-	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 09:20:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AC711D2707
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Oct 2024 14:00:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727860838; cv=none; b=ZRQdns9arrjJk5R3ZsYeCzvWG3ta+S4TftoiTOgvVhx8iG7MVFcE+FtH/5MCCXhd7el9UqrzolnoE8Sd2t44STzDAfFlgcRGjHBv3ZVAQZIXUHkNDz/CmvQkxDRlnp5DCvg+91V44JQ7wKBBUnnnmgIRuaXTudU37XkcQ44Z3+Y=
+	t=1727877608; cv=none; b=LLLHMUBatfvF14tgFjzLn+Fnn7qFPUVLO2msiAt0uBxvqOsRWcGOneWpH4HuYROht7mkLFmWGnBRw+1pWINCFPk/EWvwNttwwc6QI2dL7UN6e7otlgE0mU2P4JIS7ZHMrdn4Xglssj6kGgVuCTC3+y+HR9Pjl4tNlwVF1OBIX2Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727860838; c=relaxed/simple;
-	bh=mzDHbmnmSbZgPh/ZeldgAOMha3PtMlQ6ANgxAOBY+Lo=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=JHosBGi0OFmdCWMLNzuAautr4EtLFcR63LnB/ncB68vTzaOx7Ukx8XCX0CTt4OSScqSw+Ov7rkR8ktn6UoPyqqaRfoLplx10gWdA/p1dL7uVkNLEn04RmYr/TWgmS33mrpj24HbZNKDSCLVFGXKRsT+hF7Hl45cWY4MMYi678Hw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rasmusvillemoes.dk; spf=pass smtp.mailfrom=rasmusvillemoes.dk; dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b=QogGA6z5; arc=none smtp.client-ip=209.85.167.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=rasmusvillemoes.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rasmusvillemoes.dk
+	s=arc-20240116; t=1727877608; c=relaxed/simple;
+	bh=IAfOxs+MmT/GnEakCW2nbON7Y/GmcDUpYfP7wK60w48=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=HEAuRL9uc3qsW7DT8zbNsRKWmN5CCLFbONsat1/wctNi+gGumljqIhsrzhdsi6+hRIp9ordJsnDko8V0aQD985C7SDGcHjhsk52Oe1lf6Qo9y9FQv/ml7miEafJl5MKu3c6fYw52P/JileKHKNE4cEHio3SbjeBNtoArqCltaWE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=r7FoxIkh; arc=none smtp.client-ip=209.85.208.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rasmusvillemoes.dk header.i=@rasmusvillemoes.dk header.b="QogGA6z5"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5398c1bd0b8so660751e87.0
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 02:20:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="r7FoxIkh"
+Received: by mail-lj1-f180.google.com with SMTP id 38308e7fff4ca-2fac6b3c220so45370041fa.2
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Oct 2024 07:00:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=rasmusvillemoes.dk; s=google; t=1727860835; x=1728465635; darn=vger.kernel.org;
-        h=mime-version:user-agent:message-id:date:references:in-reply-to
-         :subject:cc:to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=3ZO0Y8/ubh1XnuZPCq0ksaN5wnj9mPknfJDM/0u+lyg=;
-        b=QogGA6z5eZVmTANsamaQycj17E5dDAmzrgR5aS6Kh4VQ5qH5zJu85Gb1n+oG1R9AdY
-         gUiF9TQ0oudqONW3Wsz3a5wzIuekzBQ1FFmLB+IIbB2Gy75b/0PlVcnOsKgzAB4uIACp
-         /8t61Cbl4CgKgBh9+Y9IX45DcjEJRlDc+Ksik=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1727860835; x=1728465635;
-        h=mime-version:user-agent:message-id:date:references:in-reply-to
-         :subject:cc:to:from:x-gm-message-state:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1727877604; x=1728482404; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=3ZO0Y8/ubh1XnuZPCq0ksaN5wnj9mPknfJDM/0u+lyg=;
-        b=ElMI2yHxN6z4Sm8Qc/c5QIaIgfakUQwuO8t65BQ4tTX9W8xl1vnVrAOaesCsZ3Pj6a
-         eDGhjA+vRVdkg7IEgpO+wVp+eHgayVkoxLS2zqe8mMEF4saXcFICv7L9BPHIQU8vPKTv
-         //+bz1Hq6sfWow1Smk8zY80I81SIbA226B18/+OZ43ICPZTDFRb8XRZvcsULG/psYTy4
-         rGE+naN31ZvdxgbXLHU+JX+vfGkCLTMy43zSScj1EOhjOiWUdVoVBUdXbS1wY6a7Y3bQ
-         1GOngubP0e3nS012d55kAhVeVsYcnf7vhklN36K12pVMmaeTUKoqkpMSD9Ut1I7U785U
-         OifA==
-X-Forwarded-Encrypted: i=1; AJvYcCV/UnYujDRRTcRxwdn/jBGJ7+sQrPN+Or8KyU2glf+S99qfDNnUra22CMX6XKimbaEFfWRQFkit3Ss=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywsl8edsqmjLxmwpyneKMpz6759/DdCZci3UwN9hEJ9NDyLjwVy
-	GMovTVtq+fjKESNG/kmZqxBg5ATLGAJJO+y5VFQsTFyNemWvMX8MrEmghwkcKj0=
-X-Google-Smtp-Source: AGHT+IGtXJvrufAFjd2v/2BhFG3gRzFXYZPIU0TWOYK8Da9d0sVChTE0gL9gdkfIYnsbyV2u2l+F+A==
-X-Received: by 2002:a05:6512:12ca:b0:539:950b:139c with SMTP id 2adb3069b0e04-5399a24664bmr2042373e87.12.1727860835200;
-        Wed, 02 Oct 2024 02:20:35 -0700 (PDT)
-Received: from localhost ([81.216.59.226])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-538a043220csm1817735e87.156.2024.10.02.02.20.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Oct 2024 02:20:34 -0700 (PDT)
-From: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-To: Andy Shevchenko <andy@kernel.org>
-Cc: Christian Marangi <ansuelsmth@gmail.com>,  Jens Axboe <axboe@kernel.dk>,
-  Jonathan Corbet <corbet@lwn.net>,  Ulf Hansson <ulf.hansson@linaro.org>,
-  Rob Herring <robh@kernel.org>,  Krzysztof Kozlowski <krzk+dt@kernel.org>,
-  Conor Dooley <conor+dt@kernel.org>,  Kees Cook <kees@kernel.org>,  Daniel
- Golle <daniel@makrotopia.org>,  INAGAKI Hiroshi
- <musashino.open@gmail.com>,  Christian Brauner <brauner@kernel.org>,  Al
- Viro <viro@zeniv.linux.org.uk>,  Li Lingfeng <lilingfeng3@huawei.com>,
-  Ming Lei <ming.lei@redhat.com>,  Christian Heusel <christian@heusel.eu>,
-  linux-block@vger.kernel.org,  linux-doc@vger.kernel.org,
-  linux-kernel@vger.kernel.org,  linux-mmc@vger.kernel.org,
-  devicetree@vger.kernel.org,  linux-hardening@vger.kernel.org,  Miquel
- Raynal <miquel.raynal@bootlin.com>,  Lorenzo Bianconi
- <lorenzo@kernel.org>,  upstream@airoha.com
-Subject: Re: [PATCH v4 0/5] block: partition table OF support
-In-Reply-To: <ZvqfbNDfI2QWZEBg@smile.fi.intel.com> (Andy Shevchenko's message
-	of "Mon, 30 Sep 2024 15:54:04 +0300")
-References: <20240930113045.28616-1-ansuelsmth@gmail.com>
-	<ZvqfbNDfI2QWZEBg@smile.fi.intel.com>
-Date: Wed, 02 Oct 2024 11:20:37 +0200
-Message-ID: <87setej1y2.fsf@prevas.dk>
-User-Agent: Gnus/5.13 (Gnus v5.13)
+        bh=IAfOxs+MmT/GnEakCW2nbON7Y/GmcDUpYfP7wK60w48=;
+        b=r7FoxIkh1N0aMKg1mxNgfRkvsb66Uscruxz421Sz7m1pE6B1qh9AvmM+0SQ2AGcK7g
+         AZk+54AISYTB3jzhhd3voXSHg0zBdmwnM00jHKNfdAr0UNFwxoPtjr2DbYB4GRPEd6Mk
+         zEsIWlYXvL+GxMehIBMvyKHf2fv7epGyNIOmPXiL8aeSiKeLo1TyfxBwWSameYfx9FaI
+         A+qElqpoH/oYsZzZCJvZyp1GZbNs49zU1CCfEAC8X7zx3OfWbaoPhAoT1cugNzW6T+w1
+         5EAMSeK9crA7x1e8BEYhW++8uJAumKTWpQIck/IHxROYJ3Kh4kb04M4pXVHnOLImcCbt
+         dcqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727877604; x=1728482404;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=IAfOxs+MmT/GnEakCW2nbON7Y/GmcDUpYfP7wK60w48=;
+        b=b/qKmVPdWZ8uBKvsOiAluX6CaqPQ5MBihgCOjbbd7u+q0IxlwUesnxs3Ke5CJNV3ym
+         kcXyDV1XeL6cN6DzHWNJtylh0QspG7akVUnrdt2ANjHmz8xUHcsASeR0mRORGNYnfdvN
+         GTwBOXnmr/XjnihoZDBEcNzftgMo0rxXLe54+MMMlgQeAvIyDqYQ1OfZPEL6wK12BCYM
+         HmUMC/yC5U49joBEHOskcP1Qp8SMVW5ZUsmvvhQTp5QHB/7gmrxWjtl34ubyf0CdRJSP
+         BnJPPWp52qzDJJrRRvyUobnUs0tB0uqN0lIHDvlhxhbWOawR1m98eDZyT92t4O2bsQxA
+         FeBA==
+X-Forwarded-Encrypted: i=1; AJvYcCV8GXxOAOPJboXxcBSrEmYZF2l9gcfxo0+9YgimoIwohZaQvbIhIF6wvOzoef9tvcCnFKaaEvZFXOI=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy58VlPNRIONd9BjNuUx181INOMMtpm6sWWwBfFtntgMIj+2dS3
+	wv9ct/Hxz1lKDi5raupUS77Mknc9RxtDXJiX5yio/RzG/uFyQxuFKUkcTsyUSXb2Qm1UoawjOF+
+	CQtfOKj07hhLyLrgRWTnGd5kxyE37tpFNZEk/rQ==
+X-Google-Smtp-Source: AGHT+IGKpyD86o51/mH1jmT3XyTXXQ04eUmkZrdRnPAbt4xNVnFa0ctf59clyoNk8jd6v51p1J6gAo/K0SkEmpgV3uY=
+X-Received: by 2002:a05:6512:224a:b0:531:8f2f:8ae7 with SMTP id
+ 2adb3069b0e04-539a0677474mr2946120e87.25.1727877604149; Wed, 02 Oct 2024
+ 07:00:04 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20241001221931.9309-1-ansuelsmth@gmail.com> <20241001221931.9309-5-ansuelsmth@gmail.com>
+In-Reply-To: <20241001221931.9309-5-ansuelsmth@gmail.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Wed, 2 Oct 2024 15:59:53 +0200
+Message-ID: <CACRpkdarPcHnZOrhq1r+-DyWbGWL00tPjLohEac+tZZu_f=Uow@mail.gmail.com>
+Subject: Re: [PATCH v5 4/6] mmc: block: attach partitions fwnode if found in mmc-card
+To: Christian Marangi <ansuelsmth@gmail.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	INAGAKI Hiroshi <musashino.open@gmail.com>, Daniel Golle <daniel@makrotopia.org>, 
+	Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, 
+	Ming Lei <ming.lei@redhat.com>, Jan Kara <jack@suse.cz>, Li Lingfeng <lilingfeng3@huawei.com>, 
+	Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Mikko Rapeli <mikko.rapeli@linaro.org>, 
+	Riyan Dhiman <riyandhiman14@gmail.com>, Jorge Ramirez-Ortiz <jorge@foundries.io>, 
+	Dominique Martinet <dominique.martinet@atmark-techno.com>, 
+	Jens Wiklander <jens.wiklander@linaro.org>, 
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>, Li Zhijian <lizhijian@fujitsu.com>, 
+	linux-block@vger.kernel.org, linux-doc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>, 
+	Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Andy Shevchenko <andy@kernel.org> writes:
+On Wed, Oct 2, 2024 at 12:20=E2=80=AFAM Christian Marangi <ansuelsmth@gmail=
+.com> wrote:
 
-> On Mon, Sep 30, 2024 at 01:30:07PM +0200, Christian Marangi wrote:
->> Hi,
->> this is an initial proposal to complete support for manually defining
->> partition table.
->> 
->> 
->> Some block device also implement boot1 and boot2 additional disk. Similar
->> to the cmdline parser, these disk can have OF support using the
->> "partitions-boot0" and "partitions-boot1" additional node.
->> 
->> It's also completed support for declaring partition as read-only as this
->> feature was introduced but never finished in the cmdline parser.
+> Attach partitions fwnode if found in mmc-card and register disk with it.
 >
+> This permits block partition to reference the node and register a
+> partition table defined in DT for the special case for embedded device
+> that doesn't have a partition table flashed but have an hardcoded
+> partition table passed from the system.
 >
-> I'm not sure I fully understood the problem you are trying to solve.
-> I have a device at hand that uses eMMC (and was produced almost ten years ago).
-> This device has a regular GPT on eMMC and no kernel needs to be patched for that.
-> So, why is it a problem for the mentioned OEMs to use standard GPT approach?
+> JEDEC BOOT partition boot0/boot1 are supported but in DT we refer with
+> the JEDEC name of boot1 and boot2 to better adhere to documentation.
+>
+> Also JEDEC GP partition gp0/1/2/3 are supported but in DT we refer with
+> the JEDEC name of gp1/2/3/4 to better adhere to documentration.
+>
+> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
 
-For the user area (main block device), yes, a GPT can often be used, but
-not always. For the boot partitions, the particular SOC/cpu/bootrom may
-make it impossible to use a standard partition table, because the
-bootrom expects to find a bootloader at offset 0 on the active boot
-partition. In such a case, there's no way you can write a regular MBR or
-GPT, but it is nevertheless nice to have a machine-readable definition
-of which data goes where in the boot partitions. With these patches, one
-can do
+This looks very useful and avoids a lot of out-of-tree hacks.
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-  partitions-boot0 {
-    partition@0 {
-      label = "bootloader";
-      reg = <0 0x...>; // 2 MB
-    }
-    partition@... {
-      label = "device-data";
-      reg = <...> // 4 MB
-    }
-  }
-
-and describe that layout.
-
-Rasmus
+Yours,
+Linus Walleij
