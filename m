@@ -1,62 +1,66 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9373028370;
-	Thu,  3 Oct 2024 09:59:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 509C314D708;
+	Thu,  3 Oct 2024 12:10:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1727949570; cv=none; b=p54EO0vxA5S8eX/VRzydiiZ5iVUEQefs973PZFlKPap27WLk6QdS4HMXt7WmjhsHSSfBhnijukV1L/vaXkE+USZOTWjQ4QzL3Qe587D/VYbRtv5zt4W0SGFtYnDwAO4zNLEFq+o70CLKB4RrEDVnvtXv7t5WjX8HSkTkdDc8YQo=
+	t=1727957414; cv=none; b=lcniQgR7a9VKGM5uGP1qTu2cAzME0FWuR7GSEtlg0GEih3sS0C288y4QHvhddpiFTiN0G5L2zFbjb+fWVHnbrMIGM3il8NdtNU+WvVWZ8TOjjTUqJkIeVKGdwZeoXwd+SmJKiiuWyCGmQAbe2pzGrNda8Yp+VBnboDiWYZequTo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1727949570; c=relaxed/simple;
-	bh=GAvgnDYbIpJ8EztU1XXyYsFYyamS+ZKbGL4mJyafhNw=;
+	s=arc-20240116; t=1727957414; c=relaxed/simple;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iJDYcOZ5EjZbcUEe0sA92Isitsa9llCIrISLVGDO77gJOjgKUV46ZLD5cvdFGnLatbNBphWkONR4AVKnGaQtmBLXUy+GSoH0BOgzu9snRzJJUPhCtCwMFManvAYo9P0fGAIlmSHl7StSZIC7S5gD8aJo4U+6bvBpXpKBM8ejqVY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=fail smtp.mailfrom=kernel.org; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=kernel.org
-X-CSE-ConnectionGUID: JSxS/CNDQjaeoEm8LJ3OHQ==
-X-CSE-MsgGUID: RCGoF4pKTaSIuJvgiL+dqA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11213"; a="44604905"
-X-IronPort-AV: E=Sophos;i="6.11,174,1725346800"; 
-   d="scan'208";a="44604905"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Oct 2024 02:59:28 -0700
-X-CSE-ConnectionGUID: sAT+PtLZQ5icH7Km736sXg==
-X-CSE-MsgGUID: 2r+uLvUiSDOn+6O7WPYLxw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,174,1725346800"; 
-   d="scan'208";a="74155166"
-Received: from unknown (HELO smile.fi.intel.com) ([10.237.72.154])
-  by orviesa010.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Oct 2024 02:59:23 -0700
-Received: from andy by smile.fi.intel.com with local (Exim 4.98)
-	(envelope-from <andy@kernel.org>)
-	id 1swIcB-0000000G4lR-3KKf;
-	Thu, 03 Oct 2024 12:59:19 +0300
-Date: Thu, 3 Oct 2024 12:59:19 +0300
-From: Andy Shevchenko <andy@kernel.org>
-To: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Christian Marangi <ansuelsmth@gmail.com>, Jens Axboe <axboe@kernel.dk>,
-	Jonathan Corbet <corbet@lwn.net>,
+	 Content-Type:Content-Disposition:In-Reply-To; b=LR4uSo6/6PhLYM57jeADnyxWXvKZeyfoF3WcFtJodaHjr/IH24Co587N9QCNp0h8vz96PK154kFKyZewd9nkOprtgxFkyLkEY9gmUWEVyrg4SgpwwMkkKtvk6J6a5v9kWyqslt01apDrzB6Tf0Jp9qS266eBH2ELvR4JVnwhyNE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=W8qqgZAC; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="W8qqgZAC"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=M7NmYC/Iylm9myghHwqILim55SAUt9QrM+UZYk0eJlw=; b=W8qqgZACIPu/EEFOH0Vqr6JZ06
+	KDSeR1/yEHFCX/6U6UDZXxhCdxB9z6yurVR1Dx8r5C9RcSLcdOGBiyf5HnnFyR+r/TozDpRT5eX54
+	WMdxJfMaJIO1q4vG1HqshftVf1ZExujWwdV7ypXv5BlSw5clp8+8e8zUscTG2jrNx2z5IAA+nJmB5
+	O5wsR5fpOiIWlyNSVPdSFOurGtqPRzpyb37m/ZbJ6vqUWYm/9YzpTAGR6GYDWUF6yWH3nRxZe1M5k
+	YC82NQmNgPTyMyk6voH/9w/GFTaFznQstKqo/6C0n81sU2D8GW6c+QWSTX03eR6IRFibb1owsPRwC
+	b938V0PQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1swKeU-00000008yqq-23y3;
+	Thu, 03 Oct 2024 12:09:50 +0000
+Date: Thu, 3 Oct 2024 05:09:50 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Christian Marangi <ansuelsmth@gmail.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
 	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Kees Cook <kees@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Daniel Golle <daniel@makrotopia.org>,
 	INAGAKI Hiroshi <musashino.open@gmail.com>,
 	Christian Brauner <brauner@kernel.org>,
-	Al Viro <viro@zeniv.linux.org.uk>,
+	Al Viro <viro@zeniv.linux.org.uk>, Ming Lei <ming.lei@redhat.com>,
 	Li Lingfeng <lilingfeng3@huawei.com>,
-	Ming Lei <ming.lei@redhat.com>,
-	Christian Heusel <christian@heusel.eu>, linux-block@vger.kernel.org,
-	linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-hardening@vger.kernel.org,
-	Miquel Raynal <miquel.raynal@bootlin.com>,
-	Lorenzo Bianconi <lorenzo@kernel.org>, upstream@airoha.com
-Subject: Re: [PATCH v4 0/5] block: partition table OF support
-Message-ID: <Zv5q90Dc_VzA4xs3@smile.fi.intel.com>
-References: <20240930113045.28616-1-ansuelsmth@gmail.com>
- <ZvqfbNDfI2QWZEBg@smile.fi.intel.com>
- <87setej1y2.fsf@prevas.dk>
+	Christian Heusel <christian@heusel.eu>,
+	Avri Altman <avri.altman@wdc.com>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Riyan Dhiman <riyandhiman14@gmail.com>,
+	Mikko Rapeli <mikko.rapeli@linaro.org>,
+	Jorge Ramirez-Ortiz <jorge@foundries.io>,
+	Li Zhijian <lizhijian@fujitsu.com>,
+	Dominique Martinet <dominique.martinet@atmark-techno.com>,
+	Jens Wiklander <jens.wiklander@linaro.org>,
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+	linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
+	Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
+	Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v6 3/6] block: introduce add_disk_fwnode()
+Message-ID: <Zv6JjnDLleKKxxsQ@infradead.org>
+References: <20241002221306.4403-1-ansuelsmth@gmail.com>
+ <20241002221306.4403-4-ansuelsmth@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -65,57 +69,10 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <87setej1y2.fsf@prevas.dk>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+In-Reply-To: <20241002221306.4403-4-ansuelsmth@gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Wed, Oct 02, 2024 at 11:20:37AM +0200, Rasmus Villemoes wrote:
-> Andy Shevchenko <andy@kernel.org> writes:
-> > On Mon, Sep 30, 2024 at 01:30:07PM +0200, Christian Marangi wrote:
+Looks good:
 
-...
-
-> >> this is an initial proposal to complete support for manually defining
-> >> partition table.
-> >> 
-> >> Some block device also implement boot1 and boot2 additional disk. Similar
-> >> to the cmdline parser, these disk can have OF support using the
-> >> "partitions-boot0" and "partitions-boot1" additional node.
-> >> 
-> >> It's also completed support for declaring partition as read-only as this
-> >> feature was introduced but never finished in the cmdline parser.
-> >
-> > I'm not sure I fully understood the problem you are trying to solve.
-> > I have a device at hand that uses eMMC (and was produced almost ten years ago).
-> > This device has a regular GPT on eMMC and no kernel needs to be patched for that.
-> > So, why is it a problem for the mentioned OEMs to use standard GPT approach?
-> 
-> For the user area (main block device), yes, a GPT can often be used, but
-> not always. For the boot partitions, the particular SOC/cpu/bootrom may
-> make it impossible to use a standard partition table, because the
-> bootrom expects to find a bootloader at offset 0 on the active boot
-> partition. In such a case, there's no way you can write a regular MBR or
-> GPT, but it is nevertheless nice to have a machine-readable definition
-> of which data goes where in the boot partitions. With these patches, one
-> can do
-> 
->   partitions-boot0 {
->     partition@0 {
->       label = "bootloader";
->       reg = <0 0x...>; // 2 MB
->     }
->     partition@... {
->       label = "device-data";
->       reg = <...> // 4 MB
->     }
->   }
-> 
-> and describe that layout.
-
-I see now, on the device I mentioned the firmware is located on a boot
-partition, so the user ones are being used for bootloader and the OS.
-
--- 
-With Best Regards,
-Andy Shevchenko
-
+Reviewed-by: Christoph Hellwig <hch@lst.de>
 
