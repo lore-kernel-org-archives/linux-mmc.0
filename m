@@ -1,202 +1,185 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from EUR03-VI1-obe.outbound.protection.outlook.com (mail-vi1eur03on2087.outbound.protection.outlook.com [40.107.103.87])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F56D1581E0
-	for <linux-mmc@vger.kernel.org>; Fri,  4 Oct 2024 11:55:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728042922; cv=none; b=rLwsCqX4ouI2pIfH/R70dnCSBgN5M+gIKYwefZCHmtxuEOeTnr5+eW90lud04bGo+OU1I2LS/W8MezuyfuxDgJyIW09HFEIN2m7T9ZOlm6BbwRDnuE26BdiHfWTcQW8KyXCXG/r6NprXTspsa4oh3549/ITwJF3fE0ujVXa9e9Y=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728042922; c=relaxed/simple;
-	bh=lW4WYgkssxVBDl6uNjKBsszdRCDAxXm8ViV/nvdlr1g=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=SyixtlE32/BhgYaEiOmW5TiRexLCuSGZkvAIwp4l+Ba36FbX+DS6wXWvRQMMh4YW6bX8Mvxn403RYQaTuMnA3x7qxK1qo3kDr512Oc7gSM3e1iIezdRsnXRckXKA49usVvUEWrD0rb2hW58u3k92cbzbH7FUHmKyg69BKutCbE8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fFx1/JX9; arc=none smtp.client-ip=209.85.219.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EA951FAA;
+	Fri,  4 Oct 2024 12:07:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.103.87
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1728043669; cv=fail; b=vEEih9bK2vMvmYiVZi8o/h7uBjgQSjPYvCpf7fKe4POtLfDvcLlOoKA0xJjS8JbWa5VzuLY0oKK9x4MslqUhLKHZP3mAenjeNbOFJUBQB1f1Gi7Ny0e/ndsNEwTyidfn4B5q9Wf9mjtleFOSduB0ti2BUVptqao4Y7KvCfrcvMk=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1728043669; c=relaxed/simple;
+	bh=zA+8xOj5XpFM2Wvn2mGYoAxCBw2Xptl3UhwUdidTQlA=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=EKlibjlxHvaeSN3RK+dpJA8RodSB0LY5JG6+X5ZXVGGX2M6ZDpgG8wZfM5mz1m8AdBgeQqWTQRhQ+lvO89Kl+VrgavjiMAPoy9OEACrwTDxxteAiaAsn1bPJQkzKZ1b85iWaw+UAPt5oE7ZhnDuFQ0qtnSQWOQx9xx0vHtRL6cc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=leica-geosystems.com; spf=fail smtp.mailfrom=leica-geosystems.com; dkim=pass (1024-bit key) header.d=leica-geosystems.com header.i=@leica-geosystems.com header.b=ifc5V/sA; arc=fail smtp.client-ip=40.107.103.87
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=leica-geosystems.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=leica-geosystems.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fFx1/JX9"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e28a083d531so161113276.2
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Oct 2024 04:55:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728042918; x=1728647718; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wTaeamx6DcDUAZ9BpfuVVEl85CSz9b541yZH8Gp9Gkk=;
-        b=fFx1/JX9eoe+64XPdM6zVjGuUXYuOUV0QwDSk9hGDXcYo15L2V3G1Gj0yH1f/pwVXW
-         ranYZL9P5RMNObO3Jcm54/q+DJc8dc9kE6RsCb6ScBabFOEnLJzmkxv3q5DrWCsVaukE
-         Jom/E1KjCqZJnq25xvi0Y0egkvCh9kSnKJsmOqNP3ETBi1YEy6UYq4/BrB47Xx0i6BnO
-         K3XugRyEEjFYfSkvxiowsmEB+XiGuvK/vCxn6zXiFrx8yv5fq6vhcR16HVaPgg6MfnY9
-         DvRCQ3Ut/nFZ7Rn6eV40UcZgtu23pMsqMYZCeYgaqavEKup2oYntn/OXCTX4e2bHllz+
-         WwWA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728042918; x=1728647718;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wTaeamx6DcDUAZ9BpfuVVEl85CSz9b541yZH8Gp9Gkk=;
-        b=AsHQHjPb6DyhPKnxePI4IVBkAa0ovf/1NdjPv5SHprNT51YVyTZuyR823vf68gtnFC
-         rpu2otCkIG2MNUeaYL6VK8pMmUrcIGUVqIFyFheftAU54aYfzWy0HSXH4hwXurqLSimd
-         iHgHxzcfjAnjnPaVToYseif2v8gTydM32TwxRRon/m2oGW76gT2aI0Rj3Um1rAMkT95I
-         rLu0dNp/dc7m9w4Fk4f9D+XPJ1h/phR7NC+E9NkGK1JU2JAJABrwFV1K7iHXa5tY0khR
-         6WvbQVSlMdJr4QXB85euKZ99F2YOjfmnZSkBU63M0dTvE/TlmcT1VF7++eU90F1w8W8G
-         wPww==
-X-Forwarded-Encrypted: i=1; AJvYcCXb0kEc9uxZKJnyUcX8+5SLs6XOf8absSj3r0F0qJha6yQYmIKJjs9PsAHVOtv95OcaI4TBQCweAAQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyTx6wgSu4/lAwWmQYv9Kb/nOmGAa32dF0DHteOUpTIdLwWyFHi
-	ImQSPSjuSJhF7V2R5WTyOqwIxqkySBVZABLDcbPjDvFnBWHzLQsvoKAoNy8Tvle/R3h032RH9du
-	Y6xPie/Z6sSPA608k8iSidjNkr+jIf7dWiNnWdMgQZOUCOARF
-X-Google-Smtp-Source: AGHT+IFOHbZCszBR3ogOu1f/JhER/gzMihu7gc5SjpNsnu2X6RNavWmU6/W2zmAtwXas+DdPqNCvqMeG+iyhpAHKMzo=
-X-Received: by 2002:a05:6902:11ce:b0:e26:bea:9580 with SMTP id
- 3f1490d57ef6-e28939513f8mr1470314276.53.1728042918520; Fri, 04 Oct 2024
- 04:55:18 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=leica-geosystems.com header.i=@leica-geosystems.com header.b="ifc5V/sA"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=o/8EcFVSICFSX4jSKSyCJvj3/pvFQ4eVZwy5D/L5V2OzLIfoTmRNDjSG02h6EOlfeiI9ahg+deSgoA8Lrg3ZIrCoW/6AXuBwiY2zicQXFnidpHB361NKsiF2tMjZ/LIKs+cFZCb89V5qQ8T8JrpFUF0/nmAqCyQAAKpFzgqFPTPLyGjY8mz0n2yUHWJnDdrDR/tDVETCYc5s/I+rfP4EZAA5krEEAsY5mAzvtjkWfu+o0p3Ql4OQsAAVxlxLW0U+b4GK0YWeKF7NDiaBGlgoOoOdjSrf+3qsz7Rrojt4/ZPAXoEUFWjsUdYJM2U7czBQQ4xSLjIQf5qX6msva4b9fw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=NCUWttN/BnOXjnZLtlhpD54NykMZK0LnB4i37A0SyQk=;
+ b=uiNzq2Gi/9wM4oCrfE1iXfemUkG3Di8SOcj7upe9ZouP8uuWOeM+BQWQH6BkZqJA/7ZmcJsId1+YsFzy4jBmrapvW6soHSuhZUP6lmA5im4HlyYM9noS6vryT/aZsS17WVhDRg+ecBOI6OTpncN9zHl6QqaxuJj0YIvxGv6jImEkis6rrkH5Rq4qceBkHTntmoxZzEnXir3M7nET4o6Ob0Ycytl/PEfeqU8kWDVfpPG/XmgQ1y73bjNeM9Qt6gP02yjyzGto7tMXTigkcTaBemSy4z9lfKAYGn1MBmtPBXAg+o5fOCKD9RtgDlGI16BGZotd/pLrpbgqxYaHZTtijQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 193.8.40.94) smtp.rcpttodomain=vger.kernel.org
+ smtp.mailfrom=leica-geosystems.com; dmarc=pass (p=reject sp=reject pct=100)
+ action=none header.from=leica-geosystems.com; dkim=none (message not signed);
+ arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=leica-geosystems.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=NCUWttN/BnOXjnZLtlhpD54NykMZK0LnB4i37A0SyQk=;
+ b=ifc5V/sAJqFTAOIw4X+NXlwR/5vTIxjraks+S9GFfsltRl9NEVacSVdIj9NEDlXMavo897Cfp2t4ucwvZOF5/aHTeh4kAOWrqdHgVKc5kGPZvwJzL3GslMQhdFqHLVg8uyq/eyvP137pj0fd3Qobt3sTu5FiZHsqxK0EZGRBqAo=
+Received: from AS4P191CA0030.EURP191.PROD.OUTLOOK.COM (2603:10a6:20b:5d9::16)
+ by GVXPR06MB9226.eurprd06.prod.outlook.com (2603:10a6:150:1b7::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8026.18; Fri, 4 Oct
+ 2024 12:07:42 +0000
+Received: from AM4PEPF00027A5D.eurprd04.prod.outlook.com
+ (2603:10a6:20b:5d9:cafe::2c) by AS4P191CA0030.outlook.office365.com
+ (2603:10a6:20b:5d9::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8026.18 via Frontend
+ Transport; Fri, 4 Oct 2024 12:07:42 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 193.8.40.94)
+ smtp.mailfrom=leica-geosystems.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=leica-geosystems.com;
+Received-SPF: Pass (protection.outlook.com: domain of leica-geosystems.com
+ designates 193.8.40.94 as permitted sender) receiver=protection.outlook.com;
+ client-ip=193.8.40.94; helo=hexagon.com; pr=C
+Received: from hexagon.com (193.8.40.94) by
+ AM4PEPF00027A5D.mail.protection.outlook.com (10.167.16.69) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.8026.11 via Frontend Transport; Fri, 4 Oct 2024 12:07:42 +0000
+Received: from aherlnxbspsrv01.lgs-net.com ([10.60.34.116]) by hexagon.com with Microsoft SMTPSVC(10.0.17763.1697);
+	 Fri, 4 Oct 2024 14:07:42 +0200
+From: Catalin Popescu <catalin.popescu@leica-geosystems.com>
+To: ulf.hansson@linaro.org,
+	robh@kernel.org,
+	krzk+dt@kernel.org,
+	conor+dt@kernel.org,
+	p.zabel@pengutronix.de
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	m.felsch@pengutronix.de,
+	bsp-development.geo@leica-geosystems.com,
+	Catalin Popescu <catalin.popescu@leica-geosystems.com>
+Subject: [PATCH 1/2] dt-bindings: mmc: mmc-pwrseq-simple: add support for reset control
+Date: Fri,  4 Oct 2024 14:07:39 +0200
+Message-Id: <20241004120740.2887776-1-catalin.popescu@leica-geosystems.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240913102836.6144-1-victorshihgli@gmail.com>
- <dfde5172-c1b7-4c22-94ab-87a1d5d5ee9d@intel.com> <CAK00qKAOd9_bSGs8sxaZjOjkpw3ge-jzXdmkZMcFmm=eg70KVQ@mail.gmail.com>
-In-Reply-To: <CAK00qKAOd9_bSGs8sxaZjOjkpw3ge-jzXdmkZMcFmm=eg70KVQ@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 4 Oct 2024 13:54:42 +0200
-Message-ID: <CAPDyKFqrSS=AhcQxVET9V_SN008Cu=n5PuBF70_yBt2CDjMK-w@mail.gmail.com>
-Subject: Re: [PATCH V22 00/22] Add support UHS-II for GL9755 and GL9767
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	Lucas.Lai@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-OriginalArrivalTime: 04 Oct 2024 12:07:42.0411 (UTC) FILETIME=[03C9B1B0:01DB1656]
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: AM4PEPF00027A5D:EE_|GVXPR06MB9226:EE_
+Content-Type: text/plain
+X-MS-Office365-Filtering-Correlation-Id: d854b761-5f60-48de-de58-08dce46d2666
+X-SET-LOWER-SCL-SCANNER: YES
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|36860700013|376014|82310400026|1800799024;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?TjLXER6F2Hwl5ThEbhTctIgBJbbj5FZcO+zoQynxQyYN7yhg+oFTw2LVvTRO?=
+ =?us-ascii?Q?4UdUrUAUFVI+ihldHOHGY/Jab0lUGPTL/hqmMbqvpJWxNNWjY/trlMy1NaAJ?=
+ =?us-ascii?Q?d9PUuGwPE3gh+0IkvS3BOYLemv4P9DtaEwAUCuMFRKRy8zVFBDsh2tcxKn7k?=
+ =?us-ascii?Q?BrYHqBrHMfbJmK8uYJyCHQweFWKkRS7FlftQ/tNTgFk/ZMrDtTeOECYEtmHX?=
+ =?us-ascii?Q?U0ZcURs/jJ9aMqMbgf96apOQHY5Lsp1CyiBW5rO1xh/0YxcVNHz/Mtb7D7YN?=
+ =?us-ascii?Q?jg9riMngZzXMMPXWUpUzpb5L1drhqiSPGA4UnFrPcDrD2DXMDSiXHFXj/Xfl?=
+ =?us-ascii?Q?Yv7HZW+PCTEp56Y0yWqqcx+oAz+fLZvyWI8KC7WaycKBdIbhyMkevTJ/UqgC?=
+ =?us-ascii?Q?xSwqYx/CImK3QxbtlSl/FoYXbVTkw+qUOJWTdE6WZpGFnLGazLtUCZHmkw3p?=
+ =?us-ascii?Q?NlOxTi2zyQ4KGqC77fjNlv2INBW+ejAjWBAnH0cmRv3dAx3WGBA323JhzbKK?=
+ =?us-ascii?Q?Jg/IngKSX3ZQGslAX+iBtZZDMu4YlFWNlNcwgq3jWHP28NbS3r7qWAPXVTda?=
+ =?us-ascii?Q?qJdweUMgKeEMTMC5n80r08w71M0ZmqeqOBBbFI9FGmIU11dQRNPxtyHlXo4V?=
+ =?us-ascii?Q?1ono93tX5GuwpsY1vhq2S/7GulYmuW2WETDlbCkDef1sLpUBx1UTuuDGwcr/?=
+ =?us-ascii?Q?8ajX54Fsp7y8/pAYKs7a7nW8Cm+fekstA1OyMKX70099s2qF9gB23lDuWli5?=
+ =?us-ascii?Q?9HrpUzNgxzT8NcVeawXqusxEEH1feAMPtKBJSaXNcnAASE+y5Oix++ahWCnh?=
+ =?us-ascii?Q?7FXFoWa+0cJSMhRz4H2uhgKFgtEDMsNnUjQApSkqIDK/Df5+LCUAW0/3els8?=
+ =?us-ascii?Q?NtKpDKBbqhvEACt+eZDT0xJVlgFKzoPpq64PN2lf2cy4HH9LAWE5N9p6MWBz?=
+ =?us-ascii?Q?gI+sDdxJdSREIkJYuAAzviVAqqogXP8f7+Nv0Yszf65oLKyaFva2oNnKNHP7?=
+ =?us-ascii?Q?Fbvn612lxBrDYVG7mmw2wE3EoDZU0ON3mhY8zzEdBTdP8IhAVxrIopO/muep?=
+ =?us-ascii?Q?JrI0bTXWNO9VB1IBWDgyvEoUp3TRnJYagcPjgZAQ9V4H9CKASasf6Hg4iCaz?=
+ =?us-ascii?Q?HUwo5iachRHwY3ZdXITEjN3c2ZwNGiZZWM+0oUX5LrpMutUuSyGSc0oWgKxa?=
+ =?us-ascii?Q?GE0nv6ENZqc+MnM8ilExmID9ixqN++ODgyq0WOaCpWMMdqq8dDfoi0ZBHvv3?=
+ =?us-ascii?Q?dlKhNfYprthTMmKemTTY8C/uT2W9QOi/BOgl7VSHSzCyRymkOULiH4PkAb3V?=
+ =?us-ascii?Q?C3QfHGoSOgtJAz25X4HgTzANwskFIaAKeGC7xgfFzZ5van2wlQjF0iF8gK8u?=
+ =?us-ascii?Q?Ho9A1owTfcMm2NzdglxcX+pvSLpT?=
+X-Forefront-Antispam-Report:
+	CIP:193.8.40.94;CTRY:CH;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:hexagon.com;PTR:ahersrvdom50.leica-geosystems.com;CAT:NONE;SFS:(13230040)(36860700013)(376014)(82310400026)(1800799024);DIR:OUT;SFP:1101;
+X-OriginatorOrg: leica-geosystems.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Oct 2024 12:07:42.5674
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: d854b761-5f60-48de-de58-08dce46d2666
+X-MS-Exchange-CrossTenant-Id: 1b16ab3e-b8f6-4fe3-9f3e-2db7fe549f6a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=1b16ab3e-b8f6-4fe3-9f3e-2db7fe549f6a;Ip=[193.8.40.94];Helo=[hexagon.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	AM4PEPF00027A5D.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GVXPR06MB9226
 
-On Mon, 30 Sept 2024 at 12:47, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> Hi, Ulf
->
-> Sorry for bothering you.
-> In this series of patches I have reached the final comments of the sdhci =
-parts.
-> Please help review this series of patches.
-> I hope to get your feedback to confirm whether there are any needs to
-> be modified.
-> If you already have a closer look at a paragraph in the series, could
-> you let me know your opinions first.
-> I look forward to your reply.
+Add compatible value "mmc-pwrseq-simple-reset" to support reset control
+instead of gpios. Reset controls being refcounted, they allow to use
+shared resets or gpios across drivers. Support of reset control is
+limited to one single reset control.
 
-Hi Victor,
+Signed-off-by: Catalin Popescu <catalin.popescu@leica-geosystems.com>
+---
+ .../bindings/mmc/mmc-pwrseq-simple.yaml       | 21 +++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
 
-Just wanted to let you know that I have re-started the review. I am
-looking at patch7 right now. Hopefully I should be able to complete
-the review later today or on Monday.
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+index 00feaafc1063..da218260af01 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+@@ -16,12 +16,13 @@ description:
+ 
+ properties:
+   compatible:
+-    const: mmc-pwrseq-simple
++    enum:
++      - mmc-pwrseq-simple
++      - mmc-pwrseq-simple-reset
+ 
+   reset-gpios:
+     minItems: 1
+     # Put some limit to avoid false warnings
+-    maxItems: 32
+     description:
+       contains a list of GPIO specifiers. The reset GPIOs are asserted
+       at initialization and prior we start the power up procedure of the card.
+@@ -50,6 +51,22 @@ properties:
+ required:
+   - compatible
+ 
++allOf:
++  - if:
++      properties:
++        compatible:
++          contains:
++            enum:
++              - mmc-pwrseq-simple-reset
++    then:
++      properties:
++        reset-gpios:
++          maxItems: 1
++    else:
++      properties:
++        reset-gpios:
++          maxItems: 32
++
+ additionalProperties: false
+ 
+ examples:
+-- 
+2.34.1
 
-Kind regards
-Uffe
-
-
->
-> Thanks, Victor Shih
->
-> On Wed, Sep 18, 2024 at 12:47=E2=80=AFPM Adrian Hunter <adrian.hunter@int=
-el.com> wrote:
-> >
-> > On 13/09/24 13:28, Victor Shih wrote:
-> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > >
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] support UHS-II and fix GL9755 and GL9767
-> > > UHS-II compatibility.
-> > >
-> > > About UHS-II, roughly deal with the following three parts:
-> > > 1) A UHS-II detection and initialization:
-> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup
-> > >   Sequence[2]).
-> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
-ce
-> > >   [2]).
-> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
-de
-> > >   Section 3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II
-> > >   Setting Register Setup Sequence.
-> > >
-> > > 2) Send Legacy SD command through SD-TRAN
-> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
-egacy
-> > >   SD compatibility and preserve Legacy SD infrastructures (Section 7.=
-1.1
-> > >   Packet Types and Format Overview[3]).
-> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
-S-II
-> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
-]).
-> > >
-> > > 3) UHS-II Interrupt
-> > > - Except for UHS-II error interrupts, most interrupts share the origi=
-nal
-> > >   interrupt registers.
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1-#7:  for core
-> > > patch#8-#20: for sdhci
-> > > patch#21:    for GL9755
-> > > patch#22:    for GL9767
-> > >
-> > > Tests
-> > > =3D=3D=3D=3D=3D
-> > > Ran 'dd' command to evaluate the performance 3 times:
-> > > (SanDisk UHS-II card on GL9755 controller)
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 85.5MB/s 56.3MB/s
-> > > UHS-II enabled         :  182MB/s 75.5MB/s
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 86.7MB/s 52.1MB/s
-> > > UHS-II enabled         :  179MB/s 77.6MB/s
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 85.8MB/s 49.1MB/s
-> > > UHS-II enabled         :  181MB/s 89.8MB/s
-> > > (SanDisk UHS-II card on GL9767 controller)
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 81.9MB/s 49.0MB/s
-> > > UHS-II enabled         :  186MB/s 87.9MB/s
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 80.8MB/s 53.5MB/s
-> > > UHS-II enabled         :  192MB/s 87.3MB/s
-> > >                              Read    Write
-> > > UHS-II disabled (UHS-I): 81.0MB/s 53.9MB/s
-> > > UHS-II enabled         :  199MB/s 73.6MB/s
-> > >
-> > > Test command
-> > > =3D=3D=3D=3D=3D
-> > > Read: dd if=3D/dev/mmcxxx of=3D/dev/null bs=3D4096k count=3D2000 ifla=
-g=3Ddirect
-> > > Write:dd if=3D/dev/zero of=3D/dev/mmcxxx bs=3D4096k count=3D2000 ofla=
-g=3Ddirect
-> > >
-> > > Changes in v22 (September. 13, 2024)
-> > > * Rebase on latest mmc/next.
-> > > * Adjust patch order to avoid defined but nt used warnings:
-> > >   v21 patch#18 to v22 patch#14.
-> > >   v21 patch#14 to v22 patch#15.
-> > >   v21 patch#15 to v22 patch#16.
-> > >   v21 patch#16 to v22 patch#18.
-> > > * Patch#14: Remove unnecessary code to avoid defined but not used war=
-nings.
-> > > * Patch#15: Add necessary code to avoid defined but not used warnings=
-.
-> > > * Patch#16: Remove unnecessary code to avoid defined but not used war=
-nings.
-> > >             Modify commit message.
-> > > * Patch#17: Remove unnecessary code to avoid defined but not used war=
-nings.
-> > > * Patch#18: Add necessary code to avoid defined but not used warnings=
-.
-> >
-> > For SDHCI:
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> >
