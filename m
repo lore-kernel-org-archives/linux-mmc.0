@@ -1,64 +1,49 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.18])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFC0C1804E;
-	Sat,  5 Oct 2024 14:20:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AE1515A851;
+	Sat,  5 Oct 2024 18:23:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728138016; cv=none; b=eBB2KnwK9t7Vt12pVu5q9ymvDF12+gJXoAlAeV6FHhkyuD+o/6duggxH5I561YHZuVew5mkGR/xdyOSbQrnEMiKI/EV1zBvYsrDpbVhpyVtDZvgxdMLlRLJxSsWUibVa5BwXDH4rmH8KgNYYIjep2QlKDZfj0zpIGl86Fk7MmCw=
+	t=1728152626; cv=none; b=jkMNYw7KXnXX5Nuv5Q3RbiRv1OxE5RPnwkGIQtlQ8igqG1iUJ2NV2JOtC4XojeyBqPZmfPbifSS18CSDuFsgAjczdbHFFEfoFLdysLT5Okff89VtiNIa9DPEWGKXmocNA3AF1LlvJG7BfxIT4mWp8faJvJ7bVYxbEFKZtCXJJrY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728138016; c=relaxed/simple;
-	bh=jTrJY5NY7nSitlKdPbrArtyQ+i8ZCWM8EMNpiIaduXk=;
+	s=arc-20240116; t=1728152626; c=relaxed/simple;
+	bh=kxzlIO1kgZa4eBIb9lr2I1n75J/YWBPfbw062Q50ilU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=arN849TM5edf959Lj8YBVTx90GtvaaVjTbZFaDvrZXDmfvlkeucmREidBi/yJ6C5jme2GwSldXvKqE2lqMXxTOc2EO/3ad/W47kABGp9Nrjfyx4t0YkLrt4/OACBQwtAFcWLPm68ekpTQVKKT2fO9jGwiJPVxuevShLScOIP/5w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WKO3BOrI; arc=none smtp.client-ip=198.175.65.18
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=uIgGzvhcgcTORF/F6GiHsHuB7/o8MCxgKotL4ZeZBOiSxWrNfsDfcRUiw6+Do8lszyE2H3zR2rrRLzyvWxcpNw/QVmLO0+qYPlGyoedRy4ghtAohDPO14HTSCIo49Dfe88WRA34wiaFOU8MsHdmxtBkn15zB35NcyxGWsRVOHTg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OruGk6nX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WKO3BOrI"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1728138014; x=1759674014;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=jTrJY5NY7nSitlKdPbrArtyQ+i8ZCWM8EMNpiIaduXk=;
-  b=WKO3BOrIvkehE46Bhgdj+GUAV1gjds+jQ4gujGSffcdjvqEiG3xguxVA
-   uD6KJqaX7hpe58+VimPV1R0rmQPEGCUs0hHry6d0jOEiBKY/lDjn/Qfxv
-   0GqMBx51rCtkUGlvgcuOut6eMHbL9atJDrVGcZ3B2Hcfm5j/IKuVDxBG+
-   EDlBTvc6Whm9ppUebr0B62FpraEOhqBYh5/eJg4x7hZaIQBfLqZ/skEem
-   rYLpbRQdUMTBKmnVaMGdKX+LMBg7kDBsSLR/IMhilfOMiqzMSjwF8AuSf
-   BfEnazGW4LyR3VSAS2v9MJlDSBoL/TOCX/9Ha4uNDvMzFPuIdCynICKZK
-   Q==;
-X-CSE-ConnectionGUID: fcbt/5QlRIiIcFB0xPTAxA==
-X-CSE-MsgGUID: wf7R4wJ+SaaLtjImzN22OA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11216"; a="27477239"
-X-IronPort-AV: E=Sophos;i="6.11,180,1725346800"; 
-   d="scan'208";a="27477239"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by orvoesa110.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2024 07:20:14 -0700
-X-CSE-ConnectionGUID: vNox3mjuQJmK+q1hWuUItg==
-X-CSE-MsgGUID: V+6EJzbzSFSYV4Jf19o69w==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,180,1725346800"; 
-   d="scan'208";a="74814459"
-Received: from lkp-server01.sh.intel.com (HELO a48cf1aa22e8) ([10.239.97.150])
-  by orviesa010.jf.intel.com with ESMTP; 05 Oct 2024 07:20:12 -0700
-Received: from kbuild by a48cf1aa22e8 with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1sx5dh-000314-1M;
-	Sat, 05 Oct 2024 14:20:09 +0000
-Date: Sat, 5 Oct 2024 22:19:38 +0800
-From: kernel test robot <lkp@intel.com>
-To: Catalin Popescu <catalin.popescu@leica-geosystems.com>,
-	ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-	conor+dt@kernel.org, p.zabel@pengutronix.de
-Cc: oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OruGk6nX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B44C8C4CEC2;
+	Sat,  5 Oct 2024 18:23:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728152625;
+	bh=kxzlIO1kgZa4eBIb9lr2I1n75J/YWBPfbw062Q50ilU=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=OruGk6nXMjvr08V9VJT0HhwG3POlNYQCJIs/FElKG8lHmmovlkjs4IGFkTlQ1pTf9
+	 qYSmBZlbrSsEsu0RGxYwV8iCaYYgryvHpE+oUR7pNCroNM1gbfVpnu7/KL+PoOlffw
+	 yoU3sejW5ci25DceAtepuQA95mEcizuucSq+qjyHITnsBearvHD3DXS1atGNbl7cZM
+	 2JjzTbmObo72j3ON+0WY+UhTNRhxuAU3GSA6ZMKlkdzrylOjpGhsr8vu/4kZINox8o
+	 oSPud5kXSWI6OvZfK6A3usUSPZ8D25BtrqjOg/Sm5CQeQzdQwr3ZfqKapKiHkGULYo
+	 AJp2BgQ3iP+zA==
+Date: Sat, 5 Oct 2024 13:23:45 -0500
+From: Rob Herring <robh@kernel.org>
+To: Sricharan R <quic_srichara@quicinc.com>
+Cc: andersson@kernel.org, konradybcio@kernel.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org,
+	ulf.hansson@linaro.org, linus.walleij@linaro.org,
+	catalin.marinas@arm.com, p.zabel@pengutronix.de,
+	geert+renesas@glider.be, dmitry.baryshkov@linaro.org,
+	neil.armstrong@linaro.org, linux-arm-msm@vger.kernel.org,
 	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	m.felsch@pengutronix.de, bsp-development.geo@leica-geosystems.com,
-	Catalin Popescu <catalin.popescu@leica-geosystems.com>
-Subject: Re: [PATCH 2/2] mmc: pwrseq_simple: add support for reset control
-Message-ID: <202410052201.xEk9eC0T-lkp@intel.com>
-References: <20241004120740.2887776-2-catalin.popescu@leica-geosystems.com>
+	linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	quic_varada@quicinc.com
+Subject: Re: [PATCH V3 2/7] dt-bindings: clock: Add Qualcomm IPQ5424 GCC
+ binding
+Message-ID: <20241005182345.GA482031-robh@kernel.org>
+References: <20241004102342.2414317-1-quic_srichara@quicinc.com>
+ <20241004102342.2414317-3-quic_srichara@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -67,47 +52,71 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20241004120740.2887776-2-catalin.popescu@leica-geosystems.com>
+In-Reply-To: <20241004102342.2414317-3-quic_srichara@quicinc.com>
 
-Hi Catalin,
+On Fri, Oct 04, 2024 at 03:53:37PM +0530, Sricharan R wrote:
+> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> 
+> Add binding for the Qualcomm IPQ5424 Global Clock Controller
+> 
+> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> ---
+>  [V3] Added only new clocks for IPQ5424 and ordered for both
+>       IPQ5332 and IPQ5424 based on min/max items
+> 
+>  .../bindings/clock/qcom,ipq5332-gcc.yaml      |  40 ++-
+>  include/dt-bindings/clock/qcom,ipq5424-gcc.h  | 156 +++++++++
+>  include/dt-bindings/reset/qcom,ipq5424-gcc.h  | 310 ++++++++++++++++++
+>  3 files changed, 499 insertions(+), 7 deletions(-)
+>  create mode 100644 include/dt-bindings/clock/qcom,ipq5424-gcc.h
+>  create mode 100644 include/dt-bindings/reset/qcom,ipq5424-gcc.h
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> index 9193de681de2..1b6d64385116 100644
+> --- a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> +++ b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> @@ -4,30 +4,34 @@
+>  $id: http://devicetree.org/schemas/clock/qcom,ipq5332-gcc.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Qualcomm Global Clock & Reset Controller on IPQ5332
+> +title: Qualcomm Global Clock & Reset Controller on IPQ5332 and IPQ5424
+>  
+>  maintainers:
+>    - Bjorn Andersson <andersson@kernel.org>
+>  
+>  description: |
+>    Qualcomm global clock control module provides the clocks, resets and power
+> -  domains on IPQ5332.
+> +  domains on IPQ5332 and IPQ5424.
+>  
+> -  See also:: include/dt-bindings/clock/qcom,gcc-ipq5332.h
+> -
+> -allOf:
+> -  - $ref: qcom,gcc.yaml#
+> +  See also::
+> +    include/dt-bindings/clock/qcom,gcc-ipq5332.h
+> +    include/dt-bindings/clock/qcom,gcc-ipq5424.h
+>  
+>  properties:
+>    compatible:
+> -    const: qcom,ipq5332-gcc
+> +    enum:
+> +      - qcom,ipq5332-gcc
+> +      - qcom,ipq5424-gcc
+>  
+>    clocks:
+> +    minItems: 5
+>      items:
+>        - description: Board XO clock source
+>        - description: Sleep clock source
+>        - description: PCIE 2lane PHY pipe clock source
+>        - description: PCIE 2lane x1 PHY pipe clock source (For second lane)
+> +      - description: PCIE 2-lane PHY2 pipe clock source
+> +      - description: PCIE 2-lane PHY3 pipe clock source
+>        - description: USB PCIE wrapper pipe clock source
 
-kernel test robot noticed the following build warnings:
+New clocks go on the end of the list. Otherwise, it is an ABI break (or 
+the descriptions are wrong in one case).
 
-[auto build test WARNING on robh/for-next]
-[also build test WARNING on linus/master v6.12-rc1 next-20241004]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Catalin-Popescu/mmc-pwrseq_simple-add-support-for-reset-control/20241004-200909
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-patch link:    https://lore.kernel.org/r/20241004120740.2887776-2-catalin.popescu%40leica-geosystems.com
-patch subject: [PATCH 2/2] mmc: pwrseq_simple: add support for reset control
-config: x86_64-randconfig-123-20241005 (https://download.01.org/0day-ci/archive/20241005/202410052201.xEk9eC0T-lkp@intel.com/config)
-compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20241005/202410052201.xEk9eC0T-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202410052201.xEk9eC0T-lkp@intel.com/
-
-sparse warnings: (new ones prefixed by >>)
->> drivers/mmc/core/pwrseq_simple.c:123:31: sparse: sparse: symbol 'mmc_pwrseq_simple_gpio' was not declared. Should it be static?
->> drivers/mmc/core/pwrseq_simple.c:127:31: sparse: sparse: symbol 'mmc_pwrseq_simple_reset' was not declared. Should it be static?
-
-vim +/mmc_pwrseq_simple_gpio +123 drivers/mmc/core/pwrseq_simple.c
-
-   122	
- > 123	struct mmc_pwrseq_simple_data mmc_pwrseq_simple_gpio = {
-   124		.use_reset = false,
-   125	};
-   126	
- > 127	struct mmc_pwrseq_simple_data mmc_pwrseq_simple_reset = {
-   128		.use_reset = true,
-   129	};
-   130	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Rob
