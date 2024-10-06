@@ -1,113 +1,114 @@
-Received: from mxout2.routing.net (mxout2.routing.net [134.0.28.12])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 917A3171E43;
-	Sun,  6 Oct 2024 10:22:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.0.28.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38FEA54F95;
+	Sun,  6 Oct 2024 12:37:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728210126; cv=none; b=r0/ZD3YZEOIbMEIo5ZdxY8wqyZLzWTq9xy3p+zLeJzLhgo7PoS3cL6wjx/vQmu78DdFsI+HsRclgzgUdSU0IRcLBEcOgEKx2Yc+e1yB9hhjSAqioLT3pI7c4FwN4k0agPJRTK5vkWUKeZTjnFKSWqY2d243OQIxwf8SEUG5RlVA=
+	t=1728218269; cv=none; b=LZ9O7uFO/o1wRBwV6aRLbRpCdnuS32JSCYHzlzZeAQfZSEgDt2luCgMzNWFGKUwEvn2wjS7yeysDPNko/cRPCKPdOoUYqwnLPT2M0YtTdgaHHyY8X40Q4iEz+xpkKMmP00JNqTH6ZN41gOn47ZO0S+I6wTczUrAdR7//sArsjYk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728210126; c=relaxed/simple;
-	bh=i0VDLMwDuMOVDGFP0bfNMFug3qcxk/uI24ZwMKQ5QrQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=nlmtR06d8BZhh4y3FICpqUrY9aUr2Cc6GT4mOcAEsYZN9EU8YVYZFP5QGsr+ZBAkFreWOKTTmWGd7EaxN3R2hKGrEG1hGYvg0gGUu+wcR7JXiMpEtjSgjgj9WGHVE2HiFhJDZEK9B1HLIMlClxVIRF8L/drD5fJA77oA/mSU+uQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fw-web.de; spf=pass smtp.mailfrom=fw-web.de; dkim=pass (1024-bit key) header.d=mailerdienst.de header.i=@mailerdienst.de header.b=R+fk4j5F; arc=none smtp.client-ip=134.0.28.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fw-web.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fw-web.de
+	s=arc-20240116; t=1728218269; c=relaxed/simple;
+	bh=Fd+4pPjg8zZxyNMkxDrxwDPUzAaVg1js2zv7hz1NOZA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=TiUymw02EEqMDtKk48J6EBDbBmksxegRcF6WyA+lHuPtsoQPB6x+8oaI1yPukVteq7jgCchEv9qg/ExTW4hAfMhyMcC8Jbr3IilWNyi2e6xBbi/fO6VzSi7+vPAhvL+kYftRE5dm2JwLEj//UdYWX3Z2C8JGcnNfrlEiTEuIAcs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fKx73EZg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mailerdienst.de header.i=@mailerdienst.de header.b="R+fk4j5F"
-Received: from mxbox3.masterlogin.de (unknown [192.168.10.78])
-	by mxout2.routing.net (Postfix) with ESMTP id 984D15FAA5;
-	Sun,  6 Oct 2024 10:22:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-	s=20200217; t=1728210122;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=iWad4mvVdtgpAklA0NUqnK9RzmPaXG2g9lgsXi99zSI=;
-	b=R+fk4j5Fab1v3c/n9MksdNTtBgE4MO9zzKCsS4GFJcR1Gkbos9OuyWsg2aDT0fV6j03baP
-	5ZWoq13gkE0R0GV2hp9yjhA3K7vEDaHV364/A7RqUKLp/ZBcQjv7rEbZKo3eeMv9n9wO8Z
-	HXqGM8zsVZ5eG1tVjZGHiK1b8MW+w9Y=
-Received: from frank-u24.. (fttx-pool-217.61.153.101.bambit.de [217.61.153.101])
-	by mxbox3.masterlogin.de (Postfix) with ESMTPSA id C2154360092;
-	Sun,  6 Oct 2024 10:22:01 +0000 (UTC)
-From: Frank Wunderlich <linux@fw-web.de>
-To: Chaotian Jing <chaotian.jing@mediatek.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: Frank Wunderlich <frank-w@public-files.de>,
-	linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mediatek@lists.infradead.org,
-	daniel@makrotopia.org,
-	linux-gpio@vger.kernel.org,
-	john@phrozen.org,
-	eladwf@gmail.com,
-	ansuelsmth@gmail.com
-Subject: [PATCH v1 2/2] mmc: mtk-sd: add support for mt7988
-Date: Sun,  6 Oct 2024 12:21:49 +0200
-Message-ID: <20241006102154.17087-3-linux@fw-web.de>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20241006102154.17087-1-linux@fw-web.de>
-References: <20241006102154.17087-1-linux@fw-web.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fKx73EZg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8AD2FC4CEC5;
+	Sun,  6 Oct 2024 12:37:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728218268;
+	bh=Fd+4pPjg8zZxyNMkxDrxwDPUzAaVg1js2zv7hz1NOZA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=fKx73EZgQIgXeNWoPgGTF5DsxrGqTVsCgnLO6OLa77UQaWfb6+nbL2YZH2S3D8Zp9
+	 XIU2cbub5F9eXwyr/vu935kEnwyLSEq3lYA66vaCGATBJLfr9r1JiI6+fV8XERI4Zl
+	 yK2PhoB0qcUM4P08RiEjCWElzfeKR4JkM/va9OaHusfrKpRDF/Agfu/1APFeXR7nRb
+	 MNSGiMasW/bg0BVK2owtmxqTicxBNZ5vN5a/ro/he+ELlc8RdVDTtdb3O0MkHR23OH
+	 Vac2PdLPOjVVVTWMVFbVpJRi0ZRqrZsjhSLwA+0k8pHojq+jAMJtkqwycf0yvcEFW0
+	 2UXK3RkiekJWw==
+Date: Sun, 6 Oct 2024 14:37:43 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Catalin Popescu <catalin.popescu@leica-geosystems.com>
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org, 
+	conor+dt@kernel.org, p.zabel@pengutronix.de, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, m.felsch@pengutronix.de, 
+	bsp-development.geo@leica-geosystems.com
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: mmc-pwrseq-simple: add support for
+ reset control
+Message-ID: <kpg2cwn7eq7wclpmcudwmygqzzn7s5fb4i7c2dbjlks5bttghs@aekop3ugv26s>
+References: <20241004120740.2887776-1-catalin.popescu@leica-geosystems.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Mail-ID: 8f3b2bb3-02d2-4a96-891f-7c5b1e80bb8c
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20241004120740.2887776-1-catalin.popescu@leica-geosystems.com>
 
-From: Frank Wunderlich <frank-w@public-files.de>
+On Fri, Oct 04, 2024 at 02:07:39PM +0200, Catalin Popescu wrote:
+> Add compatible value "mmc-pwrseq-simple-reset" to support reset control
+> instead of gpios. Reset controls being refcounted, they allow to use
+> shared resets or gpios across drivers. Support of reset control is
+> limited to one single reset control.
 
-Add support for mmc on MT7988 SoC.
+Driver support is not that relevant to the bindings.
 
-Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
----
- drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+> 
+> Signed-off-by: Catalin Popescu <catalin.popescu@leica-geosystems.com>
+> ---
+>  .../bindings/mmc/mmc-pwrseq-simple.yaml       | 21 +++++++++++++++++--
+>  1 file changed, 19 insertions(+), 2 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> index 00feaafc1063..da218260af01 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+> @@ -16,12 +16,13 @@ description:
+>  
+>  properties:
+>    compatible:
+> -    const: mmc-pwrseq-simple
+> +    enum:
+> +      - mmc-pwrseq-simple
+> +      - mmc-pwrseq-simple-reset
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 89018b6c97b9..6d5afe51a61d 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -571,6 +571,19 @@ static const struct mtk_mmc_compatible mt7986_compat = {
- 	.support_64g = true,
- };
- 
-+static const struct mtk_mmc_compatible mt7988_compat = {
-+	.clk_div_bits = 12,
-+	.recheck_sdio_irq = true,
-+	.hs400_tune = false,
-+	.pad_tune_reg = MSDC_PAD_TUNE0,
-+	.async_fifo = true,
-+	.data_tune = true,
-+	.busy_check = true,
-+	.stop_clk_fix = true,
-+	.enhance_rx = true,
-+	.support_64g = true,
-+};
-+
- static const struct mtk_mmc_compatible mt8135_compat = {
- 	.clk_div_bits = 8,
- 	.recheck_sdio_irq = true,
-@@ -629,6 +642,7 @@ static const struct of_device_id msdc_of_ids[] = {
- 	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
- 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
- 	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
-+	{ .compatible = "mediatek,mt7988-mmc", .data = &mt7988_compat},
- 	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
- 	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
- 	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
--- 
-2.43.0
+Nope, that's the same device.
+
+>  
+>    reset-gpios:
+>      minItems: 1
+>      # Put some limit to avoid false warnings
+> -    maxItems: 32
+>      description:
+>        contains a list of GPIO specifiers. The reset GPIOs are asserted
+>        at initialization and prior we start the power up procedure of the card.
+> @@ -50,6 +51,22 @@ properties:
+>  required:
+>    - compatible
+>  
+> +allOf:
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - mmc-pwrseq-simple-reset
+> +    then:
+> +      properties:
+> +        reset-gpios:
+> +          maxItems: 1
+> +    else:
+> +      properties:
+> +        reset-gpios:
+> +          maxItems: 32
+
+So basically they are the same... Sorry, this all patch makes little
+sense to me. You are not doing here much. It's exactly the same device
+which you now describe in two ways (first no-go) but the two ways are
+actually the same (second no-go).
+
+Best regards,
+Krzysztof
 
