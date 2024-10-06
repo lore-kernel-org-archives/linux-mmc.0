@@ -1,101 +1,105 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D183216D4E8;
-	Sun,  6 Oct 2024 12:47:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04ADFC125;
+	Sun,  6 Oct 2024 13:55:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728218856; cv=none; b=ueSjC3ImGZP1bI2ASFV3zRnGhruEYDF8BG7TdCh8PpSfo3Z+eAIvIt3f0ajKXSb4OJRSN4EjyO38GixeltTy3gBNDybYiIEyiXUT4FQDkXmOJwpeExco1eBFCx0CFt9Li/b/2B87AZ1tjJ2qeQyIN1yTMJnPksXEwslmdnEdmEU=
+	t=1728222940; cv=none; b=rUjA/llaogscud9AD+P580Lih3GZE4DGx4NXHVG6ZVrEtcwk58Aqv65giuBcB0lIjRnny9UYGIZgLguWWoVe+zAZhyy+lM+uzB7KKNdVIfrLbaXF4D2rh3tSi2EX6u8gEKl3JMs8DkAF2u9rNBQ0NzxWVbyyWxzmqrWoai45mLs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728218856; c=relaxed/simple;
-	bh=AvaqHiW6YBwhtBJJbJKHvvdReZ767Nx9pY7bI7eLXLY=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ICZh3T8ynC29fNf8GhFhc94IXiL+8dqZeQ/ul6W0x6pLBwGna2J4koZVMWtZTNiTr3gkVQz+oCEMkXLw773XKrpGoeq9dXoyaE62xGtILoyupyxESGY4r4cDBFUW6zqACvgOGCfIvkXOvmMi+MC3BEsBktd4A8g8nVUoQ82Gun8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=g3fe97gF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728222940; c=relaxed/simple;
+	bh=HAdrsEY6YlkWBS7ysRiXV9/WdgVSWOyATYuYjcqzqU0=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=gJXAvU2hM71S+SFRv/lsn7RXQt+APagXKx9vop7h+MTMPFgP+Tgme+02qae52E3olTHp4de0NQWD3ck1OvF880xP6Qf6YFhSaMDSQ8GK5oJdb4oE+5SU4MEq+x57bj3rqXPDDpAP7g+77NPAnr79poXrLSI+yKq8MZGGw8TuwvU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=cj9Hztmy; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g3fe97gF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id AF33AC4CEC5;
-	Sun,  6 Oct 2024 12:47:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728218856;
-	bh=AvaqHiW6YBwhtBJJbJKHvvdReZ767Nx9pY7bI7eLXLY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=g3fe97gFneWXirJqu9oC4yIjBak7BMOaI2EGU0tGl5B00h9IcuR4TUUwGmyhL9CQL
-	 eCHAQVT+AtdTOnOw8zCDpWTG4SD/T0HtGYO3qROCo1rdPnWlEfZTqh0I9Yr2MszMxh
-	 6EEeDETov8pr9JhkXfZRkMZWwBUDTEIzarRWW35pEhLC5CAerYhjwDGgNQM8y93I2B
-	 2zUtAlxy9a8SgkPm7wAO9bF6vnrIvWqpseH/LVR1HCobkBMSag/+MntlVrQkSXWq9l
-	 IKMx4JD54Jqvco0dYT6X3gVDW7TfhqT3T6QIEQOVlxDYPtC2l9MS+5QZRoZwWYObNX
-	 RiWu/3upU2a0w==
-Date: Sun, 6 Oct 2024 14:47:33 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Frank Wunderlich <linux@fw-web.de>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Wenbin Mei <wenbin.mei@mediatek.com>, 
-	Frank Wunderlich <frank-w@public-files.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-mediatek@lists.infradead.org, daniel@makrotopia.org, linux-gpio@vger.kernel.org, 
-	john@phrozen.org, eladwf@gmail.com, ansuelsmth@gmail.com
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
-Message-ID: <4pmhzc5sf2c7dww3tihyqq5coco6u5nx7xvtqami7u55442gij@mqvyvqrpa6ft>
-References: <20241006102154.17087-1-linux@fw-web.de>
- <20241006102154.17087-2-linux@fw-web.de>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="cj9Hztmy"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 496BGx6r019907;
+	Sun, 6 Oct 2024 13:55:35 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=jfCNoTHOpxQs
+	dhAMW7Ej4NZ+kmH7a26ExQ8nsR4Za8g=; b=cj9Hztmy4nvLQXXNULVfjSrtDR2m
+	oSu7LAddoqDDus8omAQCpqHUI4fXN/OdIuezs6qTqJgymOasQeqe8izU4e6mxNDz
+	55UpPywbJSUNXvdnGOic9ALRbKDTyZd1EzbfG9U9VHcuBBlDk0xioyIX/GNj+oQm
+	BUKXvJVvyYt6gI6w6P+CghaF78vnlmaQKNDLPllOZNvihdP5UZV3MM1kp63dq3aL
+	lwpTMBYCeuOeA+CBB4oM1V8Gmw4pchZblVime0E7CPNncbrlyng96vgezuSOF/am
+	bniUgjcuCavoANGOWzcwKBPdOkT5s3IaCqNs+36MG/A7w964kYBMpfcQ0g==
+Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 422xr5j2cu-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Sun, 06 Oct 2024 13:55:35 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 496DtV9t015203;
+	Sun, 6 Oct 2024 13:55:31 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 422xhkgnns-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+	Sun, 06 Oct 2024 13:55:31 +0000
+Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 496DtV6F015188;
+	Sun, 6 Oct 2024 13:55:31 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-spuppala-hyd.qualcomm.com [10.213.108.54])
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 496DtVJM015184;
+	Sun, 06 Oct 2024 13:55:31 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 4137148)
+	id 9AB4E600B71; Sun,  6 Oct 2024 19:25:30 +0530 (+0530)
+From: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_neersoni@quicinc.com,
+        quic_gaurkash@quicinc.com, quic_spuppala@quicinc.com
+Subject: [PATCH RFC 0/2] Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
+Date: Sun,  6 Oct 2024 19:25:28 +0530
+Message-Id: <20241006135530.17363-1-quic_spuppala@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 6ANqrEGjwaNJuvmo9WyiiqY5Y8M8mgeA
+X-Proofpoint-ORIG-GUID: 6ANqrEGjwaNJuvmo9WyiiqY5Y8M8mgeA
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 suspectscore=0
+ clxscore=1011 mlxlogscore=531 priorityscore=1501 impostorscore=0
+ adultscore=0 mlxscore=0 phishscore=0 malwarescore=0 lowpriorityscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2410060101
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20241006102154.17087-2-linux@fw-web.de>
 
-On Sun, Oct 06, 2024 at 12:21:48PM +0200, Frank Wunderlich wrote:
-> From: Frank Wunderlich <frank-w@public-files.de>
-> 
-> Add binding definitions for mmc on MT7988 SoC.
-> 
-> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
->  1 file changed, 24 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index c532ec92d2d9..db7d1c570aea 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -21,6 +21,7 @@ properties:
->            - mediatek,mt7620-mmc
->            - mediatek,mt7622-mmc
->            - mediatek,mt7986-mmc
-> +          - mediatek,mt7988-mmc
->            - mediatek,mt8135-mmc
->            - mediatek,mt8173-mmc
->            - mediatek,mt8183-mmc
-> @@ -263,6 +264,29 @@ allOf:
->              - const: bus_clk
->              - const: sys_cg
->  
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            enum:
-> +              - mediatek,mt7988-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +          minItems: 3
-> +          items:
-> +            - description: source clock
-> +            - description: HCLK which used for host
-> +            - description: Advanced eXtensible Interface
-> +            - description: Advanced High-performance Bus clock
+Crypto reprogram all keys is called for each MMC runtime
+suspend/resume in current upstream design. If this is implemented
+as a non-interruptible call to TEE for security, the cpu core is
+blocked for execution while this call executes although the crypto
+engine already has the keys. For example, glitches in audio/video
+streaming applications have been observed due to this. Add mmc_host_ops
+hook to control reprogramming keys to crypto engine for socs which dont
+require this feature.
 
-Why ahb is optional?
+This patch addresses the following:
+- Adds vendor hook to control reprogram all keys.
+- Avoids reprogram of keys for Qualcomm SOCs only.
 
-Best regards,
-Krzysztof
+Seshu Madhavi Puppala (2):
+  mmc: core: Add vendor hook to control reprogram keys to Crypto Engine
+  mmc: host: sdhci-msm: Avoid reprogram keys for QCOM socs
+
+ drivers/mmc/core/crypto.c    | 8 +++++---
+ drivers/mmc/host/sdhci-msm.c | 6 ++++++
+ drivers/mmc/host/sdhci.c     | 6 ++++++
+ include/linux/mmc/host.h     | 7 +++++++
+ 4 files changed, 24 insertions(+), 3 deletions(-)
+
+-- 
+2.17.1
 
