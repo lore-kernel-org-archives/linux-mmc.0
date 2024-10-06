@@ -1,50 +1,51 @@
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04ADFC125;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 04ABFB67F;
 	Sun,  6 Oct 2024 13:55:38 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728222940; cv=none; b=rUjA/llaogscud9AD+P580Lih3GZE4DGx4NXHVG6ZVrEtcwk58Aqv65giuBcB0lIjRnny9UYGIZgLguWWoVe+zAZhyy+lM+uzB7KKNdVIfrLbaXF4D2rh3tSi2EX6u8gEKl3JMs8DkAF2u9rNBQ0NzxWVbyyWxzmqrWoai45mLs=
+	t=1728222941; cv=none; b=F5loLYkEw+VJF8LUIoKUiUnKi6+oF0+wHjbBjy13QUVWXO0GWCzzbK3kTazXlIZjDsQcjP1F2Q2Z1R5Ko+9vkGNacWDA7XI8LcAddCyHyU93qSiEyiM/SeAX6S0DISFsuY0DKeGFEuYsQVDV2cwBIdtTSiszDHHnFMChu2a2MsU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728222940; c=relaxed/simple;
-	bh=HAdrsEY6YlkWBS7ysRiXV9/WdgVSWOyATYuYjcqzqU0=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=gJXAvU2hM71S+SFRv/lsn7RXQt+APagXKx9vop7h+MTMPFgP+Tgme+02qae52E3olTHp4de0NQWD3ck1OvF880xP6Qf6YFhSaMDSQ8GK5oJdb4oE+5SU4MEq+x57bj3rqXPDDpAP7g+77NPAnr79poXrLSI+yKq8MZGGw8TuwvU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=cj9Hztmy; arc=none smtp.client-ip=205.220.168.131
+	s=arc-20240116; t=1728222941; c=relaxed/simple;
+	bh=MYHJf4lj3n+HDqcWGj7t3rIwqbbwt9t4VigKu2pCda0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=PNwpUfb1O1JXGE2/zYha4/COyRe1qwtpulelSQMj1MlJCv2bdcaoStaVmUqZ3RFZ0fYc/a2XrM94Ms7uxz1xvO/RVoO65eswYffRV2WOsH38wi2aiYpve15IlrPAWIRuVTQtZyQSbyHqCKRWy8/jmRklupmChZ6iJ+dFkZl70t8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=iLgR1s2e; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="cj9Hztmy"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 496BGx6r019907;
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="iLgR1s2e"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 496DLi0E007514;
 	Sun, 6 Oct 2024 13:55:35 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=jfCNoTHOpxQs
-	dhAMW7Ej4NZ+kmH7a26ExQ8nsR4Za8g=; b=cj9Hztmy4nvLQXXNULVfjSrtDR2m
-	oSu7LAddoqDDus8omAQCpqHUI4fXN/OdIuezs6qTqJgymOasQeqe8izU4e6mxNDz
-	55UpPywbJSUNXvdnGOic9ALRbKDTyZd1EzbfG9U9VHcuBBlDk0xioyIX/GNj+oQm
-	BUKXvJVvyYt6gI6w6P+CghaF78vnlmaQKNDLPllOZNvihdP5UZV3MM1kp63dq3aL
-	lwpTMBYCeuOeA+CBB4oM1V8Gmw4pchZblVime0E7CPNncbrlyng96vgezuSOF/am
-	bniUgjcuCavoANGOWzcwKBPdOkT5s3IaCqNs+36MG/A7w964kYBMpfcQ0g==
+	cc:date:from:in-reply-to:message-id:references:subject:to; s=
+	qcppdkim1; bh=GM0WgxExW4LzLiSDR7xysZkDOr6U+InUUJOFL+PRPO8=; b=iL
+	gR1s2emduvV0hZEsSPr0+9A9OSHnEcmsLtYv8XNzxBU7vB/D2/cg1q9fE3HMONzm
+	bQg33UmNFgkCLYBlNFfIDh4jsDg3iw4LxzHJBuxR+GYDyl/vvVfQmkqV9g9o5V0D
+	IusIFud/m82o8r0j896g5RSmNgczHxXbUJPDYMzGlXqDZx3o9GW5X7FjVr0LfjXD
+	DjgEmdzf3YIMYjCb/IoniBDIGBZERSlCzqkGuiyyTspI687gpfISggA1tijxXXrw
+	YPNsCmtO4l1ko2C/fyHa+g/vOBvz9ZLrSqffm1hfnhrt4uB77LL2t3GZnYD9DlS7
+	gWvWRQ0XofTXKW8IgQSg==
 Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 422xr5j2cu-1
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 422xv8a1h6-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
 	Sun, 06 Oct 2024 13:55:35 +0000 (GMT)
 Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 496DtV9t015203;
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 496DtV2k015204;
 	Sun, 6 Oct 2024 13:55:31 GMT
 Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 422xhkgnns-1
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 422xhkgnnt-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
 	Sun, 06 Oct 2024 13:55:31 +0000
 Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 496DtV6F015188;
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 496DtVrP015189;
 	Sun, 6 Oct 2024 13:55:31 GMT
 Received: from hu-maiyas-hyd.qualcomm.com (hu-spuppala-hyd.qualcomm.com [10.213.108.54])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 496DtVJM015184;
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 496DtVL2015185;
 	Sun, 06 Oct 2024 13:55:31 +0000
 Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 4137148)
-	id 9AB4E600B71; Sun,  6 Oct 2024 19:25:30 +0530 (+0530)
+	id 9E59B6017A3; Sun,  6 Oct 2024 19:25:30 +0530 (+0530)
 From: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>
@@ -53,53 +54,67 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
         quic_bhaskarv@quicinc.com, quic_neersoni@quicinc.com,
         quic_gaurkash@quicinc.com, quic_spuppala@quicinc.com
-Subject: [PATCH RFC 0/2] Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
-Date: Sun,  6 Oct 2024 19:25:28 +0530
-Message-Id: <20241006135530.17363-1-quic_spuppala@quicinc.com>
+Subject: [PATCH RFC v3 2/2] mmc: host: sdhci-msm: Avoid reprogram keys for QCOM socs
+Date: Sun,  6 Oct 2024 19:25:30 +0530
+Message-Id: <20241006135530.17363-3-quic_spuppala@quicinc.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20241006135530.17363-1-quic_spuppala@quicinc.com>
+References: <20241006135530.17363-1-quic_spuppala@quicinc.com>
 X-QCInternal: smtphost
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 6ANqrEGjwaNJuvmo9WyiiqY5Y8M8mgeA
-X-Proofpoint-ORIG-GUID: 6ANqrEGjwaNJuvmo9WyiiqY5Y8M8mgeA
+X-Proofpoint-ORIG-GUID: 3O8pDHRBymviQolMkFDSabsMaYmMo8b7
+X-Proofpoint-GUID: 3O8pDHRBymviQolMkFDSabsMaYmMo8b7
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 suspectscore=0
- clxscore=1011 mlxlogscore=531 priorityscore=1501 impostorscore=0
- adultscore=0 mlxscore=0 phishscore=0 malwarescore=0 lowpriorityscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410060101
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501 mlxscore=0
+ impostorscore=0 phishscore=0 malwarescore=0 suspectscore=0 bulkscore=0
+ spamscore=0 mlxlogscore=999 adultscore=0 clxscore=1015 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2409260000
+ definitions=main-2410060101
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-Crypto reprogram all keys is called for each MMC runtime
-suspend/resume in current upstream design. If this is implemented
-as a non-interruptible call to TEE for security, the cpu core is
-blocked for execution while this call executes although the crypto
-engine already has the keys. For example, glitches in audio/video
-streaming applications have been observed due to this. Add mmc_host_ops
-hook to control reprogramming keys to crypto engine for socs which dont
-require this feature.
+Implement Qualcomm hook to avoid reprogram of all
+keys to Inline Crypto Engine on runtime suspend resume
+of MMC since keys are not lost for QCOM socs.
 
-This patch addresses the following:
-- Adds vendor hook to control reprogram all keys.
-- Avoids reprogram of keys for Qualcomm SOCs only.
-
-Seshu Madhavi Puppala (2):
-  mmc: core: Add vendor hook to control reprogram keys to Crypto Engine
-  mmc: host: sdhci-msm: Avoid reprogram keys for QCOM socs
-
- drivers/mmc/core/crypto.c    | 8 +++++---
+Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+---
  drivers/mmc/host/sdhci-msm.c | 6 ++++++
- drivers/mmc/host/sdhci.c     | 6 ++++++
- include/linux/mmc/host.h     | 7 +++++++
- 4 files changed, 24 insertions(+), 3 deletions(-)
+ 1 file changed, 6 insertions(+)
 
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e113b99a3eab..427e0126459a 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1183,6 +1183,11 @@ static void sdhci_msm_set_cdr(struct sdhci_host *host, bool enable)
+ 	}
+ }
+ 
++static bool sdhci_msm_avoid_reprogram_allkeys(void)
++{
++	return true;
++}
++
+ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -2641,6 +2646,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	host->mmc_host_ops.start_signal_voltage_switch =
+ 		sdhci_msm_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_msm_execute_tuning;
++	host->mmc_host_ops.avoid_reprogram_allkeys = sdhci_msm_avoid_reprogram_allkeys;
+ 	if (of_property_read_bool(node, "supports-cqe"))
+ 		ret = sdhci_msm_cqe_add_host(host, pdev);
+ 	else
 -- 
 2.17.1
 
