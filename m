@@ -1,93 +1,106 @@
-Received: from pidgin.makrotopia.org (pidgin.makrotopia.org [185.142.180.65])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f47.google.com (mail-wr1-f47.google.com [209.85.221.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AABA31D1F40;
-	Mon,  7 Oct 2024 11:36:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.142.180.65
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01E9E18BC10
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 11:45:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728300979; cv=none; b=vCQL7mvMgnpedHAVVamKZmdXnki/U0ltKTEzRXlp6FVNfZ9Y5IDCuKFls7NzkrsbfxwJZinCX7yvj3T+IQ+gGtg7TgjGrCZAW+hu2UewIJpsMUC9AVNNlb/CDSXqVS7ArUfTlmV5B/+CKs1xyTYy4TSEtCeR0SoH4gjiYhxrDaA=
+	t=1728301559; cv=none; b=N00+jljaygTJjh/6l6e4hazy39jqHtl4/qO0l16hVFRhP1EtmgOZh+DJGXJuo8JEjxBPNCM0kxHnMiZkjfPudPsKmtJT7H0QeMA3b9Ig2Dc1ugBlmS9pevV+CWYgjTwIF2LiGPYom/5Ybxql5ICL/Su0EBEwf+ksBMvTRlp6dXU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728300979; c=relaxed/simple;
-	bh=fJESMTPs+fQRs6bk8iVWf9SUl6L+IiJU7ufzITmJIQI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BnLGugwAHFMKENwUUWwQHIm+nWmg5M6fRpmytaG8qR8rDfILmuWxgz4AuzlEu8Dg5eh/LIl4j4aAMkxM/Fxb5JpaehcumMvtZlYRY15BCdwyukc2wuJm3YLNwbADhDGefnfWUhWLwBN2Qg5wX6dDKLDR5CZk1qyqEJs7IBctStg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org; spf=pass smtp.mailfrom=makrotopia.org; arc=none smtp.client-ip=185.142.180.65
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=makrotopia.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=makrotopia.org
-Received: from local
-	by pidgin.makrotopia.org with esmtpsa (TLS1.3:TLS_AES_256_GCM_SHA384:256)
-	 (Exim 4.98)
-	(envelope-from <daniel@makrotopia.org>)
-	id 1sxm26-000000002Mf-2WkX;
-	Mon, 07 Oct 2024 11:36:10 +0000
-Date: Mon, 7 Oct 2024 12:36:07 +0100
-From: Daniel Golle <daniel@makrotopia.org>
-To: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Cc: Frank Wunderlich <linux@fw-web.de>,
-	Chaotian Jing <chaotian.jing@mediatek.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	Wenbin Mei <wenbin.mei@mediatek.com>,
-	Frank Wunderlich <frank-w@public-files.de>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-mediatek@lists.infradead.org, john@phrozen.org,
-	eladwf@gmail.com, ansuelsmth@gmail.com
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
-Message-ID: <ZwPHp9l3Fx7f2lI4@makrotopia.org>
-References: <20241006153447.41377-1-linux@fw-web.de>
- <20241006153447.41377-2-linux@fw-web.de>
- <b41c51c4-775c-49ca-84fd-1137b61f42d5@collabora.com>
+	s=arc-20240116; t=1728301559; c=relaxed/simple;
+	bh=jESfmue0np+sznfxFUnf226R9lUQNlDJcp5q8IXgN54=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=LA/YawRiNUIbJiZZoJ7A8CkptJVHvr+dFKWK8UA5XNqqMX6sJZ61jZQfljImQHd+/at9cyuEZvDK92I1aq43BnbaPsKiE8S5PRo23O6JtzDngvdjG9A9P6zpz+29rhJiHQ3I4F/ZtHShctO5TmrUAqouvsv+87gaSEJyyn2U3og=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=3HRROZGG; arc=none smtp.client-ip=209.85.221.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="3HRROZGG"
+Received: by mail-wr1-f47.google.com with SMTP id ffacd0b85a97d-37cfff59d04so3420251f8f.1
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Oct 2024 04:45:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1728301555; x=1728906355; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=HnfRZrs5rd9jTocE6z1mGyd4iAKiwxMzAQadUPnEw/M=;
+        b=3HRROZGGyl9oqHtYebGZ1OK7hDlsCYz+YCJWiMD3KAoxaBFdRpA4IxCvnCJmxIjPwN
+         UGWXtufAHVj4u6hGSlN4agpgX2QC1SfXN1B0gR3b6Z6Cj6RMUr2Hbe8mVEZM10A5DMZX
+         7JOqQG2NPaRRFpFHX0Xnqs2H0FS2QwDE2OV2PpEBD1vJOG3OacEXZ+cKP8QaDZs3okvm
+         y1aouZqH42EDdBzstF4aPIKeKQqxHnKbjpufJfVPK1z6JAZjkrG+RIhgaWvPGBFHKY61
+         8dj/tyR+baalJ60XwjyyoCsFT9f9OKlHGuQcdlbrXLZWpSZ71KDcVkHsfrnH0I8mRxaP
+         GLsA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728301555; x=1728906355;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HnfRZrs5rd9jTocE6z1mGyd4iAKiwxMzAQadUPnEw/M=;
+        b=XYM239Rl9bNq9GSyrzMl4HH6R/FhY/bN1XyjLFKdFsTDNSA2Ymxnu+pioIrPSKCNet
+         QDCmIY1bIcPxbyc3QkkBL9KGEa2+TtcMC6SPXcIGI0T+SnsVoaiKGDb2siVxrjVZBfP1
+         3rnN7YnrivKN5w1m5HDyxb5z9rBkXK0jTZaTgRQ1u37zo8Ja8heuVW420mosQPbziBpw
+         adoFFNcMtrQD/6EujrSwPmz85r7Llgd8+rVmSkEs3wAnpipuGf+zLx9RAW7h1reILXp1
+         OjaMGc1CEpVt+YU9wx1wuCjHpbL9DuV3uDQz53Qlyv4VJcFBwYLBbcOp5OS665P9c/SA
+         Y3bg==
+X-Gm-Message-State: AOJu0Yw2+F9+tsN6h6nm3dWpN9fsvKXn6+gdPqvW2Gi2gGiNZcM01xg/
+	Gl3kCLX85xlvSFVqYGIdsE4XK6zuTvb58wtUeoyUOe8fsL899cqJMEZFPx6MkgI=
+X-Google-Smtp-Source: AGHT+IHv2HDJzBlWcJX+EM1VUKdDajOjn74SvjnVr6X2+w9ayFZJ8r4VM0n4+22m48JJDuduijUscg==
+X-Received: by 2002:adf:ce05:0:b0:374:c1d7:4ef9 with SMTP id ffacd0b85a97d-37d0f70c86cmr5784457f8f.26.1728301555040;
+        Mon, 07 Oct 2024 04:45:55 -0700 (PDT)
+Received: from brgl-uxlite.home ([2a01:cb1d:dc:7e00:6100:637:cbe9:f3bc])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-37d169734a8sm5562454f8f.101.2024.10.07.04.45.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Oct 2024 04:45:54 -0700 (PDT)
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Subject: [PATCH] mmc: mmc_spi: fix snprintf() output buffer size
+Date: Mon,  7 Oct 2024 13:45:49 +0200
+Message-ID: <20241007114549.51213-1-brgl@bgdev.pl>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b41c51c4-775c-49ca-84fd-1137b61f42d5@collabora.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-On Mon, Oct 07, 2024 at 10:00:49AM +0200, AngeloGioacchino Del Regno wrote:
-> Il 06/10/24 17:34, Frank Wunderlich ha scritto:
-> > From: Frank Wunderlich <frank-w@public-files.de>
-> > 
-> > Add binding definitions for mmc on MT7988 SoC.
-> > 
-> > Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
-> > ---
-> > v2:
-> > - fixed minItems to 4
-> > ---
-> >   .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
-> >   1 file changed, 24 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > index c532ec92d2d9..7380f72ea189 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > @@ -21,6 +21,7 @@ properties:
-> >             - mediatek,mt7620-mmc
-> >             - mediatek,mt7622-mmc
-> >             - mediatek,mt7986-mmc
-> > +          - mediatek,mt7988-mmc
-> >             - mediatek,mt8135-mmc
-> >             - mediatek,mt8173-mmc
-> >             - mediatek,mt8183-mmc
-> > @@ -263,6 +264,29 @@ allOf:
-> >               - const: bus_clk
-> >               - const: sys_cg
-> > +  - if:
-> > +      properties:
-> > +        compatible:
-> > +          contains:
-> > +            enum:
-> > +              - mediatek,mt7988-mmc
-> 
-> Are you really sure that you can't reuse the MT7986 compatible?
+From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 
-In OpenWrt we are doing exactly that. The MMC controller of
-MT7988 (and MT7981) seems 100% the same as in MT7986 and hence
-works just fine with the mediatek,mt7986-mmc compatible.
+GCC 13 complains about the truncated output of snprintf():
+
+drivers/mmc/host/mmc_spi.c: In function ‘mmc_spi_response_get’:
+drivers/mmc/host/mmc_spi.c:227:64: error: ‘snprintf’ output may be truncated before the last format character [-Werror=format-truncation=]
+  227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+      |                                                                ^
+drivers/mmc/host/mmc_spi.c:227:9: note: ‘snprintf’ output between 26 and 43 bytes into a destination of size 32
+  227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                 cmd->opcode, maptype(cmd));
+
+Increase the size of the target buffer.
+
+Fixes: 15a0580ced08 ("mmc_spi host driver")
+Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+---
+ drivers/mmc/host/mmc_spi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 8fee7052f2ef..fa1d1a1b3142 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -222,7 +222,7 @@ static int mmc_spi_response_get(struct mmc_spi_host *host,
+ 	u8 	leftover = 0;
+ 	unsigned short rotator;
+ 	int 	i;
+-	char	tag[32];
++	char	tag[43];
+ 
+ 	snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+ 		cmd->opcode, maptype(cmd));
+-- 
+2.43.0
+
