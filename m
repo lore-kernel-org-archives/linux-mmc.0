@@ -1,40 +1,33 @@
-Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43D181B3F1F;
-	Mon,  7 Oct 2024 10:15:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 629A12AD05;
+	Mon,  7 Oct 2024 11:13:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728296103; cv=none; b=fNjeKgDg22rqZRB+LHewZOdIe8YClfsQbbdYHxNU570XJr6Cl+p0a88sHisM63de20mjhN48QsxjKKxSYjzEKPYfLFeSTKyofsrXBkYdVfBYfujAPzNe3sOO47Dg3YC2vEJvnxtsJcLxvRcv7k7bz9GesMvPKCkhxGNr7Uj4L0A=
+	t=1728299602; cv=none; b=UfHd0Of623SbpJBlnwEqaWzzAGHzezIImwzIp0mi1/5McQEjPYhetmAaKoJ47Z0+ZUBsn6P5aATiP/Ospmp0WhxByE08A3jO9vd6OOuHOqqM/gI+gB81TVZHxjGaz4CE5il+Av92Hnnmut3JuErCusTd8QVrbfu/3+rJyJTg7oA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728296103; c=relaxed/simple;
-	bh=yuxB0ScFBvA5iGHvK/eJWsI8vouvpQMIaMlt77HeU8E=;
+	s=arc-20240116; t=1728299602; c=relaxed/simple;
+	bh=lqYKdMgL/af+hqxZMZr0dRdWMk1wm+DIhNwXIm0/hnA=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Cf9CnbeRLD9pvxosNqQN9Cbp+vhR07uU7XPdy/X7m/dcNsGJsId4Zt3X9Cw1rYXNY6Jz5XBCOYQYlg/UIXDfxT8+ZnRCKUNnCLJ2z7TTNFfJMwpIHnIpaVEqQkqVsrrYAEdgc/Lv0SQdAx0GHKG1BADS29DaDV0U5tovN5DbzvU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=Iijidlpu; arc=none smtp.client-ip=148.251.105.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	 In-Reply-To:Content-Type; b=njOSVTvphP8t/3S48NpXnryhYAk4GKrqIjW1ZyVGNvpNA3ABje0GpkeWDsohjIWFDLCr5js1NRaH30XQKKhvAJLJuqIE5mDO0S1lhZS+uZFtbi2rALDe/wAfDTjKCCwOAzu1E+9vNhVBXSRKYgy7hgBQEsEV45SoTgcCYoq4wk8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P+SotpmY; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="Iijidlpu"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1728296099;
-	bh=yuxB0ScFBvA5iGHvK/eJWsI8vouvpQMIaMlt77HeU8E=;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P+SotpmY"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4457C4CEC6;
+	Mon,  7 Oct 2024 11:13:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1728299602;
+	bh=lqYKdMgL/af+hqxZMZr0dRdWMk1wm+DIhNwXIm0/hnA=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Iijidlpu6bar59WUE05h2ibAszTqyDjP+Eun50NWrm0Ej2h+tAh1oj+rS3WRAqBJ4
-	 3PFdNKluA6XFdGiJgr9WOZt0wJZoKn9nrp95lOfCE8AZLBD8LkQYu7SVh4zLM3DXCx
-	 d44y4qR+ptKlKGOLd1nLhvLyHMJLQZYhSVnQ+fNxu6m6v3dqrHwQWPquYLNpX0EgOq
-	 n/x+DPZ7wE/KlXEM27+YwIiSsGxX3e6/QSgbXb/WQaEMLPchYISMRYi9yqO+xJQUdn
-	 R3rqGIJIS/iUM4wilOWhuIvVFeJZA2AcVrl1a1BlIji1HJbKRGSpIGT63rEbRuF+OU
-	 YqLxdzdWafxfQ==
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id B0C1717E1201;
-	Mon,  7 Oct 2024 12:14:58 +0200 (CEST)
-Message-ID: <272309da-24ff-49cd-9e4b-287054218cbc@collabora.com>
-Date: Mon, 7 Oct 2024 12:14:58 +0200
+	b=P+SotpmY/5NmrHLUDYcjkuEZrdK1V5uqxA+bOVR/Y8JpapNCwkKHacHPbyP0DZpIo
+	 /JWzTYj9Vin+SlFHpgS9YuRZyXMs00/FTmjKToAdZBbDDyym/RrKgDgU0nBMNo4b0N
+	 QyNSe3YmLJSx9A8aaWSB55MWhRkMnsKGbb2Y2HNPTZJAd6ssr9HOWey5HfQVrXrike
+	 i6d1D3oa2TVnutA8+mKzyOpwlWj7u+ykcxkjL4TQK3Ja3mMKXYa/152RxK90aSUV20
+	 Xjthd0N7ULO4BJKUSwAKf2DpApBrCh215vPtMJX2DwUjC+JofMoaGkTzhP7WaCvchE
+	 t60SxkDN77h7Q==
+Message-ID: <52790e95-5cb8-41a3-8184-dbde917ed15d@kernel.org>
+Date: Mon, 7 Oct 2024 13:13:14 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,102 +35,166 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: Aw: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
+Subject: Re: Aw: Re: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988
+ SoC
 To: Frank Wunderlich <frank-w@public-files.de>
 Cc: Frank Wunderlich <linux@fw-web.de>,
  Chaotian Jing <chaotian.jing@mediatek.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
  <conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
+ AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
  Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org,
  daniel@makrotopia.org, john@phrozen.org, eladwf@gmail.com,
  ansuelsmth@gmail.com
 References: <20241006153447.41377-1-linux@fw-web.de>
- <20241006153447.41377-3-linux@fw-web.de>
- <89e54baa-0f05-47d7-8d81-68862f822c59@collabora.com>
- <trinity-2ac8c3fe-ad19-424b-ab4f-da84c42c4ae1-1728290266613@3c-app-gmx-bap03>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+ <20241006153447.41377-2-linux@fw-web.de>
+ <p7lqqhet6ahmvieh5xaws6ugsnasmuw6k4oajkmfcctuhrs4dn@quvrkmyof5ss>
+ <trinity-57600902-afb6-42f3-8cf5-54a07710f979-1728284364104@3c-app-gmx-bap03>
+ <486a85cb-8e09-493b-93f8-6610855b5f7e@kernel.org>
+ <trinity-c35964a7-f0d4-435a-ac76-586e90c666ed-1728287815279@3c-app-gmx-bap03>
+From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
-In-Reply-To: <trinity-2ac8c3fe-ad19-424b-ab4f-da84c42c4ae1-1728290266613@3c-app-gmx-bap03>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <trinity-c35964a7-f0d4-435a-ac76-586e90c666ed-1728287815279@3c-app-gmx-bap03>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Il 07/10/24 10:37, Frank Wunderlich ha scritto:
+On 07/10/2024 09:56, Frank Wunderlich wrote:
 > Hi
-> 
->> Gesendet: Montag, 07. Oktober 2024 um 09:58 Uhr
->> Von: "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>
->> Betreff: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
+>> Gesendet: Montag, 07. Oktober 2024 um 09:04 Uhr
+>> Von: "Krzysztof Kozlowski" <krzk@kernel.org>
+>> Betreff: Re: Aw: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
 >>
->> Il 06/10/24 17:34, Frank Wunderlich ha scritto:
->>> From: Frank Wunderlich <frank-w@public-files.de>
+>> On 07/10/2024 08:59, Frank Wunderlich wrote:
+>>>> Gesendet: Montag, 07. Oktober 2024 um 07:55 Uhr
+>>>> Von: "Krzysztof Kozlowski" <krzk@kernel.org>
+>>>> An: "Frank Wunderlich" <linux@fw-web.de>
+>>>> Betreff: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
+>>>>
+>>>> On Sun, Oct 06, 2024 at 05:34:45PM +0200, Frank Wunderlich wrote:
+>>>>> From: Frank Wunderlich <frank-w@public-files.de>
+>>>>>
+>>>>> Add binding definitions for mmc on MT7988 SoC.
+>>>>>
+>>>>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+>>>>> ---
+>>>>> v2:
+>>>>> - fixed minItems to 4
+>>>>> ---
+>>>>>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
+>>>>>  1 file changed, 24 insertions(+)
+>>>>>
+>>>>> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>> index c532ec92d2d9..7380f72ea189 100644
+>>>>> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>> @@ -21,6 +21,7 @@ properties:
+>>>>>            - mediatek,mt7620-mmc
+>>>>>            - mediatek,mt7622-mmc
+>>>>>            - mediatek,mt7986-mmc
+>>>>> +          - mediatek,mt7988-mmc
+>>>>>            - mediatek,mt8135-mmc
+>>>>>            - mediatek,mt8173-mmc
+>>>>>            - mediatek,mt8183-mmc
+>>>>> @@ -263,6 +264,29 @@ allOf:
+>>>>>              - const: bus_clk
+>>>>>              - const: sys_cg
+>>>>>
+>>>>> +  - if:
+>>>>> +      properties:
+>>>>> +        compatible:
+>>>>> +          contains:
+>>>>> +            enum:
+>>>>> +              - mediatek,mt7988-mmc
+>>>>> +    then:
+>>>>> +      properties:
+>>>>> +        clocks:
+>>>>> +          minItems: 4
+>>>>
+>>>> Drop
+>>
+>> Drop this line.
+>>
+>>>>
+>>>>> +          items:
+>>>>> +            - description: source clock
+>>>>> +            - description: HCLK which used for host
+>>>>> +            - description: Advanced eXtensible Interface
+>>>>> +            - description: Advanced High-performance Bus clock
+>>>>> +        clock-names:
+>>>>> +          minItems: 3
+>>>>
+>>>> This is still wrong... anyway, drop.
 >>>
->>> Add support for mmc on MT7988 SoC.
+>>> arg, sorry again...i should triple-check all before resending.
+>>
+>> Drop this line.
+>>
 >>>
->>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+>>> but dropping means the global 2 is used (making axi+ahb optional), or am i wrong? afaik "minItems: 4" is right here
 >>
->> There's no need to add yet one more duplicate mtk_mmc_compatible platform
->> data, nor one more compatible string to this driver, as this is exactly
->> the same as mt7986.
->>
->> Please reuse the MT7986 compatible; in DT you'll have:
->>
->> compatible = "mediatek,mt7988-mmc", "mediatek,mt7986-mmc";
+>> How minItems:4 is right here?
 > 
-> as explained in binding, the clock config is completely different (except first 2 also required by driver - 3-7 are optional there). mt7988 uses axi and ahb clocks.
+> mt7988 needs all 4 clocks, tested with only first 2 (based on global minitems) and got this (similar with first 3 clocks):
 > 
-> but i could of course use the mt7988 compatible with mt7986 compat data...but looked dirty to me so just copied the block (to allow later changes if needed).
+> [   10.826271] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd/data/mrq
+> [   10.833485] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting mrq=(____ptrval____) cmd=18
+> [   10.842006] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd=23
+> [   10.848704] mtk-msdc 11230000.mmc: msdc_track_cmd_data: cmd=18 arg=00036402; host->error=0x00000002
+> [   15.866269] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd/data/mrq
+> [   15.873480] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting mrq=(____ptrval____) cmd=13
+> [   15.881998] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd=13
+> [   15.888694] mtk-msdc 11230000.mmc: msdc_track_cmd_data: cmd=13 arg=00010000; host->error=0x00000002
 > 
+> so minItems:4 is imho right here
 
-In case there will be any changes required *later*, you can always add new platform
-data for the MT7988 compatible, as it's just only a code change and nothing else.
+So the list has 5 items? Then your binding is incomplete.
 
-For now, since they're the same, just reuse mt7986_compat.
-
-Reusing is way better than duplicating - here and everywhere else - especially when
-this implies a 100% duplication.
-
->> Cheers,
->> Angelo
->>
->>> ---
->>>    drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
->>>    1 file changed, 14 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->>> index 89018b6c97b9..6d5afe51a61d 100644
->>> --- a/drivers/mmc/host/mtk-sd.c
->>> +++ b/drivers/mmc/host/mtk-sd.c
->>> @@ -571,6 +571,19 @@ static const struct mtk_mmc_compatible mt7986_compat = {
->>>    	.support_64g = true,
->>>    };
->>>
->>> +static const struct mtk_mmc_compatible mt7988_compat = {
->>> +	.clk_div_bits = 12,
->>> +	.recheck_sdio_irq = true,
->>> +	.hs400_tune = false,
->>> +	.pad_tune_reg = MSDC_PAD_TUNE0,
->>> +	.async_fifo = true,
->>> +	.data_tune = true,
->>> +	.busy_check = true,
->>> +	.stop_clk_fix = true,
->>> +	.enhance_rx = true,
->>> +	.support_64g = true,
->>> +};
->>> +
->>>    static const struct mtk_mmc_compatible mt8135_compat = {
->>>    	.clk_div_bits = 8,
->>>    	.recheck_sdio_irq = true,
->>> @@ -629,6 +642,7 @@ static const struct of_device_id msdc_of_ids[] = {
->>>    	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
->>>    	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
->>>    	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
->>> +	{ .compatible = "mediatek,mt7988-mmc", .data = &mt7988_compat},
->>>    	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
->>>    	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
->>>    	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
->>
->>
+Best regards,
+Krzysztof
 
