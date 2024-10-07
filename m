@@ -1,40 +1,40 @@
 Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F8491B5EDE;
-	Mon,  7 Oct 2024 10:12:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43D181B3F1F;
+	Mon,  7 Oct 2024 10:15:01 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728295978; cv=none; b=cE2uEkW//xm/I0QPbcebg74rD7wTZZfePxinm3hlyLcaluNa1k1/qjkpPpMfDVUn0KsyC4mn0i/41gDTwbiUf18PzEWr0ThE5RhC5unr4U/ZNaKWd/tnPf/Wtag/7e01eY+u9hsuj9B90vomXFicboBJGKmuZw4m1PYZm/NqIuc=
+	t=1728296103; cv=none; b=fNjeKgDg22rqZRB+LHewZOdIe8YClfsQbbdYHxNU570XJr6Cl+p0a88sHisM63de20mjhN48QsxjKKxSYjzEKPYfLFeSTKyofsrXBkYdVfBYfujAPzNe3sOO47Dg3YC2vEJvnxtsJcLxvRcv7k7bz9GesMvPKCkhxGNr7Uj4L0A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728295978; c=relaxed/simple;
-	bh=uX9MuZyTAsy4ZwdDWDKwMwzG+/9sWZbBeG99JoLQaCQ=;
+	s=arc-20240116; t=1728296103; c=relaxed/simple;
+	bh=yuxB0ScFBvA5iGHvK/eJWsI8vouvpQMIaMlt77HeU8E=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=s8106wWKIT1cGoJO8Xz29iNvtZ7UkQA/+41IYWrCqqe6p2wDfijjZH9pSoAVd5SE2aSWaAgt5nF/6o5n/p1YuYqIExPy3dfE0t1cvjQUCP5tkitzdLwooRw4X2t04kzIRQsgL/6N2bQzOLPIfRVSaoVAwIdsxtETHDmoHPDBHW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=PxAJhh/N; arc=none smtp.client-ip=148.251.105.195
+	 In-Reply-To:Content-Type; b=Cf9CnbeRLD9pvxosNqQN9Cbp+vhR07uU7XPdy/X7m/dcNsGJsId4Zt3X9Cw1rYXNY6Jz5XBCOYQYlg/UIXDfxT8+ZnRCKUNnCLJ2z7TTNFfJMwpIHnIpaVEqQkqVsrrYAEdgc/Lv0SQdAx0GHKG1BADS29DaDV0U5tovN5DbzvU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=Iijidlpu; arc=none smtp.client-ip=148.251.105.195
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="PxAJhh/N"
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="Iijidlpu"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1728295974;
-	bh=uX9MuZyTAsy4ZwdDWDKwMwzG+/9sWZbBeG99JoLQaCQ=;
+	s=mail; t=1728296099;
+	bh=yuxB0ScFBvA5iGHvK/eJWsI8vouvpQMIaMlt77HeU8E=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=PxAJhh/NsDp5f2eWZN0zCO0G8kricMgKpRZOIklpJ5n71qrx8yvRD2KddLkcu78WN
-	 lN+f0ps82+wUHSyox5r+ms7fwCSFodTdUXT+PXdMXw19DbSqp4GciIbAbBkVNcR/jg
-	 Bk6Keb0jmXClqKx1vECROVLKPzbHu+ZaA79oyNj0ln/qseZA0e1ThQEQrR1fmpKUPY
-	 xXUDltk6Xv/ViASdbCfTrpUYvnaUKNWpQQkTJo2xpzaZ8ZKNNODjy0NGhs81+D2fcS
-	 AiIBGudyOzGzbMGwvFp7Eft9QMgOaWPsxZpSu7ehtTTJokdmrjg6pKP4DLb40zFFJd
-	 nK2hnthAAH9sQ==
+	b=Iijidlpu6bar59WUE05h2ibAszTqyDjP+Eun50NWrm0Ej2h+tAh1oj+rS3WRAqBJ4
+	 3PFdNKluA6XFdGiJgr9WOZt0wJZoKn9nrp95lOfCE8AZLBD8LkQYu7SVh4zLM3DXCx
+	 d44y4qR+ptKlKGOLd1nLhvLyHMJLQZYhSVnQ+fNxu6m6v3dqrHwQWPquYLNpX0EgOq
+	 n/x+DPZ7wE/KlXEM27+YwIiSsGxX3e6/QSgbXb/WQaEMLPchYISMRYi9yqO+xJQUdn
+	 R3rqGIJIS/iUM4wilOWhuIvVFeJZA2AcVrl1a1BlIji1HJbKRGSpIGT63rEbRuF+OU
+	 YqLxdzdWafxfQ==
 Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
 	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits))
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
 	(No client certificate requested)
 	(Authenticated sender: kholk11)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id 089E817E120E;
-	Mon,  7 Oct 2024 12:12:53 +0200 (CEST)
-Message-ID: <f072a20b-abc1-4da9-b03c-fb384601bc52@collabora.com>
-Date: Mon, 7 Oct 2024 12:12:53 +0200
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id B0C1717E1201;
+	Mon,  7 Oct 2024 12:14:58 +0200 (CEST)
+Message-ID: <272309da-24ff-49cd-9e4b-287054218cbc@collabora.com>
+Date: Mon, 7 Oct 2024 12:14:58 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,7 +42,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: Aw: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
+Subject: Re: Aw: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
 To: Frank Wunderlich <frank-w@public-files.de>
 Cc: Frank Wunderlich <linux@fw-web.de>,
  Chaotian Jing <chaotian.jing@mediatek.com>,
@@ -55,93 +55,89 @@ Cc: Frank Wunderlich <linux@fw-web.de>,
  daniel@makrotopia.org, john@phrozen.org, eladwf@gmail.com,
  ansuelsmth@gmail.com
 References: <20241006153447.41377-1-linux@fw-web.de>
- <20241006153447.41377-2-linux@fw-web.de>
- <b41c51c4-775c-49ca-84fd-1137b61f42d5@collabora.com>
- <trinity-6fcf3e00-393c-48ee-9aae-26057be08645-1728289985089@3c-app-gmx-bap03>
+ <20241006153447.41377-3-linux@fw-web.de>
+ <89e54baa-0f05-47d7-8d81-68862f822c59@collabora.com>
+ <trinity-2ac8c3fe-ad19-424b-ab4f-da84c42c4ae1-1728290266613@3c-app-gmx-bap03>
 From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 Content-Language: en-US
-In-Reply-To: <trinity-6fcf3e00-393c-48ee-9aae-26057be08645-1728289985089@3c-app-gmx-bap03>
+In-Reply-To: <trinity-2ac8c3fe-ad19-424b-ab4f-da84c42c4ae1-1728290266613@3c-app-gmx-bap03>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-Il 07/10/24 10:33, Frank Wunderlich ha scritto:
+Il 07/10/24 10:37, Frank Wunderlich ha scritto:
 > Hi
 > 
->> Gesendet: Montag, 07. Oktober 2024 um 10:00 Uhr
+>> Gesendet: Montag, 07. Oktober 2024 um 09:58 Uhr
 >> Von: "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>
->> Betreff: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
+>> Betreff: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
 >>
 >> Il 06/10/24 17:34, Frank Wunderlich ha scritto:
 >>> From: Frank Wunderlich <frank-w@public-files.de>
 >>>
->>> Add binding definitions for mmc on MT7988 SoC.
+>>> Add support for mmc on MT7988 SoC.
 >>>
 >>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
->>> ---
->>> v2:
->>> - fixed minItems to 4
->>> ---
->>>    .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
->>>    1 file changed, 24 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>> index c532ec92d2d9..7380f72ea189 100644
->>> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>> @@ -21,6 +21,7 @@ properties:
->>>              - mediatek,mt7620-mmc
->>>              - mediatek,mt7622-mmc
->>>              - mediatek,mt7986-mmc
->>> +          - mediatek,mt7988-mmc
->>>              - mediatek,mt8135-mmc
->>>              - mediatek,mt8173-mmc
->>>              - mediatek,mt8183-mmc
->>> @@ -263,6 +264,29 @@ allOf:
->>>                - const: bus_clk
->>>                - const: sys_cg
->>>
->>> +  - if:
->>> +      properties:
->>> +        compatible:
->>> +          contains:
->>> +            enum:
->>> +              - mediatek,mt7988-mmc
 >>
->> Are you really sure that you can't reuse the MT7986 compatible?
+>> There's no need to add yet one more duplicate mtk_mmc_compatible platform
+>> data, nor one more compatible string to this driver, as this is exactly
+>> the same as mt7986.
+>>
+>> Please reuse the MT7986 compatible; in DT you'll have:
+>>
+>> compatible = "mediatek,mt7988-mmc", "mediatek,mt7986-mmc";
 > 
-> have not found a way to reuse mt7986 binding because clock-config is different...
-> from driver view we can use the mt7986 compatible, but from binding view it is different.
+> as explained in binding, the clock config is completely different (except first 2 also required by driver - 3-7 are optional there). mt7988 uses axi and ahb clocks.
+> 
+> but i could of course use the mt7988 compatible with mt7986 compat data...but looked dirty to me so just copied the block (to allow later changes if needed).
 > 
 
-Okay, that's fair.
+In case there will be any changes required *later*, you can always add new platform
+data for the MT7988 compatible, as it's just only a code change and nothing else.
 
-> regards Frank
-> 
+For now, since they're the same, just reuse mt7986_compat.
+
+Reusing is way better than duplicating - here and everywhere else - especially when
+this implies a 100% duplication.
+
 >> Cheers,
 >> Angelo
 >>
->>> +    then:
->>> +      properties:
->>> +        clocks:
->>> +          minItems: 4
->>> +          items:
->>> +            - description: source clock
->>> +            - description: HCLK which used for host
->>> +            - description: Advanced eXtensible Interface
->>> +            - description: Advanced High-performance Bus clock
->>> +        clock-names:
->>> +          minItems: 3
->>> +          items:
->>> +            - const: source
->>> +            - const: hclk
->>> +            - const: axi_cg
->>> +            - const: ahb_cg
+>>> ---
+>>>    drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
+>>>    1 file changed, 14 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+>>> index 89018b6c97b9..6d5afe51a61d 100644
+>>> --- a/drivers/mmc/host/mtk-sd.c
+>>> +++ b/drivers/mmc/host/mtk-sd.c
+>>> @@ -571,6 +571,19 @@ static const struct mtk_mmc_compatible mt7986_compat = {
+>>>    	.support_64g = true,
+>>>    };
+>>>
+>>> +static const struct mtk_mmc_compatible mt7988_compat = {
+>>> +	.clk_div_bits = 12,
+>>> +	.recheck_sdio_irq = true,
+>>> +	.hs400_tune = false,
+>>> +	.pad_tune_reg = MSDC_PAD_TUNE0,
+>>> +	.async_fifo = true,
+>>> +	.data_tune = true,
+>>> +	.busy_check = true,
+>>> +	.stop_clk_fix = true,
+>>> +	.enhance_rx = true,
+>>> +	.support_64g = true,
+>>> +};
 >>> +
->>>      - if:
->>>          properties:
->>>            compatible:
+>>>    static const struct mtk_mmc_compatible mt8135_compat = {
+>>>    	.clk_div_bits = 8,
+>>>    	.recheck_sdio_irq = true,
+>>> @@ -629,6 +642,7 @@ static const struct of_device_id msdc_of_ids[] = {
+>>>    	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
+>>>    	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
+>>>    	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
+>>> +	{ .compatible = "mediatek,mt7988-mmc", .data = &mt7988_compat},
+>>>    	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+>>>    	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+>>>    	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
 >>
 >>
->>
-
 
