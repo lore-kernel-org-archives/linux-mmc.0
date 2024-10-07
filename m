@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 629A12AD05;
-	Mon,  7 Oct 2024 11:13:22 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 950E2101C4;
+	Mon,  7 Oct 2024 11:30:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728299602; cv=none; b=UfHd0Of623SbpJBlnwEqaWzzAGHzezIImwzIp0mi1/5McQEjPYhetmAaKoJ47Z0+ZUBsn6P5aATiP/Ospmp0WhxByE08A3jO9vd6OOuHOqqM/gI+gB81TVZHxjGaz4CE5il+Av92Hnnmut3JuErCusTd8QVrbfu/3+rJyJTg7oA=
+	t=1728300615; cv=none; b=Wb/Qm5uk9b7i00J6zSkVe1lAvSt2H06eUNaRJBHKZt1qSgIhXRUDpQfEW54hXGOFhwZHHxE6jMHat081UgveBzxOgTk3fbwarYjEXvwq9VDHgf69rvyOdhOBIp5+49DgApAyuHVRSVai1QOPvtJeHAKqf/sIJFZro6xJxlFIH/c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728299602; c=relaxed/simple;
-	bh=lqYKdMgL/af+hqxZMZr0dRdWMk1wm+DIhNwXIm0/hnA=;
+	s=arc-20240116; t=1728300615; c=relaxed/simple;
+	bh=Rz4+xwYlnejseHEd/Mnd7CZL6xZvLaDMPzooI0qTgmY=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=njOSVTvphP8t/3S48NpXnryhYAk4GKrqIjW1ZyVGNvpNA3ABje0GpkeWDsohjIWFDLCr5js1NRaH30XQKKhvAJLJuqIE5mDO0S1lhZS+uZFtbi2rALDe/wAfDTjKCCwOAzu1E+9vNhVBXSRKYgy7hgBQEsEV45SoTgcCYoq4wk8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P+SotpmY; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=o892fXTdrPLrIZAoof5y1edjVkTzV+OTiBHchDRiaRlbmHc2Rh+wI8F7YUYrs6ictShqsnKSNN0Df9egpS8k9RtziNZmyMZ2X4gFn0bpOsutKbegoFeP9YM5DH8xLRu8oy2if6j6cCDcd0PInBexVBLQ90NVkrfdjlL0N6OLEqw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=f+VYGleb; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P+SotpmY"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C4457C4CEC6;
-	Mon,  7 Oct 2024 11:13:16 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="f+VYGleb"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5D307C4CEC6;
+	Mon,  7 Oct 2024 11:30:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728299602;
-	bh=lqYKdMgL/af+hqxZMZr0dRdWMk1wm+DIhNwXIm0/hnA=;
+	s=k20201202; t=1728300615;
+	bh=Rz4+xwYlnejseHEd/Mnd7CZL6xZvLaDMPzooI0qTgmY=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=P+SotpmY/5NmrHLUDYcjkuEZrdK1V5uqxA+bOVR/Y8JpapNCwkKHacHPbyP0DZpIo
-	 /JWzTYj9Vin+SlFHpgS9YuRZyXMs00/FTmjKToAdZBbDDyym/RrKgDgU0nBMNo4b0N
-	 QyNSe3YmLJSx9A8aaWSB55MWhRkMnsKGbb2Y2HNPTZJAd6ssr9HOWey5HfQVrXrike
-	 i6d1D3oa2TVnutA8+mKzyOpwlWj7u+ykcxkjL4TQK3Ja3mMKXYa/152RxK90aSUV20
-	 Xjthd0N7ULO4BJKUSwAKf2DpApBrCh215vPtMJX2DwUjC+JofMoaGkTzhP7WaCvchE
-	 t60SxkDN77h7Q==
-Message-ID: <52790e95-5cb8-41a3-8184-dbde917ed15d@kernel.org>
-Date: Mon, 7 Oct 2024 13:13:14 +0200
+	b=f+VYGlebZh0izT4/wpS/jAuaUTaxn4XJzdQWFUUUjyyAoKYN8Dqalm10RaSmeJZWW
+	 7DgfSR9zCvSx+tgGzWfO15tA7COUMo5s2dhPCPnZ+7BAlMsH5btJN6OasQpA9PXa1M
+	 ET+aqUEQWR8+5UolWB756Aw1oEPrN1Mn1YdEE+XkaEq8yhbPELGohjioLJvbfyQtBI
+	 iTed0U7xAlSpvAM7Z/yAaxa+xdRdQOmV22GNyDerGFbbNfMxSXDH4Y9Wh2khSoKUIQ
+	 Zd2fuQBRZ66QaavW8BYx10oBSI5cKQI0c4CjbyfJE7vCDiA8QqZWG1i38FYcGQsjdO
+	 WQIptI9bu5MsA==
+Message-ID: <e6709979-e69e-4b55-be9f-c1353dd8ffc7@kernel.org>
+Date: Mon, 7 Oct 2024 13:30:08 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,26 +35,24 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: Aw: Re: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988
- SoC
-To: Frank Wunderlich <frank-w@public-files.de>
+Subject: Re: Aw: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
+To: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+ Frank Wunderlich <frank-w@public-files.de>
 Cc: Frank Wunderlich <linux@fw-web.de>,
  Chaotian Jing <chaotian.jing@mediatek.com>,
  Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
  Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
  <conor+dt@kernel.org>, Matthias Brugger <matthias.bgg@gmail.com>,
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
  Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
  linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org,
  daniel@makrotopia.org, john@phrozen.org, eladwf@gmail.com,
  ansuelsmth@gmail.com
 References: <20241006153447.41377-1-linux@fw-web.de>
- <20241006153447.41377-2-linux@fw-web.de>
- <p7lqqhet6ahmvieh5xaws6ugsnasmuw6k4oajkmfcctuhrs4dn@quvrkmyof5ss>
- <trinity-57600902-afb6-42f3-8cf5-54a07710f979-1728284364104@3c-app-gmx-bap03>
- <486a85cb-8e09-493b-93f8-6610855b5f7e@kernel.org>
- <trinity-c35964a7-f0d4-435a-ac76-586e90c666ed-1728287815279@3c-app-gmx-bap03>
+ <20241006153447.41377-3-linux@fw-web.de>
+ <89e54baa-0f05-47d7-8d81-68862f822c59@collabora.com>
+ <trinity-2ac8c3fe-ad19-424b-ab4f-da84c42c4ae1-1728290266613@3c-app-gmx-bap03>
+ <272309da-24ff-49cd-9e4b-287054218cbc@collabora.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -100,100 +98,49 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  uZwJCLykjad45hsWcOGk3OcaAGQS6NDlfhM6O9aYNwGL6tGt/6BkRikNOs7VDEa4/HlbaSJo
  7FgndGw1kWmkeL6oQh7wBvYll2buKod4qYntmNKEicoHGU+x91Gcan8mCoqhJkbqrL7+nXG2
  5Q/GS5M9RFWS+nYyJh+c3OcfKqVcZQNANItt7+ULzdNJuhvTRRdC3g9hmCEuNSr+CLMdnRBY fv0=
-In-Reply-To: <trinity-c35964a7-f0d4-435a-ac76-586e90c666ed-1728287815279@3c-app-gmx-bap03>
+In-Reply-To: <272309da-24ff-49cd-9e4b-287054218cbc@collabora.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 07/10/2024 09:56, Frank Wunderlich wrote:
-> Hi
->> Gesendet: Montag, 07. Oktober 2024 um 09:04 Uhr
->> Von: "Krzysztof Kozlowski" <krzk@kernel.org>
->> Betreff: Re: Aw: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
+On 07/10/2024 12:14, AngeloGioacchino Del Regno wrote:
+> Il 07/10/24 10:37, Frank Wunderlich ha scritto:
+>> Hi
 >>
->> On 07/10/2024 08:59, Frank Wunderlich wrote:
->>>> Gesendet: Montag, 07. Oktober 2024 um 07:55 Uhr
->>>> Von: "Krzysztof Kozlowski" <krzk@kernel.org>
->>>> An: "Frank Wunderlich" <linux@fw-web.de>
->>>> Betreff: Re: [PATCH v2 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
->>>>
->>>> On Sun, Oct 06, 2024 at 05:34:45PM +0200, Frank Wunderlich wrote:
->>>>> From: Frank Wunderlich <frank-w@public-files.de>
->>>>>
->>>>> Add binding definitions for mmc on MT7988 SoC.
->>>>>
->>>>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
->>>>> ---
->>>>> v2:
->>>>> - fixed minItems to 4
->>>>> ---
->>>>>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
->>>>>  1 file changed, 24 insertions(+)
->>>>>
->>>>> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>>>> index c532ec92d2d9..7380f72ea189 100644
->>>>> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>>>> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->>>>> @@ -21,6 +21,7 @@ properties:
->>>>>            - mediatek,mt7620-mmc
->>>>>            - mediatek,mt7622-mmc
->>>>>            - mediatek,mt7986-mmc
->>>>> +          - mediatek,mt7988-mmc
->>>>>            - mediatek,mt8135-mmc
->>>>>            - mediatek,mt8173-mmc
->>>>>            - mediatek,mt8183-mmc
->>>>> @@ -263,6 +264,29 @@ allOf:
->>>>>              - const: bus_clk
->>>>>              - const: sys_cg
->>>>>
->>>>> +  - if:
->>>>> +      properties:
->>>>> +        compatible:
->>>>> +          contains:
->>>>> +            enum:
->>>>> +              - mediatek,mt7988-mmc
->>>>> +    then:
->>>>> +      properties:
->>>>> +        clocks:
->>>>> +          minItems: 4
->>>>
->>>> Drop
->>
->> Drop this line.
->>
->>>>
->>>>> +          items:
->>>>> +            - description: source clock
->>>>> +            - description: HCLK which used for host
->>>>> +            - description: Advanced eXtensible Interface
->>>>> +            - description: Advanced High-performance Bus clock
->>>>> +        clock-names:
->>>>> +          minItems: 3
->>>>
->>>> This is still wrong... anyway, drop.
+>>> Gesendet: Montag, 07. Oktober 2024 um 09:58 Uhr
+>>> Von: "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>
+>>> Betreff: Re: [PATCH v2 2/2] mmc: mtk-sd: add support for mt7988
 >>>
->>> arg, sorry again...i should triple-check all before resending.
->>
->> Drop this line.
->>
+>>> Il 06/10/24 17:34, Frank Wunderlich ha scritto:
+>>>> From: Frank Wunderlich <frank-w@public-files.de>
+>>>>
+>>>> Add support for mmc on MT7988 SoC.
+>>>>
+>>>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 >>>
->>> but dropping means the global 2 is used (making axi+ahb optional), or am i wrong? afaik "minItems: 4" is right here
+>>> There's no need to add yet one more duplicate mtk_mmc_compatible platform
+>>> data, nor one more compatible string to this driver, as this is exactly
+>>> the same as mt7986.
+>>>
+>>> Please reuse the MT7986 compatible; in DT you'll have:
+>>>
+>>> compatible = "mediatek,mt7988-mmc", "mediatek,mt7986-mmc";
 >>
->> How minItems:4 is right here?
+>> as explained in binding, the clock config is completely different (except first 2 also required by driver - 3-7 are optional there). mt7988 uses axi and ahb clocks.
+>>
+>> but i could of course use the mt7988 compatible with mt7986 compat data...but looked dirty to me so just copied the block (to allow later changes if needed).
+>>
 > 
-> mt7988 needs all 4 clocks, tested with only first 2 (based on global minitems) and got this (similar with first 3 clocks):
+> In case there will be any changes required *later*, you can always add new platform
+> data for the MT7988 compatible, as it's just only a code change and nothing else.
 > 
-> [   10.826271] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd/data/mrq
-> [   10.833485] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting mrq=(____ptrval____) cmd=18
-> [   10.842006] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd=23
-> [   10.848704] mtk-msdc 11230000.mmc: msdc_track_cmd_data: cmd=18 arg=00036402; host->error=0x00000002
-> [   15.866269] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd/data/mrq
-> [   15.873480] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting mrq=(____ptrval____) cmd=13
-> [   15.881998] mtk-msdc 11230000.mmc: msdc_request_timeout: aborting cmd=13
-> [   15.888694] mtk-msdc 11230000.mmc: msdc_track_cmd_data: cmd=13 arg=00010000; host->error=0x00000002
+> For now, since they're the same, just reuse mt7986_compat.
 > 
-> so minItems:4 is imho right here
+> Reusing is way better than duplicating - here and everywhere else - especially when
+> this implies a 100% duplication.
 
-So the list has 5 items? Then your binding is incomplete.
+If you use same match data, then entire change should be dropped because
+it is redundant. Instead express compatibility in the bindings and use
+fallback.
 
 Best regards,
 Krzysztof
