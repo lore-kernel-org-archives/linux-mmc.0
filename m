@@ -1,155 +1,173 @@
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 280EF18CBF4
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 09:07:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C2E318E37D
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 09:35:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728292073; cv=none; b=Eyqi6VGRK6E6OyoavlRRlEaFiFygprnCLTR8VmyxuN0SL82y+byGZpAx4Cks/I2sZZa0lAvqX0+gE8CDOPZ5/dzfOFZswHpozzJu2RX02LxRJHSTP+BSEBDJWKMdS0oXcCMmAgjFLt5tPssYF076fmustAUvDFPEOFeog4io7DY=
+	t=1728293706; cv=none; b=jS4yky49vMjwuZUNSPd2WyLNfFypPqK+tIIHDXWydKuKBcgQUDhnc1Fbxk5MAym9sC5lzVrnuPFoQNLsYsAdkP32zuPXiQIvnFH08RuWToiPhQwBiwtKS95oSicMe/gU3dLUSWiYVGMm5HPWmmdHskyYcQbu6bUkk+uQmVKSrEI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728292073; c=relaxed/simple;
-	bh=Tvcs9sYQHOdju1uSjxDitPtHC+c46V2B5i6PDIRp4y4=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=jL4yc/q4v5YW4yciwH8ZIqOWlFB8eCO24gCKKtlAIzpDDvmPKOmjojO3IjnGKQDfa6W4zSywqBJ7JuwUCvQpmrN21UQ7DEZoa2sWS5CduiayEbxuQ8joe46zW4vql2MnLTdUqF4cMhQFnBXFnKoG4NaM0dWoRGwStwj54xW7IC4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=T2nEE+6p; arc=none smtp.client-ip=209.85.167.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1728293706; c=relaxed/simple;
+	bh=zQa76wpiXIsouesGr7IaCgvgkc2npLW+g6Olkm8nps8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=malTRauh0xNO4R9lhl/NaTjJ4r74gbR3UvrM7/056XRF33+7VVjVgD4WVEZ3Ikd6gomfxHyRWq/7lvtnjNno1OTTcviQwt7f80B3vhH0rungsc3umde+sHQtNKS0K/k2wzmFM+QstT8qgduzNgukQVdKLrQTdfykNK5yBQRNVEo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=gq/JQ/WT; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="T2nEE+6p"
-Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-539973829e7so4030785e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Oct 2024 02:07:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728292070; x=1728896870; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=EpuhbLasEadVeMuVqG8sosX+rym3WCHEJ89sUQ5d+fI=;
-        b=T2nEE+6pBaCWlzhY1sTtPznE2JDmTOx/HJR8muZGUYMu478SxjPLILAoFNoGaKxGhQ
-         28fJsVe6V0ZUiTVZB8YlltDd/MTQ+TA/ALyvmj3qFLDbXI/Ozfkb+o+5jGElygednl/A
-         W7Q5bSlZ47LHoZ+IcN1zCO2csrWmfm8nP1/5H0dAoNdXXWMjDSt1nY+V8gAOhQKIGWvS
-         RcX/wgDxTUL3c9BM7/U8YzT78FHeG4zowIwYinHVIraRzIgxsor0nVnR3C8r6IE/roMY
-         gcEX3RAO7LeZ7VLj5cSqU91q5uoxvubZKD8T5vUg6fSd1HX9olAnR5Hy+wsibn1WkSnj
-         vANw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728292070; x=1728896870;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=EpuhbLasEadVeMuVqG8sosX+rym3WCHEJ89sUQ5d+fI=;
-        b=LXBPIGGjbPwDDlqRyYzR91gR5wJzGZSWDXl3/0xB1UjRinKcH0XKFj57EHehEY4NSC
-         VPYMag0c0WVD0exWfOQiwMdAOYvnbtQyBZ5wyAWdqFNMX2R2oxpDenx0fq3lg9B8KFdt
-         O9rqfXZQmj5TuxPm5Tiq++wWfR1oMj2H9Qo2XzssDwt7WB6k5EWkpBm6PY7jdn4NJpZb
-         8gdIg+CdNh7HMCX8Ex2+fGAGtISCAC3ke1hoMIOLqtgCH5i11uOc9YPgFPY/Q3lN0B2U
-         m2jplmMPPg9QEdurNeb93KcfsNg1tA61GUP+2Py5n/K57e6GznpWCfVX/kQho0qQtt6s
-         Ue9Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUQPUOs7fIOGMc1FuWJRyqhD5D7XSBPDub7SGH120SW5tNTqMKq6zwD3q+ma+W1y7G6YLq6/6NP+90=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyJj7jlMJDlm/MyNcvbLHT8VqqhABhstc52eAJgDGh9dxJSmx3G
-	Wu7jNUl9NgLW+Gqz39ZfxZcyUIl95U+4/LgTVI3s3IxPjiGMzvAlq/W95t1BmMyh0CugQO1b3yM
-	V8yE=
-X-Google-Smtp-Source: AGHT+IHjPdkrn1WCWqVQPWn/3AXhMdcCGbb+rmueJ3DkfERdPUW77sBkwqH9tc7v+VJ0Q+jVuYVwxg==
-X-Received: by 2002:a5d:4eca:0:b0:37c:cc67:8b1f with SMTP id ffacd0b85a97d-37d0e8de221mr6087900f8f.48.1728291609655;
-        Mon, 07 Oct 2024 02:00:09 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:982:cbb0:a99f:3c24:fa3b:1e7? ([2a01:e0a:982:cbb0:a99f:3c24:fa3b:1e7])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-37d1691a4eesm5210437f8f.31.2024.10.07.02.00.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 07 Oct 2024 02:00:08 -0700 (PDT)
-Message-ID: <818f287d-4ea5-4899-b4a9-98accc1be049@linaro.org>
-Date: Mon, 7 Oct 2024 11:00:08 +0200
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="gq/JQ/WT"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:mime-version:content-transfer-encoding; s=k1; bh=PKyGBesbdIV5AX
+	SvReZxuT8cszHR5cidgM6bBQIweHA=; b=gq/JQ/WThhcmPjAWSODh155nQpGuhx
+	TAZhisT0NvuFt0S0zYLeo6RHvSSHBTH3c7U3m5m18x6lQQzVFo8+WRxxfcMPR7Zw
+	EmhRmJsa4F2T1ZB6cRiNoVxw5wx/GiSayF+drIbVQyMo+LnqkQlGgDazubV6ZxRr
+	oWi5I4hIvG6dFCS2RsUvYVbjBwLcPNCPtny5GOqHbnVaJGPPXBHRuA2GZKfgZD9I
+	X/wTFuMPmcIkLmsA9aVc9hq7WvYpXGyh3ExZrkT0e11mfAg+mpLhMxWGfp8ORkBc
+	7yJG+qxTWfaYxFYtN51GukCPCVaqNO76OUeNnReBEQ/10k+zBp+UwrzA==
+Received: (qmail 73395 invoked from network); 7 Oct 2024 11:34:52 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 7 Oct 2024 11:34:52 +0200
+X-UD-Smtp-Session: l3s3148p1@oTmVu98juscgAwDPXxi/APzxl2QXB/xr
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-renesas-soc@vger.kernel.org
+Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Subject: [RFC PATCH] mmc: suspend MMC also when unbinding
+Date: Mon,  7 Oct 2024 11:31:09 +0200
+Message-ID: <20241007093447.33084-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: controller: allow node name to
- be named slot@*
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>,
- Jerome Brunet <jbrunet@baylibre.com>,
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- linux-kernel@vger.kernel.org
-References: <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org>
- <20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-1-5aa8bdfe01af@linaro.org>
- <qt3ivwsa3uaidcgkzbd2ewohbyd6zbzseraihftdhxpziuhnpq@xsne3f4wdfua>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <qt3ivwsa3uaidcgkzbd2ewohbyd6zbzseraihftdhxpziuhnpq@xsne3f4wdfua>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-Hi Rob, Krzysztof,
+When unbinding a MMC host, the card should be suspended. Otherwise,
+problems may arise. E.g. the card still expects power-off notifications
+but there is no host to send them anymore. Shimoda-san tried disabling
+notifications only, but there were issues with his approaches [1] [2].
 
+Here is my take on it, based on the review comments:
 
-On 24/09/2024 11:12, Krzysztof Kozlowski wrote:
-> On Fri, Sep 20, 2024 at 10:38:03AM +0200, Neil Armstrong wrote:
->> In preparation of supporting the mmc-slot subnode, allow
->> the nodename to be either mmc@ or mmc-slot@
->>
->> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
->> ---
->>   Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 4 +++-
->>   1 file changed, 3 insertions(+), 1 deletion(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
->> index 58ae298cd2fc..f797c32ea688 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
->> @@ -20,7 +20,9 @@ description: |
->>   
->>   properties:
->>     $nodename:
->> -    pattern: "^mmc(@.*)?$"
->> +    oneOf:
->> +      - pattern: "^mmc(@.*)?$"
->> +      - pattern: "^slot(@.*)?$"
-> 
-> I don't think mmc-slot is allowed by this.
-> 
-> This should be squashed with mmc-slot child patch. It does not make
-> sense to allow mmc-slots if there are no mmc-slots.
+a) 'In principle we would like to run the similar operations at "remove"
+    as during "system suspend"' [1]
+b) 'We want to support a graceful power off sequence or the card...' [2]
 
-Right, I don't like this oneOf/pattern, slot@(@.*)? should really only be for slots,
-by I do not see how this can be achieved because we can't override properties: pattern.
+So, _mmc_suspend gets extended to recognize another reason of being
+called, namely when unbinding happens. The logic of sending a
+notification or sending the card to sleep gets updated to handle this
+new reason. Controllers able to do full power cycles will still do that.
+Controllers which can only do power cycles in suspend, will send the
+card to sleep. Finally, mmc_remove() calls _mmc_suspend now with the new
+reason 'unbind'.
 
-Do you have any suggestions ?
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Neil
+[1] https://patchwork.kernel.org/project/linux-renesas-soc/patch/1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
+[2] https://patchwork.kernel.org/project/linux-mmc/patch/1605005330-7178-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
+---
 
-> 
-> Best regards,
-> Krzysztof
-> 
+RFC to see if the direction is proper. Obvious improvements are removing
+the debug printout and check if the forward declaration can be avoided.
+This was lightly tested on a Renesas Salvator board. Accessing the eMMC
+after unbind/bind and suspend/resume showed no regressions.
+
+ drivers/mmc/core/mmc.c | 29 +++++++++++++++++++++--------
+ 1 file changed, 21 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 6a23be214543..bd4381fa182f 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -32,6 +32,12 @@
+ #define MIN_CACHE_EN_TIMEOUT_MS 1600
+ #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
+ 
++enum mmc_pm_reason {
++	MMC_PM_REASON_SHUTDOWN,
++	MMC_PM_REASON_SUSPEND,
++	MMC_PM_REASON_UNBIND,
++};
++
+ static const unsigned int tran_exp[] = {
+ 	10000,		100000,		1000000,	10000000,
+ 	0,		0,		0,		0
+@@ -2032,11 +2038,13 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+ 	return err;
+ }
+ 
++static int _mmc_suspend(struct mmc_host *host, enum mmc_pm_reason reason);
+ /*
+  * Host is being removed. Free up the current card.
+  */
+ static void mmc_remove(struct mmc_host *host)
+ {
++	_mmc_suspend(host, MMC_PM_REASON_UNBIND);
+ 	mmc_remove_card(host->card);
+ 	host->card = NULL;
+ }
+@@ -2104,11 +2112,16 @@ static int _mmc_flush_cache(struct mmc_host *host)
+ 	return err;
+ }
+ 
+-static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
++static int _mmc_suspend(struct mmc_host *host, enum mmc_pm_reason reason)
+ {
+ 	int err = 0;
+-	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+-					EXT_CSD_POWER_OFF_LONG;
++	unsigned int notify_type = reason == MMC_PM_REASON_SUSPEND ?
++				   EXT_CSD_POWER_OFF_SHORT : EXT_CSD_POWER_OFF_LONG;
++	bool can_pwr_cycle_now = (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) ||
++				  ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND) &&
++				    reason == MMC_PM_REASON_SUSPEND);
++
++pr_info("%s: suspend reason %d, can pwr cycle %d\n", mmc_hostname(host), reason, can_pwr_cycle_now);
+ 
+ 	mmc_claim_host(host);
+ 
+@@ -2119,9 +2132,9 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (err)
+ 		goto out;
+ 
++	/* Notify if pwr_cycle is possible or power gets cut because of shutdown */
+ 	if (mmc_can_poweroff_notify(host->card) &&
+-	    ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
+-	     (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND)))
++	    (reason == MMC_PM_REASON_SHUTDOWN || can_pwr_cycle_now))
+ 		err = mmc_poweroff_notify(host->card, notify_type);
+ 	else if (mmc_can_sleep(host->card))
+ 		err = mmc_sleep(host);
+@@ -2144,7 +2157,7 @@ static int mmc_suspend(struct mmc_host *host)
+ {
+ 	int err;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, MMC_PM_REASON_SUSPEND);
+ 	if (!err) {
+ 		pm_runtime_disable(&host->card->dev);
+ 		pm_runtime_set_suspended(&host->card->dev);
+@@ -2191,7 +2204,7 @@ static int mmc_shutdown(struct mmc_host *host)
+ 		err = _mmc_resume(host);
+ 
+ 	if (!err)
+-		err = _mmc_suspend(host, false);
++		err = _mmc_suspend(host, MMC_PM_REASON_SHUTDOWN);
+ 
+ 	return err;
+ }
+@@ -2215,7 +2228,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, MMC_PM_REASON_SUSPEND);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggressive suspend\n",
+ 			mmc_hostname(host), err);
+-- 
+2.45.2
 
