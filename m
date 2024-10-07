@@ -1,166 +1,138 @@
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2CD35433CA
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 09:42:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CC851B07BB
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 09:49:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728294129; cv=none; b=UXWjtO178g8t+ipVaEKbr27MgWy2OiuKyKMZpGSbjfjbF+5Akqys4361a06E7hNp31GaL71Xm1PxyLILu40dt76c9YEhPhM0jBffO9MPDYKFjClysShvXuNOJkq2x5rB1QdViziocnRcf36uOLImW3T/m2FRocvo8qcK/bXLarY=
+	t=1728294597; cv=none; b=QEvL3ZJbp7xlPODJQ+XNW7Z2owI+gvdEnTRg+Dcqwwa5hxrx/WguULEisnpJph08NJOK5zKTAFfDjf9XoQJwZUVoYeUA0Ixs57q8GSi1Sc1Z+4MBv6R12jcGKaay4lQlahKK6nd7SZUcpUZO8pOX4AK/CFG1KLNrL8w5lnQpWsY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728294129; c=relaxed/simple;
-	bh=lEfYVFT3HbNF5XfS5lrGxJ4CBB9uhR9SXzL+cmVZen8=;
+	s=arc-20240116; t=1728294597; c=relaxed/simple;
+	bh=k8brDWLlZk0dTO8J46y2uPWyWt9rqKJ6ybBhtU5TnAA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UCP/1N1v+H94rBxQ4uC3WIun0wrBWgTOeVIoXH4ED4fkmGr5+OWpJfkRNYIS8rBAPZiv096RWI9rBYR3GIsRpoIC2zxqI7khE+XHznL+Q6fg4sJArZ4/psskrfAKrT3AG6ZT1+bh1DNN2iE67BIMEqUksVNmhrB6ZDorqbh40MY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jPIQ9259; arc=none smtp.client-ip=209.85.219.169
+	 To:Cc:Content-Type; b=JJDssd+CzNNKk16nO+7vKp/nuFWgvF6Xt+ll+N69AoQmgz3PUIdKsKr5pEaL6dUfxkUvB9YXSMU7fwO9Bh86+f+sky/5vCWSWD/gBUaY/LmZDw1DxsRzp+AOt+wIz2u0PtWtCKwwI8I1t18nuc9/AiTEee0eWk8IMPxDD0r8wNA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=n5bfMogd; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jPIQ9259"
-Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e03caab48a2so3207078276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Oct 2024 02:42:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="n5bfMogd"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6e2e3e4f65dso10512647b3.3
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Oct 2024 02:49:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728294127; x=1728898927; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1728294593; x=1728899393; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=OiatlVhaGBuayRJRI/DQzrQt1zknr0nqF+AyKHCS8FM=;
-        b=jPIQ9259Ies4DQEv/s4iYo4lE9T2VORBnypMdd7TuYcRocbh+OLT06cKvWzFMkOiKu
-         1I/5HrS2Gp+I8mhSG+55jLjKc0+hzVWIHz4JUr76bRVORtSm3z1AHO7h01zFEbcOPkV0
-         cPUe3SuWX9esmgdpyNALjgLIjtw2T2D6EpzqquBBfH8+kNYS2mG8zFBYUC/YFjmoN1B5
-         KdLgribAmsSbOcpRBx7GMyyQyw8bOyH2U/oJqQ/eJib6hiayv1ezS5I2a8xqHFRgiUdK
-         dvaObYcAh6orZcutwgcoL2+0VUREYAXLI35xgXok3GnEQ02B9Xt5Cd0THlYtHlR5nOWd
-         soSg==
+        bh=k8brDWLlZk0dTO8J46y2uPWyWt9rqKJ6ybBhtU5TnAA=;
+        b=n5bfMogdEoYJIDRe/R6/5RahWI1QeMggRlDradUu0D68q7g/Bx1VYnIUEMa3OVjcu/
+         Bba54bKxWv/ciyHFB9/Qw+XJV7ys8sVd8c+kwwXGuv7bktW42F6sBJzxxJOJkEGqnbky
+         x75s+zB0I/6F7cSGr8BXQaVNW4UgGpRdP78PGdfuzbxZbyDnjenE35V2YqCcQ/ExrFJA
+         xQ0GMGj5SQMRW62cMJdlq6DUgQZLVF4AbaK2soxauJ0Yj7gfOzImXTw/65am52mU8gg6
+         rZ155vtqPoXAtZyE1l843uu8WSacCp1VuK+/zGOwvS79ckiNQPnsslDrub0+jZYurPVd
+         zajw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728294127; x=1728898927;
+        d=1e100.net; s=20230601; t=1728294593; x=1728899393;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=OiatlVhaGBuayRJRI/DQzrQt1zknr0nqF+AyKHCS8FM=;
-        b=KZ35G1TbS0g5C/IakL+heBmdQ1tZ6bBbCGx79FisPhOQF9rlx5abUDAIHeLxl3N2Ef
-         RyZIyhJHt9Da4ykZ6l6a/BfLoggNoaVR6crI//kI9nB80kYmczfu9Zq5wqG51Fd7TMIY
-         4vX8Lcce7V2icRjyP4n4+D+8Wjku9FtL1KwaZch7vth6up6s302fpLOMnf3uSvESa6CU
-         TyU+sJl3gCCNEaFIV3ngRENbA2+Sxp0FAW/eVp3hl03nUieiLpEPc6UZDKSLv2XFGX9V
-         mb/9QL2L854xjyOT9jX6i5GzuHeQUOGb5CdjXbgFwH15FCF2PErX4dVS5rx7YkENsEKx
-         cMLg==
-X-Gm-Message-State: AOJu0YwXCi4cMXHIsjQYNmttcIQFNO9P8ustmFAP1Hf4JP+1QuR/Phjv
-	4V7gzLo0cbrpBbTpd5eRLUfVyaIBDSufSmICL1cVG1o3GCiHNcWwkFJmCIEAKoj9lonn9Y5KSaj
-	thWf76dmnEx+5CWBaas3rEyew6VyUX+A18dvtMg==
-X-Google-Smtp-Source: AGHT+IGiOte+AA8rJQYGh/Eo36BWNxGVPtG7q/gbVdkGMhn9kLYun/HZVv0231tdLG7zDR70MzHc7SuhmWS4M8oV2pY=
-X-Received: by 2002:a05:6902:d42:b0:e1d:91d4:3ddb with SMTP id
- 3f1490d57ef6-e286fa8bf2cmr10426981276.20.1728294127018; Mon, 07 Oct 2024
- 02:42:07 -0700 (PDT)
+        bh=k8brDWLlZk0dTO8J46y2uPWyWt9rqKJ6ybBhtU5TnAA=;
+        b=HIxomGXbnVw1n8yrSIX6KLaZMV2lmvR6Gb3Vj7ZA0pYzQspPGxmwtwatu4j0g13GBd
+         weiXw/EuueNMqdADlfTnxIZHBVYIWXa8Djv7G85E1nrgDXvxV/D+bws+myguxc4+V+l8
+         xWUWjnl5IxSWB62uo8MaYtwxP516gejcauxujF+o64wPm1Q8IOQvnO+Sg0BKMGSNeIvT
+         9GQv2z7xiXqlxWj8XnZQaGf/t0kZKhoT83ERYAJcGKSKtQSmrsUubaAER9AGWFK6yE5n
+         xoCWgGuIlQwpJHHe00n5lcxofc8Qd4QwazodqsjscXOOs4yrjNsocD+INOeXq3EzIMUf
+         /OWA==
+X-Forwarded-Encrypted: i=1; AJvYcCUWuXAHNkdVWGDCczg1K0qOCPqI5IOBwTI8ZQsySM2T9NgZ5d+6yRr7HA94+vl2EN7fNnfQ6VHnzYo=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxLMrex108QGxKZdUjwYDTktGFgJnb2oMveERJ/eX8T0smp0I8h
+	+WIDphT/6mfm+Mhj2NFF/I86uDzDONgdrXxV4FxRJkosGB8+wJ6R8K+KIGfKLcDXvRnHM15VHpO
+	BWpjMOuW2UJ/FQKTY3XJPkk0+73movtTD6UCEmFLjG3UOvu4N+P0=
+X-Google-Smtp-Source: AGHT+IGSGgIFN4afz5XWgt9KmsO3+YZJnn8Ko+Z2HXn7fkNdGM2ZDBjhHypaK+quYOHT6jssiLjEWS446xsZEN9pFLg=
+X-Received: by 2002:a05:6902:20c4:b0:e28:6c15:ac6c with SMTP id
+ 3f1490d57ef6-e289393a731mr7649236276.40.1728294593313; Mon, 07 Oct 2024
+ 02:49:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241006051148.160278-1-avri.altman@wdc.com>
-In-Reply-To: <20241006051148.160278-1-avri.altman@wdc.com>
+References: <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
+ <4920950.GXAFRqVoOG@diego> <CAPDyKFosf_+m9j8YgHa-PsC2SV8+Aou2O6bTbMfzGBpQ2sY8YA@mail.gmail.com>
+ <69d06c04-cc8c-4435-a622-33d5dcd1fa24@arm.com>
+In-Reply-To: <69d06c04-cc8c-4435-a622-33d5dcd1fa24@arm.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 7 Oct 2024 11:41:30 +0200
-Message-ID: <CAPDyKFoMXU=+WG1Pv1F6v5dsFryFZhrjP0Cyi1rTahRXwoLsSA@mail.gmail.com>
-Subject: Re: [PATCH v8 00/10] Add SDUC Support
-To: Avri Altman <avri.altman@wdc.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
-	Ricky WU <ricky_wu@realtek.com>, Shawn Lin <shawn.lin@rock-chips.com>, 
-	Christian Loehle <christian.loehle@arm.com>
+Date: Mon, 7 Oct 2024 11:49:17 +0200
+Message-ID: <CAPDyKFoU=AoQqXov_-qFo8xjEbiDAk9mtTtCR9HAYz_gg-bnzQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: rockchip: Keep controller working for card detect
+To: Robin Murphy <robin.murphy@arm.com>
+Cc: Kever Yang <kever.yang@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, 
+	linux-rockchip@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, 6 Oct 2024 at 07:13, Avri Altman <avri.altman@wdc.com> wrote:
+On Fri, 4 Oct 2024 at 19:34, Robin Murphy <robin.murphy@arm.com> wrote:
 >
-> Ultra Capacity SD cards (SDUC) was already introduced in SD7.0.  Those
-> cards support capacity larger than 2TB and up to including 128TB. Thus,
-> the address range of the card expands beyond the 32-bit command
-> argument. To that end, a new command - CMD22 is defined, to carry the
-> extra 6-bit upper part of the 38-bit block address that enable access to
-> 128TB memory space.
+> On 02/10/2024 10:55 pm, Ulf Hansson wrote:
+> > On Sat, 14 Sept 2024 at 13:52, Heiko St=C3=BCbner <heiko@sntech.de> wro=
+te:
+> >>
+> >> Am Donnerstag, 12. September 2024, 09:26:14 CEST schrieb Kever Yang:
+> >>> In order to make the SD card hotplug working we need the card detect
+> >>> function logic inside the controller always working. The runtime PM w=
+ill
+> >>> gate the clock and the power domain, which stops controller working w=
+hen
+> >>> no data transfer happen.
+> >>>
+> >>> So lets skip enable runtime PM when the card needs to detected by the
+> >>> controller and the card is removable.
+> >>>
+> >>> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
+> >>
+> >> So for the change itself this looks good, i.e. it fixes an issue for b=
+aords relying
+> >> on the on-chip-card-detect.
+> >>
+> >>
+> >> But for boards doing that, the controller will be running _all the tim=
+e_
+> >> even if there is never any card inserted.
+> >>
+> >> So relying on the on-soc card-detect will effectively increase the pow=
+er-
+> >> consumption of the board - even it it'll never use any sd-card?
+> >
+> > Good point! A better option is to use a polling based mechanism - and
+> > we have MMC_CAP_NEEDS_POLL for exactly that.
+> >
+> > Moreover, on DT based platforms one can even use the "broken-cd"
+> > property to indicate this.
 >
-> SDUC capacity is agnostic to the interface mode: UHS-I and UHS-II =E2=80=
-=93 Same
-> as SDXC.
->
-> The spec defines several extensions/modifications to the current SDXC
-> cards, which we address in patches 1 - 10.  Otherwise requirements are
-> out-of-scope of this change.  Specifically, CMDQ (CMD44+CMD45), and
-> Extension for Video Speed Class (CMD20).
->
-> First publication of SDUC was in [1].  This series was developed and
-> tested separately from [1] and does not borrow from it.
->
-> [1] https://lwn.net/Articles/982566/
->
-> ---
-> Changes in v8:
->  - Attend some final comments (Ulf)
->
-> Changes in v7:
->  - Minimizes the padding further in mmc_command (Christian)
->  - Set the SD_OCR_2T when enabling SDUC (Adrian)
->  - Remove unnecessary casting (Adrian)
->  - Remove redundant else and switch patches 3 & 4 (Adrian)
->  - Add patch to prevent HSQ from enabling (Adrian)
->  - Remove redundant variable and make use of clamp_val (Adrian)
->
-> Changes in v6:
->  - Remove Ricky's tested-by tag - the series has changed greatly
->  - Call mmc_send_ext_addr from mmc_start_request (Adrian)
->
-> Changes in v5:
->  - leave out the mask in mmc_send_ext_addr (Adrian)
->  - leave out close-ended SDUC support
->  - remove 500msec write delay as there is no busy indication (Adrian)
->  - disable mmc-test for SDUC
->  - move enabling SDUC to the last patch (Adrian)
->
-> Changes in v4:
->  - Squash patches 1 & 2 (Ulf)
->  - Amend SD_OCR_2T to SD_OCR_CCS in mmc_sd_get_cid (Ulf)
->  - Use card state instead of caps2 (Ricky & Ulf)
->  - Switch patches 5 & 6 (Ulf)
->
-> Changes in v3:
->  - Some more kernel test robot fixes
->  - Fix a typo in a commit log (Ricky WU)
->  - Fix ACMD22 returned value
->  - Add 'Tested-by' tag for the whole series (Ricky WU)
->
-> Changes in v2:
->  - Attend kernel test robot warnings
->
-> ---
->
-> Avri Altman (10):
->   mmc: sd: SDUC Support Recognition
->   mmc: sd: Add Extension memory addressing
->   mmc: core: Don't use close-ended rw for SDUC
->   mmc: core: Add open-ended Ext memory addressing
->   mmc: core: Allow mmc erase to carry large addresses
->   mmc: core: Add Ext memory addressing for erase
->   mmc: core: Adjust ACMD22 to SDUC
->   mmc: core: Disable SDUC for mmc_test
->   mmc: core: Prevent HSQ from enabling for SDUC
->   mmc: core: Enable SDUC
->
->  drivers/mmc/core/block.c    | 37 +++++++++++++++++++++-------
->  drivers/mmc/core/bus.c      |  4 +++-
->  drivers/mmc/core/card.h     |  3 +++
->  drivers/mmc/core/core.c     | 48 +++++++++++++++++++++++++------------
->  drivers/mmc/core/core.h     | 16 +++++++++----
->  drivers/mmc/core/mmc_test.c |  6 +++++
->  drivers/mmc/core/sd.c       | 38 +++++++++++++++++++----------
->  drivers/mmc/core/sd.h       |  2 +-
->  drivers/mmc/core/sd_ops.c   | 15 ++++++++++++
->  drivers/mmc/core/sd_ops.h   |  1 +
->  drivers/mmc/core/sdio.c     |  2 +-
->  include/linux/mmc/card.h    |  2 +-
->  include/linux/mmc/core.h    |  4 ++++
->  include/linux/mmc/sd.h      |  4 ++++
->  14 files changed, 137 insertions(+), 45 deletions(-)
->
+> Except that goes further than is needed here, since it would fall back
+> entirely to software-based polling for card presence. In this case the
+> CD function is not broken in terms of actually detecting a card, it just
+> doesn't work to wake the controller up from suspend because it can't
+> fire its own interrupt while powered off. In principle all we should
+> require here is to periodically resume/suspend the device, to provide a
+> window for the interrupt to work and normal operation to take over if
+> appropriate.
 
-Applied for next, thanks!
+Well, I would not object if "broken-cd" would be used for this case
+too. I believe it already is.
+
+Another option would be to look at a compatible string and set
+MMC_CAP_NEEDS_POLL based on that.
+
+>
+> Of course the really clever way would be for suspend to switch the pin
+> into GPIO mode, and set the GPIO interrupt as a wakeup to trigger resume
+> and switch it back again, but perhaps that's a bit tricky without
+> explicit pinctrl states in the DT :/
+
+Right. A dedicated GPIO pin for the card detect is certainly the
+preferred method, if you care about not wasting power.
 
 Kind regards
 Uffe
