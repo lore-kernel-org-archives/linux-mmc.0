@@ -1,157 +1,89 @@
-Received: from mail-io1-f47.google.com (mail-io1-f47.google.com [209.85.166.47])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3C9D81DFD85
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 14:42:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C52FB1DFE21
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 14:55:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728398543; cv=none; b=XertnWWqhwpXQazfkFnKDIT9Gjpf5rTKbAR+apcpbgoQfmjOqmRONEQcTKU6nk3zQCiKv6kHmqNDKmUUlkOXijOCcyWf3L+FD/Ws0t6FHIM8WzdcAA4w6HAPtW4PqYz+0tDSIGdnfymh6QgOi47YOrJCrcoFbJx7sukdQ5c7Tjs=
+	t=1728399354; cv=none; b=e63sO1RxCddkUWLQH0b8aCQTkPralNeiv3udi3hg68EdfdoB7p+RzU/78hkotaNyTlpBsS1U2kw5VARM14oEMouRhOxhLdXFMqKvpQ6dwMmwDt2sTZaCh6q0LuN9oGIurq8W+napAj2ufeacpBuhybGCayIB+QKgasd0GWfIdZg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728398543; c=relaxed/simple;
-	bh=o6Cs+S4dLY3RcsYbinbcTb4X8WwMR++yo1PVH4PRV1Q=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=WT7eEWIxh66HMihLQkwZonNYAAHwsapAzSWXWy1kwsEAj1QWhfW2N1bYiUqLMv5SKyncyn7jvIbW/1S9/ZM2Byi99ma9cSQ/BuIsCrawik0UDWtyYmUWKH1eIDlPePSuZS/Ax1Ye4XePx0CCK65bYP7BHSi/eeCQGRvwof7MatQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=Nxqbp2r6; arc=none smtp.client-ip=209.85.166.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1728399354; c=relaxed/simple;
+	bh=vQQcu9D2TgYGCABRLWOeL0HIYIIp0NwAhXvEYB8YwE8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=a3HLxrew0Yo/hDe/5AzwN/tqGyygqwvGv9AQ2EY7FWGYDOopTdjtbXO/hQLnxGYKTKKQSEEAto76JJnVfMkFfBbmvht/IqVeW0jumRenz/V6qr60dW9kvBdk4Bd+mVx7yWPhUDi9TLGbolaYZz5TouhT3Lp7HYt/zAMRXXOFH3M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=GV8/x4Jv; arc=none smtp.client-ip=209.85.219.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="Nxqbp2r6"
-Received: by mail-io1-f47.google.com with SMTP id ca18e2360f4ac-835393376e1so2159539f.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 07:42:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GV8/x4Jv"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e0875f1e9edso4640513276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 07:55:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1728398540; x=1729003340; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=XfJXcyDI9iqVW74ae5e7Sy3x2feF3IZz7Y0c+ABg/kk=;
-        b=Nxqbp2r64WucbxqfuamiLO+vyvajb3GqzEn9AaIr70E1uKeZDbsshqF9Z9SIwsckAx
-         BeyvoNP9Q4TL22SjpTvRiE6M7yNAMloDBYteolLJd20fwhETzR4tRWQwqtrJiRby57P/
-         1m95RTrYI2mcl+9/8BVEUns8qNZqbxxiRqwUFkYRz5mXe/9faPNIZtZyv9haaKoJ2zWG
-         +YxoiZ5W0wmT9V+F4VRH7JsLm4hpx8mbiSY8+bp7PRFWKx/k0izGvD0tDq51BV5hWqft
-         oVyHSoLDQ56CiBaEhljPuVRta1dPzBc9Na4xtNP1f1afhw+8fk0DBo6ORDtC/US1ERKM
-         UjdA==
+        d=linaro.org; s=google; t=1728399352; x=1729004152; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=vQQcu9D2TgYGCABRLWOeL0HIYIIp0NwAhXvEYB8YwE8=;
+        b=GV8/x4JvrHhWQprKMsbf3qm21WDonaRbDNmnhAH5RdRvVgTDynkZR5WC5IHXS4OfHf
+         ekSoA9QW7k4lUlwjPwyyg9HvTTgy2MSPPy3wMwFXC70DZ//YaSp705rHg5cMXKuJwavY
+         Lk9yU5c1YZmr/UB150E1+ZhfYc7tOZmjBLMDoM+avnIyyr6ky0sagXzbRMtYQVBHTuj3
+         kRVcmzUYwhzG3GDeVk1ZTPwEymY/SI+NKZW+7VpYvcboinopOxcDRXJzV6Ph07YRXlWf
+         OvrzJQj2AbF3vHiXWpTZj0VMZ72K2FqDUUY6pj7N9X6a18ziQEEYU+juxOugVSwnZXGk
+         +c1Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728398540; x=1729003340;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XfJXcyDI9iqVW74ae5e7Sy3x2feF3IZz7Y0c+ABg/kk=;
-        b=bxSpVvDcESa1I5pat/wuM2DJjLImq9GB2d/IwtcLXJvDcmE0Ci7R648Pxaz+XYWALl
-         l30ujUEqRidc7HCDq+RB+urxd3b1/fsXz0inDHapWF3AJ9gSOL0rvIZ75yeccI3vbvMp
-         d7SgbfEna5tSsvPsZEHiQ3z2b3VqzmQOoq3SUTW9Mu+XhsT51+XozZH10I0VYJBXwAyq
-         ++z3K7S6h2TKn6eEmQADC/6mbFvBFxA+GMLUP9xErhBHMbVKA/SRcoXe+3eZ03tQxa/8
-         4P+w4TGfohYDStKTDmzyD1XMNswO2qxMoAivELp0m9dPqb5jR0Ba1f1V95Bjk04DPE9I
-         3C8g==
-X-Forwarded-Encrypted: i=1; AJvYcCXB2lVXxtgDBUjl2ChnBF/FgW/yExF3ODV6JdjtoxDEu+RSS5wEcznKhzYDyVKVkNKpkN6rZB48BAk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy08xFcLEwcZTqBkGJiNP5ONWfVKsJ3Hf/SEo4K9S2XWfiOnLF3
-	eE+BvmkQ3SBbUfB0G/w/61s4muKG3iIGcQnx7Q2VuKwtFYmfXhtx0EIwwVfa35U=
-X-Google-Smtp-Source: AGHT+IETAiC1jlX8BMFN+l2CkCK2B5e9aBFzl2skka3yQGKdlkuUC0WqcWQi62+N2pbEqUuG2/CaYw==
-X-Received: by 2002:a05:6602:6c09:b0:82d:13ce:2956 with SMTP id ca18e2360f4ac-834f7d620e9mr1534160839f.10.1728398540377;
-        Tue, 08 Oct 2024 07:42:20 -0700 (PDT)
-Received: from [192.168.1.116] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id ca18e2360f4ac-83503b308b6sm179730639f.50.2024.10.08.07.42.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 08 Oct 2024 07:42:19 -0700 (PDT)
-Message-ID: <fe18edf0-dea7-49fa-a646-e06afddc84ee@kernel.dk>
-Date: Tue, 8 Oct 2024 08:42:18 -0600
+        d=1e100.net; s=20230601; t=1728399352; x=1729004152;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=vQQcu9D2TgYGCABRLWOeL0HIYIIp0NwAhXvEYB8YwE8=;
+        b=AyNTxiIbG/+3os90AgOTY07G6+LucfDg/sF1xIgmy9aEqpCkr4yszop8zKH6VPwV+A
+         mRz39PXI0UtM4pQ5AyktkXHlKNygflAjP5NRsHaRVrI+hW3e0xu1Ryq2XQ1ddmtCXMOi
+         OZNQIr12n5gglAFQ8yuUoEV6XI+13JhqFfnDwphVc8SDOMc2N+g548jWQObZVjYZJ7OY
+         8MnN9FwON1ma1ieMI/TQgrHcHYB5pNqjIU0eMRjfW1nNM+JWOTtt6E2klLhuTai52KZb
+         tC3X51InEf0kCkhHnwZdJ3D40MwgxzM+wGfv4kFw4oWhbt0mD9xqDtme/jsv34IP5LJz
+         q0sw==
+X-Gm-Message-State: AOJu0Yx8nm3INp271UBAcZhPBR4KXHABjWf+ZNkkvEe+O7cu2l6cq1Ze
+	3EslfdHgED9tswnc7INrjO/ZN4TwMddj4tucGPzcdVi3VuMUSbDslGPDNzHwZBwYeaLiFmoHKur
+	6v8DR54VuPr+JSv7+KZe+znOOFOtjE2Bbh2AY6NBD7J+EsjEzP+o=
+X-Google-Smtp-Source: AGHT+IF/Vd24y912yZbYp1RcOEBMztl7axSlO6A1ZRJVOUun2X2dVE0aRiRV/b3/WL+EiD410nkd9rNDJoL9nP263W8=
+X-Received: by 2002:a05:6902:2490:b0:e28:f6fb:6505 with SMTP id
+ 3f1490d57ef6-e28f6fb662fmr947982276.27.1728399351719; Tue, 08 Oct 2024
+ 07:55:51 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 0/6] block: partition table OF support
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Daniel Golle <daniel@makrotopia.org>,
- INAGAKI Hiroshi <musashino.open@gmail.com>,
- Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
- Ming Lei <ming.lei@redhat.com>, Li Lingfeng <lilingfeng3@huawei.com>,
- Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>,
- Linus Walleij <linus.walleij@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Riyan Dhiman <riyandhiman14@gmail.com>,
- Mikko Rapeli <mikko.rapeli@linaro.org>,
- Jorge Ramirez-Ortiz <jorge@foundries.io>, Li Zhijian
- <lizhijian@fujitsu.com>,
- Dominique Martinet <dominique.martinet@atmark-techno.com>,
- Jens Wiklander <jens.wiklander@linaro.org>,
- Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
- linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
- Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
- Christoph Hellwig <hch@infradead.org>,
- Christian Marangi <ansuelsmth@gmail.com>
-References: <20241002221306.4403-1-ansuelsmth@gmail.com>
- <172833255295.162249.16483920948700467749.b4-ty@kernel.dk>
- <CAPDyKFoueMwVfN+P+tG7zT+-iUs=hghsRu+i9mNiHGw_9tcwBw@mail.gmail.com>
- <fe10ee8f-1220-4a1d-a25b-efaaa314699a@kernel.dk>
- <CAPDyKFpoFP3v8XneMoY5_DEVssYkDyK03QpikBdsZseO4_MLPw@mail.gmail.com>
-Content-Language: en-US
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <CAPDyKFpoFP3v8XneMoY5_DEVssYkDyK03QpikBdsZseO4_MLPw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240922-b218821c1-3bdb282803d1@bugzilla.kernel.org> <20240922-b218821c2-68415fc8fafb@bugzilla.kernel.org>
+In-Reply-To: <20240922-b218821c2-68415fc8fafb@bugzilla.kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 8 Oct 2024 16:55:15 +0200
+Message-ID: <CAPDyKFq4-fL3oHeT9phThWQJqzicKeA447WBJUbtcKPhdZ2d1A@mail.gmail.com>
+Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
+ Microsoft Surface Go 2
+To: "The Linux kernel's regression tracker (Thorsten Leemhuis) via Bugspray Bot" <bugbot@kernel.org>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On 10/8/24 8:33 AM, Ulf Hansson wrote:
-> On Tue, 8 Oct 2024 at 15:24, Jens Axboe <axboe@kernel.dk> wrote:
->>
->> On 10/8/24 3:10 AM, Ulf Hansson wrote:
->>> On Mon, 7 Oct 2024 at 22:22, Jens Axboe <axboe@kernel.dk> wrote:
->>>>
->>>>
->>>> On Thu, 03 Oct 2024 00:11:40 +0200, Christian Marangi wrote:
->>>>> this is an initial proposal to complete support for manually defining
->>>>> partition table.
->>>>>
->>>>> Some background on this. Many OEM on embedded device (modem, router...)
->>>>> are starting to migrate from NOR/NAND flash to eMMC. The reason for this
->>>>> is that OEM are starting to require more and more space for the firmware
->>>>> and price difference is becoming so little that using eMMC is only benefits
->>>>> and no cons.
->>>>>
->>>>> [...]
->>>>
->>>> Applied, thanks!
->>>>
->>>> [1/6] block: add support for defining read-only partitions
->>>>       commit: 03cb793b26834ddca170ba87057c8f883772dd45
->>>> [2/6] docs: block: Document support for read-only partition in cmdline part
->>>>       commit: 62adb971e515d1bb0e9e555f3dd1d5dc948cf6a1
->>>> [3/6] block: introduce add_disk_fwnode()
->>>>       commit: e5f587242b6072ffab4f4a084a459a59f3035873
->>>> [4/6] mmc: block: attach partitions fwnode if found in mmc-card
->>>>       commit: 45ff6c340ddfc2dade74d5b7a8962c778ab7042c
->>>> [5/6] block: add support for partition table defined in OF
->>>>       commit: 884555b557e5e6d41c866e2cd8d7b32f50ec974b
->>>> [6/6] dt-bindings: mmc: Document support for partition table in mmc-card
->>>>       commit: 06f39701d0666d89dd3c86ff0b163c7139b7ba2d
->>>>
->>>
->>> I think we may need another merging strategy for this as I quite big
->>> changes in the pipe for the mmc block device this cycle.
->>>
->>> Would it be possible for you to drop the mmc patches and instead share
->>> an immutable branch with the block changes that I can pull in, so I
->>> can take the mmc changes?
->>
->> I mean we can, but the mmc changes in here are pretty self contained.
->> I'd rather avoid rebasing the block tree for that, given how small the
->> changes are. If it conflicts, should be easy enough to resolve.
-> 
-> Okay, let's give it a try and see how it goes.
-> 
->>
->> You an also just pull in the block tree now and resolve the conflict.
->> There's not a whole lot in there yet outside of this series.
-> 
-> Let's wait and see. If we get some conflicts, you can always set a tag
-> to the latest of the mmc commits in your tree that I can pull instead.
++ Ricky
 
-Yep, sounds like plan!
+On Sun, 22 Sept 2024 at 15:35, The Linux kernel's regression tracker
+(Thorsten Leemhuis) via Bugspray Bot <bugbot@kernel.org> wrote:
+>
+> The Linux kernel's regression tracker (Thorsten Leemhuis) writes via Kernel.org Bugzilla:
+>
+> (In reply to The Linux kernel's regression tracker (Thorsten Leemhuis) from comment #1)
+> > What does "makes my system frequently fail" exactly mean? Fail to boot?
+>
+> Ignore that, I had missed the "causing the filesystem on the card to stop, after several read writes."
+>
+> View: https://bugzilla.kernel.org/show_bug.cgi?id=218821#c2
+> You can reply to this message to join the discussion.
 
--- 
-Jens Axboe
+Did you try to revert the below commit?
+
+0e4cac557531 misc: rtsx: Fix some platforms can not boot and move the
+l1ss judgment to probe
+
+Kind regards
+Uffe
