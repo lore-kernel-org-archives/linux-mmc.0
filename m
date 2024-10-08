@@ -1,61 +1,61 @@
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+Received: from mail-wm1-f42.google.com (mail-wm1-f42.google.com [209.85.128.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2E621DED4F
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 07:24:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 75C78206945
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 07:25:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728372262; cv=none; b=BY2IWm1tAWzEd3qtc7sP55SXybLTqek8f+1TuGU8+qaIXalVMTdiAmL8ypwnpxtgxb6gZLYfk1fdvLB1vG8It5nCWNs1sh4to8L26pf6ToNn4Ft1RBNucgAupdIohABt0qsYT3Ig8TYBypTBgo952TUHLezAmL1Zv6MM5zSWOEs=
+	t=1728372310; cv=none; b=TjM9Q0jtyG2e28OJo4DmzairGKBKX9Ys9j6vBlaI1GVUAl0vegI0ph+bGVhxau0zplFxUmQj7QdczzKrjR46Rz5Z+pACxhPNwtnkqFNQQn9myLugPEH+hK4zExZt9kUEc4iSvYt4Tb+Us8z4ZShBVWOxQcylTdA5VXfZ8A/6S88=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728372262; c=relaxed/simple;
-	bh=k5wKtozUOXcwormKspYI1NDZ/jqQAW2HSmCajtiDnW4=;
+	s=arc-20240116; t=1728372310; c=relaxed/simple;
+	bh=T1Y4WwrIh2YEiqFz/MV6PXScb2u9aOaPE/ZxQO+KPiY=;
 	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=aDanHj/BPokjLZr5xjWcd4jh5cX3TgTKQaBG0RxbQ64I8s07cL+gjq5d5TRl2YLYkrBMorH3XQu+w7yV1Cc1QQEELzr/upDBQOselKef0DmtXGkKNiC74s7Y32th0gHYRXnCs+TgSz2KfnTJLsprocwB+9uGGSGb9uTnn988MnI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tYRY6JJ+; arc=none smtp.client-ip=209.85.221.42
+	 In-Reply-To:Content-Type; b=kJJ/YkA3UOBVXK4K6xsWfccz5us8tmhxmrNdIjI0W5DhKBkVVmWm68c3aRtNZGZprxufwZ7fdtu44rlYu4bToY0PtOWSsG2Ovd6I80QOPqT+EJpyuBppu4n2z3FQNNldPTY2yVoX2jvLeVENBW1NSInEqDQNo/uJR5djAkajCps=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kc44xN9t; arc=none smtp.client-ip=209.85.128.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tYRY6JJ+"
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-37d3297b7deso116147f8f.2
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 00:24:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kc44xN9t"
+Received: by mail-wm1-f42.google.com with SMTP id 5b1f17b1804b1-42e5e758093so46185445e9.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 00:25:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728372259; x=1728977059; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1728372307; x=1728977107; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=/1VM20ISJYt7dKAhB6XtLtvc4jaMUUz1mm+hI9Gbj9M=;
-        b=tYRY6JJ+4emHLr2KTLwUmoDMiJSfEO9MX548tPktW9j/iOx0vJuvGlg4FjNam4APbG
-         MpA8eE/kI4Dh5tOMhNAZyO45VAXG3ZnLwgCRDZIlCCwCo/LUeUObGrSh1flkAi+D1EhK
-         UR4SXBrYIwVqtRubXOZrwlYTOoK89ss5d/ppXKL10lcit/tRnYud6qLzakSomU98vSMQ
-         Yc8LB350pEPanUZ/afbq6JycB372CTjfTSMdtm2pQBuBcNoVcPH0HHq8rwQQzBUVvOHk
-         7eWQ4l3ui4YOueGqqMYSVHjkxGXHb6/yhNvuEeOBB30ACRrTuoiN58+lyFNoLEihQz1i
-         mn3A==
+        bh=5e0vB/xfUb5KsKbGyPnOatGTMRs7uojzkUVkiPqJNdc=;
+        b=kc44xN9tt+fpFPyQBRMWs0JSVRBpaS3z5QriLq+Hl+OXx02vqZ5igb14/1Qas5NUnY
+         KQ/NwANUJfKWwLgUTz+Zf5JnEkEi/O/+YhWWYHJXoY1Mf/Vm0zbFTGUSK0G5QdT+N0IH
+         93XU3cQiWaxQV9yYM/t53MPwDu3zrXugYXDY29eMYC3WqlAXIwDM5vW1amiTwBeeJsW1
+         iDaGIHYS3sKEADVXHO2JjQHRsW5d0N67miPC19dU7or8Z8GqNhdN2OvWBQ+xldDHK9AI
+         dZdQ0oYDMcS4HAb9pNXNsrUVt/clkwHfJvU5K2AJOOWt0I28xCmYXkdBtcEsa+TBhiXW
+         nmnA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728372259; x=1728977059;
+        d=1e100.net; s=20230601; t=1728372307; x=1728977107;
         h=content-transfer-encoding:in-reply-to:organization:autocrypt
          :content-language:references:cc:to:subject:reply-to:from:user-agent
          :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
          :date:message-id:reply-to;
-        bh=/1VM20ISJYt7dKAhB6XtLtvc4jaMUUz1mm+hI9Gbj9M=;
-        b=mTgLnzaySOFHv2yyIT+Y5mMkY1e6tv2lshTLjMTXOA9/rvNWQPgHEWfbqyrfm6/KQM
-         Cs5ILMi0zhVCrAGXUJz+Ohk3fqLNTzHrr7XlcyrLUKtNLHTzFd2TQ6ucyqAgZFNgux6F
-         B9IU7VO/9MMvt90iI3AEcaF/IUfkV/dgPB+FkSIhb3QATB48HH5iw3RH1dGMI+jQM1nB
-         pB5QUCQCaT6AcUwHSU96Y7xjcJVgvi/TuKGWC1p5HHMbRO+zF+p//Tin1wHb3jyhY+N3
-         gCsYX+RuT+iH7tBJkNCI6H6Ftrcy4gajItukp/8WJwnNsE7CUSyz2NKm0qrL50+QPuin
-         shAA==
-X-Forwarded-Encrypted: i=1; AJvYcCVBylEzAvdqU3+Yuc4ny6V2jNdeoNKDEqxNHnAyVzy/4HQl3yTFw+Y+Rx433PmOm7ke8ZpqXuEnNT0=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw/3neEW/qRxkT57nsOJDl897wfy46hg+vmgYJGpoBrN5Ws+7Sb
-	KqkWxl15pRUW7Ls4Q8d3jDoX1qAFWwKDgEqwMG0V7lh8dtHk0mpDv7NUgw1ji/I=
-X-Google-Smtp-Source: AGHT+IHhT7YDIaN7Kvo+FOkIhUP82M2DN1YA8Z9gx7LKSdf9ce7WfEWZNpKl+nbSFSxeivLT+cBNvg==
-X-Received: by 2002:adf:ea8c:0:b0:374:c287:929b with SMTP id ffacd0b85a97d-37d0e6bb291mr8352957f8f.4.1728372246814;
-        Tue, 08 Oct 2024 00:24:06 -0700 (PDT)
+        bh=5e0vB/xfUb5KsKbGyPnOatGTMRs7uojzkUVkiPqJNdc=;
+        b=ZVHlPbVs1SLjRLh7jAn/WEMSEkuZHdKbFj6TDpP1LEgU1NsAC1tpDmcdF8dqRRUtfH
+         HPPQnTtL9TwJL1mbWYyFzomy/BiFUkk2tSrvpdqz3sJIv5UsLD3xw+kVOXBlOhFrsjUn
+         cI8q2lLAHMa2mnQV/EPtJhaK6iR9xYM8LwyFayC0hofY98LBdO+QWo7CFQ1amPGCnYd5
+         jneqmbH5lkrt3h9YKOYM9I58w6C6h8U9ahVR+3vYOHTvFnDbiLE9ABPaih0RPnO/7LUO
+         GTd/RyJ7lJGNNjOAaRVeWaWCBfZEgzV4+SH8qC/HYBFbQUQO5stlWOTFXItK01EGgY96
+         l+rA==
+X-Forwarded-Encrypted: i=1; AJvYcCVFBPTzntZVQW/2fniXDx0IoR8sXsE9rled2vq0AGv1J7Vv7usHJ7+GiiZjthGWycSA/qjXzdWFSN8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwBtpsxgVS5iXaVx2kPGKh804AodaHAqAZFly2uese90i6WYEXa
+	bolFubQcvBhN1zVsQPPmXwfkl5ao9dG3EM626QNjpXoMWT4KfUzVgMEa2JjwM0I=
+X-Google-Smtp-Source: AGHT+IGKJyKn1CkE8ieX0UPcPGOpB+0hJcZaEl/FBijOrKGtn1bkOSUkYtwO+y6Clre3YaP2L94JBQ==
+X-Received: by 2002:a05:600c:3b95:b0:430:5406:a60d with SMTP id 5b1f17b1804b1-4305406a73amr4563595e9.23.1728372306816;
+        Tue, 08 Oct 2024 00:25:06 -0700 (PDT)
 Received: from ?IPV6:2a01:e0a:982:cbb0:4595:23ef:4ba2:2d19? ([2a01:e0a:982:cbb0:4595:23ef:4ba2:2d19])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42f89e832fesm99893515e9.8.2024.10.08.00.24.05
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42f89e8a25csm100160435e9.17.2024.10.08.00.25.05
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 08 Oct 2024 00:24:06 -0700 (PDT)
-Message-ID: <a8c4648c-0941-48f0-ab5d-c3abfc130aaa@linaro.org>
-Date: Tue, 8 Oct 2024 09:24:05 +0200
+        Tue, 08 Oct 2024 00:25:06 -0700 (PDT)
+Message-ID: <356bf96a-862a-4b66-bb63-92127ef5d84f@linaro.org>
+Date: Tue, 8 Oct 2024 09:25:05 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,7 +78,7 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>,
  linux-kernel@vger.kernel.org
 References: <20241007-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v3-0-ad4eb22c2a8d@linaro.org>
  <20241007-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v3-1-ad4eb22c2a8d@linaro.org>
- <20241007195825.GA2296490-robh@kernel.org>
+ <20241007200230.GA2301832-robh@kernel.org>
 Content-Language: en-US, fr
 Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
@@ -105,11 +105,11 @@ Autocrypt: addr=neil.armstrong@linaro.org; keydata=
  4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
  QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
 Organization: Linaro
-In-Reply-To: <20241007195825.GA2296490-robh@kernel.org>
+In-Reply-To: <20241007200230.GA2301832-robh@kernel.org>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 07/10/2024 21:58, Rob Herring wrote:
+On 07/10/2024 22:02, Rob Herring wrote:
 > On Mon, Oct 07, 2024 at 04:03:37PM +0200, Neil Armstrong wrote:
 >> Move the common MMC "slot" properties because they are shared by the
 >> single-slot or multi-slot controllers, and will help defining a simple
@@ -139,9 +139,6 @@ On 07/10/2024 21:58, Rob Herring wrote:
 >> +  - Ulf Hansson <ulf.hansson@linaro.org>
 >> +
 >> +description: |
-> 
-> Don't need '|'.
-> 
 >> +  These properties are common to multiple MMC host controllers and the
 >> +  possible slots or ports for multi-slot controllers.
 >> +
@@ -149,13 +146,11 @@ On 07/10/2024 21:58, Rob Herring wrote:
 >> +  "#address-cells":
 >> +    const: 1
 >> +    description: |
-> 
-> Ditto.
-> 
 >> +      The cell is the slot ID if a function subnode is used.
+> 
+> Actually, this comment is wrong. When slot is used, this is still the
+> cell size for the mmc bus.
 
-Right, so I simply moved the yaml definition, shall I fix it in this patch,
-before or after ?
+OK, not sure how it should be fixed, and it should be fixed before this serie.
 
-Thanks,
 Neil
