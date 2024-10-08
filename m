@@ -1,210 +1,161 @@
-Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2046.outbound.protection.outlook.com [40.107.22.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3802D1FF7A8;
-	Tue,  8 Oct 2024 07:15:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.22.46
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728371730; cv=fail; b=T9Ry/b1rWDzi+/YcLUpBrDTVhzPGJsVaw9AxfkntgcXxeCAeDs4CcZJ9lY1JX6AEkc/wMu9shqLoj8EioAveHHnPbU0gOknEO349QUz78aa96vl9WENOfm2Phro+k31RXSyGQa4D/eSKCIYjwXrgAFoQTSDeKH6HUjwu0A8Y63w=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728371730; c=relaxed/simple;
-	bh=pyYFn5n5KYxMlZf1SnCjg9Cu8WJSgdfz4BsLUftb8jw=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=JymtcPcjSWIxNNSe2qYV4E+CWLrGl563SUMu/R7XaPQ6HKMTA6KLKpmkPR82hn7yC+gLPWgVcn7SHHFGHAsSPGNn8BsSuZvs0qif9BAcs0oB3BxSrliNGUFtDw59qwq2IReUds0tHHXM2XBRxDOBvMxsRL5QOxoMb6NCWGA8KvI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=leica-geosystems.com; spf=fail smtp.mailfrom=leica-geosystems.com; dkim=pass (1024-bit key) header.d=leica-geosystems.com header.i=@leica-geosystems.com header.b=l4FUYy7x; arc=fail smtp.client-ip=40.107.22.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=leica-geosystems.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=leica-geosystems.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2E621DED4F
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 07:24:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1728372262; cv=none; b=BY2IWm1tAWzEd3qtc7sP55SXybLTqek8f+1TuGU8+qaIXalVMTdiAmL8ypwnpxtgxb6gZLYfk1fdvLB1vG8It5nCWNs1sh4to8L26pf6ToNn4Ft1RBNucgAupdIohABt0qsYT3Ig8TYBypTBgo952TUHLezAmL1Zv6MM5zSWOEs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1728372262; c=relaxed/simple;
+	bh=k5wKtozUOXcwormKspYI1NDZ/jqQAW2HSmCajtiDnW4=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=aDanHj/BPokjLZr5xjWcd4jh5cX3TgTKQaBG0RxbQ64I8s07cL+gjq5d5TRl2YLYkrBMorH3XQu+w7yV1Cc1QQEELzr/upDBQOselKef0DmtXGkKNiC74s7Y32th0gHYRXnCs+TgSz2KfnTJLsprocwB+9uGGSGb9uTnn988MnI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tYRY6JJ+; arc=none smtp.client-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=leica-geosystems.com header.i=@leica-geosystems.com header.b="l4FUYy7x"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=S/NMvDoTKUZRfIORwKiPKOymAza+mgriXiEHexwjnVEWAaus+OMci5XnwQTgOyVzRR8Th4HoznV8XlpBvrpjwwZWvj07qzjxa5fTk0goTm8DfmlRu4FiNrQUBHFJtGtAU5NUKA+XqiSKXn1mvGeA5pst30QbVP6Z5/MxZeMAWHEmrvsL70TSCl085K7o8ozliVohCuCOxLEC7BnCG3CVYLzb/RaAW3xkfO+Pf+jTZMuzfeGTvhZkVRABsj59lp8s1LEnbKW1f7+JSc+yc/ED/53aCnn1BUhC52O0ZjBlDiaRVQRImZjQ80Khe2VgOtzGVHS2EnWKwXQbNqIXqoog5A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=pyYFn5n5KYxMlZf1SnCjg9Cu8WJSgdfz4BsLUftb8jw=;
- b=F5tiU9nzPJQEwj2NzgP+2MpYfOT4WueW6mQOYBXRocwqu7B04fYZIQHKsL1pSdLdlJlu4UV9/DBO+Ro1W5dgu7jcURd68LJ6rA4O8ThoYRfNQHwuS9y7cISk8VwMsSt7d0tivpn6V0Z9ucz/SEStFiQyJZU3lPPUIbul3ICt33xffsq6a0WjmNfZz6GaiJKnQUn0OCIw66RTpcm9504FyVcJt/Z8JoLVTRTruKnepuGtLom3P4P3nq7vDqIsrXQb08Gpo9vjU6Xf0bEFbMv8RK0qD5pFSMR/fXYifThuWVhM297amONS0SVcZvMNS9s26F44b3RbFSC9woV97UbItQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=leica-geosystems.com; dmarc=pass action=none
- header.from=leica-geosystems.com; dkim=pass header.d=leica-geosystems.com;
- arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=leica-geosystems.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=pyYFn5n5KYxMlZf1SnCjg9Cu8WJSgdfz4BsLUftb8jw=;
- b=l4FUYy7xRNPDb+ClAi2abNARPGKJq07ttb/8asYVxZTm+1YLteUQQsyR5zNwuRXvZzYJDw6yqaUWSN3HTUwGoXGlGLw9B4LTU8nzgvNnRf/e7963rxtnnBW3ZFYxTSbHhbmR8oTeXjgKym7rHYg9vKWtmK4UTktwp48/Nh2DsAg=
-Received: from DBAPR06MB6901.eurprd06.prod.outlook.com (2603:10a6:10:1a0::11)
- by PAXPR06MB8157.eurprd06.prod.outlook.com (2603:10a6:102:1a3::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8026.23; Tue, 8 Oct
- 2024 07:15:25 +0000
-Received: from DBAPR06MB6901.eurprd06.prod.outlook.com
- ([fe80::3988:68ff:8fd1:7ea0]) by DBAPR06MB6901.eurprd06.prod.outlook.com
- ([fe80::3988:68ff:8fd1:7ea0%5]) with mapi id 15.20.8026.020; Tue, 8 Oct 2024
- 07:15:25 +0000
-From: POPESCU Catalin <catalin.popescu@leica-geosystems.com>
-To: Rob Herring <robh@kernel.org>
-CC: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "krzk+dt@kernel.org"
-	<krzk+dt@kernel.org>, "conor+dt@kernel.org" <conor+dt@kernel.org>,
-	"p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"m.felsch@pengutronix.de" <m.felsch@pengutronix.de>,
-	GEO-CHHER-bsp-development <bsp-development.geo@leica-geosystems.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: mmc-pwrseq-simple: add support for
- reset control
-Thread-Topic: [PATCH 1/2] dt-bindings: mmc: mmc-pwrseq-simple: add support for
- reset control
-Thread-Index: AQHbFlYFMAy48xaGhkKxPcYJRjcHabJ4e4gAgAL0GACAAAeHgIAA/9wA
-Date: Tue, 8 Oct 2024 07:15:25 +0000
-Message-ID: <fbdf9165-39b6-4d8f-97ee-a6694d02719d@leica-geosystems.com>
-References: <20241004120740.2887776-1-catalin.popescu@leica-geosystems.com>
- <20241005182632.GA496820-robh@kernel.org>
- <92a27d06-cd37-42ff-ac48-687981d24d41@leica-geosystems.com>
- <20241007155939.GA849826-robh@kernel.org>
-In-Reply-To: <20241007155939.GA849826-robh@kernel.org>
-Accept-Language: en-CH, en-US
-Content-Language: aa
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=leica-geosystems.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DBAPR06MB6901:EE_|PAXPR06MB8157:EE_
-x-ms-office365-filtering-correlation-id: 492060e5-53d5-4881-9857-08dce768fad9
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|366016|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?Y3o5NnplekN6MjJTWGJvdzBzQko2SGhjMG0ra3YzYVA2TWFnd3BNTnBvNEdK?=
- =?utf-8?B?a0huTDZHa3F3YkNMZ2huQ2toMEo3NUdkUGRKZjRYOWlCMDl5d3VrU2Z3Y0hI?=
- =?utf-8?B?bHhwN1Z0NXI0czZ4V3l2RUQ4a09NMjZjZjB5My9WT2EzWVk1ZDJvZkR4ZlJr?=
- =?utf-8?B?d09TZW40R1NBRDZvb25BZHpXa25pM09GbHR0K3dpSjFKSGlzZVlTM01HVGRX?=
- =?utf-8?B?M2hJc0UxeXVkZloyQ1E1UTRKbTNLcWcrZFZmUlpwUzZ3a25DRDJBTEJkdXNR?=
- =?utf-8?B?NHoyUFd0bVo3MzNDbUZwaHYzRTMzRE5ITDFLbWR6eVdzYjBPdTNFcmlrZ3c4?=
- =?utf-8?B?djgwRDN4QnV4VFp0TURsaHlQUGRkWllKZlVyVThIV29LdWxKcjBxZnM4dmdm?=
- =?utf-8?B?RkFrd3VuQWpnWTRYUEFZT0tmdVB0NGJadGNpRnp5TFBjUkxpTTFXZXlMbFBi?=
- =?utf-8?B?MWlYcVNrZUZKVDRKQThYV0F1N205QkJhV2RwUXRhUE9QMTJmMEt0akNoQStl?=
- =?utf-8?B?S09WMGcrM2pUV0VvS2Z0LzN3aTFRTWRiTTdkSUZXTThOdGhhMFYzM3VjTlRX?=
- =?utf-8?B?MERFbnZUY0JCRnJFM0dGK012TndNaXNuaUtnMk9ld3lEOFdqemMvSTNDOHlY?=
- =?utf-8?B?TUozWjlVSWM5dTdUMnAzbys2OUFYQ2h4MUE4ZlNSN2pqWkhtN20xb3E1L0tU?=
- =?utf-8?B?R1d0MnBzZWg0MVFlaGtadW9sWVZYOVYyMm9CTkhZRkNWUlhrWmRJd25rMC9t?=
- =?utf-8?B?WkcrT3A1QkJNRlg5YXFKdTBCMm00K3AzV2VCMnhuL3NxbzV3cVAybElaZERW?=
- =?utf-8?B?WDh3WVJubXVTNFZEVVl3Y0w5c0NLeURzUzBaMyt2QjI4enB4akpSMDNGV290?=
- =?utf-8?B?NVdXWnhqWVV4UzNHZnJ6dnBFd0VPRTZrNmMxMVhNRkNaeTlWazlmb3hXTjFK?=
- =?utf-8?B?Q1ErN0l6MXEzSkR5NkVLUW4zOHVmUmJIcmFpMkpXYTV4bnl5bmNtRXpQaEhG?=
- =?utf-8?B?RFlpN1QrWXZYQlAvVGQ5N1lXMVJzM3JaSU92L3hpcjZvaUEyRnhIUW0veDJl?=
- =?utf-8?B?TjF3MVMxaXhuZDdnTjFVd2xtWkxiV0c5R0JoYmxNWjBEU1l6K0Izemh1MXBn?=
- =?utf-8?B?TXBaUmR3dXpQRWVIMm9IK3gvRmRpWTdtOW9QLzdQOFYwalRxUjR0b2VybElH?=
- =?utf-8?B?YjlQNU9uczB5bUxvZmsyeXFHaHV2SFBiemFxZ0JESnZYcVlITlkzNEdrWUtW?=
- =?utf-8?B?TjhRUUlBbXdWdVl1ZFNWcmZIaW15Rk9oWWxIanRmN2R2aUV4MWlNdGkwZnNN?=
- =?utf-8?B?K04vanloRERoRVhvS2xxQWd3YnA5RU55VGZaRXNIa3pDN1lHTzdnYzQwY2Fl?=
- =?utf-8?B?L1E2ajJGbkdYWExwa2pydFdyeXpnQW9FaThERmtGMFYxa2x5T3YwUC9JNzhU?=
- =?utf-8?B?eWEvNk1sdEl4UVZENnBUSUNFTU02TWtuWWVhem9wMVRUc1VuQ0I3NTZBQ3Nl?=
- =?utf-8?B?YlhzNWxUWFBMNlZReXM2bitGNHlPLzhTS0RWVGdBSlloemsyaG1hWW0xekgw?=
- =?utf-8?B?Tlp1Z2VzWUtNSzRSSXJZN216akxtTE5HRi9rSWEzd0w3d005VHZocE0vMldi?=
- =?utf-8?B?QXExa3F6eTdESU1ML2hhTVR2YXVucVYzOVdLN1lFbXlCR3RiUEN1TWk2NjhQ?=
- =?utf-8?B?NVdEa0gxWkhlYStwQlFKNHk4VFQ2Mi9FYmI1a05VU0wrcXlaWUNoVStxTXls?=
- =?utf-8?B?bHo3alU5aTdJU1lVRnN5T3NjQUxMU2YreVZXNmhScXV4eVhXaDdEb29obGZp?=
- =?utf-8?B?OVdaZWRxNWYrL2s0aGs5QT09?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DBAPR06MB6901.eurprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?ZStQN3ltMU9ER0pGck1BQlZVWE1XNlZ6V085MDI5dnJZZk9IQWNvK1hCSm5k?=
- =?utf-8?B?UUZ2dXZXU2Q1QTIwbnpjdkdtZVlrVVV2YkZWVytUQklLZjI3bldIdzcvNk5v?=
- =?utf-8?B?emUwekZhQzEyWllCQjJlWXN2SHF4SWhNcmpyc0JDRmd2amhsYS9NMS9pYkNa?=
- =?utf-8?B?UmsxaHM1WjhzZC9zSlJKMXpPSkRGLzRZckwvZjBQbHBUYXVEOTI5alduRmhk?=
- =?utf-8?B?UXE4WmdTN05LQXhlaGtHZGNEQWJSd1o4ZmNXSU9FbFJwRHg4UjZLY3FCRHYy?=
- =?utf-8?B?b0I4eDVKbmwrQ1NOcEFkbU5Fcm42SEFUQlpUdUNYRHM2MVhWWjlURk1SeVFt?=
- =?utf-8?B?OGF4WElxbk5yanFNZXhxcjY2VkxFQmxTTVNobU5ZRHBhMGk1NG9DbEN4RVl6?=
- =?utf-8?B?aGppVzVvcmpyY21yanpqd1d5NUtWWVkyUitsbTRUaThpWGM3WHp6N1dtOGMv?=
- =?utf-8?B?dDl0M2pQc0VkWEVpTXFvVWxHbXloUHdodnZsOTgvbzdTT2VhM3htSDZwUWtn?=
- =?utf-8?B?Y0dFelRHNi9DdG9jVndQUzJ3WU5scUtxYmg3dmRzekZ5eVIyUnFiSXFXcFls?=
- =?utf-8?B?WGpGWmF3bDFnN3l1T3FTTVl4cS9TVmxtZGpUSXhqYnk3aDhLeVBGUmNFR0Iw?=
- =?utf-8?B?S0VPdDM3bGpncnVTVTRkSFFkUmJvVjNNWk1qNjdTZzg4UGoxVS96Z1UvVCt4?=
- =?utf-8?B?V0MxMFdTQmxWK0E2QzNYL05yL0FiTlVhS290ME51N1A2MTltK3FOMllnSzdR?=
- =?utf-8?B?Ykd0bFF6ZDFOYlR3WUxkQ3BsbGQ1dWwvRE1WSlpaNnJLRWYxdGRaTEdiZW9X?=
- =?utf-8?B?VEkwaHIzUjBTNDE4aWxIc0MzZnpPb0g1M2x6N0J4MlFublRkeFNYZmd2YTh3?=
- =?utf-8?B?WHBpRml2QWYrcUljSWh2bHpYTXQrVlpGMDgySERIKzlvSXptNHhzVFIxNksz?=
- =?utf-8?B?Tk9ueUN5d3daRWhWVUk2ODJ1cEttYUlIcjhUUFpiTE5rUkpQZ1k4anA1d3dK?=
- =?utf-8?B?bkpxZm9kbitDU0NNZ0ZvcWl4U1d0V3hYRmtMKy9nR09YbTJvUjdQQkhYa2ov?=
- =?utf-8?B?a0J5Zmtrek1vVktMUkVhOXgxM21lRis0TjV0NjJjeVowdlI5eUhaeUxHRkZh?=
- =?utf-8?B?TUw5Yk9SZWJpNGhMU3JzVzB4RmU0OUMxQ1VvZlRieG9ZUFFWWGVObVcyRUZD?=
- =?utf-8?B?bFFYNVIrWFZxWWFyVzMzK2w3dC9TMkUwdFZOVzBla2dpbHg4QXIzNytUTENM?=
- =?utf-8?B?YXQ4Z3JZdnBqYXhZaXRXL2hCbkNBSlhFblhid0VteGhYQWdxb0FTQklnVGNt?=
- =?utf-8?B?SUVQNGFUQ0Foenk0MWZ2eGxKaDlFZ0IvaU54YnRXQ2dZaWRWSS85N0pRbStp?=
- =?utf-8?B?OWxiWkRmRk9lVVM0dUpJM0FZOXNNbzJDTkZqNkdYeGVhV0dnWnpSQVFzbG53?=
- =?utf-8?B?U3huSHhxN2dDdzhlRE9EaTlIVXJFL1F0TEV1dzgxako3T3dkVmdnWlJEcVBX?=
- =?utf-8?B?SXhGejU1Z29sUXZJMzNuN1E4cHJhcThIYWxBS3hSVnZZTThEaVlLVm9UaHdX?=
- =?utf-8?B?SjhvVHNBZ2JpVDlKWGpDbE5MUEd3ZXl0QzVDbVFHVzRWTEgvcGtVL2VVc3ZF?=
- =?utf-8?B?VnI0TWhENjVDLzEvZnVFV3kvOGl6Z3NraTd2eWZ2VlNPd0diUnRycHkwZmJG?=
- =?utf-8?B?dDBYcnNEWUFhMWlOa2k5eTRVc2t1NGZVSGVtdkM3RGFIZmtRcWlaK2JiT1VD?=
- =?utf-8?B?L2dWUExQUXJKVkRQdGZaUDdhYmJ2ZlpDRlhyaS9TUms5NzREYms1L0RobGRu?=
- =?utf-8?B?ODZWblREdW14VVo0M0Fkc29pWnJwbkxzVjFhRzROV1ZkVU1zNHh3UmxuZlJQ?=
- =?utf-8?B?dWRWcktpNEtWQ1RSSSs5S255QWVZQVdKbGgyT3hCTklwZllaNkpRUEFYQWRv?=
- =?utf-8?B?RzNNK091amRHME0wVXZLb21CUlhrQ05YV1JUWGw1M2QzSU9VVXhJeG1PMzVs?=
- =?utf-8?B?eUlRSWZZMmMwd1A0b3lBZFVsSjdxRDYzL1hjM2dDazgrK1lxYWR3b1c1V0dE?=
- =?utf-8?B?anRCeDFVTmdGREhiWFhQeGp6OVZQUDVRV1NBdG5BcXNCZmhvR285NExneVRi?=
- =?utf-8?B?eUZHRklucDR3NlpPSXdFZGQwNmNkbjh3eXFqSXFsZVhwTncyb1NmYUFrYlNT?=
- =?utf-8?B?c0E9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <9FE385822FCDD14EA8EF30D48B4067FB@eurprd06.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tYRY6JJ+"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-37d3297b7deso116147f8f.2
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 00:24:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1728372259; x=1728977059; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=/1VM20ISJYt7dKAhB6XtLtvc4jaMUUz1mm+hI9Gbj9M=;
+        b=tYRY6JJ+4emHLr2KTLwUmoDMiJSfEO9MX548tPktW9j/iOx0vJuvGlg4FjNam4APbG
+         MpA8eE/kI4Dh5tOMhNAZyO45VAXG3ZnLwgCRDZIlCCwCo/LUeUObGrSh1flkAi+D1EhK
+         UR4SXBrYIwVqtRubXOZrwlYTOoK89ss5d/ppXKL10lcit/tRnYud6qLzakSomU98vSMQ
+         Yc8LB350pEPanUZ/afbq6JycB372CTjfTSMdtm2pQBuBcNoVcPH0HHq8rwQQzBUVvOHk
+         7eWQ4l3ui4YOueGqqMYSVHjkxGXHb6/yhNvuEeOBB30ACRrTuoiN58+lyFNoLEihQz1i
+         mn3A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728372259; x=1728977059;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=/1VM20ISJYt7dKAhB6XtLtvc4jaMUUz1mm+hI9Gbj9M=;
+        b=mTgLnzaySOFHv2yyIT+Y5mMkY1e6tv2lshTLjMTXOA9/rvNWQPgHEWfbqyrfm6/KQM
+         Cs5ILMi0zhVCrAGXUJz+Ohk3fqLNTzHrr7XlcyrLUKtNLHTzFd2TQ6ucyqAgZFNgux6F
+         B9IU7VO/9MMvt90iI3AEcaF/IUfkV/dgPB+FkSIhb3QATB48HH5iw3RH1dGMI+jQM1nB
+         pB5QUCQCaT6AcUwHSU96Y7xjcJVgvi/TuKGWC1p5HHMbRO+zF+p//Tin1wHb3jyhY+N3
+         gCsYX+RuT+iH7tBJkNCI6H6Ftrcy4gajItukp/8WJwnNsE7CUSyz2NKm0qrL50+QPuin
+         shAA==
+X-Forwarded-Encrypted: i=1; AJvYcCVBylEzAvdqU3+Yuc4ny6V2jNdeoNKDEqxNHnAyVzy/4HQl3yTFw+Y+Rx433PmOm7ke8ZpqXuEnNT0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw/3neEW/qRxkT57nsOJDl897wfy46hg+vmgYJGpoBrN5Ws+7Sb
+	KqkWxl15pRUW7Ls4Q8d3jDoX1qAFWwKDgEqwMG0V7lh8dtHk0mpDv7NUgw1ji/I=
+X-Google-Smtp-Source: AGHT+IHhT7YDIaN7Kvo+FOkIhUP82M2DN1YA8Z9gx7LKSdf9ce7WfEWZNpKl+nbSFSxeivLT+cBNvg==
+X-Received: by 2002:adf:ea8c:0:b0:374:c287:929b with SMTP id ffacd0b85a97d-37d0e6bb291mr8352957f8f.4.1728372246814;
+        Tue, 08 Oct 2024 00:24:06 -0700 (PDT)
+Received: from ?IPV6:2a01:e0a:982:cbb0:4595:23ef:4ba2:2d19? ([2a01:e0a:982:cbb0:4595:23ef:4ba2:2d19])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-42f89e832fesm99893515e9.8.2024.10.08.00.24.05
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 08 Oct 2024 00:24:06 -0700 (PDT)
+Message-ID: <a8c4648c-0941-48f0-ab5d-c3abfc130aaa@linaro.org>
+Date: Tue, 8 Oct 2024 09:24:05 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: leica-geosystems.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DBAPR06MB6901.eurprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 492060e5-53d5-4881-9857-08dce768fad9
-X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Oct 2024 07:15:25.0730
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 1b16ab3e-b8f6-4fe3-9f3e-2db7fe549f6a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: gmX/N7oQ4Fd1wXzF6/qr0Tkjkba5qUmdXnG6xLwpKFisoKVoj99GrMABGeOP4hHQ7gN6eDtzvxxC7TIo/8KYRUaitOQ0DrJVP+GH3IoLIaDWcR5wIo5EDrl0JUGlf9vw
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PAXPR06MB8157
+User-Agent: Mozilla Thunderbird
+From: Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: controller: move properties
+ common with slot out to mmc-controller-common
+To: Rob Herring <robh@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>,
+ Jerome Brunet <jbrunet@baylibre.com>,
+ Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+ linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ linux-kernel@vger.kernel.org
+References: <20241007-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v3-0-ad4eb22c2a8d@linaro.org>
+ <20241007-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v3-1-ad4eb22c2a8d@linaro.org>
+ <20241007195825.GA2296490-robh@kernel.org>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <20241007195825.GA2296490-robh@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-T24gMDcvMTAvMjAyNCAxNzo1OSwgUm9iIEhlcnJpbmcgd3JvdGU6DQo+IFtTb21lIHBlb3BsZSB3
-aG8gcmVjZWl2ZWQgdGhpcyBtZXNzYWdlIGRvbid0IG9mdGVuIGdldCBlbWFpbCBmcm9tIHJvYmhA
-a2VybmVsLm9yZy4gTGVhcm4gd2h5IHRoaXMgaXMgaW1wb3J0YW50IGF0IGh0dHBzOi8vYWthLm1z
-L0xlYXJuQWJvdXRTZW5kZXJJZGVudGlmaWNhdGlvbiBdDQo+DQo+IFRoaXMgZW1haWwgaXMgbm90
-IGZyb20gSGV4YWdvbuKAmXMgT2ZmaWNlIDM2NSBpbnN0YW5jZS4gUGxlYXNlIGJlIGNhcmVmdWwg
-d2hpbGUgY2xpY2tpbmcgbGlua3MsIG9wZW5pbmcgYXR0YWNobWVudHMsIG9yIHJlcGx5aW5nIHRv
-IHRoaXMgZW1haWwuDQo+DQo+DQo+IE9uIE1vbiwgT2N0IDA3LCAyMDI0IGF0IDAzOjMyOjQyUE0g
-KzAwMDAsIFBPUEVTQ1UgQ2F0YWxpbiB3cm90ZToNCj4+IE9uIDA1LzEwLzIwMjQgMjA6MjYsIFJv
-YiBIZXJyaW5nIHdyb3RlOg0KPj4+IFtTb21lIHBlb3BsZSB3aG8gcmVjZWl2ZWQgdGhpcyBtZXNz
-YWdlIGRvbid0IG9mdGVuIGdldCBlbWFpbCBmcm9tIHJvYmhAa2VybmVsLm9yZy4gTGVhcm4gd2h5
-IHRoaXMgaXMgaW1wb3J0YW50IGF0IGh0dHBzOi8vYWthLm1zL0xlYXJuQWJvdXRTZW5kZXJJZGVu
-dGlmaWNhdGlvbiBdDQo+Pj4NCj4+PiBUaGlzIGVtYWlsIGlzIG5vdCBmcm9tIEhleGFnb27igJlz
-IE9mZmljZSAzNjUgaW5zdGFuY2UuIFBsZWFzZSBiZSBjYXJlZnVsIHdoaWxlIGNsaWNraW5nIGxp
-bmtzLCBvcGVuaW5nIGF0dGFjaG1lbnRzLCBvciByZXBseWluZyB0byB0aGlzIGVtYWlsLg0KPj4+
-DQo+Pj4NCj4+PiBPbiBGcmksIE9jdCAwNCwgMjAyNCBhdCAwMjowNzozOVBNICswMjAwLCBDYXRh
-bGluIFBvcGVzY3Ugd3JvdGU6DQo+Pj4+IEFkZCBjb21wYXRpYmxlIHZhbHVlICJtbWMtcHdyc2Vx
-LXNpbXBsZS1yZXNldCIgdG8gc3VwcG9ydCByZXNldCBjb250cm9sDQo+Pj4+IGluc3RlYWQgb2Yg
-Z3Bpb3MuIFJlc2V0IGNvbnRyb2xzIGJlaW5nIHJlZmNvdW50ZWQsIHRoZXkgYWxsb3cgdG8gdXNl
-DQo+Pj4+IHNoYXJlZCByZXNldHMgb3IgZ3Bpb3MgYWNyb3NzIGRyaXZlcnMuIFN1cHBvcnQgb2Yg
-cmVzZXQgY29udHJvbCBpcw0KPj4+PiBsaW1pdGVkIHRvIG9uZSBzaW5nbGUgcmVzZXQgY29udHJv
-bC4NCj4+PiBDYW4ndCB5b3UgZG8gdGhpcyB3aXRob3V0IGEgYmluZGluZyBjaGFuZ2U/IEp1c3Qg
-dXNlIHJlc2V0IGNvbnRyb2xzIHdoZW4NCj4+PiB0aGVyZSBpcyBvbmx5IDEgR1BJTy4NCj4+IFRo
-YXQncyBhIGdvb2QgcXVlc3Rpb24uIFRoZSBpZGVhIHdhcyB0byBrZWVwIGluIHBsYWNlIHRoZSBn
-cGlvIHN1cHBvcnQNCj4+IHcvbyBpbXBhY3RpbmcgYW55IHBsYXRmb3JtIHVzaW5nIHB3cnNlcS1z
-aW1wbGUuDQo+IFdoeSB3b3VsZCBpdCBtYXR0ZXI/IElmIG5vdCBzaGFyZWQsIHRoZW4gdGhlIGJl
-aGF2aW9yIHNob3VsZCBiZSB0aGUNCj4gc2FtZS4gSWYgc2hhcmVkLCB3ZSB3YW50IHRvIG1haW50
-YWluIHRoZSBicm9rZW4gYmVoYXZpb3I/DQpJbmRlZWQsIHlvdSdyZSByaWdodC4gSSB3aWxsIHBy
-b3ZpZGUgYSBuZXcgcGF0Y2hzZXQgdy9vIHRoZSBiaW5kaW5nIA0KY2hhbmdlIGFuZCB1c2luZyBy
-ZXNldCBjb250cm9sIGZvciAxIGdwaW8gdXNlLWNhc2UuDQo+PiBBbHNvLCBsYXRlciBvbiB3aGVu
-IHN1cHBvcnQgZm9yIGEgbGlzdCBvZiByZXNldCBncGlvcyB3aWxsIGJlIGFkZGVkIHRvDQo+PiB0
-aGUgcmVzZXQgZnJhbWV3b3JrLCB0aGlzIHdvdWxkIG5vdCB3b3JrIGFueW1vcmUuLi4NCj4gV2h5
-IG5vdD8NCj4NCj4gSG93IGFuIE9TIGhhbmRsZXMgcmVzZXQtZ3Bpb3MgaXMgdXAgdG8gdGhlIE9T
-LiBJdCBjYW4gZXZvbHZlLiBUaGUNCj4gYmluZGluZyBjYW4ndCBldm9sdmUgYmVjYXVzZSBpdCBp
-cyBhbiBBQkkuDQo+DQo+IEFsc28sIGEgbGlzdCBpcyBraW5kIG9mIGJyb2tlbiB0byBiZWdpbiB3
-aXRoIGZvciBhICJnZW5lcmljIiBiaW5kaW5nLg0KPiBXaGF0J3MgdGhlIG9yZGVyIHRoZSBsaW5l
-cyBzaG91bGQgYmUgYXNzZXJ0ZWQvZGVhc3NlcnRlZD8gV2hhdCBhYm91dA0KPiB0aW1pbmcgcmVx
-dWlyZW1lbnRzPyBZb3UgZG9uJ3Qga25vdyBiZWNhdXNlIGV2ZXJ5IGRldmljZSBpcyBkaWZmZXJl
-bnQuDQo+IFRoaXMgYmluZGluZyB3b3VsZCBub3QgYmUgYWNjZXB0ZWQgbm93LCBzbyBleHRlbmRp
-bmcgaXQgaXMgcXVlc3Rpb25hYmxlLg0KPg0KPiBSb2INCg0KDQo=
+On 07/10/2024 21:58, Rob Herring wrote:
+> On Mon, Oct 07, 2024 at 04:03:37PM +0200, Neil Armstrong wrote:
+>> Move the common MMC "slot" properties because they are shared by the
+>> single-slot or multi-slot controllers, and will help defining a simple
+>> mmc-slot bindings document with proper slot properties and nodename.
+>>
+>> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+>> ---
+>>   .../bindings/mmc/mmc-controller-common.yaml        | 357 +++++++++++++++++++++
+>>   .../devicetree/bindings/mmc/mmc-controller.yaml    | 344 +-------------------
+>>   2 files changed, 360 insertions(+), 341 deletions(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> new file mode 100644
+>> index 000000000000..e02d3cbcc271
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> @@ -0,0 +1,357 @@
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/mmc/mmc-controller-common.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: MMC Controller & Slots Common Properties
+>> +
+>> +maintainers:
+>> +  - Ulf Hansson <ulf.hansson@linaro.org>
+>> +
+>> +description: |
+> 
+> Don't need '|'.
+> 
+>> +  These properties are common to multiple MMC host controllers and the
+>> +  possible slots or ports for multi-slot controllers.
+>> +
+>> +properties:
+>> +  "#address-cells":
+>> +    const: 1
+>> +    description: |
+> 
+> Ditto.
+> 
+>> +      The cell is the slot ID if a function subnode is used.
+
+Right, so I simply moved the yaml definition, shall I fix it in this patch,
+before or after ?
+
+Thanks,
+Neil
