@@ -1,178 +1,134 @@
-Received: from mail-yb1-f172.google.com (mail-yb1-f172.google.com [209.85.219.172])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72EB518DF72
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Oct 2024 22:35:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D168A1D0E38
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 07:13:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728340531; cv=none; b=g0icqhNpIVNYYjkB8phFMFSowSElonI8XNOoQsW60mhqPFr8uYy11S3/+afPT8B438p5qO3FU4GOzk7NDPjCl7jHpRTtLzt1mzbneqOEqvy7kpzfcooYkJzjOCrCJGSYmwU7Kla5ygLmgbwOabadrrfngLAfgJHS5kvpugo0fuo=
+	t=1728371623; cv=none; b=XG0l2sjGhoRxp3qjsLnjDz2G8zWAvoWMWTRhj64onVZQnHXQ5own3PzxOXTPVWIP+WiPgFsPdCxvX43S0USYGs6MEbgTxRe1lGsqmRWcZmnFtdF9rh4wTb96kPtFsESrgFHJQhAnR4eRT6Bbsh2BL9O/QH8lLlUrrmgJ0Vk9iuM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728340531; c=relaxed/simple;
-	bh=gesjil9Y0RZgbcjmX5qHd/S97rHztDCcedkOm+1cl0k=;
+	s=arc-20240116; t=1728371623; c=relaxed/simple;
+	bh=Qqnen8OlMTA+nOtnPxWjEuzheQicP9ePILel9kENRfQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Bu5AdPzC+HFly0hwh3yMhT3CE7IbdOl8/uD/k23dKZcOJl4eZyRStdFppLGy8flHl5xYxJty478Gc0/QL+UQq9ffo5Z1Ybvo/lxyTDurszvSnnGc2znfnnxTNy0ik0B9+v+BD6eF2PjZpTwFGOS1FBx9AOBH50wW9Ng2eJVR47s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=e3VL5Ud8; arc=none smtp.client-ip=209.85.219.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=WPWL4miKhMZwjyhTAdKUGJlI0jCSk/EqpV9Hx2CThiLZJ4t7HHpVEnr+LtdKj4PoVZGqBKuruCj5H9ueEQMN5H/0reu08kRDmOANB1qNo+sC1xwltWxL0DEs1yEdXfRQDlPfBm2FyIJ4q2IJ4yzTqMnzB1gPBsAaX6riNKakm9w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=YIfOcAwa; arc=none smtp.client-ip=209.85.167.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="e3VL5Ud8"
-Received: by mail-yb1-f172.google.com with SMTP id 3f1490d57ef6-e026a2238d8so4471273276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Oct 2024 15:35:27 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="YIfOcAwa"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-53992157528so5570247e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 00:13:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728340526; x=1728945326; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=gesjil9Y0RZgbcjmX5qHd/S97rHztDCcedkOm+1cl0k=;
-        b=e3VL5Ud84GLI+E2x3bA8ztpqvuFMv57yd9aYEVQJXCzdGLPTTmXpQqv3Opq72bJmux
-         KBHMo3MVO1HOzdmTO8H+pcTCfVPqaiTDnPTpbQzl0qQR7IL44jHkwS4bzBufrjeR8qhe
-         DDLiaWivcex7UxcVlthWRdgNLBWzi+M8qTeDx57baSkDWFH1agIYPgvRPadbYLCLtjZu
-         06qTHbdte5aRDCOnGRwQe0feCJbqguEWevqetTaa5WoZI91EWlvvh0bLcBUS4nMqHsf9
-         D1KWrNcsh7YIcTiYbXUJhkPijHa5aKTMIfa20aY8luGYazLflzR5ecy/UydbOSAfiQM/
-         3TDg==
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1728371619; x=1728976419; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UyH4WgH6K9qfphCXNjPyqAa7TRjWzHwQ7qZITx1WeNM=;
+        b=YIfOcAwa112DDOlYkOiLJ46EN+/4cnHGJgoRjGS4OPpX5D1d28yr592F27J6VKiguh
+         1zbHXjcx+FZiJ+Is7ti9xwjhsN3jVg9AsOTWzmdOwEEtoTe36RHz/Ncuv8tNs3LhTSpw
+         adPs4dOo1fh4/nXF/EgFvCRRm5u9+zpa7ZViu6ZgNLVDyL7UFgtyGqF6m+ZQdhyKB+zI
+         1YFlVafLwaH39G8AjjMF/v0c74TmC73BCJKyZI4M73HQ/TLaBX3JVuQIBiCD6Pn6fwFy
+         W0yg8CHuqi+65ZMOmdGKMQyT4z382KwQ5W9CRs7fjAO/l/bchaJRo78aJeUI+Mce+nlK
+         otrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728340526; x=1728945326;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=gesjil9Y0RZgbcjmX5qHd/S97rHztDCcedkOm+1cl0k=;
-        b=Lo32Jex0ZJCHgxooD3f5yqCNqUTpHwL5DpZgWQP9H4qC+mk7KpfACKUWMYgUHorhzC
-         QgZ9/XdRn7Lzn+4TRTweYgMUMep0YDmOgUYpkpn5wujzAi6vI+euIyMjNuBYAHsyrOvc
-         urGqLuv/a6qhcKAs9clqp8cYIeHfnaawQ6xCGh4fbuT3S7SZ3byIQkoD0bYwYiy1wPh+
-         Ma6mKALsonY7YnO6S5RMauF8RS4t6Ivj9YNERegSWsK9oqU1luiFM5RV4XKy5e8uW/CJ
-         DdSLgphdUURiDH5lgG16/VOiwpMjj07BYnJbLWq1wexI6fK1tZGOU55i3CMqs4ealdiU
-         H7oA==
-X-Forwarded-Encrypted: i=1; AJvYcCU5s0w9n/lyt9Ay9PyQtTsQpgm1ChnsxqO1Oqln5SY8X48HsvFptaggA4fgYoIWESaEFAvVnkLRWkk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzHJsi3QQG4DAfY1YyomwUb0Ks7HSxnB3gmZugyqm5qkLU4MM/4
-	+s58n1IsG1chbTfADNbUpxyan4ASYRBuRidD+7vBhhc35zo84Q1duJfbJ3kQciLan7876d4P5r1
-	ORVITuPiAnTgLPPg0VlXS7qmSupP+YgE+Plw8Pw==
-X-Google-Smtp-Source: AGHT+IGYLLRVc3CeXKReIUVnntYlZ+ULRb29gPUl3UTx4hoqAUGdx6q2aFDzdnacRWqcM/cOYseo4GoEdp7e3a8qLZE=
-X-Received: by 2002:a05:6902:2305:b0:e28:6ec7:4353 with SMTP id
- 3f1490d57ef6-e2893964043mr10612649276.54.1728340526338; Mon, 07 Oct 2024
- 15:35:26 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1728371619; x=1728976419;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=UyH4WgH6K9qfphCXNjPyqAa7TRjWzHwQ7qZITx1WeNM=;
+        b=IdXGcuLpMkmpaizFKom0lmk7yrrsj8MVld6pXrCD0+xZh1abdMFouFgHYyC+xnUdQf
+         nwFTy0DGXcx/onALLcbUQw+Rmw8CNuou1Te9LNbvmR3IhxXwSWMVMTv6W9uE5cb+XKU7
+         0ovxc+JfPARyKicULK5TmX/yriDbWDhPZ2f8JbuyqtXFpRlCW5PXsn2tdm1c2EUsw415
+         ScgPcpRenwQBaQEG9T3hVZwrQLbKDNWB/q3vi9/6cOHkHgpYpt+HRUBJf6X6FbUmFm2z
+         PhGvBBJ5oC9REfDvtOq/6EqkUvbvsBoj/OFQL8SiaktXdl6pkX62K5xxP8NoNgnKLFUH
+         rQvQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVHrz8rj1GJiUxDG5MHMROQw//kUGAvtV4bNlf43jFey4f2JDgXfRlNWMK5DdsPzxZRd2ORMoyN10s=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyjoIjk/R7aXPvi3+8N48gPLFfXJ0L7VpN3ATE+d9JHu/6f9MI0
+	P4Cx7FI4edmzM60usjh6sTrsAK4TCg8CShODAJ1hpkrEDFeTMdpLaVcMKlj95cztsmGhoeyHHrd
+	LyKfU6BUQG9eDuULaFjyzQKJouZkvNAQQDqQQAxO99rvOLnvP
+X-Google-Smtp-Source: AGHT+IEGDyNNIFgz7oFW2nn+cUENIDzldCDjsaV6cMS7EfRvqGpqKJC0l9Ii005Lllt4UvuPrVI0kkNZVXpqY3u+Z/g=
+X-Received: by 2002:a05:6512:33d0:b0:533:cf5a:eb32 with SMTP id
+ 2adb3069b0e04-539ab8741c0mr7295385e87.19.1728371618606; Tue, 08 Oct 2024
+ 00:13:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241004094101.113349-1-sakari.ailus@linux.intel.com>
- <CAPDyKFp0N6UJhnHS164Tdf=xkWB0jzq65L9TdvYazeBQ-6WjeQ@mail.gmail.com>
- <20241007184924.GH14766@pendragon.ideasonboard.com> <CAPDyKFpQVnF7eQv3dup8k-3EijnMjuveCG9sZ=Rpey1Y6MBJEg@mail.gmail.com>
- <20241007222502.GG30699@pendragon.ideasonboard.com>
-In-Reply-To: <20241007222502.GG30699@pendragon.ideasonboard.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 8 Oct 2024 00:34:49 +0200
-Message-ID: <CAPDyKFrGNwna6Y2pqSRaBbRYHKRaD2ayqQHLtoqLPOu9Et7qTg@mail.gmail.com>
-Subject: Re: [PATCH 00/51] treewide: Switch to __pm_runtime_put_autosuspend()
-To: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
-Cc: Sakari Ailus <sakari.ailus@linux.intel.com>, dri-devel@lists.freedesktop.org, 
-	linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org, 
-	linux-clk@vger.kernel.org, linux-crypto@vger.kernel.org, 
-	dmaengine@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	amd-gfx@lists.freedesktop.org, nouveau@lists.freedesktop.org, 
-	linux-stm32@st-md-mailman.stormreply.com, 
-	linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, 
-	linux-i3c@lists.infradead.org, linux-iio@vger.kernel.org, 
-	linux-input@vger.kernel.org, patches@opensource.cirrus.com, 
-	iommu@lists.linux.dev, imx@lists.linux.dev, 
-	linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, 
-	netdev@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	linux-pci@vger.kernel.org, linux-phy@lists.infradead.org, 
-	linux-pwm@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
-	linux-sound@vger.kernel.org, linux-spi@vger.kernel.org, 
-	linux-staging@lists.linux.dev, linux-usb@vger.kernel.org, 
-	linux-serial@vger.kernel.org, greybus-dev@lists.linaro.org, 
-	asahi@lists.linux.dev, rafael@kernel.org, 
-	Andy Shevchenko <andy.shevchenko@gmail.com>
+References: <20241007114549.51213-1-brgl@bgdev.pl> <ab1180ff-b435-46c8-82a8-66fea41db110@wanadoo.fr>
+In-Reply-To: <ab1180ff-b435-46c8-82a8-66fea41db110@wanadoo.fr>
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+Date: Tue, 8 Oct 2024 09:13:27 +0200
+Message-ID: <CAMRc=MfrQNc1idCD8fBbOx5bWzCU6f-Ryefu-eoxfzOaA8=_Fg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmc_spi: fix snprintf() output buffer size
+To: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, 
+	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 8 Oct 2024 at 00:25, Laurent Pinchart
-<laurent.pinchart@ideasonboard.com> wrote:
+On Mon, Oct 7, 2024 at 8:09=E2=80=AFPM Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
 >
-> Hi Ulf,
->
-> On Tue, Oct 08, 2024 at 12:08:24AM +0200, Ulf Hansson wrote:
-> > On Mon, 7 Oct 2024 at 20:49, Laurent Pinchart wrote:
-> > > On Fri, Oct 04, 2024 at 04:38:36PM +0200, Ulf Hansson wrote:
-> > > > On Fri, 4 Oct 2024 at 11:41, Sakari Ailus wrote:
-> > > > >
-> > > > > Hello everyone,
-> > > > >
-> > > > > This set will switch the users of pm_runtime_put_autosuspend() to
-> > > > > __pm_runtime_put_autosuspend() while the former will soon be re-purposed
-> > > > > to include a call to pm_runtime_mark_last_busy(). The two are almost
-> > > > > always used together, apart from bugs which are likely common. Going
-> > > > > forward, most new users should be using pm_runtime_put_autosuspend().
-> > > > >
-> > > > > Once this conversion is done and pm_runtime_put_autosuspend() re-purposed,
-> > > > > I'll post another set to merge the calls to __pm_runtime_put_autosuspend()
-> > > > > and pm_runtime_mark_last_busy().
-> > > >
-> > > > That sounds like it could cause a lot of churns.
-> > > >
-> > > > Why not add a new helper function that does the
-> > > > pm_runtime_put_autosuspend() and the pm_runtime_mark_last_busy()
-> > > > things? Then we can start moving users over to this new interface,
-> > > > rather than having this intermediate step?
-> > >
-> > > I think the API would be nicer if we used the shortest and simplest
-> > > function names for the most common use cases. Following
-> > > pm_runtime_put_autosuspend() with pm_runtime_mark_last_busy() is that
-> > > most common use case. That's why I like Sakari's approach of repurposing
-> > > pm_runtime_put_autosuspend(), and introducing
-> > > __pm_runtime_put_autosuspend() for the odd cases where
-> > > pm_runtime_mark_last_busy() shouldn't be called.
+> Le 07/10/2024 =C3=A0 13:45, Bartosz Golaszewski a =C3=A9crit :
+> > From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 > >
-> > Okay, so the reason for this approach is because we couldn't find a
-> > short and descriptive name that could be used in favor of
-> > pm_runtime_put_autosuspend(). Let me throw some ideas at it and maybe
-> > you like it - or not. :-)
->
-> I like the idea at least :-)
->
-> > I don't know what options you guys discussed, but to me the entire
-> > "autosuspend"-suffix isn't really that necessary in my opinion. There
-> > are more ways than calling pm_runtime_put_autosuspend() that triggers
-> > us to use the RPM_AUTO flag for rpm_suspend(). For example, just
-> > calling pm_runtime_put() has the similar effect.
->
-> To be honest, I'm lost there. pm_runtime_put() calls
-> __pm_runtime_idle(RPM_GET_PUT | RPM_ASYNC), while
-> pm_runtime_put_autosuspend() calls __pm_runtime_suspend(RPM_GET_PUT |
-> RPM_ASYNC | RPM_AUTO).
-
-__pm_runtime_idle() ends up calling rpm_idle(), which may call
-rpm_suspend() - if it succeeds to idle the device. In that case, it
-tags on the RPM_AUTO flag in the call to rpm_suspend(). Quite similar
-to what is happening when calling pm_runtime_put_autosuspend().
-
->
+> > GCC 13 complains about the truncated output of snprintf():
 > >
-> > Moreover, it's similar for pm_runtime_mark_last_busy(), it's called
-> > during rpm_resume() too, for example. So why bother about having
-> > "mark_last_busy" in the new name too.
+> > drivers/mmc/host/mmc_spi.c: In function =E2=80=98mmc_spi_response_get=
+=E2=80=99:
+> > drivers/mmc/host/mmc_spi.c:227:64: error: =E2=80=98snprintf=E2=80=99 ou=
+tput may be truncated before the last format character [-Werror=3Dformat-tr=
+uncation=3D]
+> >    227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%=
+s",
+> >        |                                                               =
+ ^
+> > drivers/mmc/host/mmc_spi.c:227:9: note: =E2=80=98snprintf=E2=80=99 outp=
+ut between 26 and 43 bytes into a destination of size 32
+> >    227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%=
+s",
+> >        |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~=
+~~~
+> >    228 |                 cmd->opcode, maptype(cmd));
 > >
-> > That said, my suggestion is simply "pm_runtime_put_suspend".
->
-> Can we do even better, and make pm_runtime_put() to handle autosuspend
-> automatically when autosuspend is enabled ?
-
-As stated above, this is already the case.
-
->
-> > If you don't like it, I will certainly not object to your current
-> > approach, even if I think it leads to unnecessary churns.
+> > Increase the size of the target buffer.
 > >
-> > [...]
+> > Fixes: 15a0580ced08 ("mmc_spi host driver")
+> > Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+> > ---
+> >   drivers/mmc/host/mmc_spi.c | 2 +-
+> >   1 file changed, 1 insertion(+), 1 deletion(-)
 > >
-> > Kind regards
-> > Uffe
+> > diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> > index 8fee7052f2ef..fa1d1a1b3142 100644
+> > --- a/drivers/mmc/host/mmc_spi.c
+> > +++ b/drivers/mmc/host/mmc_spi.c
+> > @@ -222,7 +222,7 @@ static int mmc_spi_response_get(struct mmc_spi_host=
+ *host,
+> >       u8      leftover =3D 0;
+> >       unsigned short rotator;
+> >       int     i;
+> > -     char    tag[32];
+> > +     char    tag[43];
+> >
+> >       snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+> >               cmd->opcode, maptype(cmd));
 >
-> --
-> Regards,
+> 'tag' is only used in a dev_dbg() at the end of the function.
 >
-> Laurent Pinchart
+> Maybe "  ... CMD%d response SPI_%s" could me moved directly within the
+> dev_dbg(). This would save a few bytes on the stack, save a snprintf()
+> in the normal path and fix the warning without the need of magic number.
+>
+> just my 2c.
+>
+> CJ
 
-Kind regards
-Uffe
+I would be hesitant to change this logic here. The cmd struct is
+manipulated pretty extensively later in the function which leads me to
+believe that this snprintf() here was done on purpose.
+
+Bart
