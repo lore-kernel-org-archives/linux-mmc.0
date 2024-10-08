@@ -1,48 +1,59 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF7B11AD401;
-	Tue,  8 Oct 2024 10:18:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D8B31DFE18
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 13:24:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728382725; cv=none; b=JmEI5y6ycNt7QfdysmSDraoQqPfuh5AyUoENS5Q5i6qa3jJTHdlpZJfK7/E9uuvIuWnlUQKhQypaJz9LNECRbrzd+PCbPSfTnrJFTElNS4Kp/1WxfreqJWZLitKsgeYEeMxg93lqjjjYDIM7RtvEarw1ahDzMiaAGhedhJZ0b54=
+	t=1728393887; cv=none; b=L2EFjq0UsNC3mlbe5O9ofKAdmoTR4dD9KzSj6aO0fqwEzwGCEy++5seYCTsIw8tXHQ/cvRCuxmnsTzLQGCDrlJpEn+Dwp44Yi9V4T8M935GKCPBZ0BDdpzz1dhqWNZLzE0aXDTPIiFE5uUAI+UFB6V87T3cg2ziMpBoUr1EDy28=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728382725; c=relaxed/simple;
-	bh=u8xPnDu0qAYu6LejKWYoWWMdvK8gJRvYrhiJGpOdTLg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=USFZyqxg1F6EZa77haswD1NOVwk/7SuUDGa7v6kbWJS3ftJTVnZILotFexI+v6uSCGmCddeS5iJuuaJBY4jZnSqUV4A4U13MDerhWbGWcv8/F9t9KtjR8gJTleCO6lfWAqtnHTUJjnil4yWE7wwwdJQ9yDHVO+5s7O78Hux6HYY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=c3lregHn; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1728393887; c=relaxed/simple;
+	bh=1JLses5T18eVEvY7yJFIthwSZIRfibQxel3VlN8/p1Q=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DQ8hrzCLy0Z9XP96hu7EHIdC09agen1xLPErXxBkm4SQJVVf7pUvpSpmYVUH8EhF4p24NVzTZz/quQEZPTYjyEe3TlAVzvJXtaKja3SAhjwWvigSp/j3uqHEkWJ6HnKu1IpUX4RmmzhUtd4QPIOq+x3164tjybWMTFeDDheSbEA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=FR/gX1cE; arc=none smtp.client-ip=209.85.166.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="c3lregHn"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49896gcp004100;
-	Tue, 8 Oct 2024 10:18:22 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	sqpFdTY+6jzDWQR097kkAMWTTO8iAiSE8pceKsB4sbM=; b=c3lregHnCu6sgvl0
-	IlAwZ2V8iFuSl5HXydolufxefzYRLOfjIfHvl1Y8ayfsOci9k8Uhxumg/Ka+D3Ec
-	IARenIIyvDYbyAKcQUATpms1qh7bU1nLbmkwGDX/pKxa9VNbE0QHrq+xh7S28aaU
-	hYh8utWbhkjaF3hZfRHC5XhXnulwaDbLTJxwGLXBEV9VGxzTsvB9GOUkRh5DG0sE
-	QE3CNZCpwzjLKRmGmF3ef3IkPkmKVeHKgGbWvSLybR+zSheqe9ELwrk8T2cawejk
-	LdAJvWdM697LCAUWcNN77d8KHBh5YMiTyvGfwx7j3rPaZf8AhGnY8MVk2vmx8hWB
-	OoB8aQ==
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 424ndy9vd5-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 08 Oct 2024 10:18:21 +0000 (GMT)
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 498AIK0o006896
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 8 Oct 2024 10:18:20 GMT
-Received: from [10.50.47.90] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Tue, 8 Oct 2024
- 03:18:13 -0700
-Message-ID: <5e8bac8a-8e6b-423c-8e13-b73db9a226fd@quicinc.com>
-Date: Tue, 8 Oct 2024 15:48:10 +0530
+	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="FR/gX1cE"
+Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-82ce1cd2026so221638639f.3
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 06:24:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1728393884; x=1728998684; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=28072l0Erbe4n22Upxqml8PWOL8yMC/7DRp754ESGqE=;
+        b=FR/gX1cE+Ua4vk1IVYUdrjsVnIp5UNRU7l67u1mcqoJ+oSNhFlsSwHFHnCfYDFZcLX
+         +9CLd3aLqq1o7wrQX3CJcdFv4AEWawoLsiv4R3hJa8z+ULU2PUv/ZWcPhrsZjVw8pCzW
+         8hZjoQNJM+AFCzoNAqxWNKgjb3gmArLRvMe4Z2sTD7raLHSKjFVT1fVf1PZ1gHM5/OI0
+         oMeuZQ662oBWCQWhlrZ4VUn6Sl8y7/YffDfPlK9Zd+Hj3k2QGCfI0/SiE46sxF4dbNle
+         hAqBlSXTbHR/gBndJ4YEsSuVbxUpAaoGHXJFRcQhVSFShiy0faYRRwYEzj6jTO+aPENp
+         M+kw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728393884; x=1728998684;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=28072l0Erbe4n22Upxqml8PWOL8yMC/7DRp754ESGqE=;
+        b=Ue8jUAwcdendiDJVKG10AP0++YQs8hP0YAZ3okcPqVCQzSe4oR4fPY6C7U7QawrZe+
+         aW45v/rcuc1oDQ0M+zzyzJDflAbrEMTlMi/P3qodPymIp9eywEcHKrBPCpZfrYBDv568
+         FptieGWn6ol5zGyxTtZrh9WxUu0HlhVC6WemYO8OQtTFzCJI0FXDSHEhvORZP1I187gn
+         YmneUmhgNu1aoNcLJuAWgC8DcQjuyISupjn127+DTa9hTuwvax6wQQH6ovZE4b+mQpXk
+         1Dzbq2Ki8YKWjB0A+QHsdmp84b+8yhpx4XsGuXNOdwMe17+0SSmBTuu/9uN7cYk1+DSE
+         J6AQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVTx6fpKEVgy3M4dG6SG+o8sy+q8GjW7aKx8IxvgNiMnlhPNcoxaLKL8Hu8YlHoU9OnBP31ggwo4xM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyOr/hDnXsMAZ2x3lRaDvV0qGPNGqqVhv6AUul4jxQjNRKawY8S
+	jqRXW6XfPd+miPngVF/jqa37W6/xqzTwmc1w/TJWQADj/waOt9+ZpcM04lePS1I=
+X-Google-Smtp-Source: AGHT+IGfOZKIuFNdtMdRAw3DEguCQsc9zo5vlP2DhGPcapergjoIAvlXruUxK0+QvW4hpGWp34IswQ==
+X-Received: by 2002:a05:6e02:1e0d:b0:3a1:a57a:40a1 with SMTP id e9e14a558f8ab-3a375976f0bmr148548075ab.5.1728393883943;
+        Tue, 08 Oct 2024 06:24:43 -0700 (PDT)
+Received: from [192.168.1.116] ([96.43.243.2])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4db6ec2a7c8sm1649767173.128.2024.10.08.06.24.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 08 Oct 2024 06:24:43 -0700 (PDT)
+Message-ID: <fe10ee8f-1220-4a1d-a25b-efaaa314699a@kernel.dk>
+Date: Tue, 8 Oct 2024 07:24:41 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,68 +61,84 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 4/7] clk: qcom: add Global Clock controller (GCC)
- driver for IPQ5424 SoC
-To: Kathiravan Thirumoorthy <quic_kathirav@quicinc.com>,
-        <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
-        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
-        <dmitry.baryshkov@linaro.org>, <neil.armstrong@linaro.org>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-CC: <quic_varada@quicinc.com>
-References: <20241004102342.2414317-1-quic_srichara@quicinc.com>
- <20241004102342.2414317-5-quic_srichara@quicinc.com>
- <1ac5e0e5-06c1-4930-8c03-f465d6e07848@quicinc.com>
+Subject: Re: [PATCH v6 0/6] block: partition table OF support
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Daniel Golle <daniel@makrotopia.org>,
+ INAGAKI Hiroshi <musashino.open@gmail.com>,
+ Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
+ Ming Lei <ming.lei@redhat.com>, Li Lingfeng <lilingfeng3@huawei.com>,
+ Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>,
+ Linus Walleij <linus.walleij@linaro.org>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Riyan Dhiman <riyandhiman14@gmail.com>,
+ Mikko Rapeli <mikko.rapeli@linaro.org>,
+ Jorge Ramirez-Ortiz <jorge@foundries.io>, Li Zhijian
+ <lizhijian@fujitsu.com>,
+ Dominique Martinet <dominique.martinet@atmark-techno.com>,
+ Jens Wiklander <jens.wiklander@linaro.org>,
+ Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+ linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
+ Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
+ Christoph Hellwig <hch@infradead.org>,
+ Christian Marangi <ansuelsmth@gmail.com>
+References: <20241002221306.4403-1-ansuelsmth@gmail.com>
+ <172833255295.162249.16483920948700467749.b4-ty@kernel.dk>
+ <CAPDyKFoueMwVfN+P+tG7zT+-iUs=hghsRu+i9mNiHGw_9tcwBw@mail.gmail.com>
 Content-Language: en-US
-From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <1ac5e0e5-06c1-4930-8c03-f465d6e07848@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: R4sxhw8CqABc2bubWh1F1geSuX3Npj5I
-X-Proofpoint-ORIG-GUID: R4sxhw8CqABc2bubWh1F1geSuX3Npj5I
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 mlxscore=0
- bulkscore=0 adultscore=0 phishscore=0 lowpriorityscore=0 malwarescore=0
- mlxlogscore=999 spamscore=0 suspectscore=0 impostorscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410080067
+From: Jens Axboe <axboe@kernel.dk>
+In-Reply-To: <CAPDyKFoueMwVfN+P+tG7zT+-iUs=hghsRu+i9mNiHGw_9tcwBw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-
+On 10/8/24 3:10 AM, Ulf Hansson wrote:
+> On Mon, 7 Oct 2024 at 22:22, Jens Axboe <axboe@kernel.dk> wrote:
+>>
+>>
+>> On Thu, 03 Oct 2024 00:11:40 +0200, Christian Marangi wrote:
+>>> this is an initial proposal to complete support for manually defining
+>>> partition table.
+>>>
+>>> Some background on this. Many OEM on embedded device (modem, router...)
+>>> are starting to migrate from NOR/NAND flash to eMMC. The reason for this
+>>> is that OEM are starting to require more and more space for the firmware
+>>> and price difference is becoming so little that using eMMC is only benefits
+>>> and no cons.
+>>>
+>>> [...]
+>>
+>> Applied, thanks!
+>>
+>> [1/6] block: add support for defining read-only partitions
+>>       commit: 03cb793b26834ddca170ba87057c8f883772dd45
+>> [2/6] docs: block: Document support for read-only partition in cmdline part
+>>       commit: 62adb971e515d1bb0e9e555f3dd1d5dc948cf6a1
+>> [3/6] block: introduce add_disk_fwnode()
+>>       commit: e5f587242b6072ffab4f4a084a459a59f3035873
+>> [4/6] mmc: block: attach partitions fwnode if found in mmc-card
+>>       commit: 45ff6c340ddfc2dade74d5b7a8962c778ab7042c
+>> [5/6] block: add support for partition table defined in OF
+>>       commit: 884555b557e5e6d41c866e2cd8d7b32f50ec974b
+>> [6/6] dt-bindings: mmc: Document support for partition table in mmc-card
+>>       commit: 06f39701d0666d89dd3c86ff0b163c7139b7ba2d
+>>
 > 
-> <snip>
+> I think we may need another merging strategy for this as I quite big
+> changes in the pipe for the mmc block device this cycle.
 > 
->> +
->> +static const struct freq_tbl ftbl_gcc_qupv3_uart0_clk_src[] = {
->> +    F(960000, P_XO, 10, 2, 5),
->> +    F(4800000, P_XO, 5, 0, 0),
->> +    F(9600000, P_XO, 2, 4, 5),
->> +    F(16000000, P_GPLL0_OUT_MAIN, 10, 1, 5),
->> +    F(24000000, P_XO, 1, 0, 0),
->> +    F(25000000, P_GPLL0_OUT_MAIN, 16, 1, 2),
->> +    F(50000000, P_GPLL0_OUT_MAIN, 16, 0, 0),
->> +    F(64000000, P_GPLL0_OUT_MAIN, 12.5, 0, 0),
->> +    { }
->> +};
->> +
-> 
-> There are few more frequencies got added to this table. Can we 
-> incorporate that as well?
-> 
+> Would it be possible for you to drop the mmc patches and instead share
+> an immutable branch with the block changes that I can pull in, so I
+> can take the mmc changes?
 
-ok, yeah, since these patches are already reviewed, will send the
-additional updates here and also for dts etc in a separate series.
+I mean we can, but the mmc changes in here are pretty self contained.
+I'd rather avoid rebasing the block tree for that, given how small the
+changes are. If it conflicts, should be easy enough to resolve.
 
-Regards,
-  Sricharan
+You an also just pull in the block tree now and resolve the conflict.
+There's not a whole lot in there yet outside of this series.
 
+-- 
+Jens Axboe
