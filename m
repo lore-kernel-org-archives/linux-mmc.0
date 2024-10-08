@@ -1,104 +1,126 @@
-Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com [209.85.167.41])
+Received: from mail-wm1-f46.google.com (mail-wm1-f46.google.com [209.85.128.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B0F2C1DE2A2
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 15:06:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6FA94C62B
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 16:01:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728399993; cv=none; b=CO5IJ3FXL0OQJ1kNlVkcG54zM0ArtP4xsOEu3efl4HW37/cNdRTXpW+nYUuXO6I1eTzCbQBpAqBNUWqWuEPjPAeD2D1agG2hAB/FOLiipWWlaPgETp6Iput+p7Kf1n7UZbyTkj4xa2Yy+EwvPuIh8HN/BNfRWUSSnzer1Xy5OqQ=
+	t=1728403307; cv=none; b=XnHnLox98h4CNgJs+rDlJHMc13GqDSBXCfjsb935FMFtW3Mnx5hlFKw4EK0bNSlYo9tUJf76HHudlGyxt1+VO2k3TFRKo4DneBL1ZP6gPMC2PokisDy6ETzL9ZLs+uUZ3nI+QiWa6DgkiIfKahwTKS0hEOjUB+6mYZCiXmhxQpg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728399993; c=relaxed/simple;
-	bh=N83QClFj6vSbJUe35YQ6xzEaQoaubcuiXwjOBMZHnWU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BcqOSOJacqCTzwk70XedPjkdzHDD+HkfFDTB1wwp4vGQI5VshB/3QdEC55CipwjqFU/8LvCh0ac6TRP68eau/I9xEGufb4N06qJyBXP/BdMhaB8vjCC52GVSWlZovRvd+I551n16JJbgnjVQyjXHv2SxI7OW7/3pneYgZi4szfM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LNjdwfg4; arc=none smtp.client-ip=209.85.167.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1728403307; c=relaxed/simple;
+	bh=6pU47CiYN3EVOmy5b96h41Z0vXSiMpnhxRrzNk/tQ+I=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=BT1eoqx+Fjg5A2FgkXaNtON+W5cBpn/qBFUos+tp6/HVXAJ/ngwaKGLhWtG6SytZ0DwKmDsgwZWacGgUoY7BQLw9NJXiOgNZx43ZYs6KQL09paPMCrC4xSt69a3SLH7VUl/sAEIzesWvElhEcaFfjIxmMIYkPU/dq0WhWQsHZew=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=dXeDqQxn; arc=none smtp.client-ip=209.85.128.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LNjdwfg4"
-Received: by mail-lf1-f41.google.com with SMTP id 2adb3069b0e04-53959a88668so7218070e87.2
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 08:06:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="dXeDqQxn"
+Received: by mail-wm1-f46.google.com with SMTP id 5b1f17b1804b1-42cb5b3c57eso59776355e9.2
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 09:01:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728399990; x=1729004790; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=N83QClFj6vSbJUe35YQ6xzEaQoaubcuiXwjOBMZHnWU=;
-        b=LNjdwfg42wjhY9KRjUx2je5rkUPX1SSqIQs+8E5RQqwfH/NH+uptIXCsfueCYBMzL4
-         dPs3JBiZFwNGO9QMw22bXGfBxUPbtIkORHbPNGBHtcgGZ7pqzGF6yWU4+/r+EDggNuyJ
-         mOzkdKbChc04rLwwVcdbuGbEkCV/WlE0rK1514IdG0fglrLks9bBKLayoZB9HblSyImG
-         96xXahvt3bWdwEig2T0ri2sKv62VkDx4/uP+d29IDovxVxW3oUHNBa4/b0NV5qOH/4j7
-         jApJbe7E8mbThy5BmJIs9tP+zP0QqT016sscInldrcJtdQ0sEjHoD2ypUEdg1ZOIJUT5
-         klqA==
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1728403304; x=1729008104; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=3s9oSg9hyHcMfQiy/pbWage+koXe/JdbFI9wGPznvgw=;
+        b=dXeDqQxn2QebsC6wTlQuw3xOGIkGn23CwlrnRGA6puAk7ZUPbzHRZSIYQ/OlFFsvw5
+         9Eoi2W01jmRGYd/pYygUaX7JlhfIPv8RYADYGw4SZt8FiOEMICzwJpOhyd5nrn0yJaTo
+         5mP0suw2lvpY1ASCKFfi/nPHQZiL0bT1nmfo4ksQtazGJZ/05r+SAM+kspWgmt/+4ENX
+         8GQoHIzzwbcrW0J1AKEhAWw4LlHNqNDn3zSaniAJNfBXjve7ZZax/+VySqZl1GF3ABN1
+         +0b5iiQk+A0KfqOrJMj4JHwplrWdwr4UyJ2U/scNPOPR2pJDYRT9LdC3vmoYLvWiOVhi
+         /BlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728399990; x=1729004790;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1728403304; x=1729008104;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=N83QClFj6vSbJUe35YQ6xzEaQoaubcuiXwjOBMZHnWU=;
-        b=oOr/78Fo+H0Cdsva+WdaldGCojFf4DnVjULUkN45jPB9ffdqBNd8Ki+IBO81u5Dcm7
-         TSyg04ZrBGxmm0LazNjf6RoTC0UKMhf9hj1cdWg0ZTwy006Yixo9N+nHt7xCujLZqYIC
-         QlFCzdIFgN3bLdDtkse1fo69Fr27e4OsGpyzHganhcrVL0QI1e2PsxIaV9Xcv/gIEFdf
-         6ktXBZ+uK3/yNht2k5nwSoWtmX839s26g0VbHTWOBfQ26Mdrxvlvw7yFc3xNbCRT+uvt
-         3Dr4djDXriY4Chhb6FDAGPn5SJdUDjgE3jA582QII6Lv8P8nDw2JnmgsS1goXtcRjakW
-         823g==
-X-Forwarded-Encrypted: i=1; AJvYcCXVCFp4WF76dNSk2L9GT1vP3LyrTqJDpZtWGb4wfkaUcV/nrk1ggMz6alCd/tPrR6Jd6mihdzMiaj8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzxWyFYqwKYwBT9ygv8sFVf2iYAefp7/3kpYgaqTvSa/il2VFEu
-	RrE0L32CoX0FD0yZwDBCzHCFnoNpIX8IJPxEkRBJ+tM0XvfY6L7ofGaXrKDGk7xAJkI9leCxxEu
-	1bJYgYd4ceN2bAHxUth6MS9M6fLTIwaZtC1Vn1w==
-X-Google-Smtp-Source: AGHT+IHPUH95vercgubmJyozHmL7N08Yp+6zUsDN+9h5501JG4VP8+DOvKWh9h17WjKnR/vaEzMRsx87YDdNZDb1P4k=
-X-Received: by 2002:a05:6512:1387:b0:530:daeb:c1d4 with SMTP id
- 2adb3069b0e04-539ab85c0fcmr8672320e87.12.1728399989667; Tue, 08 Oct 2024
- 08:06:29 -0700 (PDT)
+        bh=3s9oSg9hyHcMfQiy/pbWage+koXe/JdbFI9wGPznvgw=;
+        b=FrsEvz7BoYWP9M0HI8R1sH41W6NbOeocYpKvSKi4CSNVOxfG7WkpF5LLRZOZ+NCXCz
+         hSJxB1M6rDO5pNF9mPIkrCuSdfR8VRIa3xsM5yayGpEG5TfXZBrhKJcibdCh6GfRy9rU
+         EI1HPFq/tJ9UID1ZpRTPa8ozHkVtsP0p2l/aKBvE/+a416R86DrERDoTo0pLONInUf2L
+         8yn/0vUzG8sC3DgSzemqEqLgjykGaLvf9uHnlaXCNfkl+Mk4B7f9iiG3XLHciQA5TAyL
+         cV30GbeImlOD4rmBYQlsY/GJ56knUbmO/Okw93wK6JoV6S/1DBaZSInvnV53KDaDmDmT
+         y2bQ==
+X-Gm-Message-State: AOJu0YwKePORtP5EfWYmyML/Hwnsiw62bIEUngQso5OKpfPwaTx/GvXL
+	avXUOQ/JCcTXYM6yn+3zBEL6X7yLxlQkFvhNzQNUbCSzfub1W/y3cSAIFjVYc94=
+X-Google-Smtp-Source: AGHT+IG6aCaOYevj0NkS1PQr8iOt3XMxnjEGZOxnPI+9ILlWXqvGiIUJFoA2Fzjb647XEx/VNkPmEQ==
+X-Received: by 2002:a5d:6b91:0:b0:378:a935:482 with SMTP id ffacd0b85a97d-37d0eaf7adbmr9041255f8f.58.1728403303931;
+        Tue, 08 Oct 2024 09:01:43 -0700 (PDT)
+Received: from brgl-uxlite.home ([2a01:cb1d:dc:7e00:738a:20da:f541:94ff])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-37d1691a4d8sm8389125f8f.36.2024.10.08.09.01.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 08 Oct 2024 09:01:43 -0700 (PDT)
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+	Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Subject: [PATCH v2] mmc: mmc_spi: drop buggy snprintf()
+Date: Tue,  8 Oct 2024 18:01:34 +0200
+Message-ID: <20241008160134.69934-1-brgl@bgdev.pl>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <8235497b-421c-4af7-90e4-95ad4e271ead@tuxedocomputers.com>
-In-Reply-To: <8235497b-421c-4af7-90e4-95ad4e271ead@tuxedocomputers.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 8 Oct 2024 17:05:52 +0200
-Message-ID: <CAPDyKFrT6-nes784c9rCtqdJZ0nCFS3O5X=600OB6trbz2yJ2w@mail.gmail.com>
-Subject: Re: sdhci_pci module is blocking low power s0ix sleep with GL9767
-To: Georg Gottleuber <ggo@tuxedocomputers.com>
-Cc: victor.shih@genesyslogic.com.tw, Lucas.Lai@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
-	adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-+ Ben
+From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 
-On Thu, 26 Sept 2024 at 17:31, Georg Gottleuber <ggo@tuxedocomputers.com> wrote:
->
-> Hello,
->
-> I have a problem with s0ix sleep on a laptop with GL9767 SD card reader.
->
-> The device is a TUXEDO InfinityBook Pro 14 Gen9 Intel laptop and
-> consumes 6 watts in s2idle (not reaching s0ix). If I blacklist sdhci_pci
-> in /etc/modprobe.d/blacklist.conf then the device sleeps with 1.2 watts
-> (this is not super good, but OK). Unfortunately unloading and reloading
-> does not work either. Once the module has been loaded, the high power
-> consumption remains, even after a rmmod.
->
-> I tested this behavior with linux mainline 6.11,
-> 6.11.0-rc7-next-20240909. Kernel mmc/next does not work either.
->
-> In an AMD device (InfinityBook Pro 14 Gen9 AMD), however, the same card
-> reader sleeps without any problems.
->
-> Link https://bugzilla.kernel.org/show_bug.cgi?id=219284
->
-> Any ideas?
+GCC 13 complains about the truncated output of snprintf():
 
-I am sorry, but I don't have any useful suggestions at this point. We
-need some help from the guys from Genesys Logic.
+drivers/mmc/host/mmc_spi.c: In function ‘mmc_spi_response_get’:
+drivers/mmc/host/mmc_spi.c:227:64: error: ‘snprintf’ output may be truncated before the last format character [-Werror=format-truncation=]
+  227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+      |                                                                ^
+drivers/mmc/host/mmc_spi.c:227:9: note: ‘snprintf’ output between 26 and 43 bytes into a destination of size 32
+  227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  228 |                 cmd->opcode, maptype(cmd));
 
->
-> Kind regards
-> Georg Gottleuber
+Drop it and fold the string it generates into the only place where it's
+emitted - the dev_dbg() call at the end of the function.
 
-Kind regards
-Uffe
+Fixes: 15a0580ced08 ("mmc_spi host driver")
+Suggested-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+---
+- instead of fixing the buffer size, just drop the snprintf() call
+  altogether
+
+ drivers/mmc/host/mmc_spi.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 8fee7052f2ef..47443fb5eb33 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -222,10 +222,6 @@ static int mmc_spi_response_get(struct mmc_spi_host *host,
+ 	u8 	leftover = 0;
+ 	unsigned short rotator;
+ 	int 	i;
+-	char	tag[32];
+-
+-	snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
+-		cmd->opcode, maptype(cmd));
+ 
+ 	/* Except for data block reads, the whole response will already
+ 	 * be stored in the scratch buffer.  It's somewhere after the
+@@ -378,8 +374,9 @@ static int mmc_spi_response_get(struct mmc_spi_host *host,
+ 	}
+ 
+ 	if (value < 0)
+-		dev_dbg(&host->spi->dev, "%s: resp %04x %08x\n",
+-			tag, cmd->resp[0], cmd->resp[1]);
++		dev_dbg(&host->spi->dev,
++			"  ... CMD%d response SPI_%s: resp %04x %08x\n",
++			cmd->opcode, maptype(cmd), cmd->resp[0], cmd->resp[1]);
+ 
+ 	/* disable chipselect on errors and some success cases */
+ 	if (value >= 0 && cs_on)
+-- 
+2.43.0
+
