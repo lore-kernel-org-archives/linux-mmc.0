@@ -1,67 +1,66 @@
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB6261E0B66
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 14:36:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76EB01E0B9B
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 14:36:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728398205; cv=none; b=QZhzOFw7e5FVGGp3iiI1cnumzPlbEZi9Z77/zGDIZlVoEwz2bPv+mT54orTOUT+WBiK9HbS/VxLNVsifG14c/pzHVg8QUWFNbGtqAenzGAPlp6s1ozON14iQggqfckGHPOvFkulpQv58soOz/a92xebfjuZVLLBFaSfBssKqIY8=
+	t=1728398210; cv=none; b=n8IubM0zHwEbaGqQRhS18laxtZzie6oYTfnCeOGeLb9GHkPqzc3oCYYDnzWttVfiVa/vdr9Cf9VXYLBZK1MMHS1123OYswPopNxy9oZ7p3E4NfzHrwg/tnlTie0z773YfbmvsnUa+h35K2aEJCLGUAYTjxuNeCiiO2m5exJu7wU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728398205; c=relaxed/simple;
-	bh=eiBVahTw3pcHmt4RBSpt/Ftosqh8bsjEAx9y76i535g=;
+	s=arc-20240116; t=1728398210; c=relaxed/simple;
+	bh=0Z1JExvdy9ZeQJ6p0A/0vey3LiyAqfmOE62rwLJZmTM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JCHo4cmGt+9vDKu5EmoUIY2QsR0XQD/2z2qb0vRFbZgZpAYpoKs3kyy+CDmdSpXMsjL7Nh0OUMvnljqTkG337Qx+9o5iqppsXVH3pTqBgsNXaT1O7GzD51579cGR7WjBd+y+ZJ3BV3aMkalwzeNCuYKPTrcjrQ685PrVq7wyBgA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=O7pvYWal; arc=none smtp.client-ip=209.85.219.181
+	 To:Cc:Content-Type; b=rwmayELhXPpEu7cvZTOeMhxCvSA5s/GZa1SR87qajd9OCRNY41M184G3q1oZV75yCClsmETr9kFgh86iqm53QU95xE1q1OF3WrANlf/NeNstNsUbKff/AGf/cUYPmxU9ccqM8vjRbK88aqW90KgzQVzq8KVM1gKL7LVK41HfhWM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=DVzfV3P1; arc=none smtp.client-ip=209.85.128.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="O7pvYWal"
-Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e28f4549288so515872276.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 07:36:43 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="DVzfV3P1"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-6dbb24ee2ebso57523267b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 07:36:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728398203; x=1729003003; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1728398207; x=1729003007; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=WNZzKdQArnf8YLwkRp6tlekOryWYH/w6bCKp6uUyEzA=;
-        b=O7pvYWal1CQuQPyMAlI9M5wjRm5JpV8qaGz/lzrwimGIvOjOqNbURh/flZ1I2Gnur+
-         nCF7RtdhvxgZWXeBsv79k8vax4TvhJaPkjVMFkChzamdn1aoEcis74x3RnXALYYMbPMD
-         zJ8FQZDApzgfoLB2zmowj23o6gSu6zg7KwwlSWpk6w/P0E0rhUIFIlg+wcwJehk33Dxt
-         VwBs8kKOQ8vfcelQl/BKdCJ8nGrGBVv1AeEBJs/nrf6c4eUUQh/zq78Gi2n7M8LJvIA4
-         7uUOCn5+o5pY2u4DNFjLcfBTW7WgnjSGp1qZxqBXMdf7BdbKFVDp+x1xQVQdTVuWjKBx
-         ahjA==
+        bh=iwY3r5V9M933BYc/JpXLz8VpdD3oK06DMiHe6qdoa+c=;
+        b=DVzfV3P1/xELASKTE2Y6d8IlVKVLot8vmbVzfzaw2Rs4gDpNTHkVRJHYnecJEsRCsY
+         qL1Y6uQmUtHl5rHUbQLc5HhiQc3spJpTiqS3gdpBuXNh3G+Zt1MdtfW0TJZxmyTNdO8D
+         aq1Q9DRW1kcvaFqilKJg3z8UhhVFFPidFgy3E/+JNFcZe2VRMzwnExKJWL/QUj74DUt5
+         B+ibSxco0i2maIs60/tvOTn57sSWN+oqhFu1OxopPju73hX20BWia2XsxeJSFl9N/O7A
+         Ukn21nlLqOOhZ0s2Zrk7c0UtmfB0i2aLu2mNYcPk2IzC6rAIrrHAnoamOk5WYlYErfp9
+         /EHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728398203; x=1729003003;
+        d=1e100.net; s=20230601; t=1728398207; x=1729003007;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=WNZzKdQArnf8YLwkRp6tlekOryWYH/w6bCKp6uUyEzA=;
-        b=aGy0D/td3WBWxZ8KP2Y4ILqREaDr8NMbAS8rnpaumaiEPINYs46iGXRoPFDx9AKyIK
-         qyKjSWzklPSUtPbM/AmY7ecpKLi3SQIQC9+FzURSBMGFXPsObR9LXdfM48sDOyQb/GKz
-         UFbFAqdNWJvWBQp7QuQ8rVHc3J8Ms0I1rtVVrLNvMZxCIpNOfQXxSmopi1GGIJvhPcwj
-         KnbdHVmfwPbQhdo2gCDqo+dQL/NSnuest3eWrdVbBwJ/sibscd0Ov22LodUj3wtE31Ex
-         726maUW+T5oHxJ64QDukZo7/rVVeIW962L/1IoacvPuncVN8xvA4b+3fUYfw8KGd4i21
-         TnXg==
-X-Forwarded-Encrypted: i=1; AJvYcCVxeBH3avlip7GjfRIf8nfXVJwFYQ6ouhloTKTbKYNjKNkiLxEtlzoIrQgmK30rEjAm5vR82YwaUIY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxaXsyhOXALuCGraBNrYB/mtYxk3bim/pm6HW/o+08ynufodm2d
-	J+f9GEIFb4higyTMADPp5tq563crb4Ruz0XehwoKStIZtsxunbW5WNSYMLZkZM8rMrM27d2nv6m
-	vYz3FQ1uwepQNQ+6BBnzZno+o4QLIb1XubqX0Kg==
-X-Google-Smtp-Source: AGHT+IGpk0fkikZLIUB8Xv1LRK1/jbL/DWVujOUGdacoTm8NQ+nTWOMi8y8fhtWL/4PN4fQZf2hYlGAC3o0z4YwCACg=
-X-Received: by 2002:a05:6902:a86:b0:e28:eee6:1cf with SMTP id
- 3f1490d57ef6-e28eee60288mr1785573276.48.1728398203049; Tue, 08 Oct 2024
- 07:36:43 -0700 (PDT)
+        bh=iwY3r5V9M933BYc/JpXLz8VpdD3oK06DMiHe6qdoa+c=;
+        b=NxsO5Mm4xaPFYIbf4ZK+hQlYR7w9N6VBdFDKbpD2z+R+uya62zvJNJoW9cZylchb+d
+         0FB+icozuQ7rCYvPDr+go7HQy4iWpeABo+ly+0bPaLzizKIRG0yvHrYxkZjJQU7LtrWV
+         F6N44Z9cINFFZEBLu/pO1U9w43w2J8KLwkgZqMDu1dL6R8sBMYVX5LIVTeLeafCvpHwV
+         xJCoRIXe2fPuU1vkr1E5hgVDPLtKK7xqZdNAoOwABL26mHKXi5U3doKpkW6R5dzMD2A2
+         hYikEaoBxW1cSZFPdwQlgURmenDL4XYti5VM9vXn3CYbLemc4nNqtANpQoCY+65iXjXI
+         t+4g==
+X-Forwarded-Encrypted: i=1; AJvYcCUUUi7U50Aud6sNc8P/VDcwB/HS1/JutXcC34msH+CsgE/zyy/Qt73oyXgeNdVc+i8FxA8iG604df4=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz1gxWBxGa5G230yK/VtjymUO8vND0MlAy6aaZe8cJT/ohR3avg
+	WQAIrXVzg0jzFak24bQChn0TfyCSQJP2BFtzUttcvaSczBVqLNJ4cF/wsD8VJSnZtUhctWboJxv
+	+0VvzMmkKRPET8aLpcMl//zOZZ4rM+a3iLbtHQw==
+X-Google-Smtp-Source: AGHT+IHCEE3cQALhziR76pWxSHYgivNkdxDE7czzTvB21/L8ltLPROWzkDkpEip7V+fuz0HUO9PqM2K24IAxVFHk8Es=
+X-Received: by 2002:a05:6902:1b8d:b0:e1d:8a06:86c3 with SMTP id
+ 3f1490d57ef6-e28937df468mr9516417276.31.1728398207480; Tue, 08 Oct 2024
+ 07:36:47 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240930095449.1813195-1-pierre-henry.moussay@microchip.com> <20240930095449.1813195-12-pierre-henry.moussay@microchip.com>
-In-Reply-To: <20240930095449.1813195-12-pierre-henry.moussay@microchip.com>
+References: <20240930095449.1813195-1-pierre-henry.moussay@microchip.com> <20240930095449.1813195-17-pierre-henry.moussay@microchip.com>
+In-Reply-To: <20240930095449.1813195-17-pierre-henry.moussay@microchip.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 8 Oct 2024 16:36:00 +0200
-Message-ID: <CAPDyKFquF3nj3BxRqc418xC9_fFasHipDePdXsSBFLJwrO-UKQ@mail.gmail.com>
-Subject: Re: [linux][PATCH v2 11/20] dt-bindings: mmc: cdns: document
- Microchip PIC64GX MMC/SDHCI controller
+Date: Tue, 8 Oct 2024 16:36:04 +0200
+Message-ID: <CAPDyKFq1HZxKSd-V_VnmpbQTftMDmF8SkPf11N_ELcahqo16QQ@mail.gmail.com>
+Subject: Re: [linux][PATCH v2 16/20] dt-bindings: mmc: cdns,sdhci: ref sdhci-common.yaml
 To: pierre-henry.moussay@microchip.com
 Cc: Linux4Microchip@microchip.com, Rob Herring <robh@kernel.org>, 
 	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
@@ -73,7 +72,8 @@ On Mon, 30 Sept 2024 at 11:55, <pierre-henry.moussay@microchip.com> wrote:
 >
 > From: Pierre-Henry Moussay <pierre-henry.moussay@microchip.com>
 >
-> PIC64GX is compatible with cdns,sd4hc without any additional feature
+> Since the Cadence sdhci controller is sdhci compatible, the cdns,sdhci.yaml
+> should ref sdhci-common.yaml to use 'sdhci-caps-mask' property.
 >
 > Signed-off-by: Pierre-Henry Moussay <pierre-henry.moussay@microchip.com>
 
@@ -84,21 +84,22 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
 > diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 6c40611405a0..ee3a838f7f06 100644
+> index ee3a838f7f06..0432cc96f7ca 100644
 > --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
 > +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -15,6 +15,7 @@ properties:
->        - enum:
->            - amd,pensando-elba-sd4hc
->            - microchip,mpfs-sd4hc
-> +          - microchip,pic64gx-sd4hc
->            - socionext,uniphier-sd4hc
->        - const: cdns,sd4hc
+> @@ -121,7 +121,7 @@ required:
+>    - clocks
 >
+>  allOf:
+> -  - $ref: mmc-controller.yaml
+> +  - $ref: sdhci-common.yaml
+>    - if:
+>        properties:
+>          compatible:
 > --
 > 2.30.2
 >
