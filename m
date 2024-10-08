@@ -1,144 +1,115 @@
-Received: from mail-io1-f51.google.com (mail-io1-f51.google.com [209.85.166.51])
+Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com [209.85.219.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D8B31DFE18
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 13:24:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EF8B41DF750
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Oct 2024 14:01:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728393887; cv=none; b=L2EFjq0UsNC3mlbe5O9ofKAdmoTR4dD9KzSj6aO0fqwEzwGCEy++5seYCTsIw8tXHQ/cvRCuxmnsTzLQGCDrlJpEn+Dwp44Yi9V4T8M935GKCPBZ0BDdpzz1dhqWNZLzE0aXDTPIiFE5uUAI+UFB6V87T3cg2ziMpBoUr1EDy28=
+	t=1728396079; cv=none; b=rzU0aRD2aYhm2vd8ucKFrHUN6UHKcO7W4w99OpLMShpn3aomoSe2uri659thAbFN+FFL5CEhtrsVRY81XcLRNZzFfNEOIiDkTQUJBOA8Mwe4Pm5j0N0HQTTgweemqKTwf36yAqvaAP59MkqaCqwmqIBhTh7FSINHajkxcJzOSDw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728393887; c=relaxed/simple;
-	bh=1JLses5T18eVEvY7yJFIthwSZIRfibQxel3VlN8/p1Q=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DQ8hrzCLy0Z9XP96hu7EHIdC09agen1xLPErXxBkm4SQJVVf7pUvpSpmYVUH8EhF4p24NVzTZz/quQEZPTYjyEe3TlAVzvJXtaKja3SAhjwWvigSp/j3uqHEkWJ6HnKu1IpUX4RmmzhUtd4QPIOq+x3164tjybWMTFeDDheSbEA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=FR/gX1cE; arc=none smtp.client-ip=209.85.166.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1728396079; c=relaxed/simple;
+	bh=mmoCWWBPMNWN5Pi3PCZomIL/c01m10Ls09k6EAKhgOQ=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qpN/yCT/jhqSrVshV2tGs2Ph0mGRgFFMJPLSvfFHLBFJP6cWTcs4zdwTAZyPh3jZJf118Owv/vgOq+oV8ywbKFk8DusdjtXWSouv4Xx5u8m3XjL4YP5mjBEIi9e87806VeHHv/n+iBwSR25WzKuqu3FnAr8/TIZp9flwKruew+s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=MBAuS3bw; arc=none smtp.client-ip=209.85.219.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="FR/gX1cE"
-Received: by mail-io1-f51.google.com with SMTP id ca18e2360f4ac-82ce1cd2026so221638639f.3
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 06:24:45 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MBAuS3bw"
+Received: by mail-yb1-f174.google.com with SMTP id 3f1490d57ef6-e28f2a52803so518368276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Oct 2024 07:01:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1728393884; x=1728998684; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=28072l0Erbe4n22Upxqml8PWOL8yMC/7DRp754ESGqE=;
-        b=FR/gX1cE+Ua4vk1IVYUdrjsVnIp5UNRU7l67u1mcqoJ+oSNhFlsSwHFHnCfYDFZcLX
-         +9CLd3aLqq1o7wrQX3CJcdFv4AEWawoLsiv4R3hJa8z+ULU2PUv/ZWcPhrsZjVw8pCzW
-         8hZjoQNJM+AFCzoNAqxWNKgjb3gmArLRvMe4Z2sTD7raLHSKjFVT1fVf1PZ1gHM5/OI0
-         oMeuZQ662oBWCQWhlrZ4VUn6Sl8y7/YffDfPlK9Zd+Hj3k2QGCfI0/SiE46sxF4dbNle
-         hAqBlSXTbHR/gBndJ4YEsSuVbxUpAaoGHXJFRcQhVSFShiy0faYRRwYEzj6jTO+aPENp
-         M+kw==
+        d=linaro.org; s=google; t=1728396077; x=1729000877; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=QE44MjvjGlXQo09X4aaBHeiy26kXCM/N88w8ksHxsYY=;
+        b=MBAuS3bw5xb8b7v/CDwLubK8FowYK+3HfFrFV2cGSbysjONNHUxJVJMwMeMiCd4W1Y
+         YEfnoj2vE3gQpgz6Da2apn8VA7NPp64x9HLDyTr7IR5le6svttU7oHqiBMDbGgBRIztK
+         +tTYm84a9XKFeHbMpMIuw1SGW8gT6OsyQo2rzwAA3NQCG90bAlA7tVW2g0ckPUhAV7eZ
+         VQQrpVZgXJvaZZhs0VfVrWxZGLvFsWTgtCFKXFSelOc+/sQSSkrBcH8pcgcyGrlsxiyQ
+         V+ontU2i5HePpgvd0LpXqW0O4ZCU3HMgsjiIunqUOCbRIzmvjUsKwB840lkRcnGXNnsB
+         ZH+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728393884; x=1728998684;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=28072l0Erbe4n22Upxqml8PWOL8yMC/7DRp754ESGqE=;
-        b=Ue8jUAwcdendiDJVKG10AP0++YQs8hP0YAZ3okcPqVCQzSe4oR4fPY6C7U7QawrZe+
-         aW45v/rcuc1oDQ0M+zzyzJDflAbrEMTlMi/P3qodPymIp9eywEcHKrBPCpZfrYBDv568
-         FptieGWn6ol5zGyxTtZrh9WxUu0HlhVC6WemYO8OQtTFzCJI0FXDSHEhvORZP1I187gn
-         YmneUmhgNu1aoNcLJuAWgC8DcQjuyISupjn127+DTa9hTuwvax6wQQH6ovZE4b+mQpXk
-         1Dzbq2Ki8YKWjB0A+QHsdmp84b+8yhpx4XsGuXNOdwMe17+0SSmBTuu/9uN7cYk1+DSE
-         J6AQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVTx6fpKEVgy3M4dG6SG+o8sy+q8GjW7aKx8IxvgNiMnlhPNcoxaLKL8Hu8YlHoU9OnBP31ggwo4xM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyOr/hDnXsMAZ2x3lRaDvV0qGPNGqqVhv6AUul4jxQjNRKawY8S
-	jqRXW6XfPd+miPngVF/jqa37W6/xqzTwmc1w/TJWQADj/waOt9+ZpcM04lePS1I=
-X-Google-Smtp-Source: AGHT+IGfOZKIuFNdtMdRAw3DEguCQsc9zo5vlP2DhGPcapergjoIAvlXruUxK0+QvW4hpGWp34IswQ==
-X-Received: by 2002:a05:6e02:1e0d:b0:3a1:a57a:40a1 with SMTP id e9e14a558f8ab-3a375976f0bmr148548075ab.5.1728393883943;
-        Tue, 08 Oct 2024 06:24:43 -0700 (PDT)
-Received: from [192.168.1.116] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4db6ec2a7c8sm1649767173.128.2024.10.08.06.24.41
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 08 Oct 2024 06:24:43 -0700 (PDT)
-Message-ID: <fe10ee8f-1220-4a1d-a25b-efaaa314699a@kernel.dk>
-Date: Tue, 8 Oct 2024 07:24:41 -0600
+        d=1e100.net; s=20230601; t=1728396077; x=1729000877;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=QE44MjvjGlXQo09X4aaBHeiy26kXCM/N88w8ksHxsYY=;
+        b=fXcE4rZya4cV4BGqbAEHF1/Im/N5FbjIg0pPQBLy6drVbzWEnSLe24kix1Kvcv/HSJ
+         olFVrnOZ3J4vJlOC1zCYwJihvE4WmVRjbS9iMjj9Fi9vZVNpPzfB8VSjSeJdkL+SmhWO
+         VMDwrc3+giiHO8iMOOznLlPpS9mjg44v5WUNe9RCSAVlyi5mt1vSRrv+Ce8yDHEovcWZ
+         CUHiR2omZaX6I20hVeSc5J5Twjn/PQxdOd04C/GGuNlUjcGopx4ZO3UI/gWWMQTnYo1V
+         0ehlf+7O25o1vFJ7yEuYfo9IGpGohmXCZJODmZ24PHG7dhJulNf6dg/CJFJxamEtumvd
+         h+LQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXCv1fsUJdtR3QVarbzwV9zDDvnvN0k5dwDOK/jB3CVeYmnf0Gd6is4Tn792qAD0tdAbFB5K1D7B6U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwlaD8gffQ9IlsQfqXieoiatA6/3VBo9jgD2/OzAZHZsX+x4KoM
+	aWETOTfV1vKjZro7Rw0NcYxeXgiOUw1DZmKQpV/m4Ti76zhAv+x0utEo/lPKPP7iJQuTcVOk73x
+	kqZj8Ht9V9mYZOcv0DrGUmWCQ1HAb7ysqYts6+Q==
+X-Google-Smtp-Source: AGHT+IGTV6VC/pNSzGY+RUb51i/BTSuNpuC7jBoq5cv/Bck9LWu2cuxkJriYebercZ+lkwSPCxUa4kcq1oYG0RIOv+c=
+X-Received: by 2002:a05:6902:727:b0:e25:c6a3:797d with SMTP id
+ 3f1490d57ef6-e28936c984amr13384867276.6.1728396076638; Tue, 08 Oct 2024
+ 07:01:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v6 0/6] block: partition table OF support
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jonathan Corbet <corbet@lwn.net>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Daniel Golle <daniel@makrotopia.org>,
- INAGAKI Hiroshi <musashino.open@gmail.com>,
- Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
- Ming Lei <ming.lei@redhat.com>, Li Lingfeng <lilingfeng3@huawei.com>,
- Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>,
- Linus Walleij <linus.walleij@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Riyan Dhiman <riyandhiman14@gmail.com>,
- Mikko Rapeli <mikko.rapeli@linaro.org>,
- Jorge Ramirez-Ortiz <jorge@foundries.io>, Li Zhijian
- <lizhijian@fujitsu.com>,
- Dominique Martinet <dominique.martinet@atmark-techno.com>,
- Jens Wiklander <jens.wiklander@linaro.org>,
- Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
- linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
- Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
- Christoph Hellwig <hch@infradead.org>,
- Christian Marangi <ansuelsmth@gmail.com>
-References: <20241002221306.4403-1-ansuelsmth@gmail.com>
- <172833255295.162249.16483920948700467749.b4-ty@kernel.dk>
- <CAPDyKFoueMwVfN+P+tG7zT+-iUs=hghsRu+i9mNiHGw_9tcwBw@mail.gmail.com>
-Content-Language: en-US
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <CAPDyKFoueMwVfN+P+tG7zT+-iUs=hghsRu+i9mNiHGw_9tcwBw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20241006135530.17363-1-quic_spuppala@quicinc.com> <20241006135530.17363-2-quic_spuppala@quicinc.com>
+In-Reply-To: <20241006135530.17363-2-quic_spuppala@quicinc.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 8 Oct 2024 16:00:39 +0200
+Message-ID: <CAPDyKFpXh0vZrK6PU2V+y92Q_+y6Q2+VUEONXiBrqAp_qqp_jA@mail.gmail.com>
+Subject: Re: [PATCH RFC v3 1/2] mmc: core: Add vendor hook to control
+ reprogram keys to Crypto Engine
+To: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	quic_rampraka@quicinc.com, quic_nitirawa@quicinc.com, 
+	quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com, 
+	quic_neersoni@quicinc.com, quic_gaurkash@quicinc.com
+Content-Type: text/plain; charset="UTF-8"
 
-On 10/8/24 3:10 AM, Ulf Hansson wrote:
-> On Mon, 7 Oct 2024 at 22:22, Jens Axboe <axboe@kernel.dk> wrote:
->>
->>
->> On Thu, 03 Oct 2024 00:11:40 +0200, Christian Marangi wrote:
->>> this is an initial proposal to complete support for manually defining
->>> partition table.
->>>
->>> Some background on this. Many OEM on embedded device (modem, router...)
->>> are starting to migrate from NOR/NAND flash to eMMC. The reason for this
->>> is that OEM are starting to require more and more space for the firmware
->>> and price difference is becoming so little that using eMMC is only benefits
->>> and no cons.
->>>
->>> [...]
->>
->> Applied, thanks!
->>
->> [1/6] block: add support for defining read-only partitions
->>       commit: 03cb793b26834ddca170ba87057c8f883772dd45
->> [2/6] docs: block: Document support for read-only partition in cmdline part
->>       commit: 62adb971e515d1bb0e9e555f3dd1d5dc948cf6a1
->> [3/6] block: introduce add_disk_fwnode()
->>       commit: e5f587242b6072ffab4f4a084a459a59f3035873
->> [4/6] mmc: block: attach partitions fwnode if found in mmc-card
->>       commit: 45ff6c340ddfc2dade74d5b7a8962c778ab7042c
->> [5/6] block: add support for partition table defined in OF
->>       commit: 884555b557e5e6d41c866e2cd8d7b32f50ec974b
->> [6/6] dt-bindings: mmc: Document support for partition table in mmc-card
->>       commit: 06f39701d0666d89dd3c86ff0b163c7139b7ba2d
->>
-> 
-> I think we may need another merging strategy for this as I quite big
-> changes in the pipe for the mmc block device this cycle.
-> 
-> Would it be possible for you to drop the mmc patches and instead share
-> an immutable branch with the block changes that I can pull in, so I
-> can take the mmc changes?
+On Sun, 6 Oct 2024 at 15:55, Seshu Madhavi Puppala
+<quic_spuppala@quicinc.com> wrote:
+>
+> Add mmc_host_ops hook avoid_reprogram_allkeys to control
+> reprogramming keys to Inline Crypto Engine by vendor as some
+> vendors might not require this feature.
+>
+> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> ---
+>  drivers/mmc/core/crypto.c | 8 +++++---
+>  drivers/mmc/host/sdhci.c  | 6 ++++++
+>  include/linux/mmc/host.h  | 7 +++++++
+>  3 files changed, 18 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+> index fec4fbf16a5b..4168f7d135ff 100644
+> --- a/drivers/mmc/core/crypto.c
+> +++ b/drivers/mmc/core/crypto.c
+> @@ -14,9 +14,11 @@
+>
+>  void mmc_crypto_set_initial_state(struct mmc_host *host)
+>  {
+> -       /* Reset might clear all keys, so reprogram all the keys. */
+> -       if (host->caps2 & MMC_CAP2_CRYPTO)
+> -               blk_crypto_reprogram_all_keys(&host->crypto_profile);
+> +       if (host->ops->avoid_reprogram_allkeys && !host->ops->avoid_reprogram_allkeys()) {
+> +               /* Reset might clear all keys, so reprogram all the keys. */
+> +               if (host->caps2 & MMC_CAP2_CRYPTO)
+> +                       blk_crypto_reprogram_all_keys(&host->crypto_profile);
 
-I mean we can, but the mmc changes in here are pretty self contained.
-I'd rather avoid rebasing the block tree for that, given how small the
-changes are. If it conflicts, should be easy enough to resolve.
+Don't you even need to call this once, during the first initialization
+of the card?
 
-You an also just pull in the block tree now and resolve the conflict.
-There's not a whole lot in there yet outside of this series.
+> +       }
+>  }
+>
 
--- 
-Jens Axboe
+[...]
+
+Kind regards
+Uffe
