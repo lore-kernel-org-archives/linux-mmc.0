@@ -1,229 +1,194 @@
-Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21FC818F2FF
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Oct 2024 10:28:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E01FA18EFE6
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Oct 2024 10:38:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728469717; cv=none; b=gIPB2wirensHQ+r8Lv98/m7/7ru6XnFpJ1uENfkQuw8vTotle7h54CjrKRgjZk2h9l3cC29ZvC3MuxSxl4ZfP4F5p0sFvCiIzF0jqe8C7zBxw/XHEVQ9qbJYbYGjtEY1gt3WW4fhBRyacOwBySBjTSH7NXb5jwI1BaR3wmk6aPQ=
+	t=1728470296; cv=none; b=H3uK90N2XwxG+eVGQQdY4Pgh/NjPEIBMxDduE6NmiU45UQAmMV/9pf6Va8sfyCBSpM7qOmD8QRJav3HbLWvAL/kBQL3sXwrQ32ZDwmITa47k78Hc1MZK4udIcY2vsamOq4EGnD2XB0u38wCAjS2y+s7S8Z5SGSdEPxtLXZAdAIQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728469717; c=relaxed/simple;
-	bh=/fIjIpUdHAzWUFceihGJMz4qHHzjyT7pvRboVHLIXt8=;
+	s=arc-20240116; t=1728470296; c=relaxed/simple;
+	bh=Bh+XjD17aMUarcdTO7uSWw8kcbNLHSX05G1HB+CCinQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uvimP4yLy3jej3nO16wx9VVW8D5GxQlf0JIuCzGmBnORm0mRWUdLEUACfXU4WvEv0vw6sW5xp1J563e6S6yHQRYptof0IBOjphYqKiJS29siERgRTF/kRYO2wuH3qMaM0EXoQ19uUjDjkMMvRskzJVlfE+Upw/FkarsT1HrfMF0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=R/IUZLiG; arc=none smtp.client-ip=209.85.219.177
+	 To:Cc:Content-Type; b=PIy7dcsV5xpiZzmMnyPB3kdokmJYuKTPtm2/1jpY8uZjhhpJdzzQvw+VeoAaYcvjARlQ4Yfxi6Ic3ofMK1nlXCx3K5TJ5AM43uEkRJ1aQ7PDJp1tbKsye3EPnQOeUmQtfwIipr6Xi/8S0/iRme17GHYDWJsjVs3b18faC0CW1a8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=uDEQ0r7U; arc=none smtp.client-ip=209.85.219.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="R/IUZLiG"
-Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-e2904ce7e14so325191276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Oct 2024 03:28:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uDEQ0r7U"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-dff1ccdc17bso6673615276.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Oct 2024 03:38:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728469702; x=1729074502; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=/fIjIpUdHAzWUFceihGJMz4qHHzjyT7pvRboVHLIXt8=;
-        b=R/IUZLiGTVMjm+vz/itDZc9wmAPVMljxmRitpZEJud1G0u3w5i1YUFXS5nVV3WYoz8
-         ubvhh9K122Gjzldf8MIilxZWJIq+pHQJNBlZFum0GVuFc1MEaHETL5T008QXAFwPq1ot
-         kitLFU3/SkC2aWezlO4OguLTOZSf+tA1tyYrfik4ykoNQkvXAj6c52HeG1Ysmw2AI238
-         HsY2f3tX4OKHncsdhEvf1LEfHqNJ6jQgUxWv1stM9PG3qos2FQm71ynZckctR1C4pJwx
-         vtDImDcHsDnvehucXFysFeu2BI8sfq7nFQW1sE+ns0FrP0/6loH6Z+NZH4YNYSRSMgNb
-         7/VA==
+        d=linaro.org; s=google; t=1728470292; x=1729075092; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=3VJeVYBfKYnkpG7DLQGKL9U1kDI2Y0lA6CnEfPiWNjA=;
+        b=uDEQ0r7UsdCBEie321mD9kTD5XPt/TkiNXq0y8J1qbWoHeE6/avuS/S3XMWztUHlVW
+         jaJ7iTzYjTNv9kY367j/7wtwKzJV+p0gMeW+qeido7ZYvFWadMCMI5mr4SQxOhDlWs7a
+         nVGGkKI9r0YtY9sQSzuVUssQm1giDtusceDvcTiHvGIrLKQZ8ff9r5nRaCdaBLB+NjKr
+         vC3fdHxsZDdz8gXPzQNYODCKCWzsuckxppF8dexeQmV4TAi+Q03blhOg5yY7uU5fN4v1
+         JUWjWEfI75fbs0NZ6yjumRD1bX/xhyfGi4fz6MlXYc3x80omjnd4gVRZnQJpTyMjSi5J
+         gBww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728469702; x=1729074502;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=/fIjIpUdHAzWUFceihGJMz4qHHzjyT7pvRboVHLIXt8=;
-        b=tsBaTNwSiusBXbR9tZlLWgH7VZt3MPViF1I7rxo/p41cYU9MOhzbaoV0JXmKlecscG
-         v3Faxmkxpj3UvCDE14YyQgZluOOOnh9rsB/z2oBC5MiBw2QnZEJ51J4tAn/r1u0bohwm
-         sVfeLtqF5M5o502GdvZaw9FykbbdLQA3PuFKUj0H0u8O0U9Nh5ANxzLTtge9MN6dOeQL
-         K2U0XMMz3mIiJ87In4Hjdny2LQ6S3eJRT0PHHe8RPczqC9jYwAFZaCT8TigDWwPVPV1+
-         9fqczvQP3z7WoVIRn2ca2gsxHRHYgGcNcZcaArrKY8v7R0VYCOGjiDTzJeal8Lxp0oCQ
-         SaMw==
-X-Forwarded-Encrypted: i=1; AJvYcCXMw7ll5S/Cr0grFvlkc6JX/PY2VgGGML4CWi1hLb+hR2i6EbtbjeZXbB33HQ0LfWfFHrVcQByAWls=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyan3iRJ6nhsH4r5aPz94/eN+NPROgyjn3R70qm8yZ1QsVjjHXn
-	wTb7h4P4nRagbKGf3mz8tihyAvpUAIkOceWUpool7Nk/jHW/sfCJO9UInOSEyUD/wY+wg3lsUI9
-	EQETVDztnS6B4W0Azro/CzGUBsa3L7BujOfAxJw==
-X-Google-Smtp-Source: AGHT+IHNaU3Z3+DDKTWwqyhccdWy6KGvX0jRFFJtFda2WTvGLlJcpHA53hhWZp12VBznxD4kUpVSZMoh/Lgesk7avnk=
-X-Received: by 2002:a25:eb02:0:b0:e25:96a4:1706 with SMTP id
- 3f1490d57ef6-e28fe43f3d1mr1744852276.19.1728469701975; Wed, 09 Oct 2024
- 03:28:21 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1728470292; x=1729075092;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3VJeVYBfKYnkpG7DLQGKL9U1kDI2Y0lA6CnEfPiWNjA=;
+        b=Zs77lOAS02+aqDXl7LwSGZsPxlDb7mt/ScYrkihdDliNNu1OvJryNKSHEk2e1zz/S5
+         4i4ognfPDM6RpmNNiKs/FmNLCF3U7ZzKdzFauRCEk87QnpHs+UP17CSP/NaOWLvsyXf/
+         EFLTSggaf7RRMkGxMqsA9BGf2L3WXcZ9/m+rTTUuW3lCIa780sFJdB1tOZnrf5TpDlpu
+         RuOqY8yZy5AozlaBT7vhjoANbKIa0daxalqEvKl4KQFV8dXwWLNMLxUtUX91F76ygWbG
+         ekHG9vjt7ya+ehtFGvzOY6hKJ+U9RSfeyY3dcTlDMQpCzhOBUX8xU6UixHr702OCbYex
+         tcBw==
+X-Forwarded-Encrypted: i=1; AJvYcCUGQJg6eW2+IL8n4FR3Dy8IQ6k4Btu+GQcgG4V7Kvuk2Pqmnw5G/3Q73bbIzrJIxmYsy2zOdKfUAOU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxBzEhb+oNfABlrdwTSzFnH+3saSTyUyG1hUYZQY1Sj9OD39Su+
+	KsVdqhUYAssbCUbcJPg1+J6p6KrDHP6dxGaXoMz/SjOwrwFhJgRRrNYRBQ4/cDzSb1/1uYyWBBW
+	NF7AAYN3soK0qP1HM27bXcEC0jwVqjKparNebTA==
+X-Google-Smtp-Source: AGHT+IEaCqT2FEb0CIjrhdIKMtBmr3sjquXjMBesp6gahz+RMRdDBcgXZh9L7SRu1wzN7reOTF/jLVAAQ5XdWvmbnAY=
+X-Received: by 2002:a05:6902:1a4a:b0:e28:67b3:d731 with SMTP id
+ 3f1490d57ef6-e28fe4cf0cbmr1708003276.9.1728470291883; Wed, 09 Oct 2024
+ 03:38:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241004094101.113349-1-sakari.ailus@linux.intel.com>
- <CAPDyKFp0N6UJhnHS164Tdf=xkWB0jzq65L9TdvYazeBQ-6WjeQ@mail.gmail.com>
- <20241007184924.GH14766@pendragon.ideasonboard.com> <CAPDyKFpQVnF7eQv3dup8k-3EijnMjuveCG9sZ=Rpey1Y6MBJEg@mail.gmail.com>
- <20241007222502.GG30699@pendragon.ideasonboard.com> <CAPDyKFrGNwna6Y2pqSRaBbRYHKRaD2ayqQHLtoqLPOu9Et7qTg@mail.gmail.com>
- <CAJZ5v0jvJyS7D5-wURi2kyWN-rmNa+YqupeQJ000pQRVd9VBcQ@mail.gmail.com>
-In-Reply-To: <CAJZ5v0jvJyS7D5-wURi2kyWN-rmNa+YqupeQJ000pQRVd9VBcQ@mail.gmail.com>
+References: <20240913102836.6144-1-victorshihgli@gmail.com>
+ <20240913102836.6144-3-victorshihgli@gmail.com> <c053b350-f1ef-4a1c-b19e-4fe704279f49@ijzerbout.nl>
+In-Reply-To: <c053b350-f1ef-4a1c-b19e-4fe704279f49@ijzerbout.nl>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Oct 2024 12:27:45 +0200
-Message-ID: <CAPDyKFqh_BS=6eN4tQzZ20sWCHL3kdnrY=1Mgd7B9gfBamm8bw@mail.gmail.com>
-Subject: Re: [PATCH 00/51] treewide: Switch to __pm_runtime_put_autosuspend()
-To: "Rafael J. Wysocki" <rafael@kernel.org>
-Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>, 
-	Sakari Ailus <sakari.ailus@linux.intel.com>, dri-devel@lists.freedesktop.org, 
-	linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org, 
-	linux-clk@vger.kernel.org, linux-crypto@vger.kernel.org, 
-	dmaengine@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	amd-gfx@lists.freedesktop.org, nouveau@lists.freedesktop.org, 
-	linux-stm32@st-md-mailman.stormreply.com, 
-	linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, 
-	linux-i3c@lists.infradead.org, linux-iio@vger.kernel.org, 
-	linux-input@vger.kernel.org, patches@opensource.cirrus.com, 
-	iommu@lists.linux.dev, imx@lists.linux.dev, 
-	linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, 
-	netdev@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	linux-pci@vger.kernel.org, linux-phy@lists.infradead.org, 
-	linux-pwm@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
-	linux-sound@vger.kernel.org, linux-spi@vger.kernel.org, 
-	linux-staging@lists.linux.dev, linux-usb@vger.kernel.org, 
-	linux-serial@vger.kernel.org, greybus-dev@lists.linaro.org, 
-	asahi@lists.linux.dev, Andy Shevchenko <andy.shevchenko@gmail.com>
+Date: Wed, 9 Oct 2024 12:37:36 +0200
+Message-ID: <CAPDyKFpLOdydbOEe4KSmVc_C=umAieR_+Bo--JmVRDtPiX3YuQ@mail.gmail.com>
+Subject: Re: [PATCH V22 02/22] mmc: core: Prepare to support SD UHS-II cards
+To: Kees Bakker <kees@ijzerbout.nl>
+Cc: Victor Shih <victorshihgli@gmail.com>, adrian.hunter@intel.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	benchuanggli@gmail.com, Lucas.Lai@genesyslogic.com.tw, 
+	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, dlunev@chromium.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 8 Oct 2024 at 20:25, Rafael J. Wysocki <rafael@kernel.org> wrote:
+On Tue, 8 Oct 2024 at 21:56, Kees Bakker <kees@ijzerbout.nl> wrote:
 >
-> On Tue, Oct 8, 2024 at 12:35=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
+> Op 13-09-2024 om 12:28 schreef Victor Shih:
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
 > >
-> > On Tue, 8 Oct 2024 at 00:25, Laurent Pinchart
-> > <laurent.pinchart@ideasonboard.com> wrote:
-> > >
-> > > Hi Ulf,
-> > >
-> > > On Tue, Oct 08, 2024 at 12:08:24AM +0200, Ulf Hansson wrote:
-> > > > On Mon, 7 Oct 2024 at 20:49, Laurent Pinchart wrote:
-> > > > > On Fri, Oct 04, 2024 at 04:38:36PM +0200, Ulf Hansson wrote:
-> > > > > > On Fri, 4 Oct 2024 at 11:41, Sakari Ailus wrote:
-> > > > > > >
-> > > > > > > Hello everyone,
-> > > > > > >
-> > > > > > > This set will switch the users of pm_runtime_put_autosuspend(=
-) to
-> > > > > > > __pm_runtime_put_autosuspend() while the former will soon be =
-re-purposed
-> > > > > > > to include a call to pm_runtime_mark_last_busy(). The two are=
- almost
-> > > > > > > always used together, apart from bugs which are likely common=
-. Going
-> > > > > > > forward, most new users should be using pm_runtime_put_autosu=
-spend().
-> > > > > > >
-> > > > > > > Once this conversion is done and pm_runtime_put_autosuspend()=
- re-purposed,
-> > > > > > > I'll post another set to merge the calls to __pm_runtime_put_=
-autosuspend()
-> > > > > > > and pm_runtime_mark_last_busy().
-> > > > > >
-> > > > > > That sounds like it could cause a lot of churns.
-> > > > > >
-> > > > > > Why not add a new helper function that does the
-> > > > > > pm_runtime_put_autosuspend() and the pm_runtime_mark_last_busy(=
-)
-> > > > > > things? Then we can start moving users over to this new interfa=
-ce,
-> > > > > > rather than having this intermediate step?
-> > > > >
-> > > > > I think the API would be nicer if we used the shortest and simple=
-st
-> > > > > function names for the most common use cases. Following
-> > > > > pm_runtime_put_autosuspend() with pm_runtime_mark_last_busy() is =
-that
-> > > > > most common use case. That's why I like Sakari's approach of repu=
-rposing
-> > > > > pm_runtime_put_autosuspend(), and introducing
-> > > > > __pm_runtime_put_autosuspend() for the odd cases where
-> > > > > pm_runtime_mark_last_busy() shouldn't be called.
-> > > >
-> > > > Okay, so the reason for this approach is because we couldn't find a
-> > > > short and descriptive name that could be used in favor of
-> > > > pm_runtime_put_autosuspend(). Let me throw some ideas at it and may=
-be
-> > > > you like it - or not. :-)
-> > >
-> > > I like the idea at least :-)
-> > >
-> > > > I don't know what options you guys discussed, but to me the entire
-> > > > "autosuspend"-suffix isn't really that necessary in my opinion. The=
-re
-> > > > are more ways than calling pm_runtime_put_autosuspend() that trigge=
-rs
-> > > > us to use the RPM_AUTO flag for rpm_suspend(). For example, just
-> > > > calling pm_runtime_put() has the similar effect.
-> > >
-> > > To be honest, I'm lost there. pm_runtime_put() calls
-> > > __pm_runtime_idle(RPM_GET_PUT | RPM_ASYNC), while
-> > > pm_runtime_put_autosuspend() calls __pm_runtime_suspend(RPM_GET_PUT |
-> > > RPM_ASYNC | RPM_AUTO).
+> > The SD UHS-II interface was introduced to the SD spec v4.00 several years
+> > ago. The interface is fundamentally different from an electrical and a
+> > protocol point of view, comparing to the legacy SD interface.
 > >
-> > __pm_runtime_idle() ends up calling rpm_idle(), which may call
-> > rpm_suspend() - if it succeeds to idle the device. In that case, it
-> > tags on the RPM_AUTO flag in the call to rpm_suspend(). Quite similar
-> > to what is happening when calling pm_runtime_put_autosuspend().
->
-> Right.
->
-> For almost everybody, except for a small bunch of drivers that
-> actually have a .runtime_idle() callback, pm_runtime_put() is
-> literally equivalent to pm_runtime_put_autosuspend().
->
-> So really the question is why anyone who doesn't provide a
-> .runtime_idle() callback bothers with using this special
-> pm_runtime_put_autosuspend() thing, which really means "do a
-> runtime_put(), but skip my .runtime_idle() callback".
-
-My guess is that it's in most cases a legacy pattern that is being
-followed. Also note that rpm_idle() didn't "always" tag on the
-RPM_AUTO flag, even if it's quite a while ago (2013) since we added
-it.
-
-Unless there is some actual optimization involved, as it also allows
-us to skip calling rpm_idle() and go directly for rpm_suspend().
-
->
-> > >
-> > > >
-> > > > Moreover, it's similar for pm_runtime_mark_last_busy(), it's called
-> > > > during rpm_resume() too, for example. So why bother about having
-> > > > "mark_last_busy" in the new name too.
-> > > >
-> > > > That said, my suggestion is simply "pm_runtime_put_suspend".
-> > >
-> > > Can we do even better, and make pm_runtime_put() to handle autosuspen=
-d
-> > > automatically when autosuspend is enabled ?
+> > However, the legacy SD protocol is supported through a specific transport
+> > layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows the
+> > SD card to be managed in a very similar way as a legacy SD card, hence a
+> > lot of code can be re-used to support these new types of cards through the
+> > mmc subsystem.
 > >
-> > As stated above, this is already the case.
->
-> What really is needed appears to be a combination of
-> pm_runtime_mark_last_busy() with pm_runtime_put().
+> > Moreover, an SD card that supports the UHS-II interface shall also be
+> > backwards compatible with the legacy SD interface, which allows a UHS-II
+> > card to be inserted into a legacy slot. As a matter of fact, this is
+> > already supported by mmc subsystem as of today.
+> >
+> > To prepare to add support for UHS-II, this change puts the basic foundation
+> > in the mmc core in place, allowing it to be more easily reviewed before
+> > subsequent changes implements the actual support.
+> >
+> > Basically, the approach here adds a new UHS-II bus_ops type and adds a
+> > separate initialization path for the UHS-II card. The intent is to avoid us
+> > from sprinkling the legacy initialization path, but also to simplify
+> > implementation of the UHS-II specific bits.
+> >
+> > At this point, there is only one new host ops added to manage the various
+> > ios settings needed for UHS-II. Additional host ops that are needed, are
+> > being added from subsequent changes.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > ---
+> >
+> > Updates in V10:
+> >   - Drop unnecessary definitions and code.
+> >
+> > Updates in V9:
+> >   - move sd_uhs2_operation definition of PatchV8[05/23] to
+> >     PatchV9[02/23] for avoid compilation errors.
+> >   - move uhs2_control definition of PatchV8[05/23] to
+> >     PatchV9[02/23] for avoid compilation errors.
+> >   - move mmc_host flags definition of PatchV8[05/23] to
+> >     PatchV9[02/23] for avoid compilation errors.
+> >   - move mmc_host flags MMC_UHS2_SUPPORT definition of PatchV8[05/23] to
+> >     PatchV9[02/23] for avoid compilation errors.
+> >   - move mmc_host flags MMC_UHS2_SD_TRAN definition of PatchV8[05/23] to
+> >     PatchV9[02/23] for avoid compilation errors.
+> >
+> > Updates in V7:
+> >   - Drop sd_uhs2_set_ios function.
+> >   - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_up().
+> >   - Used ->uhs2_control() callback for uhs2_set_ios in sd_uhs2_power_off().
+> >   - Drop MMC_TIMING_SD_UHS2 in favor of MMC_TIMING_UHS2_SPEED_A.
+> >   - Modify sd_uhs2_legacy_init to avoid sd_uhs2_reinit cycle issue.
+> >
+> > Updates in V4:
+> >   - Re-based, updated a comment and removed white-space.
+> >   - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
+> >
+> > ---
+> >
+> >   drivers/mmc/core/Makefile  |   2 +-
+> >   drivers/mmc/core/core.c    |  17 ++-
+> >   drivers/mmc/core/core.h    |   1 +
+> >   drivers/mmc/core/sd_uhs2.c | 292 +++++++++++++++++++++++++++++++++++++
+> >   include/linux/mmc/card.h   |   7 +
+> >   include/linux/mmc/host.h   |  23 +++
+> >   6 files changed, 340 insertions(+), 2 deletions(-)
+> >   create mode 100644 drivers/mmc/core/sd_uhs2.c
+> >
+> > [...]
+> > +/*
+> > + * Run the enumeration process by sending the enumerate command to the card.
+> > + * Note that, we currently support only the point to point connection, which
+> > + * means only one card can be attached per host/slot.
+> > + */
+> > +static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
+> > +{
+> > +     return 0;
+> > +}
+> > [...]
+> > +/*
+> > + * Allocate the data structure for the mmc_card and run the UHS-II specific
+> > + * initialization sequence.
+> > + */
+> > +static int sd_uhs2_init_card(struct mmc_host *host)
+> > +{
+> > +     struct mmc_card *card;
+> > +     u32 node_id;
+> > +     int err;
+> > +
+> > +     err = sd_uhs2_dev_init(host);
+> > +     if (err)
+> > +             return err;
+> > +
+> > +     err = sd_uhs2_enum(host, &node_id);
+> node_id is still uninitialized, see implementation of sd_uhs2_enum above
+> > +     if (err)
+> > +             return err;
+> > +
+> > +     card = mmc_alloc_card(host, &sd_type);
+> > +     if (IS_ERR(card))
+> > +             return PTR_ERR(card);
+> > +
+> > +     card->uhs2_config.node_id = node_id;
+> Using uninitialized node_id
 
-This makes sense to me too, but I don't think we should limit it to this.
+I practise this should not happen as the thought is that
+sd_uhs2_enum() should return an error code, unless it can provide the
+node_id.
 
-Making pm_runtime_put_autosuspend (or if the name
-"pm_runtime_put_suspend" is better?) to do the similar thing, is
-probably a good idea too. At least in my opinion.
+In any case, it's better to initialize node_id at declaration, so I
+have amended the patch like that.
 
->
-> Granted, pm_runtime_put() could do the pm_runtime_mark_last_busy()
-> thing automatically if autosuspend is enabled and the only consequence
-> of it might be delaying a suspend of the device until its autosuspend
-> timer expires, which should not be a problem in the vast majority of
-> cases.
+[...]
 
-Right.
-
-I guess we should expect the *sync* variants to be used, if the timer
-really needs to be overridden.
+Thanks for reviewing!
 
 Kind regards
 Uffe
