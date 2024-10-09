@@ -1,202 +1,147 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC02518F2EA;
-	Wed,  9 Oct 2024 10:20:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7094918FC7E
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Oct 2024 10:22:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728469230; cv=none; b=En8kxkFTI1iN4fMB2IWKZtR53jXGMJUjF6VDggxbfh9PZO7ZLESvtKzVHF/wbhRh0JXkqsqDvKG4NHLY6HuGi2TIqRRPbv/wqmF3/vYLz+kxoDzRKl5C44dsIJis3S34z40LaOQYK+HDEnHwNldEg1rxQ88uGdi4s07xsd3V130=
+	t=1728469361; cv=none; b=YtvMahoKpeq4QFZ/kJDUBqfoJ3wfictp0IPLA1gecDJyjjQkrCK75Q6kPyNd7i2KH8N0/Nvw3Ht/h3XuHmM5dI8QNaTNkS3Dz84O2euYjQY+wVBWwDBGU8Ily8+t5/QGttCoH71KeGtTsEK6Ap9NVcUQ/Ejluhd36gNV8hkHiWM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728469230; c=relaxed/simple;
-	bh=ImAK0CpUwm+JPbTzbW7azTUBVNfLGbvl7aS7sfbdp0E=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EFU4Eg0EVpfIPO32qoWIZJJiYtqmAbbq5v8BUboN4WK4Eh0I5SR4RjkU3G4wKbmh6MRr+L2zQBvcPzN0OOKD7tkdLbfAOyyiQ+wPoNLcIgdtP7o64QXcGMdo/S4kErcaA8qgPLEeeNIiwO8rTCrzi1p2WcZKu30z5IKI9uOhYPg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Sypaa8E4; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728469361; c=relaxed/simple;
+	bh=1muRWa+wXawPE1eQ9HosXZjWY4RSa8MbWKpe3P4P9uQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=c6TRZ4EttyVWTC58XE6H897odqW4Jx9Ta5NP8krIwKSOS5XHEZov4Ftm+FhfcAwkhTh7zj3Vt76Zyp1IpGRH9lG9vZboYwrw+jmmvz8z3SLV4Tw3ZFShrTMi9nLtzVVaJgNmn4QCkrLG9wK+30MKB6yjNIpauxgv/9NPWp9WCk4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=s5gzntXx; arc=none smtp.client-ip=209.85.218.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Sypaa8E4"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7D816C4CED5;
-	Wed,  9 Oct 2024 10:20:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728469229;
-	bh=ImAK0CpUwm+JPbTzbW7azTUBVNfLGbvl7aS7sfbdp0E=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=Sypaa8E4XTR2h+6vO973S9djHACjIXek0KLq783ADF8tNtOe1bMZrJFf0zlt8+zSs
-	 OLRAtppFEIb5Ic0mWDNDYNRaI6e9/Z7vBQGyOQ8guZklNp3J6lYVvOJPY0Nte+XhtF
-	 xT1b91GGI33rYAt7gxwLcB1d3y1SBKs6bb4MxTTF1y6tGBweQi8zO12oDVI1/KpONI
-	 bOJQtQv0XV690wHla57wDR2aHvoM6Up16kaIYdw6AVyfMWDvtpnERh2dLqJ6WBvkYw
-	 EhkKXnH7yqObLqkMathJ5jYncRSwZXMHxI2dTYJuZPN1g66Yyks/L1YgZFWJ7ipDTo
-	 JPDgtbBAM36Bg==
-Received: by mail-oo1-f45.google.com with SMTP id 006d021491bc7-5e5d0a80db4so3555289eaf.3;
-        Wed, 09 Oct 2024 03:20:29 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCU7z+7jIIjC2P1U0jY1OGCX8+52+FZTOCeeDTZNMmoAY3h4n928OdSmCrC5aDF5xKtuEfbpzftJh1QELJLcCaU=@vger.kernel.org, AJvYcCU8FbU8leUEnj022ykj0ZJaI3x461l+mWVwkX91+D++0TlkjLj2X7WXN9VOvyqnoGEo6J2nIfboYVSi@vger.kernel.org, AJvYcCUFVzm7V+C/Z2wSNGBm2S7yFIrEKci5qFXJ74V7VvZrHIs40oEmmpA62Fid35+RKGjnRYEYniDNjhahhf6/@vger.kernel.org, AJvYcCUHkDTQSCsIevhis5JW7CtlUW/zSE8GUFzgQV8wgUkcj7R1dGC850kApuYWMap2qK9pkKdjDqd85npi@vger.kernel.org, AJvYcCUjipJwam9lVqW71OhF9ej/sFfsxKaDCcqX2yRJ12nen4tyZ1ylp8EkwVT2IkYHQ2yXubsnRUQADHo6@vger.kernel.org, AJvYcCUp1QUsl/llHp9Ud9boh8PVzlIzPEovDn6qsX2tj5cnhe5ejTspBgpmFA6QswLaWJUEitT0RBdDH6qnBRY=@vger.kernel.org, AJvYcCUz1nO7xw83bSHa2WHLdL190FWS4/lZhUivQqcT6WPr1TeztHSKURzx4boWh9zTFdRcA075MBHLlbtS@vger.kernel.org, AJvYcCV8K4bhWy20QNldimSqcIdlv+Z7uEsvWNbuS8qPJMJc0AlpLEMRn4BMMTIKAS7wAAqPGXSKKY1Ch80m@vger.kernel.org, AJvYcCVKbDbNlbCvq8f0d+SkA3r9bSKuRxLWgH38IaHbP2x7tR23/GT1y13SgxX4CO3yU31TS/mjKXraXGlwnNlY@vger.kernel.org, AJvYcCVWj0XSWFMzZAgH0b8PtTvwutQ0JquorXUhjwLOLkxX25FcIQS0vLm6v+V4I5lZDCUI9bwrmRt10RTW2A==@vger.kernel.org, AJvYcCVb5Xfd8I1wHNySBxd4ISZJHauEqZKNHqtL3alZ9MsSRoNiaCrgT8GvhoZg6T/JIvqzD5EcTaLtLdi6@vger.kernel.org, AJvYcCVlvSujGGmMVPSMGxuROjTXqi5k/dBNPZ+dppj4+Bv7E7yUecAVJYPyu/dOc3pQJOciMbVi3EcdEogQ@vger.kernel.org, AJvYcCWKFQeoEmjqbAOYjHpLG3t3SVXyhEATWl2KOIrGF/ZvSqOsbbC3bTM1CNnycGXZmw0et/M75BZhR+RMjvS2@vger.kernel.org, AJvYcCWPwk/6y0Rtp78PWIdFytLoq6bqb9z641B4psA+7cT67sNS3kcAUQJHCJlxG1rvqaTXzIzZy2lE9ys=@vger.kernel.org, AJvYcCWVGb5O/51e1C2pDl0FlYealE8S8mXXcYJ6swTSzz/IHAALH6YhAdHAxKyf1OoQLgTRTbt3hRPGCKerT74=@vger.kernel.org, AJvYcCWk4P26oKArraNo66o+ELkqBOeXRORrnUSYKaDjO+f7T+3WKZtv2sEOAA3LMth7S9emWrlF+Dvh@vger.kernel.org, AJvYcCWt8Onq29KmSvnAZR6jobjdVavcYrkGNIdioXxuTbxigWK3WGIyOgpUT42xXoRyXdCwlLH+mlc6FaNcnfhvP5TfEQ==@vger.kernel.org, AJvYcCWuTi/EGEOQdGj7HrqM1EaX1Ktwi4KECFYb61NcoeAIFgO1rYWfj/xV3KN5wUQm043pFaT5A26p+wSH@vger.kernel.org, AJvYcCXi2BIQFD6ExeE55giEfIgb/YEg8T5HaID11SO9vzydHSj3oFku8fBERyEtFgkQkRes3lf2xdIEkRXApbNptgVh@vger.kernel.org, AJvYcCXipGIO4LNa4qTjapDFOw/1tWG0euUmbwpm2bQLe2FI/xp6C1hy4+VjqY+/NF0Sox/8uzhVElGb+6Qjrzg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxUbrkwaL51zZQK6WHOki32c8LpB3QVpB6nuZ6zFxZaG5w652B6
-	2ob98S9sUoN7bUPBaMWN1CA5LChdYNCq7sQF8tPZVgbsy3RPL5+hXBLZPsa8w6s5/bf8zdhkdEK
-	2tIC/E6zieSkniDmlY7fXaBbTzjY=
-X-Google-Smtp-Source: AGHT+IF28e1A9mtOEy4wCWwLUrfMAFq/4+DT8Vi41Eljnp8AjlauSlJofg4NJprxAH2sFsPScvE36aWo6OHCPjXQ49c=
-X-Received: by 2002:a05:6820:270f:b0:5e7:c925:b05 with SMTP id
- 006d021491bc7-5e987aadf58mr1212364eaf.2.1728469228716; Wed, 09 Oct 2024
- 03:20:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s5gzntXx"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-a9953bdc341so440399566b.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Oct 2024 03:22:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1728469357; x=1729074157; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=s5VgD+wTXaNucrBWnqcE02bPzDtE/QymMPp7ZrJAaRA=;
+        b=s5gzntXx4N7oERKAZOKw8cZVIoRR0oYv5ClDy9hnyIHznRa0Y+V/JjL0F8ujk7wcKk
+         E/QAnNRso08a67lItzn8TZO3TrPiIxSRu9UTEVksSEKIj1wuDn6732r7eR1ps7WgfUme
+         MgyOuj/1ctCaFzJHN+//X5bMX4oGjSKwpMdN+yBUel/xGhEE6V7tIkcNPqwxPnIHP7gw
+         EZQ7MnZvjGW7MVLFItEbcuPvNUfN7Ym5K4sjnpcVDfQaRJSGQ2IoV/xo6s1ibNhCASdN
+         RxNRVPft5wyRiEerj//GDNw9r7EeazOliUZ512mOcMfjkAv3RjLlOJ23zEmioUhXle8L
+         BUMA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728469357; x=1729074157;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=s5VgD+wTXaNucrBWnqcE02bPzDtE/QymMPp7ZrJAaRA=;
+        b=bPX2pYW5VNzVrxbHKpMpyR8NF/Vf9GWTfI92nVYKPIDps/xQFYvEHvWdq1JHOF+FgA
+         m2xn84RlWt5Ul9zxcWH1yUIwia3Q2TNC9tZtDjDYAYllia6IQbT3z5zIIGCi2pQdmDch
+         lEjMlvp92HEjEAtq5ifl1KoqMrktcjolIl/tWvu+fnJPEVS5kkpfDzfT6ALZA0Avx6YX
+         6RjGzGr5YYLJIs6Z9kJIauc/k2bmP0y/QKTY8qonZHPG+HxJDCzvgBULuNIvNZtuosFY
+         tfNzhJphUHMl0E7m7s5Gndv64yknV3sCmqd8+FoPxqenT5yTWJOFYgvpxbpFP4i4INU8
+         dj2g==
+X-Forwarded-Encrypted: i=1; AJvYcCX5LHMCdukcy10TPP5dLQB5jbxwYx+2JMc7ynTTvA4I92PJIMwx4LXBK+svkhTJtRjmVtCqV7AGr4s=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyr2DbdGil6EhqS9JG49r8bTT+VpnMkg/V+HHmEdC7gq7k0q7Oq
+	dvwOcOWeFHLzeRKJHy/ryEkskm2S5Qqw9/Ut/CZpI0vIi9nTzRV2Zekf3ofduzs=
+X-Google-Smtp-Source: AGHT+IFgNDo1cyZoG4YBSn4FWa6hWBarcKKT8WDru+XyTCt2NUHvDMU1kIaP/0lbJiHrbIG5gGBXag==
+X-Received: by 2002:a17:907:9728:b0:a80:f81c:fd75 with SMTP id a640c23a62f3a-a998cf4d7a3mr166864766b.0.1728469356565;
+        Wed, 09 Oct 2024 03:22:36 -0700 (PDT)
+Received: from linaro.org ([82.77.84.93])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a994ce357b2sm472465666b.144.2024.10.09.03.22.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 09 Oct 2024 03:22:36 -0700 (PDT)
+Date: Wed, 9 Oct 2024 13:22:34 +0300
+From: Abel Vesa <abel.vesa@linaro.org>
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Johan Hovold <johan@kernel.org>,
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH 2/4] arm64: dts: qcom: x1e80100: Describe the SDHC
+ controllers
+Message-ID: <ZwZZalFKXiQh0BAK@linaro.org>
+References: <20241008-x1e80100-qcp-sdhc-v1-0-dfef4c92ae31@linaro.org>
+ <20241008-x1e80100-qcp-sdhc-v1-2-dfef4c92ae31@linaro.org>
+ <syf3uyoyh55rxieyjnhsskmythce6vnkuq77asgml736gcysd7@op5b2pd6ijsj>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241004094101.113349-1-sakari.ailus@linux.intel.com>
- <CAPDyKFp0N6UJhnHS164Tdf=xkWB0jzq65L9TdvYazeBQ-6WjeQ@mail.gmail.com>
- <20241007184924.GH14766@pendragon.ideasonboard.com> <CAPDyKFpQVnF7eQv3dup8k-3EijnMjuveCG9sZ=Rpey1Y6MBJEg@mail.gmail.com>
- <20241007222502.GG30699@pendragon.ideasonboard.com> <CAPDyKFrGNwna6Y2pqSRaBbRYHKRaD2ayqQHLtoqLPOu9Et7qTg@mail.gmail.com>
- <CAJZ5v0jvJyS7D5-wURi2kyWN-rmNa+YqupeQJ000pQRVd9VBcQ@mail.gmail.com>
-In-Reply-To: <CAJZ5v0jvJyS7D5-wURi2kyWN-rmNa+YqupeQJ000pQRVd9VBcQ@mail.gmail.com>
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Date: Wed, 9 Oct 2024 12:20:16 +0200
-X-Gmail-Original-Message-ID: <CAJZ5v0htLbrFeby43Ycqpaihqd4x56MokC9sTVRBmTTQSX7vmQ@mail.gmail.com>
-Message-ID: <CAJZ5v0htLbrFeby43Ycqpaihqd4x56MokC9sTVRBmTTQSX7vmQ@mail.gmail.com>
-Subject: Re: [PATCH 00/51] treewide: Switch to __pm_runtime_put_autosuspend()
-To: Ulf Hansson <ulf.hansson@linaro.org>, 
-	Laurent Pinchart <laurent.pinchart@ideasonboard.com>, 
-	Sakari Ailus <sakari.ailus@linux.intel.com>
-Cc: dri-devel@lists.freedesktop.org, linux-kernel@vger.kernel.org, 
-	linux-bluetooth@vger.kernel.org, linux-clk@vger.kernel.org, 
-	linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org, 
-	linux-gpio@vger.kernel.org, amd-gfx@lists.freedesktop.org, 
-	nouveau@lists.freedesktop.org, linux-stm32@st-md-mailman.stormreply.com, 
-	linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, 
-	linux-i3c@lists.infradead.org, linux-iio@vger.kernel.org, 
-	linux-input@vger.kernel.org, patches@opensource.cirrus.com, 
-	iommu@lists.linux.dev, imx@lists.linux.dev, 
-	linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, 
-	netdev@vger.kernel.org, linux-wireless@vger.kernel.org, 
-	linux-pci@vger.kernel.org, linux-phy@lists.infradead.org, 
-	linux-pwm@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
-	linux-sound@vger.kernel.org, linux-spi@vger.kernel.org, 
-	linux-staging@lists.linux.dev, linux-usb@vger.kernel.org, 
-	linux-serial@vger.kernel.org, greybus-dev@lists.linaro.org, 
-	asahi@lists.linux.dev, Andy Shevchenko <andy.shevchenko@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <syf3uyoyh55rxieyjnhsskmythce6vnkuq77asgml736gcysd7@op5b2pd6ijsj>
 
-On Tue, Oct 8, 2024 at 8:24=E2=80=AFPM Rafael J. Wysocki <rafael@kernel.org=
-> wrote:
->
-> On Tue, Oct 8, 2024 at 12:35=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
-> >
-> > On Tue, 8 Oct 2024 at 00:25, Laurent Pinchart
-> > <laurent.pinchart@ideasonboard.com> wrote:
-> > >
-> > > Hi Ulf,
-> > >
-> > > On Tue, Oct 08, 2024 at 12:08:24AM +0200, Ulf Hansson wrote:
-> > > > On Mon, 7 Oct 2024 at 20:49, Laurent Pinchart wrote:
-> > > > > On Fri, Oct 04, 2024 at 04:38:36PM +0200, Ulf Hansson wrote:
-> > > > > > On Fri, 4 Oct 2024 at 11:41, Sakari Ailus wrote:
-> > > > > > >
-> > > > > > > Hello everyone,
-> > > > > > >
-> > > > > > > This set will switch the users of pm_runtime_put_autosuspend(=
-) to
-> > > > > > > __pm_runtime_put_autosuspend() while the former will soon be =
-re-purposed
-> > > > > > > to include a call to pm_runtime_mark_last_busy(). The two are=
- almost
-> > > > > > > always used together, apart from bugs which are likely common=
-. Going
-> > > > > > > forward, most new users should be using pm_runtime_put_autosu=
-spend().
-> > > > > > >
-> > > > > > > Once this conversion is done and pm_runtime_put_autosuspend()=
- re-purposed,
-> > > > > > > I'll post another set to merge the calls to __pm_runtime_put_=
-autosuspend()
-> > > > > > > and pm_runtime_mark_last_busy().
-> > > > > >
-> > > > > > That sounds like it could cause a lot of churns.
-> > > > > >
-> > > > > > Why not add a new helper function that does the
-> > > > > > pm_runtime_put_autosuspend() and the pm_runtime_mark_last_busy(=
-)
-> > > > > > things? Then we can start moving users over to this new interfa=
-ce,
-> > > > > > rather than having this intermediate step?
-> > > > >
-> > > > > I think the API would be nicer if we used the shortest and simple=
-st
-> > > > > function names for the most common use cases. Following
-> > > > > pm_runtime_put_autosuspend() with pm_runtime_mark_last_busy() is =
-that
-> > > > > most common use case. That's why I like Sakari's approach of repu=
-rposing
-> > > > > pm_runtime_put_autosuspend(), and introducing
-> > > > > __pm_runtime_put_autosuspend() for the odd cases where
-> > > > > pm_runtime_mark_last_busy() shouldn't be called.
-> > > >
-> > > > Okay, so the reason for this approach is because we couldn't find a
-> > > > short and descriptive name that could be used in favor of
-> > > > pm_runtime_put_autosuspend(). Let me throw some ideas at it and may=
-be
-> > > > you like it - or not. :-)
-> > >
-> > > I like the idea at least :-)
-> > >
-> > > > I don't know what options you guys discussed, but to me the entire
-> > > > "autosuspend"-suffix isn't really that necessary in my opinion. The=
-re
-> > > > are more ways than calling pm_runtime_put_autosuspend() that trigge=
-rs
-> > > > us to use the RPM_AUTO flag for rpm_suspend(). For example, just
-> > > > calling pm_runtime_put() has the similar effect.
-> > >
-> > > To be honest, I'm lost there. pm_runtime_put() calls
-> > > __pm_runtime_idle(RPM_GET_PUT | RPM_ASYNC), while
-> > > pm_runtime_put_autosuspend() calls __pm_runtime_suspend(RPM_GET_PUT |
-> > > RPM_ASYNC | RPM_AUTO).
-> >
-> > __pm_runtime_idle() ends up calling rpm_idle(), which may call
-> > rpm_suspend() - if it succeeds to idle the device. In that case, it
-> > tags on the RPM_AUTO flag in the call to rpm_suspend(). Quite similar
-> > to what is happening when calling pm_runtime_put_autosuspend().
->
-> Right.
->
-> For almost everybody, except for a small bunch of drivers that
-> actually have a .runtime_idle() callback, pm_runtime_put() is
-> literally equivalent to pm_runtime_put_autosuspend().
->
-> So really the question is why anyone who doesn't provide a
-> .runtime_idle() callback bothers with using this special
-> pm_runtime_put_autosuspend() thing, which really means "do a
-> runtime_put(), but skip my .runtime_idle() callback".
->
-> > >
-> > > >
-> > > > Moreover, it's similar for pm_runtime_mark_last_busy(), it's called
-> > > > during rpm_resume() too, for example. So why bother about having
-> > > > "mark_last_busy" in the new name too.
-> > > >
-> > > > That said, my suggestion is simply "pm_runtime_put_suspend".
-> > >
-> > > Can we do even better, and make pm_runtime_put() to handle autosuspen=
-d
-> > > automatically when autosuspend is enabled ?
-> >
-> > As stated above, this is already the case.
->
-> What really is needed appears to be a combination of
-> pm_runtime_mark_last_busy() with pm_runtime_put().
->
-> Granted, pm_runtime_put() could do the pm_runtime_mark_last_busy()
-> thing automatically if autosuspend is enabled and the only consequence
-> of it might be delaying a suspend of the device until its autosuspend
-> timer expires, which should not be a problem in the vast majority of
-> cases.
+On 24-10-09 08:49:03, Krzysztof Kozlowski wrote:
+> On Tue, Oct 08, 2024 at 05:05:56PM +0300, Abel Vesa wrote:
+> > Describe the two SHDC v5 controllers found on x1e80100 platform.
+> > 
+> > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> > ---
+> >  arch/arm64/boot/dts/qcom/x1e80100.dtsi | 108 +++++++++++++++++++++++++++++++++
+> >  1 file changed, 108 insertions(+)
+> > 
+> > diff --git a/arch/arm64/boot/dts/qcom/x1e80100.dtsi b/arch/arm64/boot/dts/qcom/x1e80100.dtsi
+> > index a36076e3c56b5b8815eb41ec55e2e1e5bd878201..b835fd87b977ae81f687c4ea15f6f2f89e02e9b1 100644
+> > --- a/arch/arm64/boot/dts/qcom/x1e80100.dtsi
+> > +++ b/arch/arm64/boot/dts/qcom/x1e80100.dtsi
+> > @@ -3880,6 +3880,114 @@ lpass_lpicx_noc: interconnect@7430000 {
+> >  			#interconnect-cells = <2>;
+> >  		};
+> >  
+> > +		sdhc_2: mmc@8804000 {
+> > +			compatible = "qcom,x1e80100-sdhci", "qcom,sdhci-msm-v5";
+> > +			reg = <0 0x08804000 0 0x1000>;
+> > +
+> > +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> > +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> > +			interrupt-names = "hc_irq", "pwr_irq";
+> > +
+> > +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+> > +				 <&gcc GCC_SDCC2_APPS_CLK>,
+> > +				 <&rpmhcc RPMH_CXO_CLK>;
+> > +			clock-names = "iface", "core", "xo";
+> > +			iommus = <&apps_smmu 0x520 0>;
+> > +			qcom,dll-config = <0x0007642c>;
+> > +			qcom,ddr-config = <0x80040868>;
+> > +			power-domains = <&rpmhpd RPMHPD_CX>;
+> > +			operating-points-v2 = <&sdhc2_opp_table>;
+> > +
+> > +			interconnects = <&aggre2_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
+> > +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDCC_2 0>;
+> > +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+> > +			bus-width = <4>;
+> > +			dma-coherent;
+> > +
+> > +			/* Forbid SDR104/SDR50 - broken hw! */
+> 
+> Is it still valid or was it just copied from old code?
 
-That said, it is likely better to avoid surprising the current users
-of pm_runtime_put() and define something like
+So when I did the bring-up of this controller, for some reason I thought
+this was needed. But I guess that's not the case since I get this
+without it:
 
-static inline void pm_runtime_touch_and_put(struct device *dev)
-{
-        pm_runtime_mark_last_busy(dev);
-        pm_runtime_put(dev);
-}
+[    5.168918] mmc0: new ultra high speed SDR104 SDHC card at address
+
+So will drop in the next version.
+
+Keep in mind that I have no way to test the sdhc_4, so I'll drop it from
+there as well.
+
+> 
+> > +			sdhci-caps-mask = <0x3 0>;
+> 
+> Best regards,
+> Krzysztof
+> 
+
+Thanks for reviewing.
+
+Abel
