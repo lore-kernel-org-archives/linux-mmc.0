@@ -1,110 +1,85 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mxout1.routing.net (mxout1.routing.net [134.0.28.11])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6A68613B288
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Oct 2024 16:00:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C79A2D7BF;
+	Wed,  9 Oct 2024 16:55:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=134.0.28.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728489617; cv=none; b=HsM7uVDnOeVCom6/HqecF9dvG8GpRoJ/kGilbutalcomJU07ry9uPu993x27iFFQfF63EZi74FKY2Zc9nkQDAvvcYAcVhP2kfGhL3GkBHehg+E7Sn97zToLWvfLqIbLx6hJr2S8XE4Ib/wHshuWfhi4X+knST59vvebA19c21ao=
+	t=1728492954; cv=none; b=rIF8bXqTmZs5u8XHJSYmfOelXJKAIHo3VoiqVNVG3OFj6bpNvtFljRm7/F/6O9+W8/IoBBb2zw40dHIkqwbWadiJ6kNKZ2zrY5QAi1IhBF6Y/t7U0irHeWTGAgIFSJEwjtvO3EZhHcYDrmy+qQCXrDFk1uJW9QXOrKgXmrWbbQM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728489617; c=relaxed/simple;
-	bh=2WivTiER5H/7O3Ybl6tEYCrWvlrvxGRPlBeVehHLx4Y=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=G5ytsbDTBDSO20wYCWNEIQ+tCRLEhvTtiJ2oXBLDBVY4pxa7+Y0Zai/29sFiJUzv8bncLGlTRqHbUKIRjhz0vfatxJcUL8cNn21CouCZv7b8J+aCZZZouRRpm/7MEo+hiACutkxfRMOktRzrXS0QiRTDQPT12A8gOr9NBZ7YfTg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=s/MZp+KP; arc=none smtp.client-ip=209.85.219.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1728492954; c=relaxed/simple;
+	bh=bb+bSDyH9Lcs+qmIkFBL8MyFo4XA2i/Veq8hx1dK2is=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ne0eKECPvFGAUCZMrLEN1Xh1yqYMK7yPbWhtTEoG/w6Vl2BOo8J95LZdUbJ0x+I/9Mvztfkm6bMGWecpTUw7azKNzfavOULnCKPc7pCcm6y6dDlkJ4KhIlafyFQKvSlFM8dVyDDbZ1p1VIXxNPc112ZzyDanxFVXuISgaHoQbfA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fw-web.de; spf=pass smtp.mailfrom=fw-web.de; dkim=pass (1024-bit key) header.d=mailerdienst.de header.i=@mailerdienst.de header.b=xFa4/rj3; arc=none smtp.client-ip=134.0.28.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=fw-web.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fw-web.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s/MZp+KP"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e28fd83b5bbso1149890276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Oct 2024 09:00:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728489614; x=1729094414; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=hUaYbJCNbtT3yA/q50Du6B5PdD0L4Bvvc5rBIBJ+yuE=;
-        b=s/MZp+KP0oRuMEKZdWjYVHgovTKTWmbVHK2yRbStl4/Tfdy9jKFFO6MoCNf7vPTKwT
-         zgZ0qynCsm17NGjanq1F5xYhpnv8LQDwjnlSa0b6DHVuGCvkOAne14jWztXlxSYCxXj7
-         Rl4R0TqXFCE6z0J8ECfQ8rsGbEnIbOZqUefiS3Gy0GKqSq4AB5uLGUrDbtcnRaQgdDFz
-         IqX3o4FgZAE/VF4nFY2zLIquXCG2XVK3q3aaBI7IzgQsfui+okOH6aalIcr9AQTvEW2Y
-         fyJN4sJpw9nhxTCpQF8Bwexp/Zcfn0XDfcSqtTcr1x0CUqBENqQttwshNVDeyqbtBNcy
-         3RgA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728489614; x=1729094414;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=hUaYbJCNbtT3yA/q50Du6B5PdD0L4Bvvc5rBIBJ+yuE=;
-        b=NMzOQ6S/vyFrpX/a2eizBGc5UdpM6DD5Zs081MUXhxZ2APt3pDPSxQ/H8dJJR7nhQs
-         lKH+TDtHE2oVVy8+xLthnxl0ReBWEEfmw2L7iyKwoL7j0V9PdY7t/oCpbn0srbbvgvLP
-         tmk+DkDVwJUFWCb77vZYV2NmznQZDECsdct8OUReRCPJMyn38ISFKFTnQvgruXDdMYNI
-         R1tGabDfFTqzeZ+ghoiZoF+AmUntDwWE1rUcgbkldQc4fmxUR9+xBSqskVQaSuqaCK1V
-         YR5Ofpa990fOfZ68Xev7dWLhDmXOhqYYmXAxcjiF7IOWpK7Zw+z9Jmyylk2IKv57eqxh
-         CKRQ==
-X-Gm-Message-State: AOJu0YzoIwYPNjwDO2mXgOh2oDcbW/WHS3xKAH/O4r6voX6G4drsoDpf
-	Hfk8b4+lwtwnHuLgfdA2bAKOK//KKpwwFaNVlp2FzaQhyaWCXBai4e3cewak7ZfzaT3wdEmfGsT
-	G/SmYIR7KpYaALHCRFOExaWotUWO4A2Y1apQzuW+MFlsxE1Uy
-X-Google-Smtp-Source: AGHT+IHuEIjezilmue4IeJ8i602pQ7AMnhhR6ueU16xprp65PpVH2uLy6sP3xdzRukdMJhykw/qZYhaY39JM6C8YoPI=
-X-Received: by 2002:a05:6902:1384:b0:e28:e966:2c82 with SMTP id
- 3f1490d57ef6-e28fe419ec2mr2793606276.12.1728489614309; Wed, 09 Oct 2024
- 09:00:14 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=mailerdienst.de header.i=@mailerdienst.de header.b="xFa4/rj3"
+Received: from mxbox2.masterlogin.de (unknown [192.168.10.89])
+	by mxout1.routing.net (Postfix) with ESMTP id 7F44B40832;
+	Wed,  9 Oct 2024 16:55:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+	s=20200217; t=1728492951;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=JtXZ99XjmGyXRMM84puxICow/S4XX7s6NgxgrAuapPU=;
+	b=xFa4/rj3zQUefRtwUv05Pe4f1KVw7pUYTnimtXosAkTpR7wXqczLKWIhdU5XFjreBtAsrX
+	laAzzUzyZUC1QBJxPqBv4gep7maqR70Pgi7f5WLt62n0PQJ5CtR48uqpz7tzMPXiQneNxD
+	T1YeeU9Z4Tapvsz/BLI/fj5/v5Be9I4=
+Received: from frank-u24.. (fttx-pool-217.61.150.182.bambit.de [217.61.150.182])
+	by mxbox2.masterlogin.de (Postfix) with ESMTPSA id 44E4E10030B;
+	Wed,  9 Oct 2024 16:55:50 +0000 (UTC)
+From: Frank Wunderlich <linux@fw-web.de>
+To: Chaotian Jing <chaotian.jing@mediatek.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	Wenbin Mei <wenbin.mei@mediatek.com>
+Cc: Frank Wunderlich <frank-w@public-files.de>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org,
+	daniel@makrotopia.org,
+	john@phrozen.org,
+	eladwf@gmail.com,
+	ansuelsmth@gmail.com
+Subject: [PATCH v3 0/2] Add mmc support for mt7988
+Date: Wed,  9 Oct 2024 18:55:40 +0200
+Message-ID: <20241009165547.5959-1-linux@fw-web.de>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <0605eaf7-a28d-4f87-a9cf-d4c3517ca5d9@stanley.mountain>
-In-Reply-To: <0605eaf7-a28d-4f87-a9cf-d4c3517ca5d9@stanley.mountain>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Oct 2024 17:59:38 +0200
-Message-ID: <CAPDyKFoFgejcEf0cAqZ5JOwUBd=EdHfaomfhByqgT_bqd3kU=g@mail.gmail.com>
-Subject: Re: [bug report] mmc: core: Prepare to support SD UHS-II cards
-To: Dan Carpenter <dan.carpenter@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Mail-ID: 20f6a083-cb8a-4483-b34b-6595c1925ce0
 
-On Wed, 9 Oct 2024 at 16:59, Dan Carpenter <dan.carpenter@linaro.org> wrote:
->
-> Hello Ulf Hansson,
->
-> Commit cda235518e91 ("mmc: core: Prepare to support SD UHS-II cards")
-> from Sep 13, 2024 (linux-next), leads to the following Smatch static
-> checker warning:
->
->         drivers/mmc/core/sd_uhs2.c:138 sd_uhs2_init_card()
->         error: uninitialized symbol 'node_id'.
->
-> drivers/mmc/core/sd_uhs2.c
->     120 static int sd_uhs2_init_card(struct mmc_host *host)
->     121 {
->     122         struct mmc_card *card;
->     123         u32 node_id;
->     124         int err;
->     125
->     126         err = sd_uhs2_dev_init(host);
->     127         if (err)
->     128                 return err;
->     129
->     130         err = sd_uhs2_enum(host, &node_id);
->     131         if (err)
->     132                 return err;
->     133
->     134         card = mmc_alloc_card(host, &sd_type);
->     135         if (IS_ERR(card))
->     136                 return PTR_ERR(card);
->     137
-> --> 138         card->uhs2_config.node_id = node_id;
->
-> The sd_uhs2_enum() function is a dummy function so this is kind of intentional
-> but I just checked and it causes a build error in Clang.  I'm surprised
-> Nathan hasn't complained yet.
+From: Frank Wunderlich <frank-w@public-files.de>
 
-The patch has been amended due to even an earlier report. :-)
+Add MMC-Support for MT798 SoC
 
-Thanks for reporting anyway!
+changes in v3:
+- use mt7986 platform-data with the mt7988 compatible
 
-[...]
+changes in v2:
+- corrected minItems to require all 4 clocks
 
-Kind regards
-Uffe
+Frank Wunderlich (2):
+  dt-bindings: mmc: mtk-sd: Add mt7988 SoC
+  mmc: mtk-sd: add support for mt7988
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 +++++++++++++++++++
+ drivers/mmc/host/mtk-sd.c                     |  1 +
+ 2 files changed, 25 insertions(+)
+
+-- 
+2.43.0
+
