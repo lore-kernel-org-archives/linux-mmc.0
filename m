@@ -1,142 +1,123 @@
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com [209.85.219.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E6721917D0
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Oct 2024 10:38:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B183819068E;
+	Wed,  9 Oct 2024 12:02:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.61.82.184
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728470301; cv=none; b=gf6bVku4iom1Yu6Teny4rK8nVe3ar4SQZfoWN2D76LQUc979vLF43Mf4XeQk60fryZScgBQVvGRJEmUGRgR7LAn8+d97RGIvl0m60nH6F3dfGg5GYbroe9qg/xAiyIu8xqSKOSXfQujqsQwn+ULohErN+fRsFEH3eOIm/N4yVWw=
+	t=1728475342; cv=none; b=G82toymlM3ie2IvBqaclOYYwRyHL4amEM7fzIeX67Nx7Bp5wnXsaq2PplrZqwCyyukN9iUtDKYWdf/81VHTTF1KXkImxdNvuBB/B5LdjvZ5kr21CUOusta+Qc05aFwWlIpZpodY1wZo6GREmDvuWUY6QQmYYpTsX3bvmSZ78Q+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728470301; c=relaxed/simple;
-	bh=nB0qJf315S0Z2/pGNasKouhjG0Xme3kreiC0BS2FG1g=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DwC7+TaG3ChvgHONz70p5w9VY98209Y8Hf4eMEKjolCOOvmsAUuyp0BeeoewA4wwo8mgwh+DmOQe0u+AEhPltgj7RCo4DoRGQHFwDXTQYu6em6Ssw+DeHZQsLFTme3SnDnPIZWVj3XH+iVzutO5XmCxEa8OMT3oBi2fBUlj1EhM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JiCgrORU; arc=none smtp.client-ip=209.85.219.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1728475342; c=relaxed/simple;
+	bh=JS05tjTZ6VGXiAeuh5EpRJiPd4v2JoHnLHFs0xLRpXA=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=fvsk1WfREo+Fe3m7dzRAiWqBiL9LIfaCrB40OO2jMRZzzMUE4O9BXe3mAUHPV+3O0WgdZd1CgwQfuDpydwJ480BA1SHUNZex7ZgB3Ybx6dwlKoFmDkbzda7rinVMO9JIivZ0DfH/JW/cZBtkPwxS3LKwPMEsAjPQhirCO2a2iCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=FFal7dpZ; arc=none smtp.client-ip=210.61.82.184
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JiCgrORU"
-Received: by mail-yb1-f169.google.com with SMTP id 3f1490d57ef6-e28fe3b02ffso708125276.3
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Oct 2024 03:38:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1728470299; x=1729075099; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=g4S9RR3K6QnDDxjEOls4CSG3KtERGY2SF0IBRo/ZWYE=;
-        b=JiCgrORUJaneIN4tqpe4Bxc+0GDL7IACs6wDS34VQnn5gcYJ0ofb8On+wfA/FvvHFK
-         h5gDUwrKpeUFIy9Ort7NclbEDuGN8x8Ck+qHuGdexN7vMyPVplEbjEhwyMVmhZSvQQEd
-         nNgsXm1Ox2VwNnso4tM7fajE3qjCwo3ukM+82TpUFxqpgWwVyyFIc+pflOEQhmD9M+al
-         CFRL6mnn3AiwehukNDjnypTZ9RByqZFY4YyZblPIpR+VHn3Jg0U+xP0ZWZma/OdMAATe
-         srh/DEQQBkiCC4tQX32t5mupWutZBgwutx3O8vl4Sn2OLhaWfNtjTLBh1OrIjr4WfSPP
-         Ejww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1728470299; x=1729075099;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=g4S9RR3K6QnDDxjEOls4CSG3KtERGY2SF0IBRo/ZWYE=;
-        b=QDk9B5kxMwkN+BpdE9BOeCS3Y3FJAbL1R+PlD7XJG9N0KfI2Ra4HywK1qoJgIGf3kW
-         d4cDn0sWrSfPsOCUYi/DkONMy/NbQoNoVZJOKkK6fpUunkNnSYLtwwj1N5mfBKtVp6sc
-         jgqBZSsVK7ooGyt/ZL0D/Cb2RNvQLVM/RrH2+DNm80wfPPhMubTTbq914HIZIPKG4lUv
-         zJpspWRu8vEv0m1FdUKX3z9qSFw5R7q+BcdTi1AYJSvWBG+bhAKHpZqA0uHBBKJM7D4O
-         nSoq8eA3+lD3V8u0825b141iX5DNVXaJu0oe00q8RLN/EuXDoVs3h/0iorqNDwjIW+wn
-         /vDg==
-X-Gm-Message-State: AOJu0Yya/KorZIGXJyxzvErwhL7HCG5ew4VByQ2JxTVlBz8Yp81N2Foa
-	KYq/WdsjahG1kKkCg8TKugOFmgR7nAcc4uHPUc2ztAfjZOmvw05uS+rrRcKctOUDBUyheuS7YJk
-	PS67aQiK3kB6aG1tEi3D0sGo/qoxL4+ng0FrSnw==
-X-Google-Smtp-Source: AGHT+IF6wNDrtR2FR+iF3ORNX+EA7mJBmScQFeE/O1idJ5pgxpXmH+PgvKvohSwwMIQTiTd83HO2gsvdOY/p+lw2vhE=
-X-Received: by 2002:a05:6902:1444:b0:e28:f132:3fae with SMTP id
- 3f1490d57ef6-e28fe50c250mr1668617276.48.1728470299271; Wed, 09 Oct 2024
- 03:38:19 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="FFal7dpZ"
+X-UUID: 52335f4a863611ef8b96093e013ec31c-20241009
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=wft0wMYjRol19sQXS7lU7PGKjsnYG5Yenj+/tz3tTQ8=;
+	b=FFal7dpZ0mU4QV8mNteFS69YCD4IM/KxlT1xJXqeXJQqK39BEj5tbJIJ6qbQiVf15rXDeAj3wkvwb+YNmMr0OfalAQrolFsEK+uxZHcHrW4Q3vazMbP3CjT4Mjq+sqBXpwRbLPsxEtDOnHkV2CN+wBEQsrckRkNqwNJqVBr26aw=;
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.41,REQID:d9ea9141-0f78-4c11-8c3b-8ab414a5ec60,IP:0,U
+	RL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+	release,TS:0
+X-CID-META: VersionHash:6dc6a47,CLOUDID:8dc5fe64-444a-4b47-a99a-591ade3b04b2,B
+	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
+	RL:1,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES:1,
+	SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
+X-CID-BVR: 0
+X-CID-BAS: 0,_,0,_
+X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULS
+X-UUID: 52335f4a863611ef8b96093e013ec31c-20241009
+Received: from mtkmbs13n1.mediatek.inc [(172.21.101.193)] by mailgw02.mediatek.com
+	(envelope-from <andy-ld.lu@mediatek.com>)
+	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+	with ESMTP id 940317029; Wed, 09 Oct 2024 20:02:13 +0800
+Received: from mtkmbs13n1.mediatek.inc (172.21.101.193) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.26; Wed, 9 Oct 2024 20:02:09 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkmbs13n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.1118.26 via Frontend Transport; Wed, 9 Oct 2024 20:02:08 +0800
+From: Andy-ld Lu <andy-ld.lu@mediatek.com>
+To: <ulf.hansson@linaro.org>, <robh@kernel.org>, <krzk+dt@kernel.org>,
+	<matthias.bgg@gmail.com>, <angelogioacchino.delregno@collabora.com>,
+	<wenbin.mei@mediatek.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-mediatek@lists.infradead.org>, Andy-ld Lu <andy-ld.lu@mediatek.com>
+Subject: [PATCH v3 0/3] Add mtk-sd support for MT8196
+Date: Wed, 9 Oct 2024 20:01:23 +0800
+Message-ID: <20241009120203.14913-1-andy-ld.lu@mediatek.com>
+X-Mailer: git-send-email 2.46.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241008160134.69934-1-brgl@bgdev.pl>
-In-Reply-To: <20241008160134.69934-1-brgl@bgdev.pl>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Oct 2024 12:37:43 +0200
-Message-ID: <CAPDyKFqvpSJCpG00NtDwpuxp51T8t9JGMm6Ssxvzpg4fNGSGBQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmc_spi: drop buggy snprintf()
-To: Bartosz Golaszewski <brgl@bgdev.pl>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, 
-	Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-AS-Result: No-10--4.718400-8.000000
+X-TMASE-MatchedRID: 6Pyq8tKkRyftt0HEL3BUV7iMC5wdwKqdLoYOuiLW+uXfq/+cvg1NCKip
+	18v0DWYVnxamL54dKNbAFycL8Ymu1rhhaFskSWDqYwaJXrf2IXSL6a+kPOEFsJ6fSoF3Lt+MMqR
+	wky9xOk45imXDx6zyYOFr39PS7zaEgZI1n6aNUzbJ5W6OZe5hhYEcpMn6x9cZOW8XgChxVdgwfX
+	HHXt4W1FoqhwIvssPy3c3CRAd2bOE2UEKHDN0wzBlckvO1m+JcTJDl9FKHbrmdohxAwFG9tKPFj
+	JEFr+olwXCBO/GKkVqOhzOa6g8KraTORqtbRsP2nTRjrsQn0THUTvWJ9mbf13z4B5fjDcKL3YG1
+	Y8RuI/JK31unxphxzudGiGOk5aHhKyVJb/VK9KDdknd0aVk9DuLDq7G+Ik/yv22xKJRyIGVDnOx
+	ozmpp1r+WvXJiKHRLKUZy1dpMKy4=
+X-TM-AS-User-Approved-Sender: No
+X-TM-AS-User-Blocked-Sender: No
+X-TMASE-Result: 10--4.718400-8.000000
+X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
+X-TM-SNTS-SMTP: 02CD6116B37BFC20CAFB3C4A291E803122577B9430CD7D288F9F17C22E29986A2000:8
 
-On Tue, 8 Oct 2024 at 18:01, Bartosz Golaszewski <brgl@bgdev.pl> wrote:
->
-> From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
->
-> GCC 13 complains about the truncated output of snprintf():
->
-> drivers/mmc/host/mmc_spi.c: In function =E2=80=98mmc_spi_response_get=E2=
-=80=99:
-> drivers/mmc/host/mmc_spi.c:227:64: error: =E2=80=98snprintf=E2=80=99 outp=
-ut may be truncated before the last format character [-Werror=3Dformat-trun=
-cation=3D]
->   227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
->       |                                                                ^
-> drivers/mmc/host/mmc_spi.c:227:9: note: =E2=80=98snprintf=E2=80=99 output=
- between 26 and 43 bytes into a destination of size 32
->   227 |         snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
->       |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->   228 |                 cmd->opcode, maptype(cmd));
->
-> Drop it and fold the string it generates into the only place where it's
-> emitted - the dev_dbg() call at the end of the function.
->
-> Fixes: 15a0580ced08 ("mmc_spi host driver")
-> Suggested-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-> Signed-off-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+There are some new features for Mediatek SoC MT8196, which include new
+command/data transmitting and receiving path (abbreviated as tx/rx), and
+two modified register settings.
 
-Applied for next, thanks!
+The driver code has to be adapted to implement the above changes, and the
+compatible string 'mediatek,mt8196-mmc' is added to driver and devicetree
+bindings.
 
-Kind regards
-Uffe
+---
+Changes in v3:
+- Separate the settings for stop_dly_sel and pop_en_cnt to a different
+  commit; 
+- Add the original value of stop_dly_sel to the platdata of legacy SoCs,
+  for unified code setting;
+- Change to return if host->top_base is NULL in msdc_new_tx_setting function,
+  to simplify coding;
+- Optimize the location of assignment for 'timing_changed' in msdc_set_mclk
+  function.
 
+Changes in v2:
+- Use compatible string 'mediatek,mt8196-mmc' to replace 'mediatek,msdc-v2';
+- Remove the 'mediatek,stop-dly-sel', 'mediatek,pop-en-cnt' and 'mediatek,
+  prohibit-gate-cg' in devicetree bindings, due to SoC dependent;
+- Add 'stop_dly_sel' and 'pop_en_cnt' to the compatiblity structure for
+  different register settings;
+- The SoC's upgraded version would discard the bus design that detect source
+  clock CG when the CPU access the IP registers, so drop the related control
+  flow with 'prohibit_gate_cg' flag.
 
-> ---
-> - instead of fixing the buffer size, just drop the snprintf() call
->   altogether
->
->  drivers/mmc/host/mmc_spi.c | 9 +++------
->  1 file changed, 3 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 8fee7052f2ef..47443fb5eb33 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -222,10 +222,6 @@ static int mmc_spi_response_get(struct mmc_spi_host =
-*host,
->         u8      leftover =3D 0;
->         unsigned short rotator;
->         int     i;
-> -       char    tag[32];
-> -
-> -       snprintf(tag, sizeof(tag), "  ... CMD%d response SPI_%s",
-> -               cmd->opcode, maptype(cmd));
->
->         /* Except for data block reads, the whole response will already
->          * be stored in the scratch buffer.  It's somewhere after the
-> @@ -378,8 +374,9 @@ static int mmc_spi_response_get(struct mmc_spi_host *=
-host,
->         }
->
->         if (value < 0)
-> -               dev_dbg(&host->spi->dev, "%s: resp %04x %08x\n",
-> -                       tag, cmd->resp[0], cmd->resp[1]);
-> +               dev_dbg(&host->spi->dev,
-> +                       "  ... CMD%d response SPI_%s: resp %04x %08x\n",
-> +                       cmd->opcode, maptype(cmd), cmd->resp[0], cmd->res=
-p[1]);
->
->         /* disable chipselect on errors and some success cases */
->         if (value >=3D 0 && cs_on)
-> --
-> 2.43.0
->
+Link to v1:
+https://patchwork.kernel.org/patch/13812924
+
+---
+Andy-ld Lu (3):
+  mmc: mtk-sd: Add support for MT8196
+  mmc: mtk-sd: Add two settings in platdata
+  dt-bindings: mmc: mtk-sd: Add support for MT8196
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |   2 +
+ drivers/mmc/host/mtk-sd.c                     | 166 +++++++++++++++---
+ 2 files changed, 147 insertions(+), 21 deletions(-)
+
+-- 
+2.46.0
+
