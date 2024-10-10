@@ -1,197 +1,152 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 887DF187859;
-	Thu, 10 Oct 2024 09:29:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 11F0E1BC9FE
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Oct 2024 09:57:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728552547; cv=none; b=EhxSxDZR62bgGDBecETpr/4v+8xFTkMH0D8jlS2CMoH33EHv4YKM1019GucV0K59F/4nmk6+IHrIjzKaCQ8vzV7/IRTOccnBrERlz72QeKWJs+bRhyTIz71N7FbWPjEyOes8KdHfVV0TjJroyGNdJKWhiIKv1rgthAtr+3JhqeI=
+	t=1728554260; cv=none; b=bvyRfBw3j05GbZKo5b78DJIHv+tdbT52JnOGOxzYt6LCjuor9jh5AjnTnrI1KoYZLIRqoz85qNBxnHZl1BpqeDiiF5PljpqwCLBTia+HVYVmmh5CV1G6aTOmMcZciC5j2KbMBgGfQOWqa9SPcRzzUXRcIAtS7NAtBqQxDJcCFIk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728552547; c=relaxed/simple;
-	bh=3MWIB6YPNQ7Ys95rrr5Z3iqkTMBH7/EbWG9fSXyXcbI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AQDss9i4EK4eCf0bJ/DUphnwT72mRJEffKxrHuqZOWJh6jUCjB9XJ6bpYPcDOS1JslK91gCVG6dbizqwMgoU05NxbRkwtCECryYqXZi4ib9YZCJN4K2+ZwS5NKsD/7O2vPUrXU9MxEMN0/OBkWExImZzqAIoKMn+mLEemnWAWK8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dD9BiYnB; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1728554260; c=relaxed/simple;
+	bh=dJ57paU3yob7a98B5OTRsIY7OeCtfujMFlrYsNqU8PU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=BbCyE4ajafqYnY40E+WuHIzlg0z+wpReRbg50pW8j3HM/LoGvRIvCfYKaQUWbACGyRO5rXxDTx5I0S3e37EvfkHBL/FGbLaDGlAVMG3o/Mx+HHeRbX9Z2niQ6hMe5JhrD2d738aoWxYMfKCoV4WMzh2l4NmiC8UARwmIUkPCIyE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YT5jwcCk; arc=none smtp.client-ip=209.85.219.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dD9BiYnB"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1728552546; x=1760088546;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=3MWIB6YPNQ7Ys95rrr5Z3iqkTMBH7/EbWG9fSXyXcbI=;
-  b=dD9BiYnBw1y/8RODlMAPsojIq9swt1sIFqu82GbkbUfOVkiFlZ/B+jRa
-   wyJRJQwa7WzEXwh3WQz1A2ETR5WKXUvlkFrj9r+JiIl0cHhjgGGw4wx69
-   OQmbdxTHEu74/MC5NWDHN6Eo0hlWP2a/bDNdXMGzeva6OHsRUfBCd8cgi
-   zdGLjOxASVMjob9AJnnkSOhccIOvxF+tgh8ysOXoUin79JbYp26xhtKWQ
-   4E1lEMrnM8nRd7r9YXOnoJtR2VqwD3A4dA7vbHTbzon0XuvM2XaRnuosB
-   bhlwLDRHEO1sHf2bA0ouONuRMlJeC8c6r22osf00+aqqajchGOMGYSM+u
-   Q==;
-X-CSE-ConnectionGUID: e8GqysL+TzWjW4APn+JQGQ==
-X-CSE-MsgGUID: AiuHe+qTRk69+5TCrzjUpg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11220"; a="28015090"
-X-IronPort-AV: E=Sophos;i="6.11,192,1725346800"; 
-   d="scan'208";a="28015090"
-Received: from orviesa007.jf.intel.com ([10.64.159.147])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2024 02:29:05 -0700
-X-CSE-ConnectionGUID: 4ixj6F09TLaqdej5z9ADOw==
-X-CSE-MsgGUID: S3YGe2raT0+l/PUJicw/dA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,192,1725346800"; 
-   d="scan'208";a="77011173"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
-  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2024 02:29:02 -0700
-Message-ID: <bc8e6cb6-3950-4cf9-ab47-636e4ac92341@intel.com>
-Date: Thu, 10 Oct 2024 12:28:57 +0300
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YT5jwcCk"
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e03caab48a2so562193276.1
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Oct 2024 02:57:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1728554258; x=1729159058; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=l2ArA4ZcoREZanu8i6/c0JbOGoOWnzH6250enjQ0frk=;
+        b=YT5jwcCkqs8gCzvkaW6EQFS8XxibjtMZnbStmPqAExpyFwzXGZKxcUdX6AB40AWlNx
+         HKDS/V+kFwgc2YUStqkKc8+IBLfkNPRW2azad1Sl56Du6MnTTz6k0UkSzzjv1bgYxKuT
+         Acu4RW/k9r2tNlt//BEX1moyp8/w2mwtHsG0gw+ozLIlLhLmIjqDVBpOitMhpV0N7N8J
+         3yvUif/yPhH+8JR3Ai9OkXv7co7rVrDfMX6LJ85O17stjxBMXQ3BTo0VOhUuo+JVxIcI
+         82ovVsrk+2yeGMWHvtsnrtHFcQUfTuY3FcwJ0bXx856/LUKZCaiBG4dFYiAPh9RGj1+b
+         lG8g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1728554258; x=1729159058;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=l2ArA4ZcoREZanu8i6/c0JbOGoOWnzH6250enjQ0frk=;
+        b=ZQ25CQZe7WTeS7QUXlDRBAouta9uKGQpyMv5L/7X+QDGlDWenX0Jb+VtPxnrlBsNXf
+         CafM2opGHz7jNPrKruRdrBEvJPRWjj5X+VIbPaOAp8MKXcFoFh5yz4Wjj6VWSwmTVfAD
+         ZgBgMwTISR33PoupMQp7DzEcHp4Uxl9ZodtdYdW1Hs4i/ywFSkvYOrHRoe/6NzVl4zqr
+         qnf4cjHOQ0flGv8lihXTYdJq/oAnCEOzP/oOF/14hC5HLY2L8Asc9xPd5DqBG66p6/yj
+         PvtH2QToAYCCMhrNlTAQgi7kmJc/X0JV+bFhjuq/FJtpE7vgeuIcM/06aAXA/g4RkL4X
+         N9sg==
+X-Forwarded-Encrypted: i=1; AJvYcCVKGjaJdG5vP7FsGcKCMwGW0ZW/9vrSLU9pG+QjJKGXj86AQdKBp82N+ZkoIBumj1vvsOPeC6isxyY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxBA31ubE0wbDxucaVVCSnma48SBhjBSygxC9WavevCn/6GszO0
+	yd+g8sXgSh8d+J7Qq/EOf+0X4T837MGOHoHcFi18uMUdriyvgPx8cHGX+kUVfea8ImSG+2OMtm5
+	hhqVfK/hEeuqC0uBunESsHUIIqc+iMUzVPhjuhw==
+X-Google-Smtp-Source: AGHT+IFutXdu1n6F87Ao7/fpG55G3IQ3I7av3UbOLSvXJvC0UI/LJPXg6XG5U7GQSsXzAx+mdlHswYAlQWxtVCzTHio=
+X-Received: by 2002:a05:6902:140e:b0:e16:4ca7:7acf with SMTP id
+ 3f1490d57ef6-e290b7cefa9mr1978248276.10.1728554258022; Thu, 10 Oct 2024
+ 02:57:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: sdhci-of-dwcmshc: Prevent stale command interrupt
- handling
-To: Michal Wilczynski <m.wilczynski@samsung.com>, ulf.hansson@linaro.org,
- paul.walmsley@sifive.com, palmer@dabbelt.com, aou@eecs.berkeley.edu,
- m.szyprowski@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-riscv@lists.infradead.org
-References: <CGME20241008100332eucas1p12e84a156c835e719e6916331762c74b0@eucas1p1.samsung.com>
- <20241008100327.4108895-1-m.wilczynski@samsung.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241008100327.4108895-1-m.wilczynski@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20240913102836.6144-1-victorshihgli@gmail.com>
+ <CAPDyKFoHrRGYkNCu0ev8iF6e8tQV7cbTAxm9jS0CCqvizmoWmw@mail.gmail.com> <CAK00qKAUg5VFkxbrYUeFjRq+3UN2dcOZ0RJFDK2e3tCxKOJNLQ@mail.gmail.com>
+In-Reply-To: <CAK00qKAUg5VFkxbrYUeFjRq+3UN2dcOZ0RJFDK2e3tCxKOJNLQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 10 Oct 2024 11:57:00 +0200
+Message-ID: <CAPDyKFqhbt-u8qRCfvssSBDT5RUchj6gJj=4a75dEdpp++emdg@mail.gmail.com>
+Subject: Re: [PATCH V22 00/22] Add support UHS-II for GL9755 and GL9767
+To: Victor Shih <victorshihgli@gmail.com>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	Lucas.Lai@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 8/10/24 13:03, Michal Wilczynski wrote:
-> While working with the T-Head 1520 LicheePi4A SoC, certain conditions
-> arose that allowed me to reproduce a race issue in the sdhci code.
-> 
-> To reproduce the bug, you need to enable the sdio1 controller in the
-> device tree file
-> `arch/riscv/boot/dts/thead/th1520-lichee-module-4a.dtsi` as follows:
-> 
-> &sdio1 {
-> 	bus-width = <4>;
-> 	max-frequency = <100000000>;
-> 	no-sd;
-> 	no-mmc;
-> 	broken-cd;
-> 	cap-sd-highspeed;
-> 	post-power-on-delay-ms = <50>;
-> 	status = "okay";
-> 	wakeup-source;
-> 	keep-power-in-suspend;
-> };
-> 
-> When resetting the SoC using the reset button, the following messages
-> appear in the dmesg log:
-> 
-> [    8.164898] mmc2: Got command interrupt 0x00000001 even though no
-> command operation was in progress.
-> [    8.174054] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [    8.180503] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-> [    8.186950] mmc2: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> [    8.193395] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
-> [    8.199841] mmc2: sdhci: Present:   0x03da0000 | Host ctl: 0x00000000
-> [    8.206287] mmc2: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> [    8.212733] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x0000decf
-> [    8.219178] mmc2: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-> [    8.225622] mmc2: sdhci: Int enab:  0x00ff1003 | Sig enab: 0x00ff1003
-> [    8.232068] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [    8.238513] mmc2: sdhci: Caps:      0x3f69c881 | Caps_1:   0x08008177
-> [    8.244959] mmc2: sdhci: Cmd:       0x00000502 | Max curr: 0x00191919
-> [    8.254115] mmc2: sdhci: Resp[0]:   0x00001009 | Resp[1]:  0x00000000
-> [    8.260561] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> [    8.267005] mmc2: sdhci: Host ctl2: 0x00001000
-> [    8.271453] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
-> 0x0000000000000000
-> [    8.278594] mmc2: sdhci: ============================================
-> 
-> I also enabled some traces to better understand the problem:
-> 
->      kworker/3:1-62      [003] .....     8.163538: mmc_request_start:
-> mmc2: start struct mmc_request[000000000d30cc0c]: cmd_opcode=5
-> cmd_arg=0x0 cmd_flags=0x2e1 cmd_retries=0 stop_opcode=0 stop_arg=0x0
-> stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0
-> sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0
-> can_retune=0 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1
-> retune_period=0
->           <idle>-0       [000] d.h2.     8.164816: sdhci_cmd_irq:
-> hw_name=ffe70a0000.mmc quirks=0x2008008 quirks2=0x8 intmask=0x10000
-> intmask_p=0x18000
->      irq/24-mmc2-96      [000] .....     8.164840: sdhci_thread_irq:
-> msg=
->      irq/24-mmc2-96      [000] d.h2.     8.164896: sdhci_cmd_irq:
-> hw_name=ffe70a0000.mmc quirks=0x2008008 quirks2=0x8 intmask=0x1
-> intmask_p=0x1
->      irq/24-mmc2-96      [000] .....     8.285142: mmc_request_done:
-> mmc2: end struct mmc_request[000000000d30cc0c]: cmd_opcode=5
-> cmd_err=-110 cmd_resp=0x0 0x0 0x0 0x0 cmd_retries=0 stop_opcode=0
-> stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
-> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0
-> data_err=0 tag=0 can_retune=0 doing_retune=0 retune_now=0 need_retune=0
-> hold_retune=1 retune_period=0
-> 
-> Here's what happens: the __mmc_start_request function is called with
-> opcode 5. Since the power to the Wi-Fi card, which resides on this SDIO
-> bus, is initially off after the reset, an interrupt SDHCI_INT_TIMEOUT is
-> triggered. Immediately after that, a second interrupt SDHCI_INT_RESPONSE
-> is triggered. Depending on the exact timing, these conditions can
-> trigger the following race problem:
-> 
-> 1) The sdhci_cmd_irq top half handles the command as an error. It sets
->    host->cmd to NULL and host->pending_reset to true.
-> 2) The sdhci_thread_irq bottom half is scheduled next and executes faster
->    than the second interrupt handler for SDHCI_INT_RESPONSE. It clears
->    host->pending_reset before the SDHCI_INT_RESPONSE handler runs.
-> 3) The pending interrupt SDHCI_INT_RESPONSE handler gets called, triggering
->    a code path that prints: "mmc2: Got command interrupt 0x00000001 even
->    though no command operation was in progress."
-> 
-> To solve this issue, we need to clear pending interrupts when resetting
-> host->pending_reset. This ensures that after sdhci_threaded_irq restores
-> interrupts, there are no pending stale interrupts.
-> 
-> The behavior observed here is non-compliant with the SDHCI standard.
-> Place the code in the sdhci-of-dwcmshc driver to account for a
-> hardware-specific quirk instead of the core SDHCI code.
-> 
-> Signed-off-by: Michal Wilczynski <m.wilczynski@samsung.com>
+On Thu, 10 Oct 2024 at 08:20, Victor Shih <victorshihgli@gmail.com> wrote:
+>
+> On Mon, Oct 7, 2024 at 11:34=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
+rg> wrote:
+> >
+> > On Fri, 13 Sept 2024 at 12:28, Victor Shih <victorshihgli@gmail.com> wr=
+ote:
+> > >
+> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > >
+> > > Summary
+> > > =3D=3D=3D=3D=3D=3D=3D
+> > > These patches[1] support UHS-II and fix GL9755 and GL9767
+> > > UHS-II compatibility.
+> > >
+> > > About UHS-II, roughly deal with the following three parts:
+> > > 1) A UHS-II detection and initialization:
+> > > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup
+> > >   Sequence[2]).
+> > > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequen=
+ce
+> > >   [2]).
+> > > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is inclu=
+de
+> > >   Section 3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II
+> > >   Setting Register Setup Sequence.
+> > >
+> > > 2) Send Legacy SD command through SD-TRAN
+> > > - Encapsulated SD packets are defined in SD-TRAN in order to ensure L=
+egacy
+> > >   SD compatibility and preserve Legacy SD infrastructures (Section 7.=
+1.1
+> > >   Packet Types and Format Overview[3]).
+> > > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UH=
+S-II
+> > >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2=
+]).
+> > >
+> > > 3) UHS-II Interrupt
+> > > - Except for UHS-II error interrupts, most interrupts share the origi=
+nal
+> > >   interrupt registers.
+> > >
+> > > Patch structure
+> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > > patch#1-#7:  for core
+> > > patch#8-#20: for sdhci
+> > > patch#21:    for GL9755
+> > > patch#22:    for GL9767
+> >
+> > Patch 1 -> 6 applied for next, with some minor updates to patch2.
+> >
+> > Patch 7 needs some more work, I will comment on that separately.
+> >
+> > I am okay with patch 8 -> 22, but since there will be a re-spin for a
+> > new version, perhaps you can run a new round of checkpatch.pl to see
+> > if some of the warning that it reports can be fixed too.
+> >
+> > [...]
+> >
+> > Kind regards
+> > Uffe
+>
+> Hi, Ulf
+>
+> I really appreciate your reply and I will resend the new series of
+> patches before the end of next week.
+> Do I need to include patch 1 to patch 6 when re-sending the new series
+> of patches?
+> Or should patch 7 to patch 22 be sufficient?
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Hi Victor,
 
-> ---
-> v2:
->  - instead of modifying SDHCI core code, only modify th1520 specific
->    reset
-> 
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 8999b97263af..8fd80dac11bf 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -852,6 +852,14 @@ static void th1520_sdhci_reset(struct sdhci_host *host, u8 mask)
->  
->  	sdhci_reset(host, mask);
->  
-> +	/* The T-Head 1520 SoC does not comply with the SDHCI specification
-> +	 * regarding the "Software Reset for CMD line should clear 'Command
-> +	 * Complete' in the Normal Interrupt Status Register." Clear the bit
-> +	 * here to compensate for this quirk.
-> +	 */
-> +	if (mask & SDHCI_RESET_CMD)
-> +		sdhci_writel(host, SDHCI_INT_RESPONSE, SDHCI_INT_STATUS);
-> +
->  	if (priv->flags & FLAG_IO_FIXED_1V8) {
->  		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->  		if (!(ctrl_2 & SDHCI_CTRL_VDD_180)) {
+Patch 7 to 22 is sufficient. Just rebase the series on top of the
+mmc-tree's next branch, then you should be good to go.
 
+Kind regards
+Uffe
