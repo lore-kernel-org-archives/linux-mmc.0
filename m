@@ -1,83 +1,82 @@
-Received: from mo4-p02-ob.smtp.rzone.de (mo4-p02-ob.smtp.rzone.de [81.169.146.169])
+Received: from mo4-p02-ob.smtp.rzone.de (mo4-p02-ob.smtp.rzone.de [85.215.255.81])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E0685148314
-	for <linux-mmc@vger.kernel.org>; Sun, 13 Oct 2024 21:01:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BB18136345
+	for <linux-mmc@vger.kernel.org>; Sun, 13 Oct 2024 21:09:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.81
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728853297; cv=pass; b=Svoo4BJ/hLWsVQ4RCAqHthQn/YD9wD7skp5CAzdmTkJvrvuktPZkNWct+LTyon1S0mawb3DQ6LuRqlfTo2YNWArP0wxItr0fesqep3morMhaPTfD6JRav8HFZaegcEPa02qZF8FLT3V/Nsnq8YuqqL5fgwPWNsk4ouizNmKXlzI=
+	t=1728853782; cv=pass; b=ZcQ6vARMpRsRA6C1zCUfqaeRNTxbWMmTeCtMrl+cbAfIXFTCzz1LKuX8VDrv5LJgPVqgI/WVH1+bfgmAuYelTB53RhwlUFJPt7Oti9/hxu16r3UKx88e5Ah01PQhRetiD3FHzUCy02jyohPebiTTkj+A7sOPj6sItyWzjR2SR8o=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728853297; c=relaxed/simple;
+	s=arc-20240116; t=1728853782; c=relaxed/simple;
 	bh=8oW5Dsyc/RpFudOVLoMeeD4uX9PAwHtRT1OyfCt0l5I=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=HAuH4fk4y+MZCJjuq+QfMt3jt57vleaoYqokQSY1dFAcaNUNXV5nK+VCojBg8ALStLw+IaAp4jjQvBtkPQ4pCD0dNhjKl+B1+SBePxdLs/hbLlbI8sVhub/G/teIifR6xTpSOZZ/k3ZEPT9UTRqctHM4JKOpxzEZwFhjjx8PFDA=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=qFyDFIGF; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=7gEB+mao; arc=pass smtp.client-ip=81.169.146.169
+	 MIME-Version:Content-Type; b=hIwmIpvFlDJJ328EBbhmQBAi8ebUTWGUNUoqrsetUnkjEKb9BaQ4pcEXg88zesMHwyVJcryLMUDDtg0BMqi2ZJwkd0IObyOxwcAg/B9b/p2hOVG/5qVfrorcoKZ+57+k8l0W3Zvena3jjssDNijWPha6yJ14rrR7gwBKmNIG444=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=NfjZ8Iu4; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=BO5wdJ2I; arc=pass smtp.client-ip=85.215.255.81
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="qFyDFIGF";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="7gEB+mao"
-ARC-Seal: i=1; a=rsa-sha256; t=1728853102; cv=none;
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="NfjZ8Iu4";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="BO5wdJ2I"
+ARC-Seal: i=1; a=rsa-sha256; t=1728853775; cv=none;
     d=strato.com; s=strato-dkim-0002;
-    b=NrT2Cma/lcOn95+AB7trCoylxv35GQg00WWAEk3VgtbRPVZkdAimo/RNgSsfz4oRjR
-    VTbmBCqB6yz57mI3hmK3+VBcHqPyjEQlwBlJRTZKr+6dmnpm57ONZ4bFI+5d7c4d5hBi
-    U9e8u+zAchgCBsZPGo9l4YWZVmJx23V+SVU4d25v+/RTE2qbW4ruhc6nZ8O+QaiDTicS
-    KuRvU5fCqas6dxxxlXe69GeRUVTxnBeKivc6Kj5BI/v7OymAs7rFbZQcUY0+vk6Rv5Us
-    vuWORBfW7Wgr0/BeSGHPTH00GDDgkqMZEUXLk94VV2yX4WbjcIfTpVczr17EQVf9MCM8
-    GGDA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1728853102;
+    b=CJ+I6lu+QFebemg/LAXJr8SZjdxQkYrbvpMV09RU6C/cLlN66X0TOXPa/YlA5bhcOC
+    CVq+vLchvz4bmczXrYDQZA2842gPhUoRMGKQF5X5flo0X9gpllro8vaF2FimU+YbBIfj
+    m8+l0NXao7y2sKwAS16eQq72aOSvi+bM3yk9G5O/bwAIZvnUhklRMghgL7GI0LfaNhyz
+    WNuWSImpoP0zdqUYqGASgmLh4nLWMgb5SWytfD2GICeJD/525l44Rleril7qdpbixPwy
+    /e3bOlEhKoJzhIESCys1/IJ7FxBukEU4F4g1K/qlminx1X2Jir5MIF2IVwrvyBxIYeTY
+    YnGg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1728853775;
     s=strato-dkim-0002; d=strato.com;
     h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
     From:Subject:Sender;
     bh=0+fg29ijt/vicpmsBPgGVe5s3S4w+t2hVEcOX11Cs60=;
-    b=PliFMQUn8M786VtXbvaLXSTrnkqiV3zeNLkbExHpy97CyZrb2G74FdO9jkZTrJZyxH
-    p47Rw69R0sy5UAFngTApg44bAsK/RwFfqPmo+0Lp8t6SKRuLYDU3VZUd8qjYq9Tt9lED
-    2LyefIjNv61HM2frhdch2+TiAMyEIIFzsqjxk3iDfhws+PbOglGh88cMcwtk/CTVdA15
-    ikT7giAC7JuTr8zLEu1rgw3n+MA8ud5ISmOvpF5AaSi3dr9gYoZKkuF7kVW72NI24ZSF
-    FAGLCvDqrAvaA3DNE6/s7A/4NstK1yVptfwZ6m4hFcZTWmrEqFkdn/Fu8Zx2yhp1c7Bi
-    6TbA==
+    b=gxJLIxFS1W9ksLiPHhjHCV3aa9vstIHRPdln5mjpvqXhNb4iJOe1ca+ENTC3y1HgiY
+    R/wuNsiY/3P4PPozhqOMf01f5KlPqtiqFb+0TcoiCiiByVcX/pLmGFktNP+q9fW7QwY9
+    osgodJL6udtAiU1792X52Zoa48ZknUndaigK7AkV+gCzxz0ID4Rm7zqJSUQTWbJlSEwV
+    sCLSMp5+rgae98l4fGLFIYVSX7GjIwv/pvNxhxZxYkMF7/ZwxAmbESVRzqzzYvXlmyO3
+    jbdCGJfEF7Ikvey3ECbjo8JUuyhIdhdqESE2sceYDz9jEPcY/6AbfdLpyt4iBetgQd/x
+    rzYg==
 ARC-Authentication-Results: i=1; strato.com;
     arc=none;
     dkim=none
 X-RZG-CLASS-ID: mo02
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1728853102;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1728853775;
     s=strato-dkim-0002; d=iokpp.de;
     h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
     From:Subject:Sender;
     bh=0+fg29ijt/vicpmsBPgGVe5s3S4w+t2hVEcOX11Cs60=;
-    b=qFyDFIGF7RF49xs6shb2n5RyENshgdHamMBVhirCoULP2RBA00YeSTuPcEzMYVqPUI
-    Gf5V3mDPjnn6EuicUItpY5PyBXRK6mReOFFwBWyC24tkX1pz99GIBbzG/5Y9ohxip95H
-    eB+v6wplpbZP9PK+RgzWWVIohSkNkfCTC/R86lJypAJfN6nAvEBPS32eAMZntT2FWUzs
-    7GmJfmCGBuUQl50xxyZJyuVtrXMRsnQ0NVCU+vnxXe9D0DiJzNXmfDw9g8x4MvyMsg1c
-    UckyxyWNO6rxPZZPf1NDtNZPaTZNIijrq2YeEtbLY9/pDWGQtns7h/Q93a3pnFWblVap
-    bbbw==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1728853102;
+    b=NfjZ8Iu4+EUmVlNESOye1QzF+4QscmghlbId9AiahG9CSIZPNo2gVw5+An7c1PmWWQ
+    UeitlIB9cb6FQCDRw3HTCNk6bOUHmuQUz/gYD6o+RpJNwz8p24o2hSUP24Inj2aPCrgQ
+    ferdAK8bu886poDy0xDmoXFuPEoKFcPcFQ0kobQ+U2WzTL2k/h3DbZY672EWVJBulyo9
+    qwlKkWwCKfWxr+PnjtNW8mF+HSFQ+LR+NA5De+9sTFzeuPzQKVGDxinJICUXnhUts+3X
+    QHMq/0HPTGNz+fbCo3eOa7O3yb0ycLs9pzD5tiqQKa6Lt8boY/6vJbKZ/I1bkrV/nIR6
+    RN2A==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1728853775;
     s=strato-dkim-0003; d=iokpp.de;
     h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
     From:Subject:Sender;
     bh=0+fg29ijt/vicpmsBPgGVe5s3S4w+t2hVEcOX11Cs60=;
-    b=7gEB+maohEnk7DCc/EMaswbHYpBCxkOHQWKmQsoBb27+5sInY2GrNtG2ecRXTPyscM
-    mF0Q/n0ajIONd3sw51AQ==
+    b=BO5wdJ2I0WFparTn55BZugPe1Sru6bnvUfDTke8Idq71Y349QIbFle2oO2xYNKxnNf
+    qM4tW6rK6tzqD2Klb9CQ==
 X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RD+6IXG87q6MA1dHIkU4bBBNmkv0kIa54BlKI8="
 Received: from Munilab01-lab.speedport.ip
     by smtp.strato.de (RZmta 51.2.8 AUTH)
-    with ESMTPSA id z0e6b009DKwMB79
+    with ESMTPSA id z0e6b009DL9ZB83
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
 	(Client did not present a certificate);
-    Sun, 13 Oct 2024 22:58:22 +0200 (CEST)
+    Sun, 13 Oct 2024 23:09:35 +0200 (CEST)
 From: Bean Huo <beanhuo@iokpp.de>
 To: avri.altman@wdc.com,
-	ulf,
-	hansson@linaro.org,
+	ulf.hansson@linaro.org,
 	vfazio@xes-inc.com,
 	linux-mmc@vger.kernel.org
 Cc: Bean Huo <beanhuo@micron.com>
-Subject: [PATCH v3 4/5] mmc-utils: Added FFU mode 4 that uses CMD6 and CMD24 for single-block firmware download
-Date: Sun, 13 Oct 2024 22:58:06 +0200
-Message-Id: <20241013205807.121932-5-beanhuo@iokpp.de>
+Subject: [RESENT PATCH v3 4/5] mmc-utils: Added FFU mode 4 that uses CMD6 and CMD24 for single-block firmware download
+Date: Sun, 13 Oct 2024 23:09:24 +0200
+Message-Id: <20241013210925.123632-5-beanhuo@iokpp.de>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20241013205807.121932-1-beanhuo@iokpp.de>
-References: <20241013205807.121932-1-beanhuo@iokpp.de>
+In-Reply-To: <20241013210925.123632-1-beanhuo@iokpp.de>
+References: <20241013210925.123632-1-beanhuo@iokpp.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
