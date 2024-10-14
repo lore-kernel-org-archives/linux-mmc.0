@@ -1,331 +1,666 @@
-Received: from EUR03-VI1-obe.outbound.protection.outlook.com (mail-vi1eur03on2084.outbound.protection.outlook.com [40.107.103.84])
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DFF61428F1;
-	Mon, 14 Oct 2024 06:00:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.103.84
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8DA636B
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Oct 2024 06:55:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.143.124
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728885649; cv=fail; b=qA4XvpnvSTlzDKN80/pQST1jd4GDXpMk2Cupboo9Uf6o+5rf3uq7vx16DjsWNRMRTRx2nUMNl9MVlUPWu1dx7nwH+3D27N2rBqavtXpjziu4GCMeH+UB9P51s5MrP1VtSicm5bDRzg7gdbYr0RJk4ghKZMuUrovKme2NB/QdmBk=
+	t=1728888940; cv=fail; b=JNbEjjqnwDB4R+Mp9bXHfDnexb48lmGbuWRFwv5FR/7xak3wPHchg0VkCgpWpG8Vok+LkPilFpFTn8GkDV8BBkgwrZkZ07HfpaGEG8QwK0coRAivRjC4QZYN/75nwqOBGT77+gNAqVV8YhHimhZUNGzwU9qCAnb84KcHdT9K15Q=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728885649; c=relaxed/simple;
-	bh=XpzPxDFynOBgTh84+8z0cvsZTJyltgVl6OAlCQgIV7Q=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=BWaCbx23XeXUn2VmLA3TJFfUTs3US/V+2rK/hfPnlRIstPzwI0yE1SGjUUdKgpujwAKmqBhfsZxcoaoSncTkYMqFwIbhASMWN1HgIflEU8IYuufTNGygzaR2fgubInXJwvWxcacmD1pCVgauXRaYJO3n4xiy5DROQYLDe8XjUAU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=jTYDPl1u; arc=fail smtp.client-ip=40.107.103.84
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	s=arc-20240116; t=1728888940; c=relaxed/simple;
+	bh=RYZkK+DXukq4DUEL4n0l+4F5rAbvk01WcTm3ChnhY34=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=IImwF4X7s1olkpREu3qB6LYlvo2Ky5kwfuWTF9O7X5i9WcvFEAmeEJRXZB0ImdVbGsnCl4J6U2dzQqzYQdq2yxV5lQh/+miaScR9ReanGO4lCMOaFwGQ6krDEIIXsnLF90scZ3ApYuUMVCT8se/4dbRyBnEfG6L4ZedOmjfaYFE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=BYBFZXBf; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=xyJnyk0Y; arc=fail smtp.client-ip=68.232.143.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="jTYDPl1u"
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="BYBFZXBf";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="xyJnyk0Y"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1728888937; x=1760424937;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=RYZkK+DXukq4DUEL4n0l+4F5rAbvk01WcTm3ChnhY34=;
+  b=BYBFZXBfuCnJKCdblJiKDwecXWcHxV/wk4R0i6LMxzRCspIQpRa9jXs6
+   C1mALnGUDv6UFZ4AYBbM0odnx6Xr6MhPVHjPDYqL1tf51Drq78kmcz1im
+   Irj2FtB/COkiYFfs7ZtjB26/c9xbsGMW8QiIjcvHWr2vr8gon+wGHEOvB
+   tKZZzae3wglZ6qYsoWYwOZ1rr0+8u/7Lo91XV6/BpJkMk5/NnY+MzBxbN
+   yAL6uYQSm6L+rmF+UBrzm/351sDQVl7ZVuOJzd5qDJxgyoNwHs/xqhbG2
+   AteeG6SqbUNPVxjzhDKyB9IBvDh2bbGxqzov0sxzUOlvYSSdq8muGSqfn
+   g==;
+X-CSE-ConnectionGUID: qXwneTn6RhGTZCmJpuKVlQ==
+X-CSE-MsgGUID: R8eEM5MUSz6lyqleyp3Ckg==
+X-IronPort-AV: E=Sophos;i="6.11,202,1725292800"; 
+   d="scan'208";a="29324568"
+Received: from mail-centralusazlp17010005.outbound.protection.outlook.com (HELO DM1PR04CU001.outbound.protection.outlook.com) ([40.93.13.5])
+  by ob1.hgst.iphmx.com with ESMTP; 14 Oct 2024 14:55:30 +0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Po7s5Biu6c/jpaaoUN6XIMwgRonvWYXwVNUDA+W4KWhOaIzXX/Pc7dAK8rCROe4HAFz9SJPdFIF+fnVRCoHZJaMNEnnmGv5iwRU8fQB+IDaNPwsncxafW1dmYICrMX8Q2tEGT96mj/5Yz9FdJpSnnOxHLTHpeCcxE8EkoGOpCTGJCkQZQdsDhzslB7OXG+ZqgWU+t/u+Jzzggubife8LhRkJ3OtsboBfx72mr/O9rpRmUIvsXZboYTrIyVWpyivJTme+nGgme0Ml+Kvigv3w90tAizS51garL9m03uhZf+DLevGriJkrrzy1flPzbm90mvjoSWvEgAsFPU2Y4cZeSw==
+ b=xvL2LkR0Xml5/skxu5D0/8TKM0ctfTm8AtEfAuUg6tNCRCrrfRJpSaWTBn6g+9HoHnP/0li71clkdQADDcfJi6IcfKxsbMrVdE+RbobWC8JlOoEqBdVLW6sK4ONjdyE1wMVnXJkWHG9oXGJ5tvz2cL1HUYAUE7/epYGU15SvhEDZuOYtolIdDHgWSQ1YJaAnacgML617fyiFBxi/JYFNq+ElcUwN36k6VkOTKdDAoBdoHIbUT/j+t7IAtawjy3yMdMMfKAEnnwIzfC8c/vS9GacZKKIgy0ylJoYp4jVwKyGQiLFjJrvkzJqpoByk/54Po3dFGbDA63Tu+HR0fJCH2w==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=2uvylZoVj2f5wE9XylQPvz8SlUsXond/T1pZkE8NnEU=;
- b=SeWF1C3ntLjU0BbC2lTxDQFjSI8XSjMoFkYVLb64y9GFNYG5GVb8l5jYnI+xMiNOBCTzBQJcWMT/GDod1P3CLw7K+LurThUandtTEmGIAsSJ3q14GjDD8pxMkJ2SccHqJMWDNTi1YxnXp7MyumDLNHwOE2FjRfZ10Yk1OhKUBQwZ5UMmiwUVhe4/IywXzlrJKtSMyZ/bPXt6yoRRzqXsqharVzhzUwX9AYNDnuE1wiNafmAbN7uBVUtunO+JFqHRMWBiDxEG4lFN2JDigEEph2elLb7VY6KaD29wuC2Sd6+hkwNbvXsU1dZxpY2l6IEyR4huuryVvCTukeMeZPhXoA==
+ bh=IPnU1dgrdtUbw1XwGzdITjlO6bGPT4CK87O0wg5OF5o=;
+ b=SpvEKFohx9mjKGuPyMF8n/7ItWEwEZGaJwkk27PMMEqX8eHYEgxv5IuFNiXUgVTn06c65uKmcbB/CwBnOcm530cA389uNGRpHZbjiBiXuPkveqPfjzoTimYnJRLri4WaS5JsIWoWQUq50ckH/O5BPNdTct95OUsU6prT9UV3XcMSiYempAZRJ2ZaW1om1k0ayl5iEGNDqblf0tOibSO2q8tx8zHXf9MqSgYYgATqa7uQY57uDoNLukV+w7YdqNdW810kRVnFNfRT9eOEOs9mBbtWSYeCTYWhJpvMKx+DMZ1HItj+DdVXUkM4OZz0BYe/gX1Iw5swL/ZfS0G3m3VBKQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=2uvylZoVj2f5wE9XylQPvz8SlUsXond/T1pZkE8NnEU=;
- b=jTYDPl1ucQc5LTCVZDB+Jyjro806LzzuUletKtL6EPifohRakbrDHf6Pas6Ys92QvrZ5t1Cc9SPVExnKT6pmJA7mzEyEjZYRHf8iheuLU7a+K6eePXKNgKssiVZS7BAlzzqyy+C5MLw+o/w3Xvql7Gr7VyjfzhyEoMMlvJIEj+aOWN2o4qL4f1/eOQRZ+jdtF23SUL7JAHojm5KCfZlwUyre6JRwtWF899HG9YUVKDn5wMUKsmCEG0RIT3gC8sEu+C0D0T9Ts1fczSNFYXXC2B8bxIEI1zTqQg6g8NG1SOAtXTaJoLcBnVLXrebIQKWazo4YE2E4TZC5g+/p38TRvQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from DU0PR04MB9496.eurprd04.prod.outlook.com (2603:10a6:10:32d::19)
- by AS4PR04MB9459.eurprd04.prod.outlook.com (2603:10a6:20b:4eb::22) with
+ bh=IPnU1dgrdtUbw1XwGzdITjlO6bGPT4CK87O0wg5OF5o=;
+ b=xyJnyk0Y7X3Slmt/DQiRSHYgLvuFO6LhMLaRd2Ef6vJ6g/mxA6glxQnsFi5+1CYor9LB3a3KPsSmD33ib8bKP++ToKzWhSEZuhYTQ7JA77Ay10ixcshTrvowm0Yw2nE0mXPTmeCsYuowD+g54fbOG6EsshUzo0RQIdDTjRyBh9c=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ BN0PR04MB7997.namprd04.prod.outlook.com (2603:10b6:408:158::24) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8048.25; Mon, 14 Oct
- 2024 06:00:37 +0000
-Received: from DU0PR04MB9496.eurprd04.prod.outlook.com
- ([fe80::4fa3:7420:14ed:5334]) by DU0PR04MB9496.eurprd04.prod.outlook.com
- ([fe80::4fa3:7420:14ed:5334%7]) with mapi id 15.20.8048.020; Mon, 14 Oct 2024
- 06:00:36 +0000
-From: haibo.chen@nxp.com
-To: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org
-Cc: imx@lists.linux.dev,
-	haibo.chen@nxp.com,
-	shawnguo@kernel.org,
-	s.hauer@pengutronix.de,
-	kernel@pengutronix.de,
-	festevam@gmail.com,
-	s32@nxp.com,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH 3/4] mmc: host: sdhci-esdhc-imx: save tuning value for the SDIO card as wakeup source
-Date: Mon, 14 Oct 2024 14:01:29 +0800
-Message-Id: <20241014060130.1162629-4-haibo.chen@nxp.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20241014060130.1162629-1-haibo.chen@nxp.com>
-References: <20241014060130.1162629-1-haibo.chen@nxp.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SI2PR06CA0011.apcprd06.prod.outlook.com
- (2603:1096:4:186::16) To DU0PR04MB9496.eurprd04.prod.outlook.com
- (2603:10a6:10:32d::19)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8048.26; Mon, 14 Oct
+ 2024 06:55:29 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::bf16:5bed:e63:588f]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::bf16:5bed:e63:588f%7]) with mapi id 15.20.8048.020; Mon, 14 Oct 2024
+ 06:55:28 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Bean Huo <beanhuo@iokpp.de>, "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>, "vfazio@xes-inc.com" <vfazio@xes-inc.com>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC: Bean Huo <beanhuo@micron.com>
+Subject: RE: [RESENT PATCH v3 1/5] mmc-utils: Refactor common FFU code into
+ functions to support additional FFU modes
+Thread-Topic: [RESENT PATCH v3 1/5] mmc-utils: Refactor common FFU code into
+ functions to support additional FFU modes
+Thread-Index: AQHbHbRBJspi0tk2HU6EyKxd/I/477KFvmUw
+Date: Mon, 14 Oct 2024 06:55:28 +0000
+Message-ID:
+ <DM6PR04MB657548AECCE954C3FCE9DEBDFC442@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20241013210925.123632-1-beanhuo@iokpp.de>
+ <20241013210925.123632-2-beanhuo@iokpp.de>
+In-Reply-To: <20241013210925.123632-2-beanhuo@iokpp.de>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|BN0PR04MB7997:EE_
+x-ms-office365-filtering-correlation-id: fa2ad43f-32f8-44a1-6c24-08dcec1d3051
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|376014|366016|1800799024|38070700018;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?Xoi8sWQDjkZQqrX1jFNveeY0ZOTP7doA46Mci4QMa+xOLW/FEow2S7YKv6vQ?=
+ =?us-ascii?Q?rIcVii4khknlcZeKxf9KrtzaZxMbNlGk3IizaKfdd8wM900J23jcVxjizGGZ?=
+ =?us-ascii?Q?GqdmnVhdona+wZwYII/jQZhhVO3tS6Y6xhmTYWOyiBu5uo/s48XcocFXKnsy?=
+ =?us-ascii?Q?gFs5A8yjEfiXUAvsH0njJ4QYbyCeJQRc/qYfu7jaOdWaUp6n7yCJGwfSRD7i?=
+ =?us-ascii?Q?106sR7QNVC9+7C27ccYCKeP0l3l4sqm1xORuNPwxBajevYGtjRS9EuiTGj7T?=
+ =?us-ascii?Q?lFyZLNks2JcWWZ2szovstoi1ogmUIRbp7V0EqpjrJB+IQK3pGfKHw0+VIlQT?=
+ =?us-ascii?Q?IOPg4rpjbLgJE1Omaif5whfEFyT7N1B/r4L5UwUpoTAGmZFadyqHs+6owEDi?=
+ =?us-ascii?Q?WHxmarnizSg8xtPxVurZOG4Ug4GYdmGhxqhXaYRBrFluRhrOPxFh7riKWmAZ?=
+ =?us-ascii?Q?US57bcq0FGyJuB+Fln9ywZcm2+bEOr57/zNJRzVSj1tROrCatRdMRIccooip?=
+ =?us-ascii?Q?IPnLfFxNkNalcvLnWVHTh44LcEfbSOCrx6h9EDlnHHaamOTbVdViyUEbqxiC?=
+ =?us-ascii?Q?q8GtX+r2BbxckeTqGz/+Chee+E8YljXavT+MbQzRTP3bjU4hUybfWRJsR5Fg?=
+ =?us-ascii?Q?Ru5DQTTXqgawNtyea+ZRR9r30a/SDmPsru41PMxXZh4BjavM2PpoGEQ1YGnr?=
+ =?us-ascii?Q?S8hNyrSqKoGnUNG7yHKZLOabgcQm1ojKfx10A1/LlZi8W/lEXNrukPnf14hD?=
+ =?us-ascii?Q?/FgxdzcSHO7GRZdbkh8irh8uv6EFD8bvsYMcZvUTNB/896Nx44yEun19piFB?=
+ =?us-ascii?Q?EUZmjZ3mEtKTo/4Ey24GrucANEzyPTXkc6GRP/++2ez6t/lcVmgaGYtRcC/v?=
+ =?us-ascii?Q?omPfTHRAYTgpovBf54LB3iNOsAHrs6/pJ2eYKXVsSdL5TtoRaxuxrU0GeIHf?=
+ =?us-ascii?Q?f7q9PDK9oKf/gAT8IwgR7c4Z3sBWkgl+8KTeP1RVBBMVFrQ+2/b9yYeU+LTG?=
+ =?us-ascii?Q?J8A2TunNfLBncISs0XY2jY0w+rJkJ+MUiVOfa/jptq5hDEbsB3CPtfbsuUXE?=
+ =?us-ascii?Q?MSbxsSjp29Fh8e1ljP1mZkfyTkQqdxH7hHfsM6Fz0RPKnmdI6zu3HKPFKzA0?=
+ =?us-ascii?Q?7+uWVGpXwqlZYYx2Kgz1IgJ4JGVof8fJ367lzKsugO24PXF2s9XitUPjM2OR?=
+ =?us-ascii?Q?j6w5QuqNkrABiEEMuJRypmz+r391/rpRBABQJKxHDbzpNJ6qu2cRqVcI6p+H?=
+ =?us-ascii?Q?wT2VMS2rd8r5ODFy5RyRavTFqR+kw9WKALQZAAzd+9MbSK8vjrLw5izWfnRm?=
+ =?us-ascii?Q?SNDPkHYtKgj2Go3VhogvHTN1MQEZp0JuR6ua6wmcm2DUVw=3D=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?/8ycHlEabSpmySS6KDscsoVFc0Y5qwBpykVz9b7Kc+fwzCJbytiKQNblm9Cs?=
+ =?us-ascii?Q?R4LqR5NQRnErKaWUzYZMA+fvffyqCV4gxM/VX1rbxrU8xZzr2tC1iz67uJ46?=
+ =?us-ascii?Q?9LD/hKkLE+na5j9i+kng9np8o0hwnn7P/WcYJqRnACZR0tqnIVuGIwhiHJOg?=
+ =?us-ascii?Q?FHTVV2FayIwtyuwhdp6WYggwlDUX7ezyByset67ZVkB0bIaF0LzUSsUmxVMX?=
+ =?us-ascii?Q?GFRbDHOxoKwIwnhTn7pbvl8vmw60ROiJPYR8dX+e4UGG6pA7O/Itsg4AdiQP?=
+ =?us-ascii?Q?enNcT9TIIDMwK+HMfu/Pk5aIi3Uvu/XlHK88sW35G4iAnSHMZPNbt+DZv6rZ?=
+ =?us-ascii?Q?xdpIoC8kqvABxM95x0wBHSmO+/T9oWg3iKVXSWc46nejx6EwhVpGD1RGjPhZ?=
+ =?us-ascii?Q?J0jsAx0JSD72CaIcaEe9htf0cm9fsIG9qB7R8jNgW93w91jFPedEFT+vjblv?=
+ =?us-ascii?Q?cjbV66TPEN+lXCoZaYwafO+8JJ9yUvbKNa+vMW6dseTTnvtu8sAU3vr06cyU?=
+ =?us-ascii?Q?oSzElUBnXzjoHPdutlhRTFHqXn9LaH70XlfrNRTV5r7fSzEZ2QnnD0+AZ8eO?=
+ =?us-ascii?Q?sjxtisFWklqkhFMxdTXzH5WkY4mUJdpvfisdvAKbhmTyHeAfKTOpTbclbB2H?=
+ =?us-ascii?Q?8QnUdi+3avz+GCcI72qtU+V5AGioTC3b52Bqe2RJtXYVjs0hy18oADhGwO0n?=
+ =?us-ascii?Q?K+IVZK+Hd0kIb+CW2rMRkZ+rmUXxEK08HM2GWSYCeb/M5vtdV20+XyiGWc9L?=
+ =?us-ascii?Q?cNlVKp5zDBD05EwBblitT9yXjeI0c8daGPjXZJ+vOxUVuV6zMlVyLXYcCds3?=
+ =?us-ascii?Q?Lom7YiHFf9XYZhrAeYuXf+Qc136f4q6Z5dUT8Vq0S3aqmMA/ZdjoGuhdGPTO?=
+ =?us-ascii?Q?NNKPlXREg6+0XsFnMp0b2WNVMgh8jlArruvsIKgfByvgsjOgxlPsGyNNw4Zn?=
+ =?us-ascii?Q?hTScLKuvknBPSRjo3DnoHUGyAOTI2I0m20wV6xawpltitYhsSFlOyz8zWYYS?=
+ =?us-ascii?Q?fScW10Yx8lZo+1hoTHMkJUZoeFTSESJ3xF43mtddM980fi9CJwTM5v5jqhIz?=
+ =?us-ascii?Q?prR7n1MNu13YH+HGZuZwvuwJN1MkBIQH4YkYgfKndJTFEaZahgvEZvISDQ0Q?=
+ =?us-ascii?Q?midd4YBHAXd1yhCsqNaI9BCMgCj16vcXC1Sz9kq2gIY2UW2KQeAzUARHOjS/?=
+ =?us-ascii?Q?MysvJJCEcMr+/jmpA7NAcr47o8EY/ed15gjLOcKu2CnEv1Dw/Iph1xAH7r9t?=
+ =?us-ascii?Q?7auu8JjXmmWXknqMyOv7t74BQxpHhMycAlp+eOpNaYcax3HrqUfH8umdcXv7?=
+ =?us-ascii?Q?31mjmVUKwRXak6op1nsgMjPgWDqzDXoe15PXmh+dePqYkeimv8EfRInBJmhn?=
+ =?us-ascii?Q?czmDsndC7gjr7IH9mEYhdPl8TbpxTeHvEBsan1S78x2FTt4Hs44mu+2E6nkK?=
+ =?us-ascii?Q?TXwuGxQnwuRRpF0dqbb5Jo/W5i18r23NN0/PxR9R7gZipxRCLkdU7sgOT7AA?=
+ =?us-ascii?Q?O7lWE98mFB8WFeTKjEVtCbutZjjJjyLYl3I7VJK7O+QpFjzQG+X+zNzDpM6D?=
+ =?us-ascii?Q?tnbcX0RiKLdvzKn2yd4v8V9DuAs/gAFHA3wBmZt3?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU0PR04MB9496:EE_|AS4PR04MB9459:EE_
-X-MS-Office365-Filtering-Correlation-Id: 1bc3322d-c3a0-4a93-dc40-08dcec1585ea
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|376014|7416014|52116014|366016|1800799024|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?j3ymP+Xqp+YDWj99DEORqBH8cNLRoJO760AzB8ZSsqtFk2CUI6wGHYhd6ed8?=
- =?us-ascii?Q?b4Q9AqQxqROcCy8oFwNzTMIaiZe3eUwDyVJ1twsNl/2jDdXNxNQosLAU4OkB?=
- =?us-ascii?Q?NrCviyrPr2/FtTnxug7zUK6psYISQNxGD/5ihS3HBGUe3v0I/nt7tbZrEi+V?=
- =?us-ascii?Q?S+eGMAFsDbtkvFhOZ6UsnkoVGYcJHY1Tj7s4nfLAWKGokNHPgPE5yyqJCHq7?=
- =?us-ascii?Q?fYWjvvAuOgmDkzARaWWFW92YCjfpLarcGhunn0AKNmChKbFfIpHrjfO3trKh?=
- =?us-ascii?Q?Aa8MgRoSuygLfLaT32RIpaFKSXPKCmbZGrrXPvn1KxB1hfUpiLiiyBvFAbXw?=
- =?us-ascii?Q?RE2q6Eo2m0M5vCy+3lAZAL9uhvXfG4WFJIFPvSWPvezATCfVYHs6K7EVhwuP?=
- =?us-ascii?Q?n1ATwPodWVg/J0NEj9VAdWjcU9eGSJfP7wx5xxfYzv4o/wL1mMueE0q+QmNY?=
- =?us-ascii?Q?JZtLZ1WuE83ALi9eFe3dgqFw2Ad6ozTKWSsKxBhIm5MejUnjW7ihXoqjkGkY?=
- =?us-ascii?Q?z+9RF1+5jAxdWOCvlajjDNjD333AyM0BWFK0erD6eL5hfclZdi7fNMTYnnA8?=
- =?us-ascii?Q?drhb6E/pPfsenvsmXmyRrDSI1rxlptHxZXNQ02viJHuRqr5STWOKrEHaqL1/?=
- =?us-ascii?Q?JNByTbpvSv+DeHMT2Y8++RNTpYMqw1xKlbuvQcYIsTQ9NueVmCXWjp4ZUUR3?=
- =?us-ascii?Q?M5TsFbOFz4IQGsN5F8eT02G9MYwoQOUehud/otGW+rgMTIioTfh9Cx2m9BLQ?=
- =?us-ascii?Q?2PCkiOoGWlaGi7lZFJNWFi2dKfK5JpywPyiih7O+ceSrYDW1E1xp2awtCvt7?=
- =?us-ascii?Q?BMTXSliDeEz0a/dGsIu23bKvSja3bWkPzLtnrqXVl/CZaZoGxcH8YVSDjHo0?=
- =?us-ascii?Q?GucuG4mC9PVxkTF2ANoRnPyTnsSuetsnznSSDPX7UOoZDNlZgxwVEYTEVNWy?=
- =?us-ascii?Q?kly+YzUS+kFWyBClQQlLav5PHgqrB0nyyXA1jkzYmXwm/q/Zhh7J0ejq4GHT?=
- =?us-ascii?Q?w8SJpFhNCuiwFtyShWC7NPCdOx9Lgu5WSRDNRbykKW+dtfbvrdxT+/jqDS0z?=
- =?us-ascii?Q?GR6xq7v8euv7WbCIp0Jtjh8TVQeORySCr8lZEEN3a5n/OTaJ1Ta71Z95E48p?=
- =?us-ascii?Q?ZIjlzqRDLnBOM8focl7gFqAaYhLD1b5LMXv9jn9IrTUv7FxIxqrDfXaVBXLP?=
- =?us-ascii?Q?vybgquPAgbRkP/5FyqNNn9hOy8tkNAfXlya70o4H+DInbrnMBGcUBspNto9Y?=
- =?us-ascii?Q?9FbsbbeRirg/m+uZeK7UQLG9WpuA2r60cejfH0EZ7pFJGRbF4D4ahKD3lBg7?=
- =?us-ascii?Q?+h8yHIbAz/mQ8fnUgMPlLdgY473KUwP0ANws46ItOy0RlA=3D=3D?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9496.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(52116014)(366016)(1800799024)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?BkhAWneLOmKCoGjiJfBwIxv54E7fWLsmsbU9X/Ik7+PF0cpZhu9i1dTtqdbK?=
- =?us-ascii?Q?LYxGExpBJNcwVa3HvAMmd/2WlHexyZKZIfyYYDT7DjESn/PGEdv8AScVcTPo?=
- =?us-ascii?Q?bH0JgEV4VaBBJZNZ/YNjQWvDXtXzSAfR35MjL4PIiBRijtYLMr2ecMLCyuuB?=
- =?us-ascii?Q?NTYbPNV2i/Qi3xla+9+qsLNvWLHkzMK6/B4egWngbTFuqjV4DXb0JEnYxuqP?=
- =?us-ascii?Q?JhWhNlfBVtnMqWuQ+GNMy5KoWN4snasjob5AQUapqU84kgp3nZPDZ8hWAIrA?=
- =?us-ascii?Q?oADBOih3U/929WEegTsL+x3dYldWhniM4R41DuRPE1/oXUDYzCxUYKQL3CMr?=
- =?us-ascii?Q?oN70wysX+tYAyxcXDw2ZRxmJjrbRrYB57dxX+ulAEGvz8jGOoA6f48nkrjZJ?=
- =?us-ascii?Q?C/upCPIs1VC3LEmbM6VDsZccqMZdsHqx/0/gqxxfkXzKE7AL67Nnju7YJrh/?=
- =?us-ascii?Q?wkzD6OmEwLem/IJ/ss9NhHmH8w/4bdGXk6YW26BV118IoW1hCjqFRi+U8rp6?=
- =?us-ascii?Q?H0c5fZ73TgeVg/mTKnbectS6bND9wQgGeTFPu0ZuvuqzRCFdg67YNAkAtocW?=
- =?us-ascii?Q?ZvCTXtkRoQkJY9HtaeM/RLvdMxpB1MiTx709mDErFVSGeR3QtJUHE2s6tawG?=
- =?us-ascii?Q?lDk4DLZs0vBm6iCNe+7Ql4pN9gLVMiJzPNpMiP++iHRqbvJ0CGAe2IdzPo70?=
- =?us-ascii?Q?vCQT4x8gQ8p1g0aPsdLjvocVKGkDBdOR0FAG6R7DFnfhPOo2Q8llVECLpHHs?=
- =?us-ascii?Q?Gan5kX2eHOl1EhTYVZJwY2CN/LhkEBNwOvDtsuK73+2LVdEqOxVr0CeHq3XK?=
- =?us-ascii?Q?PhUav1G1a7PypLsv01UwoI8NFB1Ct7/lerMoeVGzNaHRjmP07JmOLMP/1n5u?=
- =?us-ascii?Q?oZYNnPUQhAzfgnE0fxEdqR5VZ31PWG8pMhX/XIh+JqD1Zu85gYvYF1CEIkbI?=
- =?us-ascii?Q?JiiA/fYiskg0/HILmt76NSPylH2o5zLweybpdShakjU82Ipo+674fUyJGDGq?=
- =?us-ascii?Q?d8BVLBpO7aOjkKTaOU+/5MXMdE1UvQuisDWRmBHPijpA3w4Ibx7tK+hottV5?=
- =?us-ascii?Q?vwa2kaglsQm8ozy7qOlAJF9MsZyqPaID+D5mT4awyswE6jpeTp0A6dE7mBIo?=
- =?us-ascii?Q?5IR3uDmczHFf3KVgbpqdVGuwguqtkOYLOYg4R97n/Co6nKFvUYenM3Iu09s8?=
- =?us-ascii?Q?gqMug9qzjY99O7TrpZrhAvwrIg2G+xUPDviMBvSnQ+Xr/dy/xxHR3ZhE8CPy?=
- =?us-ascii?Q?buXsXemudFnO22w+zTscy5mMSgimZjqaebpVcdqSVhgoP6v5SVtto0Sav3PL?=
- =?us-ascii?Q?HwLIIvNm2zUORbuGjXD5fEFX33ar05iaBQx9fY/GaABgfG59B/oO48iYKZpV?=
- =?us-ascii?Q?xtcunVbSEPhRU67EyUbIC60ktCZCFrG+3AS2psG8SrBMIXmKgUbmUBw3pykj?=
- =?us-ascii?Q?4t3KHMConG3ufOjHuDR2Ws97/k0/yNHzofav6H2Y8jwwaZCYEHk/O1rzrlRE?=
- =?us-ascii?Q?pki0AZDCvkzVpaRwy8cElWplssm2nubPmSLvpc6vn1JKYGNOqoyZpi9KMqtM?=
- =?us-ascii?Q?rKByke3r0YSvvvKVPYObODQc10q51612LR0me0mV?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1bc3322d-c3a0-4a93-dc40-08dcec1585ea
-X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9496.eurprd04.prod.outlook.com
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	xkhFCCx4yXmCJ9WcxF05q8JRgnqpiSLxEheSeBJ/g6BtDatNato5wH2WTykyUiveCEmysrKafXdw880yT9oCWA73qeJaoDfgCvtIWH0gZFb8vZqY94zFsFYW1NJ9qxIqRkIupkwlGHB+WROby1ZdtTOkwye3i1Gym/ht+bsWHOd611eLr5roi4tyKdpPDyOPqvEC0yleupPDGl9lmDj0N1MyVS58S+dEoDEFMHibF5pT7FNlS+ZT8LqKRiMOuTHEYe5IsvybXA1neDjIW2jz8G4IR7xWOduxlVFxakDeubOs9A1Tp9Hs2IxlqxY9T8uBWW/lO8LKYEAs00JcWs/Zlav6ep+cA9XQU426zj/fiMxf3sKzsubo/ze+KF6rsQbsIX426+OP9NVVBPstO/3m6yrLDzEA5Mi4vYk4E1UA7J0RBrGvhDePakRtw8GyH2L4DEXxyxpN95DjteJE46TaSaCXdQrGg0TmTn8IdpwBDx5DdIqJM2K4sjs85bv8EROK8YkbNeNWnDwV81Vlj/RNLHRYZw3HQUCbw8U0kC95VT2uNT33JTNqDNQGw6DUJpEntnggRHAnjZSDdKPI19fmt0D9Dr4fj5iPEilNEyysqEu1xfaY9lC0y13UOKHIyNJF
+X-OriginatorOrg: wdc.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Oct 2024 06:00:36.6587
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fa2ad43f-32f8-44a1-6c24-08dcec1d3051
+X-MS-Exchange-CrossTenant-originalarrivaltime: 14 Oct 2024 06:55:28.8597
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: BxO6PDx2qFYkSGYm133fXJ7tCmCz59C+kOlyHLB9B2+xOL+NJbQNfv9gf1rHyZi9G0eQttuoEiUZdIawwlXdBQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS4PR04MB9459
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 4fw4/5FnHt29h0CCV2bWCCK/kr7PoyWISFmSS8I+KYF7UdBDifMjYhDJQW8SsuqLuduGmA1Fcdyb1cg65k1Y+w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN0PR04MB7997
 
-From: Haibo Chen <haibo.chen@nxp.com>
+>  mmc_cmds.c | 287 +++++++++++++++++++++++++++++++----------------------
+>  1 file changed, 171 insertions(+), 116 deletions(-)
+>=20
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 3b1bcf4..72921a7 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -29,6 +29,7 @@
+>  #include <stdint.h>
+>  #include <assert.h>
+>  #include <linux/fs.h> /* for BLKGETSIZE */
+> +#include <stdbool.h>
+>=20
+>  #include "mmc.h"
+>  #include "mmc_cmds.h"
+> @@ -2810,15 +2811,13 @@ out:
+>         return ret;
+>  }
+>=20
+> -static void set_ffu_single_cmd(struct mmc_ioc_multi_cmd *multi_cmd,
+> -                              __u8 *ext_csd, unsigned int bytes, __u8 *b=
+uf,
+> -                              off_t offset)
+> +static void set_ffu_download_cmd(struct mmc_ioc_multi_cmd *multi_cmd,
+> __u8 *ext_csd,
+> +                               unsigned int bytes, __u8 *buf, off_t
+> +offset)
+>  {
+>         __u32 arg =3D per_byte_htole32(&ext_csd[EXT_CSD_FFU_ARG_0]);
+>=20
+>         /* send block count */
+> -       set_single_cmd(&multi_cmd->cmds[1], MMC_SET_BLOCK_COUNT, 0, 0,
+> -                      bytes / 512);
+> +       set_single_cmd(&multi_cmd->cmds[1], MMC_SET_BLOCK_COUNT, 0, 0,
+> + bytes / 512);
+>         multi_cmd->cmds[1].flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+> MMC_CMD_AC;
+>=20
+>         /*
+> @@ -2826,23 +2825,141 @@ static void set_ffu_single_cmd(struct
+> mmc_ioc_multi_cmd *multi_cmd,
+>          * long as the product is fw_size, but some hosts don't handle la=
+rger
+>          * blksz well.
+>          */
+> -       set_single_cmd(&multi_cmd->cmds[2], MMC_WRITE_MULTIPLE_BLOCK,
+> 1,
+> -                      bytes / 512, arg);
+> +       set_single_cmd(&multi_cmd->cmds[2], MMC_WRITE_MULTIPLE_BLOCK,
+> 1,
+> + bytes / 512, arg);
+>         mmc_ioc_cmd_set_data(multi_cmd->cmds[2], buf + offset);  }
+It is not recommended to mix functional & formatting changes.
 
-For some SoCs like imx6ul(l/z)/imx7d/imx93, during system PM, usdhc will
-totally power off, so the internal tuning status will lost. Here add
-save/restore the tuning value for any command after system resume back
-when re-tuning hold.
+>=20
+> +static int get_ffu_sectors_programmed(int *dev_fd, __u8 *ext_csd) {
+> +       int ret;
+> +
+> +       ret =3D read_extcsd(*dev_fd, ext_csd);
+> +       if (ret) {
+> +               fprintf(stderr, "Could not read EXT_CSD\n");
+> +               return ret;
+> +       }
+> +
+> +       ret =3D per_byte_htole32((__u8
+> + *)&ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0]);
+> +
+> +       return ret;
+> +}
+ret is not really needed.
+It is not common for the return value to indicate both error and expected f=
+unctionality.
 
-The tipical case is for the SDIO which contain flag MMC_PM_KEEP_POWER,
-and contain pm_flags MMC_PM_WAKE_SDIO_IRQ. in mmc_sdio_suspend(), SDIO
-will switch to 1 bit mode, and switch back to 4 bit mode when resume back.
-According to spec, tuning command do not support in 1 bit mode. So when
-send cmd52 to switch back to 4 bit mode, need to hold re-tuning. But this
-cmd52 still need a correct sample point, otherwise will meet command CRC
-error, so need to keep the previous tuning value.
+> +
+> +static bool ffu_is_supported(__u8 *ext_csd, char *device) {
+> +       if (ext_csd =3D=3D NULL) {
+> +               fprintf(stderr, "ext_cst is NULL\n");
+                                               ^^^^
+s/cst/csd/g
 
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 94 +++++++++++++++++++++++++++++-
- 1 file changed, 91 insertions(+), 3 deletions(-)
+> +               return false;
+> +       }
+> +
+> +       if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
+> +               fprintf(stderr, "The FFU feature is only available on dev=
+ices >=3D "
+> +                       "MMC 5.0, not supported in %s\n", device);
+> +               return false;
+> +       }
+> +
+> +       if (!(ext_csd[EXT_CSD_SUPPORTED_MODES] & EXT_CSD_FFU)) {
+> +               fprintf(stderr, "FFU is not supported in %s\n", device);
+> +               return false;
+> +       }
+> +
+> +       if (ext_csd[EXT_CSD_FW_CONFIG] & EXT_CSD_UPDATE_DISABLE) {
+> +               fprintf(stderr, "Firmware update was disabled in %s\n", d=
+evice);
+> +               return false;
+> +       }
+> +
+> +       return true;
+> +}
+> +
+> +static int do_ffu_download(int *dev_fd, __u8 *ext_csd, __u8 *fw_buf, off=
+_t
+> fw_size,
+> +                                                       unsigned int
+> +chunk_size) {
+Why dev_fd can't be just an integer?
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 18febfeb60cf..4173967022d0 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -80,6 +80,9 @@
- #define  ESDHC_TUNE_CTRL_STEP		1
- #define  ESDHC_TUNE_CTRL_MIN		0
- #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
-+#define ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK		0x7f000000
-+#define ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_SHIFT	24
-+#define ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT	8
- 
- /* strobe dll register */
- #define ESDHC_STROBE_DLL_CTRL		0x70
-@@ -234,6 +237,7 @@ struct esdhc_platform_data {
- 	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
- 	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
- 	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
-+	unsigned int saved_tuning_delay_cell;	/* save the value of tuning delay cell */
- };
- 
- struct esdhc_soc_data {
-@@ -1055,7 +1059,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
--	u32 ctrl;
-+	u32 ctrl, tuning_ctrl;
- 	int ret;
- 
- 	/* Reset the tuning circuit */
-@@ -1069,6 +1073,17 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- 			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
- 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
- 			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-+
-+			/*
-+			 * enable the std tuning just in case it cleared in
-+			 * sdhc_esdhc_tuning_restore.
-+			 */
-+			tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+			if (!(tuning_ctrl & ESDHC_STD_TUNING_EN)) {
-+				tuning_ctrl |= ESDHC_STD_TUNING_EN;
-+				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
-+			}
-+
- 			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
- 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-@@ -1147,7 +1162,8 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
- 	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
- 			ESDHC_MIX_CTRL_FBCLK_SEL;
- 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
--	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+	writel(val << ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT,
-+				host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
- 	dev_dbg(mmc_dev(host->mmc),
- 		"tuning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
- 			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
-@@ -1555,6 +1571,58 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
- 	}
- }
- 
-+static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	/*
-+	 * SD/eMMC do not need this tuning save because it will re-init
-+	 * after system resume back.
-+	 * Here save the tuning delay value for SDIO device since it may
-+	 * keep power during system PM. And for usdhc, only SDR50 and
-+	 * SDR104 mode for SDIO devide need to do tuning, and need to
-+	 * save/restore.
-+	 */
-+	if ((host->timing == MMC_TIMING_UHS_SDR50) |
-+			(host->timing == MMC_TIMING_UHS_SDR104)) {
-+		reg = readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+		reg = (reg & ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK) >>
-+				ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_SHIFT;
-+		imx_data->boarddata.saved_tuning_delay_cell = reg;
-+	}
-+}
-+
-+static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	if ((host->timing == MMC_TIMING_UHS_SDR50) |
-+			(host->timing == MMC_TIMING_UHS_SDR104)) {
-+		/*
-+		 * restore the tuning delay value actually is a
-+		 * manual tuning method, so clear the standard
-+		 * tuning enable bit here. Will set back this
-+		 * ESDHC_STD_TUNING_EN in esdhc_reset_tuning()
-+		 * when trigger re-tuning.
-+		 */
-+		reg = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+		reg &= ~ESDHC_STD_TUNING_EN;
-+		writel(reg, host->ioaddr + ESDHC_TUNING_CTRL);
-+
-+		reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+		reg |= ESDHC_MIX_CTRL_SMPCLK_SEL | ESDHC_MIX_CTRL_FBCLK_SEL;
-+		writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-+
-+		writel(imx_data->boarddata.saved_tuning_delay_cell <<
-+				ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT,
-+				host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+	}
-+}
-+
- static void esdhc_cqe_enable(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1883,7 +1951,17 @@ static int sdhci_esdhc_suspend(struct device *dev)
- 		(host->tuning_mode != SDHCI_TUNING_MODE_1)) {
- 		mmc_retune_timer_stop(host->mmc);
- 		mmc_retune_needed(host->mmc);
--	}
-+
-+		/*
-+		 * For the SDIO device need to keep power during system PM, and enable
-+		 * wakeup, need to save the tuning delay value just in case the retuning
-+		 * is hold when SDIO resume, but still need to switch to 4 bit bus width.
-+		 */
-+		if (host->mmc->sdio_irqs && mmc_card_keep_power(host->mmc) &&
-+				(esdhc_is_usdhc(imx_data)))
-+			sdhc_esdhc_tuning_save(host);
-+
-+		}
- 
- 	if (device_may_wakeup(dev)) {
- 		ret = sdhci_enable_irq_wakeups(host);
-@@ -1903,6 +1981,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
- static int sdhci_esdhc_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = mmc_gpio_set_cd_wake(host->mmc, false);
-@@ -1915,6 +1995,14 @@ static int sdhci_esdhc_resume(struct device *dev)
- 	if (host->irq_wake_enabled)
- 		sdhci_disable_irq_wakeups(host);
- 
-+	/*
-+	 * Restore the saved tuning delay value for the SDIO device
-+	 * which enabled wakeup and keep power during system PM.
-+	 */
-+	if ((imx_data->socdata->flags & ESDHC_FLAG_STATE_LOST_IN_LPMODE) &&
-+	    mmc_card_keep_power(host->mmc) && mmc_card_wake_sdio_irq(host->mmc))
-+		sdhc_esdhc_tuning_restore(host);
-+
- 	pm_runtime_mark_last_busy(dev);
- 	pm_runtime_put_autosuspend(dev);
- 
--- 
-2.34.1
+> +       int ret;
+> +       __u8 num_of_cmds =3D 4;
+> +       off_t bytes_left, off;
+> +       unsigned int bytes_per_loop, sect_done, retry =3D 3;
+> +       struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+> +
+> +       if (!dev_fd || !fw_buf || !ext_csd) {
+> +               fprintf(stderr, "unexpected NULL pointer\n");
+> +               return -EINVAL;
+> +       }
+> +       /* allocate maximum required */
+> +       multi_cmd =3D calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> num_of_cmds * sizeof(struct mmc_ioc_cmd));
+> +       if (!multi_cmd) {
+> +               perror("failed to allocate memory");
+> +               return -ENOMEM;
+> +       }
+I was expecting that do_ffu_download will be called with struct mmc_ioc_mul=
+ti_cmd *multi_cmd argument as well.
+That each ffu<x> mode fills it according to its own logic.
+This you won't be needing that ffu_mode additional parameter.
+
+> +
+> +       /* prepare multi_cmd for FFU based on cmd to be used */
+> +       /* put device into ffu mode */
+> +       fill_switch_cmd(&multi_cmd->cmds[0], EXT_CSD_MODE_CONFIG,
+> + EXT_CSD_FFU_MODE);
+> +
+> +       /* return device into normal mode */
+> +       fill_switch_cmd(&multi_cmd->cmds[3], EXT_CSD_MODE_CONFIG,
+> + EXT_CSD_NORMAL_MODE);
+> +
+> +do_retry:
+> +       bytes_left =3D fw_size;
+> +       off =3D 0;
+> +       multi_cmd->num_of_cmds =3D num_of_cmds;
+> +
+> +       while (bytes_left) {
+> +               bytes_per_loop =3D bytes_left < chunk_size ? bytes_left :
+> + chunk_size;
+> +
+> +               /* prepare multi_cmd for FFU based on cmd to be used */
+> +               set_ffu_download_cmd(multi_cmd, ext_csd, bytes_per_loop,
+> + fw_buf, off);
+> +
+> +               /* send ioctl with multi-cmd, download firmware bundle */
+> +               ret =3D ioctl(*dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +
+> +               if (ret) {
+> +                       perror("Multi-cmd ioctl");
+> +                       /*
+> +                        * In case multi-cmd ioctl failed before exiting =
+from
+> +                        * ffu mode
+> +                        */
+> +                       ioctl(*dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> +                       goto out;
+> +               }
+> +
+> +               sect_done =3D get_ffu_sectors_programmed(dev_fd, ext_csd)=
+;
+> +               if (sect_done <=3D 0) {
+> +                       /* By spec, host should re-start download from th=
+e first sector
+> if sect_done is 0 */
+> +                       ioctl(*dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> +                       if (retry > 0) {
+> +                               retry--;
+> +                               fprintf(stderr, "Programming failed. Retr=
+ying... (%d)\n",
+> retry);
+> +                               goto do_retry;
+> +                       }
+> +                       fprintf(stderr, "Programming failed! Aborting...\=
+n");
+> +                       ret =3D sect_done;
+> +                       goto out;
+> +               } else {
+> +                       fprintf(stderr, "Programmed %d/%jd bytes\r", sect=
+_done * 512,
+> (intmax_t)fw_size);
+> +               }
+> +
+> +               bytes_left -=3D bytes_per_loop;
+> +               off +=3D bytes_per_loop;
+> +       }
+> +
+> +       ret =3D get_ffu_sectors_programmed(dev_fd, ext_csd);
+> +out:
+> +       free(multi_cmd);
+> +       return ret;
+> +
+> +}
+> +
+>  int do_ffu(int nargs, char **argv)
+>  {
+> +       off_t fw_size;
+> +       char *device;
+> +       int sect_done =3D 0;
+>         int dev_fd, img_fd;
+> -       int retry =3D 3, ret =3D -EINVAL;
+> +       int ret =3D -EINVAL;
+>         unsigned int sect_size;
+>         __u8 ext_csd[512];
+> -       __u8 *buf =3D NULL;
+> -       off_t fw_size, bytes_left, off;
+> -       char *device;
+> +       __u8 *fw_buf =3D NULL;
+>         struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+>         unsigned int default_chunk =3D MMC_IOC_MAX_BYTES;
+> -       __u32 sect_done =3D 0;
+It is not recommended to mix functional & formatting changes.
+
+>=20
+>         assert (nargs =3D=3D 3 || nargs =3D=3D 4);
+>=20
+> @@ -2852,6 +2969,7 @@ int do_ffu(int nargs, char **argv)
+>                 perror("device open failed");
+>                 exit(1);
+>         }
+> +
+>         img_fd =3D open(argv[1], O_RDONLY);
+>         if (img_fd < 0) {
+>                 perror("image open failed"); @@ -2859,28 +2977,22 @@ int
+> do_ffu(int nargs, char **argv)
+>                 exit(1);
+>         }
+>=20
+> +       if (nargs =3D=3D 4) {
+> +               default_chunk =3D strtol(argv[3], NULL, 10);
+> +               if (default_chunk > MMC_IOC_MAX_BYTES || default_chunk %
+> 512) {
+> +                       fprintf(stderr, "Invalid chunk size");
+> +                       goto out;
+> +               }
+> +       }
+> +
+Can the argument parsing part be common to all modes as well?
+
+>         ret =3D read_extcsd(dev_fd, ext_csd);
+>         if (ret) {
+>                 fprintf(stderr, "Could not read EXT_CSD from %s\n", devic=
+e);
+>                 goto out;
+>         }
+can this part also be part of ffu_is_supported()?
+
+>=20
+> -       if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
+> -               fprintf(stderr,
+> -                       "The FFU feature is only available on devices >=
+=3D "
+> -                       "MMC 5.0, not supported in %s\n", device);
+> -               goto out;
+> -       }
+> -
+> -       if (!(ext_csd[EXT_CSD_SUPPORTED_MODES] & EXT_CSD_FFU)) {
+> -               fprintf(stderr, "FFU is not supported in %s\n", device);
+> -               goto out;
+> -       }
+> -
+> -       if (ext_csd[EXT_CSD_FW_CONFIG] & EXT_CSD_UPDATE_DISABLE) {
+> -               fprintf(stderr, "Firmware update was disabled in %s\n", d=
+evice);
+> +       if (ffu_is_supported(ext_csd, device) !=3D true)
+If (!ffu_is_supported(ext_csd, device))
+
+>                 goto out;
+> -       }
+>=20
+>         fw_size =3D lseek(img_fd, 0, SEEK_END);
+>         if (fw_size =3D=3D 0) {
+> @@ -2888,15 +3000,6 @@ int do_ffu(int nargs, char **argv)
+>                 goto out;
+>         }
+>=20
+> -       /* allocate maximum required */
+> -       buf =3D malloc(fw_size);
+> -       multi_cmd =3D calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> -                               4 * sizeof(struct mmc_ioc_cmd));
+> -       if (!buf || !multi_cmd) {
+> -               perror("failed to allocate memory");
+> -               goto out;
+> -       }
+> -
+>         /* ensure fw is multiple of native sector size */
+>         sect_size =3D (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] =3D=3D 0) ? 512 =
+: 4096;
+>         if (fw_size % sect_size) {
+> @@ -2904,61 +3007,32 @@ int do_ffu(int nargs, char **argv)
+>                 goto out;
+>         }
+>=20
+> -       if (nargs =3D=3D 4) {
+> -               default_chunk =3D strtol(argv[3], NULL, 10);
+> -               if (default_chunk > MMC_IOC_MAX_BYTES || default_chunk % =
+512)
+> {
+> -                       fprintf(stderr, "Invalid chunk size");
+> -                       goto out;
+> -               }
+> +       /* allocate maximum required */
+> +       fw_buf =3D malloc(fw_size);
+> +       if (!fw_buf) {
+> +               perror("failed to allocate memory");
+> +               goto out;
+>         }
+>=20
+> -       /* prepare multi_cmd for FFU based on cmd to be used */
+> -
+> -       multi_cmd->num_of_cmds =3D 4;
+> -
+> -       /* put device into ffu mode */
+> -       fill_switch_cmd(&multi_cmd->cmds[0], EXT_CSD_MODE_CONFIG,
+> -                       EXT_CSD_FFU_MODE);
+> -
+> -       /* return device into normal mode */
+> -       fill_switch_cmd(&multi_cmd->cmds[3], EXT_CSD_MODE_CONFIG,
+> -                       EXT_CSD_NORMAL_MODE);
+> -
+>         /* read firmware */
+>         lseek(img_fd, 0, SEEK_SET);
+> -       if (read(img_fd, buf, fw_size) !=3D fw_size) {
+> +       if (read(img_fd, fw_buf, fw_size) !=3D fw_size) {
+>                 perror("Could not read the firmware file: ");
+>                 ret =3D -ENOSPC;
+>                 goto out;
+>         }
+>=20
+> -do_retry:
+> -       bytes_left =3D fw_size;
+> -       off =3D 0;
+> -       while (bytes_left) {
+> -               unsigned int chunk_size =3D bytes_left < default_chunk ?
+> -                                         bytes_left : default_chunk;
+> -
+> -               /* prepare multi_cmd for FFU based on cmd to be used */
+> -               set_ffu_single_cmd(multi_cmd, ext_csd, chunk_size, buf, o=
+ff);
+> -
+> -               /* send ioctl with multi-cmd */
+> -               ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +       sect_done =3D do_ffu_download((int *)&dev_fd, ext_csd, fw_buf,
+> + fw_size, default_chunk);
+>=20
+> -               if (ret) {
+> -                       perror("Multi-cmd ioctl");
+> -                       /*
+> -                        * In case multi-cmd ioctl failed before exiting =
+from
+> -                        * ffu mode
+> -                        */
+> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> -                       goto out;
+> -               }
+> -
+> -               bytes_left -=3D chunk_size;
+> -               off +=3D chunk_size;
+> +       /* Check programmed sectors */
+> +       if (sect_done > 0 && (sect_done * 512) =3D=3D fw_size) {
+> +               fprintf(stderr, "Programmed %jd/%jd bytes\n", (intmax_t)f=
+w_size,
+> (intmax_t)fw_size);
+> +               fprintf(stderr, "Programming finished with status %d \n",=
+ ret);
+> +       } else {
+> +               fprintf(stderr, "Firmware bundle download failed. Operati=
+on status
+> %d\n", sect_done);
+> +               ret =3D -EIO;
+> +               goto out;
+>         }
+> -
+>         /*
+>          * By spec - check if mode operation codes are supported in ffu f=
+eatures,
+>          * if not then skip checking number of sectors programmed after i=
+nstall
+> @@ -2969,48 +3043,29 @@ do_retry:
+>                 goto out;
+>         }
+>=20
+> -       ret =3D read_extcsd(dev_fd, ext_csd);
+> -       if (ret) {
+> -               fprintf(stderr, "Could not read EXT_CSD from %s\n", devic=
+e);
+> -               goto out;
+> -       }
+> -
+> -       /* Test if we need to restart the download */
+> -       sect_done =3D
+> per_byte_htole32(&ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0]);
+> -       /* By spec, host should re-start download from the first sector i=
+f
+> sect_done is 0 */
+> -       if (sect_done =3D=3D 0) {
+> -               if (retry--) {
+> -                       fprintf(stderr, "Programming failed. Retrying... =
+(%d)\n", retry);
+> -                       goto do_retry;
+> -               }
+> -               fprintf(stderr, "Programming failed! Aborting...\n");
+> -               goto out;
+> -       }
+> -
+> -       if ((sect_done * sect_size) =3D=3D fw_size) {
+> -               fprintf(stderr, "Programmed %jd/%jd bytes\n", (intmax_t)f=
+w_size,
+> (intmax_t)fw_size);
+> -               fprintf(stderr, "Programming finished with status %d \n",=
+ ret);
+> -       }
+> -       else {
+> -               fprintf(stderr, "FW size and number of sectors written mi=
+smatch.
+> Status return %d\n", ret);
+> +       fprintf(stderr, "Installing firmware on %s...\n", device);
+> +       multi_cmd =3D calloc(1, sizeof(struct mmc_ioc_multi_cmd) + 2 *
+> sizeof(struct mmc_ioc_cmd));
+> +       if (!multi_cmd) {
+> +               perror("failed to allocate memory");
+> +               ret =3D -ENOMEM;
+>                 goto out;
+>         }
+>=20
+> -       fprintf(stderr, "Installing firmware on %s...\n", device);
+>         /* Re-enter ffu mode and install the firmware */
+>         multi_cmd->num_of_cmds =3D 2;
+> -
+> -       /* set ext_csd to install mode */
+> -       fill_switch_cmd(&multi_cmd->cmds[1],
+> EXT_CSD_MODE_OPERATION_CODES,
+> -                       EXT_CSD_FFU_INSTALL);
+> +       /* put device into ffu mode */
+> +       fill_switch_cmd(&multi_cmd->cmds[0], EXT_CSD_MODE_CONFIG,
+> EXT_CSD_FFU_MODE);
+> +       /* Re-enter ffu mode and set ext_csd to install mode */
+> +       fill_switch_cmd(&multi_cmd->cmds[1],
+> + EXT_CSD_MODE_OPERATION_CODES, EXT_CSD_FFU_INSTALL);
+>=20
+>         /* send ioctl with multi-cmd */
+>         ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+Can wrapping up be common to all modes as well?
+
+Thanks,
+Avri
+
+>=20
+>         if (ret) {
+>                 perror("Multi-cmd ioctl failed setting install mode");
+> +               fill_switch_cmd(&multi_cmd->cmds[1],
+> + EXT_CSD_MODE_CONFIG, EXT_CSD_NORMAL_MODE);
+>                 /* In case multi-cmd ioctl failed before exiting from ffu=
+ mode */
+> -               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> +               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[1]);
+>                 goto out;
+>         }
+>=20
+> @@ -3022,16 +3077,16 @@ do_retry:
+>=20
+>         /* return status */
+>         ret =3D ext_csd[EXT_CSD_FFU_STATUS];
+> -       if (ret) {
+> +       if (ret)
+>                 fprintf(stderr, "%s: error %d during FFU install:\n", dev=
+ice, ret);
+> -               goto out;
+> -       } else {
+> +       else
+>                 fprintf(stderr, "FFU finished successfully\n");
+> -       }
+>=20
+>  out:
+> -       free(buf);
+> -       free(multi_cmd);
+> +       if (fw_buf)
+> +               free(fw_buf);
+> +       if (multi_cmd)
+> +               free(multi_cmd);
+>         close(img_fd);
+>         close(dev_fd);
+>         return ret;
+> --
+> 2.34.1
 
