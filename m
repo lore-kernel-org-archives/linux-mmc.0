@@ -1,76 +1,74 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2017A143890;
-	Mon, 14 Oct 2024 07:10:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88E941537A8;
+	Mon, 14 Oct 2024 07:39:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728889851; cv=none; b=cq+x/aLv0pHHTSd51xZahUTXsulKdWL5/uEE8bpXRADdqotNxJ5TeU4NVaC9SIxPzbbaoXhkGnTbH2fOkzEtViC8YemCwMrkq9cCgUBRWp58h6pDhlUVncKa8iqX4tQfJ5dSx5uHfMcvqtVAS0pJ4ROgavs41dHZsspMhkhVH5o=
+	t=1728891542; cv=none; b=eNOhnDKKhsjRbNx8B7OGjnS6o0+SLRxjgGr7iPKq5hsLrqsOuo4jIWflE2I9x38A2dGApJKh5ZVxJ7iRyzW1dGjleq2eW+j51rBVRHEwIK8mXU4+DbBy11/l7NFNIUFyvoNdbHyfGdbjZJBmcaTAkdlzlOtQ9J5mpy8zHuoV1Hw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728889851; c=relaxed/simple;
-	bh=FJBw7ZIUo2NEVgH4S4KSccbKhXWxyCD67qRXO3xAU7Q=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dRqytyihPEFV6Xtracwybx63bXGlxIuJFE/qCVNNnaHmpRBoEP0Zw/NcJu4hpufgL7H3hKuIEzgYWVGnxWAPoYCzS/ecKlmbDbsTw5+xeZzmzF+GQUaiVhodv9qfGBANFg1Hs2Xjr53dOZZsPl0y7Um90GvTKAWcsrcOcGCVGeo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=r1n09hrq; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1728891542; c=relaxed/simple;
+	bh=qoOrVX2qlw+79bRxKaouwZTrx5lgcm9sOHSXhAzeJKY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=MhG3eQueXgX6FqI+uC4yXgs404KeBdssz1eCe1z22BpkkC+9/VP17ep+VsZ7q231MKpBxigWEAsmyID8uGBQMlRYHyY7rKa2KZs2/R3P8AdLlKOuZdoQTfbHgYwy+rOkkwAOCgt8Soxw7dGJwap7vK4lbJ9iR/9PgkNsy7UnN8g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=ejGa/cLb; arc=none smtp.client-ip=148.251.105.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="r1n09hrq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B0F02C4CECE;
-	Mon, 14 Oct 2024 07:10:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1728889850;
-	bh=FJBw7ZIUo2NEVgH4S4KSccbKhXWxyCD67qRXO3xAU7Q=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=r1n09hrqqJiEuQhiatvDTOrzixrB9dCraf3ef+ILClbjfwsBa6VfGe+EG59mVBDdm
-	 m8kF4J8tbv/p02MdqGLvsm9EfacOjWMhuL4KQ1AymCZVlZ9lHLqiJYclF0BVtFWVqv
-	 qwGCzTo3lCxroZ6YAHm1UhwZv3r41fkn+sHopuDAY806I26FW0uniT9oY/ZERb9PP6
-	 YYwq/D1UZ280sV54pLedGqD18xCICokr+2/8nGrgxWaWTkXvPNyaBP/BAntXEZK0zW
-	 nzjpg5EQ0J0jSTo33Nk5/shKkvPCqBGhBXJnpJzgP56+QaZWARGN/ruYQXiXJ6MmiO
-	 XVhJPXBY3xMtQ==
-Date: Mon, 14 Oct 2024 09:10:46 +0200
-From: Krzysztof Kozlowski <krzk@kernel.org>
-To: Frank Wunderlich <linux@fw-web.de>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Wenbin Mei <wenbin.mei@mediatek.com>, 
-	Frank Wunderlich <frank-w@public-files.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-mediatek@lists.infradead.org, daniel@makrotopia.org, john@phrozen.org, eladwf@gmail.com, 
-	ansuelsmth@gmail.com
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: mtk-sd: Add mt7988 SoC
-Message-ID: <l4t7pgiuvnqb4dcpr6w7mmjkb2mvu5x3fdmid7txoi2gl6vv4h@75roixcfbamz>
-References: <20241012143826.7690-1-linux@fw-web.de>
- <20241012143826.7690-2-linux@fw-web.de>
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="ejGa/cLb"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1728891538;
+	bh=qoOrVX2qlw+79bRxKaouwZTrx5lgcm9sOHSXhAzeJKY=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=ejGa/cLbWqqWq/E+ZM31pk65ouQRFNTSnqIPWaJwU59j5v1u30Bph0gokY34TNmEM
+	 UvBG+o0bzs8ZsQAqE5EMv0i+znaygkKwvclJTW+QktPNwOhhEMfceYVC9y2ANlA8/g
+	 zidhz2H6OkWv7ub/SgJt2Zj2l9HXaZ2VK2gUOMgQD89bElPt4nVsa8ckN1rRbHH7fM
+	 /GtPOSSZ3i6R1Ma+L9ExJsDnUfHwpKW4ZbxphBibCJc36uqYKTOsIToz73fRn0Mx3N
+	 vClKUVYG6xAxH8y1y3Bs1fOGbmfQ75clwoF8Tw+O0LTqKqyguBLgf4haPLNgi56VRM
+	 p7qGYANu2xWkw==
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id 366C017E10AC;
+	Mon, 14 Oct 2024 09:38:58 +0200 (CEST)
+Message-ID: <1a29be6e-fb36-4ee2-9cc6-906f82159b9f@collabora.com>
+Date: Mon, 14 Oct 2024 09:38:57 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20241012143826.7690-2-linux@fw-web.de>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 1/3] mmc: mtk-sd: Add stop_dly_sel and pop_en_cnt to
+ platform data
+To: Andy-ld Lu <andy-ld.lu@mediatek.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, matthias.bgg@gmail.com,
+ wenbin.mei@mediatek.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-mediatek@lists.infradead.org
+References: <20241011024906.8173-1-andy-ld.lu@mediatek.com>
+ <20241011024906.8173-2-andy-ld.lu@mediatek.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Content-Language: en-US
+In-Reply-To: <20241011024906.8173-2-andy-ld.lu@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Sat, Oct 12, 2024 at 04:38:22PM +0200, Frank Wunderlich wrote:
-> From: Frank Wunderlich <frank-w@public-files.de>
+Il 11/10/24 04:48, Andy-ld Lu ha scritto:
+> There are modified register settings for STOP_DLY_SEL and POP_EN_CNT
+> from our next generation SoCs, due to the advanced chip manufacturing
+> process and the resulting changes in the internal signal timing.
 > 
-> Add binding definitions for mmc on MT7988 SoC.
+> Add two new fields to the compatibility structure to reflect the
+> modifications. For legacy SoCs, also add the original value of
+> 'stop_dly_sel' to the platform data, for unified code setting.
 > 
-> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
-> ---
-> v4:
-> - drop minitems because of errors
-> v3:
-> - fixed minItems on clock-names too
-> v2:
-> - fixed minItems to 4
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 22 +++++++++++++++++++
->  1 file changed, 22 insertions(+)
+> Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 
-Best regards,
-Krzysztof
 
