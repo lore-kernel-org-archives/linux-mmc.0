@@ -1,132 +1,113 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B91211BF2B;
-	Tue, 15 Oct 2024 09:44:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 453151E7653
+	for <linux-mmc@vger.kernel.org>; Tue, 15 Oct 2024 10:59:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1728985485; cv=none; b=e9ImnWoRXiRt2eXZW1sn0DLfFcS2yN5qmLoLKiE0aFSzKpQxh0UfRBciSbA0jNi/f4Q+9WAgCgqaUeC6oEsUIUOOf+oCdfRWSb5li3t+4idvNKrR88DjX/IB+b36JvKGYkjX0cmZO43qFJyp/hGG2ElAhB64NJPIQKDQHoYMMl4=
+	t=1728989972; cv=none; b=WENOTe8tMPqKVt+kQauIqVgHoD4FH0XE9a1ZlGHu5P1dG7Xa0PWgI6EG6EKKzdHixU4/efXuWw5ubD65FWJV34CUc83GAWqqlv/De3B4JpIod+lZ5yZCt1sZTEl9uKkYqHJ9/lpc64ap1QTXIGlP4WuI3z0SMR63oAbQHRI4UzY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1728985485; c=relaxed/simple;
-	bh=xDzom3Mp9aBUd2cif8YQ9ZgSLhcqWvPQSQFDkhI/jYo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=cHp2yKBpSIIW7uhBD6G4NKkrPLUISyJuQKR59PEqGy3R/5SWUb51di67OQfCcsChozUUS/A7l8lZqso/nHLqQDmn3Kl2SS6ejoZoiu4NAnuulG8vve6SYaw7P0jfyFFTj8j4rsl6QqdGgWPzKTWzyx7YJu/4j509B9Vxm34Gw4k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=iMihmCbl; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1728989972; c=relaxed/simple;
+	bh=ly/NC2kwZ3cRKwWiABDoQjTvFKH0kh1X0ePiMlqGNMA=;
+	h=Date:From:To:cc:Subject:In-Reply-To:Message-ID:References:
+	 MIME-Version:Content-Type; b=hYkDlc9tMYiLADuSZ3tr0ql1Gf0IsFmoKKvBPAGxp2zoFABbittjYeRnZx7qPNrOhazn+LEN77D0QtGm6seTptnRODixL+LwWa3Hs3Rfo9GZq6mzixSdhQXoKvWOIpjwosMLFrufriLaMPH1XQ41y4EeCviTCrViPcrex2anY30=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=B1W2hg8G; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="iMihmCbl"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1728985484; x=1760521484;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=xDzom3Mp9aBUd2cif8YQ9ZgSLhcqWvPQSQFDkhI/jYo=;
-  b=iMihmCblQoMimcHMFSMpBZ6j0aGS3pi9EuHxcLgnr043PPEhT0C3UxYm
-   AFPKEFKmtz8fKqiHIcJLcf/a4sNI2aADN/AyI1o8x+qyZ7OD9VxCl0z2q
-   hEghiEakctWxmeiqrYAYmhKIkMF/eCi+ni7H/b5/1PJl2l2OXpjX5uNEd
-   2NsHu4pfwukbiZQP4t67qOTQ1b4F8NJLGnUPrOVcr8kRBXEURhMU0ZVCu
-   GAtKUTsNbYzFUvEGLv9PNXgUeSK9LOIEfxFvbdPhi8mjRK9k7ZdCIFZFP
-   F0WMDChpli2uXXPXEz79kYEBdQ4Z7SZ9WWxONTgd3RMSV9xIfgSVTph42
-   w==;
-X-CSE-ConnectionGUID: sfshIy9BRjOcFqbm9mlBXg==
-X-CSE-MsgGUID: ceLh9gRQRTSxvWVAQPyB2Q==
-X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="45839815"
-X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
-   d="scan'208";a="45839815"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Oct 2024 02:44:43 -0700
-X-CSE-ConnectionGUID: 2BiOxhbyTiCfFN8BIwtL2A==
-X-CSE-MsgGUID: mFRFN6fJQ+epfUaK8fPLRQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,204,1725346800"; 
-   d="scan'208";a="82615994"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
-  by orviesa005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Oct 2024 02:44:41 -0700
-Message-ID: <18e66783-0fc7-4c55-8087-dc4212e851b4@intel.com>
-Date: Tue, 15 Oct 2024 12:44:37 +0300
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="B1W2hg8G"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1728989970;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=ybTiS+fP0SSadAHt+F77jSZOWRj/uDfaIQfdA4Tihlk=;
+	b=B1W2hg8GQXBpxxFN50+looD+bZNhFnUJE7Y5imo7m/nHhUQYkRz6AF0iqpRFNF6ZLfnheH
+	FDG7y13tvlToaRg0GYovs3eVauy9ng6PxZwmFatKLP4HuGBnD5SJT2SjdVAlJxv8hKoCkG
+	RGgHRDA6yQNsE3DUpVCTmLg6xFjCQyU=
+Received: from mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-614-MzYKfzDZNr6jLeY-LjMoDg-1; Tue,
+ 15 Oct 2024 06:59:27 -0400
+X-MC-Unique: MzYKfzDZNr6jLeY-LjMoDg-1
+Received: from mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.4])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-02.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 3150A1955D59;
+	Tue, 15 Oct 2024 10:59:23 +0000 (UTC)
+Received: from [10.45.226.64] (unknown [10.45.226.64])
+	by mx-prod-int-01.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 79B2330001A3;
+	Tue, 15 Oct 2024 10:59:16 +0000 (UTC)
+Date: Tue, 15 Oct 2024 12:59:13 +0200 (CEST)
+From: Mikulas Patocka <mpatocka@redhat.com>
+To: Md Sadre Alam <quic_mdalam@quicinc.com>
+cc: axboe@kernel.dk, song@kernel.org, yukuai3@huawei.com, agk@redhat.com, 
+    snitzer@kernel.org, adrian.hunter@intel.com, quic_asutoshd@quicinc.com, 
+    ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org, 
+    konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org, 
+    linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
+    linux-raid@vger.kernel.org, dm-devel@lists.linux.dev, 
+    linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+    linux-hardening@vger.kernel.org, quic_srichara@quicinc.com, 
+    quic_varada@quicinc.com
+Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+In-Reply-To: <20240916085741.1636554-2-quic_mdalam@quicinc.com>
+Message-ID: <3161a67d-66f6-775e-c67e-3b5ca1aa2e1b@redhat.com>
+References: <20240916085741.1636554-1-quic_mdalam@quicinc.com> <20240916085741.1636554-2-quic_mdalam@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: core: Use GFP_NOIO in ACMD22
-To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- linux-mmc@vger.kernel.org
-Cc: stable@vger.kernel.org
-References: <20241014114458.360538-1-avri.altman@wdc.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241014114458.360538-1-avri.altman@wdc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+X-Scanned-By: MIMEDefang 3.4.1 on 10.30.177.4
 
-On 14/10/24 14:44, Avri Altman wrote:
-> While reviewing the SDUC series, Adrian made a comment concerning the
-> memory allocation code in mmc_sd_num_wr_blocks() - see [1].
-> Prevent memory allocations from triggering I/O operations while ACMD22
-> is in progress.
-> 
-> [1] https://www.spinics.net/lists/linux-mmc/msg82199.html
-> 
-> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
-> Cc: stable@vger.kernel.org
-> ---
->  drivers/mmc/core/block.c | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 04f3165cf9ae..042b0147d47e 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -995,6 +995,8 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->  	u32 result;
->  	__be32 *blocks;
->  	u8 resp_sz = mmc_card_ult_capacity(card) ? 8 : 4;
-> +	unsigned int noio_flag;
+Hi
+
+The patch seems OK. Should it go in via the device mapper tree or the 
+block layer tree?
+
+
+On Mon, 16 Sep 2024, Md Sadre Alam wrote:
+
+> +#define DM_CRYPT_DEFAULT_MAX_READ_SIZE		131072
+> +#define DM_CRYPT_DEFAULT_MAX_WRITE_SIZE		131072
 > +
->  	struct mmc_request mrq = {};
->  	struct mmc_command cmd = {};
->  	struct mmc_data data = {};
-> @@ -1018,9 +1020,13 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->  	mrq.cmd = &cmd;
->  	mrq.data = &data;
->  
-> +	noio_flag = memalloc_noio_save();
+> +static unsigned int get_max_request_size(struct inlinecrypt_config *cc, bool wrt)
+> +{
+> +	unsigned int val, sector_align;
 > +
->  	blocks = kmalloc(resp_sz, GFP_KERNEL);
-
-Could have memalloc_noio_restore() here:
-
-	memalloc_noio_restore(noio_flag);
-
-but I feel maybe adding something like:
-
-	u64 __aligned(8)	tiny_io_buf;
-
-to either struct mmc_card or struct mmc_host is better?
-Ulf, any thoughts?
-
-> -	if (!blocks)
-> +	if (!blocks) {
-> +		memalloc_noio_restore(noio_flag);
->  		return -ENOMEM;
+> +	val = !wrt ? DM_CRYPT_DEFAULT_MAX_READ_SIZE : DM_CRYPT_DEFAULT_MAX_WRITE_SIZE;
+> +	if (wrt) {
+> +		if (unlikely(val > BIO_MAX_VECS << PAGE_SHIFT))
+> +			val = BIO_MAX_VECS << PAGE_SHIFT;
 > +	}
->  
->  	sg_init_one(&sg, blocks, resp_sz);
->  
-> @@ -1041,6 +1047,8 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->  	}
->  	kfree(blocks);
->  
-> +	memalloc_noio_restore(noio_flag);
-> +
->  	if (cmd.error || data.error)
->  		return -EIO;
->  
+> +	sector_align = max(bdev_logical_block_size(cc->dev->bdev), (unsigned int)cc->sector_size);
+> +	val = round_down(val, sector_align);
+> +	if (unlikely(!val))
+> +		val = sector_align;
+> +	return val >> SECTOR_SHIFT;
+> +}
+
+This piece of code was copied from the dm-crypt target. For dm-crypt, I 
+was actually benchmarking the performance for various 
+DM_CRYPT_DEFAULT_MAX_READ_SIZE and DM_CRYPT_DEFAULT_MAX_WRITE_SIZE values 
+and I selected the values that resulted in the best performance.
+
+You should benchmark it too to find the optimal I/O size. Perhaps you find 
+out that there is no need to split big requests and this piece of code can 
+be dropped.
+
+> +               /* Omit the key for now. */
+> +               DMEMIT("%s - %llu %s %llu", ctx->cipher_string, ctx->iv_offset,
+> +                      ctx->dev->name, (unsigned long long)ctx->start);
+
+What if someone reloads the table? I think you should display the key. 
+dmsetup does not display the key if the "--showkeys" parameter is not 
+specified.
+
+Mikulas
 
