@@ -1,90 +1,147 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73EAA16A956;
-	Fri, 18 Oct 2024 05:56:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F09B2184539;
+	Fri, 18 Oct 2024 06:13:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729231003; cv=none; b=RE96tA0VoMfzx6b3o7T4soPler/Ekg/8P45V5sjoHbZOU3tJD3e7iIGM+egNlTGu5WaE7I5QH/H1ajATIpZlu+1l67I/RsxtAQQcXqI2epd9fwa7uG+dyxPogBnPOPV/AP2zCuegCDjoJHyE280T7Hd0lHGGHRKFqRCwLC2Ct7o=
+	t=1729231988; cv=none; b=myAAXMOd6Bfz8TKUPGgwZD5VZ/mRjb6xsNejKnOBDHD4ZlAjc7SZPn7vBPfLwzg6deqfM+pbTKqyfh4GpWOEe3Ns+HuKUZ4y4Nlmx13S52zXDO8g1lkE5t+tWGtT0BxRRM3LaaiJKRwobuUg9f5NI18vmvtTBEYh/rCJ5v08zyM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729231003; c=relaxed/simple;
-	bh=KQXMxq9xyEnxveLtUTCsk7rHQIZf8YRsfjPWVEZLEA0=;
+	s=arc-20240116; t=1729231988; c=relaxed/simple;
+	bh=f/5yZzyoQwcXgVSm7jfxqmgjDko+M5Tsgn35ebfSdh4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OBtZtC2HlZ6qd56ApVp7etnrbtblUdlDuUlJYL/AWaqtIivLeUGX2Megr58QOIkZFyGBUZD4SJ+jQ88iEWmIYI/7KdkMlFY6tiBcRLnztcjv0zgCkhNAzXexSfVbeUEjrYeo2rIhnYMunXRVi4h2HE9K2SkOv7jSed6SzGdYuy0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=dsXHgo8U; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	 Content-Type:Content-Disposition:In-Reply-To; b=UHZtOqG42I/GXfTpncNkqzQnhYH/XC+6xWBVK24yjjUQe56SSaHS67eOx+3aKaRfktNdmq3WcJ7HsBCouGHPtr9uNRA/hpaxdDfosIvibW288VuOs5DnPHF8LSWcXgpaX6pGvFmz/H54qjfvcjA/IDLFr4r36GDuofsyRLMkA7o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PgD3ztGf; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="dsXHgo8U"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=DrapM8V0roazjVvh+9x1l3Lmh4S4DQREm0viXSpD/fY=; b=dsXHgo8UrUJL+S0w2HmAikDgJk
-	Uvn1+CWaY/kqI7HcTItHPPxDiLHXjMMkruLQ/tyzuOqGGZT0ODpvSmpNJKf8+8BPfiLkUkJj2W5QC
-	eST7ZCMxDbbQ0HbAm+hV8kucQrVkp6MrsvQnJFtxgeEpdsMpWyV/wV3OFv7S2NyS5U8Gd+ialRQa6
-	gWj50jSz2TQPGfLtQ0SWC2uqJk/I7b4zticLeeUIqBjh2d90Iw1msQOkOZv1fE6cytT+YSqL10W5G
-	UVWx9XwEOYvvrTiSQERCfhzvdOOA7tBN3mtKNVzDJmfgah7EZD0VShWzHjs4uXWJzzZuhrM6rJEp+
-	nDPaCuLA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1t1fyY-0000000H2tp-21ND;
-	Fri, 18 Oct 2024 05:56:38 +0000
-Date: Thu, 17 Oct 2024 22:56:38 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Adrian Vovk <adrianvovk@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>,
-	Eric Biggers <ebiggers@kernel.org>,
-	Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk,
-	song@kernel.org, yukuai3@huawei.com, agk@redhat.com,
-	snitzer@kernel.org, Mikulas Patocka <mpatocka@redhat.com>,
-	adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
-	ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org,
-	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org,
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-hardening@vger.kernel.org, quic_srichara@quicinc.com,
-	quic_varada@quicinc.com
-Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
-Message-ID: <ZxH4lnkQNhTP5fe6@infradead.org>
-References: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
- <20240916085741.1636554-2-quic_mdalam@quicinc.com>
- <20240921185519.GA2187@quark.localdomain>
- <ZvJt9ceeL18XKrTc@infradead.org>
- <ef3c9a17-79f3-4937-965e-52e2b9e66ac2@gmail.com>
- <ZxHwgsm2iP2Z_3at@infradead.org>
- <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PgD3ztGf"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D1977C4CEC3;
+	Fri, 18 Oct 2024 06:13:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1729231987;
+	bh=f/5yZzyoQwcXgVSm7jfxqmgjDko+M5Tsgn35ebfSdh4=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=PgD3ztGfIGwfMqkBDBwYC3jy3OY5KeqWLnH2DU9dfF9d1yDCQA9SJ3ZSwK8aZ6s7X
+	 +mIOl/53ycEQ8Kzy8hGOiO9rsfgOdg3kDmgi93f7wQ9jupAu5LyghEU+bor7cI6JPw
+	 wo8PHmoa7boLcDA+kekKemlcyS5i2Da3gupL/CIkg5tN8cJlN3IAn1t0MNApxPlvUl
+	 w6kT0fOk6Wh8DBWzC0d6/cvW+j5HCz69+GCgJUrMsszUSKGNLqqlXN2aRJPWUPXeUq
+	 BD9pN7OtgqHJtX8qmsEauO+X9wk26DiWpC4xMWP2ENkUOLpyfIZ3FC32WKilYOl+7K
+	 P23vMu2+iDHwQ==
+Date: Fri, 18 Oct 2024 08:13:03 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Sricharan R <quic_srichara@quicinc.com>
+Cc: andersson@kernel.org, konradybcio@kernel.org, robh@kernel.org, 
+	krzk+dt@kernel.org, conor+dt@kernel.org, mturquette@baylibre.com, sboyd@kernel.org, 
+	ulf.hansson@linaro.org, linus.walleij@linaro.org, catalin.marinas@arm.com, 
+	p.zabel@pengutronix.de, geert+renesas@glider.be, dmitry.baryshkov@linaro.org, 
+	neil.armstrong@linaro.org, linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org, quic_varada@quicinc.com
+Subject: Re: [PATCH V4 2/6] dt-bindings: clock: Add Qualcomm IPQ5424 GCC
+ binding
+Message-ID: <nznisr4aqpe65fovvk3q3r6capmqj4jm4xsqufjib2b7vax4xx@6r3tzaar2w3p>
+References: <20241017123626.204421-1-quic_srichara@quicinc.com>
+ <20241017123626.204421-3-quic_srichara@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20241017123626.204421-3-quic_srichara@quicinc.com>
 
-On Fri, Oct 18, 2024 at 01:44:19AM -0400, Adrian Vovk wrote:
-> > So just run a target on each partition.
+On Thu, Oct 17, 2024 at 06:06:22PM +0530, Sricharan R wrote:
+> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 > 
+> Add binding for the Qualcomm IPQ5424 Global Clock Controller
 > 
-> That has different semantics. If I encrypt each virtual partition there's
-> nothing encrypting the metadata around the virtual partitions. Of course,
-> this is a rather contrived example but point stands, the semantics are
-> different.
-
-Then you set up an dm-crype device mapper table for the partition table as
-well.
-
-> > This is the prime example of why allowing higher layers to skip
-> > encryption is a no-go.
-> >
+> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> ---
+>  [V4] Added 2 new PCIE clks to end of the list, preserving default order
 > 
-> In what way does that break the file system's security model? Could you
-> elaborate on what's objectionable about the behavior here?
+>  .../bindings/clock/qcom,ipq5332-gcc.yaml      |  40 ++-
+>  include/dt-bindings/clock/qcom,ipq5424-gcc.h  | 156 +++++++++
+>  include/dt-bindings/reset/qcom,ipq5424-gcc.h  | 310 ++++++++++++++++++
+>  3 files changed, 499 insertions(+), 7 deletions(-)
+>  create mode 100644 include/dt-bindings/clock/qcom,ipq5424-gcc.h
+>  create mode 100644 include/dt-bindings/reset/qcom,ipq5424-gcc.h
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> index 9193de681de2..ef1fd9d9f8da 100644
+> --- a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> +++ b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+> @@ -4,31 +4,35 @@
+>  $id: http://devicetree.org/schemas/clock/qcom,ipq5332-gcc.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Qualcomm Global Clock & Reset Controller on IPQ5332
+> +title: Qualcomm Global Clock & Reset Controller on IPQ5332 and IPQ5424
+>  
+>  maintainers:
+>    - Bjorn Andersson <andersson@kernel.org>
+>  
+>  description: |
+>    Qualcomm global clock control module provides the clocks, resets and power
+> -  domains on IPQ5332.
+> +  domains on IPQ5332 and IPQ5424.
+>  
+> -  See also:: include/dt-bindings/clock/qcom,gcc-ipq5332.h
+> -
+> -allOf:
+> -  - $ref: qcom,gcc.yaml#
+> +  See also:
+> +    include/dt-bindings/clock/qcom,gcc-ipq5332.h
+> +    include/dt-bindings/clock/qcom,gcc-ipq5424.h
+>  
+>  properties:
+>    compatible:
+> -    const: qcom,ipq5332-gcc
+> +    enum:
+> +      - qcom,ipq5332-gcc
+> +      - qcom,ipq5424-gcc
+>  
+>    clocks:
+> +    minItems: 5
+>      items:
+>        - description: Board XO clock source
+>        - description: Sleep clock source
+>        - description: PCIE 2lane PHY pipe clock source
+>        - description: PCIE 2lane x1 PHY pipe clock source (For second lane)
+>        - description: USB PCIE wrapper pipe clock source
+> +      - description: PCIE 2-lane PHY2 pipe clock source
+> +      - description: PCIE 2-lane PHY3 pipe clock source
+>  
+>    '#power-domain-cells': false
+>    '#interconnect-cells':
+> @@ -38,6 +42,28 @@ required:
+>    - compatible
+>    - clocks
+>  
+> +allOf:
+> +  - $ref: qcom,gcc.yaml#
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: qcom,ipq5332-gcc
+> +    then:
+> +      properties:
+> +        clocks:
+> +          maxItems: 5
+> +
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: qcom,ipq5424-gcc
+> +    then:
+> +      properties:
+> +        clocks:
 
-Because you are now bypassing encryption for certainl LBA ranges in
-the file system based on hints/flags for something sitting way above
-in the stack.
+This needs minItems: 7, unless clocks are really optional (but they
+shouldn't be optional). I think I missed this part last time.
+
+Best regards,
+Krzysztof
 
