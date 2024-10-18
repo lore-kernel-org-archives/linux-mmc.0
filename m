@@ -1,105 +1,90 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE239170A13;
-	Fri, 18 Oct 2024 05:31:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73EAA16A956;
+	Fri, 18 Oct 2024 05:56:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729229477; cv=none; b=OWP8bT0GrDPNZ5smuIlUGy0pOlFglfyOUooL7+7DwhuyIr1lVjrtz61kuIpnJ/HyhdSUReQDkxJo21AEVirSmBsUgXfs7vhue4+igfhKDBsEAj/5mNbkOKbQ9PE9TaVUEzRnxb5To70qHh2/X5BGgr11h7+WkBelfHYKP46ByDU=
+	t=1729231003; cv=none; b=RE96tA0VoMfzx6b3o7T4soPler/Ekg/8P45V5sjoHbZOU3tJD3e7iIGM+egNlTGu5WaE7I5QH/H1ajATIpZlu+1l67I/RsxtAQQcXqI2epd9fwa7uG+dyxPogBnPOPV/AP2zCuegCDjoJHyE280T7Hd0lHGGHRKFqRCwLC2Ct7o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729229477; c=relaxed/simple;
-	bh=zahFCON/nEHsDnY5ZPS0ZAvV/Lw28OGPtnYv646hDhA=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=bWBmtbr+RVR031CbwuDiYVbbc4J+plBFP4f34FTdr+OXmXmuZkxMg0dnsgHNcjI6TG6Q5g8j2Dl0NpvAOQrhyuiiByXOHZ54W5n5rsstozYLr+hit6ivZx3FeHn+zlrTxd1RcKJ7GPaZFCE2oP6WqgGFhKr6UcSlPXK0+hYe9/A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=YoLVXKlg; arc=none smtp.client-ip=216.71.154.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1729231003; c=relaxed/simple;
+	bh=KQXMxq9xyEnxveLtUTCsk7rHQIZf8YRsfjPWVEZLEA0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=OBtZtC2HlZ6qd56ApVp7etnrbtblUdlDuUlJYL/AWaqtIivLeUGX2Megr58QOIkZFyGBUZD4SJ+jQ88iEWmIYI/7KdkMlFY6tiBcRLnztcjv0zgCkhNAzXexSfVbeUEjrYeo2rIhnYMunXRVi4h2HE9K2SkOv7jSed6SzGdYuy0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=dsXHgo8U; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="YoLVXKlg"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1729229473; x=1760765473;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=zahFCON/nEHsDnY5ZPS0ZAvV/Lw28OGPtnYv646hDhA=;
-  b=YoLVXKlgDW+b7rzVdi8sL5ogvkAHfdQ+BbkBUVJoBFjOHVpu4mISRRlo
-   1BpHJngS1MMmcalx/IJqmaNAoT0ZWRUYXkqtxRA6t85m8eOT2zAlfES6z
-   1oU3jZ21TOGI0ONnUjVXfdNGV/QU4dPkKEeh9paSAi24/pE0o4VO6LR5C
-   jGMJH7upLuQEB5C9r+WeAth023bfXlHNOzwk03ZeK8hoM7TdIHQaRoPNB
-   mbH6vAEEWyVEBRHjJMp4kremMftaJCmT7QZpRtVHX60mbLgvHQKlpD2Dj
-   lV15Hb3YsxvZXvqYv2hpsinf7pZUsf9WIZSF2/sBMYLWzYYlePqWqNoYp
-   w==;
-X-CSE-ConnectionGUID: hkq/DbvWS1y0+IOUVxIdig==
-X-CSE-MsgGUID: XEqiY2mZSbq96C9kYP9VGg==
-X-IronPort-AV: E=Sophos;i="6.11,212,1725292800"; 
-   d="scan'208";a="28639438"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Oct 2024 13:31:07 +0800
-IronPort-SDR: 6711e448_G+ZCLvpk2/PeVuPSnQxVg64ppZ+boCy71PTbxFQm/ll/lyA
- lyix21z/aoVYVUCacvr1woIgrmZEw4o2pMnT5Ow==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 17 Oct 2024 21:30:00 -0700
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 17 Oct 2024 22:31:06 -0700
-From: Avri Altman <avri.altman@wdc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <avri.altman@wdc.com>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] mmc: core: Use GFP_NOIO in ACMD22
-Date: Fri, 18 Oct 2024 08:29:01 +0300
-Message-Id: <20241018052901.446638-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="dsXHgo8U"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+	Content-Transfer-Encoding:Content-ID:Content-Description;
+	bh=DrapM8V0roazjVvh+9x1l3Lmh4S4DQREm0viXSpD/fY=; b=dsXHgo8UrUJL+S0w2HmAikDgJk
+	Uvn1+CWaY/kqI7HcTItHPPxDiLHXjMMkruLQ/tyzuOqGGZT0ODpvSmpNJKf8+8BPfiLkUkJj2W5QC
+	eST7ZCMxDbbQ0HbAm+hV8kucQrVkp6MrsvQnJFtxgeEpdsMpWyV/wV3OFv7S2NyS5U8Gd+ialRQa6
+	gWj50jSz2TQPGfLtQ0SWC2uqJk/I7b4zticLeeUIqBjh2d90Iw1msQOkOZv1fE6cytT+YSqL10W5G
+	UVWx9XwEOYvvrTiSQERCfhzvdOOA7tBN3mtKNVzDJmfgah7EZD0VShWzHjs4uXWJzzZuhrM6rJEp+
+	nDPaCuLA==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
+	id 1t1fyY-0000000H2tp-21ND;
+	Fri, 18 Oct 2024 05:56:38 +0000
+Date: Thu, 17 Oct 2024 22:56:38 -0700
+From: Christoph Hellwig <hch@infradead.org>
+To: Adrian Vovk <adrianvovk@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>,
+	Eric Biggers <ebiggers@kernel.org>,
+	Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk,
+	song@kernel.org, yukuai3@huawei.com, agk@redhat.com,
+	snitzer@kernel.org, Mikulas Patocka <mpatocka@redhat.com>,
+	adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
+	ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org,
+	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org,
+	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev,
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+	linux-hardening@vger.kernel.org, quic_srichara@quicinc.com,
+	quic_varada@quicinc.com
+Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+Message-ID: <ZxH4lnkQNhTP5fe6@infradead.org>
+References: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
+ <20240916085741.1636554-2-quic_mdalam@quicinc.com>
+ <20240921185519.GA2187@quark.localdomain>
+ <ZvJt9ceeL18XKrTc@infradead.org>
+ <ef3c9a17-79f3-4937-965e-52e2b9e66ac2@gmail.com>
+ <ZxHwgsm2iP2Z_3at@infradead.org>
+ <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-While reviewing the SDUC series, Adrian made a comment concerning the
-memory allocation code in mmc_sd_num_wr_blocks() - see [1].
-Prevent memory allocations from triggering I/O operations while ACMD22
-is in progress.
+On Fri, Oct 18, 2024 at 01:44:19AM -0400, Adrian Vovk wrote:
+> > So just run a target on each partition.
+> 
+> 
+> That has different semantics. If I encrypt each virtual partition there's
+> nothing encrypting the metadata around the virtual partitions. Of course,
+> this is a rather contrived example but point stands, the semantics are
+> different.
 
-[1] https://www.spinics.net/lists/linux-mmc/msg82199.html
+Then you set up an dm-crype device mapper table for the partition table as
+well.
 
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
-Cc: stable@vger.kernel.org
+> > This is the prime example of why allowing higher layers to skip
+> > encryption is a no-go.
+> >
+> 
+> In what way does that break the file system's security model? Could you
+> elaborate on what's objectionable about the behavior here?
 
----
-Changes since v1:
- - Move memalloc_noio_restore around (Adrian)
----
- drivers/mmc/core/block.c | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 04f3165cf9ae..a813fd7f39cc 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -995,6 +995,8 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	u32 result;
- 	__be32 *blocks;
- 	u8 resp_sz = mmc_card_ult_capacity(card) ? 8 : 4;
-+	unsigned int noio_flag;
-+
- 	struct mmc_request mrq = {};
- 	struct mmc_command cmd = {};
- 	struct mmc_data data = {};
-@@ -1018,7 +1020,9 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
- 
-+	noio_flag = memalloc_noio_save();
- 	blocks = kmalloc(resp_sz, GFP_KERNEL);
-+	memalloc_noio_restore(noio_flag);
- 	if (!blocks)
- 		return -ENOMEM;
- 
--- 
-2.25.1
+Because you are now bypassing encryption for certainl LBA ranges in
+the file system based on hints/flags for something sitting way above
+in the stack.
 
