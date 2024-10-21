@@ -1,189 +1,138 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oa1-f54.google.com (mail-oa1-f54.google.com [209.85.160.54])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ED65634;
-	Mon, 21 Oct 2024 05:41:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF4F31EEF9;
+	Mon, 21 Oct 2024 06:07:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729489302; cv=none; b=tv92V0n5sbe0h30GXeR1jpnfvJVpCzuY8SAsD6DQD3X/yYE8w5cYaqxLhJYD8H1HV3l+JPxmHQG9IkBIoqf4/wH56sSQm5QgP1O/vgVWvEBJreK+LKDtP0BZpozEV6UdWH/0l++0CAjIEwaCVO4jNQDSm2n5/ngOMgxKdB1x3pM=
+	t=1729490876; cv=none; b=flYJT479WlrQW1jTLxS6wHjdQimNFD7q5QZn3UekZ2HWaVt0K1dorwADPqUEpjZ78xPgpywbeCrywwRH2y90HD6jyr5wp/6AdU0yWvFfb8aC8+rYoVDErMTA3rRg+tjDmzO9203JJATLyTXyt3M5/L9yoGCBnMhQHNOSu0G6gEM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729489302; c=relaxed/simple;
-	bh=x15yRLhgy42+yizJ86mU28DoOslmxHJB5vdr0m9Jm+w=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=CdicnGy1g3R3rY/OdSzLqCR4nvGIUsVoq7KbICP+rc/xh1+v9bI858hVUXrj8RLwb9htfRirzlH+5R3WAAn8QpdBEWjlYm+TdVMasKyDa33AQXpOjnGOhKpsQlw5xUXvqq74Kd7DIeZufAMYYVqtmWxGv/Vy6+w9vOq5DIvlJ6o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=b7Ovei4D; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1729490876; c=relaxed/simple;
+	bh=qXsYb9SX8s/L/zEPUt4/xo8MTk2kBkfL88O19nPRdm4=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=OVQHzquT8t6fepvI3yFXm8SNZzs63s/YHF7e5b3y+kjd6H/2nXUxNXs/Lzr0krTDTEQTbmQIc5uTTnWvldw/svo8zNAVFF1sj3xOFnElibe6ahqSqUuVs4M4bYaHjbuZykEsUvD+V2rG/1PZI836387WYXJN4+EUwCOJ88A/A7A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Qmxsljzf; arc=none smtp.client-ip=209.85.160.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="b7Ovei4D"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49KNHeBB014302;
-	Mon, 21 Oct 2024 05:41:22 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	OI+g/PDRqVZ95UWxsvAz05m79blc6jc1PXoXbNyQswA=; b=b7Ovei4DFeFWBJ0Z
-	wC+yHk5XzuTgof4wrQkk7Mwnyh3mc0DLyZEDo0rvIex9U90w7eqSyqbCpf0VVhF9
-	O+UaWCU17fV8k69zKZhE3eSo/cu3+dszW1lHxqJu1/jCZo9fv4L/PeWJcyJFTwn4
-	zxWw2wrKLHAaRxkxsknJUHOAUSIOdLhxiCKOpzGjC5eBRLE2UaQwBcEBu4GSJ1Vr
-	Rv7bJhKcbho2QrvIgZez5UYNnz93WZ6vW1WE0aGOObN3MzhDYN4DbD79SmwVRWBD
-	nsvp2+BYnQX4H6vUDH3A39g/zf8NA2bjUdjGAVf11xiOEjXAZxqrdQMbD8W7cG4l
-	m3p0lQ==
-Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42c6vuua0v-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 21 Oct 2024 05:41:22 +0000 (GMT)
-Received: from nasanex01b.na.qualcomm.com (nasanex01b.na.qualcomm.com [10.46.141.250])
-	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 49L5fLt2005526
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 21 Oct 2024 05:41:21 GMT
-Received: from [10.151.37.100] (10.80.80.8) by nasanex01b.na.qualcomm.com
- (10.46.141.250) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Sun, 20 Oct
- 2024 22:41:14 -0700
-Message-ID: <01cbb389-1966-4501-a22d-7227765d1eb9@quicinc.com>
-Date: Mon, 21 Oct 2024 11:11:13 +0530
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Qmxsljzf"
+Received: by mail-oa1-f54.google.com with SMTP id 586e51a60fabf-288d4da7221so1927891fac.1;
+        Sun, 20 Oct 2024 23:07:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1729490873; x=1730095673; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=FsHV1DeqWJoj2ZcYbTpaphYAWXw5LJS8G2+p8MKU1jM=;
+        b=QmxsljzfKBpfeDxzxFV7x/IG+vAWTFTIfk0z3ZA+cLb5+TKVppQXp9r9mBkagKSeFL
+         QbfUozXIwVDY682y/04YZwUS79uvRoYT0IkWyA1fwqCRKl9GQ++AkitnFCpSsXz9ZGRi
+         gRnnZKIwYkCoKwaKoTz3cDjxmxpfxFtgRosU+cHJbl5IThmPlTUaYeK5ia+KBeL+msK0
+         MQzKe/mCTTJ3QKZEXMHPCKkTXobBhQOVy8UL/myPtm7IkKQz9Dr3I+wK7gUZq8CcmbHa
+         qDZ4WB+9gda6Cx7CjWcit9JKEpP2FXZ32/4CimN1QL/tdVseF1JtqQ7EknmhaT0s4htL
+         v4aQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729490873; x=1730095673;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=FsHV1DeqWJoj2ZcYbTpaphYAWXw5LJS8G2+p8MKU1jM=;
+        b=svsDG3lvm6aE3wpXCBVK2mMlAXMmTWouPiU+On1dymUq+oVY5Bvk0dAbCayK0R82JY
+         dK8xlRQXtYtnC03OzbiHvuQfwszca0KIClhgWsEGieKoiO3DYuy30EHNy/rfRzKREoi7
+         QT021keblA9c4Y5SsEVXqh0d0JIbOcCj9EpxryZRz180XZSAspPABV3/SAMQDMUwtWBm
+         8Q/pZUgRZ9PYinlBM65vqQU9+K0Dkhpb3nyIiOo4Tmgu0vNvFFkZWj/d9PSNw3kC8VnU
+         pNCCYY3DzZk3KI10fX8v6qbK8j7AOFFHyk2rGRTnxsDg4v74OyhaDwUIBQkuZotGKxFW
+         hwKw==
+X-Forwarded-Encrypted: i=1; AJvYcCVuKAiRL/NG/3nfEYdNOIlyMQOh9zhsFLyn8JwHOZk8adJq9gTNViKon/n7kPkjSWddU4xo3YAJ@vger.kernel.org, AJvYcCXgWwTdmQPjS6Eah9mBPmyI8+h0FaMG2wP4lH0ZZvTrpLpv8ykZNPcTm1IXEmZOJPkI8s8Ni4AxHVAM@vger.kernel.org, AJvYcCXqaw6i8vNC8ohKsWdbm9+hpYPTDRqP8qJskAPkEnlCFvFhW1C2YiyCWvNvQqI7yDw2n3n6JeC8tF7N2U8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywo6JmeacN/zth57b1eeEC/cJeUtYp8Jkdq6hFlF+I+ZcG9aW1d
+	aMKLXULrmBEmqWBvi3cYacWaBlQth5X8cM1FTjuAg3UC83LuPe7iNr/kUyyn25W+tf5a+vEBScF
+	vaiXj1OLdZ4bscGzhPHMBUH31Yc3F0A==
+X-Google-Smtp-Source: AGHT+IHpPFqsJuCvsJFqshBiSlkp52VkseK6tb4r+rc6MrPKp4rcWkL3ThHr5jpGe6dSRrP2Uk6AQnrmJjxXvN8NsHg=
+X-Received: by 2002:a05:6870:6394:b0:270:1b79:ccbc with SMTP id
+ 586e51a60fabf-2892c24db1bmr7442706fac.5.1729490872798; Sun, 20 Oct 2024
+ 23:07:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V4 2/6] dt-bindings: clock: Add Qualcomm IPQ5424 GCC
- binding
-To: Krzysztof Kozlowski <krzk@kernel.org>
-CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
-        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
-        <dmitry.baryshkov@linaro.org>, <neil.armstrong@linaro.org>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <quic_varada@quicinc.com>
-References: <20241017123626.204421-1-quic_srichara@quicinc.com>
- <20241017123626.204421-3-quic_srichara@quicinc.com>
- <nznisr4aqpe65fovvk3q3r6capmqj4jm4xsqufjib2b7vax4xx@6r3tzaar2w3p>
-Content-Language: en-US
-From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <nznisr4aqpe65fovvk3q3r6capmqj4jm4xsqufjib2b7vax4xx@6r3tzaar2w3p>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01b.na.qualcomm.com (10.46.141.250)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: BvccQ3eEA3DBohRrCELpz3wod20lmi_E
-X-Proofpoint-GUID: BvccQ3eEA3DBohRrCELpz3wod20lmi_E
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 phishscore=0
- mlxlogscore=999 bulkscore=0 spamscore=0 mlxscore=0 clxscore=1015
- suspectscore=0 priorityscore=1501 adultscore=0 lowpriorityscore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410210038
+References: <20241020142931.138277-1-aurelien@aurel32.net>
+In-Reply-To: <20241020142931.138277-1-aurelien@aurel32.net>
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Mon, 21 Oct 2024 11:37:37 +0530
+Message-ID: <CANAwSgR1ks_L94QPSCOsL4ATX=3HA59LHK1GdJTctUsM_f_DuQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: take SWIOTLB memory size limitation into account
+To: Aurelien Jarno <aurelien@aurel32.net>
+Cc: William Qiu <william.qiu@starfivetech.com>, 
+	"open list:RISC-V MISC SOC SUPPORT" <linux-riscv@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Sam Protsenko <semen.protsenko@linaro.org>, 
+	"open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER" <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, 
+	Ron Economos <re@w6rz.net>, Jing Luo <jing@jing.rocks>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
+Hi Aurelien,
 
+On Sun, 20 Oct 2024 at 20:01, Aurelien Jarno <aurelien@aurel32.net> wrote:
+>
+> The Synopsys DesignWare mmc controller on the JH7110 SoC
+> (dw_mmc-starfive.c driver) is using a 32-bit IDMAC address bus width,
+> and thus requires the use of SWIOTLB.
+>
+> The commit 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages
+> bigger than 4K") increased the max_seq_size, even for 4K pages, causing
+> "swiotlb buffer is full" to happen because swiotlb can only handle a
+> memory size up to 256kB only.
+>
+> Fix the issue, by making sure the dw_mmc driver doesn't use segments
+> bigger than what SWIOTLB can handle.
+>
+> Reported-by: Ron Economos <re@w6rz.net>
+> Reported-by: Jing Luo <jing@jing.rocks>
+> Fixes: 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+> ---
+Please add my
 
-On 10/18/2024 11:43 AM, Krzysztof Kozlowski wrote:
-> On Thu, Oct 17, 2024 at 06:06:22PM +0530, Sricharan R wrote:
->> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->>
->> Add binding for the Qualcomm IPQ5424 Global Clock Controller
->>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->> ---
->>   [V4] Added 2 new PCIE clks to end of the list, preserving default order
->>
->>   .../bindings/clock/qcom,ipq5332-gcc.yaml      |  40 ++-
->>   include/dt-bindings/clock/qcom,ipq5424-gcc.h  | 156 +++++++++
->>   include/dt-bindings/reset/qcom,ipq5424-gcc.h  | 310 ++++++++++++++++++
->>   3 files changed, 499 insertions(+), 7 deletions(-)
->>   create mode 100644 include/dt-bindings/clock/qcom,ipq5424-gcc.h
->>   create mode 100644 include/dt-bindings/reset/qcom,ipq5424-gcc.h
->>
->> diff --git a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
->> index 9193de681de2..ef1fd9d9f8da 100644
->> --- a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
->> +++ b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
->> @@ -4,31 +4,35 @@
->>   $id: http://devicetree.org/schemas/clock/qcom,ipq5332-gcc.yaml#
->>   $schema: http://devicetree.org/meta-schemas/core.yaml#
->>   
->> -title: Qualcomm Global Clock & Reset Controller on IPQ5332
->> +title: Qualcomm Global Clock & Reset Controller on IPQ5332 and IPQ5424
->>   
->>   maintainers:
->>     - Bjorn Andersson <andersson@kernel.org>
->>   
->>   description: |
->>     Qualcomm global clock control module provides the clocks, resets and power
->> -  domains on IPQ5332.
->> +  domains on IPQ5332 and IPQ5424.
->>   
->> -  See also:: include/dt-bindings/clock/qcom,gcc-ipq5332.h
->> -
->> -allOf:
->> -  - $ref: qcom,gcc.yaml#
->> +  See also:
->> +    include/dt-bindings/clock/qcom,gcc-ipq5332.h
->> +    include/dt-bindings/clock/qcom,gcc-ipq5424.h
->>   
->>   properties:
->>     compatible:
->> -    const: qcom,ipq5332-gcc
->> +    enum:
->> +      - qcom,ipq5332-gcc
->> +      - qcom,ipq5424-gcc
->>   
->>     clocks:
->> +    minItems: 5
->>       items:
->>         - description: Board XO clock source
->>         - description: Sleep clock source
->>         - description: PCIE 2lane PHY pipe clock source
->>         - description: PCIE 2lane x1 PHY pipe clock source (For second lane)
->>         - description: USB PCIE wrapper pipe clock source
->> +      - description: PCIE 2-lane PHY2 pipe clock source
->> +      - description: PCIE 2-lane PHY3 pipe clock source
->>   
->>     '#power-domain-cells': false
->>     '#interconnect-cells':
->> @@ -38,6 +42,28 @@ required:
->>     - compatible
->>     - clocks
->>   
->> +allOf:
->> +  - $ref: qcom,gcc.yaml#
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const: qcom,ipq5332-gcc
->> +    then:
->> +      properties:
->> +        clocks:
->> +          maxItems: 5
->> +
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const: qcom,ipq5424-gcc
->> +    then:
->> +      properties:
->> +        clocks:
-> 
-> This needs minItems: 7, unless clocks are really optional (but they
-> shouldn't be optional). I think I missed this part last time.
+Tested-by: Anand Moon <linux.amoon@gmail.com>
 
-ok, got it, will update and send V5.
+Thanks for fixing the warning below.
 
-Regards,
-  Sricharan
+[  511.837216][  T148] dwmmc_starfive 16020000.mmc: swiotlb buffer is
+full (sz: 290816 bytes), total 65536 (slots), used 246 (slots)
+[  511.837423][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
+full (sz: 278528 bytes), total 65536 (slots), used 222 (slots)
+[  511.916951][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
+full (sz: 290816 bytes), total 65536 (slots), used 24 (slots)
+[  516.803916][  T575] dwmmc_starfive 16020000.mmc: swiotlb buffer is
+full (sz: 507904 bytes), total 65536 (slots), used 122 (slots)
+[  516.805450][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
+full (sz: 507904 bytes), total 65536 (slots), used 364 (slots)
 
+Thanks
+-Anand
 
-
+>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 41e451235f637..dc0d6201f7b73 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2958,7 +2958,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>                 mmc->max_segs = host->ring_size;
+>                 mmc->max_blk_size = 65535;
+>                 mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
+> -               mmc->max_seg_size = mmc->max_req_size;
+> +               mmc->max_seg_size =
+> +                   min_t(size_t, mmc->max_req_size, dma_max_mapping_size(host->dev));
+>                 mmc->max_blk_count = mmc->max_req_size / 512;
+>         } else if (host->use_dma == TRANS_MODE_EDMAC) {
+>                 mmc->max_segs = 64;
+> --
+> 2.45.2
+>
+>
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
