@@ -1,138 +1,109 @@
-Received: from mail-oa1-f54.google.com (mail-oa1-f54.google.com [209.85.160.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF4F31EEF9;
-	Mon, 21 Oct 2024 06:07:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 85DBD1EEE0
+	for <linux-mmc@vger.kernel.org>; Mon, 21 Oct 2024 06:53:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729490876; cv=none; b=flYJT479WlrQW1jTLxS6wHjdQimNFD7q5QZn3UekZ2HWaVt0K1dorwADPqUEpjZ78xPgpywbeCrywwRH2y90HD6jyr5wp/6AdU0yWvFfb8aC8+rYoVDErMTA3rRg+tjDmzO9203JJATLyTXyt3M5/L9yoGCBnMhQHNOSu0G6gEM=
+	t=1729493586; cv=none; b=pUt7Yqn4EVhux5K3cyro1axnUp8BwFBl5WeaIn3sSTKabY5aEhYixhiSVbIsmbt2gToCm4/cLBAP62QOsWuAkT47XrbeOxMQwEKaNyCnqn26lUjEp0iiGzvLjar+cmVM71zI3ZiQLixWTbU9htcPm+oCzTltlPVIWuUzr60mMX4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729490876; c=relaxed/simple;
-	bh=qXsYb9SX8s/L/zEPUt4/xo8MTk2kBkfL88O19nPRdm4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OVQHzquT8t6fepvI3yFXm8SNZzs63s/YHF7e5b3y+kjd6H/2nXUxNXs/Lzr0krTDTEQTbmQIc5uTTnWvldw/svo8zNAVFF1sj3xOFnElibe6ahqSqUuVs4M4bYaHjbuZykEsUvD+V2rG/1PZI836387WYXJN4+EUwCOJ88A/A7A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Qmxsljzf; arc=none smtp.client-ip=209.85.160.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Qmxsljzf"
-Received: by mail-oa1-f54.google.com with SMTP id 586e51a60fabf-288d4da7221so1927891fac.1;
-        Sun, 20 Oct 2024 23:07:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729490873; x=1730095673; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=FsHV1DeqWJoj2ZcYbTpaphYAWXw5LJS8G2+p8MKU1jM=;
-        b=QmxsljzfKBpfeDxzxFV7x/IG+vAWTFTIfk0z3ZA+cLb5+TKVppQXp9r9mBkagKSeFL
-         QbfUozXIwVDY682y/04YZwUS79uvRoYT0IkWyA1fwqCRKl9GQ++AkitnFCpSsXz9ZGRi
-         gRnnZKIwYkCoKwaKoTz3cDjxmxpfxFtgRosU+cHJbl5IThmPlTUaYeK5ia+KBeL+msK0
-         MQzKe/mCTTJ3QKZEXMHPCKkTXobBhQOVy8UL/myPtm7IkKQz9Dr3I+wK7gUZq8CcmbHa
-         qDZ4WB+9gda6Cx7CjWcit9JKEpP2FXZ32/4CimN1QL/tdVseF1JtqQ7EknmhaT0s4htL
-         v4aQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729490873; x=1730095673;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=FsHV1DeqWJoj2ZcYbTpaphYAWXw5LJS8G2+p8MKU1jM=;
-        b=svsDG3lvm6aE3wpXCBVK2mMlAXMmTWouPiU+On1dymUq+oVY5Bvk0dAbCayK0R82JY
-         dK8xlRQXtYtnC03OzbiHvuQfwszca0KIClhgWsEGieKoiO3DYuy30EHNy/rfRzKREoi7
-         QT021keblA9c4Y5SsEVXqh0d0JIbOcCj9EpxryZRz180XZSAspPABV3/SAMQDMUwtWBm
-         8Q/pZUgRZ9PYinlBM65vqQU9+K0Dkhpb3nyIiOo4Tmgu0vNvFFkZWj/d9PSNw3kC8VnU
-         pNCCYY3DzZk3KI10fX8v6qbK8j7AOFFHyk2rGRTnxsDg4v74OyhaDwUIBQkuZotGKxFW
-         hwKw==
-X-Forwarded-Encrypted: i=1; AJvYcCVuKAiRL/NG/3nfEYdNOIlyMQOh9zhsFLyn8JwHOZk8adJq9gTNViKon/n7kPkjSWddU4xo3YAJ@vger.kernel.org, AJvYcCXgWwTdmQPjS6Eah9mBPmyI8+h0FaMG2wP4lH0ZZvTrpLpv8ykZNPcTm1IXEmZOJPkI8s8Ni4AxHVAM@vger.kernel.org, AJvYcCXqaw6i8vNC8ohKsWdbm9+hpYPTDRqP8qJskAPkEnlCFvFhW1C2YiyCWvNvQqI7yDw2n3n6JeC8tF7N2U8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywo6JmeacN/zth57b1eeEC/cJeUtYp8Jkdq6hFlF+I+ZcG9aW1d
-	aMKLXULrmBEmqWBvi3cYacWaBlQth5X8cM1FTjuAg3UC83LuPe7iNr/kUyyn25W+tf5a+vEBScF
-	vaiXj1OLdZ4bscGzhPHMBUH31Yc3F0A==
-X-Google-Smtp-Source: AGHT+IHpPFqsJuCvsJFqshBiSlkp52VkseK6tb4r+rc6MrPKp4rcWkL3ThHr5jpGe6dSRrP2Uk6AQnrmJjxXvN8NsHg=
-X-Received: by 2002:a05:6870:6394:b0:270:1b79:ccbc with SMTP id
- 586e51a60fabf-2892c24db1bmr7442706fac.5.1729490872798; Sun, 20 Oct 2024
- 23:07:52 -0700 (PDT)
+	s=arc-20240116; t=1729493586; c=relaxed/simple;
+	bh=gJW+xKiNt2Bu9JJVERXHzUdIj2hOtgdERCGzLOekrfg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lnj3plgPdMb5GCJqIDCUeGE0vitYV+YhCjxYNT907zH/DnW3MwLF2x4p06NAHhvKElLdgGZihBEiefjtwrZkxKrjXfx5nOmr68c5GPNlmI7Qd0kWDm60ATQqd+KZofhh7l/YDGD2s1Mds/WHDvEiB2Lc87dc/Qbrt9Kf4K7gYKg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t2mHj-00048P-3d; Mon, 21 Oct 2024 08:52:59 +0200
+Received: from [2a0a:edc0:2:b01:1d::c5] (helo=pty.whiteo.stw.pengutronix.de)
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t2mHi-000eIu-28;
+	Mon, 21 Oct 2024 08:52:58 +0200
+Received: from mfe by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t2mHi-005e9d-1o;
+	Mon, 21 Oct 2024 08:52:58 +0200
+Date: Mon, 21 Oct 2024 08:52:58 +0200
+From: Marco Felsch <m.felsch@pengutronix.de>
+To: Rob Herring <robh@kernel.org>
+Cc: POPESCU Catalin <catalin.popescu@leica-geosystems.com>,
+	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	"krzk+dt@kernel.org" <krzk+dt@kernel.org>,
+	"conor+dt@kernel.org" <conor+dt@kernel.org>,
+	"p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	GEO-CHHER-bsp-development <bsp-development.geo@leica-geosystems.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: mmc-pwrseq-simple: add support for
+ reset control
+Message-ID: <20241021065258.w56zhl7y3loanjwi@pengutronix.de>
+References: <20241004120740.2887776-1-catalin.popescu@leica-geosystems.com>
+ <20241005182632.GA496820-robh@kernel.org>
+ <92a27d06-cd37-42ff-ac48-687981d24d41@leica-geosystems.com>
+ <20241007155939.GA849826-robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241020142931.138277-1-aurelien@aurel32.net>
-In-Reply-To: <20241020142931.138277-1-aurelien@aurel32.net>
-From: Anand Moon <linux.amoon@gmail.com>
-Date: Mon, 21 Oct 2024 11:37:37 +0530
-Message-ID: <CANAwSgR1ks_L94QPSCOsL4ATX=3HA59LHK1GdJTctUsM_f_DuQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: take SWIOTLB memory size limitation into account
-To: Aurelien Jarno <aurelien@aurel32.net>
-Cc: William Qiu <william.qiu@starfivetech.com>, 
-	"open list:RISC-V MISC SOC SUPPORT" <linux-riscv@lists.infradead.org>, Jaehoon Chung <jh80.chung@samsung.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Sam Protsenko <semen.protsenko@linaro.org>, 
-	"open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER" <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, 
-	Ron Economos <re@w6rz.net>, Jing Luo <jing@jing.rocks>, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20241007155939.GA849826-robh@kernel.org>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: mfe@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hi Aurelien,
+On 24-10-07, Rob Herring wrote:
+> On Mon, Oct 07, 2024 at 03:32:42PM +0000, POPESCU Catalin wrote:
+> > On 05/10/2024 20:26, Rob Herring wrote:
+> > > [Some people who received this message don't often get email from robh@kernel.org. Learn why this is important at https://aka.ms/LearnAboutSenderIdentification ]
+> > >
+> > > This email is not from Hexagon’s Office 365 instance. Please be careful while clicking links, opening attachments, or replying to this email.
+> > >
+> > >
+> > > On Fri, Oct 04, 2024 at 02:07:39PM +0200, Catalin Popescu wrote:
+> > >> Add compatible value "mmc-pwrseq-simple-reset" to support reset control
+> > >> instead of gpios. Reset controls being refcounted, they allow to use
+> > >> shared resets or gpios across drivers. Support of reset control is
+> > >> limited to one single reset control.
+> > > Can't you do this without a binding change? Just use reset controls when
+> > > there is only 1 GPIO.
+> > 
+> > That's a good question. The idea was to keep in place the gpio support 
+> > w/o impacting any platform using pwrseq-simple.
+> 
+> Why would it matter? If not shared, then the behavior should be the 
+> same. If shared, we want to maintain the broken behavior?
 
-On Sun, 20 Oct 2024 at 20:01, Aurelien Jarno <aurelien@aurel32.net> wrote:
->
-> The Synopsys DesignWare mmc controller on the JH7110 SoC
-> (dw_mmc-starfive.c driver) is using a 32-bit IDMAC address bus width,
-> and thus requires the use of SWIOTLB.
->
-> The commit 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages
-> bigger than 4K") increased the max_seq_size, even for 4K pages, causing
-> "swiotlb buffer is full" to happen because swiotlb can only handle a
-> memory size up to 256kB only.
->
-> Fix the issue, by making sure the dw_mmc driver doesn't use segments
-> bigger than what SWIOTLB can handle.
->
-> Reported-by: Ron Economos <re@w6rz.net>
-> Reported-by: Jing Luo <jing@jing.rocks>
-> Fixes: 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
-> ---
-Please add my
+My two cents on this. This will break systems which haven't the
+RESET_GPIO driver enabled yet. Therefore we may get regressions mails.
+I'm fine with it if that is okay.
 
-Tested-by: Anand Moon <linux.amoon@gmail.com>
+Regards,
+  Marco
 
-Thanks for fixing the warning below.
-
-[  511.837216][  T148] dwmmc_starfive 16020000.mmc: swiotlb buffer is
-full (sz: 290816 bytes), total 65536 (slots), used 246 (slots)
-[  511.837423][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
-full (sz: 278528 bytes), total 65536 (slots), used 222 (slots)
-[  511.916951][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
-full (sz: 290816 bytes), total 65536 (slots), used 24 (slots)
-[  516.803916][  T575] dwmmc_starfive 16020000.mmc: swiotlb buffer is
-full (sz: 507904 bytes), total 65536 (slots), used 122 (slots)
-[  516.805450][    C0] dwmmc_starfive 16020000.mmc: swiotlb buffer is
-full (sz: 507904 bytes), total 65536 (slots), used 364 (slots)
-
-Thanks
--Anand
-
->  drivers/mmc/host/dw_mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 41e451235f637..dc0d6201f7b73 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2958,7 +2958,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
->                 mmc->max_segs = host->ring_size;
->                 mmc->max_blk_size = 65535;
->                 mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
-> -               mmc->max_seg_size = mmc->max_req_size;
-> +               mmc->max_seg_size =
-> +                   min_t(size_t, mmc->max_req_size, dma_max_mapping_size(host->dev));
->                 mmc->max_blk_count = mmc->max_req_size / 512;
->         } else if (host->use_dma == TRANS_MODE_EDMAC) {
->                 mmc->max_segs = 64;
-> --
-> 2.45.2
->
->
-> _______________________________________________
-> linux-riscv mailing list
-> linux-riscv@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-riscv
+> > Also, later on when support for a list of reset gpios will be added to 
+> > the reset framework, this would not work anymore...
+> 
+> Why not?
+> 
+> How an OS handles reset-gpios is up to the OS. It can evolve. The 
+> binding can't evolve because it is an ABI.
+> 
+> Also, a list is kind of broken to begin with for a "generic" binding. 
+> What's the order the lines should be asserted/deasserted? What about 
+> timing requirements? You don't know because every device is different. 
+> This binding would not be accepted now, so extending it is questionable.
+> 
+> Rob
+> 
