@@ -1,137 +1,189 @@
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [81.169.146.167])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49C14194C67
-	for <linux-mmc@vger.kernel.org>; Sun, 20 Oct 2024 20:36:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.167
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729456584; cv=pass; b=BMlKvAPI+d20k5kC35qRl/dUcqFEs2rEdvkIRUXoZ3LdSKdO1qej5O81oY/bNHXA/IwuBs5YLMJi8BCJo4tYkTCCYP/t5HSf5uw1/7g0omJJyVYeIwm/vjoTc+XOPVVNt53eClmx9BgWEzYTp5l+du4yGoXQ536d+TV6Ob+DEu4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729456584; c=relaxed/simple;
-	bh=zpYyRw3AkANzVQVVgXur+ZnU5wZkNgNrdD6YPHHLt5A=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=L0O+A+xy0qFBbObEi1BUGXb/Ros8tADmqu2JfRoOK4mWDIru3Z0AeEqMFN8obbBpaIEZuRCK4xOFnkv0enLlj/7rwdWGkywNXhl02KeZlAGDa+Vy9O7pl26RzMKIVNI9f4GVsfeAPg5NUwM0ex4AdRBIqhnRhTOOhkZhTKtXP90=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=Qv+DHY7c; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=Sc05zkQT; arc=pass smtp.client-ip=81.169.146.167
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ED65634;
+	Mon, 21 Oct 2024 05:41:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1729489302; cv=none; b=tv92V0n5sbe0h30GXeR1jpnfvJVpCzuY8SAsD6DQD3X/yYE8w5cYaqxLhJYD8H1HV3l+JPxmHQG9IkBIoqf4/wH56sSQm5QgP1O/vgVWvEBJreK+LKDtP0BZpozEV6UdWH/0l++0CAjIEwaCVO4jNQDSm2n5/ngOMgxKdB1x3pM=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1729489302; c=relaxed/simple;
+	bh=x15yRLhgy42+yizJ86mU28DoOslmxHJB5vdr0m9Jm+w=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=CdicnGy1g3R3rY/OdSzLqCR4nvGIUsVoq7KbICP+rc/xh1+v9bI858hVUXrj8RLwb9htfRirzlH+5R3WAAn8QpdBEWjlYm+TdVMasKyDa33AQXpOjnGOhKpsQlw5xUXvqq74Kd7DIeZufAMYYVqtmWxGv/Vy6+w9vOq5DIvlJ6o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=b7Ovei4D; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="Qv+DHY7c";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="Sc05zkQT"
-ARC-Seal: i=1; a=rsa-sha256; t=1729456210; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=f1OZr+aNLYxMScaqbDojcKtbgx8q0/iBJHR6lyxLiei/fMCCl7GMBmihsbdlmv3Yqh
-    Wj0Zmd476+2bWf+2ORMdmoH7Cz1Wdv/1pT1rDmRArNLdj/qNF+01aowl0ga5/aacuFHs
-    +gQjpas7XhSM1GtoD+j+6Jy3GD/6LvV9kktVQaULfkAfGLjNFyIkXjOrIxksWi0ud5EN
-    /KTfYMQQN/hMxRNwyOoWU8vV+VFcIEjY5+2Jy6vPhEkKloq+FI4JMGL+UuPHGMUPNNwf
-    NTqQNRXoREBbVGTCIDDYdPj+//I4R4i+eJjz1LDEtfqNOt2GOl6dQoO2CrIp08Lvym/A
-    44fA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729456210;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zpYyRw3AkANzVQVVgXur+ZnU5wZkNgNrdD6YPHHLt5A=;
-    b=Ds16TVAulfDCkZbVNaPda0Y+VNba96IpVVARFkO2R7uGdOJORJ0R5FImFCr2nv7G30
-    6Ysq7boEujI/YnyxA/BmduEhrlf1CmXCVOmGSpOCvc+XQ5bchge4LeeHLqOjK9SRtyDN
-    gWGHXRB5I3XUuq3s7awHHxxMwVo8Wld3BocwGqr7j3p5220BkdqT+ygt9NNJBzDhuPja
-    +WW3s5gU+AqCY3VmC9pIsOdtGeWEkDbvhU18HFceK/wF+dhbE54k1UAfnnB/aKGokUPI
-    C49rpisSA3H4BzcYzh2ycoygIwEfjSFT30cIeXGmBqvKQlCYwsES2NwUZuiV9YdPZsUr
-    Oe1w==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo01
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729456210;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zpYyRw3AkANzVQVVgXur+ZnU5wZkNgNrdD6YPHHLt5A=;
-    b=Qv+DHY7cP88yewuNOel0wdnfU674q4/Vo/YVRSdcwoTbVgG7X5BAopEor1V78s9tzF
-    jfsgQDneUEVLIIKVY9achfwFLvDqAZczKZcsjMYEfk24Ea6TV8q7Dld25lSwFs3OD9Wl
-    hxq4MT1E398gwrXjX59pVa1d1ruwzonYhDEmP2n9A6D9yOTAqNiarErua1JlygLPyJPw
-    6wDRAt6344xxJ5Rbac8eKaTcKybzbO1wl2pL4CKaBC1arLzjCDB2/QuOJ6egC+n2fmms
-    BIZPrRpbuQjBZ9cYccHww8vCw2M13q+hFtu2Qr3nVxzCFEBu0nj7f7/2UnPYQXkxkft5
-    J/Cw==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729456210;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=zpYyRw3AkANzVQVVgXur+ZnU5wZkNgNrdD6YPHHLt5A=;
-    b=Sc05zkQTkoLMwhq3PUf/RSSyljn68tV87jXMnbDbN6oXytYv//FWXdKuTW0udcO04Q
-    qWKh8hwFmHelMeQtdMDQ==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0zNriHg+YfT0rGWYpI+wj+spyMYUkXOdVtbeJt47M/LNQin0Lcc="
-Received: from p200300c58718678f3e695a7e1d71bbfd.dip0.t-ipconnect.de
-    by smtp.strato.de (RZmta 51.2.11 AUTH)
-    with ESMTPSA id za0ed209KKU9IPo
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Sun, 20 Oct 2024 22:30:09 +0200 (CEST)
-Message-ID: <3d418d89c5d4f420ecf7ea2a15e391a189774386.camel@iokpp.de>
-Subject: Re: [RESENT PATCH v3 1/5] mmc-utils: Refactor common FFU code into
- functions to support additional FFU modes
-From: Bean Huo <beanhuo@iokpp.de>
-To: Avri Altman <Avri.Altman@wdc.com>, "ulf.hansson@linaro.org"
-	 <ulf.hansson@linaro.org>, "vfazio@xes-inc.com" <vfazio@xes-inc.com>, 
-	"linux-mmc@vger.kernel.org"
-	 <linux-mmc@vger.kernel.org>
-Cc: Bean Huo <beanhuo@micron.com>
-Date: Sun, 20 Oct 2024 22:30:09 +0200
-In-Reply-To: <DM6PR04MB657548AECCE954C3FCE9DEBDFC442@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20241013210925.123632-1-beanhuo@iokpp.de>
-	 <20241013210925.123632-2-beanhuo@iokpp.de>
-	 <DM6PR04MB657548AECCE954C3FCE9DEBDFC442@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4-0ubuntu2 
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="b7Ovei4D"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49KNHeBB014302;
+	Mon, 21 Oct 2024 05:41:22 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	OI+g/PDRqVZ95UWxsvAz05m79blc6jc1PXoXbNyQswA=; b=b7Ovei4DFeFWBJ0Z
+	wC+yHk5XzuTgof4wrQkk7Mwnyh3mc0DLyZEDo0rvIex9U90w7eqSyqbCpf0VVhF9
+	O+UaWCU17fV8k69zKZhE3eSo/cu3+dszW1lHxqJu1/jCZo9fv4L/PeWJcyJFTwn4
+	zxWw2wrKLHAaRxkxsknJUHOAUSIOdLhxiCKOpzGjC5eBRLE2UaQwBcEBu4GSJ1Vr
+	Rv7bJhKcbho2QrvIgZez5UYNnz93WZ6vW1WE0aGOObN3MzhDYN4DbD79SmwVRWBD
+	nsvp2+BYnQX4H6vUDH3A39g/zf8NA2bjUdjGAVf11xiOEjXAZxqrdQMbD8W7cG4l
+	m3p0lQ==
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42c6vuua0v-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 21 Oct 2024 05:41:22 +0000 (GMT)
+Received: from nasanex01b.na.qualcomm.com (nasanex01b.na.qualcomm.com [10.46.141.250])
+	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 49L5fLt2005526
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 21 Oct 2024 05:41:21 GMT
+Received: from [10.151.37.100] (10.80.80.8) by nasanex01b.na.qualcomm.com
+ (10.46.141.250) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Sun, 20 Oct
+ 2024 22:41:14 -0700
+Message-ID: <01cbb389-1966-4501-a22d-7227765d1eb9@quicinc.com>
+Date: Mon, 21 Oct 2024 11:11:13 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V4 2/6] dt-bindings: clock: Add Qualcomm IPQ5424 GCC
+ binding
+To: Krzysztof Kozlowski <krzk@kernel.org>
+CC: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
+        <krzk+dt@kernel.org>, <conor+dt@kernel.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <p.zabel@pengutronix.de>, <geert+renesas@glider.be>,
+        <dmitry.baryshkov@linaro.org>, <neil.armstrong@linaro.org>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <quic_varada@quicinc.com>
+References: <20241017123626.204421-1-quic_srichara@quicinc.com>
+ <20241017123626.204421-3-quic_srichara@quicinc.com>
+ <nznisr4aqpe65fovvk3q3r6capmqj4jm4xsqufjib2b7vax4xx@6r3tzaar2w3p>
+Content-Language: en-US
+From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <nznisr4aqpe65fovvk3q3r6capmqj4jm4xsqufjib2b7vax4xx@6r3tzaar2w3p>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01b.na.qualcomm.com (10.46.141.250)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: BvccQ3eEA3DBohRrCELpz3wod20lmi_E
+X-Proofpoint-GUID: BvccQ3eEA3DBohRrCELpz3wod20lmi_E
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 phishscore=0
+ mlxlogscore=999 bulkscore=0 spamscore=0 mlxscore=0 clxscore=1015
+ suspectscore=0 priorityscore=1501 adultscore=0 lowpriorityscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2410210038
 
-On Mon, 2024-10-14 at 06:55 +0000, Avri Altman wrote:
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 __u8 num_of_cmds =3D 4;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 off_t bytes_left, off;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 unsigned int bytes_per_loop, sect=
-_done, retry =3D 3;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 struct mmc_ioc_multi_cmd *multi_c=
-md =3D NULL;
-> > +
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!dev_fd || !fw_buf || !ext_cs=
-d) {
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 fprintf(stderr, "unexpected NULL pointer\n");
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 return -EINVAL;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /* allocate maximum required */
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 multi_cmd =3D calloc(1, sizeof(st=
-ruct mmc_ioc_multi_cmd) +
-> > num_of_cmds * sizeof(struct mmc_ioc_cmd));
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (!multi_cmd) {
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 perror("failed to allocate memory");
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0 return -ENOMEM;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
-> I was expecting that do_ffu_download will be called with struct
-> mmc_ioc_multi_cmd *multi_cmd argument as well.
-> That each ffu<x> mode fills it according to its own logic.
-> This you won't be needing that ffu_mode additional parameter.
 
-I wanted to clarify why the ffu_mode parameter is necessary during the
-download phase. By extracting the logic into a common approach and
-using ffu_mode to dynamically update the multi_cmd structure across
-iterations per ffu-mode, I can handle the variations between different
-FFU modes more effectively. This allows me to extract more common code
-and avoid duplication, as the ffu_mode helps determine which specific
-updates or adjustments need to be made to the multi_cmd at each stage.
 
-Without this, it would be difficult to manage multiple loops or
-iterations of the download process, especially when the command
-structure needs to be modified in different ways depending on the mode.
-The use of ffu_mode centralizes this control, making the code cleaner
-and more maintainable.
+On 10/18/2024 11:43 AM, Krzysztof Kozlowski wrote:
+> On Thu, Oct 17, 2024 at 06:06:22PM +0530, Sricharan R wrote:
+>> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>>
+>> Add binding for the Qualcomm IPQ5424 Global Clock Controller
+>>
+>> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>> ---
+>>   [V4] Added 2 new PCIE clks to end of the list, preserving default order
+>>
+>>   .../bindings/clock/qcom,ipq5332-gcc.yaml      |  40 ++-
+>>   include/dt-bindings/clock/qcom,ipq5424-gcc.h  | 156 +++++++++
+>>   include/dt-bindings/reset/qcom,ipq5424-gcc.h  | 310 ++++++++++++++++++
+>>   3 files changed, 499 insertions(+), 7 deletions(-)
+>>   create mode 100644 include/dt-bindings/clock/qcom,ipq5424-gcc.h
+>>   create mode 100644 include/dt-bindings/reset/qcom,ipq5424-gcc.h
+>>
+>> diff --git a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+>> index 9193de681de2..ef1fd9d9f8da 100644
+>> --- a/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+>> +++ b/Documentation/devicetree/bindings/clock/qcom,ipq5332-gcc.yaml
+>> @@ -4,31 +4,35 @@
+>>   $id: http://devicetree.org/schemas/clock/qcom,ipq5332-gcc.yaml#
+>>   $schema: http://devicetree.org/meta-schemas/core.yaml#
+>>   
+>> -title: Qualcomm Global Clock & Reset Controller on IPQ5332
+>> +title: Qualcomm Global Clock & Reset Controller on IPQ5332 and IPQ5424
+>>   
+>>   maintainers:
+>>     - Bjorn Andersson <andersson@kernel.org>
+>>   
+>>   description: |
+>>     Qualcomm global clock control module provides the clocks, resets and power
+>> -  domains on IPQ5332.
+>> +  domains on IPQ5332 and IPQ5424.
+>>   
+>> -  See also:: include/dt-bindings/clock/qcom,gcc-ipq5332.h
+>> -
+>> -allOf:
+>> -  - $ref: qcom,gcc.yaml#
+>> +  See also:
+>> +    include/dt-bindings/clock/qcom,gcc-ipq5332.h
+>> +    include/dt-bindings/clock/qcom,gcc-ipq5424.h
+>>   
+>>   properties:
+>>     compatible:
+>> -    const: qcom,ipq5332-gcc
+>> +    enum:
+>> +      - qcom,ipq5332-gcc
+>> +      - qcom,ipq5424-gcc
+>>   
+>>     clocks:
+>> +    minItems: 5
+>>       items:
+>>         - description: Board XO clock source
+>>         - description: Sleep clock source
+>>         - description: PCIE 2lane PHY pipe clock source
+>>         - description: PCIE 2lane x1 PHY pipe clock source (For second lane)
+>>         - description: USB PCIE wrapper pipe clock source
+>> +      - description: PCIE 2-lane PHY2 pipe clock source
+>> +      - description: PCIE 2-lane PHY3 pipe clock source
+>>   
+>>     '#power-domain-cells': false
+>>     '#interconnect-cells':
+>> @@ -38,6 +42,28 @@ required:
+>>     - compatible
+>>     - clocks
+>>   
+>> +allOf:
+>> +  - $ref: qcom,gcc.yaml#
+>> +  - if:
+>> +      properties:
+>> +        compatible:
+>> +          contains:
+>> +            const: qcom,ipq5332-gcc
+>> +    then:
+>> +      properties:
+>> +        clocks:
+>> +          maxItems: 5
+>> +
+>> +  - if:
+>> +      properties:
+>> +        compatible:
+>> +          contains:
+>> +            const: qcom,ipq5424-gcc
+>> +    then:
+>> +      properties:
+>> +        clocks:
+> 
+> This needs minItems: 7, unless clocks are really optional (but they
+> shouldn't be optional). I think I missed this part last time.
 
-Kind regards,=20
-Bean
+ok, got it, will update and send V5.
+
+Regards,
+  Sricharan
+
+
+
