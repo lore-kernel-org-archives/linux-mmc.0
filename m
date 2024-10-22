@@ -1,252 +1,235 @@
-Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DBFC1CF5FF;
-	Mon, 21 Oct 2024 19:32:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E8321487F6
+	for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2024 08:29:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729539175; cv=none; b=FDIUGWEwcLfAPSuzTTsPFx5UUiI9EUiwkKcCCXgmeKbFBXHxXvfkdBCNBPC5ywjlKdfZezUnQtmnGNiI2fBrNSlrU6MHbolUpSBvtOuCSGsuhQHS+fQ7uRmQrzVX5E6U8TUI7tSoRnvrkyjmUUFQ8hSeqNmJHXDD17LPKsiVGx0=
+	t=1729585771; cv=none; b=MS1A/xAAYX6DNtD/dNJwMoiflBHxk23Jy4QhO9eB7Q1cfXEPOWqnmG5zxj33UGP1bZZfLugLCiVy6SGEDZkhMpLls68SnoxYwM8Ud+GSWpkdzNVJbk01ZW5RvbwAIZ9tG7/ct2j5qTXctDAkSMymR66FEiYEsW9ZyAFwB+nPAO4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729539175; c=relaxed/simple;
-	bh=4V0XjPga2xSDbOxPLy28D8hsComjHbPPkvsqyU7inZM=;
+	s=arc-20240116; t=1729585771; c=relaxed/simple;
+	bh=91JYyvnl+Fdi6fkf5FSlb8LxDeQ2IrQc7l6lvJQCgto=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ICosUMD1Srix4ZNbpc2tyf7K1gteM8BpW4SWQnrJ/9t66eFytPY+i2JmBQRwAYuhkwnAoFaET1e0VomZcfFrnUleHmGHcJId8kMtJ9pvwmKRVRPwSBnsh8uYGidnc2oqcglEyuGzRqnhGhx/BX/jw4M9UuedNa53unK/D3K3fjA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jg1tVtvc; arc=none smtp.client-ip=209.85.218.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 To:Cc:Content-Type; b=t+yPab3CIJKgVou5xHgSApp6/yJV1ZHaU9etyqT322EzLohVfL4yBdHZ/DqAitLX7cy7N7uARRMXgUAtIKVPO8HzVH9TQrIZQApYYUoq67pKBC5sYDLWupPMkjnEzsQXT/sM8qqEK+CqmoA3ABhfBP4gZndKBj6Wxdm4TtD4MGY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bDn73JS1; arc=none smtp.client-ip=209.85.128.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jg1tVtvc"
-Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-a9a850270e2so401347966b.0;
-        Mon, 21 Oct 2024 12:32:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bDn73JS1"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-6e38fa1f82fso50350037b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Oct 2024 01:29:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1729539171; x=1730143971; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1729585767; x=1730190567; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=1mEFsjrwg2muYYcaLlxcwnMxP+84IdSFbixovGhqXIY=;
-        b=jg1tVtvcpp59yyOqxIpyEVOFcKJBhhiHzV8OI8kZ3oZkV2cq1uo+Nrc0v2daNmRt4Z
-         vuTEenkDNDnQLfoZxLI1aavHQ4nMXbA4VhguY0B/9ks6g727ybmvIwiH/j8TyQVr/Anm
-         cBub5biSTW/1haOMx5+M7zViRoHIg6xob+tKmPNmvKddV99mdUCWgWGsJ9Ck7TbiSP8n
-         hsT9ApD9r3+a0ddWCz5ShJ677gIuzEMOEUSZcRtTVe5a2wFsC2UJgGeaXN2c37PVEOOa
-         4d+7bNtkWpJf4uxy4AvsiLUfxz5mCoh/8dAwEWttxjds59xSIgQElJbb3n2BGRkLoiTx
-         h+sQ==
+        bh=kLQbdGQU/v5ri2hhQLOr8G4Wt+hC9tXpUHCmYp6zu9E=;
+        b=bDn73JS1EtBKgzlJeBQy5CCN1c7t6L/wCYlPyyKORbtRp0mwbvBstkNX0ZFt6BHf65
+         1xPZ/ZFKGnE/ijpOuHdNyNoTuMLjxw3iC3jjaIh4AC9HCgGyrqWias73WeIKaTb/VDxm
+         RH0paKJaPmdWH32FlRpOBhparSZhaenb3EVxJLT0L8zuMspRdV0SUdeQw6OfjrNjvUfe
+         n7iemOKlWt6BZtbvT8bFigZrOEUfGbNS48zkLjuk0RPidimy0pBZRt3jEAFgwfeIr50f
+         0LdHnaLhxRnubMLl8vAGty/0T71JKl5LR/lRXt9E6cNhAXf/0QYxOaZTGTZHrPTAbaYM
+         9+4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729539171; x=1730143971;
+        d=1e100.net; s=20230601; t=1729585767; x=1730190567;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=1mEFsjrwg2muYYcaLlxcwnMxP+84IdSFbixovGhqXIY=;
-        b=w6i6QPRt0UtVOhFdPtZnoYSFnfZ68sbcE3KNC5d7ithm81CYdxVJX/m0YHYNcyWhrX
-         55oGAZtpLOgeLA1HR4FHFsfJdQv3ynZGWjxPvfeDNUCduOnl2eZaz2e7chs42QSs3dea
-         fyBj0dH9vMNwrJfvpp61p4Lzel/AItsd4aM5/5IZe8jOAXo1zN39ggESVjP5Ezu9SYYu
-         yJ4kS4XlaZhdisaLfVwZZK9iEQhy2tzO7UVclsR9cJC8JiipSefwLMI1sVtkU+TQgBBl
-         ew5slu0DbAHHIzpA4ORYEo52pDPrLPYO5HKnwXfJHyoZrzgPeqozPy/lyEdabK7aWR4v
-         xEhQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUe2crqm+JnihhPeXBuLDD7VUABnAb+B+/A/iBkv9mLTxv5f5vfbrlIQ0IUfrVts4839LA4iT0UTZwC@vger.kernel.org, AJvYcCXi412gjxLfOxG+AavulEl8jQEuenYNpeh2xuPnchqvlEfmlAYExaPRjX2/wr066qdhoq7va3F7MWm7Jvo=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywkm9ymaiC3f9xdiNG7QTtimtl5o8DXb8rZTW1d67qfJPBdaWXC
-	Nq8fCi8q5fbbOkpq2kboyD4k+GQqjWJ3kHNPw83dQ/N6Ls0dIIpBe4Jprcpcs12cVtstoshZHMG
-	bH7Ww2ca4bltchmkw9BITLHS623fDH0N2Luk=
-X-Google-Smtp-Source: AGHT+IFAMNL98PLu/k+jvmf7Yek3FMK4f/dR36xw0cjFwF39PNW5JD+YHqfnsaaGB0pBSLcqlkcepqOlVX6xXZKXLOo=
-X-Received: by 2002:a17:907:3f1c:b0:a9a:161:7863 with SMTP id
- a640c23a62f3a-a9a69de760fmr1151459366b.58.1729539171233; Mon, 21 Oct 2024
- 12:32:51 -0700 (PDT)
+        bh=kLQbdGQU/v5ri2hhQLOr8G4Wt+hC9tXpUHCmYp6zu9E=;
+        b=FyvLOMKbRJX+98sQm2AeaUkwwnU86qv0+iUVBul73FU6ZW0lpsW3T54cJpF+DWWYUO
+         Q7UkmU0rL+LRdj/eeX9iHTUUt50Mlb+s8476NXmVOBUyAjFNK07uCjrNB2VbjGXa9U0l
+         QFJNlCNhT2EYaThiQgUP1gSqA80Q63OguCCdZFNTn+6Qz1BMfm3RnmhofQUM0u3qBK1S
+         +vLLrlVYEiih/q53HiYApdW5gwoGdtcTAwbZJGhdjdrmg0kSIx9KHPDTT+dKFs3lEFJa
+         0IuAxMsgEJzw26+Jc0q2ISUO403AuqhUn8II1NiVW1ztaEdh6CBa4kiT7f+dAv8+wfe/
+         FTog==
+X-Forwarded-Encrypted: i=1; AJvYcCUTt7yW2yCqJLCvV1iYF6BXka2cIdyy3/uleVdPPsQdV4y8fBOS6uGDJ0rCSGQfP92yzW8iw0A2ofw=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz1IWoNFanjR1ia999DHnZ2ks+MUdkhMpUJYfAZYsngRFE0dHzO
+	QgdUL+hzaWs4zaUUBHPBwK4pFVUbd82CkoVm7ovz0LItgc459uqIEJ/s0RbnwJIdN841pXRKrAx
+	yx/DnmrDRAB+L2xi5mz0527KnOBwcnH7zoMDbmg==
+X-Google-Smtp-Source: AGHT+IG9Q3YEuJr8VKnJyP4ALVy/0ok/SYBCMzoi2I9bl8cdDzUPuqepo05ucF6AILKeMjf8mXd/KxO/YrS7ZIa3T0w=
+X-Received: by 2002:a05:690c:4907:b0:6e5:de2d:39e0 with SMTP id
+ 00721157ae682-6e5de2d5659mr108655877b3.42.1729585767136; Tue, 22 Oct 2024
+ 01:29:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAC8uq=Ppnmv98mpa1CrWLawWoPnu5abtU69v-=G-P7ysATQ2Pw@mail.gmail.com>
- <3748add3-18e5-42ef-9d48-93650cfc0682@rock-chips.com> <CAC8uq=O=519iRpcs7p+jZaKngkCDuawLz8NVZYORY6qfGPifZg@mail.gmail.com>
- <eb1d15dd-8e85-4a9b-9b8b-ee005c446bf6@rock-chips.com> <CAPDyKFr6oDxdc2UhMvAh885dofF1EeT17Ch_Fp-9f2Yvf-654A@mail.gmail.com>
-In-Reply-To: <CAPDyKFr6oDxdc2UhMvAh885dofF1EeT17Ch_Fp-9f2Yvf-654A@mail.gmail.com>
-From: Adam Green <greena88@gmail.com>
-Date: Mon, 21 Oct 2024 20:32:40 +0100
-Message-ID: <CAC8uq=NNBCmtNamvcSHbdv7U99iE6L=teRz9eZ-nJDKx4PMuFw@mail.gmail.com>
-Subject: Re: Unable to handle kernel paging request at virtual address ffffffc08058e000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Sam Protsenko <semen.protsenko@linaro.org>, 
-	regressions@lists.linux.dev, linux-kernel@vger.kernel.org, sydarn@proton.me, 
-	linux-mmc@vger.kernel.org
+References: <20241014060130.1162629-1-haibo.chen@nxp.com> <20241014060130.1162629-3-haibo.chen@nxp.com>
+ <CAPDyKFr37wLYxdFJ-Lgbq7PbWyiQz+CuwMxwgeeP3QpMvdyjqg@mail.gmail.com>
+ <DU0PR04MB949604108991809742E83E5D90402@DU0PR04MB9496.eurprd04.prod.outlook.com>
+ <DU0PR04MB9496801A4571142F914BBF4990402@DU0PR04MB9496.eurprd04.prod.outlook.com>
+In-Reply-To: <DU0PR04MB9496801A4571142F914BBF4990402@DU0PR04MB9496.eurprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 22 Oct 2024 10:28:49 +0200
+Message-ID: <CAPDyKFpectKosHEU7cm7uNCNwHZaT0XCSn674dGtu8Y+hmf_Pw@mail.gmail.com>
+Subject: Re: [PATCH 2/4] mmc: host: sdhci-esdhc-imx: refactor the system PM logic
+To: Bough Chen <haibo.chen@nxp.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "imx@lists.linux.dev" <imx@lists.linux.dev>, 
+	"shawnguo@kernel.org" <shawnguo@kernel.org>, "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>, 
+	"kernel@pengutronix.de" <kernel@pengutronix.de>, "festevam@gmail.com" <festevam@gmail.com>, dl-S32 <S32@nxp.com>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi Uffe,
+On Fri, 18 Oct 2024 at 05:20, Bough Chen <haibo.chen@nxp.com> wrote:
+>
+> > -----Original Message-----
+> > From: Bough Chen
+> > Sent: 2024=E5=B9=B410=E6=9C=8818=E6=97=A5 9:23
+> > To: Ulf Hansson <ulf.hansson@linaro.org>
+> > Cc: adrian.hunter@intel.com; linux-mmc@vger.kernel.org; imx@lists.linux=
+.dev;
+> > shawnguo@kernel.org; s.hauer@pengutronix.de; kernel@pengutronix.de;
+> > festevam@gmail.com; dl-S32 <S32@nxp.com>;
+> > linux-arm-kernel@lists.infradead.org; linux-kernel@vger.kernel.org
+> > Subject: RE: [PATCH 2/4] mmc: host: sdhci-esdhc-imx: refactor the syste=
+m PM
+> > logic
+> >
+> > > -----Original Message-----
+> > > From: Ulf Hansson <ulf.hansson@linaro.org>
+> > > Sent: 2024=E5=B9=B410=E6=9C=8817=E6=97=A5 21:07
+> > > To: Bough Chen <haibo.chen@nxp.com>
+> > > Cc: adrian.hunter@intel.com; linux-mmc@vger.kernel.org;
+> > > imx@lists.linux.dev; shawnguo@kernel.org; s.hauer@pengutronix.de;
+> > > kernel@pengutronix.de; festevam@gmail.com; dl-S32 <S32@nxp.com>;
+> > > linux-arm-kernel@lists.infradead.org; linux-kernel@vger.kernel.org
+> > > Subject: Re: [PATCH 2/4] mmc: host: sdhci-esdhc-imx: refactor the
+> > > system PM logic
+> > >
+> > > On Mon, 14 Oct 2024 at 08:00, <haibo.chen@nxp.com> wrote:
+> > > >
+> > > > From: Haibo Chen <haibo.chen@nxp.com>
+> > > >
+> > > > Current suspend/resume logic has one issue. in suspend, will config
+> > > > register when call sdhci_suspend_host(), but at this time, can't
+> > > > guarantee host in runtime resume state. if not, the per clock is
+> > > > gate off, access register will hung.
+> > > >
+> > > > Now use pm_runtime_force_suspend/resume() in
+> > NOIRQ_SYSTEM_SLEEP_PM,
+> > > > add in NOIRQ stage can cover SDIO wakeup feature, because in
+> > > > interrupt handler, there is register access, need the per clock on.
+> > > >
+> > > > In sdhci_esdhc_suspend/sdhci_esdhc_resume, remove
+> > > > sdhci_suspend_host() and sdhci_resume_host(), all are handled in
+> > > > runtime PM callbacks except the wakeup irq setting.
+> > > >
+> > > > Remove pinctrl_pm_select_default_state() in sdhci_esdhc_resume,
+> > > > because
+> > > > pm_runtime_force_resume() already config the pinctrl state accordin=
+g
+> > > > to ios timing, and here config the default pinctrl state again is
+> > > > wrong for
+> > > > SDIO3.0 device if it keep power in suspend.
+> > >
+> > > I had a look at the code - and yes, there are certainly several
+> > > problems with PM support in this driver.
+> > >
+> > > >
+> > > > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> > > > ---
+> > > >  drivers/mmc/host/sdhci-esdhc-imx.c | 39
+> > > > +++++++++++++++---------------
+> > > >  1 file changed, 19 insertions(+), 20 deletions(-)
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > > b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > > index c7582ad45123..18febfeb60cf 100644
+> > > > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > > > @@ -1871,11 +1871,13 @@ static int sdhci_esdhc_suspend(struct devic=
+e
+> > > *dev)
+> > > >         struct pltfm_imx_data *imx_data =3D sdhci_pltfm_priv(pltfm_=
+host);
+> > > >         int ret;
+> > > >
+> > > > -       if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> > > > -               ret =3D cqhci_suspend(host->mmc);
+> > > > -               if (ret)
+> > > > -                       return ret;
+> > > > -       }
+> > > > +       /*
+> > > > +        * Switch to runtime resume for two reasons:
+> > > > +        * 1, there is register access, so need to make sure gate o=
+n ipg
+> > clock.
+> > >
+> > > You are right that we need to call pm_runtime_get_sync() for this rea=
+son.
+> > >
+> > > However, the real question is rather; Under what circumstances do we
+> > > really need to make a register access beyond this point?
+> > >
+> > > If the device is already runtime suspended, I am sure we could just
+> > > leave it in that state without having to touch any of its registers.
+> > >
+> > > As I understand it, there are mainly two reasons why the device may b=
+e
+> > > runtime resumed at this point:
+> > > *) The runtime PM usage count has been bumped in
+> > > sdhci_enable_sdio_irq(), since the SDIO irqs are enabled and it's
+> > > likely that we will configure them for system wakeup too.
+> > > *) The device has been used, but nothing really prevents it from bein=
+g
+> > > put into a low power state via the ->runtime_suspend() callback.
+> > >
+> > > > +        * 2, make sure the pm_runtime_force_suspend() in NOIRQ
+> > > > + stage
+> > > really
+> > > > +        *    invoke its ->runtime_suspend callback.
+> > > > +        */
+> > >
+> > > Rather than using the *noirq-callbacks, we should be able to call
+> > > pm_runtime_force_suspend() from sdhci_esdhc_suspend(). And vice versa
+> > > for sdhci_esdhc_resume().
+> > >
+> > > Although, according to my earlier comment above, we also need to take
+> > > into account the SDIO irq. If it's being enabled for system wakeup, w=
+e
+> > > must not put the controller into low power mode by calling
+> > > pm_runtime_force_suspend(), otherwise we will not be able to deliver =
+the
+> > wakeup, right?
+> >
+> > Thanks for your careful review!
+> > Yes, I agree.
+>
+> Hi Ulf,
+>
+> Sorry, I maybe give the wrong answer.
+>
+> I double check the IP, usdhc can support sdio irq wakeup even when usdhc =
+clock gate off.
 
-I have tried the linked patch on both 6.11.4 and next-20241021 and can
-confirm that the problem is still present,
+Okay, so there is some out-band logic that can manage the SDIO irq,
+even when the controller has been runtime suspended?
 
-Best regards,
+In these cases, we use dev_pm_set_dedicated_wake_irq* to manage that
+wake-irq. There are other mmc host drivers that implement support for
+this too.
 
-Adam
+If you are referring to solely clock gating, that is not going to
+work. A runtime suspended controller is not supposed to deliver
+in-band irqs.
 
-On Mon, 21 Oct 2024 at 14:30, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 18 Oct 2024 at 05:43, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> >
-> > + Sam
-> >
-> > =E5=9C=A8 2024/10/18 8:06, Adam Green =E5=86=99=E9=81=93:
-> > > Hi Shawn,
-> > >
-> > > I can confirm that after reverting
-> > >
-> > > commit 8396c793ffdf28bb8aee7cfe0891080f8cab7890
-> > > Author: Sam Protsenko <semen.protsenko@linaro.org>
-> > > Date:   Wed Mar 6 17:20:52 2024 -0600
-> > >
-> > >      mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
-> > >
-> > > that the problem does appear to have resolved itself, I tested this o=
-n
-> > > a variety of devices.
-> > >
-> >
-> > I'm confused about the patch. Doesn't max_seg_size stand for max bytes
-> > per IDMA descriptor can handle?  How can it be equal to max_req_size
-> > which should be max_seq_size * max_segs=EF=BC=88max_segs is IDMAC descr=
-iptors
-> > number can be used=EF=BC=89 ?
-> >
-> >   /* Each descriptor can transfer up to 4KB of data in chained mode */
-> >   #define DW_MCI_DESC_DATA_LENGTH 0x1000
-> >
->
-> Does the below patch fix the problem too?
->
-> https://lore.kernel.org/lkml/20241020142931.138277-1-aurelien@aurel32.net=
-/T/
->
-> Kind regards
-> Uffe
->
-> >
-> > > Best regards,
-> > >
-> > > Adam
-> > >
-> > > On Wed, 16 Oct 2024 at 11:13, Shawn Lin <shawn.lin@rock-chips.com> wr=
-ote:
-> > >>
-> > >> =E5=9C=A8 2024/10/16 17:55, Adam Green =E5=86=99=E9=81=93:
-> > >>> Good morning,
-> > >>>
-> > >>> I would like to report a regression that appears to have been
-> > >>> introduced into the linux kernel since v6.9.
-> > >>>
-> > >>
-> > >> I didn't see many patches for dw_mmc since 6.9. So I guess the faste=
-st
-> > >> way is to do a bisect. Or maybe you could try reverting this commit
-> > >> first to see what will happen.
-> > >>
-> > >> commit 8396c793ffdf28bb8aee7cfe0891080f8cab7890
-> > >> Author: Sam Protsenko <semen.protsenko@linaro.org>
-> > >> Date:   Wed Mar 6 17:20:52 2024 -0600
-> > >>
-> > >>       mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K
-> > >>
-> > >>
-> > >>> My device is currently experiencing a panic booting the kernel/root=
-fs
-> > >>> from an SD card.
-> > >>>
-> > >>> The device is a Powkiddy RGB30 which is a portable handheld gaming
-> > >>> console with a Rockchip RK3566 SoC (arm64).
-> > >>>
-> > >>> I have tested a variety of devices from a couple of manufacturers w=
-ith
-> > >>> the same SoC and they all have the same issue,
-> > >>> I have also tested, 6.12-rc3 and linux-next and the same issue appe=
-ars present.
-> > >>>
-> > >>> A full UART dump can be found here: https://clbin.com/zLZAW
-> > >>>
-> > >>> [   41.547983] Unable to handle kernel paging request at virtual
-> > >>> address ffffffc08058e000
-> > >>> [   41.553426] Mem abort info:
-> > >>> [   41.558231]   ESR =3D 0x0000000096000007
-> > >>> [   41.563115]   EC =3D 0x25: DABT (current EL), IL =3D 32 bits
-> > >>> [   41.568135]   SET =3D 0, FnV =3D 0
-> > >>> [   41.572882]   EA =3D 0, S1PTW =3D 0
-> > >>> [   41.577575]   FSC =3D 0x07: level 3 translation fault
-> > >>> [   41.582404] Data abort info:
-> > >>> [   41.586995]   ISV =3D 0, ISS =3D 0x00000007, ISS2 =3D 0x00000000
-> > >>> [   41.591848]   CM =3D 0, WnR =3D 0, TnD =3D 0, TagAccess =3D 0
-> > >>> [   41.596664]   GCS =3D 0, Overlay =3D 0, DirtyBit =3D 0, Xs =3D 0
-> > >>> [   41.601457] swapper pgtable: 4k pages, 39-bit VAs, pgdp=3D000000=
-000363e000
-> > >>> [   41.606359] [ffffffc08058e000] pgd=3D1000000000225003,
-> > >>> p4d=3D1000000000225003, pud=3D1000000000225003, pmd=3D1000000000c8c=
-003,
-> > >>> pte=3D0000000000000000
-> > >>> [   41.616442] Internal error: Oops: 0000000096000007 [#1] PREEMPT =
-SMP
-> > >>> [   41.621544] Modules linked in: hci_uart btrtl bluetooth rfkill
-> > >>> [   41.626678] CPU: 0 UID: 0 PID: 0 Comm: swapper/0 Not tainted 6.1=
-2.0-rc2 #1
-> > >>> [   41.631922] Hardware name: Powkiddy RGB30 (DT)
-> > >>> [   41.636951] pstate: 20400009 (nzCv daif +PAN -UAO -TCO -DIT -SSB=
-S BTYPE=3D--)
-> > >>> [   41.642330] pc : dw_mci_idmac_start_dma+0xa0/0x358
-> > >>> [   41.647585] lr : __dw_mci_start_request+0x21c/0x6a0
-> > >>> [   41.652827] sp : ffffffc080003da0
-> > >>> [   41.657882] x29: ffffffc080003da0 x28: ffffff8001f06d80 x27: fff=
-fffc08058d000
-> > >>> [   41.663399] x26: ffffffc08058e000 x25: 0000000000002711 x24: 000=
-0000000002000
-> > >>> [   41.668864] x23: ffffff800167dc80 x22: 0000000080000012 x21: 000=
-0000000001000
-> > >>> [   41.674257] x20: 000000003b5d1000 x19: 0000000000001000 x18: 000=
-0000972073a81
-> > >>> [   41.679654] x17: ffffff9c39b47000 x16: ffffffc080000000 x15: 000=
-0000000000001
-> > >>> [   41.685074] x14: 0000000000000004 x13: 000001ba5087c8e8 x12: 000=
-00000000001a8
-> > >>> [   41.690506] x11: 0000000000000040 x10: ffffffe40628d890 x9 : 000=
-0000000000000
-> > >>> [   41.695972] x8 : ffffff803fd44080 x7 : 0000000008f0d180 x6 : 000=
-000003b9ac9ff
-> > >>> [   41.701495] x5 : 0000000000fffffe x4 : ffffffc08058de80 x3 : 000=
-00000b2d05e00
-> > >>> [   41.707073] x2 : ffffffe40546ab08 x1 : ffffffc08058e000 x0 : 000=
-0000000001000
-> > >>> [   41.712686] Call trace:
-> > >>> [   41.717857]  dw_mci_idmac_start_dma+0xa0/0x358
-> > >>> [   41.723266]  __dw_mci_start_request+0x21c/0x6a0
-> > >>> [   41.728719]  dw_mci_work_func+0x4c8/0x4d8
-> > >>> [   41.734144]  process_one_work+0x148/0x284
-> > >>> [   41.739587]  bh_worker+0x224/0x278
-> > >>> [   41.744985]  workqueue_softirq_action+0x78/0x88
-> > >>> [   41.750545]  tasklet_action+0x14/0x3c
-> > >>> [   41.756023]  handle_softirqs+0x100/0x23c
-> > >>> [   41.761506]  __do_softirq+0x14/0x20
-> > >>> [   41.766917]  ____do_softirq+0x10/0x20
-> > >>> [   41.772301]  call_on_irq_stack+0x24/0x54
-> > >>> [   41.777689]  do_softirq_own_stack+0x1c/0x40
-> > >>> [   41.783106]  irq_exit_rcu+0x94/0xd0
-> > >>> [   41.788455]  el1_interrupt+0x38/0x68
-> > >>> [   41.793799]  el1h_64_irq_handler+0x18/0x24
-> > >>> [   41.799200]  el1h_64_irq+0x68/0x6c
-> > >>> [   41.804532]  default_idle_call+0x28/0x58
-> > >>> [   41.809931]  do_idle+0x1fc/0x260
-> > >>> [   41.815152]  cpu_startup_entry+0x34/0x40
-> > >>> [   41.820346]  kernel_init+0x0/0x140
-> > >>> [   41.825437]  console_on_rootfs+0x0/0x6c
-> > >>> [   41.830477]  __primary_switched+0x80/0x88
-> > >>> [   41.835501] Code: 54000280 d294f8c0 940e1f8c d503203f (b9400340)
-> > >>> [   41.840748] ---[ end trace 0000000000000000 ]---
-> > >>> [   41.845896] Kernel panic - not syncing: Oops: Fatal exception in=
- interrupt
-> > >>> [   41.851321] SMP: stopping secondary CPUs
-> > >>> [   41.856502] Kernel Offset: 0x2384800000 from 0xffffffc080000000
-> > >>> [   41.861840] PHYS_OFFSET: 0x0
-> > >>> [   41.866814] CPU features: 0x0c,00000014,00280928,4201720b
-> > >>> [   41.872087] Memory Limit: none
-> > >>> [   41.877119] Rebooting in 1 seconds..
-> > >>>
-> > >>> Best regards,
-> > >>>
-> > >>> Adam Green
-> > >>
-> >
+> So to save power, need to call pm_runtime_force_suspend() to gate off the=
+ clock when enable sdio irq for system wakeup.
+> This is the main reason I involve pm_runtime_force_suspend in noirq stage=
+, because in sdhci_irq, there is register access, need gate on clock.
+
+In summary, to support the out-band irq as a wakeup for runtime and
+system suspend, dev_pm_set_dedicated_wake_irq* should be used.
+
+To move things forward, I suggest you start simple and add support for
+the out-band irq as a step on top.
+
+[...]
+
+Kind regards
+Uffe
