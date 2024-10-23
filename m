@@ -1,160 +1,376 @@
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.160])
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 034361E2606
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 01A7D1E2604
 	for <linux-mmc@vger.kernel.org>; Wed, 23 Oct 2024 14:41:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.160
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.53
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729694518; cv=pass; b=Surg+ZjL5ITNnx6FbGZFX2E1TkFHEEQh455CcnMRGCcT2NEcJYgLjiVtE+T8OOedi+CGG8YRyy3nZEJb1+we4YRt3n5OX5XcyJK3bsoQ5tTjm9r+rCyU6mY5USehH0oiGG1NRJKeuZm4J3mC5TgvcA5WQ0hJSNzgxtav9CLJb1E=
+	t=1729694518; cv=pass; b=EoxQmnxCC3WsY5siRu3ldq+AXQLWEzuANQGSIznJEDo1gRYjBopxRPxURs8ZHA5UTx5ATxDssYnFdU0V5gClD2sw0Lih8obxtHcfv8I+1Rm5F2RT9+cRkLxNGhws+Z0Uc6LAGmWIvGzP1wqI9HfA/rkmC9UUn/w38QgxiZi9HJk=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1729694518; c=relaxed/simple;
-	bh=J7Bfl+7hquDBF91RxmHwA6GI4xGbfnC6bhT2hnlxnHU=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=JKaglRez2zD/9hJZ1ciwZbo6kWKRESWpr8HdrYP7XrUYRXCe+MzNiCQDJAxmMfUMBSheQv/mezszPcioMMb06piq2YqARq+FacJWvP0ZuRl0APYJaQXCRrZzk021i2y13r6cdewalDmTsbZiN1txr3c++LjVZMRAXvGIZY0S49w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=o6Kw6JU+; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=gc9LCj28; arc=pass smtp.client-ip=81.169.146.160
+	bh=pOEkrvIZrlmY1ohTqJlokFeiG/QYgPns/4D/kUf+QLU=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=t/kbS5mFZoX5IXBKtXlUNud7wWhCBsQOMt5Q+d+lk+J6zXB6rppzyaNl2yS6weDDYYlI1AxSJzjrNiPpyb+6KFOUJOMYn3sL6QZs5MDZbOC3SbSNaMjNz0AQGJndAp20TFz/CongyHixBXS26lZkbrFSTnGsnbbHFsyEd/Qzi58=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=kj+uu/rV; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=Z5+zlVrS; arc=pass smtp.client-ip=85.215.255.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="o6Kw6JU+";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="gc9LCj28"
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="kj+uu/rV";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="Z5+zlVrS"
 ARC-Seal: i=1; a=rsa-sha256; t=1729694329; cv=none;
     d=strato.com; s=strato-dkim-0002;
-    b=LPrJZPvL+5LmWZVZ/vDQN7jcfviV7r3N3/JpE+twdKNQdB41uv+WTBGCD+j3N23rLl
-    xMf4+5ab7MeLg+kpM/buyzKoW6AJyzIqp6fOyBitWSz/S/vIV1utnUTXIVrrl/VuKdqX
-    XQIo2W336Jbrv8wbF7azHMGT523McThTkEj4tLB8u9Zu0x87ydXkcYEnZHCvLha2vyrd
-    gBWV1UOVMwEMa8ui6NCRnj3NJF/FcPoPfUQeG83FUtHZjNRqnXRj09Bhunud/rAN1hGs
-    HauBkcTH1vAdqkQ/ohegREHi9U+p8JaljQNlPjUIYMIJdt2vgAtPQJAIpeSlH1HisICL
-    M6KQ==
+    b=LCxn8BalzfGXVfWWLOjGEDPvIq+1s8SenSNXx8SCAmR1oL22igIFmZwsAfL/C4WXVC
+    72knNw4tKNmyMMsabKpIeaftTr7z5IHsVyO7Gfb/Xo2eT01IFtMFNV2fGv10SNW3o2Jn
+    mDXumds11Wwzl0FucVoNKlggTl1hhVeXOfKZBWJeh58ZvW6x1HciZ0pidTuQW44OJLUj
+    RXDS/gHM20sfhTKFIg94DZj0/4q2JD7PM5xI4BAl4C7uXbcE19Ta487XFaKcq+oMn3Vi
+    qnboGzRmICvGHSvP9xN1AaJit7RfDEXz3P72ceDI0lyS8wJD19rLtpkt1yjLA1a7YA4n
+    px0Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729694329;
     s=strato-dkim-0002; d=strato.com;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=2CHizuN/dbjj3UAK+J4sPeWTuQT7n/7DZDpBofVhcm8=;
-    b=OBzKdV5LXtenppaxsSUFiX9lUgVgUU6txNK6bhxmQnZyjY+ZzpLOsMWuxkcddbEvDM
-    thTHoKQDldNER3N+csahn2BsTZd8WYHva+M2tTAbvzQBs6vR6+BiIwG87fCdVMpKaeCm
-    t1RF20o8hla/5+ouFGf/YpOcRiogHnXHwMqogvPbywZvBRTVpyighaDJ22UtVATzl7Ft
-    uDavtsWOOeuY6f09nV7vUzeZkFzUSGFze/Aw+XsQYPLS1UOKQfXNZqahQjRoQFhHjM5W
-    tYITc35BrF9obzNlGobXCagnyniVerYGllKedPEiKbcYdA4YN4sGw9orBrwhjJvJ3oq0
-    6eLQ==
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=vzR3H7P+FOprNzNIrZ9JI6UECdvh7ijlmk5vCwjA5Zw=;
+    b=XyR+l4omxEy6mkotdhhWP+dYr/Z1sGZUKLFht3+tk8yILLzzZndaA8QPb+irHXJZLZ
+    IeVz++wCP16+yhp6MOVbEAhwFP+2LTBwBPPU4eQYFxM+wHL5jCW+ZAKfHGEJmITJGsp4
+    i4fx7YiG/lLBYhqyWyRx79hMlDC1SjsZG/PCsuOroAp/LV9kNh1cNzsYLiypbA4nXILk
+    vO2gbA6ltKdXovGx5jCQf/mfvhuSWbEGeVzLpCuOPoQIlHdZnXchZRxQ7qEwjqU77Xfv
+    QyVykAb2aXTEW5qMGeQML3wc8eOCzmupJKOnXHYQTG3BdSoGz+3eLl7IrErT3rcGwzQD
+    ZD2g==
 ARC-Authentication-Results: i=1; strato.com;
     arc=none;
     dkim=none
-X-RZG-CLASS-ID: mo00
+X-RZG-CLASS-ID: mo01
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729694329;
     s=strato-dkim-0002; d=iokpp.de;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=2CHizuN/dbjj3UAK+J4sPeWTuQT7n/7DZDpBofVhcm8=;
-    b=o6Kw6JU+2KVWYDCFnzrYAWoe9MvwKMwbbPySdI8o0Hau2thg10RVq99yRGBbfP9B8Y
-    WLghfiYxsUGG5+9HkLyPRiCidbfnUocF7ePua+h7v8jAJOV/FA+6L1gt+Evw9/vOdolQ
-    tKYE/9UubFrvU2zxiolehTa2fcVUhP/rPABzA4zvUlTJr/oMpgbQ6X5ZTGdH4Wjch2BZ
-    ZraVBHvx0GQsLmditForLHT21XVfp+Hqpdzem712pURnDyCRdWQBmWahg/aDoQPaD6N5
-    l/FZ8I0hjSgf8j5Nk7t4Ju+6iWzBFie4iyLgVnF4IXS2AP3YYtwHqXEBslmULMwZoszT
-    wluA==
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=vzR3H7P+FOprNzNIrZ9JI6UECdvh7ijlmk5vCwjA5Zw=;
+    b=kj+uu/rV/c5dBe1KlVRE/ixLgc71sAOW/lIh+u5E22Pr4CONwgq1YGu0xdY8Hwpb2L
+    BfOS2beDZFUeVTUhKH8yJ57HrQLNDnfriYcKCfDbcoL2pePPgIedgdrnl74c9kJdPoQu
+    84Kv/WsTjOrVdiuUo+JDcqo0jIZWe492mATFr2ozR08Ap2gPMbXpdAI9cN6In0y/vxyI
+    CUL02DdxXvtZxkSPT0wmjgyU4ifXdw0YCLuyKWI3pg4vFhUDPH7exqXXgMYxQtXd/nnz
+    NCulxiVAc0qpBkiCVnNddEs6tsNTeJ6ugCYRlplKFzcsYsvTunzoZGgTZv42S00z9uPY
+    1USQ==
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729694329;
     s=strato-dkim-0003; d=iokpp.de;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=2CHizuN/dbjj3UAK+J4sPeWTuQT7n/7DZDpBofVhcm8=;
-    b=gc9LCj28gI7cXTiZjG5IkdoUFZyXzuhceIEhEXkY1KHMA8bMRccwrUiuog9ZDeAUYd
-    P8IKagmDRGrrh/zpilBA==
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=vzR3H7P+FOprNzNIrZ9JI6UECdvh7ijlmk5vCwjA5Zw=;
+    b=Z5+zlVrS29eDgCfM4lO93wonW4ZUbg1GeiNYAep2H8Ls1fL4dUZhHA6E64QgIMsLlK
+    GvBnnQd9uN2yuTm/BJAA==
 X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O2J2YOom0XQaPis+nU/xK"
 Received: from Munilab01-lab.micron.com
     by smtp.strato.de (RZmta 51.2.11 AUTH)
-    with ESMTPSA id za0ed209NEcmTm7
+    with ESMTPSA id za0ed209NEcnTm9
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
 	(Client did not present a certificate);
-    Wed, 23 Oct 2024 16:38:48 +0200 (CEST)
+    Wed, 23 Oct 2024 16:38:49 +0200 (CEST)
 From: Bean Huo <beanhuo@iokpp.de>
 To: avri.altman@wdc.com,
 	ulf.hansson@linaro.org,
 	linux-mmc@vger.kernel.org,
 	vfazio@xes-inc.com
-Cc: Bean Huo <beanhuo@iokpp.de>
-Subject: [PATCH v4 0/5] Add multiple FFU modes in mmc-utils based on eMMC specification 6.6.18 for flexible firmware updates
-Date: Wed, 23 Oct 2024 16:38:34 +0200
-Message-Id: <20241023143839.108572-1-beanhuo@iokpp.de>
+Cc: Bean Huo <beanhuo@micron.com>
+Subject: [PATCH v4 2/5] mmc-utils: Add FFU mode 2
+Date: Wed, 23 Oct 2024 16:38:36 +0200
+Message-Id: <20241023143839.108572-3-beanhuo@iokpp.de>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20241023143839.108572-1-beanhuo@iokpp.de>
+References: <20241023143839.108572-1-beanhuo@iokpp.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="us-ascii"
 
-Following the discussions with Avri at the 2024 ALPSS, I am submitting these patches to
-introduce multiple FFU modes, as defined in the eMMC specification 6.6.18.
+From: Bean Huo <beanhuo@micron.com>
 
-The new FFU implementation can support diverse vendor requirements and operational conditions.
-The key benefits include:
+Added a new FFU mode 2, in this mode, begins with CMD6, followed by repeated
+CMD23+CMD25 for downloading the firmware bundle. Once the entire firmware image is downloaded,
+the FFU mode is exited with CMD6, ensuring the download is treated as an atomic operation.
 
-1, The host can select the most appropriate update mode based on device capabilities and
-firmware size.
-2, The patches ensure that firmware downloads are treated as a single, uninterrupted operation,
-preventing partial updates that could compromise device stability.
-3, Some new modes keep the device in FFU mode throughout the process, reducing the risk of
-premature exits and update failures.
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+---
+ mmc.1      |   5 ++-
+ mmc.c      |   9 +++-
+ mmc_cmds.c | 126 +++++++++++++++++++++++++++++++++++++++++------------
+ mmc_cmds.h |   3 +-
+ 4 files changed, 112 insertions(+), 31 deletions(-)
 
-By supporting these modes, we can better accommodate varying firmware sizes and ensure smoother,
-more reliable firmware updates across different scenarios.
-
-
-Summary of Changes:
-
-FFU mode 1:
-Uses CMD6 to enter FFU mode, CMD23 to set the block count, CMD25 for multiple-block write, and
-CMD6 to exit FFU mode. This mode may exit FFU mode during the download if the firmware size exceeds
-the chunk size.
-
-FFU mode 2:
-Similar to mode 1, but repeats CMD23+CMD25 for each chunk, ensuring FFU mode is maintained
-throughout the firmware download. FFU mode is only exited after the entire firmware has been
-successfully downloaded.
-
-FFU mode 3: use CMD25+CMD12 for open-ended multiple-block write
-Introduces a method using CMD25 for open-ended multiple-block writes followed by CMD12 to stop
-the transmission. This allows for a smoother and more continuous firmware bundle download.
-
-FFU mode 4: use CMD6 and CMD24 for single-block write
-A new mode that uses CMD6 to enter FFU mode, CMD24 for single-block writes, and CMD6 to exit FFU
-mode after each write cycle. This ensures granular control over each block but may introduce more
-frequent mode transitions.
-
-FFU mode 5: use CMD6 and repeated CMD24 sequence
-In this mode, CMD6 is used to enter FFU mode, followed by repeated CMD24 single-block writes.
-After all firmware data is written, CMD6 is used to exit FFU mode, ensuring an atomic and
-uninterrupted download process.
-
-
-Changelog:
-
- v1 -- v2:
- 	1. Added memset() to clean command structure
- v2 -- V3:
- 	1. Refactor patch, and remove ffu dedicated file mmc_ffu.c
- v3 -- v4:
- 	1. Incorporated Avri’s comments
-	2. Due to "ERROR: in command 'ffu', 'ffu' is ambiguous" when using "mmc ffu", update
-	   default FFU mode 'ffu' to 'ffu1'
-
-
-
-Bean Huo (5):
-  mmc-utils: Refactor common FFU code into functions to support
-    additional FFU modes
-  mmc-utils: Add FFU mode 2
-  mmc-utils: Add new FFU mode using CMD25+CMD12 for Open-ended write
-    download FW
-  mmc-utils: Add FFU mode 4 that uses CMD6 and CMD24 single-block write
-    to download firmware
-  mmc-utils: Add FFU mode 5 for firmware download using repeated CMD24
-    single-block write command
-
- mmc.1      |  14 +-
- mmc.c      |  24 ++-
- mmc.h      |   1 +
- mmc_cmds.c | 480 +++++++++++++++++++++++++++++++++++++----------------
- mmc_cmds.h |   6 +-
- 5 files changed, 381 insertions(+), 144 deletions(-)
-
+diff --git a/mmc.1 b/mmc.1
+index e153557..256852b 100644
+--- a/mmc.1
++++ b/mmc.1
+@@ -185,13 +185,16 @@ The device path should specify the cid sysfs file directory.
+ Print SCR data from \fIdevice\-path\fR.
+ The device path should specify the scr sysfs file directory.
+ .TP
+-.BI ffu " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
++.BI ffu1 " " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
+ Run Field Firmware Update with \fIimage\-file\-name\fR on the device.
+ .br
+ [\fIchunk\-bytes\fR] is optional and defaults to its max - 512k. should be in decimal bytes and sector aligned.
+ .br
+ if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the largest possible chunks: max(image-file, 512k).
+ .TP
++.BI ffu2 " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
++Same as 'ffu1', but uses CMD23+CMD25 for repeated downloads and remains in FFU mode until completion.
++.TP
+ .BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
+ Send Erase CMD38 with specific argument to the device.
+ .br
+diff --git a/mmc.c b/mmc.c
+index 2c5b9b5..ffc98dc 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -227,13 +227,18 @@ static struct Command commands[] = {
+ 		  "The device path should specify the scr file directory.",
+ 	  NULL
+ 	},
+-	{ do_ffu, -2,
+-	  "ffu", "<image name> <device> [chunk-bytes]\n"
++	{ do_ffu1, -2,
++	  "ffu1", "<image name> <device> [chunk-bytes]\n"
+ 		"Run Field Firmware Update with <image name> on <device>.\n"
+ 		"[chunk-bytes] is optional and defaults to its max - 512k. "
+ 		"should be in decimal bytes and sector aligned.\n",
+ 	  NULL
+ 	},
++	{ do_ffu2, -2,
++	 "ffu2", "<image name> <device> [chunk-bytes]\n"
++	 "Same as 'ffu1', but uses CMD23+CMD25 for repeated downloads and remains in FFU mode until completion.\n",
++	 NULL
++	},
+ 	{ do_erase, -4,
+ 	"erase", "<type> " "<start address> " "<end address> " "<device>\n"
+ 		"Send Erase CMD38 with specific argument to the <device>\n\n"
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 1a35431..c183a2d 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2813,23 +2813,40 @@ out:
+ 
+ static void set_ffu_download_cmd(struct mmc_ioc_multi_cmd *multi_cmd,
+ 			       __u8 *ext_csd, unsigned int bytes, __u8 *buf,
+-			       off_t offset)
++			       off_t offset, __u8 ffu_mode)
+ {
+ 	__u32 arg = per_byte_htole32(&ext_csd[EXT_CSD_FFU_ARG_0]);
+ 
+-	/* send block count */
+-	set_single_cmd(&multi_cmd->cmds[1], MMC_SET_BLOCK_COUNT, 0, 0,
+-		       bytes / 512);
+-	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+-
+-	/*
+-	 * send image chunk: blksz and blocks essentially do not matter, as
+-	 * long as the product is fw_size, but some hosts don't handle larger
+-	 * blksz well.
+-	 */
+-	set_single_cmd(&multi_cmd->cmds[2], MMC_WRITE_MULTIPLE_BLOCK, 1,
+-		       bytes / 512, arg);
+-	mmc_ioc_cmd_set_data(multi_cmd->cmds[2], buf + offset);
++	/* prepare multi_cmd for FFU based on cmd to be used */
++	if (ffu_mode == 1) {
++		/* put device into ffu mode */
++		fill_switch_cmd(&multi_cmd->cmds[0], EXT_CSD_MODE_CONFIG, EXT_CSD_FFU_MODE);
++		/* send block count */
++		set_single_cmd(&multi_cmd->cmds[1], MMC_SET_BLOCK_COUNT, 0, 0,
++			       bytes / 512);
++		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++
++		/*
++		 * send image chunk: blksz and blocks essentially do not matter, as
++		 * long as the product is fw_size, but some hosts don't handle larger
++		 * blksz well.
++		 */
++		set_single_cmd(&multi_cmd->cmds[2], MMC_WRITE_MULTIPLE_BLOCK, 1,
++			       bytes / 512, arg);
++		mmc_ioc_cmd_set_data(multi_cmd->cmds[2], buf + offset);
++		/* return device into normal mode */
++		fill_switch_cmd(&multi_cmd->cmds[3], EXT_CSD_MODE_CONFIG, EXT_CSD_NORMAL_MODE);
++	} else if (ffu_mode == 2) {
++		/*
++		 * FFU mode 2 uses CMD23+CMD25 for repeated downloads and remains in FFU mode
++		 * during FW bundle downloading until completion. In this mode, multi_cmd only
++		 * has 2 sub-commands.
++		 */
++		set_single_cmd(&multi_cmd->cmds[0], MMC_SET_BLOCK_COUNT, 0, 0, bytes / 512);
++		multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++		set_single_cmd(&multi_cmd->cmds[1], MMC_WRITE_MULTIPLE_BLOCK, 1, bytes / 512, arg);
++		mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf + offset);
++	}
+ }
+ 
+ /*
+@@ -2873,6 +2890,36 @@ static bool ffu_is_supported(__u8 *ext_csd, char *device)
+ 	return true;
+ }
+ 
++static int enter_ffu_mode(int dev_fd)
++{
++	int ret;
++	struct mmc_ioc_cmd cmd;
++
++	memset(&cmd, 0, sizeof(cmd));
++
++	fill_switch_cmd(&cmd, EXT_CSD_MODE_CONFIG, EXT_CSD_FFU_MODE);
++	ret = ioctl(dev_fd, MMC_IOC_CMD, &cmd);
++	if (ret)
++		perror("enter FFU mode failed!");
++
++	return ret;
++}
++
++static int exit_ffu_mode(int dev_fd)
++{
++	int ret;
++	struct mmc_ioc_cmd cmd;
++
++	memset(&cmd, 0, sizeof(cmd));
++
++	fill_switch_cmd(&cmd, EXT_CSD_MODE_CONFIG, EXT_CSD_NORMAL_MODE);
++	ret = ioctl(dev_fd, MMC_IOC_CMD, &cmd);
++	if (ret)
++		perror("exit FFU mode failed!");
++
++	return ret;
++}
++
+ /*
+  * Performs FFU download of the firmware bundle.
+  *
+@@ -2886,7 +2933,7 @@ static bool ffu_is_supported(__u8 *ext_csd, char *device)
+  *         On failure, returns a negative error number.
+  */
+ static int do_ffu_download(int dev_fd, __u8 *ext_csd, __u8 *fw_buf, off_t fw_size,
+-							unsigned int chunk_size)
++							unsigned int chunk_size, __u8 ffu_mode)
+ {
+ 	int ret;
+ 	__u8 num_of_cmds = 4;
+@@ -2898,6 +2945,10 @@ static int do_ffu_download(int dev_fd, __u8 *ext_csd, __u8 *fw_buf, off_t fw_siz
+ 		fprintf(stderr, "unexpected NULL pointer\n");
+ 		return -EINVAL;
+ 	}
++
++	if (ffu_mode != 1) /* in FFU mode 1, mmc_ioc_multi_cmd contains 4 commands */
++		num_of_cmds = 2;
++
+ 	/* allocate maximum required */
+ 	multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+ 				num_of_cmds * sizeof(struct mmc_ioc_cmd));
+@@ -2906,14 +2957,15 @@ static int do_ffu_download(int dev_fd, __u8 *ext_csd, __u8 *fw_buf, off_t fw_siz
+ 		return -ENOMEM;
+ 	}
+ 
+-	/* prepare multi_cmd for FFU based on cmd to be used */
+-	/* put device into ffu mode */
+-	fill_switch_cmd(&multi_cmd->cmds[0], EXT_CSD_MODE_CONFIG,
+-			EXT_CSD_FFU_MODE);
+-
+-	/* return device into normal mode */
+-	fill_switch_cmd(&multi_cmd->cmds[3], EXT_CSD_MODE_CONFIG,
+-			EXT_CSD_NORMAL_MODE);
++	if (ffu_mode != 1) {
++		/*
++		 * If the device is not in FFU mode 1, the command to enter FFU mode will be sent
++		 * independently, separate from the firmware bundle download command.
++		 */
++		ret = enter_ffu_mode(dev_fd);
++		if (ret)
++			goto out;
++	}
+ 
+ do_retry:
+ 	bytes_left = fw_size;
+@@ -2924,7 +2976,7 @@ do_retry:
+ 		bytes_per_loop = bytes_left < chunk_size ? bytes_left : chunk_size;
+ 
+ 		/* prepare multi_cmd for FFU based on cmd to be used */
+-		set_ffu_download_cmd(multi_cmd, ext_csd, bytes_per_loop, fw_buf, off);
++		set_ffu_download_cmd(multi_cmd, ext_csd, bytes_per_loop, fw_buf, off, ffu_mode);
+ 
+ 		/* send ioctl with multi-cmd, download firmware bundle */
+ 		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+@@ -2935,7 +2987,7 @@ do_retry:
+ 			 * In case multi-cmd ioctl failed before exiting from
+ 			 * ffu mode
+ 			 */
+-			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
++			exit_ffu_mode(dev_fd);
+ 			goto out;
+ 		}
+ 
+@@ -2962,6 +3014,16 @@ do_retry:
+ 		off += bytes_per_loop;
+ 	}
+ 
++	if (ffu_mode != 1) {
++		/*
++		 * If the device is not in FFU mode 1, the command to exit FFU mode will be sent
++		 * independently, separate from the firmware bundle download command.
++		 */
++		ret = exit_ffu_mode(dev_fd);
++		if (ret)
++			goto out;
++	}
++
+ 	ret = get_ffu_sectors_programmed(dev_fd, ext_csd);
+ out:
+ 	free(multi_cmd);
+@@ -3009,7 +3071,7 @@ out:
+ 	return ret;
+ }
+ 
+-int do_ffu(int nargs, char **argv)
++static int __do_ffu(int nargs, char **argv, __u8 ffu_mode)
+ {
+ 	int dev_fd, img_fd;
+ 	int ret = -EINVAL;
+@@ -3085,7 +3147,7 @@ int do_ffu(int nargs, char **argv)
+ 	}
+ 
+ 	/* Download firmware bundle */
+-	ret = do_ffu_download(dev_fd, ext_csd, fw_buf, fw_size, default_chunk);
++	ret = do_ffu_download(dev_fd, ext_csd, fw_buf, fw_size, default_chunk, ffu_mode);
+ 	/* Check programmed sectors */
+ 	if (ret > 0 && (ret * 512) == fw_size) {
+ 		fprintf(stderr, "Programmed %jd/%jd bytes\n", (intmax_t)fw_size, (intmax_t)fw_size);
+@@ -3125,6 +3187,16 @@ out:
+ 	return ret;
+ }
+ 
++int do_ffu1(int nargs, char **argv)
++{
++	return __do_ffu(nargs, argv, 1);
++}
++
++int do_ffu2(int nargs, char **argv)
++{
++	return __do_ffu(nargs, argv, 2);
++}
++
+ int do_general_cmd_read(int nargs, char **argv)
+ {
+ 	int dev_fd;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 5f2bef1..e2eba91 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -41,7 +41,8 @@ int do_rpmb_read_block(int nargs, char **argv);
+ int do_rpmb_write_block(int nargs, char **argv);
+ int do_cache_en(int nargs, char **argv);
+ int do_cache_dis(int nargs, char **argv);
+-int do_ffu(int nargs, char **argv);
++int do_ffu1(int nargs, char **argv);
++int do_ffu2(int nargs, char **argv);
+ int do_read_scr(int argc, char **argv);
+ int do_read_cid(int argc, char **argv);
+ int do_read_csd(int argc, char **argv);
 -- 
 2.34.1
 
