@@ -1,84 +1,163 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57FBD1537CB;
-	Wed, 23 Oct 2024 06:57:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 90DC8155A4E;
+	Wed, 23 Oct 2024 08:59:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729666672; cv=none; b=jJaX+vrEffzfDsgUXIFo5YcA4rJ1spTJc5RcVzWQBtlcF+2ReX0oeeIYGH1bMra/dj1HPBlun6EKa9xM0NzQJU0EVhG3NLU8C41diPkhTU68Qdb1iucENdhjZisGpg5w0Naib2xfKqvb3sMdHu46Sf+di/23Z2UvFf+xQf6rXbY=
+	t=1729673952; cv=none; b=J8bO/0bEaaXeVHdX9Rm9HL5iNPHbJESzlxLnniQCov64gVs3os1hjRVzCQpzZIK9TkErCCqMqNc48mmqRbVspbFlsv7z7l0zDB2BtOpoqqH3NbIisH73MzJwduBZnreFTvzMn19YqkWLzt2YK6qFm6EZpb6cI/J+vy5Ph4ro4xY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729666672; c=relaxed/simple;
-	bh=JM0QX+rcNcciycCq4cQEVeZ/Eg12wyw+gI6m5h++2PM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=B23ngIcCoZzbYwLHDTROa+Joe48/UrVVPMoZ4hyHxXRZCmqIiNJ9ODDKzTxAuj4P2lApOvW6XGgS83kssSU+86cZ1PVrEe0tMR/+L+IpWnVyzDGS30B/nlhl5hIjPNixyEt/1cDtEEvLQU8iWQImI85J6ER8qVN11h7OIDQxKV8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=4HpS1+iP; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1729673952; c=relaxed/simple;
+	bh=3Z7u4wZm/iuLqCCuaeor5uPPDgpyABJSSkp9X+2Lfyg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=C61CidQ8u25g3vx1h1OXy2amUoQ5pcjgiKF1X3hhe3fRe5dfBtXeXCKAJa4dumVy1FknSscx7cSmif8ZrdJqjBGhKwydW+1kYEieZfZkXLDG92H2A5f49NztG7XZsCb7nJetRkuaUcaNTi/iq81IQOV7+w4mXZy9L1eQRXK59UI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=JoY7Ghmu; arc=none smtp.client-ip=192.198.163.15
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="4HpS1+iP"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=l/dIdLkpg3nY7mL+kOCv40XaN/+P5ZiBELHPID6DHIA=; b=4HpS1+iPtWu3Q6rWByBHg6zg1t
-	1JrA57T8qGLy/cN7tUE72nHaaV+hXcY7NKaOu2lwF5Sk4Vf8Y9Y9WZB1W1BbPt2NuqOn3gJohocEN
-	f9PsZyaA7pOeWgeIIKsi75KubAnO0mtLiUnx6idLonBZGG/rj3qcVP+5tv1+h9H8jcMBlW+pdcFV8
-	XpAcLjFgATy7mW7gDgV9b1TGTT8w6JYxd33LZfFcNIKE7byvcDEMecLyzGlzcBn0I3z6ZfN4bXvUZ
-	Qp3bmBRNjyEbdYyBKc6jK6NOF6ffCtsh+Ay7cBYCyQ2rXf5msRguvAu/zehYyBKpN9Hnc5WVx0grf
-	LB02Fw/g==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1t3VJM-0000000DHn8-1MMo;
-	Wed, 23 Oct 2024 06:57:40 +0000
-Date: Tue, 22 Oct 2024 23:57:40 -0700
-From: Christoph Hellwig <hch@infradead.org>
-To: Adrian Vovk <adrianvovk@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>,
-	Eric Biggers <ebiggers@kernel.org>,
-	Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk,
-	song@kernel.org, yukuai3@huawei.com, agk@redhat.com,
-	snitzer@kernel.org, Mikulas Patocka <mpatocka@redhat.com>,
-	adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
-	ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org,
-	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org,
-	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev,
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-hardening@vger.kernel.org, quic_srichara@quicinc.com,
-	quic_varada@quicinc.com
-Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
-Message-ID: <ZxieZPlH-S9pakYW@infradead.org>
-References: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
- <20240916085741.1636554-2-quic_mdalam@quicinc.com>
- <20240921185519.GA2187@quark.localdomain>
- <ZvJt9ceeL18XKrTc@infradead.org>
- <ef3c9a17-79f3-4937-965e-52e2b9e66ac2@gmail.com>
- <ZxHwgsm2iP2Z_3at@infradead.org>
- <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
- <ZxH4lnkQNhTP5fe6@infradead.org>
- <D96294E2-F17A-4E58-90FB-1D17747048E5@gmail.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="JoY7Ghmu"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1729673951; x=1761209951;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=3Z7u4wZm/iuLqCCuaeor5uPPDgpyABJSSkp9X+2Lfyg=;
+  b=JoY7GhmumQ9k63v9d4Uu43SRkDrs62+tahV8W+7cFtJHDNeqJLNZ8Yqj
+   OTdF8mkrNjH6qtv/yhVGhBxnvZPsBGXp6Px+hU/3sOinMIDVKApVSEyB9
+   S3H0l6PRT0Pdt7rbtBlVEIU7MHnUDL7Vp1c48udv4aPQA1qtweg0U/E2U
+   PDC9udkp0PxsPvQ6VP5jdwqiYDbIRTSRwueZH4SHce74W5oatYXOPrTZH
+   Quk4Sb6QQEn9pNlwMH+B6SYzXkC6b6xLvJmZyPV3avH9sVYNQuuCea5Ui
+   PdVE/lURe18M6WejwdgbqsAuGNXcfkWGMKx4VjMSLeNjQS5AHypXQDGH9
+   A==;
+X-CSE-ConnectionGUID: fuDkEGrGRHGkd9eGz02dHw==
+X-CSE-MsgGUID: NpplyEdEQGewISAe4CSaAA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11233"; a="29360978"
+X-IronPort-AV: E=Sophos;i="6.11,225,1725346800"; 
+   d="scan'208";a="29360978"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmvoesa109.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2024 01:59:10 -0700
+X-CSE-ConnectionGUID: 1HHVKIziSdGBTI6/bdW74w==
+X-CSE-MsgGUID: 3d3neFQNSFWQwkjXzm5tAA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.11,225,1725346800"; 
+   d="scan'208";a="103414582"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.115.59])
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Oct 2024 01:59:06 -0700
+Message-ID: <1cb08708-fca2-48a9-9cf9-c0c1ac004587@intel.com>
+Date: Wed, 23 Oct 2024 11:59:01 +0300
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <D96294E2-F17A-4E58-90FB-1D17747048E5@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC v3 1/2] mmc: core: Add vendor hook to control
+ reprogram keys to Crypto Engine
+To: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
+ quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+ quic_bhaskarv@quicinc.com, quic_neersoni@quicinc.com,
+ quic_gaurkash@quicinc.com, Eric Biggers <ebiggers@google.com>,
+ Abel Vesa <abel.vesa@linaro.org>
+References: <20241006135530.17363-1-quic_spuppala@quicinc.com>
+ <20241006135530.17363-2-quic_spuppala@quicinc.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241006135530.17363-2-quic_spuppala@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Oct 18, 2024 at 11:03:50AM -0400, Adrian Vovk wrote:
-> Sure, but then this way you're encrypting each partition twice. Once by the dm-crypt inside of the partition, and again by the dm-crypt that's under the partition table. This double encryption is ruinous for performance, so it's just not a feasible solution and thus people don't do this. Would be nice if we had the flexibility though.
-
-Why do you assume the encryption would happen twice?
-
-> >Because you are now bypassing encryption for certainl LBA ranges in
-> >the file system based on hints/flags for something sitting way above
-> >in the stack.
-> >
+On 6/10/24 16:55, Seshu Madhavi Puppala wrote:
+> Add mmc_host_ops hook avoid_reprogram_allkeys to control
+> reprogramming keys to Inline Crypto Engine by vendor as some
+> vendors might not require this feature.
 > 
-> Well the data is still encrypted. It's just encrypted with a different key. If the attacker has a FDE dump of the disk, the data is still just as inaccessible to them.
+> Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+> Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> ---
+>  drivers/mmc/core/crypto.c | 8 +++++---
+>  drivers/mmc/host/sdhci.c  | 6 ++++++
+>  include/linux/mmc/host.h  | 7 +++++++
+>  3 files changed, 18 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+> index fec4fbf16a5b..4168f7d135ff 100644
+> --- a/drivers/mmc/core/crypto.c
+> +++ b/drivers/mmc/core/crypto.c
+> @@ -14,9 +14,11 @@
+>  
+>  void mmc_crypto_set_initial_state(struct mmc_host *host)
+>  {
+> -	/* Reset might clear all keys, so reprogram all the keys. */
+> -	if (host->caps2 & MMC_CAP2_CRYPTO)
+> -		blk_crypto_reprogram_all_keys(&host->crypto_profile);
+> +	if (host->ops->avoid_reprogram_allkeys && !host->ops->avoid_reprogram_allkeys()) {
+> +		/* Reset might clear all keys, so reprogram all the keys. */
+> +		if (host->caps2 & MMC_CAP2_CRYPTO)
+> +			blk_crypto_reprogram_all_keys(&host->crypto_profile);
+> +	}
 
-No one knows that it actually is encryped.  The lower layer just knows
-the skip encryption flag was set, but it has zero assurance data
-actually was encrypted.
+Probably nicer to put MMC_CAP2_CRYPTO check first, but also the logic
+needs a tweak:
+
+	/* Reset might clear all keys, so reprogram all the keys. */
+	if (host->caps2 & MMC_CAP2_CRYPTO &&
+	    (!host->ops->avoid_reprogram_allkeys ||
+	     !host->ops->avoid_reprogram_allkeys()))
+		blk_crypto_reprogram_all_keys(&host->crypto_profile);
+
+>  }
+>  
+>  void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index fbf7a91bed35..cd663899c025 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2704,6 +2704,11 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  }
+>  EXPORT_SYMBOL_GPL(sdhci_start_signal_voltage_switch);
+>  
+> +static bool sdhci_avoid_reprogram_allkeys(void)
+> +{
+> +	return false;
+> +}
+> +
+>  static int sdhci_card_busy(struct mmc_host *mmc)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> @@ -3066,6 +3071,7 @@ static const struct mmc_host_ops sdhci_ops = {
+>  	.execute_tuning			= sdhci_execute_tuning,
+>  	.card_event			= sdhci_card_event,
+>  	.card_busy	= sdhci_card_busy,
+> +	.avoid_reprogram_allkeys	= sdhci_avoid_reprogram_allkeys,
+
+There isn't any need for this
+
+>  };
+>  
+>  /*****************************************************************************\
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 88c6a76042ee..c4109d17f177 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -218,6 +218,13 @@ struct mmc_host_ops {
+>  
+>  	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
+>  	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
+> +
+> +	/*
+> +	 * Optional callback to support controllers that dont require to
+> +	 * reprogram all crypto keys on card suspend/resume.
+> +	 */
+> +	bool	(*avoid_reprogram_allkeys)(void);
+> +
+>  };
+>  
+>  struct mmc_cqe_ops {
+
