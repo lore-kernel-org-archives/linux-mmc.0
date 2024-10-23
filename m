@@ -1,66 +1,82 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D283715C13F;
-	Wed, 23 Oct 2024 09:28:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729675692; cv=none; b=qrs0jiLdTmMOIP7jAwU4hl/SUEFsB0XTVsbBnR89v+5P4EZaya+HQLg65QuDsmCvGvQW08gTaSIag2OhG4sn0JfFEJ7iLFy9lCNea7oqZnb7Gnr+LEpfhAwI6AnYgoGHqMQegT1uSO6BzX0HWjgD0rCCYj6DD5JlIh0qNzZrZ7w=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729675692; c=relaxed/simple;
-	bh=1U/86iNR/EYEQDTHkUAQXqy2XQwTqZkjqordBNMQa+4=;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC0F71E22FC
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Oct 2024 14:41:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.54
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1729694518; cv=pass; b=cMizAnXmZQmjD1B2UXc5JdQY3u2xHd5ro/j13bRjQQM3q+/7uTS3+A9ZUz7rLb2buJ2kfQWiuKbgeDtZ7oQlr20YEPcSa0g1D+FnfQizpnKnlFV8Ipwn7rCCeJXimnteik00ausqiqYLqJDXS5vf5rU0YTwlVy+kRAJipObeH5s=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1729694518; c=relaxed/simple;
+	bh=0A8k9TWam9yB/uf9TNe+kd6pqtKxOQyEhwAXy1k8/1s=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=YGLp5D6DLNphs1buwfy2f/tOJK+o3I1DCz15mP/jjTaNJxLUthPc3pCPb4HZll/lrSlWQAsR1iSsT5HXpFF8M5FMz4BRldX/yJydulyut6q7Y3hozBVje6nE3qpnFSi3kPJhNiebQ2TFGM5H43aSjnsLL9a1BZ5kdFRwvW3mamA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=IH2X+03Y; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	 MIME-Version:Content-Type; b=DL0J869LfAumBJBVW3ldbJxBkUVW+0G44LO3L2iEfy+ygOHvnKyPcoQw7FUGCjD/x8FMweyztApUob4Wq/zZIkF5Qft5xUjoEskKrTwX+zRX7G1nDVGWDwbVzQF0sO00EwkSrsrFgmDwPAxDKvWF2rFhMHYMa+Sub8e1QA3pboo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=GGn+SSZM; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=0qRlk2q/; arc=pass smtp.client-ip=85.215.255.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="IH2X+03Y"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49MLa5p8017697;
-	Wed, 23 Oct 2024 09:28:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:date:from:in-reply-to:message-id
-	:mime-version:references:subject:to; s=qcppdkim1; bh=Ngj/RHYHYv2
-	Q3dygQcJq42VRpXyevhAe85mjsl8o7Tw=; b=IH2X+03YCVfe4N0FWukqTUK4VjM
-	dAubCwkgBZMKFw4Zku3ZBt4X+9ugx+JdKvNAvUOFRJTov88MOCRCIKeR39PgElw8
-	vfvrEtC/y95qE32XwNYVO2IjpUoBAKl/wHQy7aUxUlpHHCH5NgPrWM+PL+RbWXlP
-	0q124cFe9mI6RNyCqqEstIFeKXYwDrAfqz8R7TezZGbE8SEM7/bAw2RK8icI+NUj
-	YpPWWYntXVjlDwsXtApTPBdmMYg7MrJ7CE4noawRHPqt3c3MJIOWfF+34VhtOS0U
-	89u0Wop4a7rRH39TTnRCUTMXlHri9KWXrNyY/LJeySMfqK3GS9su+cktMSQ==
-Received: from aptaippmta02.qualcomm.com (tpe-colo-wan-fw-bordernet.qualcomm.com [103.229.16.4])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42em3w9n67-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 23 Oct 2024 09:28:06 +0000 (GMT)
-Received: from pps.filterd (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 49N9S4lM016264;
-	Wed, 23 Oct 2024 09:28:04 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 42cpckqq29-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 23 Oct 2024 09:28:04 +0000
-Received: from APTAIPPMTA02.qualcomm.com (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 49N9S3AN016249;
-	Wed, 23 Oct 2024 09:28:03 GMT
-Received: from cse-cd02-lnx.ap.qualcomm.com (cse-cd02-lnx.qualcomm.com [10.64.75.246])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 49N9S2xj016228
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 23 Oct 2024 09:28:03 +0000
-Received: by cse-cd02-lnx.ap.qualcomm.com (Postfix, from userid 4571896)
-	id 7FAFA137D; Wed, 23 Oct 2024 17:28:01 +0800 (CST)
-From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-        conor+dt@kernel.org, bhupesh.sharma@linaro.org, andersson@kernel.org,
-        konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_tingweiz@quicinc.com, Yuanjie Yang <quic_yuanjiey@quicinc.com>
-Subject: [PATCH v1 2/3] arm64: dts: qcom: qcs615: add SD and emmc node
-Date: Wed, 23 Oct 2024 17:27:07 +0800
-Message-Id: <20241023092708.604195-3-quic_yuanjiey@quicinc.com>
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="GGn+SSZM";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="0qRlk2q/"
+ARC-Seal: i=1; a=rsa-sha256; t=1729694330; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=gkbQl8tbNBfyWYmkZrZvTaPeQl1Z7698WOmRlF7mLsw5B12nTqUCmRwjQyTtIgCOMr
+    jXgJf6a07TxeCyW2ITlcPKgX6Nw2Pj6ddWDeEAGFLLsV1S7uA161qfnM2B7LudI9zpfi
+    lw2+5Gggc6i0urJGOqqzO0wWD1uTtiv4XHW5LFMRvbrors1802dm5Ri0X7nSjWgcG88S
+    NGEScENVpnHPWo3pDR1QVzm6s2LO7CUImfJbMlvcmuST3fzODHhSQEwTB6y9wWiHWuva
+    6W9FisYtUlS3kK9GYKAAl3yV51bCeW5sazxBrAGy0d3kzqxmKGIyXIJitVnh7y40lFXC
+    //xQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729694330;
+    s=strato-dkim-0002; d=strato.com;
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=4UMj/6L75msqfl4ZuzDIdWw+0IgWgStcnjxHHsqRRO4=;
+    b=IfzW2n9KvOCm0FFCnzPSJGpYsHF9ygV7H1Y3A+bfWUJFIUgThH+55p6RoKKt72rSQq
+    57K/onRcATF5Gb8cxf8J8Jr3t/3TXPiWChhvgZkHSYmRkl0R31gK2VXsrBOUzDPd/HZh
+    6g+rnrSe8GJlLXimqQ+g9k36yJ2x7ZEAV+SWLLUmYQ1F5QxJFGhUs5G1rKLQyhKkhRC+
+    Pp2DOuDk7dH3+69556JiEPBmtwh0kjDQpyTp3feyVOhV2HN2SRRLfPjcPZyVloxJ+MS2
+    UmzlbeTBrtazgJJehpbKeW2Bsqq1sKtJqUe1evrISvhM1WXiLaQ2lnUF7RV1PYZQTV3b
+    MlGg==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729694330;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=4UMj/6L75msqfl4ZuzDIdWw+0IgWgStcnjxHHsqRRO4=;
+    b=GGn+SSZMdCHYQgpkptvKk5HcxTRn3a5kzGXD+Myn66H7CjalQ0F1LEC2fg9pUMmQes
+    nAFSXDUDQAL2QLhyUgfjP381GTsh3nDU/p71wRvxvfYSQcrZtws1Wtmqty79vNWlWqQx
+    LyUYVrDsioG3fnBvdmW8rcz7PLHJY0u/BpEyUwTwiMVPFGwcxzSsNkWgdmV2WWKPpkZD
+    WfOEdz7Rz9+TwJ7E3oZGZefgqiRTH3I23Jb4Nz40q1iocCIaFu50q6s8Gs4yP/Jv2hSw
+    GuyBbZMIg8GzFFd+JSIo6ikb3SzrSTHPBoWuJq+run8ns23dwsWyFryJwCBdN/NUMAtw
+    6fkQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729694330;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
+    From:Subject:Sender;
+    bh=4UMj/6L75msqfl4ZuzDIdWw+0IgWgStcnjxHHsqRRO4=;
+    b=0qRlk2q/oU2At0n2eAn+SpkEhvAh9mOEQiuQ7NFXxoYO+d6SusBbSM4NUrARkDQEDM
+    uu+AVE1lmI6DEck2HpAw==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O2J2YOom0XQaPis+nU/xK"
+Received: from Munilab01-lab.micron.com
+    by smtp.strato.de (RZmta 51.2.11 AUTH)
+    with ESMTPSA id za0ed209NEcnTmA
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Wed, 23 Oct 2024 16:38:49 +0200 (CEST)
+From: Bean Huo <beanhuo@iokpp.de>
+To: avri.altman@wdc.com,
+	ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org,
+	vfazio@xes-inc.com
+Cc: Bean Huo <beanhuo@micron.com>
+Subject: [PATCH v4 3/5] mmc-utils: Add new FFU mode using CMD25+CMD12 for Open-ended write download FW
+Date: Wed, 23 Oct 2024 16:38:37 +0200
+Message-Id: <20241023143839.108572-4-beanhuo@iokpp.de>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20241023092708.604195-1-quic_yuanjiey@quicinc.com>
-References: <20241023092708.604195-1-quic_yuanjiey@quicinc.com>
+In-Reply-To: <20241023143839.108572-1-beanhuo@iokpp.de>
+References: <20241023143839.108572-1-beanhuo@iokpp.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,248 +84,107 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 9W-rpbRabXHOII0sTj-RqxfrxsIyhuwm
-X-Proofpoint-ORIG-GUID: 9W-rpbRabXHOII0sTj-RqxfrxsIyhuwm
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 malwarescore=0
- mlxscore=0 lowpriorityscore=0 phishscore=0 impostorscore=0 clxscore=1015
- priorityscore=1501 mlxlogscore=999 suspectscore=0 bulkscore=0 adultscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2409260000
- definitions=main-2410230058
+Content-Type: text/plain; charset="us-ascii"
 
-Add SD and emmc support to the QCS615 Ride platform. The SD controller
-and emmc controller of QCS615 are derived from SM6115. Include the
-relevant binding documents accordingly. Additionally, configure
-emmc-related and SD-related opp, power, and interconnect settings
-in the device tree.
+From: Bean Huo <beanhuo@micron.com>
 
-Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Introduced a new FFU mode 3 of leveraging CMD25+CMD12 for Open-ended Multiple-block write to
+download the firmware bundle. In this mmode, the device remains in FFU mode during firmware
+download until the downloading is completed.
+
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+Acked-by: Avri Altman <avri.altman@wdc.com>
 ---
- arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
- 1 file changed, 198 insertions(+)
+ mmc.1      |  3 +++
+ mmc.c      |  5 +++++
+ mmc.h      |  1 +
+ mmc_cmds.c | 11 +++++++++++
+ mmc_cmds.h |  1 +
+ 5 files changed, 21 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-index fcba83fca7cf..3840edf13fe8 100644
---- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
-+++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-@@ -399,6 +399,65 @@ qfprom: efuse@780000 {
- 			#size-cells = <1>;
- 		};
+diff --git a/mmc.1 b/mmc.1
+index 256852b..220427b 100644
+--- a/mmc.1
++++ b/mmc.1
+@@ -195,6 +195,9 @@ if [\fIchunk\-bytes\fR] is omitted, mmc-utils will try to run ffu using the larg
+ .BI ffu2 " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
+ Same as 'ffu1', but uses CMD23+CMD25 for repeated downloads and remains in FFU mode until completion.
+ .TP
++.BI ffu3 " \fIimage\-file\-name\fR " " \fIdevice\fR " " [\fIchunk\-bytes\fR]
++Same as 'ffu1', but uses CMD25+CMD12 Open-ended Multiple-block write to download and remains in FFU mode until completion.
++.TP
+ .BI erase " " \fItype\fR " " \fIstart-address\fR " " \fIend\-address\fR " " \fIdevice\fR
+ Send Erase CMD38 with specific argument to the device.
+ .br
+diff --git a/mmc.c b/mmc.c
+index ffc98dc..e013fc6 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -239,6 +239,11 @@ static struct Command commands[] = {
+ 	 "Same as 'ffu1', but uses CMD23+CMD25 for repeated downloads and remains in FFU mode until completion.\n",
+ 	 NULL
+ 	},
++	{ do_ffu3, -2,
++	 "ffu3", "<image name> <device> [chunk-bytes]\n"
++	 "Same as 'ffu', but uses CMD25+CMD12 Open-ended Multiple-block write to download and remains in FFU mode until completion.\n",
++	 NULL
++	},
+ 	{ do_erase, -4,
+ 	"erase", "<type> " "<start address> " "<end address> " "<device>\n"
+ 		"Send Erase CMD38 with specific argument to the <device>\n\n"
+diff --git a/mmc.h b/mmc.h
+index 6f1bf3e..14dac38 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -27,6 +27,7 @@
+ #define MMC_BOOT_INITIATION_ARG		0xFFFFFFFA
+ #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
+ #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
++#define MMC_STOP_TRANSMISSION  12      /* ac                           R1b */
+ #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
+ #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
+ #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index c183a2d..4bec56d 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2846,6 +2846,12 @@ static void set_ffu_download_cmd(struct mmc_ioc_multi_cmd *multi_cmd,
+ 		multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+ 		set_single_cmd(&multi_cmd->cmds[1], MMC_WRITE_MULTIPLE_BLOCK, 1, bytes / 512, arg);
+ 		mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf + offset);
++	} else if (ffu_mode == 3) {
++		set_single_cmd(&multi_cmd->cmds[0], MMC_WRITE_MULTIPLE_BLOCK, 1, bytes / 512, arg);
++		multi_cmd->cmds[0].flags = MMC_RSP_R1 | MMC_CMD_ADTC;
++		mmc_ioc_cmd_set_data(multi_cmd->cmds[0], buf + offset);
++		set_single_cmd(&multi_cmd->cmds[1], MMC_STOP_TRANSMISSION, 0, 0, 0);
++		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+ 	}
+ }
  
-+		sdhc_1: mmc@7c4000 {
-+			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0 0x7c4000 0 0x1000>,
-+			      <0 0x7c5000 0 0x1000>;
-+			reg-names = "hc",
-+				    "cqhci";
-+
-+			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq",
-+					  "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>,
-+				 <&rpmhcc RPMH_CXO_CLK>,
-+				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+			clock-names = "iface",
-+				      "core",
-+				      "xo",
-+				      "ice";
-+
-+			resets = <&gcc GCC_SDCC1_BCR>;
-+
-+			power-domains = <&rpmhpd RPMHPD_CX>;
-+			operating-points-v2 = <&sdhc1_opp_table>;
-+			iommus = <&apps_smmu 0x02c0 0x0>;
-+			interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
-+					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-+					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-+					 &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
-+			interconnect-names = "sdhc-ddr",
-+					     "cpu-sdhc";
-+
-+			bus-width = <8>;
-+			qcom,dll-config = <0x000f642c>;
-+			qcom,ddr-config = <0x80040868>;
-+			supports-cqe;
-+			dma-coherent;
-+			mmc-ddr-1_8v;
-+			mmc-hs200-1_8v;
-+			mmc-hs400-1_8v;
-+			mmc-hs400-enhanced-strobe;
-+			status = "disabled";
-+
-+			sdhc1_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-100000000 {
-+					opp-hz = /bits/ 64 <100000000>;
-+					required-opps = <&rpmhpd_opp_svs>;
-+				};
-+
-+				opp-384000000 {
-+					opp-hz = /bits/ 64 <384000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+				};
-+			};
-+		};
-+
- 		qupv3_id_0: geniqup@8c0000 {
- 			compatible = "qcom,geni-se-qup";
- 			reg = <0x0 0x8c0000 0x0 0x6000>;
-@@ -494,6 +553,145 @@ qup_uart0_rx: qup-uart0-rx-state {
- 				pins = "gpio17";
- 				function = "qup0";
- 			};
-+
-+			sdc1_state_on: sdc1-on-state {
-+				clk-pins {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data-pins {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				rclk-pins {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc1_state_off: sdc1-off-state {
-+				clk-pins {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				data-pins {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				rclk-pins {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc2_state_on: sdc2-on-state {
-+				clk-pins {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data-pins {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+			};
-+
-+			sdc2_state_off: sdc2-off-state {
-+				clk-pins {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+
-+				cmd-pins {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				data-pins {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+			};
-+		};
-+
-+		sdhc_2: mmc@8804000 {
-+			compatible = "qcom,qcs615-sdhci","qcom,sdhci-msm-v5";
-+			reg = <0x0 0x8804000 0x0 0x1000>;
-+			reg-names = "hc";
-+
-+			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq",
-+					  "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-+				 <&gcc GCC_SDCC2_APPS_CLK>,
-+				 <&rpmhcc RPMH_CXO_CLK>;
-+			clock-names = "iface",
-+				      "core",
-+				      "xo";
-+
-+			power-domains = <&rpmhpd RPMHPD_CX>;
-+			operating-points-v2 = <&sdhc2_opp_table>;
-+			iommus = <&apps_smmu 0x02a0 0x0>;
-+			resets = <&gcc GCC_SDCC2_BCR>;
-+			interconnects = <&aggre1_noc MASTER_SDCC_2 QCOM_ICC_TAG_ALWAYS
-+					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-+					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-+					 &config_noc SLAVE_SDCC_2 QCOM_ICC_TAG_ALWAYS>;
-+			interconnect-names = "sdhc-ddr",
-+					     "cpu-sdhc";
-+
-+			bus-width = <4>;
-+			qcom,dll-config = <0x0007642c>;
-+			qcom,ddr-config = <0x80040868>;
-+			dma-coherent;
-+			status = "disabled";
-+
-+			sdhc2_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-100000000 {
-+					opp-hz = /bits/ 64 <100000000>;
-+					required-opps = <&rpmhpd_opp_low_svs>;
-+				};
-+
-+				opp-202000000 {
-+					opp-hz = /bits/ 64 <202000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+				};
-+			};
- 		};
+@@ -3197,6 +3203,11 @@ int do_ffu2(int nargs, char **argv)
+ 	return __do_ffu(nargs, argv, 2);
+ }
  
- 		dc_noc: interconnect@9160000 {
++int do_ffu3(int nargs, char **argv)
++{
++	return __do_ffu(nargs, argv, 3);
++}
++
+ int do_general_cmd_read(int nargs, char **argv)
+ {
+ 	int dev_fd;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index e2eba91..413bc85 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -43,6 +43,7 @@ int do_cache_en(int nargs, char **argv);
+ int do_cache_dis(int nargs, char **argv);
+ int do_ffu1(int nargs, char **argv);
+ int do_ffu2(int nargs, char **argv);
++int do_ffu3(int nargs, char **argv);
+ int do_read_scr(int argc, char **argv);
+ int do_read_cid(int argc, char **argv);
+ int do_read_csd(int argc, char **argv);
 -- 
 2.34.1
 
