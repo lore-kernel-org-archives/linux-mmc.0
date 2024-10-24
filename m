@@ -1,140 +1,116 @@
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.218])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8048A1FDF9D
-	for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 14:19:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.218
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729779550; cv=pass; b=IG9tpVbp6QMByGFpCc6rwcsS6WDr2ZaLRjeDZxJHX5WSqjFmv1IwtGLqRyUbduYpSZ6yV55i/xBQXvBpUXJl4GIeCRIBL/JV6Lijez48lppSCy+bbm6yEJ0wq0kBn3WWBPHmqH5vsE9pZOAUtUY2aGx4Ou9mr929ZaVi0AsPJic=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729779550; c=relaxed/simple;
-	bh=ux/eVMc3yvVSmwqXKQqYBjixW0ioZO4elH8hFaAIVUM=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=rLfTuoxeE7LougGuIClkq58jOO9DS0RUq1XwJTiOLTj8OVU9qFhFQfAnxOU0kwb5kgCGz5bZjXXX2NMGMf7hesajI9Ra+x5KLCg+nKG15Cgq7h6a+rL+iCQuc5UE/BJdPuox4vOTiukeSJ62GTC++F4ar0hCYw4r+gDjlux7FlE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=S2IEFPY+; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=QD1hqlLJ; arc=pass smtp.client-ip=81.169.146.218
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D295D1EF0A0;
+	Thu, 24 Oct 2024 15:28:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1729783710; cv=none; b=aIfJD4NwZoyJ3b0H+/hX2T7fdTd3k4pGSsfTo7B7B9WzUqAGUqtZC30KCdiBh5bKm6VWBNnnDh8IbnbQcDAcZptGeyOJRlzLmG91E3wjx05XVJM8gO70/zu3KqRcAqnHrRYeIdSIUc49TP+i7igAMTz5kQFKsetYyYTxeaWOadk=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1729783710; c=relaxed/simple;
+	bh=Fs2tc1WwAR2PY2tTefPbWYTpSMFv2nPyy55SErMhtP0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WZQ29Gojrz9ZMhTlEWq9pPYsVV75D6jo72NrSTV0VZALsOKQfvlPypnQC7NJ57uR/hGB1LHPEGvGOZb3JQz0TNhSLMw0ntlsNGz20C3WArsc+LtQ3d9FpumCFYW5oSpC0Ds+XyP28DqijpBR8ItsQ1cuYZuDH0aWMt1WGkIjRJI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=dKOXGfWZ; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="S2IEFPY+";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="QD1hqlLJ"
-ARC-Seal: i=1; a=rsa-sha256; t=1729779535; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=kPZRo+O9Oi/f4hPre7pgNN2xwodDbDLTjEbFdNCrqtP/4vFmhKfqd/3Qcz95s+kqvL
-    h5WUX5YenHDS8XOf3Thy1uQ7K14fNi2+C5I3ckFgKyn3l61McPM6pahbIHvyT7dy+kYB
-    hg3Mr0zcwj3kyK8LwYkOCgYdhb+5wUaItjh94BIRCmja87WXCXLOE9bRonAuBycuxlAm
-    SnDIrvZx0STFN5gQJpaVDu0DRllmz4zOCbanjwSclO+mkxKQbJFQx1lzkST27bC2qKLN
-    jnHr/vGg+/x9Fb0a7Yy6GKNCUWdCUxfjXj7ZP6GTdVPIOh0j9rfuK/8KQtwnjh1lOie5
-    5uQg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729779535;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=ux/eVMc3yvVSmwqXKQqYBjixW0ioZO4elH8hFaAIVUM=;
-    b=eFbQedL2fIr6YrD51XpBE0lGoZi62BRf/HmJd28t5qWeeJhL6+mC8coJFdWzXY8lqa
-    Ldj9P0ablcUuJKE+Ddthn12wUqoSbmzJ6OJsz5u91u5qnPViNilYalpiVT/u9wmF4BZc
-    /AtYNGdgxrWUY7eV5oVd3xWuQQO0+g2UjUc9AYwvob+XRXmtRNLfs4alt2WHZv6eEpIb
-    2nUxUetOrrKUA/fD1w0NcoSb9z1tWsrwLQZzxHRufkiPWZVIWVlvpJ7m2iTRSDWCsM+d
-    8bR2ugWLYmqPChklBRzHQe0uCDn8U/J2c4+4jhLbXbjwmM9PKEmJoju0d7Zf1hyqiXiz
-    ATgA==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo00
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729779535;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=ux/eVMc3yvVSmwqXKQqYBjixW0ioZO4elH8hFaAIVUM=;
-    b=S2IEFPY+UIl7Qzq3NVugPMSmyM9jwLGeMt14jp+cSbRUX6ROffkgPu5qSTZySz+V2J
-    4RS20kfHYB3AkOevQONw0KUEXjgzQYbNssmBAQPjX56eoTziyjOOyEVr8mQqum8hM20N
-    OxOknFeBewCbVH61Jn7xpAYQ2zEvA1PVLb1/5TC50RSm7BcYo5InGyYuD7qzP0dXRhBe
-    VtPbJVnuaBv0LFWrlJr6iIN3PD+JlM/C0HkHACrgAtfukFn012mCNK+qMCo+uO6Y7NM8
-    e24zN0qBRccSlsDC/hZpGxt4blXy4aEUcjwe83DKsi8mtEIZwC62UB5UE2qgkjG41ZUw
-    mzXw==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729779535;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=ux/eVMc3yvVSmwqXKQqYBjixW0ioZO4elH8hFaAIVUM=;
-    b=QD1hqlLJUrEfnkWHn8ybHoencbeA3lX7au8caIm5/Q6ByIbVExz5tlnsZ9l7Nx/AB8
-    60jhYKHe5IfAEbDrjjBQ==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0DBslXBtZUxPOub3IZik"
-Received: from [10.176.235.56]
-    by smtp.strato.de (RZmta 51.2.11 AUTH)
-    with ESMTPSA id za0ed209OEIsXht
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Thu, 24 Oct 2024 16:18:54 +0200 (CEST)
-Message-ID: <11ab9fb918d7ceb15c75560086b0b988db2ad24d.camel@iokpp.de>
-Subject: Re: [PATCH v4 2/5] mmc-utils: Add FFU mode 2
-From: Bean Huo <beanhuo@iokpp.de>
-To: Avri Altman <Avri.Altman@wdc.com>, "ulf.hansson@linaro.org"
-	 <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org"
-	 <linux-mmc@vger.kernel.org>, "vfazio@xes-inc.com" <vfazio@xes-inc.com>
-Cc: Bean Huo <beanhuo@micron.com>
-Date: Thu, 24 Oct 2024 16:18:54 +0200
-In-Reply-To: <eccc31a9689842d711e163a2d4d8b14f97100f83.camel@iokpp.de>
-References: <20241023143839.108572-1-beanhuo@iokpp.de>
-	 <20241023143839.108572-3-beanhuo@iokpp.de>
-	 <BL0PR04MB6564794698F1DF0223380CC0FC4E2@BL0PR04MB6564.namprd04.prod.outlook.com>
-	 <eccc31a9689842d711e163a2d4d8b14f97100f83.camel@iokpp.de>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4-0ubuntu2 
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dKOXGfWZ"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-6e38fc62b9fso10341197b3.2;
+        Thu, 24 Oct 2024 08:28:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1729783708; x=1730388508; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=MrA+PE9QFVQSWd15h41v5TtusoT9a0SkYDwQrFOXSR4=;
+        b=dKOXGfWZlb8w2TV6ORCoa2GSdteQMW3Ww8bwNPmkiHrtmUCpMj2L/pU5359U2zxLNK
+         zOh8PAZcPT/HFdIJU2du6oGuf6QuInOZe1NL9Znf2yevnw2RHGmgZQRUuaCA/iTfp3oz
+         nE5zlv1JoTDA3zdzBtSgL7/u9wck8Jlg96jKtl1xxMj7WZ4UMR8l1tSUUPmU1mAu61iQ
+         UUgSqd4TJTicmEanzQGG19Ks0K1ur71rdiG1vSyrB0bFy5+oup8/Z1Y4lLAI/VglFcvu
+         mZHLW0SeJ5EtVf931hR55P0CUurVuO+1WTP1HdTLJ9y3X9U6xDAqRt5iiAwgtwMRE/X6
+         PwHA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729783708; x=1730388508;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=MrA+PE9QFVQSWd15h41v5TtusoT9a0SkYDwQrFOXSR4=;
+        b=uPEqKyhgs4pM3YnkNirpfESfYCwmFqS0bXHwjVpdS2yFsCy++jF5tKWacLzU+mm6Vb
+         WgO+5IuH9yUbqNDBAxPO75UU+L4wzVf4yhezE4I6knuB9memBi3XrXmSf59DWOi6JAHM
+         ANho+MB5Qs3OnREGO6mgtpRhoQ5Wi+W7ycSZgyOtWk5WdXM4WJY1VHyDtPRDylbDic5J
+         xabUPz5m2ueSMKnpS1G+k3xKD9JpmA/l/TY3k/Vuo1Q36uKUqgbcEnB4NTRgOjlbcKQ5
+         W9dWegXLftvMcu/NvPdXuFV8h10fJXHz81TqisuY20zrpKTth6zGP9wmd/Cjy6kMcm/p
+         L8qg==
+X-Forwarded-Encrypted: i=1; AJvYcCU7ApozTMW6sDVKkLPANP7hZGKieoA+QvdlvnDu5Mp2wXOqmiclhbq5C/o3j48eAl75TTM1QaXk39WLOMg=@vger.kernel.org, AJvYcCU8//vezLo3OKNiKMY40Inepzpp0WFBEWV0R4HYrkRqyTvnBgPZ4j52LTqJebcF8iu1nF1kAqHYzAmVXLKj@vger.kernel.org, AJvYcCUBqgV6ftGTNcpMZr3sWybADfG8ClsUKXsMFKXOj7KU4FJH1g5pQq5WnqBH3TkLr7Ic7K3dl3/oh3HSenxG@vger.kernel.org, AJvYcCW5lOtyEE20Ujru1vmOhhWfPvz1gQ0NXCMikjLPIw5mI5svtY3qvATSveKtYClmLONHocaE+Z+PF8NpmbTjvj8q@vger.kernel.org, AJvYcCXkZx4hply13gHMAuujRUYSJgGbXoS9XgXcYIjC67IrwEafc4JzTaVofSqYDNNEATCpDyFXZwTe9x+q@vger.kernel.org, AJvYcCXrN5Gwi6XSRxp0Q92etCnZB8MW+GnjW99phCv8HqqKJD1zRE6ol0BrrqKn3VSugemqMTfZN5cD/P47FA==@vger.kernel.org
+X-Gm-Message-State: AOJu0YxIpnC7T9T+lp8QtQJNi7oXDhHk3rfvjwb4vLhjOrNYUg4Zca0j
+	ksAAaHZ/99Wk/is5bYp/TBK/ISjv5qSX82EdgFQEdTGj1Z/H3tGem12Kc+7V72g7iv0OTlW7Imy
+	R3V2bnjfFZzhN76nPXmzgzGw/V/s=
+X-Google-Smtp-Source: AGHT+IFRyXW0hYO2Swz9RLGo1csIv7IsSIQzzTKkoxMY8+2S6NZhcmqrrYbuG7/FRn1ItAKRcQRE+umN/jZ8cxvEJOI=
+X-Received: by 2002:a05:690c:fd5:b0:6dd:ce14:a245 with SMTP id
+ 00721157ae682-6e7f0dc1121mr77233267b3.6.1729783707713; Thu, 24 Oct 2024
+ 08:28:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <20240916085741.1636554-1-quic_mdalam@quicinc.com>
+ <20240916085741.1636554-2-quic_mdalam@quicinc.com> <20240921185519.GA2187@quark.localdomain>
+ <ZvJt9ceeL18XKrTc@infradead.org> <ef3c9a17-79f3-4937-965e-52e2b9e66ac2@gmail.com>
+ <ZxHwgsm2iP2Z_3at@infradead.org> <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
+ <ZxH4lnkQNhTP5fe6@infradead.org> <D96294E2-F17A-4E58-90FB-1D17747048E5@gmail.com>
+ <ZxieZPlH-S9pakYW@infradead.org> <CAAdYy_ms=VmvxZy9QiMkwcNk21a2kVy73c8-NxUh4dNJuLefCg@mail.gmail.com>
+ <dfe48df3-5527-4aed-889a-224221cbd190@demonlair.co.uk>
+In-Reply-To: <dfe48df3-5527-4aed-889a-224221cbd190@demonlair.co.uk>
+From: Adrian Vovk <adrianvovk@gmail.com>
+Date: Thu, 24 Oct 2024 11:28:16 -0400
+Message-ID: <CAAdYy_=n19fT2U1KUcF+etvbLGiOgdVZ7DceBQiHqEtXcOa-Ow@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+To: Geoff Back <geoff@demonlair.co.uk>
+Cc: Christoph Hellwig <hch@infradead.org>, Eric Biggers <ebiggers@kernel.org>, 
+	Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk, song@kernel.org, 
+	yukuai3@huawei.com, agk@redhat.com, snitzer@kernel.org, 
+	Mikulas Patocka <mpatocka@redhat.com>, adrian.hunter@intel.com, quic_asutoshd@quicinc.com, 
+	ritesh.list@gmail.com, ulf.hansson@linaro.org, andersson@kernel.org, 
+	konradybcio@kernel.org, kees@kernel.org, gustavoars@kernel.org, 
+	linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-raid@vger.kernel.org, dm-devel@lists.linux.dev, 
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-hardening@vger.kernel.org, quic_srichara@quicinc.com, 
+	quic_varada@quicinc.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 2024-10-24 at 11:04 +0200, Bean Huo wrote:
-> On Thu, 2024-10-24 at 08:00 +0000, Avri Altman wrote:
-> > > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 { do_ffu, -2,
-> > > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "ffu", "<image name=
-> <device> [chunk-bytes]\n"
-> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 { do_ffu1, -2,
-> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "ffu1", "<image nam=
-e> <device> [chunk-bytes]\n"
-> > Ah, but didn't we establish that the current API should be retained
-> > to act as the default mode?
-> >=20
-> > Thanks,
-> > Avri
->=20
-> Avri,=20
->=20
-> Corret, the reason for updating the default FFU mode name from 'ffu'
-> to
-> 'ffu1' is to avoid the error: 'ERROR: in command 'ffu', 'ffu' is
-> ambiguous' when using 'mmc ffu'. Without this change, the system will
-> encounter ambiguity.
->=20
->=20
-> I am considering a naming scheme like opt_ffu1 and opt_ffu2, that
-> works
-> well for maintaining consistency and keeping the names concise.
->=20
-> ffu2 could become opt_ffu1 (indicating the first optimized or
-> alternate
-> FFU mode).
->=20
-> ffu3 could become opt_ffu2.
-> ffu4 could become opt_ffu3.
-> ffu5 could become opt_ffu4.
->=20
-> then keep default ffu name as it is used to be.
->=20
-> how do you think?
->=20
->=20
->=20
-> Kind regards,
-> Bean
+On Thu, Oct 24, 2024 at 4:11=E2=80=AFAM Geoff Back <geoff@demonlair.co.uk> =
+wrote:
+>
+>
+> On 24/10/2024 03:52, Adrian Vovk wrote:
+> > On Wed, Oct 23, 2024 at 2:57=E2=80=AFAM Christoph Hellwig <hch@infradea=
+d.org> wrote:
+> >> On Fri, Oct 18, 2024 at 11:03:50AM -0400, Adrian Vovk wrote:
+> >>> Sure, but then this way you're encrypting each partition twice. Once =
+by the dm-crypt inside of the partition, and again by the dm-crypt that's u=
+nder the partition table. This double encryption is ruinous for performance=
+, so it's just not a feasible solution and thus people don't do this. Would=
+ be nice if we had the flexibility though.
+>
+> As an encrypted-systems administrator, I would actively expect and
+> require that stacked encryption layers WOULD each encrypt.  If I have
+> set up full disk encryption, then as an administrator I expect that to
+> be obeyed without exception, regardless of whether some higher level
+> file system has done encryption already.
+>
+> Anything that allows a higher level to bypass the full disk encryption
+> layer is, in my opinion, a bug and a serious security hole.
 
-Avri,=20
+Sure I'm sure there's usecases where passthrough doesn't make sense.
+It should absolutely be an opt-in flag on the dm target, so you the
+administrator at setup time can choose whether or not you perform
+double-encryption (and it defaults to doing so). Because there are
+usecases where it doesn't matter, and for those usecases we'd set the
+flag and allow passthrough for performance reasons.
 
-how do you think about above my proposal of changing ffux to opt_ffux?
-
-Kind regards,
-Bean
+- Adrian
