@@ -1,175 +1,146 @@
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.163])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4CACF22B67B
-	for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 20:09:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.163
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729800549; cv=pass; b=h+0KTF+m28YMVXVO431iceJK0qSUK1RZBrDzoQTXXB+MhWjV++IGHfoh8/wSvqfmQVumwGsOUzi9+S0kgJJN/kjU+JZK4qw+0B1LFQSnYi18AFz8Iroxnqe+Cs7gF6wClh0PxAV9KKndmIQRxQuDRIN3JItwLdwGlm+BirZTxC4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729800549; c=relaxed/simple;
-	bh=y9Ze0Rs/RrlEOSiDikKHf8VnLppfPHVvMpp7OvvXLoU=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=sjkThtKXIWFTulq1jg22EhiwF/JCRRQSPPN9PEGjKD8vOof0kqDWWAebWA3H0+4GPABSRAX5MqaQ3SCTOu5Qib84TM0H23NUlXkqIczLUpRiUg/QbnZARHeVMyXper6SOvQyOkkwurefDpCr+p7xwbQ//z9I6QJbUjY85chIEwQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=kDbvvuXg; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=CgCp4s3m; arc=pass smtp.client-ip=81.169.146.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94233185920;
+	Thu, 24 Oct 2024 20:19:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1729801146; cv=none; b=C0nkYmiwR+qwCCGHY4B50IlH0Ji7usFuKfhdC/4z1fzb5eXCGYyuVk/H8xslHPz5T3nRmd6Qo2YKBTSmnyr17i5Lh5gvJGJh5C6nMpmC110SrlSLl85qI48CeF89Tuv2gHGtb0wzSj9ShpC5xaiKJe7tVG5fmmtKpyfDX76wx/0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1729801146; c=relaxed/simple;
+	bh=V9/4Nd+sWme/u2mCmc2sE127qiJQZgk7dOc5mUf2E6c=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=To0rLQGV46J+DzNdBvDDyeIiLa7XNT2fdtoq0AU/Z/NIAR3iodev/tH0vq/pduZ51E6LnFkXh541lrJDYTADzzDgHwhSw7O6cotnuPgt7sAXmRTPwwtF2wm5EgNWtSMP+vMn0t9wlJ1okhQPbCAQdSDFrTQMHWnXaUksXQhlKD8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=FWZYMB4i; arc=none smtp.client-ip=212.227.15.15
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="kDbvvuXg";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="CgCp4s3m"
-ARC-Seal: i=1; a=rsa-sha256; t=1729800536; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=hJIjj9EEoNZyvo7wTIpvNr2NOlZEqfAdazSNZxQET+m1cnQT1dARtpQR9/msYVVqNn
-    7rKPev80ZCw212fA2kYmJVnlFXyrEt0NHRdQalKac78UMa63IqgKYkGexLBl6cgEzOmX
-    vYJTjHYfdGYSBLoiY+qVZ5lpIc+wg/cykcjEvBCRueOQhu44ALmzRiOLWSi8P/kXf6EJ
-    uq5JiEnFOCO4raeNLveT2zsG029FrKeajEuSGsvBKWud8NdoE70u2RCoG11iMqcwrZZl
-    XruxTOZv0BvfzQp+SBbQHdwttcvhmmagWGdlKwbDelwqO4331Qp5t0z7cKiL/gomh/vc
-    c30Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729800536;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=y9Ze0Rs/RrlEOSiDikKHf8VnLppfPHVvMpp7OvvXLoU=;
-    b=tCx1lx52naKJMUIbPtGAO+YQKoNQlNQBqtmW2G7kVQdDcg3qpQoNmn0rxmFu8cZH00
-    o72MQL66MoxaSArvUgLLuWfm/o/tVE6BBWIJ8jAUkn9arF5nFhj/vTS+Sg7W43TFEMxf
-    bIwaGmveSEtfskvx6r8K7crKOnmFtErgoTmJ1AAIo2s7JYsTbdqHjBl+NSBaGuRfbRiI
-    yy+/TEtn8zrFpCd+7/PfLou6D60yJ59ak5UlPQzRBA/5aCkRr5RrKRzwP/AA8yceElNd
-    Bxr6lAuOESWzsjdrKSvUM5VowNLv2F9zTnR0g0hQTobttGdhL+NuBoFixnJ0lHa1Wetj
-    BYcg==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo00
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729800536;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=y9Ze0Rs/RrlEOSiDikKHf8VnLppfPHVvMpp7OvvXLoU=;
-    b=kDbvvuXg5tEtBcBO+ShSQPrKqF5HbyA9b7sAAXfN1wIvUwzwewkVvQXW5h6cGNvO83
-    swx5N76ZdSzSefVm0TYjVSt69M9aAXGQZWjjyPHpO/41BvRhwPSw7MYo2RefATDX33xc
-    4OFHSAyiSYR3i7hLZmjtTXJFwkzTIBwG1u9AaROxOH1NVnynhGs41leTbp1idchOdprB
-    jg8K74D5aAQBP6hKfVtK2gNuWH9MmBDE9yLuxRk6Qv/zOvX7smS5mWRJGhSONtHbAi5i
-    mJD8B6r4Y+1+qB7f7bwSbpjLwOUuPpyOWwEkdaKgzV9x58YvSEmcA3p5r8+XaElz1f+l
-    zSpQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729800536;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=y9Ze0Rs/RrlEOSiDikKHf8VnLppfPHVvMpp7OvvXLoU=;
-    b=CgCp4s3mMkBaokJPXtsSrW5Iq+J87UZ03TyIwDecI3zsZv5fZm0SuvTU4LXKtg87ds
-    /aZA9lXC3IfdhyzXLWCg==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0zNriHg+YfT0rGWYpI+wh+kpzZtBynObdN32R3IYC9YTJ7ZVUKg="
-Received: from p200300c58718670d68cbcc3f1f585372.dip0.t-ipconnect.de
-    by smtp.strato.de (RZmta 51.2.11 AUTH)
-    with ESMTPSA id za0ed209OK8uYP6
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Thu, 24 Oct 2024 22:08:56 +0200 (CEST)
-Message-ID: <a2ecff531910f11428b6830c8053872c4a6a19c2.camel@iokpp.de>
-Subject: Re: [PATCH v4 2/5] mmc-utils: Add FFU mode 2
-From: Bean Huo <beanhuo@iokpp.de>
-To: Avri Altman <Avri.Altman@wdc.com>, "ulf.hansson@linaro.org"
-	 <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org"
-	 <linux-mmc@vger.kernel.org>, "vfazio@xes-inc.com" <vfazio@xes-inc.com>
-Cc: Bean Huo <beanhuo@micron.com>
-Date: Thu, 24 Oct 2024 22:08:55 +0200
-In-Reply-To: <DM6PR04MB6575BEE89D1BB00936AC702AFC4E2@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20241023143839.108572-1-beanhuo@iokpp.de>
-	 <20241023143839.108572-3-beanhuo@iokpp.de>
-	 <BL0PR04MB6564794698F1DF0223380CC0FC4E2@BL0PR04MB6564.namprd04.prod.outlook.com>
-	 <eccc31a9689842d711e163a2d4d8b14f97100f83.camel@iokpp.de>
-	 <11ab9fb918d7ceb15c75560086b0b988db2ad24d.camel@iokpp.de>
-	 <DM6PR04MB6575BEE89D1BB00936AC702AFC4E2@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4-0ubuntu2 
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="FWZYMB4i"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
+	s=s31663417; t=1729801125; x=1730405925; i=wahrenst@gmx.net;
+	bh=KTdkJ5P6J2KL4Qt0vXA0RPNETkbTyLxenzCZPLKwNyw=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
+	 References:MIME-Version:Content-Transfer-Encoding:cc:
+	 content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=FWZYMB4i6pII+5Cu3Z5TKjNhZw3OeczRSY9NS1oKV+6nCpO5qBxWkFSMzQy3ryjy
+	 sTBPl6mymi8N8pfcjQTGHeixmz1FlytcthQTMKfUKj6lj84V+VBjLmBq3UgalJkva
+	 JEaQFMRjgNbNbdMEaPmK+wAshzpYPXvTCn17cGjSsKzmWYik3rbrkKHlLo1ybXYgw
+	 nmpXqDpNELx0KrelSEq2Bs+U+6YillRq8IJ0viD5X7COpWmtluzO7vibsakKMu5Bg
+	 Ozx3pTFWgU0KSPGK/Rcz7+ZbUURtla0EhwLwSQm4nJlNpYgFvArJgR7y1qypvMbPj
+	 CC9yErUmZ94S0rAR6w==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx005
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MacSe-1taMqF1UCo-00fMm2; Thu, 24
+ Oct 2024 22:18:45 +0200
+From: Stefan Wahren <wahrenst@gmx.net>
+To: Russell King <linux@armlinux.org.uk>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Minas Harutyunyan <hminas@synopsys.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Lukas Wunner <lukas@wunner.de>,
+	Peter Robinson <pbrobinson@gmail.com>,
+	linux-arm-kernel@lists.infradead.org,
+	kernel-list@raspberrypi.com,
+	bcm-kernel-feedback-list@broadcom.com,
+	dmaengine@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-usb@vger.kernel.org,
+	Stefan Wahren <wahrenst@gmx.net>
+Subject: [PATCH 2/9] dmaengine: bcm2835-dma: add suspend/resume pm support
+Date: Thu, 24 Oct 2024 22:18:30 +0200
+Message-Id: <20241024201837.79927-3-wahrenst@gmx.net>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20241024201837.79927-1-wahrenst@gmx.net>
+References: <20241024201837.79927-1-wahrenst@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:uurm7aNTi5uMv/4ThSbmO9f2OZgP0MZnWhjwfJlbBd5reY0RN+4
+ IAVrERajL/SXD91WlaaM5YamNsh/dSKucmU55D5SaAEEQkoqZBY/JHgqNxRpe0I5XTRShXL
+ 3u/VkDO3dMzYYk6cWKJTvkzd/3tQ0Ng04QCY6SWoGEJClobXZpUdzZj1vDLuxu1P9YxyRx2
+ DKKtsV1iGb8R5B/hQ1oVQ==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:+I6/p0Kc/ug=;MnMyC57laSsmSHRtvqZJ29mp/Nb
+ ePBEqIpKuQ7RKFK7KACh+NKHeayIpTFmIwoSOdWHe1XRErBmYkSoLGDQhOKUpPUTsWVcFue/i
+ rUMTicPtvX9cqyD1KQ4eJvQvH+nWcurtOmNmBXo+bi0dofmvddlAj5McAgWtBvMG6GYIFIrN9
+ oE16Y/uJh2Hd/R/euG0xJDULNTZbEw6tgfXATdhS3kFFfnSNUfV4EWSyfW73EmSIF6hrN2Hk5
+ B6gS5N/IdG7wtL26mujzFnpR0JNUP+xJ/bCsn3e7pHmNOgrGvsZ5FHx/uxVu6hoJ8/LLOsp5j
+ X+dXXB6VOjJHgV8mQD2mmBETQaZkP/A3mECb8xigYDHAL85umvvilsWxnTpQs2NnS/8PKYT73
+ 0S8ZqdPMEymxnWMvafKsHgo4IIj9k9pCTXc7kg0U8jtrowurSIYRfvqmvwEKjXAVFqD04rQbr
+ gfwFAg3nzhPJqQEmiypB8qeicZn4Fn1nGB6b3OByUjjwQJahLl+n4qPrB+H0dTnj1lw5pvP0f
+ g+HpQXexssH1UuWRKnCBu2LY8DUUjarhkvk34n9DmeqFB3hLOm0VwBw6b0rSLCnkgcbEgh3my
+ l8rtV8v9UH6OZMRY3/p2p/6fD4jBiWfNovx09+EJx5dbyFPaDmTlL0e2VnLWbWhJVmLq4yGwo
+ abyowlcPDncsKoUBF/ywor+7bT9STzwNIpIAC8BLXDpYwUCNWiSG5k6O1K5XdwOpwMRWObVyi
+ j3obmgQUA3H0m1j5dleEczNfwxENYHJo8t1h3CMl/C6Zq2F8/ZEAicuhUFBP8n3BEBQWB/B8P
+ qcoHpZmtzh6PglEjii4PGTrQ==
 
-On Thu, 2024-10-24 at 18:19 +0000, Avri Altman wrote:
-> > On Thu, 2024-10-24 at 11:04 +0200, Bean Huo wrote:
-> > > On Thu, 2024-10-24 at 08:00 +0000, Avri Altman wrote:
-> > > > > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 { do_ffu, -2,
-> > > > > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "ffu", "<image =
-name> <device> [chunk-bytes]\n"
-> > > > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 { do_ffu1, -2,
-> > > > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "ffu1", "<image=
- name> <device> [chunk-bytes]\n"
-> > > > Ah, but didn't we establish that the current API should be
-> > > > retained
-> > > > to act as the default mode?
-> > > >=20
-> > > > Thanks,
-> > > > Avri
-> > >=20
-> > > Avri,
-> > >=20
-> > > Corret, the reason for updating the default FFU mode name from
-> > > 'ffu'
-> > > to
-> > > 'ffu1' is to avoid the error: 'ERROR: in command 'ffu', 'ffu' is
-> > > ambiguous' when using 'mmc ffu'. Without this change, the system
-> > > will
-> > > encounter ambiguity.
-> > >=20
-> > >=20
-> > > I am considering a naming scheme like opt_ffu1 and opt_ffu2, that
-> > > works well for maintaining consistency and keeping the names
-> > > concise.
-> > >=20
-> > > ffu2 could become opt_ffu1 (indicating the first optimized or
-> > > alternate FFU mode).
-> > >=20
-> > > ffu3 could become opt_ffu2.
-> > > ffu4 could become opt_ffu3.
-> > > ffu5 could become opt_ffu4.
-> > >=20
-> > > then keep default ffu name as it is used to be.
-> > >=20
-> > > how do you think?
-> > >=20
-> > >=20
-> > >=20
-> > > Kind regards,
-> > > Bean
-> >=20
-> > Avri,
-> >=20
-> > how do you think about above my proposal of changing ffux to
-> > opt_ffux?
-> I don't really have a strong opinion about that.
-> As long as the current mode stay the same.
->=20
-> Thanks,
-> Avri
+bcm2835-dma provides the service to others, so it should
+suspend late and resume early.
 
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+=2D--
+ drivers/dma/bcm2835-dma.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
-To avoid ambiguity while keeping the default FFU mode as 'ffu', I
-cannot use prefix ffu. I=E2=80=99m considering using the prefix opt_ffu for=
- the
-optional FFU modes. This would allow us to differentiate between the
-default FFU implementation and the various optimized or alternative
-modes without using the "ffu" prefix directly.
+diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
+index e1b92b4d7b05..647dda9f3376 100644
+=2D-- a/drivers/dma/bcm2835-dma.c
++++ b/drivers/dma/bcm2835-dma.c
+@@ -875,6 +875,35 @@ static struct dma_chan *bcm2835_dma_xlate(struct of_p=
+handle_args *spec,
+ 	return chan;
+ }
 
++static int bcm2835_dma_suspend_late(struct device *dev)
++{
++	struct bcm2835_dmadev *od =3D dev_get_drvdata(dev);
++	struct bcm2835_chan *c, *next;
++
++	list_for_each_entry_safe(c, next, &od->ddev.channels,
++				 vc.chan.device_node) {
++		void __iomem *chan_base =3D c->chan_base;
++
++		if (readl(chan_base + BCM2835_DMA_ADDR)) {
++			dev_warn(dev, "Suspend is prevented by chan %d\n",
++				 c->ch);
++			return -EBUSY;
++		}
++	}
++
++	return 0;
++}
++
++static int bcm2835_dma_resume_early(struct device *dev)
++{
++	return 0;
++}
++
++static const struct dev_pm_ops bcm2835_dma_pm_ops =3D {
++	SET_LATE_SYSTEM_SLEEP_PM_OPS(bcm2835_dma_suspend_late,
++				     bcm2835_dma_resume_early)
++};
++
+ static int bcm2835_dma_probe(struct platform_device *pdev)
+ {
+ 	struct bcm2835_dmadev *od;
+@@ -1033,6 +1062,7 @@ static struct platform_driver bcm2835_dma_driver =3D=
+ {
+ 	.driver =3D {
+ 		.name =3D "bcm2835-dma",
+ 		.of_match_table =3D of_match_ptr(bcm2835_dma_of_match),
++		.pm =3D pm_ptr(&bcm2835_dma_pm_ops),
+ 	},
+ };
 
-opt_ffu1: First optional/optimized FFU mode
-opt_ffu2: Second optional/optimized FFU mode
-opt_ffu3, etc.
-
-This would keep the default ffu unchanged while allowing us to add
-clarity and scalability to the naming of other FFU modes.
-
-
-
-
-Hi Ulf
-
-What=E2=80=99s your thought on this approach?
-
-Kind regards,=20
-Bean
+=2D-
+2.34.1
 
