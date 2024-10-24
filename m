@@ -1,38 +1,38 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 990F2200BB6;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63E7A2170CD;
 	Thu, 24 Oct 2024 20:19:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729801150; cv=none; b=ls0tQyb9UdGwPNBrNCrgCtHNf7o7KS6tTniDik0QY+E0YZt6OYHWbeLSFjVr3yYlR8hiE4Q/mpMahQ+q+Tro5/D85uZpGCX7L1+9dZrMuRgtW6eSrFEhSAkHfutBp2S9O66K/k9MTgiqhs5oKsSPN0zJL5VGSiv0g3hz8L3JQFc=
+	t=1729801150; cv=none; b=jjERx89tsiEUFPPGrpYsckUfoKMtRnJZs3wlIQx0DSB2QmOTpWKuYSzI7CiK/P/ROvOh8kmQWMwfCXzVZTVoW1eGJ6EBBrUKEVBlAxGLncu4wkx45zvOgWqkCCyfSxXKF4Ixv9Poyeshqg4znXh60ORBg4Pyl5BvV4j82qcti2o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1729801150; c=relaxed/simple;
-	bh=NLJhKND256gSjgqz5+jXNVwCkHAy7Lhhbara7R1G0Sk=;
+	bh=EIb/0BVQLAIWTGsSf2exEUrI6S97uVc10LsFQOB7HdM=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=qNm+mXYuGXFjLwPYC1zaiqCF7P7mh+7aGeFoss67T1wvATM+4jhTC6MJ1rUAEzVl19Io77KrU+wd5fbVOMPiPTRYyC/qLH+fy1+almNyTT32I0bTFytxp18bY65dD1PnF/ezlHVbUx8GJwzCcn6E9DkvxutG0CgjOfAIzkEEINQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=ph1S/yzx; arc=none smtp.client-ip=212.227.15.15
+	 MIME-Version; b=uyqd3qQCioRQAaV5aqHIimBclOHbQwSYaxm2Q4CPXxz7ja1YrOz3mNnkGtpP5GIbzlErZb4P343saDZ6FI62uFuxObKc4UyRzvtbzi2FOc1P18BuspGgpGqvSIVCNOWM/CRMfszBkDeWM3r/CpSiI1G+7UAVa7PCAy9m16AEdyM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=f+sUdQPI; arc=none smtp.client-ip=212.227.15.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="ph1S/yzx"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="f+sUdQPI"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1729801127; x=1730405927; i=wahrenst@gmx.net;
-	bh=JRrp6JLKk7ZewfhLxhmIMUVWuQ9FaYJ7taL+ewhOlow=;
+	s=s31663417; t=1729801129; x=1730405929; i=wahrenst@gmx.net;
+	bh=EIb/0BVQLAIWTGsSf2exEUrI6S97uVc10LsFQOB7HdM=;
 	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=ph1S/yzxaSFMuUMjJULTbbm+fsL+wECSBxU56vEZvnETgFB+vq+2R0WCmBVU8Yi6
-	 k6zzyp950Q+YXdcOLDZ5VoszNaOFSBPQgkcUaeaKbQiY6XWlG4B94CMNRbCGv1RAi
-	 IUBW3HrVGrtPWUb+UYTnTgNaue6GBkjgfoBIQO0hq66zb9t7TDyfFq6yMWarqHEG6
-	 U/gtNnWNQNRIhu/xt0CB03HB1YY4lonltbw2f1lsYTmLjLpL8S08b8FuHo1nRMQg8
-	 KaB6oYgyzphWEplATpMD8LM4cJrNKVlCLD1N2ukly5CA1Og9i2nDOnZWSnFf3VIl1
-	 bKRykL/6LjR6SvE1vQ==
+	b=f+sUdQPIrpLcefcW9v+loVnd4h4gsck8HNCHWcpP3Nfk99KiATs4QJkAvJEe3rDS
+	 MhR8qm9+EjTb0Bn25PBmJk+tmJBk3wdvAR4ftaA4J1rfuXWuoAmbBznBtQvnfJxov
+	 lvCk2fawLS5Fzjmjoach7C/8405fkKde9SDXNrCQ3xmmiGdd+NpSc+HpMtisWIUAC
+	 xIiRpXBU7P6NATk3Ss8GOEE0fN8p5D45EVZG2AGlGP9jDEMt6gftus+iGlXNzeiSR
+	 wGoH/n62knbVqXDD1nVVO+XPpNCb/Mrj+zGaRVlRs4CM7ubmZDFWpIa/13FHmjTqz
+	 kvE2ApD3fC9hxOd4Wg==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx005
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1Ml6qM-1tkmxX2UY8-00mTVU; Thu, 24
- Oct 2024 22:18:47 +0200
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MOzT4-1tGFWf15oq-00HnTY; Thu, 24
+ Oct 2024 22:18:49 +0200
 From: Stefan Wahren <wahrenst@gmx.net>
 To: Russell King <linux@armlinux.org.uk>,
 	Florian Fainelli <florian.fainelli@broadcom.com>,
@@ -51,9 +51,9 @@ Cc: Lukas Wunner <lukas@wunner.de>,
 	linux-mmc@vger.kernel.org,
 	linux-usb@vger.kernel.org,
 	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH 6/9] usb: dwc2: gadget: Introduce register restore flags
-Date: Thu, 24 Oct 2024 22:18:34 +0200
-Message-Id: <20241024201837.79927-7-wahrenst@gmx.net>
+Subject: [PATCH 9/9] ARM: bcm2835_defconfig: Enable SUSPEND
+Date: Thu, 24 Oct 2024 22:18:37 +0200
+Message-Id: <20241024201837.79927-10-wahrenst@gmx.net>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20241024201837.79927-1-wahrenst@gmx.net>
 References: <20241024201837.79927-1-wahrenst@gmx.net>
@@ -64,144 +64,48 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:CqgYeeZNUwYzTJ4GE0juj9SGPyyOYxIPFyKOUz1FCHoELlxSPBO
- uCLm65+qf767P9c8nkrvo5VhNJ7oPFi4WFKbWl3AseMCGXpBsR/KLyp1MCdLM+nMMpNRV9T
- /pnK0vR8LoRYHBV2HlLfMXf+44c7VWxKOP19k6KPCJG3KnWLT1eF+bRkJMlQYx3ZO3OC3BV
- mioA28LqtZbvj1VyXmTZA==
+X-Provags-ID: V03:K1:y5qs/K+Ex8uHWt3Wttf4GhkVYRu3Bxw5179FQJlfcGye3NuYOCR
+ rlCUl4rYbHCkDTE0zT9u2NBAmL64Jd3QihDV92VlvKRtbLca9N7WjGdTP+QyH2x7mUabJqE
+ qKI8xvSwgeKpTl+BjWz04YJl/Rion2QY3C3kJFsI7qAIXd8TStmqJgWB9Ej+XwxUbdD61rr
+ bSuWGu1IT+G9XL2uAuhpA==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:hZar9UeG20M=;j9ZFZy0OgPtqao0NNzl58dNPiZt
- EpetYR4ISrhIiTBcgszQxelh4/1CiqikfvXspNioGdzClbIku0Ca1slnzFl7p4gMzTnZzyGXD
- WspSwVPO2xQq13VhQorPUu2G0Ugx3T720iQsHjk96uMR5O1EDfZurG0DpLGPIrSV2A30r8gw5
- KnYXZsm/siTlVMeAapnw3wCinkgXGrFs38airnjTltCGbjOvTXdLNla3j5TR+ASk+biUDEfUB
- y9hsFE/rFoYqVAqZv+dRHaIXzr6wv0nR51lzYvIUkcCl2+zZ7aDSTLHaHKi/hnua5R63omMbR
- wVZsWXvBxvUAKlgnHufIXU13+aRm9Z+oeB140OsochtcJsuY6NpQOMBnJJV04lT7JhIVXCnUE
- saiVnVyWl77MWY5cLDLJduPA3uKZ4A4lF3FcInPJV6H2sc4GPk4+DvJ/TFmiAH0KkHPAourcH
- gl0Sw2LjYjWR2uSuwJeIeIoU2jdNyhiSRa3DtW94Eh4/i0M5gF4RZgCfrOdcyrOtk90rIIrbd
- 31oWHzbscthVEFo3TT+RhKrXo8P6lT4Kl8Rle7kHIr8k66brM+Y2+fLHji/B6gh9/1379BRhZ
- CjIkp2jrIIbfBUSmHP7DoMCFWGmrTto/1iUonxGlDoZaqOnh50mVEt079FecoxfDzfxymvJyW
- HA28UYhsdQb9Y8xkyxblKuwSvMjirFIcPfwrFJ0wW81KGjNiedDQ8D1bguartUg84+eHpIFQQ
- 6SkHFnL0XQrTcQA9UTnVr/0gYOSrYvQAWzQngQhZ8zsaW7uJsSc5PcGEh3sXakkdNH0G4GDHj
- g3gsx4tQHeVpU1JuMO6gSz/Q==
+UI-OutboundReport: notjunk:1;M01:P0:5Bqh0xCZoz8=;7qu7RK6hWjZs3fljgjsKj1/Vyl/
+ ykqWpTFJZT6uHKczUlyiqZovVrD2KIPNEp0uF+KUvU3Pcr4p+1qvKIl2WhLYDVoVQANhub/gJ
+ DSWWnDp26eAVcntEruJm9YumheLecR/XB8j2naIuhoqe2bK0xe3cWgPo7ddT1TxOaDzlwU+mH
+ pgvVQuT5+rA/UM5/lVNeBr/jVwvcecwyu2sOANNkqqgsbNXb1u74ib8507/tD0zPFG48Zp3vu
+ OjA2tSiHoS0jfCSeJApf0016KWwsNHZ0vmxY5ZZBnlNjiSNyaLepHBIZ/20My4rKWUgLYB/Au
+ URUeJRmHdl13QDeXARorbtntR9IYMowWYzdra0luik5WeyBe0zcGWvc5B4Cv8WSD6LAWWklIR
+ Jc1KFyEbXpURxZC2r974fDURffxx4SHi3FkfBVmoKwl9qzV7Jf+1iO2eY0BIPP8DR9yRLFmT6
+ UChhtkQtAePgVLuKYcIMvAmvfaskALwQTB/QbEIaHaCbPN1/1yPWrKTbl7SXv909Ep3OA4J5L
+ SEoQJSvvvtI/dy/NapCw/qu9g9jA1Xpapf6tlm5TW7EvCuNlJ6c30LzxxHqJLpzrNIvDkoKfB
+ MWclfuY9e56KGJGoyCTlLXdQCU3mEl2KUcd0wKK3VLXJjTgtqBFFKaDVQp578XkBHGKrLLGjn
+ FBcQ2J+7ZSvzLGnd0et8UhCimlOghZ6q0/Kb5kEh9j9440wrf/KoVQyXxJi/WYQVq3QciNCD9
+ M6CWHHltYhrJbFNz5PEC2fxeiUG7xH5w3SvA1ui+Lj2QSYFkJSkXWxHy/LP5Kq/LjzP1QfF2q
+ n+HGCgrJRdE1UOdQsZo5bnEQ==
 
-dwc2_restore_device_registers() use a single boolean
-to decide about the register restoring behavior.
-So replace this with a flags parameter, which can
-be extended later.
-
-No functional change intended.
+Since the Raspberry Pi supports Suspend-To-Idle now, this option
+should be enabled. This should make power management testing easier.
 
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
 =2D--
- drivers/usb/dwc2/core.h   |  6 ++++--
- drivers/usb/dwc2/gadget.c | 12 +++++++-----
- 2 files changed, 11 insertions(+), 7 deletions(-)
+ arch/arm/configs/bcm2835_defconfig | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
-index 2bd74f3033ed..48f4b639ca2f 100644
-=2D-- a/drivers/usb/dwc2/core.h
-+++ b/drivers/usb/dwc2/core.h
-@@ -1127,6 +1127,8 @@ struct dwc2_hsotg {
- #define DWC2_FS_IOT_ID		0x55310000
- #define DWC2_HS_IOT_ID		0x55320000
-
-+#define DWC2_RESTORE_DCTL BIT(0)
-+
- #if IS_ENABLED(CONFIG_USB_DWC2_HOST) || IS_ENABLED(CONFIG_USB_DWC2_DUAL_R=
-OLE)
- 	union dwc2_hcd_internal_flags {
- 		u32 d32;
-@@ -1420,7 +1422,7 @@ int dwc2_hsotg_set_test_mode(struct dwc2_hsotg *hsot=
-g, int testmode);
- #define dwc2_is_device_connected(hsotg) (hsotg->connected)
- #define dwc2_is_device_enabled(hsotg) (hsotg->enabled)
- int dwc2_backup_device_registers(struct dwc2_hsotg *hsotg);
--int dwc2_restore_device_registers(struct dwc2_hsotg *hsotg, int remote_wa=
-keup);
-+int dwc2_restore_device_registers(struct dwc2_hsotg *hsotg, unsigned int =
-flags);
- int dwc2_gadget_enter_hibernation(struct dwc2_hsotg *hsotg);
- int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *hsotg,
- 				 int rem_wakeup, int reset);
-@@ -1459,7 +1461,7 @@ static inline int dwc2_hsotg_set_test_mode(struct dw=
-c2_hsotg *hsotg,
- static inline int dwc2_backup_device_registers(struct dwc2_hsotg *hsotg)
- { return 0; }
- static inline int dwc2_restore_device_registers(struct dwc2_hsotg *hsotg,
--						int remote_wakeup)
-+						unsigned int flags)
- { return 0; }
- static inline int dwc2_gadget_enter_hibernation(struct dwc2_hsotg *hsotg)
- { return 0; }
-diff --git a/drivers/usb/dwc2/gadget.c b/drivers/usb/dwc2/gadget.c
-index e7bf9cc635be..96d703f4c509 100644
-=2D-- a/drivers/usb/dwc2/gadget.c
-+++ b/drivers/usb/dwc2/gadget.c
-@@ -5203,11 +5203,11 @@ int dwc2_backup_device_registers(struct dwc2_hsotg=
- *hsotg)
-  * if controller power were disabled.
-  *
-  * @hsotg: Programming view of the DWC_otg controller
-- * @remote_wakeup: Indicates whether resume is initiated by Device or Hos=
-t.
-+ * @flags: Defines which registers should be restored.
-  *
-  * Return: 0 if successful, negative error code otherwise
-  */
--int dwc2_restore_device_registers(struct dwc2_hsotg *hsotg, int remote_wa=
-keup)
-+int dwc2_restore_device_registers(struct dwc2_hsotg *hsotg, unsigned int =
-flags)
- {
- 	struct dwc2_dregs_backup *dr;
- 	int i;
-@@ -5223,7 +5223,7 @@ int dwc2_restore_device_registers(struct dwc2_hsotg =
-*hsotg, int remote_wakeup)
- 	}
- 	dr->valid =3D false;
-
--	if (!remote_wakeup)
-+	if (flags & DWC2_RESTORE_DCTL)
- 		dwc2_writel(hsotg, dr->dctl, DCTL);
-
- 	dwc2_writel(hsotg, dr->daintmsk, DAINTMSK);
-@@ -5414,6 +5414,7 @@ int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *=
-hsotg,
- 	u32 gpwrdn;
- 	u32 dctl;
- 	int ret =3D 0;
-+	unsigned int flags =3D 0;
- 	struct dwc2_gregs_backup *gr;
- 	struct dwc2_dregs_backup *dr;
-
-@@ -5476,6 +5477,7 @@ int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *=
-hsotg,
- 		dctl =3D dwc2_readl(hsotg, DCTL);
- 		dctl |=3D DCTL_PWRONPRGDONE;
- 		dwc2_writel(hsotg, dctl, DCTL);
-+		flags |=3D DWC2_RESTORE_DCTL;
- 	}
- 	/* Wait for interrupts which must be cleared */
- 	mdelay(2);
-@@ -5491,7 +5493,7 @@ int dwc2_gadget_exit_hibernation(struct dwc2_hsotg *=
-hsotg,
- 	}
-
- 	/* Restore device registers */
--	ret =3D dwc2_restore_device_registers(hsotg, rem_wakeup);
-+	ret =3D dwc2_restore_device_registers(hsotg, flags);
- 	if (ret) {
- 		dev_err(hsotg->dev, "%s: failed to restore device registers\n",
- 			__func__);
-@@ -5619,7 +5621,7 @@ int dwc2_gadget_exit_partial_power_down(struct dwc2_=
-hsotg *hsotg,
- 		/* Restore DCFG */
- 		dwc2_writel(hsotg, dr->dcfg, DCFG);
-
--		ret =3D dwc2_restore_device_registers(hsotg, 0);
-+		ret =3D dwc2_restore_device_registers(hsotg, DWC2_RESTORE_DCTL);
- 		if (ret) {
- 			dev_err(hsotg->dev, "%s: failed to restore device registers\n",
- 				__func__);
+diff --git a/arch/arm/configs/bcm2835_defconfig b/arch/arm/configs/bcm2835=
+_defconfig
+index b5f0bd8dd536..97632dee1ab3 100644
+=2D-- a/arch/arm/configs/bcm2835_defconfig
++++ b/arch/arm/configs/bcm2835_defconfig
+@@ -38,8 +38,6 @@ CONFIG_CPU_FREQ_GOV_ONDEMAND=3Dy
+ CONFIG_CPUFREQ_DT=3Dy
+ CONFIG_ARM_RASPBERRYPI_CPUFREQ=3Dy
+ CONFIG_VFP=3Dy
+-# CONFIG_SUSPEND is not set
+-CONFIG_PM=3Dy
+ CONFIG_JUMP_LABEL=3Dy
+ CONFIG_MODULES=3Dy
+ CONFIG_MODULE_UNLOAD=3Dy
 =2D-
 2.34.1
 
