@@ -1,159 +1,192 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9874E148838;
-	Thu, 24 Oct 2024 11:24:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8B1417DFE4
+	for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 12:41:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729769089; cv=none; b=aHBnvyVn0oB4vjep6Z09LFInLU9gRw8sQToTtrk9q80luz/ljk/q93/1oymBUT/ZYocjgVeXgB4Z9Lti7ypjRmUZ2W19EM/XxLGB49/muRsh5iv51quWzQWmKix1tbfNtapW5JelecKZvSU4n3SsypR6pXRcr2EU6RKGOTLvEgM=
+	t=1729773711; cv=none; b=ULwA/P50lWfMEm3Xc1CTbfhsTS+g1EVPzvlwk7X3ZICxt7gDLgh/Jo2PzkGtOSRx6rerqCBPXZPK6ouxGokrM+OuWxlI8xk0ia1obRIp64ONbc1Q4i19W7xRN53eLT+kvxf3qiudIjKMuqrlMRBUyXZDsb3DoNAzIjbN9uBK8mg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729769089; c=relaxed/simple;
-	bh=bKn1zWxfQ+atPPXQ2airthHAbMPyOIETHQqWmdUEkMo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=UDZ6VSNsooim5e1tCE9IOXMNhYNARASlRe8urgYc3SnZLD1GmtVJfx7hyDZy2E7Vkj2E2GDI2H7C/e9YssUoM0rJsBw5Yx86yQWkqEBBczEUJEjqih9T2odl0pFMsq6/7g7+Cm+t8cAz2z8jVqtY/+IrkRejnVmoK/uIkDUq1iQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=WBKywO1P; arc=none smtp.client-ip=198.175.65.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1729773711; c=relaxed/simple;
+	bh=oWPA/2U1Bgaa+ki5dn0LOSX4WA4bXxtkFxP76lA9Kkk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=nQpupz09d/1LD2FXcG4bk5I770zv/pAdUwVluk3ww1eKdIxxc/ALLNtfxRR8UQY6UyvvZ3RHRvRbq0Zp3SXTcm2XEbzFHGPuzw4beggRunZ39onnk4SoN9B8L/BYHo01q4Ayvs6LgTVqSxhqBNst4y2IB6AJM8v3uvptokchwAw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rp/LtimV; arc=none smtp.client-ip=209.85.128.180
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="WBKywO1P"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1729769087; x=1761305087;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=bKn1zWxfQ+atPPXQ2airthHAbMPyOIETHQqWmdUEkMo=;
-  b=WBKywO1Pm1NH3hvIB2fG/6rNZ0kqx/QPX41SBI96VdkKuohi+0YjcjZT
-   IiU5U2ozjmwQAKfJwISrj0zC2DgcEwMWQcKPr97uPFvpkHIATUSfZo1Db
-   oxff63ZFG0VjKI2bM6NRB+0yDRG9ViUg02VARKBptmNmtCXSlDn+JFT+B
-   6qRvqiBYmQwnM5diRPZmL2/o6c7gFm9T1BmUDGHSiE6QFauPLMjqQjPao
-   Ld46plKc1Pl71DIfpOrJCIeIFSa1uHr/G2VeScrEwsVXH91JO9z9EZ5lR
-   bAODVCEWt7++PyoilsCtrct4To0V7jQFG4khQsoQeNGiNTcOj4OisCO40
-   g==;
-X-CSE-ConnectionGUID: ISOuK6Q5SU+WHX6vejvkmA==
-X-CSE-MsgGUID: mrWAhxaKQzyKkLPb8MjJCQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11234"; a="33192631"
-X-IronPort-AV: E=Sophos;i="6.11,229,1725346800"; 
-   d="scan'208";a="33192631"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2024 04:24:46 -0700
-X-CSE-ConnectionGUID: 9fViNcHISpWdpdOkUE7INA==
-X-CSE-MsgGUID: WOBsemSpSI+Pq49VF0YsRA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,229,1725346800"; 
-   d="scan'208";a="80735898"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
-  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2024 04:24:42 -0700
-Message-ID: <ed236a63-6505-4cd9-8ccf-97a1035e2848@intel.com>
-Date: Thu, 24 Oct 2024 14:24:36 +0300
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rp/LtimV"
+Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6e3c3da5bcdso9214217b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 05:41:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1729773708; x=1730378508; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=6nrguRJ1ngVjVKk6xWYfwqCRJTmyUYBAOWkMRtDC6UA=;
+        b=rp/LtimV7z3cMOnnWer6TKNi7RNs6fqJYFP3KCIQqtjdPhYKv8Db6rW3X0P55dIwM/
+         nMtrDkYYhNugOraCjtujCDUNRrIzkTepMJE0TL7+y5Hmclr2Pt4s9+iQDsJgXBCHFoQf
+         JNnl6QvmDAetH8NfQmoTsrEDgHS7Tl9/dHYFsrnuBDrgvakQpCeMkks4lOt49tvfLCT8
+         s22la8I/C5qBlyIlgnOk8i40/KM69Gd9EXp4wGx8UsfZSe/0YGFlYtDjdlccqY7QGFx6
+         pTuvCeqGK/q/v13j3Pfk5mlzFNPgpMcnj5o9EW332ntdvhxvL7jzV7l2H6pdelD7NOR4
+         0n0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729773708; x=1730378508;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=6nrguRJ1ngVjVKk6xWYfwqCRJTmyUYBAOWkMRtDC6UA=;
+        b=TjZHHMUb5R8BH9yrWYiOtmFucEbCZlbh3nTAZkijIaEvXzddt87Cvly7Kuje2fwDUL
+         b9uYNmPVsz2q63vSgvEsr1zy8mSGxpjFOO1HWdE4vUtzwOxCvRbpBFim0loaJivvMMoq
+         BRrZhpg4Uq2+O+nVfhjRo/i4FS4VGCznA8YONAkuuwJxuZeexvwTBEi+46jcF5aWZPmn
+         bfqDE37BEx2XnCcmMIuQ/K4zsgQ1FRlnGT5dLhNtyUmW9IbP/+bpJfcXr5RSy6nizt5H
+         Y7WnbeiLT5w9cBGa2xvr31Jl1obe20PguVlgncurCo1Jw30qHlFf/BKEV4gwfjDFp57/
+         K0fQ==
+X-Gm-Message-State: AOJu0YwF0NKIxjGezyjsRv78Bt2i25t4QwAyaE8LpR3SBihfMUy96F8V
+	O1bbZnO1A20pQdQcvePoys2Nv29O9/SU4ExaH1HFMARFJz4XqpShXK0W+oLeyYaGZTlUxu/yLTQ
+	VjoYKXgWU71dn5zqv41tGdRnUoXmm/zwYhX0O3Twmx7jF82Tl
+X-Google-Smtp-Source: AGHT+IE69ezedNUOLVOrv8Tbf/4XuiEwvQr/cDlHISG8tirVX4Epc9Z1eC9+3p0MK2qi9f6jO1pGRtjZYSuh0snLGOE=
+X-Received: by 2002:a05:690c:fc6:b0:6e7:e76e:5852 with SMTP id
+ 00721157ae682-6e7f0fa4112mr72569707b3.32.1729773707683; Thu, 24 Oct 2024
+ 05:41:47 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-msm: Add sysfs attribute for error state in
- SDHCI MSM driver
-To: Sachin Gupta <quic_sachgupt@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- linux-kernel@vger.kernel.org, quic_cang@quicinc.com,
- quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com,
- quic_narepall@quicinc.com, quic_nitirawa@quicinc.com,
- quic_rampraka@quicinc.com, quic_sartgarg@quicinc.com
-References: <20241022141659.18764-1-quic_sachgupt@quicinc.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241022141659.18764-1-quic_sachgupt@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20241018105333.4569-1-victorshihgli@gmail.com>
+ <20241018105333.4569-2-victorshihgli@gmail.com> <a8033f18-7836-4de4-b21a-b81f52c1698d@intel.com>
+In-Reply-To: <a8033f18-7836-4de4-b21a-b81f52c1698d@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 24 Oct 2024 14:41:11 +0200
+Message-ID: <CAPDyKFqrkzDTakhzZOsF2mBpko0XG_v5mKManhTQzj1XRJfxxg@mail.gmail.com>
+Subject: Re: [PATCH V23 01/16] mmc: core: Support UHS-II card control and access
+To: Victor Shih <victorshihgli@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	benchuanggli@gmail.com, Lucas.Lai@genesyslogic.com.tw, 
+	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
+	Jason Lai <jason.lai@genesyslogic.com.tw>, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 
-On 22/10/24 17:16, Sachin Gupta wrote:
-> Introduce a new sysfs attribute err_state to the SDHCI MSM driver.
-> The attribute allows users to query the error state of the SDHCI host controller.
+[...]
 
-We already have err_stats and err_state in debugfs.  That seems
-more appropriate.
+> > +
+> >  static int sd_uhs2_power_up(struct mmc_host *host)
+> >  {
+> >       int err;
+> > @@ -42,12 +70,46 @@ static int sd_uhs2_power_off(struct mmc_host *host)
+> >
+> >       host->ios.vdd = 0;
+> >       host->ios.clock = 0;
+> > +     /* Must set UHS2 timing to identify UHS2 mode */
+>
+> That comment is stale, but...
+>
+> >       host->ios.timing = MMC_TIMING_LEGACY;
+>
+> MMC_TIMING_UHS2_SPEED_A is also checked by mmc_card_uhs2()
+> which is used a lot.
+>
+> It might be that ios.timing should be MMC_TIMING_UHS2_SPEED_A
+> until after calling host->ops->uhs2_control() ?
 
-> 
-> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> ---
->  drivers/mmc/host/sdhci-msm.c | 40 ++++++++++++++++++++++++++++++++++++
->  1 file changed, 40 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index e113b99a3eab..a256e3569a92 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -290,6 +290,7 @@ struct sdhci_msm_host {
->  	u32 dll_config;
->  	u32 ddr_config;
->  	bool vqmmc_enabled;
-> +	bool err_occurred;
->  };
->  
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -2255,6 +2256,8 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
->  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->  	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
->  
-> +	msm_host->err_occurred = true;
-> +
->  	SDHCI_MSM_DUMP("----------- VENDOR REGISTER DUMP -----------\n");
->  
->  	SDHCI_MSM_DUMP(
-> @@ -2398,6 +2401,41 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
->  	return ret;
->  }
->  
-> +static ssize_t err_state_show(struct device *dev,
-> +			struct device_attribute *attr, char *buf)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (!host || !host->mmc)
-> +		return -EINVAL;
-> +
-> +	return scnprintf(buf, PAGE_SIZE, "%d\n", !!msm_host->err_occurred);
-> +}
-> +
-> +static DEVICE_ATTR_RO(err_state);
-> +
-> +static struct attribute *sdhci_msm_sysfs_attrs[] = {
-> +	&dev_attr_err_state.attr,
-> +	NULL
-> +};
-> +
-> +static const struct attribute_group sdhci_msm_sysfs_group = {
-> +	.name = "qcom",
-> +	.attrs = sdhci_msm_sysfs_attrs,
-> +};
-> +
-> +static void sdhci_msm_init_sysfs(struct device *dev)
-> +{
-> +	int ret;
-> +
-> +	ret = sysfs_create_group(&dev->kobj, &sdhci_msm_sysfs_group);
-> +	if (ret)
-> +		dev_err(dev, "%s: Failed to create qcom sysfs group (err = %d)\n",
-> +				__func__, ret);
-> +}
-> +
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> @@ -2442,6 +2480,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	sdhci_get_of_property(pdev);
->  	sdhci_msm_get_of_property(pdev, host);
->  
-> +	sdhci_msm_init_sysfs(&pdev->dev);
-> +
->  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
->  
->  	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
+I agree, that was also how the code looked before my previous comment for v22.
 
+Victor, sorry for the confusion, I simply didn't realize that
+mmc_card_uhs2() was using MMC_TIMING_UHS2_SPEED_A.
+
+It looks like we should set MMC_TIMING_LEGACY, *after* calling
+host->ops->uhs2_control(). Just to make sure we have the correct
+initial state after powering-off.
+
+I will fix this when applying, see more comments about that below.
+
+>
+> >       host->ios.power_mode = MMC_POWER_OFF;
+> > +     host->uhs2_sd_tran = false;
+> >
+> >       return host->ops->uhs2_control(host, UHS2_SET_IOS);
+> >  }
+
+[...]
+
+> > +static int sd_uhs2_init_card(struct mmc_host *host, struct mmc_card *oldcard)
+> >  {
+> >       struct mmc_card *card;
+> >       u32 node_id = 0;
+> > @@ -131,33 +818,211 @@ static int sd_uhs2_init_card(struct mmc_host *host)
+> >       if (err)
+> >               return err;
+> >
+> > -     card = mmc_alloc_card(host, &sd_type);
+> > -     if (IS_ERR(card))
+> > -             return PTR_ERR(card);
+> > +     if (oldcard) {
+> > +             card = oldcard;
+> > +     } else {
+> > +             card = mmc_alloc_card(host, &sd_type);
+> > +             if (IS_ERR(card))
+> > +                     return PTR_ERR(card);
+> > +     }
+> >
+> >       card->uhs2_config.node_id = node_id;
+> >       card->type = MMC_TYPE_SD;
+> >
+> >       err = sd_uhs2_config_read(host, card);
+> >       if (err)
+> > -             goto err;
+> > +             return err;
+>
+> This leaks card if !oldcard.  Still need:
+>
+> err:
+>         if (!oldcard)
+>                 mmc_remove_card(card);
+>
+>
+> >
+> >       err = sd_uhs2_config_write(host, card);
+> >       if (err)
+> > -             goto err;
+> > +             return err;
+>
+> Ditto
+>
+> >
+> >       host->card = card;
+> > +     /* If change speed to Range B, need to GO_DORMANT_STATE */
+> > +     if (host->ios.timing == MMC_TIMING_UHS2_SPEED_B ||
+> > +         host->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD) {
+> > +             err = sd_uhs2_go_dormant_state(host, node_id);
+> > +             if (err)
+> > +                     return err;
+>
+> And here host->card is assigned but we have failed.
+> The other card types do not set host->card until
+> just before return 0.  Then this can be goto err
+> instead of return err.
+
+In regards to the error path and how to handle the cleanup of the
+mmc_card, indeed things are still not correct.
+
+However, I realize these parts are somewhat a bit tricky to get right.
+Therefore, I am simply going to leave this as is when applying and I
+am going to send patches that fixes things on top.
+
+In this way we can move things forward and avoid additional new
+versions of the complete series to be sent.
+
+> > +     }
+> > +
+> > +     host->uhs2_sd_tran = true;
+> > +
+> > +     return 0;
+> > +}
+> > +
+>
+
+[...]
+
+Kind regards
+Uffe
