@@ -1,38 +1,38 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E6EB189916;
-	Thu, 24 Oct 2024 20:19:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88460189F5E;
+	Thu, 24 Oct 2024 20:19:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729801147; cv=none; b=NydYeJTVfvAMgy2aEV6ZmHMeH788erUZGJpv7lY+3otH8sMkk4+LYftlRtiL/lZFJ7AVmKdw2b20mbw8Mqt7bJEQ9c/UUo2hP4MwL9+uc/8LyeZmxgUqAdXLX9ey+sm4YpPk/WUvNQBxsfx3u4TnGNTohxenlQAjA7QYFzlZZ/U=
+	t=1729801147; cv=none; b=C+rHZKqWybBfd0rWic0AlaN6bEmK4dZcaC0rOGhQZYorJQ+sr4IRQarxn67aCSpPoWdZLXjZStBgEqJ6tV09yTDCL6Pj/c8IauhS4QIf82U/SmVI/0kQn6mdeuyjc4l52rZ9FSdSCOKpdJhVwZz306mR/MS4SZJtvZyMf98OG7o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1729801147; c=relaxed/simple;
-	bh=YB9sep2oCN35bAcGfSErLNH5swAiXAI0QKrxaK1mf2A=;
+	bh=nDW0JkC5oOVw3y6HyHxt9mKYcZxpXMokS2HNemOLjZ4=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=p3ghdo/4uPH9pYKHsOFCZ0uootY8uo9SBxjNdYN5jgz4acV9VmN+0gzU26ENEJlllXKvAlSjghsgMlwPjDXVvCSA1mP3GVcBDBw0nvmIlgD6LhhvOuZi60qpFE6ERPdBTYBEMO+yJ5kEN4U38LLTgIEdFD/SSH5kUv9zGpudCY0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=iizMTzz8; arc=none smtp.client-ip=212.227.15.18
+	 MIME-Version; b=oeIf5HhsnqOGMZu4HcqcL/Tm/jGIXvPbc9wmhX0dqSAfjSOAD8MyndoIlV6wjghOZFzkpJRROu0lrKzetYwYRbabzbUns9zAWEJvuPSaUoinKLVFH2srNz0uPNVOKPH5Zr32HNSEHndSPxHI9ZGybluILfzHtpnqIerr25JdzRo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=KZLSTsDx; arc=none smtp.client-ip=212.227.15.15
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="iizMTzz8"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="KZLSTsDx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1729801126; x=1730405926; i=wahrenst@gmx.net;
-	bh=kE9FPbtpN1gptfSk3BViKriGQyJtWlX0djOx3GlUBlw=;
+	s=s31663417; t=1729801127; x=1730405927; i=wahrenst@gmx.net;
+	bh=7SJXJq2uX1cxKxMjslAAHJO+ZqjPnNq4UxpqnQBoZXU=;
 	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=iizMTzz892WPd7YaLtaujj/lOy0cUqiiXP+tEw336uO6CZMXHbV4g32/L2EZo13g
-	 ycMm1aSQa+ShVeLq6o7h2EUmtU6cdSpJES7tCSp/MU3m80X7/mOXOWbqhPLD/6hBH
-	 sQBFLkkPQN3j8o68Spb0aTw0UBDZtqTr46ygYljc3uTWQucd2OeKkU6RA5mefcqAu
-	 GrWPJchlOzqtzUWSXzioXOFN4REO0T8cLZvnYGU9ieU7CxaTLgCV2TRMAZ9znwzCF
-	 FHhxBVEbH+XfEmWunQyHtji80hIEpSws+1yultzgOrOzgpG79Oh5TlfX86PmXluRR
-	 jxntSTo4JfdGgdvy8Q==
+	b=KZLSTsDxZihnlXirdBa0AQQu2DSslmDJlLNVopdqTNhQm9XMLk63uuEmJ43pIIQw
+	 wkf0+C/y3POcLDf2xE+Gj6SGf0JmoK8Spt7IJfZKEWkiEZOY3/J3c+zlKWTFXdG36
+	 RxB4CnL2KZV3xvuSqw9PRCkEfetAKS6zoli0N5k/w6G6GoaPPxk41m2ywLTKIWQw3
+	 aRGTkIqDoSZ+h1mtDD4utQAwEtY6YImjihsQyEcciR4vWYrs19aOOpGc+TzqRWBcR
+	 pxr4JC7WMp+hsiqaXV5mPT+nq83ExA80OH2+i3ZOsD9KugyiW3Aq4vHghBCTL3H6k
+	 PnfjK7K8zt5hv6TEnw==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx005
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1MkYc0-1tkEjD3kbO-00n1jq; Thu, 24
- Oct 2024 22:18:46 +0200
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MPXhA-1tGnkz0Eny-00Le1q; Thu, 24
+ Oct 2024 22:18:47 +0200
 From: Stefan Wahren <wahrenst@gmx.net>
 To: Russell King <linux@armlinux.org.uk>,
 	Florian Fainelli <florian.fainelli@broadcom.com>,
@@ -51,9 +51,9 @@ Cc: Lukas Wunner <lukas@wunner.de>,
 	linux-mmc@vger.kernel.org,
 	linux-usb@vger.kernel.org,
 	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH 3/9] mmc: bcm2835: Fix type of current clock speed
-Date: Thu, 24 Oct 2024 22:18:31 +0200
-Message-Id: <20241024201837.79927-4-wahrenst@gmx.net>
+Subject: [PATCH 5/9] mmc: bcm2835: add suspend/resume pm support
+Date: Thu, 24 Oct 2024 22:18:33 +0200
+Message-Id: <20241024201837.79927-6-wahrenst@gmx.net>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20241024201837.79927-1-wahrenst@gmx.net>
 References: <20241024201837.79927-1-wahrenst@gmx.net>
@@ -64,48 +64,76 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:ZHnUj5N1ri1FpgNmvmUfKpJ9EiJQpv1kd+uvgbTIUstY1PSxrly
- 8HeS+/FhbVxKaaRb8yQqTsJcZoJHeNKOf3U3evEWVJjhnGE8PNjuuYVdbuL70ociJQOLGm9
- caxShFkJTRZeEVpz1IlOnpJcVzDc7UBxGPcke2XHsrX4Zdh1pn1m2utJkd1Ne6JIcwFcexU
- YsE74od3LaP9yL3cMaOOg==
+X-Provags-ID: V03:K1:9TmHXDC8x1toKmQj5TL/zr1r9VxVKXQInUCA3JeqWfeBotHSHp8
+ wLE1AA0+kLRoWZpFnsyE4ypCh+VDSSwImsj9NpzVERhwNkskidZqyV6e/pwYvPgtjXqqPIN
+ dKF5Cw/6ZqzyERKBCWYhADUJLiDKe+wT6MTyi6A5+uNIl6WlpGZ+RY+ZFRdnWqfhJ1IdpNP
+ J6BA6SqMbLqZ8lwtJFtow==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:7dNHSwoAxOw=;Ok3TtRcyjeVnY1CYGL21gL5LX4u
- pVP7Lzl6Oe4+cPYtXju8zUfZdE0pTqF58Q685nJlqCu2JWSvaCN2S19czG+V8Ms3fRgjZbcOn
- qdVL2O9+14D+IIsHjmOb9WYMXzNEUhwoos/V8PpFqqLsxHqaWGAp+OLM5Df5CHvpr2rAyOUYg
- 1XWUWUXJFjoIRoW1XQL+GXtwBwsHypTRqwSGu1d+RJb+kTcuAwfil8fzR0XoPNVi9YsfT3fBa
- 7ZC9/TqV5IF43qX8FersJSEpFduFvJSi3p0VKxENo4yFQLIRZ8ryIm40/1dNKovLgL06hFHA2
- Pn5lmCi5Z41ci+vIzH2Dl9hhE2gu6bWRPkhbRHzMmMeXczmo2G6Fk+OkoiZeh6Tu9fnw9AtHu
- Ud4tNzCj2ArdUpUNCO00kjqqxEgrZNYiEBThjMxKyQcphEz0rt1+75VMekALKYocyeS1HTk7O
- vI257JLeoXtln/Rz+cU2iBuVsPJrTNOFcQRODa6Na0CuqpGawb9JKtr8Uc1IaAAOXt+OShsGr
- yj4hJ5R0wK/zr47cu9rsIeSSc+5PDmeaTTbyNM/OMG9TQrnKH7BkP2VE8H2dgvJmQRzb2UVY5
- +rdxeoBr7SGI9n2JJgnrae4I1P5RY1JXI5f1u4nfz2CUQFtKTI5KA+xaPgacxWTAaI0Eghqn4
- 8gDVPcCaPdnxVgTThrgHzgLOlcpvQn2zPaCTVSfrABivY6Wx/xDn0csGPZZAnYmYA3Cd4uYrE
- UAmAdIf/jAMFDB23WW3lmmLNvCUItAcGgPjV57+lO88mEeA55czVEHvpX4xPi0Bg3F1fa0mGn
- +rT5/+W06U9lT9ldU7qlla5w==
+UI-OutboundReport: notjunk:1;M01:P0:bPTh4IaJ1/s=;DvZyp+ul50m2MoJpgBSYoErzoer
+ AbfbZynkrtkr/VN3ylQefl5asCMF01gq+igg96KF6o8g7jl7bfNo8d0xBpVQ05s8QpmOLM2Oy
+ CnmuA+QE+SRGFAhwFRd4+17v5FHfxOcbok9OczzdUDVdosuNY5hsVXa+cQ5o+tqdW1uY69ViY
+ 3/PbVKf8MBtIRQiyJmCOybn87kxd4kgM3Hj4YY4cEcncWh+WpLB3O+xj6kSbzeddMx+Dm2qC4
+ yW02bi2qa/uOli5uTteIeCdNS5+1ULuFUPZ0bONegz0m/CaE4VRG/pA6N9J1gs0ncIpjE7qLM
+ XQMHBcBkSiD5FNdqO886NQleDowz5/JkDVIKj5732IaAZdjGuPPgXwiUb1NtBLYh5Yiz3Gi3V
+ K+jA+NDX7rAsrq2cVtEZGK8FL8ZEhW3DR4unOGEDHHpJE0FoVT8KUPwrDDGahIbK4r0RZChoq
+ PN5FRDMXc8XjRy3GUEq5HK6oIgJ/tMpoeXoVOv1CKYuii67fvypFxO/7kg/XK94EsoD3wsD9K
+ eCyW7ggaqih3cg5DiQ8CY3ea8zlGVe0FBl+enBhSKObYJF3oqVI/gJtIZZzcBf6HDgl1gr8MK
+ 6vmKR4Qh+bu9Uo0ulgIDyxCic49QrET8p9bPtTTGEkfoFI6pLvwq1mrioVtlp7NjI5RJUl49R
+ KtPDKUgHARqf9J4m89h53uezA1DbUS0qdD1VukTzLZIl4QRch6HLpaDMGud7zwADQMTJ2Saj4
+ 6ZjmHrYPUTgnBSHLAQF+IyNbNX/xzkbdtfrM0yPqG3kGbkTmlQlAIexAgMQYUroEMbJjDCDEd
+ PK8Alhu0VddmoeusWHwUv0mA==
 
-The type of mmc_ios.clock is unsigned int, so the cached value
-should be of the same type.
+Add a minimalistic suspend/resume PM support.
 
-Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controll=
-er.")
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 =2D--
- drivers/mmc/host/bcm2835.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/bcm2835.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
 diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 35d8fdea668b..3d3eda5a337c 100644
+index 107666b7c1c8..17c327b7b5cc 100644
 =2D-- a/drivers/mmc/host/bcm2835.c
 +++ b/drivers/mmc/host/bcm2835.c
-@@ -150,7 +150,7 @@ struct bcm2835_host {
+@@ -1343,6 +1343,30 @@ static int bcm2835_add_host(struct bcm2835_host *ho=
+st)
+ 	return 0;
+ }
 
- 	struct platform_device	*pdev;
-
--	int			clock;		/* Current clock speed */
-+	unsigned int		clock;		/* Current clock speed */
- 	unsigned int		max_clk;	/* Max possible freq */
- 	struct work_struct	dma_work;
- 	struct delayed_work	timeout_work;	/* Timer for timeouts */
++static int bcm2835_suspend(struct device *dev)
++{
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
++
++	if (!host->data_complete) {
++		dev_warn(dev, "Suspend is prevented\n");
++		return -EBUSY;
++	}
++
++	clk_disable_unprepare(host->clk);
++
++	return 0;
++}
++
++static int bcm2835_resume(struct device *dev)
++{
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
++
++	return clk_prepare_enable(host->clk);
++}
++
++static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
++				bcm2835_resume);
++
+ static int bcm2835_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev =3D &pdev->dev;
+@@ -1471,6 +1495,7 @@ static struct platform_driver bcm2835_driver =3D {
+ 		.name		=3D "sdhost-bcm2835",
+ 		.probe_type	=3D PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table	=3D bcm2835_match,
++		.pm =3D pm_ptr(&bcm2835_pm_ops),
+ 	},
+ };
+ module_platform_driver(bcm2835_driver);
 =2D-
 2.34.1
 
