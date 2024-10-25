@@ -1,166 +1,191 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-pg1-f176.google.com (mail-pg1-f176.google.com [209.85.215.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7777D18E021
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 05:49:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E09321BF2B;
+	Fri, 25 Oct 2024 06:01:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729835342; cv=none; b=HLtE4Q6joAONmAyFKwFitoNG1fmIU0tQLhUrA/TEDh8LlefliK3xs2KwKO/X8RtVapheHybbs1T3AMUV4IB7eADgCbKO/mQIU1MFkpP/iasyuql7t9h10MUuVJ3DWYEVv/RBeNSy9reCdANqh4FFNW1aRhFYSZ51IrVoXYgJYUA=
+	t=1729836066; cv=none; b=c3aojPPhlT/iX6b7UTabguTUpdbw7pIPBnRUpixE60p7U6h9HPJpxsdZIbCFajZPMFIdU5AGsha+u/FonOa+zdbLLwimosook0Re1QhwzHrVxmCp3eOW0WfKw2rDS3644Abv/aO+ISZuGSZTTjngidygY0Or6E1DYy9HRo270cw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729835342; c=relaxed/simple;
-	bh=3YLKOAKdedA794EBEEELdq9D/mc6G2/g5JyWa14ZmW4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jievFPWruFTJYkaPi25PhZPrpDlkNNghr+i+kqj92+ARt1/CG8fxXHgAAcipb1sbE0kZRsogvOWM3dtpTBcFUlNT51y5TMqncC8732GGYAaksVt//Xt9u3lcJ4iNn89eVtixWT/K9bXQ4ZsEwh2dXC1i3ErVir4gPL7on1LlPwM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=c/CKEtQf; arc=none smtp.client-ip=209.85.128.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1729836066; c=relaxed/simple;
+	bh=OS0UVRvlt1s9coimwIHuyfG3Bm4e+hCBpF+aO3huxw0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=iI1348Reeg3nolVIBoZekehLLVWm7gHdUSZiSKL4bKhcq9DNFYMAvF8ErGvU8U2In74fLS01iNqo+ngRqosQo6H+U+FWi0v9TzdOnhZMyPTXl+nl6VyPqMDmzRUP62X3rtsZpb0eU8wgzSOFmBwT1VwvhD2SDr7O9A7yJKQ4T8o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ey7ssW+G; arc=none smtp.client-ip=209.85.215.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="c/CKEtQf"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6e314136467so16593237b3.0
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 22:49:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ey7ssW+G"
+Received: by mail-pg1-f176.google.com with SMTP id 41be03b00d2f7-7ea7ad1e01fso1119386a12.0;
+        Thu, 24 Oct 2024 23:01:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1729835339; x=1730440139; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=HuBj6jHH+2hH/HnRC6bTykIAkOcHwoEScoSLgxcpErQ=;
-        b=c/CKEtQfgEKQcf05zAJtGEoeWRcVnWisyYVEHG0qNpNwbfN/etepON+YpfHJQobOrP
-         IcheKezQ4ObZnV4KzwPsv/sXWCSImDQ6nwX+DNZJ2MEPYi02ohWcQL+jFhgwJL2qlTqD
-         e82aqj02ahASm/zlpAU3gG1ZaccUH5llWSPG7l6Tqkonz2sCgMODeSWiZCAzo0vFatr9
-         aYxFVCpqv60yKLz6/pKbubwirvm2e7EOkzdJoklop7HdH+AGztlPoeNobPwLlDPDps8R
-         Vp+C/Xokc83Luj8ceCctUngWf7XHT+eXjHVOJiXoigtYrzFPnetCWv7wrIyN3tx2WzjP
-         54vQ==
+        d=gmail.com; s=20230601; t=1729836063; x=1730440863; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=cHsltCjYk2l8xbGPXpxva0UoOStLYFhJUfhmHUZULaA=;
+        b=ey7ssW+G+esUXbbi01g6SD2XUWeVr69LV47BWl2rvVP6597TxD18w/LAQPvrIrU6K9
+         //V2Xy6Mj55aLr2S9hhqrv23bW8rxWDs53nCCewtZye91NxcLoOakH/kGb702STwAW2j
+         x5bv1eQza43n9VBHEaviLsGcV/fiaymMmtCUGjbwaAKeXZs8uVl6mv2p+oGMBN56Abnl
+         o10BhejZJoH5HD5Ab/hpfrHjIXjdZEIn9cW1ANkQpCwvaUh53D+uzd3YGqpQRDvNAt9b
+         KYUCMQ4iD6wL9PFsoqJapshj8KEcYd2tLXYhUemBmezpewMiDw3Bphc2OX5A21dhr1nD
+         ezTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729835339; x=1730440139;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1729836063; x=1730440863;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=HuBj6jHH+2hH/HnRC6bTykIAkOcHwoEScoSLgxcpErQ=;
-        b=s5xp3QmxhzjwGcnRZrWbpACnCbO/lbQe/r8F9AWOmFpVzjcKmmoEMKxP0ywsM0pS3h
-         u6I42IN0vQFfFxMtyjJm2hASeDSAhk8+i46HYc9kYLq5oervfvBFeH3LMWQr8zOBY94B
-         fSgyHxQnOwItUNongDZq/eoR3Die4N9b1t/LWjU20J0njZQ+mOa79QY+YVZdkJznkjE3
-         jq744EnZZdQASzmyCVsa7Lr60UoHOvcV/J+HScDCA49a86MkllpkT9Gmw+OgCPKR4Njy
-         AXugtcPNzENP6+xivsFki0fJlJ6kUA3ZLAS6ApOgFeDssuKRbnWITg1T59qa+bORnQau
-         6guQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVClnHn/qRvTPNigPLr9heJgQxR6h0gVeY4sT+N7cTWksWfTsRJ6bL2NNZXrAT52BOHUjaOI1xPrxk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz6qKY2lhWl+0OYIMg+RpU4OvUi+4cuSftb35sgYH3VONWqjKnp
-	zT92OJFsKK3tb8mfKBg+oFSGj1FFN7AL+9PteJhFW2agOBz+m43AHZbVtJNOQSvUXS3vbkmFsbr
-	uRPMEy3wrXIfnv9XaNb9BRGJxTvBrUD/GVN7gZw==
-X-Google-Smtp-Source: AGHT+IE/2A2wcTRWtJIdxZFRWU2jMnFi993sbCQCkQ/aUt0tW3T8bN0qOPk5do1LQHq+4wKE6dywoyXSXH+Knynop1g=
-X-Received: by 2002:a05:690c:f8a:b0:6e2:5a6f:d90b with SMTP id
- 00721157ae682-6e84a7e69dfmr45932207b3.2.1729835339441; Thu, 24 Oct 2024
- 22:48:59 -0700 (PDT)
+        bh=cHsltCjYk2l8xbGPXpxva0UoOStLYFhJUfhmHUZULaA=;
+        b=d0L9dOYsP5m/H8pGV2C+mGaLQO/Tf3CCBDezEa5Vv2VB1/9YrjcJoVw4gPw6eKL7G3
+         ZJypiL1vu6q6nytNd9mJoJkKj+wiTCak8b6all/JwYOObLqJlkGqyRPJIbdyqx/3OfQK
+         D8Xue+N2Ih2Bn09uk/HTKF4+sJaRSDIz1uU/97BFg+bzJcziI6q6zg0qo+BqjJiuhcjK
+         D9kPE3fvAwvpcHmcVawiA52I+BCPWiFXhqfkotKy0Z66llQ1J/NFkzliwm+cgyKfaLbO
+         2W7SKETP7lDZJm9IcmYe7cuZQsqY6kHkSPCMUBk1+Pu2FE/Zid0ysHPNbdXHVtc3p7Jf
+         Pqbw==
+X-Forwarded-Encrypted: i=1; AJvYcCVy9Dbf4bt+OwIgkZRTns0LSvgO0q+jFK+Uz/t5/NPKDOo4SVwGfvmYsN1ZlSxt9YJlgkXS15BkuIMz@vger.kernel.org, AJvYcCWpqyEq/mhl7mkMoff+E2M1WVi/MdaY0TCeSZ0/PvY/X87u4hNLT6R3LdJqmv+ul5TUO6GbZJ8ye0ufUQE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz3dZmZYI1wM11iv15nIPMvXSYOBBUyx4saCAoq17IJwJstAN8y
+	XZi6dKqyhWS/j8XZb/GtMs3pnrnmhd0Qgy+5yDXfW6frq5OuhHs9KcA5Ww==
+X-Google-Smtp-Source: AGHT+IHNBMW8srxqG4xJuBBdWY52yy2dbGfJ2RwXjMtKa47S+m3uV66e2GjLQDwz+nLf178+BZGbVw==
+X-Received: by 2002:a05:6a20:9f89:b0:1d9:761:8ad8 with SMTP id adf61e73a8af0-1d9889975a9mr8988513637.21.1729836063025;
+        Thu, 24 Oct 2024 23:01:03 -0700 (PDT)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72057a3c024sm363557b3a.192.2024.10.24.23.00.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Oct 2024 23:01:02 -0700 (PDT)
+From: Ben Chuang <benchuanggli@gmail.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org,
+	victor.shih@genesyslogic.com.tw
+Cc: greg.tu@genesyslogic.com.tw,
+	ben.chuang@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	Lucas.Lai@genesyslogic.com.tw,
+	benchuanggli@gmail.com,
+	victorshihgli@gmail.com,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 1/2] mmc: sdhci-pci-gli: GL9767: Fix low power mode on the set clock function
+Date: Fri, 25 Oct 2024 14:00:16 +0800
+Message-ID: <20241025060017.1663697-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.47.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241023092708.604195-1-quic_yuanjiey@quicinc.com>
- <20241023092708.604195-3-quic_yuanjiey@quicinc.com> <xfy335jzh5t5a7fdrjfswerjdze3vaybf7rvkxnae3cv3xaii7@rn7iqwga2p62>
- <ZxsJp6XtJSfnNJqH@cse-cd02-lnx.ap.qualcomm.com>
-In-Reply-To: <ZxsJp6XtJSfnNJqH@cse-cd02-lnx.ap.qualcomm.com>
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Date: Fri, 25 Oct 2024 08:48:48 +0300
-Message-ID: <CAA8EJprVrCr11qkZjvzKhbZ=BvGRvbvCK-KsAhWiG48dOXQHvw@mail.gmail.com>
-Subject: Re: [PATCH v1 2/3] arm64: dts: qcom: qcs615: add SD and emmc node
-To: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org, 
-	conor+dt@kernel.org, bhupesh.sharma@linaro.org, andersson@kernel.org, 
-	konradybcio@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	quic_tingweiz@quicinc.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 25 Oct 2024 at 06:00, Yuanjie Yang <quic_yuanjiey@quicinc.com> wrote:
->
-> On Thu, Oct 24, 2024 at 11:42:26PM +0300, Dmitry Baryshkov wrote:
-> > On Wed, Oct 23, 2024 at 05:27:07PM +0800, Yuanjie Yang wrote:
-> > > Add SD and emmc support to the QCS615 Ride platform. The SD controller
-> > > and emmc controller of QCS615 are derived from SM6115. Include the
-> > > relevant binding documents accordingly. Additionally, configure
-> > > emmc-related and SD-related opp, power, and interconnect settings
-> > > in the device tree.
-> > >
-> > > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-> > > ---
-> > >  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
-> > >  1 file changed, 198 insertions(+)
-> > >
-> > > diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > > index fcba83fca7cf..3840edf13fe8 100644
-> > > --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > > +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > > @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
-> > >                     #size-cells = <1>;
-> > >             };
-> > >
-> > > +           sdhc_1: mmc@7c4000 {
-> > > +                   compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
-> > > +                   reg = <0 0x7c4000 0 0x1000>,
-> > > +                         <0 0x7c5000 0 0x1000>;
-> >
-> >  <0x0 0x007c4000 0x0 0x1000> (this applies to all address nodes, so
-> >  sdhc_2 too.
-> Thanks, in the next version, I will adjust all the values in the reg to hexadecimal.
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Not only that. In the entry that I've posted there is a second change.
+On sdhci_gl9767_set_clock(), the vendor header space(VHS) is read-only
+after calling gl9767_disable_ssc_pll() and gl9767_set_ssc_pll_205mhz().
+So the low power negotiation mode cannot be enabled again.
+Introduce gl9767_set_low_power_negotiation() function to fix it.
 
->
-> >
-> > > +                   reg-names = "hc",
-> > > +                               "cqhci";
-> > > +
-> > > +                   interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-> > > +                                <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-> > > +                   interrupt-names = "hc_irq",
-> > > +                                     "pwr_irq";
-> > > +
-> > > +                   clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> > > +                            <&gcc GCC_SDCC1_APPS_CLK>,
-> > > +                            <&rpmhcc RPMH_CXO_CLK>,
-> > > +                            <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-> > > +                   clock-names = "iface",
-> > > +                                 "core",
-> > > +                                 "xo",
-> > > +                                 "ice";
-> > > +
-> > > +                   resets = <&gcc GCC_SDCC1_BCR>;
-> > > +
-> > > +                   power-domains = <&rpmhpd RPMHPD_CX>;
-> > > +                   operating-points-v2 = <&sdhc1_opp_table>;
-> > > +                   iommus = <&apps_smmu 0x02c0 0x0>;
-> > > +                   interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
-> > > +                                    &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-> > > +                                   <&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-> > > +                                    &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
-> > > +                   interconnect-names = "sdhc-ddr",
-> > > +                                        "cpu-sdhc";
-> > > +
-> > > +                   bus-width = <8>;
-> > > +                   qcom,dll-config = <0x000f642c>;
-> > > +                   qcom,ddr-config = <0x80040868>;
-> > > +                   supports-cqe;
-> > > +                   dma-coherent;
-> > > +                   mmc-ddr-1_8v;
-> > > +                   mmc-hs200-1_8v;
-> > > +                   mmc-hs400-1_8v;
-> > > +                   mmc-hs400-enhanced-strobe;
-> >
-> > Are these board properties or SoC properties?
-> Thanks, these properties are Soc properties, so I put them in dtsi.
->
-> > > +                   status = "disabled";
-> > > +
-> >
-> > --
-> > With best wishes
-> > Dmitry
->
-> Thanks,
-> Yuanjie
+The explanation process is as below.
 
+static void sdhci_gl9767_set_clock()
+{
+	...
+        gl9767_vhs_write();
+        ...
+	value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+        pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <--- (a)
 
+        gl9767_disable_ssc_pll(); <--- (b)
+        sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
 
+        if (clock == 0)
+                return;  <-- (I)
+
+	...
+        if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+		...
+                gl9767_set_ssc_pll_205mhz(); <--- (c)
+        }
+	...
+	value &= ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+        pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <-- (II)
+        gl9767_vhs_read();
+}
+
+(a) disable low power negotiation mode. When return on (I), the low power
+mode is disabled.  After (b) and (c), VHS is read-only, the low power mode
+cannot be enabled on (II).
+
+Fixes: d2754355512e ("mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for GL9767")
+Signed-off-by: Ben Chuang <benchuanggli@gmail.com>
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 35 +++++++++++++++++++-------------
+ 1 file changed, 21 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 0f81586a19df..22a927ce2c88 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -892,28 +892,40 @@ static void gl9767_disable_ssc_pll(struct pci_dev *pdev)
+ 	gl9767_vhs_read(pdev);
+ }
+ 
++static void gl9767_set_low_power_negotiation(struct pci_dev *pdev, bool enable)
++{
++	u32 value;
++
++	gl9767_vhs_write(pdev);
++
++	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
++	if (enable)
++		value &= ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
++	else
++		value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
++	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
++
++	gl9767_vhs_read(pdev);
++}
++
+ static void sdhci_gl9767_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+ 	struct mmc_ios *ios = &host->mmc->ios;
+ 	struct pci_dev *pdev;
+-	u32 value;
+ 	u16 clk;
+ 
+ 	pdev = slot->chip->pdev;
+ 	host->mmc->actual_clock = 0;
+ 
+-	gl9767_vhs_write(pdev);
+-
+-	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
+-	value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+-	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
+-
++	gl9767_set_low_power_negotiation(pdev, false);
+ 	gl9767_disable_ssc_pll(pdev);
+ 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+ 
+-	if (clock == 0)
++	if (clock == 0) {
++		gl9767_set_low_power_negotiation(pdev, true);
+ 		return;
++	}
+ 
+ 	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+ 	if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+@@ -922,12 +934,7 @@ static void sdhci_gl9767_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ 
+ 	sdhci_enable_clk(host, clk);
+-
+-	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
+-	value &= ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+-	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
+-
+-	gl9767_vhs_read(pdev);
++	gl9767_set_low_power_negotiation(pdev, true);
+ }
+ 
+ static void gli_set_9767(struct sdhci_host *host)
 -- 
-With best wishes
-Dmitry
+2.47.0
+
