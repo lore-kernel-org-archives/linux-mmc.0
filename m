@@ -1,112 +1,161 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 569772036FC
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 18:40:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729881637; cv=none; b=FidxqjCopWVoNStd8ldTNB27iif6ckgAEVStHYt8kf90fRMNKb0EmghE4ArP2dwrwcUruXVhz0PG931tStCfa2aFnFAZPqHkbovUAgQeTNtEVg37EeHo9TPBu0uvvt4jDLCAEOzeJi86uF+NTvMQFe6BbGezlw+SNg7lGI3K6Zs=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729881637; c=relaxed/simple;
-	bh=pHSh3XPSaFVV84kA7tilhdhkPW5JX36He6gVwTk2sUQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=KqzWy6LbLUMbGDFZ+YLB5eNSMzZbp9myvnUh4KLx3BYSnwebH0GElE48DPNAaG5Ub9SmKwaYHQKuW93vzQpoeSDPJMNrdAMUDDTsWcn5IESYQdnEz1JYeywof3+ChJUV3GjNduyH+MHuImdI/Wh74k5I8ecfyKHC2K7rI48P+04=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=fail smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=kVS1VXkm; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B08F520EA32
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 20:22:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=85.215.255.20
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1729887735; cv=pass; b=AkTbI+bnVxarFQNe2BalIf7P5sLvyYgkso2uwi/JXZZTfnPbGLs1KzSUBULqBi7KjsLZ/2yQfOafiB4bHo5G9PgScfTMLh3BqaaPQvTRneOrA80kCUq7Us7NJ5p6k+y5atovJlUqKCjh52Jcb5g5IiqxPKQZoOYtHXXFyBdT5nM=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1729887735; c=relaxed/simple;
+	bh=A8TDF7Ng/WXc23wTlCMeRGD+bsrNWdMZq7tZVwx9vnA=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=sm4wBvf5bQvkuhjFT5ow2SW4PRxcDBqJtHRcufrCeycpZzjlycsbdPN0dU6PSkL6RkyebZGMYkmMrgsRV4jR7DIPPrEwsGm/DbXOxvFmEw2P0tw719SIqP1gLuLPQvE0EU0BoNL2ZRvqDloE2PLVWyOLwhk25DxRrKRY6zPt67M=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=jM3p2dcc; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=nwCp2wcJ; arc=pass smtp.client-ip=85.215.255.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="kVS1VXkm"
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49PB5oit015410
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 18:40:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	gVvgWoKlcV9LtUsUs6yWkyXRhBCiJ5gKYOTtTqqtPO8=; b=kVS1VXkmNnXzZMXO
-	RB96+9SH3GtfraqsLuzYUkLUGIGlGiZbu1jkPwiAFiyHPSv5YUs8L9BLxA28bAIx
-	vyxVRwKHa3G1ptCi9MnKnvcGe8ZYL1E72zpkRvfaWGLMt+UCf1IISoMHly0RLDk2
-	+su8DJr8YA1P0YoWd6D0tlT/lQbiNRH7F40s24miM7hlNQkQwinjvg67ndtATaCx
-	xc+dyeVsqgHbNC4jCeHgMieMq9sBkGIIZMoM5U7bMklfp98weGHF0Ta7n+tSd8BA
-	Iswx6CsLF9TwZus82XfgwGxgkYGicL7eueSSqDUIZTxiDHkQg/sUhgCo19bGVtIi
-	8m5drQ==
-Received: from mail-il1-f200.google.com (mail-il1-f200.google.com [209.85.166.200])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42ga5jsbbn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 18:40:33 +0000 (GMT)
-Received: by mail-il1-f200.google.com with SMTP id e9e14a558f8ab-3a4d8e3c162so2702775ab.2
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 11:40:33 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729881632; x=1730486432;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=gVvgWoKlcV9LtUsUs6yWkyXRhBCiJ5gKYOTtTqqtPO8=;
-        b=d1/Nc6Xuu9+H+zypxd7qRg3IAos0i/xIl/04aHtOMt/TNZKy0RWwgdxxr/0aaZc9ha
-         0mdp8Y1UAbnh3/08TFU4Ha4wI1UEXrohdzQUv94qBrK8vHAd68EkbrMb0BYRYcoFWf75
-         bMPO5mwtwiAVU38AsnmUrq7Gu4cJIO518BD1AtlyjmF/lEnxYveCS40nx96b+tJgf0Ed
-         KcJlXW15Ntjd9/ugkw4ZAt5Slim/m6qYO8SR0ZzMO2jVgX0TyKujc73zTU9uCOtRCvg/
-         zmOvYnqOCxXNUOaSekBzQL0uQu1wd7PxCKiVrFiH8DPuNHkzbMwermCsWnSVGaKG3MQI
-         vO9w==
-X-Forwarded-Encrypted: i=1; AJvYcCXeHno88kFApLRFos1YU2QV3BT7klMBmNbcuX3remGd/276jAa2p/D4ZXAx7XdSBpC9DfiwsF0dVM4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyWldEvfV9H8ZOswu1JeJWy+YQhudTL1pBFw+0IjZn4B/Eq9c67
-	+8gOdVmsao6E8ZQkTZ/LdVxZQnazQWIBcmVSXQNUPc47qqDxKYVfz9U9e4O3PmO2upFVMVqHudh
-	lfPxNXeSqXeNxduqxifFSwHqcO7J6xM/A2sSAXxYKGny5b7FxH70CPIx6s8o=
-X-Received: by 2002:a05:6e02:1566:b0:3a1:a227:c8a5 with SMTP id e9e14a558f8ab-3a4ed31fea8mr360495ab.5.1729881631808;
-        Fri, 25 Oct 2024 11:40:31 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGjSzBGiWU/ckW48xJT/7uhrcEOsittz0zEh+q6ENMSKuiPW4j11zulREu0udCO3SUIwIwiUw==
-X-Received: by 2002:a05:6e02:1566:b0:3a1:a227:c8a5 with SMTP id e9e14a558f8ab-3a4ed31fea8mr360375ab.5.1729881631352;
-        Fri, 25 Oct 2024 11:40:31 -0700 (PDT)
-Received: from [192.168.212.120] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5cbb631b0bcsm861369a12.60.2024.10.25.11.40.27
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 25 Oct 2024 11:40:29 -0700 (PDT)
-Message-ID: <fae33f7a-aa29-4254-a846-cf90d49e0193@oss.qualcomm.com>
-Date: Fri, 25 Oct 2024 20:40:26 +0200
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="jM3p2dcc";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="nwCp2wcJ"
+ARC-Seal: i=1; a=rsa-sha256; t=1729887719; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=ME9mC3D1pk913SHa5P6zNCbRimxkSDqXonVV5vchPZre5X+9TZKz8KLUN4pYOocxRF
+    7KzbRTlKGXeD9/9EOdmqzOnq0d7IvhnCSgt5+7acbH0Rm9sZhaAOzQdKccQgNMj+Vklu
+    XZesfJXqR9A0/yiBpl6ngo3kPpMLt0pvtlxz9aOykDb/9cgsPyI6FsImHURPhZTbo5T1
+    6G4hJhtMIEmBNxAQR9DLMXUbxP6zwesdgmK0kTU/vNvkEM3D4/s9WJpcCD3XEnwn1730
+    Fle7DAILfCH5ruhXjnMpoBqns8fTV4oVT6cqm6h7Lm4q/1FF2UxQGiMw7qmYJbxJRBdp
+    pn7g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1729887719;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=7q/PVRVcgB4jTlSCbHCYuihWp6ROLksyJlKDQNJnPT4=;
+    b=CWRGVqmNMa9srXYtV/NYjpvqugs2/rWdbCx1L2ehInDJ+grSLwwFpSWapuIzuRI9cY
+    R0mYXOrxu20MHnya+xZyON/D179zcGx0MSGGjSBsvFpwNudWP7KLo0+9quA2HgdMOO4l
+    GZIZv6L5xwyV0Wx//a+FC7DGX/dU8e8klQd3Q5IPFSftBXu0ea4yrVJ/4nRuhCxJldK2
+    6oqfgDtZHAhKWSCgr8cgAm87iO5wDQd/VM8mWAk2vtIV4DhNtMiQ+v/v1w7cXKX8Sl/0
+    19L2nRbaYqOqgq6pI9+215FOt6FczQjh4o3+wDnloYe3TxqQWUjM1cSTs/DgHupBRyXk
+    sxuQ==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1729887719;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=7q/PVRVcgB4jTlSCbHCYuihWp6ROLksyJlKDQNJnPT4=;
+    b=jM3p2dcc5Eeaa2hNIDxffKIgoQYSjSzhKYigkwPDdY/GhYaBhaLNgnNn+L9JrJKp5v
+    nB9KMbptObVq4xseiiNXatu+wDBnwQqj4pkgNfTVMIxGPGS0Spp+lV4lUE5FTsNQIuD9
+    l8aHhmqXUbtv0XCYH1rrGF3xppvd2Nol9WHANbA3hnn69AZRstnJgRJUGwhyOYlPJ+9a
+    wcZsQdgTg1yQeN4fKT9MM5R1ce0+6PcI8jv4hgZ83FdJFggphVDDYpx3DIUJ29ba3XhG
+    bx3/f7PqVJdqgb8TMnXr37qU29SBYM34simSIBDa/qhVnzUgIcZSx/4hSHMCN85pbwei
+    bxxg==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1729887719;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=7q/PVRVcgB4jTlSCbHCYuihWp6ROLksyJlKDQNJnPT4=;
+    b=nwCp2wcJs0MFrwOF80EENfgSqWg30VV7o04UIywab871vlrGqYh4wXkzpwspJ6w57p
+    0kTi5NCS4KzHzbv5HsAQ==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSfNuhhDSDt3O256fJ4HnWXON1RD+6IXGo7S6YVZbGYm2ZHbmjWFWcm6Nbb9lHw=="
+Received: from Munilab01-lab.speedport.ip
+    by smtp.strato.de (RZmta 51.2.11 AUTH)
+    with ESMTPSA id za0ed209PKLwbev
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Fri, 25 Oct 2024 22:21:58 +0200 (CEST)
+From: Bean Huo <beanhuo@iokpp.de>
+To: avri.altman@wdc.com,
+	ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org,
+	vfazio@xes-inc.com
+Cc: Bean Huo <beanhuo@iokpp.de>
+Subject: [PATCH v5 0/5] Add multiple FFU modes based on eMMC specification 6.6.18 for flexible firmware updates
+Date: Fri, 25 Oct 2024 22:21:43 +0200
+Message-Id: <20241025202148.161586-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 3/3] arm64: dts: qcom: x1e80100-qcp: Enable SD card
- support
-To: Abel Vesa <abel.vesa@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>
-Cc: Johan Hovold <johan@kernel.org>,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-References: <20241022-x1e80100-qcp-sdhc-v3-0-46c401e32cbf@linaro.org>
- <20241022-x1e80100-qcp-sdhc-v3-3-46c401e32cbf@linaro.org>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <20241022-x1e80100-qcp-sdhc-v3-3-46c401e32cbf@linaro.org>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: L0PgoPqUJWAJAf-neuEemnB7Bb0gajDo
-X-Proofpoint-GUID: L0PgoPqUJWAJAf-neuEemnB7Bb0gajDo
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- impostorscore=0 mlxlogscore=700 malwarescore=0 clxscore=1015
- priorityscore=1501 adultscore=0 mlxscore=0 spamscore=0 suspectscore=0
- phishscore=0 bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410250142
+Content-Transfer-Encoding: 8bit
 
-On 22.10.2024 12:46 PM, Abel Vesa wrote:
-> One of the SD card slots found on the X Elite QCP board is
-> controlled by the SDC2. Enable it and describe the board
-> specific resources.
-> 
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> ---
+Following the discussions with Avri at the 2024 ALPSS, I am submitting these patches to
+introduce multiple FFU modes, as defined in the eMMC specification 6.6.18.
 
-Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+The new FFU implementation can support diverse vendor requirements and operational conditions.
+The key benefits include:
 
-Konrad
+1, The host can select the most appropriate update mode based on device capabilities and
+firmware size.
+2, The patches ensure that firmware downloads are treated as a single, uninterrupted operation,
+preventing partial updates that could compromise device stability.
+3, Some new modes keep the device in FFU mode throughout the process, reducing the risk of
+premature exits and update failures.
+
+By supporting these modes, we can better accommodate varying firmware sizes and ensure smoother,
+more reliable firmware updates across different scenarios.
+
+
+Summary of Changes:
+
+Default FFU mode: "mmc ffu"
+Uses CMD6 to enter FFU mode, CMD23 to set the block count, CMD25 for multiple-block write, and
+CMD6 to exit FFU mode. This mode may exit FFU mode during the download if the firmware size exceeds
+the chunk size.
+
+Optional FFU mode 1:
+Similar to default FFU mode, but repeats CMD23+CMD25 for each chunk, ensuring FFU mode is maintained
+throughout the firmware download. FFU mode is only exited after the entire firmware has been
+successfully downloaded.
+
+Optional FFU mode 2: use CMD25+CMD12 for open-ended multiple-block write
+Introduces a method using CMD25 for open-ended multiple-block writes followed by CMD12 to stop
+the transmission. This allows for a smoother and more continuous firmware bundle download.
+
+Optional FFU mode 3: use CMD6 and CMD24 for single-block write
+A new mode that uses CMD6 to enter FFU mode, CMD24 for single-block writes, and CMD6 to exit FFU
+mode after each write cycle. This ensures granular control over each block but may introduce more
+frequent mode transitions.
+
+Optional FFU mode 4: use CMD6 and repeated CMD24 sequence
+In this mode, CMD6 is used to enter FFU mode, followed by repeated CMD24 single-block writes.
+After all firmware data is written, CMD6 is used to exit FFU mode, ensuring an atomic and
+uninterrupted download process.
+
+
+Changelog:
+
+ v1 -- v2:
+ 	1. Added memset() to clean command structure
+ v2 -- V3:
+ 	1. Refactor patch, and remove ffu dedicated file mmc_ffu.c
+ v3 -- v4:
+ 	1. Incorporated Avri’s comments
+	2. Due to "ERROR: in command 'ffu', 'ffu' is ambiguous" when using "mmc ffu", update
+	   default FFU mode 'ffu' to 'ffu1'
+v4 -- v5:
+	1. Retain the default FFU mode as 'ffu' and rename the other FFU modes to 'opt_ffux' for consistency.
+
+
+Bean Huo (5):
+  mmc-utils: Refactor common FFU code into functions to support
+    additional FFU modes
+  mmc-utils: Add FFU optional mode 1
+  mmc-utils: Add FFU optional mode 2 using CMD25+CMD12 for Open-ended
+    write download FW
+  mmc-utils: Add FFU optional mode 4 that uses CMD6 and CMD24
+    single-block write to download firmware
+  mmc-utils: Add FFU optional mode 4 for firmware download using
+    repeated CMD24 single-block write command
+
+ mmc.1      |  12 ++
+ mmc.c      |  20 +++
+ mmc.h      |   1 +
+ mmc_cmds.c | 492 ++++++++++++++++++++++++++++++++++++++---------------
+ mmc_cmds.h |   4 +
+ 5 files changed, 389 insertions(+), 140 deletions(-)
+
+-- 
+2.34.1
+
