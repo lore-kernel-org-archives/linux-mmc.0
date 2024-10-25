@@ -1,38 +1,38 @@
 Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 869E01EF943;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1EFD1F76DA;
 	Fri, 25 Oct 2024 10:36:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729852616; cv=none; b=uRBJzvRngcYizmeyWnfYKzE/mrzbNdgqM/HFdbhcdiMM1KC2sO7mRGadE0PYq90UGqxDzRdEWOIaueBXR4LkcFkltabBUTNtyms90tmxrLsv7pxVDE7zoiUv54NFHtaooB6o4OIkLmiyAWF5+MBlZsROIYKJFOcilytlTG0rmic=
+	t=1729852617; cv=none; b=DLJUC6/3KjdWO660bW+jexgDkD9MZH8V9hYNyfuutQ0wiOF0Q7uq4qyYmdSvxMGxRCsWJaeHBIV0F4wNLB8cne5bDdj7c2FU9G2HD5zw5V+duvJ3FXxUR5erMkubVTwaun1PG7csPYnG4FswXETgk+3Wz8ogtp0zhzRt4213DJM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729852616; c=relaxed/simple;
-	bh=YB9sep2oCN35bAcGfSErLNH5swAiXAI0QKrxaK1mf2A=;
+	s=arc-20240116; t=1729852617; c=relaxed/simple;
+	bh=EIb/0BVQLAIWTGsSf2exEUrI6S97uVc10LsFQOB7HdM=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=sla3dZNNS9LcgHojHRQI4b7bJ52/9NII7T5BYp/V2GmaY7KH65WYTu/u7s6ANAGJy3olWKEM6OXUVpV3cvQEu9SH8fyLWUxYeC9UDeSARHo7xFHBNr/JxsceULAjkyLqyPzJUhxxvV+EHUuDgS+IJCvHnu9XRGymPvtXEUOTG04=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=nimaA2Ha; arc=none smtp.client-ip=212.227.17.20
+	 MIME-Version; b=Wi1j7ZMwZgRN62g9cTnfJC6EkWlZh6VEMyM7Z6r4LbRXfXCg1YV9tn3iasFGamXv9cG7sOVAbe7DjTB8NVoS4BgInrPYFILoHKw0dkFDt66I9dFW+bX0xXobJfPxmuzX9qQljqcTk0B5IKa+rjctVO0U71AcqVGC6XNNZyxJxwo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=q/qrI706; arc=none smtp.client-ip=212.227.17.20
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="nimaA2Ha"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="q/qrI706"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1729852592; x=1730457392; i=wahrenst@gmx.net;
-	bh=kE9FPbtpN1gptfSk3BViKriGQyJtWlX0djOx3GlUBlw=;
+	s=s31663417; t=1729852596; x=1730457396; i=wahrenst@gmx.net;
+	bh=EIb/0BVQLAIWTGsSf2exEUrI6S97uVc10LsFQOB7HdM=;
 	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=nimaA2HazKryFAo61mBKF14k6YYiPaV7xQ1fZV9RdxaU30jeL9pwWRcjUVBnVhwr
-	 HEPyanwkh25JNv/mqUtom6TV/ZHQfInbegDHUMAbLGSF0jNL7ufWSjB0R7G7cwnUM
-	 40tyyHPgRYJxX7Dv8Asdo+2bjr3mPXAWg+tfd9MoIp5311149n8dfiJFis3hdRcE0
-	 woWCsBJPmK6vQaoXSWpDweXkNrQbNmnXyIp+M26Isw40KiIeOzH/JXQraqhin+LTa
-	 PPIV1EO3MFJOqR078ZlUj0ZJPFBJuuU5RSeh5xUnbm3ozhCujZ8KKG5XDRLh3/RoP
-	 4YnEV50qeFQuL9zvvA==
+	b=q/qrI70695V/9bTDqyidpR3DqN7SvtuI9udN3qlYdVTHhjTe3pdXukCgXVr4eSZT
+	 oVpVSWvm9Ht8gJZWw6h3QFcW/FmIZvn6x1IdOeioU5edI3X9axkQUaZ7MR3YgJWAr
+	 zx6prtedcexgJh39RlANFrBey61daP9eSO6kyYmiDdSpdYj3E5KxY+EI3YfqL0qCf
+	 B5FAXvAWQc6+wmANqG2oK83TG/NapT1C7OwePVWRlDh4bK5uvTLsWMsEUJJDdI42e
+	 PDpB87erwL4DhJEMrtWAEMgZV2OmisPUU2T9IXxSzIhyeJimpVfAFdK0+1uGor7M9
+	 lIyWrRTn32WWWWA19w==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MMXUN-1tM5Y72BwV-00RcC3; Fri, 25
- Oct 2024 12:36:32 +0200
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1McH5Q-1tcWVM2Kx2-00mIdc; Fri, 25
+ Oct 2024 12:36:36 +0200
 From: Stefan Wahren <wahrenst@gmx.net>
 To: Russell King <linux@armlinux.org.uk>,
 	Florian Fainelli <florian.fainelli@broadcom.com>,
@@ -52,9 +52,9 @@ Cc: Lukas Wunner <lukas@wunner.de>,
 	linux-mmc@vger.kernel.org,
 	linux-usb@vger.kernel.org,
 	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH V5 3/9] mmc: bcm2835: Fix type of current clock speed
-Date: Fri, 25 Oct 2024 12:36:15 +0200
-Message-Id: <20241025103621.4780-4-wahrenst@gmx.net>
+Subject: [PATCH V5 9/9] ARM: bcm2835_defconfig: Enable SUSPEND
+Date: Fri, 25 Oct 2024 12:36:21 +0200
+Message-Id: <20241025103621.4780-10-wahrenst@gmx.net>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20241025103621.4780-1-wahrenst@gmx.net>
 References: <20241025103621.4780-1-wahrenst@gmx.net>
@@ -65,48 +65,48 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:unuppcKVWCelo/CPxApDW+wIc1GUoX5LJis6Za5+ejJZaHISsel
- IrRzfjqFWcMwDfIXZpLa+5lFhoBUfSvGs+EAIPExq8Swhcg/G+lOKK+sCLeIOlj3cDjrA9h
- IjTu4RRYIfyAfpffgtfG55gnPNU5ri2ZIGBLzasCgjtpy3YjxCWxikUpJ8x+bOOQ1ay58pn
- VLYdTXA8JOHka4KiQFdBw==
+X-Provags-ID: V03:K1:SXjQg6GNw0ZSmSHqCIeG/A2AkVfM9T0ww/zGck0+NtQOedM3JmX
+ nhvnTRKK+Jjft6MtlKRLW/DprsGs2O6qwPDtcV7LmsT3VHJU2mvgDnoWKG0zD4F9S4r+ID5
+ y96ms+DyCXFaM6Gi5sBPfDPI5dY2bBqgdan7D2XSLY4t6Tqe5hKlJ7GM/BV2pqsol2Vd6nF
+ UVibuxzjEiygkJgZnD+RQ==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:Mki8rbRtU9I=;jGGeBqmE9YrFESl0962y8sxY9+4
- KRxp3OeEGgrFfERPShzSLCn4CQi73c6JOoQqGjCmjnaBso+sSd3JekCaBRULbxdNRGcI42LJV
- vW3ORJVwGYYiSRE6Lj9MUSOaLtFMQ0LbpP8Ek1GzChGPM0f+FOHQzGBEVXKYFZqrLHucy4OYC
- LKYHX43b5+1pILA4Vm9G34ZhfTGgj9KvUKt56wU15CQIp3oeJVF4mWVytFey+Ac0ZMZy+P9SQ
- S9HYLjSr8XuPE5Q3vqWm2NY8b6LtErxRPV8/9wgsOGkJVsuODydkZGXmE6um+lVGc0CaJZENf
- vhIInz5m+vSloowgZ41EDsFxVcKhcy2L5eOFt9p420KiWqtj/gK7btr3tJqgNOOhCV0jUEBh0
- jTI4068OPO1zPMSPchXJg7XVLYLuzPCUVdANo8xe0R26xwepxG8YyQahYiaptvwC+qZ0Non1E
- kUpeyeSMioJJtCX2KMuEMdr5XTW1AP/teLvE71Rnq6JLeNJEWmZdwiaS5hey9sz9TiZ396vC3
- 4FJq4lZbsZ153EflsJoCAv+NSEywJ+3dcSsz4z+6E9oOh8EIMqLy4f9dQpa+p1u95v16CT7o3
- QcTRfUW/zkXdCjCmF8LBMNszXBGXuE9Grhfq2v7xExy3y9LDzdBUILZLAF6uVSs+gJ0vBTNAx
- 3Pdoo25rcA3ponjBezNsunRlDQFkSrdWOtRdBu/Dp4s07w+trqJfAwF/JZTDrTqvGyObWiOgZ
- MQKZ4HPSF+9gjHuLKmeWvxH7+/A6DcRdJia1uxwJ/L6DlrTW8n1+uxzsLJZ/f0vGJaiKU6ogE
- o8sFCbk2+OAgqFZZ7nOBx/ng==
+UI-OutboundReport: notjunk:1;M01:P0:l56zcNjiEFw=;7BA/2Q97vKnLVe4tWhxMXYjl5WO
+ Vf2oL5llpTDWf8MMu9SWofNzQf00yjoNfDRWjsvmbB2kSd2mfqFBGvWS+jobK6SYQENAU1GFv
+ E7gqHgJAGhKJAt/rRfh6ye7918d1iY+U6vWOnntYrG3EZa5tPHeHrSf7NOrxPicSds48iRbLp
+ vlODfPnpmOxdJ0i0zGVig/ePbLUQq4bgCKTofjkbvSLQ6B8a89bskm6TAF27lav+yDu0/Q274
+ 7IRz8Lmqengc83zCrSgBNXGVMhF8hicywRZGtIFwLkowDcLV9wVLgSabxW7Vo7cJNviWWK6IY
+ TcH4MpqCX7elZEHVdQQpkvxhaKq/l6hcKalsfVKs8dDzEverWVdhnY4WZDw+9mKOxmpLVLvI2
+ IP/wpO0YsYmsB2LIq3zJwHMZNOeab8EJmmK+pBwpBHovOFIETtV5zv/xvwbwctN78nw/MkIGY
+ Y+twbeMLVUmzBNKzW3aicYfxswcjucU/Q1+wvb6wy7wTsEWWwq3cNI6aEc+T0vUHwIxIhZsvh
+ qm/l3gQD/KHna78N7aKm6eXugMekG5JxmkqplrP5q2dhDf8esJgup8JnyqknyBtw8ICJc6+57
+ qmpk3EZ2ul6gZ6Rooe7wpwFQJ0/BMTkfcE3YtaJBZ4gAo2ibh5ysM1SP/qLaJ0a534K7ago3R
+ 66F+hWNXMva7K2+GU0V6jDxSMGEG18oGYRQtP9scz74H1ctu7pbv2aib6pFZlsIxrWvc5MI49
+ QKF+weCWt7mRfrAUZex0E8GSHrQ0BaI80FgHvdi06pu4LAWmj82B98YdVIJGMIAxjmhTm8UgU
+ iSWTw800/7Xf2LzAuNtCGITg==
 
-The type of mmc_ios.clock is unsigned int, so the cached value
-should be of the same type.
+Since the Raspberry Pi supports Suspend-To-Idle now, this option
+should be enabled. This should make power management testing easier.
 
-Fixes: 660fc733bd74 ("mmc: bcm2835: Add new driver for the sdhost controll=
-er.")
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
 =2D--
- drivers/mmc/host/bcm2835.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/configs/bcm2835_defconfig | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-index 35d8fdea668b..3d3eda5a337c 100644
-=2D-- a/drivers/mmc/host/bcm2835.c
-+++ b/drivers/mmc/host/bcm2835.c
-@@ -150,7 +150,7 @@ struct bcm2835_host {
-
- 	struct platform_device	*pdev;
-
--	int			clock;		/* Current clock speed */
-+	unsigned int		clock;		/* Current clock speed */
- 	unsigned int		max_clk;	/* Max possible freq */
- 	struct work_struct	dma_work;
- 	struct delayed_work	timeout_work;	/* Timer for timeouts */
+diff --git a/arch/arm/configs/bcm2835_defconfig b/arch/arm/configs/bcm2835=
+_defconfig
+index b5f0bd8dd536..97632dee1ab3 100644
+=2D-- a/arch/arm/configs/bcm2835_defconfig
++++ b/arch/arm/configs/bcm2835_defconfig
+@@ -38,8 +38,6 @@ CONFIG_CPU_FREQ_GOV_ONDEMAND=3Dy
+ CONFIG_CPUFREQ_DT=3Dy
+ CONFIG_ARM_RASPBERRYPI_CPUFREQ=3Dy
+ CONFIG_VFP=3Dy
+-# CONFIG_SUSPEND is not set
+-CONFIG_PM=3Dy
+ CONFIG_JUMP_LABEL=3Dy
+ CONFIG_MODULES=3Dy
+ CONFIG_MODULE_UNLOAD=3Dy
 =2D-
 2.34.1
 
