@@ -1,79 +1,80 @@
-Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+Received: from mail-ed1-f46.google.com (mail-ed1-f46.google.com [209.85.208.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B190166310
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 14:52:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7D235158A2E
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 14:52:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729867929; cv=none; b=ZrlFfznd+mHPEWFWqQ9s9Zbj7RXSN+xhd7ZUpMYT1JKeXCoCzvD0cNA35sZo/T+sxfJmKykz4EVbhkyYeyo2k7Eiy1Z16NZgqcnA2WN08WoDhvhjFgFXJBFAnBxp0Ie1HOvIQ4ohLim159mw7jRCYNoh4fkpdiSg18ZobOk2Jkk=
+	t=1729867938; cv=none; b=oj2DzTgU/ajsmzq2wZkAtfwbVJGaYGeOXMxtj5ZD4Z3w2bgItZ5vVtJtdoOScn4WnFsEJUs27McllA2zRec47KGN9Yn3pLn/07GIhRrKGegsShrO8B7uj46+ql0W/HGYx0uN9CgcBBMS21DduHDvHir2tgGq64FGOSZQU0Do3xU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729867929; c=relaxed/simple;
-	bh=PR/HBC/9SdnqLv3iwd38ahFTmRtcv4jpMizzyfBx17E=;
+	s=arc-20240116; t=1729867938; c=relaxed/simple;
+	bh=BIJuuavrMOlGZTXnRZtJFIBi6jsUUmE/2bFNi5XpxeM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=J9uN+kC4qBNK4sWuxAE0Aibrbf7COyL/0hDsseJsr0rcjijjaqRmpwJi4O56FRXsjs+PGXS2K46salCaFG45jdjEfd5BrVeKh35hOMHGEqIg2OHu2Qel++wtRu4lA13xDWRp1Dv621q5gpORVGnAaz8INrOFEmGxpiBCdieFNXI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rCKCZPrA; arc=none smtp.client-ip=209.85.218.41
+	 To:Cc:Content-Type; b=s25zkEZ8F4aM/gV/nEVwfF+3dV82ZAhyzcD/Y/ST5UUiBCDRZ9kHI80Jbh23mkBgmZsQW19O9+JU7lgOs1AZ+bD35TUlfW6esvvQaXvEuKJ5TD5tvaQ6viCeucS1dOZ99wpg/4lSobgqVPjl7vNRsApjNL6v/k1znDSvls4pqZk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JvGd3VBv; arc=none smtp.client-ip=209.85.208.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rCKCZPrA"
-Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a99f629a7aaso352521666b.1
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 07:52:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JvGd3VBv"
+Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-5c9428152c0so2447196a12.1
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 07:52:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1729867925; x=1730472725; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1729867935; x=1730472735; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=linTMr6O6XhFYFc+VtOW5M19IlrPjzZArEaPZ8T+Wss=;
-        b=rCKCZPrAUvxIrbdATtoDn3bl1t/LNHnXVrQJ3j+JMgZ5qtvXE2IvVveaJYfx88SYcz
-         Va/xW4+fJoFn3eVeIAQMgHgrC9eMkeO/QPE51tVvbiNz0amxWMM3HO+N7vDy/678fvAt
-         O9+nYzTw0QRbgaRO8hkUMocctzjF9jmcJQgL+VrYzK0kLZPPsRFSAGrvtE9sUGcB9Ljp
-         t24eTLKvGtAJlsLMFv89HHFoRdVYv3t+OY6cS+f2OUiiJUwu+X8Z2qImHxXHL1kqN2HS
-         BoilBWaWQGIRLDQrZmEJXyChhQrTok0bbZ465JFd0gW5jU6c+Q94vEdsC4MylHm4vsAe
-         4EUw==
+        bh=nrOief8nbYiJuOMekAxMqg6yuzzPDCii8DxLZ9mR0vA=;
+        b=JvGd3VBv4GyxKHxqlO3OtS5A7Y9aW8WI5C3XtQioof5mkInUsNYSitGjR5xH1MnTQg
+         WdZpr/NNaaI9vXWunowmvckOPg0QessiRxsH+XSpOVfFQjP3hD3gFyDQRDXk7S8cCwdj
+         sDYUmU65pftdWsdBRj2bvEi7STzfaOG078Nvw4ddmAjahiWQ7vwq3xJZRL6Aie7XhvIL
+         SjtnFVrxKXatkC6UoMejsBoH6rkobxo3bZH3IFLsMNSF7ztnvBrU9WCL9CFlitNwNurT
+         +EqA/8i/7qyBl6pvm+x/insO18akILP4vgFi+rJoB5AW8YLvikUp84yHTvDj5TWhlCkV
+         nojA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729867925; x=1730472725;
+        d=1e100.net; s=20230601; t=1729867935; x=1730472735;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=linTMr6O6XhFYFc+VtOW5M19IlrPjzZArEaPZ8T+Wss=;
-        b=P6u3znN1VhlCfGzrKqh9ajsIdfMMkVwJar6KqC5VbtiZ3pcdTh3pJXidTNW9Yvsb+S
-         aA13QZjfyY0XBjltrZZ8xQ2528RJpcegH4Y/y5rgp4hy2F8v/7wgu37LDo7anW9+6G1a
-         1de8tTL1p3QIXcOL8xFA6fgLPjqMVQSn8VsuQOcY5PFB5TuP5KJFQ4i+O8T6/zc7JyOa
-         10zxNmEpD7jU9YvxFuHwzt1kpJsJyu5CD9UxY2AuIGlNgcDB+TE+CMsSImG+fRip+kik
-         mnzdUWyi6Us5hdT6rcNZbm8gqC8cIon/RtJHWo3Tjs7CKa47+yTfemHwYJShAO6JpNpN
-         OLXA==
-X-Forwarded-Encrypted: i=1; AJvYcCUCKVlnxdsqiKWetn5z6iHgQKV7C3/2yAVpP0Mjx7HnlJRMv6vNi/Nwh+q7B6zx8WAORp1DIQCUpYo=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw/5iCHBpfMIQYd3bU0nCLILw2nDuj1CFmx/+srLaDJ7nnvTI7m
-	0//nhuIk7PWVOWyJarzH3ynHz3Nc0NTcmu1cg/Ymm1YpVGFvmcYr0UMvSF3d1NUKy8w3ux3vUth
-	N1dmp4YWP7V+T8BivleEZdxpYlD3mom1NijTFaw==
-X-Google-Smtp-Source: AGHT+IEwfs/W3Owgk+RTmMlzdFuDGgmomxgsb+KMUloSwElRxnFSyypOytLKotVKhjZEiJNaWnl8Bz+gsTn3D052dQk=
-X-Received: by 2002:a17:907:1c84:b0:a9a:8263:d2c7 with SMTP id
- a640c23a62f3a-a9ad199c2c5mr567345366b.7.1729867925486; Fri, 25 Oct 2024
- 07:52:05 -0700 (PDT)
+        bh=nrOief8nbYiJuOMekAxMqg6yuzzPDCii8DxLZ9mR0vA=;
+        b=YHSJqgKEaE/gYjog6mWseqG9jFKhUIP0ajvsSKzrySdTusmsYWteP3PwOYVT6SMb5B
+         shL0h+/6kA4GTKhpN8JPrXescsRFhDko7Sa1L1ad0z9a35kPPsYkkP3aiLvXIN/jYR79
+         Z08AKkVqGxYpMN+XF0E0dF/L3EkJ3vLNj5DJXsWV5W2osUSeT5EYm5cWgcxfbWcHsJMd
+         HY5kwsnJrpK8Xbyc1H6mncjgryo3wcyHTivyzS3y4XKXskKq/k2Sq0TdmfEbX35MgCiG
+         Z5uY9YYctL7JnrxdvlOY5nqWuqLMYuHNVo372o8jlCd4jhfAFqBLUitvBs15Zwwk188H
+         gYRg==
+X-Forwarded-Encrypted: i=1; AJvYcCWPc/ahIqsBznOogDcDHljEInJDQeieVTf/ibvU9DQfHH1E1nerR/A29BTjEFfu17u5NX3fRsSlx9E=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZmZv/Owskzf6rBSEeZAaZ7ggHyAzP0HBLy88WDflSmtJJMGXG
+	bWIfXwVWBw3fsDPFWXwWnMqZ2adsIURuLXPawYLIwX0zNSJe2/ZyeuDzmIKQWgfB0xw5EkPD5Uj
+	iHM7Ayr+ktAmjWHnm/vwYxBm+HHu+Af+5bhj9qQ==
+X-Google-Smtp-Source: AGHT+IHscqiA2vwhlqzyfYQiuye1p7e18GSeto+pEBjS430QeRHPKdPaupXdrDQYhsEJh+l4Tn8aYInhGwbc5CIL1KA=
+X-Received: by 2002:a05:6402:4304:b0:5c9:2a5a:5f0e with SMTP id
+ 4fb4d7f45d1cf-5cba249c506mr5998675a12.28.1729867934911; Fri, 25 Oct 2024
+ 07:52:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241017-sar2130p-mmc-v1-1-c84da16a001e@linaro.org>
-In-Reply-To: <20241017-sar2130p-mmc-v1-1-c84da16a001e@linaro.org>
+References: <20241023092708.604195-1-quic_yuanjiey@quicinc.com> <20241023092708.604195-2-quic_yuanjiey@quicinc.com>
+In-Reply-To: <20241023092708.604195-2-quic_yuanjiey@quicinc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 25 Oct 2024 16:51:22 +0200
-Message-ID: <CAPDyKFqBAm8kC5HNsKKpszftqaVisL1wMuFVNSKtBT1soz9HMw@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: Add SAR2130P compatible
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Bhupesh Sharma <bhupesh.sharma@linaro.org>, 
+Date: Fri, 25 Oct 2024 16:51:28 +0200
+Message-ID: <CAPDyKFr-Gzd3Mzn+vN6DXO9C4Xrvpv4z5V2G_VRTzOa=89Fd3w@mail.gmail.com>
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add sdhci compatible for QCS615
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
+	bhupesh.sharma@linaro.org, andersson@kernel.org, konradybcio@kernel.org, 
 	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	quic_tingweiz@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 17 Oct 2024 at 20:15, Dmitry Baryshkov
-<dmitry.baryshkov@linaro.org> wrote:
+On Wed, 23 Oct 2024 at 11:28, Yuanjie Yang <quic_yuanjiey@quicinc.com> wrote:
 >
-> Document compatible for the SDHCI Controller on SAR2130P platform.
+> Document the sdhci compatible for Qualcomm QCS615 to support
+> function for emmc and sd card on the Soc.
 >
-> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
 
 Applied for next, thanks!
 
@@ -86,23 +87,17 @@ Uffe
 >  1 file changed, 1 insertion(+)
 >
 > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index b32253c60919eb68f3cc0e1a37381f8cef748728..f2215de02e1b1f40ea9b11cb39f1ebc39d78845f 100644
+> index b32253c60919..164a45cdb972 100644
 > --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
 > +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -44,6 +44,7 @@ properties:
+> @@ -43,6 +43,7 @@ properties:
+>                - qcom,ipq9574-sdhci
 >                - qcom,qcm2290-sdhci
 >                - qcom,qcs404-sdhci
+> +              - qcom,qcs615-sdhci
 >                - qcom,qdu1000-sdhci
-> +              - qcom,sar2130p-sdhci
 >                - qcom,sc7180-sdhci
 >                - qcom,sc7280-sdhci
->                - qcom,sc8280xp-sdhci
->
-> ---
-> base-commit: 7df1e7189cecb6965ce672e820a5ec6cf499b65b
-> change-id: 20241017-sar2130p-mmc-7f8b32889e31
->
-> Best regards,
 > --
-> Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> 2.34.1
 >
