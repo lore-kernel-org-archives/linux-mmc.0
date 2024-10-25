@@ -1,162 +1,203 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com [209.85.221.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A09B3136326;
-	Fri, 25 Oct 2024 03:00:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 84EB54C83;
+	Fri, 25 Oct 2024 04:00:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729825208; cv=none; b=GzS4PcPpuigYS+VsFPY6r5m1WGQCkf24n/8xnn5I5h/On7qF7sRw9v+m/9FTBq6Jsq7258S/CacqhS9umIBMkCQ2M94knO1d7t2ZFThfUynJ3aXPwhkpaN0FQq2NhODhGVNJXAfwM8sOLnySaQb6oPS/Vqc2/w9NpGz5oWk8fN0=
+	t=1729828834; cv=none; b=uOfZPqNdYYtiuCrC5paBdO2p9n/u8C3qLu1Qv42SzCL4H7kUMXWfpgLpJz2nmDlfDTiN/6dL/z/lGXY4qTtwOFxWm1fC2EYE1xgG3zp4+B+qFyDLcpWDqrsiE8mt7e0jZiPECerDTVTgbNxMAbVdzxiqGtCuRRX8G4V2CJQ/LTg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729825208; c=relaxed/simple;
-	bh=AS8e/Nl5pwNV3BaA5zEKM1+4fcoc/cezX1VPg5Fbmok=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=i/vy3JnBMYAVC7yUP4+iIpWyVP18Y2XKODJ1qD+ZlzDVVuBZmH6g+OhYbz38xlHZCJYVx6n7EpBKtK1weNijRq5bdpWoAjb2V6YNhXuYxkDi8VRmVLRbKtvaEgmxPni0yH3JM3Kfg9tR0PcqR0RlrvNujg8GXZc/NUwmlDfqyYI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=MJAGflzy; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1729828834; c=relaxed/simple;
+	bh=UnfumKbSXfD3Ri0PbWi/59CBARSG+OKlibkeKR7+clY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=pbJIIzMfTEtrUmmnBVvPyM3vQQOO+hFeqNfwuARcgNIF0DIf7EsOTN9WcFYF8WWfbGgJ5MtiL2eQNi2PNfj16lk4hclgs3F3sWw++wakLga0aif9Jk+r0yBWTXI2F4gyooTCMP13TJw1p4owyY6qyz04NFHUIYvNvqZZbP3eODA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SrjgMvEm; arc=none smtp.client-ip=209.85.221.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="MJAGflzy"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49OKcuqE029449;
-	Fri, 25 Oct 2024 03:00:02 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=zTvjHGQmHShqHVodkQLupmPJ
-	uXE9pqqtxdqU5dalTG4=; b=MJAGflzyGDszkDswVZr37BuabSLQAZ77YWxDbOEM
-	yV86uDyq8riqi0l0NjHFBpkpi6KJNGV2D3SB9FfD3dsgCTOPJMp7h77R+FHXkX0y
-	qhI1UdtQqFKXP0AmcC+bmcjP5E470MiWSmpGdIvwMJPo+4XT5ZhDlwtmIfkegg69
-	3kjeeLyfV+yTqSFatDZhsvPzTxmZLSC+ht8D4aagygOeCrYOUk0nuYCx+M1SfN8U
-	Iw7n/RuO6PVQ5Tzd2TiLRWPatSNP93iwe/4EqZjQQSq79METY0a98LplsrHxiQyQ
-	yj/wPtpLC64D5V6nQ4wZF10gQ5B8wONslHd3AuP35ry3PA==
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42em3w7k3x-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 25 Oct 2024 03:00:02 +0000 (GMT)
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 49P301iM007877
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 25 Oct 2024 03:00:01 GMT
-Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Thu, 24 Oct 2024 19:59:56 -0700
-Date: Fri, 25 Oct 2024 10:59:51 +0800
-From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, <ulf.hansson@linaro.org>,
-        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
-        <bhupesh.sharma@linaro.org>, <andersson@kernel.org>,
-        <konradybcio@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_tingweiz@quicinc.com>, <quic_yuanjiey@quicinc.com>
-Subject: Re: [PATCH v1 2/3] arm64: dts: qcom: qcs615: add SD and emmc node
-Message-ID: <ZxsJp6XtJSfnNJqH@cse-cd02-lnx.ap.qualcomm.com>
-References: <20241023092708.604195-1-quic_yuanjiey@quicinc.com>
- <20241023092708.604195-3-quic_yuanjiey@quicinc.com>
- <xfy335jzh5t5a7fdrjfswerjdze3vaybf7rvkxnae3cv3xaii7@rn7iqwga2p62>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SrjgMvEm"
+Received: by mail-vk1-f174.google.com with SMTP id 71dfb90a1353d-50d3d2d0775so494580e0c.3;
+        Thu, 24 Oct 2024 21:00:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1729828831; x=1730433631; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=PFr9jApJlHsRumVXS3aswqFDdSiZBz50eoTObyEuo78=;
+        b=SrjgMvEmnGeD2kG3Bdis79FUIBx4n5JUkKdyhEpZym2re40ohE0U/GR+WfYd/cEMzZ
+         QdsR0iaI9fOPzeM6uVQjOAlR/W6To3phrdLpXZn6u0pHw7OpHBURqpSTMNWLJxFYQINd
+         ELsuKqhH9iUxYqbq3WFe9TgntO1vh2Tpamtnz1q1e4mNThxOw+4RuecDpL6SrnLypsfe
+         BdV2lSpKxgsnahx0Xuy5WWxAqdGrnRu0i7qo1nPIwcF5Wdfsz71+cNltZ5ottMePC6Rc
+         XGzrvdVvWuJZ/I/A0zEpyNLbLDIGvUZKYpSRUQahqfmjgMAPnOxRSackErD45EMfSOMD
+         xbGg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1729828831; x=1730433631;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=PFr9jApJlHsRumVXS3aswqFDdSiZBz50eoTObyEuo78=;
+        b=sFg5jD9r5kfJzp+S/wT5IIssibrdydO8BMnOXTTUBZI5WYm/tCcNRLapn18u0pAqja
+         GgICJD4WuBYnfUcMd27NXemb3jSda1p5ikGPFjT2aVdgCujapv54QrcXw0+8O6c8Sjfy
+         koTV3/3jNOEPRL3rLN6ZZpLmyfWizHLlJTYKbz2rJq0TBYQwBDGufBVG7MBwzvuPmS0D
+         gIrlMJomyVNigQjaVscKd9lDQJVcqgYKobSHIPnuwt1eGQsXKau8YLu+f1q4AL1xNrVR
+         b2XrdG6e9ZQ4pWzfvv8CdI6YZ/nN858SWzrvlVb7geid2wGmZVPxCZCE57XipuyNr2A6
+         PZbQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUfGwmXsJ5sj5hP55T7DsOeLusLP3jxPdCMAGC6toGZT+fTqgVCtLQXHwRsYGf0n0givp765m0YStn/kIk=@vger.kernel.org, AJvYcCWFKkSnvWfi1NCigAPGrhHuM457V48oshPIZU5lOtDdgiX6++K4wrxZoEoqAhjJ11IzUsE/7MBPbKy9@vger.kernel.org
+X-Gm-Message-State: AOJu0YwYsUNJ//JcXS27eZsfKdqCbQNPGRwjK3hJ2rt7qt1mG1kE8qSW
+	Z79/xe5fQNoTZfx0vyFsxPgFibZB1wSsatN4UvPrG3ov4H1lwn2B/Ph23JSr+BKfbCvIjYKN2h9
+	aB+jYoxf6jgxkZ/zteTDHkWJ+Fsk=
+X-Google-Smtp-Source: AGHT+IGN7ZpaB7MTYq/uoBJE/mRK0YyYLcQ+X//Q8/O3AY8fPDzvH5HNwKhOvy8XFwKhir1RMTvBdK5793BTFkfx8Pg=
+X-Received: by 2002:a05:6122:1d42:b0:50d:3ec1:154b with SMTP id
+ 71dfb90a1353d-50fd01bdbfemr10050003e0c.3.1729828831128; Thu, 24 Oct 2024
+ 21:00:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <xfy335jzh5t5a7fdrjfswerjdze3vaybf7rvkxnae3cv3xaii7@rn7iqwga2p62>
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 3Xq7Z9kwTsThphRfzQvyR6Q6ZJjx7eBy
-X-Proofpoint-GUID: 3Xq7Z9kwTsThphRfzQvyR6Q6ZJjx7eBy
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 mlxlogscore=999
- priorityscore=1501 impostorscore=0 bulkscore=0 lowpriorityscore=0
- clxscore=1011 suspectscore=0 spamscore=0 malwarescore=0 mlxscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410250021
+References: <20241018105333.4569-1-victorshihgli@gmail.com> <CAPDyKFrgwmPaAnv3CgH=rL9yV4JfbF9mX6nt+Wy=2OUphadZJQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFrgwmPaAnv3CgH=rL9yV4JfbF9mX6nt+Wy=2OUphadZJQ@mail.gmail.com>
+From: Victor Shih <victorshihgli@gmail.com>
+Date: Fri, 25 Oct 2024 12:00:20 +0800
+Message-ID: <CAK00qKAs0yt=1eG5B==9y48TteyBnM7n3nR1ogGP8AWGOxzvXg@mail.gmail.com>
+Subject: Re: [PATCH V23 00/16] Add support UHS-II for GL9755 and GL9767
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	Lucas.Lai@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, Oct 24, 2024 at 11:42:26PM +0300, Dmitry Baryshkov wrote:
-> On Wed, Oct 23, 2024 at 05:27:07PM +0800, Yuanjie Yang wrote:
-> > Add SD and emmc support to the QCS615 Ride platform. The SD controller
-> > and emmc controller of QCS615 are derived from SM6115. Include the
-> > relevant binding documents accordingly. Additionally, configure
-> > emmc-related and SD-related opp, power, and interconnect settings
-> > in the device tree.
-> > 
-> > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-> > ---
-> >  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
-> >  1 file changed, 198 insertions(+)
-> > 
-> > diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > index fcba83fca7cf..3840edf13fe8 100644
-> > --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> > @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
-> >  			#size-cells = <1>;
-> >  		};
-> >  
-> > +		sdhc_1: mmc@7c4000 {
-> > +			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
-> > +			reg = <0 0x7c4000 0 0x1000>,
-> > +			      <0 0x7c5000 0 0x1000>;
-> 
->  <0x0 0x007c4000 0x0 0x1000> (this applies to all address nodes, so
->  sdhc_2 too.
-Thanks, in the next version, I will adjust all the values in the reg to hexadecimal.
+On Thu, Oct 24, 2024 at 8:57=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Fri, 18 Oct 2024 at 12:53, Victor Shih <victorshihgli@gmail.com> wrote=
+:
+> >
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > Summary
+> > =3D=3D=3D=3D=3D=3D=3D
+> > These patches[1] support UHS-II and fix GL9755 and GL9767
+> > UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup
+> >   Sequence[2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence
+> >   [2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include
+> >   Section 3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II
+> >   Setting Register Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Leg=
+acy
+> >   SD compatibility and preserve Legacy SD infrastructures (Section 7.1.=
+1
+> >   Packet Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-=
+II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2])=
+.
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the origina=
+l
+> >   interrupt registers.
+> >
+> > Patch structure
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > patch#1:     for core
+> > patch#2-#14: for sdhci
+> > patch#15:    for GL9755
+> > patch#16:    for GL9767
+> >
+> > Tests
+> > =3D=3D=3D=3D=3D
+> > Ran 'dd' command to evaluate the performance 3 times:
+> > (SanDisk UHS-II card on GL9755 controller)
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 81.9MB/s 51.4MB/s
+> > UHS-II enabled         :  206MB/s 80.5MB/s
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 82.3MB/s 49.7MB/s
+> > UHS-II enabled         :  208MB/s 80.8MB/s
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 82.9MB/s 50.8MB/s
+> > UHS-II enabled         :  205MB/s 90.0MB/s
+> > (SanDisk UHS-II card on GL9767 controller)
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 83.5MB/s 50.5MB/s
+> > UHS-II enabled         :  200MB/s 75.3MB/s
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 85.2MB/s 56.3MB/s
+> > UHS-II enabled         :  203MB/s 75.8MB/s
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 82.9MB/s 51.1MB/s
+> > UHS-II enabled         :  196MB/s 77.8MB/s
+> >
+> > Test command
+> > =3D=3D=3D=3D=3D
+> > Read: dd if=3D/dev/mmcxxx of=3D/dev/null bs=3D4096k count=3D2000 iflag=
+=3Ddirect
+> > Write:dd if=3D/dev/zero of=3D/dev/mmcxxx bs=3D4096k count=3D2000 oflag=
+=3Ddirect
+> >
+> > Changes in v23 (October. 18, 2024)
+> > * Rebase on latest mmc/next.
+> > * Version 22 patch#1-patch#6 have already been applied to the mmc/next
+> >   branch, so the patch order for version 23 has been shifted forward.
+> > * Patch#1: Remove mmc_uhs2_card_prepare_cmd() function.
+> >            Remove mmc_sd_can_poweroff_notify() function.
+> >            Modify ios.timing setting in the sd_uhs2_power_off() functio=
+n.
+> >            Restore the position of assign the host->card to original
+> >            position in the sd_uhs2_init_card() function.
+> >            Remove unnecessary error handle in the sd_uhs2_init_card()
+> >            function.
+> >            Add oldcard judgment to skip some programs in the
+> >            sd_uhs2_legacy_init() function.
+> >            Remove unnecessary error handle in the sd_uhs2_legacy_init()
+> >            function.
+> >            Remove mmc_card_set_present() function in the
+> >            sd_uhs2_reinit()function.
+>
+> I have queued this up for next, with a few amendments and added
+> Adrian's acks to the SDHCI patches.
+>
+> When applying, I made a couple of cleanups and fixed
+> sd_uhs2_power_off() to patch 1. I also took care of the checkpatch
+> warnings for the SDHCI patches.
+>
+> That said, there are still some issues that remain to be fixed, but
+> let's do that on top of the $subject series. See below:
+>
+> *) The error/re-init path of the card is broken, as also pointed out
+> by Adrian. I will work on this shortly and send patches to fix this
+> up, please help to review and test.
+> *) We should read the card's ext registers, to for example enable the
+> card's internal cache to be used.
+> *) We should avoid unnecessary commands during re-init of the card, to
+> decrease latency.
+> *) During suspend, we should probably send the go-dormant command with
+> the hibernate bit, rather than just doing a plain power-off.
+>
+> [...]
+>
+> Thanks and kind regards
+> Uffe
 
-> 
-> > +			reg-names = "hc",
-> > +				    "cqhci";
-> > +
-> > +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-> > +				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-> > +			interrupt-names = "hc_irq",
-> > +					  "pwr_irq";
-> > +
-> > +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> > +				 <&gcc GCC_SDCC1_APPS_CLK>,
-> > +				 <&rpmhcc RPMH_CXO_CLK>,
-> > +				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-> > +			clock-names = "iface",
-> > +				      "core",
-> > +				      "xo",
-> > +				      "ice";
-> > +
-> > +			resets = <&gcc GCC_SDCC1_BCR>;
-> > +
-> > +			power-domains = <&rpmhpd RPMHPD_CX>;
-> > +			operating-points-v2 = <&sdhc1_opp_table>;
-> > +			iommus = <&apps_smmu 0x02c0 0x0>;
-> > +			interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
-> > +					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-> > +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-> > +					 &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
-> > +			interconnect-names = "sdhc-ddr",
-> > +					     "cpu-sdhc";
-> > +
-> > +			bus-width = <8>;
-> > +			qcom,dll-config = <0x000f642c>;
-> > +			qcom,ddr-config = <0x80040868>;
-> > +			supports-cqe;
-> > +			dma-coherent;
-> > +			mmc-ddr-1_8v;
-> > +			mmc-hs200-1_8v;
-> > +			mmc-hs400-1_8v;
-> > +			mmc-hs400-enhanced-strobe;
-> 
-> Are these board properties or SoC properties?
-Thanks, these properties are Soc properties, so I put them in dtsi.
+Hi, Ulf and Adrian
 
-> > +			status = "disabled";
-> > +
-> 
-> -- 
-> With best wishes
-> Dmitry
+I got it.
+I will continue to discuss and implement the above issues with you and
+offer any help I can.
+Finally, thank you very much for your help and advice on this series of pat=
+ches.
 
-Thanks,
-Yuanjie
+Thanks, Victor Shih
