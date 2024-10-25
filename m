@@ -1,126 +1,121 @@
-Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com [209.85.208.169])
+Received: from mail.tuxedocomputers.com (mail.tuxedocomputers.com [157.90.84.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3B061411E0
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 14:52:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D3B5D169AC5;
+	Fri, 25 Oct 2024 15:40:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=157.90.84.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729867939; cv=none; b=d7vq3l6/BpRa0t8Qlw5/qUoLJg7DZPY0q9XDDJ0/LwE6c16lYa2IEl5pS3LgeVv0fsVD4yQ/F6eRClnxiICIyhtUirZ6ni/wDHV9ScwM4kCT9LNt2O3IT2i476VQTJ+LnlZm2ySVQI5ePJvScOxf8xafWD9/bPPCe6nFI2uELaE=
+	t=1729870843; cv=none; b=KhxGGAfU1fomA2Eu1eew888CSZvvYH+bApnEtniQZfW4eKZACgWEmj+T8ef7JadqPLi6XaOyaVE+JXD7Y+dyMaUJSRAR1woW+HB04b8mHWBsHHpDB6ajoimRKw3KBfY+EFP63nh3Dp0Nm+MEeUTd7OH2+hkO+8+yWPpRXT6t8DI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729867939; c=relaxed/simple;
-	bh=5IckEMkS1v2w7MlR9TIpxfK3GkEl6figDrhQ9A8m/fA=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=p0YCbe63iSjtFQydb0XsMf+TgE6E9HULBU8Q/zjejxhlFf6LIwGUz+skvGnHaAxfESVulkHdqj4CU516BlJwhGoEBmX6lzwlEMm4WLxWdVUaou1NqnxfuZUlEqFggY+6Emc2AyRgQ2uTumJsrvQZngBxJAF17SGySIY/GIeXOsM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jxPRzMDg; arc=none smtp.client-ip=209.85.208.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1729870843; c=relaxed/simple;
+	bh=lnzej9riwoP0T3XvrgsBen19+FPab1L5CE0OE6JawpQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=aa1aGpGUtv7RKkHupRlncuCZLi/K0eLCFRC5D2ySp7q7sPU2ZGioUV9zirIBs79ERluxEV42CZ7VOvin/yr7hlvRV1Pa5RzfAIeMBeOIybNvEfPizY2PJJaLGSMiINXbVG1Suj+DaeqmFe6ak+vFyFPXiOSIMrODeVa1y1S0ULo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tuxedocomputers.com; spf=pass smtp.mailfrom=tuxedocomputers.com; dkim=pass (1024-bit key) header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.b=coBG6Tt7; arc=none smtp.client-ip=157.90.84.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=tuxedocomputers.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxedocomputers.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jxPRzMDg"
-Received: by mail-lj1-f169.google.com with SMTP id 38308e7fff4ca-2fc968b3545so22163381fa.2
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 07:52:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1729867934; x=1730472734; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=f6xxM29JGW9/m5jgRsXar/Ma8MndkZnSYP4n/2yVQCs=;
-        b=jxPRzMDgG0z2wgeZAJC9lbdX6sZ/q3tU/ENdouq1yk10peHc4d3c4YQX/0wbn17W8P
-         LThicsXB7c4J+lt5HxFgL1yE1qGIUMSFLzQcLT1umEgPh5BjstoL/xdzHHe0moMaF+mt
-         aKSCa7b1GVgq9HuZtyDCcoD2o8GmE0tjfZ/GF3s3jV885Ex6P4kY6dF0AlW9Hu3O4Y1Y
-         8KiY7onYqDahAL1UkA4i9d8ojNggND7NtDGe4SZ+Ob1LpWzP94c5lEsAKvcIxNTMplQZ
-         1aJl4LQFltxH0gMTcLzUO6+56TkXJ2lyEvix7m6TMsRsAGY4DTtSh9xYZo0VOEQTVu3d
-         fk0w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729867934; x=1730472734;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=f6xxM29JGW9/m5jgRsXar/Ma8MndkZnSYP4n/2yVQCs=;
-        b=qNcIlRno3wCh8UUJoOTGf6aYmM9siBM9IYSioquNoZReGAu9T4KsJECWGKZU79ACys
-         ovgzp1vP2v4ielpVOtEPY/X1jk0AvlV9YzsxntRRFMMdjw362qYSVx09LMwxoIPaf8VM
-         DQILEXipnXWH45ACWqPnTBgz8RqAAu6K44z/ZwT6IU86nVwHitTfUuShhxvmSQPKdNg8
-         3rUYVc/YdrNlG95u1P8fpKgz+x/SH4ENkQCtSYl7i3m9V6a25f5GKV5bhMo7R2j6ECOE
-         cQD3+qR4o9OAXLPBL7gJMAhxE2SvhTtZM6oMLS6TUt7GrJwB0OjmvdfV3o666RrZH2t+
-         XIPg==
-X-Gm-Message-State: AOJu0YwuKxJeTa6wMOgehS94daJyZB4Dkay7RO90kiuFWvHGldzAgpwx
-	Uoog6ElUeaHgNLLaBSw7KheMnmdUw0VWMtYtcSvVfpzngNKsEmqnphdAWX8QzyVpoTilWB9AT+u
-	oiImWC2/B4YEkmJkDzuwUZI0oqcXEcN4A7ii+IkDsQGlmplP1
-X-Google-Smtp-Source: AGHT+IHQkI55s2R4KWCezWYix7qWa1t/64NsxwgDAYWhmOO6jr0QoGtNrSBZQrP9LyXay6avpMCJf2b26b8MEVlloPs=
-X-Received: by 2002:a05:651c:501:b0:2fb:2e27:5334 with SMTP id
- 38308e7fff4ca-2fc9d309a05mr57096061fa.15.1729867932645; Fri, 25 Oct 2024
- 07:52:12 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=tuxedocomputers.com header.i=@tuxedocomputers.com header.b="coBG6Tt7"
+Received: from [192.168.178.76] (host-212-18-30-247.customer.m-online.net [212.18.30.247])
+	(Authenticated sender: g.gottleuber@tuxedocomputers.com)
+	by mail.tuxedocomputers.com (Postfix) with ESMTPSA id 81C8D2FC0063;
+	Fri, 25 Oct 2024 17:40:26 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=tuxedocomputers.com;
+	s=default; t=1729870830;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=c//f/7s6BWOQiiDwzMLRRIcTmPrSjbMYXtncbing1bQ=;
+	b=coBG6Tt7Bzq424t8FVpqd5E+0hRt40TI+qQnzcTQGSWbaYChpiAGIZ3vkk3oZA7Zg2cMCo
+	9aYNyHwL/tH+3EwenOn2IpQhVKg+p28azFIkgSU9hMuBksHhKeCeReEnypg28tzTCHpCHz
+	7y6hWHMyTFNT3AdB8gTIa8dD7rNqCNg=
+Authentication-Results: mail.tuxedocomputers.com;
+	auth=pass smtp.auth=g.gottleuber@tuxedocomputers.com smtp.mailfrom=ggo@tuxedocomputers.com
+Message-ID: <4dd25dca-f217-4abd-88e8-0a6b03760dd7@tuxedocomputers.com>
+Date: Fri, 25 Oct 2024 17:40:26 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241021153227.493970-1-avri.altman@wdc.com>
-In-Reply-To: <20241021153227.493970-1-avri.altman@wdc.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 25 Oct 2024 16:51:25 +0200
-Message-ID: <CAPDyKFrhda1k=zQXzYK3uzYX9AXo7XAa+cQiUZg_E-gGbECnsQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: core: Use GFP_NOIO in ACMD22
-To: Avri Altman <avri.altman@wdc.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
-	stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] mmc: sdhci-pci-gli: GL9767: Fix low power mode on the
+ set clock function
+To: Ulf Hansson <ulf.hansson@linaro.org>, Ben Chuang <benchuanggli@gmail.com>
+Cc: adrian.hunter@intel.com, victor.shih@genesyslogic.com.tw,
+ greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+ HL.Liu@genesyslogic.com.tw, Lucas.Lai@genesyslogic.com.tw,
+ victorshihgli@gmail.com, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, Georg Gottleuber <ggo@tuxedocomputers.com>,
+ Werner Sembach <wse@tuxedocomputers.com>, cs@tuxedo.de
+References: <20241025060017.1663697-1-benchuanggli@gmail.com>
+ <CAPDyKFpb5ZePhXziLH3VbuKKywJZbo8UBF1NM1_dyOWq9oLDng@mail.gmail.com>
+Content-Language: en-US
+From: Georg Gottleuber <ggo@tuxedocomputers.com>
+In-Reply-To: <CAPDyKFpb5ZePhXziLH3VbuKKywJZbo8UBF1NM1_dyOWq9oLDng@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, 21 Oct 2024 at 17:34, Avri Altman <avri.altman@wdc.com> wrote:
->
-> While reviewing the SDUC series, Adrian made a comment concerning the
-> memory allocation code in mmc_sd_num_wr_blocks() - see [1].
-> Prevent memory allocations from triggering I/O operations while ACMD22
-> is in progress.
->
-> [1] https://lore.kernel.org/linux-mmc/3016fd71-885b-4ef9-97ed-46b4b0cb0e35@intel.com/
->
-> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
-> Fixes: 051913dada04 ("mmc_block: do not DMA to stack")
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
-> Cc: stable@vger.kernel.org
+Hello Ben, hello Uffe,
 
-Applied for next (as it doesn't apply on fixes), thanks!
+thank you for this fix.
 
-Kind regards
-Uffe
+Am 25.10.24 um 15:22 schrieb Ulf Hansson:
+> + Georg
+> 
+> On Fri, 25 Oct 2024 at 08:01, Ben Chuang <benchuanggli@gmail.com> wrote:
+>>
+>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>>
+>> On sdhci_gl9767_set_clock(), the vendor header space(VHS) is read-only
+>> after calling gl9767_disable_ssc_pll() and gl9767_set_ssc_pll_205mhz().
+>> So the low power negotiation mode cannot be enabled again.
+>> Introduce gl9767_set_low_power_negotiation() function to fix it.
+>>
+>> The explanation process is as below.
+>>
+>> static void sdhci_gl9767_set_clock()
+>> {
+>>         ...
+>>         gl9767_vhs_write();
+>>         ...
+>>         value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+>>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <--- (a)
+>>
+>>         gl9767_disable_ssc_pll(); <--- (b)
+>>         sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>>
+>>         if (clock == 0)
+>>                 return;  <-- (I)
+>>
+>>         ...
+>>         if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+>>                 ...
+>>                 gl9767_set_ssc_pll_205mhz(); <--- (c)
+>>         }
+>>         ...
+>>         value &= ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+>>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <-- (II)
+>>         gl9767_vhs_read();
+>> }
+>>
+>> (a) disable low power negotiation mode. When return on (I), the low power
+>> mode is disabled.  After (b) and (c), VHS is read-only, the low power mode
+>> cannot be enabled on (II).
+>>
+>> Fixes: d2754355512e ("mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for GL9767")
+> 
+> Is this the same problem as being reported in
+> https://lore.kernel.org/all/41c1c88a-b2c9-4c05-863a-467785027f49@tuxedocomputers.com/
+> 
+> ?
 
+Yes, this patch fixes
+https://bugzilla.kernel.org/show_bug.cgi?id=219284
 
+This makes my patch obsolete.
 
->
-> ---
-> Changes since v2:
->  - Fix checkpatch warnings (Adrian)
->
-> Changes since v1:
->  - Move memalloc_noio_restore around (Adrian)
-> ---
->  drivers/mmc/core/block.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 04f3165cf9ae..a813fd7f39cc 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -995,6 +995,8 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->         u32 result;
->         __be32 *blocks;
->         u8 resp_sz = mmc_card_ult_capacity(card) ? 8 : 4;
-> +       unsigned int noio_flag;
-> +
->         struct mmc_request mrq = {};
->         struct mmc_command cmd = {};
->         struct mmc_data data = {};
-> @@ -1018,7 +1020,9 @@ static int mmc_sd_num_wr_blocks(struct mmc_card *card, u32 *written_blocks)
->         mrq.cmd = &cmd;
->         mrq.data = &data;
->
-> +       noio_flag = memalloc_noio_save();
->         blocks = kmalloc(resp_sz, GFP_KERNEL);
-> +       memalloc_noio_restore(noio_flag);
->         if (!blocks)
->                 return -ENOMEM;
->
-> --
-> 2.25.1
->
+Kind regards,
+Georg
