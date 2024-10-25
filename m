@@ -1,37 +1,38 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E16EA1DAC90;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1AF231DE3A7;
 	Fri, 25 Oct 2024 10:36:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729852616; cv=none; b=XUTJ3MX6byr8YYHa4STSsPxTyJRJRuE5KMOGwqYng9F/17/6EOwqxL0TUChMIzc2sWUaoqQEkSA91CUt5MVJ15G2NiqHyvNGfr8fXd/MsRbx6J/qQ0i66ItjL4uU7DVQovWNZei67ib173Y4cANtqsP3ECNxObkfDMjWZ8bo0FU=
+	t=1729852616; cv=none; b=QwxNPqOl3LT1vLbectHxqN0FvFzjp3xO5WT2D8/5zFc2wEHSElSO2bcw0hrNW2urosK0s211j6aoGTGW5xHLfIrJEan4AEFdo+qmeKPcebcvjuIZjM4XjF8QV0Zy8CPsDJ6cwY34q+2YSEc2r91jmhvkjhnrLVFaMJkmpvTgWR8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1729852616; c=relaxed/simple;
-	bh=FtB7n0flVWbqHTdJaCNsHoIjLctGLxMpTmctKJudKjA=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=vASIilcrvgklwYrtMmsVgkT1aTzD1iN7b4/j0PtV7eC+Q9sejvNiEtlnnZ3HdjUpeTOzhi+eeagj5JwHCCQ3ZIWbjlFYU9xK0hffZSgy2BwtpI4DodgNa2VH9iiWpPxvHDhzXvkjS8p4N328wal9KbCBL4g54jSSSZFvY9e7xXM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=f/UQqyZ4; arc=none smtp.client-ip=212.227.17.21
+	bh=Dnh9zA68cmn86JxmjQWm3VeD9mYPGUG2L6WhqKPqrUc=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=RpX6vsvxsKYKsmc8ktedO9pRa6K5yY8C8bIQjmStWu5BPcqYqI5WSppLYX3D3hHN/TYC36xZDoSIipzXAMo52fbzzmUOIDtHyJbHGPQm9PQJMnn2EVEnIdKIp5ZJijILvD702NiaH2IJCP8e15oD4wqlmgrnVY2/0ysUlAOKrH4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=ECiSl6oo; arc=none smtp.client-ip=212.227.17.22
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="f/UQqyZ4"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="ECiSl6oo"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1729852590; x=1730457390; i=wahrenst@gmx.net;
-	bh=amPxo4S/Ct/6DZ6qNnunsTkfju7K6NksorlhbkGz9ag=;
-	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:
-	 MIME-Version:Content-Type:Content-Transfer-Encoding:cc:
+	s=s31663417; t=1729852596; x=1730457396; i=wahrenst@gmx.net;
+	bh=09r8SsGNZ34ZiyCPE+YPDY1tjwAlvhjANIoGjogob0I=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
+	 References:MIME-Version:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=f/UQqyZ4mjQbV2oTHIfFNGbpx6DpsGNwE5Se8hUr1xjClFuijI+vjrcPgxgifKM3
-	 tL37avOynFlBr/67wsNzxHq8G4o8lnTko8fGZOK6iY1e9CYg9+jDVVel5pdqER1o1
-	 yfCxR8Y3VOCAMWw1xIBxbsk5H8jjcmyEG9ugP/tQS56eOseZBmcRyGTAP+h6lkH5j
-	 eaokLVaPqfPf/WAYgtRxrnSZyZr5HK4HRU2Lh7CzXMrM4VVhnvofRrJIzpJZzflY5
-	 ZlJ4IL9AxAwl/MERS/ZWLsCBlP1vX0ex1jRWN9PcYfQsw4WHt4j7YjslSDlOmxWKo
-	 RtQnRwFTHkgmYq9gKg==
+	b=ECiSl6ooctwk0v6aDqAO5MXTpskQlO6ki24e5NxKwOw/JTL2w/sksOzf2xKxpPoh
+	 RbXhI490NANYGxgVzEyJhv7hCT1L0/EN7jaaeeYiQsQq70+tArhT4ojiIcRYItQBW
+	 T1aRUWMjSc/0RSMHGPT0A2NeDgGIDzXvoXRfeq2i57byutRb2b9Jj9OGmNYSman8b
+	 wcFMA250lwRytgNOAF/y0wPYd3BPSkb5WmfZqOm7MdUfn5WKcS84QdUn6CWtEGVHz
+	 bsEfPa05yugrJme3SE5fsvUGz2+aadGfzzmXaWEKoHFRKEdqa6w5+/0pRlb/AMq9A
+	 oBA+kXhFAuV2GzjjRw==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MLR1f-1tKzcL0mdH-00QVjT; Fri, 25
- Oct 2024 12:36:30 +0200
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1N1Obb-1u0twG3hDn-00tCdT; Fri, 25
+ Oct 2024 12:36:36 +0200
 From: Stefan Wahren <wahrenst@gmx.net>
 To: Russell King <linux@armlinux.org.uk>,
 	Florian Fainelli <florian.fainelli@broadcom.com>,
@@ -50,150 +51,158 @@ Cc: Lukas Wunner <lukas@wunner.de>,
 	dmaengine@vger.kernel.org,
 	linux-mmc@vger.kernel.org,
 	linux-usb@vger.kernel.org,
-	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH V5 0/9] ARM: bcm2835: Implement initial S2Idle for Raspberry Pi
-Date: Fri, 25 Oct 2024 12:36:12 +0200
-Message-Id: <20241025103621.4780-1-wahrenst@gmx.net>
+	Stefan Wahren <wahrenst@gmx.net>,
+	Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH V5 8/9] usb: dwc2: Implement recovery after PM domain off
+Date: Fri, 25 Oct 2024 12:36:20 +0200
+Message-Id: <20241025103621.4780-9-wahrenst@gmx.net>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20241025103621.4780-1-wahrenst@gmx.net>
+References: <20241025103621.4780-1-wahrenst@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:zXzoaq0PE3RrmfyCowWNAEhGtFClTAK4tiZAejmiOdXy3277ZNd
- Piu95Otg3VHC+6HYkERem6L66YN8oOa9djCGQPMnF66Be/6Bms3HBLHdl0Ykje/EaLekqDX
- cmGLfZHU2uZLY8x6XODCKyai9avTy/D38u3/fdcQmXsHnjyB/UtoIp554rtr4px7hhDBnOE
- H7QdjCbcBAJW92TWec69w==
+X-Provags-ID: V03:K1:0DHeVITrWMY0vQ2rx2e0e4B9KfArVPTafQp1rYxE/73DMjVjSV5
+ xHBqz3tEPRtHyaXxyscUt/UgcM0ONCSNYzdhfH7pZ8qBt7H9cMM+MsT4qIIfQXrs4m/jAYQ
+ x+Q3AUP4LR4FBWHoUvQLiOWCYxhW/qO82B6V3tn/L+UiojQDRq1iDfqqoul4OZJZsxIvupr
+ p78tzIJIfCpn6BRTY6chw==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:k6GJJeBJmOY=;pItoyKMWfDCZsYsxiT9g//rs8PL
- QSE3/8vwwx/CfEZPQ+xzai6MvUSx/zMYOOa9jcbblqRPTs5jBophaDCtgz3SRIAIzfT3V+JmW
- lKm42XYsvFdQkYJOPNYz+ARaIsgCo27L/DogxC8k9Ynux7hakEfkiyZbqcAYACO4e2SqwdESm
- HFQF6ZtBUENCBVEzNYn3mDJlahTN97/xdr8DJo4dNWcs/p7nwdRDsjlpbUdXbpcqtN37Us35s
- ZyF7f76hUU3AmTk6aPRuG4OOOXd5kGcAQSo169Z5j1MsggTODNgYUpDDiQS49MeNO/oCmthx9
- +z/gQTlx/SRcwiCd0v0qArkgLAfFUplX8Ub51n/JStGPIWblZa5XMPs5XjJnhEQBAV7AzkXbJ
- icuOjuE8QMmfE+06WVvCcCyW9vigdiS/4ckzFCj386ByKcJvmbW8/OBV+GiT/7sZITJBA5nuU
- 5eUWvqPgu/r9ZYMO86c3qqgmOTN14hjAyeBzm5IPCQ0DVOq3RiJtjLpk8Kl7o1oyV3jy0fJHb
- M4erRwfuAegSKafvGL7puyRzh+wwemwxIk+dDIKHtrDdUZFpS2CFvHHOvXdN4ST9JV8rRO6sB
- 0mQ4SAjmIbL9C5cWTu9lBKOUkz3Zzz5CItoaJdT/dCN4+f3j5y3anB+KWGr1bnNdMZP0Ipzbj
- 8Tg3/bBi7tSfcDC0TA87hrIIo90FXkGEsJn7OyNlPCg7Z2wDztqw2A6LuLL6uiM+/VU2rg5og
- YeXFwKrD11yNS/9w/uvqXHLCOPqKPSLF727cdUfZf64uroQ1PWhx8oPyw1QzZtGk4pPbCfl4l
- 8WjkZusJggqEnptFsVrS7ZXniMgTN1oo0Dh49nHw1+4U8=
+UI-OutboundReport: notjunk:1;M01:P0:zomxAVLVd9U=;XjqOY2BCkTudZjgYhWCHiU5l7cf
+ UNVhAVItObGLY7r30VboevP7zZ8XoUQcxHKprH4xN/Teqek1OqWdEHsXFkA6Lu8dam6N2uQ85
+ 7dV2YGVALPaosxazJDCOl9lNa4xISd4KrEskqvW88sytwOpbsVhrK2DtoRZCcQzuKcQQICbTi
+ JO2Nkm5E4QiCJFQbukl95fO+74nywsxWYe7+NeGQcTHzdYA/bai7u2zvysaavqQevMAhV7ir4
+ jmaBUQ18hlvOE1T1Uf/8ohPb8tCymeE4AmL+YStrShqZ3Q4JI+cws+i6Ozbj+Y/Aj9K/qEuM/
+ HFCAi6GlcTy99cJaW7+lN+lwPdNz+aWynN6dQNWphi5c3qgDJdiOp/C4R9KScLxE+OLOVKJ2G
+ 0THbnPfXdVs1yDUI3qFM/LKM0m4teS1fxrA9j3T6hIg9wZzmei8+suv3Z2q03YQPXnCBCBOYu
+ mAQZV+zs3a2iZ+kCkVqBBja/4rnBAwYKlhqSFJzBo6Kv+rm/oG+bac7r6OW66GHhMQqufG055
+ WYW3pnpC6W2tjUPeSPMGQlD4LLBwZB02iqjLjZvZRUAy0zcZXd4l3Zr3LtnZqJTq8VGubD5QQ
+ tPDeYzZZt/420uiJJUp7HfCheBdDWh9sqTdaLPJwYbPegg4kX70nczKEolTUvqrpXfUUTFAk6
+ lBC6Br1tgOQ+NKHns21AfXfTtcghLGeZKEKO8GnNJLSr/ac1mzW1+gi5oG7OwaCQ0tmeNYKW3
+ DAY95KzW5kxYE+7MAR3wlyu+HiYUWHj3UzdA+UwRBt1Uoe1XIHkkCz06/Iq+/IJL1jTx3e74Y
+ DU+V3/MXTQ8RoaMRz5PWzBMg==
 
-This series implement the initial S2Idle support for
-the Raspberry Pi, which was a long time on my TODO list [1]. The
-changes allow to suspend and resume the Raspberry Pi via debug UART.
-The focus is on the BCM2835 SoC, because it's less complex than its
-successors and have enough documentation.
+According to the dt-bindings there are some platforms, which have a
+dedicated USB power domain for DWC2 IP core supply. If the power domain
+is switched off during system suspend then all USB register will lose
+their settings.
 
-Now the VC4 part has been split from the series [4], because of some issue=
-s
-in that part.
+Use GUSBCFG_TOUTCAL as a canary to detect that the power domain has
+been powered off during suspend. Since the GOTGCTL_CURMODE_HOST doesn't
+match on all platform with the current mode, additionally backup
+GINTSTS. This works reliable to decide which registers should be
+restored.
 
-Cherry-picking of patches should be fine.
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
+=2D--
+ drivers/usb/dwc2/core.c     |  1 +
+ drivers/usb/dwc2/core.h     |  2 ++
+ drivers/usb/dwc2/platform.c | 38 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 41 insertions(+)
 
-Test steps:
-- configure debug console (pl011 or mini UART) as wakeup source
-- send system to idle state
+diff --git a/drivers/usb/dwc2/core.c b/drivers/usb/dwc2/core.c
+index 9919ab725d54..c3d24312db0f 100644
+=2D-- a/drivers/usb/dwc2/core.c
++++ b/drivers/usb/dwc2/core.c
+@@ -43,6 +43,7 @@ int dwc2_backup_global_registers(struct dwc2_hsotg *hsot=
+g)
+ 	/* Backup global regs */
+ 	gr =3D &hsotg->gr_backup;
 
-  echo freeze > /sys/power/state
++	gr->gintsts =3D dwc2_readl(hsotg, GINTSTS);
+ 	gr->gotgctl =3D dwc2_readl(hsotg, GOTGCTL);
+ 	gr->gintmsk =3D dwc2_readl(hsotg, GINTMSK);
+ 	gr->gahbcfg =3D dwc2_readl(hsotg, GAHBCFG);
+diff --git a/drivers/usb/dwc2/core.h b/drivers/usb/dwc2/core.h
+index 265791fbe87f..34127b890b2a 100644
+=2D-- a/drivers/usb/dwc2/core.h
++++ b/drivers/usb/dwc2/core.h
+@@ -667,6 +667,7 @@ struct dwc2_hw_params {
+ /**
+  * struct dwc2_gregs_backup - Holds global registers state before
+  * entering partial power down
++ * @gintsts:		Backup of GINTSTS register
+  * @gotgctl:		Backup of GOTGCTL register
+  * @gintmsk:		Backup of GINTMSK register
+  * @gahbcfg:		Backup of GAHBCFG register
+@@ -683,6 +684,7 @@ struct dwc2_hw_params {
+  * @valid:		True if registers values backuped.
+  */
+ struct dwc2_gregs_backup {
++	u32 gintsts;
+ 	u32 gotgctl;
+ 	u32 gintmsk;
+ 	u32 gahbcfg;
+diff --git a/drivers/usb/dwc2/platform.c b/drivers/usb/dwc2/platform.c
+index c1b7209b9483..4a3c81cd45d6 100644
+=2D-- a/drivers/usb/dwc2/platform.c
++++ b/drivers/usb/dwc2/platform.c
+@@ -685,6 +685,14 @@ static int __maybe_unused dwc2_suspend(struct device =
+*dev)
+ 		regulator_disable(dwc2->usb33d);
+ 	}
 
-- wakeup system by console traffic
++	if (is_device_mode)
++		ret =3D dwc2_gadget_backup_critical_registers(dwc2);
++	else
++		ret =3D dwc2_host_backup_critical_registers(dwc2);
++
++	if (ret)
++		return ret;
++
+ 	if (dwc2->ll_hw_enabled &&
+ 	    (is_device_mode || dwc2_host_can_poweroff_phy(dwc2))) {
+ 		ret =3D __dwc2_lowlevel_hw_disable(dwc2);
+@@ -694,6 +702,24 @@ static int __maybe_unused dwc2_suspend(struct device =
+*dev)
+ 	return ret;
+ }
 
-The clock gating must be restored, because otherwise we have a
-regression on Raspberry Pi 3 B+ . Luckily the disabling of clock gating
-isn't necessary anymore. Thanks to the rest of the DWC2 patches which
-based on an idea of Doug Anderson. The USB domain is now powered down
-and the USB devices are still usable after resume. There might be room
-for improvements, but at least the system won't freeze forever as before.
++static int dwc2_restore_critical_registers(struct dwc2_hsotg *hsotg)
++{
++	struct dwc2_gregs_backup *gr;
++
++	gr =3D &hsotg->gr_backup;
++
++	if (!gr->valid) {
++		dev_err(hsotg->dev, "No valid register backup, failed to restore\n");
++		return -EINVAL;
++	}
++
++	if (gr->gintsts & GINTSTS_CURMODE_HOST)
++		return dwc2_host_restore_critical_registers(hsotg);
++
++	return dwc2_gadget_restore_critical_registers(hsotg, DWC2_RESTORE_DCTL |
++						      DWC2_RESTORE_DCFG);
++}
++
+ static int __maybe_unused dwc2_resume(struct device *dev)
+ {
+ 	struct dwc2_hsotg *dwc2 =3D dev_get_drvdata(dev);
+@@ -706,6 +732,18 @@ static int __maybe_unused dwc2_resume(struct device *=
+dev)
+ 	}
+ 	dwc2->phy_off_for_suspend =3D false;
 
-Here are some figures for the Raspberry Pi 1 (without any
-devices connected except of a debug UART):
-
-running but CPU idle =3D 1.67 W
-S2Idle               =3D 1.33 W
-
-In comparison with HDMI & USB keyboard connected (but neither active
-nor wakeup source):
-
-running but CPU idle =3D 1.82 W
-S2Idle               =3D 1.33 W
-
-The series has been successfully tested on the following platforms:
-Raspberry Pi 1 B
-Raspberry Pi 3 B+
-
-Changes in V5:
-- add missing version
-
-Changes in V4:
-- added Reviewed-by from Doug
-- dropped applied VC4 improvement patches
-- fix DWC2 register backup
-- add revert because of Raspberry Pi 3B+ regression
-- add suspend/resume support for DMA & eMMC to be on the safe side
-
-Changes in V3:
-- added Reviewed-by & Acked-by from Florian & Ma=C3=ADra
-- dropped applied pmdomain & bcm2835aux patches
-- address comments by Ma=C3=ADra (patch 3 & 5)
-- replace old USB recovery patch with canary approach [3], which should
-  work with other platforms
-
-Changes in V2:
-- rebased against todays mainline
-- added Reviewed-by from Florian
-- added Acked-by from Minas
-- dropped "irqchip/bcm2835: Enable SKIP_SET_WAKE and MASK_ON_SUSPEND"
-  because it has been applied by Thomas Gleixner
-- dropped "pmdomain: raspberrypi-power: Avoid powering down USB"
-  because this workaround has been replaced by patch 14
-- use drm_err_once instead of DRM_ERROR and return connector_status_unknow=
-n
-  in patch 6
-- add new patch in order to clean-up all DRM_ERROR
-- add new patch to improve raspberrypi-power logging
-- add new patch to simplify V3D clock retrieval
-- add new patch 5 to avoid power down of wakeup devices
-- add new patch 12 to avoid confusion about ACPI ID of BCM283x USB
-- add new patch 8 & 10 which address the problem that HDMI
-  is not functional after s2idle
-- add more links and fix typo in patch 13
-- add new WIP patch 14 which recover DWC2 register after power down
-- take care of UART clock in patch 15 as commented by Florian
-- use SYSTEM_SLEEP_PM_OPS in patch 15
-
-[1] - https://github.com/lategoodbye/rpi-zero/issues/9
-[2] - https://bugzilla.redhat.com/show_bug.cgi?id=3D2283978
-[3] - https://lore.kernel.org/linux-usb/CAD=3DFV=3DW7sdi1+SHfhY6RrjK32r8iA=
-Ge4w+O_u5Sp982vgBU6EQ@mail.gmail.com/
-[4] - https://lore.kernel.org/dri-devel/20241003124107.39153-1-wahrenst@gm=
-x.net/
-
-Stefan Wahren (9):
-  Revert "usb: dwc2: Skip clock gating on Broadcom SoCs"
-  dmaengine: bcm2835-dma: add suspend/resume pm support
-  mmc: bcm2835: Fix type of current clock speed
-  mmc: bcm2835: Introduce proper clock handling
-  mmc: bcm2835: add suspend/resume pm support
-  usb: dwc2: gadget: Introduce register restore flags
-  usb: dwc2: Refactor backup/restore of registers
-  usb: dwc2: Implement recovery after PM domain off
-  ARM: bcm2835_defconfig: Enable SUSPEND
-
- arch/arm/configs/bcm2835_defconfig |   2 -
- drivers/dma/bcm2835-dma.c          |  30 ++++++++
- drivers/mmc/host/bcm2835.c         |  56 +++++++++++---
- drivers/usb/dwc2/core.c            |   1 +
- drivers/usb/dwc2/core.h            |  23 +++++-
- drivers/usb/dwc2/gadget.c          | 116 +++++++++++++++--------------
- drivers/usb/dwc2/hcd.c             |  99 ++++++++++++------------
- drivers/usb/dwc2/params.c          |   1 -
- drivers/usb/dwc2/platform.c        |  38 ++++++++++
- 9 files changed, 245 insertions(+), 121 deletions(-)
-
++	/*
++	 * During suspend it's possible that the power domain for the
++	 * DWC2 controller is disabled and all register values get lost.
++	 * In case the GUSBCFG register is not initialized, it's clear the
++	 * registers must be restored.
++	 */
++	if (!(dwc2_readl(dwc2, GUSBCFG) & GUSBCFG_TOUTCAL_MASK)) {
++		ret =3D dwc2_restore_critical_registers(dwc2);
++		if (ret)
++			return ret;
++	}
++
+ 	if (dwc2->params.activate_stm_id_vb_detection) {
+ 		unsigned long flags;
+ 		u32 ggpio, gotgctl;
 =2D-
 2.34.1
 
