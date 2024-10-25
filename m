@@ -1,210 +1,183 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 65E7B101F7
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 06:07:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A509170A16;
+	Fri, 25 Oct 2024 06:30:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729836469; cv=none; b=cM09Gob60V59MpDksCQBU89ddYVR9v9niY1xLqgbbDCAXPAdznp850rTa/BtwcJ2J/qtj1GHVWswjooagXUyw4hpd2xIm8/TCoM27xgLARt2+SZPaPuYqNPMe11cIfcERNFpgNjouHjq+WAtV/Q+8QO0W2F5CPUdadX/zxDkBIM=
+	t=1729837840; cv=none; b=r/yKv5OwIrbUMXEIGszru9akTB4ng49hcqwaqi2WAh/0t9JaOzCuKs7bFogLUkLGal/US2k9eJxAkn9Y5XbA8YmSDLkQwXAPAxGeKu78wEWfm+y6TEnGBltU5TvWMeEwAHapBjXJpr4EMkcBEfNh5Y9AzucWsTvsJO3Azy9nXBQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729836469; c=relaxed/simple;
-	bh=7523xMi56jFn2BFaJmqh9zJ8aNB35qcZ1U+TUU/Ixxc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=d7jKoqN8MItaaTEfnmdYoebwBLM5D7GzcjytEN9mAnoDO1iltCFoNfQwz+dGFsOKlZYYAJdvNj3fQal5Lr2nyP6DPAk0rnq1qXxADPPoxf8bB4xxyrriwX70d1SQVIzSXlKDmEJXuDpjCyYONJcbLVDBfz/x4vh/q3JvVpPdMa0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jJtZYu3j; arc=none smtp.client-ip=209.85.167.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1729837840; c=relaxed/simple;
+	bh=WcsQnfEMDqphi9g0150zF5OPj8mbLFRCYOkSTO8Hq0Q=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=jBLeAg2k+HDASdcYYYMA8VXgmLTRSmpmTwI/j4iEl8dAepd7nqi1Ok0jvI7PQ7YBw9fM6Uflu3xtOwWMPrkGR3YsedD2q90TCJmYiQg1fAmu7LSWiFCax6X9eDzV2CeU2pfTSJ9RMjwlpiuPHHB93kU+9Vg4TY2XW567GpH6X4E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=lPk0PwYl; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jJtZYu3j"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-539ee1acb86so1837333e87.0
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Oct 2024 23:07:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1729836464; x=1730441264; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=TTCFyQf3Xe7NvImgZ2XWniLlI9X6CvRNK0VpqeIrXvg=;
-        b=jJtZYu3jj/oad2hwXSmcWsrKwwBB6If832uqiDdvFZvhlXQYOrake/qY5nYLp4OIz8
-         FlfnPXCpoWNGe0uZGMbmPqn++sXqTlS+Fap1EgkyqHeZSSleXah3iNKwXVho8bTv1g9b
-         q6lOGlhqUnNDuT+i6DdlrEsXWGuWdBYhr/bdcWuHdM7jjvoNUijZJ3WTu8SFSoKU+8RN
-         4q/Y6cqdbwU+wUQoCkFFpmjBKC6Gc+DeD3V/Kko0lZRvExOmC+QosQDtaOHE4CTTHQF9
-         LFdyVbf26g/V+S5NhimcY+6IjTqyuLCe5iHcnq7nvSSgUoKZaYdxSf6q1LqWK+sGLjYd
-         mZpQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729836464; x=1730441264;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=TTCFyQf3Xe7NvImgZ2XWniLlI9X6CvRNK0VpqeIrXvg=;
-        b=dvXLsdNqf4mikRNfH6rVCVyUWDpbwxQc2mLsGBl95cW6Txotidrq5xJ6E98a2oLI+s
-         ngcPqu+lhVfm9FBQoWUUZ9cewsnp1cqKOevVvF7T481IQKVVUw4seB0N3unH+vmzrxVv
-         lw00Ad1C9FkTp81yeot/oX7njeLMeIUF7XJf1JpzVO3tZbvjnOGaZ+IMW/QmHhJus4pA
-         2msd7WvX4SN2uLifeCilS56HZU3vy7b7jNk833ETCV6+1r0Coca/GC2/rukmTLoSdxWs
-         hX8ZY7/ZNlrYNVeWhDQbaQMJe9DuPDiVR6nfmBfdlBeu2U1w4SjLlEbc8FPi98I1ZFBE
-         ad0A==
-X-Forwarded-Encrypted: i=1; AJvYcCX6ABjxejckmwvZQwQynSTV2uaA5Txf02MzznrNoRECh1GGAqH8Z/bd9QPXG/WqAbFie5dhWh57ZMY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx03weOT3UTRJf1imygo0zVr1ZkNlH5MlAThS4KhRWlZ+WUeBVq
-	MGMUoPDGxNWEPZUXCBpoUorCTOqDpTAKOzDDBaQdzpEMmTuy6h4h62ihEAK1peE=
-X-Google-Smtp-Source: AGHT+IGoSzH+71TKq9OlvnAlJbA6h7i+EdllRvot6u7Yic8iRLuolkjIdgdyHtVtXSMJzI4PruXv0w==
-X-Received: by 2002:a05:6512:1083:b0:539:de03:d7a7 with SMTP id 2adb3069b0e04-53b1a3030fdmr5293565e87.22.1729836464479;
-        Thu, 24 Oct 2024 23:07:44 -0700 (PDT)
-Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53b2e10c177sm64695e87.58.2024.10.24.23.07.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Oct 2024 23:07:43 -0700 (PDT)
-Date: Fri, 25 Oct 2024 09:07:40 +0300
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
-	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
-	quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com, 
-	kernel@quicinc.com
-Subject: Re: [PATCH 1/1] mmc: sdhci-msm: Toggle the FIFO write clock after
- ungate
-Message-ID: <v5lym7auj74tpsa75qsfpl2i6sq4xkqeapi4vu5i47ytw6mrek@ktvw6kpxnxwv>
-References: <20241022111025.25157-1-quic_rampraka@quicinc.com>
- <CAPDyKFr8EhLU8EhydypLwL_PZH0+KMTqAU_D7AFdNmRac5R=vg@mail.gmail.com>
- <ec15e7d2-ed18-b2fe-37a1-9609c5c91d1a@quicinc.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="lPk0PwYl"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49OKlGHL009177;
+	Fri, 25 Oct 2024 06:30:34 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=qcppdkim1; bh=7q3Sz4ZxXCE5Gw9ArxeItt7X
+	OUc4+2pIF82QOKUsNik=; b=lPk0PwYldVM59uytIceKFxSPjL0S6/9k0ObPLZcx
+	lRlO0weHL2LW6NvAnWnyQs39kcEwyr6GZahdqgdIuXt03WAUbZhGITMLotREOFcj
+	i5tmKxJ9DSQIa16RGwIhlYhxIU1cDc6MXBM4FgmMNu/oR4+2Vty4yTYOM/MlGtOj
+	7CwubgnvO4I6s0yrxQfEKusU4Mpv3rIc+lDyzpD8cVRjxs5nF7OgpZwPKTHjruzV
+	CNZOByAad1FOX0fTPuSVTUlkffQOv4p6dbKEoMG03uKwXpR3o/fEo9JlZDsGCNMR
+	4RGdCZ1Av+6RaMdWzdzhwSUImL1K9HJsw/4UVnnxu1zdJg==
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42em43fyku-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 25 Oct 2024 06:30:34 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 49P6UWRi019525
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 25 Oct 2024 06:30:32 GMT
+Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Thu, 24 Oct 2024 23:30:28 -0700
+Date: Fri, 25 Oct 2024 14:30:25 +0800
+From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, <ulf.hansson@linaro.org>,
+        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
+        <bhupesh.sharma@linaro.org>, <andersson@kernel.org>,
+        <konradybcio@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_tingweiz@quicinc.com>, <quic_yuanjiey@quicinc.com>
+Subject: Re: [PATCH v1 2/3] arm64: dts: qcom: qcs615: add SD and emmc node
+Message-ID: <Zxs7AcuFpiD5YCYN@cse-cd02-lnx.ap.qualcomm.com>
+References: <20241023092708.604195-1-quic_yuanjiey@quicinc.com>
+ <20241023092708.604195-3-quic_yuanjiey@quicinc.com>
+ <xfy335jzh5t5a7fdrjfswerjdze3vaybf7rvkxnae3cv3xaii7@rn7iqwga2p62>
+ <ZxsJp6XtJSfnNJqH@cse-cd02-lnx.ap.qualcomm.com>
+ <CAA8EJprVrCr11qkZjvzKhbZ=BvGRvbvCK-KsAhWiG48dOXQHvw@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <ec15e7d2-ed18-b2fe-37a1-9609c5c91d1a@quicinc.com>
+In-Reply-To: <CAA8EJprVrCr11qkZjvzKhbZ=BvGRvbvCK-KsAhWiG48dOXQHvw@mail.gmail.com>
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: H4A1r_uvG2qGAc6-Dzmh23v-wj5qvKkT
+X-Proofpoint-ORIG-GUID: H4A1r_uvG2qGAc6-Dzmh23v-wj5qvKkT
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 lowpriorityscore=0
+ adultscore=0 mlxlogscore=999 spamscore=0 malwarescore=0 impostorscore=0
+ phishscore=0 bulkscore=0 clxscore=1015 priorityscore=1501 suspectscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2409260000
+ definitions=main-2410250048
 
-On Fri, Oct 25, 2024 at 07:04:37AM +0530, Ram Prakash Gupta wrote:
+On Fri, Oct 25, 2024 at 08:48:48AM +0300, Dmitry Baryshkov wrote:
+> On Fri, 25 Oct 2024 at 06:00, Yuanjie Yang <quic_yuanjiey@quicinc.com> wrote:
+> >
+> > On Thu, Oct 24, 2024 at 11:42:26PM +0300, Dmitry Baryshkov wrote:
+> > > On Wed, Oct 23, 2024 at 05:27:07PM +0800, Yuanjie Yang wrote:
+> > > > Add SD and emmc support to the QCS615 Ride platform. The SD controller
+> > > > and emmc controller of QCS615 are derived from SM6115. Include the
+> > > > relevant binding documents accordingly. Additionally, configure
+> > > > emmc-related and SD-related opp, power, and interconnect settings
+> > > > in the device tree.
+> > > >
+> > > > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> > > > ---
+> > > >  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
+> > > >  1 file changed, 198 insertions(+)
+> > > >
+> > > > diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > > > index fcba83fca7cf..3840edf13fe8 100644
+> > > > --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > > > +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > > > @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
+> > > >                     #size-cells = <1>;
+> > > >             };
+> > > >
+> > > > +           sdhc_1: mmc@7c4000 {
+> > > > +                   compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
+> > > > +                   reg = <0 0x7c4000 0 0x1000>,
+> > > > +                         <0 0x7c5000 0 0x1000>;
+> > >
+> > >  <0x0 0x007c4000 0x0 0x1000> (this applies to all address nodes, so
+> > >  sdhc_2 too.
+> > Thanks, in the next version, I will adjust all the values in the reg to hexadecimal.
 > 
-> 
-> On 10/22/2024 6:15 PM, Ulf Hansson wrote:
-> > On Tue, 22 Oct 2024 at 13:10, Ram Prakash Gupta
-> > <quic_rampraka@quicinc.com> wrote:
-> > > 
-> > > For Qualcomm SoCs with sdcc minor version 6B and more, command path
-> > > state machine is getting corrupted post clock ungate which is leading
-> > > to software timeout.
+> Not only that. In the entry that I've posted there is a second change.
+Thanks, of course, in the next version I will change all the values in the reg of
+sdhc1 and sdhc2 to hexadecimal.I will also check other places to see if there are
+similar situations that need to be modified.
 
-Affected platforms are ...
-
-> > > 
-> > > Toggle the write fifo clock to reset the async fifo to fix this issue.
-> > > 
-> > > Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> > 
-> > Seems like we should add a stable tag, but do we have a fixes tag that
-> > we can use too?
-> > 
-> > Kind regards
-> > Uffe
-> > 
-> 
-> No, we don't have fixes tag for this as this is not dependent on any
-> software version. And there is no way to map minor version with stable
-> tag also here, I guess. But I agree this needs stable tag, if you have
-> any suggestion to find right stable tag, we can add.
-
-In the least case you can add Fixes tag pointing to the first affected
-hardware being added to the DT schema. As for the stable tag, I think,
-Uffe has been asking for Cc:stable in adddition to Fixes.
-
-> 
-> Thanks
-> Ram
-> 
-> > > ---
-> > >   drivers/mmc/host/sdhci-msm.c | 41 ++++++++++++++++++++++++++++++++++++
-> > >   1 file changed, 41 insertions(+)
-> > > 
-> > > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> > > index e113b99a3eab..c2ccdac21232 100644
-> > > --- a/drivers/mmc/host/sdhci-msm.c
-> > > +++ b/drivers/mmc/host/sdhci-msm.c
-> > > @@ -146,6 +146,7 @@
-> > >   /* CQHCI vendor specific registers */
-> > >   #define CQHCI_VENDOR_CFG1      0xA00
-> > >   #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN  (0x3 << 13)
-> > > +#define RCLK_TOGGLE BIT(1)
-> > > 
-> > >   struct sdhci_msm_offset {
-> > >          u32 core_hc_mode;
-> > > @@ -290,6 +291,7 @@ struct sdhci_msm_host {
-> > >          u32 dll_config;
-> > >          u32 ddr_config;
-> > >          bool vqmmc_enabled;
-> > > +       bool toggle_fifo_clk;
-> > >   };
-> > > 
-> > >   static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> > > @@ -1162,6 +1164,39 @@ static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
-> > >          return ret;
-> > >   }
-> > > 
-> > > +/*
-> > > + * After MCLK ugating, toggle the FIFO write clock to get
-> > > + * the FIFO pointers and flags to valid state.
-> > > + */
-> > > +static void sdhci_msm_toggle_fifo_write_clk(struct sdhci_host *host)
-> > > +{
-> > > +       u32 config;
-> > > +       struct mmc_ios ios = host->mmc->ios;
-> > > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +       const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-> > > +
-> > > +       if ((msm_host->tuning_done || ios.enhanced_strobe) &&
-> > > +               host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
-> > > +               /*
-> > > +                * Select MCLK as DLL input clock.
-> > > +                */
-> > > +               config = readl_relaxed(host->ioaddr + msm_offset->core_dll_config_3);
-> > > +               config |= RCLK_TOGGLE;
-> > > +               writel_relaxed(config, host->ioaddr + msm_offset->core_dll_config_3);
-> > > +
-> > > +               /* ensure above write as toggling same bit quickly */
-> > > +               wmb();
-> > > +               udelay(2);
-> > > +
-> > > +               /*
-> > > +                * Select RCLK as DLL input clock
-> > > +                */
-> > > +               config &= ~RCLK_TOGGLE;
-> > > +               writel_relaxed(config, host->ioaddr + msm_offset->core_dll_config_3);
-> > > +       }
-> > > +}
-> > > +
-> > >   static void sdhci_msm_set_cdr(struct sdhci_host *host, bool enable)
-> > >   {
-> > >          const struct sdhci_msm_offset *msm_offset = sdhci_priv_msm_offset(host);
-> > > @@ -2587,6 +2622,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
-> > >          if (core_major == 1 && core_minor >= 0x71)
-> > >                  msm_host->uses_tassadar_dll = true;
-> > > 
-> > > +       if (core_major == 1 && core_minor >= 0x6B)
-
-lowercase hex, please.
-
-> > > +               msm_host->toggle_fifo_clk = true;
-> > > +
-> > >          ret = sdhci_msm_register_vreg(msm_host);
-> > >          if (ret)
-> > >                  goto clk_disable;
-> > > @@ -2720,6 +2758,9 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
-> > >                                         msm_host->bulk_clks);
-> > >          if (ret)
-> > >                  return ret;
-> > > +
-> > > +       if (msm_host->toggle_fifo_clk)
-> > > +               sdhci_msm_toggle_fifo_write_clk(host);
-> > >          /*
-> > >           * Whenever core-clock is gated dynamically, it's needed to
-> > >           * restore the SDR DLL settings when the clock is ungated.
+> >
+> > >
+> > > > +                   reg-names = "hc",
+> > > > +                               "cqhci";
+> > > > +
+> > > > +                   interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+> > > > +                                <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+> > > > +                   interrupt-names = "hc_irq",
+> > > > +                                     "pwr_irq";
+> > > > +
+> > > > +                   clocks = <&gcc GCC_SDCC1_AHB_CLK>,
+> > > > +                            <&gcc GCC_SDCC1_APPS_CLK>,
+> > > > +                            <&rpmhcc RPMH_CXO_CLK>,
+> > > > +                            <&gcc GCC_SDCC1_ICE_CORE_CLK>;
+> > > > +                   clock-names = "iface",
+> > > > +                                 "core",
+> > > > +                                 "xo",
+> > > > +                                 "ice";
+> > > > +
+> > > > +                   resets = <&gcc GCC_SDCC1_BCR>;
+> > > > +
+> > > > +                   power-domains = <&rpmhpd RPMHPD_CX>;
+> > > > +                   operating-points-v2 = <&sdhc1_opp_table>;
+> > > > +                   iommus = <&apps_smmu 0x02c0 0x0>;
+> > > > +                   interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
+> > > > +                                    &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
+> > > > +                                   <&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
+> > > > +                                    &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
+> > > > +                   interconnect-names = "sdhc-ddr",
+> > > > +                                        "cpu-sdhc";
+> > > > +
+> > > > +                   bus-width = <8>;
+> > > > +                   qcom,dll-config = <0x000f642c>;
+> > > > +                   qcom,ddr-config = <0x80040868>;
+> > > > +                   supports-cqe;
+> > > > +                   dma-coherent;
+> > > > +                   mmc-ddr-1_8v;
+> > > > +                   mmc-hs200-1_8v;
+> > > > +                   mmc-hs400-1_8v;
+> > > > +                   mmc-hs400-enhanced-strobe;
+> > >
+> > > Are these board properties or SoC properties?
+> > Thanks, these properties are Soc properties, so I put them in dtsi.
+> >
+> > > > +                   status = "disabled";
+> > > > +
+> > >
 > > > --
-> > > 2.17.1
-> > > 
+> > > With best wishes
+> > > Dmitry
+> >
+> > Thanks,
+> > Yuanjie
+> 
+> 
+> 
+> -- 
+> With best wishes
+> Dmitry
 
--- 
-With best wishes
-Dmitry
+Thanks,
+Yuanjie
+
