@@ -1,38 +1,38 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C99681D5ABF;
-	Fri, 25 Oct 2024 10:36:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AF9811D5CE5;
+	Fri, 25 Oct 2024 10:36:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729852614; cv=none; b=RHKGcJnPatwWnlwFXfBbK8yKrGzDAsH0YpOrOi3LX5CZWkoizC5jAoQBk/bamVvkbK0hqKJkcYn6COnz8hSmkHaYAPDCfHSKtNbRBLCF1TELslmBw3hP+exO2wog363ClvcRJuvdiDM5WJd9hQ9UKJQxTZBy+d/siroFXbHFfyU=
+	t=1729852615; cv=none; b=iIZQR7HQ13PkQneRI2xs3eJS8o+EPpM5zJslVCt4bzD49+U/nehOTbjvIJDkeMfjFJ6Fu+/HPH6xWPWFANbOfg/1ihxsusTH3NgXliJJR82hwWxHkhkwupGwv901YEcZdWKrNKoIFmtdFdP/KykM/0Tdm7nPVx3xRyYXgzSlXYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729852614; c=relaxed/simple;
-	bh=V9/4Nd+sWme/u2mCmc2sE127qiJQZgk7dOc5mUf2E6c=;
+	s=arc-20240116; t=1729852615; c=relaxed/simple;
+	bh=nDW0JkC5oOVw3y6HyHxt9mKYcZxpXMokS2HNemOLjZ4=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=M+554tdJdlyAvnaROEZklvtenbrPkvIqBLpiUZcPs1Tm0YdJ6S6ZJDl9a7HFzLr6RdrFbMNLNQdVuru9v6lpVL0g8Yn81zkYTQ8ZrgT71jPT/Kmh4lnayNwofKdKFT4vKDXu0ritGXOlIVyO0q6y36fj1n3pqSNyos8JWDS8+IM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=sTuq01Qs; arc=none smtp.client-ip=212.227.17.21
+	 MIME-Version; b=dA8nWlWubuYFwyGPJeXgwnYt6dRe1v7m10ma+TvtPMGq6uXY2c5hWXqenfUcmlOVgMaKrvz2jQ5dAenGmFg80I6g+pwdgpEOSWpUFDa+KR4yzulonSlxmN0bHv44jS6DG8B7ziYJMgYHThB56ifg/LE968IsbaSTCVWeSJ57H6g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=OMfN+BJ3; arc=none smtp.client-ip=212.227.17.22
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="sTuq01Qs"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="OMfN+BJ3"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1729852592; x=1730457392; i=wahrenst@gmx.net;
-	bh=KTdkJ5P6J2KL4Qt0vXA0RPNETkbTyLxenzCZPLKwNyw=;
+	s=s31663417; t=1729852594; x=1730457394; i=wahrenst@gmx.net;
+	bh=7SJXJq2uX1cxKxMjslAAHJO+ZqjPnNq4UxpqnQBoZXU=;
 	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
 	 References:MIME-Version:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=sTuq01QskJq2zdiAiIljyIGlG2h1rEWoc/ghG7FS2b1oNWb1biDLhZyfQLPCtDhz
-	 4DfqY2404X1N8hd7jUSizN+ACfzYPc8jwUuneL0b2lV3RFoC6roUKh035M4I0h27Q
-	 qi589UXd/Xwmn0Xmv+YpbB1mW7H7IZJVNyuQb/YCN7amnUmFbWDEfJHHl6tOzAYxS
-	 hdAx4lXb6B8jH33Rklu5QdNGh0ZNB6Mjv53WFEhXVzgU4Tj5m7BoSF8yvKSpO2/zf
-	 7gGh35/Lcp9Ej09sJUm/9xHjuHf/Wj9IBU7G4/j8czTXI7uqHWrtb2Du5PeyNDL4R
-	 FACT4hUAsvQgW76N7Q==
+	b=OMfN+BJ3jEVar7Z9mM3x0Iqs1yFDb76xD9fFjkO+EoKsIGoZgHX7RItOBVtWl7ro
+	 mLUjivfa4hADRkUN36kIeSWws9iGwsiidjSEi6Oeq5tYTcpJSJlCFbkOCyLxMZbqo
+	 +/aqWop9S+NWSd3G0zKJrlPxyb6DhYGGNwFfu4qNydwU4+z9G/GTnoTYNka+13Lbz
+	 5z7aahp9T1nkP9EpdWWS62VCRD4tDWvF6wo+UCG9StkZWJvFNup0y4b5HzmbLB7Xm
+	 6W8krDDtpxjYBJzqwrOHCcfQ9hMymGPKWfwz3Ygdug4g5EccEdcOIqXkTlF56Zx2k
+	 WbzRkd5TMSpo+kTXOw==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MvbBu-1tvhHN3fXy-011DvW; Fri, 25
- Oct 2024 12:36:31 +0200
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1N8GMq-1tzUtF3bd2-00wFqO; Fri, 25
+ Oct 2024 12:36:34 +0200
 From: Stefan Wahren <wahrenst@gmx.net>
 To: Russell King <linux@armlinux.org.uk>,
 	Florian Fainelli <florian.fainelli@broadcom.com>,
@@ -52,9 +52,9 @@ Cc: Lukas Wunner <lukas@wunner.de>,
 	linux-mmc@vger.kernel.org,
 	linux-usb@vger.kernel.org,
 	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH V5 2/9] dmaengine: bcm2835-dma: add suspend/resume pm support
-Date: Fri, 25 Oct 2024 12:36:14 +0200
-Message-Id: <20241025103621.4780-3-wahrenst@gmx.net>
+Subject: [PATCH V5 5/9] mmc: bcm2835: add suspend/resume pm support
+Date: Fri, 25 Oct 2024 12:36:17 +0200
+Message-Id: <20241025103621.4780-6-wahrenst@gmx.net>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20241025103621.4780-1-wahrenst@gmx.net>
 References: <20241025103621.4780-1-wahrenst@gmx.net>
@@ -65,83 +65,76 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:9ySflbT0hiT4UVGNuvyyRzkwct+mz5PnD601aE9k6dVwc3IIdMJ
- 9lvj5fWE+a2G9m7siGoDQyifgvrh3Q6BnxgJVGRvEGIKotsSDjiI4VIxSKZkLEiMBJika6y
- q27k5rxf6BbGefsUmf5Pa3EOTRGST2FFI91IynMUbxtgnob6y6X57jSW3SB5zMJGY1HHy/+
- lmOPdRwD4PhntEGUfAN/w==
+X-Provags-ID: V03:K1:r6awQYunqIyfua3c0UOjHK0bzNoQpAtzd9ESDD3nUHWFOjq7NEV
+ mK0a9d7j6jmP5GdgWNB6Y6bjTvlxAuNg1US/ywe2ZJ0IqMJz3bLkWAN8ciNrQHNwIJftSED
+ WLpLEFG0ZesznqsbjvHuTEfyijajuo0UwU1bQkyjixUIk7dQSLB6Vj4z2Lty/g8L1qiDlqq
+ HM9fUjoxFMdog4tU43dzw==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:omwtgH910K0=;h9ZuJ0bANMewdfvjfbq8oysc/QH
- kZaXBTyFt7ejXXdTw9ffWKtJQ2L7lbl/boxn7T+kcmsNYd65+yWejg1lT1yC7FJuUqhQY0kSd
- 6Ub/Vh2rMAVIQp/ECA87TiM+sZ5j7/pZO5k3+tRgHVv1n7FozbhUft4ZZIVV74tNvLFH8hAf6
- hBpW3FPi+pVmEtS5R2+qo0WqNKhie94/PHHsIKzbZMRNm0Y6C55COM+XWHOOGnBEZle3+YZjv
- jVNoG6F9XrnEIrdJ9ZwPIylXin0Bxyd/Z+dt3er2m7OQLy3qb9LFxwyUjGjAGMvrw3fLQAQJa
- yrkxlkkGaaFjfzGHobMvL23XkbeuXpIu6UG4AS/pUirLc1Y7qX9IXNtogAGVrpDrXAz882xSR
- n75gDVmw+D0+MFnbeN90gg1LdxfWJyvzYUultUZvoHzWmZCc37/usUm4mjzAdwaTq4xds+gWG
- aQf1LJbG5CEfBFkH6KXdlNVDPvnn7ZlQWF+2rspN4iE1LL6bTrlLf3ZYGSblNvKyP1peMBZmc
- 2kjm8cUJog8BXgYR1jWNXEaOQHHvgxdlu3FnBpTCWVh0q5/Cfwfqfdm8UwXGFG+awOeYYPCQC
- +mGYjTVrb9asXnkIHUmqKV5RGWYkM8vr0FoMTkXAnon5kv9X6Uo92BSJCeZ/1ObY8+kKew5hD
- FoDvYF4UP8DJZ5H3rgDUCmOG5C2IOryK8XYSVoZk4Qjfj9sz7p6LFDzVHrJMWyJZ3GLJmpDma
- NEr0vMb0YkeAFo1q3vxJRlrysD9oHmlfI6zu8NF/SX24O4wyDj2uYT2VPWZNLuyzDZvJ+BCpS
- jI4PJXdRQv42b8HQAJNc/XZg==
+UI-OutboundReport: notjunk:1;M01:P0:zvRF6oIdmeA=;EnW4FddaoRaUIEDasz8kgcQp10d
+ wYPzFPZyHuuO5FHks02gX3Zr5ckD2sNRvkDtYDNe9pdoiwqkQsVdRAJ3XA5zILrMhl86BsKq5
+ J5ODpCTnFPejaB6np1zMyhFZBFMPBFekihvnYlV7S0XDyYzZx06b+hFWVbJaDhYSnUkJ+8K+S
+ nRnNNJpAq/OhtuS9S14mPQ5e/Y7Kn/56XUvzNWLe6ZS4YuzcGpPUKE8SSX4BHN9PWQxYW4dlX
+ O34UUhooQahnyjt34DI6FlelxrTg5mdOclcOoKzgD/OKhJc8MArhfYx7zctqz1piCJKWqn7WQ
+ fEv6d/C3c5IXwEK3ao7ic2lfxg5baGjius11pEBUUxp9vLuJU9zbqLTtMtUAD6jr2X2fW1cWg
+ s9NISyjuibxiiBtg+gq7anJirFnxQiRhQ5eeJOVgpZ9dF01c3F/zh46nniyVG/hacWVfBbCxw
+ bm4lH/7jb3gnOnaFNsBHJRLnvnAHIuRVa6/rdpnfHTFxQDnkNRfWuBBlSUsHfTjJ35sJyub0f
+ 0+b3Sgr5Fkghwm+sFKCEhl2Zsdbzr7TEJZdVi16AnqUTtc4Qwq1vy0Q1To72XnfWCfio9EZVj
+ oKMo0Z6LOXqEELdoYx8j6YNhIYiHx86uzTVg6Xn3+LjMByb+h3Qcu6EdDypfmhMi1XtzXdPDH
+ WTkdgv9NDLfKCMzWYy2hAxmiBb5qVgqUIsSK5dtmXUvSBLaO5dxHRbRDckrNriP2yu3j+6CLe
+ Eisi4HIiulLdIlAE+Z/rkQe+osJs/S8Cm5ZhUnRGy/83FIOIx/8ll/uo/blaBHml0JSudYFsf
+ 5ZhOdB53DQ91gcy2LsfUXOYg==
 
-bcm2835-dma provides the service to others, so it should
-suspend late and resume early.
+Add a minimalistic suspend/resume PM support.
 
 Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 =2D--
- drivers/dma/bcm2835-dma.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+ drivers/mmc/host/bcm2835.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
-index e1b92b4d7b05..647dda9f3376 100644
-=2D-- a/drivers/dma/bcm2835-dma.c
-+++ b/drivers/dma/bcm2835-dma.c
-@@ -875,6 +875,35 @@ static struct dma_chan *bcm2835_dma_xlate(struct of_p=
-handle_args *spec,
- 	return chan;
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index 107666b7c1c8..17c327b7b5cc 100644
+=2D-- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -1343,6 +1343,30 @@ static int bcm2835_add_host(struct bcm2835_host *ho=
+st)
+ 	return 0;
  }
 
-+static int bcm2835_dma_suspend_late(struct device *dev)
++static int bcm2835_suspend(struct device *dev)
 +{
-+	struct bcm2835_dmadev *od =3D dev_get_drvdata(dev);
-+	struct bcm2835_chan *c, *next;
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
 +
-+	list_for_each_entry_safe(c, next, &od->ddev.channels,
-+				 vc.chan.device_node) {
-+		void __iomem *chan_base =3D c->chan_base;
-+
-+		if (readl(chan_base + BCM2835_DMA_ADDR)) {
-+			dev_warn(dev, "Suspend is prevented by chan %d\n",
-+				 c->ch);
-+			return -EBUSY;
-+		}
++	if (!host->data_complete) {
++		dev_warn(dev, "Suspend is prevented\n");
++		return -EBUSY;
 +	}
 +
++	clk_disable_unprepare(host->clk);
++
 +	return 0;
 +}
 +
-+static int bcm2835_dma_resume_early(struct device *dev)
++static int bcm2835_resume(struct device *dev)
 +{
-+	return 0;
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
++
++	return clk_prepare_enable(host->clk);
 +}
 +
-+static const struct dev_pm_ops bcm2835_dma_pm_ops =3D {
-+	SET_LATE_SYSTEM_SLEEP_PM_OPS(bcm2835_dma_suspend_late,
-+				     bcm2835_dma_resume_early)
-+};
++static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
++				bcm2835_resume);
 +
- static int bcm2835_dma_probe(struct platform_device *pdev)
+ static int bcm2835_probe(struct platform_device *pdev)
  {
- 	struct bcm2835_dmadev *od;
-@@ -1033,6 +1062,7 @@ static struct platform_driver bcm2835_dma_driver =3D=
- {
- 	.driver =3D {
- 		.name =3D "bcm2835-dma",
- 		.of_match_table =3D of_match_ptr(bcm2835_dma_of_match),
-+		.pm =3D pm_ptr(&bcm2835_dma_pm_ops),
+ 	struct device *dev =3D &pdev->dev;
+@@ -1471,6 +1495,7 @@ static struct platform_driver bcm2835_driver =3D {
+ 		.name		=3D "sdhost-bcm2835",
+ 		.probe_type	=3D PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table	=3D bcm2835_match,
++		.pm =3D pm_ptr(&bcm2835_pm_ops),
  	},
  };
-
+ module_platform_driver(bcm2835_driver);
 =2D-
 2.34.1
 
