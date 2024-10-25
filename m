@@ -1,138 +1,184 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B8F571D26E7
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 08:43:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7848C1D54C7;
+	Fri, 25 Oct 2024 10:36:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1729845797; cv=none; b=S8jM0CyxqW56X41MJn/Uuo4hf7J4cB9UbUs8NriqRg3EcdEm6tGne4cmUAmDRIA3vxnBguEcosMl7rhtL/keqw4CT72NkW9A25R/ZKrelZDQV05oENG8xt5WVXa3u/8XseUHFhmGrIgJCnQhVVSH5SB5cXBh1Z8Z77QsKohZxfw=
+	t=1729852613; cv=none; b=M0LD5ShFUKpM5IVvFaSqd774KiBHBNA3vRNf2klaqbMQprSQX8SMjLxBCHgca+VaW2BviSoF8zLB8hz1duAhRhbJYTl04/JnzfA0Szbz5yJQQ4DOt4Fa5+TervVRVIVSppgUrX74RMHitLNEtNn0kO32rBrhx4SQchiqfkEq0So=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1729845797; c=relaxed/simple;
-	bh=gqO6H9f6wkA2+S3L9LFbGLXMmbD0O/wXTCeVxvKUAQ8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jKSLcnB4CRUGke2bSaYibMIjrcFlfJV1xFN6DpcZ/+UcvVDuvE0LlkMSixpXIrw4zFNDUyIImX9NakKviWhzgR9j3sPPnHfMWBc3BhIEzR/GuP0ipKQZIbbbHIyflt1ADiXCljL4lJRMdwirOELgTX/TTEgKM/DvyRFAt+KmFEE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XTinhZ2Y; arc=none smtp.client-ip=209.85.128.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1729852613; c=relaxed/simple;
+	bh=W/Eol3PGqBkVJnzoyfSd/OIVp/8l/BiqcbjtDTzoD5A=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=tMQ8Nius3mjtDtM8c7Udn3Bp05de4fnwgbG+HkRMy2eNdB7dyB3NcVYNtphQAAe2IQyFBZvrhX4aQfpdbvDnxW6niJfkD5PyB7lrnGnU4281gPziU8ovMOZ2TSE4ON2z481Wt8+iEe0p3dm+sob2R8A1uILnuqX3xZelExqWkDQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=tbVyV4xm; arc=none smtp.client-ip=212.227.17.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XTinhZ2Y"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6e5a5a59094so16820277b3.3
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Oct 2024 01:43:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1729845795; x=1730450595; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=GC+qtopUK4oSW4KGo5gKXeaDDfYPEvj4E4F8hcqDrxw=;
-        b=XTinhZ2Yle0mJw8ae4h4/NlZ42xApmKgqWq1gH+Na2cVGM8J4dJy5PT3XFmHcO4582
-         +bH6+ruN/lKpr1chM4K/7x10RCyoMr95xOvNmiqfwfu16msNh4WZkP7/C1tAsVF9LAqk
-         EsZqnb7PgLWwMv1BvByNSrgJWEW4a4SWc1EAIeIhE0CKrVS3RZ9sA7GQZJZAx5/xVP+O
-         N8tui2e/oq1IR2XnEe1qJeEM2+DxyqVf0r8sLiybKpal9o2zMFa7zT6n3yHS6gPqhQTq
-         4XDqhSwAByMSSxvYYOdsQdQQl4IxYUU2ivT+sS0cvY5aWydEv4+inih8M4IxH9WNhc3p
-         5xxg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1729845795; x=1730450595;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=GC+qtopUK4oSW4KGo5gKXeaDDfYPEvj4E4F8hcqDrxw=;
-        b=LwkjYU1dn+Jqr4wcEocVDrbjtnajrzPdzQXyByWUE7ffpibNEFNy2gJytFIJCEGCRo
-         YOWyybtqrEU3ylBP6OFOV7dzuI8b2FHBfXNP4XJo/+M9ZYJp6NJCrdz/FQqcFyhjRBV4
-         lUJfUL71qd2KKpRR73K4iGWMj0fvVbdG130MMPuhVo/DRICTGRyKX6iOafaKXdGgYY58
-         1UewIYcT/wbykrXbui4n7iTXcxbU6AGp13aspg8lVKl+IhYJSqRIor3guXnWq+yu1/2H
-         K3EPcM9mtZfdBfOrmxcZ3puvP3ALuXws4JkBp4GxaQXQ6Nh7uUcGsAqXGnyuCAI0dCAb
-         9Q/A==
-X-Forwarded-Encrypted: i=1; AJvYcCV9UnMx2MApc0rMstbfZ0g7OCOnWaIHS9cdNGeFfb9kF12Hs0rrsGBSmMf/Qa0dQkJK9o+hVbmYubE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzNK2bD2rELJVgKKsulWTMmtJxOZOkTu1VHarQ7QWEHWAWe926L
-	ov8B07VenFlKH92CtPz2ckLqfnvPec0lca5ENkddJFcFaTAHpppwdzmUm4mA+JTIAPcMWpa7q9R
-	prMYsR9pdfRd+HkMP/Ar2CgBrpzYlz7RhN0FXzw==
-X-Google-Smtp-Source: AGHT+IFrRXdZkgGxH0j5lBC5M/B8Et457P+nj+I6ZhAqPxt0MfCx1n+REAlyGGvq27rvvYwVe3tTniNTFUNptx7YNbM=
-X-Received: by 2002:a05:690c:4a03:b0:6e2:446f:422c with SMTP id
- 00721157ae682-6e7f0e4735emr106087327b3.21.1729845794711; Fri, 25 Oct 2024
- 01:43:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="tbVyV4xm"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
+	s=s31663417; t=1729852593; x=1730457393; i=wahrenst@gmx.net;
+	bh=TppAUiDXkUFwSrv2A2knMxXHQkH96XkM3sjE1E2labc=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:In-Reply-To:
+	 References:MIME-Version:Content-Transfer-Encoding:cc:
+	 content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=tbVyV4xmtEPMhA3DvUpg0Jw/N1a4F2X2KKzCpHgsSj0xDUxTLDBFMKCSfoFwlIy2
+	 vDtGZgSHpvDtOK2dL6OcZ2ICIUzLZeS+ljjRJxsTp/AqOLKTqNE/FuiPB6mwlSd8X
+	 HCGBwNca9R2fvYbyEyZz2OSkz/thjqc9bkz5kZ2FabEcJi3OiQ73vgLOZRIkRvb0j
+	 njph056umZyVHkLBcYHnalBxHNPvnKKsOtqhNla1xaT308YMVXCQGJQiYtcyBtyLM
+	 NHqJcaC6UqMoWjYsvgNwd9KWRgtpG143MovBAzOMrNOTzAkWv0Q+cBP3NsW4sWrf7
+	 hy13a76cRP4mUQ1UOA==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1MXXyJ-1tOFGY0ryZ-00POCJ; Fri, 25
+ Oct 2024 12:36:33 +0200
+From: Stefan Wahren <wahrenst@gmx.net>
+To: Russell King <linux@armlinux.org.uk>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Minas Harutyunyan <hminas@synopsys.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Lukas Wunner <lukas@wunner.de>,
+	Peter Robinson <pbrobinson@gmail.com>,
+	"Ivan T . Ivanov" <iivanov@suse.de>,
+	linux-arm-kernel@lists.infradead.org,
+	kernel-list@raspberrypi.com,
+	bcm-kernel-feedback-list@broadcom.com,
+	dmaengine@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-usb@vger.kernel.org,
+	Stefan Wahren <wahrenst@gmx.net>
+Subject: [PATCH V5 4/9] mmc: bcm2835: Introduce proper clock handling
+Date: Fri, 25 Oct 2024 12:36:16 +0200
+Message-Id: <20241025103621.4780-5-wahrenst@gmx.net>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20241025103621.4780-1-wahrenst@gmx.net>
+References: <20241025103621.4780-1-wahrenst@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241006135530.17363-1-quic_spuppala@quicinc.com>
- <20241023213134.GC3736641@google.com> <CAPDyKFo05Hyw9gdEBx7zQq_6P58ittHHsZQLuqmeR1AChyHSHw@mail.gmail.com>
- <20241025025628.GD1781@sol.localdomain>
-In-Reply-To: <20241025025628.GD1781@sol.localdomain>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 25 Oct 2024 10:42:38 +0200
-Message-ID: <CAPDyKFo5EijkL5Y+MZ0=ZWyGdLfDdSdqTOC0eMsTVY00KP+RAA@mail.gmail.com>
-Subject: Re: [PATCH RFC 0/2] Avoid reprogram all keys to Inline Crypto Engine
- for MMC runtime suspend resume
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com, 
-	quic_bhaskarv@quicinc.com, quic_neersoni@quicinc.com, 
-	quic_gaurkash@quicinc.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:+Di2pOcsa3c3E/0JQDbVqLTw7ySipdBClQ9F/jLlbeQzzRxZ232
+ yDWxEVys72iA6MJRo1mUc7mW//tb7EZO5x8R8vS4QVuCdF0xUENqvAZX4ThVdfxDA3kMxg9
+ FgzpKa9DTwgbt9nE3gAkaOXKsz/MQTt48lCSrId6nhTj+44oURFGsMXI8iN3zDfQMu/LewP
+ k6bEWQhIR5AMhkuISMu9w==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:DeStJdH3WkU=;dl+pokVxqHve1DeFpO1IWkIos7B
+ NL9bIHQWsfHyBrcFpODuMX0BfcrTLC7ylSEQegr93PrtNRzhiY+MwDnff6soAJEJP5FpBad+L
+ pRil+1xmSn80iEi64hXM2iCFi65CBDZItjTqanf5RnArzPLSveAWnecA81mJUmh6fHaIuLojr
+ +8SA8vURLGQdQP124dyYLb9QtMkGctEm5YIPtNrHqfWKAqS4EbbIYwZseS2QCb8NFH0rQ7+sH
+ M/kJ/ndEZ3qiaXS3TKkvn8jCO/1Sn+4+eBLr7Ajr1BOAaO2xpsLdCIC7gH3wPWwPAYzXwnyPT
+ Ov7v/THpazrlFXYtaXkX07A5acBWslOtgsnxjuxtl4hxvhy+s5TESFBj8qEp7cHdlf3EyHSqV
+ FATAFz576Yx9HSFppvyiXxeakkKG8VY3D0F4eLUOFq5R3gFMKPLU5DwSbhMubgK+uui+26Wwr
+ VQvQ5QIgALtjOeP36fbaA88gXg9Ih1jasBRmTQKDK8oS3bOdN6+yCKW8ohe3Gwy3r3XAft9bm
+ F0goiucGyEl2zhm8LRQ1Tn0FFMvPJ/umMvzXd9Mz3c5X5TilrxG0rHvxBU8HUIIbRTmHkVtZr
+ 2nkh9jLlZfzbRLer9knyKe2VEkJXO67GIXWOlvcD63JusVA2TdWLSsqIqvUstRkdQGAuPdH4x
+ AGThr7nrm1d2DmyZmLW77dpB24ODzdUWze3TNtSh8SDEI5IqBdDxqK9HWnL24sYOEV9Ehlmu7
+ g9hU9CblYCC15244Tmksr3wK3f2NFBP4MmlFNXwK4zBn2HJu4BSTZngZBaCor9wJYgS6So2jo
+ RpN6WurQEWJSd0Ob16hmls8A==
 
-On Fri, 25 Oct 2024 at 04:56, Eric Biggers <ebiggers@kernel.org> wrote:
->
-> On Fri, Oct 25, 2024 at 01:07:18AM +0200, Ulf Hansson wrote:
-> > On Wed, 23 Oct 2024 at 23:31, Eric Biggers <ebiggers@kernel.org> wrote:
-> > >
-> > > On Sun, Oct 06, 2024 at 07:25:28PM +0530, Seshu Madhavi Puppala wrote:
-> > > > Crypto reprogram all keys is called for each MMC runtime
-> > > > suspend/resume in current upstream design.
-> > >
-> > > Is that correct?  I thought that similar to what is done for UFS, the key
-> > > reprogramming happens only after the MMC controller is reset.  I thought that is
-> > > different from a runtime suspend.
-> >
-> > Looks like Seshu is not really worried about the host's runtime
-> > suspend, but the card's runtime suspend.
-> >
-> > Perhaps there are some out of tree code involved here that makes use
-> > of MMC_CAP_AGGRESSIVE_PM, which is what allows the card to be runtime
-> > suspended?
-> >
-> > >
-> > > If it's in fact triggering more often, maybe that is what needs to be fixed?
-> >
-> > We could extend the runtime PM autosusend timeout for the card, if
-> > that makes sense.
-> >
-> > Kind regards
-> > Uffe
->
-> The keyslots are being reprogrammed from mmc_set_initial_state(), which is
-> documented as:
->
->     /*
->      * Set initial state after a power cycle or a hw_reset.
->      */
->     void mmc_set_initial_state(struct mmc_host *host)
->
-> It's called by: mmc_power_up(), mmc_power_off(), _mmc_hw_reset(), and
-> mmc_sdio_sw_reset().
->
-> Can that mean a power cycle of the card, not a power cycle of the host
-> controller?
+The custom sdhost controller on BCM2835 is feed by the critical VPU clock.
+In preparation for PM suspend/resume support, add a proper clock handling
+to the driver like in the other clock consumers (e.g. I2C).
 
-Yes, that's correct.
+Move the clock handling behind mmc_of_parse(), because it could return
+with -EPROBE_DEFER and we want to minimize potential clock operation durin=
+g
+boot phase.
 
-Well, indirectly the host is likely to be power cycled too, but not necessarily.
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+=2D--
+ drivers/mmc/host/bcm2835.c | 29 ++++++++++++++++++-----------
+ 1 file changed, 18 insertions(+), 11 deletions(-)
 
-> The keyslots are part of the host controller, so that may explain
-> the problem.  The keyslots should be reprogrammed only when the host controller
-> is reset, as that is when they are lost.  (And it should not be skipped entirely
-> as this patchset does, as a host controller reset is possible.)
->
-> I am not an expert in MMC or in the details of how Qualcomm ICE is wired up to
-> the system, so I might have this wrong.  But let me know if it sounds right.
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index 3d3eda5a337c..107666b7c1c8 100644
+=2D-- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -148,6 +148,7 @@ struct bcm2835_host {
+ 	void __iomem		*ioaddr;
+ 	u32			phys_addr;
 
-It sounds reasonable to me, but I also don't know the HW well enough
-to be able to tell.
++	struct clk		*clk;
+ 	struct platform_device	*pdev;
 
-Looks like we need some more input from Seshu and the QC folkz to
-understand better.
+ 	unsigned int		clock;		/* Current clock speed */
+@@ -1345,7 +1346,6 @@ static int bcm2835_add_host(struct bcm2835_host *hos=
+t)
+ static int bcm2835_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev =3D &pdev->dev;
+-	struct clk *clk;
+ 	struct bcm2835_host *host;
+ 	struct mmc_host *mmc;
+ 	const __be32 *regaddr_p;
+@@ -1393,15 +1393,6 @@ static int bcm2835_probe(struct platform_device *pd=
+ev)
+ 		/* Ignore errors to fall back to PIO mode */
+ 	}
 
-Kind regards
-Uffe
+-
+-	clk =3D devm_clk_get(dev, NULL);
+-	if (IS_ERR(clk)) {
+-		ret =3D dev_err_probe(dev, PTR_ERR(clk), "could not get clk\n");
+-		goto err;
+-	}
+-
+-	host->max_clk =3D clk_get_rate(clk);
+-
+ 	host->irq =3D platform_get_irq(pdev, 0);
+ 	if (host->irq < 0) {
+ 		ret =3D host->irq;
+@@ -1412,16 +1403,30 @@ static int bcm2835_probe(struct platform_device *p=
+dev)
+ 	if (ret)
+ 		goto err;
+
+-	ret =3D bcm2835_add_host(host);
++	host->clk =3D devm_clk_get(dev, NULL);
++	if (IS_ERR(host->clk)) {
++		ret =3D dev_err_probe(dev, PTR_ERR(host->clk), "could not get clk\n");
++		goto err;
++	}
++
++	ret =3D clk_prepare_enable(host->clk);
+ 	if (ret)
+ 		goto err;
+
++	host->max_clk =3D clk_get_rate(host->clk);
++
++	ret =3D bcm2835_add_host(host);
++	if (ret)
++		goto err_clk;
++
+ 	platform_set_drvdata(pdev, host);
+
+ 	dev_dbg(dev, "%s -> OK\n", __func__);
+
+ 	return 0;
+
++err_clk:
++	clk_disable_unprepare(host->clk);
+ err:
+ 	dev_dbg(dev, "%s -> err %d\n", __func__, ret);
+ 	if (host->dma_chan_rxtx)
+@@ -1445,6 +1450,8 @@ static void bcm2835_remove(struct platform_device *p=
+dev)
+ 	cancel_work_sync(&host->dma_work);
+ 	cancel_delayed_work_sync(&host->timeout_work);
+
++	clk_disable_unprepare(host->clk);
++
+ 	if (host->dma_chan_rxtx)
+ 		dma_release_channel(host->dma_chan_rxtx);
+
+=2D-
+2.34.1
+
