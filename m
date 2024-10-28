@@ -1,124 +1,111 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.216])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D1DBE2AE8C
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 13:10:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730121062; cv=none; b=MUUvseh1oOoqL6df5TM3x3wlJD6Pi50R5S2NPIcaxbpOyZzJb7FAhPqL0ArtlFtHLwxpSLfqy7oy1yrdXwsMq3e5BmBVHvDqmE/2OdxTBYvMYSFWwZSNO1X1nDxlR/ubd5kdMrmREmT8OzcK/dMhA/g7nOq1NHsm9q2VuVnrlD0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730121062; c=relaxed/simple;
-	bh=e9/G2XYYF8CwOvtty/jbQJENgNEJnBUmgvIogS/mCVw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Cw0mqMOownZ9LYEYHGYMzlwCCUD0mzi9QzYq+ROiX3KJrpeyK5ll6T0dKFMrftW3ViaOwrbhA1Mi1RVPZPineHelD97YbL/B3KW5XJGP6LZCLzQT7WwO4JL4xlyJ4qNTAJShPfRowIdd9/odpHoZAKZe+xfigkBnbNdkQNePHTc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=fail smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=O0FY/O/d; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 235C71DB92E
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 13:15:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.216
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1730121332; cv=pass; b=Xj+X9z60CQDjzZ9RkDIvigSr4QGtVEJAN3uXXj+BpF5Mp5h5FzYl2bchgV0YD4dZBYWhX1nD+/EoFO3af+MOf2MDzJd/PzODsLirAudDSzr47rHQxvjqKxdpH6BkcKIrRNTc8/gN/b0dDJ8dIsmZslfy7eIi6Ttf3sGly503Yko=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1730121332; c=relaxed/simple;
+	bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=h2zPTRIp2R8BdIO2KUgQm7FuYJz6JKYWq/f6IoJ/G7IUE9v599UELUPHFFN9fOlS1Wcy6Bgicr7ntR+/Im0JtBiWziwJOCSMr0q4fRsTzCNbPbkQW0SVVoghkfJZScJNDbctnxbrDG5dMvTIexzVcQ4Nc0Djx3wSwbMscFUp52k=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=aSJ0gbSh; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=hrOT7VKJ; arc=pass smtp.client-ip=81.169.146.216
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="O0FY/O/d"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49SAhQsf000767
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 13:10:59 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	v+/Vw05jKsCpvo+LzX33OBe8/nvt7U4c4yVqDeCabWg=; b=O0FY/O/dVowOE8F3
-	VV9ZUz+GsgRMhcyBLJJdhH1ot3T3b7Q2Vf8zSMVsJ9H23WfrACHHtR5psn3GHVm/
-	rluLJqeCEvLSP3hOTD1rQ/4Tf5E7J2C2FbptH1qgmd8Qh095Vq12dfmDWi0gbz5c
-	pNjzdOhv+Xop85LReGXFsMYlDrvTmwZL3bT1tVDWFgWfnxJTlSlufiziDIEjbojC
-	lPrFSiiCDUrqB17noqgIlDiWkdMGpJnOzfwyHd7bAGZ1W+JKeAk+VTD30zL4JIyd
-	oScRufDed9KUUds3W6G1aoWYJzBborHLYpQO74PFtoHdBhBYWwcAOFAuOg8GTpBL
-	ugzXQg==
-Received: from mail-qv1-f69.google.com (mail-qv1-f69.google.com [209.85.219.69])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42gskjvwe6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 13:10:58 +0000 (GMT)
-Received: by mail-qv1-f69.google.com with SMTP id 6a1803df08f44-6cbe149b1cfso14584796d6.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 06:10:58 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730121057; x=1730725857;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=v+/Vw05jKsCpvo+LzX33OBe8/nvt7U4c4yVqDeCabWg=;
-        b=SuJE0YFgQt5OSt31Fj2hEXRdnCePgxFh48hCNNVtvq1ELQYtYKkiHBwwVGi8kaaadS
-         gpSFLncHJ53Cp0iG5QO2qbicsbQT0BJ+Jni6yKXIb9XwDyJvjb3hQVzulml+8GN0R3S6
-         3GyRmpkBXjMawpsOnrHxVoMLNfjAGsJBUc4pFFuAh09qeoeekdCk+oWI4KlxuHYksP43
-         M/Hz0NwQgO/45Lanxt8pRdain5R2OmBmpxgKqjb05pni3Ce3lt8FXQakPAqpAg66tWof
-         t67XW9OLZSyLUOSxfHri6fl9jvIwYBrKO9QJQhrTiNB38OnbVe10/djzdaxN2gngGVBb
-         RelQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXUEf7atFb0GqYm0kpXiSCRqto6Rq3pSq0OZXvw1+4qzkM2LBVx+OklCtVpcSNtlouUMonPvhNPOqg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxbJvhOS+BztAXIGgQsHb0L1jo5SaKbAw0hLbICDPiYPR5USV/O
-	GGoVbT2akWCJzrmqgbkuMf4I79sr08lt/Q3dvlSyd2JKnXKxXRKCTzk67Pn/dsIpjj+PT0n1KvW
-	2HUukN2dFBKnjMwoX+6vjQblEwyyYsy70vk8tCL0LYruWXVNXVTAla+soiMM=
-X-Received: by 2002:a05:6214:d45:b0:6cb:c6da:5fe3 with SMTP id 6a1803df08f44-6d18567a31cmr64568246d6.1.1730121057566;
-        Mon, 28 Oct 2024 06:10:57 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEq3HPWRKMYJD2jxgNWRBKn4gWDVDCn7ik3MY50U15z0QzhZx2GE41JYtE6eIwfAbDmYHRPSQ==
-X-Received: by 2002:a05:6214:d45:b0:6cb:c6da:5fe3 with SMTP id 6a1803df08f44-6d18567a31cmr64568066d6.1.1730121057254;
-        Mon, 28 Oct 2024 06:10:57 -0700 (PDT)
-Received: from [192.168.212.120] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a9b1ef322ecsm375399966b.49.2024.10.28.06.10.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Oct 2024 06:10:56 -0700 (PDT)
-Message-ID: <327507d8-2dc7-4645-ac3d-d68ff31a84dd@oss.qualcomm.com>
-Date: Mon, 28 Oct 2024 14:10:54 +0100
+	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="aSJ0gbSh";
+	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="hrOT7VKJ"
+ARC-Seal: i=1; a=rsa-sha256; t=1730121318; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=c/zvovB3zpT3Z3ikYAbd2XsGMaBaHEHFLGra+y0LVycubQu/3KuD7o1XG2q5Svl7/u
+    DJdKSeB0OCMP4s06WL5gGIaLCEyk81eXW8u03NdPEdIJBUm8m95xo2PglM/Ayc2qFHnD
+    sjDoMZqV4pr8y9nwmwEek902XlRNqmiFg1ScG/VFf8Y1BfGEibVtOuJst3BZFJGbz7dL
+    SyWHKvNkw6HmxcAZKB65ZbqvMALxPji2n+ND5zLadYqOcX2KC/c6FHvd6CdCp04iJVQv
+    TW69bJ5LyUf+t/nnWMM9k9Hir7LObWPK9msU2aG8CsvO9o1c+rRlpb8oMbBx6qmj6YQv
+    478Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1730121318;
+    s=strato-dkim-0002; d=strato.com;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
+    b=E3LSIGrrpfMGvFU7nfSIKPrrU9VtlniDeR7dMMDpql5p/XyjNU2/wzdKOgKKb4JMmK
+    Mg3hn2bHu2KUHhsj4qxD1bH0jDwpV8Ipb8/kag+W3aC8mkCUiPDV+66AZtkNKr7zv+7+
+    hsf7SVMuEm7wp5+JzpBXdYbmg0IDHorq9YpYz2bT4FGlKRR2I+yQ3Sf20KMq0i5Kzgh+
+    SIToN3zPK4xg38QX6bYraf/UiNECiFzDZjjL/UFn13TP09Nnszs1m2asDwu/9sIz5lfB
+    wVUnlPCLFvXwU7k6smLX82sZqvs59L8TeFuYqoqqvPbZf8Aq+BBfLHb50k0EcJ2UTjXj
+    sFBw==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1730121318;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
+    b=aSJ0gbShWRb5h2MlCfzO12b0RJWA51FOmPQQtEpmngKjU3JM9xnaIqrT5vOI5N7u7i
+    O/z7/RoAb3Z2vdVRaOZHHP+xolCuakAl1I7iFscfVjodEiopIovOg7yMC6jDTVvxHhkT
+    nRzWHsSgS7Amquo8CbOgnHzwp5hYRkrHZJYI7JnBExLQVO1b81e6FbDKeE802HaYQqzN
+    hrnyxA8yVireSwuNLs9c7BBsV0f7OPrjaOi411wEHlwVcf/2OHpIg2Wn4TG6BJpB+qEP
+    mq4hSHlfsEVsKllU6E38EaeeXJNz4EKlfglWBYntZ1DhaS1dOabs5cJn8YeQ3Mh/0gdV
+    CQMQ==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1730121318;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
+    From:Subject:Sender;
+    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
+    b=hrOT7VKJxPWoGKA8yPeetvkSi1tOzcIERtFCL38TlcYGY435uKkWr52r/UtFUYEAoq
+    IJXqArzHU/cKx/XIE+Dg==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0DBslXBtZUxPOub3IZik"
+Received: from [10.176.235.56]
+    by smtp.strato.de (RZmta 51.2.11 AUTH)
+    with ESMTPSA id za0ed209SDFIguq
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+	(Client did not present a certificate);
+    Mon, 28 Oct 2024 14:15:18 +0100 (CET)
+Message-ID: <b1b127b172c9accd25028f0263a09dee3386d15c.camel@iokpp.de>
+Subject: Re: [PATCH v6 0/5] Add multiple FFU modes based on eMMC
+ specification 6.6.18 for flexible firmware updates
+From: Bean Huo <beanhuo@iokpp.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: avri.altman@wdc.com, linux-mmc@vger.kernel.org, vfazio@xes-inc.com
+Date: Mon, 28 Oct 2024 14:15:17 +0100
+In-Reply-To: <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
+References: <20241025203454.162710-1-beanhuo@iokpp.de>
+	 <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.4-0ubuntu2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 2/3] arm64: dts: qcom: x1e80100: Describe TLMM pins for
- SDC2
-To: Abel Vesa <abel.vesa@linaro.org>,
-        Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Johan Hovold <johan@kernel.org>,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-References: <20241022-x1e80100-qcp-sdhc-v3-0-46c401e32cbf@linaro.org>
- <20241022-x1e80100-qcp-sdhc-v3-2-46c401e32cbf@linaro.org>
- <a282021f-5e61-480c-84c4-272049e28244@oss.qualcomm.com>
- <Zx9P+HQMOkJsJGcj@linaro.org>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <Zx9P+HQMOkJsJGcj@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-GUID: kcqdcCini0lfw7eV8FIjiYmwtbM0NjHE
-X-Proofpoint-ORIG-GUID: kcqdcCini0lfw7eV8FIjiYmwtbM0NjHE
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 clxscore=1015
- impostorscore=0 suspectscore=0 phishscore=0 priorityscore=1501
- mlxlogscore=887 bulkscore=0 mlxscore=0 malwarescore=0 lowpriorityscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2410280106
 
-On 28.10.2024 9:48 AM, Abel Vesa wrote:
-> On 24-10-25 20:34:19, Konrad Dybcio wrote:
->> On 22.10.2024 12:46 PM, Abel Vesa wrote:
->>> Describe the SDC2 default and sleep state pins configuration
->>> in TLMM. Do this in SoC dtsi file since they will be shared
->>> across multiple boards.
->>>
->>> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
->>> ---
->>
->> Not very useful on its own but okay..
-> 
-> Fair enough. For some reason, I'm not able to get sdc4 pinconf
-> to work.
+On Mon, 2024-10-28 at 12:52 +0100, Ulf Hansson wrote:
+> >=20
+> > =C2=A0 mmc.1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 12 ++
+> > =C2=A0 mmc.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 20 +++
+> > =C2=A0 mmc.h=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0=C2=A0 1 +
+> > =C2=A0 mmc_cmds.c | 492 ++++++++++++++++++++++++++++++++++++++---------=
+-
+> > -----
+> > =C2=A0 mmc_cmds.h |=C2=A0=C2=A0 4 +
+> > =C2=A0 5 files changed, 389 insertions(+), 140 deletions(-)
+> >=20
+>=20
+> The series applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+> master, thanks!
+>=20
+> Kind regards
+> Uffe
 
-Any chance you tried to define 'sdc4_cmd' etc.? This one seems to have
-sdc4 pins on gpio127..=132
 
-Konrad
+Thanks Uffe, have a good working day!
+
+
+Kind regards,
+Bean
