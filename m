@@ -1,176 +1,174 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3368B1D63F9
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 11:44:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD0221BDA8C
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 11:52:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730115878; cv=none; b=KTg43LTE6lugq0RAMBFkvbPNVZ0hfQzwFnY7DTRzQHd787H72MidEoKhdfAWFCjMnLArShkPfbMyLQe8KNAvOQo4QDST82BLrHA73HhZ04kGygDuq5qfkGAGRWmwLYKfpIAojD/JK0Jh8esBZZoul2fiJvF7WYP804r5PaVvOh0=
+	t=1730116359; cv=none; b=sXYKojfkUFWsatnCr59KePCcgGfDOIR1tdvEWUJdiPGxPUsriRvHkpUTEsmnNZeJhFS8Y+mXmzVUbiPQXXCMXNXrLoys7KmpDtZVEF7KAlEoqSytyB+XfKSnw4/OjV57aaQKxdYNtNnryvDZOa1rSUeu65veDsPXtVu60dLLB4k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730115878; c=relaxed/simple;
-	bh=sIrBYg66hmwWk7TsDy2bhP4Kq6hK7NxiK4s3ASUWf5Q=;
+	s=arc-20240116; t=1730116359; c=relaxed/simple;
+	bh=fJzRSevgpRIm3AEFzCEdm+GziNOoyiviPN9I1rCpZ0M=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jgjClxomLuRhAYH8IPyQgSH0cB2fZj+tV4OJapD5GrowBVsXDPfpmBJuzbjjByFnqv4jRKJnP4fFJ5vzdE5R5VJCWqwhsaJVUGlqhSNfDM12Rj9fGPN6SwVjFShvyhWIXdhkZgcuyFukUBQlNOuPlCNr4XOsgRv6YA86ll78IsQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Hdf2SnIu; arc=none smtp.client-ip=209.85.128.175
+	 To:Cc:Content-Type; b=GqCn53+695BHqYQEtWusWUUxJN4CCdDH8FgT1k0bwTfIA4yAiTBeO8lDPrSXNzF5IB7/aXJCUQ8gH9UOEOXBHCe6emjW3j5xrTopK55br90JBsAHRP2yUU3KS6AFD4ChMXpS6AoAjMcbftYd1+28UbfNLwwbFQa0rrazPe0g0Pk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LxBLHctA; arc=none smtp.client-ip=209.85.128.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Hdf2SnIu"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6e9ba45d67fso32652987b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 04:44:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LxBLHctA"
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6ea1407e978so4316277b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 04:52:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1730115875; x=1730720675; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=sZVio8cvkxkCAcUKP0pXIkXjIVgnIaUFuCYZiRy+dgw=;
-        b=Hdf2SnIu1EwafM/87KxO2k/ifP8fMS0KNIvY9KdHeyCpKTjlL72xsCb7Xbyc1xzImy
-         kO4aIE9jfVwJUNj2VXiDQt4L5K6hHqd8R/OGschD7SVoSCrLvVXHJpy6U9dRQXxhLna2
-         wC60ZMoNcv85TPc4z54N3PWgpyr2JeeJ9Ze5/Xjv9mxxQa1+4/BQqD4oK598IMnQNGFE
-         5LrJuOMa4AEqQdOvx1qkCYndMGC3ijCkLhvGTOQINCVcPdxy8YsTUGQ8ROtDQKkzX1Qm
-         hl6+UfhukwqOzLzRf2Ic5eJ7Ia7OY0KFVB/k9l7BY8wasX0ccyGupkqx3BRWtSCHiIQq
-         y1Gw==
+        d=linaro.org; s=google; t=1730116356; x=1730721156; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=KoCQbia54G4nxIzYls71RpgLTTqVGkgyKzKzAA6TlwE=;
+        b=LxBLHctAv1vYf4eyZQr84U9ckaoisqFyrwVDWnNgm3T7fu+K1fv0SZjDYWZQ4Qu2qY
+         KH3tvev+IwBmtNf+A800J3YyU9/0uhujtWGLVz6oT6oY6Pz1CocRrdFncMaX8IyB+co3
+         1Yimv004583fo82tkay265d4un1cXhG9k4gGmI7LAB5FADGq8ZDvlxmpeWUf9tnBUR9a
+         YYj7yJ/FYhpWpTekb+9l8G4HdtSliQ6TO2L8NkBL2d9gFauE1N9BNU0fLxHcXibhytAF
+         xNyjmEopTmg8iYML4Z3oQHmsaEUrrBi//J9m5YKwjbRnMtb56ltEXvQVOTRrWxLrgBW5
+         FK/A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730115875; x=1730720675;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=sZVio8cvkxkCAcUKP0pXIkXjIVgnIaUFuCYZiRy+dgw=;
-        b=rw9ejzuNy4+wKtXm5XxzvkzlSlJHer8gWYqofc4EOrEmjvStzI35wR1Ebt+LJ6wVZj
-         9etkx4sGmF+D6DMbQs53giiNN/oUUTBbGuIJLYnlPrjUoFIq7ns6csrPKuTmmmgsTiGR
-         3SN9ymbn4D/c9ArXaN6SQcIX02xnHZpF6hGKLVAkqfqCnpSV18DY4dz0hxT3cyh6rZTx
-         sNyxW+qcUXjHRtxgI0Y5P+75htQ7boa7ksGCu6WczIkeo2K2aFXpbOrfs19CCa12FcZO
-         2agXTo0NRAn0AaB1Lgm+6bBO1Fu/0rsE8Q4YcmooskXMKzxjzer0fVH7c411QnrSg4Mf
-         pSaA==
-X-Forwarded-Encrypted: i=1; AJvYcCWeUsqDDdiR3YpNUH5WD/M9QTYbaJh62uD/HwO3YyB9edBm9/hK35XmC99G2mlNfMrkwEHrOe/bFWY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwTO4t+36hIwzyeAx2YH27xzE4ntyHdgDf+3svvD96v+FS2CL0w
-	KIkvEd51EF6vFzbYuswpjKvjR2L2it2r9uktjC/PdwiWCOPyAoBwMhHK14r/UA2iFC2tdACrCvM
-	WHi5fgS8y4IeR5mXrRb9WDstppOKDoM8o5BglQg==
-X-Google-Smtp-Source: AGHT+IHLKeKx9NpqZxAGiLQJMaILqzRYuWQfYpYj/MQf6dPo+SbTGqn7EpjJInbFkjakb3I2ccTD9UYXD8f0NCsex7M=
-X-Received: by 2002:a05:690c:3804:b0:6e3:6467:f46c with SMTP id
- 00721157ae682-6e9d89f3b5emr75751517b3.14.1730115875249; Mon, 28 Oct 2024
- 04:44:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1730116356; x=1730721156;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=KoCQbia54G4nxIzYls71RpgLTTqVGkgyKzKzAA6TlwE=;
+        b=OQ/XlOO7kR+tSNLg/Aq1olhvA1aCsZ6m03tsob7LjIF4LwReC6ttZxbHtHuWBvKLFB
+         WV2WDOLt5fX/8mVLy6q1dgwcwVKR+Tv+I1+unPMU4ncP4TXiw/t4Nc7DRRVt87ZYo/OO
+         VaRKmzJwPBZUJ6LET7gLeaOqiBBauoZ98cQVv84rgpDDUJ9/ogs0ba4ML95YE/pFmooK
+         M5wTXRfM2C7gjE6iNSMoRJl1o4l7yhP5meFFEUnKkv6cuX3Ap92sWC3d1qc+BuV2zi45
+         MQeavxh1rSxKDZcB8phGN4eL9FV55z7MNQ2nH0t2yJcabvRbjKW8zLxQpA32nRPXn4/m
+         SF6g==
+X-Forwarded-Encrypted: i=1; AJvYcCWzk5ctiRQJ9U3+4cTFgr9MFOrVhAMW9k1JkyHJMaTEhn0Gaf4oSOjzNaULv7TkZKO0sf0byznLe8U=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxn/WWqqYGk1j6eeiba4VzxRCiREaMc3jyl++x6fR8mbKbTh4QD
+	uYafEgnfR4ERPiUsIG7915JIecaMiLc8npci/f25v610vLaiYZJ2jhfV2J3xG0mWH3PQz+XoH8q
+	fa4Q3XV9VTQfw0usxQWUf6GNejseGJcTOgQC9fhFjaou9ZXwJeQA=
+X-Google-Smtp-Source: AGHT+IEE2aBSIgy8byIyg2l4p9ZPUVjQluqtmANmq+eODyck3I7WPPej0mD9y2DzA70ycDOntX2wkwMJ1q9LdOqEriY=
+X-Received: by 2002:a05:690c:f06:b0:6e2:636:d9ed with SMTP id
+ 00721157ae682-6e9d891eb15mr55877867b3.3.1730116355765; Mon, 28 Oct 2024
+ 04:52:35 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241025103621.4780-1-wahrenst@gmx.net> <20241025103621.4780-5-wahrenst@gmx.net>
-In-Reply-To: <20241025103621.4780-5-wahrenst@gmx.net>
+References: <20241025203454.162710-1-beanhuo@iokpp.de>
+In-Reply-To: <20241025203454.162710-1-beanhuo@iokpp.de>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 28 Oct 2024 12:43:58 +0100
-Message-ID: <CAPDyKFqwozGppFLJhjTc86nW1rodZymBbVZr+VpN4e2J3VowMQ@mail.gmail.com>
-Subject: Re: [PATCH V5 4/9] mmc: bcm2835: Introduce proper clock handling
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Russell King <linux@armlinux.org.uk>, Florian Fainelli <florian.fainelli@broadcom.com>, 
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Vinod Koul <vkoul@kernel.org>, 
-	Minas Harutyunyan <hminas@synopsys.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Lukas Wunner <lukas@wunner.de>, Peter Robinson <pbrobinson@gmail.com>, 
-	"Ivan T . Ivanov" <iivanov@suse.de>, linux-arm-kernel@lists.infradead.org, 
-	kernel-list@raspberrypi.com, bcm-kernel-feedback-list@broadcom.com, 
-	dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-usb@vger.kernel.org
+Date: Mon, 28 Oct 2024 12:52:00 +0100
+Message-ID: <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
+Subject: Re: [PATCH v6 0/5] Add multiple FFU modes based on eMMC specification
+ 6.6.18 for flexible firmware updates
+To: Bean Huo <beanhuo@iokpp.de>
+Cc: avri.altman@wdc.com, linux-mmc@vger.kernel.org, vfazio@xes-inc.com
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 25 Oct 2024 at 12:36, Stefan Wahren <wahrenst@gmx.net> wrote:
+On Fri, 25 Oct 2024 at 22:35, Bean Huo <beanhuo@iokpp.de> wrote:
 >
-> The custom sdhost controller on BCM2835 is feed by the critical VPU clock.
-> In preparation for PM suspend/resume support, add a proper clock handling
-> to the driver like in the other clock consumers (e.g. I2C).
+> Following the discussions with Avri at the 2024 ALPSS, I am submitting th=
+ese patches to
+> introduce multiple FFU modes, as defined in the eMMC specification 6.6.18=
+.
 >
-> Move the clock handling behind mmc_of_parse(), because it could return
-> with -EPROBE_DEFER and we want to minimize potential clock operation during
-> boot phase.
+> The new FFU implementation can support diverse vendor requirements and op=
+erational conditions.
+> The key benefits include:
 >
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> 1, The host can select the most appropriate update mode based on device c=
+apabilities and
+> firmware size.
+> 2, The patches ensure that firmware downloads are treated as a single, un=
+interrupted operation,
+> preventing partial updates that could compromise device stability.
+> 3, Some new modes keep the device in FFU mode throughout the process, red=
+ucing the risk of
+> premature exits and update failures.
+>
+> By supporting these modes, we can better accommodate varying firmware siz=
+es and ensure smoother,
+> more reliable firmware updates across different scenarios.
+>
+>
+> Summary of Changes:
+>
+> Default FFU mode: "mmc ffu"
+> Uses CMD6 to enter FFU mode, CMD23 to set the block count, CMD25 for mult=
+iple-block write, and
+> CMD6 to exit FFU mode. This mode may exit FFU mode during the download if=
+ the firmware size exceeds
+> the chunk size.
+>
+> Optional FFU mode 1:
+> Similar to default FFU mode, but repeats CMD23+CMD25 for each chunk, ensu=
+ring FFU mode is maintained
+> throughout the firmware download. FFU mode is only exited after the entir=
+e firmware has been
+> successfully downloaded.
+>
+> Optional FFU mode 2: use CMD25+CMD12 for open-ended multiple-block write
+> Introduces a method using CMD25 for open-ended multiple-block writes foll=
+owed by CMD12 to stop
+> the transmission. This allows for a smoother and more continuous firmware=
+ bundle download.
+>
+> Optional FFU mode 3: use CMD6 and CMD24 for single-block write
+> A new mode that uses CMD6 to enter FFU mode, CMD24 for single-block write=
+s, and CMD6 to exit FFU
+> mode after each write cycle. This ensures granular control over each bloc=
+k but may introduce more
+> frequent mode transitions.
+>
+> Optional FFU mode 4: use CMD6 and repeated CMD24 sequence
+> In this mode, CMD6 is used to enter FFU mode, followed by repeated CMD24 =
+single-block writes.
+> After all firmware data is written, CMD6 is used to exit FFU mode, ensuri=
+ng an atomic and
+> uninterrupted download process.
+>
+>
+> Changelog:
+>
+>  v1 -- v2:
+>         1. Added memset() to clean command structure
+>  v2 -- V3:
+>         1. Refactor patch, and remove ffu dedicated file mmc_ffu.c
+>  v3 -- v4:
+>         1. Incorporated Avri=E2=80=99s comments
+>         2. Due to "ERROR: in command 'ffu', 'ffu' is ambiguous" when usin=
+g "mmc ffu", update
+>            default FFU mode 'ffu' to 'ffu1'
+> v4 -- v5:
+>         1. Retain the default FFU mode as 'ffu' and rename the other FFU =
+modes to 'opt_ffux' for consistency.
+> v5 -- v6:
+>         1. Fix a typo in patch [4/5] commit subject
+>
+> Bean Huo (5):
+>   mmc-utils: Refactor common FFU code into functions to support
+>     additional FFU modes
+>   mmc-utils: Add FFU optional mode 1
+>   mmc-utils: Add FFU optional mode 2 using CMD25+CMD12 for Open-ended
+>     write download FW
+>   mmc-utils: Add FFU optional mode 3 that uses CMD6 and CMD24
+>     single-block write to download firmware
+>   mmc-utils: Add FFU optional mode 4 for firmware download using
+>     repeated CMD24 single-block write command
+>
+>  mmc.1      |  12 ++
+>  mmc.c      |  20 +++
+>  mmc.h      |   1 +
+>  mmc_cmds.c | 492 ++++++++++++++++++++++++++++++++++++++---------------
+>  mmc_cmds.h |   4 +
+>  5 files changed, 389 insertions(+), 140 deletions(-)
+>
 
-Applied for next, thanks!
+The series applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+master, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/bcm2835.c | 29 ++++++++++++++++++-----------
->  1 file changed, 18 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 3d3eda5a337c..107666b7c1c8 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -148,6 +148,7 @@ struct bcm2835_host {
->         void __iomem            *ioaddr;
->         u32                     phys_addr;
->
-> +       struct clk              *clk;
->         struct platform_device  *pdev;
->
->         unsigned int            clock;          /* Current clock speed */
-> @@ -1345,7 +1346,6 @@ static int bcm2835_add_host(struct bcm2835_host *host)
->  static int bcm2835_probe(struct platform_device *pdev)
->  {
->         struct device *dev = &pdev->dev;
-> -       struct clk *clk;
->         struct bcm2835_host *host;
->         struct mmc_host *mmc;
->         const __be32 *regaddr_p;
-> @@ -1393,15 +1393,6 @@ static int bcm2835_probe(struct platform_device *pdev)
->                 /* Ignore errors to fall back to PIO mode */
->         }
->
-> -
-> -       clk = devm_clk_get(dev, NULL);
-> -       if (IS_ERR(clk)) {
-> -               ret = dev_err_probe(dev, PTR_ERR(clk), "could not get clk\n");
-> -               goto err;
-> -       }
-> -
-> -       host->max_clk = clk_get_rate(clk);
-> -
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq < 0) {
->                 ret = host->irq;
-> @@ -1412,16 +1403,30 @@ static int bcm2835_probe(struct platform_device *pdev)
->         if (ret)
->                 goto err;
->
-> -       ret = bcm2835_add_host(host);
-> +       host->clk = devm_clk_get(dev, NULL);
-> +       if (IS_ERR(host->clk)) {
-> +               ret = dev_err_probe(dev, PTR_ERR(host->clk), "could not get clk\n");
-> +               goto err;
-> +       }
-> +
-> +       ret = clk_prepare_enable(host->clk);
->         if (ret)
->                 goto err;
->
-> +       host->max_clk = clk_get_rate(host->clk);
-> +
-> +       ret = bcm2835_add_host(host);
-> +       if (ret)
-> +               goto err_clk;
-> +
->         platform_set_drvdata(pdev, host);
->
->         dev_dbg(dev, "%s -> OK\n", __func__);
->
->         return 0;
->
-> +err_clk:
-> +       clk_disable_unprepare(host->clk);
->  err:
->         dev_dbg(dev, "%s -> err %d\n", __func__, ret);
->         if (host->dma_chan_rxtx)
-> @@ -1445,6 +1450,8 @@ static void bcm2835_remove(struct platform_device *pdev)
->         cancel_work_sync(&host->dma_work);
->         cancel_delayed_work_sync(&host->timeout_work);
->
-> +       clk_disable_unprepare(host->clk);
-> +
->         if (host->dma_chan_rxtx)
->                 dma_release_channel(host->dma_chan_rxtx);
->
-> --
-> 2.34.1
->
