@@ -1,108 +1,165 @@
-Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AEC4192D95
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 08:48:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1F902192B98;
+	Mon, 28 Oct 2024 10:41:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730105341; cv=none; b=SEs7E6Gjao73HyMu8I3ZcaHElGjmVKVE8+JdHjM45Ls8oc1hqkbBTQuYVlwNKAQHjKT3jycfZ8gmgqzZJ0JrVbfoWaWj/xHIVpPzfSW5k2hLD0tumRguHoMwX3WOmcwPd3NOBRHiuhxXborzBwptIg9hvs9b7oqifnjCABj7CmQ=
+	t=1730112065; cv=none; b=kZNH0XjrePYaX+d5Hk/ua6bH9giR9ZC5EbsK/B1K6raMc7UP3gvcr+/47yyMB8V7mv0llr4SXVr3wGWBZnu6lFTXasdfkkqQzCu/L3LZ/K7G4gog+Iom7/JngFeQAt6E7HYI0N7k6CPbTrCoSdAlvrPxRQ5s6/N0zhqyKFw2beI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730105341; c=relaxed/simple;
-	bh=YmzdiVli4lYby9EUWBotCYouDofIO5rwoTrrfgeeQ2I=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=MJV5sYb/8dDucPbUAW0j72kVGdi5CHJFkPK4RL3u+kNe139HtQbWrm87k6D11x9baiaBZYufhYd9Rd5sZwiyM2y+QsB8r9HSo6Lp1mjPpybmN9YOKWf9L+sKzmgFmaNT3PIp45W2AKfOshbvRJ93ZoaqQyR6wq4/0dZqXaoZJyQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yRgY1ReU; arc=none smtp.client-ip=209.85.128.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1730112065; c=relaxed/simple;
+	bh=UZSZxr/HG9RX28U6C4Z9wIsayGdx5uiLoXfcknt/cWw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=V31GLajFs1v7sGml0NyRiuA6LpC+p5otH7BymxCTW8CFvWm4uJJg9vwEM6DU7JPHH07owOdYsBj+purna8eFQODCRlZHXO855KCFflt7CG8u8sUiXoXjRg8yJnu2h/V1WzIT8PLED9+i7vEHRAeQ8hUTVuCU9wR+Y7orlEcLBT4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=hW0p+vWX; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yRgY1ReU"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-43155abaf0bso41620495e9.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 01:48:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1730105338; x=1730710138; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=NZHqE5FIZcWpwQkY/RrgB0YFJ0n6wWMGAIU6ebDFpm4=;
-        b=yRgY1ReUAeABQ6NWrAOmhmC1uv1dRMA+lxwSwKaHLvIoUg4dRF372oBxiFdOauRUWQ
-         EsbJmum+E+Rx7EVzPPBYpCWBVmXyaH5AsJYCa/7nkHl9deIgHo3O7XgaieE/BuvQgTfS
-         0XpLR1BOg1iLbPO0NFuQQmigC5gEdkYWGrbtja4Vs/yRWm+5pGpi/slJnc3sR08xhyJN
-         gJuCAuCO7qVhhdkzf4d+G8zhKExMxzXgrlFmVu5CQ+6PqjGPi0VkwCdw0flaLNvRrJrh
-         TF8Xy2zuempPj8E/NPjJa+0T5mG6EsJkpWzquacsOiWiAFjeUDdPIeGrXWK7chmgKt8A
-         LrWA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730105338; x=1730710138;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NZHqE5FIZcWpwQkY/RrgB0YFJ0n6wWMGAIU6ebDFpm4=;
-        b=fLQ6/KHeBQnzm4+FAG2gNZc+gyyNmlGcBBFZezP9OZZs5YT167Bsau70MQ+HPwMrQA
-         9vfLwND5fPMIYl/fz79ktIAmbyle72VE5c2jQDfY7SGSZ08Vr+KREAsA5xPIfzpl3mTH
-         SKHDT5VF8A+rGeAAU26UWiIYFcecBvApZx3WkMZHPHBWIy/NCCoO3PhR5p5hqeT+725/
-         OSDHIEpVGR85PJEto32jmDl4HBs/Z0nnXBS+BAx6ShmLAjZsvbVf3aOlCBpVU/NVC6bJ
-         GZm2eMubsrS5bvAwAG/jAEXo1tPbhwnNcw7Kcxw4vNyGQxBkpNsNxIraYx+4EquBq/bm
-         y/8w==
-X-Forwarded-Encrypted: i=1; AJvYcCVQUcfD1fMcDIh8PXo+j+669zX4VNYYZsCrTLFr6Ym2CufgDWnMbragRxQvs/xS1nBse6gniNf6smY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YylHFa5i7uVxX6N75g1mjTt/8kk46g3r+ERowT5KWGT1Lf7E/fJ
-	f2+rGyLRvhi5qHaI9amVrykFHii1L9RE9qCbebGxp0EyHCb9sDmaN15fgxWDTCs=
-X-Google-Smtp-Source: AGHT+IEFxQSc2bqcOE6ZMtPaTM9U6ny4QVIlaUduSs6ZEGDMn5VQh1w848qM/SJNHxs0ooF44YbSVQ==
-X-Received: by 2002:a05:600c:458f:b0:42b:a7c7:5667 with SMTP id 5b1f17b1804b1-4319ad02659mr61662165e9.25.1730105338472;
-        Mon, 28 Oct 2024 01:48:58 -0700 (PDT)
-Received: from linaro.org ([82.76.168.176])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4318b5430b6sm132596245e9.3.2024.10.28.01.48.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Oct 2024 01:48:58 -0700 (PDT)
-Date: Mon, 28 Oct 2024 10:48:56 +0200
-From: Abel Vesa <abel.vesa@linaro.org>
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Johan Hovold <johan@kernel.org>,
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH v3 2/3] arm64: dts: qcom: x1e80100: Describe TLMM pins
- for SDC2
-Message-ID: <Zx9P+HQMOkJsJGcj@linaro.org>
-References: <20241022-x1e80100-qcp-sdhc-v3-0-46c401e32cbf@linaro.org>
- <20241022-x1e80100-qcp-sdhc-v3-2-46c401e32cbf@linaro.org>
- <a282021f-5e61-480c-84c4-272049e28244@oss.qualcomm.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="hW0p+vWX"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49RLfHdp004837;
+	Mon, 28 Oct 2024 10:41:00 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	nAg5WQp6r9XHYcfiTy3LVub8K2pf/58GuSBUm35yAV4=; b=hW0p+vWXWWppOLkr
+	yIJooWF09p0JvuTX21b1p5vVhlk3It7/TCf3jQWCiHM7ZroxCxtnY/R+uU52IoaW
+	IDsS8Wvsbu+nfNdfXnasn6E0Y0OFGu0MFvqgqenb5EWdAhDbL614TlZf2dwb2YPj
+	JJ9qn/L6AEolN61aCA74xXKF4DjiwMxG+A1yeLjFthilUSVUPJk/wd4rKJHOsvHo
+	60/ztP6Calv0JsAwe/WO6Qz7vmyi5J5weZjVf6FL7BuGbyTdEYh80C9WkAiJP89U
+	AZrx+3ro89AXkR1GeP+ZN1fVmp6IiPEUvnXOuBBNB0ZqLvUXc1aEX/L3P+oyaBDT
+	a+xLvg==
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42grt6vg7x-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 28 Oct 2024 10:40:59 +0000 (GMT)
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 49SAewdU013785
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 28 Oct 2024 10:40:58 GMT
+Received: from [10.216.3.216] (10.80.80.8) by nalasex01b.na.qualcomm.com
+ (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Mon, 28 Oct
+ 2024 03:40:54 -0700
+Message-ID: <0a0647aa-1fa4-4149-a76d-da7e08034fe4@quicinc.com>
+Date: Mon, 28 Oct 2024 16:10:37 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a282021f-5e61-480c-84c4-272049e28244@oss.qualcomm.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: sdhci-msm: Slot indexing for distinguishing multiple
+ SDCC instances
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <quic_cang@quicinc.com>,
+        <quic_nguyenb@quicinc.com>, <quic_bhaskarv@quicinc.com>,
+        <quic_mapa@quicinc.com>, <quic_narepall@quicinc.com>,
+        <quic_nitirawa@quicinc.com>, <quic_rampraka@quicinc.com>,
+        <quic_sartgarg@quicinc.com>
+References: <20241022141828.618-1-quic_sachgupt@quicinc.com>
+ <3e2f8132-af87-40c0-9c31-c0103078fe39@intel.com>
+ <1cb1e8c1-63f4-4752-8358-b5c7078f9c6b@quicinc.com>
+ <be483786-d8d2-4d46-9ca2-fbb629ba0674@intel.com>
+Content-Language: en-US
+From: Sachin Gupta <quic_sachgupt@quicinc.com>
+In-Reply-To: <be483786-d8d2-4d46-9ca2-fbb629ba0674@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: rM9oJELF4j0Aug5VMBmUjWNqiCQuSU4a
+X-Proofpoint-GUID: rM9oJELF4j0Aug5VMBmUjWNqiCQuSU4a
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 bulkscore=0
+ adultscore=0 clxscore=1015 impostorscore=0 malwarescore=0
+ priorityscore=1501 phishscore=0 mlxscore=0 suspectscore=0 mlxlogscore=999
+ lowpriorityscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2410280087
 
-On 24-10-25 20:34:19, Konrad Dybcio wrote:
-> On 22.10.2024 12:46 PM, Abel Vesa wrote:
-> > Describe the SDC2 default and sleep state pins configuration
-> > in TLMM. Do this in SoC dtsi file since they will be shared
-> > across multiple boards.
-> > 
-> > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> > ---
+
+
+On 10/25/2024 6:03 PM, Adrian Hunter wrote:
+> On 25/10/24 13:37, Sachin Gupta wrote:
+>>
+>>
+>> On 10/24/2024 4:38 PM, Adrian Hunter wrote:
+>>> On 22/10/24 17:18, Sachin Gupta wrote:
+>>>> This update addresses the requirement for accurate slot indexing
+>>>> in the sdhci-msm driver to differentiate between multiple SDCC
+>>>> (Secure Digital Card Controller) instances, such as eMMC, SD card,
+>>>> and SDIO.
+>>>>
+>>>> Additionally, it revises the slot indexing logic to comply with
+>>>> the new device tree (DT) specifications.
+>>>
+>>> This patch seems incomplete because all it does is assign a global
+>>> variable which is never used again.
+>>>
+>>
+>> Qualcomm internal debugging tools utilize this global variable to
+>> access and differentiate between all the instance's sdhci_msm_host
+>> data structure (eMMC, SD card, and SDIO).
 > 
-> Not very useful on its own but okay..
-
-Fair enough. For some reason, I'm not able to get sdc4 pinconf
-to work. And there is no board that has a slot populated for it.
-So I split the pinconf for sdc2 into a separate patch to make it more
-obvious that sdc4 one is missing.
-
-Let me know if you still want to me to squash this into the patch that
-adds the controller nodes.
-
+> The kernel does not accept code that does not serve a functional
+> purpose.
 > 
-> Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+> You could look at using eBPF or KGDB to get the information,
+> otherwise you might just have to carry that kind of patch in
+> your internal tree.
 > 
-> Konrad
 
-Thanks for reviewing.
+Sorry for misleading sentence, the tool I use is lauterbach Trace32 and 
+when using Lauterbach Trace32 tool, having a global variable makes it 
+easier to load and inspect dumps. It will be easy to quickly locate and 
+analyze the sdhci_msm_host structure, which speeds up the debugging process.
 
-Abel
+>>
+>>>>
+>>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>> Signed-off-by: Maramaina Naresh <quic_mnaresh@quicinc.com>
+>>>> Signed-off-by: Ziqi Chen <quic_ziqichen@quicinc.com>
+>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-msm.c | 10 ++++++++++
+>>>>    1 file changed, 10 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>> index e113b99a3eab..3cb79117916f 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -292,6 +292,8 @@ struct sdhci_msm_host {
+>>>>        bool vqmmc_enabled;
+>>>>    };
+>>>>    +static struct sdhci_msm_host *sdhci_slot[3];
+>>>> +
+>>>>    static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+>>>>    {
+>>>>        struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> @@ -2426,6 +2428,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>>>        if (ret)
+>>>>            goto pltfm_free;
+>>>>    +    if (node) {
+>>>> +        ret = of_alias_get_id(pdev->dev.of_node, "mmc");
+>>>> +        if (ret < 0)
+>>>> +            dev_err(&pdev->dev, "get slot index failed %d\n", ret);
+>>>> +        else
+>>>> +            sdhci_slot[ret] = msm_host;
+>>>> +    }
+>>>> +
+>>>>        /*
+>>>>         * Based on the compatible string, load the required msm host info from
+>>>>         * the data associated with the version info.
+>>>
+>>
+> 
+
