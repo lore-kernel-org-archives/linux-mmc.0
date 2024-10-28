@@ -1,135 +1,141 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DCE61D86C3
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 10:57:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 258D01D63D2
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 11:44:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730113038; cv=none; b=WgHCWbXEx7kvCldcUyw22zWNXikEcFzHmnAujXMDCcrf2y1XVABlRHU4yh2rPfyQpao+rWyTklRtEhT8Kz0Zz3y76fQJQs3CWDUKPEsHlsEa1GAjzZKqsdhX7z8PIdcWZ7tsoWiakIVlqdn6yelY2PqOzDLbxER7aygZtbaDE9U=
+	t=1730115860; cv=none; b=Ge5XXGFz+SvAdpQpIIDTLaDBGXWN1hUT5nx2TMZUDq8Lg0nJWpmvLoKcUVQFbd1S1ccXYSe69iTFqtbIEdx9rBr8Clh546nXm5AUC7Wgmde4uFT5aQhdFUQW0ONL3bpvYnHPsji+zrfNu6mNJkcVG9CGHYyJCzluH00HF5T/rUY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730113038; c=relaxed/simple;
-	bh=ACRaOUj1WOVfpWuhZEMw7VYY4sp45JSXpzq4OnInkZg=;
+	s=arc-20240116; t=1730115860; c=relaxed/simple;
+	bh=oHN252Cm/PR4IfsmtjEHlgEfFHmNRB7exyOEQK+Es38=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WTzvm9FefYhjtMBv/JnOTsRw0OR7ioVvd19FkZS+DKKohZIiEyVEiCi2M60POjzhhsYQ64mUeiH4IErkkr1s4J0RJEFO+dU7S+geLq3DBBjgMpB79u57NzxloP0c9UJEBQnHg1LYrrwrZCz5/mnYcantkc/APH1+U8MoPf3kzHM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WHbvzbmw; arc=none smtp.client-ip=209.85.128.172
+	 To:Cc:Content-Type; b=D/RIGKudTExlDCQfkkUkT07K6oz+S8GJO/YVTPuMt/3MT6DTVL+JbGQ1eoYtqD92EVyNaOUpiI9l/KCRVhsTf2t3yc3kcRFN7Nln7yeZuEb1sW6RDsx0tCJP9Ohx7zJmn2qc3Bur6bme9g7lHqRBiIG3FKrEAPSbY02TrugO7zU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AeoPWa0X; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WHbvzbmw"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-6e9f8dec3daso6896207b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 03:57:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AeoPWa0X"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-6e390d9ad1dso33695637b3.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 04:44:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1730113035; x=1730717835; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1730115857; x=1730720657; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=48Mqgz0yoPcTn42M0JioJyjAgLLTyWy+bgFbYFVMpQY=;
-        b=WHbvzbmw7l1r2ZG7BL3KVSyHXykcGwjuarvHb5RWaPKS709EGyoLHGPwhZKfVPecNH
-         zympayYcjvrU0BiN2acYrvRLCDOgdiX99bCJsrY5YGh6d6A6qKRH32/imJcwyVzcp+5+
-         4Vq7y9di3iLgTtzzCsv0TRgMm8yELz+51VWVkQRlpGETLIlBGpXva+a6R01Z4hcSMBbe
-         mfFXbhCFdHiYveosWl1Z+9c+h5G4z4NKVO/m/EMA2fnmihZ/L76zVEffteu+qkDWAlx8
-         pPn5m/2ai9GENpUQpKL2Mt2ntiuCchdkwKmqeKdcj7caHBBNcduT8dPKbfvvbAlSrU3+
-         XG+g==
+        bh=szANAidLxxi7S1PZCTPLqWZlMP+zv9KWhvcW3ZJkZQM=;
+        b=AeoPWa0XlYxQDg/X6POZ/NvoPCLwXVGYgXitiKqPr2RiwlswK4KUsKDpfY5F2VT7fU
+         JLgx/zu7KPExzDDCOootdJAqCD7f+tWzpotEzdt7N/ImMlz1RXbMh4AdeE9EMuRBiEku
+         g0lYigKR6yVkbk5JY53MjN7ncWKpx99c59wYGi/RP8puBcWA5NHIgVZuCBeY5GSYEcU3
+         O4g44+WOQ+pQX148deIuBP3xwB7jG2qWpi3xwNz21u0evouY16/zEU39n7zWEi5sJ+cD
+         oN7FDgE4aofeWgj6TTQosqgLgOWSrZrF5LSkIJs8lfqXF4/CHZKnMv7AJotBEchC2J4m
+         7GlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730113035; x=1730717835;
+        d=1e100.net; s=20230601; t=1730115857; x=1730720657;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=48Mqgz0yoPcTn42M0JioJyjAgLLTyWy+bgFbYFVMpQY=;
-        b=KNiA6JEgW9JatpwNDVFpb+RTyaeYS0co2jh/PXwOOcgFkwwDEWLMGLqchorJkV2tg1
-         KWfDfjijP/YuacCCp4bu/7928Fu1A+LLXQMZbp19XopHqpS23z8nk/lKqfwhz8UedIrN
-         dtXmgT1K7gVXxN7sXzAAZIwP/2gEyzKu34calMuy8BXR2GeHF/DSnBg4gqkes8T2yFI/
-         KUgsdURrsM9m4Hi4V3uB5MyAERvE8Aq/0I6GrqPHKdhEVXEuGcSzVEP9y1MVt8V4Tljx
-         8+gFr0BJnGnQK51DuelxXOcOrQOfBXbM1CFhsBVJi0QvmMUpl8sCrZpshrDCeMyTMDt3
-         OFdw==
-X-Forwarded-Encrypted: i=1; AJvYcCW9Cl08eesIMzJZ2A5i+klcv5xQLWQBRQQ3ZsTfnkv7e/Kw/yo6pgR6XNN/0YnOE3FT39KgWi9IjAA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz2LTOIrFeAr1l8PlLtWR+xYFJpo7NBJTBKFJYBhwKrq4PEw+Si
-	IoBALsSuYYvDlYAmtSdikVx8ZUZQNFck4iLYVtCMHTvULXHARqR/sBXo7lgrrB/BjIPM/YUXD0V
-	Q03pFYYqFG2LBMzA+rTYNkTVnWVSGpDYAcTBS3Q==
-X-Google-Smtp-Source: AGHT+IHA0r4lmbXa1zcBrKWmUfLUZyXRw9N6lNM3hTgpKMnZRgAzGlVS4oP7yDvcJkxKm4/yuGEHcyAWNjCtADPWGf0=
-X-Received: by 2002:a05:690c:3809:b0:6e3:1063:91ca with SMTP id
- 00721157ae682-6e9d8ad3e88mr72127657b3.40.1730113035192; Mon, 28 Oct 2024
- 03:57:15 -0700 (PDT)
+        bh=szANAidLxxi7S1PZCTPLqWZlMP+zv9KWhvcW3ZJkZQM=;
+        b=g/2pOBWHeSSHR1XTMUKHkKYw6t/nu7MCb40/e1XfAM1/XPjUk31SF2lr1rMtCzrJ8R
+         lp1SCWHp7Cxt9vE6au1e1nZiML2zevivi0ekPdLbwHULt9sUVczjoKzE81l08bTdUmyT
+         2BJlwNn3BhXmB3vMw1QaPbyAbpndJw9nrH9BsDQOIHLUo9sAlZSmPelIcZNbohcaZctA
+         PqilL5Y1VFNYKqvqnFTN2oOl2zQshIL+EAjet5aaldwO8YCL5NqA6MgC8/xSV9lXjxwP
+         PGE8vm4HFn7PUyveIM8HigU0P5ueqCtdCK+Gs7xww5vFJ2SHI7vP/Pj6th9nlBkKTGWk
+         gTnw==
+X-Forwarded-Encrypted: i=1; AJvYcCWi0GVJQMIsDWsbnMN8RkfPOnAuWd2UtGRPvc+9J5MLPS8oTCtRl1TvWLPBNDofzVIwYaMHaxCC2kA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzk92t+vxrD/YC/2Np+hrrdi/GmD2z/rPr13OfSTGBn/VfjGS9p
+	pUVl6cf1OUxn92y4PcllX2iPt+f28wohHfnfnpFA19jGEuHgQGH7ZtHlCBd5abx7cApSwfCFWQd
+	jLPTrze3wsMz9rnHD6wfxv619a4RiLkewxXLbMsG9arJ09IRU
+X-Google-Smtp-Source: AGHT+IGlwVOjMs2uEyjnINxzYdhzOYC3xUxuhss1DI1A8rYReLEVT61L75XVgrauUGWoh5wtBcMP1/AClNWL+Q5J27A=
+X-Received: by 2002:a05:690c:f15:b0:6e5:e714:3be0 with SMTP id
+ 00721157ae682-6e9d88fd767mr64305097b3.1.1730115856984; Mon, 28 Oct 2024
+ 04:44:16 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241025103621.4780-1-wahrenst@gmx.net> <20241025103621.4780-6-wahrenst@gmx.net>
-In-Reply-To: <20241025103621.4780-6-wahrenst@gmx.net>
+References: <20241025060017.1663697-1-benchuanggli@gmail.com>
+ <CAPDyKFpb5ZePhXziLH3VbuKKywJZbo8UBF1NM1_dyOWq9oLDng@mail.gmail.com> <4dd25dca-f217-4abd-88e8-0a6b03760dd7@tuxedocomputers.com>
+In-Reply-To: <4dd25dca-f217-4abd-88e8-0a6b03760dd7@tuxedocomputers.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 28 Oct 2024 11:56:38 +0100
-Message-ID: <CAPDyKFoKuZD596mVNeV5VszU8ncQ8cPda1fbktb3UQQiv+67GQ@mail.gmail.com>
-Subject: Re: [PATCH V5 5/9] mmc: bcm2835: add suspend/resume pm support
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Russell King <linux@armlinux.org.uk>, Florian Fainelli <florian.fainelli@broadcom.com>, 
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Vinod Koul <vkoul@kernel.org>, 
-	Minas Harutyunyan <hminas@synopsys.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Lukas Wunner <lukas@wunner.de>, Peter Robinson <pbrobinson@gmail.com>, 
-	"Ivan T . Ivanov" <iivanov@suse.de>, linux-arm-kernel@lists.infradead.org, 
-	kernel-list@raspberrypi.com, bcm-kernel-feedback-list@broadcom.com, 
-	dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-usb@vger.kernel.org
+Date: Mon, 28 Oct 2024 12:43:40 +0100
+Message-ID: <CAPDyKFpx=FwMH0PgaQqd+hFVa3ncuUjnikC3vfDHwN9V65H9mA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pci-gli: GL9767: Fix low power mode on the
+ set clock function
+To: Ben Chuang <benchuanggli@gmail.com>, Georg Gottleuber <ggo@tuxedocomputers.com>
+Cc: adrian.hunter@intel.com, victor.shih@genesyslogic.com.tw, 
+	greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw, 
+	HL.Liu@genesyslogic.com.tw, Lucas.Lai@genesyslogic.com.tw, 
+	victorshihgli@gmail.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, Werner Sembach <wse@tuxedocomputers.com>, cs@tuxedo.de
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 25 Oct 2024 at 12:36, Stefan Wahren <wahrenst@gmx.net> wrote:
+On Fri, 25 Oct 2024 at 17:40, Georg Gottleuber <ggo@tuxedocomputers.com> wrote:
 >
-> Add a minimalistic suspend/resume PM support.
+> Hello Ben, hello Uffe,
 >
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
-> ---
->  drivers/mmc/host/bcm2835.c | 25 +++++++++++++++++++++++++
->  1 file changed, 25 insertions(+)
+> thank you for this fix.
 >
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 107666b7c1c8..17c327b7b5cc 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -1343,6 +1343,30 @@ static int bcm2835_add_host(struct bcm2835_host *host)
->         return 0;
->  }
+> Am 25.10.24 um 15:22 schrieb Ulf Hansson:
+> > + Georg
+> >
+> > On Fri, 25 Oct 2024 at 08:01, Ben Chuang <benchuanggli@gmail.com> wrote:
+> >>
+> >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >>
+> >> On sdhci_gl9767_set_clock(), the vendor header space(VHS) is read-only
+> >> after calling gl9767_disable_ssc_pll() and gl9767_set_ssc_pll_205mhz().
+> >> So the low power negotiation mode cannot be enabled again.
+> >> Introduce gl9767_set_low_power_negotiation() function to fix it.
+> >>
+> >> The explanation process is as below.
+> >>
+> >> static void sdhci_gl9767_set_clock()
+> >> {
+> >>         ...
+> >>         gl9767_vhs_write();
+> >>         ...
+> >>         value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> >>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <--- (a)
+> >>
+> >>         gl9767_disable_ssc_pll(); <--- (b)
+> >>         sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> >>
+> >>         if (clock == 0)
+> >>                 return;  <-- (I)
+> >>
+> >>         ...
+> >>         if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+> >>                 ...
+> >>                 gl9767_set_ssc_pll_205mhz(); <--- (c)
+> >>         }
+> >>         ...
+> >>         value &= ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> >>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <-- (II)
+> >>         gl9767_vhs_read();
+> >> }
+> >>
+> >> (a) disable low power negotiation mode. When return on (I), the low power
+> >> mode is disabled.  After (b) and (c), VHS is read-only, the low power mode
+> >> cannot be enabled on (II).
+> >>
+> >> Fixes: d2754355512e ("mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for GL9767")
+> >
+> > Is this the same problem as being reported in
+> > https://lore.kernel.org/all/41c1c88a-b2c9-4c05-863a-467785027f49@tuxedocomputers.com/
+> >
+> > ?
 >
-> +static int bcm2835_suspend(struct device *dev)
-> +{
-> +       struct bcm2835_host *host = dev_get_drvdata(dev);
-> +
-> +       if (!host->data_complete) {
-> +               dev_warn(dev, "Suspend is prevented\n");
-> +               return -EBUSY;
-> +       }
+> Yes, this patch fixes
+> https://bugzilla.kernel.org/show_bug.cgi?id=219284
+>
+> This makes my patch obsolete.
 
-This should not be needed.
+Thanks to both of you for helping out and fixing the problem!
 
-The mmc core makes sure all outstanding requests have been flushed,
-before the host controller becomes suspended.
-
-> +
-> +       clk_disable_unprepare(host->clk);
-> +
-> +       return 0;
-> +}
-> +
-> +static int bcm2835_resume(struct device *dev)
-> +{
-> +       struct bcm2835_host *host = dev_get_drvdata(dev);
-> +
-> +       return clk_prepare_enable(host->clk);
-> +}
-> +
-> +static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
-> +                               bcm2835_resume);
-> +
->  static int bcm2835_probe(struct platform_device *pdev)
->  {
->         struct device *dev = &pdev->dev;
-> @@ -1471,6 +1495,7 @@ static struct platform_driver bcm2835_driver = {
->                 .name           = "sdhost-bcm2835",
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = bcm2835_match,
-> +               .pm = pm_ptr(&bcm2835_pm_ops),
->         },
->  };
->  module_platform_driver(bcm2835_driver);
+I added Georg's reported/tested-by tag when applying and queued this
+up as a fix with a stable tag.
 
 Kind regards
 Uffe
