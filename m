@@ -1,174 +1,165 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD0221BDA8C
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 11:52:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 08C001DB375
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 12:26:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730116359; cv=none; b=sXYKojfkUFWsatnCr59KePCcgGfDOIR1tdvEWUJdiPGxPUsriRvHkpUTEsmnNZeJhFS8Y+mXmzVUbiPQXXCMXNXrLoys7KmpDtZVEF7KAlEoqSytyB+XfKSnw4/OjV57aaQKxdYNtNnryvDZOa1rSUeu65veDsPXtVu60dLLB4k=
+	t=1730118412; cv=none; b=K3k0AOGbbnUL11H3iFeKgR8gTMS98MYoIAmr05eBI87kcscOSh+hYZaQ9y6BHFBhHjhQNCABFvRitRPfVgFUqlFi0Cok+qlnWH8Dyp9JiNMYoqE/wG3vbEsRwDSkWVTPjfGs5aubvU2ngW68Y0Yi2sYA/2disO7ZVX7eS/8qDnc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730116359; c=relaxed/simple;
-	bh=fJzRSevgpRIm3AEFzCEdm+GziNOoyiviPN9I1rCpZ0M=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=GqCn53+695BHqYQEtWusWUUxJN4CCdDH8FgT1k0bwTfIA4yAiTBeO8lDPrSXNzF5IB7/aXJCUQ8gH9UOEOXBHCe6emjW3j5xrTopK55br90JBsAHRP2yUU3KS6AFD4ChMXpS6AoAjMcbftYd1+28UbfNLwwbFQa0rrazPe0g0Pk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LxBLHctA; arc=none smtp.client-ip=209.85.128.178
+	s=arc-20240116; t=1730118412; c=relaxed/simple;
+	bh=3PulT3fSYPx07ta8K/JrXit9WxJNJriqpUJ7sJ+UBP4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=qHLa4peeYq3bXlNQkDWE3uHThWYqaQvlx4j8Of//eFYiBZwKSCys+BtZEmbayfTzI5YwuWvilfidXDxoQjJl7pmSjKMilpiGZbFwp+FygnofnXx/VK3CXv1DQ+m9K03NeWjkcPTTRcdhYBtgX6ASDSCpI1dDY16ewf09KEJG04A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=CDPikZJo; arc=none smtp.client-ip=209.85.167.45
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LxBLHctA"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6ea1407e978so4316277b3.1
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 04:52:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CDPikZJo"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-539e13375d3so4737246e87.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 05:26:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1730116356; x=1730721156; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KoCQbia54G4nxIzYls71RpgLTTqVGkgyKzKzAA6TlwE=;
-        b=LxBLHctAv1vYf4eyZQr84U9ckaoisqFyrwVDWnNgm3T7fu+K1fv0SZjDYWZQ4Qu2qY
-         KH3tvev+IwBmtNf+A800J3YyU9/0uhujtWGLVz6oT6oY6Pz1CocRrdFncMaX8IyB+co3
-         1Yimv004583fo82tkay265d4un1cXhG9k4gGmI7LAB5FADGq8ZDvlxmpeWUf9tnBUR9a
-         YYj7yJ/FYhpWpTekb+9l8G4HdtSliQ6TO2L8NkBL2d9gFauE1N9BNU0fLxHcXibhytAF
-         xNyjmEopTmg8iYML4Z3oQHmsaEUrrBi//J9m5YKwjbRnMtb56ltEXvQVOTRrWxLrgBW5
-         FK/A==
+        d=linaro.org; s=google; t=1730118407; x=1730723207; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=eY9h7I+0Bth8LhQa7GYGkdcbMWz4UGW0FLXHUMtiesc=;
+        b=CDPikZJo0Mj3NVB/AQ7HZ7Pj8PcrHx3sxc4McFC+dThWAxTK8oZS+lHXCZBc59WRHh
+         +IAFJnnToV7jmb2cKJ+MjcyliUt58TqiaTczbWcpnBCNhP8Fep69xrKytyi7YnJp9BM1
+         Uas5y4xvCXDsR4QHJr+eh+P5amgAEmZmJxgEEM2rHKjXFJ3npnEUaZOYqO//C52ij6IS
+         BV/TC/j2D4pQq+t5QF3/03EvTKCUAOeko/43zdWMBfKIhmElssSH/4+6YI0TCWSzQq4g
+         NNw17IAjtEhhn7sWhBnG3kadIhw8NC846cEvNkLvhuuRSDmruYtba122aBOg8R+WsPXv
+         zfIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730116356; x=1730721156;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=KoCQbia54G4nxIzYls71RpgLTTqVGkgyKzKzAA6TlwE=;
-        b=OQ/XlOO7kR+tSNLg/Aq1olhvA1aCsZ6m03tsob7LjIF4LwReC6ttZxbHtHuWBvKLFB
-         WV2WDOLt5fX/8mVLy6q1dgwcwVKR+Tv+I1+unPMU4ncP4TXiw/t4Nc7DRRVt87ZYo/OO
-         VaRKmzJwPBZUJ6LET7gLeaOqiBBauoZ98cQVv84rgpDDUJ9/ogs0ba4ML95YE/pFmooK
-         M5wTXRfM2C7gjE6iNSMoRJl1o4l7yhP5meFFEUnKkv6cuX3Ap92sWC3d1qc+BuV2zi45
-         MQeavxh1rSxKDZcB8phGN4eL9FV55z7MNQ2nH0t2yJcabvRbjKW8zLxQpA32nRPXn4/m
-         SF6g==
-X-Forwarded-Encrypted: i=1; AJvYcCWzk5ctiRQJ9U3+4cTFgr9MFOrVhAMW9k1JkyHJMaTEhn0Gaf4oSOjzNaULv7TkZKO0sf0byznLe8U=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxn/WWqqYGk1j6eeiba4VzxRCiREaMc3jyl++x6fR8mbKbTh4QD
-	uYafEgnfR4ERPiUsIG7915JIecaMiLc8npci/f25v610vLaiYZJ2jhfV2J3xG0mWH3PQz+XoH8q
-	fa4Q3XV9VTQfw0usxQWUf6GNejseGJcTOgQC9fhFjaou9ZXwJeQA=
-X-Google-Smtp-Source: AGHT+IEE2aBSIgy8byIyg2l4p9ZPUVjQluqtmANmq+eODyck3I7WPPej0mD9y2DzA70ycDOntX2wkwMJ1q9LdOqEriY=
-X-Received: by 2002:a05:690c:f06:b0:6e2:636:d9ed with SMTP id
- 00721157ae682-6e9d891eb15mr55877867b3.3.1730116355765; Mon, 28 Oct 2024
- 04:52:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1730118407; x=1730723207;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=eY9h7I+0Bth8LhQa7GYGkdcbMWz4UGW0FLXHUMtiesc=;
+        b=NLHgGt4ki9jkFb5Miw+ZLfwS8Pf/XVXyp9DwOZ64fDJjEwm/ItqZuyfqUdQkgiwlSl
+         7aL8vWzxARVTyCs4q0M4rayfNa0WnRbLLAgrOAYp9QJElwQLa0h0gVqasdK/XGH/9E8S
+         6Bb4fr8uj4CSYVphwRLSLOZxm8sEIH4PLs7I89IF01lQIEzcAl0ivuEsqma5B6c/5qqE
+         7iavSCnJBi6m3/gSnL0mod9GuAMwf2f19b/nGUdNBNF+E6dyjy19I1OWxuygsLHePUqu
+         9jK59EiFdzjIj7Y3vHqVQGaOPOmIhSl6N/eSc8bhnJuy4zfQ8DlZ0PRxy7W+MjsQcvKb
+         8WFA==
+X-Forwarded-Encrypted: i=1; AJvYcCWV9kffWzqc1/fFaZR7volgQT1xf4cryfaD8JHc+2ev32scNya1IatqHRZ22x8AwuYLRRV67v/nndg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyetdcsnaFA2sxJdJfmDrD4K3T0sYg2NrhFk3pvp2Z+kBRX/bKh
+	9yXS4pqWyC+Hn6u3gmh5EiRjDeedKA5TAcvgZV+rnW3cz74vVUezpBDZRS+seoo=
+X-Google-Smtp-Source: AGHT+IEZKcB2x5GNVabdEmw8aO9WQ9FCEugl4CW5KcRejhI5DMr6SnMlN5KZjsnO89WQIFFN0/Jrmw==
+X-Received: by 2002:a05:6512:acc:b0:530:ae4a:58d0 with SMTP id 2adb3069b0e04-53b348c7067mr2947564e87.8.1730118407183;
+        Mon, 28 Oct 2024 05:26:47 -0700 (PDT)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53b2e1f3e21sm1057652e87.288.2024.10.28.05.26.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Oct 2024 05:26:45 -0700 (PDT)
+Date: Mon, 28 Oct 2024 14:26:44 +0200
+From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Sachin Gupta <quic_sachgupt@quicinc.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
+	quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com, quic_narepall@quicinc.com, 
+	quic_nitirawa@quicinc.com, quic_rampraka@quicinc.com, quic_sartgarg@quicinc.com
+Subject: Re: [PATCH] mmc: sdhci-msm: Slot indexing for distinguishing
+ multiple SDCC instances
+Message-ID: <2knkpsv3nlbcolosyza3awktztv23kqweow3b3wilbehv2azre@dcldb6a37sbf>
+References: <20241022141828.618-1-quic_sachgupt@quicinc.com>
+ <3e2f8132-af87-40c0-9c31-c0103078fe39@intel.com>
+ <1cb1e8c1-63f4-4752-8358-b5c7078f9c6b@quicinc.com>
+ <be483786-d8d2-4d46-9ca2-fbb629ba0674@intel.com>
+ <0a0647aa-1fa4-4149-a76d-da7e08034fe4@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241025203454.162710-1-beanhuo@iokpp.de>
-In-Reply-To: <20241025203454.162710-1-beanhuo@iokpp.de>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 28 Oct 2024 12:52:00 +0100
-Message-ID: <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
-Subject: Re: [PATCH v6 0/5] Add multiple FFU modes based on eMMC specification
- 6.6.18 for flexible firmware updates
-To: Bean Huo <beanhuo@iokpp.de>
-Cc: avri.altman@wdc.com, linux-mmc@vger.kernel.org, vfazio@xes-inc.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <0a0647aa-1fa4-4149-a76d-da7e08034fe4@quicinc.com>
 
-On Fri, 25 Oct 2024 at 22:35, Bean Huo <beanhuo@iokpp.de> wrote:
->
-> Following the discussions with Avri at the 2024 ALPSS, I am submitting th=
-ese patches to
-> introduce multiple FFU modes, as defined in the eMMC specification 6.6.18=
-.
->
-> The new FFU implementation can support diverse vendor requirements and op=
-erational conditions.
-> The key benefits include:
->
-> 1, The host can select the most appropriate update mode based on device c=
-apabilities and
-> firmware size.
-> 2, The patches ensure that firmware downloads are treated as a single, un=
-interrupted operation,
-> preventing partial updates that could compromise device stability.
-> 3, Some new modes keep the device in FFU mode throughout the process, red=
-ucing the risk of
-> premature exits and update failures.
->
-> By supporting these modes, we can better accommodate varying firmware siz=
-es and ensure smoother,
-> more reliable firmware updates across different scenarios.
->
->
-> Summary of Changes:
->
-> Default FFU mode: "mmc ffu"
-> Uses CMD6 to enter FFU mode, CMD23 to set the block count, CMD25 for mult=
-iple-block write, and
-> CMD6 to exit FFU mode. This mode may exit FFU mode during the download if=
- the firmware size exceeds
-> the chunk size.
->
-> Optional FFU mode 1:
-> Similar to default FFU mode, but repeats CMD23+CMD25 for each chunk, ensu=
-ring FFU mode is maintained
-> throughout the firmware download. FFU mode is only exited after the entir=
-e firmware has been
-> successfully downloaded.
->
-> Optional FFU mode 2: use CMD25+CMD12 for open-ended multiple-block write
-> Introduces a method using CMD25 for open-ended multiple-block writes foll=
-owed by CMD12 to stop
-> the transmission. This allows for a smoother and more continuous firmware=
- bundle download.
->
-> Optional FFU mode 3: use CMD6 and CMD24 for single-block write
-> A new mode that uses CMD6 to enter FFU mode, CMD24 for single-block write=
-s, and CMD6 to exit FFU
-> mode after each write cycle. This ensures granular control over each bloc=
-k but may introduce more
-> frequent mode transitions.
->
-> Optional FFU mode 4: use CMD6 and repeated CMD24 sequence
-> In this mode, CMD6 is used to enter FFU mode, followed by repeated CMD24 =
-single-block writes.
-> After all firmware data is written, CMD6 is used to exit FFU mode, ensuri=
-ng an atomic and
-> uninterrupted download process.
->
->
-> Changelog:
->
->  v1 -- v2:
->         1. Added memset() to clean command structure
->  v2 -- V3:
->         1. Refactor patch, and remove ffu dedicated file mmc_ffu.c
->  v3 -- v4:
->         1. Incorporated Avri=E2=80=99s comments
->         2. Due to "ERROR: in command 'ffu', 'ffu' is ambiguous" when usin=
-g "mmc ffu", update
->            default FFU mode 'ffu' to 'ffu1'
-> v4 -- v5:
->         1. Retain the default FFU mode as 'ffu' and rename the other FFU =
-modes to 'opt_ffux' for consistency.
-> v5 -- v6:
->         1. Fix a typo in patch [4/5] commit subject
->
-> Bean Huo (5):
->   mmc-utils: Refactor common FFU code into functions to support
->     additional FFU modes
->   mmc-utils: Add FFU optional mode 1
->   mmc-utils: Add FFU optional mode 2 using CMD25+CMD12 for Open-ended
->     write download FW
->   mmc-utils: Add FFU optional mode 3 that uses CMD6 and CMD24
->     single-block write to download firmware
->   mmc-utils: Add FFU optional mode 4 for firmware download using
->     repeated CMD24 single-block write command
->
->  mmc.1      |  12 ++
->  mmc.c      |  20 +++
->  mmc.h      |   1 +
->  mmc_cmds.c | 492 ++++++++++++++++++++++++++++++++++++++---------------
->  mmc_cmds.h |   4 +
->  5 files changed, 389 insertions(+), 140 deletions(-)
->
+On Mon, Oct 28, 2024 at 04:10:37PM +0530, Sachin Gupta wrote:
+> 
+> 
+> On 10/25/2024 6:03 PM, Adrian Hunter wrote:
+> > On 25/10/24 13:37, Sachin Gupta wrote:
+> > > 
+> > > 
+> > > On 10/24/2024 4:38 PM, Adrian Hunter wrote:
+> > > > On 22/10/24 17:18, Sachin Gupta wrote:
+> > > > > This update addresses the requirement for accurate slot indexing
+> > > > > in the sdhci-msm driver to differentiate between multiple SDCC
+> > > > > (Secure Digital Card Controller) instances, such as eMMC, SD card,
+> > > > > and SDIO.
+> > > > > 
+> > > > > Additionally, it revises the slot indexing logic to comply with
+> > > > > the new device tree (DT) specifications.
+> > > > 
+> > > > This patch seems incomplete because all it does is assign a global
+> > > > variable which is never used again.
+> > > > 
+> > > 
+> > > Qualcomm internal debugging tools utilize this global variable to
+> > > access and differentiate between all the instance's sdhci_msm_host
+> > > data structure (eMMC, SD card, and SDIO).
+> > 
+> > The kernel does not accept code that does not serve a functional
+> > purpose.
+> > 
+> > You could look at using eBPF or KGDB to get the information,
+> > otherwise you might just have to carry that kind of patch in
+> > your internal tree.
+> > 
+> 
+> Sorry for misleading sentence, the tool I use is lauterbach Trace32 and when
+> using Lauterbach Trace32 tool, having a global variable makes it easier to
+> load and inspect dumps. It will be easy to quickly locate and analyze the
+> sdhci_msm_host structure, which speeds up the debugging process.
 
-The series applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
-master, thanks!
+This still isn't a functional purpose. This is a debugging code for a
+particular developer debugging SDHCI issues.
 
-Kind regards
-Uffe
+> > > > > Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+> > > > > Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> > > > > Signed-off-by: Maramaina Naresh <quic_mnaresh@quicinc.com>
+> > > > > Signed-off-by: Ziqi Chen <quic_ziqichen@quicinc.com>
+> > > > > Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
+> > > > > ---
+> > > > >    drivers/mmc/host/sdhci-msm.c | 10 ++++++++++
+> > > > >    1 file changed, 10 insertions(+)
+> > > > > 
+> > > > > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> > > > > index e113b99a3eab..3cb79117916f 100644
+> > > > > --- a/drivers/mmc/host/sdhci-msm.c
+> > > > > +++ b/drivers/mmc/host/sdhci-msm.c
+> > > > > @@ -292,6 +292,8 @@ struct sdhci_msm_host {
+> > > > >        bool vqmmc_enabled;
+> > > > >    };
+> > > > >    +static struct sdhci_msm_host *sdhci_slot[3];
+> > > > > +
+> > > > >    static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+> > > > >    {
+> > > > >        struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > > > > @@ -2426,6 +2428,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+> > > > >        if (ret)
+> > > > >            goto pltfm_free;
+> > > > >    +    if (node) {
+> > > > > +        ret = of_alias_get_id(pdev->dev.of_node, "mmc");
+> > > > > +        if (ret < 0)
+> > > > > +            dev_err(&pdev->dev, "get slot index failed %d\n", ret);
+> > > > > +        else
+> > > > > +            sdhci_slot[ret] = msm_host;
+> > > > > +    }
+> > > > > +
+> > > > >        /*
+> > > > >         * Based on the compatible string, load the required msm host info from
+> > > > >         * the data associated with the version info.
+> > > > 
+> > > 
+> > 
+> 
+
+-- 
+With best wishes
+Dmitry
