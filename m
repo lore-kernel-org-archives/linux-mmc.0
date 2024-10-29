@@ -1,111 +1,170 @@
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [81.169.146.216])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f51.google.com (mail-ed1-f51.google.com [209.85.208.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 235C71DB92E
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Oct 2024 13:15:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=81.169.146.216
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730121332; cv=pass; b=Xj+X9z60CQDjzZ9RkDIvigSr4QGtVEJAN3uXXj+BpF5Mp5h5FzYl2bchgV0YD4dZBYWhX1nD+/EoFO3af+MOf2MDzJd/PzODsLirAudDSzr47rHQxvjqKxdpH6BkcKIrRNTc8/gN/b0dDJ8dIsmZslfy7eIi6Ttf3sGly503Yko=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730121332; c=relaxed/simple;
-	bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
-	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=h2zPTRIp2R8BdIO2KUgQm7FuYJz6JKYWq/f6IoJ/G7IUE9v599UELUPHFFN9fOlS1Wcy6Bgicr7ntR+/Im0JtBiWziwJOCSMr0q4fRsTzCNbPbkQW0SVVoghkfJZScJNDbctnxbrDG5dMvTIexzVcQ4Nc0Djx3wSwbMscFUp52k=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de; spf=none smtp.mailfrom=iokpp.de; dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=aSJ0gbSh; dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b=hrOT7VKJ; arc=pass smtp.client-ip=81.169.146.216
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iokpp.de
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=iokpp.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 930691863F;
+	Tue, 29 Oct 2024 02:15:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.51
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1730168104; cv=none; b=JfK7fIacx/+nKH8pydeep5mOSDVhbt+Ho7rD4krJNITEzLyrQ2lfrlNYtBiZy4OHY6mk34HYayyM9qoNxYCrJLrb/sXFmQk5uSl9Cfx9V4ZB8lsHPF3JUjL+j8le/6l3ZOqMtHwhwsWuMOsQFCiyC3ZqqkR1EPpJOAqmTH0xxD0=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1730168104; c=relaxed/simple;
+	bh=AeXjM+KrtUS2sBUX9RGnVY1PaBn/obbXi2dQOFIuKBA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=FYhL1WrwwhYuFoguTfK3Ox/25mCba5nEzgsDTm3qxx+LovVCeluS+P0WN8vFiu02P+nF87ObAP40ThIfsACwolj7yVf9HFNi9kEqoGINk+x3LuCMe1cDUWI7EKQgOIn10nZkL4l+HM7nfbcBXkEBxWWEF8dp/FywBJeujAfJThI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LEHYTCJZ; arc=none smtp.client-ip=209.85.208.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="aSJ0gbSh";
-	dkim=permerror (0-bit key) header.d=iokpp.de header.i=@iokpp.de header.b="hrOT7VKJ"
-ARC-Seal: i=1; a=rsa-sha256; t=1730121318; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=c/zvovB3zpT3Z3ikYAbd2XsGMaBaHEHFLGra+y0LVycubQu/3KuD7o1XG2q5Svl7/u
-    DJdKSeB0OCMP4s06WL5gGIaLCEyk81eXW8u03NdPEdIJBUm8m95xo2PglM/Ayc2qFHnD
-    sjDoMZqV4pr8y9nwmwEek902XlRNqmiFg1ScG/VFf8Y1BfGEibVtOuJst3BZFJGbz7dL
-    SyWHKvNkw6HmxcAZKB65ZbqvMALxPji2n+ND5zLadYqOcX2KC/c6FHvd6CdCp04iJVQv
-    TW69bJ5LyUf+t/nnWMM9k9Hir7LObWPK9msU2aG8CsvO9o1c+rRlpb8oMbBx6qmj6YQv
-    478Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1730121318;
-    s=strato-dkim-0002; d=strato.com;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
-    b=E3LSIGrrpfMGvFU7nfSIKPrrU9VtlniDeR7dMMDpql5p/XyjNU2/wzdKOgKKb4JMmK
-    Mg3hn2bHu2KUHhsj4qxD1bH0jDwpV8Ipb8/kag+W3aC8mkCUiPDV+66AZtkNKr7zv+7+
-    hsf7SVMuEm7wp5+JzpBXdYbmg0IDHorq9YpYz2bT4FGlKRR2I+yQ3Sf20KMq0i5Kzgh+
-    SIToN3zPK4xg38QX6bYraf/UiNECiFzDZjjL/UFn13TP09Nnszs1m2asDwu/9sIz5lfB
-    wVUnlPCLFvXwU7k6smLX82sZqvs59L8TeFuYqoqqvPbZf8Aq+BBfLHb50k0EcJ2UTjXj
-    sFBw==
-ARC-Authentication-Results: i=1; strato.com;
-    arc=none;
-    dkim=none
-X-RZG-CLASS-ID: mo00
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1730121318;
-    s=strato-dkim-0002; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
-    b=aSJ0gbShWRb5h2MlCfzO12b0RJWA51FOmPQQtEpmngKjU3JM9xnaIqrT5vOI5N7u7i
-    O/z7/RoAb3Z2vdVRaOZHHP+xolCuakAl1I7iFscfVjodEiopIovOg7yMC6jDTVvxHhkT
-    nRzWHsSgS7Amquo8CbOgnHzwp5hYRkrHZJYI7JnBExLQVO1b81e6FbDKeE802HaYQqzN
-    hrnyxA8yVireSwuNLs9c7BBsV0f7OPrjaOi411wEHlwVcf/2OHpIg2Wn4TG6BJpB+qEP
-    mq4hSHlfsEVsKllU6E38EaeeXJNz4EKlfglWBYntZ1DhaS1dOabs5cJn8YeQ3Mh/0gdV
-    CQMQ==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1730121318;
-    s=strato-dkim-0003; d=iokpp.de;
-    h=References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Cc:Date:
-    From:Subject:Sender;
-    bh=SUhG9csLlYKex3/aZkQRyWc8EwEtojWx+qUAgs3PYww=;
-    b=hrOT7VKJxPWoGKA8yPeetvkSi1tOzcIERtFCL38TlcYGY435uKkWr52r/UtFUYEAoq
-    IJXqArzHU/cKx/XIE+Dg==
-X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSe9tgBDSDt0V0DBslXBtZUxPOub3IZik"
-Received: from [10.176.235.56]
-    by smtp.strato.de (RZmta 51.2.11 AUTH)
-    with ESMTPSA id za0ed209SDFIguq
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-	(Client did not present a certificate);
-    Mon, 28 Oct 2024 14:15:18 +0100 (CET)
-Message-ID: <b1b127b172c9accd25028f0263a09dee3386d15c.camel@iokpp.de>
-Subject: Re: [PATCH v6 0/5] Add multiple FFU modes based on eMMC
- specification 6.6.18 for flexible firmware updates
-From: Bean Huo <beanhuo@iokpp.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: avri.altman@wdc.com, linux-mmc@vger.kernel.org, vfazio@xes-inc.com
-Date: Mon, 28 Oct 2024 14:15:17 +0100
-In-Reply-To: <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
-References: <20241025203454.162710-1-beanhuo@iokpp.de>
-	 <CAPDyKFrhcLHo5pVW1ZmuEBnHdkTkFG9yCcyWuQy4pTYWe=_sMQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.4-0ubuntu2 
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LEHYTCJZ"
+Received: by mail-ed1-f51.google.com with SMTP id 4fb4d7f45d1cf-5c9428152c0so5697513a12.1;
+        Mon, 28 Oct 2024 19:15:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1730168100; x=1730772900; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=kIiU2u88CNLnMtknaXCkV4tr9hDbgVBg90xo4uhBPuY=;
+        b=LEHYTCJZjzPMbo8bJfLLkxfLngu+mgSmevyTPglCxhn759oUOGobqKtwbS+YvqeJfh
+         DUEqZ3C4+0OmI/xxALn1pWPIPBAnxdycVG5l9LL+/qxrcLfafZAFtUXf9EFFmV1N2AMW
+         FgVDG1cbxVemRXEHS/dUl6FYav2c+3uQ1jgYmb/NovZkBhUJR7dpwz7syGufD4luHJlD
+         rLoMZ/ocApdmMuyJgQ3Lu/Apx3swHeV1a73ypzrC3/knSJ37E9mGBnHcqgmMq2vNu3TP
+         PySewY/6WCFAaSc7Z9d7KRRGI8umjm5nMerjKaTt7dlQkfQCMkXNMBRyvG7azKDSIU0u
+         30qg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730168100; x=1730772900;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=kIiU2u88CNLnMtknaXCkV4tr9hDbgVBg90xo4uhBPuY=;
+        b=sWeQs/OghHD3juNAikCfF7tXx+j8+qOLG7oUBAQumfbQ/I1zik+TwedG9fchqdO9um
+         i0xUC3DLSnt4O3pY4QpaS+VJYzBgjP9bRzurRDFRm/A97CaUJ1oJDZ1v2gUyKfPPdleG
+         HS8FcX0g8XFa6x6wqWtGmVwt/osNYPj6yGzqg0+5YIJ/ckUelEpO2Sg1RVQc1N+/9a61
+         BLASyj9R49dos1BUp89veqZKt0q8WzRgXqQAgomMSd/raqcu4L6awypKHD6v4kv24KpG
+         1heXU2tjwXEbZcGtDkss3w9Kpqvn82DWUE5wEJtU3QYYa4grruE+qKkypMK/k+sYOp8p
+         ecYg==
+X-Forwarded-Encrypted: i=1; AJvYcCUexo94jJz3X9/vG/P7+pKUhRf/rfcGCx88yo+e/wdd7BLRtqwU3j0wYDfwKNu2OawaepKOQvaDNLEx@vger.kernel.org, AJvYcCVKIYLEmAKqdcnCyMEEUNGs+RdyjEWAgC8N7NzXUAJVjmzEAW5kjgvHJF6SMro3A136X1XRt8/IjGZhBGs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxWOjLn16lu2GFrrWSn6x3S9ZkNQSiTr5JYYTVoZvpmCO7dBh3r
+	iJgkEpVtDeCoJanvnp4KGeM7wE1OS0b0KBQKVsBU4iF1/vn3LqRESUDsmE71G8rsYFkR+uQuFC1
+	74d+PEb7WGjlDzIJR2nnFtqgLbF0=
+X-Google-Smtp-Source: AGHT+IFbBQvmK+EqMm3U3Vb9kazuFRR5cf6WIpDO2fxv3BVBeloP2e+f8Tuw/Olo8uB7+cWasCGQr5+O8J7uKtK16zI=
+X-Received: by 2002:a05:6402:1d55:b0:5ca:ea4:874a with SMTP id
+ 4fb4d7f45d1cf-5cbbf8c2d7emr8761748a12.14.1730168099608; Mon, 28 Oct 2024
+ 19:14:59 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <20241025060017.1663697-1-benchuanggli@gmail.com>
+ <CAPDyKFpb5ZePhXziLH3VbuKKywJZbo8UBF1NM1_dyOWq9oLDng@mail.gmail.com>
+ <4dd25dca-f217-4abd-88e8-0a6b03760dd7@tuxedocomputers.com> <CAPDyKFpx=FwMH0PgaQqd+hFVa3ncuUjnikC3vfDHwN9V65H9mA@mail.gmail.com>
+In-Reply-To: <CAPDyKFpx=FwMH0PgaQqd+hFVa3ncuUjnikC3vfDHwN9V65H9mA@mail.gmail.com>
+From: Ben Chuang <benchuanggli@gmail.com>
+Date: Tue, 29 Oct 2024 10:14:25 +0800
+Message-ID: <CACT4zj-YT21rFFg=VYk1OF-HEefVYR=d=JXYbUz-kGrj_RD85g@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pci-gli: GL9767: Fix low power mode on the
+ set clock function
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Georg Gottleuber <ggo@tuxedocomputers.com>, adrian.hunter@intel.com, 
+	victor.shih@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw, 
+	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Lucas.Lai@genesyslogic.com.tw, victorshihgli@gmail.com, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Werner Sembach <wse@tuxedocomputers.com>, cs@tuxedo.de
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 2024-10-28 at 12:52 +0100, Ulf Hansson wrote:
-> >=20
-> > =C2=A0 mmc.1=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 12 ++
-> > =C2=A0 mmc.c=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0 20 +++
-> > =C2=A0 mmc.h=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 |=C2=A0=C2=A0 1 +
-> > =C2=A0 mmc_cmds.c | 492 ++++++++++++++++++++++++++++++++++++++---------=
--
-> > -----
-> > =C2=A0 mmc_cmds.h |=C2=A0=C2=A0 4 +
-> > =C2=A0 5 files changed, 389 insertions(+), 140 deletions(-)
-> >=20
->=20
-> The series applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
-> master, thanks!
->=20
+On Mon, Oct 28, 2024 at 7:44=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Fri, 25 Oct 2024 at 17:40, Georg Gottleuber <ggo@tuxedocomputers.com> =
+wrote:
+> >
+> > Hello Ben, hello Uffe,
+> >
+> > thank you for this fix.
+> >
+> > Am 25.10.24 um 15:22 schrieb Ulf Hansson:
+> > > + Georg
+> > >
+> > > On Fri, 25 Oct 2024 at 08:01, Ben Chuang <benchuanggli@gmail.com> wro=
+te:
+> > >>
+> > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > >>
+> > >> On sdhci_gl9767_set_clock(), the vendor header space(VHS) is read-on=
+ly
+> > >> after calling gl9767_disable_ssc_pll() and gl9767_set_ssc_pll_205mhz=
+().
+> > >> So the low power negotiation mode cannot be enabled again.
+> > >> Introduce gl9767_set_low_power_negotiation() function to fix it.
+> > >>
+> > >> The explanation process is as below.
+> > >>
+> > >> static void sdhci_gl9767_set_clock()
+> > >> {
+> > >>         ...
+> > >>         gl9767_vhs_write();
+> > >>         ...
+> > >>         value |=3D PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> > >>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <---=
+ (a)
+> > >>
+> > >>         gl9767_disable_ssc_pll(); <--- (b)
+> > >>         sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> > >>
+> > >>         if (clock =3D=3D 0)
+> > >>                 return;  <-- (I)
+> > >>
+> > >>         ...
+> > >>         if (clock =3D=3D 200000000 && ios->timing =3D=3D MMC_TIMING_=
+UHS_SDR104) {
+> > >>                 ...
+> > >>                 gl9767_set_ssc_pll_205mhz(); <--- (c)
+> > >>         }
+> > >>         ...
+> > >>         value &=3D ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> > >>         pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value); <-- =
+(II)
+> > >>         gl9767_vhs_read();
+> > >> }
+> > >>
+> > >> (a) disable low power negotiation mode. When return on (I), the low =
+power
+> > >> mode is disabled.  After (b) and (c), VHS is read-only, the low powe=
+r mode
+> > >> cannot be enabled on (II).
+> > >>
+> > >> Fixes: d2754355512e ("mmc: sdhci-pci-gli: Set SDR104's clock to 205M=
+Hz and enable SSC for GL9767")
+> > >
+> > > Is this the same problem as being reported in
+> > > https://lore.kernel.org/all/41c1c88a-b2c9-4c05-863a-467785027f49@tuxe=
+docomputers.com/
+> > >
+> > > ?
+> >
+> > Yes, this patch fixes
+> > https://bugzilla.kernel.org/show_bug.cgi?id=3D219284
+> >
+> > This makes my patch obsolete.
+>
+> Thanks to both of you for helping out and fixing the problem!
+>
+> I added Georg's reported/tested-by tag when applying and queued this
+> up as a fix with a stable tag.
+>
 > Kind regards
 > Uffe
 
+Hi Georg and Uffe,
 
-Thanks Uffe, have a good working day!
+The original test reported on bugzilla that only Intel laptops had issues.
+AMD laptops without this patch seem to have no impact.
 
+I'm not sure if this patch is related to the originally reported issue.
+Thanks for the help.
 
-Kind regards,
-Bean
+Best regards,
+Ben Chuang
