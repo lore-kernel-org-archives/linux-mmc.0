@@ -1,158 +1,109 @@
-Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFC652036F4;
-	Tue, 29 Oct 2024 09:37:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EFA06205AB3
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Oct 2024 11:09:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730194667; cv=none; b=FVPzxgv6yWbm0W3SVNS25NOhoST3O+WgClRxP/rkMVPHBXPPPto8cd5mQjlBduXZ4mr8Huw/V9QYSNtgMVBnUP1CRbqmM+EqRnlydFkf1cZZl2p88td02hzNAONGBgL+ni1rxuPL1ytitn5h8YdxBBlbSyWAvfiW5V1lxkLuA1M=
+	t=1730200150; cv=none; b=HJ2EIIxs4MWvgv3ivjEKyYwdj1Rd/6AgzyvRHpgwYl0HRk8lEwJLRQNJBF7bNItCMZbjUs4kcyUFLK3QS6LMRSCABFAi8PbTatPGxQlHpjeXVOD46J0yvl0uKDOwZ56foRz+S7yBYLYYff06yxwtDE0+tTGge8EeoNrIgqZjhP0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730194667; c=relaxed/simple;
-	bh=hhTbhQy5WqBCVGKga+NQ+/BK9Sfjhrxqz0X4EmpeUrg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Fr5fikzOucsicRJDGUh/U4XFYe9BBjkJgtnXDv8fpYN+GXi0Om9FuvcRQz1SVnR1PiAzy4Kw8tp2KrcXqhbDQTZJFn0qftFN0qopBWZoFcQ8WF3AcsemjycPgr6CbsQ7QX1cCYnT9SauZAsI42IhV6uRKUGxlhEkeoueq91nCXE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MFpph/jB; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Aq9To5J4; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=MFpph/jB; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Aq9To5J4; arc=none smtp.client-ip=195.135.223.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	s=arc-20240116; t=1730200150; c=relaxed/simple;
+	bh=rRAEgyNOWwhOyxMUbVEYKP+9w548eZ2zWldFy83pZag=;
+	h=Date:From:To:cc:Subject:In-Reply-To:Message-ID:References:
+	 MIME-Version:Content-Type; b=JG7OAAeQ8VCmFDm/Mm1HVCrbtWK0AewWb9FD22V3SrTcoaSpxLqwuv5K09NEVw9TZ1awZETxswYJoTEptgZREHwrAV+Px9Tue40KJ+2OSKpqBo3TS0a7y4N1qnvlX/kSFv2HDjtzaraVbCxcA3B03HBD/iQFnteijxBuQ6mbQoQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=LN2280kV; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MFpph/jB";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Aq9To5J4";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="MFpph/jB";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Aq9To5J4"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="LN2280kV"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1730200147;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=XNsXWr8C4+pGAB/ZzZscQZye/5tnLQlo7HFEntqVYd0=;
+	b=LN2280kVxHldzT9DM7g7qCe1cTlr0WL3XhoHg8+91An9i3ecYdStZNP3WEflTKBHxpTlo1
+	csRktaQu3tIhN+H9Rkf95w3ko+LOpjtB4MHUg790yv8pRP2KEKyHnZBcI6OO6KE6fQtRfZ
+	pwU5vXOWIh2sfioikYn1xU6HfS6mSZ8=
+Received: from mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-674-OiGAK7LwPRCg8Cw3M5RuZg-1; Tue,
+ 29 Oct 2024 07:09:00 -0400
+X-MC-Unique: OiGAK7LwPRCg8Cw3M5RuZg-1
+Received: from mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.17])
 	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
 	(No client certificate requested)
-	by smtp-out1.suse.de (Postfix) with ESMTPS id 04DC821CB5;
-	Tue, 29 Oct 2024 09:37:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1730194664; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0axVOqoMls//Wk+pvC5XHfu4g+8K4S/uESA90ZpiSro=;
-	b=MFpph/jBB1J/ISr6NeT9WLZmTaOCpka/EFPFi79RpcQDXvUb6gXFq2uiaw9Znyk9eyFz3H
-	ReVfuHyJDoUtN4FNxVwYSXTY9xburM0eD3Qxpfz59mKLKgamQMVHy7RqBu1hs5/SFFJPLw
-	DRRSdlBNDz7zfFGhJ+J9+C59ZyUJtp0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1730194664;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0axVOqoMls//Wk+pvC5XHfu4g+8K4S/uESA90ZpiSro=;
-	b=Aq9To5J4OyWv9MZ1wXaqA99S23W+n2hHs6LsWZOc48A04RFALqgDjs6OHKARjcxMxsOhZx
-	5NEMh2sW95cAg9CQ==
-Authentication-Results: smtp-out1.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1730194664; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0axVOqoMls//Wk+pvC5XHfu4g+8K4S/uESA90ZpiSro=;
-	b=MFpph/jBB1J/ISr6NeT9WLZmTaOCpka/EFPFi79RpcQDXvUb6gXFq2uiaw9Znyk9eyFz3H
-	ReVfuHyJDoUtN4FNxVwYSXTY9xburM0eD3Qxpfz59mKLKgamQMVHy7RqBu1hs5/SFFJPLw
-	DRRSdlBNDz7zfFGhJ+J9+C59ZyUJtp0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1730194664;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=0axVOqoMls//Wk+pvC5XHfu4g+8K4S/uESA90ZpiSro=;
-	b=Aq9To5J4OyWv9MZ1wXaqA99S23W+n2hHs6LsWZOc48A04RFALqgDjs6OHKARjcxMxsOhZx
-	5NEMh2sW95cAg9CQ==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id D170C136A5;
-	Tue, 29 Oct 2024 09:37:43 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id JKDMMuesIGc+HwAAD6G6ig
-	(envelope-from <iivanov@suse.de>); Tue, 29 Oct 2024 09:37:43 +0000
-Date: Tue, 29 Oct 2024 11:44:45 +0200
-From: "Ivan T . Ivanov" <iivanov@suse.de>
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Russell King <linux@armlinux.org.uk>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-	Vinod Koul <vkoul@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-	Minas Harutyunyan <hminas@synopsys.com>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Lukas Wunner <lukas@wunner.de>,
-	Peter Robinson <pbrobinson@gmail.com>,
-	linux-arm-kernel@lists.infradead.org, kernel-list@raspberrypi.com,
-	bcm-kernel-feedback-list@broadcom.com, dmaengine@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH V5 1/9] Revert "usb: dwc2: Skip clock gating on Broadcom
- SoCs"
-Message-ID: <20241029094445.hsporitxkv2q45c5@localhost.localdomain>
-References: <20241025103621.4780-1-wahrenst@gmx.net>
- <20241025103621.4780-2-wahrenst@gmx.net>
+	by mx-prod-mc-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 52DEC19560AA;
+	Tue, 29 Oct 2024 11:08:56 +0000 (UTC)
+Received: from [10.45.226.64] (unknown [10.45.226.64])
+	by mx-prod-int-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 81B7D1955F21;
+	Tue, 29 Oct 2024 11:08:49 +0000 (UTC)
+Date: Tue, 29 Oct 2024 12:08:44 +0100 (CET)
+From: Mikulas Patocka <mpatocka@redhat.com>
+To: Adrian Vovk <adrianvovk@gmail.com>
+cc: Christoph Hellwig <hch@infradead.org>, Eric Biggers <ebiggers@kernel.org>, 
+    Md Sadre Alam <quic_mdalam@quicinc.com>, axboe@kernel.dk, song@kernel.org, 
+    yukuai3@huawei.com, agk@redhat.com, snitzer@kernel.org, 
+    adrian.hunter@intel.com, quic_asutoshd@quicinc.com, ritesh.list@gmail.com, 
+    ulf.hansson@linaro.org, andersson@kernel.org, konradybcio@kernel.org, 
+    kees@kernel.org, gustavoars@kernel.org, linux-block@vger.kernel.org, 
+    linux-kernel@vger.kernel.org, linux-raid@vger.kernel.org, 
+    dm-devel@lists.linux.dev, linux-mmc@vger.kernel.org, 
+    linux-arm-msm@vger.kernel.org, linux-hardening@vger.kernel.org, 
+    quic_srichara@quicinc.com, quic_varada@quicinc.com
+Subject: Re: [PATCH v2 1/3] dm-inlinecrypt: Add inline encryption support
+In-Reply-To: <14126375-5F6F-484A-B34B-F0C011F3A9C5@gmail.com>
+Message-ID: <74adbf13-c778-ee00-0cd6-3931a4a518ec@redhat.com>
+References: <20240916085741.1636554-2-quic_mdalam@quicinc.com> <20240921185519.GA2187@quark.localdomain> <ZvJt9ceeL18XKrTc@infradead.org> <ef3c9a17-79f3-4937-965e-52e2b9e66ac2@gmail.com> <ZxHwgsm2iP2Z_3at@infradead.org> <CAAdYy_mVy3uXPqWbjPzK_i8w7Okq73wKBQyc95TbnonE36rPgQ@mail.gmail.com>
+ <ZxH4lnkQNhTP5fe6@infradead.org> <D96294E2-F17A-4E58-90FB-1D17747048E5@gmail.com> <ZxieZPlH-S9pakYW@infradead.org> <CAAdYy_ms=VmvxZy9QiMkwcNk21a2kVy73c8-NxUh4dNJuLefCg@mail.gmail.com> <Zxnl4VnD6K6No4UQ@infradead.org>
+ <14126375-5F6F-484A-B34B-F0C011F3A9C5@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241025103621.4780-2-wahrenst@gmx.net>
-X-Spam-Score: -4.30
-X-Spamd-Result: default: False [-4.30 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	ARC_NA(0.00)[];
-	RCVD_TLS_ALL(0.00)[];
-	RCPT_COUNT_TWELVE(0.00)[17];
-	MISSING_XM_UA(0.00)[];
-	MIME_TRACE(0.00)[0:+];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	FREEMAIL_TO(0.00)[gmx.net];
-	FREEMAIL_ENVRCPT(0.00)[gmail.com,gmx.net];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	FROM_HAS_DN(0.00)[];
-	FREEMAIL_CC(0.00)[armlinux.org.uk,broadcom.com,kernel.org,linaro.org,synopsys.com,linuxfoundation.org,wunner.de,gmail.com,lists.infradead.org,raspberrypi.com,vger.kernel.org];
-	TO_DN_SOME(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo,suse.de:email]
-X-Spam-Flag: NO
-X-Spam-Level: 
+Content-Type: text/plain; charset=US-ASCII
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.17
 
-Hi Stefan,
 
-On 10-25 12:36, Stefan Wahren wrote:
+
+On Thu, 24 Oct 2024, Adrian Vovk wrote:
+
+> >Sure.  But why would you do that?
 > 
-> The commit d483f034f032 ("usb: dwc2: Skip clock gating on Broadcom SoCs")
-> introduced a regression on Raspberry Pi 3 B Plus, which prevents
-> enumeration of the onboard Microchip LAN7800 in case no external USB device
-> is connected during boot.
+> As mentioned earlier in the thread: I don't have a usecase specifically 
+> for this and it was an example of a situation where passthrough is 
+> necessary and no filesystem is involved at all. Though, as I also 
+> pointed out, a usecase where you're putting encrypted virtual partitions 
+> on an encrypted LVM setup isn't all that absurd.
 > 
-> Fixes: d483f034f032 ("usb: dwc2: Skip clock gating on Broadcom SoCs")
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
-> ---
->  drivers/usb/dwc2/params.c | 1 -
->  1 file changed, 1 deletion(-)
+> In my real-world case, I'm putting encrypted loop devices on top of a 
+> filesystem that holds its own sensitive data. Each loop device has 
+> dm-crypt inside and uses a unique key, but the filesystem needs to be 
+> encrypted too (because, again, it has its own sensitive data outside of 
+> the loop devices). The loop devices cannot be put onto their own 
+> separate partition because there's no good way to know ahead of time how 
+> much space either of the partitions would need: sometimes the loop 
+> devices need to take up loads of space on the partition, and other times 
+> the non-loop-device data needs to take up that space. And to top it all 
+> off, the distribution of allocated space needs to change dynamically.
 > 
-> diff --git a/drivers/usb/dwc2/params.c b/drivers/usb/dwc2/params.c
-> index 68226defdc60..4d73fae80b12 100644
-> --- a/drivers/usb/dwc2/params.c
-> +++ b/drivers/usb/dwc2/params.c
-> @@ -23,7 +23,6 @@ static void dwc2_set_bcm_params(struct dwc2_hsotg *hsotg)
->  	p->max_transfer_size = 65535;
->  	p->max_packet_count = 511;
->  	p->ahbcfg = 0x10;
-> -	p->no_clock_gating = true;
->  }
-> 
+> The current Linux kernel does not support this use-case without double 
+> encryption. The loop devices are encrypted once with their own dm-crypt 
+> instance. Then that same data is encrypted a second time over by the 
+> partition.
 
-Thanks, this makes RPi3 Ethernet operational again.
+You can add a flag to an inode, then you can modify the page cache code so 
+that if it is reading/writing a flagged file, it will attach the flag to 
+the bio. Then, you can create a device-mapper target "dm-flag-switch" that 
+will forward unflagged bios to one underlying device and flagged bios to 
+another underlying device.
 
-Tested-by: Ivan T. Ivanov <iivanov@suse.de>
+I think this is not impossible. But this change needs to go through the 
+VFS tree, so I suggest that you start asking about it there.
 
-Regards.
+Mikulas
 
