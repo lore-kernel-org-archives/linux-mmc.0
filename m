@@ -1,77 +1,90 @@
-Received: from riemann.telenet-ops.be (riemann.telenet-ops.be [195.130.137.80])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f47.google.com (mail-ed1-f47.google.com [209.85.208.47])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3B47194151
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2024 10:07:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.130.137.80
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C7331E2833
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2024 11:08:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730282837; cv=none; b=YplIUwkdN56A90cbnQqKvujs9EdEIPREJICUvFagI62kduVqvFhCRJ+ls0Gb0qb902NJXniClrIm9T4mKiVU8DZEjH6WE1YfMRLSKQLWhVjTRDz/tUF4+k1R7qXCQ86i0lotilFI8IZyfO4SRrwsvjx9p5bv+9eYBddWmV0ppfM=
+	t=1730286488; cv=none; b=n8MAeYOr/80JzEThEGYqrI0w6oqFjcK86eihHh8yNcz45PM6/VycKw4ywhSn3U50rJvymTJaqvHXh7w7qNzb3ornPZ/oPCGwlSIHr7XzscYvT44aUSHPAg14x7BxtXkgLRWutKQpCD94XOMAuiqsKUD7G8JDg3IDqiO2/qPaY10=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730282837; c=relaxed/simple;
-	bh=IxWOzOcXLbCyF5KE/BHYteO5dIdffrmHNFkpJrH8kNw=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=q5p4/g5A2qjUu8lQ/C4rEJrN1IltOSCBpqJGL21TMde5VXl6UOndhR830aCs6o7nS4utCPx2DnhVteCyFWtgp5/afLz0gujmXl+CzGsSeTfBXNOgfTbYgRkzl6503UX2g7GUo0j2/zBFM0GnzOOVbHRRXJioh94xrbDVIKRNHd8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be; spf=none smtp.mailfrom=linux-m68k.org; arc=none smtp.client-ip=195.130.137.80
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=glider.be
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux-m68k.org
-Received: from michel.telenet-ops.be (michel.telenet-ops.be [IPv6:2a02:1800:110:4::f00:18])
-	by riemann.telenet-ops.be (Postfix) with ESMTPS id 4XdjTl2LjWz4wyvt
-	for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2024 11:07:07 +0100 (CET)
-Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed80:ceb8:3fda:3601:820f])
-	by michel.telenet-ops.be with cmsmtp
-	id Wa6z2D0044BbGPD06a6zKD; Wed, 30 Oct 2024 11:07:00 +0100
-Received: from rox.of.borg ([192.168.97.57])
-	by ramsan.of.borg with esmtp (Exim 4.95)
-	(envelope-from <geert@linux-m68k.org>)
-	id 1t65b6-005zPP-Ht;
-	Wed, 30 Oct 2024 11:06:59 +0100
-Received: from geert by rox.of.borg with local (Exim 4.95)
-	(envelope-from <geert@linux-m68k.org>)
-	id 1t65bO-006QXP-Rt;
-	Wed, 30 Oct 2024 11:06:58 +0100
-From: Geert Uytterhoeven <geert+renesas@glider.be>
-To: Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-	AKASHI Takahiro <takahiro.akashi@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] mmc: sdhci: Make MMC_SDHCI_UHS2 config symbol invisible
-Date: Wed, 30 Oct 2024 11:06:55 +0100
-Message-Id: <079f2b7473d34895843ad278d79930c681385b2e.1730282633.git.geert+renesas@glider.be>
-X-Mailer: git-send-email 2.34.1
+	s=arc-20240116; t=1730286488; c=relaxed/simple;
+	bh=zzrha7jGy6bX4A4KIQJr6OduF2QVMnAKjm8yxplyNYA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mT50agLD4xbcAaSw8DHSnVNBl7AJuCFNjPa4W1xNKP3fW1cqz85OAM8ywWzRaqTBfO5ntdO7a58DrlM1xVA+5W/yBP9DtmU0tdcCblqDugnlyf26eXNuJPvFj0uTZYq18LYrdEH/iycZdY29QdwLHtLi0ISI3nDypPp1qztn2bk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=D2kRHwRd; arc=none smtp.client-ip=209.85.208.47
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D2kRHwRd"
+Received: by mail-ed1-f47.google.com with SMTP id 4fb4d7f45d1cf-5cacb76e924so8426334a12.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Oct 2024 04:08:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1730286484; x=1730891284; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=HtW7qNw/Gr/IvmBwOpblzp4beHIWRAaSzNdUMpl4z7U=;
+        b=D2kRHwRdHDN2BcGJd6LGb2IteosWeHU0j1NddhY2tB5w0dwGcz7w8XOmJmyHw/oMPn
+         yC37AJO4h+4P4TJpPEGL8mTTeagxBub0zJR9wqZ9c9wQMJ9vGa7F4V6Sf/88Fem9t5i4
+         L/c5rLVRphizxe5CwGTW8i+Pj48fX209GAHT6ltH4mtvFL1g+SmzNMsaOpqXbmXhXKhM
+         d/r3xDkMRHjUeNW/eOJW3bIOirnF4ywGS9UTAflzORghj6NZStauXTYrx9NMmNFsX8/z
+         9xhjyrqr9LsqX/RU2OZ7ZDizmlFUEtY4VjVDEKJ8IrIQfLGtlYEn5Gwd4brRVYDfbDv1
+         jVsQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730286484; x=1730891284;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HtW7qNw/Gr/IvmBwOpblzp4beHIWRAaSzNdUMpl4z7U=;
+        b=gzAW7j9ZGZERhUoxIQSAbegLq45Rk/Ehu3JelPgTFF3YADlXqgyl3PZTzlTw1IN15+
+         w0pm6urmzL4Uk+z2JKUCWjEJEaWZpR9lK1A5AlxDZd6TOIIU1CPbH1dXHDN1weX8eAte
+         gMlZD3MOnSX2iQK/nCE8HS+RkfhLu8wwfzYjPQcw7wVhbqT0aRDGgK8lYMghnrgXgjEJ
+         9J5GCRIq1jdm6/NMMGzX/h1QvyWQHbL1a3bPUGgz0xvLqyshMKv5JZPD0I5jh5t6sA0x
+         tV53BS+DkTGQLJh5ZTKeKRA98TzgWbUNsWCBLSMrkcoQ50G26Iel+5kYFTzH+Z7MfIVQ
+         9LTQ==
+X-Gm-Message-State: AOJu0Yz/ffttC5KvcUXBqus1bPvrTe6dVS1dBfT+hhhkTnZEJ6KAXdEY
+	wG8lDvdKnjwGTTB9pOrfZ9SvMDjAum2Teyt7LLOaIuPzSRyV/be2gCh6RTeLSieVoFiwMdtoObz
+	fDLKQ2ABINQCWrf3h99t/o6KEt3WxThMyakKIcw==
+X-Google-Smtp-Source: AGHT+IFXN3h9v/G1nyYZauhpuoFivbA/dTsCzahlR97/GO2a33q0fDcSFnxWfjsGDzeOG9bypL8ba+QnHBYYVFERS80=
+X-Received: by 2002:a05:6402:440a:b0:5c9:87a0:4fcc with SMTP id
+ 4fb4d7f45d1cf-5cbbf8c30a9mr12008965a12.16.1730286484442; Wed, 30 Oct 2024
+ 04:08:04 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20241029131752.226764-1-ulf.hansson@linaro.org> <b46e153f-f329-44b9-a72e-bcc65763f789@intel.com>
+In-Reply-To: <b46e153f-f329-44b9-a72e-bcc65763f789@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 30 Oct 2024 12:07:25 +0100
+Message-ID: <CAPDyKFoL7gHY7h924HXc6_TTyGsRR=oTs1p5BitJP8OpBPcTfw@mail.gmail.com>
+Subject: Re: [PATCH 0/3] mmc: core: A couple of fixes for UHS-II card
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	Victor Shih <victorshihgli@gmail.com>, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-There is no need to ask the user about enabling UHS-II support, as all
-drivers that support UHS2-capable devices already select MMC_SDHCI_UHS2.
-Hence make the symbol invisible, unless when compile-testing.
+On Tue, 29 Oct 2024 at 16:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 29/10/24 15:17, Ulf Hansson wrote:
+> > The recently introduced UHS-II support to the mmc core has a few problems,
+> > during the card initialization and re-initialization. This series intends to
+> > addresses some these problems.
+> >
+> > Ulf Hansson (3):
+> >   mmc: core: Simplify sd_uhs2_power_up()
+> >   mmc: core: Add error handling of sd_uhs2_power_up()
+> >   mmc: core: Fix error paths for UHS-II card init and re-init
+> >
+> >  drivers/mmc/core/sd_uhs2.c | 65 +++++++++++++++++---------------------
+> >  1 file changed, 29 insertions(+), 36 deletions(-)
+>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Fixes: 2af7dd8b64f2fd6a ("mmc: sdhci: add UHS-II module and add a kernel configuration")
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- drivers/mmc/host/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Thanks for reviewing!
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index fec47022558443fe..6824131b69b188ca 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -99,7 +99,7 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
- 	  This is the case for the Nintendo Wii SDHCI.
- 
- config MMC_SDHCI_UHS2
--	tristate "UHS2 support on SDHCI controller"
-+	tristate "UHS2 support on SDHCI controller" if COMPILE_TEST
- 	depends on MMC_SDHCI
- 	help
- 	  This option is selected by SDHCI controller drivers that want to
--- 
-2.34.1
+I have queued up the series for next.
 
+Kind regards
+Uffe
