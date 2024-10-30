@@ -1,83 +1,104 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f178.google.com (mail-pf1-f178.google.com [209.85.210.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A79AFC0A;
-	Tue, 29 Oct 2024 14:59:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1E431BC3F;
+	Wed, 30 Oct 2024 01:54:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730214002; cv=none; b=HQzeLmwd7LP9t/L3NSj/iDSZOIW4t6IMBToUA3v1GvfUB9ym8AQ8t3ouubpnBIQ0EsczeAP+fF5ttYj8lAoTMLMCa0a3M9WdkTlHS9MMJR8/2vl0ozfHrOve1AYe0u4yQJMFQsfJloydbPSmlOn0Q0imFb1nmSZBYbddbSQiSgQ=
+	t=1730253287; cv=none; b=D1H6BMhueM0njfkYPa03jhZr2DcpquxV/IiVnig51Ed2ZNxSKXrapC56/MGceQeWY+elBfFW9WJ1AiqaTHykW0bpDZMrXmQxGkDqBLHkvXtfrWacYhkG146w1tl46XSrad5vP36vM0YDvD+e7S8RddJ6dhTlMUJZBwZoKSBbsgA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730214002; c=relaxed/simple;
-	bh=SiEFjk6TmcgSl4Jn7HhISzuv6QAVmzOotSoDU8dmeEw=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gwAyZgDW472pHiS8QinL06N8YajZR4O3xNUUVOotLZp6bCWPzSaqwRs7ZvGYdTJ1HtJJhWrAmxUIxgu0FZOueB9hFlidZ7xnZ+YrbHnQBwPDQYu0BIj6FguL1x14gTggC+81F2VpkYlBs0Iak8tO2AII/CPrrrPgQNIId6J0rkg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=P+zzB3nv; arc=none smtp.client-ip=198.175.65.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1730253287; c=relaxed/simple;
+	bh=qpOOOXWMQa1lDZwHHMx3OdFflw+w+2pzxfyq06gqboM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ciaQ10FxSXw8U4A516ZkuERe1IbLlu8lxF3siFw8lDaLEmNACUnvzsSDb9sgFovIxrdpNtfJf20NXsRB6JPczhf5EzMMEjqIxs6Nyts3OVdcuse1p+rlTNWV7v5kF+81A9uw/HbgOz703n6nUEH4ip6gNhrOBNprvlZT/i9zaGQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=O2D1Bm2w; arc=none smtp.client-ip=209.85.210.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="P+zzB3nv"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1730214000; x=1761750000;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=SiEFjk6TmcgSl4Jn7HhISzuv6QAVmzOotSoDU8dmeEw=;
-  b=P+zzB3nvHiQ746656/pWwVcWESLQqvhJdvbsi8P7eH/6TAkQ8xzNW/r4
-   g0vOyvPbLl+KxcC8o4a/UJ8f3JIKpcdrCFhc5ECe71v7BhilznnMCL7K2
-   MBoxHIafBJ2qewePjObF0Rc+5wUw1dHbOBjuKTPcACsWZvKcSCS+2HODM
-   iPpsUOXre6AEI94mkSeZPj3vURGFvqC8956mmYLFF+GqYs38QbisqczgI
-   2y9rBG+xl7x1PsRv/poN3Por+//MtFrpTHisv2tdOspU3pZVfKoi2QQVO
-   YsVhr4o9kMGLv+bcaQWwE6fbenmXK1YYnCQC/bbr2vjGm/r/EE3Ljgklx
-   A==;
-X-CSE-ConnectionGUID: ysYmMqfhTPmJyd9rmCBPkg==
-X-CSE-MsgGUID: cqeukXbLTy2nQ3XWyRjLvQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="47322642"
-X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
-   d="scan'208";a="47322642"
-Received: from orviesa006.jf.intel.com ([10.64.159.146])
-  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2024 07:59:59 -0700
-X-CSE-ConnectionGUID: t62fhBRmSRONYCfyGV2ujA==
-X-CSE-MsgGUID: 8NCGtjc+Q+enW08+sMFsJw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,241,1725346800"; 
-   d="scan'208";a="82127490"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
-  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Oct 2024 07:59:56 -0700
-Message-ID: <b46e153f-f329-44b9-a72e-bcc65763f789@intel.com>
-Date: Tue, 29 Oct 2024 16:59:50 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="O2D1Bm2w"
+Received: by mail-pf1-f178.google.com with SMTP id d2e1a72fcca58-7205b6f51f3so3664805b3a.1;
+        Tue, 29 Oct 2024 18:54:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1730253284; x=1730858084; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=avMnOGtv+fjDKb2FHdKpORq82ypriAfOKWgYRnhbdSM=;
+        b=O2D1Bm2wEBWTUxDaA7sjuuIhks9x9+nr7E0CBSjZXdNS+EF/YU+ox4kkzzOIz3krA9
+         MYRYwxpH95njrolqjPs4ANMBPbekGuYtqwkJdCRc8h6UZhTJS64h6CVD5eRZUYjD1cAU
+         R6w78M/z7Fb1k50f2pv2BR8723eSX/SmS5oWM3d2JnpuMGZl+TXLBfjGB1Avh2rcJppD
+         iHR56cLlNwAnfhgmCWQN3ZLehtOQHNrifRTW3+3+cdE/Ock+//AYEsF4prwNlHii5SgT
+         oZWAzlFEJMlES6oNonSh8/9Y3JUpiu/7I69IymyubNoAjBYh6EuutfeFVbSWwQ0oRjb4
+         egpw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730253284; x=1730858084;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=avMnOGtv+fjDKb2FHdKpORq82ypriAfOKWgYRnhbdSM=;
+        b=vflOjkTn/UJjpidgE/govZ0Yb1d60AzqL240vSvHhphWkAOpv4WU3E02nxX2WG4gNH
+         UvYClWYzCLdAdVRuH/m0etKAiMpy5Y4zXxX/gqsgFP4ErIkg5GKxrIRA6hQBsFVAP/yn
+         K79sc2ap+EwAE+dx0gGKQv+qN4Jdt+mKfvnQ2RaCRuNmQmDPu7vexNJuX4q601Z5OE+L
+         7wIbAIuHHMwqeup4H3L2RFJ2n1M26OSXeSPZZ2DW1XiodYPk2S2SS8jZHmQ2P3pU4tco
+         QK85A4m70FeFcYi1SrIaUS9ATeSnvfOn+k9PPgv/DURI/QadNoae2rWF5g/Aeuc1DxQY
+         UxKA==
+X-Forwarded-Encrypted: i=1; AJvYcCUIQVEWuVDUUq6hUZPXy4+56k1xL9jCLJ74yMjhWn0NQoMtJj+GP1/CF+Hhi+I+PEVlIGaSeV8SFBxU4iU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwsjU8It9bF2KfL7DINJBVJEaCGHXdqPBZ1e/gexKWorewA7L6/
+	VigAL7h0UR5c494Y9PJWW9zS4fxg233k0yLmhwm21OnapMDaQ5C7
+X-Google-Smtp-Source: AGHT+IG9wAHbREcAEMMe0SYlXgOMatkkrJkfcotPYGghnPUZpulpvkceQM8lNQX+WPxyEzVUETMmjA==
+X-Received: by 2002:a05:6a00:4fc3:b0:71e:410:4764 with SMTP id d2e1a72fcca58-72062f83b02mr21342350b3a.8.1730253284161;
+        Tue, 29 Oct 2024 18:54:44 -0700 (PDT)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-72057a219d9sm8549476b3a.171.2024.10.29.18.54.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 29 Oct 2024 18:54:43 -0700 (PDT)
+From: Ben Chuang <benchuanggli@gmail.com>
+To: adrian.hunter@intel.com,
+	ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	ben.chuang@genesyslogic.com.tw,
+	benchuanggli@gmail.com,
+	greg.tu@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	victor.shih@genesyslogic.com.tw,
+	dan.carpenter@linaro.org,
+	takahiro.akashi@linaro.org
+Subject: [PATCH] mmc: sdhci-uhs2: Remove unnecessary NULL check
+Date: Wed, 30 Oct 2024 09:53:26 +0800
+Message-ID: <20241030015326.2289070-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.47.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 0/3] mmc: core: A couple of fixes for UHS-II card
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Victor Shih <victor.shih@genesyslogic.com.tw>,
- Victor Shih <victorshihgli@gmail.com>, linux-kernel@vger.kernel.org
-References: <20241029131752.226764-1-ulf.hansson@linaro.org>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241029131752.226764-1-ulf.hansson@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 29/10/24 15:17, Ulf Hansson wrote:
-> The recently introduced UHS-II support to the mmc core has a few problems,
-> during the card initialization and re-initialization. This series intends to
-> addresses some these problems.
-> 
-> Ulf Hansson (3):
->   mmc: core: Simplify sd_uhs2_power_up()
->   mmc: core: Add error handling of sd_uhs2_power_up()
->   mmc: core: Fix error paths for UHS-II card init and re-init
-> 
->  drivers/mmc/core/sd_uhs2.c | 65 +++++++++++++++++---------------------
->  1 file changed, 29 insertions(+), 36 deletions(-)
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+The "host->ops" pointer points to an offset into the "sdhci_ops" struct
+so it cannot be NULL. Remove "host->ops" check in "if" statement.
 
+Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
+Closes: https://lore.kernel.org/r/202410271835.tqz9s9JV-lkp@intel.com/
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-uhs2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index c488c6d56015..b0e4ab852a94 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -413,7 +413,7 @@ static int sdhci_uhs2_do_detect_init(struct mmc_host *mmc)
+ 
+ 	DBG("Begin do uhs2 detect init.\n");
+ 
+-	if (host->ops && host->ops->uhs2_pre_detect_init)
++	if (host->ops->uhs2_pre_detect_init)
+ 		host->ops->uhs2_pre_detect_init(host);
+ 
+ 	if (sdhci_uhs2_interface_detect(host)) {
+-- 
+2.47.0
 
