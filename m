@@ -1,129 +1,175 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com [209.85.222.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35A841885B0;
-	Fri,  1 Nov 2024 10:14:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A6801AB6EF;
+	Fri,  1 Nov 2024 10:40:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730456094; cv=none; b=AemAuqHpY/jUCG0ErLTu8k4Px6oj65DEgwyEsb67FqT+Vpob4LVSOUcLStry++OofPuxSa6VENtsSlOyldqAbhvwjPkCHsqodSLRSfEi8l7FVKyISV8falxy/cDA93OrO3FxCGk8l7EgwlH6Lu1LF2qQ6fG+EB60d2JU8UiOWTQ=
+	t=1730457612; cv=none; b=O8qiC2XdnXzw6gIdH6mdM7vmvjohZI8Dj3bWl4dI00qRiHP6++1hiLmLMgcFHnUXCL7KzmC6BHcoV1RfbynsG60uTdRObv97mkZDYv7ho2MgUoEai3dOKmwBzBO7Z+jvSDOdgz3UHeAcmm71Pxyud1NNi/1JOuQ/+/+4F8RMJO0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730456094; c=relaxed/simple;
-	bh=bHJR8SM95eGim0uQIvrzDUF6VWp5MUoPqulcvUcx1GQ=;
-	h=From:To:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=a1cjAtyWXqF67uIs0rNh/0+HB+si4buBMlQz+ub8IWXW1PlHj+rPiblqCkLQDOqsuIOSVYFcV2WaPXZ4I0X8dR5abcJUkpRf4RQbamh2N4XYP69OZf9D1NxMR+19/V2CpXWQAKJaO6Is3BeXCw1OKvnnHdEOWxdWIbj5Q/hW9tg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=IAeNOTzh; arc=none smtp.client-ip=198.175.65.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1730457612; c=relaxed/simple;
+	bh=v+qxwvGY1m0dlY7yDb24hPEIzmLjNV/bOx2C3HqmrjI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=N5EisBhnrD/Sn8CPF6pGefsyGMhUE5qC9bxgnNZ3BmJwZN5C9EPMneNzfbvJJEsYjXWd7rL7Vx4qFTuWTYjMMDHnNc4S7CfjFRpDzZyyLq0VpacZPSUHx/kvbiY3OlOW7c9cHdCQJCws0Q2VHmDpvGzo2J0kjlvVBP3rXENCp6I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Xv3zmiqt; arc=none smtp.client-ip=209.85.222.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="IAeNOTzh"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1730456092; x=1761992092;
-  h=from:to:subject:date:message-id:in-reply-to:references:
-   mime-version:content-transfer-encoding;
-  bh=bHJR8SM95eGim0uQIvrzDUF6VWp5MUoPqulcvUcx1GQ=;
-  b=IAeNOTzhY49/U83O+Fj0nKCoyOG/p91/YRsbPsQC3U2jddITqOmwYqtw
-   EbhKbE8O8y8ZsPYGFvyLsFXfiMZZZiO0TbA2T2nABTPKnRscLHkty046Q
-   1RC7oAuutZ6+OReDmCvdx2S1KhrkqXxx7z+WenvqPKlkPx0BVV6HXmh1Q
-   vAEAafVpn9W+8dj/OpBKEA3UyA8pbfgvc3hMip5n0caWhYD+KwXnexdbv
-   UtSYUVXvBDODKVqQuxjcOhLQudukmEaMLd4JvA6F28T2R/NYn3FAAFPEu
-   s23P4Koep7hhntKcof5JTDXcoD5oh8vg+DFXjsumT5b47gro+LiIeQLQ1
-   Q==;
-X-CSE-ConnectionGUID: 1ymS2PVKT2Kzk1OV/b4zIw==
-X-CSE-MsgGUID: nOb9I6eZT/amuI/kb6mZxQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="41319320"
-X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
-   d="scan'208";a="41319320"
-Received: from orviesa007.jf.intel.com ([10.64.159.147])
-  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2024 03:14:50 -0700
-X-CSE-ConnectionGUID: tc/e7HAwRheFgO4+/uctqg==
-X-CSE-MsgGUID: Rb3ip6b4THW6jI26P96O2g==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.11,249,1725346800"; 
-   d="scan'208";a="83355133"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by orviesa007.jf.intel.com with ESMTP; 01 Nov 2024 03:14:49 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1003)
-	id E329D3AD; Fri, 01 Nov 2024 12:14:44 +0200 (EET)
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 6/6] mmc: sdhci-acpi: Don't use "proxy" headers
-Date: Fri,  1 Nov 2024 12:11:36 +0200
-Message-ID: <20241101101441.3518612-7-andriy.shevchenko@linux.intel.com>
-X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
-In-Reply-To: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
-References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Xv3zmiqt"
+Received: by mail-ua1-f48.google.com with SMTP id a1e0cc1a2514c-84fe06fbdc6so590531241.0;
+        Fri, 01 Nov 2024 03:40:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1730457609; x=1731062409; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3xGyDEYNWfKOFJLpEkm/4qBVP0ZMK9b+NBJIWM6trnI=;
+        b=Xv3zmiqtmj56skaXxFNGzhFG05139QBMq02kI9vYpobyXNCodBrZFryELnoCOLfK3b
+         ediAgxxQOv56JOd34UNsEKLQiAeQfFSF0VuUXXbkAWXF4S0PaFMvOtPnQjJPs6Hpoy0l
+         /5iOjE4Lf63lCNWwYj6Q6U25dAHKbClyJfBI1YyL/LGW9r7GflCpwSF/7teav52UycEH
+         NM3kXdJdQgjkUaYEAIjVzR+KbOUU4nUgwmOhkVUS50vC2eQ3HF5sL7Js+9MZxjCwOU4d
+         8v5aCevSeG6SCthbyXdRp9ccSW9ha+VjcEJrNOaEXNhosBgjPimulLQKPbNQyKd+3bKS
+         mfag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730457609; x=1731062409;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=3xGyDEYNWfKOFJLpEkm/4qBVP0ZMK9b+NBJIWM6trnI=;
+        b=vO9GCHkD0fqcU+GK+uqhr3PJzO0uTmYqAXyMg8XBRnZPlziutlzsU8PxebeuYrowE+
+         Zd2TgFB7aa14YCG6nfCyRODLCHy/oD9Byih85SDQlT0o9jzRGPJqKGczmdtbcviyOroF
+         vYqM5OIGmjymH8Cn0HGUrQAFvNOYYBMI+gjdK475rlcPSPeAifZNfem522H3ibuqFx96
+         TQF/QBPDAbTfud8lQRshwazVR1sIojBImMGVK9RkEEK9ei2ioU9gMHJTUAqO7vI19HWC
+         T+zWkpeSEQFUDLh4ANAXuwZyG0AoYLmio3Xq4eq/XV3OGa3qA7A+o/tnSTJ975LuwV1t
+         kd9w==
+X-Forwarded-Encrypted: i=1; AJvYcCUD6XDElJOOuFsxkQx5rb5k+VwiXWg0GDdFWXKdfqPLpnTc+wp0qZoc1m2QK2LPzwm515OswcsvkteN@vger.kernel.org, AJvYcCWX0WHtg7rP4vJjJGrYZwkVpYrPxoDNX2XXc14FwPTYFrSVg1S+nn2dwsKOipxPvmceKFAWZ7BBJD2H01Q=@vger.kernel.org
+X-Gm-Message-State: AOJu0YziBIQqY7ri4a8P+F7VS/mglFUuLrwPRfKPCdnfxrlDzGQNN/A0
+	Uw3t3v8n+AKfrKUnkH9u9IlzXuaFLqMMTU7RDK/spvA8vf37i03PCsuKE2PxMxE3hs+8PO9q+q2
+	x3HxG8D6EImUFCSeI+yLbqx+xPDQ=
+X-Google-Smtp-Source: AGHT+IELxio5Fp4CUQ+VZXCAxZlg5M8PwN/Sj96D+5cfX+mjsg9Cac1Dy2zxi8TLd1qqdkZNY0fF9eMI8oqq6k8ie/k=
+X-Received: by 2002:a05:6102:3753:b0:4a7:487d:88e4 with SMTP id
+ ada2fe7eead31-4a9542630e2mr8288542137.4.1730457609208; Fri, 01 Nov 2024
+ 03:40:09 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20241018105333.4569-1-victorshihgli@gmail.com>
+ <20241018105333.4569-4-victorshihgli@gmail.com> <CAMuHMdWQWxSsSC=LhG7wcF=gaQhr45A_bE_RneCAG85WQU+2mA@mail.gmail.com>
+In-Reply-To: <CAMuHMdWQWxSsSC=LhG7wcF=gaQhr45A_bE_RneCAG85WQU+2mA@mail.gmail.com>
+From: Victor Shih <victorshihgli@gmail.com>
+Date: Fri, 1 Nov 2024 18:39:57 +0800
+Message-ID: <CAK00qKDxbdOoYx9UJEdEBb6uggof5fZV3JNar7s_cGP6ERSdzg@mail.gmail.com>
+Subject: Re: [PATCH V23 03/16] mmc: sdhci: add UHS-II module and add a kernel configuration
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	Lucas.Lai@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, dlunev@chromium.org, 
+	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
+	AKASHI Takahiro <takahiro.akashi@linaro.org>, Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Update header inclusions to follow IWYU (Include What You Use) principle.
-While at it, sort them alphabetically for better maintenance.
+On Tue, Oct 29, 2024 at 9:56=E2=80=AFPM Geert Uytterhoeven <geert@linux-m68=
+k.org> wrote:
+>
+> Hi Victor,
+>
+> On Fri, Oct 18, 2024 at 1:14=E2=80=AFPM Victor Shih <victorshihgli@gmail.=
+com> wrote:
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > This patch adds sdhci-uhs2.c as a module for UHS-II support.
+> > This is a skeleton for further development in this patch series.
+> >
+> > This kernel configuration, CONFIG_MMC_SDHCI_UHS2, will be used
+> > in the following commits to indicate UHS-II specific code in sdhci
+> > controllers.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+>
+> Thanks for your patch, which is now commit 2af7dd8b64f2fd6a ("mmc:
+> sdhci: add UHS-II module and add a kernel configuration") in
+> linux-next/master mmc/next next-20241025 next-20241028 next-20241029
+>
+> > --- /dev/null
+> > +++ b/drivers/mmc/host/sdhci-uhs2.c
+> > @@ -0,0 +1,41 @@
+> > +// SPDX-License-Identifier: GPL-2.0-or-later
+> > +/*
+> > + *  linux/drivers/mmc/host/sdhci_uhs2.c - Secure Digital Host Controll=
+er
+> > + *  Interface driver
+> > + *
+> > + *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
+> > + *  Copyright (C) 2020 Genesys Logic, Inc.
+> > + *  Authors: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > + *  Copyright (C) 2020 Linaro Limited
+> > + *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>
+> That is a very extensive copyright header, for just a small piece of
+> boilerplate code?
+>
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 33 ++++++++++++++++++---------------
- 1 file changed, 18 insertions(+), 15 deletions(-)
+Hi, Geert
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index c931f506c1b0..fcb69a509c1e 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -5,27 +5,30 @@
-  * Copyright (c) 2012, Intel Corporation.
-  */
- 
-+#include <linux/acpi.h>
- #include <linux/bitfield.h>
--#include <linux/init.h>
--#include <linux/export.h>
--#include <linux/module.h>
-+#include <linux/bitops.h>
-+#include <linux/compiler.h>
-+#include <linux/delay.h>
- #include <linux/device.h>
-+#include <linux/dma-mapping.h>
-+#include <linux/dmi.h>
-+#include <linux/err.h>
-+#include <linux/errno.h>
-+#include <linux/export.h>
-+#include <linux/init.h>
-+#include <linux/interrupt.h>
-+#include <linux/io.h>
-+#include <linux/ioport.h>
-+#include <linux/mod_devicetable.h>
-+#include <linux/module.h>
- #include <linux/pinctrl/pinconf-generic.h>
- #include <linux/platform_device.h>
--#include <linux/ioport.h>
--#include <linux/io.h>
--#include <linux/dma-mapping.h>
--#include <linux/compiler.h>
--#include <linux/stddef.h>
--#include <linux/bitops.h>
--#include <linux/types.h>
--#include <linux/err.h>
--#include <linux/interrupt.h>
--#include <linux/acpi.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
--#include <linux/delay.h>
--#include <linux/dmi.h>
-+#include <linux/stddef.h>
-+#include <linux/types.h>
-+#include <linux/uuid.h>
- 
- #include <linux/mmc/host.h>
- #include <linux/mmc/pm.h>
--- 
-2.43.0.rc1.1336.g36b5255a03ac
+As I know, the copyright is for the complete sdhci-uhs2.c file
+and subsequent patches added the code into the sdhci-uhs2.c file.
 
+Thanks, Victor Shih
+
+> > + */
+> > +
+> > +#include <linux/module.h>
+> > +
+> > +#include "sdhci.h"
+> > +#include "sdhci-uhs2.h"
+> > +
+> > +#define DRIVER_NAME "sdhci_uhs2"
+> > +#define DBG(f, x...) \
+> > +       pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
+> > +
+> > +/*********************************************************************=
+********\
+> > + *                                                                    =
+       *
+> > + * Driver init/exit                                                   =
+       *
+> > + *                                                                    =
+       *
+> > +\*********************************************************************=
+********/
+> > +
+> > +static int __init sdhci_uhs2_mod_init(void)
+> > +{
+> > +       return 0;
+> > +}
+> > +module_init(sdhci_uhs2_mod_init);
+> > +
+> > +static void __exit sdhci_uhs2_mod_exit(void)
+> > +{
+> > +}
+> > +module_exit(sdhci_uhs2_mod_exit);
+> > +
+> > +MODULE_AUTHOR("Intel, Genesys Logic, Linaro");
+> > +MODULE_DESCRIPTION("MMC UHS-II Support");
+> > +MODULE_LICENSE("GPL");
+>
+> Gr{oetje,eeting}s,
+>
+>                         Geert
+>
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m6=
+8k.org
+>
+> In personal conversations with technical people, I call myself a hacker. =
+But
+> when I'm talking to journalists I just say "programmer" or something like=
+ that.
+>                                 -- Linus Torvalds
