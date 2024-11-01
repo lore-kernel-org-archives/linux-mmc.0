@@ -1,51 +1,51 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A357487BE;
-	Fri,  1 Nov 2024 03:15:47 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BA3413C83D;
+	Fri,  1 Nov 2024 03:15:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730430950; cv=none; b=TrEAlEUU8R43k9x3bGZhUcq/oqsPa30I3VSI8Ys28Uf8BsK5JGJDOYjwLlw0Odg0f0eNt80M19X9XSq/mPImz8+dvNr1a5+OERhqQz4tMJ8U/VWTDIHK8aXr1MlNfEu9Q7+wsUP493ujY5vOSbEvdSlc1UlFMtCATgzosfLijOg=
+	t=1730430950; cv=none; b=cXJ+JqIgj17s2l7uc1A0kcDD6l4xBCN0IFWCSdS2xy26WN1nf9CzKfVd8ow9qce1oMQuP7RcG2g7VQpuIMJYrWYzdVmBN6lVjejBcfvjXBxumLcpHL4M46CVqXro+VOyFHD7wO2vz0IErh3+2O98XG0pECqCBv6w5e2O/HEeePQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1730430950; c=relaxed/simple;
-	bh=BXNQBM6G//BrKa1YcI8JgufjQszQqzdvYvQMktRzmaI=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=ufqsCF89qBxKXrrTMApjpscEWh+L+/2K5hrXKXiy8ZCU2z+H+tKGrzFxS9sRrJ7UnBxAuPFhXUrg3w22Rww99X97Vz3xOu5hnraz3+HfzzmhsB058pSc1y1m+pXAe7g54hCRq+mNSVTNIWo0rpV1zv6BlMiL/eo2q+5nTVFpecU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=MKlfGn7p; arc=none smtp.client-ip=205.220.180.131
+	bh=Zbw3cciU18XnMOna37Dl9R+P5jMoeNsP2pVcoTOzDV0=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=G8jNDwiQSRK2ykbyi887YvSG7smFwHS3oTdDlp5GVqyF6bFToR8keTMZu0dgyc3Im4RAeK40M3jNWWLc5cFv1o6vv0+5tgfiFpHBjNGnM037yYIaspJ9ktgksjGnZlSoliRn5edai+9sPOD1SU8hCf1hwOHscvwpXvaQWz2FqLs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=BI27d5Tj; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="MKlfGn7p"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A10jlEB009603;
-	Fri, 1 Nov 2024 03:15:44 GMT
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="BI27d5Tj"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49VCX9jH002324;
+	Fri, 1 Nov 2024 03:15:45 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
 	cc:date:from:in-reply-to:message-id:references:subject:to; s=
-	qcppdkim1; bh=wJir/rIBeE779G+3/i9b0ZwypdjmGHuZwTf+UAYLSzk=; b=MK
-	lfGn7pXMNFpjqFShvOu1nyUZu+lDU8dcXniH1lsyWGOwm7OcFF0Ufdtw8rXE5JhO
-	HRfLheyIl+hT5Ev0czgsMcmmyuKzgYqKPBR+Lp3rRZwBGu+AI/p9FjS/2OeZlZxp
-	yCk3/+CCaaj7VddsHAWmON7Bv1B4K2YYtI4YCfjs17uLW2RSTjGiXQMnN1Y2as+x
-	bUTav4I/yPjoUoNrCGsKk123fj1qktQ9sgDEAtoRJgcQ4kf79rmT3L+oFnlLY7l+
-	94HlmpmPRbEm6Fdas3v4s/kMZMUUeKhyXGhitBJ634BpcCjRWuYwJM6phEiHRXOn
-	OcPPewPtBgG4jl6xYg2w==
+	qcppdkim1; bh=k+I3jfrOqM1I9wbUUj7pxuJz32A7kXUo2hK6Ue5/OqI=; b=BI
+	27d5TjZKfsNWs54L5cGD6LcxOOCp+qHrvyQT2720Vrwd95TZhXUbRTbQVaRt4XQg
+	FME8/amRNuqLwFufCKy66b4f+ARaOENGvoRvOMeGwrw4MVlfkPr6i2x1P6Akj667
+	XDFkauQCv/wpbdekRQlPyA1h5F73+iVwYb8v+b3dnbDRksi0p0/gGWkcoIn83giX
+	PaO7+duZGHOWxWBrL+Z4d3UeQlxIrHZArOrONjbv4ojjmDL4mIAo+izAHRGnLZqQ
+	uW1BHJ/RvY1VDIoWLq1IDWxkLZBzCuvGGb/zsg9dtNxzCuAJ3JsMowL6Z+Ol0yzN
+	Qu7Ws0npgCN3AiutyUEw==
 Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42kjm1e09e-1
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42kmn5dm4f-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
 	Fri, 01 Nov 2024 03:15:44 +0000 (GMT)
 Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A13Ff9W010612;
+	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A13Fen1010609;
 	Fri, 1 Nov 2024 03:15:41 GMT
 Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 42gsgmd4tb-1
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 42gsgmd4ts-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Fri, 01 Nov 2024 03:15:40 +0000
+	Fri, 01 Nov 2024 03:15:41 +0000
 Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A13FeNC010587;
-	Fri, 1 Nov 2024 03:15:40 GMT
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A13FeNE010587;
+	Fri, 1 Nov 2024 03:15:41 GMT
 Received: from hu-maiyas-hyd.qualcomm.com (hu-spuppala-hyd.qualcomm.com [10.213.108.54])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 4A13FeVv010581;
-	Fri, 01 Nov 2024 03:15:40 +0000
+	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 4A13FfVR010628;
+	Fri, 01 Nov 2024 03:15:41 +0000
 Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 4137148)
-	id 7F3155006D5; Fri,  1 Nov 2024 08:45:39 +0530 (+0530)
+	id 86991500922; Fri,  1 Nov 2024 08:45:39 +0530 (+0530)
 From: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
 To: Adrian Hunter <adrian.hunter@intel.com>,
         Asutosh Das <quic_asutoshd@quicinc.com>,
@@ -54,9 +54,9 @@ Cc: Ritesh Harjani <ritesh.list@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
         quic_gaurkash@quicinc.com, quic_neersoni@quicinc.com,
         quic_spuppala@quicinc.com
-Subject: [PATCH RFC 2/6] mmc: host: add support to derive software secret
-Date: Fri,  1 Nov 2024 08:45:35 +0530
-Message-Id: <20241101031539.13285-3-quic_spuppala@quicinc.com>
+Subject: [PATCH RFC 5/6] mmc: host: implement derive sw secret vop in mmc qcom
+Date: Fri,  1 Nov 2024 08:45:38 +0530
+Message-Id: <20241101031539.13285-6-quic_spuppala@quicinc.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20241101031539.13285-1-quic_spuppala@quicinc.com>
 References: <20241101031539.13285-1-quic_spuppala@quicinc.com>
@@ -64,15 +64,15 @@ X-QCInternal: smtphost
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: ezw1nIAHbb5kSMANJs-rKadhV2HWSYSU
-X-Proofpoint-ORIG-GUID: ezw1nIAHbb5kSMANJs-rKadhV2HWSYSU
+X-Proofpoint-ORIG-GUID: E6qh5HOpKUXt6sS4s-yC28VEZpKy1Q2u
+X-Proofpoint-GUID: E6qh5HOpKUXt6sS4s-yC28VEZpKy1Q2u
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 phishscore=0
- priorityscore=1501 malwarescore=0 lowpriorityscore=0 adultscore=0
- mlxscore=0 mlxlogscore=999 spamscore=0 suspectscore=0 clxscore=1015
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 spamscore=0
+ lowpriorityscore=0 impostorscore=0 phishscore=0 mlxlogscore=982
+ priorityscore=1501 mlxscore=0 malwarescore=0 bulkscore=0 suspectscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.19.0-2409260000 definitions=main-2411010022
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -80,77 +80,50 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 
-Block crypto allows storage controllers like MMC to
-register an op derive a software secret from wrapped
-keys added to the kernel.
-
-Wrapped keys in most cases will have vendor specific
-implementations, which means this op would need to have
-a corresponding MMC variant op.
-This change adds hooks in MMC to support this variant
-ops and tie them to the blk crypto op.
+MMC defines a variant op to tie the corresponding
+derive software secret blk crypto op to the vendor specific
+implementation of wrapped keys. This patch implements
+this variant op.
 
 Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
 ---
- drivers/mmc/host/cqhci-crypto.c | 14 ++++++++++++++
- drivers/mmc/host/cqhci.h        |  5 +++++
- 2 files changed, 19 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
 
-diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
-index c4e7ae95bc7d..e2a4700f3153 100644
---- a/drivers/mmc/host/cqhci-crypto.c
-+++ b/drivers/mmc/host/cqhci-crypto.c
-@@ -128,6 +128,19 @@ static int cqhci_crypto_keyslot_evict(struct blk_crypto_profile *profile,
- 	return cqhci_crypto_clear_keyslot(cq_host, slot);
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index f031a4dbc719..aba1d6e688b6 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1897,6 +1897,21 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 		return qcom_ice_evict_key(msm_host->ice, slot);
  }
  
-+static int cqhci_crypto_derive_sw_secret(struct blk_crypto_profile *profile,
-+					  const u8 wkey[], size_t wkey_size,
++/*
++ * Derive a software secret from a hardware wrapped key. The key is unwrapped in
++ * hardware from trustzone and a software key/secret is then derived from it.
++ */
++static int sdhci_msm_ice_derive_sw_secret(struct cqhci_host *cq_host, const u8 wkey[],
++					  unsigned int wkey_size,
 +					  u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
 +{
-+	struct cqhci_host *cq_host = cqhci_host_from_crypto_profile(profile);
++	struct sdhci_host *host = mmc_priv(cq_host->mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
 +
-+	if (cq_host->ops && cq_host->ops->derive_sw_secret)
-+		return  cq_host->ops->derive_sw_secret(cq_host, wkey, wkey_size,
-+						    sw_secret);
-+
-+	return -EOPNOTSUPP;
++	return qcom_ice_derive_sw_secret(msm_host->ice, wkey, wkey_size, sw_secret);
 +}
 +
- /*
-  * The keyslot management operations for CQHCI crypto.
-  *
-@@ -139,6 +152,7 @@ static int cqhci_crypto_keyslot_evict(struct blk_crypto_profile *profile,
- static const struct blk_crypto_ll_ops cqhci_crypto_ops = {
- 	.keyslot_program	= cqhci_crypto_keyslot_program,
- 	.keyslot_evict		= cqhci_crypto_keyslot_evict,
-+	.derive_sw_secret	= cqhci_crypto_derive_sw_secret,
- };
+ #else /* CONFIG_MMC_CRYPTO */
  
- static enum blk_crypto_mode_num
-diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-index f6bc66bc6418..77368fb97eba 100644
---- a/drivers/mmc/host/cqhci.h
-+++ b/drivers/mmc/host/cqhci.h
-@@ -286,6 +286,8 @@ struct cqhci_host {
+ static inline int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+@@ -2003,6 +2018,7 @@ static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+ 	.disable	= sdhci_msm_cqe_disable,
+ #ifdef CONFIG_MMC_CRYPTO
+ 	.program_key	= sdhci_msm_program_key,
++	.derive_sw_secret	= sdhci_msm_ice_derive_sw_secret,
  #endif
  };
  
-+/* @derive_sw_secret: derive sw secret from a wrapped key
-+ */
- struct cqhci_host_ops {
- 	void (*dumpregs)(struct mmc_host *mmc);
- 	void (*write_l)(struct cqhci_host *host, u32 val, int reg);
-@@ -300,6 +302,9 @@ struct cqhci_host_ops {
- 	int (*program_key)(struct cqhci_host *cq_host,
- 			   const struct blk_crypto_key *bkey,
- 			   const union cqhci_crypto_cfg_entry *cfg, int slot);
-+	int (*derive_sw_secret)(struct cqhci_host *cq_host, const u8 wkey[],
-+				unsigned int wkey_size,
-+				u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE]);
- #endif
- 	void (*set_tran_desc)(struct cqhci_host *cq_host, u8 **desc,
- 			      dma_addr_t addr, int len, bool end, bool dma64);
 -- 
 2.17.1
 
