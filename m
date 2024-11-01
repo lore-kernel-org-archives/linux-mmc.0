@@ -1,138 +1,90 @@
-Received: from mail-m19731120.qiye.163.com (mail-m19731120.qiye.163.com [220.197.31.120])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A553FF1;
-	Fri,  1 Nov 2024 09:14:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.120
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10D3315B547;
+	Fri,  1 Nov 2024 10:14:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730452501; cv=none; b=M7SxnrPpvLF5Iec8XP5Fys2pu/g0IfrfUB+456y4gai1wPcJxk/hzIvgyJaaB2QdpsZDmgpauqK0ftj5lKUFZLwXgbOi5lYjp5veSTncvct1vq9JMwQcuXoQn9msrqUyX+g120lWlMT4SUzSfLCPT5EUy1Uy/CDf+zhhI47OZ8c=
+	t=1730456089; cv=none; b=DZF97tCbrET41btzQKAQeTfmeSYwVbLEwvu6Vk/T5OgJhNiSkjAd/AwOaSz8IAvBa1PkYGqoFOkx7Lr8NgSvtt6QQDwQnfuEMAbo9UsQtbnCGeqQv8HU9ke7PgKlJubr3ENIr8lh00AAlEo6Mvt8NXuf5sKopD59PaqqJTAJP2I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730452501; c=relaxed/simple;
-	bh=QeWofm20AbRL0tUJ6h2EObOvluRG9xxAampMZD1MHaY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ayjTVO63Sh7C/XjhouiizLFFJzQx8Aq0L7dwCMMvW6fbh/n4RRwMwVb6G4z8TmD7KIwBzF+uzTelD9YTHc5RKjDrzF7eSoeil0+aTPi8PGgqER/O4YpLEo7bncstTucad0648WknAO2URTNukv/VrnvsmLMCi0iS60dyThNlpZs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=Ns2PAmM3; arc=none smtp.client-ip=220.197.31.120
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1730456089; c=relaxed/simple;
+	bh=gOtRUzBBjAMr9lOHwIInIW2ETDv9377pSLdr5cMAv5w=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version; b=sd1dZ+Acm474J4+PjzcpY8wSrmikOn7mJTVV0AghSGGgNSpvAZBIeWaWW0PV5HfOJrvlR/YJ9TcCVTc6GUsKpejWE1csUAjPEkdSokweImhRXUNgAOcx5w/L4PqljElGKgb8Uh9ckY2VSA5O4B31Ydi6xHJ2rhe2ApKFNiIQJu0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Dv4IthZw; arc=none smtp.client-ip=198.175.65.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="Ns2PAmM3"
-Received: from [172.16.12.67] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 183987c6;
-	Fri, 1 Nov 2024 15:59:18 +0800 (GMT+08:00)
-Message-ID: <eb96b240-f3ee-4057-b016-c746d48cc1b4@rock-chips.com>
-Date: Fri, 1 Nov 2024 15:59:18 +0800
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Dv4IthZw"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1730456088; x=1761992088;
+  h=from:to:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=gOtRUzBBjAMr9lOHwIInIW2ETDv9377pSLdr5cMAv5w=;
+  b=Dv4IthZwzNAA27FrK7/hGaQr+exU8sP2ccSkI6A520qockOioW5FPKnz
+   a6LgUD/93wyFI3Snk6AUgFD2fDulDTIzNAojwD73DTgLFE08lSMbJiNH0
+   jjX+T8mBh3N32PXI7vk9m/yrQNavWMKPBXbz0rihB2s+KlXzlDSC2oT9v
+   cXFiH2+jBpCh/WvoUE071LjbHnFK7U7Xem0gkD5Zbv6DU5kPdAmdATqdt
+   bmyjJ0/nMIFd9tRVZP2DYqfS4L7+fkIdTGVNNlCDkx/YCvCN0EvnZndgh
+   Awy1YouQJbK66sFBA/p7QvQVNt3XuBs5+6DUs58WDt0LnI0OCjC0mwSWE
+   g==;
+X-CSE-ConnectionGUID: nTTElTwITbSc/l6HBGYDyA==
+X-CSE-MsgGUID: XuvQY5RcQga9f0OGjAUInA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="41319313"
+X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
+   d="scan'208";a="41319313"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Nov 2024 03:14:47 -0700
+X-CSE-ConnectionGUID: XVbt0zTgSXSSSlG3/lY1Ww==
+X-CSE-MsgGUID: WX/ctoxkSIOz+T7XPQn24Q==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.11,249,1725346800"; 
+   d="scan'208";a="83355127"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by orviesa007.jf.intel.com with ESMTP; 01 Nov 2024 03:14:46 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+	id 9D3741AC; Fri, 01 Nov 2024 12:14:44 +0200 (EET)
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v2 0/6] mmc: sdhci-acpi: A few cleanups
+Date: Fri,  1 Nov 2024 12:11:30 +0200
+Message-ID: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.43.0.rc1.1336.g36b5255a03ac
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: dw_mmc: rockchip: Keep controller working for card
- detect
-To: Ulf Hansson <ulf.hansson@linaro.org>, Robin Murphy <robin.murphy@arm.com>
-Cc: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
- linux-rockchip@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
- <4920950.GXAFRqVoOG@diego>
- <CAPDyKFosf_+m9j8YgHa-PsC2SV8+Aou2O6bTbMfzGBpQ2sY8YA@mail.gmail.com>
- <69d06c04-cc8c-4435-a622-33d5dcd1fa24@arm.com>
- <CAPDyKFoU=AoQqXov_-qFo8xjEbiDAk9mtTtCR9HAYz_gg-bnzQ@mail.gmail.com>
-Content-Language: en-US
-From: Kever Yang <kever.yang@rock-chips.com>
-In-Reply-To: <CAPDyKFoU=AoQqXov_-qFo8xjEbiDAk9mtTtCR9HAYz_gg-bnzQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGkwaQlYfQk8YQklLSh5PTUhWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-X-HM-Tid: 0a92e6bc62c103afkunm183987c6
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MRQ6Hzo5LjIjTE9KSUhIFxRW
-	GkNPCz5VSlVKTEhLT09MQk5CTE5JVTMWGhIXVRAeDR4JVQIaFRw7CRQYEFYYExILCFUYFBZFWVdZ
-	EgtZQVlOQ1VJSVVMVUpKT1lXWQgBWUFITkJMNwY+
-DKIM-Signature:a=rsa-sha256;
-	b=Ns2PAmM3r3IVo0z1BD9bWzhY49ezgnto/lCiZiqHcWvBOHPb/A16zDxfwiJa5XmD9Kq+7evbQpnVKcBtIO8uqQFV6WquR4xpX94n/2J949wt9rM7N+BKjxsdqrHzVtftHH5tHj1nP850u2tkMsiaKiyObzVPr06Dc1mNbEPFe5Y=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=UUxatgIjseNyDqt3FqqOob4pJSJxFWPR3CwFmtzwsvQ=;
-	h=date:mime-version:subject:message-id:from;
 
-Hi Ulf, Robin, Heiko,
+A few almost independent cleanups for the driver because of
+new available APIs.
 
-On 2024/10/7 17:49, Ulf Hansson wrote:
-> On Fri, 4 Oct 2024 at 19:34, Robin Murphy <robin.murphy@arm.com> wrote:
->> On 02/10/2024 10:55 pm, Ulf Hansson wrote:
->>> On Sat, 14 Sept 2024 at 13:52, Heiko Stübner <heiko@sntech.de> wrote:
->>>> Am Donnerstag, 12. September 2024, 09:26:14 CEST schrieb Kever Yang:
->>>>> In order to make the SD card hotplug working we need the card detect
->>>>> function logic inside the controller always working. The runtime PM will
->>>>> gate the clock and the power domain, which stops controller working when
->>>>> no data transfer happen.
->>>>>
->>>>> So lets skip enable runtime PM when the card needs to detected by the
->>>>> controller and the card is removable.
->>>>>
->>>>> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
->>>> So for the change itself this looks good, i.e. it fixes an issue for baords relying
->>>> on the on-chip-card-detect.
->>>>
->>>>
->>>> But for boards doing that, the controller will be running _all the time_
->>>> even if there is never any card inserted.
->>>>
->>>> So relying on the on-soc card-detect will effectively increase the power-
->>>> consumption of the board - even it it'll never use any sd-card?
-Yes, this is how the controller works, the controller needs the clock to 
-make the detect logic work.
-If we use gpio to implement this card-detect, it works because the GPIO 
-controller/clock keeps working.
-For the dw_mmc driver support, we should support both kind of implement 
-due to the controller has this function,
-so this patch is for the card-detect implement by the dwmmc controller, 
-the controller need to keep working
-- only for sd-card (so not include the "non-removable " device)
-- also not disable rpm when "cd-gpios" is used.
+In v2:
+- added patch 1 to solve compilation error (LKP)
+- split patch 3 out of (previous version of) patch 4 (Christophe)
+- added patches 5 and 6
 
-For the power consumption, I believe it will increase, but very very 
-small, we can't even monitor the change
-if we use the normal equipment. The driver should make function works 
-first, and then consider the power.
+Andy Shevchenko (6):
+  mmc: sdhci: Use EXPORT_PM_FN_NS_GPL() for exporting PM functions
+  mmc: sdhci-acpi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() and
+    pm_ptr()
+  mmc: sdhci-acpi: Remove not so useful error message
+  mmc: sdhci-acpi: Use devm_platform_ioremap_resource()
+  mmc: sdhci-acpi: Tidy up ACPI ID table
+  mmc: sdhci-acpi: Don't use "proxy" headers
 
-This patch is to make the dwmmc function works without gpio's help in 
-dwmmc driver,
-  and has no affect to the gpio option, people still able to use gpio to 
-do the cd.
+ drivers/mmc/host/sdhci-acpi.c | 92 ++++++++++++++---------------------
+ drivers/mmc/host/sdhci.c      | 14 ++----
+ drivers/mmc/host/sdhci.h      |  2 -
+ 3 files changed, 40 insertions(+), 68 deletions(-)
 
+-- 
+2.43.0.rc1.1336.g36b5255a03ac
 
-Thanks,
-- Kever
->>> Good point! A better option is to use a polling based mechanism - and
->>> we have MMC_CAP_NEEDS_POLL for exactly that.
->>>
->>> Moreover, on DT based platforms one can even use the "broken-cd"
->>> property to indicate this.
->> Except that goes further than is needed here, since it would fall back
->> entirely to software-based polling for card presence. In this case the
->> CD function is not broken in terms of actually detecting a card, it just
->> doesn't work to wake the controller up from suspend because it can't
->> fire its own interrupt while powered off. In principle all we should
->> require here is to periodically resume/suspend the device, to provide a
->> window for the interrupt to work and normal operation to take over if
->> appropriate.
-> Well, I would not object if "broken-cd" would be used for this case
-> too. I believe it already is.
->
-> Another option would be to look at a compatible string and set
-> MMC_CAP_NEEDS_POLL based on that.
->
->> Of course the really clever way would be for suspend to switch the pin
->> into GPIO mode, and set the GPIO interrupt as a wakeup to trigger resume
->> and switch it back again, but perhaps that's a bit tricky without
->> explicit pinctrl states in the DT :/
-> Right. A dedicated GPIO pin for the card detect is certainly the
-> preferred method, if you care about not wasting power.
->
-> Kind regards
-> Uffe
