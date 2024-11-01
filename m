@@ -1,134 +1,138 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mail-m19731120.qiye.163.com (mail-m19731120.qiye.163.com [220.197.31.120])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4679B13A24D;
-	Fri,  1 Nov 2024 03:15:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76A553FF1;
+	Fri,  1 Nov 2024 09:14:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.120
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730430951; cv=none; b=PoEvkHsJ6zVfgxlPUc0pldWnIDeifdePIEwJ8cVOP/OPtbKvSfaN4V8ocvB7fmbMlnssxoKaC+x3L1zYi+Dxi47d3uTKAQUjqF7kkkqFfCbKbwfBHEg2ZmyV4GF5Hor+BsbAY2aedpeXuzOYFZQ642AYt6/xCBb8Blbz6mqvpiA=
+	t=1730452501; cv=none; b=M7SxnrPpvLF5Iec8XP5Fys2pu/g0IfrfUB+456y4gai1wPcJxk/hzIvgyJaaB2QdpsZDmgpauqK0ftj5lKUFZLwXgbOi5lYjp5veSTncvct1vq9JMwQcuXoQn9msrqUyX+g120lWlMT4SUzSfLCPT5EUy1Uy/CDf+zhhI47OZ8c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730430951; c=relaxed/simple;
-	bh=Z/Z3v3f5ZNuL1B/BD2BcQLw4mmBCJrnNHI1teHcC+iI=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=lOLBw3wiv5eztpIJeHV2yIq+BNIF1jKyyR8TIvbEPxkeC+dlLj3RNO4MsivNKjqrMJnzxZgoGMeUajOcm8GdD0Z56uhKYKxMwNuVtWGyXREc81gNnhMsH/JGAvnAPtmOHcyPX8H+XeAUmI7E3iB2bsfvXBlNBtzI6qbPabu6diU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=e06ZpUlN; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1730452501; c=relaxed/simple;
+	bh=QeWofm20AbRL0tUJ6h2EObOvluRG9xxAampMZD1MHaY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ayjTVO63Sh7C/XjhouiizLFFJzQx8Aq0L7dwCMMvW6fbh/n4RRwMwVb6G4z8TmD7KIwBzF+uzTelD9YTHc5RKjDrzF7eSoeil0+aTPi8PGgqER/O4YpLEo7bncstTucad0648WknAO2URTNukv/VrnvsmLMCi0iS60dyThNlpZs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=Ns2PAmM3; arc=none smtp.client-ip=220.197.31.120
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="e06ZpUlN"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 49VMbU12008963;
-	Fri, 1 Nov 2024 03:15:44 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=xrhQ149HLnk4
-	JXhbaoX5SCWn4CD66hZ2w9+VqWyaaLE=; b=e06ZpUlNfoP+xUzayshvYCGYsG6+
-	+yVW4rlYPF/4jJ17LplVRQui6Rl/lCzMksxk7SpxODpkjytg9xMp9c3+xL3MSlfF
-	+XSFGlVZ5Vi1T8T1+hGgJkOJPjB9zZcKFPTgZ7rT9CbnldDjXtdR33eY2+dfcDYk
-	HjpV0qQhI7Xq2n8KHDHofs2Htc9atYiJNDFNW68uVvyUTUBaWQlH/PVtTq9rKD/P
-	4SOZGJVnrC9om0/kCua8qolgw88V7JQrJ4AEe/dhPcutdU2zn3H//V7p3xYxxL3Q
-	W8q5S5A99xs1ncWJ1eHf2bldc5KbTQo68uVQ5lUm0Jz2vgC+d5Ixn/Eb+w==
-Received: from apblrppmta02.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42grgusq53-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 01 Nov 2024 03:15:44 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A13Fe6e010611;
-	Fri, 1 Nov 2024 03:15:41 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTPS id 42gsgmd4tc-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Fri, 01 Nov 2024 03:15:40 +0000
-Received: from APBLRPPMTA02.qualcomm.com (APBLRPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A13FekI010585;
-	Fri, 1 Nov 2024 03:15:40 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-spuppala-hyd.qualcomm.com [10.213.108.54])
-	by APBLRPPMTA02.qualcomm.com (PPS) with ESMTP id 4A13FeQt010579;
-	Fri, 01 Nov 2024 03:15:40 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 4137148)
-	id 7B3D95001B7; Fri,  1 Nov 2024 08:45:39 +0530 (+0530)
-From: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <quic_asutoshd@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ritesh Harjani <ritesh.list@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_gaurkash@quicinc.com, quic_neersoni@quicinc.com,
-        quic_spuppala@quicinc.com
-Subject: [PATCH RFC 0/6] Hardware wrapped key support for MMC core
-Date: Fri,  1 Nov 2024 08:45:33 +0530
-Message-Id: <20241101031539.13285-1-quic_spuppala@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: hj8AtRXfLcJMXeR1v4kl2u5FnMUYeUho
-X-Proofpoint-GUID: hj8AtRXfLcJMXeR1v4kl2u5FnMUYeUho
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 clxscore=1015
- lowpriorityscore=0 adultscore=0 mlxscore=0 bulkscore=0 suspectscore=0
- phishscore=0 spamscore=0 malwarescore=0 mlxlogscore=999 priorityscore=1501
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2409260000
- definitions=main-2411010022
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="Ns2PAmM3"
+Received: from [172.16.12.67] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 183987c6;
+	Fri, 1 Nov 2024 15:59:18 +0800 (GMT+08:00)
+Message-ID: <eb96b240-f3ee-4057-b016-c746d48cc1b4@rock-chips.com>
+Date: Fri, 1 Nov 2024 15:59:18 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: dw_mmc: rockchip: Keep controller working for card
+ detect
+To: Ulf Hansson <ulf.hansson@linaro.org>, Robin Murphy <robin.murphy@arm.com>
+Cc: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+ linux-rockchip@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20240912152538.1.I858c2a0bf83606c8b59ba1ab6944978a398d2ac5@changeid>
+ <4920950.GXAFRqVoOG@diego>
+ <CAPDyKFosf_+m9j8YgHa-PsC2SV8+Aou2O6bTbMfzGBpQ2sY8YA@mail.gmail.com>
+ <69d06c04-cc8c-4435-a622-33d5dcd1fa24@arm.com>
+ <CAPDyKFoU=AoQqXov_-qFo8xjEbiDAk9mtTtCR9HAYz_gg-bnzQ@mail.gmail.com>
+Content-Language: en-US
+From: Kever Yang <kever.yang@rock-chips.com>
+In-Reply-To: <CAPDyKFoU=AoQqXov_-qFo8xjEbiDAk9mtTtCR9HAYz_gg-bnzQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGkwaQlYfQk8YQklLSh5PTUhWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+X-HM-Tid: 0a92e6bc62c103afkunm183987c6
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MRQ6Hzo5LjIjTE9KSUhIFxRW
+	GkNPCz5VSlVKTEhLT09MQk5CTE5JVTMWGhIXVRAeDR4JVQIaFRw7CRQYEFYYExILCFUYFBZFWVdZ
+	EgtZQVlOQ1VJSVVMVUpKT1lXWQgBWUFITkJMNwY+
+DKIM-Signature:a=rsa-sha256;
+	b=Ns2PAmM3r3IVo0z1BD9bWzhY49ezgnto/lCiZiqHcWvBOHPb/A16zDxfwiJa5XmD9Kq+7evbQpnVKcBtIO8uqQFV6WquR4xpX94n/2J949wt9rM7N+BKjxsdqrHzVtftHH5tHj1nP850u2tkMsiaKiyObzVPr06Dc1mNbEPFe5Y=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=UUxatgIjseNyDqt3FqqOob4pJSJxFWPR3CwFmtzwsvQ=;
+	h=date:mime-version:subject:message-id:from;
 
-This series adds support for wrapped keys by implementing relevant
-callbacks MMC core and QCom layer.
+Hi Ulf, Robin, Heiko,
 
-They patches do the following:
-- Tested on top of Hardware wrapped key support for QCom ICE and UFS core: https://patchwork.kernel.org/project/linux-scsi/cover/20241011-wrapped-keys-v7-0-e3f7a752059b@linaro.org/
+On 2024/10/7 17:49, Ulf Hansson wrote:
+> On Fri, 4 Oct 2024 at 19:34, Robin Murphy <robin.murphy@arm.com> wrote:
+>> On 02/10/2024 10:55 pm, Ulf Hansson wrote:
+>>> On Sat, 14 Sept 2024 at 13:52, Heiko Stübner <heiko@sntech.de> wrote:
+>>>> Am Donnerstag, 12. September 2024, 09:26:14 CEST schrieb Kever Yang:
+>>>>> In order to make the SD card hotplug working we need the card detect
+>>>>> function logic inside the controller always working. The runtime PM will
+>>>>> gate the clock and the power domain, which stops controller working when
+>>>>> no data transfer happen.
+>>>>>
+>>>>> So lets skip enable runtime PM when the card needs to detected by the
+>>>>> controller and the card is removable.
+>>>>>
+>>>>> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
+>>>> So for the change itself this looks good, i.e. it fixes an issue for baords relying
+>>>> on the on-chip-card-detect.
+>>>>
+>>>>
+>>>> But for boards doing that, the controller will be running _all the time_
+>>>> even if there is never any card inserted.
+>>>>
+>>>> So relying on the on-soc card-detect will effectively increase the power-
+>>>> consumption of the board - even it it'll never use any sd-card?
+Yes, this is how the controller works, the controller needs the clock to 
+make the detect logic work.
+If we use gpio to implement this card-detect, it works because the GPIO 
+controller/clock keeps working.
+For the dw_mmc driver support, we should support both kind of implement 
+due to the controller has this function,
+so this patch is for the card-detect implement by the dwmmc controller, 
+the controller need to keep working
+- only for sd-card (so not include the "non-removable " device)
+- also not disable rpm when "cd-gpios" is used.
 
-Tested on QCM6490.
+For the power consumption, I believe it will increase, but very very 
+small, we can't even monitor the change
+if we use the normal equipment. The driver should make function works 
+first, and then consider the power.
 
-How to test:
+This patch is to make the dwmmc function works without gpio's help in 
+dwmmc driver,
+  and has no affect to the gpio option, people still able to use gpio to 
+do the cd.
 
-Use the wip-wrapped-keys branch from https://github.com/ebiggers/fscryptctl
-to build a custom fscryptctl that supports generating wrapped keys.
 
-Enable the following config options:
-CONFIG_BLK_INLINE_ENCRYPTION=y
-CONFIG_QCOM_INLINE_CRYPTO_ENGINE=m
-CONFIG_FS_ENCRYPTION_INLINE_CRYPT=y
-CONFIG_MMC_CRYPTO=y
-
-$ mkfs.ext4 -F -O encrypt,stable_inodes /dev/mmcblk0p12
-$ mount /dev/mmcblk0p12 -o inlinecrypt /mnt
-$ fscryptctl generate_hw_wrapped_key /dev/mmcblk0p12 > /mnt/key.longterm
-$ fscryptctl prepare_hw_wrapped_key /dev/mmcblk0p12 < /mnt/key.longterm > /tmp/key.ephemeral
-$ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-$ rm -rf /mnt/dir
-$ mkdir /mnt/dir
-$ fscryptctl set_policy --hw-wrapped-key --iv-ino-lblk-32 "$KEYID" /mnt/dir
-$ dmesg > /mnt/dir/test.txt
-$ sync
-
-Reboot the board
-
-$ mount /dev/mmcblk0p12 -o inlinecrypt /mnt
-$ ls /mnt/dir
-$ fscryptctl prepare_hw_wrapped_key /dev/mmcblk0p12 < /mnt/key.longterm > /tmp/key.ephemeral
-$ KEYID=$(fscryptctl add_key --hw-wrapped-key < /tmp/key.ephemeral /mnt)
-$ fscryptctl set_policy --hw-wrapped-key --iv-ino-lblk-32 "$KEYID" /mnt/dir
-$ cat /mnt/dir/test.txt # File should now be decrypted
-
-Seshu Madhavi Puppala (6):
-  mmc: host: support wrapped keys in mmc
-  mmc: host: add support to derive software secret
-  mmc: host: add support for generate, import and prepare keys
-  mmc: host: wrapped keys support in mmc qcom
-  mmc: host: implement derive sw secret vop in mmc qcom
-  mmc: host: support for generate, import and prepare key
-
- drivers/mmc/host/cqhci-crypto.c | 79 +++++++++++++++++++++++++++++----
- drivers/mmc/host/cqhci.h        | 22 +++++++++
- drivers/mmc/host/sdhci-msm.c    | 59 +++++++++++++++++++++++-
- 3 files changed, 151 insertions(+), 9 deletions(-)
-
--- 
-2.17.1
-
+Thanks,
+- Kever
+>>> Good point! A better option is to use a polling based mechanism - and
+>>> we have MMC_CAP_NEEDS_POLL for exactly that.
+>>>
+>>> Moreover, on DT based platforms one can even use the "broken-cd"
+>>> property to indicate this.
+>> Except that goes further than is needed here, since it would fall back
+>> entirely to software-based polling for card presence. In this case the
+>> CD function is not broken in terms of actually detecting a card, it just
+>> doesn't work to wake the controller up from suspend because it can't
+>> fire its own interrupt while powered off. In principle all we should
+>> require here is to periodically resume/suspend the device, to provide a
+>> window for the interrupt to work and normal operation to take over if
+>> appropriate.
+> Well, I would not object if "broken-cd" would be used for this case
+> too. I believe it already is.
+>
+> Another option would be to look at a compatible string and set
+> MMC_CAP_NEEDS_POLL based on that.
+>
+>> Of course the really clever way would be for suspend to switch the pin
+>> into GPIO mode, and set the GPIO interrupt as a wakeup to trigger resume
+>> and switch it back again, but perhaps that's a bit tricky without
+>> explicit pinctrl states in the DT :/
+> Right. A dedicated GPIO pin for the card detect is certainly the
+> preferred method, if you care about not wasting power.
+>
+> Kind regards
+> Uffe
