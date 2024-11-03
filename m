@@ -1,172 +1,125 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C380F17741;
-	Sat,  2 Nov 2024 13:45:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78CCD16E86F;
+	Sun,  3 Nov 2024 11:01:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730555146; cv=none; b=r+b63Of6YKo82FW2JuP7+N0c9FIDWjDdeP5UxY3qWnW5U2hkk4+cROTsOYKRPnuvNj1WkKP2We1VhviHN0EztXijr5IfXgEf4R0aHQZu3p/oNbjOYKOg85ucNYxzyEoENiqcKVEyKhUHsneNe6Bb1QVYgJTcsxNqPDr1xGMU6WA=
+	t=1730631701; cv=none; b=IUmVN1mRjVTXmE2Ey1mK2vI0b4uTyFvJ0QICVxJ/uHELURoCvPicl9WUQEb8tLiLAMxk9hIRgePOXKEUWGtuKyPX5Zc/qCJmiAx4D71xzt/AA51Aq0cmk1qZa4pmuHP8dgcWmQzzsrPWvMyOVEjgVPj1bJO+X1dTPqyrBavbXTA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730555146; c=relaxed/simple;
-	bh=e03yKnN3xWXXNqLp+H7ewAvYxlWFLHNk6mNt6rYdGRM=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=TV/2poyWOWj4fxCrZnEETmEBFwf1SKkuOlaWj9nnwTBJaMn09j8Et3cm4oiU1hvvEEitUWZEvnXjDoW/2hKAM4jZjk9KyxNeF+DczIw7LF9d7xmj1VNUz6dw5Kn695ClgvpMTo5RrolislGB6UCVfWfCCD1RF78HGi8cMlCUNL0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=tEYyNh5C; arc=none smtp.client-ip=212.227.17.21
+	s=arc-20240116; t=1730631701; c=relaxed/simple;
+	bh=+wsgetk5/sonAYIBPou7wSVPc/FmkisVd5K5rj9Vc88=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:Content-Type; b=ViVZugJg7jPbDgqlG5JLDstAsZqLJKt9wm4f0420Sr2WEcI8F2P3XT+pU8qtNNyBkfUBeTOcNfaMZgB0HZJw9cgbWMSuRJHbMRTLgRMI+0QBIJ1zieXW0RopUtc23pGaLgkDXOCCFFYm7p6d9nxrwZZFDgf58BDIxOvpXliZB+Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=lybmVG6N; arc=none smtp.client-ip=212.227.15.15
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="tEYyNh5C"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="lybmVG6N"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1730555125; x=1731159925; i=wahrenst@gmx.net;
-	bh=wh8jWE/SuHQZpH1OicaEibZkdDUs8oXsmEh1paiPtHU=;
-	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:
-	 MIME-Version:Content-Transfer-Encoding:cc:
+	s=s31663417; t=1730631691; x=1731236491; i=wahrenst@gmx.net;
+	bh=+wsgetk5/sonAYIBPou7wSVPc/FmkisVd5K5rj9Vc88=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:From:Subject:To:
+	 Cc:Content-Type:Content-Transfer-Encoding:cc:
 	 content-transfer-encoding:content-type:date:from:message-id:
 	 mime-version:reply-to:subject:to;
-	b=tEYyNh5C432n6QJ3/ReOh2iXRHf55sXiK2LY0BnUIYoVg4puSzL3VBcGUBYKNDZ+
-	 mZyu8GUlLosI7z9Mt9wLbOeBUdfEt852Jl3vYp8mf77GIgvVBnGDpDjT7x9/A+/WY
-	 ZDr426afeaHkiBiCz7+XdhJsFNbpjpflGXgOCLC+VSnQWnUCtJNM6ETgbGP949MkM
-	 cXE1jMJurUylazlV3qogkEGACC+dnUQYlQlQamBNcV9Kb2xLrHhMFOUFUbxZdQ6Ux
-	 U3m25wyupM0lTY30ejlkxJ5WZGHf4ePp15zOQJLdO1UrIeNCz0zLNddsTecCowRDV
-	 oR3No6AZeKYfuBErQg==
+	b=lybmVG6N6PFBRvqOVzHGGRHjPqWzctv/x/qTaAsfSJt4VZt56MnAU6nvYPKUewN4
+	 lW+n99Vfo499qu5Iz/m13QzWslJ9kUarO9hNKFvYiU58oF+hAb/VyjsjJRvoUymzW
+	 n5tNlJcf2+ktS78Q037/7WpHv9SQY+eWdP56Z7jDI0Nv9j/vJWd9nage4yhjl5acL
+	 HwXvzf6bP6zruX3/nzmd4zeZlD2zkPi+ced3uuEpu+CPigYjtJqIf343ylavnL9zK
+	 lZq66sgFXrC8HVvOHQ4yhqMm2C4HXi2xTwipYq+AxwA1NNeLFj9kGvroQW2sNw7id
+	 3+sWajszsbVKzvKpRg==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MNsw4-1tVVWP2fFY-00Xw0G; Sat, 02
- Nov 2024 14:45:25 +0100
-From: Stefan Wahren <wahrenst@gmx.net>
-To: Philipp Zabel <p.zabel@pengutronix.de>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Marco Felsch <m.felsch@pengutronix.de>,
-	Catalin Popescu <catalin.popescu@leica-geosystems.com>,
-	Mark Brown <broonie@kernel.org>
-Cc: Florian Fainelli <florian.fainelli@broadcom.com>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-next@vger.kernel.org,
-	regressions@lists.linux.dev,
-	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH RFC] mmc: pwrseq_simple: Handle !RESET_CONTROLLER properly
-Date: Sat,  2 Nov 2024 14:45:22 +0100
-Message-Id: <20241102134522.333047-1-wahrenst@gmx.net>
-X-Mailer: git-send-email 2.34.1
+Received: from [192.168.1.105] ([37.4.248.43]) by mail.gmx.net (mrgmx005
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MyKHm-1u3tiA45j2-00qqmf; Sun, 03
+ Nov 2024 12:01:31 +0100
+Message-ID: <a825587c-e6f6-45f8-8ac0-a1a5642a5333@gmx.net>
+Date: Sun, 3 Nov 2024 12:01:30 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Content-Language: en-US
+From: Stefan Wahren <wahrenst@gmx.net>
+Subject: brcmfmac: error messages while entering suspend
+To: Arend van Spriel <aspriel@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+ "brcm80211-dev-list.pdl@broadcom.com" <brcm80211-dev-list.pdl@broadcom.com>,
+ SHA-cyfmac-dev-list@infineon.com, Kalle Valo <kvalo@kernel.org>,
+ linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:gR28kxpGv/paCHFYL+WOtD2omK8W76H6OxEFca2yYlzpt/S7qPc
- /02bKimVT4RMVrEYArMy4wu4g8NeZ2V/+caEDXvOpV9bkMQ6rIGVa4GSwcVTPoYteUOG1jB
- QNtiYQEllcjjBk4xs8tysy/1gw3IKr6WpZd1+a5UTJ93K5cOYrX67bgiiGJysPS0+lMlVqA
- B6iBdr4iiHwoZAiAv42ew==
+X-Provags-ID: V03:K1:8ScJX5vdiGXdW9kUo7g4BFBr602OvFdMP1SUxDBuqk/XBnj+Cig
+ ThLXQFAUmwHgB5RLJVinczDijot4P1zqdkq97hu2W9TWpm2iM8v0sq/l5LVakeZ2844g8C/
+ 9yoN2cDotesf4aIPhu9AH1uQ3xwunm17uHOVwWxOG8x8o9qg4jpFkU5taaIra9RIDqyFwB3
+ UByg+b13HM8lOEP9H413A==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:1HQhTF2m7cY=;vO7nMt2DEIbIhGRCHChaoucxQme
- UfAywgwv5ofAeu82VeQq2WMWl39EncgG4flGt4kuXwaAnCHJ9hFjJxEWBwl0sDbLl0pCfz+Ox
- iRZxRwl28uewevqRjIqZUYy0JBXJaMYrNQEs/kyUkp33Of8hZss46x3/t8HBeQljij1T3plLU
- pau0V5/s6AijvxPDLADhXYQ4B2/Ro6ND2YUcKxLf7lnqZm+gga6PvvZ7pek61pIZ+P6fLCr4X
- YmuC8TY3Q+/pX7WijVMwB1JfGIg6o4l19YtueVR0Y6K3wkGbzDrtxKPML752W6XmpairEuOfK
- NOruHozFz/xVnqG0J4mirtiP8KDXtZEMBW+aNyBx/3qvge3gSl2bkqnJwtYEjNnrABvYWhhXB
- 9Lcp/xDsA1VmOy8Jj7LRp58JqMGQms0IcweMGgNb0IaR3Oos6h+Yv26hWAia+fax7Cm7muAaS
- s4XFWyz8lX/RNd8LUf1+nL9RhMrMiVIhhhQrYqI6GgGqsORzSDJQVMnIJRQnkFxhT/d/Pv6Gs
- t+Z+bMBNFFCHJIUACRJQmOTRO5OTnliwIEut72+xIbv3J8Z5Bk6+2od6egFQCXZO7mPX/DA5n
- /5DDSXQdaENQdzTxSMtXJWznc6MmG2d+kFCr4eyYETjLnA31rXdzIo8JWIoaO5DzovnGup0uy
- 8BXIgkcSu7YLlP0EW9iVG43BVjClP4mSeA11VdIf/qZeCYgzXI7CLh5F5mrCXN+m11Oj7BrDk
- /1cVAb1/HPGyI3BgGe2yvEJ0zrrafdvWfna7iNyZuJbNlEXX9EEu50zc3gp4yjdRbLsCKq0jg
- CKqD7OXfURtqFKqQHXCt2CBQ==
-
-The recent introduction of reset control in pwrseq_simple introduced
-a regression for platforms without RESET_CONTROLLER support, because
-devm_reset_control_get_optional_shared() would return NULL and make all
-resets no-ops. Instead of enforcing this dependency rely on this behavior
-to determine reset support. As a benefit we can get the rid of the
-use_reset flag.
-
-Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset contro=
-l")
-Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
-=2D--
- drivers/mmc/core/pwrseq_simple.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+UI-OutboundReport: notjunk:1;M01:P0:rtgKeTex454=;EMSWUCt74aDLX75m6SrPwZofiVd
+ GniyW8sczTVu/EkhY9SySfkACpeMGiL1tbCww8X9VkFfL+mz5Ka3htqRD07u8/mbh4WeS+7Ad
+ oYEROJXcsATgYSVe89G3uUdgZKQnMVa+P81cNdqjbAREPU2rJa5jm7VIT1e3zN7OwUeN8ukL5
+ QJ2Ck5XYMYB2JBkUJkUt+xL/a2ZmnCjTGui3yIbviQZuL7wN48X7QzmbqFFu39BuhDxYYwKIv
+ 3Rx6XFzFdNke3tcGoW9IJzqPCuudx6Ds5sS5sxIK2mbrvkoSQQcpFATjFKMkoaIumPFjj0da/
+ rAse7ytMp5yHnOLt9ir9xeXJAl/YpZTQfp5z6lCipvcKQQVdtrnZrwPrUKejzjCaLiv/WSnlx
+ 6ZoIAoYHhXav0jwKwjds+pmS3AQsQModmwMBqh5VlyiEyW4EwdUpnj5eP3MZ1eoUj2sTrd+SA
+ Yi4hzWhy6QD+usHXh5+2QG6hnpRmc7WS9fekUOVkdn/EcULGzJbANbSGAEe5cqtiLpNIjD+bF
+ 1Ox8aytXKZrx3CCNDHXUki9OWT4EqKlCAmP0QiRy5KPgWhM1j09YH9W5FUuAu9aWbkafDgRls
+ ydJ6iXp0anXleTlTLe7P+/UX6MFNs4Th8YMYzXXIFlauLq0Yv97oPl1d+DXxlm0vM60ygsFPq
+ UzJ9IEA03SH/xFbLFLiWawSsVpla2mzYfF1NLEmLeoQOEQDAh1DaCbJySGQGlMeyn2Kafw/qW
+ KgWdobnpygkRgp7I2efCQB+RvvxV7XRANW1n9qJA4DpD8rNFtdmx2ID3O/H2o3eFTMooUiu9I
+ eSvtdZXV12+b1m85dtRtG1Cg==
 
 Hi,
-will trying to reproduce the Rpi 4 regression from here [1], I found
-the issue above. I'm pretty sure the Rpi 4 regression is caused by the sam=
-e
-commit. Unfortunately I wasn't able to reproduce it.
+I'm currently working on s2idle support for Raspberry Pi 3B+ (BCM43455
+SDIO). During the tests with I noticed harmless, but annoying error
+messages from brcmfmac like this:
 
-[1] - https://lore.kernel.org/linux-next/6724d7d5.170a0220.1281e9.910a@mx.=
-google.com/T/#u
+[=C2=A0 383.186640] PM: suspend entry (s2idle)
+[=C2=A0 383.190107] Filesystems sync: 0.003 seconds
+[=C2=A0 383.247470] Freezing user space processes
+[=C2=A0 383.250291] Freezing user space processes completed (elapsed 0.002
+seconds)
+[=C2=A0 383.250379] OOM killer disabled.
+[=C2=A0 383.250385] Freezing remaining freezable tasks
+[=C2=A0 383.251677] Freezing remaining freezable tasks completed (elapsed
+0.001 seconds)
+[=C2=A0 384.292071] ieee80211 phy0: brcmf_fil_cmd_data: bus is down. we ha=
+ve
+nothing to do.
+[=C2=A0 384.292079] ieee80211 phy0: brcmf_cfg80211_get_tx_power: error (-5=
+)
 
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_si=
-mple.c
-index 24e4e63a5dc8..b8782727750e 100644
-=2D-- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -32,7 +32,6 @@ struct mmc_pwrseq_simple {
- 	struct clk *ext_clk;
- 	struct gpio_descs *reset_gpios;
- 	struct reset_control *reset_ctrl;
--	bool use_reset;
- };
+These errors are not new and I assume they have always been there. I'm
+not an expert here, so I want to know is the problem here that the SDIO
+interface is shutdown before brcmfmac is suspended or lies the issue
+within brcmfmac suspend itself?
 
- #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwr=
-seq)
-@@ -71,7 +70,7 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_ho=
-st *host)
- 		pwrseq->clk_enabled =3D true;
- 	}
+Here is a calltrace for the error above:
 
--	if (pwrseq->use_reset) {
-+	if (pwrseq->reset_ctrl) {
- 		reset_control_deassert(pwrseq->reset_ctrl);
- 		reset_control_assert(pwrseq->reset_ctrl);
- 	} else
-@@ -82,7 +81,7 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_h=
-ost *host)
- {
- 	struct mmc_pwrseq_simple *pwrseq =3D to_pwrseq_simple(host->pwrseq);
+[=C2=A0 384.291308]=C2=A0 brcmf_fil_cmd_data+0xe0/0x114 [brcmfmac] (P)
+[=C2=A0 384.291347]=C2=A0 brcmf_fil_iovar_data_get+0xcc/0x134 [brcmfmac] (=
+L)
+[=C2=A0 384.291384]=C2=A0 brcmf_fil_iovar_data_get+0xcc/0x134 [brcmfmac]
+[=C2=A0 384.291420]=C2=A0 brcmf_cfg80211_get_tx_power+0x58/0xd4 [brcmfmac]
+[=C2=A0 384.291458]=C2=A0 nl80211_send_iface+0x1e8/0x584 [cfg80211]
+[=C2=A0 384.291549]=C2=A0 nl80211_notify_iface+0x58/0xd4 [cfg80211]
+[=C2=A0 384.291615]=C2=A0 _cfg80211_unregister_wdev+0x40/0x27c [cfg80211]
+[=C2=A0 384.291682]=C2=A0 cfg80211_unregister_wdev+0x14/0x20 [cfg80211]
+[=C2=A0 384.291748]=C2=A0 brcmf_p2p_ifp_removed+0x6c/0x98 [brcmfmac]
+[=C2=A0 384.291785]=C2=A0 brcmf_remove_interface+0x170/0x1ec [brcmfmac]
+[=C2=A0 384.291822]=C2=A0 brcmf_detach+0x60/0xfc [brcmfmac]
+[=C2=A0 384.291859]=C2=A0 brcmf_sdio_remove+0x4c/0x188 [brcmfmac]
+[=C2=A0 384.291896]=C2=A0 brcmf_sdiod_remove+0x24/0xa4 [brcmfmac]
+[=C2=A0 384.291933]=C2=A0 brcmf_ops_sdio_suspend+0x100/0x1c8 [brcmfmac]
+[=C2=A0 384.291971]=C2=A0 pm_generic_suspend+0x2c/0x44
+[=C2=A0 384.291982]=C2=A0 dpm_run_callback.constprop.0+0x74/0x134
+[=C2=A0 384.291993]=C2=A0 device_suspend+0x110/0x3d0
+[=C2=A0 384.292002]=C2=A0 async_suspend+0x24/0x3c
+[=C2=A0 384.292012]=C2=A0 async_run_entry_fn+0x34/0xe0
+[=C2=A0 384.292022]=C2=A0 process_one_work+0x150/0x294
+[=C2=A0 384.292032]=C2=A0 worker_thread+0x2dc/0x3dc
+[=C2=A0 384.292041]=C2=A0 kthread+0x118/0x11c
+[=C2=A0 384.292049]=C2=A0 ret_from_fork+0x10/0x20
 
--	if (pwrseq->use_reset)
-+	if (pwrseq->reset_ctrl)
- 		reset_control_deassert(pwrseq->reset_ctrl);
- 	else
- 		mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
-@@ -95,7 +94,7 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host =
-*host)
- {
- 	struct mmc_pwrseq_simple *pwrseq =3D to_pwrseq_simple(host->pwrseq);
-
--	if (pwrseq->use_reset)
-+	if (pwrseq->reset_ctrl)
- 		reset_control_assert(pwrseq->reset_ctrl);
- 	else
- 		mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
-@@ -137,15 +136,14 @@ static int mmc_pwrseq_simple_probe(struct platform_d=
-evice *pdev)
- 		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not=
- ready\n");
-
- 	ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio=
--cells");
--	if (ngpio =3D=3D 1)
--		pwrseq->use_reset =3D true;
--
--	if (pwrseq->use_reset) {
-+	if (ngpio =3D=3D 1) {
- 		pwrseq->reset_ctrl =3D devm_reset_control_get_optional_shared(dev, NULL=
-);
- 		if (IS_ERR(pwrseq->reset_ctrl))
- 			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
- 					     "reset control not ready\n");
--	} else {
-+	}
-+
-+	if (!pwrseq->reset_ctrl) {
- 		pwrseq->reset_gpios =3D devm_gpiod_get_array(dev, "reset", GPIOD_OUT_HI=
-GH);
- 		if (IS_ERR(pwrseq->reset_gpios) &&
- 		    PTR_ERR(pwrseq->reset_gpios) !=3D -ENOENT &&
-=2D-
-2.34.1
-
+Best regards
