@@ -1,183 +1,159 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE4366FC5
-	for <linux-mmc@vger.kernel.org>; Mon,  4 Nov 2024 09:22:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E69D1AC426
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Nov 2024 09:39:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730712147; cv=none; b=BZxWOAkDNAieVDq9acTxmccn13wla5uM7sqUMT1eyUzO1w7LkBA8NAFhVVUwQ3pGPaZ04glLlqFCTCTs7VtBZX0Ig+i2+GQ3FsjV4fMK0X2TqA/SzhUfG/aluRs4bnfJ/fVAh06ClhrckslP3lr/+hO7tAGIAloDMZcMcGC319o=
+	t=1730713150; cv=none; b=ssXJAkvnGo4goIm/4M3LjpgKAc4hpKHm/aOS2/XZzKho/iaLAzf0+YFGQPNEkka5SN+xn2K40nvps98XjQWEtKW4xAX/EFapNlaPHMKiLNkBYJcY+PClLV4rmw1Miw2ags9/QwdBDRZDjFZEQKQ8TmmJ0x5L2b5Ydgf5koF9USk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730712147; c=relaxed/simple;
-	bh=oYozuXtt5Z6JeaX0RlqqKPM9/MUDkhOMD8Gopuv+7rI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DHt2FKFyhF6jWxpD37rAqlhRVGUrAX3SIlu4GjOPzMFi5OLQ6zGbPknB300JGZxMluflcIfUSj4Gv0gogOk1wXcmcvSZnq9N+qza/xXVSBMRU0PXPrkYwpQ0zpMMp/9iAPDq1aac/itDZ+hEgpr/G0wA9vjpVtMgjNC+XWeELbU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=eSBZnrV9; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="eSBZnrV9"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:mime-version:content-transfer-encoding; s=k1; bh=x9c7Uglnj8/t49
-	OIveEXApQV0J7ESUNlFMNmSWSa7E0=; b=eSBZnrV9iipdLIVWdUS8udF/TjMK3j
-	nnmMcFB95Q/hX7G/fwwFFhP5zwzo4k0/uxDWq0015bELWSh6RJp5KVJhHPtRbzf+
-	+IZXf9hnOm44Hn7RcsO4hAD/wzFnbzVAMKjBCoCF18u6GiTx6ya0OQuClzLChi2i
-	MX0qJN88sHE4gpwSsvzaEBOrBQmLAZwaqjZVwpA9Ja707MaKruOb+ChCiISp2MYm
-	Kcn/NQDhwxOJobE4OaQsPtk8aRbYagkTMo68xFqFcwjgwjjlg2VRH+yivgPkW8xD
-	ZvCVs2hgts4EIlHnUwGEL4YQZzKY7CgG7FyV9ZcKIR3WoGFY54xqcE7A==
-Received: (qmail 319331 invoked from network); 4 Nov 2024 10:22:21 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Nov 2024 10:22:21 +0100
-X-UD-Smtp-Session: l3s3148p1@H75k0hIm9r7VHA60
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	s=arc-20240116; t=1730713150; c=relaxed/simple;
+	bh=4lLU8yg8a4RCxzMArT/7z31wwCcdW3fYlKsKjZeWhdc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=LTV9kWocHu9/PPxpRP0PlleA8OVEi0/1kgeJ0dgGLRV4Bt6jPhOIC8IbY7NkBcN0eAyXXp3wFTcZ81G4ajCEbxOCCtZYR4K39I0kYPwHISNrTWUIFdEg38WNtu9FUoCQ4mtrjJDNGv3I0jMta5Wc/tSZXLBNnXKzTEEsvpI/rv0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t7tY6-0000aX-Mp; Mon, 04 Nov 2024 10:39:02 +0100
+Received: from pty.whiteo.stw.pengutronix.de ([2a0a:edc0:2:b01:1d::c5])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t7tY5-001xM7-2T;
+	Mon, 04 Nov 2024 10:39:01 +0100
+Received: from mfe by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <mfe@pengutronix.de>)
+	id 1t7tY5-00DP6z-27;
+	Mon, 04 Nov 2024 10:39:01 +0100
+Date: Mon, 4 Nov 2024 10:39:01 +0100
+From: Marco Felsch <m.felsch@pengutronix.de>
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Philipp Zabel <p.zabel@pengutronix.de>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Subject: [RFC PATCH v2] mmc: suspend MMC also when unbinding
-Date: Mon,  4 Nov 2024 11:18:42 +0200
-Message-ID: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.45.2
+	Catalin Popescu <catalin.popescu@leica-geosystems.com>,
+	Mark Brown <broonie@kernel.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-next@vger.kernel.org,
+	regressions@lists.linux.dev
+Subject: Re: [PATCH RFC] mmc: pwrseq_simple: Handle !RESET_CONTROLLER properly
+Message-ID: <20241104093901.rb5ozxt7qkdgoatc@pengutronix.de>
+References: <20241102134522.333047-1-wahrenst@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241102134522.333047-1-wahrenst@gmx.net>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: mfe@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-When unbinding a MMC host, the card should be suspended. Otherwise,
-problems may arise. E.g. the card still expects power-off notifications
-but there is no host to send them anymore. Shimoda-san tried disabling
-notifications only, but there were issues with his approaches [1] [2].
+Hi Stefan,
 
-Here is my take on it, based on the review comments:
+On 24-11-02, Stefan Wahren wrote:
+> The recent introduction of reset control in pwrseq_simple introduced
+> a regression for platforms without RESET_CONTROLLER support, because
 
-a) 'In principle we would like to run the similar operations at "remove"
-    as during "system suspend"' [1]
-b) 'We want to support a graceful power off sequence or the card...' [2]
+This is what I was afraid of :/
 
-So, first, mmc_remove_card() gets improved to mark the card as "not
-present" and to call the bus specific suspend() handler.
+> devm_reset_control_get_optional_shared() would return NULL and make all
+> resets no-ops. Instead of enforcing this dependency rely on this behavior
+> to determine reset support. As a benefit we can get the rid of the
+> use_reset flag.
+> 
+> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset control")
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> ---
+>  drivers/mmc/core/pwrseq_simple.c | 16 +++++++---------
+>  1 file changed, 7 insertions(+), 9 deletions(-)
+> 
+> Hi,
+> will trying to reproduce the Rpi 4 regression from here [1], I found
+> the issue above. I'm pretty sure the Rpi 4 regression is caused by the same
+> commit. Unfortunately I wasn't able to reproduce it.
+> 
+> [1] - https://lore.kernel.org/linux-next/6724d7d5.170a0220.1281e9.910a@mx.google.com/T/#u
+> 
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 24e4e63a5dc8..b8782727750e 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -32,7 +32,6 @@ struct mmc_pwrseq_simple {
+>  	struct clk *ext_clk;
+>  	struct gpio_descs *reset_gpios;
+>  	struct reset_control *reset_ctrl;
+> -	bool use_reset;
+>  };
+> 
+>  #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
+> @@ -71,7 +70,7 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+>  		pwrseq->clk_enabled = true;
+>  	}
+> 
+> -	if (pwrseq->use_reset) {
+> +	if (pwrseq->reset_ctrl) {
+>  		reset_control_deassert(pwrseq->reset_ctrl);
+>  		reset_control_assert(pwrseq->reset_ctrl);
+>  	} else
+> @@ -82,7 +81,7 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+>  {
+>  	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+> 
+> -	if (pwrseq->use_reset)
+> +	if (pwrseq->reset_ctrl)
+>  		reset_control_deassert(pwrseq->reset_ctrl);
+>  	else
+>  		mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+> @@ -95,7 +94,7 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+>  {
+>  	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+> 
+> -	if (pwrseq->use_reset)
+> +	if (pwrseq->reset_ctrl)
+>  		reset_control_assert(pwrseq->reset_ctrl);
+>  	else
+>  		mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+> @@ -137,15 +136,14 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+>  		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not ready\n");
+> 
+>  	ngpio = of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio-cells");
+> -	if (ngpio == 1)
+> -		pwrseq->use_reset = true;
+> -
+> -	if (pwrseq->use_reset) {
+> +	if (ngpio == 1) {
+>  		pwrseq->reset_ctrl = devm_reset_control_get_optional_shared(dev, NULL);
+>  		if (IS_ERR(pwrseq->reset_ctrl))
+>  			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
+>  					     "reset control not ready\n");
+> -	} else {
+> +	}
+> +
 
-Then, _mmc_suspend gets extended to recognize another reason of being
-called, namely when a card removal happens. Building upon the now
-updated mmc_remove_card(), this is the case when the card is flagged as
-"not present".
+Can we add a comment like:
 
-The logic of either sending a notification or sending the card to sleep
-gets updated to handle this new reason. Controllers able to do full
-power cycles will still do a full power cycle. Controllers which can
-only do power cycles in suspend, will send the card to sleep.
+/*
+ * Fallback to gpio based reset control in case of multiple reset lines
+ * are specified or the platform doesn't have support for RESET at all.
+ */
 
-All this is for MMC. SD/SDIO are unaffected because they are not using
-the 'card present' flag.
+Regards,
+  Marco
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-[1] https://patchwork.kernel.org/project/linux-renesas-soc/patch/1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
-[2] https://patchwork.kernel.org/project/linux-mmc/patch/1605005330-7178-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
----
-
-Lightly tested with a Renesas R-Car S4 Spider board. It bascially works
-as expected. Serious testing postponed until the generic direction of
-this is approved :)
-
- drivers/mmc/core/bus.c |  3 +++
- drivers/mmc/core/mmc.c | 29 +++++++++++++++++++++--------
- 2 files changed, 24 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 0ddaee0eae54..52704d39c6d5 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -403,5 +403,8 @@ void mmc_remove_card(struct mmc_card *card)
- 		host->cqe_enabled = false;
- 	}
- 
-+	card->state &= ~MMC_STATE_PRESENT; // TBD: mmc_card_clear_present()
-+	host->bus_ops->suspend(host);
-+
- 	put_device(&card->dev);
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 6a23be214543..2bcf9ee0caa8 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -32,6 +32,12 @@
- #define MIN_CACHE_EN_TIMEOUT_MS 1600
- #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
- 
-+enum mmc_pm_reason {
-+	MMC_PM_REASON_SHUTDOWN,
-+	MMC_PM_REASON_SUSPEND,
-+	MMC_PM_REASON_REMOVAL,
-+};
-+
- static const unsigned int tran_exp[] = {
- 	10000,		100000,		1000000,	10000000,
- 	0,		0,		0,		0
-@@ -2104,11 +2110,16 @@ static int _mmc_flush_cache(struct mmc_host *host)
- 	return err;
- }
- 
--static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-+static int _mmc_suspend(struct mmc_host *host, enum mmc_pm_reason reason)
- {
- 	int err = 0;
--	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
--					EXT_CSD_POWER_OFF_LONG;
-+	unsigned int notify_type = reason == MMC_PM_REASON_SUSPEND ?
-+				   EXT_CSD_POWER_OFF_SHORT : EXT_CSD_POWER_OFF_LONG;
-+	bool can_pwr_cycle_now = (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) ||
-+				  ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND) &&
-+				    reason == MMC_PM_REASON_SUSPEND);
-+
-+	pr_info("%s: suspend reason %d, can pwr cycle %d\n", mmc_hostname(host), reason, can_pwr_cycle_now);
- 
- 	mmc_claim_host(host);
- 
-@@ -2119,9 +2130,9 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
- 	if (err)
- 		goto out;
- 
-+	/* Notify if pwr_cycle is possible or power gets cut because of shutdown */
- 	if (mmc_can_poweroff_notify(host->card) &&
--	    ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
--	     (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND)))
-+	    (can_pwr_cycle_now || reason == MMC_PM_REASON_SHUTDOWN))
- 		err = mmc_poweroff_notify(host->card, notify_type);
- 	else if (mmc_can_sleep(host->card))
- 		err = mmc_sleep(host);
-@@ -2142,9 +2153,11 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-  */
- static int mmc_suspend(struct mmc_host *host)
- {
-+	enum mmc_pm_reason reason = mmc_card_present(host->card) ?
-+				    MMC_PM_REASON_SUSPEND : MMC_PM_REASON_REMOVAL;
- 	int err;
- 
--	err = _mmc_suspend(host, true);
-+	err = _mmc_suspend(host, reason);
- 	if (!err) {
- 		pm_runtime_disable(&host->card->dev);
- 		pm_runtime_set_suspended(&host->card->dev);
-@@ -2191,7 +2204,7 @@ static int mmc_shutdown(struct mmc_host *host)
- 		err = _mmc_resume(host);
- 
- 	if (!err)
--		err = _mmc_suspend(host, false);
-+		err = _mmc_suspend(host, MMC_PM_REASON_SHUTDOWN);
- 
- 	return err;
- }
-@@ -2215,7 +2228,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
- 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
- 		return 0;
- 
--	err = _mmc_suspend(host, true);
-+	err = _mmc_suspend(host, MMC_PM_REASON_SUSPEND);
- 	if (err)
- 		pr_err("%s: error %d doing aggressive suspend\n",
- 			mmc_hostname(host), err);
--- 
-2.45.2
-
+> +	if (!pwrseq->reset_ctrl) {
+>  		pwrseq->reset_gpios = devm_gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
+>  		if (IS_ERR(pwrseq->reset_gpios) &&
+>  		    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+> --
+> 2.34.1
+> 
+> 
