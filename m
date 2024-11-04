@@ -1,185 +1,109 @@
-Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com [209.85.208.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 38FB71AF0CB
-	for <linux-mmc@vger.kernel.org>; Mon,  4 Nov 2024 10:07:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8F00A290F
+	for <linux-mmc@vger.kernel.org>; Mon,  4 Nov 2024 10:49:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730714827; cv=none; b=pNWG1onFxMV86KwPM+0PzKzOxWJFrN4KoxaKQQjqx3trede6y5YFTs8OHVdI0XACRnBgfbRVgObqneZN5Sklm+Vx+UpEO/1O9JSjI+VcevsEu5UKIKGtnU2jnUUe3P+f72gEf+H1v6UOkRik3asMhPmeQetkc8jRJaXQo1jTji8=
+	t=1730717402; cv=none; b=ut7TCjfg8v9EB/SOIIAEMy34tEUeO7GYlDsLgzB12M5jflIyFYDLaB9g5/wu37oJUtPRMgFns8QGqR9s3UpWyKkpeb3r9wAfM4QaqYQXQxYYeo1eFXCKNRET54S3JMpjy91bzV8EbpitbLHiuHPgijDH9clH+CemG/OT0ybxs1k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730714827; c=relaxed/simple;
-	bh=1f4HDTr7zjyAleJSQ9D0qYziygXYurzjF9zC7TSJMdA=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=VDUaiy+DREjBJrtQ1lDiOfBAqgh2XH7ad09LZbGLomBcxBvIp6xG1xuxbtW5KzMKFEFrWTI4pxG0BybB+EcAz2OF7LKfzMkmv/oBb8Cva+Xg+lFQeftGuAWdldQ381rWuN24fAcVsGbi6l4u+QKSUz6Y8E2nmMqUMMYJlmBhQgY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=BWYyDMaR; arc=none smtp.client-ip=209.85.210.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1730717402; c=relaxed/simple;
+	bh=HjiluiYYU8ct9uzPa/9+3mrpL1aTF+xLCA8ImAoVnW8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=FRrD/ezfHE2TXp4hpOXw5ErVfkfGpuYJYAU2CiMCX/YH5rJ3bCWocui/RtaQDr8RKr9/JjmRuomCpjNj225roieO49z1TwxkDIwUl/MQ+BU4JhDGIxv4mfceCn3OaarnLhSuTP+JbszgoN0nL6G8RWkg4Q4d96hLyVhqR+tEA7M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AU5V7fnL; arc=none smtp.client-ip=209.85.208.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="BWYyDMaR"
-Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-720be2b27acso3157668b3a.0
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Nov 2024 02:07:06 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AU5V7fnL"
+Received: by mail-lj1-f182.google.com with SMTP id 38308e7fff4ca-2fb4ec17f5cso30532221fa.3
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Nov 2024 02:49:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1730714825; x=1731319625; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=Rle5SKLETfESdrXUPBzgj8C4czQZN1OmDrIQFZUAujQ=;
-        b=BWYyDMaRT7D/qjztFdKwOCa4ghRgO4An/iOrgZ6VRYoD4a3mDJd5dPM4kFrawC+b9v
-         PLvXjg5r7QcEAkvV5BkKy7+o2GM+48RH76Zx+LrC1HQ9lXYlFjOhqVAqcdsPSkn8/VTR
-         X+BUqQg0E42HFcZjpQ9+wuHbHry674zfCcUec=
+        d=linaro.org; s=google; t=1730717398; x=1731322198; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=XeXQFy9Pj3a/4ODUXYJdySuoRgQr+QO7RlBYiaBrsZk=;
+        b=AU5V7fnLPInUAccZmsYThZC/FIOOhHmW3PGKooWGVc9ogmaLvR0mCiFk64r6C9nLPh
+         Fj0qV/ce132viVbNlqCheppIVYzRvsUTbLXzqoRxF4ISNpudn9vMefX9sNWoN8zSHakA
+         gHzkfG5N8dR6JweS6kUqa+Y6Pksb/YkY4BPiQytYtUFEvtNNvCANe5pqoWoLw47H6YXJ
+         /MJkWyRBxgaFp291ARQ62hRJxspi8XT2IAfIAmfmNMzr5JW+cdKltHBGK07vkB4uOKqm
+         jlobwEJiLmCifTwuyXvRzDFgZ7kluOZWRefQIYkIBEB5NJt1uqljnKZQDaCXAmgrmLMo
+         pS9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730714825; x=1731319625;
-        h=content-transfer-encoding:in-reply-to:autocrypt:content-language
-         :references:cc:to:subject:from:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Rle5SKLETfESdrXUPBzgj8C4czQZN1OmDrIQFZUAujQ=;
-        b=RqorrSPCvwZtO+JTbhHk4Em3sm/igVG0WPSVCqC4h5kZmAeeQYbY3yTjsjmv9YWJAq
-         96vDzi0AUBJdreQhsgAxMKbdmqVhK5CQ8WHwcyTfZ1mtnqRf01/J8SemUSKUd21bFOL4
-         HPbtuRVjGmdlEijisu6gXgWXIjROiMTp0lCbIHG8jwjDkmqmezwEhQNlE/msA8jkIgcD
-         vpovjbEHOH7jHfgMvxs9c0yw5Np538/uQUrYMVsvJXPUy6LEIwee+4hxiJ1y75p2CzX2
-         ggSHSbPpgnXnPUzrIymeldXB+G9ofsMwHtRMhuvVKC6wk/Hh7ac5WexjTGbklZmsBtyT
-         JoQQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVtViWVztwoDEA8VlUqApl+5DzLfLPEf0qaXVGrcPKzRWTrg/wvrU52h+yMcZysLYsclEnaKIESsn8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw01R5/EflHrB3YzPTx9uLSDxetn7XUqTJP1G22BOMwjV+6sm39
-	H3PW3h03TqkHW+uIkeuK16ytuQfItyPRXLBsudX2xmgO2R6vEbydTgOva0LtaQ==
-X-Google-Smtp-Source: AGHT+IGm6Dywu4SWPI1SYam0DOTcyvfVOO3244TddVk2u6YFOHnq3Om43kwBeRfyfgrmbiCxRcZ2Rg==
-X-Received: by 2002:a05:6a00:a0a:b0:71e:581f:7d7e with SMTP id d2e1a72fcca58-720b9c29c4cmr20476123b3a.15.1730714825464;
-        Mon, 04 Nov 2024 02:07:05 -0800 (PST)
-Received: from [10.176.68.61] ([192.19.176.250])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-720bc2eb5adsm7003912b3a.163.2024.11.04.02.07.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 04 Nov 2024 02:07:04 -0800 (PST)
-Message-ID: <16169285-d838-46f3-8be1-3639f573062e@broadcom.com>
-Date: Mon, 4 Nov 2024 11:06:59 +0100
+        d=1e100.net; s=20230601; t=1730717398; x=1731322198;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XeXQFy9Pj3a/4ODUXYJdySuoRgQr+QO7RlBYiaBrsZk=;
+        b=w1XowMOBnevMNzu+w0Rlg+ERgwtnIE7P58jT0driIvsfOrhQZKiGTaXCxH8Kocvxcl
+         PvpXF/EkvSuFJDfHry+t4zbqShoumvku+q35t14bn+HmcKRpi2AZTu41tJqmjEiQTrO8
+         U94bADGB2LHjmMyZZ2W6F5rInUVpHIuS37Isxs7iolg89kXxQFMEKDymVrruu3zQXFeL
+         cC5QY3VNAX/xGXyVv9TdkEI2P1rk+vz9XtOp+OtMSBU1nxxD7jnDCltdju38QnF2/NLv
+         ZIHDh3RDs2K0uetHoBzF5P8cYXbXq27oG/gpurAG2Sl0IEVzshcZHmnEdL1rh9AK42aq
+         rOUg==
+X-Forwarded-Encrypted: i=1; AJvYcCUPeZ0J/6B0DzSc97f26MqMTkJQSWdha0fE1phgRUtpx+m8fP3mrPz/vMYjQp7ZTKwpCagz1R1YDMQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwKX270zzKp/YPUqI4X6mOqtBaVxMmO1ZU/a/ceyFN/VGL9YLes
+	fWWUsSvWiOopQ1kCKly9BZ10YKED3lHahc9WtcqlgYQ1SApK7I9IzHweULDIG3o=
+X-Google-Smtp-Source: AGHT+IFkB+YOxqygY78jfvdT7ykV+NKLizBcQos+MO01VyMRIJ9LTRYILzClrQ7HWeqYmtT14mH4Sw==
+X-Received: by 2002:a2e:1302:0:b0:2fb:5723:c9ea with SMTP id 38308e7fff4ca-2fd059d336amr70161111fa.30.1730717397626;
+        Mon, 04 Nov 2024 02:49:57 -0800 (PST)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2fdef3b732bsm16206121fa.4.2024.11.04.02.49.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Nov 2024 02:49:56 -0800 (PST)
+Date: Mon, 4 Nov 2024 12:49:54 +0200
+From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Sarthak Garg <quic_sartgarg@quicinc.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
+	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
+	quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com, 
+	quic_narepall@quicinc.com, kernel@quicinc.com
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
+ qualcomm controllers
+Message-ID: <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
+References: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Arend van Spriel <arend.vanspriel@broadcom.com>
-Subject: Re: brcmfmac: error messages while entering suspend
-To: Stefan Wahren <wahrenst@gmx.net>, Arend van Spriel <aspriel@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com,
- SHA-cyfmac-dev-list@infineon.com, Kalle Valo <kvalo@kernel.org>,
- linux-mmc <linux-mmc@vger.kernel.org>
-References: <a825587c-e6f6-45f8-8ac0-a1a5642a5333@gmx.net>
-Content-Language: en-US
-Autocrypt: addr=arend.vanspriel@broadcom.com; keydata=
- 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
-In-Reply-To: <a825587c-e6f6-45f8-8ac0-a1a5642a5333@gmx.net>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
 
-On November 3, 2024 12:01:55 PM Stefan Wahren <wahrenst@gmx.net> wrote:
+On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
+> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
+> This enables runtime PM for eMMC/SD card.
 
-> Hi,
-> I'm currently working on s2idle support for Raspberry Pi 3B+ (BCM43455
-> SDIO). During the tests with I noticed harmless, but annoying error
-> messages from brcmfmac like this:
->
-> [  383.186640] PM: suspend entry (s2idle)
-> [  383.190107] Filesystems sync: 0.003 seconds
-> [  383.247470] Freezing user space processes
-> [  383.250291] Freezing user space processes completed (elapsed 0.002
-> seconds)
-> [  383.250379] OOM killer disabled.
-> [  383.250385] Freezing remaining freezable tasks
-> [  383.251677] Freezing remaining freezable tasks completed (elapsed
-> 0.001 seconds)
-> [  384.292071] ieee80211 phy0: brcmf_fil_cmd_data: bus is down. we have
-> nothing to do.
-> [  384.292079] ieee80211 phy0: brcmf_cfg80211_get_tx_power: error (-5)
->
-> These errors are not new and I assume they have always been there. I'm
-> not an expert here, so I want to know is the problem here that the SDIO
-> interface is shutdown before brcmfmac is suspended or lies the issue
-> within brcmfmac suspend itself?
+Could you please mention, which platforms were tested with this patch?
+Note, upstream kernel supports a lot of platforms, including MSM8974, I
+think the oldest one, which uses SDHCI.
 
-Hi Stefan,
+> 
+> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e00208535bd1..6657f7db1b8e 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2626,6 +2626,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  		goto clk_disable;
+>  	}
+>  
+> +	msm_host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+>  	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+>  
+>  	/* Set the timeout value to max possible */
+> -- 
+> 2.17.1
+> 
 
-Upon suspend we execute the remove path and cleaning the interfaces. We 
-notify cfg80211 about the removal, which in turn will notify userspace, 
-but is tries to obtain the tx power from brcmfmac. However, at this 
-stage the communication with the dongle is already gone. These messages 
-are also seen in the module unload scenario. It seems a bit redundant to 
-query a device that is going to be removed. So it could be fixed by 
-chiming down those message or avoid it completely by changing the 
-behavior in cfg80211.
-
-Regards,
-Arend
-
-> Here is a calltrace for the error above:
->
-> [  384.291308]  brcmf_fil_cmd_data+0xe0/0x114 [brcmfmac] (P)
-> [  384.291347]  brcmf_fil_iovar_data_get+0xcc/0x134 [brcmfmac] (L)
-> [  384.291384]  brcmf_fil_iovar_data_get+0xcc/0x134 [brcmfmac]
-> [  384.291420]  brcmf_cfg80211_get_tx_power+0x58/0xd4 [brcmfmac]
-> [  384.291458]  nl80211_send_iface+0x1e8/0x584 [cfg80211]
-> [  384.291549]  nl80211_notify_iface+0x58/0xd4 [cfg80211]
-> [  384.291615]  _cfg80211_unregister_wdev+0x40/0x27c [cfg80211]
-> [  384.291682]  cfg80211_unregister_wdev+0x14/0x20 [cfg80211]
-> [  384.291748]  brcmf_p2p_ifp_removed+0x6c/0x98 [brcmfmac]
-> [  384.291785]  brcmf_remove_interface+0x170/0x1ec [brcmfmac]
-> [  384.291822]  brcmf_detach+0x60/0xfc [brcmfmac]
-> [  384.291859]  brcmf_sdio_remove+0x4c/0x188 [brcmfmac]
-> [  384.291896]  brcmf_sdiod_remove+0x24/0xa4 [brcmfmac]
-> [  384.291933]  brcmf_ops_sdio_suspend+0x100/0x1c8 [brcmfmac]
-> [  384.291971]  pm_generic_suspend+0x2c/0x44
-> [  384.291982]  dpm_run_callback.constprop.0+0x74/0x134
-> [  384.291993]  device_suspend+0x110/0x3d0
-> [  384.292002]  async_suspend+0x24/0x3c
-> [  384.292012]  async_run_entry_fn+0x34/0xe0
-> [  384.292022]  process_one_work+0x150/0x294
-> [  384.292032]  worker_thread+0x2dc/0x3dc
-> [  384.292041]  kthread+0x118/0x11c
-> [  384.292049]  ret_from_fork+0x10/0x20
->
-> Best regards
-
-
+-- 
+With best wishes
+Dmitry
