@@ -1,41 +1,41 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.18])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DFFA1C876D;
-	Mon,  4 Nov 2024 19:37:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A69151CBA1E;
+	Mon,  4 Nov 2024 20:06:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730749063; cv=none; b=RHhg9kJB8LKsfMZLP9PyDWvcxw6G1sky2zb1x0dLT0CCIxJjm5OXYu/7WYaDr7OaO9qYImy+2uI4VyytgI7YIDxoI95ZCpKdx0XtV7vttF7/iwzH6//FRm6FY91T3LgdGSj04X5lGc9mziVdAp499++7LGI0LmJnZk/3cYPyZrg=
+	t=1730750774; cv=none; b=dRSjmfabXkBQWpRP4v6EdcPUYUZyWa0l/kB0eeFo/Zt7AuS1whKLcl/dFwahF6PxQVYQIcq15VUN3RffY6z1oZHQKU6FVTHxX1hluW9CeWAKkJG1WZdINctdNEdgyR+UKkiE/LYwHkCbHvOGy/xMcctNoascNucV+kKGRKQoXZU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730749063; c=relaxed/simple;
-	bh=/JXW2R0LchTZmcQ88Qn1IKszBGN9/UOK3xrZwi1QnxE=;
+	s=arc-20240116; t=1730750774; c=relaxed/simple;
+	bh=FKFWGi5po/mx3uK8oCShRp6WwiaDqV99UF5bP5pHJNc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CQ2zZ0PUYDL2WZkH50WO8cwyVhIyc77XXk4aE4uGo4qXk/6a6x+s5kpjSstNwYBfqNrKbIwE0deM1TUDISwtzfsUjfAC6kVwU6yDx0hF/SEptgm7uXpjCcvfmnRfe+Rrmr3Gum8qkUwLSODFfMmoeWGynWyZGQuK1PEvQ2LFbBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=Hq94fEEw; arc=none smtp.client-ip=212.227.15.18
+	 In-Reply-To:Content-Type; b=PQmRUB1zI0rNjBDVyRoBwbkCBBawl6rjDPzahurKzW3gxE7zbh/RrCobpBTA+Uhz4Oq7Urnp1CuQp0LdYw7FpqenbyFqFrtxGekBXi2zHgpH64K5CtpeDrcSiHbo08XRlTss0GjJSnA7Hd9xvB/+00LRvPPCX7/3GZ5KKOgN7Ac=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=T0TuLFSv; arc=none smtp.client-ip=212.227.15.19
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="Hq94fEEw"
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="T0TuLFSv"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1730749047; x=1731353847; i=wahrenst@gmx.net;
-	bh=HHRJUUe4qBU3jMnR/014D6ykMod61nDwsGapWt+8eV8=;
+	s=s31663417; t=1730750762; x=1731355562; i=wahrenst@gmx.net;
+	bh=FKFWGi5po/mx3uK8oCShRp6WwiaDqV99UF5bP5pHJNc=;
 	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
 	 References:From:In-Reply-To:Content-Type:
 	 Content-Transfer-Encoding:cc:content-transfer-encoding:
 	 content-type:date:from:message-id:mime-version:reply-to:subject:
 	 to;
-	b=Hq94fEEwOp2b+g18twxwSd1BXAVnk0g5Kf/7PLMX325lojcA1FKhQsPudl5O2FYU
-	 56WSopfFIfL613fT/mEi1Wk5krRJY7R5WJ4/QqQCv/Oy6dC+mEhaalDzJF973ebq4
-	 MzTmywK1o+z6Y2vL80jasoQWQX15xoBwdtzYfobOibtNObVhG+7GoH65oy8ZhbNZD
-	 XJCmh73xFlPM9gacD3xzKNpt0JeLfPFzUrF5c0laQo26+YTUWY4yYU09C/eEFABds
-	 Z5azlSqyiQ/i6cgY1cg+x0+nLApWYPm1Kyr3x7id4KXx4pjITtuCV4z20VQC3hFBf
-	 0dyuntjDb2/CxgsAvw==
+	b=T0TuLFSv+FKPahPisFOQSNfppvWHno9zpAXTeltY6/DiSESG2XY92oDYfJ2jIEG2
+	 8N4+bL8tVBBDC2fUf3HzKyg7ECHj8666duELDKNpibZ/n6Ygem9OnAVCQ8B0fkTLl
+	 OdAZiOIFwHzVnYmqXIROKupx8Dqw/uhI//KSKjycWQkA3q/nVzf1kJc42BV8Rwrcv
+	 XMBl0TeVNvzmh5jNcuPUUbWWEge3722ihBQ8yOou87Ebul+MT0vB4tqcn1BSLe+zK
+	 OTE9PuVgCc8vdN3SiXFN8ak1FlEcY9xJ8gOKzfmig6ozxZE5W7172Hsn4kIGaC4nY
+	 8M662DnYvOAd3QSvPQ==
 X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
 Received: from [192.168.1.105] ([37.4.248.43]) by mail.gmx.net (mrgmx005
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1M5wLZ-1tAXrJ3vYJ-002Bap; Mon, 04
- Nov 2024 20:37:27 +0100
-Message-ID: <e42a6573-fc0d-4a12-9895-09c1889fc759@gmx.net>
-Date: Mon, 4 Nov 2024 20:37:25 +0100
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MvbFs-1u0iFw2Kla-00xzfv; Mon, 04
+ Nov 2024 21:06:02 +0100
+Message-ID: <a122ad79-086b-42a9-894e-d589092bac80@gmx.net>
+Date: Mon, 4 Nov 2024 21:06:01 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -43,78 +43,135 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RFC] mmc: pwrseq_simple: Handle !RESET_CONTROLLER properly
-To: Mark Brown <broonie@kernel.org>
-Cc: Philipp Zabel <p.zabel@pengutronix.de>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Catalin Popescu <catalin.popescu@leica-geosystems.com>,
- Florian Fainelli <florian.fainelli@broadcom.com>,
- Marco Felsch <m.felsch@pengutronix.de>,
- linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-next@vger.kernel.org,
- regressions@lists.linux.dev
-References: <20241102134522.333047-1-wahrenst@gmx.net>
- <20241104093901.rb5ozxt7qkdgoatc@pengutronix.de>
+Subject: Re: brcmfmac: error messages while entering suspend
+To: Johannes Berg <johannes@sipsolutions.net>,
+ Arend van Spriel <arend.vanspriel@broadcom.com>,
+ Arend van Spriel <aspriel@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-wireless@vger.kernel.org, brcm80211-dev-list.pdl@broadcom.com,
+ SHA-cyfmac-dev-list@infineon.com, Kalle Valo <kvalo@kernel.org>,
+ linux-mmc <linux-mmc@vger.kernel.org>
+References: <a825587c-e6f6-45f8-8ac0-a1a5642a5333@gmx.net>
+ <16169285-d838-46f3-8be1-3639f573062e@broadcom.com>
+ <86ef2465-3b5c-47c8-9e81-ad5b545bcfe4@gmx.net>
+ <89888eab44b7b431ac7fedcd573db325e07b935d.camel@sipsolutions.net>
 Content-Language: en-US
 From: Stefan Wahren <wahrenst@gmx.net>
-In-Reply-To: <20241104093901.rb5ozxt7qkdgoatc@pengutronix.de>
+In-Reply-To: <89888eab44b7b431ac7fedcd573db325e07b935d.camel@sipsolutions.net>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:3QUeJFnW8IfUDzUNR3gHgR1GLzSJwBr2VWJeYALXvvQo2Dx3pKc
- R/3ZgYDtC+toB/++6G0GvS/CXbk0ckOVkqertfY4jQYMXzN69VurWjmsBcPrfvcE6OVphnM
- gpHlZ0zTROZGsN0flINwOO6bdY7NAA8P1RGBwO52pds9HQ5WwQSFp1P9Y8R/JjPMl5QX4z6
- +2IIj9CzENqrj9jnJiSWQ==
+X-Provags-ID: V03:K1:VRc1NSBpucuM0Cx95dMoCWJfKwSLvhQQpbor7Bo1SQv2WCBHBKv
+ LdEhTjaUfKVbvh+Lftxe77Rg0DMnHXUFn6/pcg3FDiakXcUblKti04fRc2/Fr0quJeudWJL
+ zx/fg4wi2peI0ZR0LKzo16NA4nkLaglA5WblBuLInLlSbzC1Z7HUzVHJyYH1MRPdKhMWKsQ
+ fp3Xve/CYm1ZRt8mqIGvg==
 X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:h5KB0udMUDs=;AI4WhMe78Bj/ADR/ZjjqpSQXFYu
- TVpk8jdDCDyDs2eavH9OmRT9BOMyWmtKz5+fu4jGuNfVg1O8vvj3O1nn99I0d5wj+plKAfHTW
- ulONPu1XpBkrgeRdtlUvOKx8cR1R+EFggHUouFfdcIJrRSxgs3btp5vsWTYoQouir+BkyCujN
- zwtSD+Cv1MqitaOXJ+XsJN1LgCUvlSXO3Xw39PE4tSgdpd2gtxa2AY+Q7Mp6RA1TzDD7HFDcR
- Z00L9Cw3mL/uxBezrMAyAjx/f3DrhmovYZK8gnw3dVgdAv6auRut3gCilZq7YNue12Bw8zwCb
- MOZYhCo2RA0MKy/0KRFm3I78OM8SCfIw7v+3fFfsXWTIAhY9gJ4p6wQs2T262ohRjnPwD1tjJ
- RuP5o+RzsQcP13csIbkQPDzXaInyrqIDPsLjcXiojinbrIUEdEM8vim+x7ZRrBg22YXeKSxNl
- WN927O8oR5QIwQXzEDRIsJ5S5aaXnegykPwBR270z+z15aFtKy2H6qWHf7CvYXFSFYUpVIlCK
- wFNW9H3+R5Emwo2e5Lb4PZgGhx+qhkkd4crxdWsQ5/Ys9iXOHrgn/aKG0xn0xi/QaZb7hvdU5
- nYE4XCgMY34NL8F3+jOWg6fVPRoaNuJN6cvkbkbhxl/8FvpS+H9YSdTUmq+DPveyOXzZr5fws
- LNPTG4rvBLjz90dqufEqHAglEbLWplhOcxek0sDuGmHMbmuC5V0hXFgI0JdLNAmARDsb76czm
- ytXa7vs5bYMcRSS9K1SKn6sgGzS+yRa1Ro2dy0vd/fJeWCcc4BMEldW2R3g1q+ZyHzXePwwMo
- sibno5DLHfnVfd/b7mm3W42A==
+UI-OutboundReport: notjunk:1;M01:P0:iqKjcf2qvjM=;V991R9Fa8EWLuo37ZVmw0KJ9HVO
+ 1k8cfmVGnOCpDk6rTQNBx4kf0wC/taGGHOmBaz0oH07NEDYKuOtYhPIQj2viajT+N0Fn084Pl
+ /LKDz9wG+TNGPmCa/Z3RbLLEYHHASVHWNAYL2P6OF9vqVWCCZiuiL81lhw4gcIEp50jztRXeq
+ c7vTfeQj/nq9Ydgt1W5WhDXiS4Kpvt1TNAbLHia7jJUOeGbR6eGlM4exawABvxTZMrD9Gf1CE
+ ng9UgyMGH4gb3f06sLe5PvaoYP3RQ4He4yF3ckPUHv6xHv3EBoqtpN/5qvXqciecZ2dl43MAc
+ Cp0Pvtb9972SdF9Nig7f1R0KGJWd4nLzRxh9Ew4gxiuIv2naw4tobKC+ImqD+NaCzCTBny6fK
+ 1RRi7bEbASmU9hQGrJO2rFUgYWFdAF9IZUjEk9zZBv8FJpCQVPcz9hQkP2Y7p4z59+XFNjjq8
+ wb4xl9vlfFXzr4krk42KFDt/YryVUZ1MhJPuRpkfHglr7cfM8FWE2ntYtrsdu81UeBT07whi0
+ nfK8E6qCsumsdtz3dQlEElWPXkaSSKs+UKWCJTMtIKRIzDBZRmLTBJFlw6Zkso3lfdPXtLuXs
+ v1Z5gBejJNamwDFoJqVwrIPoMiZzRWSS5oU/5XCG7mtXJt/LHEgTYih1nIhB8OBjAZVYh6t8D
+ 7Fruz5idq8K10M8tJPgGKxLaegnO9GH3Fibsh3WjgHVd44y4euPs0ItSUIGeoq2ZTCueVtzSL
+ eIQoP350I/vvIp2EmKB4nNCs9zQ34ESVEoLlb8bvmxJBrKZaYs0HQg3keZ//q/93g0K7QL7HF
+ Pju+4Lg04NgXBZP2ysWwYh0w==
 
-Hi Mark,
+Hi,
 
-Am 04.11.24 um 10:39 schrieb Marco Felsch:
-> Hi Stefan,
+Am 04.11.24 um 13:18 schrieb Johannes Berg:
+> On Mon, 2024-11-04 at 12:59 +0100, Stefan Wahren wrote:
+>>>> [=C2=A0 384.292071] ieee80211 phy0: brcmf_fil_cmd_data: bus is down. =
+we have
+>>>> nothing to do.
+>>>> [=C2=A0 384.292079] ieee80211 phy0: brcmf_cfg80211_get_tx_power: erro=
+r (-5)
+>>>>
+>>>> These errors are not new and I assume they have always been there. I'=
+m
+>>>> not an expert here, so I want to know is the problem here that the SD=
+IO
+>>>> interface is shutdown before brcmfmac is suspended or lies the issue
+>>>> within brcmfmac suspend itself?
+>>> Upon suspend we execute the remove path and cleaning the interfaces.
+>>> We notify cfg80211 about the removal, which in turn will notify
+>>> userspace, but is tries to obtain the tx power from brcmfmac.
+> I guess "it tries to obtain" is some sort of event path that wants to
+> include the TX power in an event. That doesn't seem to make all that
+> much sense on removal events though, so perhaps we could remove the
+> get_channel and get_tx_power calls for NL80211_CMD_DEL_INTERFACE.
 >
-> On 24-11-02, Stefan Wahren wrote:
->> The recent introduction of reset control in pwrseq_simple introduced
->> a regression for platforms without RESET_CONTROLLER support, because
-> This is what I was afraid of :/
->
->> devm_reset_control_get_optional_shared() would return NULL and make all
->> resets no-ops. Instead of enforcing this dependency rely on this behavi=
-or
->> to determine reset support. As a benefit we can get the rid of the
->> use_reset flag.
->>
->> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset con=
-trol")
->> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
->> ---
->>   drivers/mmc/core/pwrseq_simple.c | 16 +++++++---------
->>   1 file changed, 7 insertions(+), 9 deletions(-)
->>
->> Hi,
->> will trying to reproduce the Rpi 4 regression from here [1], I found
->> the issue above. I'm pretty sure the Rpi 4 regression is caused by the =
-same
->> commit. Unfortunately I wasn't able to reproduce it.
->>
->> [1] - https://lore.kernel.org/linux-next/6724d7d5.170a0220.1281e9.910a@=
-mx.google.com/T/#u
-I think i've a better unterstanding of the regression in your case. I
-noticed on my Raspberry Pi 3 B+ that this change in combination with
-arm64/defconfig causes a huge delay until wifi is probed (~ 32 seconds).
-Maybe this is caused by the fact that RESET_GPIO is build as a module,
-while PWRSEQ_SIMPLE is builtin. But this doesn't explain why the driver
-seem to never probe in your case.
+Not sure if I get it right, but the follow patch make the errors go away:
+
+diff --git a/net/wireless/nl80211.c b/net/wireless/nl80211.c
+index 1ac8a196f376..52120cce2f7e 100644
+=2D-- a/net/wireless/nl80211.c
++++ b/net/wireless/nl80211.c
+@@ -4006,23 +4006,25 @@ static int nl80211_send_iface(struct sk_buff
+*msg, u32 portid, u32 seq, int flag
+ =C2=A0=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 nla_put_u32(msg, NL80211_ATTR=
+_VIF_RADIO_MASK, wdev->radio_mask))
+ =C2=A0=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 goto nla_put_failure;
+
+-=C2=A0=C2=A0=C2=A0 if (rdev->ops->get_channel && !wdev->valid_links) {
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 struct cfg80211_chan_def chandef =
+=3D {};
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 int ret;
++=C2=A0=C2=A0=C2=A0 if (cmd !=3D NL80211_CMD_DEL_INTERFACE) {
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (rdev->ops->get_channel && !wdev=
+->valid_links) {
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 struct cfg80211_=
+chan_def chandef =3D {};
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 int ret;
+
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D rdev_get_channel(rdev, wdev=
+, 0, &chandef);
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret =3D=3D 0 && nl80211_send_ch=
+andef(msg, &chandef))
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 goto nla_put_fai=
+lure;
+-=C2=A0=C2=A0=C2=A0 }
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D rdev_get=
+_channel(rdev, wdev, 0, &chandef);
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret =3D=3D 0=
+ && nl80211_send_chandef(msg, &chandef))
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 goto nla_put_failure;
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 }
+
+-=C2=A0=C2=A0=C2=A0 if (rdev->ops->get_tx_power) {
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 int dbm, ret;
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (rdev->ops->get_tx_power) {
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 int dbm, ret;
+
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D rdev_get_tx_power(rdev, wde=
+v, &dbm);
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret =3D=3D 0 &&
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 nla_put_u32(msg,=
+ NL80211_ATTR_WIPHY_TX_POWER_LEVEL,
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 DBM_TO_MBM(dbm)))
+-=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 goto nla_put_fai=
+lure;
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 ret =3D rdev_get=
+_tx_power(rdev, wdev, &dbm);
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 if (ret =3D=3D 0=
+ &&
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_LEVEL,
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 =C2=A0=C2=A0=C2=A0 DBM_TO_MBM(dbm)))
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 goto nla_put_failure;
++=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 }
+ =C2=A0=C2=A0=C2=A0=C2=A0 }
+
+ =C2=A0=C2=A0=C2=A0=C2=A0 switch (wdev->iftype) {
+
+But this change doesn't consider get_txq_stats and the further calls
+rdev_get_channel for the valid_links.
+
+Do we actually need nl80211_send_iface() for NL80211_CMD_DEL_INTERFACE?
 
 Regards
