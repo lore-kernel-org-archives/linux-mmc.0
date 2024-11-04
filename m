@@ -1,104 +1,107 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7C2E718BC0D;
-	Mon,  4 Nov 2024 06:07:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B10E938F97;
+	Mon,  4 Nov 2024 06:38:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730700454; cv=none; b=DxgYEREguWrTF9rRBDrlDej1fPnqbJbmNy6g4OHxhxVqb64Cdqy/NLDvShsqyIZbMRN8Wwh/pEHqNrViqI4GBFGr7Zg76HYJGYALG+Tjf8IRVsgDxnb+MuYwIWS63KIXs+ckbxIerWtBJWmYntx0g0F9N3G+7OKb5hhv4j/BObA=
+	t=1730702311; cv=none; b=NkNHK3qxkutTpqjf60qaCvDi5FZsX7mBJPfTo5KFHfVZAEk9DWpvtrfW33kk22OGm63tnRjaFdUPjvdoqPQdQKMInBoyudmF/bYla9oCdKEFKumXNNcEBRSjXF6axTLz1hm/pJqxHbcDBb781mTFnQ6wKOr9AO+GIskbBLG89d0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730700454; c=relaxed/simple;
-	bh=SUcaGBKEuufKEAxOQUtGgQ/TxG/c5ajxrCwDGqg9WOs=;
-	h=From:To:Cc:Subject:Date:Message-Id; b=XXZLnjcK9hUTOLs5HQoTg9CmairXI9kCdcw5cpIo7u1eLjqsS9/ZKqS+mO2X8Z1t9gjCxTK5ncwQkF2j6fxsU76bp6+0MzwYi/6LaW2Go6m2vGqO4Q41+vwMmR4x5ID9OdAgv1SFBrMAsrGhfHhG2qc6Vx2cS0quZ56N0z6aCiQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=Ps0ZnanM; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1730702311; c=relaxed/simple;
+	bh=w5IzZhNS0pyq3dZVWuxnPxZjGqxLGha5AZ2HRi5kLkE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UnsNBBaOXrfnl4CVvD8ekiqUfdllaM3XkjVjs42+/g7/Gs+IhQA7/fF3R14VpgngZJPNoeWdpaAS9hPsJ+JmimYvGQylyIRGLNt3HXq1bVoWF+4AxYHDUdOJ7HsMNPWbTwqnu9i9P1idw/+baHVTsEoj02JeKV/Uz0FV23fiksY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=OTaamrWS; arc=none smtp.client-ip=192.198.163.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="Ps0ZnanM"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A3NLDH7026361;
-	Mon, 4 Nov 2024 06:07:28 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=s54UzP9JI7D6
-	AHRbqCrzy1vQqY3KlXI1sJJvVnKYbAw=; b=Ps0ZnanMIyEgwScbinIV9xVmWdgD
-	+4J+sk2zVSWUH1Kfd9SXdzY1/PrDXYCcNTtjBooeIQqgPas6NTDKAv2N2nak0ai+
-	31RTIH10P3Lh7J26fefH7kicg3Cm8MXuGn2NGMFUb3rDqE6Mz3mI25O5Uxtm2zUl
-	mmyVohDl6C9s8SYOEhFPkywG+sSnM0J8e1cR1FQInxa2WM20DIplrbpUEuVVA2Ml
-	c9doVL+Sv/XDB5DgdU8579EGrVFIbPQ4Xj/h3f6yxk4oI/ZqC1gy93b13DfDkprw
-	EgFMTkxIAzx/NDvgSR3h/XTQLegCAXqBROyWfbvNlioDepydUeVEhpmRig==
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42ndc6u5kr-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 04 Nov 2024 06:07:28 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A467PNw025939;
-	Mon, 4 Nov 2024 06:07:25 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 42nd5kqw7e-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Mon, 04 Nov 2024 06:07:25 +0000
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A467OFO025930;
-	Mon, 4 Nov 2024 06:07:24 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 4A467O31025928;
-	Mon, 04 Nov 2024 06:07:24 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
-	id D8BCA5001D1; Mon,  4 Nov 2024 11:37:23 +0530 (+0530)
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_cang@quicinc.com,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
-        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
-        kernel@quicinc.com, Sarthak Garg <quic_sartgarg@quicinc.com>
-Subject: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers
-Date: Mon,  4 Nov 2024 11:37:22 +0530
-Message-Id: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 1_M2nQvFUXWR3diDO2n51JqGIgmHLkqC
-X-Proofpoint-GUID: 1_M2nQvFUXWR3diDO2n51JqGIgmHLkqC
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- lowpriorityscore=0 mlxlogscore=999 adultscore=0 clxscore=1011 mlxscore=0
- phishscore=0 impostorscore=0 suspectscore=0 malwarescore=0 bulkscore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2411040053
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="OTaamrWS"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1730702309; x=1762238309;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=w5IzZhNS0pyq3dZVWuxnPxZjGqxLGha5AZ2HRi5kLkE=;
+  b=OTaamrWSJbqHLI7TPRMbRmth9uYMaJqm14xfNVKZfKR18SmZENsESSX1
+   arUH5nH/DEnfY1svaUINJZwhEFN0+JTAYDQRNdLfSV1MLBw7m94VB/2+k
+   TjPtgoTjMRIBLcZCsUD0Ia0l2i87nzm7HiuF4YOUTMg/qG8sH515fpcKm
+   N2VP+O2iIwAtbtmqG28QfXAVGpaRU/AgEEUbS3DaQRqbS9Zp9KBJxIuJY
+   +eIjmnYuTsCLKZU1nfQifHNvSRjGUxyyGxs3VE+mmbn/kzP8K1ZEiJy3O
+   ifKMJO96ASnenxj/JgEylYTM7pUTrFpITHyJ695iT2TxLXbWlxS9R2xbA
+   g==;
+X-CSE-ConnectionGUID: Lm5ESs1uRje2v3vUil3Pbw==
+X-CSE-MsgGUID: Nmy7KQwYQwSUUrrncwj4Qw==
+X-IronPort-AV: E=McAfee;i="6700,10204,11245"; a="29801130"
+X-IronPort-AV: E=Sophos;i="6.11,256,1725346800"; 
+   d="scan'208";a="29801130"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by fmvoesa113.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Nov 2024 22:38:24 -0800
+X-CSE-ConnectionGUID: 3u7azeIwSYCzt9aSZon4Rw==
+X-CSE-MsgGUID: XYoWjP+nSS+br4byYIhU6w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.11,256,1725346800"; 
+   d="scan'208";a="114348431"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
+  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Nov 2024 22:38:19 -0800
+Message-ID: <8383c639-66ce-4252-b3e8-734cb6688b44@intel.com>
+Date: Mon, 4 Nov 2024 08:38:14 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 0/2] mmc: host: sdhci-esdhc-imx: implement emmc
+ hardware reset
+To: Josua Mayer <josua@solid-run.com>, Haibo Chen <haibo.chen@nxp.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
+ Sascha Hauer <s.hauer@pengutronix.de>,
+ Pengutronix Kernel Team <kernel@pengutronix.de>,
+ Fabio Estevam <festevam@gmail.com>
+Cc: Mikhail Anikin <mikhail.anikin@solid-run.com>,
+ Jon Nettleton <jon@solid-run.com>, Yazan Shhady
+ <yazan.shhady@solid-run.com>, Rabeeh Khoury <rabeeh@solid-run.com>,
+ imx@lists.linux.dev, linux-mmc@vger.kernel.org, s32@nxp.com,
+ linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
-This enables runtime PM for eMMC/SD card.
+On 1/11/24 13:42, Josua Mayer wrote:
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
+> ---
+> Changes in v3:
+> - reused existing control register definition from sdhci-esdhc.h
+>   (Reported-by: Bough Chen <haibo.chen@nxp.com>)
+> - placed both control register mask definitions next to each other
+> - fixed timeout write register name
+> - Link to v2: https://lore.kernel.org/r/20241030-imx-emmc-reset-v2-0-b3a823393974@solid-run.com
+> 
+> Changes in v2:
+> - replaced udelay with usleep_range
+>   (Reported-by: Adrian Hunter <adrian.hunter@intel.com>)
+> - added comments for delay values
+>   (Reported-by: Peng Fan <peng.fan@nxp.com>)
+> - delay values based on JEDEC Standard No. 84-B51, 6.15.10 H/W Reset Operation,
+>   on page 159
+>   (Thanks to Bough Chen <haibo.chen@nxp.com>)
+> - added a second patch demonstrating a cosmetic issue revealed by first
+>   patch - it bothered me during development but is not important
+> - Link to v1: https://lore.kernel.org/r/20241027-imx-emmc-reset-v1-1-d5d0c672864a@solid-run.com
+> 
+> ---
+> Josua Mayer (2):
+>       mmc: host: sdhci-esdhc-imx: implement emmc hardware reset
+>       mmc: host: sdhci-esdhc-imx: update esdhc sysctl dtocv bitmask
 
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
+For both:
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index e00208535bd1..6657f7db1b8e 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2626,6 +2626,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
- 
-+	msm_host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 
- 	/* Set the timeout value to max possible */
--- 
-2.17.1
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 
