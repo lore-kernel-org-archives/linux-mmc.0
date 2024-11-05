@@ -1,112 +1,150 @@
-Received: from mail.manjaro.org (mail.manjaro.org [116.203.91.91])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1FCC941C69;
-	Tue,  5 Nov 2024 06:29:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=116.203.91.91
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C305C1D1F54;
+	Tue,  5 Nov 2024 09:35:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730788194; cv=none; b=buHD5Y6Xh5DqNBTRP/C5tX5Nau3klFqJSZ2Oqm/e2grD3EpOQWczAlLtkVMhUTh7tLBg/IGto/aA7zKzDCaFgGdncAut6KkYsk8DNW49hSSizZz0pF5Kds/o2u7x6wUHjXOYwq03TTz9cdI10radFi78nVgN718FjvFAMiczFUs=
+	t=1730799324; cv=none; b=VrSbN79VEwHPjFGkSolv8Z9+V/hvq2gXBlnvzNrc1/Y3dtxqKo6ephFi9vn42MbxFjYQBPUZLt64w9e6sMwmXn3gwczt5KiObtynrR2LThSiScNBKdeLtZQlOInZ7eFjVcCWI882x4U8812slClAmMX96HyKgN8YQ7XUue0xze4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730788194; c=relaxed/simple;
-	bh=6DEYIIrf9rnJY37cFJ6bjpvI+y1KGnq1lzv188Z3PrQ=;
-	h=MIME-Version:Date:From:To:Cc:Subject:In-Reply-To:References:
-	 Message-ID:Content-Type; b=KuJf3jFYhWY0zgh/RJS3w6Z10zv1ULcUTWO4pC7/PXDu7wFNZrCqSwnzWNXFxx8mufzqGGmEv4Z4GWLpmYve0xT3r8kyu5TktmAbWboA1pCuJkfy02GradHO0S7q3Uepzn9hWsRgWxY0ciqO/Fe9MRNb1a5xVD93JwUDhkUA7y8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org; spf=pass smtp.mailfrom=manjaro.org; dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b=pxeH1phe; arc=none smtp.client-ip=116.203.91.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=manjaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=manjaro.org
+	s=arc-20240116; t=1730799324; c=relaxed/simple;
+	bh=g+y6xSTDDc/4iOIBVWx79ClWRqfmXl4RFvMLEW9wxR8=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=RBApoV35Q1jMWYoVFG3vPUkq8J7nJ1FflzLhtnKSyqBkKhlxy6YVkx9KL8nANGQqPzz2bTub2jgzTjZTlUesd2hIQjmBeTUjkp0XT0ryrRH1+5zyYkdHlLcM7ma1JvzacwRTuJp0Adj+/RwYT/OaM60EpRuOgqx83AxhN706QE4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=UtfvhuZC; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=manjaro.org header.i=@manjaro.org header.b="pxeH1phe"
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="UtfvhuZC"
+Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A59WBmw021458;
+	Tue, 5 Nov 2024 09:35:19 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=+3mobtsCqfmg
+	gYkUHIHhRo0d7QRYbP9IuytZtXf6vV8=; b=UtfvhuZCDEGTe4pG19vjvOUSi6Sz
+	IF+taeNNSOfak91Q7un4pFvDs7IRABjpO0PbNU1/iJuDOYJsFB7FXKFziyckLtuY
+	dp7b75e6CKe2ecqsYsCihxQZRJF6vRI+K9f+RhFPHY9bQ1sOhgUaAAQpL1YiWI0a
+	bNUFNF44oCI3gXvcqtddFEwxxmPBS/gwDDebplvCGOi50pYwNDUSzUVQujcJVIwk
+	ElSdQ0PyMPy23NVs68oL+1wr0/bKX/TrrL8DZU3Gv4n9IRCwq+ywg5ZoCIb2vf1A
+	47JeeMzOYZW2B61TH3LKka+C9RsXaIjL4hBVOPGiOYyZxFAx7KekDB1VEQ==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42ncyxy25x-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 05 Nov 2024 09:35:19 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A59ZGj5018185;
+	Tue, 5 Nov 2024 09:35:16 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 42nd5m734r-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+	Tue, 05 Nov 2024 09:35:16 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A59ZFp9018172;
+	Tue, 5 Nov 2024 09:35:15 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 4A59ZFfu018171;
+	Tue, 05 Nov 2024 09:35:15 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
+	id 8BE8F5001CF; Tue,  5 Nov 2024 15:05:14 +0530 (+0530)
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_cang@quicinc.com,
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com,
+        kernel@quicinc.com, Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V1] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
+Date: Tue,  5 Nov 2024 15:05:13 +0530
+Message-Id: <20241105093513.16800-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: x9aDHvmvt2y_Csly4ndLBcZzAdca7YmA
+X-Proofpoint-GUID: x9aDHvmvt2y_Csly4ndLBcZzAdca7YmA
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 suspectscore=0
+ malwarescore=0 bulkscore=0 impostorscore=0 priorityscore=1501
+ lowpriorityscore=0 mlxscore=0 phishscore=0 adultscore=0 mlxlogscore=999
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2411050071
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=manjaro.org; s=2021;
-	t=1730788190;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=RSfZmloa5ktLj5m2satJeJFjZZCI/khmEGOs0heit4E=;
-	b=pxeH1pheOQFO9IM4gwFWvB08/Pm/bh3299YWAbgeriWmT03jXKkL0l6UoF4H0KJNDGqcEt
-	2qFSavAgbdfOySL1PlPtKAny1u2Kx30iZpS1rM6FXytqu0r6we/O/Ncjec7nosgzTDKaqe
-	lxl09XU2iE+EQES14V7CPqY+Q4mi4u5x6wlqBkxCUtK43/j9bbxE4syPt5Y33F/Z0Tz+na
-	HvIG7GPMFiZ5ouSwo/Iiv5gEEFU9dPBgV1rkWi1ZC1XU8vpMYAPEHLSYUVTfDfsqYjXpgM
-	6EH4BnoOSCKm1Up5urHE9/X3F2Toxe7dDsycOe5Em9y12azIm6gGuwXvRCZUsA==
-Date: Tue, 05 Nov 2024 07:29:50 +0100
-From: Dragan Simic <dsimic@manjaro.org>
-To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter
- <adrian.hunter@intel.com>, Haibo Chen <haibo.chen@nxp.com>, Shawn Guo
- <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Pengutronix
- Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- imx@lists.linux.dev, s32@nxp.com, linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH] mmc: Use of_property_present() for non-boolean properties
-In-Reply-To: <20241104190707.275758-1-robh@kernel.org>
-References: <20241104190707.275758-1-robh@kernel.org>
-Message-ID: <e737fdb7766495ec95fdf42d23c68736@manjaro.org>
-X-Sender: dsimic@manjaro.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Authentication-Results: ORIGINATING;
-	auth=pass smtp.auth=dsimic@manjaro.org smtp.mailfrom=dsimic@manjaro.org
 
-Hello Rob,
+Make sure SD card power is not enabled when the card is
+being removed.
+On multi-card tray designs, the same card-tray would be used for SD
+card and SIM cards. If SD card is placed at the outermost location
+in the tray, then SIM card may come in contact with SD card power-
+supply while removing the tray. It may result in SIM damage.
+So in sdhci_msm_handle_pwr_irq we skip the BUS_ON request when the
+SD card is removed to be in consistent with the MGPI hardware fix to
+prevent any damage to the SIM card in case of mult-card tray designs.
+But we need to have a similar check in sdhci_msm_check_power_status to
+be in consistent with the sdhci_msm_handle_pwr_irq function.
+Also reset host->pwr and POWER_CONTROL register accordingly since we
+are not turning ON the power actually.
 
-On 2024-11-04 20:07, Rob Herring (Arm) wrote:
-> The use of of_property_read_bool() for non-boolean properties is
-> deprecated in favor of of_property_present() when testing for property
-> presence.
-> 
-> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+---
+ drivers/mmc/host/sdhci-msm.c | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
 
-Looking good to me, thanks for the patch!  See also a small nitpick 
-below.
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e00208535bd1..443526c56194 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1516,10 +1516,11 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+-	bool done = false;
+-	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
+ 	const struct sdhci_msm_offset *msm_offset =
+ 					msm_host->offset;
++	struct mmc_host *mmc = host->mmc;
++	bool done = false;
++	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
+ 
+ 	pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
+ 			mmc_hostname(host->mmc), __func__, req_type,
+@@ -1573,6 +1574,13 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+ 				 "%s: pwr_irq for req: (%d) timed out\n",
+ 				 mmc_hostname(host->mmc), req_type);
+ 	}
++
++	if (mmc->card && mmc->ops && mmc->ops->get_cd &&
++		!mmc->ops->get_cd(mmc) && (req_type & REQ_BUS_ON)) {
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		host->pwr = 0;
++	}
++
+ 	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
+ 			__func__, req_type);
+ }
+@@ -1631,6 +1639,14 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+ 		udelay(10);
+ 	}
+ 
++	if (mmc->card && mmc->ops && mmc->ops->get_cd &&
++		!mmc->ops->get_cd(mmc) && irq_status & CORE_PWRCTL_BUS_ON) {
++		irq_ack = CORE_PWRCTL_BUS_FAIL;
++		msm_host_writel(msm_host, irq_ack, host,
++				msm_offset->core_pwrctl_ctl);
++		return;
++	}
++
+ 	/* Handle BUS ON/OFF*/
+ 	if (irq_status & CORE_PWRCTL_BUS_ON) {
+ 		pwr_state = REQ_BUS_ON;
+-- 
+2.17.1
 
-Reviewed-by: Dragan Simic <dsimic@manjaro.org>
-
-> ---
->  drivers/mmc/host/mxcmmc.c          | 6 +++---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
->  2 files changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 1edf65291354..dcb1a7336029 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1048,9 +1048,9 @@ static int mxcmci_probe(struct platform_device 
-> *pdev)
-> 
->  	if (pdata)
->  		dat3_card_detect = pdata->dat3_card_detect;
-> -	else if (mmc_card_is_removable(mmc)
-> -			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
-> -		dat3_card_detect = true;
-> +	else
-> +		dat3_card_detect = mmc_card_is_removable(mmc) &&
-> +			!of_property_present(pdev->dev.of_node, "cd-gpios");
-
-There's enough space in the allowed 100 columns to align "mmc_card_..."
-and "!of_property_..." by indenting the latter further a bit.
-
-> 
->  	ret = mmc_regulator_get_supply(mmc);
->  	if (ret)
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 8f0bc6dca2b0..cda1872769e0 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1629,7 +1629,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device 
-> *pdev,
->  	 * Retrieveing and requesting the actual WP GPIO will happen
->  	 * in the call to mmc_of_parse().
->  	 */
-> -	if (of_property_read_bool(np, "wp-gpios"))
-> +	if (of_property_present(np, "wp-gpios"))
->  		boarddata->wp_type = ESDHC_WP_GPIO;
-> 
->  	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
