@@ -1,709 +1,209 @@
-Received: from mail-m1973190.qiye.163.com (mail-m1973190.qiye.163.com [220.197.31.90])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5108552F9B
-	for <linux-mmc@vger.kernel.org>; Wed,  6 Nov 2024 13:47:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.90
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730900849; cv=none; b=NWLjOFuH+VdDbz452Z57opaYLCxRip9UWW/rc7tf4FcBFm9uF6AwqdeOAK4xDUCRJ82fr2B5RAOet6oR7MAW5vnuGsV67UkKC6GJxJtUXIfesc20lfpBtzRWoJJUxOskIR8/8oGiRd0k0kvy14kUyx++6rsQ+d8zV8TiO1ca7H8=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730900849; c=relaxed/simple;
-	bh=A17wbDA0o3LhR5h6e2CiIm4gSPAsvMMfeZBKqEtKKuY=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=W81nbqm8JQAFxbu8aoTVk0uZI0CWK03HSGufmkSs5RM6MVvKuWP+60R73OFFgVfu+4vTukLxuD8tdJ4rKIXKa+ezHiPPV563hrtu3TNbZQDkzLlkpH/DE+xtIQI1ravB8wKZXzQ96dfPgK8vcRSXnJRwQ1mGhfHrTDoAzpjgSDs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=Q1BkfC6T; arc=none smtp.client-ip=220.197.31.90
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7524D1D63DF
+	for <linux-mmc@vger.kernel.org>; Wed,  6 Nov 2024 14:24:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1730903061; cv=fail; b=Hg5MWMxyJ6VEBbDns3yGBoSxyDlm5zhB3kV/A4XiyorfYAjdQNu8wP8MDumQg7pM81zyyu7RV0SuQGR3MMG+l0blg1duQppI7PR9i3wr9FY73hpWmcAATCrf/NofgpSdH9TG0ZtqY6EXss0uFIH20+gv0ey3B79ID5HTG8Nnbaw=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1730903061; c=relaxed/simple;
+	bh=e7YUHHoy4XswVo2rR90V/WFoDtu1tKkaYHkV/ucwk1Q=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=CuuMhgMIYC0F7CQj3UDTFdgBFMHJboHcxhs/RpUM96B/hsAXKppxS9dnBQdFdaBUemzPl1WL2AiaAe9J+Y6L8QqTCSPz+qQ92349Kd9baXZjphMFXPdoNJwjhRmVS44ous5HU1+8xA4geOREAZwRt2pGEUMSSbMHOZTocfRsghw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=mt3Lb9cX; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=eMeEffTc; arc=fail smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="Q1BkfC6T"
-Received: from [172.16.12.45] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 1fbc9180;
-	Wed, 6 Nov 2024 21:42:06 +0800 (GMT+08:00)
-Message-ID: <22a22679-d51a-4455-9955-df522ef7fe84@rock-chips.com>
-Date: Wed, 6 Nov 2024 21:42:06 +0800
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="mt3Lb9cX";
+	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="eMeEffTc"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1730903059; x=1762439059;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=e7YUHHoy4XswVo2rR90V/WFoDtu1tKkaYHkV/ucwk1Q=;
+  b=mt3Lb9cX4kayYGIiuHrFxCG1+bnE3TPhGalXA9L5PS7BxICEw/Shf1+c
+   zSKF2dIhHCgKwl2fSdqw7PyE4gthboMHSawFkL4o01pavEw/5pydQQn1B
+   V2nL6HweC+MaCJEFxcDH0UU3w/YreYtguP4jVWJ3/mzmBbRDokA87xQDu
+   PdyMqTvdo1YFfG+TjTKu3B+vxBrz3mxDR/alSpxJ97qL3sSh4TTtLYHd4
+   sX60gWyYvu2+/5/rNzBjh+N3qOR4tZdcyVU5Pd1QITfVCtBLmq2CMgm8Y
+   Dw8C3mOfQ/LXxvveeDlx4Qlcu9PolMjIWj+FOt4zZhDds74cjpfby3RFL
+   g==;
+X-CSE-ConnectionGUID: 1jbMHVMDQw+oIoelcOF5UA==
+X-CSE-MsgGUID: 8d/FqQCARAC059N4cVqCmg==
+X-IronPort-AV: E=Sophos;i="6.11,263,1725292800"; 
+   d="scan'208";a="30186724"
+Received: from mail-mw2nam12lp2043.outbound.protection.outlook.com (HELO NAM12-MW2-obe.outbound.protection.outlook.com) ([104.47.66.43])
+  by ob1.hgst.iphmx.com with ESMTP; 06 Nov 2024 22:24:13 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=gpkrkGDpWBhrEypm4+DIdcOb5/EsXbu1pTXj4UQwIAqCDuEsIJ116paeGaEw+zPeRFBvtROsiCXurD7r1osH9UYJrxw9aY/PGlf7Or6IolU3+Wtw1O0yyBmBRLFUghx+IcaFuOiUxLhm/b3ftoFk8j6WpfZTZxXgOjlo52zj3X1/j3AI5uIWYN2WkAseeTChRweR2iquTyx3v9StrlOX4IoGmExgwGvUObyAmM79i3YXQlP46R0e3ZO4qj2z7ekeZj4/TYOM4nSNtGJUDbinv9hmgwLAluwTUp/Z0MPN5ZYKmsRhl2Ycpq7uvQZfkrZEu7s6yTevuCtoaRtUvGPcpw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=e7YUHHoy4XswVo2rR90V/WFoDtu1tKkaYHkV/ucwk1Q=;
+ b=w6G2fHSid/lhesJJbymJfLare9wHcpRuTx3Jjqfg2jCn+zCCUXOOmPx/MV7FrHkSYCuYmnwhnJrlA4auVXZFJELvlSErlXcMO1HUmj75cDIkEqPtnq7HmQ/zOv/+CzGCi6i/sAFqwG+py/D0IsKn3XaSlGIMQctv+tDHI8q/JhN5YVMqh2QZ93fVkC9Zx+iWT2RU0V/eXUUAXhUX9dU/onQmP1M417yJkcsC0H5wWJTA1D6nD41hCu+KKhPpHr2MJ46iFoNBMk1f2lkSWhlDFQTc6qqFzTajOd+HOuLz5Q+5INM+YltgNmapEjmS3Fsttu6O4nrt/tpomfLsm3aUuA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=e7YUHHoy4XswVo2rR90V/WFoDtu1tKkaYHkV/ucwk1Q=;
+ b=eMeEffTcWGCdiOR47IE3pwu1mNpVGbZHG68nebwuSfoaQQFTsTG2AlgXF/Ma/ojY6eDGfEZVhYqD4Dd/GapIc//+JXEtVgDjqUIGsU+KL5zflMHxyw3sB3VhC2Fj9bSsCqrS37UO5bpZYtD1gYvx0d6ND4DJQs2tI0W6NxrrOZI=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ BY5PR04MB6721.namprd04.prod.outlook.com (2603:10b6:a03:22a::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8137.19; Wed, 6 Nov
+ 2024 14:24:10 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::bf16:5bed:e63:588f]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::bf16:5bed:e63:588f%7]) with mapi id 15.20.8137.018; Wed, 6 Nov 2024
+ 14:24:10 +0000
+From: Avri Altman <Avri.Altman@wdc.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+CC: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH] mmc: core: clang-format fixes - part 1
+Thread-Topic: [PATCH] mmc: core: clang-format fixes - part 1
+Thread-Index: AQHbMEZWP7S5xGGM10mvFlfsGDkrdbKqQskAgAAJcQA=
+Date: Wed, 6 Nov 2024 14:24:10 +0000
+Message-ID:
+ <DM6PR04MB657587352F665AB88DADA482FC532@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20241106121830.739041-1-avri.altman@wdc.com>
+ <22a22679-d51a-4455-9955-df522ef7fe84@rock-chips.com>
+In-Reply-To: <22a22679-d51a-4455-9955-df522ef7fe84@rock-chips.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|BY5PR04MB6721:EE_
+x-ms-office365-filtering-correlation-id: 431d7748-5986-4e3e-6fa9-08dcfe6eae86
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|376014|366016|1800799024|38070700018;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?dFVTUndvc2pjZFVtV2FEZ205SUJaaGY4QUFtK3ZjODVFOE03OHpVSXVvUE1M?=
+ =?utf-8?B?OW9SVFJxTXkyRGVxaGhsOUtCKzJIUmRCYjhnNzcyd0F5OEhPcjlTZWw3VE4y?=
+ =?utf-8?B?KzhtUFZhVU81a0NDOXF0MEtsdWFXTHZYZ3NXRS9WZ3pCbzI5ZnJlZWRSTnlq?=
+ =?utf-8?B?dUtuVDlNYmJZZ3hFemc0dGM1V1lUdXJiR3J5S2NGV2tqMStiMGhtVTBWanhl?=
+ =?utf-8?B?NzNrdDNGZVczLzJNSnJ3dnBPSSt6cUhwQjVPbXl2Y1M3WGpUamQrS1FJaEts?=
+ =?utf-8?B?eGRoVHp3UHFQbnhEUys1aXBaeU9MOFNkMzAzUitaV2JkdGU5R3IwaDNOemRx?=
+ =?utf-8?B?R0hZRE9ka1kwV1VQS0EwdU5OUFNYbUhrVEo0SUkxUkNYMkZrR0tCc1ZoQUNH?=
+ =?utf-8?B?QkdzSitONkRKK0xvWFZKZTIvTUxrV0RpNmwveUlJNlE3VW1rUDVMcWRSWllm?=
+ =?utf-8?B?S0FBV2ZQMTVSd2kxajlpRkt2K29acE4yVzNjR3R6d2Y3VDBSc0hKWnZIWHpU?=
+ =?utf-8?B?WlBuVW9aRzlKRGZMdEVocTVuQ3JibnlXZ2FHVmthaTVFU0N6OW5oQk1URGVa?=
+ =?utf-8?B?RkphNWZYb3J2UWU4cFIwbHJ6aldlZzJwcVRVcWU3OGVpTkQ2Q0VBTXpuTXZJ?=
+ =?utf-8?B?d0g4VTVadWF0TkZKVWJZQTJJQzFtdlJUNmZiMXY3ZnZnUC9zV08wZkZVODlB?=
+ =?utf-8?B?dExMKy9uaUtUcnBGb0lHV0s2UDRpS3FnZmxZVEVLcGJHb01ZbWdiNUZJdjFw?=
+ =?utf-8?B?NVdXR0VScDhnd2JRZFZFd09Gd1QydEF1bWVOdzF5NU16czhEWHJwQWEvWXBF?=
+ =?utf-8?B?akJNMHE4WVkrT2s0ZE5vWVAxeXBtMXM0M2JTMWRXenZ5M05hZ0dHdG5qamJ1?=
+ =?utf-8?B?ZU5ZNXBHckEzbGZwS2dPQ1J0V2lhT1Q3VDE1YlF0ZWllbnE4ZGVIbFlyK2R0?=
+ =?utf-8?B?dlZFM0tSTDNCMlVMVDBzYmoyaUUrUjVCWmlvRDRvSlFSVUYrbFlNandSWlZU?=
+ =?utf-8?B?aGZMU3QwNWJ3WHRrb3hRNGFsZXhFN1YxUG1Td1hUWndCM2xJZ2hjazdzSnpz?=
+ =?utf-8?B?QnY1RC9HZXMvcFY5QytXRDFmTklBK1MxTzdyOUtvNUE3UHo1RG1JV1hmMG92?=
+ =?utf-8?B?cnBsdGVWZXhzMkdONkd0SEJlT2ZQcjFHdlRXRDd1eUVLNnRKaXB2VnpJa0c2?=
+ =?utf-8?B?WVMzL1RZYnZiaU5pbmExaU5JcG1HS0pRL1R5dlRzY1lNSy9ueGRvZGc3UWFZ?=
+ =?utf-8?B?STA2QVhiMmRpeWtxMW93N2Z5SlByeFd6aU5KZjdKVWVWWmlySitReUpYZmRY?=
+ =?utf-8?B?ZmVoc1lqZ1pkU2tCUzFFWUFhS3ovSFU2L1Z0MlVlTEovSE9NSlcxbWk0ZWcr?=
+ =?utf-8?B?bUJhTjdpR3drU0ExM1ExUHcrWHFTdzNYK3pCM2twRlJWUTIxMTNubFBKNDhv?=
+ =?utf-8?B?TDVjWisrUGNDZGw5OTlKeUpPUXNCVkkwOTE4MnJnK1RRN1ZRekVJMCtmOGp4?=
+ =?utf-8?B?R3RUV0hQdFkxRDk5SjJrT09zeXVNYXk3dDRtbEh3QlBuMUdqYUJNRnlhQW02?=
+ =?utf-8?B?K2ppQ2ZHWlFDcWpVeGxnNTllQWQ3aERpYVdNdVQxbkxCc3VJcEhGb2dZRnJC?=
+ =?utf-8?B?MUZYR2p1dUYzY3VTWlpSSm83SExMbitkSXZrcEhUUStUN1poS0VlMUY3UjFU?=
+ =?utf-8?B?TmNEYmhQS0E3cjVCTmJvSVFuQ2NYaW5KVkM2K2ZHajVMQVJOeEJ3SXJpQTZt?=
+ =?utf-8?B?RzJBMFNNM28vSHh3ZTZ0K2FyYUNOR3I1WDAvcWVETW80aEdBREpQMjNCOFc5?=
+ =?utf-8?Q?wkyy+pSA+78SwZ++06nfWJkAHhNIVFHitk01I=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(1800799024)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?SytHbGhaMmRIRHh4MTlqVm1SbHlneWFkZDZ3VldFT1RUT2JnYW5TUTNzZVQr?=
+ =?utf-8?B?NGh0eEQxYmwvYXpjYlA3cERKMTZ0NTVCTTBPWVNCeEw1MXI0RnBPa3BvcDZG?=
+ =?utf-8?B?cUJPQnQyclhOQzBHZVBiaXR6SStpSmlCdjkzN2dKRWpuckpWMDR5d3NCRDJD?=
+ =?utf-8?B?TVV2RTZvaVlEdTBzcEs5b1FxQzBvVWpBaHNWMUNDaDdxTm0zWlBiM00rRVRG?=
+ =?utf-8?B?bEEvTXl5elA0TUlYVDRucS91dHlSdlJiQ3JXb00rc0sydHRVaW9BN0xQSWV3?=
+ =?utf-8?B?QUpPZmlMb3J6aWgybmY5T25BRVBnVnZZWTlCTlVmTVoyS1VOZGFKbjdjUE9C?=
+ =?utf-8?B?MzFyZjg2TlQxbjM3NTMwMnh3ckJGeVgzNUdPQ1A4VmlWeXA1MzlxcFhodzhi?=
+ =?utf-8?B?L2Jpa2hjUk5PdVZKYTN6UGpNblBDZ2Z5U3dVRnRYdytFazhBaEpjZVU5OEs4?=
+ =?utf-8?B?R29SOExKRThmM2wrT0s2RkJ2S25zKzNwRkZPYnhoSDF2NGRZN1lMa2JmNTJk?=
+ =?utf-8?B?bnpIekxKbEkzWWhMZzZGb1UvTk9aKzhFU2I0Z3ZkZmFMU1lnYmtpZGtHRnRh?=
+ =?utf-8?B?bnA2T3NEYXg2aU5SaG83T0FxYzFGQTYwaDAvbzdxNmRVSGVjMk9IY2lYZng5?=
+ =?utf-8?B?L0tYYVc2S2JhaDRlazhycGEyUG0xNXRnTVh4U2RaL2ZlTkVDS3Z2RjUvZDk2?=
+ =?utf-8?B?Y21TQkw0ZWRkcml3b1VaMVJKbnpoalVQRWh5M0pmWTllMDFmZGsvYXBUZFdr?=
+ =?utf-8?B?ZDB0SndsVm05VUgrVmdXVHJnSlpqbDlXbFMvT2NaL3M0UExkd3pLYXhYM3h0?=
+ =?utf-8?B?ZVBNR3dQRy8vSitybmtJQTU5bHhjMG5rU3FjTmJrTlJmMU9pM2d4WGl6bmFL?=
+ =?utf-8?B?RkpVbWFpQTR5TCtUU0h5L0krbmhDWGhlVXhGMzVkamY5TlJ6YklabUhtb0lY?=
+ =?utf-8?B?VWFPcmlYNHoxQXhibDVjaTh6QnhiZXFyOFhIUFYrRzEvajVvTzd1ZWM4Z1FO?=
+ =?utf-8?B?aTlyS21XQ21Xd3lkRkV6RG5SWHlNbmNsYWJ6aGE4M2J2NTdtS3RRTEMrdTU3?=
+ =?utf-8?B?NmtHWmo2b1RRem5rMnkrTU52MWNRalRMTHd2VDM5Sy8wL2QyRFZhRkg0dDhN?=
+ =?utf-8?B?blQ3dWR0VDlIQ0wwNHNnOHNPTlRreHZXZjgwOVl4LzF3SlZVcWZjUTMwajNC?=
+ =?utf-8?B?UFgvSDEvejRmcDhONmVUdDg5NGQvU3hzK2wvdkIyZ2lyMGR3R2IzemEydFdl?=
+ =?utf-8?B?NXM5U0NZZ1NHUzlRR3ZKS0loa0hSMkc4NnAzOEJ4UW5rWU0yQ2xlNGp2Tm8z?=
+ =?utf-8?B?TnlkVHhKUzVIYkVyMVV6ZktxclFjejQ2OGFxRXRSWlZTMnVGVm5XbS83WE41?=
+ =?utf-8?B?ZzA1Si94V2ZnNkk3cnBHQkNqR080Z2FVWENiNzhTaEJLMjRLY0d4SG1qVzNC?=
+ =?utf-8?B?RCt2elEzcFJiZFZIQ3RWa0JtbXpKMlY2RHI5L3JhMmxTbGhKUVlhSWlqejNC?=
+ =?utf-8?B?YzJsS0Z2NXBuN0h6NDR6WHB6bWlnUno5NVZJYUpiV2NBb3EvVGhzK3BTQisr?=
+ =?utf-8?B?cVlCWjgwaTdMMkUrQjJtaXlCUmxaZFVMNXNQOWozZ2tBbWs5YXFnY0ZGUzFY?=
+ =?utf-8?B?NEg4R3hmWnlPVUZzUExtQm1hNERLdnE3VHNQLzhxc1VmTUhRL2ZiWHV3RUFD?=
+ =?utf-8?B?UGhOeUtDL3hrSUtwdnVVdFU4OWpUL1NVeUl5SFJ2YThiUm1ncmxBRk9JNVV5?=
+ =?utf-8?B?VWFpRHkrdG9iYy9XMzdIQ2NLZitXUnlrVWN2TEx3KzlybWNnTW8rajczMUs3?=
+ =?utf-8?B?WkYycWVDQnB5OTBJTlRlMVNtSVIrc1dWSWhQVWVZd1BuZFJlOGNjcVFqNHp1?=
+ =?utf-8?B?b3JYMUw3OWswUzBhU2pLRDlKRlk0TUJwSk9VVlc0dmRPbGhwSkRPYUFrbVZu?=
+ =?utf-8?B?OURRMiszVlpBMnhwQThhSTNhRS9VbUdHSGdXb0l1amJCK1c5ZzZlRFVETDlT?=
+ =?utf-8?B?aURLbkFoenNKclZ5Ni9GWjhvdWJYR1o2cjZZQTBoOC9VSnh0U0hETXZDd3FK?=
+ =?utf-8?B?N3AwbXNrYnpobG5iR2hhKzJhTXFYOElPamtROXhNNHRhbnM3L2x6a3RPcCtN?=
+ =?utf-8?Q?5GHGhqnIpeyr7YBrJ5lONq7ws?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: clang-format fixes - part 1
-To: Avri Altman <avri.altman@wdc.com>
-References: <20241106121830.739041-1-avri.altman@wdc.com>
-Content-Language: en-GB
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20241106121830.739041-1-avri.altman@wdc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGhkYH1YeH0wZTklPTxkYHx5WFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-X-HM-Tid: 0a9301b605b609cckunm1fbc9180
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6NS46KSo4CTIdCjBRKBoaTx06
-	LBgKFDJVSlVKTEhLQktLTklMTk5OVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUlOT0xJNwY+
-DKIM-Signature:a=rsa-sha256;
-	b=Q1BkfC6TyY8WK8EoluVBAcadbKwL6PYTQEcmHjRR0FgICeyzVhaZBQO8HpxnCc1+Ib44mBwmPUjvIM2juIXoV3cHeUyydMkKOLporNd70nWWfB/O0g5C33Bnk0Y5zpQo2NYr+FGcv3JoBA3Mke5bkQSItrdk7dZpKnMvc9UJ6cI=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=YQ5HyfITg7ZIU5T0Ul+lvf3vhvh3p7Dg6cK/LxcWLSY=;
-	h=date:mime-version:subject:message-id:from;
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	4hIKJCpvH7wmo48G6OjYJaJeFca4hnKkNZHbYIRz6dXBv1e4QxkoaaqH/UHP7O1GZ3eKiC7zaNoADhrQ4RAL36SwMinhIBj0Uw63b3Fw4qMrvYmcNF6VTaYC4gb886XxxFmSh3GwBDJVEJm1ye/goG3bskgOQzlWit+YjPJFPUrvudrnsveme/fFTfGfT9NAtyLmw8z/YPYomt+rICQi1LR9TYvFgouPcauyjyUIq6srrSHOgxjl9GvTnYVnYaXKhFIc5L5mMzv5zEAzeilv6fSB95YFgmy+PXSosjgulc34iTd+TbqVSkhTReUrJmijegv/TCwkJL/EoHQrtpOeHjY8Cc5cH8RUYaNnjwRkkgRE7zzRehmEgL9pCS6CB9ntTEHzna3LXDAnwjsBH1OHmjD0ALouBNtspCtXGwu+omLsYV7r+lVzHF5ROZ0NJbfgqVKk3en3Nc5t1O3qVXY5FeuP3Xcz0lyt0c+w8QV/gbW4gKq6XmxXinBPk+Dq9X0wuaDUMXQsjEA4d812T+D80GKwnwPGK9T/2qNDzZI49BnvC1VO3ts1vjWDWxygGc2K+hgZ96jV1TtFPjGioJusmM64zrV1cOdydlfma+SfowhOVa6adMYcTBlgyHbtZjQN
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 431d7748-5986-4e3e-6fa9-08dcfe6eae86
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Nov 2024 14:24:10.7138
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: lqVx7fE3ZBuXw07iOAM7aHZDJFCjFjc8cqYVjDN13t4s+FHP+2fSDKQyXbvN8dOqNijL01n9lrpQEHCq5QzWwg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR04MB6721
 
-Hi Avril,
-
-在 2024/11/6 20:18, Avri Altman 写道:
-> While strict checkpatch is useful for identifying common style issues
-> and enforcing certain coding standards, clang-format provides several
-> advantages, e.g. automated formatting, customizable style, consistency
-> across tools, and more.
-> 
-> By adopting clang-format, we aim to improve code readability,
-> maintainability, and overall code quality in the ufs core driver.
-> 
-
-It does improve the code a bit, however, my concern is that if this
-massive change, maybe along with the following part 2 or so，will makes
-the git-blame hard to follow the history?
-
-> Apply this in phases - starting with mmc-test.
-> No functional change.
-> 
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
-> ---
->   drivers/mmc/core/mmc_test.c | 250 ++++++++++++++++++------------------
->   1 file changed, 123 insertions(+), 127 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 4f4286b8e0f2..42c533a272ac 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -23,15 +23,15 @@
->   #include "bus.h"
->   #include "mmc_ops.h"
->   
-> -#define RESULT_OK		0
-> -#define RESULT_FAIL		1
-> -#define RESULT_UNSUP_HOST	2
-> -#define RESULT_UNSUP_CARD	3
-> +#define RESULT_OK 0
-> +#define RESULT_FAIL 1
-> +#define RESULT_UNSUP_HOST 2
-> +#define RESULT_UNSUP_CARD 3
->   
-> -#define BUFFER_ORDER		2
-> -#define BUFFER_SIZE		(PAGE_SIZE << BUFFER_ORDER)
-> +#define BUFFER_ORDER 2
-> +#define BUFFER_SIZE (PAGE_SIZE << BUFFER_ORDER)
->   
-> -#define TEST_ALIGN_END		8
-> +#define TEST_ALIGN_END 8
->   
->   /*
->    * Limit the test area size to the maximum MMC HC erase group size.  Note that
-> @@ -141,15 +141,15 @@ struct mmc_test_dbgfs_file {
->    * @gr: pointer to results of current testcase
->    */
->   struct mmc_test_card {
-> -	struct mmc_card	*card;
-> +	struct mmc_card *card;
->   
-> -	u8		scratch[BUFFER_SIZE];
-> -	u8		*buffer;
-> +	u8 scratch[BUFFER_SIZE];
-> +	u8 *buffer;
->   #ifdef CONFIG_HIGHMEM
-> -	struct page	*highmem;
-> +	struct page *highmem;
->   #endif
-> -	struct mmc_test_area		area;
-> -	struct mmc_test_general_result	*gr;
-> +	struct mmc_test_area area;
-> +	struct mmc_test_general_result *gr;
->   };
->   
->   enum mmc_test_prep_media {
-> @@ -207,18 +207,20 @@ static void mmc_test_prepare_sbc(struct mmc_test_card *test,
->    * Fill in the mmc_request structure given a set of transfer parameters.
->    */
->   static void mmc_test_prepare_mrq(struct mmc_test_card *test,
-> -	struct mmc_request *mrq, struct scatterlist *sg, unsigned sg_len,
-> -	unsigned dev_addr, unsigned blocks, unsigned blksz, int write)
-> +				 struct mmc_request *mrq,
-> +				 struct scatterlist *sg, unsigned sg_len,
-> +				 unsigned dev_addr, unsigned blocks,
-> +				 unsigned blksz, int write)
->   {
->   	if (WARN_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop))
->   		return;
->   
->   	if (blocks > 1) {
-> -		mrq->cmd->opcode = write ?
-> -			MMC_WRITE_MULTIPLE_BLOCK : MMC_READ_MULTIPLE_BLOCK;
-> +		mrq->cmd->opcode = write ? MMC_WRITE_MULTIPLE_BLOCK :
-> +					   MMC_READ_MULTIPLE_BLOCK;
->   	} else {
-> -		mrq->cmd->opcode = write ?
-> -			MMC_WRITE_BLOCK : MMC_READ_SINGLE_BLOCK;
-> +		mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
-> +					   MMC_READ_SINGLE_BLOCK;
->   	}
->   
->   	mrq->cmd->arg = dev_addr;
-> @@ -249,7 +251,7 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
->   static int mmc_test_busy(struct mmc_command *cmd)
->   {
->   	return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
-> -		(R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
-> +	       (R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
->   }
->   
->   /*
-> @@ -286,8 +288,8 @@ static int mmc_test_wait_busy(struct mmc_test_card *test)
->   /*
->    * Transfer a single sector of kernel addressable data
->    */
-> -static int mmc_test_buffer_transfer(struct mmc_test_card *test,
-> -	u8 *buffer, unsigned addr, unsigned blksz, int write)
-> +static int mmc_test_buffer_transfer(struct mmc_test_card *test, u8 *buffer,
-> +				    unsigned addr, unsigned blksz, int write)
->   {
->   	struct mmc_request mrq = {};
->   	struct mmc_command cmd = {};
-> @@ -319,8 +321,7 @@ static void mmc_test_free_mem(struct mmc_test_mem *mem)
->   	if (!mem)
->   		return;
->   	while (mem->cnt--)
-> -		__free_pages(mem->arr[mem->cnt].page,
-> -			     mem->arr[mem->cnt].order);
-> +		__free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
->   	kfree(mem->arr);
->   	kfree(mem);
->   }
-> @@ -366,7 +367,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
->   		struct page *page;
->   		unsigned int order;
->   		gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
-> -				__GFP_NORETRY;
-> +			      __GFP_NORETRY;
->   
->   		order = get_order(max_seg_page_cnt << PAGE_SHIFT);
->   		while (1) {
-> @@ -456,12 +457,10 @@ static int mmc_test_map_sg(struct mmc_test_mem *mem, unsigned long size,
->    * Map memory into a scatterlist so that no pages are contiguous.  Allow the
->    * same memory to be mapped more than once.
->    */
-> -static int mmc_test_map_sg_max_scatter(struct mmc_test_mem *mem,
-> -				       unsigned long sz,
-> -				       struct scatterlist *sglist,
-> -				       unsigned int max_segs,
-> -				       unsigned int max_seg_sz,
-> -				       unsigned int *sg_len)
-> +static int
-> +mmc_test_map_sg_max_scatter(struct mmc_test_mem *mem, unsigned long sz,
-> +			    struct scatterlist *sglist, unsigned int max_segs,
-> +			    unsigned int max_seg_sz, unsigned int *sg_len)
->   {
->   	struct scatterlist *sg = NULL;
->   	unsigned int i = mem->cnt, cnt;
-> @@ -531,8 +530,10 @@ static unsigned int mmc_test_rate(uint64_t bytes, struct timespec64 *ts)
->    * Save transfer results for future usage
->    */
->   static void mmc_test_save_transfer_result(struct mmc_test_card *test,
-> -	unsigned int count, unsigned int sectors, struct timespec64 ts,
-> -	unsigned int rate, unsigned int iops)
-> +					  unsigned int count,
-> +					  unsigned int sectors,
-> +					  struct timespec64 ts,
-> +					  unsigned int rate, unsigned int iops)
->   {
->   	struct mmc_test_transfer_result *tr;
->   
-> @@ -567,11 +568,10 @@ static void mmc_test_print_rate(struct mmc_test_card *test, uint64_t bytes,
->   	iops = mmc_test_rate(100, &ts); /* I/O ops per sec x 100 */
->   
->   	pr_info("%s: Transfer of %u sectors (%u%s KiB) took %llu.%09u "
-> -			 "seconds (%u kB/s, %u KiB/s, %u.%02u IOPS)\n",
-> -			 mmc_hostname(test->card->host), sectors, sectors >> 1,
-> -			 (sectors & 1 ? ".5" : ""), (u64)ts.tv_sec,
-> -			 (u32)ts.tv_nsec, rate / 1000, rate / 1024,
-> -			 iops / 100, iops % 100);
-> +		"seconds (%u kB/s, %u KiB/s, %u.%02u IOPS)\n",
-> +		mmc_hostname(test->card->host), sectors, sectors >> 1,
-> +		(sectors & 1 ? ".5" : ""), (u64)ts.tv_sec, (u32)ts.tv_nsec,
-> +		rate / 1000, rate / 1024, iops / 100, iops % 100);
->   
->   	mmc_test_save_transfer_result(test, 1, sectors, ts, rate, iops);
->   }
-> @@ -593,13 +593,12 @@ static void mmc_test_print_avg_rate(struct mmc_test_card *test, uint64_t bytes,
->   	iops = mmc_test_rate(count * 100, &ts); /* I/O ops per sec x 100 */
->   
->   	pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took "
-> -			 "%llu.%09u seconds (%u kB/s, %u KiB/s, "
-> -			 "%u.%02u IOPS, sg_len %d)\n",
-> -			 mmc_hostname(test->card->host), count, sectors, count,
-> -			 sectors >> 1, (sectors & 1 ? ".5" : ""),
-> -			 (u64)ts.tv_sec, (u32)ts.tv_nsec,
-> -			 rate / 1000, rate / 1024, iops / 100, iops % 100,
-> -			 test->area.sg_len);
-> +		"%llu.%09u seconds (%u kB/s, %u KiB/s, "
-> +		"%u.%02u IOPS, sg_len %d)\n",
-> +		mmc_hostname(test->card->host), count, sectors, count,
-> +		sectors >> 1, (sectors & 1 ? ".5" : ""), (u64)ts.tv_sec,
-> +		(u32)ts.tv_nsec, rate / 1000, rate / 1024, iops / 100,
-> +		iops % 100, test->area.sg_len);
->   
->   	mmc_test_save_transfer_result(test, count, sectors, ts, rate, iops);
->   }
-> @@ -670,14 +669,14 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
->    * Modifies the mmc_request to perform the "short transfer" tests
->    */
->   static void mmc_test_prepare_broken_mrq(struct mmc_test_card *test,
-> -	struct mmc_request *mrq, int write)
-> +					struct mmc_request *mrq, int write)
->   {
->   	if (WARN_ON(!mrq || !mrq->cmd || !mrq->data))
->   		return;
->   
->   	if (mrq->data->blocks > 1) {
-> -		mrq->cmd->opcode = write ?
-> -			MMC_WRITE_BLOCK : MMC_READ_SINGLE_BLOCK;
-> +		mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
-> +					   MMC_READ_SINGLE_BLOCK;
->   		mrq->stop = NULL;
->   	} else {
->   		mrq->cmd->opcode = MMC_SEND_STATUS;
-> @@ -706,8 +705,8 @@ static int mmc_test_check_result(struct mmc_test_card *test,
->   		ret = mrq->data->error;
->   	if (!ret && mrq->stop && mrq->stop->error)
->   		ret = mrq->stop->error;
-> -	if (!ret && mrq->data->bytes_xfered !=
-> -		mrq->data->blocks * mrq->data->blksz)
-> +	if (!ret &&
-> +	    mrq->data->bytes_xfered != mrq->data->blocks * mrq->data->blksz)
->   		ret = RESULT_FAIL;
->   
->   	if (ret == -EINVAL)
-> @@ -720,7 +719,7 @@ static int mmc_test_check_result(struct mmc_test_card *test,
->    * Checks that a "short transfer" behaved as expected
->    */
->   static int mmc_test_check_broken_result(struct mmc_test_card *test,
-> -	struct mmc_request *mrq)
-> +					struct mmc_request *mrq)
->   {
->   	int ret;
->   
-> @@ -871,8 +870,9 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
->    * Tests a basic transfer with certain parameters
->    */
->   static int mmc_test_simple_transfer(struct mmc_test_card *test,
-> -	struct scatterlist *sg, unsigned sg_len, unsigned dev_addr,
-> -	unsigned blocks, unsigned blksz, int write)
-> +				    struct scatterlist *sg, unsigned sg_len,
-> +				    unsigned dev_addr, unsigned blocks,
-> +				    unsigned blksz, int write)
->   {
->   	struct mmc_request mrq = {};
->   	struct mmc_command cmd = {};
-> @@ -883,8 +883,8 @@ static int mmc_test_simple_transfer(struct mmc_test_card *test,
->   	mrq.data = &data;
->   	mrq.stop = &stop;
->   
-> -	mmc_test_prepare_mrq(test, &mrq, sg, sg_len, dev_addr,
-> -		blocks, blksz, write);
-> +	mmc_test_prepare_mrq(test, &mrq, sg, sg_len, dev_addr, blocks, blksz,
-> +			     write);
->   
->   	mmc_wait_for_req(test->card->host, &mrq);
->   
-> @@ -896,8 +896,8 @@ static int mmc_test_simple_transfer(struct mmc_test_card *test,
->   /*
->    * Tests a transfer where the card will fail completely or partly
->    */
-> -static int mmc_test_broken_transfer(struct mmc_test_card *test,
-> -	unsigned blocks, unsigned blksz, int write)
-> +static int mmc_test_broken_transfer(struct mmc_test_card *test, unsigned blocks,
-> +				    unsigned blksz, int write)
->   {
->   	struct mmc_request mrq = {};
->   	struct mmc_command cmd = {};
-> @@ -927,9 +927,9 @@ static int mmc_test_broken_transfer(struct mmc_test_card *test,
->    *
->    * Note: mmc_test_prepare() must have been done before this call
->    */
-> -static int mmc_test_transfer(struct mmc_test_card *test,
-> -	struct scatterlist *sg, unsigned sg_len, unsigned dev_addr,
-> -	unsigned blocks, unsigned blksz, int write)
-> +static int mmc_test_transfer(struct mmc_test_card *test, struct scatterlist *sg,
-> +			     unsigned sg_len, unsigned dev_addr,
-> +			     unsigned blocks, unsigned blksz, int write)
->   {
->   	int ret, i;
->   
-> @@ -945,8 +945,8 @@ static int mmc_test_transfer(struct mmc_test_card *test,
->   	if (ret)
->   		return ret;
->   
-> -	ret = mmc_test_simple_transfer(test, sg, sg_len, dev_addr,
-> -		blocks, blksz, write);
-> +	ret = mmc_test_simple_transfer(test, sg, sg_len, dev_addr, blocks,
-> +				       blksz, write);
->   	if (ret)
->   		return ret;
->   
-> @@ -968,8 +968,8 @@ static int mmc_test_transfer(struct mmc_test_card *test,
->   
->   		for (i = 0; i < sectors; i++) {
->   			ret = mmc_test_buffer_transfer(test,
-> -				test->buffer + i * 512,
-> -				dev_addr + i, 512, 0);
-> +						       test->buffer + i * 512,
-> +						       dev_addr + i, 512, 0);
->   			if (ret)
->   				return ret;
->   		}
-> @@ -1371,7 +1371,7 @@ static int mmc_test_multi_read_high(struct mmc_test_card *test)
->   static int mmc_test_no_highmem(struct mmc_test_card *test)
->   {
->   	pr_info("%s: Highmem not configured - test skipped\n",
-> -	       mmc_hostname(test->card->host));
-> +		mmc_hostname(test->card->host));
->   	return 0;
->   }
->   
-> @@ -1392,7 +1392,7 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
->   	if (max_scatter) {
->   		err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg,
->   						  t->max_segs, t->max_seg_sz,
-> -				       &t->sg_len);
-> +						  &t->sg_len);
->   	} else {
->   		err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
->   				      t->max_seg_sz, &t->sg_len, min_sg_len);
-> @@ -1415,7 +1415,7 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
->   err:
->   	if (err)
->   		pr_info("%s: Failed to map sg list\n",
-> -		       mmc_hostname(test->card->host));
-> +			mmc_hostname(test->card->host));
->   	return err;
->   }
->   
-> @@ -1585,8 +1585,8 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
->   		goto out_free;
->   	}
->   
-> -	t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg_areq),
-> -				   GFP_KERNEL);
-> +	t->sg_areq =
-> +		kmalloc_array(t->max_segs, sizeof(*t->sg_areq), GFP_KERNEL);
->   	if (!t->sg_areq) {
->   		ret = -ENOMEM;
->   		goto out_free;
-> @@ -2036,8 +2036,8 @@ static int mmc_test_seq_perf(struct mmc_test_card *test, int write,
->   
->   	ktime_get_ts64(&ts1);
->   	for (i = 0; i < cnt; i++) {
-> -		ret = mmc_test_area_io(test, sz, dev_addr, write,
-> -				       max_scatter, 0);
-> +		ret = mmc_test_area_io(test, sz, dev_addr, write, max_scatter,
-> +				       0);
->   		if (ret)
->   			return ret;
->   		dev_addr += ssz;
-> @@ -2114,26 +2114,25 @@ static int mmc_test_rw_multiple(struct mmc_test_card *test,
->   		return 0;
->   
->   	/* prepare test area */
-> -	if (mmc_can_erase(test->card) &&
-> -	    tdata->prepare & MMC_TEST_PREP_ERASE) {
-> -		ret = mmc_erase(test->card, dev_addr,
-> -				size / 512, test->card->erase_arg);
-> +	if (mmc_can_erase(test->card) && tdata->prepare & MMC_TEST_PREP_ERASE) {
-> +		ret = mmc_erase(test->card, dev_addr, size / 512,
-> +				test->card->erase_arg);
->   		if (ret)
-> -			ret = mmc_erase(test->card, dev_addr,
-> -					size / 512, MMC_ERASE_ARG);
-> +			ret = mmc_erase(test->card, dev_addr, size / 512,
-> +					MMC_ERASE_ARG);
->   		if (ret)
->   			goto err;
->   	}
->   
->   	/* Run test */
-> -	ret = mmc_test_area_io_seq(test, reqsize, dev_addr,
-> -				   tdata->do_write, 0, 1, size / reqsize,
-> -				   tdata->do_nonblock_req, min_sg_len);
-> +	ret = mmc_test_area_io_seq(test, reqsize, dev_addr, tdata->do_write, 0,
-> +				   1, size / reqsize, tdata->do_nonblock_req,
-> +				   min_sg_len);
->   	if (ret)
->   		goto err;
->   
->   	return ret;
-> - err:
-> +err:
->   	pr_info("[%s] error\n", __func__);
->   	return ret;
->   }
-> @@ -2152,7 +2151,7 @@ static int mmc_test_rw_multiple_size(struct mmc_test_card *test,
->   		return -EINVAL;
->   	}
->   
-> -	for (i = 0 ; i < rw->len && ret == 0; i++) {
-> +	for (i = 0; i < rw->len && ret == 0; i++) {
->   		ret = mmc_test_rw_multiple(test, rw, rw->bs[i], rw->size, 0);
->   		if (ret)
->   			break;
-> @@ -2166,7 +2165,7 @@ static int mmc_test_rw_multiple_sg_len(struct mmc_test_card *test,
->   	int ret = 0;
->   	int i;
->   
-> -	for (i = 0 ; i < rw->len && ret == 0; i++) {
-> +	for (i = 0; i < rw->len && ret == 0; i++) {
->   		ret = mmc_test_rw_multiple(test, rw, 512 * 1024, rw->size,
->   					   rw->sg_len[i]);
->   		if (ret)
-> @@ -2180,8 +2179,8 @@ static int mmc_test_rw_multiple_sg_len(struct mmc_test_card *test,
->    */
->   static int mmc_test_profile_mult_write_blocking_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
-> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.bs = bs,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2199,8 +2198,8 @@ static int mmc_test_profile_mult_write_blocking_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_mult_write_nonblock_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
-> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.bs = bs,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2218,8 +2217,8 @@ static int mmc_test_profile_mult_write_nonblock_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_mult_read_blocking_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
-> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.bs = bs,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2237,8 +2236,8 @@ static int mmc_test_profile_mult_read_blocking_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_mult_read_nonblock_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
-> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
-> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.bs = bs,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2256,8 +2255,8 @@ static int mmc_test_profile_mult_read_nonblock_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_sglen_wr_blocking_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
-> -				 1 << 7, 1 << 8, 1 << 9};
-> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
-> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.sg_len = sg_len,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2275,8 +2274,8 @@ static int mmc_test_profile_sglen_wr_blocking_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_sglen_wr_nonblock_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
-> -				 1 << 7, 1 << 8, 1 << 9};
-> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
-> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.sg_len = sg_len,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2294,8 +2293,8 @@ static int mmc_test_profile_sglen_wr_nonblock_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_sglen_r_blocking_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
-> -				 1 << 7, 1 << 8, 1 << 9};
-> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
-> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.sg_len = sg_len,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2313,8 +2312,8 @@ static int mmc_test_profile_sglen_r_blocking_perf(struct mmc_test_card *test)
->    */
->   static int mmc_test_profile_sglen_r_nonblock_perf(struct mmc_test_card *test)
->   {
-> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
-> -				 1 << 7, 1 << 8, 1 << 9};
-> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
-> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
->   	struct mmc_test_multiple_rw test_data = {
->   		.sg_len = sg_len,
->   		.size = TEST_AREA_MAX_SIZE,
-> @@ -2390,9 +2389,8 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
->   			     512, write);
->   
->   	if (use_sbc && t->blocks > 1 && !mrq->sbc) {
-> -		ret =  mmc_host_cmd23(host) ?
-> -		       RESULT_UNSUP_CARD :
-> -		       RESULT_UNSUP_HOST;
-> +		ret = mmc_host_cmd23(host) ? RESULT_UNSUP_CARD :
-> +					     RESULT_UNSUP_HOST;
->   		goto out_free;
->   	}
->   
-> @@ -2971,8 +2969,7 @@ static void mmc_test_run(struct mmc_test_card *test, int testcase)
->   			ret = mmc_test_cases[i].prepare(test);
->   			if (ret) {
->   				pr_info("%s: Result: Prepare stage failed! (%d)\n",
-> -					mmc_hostname(test->card->host),
-> -					ret);
-> +					mmc_hostname(test->card->host), ret);
->   				continue;
->   			}
->   		}
-> @@ -3026,16 +3023,14 @@ static void mmc_test_run(struct mmc_test_card *test, int testcase)
->   			ret = mmc_test_cases[i].cleanup(test);
->   			if (ret) {
->   				pr_info("%s: Warning: Cleanup stage failed! (%d)\n",
-> -					mmc_hostname(test->card->host),
-> -					ret);
-> +					mmc_hostname(test->card->host), ret);
->   			}
->   		}
->   	}
->   
->   	mmc_release_host(test->card->host);
->   
-> -	pr_info("%s: Tests completed.\n",
-> -		mmc_hostname(test->card->host));
-> +	pr_info("%s: Tests completed.\n", mmc_hostname(test->card->host));
->   }
->   
->   static void mmc_test_free_result(struct mmc_card *card)
-> @@ -3044,13 +3039,13 @@ static void mmc_test_free_result(struct mmc_card *card)
->   
->   	mutex_lock(&mmc_test_lock);
->   
-> -	list_for_each_entry_safe(gr, grs, &mmc_test_result, link) {
-> +	list_for_each_entry_safe (gr, grs, &mmc_test_result, link) {
->   		struct mmc_test_transfer_result *tr, *trs;
->   
->   		if (card && gr->card != card)
->   			continue;
->   
-> -		list_for_each_entry_safe(tr, trs, &gr->tr_lst, link) {
-> +		list_for_each_entry_safe (tr, trs, &gr->tr_lst, link) {
->   			list_del(&tr->link);
->   			kfree(tr);
->   		}
-> @@ -3071,7 +3066,7 @@ static int mtf_test_show(struct seq_file *sf, void *data)
->   
->   	mutex_lock(&mmc_test_lock);
->   
-> -	list_for_each_entry(gr, &mmc_test_result, link) {
-> +	list_for_each_entry (gr, &mmc_test_result, link) {
->   		struct mmc_test_transfer_result *tr;
->   
->   		if (gr->card != card)
-> @@ -3079,11 +3074,11 @@ static int mtf_test_show(struct seq_file *sf, void *data)
->   
->   		seq_printf(sf, "Test %d: %d\n", gr->testcase + 1, gr->result);
->   
-> -		list_for_each_entry(tr, &gr->tr_lst, link) {
-> +		list_for_each_entry (tr, &gr->tr_lst, link) {
->   			seq_printf(sf, "%u %d %llu.%09u %u %u.%02u\n",
-> -				tr->count, tr->sectors,
-> -				(u64)tr->ts.tv_sec, (u32)tr->ts.tv_nsec,
-> -				tr->rate, tr->iops / 100, tr->iops % 100);
-> +				   tr->count, tr->sectors, (u64)tr->ts.tv_sec,
-> +				   (u32)tr->ts.tv_nsec, tr->rate,
-> +				   tr->iops / 100, tr->iops % 100);
->   		}
->   	}
->   
-> @@ -3098,7 +3093,7 @@ static int mtf_test_open(struct inode *inode, struct file *file)
->   }
->   
->   static ssize_t mtf_test_write(struct file *file, const char __user *buf,
-> -	size_t count, loff_t *pos)
-> +			      size_t count, loff_t *pos)
->   {
->   	struct seq_file *sf = file->private_data;
->   	struct mmc_card *card = sf->private;
-> @@ -3148,11 +3143,11 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
->   }
->   
->   static const struct file_operations mmc_test_fops_test = {
-> -	.open		= mtf_test_open,
-> -	.read		= seq_read,
-> -	.write		= mtf_test_write,
-> -	.llseek		= seq_lseek,
-> -	.release	= single_release,
-> +	.open = mtf_test_open,
-> +	.read = seq_read,
-> +	.write = mtf_test_write,
-> +	.llseek = seq_lseek,
-> +	.release = single_release,
->   };
->   
->   static int mtf_testlist_show(struct seq_file *sf, void *data)
-> @@ -3178,7 +3173,7 @@ static void mmc_test_free_dbgfs_file(struct mmc_card *card)
->   
->   	mutex_lock(&mmc_test_lock);
->   
-> -	list_for_each_entry_safe(df, dfs, &mmc_test_file_test, link) {
-> +	list_for_each_entry_safe (df, dfs, &mmc_test_file_test, link) {
->   		if (card && df->card != card)
->   			continue;
->   		debugfs_remove(df->file);
-> @@ -3190,14 +3185,15 @@ static void mmc_test_free_dbgfs_file(struct mmc_card *card)
->   }
->   
->   static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
-> -	const char *name, umode_t mode, const struct file_operations *fops)
-> +					  const char *name, umode_t mode,
-> +					  const struct file_operations *fops)
->   {
->   	struct dentry *file = NULL;
->   	struct mmc_test_dbgfs_file *df;
->   
->   	if (card->debugfs_root)
-> -		file = debugfs_create_file(name, mode, card->debugfs_root,
-> -					   card, fops);
-> +		file = debugfs_create_file(name, mode, card->debugfs_root, card,
-> +					   fops);
->   
->   	df = kmalloc(sizeof(*df), GFP_KERNEL);
->   	if (!df) {
-> @@ -3219,12 +3215,12 @@ static int mmc_test_register_dbgfs_file(struct mmc_card *card)
->   	mutex_lock(&mmc_test_lock);
->   
->   	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
-> -		&mmc_test_fops_test);
-> +					     &mmc_test_fops_test);
->   	if (ret)
->   		goto err;
->   
->   	ret = __mmc_test_register_dbgfs_file(card, "testlist", S_IRUGO,
-> -		&mtf_testlist_fops);
-> +					     &mtf_testlist_fops);
->   	if (ret)
->   		goto err;
->   
-
+PiBIaSBBdnJpbCwNCkhpLCB0aGFua3MgZm9yIGhhdmluZyBhIGxvb2suDQoNCj4gDQo+IOWcqCAy
+MDI0LzExLzYgMjA6MTgsIEF2cmkgQWx0bWFuIOWGmemBkzoNCj4gPiBXaGlsZSBzdHJpY3QgY2hl
+Y2twYXRjaCBpcyB1c2VmdWwgZm9yIGlkZW50aWZ5aW5nIGNvbW1vbiBzdHlsZSBpc3N1ZXMNCj4g
+PiBhbmQgZW5mb3JjaW5nIGNlcnRhaW4gY29kaW5nIHN0YW5kYXJkcywgY2xhbmctZm9ybWF0IHBy
+b3ZpZGVzIHNldmVyYWwNCj4gPiBhZHZhbnRhZ2VzLCBlLmcuIGF1dG9tYXRlZCBmb3JtYXR0aW5n
+LCBjdXN0b21pemFibGUgc3R5bGUsIGNvbnNpc3RlbmN5DQo+ID4gYWNyb3NzIHRvb2xzLCBhbmQg
+bW9yZS4NCj4gPg0KPiA+IEJ5IGFkb3B0aW5nIGNsYW5nLWZvcm1hdCwgd2UgYWltIHRvIGltcHJv
+dmUgY29kZSByZWFkYWJpbGl0eSwNCj4gPiBtYWludGFpbmFiaWxpdHksIGFuZCBvdmVyYWxsIGNv
+ZGUgcXVhbGl0eSBpbiB0aGUgdWZzIGNvcmUgZHJpdmVyLg0KPiA+DQo+IA0KPiBJdCBkb2VzIGlt
+cHJvdmUgdGhlIGNvZGUgYSBiaXQsIGhvd2V2ZXIsIG15IGNvbmNlcm4gaXMgdGhhdCBpZiB0aGlz
+IG1hc3NpdmUNCj4gY2hhbmdlLCBtYXliZSBhbG9uZyB3aXRoIHRoZSBmb2xsb3dpbmcgcGFydCAy
+IG9yIHNv77yMd2lsbCBtYWtlcyB0aGUgZ2l0LQ0KPiBibGFtZSBoYXJkIHRvIGZvbGxvdyB0aGUg
+aGlzdG9yeT8NCkkgdW5kZXJzdGFuZCB5b3VyIGNvbmNlcm4uDQpJdCdzIHRydWUgdGhhdCBsYXJn
+ZS1zY2FsZSBmb3JtYXR0aW5nIGNoYW5nZXMgY2FuIG1ha2UgaXQgaGFyZGVyIHRvIHVzZSBgZ2l0
+IGJsYW1lYCB0byB0cmFjZSB0aGUgaGlzdG9yeSBvZiBzcGVjaWZpYyBsaW5lcyBvZiBjb2RlLg0K
+VGhpcyBpcyB3aHkgSSBsaW1pdCB0aGlzIGNoYW5nZSB0byBhIHNpbmdsZSBtb2R1bGUuDQpJIGFt
+IG5vdCBwbGFubmluZyB0byBmbG9vZCB0aGUgbWFpbGluZyBsaXN0IHdpdGggdGhvc2UgY2hhbmdl
+cywNCkJ1dCB0byAqc2xvd2x5KiBjb252ZXJ0IGZvcm1hdHRpbmcgaXNzdWVzIGluIHRoZSBtbWMg
+Y29yZSBkcml2ZXIsIGFuZCBvbmx5IHRob3NlIEkgY2FuIHRlc3QuDQpBbHNvLCB0aGlzIGNoYW5n
+ZSBpcyBub24tZnVuY3Rpb25hbCBmb3JtYXR0aW5nIG9ubHkgY2hhbmdlIC0gDQpUbyBtYWtlIGl0
+IGVhc2llciB0byB1c2UgYGdpdCBibGFtZWAgdG8gdHJhY2UgZnVuY3Rpb25hbCBjaGFuZ2VzIHdp
+dGhvdXQgYmVpbmcgYWZmZWN0ZWQgYnkgZm9ybWF0dGluZyBjaGFuZ2VzLg0KSSBhbHNvIHRoaW5r
+IHRoYXQgdGhlcmUgYXJlIHNvbWUgZ2l0IGJsYW1lIHN3aXRjaGVzIHRoYXQgaGVscCBpZ25vcmUg
+Zm9ybWF0dGluZyBvbmx5IGNoYW5nZXMsDQplLmcuIGdpdCBibGFtZSAtdy4NCg0KVGhhbmtzLA0K
+QXZyaQ0K
