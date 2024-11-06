@@ -1,113 +1,120 @@
-Received: from mail-lf1-f54.google.com (mail-lf1-f54.google.com [209.85.167.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ADB101DBB19
-	for <linux-mmc@vger.kernel.org>; Wed,  6 Nov 2024 09:11:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A53371D27BA;
+	Wed,  6 Nov 2024 09:33:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730884268; cv=none; b=NCVCATees6AD0JR7DZ6YKPxLeH1wBsq0EG6ad6TS5ssZivCzdZIGfweB/drIQpG7QvWk9/1Fg+E1PtOZr/WFU8H/z5vBebKjXYuR9PL6BZBoB1U2EanfAhl+7m4j1UgMN0u+C/YvdUD87BiCRk9olzcAO9sa0jd5nHxOpGAAzhE=
+	t=1730885599; cv=none; b=lKZ87mimyqB/9tkFjFP+0n2yY5wxENbIO2l/C3IWT3tTA2HteuP8Drr5PgBrtG2jiQWdS0vVL2E1dfdp3Oqet8tFSqqPGOf1CbK3k/itKMWoYpxfBP7z23PwkXXGBrkuOuvtckYcHnE/264eR8l4ZtNNdT3Ul/4sYd42r6O0HIw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730884268; c=relaxed/simple;
-	bh=1zAzLkW/f2nboF9qbLPIqlx5xCQjSwlZVzYtvjCOkKc=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=cRPJ6wFGVbjBV6+92BM7ZOjOyI4gB257OfGXi9V09/TQy34OVArMmNei1c355QOmhINbF6W6XWBqb1P3SM1REtwbZWoiGJNNIfByWupE6tkpdSoQmbxUQCAqvZs6yb9xZUt0Fi1cQjXY/qgb5PwjV1Itr5O2WJ9cHia/3QhSdXE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hGDUXrcY; arc=none smtp.client-ip=209.85.167.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1730885599; c=relaxed/simple;
+	bh=QiEDB5mi8W/VjNnRPEmKrLelOzqBFEdzV3sB1MVs9/U=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HUOn3Gv1h78y3SmikvEYJ4iltDvL8g67YUWtO0l0tykZXsucx7Wksnhr3TpoH8g8VIOimLMzancXk7SGsyiOScDj0IiTzmtqrt/TIGNEEcQuaqQ0wkuy6X47uIFVRzVvPF3OVaYP50zSr7o4rgEWp8GzR8L29co1APmecuEK664=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=dJCbaX2C; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hGDUXrcY"
-Received: by mail-lf1-f54.google.com with SMTP id 2adb3069b0e04-539f8490856so6738196e87.2
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Nov 2024 01:11:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1730884263; x=1731489063; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:references
-         :in-reply-to:user-agent:subject:cc:to:from:date:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=/QYPghorRcTYN0shVQYwBn/dY0r8tY2xwb/60ofT3BI=;
-        b=hGDUXrcYOboR5kZaxvzBlo0hUQDiO1fwHMCA26CQNd811FkpJF9O0qcuWpo1U1hnYg
-         9sPq6iolq42LziI5H9sm4U7VL6Vpd1oNzxMBNUJS+dTmgGoJ5rihZERcAwXG/ez5lhWb
-         NcE9Av0Do7PnQlqTwsIP7qBk2cpNPuLhIF8WSNzTbZP2okeCaIru6+IpMD/8dZ++yH1R
-         ijCesYew4KytenuW9aJCQwBH0EN5DKtLLjwERBG13osRbQMRPKl3AYhoCZSe78PCKumO
-         fsQwN4KOzkEz9E1BO7ASEpnSV3xMXR453Poq73OFDTi3Z7tycy0LHkKLM2x8QIzrYxqk
-         VK3g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1730884263; x=1731489063;
-        h=content-transfer-encoding:mime-version:message-id:references
-         :in-reply-to:user-agent:subject:cc:to:from:date:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=/QYPghorRcTYN0shVQYwBn/dY0r8tY2xwb/60ofT3BI=;
-        b=K9nb9OpaHT9XwsPrxk6SnEameP9rqEVkCpiFYW7Lxan/daamTC7sUfrp2sHY4Bqdnt
-         FlsgUSGU/LDLYQRGIY/xr/ugnUsv035wJopWtF2wOIJm0e4cfq+NYXQ4aJ4KxonOpdir
-         R5MLXFf6sRwyuKkaoac7aKDXrI3MlgPmaTHxIfzce7MizzQ/b87Gw2PYHcUFtdsTtWn7
-         PoZgeaZEFsDTBf/OiOa7wpeDZVdifKG9nYycVsr+ERRztgiF/ORY9a+3aJSJUjGtqU57
-         +F0TFeSU9WPc66FKkW6SvIiL6DbAhR+CpsM/UEhyhRCAZ/E7Yl/55ArvsyIyQvHh6jmj
-         puVQ==
-X-Gm-Message-State: AOJu0Yys64uqKTs1WpWp5FSw9+0L7T6TVQ/SsJFD65BmFgekrBpfYbrt
-	o9q8vN7IhCoDZUPIguM7vaCn1ycuUHOF86fZA6ppYW8Nv6PMUD2BB/TYa3Dn4yY=
-X-Google-Smtp-Source: AGHT+IFgFtkTNxczGyqzn7wYXW9ZEAg3W8OYU60DWsR7AGwkgCQzgf+QKFtY9ICn2zYQFSnBE45QLQ==
-X-Received: by 2002:a05:6512:3c9f:b0:539:dc87:fd3a with SMTP id 2adb3069b0e04-53c79e16040mr11342042e87.6.1730884262780;
-        Wed, 06 Nov 2024 01:11:02 -0800 (PST)
-Received: from [127.0.0.1] (85-76-77-12-nat.elisa-mobile.fi. [85.76.77.12])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53c7bc957aasm2443358e87.42.2024.11.06.01.10.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 06 Nov 2024 01:11:01 -0800 (PST)
-Date: Wed, 06 Nov 2024 09:10:57 +0000
-From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- bhupesh.sharma@linaro.org, andersson@kernel.org, konradybcio@kernel.org
-CC: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_tingweiz@quicinc.com, quic_yuanjiey@quicinc.com
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="dJCbaX2C"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A5Lr3fG015895;
+	Wed, 6 Nov 2024 09:33:14 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=qcppdkim1; bh=g2hmAisisJ+9Ub7aj6jl4dRQ
+	PL81uW+0wOCEjJo02DY=; b=dJCbaX2CgmcoY0VTCe/uZH85TxfamcZIegL3Nsyg
+	BOflMrqznyAGcXjnID808pfIMHBSLYTOsnW7lmlw/WICeOqR7IkyOJkh/X2IWLhE
+	apSiFoRlRjCE9KtNJ+q+KehTkF301aN6GcSJCcsUDmO9dIIxykDS0NA4GL1YReEU
+	oIiBOKVeAyLAZdo+kVmZpLDapoIJGoKguOoZX2yxtcuY3b3j31zqycw1YSHeAurR
+	qxBk8ri3qXeO12ElkWzjrgU4dYX620YR1gEBzGNl7YjgOooTuaOgbIOzAQBjQYoz
+	/derzL1ZOmzY8yb8gqRGA4dBt9okdOehDpUSlTWQqf3/Eg==
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42q5n8n3qr-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 06 Nov 2024 09:33:13 +0000 (GMT)
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4A69XDFg006098
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 6 Nov 2024 09:33:13 GMT
+Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Wed, 6 Nov 2024 01:33:08 -0800
+Date: Wed, 6 Nov 2024 17:33:03 +0800
+From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, <ulf.hansson@linaro.org>,
+        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
+        <bhupesh.sharma@linaro.org>, <andersson@kernel.org>,
+        <konradybcio@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_tingweiz@quicinc.com>, <quic_yuanjiey@quicinc.com>
 Subject: Re: [PATCH v2 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-User-Agent: Thunderbird for Android
-In-Reply-To: <ZyshSbJgLHTRaps1@cse-cd02-lnx.ap.qualcomm.com>
-References: <20241106072343.2070933-1-quic_yuanjiey@quicinc.com> <20241106072343.2070933-2-quic_yuanjiey@quicinc.com> <347uhs7apex3usmfpzrpwakrzchxactwtc7gs45indkzez2vfj@n75dc3ovl3g2> <ZyshSbJgLHTRaps1@cse-cd02-lnx.ap.qualcomm.com>
-Message-ID: <FF5BD9CD-8E5E-4C40-906C-8552C067AE8C@linaro.org>
+Message-ID: <Zys3zwMAA+dWuGby@cse-cd02-lnx.ap.qualcomm.com>
+References: <20241106072343.2070933-1-quic_yuanjiey@quicinc.com>
+ <20241106072343.2070933-2-quic_yuanjiey@quicinc.com>
+ <347uhs7apex3usmfpzrpwakrzchxactwtc7gs45indkzez2vfj@n75dc3ovl3g2>
+ <ZyshSbJgLHTRaps1@cse-cd02-lnx.ap.qualcomm.com>
+ <FF5BD9CD-8E5E-4C40-906C-8552C067AE8C@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <FF5BD9CD-8E5E-4C40-906C-8552C067AE8C@linaro.org>
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: Pzvn6bKvwG4HwTzo0T3vWw5xa1zXrc8a
+X-Proofpoint-ORIG-GUID: Pzvn6bKvwG4HwTzo0T3vWw5xa1zXrc8a
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 impostorscore=0
+ suspectscore=0 lowpriorityscore=0 mlxlogscore=961 mlxscore=0
+ priorityscore=1501 bulkscore=0 adultscore=0 malwarescore=0 phishscore=0
+ clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2411060077
 
-On 6 November 2024 07:56:57 GMT, Yuanjie Yang <quic_yuanjiey@quicinc=2Ecom>=
- wrote:
->On Wed, Nov 06, 2024 at 09:36:56AM +0200, Dmitry Baryshkov wrote:
->> On Wed, Nov 06, 2024 at 03:23:42PM +0800, Yuanjie Yang wrote:
->> > Add SDHC1 and SDHC2 support to the QCS615 Ride platform=2E The SDHC1
->> > and SDHC2 of QCS615 are derived from SM6115=2E Include the relevant
->> > binding documents accordingly=2E
->>=20
->> Which binding documents?
->Thanks, the binding documents is sdhci-msm=2Eyaml=2E
->I have modified this yaml patch in patch v1, and this yaml patch is
->applied, so I remove this yaml patch in patch v2=2E
->link:https://lore=2Ekernel=2Eorg/all/CAPDyKFr-Gzd3Mzn+vN6DXO9C4Xrvpv4z5V2=
-G_VRTzOa=3D89Fd3w@mail=2Egmail=2Ecom/
+On Wed, Nov 06, 2024 at 09:10:57AM +0000, Dmitry Baryshkov wrote:
+> On 6 November 2024 07:56:57 GMT, Yuanjie Yang <quic_yuanjiey@quicinc.com> wrote:
+> >On Wed, Nov 06, 2024 at 09:36:56AM +0200, Dmitry Baryshkov wrote:
+> >> On Wed, Nov 06, 2024 at 03:23:42PM +0800, Yuanjie Yang wrote:
+> >> > Add SDHC1 and SDHC2 support to the QCS615 Ride platform. The SDHC1
+> >> > and SDHC2 of QCS615 are derived from SM6115. Include the relevant
+> >> > binding documents accordingly.
+> >> 
+> >> Which binding documents?
+> >Thanks, the binding documents is sdhci-msm.yaml.
+> >I have modified this yaml patch in patch v1, and this yaml patch is
+> >applied, so I remove this yaml patch in patch v2.
+> >link:https://lore.kernel.org/all/CAPDyKFr-Gzd3Mzn+vN6DXO9C4Xrvpv4z5V2G_VRTzOa=89Fd3w@mail.gmail.com/
+> 
+> The question is why do you mention bindings in the DTSI commit message? Please don't just C&P your texts.
+Thanks, I will adjust commit message in next version. I will optimize my language expression again.
 
-The question is why do you mention bindings in the DTSI commit message? Pl=
-ease don't just C&P your texts=2E
+> >
+> >> > Additionally, configure SDHC1-related
+> >> > and SDHC2-related opp, power, and interconnect settings in the device
+> >> > tree.
+> >> > 
+> >> > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> >> > ---
+> >> >  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
+> >> >  1 file changed, 198 insertions(+)
+> >> > 
+> >> 
+> >> -- 
+> >> With best wishes
+> >> Dmitry
+> >
+> >Thanks,
+> >Yuanjie
+> 
 
->
->> > Additionally, configure SDHC1-related
->> > and SDHC2-related opp, power, and interconnect settings in the device
->> > tree=2E
->> >=20
->> > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc=2Ecom>
->> > ---
->> >  arch/arm64/boot/dts/qcom/qcs615=2Edtsi | 198 +++++++++++++++++++++++=
-++++
->> >  1 file changed, 198 insertions(+)
->> >=20
->>=20
->> --=20
->> With best wishes
->> Dmitry
->
->Thanks,
->Yuanjie
-
+Thanks,
+Yuanjie
