@@ -1,98 +1,117 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82E92196D8F;
-	Thu,  7 Nov 2024 09:28:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D70341CC16C
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Nov 2024 09:36:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730971692; cv=none; b=SflT7TSkwRh/WXPuVdQ/WWAson2NQYoBJBO1T/4cpU6xQ3Uc3PQJtGIcNCcBmiEttVIrAFpgANMwj2NMTnOQjUSHEpFjLB2oz2tuAx5Ev1vn6bfoE+jvxCQ/gQNYqKQwN5EinPTPE8HdekRKzw3fbMdi/qvxmjTDuP+KQpGWrFQ=
+	t=1730972169; cv=none; b=kKmcL3p5HtqYQt53EwtwK9paUWDf4BxkU3UUmwZZzAcsnq6FDCb4WWelkQkKW05sJyMycP2kT7RXVSawFPohMhw+8zOg5GdX/5hvJmRYn2qL3FGl65/dj4BA3BfPoBLTJEYgfpIVZSwA3iIKcPfsIz9m59Ld0LYHOP2Sq4xeiYk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730971692; c=relaxed/simple;
-	bh=inInmAOEGIQYmj1++GbuXfyk7lHVgFnSJgJOGWipTjk=;
-	h=Date:Content-Type:MIME-Version:From:To:Cc:In-Reply-To:References:
-	 Message-Id:Subject; b=t56FrU0hZ7G0q3mBaM9AErQZsYS2k43CKhGSwAk18ZFYXPz3bk1xR8fF+N6iQIYK+mHodch3UqikRJpunIzj5TUk//ulbXOZpURylTp4LDqaV92oBrKe7PW1JfEQWLP8YBQHltz4AUrTKlVsiNA9NVlbU8A96Rop8rm+I2wwvus=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=IQllOons; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1730972169; c=relaxed/simple;
+	bh=mB6MVB4b7gF6TXIDCHMbq8tLAQaO1lxgKeME80EOWEs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=SL/x+dCa/HXOV0Rq6kXvlJeto7FkEIenNx+u+Zpu+P6uPfAyLsmH47VNAfXpcMYP8cVWa2w4pm1y/SfBRgYhb8KCo5XzuFtJA8ozz/JewghSYQGIIGDyZiXznW09bLAZyajese2ZTZs1OAaiI+o579a1LUT1yyVlz/xy3E2D5u8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=W/LF5sRX; arc=none smtp.client-ip=198.175.65.13
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="IQllOons"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B895EC4CECC;
-	Thu,  7 Nov 2024 09:28:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1730971692;
-	bh=inInmAOEGIQYmj1++GbuXfyk7lHVgFnSJgJOGWipTjk=;
-	h=Date:From:To:Cc:In-Reply-To:References:Subject:From;
-	b=IQllOons9q1GW676npTQaZgApYsAUUlpYXvsxx/H2b1czH53GlLQ3lQKvskzA86pC
-	 0j49vyiVHHTYAAqthSAER06O3cssf/XyzD8kSMiwa+FeLfW1xMKr4B6hSwqHKTFMi5
-	 RsSF58uhhEnJqidtGbkPffwbQTs9aD6M4whwKPy/8GhS/hsm9H9lx6jqAug7E2VC4E
-	 zQ4HGlIYp/nLbWYhgzo4HYlPynQnOroCiqTF4jmykZwN/78FHLysdum6vXgbu28p7/
-	 f1IRWTu9tTqzLj1y1Gmk+7LP+n8j5XvHk2eFpXrw9a5hcOYXO+fknGoNrmTvnUZJC+
-	 J6UmAfPIyoWxg==
-Date: Thu, 07 Nov 2024 03:28:10 -0600
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="W/LF5sRX"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1730972167; x=1762508167;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=mB6MVB4b7gF6TXIDCHMbq8tLAQaO1lxgKeME80EOWEs=;
+  b=W/LF5sRX0ZwH9XMu0mUJwxdmIbcWR2ymBrWBq5XF196qOD3N1YEOZdT9
+   yxvZ0xWI41EJxQ+XN5/xtkBbXLn83u/ySvXUNYux5pgrO8GeZSfoxoHI+
+   e3fJvM14f4YuE7ru1dEubJW7TcdTBYIPOijWbFxqqjKR6H5wsVihjailb
+   X1gogh4MhptWKlE6L5IeBt6er6AIeRyJ95dv/0EF4W5lYGs6vrB9Xondg
+   2+Wc5zDj+zZYFyT1+M93PQkEL2zLWv7GvgrnikxFiXTjW4R+Ckblns6HG
+   Y66ehZlOef1++/8Fz5yYhuwgf70JqRUKSlIMbWegYY8fZUAq/g6khJmdB
+   w==;
+X-CSE-ConnectionGUID: 1psddtsiQpy9GJcJL+21Fg==
+X-CSE-MsgGUID: gEHEw9ruSiC6QzQYpKqyHg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="41908054"
+X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
+   d="scan'208";a="41908054"
+Received: from fmviesa006.fm.intel.com ([10.60.135.146])
+  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Nov 2024 01:36:07 -0800
+X-CSE-ConnectionGUID: vHkGxGmZT/mZVkdWe7nFuQ==
+X-CSE-MsgGUID: EvoS3kjmSamiqpQnEnEbQA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.11,265,1725346800"; 
+   d="scan'208";a="84561418"
+Received: from lkp-server01.sh.intel.com (HELO a48cf1aa22e8) ([10.239.97.150])
+  by fmviesa006.fm.intel.com with ESMTP; 07 Nov 2024 01:36:05 -0800
+Received: from kbuild by a48cf1aa22e8 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1t8yvq-000q3q-21;
+	Thu, 07 Nov 2024 09:36:02 +0000
+Date: Thu, 7 Nov 2024 17:35:52 +0800
+From: kernel test robot <lkp@intel.com>
+To: Hans de Goede <hdegoede@redhat.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: oe-kbuild-all@lists.linux.dev, Hans de Goede <hdegoede@redhat.com>,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
+ Vexia Edu Atla 10 tablet
+Message-ID: <202411071730.x3HIZimE-lkp@intel.com>
+References: <20241106215927.40482-1-hdegoede@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, quic_rampraka@quicinc.com, 
- Conor Dooley <conor+dt@kernel.org>, quic_nguyenb@quicinc.com, 
- Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org, 
- quic_pragalla@quicinc.com, quic_bhaskarv@quicinc.com, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, quic_sachgupt@quicinc.com, 
- Bhupesh Sharma <bhupesh.sharma@linaro.org>, devicetree@vger.kernel.org, 
- quic_nitirawa@quicinc.com, quic_cang@quicinc.com, quic_narepall@quicinc.com, 
- quic_sayalil@quicinc.com, linux-mmc@vger.kernel.org, kernel@quicinc.com, 
- linux-arm-msm@vger.kernel.org
-In-Reply-To: <20241107080505.29244-2-quic_sartgarg@quicinc.com>
-References: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
- <20241107080505.29244-2-quic_sartgarg@quicinc.com>
-Message-Id: <173097168998.1358564.6585218093768664587.robh@kernel.org>
-Subject: Re: [PATCH V1 1/3] dt-bindings: mmc: qcom: Document level shifter
- flag for SD card
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241106215927.40482-1-hdegoede@redhat.com>
 
+Hi Hans,
 
-On Thu, 07 Nov 2024 13:35:03 +0530, Sarthak Garg wrote:
-> Introduce a flag to indicate if the Qualcomm platform has a level
-> shifter for SD cards. With level shifter addition some extra delay is
-> seen on RX data path leading to CRC errors. To compensate these delays
-> and avoid CRC errors below things needs to be done:
-> 
-> 1) Enable tuning for SDR50 mode
-> 2) Limit HS mode frequency to 37.5MHz from 50MHz
-> 
-> Add this flag for all targets with a level shifter to handle these
-> issues for SD card.
-> 
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 3 +++
->  1 file changed, 3 insertions(+)
-> 
+kernel test robot noticed the following build warnings:
 
-My bot found errors running 'make dt_binding_check' on your patch:
+[auto build test WARNING on ulf-hansson-mmc-mirror/next]
+[also build test WARNING on linus/master v6.12-rc6 next-20241106]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-yamllint warnings/errors:
+url:    https://github.com/intel-lab-lkp/linux/commits/Hans-de-Goede/mmc-sdhci-pci-Add-DMI-quirk-for-missing-CD-GPIO-on-Vexia-Edu-Atla-10-tablet/20241107-060048
+base:   https://git.linaro.org/people/ulf.hansson/mmc-mirror.git next
+patch link:    https://lore.kernel.org/r/20241106215927.40482-1-hdegoede%40redhat.com
+patch subject: [PATCH] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on Vexia Edu Atla 10 tablet
+config: i386-randconfig-061-20241107 (https://download.01.org/0day-ci/archive/20241107/202411071730.x3HIZimE-lkp@intel.com/config)
+compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20241107/202411071730.x3HIZimE-lkp@intel.com/reproduce)
 
-dtschema/dtc warnings/errors:
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml: qcom,use-level-shifter: missing type definition
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202411071730.x3HIZimE-lkp@intel.com/
 
-doc reference errors (make refcheckdocs):
+sparse warnings: (new ones prefixed by >>)
+>> drivers/mmc/host/sdhci-pci-core.c:2068:28: sparse: sparse: symbol 'sdhci_pci_dmi_cd_gpio_overrides' was not declared. Should it be static?
 
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20241107080505.29244-2-quic_sartgarg@quicinc.com
+vim +/sdhci_pci_dmi_cd_gpio_overrides +2068 drivers/mmc/host/sdhci-pci-core.c
 
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
+  2067	
+> 2068	const struct dmi_system_id sdhci_pci_dmi_cd_gpio_overrides[] = {
+  2069		{
+  2070			/* Vexia Edu Atla 10 tablet 9V version */
+  2071			.matches = {
+  2072				DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
+  2073				DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
+  2074				/* Above strings are too generic, also match on BIOS date */
+  2075				DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
+  2076			},
+  2077			.driver_data = (void *)&vexia_edu_atla10_cd_gpios,
+  2078		},
+  2079		{ }
+  2080	};
+  2081	
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
-
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
