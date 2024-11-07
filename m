@@ -1,145 +1,147 @@
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+Received: from omta38.uswest2.a.cloudfilter.net (omta38.uswest2.a.cloudfilter.net [35.89.44.37])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C40379F6;
-	Thu,  7 Nov 2024 01:47:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C09EEDF59
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Nov 2024 04:18:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=35.89.44.37
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730944048; cv=none; b=mKuHL7I3jvYWmF/oycY2SxPpFDrNI37Y8ZGVqPBCM0yAgO0gZIu6U/RAhEeDFpjkMf60UbRv2b8pn8g6by1I/iQyNhX+/R2yxY6ryVRqa60UvnSJjOdGJ20qdDqYH8/FzWOkuBtb0fZ+Q9pn5VmYEP7spDs2dIcaY8bU1Vmt/9Y=
+	t=1730953110; cv=none; b=f501EzVtCbJVLRsPp+RkAsY7RZ0A/cUvctXfzb+nrije6pyaXpKQWHPHCecHAvBVA41m1Zk214xcwGif6l3tG1YFzIwl5Jb8UyUsKCI3vdVZRMyK+RZLUIXSncG4ID/RyBiWd7/EbqrdiRX3XbFG08/OfGWuvk53AlERwP2MgMk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730944048; c=relaxed/simple;
-	bh=rRk6cq2F/tp4Zcn90ksnzekGavL+iUlCGiUtZ73axNE=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=UI2alLYEcYhD1QhCR5t9MdFPiZ/m+Fyt3AaluTON5Erg/8C7oZJEHT0I3o6vAar1Ma8g2VPfD9TmdoR9wbIa3HGQi8ItbirDlyHNZlYzExklJ0thYndyaOfBdZusbCSXDYVvsNRWEW5YaIjrg4+LD0ScwK1yDR7Ydm3K+j0mxD8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=bYSeO+W5; arc=none smtp.client-ip=60.244.123.138
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1730953110; c=relaxed/simple;
+	bh=6dnQkQqfHh1sOcickMpv1JDUan6dh4Wu1yIDrpH/GKU=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=UL/5i1OrKEH1kl/Wbji7qGuaIto1To6jVUrIIv2kTZ5PaeAxhvn+1ljGp46GtIdD4Frc2wwPfb/h8x2UnsUM1/vHNrksHVLwBDDnyBacpsAEuaQvTg5mwmY/4n87BeQeaQb9kH7OydSpLU+ggjPaGaOvfUq2Hr84xh68ApeLezI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linumiz.com; spf=pass smtp.mailfrom=linumiz.com; dkim=pass (2048-bit key) header.d=linumiz.com header.i=@linumiz.com header.b=Ae+uZ+VP; arc=none smtp.client-ip=35.89.44.37
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linumiz.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linumiz.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="bYSeO+W5"
-X-UUID: 3b4858e69caa11efb88477ffae1fc7a5-20241107
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=3W5PDY06+vGKIgs/nnc6DCcFazFeqkExG65rOZ8TJMY=;
-	b=bYSeO+W50cK/AvrjmSKscoWuKjivWQPfkz4a+5Af9bVyl27r8gXfGIuckiyXrMAv9sPSuAA5QZMdbpSfNu/e6WYzP0Tz9XRqWGJb4W5xAWq9wkGWjOC3S5yf8HdkmMlDiJh4s14wNgWg4Y1y59r83hmLs/hfyFEzu9nzrm2B+0k=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.42,REQID:263391a9-8d72-4741-aaea-a742953a93ae,IP:0,U
-	RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
-	N:release,TS:-25
-X-CID-META: VersionHash:b0fcdc3,CLOUDID:26c1ac06-6ce0-4172-9755-bd2287e50583,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-	RL:11|1,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES
-	:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULN
-X-UUID: 3b4858e69caa11efb88477ffae1fc7a5-20241107
-Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw01.mediatek.com
-	(envelope-from <andy-ld.lu@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 2031822430; Thu, 07 Nov 2024 09:47:22 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Thu, 7 Nov 2024 09:47:19 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Thu, 7 Nov 2024 09:47:19 +0800
-From: Andy-ld Lu <andy-ld.lu@mediatek.com>
-To: <angelogioacchino.delregno@collabora.com>, <ulf.hansson@linaro.org>,
-	<matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
-	Andy-ld Lu <andy-ld.lu@mediatek.com>
-Subject: [PATCH] mmc: mtk-sd: Fix error handle of probe function
-Date: Thu, 7 Nov 2024 09:47:07 +0800
-Message-ID: <20241107014714.24981-1-andy-ld.lu@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (2048-bit key) header.d=linumiz.com header.i=@linumiz.com header.b="Ae+uZ+VP"
+Received: from eig-obgw-6003a.ext.cloudfilter.net ([10.0.30.151])
+	by cmsmtp with ESMTPS
+	id 8ncTtG1LOumtX8tyNtIMxE; Thu, 07 Nov 2024 04:18:19 +0000
+Received: from md-in-79.webhostbox.net ([43.225.55.182])
+	by cmsmtp with ESMTPS
+	id 8tyJtzLVYCgT68tyKtRweV; Thu, 07 Nov 2024 04:18:17 +0000
+X-Authority-Analysis: v=2.4 cv=XvwxOkF9 c=1 sm=1 tr=0 ts=672c3f89
+ a=LfuyaZh/8e9VOkaVZk0aRw==:117 a=kofhyyBXuK/oEhdxNjf66Q==:17
+ a=IkcTkHD0fZMA:10 a=VlfZXiiP6vEA:10 a=-pn6D5nKLtMA:10 a=VwQbUJbxAAAA:8
+ a=7CQSdrXTAAAA:8 a=vU9dKmh3AAAA:8 a=rQIMLdAWvKoWWgQMOJcA:9 a=QEXdDO2ut3YA:10
+ a=a-qgeE7W1pNrGK8U0ZQC:22 a=rsP06fVo5MYu2ilr0aT5:22 a=ZCPYImcxYIQFgLOT52_G:22
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=linumiz.com
+	; s=default; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:From:
+	References:To:Subject:Cc:MIME-Version:Date:Message-ID:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
+	List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=1yLSujXjZ1vWyoNhn9Q/+EnZQtwboxPDVegByiRGcUI=; b=Ae+uZ+VP8cnIBy/ygVfCll2Z2h
+	1Aqzf+23wPlMaOpCuvSlLqS9smUrQC9QISA+tkOzEKoLfUnU09AWYs3lIQRojNJOm3caBBIurcKzi
+	iMeSsWbskf4cQIru86EXaXX1A7RaBE9mQGg26z6Buwe39AB33Sdaa+f6T0HuGIr15bWRqUYRItaQE
+	la1LDTaIuFLQUzIT/mNxz+2EcJHnC9XV2H6Rak0PozS2rWtRvPPGWHDPu/JBbh9MA9E0j5E9Ky00A
+	FqzPxSOgIxlWUAgcFNliQ9lCzxXHZBMnWusNWs3At6uI4iWNCwSKN3f7FV6pv1RGXMXtz1zVQ5llb
+	pxjLd1yA==;
+Received: from [122.165.245.213] (port=38142 helo=[192.168.1.5])
+	by md-in-79.webhostbox.net with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96.2)
+	(envelope-from <parthiban@linumiz.com>)
+	id 1t8tyI-0040BA-0J;
+	Thu, 07 Nov 2024 09:48:14 +0530
+Message-ID: <411e2025-6e2c-4755-bb44-d2388ed5058e@linumiz.com>
+Date: Thu, 7 Nov 2024 09:48:11 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-AS-Result: No-10--8.332800-8.000000
-X-TMASE-MatchedRID: OLc6pRZQUVIxZlmZjLleZjPDkSOzeDWWq6/EYzBxkJgifM7JMNHW6xnH
-	32sG9jpsk6w8yr9UCBOnpDsu3n08UYjHxngndevxjNvYZHpO13fRfRfl2l4F3mtl3YYsdIHcBtM
-	QoGDRYEdfcTZ8crFLktWHvGFXsGeXsEBAuoaUqK/il2r2x2PwtQrefVId6fzVYdn5x3tXIpc7Qm
-	s3AC7auwWJQuk93Z8PIHSszW9OO9ONBnVioBmwYZ4CIKY/Hg3AGdQnQSTrKGPEQdG7H66TyF82M
-	XkEdQ770NH2Sv6E5SYne4LyJjwYxKLlHqJF1Ux2JFezMmuBWhtUQBzN9bOMTg==
-X-TM-AS-User-Approved-Sender: No
-X-TM-AS-User-Blocked-Sender: No
-X-TMASE-Result: 10--8.332800-8.000000
-X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-SNTS-SMTP: 3EFFC2BAA1189F12C483A8F0D241AC66204B4ABBF44944DC8F2C2D7C342F09702000:8
+User-Agent: Mozilla Thunderbird
+Cc: parthiban@linumiz.com, linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
+ Yangtao Li <tiny.windzz@gmail.com>, Cody Eksal <masterr3c0rd@epochal.quest>,
+ stable@vger.kernel.org
+Subject: Re: [PATCH] mmc: sunxi-mmc: Fix A100 compatible description
+To: Andre Przywara <andre.przywara@arm.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>,
+ Jernej Skrabec <jernej.skrabec@gmail.com>,
+ Samuel Holland <samuel@sholland.org>
+References: <20241107014240.24669-1-andre.przywara@arm.com>
+Content-Language: en-US
+From: Parthiban <parthiban@linumiz.com>
+Organization: Linumiz
+In-Reply-To: <20241107014240.24669-1-andre.przywara@arm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
+X-AntiAbuse: Primary Hostname - md-in-79.webhostbox.net
+X-AntiAbuse: Original Domain - vger.kernel.org
+X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
+X-AntiAbuse: Sender Address Domain - linumiz.com
+X-BWhitelist: no
+X-Source-IP: 122.165.245.213
+X-Source-L: No
+X-Exim-ID: 1t8tyI-0040BA-0J
+X-Source: 
+X-Source-Args: 
+X-Source-Dir: 
+X-Source-Sender: ([192.168.1.5]) [122.165.245.213]:38142
+X-Source-Auth: parthiban@linumiz.com
+X-Email-Count: 6
+X-Org: HG=dishared_whb_net_legacy;ORG=directi;
+X-Source-Cap: bGludW1jbWM7aG9zdGdhdG9yO21kLWluLTc5LndlYmhvc3Rib3gubmV0
+X-Local-Domain: yes
+X-CMAE-Envelope: MS4xfIhImrNjNFg5SvDO9CcxopxqdxHxYEjPdgy8ZsMYPmn4ietIOgH1CUDI5pTZfqRLeqJ6KaWmpEbqRD+QwP64kmjb9sc9Dk7qsp4UsCAmuUQHGRCUcXFg
+ OHQp0FdTf/1QFCcFjT4HDbHYH4hGjt9zkrTh99T0UImssBTTB2szBqb0zJLdoahzyl+JNjEeRCNVcEg5JKFfrgb/S8SIZbeJmRE=
 
-In the probe function, it goes to 'release_mem' label and returns after
-some procedure failure. But if the clocks (partial or all) have been
-enabled previously, they would not be disabled in msdc_runtime_suspend,
-since runtime PM is not yet enabled for this case.
+On 11/7/24 7:12 AM, Andre Przywara wrote:
+> It turns out that the Allwinner A100/A133 SoC only supports 8K DMA
+> blocks (13 bits wide), for both the SD/SDIO and eMMC instances.
+> And while this alone would make a trivial fix, the H616 falls back to
+> the A100 compatible string, so we have to now match the H616 compatible
+> string explicitly against the description advertising 64K DMA blocks.
+> 
+> As the A100 is now compatible with the D1 description, let the A100
+> compatible string point to that block instead, and introduce an explicit
+> match against the H616 string, pointing to the old description.
+> Also remove the redundant setting of clk_delays to NULL on the way.
+> 
+> Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+Tested working with SD card in mmc0.
 
-That cause mmc related clocks always on during system suspend and block
-suspend flow. Below log is from a SDCard issue of MT8196 chromebook, it
-returns -ETIMEOUT while polling clock stable in the msdc_ungate_clock()
-and probe failed, but the enabled clocks could not be disabled anyway.
+Tested-by: Parthiban Nallathambi <parthiban@linumiz.com>
 
-[  129.059253] clk_chk_dev_pm_suspend()
-[  129.350119] suspend warning: msdcpll is on
-[  129.354494] [ck_msdc30_1_sel : enabled, 1, 1, 191999939,   ck_msdcpll_d2]
-[  129.362787] [ck_msdcpll_d2   : enabled, 1, 1, 191999939,         msdcpll]
-[  129.371041] [ck_msdc30_1_ck  : enabled, 1, 1, 191999939, ck_msdc30_1_sel]
-[  129.379295] [msdcpll         : enabled, 1, 1, 383999878,          clk26m]
+Thanks,
+Parthiban
 
-Add a new 'release_clk' label and reorder the error handle functions to
-make sure the clocks be disabled after probe failure.
-
-Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index a2750a45c1b7..022526a1f754 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -3007,7 +3007,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	ret = msdc_ungate_clock(host);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Cannot ungate clocks!\n");
--		goto release_mem;
-+		goto release_clk;
- 	}
- 	msdc_init_hw(host);
- 
-@@ -3017,14 +3017,14 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 					     GFP_KERNEL);
- 		if (!host->cq_host) {
- 			ret = -ENOMEM;
--			goto release_mem;
-+			goto release;
- 		}
- 		host->cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
- 		host->cq_host->mmio = host->base + 0x800;
- 		host->cq_host->ops = &msdc_cmdq_ops;
- 		ret = cqhci_init(host->cq_host, mmc, true);
- 		if (ret)
--			goto release_mem;
-+			goto release;
- 		mmc->max_segs = 128;
- 		/* cqhci 16bit length */
- 		/* 0 size, means 65536 so we don't have to -1 here */
-@@ -3064,9 +3064,10 @@ static int msdc_drv_probe(struct platform_device *pdev)
- end:
- 	pm_runtime_disable(host->dev);
- release:
--	platform_set_drvdata(pdev, NULL);
- 	msdc_deinit_hw(host);
-+release_clk:
- 	msdc_gate_clock(host);
-+	platform_set_drvdata(pdev, NULL);
- release_mem:
- 	if (host->dma.gpd)
- 		dma_free_coherent(&pdev->dev,
--- 
-2.46.0
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index d3bd0ac99ec46..e0ab5fd635e6c 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1191,10 +1191,9 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
+>  	.needs_new_timings = true,
+>  };
+>  
+> -static const struct sunxi_mmc_cfg sun50i_a100_cfg = {
+> +static const struct sunxi_mmc_cfg sun50i_h616_cfg = {
+>  	.idma_des_size_bits = 16,
+>  	.idma_des_shift = 2,
+> -	.clk_delays = NULL,
+>  	.can_calibrate = true,
+>  	.mask_data0 = true,
+>  	.needs_new_timings = true,
+> @@ -1217,8 +1216,9 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
+>  	{ .compatible = "allwinner,sun20i-d1-mmc", .data = &sun20i_d1_cfg },
+>  	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
+>  	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
+> -	{ .compatible = "allwinner,sun50i-a100-mmc", .data = &sun50i_a100_cfg },
+> +	{ .compatible = "allwinner,sun50i-a100-mmc", .data = &sun20i_d1_cfg },
+>  	{ .compatible = "allwinner,sun50i-a100-emmc", .data = &sun50i_a100_emmc_cfg },
+> +	{ .compatible = "allwinner,sun50i-h616-mmc", .data = &sun50i_h616_cfg },
+>  	{ /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
 
