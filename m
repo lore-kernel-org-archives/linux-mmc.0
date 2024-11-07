@@ -1,72 +1,99 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70AAF1426C;
-	Thu,  7 Nov 2024 06:30:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E2ADC17DE36;
+	Thu,  7 Nov 2024 08:05:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730961047; cv=none; b=eGyvD4Ki+YuyE28jkp2kjkjtS2wWOSNUTcd2CRC0GfFyQudNUGIdqdj3od4NnFQ+k8i2YCdkb3z+2fymVEJuudeU6dQgM0Vv3GthK4G8rCkmqbLITLljCEiRiETcYyY97hZSdfHMnq24LOOzZwF+udNKutQN/sX3WVFDuOiHJSA=
+	t=1730966721; cv=none; b=AaqI6IFy7UCJlTBDlO5cUHY2dfiZeNHWECxaUjBhMaKqtcg9vi1GtYWyeUSlVhh1kiiD/W2Y2AqXptwfoZSbJMmmPmgG8jS08ZDxErePQixKnbNmJLDGVuCxCbI2naEDI0gkCSpe48hIC+DbcDKOM7fZXmrIa3pGHWuRHvkfirU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730961047; c=relaxed/simple;
-	bh=b9X/uaE7mdNzyDuyL39w7Td+pQgj7Kk0Bc8AT00Pto0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=S+jLeYwPXQIesDGLU8XwqxpkmRGKGIUWYJsvwYhBpLl0/b3hs4ARUVTyjfDBzR7wCBiT/f++LWpv3AMcvi+81tT8cTsITrwHLU5ZvYZTfqmkxox2BFX5z4N6PVRypmoAcusZs79TtsFNSeGHCFHsrvjukY+u7YgqevYtGiElW2k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=wKSDEfFX; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bombadil.srs.infradead.org
+	s=arc-20240116; t=1730966721; c=relaxed/simple;
+	bh=Y2APkLXTAecIPGbQD+tRXNFyd02ylrW7G84QrRVXJYY=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=kwFs2FXZyvX7vkQLgmZG5nI5K4fYeyrYMfbMv1hg9fDBWGlcxdXKwuB2io/PT73ZYKiHwulN8ctU8QkFtEh/FcfU4OuaRquE3os/b1K5yJZmSkq+mUmsFiWQyGJJCdT6TfF9nqJuW4UXEouI9VSOQNkYvfannmww62RT3bhl5Dk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=Omt6MdKH; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="wKSDEfFX"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-	:References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-	Content-Transfer-Encoding:Content-ID:Content-Description;
-	bh=z4fFsBMuTr+/KR25exKOqxWxItnrYFoxknfnC8WF7ps=; b=wKSDEfFXwTzUDlFsihcQe8EYfO
-	6xIyzYo+5puAUMNLTL62x+Ed7o5GIibqFSnJT9V6FEoaTOGXjTbS4qN7U7Dhm2dLW4Bq0fh4K6gEN
-	bJ9PzN0bog//XGnLUk43BSC3BYRAnMbDPQRaxGIsoT/JRSBa3UoKh3vhjDlxCVJfUAAKRZ1oZxIHk
-	KIvEiX6ko1oXhTqGsdWhUwRatJIfImftXBX9sOfLa9JigRa4bd4ICTYQ4kGZJNMmEMSD8bpJAgK8x
-	SXxZEAIr9AG/0h/vK66hKeRhHnkFIx5WW++z5xjzu6BFsSV2bYyEqzLki4d0RX7+Mz8kQH05iwbHz
-	s8vWcYOA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.98 #2 (Red Hat Linux))
-	id 1t8w2W-00000005qSl-2VDF;
-	Thu, 07 Nov 2024 06:30:44 +0000
-Date: Wed, 6 Nov 2024 22:30:44 -0800
-From: Christoph Hellwig <hch@infradead.org>
-To: Jangsub Yi <jangsub.yi@samsung.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, junwoo80.lee@samsung.com,
-	sh8267.baek@samsung.com, wkon.kim@samsung.com
-Subject: Re: [PATCH] mmc: Add config_host callback to set a mmc queue
-Message-ID: <ZyxelKdmXXiSVL1g@infradead.org>
-References: <CGME20241106051403epcas1p29e983006930bd7b8364b1a1f858ad21c@epcas1p2.samsung.com>
- <20241106051347.969-1-jangsub.yi@samsung.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="Omt6MdKH"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A6JrhIG003896;
+	Thu, 7 Nov 2024 08:05:16 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=vyzYNbaurjd3
+	Ot4cJfqDXygZG7rFA9tRaAXRL+eeIHo=; b=Omt6MdKHGsZ0lxwssGluAPETlkxG
+	zD1I/KNfW6ybwNwkvnvY0ij51lRoIdFUZhjM5ftWiy/8BBBpFe4LffOBjYhxtjjU
+	woXd5fPFLaAaXK2iiuIZ4LC9m8Lfd36hJV5uHBGwTq3BGNpnhLnVF0HAx/v8Pwhi
+	NvWdiTQev/O7HJOMKMXelOZ0I076QElH0WFauzwhLwfg1IpCRqCZAAch6l1ues61
+	Rry/MCU0XBT7llNImgSYgpRgXLP5pBgcOZVzAdBH1d28sblF5tuCaRFTPy+dMr7P
+	h+na39ceBm8Tmh0XnDN4lifW5veJLHQJktUAXn0h88kH2qSnOcmjwIqjaQ==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42qfdx6t3u-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 07 Nov 2024 08:05:15 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A785Bqh004128;
+	Thu, 7 Nov 2024 08:05:11 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 42nd5mu5n5-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+	Thu, 07 Nov 2024 08:05:11 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A785AZG004052;
+	Thu, 7 Nov 2024 08:05:10 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 4A785AgN004028;
+	Thu, 07 Nov 2024 08:05:10 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
+	id 7DB975013D2; Thu,  7 Nov 2024 13:35:09 +0530 (+0530)
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_narepall@quicinc.com, kernel@quicinc.com,
+        Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V1 0/3] Add level shifter support for qualcomm SOC's
+Date: Thu,  7 Nov 2024 13:35:02 +0530
+Message-Id: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 9xrCCTvF9wFzWszc4y2bNyNl0KtxkRRk
+X-Proofpoint-ORIG-GUID: 9xrCCTvF9wFzWszc4y2bNyNl0KtxkRRk
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1011 malwarescore=0
+ lowpriorityscore=0 suspectscore=0 phishscore=0 priorityscore=1501
+ impostorscore=0 mlxscore=0 bulkscore=0 spamscore=0 mlxlogscore=983
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2411070060
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20241106051347.969-1-jangsub.yi@samsung.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 
-On Wed, Nov 06, 2024 at 02:13:47PM +0900, Jangsub Yi wrote:
-> From: "jangsub.yi" <jangsub.yi@samsung.com>
-> 
-> Currently, there is no way to set up a host-dependent MMC queue.
-> In UFS driver, it is possible to configure the request queue in
-> ufshcd_slave_configure.
-> 
-> There are cases where we need to configure and check the current
-> state of the request queue on the host operation. For example,
-> mmc_queue->in_recovery, in_flight, mmc_queue->queue->queue_flag, etc.
-> 
-> Additionally, since the timeout setting may be longer depending
-> on the device, block layer settings such as timeout are also required.
-> 
-> To add the configuration for the MMC queue, I will add the corresponding
-> code and initially try to add it during initialization in block.c.
-> The detailed implementation will be done on the host side.
+Add level shifter support for qualcomm SOC's.
 
-This seems to lack an actual user and thus just creates dead code.
+Sarthak Garg (3):
+  dt-bindings: mmc: qcom: Document level shifter flag for SD card
+  mmc: sdhci-msm: Enable tuning for SDR50 mode for SD card
+  mmc: sdhci-msm: Limit HS mode frequency to 37.5MHz
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |  3 +++
+ drivers/mmc/host/sdhci-msm.c                  | 26 +++++++++++++++++++
+ 2 files changed, 29 insertions(+)
+
+-- 
+2.17.1
 
