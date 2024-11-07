@@ -1,145 +1,147 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D5A51DB372;
-	Thu,  7 Nov 2024 08:05:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 212FC1D7E4E
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Nov 2024 09:06:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730966725; cv=none; b=OR7gMfRodkU41jv8UrWOWzXkjNNNn0spRiCY7T7nCGlQj3IM0YtlDCO/1KkgtfSv9gCSQMsoYEdg1bnbZzApFXwkOO7VG83nmi9EvqTV4MFei3DvJjJf/PU4F9ZkSdhrM7StE/fa5fnrBqnBaxGK0OhKAVVH0xmB35MaJT8NCuU=
+	t=1730970379; cv=none; b=OJb4vPezrfvckbyejx+57GjUdN6YX+hbYEEGrUgsN0fOE2xRTVeka1cWaCHhKjeDlg+GVupnw2TFYDNZ5MDgcFP+R8ygb82C/REexUXNn/u+5lNIPBb0swH/EhBocu4yGKIIKQyYl0/sp/xQ8si+0wSTR1n+YntMzma+uZFcHCo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730966725; c=relaxed/simple;
-	bh=+Qv4Z6158Iv+7BItSSfBSo/w9yMs1NxgL3uRJbM2cjc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=HcAxrCdtB9RIiSuKIDKhVNPcnHEbPLNhUG1BtCyPBaqWcGao9BVMBwd9x8pAVunKLYGYE3oLJb6UWD1VQU0HSYRGNfHBnU8dHh3shKYGI+g45bypPq9wo0HjRE7nFfKZ2HfrxENUBTSrb5X9rPXo94xa1RXhfct8Quq4VYEg6as=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=nOENropn; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1730970379; c=relaxed/simple;
+	bh=bN3mzRF8CNzos9XmGraREi5v2QGaaOW3HmAT6PZsdk0=;
+	h=From:To:Cc:In-Reply-To:Subject:Date:Message-ID:MIME-Version:
+	 Content-Type:References; b=l4dNAVtkEHewcJex6WqkinBq9a1qPaKNXR+r903b4orIH4aovTXXlctabxxLh+IsSx/EhR2OluS8oASe6Jv/wYNyK+T5XHT3HbtKXWIpdsolAlDqWbJPASgDRtKwHuBbzhp+hScGtbvwCB+2Re9+zCCfYm2hDKx6vFBB24B0UbE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=Ub8tWipb; arc=none smtp.client-ip=203.254.224.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="nOENropn"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4A71HEOr005306;
-	Thu, 7 Nov 2024 08:05:21 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:date:from:in-reply-to:message-id:references:subject:to; s=
-	qcppdkim1; bh=MNn9gnfQccnQWE3qEzReoQ4ozshVH41Oucj/8xiR6Lc=; b=nO
-	ENropnDKqLHTrBHMAZCNnWViyfAo5E1a/k72vD+BCmq9IOMYawtUMchOuRwNUC/R
-	HdxgHZiyZpMaijq08wZ5c6hVNTgdQkOUpKNAE7ZuoXoZJUsnJMcazWAdEoJo/MTn
-	P6hZ4CcA2M32mnXag/5fjfn9vGES8/iLtfSZUnfmd5jATwouQkiDHAyJftgf/G1p
-	Tf+tfV4CyflFvLCKiUXNajvRTZlMNXOpBM/WUEZKKh0hs7RaBCMUqpLWGCmMwgNw
-	akcP56rLv+Y7QKOD7XN6/YEq4cDSKCqwLfKJqVw1ZtmpjvP1BhWj00K8nsv8fsOW
-	YE93ojAWREWSL40W71Cg==
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42qvg3vf9j-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 07 Nov 2024 08:05:20 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4A785G1d004533;
-	Thu, 7 Nov 2024 08:05:16 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 42nd5mu5nw-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Thu, 07 Nov 2024 08:05:16 +0000
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4A785DfI004498;
-	Thu, 7 Nov 2024 08:05:15 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 4A785FUa004527;
-	Thu, 07 Nov 2024 08:05:15 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
-	id E2F105013D2; Thu,  7 Nov 2024 13:35:14 +0530 (+0530)
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sachgupt@quicinc.com, quic_bhaskarv@quicinc.com,
-        quic_narepall@quicinc.com, kernel@quicinc.com,
-        Sarthak Garg <quic_sartgarg@quicinc.com>
-Subject: [PATCH V1 3/3] mmc: sdhci-msm: Limit HS mode frequency to 37.5MHz
-Date: Thu,  7 Nov 2024 13:35:05 +0530
-Message-Id: <20241107080505.29244-4-quic_sartgarg@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
-References: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: LkANyD9lYgCDZA9MYRePx1y3Fhq-FenZ
-X-Proofpoint-GUID: LkANyD9lYgCDZA9MYRePx1y3Fhq-FenZ
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=999
- lowpriorityscore=0 priorityscore=1501 clxscore=1015 mlxscore=0 spamscore=0
- suspectscore=0 bulkscore=0 phishscore=0 adultscore=0 impostorscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2409260000 definitions=main-2411070060
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="Ub8tWipb"
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20241107090613epoutp03f1afd5c30539ed342a4e6a80d890dc48~FpGIXjh1U2248422484epoutp03G
+	for <linux-mmc@vger.kernel.org>; Thu,  7 Nov 2024 09:06:13 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20241107090613epoutp03f1afd5c30539ed342a4e6a80d890dc48~FpGIXjh1U2248422484epoutp03G
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1730970373;
+	bh=JpLAukNeiMEzR5m7gPRVGbXL1gM2R7NAa2tSdIk0+84=;
+	h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
+	b=Ub8tWipbrqaNjJHkjqnD4TbN6j4Tx4FrvCWKaFAIt49CG9TUJ/6Pg/QzpFyor+EAr
+	 3hOYVs4diFkp+jq8kgptBbxEbU84I8ikHX4Toq1GjdaGqpJHLk+pBA+H+kFPF85ETI
+	 pjr8RgEcH/U+tKXsntiksesU/hVgbZwMBdYxroe8=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+	epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+	20241107090612epcas1p138eb0444d64175f1ad94686c27d5c0dc~FpGICRTUh3022630226epcas1p1B;
+	Thu,  7 Nov 2024 09:06:12 +0000 (GMT)
+Received: from epsmges1p5.samsung.com (unknown [182.195.36.226]) by
+	epsnrtp2.localdomain (Postfix) with ESMTP id 4Xkblm1pLXz4x9Py; Thu,  7 Nov
+	2024 09:06:12 +0000 (GMT)
+Received: from epcas1p1.samsung.com ( [182.195.41.45]) by
+	epsmges1p5.samsung.com (Symantec Messaging Gateway) with SMTP id
+	1F.20.09398.4038C276; Thu,  7 Nov 2024 18:06:12 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+	epcas1p3.samsung.com (KnoxPortal) with ESMTPA id
+	20241107090611epcas1p31994e0df204941e07a3b2da78818a3c8~FpGHWuM9G0971909719epcas1p3N;
+	Thu,  7 Nov 2024 09:06:11 +0000 (GMT)
+Received: from epsmgmcp1.samsung.com (unknown [182.195.42.82]) by
+	epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+	20241107090611epsmtrp1d388819330bba1fc79bd35f4ccee5540~FpGHWGTyJ0191801918epsmtrp1c;
+	Thu,  7 Nov 2024 09:06:11 +0000 (GMT)
+X-AuditID: b6c32a39-5f9f8700000024b6-a8-672c83044a5d
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+	epsmgmcp1.samsung.com (Symantec Messaging Gateway) with SMTP id
+	97.39.18937.3038C276; Thu,  7 Nov 2024 18:06:11 +0900 (KST)
+Received: from jangsubyi03 (unknown [10.253.100.135]) by
+	epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+	20241107090611epsmtip2063278b5db7039ad8c8fdc0304f6507e~FpGHJBeEX3091630916epsmtip2R;
+	Thu,  7 Nov 2024 09:06:11 +0000 (GMT)
+From: "???" <jangsub.yi@samsung.com>
+To: "'Christoph Hellwig'" <hch@infradead.org>
+Cc: <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>, <junwoo80.lee@samsung.com>,
+	<sh8267.baek@samsung.com>, <wkon.kim@samsung.com>
+In-Reply-To: <ZyxelKdmXXiSVL1g@infradead.org>
+Subject: RE: [PATCH] mmc: Add config_host callback to set a mmc queue
+Date: Thu, 7 Nov 2024 18:06:11 +0900
+Message-ID: <000001db30f4$4a749770$df5dc650$@samsung.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: AQH5zy9MrK58XqKdq8KPmuKMwnV7FAHbhmEtAfVDB6SyT7dXEA==
+Content-Language: ko
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprIJsWRmVeSWpSXmKPExsWy7bCmri5Ls066wfRNnBanJyxistj1t5nJ
+	4vKuOWwWR/73M1pcO3OC1eL42nCLzZe+sTiwe2xeoeVx59oeNo++LasYPT5vkgtgicq2yUhN
+	TEktUkjNS85PycxLt1XyDo53jjc1MzDUNbS0MFdSyEvMTbVVcvEJ0HXLzAHar6RQlphTChQK
+	SCwuVtK3synKLy1JVcjILy6xVUotSMkpMCvQK07MLS7NS9fLSy2xMjQwMDIFKkzIzlg88xhT
+	QQt3xbRZ8Q2MHzi6GDk5JARMJD6+vMraxcjFISSwg1FiV28PG4TziVGiY8lKFjjnVc8qVpiW
+	GdeeQCV2Mkoc2LebCcJ5xSixeM4rJpAqNgEViZdzv7GD2CICuhJnF75gBCliFljDKNF+aSMj
+	SIITKNH4ehEbiC0s4CrxaNkFsDgLUPPrp0fBmnkFLCVeXpsGZQtKnJwJspoTaJCBxPtz85kh
+	bHmJ7W/nMEOcpyDx8+kyVojFThJbH0xigqgRkZjd2cYMcoSEQCuHxIXDv4CGcgA5LhLL99dC
+	9ApLvDq+hR3ClpJ42d8GZRdLHHj2iAXCrpHY0fCVCcK2l2hubWaDmM8n8e5rDyvESF6JjjYh
+	CFNFYmufGszEjXumQV3pITH13BX2CYyKs5A8NgvJY7OQPDYLyQMLGFlWMYqlFhTnpqcWGxaY
+	wmM7OT93EyM4bWpZ7mCc/vaD3iFGJg7GQ4wSHMxKIrz+UdrpQrwpiZVVqUX58UWlOanFhxhN
+	gWE9kVlKNDkfmLjzSuINTSwNTMyMTCyMLY3NlMR5z1wpSxUSSE8sSc1OTS1ILYLpY+LglGpg
+	WnHxduEhiSrmB/LzNs49JWnhqHVGr3vGZtHsvlnrTGP5rhry6i9N9k1dbzF7OcNzyRUee68E
+	VPHd2f1TyD54HVvr7tX1ko0/nrnmZ5kujpzOvyPGcbtM8uM26yUOAVUVK/86hpnovTFQ4JL5
+	OWvlkq0ei2xlAq+mXVL7q6hi7r7hxePl21JOMk9L6k+ZHjfpRHpG/MQAw4eTP++5tbT26HFt
+	tpRFAZOeh1jO7zGTO1sZcDa0/uf2/daxB6v6+hXuebFv7DXT8XOKOVb37r+39MPoubpvl4Ql
+	Gt+sSdroP31me+ccdhORKf2T22er1zbpzMjS7RPjmJK773S6am+3snLqFd+q6Am7O1qjWAqV
+	WIozEg21mIuKEwFGpupBJAQAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrOLMWRmVeSWpSXmKPExsWy7bCSvC5zs066waE7+hanJyxistj1t5nJ
+	4vKuOWwWR/73M1pcO3OC1eL42nCLzZe+sTiwe2xeoeVx59oeNo++LasYPT5vkgtgieKySUnN
+	ySxLLdK3S+DKWDzzGFNBC3fFtFnxDYwfOLoYOTkkBEwkZlx7wtLFyMUhJLCdUaL7xHa2LkYO
+	oISUxIdPKRCmsMThw8UQJS8YJbZf2M8O0ssmoCLxcu43MFtEQFfi7MIXjCBFzAKbGCXe/lvP
+	DNGxhlHi0LUmFpAqTqCqxteL2EBsYQFXiUfLLjCC2CxAk14/PQo2iVfAUuLltWlQtqDEyZlP
+	wHqZBYwkzh3azwZhy0tsfzuHGeIDBYmfT5exQlzhJLH1wSQmiBoRidmdbcwTGIVnIRk1C8mo
+	WUhGzULSsoCRZRWjaGpBcW56bnKBoV5xYm5xaV66XnJ+7iZGcNxoBe1gXLb+r94hRiYOxkOM
+	EhzMSiK8/lHa6UK8KYmVValF+fFFpTmpxYcYpTlYlMR5lXM6U4QE0hNLUrNTUwtSi2CyTByc
+	Ug1Mk+Neuk67r+36XPnwt1JXzqa2lDMiLEd3+Kw8zfDrwo05l8p1X/WzPhb6GuB79kXczenb
+	ZT58+bXtifzN6nJNnYyN5pLmE/82Lmn1XbQ8ac/xKxNDHz4/IF7sul9206SZC/d2953oq5vJ
+	ERZf+mXe6h/ZNle/vJKcffB8s+SlkO1ipiuul212m5npHvb2Qqr6qfXlzsLuL9Y+mBh48kCs
+	ZzbnZsaHmtNZPT+eYvTu2eIb/ErM7jfLiYtzLcTl5aPOX1lYFv2Pf4dgtU6ZyazJhzedXng8
+	iuGWOtuUGffaTDZnOdROVLNbohZVnb87Sfm75ZkDxiVrBGX1GuevVdM2PaBQaswg+TbOiFv+
+	9L+p/5VYijMSDbWYi4oTAS1GEyMKAwAA
+X-CMS-MailID: 20241107090611epcas1p31994e0df204941e07a3b2da78818a3c8
+X-Msg-Generator: CA
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20241106051403epcas1p29e983006930bd7b8364b1a1f858ad21c
+References: <CGME20241106051403epcas1p29e983006930bd7b8364b1a1f858ad21c@epcas1p2.samsung.com>
+	<20241106051347.969-1-jangsub.yi@samsung.com>
+	<ZyxelKdmXXiSVL1g@infradead.org>
 
-For Qualcomm SoCs with level shifter delays are seen on receivers data
-path due to latency added by level shifter.
-
-To bring these delays in normal range and avoid CMD CRC errors
-reduce frequency for HS mode SD cards to 37.5MHz for targets which has
-level shifter.
-
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 16325c21de52..5e1dc06c4707 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -138,6 +138,8 @@
- /* Max load for eMMC Vdd-io supply */
- #define MMC_VQMMC_MAX_LOAD_UA	325000
- 
-+#define LEVEL_SHIFTER_HIGH_SPEED_FREQ	37500000
-+
- #define msm_host_readl(msm_host, host, offset) \
- 	msm_host->var_ops->msm_readl_relaxed(host, offset)
- 
-@@ -287,6 +289,7 @@ struct sdhci_msm_host {
- 	bool use_cdr;
- 	u32 transfer_mode;
- 	bool updated_ddr_cfg;
-+	bool uses_level_shifter;
- 	bool uses_tassadar_dll;
- 	u32 dll_config;
- 	u32 ddr_config;
-@@ -366,6 +369,11 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
- 
- 	mult = msm_get_clock_mult_for_bus_mode(host);
- 	desired_rate = clock * mult;
-+
-+	if (curr_ios.timing == MMC_TIMING_SD_HS && desired_rate == 50000000
-+		&& msm_host->uses_level_shifter)
-+		desired_rate = LEVEL_SHIFTER_HIGH_SPEED_FREQ;
-+
- 	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
- 	if (rc) {
- 		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-@@ -2372,6 +2380,8 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
- 
- 	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
- 
-+	msm_host->uses_level_shifter = of_property_read_bool(node, "qcom,use-level-shifter");
-+
- 	if (of_device_is_compatible(node, "qcom,msm8916-sdhci"))
- 		host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
- }
--- 
-2.17.1
+> On Wed, Nov 06, 2024 at 02:13:47PM +0900, Jangsub Yi wrote:
+> > From: "jangsub.yi" <jangsub.yi@samsung.com>
+> >
+> > Currently, there is no way to set up a host-dependent MMC queue.
+> > In UFS driver, it is possible to configure the request queue in
+> > ufshcd_slave_configure.
+> >
+> > There are cases where we need to configure and check the current state
+> > of the request queue on the host operation. For example,
+> > mmc_queue->in_recovery, in_flight, mmc_queue->queue->queue_flag, etc.
+> >
+> > Additionally, since the timeout setting may be longer depending on the
+> > device, block layer settings such as timeout are also required.
+> >
+> > To add the configuration for the MMC queue, I will add the
+> > corresponding code and initially try to add it during initialization in
+> block.c.
+> > The detailed implementation will be done on the host side.
+> 
+> This seems to lack an actual user and thus just creates dead code.
+> 
+Currently, there is no way to configure a request queue on the host side.
+Although there are various exported symbols in kernel/block/blk-settings.c
+that can be used to configure a request queue, users cannot utilize them
+as needed.
+ For example, I want to change the timeout setting by calling 
+blk_queue_rq_timeout(). Because 60 seconds is too long depending
+on the device. Therefore, we need a method for independent configuration
+for each host.
 
