@@ -1,152 +1,91 @@
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 248D618FDA5
-	for <linux-mmc@vger.kernel.org>; Wed,  6 Nov 2024 21:59:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.129.124
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id D104EF9D6;
+	Thu,  7 Nov 2024 01:43:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1730930376; cv=none; b=sqXzlrMdhnjT/0a+8Y5HRm/9HO1xutUOvQFKxktnCxm8VccJOkQ0T4/uSlAF9G7GeWYx51PEq6+HQuTCwT33pSnqzK3PfX2oi0MAvf0TvLiVzArXMuFMOhbpueIJSRuiSHZ7PJIi7jBp+J0nXojwqmgecDrU7z4rVxVyLWBGcLQ=
+	t=1730943785; cv=none; b=LkPh70si5Nvy9cOAKrB2HEnbbs8k/0XWCtjs0hTRtG95/fKQ3GM670Ocp6Lp3ko0ACXhUs2VtZTqc6S0Lrdn37a21Ccgg0Z0WVGcyQ50n6L8Nh3qqe5XjfCj1CnK8rndOGYBOM/GpISC9kN/+6qLuEa9mlaiCH/6gkx58PhjETw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1730930376; c=relaxed/simple;
-	bh=BsP0lygsoPPdaSn/KPoHtOSlu19u5SR52npiUH7UM9A=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=fNgf3V1uzSEvrv/dwhVqr3lm+3DHhYRlV2VeE0LNkPeu0FlKKnCwbjojrRDyLHpFqw8BxedKiyhFo/n43BLMuyOz9qsT0tOazzHrV5L3Ag0lGudvNVDYIXT6I7GXL8S60O3oD85bosS4Bs1XeF1EGIQ+NQSvKkNJ7n+vs25Dg40=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=VxcclEzz; arc=none smtp.client-ip=170.10.129.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="VxcclEzz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-	s=mimecast20190719; t=1730930374;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=Mq1ovykBQxiIueFkqwLikLav8MbZd2NlWdg5r+aRm/k=;
-	b=VxcclEzzRpAer5SR7m4pPX9ktT59Vk2IX8yHxkdTz1XkfZYc6P64fQo8f7xfJmJxuWm1uP
-	6ZBfxXPocrEv71ofwVUtJbRj/Zt3wk2DMKy1bp5nY8gUAd+sRYz+w1MbD1lD5x336NIfzD
-	9b/3SpjbIJrfPkBqfsMvn6CPfBk6Di8=
-Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
- (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
- cipher=TLS_AES_256_GCM_SHA384) id us-mta-249-IbioooD9OCWc0GI2uGzIzA-1; Wed,
- 06 Nov 2024 16:59:31 -0500
-X-MC-Unique: IbioooD9OCWc0GI2uGzIzA-1
-X-Mimecast-MFC-AGG-ID: IbioooD9OCWc0GI2uGzIzA
-Received: from mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.40])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 2296D195608A;
-	Wed,  6 Nov 2024 21:59:30 +0000 (UTC)
-Received: from shalem.redhat.com (unknown [10.39.192.71])
-	by mx-prod-int-04.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id C2DDC19560AA;
-	Wed,  6 Nov 2024 21:59:28 +0000 (UTC)
-From: Hans de Goede <hdegoede@redhat.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on Vexia Edu Atla 10 tablet
-Date: Wed,  6 Nov 2024 22:59:27 +0100
-Message-ID: <20241106215927.40482-1-hdegoede@redhat.com>
+	s=arc-20240116; t=1730943785; c=relaxed/simple;
+	bh=bDlEMe4p+Ix+XDJgWpZjIDVzNG8F46fsApthqT/VKs0=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=lO2pZlKwwRSVRibyGKxRc7ieTs+EbllLImSM5oSzRwHbsh1cTzW4ZvMeUzDbrOGkblYwM6lXLRZj2TtgUJT/mVe7LSwgGYId9D7XMMkvOnAYfelkKeqjo0zrsij2iPqXWfBESZGJ2jDyUzYutwVTNNpF8YsZL4FEKqBXbdRtpjk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id C236F497;
+	Wed,  6 Nov 2024 17:43:31 -0800 (PST)
+Received: from localhost.localdomain (usa-sjc-mx-foss1.foss.arm.com [172.31.20.19])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 5A7F83F66E;
+	Wed,  6 Nov 2024 17:43:00 -0800 (PST)
+From: Andre Przywara <andre.przywara@arm.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Chen-Yu Tsai <wens@csie.org>,
+	Jernej Skrabec <jernej.skrabec@gmail.com>,
+	Samuel Holland <samuel@sholland.org>
+Cc: linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-sunxi@lists.linux.dev,
+	Yangtao Li <tiny.windzz@gmail.com>,
+	Cody Eksal <masterr3c0rd@epochal.quest>,
+	Parthiban <parthiban@linumiz.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: sunxi-mmc: Fix A100 compatible description
+Date: Thu,  7 Nov 2024 01:42:40 +0000
+Message-ID: <20241107014240.24669-1-andre.przywara@arm.com>
+X-Mailer: git-send-email 2.46.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 3.0 on 10.30.177.40
 
-The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
-Andalucía region has no ACPI fwnode associated with the SDHCI controller
-for its microsd-slot and thus has no ACPI GPIO resource info.
+It turns out that the Allwinner A100/A133 SoC only supports 8K DMA
+blocks (13 bits wide), for both the SD/SDIO and eMMC instances.
+And while this alone would make a trivial fix, the H616 falls back to
+the A100 compatible string, so we have to now match the H616 compatible
+string explicitly against the description advertising 64K DMA blocks.
 
-This causes the following error to be logged and the slot to not work:
-[   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpio
+As the A100 is now compatible with the D1 description, let the A100
+compatible string point to that block instead, and introduce an explicit
+match against the H616 string, pointing to the old description.
+Also remove the redundant setting of clk_delays to NULL on the way.
 
-Add a DMI quirk table for providing gpiod_lookup_tables with manually
-provided CD GPIO info and use this DMI table to provide the CD GPIO info
-on this tablet. This fixes the microsd-slot not working.
-
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
+Cc: stable@vger.kernel.org
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 39 +++++++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index ed45ed0bdafd..eb9fb4ccd31b 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -11,6 +11,7 @@
- #include <linux/bitfield.h>
- #include <linux/string.h>
- #include <linux/delay.h>
-+#include <linux/dmi.h>
- #include <linux/highmem.h>
- #include <linux/module.h>
- #include <linux/pci.h>
-@@ -21,6 +22,7 @@
- #include <linux/io.h>
- #include <linux/iopoll.h>
- #include <linux/gpio.h>
-+#include <linux/gpio/machine.h>
- #include <linux/pm_runtime.h>
- #include <linux/pm_qos.h>
- #include <linux/debugfs.h>
-@@ -2054,6 +2056,29 @@ static const struct dev_pm_ops sdhci_pci_pm_ops = {
-  *                                                                           *
- \*****************************************************************************/
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index d3bd0ac99ec46..e0ab5fd635e6c 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1191,10 +1191,9 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_cfg = {
+ 	.needs_new_timings = true,
+ };
  
-+/* DMI quirks for devices with missing or broken CD GPIO info */
-+static struct gpiod_lookup_table vexia_edu_atla10_cd_gpios = {
-+	.dev_id = "0000:00:12.0",
-+	.table = {
-+		GPIO_LOOKUP("INT33FC:00", 38, "cd", GPIO_ACTIVE_HIGH),
-+		{ }
-+	},
-+};
-+
-+const struct dmi_system_id sdhci_pci_dmi_cd_gpio_overrides[] = {
-+	{
-+		/* Vexia Edu Atla 10 tablet 9V version */
-+		.matches = {
-+			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
-+			DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
-+			/* Above strings are too generic, also match on BIOS date */
-+			DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
-+		},
-+		.driver_data = (void *)&vexia_edu_atla10_cd_gpios,
-+	},
-+	{ }
-+};
-+
- static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
- 	int slotno)
-@@ -2129,8 +2154,22 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 		device_init_wakeup(&pdev->dev, true);
- 
- 	if (slot->cd_idx >= 0) {
-+		struct gpiod_lookup_table *cd_gpio_lookup_table = NULL;
-+		const struct dmi_system_id *dmi_id;
-+
-+		dmi_id = dmi_first_match(sdhci_pci_dmi_cd_gpio_overrides);
-+		if (dmi_id)
-+			cd_gpio_lookup_table = dmi_id->driver_data;
-+
-+		if (cd_gpio_lookup_table)
-+			gpiod_add_lookup_table(cd_gpio_lookup_table);
-+
- 		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
- 					   slot->cd_override_level, 0);
-+
-+		if (cd_gpio_lookup_table)
-+			gpiod_remove_lookup_table(cd_gpio_lookup_table);
-+
- 		if (ret && ret != -EPROBE_DEFER)
- 			ret = mmc_gpiod_request_cd(host->mmc, NULL,
- 						   slot->cd_idx,
+-static const struct sunxi_mmc_cfg sun50i_a100_cfg = {
++static const struct sunxi_mmc_cfg sun50i_h616_cfg = {
+ 	.idma_des_size_bits = 16,
+ 	.idma_des_shift = 2,
+-	.clk_delays = NULL,
+ 	.can_calibrate = true,
+ 	.mask_data0 = true,
+ 	.needs_new_timings = true,
+@@ -1217,8 +1216,9 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun20i-d1-mmc", .data = &sun20i_d1_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
+-	{ .compatible = "allwinner,sun50i-a100-mmc", .data = &sun50i_a100_cfg },
++	{ .compatible = "allwinner,sun50i-a100-mmc", .data = &sun20i_d1_cfg },
+ 	{ .compatible = "allwinner,sun50i-a100-emmc", .data = &sun50i_a100_emmc_cfg },
++	{ .compatible = "allwinner,sun50i-h616-mmc", .data = &sun50i_h616_cfg },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
 -- 
-2.47.0
+2.46.2
 
