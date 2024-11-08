@@ -1,168 +1,718 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6568A1E0E1A;
-	Fri,  8 Nov 2024 13:07:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 978501F4722
+	for <linux-mmc@vger.kernel.org>; Fri,  8 Nov 2024 15:05:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731071229; cv=none; b=iS4gmSy37owjSMD+paEIfGVNcUGt9j1Y0sdIcbY5zYbA1Tfl06ZZ/dqyExvT+YhWAjb+vrnLEcxUxZO32vaoKgZYaBo01QvxLcQySJucXHE1sS9GqswRw6FnGQYDmlh4aRBCnwkPypHVqHfTnIBQ3mPRK0LDM1aGJtX1UydFOVo=
+	t=1731078325; cv=none; b=gV/MgqNRZ1/hqLkzNznWHHdgebVYe95zvHbqnHM1HZsLxC9fOvb0nLBmFqFq/3gn3iWz5am9zFts0TBM0zFM/fxXxT1gczGnfh0ps/xisAkKJuaJdWUZZQWMu5//OGtNzfDXlhSfKqJreH38Gf60jpVNOF9IltCsBOP1DiQi+kM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731071229; c=relaxed/simple;
-	bh=z2Mtdk7vsxKCcZLHpLJawXgyEfIX75i0FxnVD2WIfuY=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=qi3yhfmNkIFilCiqmgllM0h6h0bGWtHJF19re/DtwPWXFDk94wR2JIIeBJ8ESNLu3r3Gu+TJWMOJovGPnqOzE5F2Mv8WM6JXJSyfhONoe9qC3xyzgHgvU+nu4VejXgMOt1MSJ1PAM2ksp7KCYMXf5Yz864GHmRHqoHb/c8m46DE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=HfE64W5u; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
+	s=arc-20240116; t=1731078325; c=relaxed/simple;
+	bh=RODQKNIFAub+voO/9pG9nimjIa5SSVsw4xbRWAp0xWw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=bEuEUHEnWl4tWdw0w0zDw8/LTjkEsZXZqo3en7KGjL/L1UBpXAqM7XWa0y4OIstU8DFAuJkANEOCPEi+MiAV52U0wHjIh484pn8z6YlC0KfnuY3RgSQkPcw3sySnnfh1gY29r+GFftwSjqCgVOoyfvnyc8h4657gl9Hux/HSyuY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=RdElZq1y; arc=none smtp.client-ip=198.175.65.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="HfE64W5u"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1731071212; x=1731676012; i=wahrenst@gmx.net;
-	bh=1p77c5f46fGoPaVLzCPx/GSglvzQAh4d6x8dFwGg/y8=;
-	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:
-	 MIME-Version:Content-Transfer-Encoding:cc:
-	 content-transfer-encoding:content-type:date:from:message-id:
-	 mime-version:reply-to:subject:to;
-	b=HfE64W5urkFxX4SCcp8HQXVGTR1zZkCyMFklSNKtICLvfOu5YTeLhJ5xLrFpogIX
-	 ZnAT/5dMV5fAI9lBJiA76slejh60mdaK9SuSEGC8X7VSk0G3V0rJbv0uZzpAkFEIU
-	 O/wxsdezOExa+aajoCf9AFoNQ+Cimt3Cran844SBUvSBpXlzhgHE5cku4i9EVjYMV
-	 wjDcswBkEOofrcNlpcxuQadtF+BSJsADpUv/PuSWnuQ5EFt+Dwx3Py4+ChKSsWbWy
-	 oddEdmrBvm5fZhB767aXYffKp2/3eJ4rUpuF3YrQQGmKguOKEOhnhn+owv5exINuB
-	 KYaU48JNO518sBK2Dg==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from stefanw-SCHENKER ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1N5GE1-1tqo2L0f5B-0138g2; Fri, 08
- Nov 2024 14:06:52 +0100
-From: Stefan Wahren <wahrenst@gmx.net>
-To: Philipp Zabel <p.zabel@pengutronix.de>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Marco Felsch <m.felsch@pengutronix.de>,
-	Catalin Popescu <catalin.popescu@leica-geosystems.com>
-Cc: Florian Fainelli <florian.fainelli@broadcom.com>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Stefan Wahren <wahrenst@gmx.net>
-Subject: [PATCH V2] mmc: pwrseq_simple: Handle !RESET_CONTROLLER properly
-Date: Fri,  8 Nov 2024 14:06:47 +0100
-Message-Id: <20241108130647.8281-1-wahrenst@gmx.net>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="RdElZq1y"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1731078323; x=1762614323;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=RODQKNIFAub+voO/9pG9nimjIa5SSVsw4xbRWAp0xWw=;
+  b=RdElZq1yvMMF1GiXAyQr2FraQyWqdPam1XFUoIxHD3IXWTrrVXJk6CTN
+   2S+Gv6EzYX4f/tU9MdIpz35PV9nyJzQU7IvRjLoPTwiymKyKRA+98EuVz
+   VmJs/aSdcDUSUfUU/pusOEkKEOQV4ZUonQX/12m7qLjiILTwPFqN73ysP
+   smFTMeRcnjJl8QWBg5oZKsGbzQ71ep7399aQsgK8kd7YtJF2hTI5o9HGG
+   MNNl9tC2se2X00z8EDSsnuuCokRoB6dN99Pt45xHHjDGN5xCIfhaH2OK1
+   hKZnKlXNmChYf7rWS/HxBKJto8FmJd6sAxm3t5oVRHSRFCAvlvRD5wNpt
+   g==;
+X-CSE-ConnectionGUID: ZxWhbpVETr2wUsQlaobUxQ==
+X-CSE-MsgGUID: OOPfLkkmTwyZ1XcwQnHilA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="30818321"
+X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
+   d="scan'208";a="30818321"
+Received: from orviesa002.jf.intel.com ([10.64.159.142])
+  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Nov 2024 07:05:23 -0800
+X-CSE-ConnectionGUID: S3OXYm4WR7+1ld6+9t8Oow==
+X-CSE-MsgGUID: sbZCct48QKCUVGmqAhpr/w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,138,1728975600"; 
+   d="scan'208";a="116427301"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
+  by orviesa002-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Nov 2024 07:05:21 -0800
+Message-ID: <e34b886b-aac6-4d0a-92b2-0b342dd45240@intel.com>
+Date: Fri, 8 Nov 2024 17:05:15 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:CzNb5FcPCkmFO2MkOQP2r9VgtLh5nVVcu0PLyDmwl2n2DXTR+S0
- Iy+HY8QIyh9L11L6whQivHPt+eXPpMJLChqWvCPbAZSdkbhXntTROQFkOFt9uTgp1T20kne
- EB1Pvx3htSxUxjlrDm0QH+OyYEBJHuZwDPq1QfiNWPvEhDRaOMRTy7UYVdcBe6CRCqtZOlz
- VRlVEDrQo6Iz+8pOqbOjA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:gyABekB2yNM=;RmfHHNj/19FzHkpHw5x4UlPlRBE
- brzDjfQ57McqGPHjgDXwKHAd0M760e8vSRklNkAZHhRq/RPglph50Pg9WSUJSPsu2HWts5fNw
- tuU/qnI0nTDkCskokGahbdyjzJaCO+ESMwxwPoEqcBeRZmjOBdvswtITBV3kxxL7mS3FVlXVV
- PV1KmO4Irv0Q6hUZNSG10h89CXy/eIavVU7Sef252TkG8acklOHA3lTksTEXajmWYfYC7CRhx
- UvH60/SkX/YExWkj9W5yfn4FPWlnl1dlwQ+ECYU73zQwAoz2Ox00NEHrQ6ZaJSfvPJm8+yz+R
- VXzzfUeHrsW0uBu6c+RxsEaV74nOfly8H9uAn3FWkgewPsKQsHvredBuAJTVgBSkVkttI3Z5V
- 9FtpxzeSVBCKlDceXS+a88GlyH/aI7TCFmIM5AKqLXl8xOsYgPynVUbs4g19Ur6abw/7OzNQ/
- rzGhkakRyElQU7lVqhR7+58t+ukpOf6aBfbu1Mkgkg4spPryDzDugwIFwqWC13AfFBf+U3lya
- L7+xIMUJE3ZHuSz5Y/WUHcgl3/aCm3Dn+63G/ytwtNCyQR+x80l71+1QckE11Nk8fsraGW773
- yyeNRt0BehJ55oOc+KAe8WrV3ETdBqEjEEbOjxsAXRhaMIhFwJx+mKMLA53anaQovc90EThgc
- sLNdn0v+aj4Gz8HGc46RpHet/a2fUEoGu9xEIxNZGyMkd9YvnceEng17cft/b4drS3fXg1cZd
- mn+9kritsgGFvsMKHGdLcY6Y9gKJX84hji7IhiWhPuO2XyDAK3nQ9S6iyK4+9yitFEI/AHC6C
- KFybgvsHpieRyKXkqV90M9ouSRi+bJn2rjGvuuSQT+ZNXSFwUVXOwMepBbTFYLC4Y6l6/M8Vh
- SuywGD4pF+u241xTuCU0YIx8xLlhzbCH22MCKK8CRtlgY3Tr2mlZbh2J6
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: core: clang-format fixes - part 1
+To: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ linux-mmc@vger.kernel.org
+References: <20241106121830.739041-1-avri.altman@wdc.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241106121830.739041-1-avri.altman@wdc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-The recent introduction of reset control in pwrseq_simple introduced
-a regression for platforms without RESET_CONTROLLER support, because
-devm_reset_control_get_optional_shared() would return NULL and make all
-resets no-ops. Instead of enforcing this dependency, rely on this behavior
-to determine reset support. As a benefit we can get the rid of the
-use_reset flag.
+On 6/11/24 14:18, Avri Altman wrote:
+> While strict checkpatch is useful for identifying common style issues
+> and enforcing certain coding standards, clang-format provides several
+> advantages, e.g. automated formatting, customizable style, consistency
+> across tools, and more.
+> 
+> By adopting clang-format, we aim to improve code readability,
+> maintainability, and overall code quality in the ufs core driver.
+> 
+> Apply this in phases - starting with mmc-test.
+> No functional change.
 
-Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset contro=
-l")
-Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
-=2D--
- drivers/mmc/core/pwrseq_simple.c | 20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
+I am not a fan of churning code in this way because it gets in the
+way of having fixes apply automatically to stable trees.
 
-Changes in V2:
-- add explaining comment as suggested by Marco Felsch
-
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_si=
-mple.c
-index 24e4e63a5dc8..37cd858df0f4 100644
-=2D-- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -32,7 +32,6 @@ struct mmc_pwrseq_simple {
- 	struct clk *ext_clk;
- 	struct gpio_descs *reset_gpios;
- 	struct reset_control *reset_ctrl;
--	bool use_reset;
- };
-
- #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwr=
-seq)
-@@ -71,7 +70,7 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_ho=
-st *host)
- 		pwrseq->clk_enabled =3D true;
- 	}
-
--	if (pwrseq->use_reset) {
-+	if (pwrseq->reset_ctrl) {
- 		reset_control_deassert(pwrseq->reset_ctrl);
- 		reset_control_assert(pwrseq->reset_ctrl);
- 	} else
-@@ -82,7 +81,7 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_h=
-ost *host)
- {
- 	struct mmc_pwrseq_simple *pwrseq =3D to_pwrseq_simple(host->pwrseq);
-
--	if (pwrseq->use_reset)
-+	if (pwrseq->reset_ctrl)
- 		reset_control_deassert(pwrseq->reset_ctrl);
- 	else
- 		mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
-@@ -95,7 +94,7 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host =
-*host)
- {
- 	struct mmc_pwrseq_simple *pwrseq =3D to_pwrseq_simple(host->pwrseq);
-
--	if (pwrseq->use_reset)
-+	if (pwrseq->reset_ctrl)
- 		reset_control_assert(pwrseq->reset_ctrl);
- 	else
- 		mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
-@@ -137,15 +136,18 @@ static int mmc_pwrseq_simple_probe(struct platform_d=
-evice *pdev)
- 		return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not=
- ready\n");
-
- 	ngpio =3D of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio=
--cells");
--	if (ngpio =3D=3D 1)
--		pwrseq->use_reset =3D true;
--
--	if (pwrseq->use_reset) {
-+	if (ngpio =3D=3D 1) {
- 		pwrseq->reset_ctrl =3D devm_reset_control_get_optional_shared(dev, NULL=
-);
- 		if (IS_ERR(pwrseq->reset_ctrl))
- 			return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
- 					     "reset control not ready\n");
--	} else {
-+	}
-+
-+	/*
-+	 * Fallback to GPIO based reset control in case of multiple reset lines
-+	 * are specified or the platform doesn't have support for RESET at all.
-+	 */
-+	if (!pwrseq->reset_ctrl) {
- 		pwrseq->reset_gpios =3D devm_gpiod_get_array(dev, "reset", GPIOD_OUT_HI=
-GH);
- 		if (IS_ERR(pwrseq->reset_gpios) &&
- 		    PTR_ERR(pwrseq->reset_gpios) !=3D -ENOENT &&
-=2D-
-2.34.1
+> 
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> ---
+>  drivers/mmc/core/mmc_test.c | 250 ++++++++++++++++++------------------
+>  1 file changed, 123 insertions(+), 127 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+> index 4f4286b8e0f2..42c533a272ac 100644
+> --- a/drivers/mmc/core/mmc_test.c
+> +++ b/drivers/mmc/core/mmc_test.c
+> @@ -23,15 +23,15 @@
+>  #include "bus.h"
+>  #include "mmc_ops.h"
+>  
+> -#define RESULT_OK		0
+> -#define RESULT_FAIL		1
+> -#define RESULT_UNSUP_HOST	2
+> -#define RESULT_UNSUP_CARD	3
+> +#define RESULT_OK 0
+> +#define RESULT_FAIL 1
+> +#define RESULT_UNSUP_HOST 2
+> +#define RESULT_UNSUP_CARD 3
+>  
+> -#define BUFFER_ORDER		2
+> -#define BUFFER_SIZE		(PAGE_SIZE << BUFFER_ORDER)
+> +#define BUFFER_ORDER 2
+> +#define BUFFER_SIZE (PAGE_SIZE << BUFFER_ORDER)
+>  
+> -#define TEST_ALIGN_END		8
+> +#define TEST_ALIGN_END 8
+>  
+>  /*
+>   * Limit the test area size to the maximum MMC HC erase group size.  Note that
+> @@ -141,15 +141,15 @@ struct mmc_test_dbgfs_file {
+>   * @gr: pointer to results of current testcase
+>   */
+>  struct mmc_test_card {
+> -	struct mmc_card	*card;
+> +	struct mmc_card *card;
+>  
+> -	u8		scratch[BUFFER_SIZE];
+> -	u8		*buffer;
+> +	u8 scratch[BUFFER_SIZE];
+> +	u8 *buffer;
+>  #ifdef CONFIG_HIGHMEM
+> -	struct page	*highmem;
+> +	struct page *highmem;
+>  #endif
+> -	struct mmc_test_area		area;
+> -	struct mmc_test_general_result	*gr;
+> +	struct mmc_test_area area;
+> +	struct mmc_test_general_result *gr;
+>  };
+>  
+>  enum mmc_test_prep_media {
+> @@ -207,18 +207,20 @@ static void mmc_test_prepare_sbc(struct mmc_test_card *test,
+>   * Fill in the mmc_request structure given a set of transfer parameters.
+>   */
+>  static void mmc_test_prepare_mrq(struct mmc_test_card *test,
+> -	struct mmc_request *mrq, struct scatterlist *sg, unsigned sg_len,
+> -	unsigned dev_addr, unsigned blocks, unsigned blksz, int write)
+> +				 struct mmc_request *mrq,
+> +				 struct scatterlist *sg, unsigned sg_len,
+> +				 unsigned dev_addr, unsigned blocks,
+> +				 unsigned blksz, int write)
+>  {
+>  	if (WARN_ON(!mrq || !mrq->cmd || !mrq->data || !mrq->stop))
+>  		return;
+>  
+>  	if (blocks > 1) {
+> -		mrq->cmd->opcode = write ?
+> -			MMC_WRITE_MULTIPLE_BLOCK : MMC_READ_MULTIPLE_BLOCK;
+> +		mrq->cmd->opcode = write ? MMC_WRITE_MULTIPLE_BLOCK :
+> +					   MMC_READ_MULTIPLE_BLOCK;
+>  	} else {
+> -		mrq->cmd->opcode = write ?
+> -			MMC_WRITE_BLOCK : MMC_READ_SINGLE_BLOCK;
+> +		mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
+> +					   MMC_READ_SINGLE_BLOCK;
+>  	}
+>  
+>  	mrq->cmd->arg = dev_addr;
+> @@ -249,7 +251,7 @@ static void mmc_test_prepare_mrq(struct mmc_test_card *test,
+>  static int mmc_test_busy(struct mmc_command *cmd)
+>  {
+>  	return !(cmd->resp[0] & R1_READY_FOR_DATA) ||
+> -		(R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
+> +	       (R1_CURRENT_STATE(cmd->resp[0]) == R1_STATE_PRG);
+>  }
+>  
+>  /*
+> @@ -286,8 +288,8 @@ static int mmc_test_wait_busy(struct mmc_test_card *test)
+>  /*
+>   * Transfer a single sector of kernel addressable data
+>   */
+> -static int mmc_test_buffer_transfer(struct mmc_test_card *test,
+> -	u8 *buffer, unsigned addr, unsigned blksz, int write)
+> +static int mmc_test_buffer_transfer(struct mmc_test_card *test, u8 *buffer,
+> +				    unsigned addr, unsigned blksz, int write)
+>  {
+>  	struct mmc_request mrq = {};
+>  	struct mmc_command cmd = {};
+> @@ -319,8 +321,7 @@ static void mmc_test_free_mem(struct mmc_test_mem *mem)
+>  	if (!mem)
+>  		return;
+>  	while (mem->cnt--)
+> -		__free_pages(mem->arr[mem->cnt].page,
+> -			     mem->arr[mem->cnt].order);
+> +		__free_pages(mem->arr[mem->cnt].page, mem->arr[mem->cnt].order);
+>  	kfree(mem->arr);
+>  	kfree(mem);
+>  }
+> @@ -366,7 +367,7 @@ static struct mmc_test_mem *mmc_test_alloc_mem(unsigned long min_sz,
+>  		struct page *page;
+>  		unsigned int order;
+>  		gfp_t flags = GFP_KERNEL | GFP_DMA | __GFP_NOWARN |
+> -				__GFP_NORETRY;
+> +			      __GFP_NORETRY;
+>  
+>  		order = get_order(max_seg_page_cnt << PAGE_SHIFT);
+>  		while (1) {
+> @@ -456,12 +457,10 @@ static int mmc_test_map_sg(struct mmc_test_mem *mem, unsigned long size,
+>   * Map memory into a scatterlist so that no pages are contiguous.  Allow the
+>   * same memory to be mapped more than once.
+>   */
+> -static int mmc_test_map_sg_max_scatter(struct mmc_test_mem *mem,
+> -				       unsigned long sz,
+> -				       struct scatterlist *sglist,
+> -				       unsigned int max_segs,
+> -				       unsigned int max_seg_sz,
+> -				       unsigned int *sg_len)
+> +static int
+> +mmc_test_map_sg_max_scatter(struct mmc_test_mem *mem, unsigned long sz,
+> +			    struct scatterlist *sglist, unsigned int max_segs,
+> +			    unsigned int max_seg_sz, unsigned int *sg_len)
+>  {
+>  	struct scatterlist *sg = NULL;
+>  	unsigned int i = mem->cnt, cnt;
+> @@ -531,8 +530,10 @@ static unsigned int mmc_test_rate(uint64_t bytes, struct timespec64 *ts)
+>   * Save transfer results for future usage
+>   */
+>  static void mmc_test_save_transfer_result(struct mmc_test_card *test,
+> -	unsigned int count, unsigned int sectors, struct timespec64 ts,
+> -	unsigned int rate, unsigned int iops)
+> +					  unsigned int count,
+> +					  unsigned int sectors,
+> +					  struct timespec64 ts,
+> +					  unsigned int rate, unsigned int iops)
+>  {
+>  	struct mmc_test_transfer_result *tr;
+>  
+> @@ -567,11 +568,10 @@ static void mmc_test_print_rate(struct mmc_test_card *test, uint64_t bytes,
+>  	iops = mmc_test_rate(100, &ts); /* I/O ops per sec x 100 */
+>  
+>  	pr_info("%s: Transfer of %u sectors (%u%s KiB) took %llu.%09u "
+> -			 "seconds (%u kB/s, %u KiB/s, %u.%02u IOPS)\n",
+> -			 mmc_hostname(test->card->host), sectors, sectors >> 1,
+> -			 (sectors & 1 ? ".5" : ""), (u64)ts.tv_sec,
+> -			 (u32)ts.tv_nsec, rate / 1000, rate / 1024,
+> -			 iops / 100, iops % 100);
+> +		"seconds (%u kB/s, %u KiB/s, %u.%02u IOPS)\n",
+> +		mmc_hostname(test->card->host), sectors, sectors >> 1,
+> +		(sectors & 1 ? ".5" : ""), (u64)ts.tv_sec, (u32)ts.tv_nsec,
+> +		rate / 1000, rate / 1024, iops / 100, iops % 100);
+>  
+>  	mmc_test_save_transfer_result(test, 1, sectors, ts, rate, iops);
+>  }
+> @@ -593,13 +593,12 @@ static void mmc_test_print_avg_rate(struct mmc_test_card *test, uint64_t bytes,
+>  	iops = mmc_test_rate(count * 100, &ts); /* I/O ops per sec x 100 */
+>  
+>  	pr_info("%s: Transfer of %u x %u sectors (%u x %u%s KiB) took "
+> -			 "%llu.%09u seconds (%u kB/s, %u KiB/s, "
+> -			 "%u.%02u IOPS, sg_len %d)\n",
+> -			 mmc_hostname(test->card->host), count, sectors, count,
+> -			 sectors >> 1, (sectors & 1 ? ".5" : ""),
+> -			 (u64)ts.tv_sec, (u32)ts.tv_nsec,
+> -			 rate / 1000, rate / 1024, iops / 100, iops % 100,
+> -			 test->area.sg_len);
+> +		"%llu.%09u seconds (%u kB/s, %u KiB/s, "
+> +		"%u.%02u IOPS, sg_len %d)\n",
+> +		mmc_hostname(test->card->host), count, sectors, count,
+> +		sectors >> 1, (sectors & 1 ? ".5" : ""), (u64)ts.tv_sec,
+> +		(u32)ts.tv_nsec, rate / 1000, rate / 1024, iops / 100,
+> +		iops % 100, test->area.sg_len);
+>  
+>  	mmc_test_save_transfer_result(test, count, sectors, ts, rate, iops);
+>  }
+> @@ -670,14 +669,14 @@ static int mmc_test_cleanup(struct mmc_test_card *test)
+>   * Modifies the mmc_request to perform the "short transfer" tests
+>   */
+>  static void mmc_test_prepare_broken_mrq(struct mmc_test_card *test,
+> -	struct mmc_request *mrq, int write)
+> +					struct mmc_request *mrq, int write)
+>  {
+>  	if (WARN_ON(!mrq || !mrq->cmd || !mrq->data))
+>  		return;
+>  
+>  	if (mrq->data->blocks > 1) {
+> -		mrq->cmd->opcode = write ?
+> -			MMC_WRITE_BLOCK : MMC_READ_SINGLE_BLOCK;
+> +		mrq->cmd->opcode = write ? MMC_WRITE_BLOCK :
+> +					   MMC_READ_SINGLE_BLOCK;
+>  		mrq->stop = NULL;
+>  	} else {
+>  		mrq->cmd->opcode = MMC_SEND_STATUS;
+> @@ -706,8 +705,8 @@ static int mmc_test_check_result(struct mmc_test_card *test,
+>  		ret = mrq->data->error;
+>  	if (!ret && mrq->stop && mrq->stop->error)
+>  		ret = mrq->stop->error;
+> -	if (!ret && mrq->data->bytes_xfered !=
+> -		mrq->data->blocks * mrq->data->blksz)
+> +	if (!ret &&
+> +	    mrq->data->bytes_xfered != mrq->data->blocks * mrq->data->blksz)
+>  		ret = RESULT_FAIL;
+>  
+>  	if (ret == -EINVAL)
+> @@ -720,7 +719,7 @@ static int mmc_test_check_result(struct mmc_test_card *test,
+>   * Checks that a "short transfer" behaved as expected
+>   */
+>  static int mmc_test_check_broken_result(struct mmc_test_card *test,
+> -	struct mmc_request *mrq)
+> +					struct mmc_request *mrq)
+>  {
+>  	int ret;
+>  
+> @@ -871,8 +870,9 @@ static int mmc_test_nonblock_transfer(struct mmc_test_card *test,
+>   * Tests a basic transfer with certain parameters
+>   */
+>  static int mmc_test_simple_transfer(struct mmc_test_card *test,
+> -	struct scatterlist *sg, unsigned sg_len, unsigned dev_addr,
+> -	unsigned blocks, unsigned blksz, int write)
+> +				    struct scatterlist *sg, unsigned sg_len,
+> +				    unsigned dev_addr, unsigned blocks,
+> +				    unsigned blksz, int write)
+>  {
+>  	struct mmc_request mrq = {};
+>  	struct mmc_command cmd = {};
+> @@ -883,8 +883,8 @@ static int mmc_test_simple_transfer(struct mmc_test_card *test,
+>  	mrq.data = &data;
+>  	mrq.stop = &stop;
+>  
+> -	mmc_test_prepare_mrq(test, &mrq, sg, sg_len, dev_addr,
+> -		blocks, blksz, write);
+> +	mmc_test_prepare_mrq(test, &mrq, sg, sg_len, dev_addr, blocks, blksz,
+> +			     write);
+>  
+>  	mmc_wait_for_req(test->card->host, &mrq);
+>  
+> @@ -896,8 +896,8 @@ static int mmc_test_simple_transfer(struct mmc_test_card *test,
+>  /*
+>   * Tests a transfer where the card will fail completely or partly
+>   */
+> -static int mmc_test_broken_transfer(struct mmc_test_card *test,
+> -	unsigned blocks, unsigned blksz, int write)
+> +static int mmc_test_broken_transfer(struct mmc_test_card *test, unsigned blocks,
+> +				    unsigned blksz, int write)
+>  {
+>  	struct mmc_request mrq = {};
+>  	struct mmc_command cmd = {};
+> @@ -927,9 +927,9 @@ static int mmc_test_broken_transfer(struct mmc_test_card *test,
+>   *
+>   * Note: mmc_test_prepare() must have been done before this call
+>   */
+> -static int mmc_test_transfer(struct mmc_test_card *test,
+> -	struct scatterlist *sg, unsigned sg_len, unsigned dev_addr,
+> -	unsigned blocks, unsigned blksz, int write)
+> +static int mmc_test_transfer(struct mmc_test_card *test, struct scatterlist *sg,
+> +			     unsigned sg_len, unsigned dev_addr,
+> +			     unsigned blocks, unsigned blksz, int write)
+>  {
+>  	int ret, i;
+>  
+> @@ -945,8 +945,8 @@ static int mmc_test_transfer(struct mmc_test_card *test,
+>  	if (ret)
+>  		return ret;
+>  
+> -	ret = mmc_test_simple_transfer(test, sg, sg_len, dev_addr,
+> -		blocks, blksz, write);
+> +	ret = mmc_test_simple_transfer(test, sg, sg_len, dev_addr, blocks,
+> +				       blksz, write);
+>  	if (ret)
+>  		return ret;
+>  
+> @@ -968,8 +968,8 @@ static int mmc_test_transfer(struct mmc_test_card *test,
+>  
+>  		for (i = 0; i < sectors; i++) {
+>  			ret = mmc_test_buffer_transfer(test,
+> -				test->buffer + i * 512,
+> -				dev_addr + i, 512, 0);
+> +						       test->buffer + i * 512,
+> +						       dev_addr + i, 512, 0);
+>  			if (ret)
+>  				return ret;
+>  		}
+> @@ -1371,7 +1371,7 @@ static int mmc_test_multi_read_high(struct mmc_test_card *test)
+>  static int mmc_test_no_highmem(struct mmc_test_card *test)
+>  {
+>  	pr_info("%s: Highmem not configured - test skipped\n",
+> -	       mmc_hostname(test->card->host));
+> +		mmc_hostname(test->card->host));
+>  	return 0;
+>  }
+>  
+> @@ -1392,7 +1392,7 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
+>  	if (max_scatter) {
+>  		err = mmc_test_map_sg_max_scatter(t->mem, sz, t->sg,
+>  						  t->max_segs, t->max_seg_sz,
+> -				       &t->sg_len);
+> +						  &t->sg_len);
+>  	} else {
+>  		err = mmc_test_map_sg(t->mem, sz, t->sg, 1, t->max_segs,
+>  				      t->max_seg_sz, &t->sg_len, min_sg_len);
+> @@ -1415,7 +1415,7 @@ static int mmc_test_area_map(struct mmc_test_card *test, unsigned long sz,
+>  err:
+>  	if (err)
+>  		pr_info("%s: Failed to map sg list\n",
+> -		       mmc_hostname(test->card->host));
+> +			mmc_hostname(test->card->host));
+>  	return err;
+>  }
+>  
+> @@ -1585,8 +1585,8 @@ static int mmc_test_area_init(struct mmc_test_card *test, int erase, int fill)
+>  		goto out_free;
+>  	}
+>  
+> -	t->sg_areq = kmalloc_array(t->max_segs, sizeof(*t->sg_areq),
+> -				   GFP_KERNEL);
+> +	t->sg_areq =
+> +		kmalloc_array(t->max_segs, sizeof(*t->sg_areq), GFP_KERNEL);
+>  	if (!t->sg_areq) {
+>  		ret = -ENOMEM;
+>  		goto out_free;
+> @@ -2036,8 +2036,8 @@ static int mmc_test_seq_perf(struct mmc_test_card *test, int write,
+>  
+>  	ktime_get_ts64(&ts1);
+>  	for (i = 0; i < cnt; i++) {
+> -		ret = mmc_test_area_io(test, sz, dev_addr, write,
+> -				       max_scatter, 0);
+> +		ret = mmc_test_area_io(test, sz, dev_addr, write, max_scatter,
+> +				       0);
+>  		if (ret)
+>  			return ret;
+>  		dev_addr += ssz;
+> @@ -2114,26 +2114,25 @@ static int mmc_test_rw_multiple(struct mmc_test_card *test,
+>  		return 0;
+>  
+>  	/* prepare test area */
+> -	if (mmc_can_erase(test->card) &&
+> -	    tdata->prepare & MMC_TEST_PREP_ERASE) {
+> -		ret = mmc_erase(test->card, dev_addr,
+> -				size / 512, test->card->erase_arg);
+> +	if (mmc_can_erase(test->card) && tdata->prepare & MMC_TEST_PREP_ERASE) {
+> +		ret = mmc_erase(test->card, dev_addr, size / 512,
+> +				test->card->erase_arg);
+>  		if (ret)
+> -			ret = mmc_erase(test->card, dev_addr,
+> -					size / 512, MMC_ERASE_ARG);
+> +			ret = mmc_erase(test->card, dev_addr, size / 512,
+> +					MMC_ERASE_ARG);
+>  		if (ret)
+>  			goto err;
+>  	}
+>  
+>  	/* Run test */
+> -	ret = mmc_test_area_io_seq(test, reqsize, dev_addr,
+> -				   tdata->do_write, 0, 1, size / reqsize,
+> -				   tdata->do_nonblock_req, min_sg_len);
+> +	ret = mmc_test_area_io_seq(test, reqsize, dev_addr, tdata->do_write, 0,
+> +				   1, size / reqsize, tdata->do_nonblock_req,
+> +				   min_sg_len);
+>  	if (ret)
+>  		goto err;
+>  
+>  	return ret;
+> - err:
+> +err:
+>  	pr_info("[%s] error\n", __func__);
+>  	return ret;
+>  }
+> @@ -2152,7 +2151,7 @@ static int mmc_test_rw_multiple_size(struct mmc_test_card *test,
+>  		return -EINVAL;
+>  	}
+>  
+> -	for (i = 0 ; i < rw->len && ret == 0; i++) {
+> +	for (i = 0; i < rw->len && ret == 0; i++) {
+>  		ret = mmc_test_rw_multiple(test, rw, rw->bs[i], rw->size, 0);
+>  		if (ret)
+>  			break;
+> @@ -2166,7 +2165,7 @@ static int mmc_test_rw_multiple_sg_len(struct mmc_test_card *test,
+>  	int ret = 0;
+>  	int i;
+>  
+> -	for (i = 0 ; i < rw->len && ret == 0; i++) {
+> +	for (i = 0; i < rw->len && ret == 0; i++) {
+>  		ret = mmc_test_rw_multiple(test, rw, 512 * 1024, rw->size,
+>  					   rw->sg_len[i]);
+>  		if (ret)
+> @@ -2180,8 +2179,8 @@ static int mmc_test_rw_multiple_sg_len(struct mmc_test_card *test,
+>   */
+>  static int mmc_test_profile_mult_write_blocking_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
+> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.bs = bs,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2199,8 +2198,8 @@ static int mmc_test_profile_mult_write_blocking_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_mult_write_nonblock_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
+> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.bs = bs,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2218,8 +2217,8 @@ static int mmc_test_profile_mult_write_nonblock_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_mult_read_blocking_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
+> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.bs = bs,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2237,8 +2236,8 @@ static int mmc_test_profile_mult_read_blocking_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_mult_read_nonblock_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int bs[] = {1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> -			     1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22};
+> +	unsigned int bs[] = { 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16,
+> +			      1 << 17, 1 << 18, 1 << 19, 1 << 20, 1 << 22 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.bs = bs,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2256,8 +2255,8 @@ static int mmc_test_profile_mult_read_nonblock_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_sglen_wr_blocking_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
+> -				 1 << 7, 1 << 8, 1 << 9};
+> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
+> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.sg_len = sg_len,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2275,8 +2274,8 @@ static int mmc_test_profile_sglen_wr_blocking_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_sglen_wr_nonblock_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
+> -				 1 << 7, 1 << 8, 1 << 9};
+> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
+> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.sg_len = sg_len,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2294,8 +2293,8 @@ static int mmc_test_profile_sglen_wr_nonblock_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_sglen_r_blocking_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
+> -				 1 << 7, 1 << 8, 1 << 9};
+> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
+> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.sg_len = sg_len,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2313,8 +2312,8 @@ static int mmc_test_profile_sglen_r_blocking_perf(struct mmc_test_card *test)
+>   */
+>  static int mmc_test_profile_sglen_r_nonblock_perf(struct mmc_test_card *test)
+>  {
+> -	unsigned int sg_len[] = {1, 1 << 3, 1 << 4, 1 << 5, 1 << 6,
+> -				 1 << 7, 1 << 8, 1 << 9};
+> +	unsigned int sg_len[] = { 1,	  1 << 3, 1 << 4, 1 << 5,
+> +				  1 << 6, 1 << 7, 1 << 8, 1 << 9 };
+>  	struct mmc_test_multiple_rw test_data = {
+>  		.sg_len = sg_len,
+>  		.size = TEST_AREA_MAX_SIZE,
+> @@ -2390,9 +2389,8 @@ static int mmc_test_ongoing_transfer(struct mmc_test_card *test,
+>  			     512, write);
+>  
+>  	if (use_sbc && t->blocks > 1 && !mrq->sbc) {
+> -		ret =  mmc_host_cmd23(host) ?
+> -		       RESULT_UNSUP_CARD :
+> -		       RESULT_UNSUP_HOST;
+> +		ret = mmc_host_cmd23(host) ? RESULT_UNSUP_CARD :
+> +					     RESULT_UNSUP_HOST;
+>  		goto out_free;
+>  	}
+>  
+> @@ -2971,8 +2969,7 @@ static void mmc_test_run(struct mmc_test_card *test, int testcase)
+>  			ret = mmc_test_cases[i].prepare(test);
+>  			if (ret) {
+>  				pr_info("%s: Result: Prepare stage failed! (%d)\n",
+> -					mmc_hostname(test->card->host),
+> -					ret);
+> +					mmc_hostname(test->card->host), ret);
+>  				continue;
+>  			}
+>  		}
+> @@ -3026,16 +3023,14 @@ static void mmc_test_run(struct mmc_test_card *test, int testcase)
+>  			ret = mmc_test_cases[i].cleanup(test);
+>  			if (ret) {
+>  				pr_info("%s: Warning: Cleanup stage failed! (%d)\n",
+> -					mmc_hostname(test->card->host),
+> -					ret);
+> +					mmc_hostname(test->card->host), ret);
+>  			}
+>  		}
+>  	}
+>  
+>  	mmc_release_host(test->card->host);
+>  
+> -	pr_info("%s: Tests completed.\n",
+> -		mmc_hostname(test->card->host));
+> +	pr_info("%s: Tests completed.\n", mmc_hostname(test->card->host));
+>  }
+>  
+>  static void mmc_test_free_result(struct mmc_card *card)
+> @@ -3044,13 +3039,13 @@ static void mmc_test_free_result(struct mmc_card *card)
+>  
+>  	mutex_lock(&mmc_test_lock);
+>  
+> -	list_for_each_entry_safe(gr, grs, &mmc_test_result, link) {
+> +	list_for_each_entry_safe (gr, grs, &mmc_test_result, link) {
+>  		struct mmc_test_transfer_result *tr, *trs;
+>  
+>  		if (card && gr->card != card)
+>  			continue;
+>  
+> -		list_for_each_entry_safe(tr, trs, &gr->tr_lst, link) {
+> +		list_for_each_entry_safe (tr, trs, &gr->tr_lst, link) {
+>  			list_del(&tr->link);
+>  			kfree(tr);
+>  		}
+> @@ -3071,7 +3066,7 @@ static int mtf_test_show(struct seq_file *sf, void *data)
+>  
+>  	mutex_lock(&mmc_test_lock);
+>  
+> -	list_for_each_entry(gr, &mmc_test_result, link) {
+> +	list_for_each_entry (gr, &mmc_test_result, link) {
+>  		struct mmc_test_transfer_result *tr;
+>  
+>  		if (gr->card != card)
+> @@ -3079,11 +3074,11 @@ static int mtf_test_show(struct seq_file *sf, void *data)
+>  
+>  		seq_printf(sf, "Test %d: %d\n", gr->testcase + 1, gr->result);
+>  
+> -		list_for_each_entry(tr, &gr->tr_lst, link) {
+> +		list_for_each_entry (tr, &gr->tr_lst, link) {
+>  			seq_printf(sf, "%u %d %llu.%09u %u %u.%02u\n",
+> -				tr->count, tr->sectors,
+> -				(u64)tr->ts.tv_sec, (u32)tr->ts.tv_nsec,
+> -				tr->rate, tr->iops / 100, tr->iops % 100);
+> +				   tr->count, tr->sectors, (u64)tr->ts.tv_sec,
+> +				   (u32)tr->ts.tv_nsec, tr->rate,
+> +				   tr->iops / 100, tr->iops % 100);
+>  		}
+>  	}
+>  
+> @@ -3098,7 +3093,7 @@ static int mtf_test_open(struct inode *inode, struct file *file)
+>  }
+>  
+>  static ssize_t mtf_test_write(struct file *file, const char __user *buf,
+> -	size_t count, loff_t *pos)
+> +			      size_t count, loff_t *pos)
+>  {
+>  	struct seq_file *sf = file->private_data;
+>  	struct mmc_card *card = sf->private;
+> @@ -3148,11 +3143,11 @@ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
+>  }
+>  
+>  static const struct file_operations mmc_test_fops_test = {
+> -	.open		= mtf_test_open,
+> -	.read		= seq_read,
+> -	.write		= mtf_test_write,
+> -	.llseek		= seq_lseek,
+> -	.release	= single_release,
+> +	.open = mtf_test_open,
+> +	.read = seq_read,
+> +	.write = mtf_test_write,
+> +	.llseek = seq_lseek,
+> +	.release = single_release,
+>  };
+>  
+>  static int mtf_testlist_show(struct seq_file *sf, void *data)
+> @@ -3178,7 +3173,7 @@ static void mmc_test_free_dbgfs_file(struct mmc_card *card)
+>  
+>  	mutex_lock(&mmc_test_lock);
+>  
+> -	list_for_each_entry_safe(df, dfs, &mmc_test_file_test, link) {
+> +	list_for_each_entry_safe (df, dfs, &mmc_test_file_test, link) {
+>  		if (card && df->card != card)
+>  			continue;
+>  		debugfs_remove(df->file);
+> @@ -3190,14 +3185,15 @@ static void mmc_test_free_dbgfs_file(struct mmc_card *card)
+>  }
+>  
+>  static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
+> -	const char *name, umode_t mode, const struct file_operations *fops)
+> +					  const char *name, umode_t mode,
+> +					  const struct file_operations *fops)
+>  {
+>  	struct dentry *file = NULL;
+>  	struct mmc_test_dbgfs_file *df;
+>  
+>  	if (card->debugfs_root)
+> -		file = debugfs_create_file(name, mode, card->debugfs_root,
+> -					   card, fops);
+> +		file = debugfs_create_file(name, mode, card->debugfs_root, card,
+> +					   fops);
+>  
+>  	df = kmalloc(sizeof(*df), GFP_KERNEL);
+>  	if (!df) {
+> @@ -3219,12 +3215,12 @@ static int mmc_test_register_dbgfs_file(struct mmc_card *card)
+>  	mutex_lock(&mmc_test_lock);
+>  
+>  	ret = __mmc_test_register_dbgfs_file(card, "test", S_IWUSR | S_IRUGO,
+> -		&mmc_test_fops_test);
+> +					     &mmc_test_fops_test);
+>  	if (ret)
+>  		goto err;
+>  
+>  	ret = __mmc_test_register_dbgfs_file(card, "testlist", S_IRUGO,
+> -		&mtf_testlist_fops);
+> +					     &mtf_testlist_fops);
+>  	if (ret)
+>  		goto err;
+>  
 
