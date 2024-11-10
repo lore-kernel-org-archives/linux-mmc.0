@@ -1,153 +1,135 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.21])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53A502556E;
-	Sat,  9 Nov 2024 17:37:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CC2613D244;
+	Sun, 10 Nov 2024 09:04:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731173854; cv=none; b=slrW481dqrRGtDMjgbCOf3I4FpHnT20OIq8VXZG0FYAx8P0lJOPrQn1BCXikteftMZoemo3MPypZHFLzbacNudLKugpODi5j+dly8fV2qcNfSGQBd3jqL+pT6wf5neP/spd43S7TI2fEgvc3GgOqsDkWTj3x6BUpZ2wQ9BR/dxY=
+	t=1731229467; cv=none; b=EBQgH2V9AbqZNKqx7prdAuPLJd0nsYEZDNLxFFo2WA5phUG5s48VvzbUmcpJh+R0ZS1mGxuLOH3AZlPcVWVWREAhFo5uBke5Nk0Bw4tECIOa2AIEh1ff67LS983k64lSOf4S6VEzD/4uxIQIrvxB4dfW/Ydt+06f6ysl3M3n8BU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731173854; c=relaxed/simple;
-	bh=i6yvpd4PiYqHCrO03Ai94gLpVeDRtmo8KRvnB3M/Fpc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=AP3UL6OGCYBeLH0nX5N45PZxryKcvZnAJmTY2J2MkbFCHJJg86597//ln59fNfzwevYs6M+9DohE564X7NzlpOlkceGLMJVUPbY9bFHWoR7eN4BKl89dFhrSvOl8HKApBcm9/UsddoF4X4Dv+Vcts6gwRZzzK0iQLHwyAv3mhaI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=koVjcZPA; arc=none smtp.client-ip=212.227.17.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="koVjcZPA"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1731173829; x=1731778629; i=wahrenst@gmx.net;
-	bh=ID0U4v8IJwDheWM1GMjMt6YDBO95xzj8yHE+CefJD7M=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=koVjcZPAN3TgN0vh/aNhAnQeeko+NkgKFJ4h1F4VtB8yBykyhdHKYHV+tU/tMiZ9
-	 tlB9xVpOcO1GutBKUxVA1sY96xww15lbA18nMLnD5QUYIzSUJ9CNd+xnaz3SMXTg7
-	 z5DAAWZhHlt4fh+L/OjI98iWmSSOD/cCesYnRhJOwHsA5KdAsMbQ4DKsQ4PBn+oZx
-	 Hzfxfwrvve8xeDUAhY4MzVNml7KLvDmkrnnHDuD8kMmGmHiapmWdkLoXD8SrtydZC
-	 J4ZktRIFIgZhaWTGsGc754NV+yv+yxHXDY+2KcHYK2a2yptXaXi2agTTJLHfGFuzM
-	 JOTecv9qMEEvoqwcbQ==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.1.105] ([37.4.248.43]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MAfUe-1syr2z1s5Y-0097Bl; Sat, 09
- Nov 2024 18:37:09 +0100
-Message-ID: <83a0282c-0263-46ba-8eba-78f6a81e7c98@gmx.net>
-Date: Sat, 9 Nov 2024 18:37:05 +0100
+	s=arc-20240116; t=1731229467; c=relaxed/simple;
+	bh=9D76VTSvQj4qIs157AAY7CHs1PwRQ61N7EvhyoBYfm8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Tfpk5yvWM73he6Sc5DpmNkuCJ1f8HM9ntUqOJyr4+1cgSjG3mDUTHvh5cViRTJSxkN6oap2kDZ+Tyw4k8InUjNkWqR/2EsrbcaSWJ+9SfcUNg20EsY/M8gnVvnCut+6jIV2ZHLKJxkru9CpBliohdk8qpVdIHnqZ3zNiK5uzAn4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=csie.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.208.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=csie.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-2fb49510250so28244491fa.0;
+        Sun, 10 Nov 2024 01:04:24 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731229462; x=1731834262;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :reply-to:in-reply-to:references:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=0wtpfkEmN9TnpSt9kWyIfHjD/NJzBYrneyOwbFIleHc=;
+        b=r5NVKANtZ/sQnhIkV4HIRzrgGT/s9EEwYYPCVkzBodf3/Ejy1FR9J0gMTUgjBC3OOA
+         fCxeYLf/k3OaY0fzQ696JV+HX1L1KOdxR96yeXqy80hHt2oThuL+BnEt7QeEDE6qnsLU
+         pCFTB+lwmve0eetEwl6zmQCY/sSE0JLW75DvCkaOCbfgOHr74YtG+x65FkzkLlPZvCI8
+         wWkGIMKUaJmUnnYU20v1LC305f3BN8fVbU73nXGxjMEiTp9AvTpGUuE9xEHZ35kWZeIH
+         SbWT6Vykb/Rodkb3e9nu2YnSjUFtR+B1k5WNhsbuJK3jgJSZPUEh0+ZkTYL8cL+8Dz0v
+         Z55Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUYfGNiLu/W/O2A3TkOcB3sSYK0gW1Lfze8ghEChskoJkdL7VZ/vrmkvEkmxfLOZgb0ZywrQYMBD/0=@vger.kernel.org, AJvYcCWLg7vvr7m8dTOd9vCJRo+ePVZfMNIWu+I+b/FM+gj93W1WJr7R5YFaqrri8mGyacud1wpHwUld@vger.kernel.org
+X-Gm-Message-State: AOJu0YxFkHiO8ON0xjRa912yYTaoLM7BKNGLYYwZ8wJ6ElNEiF9a1EJF
+	S/JkmaV/MGL3jW/lnRojyaJ3SntSFnpsx2VOQPgWEYp8RGHU6MsUI9pcvC2s
+X-Google-Smtp-Source: AGHT+IFy4pePmfOdy8XCKaGA/w6XuoOWaHpoYfYYfApg7WYXGMPzjOzUsZ0zb7HM5KSpcv2jZdHOEw==
+X-Received: by 2002:a2e:a887:0:b0:2fb:6277:71d0 with SMTP id 38308e7fff4ca-2ff20280dadmr39523951fa.22.1731229461932;
+        Sun, 10 Nov 2024 01:04:21 -0800 (PST)
+Received: from mail-lj1-f170.google.com (mail-lj1-f170.google.com. [209.85.208.170])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-2ff17991a30sm12890061fa.87.2024.11.10.01.04.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 10 Nov 2024 01:04:20 -0800 (PST)
+Received: by mail-lj1-f170.google.com with SMTP id 38308e7fff4ca-2fb5111747cso29510741fa.2;
+        Sun, 10 Nov 2024 01:04:20 -0800 (PST)
+X-Forwarded-Encrypted: i=1; AJvYcCURsHAOV+Yak/dFc16lWtiPWCMvLgYqsf/Lbi9/D60WDmWF6S72qpdvjEWNxY8080XvMaMdCmN1Pvg=@vger.kernel.org, AJvYcCUydZnaPAxmw5LwZYfY+yc+ME06/O0Mf2T1pZjsOv2b9R9vcN5WO2AoJRjx5FkHNdbeDoGdKVz0@vger.kernel.org
+X-Received: by 2002:a2e:a552:0:b0:2f7:58bc:f497 with SMTP id
+ 38308e7fff4ca-2ff202e1810mr39484121fa.28.1731229460191; Sun, 10 Nov 2024
+ 01:04:20 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V5 2/9] dmaengine: bcm2835-dma: add suspend/resume pm
- support
-To: Russell King <linux@armlinux.org.uk>, Lukas Wunner <lukas@wunner.de>,
- Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui
- <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
- Vinod Koul <vkoul@kernel.org>
-Cc: Peter Robinson <pbrobinson@gmail.com>, "Ivan T . Ivanov"
- <iivanov@suse.de>, linux-arm-kernel@lists.infradead.org,
- Ulf Hansson <ulf.hansson@linaro.org>, kernel-list@raspberrypi.com,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Minas Harutyunyan <hminas@synopsys.com>,
- bcm-kernel-feedback-list@broadcom.com, dmaengine@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
-References: <20241025103621.4780-1-wahrenst@gmx.net>
- <20241025103621.4780-3-wahrenst@gmx.net>
-Content-Language: en-US
-From: Stefan Wahren <wahrenst@gmx.net>
-In-Reply-To: <20241025103621.4780-3-wahrenst@gmx.net>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+References: <20241107014240.24669-1-andre.przywara@arm.com>
+In-Reply-To: <20241107014240.24669-1-andre.przywara@arm.com>
+Reply-To: wens@csie.org
+From: Chen-Yu Tsai <wens@csie.org>
+Date: Sun, 10 Nov 2024 17:04:08 +0800
+X-Gmail-Original-Message-ID: <CAGb2v64HUp4Xwgc3fw1fMVTBQFV2kHSVbs7=XBufzJpQ9hkuzg@mail.gmail.com>
+Message-ID: <CAGb2v64HUp4Xwgc3fw1fMVTBQFV2kHSVbs7=XBufzJpQ9hkuzg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sunxi-mmc: Fix A100 compatible description
+To: Andre Przywara <andre.przywara@arm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jernej Skrabec <jernej.skrabec@gmail.com>, 
+	Samuel Holland <samuel@sholland.org>, linux-mmc@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev, 
+	Yangtao Li <tiny.windzz@gmail.com>, Cody Eksal <masterr3c0rd@epochal.quest>, 
+	Parthiban <parthiban@linumiz.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:hN71PDERMZiyLGnEBo4kzNeGRlc5kNE3RE8MVnKiOzxG8c1bGzU
- +go8AsrMPQugllh1JPxfyvkavCbZpNtALQi2JaZW1jrV1lYo03gLh0t/tS2SoAI/bDQKmW3
- DdKWANT5sJm8Gyt2TuMUt0QEHrnmeqU1KGb145iQVlIVG9pddn+PPicibpIXDhYA/O8yDiK
- cBnHsrnKR37Xz1+5GPWRg==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:LUbR2To7WhQ=;ZEsSZRvxT7/lz0VEiqxCjoC1+0h
- 4KFN2gZhUGHQpVKGN1Ks1Xos/+D2k6uhiF9v01JDs3Ov9unVOR632WPrldf3A9pauhU+nr9eh
- t1OexOzAH+JCIotdNQMlIgiV+FDmuX0e/9yfkUDfGdgIRnuy8WPZoz8bzKdNn6y802PS54gTt
- zcBmmTAmQq9OlkUe9TvwaNNeMighOIhiyHLy8SjkHopw9Vf8r1Hof1kLQDhiwMmqs7MLlpswa
- h1YrV1nSPYepF3MGZ15disZWtKE8PGqN5CyMDBdqJ2yQArP7LzmGRAnGt0Xl3r8mwA2gtlxLl
- E32MnPLxNhkz9tcJJ1lQx07TvdKdDj79ynm6i3UTT0S3xq0bMIlttlaeTupwFSCeeLLr45QcZ
- /LBriAnID8R3VJAQT8Ht7AUvVRpregZLNbsEm548eoYsFdU3x+U9gU/WTduEc1/lH8fU9yTBe
- r+qd1sXRlSfyv7Z4WDeQU/stPDdrb3aP3vJGZQhBvyP/9kaxbhMerh7+IuyeeymwzlyvXQL/A
- fesWLW4tVgsQPRT1/hmUWKKQ37BJUxuQEUGK/RjHMLTRKNpZlj7/3pHYtvU4fNQ+DnvJbhilT
- X8C8HxTA8k4ycQ7Mjfr2luOKquBPkSb51qOMSPjsSV0qMylqklOuV1EELzklXBmvvv084jMG9
- AyBk8NFSm21Ufuf8Tpo6UnkXPGn1Z7blB0/7NlCKUtoODr0QSGQVbejSyCYHtZWO0SyzutvS+
- KEyMeLACCXnnjZi0bbEcD1jiY0EzuDwkjchooLE2Pf9FkRKb4EpHKNN2u2u5ZpTQiyp9lia/1
- TpE8gtz3MKLj90BbMY8wUeX88aFWG1/c3XndRfKf5MtTCB70gQgpcZzolQXygHmDOQNRI4YSN
- KwmuxcrdGUltKdMouqKebAH44mwJsXnokO/1BB2xkJYgre0YAPudawPQl
 
-Am 25.10.24 um 12:36 schrieb Stefan Wahren:
-> bcm2835-dma provides the service to others, so it should
-> suspend late and resume early.
+On Thu, Nov 7, 2024 at 9:43=E2=80=AFAM Andre Przywara <andre.przywara@arm.c=
+om> wrote:
 >
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> It turns out that the Allwinner A100/A133 SoC only supports 8K DMA
+> blocks (13 bits wide), for both the SD/SDIO and eMMC instances.
+> And while this alone would make a trivial fix, the H616 falls back to
+> the A100 compatible string, so we have to now match the H616 compatible
+> string explicitly against the description advertising 64K DMA blocks.
 
-Since there wasn't any feedback for this patch, i want to send a gentle
-ping ...
+Would be nice to know how this was discovered, and how the correct size
+was determined. As far as I could find, the A133 user manual says its
+64K.
 
-Regards
+ChenYu
 
+> As the A100 is now compatible with the D1 description, let the A100
+> compatible string point to that block instead, and introduce an explicit
+> match against the H616 string, pointing to the old description.
+> Also remove the redundant setting of clk_delays to NULL on the way.
+>
+> Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Andre Przywara <andre.przywara@arm.com>
 > ---
->   drivers/dma/bcm2835-dma.c | 30 ++++++++++++++++++++++++++++++
->   1 file changed, 30 insertions(+)
+>  drivers/mmc/host/sunxi-mmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
-> index e1b92b4d7b05..647dda9f3376 100644
-> --- a/drivers/dma/bcm2835-dma.c
-> +++ b/drivers/dma/bcm2835-dma.c
-> @@ -875,6 +875,35 @@ static struct dma_chan *bcm2835_dma_xlate(struct of=
-_phandle_args *spec,
->   	return chan;
->   }
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index d3bd0ac99ec46..e0ab5fd635e6c 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1191,10 +1191,9 @@ static const struct sunxi_mmc_cfg sun50i_a64_emmc_=
+cfg =3D {
+>         .needs_new_timings =3D true,
+>  };
 >
-> +static int bcm2835_dma_suspend_late(struct device *dev)
-> +{
-> +	struct bcm2835_dmadev *od =3D dev_get_drvdata(dev);
-> +	struct bcm2835_chan *c, *next;
-> +
-> +	list_for_each_entry_safe(c, next, &od->ddev.channels,
-> +				 vc.chan.device_node) {
-> +		void __iomem *chan_base =3D c->chan_base;
-> +
-> +		if (readl(chan_base + BCM2835_DMA_ADDR)) {
-> +			dev_warn(dev, "Suspend is prevented by chan %d\n",
-> +				 c->ch);
-> +			return -EBUSY;
-> +		}
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static int bcm2835_dma_resume_early(struct device *dev)
-> +{
-> +	return 0;
-> +}
-> +
-> +static const struct dev_pm_ops bcm2835_dma_pm_ops =3D {
-> +	SET_LATE_SYSTEM_SLEEP_PM_OPS(bcm2835_dma_suspend_late,
-> +				     bcm2835_dma_resume_early)
-> +};
-> +
->   static int bcm2835_dma_probe(struct platform_device *pdev)
->   {
->   	struct bcm2835_dmadev *od;
-> @@ -1033,6 +1062,7 @@ static struct platform_driver bcm2835_dma_driver =
-=3D {
->   	.driver =3D {
->   		.name =3D "bcm2835-dma",
->   		.of_match_table =3D of_match_ptr(bcm2835_dma_of_match),
-> +		.pm =3D pm_ptr(&bcm2835_dma_pm_ops),
->   	},
->   };
->
+> -static const struct sunxi_mmc_cfg sun50i_a100_cfg =3D {
+> +static const struct sunxi_mmc_cfg sun50i_h616_cfg =3D {
+>         .idma_des_size_bits =3D 16,
+>         .idma_des_shift =3D 2,
+> -       .clk_delays =3D NULL,
+>         .can_calibrate =3D true,
+>         .mask_data0 =3D true,
+>         .needs_new_timings =3D true,
+> @@ -1217,8 +1216,9 @@ static const struct of_device_id sunxi_mmc_of_match=
+[] =3D {
+>         { .compatible =3D "allwinner,sun20i-d1-mmc", .data =3D &sun20i_d1=
+_cfg },
+>         { .compatible =3D "allwinner,sun50i-a64-mmc", .data =3D &sun50i_a=
+64_cfg },
+>         { .compatible =3D "allwinner,sun50i-a64-emmc", .data =3D &sun50i_=
+a64_emmc_cfg },
+> -       { .compatible =3D "allwinner,sun50i-a100-mmc", .data =3D &sun50i_=
+a100_cfg },
+> +       { .compatible =3D "allwinner,sun50i-a100-mmc", .data =3D &sun20i_=
+d1_cfg },
+>         { .compatible =3D "allwinner,sun50i-a100-emmc", .data =3D &sun50i=
+_a100_emmc_cfg },
+> +       { .compatible =3D "allwinner,sun50i-h616-mmc", .data =3D &sun50i_=
+h616_cfg },
+>         { /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
 > --
-> 2.34.1
+> 2.46.2
 >
