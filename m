@@ -1,53 +1,42 @@
 Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id BA418482DD;
-	Mon, 11 Nov 2024 01:30:46 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6976F85C5E;
+	Mon, 11 Nov 2024 01:30:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731288650; cv=none; b=jWS/8H6vs4XFNAgJDbpbZgI/yTD3M492kkvCI56qtULqnk59a5AIFRQmLsv3sCmymvZqCwW1FhRIkEbjqaB2/7dWxKuOp2/R8Rm2G249Hxqm6Whg1OfTAq561wcht8utZfxg6T/3sS1JZnXbo4wxb8cDmprG3MVi/BGXuTY5GMc=
+	t=1731288652; cv=none; b=UsTCOnh9fC8djPl2o7eiUv06yYtQFbcOZBPtLi9Y9jDTC4PtMrJo/gB2PllnFiuy68YWv3Mgbzqi8FLYN8mq0vt/Ts+AUOzN1DXrm65sVV2BqVBQ00t2+r2nlFQtMwbmuObivEnPI/IkP40ebt4r4ArqUwBphKvJThTtPjE5h2I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731288650; c=relaxed/simple;
-	bh=Yitza08W5XYTvZe1J/EwMesDT4epJexlDkl8ospyV9I=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kS9RzAMUqGRgz6BgKybNeszzktmp1hJ9Hekp4gC65gcX97jn+MFP2niIvRBQmFPBGIWwt2kSohVND3CvPKCqmptAAzJefsweU9K+J35kZFsJdEVp9jXDDu4R5Yh32Eq+PlqizFW8gaol0msQKIMrUkRL5AgHjvkucuDLpPoE59o=
+	s=arc-20240116; t=1731288652; c=relaxed/simple;
+	bh=MSgyfh8JQ8IhWBVSCbM3Kve8T1LhHCLog5V9N7pHy1Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=LiI/wz1TLPXDPRNk34ozjoBYOEM6kGSPWQuEE6AphbNG5ookS5Y+pK5vYoSaUrBdLwh5Lpk1HG89rKeKe8p6UYyfccmyzCFT2ijexEnk0+R1R9y1iIBOWNlUdPgxo3mNAnFXxzOEtNBnri+xO49O/gkRta080nAQWyXNiinLqTc=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 0E61113D5;
-	Sun, 10 Nov 2024 17:31:16 -0800 (PST)
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id D6E6E1CDD;
+	Sun, 10 Nov 2024 17:31:19 -0800 (PST)
 Received: from localhost.localdomain (usa-sjc-mx-foss1.foss.arm.com [172.31.20.19])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id DFB6E3F66E;
-	Sun, 10 Nov 2024 17:30:42 -0800 (PST)
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 4C5003F66E;
+	Sun, 10 Nov 2024 17:30:48 -0800 (PST)
 From: Andre Przywara <andre.przywara@arm.com>
 To: Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
 	Chen-Yu Tsai <wens@csie.org>,
 	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>
+	Samuel Holland <samuel@sholland.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>
 Cc: devicetree@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	linux-sunxi@lists.linux.dev,
 	linux-kernel@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org,
-	Wim Van Sebroeck <wim@linux-watchdog.org>,
-	Guenter Roeck <linux@roeck-us.net>,
-	linux-watchdog@vger.kernel.org,
-	Gregory CLEMENT <gregory.clement@bootlin.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	linux-i2c@vger.kernel.org,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	linux-phy@lists.infradead.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	linux-usb@vger.kernel.org,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	linux-rtc@vger.kernel.org
-Subject: [PATCH 00/14] arm64: dts: allwinner: Add basic Allwinner A523 support
-Date: Mon, 11 Nov 2024 01:30:19 +0000
-Message-ID: <20241111013033.22793-1-andre.przywara@arm.com>
+	linux-mmc@vger.kernel.org
+Subject: [PATCH 02/14] dt-bindings: mmc: sunxi: add compatible strings for Allwinner A523
+Date: Mon, 11 Nov 2024 01:30:21 +0000
+Message-ID: <20241111013033.22793-3-andre.przywara@arm.com>
 X-Mailer: git-send-email 2.46.2
+In-Reply-To: <20241111013033.22793-1-andre.przywara@arm.com>
+References: <20241111013033.22793-1-andre.przywara@arm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -56,100 +45,42 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hi,
+The Allwinner A523 uses the same MMC IP as the D1.
 
-this series adds basic DT support for the Allwinner A523 SoC, plus the
-Avaota-A1 router board using the T527 package variant of that SoC.[1]
-Functionality-wise it relies on the pinctrl[2] and clock[3] support
-series, though there is no direct code dependency series to this series
-(apart from the respective binding patches in the two series').
+Introduce the new specific compatible strings, and use them with
+fallbacks to the D1 strings.
 
-Most of the patches add DT binding documentation for the most basic
-peripherals, the vast majority of them actually being already supported,
-courtesy of identical IP being used. This includes MMC and USB 2.0, so
-with the above mentioned clock and pinctrl support this gives an already
-somewhat usable mainline support for this new SoC family.
-The watchdog is not completely compatible, but is an easy addition, so
-this bit is included in here as well.
+Also it turned out that the A100 is not compatible to the H616, instead
+it is the same as the D1. For compatibility we cannot change the fallback
+chain, but any drivers are from now on supposed to match on the H616
+string directly. Mark this fallback chain as deprecated, to avoid new
+users to be added.
 
-The A523 features 8 Arm Cortex-A55 cores, organised in two clusters,
-clocked separately, with different OPP limits, in some kind of
-little/LITTLE configuration. The GPU is a Arm Mali G57 MC01, and the chip
-also features a single PCIe 2.1 lane, sharing a PHY with some USB 3.1
-controller - which means only one of the two can be used.
-The rest of the SoC is the usual soup of multimedia SoC IP, with eDP
-support and two Gigabit Ethernet MACs among the highlights.
+Signed-off-by: Andre Przywara <andre.przywara@arm.com>
+---
+ .../devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml    | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-The main feature is patch 11/14, which adds the SoC .dtsi. This for now
-is limited to the parts that are supported and could be tested. At the
-moment there is no PSCI firmware, even the TF-A port from the BSP does
-not seem to work for me. That's why the secondary cores have been omitted
-for now, among other instances of some IP that I couldn't test yet.
-I plan to add them in one of the next revisions.
-
-The last patch adds basic support for the Avaota-A1 router board,
-designed by YuzukiHD, with some boards now built by Pine64.
-
-The mainline firmware side in general is somewhat lacking still: I have
-basic U-Boot support working (including MMC and USB), although still
-without DRAM support. This is for now covered by some binary blob found
-in the (otherwise Open Source) Syterkit firmware, which also provides
-the BSP versions of TF-A and the required (RISC-V) management core
-firmware. Fortunately we have indications that DRAM support is not that
-tricky, as the IP blocks are very similar to already supported, and dev
-boards are on their way to the right people.
-
-Meanwhile I would like people to have a look at those DT bits here. Please
-compare them to the available user manual, and test them if you have access
-to hardware.
-
-Based on v6.12-rc1.
-I pushed a branch with all the three series combined here:
-https://github.com/apritzel/linux/commits/a523-v1/
-
-Cheers,
-Andre
-
-[1] https://linux-sunxi.org/A523#Family_of_sun55iw3
-[2] https://lore.kernel.org/linux-sunxi/20241111005750.13071-1-andre.przywara@arm.com/T/#t
-[3] https://lore.kernel.org/linux-sunxi/20241111004722.10130-1-andre.przywara@arm.com/T/#t
-
-Andre Przywara (14):
-  dt-bindings: mmc: sunxi: Simplify compatible string listing
-  dt-bindings: mmc: sunxi: add compatible strings for Allwinner A523
-  dt-bindings: watchdog: sunxi: add Allwinner A523 compatible string
-  watchdog: sunxi_wdt: Add support for Allwinner A523
-  dt-bindings: i2c: mv64xxx: Add Allwinner A523 compatible string
-  dt-bindings: irq: sun7i-nmi: document the Allwinner A523 NMI
-    controller
-  dt-bindings: phy: document Allwinner A523 USB-2.0 PHY
-  dt-bindings: usb: sunxi-musb: add Allwinner A523 compatible string
-  dt-bindings: usb: add A523 compatible string for EHCI and OCHI
-  dt-bindings: rtc: sun6i: Add Allwinner A523 support
-  arm64: dts: allwinner: Add Allwinner A523 .dtsi file
-  dt-bindings: vendor-prefixes: Add YuzukiHD name
-  dt-bindings: arm: sunxi: Add Avaota A1 board
-  arm64: dts: allwinner: a523: add Avaota-A1 router support
-
- .../devicetree/bindings/arm/sunxi.yaml        |   5 +
- .../bindings/i2c/marvell,mv64xxx-i2c.yaml     |   1 +
- .../allwinner,sun7i-a20-sc-nmi.yaml           |   1 +
- .../bindings/mmc/allwinner,sun4i-a10-mmc.yaml |  40 +-
- .../phy/allwinner,sun50i-a64-usb-phy.yaml     |  10 +-
- .../bindings/rtc/allwinner,sun6i-a31-rtc.yaml |   4 +-
- .../usb/allwinner,sun4i-a10-musb.yaml         |   1 +
- .../devicetree/bindings/usb/generic-ehci.yaml |   1 +
- .../devicetree/bindings/usb/generic-ohci.yaml |   1 +
- .../devicetree/bindings/vendor-prefixes.yaml  |   2 +
- .../watchdog/allwinner,sun4i-a10-wdt.yaml     |   2 +
- arch/arm64/boot/dts/allwinner/Makefile        |   1 +
- .../arm64/boot/dts/allwinner/sun55i-a523.dtsi | 386 ++++++++++++++++++
- .../dts/allwinner/sun55i-t527-avaota-a1.dts   | 311 ++++++++++++++
- drivers/watchdog/sunxi_wdt.c                  |  11 +
- 15 files changed, 751 insertions(+), 26 deletions(-)
- create mode 100644 arch/arm64/boot/dts/allwinner/sun55i-a523.dtsi
- create mode 100644 arch/arm64/boot/dts/allwinner/sun55i-t527-avaota-a1.dts
-
+diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
+index 8e4c77b7e4ab9..40b83af02c3f9 100644
+--- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
++++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
+@@ -50,10 +50,14 @@ properties:
+           - enum:
+               - allwinner,sun20i-d1-emmc
+               - allwinner,sun50i-h616-emmc
++              - allwinner,sun55i-a523-emmc
+           - const: allwinner,sun50i-a100-emmc
+-      - items:
++      - items:  # deprecated fallback chain
+           - const: allwinner,sun50i-h616-mmc
+           - const: allwinner,sun50i-a100-mmc
++      - items:
++          - const: allwinner,sun55i-a523-mmc
++          - const: allwinner,sun20i-d1-mmc
+ 
+   reg:
+     maxItems: 1
 -- 
 2.46.2
 
