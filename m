@@ -1,50 +1,50 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.16])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7B3216CD1D;
-	Mon, 11 Nov 2024 08:58:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2BA1149C4D
+	for <linux-mmc@vger.kernel.org>; Mon, 11 Nov 2024 10:07:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731315497; cv=none; b=pieBTaqnRXl0g2u6GV5bWXByfcPJQzVrEwWzz4p82hAMYOROgEL6TO2J6CG2weiRElJ3yjmJnmO3aNB+PynoWe3waVv322pzH2H1/E7P37PQZ+997CnCjVQHfk7rTdZmjMVPCYFFgl+nh5gfqsI9pQvT7AzoFhMNj8ND9QYBdHw=
+	t=1731319646; cv=none; b=m1yJKPKU6tXXv4RAAAfOyWb3dURnRyEa9/ilh0ih4cNJEUUqL5KvGXVCpjd4B3qKdINJNvOjnDaRfT0LNfjc+Ryoxa2oZ0R96dB2CV6D1HvbSBs0M4MW1bgvtjpQYoOeaCmBWR6A7DmMuBEHL9BCotDhKRdnXMxZfpzQHGU7FwY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731315497; c=relaxed/simple;
-	bh=FjLbHsVcjXYxleIwuWfg8xqDXhVTODDJ9HddDk5h+Ts=;
+	s=arc-20240116; t=1731319646; c=relaxed/simple;
+	bh=rsuVNb4JS0GNp6LTKxtvVJqNM4I+2tAMMxLfBibTzPg=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=vC0slesn0RVOcXVRquKJcqE+3BQIErki+SKgNR6ToaUjkANS4Wm6BEysw8Yx69JJzd5eseLrlmPGT2oFhH3or6mRAdSu1rDS0fk6fAKAqqL9r0fXmwFuc9Rtl7I6WF1XTGQbzygLXcxnqtpFFqp/wrkK9idoEeqRfSY78YzahW0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=C4Ah/gO3; arc=none smtp.client-ip=198.175.65.16
+	 In-Reply-To:Content-Type; b=fKZVnz5tQqgPVQrTOXFgHXe/dUM7gCFDAgrpUmMcWbyA8302qpuSATmd/fhD36eVy8XwT0plxZ4opplXfkdslNH95snCAdzhJl3sTcyIOhF6T8Azs5Z1xP0/7uvCP8QONw4YeUr+UqVHkANIpkFtOoeZ0oNFL4kF3V11MBkJ/cU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=DrQohBQ3; arc=none smtp.client-ip=192.198.163.16
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="C4Ah/gO3"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="DrQohBQ3"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1731315496; x=1762851496;
+  t=1731319645; x=1762855645;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=FjLbHsVcjXYxleIwuWfg8xqDXhVTODDJ9HddDk5h+Ts=;
-  b=C4Ah/gO3y+ssKAdYwkY6eDZZB5/ryMaEuUjEf7T91cZwqAcyVDrzug5p
-   MUrOIQoL6wjL04cBZOGRhorLAIQ7UJi0qdiD+HaEhwjzNyps+devhZFOd
-   K2mFYEIOifUSjvbQlLrQUa9ojcExwMErVeb1NcooWrBmDcYn6BcfMjmcb
-   GlKR4n6A3mYvbHdWdx9xyD0ftkLWKlB67wdAbRxBS3ZwlC+f/D+BxdpLr
-   gBnzadTTeKkOl1mC1dxC6ZMAWO+zPNlLIcT1jiMgOIhJLPxgwb2Y0QiJQ
-   mbhzn1Y/KQV5ZBaXWcxBGN959HLpfqt5wtwNkyzEKq9D0+8VBw42cY05K
+  bh=rsuVNb4JS0GNp6LTKxtvVJqNM4I+2tAMMxLfBibTzPg=;
+  b=DrQohBQ3JRrEaK7SvjAzu2gD8D3eXx2rH0I7PhL3Xm+JlkQ2vCS/xw52
+   lMDHpZU1aA3ejhhvKGX8LpeyDBoMXTZqQs0NjSqUPbX9238yvkRyYx/nd
+   wsW5KGLcMfWBOMedsUv1qPkNbT+Ss83S9KzBBxUoq+VjpgVRWxMV4crw9
+   xjCNFb3AWP1QsP7Zh82zHZ2bCgnouEF4vNw8U0ndd5RXjjKQ7WDWc+4Tg
+   beWNZaIRnLgqlvBbdqBWCo/z5GnCLQ5EPBP/6TZqWyXhOibHinUOvTdaf
+   ppH8nqvaeV5dvLBGSg+zG0EkIqrjoWtjNu1wBePsslZJuEjbc9SWtDqM7
    A==;
-X-CSE-ConnectionGUID: HtNuvXgETgicxWa4yzzqRg==
-X-CSE-MsgGUID: 9cFjWmVpTdOKkgCZJXWrrg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11222"; a="31273169"
-X-IronPort-AV: E=Sophos;i="6.11,199,1725346800"; 
-   d="scan'208";a="31273169"
-Received: from fmviesa005.fm.intel.com ([10.60.135.145])
-  by orvoesa108.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 00:58:15 -0800
-X-CSE-ConnectionGUID: O1RNeuezT1Goik8uRad5ag==
-X-CSE-MsgGUID: RFD2WFcnRl2eUS7HhopbAA==
+X-CSE-ConnectionGUID: NlznV6X6TACzHlnz0eKrCA==
+X-CSE-MsgGUID: ZFksBH+XTJiwMfrnFzDklg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11252"; a="18740330"
+X-IronPort-AV: E=Sophos;i="6.12,144,1728975600"; 
+   d="scan'208";a="18740330"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 02:07:22 -0800
+X-CSE-ConnectionGUID: M3RAqvQiQcWURXuk0papmw==
+X-CSE-MsgGUID: JytltEGgQQ+6z+NeXd6f/w==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.12,144,1728975600"; 
-   d="scan'208";a="91341505"
+   d="scan'208";a="117774116"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
-  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 00:58:08 -0800
-Message-ID: <8b415442-283a-4fc8-ad0d-fbd8892d2ba2@intel.com>
-Date: Mon, 11 Nov 2024 10:58:05 +0200
+  by smtpauth.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 02:07:20 -0800
+Message-ID: <22b456ed-6465-4090-84d8-448a695d80a7@intel.com>
+Date: Mon, 11 Nov 2024 12:07:17 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,94 +52,124 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V1 3/3] mmc: sdhci-msm: Limit HS mode frequency to 37.5MHz
-To: Sarthak Garg <quic_sartgarg@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
- quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
- quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com, kernel@quicinc.com
-References: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
- <20241107080505.29244-4-quic_sartgarg@quicinc.com>
+Subject: Re: [PATCH v2] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
+ Vexia Edu Atla 10 tablet
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+References: <20241107100048.11661-1-hdegoede@redhat.com>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241107080505.29244-4-quic_sartgarg@quicinc.com>
+In-Reply-To: <20241107100048.11661-1-hdegoede@redhat.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 7/11/24 10:05, Sarthak Garg wrote:
-> For Qualcomm SoCs with level shifter delays are seen on receivers data
-> path due to latency added by level shifter.
+On 7/11/24 12:00, Hans de Goede wrote:
+> The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
+> Andalucía region has no ACPI fwnode associated with the SDHCI controller
+> for its microsd-slot and thus has no ACPI GPIO resource info.
 > 
-> To bring these delays in normal range and avoid CMD CRC errors
-> reduce frequency for HS mode SD cards to 37.5MHz for targets which has
-> level shifter.
+> This causes the following error to be logged and the slot to not work:
+> [   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpio
 > 
-> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> Add a DMI quirk table for providing gpiod_lookup_tables with manually
+> provided CD GPIO info and use this DMI table to provide the CD GPIO info
+> on this tablet. This fixes the microsd-slot not working.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
+> Changes in v2:
+> - Make sdhci_pci_dmi_cd_gpio_overrides static const instead of just const
+> - Drop duplicate #include <linux/dmi.h> (already there at the end)
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 38 +++++++++++++++++++++++++++++++
+>  1 file changed, 38 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 16325c21de52..5e1dc06c4707 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -138,6 +138,8 @@
->  /* Max load for eMMC Vdd-io supply */
->  #define MMC_VQMMC_MAX_LOAD_UA	325000
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index ed45ed0bdafd..9c2bce5e88d9 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/io.h>
+>  #include <linux/iopoll.h>
+>  #include <linux/gpio.h>
+> +#include <linux/gpio/machine.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/debugfs.h>
+> @@ -2054,6 +2055,29 @@ static const struct dev_pm_ops sdhci_pci_pm_ops = {
+>   *                                                                           *
+>  \*****************************************************************************/
 >  
-> +#define LEVEL_SHIFTER_HIGH_SPEED_FREQ	37500000
+> +/* DMI quirks for devices with missing or broken CD GPIO info */
+> +static struct gpiod_lookup_table vexia_edu_atla10_cd_gpios = {
+> +	.dev_id = "0000:00:12.0",
+> +	.table = {
+> +		GPIO_LOOKUP("INT33FC:00", 38, "cd", GPIO_ACTIVE_HIGH),
+> +		{ }
+> +	},
+> +};
 > +
->  #define msm_host_readl(msm_host, host, offset) \
->  	msm_host->var_ops->msm_readl_relaxed(host, offset)
->  
-> @@ -287,6 +289,7 @@ struct sdhci_msm_host {
->  	bool use_cdr;
->  	u32 transfer_mode;
->  	bool updated_ddr_cfg;
-> +	bool uses_level_shifter;
->  	bool uses_tassadar_dll;
->  	u32 dll_config;
->  	u32 ddr_config;
-> @@ -366,6 +369,11 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->  
->  	mult = msm_get_clock_mult_for_bus_mode(host);
->  	desired_rate = clock * mult;
-> +
-> +	if (curr_ios.timing == MMC_TIMING_SD_HS && desired_rate == 50000000
+> +static const struct dmi_system_id sdhci_pci_dmi_cd_gpio_overrides[] = {
+> +	{
+> +		/* Vexia Edu Atla 10 tablet 9V version */
+> +		.matches = {
+> +			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
+> +			DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
+> +			/* Above strings are too generic, also match on BIOS date */
+> +			DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
+> +		},
+> +		.driver_data = (void *)&vexia_edu_atla10_cd_gpios,
+> +	},
+> +	{ }
+> +};
 
-Wouldn't desired_rate > LEVEL_SHIFTER_HIGH_SPEED_FREQ make more sense?
-
-> +		&& msm_host->uses_level_shifter)
-> +		desired_rate = LEVEL_SHIFTER_HIGH_SPEED_FREQ;
-
-As checkpatch says:
-
-CHECK: Logical continuations should be on the previous line
-#46: FILE: drivers/mmc/host/sdhci-msm.c:374:
-+       if (curr_ios.timing == MMC_TIMING_SD_HS && desired_rate == 50000000
-+               && msm_host->uses_level_shifter)
-
-total: 0 errors, 0 warnings, 1 checks, 34 lines checked
-
+Can this be in struct sdhci_pci_fixes?
 
 > +
->  	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
->  	if (rc) {
->  		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> @@ -2372,6 +2380,8 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+>  static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
+>  	int slotno)
+> @@ -2129,8 +2153,22 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  		device_init_wakeup(&pdev->dev, true);
 >  
->  	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
->  
-> +	msm_host->uses_level_shifter = of_property_read_bool(node, "qcom,use-level-shifter");
+>  	if (slot->cd_idx >= 0) {
+> +		struct gpiod_lookup_table *cd_gpio_lookup_table = NULL;
+> +		const struct dmi_system_id *dmi_id;
 > +
->  	if (of_device_is_compatible(node, "qcom,msm8916-sdhci"))
->  		host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
->  }
+> +		dmi_id = dmi_first_match(sdhci_pci_dmi_cd_gpio_overrides);
+> +		if (dmi_id)
+> +			cd_gpio_lookup_table = dmi_id->driver_data;
+> +
+> +		if (cd_gpio_lookup_table)
+> +			gpiod_add_lookup_table(cd_gpio_lookup_table);
+
+If we were probing asynchronously, gpiod_add_lookup_table() and
+gpiod_remove_lookup_table() could race.
+
+I'd suggest making vexia_edu_atla10_cd_gpios const and kmemdup'ing
+and freeing it.
+
+Add helper functions something like:
+
+		cd_gpio_lookup_table = sdhci_pci_add_gpio_lookup_table(chip);
+		if (IS_ERR(cd_gpio_lookup_table)) {
+			etc
+		}
+
+		...
+
+		sdhci_pci_remove_gpio_lookup_table(cd_gpio_lookup_table);
+
+> +
+>  		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+>  					   slot->cd_override_level, 0);
+> +
+> +		if (cd_gpio_lookup_table)
+> +			gpiod_remove_lookup_table(cd_gpio_lookup_table);
+> +
+>  		if (ret && ret != -EPROBE_DEFER)
+>  			ret = mmc_gpiod_request_cd(host->mmc, NULL,
+>  						   slot->cd_idx,
 
