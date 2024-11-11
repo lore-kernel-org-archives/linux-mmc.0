@@ -1,137 +1,188 @@
-Received: from mailout1.samsung.com (mailout1.samsung.com [203.254.224.24])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.8])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 225B7146D55
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Nov 2024 08:06:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.24
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6120820B22;
+	Mon, 11 Nov 2024 08:11:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.8
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731312402; cv=none; b=sSvI6L40A2VZ719Ey+iwSwOXzFXus8YvtT6/RL7aUsOECEEh0WxQXA5p/JPW3rq/DGIIsfn0iYXNgfh735E1E/w6dTwx3MvXKJJrfgc+/+BfJ3uyuGv5UEf+UyCzv4jnB3E0gbtBjM/vtQDU1DrWEik16GS4NNkU2N+rNj8DXT4=
+	t=1731312699; cv=none; b=Vk1arJYaNGO39x1vYcDzRRE/A+okmrJStiGChC9Q5Jio5k/EnLkOgyUfu43GfvbgkZS1l3iskf4oXtySKdq2sKti9o7WdFZstsr5X6QuLgCWnTGtKD7I+44WFhsgva55pLxHPkTdGFBAq+8c8sxfrUQI84X6Br5XvTWbof+wGDs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731312402; c=relaxed/simple;
-	bh=aeNy0DuaGFVuo5k3rdPwp5gTQmzmV5Dq7lW1ynUi704=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:Message-ID:MIME-Version:
-	 Content-Type:References; b=AufByDAHQC1CxsIJH9isH9lOWsLiVzZZY/Z4g1VkS8/emftZsHncVF2hDwIeu6J4CL1UA7w+FOhN4jbdr4+ZaRWG8JAAz2EzkiuEP6kGjMmmyyQbrbaH2qvf2dTFUaXMf60KxeDfXIIYGhJtqb+tYmR9xIb4aria8d6lJf5LV60=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=leevOo8C; arc=none smtp.client-ip=203.254.224.24
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
+	s=arc-20240116; t=1731312699; c=relaxed/simple;
+	bh=6jJwGR0OZ353UMWH14ChXmJeglWJyzDkeiqIAP0cUxY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=tMw2m52GPp8v1IculZBjsQIDI5zL18Z1jqHbqn7OWuG15SOVVS8BLdBpeWTkrYXigVGCJd9thMeFLTpgP3lHzm5LJs8Xh3l9V+rPNKRQlSI324yVe0vsowZEYQ1bEkRg588lKZOpGYyegB/D/eLQszJt+henF9fehJvWI3CnXUY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=SCjNU1ay; arc=none smtp.client-ip=192.198.163.8
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="leevOo8C"
-Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
-	by mailout1.samsung.com (KnoxPortal) with ESMTP id 20241111080636epoutp015644b57129a41aafdd55a6f8e617e992~G23O7Gkgp0967509675epoutp01B
-	for <linux-mmc@vger.kernel.org>; Mon, 11 Nov 2024 08:06:36 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20241111080636epoutp015644b57129a41aafdd55a6f8e617e992~G23O7Gkgp0967509675epoutp01B
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-	s=mail20170921; t=1731312396;
-	bh=flaFcwJald/rkzEebnMVSU7S4KyWdSWn/CtTa251TKc=;
-	h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
-	b=leevOo8CuAeO9cRQe9jIF9VlSyahNDl+/VO0ZF6bU9OCLHyzmzs6EImPdHqBQAyog
-	 Th/U+EWSIgyNiukOXsl5oTh1GSqr7r8sC8msrelrpi60etjMkZ7tiDVE8AxeS2nh+L
-	 6Idab4N0RgEtwgQuKuvud1XccmH+F9zSU1JfUaP8=
-Received: from epsnrtp4.localdomain (unknown [182.195.42.165]) by
-	epcas1p1.samsung.com (KnoxPortal) with ESMTP id
-	20241111080636epcas1p1698e5d20a7b2dd1c7bc0620447c8c980~G23OeZJRk0041500415epcas1p1Q;
-	Mon, 11 Nov 2024 08:06:36 +0000 (GMT)
-Received: from epsmgec1p1.samsung.com (unknown [182.195.38.242]) by
-	epsnrtp4.localdomain (Postfix) with ESMTP id 4Xn2F809Z9z4x9QM; Mon, 11 Nov
-	2024 08:06:36 +0000 (GMT)
-Received: from epcas1p1.samsung.com ( [182.195.41.45]) by
-	epsmgec1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
-	E9.A9.08588.B0BB1376; Mon, 11 Nov 2024 17:06:35 +0900 (KST)
-Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
-	epcas1p3.samsung.com (KnoxPortal) with ESMTPA id
-	20241111080635epcas1p3ac1df881f67c49f065302c231615cff8~G23NoMxmY1583615836epcas1p3T;
-	Mon, 11 Nov 2024 08:06:35 +0000 (GMT)
-Received: from epsmgms1p2new.samsung.com (unknown [182.195.42.42]) by
-	epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
-	20241111080635epsmtrp2f41731602b10d7b9c74f5c07c1148d19~G23Nm0WG42626226262epsmtrp2T;
-	Mon, 11 Nov 2024 08:06:35 +0000 (GMT)
-X-AuditID: b6c32a33-a57ff7000000218c-33-6731bb0b1d6b
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-	epsmgms1p2new.samsung.com (Symantec Messaging Gateway) with SMTP id
-	20.FF.08227.B0BB1376; Mon, 11 Nov 2024 17:06:35 +0900 (KST)
-Received: from jangsubyi03 (unknown [10.253.100.135]) by
-	epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
-	20241111080635epsmtip2f4d5f0e8fb0f8b80910bca86b6ce6156~G23NcSIX92026320263epsmtip2h;
-	Mon, 11 Nov 2024 08:06:35 +0000 (GMT)
-From: "Jangsub Yi" <jangsub.yi@samsung.com>
-To: "'Christoph Hellwig'" <hch@infradead.org>
-Cc: <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-	<linux-kernel@vger.kernel.org>, <junwoo80.lee@samsung.com>,
-	<sh8267.baek@samsung.com>, <wkon.kim@samsung.com>
-In-Reply-To: <ZyzYnw0PgpyViFdf@infradead.org>
-Subject: RE: [PATCH] mmc: Add config_host callback to set a mmc queue
-Date: Mon, 11 Nov 2024 17:06:35 +0900
-Message-ID: <0b2e01db3410$a05f41c0$e11dc540$@samsung.com>
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="SCjNU1ay"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1731312697; x=1762848697;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=6jJwGR0OZ353UMWH14ChXmJeglWJyzDkeiqIAP0cUxY=;
+  b=SCjNU1ayPbVReZIuXu7ZpVuIUDOjXAskh1qxYFFwuJEbxv6nN/k0VCfN
+   zXIEnbUhlMyTR0pwnFt1b7Gik4H0U4ZZSbGP44pm0yFGCZvGdJ54NbQLS
+   Blb212lZ1B0C4zUI32oCvXSDWbzLW0Z5cT/Q15NsEjozy82q0gftMplub
+   KKakVAjfvaacBQfUMLQhss8DzDPvp3Ai6vhzAXqfmcbAdsVh037FEtpiQ
+   +bT51dvOlFtx1SmlX1rQdbVL1PDz05wlz4lm7SNZX/gsau8kibf1YvDjd
+   DaxbqkDSrfIrxuOMYSUZknO9zljtiY2zrKZyORagCW7ugneeHNfzjeCFR
+   g==;
+X-CSE-ConnectionGUID: LJhndhDzQKCII51nSIuXMA==
+X-CSE-MsgGUID: z2zq8dCOQq6+nCqHkWD+7Q==
+X-IronPort-AV: E=McAfee;i="6700,10204,11252"; a="48627845"
+X-IronPort-AV: E=Sophos;i="6.12,144,1728975600"; 
+   d="scan'208";a="48627845"
+Received: from orviesa006.jf.intel.com ([10.64.159.146])
+  by fmvoesa102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 00:11:36 -0800
+X-CSE-ConnectionGUID: 9UvOKwY+QPaH+OraXzd1iw==
+X-CSE-MsgGUID: E5WE2EC5QXKGuu4eJJefXw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,144,1728975600"; 
+   d="scan'208";a="86962891"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
+  by orviesa006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Nov 2024 00:11:31 -0800
+Message-ID: <48df0005-34d1-4bac-9517-16dc6018aa85@intel.com>
+Date: Mon, 11 Nov 2024 10:11:27 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="Windows-1252"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Ensure SD card power isn't ON when
+ card removed
+To: Sarthak Garg <quic_sartgarg@quicinc.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-kernel@vger.kernel.org, quic_cang@quicinc.com,
+ quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+ quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+ quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+ quic_bhaskarv@quicinc.com, quic_narepall@quicinc.com, kernel@quicinc.com
+References: <20241105093513.16800-1-quic_sartgarg@quicinc.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241105093513.16800-1-quic_sartgarg@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQH5zy9MrK58XqKdq8KPmuKMwnV7FAHbhmEtAfVDB6QBL9uedwJ0SwfJsjjaF+A=
-Content-Language: ko
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprMJsWRmVeSWpSXmKPExsWy7bCmri73bsN0g0+zLSxOT1jEZLHrbzOT
-	xeVdc9gsjvzvZ7S4duYEq8XxteEWmy99Y3Fg99i8QsvjzrU9bB59W1YxenzeJBfAEpVtk5Ga
-	mJJapJCal5yfkpmXbqvkHRzvHG9qZmCoa2hpYa6kkJeYm2qr5OIToOuWmQO0X0mhLDGnFCgU
-	kFhcrKRvZ1OUX1qSqpCRX1xiq5RakJJTYFagV5yYW1yal66Xl1piZWhgYGQKVJiQnfHu/xO2
-	gjNsFZe7TjM1MM5m7WLk5JAQMJH41HeOrYuRi0NIYAejxMnDc9khnE+MEqemtrJCON8YJVo2
-	3mGDaTnyfj5Uy15Gif1LzjFBOK8YJc7d3gdWxSagLXHk23IwW0RAV+LswheMIEXMAmsYJdov
-	bWQESXACJZbv388MYgsLuEo8WnYBLM4ioCrxek032IW8ApYS9xo/QNmCEidnPmEBsZkFDCTe
-	n5vPDGHLS2x/O4cZ4jwFiZ9Pl7FCLPaTmPfhCztEjYjE7M42ZpAjJAR6OSR69t5ih2hwkXg2
-	4xxUs7DEq+NboOJSEp/f7YX6uVjiwLNHLBB2jcSOhq9MELa9RHNrMxvEAj6Jd197gBZzAMV5
-	JTrahCBMFYmtfWowEzfumQa1yUNi6rkr7BMYFWch+WwWks9mIflsFpIPFjCyrGIUSy0ozk1P
-	TTYsMITHd3J+7iZGcOrUMt7BeHn+P71DjEwcjIcYJTiYlUR4Nfz104V4UxIrq1KL8uOLSnNS
-	iw8xmgIDeyKzlGhyPjB555XEG5pYGpiYGZlYGFsamymJ8565UpYqJJCeWJKanZpakFoE08fE
-	wSnVwJT8LnZHbvp5NwORt+t/uR+/WdIbLODMlcIss12sqdLstOfx/652So+bNP7UP1jc93pd
-	ufOfb4s2WK7eXi3W+n3r57933rz4d+EuC99+8a2P8vc8TIl1EU+XdRL9se7ChWXu3zcKZCwq
-	/XF430//TWs4r7lNyw5ina2YU8WxcMfs8EPPZTuXXOJWY29Z+H3l6Sa2adqnH5gHTbkXG/f2
-	k8h0tUUXtSQNpPdubvzRL1juPUOQMXO5gMKprdHf8x27W3t281ybqvWia8KjvU4TjoVmPvg8
-	YdWiU+f37pP3zz7r8/LGuZWz/fdfS6/59WHSNLa6WtWCKMcP19kjN39ctYOxbubcPZkv5dIu
-	GlkpXDQUUmIpzkg01GIuKk4EAK5IQdImBAAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrNLMWRmVeSWpSXmKPExsWy7bCSvC73bsN0g22vxC1OT1jEZLHrbzOT
-	xeVdc9gsjvzvZ7S4duYEq8XxteEWmy99Y3Fg99i8QsvjzrU9bB59W1YxenzeJBfAEsVlk5Ka
-	k1mWWqRvl8CV8e7/E7aCM2wVl7tOMzUwzmbtYuTkkBAwkTjyfj4biC0ksJtRonGGQRcjB1Bc
-	SuLDpxQIU1ji8OHiLkYuoIoXjBItp14zgpSzCWhLHPm2HKxVREBX4uzCF4wgRcwCmxgl3v5b
-	zwzR8ZtRYvfC+2BVnEBVy/fvZwaxhQVcJR4tuwA2iUVAVeL1mm6wg3gFLCXuNX6AsgUlTs58
-	wgJiMwsYSZw7tJ8NwpaX2P52DjPEAwoSP58uY4W4wk9i3ocv7BA1IhKzO9uYJzAKz0IyahaS
-	UbOQjJqFpGUBI8sqRsnUguLc9NxiwwKjvNRyveLE3OLSvHS95PzcTYzg+NHS2sG4Z9UHvUOM
-	TByMhxglOJiVRHg1/PXThXhTEiurUovy44tKc1KLDzFKc7AoifN+e92bIiSQnliSmp2aWpBa
-	BJNl4uCUamBiuB+yI2dq3h53zZPqDd2/LRJzzVIX2izTtLPWEXy/f8Ziqwf7TskaLZ3n88Vo
-	944OtfWHQp+byhpUri3fWGTO8Jd136sWzfkXV4anWJ0r+Sih+vLx303rzSL5bVjcJcLv3w59
-	E6L0d5fLcu3r3ycErjq/mbUjbekNo/W5kRUzX/DtOzm9IrDO+BGzy7LsyXz/XzhylzhsE6rY
-	8H+t+MmdLCe+Bm87yf2p/Vpi2ItVWryJD2dISKgLZr22+Lr9REq064/7+xM2Om5dF/fw6+Qn
-	P/dvnlhync3TzW9PA2MwX9W8vlcdzUmuyT/aH55Vf7jJhs/jmsGNxOgtzvfS1wtFhAiqzXnt
-	zZT9MSJx6kUpJZbijERDLeai4kQA2ZbDXQ4DAAA=
-X-CMS-MailID: 20241111080635epcas1p3ac1df881f67c49f065302c231615cff8
-X-Msg-Generator: CA
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20241106051403epcas1p29e983006930bd7b8364b1a1f858ad21c
-References: <CGME20241106051403epcas1p29e983006930bd7b8364b1a1f858ad21c@epcas1p2.samsung.com>
-	<20241106051347.969-1-jangsub.yi@samsung.com>
-	<ZyxelKdmXXiSVL1g@infradead.org>
-	<000001db30f4$4a749770$df5dc650$@samsung.com>
-	<ZyzYnw0PgpyViFdf@infradead.org>
 
-> On Thu, Nov 07, 2024 at 06:06:11PM +0900, ??? wrote:
-> > Currently, there is no way to configure a request queue on the host
-side.
-> > Although there are various exported symbols in
-> > kernel/block/blk-settings.c that can be used to configure a request
-> > queue, users cannot utilize them as needed.
+On 5/11/24 11:35, Sarthak Garg wrote:
+> Make sure SD card power is not enabled when the card is
+> being removed.
+> On multi-card tray designs, the same card-tray would be used for SD
+> card and SIM cards. If SD card is placed at the outermost location
+> in the tray, then SIM card may come in contact with SD card power-
+> supply while removing the tray. It may result in SIM damage.
+> So in sdhci_msm_handle_pwr_irq we skip the BUS_ON request when the
+> SD card is removed to be in consistent with the MGPI hardware fix to
+> prevent any damage to the SIM card in case of mult-card tray designs.
+> But we need to have a similar check in sdhci_msm_check_power_status to
+> be in consistent with the sdhci_msm_handle_pwr_irq function.
+> Also reset host->pwr and POWER_CONTROL register accordingly since we
+> are not turning ON the power actually.
 > 
-> If you actually provided a user and didn't just try to offend the kernel
-> maintainers by submitting dead code I could explain you in detail why
-> youre idea is flawed.
+> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 20 ++++++++++++++++++--
+>  1 file changed, 18 insertions(+), 2 deletions(-)
 > 
-If a machine uses both SD and MMC simultaneously, how should timeouts be set
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e00208535bd1..443526c56194 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -1516,10 +1516,11 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> -	bool done = false;
+> -	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
+>  	const struct sdhci_msm_offset *msm_offset =
+>  					msm_host->offset;
+> +	struct mmc_host *mmc = host->mmc;
+> +	bool done = false;
+> +	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
 
-for each? And if different timeout values need to be used depending on the
-manufacturer of the SD card, how can this be implemented? I believe it is
-not appropriate to make such changes in the core code. There needs to be
-a way to configure these settings per host.
+Please don't make unrelated changes.  The above 2 lines
+have not changed and should stay where they are.  If you
+feel the need to make cosmetic changes, make a separate
+patch.
+
+>  
+>  	pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
+>  			mmc_hostname(host->mmc), __func__, req_type,
+> @@ -1573,6 +1574,13 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+>  				 "%s: pwr_irq for req: (%d) timed out\n",
+>  				 mmc_hostname(host->mmc), req_type);
+>  	}
+> +
+> +	if (mmc->card && mmc->ops && mmc->ops->get_cd &&
+> +		!mmc->ops->get_cd(mmc) && (req_type & REQ_BUS_ON)) {
+
+It would be tidier to have a separate fn for calling get_cd()
+e.g.
+
+static int get_cd(struct sdhci_host *host)
+{
+	struct mmc_host *mmc = host->mmc;
+
+	return mmc->card && mmc->ops && mmc->ops->get_cd ? mmc->ops->get_cd(mmc) : 0;
+}
+
+and put the other check first to avoid calling ->get_cd() for no reason:
+
+	if ((req_type & REQ_BUS_ON) && !get_cd(host)) {
+		...
+
+
+> +		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> +		host->pwr = 0;
+> +	}
+> +
+>  	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
+>  			__func__, req_type);
+>  }
+> @@ -1631,6 +1639,14 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  		udelay(10);
+>  	}
+>  
+> +	if (mmc->card && mmc->ops && mmc->ops->get_cd &&
+> +		!mmc->ops->get_cd(mmc) && irq_status & CORE_PWRCTL_BUS_ON) {
+
+If the card is being removed, how do you know mmc->ops
+won't disappear under you?  You need READ_ONCE otherwise
+e.g.
+
+	const struct mmc_host_ops *mmc_ops = READ_ONCE(mmc->ops);
+
+so like:
+
+static int get_cd(struct sdhci_host *host)
+{
+	struct mmc_host *mmc = host->mmc;
+	const struct mmc_host_ops *mmc_ops = READ_ONCE(mmc->ops);
+
+	return mmc->card && mmc_ops && mmc_ops->get_cd ? mmc_ops->get_cd(mmc) : 0;
+}
+
+
+And again, put the other check first e.g.
+
+	if ((irq_status & CORE_PWRCTL_BUS_ON) && !get_cd(host)) {
+		...
+
+
+> +		irq_ack = CORE_PWRCTL_BUS_FAIL;
+> +		msm_host_writel(msm_host, irq_ack, host,
+> +				msm_offset->core_pwrctl_ctl);
+> +		return;
+> +	}
+> +
+>  	/* Handle BUS ON/OFF*/
+>  	if (irq_status & CORE_PWRCTL_BUS_ON) {
+>  		pwr_state = REQ_BUS_ON;
 
