@@ -1,91 +1,110 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B70C88468;
-	Mon, 11 Nov 2024 20:35:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 657D6217476
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 18:44:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731357332; cv=none; b=DFDcrbc2moFDu23Hks6zckeIZz6afI0dXM7Dkb0FXtnfGvZ5Hhav9nJ6xHPp4j9Ks/A879SqIqOXtb91nk8H7ipXBgxyMCms73ps/DfxM5dM6qXwmARGL52zToPVwQx0nGx/WfZtTnnwgMcmwd9/GyABXDFgOPqY+zQeOnVBLjc=
+	t=1731437049; cv=none; b=qC7aKJhgRoXylWVqXC/jZPcwCEoyX/1hNlIcO157Kg3u24/Crf2EvU3vKcFnVFPGNRVgkCV8yTh83O02067rKL7RTHyYiNl6yDbFGnDT7o5ZcwWThJJQ24b0t+MplKxGgVDvUNb6bqyibFgwSxpghZlgdXAWutSvWfpCmkKGC0M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731357332; c=relaxed/simple;
-	bh=SJUgRBJXeIpWfWL2A4lNrZPzQEHHoj5ONqPuy+LPT+4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=R+CLCrH99CbNMZY/PDwYM1xtcjIc4ocY+ABTO0Pi1pUYJXpb+vJoJ7438tsswNXBm18omOLRuSJUoiCVNkJsP7xGCSSSpJDSiMHdOR4uIoU4RAnqhZkwtXCnoMUK0862FczrWb2/z7QmtkZmcmtvg//0729japIxzhGnlFeMoPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ndAD+MHf; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731437049; c=relaxed/simple;
+	bh=0t8sOmwlSOH1o1/6C/3qT6TANEqdqVcQQAurabnYBIo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=fk8gDQVosddSBaV981g5K9ZuqOG5yzZe7xN+tnkXA4Rl3922ALgRNAMeWUdv10Id+HFXRl/UsDAAI0Bei6xUf3qBBUlMw3D8CLSA/XrllRvVXxTp3rUIyMZDA1SK1v+kQWROVlUr3gwngslovQYlMbDx2gfSGOFgpnNWxu4iQRU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lNauDYvu; arc=none smtp.client-ip=209.85.128.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ndAD+MHf"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2BAA2C4CECF;
-	Mon, 11 Nov 2024 20:35:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731357332;
-	bh=SJUgRBJXeIpWfWL2A4lNrZPzQEHHoj5ONqPuy+LPT+4=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ndAD+MHfRHSBbSaHozkXBdf6jY7I3VmQYwnQ9Bn5xXa225IXvEFASbd+rbiNMSOXn
-	 GtZiESzjmpXWGAZcdHnwWDCI0GHXIaEWrxdVB/CsXwDZSmi1pxNElsF3CQ/MX+l1/c
-	 3F+d/QeC6Q3tJ1nnYbDvCV5qx23sN/NSwjyT/SfB+gb6kTl/EMWoXYGrkBQa33fOIz
-	 5y+MUihepVu1V+YIssK8efiVws9X+LlEfkQbl8JFWx2CxX2zR2/6jXWzAsLRnt56iM
-	 ZctfPOOSwNh+Hl+CC8JiYrJpcC09di75QC7vIgkJbxfV1ccHExI1RFw4Z15X+7Nqea
-	 DcX01mW8LZKtA==
-Date: Mon, 11 Nov 2024 20:35:27 +0000
-From: Conor Dooley <conor@kernel.org>
-To: Andre Przywara <andre.przywara@arm.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Chen-Yu Tsai <wens@csie.org>,
-	Jernej Skrabec <jernej.skrabec@gmail.com>,
-	Samuel Holland <samuel@sholland.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 02/14] dt-bindings: mmc: sunxi: add compatible strings
- for Allwinner A523
-Message-ID: <20241111-enviable-caucasian-0bde133c7ddf@spud>
-References: <20241111013033.22793-1-andre.przywara@arm.com>
- <20241111013033.22793-3-andre.przywara@arm.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lNauDYvu"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6e3cdbc25a0so60321197b3.2
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 10:44:08 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1731437047; x=1732041847; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=tmlE3ocaQwI744iyoEKb0Mlm8+PfDOrWjfONTieFefw=;
+        b=lNauDYvua2CJ0TotVd6/rHjgkprqjGgJDyWlfthLZpZDRxPNSfMuA15TFxeSVhYBk3
+         VLTx9qs+otuM9ZN0gRGrOKfxTqzqFkN7dL/1zuJ7ID1IYoUm7isx4xYVxhOpN0Hi/3Qn
+         w1yq1Wg8hiqM5l8/ubMHLa4Th8NL7FTcfI8lAwF4sF2GZ5Y9JpNTPmSzNhbaswcbYukq
+         Wg3kR1k9QQcNqkZ74Qd+V/f5hjbFDMnJrMepS94liYs2spuDhGJSx0FaSuO5pNFCg2b1
+         Kfua03yYL/Vwxt3rAl2pP42XLZOA9itxKXA2dFEz7ax2/XeD4mZXSmDu7hoBxQeSHCUC
+         9BAQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1731437047; x=1732041847;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tmlE3ocaQwI744iyoEKb0Mlm8+PfDOrWjfONTieFefw=;
+        b=qcoMeoDVGXfPJG7ro5NYi8nqaARbABudK+ykVC7lQsbnyv181jNiWBofJEz7vX0tyS
+         4FjESZSYHaSAcZqRelQ1hN8HfUS8jhUh7fCbc2SHqsZH8o/eBe2J6U9dOzDvbtQGL+yG
+         qaeAPXxg6+wjPRkpOgV11O+/wGFCuIGe+wExKsRGV8sw9LB1/bihG9WNiFT6hxlCESQG
+         jj1lFervUUb73IwGfSsuCbViMgdWVlDUMfFQ+E8T3Ggt4ALoho0kclGAw1gdZTozHXc/
+         imUXeQAZYbRoraHvo8vBWXYXJFEHpM8lszQzR3ynXjvhyo9AAdZvzI0CzRMCdtI39av1
+         AOEQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWZPpLtMjRiYAkbkkJESzLZR8t/WnLSpYHD4TO66V5VTleBSrwMxoH3YQMeLK6bKiCg2UM36kZUYM4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyPa05XPTcp+S3ut8cupASQbpB8Hu9oK6MxpzawYffr1VQmUB6e
+	HkEyiJL2E4tqNJKYh/jGyHwZKG0vGrGgTNYySlZLx+g1sVOS9mNTs1KZ4iUFPVLYAKtWOdXRPpR
+	3+5+9nYhlrfuuJUkIViNE+IIkAW2GdP3Atkx6Jw==
+X-Google-Smtp-Source: AGHT+IFh1YSNqJrUyWFeYrySj4puHrtEywEG7OT7qiq8/ABi/USrmbl/pgQBx5lmlFIuZUP2a34Q11eyh0jgarstWi0=
+X-Received: by 2002:a05:690c:998b:b0:6e3:3508:e32e with SMTP id
+ 00721157ae682-6eaddfb97a5mr155863057b3.41.1731437047401; Tue, 12 Nov 2024
+ 10:44:07 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="P2tUd8xoLv9YzkgD"
-Content-Disposition: inline
-In-Reply-To: <20241111013033.22793-3-andre.przywara@arm.com>
+References: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
+In-Reply-To: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 12 Nov 2024 19:43:31 +0100
+Message-ID: <CAPDyKFq9uQcDsMpYXKe=8f7AGybZaUsvMVU9RDxv2SZpYwbdgA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] mmc: host: sdhci-esdhc-imx: implement emmc
+ hardware reset
+To: Josua Mayer <josua@solid-run.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Haibo Chen <haibo.chen@nxp.com>, 
+	Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
+	Mikhail Anikin <mikhail.anikin@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
+	Yazan Shhady <yazan.shhady@solid-run.com>, Rabeeh Khoury <rabeeh@solid-run.com>, imx@lists.linux.dev, 
+	linux-mmc@vger.kernel.org, s32@nxp.com, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+
+On Fri, 1 Nov 2024 at 12:42, Josua Mayer <josua@solid-run.com> wrote:
+>
+> Signed-off-by: Josua Mayer <josua@solid-run.com>
+> ---
+> Changes in v3:
+> - reused existing control register definition from sdhci-esdhc.h
+>   (Reported-by: Bough Chen <haibo.chen@nxp.com>)
+> - placed both control register mask definitions next to each other
+> - fixed timeout write register name
+> - Link to v2: https://lore.kernel.org/r/20241030-imx-emmc-reset-v2-0-b3a823393974@solid-run.com
+>
+> Changes in v2:
+> - replaced udelay with usleep_range
+>   (Reported-by: Adrian Hunter <adrian.hunter@intel.com>)
+> - added comments for delay values
+>   (Reported-by: Peng Fan <peng.fan@nxp.com>)
+> - delay values based on JEDEC Standard No. 84-B51, 6.15.10 H/W Reset Operation,
+>   on page 159
+>   (Thanks to Bough Chen <haibo.chen@nxp.com>)
+> - added a second patch demonstrating a cosmetic issue revealed by first
+>   patch - it bothered me during development but is not important
+> - Link to v1: https://lore.kernel.org/r/20241027-imx-emmc-reset-v1-1-d5d0c672864a@solid-run.com
+>
+> ---
+> Josua Mayer (2):
+>       mmc: host: sdhci-esdhc-imx: implement emmc hardware reset
+>       mmc: host: sdhci-esdhc-imx: update esdhc sysctl dtocv bitmask
+>
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 19 ++++++++++++++++---
+>  1 file changed, 16 insertions(+), 3 deletions(-)
 
 
---P2tUd8xoLv9YzkgD
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The series applied for next, thanks!
 
-On Mon, Nov 11, 2024 at 01:30:21AM +0000, Andre Przywara wrote:
-> The Allwinner A523 uses the same MMC IP as the D1.
->=20
-> Introduce the new specific compatible strings, and use them with
-> fallbacks to the D1 strings.
->=20
-> Also it turned out that the A100 is not compatible to the H616, instead
-> it is the same as the D1. For compatibility we cannot change the fallback
-> chain, but any drivers are from now on supposed to match on the H616
-> string directly. Mark this fallback chain as deprecated, to avoid new
-> users to be added.
-
-tbh, I think this should be split out into a fix commit of its own.
-
-Split,
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-
-
-
---P2tUd8xoLv9YzkgD
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZzJqjwAKCRB4tDGHoIJi
-0hyMAP9ZGAHS/FCK9zdjUAX2svq725gONsDtrgBRvMElf9rRlwEA+fVjQ2wgl5wW
-kbFO0vy7b481xik4eOPVjVc/KhxN6gw=
-=V6hC
------END PGP SIGNATURE-----
-
---P2tUd8xoLv9YzkgD--
+Kind regards
+Uffe
