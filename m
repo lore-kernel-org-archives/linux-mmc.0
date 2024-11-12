@@ -1,110 +1,111 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 657D6217476
-	for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 18:44:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 40777217F5C
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 18:44:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731437049; cv=none; b=qC7aKJhgRoXylWVqXC/jZPcwCEoyX/1hNlIcO157Kg3u24/Crf2EvU3vKcFnVFPGNRVgkCV8yTh83O02067rKL7RTHyYiNl6yDbFGnDT7o5ZcwWThJJQ24b0t+MplKxGgVDvUNb6bqyibFgwSxpghZlgdXAWutSvWfpCmkKGC0M=
+	t=1731437053; cv=none; b=Gx/MJyB8e4ya1okGSBIs+7VhfMWb5BDxfkgBH9wyWhp6ygozW4LXL9fFdJ9S79YK2HjKF55RGMAT5wCI+nlbEM0r2Gl1DYmXxcebuC1gyBqbYlQR5INZAgNhDbRlEe5uHAtV65ltg6xp0bl85ayNRsIwC/tCHZBblF2AgL6kBCU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731437049; c=relaxed/simple;
-	bh=0t8sOmwlSOH1o1/6C/3qT6TANEqdqVcQQAurabnYBIo=;
+	s=arc-20240116; t=1731437053; c=relaxed/simple;
+	bh=I+FspxCvjXN1d6jAEz7mVDNmvXxhrfS/Nunabzq1yo4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fk8gDQVosddSBaV981g5K9ZuqOG5yzZe7xN+tnkXA4Rl3922ALgRNAMeWUdv10Id+HFXRl/UsDAAI0Bei6xUf3qBBUlMw3D8CLSA/XrllRvVXxTp3rUIyMZDA1SK1v+kQWROVlUr3gwngslovQYlMbDx2gfSGOFgpnNWxu4iQRU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lNauDYvu; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=NnELzAeYskID7t4VWxYRav1VE3H5cEcuKjmsEMSJhGLNRbhpoMDdIr0Qg0oXP3jMl3Lg81V9kmSD87SpvY785TI1AnKvkGCg3LACJpwbiqg9lHNg1/OnPt2TxLbgNueLLCpeGH+vEeYPCrvVnPINoMjaeSwFLimZ/ArdZakeMXk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kUmGUQQj; arc=none smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lNauDYvu"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6e3cdbc25a0so60321197b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 10:44:08 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kUmGUQQj"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-6e9ba45d67fso55970737b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 10:44:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1731437047; x=1732041847; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1731437051; x=1732041851; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=tmlE3ocaQwI744iyoEKb0Mlm8+PfDOrWjfONTieFefw=;
-        b=lNauDYvua2CJ0TotVd6/rHjgkprqjGgJDyWlfthLZpZDRxPNSfMuA15TFxeSVhYBk3
-         VLTx9qs+otuM9ZN0gRGrOKfxTqzqFkN7dL/1zuJ7ID1IYoUm7isx4xYVxhOpN0Hi/3Qn
-         w1yq1Wg8hiqM5l8/ubMHLa4Th8NL7FTcfI8lAwF4sF2GZ5Y9JpNTPmSzNhbaswcbYukq
-         Wg3kR1k9QQcNqkZ74Qd+V/f5hjbFDMnJrMepS94liYs2spuDhGJSx0FaSuO5pNFCg2b1
-         Kfua03yYL/Vwxt3rAl2pP42XLZOA9itxKXA2dFEz7ax2/XeD4mZXSmDu7hoBxQeSHCUC
-         9BAQ==
+        bh=raxppSo1jMcpz5wA1AgpjcgkeRdGGPMkWi2ZmAReokQ=;
+        b=kUmGUQQjLMaEdk2RFniXP2MVtZqGxT8vga6vTmzXE327+Go98UiLDzB5eSo3flSLzH
+         3EAdbaiVaDUOSzYGViO/PM9BRZG9tloXkqb3EUh7luC1gtUX1pcDFxRilOWADOPakARd
+         FSjlxNQceucubmHVf+fBJrdHPlLEcWjyZnNfyN30A7mBS9CZhYqLCSmoFV34kgslNISw
+         Cu9ynpvQrQvzvqE1J6n1sB4clc4SDHhQJ6sCDss2TJ9UUU1n+XtfceDzlvOe0+FP1+/a
+         jOjbQihgHlhqOmsssa3RgIFn7mQEyZ3fI89LYZEtComwaUt139A+XD999vdMFmOmkBzx
+         +KCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731437047; x=1732041847;
+        d=1e100.net; s=20230601; t=1731437051; x=1732041851;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=tmlE3ocaQwI744iyoEKb0Mlm8+PfDOrWjfONTieFefw=;
-        b=qcoMeoDVGXfPJG7ro5NYi8nqaARbABudK+ykVC7lQsbnyv181jNiWBofJEz7vX0tyS
-         4FjESZSYHaSAcZqRelQ1hN8HfUS8jhUh7fCbc2SHqsZH8o/eBe2J6U9dOzDvbtQGL+yG
-         qaeAPXxg6+wjPRkpOgV11O+/wGFCuIGe+wExKsRGV8sw9LB1/bihG9WNiFT6hxlCESQG
-         jj1lFervUUb73IwGfSsuCbViMgdWVlDUMfFQ+E8T3Ggt4ALoho0kclGAw1gdZTozHXc/
-         imUXeQAZYbRoraHvo8vBWXYXJFEHpM8lszQzR3ynXjvhyo9AAdZvzI0CzRMCdtI39av1
-         AOEQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWZPpLtMjRiYAkbkkJESzLZR8t/WnLSpYHD4TO66V5VTleBSrwMxoH3YQMeLK6bKiCg2UM36kZUYM4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyPa05XPTcp+S3ut8cupASQbpB8Hu9oK6MxpzawYffr1VQmUB6e
-	HkEyiJL2E4tqNJKYh/jGyHwZKG0vGrGgTNYySlZLx+g1sVOS9mNTs1KZ4iUFPVLYAKtWOdXRPpR
-	3+5+9nYhlrfuuJUkIViNE+IIkAW2GdP3Atkx6Jw==
-X-Google-Smtp-Source: AGHT+IFh1YSNqJrUyWFeYrySj4puHrtEywEG7OT7qiq8/ABi/USrmbl/pgQBx5lmlFIuZUP2a34Q11eyh0jgarstWi0=
-X-Received: by 2002:a05:690c:998b:b0:6e3:3508:e32e with SMTP id
- 00721157ae682-6eaddfb97a5mr155863057b3.41.1731437047401; Tue, 12 Nov 2024
- 10:44:07 -0800 (PST)
+        bh=raxppSo1jMcpz5wA1AgpjcgkeRdGGPMkWi2ZmAReokQ=;
+        b=YTuzPEyQZYtAPhEsKydlk59rmmivLMFK4cGNyK1UznBSrnVYa0q39VrkMvh601h8qZ
+         GaJQRka6pEmBSGGFBeO24vgfVEpjZ9nBYIY9iEOo0cIkoU7VsmrK+9z9WrMqRm+kvtph
+         G8VMJ+yfLRBua5MV5xclD35UyfjJxDP5yyK24nbaSf9b7N3GAGgSwdpGPAYJBJvKwceO
+         iNcOKCBsv2Itn0UP/Z9p+jiUDjEI0+i1y/VLOMyw+6kDSgdGzuElVMOVKwCoWMv2yZiq
+         VvtneGsXUfZK/duj7SfmaR+mJ++Bfo1CQqFy4injGP5GJSob7k7usZUxLgste4SuyBkC
+         U6LQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUS8MbaRdmklXSru07GDOjX9BTxX218NMzLXxEhLT4Ss5jN3ne4nhJqcMzoeOeVgkiLTd8gsBA8UZc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyBwQibnzVk7Skq20NZjLIY0escxvBpCEdMKRBKRNXdqXmJimbm
+	SCY4OvaNryDmcbPxIFX/E23YqAf1FQ94Fba2wr1IbSlP50KFcj9D6MgahyjuGzpPI7wbCP5FAXe
+	lYLQgnOb0sfPYbABcKwcuwQJ+sk6zyxus1GdtoA==
+X-Google-Smtp-Source: AGHT+IHggGwQBF3hSzjzb92c45ZRJ4m2KowZjmIDRaih1Yr1+njT1vET97p0CVVZ9fc8pdTOaC5cWsqpuqzxPOTvyJ4=
+X-Received: by 2002:a05:690c:6483:b0:6ea:8132:4081 with SMTP id
+ 00721157ae682-6eca4640b4emr44240157b3.3.1731437050114; Tue, 12 Nov 2024
+ 10:44:10 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
-In-Reply-To: <20241101-imx-emmc-reset-v3-0-184965eed476@solid-run.com>
+References: <20241101104416.4954-1-victorshihgli@gmail.com>
+In-Reply-To: <20241101104416.4954-1-victorshihgli@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 12 Nov 2024 19:43:31 +0100
-Message-ID: <CAPDyKFq9uQcDsMpYXKe=8f7AGybZaUsvMVU9RDxv2SZpYwbdgA@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] mmc: host: sdhci-esdhc-imx: implement emmc
- hardware reset
-To: Josua Mayer <josua@solid-run.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Haibo Chen <haibo.chen@nxp.com>, 
-	Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, 
-	Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam <festevam@gmail.com>, 
-	Mikhail Anikin <mikhail.anikin@solid-run.com>, Jon Nettleton <jon@solid-run.com>, 
-	Yazan Shhady <yazan.shhady@solid-run.com>, Rabeeh Khoury <rabeeh@solid-run.com>, imx@lists.linux.dev, 
-	linux-mmc@vger.kernel.org, s32@nxp.com, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org
+Date: Tue, 12 Nov 2024 19:43:34 +0100
+Message-ID: <CAPDyKFq25Y2Ftk+7A-hxEu1dLx2hJeAA7yzrcc7FZkSyjL=B+g@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-uhs2: correction a warning caused by
+ incorrect type in argument
+To: Victor Shih <victorshihgli@gmail.com>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
+	kernel test robot <lkp@intel.com>, Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 1 Nov 2024 at 12:42, Josua Mayer <josua@solid-run.com> wrote:
+On Fri, 1 Nov 2024 at 11:44, Victor Shih <victorshihgli@gmail.com> wrote:
 >
-> Signed-off-by: Josua Mayer <josua@solid-run.com>
-> ---
-> Changes in v3:
-> - reused existing control register definition from sdhci-esdhc.h
->   (Reported-by: Bough Chen <haibo.chen@nxp.com>)
-> - placed both control register mask definitions next to each other
-> - fixed timeout write register name
-> - Link to v2: https://lore.kernel.org/r/20241030-imx-emmc-reset-v2-0-b3a823393974@solid-run.com
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 >
-> Changes in v2:
-> - replaced udelay with usleep_range
->   (Reported-by: Adrian Hunter <adrian.hunter@intel.com>)
-> - added comments for delay values
->   (Reported-by: Peng Fan <peng.fan@nxp.com>)
-> - delay values based on JEDEC Standard No. 84-B51, 6.15.10 H/W Reset Operation,
->   on page 159
->   (Thanks to Bough Chen <haibo.chen@nxp.com>)
-> - added a second patch demonstrating a cosmetic issue revealed by first
->   patch - it bothered me during development but is not important
-> - Link to v1: https://lore.kernel.org/r/20241027-imx-emmc-reset-v1-1-d5d0c672864a@solid-run.com
+> There is a type issue in the argument in the uhs2_dev_cmd()
+> that will generate a warning when building the kernel.
 >
-> ---
-> Josua Mayer (2):
->       mmc: host: sdhci-esdhc-imx: implement emmc hardware reset
->       mmc: host: sdhci-esdhc-imx: update esdhc sysctl dtocv bitmask
->
->  drivers/mmc/host/sdhci-esdhc-imx.c | 19 ++++++++++++++++---
->  1 file changed, 16 insertions(+), 3 deletions(-)
+> Reported-by: kernel test robot <lkp@intel.com>
+> Closes: https://lore.kernel.org/oe-kbuild-all/202410260525.ZUuPhMJz-lkp@intel.com/
+> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-
-The series applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-uhs2.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> index 7f41ca67b069..33a16cf2e656 100644
+> --- a/drivers/mmc/host/sdhci-uhs2.c
+> +++ b/drivers/mmc/host/sdhci-uhs2.c
+> @@ -70,7 +70,7 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
+>
+>  static inline u16 uhs2_dev_cmd(struct mmc_command *cmd)
+>  {
+> -       return be16_to_cpu((__be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
+> +       return be16_to_cpu((__force __be16)cmd->uhs2_cmd->arg) & UHS2_ARG_IOADR_MASK;
+>  }
+>
+>  static inline int mmc_opt_regulator_set_ocr(struct mmc_host *mmc,
+> --
+> 2.25.1
+>
