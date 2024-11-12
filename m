@@ -1,161 +1,124 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E207C219C93
-	for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 18:44:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDAB5219E21
+	for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 18:44:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731437073; cv=none; b=l3Lw+NL1GEhAeLRY6nfiNK7v8i9D96UG6CuTsuwowFQC8g7Ox39dMWA9sJbGVaF3BmJcy3FZG80FCy+41qyxSNHNfuSmZnV64+iShH/UCPWoGC55NzCb1MhzERS3Cj3nO1E1XQvsQn4G+s0Eb0OE8UnVhDhAdKBIMl2GgCDTlOc=
+	t=1731437077; cv=none; b=YwbERUMqCmmYTF5mCquRCcOgYjsZMDvrfCCX+gIDPqyKiIjCZzWO0FNAmMUYWcTs9q8qLhw4Rd5rDq4s5FQMwVmHxCc8T4u9j+OyT3SHW5+sn1TRh7xprGEsYMAbJaBKmNI/4dTbWOAtIwYAxmaMKS1XHgCtHgZvzEuwh0ZNzg0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731437073; c=relaxed/simple;
-	bh=jnzdl+fbVVcTTbZj2P9A5xsyzaZA7Tie8/2XgiKueJk=;
+	s=arc-20240116; t=1731437077; c=relaxed/simple;
+	bh=Oa/YrficsfeyjH0/jTjfnABLWOfA6T78uM65AF9s+o8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=j+jPGpvulqJZYxuI9IPRNoTpuKpZOM967QovYISuU9muuBq7IdYzlI3QFR2E2EnWdVEdbhfjL/TUYDznB+6ofvKwVKPXPjCHlGXyAjfNNb6MyV3U3lEjhBVIxbP3hEedWOj7XRvl6c7ICebPWDqNUfHB80FZNkKbGGmuO6/S28E=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=h39XCgrR; arc=none smtp.client-ip=209.85.128.180
+	 To:Cc:Content-Type; b=JuZL0G+QQi+wmQvtZtKh0ejNJyTI5zFJrDbIg41XZ/e/oPp74Gmy2ResR19915oVmKN1gcamZT+MFY2VKZMFFyO+YRVi/x4wlnQtehXyhMgYk5/Gef0vmMkgKvTKUVI66HrpkXwhjdlCvc2OrfCIDcpFk34BgA24PrHCw7kUQfc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TNZTecwv; arc=none smtp.client-ip=209.85.128.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="h39XCgrR"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6ea339a41f1so51302427b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 10:44:31 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TNZTecwv"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-6ea7c9226bbso59411077b3.3
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Nov 2024 10:44:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1731437071; x=1732041871; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1731437073; x=1732041873; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=tr6REDhXVt1opvineUair86Kv+hNXCwWuTG4wc24Uvg=;
-        b=h39XCgrRThI+G2VlCLMORW6c/AndWOX6SR5PdJ690jPeJ+kumPHQSA76Ev4Zigl8Dl
-         WrnMjfQtZlVMd7SiThDO+MZo7ZbOVrMMgTrRLU33b299A5y0+sD5ksWVf3xFHJxwziBi
-         j5OYBfsjqxPcbRw25zy6zLvdu7Qhak60dUKSF/RBALu7msPUGNqlWo3dDWrS4KgSkbE2
-         MKPMzWaHwPY++dZi8N/eEz2tBZPgeURXlgt55HiA80MZFKXTZJE4SCBhSeuVADZ0t8uv
-         9CPVSZodA+TO9GvXfO0DRVe1N5SmUXkhbBkQR9Qa79zVO6uKxQSH65kbbJvmRa1jtZ2e
-         192g==
+        bh=xGvVgCeLO47x1MsXySaQq6071hjPH/NhHOthZqYhKSQ=;
+        b=TNZTecwvlx2iw0NB+5v5GER1r97bOxENB1eMz5KB28cOyVBciLOVze0vhbmFNskiIt
+         iD/lRXPfodp/5YeLrbpyMMqdOhSkqLdIp80dkqWUST5hc8JwXcCizlA5A9HF3sMMLGQo
+         UanHNml33M3SSmTxkqbFYpfZ5RQd2pe8NrG/bKY6f92RKZ0NrFmnTGu4WtwYXL9ASfAc
+         XVhHDMhDD5YqURN7lFoA8LyFLSeNMOSOeikTz9Zal1LZOFZbBXaW9m3n12Vze65n0Miz
+         m8CyvxWhiaZVQz2fpXkHCwgr0Tz3m+PynHPnL0X292CoDpa2y1+Qj3X/Dpk3hCxPAfLZ
+         QNUQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731437071; x=1732041871;
+        d=1e100.net; s=20230601; t=1731437073; x=1732041873;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=tr6REDhXVt1opvineUair86Kv+hNXCwWuTG4wc24Uvg=;
-        b=joo0qcnPhc08BkUi6EY2rvgIDQH9UUQVjZUf4y8jnF1vRnbXjQz4qdHOZTjmixvsEF
-         IxSHtSqGBnFPDYt6WDmLylEW/AqUwK3hd/dJFYBE4/KpHYY8eFZL9FJcmzqKoRCbbFTZ
-         O93qjbRExXgAgsQYIU7MVW9k7A7avMU5kCix1BxgqvV5svOeJc16p6QvLzussa3+9P2Q
-         vF25IqxluwbisqTaIcd+PSkSDbtnQQyK8nQ9E9WdND5MNK/qZj+OguYQXqynNj2Z/woh
-         TZyyo+7Cn8v9Yf2bvlsMWUzIdfhmVCUVk3cmt3xJP/70yhnpHli8lGHPSXcbyNwlKLWo
-         OVYg==
-X-Forwarded-Encrypted: i=1; AJvYcCUvDHryxY7Y5zhInY8eRrCBi09fv+gq5m3EMMMt4ijAKO/XdOYy5o6IOS4/Fru1VSP0KNQaT1bESxs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz0gJKVad5oIF6FZE4MxxjSPUjbSLe7U/G4OiFekUttHWmX+Ms4
-	rj31eaxciGX+z6Z5REGBJLL+y67zQm4fBb0dRsrsIf+VQpCwQaG5QqcOE/o6SSffnAHArbQyMnj
-	5J2J+ld/edQt5O911Ok4OlOxtU3CXDaq2e44x4Q==
-X-Google-Smtp-Source: AGHT+IH44Q8MD0K4pqUKXUCjf2JqplnFw2dHro4nArL34sMNY7ms7UeoYKZIVy0yhJb2ir9HCSb3HgO2REJ9e9FblRM=
-X-Received: by 2002:a05:690c:7090:b0:6ea:5da9:2f7c with SMTP id
- 00721157ae682-6ecb32cb110mr719877b3.12.1731437071000; Tue, 12 Nov 2024
- 10:44:31 -0800 (PST)
+        bh=xGvVgCeLO47x1MsXySaQq6071hjPH/NhHOthZqYhKSQ=;
+        b=keEsj5t8XrkUPMQrNyX+9hWt2JZKuQ4Vbtpu8AiVsX611IVKdBNK+9mLwz9UyuCS1r
+         GknIbpAhf3NVimv5cCx/N/VEuLZnKIh4nAwzC8ABhI+mLTutEKckTFTYhPajAkFC6EZj
+         kW2O6BYthKVDx405kNsNJ8VoUyp7EY/G9QqxYsQ+vXdtigNlQfkk3SDEV7teKbXCBnGx
+         6hoCpqWspIpqJyV1G1LdOxxNNc9+WfmVnsnEEYaO6uQ7ZNufdz8JNVFZYy1xFMVwktDh
+         TGX230QFK4MoMzLK/eW7FKjHbbTaTenEnc6CpqbYX4FcA5QBUes+K0pKAhV5REhl0jN+
+         NtsA==
+X-Forwarded-Encrypted: i=1; AJvYcCUUJIEZjegU7bzXeJQSCTdwB8CELvKfeAb5pLaXYPKZkJMEX8GQCiT32Cc5egHp3bvNnrLm33/t+0k=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVMloSvBcjuZLZ6vYJ/uVQxNvyFsRoTPEf+vmo/0LSik6YXZe/
+	RVWwKlkilhkuT4C5eRtMSRloImNLCNoAegCIafEVi8ii9U2myNxozrIEjL35z/2m/I8ykpCcRZG
+	D8gsB7zdWAh9qsKt+h37oiUHh5+mjIJqrvzG+FQ==
+X-Google-Smtp-Source: AGHT+IEe8csqC3Pg0F21RvUMA9aG223tYNBFweh8Drp5qTSmfQtunv7apTIfO3K79mr2mEtEH9f9z4XcBwW5aOMunNg=
+X-Received: by 2002:a05:690c:2501:b0:6dd:cdd7:ce49 with SMTP id
+ 00721157ae682-6eca4640ff7mr44651927b3.6.1731437073569; Tue, 12 Nov 2024
+ 10:44:33 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241108130647.8281-1-wahrenst@gmx.net>
-In-Reply-To: <20241108130647.8281-1-wahrenst@gmx.net>
+References: <20241110114700.622372-1-aurelien@aurel32.net>
+In-Reply-To: <20241110114700.622372-1-aurelien@aurel32.net>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 12 Nov 2024 19:43:54 +0100
-Message-ID: <CAPDyKFrKTw16mfmMcnaz08vPJsAsC6KJj_j8j6UcbQif9VK1cA@mail.gmail.com>
-Subject: Re: [PATCH V2] mmc: pwrseq_simple: Handle !RESET_CONTROLLER properly
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Philipp Zabel <p.zabel@pengutronix.de>, Marco Felsch <m.felsch@pengutronix.de>, 
-	Catalin Popescu <catalin.popescu@leica-geosystems.com>, 
-	Florian Fainelli <florian.fainelli@broadcom.com>, linux-arm-kernel@lists.infradead.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 12 Nov 2024 19:43:57 +0100
+Message-ID: <CAPDyKFp4t0zHo_sJ3F7D1atwiPK+e38KbhTfcr76Jv+32yUw6w@mail.gmail.com>
+Subject: Re: [PATCH] Revert "mmc: dw_mmc: Fix IDMAC operation with pages
+ bigger than 4K"
+To: Aurelien Jarno <aurelien@aurel32.net>
+Cc: linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, 
+	Sam Protsenko <semen.protsenko@linaro.org>, 
+	"open list:SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER" <linux-mmc@vger.kernel.org>, Ron Economos <re@w6rz.net>, Adam Green <greena88@gmail.com>, 
+	Emil Renner Berthing <emil.renner.berthing@canonical.com>, stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 8 Nov 2024 at 14:06, Stefan Wahren <wahrenst@gmx.net> wrote:
+On Sun, 10 Nov 2024 at 12:47, Aurelien Jarno <aurelien@aurel32.net> wrote:
 >
-> The recent introduction of reset control in pwrseq_simple introduced
-> a regression for platforms without RESET_CONTROLLER support, because
-> devm_reset_control_get_optional_shared() would return NULL and make all
-> resets no-ops. Instead of enforcing this dependency, rely on this behavior
-> to determine reset support. As a benefit we can get the rid of the
-> use_reset flag.
+> The commit 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages
+> bigger than 4K") increased the max_req_size, even for 4K pages, causing
+> various issues:
+> - Panic booting the kernel/rootfs from an SD card on Rockchip RK3566
+> - Panic booting the kernel/rootfs from an SD card on StarFive JH7100
+> - "swiotlb buffer is full" and data corruption on StarFive JH7110
 >
-> Fixes: 73bf4b7381f7 ("mmc: pwrseq_simple: add support for one reset control")
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> At this stage no fix have been found, so it's probably better to just
+> revert the change.
+>
+> This reverts commit 8396c793ffdf28bb8aee7cfe0891080f8cab7890.
+>
+> Cc: stable@vger.kernel.org
+> Cc: Sam Protsenko <semen.protsenko@linaro.org>
+> Fixes: 8396c793ffdf ("mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K")
+> Closes: https://lore.kernel.org/linux-mmc/614692b4-1dbe-31b8-a34d-cb6db1909bb7@w6rz.net/
+> Closes: https://lore.kernel.org/linux-mmc/CAC8uq=Ppnmv98mpa1CrWLawWoPnu5abtU69v-=G-P7ysATQ2Pw@mail.gmail.com/
+> Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/pwrseq_simple.c | 20 +++++++++++---------
->  1 file changed, 11 insertions(+), 9 deletions(-)
+>  drivers/mmc/host/dw_mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> Changes in V2:
-> - add explaining comment as suggested by Marco Felsch
+> I have posted a patch to fix the issue, but unfortunately it only fixes
+> the JH7110 case:
+> https://lore.kernel.org/linux-mmc/20241020142931.138277-1-aurelien@aurel32.net/
 >
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 24e4e63a5dc8..37cd858df0f4 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -32,7 +32,6 @@ struct mmc_pwrseq_simple {
->         struct clk *ext_clk;
->         struct gpio_descs *reset_gpios;
->         struct reset_control *reset_ctrl;
-> -       bool use_reset;
->  };
->
->  #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
-> @@ -71,7 +70,7 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
->                 pwrseq->clk_enabled = true;
->         }
->
-> -       if (pwrseq->use_reset) {
-> +       if (pwrseq->reset_ctrl) {
->                 reset_control_deassert(pwrseq->reset_ctrl);
->                 reset_control_assert(pwrseq->reset_ctrl);
->         } else
-> @@ -82,7 +81,7 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
->  {
->         struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
->
-> -       if (pwrseq->use_reset)
-> +       if (pwrseq->reset_ctrl)
->                 reset_control_deassert(pwrseq->reset_ctrl);
->         else
->                 mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
-> @@ -95,7 +94,7 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
->  {
->         struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
->
-> -       if (pwrseq->use_reset)
-> +       if (pwrseq->reset_ctrl)
->                 reset_control_assert(pwrseq->reset_ctrl);
->         else
->                 mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
-> @@ -137,15 +136,18 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
->                 return dev_err_probe(dev, PTR_ERR(pwrseq->ext_clk), "external clock not ready\n");
->
->         ngpio = of_count_phandle_with_args(dev->of_node, "reset-gpios", "#gpio-cells");
-> -       if (ngpio == 1)
-> -               pwrseq->use_reset = true;
-> -
-> -       if (pwrseq->use_reset) {
-> +       if (ngpio == 1) {
->                 pwrseq->reset_ctrl = devm_reset_control_get_optional_shared(dev, NULL);
->                 if (IS_ERR(pwrseq->reset_ctrl))
->                         return dev_err_probe(dev, PTR_ERR(pwrseq->reset_ctrl),
->                                              "reset control not ready\n");
-> -       } else {
-> +       }
-> +
-> +       /*
-> +        * Fallback to GPIO based reset control in case of multiple reset lines
-> +        * are specified or the platform doesn't have support for RESET at all.
-> +        */
-> +       if (!pwrseq->reset_ctrl) {
->                 pwrseq->reset_gpios = devm_gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
->                 if (IS_ERR(pwrseq->reset_gpios) &&
->                     PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 41e451235f637..e9f6e4e622901 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2957,8 +2957,8 @@ static int dw_mci_init_slot(struct dw_mci *host)
+>         if (host->use_dma == TRANS_MODE_IDMAC) {
+>                 mmc->max_segs = host->ring_size;
+>                 mmc->max_blk_size = 65535;
+> -               mmc->max_req_size = DW_MCI_DESC_DATA_LENGTH * host->ring_size;
+> -               mmc->max_seg_size = mmc->max_req_size;
+> +               mmc->max_seg_size = 0x1000;
+> +               mmc->max_req_size = mmc->max_seg_size * host->ring_size;
+>                 mmc->max_blk_count = mmc->max_req_size / 512;
+>         } else if (host->use_dma == TRANS_MODE_EDMAC) {
+>                 mmc->max_segs = 64;
 > --
-> 2.34.1
+> 2.45.2
 >
