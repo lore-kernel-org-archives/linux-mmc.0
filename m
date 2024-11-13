@@ -1,35 +1,42 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6C15221CF89;
-	Tue, 12 Nov 2024 22:53:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 904D12AE84;
+	Wed, 13 Nov 2024 22:56:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731451984; cv=none; b=sVVN7ccOvHzjOiWYIAw5iIzML2Etd0k9OlGNlUPpNiwBlKvR64tiwIyEvPu/1fc05L0Hfi8pQ0Au4/z6VBKEqDCeLL22xSUXW0QDuzrBsPAmFMn4eewj0wxqmNrGKI2k+M/hUf2SFDK5rbR980I1X3KhGcLwQuFutEeE8svHYas=
+	t=1731538570; cv=none; b=HOBJW3+j/wKaYFoS+rgG2LXW9LP/lb5lfSpKwIkVgXDuxmvIV2pP1M7IZpklGJzNFLFAeqwB5z2q9HlxSD3KtA47Mw68Lqd0DDF+vvMoi0FC1dCPHbsuuuRo9F4bJ/s32o+7IdBn34h0qOa2F6L1dqFu2o8mXQvInd3wu0ZsO4A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731451984; c=relaxed/simple;
-	bh=yQwt2DsCgJNyhwxurxcyAkIppPnQMY1VaVKG7hi5I50=;
-	h=Content-Type:MIME-Version:Subject:From:Message-Id:Date:References:
-	 In-Reply-To:To:Cc; b=kcNNvOcGg9tgFaxcq7ZU/WB9vjQEFflJtSTfAUn3H1c979nlmkEt5qpOY4bCCZeLqk8Jibdoat2BjTa+5Yp/2+qq+HdOiJsr+xwjcPVjnivTSruTeJ5A1Xk4WLt8Nee0lMZEJFPPfx4ct0yA7xyZ0FpfabSQ9fzITRnxgjC0fws=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=q6y6LtGk; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731538570; c=relaxed/simple;
+	bh=zSA3eE89l1UDfOvFbyzQrw4Ez4fRb4Xk/Y3akNPoOdU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FSSnFILsV5s/vaYJVaiPLjUYZVrN3PvKcHmXjh5XftkmXcLG55uRcMSSyJlSshq/CMDI91Laroki8b4kbNW0qpP5ncGuUbBHf3y9xkx6re6a/1CM3dJfJvDSQhcvoPI/sTRbO6mvJ5HhFBRjog1bqIiuf0e7lDh1XOyw4yVVWxg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hIC8EOFz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="q6y6LtGk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F323AC4CECD;
-	Tue, 12 Nov 2024 22:53:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hIC8EOFz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D03FC4CEC3;
+	Wed, 13 Nov 2024 22:56:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731451984;
-	bh=yQwt2DsCgJNyhwxurxcyAkIppPnQMY1VaVKG7hi5I50=;
-	h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
-	b=q6y6LtGktbgmjw7H7iEjQnUw2HgxVOxdQdc3XvkpzYIwS3B5Bg7247bL18aVlvf6c
-	 HruMzh6Ko1Z6shqY/8X6eMEliFKSNrAGHS4/4Gcijrjs1UEkqkNoEqSTHUaZFrDJEb
-	 gdMrbkSjLDbKB6sAihOeai9Ad4VstoFrf0AAF1cS13kfFvglzDCWVE3PgFXTzsHimE
-	 IVH8dkBDV5m2c3gm2t0Ees/AGJmcOdAt5qLgyZsn1B3WYif5ivyXEdgPMXyqyOvJtb
-	 QbqFFo/TMAivSPSeohmtQmadCT9s+3jD4Qd0eMqU7D/cVZPZxP6YEeSfcQb2sXnRKj
-	 VdxC4cxziwnBA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 70C503809A80;
-	Tue, 12 Nov 2024 22:53:15 +0000 (UTC)
-Content-Type: text/plain; charset="utf-8"
+	s=k20201202; t=1731538570;
+	bh=zSA3eE89l1UDfOvFbyzQrw4Ez4fRb4Xk/Y3akNPoOdU=;
+	h=From:To:Cc:Subject:Date:From;
+	b=hIC8EOFzRvdiuwcpt02lbeyGLdcU+M/3ckOVKJ7PkHww00QpyCXV2bi0iOPEj8SF1
+	 gu3dwwPjN3Ma1x9eIT9j0C33/hIUIMGkZFIU4YfZcEfVC7jfGDk8prDqkg2MxojTSl
+	 btVGiPi1xw+NYdJ6GchvfqS59a6ZIAb1E23WKd1F6bTfaTiXbPxJDqLrKvAVRL8W82
+	 0K2A76YXgV/oLbv3Ym6Zo5s5q6wez6FslsBqVOCssWRYLs97dvDhF+xtckZoWG+4Nh
+	 23oV6zX4Aqyr6SSULs495VniS8SYux1xB4qHoIeuW1Qmw6BHYvzlDeMtMsLxA4jVqQ
+	 Ybxfgj1f9/brA==
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Hu Ziji <huziji@marvell.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: marvell,xenon-sdhci: Simplify Armada 3700 if/then schema
+Date: Wed, 13 Nov 2024 16:56:01 -0600
+Message-ID: <20241113225602.1782573-1-robh@kernel.org>
+X-Mailer: git-send-email 2.45.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -37,44 +44,96 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Subject: Re: [PATCH] mmc: core: Only set maximum DMA segment size if DMA is
- supported
-From: patchwork-bot+linux-riscv@kernel.org
-Message-Id: 
- <173145199424.701548.5612261824540957185.git-patchwork-notify@kernel.org>
-Date: Tue, 12 Nov 2024 22:53:14 +0000
-References: <20240924210123.2288529-1-linux@roeck-us.net>
-In-Reply-To: <20240924210123.2288529-1-linux@roeck-us.net>
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: linux-riscv@lists.infradead.org, ulf.hansson@linaro.org,
- paul.walmsley@sifive.com, samuel.holland@sifive.com,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, hch@lst.de,
- robin.murphy@arm.com
 
-Hello:
+Properties are supposed to be defined in the top-level schema and then
+disallowed in an if/then schema if necessary. Move the "marvell,pad-type"
+property to follow this.
 
-This patch was applied to riscv/linux.git (fixes)
-by Ulf Hansson <ulf.hansson@linaro.org>:
+"reg" can also be similarly described at the top-level with only the
+number of entries restricted in the if/then schema.
 
-On Tue, 24 Sep 2024 14:01:23 -0700 you wrote:
-> Since upstream commit 334304ac2bac ("dma-mapping: don't return errors
-> from dma_set_max_seg_size") calling dma_set_max_seg_size() on a device
-> not supporting DMA results in a warning traceback. This is seen when
-> booting the sifive_u machine from SD. The underlying SPI controller
-> (sifive,spi0 compatible) explicitly sets dma_mask to NULL.
-> 
-> Avoid the backtrace by only calling dma_set_max_seg_size() if DMA is
-> supported.
-> 
-> [...]
+Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+---
+ .../bindings/mmc/marvell,xenon-sdhci.yaml     | 48 +++++++++----------
+ 1 file changed, 22 insertions(+), 26 deletions(-)
 
-Here is the summary with links:
-  - mmc: core: Only set maximum DMA segment size if DMA is supported
-    https://git.kernel.org/riscv/c/c26339faed11
-
-You are awesome, thank you!
+diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+index cfe6237716f4..3f48d8292d5b 100644
+--- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+@@ -38,15 +38,9 @@ properties:
+ 
+   reg:
+     minItems: 1
+-    maxItems: 2
+-    description: |
+-      For "marvell,armada-3700-sdhci", two register areas.  The first one
+-      for Xenon IP register. The second one for the Armada 3700 SoC PHY PAD
+-      Voltage Control register.  Please follow the examples with compatible
+-      "marvell,armada-3700-sdhci" in below.
+-      Please also check property marvell,pad-type in below.
+-
+-      For other compatible strings, one register area for Xenon IP.
++    items:
++      - description: Xenon IP registers
++      - description: Armada 3700 SoC PHY PAD Voltage Control register
+ 
+   clocks:
+     minItems: 1
+@@ -61,6 +55,17 @@ properties:
+   interrupts:
+     maxItems: 1
+ 
++  marvell,pad-type:
++    $ref: /schemas/types.yaml#/definitions/string
++    enum:
++      - sd
++      - fixed-1-8v
++    description:
++      Type of Armada 3700 SoC PHY PAD Voltage Controller register. If "sd" is
++      selected, SoC PHY PAD is set as 3.3V at the beginning and is switched to
++      1.8V when later in higher speed mode. If "fixed-1-8v" is selected, SoC PHY
++      PAD is fixed 1.8V, such as for eMMC.
++
+   marvell,xenon-sdhc-id:
+     $ref: /schemas/types.yaml#/definitions/uint32
+     minimum: 0
+@@ -147,27 +152,18 @@ allOf:
+     then:
+       properties:
+         reg:
+-          items:
+-            - description: Xenon IP registers
+-            - description: Armada 3700 SoC PHY PAD Voltage Control register
+-
+-        marvell,pad-type:
+-          $ref: /schemas/types.yaml#/definitions/string
+-          enum:
+-            - sd
+-            - fixed-1-8v
+-          description: |
+-            Type of Armada 3700 SoC PHY PAD Voltage Controller register.
+-            If "sd" is selected, SoC PHY PAD is set as 3.3V at the beginning
+-            and is switched to 1.8V when later in higher speed mode.
+-            If "fixed-1-8v" is selected, SoC PHY PAD is fixed 1.8V, such as for
+-            eMMC.
+-            Please follow the examples with compatible
+-            "marvell,armada-3700-sdhci" in below.
++          minItems: 2
+ 
+       required:
+         - marvell,pad-type
+ 
++    else:
++      properties:
++        reg:
++          maxItems: 1
++
++        marvell,pad-type: false
++
+   - if:
+       properties:
+         compatible:
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/patchwork/pwbot.html
-
+2.45.2
 
