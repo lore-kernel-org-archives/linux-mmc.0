@@ -1,139 +1,209 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 904D12AE84;
-	Wed, 13 Nov 2024 22:56:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEC8B53365
+	for <linux-mmc@vger.kernel.org>; Thu, 14 Nov 2024 15:56:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=170.10.133.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731538570; cv=none; b=HOBJW3+j/wKaYFoS+rgG2LXW9LP/lb5lfSpKwIkVgXDuxmvIV2pP1M7IZpklGJzNFLFAeqwB5z2q9HlxSD3KtA47Mw68Lqd0DDF+vvMoi0FC1dCPHbsuuuRo9F4bJ/s32o+7IdBn34h0qOa2F6L1dqFu2o8mXQvInd3wu0ZsO4A=
+	t=1731599779; cv=none; b=j1qFtBAJW7pOyTWKRdl9rHgqZrtc+x/WTrZr9uuy3bkRsuxZ2CH/e2xhM2X+uHTn5yB88bpeMe2Zrr2OczmpYtYOxYp5hWNle2i+FeThYWrB32EwOq2xJlvVIQxgNsPA2Yofqiu9EYJ1hG6bPC2Au9bg1RNy3r8rTQXPqxmMCYE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731538570; c=relaxed/simple;
-	bh=zSA3eE89l1UDfOvFbyzQrw4Ez4fRb4Xk/Y3akNPoOdU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=FSSnFILsV5s/vaYJVaiPLjUYZVrN3PvKcHmXjh5XftkmXcLG55uRcMSSyJlSshq/CMDI91Laroki8b4kbNW0qpP5ncGuUbBHf3y9xkx6re6a/1CM3dJfJvDSQhcvoPI/sTRbO6mvJ5HhFBRjog1bqIiuf0e7lDh1XOyw4yVVWxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hIC8EOFz; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1731599779; c=relaxed/simple;
+	bh=OdCbfoVAZF7OYiwMfY18VTYsBvZ/jYiwJz1NXu2gnXY=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=J0eo2/cS3Abz/ukmd+PbAoy08ET+mC1UdzLW/s/hLNcNAOJntyWvY3hLypyKZsXb64V9feDGA+3JFFLRl0igTa70gpmvMNkmtOxLvxQJ4FjVKzs8+IpgR45XU+SlRFMjBGgVy7B0KRUqJeOtXxmm1RV5wqe2bg2dktw94245oI8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com; spf=pass smtp.mailfrom=redhat.com; dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b=crY+3Spr; arc=none smtp.client-ip=170.10.133.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=redhat.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=redhat.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hIC8EOFz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D03FC4CEC3;
-	Wed, 13 Nov 2024 22:56:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1731538570;
-	bh=zSA3eE89l1UDfOvFbyzQrw4Ez4fRb4Xk/Y3akNPoOdU=;
-	h=From:To:Cc:Subject:Date:From;
-	b=hIC8EOFzRvdiuwcpt02lbeyGLdcU+M/3ckOVKJ7PkHww00QpyCXV2bi0iOPEj8SF1
-	 gu3dwwPjN3Ma1x9eIT9j0C33/hIUIMGkZFIU4YfZcEfVC7jfGDk8prDqkg2MxojTSl
-	 btVGiPi1xw+NYdJ6GchvfqS59a6ZIAb1E23WKd1F6bTfaTiXbPxJDqLrKvAVRL8W82
-	 0K2A76YXgV/oLbv3Ym6Zo5s5q6wez6FslsBqVOCssWRYLs97dvDhF+xtckZoWG+4Nh
-	 23oV6zX4Aqyr6SSULs495VniS8SYux1xB4qHoIeuW1Qmw6BHYvzlDeMtMsLxA4jVqQ
-	 Ybxfgj1f9/brA==
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Hu Ziji <huziji@marvell.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: marvell,xenon-sdhci: Simplify Armada 3700 if/then schema
-Date: Wed, 13 Nov 2024 16:56:01 -0600
-Message-ID: <20241113225602.1782573-1-robh@kernel.org>
-X-Mailer: git-send-email 2.45.2
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="crY+3Spr"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+	s=mimecast20190719; t=1731599776;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=x5FjMPrMfsoiPNyeB17OLR1MoaJAprN50ibFXfotm7E=;
+	b=crY+3Sprc1DeRL7oxeANWQd8MnK9qZNJ36g3B+aFGlrgGYLAgtHKCN4mcHZMbUUPhXetaI
+	m+qug7iwvrK99xDvUgrDRvokQ4Q14dsIN3++3MW4/lydVqjioRwguhWilU8ZNgsa4nGvUs
+	HVlBgWIWvTI/IMiDocUkrtGpBmqGFJc=
+Received: from mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com
+ (ec2-54-186-198-63.us-west-2.compute.amazonaws.com [54.186.198.63]) by
+ relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.3,
+ cipher=TLS_AES_256_GCM_SHA384) id us-mta-530-3uJ3j6D7Pu2DXTtO8XCILw-1; Thu,
+ 14 Nov 2024 10:56:15 -0500
+X-MC-Unique: 3uJ3j6D7Pu2DXTtO8XCILw-1
+X-Mimecast-MFC-AGG-ID: 3uJ3j6D7Pu2DXTtO8XCILw
+Received: from mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com [10.30.177.12])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx-prod-mc-05.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTPS id 305201956088;
+	Thu, 14 Nov 2024 15:56:14 +0000 (UTC)
+Received: from shalem.redhat.com (unknown [10.39.193.206])
+	by mx-prod-int-03.mail-002.prod.us-west-2.aws.redhat.com (Postfix) with ESMTP id D292819560A3;
+	Thu, 14 Nov 2024 15:56:12 +0000 (UTC)
+From: Hans de Goede <hdegoede@redhat.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Hans de Goede <hdegoede@redhat.com>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH v3] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on Vexia Edu Atla 10 tablet
+Date: Thu, 14 Nov 2024 16:56:11 +0100
+Message-ID: <20241114155611.59577-1-hdegoede@redhat.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 3.0 on 10.30.177.12
 
-Properties are supposed to be defined in the top-level schema and then
-disallowed in an if/then schema if necessary. Move the "marvell,pad-type"
-property to follow this.
+The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
+Andalucía region has no ACPI fwnode associated with the SDHCI controller
+for its microsd-slot and thus has no ACPI GPIO resource info.
 
-"reg" can also be similarly described at the top-level with only the
-number of entries restricted in the if/then schema.
+This causes the following error to be logged and the slot to not work:
+[   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpio
 
-Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+Add a DMI quirk table for providing gpiod_lookup_tables with manually
+provided CD GPIO info and use this DMI table to provide the CD GPIO info
+on this tablet. This fixes the microsd-slot not working.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- .../bindings/mmc/marvell,xenon-sdhci.yaml     | 48 +++++++++----------
- 1 file changed, 22 insertions(+), 26 deletions(-)
+Changes in v3:
+- Add a cd_gpio_override pointer to sdhci_pci_fixes
+- Add sdhci_pci_add_gpio_lookup_table() helper which kmemdup-s a const
+  struct gpiod_lookup_table to avoid races when using async probing
 
-diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-index cfe6237716f4..3f48d8292d5b 100644
---- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-@@ -38,15 +38,9 @@ properties:
+Changes in v2:
+- Make sdhci_pci_dmi_cd_gpio_overrides static const instead of just const
+- Drop duplicate #include <linux/dmi.h> (already there at the end)
+---
+ drivers/mmc/host/sdhci-pci-core.c | 67 +++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |  1 +
+ 2 files changed, 68 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index ed45ed0bdafd..a2ddbe3d8742 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -21,6 +21,7 @@
+ #include <linux/io.h>
+ #include <linux/iopoll.h>
+ #include <linux/gpio.h>
++#include <linux/gpio/machine.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/pm_qos.h>
+ #include <linux/debugfs.h>
+@@ -1235,6 +1236,29 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+ 	.priv_size	= sizeof(struct intel_host),
+ };
  
-   reg:
-     minItems: 1
--    maxItems: 2
--    description: |
--      For "marvell,armada-3700-sdhci", two register areas.  The first one
--      for Xenon IP register. The second one for the Armada 3700 SoC PHY PAD
--      Voltage Control register.  Please follow the examples with compatible
--      "marvell,armada-3700-sdhci" in below.
--      Please also check property marvell,pad-type in below.
--
--      For other compatible strings, one register area for Xenon IP.
-+    items:
-+      - description: Xenon IP registers
-+      - description: Armada 3700 SoC PHY PAD Voltage Control register
- 
-   clocks:
-     minItems: 1
-@@ -61,6 +55,17 @@ properties:
-   interrupts:
-     maxItems: 1
- 
-+  marvell,pad-type:
-+    $ref: /schemas/types.yaml#/definitions/string
-+    enum:
-+      - sd
-+      - fixed-1-8v
-+    description:
-+      Type of Armada 3700 SoC PHY PAD Voltage Controller register. If "sd" is
-+      selected, SoC PHY PAD is set as 3.3V at the beginning and is switched to
-+      1.8V when later in higher speed mode. If "fixed-1-8v" is selected, SoC PHY
-+      PAD is fixed 1.8V, such as for eMMC.
++/* DMI quirks for devices with missing or broken CD GPIO info */
++static const struct gpiod_lookup_table vexia_edu_atla10_cd_gpios = {
++	.dev_id = "0000:00:12.0",
++	.table = {
++		GPIO_LOOKUP("INT33FC:00", 38, "cd", GPIO_ACTIVE_HIGH),
++		{ }
++	},
++};
 +
-   marvell,xenon-sdhc-id:
-     $ref: /schemas/types.yaml#/definitions/uint32
-     minimum: 0
-@@ -147,27 +152,18 @@ allOf:
-     then:
-       properties:
-         reg:
--          items:
--            - description: Xenon IP registers
--            - description: Armada 3700 SoC PHY PAD Voltage Control register
--
--        marvell,pad-type:
--          $ref: /schemas/types.yaml#/definitions/string
--          enum:
--            - sd
--            - fixed-1-8v
--          description: |
--            Type of Armada 3700 SoC PHY PAD Voltage Controller register.
--            If "sd" is selected, SoC PHY PAD is set as 3.3V at the beginning
--            and is switched to 1.8V when later in higher speed mode.
--            If "fixed-1-8v" is selected, SoC PHY PAD is fixed 1.8V, such as for
--            eMMC.
--            Please follow the examples with compatible
--            "marvell,armada-3700-sdhci" in below.
-+          minItems: 2
- 
-       required:
-         - marvell,pad-type
- 
-+    else:
-+      properties:
-+        reg:
-+          maxItems: 1
++static const struct dmi_system_id sdhci_intel_byt_cd_gpio_override[] = {
++	{
++		/* Vexia Edu Atla 10 tablet 9V version */
++		.matches = {
++			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
++			DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
++			/* Above strings are too generic, also match on BIOS date */
++			DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
++		},
++		.driver_data = (void *)&vexia_edu_atla10_cd_gpios,
++	},
++	{ }
++};
 +
-+        marvell,pad-type: false
+ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+ #ifdef CONFIG_PM_SLEEP
+ 	.resume		= byt_resume,
+@@ -1253,6 +1277,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+ 	.add_host	= byt_add_host,
+ 	.remove_slot	= byt_remove_slot,
+ 	.ops		= &sdhci_intel_byt_ops,
++	.cd_gpio_override = sdhci_intel_byt_cd_gpio_override,
+ 	.priv_size	= sizeof(struct intel_host),
+ };
+ 
+@@ -2054,6 +2079,37 @@ static const struct dev_pm_ops sdhci_pci_pm_ops = {
+  *                                                                           *
+ \*****************************************************************************/
+ 
++static struct gpiod_lookup_table *sdhci_pci_add_gpio_lookup_table(
++	struct sdhci_pci_chip *chip)
++{
++	struct gpiod_lookup_table *cd_gpio_lookup_table;
++	const struct dmi_system_id *dmi_id = NULL;
 +
-   - if:
-       properties:
-         compatible:
++	if (chip->fixes && chip->fixes->cd_gpio_override)
++		dmi_id = dmi_first_match(chip->fixes->cd_gpio_override);
++
++	if (!dmi_id)
++		return NULL;
++
++	cd_gpio_lookup_table = kmemdup(dmi_id->driver_data,
++				       /* 1 GPIO lookup entry + 1 terminating entry */
++				       struct_size(cd_gpio_lookup_table, table, 2),
++				       GFP_KERNEL);
++	if (!cd_gpio_lookup_table)
++		return ERR_PTR(-ENOMEM);
++
++	gpiod_add_lookup_table(cd_gpio_lookup_table);
++	return cd_gpio_lookup_table;
++}
++
++static void sdhci_pci_remove_gpio_lookup_table(struct gpiod_lookup_table *lookup_table)
++{
++	if (lookup_table) {
++		gpiod_remove_lookup_table(lookup_table);
++		kfree(lookup_table);
++	}
++}
++
+ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
+ 	int slotno)
+@@ -2129,8 +2185,19 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		device_init_wakeup(&pdev->dev, true);
+ 
+ 	if (slot->cd_idx >= 0) {
++		struct gpiod_lookup_table *cd_gpio_lookup_table;
++
++		cd_gpio_lookup_table = sdhci_pci_add_gpio_lookup_table(chip);
++		if (IS_ERR(cd_gpio_lookup_table)) {
++			ret = PTR_ERR(cd_gpio_lookup_table);
++			goto remove;
++		}
++
+ 		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+ 					   slot->cd_override_level, 0);
++
++		sdhci_pci_remove_gpio_lookup_table(cd_gpio_lookup_table);
++
+ 		if (ret && ret != -EPROBE_DEFER)
+ 			ret = mmc_gpiod_request_cd(host->mmc, NULL,
+ 						   slot->cd_idx,
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 153704f812ed..4973fa859217 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -156,6 +156,7 @@ struct sdhci_pci_fixes {
+ #endif
+ 
+ 	const struct sdhci_ops	*ops;
++	const struct dmi_system_id *cd_gpio_override;
+ 	size_t			priv_size;
+ };
+ 
 -- 
-2.45.2
+2.47.0
 
