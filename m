@@ -1,107 +1,122 @@
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com [209.85.167.46])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3FE48192D8B
-	for <linux-mmc@vger.kernel.org>; Fri, 15 Nov 2024 10:00:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.46
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7BD7013D52B;
+	Fri, 15 Nov 2024 10:23:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1731664854; cv=none; b=N5jcUTp0i6xljEPsQ4UsBeEJlIkHnerHxuA+Yw68AtsE75ImGwvOhzSv6NltevrUa1ToViaWnvRY2AQ9q1JaLhUBrzsn6+po7zg6/uT/nYHzvoo6Ad7g27M5tv44NcmBmlS3BOmBw5WSD874TA20AqfTL42j2ICAUEhpynFPZcs=
+	t=1731666220; cv=none; b=U6K1bNhX49S6/6ehv+foeixG33m7GupPALlTXc/HJQVI8rJcDmv6U2DEmgQMqZH2xVxcVtgCfqArcj3fF9a708FQgdXGDNzTCoU+jLwey3XYXH3rPX27F4VHWlUYHEdy2HDEivO6nyZk0PVGCpFduh6IBlpAXEUfXJvQeftP3/8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1731664854; c=relaxed/simple;
-	bh=Y0l6MYL9FxYgkAobyrV1dEFhx51cciq6fBBoBftTGmI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OK7C470ZATrQyzycUzf8FtKLJBeycZnhjOfsJCrO85zE92m/P7DNKqVdL+jtmkC59wGG3g1rPqYCmBwC5xfvC3FP8BCi2WOuupak0TB627lmVvQqpk2Oc5U0GtasC2Muy/096J2HspjP8WK74kRu2uZCCFt6sG3R/g0/663p3jc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KJIUcDUY; arc=none smtp.client-ip=209.85.167.46
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1731666220; c=relaxed/simple;
+	bh=Kn+dgYRSEhesLvnMLfFPReCn1g2YzacRgHl7Qvoitxk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=MPrEfQ8wUYnSNcEed0sr7lo6mwTLQRKO19H2l0UR9JBlv1CyA/eEb9WBvfEEj6XihjEJhCWlXpQsPyc+hQJK+9UipUy2c39Xq7fJYDSm2ah9OMSo87j5n4LB2F0hKsaBz9tmF/Pg53nS0rI/pYa7AZfk2WDD3edmvGgmAsedgSE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=pnN03tsB; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KJIUcDUY"
-Received: by mail-lf1-f46.google.com with SMTP id 2adb3069b0e04-53da24e9673so1655554e87.2
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Nov 2024 02:00:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1731664850; x=1732269650; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=SJgKGB6f22K0gvP8aMMCcAaLzCd5tDQzwgfcDLV3EIs=;
-        b=KJIUcDUYnDJmflc7cRSKo+CRHyffV+LmGgiwE9ochJCLgHzc+EEsDarqDZIbnI7TeQ
-         qJBifzWJM8Xz1KhAbXEIWGTWAxvTSeWLuUMXM1VzmACzbhB7h6n7Grn0/5ymH8Siczo9
-         1L1tzJfdGIkbZicFZ9xo51NI+53UrdEq+/wx+pJ3me1d5wh+JTOeQKmx9CdLmJADAY7m
-         XtloV11IZdQW7ri3nwDGZeDb+FjU0BOAf6gvN95KVAEyaYwLAnJZRNODfAqSqeCNFFtg
-         tPrsn313gf0AwQngc0yq8Rw9lIJk008Fw0GLYTPtf6vBlm171ulyhfJ1E4BMFJSImRrq
-         SOHQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1731664850; x=1732269650;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=SJgKGB6f22K0gvP8aMMCcAaLzCd5tDQzwgfcDLV3EIs=;
-        b=wuGPi2xSD69tU2ky8uYXdQGVr8QYQwfcIK1cMmTHBzlxzhEUYGCJjmntToyUhFtVOm
-         tvpwozAcF+T9c7BUFCY3/rfPaXYBhsRfXrHg0nEyMOVgXiKSlnICR+P94YGuQqBfR1Qy
-         gLE4AN+0Di+Q+pOaVpS8kbALY8qMTrdUcEjUzqOIe1wUSEwat17m67zzyyWR5tHuAs2R
-         eFa4MZMF6DpI5s4EI6MtAdMjkGS/XG4GdRo7bhaJdyX8w8U8xLe+V61SQl1PXzUujOyD
-         Faj1lqwO0hmk+hiIsVIkLq481iL2ll4P4rgi+Ht5Dsp+BKDJNQjUbOHQNnPly1JpqagR
-         sPpw==
-X-Forwarded-Encrypted: i=1; AJvYcCU2KIGzowGZrt8yxP5vlpHsnQHZxqR7f+sUNezEwrHgfiArTqvWbN9f1a25x8FwkrW4bKyx4Ya8nbc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxgvnSAWat+z3+tmm7Ssfh671uB9bHWyuPLvAsKi16k2NoIzbGx
-	KkuavbgrBaUBjSGksy313NS45FGogGNE49oUHoWH24TUjGbO8toXpEwqF3FPMVs=
-X-Google-Smtp-Source: AGHT+IFjnu0mql1AWmnPV6lQab9zoQWnmE3byvz9cEBkk9nA7T4JGo1IHamARfz9EQEozoujyBSePA==
-X-Received: by 2002:a05:6512:3c95:b0:53d:a9c1:f6d with SMTP id 2adb3069b0e04-53dab29ba46mr831016e87.13.1731664845746;
-        Fri, 15 Nov 2024 02:00:45 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53da6548c3csm500950e87.261.2024.11.15.02.00.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Nov 2024 02:00:44 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.12-rc8
-Date: Fri, 15 Nov 2024 11:00:42 +0100
-Message-ID: <20241115100042.116738-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="pnN03tsB"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AF8b7SI021969;
+	Fri, 15 Nov 2024 10:23:36 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	d7391IPJwynSSH46H3KmmIrWzxKXLTxZvxCA67ilJsE=; b=pnN03tsBviajtGRk
+	KQcn+KlUlFvBdQ72I9jqtT0RX2XaNPJzRu29VOwsZOvd07gJfFtwBKOzbIpPqh6R
+	3avzEdAt3BJpFvCZWV5fc7f/QEOeaOIASanC+uXP6Pwq3H2UyQMhX5h+uoNGBBqp
+	staoomIPz4AJHurzERYC83v+smWq7wg+ROKs+bAUieqaeIOAf3iDRVnsG3RIpfxu
+	COnqHOtu5xpHwyT4CMzUCiRDWFR35EeaiFEh/4GIojVdxMuRYstI6ujte3OHb5Dq
+	RerTp7bSjNaBzM9P6Jmxl+rHcdHlBqCIzxZHrZYm02L/WI6cpcXPqSUdEK9wT6Sg
+	nVfBuw==
+Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 42vsg586vx-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 15 Nov 2024 10:23:35 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4AFANZVB001366
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 15 Nov 2024 10:23:35 GMT
+Received: from [10.217.218.234] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Fri, 15 Nov
+ 2024 02:23:27 -0800
+Message-ID: <10c90fee-ce7f-4034-9028-4252f19cb67f@quicinc.com>
+Date: Fri, 15 Nov 2024 15:52:49 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
+ qualcomm controllers
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+CC: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_sachgupt@quicinc.com>, <quic_bhaskarv@quicinc.com>,
+        <quic_narepall@quicinc.com>, <kernel@quicinc.com>
+References: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
+ <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
+Content-Language: en-US
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: lBMIFjkGh2ZUriwFchqGuJ309Nr8Pl3U
+X-Proofpoint-ORIG-GUID: lBMIFjkGh2ZUriwFchqGuJ309Nr8Pl3U
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1011
+ priorityscore=1501 phishscore=0 malwarescore=0 lowpriorityscore=0
+ mlxscore=0 mlxlogscore=999 impostorscore=0 bulkscore=0 adultscore=0
+ suspectscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2411150088
 
-Hi Linus,
-
-Here's a PR with a couple of MMC fixes intended for v6.12-rc8. Details about the
-highlights are as usual found in the signed tag.
-
-Please pull this in!
-
-Kind regards
-Ulf Hansson
 
 
-The following changes since commit c4dedaaeb3f78d3718e9c1b1e4d972a6b99073cd:
+On 11/4/2024 4:19 PM, Dmitry Baryshkov wrote:
+> On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
+>> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
+>> This enables runtime PM for eMMC/SD card.
+> 
+> Could you please mention, which platforms were tested with this patch?
+> Note, upstream kernel supports a lot of platforms, including MSM8974, I
+> think the oldest one, which uses SDHCI.
+>
 
-  mmc: sdhci-pci-gli: GL9767: Fix low power mode in the SD Express process (2024-10-28 12:30:27 +0100)
+This was tested with qdu1000 platform.
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.12-rc3-2
-
-for you to fetch changes up to 1635e407a4a64d08a8517ac59ca14ad4fc785e75:
-
-  Revert "mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K" (2024-11-12 19:40:40 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - dw_mmc: Revert fix for IDMAC operation with pages bigger than 4K
- - sunxi-mmc: Fix A100 compatible description
-
-----------------------------------------------------------------
-Andre Przywara (1):
-      mmc: sunxi-mmc: Fix A100 compatible description
-
-Aurelien Jarno (1):
-      Revert "mmc: dw_mmc: Fix IDMAC operation with pages bigger than 4K"
-
- drivers/mmc/host/dw_mmc.c    | 4 ++--
- drivers/mmc/host/sunxi-mmc.c | 6 +++---
- 2 files changed, 5 insertions(+), 5 deletions(-)
+>>
+>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 1 +
+>>   1 file changed, 1 insertion(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index e00208535bd1..6657f7db1b8e 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -2626,6 +2626,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>   		goto clk_disable;
+>>   	}
+>>   
+>> +	msm_host->mmc->caps |= MMC_CAP_AGGRESSIVE_PM;
+>>   	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+>>   
+>>   	/* Set the timeout value to max possible */
+>> -- 
+>> 2.17.1
+>>
+> 
