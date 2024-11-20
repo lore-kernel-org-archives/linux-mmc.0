@@ -1,177 +1,253 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3173D17F7;
-	Wed, 20 Nov 2024 12:07:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D234D1DFEF
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2024 12:56:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732104466; cv=none; b=DpLjOwPQE0l+/4/5MHKg3683CPgIJPA5Lw3wK0pLfDblpKu7k/LvPYCH3wHtYKv/0bl62P9e5sDj7YO9+MWVYGmWnMrbk22x/upj3/R+7dIF2bcDceED2fVjRunTRpA5TZjb5m+CZkZFIZUDICHfZxlXadYM86vUvUkQjQIGCTs=
+	t=1732107409; cv=none; b=FQpDbyS+XTidAlD/aex3F+E6Lj4pBSjE8ffROjikC3zInfqpzTJBinIWtrH/rUp7Zmv++uSsR9hc+ccmz20g/9IEdgydu9B5tuT2ZSE/U2fro7q0P2tn4i2pcuS66AZ+EItHDol2f6QvBO/pthAY8RxrTFir79a+3NUCEjBuhEc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732104466; c=relaxed/simple;
-	bh=sIU4agl5c0sKd8ycD4wjm+awbGC+sQurasae39S0W2o=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=gMOTFxJR283GmQE8sTCbOo2iOrjjQppB9Ad99ESkDEEFFeA53kysszor5vQsjSCwBiIrBeM0xX9Hq19PF1KfFdMMtToO5PD4lKcJaId587Tjv/E1STEuLK1jmfWfZ8gyNMnVrJpq0CBb1djNrkoEvgQtbP3dYvg10qak4f82VuI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=B4mzhRjY; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1732107409; c=relaxed/simple;
+	bh=ZeM63XqCzuu+vMjlQhKvzCYJvpdJDiNI3dTZwKha5oA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=tK4VbiDZLqEdiwbh6Cels1m7UlczXHLEqCmu67XUTBHQgd8HhRsbIpYcsFDgyF1peWT6Nr4/SbrSqKGmy3gfOfRxJnL/2m52JUCSVOuY0CZH3OwL5wfpf9GCTEVttwF4Bk/ZS6YZcbEUUTzkN8vv/nkPZrN2+umcNDPYuRJQk1I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AO0b7Ggi; arc=none smtp.client-ip=209.85.219.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="B4mzhRjY"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AK9FLX5003947;
-	Wed, 20 Nov 2024 12:07:41 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	WPYqUbAc0US3qw0Azyzie+o8Etpi4oTKHdU1SyKmKMs=; b=B4mzhRjYx0qYbXHw
-	mFWRSHtb0WRyX0JGzS4S7WH3MhLJcS041t0ZRLRoXje56uZjou4puhIDIBgm8Zjm
-	BNf2TTBxWFUdzxWTq0ETXVhPSgU8Zki+hn1w2Pui66x0+WKL1/pl4Fv/cGprGTh6
-	9Wcp5AzkHUQMCet5IcjCtvJCc5k7Qc/E6BDu6s2C8Y3TjNA+y7PUlmI8qO2FbjY7
-	MeI6Y+rWIoQUJax/fd1L13reLpA+DleD0MYC+OXhVs9iydYcGWIEbmj7M3V1jN1y
-	LpKOvgnB2s447O9st7zT2li/S2WaIOgtasFgZ6S1iyAecrC9+fzEsxAZn86bphlw
-	zOZeNQ==
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 431ce38h1f-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 20 Nov 2024 12:07:41 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4AKC7eJq011472
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 20 Nov 2024 12:07:40 GMT
-Received: from [10.216.2.70] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Wed, 20 Nov
- 2024 04:07:34 -0800
-Message-ID: <40694102-8daa-481b-b724-0a7e37dd4af1@quicinc.com>
-Date: Wed, 20 Nov 2024 17:37:20 +0530
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AO0b7Ggi"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e387e50d98eso1857320276.2
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2024 04:56:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1732107407; x=1732712207; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Zhy4N4GY1+ZvMEMkVSolrHoQCEqYRT3om0rXzZlH72o=;
+        b=AO0b7GgiBQGuf32wmdRt4DRMt+54dQ74rHIZ4+IUyzgzkFGNTNlTiTy63wwjYBShZA
+         GtZb5nsxjEWfHuJEcXGjuGZohIPeCxw23wKIH3rDLCbI36aVt9JLv3zkXbbErVdBMvAY
+         cvJrlA4Ne4MLpgQ+bu4fJCVne+te2b88ej6YwTRoAv/cBerxD7PHHtm6xn13LAD0NX9F
+         ShL00qhvGIbmAXJ6+ewWxwNhY6N9QbRS2ra5EMee9Ahev9alXD7YWp2ZaYs+a7mRM3lP
+         qiuQAVkrOM41qmSqIKgX23HLuZIkTyT9+D2YL/aX7Ko6zifa4C76SYcoKuuLXK1BVO3B
+         gYiA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732107407; x=1732712207;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Zhy4N4GY1+ZvMEMkVSolrHoQCEqYRT3om0rXzZlH72o=;
+        b=u6CLj3XT9xXSUCXFHMEBmDjnh6CYV5Lr9C4yH7VUysCA1uuk7viTnGLueWo2dQ+rW0
+         8BHMKhITwXNOfn5kXB6vBOyT4tGegxkgjdP5P8WqReXu93p3MejOjaWXHit+KML/ximY
+         1CQW5LWyjPvjaCrnFXxcpAPgp0Vf91B+2MC3u8vXhkpydqyPL+rSMXxtRvFM3IqDCObC
+         +FrCJYvKRMBA70sJGlgOnX1fHfI40youfiuGWEVfYqRC+rqElfvvLsXE0cUaIvYN8S6H
+         HefnpJdhmtizZVdKAUe4T6AdEhSSm5XquuuI1fyug6Tqg1yKrLgOb0omRANSSg/DIELt
+         8Z2w==
+X-Forwarded-Encrypted: i=1; AJvYcCVuas+HE//2BXJ3WRTTw7uLuRyIJdQGfEe37mLWow8JHLwTScyiVco2eAwtqvh2r47AKV5iiUbAPPk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzudUbLNXk4I3ilEd/OZd3cK31WhxdXDMmLsXPJYemhGk4HHgmP
+	EhQHVQdRmBNtI0aIIwCHcziG3DUR044HMEAORO4kYYPUsjg38FWNDu/DE4fmjPYW6u9DHLljV0+
+	UuI2eLktyUOWONE8K2FaiuGRVbIFAfIA2xn+1soeD0SEKzZib
+X-Google-Smtp-Source: AGHT+IHB/Q1GiOFWTzQsjHiArNAhHNGKTW8uZyCB2r5DunNeyOJiTs9Rr3/hwDxp86DfnITs/kcAWJtEKoHqPKLt33g=
+X-Received: by 2002:a05:6902:240d:b0:e33:1096:f2e1 with SMTP id
+ 3f1490d57ef6-e38cb5ebaa2mr1930702276.40.1732107406797; Wed, 20 Nov 2024
+ 04:56:46 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-msm: Slot indexing for distinguishing multiple
- SDCC instances
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <quic_mapa@quicinc.com>,
-        <quic_narepall@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_rampraka@quicinc.com>, <quic_sartgarg@quicinc.com>
-References: <20241022141828.618-1-quic_sachgupt@quicinc.com>
- <3e2f8132-af87-40c0-9c31-c0103078fe39@intel.com>
- <1cb1e8c1-63f4-4752-8358-b5c7078f9c6b@quicinc.com>
- <be483786-d8d2-4d46-9ca2-fbb629ba0674@intel.com>
- <0a0647aa-1fa4-4149-a76d-da7e08034fe4@quicinc.com>
- <2knkpsv3nlbcolosyza3awktztv23kqweow3b3wilbehv2azre@dcldb6a37sbf>
-Content-Language: en-US
-From: Sachin Gupta <quic_sachgupt@quicinc.com>
-In-Reply-To: <2knkpsv3nlbcolosyza3awktztv23kqweow3b3wilbehv2azre@dcldb6a37sbf>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: IwOTFG-zRAE5-DqqTJFeyca_qChbgUmY
-X-Proofpoint-ORIG-GUID: IwOTFG-zRAE5-DqqTJFeyca_qChbgUmY
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- malwarescore=0 clxscore=1011 priorityscore=1501 impostorscore=0
- bulkscore=0 mlxscore=0 adultscore=0 spamscore=0 mlxlogscore=999
- suspectscore=0 phishscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.19.0-2409260000 definitions=main-2411200082
+References: <20241118210049.311079-1-hdegoede@redhat.com>
+In-Reply-To: <20241118210049.311079-1-hdegoede@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 20 Nov 2024 13:56:11 +0100
+Message-ID: <CAPDyKFov29aLGq4vmTZB45mfkLEAAsC_NMCv2u858K9XPdCPkg@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
+ Vexia Edu Atla 10 tablet
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
+On Mon, 18 Nov 2024 at 22:01, Hans de Goede <hdegoede@redhat.com> wrote:
+>
+> The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
+> Andaluc=C3=ADa region has no ACPI fwnode associated with the SDHCI contro=
+ller
+> for its microsd-slot and thus has no ACPI GPIO resource info.
+>
+> This causes the following error to be logged and the slot to not work:
+> [   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpio
+>
+> Add a DMI quirk table for providing gpiod_lookup_tables with manually
+> provided CD GPIO info and use this DMI table to provide the CD GPIO info
+> on this tablet. This fixes the microsd-slot not working.
+>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 
+I assume we should tag this for stable kernels, but can we find a fixes tag=
+ too?
 
-On 10/28/2024 5:56 PM, Dmitry Baryshkov wrote:
-> On Mon, Oct 28, 2024 at 04:10:37PM +0530, Sachin Gupta wrote:
->>
->>
->> On 10/25/2024 6:03 PM, Adrian Hunter wrote:
->>> On 25/10/24 13:37, Sachin Gupta wrote:
->>>>
->>>>
->>>> On 10/24/2024 4:38 PM, Adrian Hunter wrote:
->>>>> On 22/10/24 17:18, Sachin Gupta wrote:
->>>>>> This update addresses the requirement for accurate slot indexing
->>>>>> in the sdhci-msm driver to differentiate between multiple SDCC
->>>>>> (Secure Digital Card Controller) instances, such as eMMC, SD card,
->>>>>> and SDIO.
->>>>>>
->>>>>> Additionally, it revises the slot indexing logic to comply with
->>>>>> the new device tree (DT) specifications.
->>>>>
->>>>> This patch seems incomplete because all it does is assign a global
->>>>> variable which is never used again.
->>>>>
->>>>
->>>> Qualcomm internal debugging tools utilize this global variable to
->>>> access and differentiate between all the instance's sdhci_msm_host
->>>> data structure (eMMC, SD card, and SDIO).
->>>
->>> The kernel does not accept code that does not serve a functional
->>> purpose.
->>>
->>> You could look at using eBPF or KGDB to get the information,
->>> otherwise you might just have to carry that kind of patch in
->>> your internal tree.
->>>
->>
->> Sorry for misleading sentence, the tool I use is lauterbach Trace32 and when
->> using Lauterbach Trace32 tool, having a global variable makes it easier to
->> load and inspect dumps. It will be easy to quickly locate and analyze the
->> sdhci_msm_host structure, which speeds up the debugging process.
-> 
-> This still isn't a functional purpose. This is a debugging code for a
-> particular developer debugging SDHCI issues.
-> 
+Kind regards
+Uffe
 
-Thanks for your comment and time we will explore more on this.
-
->>>>>> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
->>>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
->>>>>> Signed-off-by: Maramaina Naresh <quic_mnaresh@quicinc.com>
->>>>>> Signed-off-by: Ziqi Chen <quic_ziqichen@quicinc.com>
->>>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>>>> ---
->>>>>>     drivers/mmc/host/sdhci-msm.c | 10 ++++++++++
->>>>>>     1 file changed, 10 insertions(+)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>>>>> index e113b99a3eab..3cb79117916f 100644
->>>>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>>>> @@ -292,6 +292,8 @@ struct sdhci_msm_host {
->>>>>>         bool vqmmc_enabled;
->>>>>>     };
->>>>>>     +static struct sdhci_msm_host *sdhci_slot[3];
->>>>>> +
->>>>>>     static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
->>>>>>     {
->>>>>>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>> @@ -2426,6 +2428,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>>>>>         if (ret)
->>>>>>             goto pltfm_free;
->>>>>>     +    if (node) {
->>>>>> +        ret = of_alias_get_id(pdev->dev.of_node, "mmc");
->>>>>> +        if (ret < 0)
->>>>>> +            dev_err(&pdev->dev, "get slot index failed %d\n", ret);
->>>>>> +        else
->>>>>> +            sdhci_slot[ret] = msm_host;
->>>>>> +    }
->>>>>> +
->>>>>>         /*
->>>>>>          * Based on the compatible string, load the required msm host info from
->>>>>>          * the data associated with the version info.
->>>>>
->>>>
->>>
->>
-> 
-
+> ---
+> Changes in v4:
+> - Count number of GPIOs in the lookup table instead of assuming it is
+>   always 1
+>
+> Changes in v3:
+> - Add a cd_gpio_override pointer to sdhci_pci_fixes
+> - Add sdhci_pci_add_gpio_lookup_table() helper which kmemdup-s a const
+>   struct gpiod_lookup_table to avoid races when using async probing
+>
+> Changes in v2:
+> - Make sdhci_pci_dmi_cd_gpio_overrides static const instead of just const
+> - Drop duplicate #include <linux/dmi.h> (already there at the end)
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 72 +++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h      |  1 +
+>  2 files changed, 73 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-p=
+ci-core.c
+> index ed45ed0bdafd..2e2e15e2d8fb 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/io.h>
+>  #include <linux/iopoll.h>
+>  #include <linux/gpio.h>
+> +#include <linux/gpio/machine.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/debugfs.h>
+> @@ -1235,6 +1236,29 @@ static const struct sdhci_pci_fixes sdhci_intel_by=
+t_sdio =3D {
+>         .priv_size      =3D sizeof(struct intel_host),
+>  };
+>
+> +/* DMI quirks for devices with missing or broken CD GPIO info */
+> +static const struct gpiod_lookup_table vexia_edu_atla10_cd_gpios =3D {
+> +       .dev_id =3D "0000:00:12.0",
+> +       .table =3D {
+> +               GPIO_LOOKUP("INT33FC:00", 38, "cd", GPIO_ACTIVE_HIGH),
+> +               { }
+> +       },
+> +};
+> +
+> +static const struct dmi_system_id sdhci_intel_byt_cd_gpio_override[] =3D=
+ {
+> +       {
+> +               /* Vexia Edu Atla 10 tablet 9V version */
+> +               .matches =3D {
+> +                       DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
+> +                       DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
+> +                       /* Above strings are too generic, also match on B=
+IOS date */
+> +                       DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
+> +               },
+> +               .driver_data =3D (void *)&vexia_edu_atla10_cd_gpios,
+> +       },
+> +       { }
+> +};
+> +
+>  static const struct sdhci_pci_fixes sdhci_intel_byt_sd =3D {
+>  #ifdef CONFIG_PM_SLEEP
+>         .resume         =3D byt_resume,
+> @@ -1253,6 +1277,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt=
+_sd =3D {
+>         .add_host       =3D byt_add_host,
+>         .remove_slot    =3D byt_remove_slot,
+>         .ops            =3D &sdhci_intel_byt_ops,
+> +       .cd_gpio_override =3D sdhci_intel_byt_cd_gpio_override,
+>         .priv_size      =3D sizeof(struct intel_host),
+>  };
+>
+> @@ -2054,6 +2079,42 @@ static const struct dev_pm_ops sdhci_pci_pm_ops =
+=3D {
+>   *                                                                      =
+     *
+>  \***********************************************************************=
+******/
+>
+> +static struct gpiod_lookup_table *sdhci_pci_add_gpio_lookup_table(
+> +       struct sdhci_pci_chip *chip)
+> +{
+> +       struct gpiod_lookup_table *cd_gpio_lookup_table;
+> +       const struct dmi_system_id *dmi_id =3D NULL;
+> +       size_t count;
+> +
+> +       if (chip->fixes && chip->fixes->cd_gpio_override)
+> +               dmi_id =3D dmi_first_match(chip->fixes->cd_gpio_override)=
+;
+> +
+> +       if (!dmi_id)
+> +               return NULL;
+> +
+> +       cd_gpio_lookup_table =3D dmi_id->driver_data;
+> +       for (count =3D 0; cd_gpio_lookup_table->table[count].key; count++=
+)
+> +               ;
+> +
+> +       cd_gpio_lookup_table =3D kmemdup(dmi_id->driver_data,
+> +                                      /* count + 1 terminating entry */
+> +                                      struct_size(cd_gpio_lookup_table, =
+table, count + 1),
+> +                                      GFP_KERNEL);
+> +       if (!cd_gpio_lookup_table)
+> +               return ERR_PTR(-ENOMEM);
+> +
+> +       gpiod_add_lookup_table(cd_gpio_lookup_table);
+> +       return cd_gpio_lookup_table;
+> +}
+> +
+> +static void sdhci_pci_remove_gpio_lookup_table(struct gpiod_lookup_table=
+ *lookup_table)
+> +{
+> +       if (lookup_table) {
+> +               gpiod_remove_lookup_table(lookup_table);
+> +               kfree(lookup_table);
+> +       }
+> +}
+> +
+>  static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>         struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
+>         int slotno)
+> @@ -2129,8 +2190,19 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot=
+(
+>                 device_init_wakeup(&pdev->dev, true);
+>
+>         if (slot->cd_idx >=3D 0) {
+> +               struct gpiod_lookup_table *cd_gpio_lookup_table;
+> +
+> +               cd_gpio_lookup_table =3D sdhci_pci_add_gpio_lookup_table(=
+chip);
+> +               if (IS_ERR(cd_gpio_lookup_table)) {
+> +                       ret =3D PTR_ERR(cd_gpio_lookup_table);
+> +                       goto remove;
+> +               }
+> +
+>                 ret =3D mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_id=
+x,
+>                                            slot->cd_override_level, 0);
+> +
+> +               sdhci_pci_remove_gpio_lookup_table(cd_gpio_lookup_table);
+> +
+>                 if (ret && ret !=3D -EPROBE_DEFER)
+>                         ret =3D mmc_gpiod_request_cd(host->mmc, NULL,
+>                                                    slot->cd_idx,
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 153704f812ed..4973fa859217 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -156,6 +156,7 @@ struct sdhci_pci_fixes {
+>  #endif
+>
+>         const struct sdhci_ops  *ops;
+> +       const struct dmi_system_id *cd_gpio_override;
+>         size_t                  priv_size;
+>  };
+>
+> --
+> 2.47.0
+>
