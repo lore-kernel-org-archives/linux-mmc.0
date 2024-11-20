@@ -1,40 +1,50 @@
-Received: from smtp.smtpout.orange.fr (smtp-16.smtpout.orange.fr [80.12.242.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C18078528E;
-	Tue, 19 Nov 2024 18:47:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=80.12.242.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF051E545
+	for <linux-mmc@vger.kernel.org>; Wed, 20 Nov 2024 06:18:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.18
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732042029; cv=none; b=ZX396lYOqkDzmy0TnKbKZ5vXTlBjteTOBkX2gmcuAjqS8GeaSeicn90yxjH43poSLjoIIA2pv/udbQLyM04G4FEKytMlZ0Olt0qrTZclSGpCXEKX4eijcK+04GewBnovT97dtITvt9OYWMDSk9neBI3GJgugL6Yt9hYCVYCRyqs=
+	t=1732083522; cv=none; b=U4B+kiF2+x1Y22pGV02mALzjzopLCQpRTZCp38NkLGAW75V1Y5D8rqJjFPlisdPuHQibrMs6VOpWbL+yXtVK4aHg94ZN48s1+u50uhAkxsxTQfcZYMypaOBA+HalULn5VDiQNTHpSoNf3Q66ERSNNA8EPHwHHSEasqjU8DXTZw0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732042029; c=relaxed/simple;
-	bh=JaWytgbPiisX8pvxdqweWT07VNH9/o+4cgnjKLsBIxc=;
+	s=arc-20240116; t=1732083522; c=relaxed/simple;
+	bh=IKC02CbADvu8eHlGlPnVVSWib9PY2OAoxoS4QX7oiyY=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=ZAlTnP3dJDhjTmvVW9G8PyoBZi4CeBSbFRRiCo7NPrhEbAQS2O9aRGvRD3wPc2GJuCu3S63p9D7NEWNtRtCA+KN1P6QZNgJwA+3nXHzbnZDGZc5ZYxXp0RXIAEcm/skDjFl0DaKpw+2ZEzCit53+8VD/7kyEpsqulnPlMDxOr4c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr; spf=pass smtp.mailfrom=wanadoo.fr; dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b=G8R6rIHK; arc=none smtp.client-ip=80.12.242.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wanadoo.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wanadoo.fr
+	 In-Reply-To:Content-Type; b=O6ShhPZWEKfOQNEWeoi4gBtRKFElIBdVzFvdXRhV2hYDsQ9dJ4meLmW9n8lZLPZD307cdTAfgTi4nx8n+zaN6oLQLMQOfPBKHIRooG2l9pBZrwtGA2pzhKQTW1n8jqYgcnNr3QaJ6puzAlos7JpBdgOJxLAEDKHltulofXxoWyE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=epd8GOoc; arc=none smtp.client-ip=192.198.163.18
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wanadoo.fr header.i=@wanadoo.fr header.b="G8R6rIHK"
-Received: from [192.168.1.37] ([90.11.132.44])
-	by smtp.orange.fr with ESMTPA
-	id DTFWt5CAGmK41DTFWt0cNu; Tue, 19 Nov 2024 19:46:57 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
-	s=t20230301; t=1732042017;
-	bh=UBYWGpjQPLsx4MqQVn9RTX35vK2sjzBZKj9YylR+AGg=;
-	h=Message-ID:Date:MIME-Version:Subject:To:From;
-	b=G8R6rIHKsbms6vIV7zgAO/inZ9vm1EVYuy2Z5rB/ETZDH5P5yO+qLWDlYU/Oq8t/7
-	 bJb5nMYG9PzrGTEey3AtYoPae7m161jXr9WiJKHPhGzBvdBpdZE7eOJXlsO3m0YFIU
-	 FbxiR7efvdVCKbH27twFI+0UrZ1wiCcYvqAq7plh/NpRsaNj4zZy8SH9/gYcUTdYUQ
-	 24GvLPk7HwBNRHF5ldMUli4HVKGbHDMWxvxysppZZ+MiCgUXUw6rpOv+RYt3C9QphJ
-	 rUSIzFy1lali9z0U3swn6NwN6XSfMZ1Np6c8X4R4KqGXDxPr0TF1OVOGvajvlj2wk/
-	 D/l6hOGSmSErA==
-X-ME-Helo: [192.168.1.37]
-X-ME-Auth: bWFyaW9uLmphaWxsZXRAd2FuYWRvby5mcg==
-X-ME-Date: Tue, 19 Nov 2024 19:46:57 +0100
-X-ME-IP: 90.11.132.44
-Message-ID: <4e351cd7-cc34-4fb2-bce4-1612e46e285b@wanadoo.fr>
-Date: Tue, 19 Nov 2024 19:46:53 +0100
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="epd8GOoc"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1732083521; x=1763619521;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=IKC02CbADvu8eHlGlPnVVSWib9PY2OAoxoS4QX7oiyY=;
+  b=epd8GOocLugb4vw5obqwVkNhP4LwfseR2Da9RYSpqqNJJgZ/e1XxxWHW
+   4uueyjKyTIByWIuX0NXLVXNH0wAAav8RTYtsogxDRE34H7B6c7qQFJPf/
+   o7dXBrylfXnVTIIdMtfEqMblIFYLIG/fXLZg8yXkWCHNcyJZF40U7Wo2B
+   bBUTvy+Y8licqjEQmSQJE3fg9tncNACR4LaOCaAlJAinFhUj3GpWAjJK7
+   BBb+2QVNYx+DxoPGWnPV5iNFq8WV0Rksf+0gTZfT2+AoMxLsqyNPrnaCE
+   BObLlPVlsI+ofFb3ThIFM+tuZXP/wo2UC/RwQ4ksbeY0XVSBb7CiS3vYk
+   A==;
+X-CSE-ConnectionGUID: Fksww16hQXOLtSgyH8kEWA==
+X-CSE-MsgGUID: pzWu+lOJQl2FNtTTpNkVlA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11261"; a="31494018"
+X-IronPort-AV: E=Sophos;i="6.12,168,1728975600"; 
+   d="scan'208";a="31494018"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2024 22:18:40 -0800
+X-CSE-ConnectionGUID: 4X4y4ZgRTi+Hcq1/Ua85Tw==
+X-CSE-MsgGUID: dNaKJmKgSCy7J95tO1S8+Q==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,168,1728975600"; 
+   d="scan'208";a="90203110"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.16.81])
+  by fmviesa009-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Nov 2024 22:18:38 -0800
+Message-ID: <56f3ad3c-5fb2-4c5b-b745-84e8e6fd4e6d@intel.com>
+Date: Wed, 20 Nov 2024 08:18:34 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,354 +52,178 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 15/15] clk: at91: sama7d65: add sama7d65 pmc driver
-To: Ryan.Wanner@microchip.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, nicolas.ferre@microchip.com,
- alexandre.belloni@bootlin.com, claudiu.beznea@tuxon.dev,
- mturquette@baylibre.com, sboyd@kernel.org, arnd@arndb.de
-Cc: dharma.b@microchip.com, mihai.sain@microchip.com,
- romain.sioen@microchip.com, varshini.rajendran@microchip.com,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
- linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-References: <cover.1732030972.git.Ryan.Wanner@microchip.com>
- <0b7af2a91d4d58cfd4909d338f1879e14f61f77f.1732030972.git.Ryan.Wanner@microchip.com>
-Content-Language: en-US, fr-FR
-From: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-In-Reply-To: <0b7af2a91d4d58cfd4909d338f1879e14f61f77f.1732030972.git.Ryan.Wanner@microchip.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Subject: Re: [PATCH v4] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
+ Vexia Edu Atla 10 tablet
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+References: <20241118210049.311079-1-hdegoede@redhat.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241118210049.311079-1-hdegoede@redhat.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Le 19/11/2024 à 17:40, Ryan.Wanner@microchip.com a écrit :
-> From: Ryan Wanner <Ryan.Wanner@microchip.com>
+On 18/11/24 23:00, Hans de Goede wrote:
+> The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
+> Andalucía region has no ACPI fwnode associated with the SDHCI controller
+> for its microsd-slot and thus has no ACPI GPIO resource info.
 > 
-> Add clock support for SAMA7D65 SoC.
+> This causes the following error to be logged and the slot to not work:
+> [   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpio
 > 
-> Signed-off-by: Ryan Wanner <Ryan.Wanner@microchip.com>
+> Add a DMI quirk table for providing gpiod_lookup_tables with manually
+> provided CD GPIO info and use this DMI table to provide the CD GPIO info
+> on this tablet. This fixes the microsd-slot not working.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 > ---
+> Changes in v4:
+> - Count number of GPIOs in the lookup table instead of assuming it is
+>   always 1
 
-Hi,
+Looks good, thank you!
 
-> +enum pll_ids {
-> +	PLL_ID_CPU,
-> +	PLL_ID_SYS,
-> +	PLL_ID_DDR,
-> +	PLL_ID_GPU,
-> +	PLL_ID_BAUD,
-> +	PLL_ID_AUDIO,
-> +	PLL_ID_ETH,
-> +	PLL_ID_LVDS,
-> +	PLL_ID_USB,
-> +	PLL_ID_MAX,
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Maybe the last comma could be removed to show that nothing is expected 
-after it?
-
+> 
+> Changes in v3:
+> - Add a cd_gpio_override pointer to sdhci_pci_fixes
+> - Add sdhci_pci_add_gpio_lookup_table() helper which kmemdup-s a const
+>   struct gpiod_lookup_table to avoid races when using async probing
+> 
+> Changes in v2:
+> - Make sdhci_pci_dmi_cd_gpio_overrides static const instead of just const
+> - Drop duplicate #include <linux/dmi.h> (already there at the end)
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 72 +++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h      |  1 +
+>  2 files changed, 73 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index ed45ed0bdafd..2e2e15e2d8fb 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/io.h>
+>  #include <linux/iopoll.h>
+>  #include <linux/gpio.h>
+> +#include <linux/gpio/machine.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/debugfs.h>
+> @@ -1235,6 +1236,29 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sdio = {
+>  	.priv_size	= sizeof(struct intel_host),
+>  };
+>  
+> +/* DMI quirks for devices with missing or broken CD GPIO info */
+> +static const struct gpiod_lookup_table vexia_edu_atla10_cd_gpios = {
+> +	.dev_id = "0000:00:12.0",
+> +	.table = {
+> +		GPIO_LOOKUP("INT33FC:00", 38, "cd", GPIO_ACTIVE_HIGH),
+> +		{ }
+> +	},
 > +};
 > +
-> +/*
-> + * PLL component identifier
-> + * @PLL_COMPID_FRAC: Fractional PLL component identifier
-> + * @PLL_COMPID_DIV0: 1st PLL divider component identifier
-> + * @PLL_COMPID_DIV1: 2nd PLL divider component identifier
-> + */
-> +enum pll_component_id {
-> +	PLL_COMPID_FRAC,
-> +	PLL_COMPID_DIV0,
-> +	PLL_COMPID_DIV1,
-> +	PLL_COMPID_MAX,
-
-Maybe the last comma could be removed to show that nothing is expected 
-after it?
-
+> +static const struct dmi_system_id sdhci_intel_byt_cd_gpio_override[] = {
+> +	{
+> +		/* Vexia Edu Atla 10 tablet 9V version */
+> +		.matches = {
+> +			DMI_MATCH(DMI_BOARD_VENDOR, "AMI Corporation"),
+> +			DMI_MATCH(DMI_BOARD_NAME, "Aptio CRB"),
+> +			/* Above strings are too generic, also match on BIOS date */
+> +			DMI_MATCH(DMI_BIOS_DATE, "08/25/2014"),
+> +		},
+> +		.driver_data = (void *)&vexia_edu_atla10_cd_gpios,
+> +	},
+> +	{ }
 > +};
-...
-
-> +static void __init sama7d65_pmc_setup(struct device_node *np)
+> +
+>  static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  #ifdef CONFIG_PM_SLEEP
+>  	.resume		= byt_resume,
+> @@ -1253,6 +1277,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  	.add_host	= byt_add_host,
+>  	.remove_slot	= byt_remove_slot,
+>  	.ops		= &sdhci_intel_byt_ops,
+> +	.cd_gpio_override = sdhci_intel_byt_cd_gpio_override,
+>  	.priv_size	= sizeof(struct intel_host),
+>  };
+>  
+> @@ -2054,6 +2079,42 @@ static const struct dev_pm_ops sdhci_pci_pm_ops = {
+>   *                                                                           *
+>  \*****************************************************************************/
+>  
+> +static struct gpiod_lookup_table *sdhci_pci_add_gpio_lookup_table(
+> +	struct sdhci_pci_chip *chip)
 > +{
-> +	const char *main_xtal_name = "main_xtal";
-> +	struct pmc_data *sama7d65_pmc;
-> +	const char *parent_names[11];
-> +	void **alloc_mem = NULL;
-> +	int alloc_mem_size = 0;
-> +	struct regmap *regmap;
-> +	struct clk_hw *hw, *main_rc_hw, *main_osc_hw, *main_xtal_hw;
-> +	struct clk_hw *td_slck_hw, *md_slck_hw;
-> +	static struct clk_parent_data parent_data;
-> +	struct clk_hw *parent_hws[10];
-> +	bool bypass;
-> +	int i, j;
+> +	struct gpiod_lookup_table *cd_gpio_lookup_table;
+> +	const struct dmi_system_id *dmi_id = NULL;
+> +	size_t count;
 > +
-> +	td_slck_hw = __clk_get_hw(of_clk_get_by_name(np, "td_slck"));
-> +	md_slck_hw = __clk_get_hw(of_clk_get_by_name(np, "md_slck"));
-> +	main_xtal_hw = __clk_get_hw(of_clk_get_by_name(np, main_xtal_name));
+> +	if (chip->fixes && chip->fixes->cd_gpio_override)
+> +		dmi_id = dmi_first_match(chip->fixes->cd_gpio_override);
 > +
-> +	if (!td_slck_hw || !md_slck_hw || !main_xtal_hw)
-> +		return;
+> +	if (!dmi_id)
+> +		return NULL;
 > +
-> +	regmap = device_node_to_regmap(np);
-> +	if (IS_ERR(regmap))
-> +		return;
+> +	cd_gpio_lookup_table = dmi_id->driver_data;
+> +	for (count = 0; cd_gpio_lookup_table->table[count].key; count++)
+> +		;
 > +
-> +	sama7d65_pmc = pmc_data_allocate(PMC_INDEX_MAX,
-> +					 nck(sama7d65_systemck),
-> +					 nck(sama7d65_periphck),
-> +					 nck(sama7d65_gck), 8);
-> +	if (!sama7d65_pmc)
-> +		return;
+> +	cd_gpio_lookup_table = kmemdup(dmi_id->driver_data,
+> +				       /* count + 1 terminating entry */
+> +				       struct_size(cd_gpio_lookup_table, table, count + 1),
+> +				       GFP_KERNEL);
+> +	if (!cd_gpio_lookup_table)
+> +		return ERR_PTR(-ENOMEM);
 > +
-> +	alloc_mem = kmalloc(sizeof(void *) *
-> +			    (ARRAY_SIZE(sama7d65_mckx) + ARRAY_SIZE(sama7d65_gck)),
-> +			    GFP_KERNEL);
-> +	if (!alloc_mem)
-> +		goto err_free;
-> +
-> +	main_rc_hw = at91_clk_register_main_rc_osc(regmap, "main_rc_osc", 12000000,
-> +						   50000000);
-> +	if (IS_ERR(main_rc_hw))
-> +		goto err_free;
-> +
-> +	bypass = of_property_read_bool(np, "atmel,osc-bypass");
-> +
-> +	parent_data.name = main_xtal_name;
-> +	parent_data.fw_name = main_xtal_name;
-> +	main_osc_hw = at91_clk_register_main_osc(regmap, "main_osc", NULL,
-> +						 &parent_data, bypass);
-> +	if (IS_ERR(main_osc_hw))
-> +		goto err_free;
-> +
-> +	parent_hws[0] = main_rc_hw;
-> +	parent_hws[1] = main_osc_hw;
-> +	hw = at91_clk_register_sam9x5_main(regmap, "mainck", NULL, parent_hws, 2);
-> +	if (IS_ERR(hw))
-> +		goto err_free;
-> +
-> +	sama7d65_pmc->chws[PMC_MAIN] = hw;
-> +
-> +	for (i = 0; i < PLL_ID_MAX; i++) {
-> +		for (j = 0; j < PLL_COMPID_MAX; j++) {
-> +			struct clk_hw *parent_hw;
-> +
-> +			if (!sama7d65_plls[i][j].n)
-> +				continue;
-> +
-> +			switch (sama7d65_plls[i][j].t) {
-> +			case PLL_TYPE_FRAC:
-> +				switch (sama7d65_plls[i][j].p) {
-> +				case SAMA7D65_PLL_PARENT_MAINCK:
-> +					parent_hw = sama7d65_pmc->chws[PMC_MAIN];
-> +					break;
-> +				case SAMA7D65_PLL_PARENT_MAIN_XTAL:
-> +					parent_hw = main_xtal_hw;
-> +					break;
-> +				default:
-> +					/* Should not happen. */
-> +					parent_hw = NULL;
-> +					break;
-> +				}
-> +
-> +				hw = sam9x60_clk_register_frac_pll(regmap,
-> +					&pmc_pll_lock, sama7d65_plls[i][j].n,
-> +					NULL, parent_hw, i,
-> +					sama7d65_plls[i][j].c,
-> +					sama7d65_plls[i][j].l,
-> +					sama7d65_plls[i][j].f);
-> +				break;
-> +
-> +			case PLL_TYPE_DIV:
-> +				hw = sam9x60_clk_register_div_pll(regmap,
-> +					&pmc_pll_lock, sama7d65_plls[i][j].n,
-> +					NULL, sama7d65_plls[i][0].hw, i,
-> +					sama7d65_plls[i][j].c,
-> +					sama7d65_plls[i][j].l,
-> +					sama7d65_plls[i][j].f,
-> +					sama7d65_plls[i][j].safe_div);
-> +				break;
-> +
-> +			default:
-> +				continue;
-> +			}
-> +
-> +			if (IS_ERR(hw))
-> +				goto err_free;
-> +
-> +			sama7d65_plls[i][j].hw = hw;
-> +			if (sama7d65_plls[i][j].eid)
-> +				sama7d65_pmc->chws[sama7d65_plls[i][j].eid] = hw;
-> +		}
-> +	}
-> +
-> +	hw = at91_clk_register_master_div(regmap, "mck0", NULL,
-> +					  sama7d65_plls[PLL_ID_CPU][1].hw,
-> +					  &mck0_layout, &mck0_characteristics,
-> +					  &pmc_mck0_lock, CLK_GET_RATE_NOCACHE, 5);
-> +	if (IS_ERR(hw))
-> +		goto err_free;
-> +
-> +	sama7d65_pmc->chws[PMC_MCK] = hw;
-> +	sama7d65_mckx[PCK_PARENT_HW_MCK0].hw = hw;
-> +
-> +	parent_hws[0] = md_slck_hw;
-> +	parent_hws[1] = td_slck_hw;
-> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
-> +	for (i = PCK_PARENT_HW_MCK1; i < ARRAY_SIZE(sama7d65_mckx); i++) {
-> +		u8 num_parents = 3 + sama7d65_mckx[i].ep_count;
-> +		struct clk_hw *tmp_parent_hws[8];
-> +		u32 *mux_table;
-> +
-> +		mux_table = kmalloc_array(num_parents, sizeof(*mux_table),
-> +					  GFP_KERNEL);
-> +		if (!mux_table)
-> +			goto err_free;
-> +
-> +		PMC_INIT_TABLE(mux_table, 3);
-> +		PMC_FILL_TABLE(&mux_table[3], sama7d65_mckx[i].ep_mux_table,
-> +			       sama7d65_mckx[i].ep_count);
-> +		for (j = 0; j < sama7d65_mckx[i].ep_count; j++) {
-> +			u8 pll_id = sama7d65_mckx[i].ep[j].pll_id;
-> +			u8 pll_compid = sama7d65_mckx[i].ep[j].pll_compid;
-> +
-> +			tmp_parent_hws[j] = sama7d65_plls[pll_id][pll_compid].hw;
-> +		}
-> +		PMC_FILL_TABLE(&parent_hws[3], tmp_parent_hws,
-> +			       sama7d65_mckx[i].ep_count);
-> +
-> +		hw = at91_clk_sama7g5_register_master(regmap, sama7d65_mckx[i].n,
-> +						      num_parents, NULL, parent_hws,
-> +						      mux_table, &pmc_mckX_lock,
-> +						      sama7d65_mckx[i].id,
-> +						      sama7d65_mckx[i].c,
-> +						      sama7d65_mckx[i].ep_chg_id);
-> +		if (IS_ERR(hw))
-
-Missing kfree(mux_table);
-(or move "alloc_mem[alloc_mem_size++] = mux_table;" before this test to 
-have in done by the error handling path)
-
-> +			goto err_free;
-> +
-> +		alloc_mem[alloc_mem_size++] = mux_table;
-> +
-> +		sama7d65_mckx[i].hw = hw;
-> +		if (sama7d65_mckx[i].eid)
-> +			sama7d65_pmc->chws[sama7d65_mckx[i].eid] = hw;
-> +	}
-> +
-> +	parent_names[0] = "syspll_divpmcck";
-> +	parent_names[1] = "usbpll_divpmcck";
-> +	parent_names[2] = "main_osc";
-> +	hw = sam9x60_clk_register_usb(regmap, "usbck", parent_names, 3);
-> +	if (IS_ERR(hw))
-> +		goto err_free;
-> +
-> +	parent_hws[0] = md_slck_hw;
-> +	parent_hws[1] = td_slck_hw;
-> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
-> +	parent_hws[3] = sama7d65_plls[PLL_ID_SYS][PLL_COMPID_DIV0].hw;
-> +	parent_hws[4] = sama7d65_plls[PLL_ID_DDR][PLL_COMPID_DIV0].hw;
-> +	parent_hws[5] = sama7d65_plls[PLL_ID_GPU][PLL_COMPID_DIV0].hw;
-> +	parent_hws[6] = sama7d65_plls[PLL_ID_BAUD][PLL_COMPID_DIV0].hw;
-> +	parent_hws[7] = sama7d65_plls[PLL_ID_AUDIO][PLL_COMPID_DIV0].hw;
-> +	parent_hws[8] = sama7d65_plls[PLL_ID_ETH][PLL_COMPID_DIV0].hw;
-> +
-> +	for (i = 0; i < 8; i++) {
-> +		char name[6];
-> +
-> +		snprintf(name, sizeof(name), "prog%d", i);
-> +
-> +		hw = at91_clk_register_programmable(regmap, name, NULL, parent_hws,
-> +						    9, i,
-> +						    &programmable_layout,
-> +						    sama7d65_prog_mux_table);
-> +		if (IS_ERR(hw))
-> +			goto err_free;
-> +
-> +		sama7d65_pmc->pchws[i] = hw;
-> +	}
-> +
-> +	for (i = 0; i < ARRAY_SIZE(sama7d65_systemck); i++) {
-> +		hw = at91_clk_register_system(regmap, sama7d65_systemck[i].n,
-> +					      sama7d65_systemck[i].p, NULL,
-> +					      sama7d65_systemck[i].id, 0);
-> +		if (IS_ERR(hw))
-> +			goto err_free;
-> +
-> +		sama7d65_pmc->shws[sama7d65_systemck[i].id] = hw;
-> +	}
-> +
-> +	for (i = 0; i < ARRAY_SIZE(sama7d65_periphck); i++) {
-> +		hw = at91_clk_register_sam9x5_peripheral(regmap, &pmc_pcr_lock,
-> +							 &sama7d65_pcr_layout,
-> +							 sama7d65_periphck[i].n,
-> +							 NULL,
-> +							 sama7d65_mckx[sama7d65_periphck[i].p].hw,
-> +							 sama7d65_periphck[i].id,
-> +							 &sama7d65_periphck[i].r,
-> +							 sama7d65_periphck[i].chgp ? 0 :
-> +							 INT_MIN, 0);
-> +		if (IS_ERR(hw))
-> +			goto err_free;
-> +
-> +		sama7d65_pmc->phws[sama7d65_periphck[i].id] = hw;
-> +	}
-> +
-> +	parent_hws[0] = md_slck_hw;
-> +	parent_hws[1] = td_slck_hw;
-> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
-> +	parent_hws[3] = sama7d65_pmc->chws[PMC_MCK1];
-> +	for (i = 0; i < ARRAY_SIZE(sama7d65_gck); i++) {
-> +		u8 num_parents = 4 + sama7d65_gck[i].pp_count;
-> +		struct clk_hw *tmp_parent_hws[8];
-> +		u32 *mux_table;
-> +
-> +		mux_table = kmalloc_array(num_parents, sizeof(*mux_table),
-> +					  GFP_KERNEL);
-> +		if (!mux_table)
-> +			goto err_free;
-> +
-> +		PMC_INIT_TABLE(mux_table, 4);
-> +		PMC_FILL_TABLE(&mux_table[4], sama7d65_gck[i].pp_mux_table,
-> +			       sama7d65_gck[i].pp_count);
-> +		for (j = 0; j < sama7d65_gck[i].pp_count; j++) {
-> +			u8 pll_id = sama7d65_gck[i].pp[j].pll_id;
-> +			u8 pll_compid = sama7d65_gck[i].pp[j].pll_compid;
-> +
-> +			tmp_parent_hws[j] = sama7d65_plls[pll_id][pll_compid].hw;
-> +		}
-> +		PMC_FILL_TABLE(&parent_hws[4], tmp_parent_hws,
-> +			       sama7d65_gck[i].pp_count);
-> +
-> +		hw = at91_clk_register_generated(regmap, &pmc_pcr_lock,
-> +						 &sama7d65_pcr_layout,
-> +						 sama7d65_gck[i].n, NULL,
-> +						 parent_hws, mux_table,
-> +						 num_parents,
-> +						 sama7d65_gck[i].id,
-> +						 &sama7d65_gck[i].r,
-> +						 sama7d65_gck[i].pp_chg_id);
-> +		if (IS_ERR(hw))
-> +			goto err_free;
-> +
-> +		sama7d65_pmc->ghws[sama7d65_gck[i].id] = hw;
-> +		alloc_mem[alloc_mem_size++] = mux_table;
-> +	}
-> +
-> +	of_clk_add_hw_provider(np, of_clk_hw_pmc_get, sama7d65_pmc);
-> +	kfree(alloc_mem);
-> +
-> +	return;
-> +
-> +err_free:
-> +	if (alloc_mem) {
-> +		for (i = 0; i < alloc_mem_size; i++)
-> +			kfree(alloc_mem[i]);
-> +		kfree(alloc_mem);
-> +	}
-> +
-> +	kfree(sama7d65_pmc);
+> +	gpiod_add_lookup_table(cd_gpio_lookup_table);
+> +	return cd_gpio_lookup_table;
 > +}
 > +
-> +/* Some clks are used for a clocksource */
-> +CLK_OF_DECLARE(sama7d65_pmc, "microchip,sama7d65-pmc", sama7d65_pmc_setup);
+> +static void sdhci_pci_remove_gpio_lookup_table(struct gpiod_lookup_table *lookup_table)
+> +{
+> +	if (lookup_table) {
+> +		gpiod_remove_lookup_table(lookup_table);
+> +		kfree(lookup_table);
+> +	}
+> +}
+> +
+>  static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  	struct pci_dev *pdev, struct sdhci_pci_chip *chip, int first_bar,
+>  	int slotno)
+> @@ -2129,8 +2190,19 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+>  		device_init_wakeup(&pdev->dev, true);
+>  
+>  	if (slot->cd_idx >= 0) {
+> +		struct gpiod_lookup_table *cd_gpio_lookup_table;
+> +
+> +		cd_gpio_lookup_table = sdhci_pci_add_gpio_lookup_table(chip);
+> +		if (IS_ERR(cd_gpio_lookup_table)) {
+> +			ret = PTR_ERR(cd_gpio_lookup_table);
+> +			goto remove;
+> +		}
+> +
+>  		ret = mmc_gpiod_request_cd(host->mmc, "cd", slot->cd_idx,
+>  					   slot->cd_override_level, 0);
+> +
+> +		sdhci_pci_remove_gpio_lookup_table(cd_gpio_lookup_table);
+> +
+>  		if (ret && ret != -EPROBE_DEFER)
+>  			ret = mmc_gpiod_request_cd(host->mmc, NULL,
+>  						   slot->cd_idx,
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 153704f812ed..4973fa859217 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -156,6 +156,7 @@ struct sdhci_pci_fixes {
+>  #endif
+>  
+>  	const struct sdhci_ops	*ops;
+> +	const struct dmi_system_id *cd_gpio_override;
+>  	size_t			priv_size;
+>  };
+>  
 
