@@ -1,150 +1,151 @@
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC0831CD1EB
-	for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 10:59:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 425CE1CB515
+	for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 11:03:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732186760; cv=none; b=NsuSffcpO/Zo9Grk3ViO7XTzXxr5nOyqOzdD4Um8UzLVqpLHkn02xLxURgl5lQIEJm1VaEGiyBrskGILZXm5pz/GU8h4Z7U7DiYsx8SMJYZ4CxcET8dlEbX2uz1YPZkQR+rSwIFLIuFvwv6JkvsrPcLNY90ER3FYvd+ywDMkLTA=
+	t=1732187030; cv=none; b=sA/YyqRxKu0O1YiEbR0i+OzR6oMb7FcjH7t1mZjX+A+Hxd70pyVSoZ+4XIldoVdg+ciH97Et4eDAQeZ9AWdQk07iP3uuL4y8EjFIFjcPyFGFKopwAUyv9yIJCSE9vbFKFadVRl5uPKMCfht6Rl+DW7VRoMvuCIO2UhVP7sJhDb4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732186760; c=relaxed/simple;
-	bh=YnA/1DUcUhvDASk9V/VeCELnPCVs4RkYPWSe1KxRapU=;
+	s=arc-20240116; t=1732187030; c=relaxed/simple;
+	bh=7PVx9sFZRrAihAdQ/yUnR6p8Gj46dp5SH7888wIWc3I=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QmFFtQzVvi4fK1RPuZzPsgsxi8XRuNyCbH9CPU8TUC8lIbDCCQgTzGLXKOd8BTZk948G/4JY1dFDzUSEQxuV9Tx/zFAvTjAm50s5ErZwT5oioJHc4RoLuixFB7Me7VwtYNc8Pp/Uzg8z7spqk5FeBZ/j7uFzX5NmecudH6N/dLg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jfJklRSH; arc=none smtp.client-ip=209.85.219.181
+	 To:Cc:Content-Type; b=H3kSQqq4iTr8G6vd00WipEeulu/w2N8TaBJLL9sSjww4S0EWAem0gsP/BlyGCW7C8oh7G7W1eQt07cggMtgsanHbX1Ga7sMBU1QilbWQf9vFL/UQZC+apMi+UTTFv/yJFT6OEvBqUkaYDjwqZirHNvACRGHmMHOnl/7ZNiD3wuc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tfwg01Cl; arc=none smtp.client-ip=209.85.219.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jfJklRSH"
-Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e388503c0d7so627452276.0
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 02:59:17 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tfwg01Cl"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e3873c7c9b4so726184276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 03:03:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1732186757; x=1732791557; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=zHvl496Z7pSqn98+EqxZXZG+jqGpIOiw3viE2hiU7vc=;
-        b=jfJklRSHD9/wkcUGX1VcRUIKvU3E8NPK8v1MW6tQ6/M8Aa4hQFuh3e1Ha1Xvlq51CC
-         CgxmWD/4emVH2yAFSwtHaD10zW6AAWX2ObHuQG6uNotlAK/DbuSxWUfOz24rQof484Bq
-         0ZSLRVx7Fs5l6ggaQuNned0gkgPLfJ5a4VeWwa0i6pNjL6P6WViPeWtivwZMjqrxCmVh
-         n9QjiX1S8JbDlw7msafEzwIurEz2wfEt9yqpyPbk4IMkT9gu7BLqMUsRNpHoQqZD89GV
-         aivaGPNjRpm8soULRPAIcHHSk1rWk5aHUkAEUe3kjh5zyF1LpNEHI6lDes3zzCuE5jzw
-         4tvA==
+        d=linaro.org; s=google; t=1732187028; x=1732791828; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=HnmX5TqmpI0tRkOweTa1/DhIzHunTTWi3NrhaxtEZZM=;
+        b=tfwg01ClTD7JVknLKBXOVgp/r6wMpkfqVhNpQz2juqfJt6fiL1bjfLQ121b5lNEsco
+         jUDa85f+labp/Tl5NWXIJDqDZyMege4bP2evJgvTVfSKtJkSoWp8UuAkR/vYIuphmmAd
+         SXPVkYGUOQuhbrBOUs3EtVIJfyV/EREIS+R8SLMdhuD2MaKxYbE4AFem36ucwbT0aEKE
+         8dxrRYttvACv1XwrDZEGb0iv+CLsOBoIS/x7VQputLAgMTY/kR2ShM2VuIT1XEWz7CYq
+         TQ/dEQPry/oslWEQd8oxI3inK8tckt6EohH7/iKueJRUXNS8O2Dj8WJJNPv59XXj5p7t
+         hVWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732186757; x=1732791557;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=zHvl496Z7pSqn98+EqxZXZG+jqGpIOiw3viE2hiU7vc=;
-        b=Xuri5gqulujWGImNSh93a/RWN3LssLEtnbhOiMSezFZqEGcy1P4SqpjIp/5XiXe/iN
-         WFqPQl9fE2yf+DDgfZTy8VCCOzvhLPZQgQAB+79KTX2o03ROZZpx5yWmtKvPYEnQS8YP
-         J+A+57HFKdBxRYzAAinRXxwgj9NcMaPh89tYugACJN835GsidwM1b6kTcj6QYYc/Wcoa
-         57azEzmY+OtmQnvW9HQ4GEWNztY2WIid/Snd43/v/LYMAF/Erb43fycGJxo5+wme6P6C
-         y9msDd/R3Ue1MeG5SZ/vVEwiCv0EXIb/NAOagjFkUDj9rpP5lkS7xRNPTWh6Lqzky2/7
-         /Fow==
-X-Gm-Message-State: AOJu0YxEAlVAeg4IZAF/NA1IeoPQ9iu2KKAfryfM6bOHgm8BBELOo7ob
-	R7fXVl2l6IfYU6Th5we6mNSFNmVSTi0bjoEweroBxzT6oC9+kCLYmFq31PEczVC4yg+ZMkr+SJs
-	fql/anB8tkgUYukPkzxOnIIn8ngCzndzRWMuYR7/clHFbi3I03Xo=
-X-Gm-Gg: ASbGncsnE66PoG+JDVwxqIjJMXiL23AOvAMBz2wsLzvcyIXlIQ2ExL4cBGuUIwLclMP
-	tXILhrQoOjafqktH9Jqns9wLersKIEYd7
-X-Google-Smtp-Source: AGHT+IElbar0KOnHQoMjtgZ9A8x6vKe5HVzOGCEKN7SP22gDNrI9hA9F1uiWE3NxT3zuXQurvUfMjHZHnCeT02pKkdc=
-X-Received: by 2002:a05:6902:240d:b0:e30:d4e4:b9f0 with SMTP id
- 3f1490d57ef6-e38cb70aca2mr5431005276.46.1732186756848; Thu, 21 Nov 2024
- 02:59:16 -0800 (PST)
+        d=1e100.net; s=20230601; t=1732187028; x=1732791828;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HnmX5TqmpI0tRkOweTa1/DhIzHunTTWi3NrhaxtEZZM=;
+        b=RrzepuwjJgjBdBv8w+Lz3KOF95zJN4T3iaF6SqZQQ23gScJ8yYfW/XHfpdp5JHcOaE
+         gELaZuFIqsuzK+W8ePWvDlbSFqystDE4LUez5ZWokhcdaYm+wks28vKl8p3AvLRJQ1UQ
+         c2nsw2lm+cPjSmF1KyYYALZe3m912mTMbjon+mwO/uiQgrlO8mqVadH0rd5PqR0wxyCA
+         2z2SYtF0TUrTVoreYTfHCJ53wKWZ7rX5b+u5Ffe5NG1fpvCGN6MT9NRgokyOIJQylbim
+         PI8lEWZDw9zILWNKjs0Q7sH7aI0Ffh42F4xheIlMJ/XlEv2g1a+sG03NjeWOG9/54Ezz
+         1G1Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUPS78k4RadG1Iog6XsoZplE9/swNlphAD/gC/1mDGMwYtvXYin+rspofBzW5/lx3pEoT87IFuSlY0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw2iJj9RhcRTheVcLJ/MErRi5I1thvOB90fsXmdZ0a6Y4UHKB3D
+	9pHNVw5Rad5Wo0nzrkIYYqSkF1StW0BapDB+FSDIXLnl4y6zEYHnkyAurk4+gwWJDuaGHuUevBn
+	IqEs8C1fCqjMDJrjAkwRYsfiE5u87hBloGmKsyA==
+X-Gm-Gg: ASbGnctUtOOeWGcDdaJlQet9d41Bis39lKeYwBAZPEKv1Du0do1QU25fqZsxmYIBRLj
+	yT5A9GV7E0foDko56yISfdc/81xa8+7TE
+X-Google-Smtp-Source: AGHT+IHThgwC/2AN5VCX26+izVDudjEqWF+s/Kp+cAGqMDexA7+s1nCPpNNrlrMFSnqiN8eH6D0iaXXY9h4nOZXblmE=
+X-Received: by 2002:a05:6902:1004:b0:e38:d1e5:c247 with SMTP id
+ 3f1490d57ef6-e38d1e5c514mr5266672276.19.1732187028290; Thu, 21 Nov 2024
+ 03:03:48 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <BN0PR08MB695133000AF116F04C3A9FFE83212@BN0PR08MB6951.namprd08.prod.outlook.com>
-In-Reply-To: <BN0PR08MB695133000AF116F04C3A9FFE83212@BN0PR08MB6951.namprd08.prod.outlook.com>
+References: <20241006135530.17363-1-quic_spuppala@quicinc.com>
+ <20241023213134.GC3736641@google.com> <CAPDyKFo05Hyw9gdEBx7zQq_6P58ittHHsZQLuqmeR1AChyHSHw@mail.gmail.com>
+ <20241025025628.GD1781@sol.localdomain> <CAPDyKFo5EijkL5Y+MZ0=ZWyGdLfDdSdqTOC0eMsTVY00KP+RAA@mail.gmail.com>
+ <c41839b9-36b1-431e-9031-4e57f62b50c2@quicinc.com>
+In-Reply-To: <c41839b9-36b1-431e-9031-4e57f62b50c2@quicinc.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 21 Nov 2024 11:58:41 +0100
-Message-ID: <CAPDyKFrmMog-jemQb2-FGogq93+RACkoBXxOFRHUfYSkEsg4cw@mail.gmail.com>
-Subject: Re: MMC card detection may trip watchdog if card powered off
-To: "Anthony Pighin (Nokia)" <anthony.pighin@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date: Thu, 21 Nov 2024 12:03:12 +0100
+Message-ID: <CAPDyKFpKnofrut7pbWTJSrZP8uHCWO9omr=bNLp27JH6aP8q7g@mail.gmail.com>
+Subject: Re: [PATCH RFC 0/2] Avoid reprogram all keys to Inline Crypto Engine
+ for MMC runtime suspend resume
+To: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+Cc: Eric Biggers <ebiggers@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com, 
+	quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com, 
+	quic_bhaskarv@quicinc.com, quic_neersoni@quicinc.com, 
+	quic_gaurkash@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 20 Nov 2024 at 17:21, Anthony Pighin (Nokia)
-<anthony.pighin@nokia.com> wrote:
+On Thu, 21 Nov 2024 at 06:16, Seshu Madhavi Puppala
+<quic_spuppala@quicinc.com> wrote:
 >
-> If card detection is done via polling, due to broken-cd (Freescale LX2160=
-, etc.), or for other reasons, then the card will be polled asynchronously =
-and periodically.
 >
-> If that polling happens after the card has been put in powered off state =
-(i.e. during system shutdown/reboot), then the polling times out. That time=
-out is of a long duration (10s). And it is repeated multiple times (x3). An=
-d that is all done after the watchdogd has been disabled, meaning that syst=
-em watchdogs are not being kicked.
 >
-> If the MMC polling exceeds the watchdog trip time, then the system will b=
-e ungraciously reset. Or in the case of a pretimeout capable watchdog, the =
-pretimeout will trip unnecessarily.
+> On 10/25/2024 2:12 PM, Ulf Hansson wrote:
+> > On Fri, 25 Oct 2024 at 04:56, Eric Biggers <ebiggers@kernel.org> wrote:
+> >>
+> >> On Fri, Oct 25, 2024 at 01:07:18AM +0200, Ulf Hansson wrote:
+> >>> On Wed, 23 Oct 2024 at 23:31, Eric Biggers <ebiggers@kernel.org> wrote:
+> >>>>
+> >>>> On Sun, Oct 06, 2024 at 07:25:28PM +0530, Seshu Madhavi Puppala wrote:
+> >>>>> Crypto reprogram all keys is called for each MMC runtime
+> >>>>> suspend/resume in current upstream design.
+> >>>>
+> >>>> Is that correct?  I thought that similar to what is done for UFS, the key
+> >>>> reprogramming happens only after the MMC controller is reset.  I thought that is
+> >>>> different from a runtime suspend.
+> >>>
+> >>> Looks like Seshu is not really worried about the host's runtime
+> >>> suspend, but the card's runtime suspend.
+> >>>
+> >>> Perhaps there are some out of tree code involved here that makes use
+> >>> of MMC_CAP_AGGRESSIVE_PM, which is what allows the card to be runtime
+> >>> suspended?
+> >>>
+> >>>>
+> >>>> If it's in fact triggering more often, maybe that is what needs to be fixed?
+> >>>
+> >>> We could extend the runtime PM autosusend timeout for the card, if
+> >>> that makes sense.
+> >>>
+> This change aims to address host side feature by not tying it up to card
+> side flag/feature.
+> >>> Kind regards
+> >>> Uffe
+> >>
+> >> The keyslots are being reprogrammed from mmc_set_initial_state(), which is
+> >> documented as:
+> >>
+> >>      /*
+> >>       * Set initial state after a power cycle or a hw_reset.
+> >>       */
+> >>      void mmc_set_initial_state(struct mmc_host *host)
+> >>
+> >> It's called by: mmc_power_up(), mmc_power_off(), _mmc_hw_reset(), and
+> >> mmc_sdio_sw_reset().
+> >>
+> >> Can that mean a power cycle of the card, not a power cycle of the host
+> >> controller?
+> >
+> > Yes, that's correct.
+> >
+> > Well, indirectly the host is likely to be power cycled too, but not necessarily.
+> >
+> >> The keyslots are part of the host controller, so that may explain
+> >> the problem.  The keyslots should be reprogrammed only when the host controller
+> >> is reset, as that is when they are lost.  (And it should not be skipped entirely
+> >> as this patchset does, as a host controller reset is possible.)
+> >>
 >
->     [   46.872767] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg 03220301=
- flags 0000049d
->     [   46.880258] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x00000001
->     [   46.886082] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x00000002
->     [   46.891906] mmc_request_done:187: mmc1: req done (CMD6): 0: 000008=
-00 00000000 00000000 00000000
->     [   46.900606] mmc_set_ios:892: mmc1: clock 0Hz busmode 2 powermode 0=
- cs 0 Vdd 0 width 1 timing 0
->     [   46.914934] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg 0001000=
-0 flags 00000195
->     [   57.433351] mmc1: Timeout waiting for hardware cmd interrupt.
+> This will be update via a separate patch by invoking reprogram_all_keys
+> API from sdhci_msm_gcc_reset() API
+> https://github.com/torvalds/linux/blob/master/drivers/mmc/host/sdhci-msm.c#L2363
 
-Hmm. How is the polling being done? By using MMC_CAP_NEEDS_POLL?
+Okay, in that case, please post the complete solution in the next
+version. It seems like $subject series on its own doesn't make sense
+to us.
 
-The above certainly looks weird. The mmc_rescan work should not be
-allowed to run at this point, as the work is getting punted to the
-system_freezable_wq via mmc_schedule_delayed_work().
-
->     ...
->     [   71.031911] [Redacted] 2030000.i2c:[Redacted]@41:watchdog: Watchdo=
-g interrupt received!
->     [   71.039737] Kernel panic - not syncing: watchdog pretimeout event
->     [   71.045820] CPU: 0 PID: 0 Comm: swapper/0 Tainted: G           O  =
-     6.6.59 #1
->     [   71.053207] Hardware name: [Redacted]
->     [   71.059897] Call trace:
->     [   71.062332]  dump_backtrace+0x9c/0x128
->     ...
->
-> CMD6 is SWITCH_FUNC and arg 03220301 is POWER_OFF_NOTIFICATION (bits 16:2=
-3 =3D 0x22 =3D 34).
-> CMD13 is SEND_STATUS, and when it occurs after the POWER_OFF_NOTIFICATION=
- (as above) bad things happen.
->
-> I have made the following change to attempt to work around the issue, and=
- it seems to hold up, but is also quite brute force:
->
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -2046,6 +2046,11 @@ static void mmc_remove(struct mmc_host *host)
->   */
->  static int mmc_alive(struct mmc_host *host)
->  {
-> +       if (host->card && mmc_card_suspended(host->card)) {
-> +               pr_err("%s: Skip card detection: Card suspended\n",
-> +                      mmc_hostname(host));
-> +               return -ENOMEDIUM;
-> +       }
->         return mmc_send_status(host->card, NULL);
->  }
-
-Yeah, the above isn't really the correct solution in my opinion.
-
-We need to prevent the mmc_rescan work from running, which I thought
-we already did...
-
->
-> Anthony
->
->
+[...]
 
 Kind regards
 Uffe
