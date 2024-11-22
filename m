@@ -1,228 +1,356 @@
-Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2077.outbound.protection.outlook.com [40.107.92.77])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0E181DE89D
-	for <linux-mmc@vger.kernel.org>; Fri, 22 Nov 2024 16:15:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732292108; cv=none; b=LP71gZu01tcr9zQvM1B6PHef4wDLVn8ygMxNLPRl1GqJc6D8Uj93YF5eEWVW8TNg9LVF0bVUMBHl2eSkUgtGiY5l5Gy8DqjFNfsVqnUa0wsts3mWFTQJ01YkeTS60Vd0/0qGbKuQkKw4NReZp89plQIqQaHpqNWgRpfcXA1fXVI=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732292108; c=relaxed/simple;
-	bh=UXHKH+tn2k1sf2pymXA3k1t9baA/88reB+OQUj4zdHo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=qA6JVlp07LqeIKQphREgqSPeLyHD7f0BYbJLAXoqwrKgaBkcZTK02u+gQZNSzPBlXhcp07+XYOpeZobwy1VwSGQTi9PurysT7GKBBknrRge8LW6eix7x2UVIxvcL0gIZHOdfbV/4MR3kvvpd4NiD5Lcz0/ntSroQmkLbdv8oals=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=p55FwqHi; arc=none smtp.client-ip=209.85.208.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D173113B58C
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Nov 2024 17:47:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.92.77
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1732297671; cv=fail; b=p0VEoX0Xl5BtDTUGIg1GB2MdQhCBD4x5T4fKg/0qgBMXimgBNN5fPdCF32CNC6vT7hdhYsXKuDJia67RyAByrck+tBqc6FJhLB7NnbVPjL0NNyOiXUpVhrwkrMgVCGmD6c7Mvi2maxaoVY75VyDm7rqxyk/miS9cxFzmC71gs5s=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1732297671; c=relaxed/simple;
+	bh=49BmNLMoUERL9w3FckgkEBvZ4+f9QOczd/dP00YOCB4=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=hUELe0BuDKexzvXT4x+9dDXrSjtNOogrDKCA7UmL0nb4f/NcGtnHapYPQERsjSWXr6THucVIjrwtcu6avka3T6E8FbtHmALsSjDoHvwtUduMopBn7Gf+ojxFn6Or2ZzSKP8OFAAAmet2Z+tBFjwaq9p31ecJyJoql6PpGrwVfn0=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nokia.com; spf=fail smtp.mailfrom=nokia.com; dkim=pass (2048-bit key) header.d=nokia.com header.i=@nokia.com header.b=hIauWjQf; arc=fail smtp.client-ip=40.107.92.77
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=nokia.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=nokia.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="p55FwqHi"
-Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-5cf9ef18ae9so6487315a12.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Nov 2024 08:15:05 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1732292104; x=1732896904; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IKuaoF5WY6am7cO+jXx2uCjMC60YxcYyklIAVCPFPTE=;
-        b=p55FwqHiYY+5gvWK5BamjrMWtyk48nL/dLiyERGgGD1dt93eljXDwGyR+OEaQnv9ov
-         Cs1XEarMh7iyIDCUoSr5eeVG5DRbzB6/wVCF+P5RKUgROO2C94JgugTxbEjNdvFLD3vM
-         sW5rOxyJDXKxuLSNnpmlxlD8bAMVOKRnNVVfh8P9k7mRnne2F7fzIyPbW3jO0Ck5sewu
-         EnsQxHs4ekiGDwaiobY4Kfunn0AkeJwkxehkRAyn7VOzDP/59rYvhAWR1gI/a6SeFT6W
-         +H5OCeaDIavtjM3D/bknRlPbGpyM1OEOKdzFykUAhZ9sIL72ygKAyESzB5WTNITBv5cR
-         ABpA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732292104; x=1732896904;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=IKuaoF5WY6am7cO+jXx2uCjMC60YxcYyklIAVCPFPTE=;
-        b=sXPse34wtjTQ4Bc6Tet3GGK190bV04TYzq2Olb2JHpgTpz6xNQOPnm3Ivi1qj1TqZd
-         r2qiT0I+dQEwiWI910d1P68p18tgok4XjCJYzlPFEUS+zX7jB0NfodKiQGq/Zwr8Oa+q
-         DkJ+zD4kbDdZn06V1XdZHywBmsnm8rx35kJNpioSOTCNuLodaByYBTuKgbHMhMxl6BVz
-         xRgqmc9RXZq2eKto3Ts6Se8emsuAQSCFZeXeB17q7tH60yn0hP6rTM+ou310xLCchshZ
-         IpTCNY19JTnqt28k6R1JYtIiLxdX743dg16IYUdk2hJs/pjeG5x4MsZAXcNaq+4GeoJg
-         nVXA==
-X-Gm-Message-State: AOJu0YxQgr5rVXYUoE3CPmtnxuhAnngipiVfMcyvIwkgjrhC2WfU44KM
-	Ks3o9kjC6cTsdTbl7PJuPhqe96FoRrGkT3ppVIr6T6CsV0IwrH07pPXEOS+X7tUUyUdnpZMNn0a
-	sTQRmlAu35lbkTYDYwKamanUQTVwpZ7OgEC5XTA==
-X-Gm-Gg: ASbGncsw7NytM6aA4dyRHMYH9QOsV50IhcOZ3pWG9egcX6MMB2Utbz/n9wwX87qtguY
-	+ExLqJQJJkJxbcLJVn3/4s+6LoCgm5c8A
-X-Google-Smtp-Source: AGHT+IFSakD+edGOb7cjWBeASvcWCarbhk3/bGqqxTgW8QTN6VnCuOros7gn3tl8Zs99mMCeBEl7vdhAv7EJRVPLTCY=
-X-Received: by 2002:a17:907:770a:b0:a99:f777:c6ef with SMTP id
- a640c23a62f3a-aa509985435mr429626166b.3.1732292104288; Fri, 22 Nov 2024
- 08:15:04 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=nokia.com header.i=@nokia.com header.b="hIauWjQf"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=CQONPN1PdTjM7VDlcU7Q1ypVvxYq39WBh92Pnk16hMKqAq0TzpnUGssvhuppphFz5/EtP3uVfk7FgyaBNa+aj4Ra3eDboEwvntz9VJeWCZtVmgVErA2NxJ76+HIPDLv2neKh+/oQ2QjcEPR4KGTjXdQ6Mfh3/XtlOGa8iQge8LAHh1orGnJcgr+Zy/qn2WY38Q0UnZEQ5GQmfMY9qvnB8MrhhOYGcMAMSGP5m/Nu3eH2/XwnMAYHfB2G2bVYwDNVJ095K5QIWER5q1ztpKeLyb5ex2QYuDNsyVlYP0UVoZvYbqruddp9jFuj5xdfpMTrfJscqD3Dqt2IT8o+alGpFQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=QnvAiP1Xa4h/XBQS/W7XxVTQnaBheYlBL7bBL4lP6Rk=;
+ b=n+yXs1V20Ljq8Lvz2UznNfxodwPtANgRZUaoIA+OSbUB2KNqdphmM9EOjmqHkYjkXPJoRfzoeJWg+Q7Q+sE7uL6dwe869Dtlp0aYJqCUznKRyHVlzpYNbuaQujmKo/XogFkEPVoL7oqFh7ndJVdBRq02rgdVVJzp/3CEHrZqlWeiUjnWRigakq0MPb6HopwEflXU9aF0SPttOmAJ6QRo7erFtl7fLLoLjqzmdJpL7+SHceC52YD+OTn1ZGHYnjKoKPPiodZfykXIoRie6tKE2IhqtfmzPwowi+yAKej5R4d283n40/eMsO5CepqHnKuvpkt6CfZErluvt+Wk4ggmLg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
+ dkim=pass header.d=nokia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=QnvAiP1Xa4h/XBQS/W7XxVTQnaBheYlBL7bBL4lP6Rk=;
+ b=hIauWjQfPa/RhfKQ3i6LV3o7L7vcpw50WOuRUMalT4jbUWOFBwzLOUr0jIaXKP5YoFXXsg7fIhmoxKRdc3R9j5dT9FH5pm5YXTiwYMdDT0BhMeUIIokc+NX8HJb7z0vQ3Mc1tiMFjUPZRycxeBSNa74/OmaNhQ5PfdQYBLoHIB4nyUy9k8tdZOwvzWQIQIk+vz9aktYz60tMiBLOHIGaRp+24UAZTJ6G4GRXTlSGa3p7qcuhW5TsS/rVa5SaO2ETE91z9bJVEERKkj51Ha9i6B3PEsml1L3Re+aGiEFKqar8uN5B2Wd8WcAEaKOs3IXhxJAsXfkExYFC0qEs144Ddg==
+Received: from BN0PR08MB6951.namprd08.prod.outlook.com (2603:10b6:408:128::14)
+ by BL3PR08MB7515.namprd08.prod.outlook.com (2603:10b6:208:346::24) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8158.27; Fri, 22 Nov
+ 2024 17:47:44 +0000
+Received: from BN0PR08MB6951.namprd08.prod.outlook.com
+ ([fe80::9ea8:ab2e:4ce1:2d36]) by BN0PR08MB6951.namprd08.prod.outlook.com
+ ([fe80::9ea8:ab2e:4ce1:2d36%3]) with mapi id 15.20.8182.018; Fri, 22 Nov 2024
+ 17:47:42 +0000
+From: "Anthony Pighin (Nokia)" <anthony.pighin@nokia.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: MMC card detection may trip watchdog if card powered off
+Thread-Topic: MMC card detection may trip watchdog if card powered off
+Thread-Index: Ads7Zw4syJtxBkzjQFCdin/8++ZdRQAnUT6AAATlKMAAN9t7gAADregw
+Date: Fri, 22 Nov 2024 17:47:42 +0000
+Message-ID:
+ <BN0PR08MB69513344FCF13A3CD7780B1283232@BN0PR08MB6951.namprd08.prod.outlook.com>
+References:
+ <BN0PR08MB695133000AF116F04C3A9FFE83212@BN0PR08MB6951.namprd08.prod.outlook.com>
+ <CAPDyKFrmMog-jemQb2-FGogq93+RACkoBXxOFRHUfYSkEsg4cw@mail.gmail.com>
+ <BN0PR08MB695151B49A2CBFF1D293775883222@BN0PR08MB6951.namprd08.prod.outlook.com>
+ <CAPDyKFo6BnHRg6G9vj6xiUncowUi59ExE3sCVLk8K+=6wqd1xQ@mail.gmail.com>
+In-Reply-To:
+ <CAPDyKFo6BnHRg6G9vj6xiUncowUi59ExE3sCVLk8K+=6wqd1xQ@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nokia.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: BN0PR08MB6951:EE_|BL3PR08MB7515:EE_
+x-ms-office365-filtering-correlation-id: fb835067-599d-473a-58f2-08dd0b1dc427
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|376014|1800799024|38070700018;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?dS5ICzMSMLIWBnBYE8jhpniOo6M093ggRPqMmao13zDxo5lX9nSJYlo6M7NY?=
+ =?us-ascii?Q?XyvovFjfUsHlgsOiSYpXNHyUXrggSbn4RAXLVnXQOCO/i5i8vb638FRE6rA2?=
+ =?us-ascii?Q?uub+eZL6JJyQYfu/vmF36YyC2EJnhVT1xicsv5NUq/7Z2d6OKDmB1ECZ0+Y3?=
+ =?us-ascii?Q?Pf+ayl/WOzgyEUACwnOXJx8EXGdcYSCoAizTpkhgizqmnHMRLw5ncB4mDlQk?=
+ =?us-ascii?Q?Rw0RP2rn4BG3KdSxcCXVjr3c7/zHqRDtU6b0nyINnTbHfB+OUIGwDZ+AOgOR?=
+ =?us-ascii?Q?t/y11+QSjNXWg9zv25Kt87ph6bgLns4AFnTh2P7QZTPCaPA/XI8KiBL03iIF?=
+ =?us-ascii?Q?7Wgaa6geggsIHKO+/laDqcCfyI3U16FRgmgRebBMkLg9seUsIIthVozDI2RU?=
+ =?us-ascii?Q?oa+ne6Yd1j9Wo1c2PyQN6IbXlGppY6YbvJwChdCsPCzHqzFKuLT7JpcOZrrD?=
+ =?us-ascii?Q?UnW1Jqs3dR1oprw8DHlVyShnWDdhKn0StiW3s0KnTVPaOHx7IRw96uhXVSRL?=
+ =?us-ascii?Q?sj6fqUlU15Qmh8CZrkqgRlnTQws62rEnQquyd0ekEudeivigKMbI77wdxzME?=
+ =?us-ascii?Q?5ZubMxGOioZgBkORXamU6shj6HOu3KX68GlwQoOv8EqTDvGJtJIl1JXm6RVG?=
+ =?us-ascii?Q?8sJJ0b9Qq0v9i78bzKwVgUlY35IuHZvibzXgLpoSHkDIiXOdv+z1nh6Ggm+i?=
+ =?us-ascii?Q?nZ21WeAjhlRUY6tWW1PrKIMN4OW+m0GMnMPgVcL/n/WovFaPQgXaAVRfOxl2?=
+ =?us-ascii?Q?1IL6SI2jgioXsD1WyIHDqt+Z+ZErKdRkPZfzpRJ7kJDrXK1+fnEmE472hJVj?=
+ =?us-ascii?Q?XBbKT4Vz+cePBvAb+iM+kzPNhWGnLWaf4GhrQargN0G/hqKgO6hw+C2TyHjl?=
+ =?us-ascii?Q?vbC24kdipcG2cnvn7APa4PP47SNIjt5F1I6SMI8cjXDcYhuj0nS5/a4ij1T8?=
+ =?us-ascii?Q?iwfjqBh2ILF8TdmHSifo1yjd7w3f46SN20IUrY52KMC8owp+IU64MJkaMd/f?=
+ =?us-ascii?Q?hIaJytYUVNBqwL4XUcO4xjl+qMiGZtio7dm5t2DdylcGyIxumdu9RlhGDTCv?=
+ =?us-ascii?Q?8SUPIuM/Qy2FyhsBUrCG+Svn54t0H+KkDby0mhHZoOA39TDf4IG09ZKu0wrn?=
+ =?us-ascii?Q?aaa0+/oH5tZTQuWj3CYgYOmV+EMzhD2e96upHFEyEm5GPQHrqtREoFuRM1ny?=
+ =?us-ascii?Q?Jvd053khWkzZpg5ASDeH9SpgOLBgr5OKlrjfxOpEuCz1D35duDKCCJ5S3IhA?=
+ =?us-ascii?Q?ok0WKuwo6ffqeWAmp2ZvRv4EICAiWNy2b9TraY+TE/gt+ELLE6T64FLv5QI6?=
+ =?us-ascii?Q?Z7K9PwPMsTW39U84nC3IOrrcErR5A2Ekl2kqnJG5KcscottK177zkDaNj7Em?=
+ =?us-ascii?Q?5W1BNmk=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN0PR08MB6951.namprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?XyAQpInjunLH5Pqay47UtzYLxqfK8YVhzKp5Ni+d3KzX0uZsGKNMgo8MQ8/h?=
+ =?us-ascii?Q?cBZeUCqAYbfZLQvdwZ4dU+oijlgc2DUwGwmVgaHgNC9OvO8Fuyxjr8FwykfH?=
+ =?us-ascii?Q?h4un928tZ6ge8qayYEqyQAfbE3YfOZCJ6HJknyausB9SqNa6IrUSKdyd/w1N?=
+ =?us-ascii?Q?WSyxANeRm8KSpm8lwaelgMBNkfx+5Kn77A696I7SF8/xckKKJCmCKgln3Fq9?=
+ =?us-ascii?Q?qVbobMnb1O/JpACqidzpuhi3sqIAY5y1jxhcqPeMhP2Ojta2LhueccmxqJB/?=
+ =?us-ascii?Q?iZMblNOxY0QrwORuHDY1XVhakH23w/B/+6wB9vSr/WCx57DmSBXEhMG6r1+M?=
+ =?us-ascii?Q?v+On0fcakJo7jdT5Xv+aGoaw0Jql3+zB6wDGIDO8kKTDk5wAB6ohvJ7heQzZ?=
+ =?us-ascii?Q?xj9+p9xULIRw6sgX02aMWqqyREc8hJJYQEpEihM0cgYUWX0MdaHGN7thUOiY?=
+ =?us-ascii?Q?//lCYFJCy9WBaDqjjgWn89ABVwYOR6Itu/SWMKEAa1tqyHX7g8fBneVO8fa1?=
+ =?us-ascii?Q?C2Iz/B/XaMgxo40Tx3xsT9PlXdyg8lex1Snb73XKj6oouW4qEiZSuDbWs384?=
+ =?us-ascii?Q?2vltouYTksCZcwE+6QRyA0vESgwcgpLdG52E3NuSEAu9gfHvo1Q+1FkjzuL1?=
+ =?us-ascii?Q?nZqKy/zyOcxhvcLKacdqY25A9+Ih/Z5ueUeeNIo32EmqPBMxp7NDwK6X+g2A?=
+ =?us-ascii?Q?z42sP1bpgdTGKQJJw8p/uBGUHa0MjPj5D7/9hYVADDD37+PGCt6MLL0QDquX?=
+ =?us-ascii?Q?E0p5tGqIdE9ejVtGSr66FU5/XR232A7kb+N7gMdeTtGUfNe2eC1aQVIlq/HL?=
+ =?us-ascii?Q?003/6N6+3pXx9en9iETKXBzH0oGMQ21R+eaC32MvocrwzZj253h1n6I6ZlVD?=
+ =?us-ascii?Q?CgpZUTYBEX1khtXeZlI69drWrksDL/ZKuhr5XqUjTd7WzG2NqNkiefWiTtoK?=
+ =?us-ascii?Q?2Uoy59nwb6FmuqqypZaEd9lKuZbH6lsHJVNMCLtkka0NqyOz7ZnFNl454RD5?=
+ =?us-ascii?Q?5K+8C9DfCPKvFVoMHKd63nPA/2jPn2Gydpl5pCGfUrk4sAL4pt/jjNjSUir4?=
+ =?us-ascii?Q?zaqruMs5Qzt+JsrAs4BTsJOViyH8Jvy1JyJq8mwg6pNtQQ7EpCLcPJF5gFda?=
+ =?us-ascii?Q?ZwD11AJUnJKnUtpv/5fR3PBx3TETmzisrNeXZyQHOTO2BxAfy51xaSh9LQZp?=
+ =?us-ascii?Q?94UJz/UM+iKzGu1LywvdYn0sp4tBH1Fld264HA0d+drmEpUrP0y4IgORrXBc?=
+ =?us-ascii?Q?1mvY52fmhcIYeu1exKEIZZ+YMchqn9e5x3YcpV34knhnvInfbPM6XLNKpNWq?=
+ =?us-ascii?Q?mzRb3Gup5/0EiXj07wFSVeE+nog0VuGdYf3xfjzZe1euv0UFJ2tR2B93UPeA?=
+ =?us-ascii?Q?cxVW6DHjaCT8A9YTwBfSIZVPZmWG55bXmXlhrVnBSQtiJRX2iL7RsivY4Y1+?=
+ =?us-ascii?Q?LkueumG2TIy66XpbLMW2wk1GHNMS8OJxnnUs9hozU4z9Slgo345joz6YpQ/F?=
+ =?us-ascii?Q?Bmvrro6g2mcbeSS127Bx9glNthKO354uRGj71bBn31NKBKqqDqfdiRmRSelH?=
+ =?us-ascii?Q?dBGHCfRMhRXFoqy67Gsr74/0vb0E92qhBFJJlsoD?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAOdCjQuiLHkX+ZJT6RbG01gxMo-Q9Y80P=FpNnS35rYWWV3eLw@mail.gmail.com>
- <CAPDyKFrqxO6gSNTx7suYv+2_KZRaBrwnwwXzrAeSERYs3nRDXg@mail.gmail.com> <CAOdCjQsGG5wdsvkkSw9DtcnYGG-4q1Mzpfb=m5EvEtMccX3QLg@mail.gmail.com>
-In-Reply-To: <CAOdCjQsGG5wdsvkkSw9DtcnYGG-4q1Mzpfb=m5EvEtMccX3QLg@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 22 Nov 2024 17:14:26 +0100
-Message-ID: <CAPDyKFo9waTUhFWgZMtgmGzmho7BzxvGCpQp7ikdEF6=LmipVg@mail.gmail.com>
-Subject: Re: SDHCI: linux-6.11: mmc0: Reset 0x2 never completed
-To: Pankaj Pandey <pankaj.embedded@gmail.com>
-Cc: linux-mmc@vger.kernel.org, isheng Zhang <jszhang@kernel.org>, 
-	Shawn Lin <shawn.lin@rock-chips.com>, Liming Sun <limings@nvidia.com>, 
-	Yifeng Zhao <yifeng.zhao@rock-chips.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-OriginatorOrg: nokia.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BN0PR08MB6951.namprd08.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fb835067-599d-473a-58f2-08dd0b1dc427
+X-MS-Exchange-CrossTenant-originalarrivaltime: 22 Nov 2024 17:47:42.8980
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 5d471751-9675-428d-917b-70f44f9630b0
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: DLTunGQygQohk8JPzuoOgux9LR6iXPkDb3EtOAEBPIMfxDiNXeGqfUKWb4jorDf49xHRrJNjHYd8T1kMo5pgqSaBcXT2z8bE4x5HV3c/T9s=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL3PR08MB7515
 
-+ Shawn, Liming, Yifeng,
-
-On Fri, 22 Nov 2024 at 08:09, Pankaj Pandey <pankaj.embedded@gmail.com> wro=
-te:
->
-> Hi Ulf,
->
-> Tried in linux-6.12 but observed same issue there also:
->
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D
-> devkit-e7 login: mmc0: Timeout waiting for hardware cmd interrupt.
-> mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-> mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
-> mmc0: sdhci: Present:   0x03ff0000 | Host ctl: 0x00000001
-> mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-> mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-> mmc0: sdhci: Int enab:  0x00ff1003 | Sig enab: 0x00ff1003
-> mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-> mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
-> mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> mmc0: sdhci: Host ctl2: 0x00000000
-> mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-> mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> mmc0: Reset 0x2 never completed.
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D
->
-> Regards,
-> Pankaj Pandey
-
-Thanks Pankaj,
-
-It's not entirely easy to tell what goes wrong - and a lot of changes
-have happened since v5.4.
-
-I guess a git bisect would help us to narrow down when things got
-screwed up. If you have the time to do that, that would greatly help I
-think.
-
-I have looped in some more of the driver authors to see if someone has
-an idea where to start looking.
-
-In the meantime, it would be useful to get some more information about
-your platform and a pointer to some DTS files.
-
-Kind regards
-Uffe
-
->
-> On Wed, Nov 20, 2024 at 6:34=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
+> > > >
+> > > > If card detection is done via polling, due to broken-cd (Freescale
+> > > > LX2160,
+> > > etc.), or for other reasons, then the card will be polled
+> > > asynchronously and periodically.
+> > > >
+> > > > If that polling happens after the card has been put in powered off =
+state
+> (i.e.
+> > > during system shutdown/reboot), then the polling times out. That
+> > > timeout is of a long duration (10s). And it is repeated multiple
+> > > times (x3). And that is all done after the watchdogd has been
+> > > disabled, meaning that system watchdogs are not being kicked.
+> > > >
+> > > > If the MMC polling exceeds the watchdog trip time, then the system
+> > > > will be
+> > > ungraciously reset. Or in the case of a pretimeout capable watchdog,
+> > > the pretimeout will trip unnecessarily.
+> > > >
+> > > >     [   46.872767] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg
+> > > 03220301 flags 0000049d
+> > > >     [   46.880258] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x000000=
+01
+> > > >     [   46.886082] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x000000=
+02
+> > > >     [   46.891906] mmc_request_done:187: mmc1: req done (CMD6): 0:
+> > > 00000800 00000000 00000000 00000000
+> > > >     [   46.900606] mmc_set_ios:892: mmc1: clock 0Hz busmode 2
+> > > powermode 0 cs 0 Vdd 0 width 1 timing 0
+> > > >     [   46.914934] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
+> > > 00010000 flags 00000195
+> > > >     [   57.433351] mmc1: Timeout waiting for hardware cmd interrupt=
+.
+> > >
+> > > Hmm. How is the polling being done? By using MMC_CAP_NEEDS_POLL?
+> > >
 > >
-> > On Wed, 20 Nov 2024 at 09:28, Pankaj Pandey <pankaj.embedded@gmail.com>=
- wrote:
+> > Correct. (At least in my understanding.) 'broken-cd' in the device
+> > tree will trigger MMC_CAP_NEEDS_POLL to be set.
+> >
+> > > The above certainly looks weird. The mmc_rescan work should not be
+> > > allowed to run at this point, as the work is getting punted to the
+> > > system_freezable_wq via mmc_schedule_delayed_work().
 > > >
-> > > Hi All,
-> > >
-> > > My target board(ARMv8-A AArch32 processor), supports the "Synopsys DW=
-C
-> > > MSHC controller." I am using the Linux 5.4 kernel and have enabled th=
+> >
+> > This is the backtrace I get when the timeout occurs:
+> >
+> > [   46.154348] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
+> 00010000 flags 00000195
+> > [   46.161917] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
+> > [   46.167743] mmc_request_done:187: mmc1: req done (CMD13): 0:
+> 00000900 00000000 00000000 00000000
+> > [   46.176526] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg
+> 03220301 flags 0000049d
+> > [   46.184016] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
+> > [   46.189840] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000002
+> > [   46.195665] mmc_request_done:187: mmc1: req done (CMD6): 0:
+> 00000800 00000000 00000000 00000000
+> > [   46.204362] mmc_set_ios:892: mmc1: clock 0Hz busmode 2 powermode 0
+> cs 0 Vdd 0 width 1 timing 0
+> > [   46.219307] CPU: 6 PID: 153 Comm: kworker/6:1 Tainted: G           O
+> 6.6.59 #1
+> > [   46.231988] Hardware name: [Redacted]
+> > [   46.238678] Workqueue: events_freezable mmc_rescan
+> > [   46.243466] Call trace:
+> > [   46.245901]  dump_backtrace+0x9c/0x128
+> > [   46.249643]  show_stack+0x20/0x38
+> > [   46.252948]  dump_stack_lvl+0x48/0x60
+> > [   46.256603]  dump_stack+0x18/0x28
+> > [   46.259909]  mmc_alive+0x74/0x88
+> > [   46.263128]  _mmc_detect_card_removed+0x3c/0x158
+> > [   46.267735]  mmc_detect+0x30/0x98
+> > [   46.271040]  mmc_rescan+0x94/0x238
+> > [   46.274432]  process_one_work+0x178/0x3d8
+> > [   46.278432]  worker_thread+0x2bc/0x3e0
+> > [   46.282171]  kthread+0xf8/0x110
+> > [   46.285303]  ret_from_fork+0x10/0x20
+> > [   46.288878] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
+> 00010000 flags 00000195
+> > [   56.793379] mmc1: Timeout waiting for hardware cmd interrupt.
+> > [   56.799116] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI =
+REGISTER DUMP
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > [   56.805545] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x0000220=
+2
+> > ...
+> >
+>=20
+> Okay. If this is system suspend, it looks like the workqueue didn't becom=
 e
-> > > following configurations to support the "SDHCI platform driver for
-> > > Synopsys DWC MSHC":
+> frozen as exepcted. I don't know why, but this needs to be investigated.
+>=20
+> If this is a shutdown, mmc_host_classdev_shutdown() should be called to
+> "disable" the mmc_rescan work from running the code causing the above.
+>=20
+> What am I missing?
+>=20
+> Kind regards
+> Uffe
+>=20
+
+This occurs in response to a 'reboot' command.
+
+Here is an instance of the failure, with initcall_debug set to 'Y':
+
+Rebooting...=20
+[   44.500858] caam_jr 8030000.jr: shutdown
+[   44.504805] caam_jr 8020000.jr: shutdown
+[   44.508748] caam_jr 8010000.jr: shutdown
+[   44.515349] tpm tpm0: shutdown_pre
+[   44.523165] igb 0000:01:00.0: shutdown
+[   44.558695] usb usb2-port1: shutdown
+[   44.562268] usb usb1-port1: shutdown
+[   44.565864] xhci-hcd xhci-hcd.0.auto: shutdown
+[   44.570306] dwc3 3100000.usb: shutdown
+[   44.574052] [Redacted] 2030000.i2c:cpld@41:watchdog: shutdown
+[   44.580137] tpm_tis_spi spi2.0: shutdown
+[   44.584054] spi-nor spi0.1: shutdown
+[   44.588066] spi-nor spi0.0: shutdown
+[   44.592112] mmcblk mmc0:0001: shutdown
+[   44.595902] mmc_mrq_pr_debug:274: mmc0: starting CMD7 arg 00000000 flags=
+ 00000000
+[   44.603413] sdhci_irq:3546: mmc0: sdhci: IRQ status 0x00000001
+[   44.609240] mmc_request_done:187: mmc0: req done (CMD7): 0: 00000000 000=
+00000 00000000 00000000
+[   44.617939] mmc_set_ios:892: mmc0: clock 0Hz busmode 2 powermode 0 cs 0 =
+Vdd 0 width 1 timing 0
+[   44.627877] mmcblk mmc1:0001: shutdown
+[   44.631709] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg 03200101 flags=
+ 00000095
+[   44.639200] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
+[   44.645027] mmc_request_done:187: mmc1: req done (CMD6): 0: 00000800 000=
+00000 00000000 00000000
+[   44.653727] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg 00010000 flag=
+s 00000195
+[   44.661296] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
+[   44.667123] mmc_request_done:187: mmc1: req done (CMD13): 0: 00000900 00=
+000000 00000000 00000000
+[   44.675907] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg 03220301 flags=
+ 0000049d
+[   44.683399] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
+[   44.689223] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000002
+[   44.695047] mmc_request_done:187: mmc1: req done (CMD6): 0: 00000800 000=
+00000 00000000 00000000
+[   44.703746] mmc_set_ios:892: mmc1: clock 0Hz busmode 2 powermode 0 cs 0 =
+Vdd 0 width 1 timing 0
+[   44.713667] aer 0000:00:00.0:pcie002: shutdown
+[   44.713673] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg 00010000 flag=
+s 00000195
+[   44.718102] pcie_pme 0000:00:00.0:pcie001: shutdown
+[   44.730534] pcieport 0000:00:00.0: shutdown
+[   44.734898] fsl_mc_dprc dprc.1: shutdown
+[   44.740863] fsl_mc_dprc dprc.1: DPRC device shutdown
+[   44.745830] mmc_host mmc1: shutdown_pre
+[   54.873286] mmc1: Timeout waiting for hardware cmd interrupt.
+[   54.879023] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGI=
+STER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+[   54.885453] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00002202
+
+The trigger CMD13 is in-flight at time 44.713673.
+The mmc_host mmc1: shutdown_pre is at time 44.745830.
+
+> > > >     ...
+> > > >     [   71.031911] [Redacted] 2030000.i2c:[Redacted]@41:watchdog:
+> > > Watchdog interrupt received!
+> > > >     [   71.039737] Kernel panic - not syncing: watchdog pretimeout =
+event
+> > > >     [   71.045820] CPU: 0 PID: 0 Comm: swapper/0 Tainted: G        =
+   O
+> > > 6.6.59 #1
+> > > >     [   71.053207] Hardware name: [Redacted]
+> > > >     [   71.059897] Call trace:
+> > > >     [   71.062332]  dump_backtrace+0x9c/0x128
+> > > >     ...
+> > > >
+> > > > CMD6 is SWITCH_FUNC and arg 03220301 is
+> POWER_OFF_NOTIFICATION
+> > > (bits 16:23 =3D 0x22 =3D 34).
+> > > > CMD13 is SEND_STATUS, and when it occurs after the
+> > > POWER_OFF_NOTIFICATION (as above) bad things happen.
+> > > >
+> > > > I have made the following change to attempt to work around the
+> > > > issue, and
+> > > it seems to hold up, but is also quite brute force:
+> > > >
+> > > > --- a/drivers/mmc/core/mmc.c
+> > > > +++ b/drivers/mmc/core/mmc.c
+> > > > @@ -2046,6 +2046,11 @@ static void mmc_remove(struct mmc_host
+> *host)
+> > > >   */
+> > > >  static int mmc_alive(struct mmc_host *host)  {
+> > > > +       if (host->card && mmc_card_suspended(host->card)) {
+> > > > +               pr_err("%s: Skip card detection: Card suspended\n",
+> > > > +                      mmc_hostname(host));
+> > > > +               return -ENOMEDIUM;
+> > > > +       }
+> > > >         return mmc_send_status(host->card, NULL);  }
 > > >
-> > > CONFIG_MMC_SDHCI=3Dy
-> > > CONFIG_MMC_SDHCI_PLTFM=3Dy
-> > > CONFIG_MMC_SDHCI_OF_DWCMSHC=3Dy
+> > > Yeah, the above isn't really the correct solution in my opinion.
 > > >
-> > > This setup works perfectly on Linux 5.4, successfully detecting all
-> > > microSD cards. However, when I use the same driver configuration with
-> > > Linux 6.11.0, I encounter the below mentioned error:
+> > > We need to prevent the mmc_rescan work from running, which I thought
+> > > we already did...
 > > >
-> > > sdhci: Secure Digital Host Controller Interface driver
-> > > sdhci: Copyright(c) Pierre Ossman
-> > > sdhci-pltfm: SDHCI platform and OF driver helper
-> > > mmc0: sdhci: Version:   0x00000005 | Present:  0x020f0000
-> > > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-> > > SMCCC: SOC_ID: ARCH_SOC_ID not implemented, skipping ....
-> > > mmc0: sdhci: Auto-CMD23 available
-> > > mmc0: SDHCI controller on 48102000.sdhci [48102000.sdhci] using ADMA
-> > > mmc0: Timeout waiting for hardware cmd interrupt.
-> > > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP=
- =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-> > > mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> > > mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
-> > > mmc0: sdhci: Present:   0x020f0000 | Host ctl: 0x00000001
-> > > mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> > > mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-> > > mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-> > > mmc0: sdhci: Int enab:  0x00ff1083 | Sig enab: 0x00ff1083
-> > > mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> > > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-> > > mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
-> > > mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> > > mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> > > mmc0: sdhci: Host ctl2: 0x00000000
-> > > mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-> > > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D
-> > > mmc0: Reset 0x2 never completed.
+> > > >
+> > > > Anthony
+> > > >
+> > > >
 > > >
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-> > >
-> > > Please find mmc debug info and dts file changes for references:-
-> > >
-> > > root@devkit-e7:~# cat /sys/kernel/debug/mmc0/ios
-> > > clock:          400000 Hz
-> > > actual clock:   400000 Hz
-> > > vdd:            21 (3.3 ~ 3.4 V)
-> > > bus mode:       2 (push-pull)
-> > > chip select:    1 (active high)
-> > > power mode:     2 (on)
-> > > bus width:      0 (1 bits)
-> > > timing spec:    0 (legacy)
-> > > signal voltage: 0 (3.30 V)
-> > > driver type:    0 (driver type B)
-> > >
-> > > sdmmc: sdhci@48102000 {
-> > >                         compatible =3D "snps,dwcmshc-sdhci";
-> > >                         reg =3D <0x48102000 0x1000>;
-> > >                         interrupts =3D <GIC_SPI 27 IRQ_TYPE_LEVEL_HIG=
-H>,
-> > >                                      <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>=
-;
-> > >                         clocks =3D <&syst_hclk>, <&syst_hclk>;
-> > >                         clock-names =3D "core", "bus";
-> > >                         bus-width =3D <4>;
-> > > max-frequency =3D <25000000>;
-> > >                         status =3D "okay";
-> > >                 };
-> > >
-> > > Kindly request you to please let me know if I am missing anything.
-> >
-> > Would it be possible for you to do a "git bisect" to see if we can
-> > find if there is a particular commit causing the problem?
-> >
-> > Moreover, we have v6.12 now, so it seems reasonable to give that a try =
-too.
-> >
-> > Kind regards
-> > Uffe
+> > > Kind regards
+> > > Uffe
