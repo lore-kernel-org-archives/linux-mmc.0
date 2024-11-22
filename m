@@ -1,222 +1,199 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f179.google.com (mail-pg1-f179.google.com [209.85.215.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A690230999;
-	Fri, 22 Nov 2024 07:04:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 706FE230999
+	for <linux-mmc@vger.kernel.org>; Fri, 22 Nov 2024 07:09:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732259079; cv=none; b=SXmRzas7K98tH607kljZnp9bvSOoXtrebQIe7WHeHv+8zJCz2ZzjCBReVvXDkqkg08c+LqwOxXEVrDeOKeNG0947jGh/ndBDQvvS9EoMQqOBn6EA23yciHWmJv4plChUEpniim+K52rBa4Qg50G3JZPnbEOxrRJzvlgxN6GkT+Y=
+	t=1732259369; cv=none; b=qe3cmbU/Fp78jJ9V2uaAuq/AYu5IAjK7LcD3zMxMolokEVH4IzRBrqJ5Nk3AKA95xqIOGBkYARj/QmaK70omXacYoo0HMp/WoNk95JUTK3fzNLNK5h/amo85Hoh8wxWLmJ0RwYIfIKxIjuZf7ybfgXfPE7cCiqNBusqyIrznGtI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732259079; c=relaxed/simple;
-	bh=wXwjN6SWwb8tK8TltC9LInDSonKNvt9F2o/bm/x8k3I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LjVhfJ7gmbzMPNJOG8qP0j90946oD2GmtKlXMrCAkkKuyIiGNo6K11LqcmwFgvLferOZ2TEe7eL/z2ZCBQH1YfXtgA9gdOpbOSEcncWVvzhGFKrLffTTMUKFmvfywdyMu2HzoF4czSiqB0Tn4nuJyY8bW5YHRgRXFkz2CvXRPLM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=qceSWXwZ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1732259369; c=relaxed/simple;
+	bh=LVOn1uf2aZgtaTuaL/RjZFmIIiWTOuoVUC/RGwkw56c=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=PZGWNf9pXS0SCsDoaaRUvK1taj64bCSunMU+Pv1xh4gVVIoUgUne5cXuUsn5R30OMb7wFf25vBC3p9AXg44dVMbXPq53FAGnYrMGFDrr+cr9rejKylq0RDIhe0E78m29xfp1tYftsgx15w6Ym6UMQUus1TgXO6g6WnTX5g4v+Dg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=K47Aee/4; arc=none smtp.client-ip=209.85.215.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="qceSWXwZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2DF64C4CECE;
-	Fri, 22 Nov 2024 07:04:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1732259078;
-	bh=wXwjN6SWwb8tK8TltC9LInDSonKNvt9F2o/bm/x8k3I=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=qceSWXwZ+LDXTxO8USb9/Vvs7KaZwYqyiCmdclP9SmSUMmCVBNv3sOba1xU9C5rtW
-	 5634eLtQREdQlGn1Jgd4sVraQJVZma6Cn5QjYJpmK6YgCGfV5U1C1gTfuRf+0VlLiz
-	 +klKyTFbi5kmtlTcsh/WAZccpfa3m3w6GKsF4h2TCKx1rQfi3b60AUJ9Zve0uQBEMx
-	 81XdjHAfWT9SqI3GHrb+deRCO5P42w95KDSDqPjcvB9Blz6rWv+3LUFW3h64WYvc5H
-	 /mjpQZXq5+4dsucu8/c6fFwDIY2Si+YCSJpy5Z6/+w7J4aFfYdHVgZroaIGqvM3071
-	 qhUXw7Pb6Xb4A==
-Message-ID: <f9b01690-8940-4f8b-b142-6c2ec4db3e83@kernel.org>
-Date: Fri, 22 Nov 2024 08:04:31 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K47Aee/4"
+Received: by mail-pg1-f179.google.com with SMTP id 41be03b00d2f7-7ee51d9ae30so1478133a12.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 23:09:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1732259368; x=1732864168; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mG2ESGmi0RzTWybrDzghyGMSZ/bd7PjLj9w4lt7n7uk=;
+        b=K47Aee/4u8oeqbD6KO+RPrDURQBuZaD1NHCsprm3cPMnAkp57e0EvUA6j9SV+6Ayup
+         ujyzIaUcNx5yiZQml0zU1bSAU9Ir0aYIUOZDAD0x8vF6eSJ1hbfuCuIYBp4JFlHcQMfb
+         RyW3Hic9COlNUG10XhO7nEJu6a5+G6Y0QNs+p8KYUaDNZMzOJz/qFTEaCPwejNwO9xbb
+         6mECZG6+nBQHaGxAPzR2L/g4zb4RASNphWuGlv6PrHVq15C7U1cMfGMtPbEAp/0d17UT
+         rWKB2rTKKsfP1ITzMPjdSvdf+xC46x3EvVpD58CmqCV75dBuptxhA1s3AUkihCiv0iZL
+         Wv3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732259368; x=1732864168;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=mG2ESGmi0RzTWybrDzghyGMSZ/bd7PjLj9w4lt7n7uk=;
+        b=qxmz1nFcYvXe07Ny1TCNL74NpxDGOzh30SXy6jpUDGuLAhM8rDUvOaYIerfuTXuzsv
+         sFcUktzrKrA7PysqTdsNRfHBlzSm4XfMEjiRw3EfD0jajFlYmP1h0R54dK3527mZsr5N
+         1UXIc3zvhRZkRnUt4bSd9+krRGL3D+9jlcBc1n5ElSdQ9G8Hs8RMVxxLUphfuYJcbd3n
+         nYdWjkM1KdBrofXpsC9hNvT40em9gBs6Kc3O219ecNS97MOTw6Ymr1hBIVOODNeelXc0
+         SXpUFD/DejTRStS/zbWHyZjRLuw7oNccynu85lO80O/Uvm47e6SQ8bmt+t+B5YziHm61
+         Kcxg==
+X-Gm-Message-State: AOJu0Yz2iLmofYrpOzZcwWN1wCinN5OiUcjtZlFXuNs26vMjv4lgtdGK
+	2wT3MbzYsmD/6ebVzBfUm63sd+VOkYr2VCkSTMi+m+Ccu48eevfcC7xT0WhAu8AnQ4h2C87dXpX
+	/4qtV3hfuhQvSo5LayUnrhCSWLjo=
+X-Gm-Gg: ASbGncuVqqbSSrmWeb3IraTBi/KiWwMjEPyV1PsNCwmNZ772USd5Inv5Qyjd5lkfWz7
+	wtaHCF3svRXipsFVIyJbHu58D1X7aEw==
+X-Google-Smtp-Source: AGHT+IH+U8H1NI2OaV0fSkxaJ/gAksQc9HfYnwxFyE0t6wnlQ8j31I+0O628coVGrh7c4SKkGgLh9KguJSuQFyPUdZY=
+X-Received: by 2002:a05:6a20:734f:b0:1db:e922:9eaf with SMTP id
+ adf61e73a8af0-1e09e49fa49mr2413637637.27.1732259367415; Thu, 21 Nov 2024
+ 23:09:27 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-To: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org,
- robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
- bhupesh.sharma@linaro.org, andersson@kernel.org, konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_tingweiz@quicinc.com
-References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
- <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <CAOdCjQuiLHkX+ZJT6RbG01gxMo-Q9Y80P=FpNnS35rYWWV3eLw@mail.gmail.com>
+ <CAPDyKFrqxO6gSNTx7suYv+2_KZRaBrwnwwXzrAeSERYs3nRDXg@mail.gmail.com>
+In-Reply-To: <CAPDyKFrqxO6gSNTx7suYv+2_KZRaBrwnwwXzrAeSERYs3nRDXg@mail.gmail.com>
+From: Pankaj Pandey <pankaj.embedded@gmail.com>
+Date: Fri, 22 Nov 2024 12:39:15 +0530
+Message-ID: <CAOdCjQsGG5wdsvkkSw9DtcnYGG-4q1Mzpfb=m5EvEtMccX3QLg@mail.gmail.com>
+Subject: Re: SDHCI: linux-6.11: mmc0: Reset 0x2 never completed
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, "pierre@ossman.eu" <pierre@ossman.eu>, 
+	isheng Zhang <jszhang@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 22/11/2024 07:51, Yuanjie Yang wrote:
-> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
-> 
-> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
->  1 file changed, 198 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> index 590beb37f441..37c6ab217c96 100644
-> --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
->  			#size-cells = <1>;
->  		};
->  
-> +		sdhc_1: mmc@7c4000 {
-> +			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0x0 0x007c4000 0x0 0x1000>,
-> +			      <0x0 0x007c5000 0x0 0x1000>;
-> +			reg-names = "hc",
-> +				    "cqhci";
-> +
-> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq",
-> +					  "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
-> +				 <&rpmhcc RPMH_CXO_CLK>,
-> +				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-> +			clock-names = "iface",
-> +				      "core",
-> +				      "xo",
-> +				      "ice";
-> +
-> +			resets = <&gcc GCC_SDCC1_BCR>;
-> +
-> +			power-domains = <&rpmhpd RPMHPD_CX>;
-> +			operating-points-v2 = <&sdhc1_opp_table>;
-> +			iommus = <&apps_smmu 0x02c0 0x0>;
-> +			interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
-> +					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-> +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-> +					 &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
-> +			interconnect-names = "sdhc-ddr",
-> +					     "cpu-sdhc";
-> +
-> +			bus-width = <8>;
-> +			qcom,dll-config = <0x000f642c>;
-> +			qcom,ddr-config = <0x80040868>;
-> +			supports-cqe;
-> +			dma-coherent;
-> +			mmc-ddr-1_8v;
-> +			mmc-hs200-1_8v;
-> +			mmc-hs400-1_8v;
-> +			mmc-hs400-enhanced-strobe;
+Hi Ulf,
 
-These are properties of memory, not SoC. If the node is disabled, means
-memory is not attached to the SoC, right?
+Tried in linux-6.12 but observed same issue there also:
 
-> +			status = "disabled";
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D
+devkit-e7 login: mmc0: Timeout waiting for hardware cmd interrupt.
+mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
+mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
+mmc0: sdhci: Present:   0x03ff0000 | Host ctl: 0x00000001
+mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
+mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+mmc0: sdhci: Int enab:  0x00ff1003 | Sig enab: 0x00ff1003
+mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
+mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
+mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+mmc0: sdhci: Host ctl2: 0x00000000
+mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+mmc0: Reset 0x2 never completed.
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
 
+Regards,
+Pankaj Pandey
 
-
-
-...
-
-> +
-> +		sdhc_2: mmc@8804000 {
-> +			compatible = "qcom,qcs615-sdhci","qcom,sdhci-msm-v5";
-> +			reg = <0x0 0x08804000 0x0 0x1000>;
-> +			reg-names = "hc";
-> +
-> +			interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq",
-> +					  "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> +				 <&gcc GCC_SDCC2_APPS_CLK>,
-> +				 <&rpmhcc RPMH_CXO_CLK>;
-> +			clock-names = "iface",
-> +				      "core",
-> +				      "xo";
-> +
-> +			power-domains = <&rpmhpd RPMHPD_CX>;
-> +			operating-points-v2 = <&sdhc2_opp_table>;
-> +			iommus = <&apps_smmu 0x02a0 0x0>;
-> +			resets = <&gcc GCC_SDCC2_BCR>;
-> +			interconnects = <&aggre1_noc MASTER_SDCC_2 QCOM_ICC_TAG_ALWAYS
-> +					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-> +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-> +					 &config_noc SLAVE_SDCC_2 QCOM_ICC_TAG_ALWAYS>;
-> +			interconnect-names = "sdhc-ddr",
-> +					     "cpu-sdhc";
-> +
-> +			bus-width = <4>;
-
-Same comments.
-
-> +			qcom,dll-config = <0x0007642c>;
-> +			qcom,ddr-config = <0x80040868>;
-> +			dma-coherent;
-> +			status = "disabled";
-> +
-> +			sdhc2_opp_table: opp-table {
-> +				compatible = "operating-points-v2";
-> +
-> +				opp-100000000 {
-> +					opp-hz = /bits/ 64 <100000000>;
-> +					required-opps = <&rpmhpd_opp_low_svs>;
-> +				};
-> +
-> +				opp-202000000 {
-> +					opp-hz = /bits/ 64 <202000000>;
-> +					required-opps = <&rpmhpd_opp_nom>;
-> +				};
-> +			};
->  		};
->  
->  		dc_noc: interconnect@9160000 {
-
-
-Best regards,
-Krzysztof
+On Wed, Nov 20, 2024 at 6:34=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Wed, 20 Nov 2024 at 09:28, Pankaj Pandey <pankaj.embedded@gmail.com> w=
+rote:
+> >
+> > Hi All,
+> >
+> > My target board(ARMv8-A AArch32 processor), supports the "Synopsys DWC
+> > MSHC controller." I am using the Linux 5.4 kernel and have enabled the
+> > following configurations to support the "SDHCI platform driver for
+> > Synopsys DWC MSHC":
+> >
+> > CONFIG_MMC_SDHCI=3Dy
+> > CONFIG_MMC_SDHCI_PLTFM=3Dy
+> > CONFIG_MMC_SDHCI_OF_DWCMSHC=3Dy
+> >
+> > This setup works perfectly on Linux 5.4, successfully detecting all
+> > microSD cards. However, when I use the same driver configuration with
+> > Linux 6.11.0, I encounter the below mentioned error:
+> >
+> > sdhci: Secure Digital Host Controller Interface driver
+> > sdhci: Copyright(c) Pierre Ossman
+> > sdhci-pltfm: SDHCI platform and OF driver helper
+> > mmc0: sdhci: Version:   0x00000005 | Present:  0x020f0000
+> > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
+> > SMCCC: SOC_ID: ARCH_SOC_ID not implemented, skipping ....
+> > mmc0: sdhci: Auto-CMD23 available
+> > mmc0: SDHCI controller on 48102000.sdhci [48102000.sdhci] using ADMA
+> > mmc0: Timeout waiting for hardware cmd interrupt.
+> > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
+> > mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
+> > mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
+> > mmc0: sdhci: Present:   0x020f0000 | Host ctl: 0x00000001
+> > mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> > mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
+> > mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+> > mmc0: sdhci: Int enab:  0x00ff1083 | Sig enab: 0x00ff1083
+> > mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
+> > mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
+> > mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
+> > mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> > mmc0: sdhci: Host ctl2: 0x00000000
+> > mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
+> > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > mmc0: Reset 0x2 never completed.
+> >
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+> >
+> > Please find mmc debug info and dts file changes for references:-
+> >
+> > root@devkit-e7:~# cat /sys/kernel/debug/mmc0/ios
+> > clock:          400000 Hz
+> > actual clock:   400000 Hz
+> > vdd:            21 (3.3 ~ 3.4 V)
+> > bus mode:       2 (push-pull)
+> > chip select:    1 (active high)
+> > power mode:     2 (on)
+> > bus width:      0 (1 bits)
+> > timing spec:    0 (legacy)
+> > signal voltage: 0 (3.30 V)
+> > driver type:    0 (driver type B)
+> >
+> > sdmmc: sdhci@48102000 {
+> >                         compatible =3D "snps,dwcmshc-sdhci";
+> >                         reg =3D <0x48102000 0x1000>;
+> >                         interrupts =3D <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>=
+,
+> >                                      <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+> >                         clocks =3D <&syst_hclk>, <&syst_hclk>;
+> >                         clock-names =3D "core", "bus";
+> >                         bus-width =3D <4>;
+> > max-frequency =3D <25000000>;
+> >                         status =3D "okay";
+> >                 };
+> >
+> > Kindly request you to please let me know if I am missing anything.
+>
+> Would it be possible for you to do a "git bisect" to see if we can
+> find if there is a particular commit causing the problem?
+>
+> Moreover, we have v6.12 now, so it seems reasonable to give that a try to=
+o.
+>
+> Kind regards
+> Uffe
