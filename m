@@ -1,199 +1,236 @@
-Received: from mail-pg1-f179.google.com (mail-pg1-f179.google.com [209.85.215.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 706FE230999
-	for <linux-mmc@vger.kernel.org>; Fri, 22 Nov 2024 07:09:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 554761865E7;
+	Fri, 22 Nov 2024 07:51:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732259369; cv=none; b=qe3cmbU/Fp78jJ9V2uaAuq/AYu5IAjK7LcD3zMxMolokEVH4IzRBrqJ5Nk3AKA95xqIOGBkYARj/QmaK70omXacYoo0HMp/WoNk95JUTK3fzNLNK5h/amo85Hoh8wxWLmJ0RwYIfIKxIjuZf7ybfgXfPE7cCiqNBusqyIrznGtI=
+	t=1732261880; cv=none; b=GKmEUbh8h9ZURC6rsybK/DfPP5+/bLaFNwZ9+WxkAicOgcBOpIIS2vzP3eRbJLsweGm/Xy96n9cIPajsvVB3bTsZwDVc9J+tmDMDzpIyENJiJyiSIANrl77OsjHyn92h/orf/bpDRTwPvvaQJf8e/OP/QdIxUnuvB1VpBbFrDc4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732259369; c=relaxed/simple;
-	bh=LVOn1uf2aZgtaTuaL/RjZFmIIiWTOuoVUC/RGwkw56c=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PZGWNf9pXS0SCsDoaaRUvK1taj64bCSunMU+Pv1xh4gVVIoUgUne5cXuUsn5R30OMb7wFf25vBC3p9AXg44dVMbXPq53FAGnYrMGFDrr+cr9rejKylq0RDIhe0E78m29xfp1tYftsgx15w6Ym6UMQUus1TgXO6g6WnTX5g4v+Dg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=K47Aee/4; arc=none smtp.client-ip=209.85.215.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1732261880; c=relaxed/simple;
+	bh=C2xxxCSxcgNZJ6leMsg28bVXsfJ/P2l084v0AQ4W7Fs=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=hMjZL34aTb3Vqn6z2B/nUe0+YH/rviya/1iO5yPFy1ZQld9xnf8U+5hQoPt8OZ3ho9pLgpncc0796SWvYTDjs5B/LpWqa8ldhoYdOl5TG8gdhm6yhcyp9DLWyybwhMaCV3ToxFuCWFTOdVM68+anpwXfdOWckWZjb04U6J0infE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=UaeGTkaJ; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K47Aee/4"
-Received: by mail-pg1-f179.google.com with SMTP id 41be03b00d2f7-7ee51d9ae30so1478133a12.1
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Nov 2024 23:09:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1732259368; x=1732864168; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=mG2ESGmi0RzTWybrDzghyGMSZ/bd7PjLj9w4lt7n7uk=;
-        b=K47Aee/4u8oeqbD6KO+RPrDURQBuZaD1NHCsprm3cPMnAkp57e0EvUA6j9SV+6Ayup
-         ujyzIaUcNx5yiZQml0zU1bSAU9Ir0aYIUOZDAD0x8vF6eSJ1hbfuCuIYBp4JFlHcQMfb
-         RyW3Hic9COlNUG10XhO7nEJu6a5+G6Y0QNs+p8KYUaDNZMzOJz/qFTEaCPwejNwO9xbb
-         6mECZG6+nBQHaGxAPzR2L/g4zb4RASNphWuGlv6PrHVq15C7U1cMfGMtPbEAp/0d17UT
-         rWKB2rTKKsfP1ITzMPjdSvdf+xC46x3EvVpD58CmqCV75dBuptxhA1s3AUkihCiv0iZL
-         Wv3g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732259368; x=1732864168;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=mG2ESGmi0RzTWybrDzghyGMSZ/bd7PjLj9w4lt7n7uk=;
-        b=qxmz1nFcYvXe07Ny1TCNL74NpxDGOzh30SXy6jpUDGuLAhM8rDUvOaYIerfuTXuzsv
-         sFcUktzrKrA7PysqTdsNRfHBlzSm4XfMEjiRw3EfD0jajFlYmP1h0R54dK3527mZsr5N
-         1UXIc3zvhRZkRnUt4bSd9+krRGL3D+9jlcBc1n5ElSdQ9G8Hs8RMVxxLUphfuYJcbd3n
-         nYdWjkM1KdBrofXpsC9hNvT40em9gBs6Kc3O219ecNS97MOTw6Ymr1hBIVOODNeelXc0
-         SXpUFD/DejTRStS/zbWHyZjRLuw7oNccynu85lO80O/Uvm47e6SQ8bmt+t+B5YziHm61
-         Kcxg==
-X-Gm-Message-State: AOJu0Yz2iLmofYrpOzZcwWN1wCinN5OiUcjtZlFXuNs26vMjv4lgtdGK
-	2wT3MbzYsmD/6ebVzBfUm63sd+VOkYr2VCkSTMi+m+Ccu48eevfcC7xT0WhAu8AnQ4h2C87dXpX
-	/4qtV3hfuhQvSo5LayUnrhCSWLjo=
-X-Gm-Gg: ASbGncuVqqbSSrmWeb3IraTBi/KiWwMjEPyV1PsNCwmNZ772USd5Inv5Qyjd5lkfWz7
-	wtaHCF3svRXipsFVIyJbHu58D1X7aEw==
-X-Google-Smtp-Source: AGHT+IH+U8H1NI2OaV0fSkxaJ/gAksQc9HfYnwxFyE0t6wnlQ8j31I+0O628coVGrh7c4SKkGgLh9KguJSuQFyPUdZY=
-X-Received: by 2002:a05:6a20:734f:b0:1db:e922:9eaf with SMTP id
- adf61e73a8af0-1e09e49fa49mr2413637637.27.1732259367415; Thu, 21 Nov 2024
- 23:09:27 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="UaeGTkaJ"
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AM5F6bP020377;
+	Fri, 22 Nov 2024 07:51:15 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=sJEwCo+ghoL55XsmCLIJU0
+	a7yfszGQc288qfvj5WF3c=; b=UaeGTkaJsD6dNVtelSCpxE/ffXN+65DhSuSZTQ
+	2+ippeS/2wYBRCVcAR0lZufOFXwK3mfzldUzkAWwAHJWthVZ6KPlBBWQLNiPsskG
+	n/nhQ180Du2QmtRvfSk+/vlc+5znN/+Rp2c7rtV0ujO9rDctSMDw4gsioEdI2s7S
+	YvqO0LXB2Syu+x7HRQxpyjM0g070iP6+FW5NvCTGc9qEhwVOiy9VWpLQ9G88Gea0
+	P0JRo+yz+yUa4UPXzwintrnPSJi/hiFrZI3IP+lLYBhD0AzCwwJ52ef2eAgjgllf
+	0UOaxT/xyaOypkxQTaPqaf5f0M3efQ38rqRkEKeSzbXMt/Vw==
+Received: from aptaippmta02.qualcomm.com (tpe-colo-wan-fw-bordernet.qualcomm.com [103.229.16.4])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4326ataanm-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Nov 2024 07:51:14 +0000 (GMT)
+Received: from pps.filterd (APTAIPPMTA02.qualcomm.com [127.0.0.1])
+	by APTAIPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4AM7ov2T022164;
+	Fri, 22 Nov 2024 07:50:57 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 42xmfkvmx0-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Nov 2024 07:50:57 +0000
+Received: from APTAIPPMTA02.qualcomm.com (APTAIPPMTA02.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4AM7ovth022159;
+	Fri, 22 Nov 2024 07:50:57 GMT
+Received: from cse-cd02-lnx.ap.qualcomm.com (cse-cd02-lnx.qualcomm.com [10.64.75.246])
+	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 4AM7ouBd022157
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 22 Nov 2024 07:50:57 +0000
+Received: by cse-cd02-lnx.ap.qualcomm.com (Postfix, from userid 4571896)
+	id 297891801; Fri, 22 Nov 2024 15:50:55 +0800 (CST)
+From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc: quic_tengfan@quicinc.com, quic_tingweiz@quicinc.com,
+        quic_zhgao@quicinc.com, Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Subject: [PATCH v1] mmc: sdhci-msm: Correctly set the load for the regulator
+Date: Fri, 22 Nov 2024 15:50:48 +0800
+Message-Id: <20241122075048.2006894-1-quic_yuanjiey@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAOdCjQuiLHkX+ZJT6RbG01gxMo-Q9Y80P=FpNnS35rYWWV3eLw@mail.gmail.com>
- <CAPDyKFrqxO6gSNTx7suYv+2_KZRaBrwnwwXzrAeSERYs3nRDXg@mail.gmail.com>
-In-Reply-To: <CAPDyKFrqxO6gSNTx7suYv+2_KZRaBrwnwwXzrAeSERYs3nRDXg@mail.gmail.com>
-From: Pankaj Pandey <pankaj.embedded@gmail.com>
-Date: Fri, 22 Nov 2024 12:39:15 +0530
-Message-ID: <CAOdCjQsGG5wdsvkkSw9DtcnYGG-4q1Mzpfb=m5EvEtMccX3QLg@mail.gmail.com>
-Subject: Re: SDHCI: linux-6.11: mmc0: Reset 0x2 never completed
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, "pierre@ossman.eu" <pierre@ossman.eu>, 
-	isheng Zhang <jszhang@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: m7wjLmSXfswSyEaL9qyKFzVChZmvczbq
+X-Proofpoint-GUID: m7wjLmSXfswSyEaL9qyKFzVChZmvczbq
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
+ malwarescore=0 clxscore=1011 mlxlogscore=938 lowpriorityscore=0
+ phishscore=0 adultscore=0 priorityscore=1501 bulkscore=0 spamscore=0
+ mlxscore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2409260000 definitions=main-2411220065
 
-Hi Ulf,
+Qualcomm regulator supports two power supply modes: HPM and LPM.
+Currently, the sdhci-msm.c driver does not set the load to adjust
+the current for eMMC and SD. Therefore, if the regulator set load
+in LPM state, it will lead to the inability to properly initialize
+eMMC and SD.
 
-Tried in linux-6.12 but observed same issue there also:
+Set the correct regulator current for eMMC and SD to ensure that the
+device can work normally even when the regulator is in LPM.
 
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D
-devkit-e7 login: mmc0: Timeout waiting for hardware cmd interrupt.
-mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
-mmc0: sdhci: Present:   0x03ff0000 | Host ctl: 0x00000001
-mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-mmc0: sdhci: Int enab:  0x00ff1003 | Sig enab: 0x00ff1003
-mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
-mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-mmc0: sdhci: Host ctl2: 0x00000000
-mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-mmc0: Reset 0x2 never completed.
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
+Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+---
+ drivers/mmc/host/sdhci-msm.c | 91 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 89 insertions(+), 2 deletions(-)
 
-Regards,
-Pankaj Pandey
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e00208535bd1..f2a2260d54c6 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -134,9 +134,22 @@
+ /* Timeout value to avoid infinite waiting for pwr_irq */
+ #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+ 
++/* Max load for eMMC Vdd supply */
++#define MMC_VMMC_MAX_LOAD_UA	570000
++
+ /* Max load for eMMC Vdd-io supply */
+ #define MMC_VQMMC_MAX_LOAD_UA	325000
+ 
++/* Max load for SD Vdd supply */
++#define SD_VMMC_MAX_LOAD_UA	800000
++
++/* Max load for SD Vdd-io supply */
++#define SD_VQMMC_MAX_LOAD_UA	22000
++
++#define MAX_MMC_SD_VMMC_LOAD_UA  max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA)
++
++#define MAX_MMC_SD_VQMMC_LOAD_UA max(MMC_VQMMC_MAX_LOAD_UA, SD_VQMMC_MAX_LOAD_UA)
++
+ #define msm_host_readl(msm_host, host, offset) \
+ 	msm_host->var_ops->msm_readl_relaxed(host, offset)
+ 
+@@ -147,6 +160,11 @@
+ #define CQHCI_VENDOR_CFG1	0xA00
+ #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+ 
++enum {
++	VMMC_REGULATOR,
++	VQMMC_REGULATOR,
++};
++
+ struct sdhci_msm_offset {
+ 	u32 core_hc_mode;
+ 	u32 core_mci_data_cnt;
+@@ -1403,11 +1421,70 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+ 	return ret;
+ }
+ 
+-static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
++static int sdhci_msm_get_regulator_load(struct mmc_host *mmc, int max_current, int type)
++{
++	int load = 0;
++
++	/*
++	 * When eMMC and SD are powered on for the first time, select a higher
++	 * current value from the corresponding current for eMMC and SD to
++	 * ensure that the eMMC and SD cards start up properly and complete
++	 * initialization. After the initialization process is finished, use
++	 * the corresponding current to set the eMMC and SD to ensure the
++	 * normal work of the device.
++	 */
++
++	if (!mmc->card)
++		return max_current;
++
++	if (mmc_card_is_removable(mmc) && mmc_card_mmc(mmc->card))
++		load = (type == VMMC_REGULATOR) ? MMC_VMMC_MAX_LOAD_UA : MMC_VQMMC_MAX_LOAD_UA;
++	else if (mmc_card_sd(mmc->card))
++		load = (type == VMMC_REGULATOR) ? SD_VMMC_MAX_LOAD_UA : SD_VQMMC_MAX_LOAD_UA;
++
++	return load;
++}
++
++static int msm_config_regulator_load(struct sdhci_msm_host *msm_host, struct mmc_host *mmc,
++				     bool hpm, int max_current, int type)
++{
++	int ret;
++	int load = 0;
++
++	/*
++	 * After the initialization process is finished, Once the type of card
++	 * is determined，only set the corresponding current for SD and eMMC.
++	 */
++
++	if (mmc->card && !(mmc_card_mmc(mmc->card) || mmc_card_sd(mmc->card)))
++		return 0;
++
++	if (hpm)
++		load = sdhci_msm_get_regulator_load(mmc, max_current, type);
++
++	if (type == VMMC_REGULATOR)
++		ret = regulator_set_load(mmc->supply.vmmc, load);
++	else
++		ret = regulator_set_load(mmc->supply.vqmmc, load);
++	if (ret)
++		dev_err(mmc_dev(mmc), "%s: set load failed: %d\n",
++			mmc_hostname(mmc), ret);
++	return ret;
++}
++
++static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
++			      struct mmc_host *mmc, bool hpm)
+ {
++	int ret;
++
+ 	if (IS_ERR(mmc->supply.vmmc))
+ 		return 0;
+ 
++	ret = msm_config_regulator_load(msm_host, mmc, hpm,
++					MAX_MMC_SD_VMMC_LOAD_UA, VMMC_REGULATOR);
++	if (ret)
++		return ret;
++
+ 	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+ }
+ 
+@@ -1435,6 +1512,15 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+ 				goto out;
+ 			}
+ 		}
++
++		ret = msm_config_regulator_load(msm_host, mmc, level,
++						MAX_MMC_SD_VQMMC_LOAD_UA, VQMMC_REGULATOR);
++		if (ret < 0) {
++			dev_err(mmc_dev(mmc), "%s: vqmmc set regulator load failed: %d\n",
++				mmc_hostname(mmc), ret);
++			goto out;
++		}
++
+ 		ret = regulator_enable(mmc->supply.vqmmc);
+ 	} else {
+ 		ret = regulator_disable(mmc->supply.vqmmc);
+@@ -1642,7 +1728,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+ 	}
+ 
+ 	if (pwr_state) {
+-		ret = sdhci_msm_set_vmmc(mmc);
++		ret = sdhci_msm_set_vmmc(msm_host, mmc,
++					 pwr_state & REQ_BUS_ON);
+ 		if (!ret)
+ 			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+ 					pwr_state & REQ_BUS_ON);
+-- 
+2.34.1
 
-On Wed, Nov 20, 2024 at 6:34=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
->
-> On Wed, 20 Nov 2024 at 09:28, Pankaj Pandey <pankaj.embedded@gmail.com> w=
-rote:
-> >
-> > Hi All,
-> >
-> > My target board(ARMv8-A AArch32 processor), supports the "Synopsys DWC
-> > MSHC controller." I am using the Linux 5.4 kernel and have enabled the
-> > following configurations to support the "SDHCI platform driver for
-> > Synopsys DWC MSHC":
-> >
-> > CONFIG_MMC_SDHCI=3Dy
-> > CONFIG_MMC_SDHCI_PLTFM=3Dy
-> > CONFIG_MMC_SDHCI_OF_DWCMSHC=3Dy
-> >
-> > This setup works perfectly on Linux 5.4, successfully detecting all
-> > microSD cards. However, when I use the same driver configuration with
-> > Linux 6.11.0, I encounter the below mentioned error:
-> >
-> > sdhci: Secure Digital Host Controller Interface driver
-> > sdhci: Copyright(c) Pierre Ossman
-> > sdhci-pltfm: SDHCI platform and OF driver helper
-> > mmc0: sdhci: Version:   0x00000005 | Present:  0x020f0000
-> > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-> > SMCCC: SOC_ID: ARCH_SOC_ID not implemented, skipping ....
-> > mmc0: sdhci: Auto-CMD23 available
-> > mmc0: SDHCI controller on 48102000.sdhci [48102000.sdhci] using ADMA
-> > mmc0: Timeout waiting for hardware cmd interrupt.
-> > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-> > mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-> > mmc0: sdhci: Argument:  0x00000c00 | Trn mode: 0x00000000
-> > mmc0: sdhci: Present:   0x020f0000 | Host ctl: 0x00000001
-> > mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-> > mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000fa07
-> > mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
-> > mmc0: sdhci: Int enab:  0x00ff1083 | Sig enab: 0x00ff1083
-> > mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> > mmc0: sdhci: Caps:      0x276e648a | Caps_1:   0x08008071
-> > mmc0: sdhci: Cmd:       0x0000341a | Max curr: 0x00000000
-> > mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-> > mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> > mmc0: sdhci: Host ctl2: 0x00000000
-> > mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x00000000
-> > mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > mmc0: Reset 0x2 never completed.
-> >
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-> >
-> > Please find mmc debug info and dts file changes for references:-
-> >
-> > root@devkit-e7:~# cat /sys/kernel/debug/mmc0/ios
-> > clock:          400000 Hz
-> > actual clock:   400000 Hz
-> > vdd:            21 (3.3 ~ 3.4 V)
-> > bus mode:       2 (push-pull)
-> > chip select:    1 (active high)
-> > power mode:     2 (on)
-> > bus width:      0 (1 bits)
-> > timing spec:    0 (legacy)
-> > signal voltage: 0 (3.30 V)
-> > driver type:    0 (driver type B)
-> >
-> > sdmmc: sdhci@48102000 {
-> >                         compatible =3D "snps,dwcmshc-sdhci";
-> >                         reg =3D <0x48102000 0x1000>;
-> >                         interrupts =3D <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>=
-,
-> >                                      <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
-> >                         clocks =3D <&syst_hclk>, <&syst_hclk>;
-> >                         clock-names =3D "core", "bus";
-> >                         bus-width =3D <4>;
-> > max-frequency =3D <25000000>;
-> >                         status =3D "okay";
-> >                 };
-> >
-> > Kindly request you to please let me know if I am missing anything.
->
-> Would it be possible for you to do a "git bisect" to see if we can
-> find if there is a particular commit causing the problem?
->
-> Moreover, we have v6.12 now, so it seems reasonable to give that a try to=
-o.
->
-> Kind regards
-> Uffe
