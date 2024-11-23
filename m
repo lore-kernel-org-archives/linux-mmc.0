@@ -1,154 +1,165 @@
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A5CF7E110;
-	Sat, 23 Nov 2024 07:10:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.61.82.184
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39D4E16FF44
+	for <linux-mmc@vger.kernel.org>; Sat, 23 Nov 2024 09:51:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732345839; cv=none; b=esGjYLpayGm6Tnj4PCKuhL4JYUTMuI5RnKXr1nJCdntidjiHPKTE0Oc/UxDcYm889DvLqMmcT/rIn4IZUKqWPkvTMfCX6DVq7RhsCIBP28bO46Yrp18DmsebkZ1rfyRLxZdS+Uh8tQXGLrMBCFBv8VxbbYa2LASpVuJFAMdehDc=
+	t=1732355500; cv=none; b=YN5ypfBtcxiydVKbnQ3PWmqq02owzN4FsYc4fLGTzDz3KjpTKLoXxRkfssW5GodA193x/WdpnklVnUu/dzA3zVCG2QIyAUdrgzQ+7/qtYUciwThwAe9sEm1EbygVeE/f5XQJ4kWWuyB6x82xmE6iPI6sNC+gkGXcAg/VaNRHoMg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732345839; c=relaxed/simple;
-	bh=tcNGkFjzsdvzIwzgHfLMDwMCVCUfylTueMX/Jp294n4=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=X7/jmJiIYxWBMys6Tu5OYE/4LGtZ2YxHvI7lqqjIYGf8zogYcSmgUKdXRKa4CTT/H+MybwQmVLnyRbjV0WcEgzQo8J3aVM2tFB99Y+ePvoIZpJdWxMbAD81EZ9FeHMeDhdG3Rf+ScZ2RPxTUJk+s7Ho/yfy/y7Ig7T/pOiOrrYM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=Rol3+5rX; arc=none smtp.client-ip=210.61.82.184
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1732355500; c=relaxed/simple;
+	bh=5mFgvHfxxqyIok4KkeF5i1Dm8sfAGAB7oh8z6PGyMtk=;
+	h=From:To:CC:Date:Message-ID:In-Reply-To:References:Subject:
+	 MIME-Version:Content-Type; b=MeEduabjXsyVSI98BDo/YHioT+E5MXj4JGsd5EvD9CWJKFVDeVLk7EgCJT9pPz2SU7vU9eoHjtkZW0PEQgKvUWLH6Zr57+savWXgbp+OirUYRAcn7PNM0EotjTYMv2JyVQM0rp4N8EoV6sgRzkVtPyNhX7g9XGNT/p7IW9c938E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=Qw84sjbr; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Rol3+5rX"
-X-UUID: 07c34cb6a96a11efbd192953cf12861f-20241123
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=of66qC7qugkiFYiLOj7X/DHcAAfucvWSwJFAEVz9WNw=;
-	b=Rol3+5rXBZ3kQSOzhKw9IQbt7Z5T129RQdbhWeZDI6lCDUoW4hDcTjApF1d5baqbz9+LllkFIJa5TTiVBZK1wc0qnyIzlRE8fFe0asXf8PSw1NX6gzO7hs76RYZyMuZxYBck8yFcyKWYwMIqzS5YionQb6qeUUpmLzJ25SR62c0=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.44,REQID:06d93a38-28e2-49a9-a1ce-af553d4d8d5b,IP:0,U
-	RL:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTIO
-	N:release,TS:-25
-X-CID-META: VersionHash:464815b,CLOUDID:7c63aca0-f395-4dfc-8188-ce2682df7fd8,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-	RL:11|1,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES
-	:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULN
-X-UUID: 07c34cb6a96a11efbd192953cf12861f-20241123
-Received: from mtkmbs14n2.mediatek.inc [(172.21.101.76)] by mailgw02.mediatek.com
-	(envelope-from <andy-ld.lu@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 2066787923; Sat, 23 Nov 2024 15:10:33 +0800
-Received: from mtkmbs13n1.mediatek.inc (172.21.101.193) by
- MTKMBS14N2.mediatek.inc (172.21.101.76) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.26; Sat, 23 Nov 2024 15:10:30 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs13n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1118.26 via Frontend Transport; Sat, 23 Nov 2024 15:10:30 +0800
-From: Andy-ld Lu <andy-ld.lu@mediatek.com>
-To: <ulf.hansson@linaro.org>, <angelogioacchino.delregno@collabora.com>,
-	<matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
-	Andy-ld Lu <andy-ld.lu@mediatek.com>
-Subject: [PATCH] mmc: mtk-sd: Add support for ignoring cmd response CRC
-Date: Sat, 23 Nov 2024 15:09:05 +0800
-Message-ID: <20241123071006.14294-1-andy-ld.lu@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="Qw84sjbr"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-a9a6b4ca29bso410787366b.3
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Nov 2024 01:51:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1732355495; x=1732960295; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:subject:user-agent
+         :references:in-reply-to:message-id:date:cc:to:from:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2He4Y+3l6zjnzsCvPiyzHE8Ux0qLZfdpjc2IjiyYS9Q=;
+        b=Qw84sjbrYsHpizdtgyilRz7xUzWByLC4QIvYxWJ7ob8+TX3s0ZasARIAc5ljkw+ibu
+         pymgE9MmpH2OwaZz3//h5lbq8CgCQaYFVz3rziT3qwtU0sgqBWK/WPZ4vl2rylADg6Am
+         CG1x3sX5NiVAhQPQWIJ9eXcvlEvrB1l736KTQ=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732355495; x=1732960295;
+        h=content-transfer-encoding:mime-version:subject:user-agent
+         :references:in-reply-to:message-id:date:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=2He4Y+3l6zjnzsCvPiyzHE8Ux0qLZfdpjc2IjiyYS9Q=;
+        b=J2v1PP/ez6qpcG0eIn4rq1KU95DYtAMekQFlaylsP1rr1SCnkXS67K19JtyjGY36n3
+         uX/wqaXbPJJIR7Hh03WU+IuU8bxt1cz77veioMW3eQp0iULWE6qmb444m9FlAhhARIE+
+         MrPP6wRXT1Y1U/3bsa3U5FxQDTtx0w+lj6sP3VvtHc6VVzvAt/pDpJB7qCMbGa3laUYx
+         NJwQt7VsYj4RezwJ75gkkZXwiFG85Fn4YvMoELPvrKdEtphVsng7ELTRjivUnIEmNIwp
+         c31j9e+WoVENdwKHfge83g5o3XdS1bKXsn6hIlRQ77JpusJm8VY+iDUyFFSrOdqXP5UC
+         lXbg==
+X-Forwarded-Encrypted: i=1; AJvYcCW9alpVJm0Uw9rNsI05CwQxwlkfHt2uWeEgv0WitY9gqGWCIDlmq9aF+dvbEmr94zdokg6nrXZHywA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5IlJ7GRBRjYpKJ5sHRU/upwBi9bNxh4KDdlIBwBk5lLt/HJmP
+	x30SvufKPEC0GZKsRaVcw8DglxLRHHtoPozmq//98PlOi0oiN2lO0sSBNbFIeg==
+X-Gm-Gg: ASbGnct5+0DSVMYXye0UaR229WgYI+4Bq9II3F0NAPONfWShS2Y7HJrpWeYbphLUDhi
+	oaaYAZqwu1DtE6Oq2wRoJbZUsfFd1p3ibZPeGgOjl8o/ejXaMRBa3s/n9wRlkTB+wsOeycfx3Gh
+	9e5sLwV+mE6MP5UIrgVO9oz8o0F8RYwkPMAdcxdZTnn5uRPpevG9uHsV04zdwO1ms8wPkiH86yp
+	Qqta4HB6JdVPwUjQqz2Vj9RC+b5kyFw9TP4FmdeuEPeTMGC6pOMtksFsN+UPX5orU0GPyykHJ8u
+	PsgUB6ckXNqv
+X-Google-Smtp-Source: AGHT+IFq7oIJo3gucR1f2TVQm30JKlJTgPGnpog1fqvObzxkCV1gj1+y+gfxLL9E/8hQlX2VlIl+uQ==
+X-Received: by 2002:a17:906:bfea:b0:a9a:684e:9a64 with SMTP id a640c23a62f3a-aa509e94d2emr437231166b.61.1732355495522;
+        Sat, 23 Nov 2024 01:51:35 -0800 (PST)
+Received: from [192.168.178.38] (f215227.upc-f.chello.nl. [80.56.215.227])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa50b52fa20sm202775966b.113.2024.11.23.01.51.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 23 Nov 2024 01:51:35 -0800 (PST)
+From: Arend Van Spriel <arend.vanspriel@broadcom.com>
+To: Stefan Wahren <wahrenst@gmx.net>, Johannes Berg <johannes@sipsolutions.net>, Arend van Spriel <aspriel@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+CC: <linux-wireless@vger.kernel.org>, <brcm80211-dev-list.pdl@broadcom.com>, <SHA-cyfmac-dev-list@infineon.com>, Kalle Valo <kvalo@kernel.org>, "linux-mmc" <linux-mmc@vger.kernel.org>
+Date: Sat, 23 Nov 2024 10:51:35 +0100
+Message-ID: <193586f1458.279b.9b12b7fc0a3841636cfb5e919b41b954@broadcom.com>
+In-Reply-To: <a122ad79-086b-42a9-894e-d589092bac80@gmx.net>
+References: <a825587c-e6f6-45f8-8ac0-a1a5642a5333@gmx.net>
+ <16169285-d838-46f3-8be1-3639f573062e@broadcom.com>
+ <86ef2465-3b5c-47c8-9e81-ad5b545bcfe4@gmx.net>
+ <89888eab44b7b431ac7fedcd573db325e07b935d.camel@sipsolutions.net>
+ <a122ad79-086b-42a9-894e-d589092bac80@gmx.net>
+User-Agent: AquaMail/1.53.0 (build: 105300523)
+Subject: Re: brcmfmac: error messages while entering suspend
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; format=flowed; charset="us-ascii"
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-TM-AS-Product-Ver: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-AS-Result: No-10--6.109900-8.000000
-X-TMASE-MatchedRID: Q3t+gDEGl+H7W7/9wscjdRuZoNKc6pl+ju+GX08gELBKda7Cp9A+Rm7T
-	iYn7+ZHjXers26Xj0FAkAzbREWz9m28aeniRmKw1H5YQyOg71ZZMkOX0UoduuQqiCYa6w8tv8rK
-	/0wUyv6DwLx34aly34aojHM/WIuK90rly6TajiUnuykw7cfAoIHE01tKb2rARmyiLZetSf8mfop
-	0ytGwvXiq2rl3dzGQ1HN3C0owwdL7VUQqweXw1HiKsnV6jwqhAS8V3+ghPHP094nqACUbvaA==
-X-TM-AS-User-Approved-Sender: No
-X-TM-AS-User-Blocked-Sender: No
-X-TMASE-Result: 10--6.109900-8.000000
-X-TMASE-Version: SMEX-14.0.0.3152-9.1.1006-23728.005
-X-TM-SNTS-SMTP:
-	D2E444064FAB0EB55E14C3A892E9AA8715E06345789FCC8F6A380B8EA7050E592000:8
 
-The current process flow does not handle MMC requests that are indicated
-to ignore the command response CRC. For instance, cmd12 and cmd48 from
-mmc_cqe_recovery() are marked to ignore CRC, but they are not matched to
-the appropriate response type in msdc_cmd_find_resp(). As a result, they
-are defaulted to 'MMC_RSP_NONE', which means no response is expected.
+On November 4, 2024 9:06:04 PM Stefan Wahren <wahrenst@gmx.net> wrote:
 
-This commit adds a new flag 'MMC_RSP_R1B_NO_CRC' to work alongside the
-existing 'MMC_RSP_R1_NO_CRC' for the following process flow. It fixes the
-response type setting in msdc_cmd_find_resp() and adds the logic to ignore
-CRC in msdc_cmd_done().
+> Hi,
+>
+> Am 04.11.24 um 13:18 schrieb Johannes Berg:
+>> On Mon, 2024-11-04 at 12:59 +0100, Stefan Wahren wrote:
+>>>>> [  384.292071] ieee80211 phy0: brcmf_fil_cmd_data: bus is down. we have
+>>>>> nothing to do.
+>>>>> [  384.292079] ieee80211 phy0: brcmf_cfg80211_get_tx_power: error (-5)
+>>>>>
+>>>>> These errors are not new and I assume they have always been there. I'm
+>>>>> not an expert here, so I want to know is the problem here that the SDIO
+>>>>> interface is shutdown before brcmfmac is suspended or lies the issue
+>>>>> within brcmfmac suspend itself?
+>>>> Upon suspend we execute the remove path and cleaning the interfaces.
+>>>> We notify cfg80211 about the removal, which in turn will notify
+>>>> userspace, but is tries to obtain the tx power from brcmfmac.
+>> I guess "it tries to obtain" is some sort of event path that wants to
+>> include the TX power in an event. That doesn't seem to make all that
+>> much sense on removal events though, so perhaps we could remove the
+>> get_channel and get_tx_power calls for NL80211_CMD_DEL_INTERFACE.
+> Not sure if I get it right, but the follow patch make the errors go away:
+>
+> diff --git a/net/wireless/nl80211.c b/net/wireless/nl80211.c
+> index 1ac8a196f376..52120cce2f7e 100644
+> --- a/net/wireless/nl80211.c
+> +++ b/net/wireless/nl80211.c
+> @@ -4006,23 +4006,25 @@ static int nl80211_send_iface(struct sk_buff
+> *msg, u32 portid, u32 seq, int flag
+>          nla_put_u32(msg, NL80211_ATTR_VIF_RADIO_MASK, wdev->radio_mask))
+>          goto nla_put_failure;
+>
+> -    if (rdev->ops->get_channel && !wdev->valid_links) {
+> -        struct cfg80211_chan_def chandef = {};
+> -        int ret;
+> +    if (cmd != NL80211_CMD_DEL_INTERFACE) {
+> +        if (rdev->ops->get_channel && !wdev->valid_links) {
+> +            struct cfg80211_chan_def chandef = {};
+> +            int ret;
+>
+> -        ret = rdev_get_channel(rdev, wdev, 0, &chandef);
+> -        if (ret == 0 && nl80211_send_chandef(msg, &chandef))
+> -            goto nla_put_failure;
+> -    }
+> +            ret = rdev_get_channel(rdev, wdev, 0, &chandef);
+> +            if (ret == 0 && nl80211_send_chandef(msg, &chandef))
+> +                goto nla_put_failure;
+> +        }
+>
+> -    if (rdev->ops->get_tx_power) {
+> -        int dbm, ret;
+> +        if (rdev->ops->get_tx_power) {
+> +            int dbm, ret;
+>
+> -        ret = rdev_get_tx_power(rdev, wdev, &dbm);
+> -        if (ret == 0 &&
+> -            nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_LEVEL,
+> -                DBM_TO_MBM(dbm)))
+> -            goto nla_put_failure;
+> +            ret = rdev_get_tx_power(rdev, wdev, &dbm);
+> +            if (ret == 0 &&
+> +                nla_put_u32(msg, NL80211_ATTR_WIPHY_TX_POWER_LEVEL,
+> +                    DBM_TO_MBM(dbm)))
+> +                goto nla_put_failure;
+> +        }
+>      }
+>
+>      switch (wdev->iftype) {
+>
+> But this change doesn't consider get_txq_stats and the further calls
+> rdev_get_channel for the valid_links.
+>
+> Do we actually need nl80211_send_iface() for NL80211_CMD_DEL_INTERFACE?
 
-Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 11 +++++++++--
- include/linux/mmc/core.h  |  1 +
- 2 files changed, 10 insertions(+), 2 deletions(-)
+In term of user-space API the answer would (probably) be yes. At least the 
+primitive should be send. What attributes should be included is debatable. 
+The primitive is probably used by user-space to cleanup or disable 
+functionality using the given interface. So only attributes identifying the 
+interface are likely sufficient (wdev-id, if-index).
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index efb0d2d5716b..5d669f985a82 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1097,11 +1097,13 @@ static inline u32 msdc_cmd_find_resp(struct msdc_host *host,
- 	u32 resp;
- 
- 	switch (mmc_resp_type(cmd)) {
--		/* Actually, R1, R5, R6, R7 are the same */
-+	/* Actually, R1, R5, R6, R7 are the same */
- 	case MMC_RSP_R1:
-+	case MMC_RSP_R1_NO_CRC:
- 		resp = 0x1;
- 		break;
- 	case MMC_RSP_R1B:
-+	case MMC_RSP_R1B_NO_CRC:
- 		resp = 0x7;
- 		break;
- 	case MMC_RSP_R2:
-@@ -1305,6 +1307,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- {
- 	bool done = false;
- 	bool sbc_error;
-+	bool ignore_crc = false;
- 	unsigned long flags;
- 	u32 *rsp;
- 
-@@ -1329,6 +1332,10 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 		return true;
- 	rsp = cmd->resp;
- 
-+	if (mmc_resp_type(cmd) == MMC_RSP_R1_NO_CRC ||
-+	    mmc_resp_type(cmd) == MMC_RSP_R1B_NO_CRC)
-+		ignore_crc = true;
-+
- 	sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
- 
- 	if (cmd->flags & MMC_RSP_PRESENT) {
-@@ -1351,7 +1358,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 			 * CRC error.
- 			 */
- 			msdc_reset_hw(host);
--		if (events & MSDC_INT_RSPCRCERR) {
-+		if (events & MSDC_INT_RSPCRCERR && !ignore_crc) {
- 			cmd->error = -EILSEQ;
- 			host->error |= REQ_CMD_EIO;
- 		} else if (events & MSDC_INT_CMDTMO) {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 56972bd78462..076e1c71a07e 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -66,6 +66,7 @@ struct mmc_command {
- 
- /* Can be used by core to poll after switch to MMC HS mode */
- #define MMC_RSP_R1_NO_CRC	(MMC_RSP_PRESENT|MMC_RSP_OPCODE)
-+#define MMC_RSP_R1B_NO_CRC	(MMC_RSP_PRESENT|MMC_RSP_OPCODE|MMC_RSP_BUSY)
- 
- #define mmc_resp_type(cmd)	((cmd)->flags & (MMC_RSP_PRESENT|MMC_RSP_136|MMC_RSP_CRC|MMC_RSP_BUSY|MMC_RSP_OPCODE))
- 
--- 
-2.34.1
+Regards,
+Arend
+
+
+
+
 
