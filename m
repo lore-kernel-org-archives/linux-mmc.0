@@ -1,168 +1,185 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC60E539A;
-	Mon, 25 Nov 2024 02:20:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9ABF92119;
+	Mon, 25 Nov 2024 07:35:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732501221; cv=none; b=D71aBjX24Q28s9M20Sr49LMSwwjdwOcCFOH/LwWKHKWy5H+6uq4qJVYT/3p2xBPd7tbpK0mcA7waDIK5yhe9PjKSU27ORtGgxgNr6/g7qsJ791CCQvQsqOJ1dTqUDF5gHCQmV5DOUOsg1MnhwvmXF1vwT0zTbxuFdXM1OQFlqnA=
+	t=1732520157; cv=none; b=Imgsk1TmFJQ1JEsQrmYBHfQAIDiz2J14zCYR6tc8OoSGuNQt8SiVcGC7gzDkHrETl8q5bc0a8bqTHcErQsuOD2iLPRTRbPYh6SeH5R/NSW0Q03M9YhrLz24I5tI1FFg6xWvqa0h6PJ/0Byt1pyqEn4i2y08MSpyxcnvHIZ6hbhc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732501221; c=relaxed/simple;
-	bh=aKFcQ/fHtdKz0ODHzEPNO4APsuqME9RMV3b2C4hSq10=;
-	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=n79Z9kfssHMpMiQY6ygUUielq7Dn7an1yec4Yfb8qgLtzVMZzhrxWQ020XFe0d1ZZ7DzOSWA/T5w/IvE+Z+btfyCEuPkkip1u6zaVel+DPnAJHlxBGzzS4T5MfP8qW3dJKihPk9dAooOh5eVXBE6HnNrhglaR1JtzlbTZxciPRM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=VESBtHs3; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1732520157; c=relaxed/simple;
+	bh=lIaPAEe/5xyZbTdWkmRj4VZ5612+TEcRS6FQjnJseEU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=M7V+my0fKGA9RnW3/wyv9tUduDW8OyA4QUz5nEs6D6yh5WlkVMm/bBA/cBWfS/b3Be3hEOCWAsGWAiOLFfO6pwdgLeiXO1fXyn+I2BNI5I2lTSDqFDgtZl15JV8Bur166mP5PKpbt2oJZ6babbBiCFe4hnzIfcYyMjxqmdMpWm8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=FYBQeD2l; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="VESBtHs3"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4AONBuvl026562;
-	Mon, 25 Nov 2024 02:20:13 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=weMK2IPGHtlB2h8VJY4ZkVIc
-	0uwz1nC6r5XORnvCWRU=; b=VESBtHs3f2906F6kYTX+TPJ9MSnfXQVSNTDOjwDE
-	0CEaYWCpN6vpT1m6i/dNWwq2hEj4E7ZubGF3Yh6pUf7wWYc5LxN8L55VuS+Lb+gs
-	nOXImB4hIPK5RpqrB3k464ibHI3z209Jigpl+tuXItXJPEtd6LBdyoAJnWrDA0Dc
-	tbXHCGtqgcnzfn4GJKDse1NpL1ZmrGqfBrgwEK0QM140ETOve2ICO1VJhxqLGGtp
-	tBjVkx24XOl54+KowQtp1RSWEdhBNEGM0BHS+bc+UoOcfMEYomkM1Cf+81qfc+vJ
-	j/v/ujoIXT+kbTwgO3ghmjuwtgfI+FJXAGqsXCyXHfG5fg==
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4338b8b174-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 25 Nov 2024 02:20:13 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4AP2KCo7020522
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 25 Nov 2024 02:20:12 GMT
-Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
- nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Sun, 24 Nov 2024 18:20:07 -0800
-Date: Mon, 25 Nov 2024 10:20:00 +0800
-From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: Krzysztof Kozlowski <krzk@kernel.org>, <ulf.hansson@linaro.org>,
-        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
-        <bhupesh.sharma@linaro.org>, <andersson@kernel.org>,
-        <konradybcio@kernel.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_tingweiz@quicinc.com>, <quic_yuanjiey@quicinc.com>,
-        <quic_zhgao@quicinc.com>
-Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-Message-ID: <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
-References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
- <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
- <f9b01690-8940-4f8b-b142-6c2ec4db3e83@kernel.org>
- <Z0BDYiVaLQXaMsle@cse-cd02-lnx.ap.qualcomm.com>
- <ccbc6324-0dcb-405a-901a-12dc33a8130c@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="FYBQeD2l"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 24433C4CECE;
+	Mon, 25 Nov 2024 07:35:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1732520157;
+	bh=lIaPAEe/5xyZbTdWkmRj4VZ5612+TEcRS6FQjnJseEU=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=FYBQeD2lyXCXlnVftx83jDZWSdgyZqUHTVvRuBTTDy3ezqkjuenzhlo7RjQlIUYga
+	 rWnPEYdupRjS1RF7gQd3sot/WdPfTGREwux7kvSPTzgqdoqWnLsDBZ/11zNISIg622
+	 2DdI/4lXHpOF75qE1mJipbudWC/4XDO2iklhURZzXa/4UFumF0X1+hDcJ3tGo/rWj5
+	 bxp53OREGZo16QyFvy2D0qPufDY+fxZrAQT/B5oKGYzeue4K/Btk56h2zf+OEvJVOD
+	 LRfhcUUqpk/O/150+4T5RcfMh19EQRriO+A6WwUKHoVGYCYqHRzlOFCc6F6I2cR/SU
+	 fAaN5E+j/aXsQ==
+Message-ID: <97a6c471-b146-4625-a3fa-93ee29be4c37@kernel.org>
+Date: Mon, 25 Nov 2024 08:35:50 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <ccbc6324-0dcb-405a-901a-12dc33a8130c@kernel.org>
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: jchMbIhawoy5L2ZIk6ukDaaSae-GO7rT
-X-Proofpoint-GUID: jchMbIhawoy5L2ZIk6ukDaaSae-GO7rT
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 impostorscore=0
- adultscore=0 mlxscore=0 priorityscore=1501 lowpriorityscore=0 bulkscore=0
- phishscore=0 malwarescore=0 suspectscore=0 mlxlogscore=999 spamscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2409260000
- definitions=main-2411250018
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org,
+ robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+ bhupesh.sharma@linaro.org, andersson@kernel.org, konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
+References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
+ <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
+ <f9b01690-8940-4f8b-b142-6c2ec4db3e83@kernel.org>
+ <Z0BDYiVaLQXaMsle@cse-cd02-lnx.ap.qualcomm.com>
+ <ccbc6324-0dcb-405a-901a-12dc33a8130c@kernel.org>
+ <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Fri, Nov 22, 2024 at 01:35:28PM +0100, Krzysztof Kozlowski wrote:
-> On 22/11/2024 09:40, Yuanjie Yang wrote:
-> > On Fri, Nov 22, 2024 at 08:04:31AM +0100, Krzysztof Kozlowski wrote:
-> >> On 22/11/2024 07:51, Yuanjie Yang wrote:
-> >>> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
-> >>>
-> >>> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-> >>> ---
-> >>>  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
-> >>>  1 file changed, 198 insertions(+)
-> >>>
-> >>> diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> >>> index 590beb37f441..37c6ab217c96 100644
-> >>> --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> >>> +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
-> >>> @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
-> >>>  			#size-cells = <1>;
-> >>>  		};
-> >>>  
-> >>> +		sdhc_1: mmc@7c4000 {
-> >>> +			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
-> >>> +			reg = <0x0 0x007c4000 0x0 0x1000>,
-> >>> +			      <0x0 0x007c5000 0x0 0x1000>;
-> >>> +			reg-names = "hc",
-> >>> +				    "cqhci";
-> >>> +
-> >>> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
-> >>> +				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-> >>> +			interrupt-names = "hc_irq",
-> >>> +					  "pwr_irq";
-> >>> +
-> >>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> >>> +				 <&gcc GCC_SDCC1_APPS_CLK>,
-> >>> +				 <&rpmhcc RPMH_CXO_CLK>,
-> >>> +				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-> >>> +			clock-names = "iface",
-> >>> +				      "core",
-> >>> +				      "xo",
-> >>> +				      "ice";
-> >>> +
-> >>> +			resets = <&gcc GCC_SDCC1_BCR>;
-> >>> +
-> >>> +			power-domains = <&rpmhpd RPMHPD_CX>;
-> >>> +			operating-points-v2 = <&sdhc1_opp_table>;
-> >>> +			iommus = <&apps_smmu 0x02c0 0x0>;
-> >>> +			interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
-> >>> +					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
-> >>> +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
-> >>> +					 &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
-> >>> +			interconnect-names = "sdhc-ddr",
-> >>> +					     "cpu-sdhc";
-> >>> +
-> >>> +			bus-width = <8>;
-> >>> +			qcom,dll-config = <0x000f642c>;
-> >>> +			qcom,ddr-config = <0x80040868>;
-> >>> +			supports-cqe;
-> >>> +			dma-coherent;
-> >>> +			mmc-ddr-1_8v;
-> >>> +			mmc-hs200-1_8v;
-> >>> +			mmc-hs400-1_8v;
-> >>> +			mmc-hs400-enhanced-strobe;
-> >>
-> >> These are properties of memory, not SoC. If the node is disabled, means
-> >> memory is not attached to the SoC, right?
-> >>
-> >>> +			status = "disabled";
-> > Thanks, I think qcom,dll-config and qcom,ddr-config are properties of Soc,
-> > they are memory configurations that need to be written to the ioaddr.
-> > And mmc-ddr-1_8v,mmc-hs200-1_8v,mmc-hs400-1_8v are bus speed config,
-> > they indicate the bus speed at which the host contoller can operate.
-> > If the node is disabled, which means Soc don't support these properties.
-> No, that is not the meaning of node is disabled. When node is disabled,
-> it means board does not have attached memory.
+On 25/11/2024 03:20, Yuanjie Yang wrote:
+> On Fri, Nov 22, 2024 at 01:35:28PM +0100, Krzysztof Kozlowski wrote:
+>> On 22/11/2024 09:40, Yuanjie Yang wrote:
+>>> On Fri, Nov 22, 2024 at 08:04:31AM +0100, Krzysztof Kozlowski wrote:
+>>>> On 22/11/2024 07:51, Yuanjie Yang wrote:
+>>>>> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
+>>>>>
+>>>>> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+>>>>> ---
+>>>>>  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
+>>>>>  1 file changed, 198 insertions(+)
+>>>>>
+>>>>> diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+>>>>> index 590beb37f441..37c6ab217c96 100644
+>>>>> --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
+>>>>> +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+>>>>> @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
+>>>>>  			#size-cells = <1>;
+>>>>>  		};
+>>>>>  
+>>>>> +		sdhc_1: mmc@7c4000 {
+>>>>> +			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
+>>>>> +			reg = <0x0 0x007c4000 0x0 0x1000>,
+>>>>> +			      <0x0 0x007c5000 0x0 0x1000>;
+>>>>> +			reg-names = "hc",
+>>>>> +				    "cqhci";
+>>>>> +
+>>>>> +			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
+>>>>> +				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
+>>>>> +			interrupt-names = "hc_irq",
+>>>>> +					  "pwr_irq";
+>>>>> +
+>>>>> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
+>>>>> +				 <&gcc GCC_SDCC1_APPS_CLK>,
+>>>>> +				 <&rpmhcc RPMH_CXO_CLK>,
+>>>>> +				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
+>>>>> +			clock-names = "iface",
+>>>>> +				      "core",
+>>>>> +				      "xo",
+>>>>> +				      "ice";
+>>>>> +
+>>>>> +			resets = <&gcc GCC_SDCC1_BCR>;
+>>>>> +
+>>>>> +			power-domains = <&rpmhpd RPMHPD_CX>;
+>>>>> +			operating-points-v2 = <&sdhc1_opp_table>;
+>>>>> +			iommus = <&apps_smmu 0x02c0 0x0>;
+>>>>> +			interconnects = <&aggre1_noc MASTER_SDCC_1 QCOM_ICC_TAG_ALWAYS
+>>>>> +					 &mc_virt SLAVE_EBI1 QCOM_ICC_TAG_ALWAYS>,
+>>>>> +					<&gem_noc MASTER_APPSS_PROC QCOM_ICC_TAG_ALWAYS
+>>>>> +					 &config_noc SLAVE_SDCC_1 QCOM_ICC_TAG_ALWAYS>;
+>>>>> +			interconnect-names = "sdhc-ddr",
+>>>>> +					     "cpu-sdhc";
+>>>>> +
+>>>>> +			bus-width = <8>;
+>>>>> +			qcom,dll-config = <0x000f642c>;
+>>>>> +			qcom,ddr-config = <0x80040868>;
+>>>>> +			supports-cqe;
+>>>>> +			dma-coherent;
+>>>>> +			mmc-ddr-1_8v;
+>>>>> +			mmc-hs200-1_8v;
+>>>>> +			mmc-hs400-1_8v;
+>>>>> +			mmc-hs400-enhanced-strobe;
+>>>>
+>>>> These are properties of memory, not SoC. If the node is disabled, means
+>>>> memory is not attached to the SoC, right?
+>>>>
+>>>>> +			status = "disabled";
+>>> Thanks, I think qcom,dll-config and qcom,ddr-config are properties of Soc,
+>>> they are memory configurations that need to be written to the ioaddr.
+>>> And mmc-ddr-1_8v,mmc-hs200-1_8v,mmc-hs400-1_8v are bus speed config,
+>>> they indicate the bus speed at which the host contoller can operate.
+>>> If the node is disabled, which means Soc don't support these properties.
+>> No, that is not the meaning of node is disabled. When node is disabled,
+>> it means board does not have attached memory.
+>>
+>> Move the memory related properties  to the board.
 > 
-> Move the memory related properties  to the board.
+> Thanks, Ok I understand, I will move the memory related
+> properties(qcom,dll-config and qcom,ddr-config) to the
+> board dts in next version.
 
-Thanks, Ok I understand, I will move the memory related
-properties(qcom,dll-config and qcom,ddr-config) to the
-board dts in next version.
+What? Why are you talking about these properties? My comment was not
+under these!
 
-> Best regards,
-> Krzysztof
-
-Thanks,
-Yuanjie
+Best regards,
+Krzysztof
