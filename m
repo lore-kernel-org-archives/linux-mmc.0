@@ -1,149 +1,165 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDA2B199947
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82C2B567D
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 13:09:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732539069; cv=none; b=pv1Vbvo1paywaJjH164XsL+aBsXTuygj6rmC4lZMHD/t8RGm3P0ozVC8hKjvIyjnZnwMKir674foUW/suON+s+AJfUtARfgcqChokYicSt4h0mEtIcDTSUcyN7oVrYD3+L+eZwNKFZSxdF650xWZu9Xv31fqjeKEIOt9CyWSKVU=
+	t=1732540147; cv=none; b=cm/fDmVVMykTV0oihz76dkMNLnnRRY36lP5JarDiWbOaAybc1YaoMrIvCg2xVe1k0PGIdEWvjqEylAJ6wg9ywAE3eAFB3GMDYR1SNpU35vrGQnM2kn0+n/pdIPGZeAmrWbdKyreO3pTWP+7h+ykpUZgCQh+xFMK5wqZWZ//qM8U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732539069; c=relaxed/simple;
-	bh=yGW4kJoMpOcK/Cyp9ao4OTwSkjuAHkUit8e7aZifOyE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=K+ex8zYrrK127ksasyrWhWagC51fK7K1DrrycueKzcdSRE+ZJ/xYi65M4KZz4iniRYM+n0dzZmzsGgM8l/9i9xXGevVDXstFc8KNfRwD6B8PvoJAchEr+ZocVlyx86kSIzpdn8K4x8qL1hizi1L10OEmDz+wm4I5JJGEeBB04X8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=GJI6pESx; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1732540147; c=relaxed/simple;
+	bh=VlPn8ENRAtequbTvdk1TY+7P5PTASYER46wU/7kPzKU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=qMwjgzooXH/JP9MTwsFXP/Z2NWxUZ8BcdC6OJTpO9ti8JIVGuROiAG/sDyTN6XZ2ymu7rZMYrRcjruaXxWc/15i7rCA9FZwRYuTAQ9UO0aehqNfNcwkbiS5/7HiC9yp8RzTGRigT6SnrHPTnqHGDrRhy14cK64uwqDxLeSt9FH0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WXVfVPv7; arc=none smtp.client-ip=209.85.219.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="GJI6pESx"
-Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4APBbNvp008254
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	d42/JA9nYZ9/D8VoxRryYdvvcEmT7ewq1ySINHSq6jM=; b=GJI6pESxspMzIqDt
-	SQHNhyetDOG6lVTi6B2JQotmRIpWbs23S0ZJ1LpYZXRozdN4bp9Yst93Pkc2VvXd
-	QRPHRReaoCR9J2jfo3No8zEF8RYtt6J33LnnisH9voBAmy7ZnyCSfkCkwy6EOQ9W
-	QyTb1zBfNse99K7dYBc3IMq46V97751zOcZvlnWIQeAPZjzi9tok0A/LkaLLzP3x
-	P4EyH4BWUaHMOS2NKOoTeNx7w8MyJHfkd8WMkTQHyA2llasFF+L9xWLDaxuvMUxl
-	dzfFddIqYmFePTrcq6wPiPyToYfowqtI6k3ApPhL4Q0G5/LKhrNb0JuN2+HuNOrP
-	wtlDUQ==
-Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43387jcker-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 +0000 (GMT)
-Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-4668c9aa8c7so2552281cf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 04:51:03 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WXVfVPv7"
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e3892396200so3693114276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 05:09:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1732540144; x=1733144944; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=zwW5X2yVuOQxgzZYA2AkwTQIodjDxTG3chKlKalzE/A=;
+        b=WXVfVPv74gPXMeZD42iQAws+efNPkioosffFCfSY7eQ5A6m/IiyT9YWwQsNUJsDjQT
+         67UoP9GOndiQbeOqVitXu1MZs64sVAWVEB9+4PWT8qNP7vY8VFtoosKXbnHS96FUUv3d
+         1s+r1/I+9y992CXHY35bVupqHXtr1TJyMm+39UX2oSt8FYwCe1SlFB6e2pUCW8T00U9B
+         sssDjyD2VWj60/7DxI5DZ8Qm6sY8IcrNQ8Dl4nU3Set/o6ilAjeMeQWTetpRMA8dxHxb
+         o+nX1IVzwFqydPit/lXbeB4lzyqyCXyyBXdOg2mPpxxgEn+kQS8mmWtaFe2KOW+uAfpB
+         HGTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732539062; x=1733143862;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=d42/JA9nYZ9/D8VoxRryYdvvcEmT7ewq1ySINHSq6jM=;
-        b=mkfIX0I3uAlKqGDFY08mZDxziUDBJzbVNZ8haXJKm3LNlP4XYmqC5vzB313vPP5FAb
-         gVXg3wANRYqYg0ArgDJ2qqpXNZbWwvHS5XHZrOhk5dIbba/d9MSZA6cCdAzSxYr3/gbZ
-         katGqj0FVpaHAj7PFokUKbhlUIrglLn8z9KrdKhpxOuNeiuVdpv/5yYONoTIuWpZmMen
-         2/rkcA/mcPUAv42YL051hd8/Ny++x45raVc/5sooLgB/j39YWs7ewKGIsC7PpHNiY8q8
-         3YpSy+QPW3J+QBpFlGcj80ZsfHnNrV5cv9AXNFXnmKh0ZgCAlSkqBFzMn8dQIvcAf98/
-         VnwA==
-X-Gm-Message-State: AOJu0Yxgz7GoEOo4mNWWEsdMa3PEmnU7U71KrYW4MnzzDdE98R9Herxc
-	ctqz5jZwOSDigH93P5LU3lyvoa5zwfmYXeHvW0tBxJhuRAHVQ+8qlEwao9YZneFUVDXxb9T/xMP
-	2BHkaJ2q4EzIiyPvkHtHSYftl2H63Yekx9QJCiGvDlAWtpwg8GKiWlDmaHAM=
-X-Gm-Gg: ASbGncvMLeJWOi2VCMeKN+fgjoq00gAU5EBK/bhSY7IIU/8szBZdWvY7yJga/QcnCoN
-	6ZEPJDPGlTF9/q6chVw0mDYJO6hGmz9PxuvHmVO5orx5KuCst4wdHs9JDkuXDWkpvpcdMxpFdQ4
-	Q+b0a+BBNRrz9C/FYRKZ6K9CV1dWYQdJd8PZZbM26+x8EyAP50WTNQ/RS0lC92Dqie0EfYA10l2
-	thoMo41Cb5XSg88Tb64yo1qwSY0CapLtQ9Z3V7CHLaN8+UruLRRY+5hYF1AMJUix+83fG5FY/DO
-	uQCzB/EiLwavFhX1wr6Y35LYzP4OrVk=
-X-Received: by 2002:ac8:5809:0:b0:464:9463:7b32 with SMTP id d75a77b69052e-466a168bfbdmr532921cf.7.1732539061698;
-        Mon, 25 Nov 2024 04:51:01 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IFUbxYuqE9h5uUwxctdSxJ6hLhSn2lJZqVvC2/0rgVQXoeTrLMxiKLvqubgQNzDEejqNaURgg==
-X-Received: by 2002:ac8:5809:0:b0:464:9463:7b32 with SMTP id d75a77b69052e-466a168bfbdmr532691cf.7.1732539061280;
-        Mon, 25 Nov 2024 04:51:01 -0800 (PST)
-Received: from [192.168.212.120] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa50b28fe55sm456496666b.4.2024.11.25.04.50.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 25 Nov 2024 04:51:00 -0800 (PST)
-Message-ID: <833280a4-7014-45e9-852e-3384fe9d5cd4@oss.qualcomm.com>
-Date: Mon, 25 Nov 2024 13:50:59 +0100
+        d=1e100.net; s=20230601; t=1732540144; x=1733144944;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=zwW5X2yVuOQxgzZYA2AkwTQIodjDxTG3chKlKalzE/A=;
+        b=kjErbER2VMF0bW5YveXbP6OIL9ivL7bmxBwfNiHWGcpLbg6Ja4h4nM3LS0wRlR9LjG
+         lLJxFTdkS+njAfgU1VERSEIQgf5lnXkklXskYXzIAv2dRsLLUlXZ+DfE8ub5MRj4GU2Q
+         +KQg2Pxdeyv6/oxSQL2MsE4N5s4v7VWcGoaPpELi3Xok/PG8TXDEcbrGoaB/YwnfCCfa
+         OVuvmlyH2is9sLjuz3KhLaLUhHNoycIsXa/Sgb2KRnAfEF2pMWJ8JZfhagKI7GQtxPAO
+         Jkv5rXh+pHju3Vy0f74sgQVu8TYfBwUf3EakpN9gr03BxJ0Tops/DJ6xWnKkRGbYyQ7O
+         8RJg==
+X-Forwarded-Encrypted: i=1; AJvYcCWwwqY37GKNy1voEK/cIgP/ltXXHvmKt0227H+ReWs5ZF9m+I/RDcV8Gs07JpnEPFFEwFF+4RdkfBE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywvb8WlqgATcHRlgysZ6aWdTxDtXbQvpyxEb8oI6AQVDfu1LDV1
+	VmZ7V+X/qcfVGn1V1gVgc9bCoixHwPq081vuZ7u6nBNjOuDLs8LfqYcrGFtzIF/s4i3hq+/kAR6
+	izE9LmVnz1pxyWn2gdpPC/RkpL9J4SBu1F0ZfUw==
+X-Gm-Gg: ASbGncsD1V5WCdLCO6c8xdZ1LB/KMcFtymGksTyNYBJrTqeY4u2RWzp+/fL+JHfS/fl
+	8wAMN7VmCXMg0/GrV1hiEPqNaYeNnlhSw
+X-Google-Smtp-Source: AGHT+IEF6uaB71EPxvIZeVbVSPO+NaBbT0xZwtt8FC3so2FjgVG6CW+VGCBir21UFRKHNtvL6RUoiWhliSlp9tWY5cM=
+X-Received: by 2002:a05:6902:1106:b0:e2b:cf75:2840 with SMTP id
+ 3f1490d57ef6-e38f8b0aad8mr10473196276.5.1732540144455; Mon, 25 Nov 2024
+ 05:09:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-To: Yuanjie Yang <quic_yuanjiey@quicinc.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>, ulf.hansson@linaro.org,
-        robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-        bhupesh.sharma@linaro.org, andersson@kernel.org,
-        konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
-References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
- <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
- <f9b01690-8940-4f8b-b142-6c2ec4db3e83@kernel.org>
- <Z0BDYiVaLQXaMsle@cse-cd02-lnx.ap.qualcomm.com>
- <ccbc6324-0dcb-405a-901a-12dc33a8130c@kernel.org>
- <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: sMFbUzeva62r7hkfjpGkhA5wxYMlV5pA
-X-Proofpoint-GUID: sMFbUzeva62r7hkfjpGkhA5wxYMlV5pA
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
- lowpriorityscore=0 clxscore=1015 phishscore=0 malwarescore=0
- suspectscore=0 priorityscore=1501 mlxlogscore=831 bulkscore=0
- impostorscore=0 mlxscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.19.0-2409260000 definitions=main-2411250110
+References: <20241123071006.14294-1-andy-ld.lu@mediatek.com>
+In-Reply-To: <20241123071006.14294-1-andy-ld.lu@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 25 Nov 2024 14:08:28 +0100
+Message-ID: <CAPDyKFpr9KZxx4_-jW8ovqcr4BCfDcm4teHEVOgZ69GrUddJ2g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: Add support for ignoring cmd response CRC
+To: Andy-ld Lu <andy-ld.lu@mediatek.com>
+Cc: angelogioacchino.delregno@collabora.com, matthias.bgg@gmail.com, 
+	wenbin.mei@mediatek.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mediatek@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 25.11.2024 3:20 AM, Yuanjie Yang wrote:
-> On Fri, Nov 22, 2024 at 01:35:28PM +0100, Krzysztof Kozlowski wrote:
->> On 22/11/2024 09:40, Yuanjie Yang wrote:
->>> On Fri, Nov 22, 2024 at 08:04:31AM +0100, Krzysztof Kozlowski wrote:
->>>> On 22/11/2024 07:51, Yuanjie Yang wrote:
->>>>> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
->>>>>
->>>>> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
->>>>> ---
+On Sat, 23 Nov 2024 at 08:10, Andy-ld Lu <andy-ld.lu@mediatek.com> wrote:
+>
+> The current process flow does not handle MMC requests that are indicated
+> to ignore the command response CRC. For instance, cmd12 and cmd48 from
+> mmc_cqe_recovery() are marked to ignore CRC, but they are not matched to
+> the appropriate response type in msdc_cmd_find_resp(). As a result, they
+> are defaulted to 'MMC_RSP_NONE', which means no response is expected.
+>
+> This commit adds a new flag 'MMC_RSP_R1B_NO_CRC' to work alongside the
+> existing 'MMC_RSP_R1_NO_CRC' for the following process flow. It fixes the
+> response type setting in msdc_cmd_find_resp() and adds the logic to ignore
+> CRC in msdc_cmd_done().
 
-[...]
+In fact, MMC_RSP_R1_NO_CRC is not being used by the MMC core. So, host
+drivers that check this flag shouldn't need to. In other words, we
+should remove that flag entirely.
 
->>>>> +			bus-width = <8>;
->>>>> +			qcom,dll-config = <0x000f642c>;
->>>>> +			qcom,ddr-config = <0x80040868>;
->>>>> +			supports-cqe;
->>>>> +			dma-coherent;
->>>>> +			mmc-ddr-1_8v;
->>>>> +			mmc-hs200-1_8v;
->>>>> +			mmc-hs400-1_8v;
->>>>> +			mmc-hs400-enhanced-strobe;
->>>>
->>>> These are properties of memory, not SoC. If the node is disabled, means
->>>> memory is not attached to the SoC, right?
->>>>
->>>>> +			status = "disabled";
->>> Thanks, I think qcom,dll-config and qcom,ddr-config are properties of Soc,
->>> they are memory configurations that need to be written to the ioaddr.
->>> And mmc-ddr-1_8v,mmc-hs200-1_8v,mmc-hs400-1_8v are bus speed config,
->>> they indicate the bus speed at which the host contoller can operate.
->>> If the node is disabled, which means Soc don't support these properties.
->> No, that is not the meaning of node is disabled. When node is disabled,
->> it means board does not have attached memory.
->>
->> Move the memory related properties  to the board.
-> 
-> Thanks, Ok I understand, I will move the memory related
-> properties(qcom,dll-config and qcom,ddr-config) to the
-> board dts in next version.
+That said, introducing MMC_RSP_R1B_NO_CRC as the $subject patch
+suggests, makes sense to me. However, I prefer if we can make it used
+by the mmc core, so please change mmc_cqe_recovery() to use it too.
 
-DDR/DLL tuning seem to be done per SoC and not per board.
+Kind regards
+Uffe
 
-Konrad
+>
+> Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 11 +++++++++--
+>  include/linux/mmc/core.h  |  1 +
+>  2 files changed, 10 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index efb0d2d5716b..5d669f985a82 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1097,11 +1097,13 @@ static inline u32 msdc_cmd_find_resp(struct msdc_host *host,
+>         u32 resp;
+>
+>         switch (mmc_resp_type(cmd)) {
+> -               /* Actually, R1, R5, R6, R7 are the same */
+> +       /* Actually, R1, R5, R6, R7 are the same */
+>         case MMC_RSP_R1:
+> +       case MMC_RSP_R1_NO_CRC:
+>                 resp = 0x1;
+>                 break;
+>         case MMC_RSP_R1B:
+> +       case MMC_RSP_R1B_NO_CRC:
+>                 resp = 0x7;
+>                 break;
+>         case MMC_RSP_R2:
+> @@ -1305,6 +1307,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+>  {
+>         bool done = false;
+>         bool sbc_error;
+> +       bool ignore_crc = false;
+>         unsigned long flags;
+>         u32 *rsp;
+>
+> @@ -1329,6 +1332,10 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+>                 return true;
+>         rsp = cmd->resp;
+>
+> +       if (mmc_resp_type(cmd) == MMC_RSP_R1_NO_CRC ||
+> +           mmc_resp_type(cmd) == MMC_RSP_R1B_NO_CRC)
+> +               ignore_crc = true;
+> +
+>         sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+>
+>         if (cmd->flags & MMC_RSP_PRESENT) {
+> @@ -1351,7 +1358,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+>                          * CRC error.
+>                          */
+>                         msdc_reset_hw(host);
+> -               if (events & MSDC_INT_RSPCRCERR) {
+> +               if (events & MSDC_INT_RSPCRCERR && !ignore_crc) {
+>                         cmd->error = -EILSEQ;
+>                         host->error |= REQ_CMD_EIO;
+>                 } else if (events & MSDC_INT_CMDTMO) {
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 56972bd78462..076e1c71a07e 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -66,6 +66,7 @@ struct mmc_command {
+>
+>  /* Can be used by core to poll after switch to MMC HS mode */
+>  #define MMC_RSP_R1_NO_CRC      (MMC_RSP_PRESENT|MMC_RSP_OPCODE)
+> +#define MMC_RSP_R1B_NO_CRC     (MMC_RSP_PRESENT|MMC_RSP_OPCODE|MMC_RSP_BUSY)
+>
+>  #define mmc_resp_type(cmd)     ((cmd)->flags & (MMC_RSP_PRESENT|MMC_RSP_136|MMC_RSP_CRC|MMC_RSP_BUSY|MMC_RSP_OPCODE))
+>
+> --
+> 2.34.1
+>
