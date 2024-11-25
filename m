@@ -1,230 +1,149 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E65EF18AFC
-	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:30:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDA2B199947
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732537830; cv=none; b=IOEjJ9gfLYRHb1Wmuv50IcoYNVtD00++Z8vaXb6LHVmWeN+Ew+J4px7pzR0enZxcUx2qJM7ZUi2bf4h0OQmb/flb5tv95VdIFEi25XjBrMqvjKp0W1Mg9dbPn3lEcYwaEqzAFDkMXbj8VqVvN8M/kocoQqaWMDIWvtRaV9rko34=
+	t=1732539069; cv=none; b=pv1Vbvo1paywaJjH164XsL+aBsXTuygj6rmC4lZMHD/t8RGm3P0ozVC8hKjvIyjnZnwMKir674foUW/suON+s+AJfUtARfgcqChokYicSt4h0mEtIcDTSUcyN7oVrYD3+L+eZwNKFZSxdF650xWZu9Xv31fqjeKEIOt9CyWSKVU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732537830; c=relaxed/simple;
-	bh=90SLUAANxsCMNsikNIE5wtExQy6eDEIMjWU4Ztyoltk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=adkU2958gN63zwkb0LJ1SIYsIlKffBIuv3VeXpyYQD1GlTjBxkZgML/B1deeLsiPg1Z8DS2sBW78oFpK21zztFGXfGD1C5buBmL3WQkDic375PI9qjeb3F0mwtVQB1xQtVvbQ9Uss6ltdYCjTQD0G+3RVV4R5tG5DLaCszLtkVA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=QF7w5+bP; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1732539069; c=relaxed/simple;
+	bh=yGW4kJoMpOcK/Cyp9ao4OTwSkjuAHkUit8e7aZifOyE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=K+ex8zYrrK127ksasyrWhWagC51fK7K1DrrycueKzcdSRE+ZJ/xYi65M4KZz4iniRYM+n0dzZmzsGgM8l/9i9xXGevVDXstFc8KNfRwD6B8PvoJAchEr+ZocVlyx86kSIzpdn8K4x8qL1hizi1L10OEmDz+wm4I5JJGEeBB04X8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=GJI6pESx; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QF7w5+bP"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e388186edbfso4127325276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 04:30:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1732537828; x=1733142628; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=zw2qX+qEwOD7kxM/1rDaAU3vYEgA4YRJTsR7kYlb6Ro=;
-        b=QF7w5+bPP+41xBrEQ+CHc3crE56RPmTtAzwAE4leABXOY0xcPsCsEI/ZOrMmqNm8FB
-         iRuaYcGxi7MSEGQSvAAy1btGq6XbnuMcrjHB4PIBNo/btokqk4HnFM0g5s1zVmrq/UZR
-         vkzm+TpoL6O0FWmxVacbkDGgAyS0iJdSk6D/SBeT4e6dOtXE0Cg1nX6M6uY0R9CITQze
-         2jLKIBIYxgHGt8zo56W18oYLPoulOIlMxHDf841swXyPvoHGRItXPi7JPZTz57Q13q+y
-         RR4jsaVMU80minBdETJ+cpFVWQc4D0aRDFQcbXqZwNGppxdnfxlwKL4wAcslDT3jozuw
-         kSfg==
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="GJI6pESx"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4APBbNvp008254
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	d42/JA9nYZ9/D8VoxRryYdvvcEmT7ewq1ySINHSq6jM=; b=GJI6pESxspMzIqDt
+	SQHNhyetDOG6lVTi6B2JQotmRIpWbs23S0ZJ1LpYZXRozdN4bp9Yst93Pkc2VvXd
+	QRPHRReaoCR9J2jfo3No8zEF8RYtt6J33LnnisH9voBAmy7ZnyCSfkCkwy6EOQ9W
+	QyTb1zBfNse99K7dYBc3IMq46V97751zOcZvlnWIQeAPZjzi9tok0A/LkaLLzP3x
+	P4EyH4BWUaHMOS2NKOoTeNx7w8MyJHfkd8WMkTQHyA2llasFF+L9xWLDaxuvMUxl
+	dzfFddIqYmFePTrcq6wPiPyToYfowqtI6k3ApPhL4Q0G5/LKhrNb0JuN2+HuNOrP
+	wtlDUQ==
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43387jcker-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 12:51:03 +0000 (GMT)
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-4668c9aa8c7so2552281cf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 04:51:03 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732537828; x=1733142628;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=zw2qX+qEwOD7kxM/1rDaAU3vYEgA4YRJTsR7kYlb6Ro=;
-        b=lVGwSi3htwoHQxBH1Z+ekoqER+SKa4+EdD/Cw+yEOlcDznaLKd2wnz8n8mfj6rtg45
-         dN/NgN9UcPc5qs5j5RITvapuoGGahxTH7QaSPIJNvKmEegjOkrf+R1Fh2OASApGh3deD
-         v6pz6VgK2QglVIPbfCcvYYtwQARGXtaFCRtbhnu1HE5mHYyRdr0A8kGIK1jGxLT4R46s
-         VCVxsO1aED58+HD/GgVZRcw/f2T6TO0Eqk6+Qdft3WTuhE/e1U/SymGWJcQA+0sktzvr
-         umsRrX2b1vso7/4cAWDk/oiMy+S2kng4VGbPwS6v94PSVGh5fpe+1ueE209ao1aqp2r3
-         PxdQ==
-X-Gm-Message-State: AOJu0YyYiIqaxdhBA1ybGXQCIsZHGE4H8Lrz2JDH5C+/M9Qb/FSIFDhM
-	ftWOVLuEaR3BHJvUfU5hWcIy465fkuBrhQ46WqgxWMeh0MBXU4SWTGkHsKg/KwzlAP90wQ6NCSJ
-	uxLb+ZiTGlvMQInjWaqVHYQ6f18y3sN8VY+1t0Q==
-X-Gm-Gg: ASbGncut+JA6Adamm+iYjuUqi31yyXuWiKnu5/TP1lQ8Z+XupsmpObQwnloQRLWGbQO
-	VQxy0jR8RhcVyboLn5BLIc7BCYlxnaMbW
-X-Google-Smtp-Source: AGHT+IFH0p/9xEc+3Rq2YR1Lv9xY1NRTZkhxV/CjYlHQTJAV+QbtfYW0ihI4U6npcE2X8QFHBgLw0DGUUHrz6gr8qzk=
-X-Received: by 2002:a05:6902:2b84:b0:e38:99df:5406 with SMTP id
- 3f1490d57ef6-e38f8bda10emr8355594276.40.1732537827728; Mon, 25 Nov 2024
- 04:30:27 -0800 (PST)
+        d=1e100.net; s=20230601; t=1732539062; x=1733143862;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=d42/JA9nYZ9/D8VoxRryYdvvcEmT7ewq1ySINHSq6jM=;
+        b=mkfIX0I3uAlKqGDFY08mZDxziUDBJzbVNZ8haXJKm3LNlP4XYmqC5vzB313vPP5FAb
+         gVXg3wANRYqYg0ArgDJ2qqpXNZbWwvHS5XHZrOhk5dIbba/d9MSZA6cCdAzSxYr3/gbZ
+         katGqj0FVpaHAj7PFokUKbhlUIrglLn8z9KrdKhpxOuNeiuVdpv/5yYONoTIuWpZmMen
+         2/rkcA/mcPUAv42YL051hd8/Ny++x45raVc/5sooLgB/j39YWs7ewKGIsC7PpHNiY8q8
+         3YpSy+QPW3J+QBpFlGcj80ZsfHnNrV5cv9AXNFXnmKh0ZgCAlSkqBFzMn8dQIvcAf98/
+         VnwA==
+X-Gm-Message-State: AOJu0Yxgz7GoEOo4mNWWEsdMa3PEmnU7U71KrYW4MnzzDdE98R9Herxc
+	ctqz5jZwOSDigH93P5LU3lyvoa5zwfmYXeHvW0tBxJhuRAHVQ+8qlEwao9YZneFUVDXxb9T/xMP
+	2BHkaJ2q4EzIiyPvkHtHSYftl2H63Yekx9QJCiGvDlAWtpwg8GKiWlDmaHAM=
+X-Gm-Gg: ASbGncvMLeJWOi2VCMeKN+fgjoq00gAU5EBK/bhSY7IIU/8szBZdWvY7yJga/QcnCoN
+	6ZEPJDPGlTF9/q6chVw0mDYJO6hGmz9PxuvHmVO5orx5KuCst4wdHs9JDkuXDWkpvpcdMxpFdQ4
+	Q+b0a+BBNRrz9C/FYRKZ6K9CV1dWYQdJd8PZZbM26+x8EyAP50WTNQ/RS0lC92Dqie0EfYA10l2
+	thoMo41Cb5XSg88Tb64yo1qwSY0CapLtQ9Z3V7CHLaN8+UruLRRY+5hYF1AMJUix+83fG5FY/DO
+	uQCzB/EiLwavFhX1wr6Y35LYzP4OrVk=
+X-Received: by 2002:ac8:5809:0:b0:464:9463:7b32 with SMTP id d75a77b69052e-466a168bfbdmr532921cf.7.1732539061698;
+        Mon, 25 Nov 2024 04:51:01 -0800 (PST)
+X-Google-Smtp-Source: AGHT+IFUbxYuqE9h5uUwxctdSxJ6hLhSn2lJZqVvC2/0rgVQXoeTrLMxiKLvqubgQNzDEejqNaURgg==
+X-Received: by 2002:ac8:5809:0:b0:464:9463:7b32 with SMTP id d75a77b69052e-466a168bfbdmr532691cf.7.1732539061280;
+        Mon, 25 Nov 2024 04:51:01 -0800 (PST)
+Received: from [192.168.212.120] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aa50b28fe55sm456496666b.4.2024.11.25.04.50.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 25 Nov 2024 04:51:00 -0800 (PST)
+Message-ID: <833280a4-7014-45e9-852e-3384fe9d5cd4@oss.qualcomm.com>
+Date: Mon, 25 Nov 2024 13:50:59 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <BN0PR08MB695133000AF116F04C3A9FFE83212@BN0PR08MB6951.namprd08.prod.outlook.com>
- <CAPDyKFrmMog-jemQb2-FGogq93+RACkoBXxOFRHUfYSkEsg4cw@mail.gmail.com>
- <BN0PR08MB695151B49A2CBFF1D293775883222@BN0PR08MB6951.namprd08.prod.outlook.com>
- <CAPDyKFo6BnHRg6G9vj6xiUncowUi59ExE3sCVLk8K+=6wqd1xQ@mail.gmail.com> <BN0PR08MB69513344FCF13A3CD7780B1283232@BN0PR08MB6951.namprd08.prod.outlook.com>
-In-Reply-To: <BN0PR08MB69513344FCF13A3CD7780B1283232@BN0PR08MB6951.namprd08.prod.outlook.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 25 Nov 2024 13:29:52 +0100
-Message-ID: <CAPDyKFrqQUSiZRx0Hr6ZcmrFq4-CRcCHqE+k+YKjdQfu1xfGWQ@mail.gmail.com>
-Subject: Re: MMC card detection may trip watchdog if card powered off
-To: "Anthony Pighin (Nokia)" <anthony.pighin@nokia.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>, ulf.hansson@linaro.org,
+        robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
+        bhupesh.sharma@linaro.org, andersson@kernel.org,
+        konradybcio@kernel.org
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
+References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
+ <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
+ <f9b01690-8940-4f8b-b142-6c2ec4db3e83@kernel.org>
+ <Z0BDYiVaLQXaMsle@cse-cd02-lnx.ap.qualcomm.com>
+ <ccbc6324-0dcb-405a-901a-12dc33a8130c@kernel.org>
+ <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <Z0Pe0B9LsjpRHkkS@cse-cd02-lnx.ap.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-ORIG-GUID: sMFbUzeva62r7hkfjpGkhA5wxYMlV5pA
+X-Proofpoint-GUID: sMFbUzeva62r7hkfjpGkhA5wxYMlV5pA
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
+ definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0
+ lowpriorityscore=0 clxscore=1015 phishscore=0 malwarescore=0
+ suspectscore=0 priorityscore=1501 mlxlogscore=831 bulkscore=0
+ impostorscore=0 mlxscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2409260000 definitions=main-2411250110
 
-On Fri, 22 Nov 2024 at 18:47, Anthony Pighin (Nokia)
-<anthony.pighin@nokia.com> wrote:
->
-> > > > >
-> > > > > If card detection is done via polling, due to broken-cd (Freescale
-> > > > > LX2160,
-> > > > etc.), or for other reasons, then the card will be polled
-> > > > asynchronously and periodically.
-> > > > >
-> > > > > If that polling happens after the card has been put in powered off state
-> > (i.e.
-> > > > during system shutdown/reboot), then the polling times out. That
-> > > > timeout is of a long duration (10s). And it is repeated multiple
-> > > > times (x3). And that is all done after the watchdogd has been
-> > > > disabled, meaning that system watchdogs are not being kicked.
-> > > > >
-> > > > > If the MMC polling exceeds the watchdog trip time, then the system
-> > > > > will be
-> > > > ungraciously reset. Or in the case of a pretimeout capable watchdog,
-> > > > the pretimeout will trip unnecessarily.
-> > > > >
-> > > > >     [   46.872767] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg
-> > > > 03220301 flags 0000049d
-> > > > >     [   46.880258] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x00000001
-> > > > >     [   46.886082] sdhci_irq:3558: mmc1: sdhci: IRQ status 0x00000002
-> > > > >     [   46.891906] mmc_request_done:187: mmc1: req done (CMD6): 0:
-> > > > 00000800 00000000 00000000 00000000
-> > > > >     [   46.900606] mmc_set_ios:892: mmc1: clock 0Hz busmode 2
-> > > > powermode 0 cs 0 Vdd 0 width 1 timing 0
-> > > > >     [   46.914934] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
-> > > > 00010000 flags 00000195
-> > > > >     [   57.433351] mmc1: Timeout waiting for hardware cmd interrupt.
-> > > >
-> > > > Hmm. How is the polling being done? By using MMC_CAP_NEEDS_POLL?
-> > > >
-> > >
-> > > Correct. (At least in my understanding.) 'broken-cd' in the device
-> > > tree will trigger MMC_CAP_NEEDS_POLL to be set.
-> > >
-> > > > The above certainly looks weird. The mmc_rescan work should not be
-> > > > allowed to run at this point, as the work is getting punted to the
-> > > > system_freezable_wq via mmc_schedule_delayed_work().
-> > > >
-> > >
-> > > This is the backtrace I get when the timeout occurs:
-> > >
-> > > [   46.154348] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
-> > 00010000 flags 00000195
-> > > [   46.161917] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
-> > > [   46.167743] mmc_request_done:187: mmc1: req done (CMD13): 0:
-> > 00000900 00000000 00000000 00000000
-> > > [   46.176526] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg
-> > 03220301 flags 0000049d
-> > > [   46.184016] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
-> > > [   46.189840] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000002
-> > > [   46.195665] mmc_request_done:187: mmc1: req done (CMD6): 0:
-> > 00000800 00000000 00000000 00000000
-> > > [   46.204362] mmc_set_ios:892: mmc1: clock 0Hz busmode 2 powermode 0
-> > cs 0 Vdd 0 width 1 timing 0
-> > > [   46.219307] CPU: 6 PID: 153 Comm: kworker/6:1 Tainted: G           O
-> > 6.6.59 #1
-> > > [   46.231988] Hardware name: [Redacted]
-> > > [   46.238678] Workqueue: events_freezable mmc_rescan
-> > > [   46.243466] Call trace:
-> > > [   46.245901]  dump_backtrace+0x9c/0x128
-> > > [   46.249643]  show_stack+0x20/0x38
-> > > [   46.252948]  dump_stack_lvl+0x48/0x60
-> > > [   46.256603]  dump_stack+0x18/0x28
-> > > [   46.259909]  mmc_alive+0x74/0x88
-> > > [   46.263128]  _mmc_detect_card_removed+0x3c/0x158
-> > > [   46.267735]  mmc_detect+0x30/0x98
-> > > [   46.271040]  mmc_rescan+0x94/0x238
-> > > [   46.274432]  process_one_work+0x178/0x3d8
-> > > [   46.278432]  worker_thread+0x2bc/0x3e0
-> > > [   46.282171]  kthread+0xf8/0x110
-> > > [   46.285303]  ret_from_fork+0x10/0x20
-> > > [   46.288878] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg
-> > 00010000 flags 00000195
-> > > [   56.793379] mmc1: Timeout waiting for hardware cmd interrupt.
-> > > [   56.799116] mmc1: sdhci: ============ SDHCI REGISTER DUMP
-> > ===========
-> > > [   56.805545] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00002202
-> > > ...
-> > >
-> >
-> > Okay. If this is system suspend, it looks like the workqueue didn't become
-> > frozen as exepcted. I don't know why, but this needs to be investigated.
-> >
-> > If this is a shutdown, mmc_host_classdev_shutdown() should be called to
-> > "disable" the mmc_rescan work from running the code causing the above.
-> >
-> > What am I missing?
-> >
-> > Kind regards
-> > Uffe
-> >
->
-> This occurs in response to a 'reboot' command.
->
-> Here is an instance of the failure, with initcall_debug set to 'Y':
->
-> Rebooting...
-> [   44.500858] caam_jr 8030000.jr: shutdown
-> [   44.504805] caam_jr 8020000.jr: shutdown
-> [   44.508748] caam_jr 8010000.jr: shutdown
-> [   44.515349] tpm tpm0: shutdown_pre
-> [   44.523165] igb 0000:01:00.0: shutdown
-> [   44.558695] usb usb2-port1: shutdown
-> [   44.562268] usb usb1-port1: shutdown
-> [   44.565864] xhci-hcd xhci-hcd.0.auto: shutdown
-> [   44.570306] dwc3 3100000.usb: shutdown
-> [   44.574052] [Redacted] 2030000.i2c:cpld@41:watchdog: shutdown
-> [   44.580137] tpm_tis_spi spi2.0: shutdown
-> [   44.584054] spi-nor spi0.1: shutdown
-> [   44.588066] spi-nor spi0.0: shutdown
-> [   44.592112] mmcblk mmc0:0001: shutdown
-> [   44.595902] mmc_mrq_pr_debug:274: mmc0: starting CMD7 arg 00000000 flags 00000000
-> [   44.603413] sdhci_irq:3546: mmc0: sdhci: IRQ status 0x00000001
-> [   44.609240] mmc_request_done:187: mmc0: req done (CMD7): 0: 00000000 00000000 00000000 00000000
-> [   44.617939] mmc_set_ios:892: mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
-> [   44.627877] mmcblk mmc1:0001: shutdown
-> [   44.631709] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg 03200101 flags 00000095
-> [   44.639200] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
-> [   44.645027] mmc_request_done:187: mmc1: req done (CMD6): 0: 00000800 00000000 00000000 00000000
-> [   44.653727] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg 00010000 flags 00000195
-> [   44.661296] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
-> [   44.667123] mmc_request_done:187: mmc1: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-> [   44.675907] mmc_mrq_pr_debug:274: mmc1: starting CMD6 arg 03220301 flags 0000049d
-> [   44.683399] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000001
-> [   44.689223] sdhci_irq:3546: mmc1: sdhci: IRQ status 0x00000002
-> [   44.695047] mmc_request_done:187: mmc1: req done (CMD6): 0: 00000800 00000000 00000000 00000000
-> [   44.703746] mmc_set_ios:892: mmc1: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
-> [   44.713667] aer 0000:00:00.0:pcie002: shutdown
-> [   44.713673] mmc_mrq_pr_debug:274: mmc1: starting CMD13 arg 00010000 flags 00000195
-> [   44.718102] pcie_pme 0000:00:00.0:pcie001: shutdown
-> [   44.730534] pcieport 0000:00:00.0: shutdown
-> [   44.734898] fsl_mc_dprc dprc.1: shutdown
-> [   44.740863] fsl_mc_dprc dprc.1: DPRC device shutdown
-> [   44.745830] mmc_host mmc1: shutdown_pre
-> [   54.873286] mmc1: Timeout waiting for hardware cmd interrupt.
-> [   54.879023] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [   54.885453] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00002202
->
-> The trigger CMD13 is in-flight at time 44.713673.
-> The mmc_host mmc1: shutdown_pre is at time 44.745830.
-
-Thanks a lot for providing the details! Yes, this certainly points out
-the problem during shutdown/reboot.
-
-I have sent a patch [1] that I think should address the problem. Can
-you please test and verify it?
+On 25.11.2024 3:20 AM, Yuanjie Yang wrote:
+> On Fri, Nov 22, 2024 at 01:35:28PM +0100, Krzysztof Kozlowski wrote:
+>> On 22/11/2024 09:40, Yuanjie Yang wrote:
+>>> On Fri, Nov 22, 2024 at 08:04:31AM +0100, Krzysztof Kozlowski wrote:
+>>>> On 22/11/2024 07:51, Yuanjie Yang wrote:
+>>>>> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
+>>>>>
+>>>>> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+>>>>> ---
 
 [...]
 
-Kind regards
-Uffe
+>>>>> +			bus-width = <8>;
+>>>>> +			qcom,dll-config = <0x000f642c>;
+>>>>> +			qcom,ddr-config = <0x80040868>;
+>>>>> +			supports-cqe;
+>>>>> +			dma-coherent;
+>>>>> +			mmc-ddr-1_8v;
+>>>>> +			mmc-hs200-1_8v;
+>>>>> +			mmc-hs400-1_8v;
+>>>>> +			mmc-hs400-enhanced-strobe;
+>>>>
+>>>> These are properties of memory, not SoC. If the node is disabled, means
+>>>> memory is not attached to the SoC, right?
+>>>>
+>>>>> +			status = "disabled";
+>>> Thanks, I think qcom,dll-config and qcom,ddr-config are properties of Soc,
+>>> they are memory configurations that need to be written to the ioaddr.
+>>> And mmc-ddr-1_8v,mmc-hs200-1_8v,mmc-hs400-1_8v are bus speed config,
+>>> they indicate the bus speed at which the host contoller can operate.
+>>> If the node is disabled, which means Soc don't support these properties.
+>> No, that is not the meaning of node is disabled. When node is disabled,
+>> it means board does not have attached memory.
+>>
+>> Move the memory related properties  to the board.
+> 
+> Thanks, Ok I understand, I will move the memory related
+> properties(qcom,dll-config and qcom,ddr-config) to the
+> board dts in next version.
 
-[1]
-https://lore.kernel.org/all/20241125122446.18684-1-ulf.hansson@linaro.org/
+DDR/DLL tuning seem to be done per SoC and not per board.
+
+Konrad
