@@ -1,101 +1,113 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66DED1B85F6;
-	Mon, 25 Nov 2024 18:25:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAE768F58
+	for <linux-mmc@vger.kernel.org>; Tue, 26 Nov 2024 00:07:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732559125; cv=none; b=TkfheCVerAingAGnawRZ9g8mW9hNAzqnuddZG4th2zCrX7gKMMUM6Pva/eGYaBXk5KfXsmJvs9wTckg/nDbjDyr11fEbyyid7+jKl364IIuJKZye8vrGjuVd+lZxEIOSBtOugNVJnq4DEuzsPoCvEc+gdAXmISPV01NHAHk2v6s=
+	t=1732579679; cv=none; b=ryp0iAm+dFfpdFN0Nvwuxtiqg4ipEDdk0ZMyaMVi+9aH8SoJ4VrZCqi0JrvlSgrPCeoycAKWW7Hv3hZUto0/jop5Jy9aSu0g2rY8GAij6nmkkkF+LSUTZckdBZyDxDg9E2Nclb/0KvgNRglUd6Qwcf6ld5DbCYyxc28NcUh7DHI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732559125; c=relaxed/simple;
-	bh=6aRiboS4Jxrz+jvRtPC54qrBkrsY/RgG6OavSsJocjI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Qmx6Xz1rWFWdyEVNMeTCj0C4KAfmYeo5zkwKI+uBtv4Ghq6XlR1BlgqGwOI67B6AQzNxirsngdVLWSb1p+ljzNj7hYAPuA5xcphd7ahJMrtkWXZiPBXDpdQSjx7TaxR1Z8d2rNw/5GbV+V439n9igGl5UPu2dA8g3sHiuv9x6hs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=kuPrOPzs; arc=none smtp.client-ip=198.175.65.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1732579679; c=relaxed/simple;
+	bh=X6mpm+0aSH+yONFTblg/2zcjomYbcE73fIlBfI5RHMg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=L/a/uYZaQBQSicodpW2xy6+RbNPu6rlpvVgmeyuj5oVLR6l8beRlnpMz5hT+wihO3Vn9zeJgi7zXYn5gdpofve6Xasnuh+RpaXYD4G2/ct/UyVkv6yD77sMKzv4o109Hy3sgpIu23xHFEkDyhU4Sdstjd6cN+iKL4mpHYjD65Mk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ORbQMwZE; arc=none smtp.client-ip=209.85.167.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="kuPrOPzs"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1732559124; x=1764095124;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=6aRiboS4Jxrz+jvRtPC54qrBkrsY/RgG6OavSsJocjI=;
-  b=kuPrOPzskyaJ7Ol1sakkPUK+MUqQPEIgxPUeISFRP+F5hxK4qCVJBSwR
-   mx3xU33UXY5hgWhSO3f+7KnlH7/q3Yl7SbOg6fa699/6ClmlsFU03X/IQ
-   vaJrwCFki6vaOFrGaziwqbc9joFDjsFgPIup8TJ7eqGpSptpQpyWq+aCN
-   bbIIwXY2AvFHa8qQa2OWk3ZWpaW9dIGeWXdVy7cjI9sYx3XNwubaoti5j
-   FNWvCr7GJzoARZl3ZWib36lt+SFt4bpLItR/ptAImA2/hZy8Nj1eUL+Ey
-   LFEWfrQtNFs3faqPHyG9lnxZVqd/II32hHgS+8c6XEKd4q5XywfosOkWN
-   g==;
-X-CSE-ConnectionGUID: 7g/BMNlaRNCxoobHamNmmg==
-X-CSE-MsgGUID: lrpmkxAdQP2w7EusoaAzAw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11267"; a="43751854"
-X-IronPort-AV: E=Sophos;i="6.12,183,1728975600"; 
-   d="scan'208";a="43751854"
-Received: from fmviesa003.fm.intel.com ([10.60.135.143])
-  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Nov 2024 10:25:00 -0800
-X-CSE-ConnectionGUID: INFUjcOqQSy+Joj9bnk6cA==
-X-CSE-MsgGUID: OMdoFMV9SvODLT5m/kOgjA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.12,183,1728975600"; 
-   d="scan'208";a="95440526"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.115.59])
-  by fmviesa003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Nov 2024 10:24:55 -0800
-Message-ID: <8bd461ba-7fbe-4f1b-91cf-d33483cb4930@intel.com>
-Date: Mon, 25 Nov 2024 20:24:48 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ORbQMwZE"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-53dd9e853ccso3054580e87.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Nov 2024 16:07:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1732579675; x=1733184475; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=s0h1yJRyvRJoHgt/KNNsfZgVIwPLNDSnb2kihwUErsQ=;
+        b=ORbQMwZEVk0ABiGLa8623WNatb027pWFXlY4SxlKYjZ7H6G48PI8e+vuX7z1lFFXnt
+         +4e65DMtXe98gkorqTPk2CxKj4HwnSIJjZxkv92okceEmwZ46K9fjGl0Gf379ZWEyUq1
+         9ueVSJKq9QrAkimIZNdXTsoua3dTFiCWbhBD0VrhrEgG4xazcme8RiEneHzQlJ733zWc
+         b3+7oRqHaM30Z6A3l42U4lS58K17slfycpArKk4AF95MNw+qKGJwJOhkCCwpp0hPJq34
+         NI7dZVzkLQYzoKsCM4El/VLhlp7hdirxc/rCPNYMruALCbIZd/0Cbx5Cblf0Q27OYHuT
+         U84w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1732579675; x=1733184475;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=s0h1yJRyvRJoHgt/KNNsfZgVIwPLNDSnb2kihwUErsQ=;
+        b=oWojwre4imXeernrRj6465GJT0I0l7OvAWIsPCJDFAgJG0+qv865MIwM0XeNc/Xcxg
+         ov7h5rQHuaps7/cdFcuObf+mlQec/c5RWD+qYNGJ4n1PwK4K/PfQOr+mm2Tq/v/OpgFM
+         1YPrQi84AxnVs8PoKD4lKAI+19prdFX3sXQwEGNblBrGP/LqPnO8C6PXR6XfHQ9b+18L
+         c0JB0oZFPbJSQIFWLU4zQmVPEYGgn47lQs48fRYZ/mKF7N3tnAfgXpAiHFYRuzh8URBs
+         4Pjcl3lLd+WO8Oh99c5UPtQaQK1/DSwVWY0kBSyuY2qWWffc13+RFJ1JC3yMYnr+L3MV
+         MCOg==
+X-Forwarded-Encrypted: i=1; AJvYcCWn43fA8poFz4pZtBT5SmDH4d/IoTSXTGTtHOBscj/RWApOq4xJs/jbAbUxJlpdJuJYy3cS7Z4EXr0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwDqh+3pwmj4DMB7AWuWPWgKbO6oEMlA/Lx1vqMuRRB2v0JpGpA
+	KfWY6GBd+syw8OnTai6rJsIufb8En/bOYG72MLHndEL8gUeTl9TeD/sUg9NHcVQ=
+X-Gm-Gg: ASbGnct3+T/bM9Q1OnK64qu788+jktGfrRYWcn/VnQaf3UMvziCT8+emToC0zVY25mt
+	qnyh8dQGaeiZ1gWZvcfRghCXGH0lkZTXFGk2cLHSq9Qv/U5zk0w9ZeKUGlK8g1Ae+aY2johURdh
+	CUtns1CGLeUK9xvs4u/eddN01KMz3v1NgMdDeJm5gwU6PmjZ+57k6sNEB2V0bFjYyeOrKwqzzfi
+	Zuv5QveHRHxoJQN0U3E8YOB2cP7ZYv/oFcaGFGrX2enFr8GwwOrFndWB1xO4uuTNW8MWsxNpT39
+	LOgTU54su7fq9gOWtFYQdMEwmVtQFw==
+X-Google-Smtp-Source: AGHT+IHNAOdFRvV/LBBc9GEXqWd+CaGlgu2KPTG20eKSwEZ7/zIcGDm+IM+4HhB+6bbrWpaYrRfyCw==
+X-Received: by 2002:a05:6512:118d:b0:53d:dc12:7cb4 with SMTP id 2adb3069b0e04-53ddc127db7mr3683910e87.29.1732579674934;
+        Mon, 25 Nov 2024 16:07:54 -0800 (PST)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--b8c.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-53dd2451f8csm1824556e87.79.2024.11.25.16.07.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Nov 2024 16:07:53 -0800 (PST)
+Date: Tue, 26 Nov 2024 02:07:51 +0200
+From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Cc: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org, 
+	robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
+	bhupesh.sharma@linaro.org, andersson@kernel.org, konradybcio@kernel.org, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, quic_tingweiz@quicinc.com
+Subject: Re: [PATCH v3 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
+Message-ID: <frjnnd7bvrdn5frfo4xnz35rb5zxa33eayu3oc5wux7casay64@t2tfbsf5jrva>
+References: <20241122065101.1918470-1-quic_yuanjiey@quicinc.com>
+ <20241122065101.1918470-2-quic_yuanjiey@quicinc.com>
+ <7c0c1120-c2b2-40dd-8032-339cc4d4cda4@oss.qualcomm.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: enable 'SDHCI_QUIRK_NO_LED' quirk
- for S32G
-To: Ciprian Costea <ciprianmarian.costea@oss.nxp.com>,
- Haibo Chen <haibo.chen@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>,
- Fabio Estevam <festevam@gmail.com>
-Cc: Pengutronix Kernel Team <kernel@pengutronix.de>, imx@lists.linux.dev,
- linux-mmc@vger.kernel.org, s32@nxp.com,
- linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- Christophe Lizzi <clizzi@redhat.com>, Alberto Ruiz <aruizrui@redhat.com>,
- Enric Balletbo <eballetb@redhat.com>
-References: <20241125083357.1041949-1-ciprianmarian.costea@oss.nxp.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241125083357.1041949-1-ciprianmarian.costea@oss.nxp.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7c0c1120-c2b2-40dd-8032-339cc4d4cda4@oss.qualcomm.com>
 
-On 25/11/24 10:33, Ciprian Costea wrote:
-> From: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
+On Mon, Nov 25, 2024 at 02:13:22PM +0100, Konrad Dybcio wrote:
+> On 22.11.2024 7:51 AM, Yuanjie Yang wrote:
+> > Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
+> > 
+> > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> > ---
+> >  arch/arm64/boot/dts/qcom/qcs615.dtsi | 198 +++++++++++++++++++++++++++
+> >  1 file changed, 198 insertions(+)
+> > 
+> > diff --git a/arch/arm64/boot/dts/qcom/qcs615.dtsi b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > index 590beb37f441..37c6ab217c96 100644
+> > --- a/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > +++ b/arch/arm64/boot/dts/qcom/qcs615.dtsi
+> > @@ -399,6 +399,65 @@ qfprom: efuse@780000 {
+> >  			#size-cells = <1>;
+> >  		};
+> >  
+> > +		sdhc_1: mmc@7c4000 {
+> > +			compatible = "qcom,qcs615-sdhci", "qcom,sdhci-msm-v5";
+> > +			reg = <0x0 0x007c4000 0x0 0x1000>,
+> > +			      <0x0 0x007c5000 0x0 0x1000>;
+> > +			reg-names = "hc",
+> > +				    "cqhci";
 > 
-> Enable 'SDHCI_QUIRK_NO_LED' quirk for S32G2/S32G3 SoCs.
-> S32G SDHCI controller does not have a LED signal line.
-> 
-> Signed-off-by: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
+> There's an "ice" region at 0x007c8000
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Shouldn't ice now be handled by a separate device?
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index d55d045ef236..e23177ea9d91 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -304,6 +304,7 @@ static struct esdhc_soc_data usdhc_s32g2_data = {
->  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->  			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
->  			| ESDHC_FLAG_SKIP_ERR004536 | ESDHC_FLAG_SKIP_CD_WAKE,
-> +	.quirks = SDHCI_QUIRK_NO_LED,
->  };
->  
->  static struct esdhc_soc_data usdhc_imx7ulp_data = {
 
+-- 
+With best wishes
+Dmitry
