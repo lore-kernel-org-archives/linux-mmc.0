@@ -1,274 +1,235 @@
-Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 966DC1BD9C2
-	for <linux-mmc@vger.kernel.org>; Thu, 28 Nov 2024 15:16:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 55F4B211C;
+	Thu, 28 Nov 2024 17:15:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1732807015; cv=none; b=umjYEJ+XvbMW0bmuUvxZ3RBTCmFc3b/syIvyCXa2gCEU3ZdCTEYpgEl7EOckDxDoG406m5PP5XnMpDwwz8gHBxkU3MiNJD7+RfUkyCoMu81L+sAKDbmkWwmV4++EH27HRg3MY36AEGygC49UszO4XaXnC4wLYDnXMSwMkCrCR0M=
+	t=1732814157; cv=none; b=nI41OW4hxUKUQgrGIYNbWQJGetCzXRv06AzQXMis6CWv7sCgGwrHIM9Kxq1fikAARp6BDBi240w88pdK9S76GIJDCi91QAw+ljKmm84PHJdZt0R8WvpRgNSwgOcG5zRTfhbr8coCbLwmr2es0c4AS7cNWxWXiIeOWiiIYsybmhI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1732807015; c=relaxed/simple;
-	bh=EyHdKYQSzhp6Q5IckerUZg/bcUhVWP1QC3wdvMtdE4Y=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=GkP3XMzVpnBn4xo+pebmkTEaZG51O7Lx6/Puif8CR1LDN0Ks/xaxBWKWoSCChVubo+ISzMxzERZBHlGp1y6uh7Gs1crfmIplOjPKcPm6hjMuWNv4I4N6l9xP2lxnba6w88iTujs0TNdSkWGazXl3VGAcv1V5BW4y2oj8shmaYDY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nktGNZIY; arc=none smtp.client-ip=209.85.221.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1732814157; c=relaxed/simple;
+	bh=tiZymhVe0D/G2ym8mSpnxGfXK5/9orFgnPuSOUquEq8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=LTnFMThFguabdeaU3I/KHXeN1nELax1idayhE6ka8hOBvPmQVMp1dJQz0lPrros3jWdH9Z7kA8vZG/8f3DUkIXuTZLuwWy0NV1wY9/VO2wxl55SpaU74AL/f6UICuKZ/gb8phOJb3WDx0jg+XR9lJ8aTAd7oaFOuSY2aptSMHrE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XxdIZpA3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nktGNZIY"
-Received: by mail-wr1-f52.google.com with SMTP id ffacd0b85a97d-382325b0508so478034f8f.3
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Nov 2024 07:16:53 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1732807012; x=1733411812; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=tzpFYlwmRDjUdywRFCwk3EMOwG1W4Bvy7VRMs6AVjzU=;
-        b=nktGNZIYAxR7N0RpoNTV/b7UVj0G+NbbNf4HWCA/S84MSEW6LSdG08quZL0zVVEIIP
-         KDhB+Lne0aRt4yNkbnXLyMLqZw9AJAVpt0xz8s/2qP57BcSh9U2WQw6nZZDV1av6V4XE
-         0yJd1BGzpriC5oxXI/VAtJcH3j5sQJtgQWq/HKrK3i32dDOUGe7UX/G/nV7HgnQdNQx/
-         utIsf63kYCqc5E9rDkZLyl/RC9dBAn/tqTRLJI+N3heRrpOrGkeOvtrRx26vEu8rnH2m
-         J5YpVvZ1o4DS2c3HGwgsNH+muNtDsu5s145SUlx6UAwIzT1YPF4blNagiyo+NPyrxhM2
-         CRLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1732807012; x=1733411812;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=tzpFYlwmRDjUdywRFCwk3EMOwG1W4Bvy7VRMs6AVjzU=;
-        b=VxYTf4+YHf2kBnjVn1Jshi2K5kbNfuaCtNMsL0ofkY4l4fWXxavqQbCQ6K/1PCrEfg
-         AaxZjMUyTab4o2MBaJ3judUy3MaFS39HyGEWOhtZ804e0xDXyRQu0odwStYxVwZ1ScEK
-         D12MecdPW1ePjcq0im5EQ4dh2CEdVZ/9VRlaIyHUsb/pxkplgLoP3xY7cimjamw+GulS
-         rgIlvCJ6ZsBFATg1fhpyTZ45coFSCkK8q8Lq+JPJ2HWBia09TW5TigRb32amgbmRCGmG
-         WuBgdii8WYJpknGlGet9jSz3k4Um6lALJAfe0aji7OcXO9F3igDjjG9AfavDC1/hhxWy
-         /8/Q==
-X-Gm-Message-State: AOJu0Yz6vXrUykLIKmOv/dXt2/TrDBt0V5rB5Ym+tg2nAAzkflfOtbjC
-	+WmkUbP2m983pV0ldWISQFs0UAQ9i188xd262bJvwWNKuR3PzQUMAcmq2hfqgYY=
-X-Gm-Gg: ASbGncsTsQ7tlCfmfRjUCmsa780ngrH+qil1smJahGoDLEgbfac0t3Be7oiBnqymBAp
-	nC31NrX3iCYoRXQeTQLfFynhy3Pu+bi4bOwcJ9jQQEuYRhGV4Mji3KqpmnFFQC9ZQZKwEjFha8j
-	xLHKd+WKSZuO/XJ6e7l9HORCL6jFTCMy+w1Qv36d3JDRGlzhFS60eGJBlLI1qKcfV4viT+UQk6L
-	pehJ3Owxt89Hny/JPjf+FExoCNR8n7TdSz/K4S2HkI5c3q/74pfkZkYIGrdjOdluP/yziw=
-X-Google-Smtp-Source: AGHT+IH4AIKDNQTGuzrRL5OCcaR5+oCwqwuiQGkqb+Yio/Cxxa2N2THu7Mb64eFoUBklqJHWFxGrjw==
-X-Received: by 2002:a05:6000:1846:b0:382:4d6e:9f3f with SMTP id ffacd0b85a97d-385c6ec0b9dmr6474374f8f.34.1732807011807;
-        Thu, 28 Nov 2024 07:16:51 -0800 (PST)
-Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:8261:5fff:fe11:bdda])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-434aa7e4fe1sm55867025e9.38.2024.11.28.07.16.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Nov 2024 07:16:51 -0800 (PST)
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Date: Thu, 28 Nov 2024 16:16:45 +0100
-Subject: [PATCH v4 5/5] dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt
- to dtschema
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XxdIZpA3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 224FFC4CECE;
+	Thu, 28 Nov 2024 17:15:56 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1732814156;
+	bh=tiZymhVe0D/G2ym8mSpnxGfXK5/9orFgnPuSOUquEq8=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=XxdIZpA3xC3TX7JHy4Bb9kyzc4GuFjRiW8Nx1fA7xBNpx+jGcAyX5L/QKLFwyZj88
+	 J+cxCs9kmfc0q+vaCHaqlvJrWtoKp8Xma4lwP1XsPpPcQVDLdAqyAjajWPpQKi49zL
+	 DKa0X7ZpbrXhQxF5IMxK0G4bROJdGjN76yXVjMBa8mVGM7xIZIilibJ6eTCZuWIKON
+	 DMzp6losctyiLyixVR4Uf0zEU9b1EVyoKKMarErrQ6vrIamW+lGVSsn68bOq+NbGq7
+	 zF24aCKgoM06M5tK9dEYdpGhFsxLT2k2eQqHEgqZcSUQ01eihMThD1WNkeBq5LISck
+	 Mdmdx72wAl7uA==
+Date: Thu, 28 Nov 2024 11:15:54 -0600
+From: Bjorn Andersson <andersson@kernel.org>
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, 
+	linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Correctly set the load for the
+ regulator
+Message-ID: <lza5dbabt2eoipyrbgo47ftpsftcwggb4v6d53lqvsh7w7vp3n@f2ld34a53a2z>
+References: <20241127095029.3918290-1-quic_yuanjiey@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20241128-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v4-5-11d9f9200a59@linaro.org>
-References: <20241128-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v4-0-11d9f9200a59@linaro.org>
-In-Reply-To: <20241128-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v4-0-11d9f9200a59@linaro.org>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
- Jerome Brunet <jbrunet@baylibre.com>, 
- Martin Blumenstingl <martin.blumenstingl@googlemail.com>, 
- Maxime Ripard <mripard@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
- linux-kernel@vger.kernel.org, Neil Armstrong <neil.armstrong@linaro.org>
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5272;
- i=neil.armstrong@linaro.org; h=from:subject:message-id;
- bh=EyHdKYQSzhp6Q5IckerUZg/bcUhVWP1QC3wdvMtdE4Y=;
- b=owEBbQKS/ZANAwAKAXfc29rIyEnRAcsmYgBnSIldLzAfDGWjxNDmzJ2/2WMIp1sGGnOvNvp6JCAp
- myNjCKKJAjMEAAEKAB0WIQQ9U8YmyFYF/h30LIt33NvayMhJ0QUCZ0iJXQAKCRB33NvayMhJ0azxEA
- C0McuYqWQAYwfk2xajPs3bcX+BmlzuLuas2bMzBD/me9jZu2mkdUG1VEwoolEX0gCO6JlqxaxQJ4WM
- wL5TOWyl98rq7QvpGteUK8etgNs2ID4qhKX5hsWLrDH4oFKHIg776KlZ16WwFxrM9zotbWNMva+AMr
- PN2wCcOX42276Z2sU+fwg0/lzdd9L6FPWHRy5eEpK0aQHmiDQj+xWmpVF02Rpy5PZfZLrrFk0JKfYn
- kMwv8pGldajb1UUUNMVjgVjW3nCPo6TR2mKVgq07cyTxpi/BpzMzsx7mKZyQRV1wIhs/0vaSqGGoR8
- PtPicnej6Zrj/gBQ0Rx41nTgYe1ymgeHaeu7hTpaGuswR1U4Yst4g4st1a9VRP+Z3+aHaE9G68NBGW
- EFEGhsTm7hiRiOpOm/e4mIwZNv8BHi2KP+D8nWhyGQaMZQNCOoFsYII+g1gTq+O57co/vJIJGoPCS7
- HiFh3roegB3Z1kHpgZfMy+n26Nq6UgphQZK9vM8DIcEtNg+hpAvS+D2SArm9nd7UVMq3GLHcRwABCo
- znU/pLdQSIlPfCbgFBobDgij0o20asawXWTryI8DjRMq5MWYv1IFkyqg1upLB3lmE/KKIGgVc+oyRs
- rKG7qfGo4UICqZfJVFM5ejB7HSDuzO9FBcPhkyYtfPmmG3r90+p5BpLOl+yw==
-X-Developer-Key: i=neil.armstrong@linaro.org; a=openpgp;
- fpr=89EC3D058446217450F22848169AB7B1A4CFF8AE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241127095029.3918290-1-quic_yuanjiey@quicinc.com>
 
-Convert the Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-bindings to dt-schema.
+On Wed, Nov 27, 2024 at 05:50:29PM +0800, Yuanjie Yang wrote:
+> Qualcomm regulator supports two power supply modes: HPM and LPM.
+> Currently, the sdhci-msm.c driver does not set the load to adjust
+> the current for eMMC and SD. Therefore, if the regulator set load
+> in LPM state, it will lead to the inability to properly initialize
+> eMMC and SD.
+> 
+> Set the correct regulator current for eMMC and SD to ensure that the
+> device can work normally even when the regulator is in LPM.
+> 
+> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> ---
+> Changes in v2:
+> - Add enum msm_reg_type to optimize the code
 
-Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
-Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
----
- .../bindings/mmc/amlogic,meson-mx-sdio.txt         | 54 -------------
- .../bindings/mmc/amlogic,meson-mx-sdio.yaml        | 94 ++++++++++++++++++++++
- 2 files changed, 94 insertions(+), 54 deletions(-)
+Please re-optimize the code to make it easy to read and understand.
 
-diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-deleted file mode 100644
-index 8765c605e6bc761db2923ad748b5bb70d40ea830..0000000000000000000000000000000000000000
---- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.txt
-+++ /dev/null
-@@ -1,54 +0,0 @@
--* Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
--
--The highspeed MMC host controller on Amlogic SoCs provides an interface
--for MMC, SD, SDIO and SDHC types of memory cards.
--
--Supported maximum speeds are the ones of the eMMC standard 4.41 as well
--as the speed of SD standard 2.0.
--
--The hardware provides an internal "mux" which allows up to three slots
--to be controlled. Only one slot can be accessed at a time.
--
--Required properties:
-- - compatible : must be one of
--	- "amlogic,meson8-sdio"
--	- "amlogic,meson8b-sdio"
--	along with the generic "amlogic,meson-mx-sdio"
-- - reg : mmc controller base registers
-- - interrupts : mmc controller interrupt
-- - #address-cells : must be 1
-- - size-cells : must be 0
-- - clocks : phandle to clock providers
-- - clock-names : must contain "core" and "clkin"
--
--Required child nodes:
--A node for each slot provided by the MMC controller is required.
--NOTE: due to a driver limitation currently only one slot (= child node)
--      is supported!
--
--Required properties on each child node (= slot):
-- - compatible : must be "mmc-slot" (see mmc.txt within this directory)
-- - reg : the slot (or "port") ID
--
--Optional properties on each child node (= slot):
-- - bus-width : must be 1 or 4 (8-bit bus is not supported)
-- - for cd and all other additional generic mmc parameters
--   please refer to mmc.txt within this directory
--
--Examples:
--	mmc@c1108c20 {
--		compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
--		reg = <0xc1108c20 0x20>;
--		interrupts = <0 28 1>;
--		#address-cells = <1>;
--		#size-cells = <0>;
--		clocks = <&clkc CLKID_SDIO>, <&clkc CLKID_CLK81>;
--		clock-names = "core", "clkin";
--
--		slot@1 {
--			compatible = "mmc-slot";
--			reg = <1>;
--
--			bus-width = <4>;
--		};
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
-new file mode 100644
-index 0000000000000000000000000000000000000000..022682a977c6d347c36279f958dcd6f53d385b71
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
-@@ -0,0 +1,94 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/amlogic,meson-mx-sdio.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Amlogic Meson6, Meson8 and Meson8b SDIO/MMC controller
-+
-+description: |
-+  The highspeed MMC host controller on Amlogic SoCs provides an interface
-+  for MMC, SD, SDIO and SDHC types of memory cards.
-+
-+  Supported maximum speeds are the ones of the eMMC standard 4.41 as well
-+  as the speed of SD standard 2.0.
-+
-+  The hardware provides an internal "mux" which allows up to three slots
-+  to be controlled. Only one slot can be accessed at a time.
-+
-+maintainers:
-+  - Neil Armstrong <neil.armstrong@linaro.org>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - amlogic,meson8-sdio
-+          - amlogic,meson8b-sdio
-+      - const: amlogic,meson-mx-sdio
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 2
-+
-+  clock-names:
-+    items:
-+      - const: core
-+      - const: clkin
-+
-+  "#address-cells":
-+    const: 1
-+
-+  "#size-cells":
-+    const: 0
-+
-+patternProperties:
-+  "slot@[0-2]$":
-+    $ref: mmc-slot.yaml#
-+    description:
-+      A node for each slot provided by the MMC controller
-+
-+    properties:
-+      reg:
-+        enum: [0, 1, 2]
-+
-+      bus-width:
-+        enum: [1, 4]
-+
-+    unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - "#address-cells"
-+  - "#size-cells"
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    mmc@c1108c20 {
-+        compatible = "amlogic,meson8-sdio", "amlogic,meson-mx-sdio";
-+        reg = <0xc1108c20 0x20>;
-+        interrupts = <GIC_SPI 28 IRQ_TYPE_EDGE_RISING>;
-+        clocks = <&clk_core>, <&clk_in>;
-+        clock-names = "core", "clkin";
-+        #address-cells = <1>;
-+        #size-cells = <0>;
-+
-+        slot@1 {
-+            compatible = "mmc-slot";
-+            reg = <1>;
-+            bus-width = <4>;
-+        };
-+    };
+> - Delete redundant emmc type judgment
+> - Link to v1: https://lore.kernel.org/linux-arm-msm/20241122075048.2006894-1-quic_yuanjiey@quicinc.com/
+> 
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 92 +++++++++++++++++++++++++++++++++++-
+>  1 file changed, 90 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e00208535bd1..fc13ef60ab61 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -134,9 +134,22 @@
+>  /* Timeout value to avoid infinite waiting for pwr_irq */
+>  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>  
+> +/* Max load for eMMC Vdd supply */
+> +#define MMC_VMMC_MAX_LOAD_UA	570000
+> +
+>  /* Max load for eMMC Vdd-io supply */
+>  #define MMC_VQMMC_MAX_LOAD_UA	325000
+>  
+> +/* Max load for SD Vdd supply */
+> +#define SD_VMMC_MAX_LOAD_UA	800000
+> +
+> +/* Max load for SD Vdd-io supply */
+> +#define SD_VQMMC_MAX_LOAD_UA	22000
+> +
+> +#define MAX_MMC_SD_VMMC_LOAD_UA  max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA)
+> +
+> +#define MAX_MMC_SD_VQMMC_LOAD_UA max(MMC_VQMMC_MAX_LOAD_UA, SD_VQMMC_MAX_LOAD_UA)
+> +
+>  #define msm_host_readl(msm_host, host, offset) \
+>  	msm_host->var_ops->msm_readl_relaxed(host, offset)
+>  
+> @@ -147,6 +160,11 @@
+>  #define CQHCI_VENDOR_CFG1	0xA00
+>  #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+>  
+> +enum msm_reg_type {
+> +	VMMC_REGULATOR,
+> +	VQMMC_REGULATOR,
+> +};
+> +
+>  struct sdhci_msm_offset {
+>  	u32 core_hc_mode;
+>  	u32 core_mci_data_cnt;
+> @@ -1403,11 +1421,71 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+>  	return ret;
+>  }
+>  
+> -static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+> +static int sdhci_msm_get_regulator_load(struct mmc_host *mmc, int max_current,
+> +					enum msm_reg_type type)
+> +{
+> +	int load = 0;
+> +
+> +	/*
+> +	 * When eMMC and SD are powered on for the first time, select a higher
+> +	 * current value from the corresponding current for eMMC and SD to
+> +	 * ensure that the eMMC and SD cards start up properly and complete
+> +	 * initialization. After the initialization process is finished, use
+> +	 * the corresponding current to set the eMMC and SD to ensure the
+> +	 * normal work of the device.
+> +	 */
+> +
+> +	if (!mmc->card)
+> +		return max_current;
 
--- 
-2.34.1
+max_current is type == VMMC_REGULATOR ? MAX_MMC_SD_VMMC_LOAD_UA :
+MAX_MMC_SD_VQMMC_LOAD_UA;
 
+Try to rewrite the patch so that you don't have the decisions spread
+across multiple levels in the callstack.
+
+> +
+> +	if (mmc_card_mmc(mmc->card))
+> +		load = (type == VMMC_REGULATOR) ? MMC_VMMC_MAX_LOAD_UA : MMC_VQMMC_MAX_LOAD_UA;
+> +	else if (mmc_card_sd(mmc->card))
+> +		load = (type == VMMC_REGULATOR) ? SD_VMMC_MAX_LOAD_UA : SD_VQMMC_MAX_LOAD_UA;
+> +
+> +	return load;
+> +}
+> +
+> +static int msm_config_regulator_load(struct sdhci_msm_host *msm_host, struct mmc_host *mmc,
+> +				     bool hpm, int max_current, enum msm_reg_type type)
+> +{
+> +	int ret;
+> +	int load = 0;
+> +
+> +	/*
+> +	 * After the initialization process is finished, Once the type of card
+> +	 * is determined, only set the corresponding current for SD and eMMC.
+> +	 */
+> +
+> +	if (mmc->card && !(mmc_card_mmc(mmc->card) || mmc_card_sd(mmc->card)))
+> +		return 0;
+> +
+> +	if (hpm)
+> +		load = sdhci_msm_get_regulator_load(mmc, max_current, type);
+
+Does !hpm happen when regulators are enabled or always together with a
+regulator_disable? (The regulator framework skips the load of disabled
+regulators when aggregating)
+
+> +
+> +	if (type == VMMC_REGULATOR)
+> +		ret = regulator_set_load(mmc->supply.vmmc, load);
+> +	else
+> +		ret = regulator_set_load(mmc->supply.vqmmc, load);
+> +	if (ret)
+> +		dev_err(mmc_dev(mmc), "%s: set load failed: %d\n",
+> +			mmc_hostname(mmc), ret);
+> +	return ret;
+> +}
+> +
+> +static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
+> +			      struct mmc_host *mmc, bool hpm)
+>  {
+> +	int ret;
+> +
+>  	if (IS_ERR(mmc->supply.vmmc))
+>  		return 0;
+>  
+> +	ret = msm_config_regulator_load(msm_host, mmc, hpm,
+> +					MAX_MMC_SD_VMMC_LOAD_UA, VMMC_REGULATOR);
+
+msm_config_regulator_load() is mostly 2 different functions with
+multiple levels of conditional code paths depending on this last
+parameter. Please try to refactor this to avoid overloading the
+functions like that.
+
+Regards,
+Bjorn
+
+> +	if (ret)
+> +		return ret;
+> +
+>  	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+>  }
+>  
+> @@ -1435,6 +1513,15 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+>  				goto out;
+>  			}
+>  		}
+> +
+> +		ret = msm_config_regulator_load(msm_host, mmc, level,
+> +						MAX_MMC_SD_VQMMC_LOAD_UA, VQMMC_REGULATOR);
+> +		if (ret < 0) {
+> +			dev_err(mmc_dev(mmc), "%s: vqmmc set regulator load failed: %d\n",
+> +				mmc_hostname(mmc), ret);
+> +			goto out;
+> +		}
+> +
+>  		ret = regulator_enable(mmc->supply.vqmmc);
+>  	} else {
+>  		ret = regulator_disable(mmc->supply.vqmmc);
+> @@ -1642,7 +1729,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  	}
+>  
+>  	if (pwr_state) {
+> -		ret = sdhci_msm_set_vmmc(mmc);
+> +		ret = sdhci_msm_set_vmmc(msm_host, mmc,
+> +					 pwr_state & REQ_BUS_ON);
+>  		if (!ret)
+>  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+>  					pwr_state & REQ_BUS_ON);
+> -- 
+> 2.34.1
+> 
+> 
