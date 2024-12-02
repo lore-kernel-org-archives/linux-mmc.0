@@ -1,104 +1,115 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C41E3205E2C
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 14:57:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E23AE1FECDE
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:23:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733151464; cv=none; b=WzyjmbDXmFXCvf4TGqa0QXIBXUnaLJoBZlfewluPwPWJ4AcwazTfuFnkqjMoWNQ+Lic3yCC/hXj7MzmmwGS9KbQFzic8MSHQZPUPAFz8gCeLy8bDOduHuwzK4dwgNG6m/qx9Di1bpL/DEkV6jIEBWmb8isMYbW1552vjaP6XLVs=
+	t=1733153035; cv=none; b=Og0D+6cCnr83OSSFanA9ffn/V2Bh09jRgPXPyN3dCNpCTBTLsbeMS2EmFysSxxfOU/5l3PhFKSO31TaAyxLq7y2JZp2ZAoBDt76Vrvq24W8lmew8P7DdxjQyPqOkdbFqxGv0hIsREOqIB464/lZ4+fe8eIHmAT4U2dYPMPoytfg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733151464; c=relaxed/simple;
-	bh=3XvEO1u292ulfng+/044B1LGbwNEmH9fzD4lsm4bXE0=;
+	s=arc-20240116; t=1733153035; c=relaxed/simple;
+	bh=x4Tp7Ji5tTFtDm+VDKryOJJHH8dzP3hI9Qi+1CIG/hQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IJ3iQ+J8vD1GlQM1d2uhX93XWn19E3WEVfJHe79HXn31q95qthd1fUXQNxhNC67gqeNvRs4R6Ga09YW+CdVJyjI6jfJWdP0yI2dm7GMqpmJX9TEMOlvSXLQisj5M5zjG1S7U1I87naQBd3yawpYvE2gdc6vNMN/Z7ZBvY11r+e4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KHqfayEB; arc=none smtp.client-ip=209.85.219.176
+	 To:Cc:Content-Type; b=EBLS/ZZ6K2aC525IexG5161YhRJMaDxpKIoga516WOmhcY9znSlbp//gI49XTLd/Mm7eWufYBcbwLexeesxNKyK29tzp+XOrGI4KCghzuMfN5H57IRtD0Ice2wvxPrxwHy+vr9JGG8Tminx1PX5pEkmn1giqbi/0gbJBDZasAr8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=m9lbSeiv; arc=none smtp.client-ip=209.85.219.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KHqfayEB"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e38df4166c7so3504793276.0
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 06:57:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m9lbSeiv"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-e398dc7864dso2545873276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:23:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733151462; x=1733756262; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=9h3arxfXF0d1bbIs89zAuzQqDvvuKqYX7ssse+aWY7E=;
-        b=KHqfayEBrc1qtc+FB69H0UE5AQPaw9Meg/C7bEMKON642FBXumZrP4HdNEXQTtYJrh
-         fz9N5ltpw8Zw9x4veJR8E6hiGshzWTHfGSIAeNKE7Lqj++yAFaAGHjYnE6l0REHEBcuA
-         U47L3iEIXvKvgdVlPW3QvbJRe9a3OTk72CBhp4Fo5Z7g87ozLgL0sSNV2fgf9wkQGmGn
-         P8ZlTBQG69B0DbpoIX6V5nWm+k1UuVvPfQGdZY8r92IcW2YaCF5+N9RA0n+u2m8hNuYD
-         AGzzx65Ff2qwhRSf4xl4csy9n2uacgkU17+nJ++J4iMrvqs8P51umXeeB17sS6JpFD92
-         DFeQ==
+        d=linaro.org; s=google; t=1733153033; x=1733757833; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=RFVdR4UZ/YOC85vUoT5PrPJ4wSmatK+AFc9PyWFNvm0=;
+        b=m9lbSeivgwpx6yucNbV3fxczC4i6GKdJ/BYpgTN1Q5lJQ6CmHtdxUCh1Q5i4Ugwen2
+         Po0V+JTplzLU2ebey8Qm3DTDqFBJZQS5k60DCJOlpoLr/sNncDiToV5+bZuL8j2t3Qle
+         4q/pNBHKqk5AEZPwNy96n2m7ql9zGK1n0Ma+ewlnNy3ZcdJDJxdLNGr5cOODTp/Ef6rL
+         YTlgQ2wgGg6Xcl9CTSdA4CNvs0HKrFpiXkKNA/mAzI/8ZaLN09Ftjq0896Mp/mdVgKBv
+         pYqp+AH8FcTwu7lJ/rNfi2SeF/h3eK9gO+1odlHZIas1HAVdJL/cBFZ/h2HFXZu7jKCA
+         S/dQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733151462; x=1733756262;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=9h3arxfXF0d1bbIs89zAuzQqDvvuKqYX7ssse+aWY7E=;
-        b=gnzJX4dQRZiJa+LakyrSdQMtNHCAICHMo6Q8/ZoNxgGkMucURPSPHMkKsDlIJI1/MQ
-         uf8kzB473AsZef8X2XVZCgvFEcXu4JM4OKQEXmNdRSJ+pKM5FnKAm1vnAfcy2UgJxVJz
-         BArmljwpkUog5P36WwESGTSaAWq6FgI54Y4COT9Y8t/nTRpmSRSpR+Nvuv6NQ3lveYsz
-         WPzoFCFLwPsk7VlgbMYySZcpK7NMXSfBKgXHieExqb1U3fHHEJg8eEJXiLDNg3GSZczE
-         i+nN/CnL31wV+QaP7H/xJn0YiS6X47rmNFsdv23MLSaCjWudvoPXtWAbJlNliWjJjrrs
-         UPbw==
-X-Forwarded-Encrypted: i=1; AJvYcCUKiMs45APxuy0QzPIEajk7Im0GYloxuUso0aLpOSwAbf1iJeDlKiSma7ld3IkHS2KwJt8dRT98q68=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzFn/fh4fb/Ao+iHI286i8OnfM2RUAdVKpLTEvGyxdMPt5umKEn
-	54T90X870WupTnMw4W8uLeK9PfPrwY05JnnWQ8El9qY5CdVCYenjvgWCMgCavgX4FY+C7odYECZ
-	0DUMfhRgv+9p3jL5gNWIpVWXVlrjbbmnGhfMtSw==
-X-Gm-Gg: ASbGncuE5FF8X9DdcF+UmcNh3crmcO28R1ygcRqBe4IpqFxIdJ3Ij6UhBMwATXEN9Fw
-	4hJhXKTWtORXFGEs1zzw8y949Dv1IfftL
-X-Google-Smtp-Source: AGHT+IESrBiaQsHj0VmFbQnvOSv7LA62nuFEPnmhL9yibArZHjlnIQDwVpaHS5ZzW1IF64c5qcBCmuJdoD2935eEO8U=
-X-Received: by 2002:a05:6902:1104:b0:e39:6e4d:32f5 with SMTP id
- 3f1490d57ef6-e396e5c78d3mr16414282276.40.1733151461556; Mon, 02 Dec 2024
- 06:57:41 -0800 (PST)
+        d=1e100.net; s=20230601; t=1733153033; x=1733757833;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=RFVdR4UZ/YOC85vUoT5PrPJ4wSmatK+AFc9PyWFNvm0=;
+        b=vdtPBmhyF+VATKTCnbSDRWmmD/I2jWOr/sgF0f2Dri9rlmEW9ysq9ZiEOuzM3ddJVl
+         +9JlpywhFf3cTXy7iNdE5qZoTPQhqgkTwykUQo/Tf1JRO/S6sIiTC6js6YhOs6joffvX
+         RDUjHZpLknsAPuHak/o0+/U6tPy2Ju87JzPJ4aqJ+IM/Fq655WQ3Xq/9t4LxlS5ojxKT
+         Q4IX/Pgq1RzXy0PKZ3yJHlFDN6WTdtSg48y8jEEd+oPVBL4Fwu1K4k1zczWEXK/A28tZ
+         Ky5gfhK1oayx6iH/Y/2JysTnO+21Z6ZRFlYlrTDN00Lpm+QG7HXF6SA/Ow2VSpLdGwmk
+         3p6w==
+X-Forwarded-Encrypted: i=1; AJvYcCW6Ys34imI5CpKWe/PxLM8BP8mDFE3saGpWzzEIUvrxcRoDiis4bOc38ZhGnlHzCTf3HvK/1/ZvWM0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzUJQEcDaTyhGywsWUTGVJmYt81VYUryB8eVJ2RjIxcuYlr7yDF
+	XOMjMBgxxfu/A5sHePEFiHMjI6d4kb8MqFtCqIFu3uNhzs5L9T4d5yyKUJ95nZTs/f3lqzneVs6
+	LelTE6w9J/qLt+//7BS0N65xH47FHaYe9ucTUgQ==
+X-Gm-Gg: ASbGncvn6j+IxdMEAT9llojD3hhBVFXm6HEixdEHm09AbaEsoFoMb4GijKHCApw1xfa
+	QRfa7GvQBlVh7t/9+zc0jRijBmlYFylpO
+X-Google-Smtp-Source: AGHT+IF8HcEhaGeG2oqxVopeez9Li3zfibcXSVN0OW0uxE+KbdEUAIh+uLlgcKcOPw0eaKI+msrsmL/CnlhvivMzcCI=
+X-Received: by 2002:a05:6902:2b86:b0:e38:91e2:5173 with SMTP id
+ 3f1490d57ef6-e395b87336amr19485704276.8.1733153032680; Mon, 02 Dec 2024
+ 07:23:52 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241128075137.2958211-1-joe@pf.is.s.u-tokyo.ac.jp>
-In-Reply-To: <20241128075137.2958211-1-joe@pf.is.s.u-tokyo.ac.jp>
+References: <20241118210049.311079-1-hdegoede@redhat.com> <CAPDyKFov29aLGq4vmTZB45mfkLEAAsC_NMCv2u858K9XPdCPkg@mail.gmail.com>
+ <29949ef6-9c55-48a3-a96e-67cb78b96766@redhat.com>
+In-Reply-To: <29949ef6-9c55-48a3-a96e-67cb78b96766@redhat.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 15:57:05 +0100
-Message-ID: <CAPDyKFpFHnPXbVggg4fRPMU4XYqtAkNd7GNrPc9mJJ6RHSAzLw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mtk-sd: call device_init_wakeup(&pdev->dev, false)
- on the error path of .probe()
-To: Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp>
-Cc: chaotian.jing@mediatek.com, matthias.bgg@gmail.com, 
-	angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org
+Date: Mon, 2 Dec 2024 16:23:16 +0100
+Message-ID: <CAPDyKFowzQGh1Z3RoWVFVjxQtf_s+tjo1X0hQ9KDb+KLCSt8wA@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
+ Vexia Edu Atla 10 tablet
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 28 Nov 2024 at 08:51, Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp> wrote:
+On Wed, 20 Nov 2024 at 14:16, Hans de Goede <hdegoede@redhat.com> wrote:
 >
-> Current implementation leaves pdev->dev as a wakeup source. Add a
-> device_init_wakeup(&pdev->dev, false) call in the error path of the
-> .probe() function.
+> Hi Ulf,
 >
-> Signed-off-by: Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp>
-> Fixes: 527f36f5efa4 ("mmc: mediatek: add support for SDIO eint wakup IRQ")
-> ---
->  drivers/mmc/host/mtk-sd.c | 1 +
->  1 file changed, 1 insertion(+)
+> On 20-Nov-24 1:56 PM, Ulf Hansson wrote:
+> > On Mon, 18 Nov 2024 at 22:01, Hans de Goede <hdegoede@redhat.com> wrote=
+:
+> >>
+> >> The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
+> >> Andaluc=C3=ADa region has no ACPI fwnode associated with the SDHCI con=
+troller
+> >> for its microsd-slot and thus has no ACPI GPIO resource info.
+> >>
+> >> This causes the following error to be logged and the slot to not work:
+> >> [   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpi=
+o
+> >>
+> >> Add a DMI quirk table for providing gpiod_lookup_tables with manually
+> >> provided CD GPIO info and use this DMI table to provide the CD GPIO in=
+fo
+> >> on this tablet. This fixes the microsd-slot not working.
+> >>
+> >> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> >
+> > I assume we should tag this for stable kernels,
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index efb0d2d5716b..9c3cef4cf47e 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -3070,6 +3070,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
->         msdc_gate_clock(host);
->         platform_set_drvdata(pdev, NULL);
->  release_mem:
-> +       device_init_wakeup(&pdev->dev, false);
+> Yes please.
+>
+> > but can we find a fixes tag too?
+>
+> This is really a hw / firmware bug not a kernel issue, so I cannot
+> really come up with a specific commit to point to as being fixed by
+> this.
 
-This seems to be needed in the ->remove() function too. Right?
+Okay!
 
->         if (host->dma.gpd)
->                 dma_free_coherent(&pdev->dev,
->                         2 * sizeof(struct mt_gpdma_desc),
-> --
-> 2.34.1
->
+v4 applied for fixes and by adding a stable-tag, thanks!
+
+[...]
 
 Kind regards
 Uffe
