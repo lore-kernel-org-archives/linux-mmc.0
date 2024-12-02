@@ -1,134 +1,92 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.19])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF9CD209F27
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7E40A205E03;
+	Mon,  2 Dec 2024 15:31:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.19
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733153100; cv=none; b=tk4IyjblNv5r6er07FxgeJDAk7oKDh3OiNG2Po96G9aGMftvs7Iw8XGD0eBYl/5d8uaUiYKZExEy0Mn82XtDrWxXjpqW+rKo+kJaWJEoKdj8T3LFc2kXS6IBelUwhUQH7dktCd8+0UAOvSBu+qiO/3qVxrTpmCn+HhYhPeCEwlg=
+	t=1733153488; cv=none; b=QJOyDTNqvERKDf8VqAY6NXvMx/DaiHQXee2hxxlmypdG5pVPgdRpru6LLFBBuHohWJcQ6yzg/TSBZyw9yj9YjHES4pMF9euYuSXXjjcM2RYTSAjTSYaStdnq6Ps9ucHuouri/DyN10iuiJ9qdM1W4GocQz6302a9O5FVzdr5pB4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733153100; c=relaxed/simple;
-	bh=PMGnihnmxjVfL8xGmQr+urfCilgz+1Wh2VTPRzX2C1Q=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HusR3psScSx7eZWY14AAiAgczLxcs2MUR8i9gc58bQrRtbLgRKfJm3KT2okuOQngLBpMzfJZugqfMzwWsYF1dvZwx2G9+fTc4iX+v9Jrt1mu65A1VHW3OtQEXfar+LBwqHkNpLojRiii+BMFnJjUuZ62MZcC5jXqPft56odrSX8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nuevsYqr; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1733153488; c=relaxed/simple;
+	bh=LIC22lvcg0GEAsloGNR0vIWhLAC8DJjmvoKLwQeuxU8=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lnHfmG7qyippzJI45T6Aezt24QRq3Rmu+oytC3FJpAkDvEnb107k1oTXZOneULYfgitI7hmLwDECgImAYhu/RP6iUIPKk7a8Aa9V3RaTepmq5czz2YTJ09XRj5bIsPtVetKbK8sld6jBaZckJaLgwyQtn1eWDgwteXURkoK06+A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=ll+g4aD6; arc=none smtp.client-ip=198.175.65.19
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nuevsYqr"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e3983f8ff40so2763119276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733153096; x=1733757896; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=MwrhmBccWW8HQon2HiXiBLIuwsxbffUhpKyBJpHJ5sQ=;
-        b=nuevsYqrwE3thvNPI6swgY5QL0T2yIYi1ZrNCbCvNp04GqTIvDGoOWr2Hkgf2TCTWQ
-         bJ1Hq+C/SzecTlc/x48OPOdnuX2WYvsR3+4ZmbUx7lBkPvUmXevPF7a7Iolo8VOcg7Fx
-         Ry3y3ZMYR61TWjRYmNxdpGhrY+WsT6t1uBSqJjnuFUAm4NiB8wyMqef0yNCWB4xbU4+2
-         WDPyAlHQqUw8Q9Mr50doYLWJBk97dKTyeeZ084Ru9+d1Zn+drkADW+sc2RBczh7DdRaK
-         L+e/5zv6Ys3vT10XEj7dz+VumD+LGs4bWzgozXWRoPtDDf8kUO+5eNj+effIDo/ekdAO
-         deHg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733153096; x=1733757896;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=MwrhmBccWW8HQon2HiXiBLIuwsxbffUhpKyBJpHJ5sQ=;
-        b=W/AFt5w4R3SJsrTED78nNL1FiW0klnRv94Xk1l5h/+YsUpZRuI/EW2mHVCL7XizYnp
-         IjfOd1RzhQ3U6XxdMg/P8xMGr6uUhYdZFA/5ykCjbP9h2JZ9ROH4FOwoBICVgonitlJu
-         69EjY6VpwcItp+FJWDGyDMWNLvkBRxhVa1lxd0DYCWKr3gSFgP1WoMIuOFgJVGrSWoeS
-         caeku0XxcB+Wehwy5lLxjoFQNyii/PAROJhFipLw1yykH70b0bu9J/YUcIqCrP3K7FOs
-         AwDWGDZBYNZvPw6DYjw/BeVsXd6JvGxAf96W6Ij5I9GngUy/7dxEyEiBuIRvGVZ4UKiR
-         58gw==
-X-Forwarded-Encrypted: i=1; AJvYcCWYQQJPwe7bUzS3qVRAryKzKa48vq4h97LpOzl23zzLr2cNRN6OfC1zkvVx33F2YHXNDtQIoqZo4z0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyK76+HQaV6Rf96uXCHhbGz5Bgf7AsZvkpFScrhMrlS9E2KwyIc
-	fIF/36YOq9RQW07YR0KRN0wYNBjza2mcrCxgbX7lOm8orpP+WBzMG+EDOm/+S3AJyH+LfqoHAW6
-	R60gv2mavFztK4D89jtyhlSfK3aZOZryPfbn1BA==
-X-Gm-Gg: ASbGnctmhEJY1FOj+VAwF13U/3N5w5t5Nysg6F3Y7m1h+hkpiSMNFATxSJEegTeMETN
-	9IBmnQ77a33FWwePGD9lcisUyv+oMVjZY
-X-Google-Smtp-Source: AGHT+IEcO6Su/9/8KHLlrWOggxXpEUQdnHMKRQYTMnTaorultWTg9WKUXkjBrKviPAwOh+21GGIBZJNGibWrb8sKNA4=
-X-Received: by 2002:a05:6902:248a:b0:e39:8b24:65ee with SMTP id
- 3f1490d57ef6-e398b24682bmr12197418276.40.1733153095668; Mon, 02 Dec 2024
- 07:24:55 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="ll+g4aD6"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1733153486; x=1764689486;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=LIC22lvcg0GEAsloGNR0vIWhLAC8DJjmvoKLwQeuxU8=;
+  b=ll+g4aD6SCxCfx9cTrf98+jU+uOrFWjAqhH1Er3lr9q936zAqnxmO1qU
+   L87428/D4D/oDJtvy43MmzqfB9RCfPZnWVibBzQqlkl+yGDhTEf1DOIs/
+   RMGuAe5TXxhdLp/QJGh13+krJlwzAa64BmxPCt8bm5MNXGAWo8M+ecMyS
+   v0FDhiyqFizdwdb88iiZ2Q9X/XvVFQ0r82oG2kRAUSeEq1myHt8b/m+hR
+   LBUozLLwv9aTz+lzREf2nHlnXZGvVuTI+WHtqLik67K2HAR8R3IZY5v54
+   9lY/ocgkMgOpxpgbuwXmdfdJ5LqthZ9Dpg2Q6Ik5o5OlJqWnMd42gej7B
+   Q==;
+X-CSE-ConnectionGUID: i1ddb5X9TO+y3Lxq25RuqQ==
+X-CSE-MsgGUID: ezRFIptKTe251l/tG6sNeA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11274"; a="33204328"
+X-IronPort-AV: E=Sophos;i="6.12,202,1728975600"; 
+   d="scan'208";a="33204328"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by orvoesa111.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2024 07:31:09 -0800
+X-CSE-ConnectionGUID: joznqKyGSpyauln+woZzrA==
+X-CSE-MsgGUID: jhia9RVPQnacitl/6RWCdg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,202,1728975600"; 
+   d="scan'208";a="116396336"
+Received: from smile.fi.intel.com ([10.237.72.154])
+  by fmviesa002.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2024 07:31:06 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.98)
+	(envelope-from <andriy.shevchenko@linux.intel.com>)
+	id 1tI8O7-00000003BAq-3FcZ;
+	Mon, 02 Dec 2024 17:31:03 +0200
+Date: Mon, 2 Dec 2024 17:31:03 +0200
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>,
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 0/6] mmc: sdhci-acpi: A few cleanups
+Message-ID: <Z03St5LVqoNWWqcv@smile.fi.intel.com>
+References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
+ <CAPDyKFqNKXRPT_QonnJ8frY_OvA6FkEMyj09Ywiqhtu0ZL34Xg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241202115140.33492-1-wahrenst@gmx.net>
-In-Reply-To: <20241202115140.33492-1-wahrenst@gmx.net>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 16:24:20 +0100
-Message-ID: <CAPDyKFpX2dcimEVQ8EpOFvbJ6fPybazNLT-j1yf8Uoo79UD=dg@mail.gmail.com>
-Subject: Re: [PATCH V6] mmc: bcm2835: add suspend/resume pm support
-To: Stefan Wahren <wahrenst@gmx.net>
-Cc: Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
-	Scott Branden <sbranden@broadcom.com>, Lukas Wunner <lukas@wunner.de>, 
-	Peter Robinson <pbrobinson@gmail.com>, "Ivan T . Ivanov" <iivanov@suse.de>, 
-	linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com, 
-	linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqNKXRPT_QonnJ8frY_OvA6FkEMyj09Ywiqhtu0ZL34Xg@mail.gmail.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 
-On Mon, 2 Dec 2024 at 12:51, Stefan Wahren <wahrenst@gmx.net> wrote:
->
-> Add a minimalistic suspend/resume PM support.
->
-> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+On Mon, Dec 02, 2024 at 04:24:00PM +0100, Ulf Hansson wrote:
+> On Fri, 1 Nov 2024 at 11:14, Andy Shevchenko
+> <andriy.shevchenko@linux.intel.com> wrote:
+> >
+> > A few almost independent cleanups for the driver because of
+> > new available APIs.
+> >
+> > In v2:
+> > - added patch 1 to solve compilation error (LKP)
+> > - split patch 3 out of (previous version of) patch 4 (Christophe)
+> > - added patches 5 and 6
 
-Applied for next, thanks!
+> This looks good to me, but deferring to apply it a few more days to
+> allow Adrian to share his opinion.
 
-Kind regards
-Uffe
+Sure, no hurry.
+
+-- 
+With Best Regards,
+Andy Shevchenko
 
 
-> ---
->  drivers/mmc/host/bcm2835.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
->
-> Changes in V6:
-> - split out of series because there is no dependency
-> - remove unnecessary complete check
->
-> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
-> index 7847f0c8b465..e5f151d092cd 100644
-> --- a/drivers/mmc/host/bcm2835.c
-> +++ b/drivers/mmc/host/bcm2835.c
-> @@ -1343,6 +1343,25 @@ static int bcm2835_add_host(struct bcm2835_host *host)
->         return 0;
->  }
->
-> +static int bcm2835_suspend(struct device *dev)
-> +{
-> +       struct bcm2835_host *host = dev_get_drvdata(dev);
-> +
-> +       clk_disable_unprepare(host->clk);
-> +
-> +       return 0;
-> +}
-> +
-> +static int bcm2835_resume(struct device *dev)
-> +{
-> +       struct bcm2835_host *host = dev_get_drvdata(dev);
-> +
-> +       return clk_prepare_enable(host->clk);
-> +}
-> +
-> +static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
-> +                               bcm2835_resume);
-> +
->  static int bcm2835_probe(struct platform_device *pdev)
->  {
->         struct device *dev = &pdev->dev;
-> @@ -1471,6 +1490,7 @@ static struct platform_driver bcm2835_driver = {
->                 .name           = "sdhost-bcm2835",
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = bcm2835_match,
-> +               .pm = pm_ptr(&bcm2835_pm_ops),
->         },
->  };
->  module_platform_driver(bcm2835_driver);
-> --
-> 2.34.1
->
