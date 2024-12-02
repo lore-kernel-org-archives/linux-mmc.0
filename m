@@ -1,116 +1,102 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 46EE720ADD2
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 398F620C009
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733153072; cv=none; b=UzuJ45jh5Gd+Qi0byRXYUA0eGVzhr2LiOsh8ox7Jan3QfL/tF5+43Sn8uQtEZ5gZYhq3lixPq9zmR1g5cGnkovbuI3OACQoKJ1SRw5rk87A6HcteqIMcBLz0S7i5MM+n5Kob+6rO0gvRMhxnzcC1FE8t6zmKG0cbaolAjg3Xxgo=
+	t=1733153078; cv=none; b=fPZ87F5KvTB3UtfhM1uvr74tV+KI52Eh0YJJPEbC4UoZyemVfLicOEeWjnoJdTZf6qXlViCCz3D9IKwtS3vpIZvL4VVon3negqYvVb06bMu7yu2Ur4+xqM9Xgk/dS6yu77Ytam6CCJ6w3p2D61lgmH/1pDT/6nLGQxlf2lxtEUY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733153072; c=relaxed/simple;
-	bh=3gPoqlU/lVE5xUuM0NiL+r0pSn8/8rHBVsYTlF7NftA=;
+	s=arc-20240116; t=1733153078; c=relaxed/simple;
+	bh=AbvmyFF8iykoSM/f6TneHmi2O0lZAKUhiodIOq/hruA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=kZpsZRWvxlfgEz/1gBTVwk/bvlOBoy/FrjpPuD6bgRWeF5GHFS0sSuvchorXYMEVBZdbcvdA4wXaM/0H5Kmv/DTQvFguilOMfZZp7ipLTfQv2FkIOsNg+QGk7RzvHKgW0iPhEXpfCgFALssdLV5E+67hno7wzoslk0i52xOx7Uc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iwq3+P7i; arc=none smtp.client-ip=209.85.219.171
+	 To:Cc:Content-Type; b=WWD8XOxdLi3PA8xVcbLF2VP5LHJ7iH3oPm0pjQNnU7aQNwml29KV84q+3dPdVr2eH4ig26DRuk09PKNXxWzuH6u7G/n7Qqy8E5XnNkc2ao7lkmwucCOmisEpTICGITpLzmxFTQNiHE0THllr87oH03Hw8b1ySJ2TyxOCq2ednVI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JAXxGGHG; arc=none smtp.client-ip=209.85.219.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iwq3+P7i"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e0875f1e9edso3565453276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:29 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JAXxGGHG"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e39779a268bso3126845276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733153068; x=1733757868; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1733153076; x=1733757876; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=YjTimCeXKhqZkZ2I4f+pexjlxgsq58p8L6qd2thgsT8=;
-        b=iwq3+P7iJnd9FSww65hMYq52EqsRfn9fElg8M/j2fyg+i0z/KkzZYB3+/RShyg6kxh
-         4uCCdBYOUrF5Z+Hr+J4ru4VC7ixE94NUqwj6myg/ddNoatcAQ/5WV9Lbm5A5odXk7aU7
-         xGM0HFIwFbYfmdGMHc5aHbjhik3LxmaOxcsVUxkJqIaUBdpmgCObKdh9dFQJlgbdAayH
-         w7jmGtLT2D6j8qpVGSbzTil5pAs2bCi3+j4K9VlvDOwz3BJqmFbn/KjZCx4cDdb60PDC
-         oJrZm91bBipDOfZ/nIMtjuMs4bDpMetYA/p/EqjEU76ciraeFhDKAAsOrPGrPHITXtXL
-         FSLw==
+        bh=cI2UHD0+iG63sk9WQguvFbtnOatRFiHDDSI6F2s+sic=;
+        b=JAXxGGHGsuc01Aj0jXxfWP3IExpkpjjWnviWdPBffjIAQoOh6/hTPQxXq1PNBFQsbQ
+         9LuR/ADWNK220IhAw0D37MaXEWcRdMtCvIddDNNM/PF7mr95UYDaErclL3O9VGZDPjDM
+         fYy1a17+gjL7jzTGf86eyt3PWI9bWoLncK5L5wSniTk/1odKMfTzzqAj0Am62rMIGr2+
+         xhr4BcrFFJaYawmblp62P7Eu8So3DzGcN/LKKJI9FlxyszcJI5wR1Lke0FH1lxnvXQB1
+         FA1GKOtSp1yU08q9owlA7IjkhxspxNcB6wYzcNdAXjxsVbsxN12hVpulnWEvL0dlaUw9
+         215A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733153068; x=1733757868;
+        d=1e100.net; s=20230601; t=1733153076; x=1733757876;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=YjTimCeXKhqZkZ2I4f+pexjlxgsq58p8L6qd2thgsT8=;
-        b=tz/kOiysk8xwFs2Cmy6CrWWBuPReN+v0vBumt/YZB1AUUsgKVWxI/nhmYHJETalqfM
-         uEifeLWCPYUHkK/TlZ8tlnOpV5/3HMi17WRjrthvuU/YKgVuNrd/90xuqEOmTN0C6lp6
-         XWSz17Hxog7Z//ZeGYu2uuakut7LSfMIELIcwW0GmDL1+LmcAJl7GWY86Btana++KfhX
-         CzqPX4adOxoDaRrpZPZPcQYp/CfH5ISQEheH3dNkEZ9RR498IHAOAXSqu+Y2bJuRdNWO
-         y6djDQYch6EkaGKnPMWXFXpfaefJy6Cp+aH4qqRmi9QPKRZ+YdUAiJDHcjgeHcRRsvwP
-         BBrQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU6E/o37e7SUGu9JhjSEjfiiZ9W+IhsqN0AksHoTrRmGZ4YmjIqHmWrUjEl3yBhgULKmu2A8TRPK/U=@vger.kernel.org
-X-Gm-Message-State: AOJu0YylHBvZmPxpX79VK68z5bqqXm2qRaNDeyYh2dDDBj9WCydZtm0e
-	ZUWpyLCXsG/iQfoSlOdmYvf775bNqHTe6UFyOXtRftaZaCSDZOnuLJREflRujE6te+P4CfqAXeH
-	vrqiSakOBaUlr64VT7nDvBh3iH2+ztPmynhEws/Z3XC17rt8S
-X-Gm-Gg: ASbGnctVUYOhdC8uUNtd7w7wk8zabNMrIcqNlP674N1Ej3UocDC9vxTvZK6EAy61McP
-	YVjAQeJWIYUomtvKgVTEoHb7GQd9e/Iy0
-X-Google-Smtp-Source: AGHT+IEhR2D/dt/Vw7dqmP3c1NfSMof6dcurrBG0/Efhevbt891KsJCPtAS1p2Tq5jM22ure7AFSts86rVb6VBUO0Vk=
-X-Received: by 2002:a05:6902:120c:b0:e38:8e02:1f13 with SMTP id
- 3f1490d57ef6-e395b869cc6mr21365154276.10.1733153068170; Mon, 02 Dec 2024
- 07:24:28 -0800 (PST)
+        bh=cI2UHD0+iG63sk9WQguvFbtnOatRFiHDDSI6F2s+sic=;
+        b=DQbeQxIL+DwkXA7FHb/6CFZB+1CFawUpEcgzr2QO1o4b0hwjQ/NGg1GJxZ8uVgtVBo
+         hy4iJdIODmbH8WUNIZuoE++fIDX83+YYeJa0X49Un9k5v450U+IodhQC+cg29IP2qqUj
+         g4GseCF8nBKSOS4Nk+KsLg9U5vl5DEf/TFGjAkONcSWcXqJlVm/SvYY5WPgmCzWWaRXc
+         VtYAvcauAi9SLiEXFs6uWna1vbgMilAV9ctcQgVTp4lKB2zJB/jDZKZlpZr6agFvcSfG
+         A/bqHOCBESC77i1xnu+/zq0KHgWvutQ2u8PBb5Y0AF+e9X/BMKFIITsHshZAvOi99bam
+         N/bw==
+X-Forwarded-Encrypted: i=1; AJvYcCXdFA4KPzvR5jUKAf6UESTRT8rj1oxFqGsekyWtmm8ckz6Lfv2yUTnFS3RUlx8xSzccYtLn/NU5tfE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwipqCLI3nYiI0gzeFtYcbJ2+VyZiYmQpIu5ngz5Kg58iZRp4dE
+	bAo7LAl7+wavaqZvCAkwiPd2tmk6wCmA6LloLiRWxQgk2tEWSd8liDfcYD247TSoK6uQFqqMvzR
+	4ydc0bqNBPW1hPWG4T8P4JpLY9Pn1EVc23vfxMw==
+X-Gm-Gg: ASbGncvoLH/ZHnHs6muAZDqpG7Qrqgwmfua1cMiJYfY1VatSFWh+Wvko33s3JWsNA0r
+	XB2OfFtT3izKpyDzNoAAEJBZR0ykvz0/9
+X-Google-Smtp-Source: AGHT+IGyxw199x8a/NjiG9xXny4LctKmTAbUkVdDlG8lJAJId3wfy0XNCoiRv0MlIrGKEJpAZbdNecDuMiCwsnC9has=
+X-Received: by 2002:a25:d690:0:b0:e38:2b99:7f2d with SMTP id
+ 3f1490d57ef6-e3971966a52mr17352002276.12.1733153076156; Mon, 02 Dec 2024
+ 07:24:36 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241118072917.3853-1-wsa+renesas@sang-engineering.com> <20241118072917.3853-9-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20241118072917.3853-9-wsa+renesas@sang-engineering.com>
+References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 16:23:51 +0100
-Message-ID: <CAPDyKFpNTCEGzi43GABuQNo6rHV_OWWLhemu3p7Za0+rs3zVTg@mail.gmail.com>
-Subject: Re: [PATCH 08/15] mmc: core: don't include 'pm_wakeup.h' directly
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Mon, 2 Dec 2024 16:24:00 +0100
+Message-ID: <CAPDyKFqNKXRPT_QonnJ8frY_OvA6FkEMyj09Ywiqhtu0ZL34Xg@mail.gmail.com>
+Subject: Re: [PATCH v2 0/6] mmc: sdhci-acpi: A few cleanups
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Victor Shih <victor.shih@genesyslogic.com.tw>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 18 Nov 2024 at 08:29, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Fri, 1 Nov 2024 at 11:14, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
 >
-> The header clearly states that it does not want to be included directly,
-> only via 'device.h'. 'platform_device.h' works equally well. Remove the
-> direct inclusion.
+> A few almost independent cleanups for the driver because of
+> new available APIs.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> In v2:
+> - added patch 1 to solve compilation error (LKP)
+> - split patch 3 out of (previous version of) patch 4 (Christophe)
+> - added patches 5 and 6
+>
+> Andy Shevchenko (6):
+>   mmc: sdhci: Use EXPORT_PM_FN_NS_GPL() for exporting PM functions
+>   mmc: sdhci-acpi: Switch to SYSTEM_SLEEP_PM_OPS()/RUNTIME_PM_OPS() and
+>     pm_ptr()
+>   mmc: sdhci-acpi: Remove not so useful error message
+>   mmc: sdhci-acpi: Use devm_platform_ioremap_resource()
+>   mmc: sdhci-acpi: Tidy up ACPI ID table
+>   mmc: sdhci-acpi: Don't use "proxy" headers
+>
+>  drivers/mmc/host/sdhci-acpi.c | 92 ++++++++++++++---------------------
+>  drivers/mmc/host/sdhci.c      | 14 ++----
+>  drivers/mmc/host/sdhci.h      |  2 -
+>  3 files changed, 40 insertions(+), 68 deletions(-)
+>
+> --
 
-Applied for next, thanks!
+This looks good to me, but deferring to apply it a few more days to
+allow Adrian to share his opinion.
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/core.c | 1 -
->  drivers/mmc/core/host.c | 1 -
->  2 files changed, 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index d6c819dd68ed..c877dae8b4e2 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -19,7 +19,6 @@
->  #include <linux/scatterlist.h>
->  #include <linux/log2.h>
->  #include <linux/pm_runtime.h>
-> -#include <linux/pm_wakeup.h>
->  #include <linux/suspend.h>
->  #include <linux/fault-inject.h>
->  #include <linux/random.h>
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 48bda70145ee..bdb22998357e 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -14,7 +14,6 @@
->  #include <linux/idr.h>
->  #include <linux/of.h>
->  #include <linux/pagemap.h>
-> -#include <linux/pm_wakeup.h>
->  #include <linux/export.h>
->  #include <linux/leds.h>
->  #include <linux/slab.h>
-> --
-> 2.39.2
->
