@@ -1,160 +1,134 @@
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9ADFD20A5D9
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DF9CD209F27
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733153089; cv=none; b=LfeGu/uLXkWkOYymYhWfRxcw4To06gPa0/e5reACUtnhx6okR60QNtoAG7/pFokFCbjrbTunWX7rCMBXTz2KyzXddV+akwT7JORI4Xk7rDzpRjrooSfoobNMrIfHHKQG6smWop62zH3pVmh6tJMH0PXa4FqxNGTBbEnJp2a7BNg=
+	t=1733153100; cv=none; b=tk4IyjblNv5r6er07FxgeJDAk7oKDh3OiNG2Po96G9aGMftvs7Iw8XGD0eBYl/5d8uaUiYKZExEy0Mn82XtDrWxXjpqW+rKo+kJaWJEoKdj8T3LFc2kXS6IBelUwhUQH7dktCd8+0UAOvSBu+qiO/3qVxrTpmCn+HhYhPeCEwlg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733153089; c=relaxed/simple;
-	bh=goFeMCUVRbDjipThdghVVJLskLf8H473+GNXYnXXrDw=;
+	s=arc-20240116; t=1733153100; c=relaxed/simple;
+	bh=PMGnihnmxjVfL8xGmQr+urfCilgz+1Wh2VTPRzX2C1Q=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ABVj9opwdjRV2wTmutdVNXxWRuLGMtaWicfZr+QUuiACI3aDInSJ0IxHwvVtQJuHIaMUnuqjS9SYUrlUTny/seJeZ77IG3+h9iQZQ+5nS7AbBTLDlHGuTdu2O6WrZBgKkIsOP4swN39e9ToDsr2mxcgmzdNSCOFY3S5r2C8o6eo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oqVRjmwC; arc=none smtp.client-ip=209.85.128.181
+	 To:Cc:Content-Type; b=HusR3psScSx7eZWY14AAiAgczLxcs2MUR8i9gc58bQrRtbLgRKfJm3KT2okuOQngLBpMzfJZugqfMzwWsYF1dvZwx2G9+fTc4iX+v9Jrt1mu65A1VHW3OtQEXfar+LBwqHkNpLojRiii+BMFnJjUuZ62MZcC5jXqPft56odrSX8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=nuevsYqr; arc=none smtp.client-ip=209.85.219.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oqVRjmwC"
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-6eeba477fcaso39229087b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:47 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="nuevsYqr"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e3983f8ff40so2763119276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733153087; x=1733757887; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1733153096; x=1733757896; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=05ZXtxtYDYApb+lIzc95yV2LA74LDricN9fUjzTVsRg=;
-        b=oqVRjmwCPFbp8NX13GQ37Knaf7Js6RruA7JsAME9fKoTUAGL/hAHluYy3hssqDdGck
-         G3h2wgUUsarnvqYTXpdtcC7ex9fmfZah+6CcPrjQHRIdDHm5YYD2ZPWCzPyWLSZX+6Wl
-         Ttd2gF3PJx2LHbFghXgX2dyZmsOzrQOFa0InxUkzTh0xRpguw7ISgu8qgM4B0PL1BYAk
-         u2/lj2VSrRMtL+bSn3omEt6j92wabJzeXdNMRiojvlZWxVN6/j0rB5ZgVKGLX7zgR29U
-         clW/0lGnWXGwEgryAo35SEApnH1tAAyBhCWD6+6ugnSKDsCgkQNwbtXI2HeWI15fYVO/
-         e+tQ==
+        bh=MwrhmBccWW8HQon2HiXiBLIuwsxbffUhpKyBJpHJ5sQ=;
+        b=nuevsYqrwE3thvNPI6swgY5QL0T2yIYi1ZrNCbCvNp04GqTIvDGoOWr2Hkgf2TCTWQ
+         bJ1Hq+C/SzecTlc/x48OPOdnuX2WYvsR3+4ZmbUx7lBkPvUmXevPF7a7Iolo8VOcg7Fx
+         Ry3y3ZMYR61TWjRYmNxdpGhrY+WsT6t1uBSqJjnuFUAm4NiB8wyMqef0yNCWB4xbU4+2
+         WDPyAlHQqUw8Q9Mr50doYLWJBk97dKTyeeZ084Ru9+d1Zn+drkADW+sc2RBczh7DdRaK
+         L+e/5zv6Ys3vT10XEj7dz+VumD+LGs4bWzgozXWRoPtDDf8kUO+5eNj+effIDo/ekdAO
+         deHg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733153087; x=1733757887;
+        d=1e100.net; s=20230601; t=1733153096; x=1733757896;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=05ZXtxtYDYApb+lIzc95yV2LA74LDricN9fUjzTVsRg=;
-        b=mCVUuwshfpmKcH4B0sYNVAkXcWKWNBHRNq6uwKit17Kec1LJrKYfi49SsEoATxjuka
-         84iyRclB5mvt1E2YCNZJaYIzi2XF3aOwnr3aLEs9gkBdQB68s1IBQGyvXNxd2SZgzKCF
-         6+sxlL0Cj57rkrCD5tD3wQhFK0cWFEeKx6cGdo3N5mKedg/u3wbzHuxfvKxsWEli+A18
-         7YG9FTyM8oIqG6UQyAVlpxVwph9q9hEXvAPqA8WXtSnMdekrMTRMCbSlaJHss1ceRzTP
-         twYq+3qqMfO7SdBCH2CyCs32naRiNqLfTHO/PC8TeB0myF2/gPoTFH9PHu8uJsuDgAx8
-         cTwQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXEdUz/ZcAqlse1kOwQeq7/PffE7htwq4XUn03+XmuAApf3+Mjey2ix1XqNIeP4Ve6zXJlg4X1QXrY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwRlXRRu7xaWvO8pdkQYJ4SDnshI5SSZZMYn0kgLm571ZV6RIR4
-	UKsxfi3MF9YM28rHpIJXalYCIjg1F7Z47cOCcKLn4wwwMYD0hAkLu4+x8emgEjyksFNr86RFdY7
-	V658caQrZTibFtA5ujvo81TcRGo0ZSyI2UsLWZg==
-X-Gm-Gg: ASbGncs8Sj5px/kNHyFGIOXq+66+A8Z4hgi6maaj1MraoxpdJFVosAWk/hWBAm8LZTz
-	ZRB/Bc9knqQf3ZPrRx262/o+bqyRuVSZA
-X-Google-Smtp-Source: AGHT+IG1/7GNikn+o7qWaeU6OlA3SHIeQqG6VzX6iFXwmrBOhF0bD/LXd61skcVAWua1i/pv/Z75jusfAxofKt3ImP8=
-X-Received: by 2002:a05:6902:2e0e:b0:e39:9b9f:7f87 with SMTP id
- 3f1490d57ef6-e399b9f830cmr6954354276.29.1733153086437; Mon, 02 Dec 2024
- 07:24:46 -0800 (PST)
+        bh=MwrhmBccWW8HQon2HiXiBLIuwsxbffUhpKyBJpHJ5sQ=;
+        b=W/AFt5w4R3SJsrTED78nNL1FiW0klnRv94Xk1l5h/+YsUpZRuI/EW2mHVCL7XizYnp
+         IjfOd1RzhQ3U6XxdMg/P8xMGr6uUhYdZFA/5ykCjbP9h2JZ9ROH4FOwoBICVgonitlJu
+         69EjY6VpwcItp+FJWDGyDMWNLvkBRxhVa1lxd0DYCWKr3gSFgP1WoMIuOFgJVGrSWoeS
+         caeku0XxcB+Wehwy5lLxjoFQNyii/PAROJhFipLw1yykH70b0bu9J/YUcIqCrP3K7FOs
+         AwDWGDZBYNZvPw6DYjw/BeVsXd6JvGxAf96W6Ij5I9GngUy/7dxEyEiBuIRvGVZ4UKiR
+         58gw==
+X-Forwarded-Encrypted: i=1; AJvYcCWYQQJPwe7bUzS3qVRAryKzKa48vq4h97LpOzl23zzLr2cNRN6OfC1zkvVx33F2YHXNDtQIoqZo4z0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyK76+HQaV6Rf96uXCHhbGz5Bgf7AsZvkpFScrhMrlS9E2KwyIc
+	fIF/36YOq9RQW07YR0KRN0wYNBjza2mcrCxgbX7lOm8orpP+WBzMG+EDOm/+S3AJyH+LfqoHAW6
+	R60gv2mavFztK4D89jtyhlSfK3aZOZryPfbn1BA==
+X-Gm-Gg: ASbGnctmhEJY1FOj+VAwF13U/3N5w5t5Nysg6F3Y7m1h+hkpiSMNFATxSJEegTeMETN
+	9IBmnQ77a33FWwePGD9lcisUyv+oMVjZY
+X-Google-Smtp-Source: AGHT+IEcO6Su/9/8KHLlrWOggxXpEUQdnHMKRQYTMnTaorultWTg9WKUXkjBrKviPAwOh+21GGIBZJNGibWrb8sKNA4=
+X-Received: by 2002:a05:6902:248a:b0:e39:8b24:65ee with SMTP id
+ 3f1490d57ef6-e398b24682bmr12197418276.40.1733153095668; Mon, 02 Dec 2024
+ 07:24:55 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241130094758.15553-1-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20241130094758.15553-1-krzysztof.kozlowski@linaro.org>
+References: <20241202115140.33492-1-wahrenst@gmx.net>
+In-Reply-To: <20241202115140.33492-1-wahrenst@gmx.net>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 16:24:10 +0100
-Message-ID: <CAPDyKFqiar=EKBHG=PHimjNcdLKsVdx+BRZReEJzHr8_qoayeg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Drop Bhupesh Sharma from maintainers
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>, 
-	Konrad Dybcio <konradybcio@kernel.org>, linux-arm-msm@vger.kernel.org, 
-	linux-crypto@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	netdev@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
-	Bhupesh Sharma <bhupesh.linux@gmail.com>
+Date: Mon, 2 Dec 2024 16:24:20 +0100
+Message-ID: <CAPDyKFpX2dcimEVQ8EpOFvbJ6fPybazNLT-j1yf8Uoo79UD=dg@mail.gmail.com>
+Subject: Re: [PATCH V6] mmc: bcm2835: add suspend/resume pm support
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui <rjui@broadcom.com>, 
+	Scott Branden <sbranden@broadcom.com>, Lukas Wunner <lukas@wunner.de>, 
+	Peter Robinson <pbrobinson@gmail.com>, "Ivan T . Ivanov" <iivanov@suse.de>, 
+	linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com, 
+	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sat, 30 Nov 2024 at 10:48, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
+On Mon, 2 Dec 2024 at 12:51, Stefan Wahren <wahrenst@gmx.net> wrote:
 >
-> For more than a year all emails to Bhupesh Sharma's Linaro emails bounce
-> and there were no updates to mailmap.  No reviews from Bhupesh, either,
-> so change the maintainer to Bjorn and Konrad (Qualcomm SoC maintainers).
+> Add a minimalistic suspend/resume PM support.
 >
-> Cc: Bhupesh Sharma <bhupesh.linux@gmail.com>
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
 
-I have queued this up via my mmc tree for next. If anyone has
-objections to that and wants to funnel this via another tree, please
-let me know!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/crypto/qcom-qce.yaml         | 3 ++-
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml           | 3 ++-
->  Documentation/devicetree/bindings/net/qcom,ethqos.yaml         | 3 ++-
->  .../devicetree/bindings/remoteproc/qcom,sm6115-pas.yaml        | 3 ++-
->  4 files changed, 8 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/bcm2835.c | 20 ++++++++++++++++++++
+>  1 file changed, 20 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/crypto/qcom-qce.yaml b/Documentation/devicetree/bindings/crypto/qcom-qce.yaml
-> index c09be97434ac..62310add2e44 100644
-> --- a/Documentation/devicetree/bindings/crypto/qcom-qce.yaml
-> +++ b/Documentation/devicetree/bindings/crypto/qcom-qce.yaml
-> @@ -7,7 +7,8 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  title: Qualcomm crypto engine driver
+> Changes in V6:
+> - split out of series because there is no dependency
+> - remove unnecessary complete check
 >
->  maintainers:
-> -  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> +  - Bjorn Andersson <andersson@kernel.org>
-> +  - Konrad Dybcio <konradybcio@kernel.org>
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 7847f0c8b465..e5f151d092cd 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1343,6 +1343,25 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+>         return 0;
+>  }
 >
->  description:
->    This document defines the binding for the QCE crypto
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 8b393e26e025..eed9063e9bb3 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -7,7 +7,8 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  title: Qualcomm SDHCI controller (sdhci-msm)
->
->  maintainers:
-> -  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> +  - Bjorn Andersson <andersson@kernel.org>
-> +  - Konrad Dybcio <konradybcio@kernel.org>
->
->  description:
->    Secure Digital Host Controller Interface (SDHCI) present on
-> diff --git a/Documentation/devicetree/bindings/net/qcom,ethqos.yaml b/Documentation/devicetree/bindings/net/qcom,ethqos.yaml
-> index 0bcd593a7bd0..f117471fb06f 100644
-> --- a/Documentation/devicetree/bindings/net/qcom,ethqos.yaml
-> +++ b/Documentation/devicetree/bindings/net/qcom,ethqos.yaml
-> @@ -7,7 +7,8 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  title: Qualcomm Ethernet ETHQOS device
->
->  maintainers:
-> -  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> +  - Bjorn Andersson <andersson@kernel.org>
-> +  - Konrad Dybcio <konradybcio@kernel.org>
->
->  description:
->    dwmmac based Qualcomm ethernet devices which support Gigabit
-> diff --git a/Documentation/devicetree/bindings/remoteproc/qcom,sm6115-pas.yaml b/Documentation/devicetree/bindings/remoteproc/qcom,sm6115-pas.yaml
-> index 758adb06c8dd..059cb87b4d6c 100644
-> --- a/Documentation/devicetree/bindings/remoteproc/qcom,sm6115-pas.yaml
-> +++ b/Documentation/devicetree/bindings/remoteproc/qcom,sm6115-pas.yaml
-> @@ -7,7 +7,8 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  title: Qualcomm SM6115 Peripheral Authentication Service
->
->  maintainers:
-> -  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> +  - Bjorn Andersson <andersson@kernel.org>
-> +  - Konrad Dybcio <konradybcio@kernel.org>
->
->  description:
->    Qualcomm SM6115 SoC Peripheral Authentication Service loads and boots
+> +static int bcm2835_suspend(struct device *dev)
+> +{
+> +       struct bcm2835_host *host = dev_get_drvdata(dev);
+> +
+> +       clk_disable_unprepare(host->clk);
+> +
+> +       return 0;
+> +}
+> +
+> +static int bcm2835_resume(struct device *dev)
+> +{
+> +       struct bcm2835_host *host = dev_get_drvdata(dev);
+> +
+> +       return clk_prepare_enable(host->clk);
+> +}
+> +
+> +static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
+> +                               bcm2835_resume);
+> +
+>  static int bcm2835_probe(struct platform_device *pdev)
+>  {
+>         struct device *dev = &pdev->dev;
+> @@ -1471,6 +1490,7 @@ static struct platform_driver bcm2835_driver = {
+>                 .name           = "sdhost-bcm2835",
+>                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
+>                 .of_match_table = bcm2835_match,
+> +               .pm = pm_ptr(&bcm2835_pm_ops),
+>         },
+>  };
+>  module_platform_driver(bcm2835_driver);
 > --
-> 2.43.0
->
+> 2.34.1
 >
