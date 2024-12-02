@@ -1,159 +1,133 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mout.gmx.net (mout.gmx.net [212.227.15.15])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA5301F9F68;
-	Mon,  2 Dec 2024 08:56:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DE8B1FE450
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 11:51:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.15
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733129817; cv=none; b=JRcSvwqE7T55q2lnM9miSXh/EXnjgOEx9aI51In/gAQxA+5PwcbTyO6WQDAJlAqnYKMLNg76oK3BUuxAUxc9OUNBVJTf6cECG1HFjfFwbrdRndtzRA5/TSoXOh7NWrgGO/SOQ/t2Oi1p3RscRJFq567BgDLm/58ScRphSjNY5yE=
+	t=1733140314; cv=none; b=rXk/xhxnibiKqX8mtnMY83H/oAlkvIJkwnt1OjI4YmCI71uQvwJgIGDQn43tQ7B7P5xBP+fluz6kPrLUX96Mi4EV7xeXSID4tVPf/2bvicdparfMynM4c8lqcLMzVkIzirJHqla4PtUAuPcyCtpC/SyzHd/jhe1PU6HBR0maamo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733129817; c=relaxed/simple;
-	bh=NXHbiP/N1Z8upZIqhXnScWC1Bjg/zkw9Myc8i00RqOo=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=mYZXJZyd97TF0VXWECfvN4AlJXxxY3tSvwgbHAWeqUFKH7ce781nrSrkUCcInGLYpbGCl6V0r3mZEB+9lprT1AgZ8hkKS96lvZO3hXVc6hF65CK8n4AAet3CFWpbgRa7MsgKfeCmpByikFMXA1iCxvZImlQFv8hr1jPe7DD8lcA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=CgYsO47/; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1733140314; c=relaxed/simple;
+	bh=pbjUrED4i5J0KfHWo07UKGPllLu4KTU/YCZqt+0bfqM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=TR7tP4bx98s5zRQZX0p/7vDf1i681JnU06d5kxei3j4N9XE2/KwO/xbj2LaluJSeO3LJF2obisdLsP/gzideda13z6cptkzL6k8DFlL20QAofGkzye1QASqk8BdEehy0KT7OxlgQU0Z83SPnJbco1VggY0epAE88SO8WTmcLomg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=E8OL+bxd; arc=none smtp.client-ip=212.227.15.15
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="CgYsO47/"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B28khHU029794;
-	Mon, 2 Dec 2024 08:56:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-type:date:from:message-id:mime-version:subject:to; s=
-	qcppdkim1; bh=fm57W6iEr1JyDnWdJkjpV4mOUWF1y4AcSwrMEljcbec=; b=Cg
-	YsO47/frZKbnpjIKssrjkqo6gAtwI19FZ5yqQhH++XBOxxA1jwTC7b4uYJ3WmwND
-	tEd4YfSRhEeWymYwU4uzppFtx9kKnPG9Ut/tbf/F2dsB1HksilGFee3kxioKZQRQ
-	+lJD7sKQ4T6UZyZEkbsxLTFfJtCLXF83nEVeE+6p+sG4KWAxag3pbp2ncP3gVb16
-	2ItlFpekkae+89JzC/g8ZwfinuroJv5lODe1L3UBMt3ssPFGLlACveLuneapTgNK
-	qcQmJqeASo4/xaQtG3km0WrkHN3Nq3vy/u8LeQPp+NlsS6LUbfIfFiQzh6BcR4nI
-	UwETYkY2yOUSu+fO6gtA==
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 437ta2v6er-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 02 Dec 2024 08:56:52 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4B28upQO031576
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 2 Dec 2024 08:56:51 GMT
-Received: from hu-sachgupt-hyd.qualcomm.com (10.80.80.8) by
- nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Mon, 2 Dec 2024 00:56:46 -0800
-From: Sachin Gupta <quic_sachgupt@quicinc.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <quic_cang@quicinc.com>,
-        <quic_nguyenb@quicinc.com>, <quic_bhaskarv@quicinc.com>,
-        <quic_mapa@quicinc.com>, <quic_narepall@quicinc.com>,
-        <quic_nitirawa@quicinc.com>, <quic_rampraka@quicinc.com>,
-        <quic_sachgupt@quicinc.com>, <quic_sartgarg@quicinc.com>
-Subject: [PATCH] mmc: sdhci-msm: Command Queue (CQ) Register changes for v5.0
-Date: Mon, 2 Dec 2024 14:26:31 +0530
-Message-ID: <20241202085631.13468-1-quic_sachgupt@quicinc.com>
-X-Mailer: git-send-email 2.17.1
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="E8OL+bxd"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
+	s=s31663417; t=1733140303; x=1733745103; i=wahrenst@gmx.net;
+	bh=ibzrOEjWbR+1FpvncmKtT0ZNKhHCYtX65cHqDPNlL+Q=;
+	h=X-UI-Sender-Class:From:To:Cc:Subject:Date:Message-Id:
+	 MIME-Version:Content-Transfer-Encoding:cc:
+	 content-transfer-encoding:content-type:date:from:message-id:
+	 mime-version:reply-to:subject:to;
+	b=E8OL+bxdmisiKII6du+EsnYaVhY78A0iiu0dF/PcWG9SJzQyQqCARHeAav1QXKYW
+	 LAIynIUTPRWTGLINv8t9S2/BA7vt4htvSWxr4jo+NS8isDFeBjxttS4XIYNm6preq
+	 b2/qDW/Vjd3oOZqap6kwvUxe+y9jV7pVjy8v39mQMlfwR+cKr6TGvBlP+LLiNEx6l
+	 8yN2AL78RApCRb/WmrDrA425DcsniGDm5+hhGHrwrST9MgzN18FP+808koTb4lwVE
+	 armC5k90R0tzf/xvmuPdVXTOxTK3ggYhoEKbEBOO8fIRYz8Y+9sP6xejyReLKfPIr
+	 HYEqurJm9Hm67S433w==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from stefanw-SCHENKER ([37.4.251.153]) by mail.gmx.net (mrgmx004
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MYeQr-1tE2M026pH-00O3QS; Mon, 02
+ Dec 2024 12:51:43 +0100
+From: Stefan Wahren <wahrenst@gmx.net>
+To: Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Lukas Wunner <lukas@wunner.de>,
+	Peter Robinson <pbrobinson@gmail.com>,
+	"Ivan T . Ivanov" <iivanov@suse.de>,
+	linux-arm-kernel@lists.infradead.org,
+	bcm-kernel-feedback-list@broadcom.com,
+	linux-mmc@vger.kernel.org,
+	Stefan Wahren <wahrenst@gmx.net>
+Subject: [PATCH V6] mmc: bcm2835: add suspend/resume pm support
+Date: Mon,  2 Dec 2024 12:51:40 +0100
+Message-Id: <20241202115140.33492-1-wahrenst@gmx.net>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: eygyIt_0vp5NN-aCIZM50wJsn1lLXNx6
-X-Proofpoint-GUID: eygyIt_0vp5NN-aCIZM50wJsn1lLXNx6
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 bulkscore=0
- lowpriorityscore=0 suspectscore=0 mlxscore=0 impostorscore=0
- malwarescore=0 adultscore=0 priorityscore=1501 mlxlogscore=999
- phishscore=0 clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2411120000 definitions=main-2412020079
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:qy0iQs7trXhPSa/VJ9TwZ80XuXPrbDjWDrphpG4soUTPmb7RRlb
+ 6Rs1Rmr+6YQPIptsORrb/fbszZv1PShC+M/L53DHnmX9nlksFN3AjCYI3jEwJB8OKWQV57+
+ ODm/4cLAizujnRt5dk6snflV5JEVDfDDb7YzhOlzPY8xpmWfW6SpXicJjAIC3PwNZL7EPGB
+ s0W0ZEpr7trBXv8CCON6g==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:kRPqPoA5QW4=;+h2fKxCFNIpKxPPv/AVwU8nW6jo
+ tWxkZopz0nLWeJvonCVCaZtVJmjwa5SVmxRbPuoqcBYtokVaItC6IlzsO5EwIVPI1lXdGFEN6
+ jRwEmXUxwW8worEyxMLhZvARJzyInbVvPOSt+TR83vz0Znq4AbBf/Br0Yw6dbM/i2W+QFVLQ1
+ zJi9yGDDwSqTbnhRvb1GhKLI760oOu0z89qeclGo1kbK4E/B4IWUPa+DLmpYs89aQWvc2pyNh
+ otGS3h6qqRrq7CnO6u1A6mxsG5tDjMLX4brqyJJ7bJY5agUUyfPFySI3TK7RBUXkwmokPjKDJ
+ nWH9IiwC34JCz8w0PO77ZTtrD/5wBCgU8uo5XYCB2qn2SiTFwF6e2Kk0kOTmEjvfIdW58VDt4
+ tHIqs22ZrPxjjsUHwQucNJFgB6LyYLmstDAD5GDv9q/JGW+gTEKqfHSqOXWeK6O2jlLN2uMYa
+ q4NrWee8W3LTPCCLXGL0pG9rcPdYveoZxJGsDkFF8IF5mB3uke0wL3Qw8yPDQ7XPdo3uQLYxH
+ D2quHcufNhpwF7zc2ylB4v4/Y1ACjO6jn+mRTUoyBdMeQ0zL5oVQNsDB+mqj7SpdEq4Yy+oA9
+ kjRPpNmS+BMvyr1DlG3BFnrcF2kaNcOGiBL6ypMsAmuLhlEQralfyvF0kPGEd7ffpeC8W8iSS
+ CXam/IEa6/hyb8ux+Qtd0swp3XobF+fZ/yXEfGLJL5yFpi5XE4TkeGABqWbpb9Zx/cj4C2mSi
+ lOu0QvTL6PF8xebLdtCgNuV3ukDpzfCNgQ8sM3CCGiZcZUY6kUopjmcj+21A8WfJjtZrcptC2
+ /Tgt9RGKBRe0Jbc1zylx4Dlorifu78Z7mpD380fcY6xGueTx/HknbFosvOzgqWabrujC4iVgJ
+ vJBTw0ucQGPZzzRf+zpCxGSPwoNueYS1Jj2O1XB5XGLrChRD5jmbHjIYHoBrZFDeLYu9FOHAu
+ tEL6J6U/Ae0G8t+/j0X8b3WeZqwWtOe+mmE9NjxYe9PhiyXQqheghhcHcR0tpJZKKO2S9QaFm
+ 7FJ0+fNorXF+nOYiSIVfnjjhchWWwQGyHL0yewPnSS4ZfRG5WKk03k3/uhF1V2fgOvP1kjPhp
+ 9YvhuwJZaEeZdw0Tx8TD0yFQdXHN88
 
-For SDHC version 5.0 onwards, ICE3.0 specific registers are added in
-CQ register space,  due to which few CQ registers(like CQ_VENDOR_GFG,
-CQ_CMD_DBG_RAM) are shifted. This change is to add right offset to 
-shifted registers.
+Add a minimalistic suspend/resume PM support.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
-Signed-off-by: kamasali <quic_kamasali@quicinc.com>
-Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
----
- drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+=2D--
+ drivers/mmc/host/bcm2835.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index e00208535bd1..364e91049376 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -146,6 +146,8 @@
- /* CQHCI vendor specific registers */
- #define CQHCI_VENDOR_CFG1	0xA00
- #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
-+#define CQE_V5_VENDOR_CFG	0x900
-+#define CQHCI_VENDOR_CFG	0x100
- 
- struct sdhci_msm_offset {
- 	u32 core_hc_mode;
-@@ -290,6 +292,7 @@ struct sdhci_msm_host {
- 	u32 dll_config;
- 	u32 ddr_config;
- 	bool vqmmc_enabled;
-+	bool cqhci_offset_changed;
- };
- 
- static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-@@ -2249,11 +2252,20 @@ static int sdhci_msm_start_signal_voltage_switch(struct mmc_host *mmc,
- #define SDHCI_MSM_DUMP(f, x...) \
- 	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
- 
-+#define DRV_NAME "cqhci"
-+#define CQHCI_DUMP(f, x...) \
-+	pr_err("%s: " DRV_NAME ": " f, mmc_hostname(host->mmc), ## x)
-+
- static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-+	struct cqhci_host *cq_host;
-+	int offset = 0;
-+
-+	if (msm_host->cqhci_offset_changed)
-+		offset = CQE_V5_VENDOR_CFG;
- 
- 	SDHCI_MSM_DUMP("----------- VENDOR REGISTER DUMP -----------\n");
- 
-@@ -2273,6 +2285,8 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
- 		readl_relaxed(host->ioaddr +
- 			msm_offset->core_vendor_spec_func2),
- 		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec3));
-+	CQHCI_DUMP("Vendor cfg 0x%08x\n",
-+		readl_relaxed(cq_host->mmio + CQHCI_VENDOR_CFG + offset));
+Changes in V6:
+- split out of series because there is no dependency
+- remove unnecessary complete check
+
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index 7847f0c8b465..e5f151d092cd 100644
+=2D-- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -1343,6 +1343,25 @@ static int bcm2835_add_host(struct bcm2835_host *ho=
+st)
+ 	return 0;
  }
- 
- static const struct sdhci_msm_variant_ops mci_var_ops = {
-@@ -2584,6 +2598,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	if (core_major == 1 && core_minor >= 0x49)
- 		msm_host->updated_ddr_cfg = true;
- 
-+	/* For SDHC v5.0.0 onwards, ICE 3.0 specific registers are added
-+	 * in CQ register space, due to which few CQ registers are
-+	 * shifted. Set cqhci_offset_changed boolean to use updated address.
-+	 */
-+	if (core_major == 1 && core_minor >= 0x6B)
-+		msm_host->cqhci_offset_changed = true;
+
++static int bcm2835_suspend(struct device *dev)
++{
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
 +
++	clk_disable_unprepare(host->clk);
 +
- 	if (core_major == 1 && core_minor >= 0x71)
- 		msm_host->uses_tassadar_dll = true;
- 
--- 
-2.17.1
++	return 0;
++}
++
++static int bcm2835_resume(struct device *dev)
++{
++	struct bcm2835_host *host =3D dev_get_drvdata(dev);
++
++	return clk_prepare_enable(host->clk);
++}
++
++static DEFINE_SIMPLE_DEV_PM_OPS(bcm2835_pm_ops, bcm2835_suspend,
++				bcm2835_resume);
++
+ static int bcm2835_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev =3D &pdev->dev;
+@@ -1471,6 +1490,7 @@ static struct platform_driver bcm2835_driver =3D {
+ 		.name		=3D "sdhost-bcm2835",
+ 		.probe_type	=3D PROBE_PREFER_ASYNCHRONOUS,
+ 		.of_match_table	=3D bcm2835_match,
++		.pm =3D pm_ptr(&bcm2835_pm_ops),
+ 	},
+ };
+ module_platform_driver(bcm2835_driver);
+=2D-
+2.34.1
 
