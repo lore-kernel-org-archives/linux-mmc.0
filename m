@@ -1,115 +1,106 @@
-Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E23AE1FECDE
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:23:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AB5DE204F8D
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:23:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733153035; cv=none; b=Og0D+6cCnr83OSSFanA9ffn/V2Bh09jRgPXPyN3dCNpCTBTLsbeMS2EmFysSxxfOU/5l3PhFKSO31TaAyxLq7y2JZp2ZAoBDt76Vrvq24W8lmew8P7DdxjQyPqOkdbFqxGv0hIsREOqIB464/lZ4+fe8eIHmAT4U2dYPMPoytfg=
+	t=1733153039; cv=none; b=FZ15Yk5UsD7p98HheYfHE9Scix44oI0p75AInV0LsmKm+5V/8wWmZu04t8y3yMs6mMAetxBOd3mJORRFIZy+JdSR0c2OHgO8tbkc+foAJZZQ6mk0TmWy/F6SaXTybGK1RJXSs8HjrD10ng1B2+n2ZJPp6o15hOjXJh4Fsq0pkuY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733153035; c=relaxed/simple;
-	bh=x4Tp7Ji5tTFtDm+VDKryOJJHH8dzP3hI9Qi+1CIG/hQ=;
+	s=arc-20240116; t=1733153039; c=relaxed/simple;
+	bh=6CC15jbxUDlJ9BurmHxAUR/muMmumb2p41Z0I6IvNpI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EBLS/ZZ6K2aC525IexG5161YhRJMaDxpKIoga516WOmhcY9znSlbp//gI49XTLd/Mm7eWufYBcbwLexeesxNKyK29tzp+XOrGI4KCghzuMfN5H57IRtD0Ice2wvxPrxwHy+vr9JGG8Tminx1PX5pEkmn1giqbi/0gbJBDZasAr8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=m9lbSeiv; arc=none smtp.client-ip=209.85.219.179
+	 To:Cc:Content-Type; b=HZ7ZGbXYUjsxKoXHDjJcKv2Hp21Yh8LyeQI41wt29JYbdJ4o9pWYw1ITqBpYcikNE54hqBu4qENPTrsUOftnJ/+pSCG6S+BPNqh8BLzvqO3BHt4NhUjno9BPL47sJp1wY0Ul8jWosm9+qaQfblhyO+dKj8Dn/OLSfen7ZUaZ7Pk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ARa3G55m; arc=none smtp.client-ip=209.85.219.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m9lbSeiv"
-Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-e398dc7864dso2545873276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:23:53 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ARa3G55m"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e399f8bb391so1470651276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:23:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733153033; x=1733757833; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=RFVdR4UZ/YOC85vUoT5PrPJ4wSmatK+AFc9PyWFNvm0=;
-        b=m9lbSeivgwpx6yucNbV3fxczC4i6GKdJ/BYpgTN1Q5lJQ6CmHtdxUCh1Q5i4Ugwen2
-         Po0V+JTplzLU2ebey8Qm3DTDqFBJZQS5k60DCJOlpoLr/sNncDiToV5+bZuL8j2t3Qle
-         4q/pNBHKqk5AEZPwNy96n2m7ql9zGK1n0Ma+ewlnNy3ZcdJDJxdLNGr5cOODTp/Ef6rL
-         YTlgQ2wgGg6Xcl9CTSdA4CNvs0HKrFpiXkKNA/mAzI/8ZaLN09Ftjq0896Mp/mdVgKBv
-         pYqp+AH8FcTwu7lJ/rNfi2SeF/h3eK9gO+1odlHZIas1HAVdJL/cBFZ/h2HFXZu7jKCA
-         S/dQ==
+        d=linaro.org; s=google; t=1733153037; x=1733757837; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=oG32m3QcvgKOONQzZS2q59D3/5WzjOGf+ILtQyx9xHM=;
+        b=ARa3G55mkgUG2shyKe2o2t3hqlgzSpLy5zPhGofEcbMgx2TVgZHHI7TlCnxTYrtyo+
+         b8mZqJJepjlla+PETl2X65kYRCgV8l2BTBp0U61LSC4d+F9+zN5Qjn35i2LTKcRn3e/h
+         4LpdTpiwHarvWTgFlKVBe+yCB1Y1yLitOrqb9d5iUmpVxkreu81CB8i/YMOq25HbDPLk
+         JEQsKln2NINOIKoFEn+uBn51qeidiTmnSznqljrKFVEQJKEAbNt8PMtrzIlY7XzyCzwn
+         E0DLCT48rLfKCWeLM04DckrgnxKaDsfOh/t7cxp+0Zm2CPSwDc1NO0br21zjYS0eWrZY
+         e0IA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733153033; x=1733757833;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=RFVdR4UZ/YOC85vUoT5PrPJ4wSmatK+AFc9PyWFNvm0=;
-        b=vdtPBmhyF+VATKTCnbSDRWmmD/I2jWOr/sgF0f2Dri9rlmEW9ysq9ZiEOuzM3ddJVl
-         +9JlpywhFf3cTXy7iNdE5qZoTPQhqgkTwykUQo/Tf1JRO/S6sIiTC6js6YhOs6joffvX
-         RDUjHZpLknsAPuHak/o0+/U6tPy2Ju87JzPJ4aqJ+IM/Fq655WQ3Xq/9t4LxlS5ojxKT
-         Q4IX/Pgq1RzXy0PKZ3yJHlFDN6WTdtSg48y8jEEd+oPVBL4Fwu1K4k1zczWEXK/A28tZ
-         Ky5gfhK1oayx6iH/Y/2JysTnO+21Z6ZRFlYlrTDN00Lpm+QG7HXF6SA/Ow2VSpLdGwmk
-         3p6w==
-X-Forwarded-Encrypted: i=1; AJvYcCW6Ys34imI5CpKWe/PxLM8BP8mDFE3saGpWzzEIUvrxcRoDiis4bOc38ZhGnlHzCTf3HvK/1/ZvWM0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzUJQEcDaTyhGywsWUTGVJmYt81VYUryB8eVJ2RjIxcuYlr7yDF
-	XOMjMBgxxfu/A5sHePEFiHMjI6d4kb8MqFtCqIFu3uNhzs5L9T4d5yyKUJ95nZTs/f3lqzneVs6
-	LelTE6w9J/qLt+//7BS0N65xH47FHaYe9ucTUgQ==
-X-Gm-Gg: ASbGncvn6j+IxdMEAT9llojD3hhBVFXm6HEixdEHm09AbaEsoFoMb4GijKHCApw1xfa
-	QRfa7GvQBlVh7t/9+zc0jRijBmlYFylpO
-X-Google-Smtp-Source: AGHT+IF8HcEhaGeG2oqxVopeez9Li3zfibcXSVN0OW0uxE+KbdEUAIh+uLlgcKcOPw0eaKI+msrsmL/CnlhvivMzcCI=
-X-Received: by 2002:a05:6902:2b86:b0:e38:91e2:5173 with SMTP id
- 3f1490d57ef6-e395b87336amr19485704276.8.1733153032680; Mon, 02 Dec 2024
- 07:23:52 -0800 (PST)
+        d=1e100.net; s=20230601; t=1733153037; x=1733757837;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=oG32m3QcvgKOONQzZS2q59D3/5WzjOGf+ILtQyx9xHM=;
+        b=OcvKfX5rwRaCvYcMN2ZU4AMgN+s4gkV291hc9+E486x+15xjEOQh6wHrLptj7M6qL3
+         bZlVBVOQVgVCjWF78HNsmFRSyI/l+ewEjSx8j0mySpYlbtr8dEOOb63jNcn2RB4Hkpw+
+         E2OiZT35+5CjkbiKzk/YefLw4Pn3kUJwUZ+X4j1dkfFJXq5HHvovNEpHueK9uh1goTPp
+         5/hXAnq4fJKC+8m7u1BlritZLb48CbAmnYQ70DpJzu17upanTJ6ZFPW9ZRPJq2xgB2R3
+         EHjotwV2jXuHxnm/ACdqwVCni+Yz9dqXYf6yIni6xwXTgwNBvc0qveAM7fJiO1BxPXls
+         aVLQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXqnLxM9w/mGTKTIB/A893cnvJjH7RHN7OmlGgY3+0NxI3KUL+Yma3nh6y0/oOmwmHn02o/wsc0hV8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzpk3+V/9uLfIcgreFzyigINuNgCcYVVDOINQc4LKXvp5dszA3y
+	C6apCykPqOlmuRszlRpTi2Su0C3am69U4TGRlmTB4wKEY+UPWvkhqoP67vJO6Axr28P4b3C47bs
+	HZa02n0A4x4Xa14El/n+VLe0hQcB0kZCKjKy2gQyjGhFGIYSr
+X-Gm-Gg: ASbGncszvRNPC9flmgwGU+GLct9PjgjT4r4vkL1pM1do5qNEUHyxIe0n+MTjH49xt+y
+	EYi3+7G6x7QWflTBET+M6tK/RHD1fdgWh
+X-Google-Smtp-Source: AGHT+IFQBDwWAOqdm0DGv13abYWV94NvjZx0NJ/YgMvqSE6QXGn8i8KFJNAFWT/Bxo1k6U4xwUpR7PjVN/gwuOd9+/Q=
+X-Received: by 2002:a05:6902:2e0d:b0:e39:453c:b081 with SMTP id
+ 3f1490d57ef6-e395b9360e8mr19394616276.41.1733153036741; Mon, 02 Dec 2024
+ 07:23:56 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241118210049.311079-1-hdegoede@redhat.com> <CAPDyKFov29aLGq4vmTZB45mfkLEAAsC_NMCv2u858K9XPdCPkg@mail.gmail.com>
- <29949ef6-9c55-48a3-a96e-67cb78b96766@redhat.com>
-In-Reply-To: <29949ef6-9c55-48a3-a96e-67cb78b96766@redhat.com>
+References: <1732268242-72799-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <1732268242-72799-1-git-send-email-shawn.lin@rock-chips.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 16:23:16 +0100
-Message-ID: <CAPDyKFowzQGh1Z3RoWVFVjxQtf_s+tjo1X0hQ9KDb+KLCSt8wA@mail.gmail.com>
-Subject: Re: [PATCH v4] mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on
- Vexia Edu Atla 10 tablet
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Date: Mon, 2 Dec 2024 16:23:21 +0100
+Message-ID: <CAPDyKFpyxxpCaNcJuTJ9MnnHU1VXDz3hsCoP4=5nkzdVVFCqsg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: sdio: Respect quirk_max_rate for non-UHS mode
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: YiFeng Zhao <zyf@rock-chips.com>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, 20 Nov 2024 at 14:16, Hans de Goede <hdegoede@redhat.com> wrote:
+On Fri, 22 Nov 2024 at 10:37, Shawn Lin <shawn.lin@rock-chips.com> wrote:
 >
-> Hi Ulf,
+> The same limitation was done in UHS mode, so fix it in
+> non-UHS mode.
 >
-> On 20-Nov-24 1:56 PM, Ulf Hansson wrote:
-> > On Mon, 18 Nov 2024 at 22:01, Hans de Goede <hdegoede@redhat.com> wrote=
-:
-> >>
-> >> The Vexia Edu Atla 10 tablet distributed to schools in the Spanish
-> >> Andaluc=C3=ADa region has no ACPI fwnode associated with the SDHCI con=
-troller
-> >> for its microsd-slot and thus has no ACPI GPIO resource info.
-> >>
-> >> This causes the following error to be logged and the slot to not work:
-> >> [   10.572113] sdhci-pci 0000:00:12.0: failed to setup card detect gpi=
-o
-> >>
-> >> Add a DMI quirk table for providing gpiod_lookup_tables with manually
-> >> provided CD GPIO info and use this DMI table to provide the CD GPIO in=
-fo
-> >> on this tablet. This fixes the microsd-slot not working.
-> >>
-> >> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> >
-> > I assume we should tag this for stable kernels,
->
-> Yes please.
->
-> > but can we find a fixes tag too?
->
-> This is really a hw / firmware bug not a kernel issue, so I cannot
-> really come up with a specific commit to point to as being fixed by
-> this.
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Okay!
+Applied for next, thanks!
 
-v4 applied for fixes and by adding a stable-tag, thanks!
-
-[...]
+I took the liberty of clarifying the commit message a bit, please let
+me know if my change doesn't make sense to you!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/core/sdio.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 4fb247f..b31ca2b 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -458,6 +458,8 @@ static unsigned mmc_sdio_get_max_clock(struct mmc_card *card)
+>         if (mmc_card_sd_combo(card))
+>                 max_dtr = min(max_dtr, mmc_sd_get_max_clock(card));
+>
+> +       max_dtr = min_not_zero(max_dtr, card->quirk_max_rate);
+> +
+>         return max_dtr;
+>  }
+>
+> --
+> 2.7.4
+>
