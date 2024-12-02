@@ -1,111 +1,128 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA830209672
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E043E209F2B
+	for <linux-mmc@vger.kernel.org>; Mon,  2 Dec 2024 15:24:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733153049; cv=none; b=bDYex8N6y41pTScZBbwFWAduKgSqEsF6mU9isDuFiT8Dd0qJ2KP4SJU6WKrcg+Z9lsU3tfIaPz9TBipU+murR1508UUfLw92KKw8Ua+0oopvhGm/kqcF2gvSkhxUtb3ZYHTn+e2gtEzg0mY5YO6Sj81ftlthAbbYUztqXHULvfM=
+	t=1733153056; cv=none; b=Yu845XurF2KXgVdPX5dy4WbcjnsqhtyWeg5DWoheTDSn2qe8tFBs/h9qF1slJrx8sqW55vG/NQxdYPve/32YQr/t472fxlP98/Lwxdo6aDoxHQVdmPR8diZZxrKG8PpwQCdx/D92lUVMIsksGy5tJL6k44jyluR9DlqQ87UWBC4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733153049; c=relaxed/simple;
-	bh=+Xl8s91uz6z0166yhunqPMLThqhGtXNxm6DGP1hGyaY=;
+	s=arc-20240116; t=1733153056; c=relaxed/simple;
+	bh=GT/7Ze1ICZzO91X+fJzIIryCuvOoEcn09j4ZdKtLo6Q=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=kxOQ11jfRxdh4j+afitkYkW9ItOD/eMNOZr4v4QxXXbbwwk5AERJopoNgSj/el7t8N0501jHdMrDEvBdk/S5yFnlsagHxU+8WyzrVgSZp7L6vwsvAJ1uafbdGAticlR764Vg5YWYdkUDOCvn3rwpGpSqbFweY+nv4VPdj30xh4c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=k5Lk6NCL; arc=none smtp.client-ip=209.85.219.175
+	 To:Cc:Content-Type; b=laU6clr6Kb88UzEnuhUCY+LUcBneGZsL5aehywW5QrX71P8ouscsqVE3GgSXy9IUta+J8IUuZQgAKrLprOCDCJpV8fJpWVTkzNFM+vLs0vp0FemPT38qMzF8AhGw1EuuEWLHkrFheqzwQ5TnzC9KdEaYNSO4xRbifxYa/++AD0I=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=URPKnzxz; arc=none smtp.client-ip=209.85.219.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="k5Lk6NCL"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e3985aabf43so2630455276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:07 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="URPKnzxz"
+Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e396c98af22so3586937276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 07:24:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733153047; x=1733757847; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1733153053; x=1733757853; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=XMx9usLc+8H+1O3Ux5r/Qz56sk5GB2iRle+hBCjO6+0=;
-        b=k5Lk6NCL/Q9S2n2SD7XUQy3GgjWsjcXzD2V/+giR9rhAUrOGGCsMQ/r8/8dAPLYGsW
-         ulCSdELHI1aTBluKfiDycsvm82o8sgvRyGtiXYSAGP0/WxrT27xmDDDgbwE+M/CCvKEd
-         0uh4t60+ULG1Ks4uJ4LNZYFklbSa+BPzal9TSB/GfYKX+XXRNKkYMor2pa3wur1kOHlS
-         FwhQtAJpO5o9tSZUZtX+ynvGl4TSVftm5BgyNchSRDtjBsudY0vkHF6+9NmXWz9zclq8
-         x8WgYa44Bx7oS49t0Opu8E+xUy/9ma+sg7UrILv5kSFdznhmNNCq9kHIJbfa2juCgfhX
-         oyJw==
+        bh=m76+jzfpV1Gl7IDVGFQkptedm6l1QHBc35AI5nAO280=;
+        b=URPKnzxzvYoI9ybhzsWZwVzc3sQib1Kf/2TWh+EvBAJ2eCmxCfi+VGggKbP7QX0Pnl
+         gBRZHTUe2agFetZFdYg1ZGMd5Hb16QFGmRygKH6h8wwKu0UYplSpnJe8J3tv5I1jZRY5
+         PngGCeFtm2Geo3mzxVDjBX6RfXd5/hUG3bM/xasjIx1luQTEFVnQPEzlHMtCVCluNAN8
+         OSngWCxmilD0WR1V5Pu5kh9n4GoGV8hUCfPOU6cnnw5kCC0ysOyRUHiWp9VcM/p0IDEA
+         cJFgIr13ouQd6/afFwCBWzkjp51FlplKybl9TKJnG2xF+X5l77+2EaOS3FmS2XT5k/Dx
+         PCcA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733153047; x=1733757847;
+        d=1e100.net; s=20230601; t=1733153053; x=1733757853;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=XMx9usLc+8H+1O3Ux5r/Qz56sk5GB2iRle+hBCjO6+0=;
-        b=szAqxp5yp29QT6QJb9spuPWmrwQXOP7/ryoZPLmOa3vYCAOeaXwvhCCGAVQ6j/TYnk
-         PjvYyFTlvTG7eb/TCln4TANS78VPTY7k7mEW5Qfa76jyP6SKyyAq69wjEwiGnatyrcDA
-         jLCSSu6tBbND1JyoKumV81OsanRDYMIKK6JlTWBWO6hkilMxb8ha9fwh1T+jZ2tQrZUK
-         BZUm3NnJz5DHlwr1DB1WlqVKW++5VZuHJuo/tkyErZUEIuxPah7LQCFHc4JIE6S0TrRG
-         e/eUL01EB3hx663e61etnHGoHykdPblPza6HKTwTHNXqLyql2bTtn2J1iUhU2eoB5duQ
-         PhhQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXFKHW+KSzGOkE36NkQT3YY/r4YjYc20ubK7oVC8S3LshvqKVyT0f1pBVJ4/rhg4Urv+ed/6Matynk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxcTpniw3ap+5BQG4a4yUxaN6zb1yEqLvRpp5vuSslQ9fAT5OT5
-	LL6iqo7kwlbo1CLlLV1ANdRgvOlLj4MJrqMJlzGMcDbBXuXD/skEMcmgTDZQKBLeVQQrNy6NNts
-	P15TzcjPWrR0gv2Y9CPYX1oyuJt9HrOzzsRquJw==
-X-Gm-Gg: ASbGncvIGBXjbSnZvCurzBj5NUDXLJNVg5q+E0zCa5pgiLvyeVYy0ZfyfXOEnPbYsuy
-	p/BhF0r4AVWz/j1AIxaDLaoJ05+g4WCN+
-X-Google-Smtp-Source: AGHT+IEGJdd9IwF7sSUzoqqAWgtWCRY1a0UMhBwb88ErQOHU8BaxnCWHnPMW9+ru+41yFpFYGuJqHhtoLonEK76JtT0=
-X-Received: by 2002:a05:6902:1895:b0:e30:c614:5c3a with SMTP id
- 3f1490d57ef6-e395b869b78mr21357729276.3.1733153046692; Mon, 02 Dec 2024
- 07:24:06 -0800 (PST)
+        bh=m76+jzfpV1Gl7IDVGFQkptedm6l1QHBc35AI5nAO280=;
+        b=QmmrUu6dfWdjCYthDKKLOxN7wjp2l8cHtO5TdL7LxLwPf5lV41edHyreDqEk50aVYk
+         UWP+/J08JmPI4W1gU3Fvi3czdjwD3PwfdHIdTbMUqSRz3r7DUdGIvMslIdMxFXgMhWjw
+         n1vQ8Zr7lwK3gyftGJj70aU54Gn5TI4fXPctH/tzK0hAUUSU+aEO/rZAD/cQNx199JXd
+         9zZZLmvBgQJ2tJvxhjf0XmhrA91PZ8Ay2pRM507Twi/RnLSHwpqndSJ2K6cUsBF0uMhA
+         2y838l81himB0XW+4X2cWXRT0H63BECPaWrtMpGBVOrzPsoKiG303eZyCRuBginqCq8J
+         tWCQ==
+X-Gm-Message-State: AOJu0YzC5TPcvVxHTSQ1RiVS5UM1dXSUL81MIMT6KDPOShSXRsmG/cLY
+	1Qe57OY4V69+YJSnOMb+I8uLbTx5czBwYlzbLVar0saqIec16/DbZS/w6P83DZ3oiRiQXovRoT+
+	PjHhly3hhEqG47PGZVc3s/X0I7MdoA0UAqxojRMhbbFOHJPR+
+X-Gm-Gg: ASbGnctrjgTTcvIBAjkKItZDnaFVncH+SK/fzve80I4lwB6T5cOeBeBfh940C/QLD/J
+	iOsnYxcQQ1mkMGfzWq0KfcnFlHe+4IK67
+X-Google-Smtp-Source: AGHT+IHH7hIx+e8n6avEfQWiti54KkaNN3HlOI/MmlmrT0lxi9lBcIhv+cnoSDvpFTNHzd+CyUH6RHneSifHab2NRNc=
+X-Received: by 2002:a05:6902:1895:b0:e33:20c2:223f with SMTP id
+ 3f1490d57ef6-e395b869e50mr21994700276.10.1733153052749; Mon, 02 Dec 2024
+ 07:24:12 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1732030972.git.Ryan.Wanner@microchip.com> <e9e9e4cf0753422706bdc44fe7d20ca3a686ce7a.1732030972.git.Ryan.Wanner@microchip.com>
-In-Reply-To: <e9e9e4cf0753422706bdc44fe7d20ca3a686ce7a.1732030972.git.Ryan.Wanner@microchip.com>
+References: <20241125122446.18684-1-ulf.hansson@linaro.org>
+In-Reply-To: <20241125122446.18684-1-ulf.hansson@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 2 Dec 2024 16:23:30 +0100
-Message-ID: <CAPDyKFpN-2kowdi_eCtbW1WEdc5OKh7tj60GfbPPBR0Hbpyj5Q@mail.gmail.com>
-Subject: Re: [PATCH 04/15] dt-bindings: mmc: atmel,sama5d2-sdhci: add microchip,sama7d65-sdhci
-To: Ryan.Wanner@microchip.com
-Cc: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
-	nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com, 
-	claudiu.beznea@tuxon.dev, mturquette@baylibre.com, sboyd@kernel.org, 
-	arnd@arndb.de, dharma.b@microchip.com, mihai.sain@microchip.com, 
-	romain.sioen@microchip.com, varshini.rajendran@microchip.com, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+Date: Mon, 2 Dec 2024 16:23:36 +0100
+Message-ID: <CAPDyKFqQaPs1oQ9zgvOSBGLnP=tNe0UdX4B=EPELdY2jFjGRuQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Further prevent card detect during shutdown
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Anthony Pighin <anthony.pighin@nokia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, 
+	stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 19 Nov 2024 at 17:42, <Ryan.Wanner@microchip.com> wrote:
+On Mon, 25 Nov 2024 at 13:24, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> From: Dharma Balasubiramani <dharma.b@microchip.com>
+> Disabling card detect from the host's ->shutdown_pre() callback turned out
+> to not be the complete solution. More precisely, beyond the point when the
+> mmc_bus->shutdown() has been called, to gracefully power off the card, we
+> need to prevent card detect. Otherwise the mmc_rescan work may poll for the
+> card with a CMD13, to see if it's still alive, which then will fail and
+> hang as the card has already been powered off.
 >
-> Add mmc binding documentation for SAMA7D65.
+> To fix this problem, let's disable mmc_rescan prior to power off the card
+> during shutdown.
 >
-> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+> Reported-by: Anthony Pighin <anthony.pighin@nokia.com>
+> Fixes: 66c915d09b94 ("mmc: core: Disable card detect during shutdown")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Applied for next, thanks!
+Applied for fixes and by adding a Closes tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/core/bus.c  | 2 ++
+>  drivers/mmc/core/core.c | 3 +++
+>  2 files changed, 5 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-> index 8c8ade88e8fe..ba75623b7778 100644
-> --- a/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/atmel,sama5d2-sdhci.yaml
-> @@ -22,6 +22,7 @@ properties:
->        - items:
->            - enum:
->                - microchip,sam9x7-sdhci
-> +              - microchip,sama7d65-sdhci
->                - microchip,sama7g5-sdhci
->            - const: microchip,sam9x60-sdhci
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 9283b28bc69f..1cf64e0952fb 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -149,6 +149,8 @@ static void mmc_bus_shutdown(struct device *dev)
+>         if (dev->driver && drv->shutdown)
+>                 drv->shutdown(card);
 >
+> +       __mmc_stop_host(host);
+> +
+>         if (host->bus_ops->shutdown) {
+>                 ret = host->bus_ops->shutdown(host);
+>                 if (ret)
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index a499f3c59de5..d996d39c0d6f 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2335,6 +2335,9 @@ void mmc_start_host(struct mmc_host *host)
+>
+>  void __mmc_stop_host(struct mmc_host *host)
+>  {
+> +       if (host->rescan_disable)
+> +               return;
+> +
+>         if (host->slot.cd_irq >= 0) {
+>                 mmc_gpio_set_cd_wake(host, false);
+>                 disable_irq(host->slot.cd_irq);
 > --
 > 2.43.0
->
 >
