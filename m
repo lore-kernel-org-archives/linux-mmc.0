@@ -1,137 +1,108 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A2E5381C4;
-	Mon,  2 Dec 2024 18:51:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.20
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3E2E517555
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Dec 2024 02:34:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733165518; cv=none; b=JzSjEjGJCFY/s2hdt6GhnevIRuPNJYjl0kdu8KXOOm8X8FRi+kRP/SUr+eUqhU14WMHGRhnYmf7qZXFeDrazFoxZ5dtwDKvD9r5TNtlIEQvSNLftkpMKgQrue2gAXgBRuzJQHXpaUIQj834dzY+eCt9Mw48JRn4LJiLJ1N64DwI=
+	t=1733193292; cv=none; b=Z8XA6YYY3I1YRa8og3DxnSx7Y2LnV6MLrpHkD9uEuyySiDRvbmEJ/CJmFx15lchDreFh59gXtqx0cnNwlv056WXtuDVdxMHYsd6enh1XOe7JnHh9FV4fpSrzMd/NHkKy0vwfrz3z68l6kbxAcbJSOS6uyX0LJdmY1mVkJs5IIZ0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733165518; c=relaxed/simple;
-	bh=n24wWnsvKSEhSnkWZ3SQ2qlUtbn8L5c/kgAuqA70Ock=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=JJnmFvyG5z2cC92y41TI/IEYhO7ed98rizWTvttbN/uVbAPMTDh70nPJQ6YS25+0PATgPHLd/Njr48NisIbFYAkpkFfGKmT3dixnjlAFCp3o59WgV0DuYz9FQDlJ/QnJAsYTYqPnq2f8NI16+dNKoGNf4xojYWKi5aWwA6JKwAI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=d1+850v/; arc=none smtp.client-ip=212.227.17.20
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
+	s=arc-20240116; t=1733193292; c=relaxed/simple;
+	bh=KBno4d8Ri+5bkwhp+O4ZEaiQGH972Po1Uth8RjIikC0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Ekr6gyqP3pSnnbzY/2pJ9TuCrXVAjqyA7ol7eL5bUBi7yot72AermbhwbmdjfzzRTJG85LnlwsNS1kdTZiTHsAwBLS7oEuE9Ev/h+pHyK0RjDP7+h+cQW89k5nn2bnt5gCflyFtppNyMvJ8v62Uuk7QQgnUan9oXOqF7wyOZs6U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=pf.is.s.u-tokyo.ac.jp; spf=none smtp.mailfrom=pf.is.s.u-tokyo.ac.jp; dkim=pass (2048-bit key) header.d=pf-is-s-u-tokyo-ac-jp.20230601.gappssmtp.com header.i=@pf-is-s-u-tokyo-ac-jp.20230601.gappssmtp.com header.b=MNZ/399d; arc=none smtp.client-ip=209.85.210.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=none dis=none) header.from=pf.is.s.u-tokyo.ac.jp
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=pf.is.s.u-tokyo.ac.jp
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="d1+850v/"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1733165494; x=1733770294; i=wahrenst@gmx.net;
-	bh=ZgB/0b4DRUYfPuTkx30gmOcph3LtRPAAxoRoTJ+aweo=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:Cc:
-	 References:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=d1+850v/UjxK7V8+HZxecukwNyaInPHNRcoDefqRUjy9+ZdpDd+sAKJ92HDeKkaH
-	 Ydlrz0Pa+y4aS2BwCL8BqHlrXJYHIbmDPDYzo9Jp2e5nDHCMro8kSopd/zvBw/xoP
-	 GAhEdQvcO9aAhpaG3HXuJzo68/jfkNzxsZxFOnzMD/2EuBF1xBQUYxmxvB8uYyrvO
-	 8pzhVWqLwm1TV8HzWSxUNiqoBRb0Mzg+rghtO1XrT0kMOCEmdgN4Tx7H4vo45EOPo
-	 FP2RDPJP1UpwOUAsga8//6/14iZT5hLLeyP30ifrRuvDWwl6koEdW5QEAqyh/TpFf
-	 +cIGeF5yaBkQPbZXew==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.1.105] ([37.4.251.153]) by mail.gmx.net (mrgmx105
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MYeMt-1tDdDR35xj-00WWt9; Mon, 02
- Dec 2024 19:51:34 +0100
-Message-ID: <d418a30d-f0b0-49c5-8f2a-ddda9a7eeb07@gmx.net>
-Date: Mon, 2 Dec 2024 19:51:28 +0100
+	dkim=pass (2048-bit key) header.d=pf-is-s-u-tokyo-ac-jp.20230601.gappssmtp.com header.i=@pf-is-s-u-tokyo-ac-jp.20230601.gappssmtp.com header.b="MNZ/399d"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-7251731d2b9so4300696b3a.1
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Dec 2024 18:34:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pf-is-s-u-tokyo-ac-jp.20230601.gappssmtp.com; s=20230601; t=1733193289; x=1733798089; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=EnDwsulVaqZ2+plQwC8BxEf/6u08wgORMIoqPSHcn30=;
+        b=MNZ/399dv6K3x2W+rRHFv/lqlA7r8CZjA3gTW4Q+Kj8fzTvGWQFCa36ZSfqvjX7tWh
+         qRCTGyFfqQzGsBBIQR8XpE1xPm+Sq3oDLWxcUfP4cZjoMsUPVHkSf4/KR1aDb5G03w5E
+         d767LgeIh+J2eJyxv6KTEsYx6XsFxtj5/sDVGOI0HdtDvZBVdXs+J+CK7bgCutlOPluh
+         nAnSG2U86KioZDbVJMHNvuXbzdPYR9FkK5CxLKss1iQ9ZnzEIR7uRJK18r600CuOMDrE
+         1R8UawYXTI/t9X50xDNC95P9CpitjqdzxMj1kcIcAM+bcrQty+1FntX0Zh86nnjj8UUK
+         Mz5Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733193289; x=1733798089;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=EnDwsulVaqZ2+plQwC8BxEf/6u08wgORMIoqPSHcn30=;
+        b=ttN0xIR6e44wcmJHRcbjtDajb0J2MiU2AjJ9HckDthz5awqj55xrgVbODZgsruKXwl
+         vNRzGGffiT2yrB07bg/H4D43ARQpQjYCdtWCIZ/S85e836vY+aFjApafHSgrFL6l9g3E
+         1ECBscW/nrVnjUiZnoKjRN0YlwH7iG+thB5unH98pjH627c5mI1zpMDKsYc6DlQ2Tdy9
+         4AawslkKqemtWarUQuwZYn16L6p5ozpFbP/KqPXUjkrfMIdS/pXmfHmXvndB1b7OAidc
+         sqec4avH3QzR0qNZx+AjJ7la5lNi9apOJsEVeYnyyOwdfYDbTpEMhSC4XDrIAfM5Zmsk
+         Ss8w==
+X-Gm-Message-State: AOJu0YyP+vuvyVkfbosp0Z5kj6wuN0aXEaMlhKyuvviz9kWDz2r91Bt3
+	5EHCfXh/wzlPkIFcL1+fWCa7weAa2Ti51p9PZgd/zbkPfJtjN/C7W0K1sV1V62VtHpPKLzZIQfY
+	6yJQ=
+X-Gm-Gg: ASbGnculdp4qrXHJs4Xj9A5rBnibgTbQJkJtP+BKk7NyNX1WgXKaN4v66J2Aj2xia5A
+	0U15fw2/kaxGfNsBzuQ1k8upOlWGCAcIVZLlgDnCnoZXCZHHQoj0Tq3AXZ7QePHPE++92x3/eIt
+	LkKkDtfX0z+zcCDLHzHnWAtWQUNciOWGC3S6Cqb2D7fpaE1Nm+Tx4MBxtXKliQVn7zzF377bxA3
+	10W8fjIJvPopY6sHLBQeb7ZJh2D8/djRdu2Yuf/OCnGFGhgWF/uGmDWIYisPpxltPda5VbD
+X-Google-Smtp-Source: AGHT+IH0HNujKfslbwrocINWD/369RBD2eagU2fRKGDXsab0sv89K4a8AuKKpwpSvNia79ScwPzlXA==
+X-Received: by 2002:a17:902:f610:b0:215:bd3e:613b with SMTP id d9443c01a7336-215bd3e62bfmr13633125ad.27.1733193289402;
+        Mon, 02 Dec 2024 18:34:49 -0800 (PST)
+Received: from localhost.localdomain ([2001:f70:39c0:3a00:f2b3:fe35:a658:80a])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-2157432818bsm38369785ad.154.2024.12.02.18.34.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 02 Dec 2024 18:34:48 -0800 (PST)
+From: Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp>
+To: chaotian.jing@mediatek.com,
+	ulf.hansson@linaro.org,
+	matthias.bgg@gmail.com,
+	angelogioacchino.delregno@collabora.com
+Cc: linux-mmc@vger.kernel.org,
+	Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp>
+Subject: [PATCH v2] mmc: mtk-sd: disable wakeup in .remove() and in the error path of .probe()
+Date: Tue,  3 Dec 2024 11:34:42 +0900
+Message-Id: <20241203023442.2434018-1-joe@pf.is.s.u-tokyo.ac.jp>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V5 2/9] dmaengine: bcm2835-dma: add suspend/resume pm
- support
-To: Vinod Koul <vkoul@kernel.org>
-Cc: Russell King <linux@armlinux.org.uk>,
- Florian Fainelli <florian.fainelli@broadcom.com>, Ray Jui
- <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Minas Harutyunyan
- <hminas@synopsys.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Lukas Wunner <lukas@wunner.de>, Peter Robinson <pbrobinson@gmail.com>,
- "Ivan T . Ivanov" <iivanov@suse.de>, linux-arm-kernel@lists.infradead.org,
- kernel-list@raspberrypi.com, bcm-kernel-feedback-list@broadcom.com,
- dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-usb@vger.kernel.org
-References: <20241025103621.4780-1-wahrenst@gmx.net>
- <20241025103621.4780-3-wahrenst@gmx.net> <Z03l308ur7xuE1SB@vaman>
-Content-Language: en-US
-From: Stefan Wahren <wahrenst@gmx.net>
-In-Reply-To: <Z03l308ur7xuE1SB@vaman>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:JFDPQWC/iWpVzlUOkBhNid0hdinoSmvzk39ECSz5KjcFNJzYYLQ
- bBJMN8vYMo8K65/OG7nxKZi2ufJFsPLlUks4fTHwBgeG5A6u58gKNWajQ3rbJDbo69Q86rS
- RtZNPwoSGajeAVR+DOZiOCxm/H1bdwtbTF6N9RzFTSM5ECdql2Jx3a1XcD0+mDFkL8hSQvM
- A7RwEWwiFuPMe2lQdAq/g==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:HAeP/ZkyvB4=;PI/pDBlpVI/bM72GS5GvEQE1UE8
- SKq+3RgesVtT2pv+9/2xfw+yP78CjWdpPe5yI9KVb7dkz4sIfpfmCOTWLNzTAS9F/qVhzn6xW
- HrqPuHyJVT/YEmcKwoANZMOOYoPmPpy9EtA4WpZU1Q0H5mCjWiM64ss1dM18TpohYmEA9shsX
- oPWAC9l0ksfyx5wQgXdG+815rPT11ve4dPBjIAJLH9xoKdVZ70OKTfMKxyc0zh09tP7MqdHCh
- 8dAUwyzYVPKpcuyqoCTHlbVgs/2UPsNTS7pPOD+0DrL0dHC5o1xQbV7BYIhLLtoNTXkdIAPZl
- Joe0hw2nk1rUyWb5Uki0nJrNjVoNn2bUOVFd+wV1E2EbzRNOFBO6qMWIA5zxcywFv1zssKDBU
- 8FJaldSzveeB8JY5hI3u3buV57t0sGzaHNzpiTY2fHqVStBzVrQ8eWgJtW9LmHM7IwyYyAfeo
- cr5FJ2bDtt9mIRn92X//m1rcSuoO9749wbPCi9+U389Z2/ZztyyfI0TsrfJfNuIjBzn/NtGj4
- XvOEAxzRSBFqJc1TR1PRrBjaCF3mYwMhy6groxUWSHKsrPaJ4a9ftYYWh5+VgVFRLlj7f8MAQ
- Sg92jkCl3N9fpW1yitEOfgNey/NGxTw7YFFU1iPAijVR9jgbVZJ3+nucM/U0Iu7GVmO0a1xzQ
- kpm/0eoFWNc1SX7hSSfiqCgbPDBrPxk7QS2DrsqKYhUNQlfVD//cWEj/PeWhP1NwEibciYC0+
- Jw19uT9aM412Gl/k5JtTl5GkBkqj7W7+4+nhL+vhfXp0MEMn/gzx0ckpQTQ561LJtnZnWidg/
- SA0LsUg1H2BFAR2V7lWDFe2kdTLQKisTyHn+70lAQ3rt8bRjL8W1nzL1Xe4Upw9Ad9KPSqB7U
- LHp7odcaeJqLLSATuOWSucCg4iJGFppwihygh8f0lcb37uGQ1OSrgNw/tBnD1ZIZc540i3IEF
- rrrxqKfio4YpH+u3rPfrMDnJblgubSmKTkaXGnJ2dofZOFlNklo5QHGBicf5N7oInPK/A1hVK
- xjD3Nz10ndbDDBdtiIB8jbdIP+34RC+c7C3NFE0F/5m61+PGIt8pfZb3KJAir9y7ekYerfQUa
- 9wwDlmugDl457aIlAYHr3UmCetY4z8
+Content-Transfer-Encoding: 8bit
 
-Hi Vinod,
+Current implementation leaves pdev->dev as a wakeup source. Add a
+device_init_wakeup(&pdev->dev, false) call in the .remove() function and
+in the error path of the .probe() function.
 
-Am 02.12.24 um 17:52 schrieb Vinod Koul:
-> On 25-10-24, 12:36, Stefan Wahren wrote:
->> bcm2835-dma provides the service to others, so it should
->> suspend late and resume early.
->>
->> Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
->> ---
->>   drivers/dma/bcm2835-dma.c | 30 ++++++++++++++++++++++++++++++
->>   1 file changed, 30 insertions(+)
->>
->> diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
->> index e1b92b4d7b05..647dda9f3376 100644
->> --- a/drivers/dma/bcm2835-dma.c
->> +++ b/drivers/dma/bcm2835-dma.c
->> @@ -875,6 +875,35 @@ static struct dma_chan *bcm2835_dma_xlate(struct o=
-f_phandle_args *spec,
->>   	return chan;
->>   }
->>
->> +static int bcm2835_dma_suspend_late(struct device *dev)
->> +{
->> +	struct bcm2835_dmadev *od =3D dev_get_drvdata(dev);
->> +	struct bcm2835_chan *c, *next;
->> +
->> +	list_for_each_entry_safe(c, next, &od->ddev.channels,
->> +				 vc.chan.device_node) {
->> +		void __iomem *chan_base =3D c->chan_base;
->> +
->> +		if (readl(chan_base + BCM2835_DMA_ADDR)) {
->> +			dev_warn(dev, "Suspend is prevented by chan %d\n",
->> +				 c->ch);
->> +			return -EBUSY;
->> +		}
-> Can you help understand how this helps by logging... we are not adding
-> anything except checking this and resume is NOP as well!
-My intention of this patch is just to make sure, that no DMA transfer is
-in progress during late_suspend. So i followed the implementation of
-fsldma.c
+Signed-off-by: Joe Hattori <joe@pf.is.s.u-tokyo.ac.jp>
+Fixes: 527f36f5efa4 ("mmc: mediatek: add support for SDIO eint wakup IRQ")
+---
+ drivers/mmc/host/mtk-sd.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Additionally i added this warning mostly to know if this ever occurs.
-But i wasn't able to trigger.
-
-Should i drop the warning and make resume callback =3D NULL?
-
-Best regards
-
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index efb0d2d5716b..af445d3f8e2a 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -3070,6 +3070,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	msdc_gate_clock(host);
+ 	platform_set_drvdata(pdev, NULL);
+ release_mem:
++	device_init_wakeup(&pdev->dev, false);
+ 	if (host->dma.gpd)
+ 		dma_free_coherent(&pdev->dev,
+ 			2 * sizeof(struct mt_gpdma_desc),
+@@ -3103,6 +3104,7 @@ static void msdc_drv_remove(struct platform_device *pdev)
+ 			host->dma.gpd, host->dma.gpd_addr);
+ 	dma_free_coherent(&pdev->dev, MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+ 			  host->dma.bd, host->dma.bd_addr);
++	device_init_wakeup(&pdev->dev, false);
+ }
+ 
+ static void msdc_save_reg(struct msdc_host *host)
+-- 
+2.34.1
 
