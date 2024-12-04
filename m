@@ -1,121 +1,111 @@
-Received: from mail-oi1-f178.google.com (mail-oi1-f178.google.com [209.85.167.178])
+Received: from mail-ot1-f42.google.com (mail-ot1-f42.google.com [209.85.210.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C32A01F76CA
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Dec 2024 15:09:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5ACDD1A9B5D
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Dec 2024 09:29:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733238568; cv=none; b=g6u13pviBmXeCExo8XpLnq8iG+V4HZCWzkf4ItB1mRHj8CI6qjIsw6lmBR7Wkw/c9tpAjLBK614jYONXU/jsW9KDTNwfv4FpubMRniMB7A8ynueE8Aj4YRpyxm/kKMGv8Y7zfGp2eFietOXTUJ1PmUj0PF/H1BKciraH9b3GikM=
+	t=1733304543; cv=none; b=W5fb378uEqu307ra0AnycW6Bi5qmGSBzXwnvfkhXXM3zBf6UbY8mwWhph/6Pp5K+7m/LCmoBQiL9tOyTPELG90Qw5k+xWljBCq6J//kO4R3fvzXUFaKaY3ceKnTqp+gmFW5gZCljLBDOuBbqk6HckPDgz09vZFxFIuqpFsmUPds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733238568; c=relaxed/simple;
-	bh=ptJpUzd/BhAIeWpF97J96wy/fzTMEo/QGYZYJybeNNQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RDlo3N+2IT5r3Nrgc40tvb5lme+ry6sC1dqTSLGTCkJzmVfEdfWQ/w7GdhMkqC8laIw0mO/7UP3FG0MgNpUYOQObp8qFpaSZATuN8BFiKJ3tcQCVSB3MTfURRUX6mn9MEAs50Wn7cAja/q8NG8OkgIWtUM67yt7A94JrOHl6HKQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=LAia4PpJ; arc=none smtp.client-ip=209.85.167.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1733304543; c=relaxed/simple;
+	bh=pNiUJqMvkF3meLNvGaIv4zqxKa3SDQGFsOEQTo+IM0U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=T7KSnKvQ9iKkS8OBIP61sjptQiXPWNGFJaqrRcPU4LtYi5GuUp2y9zSRrxhE1/HSUx7DvdsF+eLKlngD7k9BoOTSQ1EnyjZQEbIdG5vTpaqqatwdi404aiTHpFaTuYva113KRQskoDnQ+iwAIUmpeqFEaioRyC275iPHD30IK/0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=EqisiMma; arc=none smtp.client-ip=209.85.210.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="LAia4PpJ"
-Received: by mail-oi1-f178.google.com with SMTP id 5614622812f47-3ea4c550a3fso2748392b6e.2
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Dec 2024 07:09:26 -0800 (PST)
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="EqisiMma"
+Received: by mail-ot1-f42.google.com with SMTP id 46e09a7af769-71d5476ebb1so2992645a34.2
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2024 01:29:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1733238566; x=1733843366; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=ii6/Eam+Rd1w/XN536sPdorZmSq0gN6Qv3+oQutPo10=;
-        b=LAia4PpJP2JnNrSS7Ew62eOvhwSKt3vQu9i7e90gsbvhRigAw6QAz0imLnYMfczm5V
-         2js3TxBTO6Pkw+ADPGDcANglO35y4ohkV/lYSowWrJbhhY06w9egBCIQ2mW5Y8mBNiVl
-         sWEc6tNVjdDmIgkF6NAt/G84skUE0a+prK4zkgW42arkftHiPQzL8DIsqwTu2cdqBBh4
-         GN1s4Oi0avDlK0w48OBhoEuxs23XoTT2jI3Ni3Q+du8v72IvrGeCsB/P0Ll68IbcYZiJ
-         GrA9xTjD8O1JYuy9hVH5EDj34z0ayO9nH8G+ZQd0ur8xAsWmnTMDdypXvrkAFr7K09ff
-         Iiyw==
+        d=chromium.org; s=google; t=1733304541; x=1733909341; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=rSvjzybcpgZsvOT9TlMKPiZLpA7cHiGiwj+87vtqrQI=;
+        b=EqisiMmaW5U25z7UrOhCsxY3tp5oIIAcFWVlkvU6fSL83i6z/WOItnSXIZIU54pbK/
+         /JVOk0WuKXYEi1MVb5MNyOSfAd84JhU7d2T3+s9QWMXJGiCDU4JnBYKUJpGc0fiVvs1n
+         1Wx9oxS6s69Fy5u8z5np4OE9Tn2vCA/fbBP40=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733238566; x=1733843366;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ii6/Eam+Rd1w/XN536sPdorZmSq0gN6Qv3+oQutPo10=;
-        b=lDqdmWFmPtwsjvg+CFJhT04ytnPousX+nIpsaQ05WziScTjfiwaD87LTZ/UU+M1yfB
-         zoKcV6XBP8o/LC1hznptXzJqVtaVbGGNZMKFhNfbzjM3DyYjSasT11uKpcVGeTwGUdKQ
-         0UZVJPwutIBIgMTNv49pPwyxnE2dgOqWdxc8pGqTI/naChjqbglSgr0DmgC1Dy6Dg6cC
-         f78FtH++wffg7ZqNkCnd8Q22mHCdUXYDfX7O/RLcksZh5EEgToK8YsLAqbMfRMC/wIZz
-         urhymmwIZBNDiJswGOpcDJAIpyoIdn7fQDqLz+Ci30Rm7kwuMWLwJ8IUQrtJcvWD5epb
-         LabQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVKl9AUFVSzHpHxizueCzynmAm1su3aGvGPIbmkztF+sRwX6VRJgF8YYX/kVJtOr7WbEBzK/h3XAj4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw9zaoqhnC2Ajq1uGZUels5RidSgfh/C/FMBdR2Sb92L4z4BL76
-	Mi2y2CSvdrPl85ySnJMlh2+KC39fbPBJftg4+CVnVMNvqdITH8BSXCMzqGZN02c=
-X-Gm-Gg: ASbGnct+aOTRnL/AdsVCX5nQ07OY26xxtKpPfSMukszYHe9RZpT4Nds7kosCVsM88hj
-	vBoGM1jhuAUxrJxzvEAW6nlCohqkj/eAfWrjYNEPLJ9C0WX2Z05lRg/MPEWU3BnxUawk6wexWRQ
-	XNEYiPHZJcdvzyegUnLEKDai89eooWB3SSB+B/KJqbjSp5TshLMWJST2D6Dv+CL8Cjpcv6i3bN8
-	BCizsum/wjOXr09B9R2uPWaaMDux3jx66fcmDT2z0UCbMwh
-X-Google-Smtp-Source: AGHT+IHdP/r0VTOfmHgK6zsgpRftwhI0VmkZTrKusX1MqvGl6wn141rPYAXz2iiNvED/ZdfolUyPmA==
-X-Received: by 2002:a05:6808:3843:b0:3e8:1f5d:b7f8 with SMTP id 5614622812f47-3eae4edadc4mr3237519b6e.1.1733238565720;
-        Tue, 03 Dec 2024 07:09:25 -0800 (PST)
-Received: from [172.20.2.46] ([130.250.255.163])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-3ea8609f140sm2829517b6e.19.2024.12.03.07.09.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 03 Dec 2024 07:09:24 -0800 (PST)
-Message-ID: <c3407d1c-6c5c-42ee-b446-ccbab1643a62@kernel.dk>
-Date: Tue, 3 Dec 2024 08:09:21 -0700
+        d=1e100.net; s=20230601; t=1733304541; x=1733909341;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rSvjzybcpgZsvOT9TlMKPiZLpA7cHiGiwj+87vtqrQI=;
+        b=tj6QOJT/dr9xkUztuEEKb0/7ZFb+ibRhgNo+H9y2OCI7QAGy8m6ekbj8rFgfLueqCc
+         Y5YOjqyjrF3Tk9Qyyo5FXU1CGeo1lFHDeab8r0gX+Gc5WhU8cKGKXKM5kbO9pNtrQLQT
+         432mxOheYbA32mdaiQ8aPaYc1R+Lg+P83jd6021dXzCKBEfDApIWFL1KJHCl9KWlrNTi
+         bcnFCd/qIfYmtQhklXjYaMTLjdEEreG8dGZ7N0lz1NxuX3mtxDZDC4MHGjFCpf96eckx
+         0g+Q5r/KPQsdS7BEApnjFE3JoxplSbQymhEln1QC/SM3zTFHOohT/hXEc68RlsPw67xB
+         Pf9g==
+X-Forwarded-Encrypted: i=1; AJvYcCVZmyRaimHbhgAuxT7HVAHDAvVA6BLo63R/ghp+I8hHYLaJQU4Xnnv9iVszyN1ULQq2jXwaGgsuDo8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YySGAWaJOoLRtGsV1vBmWzs6tQoFHgWsrwLN44vV3qk53FFuMSY
+	itE531hqFnQORx2S/J4BR9+V9a7WJ/7/PFmHJet8yfxf+yJi3QiRgz/MonW8GA==
+X-Gm-Gg: ASbGncumIWb9eL6Nz/eAA0pHMxiaCPH2mFF0lWqawv/MSGYwgE2cr4Jj5izNI6/zaDi
+	BwhQvj5r8zsrog85jGoSbFukn3HuPzAHU5z4C7spBPFHY9mYSf/Kctbl15puiseWNTSMwrnnZCC
+	oL6u+XGYjXrPeELbzJesb9JjmLbrP0EcLJ1GVIsQML7ZbnEyMjKj6KRmZKwr7WaRu9p5I2dupx2
+	d3NMJgzXXXbMwjAndxKHMoJJqy2ps6EglgIXq0U7m+F6yf1EuIFtcxOSIOqJeJ9J/AO
+X-Google-Smtp-Source: AGHT+IEDEK2nhMPbAOsuMuh6j108aGwGF9PHLhxq9QdnWZtG1dV+KYKtrNgMaqBZ6YJiiA1s1lmFsw==
+X-Received: by 2002:a05:6830:b93:b0:71d:5a8a:1a37 with SMTP id 46e09a7af769-71dad652b13mr7062531a34.15.1733304541404;
+        Wed, 04 Dec 2024 01:29:01 -0800 (PST)
+Received: from wenstp920.tpe.corp.google.com ([2401:fa00:1:10:2eb1:a68a:2625:b944])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7fc9c2d38dbsm11049024a12.15.2024.12.04.01.28.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 04 Dec 2024 01:29:00 -0800 (PST)
+From: Chen-Yu Tsai <wenst@chromium.org>
+To: Chaotian Jing <chaotian.jing@mediatek.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Matthias Brugger <matthias.bgg@gmail.com>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Wenbin Mei <wenbin.mei@mediatek.com>
+Cc: Chen-Yu Tsai <wenst@chromium.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-mediatek@lists.infradead.org,
+	devicetree@vger.kernel.org,
+	Frank Wunderlich <frank-w@public-files.de>,
+	Andy-ld Lu <andy-ld.lu@mediatek.com>
+Subject: [PATCH 0/2] mmc: mtk-sd: Limit second register range to SoCs requiring it
+Date: Wed,  4 Dec 2024 17:28:51 +0800
+Message-ID: <20241204092855.1365638-1-wenst@chromium.org>
+X-Mailer: git-send-email 2.47.0.338.g60cca15819-goog
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH RESEND v7 00/17] Hardware wrapped key support for QCom ICE
- and UFS core
-To: Eric Biggers <ebiggers@kernel.org>, Bartosz Golaszewski <brgl@bgdev.pl>
-Cc: Jonathan Corbet <corbet@lwn.net>, Alasdair Kergon <agk@redhat.com>,
- Mike Snitzer <snitzer@kernel.org>, Mikulas Patocka <mpatocka@redhat.com>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Asutosh Das <quic_asutoshd@quicinc.com>,
- Ritesh Harjani <ritesh.list@gmail.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>,
- Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>,
- "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
- Gaurav Kashyap <quic_gaurkash@quicinc.com>,
- Neil Armstrong <neil.armstrong@linaro.org>,
- Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
- "Martin K. Petersen" <martin.petersen@oracle.com>,
- "Theodore Y. Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>,
- Alexander Viro <viro@zeniv.linux.org.uk>,
- Christian Brauner <brauner@kernel.org>, Jan Kara <jack@suse.cz>,
- Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
- linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-kernel@vger.kernel.org, dm-devel@lists.linux.dev,
- linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
- linux-fscrypt@vger.kernel.org, linux-fsdevel@vger.kernel.org,
- linux-arm-msm@vger.kernel.org,
- Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
- Om Prakash Singh <quic_omprsing@quicinc.com>
-References: <20241202-wrapped-keys-v7-0-67c3ca3f3282@linaro.org>
- <20241202183643.GB2037@sol.localdomain>
-Content-Language: en-US
-From: Jens Axboe <axboe@kernel.dk>
-In-Reply-To: <20241202183643.GB2037@sol.localdomain>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 12/2/24 11:36 AM, Eric Biggers wrote:
-> On Mon, Dec 02, 2024 at 01:02:16PM +0100, Bartosz Golaszewski wrote:
->> The previous iteration[1] has been on the list for many weeks without
->> receiving any comments - neither positive nor negative. If there are no
->> objections - could we start discussing how to make these patches go
->> upstream for v6.14?
-> 
-> The way to do it will be for the block patches to be taken through the block
-> tree first.  That will unblock the rest, which can be taken through their
-> respective trees in subsequent cycles.
+Currently the usage of a second register range for MediaTek's MMC
+controller is seen only on a few platforms. However the driver tries
+to grab the register base regardless, and then ignores any errors.
+This makes all the other platforms that don't need it produce confusing
+error messages.
 
-I can queue up patches 1..3 in a separate branch that we can both use,
-and that can get pulled into for-6.14/block as well. Didn't want to do
-that before the rest of them are ready. IOW, if it's going to be bound
-for 6.14, let me know, and I'll setup the branch with the patches.
+Instead, make the driver only grab the register range for platforms that
+actually require it, and correctly handle the error. Also fix up the
+binding so that validation of the "reg" property is as strict as
+possible.
+
+Please take a look.
+
+
+Thanks
+ChenYu
+
+Chen-Yu Tsai (2):
+  dt-bindings: mmc: mtk-sd: Document compatibles that need two register
+    ranges
+  mmc: mtk-sd: Limit getting top_base to SoCs that require it
+
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml |  9 ++++++++-
+ drivers/mmc/host/mtk-sd.c                         | 15 +++++++++++----
+ 2 files changed, 19 insertions(+), 5 deletions(-)
 
 -- 
-Jens Axboe
+2.47.0.338.g60cca15819-goog
+
