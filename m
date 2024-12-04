@@ -1,81 +1,66 @@
-Received: from mail-pg1-f178.google.com (mail-pg1-f178.google.com [209.85.215.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4ABFB1AA7A5
-	for <linux-mmc@vger.kernel.org>; Wed,  4 Dec 2024 09:29:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B451618A6BC
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Dec 2024 10:05:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.254.224.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733304549; cv=none; b=QOr8Hr06B8Y/TnEPDRgM97OgkrwBU3WjsQuauvxJ/M17umi52+Ipg4CoBYqb1S9TtB9M+CFi56ZXR9PtmBA2kSSuKMF+EXPPaZWg8Ay+8kVjtwc6bBWzw0hzotct1JzknoxH2QdlgpehjGwcu7XZr5t7VyP27INm9uAFjan9jDU=
+	t=1733306715; cv=none; b=dgjILL//PAwn3rxcB7fyl4sRg3bKfwoo8AbP9JaIEs4l52VE7H+2wdmZAFztLSaCM5qMOKoWXZF4FGhfmXKre46l8qBhkYXCdMqy3bO2ePYAOjRKtkU1lhfqwk/T9/4REWsjhx1iye2zpAr+FVJgL09Z2zegTbhriiwZ9CPxKO8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733304549; c=relaxed/simple;
-	bh=ZF846tfxXQR1bjFKcFdA9ieHcqIFK6FjHRuAwd9+d9c=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WLl7LkJx7NZ2r5gdi3ki8AYz2WLlG7kHpsyWHR0G4HcTAG/++IzRUIBLsO7CKlwmzy3GZPqGBx50hV78gYY4GaLHYC2y5lpvvFc9icJ25/t7zjVFOiREwgCDmSLXQGmM7oxZYoiFi7FwimfHDl91NcVL7NA2qlZ9uU50USnnfSI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=Ar8kYtfz; arc=none smtp.client-ip=209.85.215.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
+	s=arc-20240116; t=1733306715; c=relaxed/simple;
+	bh=ceQAuWf0Mbqhk6O51j1FmrtSWl14o01kr+p2VRI4Cr0=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type:
+	 References; b=dq5gIPe9gbm4je0hKzMKPNJb4PBzme5A5oDv+DoAqiGAcAQuPeApJFx/X8r/NP23n54eWnHPOyz+F/1aMD7ln2ZlX/pKAulXEM/99C6GZY0rORw8pID0jBlUpgvM8PDmxHjbIGGSQxfEdyNLcAwCHqxAFpInBw+KqOk2qdnk/eg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com; spf=pass smtp.mailfrom=samsung.com; dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b=MeZ+Rt/r; arc=none smtp.client-ip=203.254.224.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=samsung.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=samsung.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="Ar8kYtfz"
-Received: by mail-pg1-f178.google.com with SMTP id 41be03b00d2f7-7fc22a88bcbso5016709a12.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2024 01:29:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1733304547; x=1733909347; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5lmhyTT2gnZ9bY0N8ST8GSpbytof12mEhpjxb7D+L9U=;
-        b=Ar8kYtfzscK8eQvziDDm5C8HUKZVLZbINqRj/8zmMnMCiCb0QDgALrhDm2NFPRn/VG
-         stUKrgrjnA689u3jjl7kurolByZm0cJWEdk1pn/pC+CToGLevuNfWK4DHz7bBL10WQDN
-         U3Cg/RmBurDghyoszvT5ZGlnlIC8D4JjR7uro=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733304547; x=1733909347;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=5lmhyTT2gnZ9bY0N8ST8GSpbytof12mEhpjxb7D+L9U=;
-        b=CdmrdH9e+UbxopQa0DQB3v7VUs7iHSbK9fqUOhALdFv7uFPZgoIl1Nabpo7+wGFqOH
-         L5QxE0PmJ26ZzcMVVAIzzWdE7hkZAOAQH2ThEFLvnbd81x+kOR2PKszMLN3qjhsbI3Kn
-         nQM8sv/Hah2b/KwsFtySTOzqMIUKaFxoiGONgY+HQW7ZFjjmv7YQzppfpCGW8qMRyPsG
-         TzQU6I0OYoSRPpJac/1YOLuG7/ZILe5zPTwC0W346NB19d5IwMJ+1qg9ojort3xCNK/U
-         54/8HWkazsoDcm5zVXyDHYqVLQrrz1yh4zJB1v+p78ubcnMLyBBbuNeOGgFWewvm8zXn
-         ZSvw==
-X-Forwarded-Encrypted: i=1; AJvYcCWp7j5CdcjEkp5AaLB1c3n8srPOO1OKcSJSqfsMz9bjNTo11SyH7Zo/d529C5VQ8sFJFnIbBki/dY4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz1GNsiapHcFGy07mfnJE0g/LAmaH6c7pEFjzJKd3AoKxVgq52q
-	5CFAftRqpaegPWJLebLGPqj7Muru0JcUYprB1AHbvAsgq45Ls+GbOb5lCjLFVA==
-X-Gm-Gg: ASbGncs7FvJegZurGKqfR8V5XENftfqv8zwIsb48S/LFC3LweoVO6sKikFXkmOA3W7X
-	78pwPs65vbnEphvwaFoJ67aJlYYynqsODXd2wflGjHtImg0sv0wXA4X9vpHs4915RXjfzBZy4FP
-	wQAZ2KFBiOwemk1iWBmayGTaFLuPKK2Zj1E/xdFS8o6hUfnwDDru895wQ1um7SKE9Kc+lLANTGf
-	NSJjuOQCkdNlnVhYrqeBCWVfJ6eFpbmcAPsMZBoHY86poE2JI7JSDhd6R+N7ojRUO+s
-X-Google-Smtp-Source: AGHT+IF/J9a4qflcZHiUbg+VHivDCNAN5kL5imj4FjGYpM9OWcUYV3cXUXaClbk0sydJ7WHWfxLZ0A==
-X-Received: by 2002:a05:6a20:8407:b0:1db:c20f:2c4d with SMTP id adf61e73a8af0-1e1653a6515mr8672949637.2.1733304547503;
-        Wed, 04 Dec 2024 01:29:07 -0800 (PST)
-Received: from wenstp920.tpe.corp.google.com ([2401:fa00:1:10:2eb1:a68a:2625:b944])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-7fc9c2d38dbsm11049024a12.15.2024.12.04.01.29.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Dec 2024 01:29:07 -0800 (PST)
-From: Chen-Yu Tsai <wenst@chromium.org>
-To: Chaotian Jing <chaotian.jing@mediatek.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Wenbin Mei <wenbin.mei@mediatek.com>
-Cc: Chen-Yu Tsai <wenst@chromium.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-mediatek@lists.infradead.org,
-	devicetree@vger.kernel.org,
-	Frank Wunderlich <frank-w@public-files.de>,
-	Andy-ld Lu <andy-ld.lu@mediatek.com>
-Subject: [PATCH 2/2] mmc: mtk-sd: Limit getting top_base to SoCs that require it
-Date: Wed,  4 Dec 2024 17:28:53 +0800
-Message-ID: <20241204092855.1365638-3-wenst@chromium.org>
-X-Mailer: git-send-email 2.47.0.338.g60cca15819-goog
-In-Reply-To: <20241204092855.1365638-1-wenst@chromium.org>
-References: <20241204092855.1365638-1-wenst@chromium.org>
+	dkim=pass (1024-bit key) header.d=samsung.com header.i=@samsung.com header.b="MeZ+Rt/r"
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+	by mailout3.samsung.com (KnoxPortal) with ESMTP id 20241204100510epoutp03afc76fb2bc9b57a677144ab9b82b9f8b~N8UUQ_Awd1404414044epoutp03T
+	for <linux-mmc@vger.kernel.org>; Wed,  4 Dec 2024 10:05:10 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20241204100510epoutp03afc76fb2bc9b57a677144ab9b82b9f8b~N8UUQ_Awd1404414044epoutp03T
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+	s=mail20170921; t=1733306710;
+	bh=BwbCci6/s7QIONtqBrwA0P6QY5OMw5SS7RLGmLbdCkE=;
+	h=From:To:Cc:Subject:Date:References:From;
+	b=MeZ+Rt/rmZmkuHb6TbJOCLzpGbOxeodD26TLI8wnFjn+ll9c81EqW9YVio5gIJJJ/
+	 N9D79Mvbaa1VUYbPiq7qT/oMWrz7WaqEUtCqWwSjsHWZarWNsAlNUOWGvckKqTy2co
+	 1PZCNYFM3aSdQrH7R4tXE+lhTbPIpNd2RwBAQfTs=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+	epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+	20241204100510epcas1p13021148864ebdc791b80d51844f56f60~N8UT72yTQ0465204652epcas1p1K;
+	Wed,  4 Dec 2024 10:05:10 +0000 (GMT)
+Received: from epsmges1p3.samsung.com (unknown [182.195.38.236]) by
+	epsnrtp2.localdomain (Postfix) with ESMTP id 4Y3CnK1dTQz4x9Pw; Wed,  4 Dec
+	2024 10:05:09 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+	epsmges1p3.samsung.com (Symantec Messaging Gateway) with SMTP id
+	AE.1F.23379.55920576; Wed,  4 Dec 2024 19:05:09 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+	epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
+	20241204100508epcas1p2cc54ed287df5a361536b68971bca48f6~N8USvVn5q3031230312epcas1p2l;
+	Wed,  4 Dec 2024 10:05:08 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+	epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+	20241204100508epsmtrp119e343fc97a82bdd0832b6bd16ed7fce~N8USuv-FQ2621026210epsmtrp1V;
+	Wed,  4 Dec 2024 10:05:08 +0000 (GMT)
+X-AuditID: b6c32a37-17dea70000005b53-81-6750295545cb
+Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+	epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+	8E.F2.18729.45920576; Wed,  4 Dec 2024 19:05:08 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.113.113.235]) by
+	epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
+	20241204100508epsmtip1e786a5912618b916873a46fdf3ceb727~N8USlLz671749517495epsmtip1L;
+	Wed,  4 Dec 2024 10:05:08 +0000 (GMT)
+From: Jaehoon Chung <jh80.chung@samsung.com>
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com
+Subject: [PATCH] mmc: sdhci-of_dwcmshc: Change to dwcmshc_phy_init for
+ reusing codes
+Date: Wed,  4 Dec 2024 19:05:07 +0900
+Message-Id: <20241204100507.330025-1-jh80.chung@samsung.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -83,85 +68,175 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrHKsWRmVeSWpSXmKPExsWy7bCmvm6oZkC6wdVGTouTT9awWdz41cZq
+	ceR/P6PF8bXhDiwei/e8ZPK4c20Pm0ffllWMHp83yQWwRGXbZKQmpqQWKaTmJeenZOal2yp5
+	B8c7x5uaGRjqGlpamCsp5CXmptoqufgE6Lpl5gBtVFIoS8wpBQoFJBYXK+nb2RTll5akKmTk
+	F5fYKqUWpOQUmBboFSfmFpfmpevlpZZYGRoYGJkCFSZkZ0xb3MRecFCzYvaurWwNjFeVuxg5
+	OSQETCReTZrO0sXIxSEksINRYseRrewQzidGif8Xf0FlvjFKTOl8AuRwgLW0/YiEiO9llPj2
+	qQOq4wujxMRFc9lA5rIJ6Ehs/3acCcQWEZCV+PnnAhtIM7OAt8TUo6IgYWGBMImzr5czgtgs
+	AqoSzb8/sIPYvAI2Es1n3rBAnCcvMfPSd6i4oMTJmU/A4sxA8eats5lB9koIrGOXmLVuGSPE
+	cS4S8/96QfQKS7w6voUdwpaSeNnfxg5R38wosXTJQVYIp4dR4l/DdTaIKmOJ/UsnM0Ecqimx
+	fpc+xDI+iXdfe1gh5vNKdLQJQVSrSFx6/ZIJZv7dJ/9ZIWwPiebVa8H2CgnESlydu5t9AqPc
+	LCQvzELywiyEZQsYmVcxiqUWFOempxYbFhjDIzI5P3cTIzihaZnvYJz29oPeIUYmDsZDjBIc
+	zEoivIFL/NOFeFMSK6tSi/Lji0pzUosPMZoCA3Uis5Rocj4wpeaVxBuaWBqYmBkZm1gYmhkq
+	ifOeuVKWKiSQnliSmp2aWpBaBNPHxMEp1cDUbtyzw27i7tscj6P4hH5Ibol+b3Rx172JFxee
+	9+JN0T99NSbJqDLlo+bDD5OFL+kVvi/t3/42r4t/fdoD1VrLjG43zYRZOazhbxWl459eVZZi
+	Os0qNcdnly1PpcWaJ6GM1atTJ+5wmmHgJZn1UePbzAADHhVvzZ2/LeVfpvcmLf0U2XpU+mBV
+	ZZyjx6miBwmTlXSEL03otX/wRzSnZdW2e5wLG2wXTeJ6x9hzIvuhp8wX+8wviodtrU6a3qg2
+	k+T58GKO+XSmzU99dL9ws35TaM18pbDDtL4mtuHZlWlL96+/clvi4sIDF6Ml5zUd+5Q7//0z
+	zjuMnQ/Ssv+ILv70cGWL26bUl7cd5poyG0xUYinOSDTUYi4qTgQAje7PJPEDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprGLMWRmVeSWpSXmKPExsWy7bCSnG6IZkC6wZEdxhYnn6xhs7jxq43V
+	4sj/fkaL42vDHVg8Fu95yeRx59oeNo++LasYPT5vkgtgieKySUnNySxLLdK3S+DKmLa4ib3g
+	oGbF7F1b2RoYryp3MXJwSAiYSLT9iOxi5OIQEtjNKNG4YSdzFyMnUFxK4vPTqWwQNcIShw8X
+	g5hCAp8YJS5kgVSwCehIbP92nAnEFhGQlfj55wIbiM0s4C9x5NMxRhBbWCBEYsLk02A2i4Cq
+	RPPvD+wgNq+AjUTzmTcsEJvkJWZe+g4VF5Q4OfMJC8QceYnmrbOZJzDyzUKSmoUktYCRaRWj
+	ZGpBcW56brFhgWFearlecWJucWleul5yfu4mRnDQaWnuYNy+6oPeIUYmDsZDjBIczEoivIFL
+	/NOFeFMSK6tSi/Lji0pzUosPMUpzsCiJ84q/6E0REkhPLEnNTk0tSC2CyTJxcEo1MPlmmc3L
+	Wbeo7UIvwwr5zIroflGW9DXTVjzVcptlsi/ofO7T9G0P5/93SvuaGlT6dH+syE4lL21/j8NJ
+	pjeWvXrdH7vq9/QGudkbgwxTZmsb9wtsnFLilVZ9/XIzw/Oq3cFdh75OTrp1W+vwJse19xln
+	vco2b5KYVGH8NzfoS8bd6VGL3820dHrxj3nHggPds21dA905tlbu3nr50bvEhXNqlki43TMP
+	TePm7vI/1XNX7Ma8f5eNbuf3Gr+04ZeIVvv4puSNQENJUtHsYGW70pwgW4/arfmF698zO6zK
+	zTCd71rE/v+Yw9bWvdPvC35T3z3DdsPSDMdfnQHpXzlf/vEy9O+JYNtzeo3639Smz0osxRmJ
+	hlrMRcWJACBHat2pAgAA
+X-CMS-MailID: 20241204100508epcas1p2cc54ed287df5a361536b68971bca48f6
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20241204100508epcas1p2cc54ed287df5a361536b68971bca48f6
+References: <CGME20241204100508epcas1p2cc54ed287df5a361536b68971bca48f6@epcas1p2.samsung.com>
 
-Currently the mtk-sd driver tries to get and map the second register
-base, named top_base in the code, regardless of whether the SoC model
-actually has it or not. This produces confusing big error messages on
-the platforms that don't need it:
+dwcmshc_phy_1_8v_init and dwcmshc_phy_3_3v_init differ only by a few
+lines of code. This allow us to reuse code depending on voltage.
 
-    mtk-msdc 11260000.mmc: error -EINVAL: invalid resource (null)
-
-Limit it to the platforms that actually require it, based on their
-device tree entries, and properly fail if it is missing. There is
-no MMC node in the MT6779 dts, so it's currently unknown if that
-platform needs it or not.
-
-Signed-off-by: Chen-Yu Tsai <wenst@chromium.org>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/mtk-sd.c | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 69 +++++------------------------
+ 1 file changed, 12 insertions(+), 57 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index e2c385853eef..1bb7044f4ca1 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -414,6 +414,7 @@ struct mtk_mmc_compatible {
- 	u8 clk_div_bits;
- 	bool recheck_sdio_irq;
- 	bool hs400_tune; /* only used for MT8173 */
-+	bool needs_top_base;
- 	u32 pad_tune_reg;
- 	bool async_fifo;
- 	bool data_tune;
-@@ -587,6 +588,7 @@ static const struct mtk_mmc_compatible mt7986_compat = {
- 	.clk_div_bits = 12,
- 	.recheck_sdio_irq = true,
- 	.hs400_tune = false,
-+	.needs_top_base = true,
- 	.pad_tune_reg = MSDC_PAD_TUNE0,
- 	.async_fifo = true,
- 	.data_tune = true,
-@@ -627,6 +629,7 @@ static const struct mtk_mmc_compatible mt8183_compat = {
- 	.clk_div_bits = 12,
- 	.recheck_sdio_irq = false,
- 	.hs400_tune = false,
-+	.needs_top_base = true,
- 	.pad_tune_reg = MSDC_PAD_TUNE0,
- 	.async_fifo = true,
- 	.data_tune = true,
-@@ -653,6 +656,7 @@ static const struct mtk_mmc_compatible mt8196_compat = {
- 	.clk_div_bits = 12,
- 	.recheck_sdio_irq = false,
- 	.hs400_tune = false,
-+	.needs_top_base = true,
- 	.pad_tune_reg = MSDC_PAD_TUNE0,
- 	.async_fifo = true,
- 	.data_tune = true,
-@@ -2887,9 +2891,13 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	if (IS_ERR(host->base))
- 		return PTR_ERR(host->base);
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 7ea3da45db32..87bc32d13cc0 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -328,11 +328,15 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	sdhci_request(mmc, mrq);
+ }
  
--	host->top_base = devm_platform_ioremap_resource(pdev, 1);
--	if (IS_ERR(host->top_base))
--		host->top_base = NULL;
-+	host->dev_comp = of_device_get_match_data(&pdev->dev);
+-static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
++static void dwcmshc_phy_init(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	u32 val;
++	u32 rxsel = PHY_PAD_RXSEL_3V3;
 +
-+	if (host->dev_comp->needs_top_base) {
-+		host->top_base = devm_platform_ioremap_resource(pdev, 1);
-+		if (IS_ERR(host->top_base))
-+			return PTR_ERR(host->top_base);
-+	}
++	if (host->flags & SDHCI_SIGNALING_180 || priv->flags & FLAG_IO_FIXED_1V8)
++		rxsel = PHY_PAD_RXSEL_1V8;
  
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
-@@ -2951,7 +2959,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	msdc_of_property_parse(pdev, host);
+ 	/* deassert phy reset & set tx drive strength */
+ 	val = PHY_CNFG_RSTN_DEASSERT;
+@@ -353,7 +357,7 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
+ 	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
  
- 	host->dev = &pdev->dev;
--	host->dev_comp = of_device_get_match_data(&pdev->dev);
- 	host->src_clk_freq = clk_get_rate(host->src_clk);
- 	/* Set host parameters to mmc */
- 	mmc->ops = &mt_msdc_ops;
+ 	/* configure phy pads */
+-	val = PHY_PAD_RXSEL_1V8;
++	val = rxsel;
+ 	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
+ 	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+ 	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+@@ -365,65 +369,20 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
+ 	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+ 	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
+ 
+-	val = PHY_PAD_RXSEL_1V8;
++	val = rxsel;
+ 	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
+ 	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+ 	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+ 	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
+ 
+ 	/* enable data strobe mode */
+-	sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL),
+-		     PHY_DLLDL_CNFG_R);
++	if (host->flags & SDHCI_SIGNALING_180 || priv->flags & FLAG_IO_FIXED_1V8)
++		sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK,
++					PHY_DLLDL_CNFG_SLV_INPSEL), PHY_DLLDL_CNFG_R);
+ 
+ 	/* enable phy dll */
+ 	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
+-}
+-
+-static void dwcmshc_phy_3_3v_init(struct sdhci_host *host)
+-{
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+-	u32 val;
+-
+-	/* deassert phy reset & set tx drive strength */
+-	val = PHY_CNFG_RSTN_DEASSERT;
+-	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
+-	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
+-	sdhci_writel(host, val, PHY_CNFG_R);
+-
+-	/* disable delay line */
+-	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
+-
+-	/* set delay line */
+-	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
+-	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
+-
+-	/* enable delay lane */
+-	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
+-	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
+-	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
+-
+-	/* configure phy pads */
+-	val = PHY_PAD_RXSEL_3V3;
+-	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
+-	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+-	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+-	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
+-	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
+-	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
+-
+-	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+-	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+-	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
+-
+-	val = PHY_PAD_RXSEL_3V3;
+-	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
+-	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+-	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+-	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
+ 
+-	/* enable phy dll */
+-	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
+ }
+ 
+ static void th1520_sdhci_set_phy(struct sdhci_host *host)
+@@ -433,11 +392,7 @@ static void th1520_sdhci_set_phy(struct sdhci_host *host)
+ 	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
+ 	u16 emmc_ctrl;
+ 
+-	/* Before power on, set PHY configs */
+-	if (priv->flags & FLAG_IO_FIXED_1V8)
+-		dwcmshc_phy_1_8v_init(host);
+-	else
+-		dwcmshc_phy_3_3v_init(host);
++	dwcmshc_phy_init(host);
+ 
+ 	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
+ 		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
+@@ -1163,7 +1118,7 @@ static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
+ 	.get_max_clock		= dwcmshc_get_max_clock,
+ 	.reset			= th1520_sdhci_reset,
+ 	.adma_write_desc	= dwcmshc_adma_write_desc,
+-	.voltage_switch		= dwcmshc_phy_1_8v_init,
++	.voltage_switch		= dwcmshc_phy_init,
+ 	.platform_execute_tuning = th1520_execute_tuning,
+ };
+ 
 -- 
-2.47.0.338.g60cca15819-goog
+2.25.1
 
