@@ -1,148 +1,116 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.15.19])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF0B71AE861;
-	Wed,  4 Dec 2024 10:33:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.19
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37C0B1BC08B;
+	Wed,  4 Dec 2024 12:27:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733308423; cv=none; b=jBH8xxCi+FL+k4wrFh1onWJQNg1LGu4uvnnMtPge60xSOiodeAjtfw0pu+bKFrhffBhNBVRwKdGgbJ4+abL6+tlgw8KLbcQTFInCrOfKZvo/O58ODtUk9W0hVj9zpa2uZhVI6mmN923glX2FRKJ1LqwkwGu2VTKfPYNapoVxIWQ=
+	t=1733315256; cv=none; b=N/oOhsZNzFZaOEUs73pRtPV/jK6ZtjLanejTDPCfUrEz7b4ySi7UtS2y+IGtMmYvn8PP6j7vWdp74Qfwcz1i9kzweJerwHjA1WSasZncPM7hT+HO8wprJT3EQaZsm6lZAfI2QsgvvUUv2xqaAtIxGjn9eZ4BCAY7DHh8/HXasmI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733308423; c=relaxed/simple;
-	bh=kJx9FLnINvE3YM4iJf1/srbrsQsAkpP4c0HtMzm13ls=;
-	h=Date:From:To:CC:Subject:In-Reply-To:References:Message-ID:
-	 MIME-Version:Content-Type; b=oz9F7oS6WI7amig1PdkTKt/Qn0IIiO2WmQGNtUK2/mLPyGFluh6mWi+zP0imIs5Q3dNPfX+ldk5l6iuqXcyMUgej0qGxeic7MRBH/TV3l6SKqADs+0IHzEwy7YMa6vIZ+rO8qZw6tccAqZy+/OFtJa7fY3LQEvNkYWM736XHhXI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=public-files.de; spf=pass smtp.mailfrom=public-files.de; dkim=pass (2048-bit key) header.d=public-files.de header.i=frank-w@public-files.de header.b=p1NsGWXO; arc=none smtp.client-ip=212.227.15.19
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=public-files.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=public-files.de
+	s=arc-20240116; t=1733315256; c=relaxed/simple;
+	bh=Tf2N6u4X8T3vx9X8/GSCe+wHISQSsJpRIqZ4jdWOQhs=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aGlsLM0gMW7nxxhvPm7oL2Wlf+2U1erWMkLA2ksY4UfdGC56/jlvjorlYCrCawkFvDQNYB09lLoB7vIawKKW/dmIkrrNc4nO7wp5FhRJNA69aqoio/gP0W7G7KUxm8jLxJb7X8yDszdZAavnTBPvSP6LlO5SqNDnoR02JomB7o4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=YDOl4K0/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=public-files.de header.i=frank-w@public-files.de header.b="p1NsGWXO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=public-files.de;
-	s=s31663417; t=1733308401; x=1733913201; i=frank-w@public-files.de;
-	bh=dyk00jx2rD13abnBIF0gny6mCB3L0WTy7Wj+eriGTe4=;
-	h=X-UI-Sender-Class:Date:From:To:CC:Subject:Reply-to:In-Reply-To:
-	 References:Message-ID:MIME-Version:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=p1NsGWXOBMpk9Xrxst9wZ0QHjMpwO7wZJ8PDKhJSd5bz+aLjtIPUof5t5z92JKzh
-	 WT02h1/9Ek2xR76AismXJy1hwo56p+h5riKtLoF+z+6W0IDaGJzvNBC1p0XHudAL3
-	 jtOOec7pDImiWz7HbelNd3t1Wpmj9F65TG7D/yPkSLXvy/a3dlWQ9MygbJHBa++zz
-	 mXLkVzs0UUVuBkS8la5c1KcoKak8F/2CyDCW9yVL+hQelEYyzrEldwIvbUOE6JEp6
-	 TnRY2WuT6d2WACzdxo5G5WAjudf2k/UcG120YBStBRKx6TEuzHzh046azmBcb2MMU
-	 zD7LgwK4EffKaV9O+Q==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [127.0.0.1] ([194.15.87.121]) by mail.gmx.net (mrgmx005
- [212.227.17.190]) with ESMTPSA (Nemesis) id 1N7zBR-1tfnDG2q0p-00rC64; Wed, 04
- Dec 2024 11:33:21 +0100
-Date: Wed, 04 Dec 2024 11:33:19 +0100
-From: Frank Wunderlich <frank-w@public-files.de>
-To: Chen-Yu Tsai <wenst@chromium.org>, Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Matthias Brugger <matthias.bgg@gmail.com>,
- AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
- Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Wenbin Mei <wenbin.mei@mediatek.com>
-CC: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org,
- devicetree@vger.kernel.org, Andy-ld Lu <andy-ld.lu@mediatek.com>
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCH_1/2=5D_dt-bindings=3A_mmc=3A_mtk-sd=3A_Docu?=
- =?US-ASCII?Q?ment_compatibles_that_need_two_register_ranges?=
-User-Agent: K-9 Mail for Android
-Reply-to: frank-w@public-files.de
-In-Reply-To: <20241204092855.1365638-2-wenst@chromium.org>
-References: <20241204092855.1365638-1-wenst@chromium.org> <20241204092855.1365638-2-wenst@chromium.org>
-Message-ID: <4762E5F1-59F2-40D1-9D22-724107623AAB@public-files.de>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="YDOl4K0/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41900C4CED1;
+	Wed,  4 Dec 2024 12:27:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1733315255;
+	bh=Tf2N6u4X8T3vx9X8/GSCe+wHISQSsJpRIqZ4jdWOQhs=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=YDOl4K0/L3XsCDjL2mHnFZZjDG0k3XFNtrRIAMxEGvSfdqy8jckhtbl1MtBS/aqth
+	 ZM1imGjRPctJZuFJmVJVsM+CclByUFIxt8BwlUXyWWT+jCW0QWy3cMpxOszYsvVfra
+	 IE8X0egYx5puCN0hCXnHTV+PZcfigGbItA2UjOV4GbU34uv3M44W0Zv7+XrUDRM668
+	 RwztyBG54VEeXir6p93oOZCNI6x4nhcCs1AwjKIWFYHxSIhelpBYifmorF47xI1H65
+	 FC3hcIz09kR3LEB61ZbTBAGTzNWm4k7Ihz5fJq7Sep2k2aYjUUuChGyLEi2CqeSDt1
+	 paANWv7fZpMzw==
+Date: Wed, 4 Dec 2024 17:57:32 +0530
+From: Vinod Koul <vkoul@kernel.org>
+To: Stefan Wahren <wahrenst@gmx.net>
+Cc: Russell King <linux@armlinux.org.uk>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Minas Harutyunyan <hminas@synopsys.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Lukas Wunner <lukas@wunner.de>,
+	Peter Robinson <pbrobinson@gmail.com>,
+	"Ivan T . Ivanov" <iivanov@suse.de>,
+	linux-arm-kernel@lists.infradead.org, kernel-list@raspberrypi.com,
+	bcm-kernel-feedback-list@broadcom.com, dmaengine@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org
+Subject: Re: [PATCH V5 2/9] dmaengine: bcm2835-dma: add suspend/resume pm
+ support
+Message-ID: <Z1BKtHPN+2qiveHJ@vaman>
+References: <20241025103621.4780-1-wahrenst@gmx.net>
+ <20241025103621.4780-3-wahrenst@gmx.net>
+ <Z03l308ur7xuE1SB@vaman>
+ <d418a30d-f0b0-49c5-8f2a-ddda9a7eeb07@gmx.net>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:db3sHldF0T6VuQva7YZ8BJkBo83cuzvjx9Z9UO2GrwoDa+O4ixH
- 63rmTFteH+CanEW1qjyJ069egAPYXQngNUs46t0yjSkh3WMF/xZrQP6vY9qrGuV5e7KbCfF
- g6HTJA6sh62ZCv5Ae+BJ8V7TBxzSZUshJcf9QvB0tKaivwWdNdU+QxtIxPo6scMnpvq6CFR
- HVb0vJa7N7Bvc35qVqjnA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:cyQuMalTPvY=;G6cIYpP8l4HrqzVPFLzj+VTuA7s
- 6uJk7KoSZC1ZovJPT25TGM8GJhSI8xoE6q/HVcQqBdR69izgSmBk0HHjKrQFCMhBlGOb/YaE1
- zFN4MB2ZIc6cuu4mTxyNsNIPoUrAv53QGq/Cxm6L8eJIqc31ePlcmdDlmYdk3wCBa/bADdyjx
- mCfBONVrdbTanzp6gGEd/sQrLnQJoiw1bf7/dVY3tiTp1f5Kl+pI9Q89yktvTjb8NgoZhitro
- 6UYJ8EU5i5S0NQPv7nd2p7N2dpscbpotcfPfUFzW1teVXMYS5TfSKS/jLpxWt2HVjsuSJ7DOp
- VPKbfuj30K1EbEFpDYPqjxTzdwBJEZw85eAqAu+DukkBex6lHtnQb7UZVJ4XDeZvfMXyXtOKB
- 66ZW1RLWCHvlAA1cBw3uIFJw4Gf65wmMO2UqTc+F4s9bJ5+TyUEkwGdY8oCr9ZBIvO2Bz8tzz
- GFWCjJ2X9GpvCXVRsHOjuAtzQY+zDeamSdAaSmxCx+SM05MFMUt53JTmBecp8xBA6w/mryszI
- PU9ndFD1J3U3Pl9sh+3RNNgBwRB9HZF9rWs5Bkbz94U8pIRKCxav7ojdmSx6d6SGOhBmbhOl5
- p/tPEYB0PXqLCglsVzE+650DxSgPifuJmr+9592Vh6OjY384voQrQFvSe65q+dzoSmoYMYzB4
- sE8VJwUSkTk1161t1+9qzBU+gVrrGHd/PfJtzGs7Rm0Ou5kYUR4CnjtefZIuJKxlxbbU29WWJ
- kGiK9aICfxDhWANsyKZ9QwlaWxZ7e+bG+MqcmE/I3DxIs4F3D53d8Vm/1gn7zgrmL1KiyuSZ2
- 3SacLt7TdVo4kM3MLSt5CdP+AxNBAXcwTE8Cy4mHVoDNOHgztGLGzKVB4UdO29dGXGLmDUHHk
- Z4wSQbE66gN7+4pDbDUc5U03YTZ3jsvphxj8U6LOv0+dX3NgWE7hkmbxAA6m4lGVbJ4QWFDW8
- fuA+JppOaV3Fm2tuCQ5lzQTLY6lgpQT96ME/EUYMtYWT+AzHPjIwZoPCwnTt7eRp4F04AXgIF
- WzqtPeQ0ZQ/r9Pfk27OTM7w1CCceSbdZLtCA06MSWkN89GmH8b/ZDCZqFhlb4yfzNtaNVCg8+
- yZaXe4JsM0f1iCA05qDKUovnAigL3g
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <d418a30d-f0b0-49c5-8f2a-ddda9a7eeb07@gmx.net>
 
-Am 4=2E Dezember 2024 10:28:52 MEZ schrieb Chen-Yu Tsai <wenst@chromium=2Eo=
-rg>:
->Besides the MT8183's MMC controller and all its compatible derivatives,
->the recently added MT7986 and MT8196 also require two register ranges=2E
->This is based on the actual device trees=2E
+On 02-12-24, 19:51, Stefan Wahren wrote:
+> Hi Vinod,
+> 
+> Am 02.12.24 um 17:52 schrieb Vinod Koul:
+> > On 25-10-24, 12:36, Stefan Wahren wrote:
+> > > bcm2835-dma provides the service to others, so it should
+> > > suspend late and resume early.
+> > > 
+> > > Signed-off-by: Stefan Wahren <wahrenst@gmx.net>
+> > > ---
+> > >   drivers/dma/bcm2835-dma.c | 30 ++++++++++++++++++++++++++++++
+> > >   1 file changed, 30 insertions(+)
+> > > 
+> > > diff --git a/drivers/dma/bcm2835-dma.c b/drivers/dma/bcm2835-dma.c
+> > > index e1b92b4d7b05..647dda9f3376 100644
+> > > --- a/drivers/dma/bcm2835-dma.c
+> > > +++ b/drivers/dma/bcm2835-dma.c
+> > > @@ -875,6 +875,35 @@ static struct dma_chan *bcm2835_dma_xlate(struct of_phandle_args *spec,
+> > >   	return chan;
+> > >   }
+> > > 
+> > > +static int bcm2835_dma_suspend_late(struct device *dev)
+> > > +{
+> > > +	struct bcm2835_dmadev *od = dev_get_drvdata(dev);
+> > > +	struct bcm2835_chan *c, *next;
+> > > +
+> > > +	list_for_each_entry_safe(c, next, &od->ddev.channels,
+> > > +				 vc.chan.device_node) {
+> > > +		void __iomem *chan_base = c->chan_base;
+> > > +
+> > > +		if (readl(chan_base + BCM2835_DMA_ADDR)) {
+> > > +			dev_warn(dev, "Suspend is prevented by chan %d\n",
+> > > +				 c->ch);
+> > > +			return -EBUSY;
+> > > +		}
+> > Can you help understand how this helps by logging... we are not adding
+> > anything except checking this and resume is NOP as well!
+> My intention of this patch is just to make sure, that no DMA transfer is
+> in progress during late_suspend. So i followed the implementation of
+> fsldma.c
+> 
+> Additionally i added this warning mostly to know if this ever occurs.
+> But i wasn't able to trigger.
 
-Hi
+Okay in the case I dont think it is a abd idea. But the patch
+description should mention that add a warning while suspending if
+channels are active or something like that.
+Patch title and description should mention this..
 
-Mt7988 is similar to mt7986 (only using different clock settings) and usin=
-g 2 reg too=2E
+> 
+> Should i drop the warning and make resume callback = NULL?
 
-Currently there is no mmc node in mt7988 dts (i currently upstreaming it) =
-so i guess this is why you have not yet noticed it=2E
+Yes that would be better as well, no point in having dummy code
 
-See this for more:
-
-https://patchwork=2Ekernel=2Eorg/project/linux-mediatek/patch/202412021226=
-02=2E30734-3-linux@fw-web=2Ede/
-
-Maybe you can add mt7988 compatible here too in v2=2E
-
-Regards Frank
-
->Properly enforce this in the binding=2E
->
->Fixes: 4a8bd2b07d88 ("dt-bindings: mmc: mtk-sd: Add mt7988 SoC")
->Fixes: 58927c9dc4ab ("dt-bindings: mmc: mtk-sd: Add support for MT8196")
->Cc: Frank Wunderlich <frank-w@public-files=2Ede>
->Cc: Andy-ld Lu <andy-ld=2Elu@mediatek=2Ecom>
->Signed-off-by: Chen-Yu Tsai <wenst@chromium=2Eorg>
->---
-> Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml | 9 ++++++++-
-> 1 file changed, 8 insertions(+), 1 deletion(-)
->
->diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml b/Docume=
-ntation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->index f86ebd81f5a5=2E=2E9ea035928563 100644
->--- a/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->+++ b/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->@@ -235,11 +235,18 @@ allOf:
->       properties:
->         compatible:
->           contains:
->-            const: mediatek,mt8183-mmc
->+            enum:
->+              - mediatek,mt7986-mmc
->+              - mediatek,mt8183-mmc
->+              - mediatek,mt8196-mmc
->     then:
->       properties:
->         reg:
->           minItems: 2
->+    else:
->+      properties:
->+        reg:
->+          maxItems: 1
->=20
->   - if:
->       properties:
-
-
-regards Frank
+-- 
+~Vinod
