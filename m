@@ -1,25 +1,50 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8254521858F
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Dec 2024 12:13:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B35881DF745
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Dec 2024 13:17:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733400797; cv=none; b=dBHLJTL5uoZEoy4/GndClOCN5Qsx7twRQkybcZvuF0yaI8S9MdTPJnkKDvgMsEmIfbAyeKZFCMc881InSlJVbV6ItvKUZYUJdgQUctuQk4U8C2r9Kp3BBXgKnMbeoREjabhufjawg8Q2T4w00/gAbDOdBZ/7rq1vWhUteZKp0MA=
+	t=1733404627; cv=none; b=S/JbL4Q7PbZeluyee0V9Gg61f7CXXqzOlm15i7FAx7E+jXtugFKOm++ejy5dzUa57u/aI0+MZuDmn3bCA4+PD5SB6Wijy9Wn1/r8PRQUTyWqYJB6p9UVsTF1QHkyICpw+Umf5n/8X/nXyBvdrhN1sfr975gkNSahsw26ib60RdQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733400797; c=relaxed/simple;
-	bh=1J4ztAGkR97mu0rXS7CUisVilusU/16YhOa82w/ptss=;
+	s=arc-20240116; t=1733404627; c=relaxed/simple;
+	bh=rO7bFJ1YKRkoa48qZM0Zr6uA2Ubqy/NEK/icvlD5L0s=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CPV+5mAH1qRUTjP04v21n9ewlQEVWV7NXSMBO8MKH+2cmyoOm82oulc0s4G28y7o5Gciwr5sWaYZfDTG/uVOlzrBy5C1HtFJ3OhL79szBI+usqmmoiRgNgnBXJdBk+sp7wdMGeXMGgmUnNNoyRtSW94MIXUL9UIk8rwghjFffp4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from ptz.office.stw.pengutronix.de ([2a0a:edc0:0:900:1d::77] helo=[127.0.0.1])
-	by metis.whiteo.stw.pengutronix.de with esmtp (Exim 4.92)
-	(envelope-from <a.fatoum@pengutronix.de>)
-	id 1tJAik-0008Hm-P7; Thu, 05 Dec 2024 13:12:38 +0100
-Message-ID: <4218cdae-07ee-433c-8a68-bb07885e43ab@pengutronix.de>
-Date: Thu, 5 Dec 2024 13:12:33 +0100
+	 In-Reply-To:Content-Type; b=K9ugoHXc4w5Qmhm80qoq8y+ky7Jdg57roc4aG6CFB/eb81XAad9/NfGIm14mvA7Ab6X9prBXFAUaRaN6ndFmj2npPhk3dp8wnAw4DoaNCMkYSt8k4QKhEgYbu4VmZKorx8VDiKslff9p9cGuuCVv9hMrO+BjqKNDn4qNwQc3umw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=GcFRQWIG; arc=none smtp.client-ip=192.198.163.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="GcFRQWIG"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1733404625; x=1764940625;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=rO7bFJ1YKRkoa48qZM0Zr6uA2Ubqy/NEK/icvlD5L0s=;
+  b=GcFRQWIGZurUQBS4+kk8Aa5fRQzucNrcLaThrNUnDV94c6RsofHhztle
+   WI/QldOp2bwphqRTH7VPU6yG7baVvTAZMzpbBHvQ5BmTOI0kI4upWgRfo
+   T65PLUajgvG5JqZG3K/zc7323YaUJSQLte4ZcSQZwi6lSbk1iO/syJ9hK
+   TSyEacWJQoWBqa51wd/KLOYQ6lmKWxnMA5T+7LsIDCbDVQvZxe7Yi/iQA
+   iKX3B7mrFIba28CdJ+dHzvuJOmi7RpQs8VMje7QbI3v72lSlqk1QCxdZr
+   VY+hWLu6nnFHYcEWRrggFRgsjyp5QPhwTfg21ef0XUiXA3jWXG7V+lLQr
+   A==;
+X-CSE-ConnectionGUID: rcn70xcOR4eMMtGST8XspQ==
+X-CSE-MsgGUID: GDhhG1PbTTSMHyZOYDOuUg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11276"; a="44321136"
+X-IronPort-AV: E=Sophos;i="6.12,210,1728975600"; 
+   d="scan'208";a="44321136"
+Received: from orviesa007.jf.intel.com ([10.64.159.147])
+  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2024 05:17:05 -0800
+X-CSE-ConnectionGUID: N96mNVkkQ7mgP6ZpkMMhsA==
+X-CSE-MsgGUID: PZwfAt6jSKe6eoVPTEFBZw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,210,1728975600"; 
+   d="scan'208";a="94533712"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.246.0.178])
+  by orviesa007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2024 05:17:04 -0800
+Message-ID: <36d8b897-e8d0-4262-b60b-a5510e93c6ff@intel.com>
+Date: Thu, 5 Dec 2024 15:16:56 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -27,165 +52,170 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: Co-existence of GPT and fixed partitions (Was: Re: [PATCH v6 5/6]
- block: add support for partition table defined in OF)
-To: "Christian Marangi (Ansuel)" <ansuelsmth@gmail.com>
-Cc: Jens Axboe <axboe@kernel.dk>, Jonathan Corbet <corbet@lwn.net>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Daniel Golle <daniel@makrotopia.org>,
- INAGAKI Hiroshi <musashino.open@gmail.com>,
- Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
- Ming Lei <ming.lei@redhat.com>, Li Lingfeng <lilingfeng3@huawei.com>,
- Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>,
- Linus Walleij <linus.walleij@linaro.org>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Riyan Dhiman <riyandhiman14@gmail.com>,
- Mikko Rapeli <mikko.rapeli@linaro.org>,
- Jorge Ramirez-Ortiz <jorge@foundries.io>, Li Zhijian
- <lizhijian@fujitsu.com>,
- Dominique Martinet <dominique.martinet@atmark-techno.com>,
- Jens Wiklander <jens.wiklander@linaro.org>,
- Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
- linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
- Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
- Christoph Hellwig <hch@infradead.org>,
- Pengutronix Kernel Team <kernel@pengutronix.de>,
- Christoph Hellwig <hch@lst.de>
-References: <20241002221306.4403-1-ansuelsmth@gmail.com>
- <20241002221306.4403-6-ansuelsmth@gmail.com>
- <5e9a80d6-6c89-478e-99c9-584647661f5e@pengutronix.de>
- <CA+_ehUwa69Qa96yy0=K9AiCEJbaZt9oGCRf5gJDh-0_14shbtA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of_dwcmshc: Change to dwcmshc_phy_init for
+ reusing codes
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org
+References: <CGME20241204100508epcas1p2cc54ed287df5a361536b68971bca48f6@epcas1p2.samsung.com>
+ <20241204100507.330025-1-jh80.chung@samsung.com>
 Content-Language: en-US
-From: Ahmad Fatoum <a.fatoum@pengutronix.de>
-In-Reply-To: <CA+_ehUwa69Qa96yy0=K9AiCEJbaZt9oGCRf5gJDh-0_14shbtA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241204100507.330025-1-jh80.chung@samsung.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:900:1d::77
-X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hello Christian,
-
-Thanks for the prompt response.
-
-On 05.12.24 12:54, Christian Marangi (Ansuel) wrote:
->> How common are these? I never worked with a system that didn't use MBR
->> or GPT for the user partition.
->>
+On 4/12/24 12:05, Jaehoon Chung wrote:
+> dwcmshc_phy_1_8v_init and dwcmshc_phy_3_3v_init differ only by a few
+> lines of code. This allow us to reuse code depending on voltage.
 > 
-> On router devices this is the approach for Mediatek and Airoha and also
-> other vendor for anything that have an eMMC.
-
-Good to know. Thanks.
-
->> barebox has for many years supported defining fixed partitions on SD/MMC
->> nodes and it's used heavily to define e.g. the location of the barebox
->> environment. Many who do so, do this either before the first partition
->> of the MBR/GPT or overlay the fixed partition to be identical to
->> an existing MBR/GPT partition.
->>
->> barebox also by default copies all fixed partitions it is aware of
->> into the kernel DT, so if the kernel now stops parsing GPT/MBR when
->> a fixed partition node is defined, this would break compatibility of
->> existing barebox-booting systems with new kernels.
->>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 69 +++++------------------------
+>  1 file changed, 12 insertions(+), 57 deletions(-)
 > 
-> I'm not following... is that a downstream thing? Also fixed-partition
-> in DT for SD/MMC were never supported, why the partition was
-> copied in DT? Userspace tools made use of them?
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 7ea3da45db32..87bc32d13cc0 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -328,11 +328,15 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  	sdhci_request(mmc, mrq);
+>  }
+>  
+> -static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
+> +static void dwcmshc_phy_init(struct sdhci_host *host)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>  	u32 val;
+> +	u32 rxsel = PHY_PAD_RXSEL_3V3;
 
-The kernel isn't modified, but the barebox-state utility can parse the
-fixed partitions in the DT and map it via udev to a block device partition
-(if one exists) or to a block device + offset.
+Nicer to order local variables by descending line length when
+possible i.e.
 
->> If I understand correctly, it's possible to have both partitions-boot1 and
->> a GPT on the user area with your patch, right?
->>
-> 
-> No, this array works by, first is found WIN. If OF_PARTITION is enabled
-> and an OF partition is declared in DT, then efi partition parse is skipped.
+	u32 rxsel = PHY_PAD_RXSEL_3V3;
+	u32 val;
 
-Yes, but Boot partitions and the user area are different block devices,
-so it should be possible to use OF partition for the boot partitions
-and GPT for the user area, right?
+> +
+> +	if (host->flags & SDHCI_SIGNALING_180 || priv->flags & FLAG_IO_FIXED_1V8)
 
->> So this only leaves the matter of dealing with both fixed-partitions and
->> GPT for the same device node.
->>
-> 
-> The logic is applied to skip exactly this scenario. GPT partition can
-> be edited at
-> runtime and change, DT is more deterministic. It's one or the other.
-> 
-> If downstream someone have GPT then OF_PARTITION should not
-> be used at all... Eventually downstream for this special approach, an additional
-> downstream patch can be added that define a special property in the node to
-> disable OF parsing. (it's a 3 line patch and since everything is downstream it
-> really doesn't matter)
+'host->flags & SDHCI_SIGNALING_180' only means 1.8V signaling
+is supported, so this looks strange. Can you clarify this?
 
-As mentioned, the kernel itself isn't patched, but there was an implicit
-assumption that MBR/GPT parsing would continue to work, even when a fixed
-partition node is specified...
+> +		rxsel = PHY_PAD_RXSEL_1V8;
+>  
+>  	/* deassert phy reset & set tx drive strength */
+>  	val = PHY_CNFG_RSTN_DEASSERT;
+> @@ -353,7 +357,7 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
+>  	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
+>  
+>  	/* configure phy pads */
+> -	val = PHY_PAD_RXSEL_1V8;
+> +	val = rxsel;
+>  	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
+>  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+>  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+> @@ -365,65 +369,20 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
+>  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+>  	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
+>  
+> -	val = PHY_PAD_RXSEL_1V8;
+> +	val = rxsel;
+>  	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
+>  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+>  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+>  	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
+>  
+>  	/* enable data strobe mode */
+> -	sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL),
+> -		     PHY_DLLDL_CNFG_R);
+> +	if (host->flags & SDHCI_SIGNALING_180 || priv->flags & FLAG_IO_FIXED_1V8)
+> +		sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK,
+> +					PHY_DLLDL_CNFG_SLV_INPSEL), PHY_DLLDL_CNFG_R);
 
->> What are the thoughts on this? An easy way out would be to make of_partition
->> come later than efi_partition/mbr_partition, but I think it would be
->> nice if the kernel could consume partition info out of both of_partition
->> and efi_partition as long they don't collide.
->>
-> 
-> The 2 thing would conflicts and would introduce so much complexity it might
-> be not worth at all. Also you would have situation where someone declare
-> OF partition in the space where the GPT partition table is located, adding
-> the possibility of corrupting it.
+Perhaps slightly more readable to use a variable e.g.
 
-If we go this way, the implementation should of course refuse creating partitions
-that conflict. The barebox implementation allows partitions only in the
-unpartitioned space or to be identical to an existing GPT partition.
+	/* enable data strobe mode */
+	if (???) {
+		u8 sel = FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL);
 
-But I agree, this needs to be thought through thoroughly to determine how
-it should interact with  runtime repartitioning.
+		sdhci_writeb(host, sel, PHY_DLLDL_CNFG_R);
+	}
 
-> Again would love more explanation of your case because by the looks of it,
-> you use GPT for partition parsing and just overload the DT with the additional
-> info maybe for userspace usage. (and that case can be handled by just keeping
-> OF_PARTITION disabled or adding a little downstream patch)
+>  
+>  	/* enable phy dll */
+>  	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
+> -}
+> -
+> -static void dwcmshc_phy_3_3v_init(struct sdhci_host *host)
+> -{
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> -	u32 val;
+> -
+> -	/* deassert phy reset & set tx drive strength */
+> -	val = PHY_CNFG_RSTN_DEASSERT;
+> -	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
+> -	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
+> -	sdhci_writel(host, val, PHY_CNFG_R);
+> -
+> -	/* disable delay line */
+> -	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
+> -
+> -	/* set delay line */
+> -	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
+> -	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
+> -
+> -	/* enable delay lane */
+> -	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
+> -	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
+> -	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
+> -
+> -	/* configure phy pads */
+> -	val = PHY_PAD_RXSEL_3V3;
+> -	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
+> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+> -	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
+> -	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
+> -	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
+> -
+> -	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+> -	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
+> -
+> -	val = PHY_PAD_RXSEL_3V3;
+> -	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
+> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
+> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
+> -	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
+>  
+> -	/* enable phy dll */
+> -	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
+>  }
+>  
+>  static void th1520_sdhci_set_phy(struct sdhci_host *host)
+> @@ -433,11 +392,7 @@ static void th1520_sdhci_set_phy(struct sdhci_host *host)
+>  	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
+>  	u16 emmc_ctrl;
+>  
+> -	/* Before power on, set PHY configs */
+> -	if (priv->flags & FLAG_IO_FIXED_1V8)
+> -		dwcmshc_phy_1_8v_init(host);
+> -	else
+> -		dwcmshc_phy_3_3v_init(host);
+> +	dwcmshc_phy_init(host);
+>  
+>  	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
+>  		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
+> @@ -1163,7 +1118,7 @@ static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
+>  	.get_max_clock		= dwcmshc_get_max_clock,
+>  	.reset			= th1520_sdhci_reset,
+>  	.adma_write_desc	= dwcmshc_adma_write_desc,
+> -	.voltage_switch		= dwcmshc_phy_1_8v_init,
+> +	.voltage_switch		= dwcmshc_phy_init,
+>  	.platform_execute_tuning = th1520_execute_tuning,
+>  };
+>  
 
-Yes, keeping OF_PARTITION disabled would be required to not break barebox
-users that made use of the non-upstream binding.
-
-I wonder though, if something can be done to reconcile Linux and barebox'
-view of this and allow in the future enabling both Linux OF_PARTITION
-and barebox OF partition fixups.
-
-> Or you are telling me you had a downstream patch that declares additional
-> partition in addition to a disk with a GPT partition table?
-> If that's the case, I'm confused of why the additional partition can't
-> be declared
-> directly in GPT.
-
-Many of the older boards supported by barebox used to place the barebox image
-and the environment prior to the first partition in the unpartitioned area.
-
-To still be able to access them, fixed partitions were used and the rest
-of the system was described by MBR/GPT partitions.
-
-This was partially made necessary by BootROMs having strange expectations
-of where the bootloader needs to be placed, which partially overlapped
-the MBR/GPT itself, making it difficult to define a partition for the bootloader.
-
-For newer boards, it's more common to place the bootloader in a GPT partition
-now. barebox has no DT binding for generically describing such a GPT partition
-though, so boards may create a fixed-partition "alias" and use that.
-
-Cheers,
-Ahmad 
-
--- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
