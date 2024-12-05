@@ -1,150 +1,303 @@
-Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com [209.85.167.50])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1196726AFF
-	for <linux-mmc@vger.kernel.org>; Thu,  5 Dec 2024 03:41:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9964A2066D6;
+	Thu,  5 Dec 2024 09:57:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733370078; cv=none; b=RK8h/pFqQwU0+05O/HnSZCzjymCxF75mjgZApbW4LuvCQk2AjvgZBYplqXYMeW+gotpzOpIcPxCvEMmQvUjyXwiJyHbCMZi+CMSbgXd1aIr0PyCQ0oyfBwYX0bowjmcbEkRDOQJcAZ+S0lxTR9JfCvsmpTsK9kGZa9HJRF6OHoY=
+	t=1733392639; cv=none; b=ndnGRmyaTsIfChzXpXC+cN7BAQO+LeGGzfiQBEAi/oPVyNoffphKt3NIktuHoy51bp7HHLDrAhxpl6V78aFU2vyPQSnVBEtbJg1/FZCWl5cxY5v3x2MsZ/3AxzcychASO6c0cb5leo7qNUJMxhLJtJeaPmmMqJXBAZu2VVwQEDU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733370078; c=relaxed/simple;
-	bh=8ILclPDNeqSnZ4d4adFACLlkV1PYPYXs8E36ta2tDWs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JN0qZNAIBc1BR3949OGcf9AqJfBC0/RkX1Hb0liCS7Vvqj7zgt5VR4mx+D4lcpXDeFOlCuZHQ5w+wdM68UiV9H1yR+QGrJ8DtVDInsqUExtF1f0oNXcdEeWaj7PVdKj+DSr78XUdgSe2ZfgZOpCzMpEESEhg/AD0QDHI9W+I4SQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org; spf=pass smtp.mailfrom=chromium.org; dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b=FEFNrATf; arc=none smtp.client-ip=209.85.167.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=chromium.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=chromium.org
+	s=arc-20240116; t=1733392639; c=relaxed/simple;
+	bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:To:CC; b=jUG2nuwalWPxj9CsdSo5VSxWzdNnqaWJID9jafHVLF268psEhNCsvLWgY75yNlGdHFePjBnC0kxsAyxvBYORxWWUCByWIlDo0333AIUVi9lRZ2p8OT9Q3aspuYnqw6EmNcnQyNyoT93FKID0c/7ceiAy9j0v7JWoLYWhejRAcOU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=PFFSZs9K; arc=none smtp.client-ip=68.232.153.233
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="FEFNrATf"
-Received: by mail-lf1-f50.google.com with SMTP id 2adb3069b0e04-53df67d6659so462672e87.3
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Dec 2024 19:41:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google; t=1733370073; x=1733974873; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=JwfLitJcijVjn3mYmWjqS2pZ/U3vybZ9MoCggOPZX9Y=;
-        b=FEFNrATfOjEwDJIJwKs7wzBSAJxytdGtTNh8t0ehBYRV5mQsDmQCkunBeaH3uVocTx
-         PzJWfAr8GeqrpFT7e08l0OwQtfycDP2EWh51hjg4yvIcROg+GFDKH6h7kbLzcw5m0gxy
-         wJ9pgvF0/wG1MhHXpyoOvtv5zK7ULh3OGV/H0=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733370073; x=1733974873;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=JwfLitJcijVjn3mYmWjqS2pZ/U3vybZ9MoCggOPZX9Y=;
-        b=qvjkLJP8rdxEyVou1WYpgRlW9BFfGpdBzwxLGDfBuZ1/l0yDUOEgDokROqMOlAo7a8
-         7/ePRTUqItLyMWSKZB9LgbBKa41P1Wm3ebdyspRsXS8atXzqXD/TCwvnMW/WyxkeV42x
-         LS2ucoH2kbm4oym80zADk+Y84vcniqcq5mcuQDp8arqKivQAYfPiF8mP2XJ2kdBASMa4
-         R6ZDBy5JigLoOACAdtFAgrxDvayHVB8XY7ew7r4j+tXlYPPS4Z1yRveEY+Hml1ytDxrE
-         Sl9hMQ6Z5qdgyoyxrpT7zyAjXNcyncM+iXwbLABjys4puXFU5uC1s+eeDiXX2TyaoGQ6
-         t2UA==
-X-Forwarded-Encrypted: i=1; AJvYcCVsZUh84xvaUJMN5g+DdlVQIwdZTI4pSRpI+yKnyVgm2zkvOVgCUoImpIRIElwfy6qGWd62FIB2MIA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzqJ5lDxlUzovprAJ9VHzWgyMeMpc14N1PnGd3eMJrXFJ9hoCMK
-	eGk8glYqeHjIfj3ZZ7e5dAE+eK5m7SYG2JDa+xEqSDBGgaTv37WPaDQ6ti6eV1gqiwWazx16ewE
-	ZJZFMhcrnjBUVW7OO06gAMmtobnjeCjTqt+jx/ZWssOkF8xA=
-X-Gm-Gg: ASbGnct/0Zmu4pmszLJSFNbyDfA3yRVtFFP0+cp3hUgBLP3n8iF7WgFUIsCCyP2vtfe
-	V94zLSpUIaKsWkD3AxpLO1wMmZRGwq8Wq/DMjK8bnVklHlcVuafT4hFha/Uk=
-X-Google-Smtp-Source: AGHT+IHqgDnUkKGPY8hz6ukhVqJstOuAN0fggL2+fodGywtVNADNTkDdluEMvlUwqS+eqw7nTOCdm7Cyv8kDB7dlMcU=
-X-Received: by 2002:a05:6512:2822:b0:53e:228a:85b with SMTP id
- 2adb3069b0e04-53e228a0a02mr191564e87.11.1733370073161; Wed, 04 Dec 2024
- 19:41:13 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="PFFSZs9K"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1733392638; x=1764928638;
+  h=from:date:subject:mime-version:content-transfer-encoding:
+   message-id:to:cc;
+  bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
+  b=PFFSZs9KnOe8/pOAJM1Mf9RoMBw1snqr5BN/Rg6fQDtHlIj7xiDq+ULR
+   bUZsEj1Keu34p8ZJdi+kjJRLi6WN2qUf4ky14oKSM8N8bJPDfjMFkWubZ
+   RUbZ1aK2w8uXck69/Rnu6YwYlwfqJDjLFaLjDyv0VfIYqRjBb9zWP0624
+   GmPRSawa3ES4bCPoWb9pxpLc8d+fEOalIWj29G5cvMf+lhA9ErLZ2WsUL
+   dfA9EXTnmTxIYdVjr4Ko/u9+tA9khspLcloiDG8hqTVyRZ+qPJy8Sqpkq
+   jvL4N5p4chhYZxQbWpkl8MX6O8l6EF7sQfAGBFIq4K+jQHB79uQBQmvFI
+   w==;
+X-CSE-ConnectionGUID: TKbBYKFISlCTYliYBZMdug==
+X-CSE-MsgGUID: 8R89V+2PRp+YRmOpe5uZbQ==
+X-IronPort-AV: E=Sophos;i="6.12,209,1728975600"; 
+   d="scan'208";a="266366334"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Dec 2024 02:57:14 -0700
+Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
+ chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35; Thu, 5 Dec 2024 02:57:13 -0700
+Received: from [127.0.0.1] (10.10.85.11) by chn-vm-ex03.mchp-main.com
+ (10.10.85.151) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
+ Transport; Thu, 5 Dec 2024 02:57:08 -0700
+From: Dharma Balasubiramani <dharma.b@microchip.com>
+Date: Thu, 5 Dec 2024 15:27:02 +0530
+Subject: [PATCH] dt-bindings: mmc: atmel,hsmci: Convert to json schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241204092855.1365638-1-wenst@chromium.org> <20241204092855.1365638-2-wenst@chromium.org>
- <4762E5F1-59F2-40D1-9D22-724107623AAB@public-files.de>
-In-Reply-To: <4762E5F1-59F2-40D1-9D22-724107623AAB@public-files.de>
-From: Chen-Yu Tsai <wenst@chromium.org>
-Date: Thu, 5 Dec 2024 11:41:01 +0800
-Message-ID: <CAGXv+5EYf9-r88nv7zDo8JFGhMFyzVPU1gBNwkETvGTp+27q0g@mail.gmail.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: mtk-sd: Document compatibles that
- need two register ranges
-To: frank-w@public-files.de
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Matthias Brugger <matthias.bgg@gmail.com>, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-mediatek@lists.infradead.org, devicetree@vger.kernel.org, 
-	Andy-ld Lu <andy-ld.lu@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-ID: <20241205-hsmci-v1-1-5a25e622dfed@microchip.com>
+X-B4-Tracking: v=1; b=H4sIAO14UWcC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDIxNDIwNT3Yzi3ORMXfPEZOPUREtDU3NzcyWg2oKi1LTMCrA50bG1tQD8cYq
+ DVwAAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
+	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Aubin Constans <aubin.constans@microchip.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
+	Dharma Balasubiramani <dharma.b@microchip.com>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1733392627; l=5386;
+ i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
+ bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
+ b=0QN3MW/Jgdj9oByvvhUmcqV48fPYJRFbZgt9+zC65YPTHjeIKzDb4lKnwYLGe3k6k/uR09hw+
+ o/btQrK51yxC3JpnRuqRaKYLJIoSg0vpCPPfZaS2xz5YOUuSqnVWGB6
+X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
+ pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
 
-On Wed, Dec 4, 2024 at 6:38=E2=80=AFPM Frank Wunderlich <frank-w@public-fil=
-es.de> wrote:
->
-> Am 4. Dezember 2024 10:28:52 MEZ schrieb Chen-Yu Tsai <wenst@chromium.org=
->:
-> >Besides the MT8183's MMC controller and all its compatible derivatives,
-> >the recently added MT7986 and MT8196 also require two register ranges.
-> >This is based on the actual device trees.
->
-> Hi
->
-> Mt7988 is similar to mt7986 (only using different clock settings) and usi=
-ng 2 reg too.
->
-> Currently there is no mmc node in mt7988 dts (i currently upstreaming it)=
- so i guess this is why you have not yet noticed it.
->
-> See this for more:
->
-> https://patchwork.kernel.org/project/linux-mediatek/patch/20241202122602.=
-30734-3-linux@fw-web.de/
+Convert atmel,hsmci documentation to yaml format. The new file will inherit
+from mmc-controller.yaml.
 
-I think I noticed it at the beginning, but it then slipped my mind. I
-might have gotten it mixed up with mt7986.
+Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+---
+ .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 124 +++++++++++++++++++++
+ .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 ------------
+ 2 files changed, 124 insertions(+), 73 deletions(-)
 
-> Maybe you can add mt7988 compatible here too in v2.
+diff --git a/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
+new file mode 100644
+index 000000000000..3870d464faa8
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
+@@ -0,0 +1,124 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/atmel,hsmci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Atmel High-Speed MultiMedia Card Interface (HSMCI)
++
++description:
++  The Atmel HSMCI controller provides an interface for MMC, SD, and SDIO memory
++  cards.
++
++maintainers:
++  - Nicolas Ferre <nicolas.ferre@microchip.com>
++  - Aubin Constans <aubin.constans@microchip.com>
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++properties:
++  compatible:
++    const: atmel,hsmci
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  dmas:
++    maxItems: 1
++
++  dma-names:
++    const: rxtx
++
++  clocks:
++    maxItems: 1
++
++  clock-names:
++    const: mci_clk
++
++  "#address-cells":
++    const: 1
++    description: Used for slot IDs.
++
++  "#size-cells":
++    const: 0
++
++patternProperties:
++  "^slot@[0-9]+$":
++    type: object
++    description: A slot node representing an MMC, SD, or SDIO slot.
++
++    allOf:
++      - $ref: mmc-controller.yaml
++
++    properties:
++      reg:
++        description: Slot ID.
++        minimum: 0
++
++      bus-width:
++        description: Number of data lines connected to the controller.
++        enum: [1, 4, 8]
++
++      cd-gpios:
++        description: GPIO used for card detection.
++
++      cd-inverted:
++        type: boolean
++        description: Inverts the value of the card detection GPIO.
++
++      wp-gpios:
++        description: GPIO used for write protection.
++
++    required:
++      - reg
++      - bus-width
++
++    unevaluatedProperties: false
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++  - "#address-cells"
++  - "#size-cells"
++
++anyOf:
++  - required:
++      - slot@0
++  - required:
++      - slot@1
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    #include <dt-bindings/clock/at91.h>
++    mmc@f0008000 {
++      compatible = "atmel,hsmci";
++      reg = <0xf0008000 0x600>;
++      interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
++      clocks = <&mci0_clk>;
++      clock-names = "mci_clk";
++      #address-cells = <1>;
++      #size-cells = <0>;
++
++      slot@0 {
++        reg = <0>;
++        bus-width = <4>;
++        cd-gpios = <&pioD 15 0>;
++        cd-inverted;
++      };
++
++      slot@1 {
++        reg = <1>;
++        bus-width = <4>;
++      };
++    };
++...
+diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+deleted file mode 100644
+index 07ad02075a93..000000000000
+--- a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
++++ /dev/null
+@@ -1,73 +0,0 @@
+-* Atmel High Speed MultiMedia Card Interface
+-
+-This controller on atmel products provides an interface for MMC, SD and SDIO
+-types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the atmel-mci driver.
+-
+-1) MCI node
+-
+-Required properties:
+-- compatible: should be "atmel,hsmci"
+-- #address-cells: should be one. The cell is the slot id.
+-- #size-cells: should be zero.
+-- at least one slot node
+-- clock-names: tuple listing input clock names.
+-	Required elements: "mci_clk"
+-- clocks: phandles to input clocks.
+-
+-The node contains child nodes for each slot that the platform uses
+-
+-Example MCI node:
+-
+-mmc0: mmc@f0008000 {
+-	compatible = "atmel,hsmci";
+-	reg = <0xf0008000 0x600>;
+-	interrupts = <12 4>;
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	clock-names = "mci_clk";
+-	clocks = <&mci0_clk>;
+-
+-	[ child node definitions...]
+-};
+-
+-2) slot nodes
+-
+-Required properties:
+-- reg: should contain the slot id.
+-- bus-width: number of data lines connected to the controller
+-
+-Optional properties:
+-- cd-gpios: specify GPIOs for card detection
+-- cd-inverted: invert the value of external card detect gpio line
+-- wp-gpios: specify GPIOs for write protection
+-
+-Example slot node:
+-
+-slot@0 {
+-	reg = <0>;
+-	bus-width = <4>;
+-	cd-gpios = <&pioD 15 0>
+-	cd-inverted;
+-};
+-
+-Example full MCI node:
+-mmc0: mmc@f0008000 {
+-	compatible = "atmel,hsmci";
+-	reg = <0xf0008000 0x600>;
+-	interrupts = <12 4>;
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	slot@0 {
+-		reg = <0>;
+-		bus-width = <4>;
+-		cd-gpios = <&pioD 15 0>
+-		cd-inverted;
+-	};
+-	slot@1 {
+-		reg = <1>;
+-		bus-width = <4>;
+-	};
+-};
 
-Will do.
+---
+base-commit: feffde684ac29a3b7aec82d2df850fbdbdee55e4
+change-id: 20241205-hsmci-7ac3ea915777
 
-Thanks
-ChenYu
+Best regards,
+-- 
+Dharma Balasubiramani <dharma.b@microchip.com>
 
-> Regards Frank
->
-> >Properly enforce this in the binding.
-> >
-> >Fixes: 4a8bd2b07d88 ("dt-bindings: mmc: mtk-sd: Add mt7988 SoC")
-> >Fixes: 58927c9dc4ab ("dt-bindings: mmc: mtk-sd: Add support for MT8196")
-> >Cc: Frank Wunderlich <frank-w@public-files.de>
-> >Cc: Andy-ld Lu <andy-ld.lu@mediatek.com>
-> >Signed-off-by: Chen-Yu Tsai <wenst@chromium.org>
-> >---
-> > Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 9 ++++++++-
-> > 1 file changed, 8 insertions(+), 1 deletion(-)
-> >
-> >diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documen=
-tation/devicetree/bindings/mmc/mtk-sd.yaml
-> >index f86ebd81f5a5..9ea035928563 100644
-> >--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> >+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> >@@ -235,11 +235,18 @@ allOf:
-> >       properties:
-> >         compatible:
-> >           contains:
-> >-            const: mediatek,mt8183-mmc
-> >+            enum:
-> >+              - mediatek,mt7986-mmc
-> >+              - mediatek,mt8183-mmc
-> >+              - mediatek,mt8196-mmc
-> >     then:
-> >       properties:
-> >         reg:
-> >           minItems: 2
-> >+    else:
-> >+      properties:
-> >+        reg:
-> >+          maxItems: 1
-> >
-> >   - if:
-> >       properties:
->
->
-> regards Frank
