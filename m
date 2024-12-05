@@ -1,303 +1,155 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9964A2066D6;
-	Thu,  5 Dec 2024 09:57:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EA1B206F10
+	for <linux-mmc@vger.kernel.org>; Thu,  5 Dec 2024 11:22:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733392639; cv=none; b=ndnGRmyaTsIfChzXpXC+cN7BAQO+LeGGzfiQBEAi/oPVyNoffphKt3NIktuHoy51bp7HHLDrAhxpl6V78aFU2vyPQSnVBEtbJg1/FZCWl5cxY5v3x2MsZ/3AxzcychASO6c0cb5leo7qNUJMxhLJtJeaPmmMqJXBAZu2VVwQEDU=
+	t=1733397738; cv=none; b=UNWkQb0UZHClqtdVPthsnsZuc0nbe4vR0GObxVaNQ2kxb19XE/V710AaCVzMQ/bnsXjIKWq54g89Pj3IxSq/4OB8POyWUNZ+0/8/E25faxXKOcGCitQBkIPj4iplFj7c1UltaCTjn9Xnjs6H6ha4LhZwLgJC0DrkNez6jSjtrZA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733392639; c=relaxed/simple;
-	bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:To:CC; b=jUG2nuwalWPxj9CsdSo5VSxWzdNnqaWJID9jafHVLF268psEhNCsvLWgY75yNlGdHFePjBnC0kxsAyxvBYORxWWUCByWIlDo0333AIUVi9lRZ2p8OT9Q3aspuYnqw6EmNcnQyNyoT93FKID0c/7ceiAy9j0v7JWoLYWhejRAcOU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=PFFSZs9K; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="PFFSZs9K"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1733392638; x=1764928638;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:to:cc;
-  bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
-  b=PFFSZs9KnOe8/pOAJM1Mf9RoMBw1snqr5BN/Rg6fQDtHlIj7xiDq+ULR
-   bUZsEj1Keu34p8ZJdi+kjJRLi6WN2qUf4ky14oKSM8N8bJPDfjMFkWubZ
-   RUbZ1aK2w8uXck69/Rnu6YwYlwfqJDjLFaLjDyv0VfIYqRjBb9zWP0624
-   GmPRSawa3ES4bCPoWb9pxpLc8d+fEOalIWj29G5cvMf+lhA9ErLZ2WsUL
-   dfA9EXTnmTxIYdVjr4Ko/u9+tA9khspLcloiDG8hqTVyRZ+qPJy8Sqpkq
-   jvL4N5p4chhYZxQbWpkl8MX6O8l6EF7sQfAGBFIq4K+jQHB79uQBQmvFI
-   w==;
-X-CSE-ConnectionGUID: TKbBYKFISlCTYliYBZMdug==
-X-CSE-MsgGUID: 8R89V+2PRp+YRmOpe5uZbQ==
-X-IronPort-AV: E=Sophos;i="6.12,209,1728975600"; 
-   d="scan'208";a="266366334"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Dec 2024 02:57:14 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Thu, 5 Dec 2024 02:57:13 -0700
-Received: from [127.0.0.1] (10.10.85.11) by chn-vm-ex03.mchp-main.com
- (10.10.85.151) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
- Transport; Thu, 5 Dec 2024 02:57:08 -0700
-From: Dharma Balasubiramani <dharma.b@microchip.com>
-Date: Thu, 5 Dec 2024 15:27:02 +0530
-Subject: [PATCH] dt-bindings: mmc: atmel,hsmci: Convert to json schema
+	s=arc-20240116; t=1733397738; c=relaxed/simple;
+	bh=z7QzahvsUpDUq/hh1dmI3rNNlgN7khulvlUbO6WYo3A=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=ovoudwzumrBU5SJTbMHoEclPYhCRYGkG/qFtviPf4UjMurDxTSCEb2MEfksQgHVFF33Z5IeUyeuMnYcgilS45mcwCUPg6Cb4J4SL9e0tnVxIz1l7Ca2gyWaGIWtP+cDMCAijlqXhDGwGUp4LZujOnaDXdsVsG7d0yeQVRQFLsVk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from ptz.office.stw.pengutronix.de ([2a0a:edc0:0:900:1d::77] helo=[127.0.0.1])
+	by metis.whiteo.stw.pengutronix.de with esmtp (Exim 4.92)
+	(envelope-from <a.fatoum@pengutronix.de>)
+	id 1tJ9vK-0008Qw-3k; Thu, 05 Dec 2024 12:21:34 +0100
+Message-ID: <5e9a80d6-6c89-478e-99c9-584647661f5e@pengutronix.de>
+Date: Thu, 5 Dec 2024 12:21:24 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Co-existence of GPT and fixed partitions (Was: Re: [PATCH v6 5/6]
+ block: add support for partition table defined in OF)
+To: Christian Marangi <ansuelsmth@gmail.com>, Jens Axboe <axboe@kernel.dk>,
+ Jonathan Corbet <corbet@lwn.net>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Daniel Golle <daniel@makrotopia.org>,
+ INAGAKI Hiroshi <musashino.open@gmail.com>,
+ Christian Brauner <brauner@kernel.org>, Al Viro <viro@zeniv.linux.org.uk>,
+ Ming Lei <ming.lei@redhat.com>, Li Lingfeng <lilingfeng3@huawei.com>,
+ Christian Heusel <christian@heusel.eu>, Avri Altman <avri.altman@wdc.com>,
+ Linus Walleij <linus.walleij@linaro.org>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Riyan Dhiman <riyandhiman14@gmail.com>,
+ Mikko Rapeli <mikko.rapeli@linaro.org>,
+ Jorge Ramirez-Ortiz <jorge@foundries.io>, Li Zhijian
+ <lizhijian@fujitsu.com>,
+ Dominique Martinet <dominique.martinet@atmark-techno.com>,
+ Jens Wiklander <jens.wiklander@linaro.org>,
+ Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+ linux-block@vger.kernel.org, linux-doc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, Lorenzo Bianconi <lorenzo@kernel.org>,
+ Miquel Raynal <miquel.raynal@bootlin.com>, upstream@airoha.com,
+ Christoph Hellwig <hch@infradead.org>,
+ Pengutronix Kernel Team <kernel@pengutronix.de>
+Cc: Christoph Hellwig <hch@lst.de>
+References: <20241002221306.4403-1-ansuelsmth@gmail.com>
+ <20241002221306.4403-6-ansuelsmth@gmail.com>
+Content-Language: en-US
+From: Ahmad Fatoum <a.fatoum@pengutronix.de>
+In-Reply-To: <20241002221306.4403-6-ansuelsmth@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Message-ID: <20241205-hsmci-v1-1-5a25e622dfed@microchip.com>
-X-B4-Tracking: v=1; b=H4sIAO14UWcC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
- vPSU3UzU4B8JSMDIxNDIwNT3Yzi3ORMXfPEZOPUREtDU3NzcyWg2oKi1LTMCrA50bG1tQD8cYq
- DVwAAAA==
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
-	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Aubin Constans <aubin.constans@microchip.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-	Dharma Balasubiramani <dharma.b@microchip.com>
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1733392627; l=5386;
- i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
- bh=SdM7VggmTcxbf8b2OTX6vQfzxYnAZ+EP51JNF4mJMF0=;
- b=0QN3MW/Jgdj9oByvvhUmcqV48fPYJRFbZgt9+zC65YPTHjeIKzDb4lKnwYLGe3k6k/uR09hw+
- o/btQrK51yxC3JpnRuqRaKYLJIoSg0vpCPPfZaS2xz5YOUuSqnVWGB6
-X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
- pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:900:1d::77
+X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Convert atmel,hsmci documentation to yaml format. The new file will inherit
-from mmc-controller.yaml.
+Hi,
 
-Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
----
- .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 124 +++++++++++++++++++++
- .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 ------------
- 2 files changed, 124 insertions(+), 73 deletions(-)
+sorry for not writing sooner. I only noticed this now.
 
-diff --git a/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-new file mode 100644
-index 000000000000..3870d464faa8
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-@@ -0,0 +1,124 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/atmel,hsmci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Atmel High-Speed MultiMedia Card Interface (HSMCI)
-+
-+description:
-+  The Atmel HSMCI controller provides an interface for MMC, SD, and SDIO memory
-+  cards.
-+
-+maintainers:
-+  - Nicolas Ferre <nicolas.ferre@microchip.com>
-+  - Aubin Constans <aubin.constans@microchip.com>
-+
-+allOf:
-+  - $ref: mmc-controller.yaml
-+
-+properties:
-+  compatible:
-+    const: atmel,hsmci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  dmas:
-+    maxItems: 1
-+
-+  dma-names:
-+    const: rxtx
-+
-+  clocks:
-+    maxItems: 1
-+
-+  clock-names:
-+    const: mci_clk
-+
-+  "#address-cells":
-+    const: 1
-+    description: Used for slot IDs.
-+
-+  "#size-cells":
-+    const: 0
-+
-+patternProperties:
-+  "^slot@[0-9]+$":
-+    type: object
-+    description: A slot node representing an MMC, SD, or SDIO slot.
-+
-+    allOf:
-+      - $ref: mmc-controller.yaml
-+
-+    properties:
-+      reg:
-+        description: Slot ID.
-+        minimum: 0
-+
-+      bus-width:
-+        description: Number of data lines connected to the controller.
-+        enum: [1, 4, 8]
-+
-+      cd-gpios:
-+        description: GPIO used for card detection.
-+
-+      cd-inverted:
-+        type: boolean
-+        description: Inverts the value of the card detection GPIO.
-+
-+      wp-gpios:
-+        description: GPIO used for write protection.
-+
-+    required:
-+      - reg
-+      - bus-width
-+
-+    unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - "#address-cells"
-+  - "#size-cells"
-+
-+anyOf:
-+  - required:
-+      - slot@0
-+  - required:
-+      - slot@1
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/clock/at91.h>
-+    mmc@f0008000 {
-+      compatible = "atmel,hsmci";
-+      reg = <0xf0008000 0x600>;
-+      interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
-+      clocks = <&mci0_clk>;
-+      clock-names = "mci_clk";
-+      #address-cells = <1>;
-+      #size-cells = <0>;
-+
-+      slot@0 {
-+        reg = <0>;
-+        bus-width = <4>;
-+        cd-gpios = <&pioD 15 0>;
-+        cd-inverted;
-+      };
-+
-+      slot@1 {
-+        reg = <1>;
-+        bus-width = <4>;
-+      };
-+    };
-+...
-diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-deleted file mode 100644
-index 07ad02075a93..000000000000
---- a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-+++ /dev/null
-@@ -1,73 +0,0 @@
--* Atmel High Speed MultiMedia Card Interface
--
--This controller on atmel products provides an interface for MMC, SD and SDIO
--types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the atmel-mci driver.
--
--1) MCI node
--
--Required properties:
--- compatible: should be "atmel,hsmci"
--- #address-cells: should be one. The cell is the slot id.
--- #size-cells: should be zero.
--- at least one slot node
--- clock-names: tuple listing input clock names.
--	Required elements: "mci_clk"
--- clocks: phandles to input clocks.
--
--The node contains child nodes for each slot that the platform uses
--
--Example MCI node:
--
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	clock-names = "mci_clk";
--	clocks = <&mci0_clk>;
--
--	[ child node definitions...]
--};
--
--2) slot nodes
--
--Required properties:
--- reg: should contain the slot id.
--- bus-width: number of data lines connected to the controller
--
--Optional properties:
--- cd-gpios: specify GPIOs for card detection
--- cd-inverted: invert the value of external card detect gpio line
--- wp-gpios: specify GPIOs for write protection
--
--Example slot node:
--
--slot@0 {
--	reg = <0>;
--	bus-width = <4>;
--	cd-gpios = <&pioD 15 0>
--	cd-inverted;
--};
--
--Example full MCI node:
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	slot@0 {
--		reg = <0>;
--		bus-width = <4>;
--		cd-gpios = <&pioD 15 0>
--		cd-inverted;
--	};
--	slot@1 {
--		reg = <1>;
--		bus-width = <4>;
--	};
--};
+On 03.10.24 00:11, Christian Marangi wrote:
+> Add support for partition table defined in Device Tree. Similar to how
+> it's done with MTD, add support for defining a fixed partition table in
+> device tree.
+> 
+> A common scenario for this is fixed block (eMMC) embedded devices that
+> have no MBR or GPT partition table to save storage space. Bootloader
+> access the block device with absolute address of data.
 
----
-base-commit: feffde684ac29a3b7aec82d2df850fbdbdee55e4
-change-id: 20241205-hsmci-7ac3ea915777
+How common are these? I never worked with a system that didn't use MBR
+or GPT for the user partition.
 
-Best regards,
+> This is to complete the functionality with an equivalent implementation
+> with providing partition table with bootargs, for case where the booargs
+> can't be modified and tweaking the Device Tree is the only solution to
+> have an usabe partition table.
+> 
+> The implementation follow the fixed-partitions parser used on MTD
+> devices where a "partitions" node is expected to be declared with
+> "fixed-partitions" compatible in the OF node of the disk device
+> (mmc-card for eMMC for example) and each child node declare a label
+> and a reg with offset and size. If label is not declared, the node name
+> is used as fallback. Eventually is also possible to declare the read-only
+> property to flag the partition as read-only.
+
+barebox has for many years supported defining fixed partitions on SD/MMC
+nodes and it's used heavily to define e.g. the location of the barebox
+environment. Many who do so, do this either before the first partition
+of the MBR/GPT or overlay the fixed partition to be identical to
+an existing MBR/GPT partition.
+
+barebox also by default copies all fixed partitions it is aware of
+into the kernel DT, so if the kernel now stops parsing GPT/MBR when
+a fixed partition node is defined, this would break compatibility of
+existing barebox-booting systems with new kernels.
+
+> +config OF_PARTITION
+> +	bool "Device Tree partition support" if PARTITION_ADVANCED
+> +	depends on OF
+> +	help
+> +	  Say Y here if you want to enable support for partition table
+> +	  defined in Device Tree. (mainly for eMMC)
+> +	  The format for the device tree node is just like MTD fixed-partition
+> +	  schema.
+
+Thanks for making this configurable and disabled by default, so users
+won't experience breakage if they just do a make olddefconfig.
+
+> diff --git a/block/partitions/core.c b/block/partitions/core.c
+> index abad6c83db8f..dc21734b00ec 100644
+> --- a/block/partitions/core.c
+> +++ b/block/partitions/core.c
+> @@ -43,6 +43,9 @@ static int (*const check_part[])(struct parsed_partitions *) = {
+>  #ifdef CONFIG_CMDLINE_PARTITION
+>  	cmdline_partition,
+>  #endif
+> +#ifdef CONFIG_OF_PARTITION
+> +	of_partition,		/* cmdline have priority to OF */
+> +#endif
+>  #ifdef CONFIG_EFI_PARTITION
+>  	efi_partition,		/* this must come before msdos */
+>  #endif
+
+If I understand correctly, it's possible to have both partitions-boot1 and
+a GPT on the user area with your patch, right?
+
+So this only leaves the matter of dealing with both fixed-partitions and
+GPT for the same device node.
+
+What are the thoughts on this? An easy way out would be to make of_partition
+come later than efi_partition/mbr_partition, but I think it would be
+nice if the kernel could consume partition info out of both of_partition
+and efi_partition as long they don't collide.
+
+Thanks,
+Ahmad
+
+
+
 -- 
-Dharma Balasubiramani <dharma.b@microchip.com>
-
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
