@@ -1,57 +1,57 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34C304C9A;
-	Fri,  6 Dec 2024 02:53:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8A7919340C;
+	Fri,  6 Dec 2024 03:25:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733453628; cv=none; b=lQ1lyjS+NNkLwIGErFoW5rd40xhZG1YR7ItwVUdcRAbbSFqoNeCjrssQRblBymxHc2xNs1qfuc62YZgqMIeivHA3GNpuJ0gTfm6HTnJQ4sZeXP0E7KidgcNIBJBAIzMBazi5kMNWDy5YlecIAYBUULmCsgIIjy9kb86Pe+Y6Je8=
+	t=1733455555; cv=none; b=KnyDmCANiNPRpnMwBMQZ7ytAfcerhDsYXzMfojMO39gj4gLoQRhqIeFtgG01WKXSYjyhU8Z2cw2dRNHWlq7DvxHB3PqM4q3wrVw73W13bcBb+fERyJ/gzUYSLUzMdR7EfQBP2jH49P0tSfOcJi7emgt308XDSOAsLpbaV23f5hM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733453628; c=relaxed/simple;
-	bh=9+nnjZyKOJUU2Gqt8b+xPm1V7Se8+MxBK7AHG9TMF3I=;
+	s=arc-20240116; t=1733455555; c=relaxed/simple;
+	bh=xMirmCHVS0lrRZ4cTLNGba8hedkBy/2Prr2PwxDJeVc=;
 	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GN9JQtl+fYe2mWp+XxX6fGml2Pf2LuWLBq80cAFfR3kJUh1dWf9lAoMsxlDKBXW/J5NRef2QhiDDPVzaihgx58WsK4ofqqPgLZbEcLN0s4WhZlIKFttEUsAoh7Qgdo6Erg9KVXoTU5kaq31PKFW+91lvK6FqXBjn934rj/P9l+o=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=aeq1myOJ; arc=none smtp.client-ip=205.220.168.131
+	 Content-Type:Content-Disposition:In-Reply-To; b=MC2Qtuc42jEGrrpqYpwTq4rmU2Foh/Sz3EZdvBISL8FTyVLLFd4gyoqsrj5/mgkIWpBMpMur3zafrPHSLsXhyzDgiKh5KMpbVdclO2CHp46XhLEGCmeHTpZI/e8wOPuvng3v6Kz69OVPaGICeZMXk1sxLOfLRmKixv2QWxvbTe0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=N5WNdaP4; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="aeq1myOJ"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B5HaWp1007445;
-	Fri, 6 Dec 2024 02:53:44 GMT
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="N5WNdaP4"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B5HaMpM020793;
+	Fri, 6 Dec 2024 03:25:48 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
 	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=afbfzP5xvo9Ii8t3LxkXEvLC
-	fOl2+S4rEmpVWjCcDlM=; b=aeq1myOJa2IfxFiQXY4SMYQLg4eZZ5VmpXldt9zp
-	EQijVr0+BzQN4tmoXc/XF5ywRGa+26vSFUnAxivufQ9Pw1NfFVFun9nTQdv0mqal
-	4ybHDDJb5HF/mcZ21lp+uw5XsqtvySr0gCYM/3QiESipNNbMQSHw6+QD//GnaE+N
-	eCsY72jUKTK6n+91tAcEXu6Xr8Ib7pxV1wP+j7mnLZBqbcdLZY7SIPu7Zoaq2DHx
-	PGYxKJAMJ3ueQIyMdzNaOQR/sYvt3lxDy+bJ7fWxQX1Wqf9tlX8Q7Bj53+Zy1lYi
-	AP4Gm1jM44H4+YRl8V8/l/NzQ5r5+LZYxph2gUzrpwUpkQ==
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43ben89hu3-1
+	:references:subject:to; s=qcppdkim1; bh=SnltfcSCBo4D4mhycStlIBBn
+	/z7ImSFBCKeEvs5Nhm8=; b=N5WNdaP44+KqYxfrsXBN+ofnrM8EyvCP3MfBOsFq
+	WGsIix25pS81nuQ+cUBWGD8BUpwrVllKB+3mt8qiqUNjc75RjtKV9t9jJg05EB/J
+	aBJVu9pNqFeTr8llxoWEJgrWcSAkNazxYOMpd+2app60REAirdmagmPEexZC+y0N
+	BZxksk4BiTq9G6Mh/F5Rkhua11z2eSHI2Dq5imUVXeSnwhm9zXH1D7Ccy3zbk9/H
+	3YyKvyr7iJWMLbyexZjj2C5WQEY0htSoAQVVGxf3bK+5bRdj82CzJVvGGpvxeNwt
+	EdG3obNDDF3F2du0zwgFWdhfwlx8Gs87bB3L1ShWBvVytQ==
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 439v801rn0-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 06 Dec 2024 02:53:43 +0000 (GMT)
+	Fri, 06 Dec 2024 03:25:47 +0000 (GMT)
 Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4B62rgZh014416
+	by NALASPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4B63PknD020353
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 6 Dec 2024 02:53:42 GMT
+	Fri, 6 Dec 2024 03:25:46 GMT
 Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
  nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Thu, 5 Dec 2024 18:53:39 -0800
-Date: Fri, 6 Dec 2024 10:53:35 +0800
+ 15.2.1544.9; Thu, 5 Dec 2024 19:25:43 -0800
+Date: Fri, 6 Dec 2024 11:25:38 +0800
 From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To: Bjorn Andersson <andersson@kernel.org>
 CC: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
         <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>, <quic_tingweiz@quicinc.com>,
         <quic_zhgao@quicinc.com>, <quic_yuanjiey@quicinc.com>
 Subject: Re: [PATCH v2] mmc: sdhci-msm: Correctly set the load for the
  regulator
-Message-ID: <Z1JnL9sgsJ+8wNxm@cse-cd02-lnx.ap.qualcomm.com>
+Message-ID: <Z1JusoQc0dFdPoNv@cse-cd02-lnx.ap.qualcomm.com>
 References: <20241127095029.3918290-1-quic_yuanjiey@quicinc.com>
- <cj7nsn2xphd4ftnhtp6ztor4cqyjsdwkubjgancfd3xojddj4s@m3pb4qc645sn>
+ <lza5dbabt2eoipyrbgo47ftpsftcwggb4v6d53lqvsh7w7vp3n@f2ld34a53a2z>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,23 +60,23 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <cj7nsn2xphd4ftnhtp6ztor4cqyjsdwkubjgancfd3xojddj4s@m3pb4qc645sn>
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+In-Reply-To: <lza5dbabt2eoipyrbgo47ftpsftcwggb4v6d53lqvsh7w7vp3n@f2ld34a53a2z>
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
  nalasex01b.na.qualcomm.com (10.47.209.197)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: mp9x1ViV_t9Cw5JYxVPuu7RI-XersSFS
-X-Proofpoint-GUID: mp9x1ViV_t9Cw5JYxVPuu7RI-XersSFS
+X-Proofpoint-ORIG-GUID: REQgGjyFLtKTFBsgiA4tIK-ue4Fuu7XH
+X-Proofpoint-GUID: REQgGjyFLtKTFBsgiA4tIK-ue4Fuu7XH
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 phishscore=0
- priorityscore=1501 impostorscore=0 mlxlogscore=999 clxscore=1015
- malwarescore=0 suspectscore=0 spamscore=0 mlxscore=0 lowpriorityscore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2411120000 definitions=main-2412060020
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 mlxscore=0
+ impostorscore=0 adultscore=0 priorityscore=1501 clxscore=1015
+ lowpriorityscore=0 suspectscore=0 mlxlogscore=999 malwarescore=0
+ bulkscore=0 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2411120000 definitions=main-2412060023
 
-On Fri, Nov 29, 2024 at 08:44:37PM +0200, Dmitry Baryshkov wrote:
+On Thu, Nov 28, 2024 at 11:15:54AM -0600, Bjorn Andersson wrote:
 > On Wed, Nov 27, 2024 at 05:50:29PM +0800, Yuanjie Yang wrote:
 > > Qualcomm regulator supports two power supply modes: HPM and LPM.
 > > Currently, the sdhci-msm.c driver does not set the load to adjust
@@ -91,6 +91,10 @@ On Fri, Nov 29, 2024 at 08:44:37PM +0200, Dmitry Baryshkov wrote:
 > > ---
 > > Changes in v2:
 > > - Add enum msm_reg_type to optimize the code
+> 
+> Please re-optimize the code to make it easy to read and understand.
+Thanks, I will re-optimize my code.
+
 > > - Delete redundant emmc type judgment
 > > - Link to v1: https://lore.kernel.org/linux-arm-msm/20241122075048.2006894-1-quic_yuanjiey@quicinc.com/
 > > 
@@ -132,10 +136,6 @@ On Fri, Nov 29, 2024 at 08:44:37PM +0200, Dmitry Baryshkov wrote:
 > > +enum msm_reg_type {
 > > +	VMMC_REGULATOR,
 > > +	VQMMC_REGULATOR,
-> 
-> Please drop enum completely, then...
-Thanks, I will drop enum in next version.
-
 > > +};
 > > +
 > >  struct sdhci_msm_offset {
@@ -162,28 +162,25 @@ Thanks, I will drop enum in next version.
 > > +
 > > +	if (!mmc->card)
 > > +		return max_current;
+> 
+> max_current is type == VMMC_REGULATOR ? MAX_MMC_SD_VMMC_LOAD_UA :
+> MAX_MMC_SD_VQMMC_LOAD_UA;
+> 
+> Try to rewrite the patch so that you don't have the decisions spread
+> across multiple levels in the callstack.
+Thanks, I will optimzie this funcition in next version.
+
 > > +
 > > +	if (mmc_card_mmc(mmc->card))
 > > +		load = (type == VMMC_REGULATOR) ? MMC_VMMC_MAX_LOAD_UA : MMC_VQMMC_MAX_LOAD_UA;
 > > +	else if (mmc_card_sd(mmc->card))
 > > +		load = (type == VMMC_REGULATOR) ? SD_VMMC_MAX_LOAD_UA : SD_VQMMC_MAX_LOAD_UA;
-> 
-> ... split this into two functions, one for vmmc and another one for
-> vqmmc...
-Thanks, I will split this funcution into two function in next version.
-
 > > +
 > > +	return load;
 > > +}
 > > +
 > > +static int msm_config_regulator_load(struct sdhci_msm_host *msm_host, struct mmc_host *mmc,
 > > +				     bool hpm, int max_current, enum msm_reg_type type)
-> 
-> Then this becomes two functions too, each of those can be inlined in the
-> proper place.
-Thanks, I will fix it in next version.
-
-> 
 > > +{
 > > +	int ret;
 > > +	int load = 0;
@@ -195,13 +192,29 @@ Thanks, I will fix it in next version.
 > > +
 > > +	if (mmc->card && !(mmc_card_mmc(mmc->card) || mmc_card_sd(mmc->card)))
 > > +		return 0;
-> 
-> This goes into sdhci_msm_get_regulator_load().
-Thanks, I will optimize this code in next patch.
-
 > > +
 > > +	if (hpm)
 > > +		load = sdhci_msm_get_regulator_load(mmc, max_current, type);
+> 
+> Does !hpm happen when regulators are enabled or always together with a
+> regulator_disable? (The regulator framework skips the load of disabled
+> regulators when aggregating)
+> 
+Thanks.
+When two or more consumer use the same regulator as eMMC/SD.
+When !hpm happen, the regulator state can be enabled or disabled.
+
+When the regulotor only used by eMMC/SD.
+When !hpm happen, the regulator state is enabled, set load 0 means to
+set let regulator enter LPM state.
+
+Recently our team are discussing this issue, when two or more consumer
+use the same regulator, one consumer set load can affect other consumer.
+
+We are trying to do some fix on DTS, just to delete "regulator-allow-set-load"
+and set regulator-allowed-modes = <RPMH_REGULATOR_MODE_HPM>.
+We are doing some experiment.
+
 > > +
 > > +	if (type == VMMC_REGULATOR)
 > > +		ret = regulator_set_load(mmc->supply.vmmc, load);
@@ -223,6 +236,17 @@ Thanks, I will optimize this code in next patch.
 > >  
 > > +	ret = msm_config_regulator_load(msm_host, mmc, hpm,
 > > +					MAX_MMC_SD_VMMC_LOAD_UA, VMMC_REGULATOR);
+> 
+> msm_config_regulator_load() is mostly 2 different functions with
+> multiple levels of conditional code paths depending on this last
+> parameter. Please try to refactor this to avoid overloading the
+> functions like that.
+Thanks, I will optimize my code in next version.
+
+> 
+> Regards,
+> Bjorn
+> 
 > > +	if (ret)
 > > +		return ret;
 > > +
@@ -258,11 +282,7 @@ Thanks, I will optimize this code in next patch.
 > > -- 
 > > 2.34.1
 > > 
-> 
-> -- 
-> With best wishes
-> Dmitry
+> >
 
 Thanks,
 Yuanjie
-
