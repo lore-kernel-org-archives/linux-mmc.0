@@ -1,122 +1,136 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E891FCFCD
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Dec 2024 11:16:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33E0A20628B;
+	Fri,  6 Dec 2024 17:02:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733483770; cv=none; b=RhMM4Py5CslKPJteLUdEG8unAChPKENlrzzPwzZFVEGE0cBE9kNj0JaHW1u/9wa+08L/xznM5SH2JFbLrl4Y/AgV5RBX3EbKQZsl75q1JM4PcHvnZV5tN+b4KQGnob/hqLnB2BvLu7idvucX1mecXAm45EK3kceoFksEmHJRwVY=
+	t=1733504574; cv=none; b=EmRLG5VhvgeUBQlANG4XPV1MMqDKBkRGbY8jn+Lhr5R9DenVZjo+09HMIihwErmPbJ/WBfxHhU3T9tUzmcqQW3XyABBBTR22NQ7piwk3KrubAG940ghnfy5CUwHfNFapQB6Kj6bZcaq3IPzzpgg7r1Yk0+pDYQr3u7ikzGINmCc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733483770; c=relaxed/simple;
-	bh=nKRp8G7zKLERyl+4hDYAGa83MoVP5NTbGCAPsiYEPII=;
+	s=arc-20240116; t=1733504574; c=relaxed/simple;
+	bh=49stkS5Jr0gbDKUcViWSMu1jZ0Ttci8yCgTnQYqEciE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=HSucOYReNIoiAdjeXKKTKhtSQxg809zdAMZgcgwP3QmKg8ht4KYumDkghFwLwv/L+VWArlmRx1nmsKuqiJiA/tFeHFKeuMewSXumhD6t2vNN/U1H6LFoSMmDvfLc2fSQWLpiNEsAW7YQDHWdGT+I6+1EETrJ87CnUsd2sC71gwA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=fwxDjnly; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=FvvkXfVK1Bp451Ib4hBab9tqtKMNLddrMr9qkvzSOLMdBtJMZ4+gtkzmpXbmHKPBWwfSq/1/JfcLTOWTeWxGO0G4EYkKJC5pOTkCkYZL5JJDf5QjqRNw7Kqgm0JkEo1YkgxK2OHjIsKyVykIobb8kGDjTjw29VQU0zad+IQccZU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=s95Pvg4h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="fwxDjnly"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=luv4
-	qVIy34wd/+LlRrPAe9e4HKQGm07TFucZNszgWMQ=; b=fwxDjnly3RdUSK3uTJ3S
-	mrKxJd0xkJzLm5x83yQxvPMxvOILccxlqB4QCHINZBnJLHPgEAMzvvaSpBTFlGpG
-	WEO1BjK7Efdg62VaBBIxsoje6xwZN951O0DDFQ8NGB1TJEfJwGKuTl/A0grDCRn9
-	QnXzgIot7a3AhC8KZgLlzIqIpem4CG799HFhKQJ8TGC0AoMVUA66soOiPYCQS80l
-	ilDdhaa6jUMyQsTvuG9b7kdrJCIlpeRAGUEC6bC+Ew4FwNnRgGbB4OifdZpWdpPe
-	A1wRqzFNbuVmHDyQ+6LvC8jtImrFmWloI8TUbfRMUsvLUp88Db9gk9gL5werCpEf
-	nQ==
-Received: (qmail 54580 invoked from network); 6 Dec 2024 12:15:56 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Dec 2024 12:15:56 +0100
-X-UD-Smtp-Session: l3s3148p1@xH6AI5goeOogAwDPXwEyAJCPbOCqswPD
-Date: Fri, 6 Dec 2024 12:15:55 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: linux-renesas-soc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Subject: Re: [RFC PATCH v2] mmc: suspend MMC also when unbinding
-Message-ID: <Z1Lc6wRWdWbI8Dcl@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-renesas-soc@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-References: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="s95Pvg4h"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 583CFC4CED1;
+	Fri,  6 Dec 2024 17:02:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1733504573;
+	bh=49stkS5Jr0gbDKUcViWSMu1jZ0Ttci8yCgTnQYqEciE=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=s95Pvg4hT1qOEsnoGUyCjcqlT8rFHJIecyBajPwtIJlikGvE804slOA25zRrwqQb0
+	 tXt/X2XMt7XZ0YyBh96/pm95OBro70p9Cfee6m6LJivURqrimVPxtAvBgxdQXado9Z
+	 6zZ42DBbu02ElICCwhfXUmmdipv/2TVTB2I79Nyr8Gzf7OKs+0INQywoi4jItZMw//
+	 K/jov+IKTkQ7iPRQOOh7foyMJnRfOfR6H7J7kK9wP3zTjJm5RfY7LxrqCTK9/4Z50k
+	 4G8I+vfuhjHp2Q3eHO8SGlv2eX0gNVubg9BY/hFCCzjVXpwiDPQDdFuR+p36VGdRR/
+	 NSvZVwSc+0zCA==
+Date: Fri, 6 Dec 2024 17:02:49 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Dharma.B@microchip.com
+Cc: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, Nicolas.Ferre@microchip.com,
+	alexandre.belloni@bootlin.com, claudiu.beznea@tuxon.dev,
+	Aubin.Constans@microchip.com, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: atmel,hsmci: Convert to json schema
+Message-ID: <20241206-untoasted-ripening-83ecf98bc42f@spud>
+References: <20241205-hsmci-v1-1-5a25e622dfed@microchip.com>
+ <20241205-trickster-rebate-d5e64bc29992@spud>
+ <4e3a4154-9e05-40b4-961f-6d7e95ec0890@microchip.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="mb12sGId6HHzPEwn"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="ScKT+5iAjDgPbCZa"
 Content-Disposition: inline
-In-Reply-To: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <4e3a4154-9e05-40b4-961f-6d7e95ec0890@microchip.com>
 
 
---mb12sGId6HHzPEwn
+--ScKT+5iAjDgPbCZa
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Nov 04, 2024 at 11:18:42AM +0200, Wolfram Sang wrote:
-> When unbinding a MMC host, the card should be suspended. Otherwise,
-> problems may arise. E.g. the card still expects power-off notifications
-> but there is no host to send them anymore. Shimoda-san tried disabling
-> notifications only, but there were issues with his approaches [1] [2].
+On Fri, Dec 06, 2024 at 05:16:39AM +0000, Dharma.B@microchip.com wrote:
+> Hi Conor,
 >=20
-> Here is my take on it, based on the review comments:
+> On 05/12/24 11:15 pm, Conor Dooley wrote:
+> > On Thu, Dec 05, 2024 at 03:27:02PM +0530, Dharma Balasubiramani wrote:
+> >=20
+> >> +patternProperties:
+> >> +  "^slot@[0-9]+$":
+> >> +    type: object
+> >> +    description: A slot node representing an MMC, SD, or SDIO slot.
+> >> +
+> >> +    allOf:
+> >> +      - $ref: mmc-controller.yaml
+> >> +
+> >> +    properties:
+> >> +      reg:
+> >> +        description: Slot ID.
+> >> +        minimum: 0
+> >> +
+> >> +      bus-width:
+> >> +        description: Number of data lines connected to the controller.
+> >> +        enum: [1, 4, 8]
+> >> +
+> >> +      cd-gpios:
+> >> +        description: GPIO used for card detection.
+> >> +
+> >> +      cd-inverted:
+> >> +        type: boolean
+> > This type conflicts with mmc-controller.yaml, it's a flag there.
 >=20
-> a) 'In principle we would like to run the similar operations at "remove"
->     as during "system suspend"' [1]
-> b) 'We want to support a graceful power off sequence or the card...' [2]
+> Yes, I overlooked it. I'll simply remove the type here.
 >=20
-> So, first, mmc_remove_card() gets improved to mark the card as "not
-> present" and to call the bus specific suspend() handler.
+> >=20
+> >> +        description: Inverts the value of the card detection GPIO.
+> >> +
+> >> +      wp-gpios:
+> >> +        description: GPIO used for write protection.
+> >> +
+> >> +    required:
+> >> +      - reg
+> >> +      - bus-width
+> >> +
+> >> +    unevaluatedProperties: false
+> > Do you mean additionalProperties: false here? You listed properties
+> > contained in mmc-controller.yaml which makes it seem like you're
+> > restricting to this subset rather than allowing all properties - but you
+> > need additionalProperties: false to do that.
 >=20
-> Then, _mmc_suspend gets extended to recognize another reason of being
-> called, namely when a card removal happens. Building upon the now
-> updated mmc_remove_card(), this is the case when the card is flagged as
-> "not present".
->=20
-> The logic of either sending a notification or sending the card to sleep
-> gets updated to handle this new reason. Controllers able to do full
-> power cycles will still do a full power cycle. Controllers which can
-> only do power cycles in suspend, will send the card to sleep.
->=20
-> All this is for MMC. SD/SDIO are unaffected because they are not using
-> the 'card present' flag.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->=20
-> [1] https://patchwork.kernel.org/project/linux-renesas-soc/patch/16025813=
-12-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
-> [2] https://patchwork.kernel.org/project/linux-mmc/patch/1605005330-7178-=
-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
-> ---
->=20
-> Lightly tested with a Renesas R-Car S4 Spider board. It bascially works
-> as expected. Serious testing postponed until the generic direction of
-> this is approved :)
+> No, I'm not restricting the properties to this subset. There are=20
+> additional properties, such as "non-removable," "broken-cd," and=20
+> "disable-wp," that are used in our DTS files but are not defined in the=
+=20
+> old text bindings. For this reason, I used `unevaluatedProperties:=20
+> false` instead of `additionalProperties: false`.
 
-Anything I can do to make the review easier? Some more testing maybe?
+> Let me know if an=20
+> `allOf` reference to `mmc-controller` alone would be sufficient in this=
+=20
+> context.
 
+Yes, there's no point duplicating properties from there, unless you're
+restricting to a subset. I think all you need to keep (other than the
+reference) is the required properties list because there seems to be
+none in mmc-controller.yaml.
 
---mb12sGId6HHzPEwn
+--ScKT+5iAjDgPbCZa
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmdS3OgACgkQFA3kzBSg
-KbZQ/Q/8C77yTOY03g+aJJB/KPisdtEP1JirjZswRL5cZNJijo/8w7MDXw9TydsG
-JDxTMPlo6IWgg61WorRqV9JzUclUpUsmxWGnNL02mjKcMMwK8+Lyjedhv09aQQDL
-plJwEZk9YcNd+9gXb5E5vPH+uryD8au+qfEpE/+RrJSJ69EPA25fknO37LD3r//n
-dvNMnUbKbpkKvl3F5x5PiCjt+C2P8gbiwtaNScy32AJhn+aDl7X5oMm/lP9kB3jc
-yviuZzA21KsvIfWnT9OOc1zJRMh+WSrFvL/IxJo/zi8xwfcCEUuPqa7e3ggT3rlt
-7RmZ1TtJqneqS/F7QrnuTDiiIwYtWpLHvpesraj2TUf9nJrjfbGsoIvj+jx0aBxJ
-GpfgQERQp8dzUnilm55BPFl8dqh4TYGoobfoO9qaHI+OS9v443g2snGjQmm+a3o7
-5eyttd1P9RKO5ZcPzn4Z6oXzjJ812PdbCPfKeUuBQYrezMFyYCXLO4KXrkmc0WSo
-wc0gauPQt9pFpwDLrP+cBvapdf2d72XXde1MfMSkrHdJIZZXMDsD+gMT1NFpNznl
-7n9JOTBFbFmzqfgSAWYxOGybC2vV4t2wtfez/qT3DNoOIYd7Q79wBJDANjgi/xHB
-Ks46SYARYPh3065IF/QBGzWQbC/FWQSFGuaMizs3aoZVOg0fCbw=
-=t9aN
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZ1MuOQAKCRB4tDGHoIJi
+0puPAQDGnZ7QeA/JWBnu9hKRBgcjCLFYUU/RfTgFGpqBBbr0rwEAlDSML8gQFQC2
+16Y1lIsu3uODoMdJwSPiOmNE7oFsdAY=
+=XVJL
 -----END PGP SIGNATURE-----
 
---mb12sGId6HHzPEwn--
+--ScKT+5iAjDgPbCZa--
