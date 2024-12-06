@@ -1,124 +1,268 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A7EB013BAC3;
-	Fri,  6 Dec 2024 02:37:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 34C304C9A;
+	Fri,  6 Dec 2024 02:53:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733452677; cv=none; b=RyoFnATLg4uri4PK6XGbmU2BqNGFr2wAzpfDUcz/JMkz1A5/t9r4865Q0dk2AFI4ecupWlaJFQ8IobieRKalSPmpPeoeM5hLfB2TAGlcPcCwzVH0+Ye8lqnUkYOPXpn+82fI/acG30b6LLjt0nK5C+PgfKXE9dhqOvt6q+dQjXE=
+	t=1733453628; cv=none; b=lQ1lyjS+NNkLwIGErFoW5rd40xhZG1YR7ItwVUdcRAbbSFqoNeCjrssQRblBymxHc2xNs1qfuc62YZgqMIeivHA3GNpuJ0gTfm6HTnJQ4sZeXP0E7KidgcNIBJBAIzMBazi5kMNWDy5YlecIAYBUULmCsgIIjy9kb86Pe+Y6Je8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733452677; c=relaxed/simple;
-	bh=yQZoZlrfGVQBaBiyH1peINAGyYt6ZaXG9HYYV0YOIQc=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Xc+E4TGY9puboDmg0jRZYmd1K2nusz5Bdl5+A6FmRG9FGM6oeDZaDyvtlBFasYU0/j6cqrEqVlg6R23qGHk3Ler4COU474gVz/D0KpmouxGr4he9FvCSMTCm/zgqFASu97uMbdMnU9Wn3F5Y66rsnEIiixjD6rvwH3jln/VYNf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=XjhytC7j; arc=none smtp.client-ip=205.220.180.131
+	s=arc-20240116; t=1733453628; c=relaxed/simple;
+	bh=9+nnjZyKOJUU2Gqt8b+xPm1V7Se8+MxBK7AHG9TMF3I=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=GN9JQtl+fYe2mWp+XxX6fGml2Pf2LuWLBq80cAFfR3kJUh1dWf9lAoMsxlDKBXW/J5NRef2QhiDDPVzaihgx58WsK4ofqqPgLZbEcLN0s4WhZlIKFttEUsAoh7Qgdo6Erg9KVXoTU5kaq31PKFW+91lvK6FqXBjn934rj/P9l+o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=aeq1myOJ; arc=none smtp.client-ip=205.220.168.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="XjhytC7j"
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B5Jhhje018614;
-	Fri, 6 Dec 2024 02:37:51 GMT
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="aeq1myOJ"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4B5HaWp1007445;
+	Fri, 6 Dec 2024 02:53:44 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=aeqPs91xuOB5ovXRkxruLfI+ecNWNRwng/E
-	/4CuEqKE=; b=XjhytC7jUl2NQzUZ3mmCi3zkTQAzXf531WKwbyMsy0c3foKkzcI
-	+qwc7R5OQzbYcYJ/L+Pzv7pSPhuyYzM6JUO67kj7SkkTiHxdUbEpG+UE7dSCPHiC
-	gk+VYEEnByswVh7fekwTFTVziLOn4MImq3irk8uWoUW434v6Go/6px2UoP86fsfm
-	Jy7y2+Qs1d+8sjnKbPRGg07TMu/Qp2q10wqh7nYiMVVw4d9tFW/ZDtEspdR33hiN
-	CXr/fSvwZuKXcMVXq6Yyi7nXgg4Pjj1HyOojZqU3FKTrAhFUJRiB7jPWx7DYCnAg
-	VHwWYlgKszk3nINUpXmCeR1JpUAuH668VBw==
-Received: from aptaippmta02.qualcomm.com (tpe-colo-wan-fw-bordernet.qualcomm.com [103.229.16.4])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43bjk8rrrv-1
+	cc:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=qcppdkim1; bh=afbfzP5xvo9Ii8t3LxkXEvLC
+	fOl2+S4rEmpVWjCcDlM=; b=aeq1myOJa2IfxFiQXY4SMYQLg4eZZ5VmpXldt9zp
+	EQijVr0+BzQN4tmoXc/XF5ywRGa+26vSFUnAxivufQ9Pw1NfFVFun9nTQdv0mqal
+	4ybHDDJb5HF/mcZ21lp+uw5XsqtvySr0gCYM/3QiESipNNbMQSHw6+QD//GnaE+N
+	eCsY72jUKTK6n+91tAcEXu6Xr8Ib7pxV1wP+j7mnLZBqbcdLZY7SIPu7Zoaq2DHx
+	PGYxKJAMJ3ueQIyMdzNaOQR/sYvt3lxDy+bJ7fWxQX1Wqf9tlX8Q7Bj53+Zy1lYi
+	AP4Gm1jM44H4+YRl8V8/l/NzQ5r5+LZYxph2gUzrpwUpkQ==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43ben89hu3-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 06 Dec 2024 02:37:50 +0000 (GMT)
-Received: from pps.filterd (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4B62bltI011445;
-	Fri, 6 Dec 2024 02:37:47 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 437uskw213-1
+	Fri, 06 Dec 2024 02:53:43 +0000 (GMT)
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4B62rgZh014416
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 06 Dec 2024 02:37:47 +0000
-Received: from APTAIPPMTA02.qualcomm.com (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4B62bkbC011435;
-	Fri, 6 Dec 2024 02:37:47 GMT
-Received: from cse-cd02-lnx.ap.qualcomm.com (cse-cd02-lnx.qualcomm.com [10.64.75.246])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 4B62bkTw011431
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 06 Dec 2024 02:37:46 +0000
-Received: by cse-cd02-lnx.ap.qualcomm.com (Postfix, from userid 4571896)
-	id 1B92A1A2A; Fri,  6 Dec 2024 10:37:45 +0800 (CST)
+	Fri, 6 Dec 2024 02:53:42 GMT
+Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
+ nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Thu, 5 Dec 2024 18:53:39 -0800
+Date: Fri, 6 Dec 2024 10:53:35 +0800
 From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-        conor+dt@kernel.org, bhupesh.sharma@linaro.org, andersson@kernel.org,
-        konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_tingweiz@quicinc.com, quic_yuanjiey@quicinc.com
-Subject: [PATCH v4 0/2] Enable SDHC1 and SDHC2 on QCS615
-Date: Fri,  6 Dec 2024 10:37:09 +0800
-Message-Id: <20241206023711.2541716-1-quic_yuanjiey@quicinc.com>
-X-Mailer: git-send-email 2.34.1
+To: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+CC: <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <quic_tingweiz@quicinc.com>,
+        <quic_zhgao@quicinc.com>, <quic_yuanjiey@quicinc.com>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Correctly set the load for the
+ regulator
+Message-ID: <Z1JnL9sgsJ+8wNxm@cse-cd02-lnx.ap.qualcomm.com>
+References: <20241127095029.3918290-1-quic_yuanjiey@quicinc.com>
+ <cj7nsn2xphd4ftnhtp6ztor4cqyjsdwkubjgancfd3xojddj4s@m3pb4qc645sn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <cj7nsn2xphd4ftnhtp6ztor4cqyjsdwkubjgancfd3xojddj4s@m3pb4qc645sn>
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: RBqYAKruyQ7E2OoduPaPJ8KuxgFNMh-E
-X-Proofpoint-GUID: RBqYAKruyQ7E2OoduPaPJ8KuxgFNMh-E
+X-Proofpoint-ORIG-GUID: mp9x1ViV_t9Cw5JYxVPuu7RI-XersSFS
+X-Proofpoint-GUID: mp9x1ViV_t9Cw5JYxVPuu7RI-XersSFS
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0
- impostorscore=0 bulkscore=0 phishscore=0 suspectscore=0 spamscore=0
- lowpriorityscore=0 adultscore=0 mlxscore=0 mlxlogscore=999
- priorityscore=1501 clxscore=1015 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.19.0-2411120000 definitions=main-2412060018
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 phishscore=0
+ priorityscore=1501 impostorscore=0 mlxlogscore=999 clxscore=1015
+ malwarescore=0 suspectscore=0 spamscore=0 mlxscore=0 lowpriorityscore=0
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2411120000 definitions=main-2412060020
 
-Add SDHC1 and SDHC2 support to the QCS615 Ride platform. The
-SDHC1 and SDHC2 of QCS615 are derived from SM6115. Include
-the configuration of SDHC1-related and SDHC2-related opp,
-power, and interconnect settings in the device tree.
+On Fri, Nov 29, 2024 at 08:44:37PM +0200, Dmitry Baryshkov wrote:
+> On Wed, Nov 27, 2024 at 05:50:29PM +0800, Yuanjie Yang wrote:
+> > Qualcomm regulator supports two power supply modes: HPM and LPM.
+> > Currently, the sdhci-msm.c driver does not set the load to adjust
+> > the current for eMMC and SD. Therefore, if the regulator set load
+> > in LPM state, it will lead to the inability to properly initialize
+> > eMMC and SD.
+> > 
+> > Set the correct regulator current for eMMC and SD to ensure that the
+> > device can work normally even when the regulator is in LPM.
+> > 
+> > Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> > ---
+> > Changes in v2:
+> > - Add enum msm_reg_type to optimize the code
+> > - Delete redundant emmc type judgment
+> > - Link to v1: https://lore.kernel.org/linux-arm-msm/20241122075048.2006894-1-quic_yuanjiey@quicinc.com/
+> > 
+> > ---
+> >  drivers/mmc/host/sdhci-msm.c | 92 +++++++++++++++++++++++++++++++++++-
+> >  1 file changed, 90 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> > index e00208535bd1..fc13ef60ab61 100644
+> > --- a/drivers/mmc/host/sdhci-msm.c
+> > +++ b/drivers/mmc/host/sdhci-msm.c
+> > @@ -134,9 +134,22 @@
+> >  /* Timeout value to avoid infinite waiting for pwr_irq */
+> >  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+> >  
+> > +/* Max load for eMMC Vdd supply */
+> > +#define MMC_VMMC_MAX_LOAD_UA	570000
+> > +
+> >  /* Max load for eMMC Vdd-io supply */
+> >  #define MMC_VQMMC_MAX_LOAD_UA	325000
+> >  
+> > +/* Max load for SD Vdd supply */
+> > +#define SD_VMMC_MAX_LOAD_UA	800000
+> > +
+> > +/* Max load for SD Vdd-io supply */
+> > +#define SD_VQMMC_MAX_LOAD_UA	22000
+> > +
+> > +#define MAX_MMC_SD_VMMC_LOAD_UA  max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA)
+> > +
+> > +#define MAX_MMC_SD_VQMMC_LOAD_UA max(MMC_VQMMC_MAX_LOAD_UA, SD_VQMMC_MAX_LOAD_UA)
+> > +
+> >  #define msm_host_readl(msm_host, host, offset) \
+> >  	msm_host->var_ops->msm_readl_relaxed(host, offset)
+> >  
+> > @@ -147,6 +160,11 @@
+> >  #define CQHCI_VENDOR_CFG1	0xA00
+> >  #define CQHCI_VENDOR_DIS_RST_ON_CQ_EN	(0x3 << 13)
+> >  
+> > +enum msm_reg_type {
+> > +	VMMC_REGULATOR,
+> > +	VQMMC_REGULATOR,
+> 
+> Please drop enum completely, then...
+Thanks, I will drop enum in next version.
 
-Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
----
-This patch series depends on below patch series:
-https://lore.kernel.org/all/20241104-add_initial_support_for_qcs615-v5-0-9dde8d7b80b0@quicinc.com/
-https://lore.kernel.org/all/20241105032107.9552-1-quic_qqzhou@quicinc.com/
+> > +};
+> > +
+> >  struct sdhci_msm_offset {
+> >  	u32 core_hc_mode;
+> >  	u32 core_mci_data_cnt;
+> > @@ -1403,11 +1421,71 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+> >  	return ret;
+> >  }
+> >  
+> > -static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+> > +static int sdhci_msm_get_regulator_load(struct mmc_host *mmc, int max_current,
+> > +					enum msm_reg_type type)
+> > +{
+> > +	int load = 0;
+> > +
+> > +	/*
+> > +	 * When eMMC and SD are powered on for the first time, select a higher
+> > +	 * current value from the corresponding current for eMMC and SD to
+> > +	 * ensure that the eMMC and SD cards start up properly and complete
+> > +	 * initialization. After the initialization process is finished, use
+> > +	 * the corresponding current to set the eMMC and SD to ensure the
+> > +	 * normal work of the device.
+> > +	 */
+> > +
+> > +	if (!mmc->card)
+> > +		return max_current;
+> > +
+> > +	if (mmc_card_mmc(mmc->card))
+> > +		load = (type == VMMC_REGULATOR) ? MMC_VMMC_MAX_LOAD_UA : MMC_VQMMC_MAX_LOAD_UA;
+> > +	else if (mmc_card_sd(mmc->card))
+> > +		load = (type == VMMC_REGULATOR) ? SD_VMMC_MAX_LOAD_UA : SD_VQMMC_MAX_LOAD_UA;
+> 
+> ... split this into two functions, one for vmmc and another one for
+> vqmmc...
+Thanks, I will split this funcution into two function in next version.
 
-Changes in v4:
-- Move properties which are not properties of the SoC to board DTS
-- Add ice region to SDHC1 Node reg
-- Add 50Mhz 200Mhz to SDHC1 opp table, add 50Mhz to SDHC2 opp table 
-- fix SDHC2 Node compatible space
-- Link to v3: https://lore.kernel.org/all/20241122065101.1918470-1-quic_yuanjiey@quicinc.com/
+> > +
+> > +	return load;
+> > +}
+> > +
+> > +static int msm_config_regulator_load(struct sdhci_msm_host *msm_host, struct mmc_host *mmc,
+> > +				     bool hpm, int max_current, enum msm_reg_type type)
+> 
+> Then this becomes two functions too, each of those can be inlined in the
+> proper place.
+Thanks, I will fix it in next version.
 
-Changes in v3:
-- Improve the commit messages and cover letter
-- Link to v2: https://lore.kernel.org/all/20241106072343.2070933-1-quic_yuanjiey@quicinc.com/
+> 
+> > +{
+> > +	int ret;
+> > +	int load = 0;
+> > +
+> > +	/*
+> > +	 * After the initialization process is finished, Once the type of card
+> > +	 * is determined, only set the corresponding current for SD and eMMC.
+> > +	 */
+> > +
+> > +	if (mmc->card && !(mmc_card_mmc(mmc->card) || mmc_card_sd(mmc->card)))
+> > +		return 0;
+> 
+> This goes into sdhci_msm_get_regulator_load().
+Thanks, I will optimize this code in next patch.
 
-Changes in v2:
-- Improve the commit messages and cover letter
-- Remove applied patches 1
-- Pad sdhc_1 node and sdhc_2 node register addresses to 8 hex digits
-- Adjust sdhc_1 node and sdhc_2 node register addresses to hexadecimal
-- Modify sdhc_2 vqmmc-supply incorrect power configuration
-- Link to v1: https://lore.kernel.org/all/20241023092708.604195-1-quic_yuanjiey@quicinc.com/
+> > +
+> > +	if (hpm)
+> > +		load = sdhci_msm_get_regulator_load(mmc, max_current, type);
+> > +
+> > +	if (type == VMMC_REGULATOR)
+> > +		ret = regulator_set_load(mmc->supply.vmmc, load);
+> > +	else
+> > +		ret = regulator_set_load(mmc->supply.vqmmc, load);
+> > +	if (ret)
+> > +		dev_err(mmc_dev(mmc), "%s: set load failed: %d\n",
+> > +			mmc_hostname(mmc), ret);
+> > +	return ret;
+> > +}
+> > +
+> > +static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
+> > +			      struct mmc_host *mmc, bool hpm)
+> >  {
+> > +	int ret;
+> > +
+> >  	if (IS_ERR(mmc->supply.vmmc))
+> >  		return 0;
+> >  
+> > +	ret = msm_config_regulator_load(msm_host, mmc, hpm,
+> > +					MAX_MMC_SD_VMMC_LOAD_UA, VMMC_REGULATOR);
+> > +	if (ret)
+> > +		return ret;
+> > +
+> >  	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+> >  }
+> >  
+> > @@ -1435,6 +1513,15 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+> >  				goto out;
+> >  			}
+> >  		}
+> > +
+> > +		ret = msm_config_regulator_load(msm_host, mmc, level,
+> > +						MAX_MMC_SD_VQMMC_LOAD_UA, VQMMC_REGULATOR);
+> > +		if (ret < 0) {
+> > +			dev_err(mmc_dev(mmc), "%s: vqmmc set regulator load failed: %d\n",
+> > +				mmc_hostname(mmc), ret);
+> > +			goto out;
+> > +		}
+> > +
+> >  		ret = regulator_enable(mmc->supply.vqmmc);
+> >  	} else {
+> >  		ret = regulator_disable(mmc->supply.vqmmc);
+> > @@ -1642,7 +1729,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+> >  	}
+> >  
+> >  	if (pwr_state) {
+> > -		ret = sdhci_msm_set_vmmc(mmc);
+> > +		ret = sdhci_msm_set_vmmc(msm_host, mmc,
+> > +					 pwr_state & REQ_BUS_ON);
+> >  		if (!ret)
+> >  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+> >  					pwr_state & REQ_BUS_ON);
+> > -- 
+> > 2.34.1
+> > 
+> 
+> -- 
+> With best wishes
+> Dmitry
 
----
-Yuanjie Yang (2):
-  arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-  arm64: dts: qcom: qcs615-ride: enable SDHC1 and SDHC2
-
- arch/arm64/boot/dts/qcom/qcs615-ride.dts |  37 ++++
- arch/arm64/boot/dts/qcom/qcs615.dtsi     | 209 +++++++++++++++++++++++
- 2 files changed, 246 insertions(+)
-
--- 
-2.34.1
+Thanks,
+Yuanjie
 
