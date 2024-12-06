@@ -1,116 +1,122 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE02279DC
-	for <linux-mmc@vger.kernel.org>; Fri,  6 Dec 2024 08:48:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60E891FCFCD
+	for <linux-mmc@vger.kernel.org>; Fri,  6 Dec 2024 11:16:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733474939; cv=none; b=Jmm095EClhflefuGiKbiI0iYFw1bNdAGnM+kpDwVeEfHKP5L03CogQA/FPRklkz3gNcwt2Y1w1mPdQ/CgeRvSziNsINRGCG9IrKUzMPe0aVtzx6tfJvKyYkelHgTo79j0evysk7HTw5jFrUmGylIqnTZp/xK+2RyOVq9w6Spkqw=
+	t=1733483770; cv=none; b=RhMM4Py5CslKPJteLUdEG8unAChPKENlrzzPwzZFVEGE0cBE9kNj0JaHW1u/9wa+08L/xznM5SH2JFbLrl4Y/AgV5RBX3EbKQZsl75q1JM4PcHvnZV5tN+b4KQGnob/hqLnB2BvLu7idvucX1mecXAm45EK3kceoFksEmHJRwVY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733474939; c=relaxed/simple;
-	bh=utjkZbDeEMTthCs80VCBUvjS3enz36ctYpoj7DLBIEI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=MK42mCiDdfTObBNhmz36HW43yLDTXV8K7jKnjiY/Rx5HHd9/AOBY24wBEwk05kZ2dDYJ5J+ylFCa0m5NGC/eNE7I1/2arzbraAcrR0e6F/kRGdlDIXRdKGTJkVVDtINmYW1UuekGUTAVdU4HwJ4jRcO0UIBt1E34Ili0ih4LwPo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AD+EvKMS; arc=none smtp.client-ip=209.85.208.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1733483770; c=relaxed/simple;
+	bh=nKRp8G7zKLERyl+4hDYAGa83MoVP5NTbGCAPsiYEPII=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=HSucOYReNIoiAdjeXKKTKhtSQxg809zdAMZgcgwP3QmKg8ht4KYumDkghFwLwv/L+VWArlmRx1nmsKuqiJiA/tFeHFKeuMewSXumhD6t2vNN/U1H6LFoSMmDvfLc2fSQWLpiNEsAW7YQDHWdGT+I6+1EETrJ87CnUsd2sC71gwA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=fwxDjnly; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AD+EvKMS"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-30039432861so560921fa.2
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Dec 2024 00:48:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733474935; x=1734079735; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1+KHZbWUUIbfPMrkQ0dg3yxh8EkZEBHyzYKLApYVQfA=;
-        b=AD+EvKMSiOilJIqp62aW6ZPUUB1rC1LCIqSWSIjJ6rcEwtVc3TRLKj/NytlOS7mME7
-         sidpkXc6eHIjY5eDC9ibYP+IZmxwR+RFMd0qAjh29kaWVWEmMlkjzDpY4cQHOx2rFwkQ
-         i9dHIxkXc7UZTep/CtoaCIBENsbvTb5NLDPm57ozrKDlNWj4VhHeQXBZv+0DPMJAK4HO
-         LCwj3IwayqoFmbHXvnsDIKUNIcqwpNbC1qSqqiu6520tsmZmpL50GBeKoUaqv1GqlSXh
-         pqGZH+2eL0/wovW5TTwPV75SaOnOrda4PMwvGvl/yVNVPcTgW4ViHIjscH3YRjqyp59M
-         CDGA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733474935; x=1734079735;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1+KHZbWUUIbfPMrkQ0dg3yxh8EkZEBHyzYKLApYVQfA=;
-        b=n7rcuFqHtK/D/De9IHw3ZtyPOU7tSJQU2C/eVATNqkV0ZLHpD7AIw5C/WgmJmFBYC1
-         Q9ivnM2T225bivBYfX3V9d67fNVtN4GViJi6duvURFyPNGa6pQUUyWI88aXAEE9D+8C9
-         S4ha0GacpMP4YFPvsYzHZX+hEqGmGdub6qRXSqhuw3QLANIIC4oiMYmvlTJj3HWz9Q/f
-         73BbPNeJOefH9By0wEDFIPvkNPSyI0gcSyhn7K4ECi9fJBGwvMx6p9X6KtgBNnjBezxY
-         FmZSfFKZv8Z8EDOJVuq2y0hIVM9xm/zhmSXjRWVQSWQas8/gKhNuC84prF6U1y1rk6mO
-         1RFw==
-X-Forwarded-Encrypted: i=1; AJvYcCV6LWDDLJ6mP5um35UelwtGGXvXbu/g7ia1dW/iU9i3bPNV9PpjY3/IMS5OWnPFOQyNzE1+YHsxKz0=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz7qafdHLKHc8mhKwIJzXDf7H9TTRR3izpGS0x2gH0LXbfmg2mf
-	e+nrZ3Ymr54ujNroEYl54OqiLZ7dFP4up1PgUie9TtoGfeyCpw/vhcEhYcDjh0Sxz2EgkUFPHLV
-	w
-X-Gm-Gg: ASbGncuUsBc+scytGdm4rhzAwmj/uQTpEYEcg+Dgi0HhGEV83/dDFGStnGRPq22e3Ds
-	QbnBvx2LZ+h/VxsVt16D4+/BNA7iH6GEcQzizGjSuUePyTVhwxS7E3qcr3+AMJZEMS4wLU4IiPK
-	QEWGLR6NFzUsXQbuGgyORNegU5y7GmheRDjjM6DajIu93mWBc/xbz0BsikADMmbfuydDEUew3eH
-	ZfJ2cQvAo+CFcGxLDGwsYzHP5vGtWQp98qoijQSHsamLuvPtX61jAW+JLrYoM7tuMPSToF/0DIk
-	l4VzPut5KaXyGFfCmCFN2wBv
-X-Google-Smtp-Source: AGHT+IFhY/F+2PQCWkWIZiH6/atvzrmubiERnGlL5oxg15r9QqhSnIsJkiSQjR3EzbfRECrt0dNZkw==
-X-Received: by 2002:a05:651c:505:b0:300:2ddb:aaa5 with SMTP id 38308e7fff4ca-3002fc92a19mr6541821fa.30.1733474934985;
-        Fri, 06 Dec 2024 00:48:54 -0800 (PST)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-30030799f35sm1374041fa.93.2024.12.06.00.48.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Dec 2024 00:48:53 -0800 (PST)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: Linus <torvalds@linux-foundation.org>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.13-rc2
-Date: Fri,  6 Dec 2024 09:48:52 +0100
-Message-ID: <20241206084852.119710-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="fwxDjnly"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=luv4
+	qVIy34wd/+LlRrPAe9e4HKQGm07TFucZNszgWMQ=; b=fwxDjnly3RdUSK3uTJ3S
+	mrKxJd0xkJzLm5x83yQxvPMxvOILccxlqB4QCHINZBnJLHPgEAMzvvaSpBTFlGpG
+	WEO1BjK7Efdg62VaBBIxsoje6xwZN951O0DDFQ8NGB1TJEfJwGKuTl/A0grDCRn9
+	QnXzgIot7a3AhC8KZgLlzIqIpem4CG799HFhKQJ8TGC0AoMVUA66soOiPYCQS80l
+	ilDdhaa6jUMyQsTvuG9b7kdrJCIlpeRAGUEC6bC+Ew4FwNnRgGbB4OifdZpWdpPe
+	A1wRqzFNbuVmHDyQ+6LvC8jtImrFmWloI8TUbfRMUsvLUp88Db9gk9gL5werCpEf
+	nQ==
+Received: (qmail 54580 invoked from network); 6 Dec 2024 12:15:56 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Dec 2024 12:15:56 +0100
+X-UD-Smtp-Session: l3s3148p1@xH6AI5goeOogAwDPXwEyAJCPbOCqswPD
+Date: Fri, 6 Dec 2024 12:15:55 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-renesas-soc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: Re: [RFC PATCH v2] mmc: suspend MMC also when unbinding
+Message-ID: <Z1Lc6wRWdWbI8Dcl@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-renesas-soc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+References: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="mb12sGId6HHzPEwn"
+Content-Disposition: inline
+In-Reply-To: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
 
-Hi Linus,
 
-Here's a PR with a couple of MMC fixes intended for v6.13-rc2. Details about the
-highlights are as usual found in the signed tag.
+--mb12sGId6HHzPEwn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Please pull this in!
+On Mon, Nov 04, 2024 at 11:18:42AM +0200, Wolfram Sang wrote:
+> When unbinding a MMC host, the card should be suspended. Otherwise,
+> problems may arise. E.g. the card still expects power-off notifications
+> but there is no host to send them anymore. Shimoda-san tried disabling
+> notifications only, but there were issues with his approaches [1] [2].
+>=20
+> Here is my take on it, based on the review comments:
+>=20
+> a) 'In principle we would like to run the similar operations at "remove"
+>     as during "system suspend"' [1]
+> b) 'We want to support a graceful power off sequence or the card...' [2]
+>=20
+> So, first, mmc_remove_card() gets improved to mark the card as "not
+> present" and to call the bus specific suspend() handler.
+>=20
+> Then, _mmc_suspend gets extended to recognize another reason of being
+> called, namely when a card removal happens. Building upon the now
+> updated mmc_remove_card(), this is the case when the card is flagged as
+> "not present".
+>=20
+> The logic of either sending a notification or sending the card to sleep
+> gets updated to handle this new reason. Controllers able to do full
+> power cycles will still do a full power cycle. Controllers which can
+> only do power cycles in suspend, will send the card to sleep.
+>=20
+> All this is for MMC. SD/SDIO are unaffected because they are not using
+> the 'card present' flag.
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>=20
+> [1] https://patchwork.kernel.org/project/linux-renesas-soc/patch/16025813=
+12-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
+> [2] https://patchwork.kernel.org/project/linux-mmc/patch/1605005330-7178-=
+1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
+> ---
+>=20
+> Lightly tested with a Renesas R-Car S4 Spider board. It bascially works
+> as expected. Serious testing postponed until the generic direction of
+> this is approved :)
 
-Kind regards
-Ulf Hansson
+Anything I can do to make the review easier? Some more testing maybe?
 
-The following changes since commit 40384c840ea1944d7c5a392e8975ed088ecf0b37:
 
-  Linux 6.13-rc1 (2024-12-01 14:28:56 -0800)
+--mb12sGId6HHzPEwn
+Content-Type: application/pgp-signature; name="signature.asc"
 
-are available in the Git repository at:
+-----BEGIN PGP SIGNATURE-----
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.13-rc1
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmdS3OgACgkQFA3kzBSg
+KbZQ/Q/8C77yTOY03g+aJJB/KPisdtEP1JirjZswRL5cZNJijo/8w7MDXw9TydsG
+JDxTMPlo6IWgg61WorRqV9JzUclUpUsmxWGnNL02mjKcMMwK8+Lyjedhv09aQQDL
+plJwEZk9YcNd+9gXb5E5vPH+uryD8au+qfEpE/+RrJSJ69EPA25fknO37LD3r//n
+dvNMnUbKbpkKvl3F5x5PiCjt+C2P8gbiwtaNScy32AJhn+aDl7X5oMm/lP9kB3jc
+yviuZzA21KsvIfWnT9OOc1zJRMh+WSrFvL/IxJo/zi8xwfcCEUuPqa7e3ggT3rlt
+7RmZ1TtJqneqS/F7QrnuTDiiIwYtWpLHvpesraj2TUf9nJrjfbGsoIvj+jx0aBxJ
+GpfgQERQp8dzUnilm55BPFl8dqh4TYGoobfoO9qaHI+OS9v443g2snGjQmm+a3o7
+5eyttd1P9RKO5ZcPzn4Z6oXzjJ812PdbCPfKeUuBQYrezMFyYCXLO4KXrkmc0WSo
+wc0gauPQt9pFpwDLrP+cBvapdf2d72XXde1MfMSkrHdJIZZXMDsD+gMT1NFpNznl
+7n9JOTBFbFmzqfgSAWYxOGybC2vV4t2wtfez/qT3DNoOIYd7Q79wBJDANjgi/xHB
+Ks46SYARYPh3065IF/QBGzWQbC/FWQSFGuaMizs3aoZVOg0fCbw=
+=t9aN
+-----END PGP SIGNATURE-----
 
-for you to fetch changes up to 87a0d90fcd31c0f36da0332428c9e1a1e0f97432:
-
-  mmc: core: Further prevent card detect during shutdown (2024-12-02 15:37:16 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Further prevent card detect during shutdown
-
-MMC host:
- - sdhci-pci: Add DMI quirk for missing CD GPIO on Vexia Edu Atla 10 tablet
-
-----------------------------------------------------------------
-Hans de Goede (1):
-      mmc: sdhci-pci: Add DMI quirk for missing CD GPIO on Vexia Edu Atla 10 tablet
-
-Ulf Hansson (1):
-      mmc: core: Further prevent card detect during shutdown
-
- drivers/mmc/core/bus.c            |  2 ++
- drivers/mmc/core/core.c           |  3 ++
- drivers/mmc/host/sdhci-pci-core.c | 72 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.h      |  1 +
- 4 files changed, 78 insertions(+)
+--mb12sGId6HHzPEwn--
