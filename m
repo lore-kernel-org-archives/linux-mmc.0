@@ -1,93 +1,143 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.17])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D9A813D518;
-	Mon,  9 Dec 2024 16:44:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1ABA213AA2F;
+	Mon,  9 Dec 2024 17:11:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733762641; cv=none; b=O24z/N8JOa1B3ci+yBqoZycvepSl0Zq4sUy+qTBj+KOVe15hzDxfd2i3w4QQRb6k8JaXzkILbuRKgeDX2FsJPhoLcEXf4mxEd8+/uVFxDd+EAHSn/gdvS5oWzaAbg59ailhHleLwvsjo3YINr/Q6AqxSyvne3nQ4d4WXVKoGows=
+	t=1733764311; cv=none; b=okcIeRyWIvJ1sig6eHiyRUDULCrvAN+5MU2OeoQuKeGqNAcbW/ExnqDz6Lf53eIcTI+4KsHk8M0Hxarkv7aqaifgnAVZFKBOkovx+cug5QIHMkeYi6TvReQUOncDIWTPxvubbk5gtyo7j6n5K+uEUXK3HeLVvw2nj+KEBihMMLY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733762641; c=relaxed/simple;
-	bh=gPBsh7kBxwTkWDxaPUYHX2x5XD0ROwzR2gKerLn0ZD4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IZFP8B0vVjn7AtbYy3M5gY/3vBoyK8CnqB2O6iTO38TttrzZpjVXZ0Jhvdo14srZYjV2MlUR2gF5puIjxyk8L0Z/tJ+s+5qe8U1Nr/vZxdVuJXfudLS2G3m/lmdiL5DhDFnLadCoDW5LtaH0hbdQO7Q1AoOra6AwHbIzNwmI2bA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com; spf=none smtp.mailfrom=linux.intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Fe+DFVRW; arc=none smtp.client-ip=198.175.65.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linux.intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=linux.intel.com
+	s=arc-20240116; t=1733764311; c=relaxed/simple;
+	bh=V1IRcBKz+2MDX3a2wbdxLqvqdh2IYyh5G7XBYuuSfLY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=m/AMynYQq5qYC5qFSLrFaytAbILkKU4pvf31iVqMgWowiQuA9rHqrdljPjCljgOSyL4LHaywIbZB7bEZOiDN6l13Yvvx/BmSpDu1PPRDKOHWVimyDY7srj5vh3qdl28P3+/mUzDNc9OUOse7EP2+B+vb4/C+3vOHWyKSaOls3tE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=SKNHG60J; arc=none smtp.client-ip=192.198.163.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Fe+DFVRW"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="SKNHG60J"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1733762640; x=1765298640;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=gPBsh7kBxwTkWDxaPUYHX2x5XD0ROwzR2gKerLn0ZD4=;
-  b=Fe+DFVRW8tsJj1I4G9EGmPFTEdqsKGaGAvrk2yGkDyAarJXFY4lPnFYz
-   /CBCUd/i6wry2+dNmAZEnAgoKeJfAFt0CgtV2tXciHCViprw6IPEtQ45e
-   w2mQXfsLXfGR/Lafk96PsJH2LTB8oeyoFgJvPVWoAEMEo8gmD5t9WZ0kB
-   yEK5uqbkyDT3BHSHP5QzrQfY4nNW8ni6Brz4fG872WvxZMvTSuv8mT9bh
-   igSVC2TP2hJ4L26syZa6E1E0qZ5ncBPiYYfhLnIS8aQiG95zlM4DPUcj4
-   0EVYfoc+CUoLdc+YMbGqq29YGeHQHRyui1GHetD96PvYfrBYi0k8FF+6P
-   Q==;
-X-CSE-ConnectionGUID: SDa2ObizSn6sq2oWhdudlw==
-X-CSE-MsgGUID: G6CTbBCTSOeJAWcgBJRMfQ==
-X-IronPort-AV: E=McAfee;i="6700,10204,11281"; a="34128181"
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="34128181"
-Received: from fmviesa006.fm.intel.com ([10.60.135.146])
-  by orvoesa109.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 08:44:00 -0800
-X-CSE-ConnectionGUID: Pv8sxWOXR3O8vwYdI5BG/w==
-X-CSE-MsgGUID: IN/Va6CeTLeOE1vVR1X0lA==
+  t=1733764310; x=1765300310;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=V1IRcBKz+2MDX3a2wbdxLqvqdh2IYyh5G7XBYuuSfLY=;
+  b=SKNHG60J4qkKbhDrQNhOzVz27eAYpF/rTuh9QG27phsgSWwOw3IGiAUj
+   wACnwlV8uhplpfP0Xff54KL/S8kO+8cj/xLri7IJTgEvCTikRbP6o/en1
+   QnXLxCZcsYLstTSZWAG0PkGdHD09u5qhFue+kujPXrmCd3w02fqgiFMs6
+   eSgb2lBPpVAItJDQ6xVzgIYfUL4l9VpYeHr02QtO2vPJkiHrGhNhPzT7x
+   hK1s7d24S/KWHL4f9uDGP+7CZghe/hmJ4nLjr33Q5mxnxGBY7mTLAGTfK
+   j0dIRZxh/VnQifIiH36D+qF3TcuEaF0qOT/NsbdFQXRpLfag+qAGj+UGx
+   A==;
+X-CSE-ConnectionGUID: y94XWhsVS4G6EH9zuZIKPA==
+X-CSE-MsgGUID: pfRTDk/PQHe8uFhdbXKwKA==
+X-IronPort-AV: E=McAfee;i="6700,10204,11281"; a="44753537"
+X-IronPort-AV: E=Sophos;i="6.12,220,1728975600"; 
+   d="scan'208";a="44753537"
+Received: from fmviesa005.fm.intel.com ([10.60.135.145])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 09:11:49 -0800
+X-CSE-ConnectionGUID: TajxL1saTNujHZuZO6NrXA==
+X-CSE-MsgGUID: FonTT+X8STypXpMdREj3wg==
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="94828598"
-Received: from smile.fi.intel.com ([10.237.72.154])
-  by fmviesa006.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 08:43:58 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.98)
-	(envelope-from <andriy.shevchenko@linux.intel.com>)
-	id 1tKgrT-00000005neT-3JUl;
-	Mon, 09 Dec 2024 18:43:55 +0200
-Date: Mon, 9 Dec 2024 18:43:55 +0200
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 6/6] mmc: sdhci-acpi: Don't use "proxy" headers
-Message-ID: <Z1ceS7FksaPeqYjF@smile.fi.intel.com>
-References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
- <20241101101441.3518612-7-andriy.shevchenko@linux.intel.com>
- <52ac8bbc-49d1-4104-98e2-40bb69c23f09@intel.com>
+X-IronPort-AV: E=Sophos;i="6.12,220,1728975600"; 
+   d="scan'208";a="99607066"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
+  by fmviesa005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 09:11:47 -0800
+Message-ID: <4ee01e24-176e-46ac-9ecd-a0976490cbdc@intel.com>
+Date: Mon, 9 Dec 2024 19:11:41 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <52ac8bbc-49d1-4104-98e2-40bb69c23f09@intel.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 1/6] mmc: sdhci: Use EXPORT_PM_FN_NS_GPL() for
+ exporting PM functions
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Victor Shih <victor.shih@genesyslogic.com.tw>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, Linux PM list <linux-pm@vger.kernel.org>,
+ "Rafael J. Wysocki" <rafael@kernel.org>
+References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
+ <20241101101441.3518612-2-andriy.shevchenko@linux.intel.com>
+ <7b5fcb3e-e3e7-4d87-9a7b-5570e2e85a0e@intel.com>
+ <Z1ccjxyxO0NMNbkm@smile.fi.intel.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <Z1ccjxyxO0NMNbkm@smile.fi.intel.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, Dec 09, 2024 at 01:32:36PM +0200, Adrian Hunter wrote:
-> On 1/11/24 12:11, Andy Shevchenko wrote:
-> > Update header inclusions to follow IWYU (Include What You Use) principle.
-> > While at it, sort them alphabetically for better maintenance.
+On 9/12/24 18:36, Andy Shevchenko wrote:
+> On Mon, Dec 09, 2024 at 12:38:59PM +0200, Adrian Hunter wrote:
+>> On 1/11/24 12:11, Andy Shevchenko wrote:
+>>> Switch from ugly ifdeffery to using EXPORT_PM_FN_NS_GPL()
+>>> for exporting PM functions. This helps cleaning up the other
+>>> SDHCI drivers in the future.
+>>
+>> It seems sdhci is the first code in the kernel to use
+>> EXPORT_PM_FN_NS_GPL() but it was not asked for ;-)
+>>
+>> As such, can you fill in a little background.  I am not
+>> sure what it achieves.  Why have CONFIG_PM if not to
+>> #ifdef dependent code behind it?
 > 
-> Not a fan of alphabetical order for include files.
-> In this case it makes it hard to see what actually
-> changed.
+> It makes sure that the code elimination happens at compile time and
 
-Huh?! It will be quite easy to see if anything is being added or removed and
-makes code robust against (possible) duplications. Much easier to maintain!
+Does it eliminate the code?  Maybe I am missing something,
+but it looks like it is still there:
 
-If you are talking about _this_ change, then it's true, but only for _this_
-change, and not for the future changes. Alphabetical order is natural for
-humans (and we write code for humans) which our brains are trained for. So
-the processing time of the ordered data is higher and less resource-consuming.
+$ grep CONFIG_PM .config
+# CONFIG_PM is not set
+# CONFIG_PMIC_OPREGION is not set
+# CONFIG_PMBUS is not set
+# CONFIG_PMIC_ADP5520 is not set
+# CONFIG_PMIC_DA903X is not set
+CONFIG_PM_DEVFREQ=y
+# CONFIG_PM_DEVFREQ_EVENT is not set
+CONFIG_PM_OPP=y
+$ objdump -d drivers/mmc/host/sdhci.ko | grep sdhci_suspend_host
+00000000000089f0 <__pfx_sdhci_suspend_host>:
+0000000000008a00 <sdhci_suspend_host>:
+    8a16:       e8 00 00 00 00          call   8a1b <sdhci_suspend_host+0x1b>
+    8a29:       74 0c                   je     8a37 <sdhci_suspend_host+0x37>
+    8a35:       75 54                   jne    8a8b <sdhci_suspend_host+0x8b>
+    8a4c:       0f 85 06 01 00 00       jne    8b58 <sdhci_suspend_host+0x158>
+    8a66:       0f 85 00 01 00 00       jne    8b6c <sdhci_suspend_host+0x16c>
+    8a7b:       e8 00 00 00 00          call   8a80 <sdhci_suspend_host+0x80>
+    8a86:       e9 00 00 00 00          jmp    8a8b <sdhci_suspend_host+0x8b>
+    8a92:       75 0a                   jne    8a9e <sdhci_suspend_host+0x9e>
+    8a98:       0f 84 87 00 00 00       je     8b25 <sdhci_suspend_host+0x125>
+    8aa5:       74 90                   je     8a37 <sdhci_suspend_host+0x37>
+    8ab8:       0f 85 f5 00 00 00       jne    8bb3 <sdhci_suspend_host+0x1b3>
+    8ad8:       0f 85 c0 00 00 00       jne    8b9e <sdhci_suspend_host+0x19e>
+    8af0:       0f 85 93 00 00 00       jne    8b89 <sdhci_suspend_host+0x189>
+    8b06:       e8 00 00 00 00          call   8b0b <sdhci_suspend_host+0x10b>
+    8b14:       0f 85 1d ff ff ff       jne    8a37 <sdhci_suspend_host+0x37>
+    8b20:       e9 00 00 00 00          jmp    8b25 <sdhci_suspend_host+0x125>
+    8b25:       e8 00 00 00 00          call   8b2a <sdhci_suspend_host+0x12a>
+    8b2c:       75 52                   jne    8b80 <sdhci_suspend_host+0x180>
+    8b53:       e9 55 ff ff ff          jmp    8aad <sdhci_suspend_host+0xad>
+    8b62:       e8 00 00 00 00          call   8b67 <sdhci_suspend_host+0x167>
+    8b67:       e9 ef fe ff ff          jmp    8a5b <sdhci_suspend_host+0x5b>
+    8b76:       e8 00 00 00 00          call   8b7b <sdhci_suspend_host+0x17b>
+    8b7b:       e9 f5 fe ff ff          jmp    8a75 <sdhci_suspend_host+0x75>
+    8b84:       e9 15 ff ff ff          jmp    8a9e <sdhci_suspend_host+0x9e>
+    8b94:       e8 00 00 00 00          call   8b99 <sdhci_suspend_host+0x199>
+    8b99:       e9 60 ff ff ff          jmp    8afe <sdhci_suspend_host+0xfe>
+    8ba9:       e8 00 00 00 00          call   8bae <sdhci_suspend_host+0x1ae>
+    8bae:       e9 32 ff ff ff          jmp    8ae5 <sdhci_suspend_host+0xe5>
+    8bbb:       e8 00 00 00 00          call   8bc0 <sdhci_suspend_host+0x1c0>
+    8bc0:       e9 03 ff ff ff          jmp    8ac8 <sdhci_suspend_host+0xc8>
+$ 
 
--- 
-With Best Regards,
-Andy Shevchenko
-
+> at the same time gives developer less uglified (by ifdeffery) code.
+> It means there is less risk to miss anything of that which make become
+> a compile-time warning of unused function, or even issues during linking
+> with modules, etc.
+> 
+> Should I update a commit message with that?
 
