@@ -1,182 +1,123 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.16])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 056F6231CA5;
-	Mon,  9 Dec 2024 12:57:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.16
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C246B1798F;
+	Mon,  9 Dec 2024 14:18:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733749064; cv=none; b=hedwEkDhZemLJxtd37h0jSHfT4NARKSE0ckdgMrmDUmcTZF6rOSegU7F4MUkHvdsJB6peH72Owau0KeeOJP50x4Dsne48H1z9TWwrUwQU1Hy+M2isaLw5sN4xz+EFesfJIBJ3J/AJQXnoPw/BeveskVvCsqzS7CyiPSESmFDS1g=
+	t=1733753926; cv=none; b=WNWA5xaR0HHNx/6oq0ztXfBY+i6iuNB5BIrvBnzsZwHqKLrDharUNCLwrhPxKSteK0eCkY5zTN/f7Shzfdy36FdSI6U/PbMKIUfjztMCpw06gFkBJWZ/La6QlrytwWetgjeDa762KfLoLC92UKvv2q4+kOfIgi0wQH/ZYFNJxS0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733749064; c=relaxed/simple;
-	bh=EbuJhA4qQx4XDk7llJVA7OD1EXIiE7sPMPIq2v+X2vY=;
+	s=arc-20240116; t=1733753926; c=relaxed/simple;
+	bh=8FsLJNnBvkyb0aie8QpxEfYPGhWI0ZQ/I6okIqIV6dc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=BfRxd1/Fto0AfWjObp1gaqJyo7EgpTiqH2635miTi8qbdWuNZt0elzmhYfQCOQSLXYh4sUGhALP+50eDaSImClxtafQaw8Fy69y6/rC9hCAQH5xSlm3ruO/Co5zI3bs/+WmcN15DsALOCfEIn1/hpT5+JrP87c98102ltfoV5Qs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=oJfzU7Ih; arc=none smtp.client-ip=192.198.163.16
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=HqTxSnv/YbJ5hktPWR1PeeWADBHj2oeQQC7VQCxuvVqFRxWBjovrgLh9wEWrNefKxUr2DKrIBTymZMvZh0LRMhl8TLyCdjJy7oQHV8wp6Tk9iss91EKskAcYVdCXmcy9kSk2mGJDCvbW6si+pUnRQOazMHTa7wGqYR+ztxm6m9s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=czuJDqZa; arc=none smtp.client-ip=209.85.221.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="oJfzU7Ih"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1733749062; x=1765285062;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=EbuJhA4qQx4XDk7llJVA7OD1EXIiE7sPMPIq2v+X2vY=;
-  b=oJfzU7IhXwkVAVrBqi5Wf4krzSXzxq46HlunoS+q2IZSmnJ264VKJq8W
-   6fodg63iP38eeJrblN52iDSb+8MrrImgiclEJIjHAHOiYjYfeZjKZPaZC
-   lfKz4LbWweFc3fxsfEH09kYpWcFD05L3q6vFhi0aszyhyX9/q2zL/fLjO
-   7vrhKJgj9te9pPsU5jjcwJkgLJkQlRSv508b8V9KH8XluJ/4wwPw7Grcz
-   z1tRG2acHJjhh/Xd42qmEmHXd/Nk+IcwOeFVEvxCkkrUDENBHz9k7L6qM
-   zkafjOaXtAjggJAuSwWfYyuNVs9EUiN3IUJ8oiTxshqXm259P2qse7uw+
-   Q==;
-X-CSE-ConnectionGUID: 0u/8TbIoTDOuLLmReWyEvA==
-X-CSE-MsgGUID: 2HlJ2vTyRWa7B7KRxZnerg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11281"; a="21632660"
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="21632660"
-Received: from orviesa005.jf.intel.com ([10.64.159.145])
-  by fmvoesa110.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 04:57:37 -0800
-X-CSE-ConnectionGUID: U8+Nfyd1TY6n08jUrXsG2Q==
-X-CSE-MsgGUID: Ptj6aMXxQvqLGUEjw6vqGQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="100023631"
-Received: from lkp-server01.sh.intel.com (HELO 82a3f569d0cb) ([10.239.97.150])
-  by orviesa005.jf.intel.com with ESMTP; 09 Dec 2024 04:57:32 -0800
-Received: from kbuild by 82a3f569d0cb with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1tKdKL-0004LJ-0i;
-	Mon, 09 Dec 2024 12:57:29 +0000
-Date: Mon, 9 Dec 2024 20:57:06 +0800
-From: kernel test robot <lkp@intel.com>
-To: Eric Biggers <ebiggers@kernel.org>, linux-block@vger.kernel.org,
-	linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
-	Avri Altman <avri.altman@wdc.com>,
-	Bart Van Assche <bvanassche@acm.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-	Jens Axboe <axboe@kernel.dk>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	"Martin K . Petersen" <martin.petersen@oracle.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v9 04/12] mmc: sdhci-msm: convert to use custom crypto
- profile
-Message-ID: <202412092047.I2fWyclK-lkp@intel.com>
-References: <20241209045530.507833-5-ebiggers@kernel.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="czuJDqZa"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-3862df95f92so2257241f8f.2;
+        Mon, 09 Dec 2024 06:18:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1733753923; x=1734358723; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=uqQ7Av76sCQ67PddSXj4+y1Hwv1xMZkPsZ7ivaLRViI=;
+        b=czuJDqZa8HdHq8zEHJi/y8mcs2rMV9ytqqtsnlCptdIC9bsKDBBXnCFalh7jzhz35y
+         OmFU+xrBQt9JwCv0ErEZBQmh9KUJZkd1DsosJpq1pJFxDd9Sqqt+2KIdLPjbVo8QW1Lb
+         +iTY4jHiskl1PiFIvWqdcEaF92v5bSAISjFKMdWhGOrbfG8jjUh6IEEGXynS2CU+tB0k
+         EJG/pv9kZYNQ9z4dxqNI3LSR7FofZ3U32bJLuqTq+pt5WJP7REuNCv4Gl5EdCmRHy3ei
+         EQKauPIRgXEpA5K6bgGVXRN4V7xT4EUXG+pMaYOAN/6Fs0Y0Wca7L+B8CvLP85ai0wu2
+         4uVA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733753923; x=1734358723;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=uqQ7Av76sCQ67PddSXj4+y1Hwv1xMZkPsZ7ivaLRViI=;
+        b=WlN22Ak7Bfn+ViCJVbC1u7/Ck5l+lMMj+Y81eHUPat55eeLa0rQOJ9MZIoHCtacdIh
+         kEKVsSSeHAta+kObUdFw3k1HwHW8n8BJ4T7OMekwMKHoEjnHN1bM7gOggATWCL6j9DCD
+         1CFaZKXkDfTqzufyLiKejRDq8xfe4rW0nwuS4swKnx3T67ZNHnxe0OW2HgoOrYIrtCFt
+         0HeJ4ONOufJcRsOW1gs8BibNqupIEdS1C6dvUdpnW9531qxjfAQsbkUXXc0LjiaOMJkx
+         AnflRL2u3aMNH5knnrAQn+rB0zzeP4/2n7DCDW7Prg95Uxg0hF5zRw+6Vf/KWlVIcUog
+         DlSw==
+X-Forwarded-Encrypted: i=1; AJvYcCURPSwZFb6OwqlZLjJI5BZKH3ME3zqy0C3g3ToM8E6Mf0h/SSrD3lNGQWufPLF/olW3lNBU1aaZ2ggs@vger.kernel.org, AJvYcCV+o9hIg6UlOniZOOSMT1uGj6jD8fnMl8arBN7v9P6D2mhy1z8ZFsRhQrc8TlzIroHy6KKR6k7y@vger.kernel.org, AJvYcCX4iy7C3wgIOIXDMhxHB4IURsRdKmfYJFvV2HJWefUbjiDGiaebXXWvHl7VzfgJUJqPa1nhgXUIDF+ZrMI=@vger.kernel.org, AJvYcCXABmySfnsrT4zszJDLXGqApeFkRknSZqJj4L4d62pEk9H9pHB5mbxaIQwFpDllB0U5sUQz5lABXOA/kI4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YydJaAB6bgHpZRp9sdaoMnyRjUTZhzlIfw7qe5bgqVbzbmd38yu
+	L3QsCmuzg/TbSdre6gIuQhyQ+SPzFZGGLnUA45inUQLNYW/kp0EseUp6Ng==
+X-Gm-Gg: ASbGnctTDB/dPHWHeRvcSlI0B2Lw5eXiNc18fZGffr5iI0CHtYExUDE646Thh930MDW
+	eAr3ynnkLv+267v3en7EMnpDvOEcJSLyd3FxllidkXXDjo+eVZl1fJR6lhOkwVoTUkdu6WdmpjB
+	EJ+Y/1l+/PDVgsczPyH+MY3KMXOty2vvn2g7J3sdg5uFIvxZ8Ki6oE3HSOh+wwmtzq3Y8/jCVzS
+	la+F7egzN+7P/XF3Ju6h0HL710gogwDD260eX8pY36Kd6CENB7OQKLyZu4qSUhRdLanHNfyuQLD
+	0J/zCEdBiaZ02WtLkQDnEXV3cZwKgmiaX1Ad
+X-Google-Smtp-Source: AGHT+IFELAj1vgxKLoKs7dlvlEpcB4HXPiDSG1NhOtqIafP5sTUuMLFi7afz0ZNUuel47+Us0guQWQ==
+X-Received: by 2002:a5d:588f:0:b0:385:f9db:3c4c with SMTP id ffacd0b85a97d-3862b33e5c1mr9840966f8f.9.1733753922778;
+        Mon, 09 Dec 2024 06:18:42 -0800 (PST)
+Received: from orome (p200300e41f281900f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f28:1900:f22f:74ff:fe1f:3a53])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3862a9705dfsm10955582f8f.4.2024.12.09.06.18.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 09 Dec 2024 06:18:41 -0800 (PST)
+Date: Mon, 9 Dec 2024 15:18:40 +0100
+From: Thierry Reding <thierry.reding@gmail.com>
+To: Prathamesh Shete <pshete@nvidia.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, jonathanh@nvidia.com, 
+	linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	anrao@nvidia.com, stable@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-tegra: Remove
+ SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC quirk
+Message-ID: <sxqxmbsdnfieqdrld4xdhwkqngofm6bq64zqwsnpjjweeqkjrn@s7hdf2krdcvq>
+References: <20241209101009.22710-1-pshete@nvidia.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="wxv6tqvev3dlmdnh"
 Content-Disposition: inline
-In-Reply-To: <20241209045530.507833-5-ebiggers@kernel.org>
-
-Hi Eric,
-
-kernel test robot noticed the following build warnings:
-
-[auto build test WARNING on f486c8aa16b8172f63bddc70116a0c897a7f3f02]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Eric-Biggers/ufs-crypto-add-ufs_hba_from_crypto_profile/20241209-130301
-base:   f486c8aa16b8172f63bddc70116a0c897a7f3f02
-patch link:    https://lore.kernel.org/r/20241209045530.507833-5-ebiggers%40kernel.org
-patch subject: [PATCH v9 04/12] mmc: sdhci-msm: convert to use custom crypto profile
-config: s390-allmodconfig (https://download.01.org/0day-ci/archive/20241209/202412092047.I2fWyclK-lkp@intel.com/config)
-compiler: clang version 19.1.3 (https://github.com/llvm/llvm-project ab51eccf88f5321e7c60591c5546b254b6afab99)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20241209/202412092047.I2fWyclK-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202412092047.I2fWyclK-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
-   In file included from drivers/mmc/host/cqhci-crypto.c:8:
-   In file included from include/linux/blk-crypto.h:72:
-   In file included from include/linux/blk_types.h:10:
-   In file included from include/linux/bvec.h:10:
-   In file included from include/linux/highmem.h:10:
-   In file included from include/linux/mm.h:2223:
-   include/linux/vmstat.h:504:43: warning: arithmetic between different enumeration types ('enum zone_stat_item' and 'enum numa_stat_item') [-Wenum-enum-conversion]
-     504 |         return vmstat_text[NR_VM_ZONE_STAT_ITEMS +
-         |                            ~~~~~~~~~~~~~~~~~~~~~ ^
-     505 |                            item];
-         |                            ~~~~
-   include/linux/vmstat.h:511:43: warning: arithmetic between different enumeration types ('enum zone_stat_item' and 'enum numa_stat_item') [-Wenum-enum-conversion]
-     511 |         return vmstat_text[NR_VM_ZONE_STAT_ITEMS +
-         |                            ~~~~~~~~~~~~~~~~~~~~~ ^
-     512 |                            NR_VM_NUMA_EVENT_ITEMS +
-         |                            ~~~~~~~~~~~~~~~~~~~~~~
-   include/linux/vmstat.h:518:36: warning: arithmetic between different enumeration types ('enum node_stat_item' and 'enum lru_list') [-Wenum-enum-conversion]
-     518 |         return node_stat_name(NR_LRU_BASE + lru) + 3; // skip "nr_"
-         |                               ~~~~~~~~~~~ ^ ~~~
-   include/linux/vmstat.h:524:43: warning: arithmetic between different enumeration types ('enum zone_stat_item' and 'enum numa_stat_item') [-Wenum-enum-conversion]
-     524 |         return vmstat_text[NR_VM_ZONE_STAT_ITEMS +
-         |                            ~~~~~~~~~~~~~~~~~~~~~ ^
-     525 |                            NR_VM_NUMA_EVENT_ITEMS +
-         |                            ~~~~~~~~~~~~~~~~~~~~~~
->> drivers/mmc/host/cqhci-crypto.c:176:6: warning: variable 'num_keyslots' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
-     176 |         if (cq_host->ops->uses_custom_crypto_profile)
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/cqhci-crypto.c:230:24: note: uninitialized use occurs here
-     230 |         for (slot = 0; slot < num_keyslots; slot++)
-         |                               ^~~~~~~~~~~~
-   drivers/mmc/host/cqhci-crypto.c:176:2: note: remove the 'if' if its condition is always false
-     176 |         if (cq_host->ops->uses_custom_crypto_profile)
-         |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     177 |                 goto profile_initialized;
-         |                 ~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/cqhci-crypto.c:166:27: note: initialize the variable 'num_keyslots' to silence this warning
-     166 |         unsigned int num_keyslots;
-         |                                  ^
-         |                                   = 0
-   5 warnings generated.
+In-Reply-To: <20241209101009.22710-1-pshete@nvidia.com>
 
 
-vim +176 drivers/mmc/host/cqhci-crypto.c
+--wxv6tqvev3dlmdnh
+Content-Type: text/plain; protected-headers=v1; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH] mmc: sdhci-tegra: Remove
+ SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC quirk
+MIME-Version: 1.0
 
-   147	
-   148	/**
-   149	 * cqhci_crypto_init - initialize CQHCI crypto support
-   150	 * @cq_host: a cqhci host
-   151	 *
-   152	 * If the driver previously set MMC_CAP2_CRYPTO and the CQE declares
-   153	 * CQHCI_CAP_CS, initialize the crypto support.  This involves reading the
-   154	 * crypto capability registers, initializing the blk_crypto_profile, clearing
-   155	 * all keyslots, and enabling 128-bit task descriptors.
-   156	 *
-   157	 * Return: 0 if crypto was initialized or isn't supported; whether
-   158	 *	   MMC_CAP2_CRYPTO remains set indicates which one of those cases it is.
-   159	 *	   Also can return a negative errno value on unexpected error.
-   160	 */
-   161	int cqhci_crypto_init(struct cqhci_host *cq_host)
-   162	{
-   163		struct mmc_host *mmc = cq_host->mmc;
-   164		struct device *dev = mmc_dev(mmc);
-   165		struct blk_crypto_profile *profile = &mmc->crypto_profile;
-   166		unsigned int num_keyslots;
-   167		unsigned int cap_idx;
-   168		enum blk_crypto_mode_num blk_mode_num;
-   169		unsigned int slot;
-   170		int err = 0;
-   171	
-   172		if (!(mmc->caps2 & MMC_CAP2_CRYPTO) ||
-   173		    !(cqhci_readl(cq_host, CQHCI_CAP) & CQHCI_CAP_CS))
-   174			goto out;
-   175	
- > 176		if (cq_host->ops->uses_custom_crypto_profile)
+On Mon, Dec 09, 2024 at 03:40:09PM +0530, Prathamesh Shete wrote:
+> Value 0 in ADMA length decsriptor is interpretated as 65536 on new Tegra
+> chips, remove SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC quirk to make sure
+> max ADMA2 length is 65536
+>=20
+> Fixes: 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 1 -
+>  1 file changed, 1 deletion(-)
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Acked-by: Thierry Reding <treding@nvidia.com>
+
+--wxv6tqvev3dlmdnh
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmdW/D8ACgkQ3SOs138+
+s6HZ4g//abkNvj5aHoLv/O5qmK6fqI1BCApgACLXu5J9FnwoYqPCe6OwViy4iiP9
+dmmqkBW+/wNrpJZZ3CgK2ZL+opMrC1ZfJLWTqzv3I9gB/EISOObv9JKRklBLMA1K
+0KHSfsHcjHkFJDoGZY60OpkMD62ERvBbcCIz4GDEUtrLeyI75aFuxz6KvCWMupqn
+8sp/p2kzKYamd7XMLsgbbpUH/Ex0l5HADnZBbeIHtV6ZzzyYETWQHKO87Y0baV52
+wJ1kUEVV/mWajDS2NhZuJJDdqvt/DkEHjxu3pDe28ruO59964zZih95pcDwf7C5T
+EEI9vHWsRXGvSCzbf291E5l/8bA/47hyIlmVNtuwUlMaMl+NEurtskYXR7qI1NNM
+WJd+7FzVA/vjcc/l9pI+b7H/yqY8hA2gTsjMbl6qKAPNejhbTFUCjRBOw815+rht
+8Z8JqpnM/aDLnMn4aULxAY1Ll+yhIF7UY4gmpi3R6IcxxuBArselQlnD/blFTFwu
+ac+//nil2fBi5CeLZCjjRhxNrAA1UfGEGVtrBaKPVBS+wglO78yUuJFIQuQmL5GA
+Fgqk8vRROvKH/YGuGNiR+HfVYVJUXVGkq+Sh1GBS97aJmDkAFxNFw/7zd4AwivMB
++jrCwGKSWTBHVTuKpfwtENLNYY/b/tydYmbh0dKK4kbq6hg8yTE=
+=Cl3i
+-----END PGP SIGNATURE-----
+
+--wxv6tqvev3dlmdnh--
