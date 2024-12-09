@@ -1,209 +1,293 @@
-Received: from NAM11-BN8-obe.outbound.protection.outlook.com (mail-bn8nam11on2056.outbound.protection.outlook.com [40.107.236.56])
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 44A65BA45;
-	Mon,  9 Dec 2024 02:37:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.236.56
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733711864; cv=fail; b=F1jBBAbHB5ZKwikeHLx2sRMc3+mRNmPths99cSh/63xuPZcUQ57v8g3MErcjmSnf9sC2csEQnCKLyPtt6im+Ym5kWZ1Y3dB6DGZs2GhbvFkxH2J1cGisRGiS5TGACjxgCrRiMOmpVOFmc+ugmUPdaafpP9v/szUTgHJ79XaEykI=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733711864; c=relaxed/simple;
-	bh=yzUllefCTkqJqPvZBJnPiqeWckAaDqlOCmdQ+hQEo8Y=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=Rgj6sFQ2NYNmSnFPnTZET9MV7jk+FG66ErumaclIWpe2Ylva2nYq393imiKyTINWiB7Qws73JZLYgxowWNqTGpJN5Ok8itDHP9IQjQp8f3NTPfspU/a0PRB/Xw0rujHJwyFCHVOT8y56khNVu0n09ie09cNIHFccYUy0KbtaPJM=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=m14qrbNf; arc=fail smtp.client-ip=40.107.236.56
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 696CB14F126;
+	Mon,  9 Dec 2024 04:33:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1733718789; cv=none; b=LkpU3vdOQwGMHMuKjI1kxEFghxIpHQrVxEWfhcifiwhAebh6nyB6Hk5EhxEt2XB9ZeCGIrz4e9c6Oc1DCh8vZ031bG5DkNQ26hZbrBZ91ZB/GSBA4TRepZkjAuM29EMDivC2CbcPRbNZ0PH23qUxrXQ9VgxDsswwQTR8De4xi/8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1733718789; c=relaxed/simple;
+	bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:To:CC; b=TFSlMyRLs8xXyYneANjtB0FYm4WeT8fT+c+rbdjt6xQSl1WYfg1C2tZ/2N+Ika4Td5gKCHnXFPHGI+D0woo1TDf3R+/EgOUyG5NwDAwrpPErQUh0NTmXg2amx9uHMdet8ZK3VpyeX5tBu28S3PWpbAhcNrWEHQpLoLSQJFICqDY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=qw1cQJyo; arc=none smtp.client-ip=68.232.153.233
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="m14qrbNf"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=CjK+eMOpz+Bc8WBkGMyswQMQMT2lAUZHnAAUhJZlk0KiVEJJ7msRHPJ84j3ETPBsYXImAja26na9rnpwAe0vepgdxRY93I3rmvmzTz093OidXUhw2Sz4Lr+nZEyI2KehIy3RAps8ykFw9EJWGufUhM2iWfc76UfqheHd2QgQkJNWU6if8Eycv7IbkFmfNk76qNUS+/+oYRN9lLVUMqaCaTo9KSWG25EJJSVh6VkhKbDO4Ud75Q0+VUKUI/r302mzXEiIRQRd+Poy70Hxqa9jiWIyz+PSCVSZYOfXmYHU08uyHo4SLQ6WcYwKLODtJ6eSIuSLTTaL/miPykulHudYIA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=yzUllefCTkqJqPvZBJnPiqeWckAaDqlOCmdQ+hQEo8Y=;
- b=TApN3zT3rWCwyOtJ6Vzr3Kvyx4CgfEwyxiLL/KTgnHXcsgwQyYxh/f3Gd0fVnPNriDLORTsgp+nwFNt//98fJZGhMam1nvQRWM2Mz1qOD+ieMEMARXHPFjZ9H+DqbWGBWRjUAWthU9R+rLzIcIYyQB4doqAcTqAi4DCNDlKe3lXibKhZnk+Nj/eekkIgASMEx65M0v+PUuakfE9ZHY/e/Ax3l56v33phEZ8+zqjCTOG6PuNwVSmkREA5I02mVMgbT4lhz2lFgrkhyCaieMjGQjU47fx9vN1PrsxHa/07AXNGuXDOq9riS121zmeLsrALxmxiXrK/wVJUu4JY+uUK6g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=microchip.com; dmarc=pass action=none
- header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=microchip.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=yzUllefCTkqJqPvZBJnPiqeWckAaDqlOCmdQ+hQEo8Y=;
- b=m14qrbNff/dSt8OfrzxnjA9UM4LWm8eO5ITFH+A+YS+qyrsujEANwilSe1TQ+ATB/gmjt5GEqdoWwWc7KMFDUaoiuZmn8nY24iPJD/s8xqNBGFYUaZzvn/maCzrWvqCXzS0pP9Olwr26Cn6u0ivylY5gH++Tl2kSu6fYfyvj6C1ATy0BNBp6vVtS8k2LPfFNozc1E4gn4ZXYuaWbhUcDZfF7mGINUzwZEAiCgAgsIsaaTS39gCUXL6wx/Kgmk06KBCVkX0sV8nbBgZbSRVhBOZKjX2xJDXv0scmoV22VchSDlv6pa+as9WTpjTmorewBnfWnSbXHrlxSno/p0eX93Q==
-Received: from PH7PR11MB6451.namprd11.prod.outlook.com (2603:10b6:510:1f4::16)
- by DM4PR11MB7400.namprd11.prod.outlook.com (2603:10b6:8:100::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8230.11; Mon, 9 Dec
- 2024 02:37:37 +0000
-Received: from PH7PR11MB6451.namprd11.prod.outlook.com
- ([fe80::80a8:f388:d92e:41f8]) by PH7PR11MB6451.namprd11.prod.outlook.com
- ([fe80::80a8:f388:d92e:41f8%4]) with mapi id 15.20.8230.016; Mon, 9 Dec 2024
- 02:37:37 +0000
-From: <Dharma.B@microchip.com>
-To: <conor@kernel.org>
-CC: <ulf.hansson@linaro.org>, <robh@kernel.org>, <krzk+dt@kernel.org>,
-	<conor+dt@kernel.org>, <Nicolas.Ferre@microchip.com>,
-	<alexandre.belloni@bootlin.com>, <claudiu.beznea@tuxon.dev>,
-	<Aubin.Constans@microchip.com>, <linux-mmc@vger.kernel.org>,
-	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] dt-bindings: mmc: atmel,hsmci: Convert to json schema
-Thread-Topic: [PATCH] dt-bindings: mmc: atmel,hsmci: Convert to json schema
-Thread-Index: AQHbRvwf3qgInoB0eU2XMIzej7Xo6rLX7RUAgADA/oCAAMVQgIADxUKA
-Date: Mon, 9 Dec 2024 02:37:37 +0000
-Message-ID: <cc15c9de-4cf8-44e3-976a-936bf16b7ab2@microchip.com>
-References: <20241205-hsmci-v1-1-5a25e622dfed@microchip.com>
- <20241205-trickster-rebate-d5e64bc29992@spud>
- <4e3a4154-9e05-40b4-961f-6d7e95ec0890@microchip.com>
- <20241206-untoasted-ripening-83ecf98bc42f@spud>
-In-Reply-To: <20241206-untoasted-ripening-83ecf98bc42f@spud>
-Accept-Language: en-GB, en-US
-Content-Language: en-GB
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=microchip.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH7PR11MB6451:EE_|DM4PR11MB7400:EE_
-x-ms-office365-filtering-correlation-id: 27c04856-b03c-49e9-7be1-08dd17fa71b9
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR11MB6451.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(7416014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|1800799024|366016|7416014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?RkIvRHJUODc0eG43bGRzK3VVaTNueVRWTXlhcTVTeE5Dd1RBL2hTRyt0eEpC?=
- =?utf-8?B?bmtlSmVHTzJSWkh3NVdLb0Vqc1pLWFZkSFdCb25VTERIS2tVVTV6OXo2cE9v?=
- =?utf-8?B?SS9Vb09LaVRMZ1JNaGtJcUxLdlluMXVRM3NjK2c1UVJNVlFrQ1FqT3ZxalVa?=
- =?utf-8?B?RnFKT2dPaDByMXZBdzZpVWpRT1YyMmthVzRyTmYyZ2t4Nk9YaHZyOE1jTnFo?=
- =?utf-8?B?WVJhNHdnWUs3VUhNV3lBdWdLcHg5K0J3WlFaMWxVVmdaU1NuTXZXTHZHSVZ0?=
- =?utf-8?B?OUU5SC9VckltZUVZOG1PMzd2WUxtRkpWRlBTSUhsbGZJRFBQdjFFcXk3aWEv?=
- =?utf-8?B?azFaSks4R3ZINjdQaXhSWFY2R3NkSlFsM0xnakdneTgzRmphVnJtcVF3YlpX?=
- =?utf-8?B?M1ppazZ3N2dYYlNZRFFoMGlGTi93NjdiWkhhVzNKRjRJSVpnRHpYWVo2T214?=
- =?utf-8?B?TmZPc2c1T2N0dExhQlA4Z0o5QnJ2WEp5c3FDRTdhK3VWZ0NYSWcwRVBuTUNC?=
- =?utf-8?B?K1kzQWQ4MjZKRTVscklBaWN6VFZJUVpFMUFlNHo2WDVWaXFJeHkxaEMyYmxy?=
- =?utf-8?B?L3RaOEo1Z254bURpaXlIYXJZMXdLMnhaMWNZUFdSTHlDMW0zMnN2NDI0Tm9O?=
- =?utf-8?B?OXBtTGZ3c0N1eDdHMklKb1VuVEExb3NuZWltekh4dHpsbWM2dThvSUxPR01R?=
- =?utf-8?B?WVVRQ2xweTBFVnluV1o1NThTOFhuVEtJakxCemg4MWhBeUl0VVRGZ2w4Z09n?=
- =?utf-8?B?KzVLR3VxZXIxVjJuZHZPY3hvMWQxYVV5QmFBSGMwRXZVZlZtNmxZZThUdk14?=
- =?utf-8?B?N3VNOVZuNmZwcVZlb1VDaTFiSmgxays3dHlCeWRTeXlxL3MyL0JpSVRFSlhU?=
- =?utf-8?B?TG1JRGpoVTNtOS9UVFRwTGZHajR2QnA1ZnQ3Qnl6dnp3OUhJbVdYYzFzNDFX?=
- =?utf-8?B?c0llb2hVK0RBOHNzWWFDRDJEUW9ScXFTWXFZK0pwMXE0K2Z2T0FaZzV6Tk5R?=
- =?utf-8?B?c0ROV0hlRjNsR0pEdWx4RWZGZ0NWKzcrUXhLQlVpUWJsWXdPWUNoWUNhK2tI?=
- =?utf-8?B?TFhiTjdjZ2RmWVkvTXVIUTlxaHhxYVFmaTVkelVndHBrSHFJd0xCOTdHbWxD?=
- =?utf-8?B?YnV3b00yaWY4d0xrVzhjbHl2dzM4d2ppaFdtamthTDJBR3VqUVV1UXk2enY2?=
- =?utf-8?B?U3I4K0tHRnZTZ01lWGNLQk1SbVg3U1VoaTNuSEc1aDIxQ1owckt6L3pzWjJV?=
- =?utf-8?B?b0RWQk1ENk5HU0dIMXBsNkx3Q2hBZjdJd1lVa3kyVUhtYTRkRys3SHA4Qllh?=
- =?utf-8?B?QjhHWnZ4R0VOODBnS2ZRZ1BuczFwSUpieDF3eXN3c0p1NzNYUDY1Qzh2UEZO?=
- =?utf-8?B?dFdnNERXVG1ubFhQT0xiMU9UeWx4K2FMbktYbFgvYWJuQlcvY29QdHNQd2E2?=
- =?utf-8?B?VU5BMjVXUTZSN3BPc2RDK3BUaDE0WGpFdXVsUU5UTXZPU2RQeURreUsxb01V?=
- =?utf-8?B?WFZrd0VVZDhtcjZuR3JubzdaaFFjNzVFTzlLRUs1VGtRd25JbTBqbzcwRFBT?=
- =?utf-8?B?WGFKYTlBeDFXRVp3bVU5VDlwditNb2ZUM29LT1J3QmZucTVZUVJzdFlzQXk4?=
- =?utf-8?B?WEN0N1BBQVVNTENvUmJkMkxmWGV2ZXBWNlFGZ0plTS91bXkrV2EyMjlndi9h?=
- =?utf-8?B?OEI2TER1ZzU1UFBmeU5jcm5MT2lqdnZ2NnJ1N1cxT2NwVlVobnNybzlLVCtq?=
- =?utf-8?B?NmZZMTFaSWdCVDZkbHRDaVFMc2I2WkVKVkRmRmlrb1crbkR3MC9VRVNZcisv?=
- =?utf-8?B?Q29kOWRmSzMzMm9qL1VWaUJCTHEyQllVb1cvQlEvd25zdXFnL0cvaWhUQ29Z?=
- =?utf-8?B?dithTnZRS1hzWWVFbStVb3JKVExGSDRXN0hzNGNDc1g0c3c9PQ==?=
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?MUthOS9HSGpOeEswSnhWK1FoYzBSZmtWZS9xMThWZnRnYzNuZThLUzhNeVRJ?=
- =?utf-8?B?S0FaMVVpbE9JL1lnT2Jrb3BhcGRsb0l1a3IvZEFtM0x4SEJGcEFxU3pCNThx?=
- =?utf-8?B?RzlyRnYyRFlPdEt6SGNFeFE5bDFvK3hCV2FLTnduVlVFN3pGQTdQRjMrR2tW?=
- =?utf-8?B?Wityd0cyUStRRFI5OGFwMzZ2NXYrL1d4dmtBN2l0TmdiMUZtTU1yT0xkZC9s?=
- =?utf-8?B?WHVWNnZ0K01CTU9PM2hmMFc1Rmp5S21RMGJ4Nk1ScDRqSWRaY2xZR3NVaUVR?=
- =?utf-8?B?cUJxRExtS09rVmhMSkNtaFB6RHNGcksvWXZidzdzNWl6TlNqSWw1d0FiQTRl?=
- =?utf-8?B?bS9OS05DMXI4eFI1b0twSWRGUFFXaUJVdFNwQ2lsbHExejZtRGE5eGVydi9M?=
- =?utf-8?B?SXI2SjBLOVA2cHdQTWZxYWxvSFdDY2VHWUc2WFFqamdoclFEVmwwMk1vcHBs?=
- =?utf-8?B?S2lWblRTQVpDZ0JnajB0SUp2V0UrNG5NRVhKaGlvWk9zTFJIWTZrUmdWQ2p1?=
- =?utf-8?B?dSsxRFdJQzladDI5Y2g3OXNPT0ExeXY0OFhKZlRNVGdlam5VY1QvSWo3QVBU?=
- =?utf-8?B?Z3BpVmlFdmtOZUgzTUdEc2JwU0tHMzFPMFA2U3IrY0tZMG5WMGN4UEZvZ00w?=
- =?utf-8?B?WEtwbFNLVDk3VDREa2daL29DWXQwUElIU25CMStXc29jNU4zMnV1NC9scTVL?=
- =?utf-8?B?MzZWTnlxRFZLNm1DNDdyL1I1alF0TnJlL1RHTlExUG1jL00yNVJadkxETUNw?=
- =?utf-8?B?M2RsRk1FUHBLNWVjWnh4VkgzSmNrRXpQYjB3QVdYVC9TQ3M0d2ZMV3puNkFk?=
- =?utf-8?B?ZzlnU1B6TWhOKy9VOVRxWVlEUkpYK01LQ00vUStCWGZoS0NiQ0NCcy9TTjJI?=
- =?utf-8?B?MTh3VkFzSGFaS200NXVWcHVhOWFGc1VTb21GeFF4UWh2amxZSytJcnphUG9N?=
- =?utf-8?B?azdFYTlzTEc4amhTT1NqMHRhbXRPaGFiN0RLejJnbmpzQXU5NUFWRzNhd2hV?=
- =?utf-8?B?alpUOGVpL3UwRDRVRUYxQ0JrWVRxQi9lVkdVTHpvRkFhRi9sbUxYTFBFZGhK?=
- =?utf-8?B?MFkraDdyelU4ZWJiY2t6Yk1PeXZjbUJ4MnVzNG1JQ2VCUCtRN0ozM3RuQkMz?=
- =?utf-8?B?ajQ1QmNJeEMxTzc5QVRxMlhXcVlWUGhkWVpNdm9nM3NnVmlVNGJ1dkFzYllF?=
- =?utf-8?B?MUVDNjEzNmd1R05OeGZBN1ZCRHU3WDBiTGZFUFJRb3ozKzhOMDI4bkhya3Fu?=
- =?utf-8?B?Nm1yNlN4eE85SDF4eG1XZnBpNjdHM3hNZTg0MlhCRWpDR2xyMlRvRGRwRkpE?=
- =?utf-8?B?N0swRWt3b2VUemhOU0Q5VEVxcURJSjcrWGl0S0VMSUV0UXdQN1hiV1pSVlJB?=
- =?utf-8?B?KzEzcEQwT2gwQUg1ZnpKZGJ2aVlRcmNjSGJCTU9iQjBBakRqcnhjUTB5NjYv?=
- =?utf-8?B?QjF3VldsWlFrQmFoTm1zUy9xV05pT3paVlphZ211VzN4OTNjTk9mVzcyN0Fi?=
- =?utf-8?B?NXZRQ00xeFlueDNLWm1mNDF1Mm9hUnVtd0owdGZSQUtFZFpiL3Q1bVNKUVlT?=
- =?utf-8?B?UFNCZ05la0hHc2Q5ZGNvRmJmRUtFZC9UMitiZFd3azY1c3kwUjNzNzZZbEZ5?=
- =?utf-8?B?L2t0dVFybzBBYk81ckJxcnlrWnpjcDZJK29xa0o2L1RnRmxlNUZnTjRMU3U2?=
- =?utf-8?B?WEVwYVdtdTVDYm5iN2wyL1NYVGQvSXF4WTRtUGZXRE9lVVN1aXdmNnR3R1pn?=
- =?utf-8?B?bW9HYTRlbFlOTHhIMmwwMWJiQnZrcFM5alJLaHVZRXBqSjJFT3NWeUZ4V2Vy?=
- =?utf-8?B?UG94cVIvMWZLaTJlcytJdFVibURuOGVacG9lRERNUWV2VkFYNCtzT3pzTjU5?=
- =?utf-8?B?OTNSNzVGT2VoTGdDZncrbUpiTVhCb3FpU0FOSW5jSjBDYzN1SWtFWFk0VU10?=
- =?utf-8?B?c2NsKzNYamNnVXAzZGI3L2ZlNXhNOEVhZ25LeFdJRFNKWGlDSnFNOGVLZE1v?=
- =?utf-8?B?T2VwV2MwOU91TnBhcTBDai9QQThkdlFHTjg3bWZ1MEdxVXlGcXN2Wm1XaFhK?=
- =?utf-8?B?L0pQUTFQeWduenU4RTUrcXo0dHV6aE05ZERBS3ZhdHZMR3krNEd5OUFsVHVy?=
- =?utf-8?Q?lnI6b+FGOzP9GoxoOG5xKhP5L?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <397EF4151E2EAC4F9861475AC6E28DB5@namprd11.prod.outlook.com>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="qw1cQJyo"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1733718787; x=1765254787;
+  h=from:date:subject:mime-version:content-transfer-encoding:
+   message-id:to:cc;
+  bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
+  b=qw1cQJyoXBKw+95R2p3TmCjFBwtofEGky32W79h70xOxWBWhhxPpMe/a
+   Exu16o98/oHzqkX3buRFUnNkTMqeo4LqpD8z0+D/2X/oWy1MCgRq9g1PR
+   DxuaWzMJZQWo2tYVyWEFGLE7McOQFlVc9F88ZicRpzUoOl+uctRdvk/UC
+   20pXwWWged4JtAZ88CFRIiOB0L8ElIy3cnYByXqHJpHRU2eqUZ03l5RRX
+   Z+CHUx+SCZaid6/i8lHkdlezUnpBTfbahvrwObPLf5Sdkhg9mP8DNTGmX
+   0VBBkiCLpjkEM8dX6rVrpW9Pgur+nn/3kYZ8DV03AlkCWoL2rLzf4MVOm
+   w==;
+X-CSE-ConnectionGUID: 72IB33lgRjS11USK+WrWBA==
+X-CSE-MsgGUID: mBb2+HZpQcCgbtECVkhTjQ==
+X-IronPort-AV: E=Sophos;i="6.12,218,1728975600"; 
+   d="scan'208";a="266487019"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Dec 2024 21:32:59 -0700
+Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35; Sun, 8 Dec 2024 21:32:38 -0700
+Received: from [127.0.0.1] (10.10.85.11) by chn-vm-ex03.mchp-main.com
+ (10.10.85.151) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
+ Transport; Sun, 8 Dec 2024 21:32:34 -0700
+From: Dharma Balasubiramani <dharma.b@microchip.com>
+Date: Mon, 9 Dec 2024 10:02:30 +0530
+Subject: [PATCH v2] dt-bindings: mmc: atmel,hsmci: Convert to json schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: microchip.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH7PR11MB6451.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 27c04856-b03c-49e9-7be1-08dd17fa71b9
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Dec 2024 02:37:37.3500
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: lEO/BJSl8G5X0E3ppYByNuTRopeClPYRPYmrwUBpIzxLcA+o5EabxDS7wQyeGUDDdtlE/PvFH+RzT0eZx8QGvw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR11MB7400
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-ID: <20241209-hsmci-v2-1-b5a6d7c59b67@microchip.com>
+X-B4-Tracking: v=1; b=H4sIAN1yVmcC/13MQQ7CIBCF4as0sxZTRpHoynuYLsgwlVlQGjBE0
+ 3B3sUuX/8vLt0HhLFzgNmyQuUqRtPTAwwAU3PJkJb434IhnjaNRoUQSZR2d2F21sdZC/66ZZ3n
+ vzmPqHaS8Uv7sbNW/9V+oWmllHBq+IPqZ/T0K5URB1iOlCFNr7QvoOxkSngAAAA==
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
+	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Aubin Constans <aubin.constans@microchip.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
+	Dharma Balasubiramani <dharma.b@microchip.com>
+X-Mailer: b4 0.13.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1733718754; l=5160;
+ i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
+ bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
+ b=wul3xm8moixq7EJMj3Cr78cgKF6RGexFxWRTaDK16ghCA6IYsyHDynh8McreBentzrQrXVIWF
+ 0NkUoX9qcPMAHu4NGQFOig6bdl/dT9XYfkkcU8p9opbEZr+d/vdPwbw
+X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
+ pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
 
-T24gMDYvMTIvMjQgMTA6MzIgcG0sIENvbm9yIERvb2xleSB3cm90ZToNCj4gDQo+IE9uIEZyaSwg
-RGVjIDA2LCAyMDI0IGF0IDA1OjE2OjM5QU0gKzAwMDAsRGhhcm1hLkJAbWljcm9jaGlwLmNvbSB3
-cm90ZToNCj4+IEhpIENvbm9yLA0KPj4NCj4+IE9uIDA1LzEyLzI0IDExOjE1IHBtLCBDb25vciBE
-b29sZXkgd3JvdGU6DQo+Pj4gT24gVGh1LCBEZWMgMDUsIDIwMjQgYXQgMDM6Mjc6MDJQTSArMDUz
-MCwgRGhhcm1hIEJhbGFzdWJpcmFtYW5pIHdyb3RlOg0KPj4+DQo+Pj4+ICtwYXR0ZXJuUHJvcGVy
-dGllczoNCj4+Pj4gKyAgIl5zbG90QFswLTldKyQiOg0KPj4+PiArICAgIHR5cGU6IG9iamVjdA0K
-Pj4+PiArICAgIGRlc2NyaXB0aW9uOiBBIHNsb3Qgbm9kZSByZXByZXNlbnRpbmcgYW4gTU1DLCBT
-RCwgb3IgU0RJTyBzbG90Lg0KPj4+PiArDQo+Pj4+ICsgICAgYWxsT2Y6DQo+Pj4+ICsgICAgICAt
-ICRyZWY6IG1tYy1jb250cm9sbGVyLnlhbWwNCj4+Pj4gKw0KPj4+PiArICAgIHByb3BlcnRpZXM6
-DQo+Pj4+ICsgICAgICByZWc6DQo+Pj4+ICsgICAgICAgIGRlc2NyaXB0aW9uOiBTbG90IElELg0K
-Pj4+PiArICAgICAgICBtaW5pbXVtOiAwDQo+Pj4+ICsNCj4+Pj4gKyAgICAgIGJ1cy13aWR0aDoN
-Cj4+Pj4gKyAgICAgICAgZGVzY3JpcHRpb246IE51bWJlciBvZiBkYXRhIGxpbmVzIGNvbm5lY3Rl
-ZCB0byB0aGUgY29udHJvbGxlci4NCj4+Pj4gKyAgICAgICAgZW51bTogWzEsIDQsIDhdDQo+Pj4+
-ICsNCj4+Pj4gKyAgICAgIGNkLWdwaW9zOg0KPj4+PiArICAgICAgICBkZXNjcmlwdGlvbjogR1BJ
-TyB1c2VkIGZvciBjYXJkIGRldGVjdGlvbi4NCj4+Pj4gKw0KPj4+PiArICAgICAgY2QtaW52ZXJ0
-ZWQ6DQo+Pj4+ICsgICAgICAgIHR5cGU6IGJvb2xlYW4NCj4+PiBUaGlzIHR5cGUgY29uZmxpY3Rz
-IHdpdGggbW1jLWNvbnRyb2xsZXIueWFtbCwgaXQncyBhIGZsYWcgdGhlcmUuDQo+PiBZZXMsIEkg
-b3Zlcmxvb2tlZCBpdC4gSSdsbCBzaW1wbHkgcmVtb3ZlIHRoZSB0eXBlIGhlcmUuDQo+Pg0KPj4+
-PiArICAgICAgICBkZXNjcmlwdGlvbjogSW52ZXJ0cyB0aGUgdmFsdWUgb2YgdGhlIGNhcmQgZGV0
-ZWN0aW9uIEdQSU8uDQo+Pj4+ICsNCj4+Pj4gKyAgICAgIHdwLWdwaW9zOg0KPj4+PiArICAgICAg
-ICBkZXNjcmlwdGlvbjogR1BJTyB1c2VkIGZvciB3cml0ZSBwcm90ZWN0aW9uLg0KPj4+PiArDQo+
-Pj4+ICsgICAgcmVxdWlyZWQ6DQo+Pj4+ICsgICAgICAtIHJlZw0KPj4+PiArICAgICAgLSBidXMt
-d2lkdGgNCj4+Pj4gKw0KPj4+PiArICAgIHVuZXZhbHVhdGVkUHJvcGVydGllczogZmFsc2UNCj4+
-PiBEbyB5b3UgbWVhbiBhZGRpdGlvbmFsUHJvcGVydGllczogZmFsc2UgaGVyZT8gWW91IGxpc3Rl
-ZCBwcm9wZXJ0aWVzDQo+Pj4gY29udGFpbmVkIGluIG1tYy1jb250cm9sbGVyLnlhbWwgd2hpY2gg
-bWFrZXMgaXQgc2VlbSBsaWtlIHlvdSdyZQ0KPj4+IHJlc3RyaWN0aW5nIHRvIHRoaXMgc3Vic2V0
-IHJhdGhlciB0aGFuIGFsbG93aW5nIGFsbCBwcm9wZXJ0aWVzIC0gYnV0IHlvdQ0KPj4+IG5lZWQg
-YWRkaXRpb25hbFByb3BlcnRpZXM6IGZhbHNlIHRvIGRvIHRoYXQuDQo+PiBObywgSSdtIG5vdCBy
-ZXN0cmljdGluZyB0aGUgcHJvcGVydGllcyB0byB0aGlzIHN1YnNldC4gVGhlcmUgYXJlDQo+PiBh
-ZGRpdGlvbmFsIHByb3BlcnRpZXMsIHN1Y2ggYXMgIm5vbi1yZW1vdmFibGUsIiAiYnJva2VuLWNk
-LCIgYW5kDQo+PiAiZGlzYWJsZS13cCwiIHRoYXQgYXJlIHVzZWQgaW4gb3VyIERUUyBmaWxlcyBi
-dXQgYXJlIG5vdCBkZWZpbmVkIGluIHRoZQ0KPj4gb2xkIHRleHQgYmluZGluZ3MuIEZvciB0aGlz
-IHJlYXNvbiwgSSB1c2VkIGB1bmV2YWx1YXRlZFByb3BlcnRpZXM6DQo+PiBmYWxzZWAgaW5zdGVh
-ZCBvZiBgYWRkaXRpb25hbFByb3BlcnRpZXM6IGZhbHNlYC4NCj4+IExldCBtZSBrbm93IGlmIGFu
-DQo+PiBgYWxsT2ZgIHJlZmVyZW5jZSB0byBgbW1jLWNvbnRyb2xsZXJgIGFsb25lIHdvdWxkIGJl
-IHN1ZmZpY2llbnQgaW4gdGhpcw0KPj4gY29udGV4dC4NCj4gWWVzLCB0aGVyZSdzIG5vIHBvaW50
-IGR1cGxpY2F0aW5nIHByb3BlcnRpZXMgZnJvbSB0aGVyZSwgdW5sZXNzIHlvdSdyZQ0KPiByZXN0
-cmljdGluZyB0byBhIHN1YnNldC4gSSB0aGluayBhbGwgeW91IG5lZWQgdG8ga2VlcCAob3RoZXIg
-dGhhbiB0aGUNCj4gcmVmZXJlbmNlKSBpcyB0aGUgcmVxdWlyZWQgcHJvcGVydGllcyBsaXN0IGJl
-Y2F1c2UgdGhlcmUgc2VlbXMgdG8gYmUNCj4gbm9uZSBpbiBtbWMtY29udHJvbGxlci55YW1sLg0K
-DQpTdXJlLCBJIHdpbGwgdXBkYXRlIHRoZSBiaW5kaW5nIGFuZCB3aWxsIHNlbmQgYSB2Mi4NClRo
-YW5rcy4NCg0KLS0gDQpXaXRoIEJlc3QgUmVnYXJkcywNCkRoYXJtYSBCLg0K
+Convert atmel,hsmci documentation to yaml format. The new file will inherit
+from mmc-controller.yaml.
+
+Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+---
+Changes in v2:
+- Drop the duplicate properties in the slot node.
+- Link to v1: https://lore.kernel.org/r/20241205-hsmci-v1-1-5a25e622dfed@microchip.com
+---
+ .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 110 +++++++++++++++++++++
+ .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 --------------
+ 2 files changed, 110 insertions(+), 73 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
+new file mode 100644
+index 000000000000..26686ada6288
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
+@@ -0,0 +1,110 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/atmel,hsmci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Atmel High-Speed MultiMedia Card Interface (HSMCI)
++
++description:
++  The Atmel HSMCI controller provides an interface for MMC, SD, and SDIO memory
++  cards.
++
++maintainers:
++  - Nicolas Ferre <nicolas.ferre@microchip.com>
++  - Aubin Constans <aubin.constans@microchip.com>
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++properties:
++  compatible:
++    const: atmel,hsmci
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  dmas:
++    maxItems: 1
++
++  dma-names:
++    const: rxtx
++
++  clocks:
++    maxItems: 1
++
++  clock-names:
++    const: mci_clk
++
++  "#address-cells":
++    const: 1
++    description: Used for slot IDs.
++
++  "#size-cells":
++    const: 0
++
++patternProperties:
++  "^slot@[0-9]+$":
++    type: object
++    description: A slot node representing an MMC, SD, or SDIO slot.
++
++    allOf:
++      - $ref: mmc-controller.yaml
++
++    properties:
++      reg:
++        description: Slot ID.
++        minimum: 0
++
++    required:
++      - reg
++      - bus-width
++
++    unevaluatedProperties: false
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++  - "#address-cells"
++  - "#size-cells"
++
++anyOf:
++  - required:
++      - slot@0
++  - required:
++      - slot@1
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    #include <dt-bindings/clock/at91.h>
++    mmc@f0008000 {
++      compatible = "atmel,hsmci";
++      reg = <0xf0008000 0x600>;
++      interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
++      clocks = <&mci0_clk>;
++      clock-names = "mci_clk";
++      #address-cells = <1>;
++      #size-cells = <0>;
++
++      slot@0 {
++        reg = <0>;
++        bus-width = <4>;
++        cd-gpios = <&pioD 15 0>;
++        cd-inverted;
++      };
++
++      slot@1 {
++        reg = <1>;
++        bus-width = <4>;
++      };
++    };
++...
+diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
+deleted file mode 100644
+index 07ad02075a93..000000000000
+--- a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
++++ /dev/null
+@@ -1,73 +0,0 @@
+-* Atmel High Speed MultiMedia Card Interface
+-
+-This controller on atmel products provides an interface for MMC, SD and SDIO
+-types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the atmel-mci driver.
+-
+-1) MCI node
+-
+-Required properties:
+-- compatible: should be "atmel,hsmci"
+-- #address-cells: should be one. The cell is the slot id.
+-- #size-cells: should be zero.
+-- at least one slot node
+-- clock-names: tuple listing input clock names.
+-	Required elements: "mci_clk"
+-- clocks: phandles to input clocks.
+-
+-The node contains child nodes for each slot that the platform uses
+-
+-Example MCI node:
+-
+-mmc0: mmc@f0008000 {
+-	compatible = "atmel,hsmci";
+-	reg = <0xf0008000 0x600>;
+-	interrupts = <12 4>;
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	clock-names = "mci_clk";
+-	clocks = <&mci0_clk>;
+-
+-	[ child node definitions...]
+-};
+-
+-2) slot nodes
+-
+-Required properties:
+-- reg: should contain the slot id.
+-- bus-width: number of data lines connected to the controller
+-
+-Optional properties:
+-- cd-gpios: specify GPIOs for card detection
+-- cd-inverted: invert the value of external card detect gpio line
+-- wp-gpios: specify GPIOs for write protection
+-
+-Example slot node:
+-
+-slot@0 {
+-	reg = <0>;
+-	bus-width = <4>;
+-	cd-gpios = <&pioD 15 0>
+-	cd-inverted;
+-};
+-
+-Example full MCI node:
+-mmc0: mmc@f0008000 {
+-	compatible = "atmel,hsmci";
+-	reg = <0xf0008000 0x600>;
+-	interrupts = <12 4>;
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-	slot@0 {
+-		reg = <0>;
+-		bus-width = <4>;
+-		cd-gpios = <&pioD 15 0>
+-		cd-inverted;
+-	};
+-	slot@1 {
+-		reg = <1>;
+-		bus-width = <4>;
+-	};
+-};
+
+---
+base-commit: feffde684ac29a3b7aec82d2df850fbdbdee55e4
+change-id: 20241205-hsmci-7ac3ea915777
+
+Best regards,
+-- 
+Dharma Balasubiramani <dharma.b@microchip.com>
+
