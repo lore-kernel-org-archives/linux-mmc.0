@@ -1,97 +1,248 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.10])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f173.google.com (mail-lj1-f173.google.com [209.85.208.173])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0808F1B0407;
-	Mon,  9 Dec 2024 14:27:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.10
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F24951C5CD7
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Dec 2024 15:00:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733754478; cv=none; b=OVpFdGVddVys7QoYK3SfvHQIz89ffqYrHmnpmdz2Vqcg8Mkkz+JaHlbPp3Rb/veCtG5Bj0wV82NkNg2I48ERVt1Y1+UV8d5c0/rPp1XidFBKxRefu6pGM7qt6mcSShLnLXQxzWFcRxrfCS5ECoDYSM/hKlZVJfTnj9UqY4dHBNQ=
+	t=1733756435; cv=none; b=cFWBYmVKaSlj4qV2VFktjbSReKc9PmXGffQ3ehX2sbLtBhZ5coJrM2kfF0Lu1KbdpTghN1zzUrsD6PHZSWipd+ZHDCl2A1jUEF8htz4CXY8Mu1uksy9gZI3BcnqwdKJozbKubnNehVM46JdOMSGU7Ml99mrs8LRkVmHLEB4TXLk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733754478; c=relaxed/simple;
-	bh=0m4Nll53SUs8R6YzahIOIM07jNhLhTzeX1XF3EFXvq0=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=q3AaE6qSIojDiycxjhy6Ch2Ljrl3GzZDst3RG4nZJwLhpYhJTHSDd+k+jt4rHIFOHW3sTlxNGvZ+MZuglL4RFIGmA6I/aMPfZbyQoGmdLrYjSgpLi7FW7v1+iLEyS9WmYNDZunFpznkChIlMDPb8job/GDrW4SMsiWnY6G+GAio=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=UXZyJ6NK; arc=none smtp.client-ip=192.198.163.10
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1733756435; c=relaxed/simple;
+	bh=gInSWd5MMgRSUDhcccm5xbE2Hvza006RfXp+2PMcT7Q=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=TXnAvisdZp3FSib9oV3x88G0TpyBdGYLasNYovRDpZ52/WWW0tr1FICtbmkbVHtq5+gW4Vg3+hBk5255FesB+Z3wSw0SM3viCkUssd+eMsNbKWSiEQHjkKQBr2CIcmv/Clb6+6pORFvibrMDXvc8K5gUbjMxkgbdrj0XZA4uUdU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=aoXCH3sx; arc=none smtp.client-ip=209.85.208.173
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="UXZyJ6NK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1733754476; x=1765290476;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=0m4Nll53SUs8R6YzahIOIM07jNhLhTzeX1XF3EFXvq0=;
-  b=UXZyJ6NKTQwOHGHd2i6+jP9EE0+RRWH4rHiBI3TOiv8/vs+J6baNwtqZ
-   13+OJEiIyJxLegxr7z79jbAm7WmWH/vQb7QvkKXqCHUt9KjmUAj6p5wmf
-   pGEbyN4xsICSEA/iJVXFPG6WQT80bbvF66HfOIsaEJjZZooYtL0jAOFP4
-   cR+X4Xcj12ckQ6DrJgB/7BlhOqsJ9Ha7EL679z0liC/z2hbPhS6+9/jzU
-   trDD6sequCD2p8oVXduwRsJaQUdo+mKwvbjwVIRfiUWb6N+FBY0u1eoQs
-   1fLSeSQfqbmIRbOGrWSRr6Gv16+LwgpaQ0TYjfdgqRMVUFkQbBoeuz1Zg
-   w==;
-X-CSE-ConnectionGUID: G23U0cqWScC5ozGLG+tsow==
-X-CSE-MsgGUID: hws2hh0XTcelnZoKmi8w8w==
-X-IronPort-AV: E=McAfee;i="6700,10204,11281"; a="45454738"
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="45454738"
-Received: from fmviesa010.fm.intel.com ([10.60.135.150])
-  by fmvoesa104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 06:27:55 -0800
-X-CSE-ConnectionGUID: sVJNZMkzQ1ujVxfJ9I1Nfg==
-X-CSE-MsgGUID: vgsEEJ2vQXKqA2fp+eI9xA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.12,219,1728975600"; 
-   d="scan'208";a="95441055"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.89.141])
-  by fmviesa010-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Dec 2024 06:27:52 -0800
-Message-ID: <8342dd26-481d-424d-9fd3-819b7c972807@intel.com>
-Date: Mon, 9 Dec 2024 16:27:49 +0200
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="aoXCH3sx"
+Received: by mail-lj1-f173.google.com with SMTP id 38308e7fff4ca-30229d5b229so5926971fa.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Dec 2024 07:00:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1733756430; x=1734361230; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ViivlbqXyCtIkKHXArGajb/AAWt9vADZPoV9+phTFlo=;
+        b=aoXCH3sxRISaxVLkB0NYkY2oPKmKDvGsDSvJGFupR3cllSb0XJenYVHF/Ef2xVfobB
+         29OTF25OceH8nH3iPbveAXe78xJsSVt6mcpECQh8FNRJtDANUItmpgQECc1ny5TvdpyE
+         b2usxrlPWDOJijVpVMbIwMgSezImRBXBzgSUCEcn+YMySVdOyflwibnoef1oRIupypNs
+         J4n2rsuO2gT1VhTwOKZytD4DK0vxg/4QOVXLORHn8w2kBS+YPEfYJ3IpN24vHLK8BAAr
+         9wmPJ7wspM2vqkDJS+vwyYoOAsG+/w2K85YtX9V5abLH7Dlq9UhAM6sKBfI8eaIuyd2S
+         CssA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1733756430; x=1734361230;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ViivlbqXyCtIkKHXArGajb/AAWt9vADZPoV9+phTFlo=;
+        b=glNCw+Jp2nognzbzPQMk67nBtiNj7jf5FFBoT+LApzGk+faa3PsSYNprhrcEe9h2Kf
+         lIPkDCVhWOEbhITFzoYAZGChLKfkM/X7ZiQo8HKIxv3fcvcnAFj/EHX6XD3je9r58Qj3
+         Q4MNCqokUosC/pHKGGHSaUhpYCcTrjYASF1gS5i/JlPTShQSdK+IdIvwahJckokpShla
+         hlcTTtSO6pjH46civuj46LYkTjdLJHcQ53Djzxu2WrLgkjxC4CsGCWFPTgEEryS3ic3x
+         FV5pt5zmOhu6cl20UEeqyPzaGaeobj2hCOUjI6OsQXQCMaR6j4k4OuT7tw44Q5SYA6eL
+         Osig==
+X-Forwarded-Encrypted: i=1; AJvYcCU4GUK08xS/u4Agb3awcmD5Rj830z+lTqywQ09My79a5x9QkiiR91s3tCD55i+cNJfHD+hYXWYoZ+A=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx2pI9TvCshQd6V5ic9fK8mB7gmIiLKDPYyWCGlENBVM++f56AS
+	VL6e6exhatGWNdyN6UHYAZep3GWR4E4U7Z0Ya4JKhKlsZ+QIM8kZ1Tl9mei6yejH1VNV567mve8
+	Ay5EjThpBVN48ArxrCWH5XaMUILCCfg4uhYHzmqaXrMz32zNvX3w=
+X-Gm-Gg: ASbGncvD+2zr4IIeDZyGq4IlUMLBPSBOIrhzs9Y99DjAsNPq4M7w4SYb63xVCTh0WU3
+	s4P2IMg39JAF3KVcWSnZgyNp1VJHz61bDu/YmNnkKfBxQlWuYmbTqPtguZEX7ArM=
+X-Google-Smtp-Source: AGHT+IGGxxX04Cbn5rlonlQPpTX4R1IKg0lQHDiZvcFPtN+IOQ1z4+qoEWIFalB4udM1M5wmHyTfRxBaDGcpotYHS/0=
+X-Received: by 2002:a05:651c:887:b0:302:2baf:6d14 with SMTP id
+ 38308e7fff4ca-3022ff81a70mr2237501fa.40.1733756429625; Mon, 09 Dec 2024
+ 07:00:29 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mmc: sdhci-tegra: Remove
- SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC quirk
-To: Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
- thierry.reding@gmail.com, jonathanh@nvidia.com, linux-mmc@vger.kernel.org,
- linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: anrao@nvidia.com, stable@vger.kernel.org
-References: <20241209101009.22710-1-pshete@nvidia.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241209101009.22710-1-pshete@nvidia.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20241209045530.507833-1-ebiggers@kernel.org>
+In-Reply-To: <20241209045530.507833-1-ebiggers@kernel.org>
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+Date: Mon, 9 Dec 2024 16:00:18 +0100
+Message-ID: <CAMRc=MfLzuNjRqURpVwLzVTsdr8OmtK+NQZ6XU4hUsawKWTcqQ@mail.gmail.com>
+Subject: Re: [PATCH v9 00/12] Support for hardware-wrapped inline encryption keys
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Alim Akhtar <alim.akhtar@samsung.com>, 
+	Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>, 
+	Bjorn Andersson <andersson@kernel.org>, Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, 
+	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>, Jens Axboe <axboe@kernel.dk>, 
+	Konrad Dybcio <konradybcio@kernel.org>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	"Martin K . Petersen" <martin.petersen@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 9/12/24 12:10, Prathamesh Shete wrote:
-> Value 0 in ADMA length decsriptor is interpretated as 65536 on new Tegra
-> chips, remove SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC quirk to make sure
-> max ADMA2 length is 65536
-> 
-> Fixes: 4346b7c7941d ("mmc: tegra: Add Tegra186 support")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+On Mon, Dec 9, 2024 at 5:56=E2=80=AFAM Eric Biggers <ebiggers@kernel.org> w=
+rote:
+>
+> This patchset is also available in git via:
+>
+>     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped=
+-keys-v9
+>
+> This is a reworked version of the patchset
+> https://lore.kernel.org/linux-fscrypt/20241202-wrapped-keys-v7-0-67c3ca3f=
+3282@linaro.org/T/#u
+> that was recently sent by Bartosz Golaszewski.  It turned out there were =
+a lot
+> of things I wanted to fix, and it would have taken much too long to addre=
+ss them
+> in a code review.  For now this is build-tested only; I've errored on the=
+ side
+> of sending this out early since others are working on this too.  Besides =
+many
+> miscellaneous fixes and cleanups, I've made the following notable changes=
+:
+>
+> - ufs-qcom and sdhci-msm now just initialize the blk_crypto_profile thems=
+elves,
+>   like what ufs-exynos was doing.  This avoids needing to add all the
+>   host-specific hooks for wrapped key support to the MMC and UFS core dri=
+vers.
+>
+> - When passing the blk_crypto_key further down the stack, it now replaces
+>   parameters like the algorithm ID, to avoid creating two sources of trut=
+h.
+>
+> - The module parameter qcom_ice.use_wrapped_keys should work correctly no=
+w.
+>
+> - The fscrypt support no longer uses a policy flag to indicate when a fil=
+e is
+>   protected by a HW-wrapped key, since it was already implied by the file=
+'s key
+>   identifier being that of a HW-wrapped key.  Originally there was an iss=
+ue
+>   where raw and HW-wrapped keys could share key identifiers, but I had fi=
+xed
+>   that earlier by introducing a new HKDF context byte.
+>
+> - The term "standard keys" is no longer used.  Now "raw keys" is consiste=
+ntly
+>   used instead.  I've found that people find the term "raw keys" to be mo=
+re
+>   intuitive.  Also HW-wrapped keys could in principle be standardized.
+>
+> - I've reordered the patchset to place preparatory patches that don't dep=
+end on
+>   the actual HW-wrapped key support first.
+>
+> My current thinking is that for 6.14 we should just aim to get the prepar=
+atory
+> patches 1-5 merged via the ufs and mmc trees, while the actual HW-wrapped=
+ key
+> support continues to be finalized and properly tested.  But let me know i=
+f
+> anyone has any other thoughts.
+>
+> A quick intro to the patchset for anyone who hasn't been following along:
+>
+> This patchset adds support for hardware-wrapped inline encryption keys, a
+> security feature supported by some SoCs and that has already seen a lot o=
+f
+> real-world use downstream.  It adds the block and fscrypt framework for t=
+he
+> feature as well as support for it with UFS on Qualcomm SoCs.
+>
+> This feature is described in full detail in the included Documentation ch=
+anges.
+> But to summarize, hardware-wrapped keys are inline encryption keys that a=
+re
+> wrapped (encrypted) by a key internal to the hardware so that they can on=
+ly be
+> unwrapped (decrypted) by the hardware.  Initially keys are wrapped with a
+> permanent hardware key, but during actual use they are re-wrapped with a
+> per-boot ephemeral key for improved security.  The hardware supports impo=
+rting
+> keys as well as generating keys itself.
+>
+> This differs from the existing support for hardware-wrapped keys in the k=
+ernel
+> crypto API (which also goes by names such as "hardware-bound keys", depen=
+ding on
+> the driver) in the same way that the crypto API differs from blk-crypto: =
+the
+> crypto API is for general crypto operations, whereas blk-crypto is for in=
+line
+> storage encryption.
+>
+> This feature is already being used by Android downstream for several year=
+s
+> (https://source.android.com/docs/security/features/encryption/hw-wrapped-=
+keys),
+> but on other platforms userspace support will be provided via fscryptctl =
+and
+> tests via xfstests (I have some old patches for this that need to be upda=
+ted).
+>
+> Eric Biggers (10):
+>   ufs: crypto: add ufs_hba_from_crypto_profile()
+>   ufs: qcom: convert to use UFSHCD_QUIRK_CUSTOM_CRYPTO_PROFILE
+>   mmc: crypto: add mmc_from_crypto_profile()
+>   mmc: sdhci-msm: convert to use custom crypto profile
+>   soc: qcom: ice: make qcom_ice_program_key() take struct blk_crypto_key
+>   blk-crypto: add basic hardware-wrapped key support
+>   blk-crypto: show supported key types in sysfs
+>   blk-crypto: add ioctls to create and prepare hardware-wrapped keys
+>   fscrypt: add support for hardware-wrapped keys
+>   ufs: qcom: add support for wrapped keys
+>
+> Gaurav Kashyap (2):
+>   firmware: qcom: scm: add calls for wrapped key support
+>   soc: qcom: ice: add HWKM support to the ICE driver
+>
+>  Documentation/ABI/stable/sysfs-block          |  18 +
+>  Documentation/block/inline-encryption.rst     | 251 +++++++++++-
+>  Documentation/filesystems/fscrypt.rst         | 201 +++++++--
+>  .../userspace-api/ioctl/ioctl-number.rst      |   2 +
+>  block/blk-crypto-fallback.c                   |   7 +-
+>  block/blk-crypto-internal.h                   |  10 +
+>  block/blk-crypto-profile.c                    | 103 +++++
+>  block/blk-crypto-sysfs.c                      |  35 ++
+>  block/blk-crypto.c                            | 196 ++++++++-
+>  block/ioctl.c                                 |   5 +
+>  drivers/firmware/qcom/qcom_scm.c              | 214 ++++++++++
+>  drivers/firmware/qcom/qcom_scm.h              |   4 +
+>  drivers/md/dm-table.c                         |   1 +
+>  drivers/mmc/host/cqhci-crypto.c               |  38 +-
+>  drivers/mmc/host/cqhci.h                      |   8 +-
+>  drivers/mmc/host/sdhci-msm.c                  | 102 +++--
+>  drivers/soc/qcom/ice.c                        | 383 +++++++++++++++++-
+>  drivers/ufs/core/ufshcd-crypto.c              |  33 +-
+>  drivers/ufs/host/ufs-exynos.c                 |   3 +-
+>  drivers/ufs/host/ufs-qcom.c                   | 137 +++++--
+>  fs/crypto/fscrypt_private.h                   |  75 +++-
+>  fs/crypto/hkdf.c                              |   4 +-
+>  fs/crypto/inline_crypt.c                      |  42 +-
+>  fs/crypto/keyring.c                           | 157 +++++--
+>  fs/crypto/keysetup.c                          |  63 ++-
+>  fs/crypto/keysetup_v1.c                       |   4 +-
+>  include/linux/blk-crypto-profile.h            |  73 ++++
+>  include/linux/blk-crypto.h                    |  73 +++-
+>  include/linux/firmware/qcom/qcom_scm.h        |   8 +
+>  include/linux/mmc/host.h                      |   8 +
+>  include/soc/qcom/ice.h                        |  34 +-
+>  include/uapi/linux/blk-crypto.h               |  44 ++
+>  include/uapi/linux/fs.h                       |   6 +-
+>  include/uapi/linux/fscrypt.h                  |   7 +-
+>  include/ufs/ufshcd.h                          |  11 +-
+>  35 files changed, 2091 insertions(+), 269 deletions(-)
+>  create mode 100644 include/uapi/linux/blk-crypto.h
+>
+>
+> base-commit: f486c8aa16b8172f63bddc70116a0c897a7f3f02
+> --
+> 2.47.1
+>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I haven't gotten to the bottom of this yet but the
+FS_IOC_ADD_ENCRYPTION_KEY ioctl doesn't work due to the SCM call
+returning EINVAL. Just FYI. I'm still figuring out what's wrong.
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 1ad0a6b3a2eb..7b6b82bec855 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1525,7 +1525,6 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
->  	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->  		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
->  		  SDHCI_QUIRK_NO_HISPD_BIT |
-> -		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
->  		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
-
+Bart
