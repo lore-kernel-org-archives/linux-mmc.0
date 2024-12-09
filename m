@@ -1,293 +1,183 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 696CB14F126;
-	Mon,  9 Dec 2024 04:33:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E2381922C0;
+	Mon,  9 Dec 2024 04:56:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733718789; cv=none; b=LkpU3vdOQwGMHMuKjI1kxEFghxIpHQrVxEWfhcifiwhAebh6nyB6Hk5EhxEt2XB9ZeCGIrz4e9c6Oc1DCh8vZ031bG5DkNQ26hZbrBZ91ZB/GSBA4TRepZkjAuM29EMDivC2CbcPRbNZ0PH23qUxrXQ9VgxDsswwQTR8De4xi/8=
+	t=1733720219; cv=none; b=l2RL2x6tCL531wBoZrucyigJCb5T91Wa1XffVPxQ7t+SGLsaetjMjdhT4MjyMaeNyG8Ch3E72SN0rXi7CK6l6azQ/qQJ5ze2TtxUACqGUZ7w9iGu/Yrjn2eqHzHcfXiiLUfA/b6NYdOfeOVfLItfWZC2Rne2+D3KDb/fBYCjBJI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733718789; c=relaxed/simple;
-	bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:To:CC; b=TFSlMyRLs8xXyYneANjtB0FYm4WeT8fT+c+rbdjt6xQSl1WYfg1C2tZ/2N+Ika4Td5gKCHnXFPHGI+D0woo1TDf3R+/EgOUyG5NwDAwrpPErQUh0NTmXg2amx9uHMdet8ZK3VpyeX5tBu28S3PWpbAhcNrWEHQpLoLSQJFICqDY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=qw1cQJyo; arc=none smtp.client-ip=68.232.153.233
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1733720219; c=relaxed/simple;
+	bh=Q4qXw6u0QnVWnTLxcFvhi8tAx/uPHNBoJYh1c3lbTGA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Tp7Or7/LmH1WePvCaV3zdoCdjMq58rDljKExrooTARimbhV5MVRaNxg28AEaszgj9y3sd0sWtmcCb6CON6DpetWbqZwY9kfeR4X2f1jC3GOysEXRH6dlXD/LsrKussGN8IWz43DyOgvld6DUvNuG+HVUcZvYQ5iidNqBiP6GL9U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=UJ8Z59pT; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="qw1cQJyo"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1733718787; x=1765254787;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:to:cc;
-  bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
-  b=qw1cQJyoXBKw+95R2p3TmCjFBwtofEGky32W79h70xOxWBWhhxPpMe/a
-   Exu16o98/oHzqkX3buRFUnNkTMqeo4LqpD8z0+D/2X/oWy1MCgRq9g1PR
-   DxuaWzMJZQWo2tYVyWEFGLE7McOQFlVc9F88ZicRpzUoOl+uctRdvk/UC
-   20pXwWWged4JtAZ88CFRIiOB0L8ElIy3cnYByXqHJpHRU2eqUZ03l5RRX
-   Z+CHUx+SCZaid6/i8lHkdlezUnpBTfbahvrwObPLf5Sdkhg9mP8DNTGmX
-   0VBBkiCLpjkEM8dX6rVrpW9Pgur+nn/3kYZ8DV03AlkCWoL2rLzf4MVOm
-   w==;
-X-CSE-ConnectionGUID: 72IB33lgRjS11USK+WrWBA==
-X-CSE-MsgGUID: mBb2+HZpQcCgbtECVkhTjQ==
-X-IronPort-AV: E=Sophos;i="6.12,218,1728975600"; 
-   d="scan'208";a="266487019"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 08 Dec 2024 21:32:59 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Sun, 8 Dec 2024 21:32:38 -0700
-Received: from [127.0.0.1] (10.10.85.11) by chn-vm-ex03.mchp-main.com
- (10.10.85.151) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
- Transport; Sun, 8 Dec 2024 21:32:34 -0700
-From: Dharma Balasubiramani <dharma.b@microchip.com>
-Date: Mon, 9 Dec 2024 10:02:30 +0530
-Subject: [PATCH v2] dt-bindings: mmc: atmel,hsmci: Convert to json schema
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="UJ8Z59pT"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2FAD2C4CED1;
+	Mon,  9 Dec 2024 04:56:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1733720218;
+	bh=Q4qXw6u0QnVWnTLxcFvhi8tAx/uPHNBoJYh1c3lbTGA=;
+	h=From:To:Cc:Subject:Date:From;
+	b=UJ8Z59pTP1FvU+F/ffL2U5GeXaTz2WS6b5mYydTseoix8Rs3scr0mpy2aqbDpDK4q
+	 4Wiz9nnSeecyHGvvNI7HQCtAVY1B/nLMWpZKXb6zTQ92Qo+DmHeAKdhyStZKUAq2hF
+	 5vgS1lHK3+pzBtQ7yagOw3I1zegoA5SuuuVJ3UHg5fEEGTP/v/YSoRmzBnzEgimE60
+	 iV6ADyWoh/Q1OjLMvYIA7GJVKu/lek4MMlRnyAWxmgX9akXwmVmfhs1QpKtz9q2ZLF
+	 uTra7No/X2l4WqMIi6HUZh/0YtBRFCyERBXKv2JqRSahCtVv2SQrRAwUJfzLa6WJ9z
+	 lU2liyyLF4csg==
+From: Eric Biggers <ebiggers@kernel.org>
+To: linux-block@vger.kernel.org,
+	linux-fscrypt@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-scsi@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org,
+	Bartosz Golaszewski <brgl@bgdev.pl>,
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Avri Altman <avri.altman@wdc.com>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+	"James E . J . Bottomley" <James.Bottomley@HansenPartnership.com>,
+	Jens Axboe <axboe@kernel.dk>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	"Martin K . Petersen" <martin.petersen@oracle.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH v9 00/12] Support for hardware-wrapped inline encryption keys
+Date: Sun,  8 Dec 2024 20:55:18 -0800
+Message-ID: <20241209045530.507833-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-ID: <20241209-hsmci-v2-1-b5a6d7c59b67@microchip.com>
-X-B4-Tracking: v=1; b=H4sIAN1yVmcC/13MQQ7CIBCF4as0sxZTRpHoynuYLsgwlVlQGjBE0
- 3B3sUuX/8vLt0HhLFzgNmyQuUqRtPTAwwAU3PJkJb434IhnjaNRoUQSZR2d2F21sdZC/66ZZ3n
- vzmPqHaS8Uv7sbNW/9V+oWmllHBq+IPqZ/T0K5URB1iOlCFNr7QvoOxkSngAAAA==
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>, Alexandre Belloni
-	<alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Aubin Constans <aubin.constans@microchip.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-kernel@vger.kernel.org>,
-	Dharma Balasubiramani <dharma.b@microchip.com>
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1733718754; l=5160;
- i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
- bh=LY3RsQ2MtH1nNBWndK3puTnO5aAq4/wJBReWAMNoQbQ=;
- b=wul3xm8moixq7EJMj3Cr78cgKF6RGexFxWRTaDK16ghCA6IYsyHDynh8McreBentzrQrXVIWF
- 0NkUoX9qcPMAHu4NGQFOig6bdl/dT9XYfkkcU8p9opbEZr+d/vdPwbw
-X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
- pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
+Content-Transfer-Encoding: 8bit
 
-Convert atmel,hsmci documentation to yaml format. The new file will inherit
-from mmc-controller.yaml.
+This patchset is also available in git via:
 
-Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
----
-Changes in v2:
-- Drop the duplicate properties in the slot node.
-- Link to v1: https://lore.kernel.org/r/20241205-hsmci-v1-1-5a25e622dfed@microchip.com
----
- .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 110 +++++++++++++++++++++
- .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 --------------
- 2 files changed, 110 insertions(+), 73 deletions(-)
+    git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped-keys-v9
 
-diff --git a/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-new file mode 100644
-index 000000000000..26686ada6288
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-@@ -0,0 +1,110 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/atmel,hsmci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Atmel High-Speed MultiMedia Card Interface (HSMCI)
-+
-+description:
-+  The Atmel HSMCI controller provides an interface for MMC, SD, and SDIO memory
-+  cards.
-+
-+maintainers:
-+  - Nicolas Ferre <nicolas.ferre@microchip.com>
-+  - Aubin Constans <aubin.constans@microchip.com>
-+
-+allOf:
-+  - $ref: mmc-controller.yaml
-+
-+properties:
-+  compatible:
-+    const: atmel,hsmci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  dmas:
-+    maxItems: 1
-+
-+  dma-names:
-+    const: rxtx
-+
-+  clocks:
-+    maxItems: 1
-+
-+  clock-names:
-+    const: mci_clk
-+
-+  "#address-cells":
-+    const: 1
-+    description: Used for slot IDs.
-+
-+  "#size-cells":
-+    const: 0
-+
-+patternProperties:
-+  "^slot@[0-9]+$":
-+    type: object
-+    description: A slot node representing an MMC, SD, or SDIO slot.
-+
-+    allOf:
-+      - $ref: mmc-controller.yaml
-+
-+    properties:
-+      reg:
-+        description: Slot ID.
-+        minimum: 0
-+
-+    required:
-+      - reg
-+      - bus-width
-+
-+    unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - "#address-cells"
-+  - "#size-cells"
-+
-+anyOf:
-+  - required:
-+      - slot@0
-+  - required:
-+      - slot@1
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/clock/at91.h>
-+    mmc@f0008000 {
-+      compatible = "atmel,hsmci";
-+      reg = <0xf0008000 0x600>;
-+      interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
-+      clocks = <&mci0_clk>;
-+      clock-names = "mci_clk";
-+      #address-cells = <1>;
-+      #size-cells = <0>;
-+
-+      slot@0 {
-+        reg = <0>;
-+        bus-width = <4>;
-+        cd-gpios = <&pioD 15 0>;
-+        cd-inverted;
-+      };
-+
-+      slot@1 {
-+        reg = <1>;
-+        bus-width = <4>;
-+      };
-+    };
-+...
-diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-deleted file mode 100644
-index 07ad02075a93..000000000000
---- a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-+++ /dev/null
-@@ -1,73 +0,0 @@
--* Atmel High Speed MultiMedia Card Interface
--
--This controller on atmel products provides an interface for MMC, SD and SDIO
--types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the atmel-mci driver.
--
--1) MCI node
--
--Required properties:
--- compatible: should be "atmel,hsmci"
--- #address-cells: should be one. The cell is the slot id.
--- #size-cells: should be zero.
--- at least one slot node
--- clock-names: tuple listing input clock names.
--	Required elements: "mci_clk"
--- clocks: phandles to input clocks.
--
--The node contains child nodes for each slot that the platform uses
--
--Example MCI node:
--
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	clock-names = "mci_clk";
--	clocks = <&mci0_clk>;
--
--	[ child node definitions...]
--};
--
--2) slot nodes
--
--Required properties:
--- reg: should contain the slot id.
--- bus-width: number of data lines connected to the controller
--
--Optional properties:
--- cd-gpios: specify GPIOs for card detection
--- cd-inverted: invert the value of external card detect gpio line
--- wp-gpios: specify GPIOs for write protection
--
--Example slot node:
--
--slot@0 {
--	reg = <0>;
--	bus-width = <4>;
--	cd-gpios = <&pioD 15 0>
--	cd-inverted;
--};
--
--Example full MCI node:
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	slot@0 {
--		reg = <0>;
--		bus-width = <4>;
--		cd-gpios = <&pioD 15 0>
--		cd-inverted;
--	};
--	slot@1 {
--		reg = <1>;
--		bus-width = <4>;
--	};
--};
+This is a reworked version of the patchset
+https://lore.kernel.org/linux-fscrypt/20241202-wrapped-keys-v7-0-67c3ca3f3282@linaro.org/T/#u
+that was recently sent by Bartosz Golaszewski.  It turned out there were a lot
+of things I wanted to fix, and it would have taken much too long to address them
+in a code review.  For now this is build-tested only; I've errored on the side
+of sending this out early since others are working on this too.  Besides many
+miscellaneous fixes and cleanups, I've made the following notable changes:
 
----
-base-commit: feffde684ac29a3b7aec82d2df850fbdbdee55e4
-change-id: 20241205-hsmci-7ac3ea915777
+- ufs-qcom and sdhci-msm now just initialize the blk_crypto_profile themselves,
+  like what ufs-exynos was doing.  This avoids needing to add all the
+  host-specific hooks for wrapped key support to the MMC and UFS core drivers.
 
-Best regards,
+- When passing the blk_crypto_key further down the stack, it now replaces
+  parameters like the algorithm ID, to avoid creating two sources of truth.
+
+- The module parameter qcom_ice.use_wrapped_keys should work correctly now.
+
+- The fscrypt support no longer uses a policy flag to indicate when a file is
+  protected by a HW-wrapped key, since it was already implied by the file's key
+  identifier being that of a HW-wrapped key.  Originally there was an issue
+  where raw and HW-wrapped keys could share key identifiers, but I had fixed
+  that earlier by introducing a new HKDF context byte.
+
+- The term "standard keys" is no longer used.  Now "raw keys" is consistently
+  used instead.  I've found that people find the term "raw keys" to be more
+  intuitive.  Also HW-wrapped keys could in principle be standardized.
+
+- I've reordered the patchset to place preparatory patches that don't depend on
+  the actual HW-wrapped key support first.
+
+My current thinking is that for 6.14 we should just aim to get the preparatory
+patches 1-5 merged via the ufs and mmc trees, while the actual HW-wrapped key
+support continues to be finalized and properly tested.  But let me know if
+anyone has any other thoughts.
+
+A quick intro to the patchset for anyone who hasn't been following along:
+
+This patchset adds support for hardware-wrapped inline encryption keys, a
+security feature supported by some SoCs and that has already seen a lot of
+real-world use downstream.  It adds the block and fscrypt framework for the
+feature as well as support for it with UFS on Qualcomm SoCs.
+
+This feature is described in full detail in the included Documentation changes.
+But to summarize, hardware-wrapped keys are inline encryption keys that are
+wrapped (encrypted) by a key internal to the hardware so that they can only be
+unwrapped (decrypted) by the hardware.  Initially keys are wrapped with a
+permanent hardware key, but during actual use they are re-wrapped with a
+per-boot ephemeral key for improved security.  The hardware supports importing
+keys as well as generating keys itself.
+
+This differs from the existing support for hardware-wrapped keys in the kernel
+crypto API (which also goes by names such as "hardware-bound keys", depending on
+the driver) in the same way that the crypto API differs from blk-crypto: the
+crypto API is for general crypto operations, whereas blk-crypto is for inline
+storage encryption.
+
+This feature is already being used by Android downstream for several years
+(https://source.android.com/docs/security/features/encryption/hw-wrapped-keys),
+but on other platforms userspace support will be provided via fscryptctl and
+tests via xfstests (I have some old patches for this that need to be updated).
+
+Eric Biggers (10):
+  ufs: crypto: add ufs_hba_from_crypto_profile()
+  ufs: qcom: convert to use UFSHCD_QUIRK_CUSTOM_CRYPTO_PROFILE
+  mmc: crypto: add mmc_from_crypto_profile()
+  mmc: sdhci-msm: convert to use custom crypto profile
+  soc: qcom: ice: make qcom_ice_program_key() take struct blk_crypto_key
+  blk-crypto: add basic hardware-wrapped key support
+  blk-crypto: show supported key types in sysfs
+  blk-crypto: add ioctls to create and prepare hardware-wrapped keys
+  fscrypt: add support for hardware-wrapped keys
+  ufs: qcom: add support for wrapped keys
+
+Gaurav Kashyap (2):
+  firmware: qcom: scm: add calls for wrapped key support
+  soc: qcom: ice: add HWKM support to the ICE driver
+
+ Documentation/ABI/stable/sysfs-block          |  18 +
+ Documentation/block/inline-encryption.rst     | 251 +++++++++++-
+ Documentation/filesystems/fscrypt.rst         | 201 +++++++--
+ .../userspace-api/ioctl/ioctl-number.rst      |   2 +
+ block/blk-crypto-fallback.c                   |   7 +-
+ block/blk-crypto-internal.h                   |  10 +
+ block/blk-crypto-profile.c                    | 103 +++++
+ block/blk-crypto-sysfs.c                      |  35 ++
+ block/blk-crypto.c                            | 196 ++++++++-
+ block/ioctl.c                                 |   5 +
+ drivers/firmware/qcom/qcom_scm.c              | 214 ++++++++++
+ drivers/firmware/qcom/qcom_scm.h              |   4 +
+ drivers/md/dm-table.c                         |   1 +
+ drivers/mmc/host/cqhci-crypto.c               |  38 +-
+ drivers/mmc/host/cqhci.h                      |   8 +-
+ drivers/mmc/host/sdhci-msm.c                  | 102 +++--
+ drivers/soc/qcom/ice.c                        | 383 +++++++++++++++++-
+ drivers/ufs/core/ufshcd-crypto.c              |  33 +-
+ drivers/ufs/host/ufs-exynos.c                 |   3 +-
+ drivers/ufs/host/ufs-qcom.c                   | 137 +++++--
+ fs/crypto/fscrypt_private.h                   |  75 +++-
+ fs/crypto/hkdf.c                              |   4 +-
+ fs/crypto/inline_crypt.c                      |  42 +-
+ fs/crypto/keyring.c                           | 157 +++++--
+ fs/crypto/keysetup.c                          |  63 ++-
+ fs/crypto/keysetup_v1.c                       |   4 +-
+ include/linux/blk-crypto-profile.h            |  73 ++++
+ include/linux/blk-crypto.h                    |  73 +++-
+ include/linux/firmware/qcom/qcom_scm.h        |   8 +
+ include/linux/mmc/host.h                      |   8 +
+ include/soc/qcom/ice.h                        |  34 +-
+ include/uapi/linux/blk-crypto.h               |  44 ++
+ include/uapi/linux/fs.h                       |   6 +-
+ include/uapi/linux/fscrypt.h                  |   7 +-
+ include/ufs/ufshcd.h                          |  11 +-
+ 35 files changed, 2091 insertions(+), 269 deletions(-)
+ create mode 100644 include/uapi/linux/blk-crypto.h
+
+
+base-commit: f486c8aa16b8172f63bddc70116a0c897a7f3f02
 -- 
-Dharma Balasubiramani <dharma.b@microchip.com>
+2.47.1
 
