@@ -1,243 +1,128 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com [209.85.219.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A538123DEBB
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2024 16:03:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 399A21AF0D8
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2024 16:10:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1733846624; cv=none; b=tolIBANV0TsEli0q6vChCyA/kKIrjOCyJMKUMwIgan4i753dCSqCopIHW5rp66CrrhtzV23ph+FlQ8jRbxzXxcWVlewpAMM/A7vvUVimFQPxO/ixb5iaxlL7MVwI4AErBylR9uG8+4tLdna6HCQ5it3Ti7YryB790b0emUkPmSs=
+	t=1733847015; cv=none; b=P9CxoGldnWHsTDrg8AZIOjrjv+wZi01FlPLuQ8YgM41KmhcOyAfUZFwfqOsw4RQf7B0/e81G8TetvjetNNL2OlHirK+FlBOILgvd0Mj7bomcZBn2mRRQ76oiMlXF2T19287sgLf33dMO8TsDZ+ukroYYNn8nEj5vmIXlSg0a1JM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1733846624; c=relaxed/simple;
-	bh=UOTPAtKWyD7gFMhOOKr+A6e81aV6rc5w+D5LzlJd6u8=;
+	s=arc-20240116; t=1733847015; c=relaxed/simple;
+	bh=5GudjBzxvQaYsCWXxbQ6HJDgG3OjE70z3x4WM6wZ57k=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=OrC7cvt6eDb+PJmzp91UQ70Vs1h48aMD5d1BB9hyv8hyXguhMoEgg2YnhreTmUgoubIdk9QZ9qAMjewzvbnSMtnE4K/WeGU6WHcWpI9b3NX79wAhDAzFkRnBVRiv7TVpeh9Gf3ek3C1raE6p7TV/6qi0/Dh6tNiQV7I+GiueXk8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HW04Sc4m; arc=none smtp.client-ip=209.85.128.180
+	 To:Cc:Content-Type; b=u7aBS2WsrDshekZdZlR20tUWqhT4ZcCpQDj7h2SDqLGx7vYlLeNIiLxBluiVpnNOBwgyfP78zf03eKvFhaXFyzTNdEbVjCRS79aOLcvOaESsLu3rl3Nmdl2JpehLLHDDsoGbLYkfhXfZ5SkoJnC8T4OEPdzlPA59TMJwcTw9B3E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lEQ3b60X; arc=none smtp.client-ip=209.85.219.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HW04Sc4m"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6ef6ffcc2dcso45356637b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2024 08:03:42 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lEQ3b60X"
+Received: by mail-yb1-f179.google.com with SMTP id 3f1490d57ef6-e3a0d2d15adso3790519276.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Dec 2024 08:10:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1733846622; x=1734451422; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1733847013; x=1734451813; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=LhEIDAnEZpONosohSVWoCUepf7Cunl5z9Kx9mK0Glaw=;
-        b=HW04Sc4mP3QZvt7x3l8m3J5mc1ZSUU16tK9oSjOkRlz7jv0TKNnxELcU+p8Ry3MLn0
-         yhnNMWtj+Xsu1T3Rllz5jiAbpC9albbwTI8g+qge5TSuiAIhvO9+2SCX+fS34JYrfh/l
-         5Htngnk0zvZFfzkJssoV1GTm138v4gby8qn4NpX12VXhRHMjcgSevykMawM7+Ctxcg6n
-         6eJkagewtlEYEdWgQVDadiBEEArojgHccaFyoTnpoVLDr9Js5+uaLnCxVpozdny4W4it
-         ZHWq64gzqeV9pno+hgTpWIy+qbDXnBrYxJnZhoTOAM5FcppRLb++mMlCPK3TKy9Qw/GS
-         dIeA==
+        bh=HNXvfug15XfoQwdKiIGBWtNC3tcA8qpMkETpkFfQs6Q=;
+        b=lEQ3b60Ximaw0rRGcTaxlZOxQ+s69OIiWqzpLCeo6tBC267U7PneKNrv2zBJIPFCdJ
+         lVXTzchz9SIy0P2hFOSLEJ3eLzCalMNZFGv+NNDvk8hUVVkZJKIXdNFvih1XklHcYO+u
+         flV8sRufX/GuITqv7L1oVmhqmEaUGISmCLIIHjvwZh+qaMHptvjkvTSrJMEwWS0IxHvH
+         I0OKtkMwTVQbnNgVO6tU+vy14RlmQWiB0m3pxoBnIiWJteW8WbWhMCrBfgEr4qlydB3R
+         mybKsXjc0eVhODmSaBFPEopy++xpRmgctn8m3eJKG0m0wmLsVIq94NMkZdKQfVrYqQIa
+         8f3Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1733846622; x=1734451422;
+        d=1e100.net; s=20230601; t=1733847013; x=1734451813;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=LhEIDAnEZpONosohSVWoCUepf7Cunl5z9Kx9mK0Glaw=;
-        b=hIAxrqGqa33rPmegABlWw1TT7RpCN1bZPwKq72jgspNtl5VVbJMOSp+6bUZiV3s4Jq
-         hD4twFSsR11C8cZ/KlUCCdOf7E25pYu+bpPCkpKXXeXnKADK7jzeMhH2yVWFc72wW1ZA
-         eT+oVxU9uJjhPp9mwnSMlgSO0MB+ixf+huYQ06ja45c928h+NY6H2qdVxbVlyknsDDEY
-         nBqoAYZ7D7gOGOjng6jVNyata3A0FFaFAWCf0EbmNY0ud0Vc7J3EfB6hJANgIQvi6jHP
-         mS+vncTp3RH3vKoWDxuoZPH0OPcn3/6EtsU/AUHhBcFk9QAZCmhTLzstg7a0zxibBJQ0
-         kUHg==
-X-Forwarded-Encrypted: i=1; AJvYcCWPUbMeNS0qjXigWxI/VUaAvhg0OYIdHirW4/15V8lBIB2ydHXpYX75ApMx3aL/VlZHcBcRKbk4d3g=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwZQOjAWrWF2YpgMZHz0iPLgPvPe5aDOnt09pfsJWfM9JpOZTTr
-	k1rQX+9IJwE83lmOnScHXFFgkUpi1rVvUARDJSupglylG9LFIZyqpkI0ArsV2IqzyRQelkkCspU
-	NhuRRUD13Ij8tjakpdXKaZ409qZa+ggmEwKWvdHDppT89qTFBEiE=
-X-Gm-Gg: ASbGnctplNG31X6bzO8l86KoQIIn9dgzsnAuDETT9ZZCNy/AvoBQTMrcVTzZHAnjvs8
-	7+jMBAFaX1Cwfh8XYY9c0yooFcEiV5PH9roCx
-X-Google-Smtp-Source: AGHT+IFWCNMrvau0H2Y5yrb8L3K2B120WvyiZ9O/dPYrX3BoboBKK5fohFRU1Id7Eja/aLuzEyj2jnn+VF3IWa1S1nY=
-X-Received: by 2002:a25:7145:0:b0:e38:81cc:f95 with SMTP id
- 3f1490d57ef6-e3a5dcefa67mr3836041276.10.1733846621324; Tue, 10 Dec 2024
- 08:03:41 -0800 (PST)
+        bh=HNXvfug15XfoQwdKiIGBWtNC3tcA8qpMkETpkFfQs6Q=;
+        b=P/s088ZbXTtH4bUOngZO6Vcu16TJ503ZjgNykG9FAnsbIwaKb2oS9mBkYxCujOBRW8
+         GCp7jIxCfKdqNjD7dSdMsHPbUPBcFTmtLP4yqNmf0c3q/HFXqO/tpZp1QAhFn45fONhM
+         YwV5ACAQ03pTLddcCZQO6mYvHeia0SWcOaVZH0Av/F+Y8VWPqScRK5MZNM8QSzqXexNj
+         d5UCGtZhYhBfSFjRUAK+nfN2U30wyFqhPV/7+2Otv50kfgUGE3fA3OPgu0jWtifUAGvU
+         xTqR4hISR6H1XDT+IRWzItUBsoqlQLAa5bLBH8Di0Rcf7sILFtIbF8IYawARCiWDAgQL
+         X3EA==
+X-Forwarded-Encrypted: i=1; AJvYcCWcHYVM7scsOmw8Jl4MvMy3Ua1VShg70Ok1NMScga7cpBVbtzh1GXNh4wVmuM+5Gj3TjPhYZyIU+7M=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyUndA1DiD5Gu9r68+VUIBPddKbJU2x9nR3sijQOLs/Pw6dg7iU
+	HIIz7OR3AgOA997+RJlpGmWl0TKakVmx/6kJNVHLImxgZ2IwFXzZnac7XDuajSFimUDsIdMgJV0
+	USfYi7bZjjkzOs/7q+8KdBH+50zRJ3vYZCHHhag==
+X-Gm-Gg: ASbGnctjh1z9Z9D0EgH/r45vEwOWzN4G/IyFcki5DxArCMUsDY53HY714GVAvZ9GjNW
+	D+VrscJqzvYyze2h5Upd1DvgT+0OiciLqhS18
+X-Google-Smtp-Source: AGHT+IELbJvk0NPV36M+fcncTTHMyREVObNbnHGvfeRgsIrYaGiOwpPdOwf890kyMOnEyS8+yJEfq/uf9mQc3jRotz8=
+X-Received: by 2002:a05:6902:2b0c:b0:e38:b889:7eff with SMTP id
+ 3f1490d57ef6-e3a0b071e93mr15453171276.6.1733847013083; Tue, 10 Dec 2024
+ 08:10:13 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20241104092215.20946-2-wsa+renesas@sang-engineering.com>
+References: <20241128-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v4-0-11d9f9200a59@linaro.org>
+In-Reply-To: <20241128-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v4-0-11d9f9200a59@linaro.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Dec 2024 17:03:05 +0100
-Message-ID: <CAPDyKFrOx3CiVjiWTPwqMC8XONwQ2C=NHFGw_h_XqA1yoZni8g@mail.gmail.com>
-Subject: Re: [RFC PATCH v2] mmc: suspend MMC also when unbinding
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
+Date: Tue, 10 Dec 2024 17:09:37 +0100
+Message-ID: <CAPDyKFon9-3U5Vn2i+WtarSAYQHnA_ho8CGQmiVoboq1tnt4fw@mail.gmail.com>
+Subject: Re: [PATCH v4 0/5] dt-bindings: mmc: document mmc-slot and convert
+ amlogic,meson-mx-sdio.txt to dtschema
+To: Neil Armstrong <neil.armstrong@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Kevin Hilman <khilman@baylibre.com>, 
+	Jerome Brunet <jbrunet@baylibre.com>, 
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>, Maxime Ripard <mripard@kernel.org>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 4 Nov 2024 at 10:22, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Thu, 28 Nov 2024 at 16:16, Neil Armstrong <neil.armstrong@linaro.org> wrote:
 >
-> When unbinding a MMC host, the card should be suspended. Otherwise,
-> problems may arise. E.g. the card still expects power-off notifications
-> but there is no host to send them anymore. Shimoda-san tried disabling
-> notifications only, but there were issues with his approaches [1] [2].
+> Document mmc-slot because used by amlogic,meson-mx-sdio.txt and
+> cavium-mmc.txt, so make it common.
 >
-> Here is my take on it, based on the review comments:
->
-> a) 'In principle we would like to run the similar operations at "remove"
->     as during "system suspend"' [1]
-> b) 'We want to support a graceful power off sequence or the card...' [2]
->
-> So, first, mmc_remove_card() gets improved to mark the card as "not
-> present" and to call the bus specific suspend() handler.
->
-> Then, _mmc_suspend gets extended to recognize another reason of being
-> called, namely when a card removal happens. Building upon the now
-> updated mmc_remove_card(), this is the case when the card is flagged as
-> "not present".
->
-> The logic of either sending a notification or sending the card to sleep
-> gets updated to handle this new reason. Controllers able to do full
-> power cycles will still do a full power cycle. Controllers which can
-> only do power cycles in suspend, will send the card to sleep.
->
-> All this is for MMC. SD/SDIO are unaffected because they are not using
-> the 'card present' flag.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> [1] https://patchwork.kernel.org/project/linux-renesas-soc/patch/1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
-> [2] https://patchwork.kernel.org/project/linux-mmc/patch/1605005330-7178-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
-> ---
->
-> Lightly tested with a Renesas R-Car S4 Spider board. It bascially works
-> as expected. Serious testing postponed until the generic direction of
-> this is approved :)
->
->  drivers/mmc/core/bus.c |  3 +++
->  drivers/mmc/core/mmc.c | 29 +++++++++++++++++++++--------
->  2 files changed, 24 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 0ddaee0eae54..52704d39c6d5 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -403,5 +403,8 @@ void mmc_remove_card(struct mmc_card *card)
->                 host->cqe_enabled = false;
->         }
->
-> +       card->state &= ~MMC_STATE_PRESENT; // TBD: mmc_card_clear_present()
+> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 
-This is nice from a consistency point of view. Although, I don't want
-us to use this bit as an indication to inform the bus_ops->suspend()
-callback what to do. It seems prone to problems.
-
-> +       host->bus_ops->suspend(host);
-
-I think this is a step in the right direction. Somehow we need to be
-able to call the bus_ops->suspend() before we call put_device() and
-before we clear the host->card pointer.
-
-However, we don't want to call bus_ops->suspend() in all cases from
-mmc_remove_card(), but *only* when it gets called from
-mmc_remove_host()->mmc_stop_host(), via the
-"host->bus_ops->remove(host)" callback.
-
-I am wondering whether we should just re-work/split-up the code a bit
-to make this work. In principle, when mmc_remove_card() is called from
-the path above, we should not let it call put_device(), but leave that
-part to the caller (mmc_stop_host()) instead. Or something along those
-lines.
-
-Would that work?
-
-> +
->         put_device(&card->dev);
->  }
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6a23be214543..2bcf9ee0caa8 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -32,6 +32,12 @@
->  #define MIN_CACHE_EN_TIMEOUT_MS 1600
->  #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
->
-> +enum mmc_pm_reason {
-> +       MMC_PM_REASON_SHUTDOWN,
-> +       MMC_PM_REASON_SUSPEND,
-> +       MMC_PM_REASON_REMOVAL,
-> +};
-> +
->  static const unsigned int tran_exp[] = {
->         10000,          100000,         1000000,        10000000,
->         0,              0,              0,              0
-> @@ -2104,11 +2110,16 @@ static int _mmc_flush_cache(struct mmc_host *host)
->         return err;
->  }
->
-> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
-> +static int _mmc_suspend(struct mmc_host *host, enum mmc_pm_reason reason)
->  {
->         int err = 0;
-> -       unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
-> -                                       EXT_CSD_POWER_OFF_LONG;
-> +       unsigned int notify_type = reason == MMC_PM_REASON_SUSPEND ?
-> +                                  EXT_CSD_POWER_OFF_SHORT : EXT_CSD_POWER_OFF_LONG;
-> +       bool can_pwr_cycle_now = (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) ||
-> +                                 ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND) &&
-> +                                   reason == MMC_PM_REASON_SUSPEND);
-> +
-> +       pr_info("%s: suspend reason %d, can pwr cycle %d\n", mmc_hostname(host), reason, can_pwr_cycle_now);
->
->         mmc_claim_host(host);
->
-> @@ -2119,9 +2130,9 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->         if (err)
->                 goto out;
->
-> +       /* Notify if pwr_cycle is possible or power gets cut because of shutdown */
->         if (mmc_can_poweroff_notify(host->card) &&
-> -           ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
-> -            (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND)))
-> +           (can_pwr_cycle_now || reason == MMC_PM_REASON_SHUTDOWN))
->                 err = mmc_poweroff_notify(host->card, notify_type);
->         else if (mmc_can_sleep(host->card))
->                 err = mmc_sleep(host);
-> @@ -2142,9 +2153,11 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
->   */
->  static int mmc_suspend(struct mmc_host *host)
->  {
-> +       enum mmc_pm_reason reason = mmc_card_present(host->card) ?
-> +                                   MMC_PM_REASON_SUSPEND : MMC_PM_REASON_REMOVAL;
-
-I don't think it makes sense to differentiate between a regular
-"suspend" and a "host-removal". The point is, we don't know what will
-happen beyond the host-removal. The platform may shutdown or the host
-driver probes again.
-
-Let's just use the same commands as we use for suspend.
-
->         int err;
->
-> -       err = _mmc_suspend(host, true);
-> +       err = _mmc_suspend(host, reason);
->         if (!err) {
->                 pm_runtime_disable(&host->card->dev);
->                 pm_runtime_set_suspended(&host->card->dev);
-> @@ -2191,7 +2204,7 @@ static int mmc_shutdown(struct mmc_host *host)
->                 err = _mmc_resume(host);
->
->         if (!err)
-> -               err = _mmc_suspend(host, false);
-> +               err = _mmc_suspend(host, MMC_PM_REASON_SHUTDOWN);
->
->         return err;
->  }
-> @@ -2215,7 +2228,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
->         if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
->                 return 0;
->
-> -       err = _mmc_suspend(host, true);
-> +       err = _mmc_suspend(host, MMC_PM_REASON_SUSPEND);
->         if (err)
->                 pr_err("%s: error %d doing aggressive suspend\n",
->                         mmc_hostname(host), err);
-> --
-> 2.45.2
->
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> Changes in v4:
+> - Fixed address-cells description of mmc controller
+> - Cleanup '|' when not needed
+> - Added review tags
+> - Link to v3: https://lore.kernel.org/r/20241007-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v3-0-ad4eb22c2a8d@linaro.org
+>
+> Changes in v3:
+> - Revert and insteads move common properties between slot and controller into mmc-controller-common.yaml
+> - Fix other comments on patch 2 & 3
+> - Link to v2: https://lore.kernel.org/r/20240920-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v2-0-5aa8bdfe01af@linaro.org
+>
+> Changes in v2:
+> - Fixed description, limited to 3 slots
+> - Moved out mmc-slot in a separate common schema
+> - Link to v1: https://lore.kernel.org/r/20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-v1-1-b7bfae886211@linaro.org
+>
+> ---
+> Neil Armstrong (5):
+>       dt-bindings: mmc: controller: clarify the address-cells description
+>       dt-bindings: mmc: controller: move properties common with slot out to mmc-controller-common
+>       dt-bindings: mmc: controller: remove '|' when not needed
+>       dt-bindings: mmc: document mmc-slot
+>       dt-bindings: mmc: convert amlogic,meson-mx-sdio.txt to dtschema
+>
+>  .../bindings/mmc/amlogic,meson-mx-sdio.txt         |  54 ----
+>  .../bindings/mmc/amlogic,meson-mx-sdio.yaml        |  94 ++++++
+>  .../bindings/mmc/mmc-controller-common.yaml        | 357 +++++++++++++++++++++
+>  .../devicetree/bindings/mmc/mmc-controller.yaml    | 346 +-------------------
+>  .../devicetree/bindings/mmc/mmc-slot.yaml          |  49 +++
+>  5 files changed, 504 insertions(+), 396 deletions(-)
+> ---
+> base-commit: f486c8aa16b8172f63bddc70116a0c897a7f3f02
+> change-id: 20240911-topic-amlogic-arm32-upstream-bindings-fixes-convert-meson-mx-sdio-6fa70546ebb8
+>
+> Best regards,
+> --
+> Neil Armstrong <neil.armstrong@linaro.org>
+>
