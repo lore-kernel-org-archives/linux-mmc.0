@@ -1,133 +1,134 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 43C3F1DFE0C;
-	Tue, 17 Dec 2024 10:10:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25E841E2607;
+	Tue, 17 Dec 2024 10:19:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734430228; cv=none; b=SytykZQD4g3bLuYRfFa11usAiqNjmelRiprMQlOnHiEnfz09olxjLm5x2s7+phm7LqUZlJ//oQQWxKw+6qswpw247pfKoavDCNGUWpDqQovgCNF0ECWu0k1v5WCW3LDx7TrAuD+clQ4hAuHaofNYRmDiY6hq9vXY5HvfhXdLf10=
+	t=1734430770; cv=none; b=u7T2Pc3aqE/HhR1jfolTOxn9S8CYby1U9uRBwiakwv0i46S0qEYFBbmcYK0vA2dnAlE6DQgxMamF3xiy9JHWMCZ0hxBwDLGVSe01ABRzdoBK528fcByjJUrwZaapSQf+WA1So1dktGEZPBXRd2h4X5qloch41fxryRUp25/EnC0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734430228; c=relaxed/simple;
-	bh=ocekj8AcIupubp/kNi52PIPWHl/ZjToQeSGdwPwbdJI=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=FxOoJ+R4IqPaU4pnxXDX4c7FrfBIywuXWkQNhVQ6f9KVzflHVZdxYVu8mGthrK+vtZI923Mcecy3QliuX5+kdGxIG481w+W8P8nYOQ5v36vR0421RZeumzA8MqKhk+aa8vzPMsDa9LJNyiopRwNHjFa32PiV1STwD7VHxbAwYvA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=XCMpa8tG; arc=none smtp.client-ip=205.220.168.131
+	s=arc-20240116; t=1734430770; c=relaxed/simple;
+	bh=UEptcp5tU8de3p6vaM3drmHNttcrpLSfkG2TaLiBuYM=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=UV8eXmlX/eMi38h6uSqWus/AaUHEIvT1kbACyrsZxnl6ISJZMUgzxAf0RDSedQJ7NBkEnzLR1H1kiteXRjnNtvBgVjtm6oK8w5vz0y2ZqJfgqTdTRSJuEx3hY02svlnCEQeV1zVPohV4zgz/TC1DC64ppdrkCluSyntOJUGQhs8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=dLiR97cQ; arc=none smtp.client-ip=205.220.180.131
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="XCMpa8tG"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BH96rMI010375;
-	Tue, 17 Dec 2024 10:10:24 GMT
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="dLiR97cQ"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BH95efE023901;
+	Tue, 17 Dec 2024 10:19:24 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:date:from:message-id:mime-version
-	:subject:to; s=qcppdkim1; bh=GJ4I1ag4ARUduIBcACW7ETkrGXK/iWpgJHG
-	CDXbBNYw=; b=XCMpa8tGqhlCPUXJqCdUmhOcgARyBF78DwqYlji9G6u6QsYSPeN
-	NwUt0vtj+dH3rA4pUAfb0n8g5vaHDSrxHXN4ePJegsycTi80VT7+CtlstBvJbljN
-	cy/3dcNoW8h8xL4GN25eNiG/3wlZv1oeV+JYSJ4Yv+fWN4uX8j3Ak4ht06tP9kMl
-	vVxm+pEChmoe2/Jci2yGR3gyAeVyM58dmP9tlZDpvM7DJpru8WWqO12DLgEh1RuS
-	dv4XV8czVLBgETA+5u/KsF4zu/er3UPEulvDU2oKqCRgC/Uh8OXKtzxD6juYdrL8
-	5YACSv69qE6zJ0IO/GHq1zN9JyaLCaIPVJw==
-Received: from aptaippmta02.qualcomm.com (tpe-colo-wan-fw-bordernet.qualcomm.com [103.229.16.4])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43k6cqg637-1
+	cc:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=qcppdkim1; bh=Vjsiep5ZRr98Ed5cctG12xE+
+	Kw6m+dJm4BgkndjpywM=; b=dLiR97cQc/lzQ11H1TZrowBPM+OSwXr+4RTsdAl/
+	NcdqgjGSzk24r3I4NPa5YjuaKUs+bYPuZkrKJ7mogfAX9gvSs0xbMJsnas9XrfdP
+	bPd0Pt1MdoQ7ae16tD1Fs4lcxXVLk6IcAPspa2sVFCCxnEPKs6mLx5N4CzlgzvnG
+	zfoIHlhptqeGkSzZDZ/2JDX/7pvtRzQ16626pRj1vPmCXn6i5M9zWgS5fTRKIDaa
+	2EYY/Tr3EyTtZsQrmdv6pxHpxjvk8imr2l5fMUvpFFSKcrbCi+CGpUJRcLMosViX
+	Mb7IZL/LQUe+KkXNXu32/FqE/swWQx+IJY479P44dzFJWQ==
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43k6c8g7ev-1
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 17 Dec 2024 10:10:23 +0000 (GMT)
-Received: from pps.filterd (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 4BHAALje016475;
-	Tue, 17 Dec 2024 10:10:21 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 43h33kevdd-1
+	Tue, 17 Dec 2024 10:19:24 +0000 (GMT)
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+	by NALASPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 4BHAJNO9026529
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 17 Dec 2024 10:10:21 +0000
-Received: from APTAIPPMTA02.qualcomm.com (APTAIPPMTA02.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 4BHAALOR016467;
-	Tue, 17 Dec 2024 10:10:21 GMT
-Received: from cse-cd02-lnx.ap.qualcomm.com (cse-cd02-lnx.qualcomm.com [10.64.75.246])
-	by APTAIPPMTA02.qualcomm.com (PPS) with ESMTPS id 4BHAALbC016465
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 17 Dec 2024 10:10:21 +0000
-Received: by cse-cd02-lnx.ap.qualcomm.com (Postfix, from userid 4571896)
-	id 26F171BD7; Tue, 17 Dec 2024 18:10:19 +0800 (CST)
+	Tue, 17 Dec 2024 10:19:23 GMT
+Received: from cse-cd02-lnx.ap.qualcomm.com (10.80.80.8) by
+ nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Tue, 17 Dec 2024 02:19:18 -0800
+Date: Tue, 17 Dec 2024 18:19:15 +0800
 From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-To: ulf.hansson@linaro.org, robh@kernel.org, krzk+dt@kernel.org,
-        conor+dt@kernel.org, bhupesh.sharma@linaro.org, andersson@kernel.org,
-        konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_tingweiz@quicinc.com, quic_yuanjiey@quicinc.com
-Subject: [PATCH v5 0/2] Enable SDHC1 and SDHC2 on QCS615
-Date: Tue, 17 Dec 2024 18:10:15 +0800
-Message-Id: <20241217101017.2933587-1-quic_yuanjiey@quicinc.com>
-X-Mailer: git-send-email 2.34.1
+To: <ulf.hansson@linaro.org>, <robh@kernel.org>, <krzk+dt@kernel.org>,
+        <conor+dt@kernel.org>, <bhupesh.sharma@linaro.org>,
+        <andersson@kernel.org>, <konradybcio@kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_tingweiz@quicinc.com>, <quic_yuanjiey@quicinc.com>
+Subject: Re: [PATCH 0/2] Enable SDHC1 and SDHC2 on QCS615
+Message-ID: <Z2FQI+8A8U7dhqhQ@cse-cd02-lnx.ap.qualcomm.com>
+References: <20241217100237.2932895-1-quic_yuanjiey@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QCInternal: smtphost
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <20241217100237.2932895-1-quic_yuanjiey@quicinc.com>
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: ZrAmx5clM0LPcLlKgrlvpYB89jDQNhQ0
-X-Proofpoint-GUID: ZrAmx5clM0LPcLlKgrlvpYB89jDQNhQ0
+X-Proofpoint-GUID: wo2X3sbkGQtjiTARDXhB1jOAPgWDpJxk
+X-Proofpoint-ORIG-GUID: wo2X3sbkGQtjiTARDXhB1jOAPgWDpJxk
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
  definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 clxscore=1015
- lowpriorityscore=0 suspectscore=0 priorityscore=1501 malwarescore=0
- impostorscore=0 mlxscore=0 mlxlogscore=999 phishscore=0 spamscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2411120000 definitions=main-2412170083
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 spamscore=0
+ mlxscore=0 lowpriorityscore=0 priorityscore=1501 adultscore=0
+ suspectscore=0 mlxlogscore=999 malwarescore=0 clxscore=1015
+ impostorscore=0 phishscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2411120000 definitions=main-2412170085
 
-Add SDHC1 and SDHC2 support to the QCS615 Ride platform. The
-SDHC1 and SDHC2 of QCS615 are derived from SM6115. Include
-the configuration of SDHC1-related and SDHC2-related opp,
-power, and interconnect settings in the device tree.
+On Tue, Dec 17, 2024 at 06:02:35PM +0800, Yuanjie Yang wrote:
+> Add SDHC1 and SDHC2 support to the QCS615 Ride platform. The
+> SDHC1 and SDHC2 of QCS615 are derived from SM6115. Include
+> the configuration of SDHC1-related and SDHC2-related opp,
+> power, and interconnect settings in the device tree.
+> 
+> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> 
+> ---
+> This patch series depends on below patch series:
+> - gcc: https://lore.kernel.org/all/20241022-qcs615-clock-driver-v4-0-3d716ad0d987@quicinc.com/
+> 
+> Changes in v5:
+> - Modify SDHC1 and SDHC2 interconnects, for the cpu path, use
+> QCOM_ICC_TAG_ACTIVE_ONLY to replace QCOM_ICC_TAG_ALWAYS
+> - For SDHC1 and SDHC2, Add a newline before status
+> - Rebase Change on tag: next-20241217
+> - Modify dependency changes
+> - Link to v4: https://lore.kernel.org/all/20241206023711.2541716-1-quic_yuanjiey@quicinc.com/
+> 
+> Changes in v4:
+> - Move properties which are not properties of the SoC to board DTS
+> - Add ice region to SDHC1 Node reg
+> - Add 50Mhz 200Mhz to SDHC1 opp table, add 50Mhz to SDHC2 opp table 
+> - fix SDHC2 Node compatible space
+> - Link to v3: https://lore.kernel.org/all/20241122065101.1918470-1-quic_yuanjiey@quicinc.com/
+> 
+> Changes in v3:
+> - Improve the commit messages and cover letter
+> - Link to v2: https://lore.kernel.org/all/20241106072343.2070933-1-quic_yuanjiey@quicinc.com/
+> 
+> Changes in v2:
+> - Improve the commit messages and cover letter
+> - Remove applied patches 1
+> - Pad sdhc_1 node and sdhc_2 node register addresses to 8 hex digits
+> - Adjust sdhc_1 node and sdhc_2 node register addresses to hexadecimal
+> - Modify sdhc_2 vqmmc-supply incorrect power configuration
+> - Link to v1: https://lore.kernel.org/all/20241023092708.604195-1-quic_yuanjiey@quicinc.com/
+> 
+> ---
+> Yuanjie Yang (2):
+>   arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
+>   arm64: dts: qcom: qcs615-ride: enable SDHC1 and SDHC2
+> 
+>  arch/arm64/boot/dts/qcom/qcs615-ride.dts |  37 ++++
+>  arch/arm64/boot/dts/qcom/qcs615.dtsi     | 211 +++++++++++++++++++++++
+>  2 files changed, 248 insertions(+)
+> 
+> -- 
+> 2.34.1
 
-Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Sent by mistake, please ignore this patch. I have sent a correct patch.
+https://lore.kernel.org/all/20241217101017.2933587-1-quic_yuanjiey@quicinc.com/
 
----
-This patch series depends on below patch series:
-- gcc: https://lore.kernel.org/all/20241022-qcs615-clock-driver-v4-0-3d716ad0d987@quicinc.com/
-
-Changes in v5:
-- Modify SDHC1 and SDHC2 interconnects, for the cpu path, use
-QCOM_ICC_TAG_ACTIVE_ONLY to replace QCOM_ICC_TAG_ALWAYS
-- For SDHC1 and SDHC2, Add a newline before status
-- Rebase Change on tag: next-20241217
-- Modify dependency changes
-- Link to v4: https://lore.kernel.org/all/20241206023711.2541716-1-quic_yuanjiey@quicinc.com/
-
-Changes in v4:
-- Move properties which are not properties of the SoC to board DTS
-- Add ice region to SDHC1 Node reg
-- Add 50Mhz 200Mhz to SDHC1 opp table, add 50Mhz to SDHC2 opp table 
-- fix SDHC2 Node compatible space
-- Link to v3: https://lore.kernel.org/all/20241122065101.1918470-1-quic_yuanjiey@quicinc.com/
-
-Changes in v3:
-- Improve the commit messages and cover letter
-- Link to v2: https://lore.kernel.org/all/20241106072343.2070933-1-quic_yuanjiey@quicinc.com/
-
-Changes in v2:
-- Improve the commit messages and cover letter
-- Remove applied patches 1
-- Pad sdhc_1 node and sdhc_2 node register addresses to 8 hex digits
-- Adjust sdhc_1 node and sdhc_2 node register addresses to hexadecimal
-- Modify sdhc_2 vqmmc-supply incorrect power configuration
-- Link to v1: https://lore.kernel.org/all/20241023092708.604195-1-quic_yuanjiey@quicinc.com/
-
----
-
-Yuanjie Yang (2):
-  arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-  arm64: dts: qcom: qcs615-ride: enable SDHC1 and SDHC2
-
- arch/arm64/boot/dts/qcom/qcs615-ride.dts |  37 ++++
- arch/arm64/boot/dts/qcom/qcs615.dtsi     | 211 +++++++++++++++++++++++
- 2 files changed, 248 insertions(+)
-
--- 
-2.34.1
+Thanks,
+yuanjie
 
