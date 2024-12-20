@@ -1,48 +1,48 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D5BE229696;
-	Fri, 20 Dec 2024 21:09:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B64F222B590;
+	Fri, 20 Dec 2024 21:09:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.153.233
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734728958; cv=none; b=p1tmQjIFhQ8JiU5JyKOk0ZoD9wcOSF1MU+67cAk9lqzhn1Rg6h8vV9i0wQoEnFi750WUEXnB1ZmQTCnAPqgejAE+HLE4xfclU74HHtBr84WE7Ud1c35Yct7wTouTa5u6qlt1fmOlG6zrDbITvO0+abgyHWyKij0KMR9sDc22UKQ=
+	t=1734728968; cv=none; b=oWyzFVLTHD9wKA2KtI28T5HT3zk88BDh5RdgjGY/qhPMDFI8fteCZOpJpDHNvpO9ml/U3BC9eg2gviJJTPe6/XL/q6L3dtTQlGhGt0I8uu9YgYi+i6IuyARcU5lnfEvqWqKHp8t4t1Rx//53loEXjveW1DV4WkQ3gQHFLybd5gg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734728958; c=relaxed/simple;
-	bh=PvMZTBsd/zyFDw280jKFb87067d4CpMhzJa4SZI+9ds=;
+	s=arc-20240116; t=1734728968; c=relaxed/simple;
+	bh=WxKGQHGRlICtETZCHRtiOGzBGngq7I0z6ILbpYiy6mI=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=i2R/4iuvSpFmhDqbIPgjN6/CFWi7++OLMVJfAJvxZ8WSSmDKX6FPISQ4YD7+IimnfWS3wf3x2QET2iU/222Bu/cx667aZcodcPF1rZRpb5eJCoRZ0X/+dBT8J5G1LJ538S5k2QVckZiwPJZO/Opu596CPPjAa1va6LLygWA27pE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=OSEG+cyw; arc=none smtp.client-ip=68.232.154.123
+	 MIME-Version:Content-Type; b=BVuQNR35q70BwCMHBiv+M6MZTIF6786FwJ6n8y8mkErznN7SyeHWpmdKpvYJ/zFFZHM/WRJI1kYnQnF2hC4dybG6EJu3dYxQov9O5nhMIJC+0zV4zQ5pvIDQPZ2+9cPoYG6XyLQMC4AKZxipF3zxgLIDKsTzoK6qFJMghDDd7YI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=xbW5rwO2; arc=none smtp.client-ip=68.232.153.233
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="OSEG+cyw"
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="xbW5rwO2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1734728956; x=1766264956;
+  t=1734728967; x=1766264967;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=PvMZTBsd/zyFDw280jKFb87067d4CpMhzJa4SZI+9ds=;
-  b=OSEG+cywPDIzs2QRsQHXjbKU+yyViNT2cDP/3KLzz75m165Ij55nlj4v
-   8WrY0Yx4rbhZG2EammXJVkOLvxltM4wPClwjlxw2dx1Yj6IREDqyUpHFO
-   2uZjCJJ1axh5DCHBSgmNZ2pBcp/5p4WlC8Svp0t3JXpTkyuyD+0unvV1/
-   94uqtZwuDDpq7KX2hLBika0JalvEtIiXmAjicVv9Bv2iCxRoxYuMaspGV
-   Ds3dE17Q2MS6ZwHnQheABT1QcerDmEc+1wkPqCBB/QzoF+TLTsdSkLFJS
-   XukPb9RZgBlyoWa8YjHESPOz7gDdZ9/EARuihMxJeUG5Nixn50IbLM6OZ
-   Q==;
-X-CSE-ConnectionGUID: 6Xn2bQedQHqhtDmL7ky2MQ==
-X-CSE-MsgGUID: 9AoGIls2SZCgjMhQrYRKeQ==
+  bh=WxKGQHGRlICtETZCHRtiOGzBGngq7I0z6ILbpYiy6mI=;
+  b=xbW5rwO2HJC/R3HFbWSZ3jeaglteWgl5Oh/R0EHMVQeyTZ/0cIxCAPor
+   cIWd1Y80Mr3XiecrZmTtnWRhX3ZGAgh774qkaOdStVTHRl6OI+SFf8cYQ
+   FwU8GNfu3LyTyNzPBlHUJBAv6GDk03Zl+cJypeSZd7TRy6PTAXNaLTH4+
+   QGSednqkF4j9FQ3AZ7ee/sfUyU8mEEJl8UNeLYoDk/a2as9rWph7eH0Wh
+   kvNOp1yIedDLPy/NxUhxi5RGEGYVDVnpL4CeCQHS94T8FUQp1gtG4eNH8
+   XVaz2PMvSZSsgVroYZI/rj5AH46NdLzGwy0oHVmQ5ivSLtDmLk9RKmrhl
+   A==;
+X-CSE-ConnectionGUID: USBJ4PpbRGWL74rt+H8wuw==
+X-CSE-MsgGUID: 75iIFNfXRv6unfXPQM8JLA==
 X-IronPort-AV: E=Sophos;i="6.12,251,1728975600"; 
-   d="scan'208";a="203274649"
+   d="scan'208";a="35811481"
 X-Amp-Result: SKIPPED(no attachment in message)
 Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa6.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Dec 2024 14:09:10 -0700
+  by esa3.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Dec 2024 14:09:24 -0700
 Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Fri, 20 Dec 2024 14:08:44 -0700
+ 15.1.2507.35; Fri, 20 Dec 2024 14:08:43 -0700
 Received: from ryan-Precision-3630-Tower.microchip.com (10.10.85.11) by
  chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.35 via Frontend Transport; Fri, 20 Dec 2024 14:08:44 -0700
+ 15.1.2507.35 via Frontend Transport; Fri, 20 Dec 2024 14:08:43 -0700
 From: <Ryan.Wanner@microchip.com>
 To: <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
 	<nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
@@ -53,10 +53,11 @@ CC: <dharma.b@microchip.com>, <mihai.sain@microchip.com>,
 	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
 	<linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
 	<linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>
-Subject: [PATCH v4 11/13] ARM: dts: microchip: add support for sama7d65_curiosity board
-Date: Fri, 20 Dec 2024 14:07:12 -0700
-Message-ID: <efe96af1361505be5ec5f409e4c503ccb56379b0.1734723585.git.Ryan.Wanner@microchip.com>
+	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>, Conor Dooley
+	<conor.dooley@microchip.com>
+Subject: [PATCH v4 06/13] dt-bindings: clocks: atmel,at91sam9x5-sckc: add sama7d65
+Date: Fri, 20 Dec 2024 14:07:07 -0700
+Message-ID: <d45866ab6caca970170199af9fd8588e33c2de2a.1734723585.git.Ryan.Wanner@microchip.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <cover.1734723585.git.Ryan.Wanner@microchip.com>
 References: <cover.1734723585.git.Ryan.Wanner@microchip.com>
@@ -69,138 +70,30 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 
-From: Romain Sioen <romain.sioen@microchip.com>
+From: Dharma Balasubiramani <dharma.b@microchip.com>
 
-Add device tree support for the SAMA7D65 Curiosity board.
-Update the Makefile to include the new device tree file.
+Add bindings for SAMA7D65's slow clock controller.
 
-uart6 is related to flexcom6, hence not sorted in alphabetical order.
-
-Signed-off-by: Romain Sioen <romain.sioen@microchip.com>
-Signed-off-by: Varshini Rajendran <varshini.rajendran@microchip.com>
+Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
 Signed-off-by: Ryan Wanner <Ryan.Wanner@microchip.com>
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
+Reviewed-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
 ---
- arch/arm/boot/dts/microchip/Makefile          |  3 +
- .../dts/microchip/at91-sama7d65_curiosity.dts | 89 +++++++++++++++++++
- 2 files changed, 92 insertions(+)
- create mode 100644 arch/arm/boot/dts/microchip/at91-sama7d65_curiosity.dts
+ .../devicetree/bindings/clock/atmel,at91sam9x5-sckc.yaml         | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/boot/dts/microchip/Makefile b/arch/arm/boot/dts/microchip/Makefile
-index 470fe46433a9..79cd38fdc7da 100644
---- a/arch/arm/boot/dts/microchip/Makefile
-+++ b/arch/arm/boot/dts/microchip/Makefile
-@@ -12,6 +12,7 @@ DTC_FLAGS_at91-sama5d2_xplained := -@
- DTC_FLAGS_at91-sama5d3_eds := -@
- DTC_FLAGS_at91-sama5d3_xplained := -@
- DTC_FLAGS_at91-sama5d4_xplained := -@
-+DTC_FLAGS_at91-sama7d65_curiosity := -@
- DTC_FLAGS_at91-sama7g54_curiosity := -@
- DTC_FLAGS_at91-sama7g5ek := -@
- dtb-$(CONFIG_SOC_AT91RM9200) += \
-@@ -90,6 +91,8 @@ dtb-$(CONFIG_SOC_SAM_V7) += \
- 	at91-sama5d4_xplained.dtb \
- 	at91-sama5d4ek.dtb \
- 	at91-vinco.dtb
-+dtb-$(CONFIG_SOC_SAMA7D65) += \
-+	at91-sama7d65_curiosity.dtb
- dtb-$(CONFIG_SOC_SAMA7G5) += \
- 	at91-sama7g54_curiosity.dtb \
- 	at91-sama7g5ek.dtb
-diff --git a/arch/arm/boot/dts/microchip/at91-sama7d65_curiosity.dts b/arch/arm/boot/dts/microchip/at91-sama7d65_curiosity.dts
-new file mode 100644
-index 000000000000..ef6a56db8acb
---- /dev/null
-+++ b/arch/arm/boot/dts/microchip/at91-sama7d65_curiosity.dts
-@@ -0,0 +1,89 @@
-+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-+/*
-+ *  at91-sama7d65_curiosity.dts - Device Tree file for SAMA7D65 Curiosity board
-+ *
-+ *  Copyright (c) 2024 Microchip Technology Inc. and its subsidiaries
-+ *
-+ *  Author: Romain Sioen <romain.sioen@microchip.com>
-+ *
-+ */
-+/dts-v1/;
-+#include "sama7d65-pinfunc.h"
-+#include "sama7d65.dtsi"
-+#include <dt-bindings/mfd/atmel-flexcom.h>
-+#include <dt-bindings/pinctrl/at91.h>
-+
-+/ {
-+	model = "Microchip SAMA7D65 Curiosity";
-+	compatible = "microchip,sama7d65-curiosity", "microchip,sama7d65",
-+		     "microchip,sama7d6", "microchip,sama7";
-+
-+	chosen {
-+		stdout-path = "serial0:115200n8";
-+	};
-+
-+	aliases {
-+		serial0 = &uart6;
-+	};
-+
-+	memory@60000000 {
-+		device_type = "memory";
-+		reg = <0x60000000 0x40000000>;
-+	};
-+};
-+
-+&flx6 {
-+	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
-+	status = "okay";
-+};
-+
-+&uart6 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_uart6_default>;
-+	status = "okay";
-+};
-+
-+&main_xtal {
-+	clock-frequency = <24000000>;
-+};
-+
-+&pioa {
-+	pinctrl_sdmmc1_default: sdmmc1-default {
-+		cmd-data {
-+			pinmux = <PIN_PB22__SDMMC1_CMD>,
-+				 <PIN_PB24__SDMMC1_DAT0>,
-+				 <PIN_PB25__SDMMC1_DAT1>,
-+				 <PIN_PB26__SDMMC1_DAT2>,
-+				 <PIN_PB27__SDMMC1_DAT3>;
-+			slew-rate = <0>;
-+			bias-disable;
-+		};
-+
-+		ck-cd-rstn-vddsel {
-+			pinmux = <PIN_PB23__SDMMC1_CK>,
-+				 <PIN_PB21__SDMMC1_RSTN>,
-+				 <PIN_PB30__SDMMC1_1V8SEL>,
-+				 <PIN_PB29__SDMMC1_CD>,
-+				 <PIN_PB28__SDMMC1_WP>;
-+			slew-rate = <0>;
-+			bias-disable;
-+		};
-+	};
-+
-+	pinctrl_uart6_default: uart6-default {
-+		pinmux = <PIN_PD18__FLEXCOM6_IO0>,
-+			<PIN_PD19__FLEXCOM6_IO1>;
-+		bias-disable;
-+	};
-+};
-+
-+&sdmmc1 {
-+	bus-width = <4>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_sdmmc1_default>;
-+	status = "okay";
-+};
-+
-+&slow_xtal {
-+	clock-frequency = <32768>;
-+};
+diff --git a/Documentation/devicetree/bindings/clock/atmel,at91sam9x5-sckc.yaml b/Documentation/devicetree/bindings/clock/atmel,at91sam9x5-sckc.yaml
+index c2283cd07f05..d4cf8ae2961e 100644
+--- a/Documentation/devicetree/bindings/clock/atmel,at91sam9x5-sckc.yaml
++++ b/Documentation/devicetree/bindings/clock/atmel,at91sam9x5-sckc.yaml
+@@ -20,6 +20,7 @@ properties:
+       - items:
+           - enum:
+               - microchip,sam9x7-sckc
++              - microchip,sama7d65-sckc
+               - microchip,sama7g5-sckc
+           - const: microchip,sam9x60-sckc
+ 
 -- 
 2.43.0
 
