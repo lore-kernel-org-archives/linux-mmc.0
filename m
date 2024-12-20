@@ -1,41 +1,41 @@
 Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F3AA4226529;
-	Fri, 20 Dec 2024 21:09:11 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88EF3227575;
+	Fri, 20 Dec 2024 21:09:12 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734728953; cv=none; b=MVOdE2Z49ZxnYE6ojGgRYf6FetZ260wwDqrNWrUMufXpPSAq1Y+gZ4wFVsTsjO3GoGKlN6OS8v0p310JQSZ4mIVyHHW/+hav2B4vGnJNENy09uCDpmUW3YWUF7a/AwEw/15Q/PCxvVS1mOO7LtQhM9JIwyBNv5Ev+hOtoJsZAvg=
+	t=1734728954; cv=none; b=R2lnW5UHWJy7vjKMZ/Z80JRWMJk0EpjEriZVuPfZ8pkUMOPOYYzNkq4r+0gwAZERBq0bnXCltlA4rVDnL9RaiF3phlTWB1YEIn/zCv6dCtN5W3tA/9pfDiWyG55y01IacN9x+zB5hqtBiqM9kK2ZRcunY6y+4J9Mqc8yr+4kEfQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734728953; c=relaxed/simple;
-	bh=+pQbU9KrAaqj8DThvbCwesXrXr/EK9f9JQYXh+Yd3Hk=;
+	s=arc-20240116; t=1734728954; c=relaxed/simple;
+	bh=/BHeA75p2Cn+kP5cxK8MIw+VO1rDeoCRJUoghk0DRRs=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=rPC3ykZuz4r9iTWayZyJcyAKny/82GCbi3b4vLpYjJ9qGb/Qu183g+KmVamLBJzWhcSeAWchO5TjICnZ8WQmWfFeeXHlI63eD8fpYI/dM6QGAfn0iNlDNoWuBOHf3XztGYjv74fy5C/wgmwMyuFlXv9D9jQk+BUe4CyKHBjhH9A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=TO0gscoe; arc=none smtp.client-ip=68.232.154.123
+	 MIME-Version:Content-Type; b=pyomImSrvJ8IhLEEs/uzB15xrKMNYLlPN6XmsKVNMW3wkkX22/bx35DrUuVS7bJxYKG6HN3zfvGnJL43zfAZ4/I6orAlfb8abWMlbOcKSQ7n0l5kBV9ZQ0rNkCOc2J1fC6M2nJ7XRWk7oCZVzKHQq7lZv7vvEhiQ1jUdLrqRNfk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=uVjrm523; arc=none smtp.client-ip=68.232.154.123
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="TO0gscoe"
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="uVjrm523"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
   t=1734728952; x=1766264952;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=+pQbU9KrAaqj8DThvbCwesXrXr/EK9f9JQYXh+Yd3Hk=;
-  b=TO0gscoeW1jxW+wkL5Xatp2b+GEQjD3E0LlZvzs0oRovr4EN7AMnC8nc
-   fOJr52hCVEKGc0jpWfIlpxaWBHPDpjaihKwG3zJUwFRwJr+DHYHRl7VUC
-   s1g+AjBC8jRgGhxlUUrNMztRiJ8Y41VgEBP+cDvk7/qE3YShSFL9bOEtj
-   AALDOaY46qW+dC8OA8vx79+kXLp26qwPCdt2wxwcAjzUzXFyjWq46loox
-   /sZJHrrERqAPvhtQh27nQepbMpZ/8cufNcAP2tx/PY4+GeGB0Lz+Z2u4K
-   ZIDtm+u0py4qxi4B7TNNEklIIO24V7LHzipbsg4roXj1OjnxkJ7+6/1Uj
-   A==;
+  bh=/BHeA75p2Cn+kP5cxK8MIw+VO1rDeoCRJUoghk0DRRs=;
+  b=uVjrm523W3C3NYjFdl8plYtRzFQmqksVsV1f7poGTChW6aknvcDk1Nt0
+   wmOWogWT7tW8A2jlDf6ZlMLtTxUZ+lZ8Gq+1PUT7JOLEh5Ka5usbC6fCt
+   h7M2G5Javue1htJZU8gxUC5T5XxkarfiKGeF4oRHgcQc+jurGN987/8n5
+   WwxKxCY5XMRE59LTCAcA+S+443nkWjJsLDXe29kZZgTJG6deggPjiEb93
+   MifOfPLGGy31wJbjHhC9kUyh1rHMH/qeav0NI8pZvbjKKE7h1wn4Oy7AG
+   vXQWtn0m/u6roWDrjmVi/gS/N1IfuQxZo7Ps1RQ9gJySrWtRVrsoHHJIs
+   w==;
 X-CSE-ConnectionGUID: 6Xn2bQedQHqhtDmL7ky2MQ==
-X-CSE-MsgGUID: I/MC5/adRJa8THr6LZiYTw==
+X-CSE-MsgGUID: Se/34m+nSA2AonXLlzKIJg==
 X-IronPort-AV: E=Sophos;i="6.12,251,1728975600"; 
-   d="scan'208";a="203274644"
+   d="scan'208";a="203274645"
 X-Amp-Result: SKIPPED(no attachment in message)
 Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa6.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Dec 2024 14:09:08 -0700
+  by esa6.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 20 Dec 2024 14:09:09 -0700
 Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
  chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
@@ -53,10 +53,12 @@ CC: <dharma.b@microchip.com>, <mihai.sain@microchip.com>,
 	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
 	<linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
 	<linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>
-Subject: [PATCH v4 05/13] dt-bindings: pinctrl: at91-pio4: add microchip,sama7d65-pinctrl
-Date: Fri, 20 Dec 2024 14:07:06 -0700
-Message-ID: <6ec5d56d36c64b7a29e043cee0b5a6c035c0d85c.1734723585.git.Ryan.Wanner@microchip.com>
+	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>, Conor Dooley
+	<conor.dooley@microchip.com>, Krzysztof Kozlowski
+	<krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v4 07/13] dt-bindings: clock: Add SAMA7D65 PMC compatible string
+Date: Fri, 20 Dec 2024 14:07:08 -0700
+Message-ID: <9b8db610f477d5339830d12cd44f783eb5cb16ea.1734723585.git.Ryan.Wanner@microchip.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <cover.1734723585.git.Ryan.Wanner@microchip.com>
 References: <cover.1734723585.git.Ryan.Wanner@microchip.com>
@@ -71,27 +73,58 @@ Content-Type: text/plain
 
 From: Dharma Balasubiramani <dharma.b@microchip.com>
 
-Add pinctrl bindings for microchip sama7d65 SoC.
+Add the `microchip,sama7d65-pmc` compatible string to the existing binding,
+since the SAMA7D65 PMC shares the same properties and clock requirements
+as the SAMA7G5.
+
+Export MCK3 and MCK5 to be accessed and referenced in DT to assign to
+the clocks property for sama7d65 SoC.
 
 Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
 Signed-off-by: Ryan Wanner <Ryan.Wanner@microchip.com>
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
+Reviewed-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
- .../devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt      | 1 +
- 1 file changed, 1 insertion(+)
+ .../devicetree/bindings/clock/atmel,at91rm9200-pmc.yaml       | 2 ++
+ include/dt-bindings/clock/at91.h                              | 4 ++++
+ 2 files changed, 6 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-index 774c3c269c40..a7d7d2eaf10f 100644
---- a/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-+++ b/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-@@ -6,6 +6,7 @@ configure it.
- Required properties:
- - compatible:
- 	"atmel,sama5d2-pinctrl"
-+	"microchip,sama7d65-pinctrl"
- 	"microchip,sama7g5-pinctrl"
- - reg: base address and length of the PIO controller.
- - interrupts: interrupt outputs from the controller, one for each bank.
+diff --git a/Documentation/devicetree/bindings/clock/atmel,at91rm9200-pmc.yaml b/Documentation/devicetree/bindings/clock/atmel,at91rm9200-pmc.yaml
+index c9eb60776b4d..885d47dd5724 100644
+--- a/Documentation/devicetree/bindings/clock/atmel,at91rm9200-pmc.yaml
++++ b/Documentation/devicetree/bindings/clock/atmel,at91rm9200-pmc.yaml
+@@ -43,6 +43,7 @@ properties:
+               - atmel,sama5d4-pmc
+               - microchip,sam9x60-pmc
+               - microchip,sam9x7-pmc
++              - microchip,sama7d65-pmc
+               - microchip,sama7g5-pmc
+           - const: syscon
+ 
+@@ -90,6 +91,7 @@ allOf:
+             enum:
+               - microchip,sam9x60-pmc
+               - microchip,sam9x7-pmc
++              - microchip,sama7d65-pmc
+               - microchip,sama7g5-pmc
+     then:
+       properties:
+diff --git a/include/dt-bindings/clock/at91.h b/include/dt-bindings/clock/at91.h
+index 6ede88c3992d..d753559b912b 100644
+--- a/include/dt-bindings/clock/at91.h
++++ b/include/dt-bindings/clock/at91.h
+@@ -42,6 +42,10 @@
+ #define PMC_PLLADIV2		(PMC_MAIN + 11)
+ #define PMC_LVDSPLL		(PMC_MAIN + 12)
+ 
++/* SAMA7D65 */
++#define PMC_MCK3		(PMC_MAIN + 13)
++#define PMC_MCK5		(PMC_MAIN + 14)
++
+ #ifndef AT91_PMC_MOSCS
+ #define AT91_PMC_MOSCS		0		/* MOSCS Flag */
+ #define AT91_PMC_LOCKA		1		/* PLLA Lock */
 -- 
 2.43.0
 
