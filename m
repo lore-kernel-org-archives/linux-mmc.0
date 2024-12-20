@@ -1,110 +1,253 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mail-m127157.xmail.ntesmail.com (mail-m127157.xmail.ntesmail.com [115.236.127.157])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8BE1219D070
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2024 20:53:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEB0919C56D;
+	Fri, 20 Dec 2024 10:43:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=115.236.127.157
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1734641631; cv=none; b=ra6JqkxNpNJjjoIYdQcX+RShIiUfTqqXX/Z8W28SKbTDqL1azD1Gpr+o+9ipXFh5fHrKvqYs8L0CErG6HrBxt85l6KfAJ/g+KjK6H9HMkKMYdLO6fJFCSzPjWmMSKJdTK1xSioO3XskjwnCBB7wLBuZITzlHgWiGF8dpQIFwxJE=
+	t=1734691437; cv=none; b=PZRUu5qXmLzX5l79DboK37HahVqH1k8xAABbgeA81aJqpeAXMRmh22JFuWdGhfYX+2lg7nGYRt3uoLuCBFFxFX/q2q0DL8n3xYsMXr9BKq5koCQQDEROKZPsiK6cLcaH3gl/Qg3vYSRBd6rx0eQrytIqlQ+OTn4TBj9/qzSRX0Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1734641631; c=relaxed/simple;
-	bh=f96R7in9nBzMDU72jjLsX7VaIEl+bGsVnCVnVDlJZSM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=JHKkrMxPOiDYD+WmmP1qUbGkTrzn5sLn6BTPiYqRts5W6wgir58f9YXYw8DvxR82qccS4Hf2P8LNKBiqbgRVJd7XqqUw9z0rdpWNC9BR1OdHPh4rc+qj8rZ9pVdP2omTVj8arF8qkal3Uhm7W4fsju7/fcs/l32awUPmSHuycPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=HChrMzh3; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1734691437; c=relaxed/simple;
+	bh=FLotb8PO7pUbOoGoa3ZcA+IJLn2SEtUGvEV7uvVVTkk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=kbln7y/CCeYJY3S9PlwwCdobmOpsBOraPpxJpouwpuGplkxgSESnNkpTn090B/kdHBqxXc2u8p+GLR8k9jPCPAcgbcXdmVGHGw60XNJkwku5wI6zdCunKuGeLKIwIWibwqrXS2c6O1FkrGFO6PM8eUS9WzTk5N0PGR9e7uX1zj4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=LXQtSCOj; arc=none smtp.client-ip=115.236.127.157
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="HChrMzh3"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 4BJGIdEe005306
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2024 20:53:49 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	U2VJSATUssS/d5iFW3jDdxPp50juAP2YhPc5I0LZEQA=; b=HChrMzh3v+QYpCq5
-	aRnI18juuzO2vK3Cg5Q/KXhSzlWkHZLfUiMAVZFKIh0cKDBry7hqcAk+Jru9W2Gv
-	eS57i5s1h+qGkYDyMhL0Be9MXBF87yRXb/ZUS7GSEqzTvj8Jn3x5eSfmEf81u2oH
-	3RwkngoK0Q4+m2yj9Q9yD1Hxbqzb2wNuEgPoAFqC5i0L265vqlejUCWVz7+ZfI6A
-	j5H9OyzHzMF1MU+UpAXdd2OgZWBFQBlP6ViI2L7LtJylD/8dveNGwyZ6uwA05Qq5
-	Wp/kPCOGjyi5w/NOCW4vJfQ+h/Jrd9zjuaCAroW2H4w/MPcYAwz2Jipm8RJ4qZMV
-	YuBQGg==
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 43mpw60mqq-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2024 20:53:49 +0000 (GMT)
-Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-4679d6f9587so3048071cf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Dec 2024 12:53:49 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1734641628; x=1735246428;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=U2VJSATUssS/d5iFW3jDdxPp50juAP2YhPc5I0LZEQA=;
-        b=UwspLZet5JUn83nq/xxMBby/NVRF9CjdXGzC7yI0tPem8AvSxnqdD8Zu7NDkW0N2br
-         xsDQlC1XRkzZA4MFz7TTRU0juBs/RaMFrm6lcfcigXkt9Iw6tuQwHzdbfmTJ+/eKY/nz
-         489alBqPSTCSyx+tAUVd2q8bc9nNJgpRx9nyAd2v9dz3b927GHmR7RprsgKmRhcC3i85
-         IHyUn3ODZIph2+mEB6IpUOjZ2XXWx5lwhsR6ck3iyYszp94NW9BF66vt0uoRcvo1oxjG
-         p4va5Gx3uoH6hwje3pH3MFT7uwN+T661ylk23FyeRbnxMF1v7xMjjMc0/x6cBU5fhuBS
-         eOlQ==
-X-Gm-Message-State: AOJu0YxcFcXrk2erRTNIE449MhT3w4TXr/SOhUQrZksvuyWYl6kvspSH
-	pO619yuT992TeKPXmSfBHTMzo0GcnrrU+dv8sPVR/wKqYHaPbg9boq/chPX/iQNz+m9SUaB8TOv
-	/rXLZdv/YYUw7mJLno7T1WZcCyWww6LL248X92bIZ8CJFJT8xINejJ+umwTo=
-X-Gm-Gg: ASbGnctNPBYnMZi1BOIXFExDXrg/VZzZcwthCrf1pukL27CGnTNN2mtABE9n9/FQtkh
-	IheJWuFOlooyeGPSe2xZFPZSqvpd/JdXS+Pe50OdpQK4EoeytNlc0SoXNHwYJ8HDouL5uYhyb5k
-	OIC5VkBN6LZMVLsBz9ghVRGMOnv+zMtgrvHhlhqaNgyGddotWSykkTQvdeccT4Zld2oo0HjgasG
-	836aGr2O81y94JGqK+SR655CwwJkrZDp6Rb3un2UZCrdw6gMmKQkPE7AOTo33FgtpNNuLHs6hA5
-	F2Mu+jsmAkz543gSqWpXnraQTm0cLIx6Tx8=
-X-Received: by 2002:ac8:5a4d:0:b0:467:5462:4a14 with SMTP id d75a77b69052e-46a4a68fa9bmr3137071cf.0.1734641628297;
-        Thu, 19 Dec 2024 12:53:48 -0800 (PST)
-X-Google-Smtp-Source: AGHT+IGSKSE7Qna0FoEqgf+pCWhHJkBcq3oXpQgHS8U8pdEpYIb4w3wO6U/+yOm0/K+TI9Ep7n7vrA==
-X-Received: by 2002:ac8:5a4d:0:b0:467:5462:4a14 with SMTP id d75a77b69052e-46a4a68fa9bmr3136941cf.0.1734641627924;
-        Thu, 19 Dec 2024 12:53:47 -0800 (PST)
-Received: from [192.168.65.90] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aac0e8951ebsm101166166b.71.2024.12.19.12.53.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Dec 2024 12:53:47 -0800 (PST)
-Message-ID: <67e5e004-7345-49a6-8e66-f2fa4faac788@oss.qualcomm.com>
-Date: Thu, 19 Dec 2024 21:53:45 +0100
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="LXQtSCOj"
+Received: from localhost.localdomain (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 656820ed;
+	Fri, 20 Dec 2024 18:38:26 +0800 (GMT+08:00)
+From: Kever Yang <kever.yang@rock-chips.com>
+To: heiko@sntech.de
+Cc: linux-rockchip@lists.infradead.org,
+	Kever Yang <kever.yang@rock-chips.com>,
+	Simon Xue <xxm@rock-chips.com>,
+	Lee Jones <lee@kernel.org>,
+	dri-devel@lists.freedesktop.org,
+	Zhang Rui <rui.zhang@intel.com>,
+	Elaine Zhang <zhangqing@rock-chips.com>,
+	linux-clk@vger.kernel.org,
+	Conor Dooley <conor+dt@kernel.org>,
+	FUKAUMI Naoki <naoki@radxa.com>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	Andy Yan <andyshrk@163.com>,
+	Michael Riesch <michael.riesch@wolfvision.net>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+	linux-pm@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-usb@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	Jakub Kicinski <kuba@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	Jose Abreu <joabreu@synopsys.com>,
+	Jamie Iles <jamie@jamieiles.com>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Chris Morgan <macromorgan@hotmail.com>,
+	Frank Wang <frank.wang@rock-chips.com>,
+	linux-mmc@vger.kernel.org,
+	Linus Walleij <linus.walleij@linaro.org>,
+	linux-i2c@vger.kernel.org,
+	Simona Vetter <simona@ffwll.ch>,
+	Finley Xiao <finley.xiao@rock-chips.com>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
+	linux-stm32@st-md-mailman.stormreply.com,
+	linux-watchdog@vger.kernel.org,
+	David Wu <david.wu@rock-chips.com>,
+	Shresth Prasad <shresthprasad7@gmail.com>,
+	linux-gpio@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	Lukasz Luba <lukasz.luba@arm.com>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Guenter Roeck <linux@roeck-us.net>,
+	linux-iio@vger.kernel.org,
+	linux-pci@vger.kernel.org,
+	David Airlie <airlied@gmail.com>,
+	linux-phy@lists.infradead.org,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Maxime Ripard <mripard@kernel.org>,
+	Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+	Vinod Koul <vkoul@kernel.org>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Alexandre Torgue <alexandre.torgue@foss.st.com>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	linux-pwm@vger.kernel.org,
+	Rob Herring <robh@kernel.org>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Mark Brown <broonie@kernel.org>,
+	Dragan Simic <dsimic@manjaro.org>,
+	Sebastian Reichel <sebastian.reichel@collabora.com>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Johan Jonker <jbx6244@gmail.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Jonathan Cameron <Jonathan.Cameron@huawei.com>,
+	linux-serial@vger.kernel.org,
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+	Daniel Lezcano <daniel.lezcano@linaro.org>,
+	devicetree@vger.kernel.org,
+	Diederik de Haas <didi.debian@cknow.org>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Tim Lunn <tim@feathertop.org>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+	netdev@vger.kernel.org,
+	Paolo Abeni <pabeni@redhat.com>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <ukleinek@kernel.org>
+Subject: [PATCH 00/38] rockchip: Add rk3562 support
+Date: Fri, 20 Dec 2024 18:37:46 +0800
+Message-Id: <20241220103825.3509421-1-kever.yang@rock-chips.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v5 1/2] arm64: dts: qcom: qcs615: add SDHC1 and SDHC2
-To: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org,
-        robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org,
-        bhupesh.sharma@linaro.org, andersson@kernel.org,
-        konradybcio@kernel.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        quic_tingweiz@quicinc.com
-References: <20241217101017.2933587-1-quic_yuanjiey@quicinc.com>
- <20241217101017.2933587-2-quic_yuanjiey@quicinc.com>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <20241217101017.2933587-2-quic_yuanjiey@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: tEtjrfGehaGACTJlpIlNPZnQLK45xwFg
-X-Proofpoint-GUID: tEtjrfGehaGACTJlpIlNPZnQLK45xwFg
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1039,Hydra:6.0.680,FMLib:17.12.60.29
- definitions=2024-09-06_09,2024-09-06_01,2024-09-02_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=839
- priorityscore=1501 lowpriorityscore=0 malwarescore=0 phishscore=0
- clxscore=1015 spamscore=0 bulkscore=0 impostorscore=0 mlxscore=0
- adultscore=0 suspectscore=0 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.19.0-2411120000 definitions=main-2412190165
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQh9LT1ZJGktPSElKGk8fQxhWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSEtNQk
+	tVSktLVUpCWQY+
+X-HM-Tid: 0a93e3a5af4003afkunm656820ed
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6Nwg6Kxw6GTIRKggeThEUMR4h
+	P0gaCyxVSlVKTEhPTUJKSkpKTElJVTMWGhIXVRAeDR4JVQIaFRw7CRQYEFYYExILCFUYFBZFWVdZ
+	EgtZQVlOQ1VJSVVMVUpKT1lXWQgBWUFOTUpJNwY+
+DKIM-Signature:a=rsa-sha256;
+	b=LXQtSCOj5PQ5rmMQS8JUHg+aVmzux+tnR5NnlpILS50US/QWv5VBCTHDsqEiVs5WhSa9UqWxWgKBEnSg0vucKhE8FyZdsUwbc5ZsdiUz76LZqHiim02ORqBuKb413jRYfReSUFy7jfbzAaPEA5wGkuukfoQqA957T+ZIIQC0lqE=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
+	bh=RUJ3VBWN4hJZF+kjNTXL1lSb1odrwauQvfHGVuJDe90=;
+	h=date:mime-version:subject:message-id:from;
 
-On 17.12.2024 11:10 AM, Yuanjie Yang wrote:
-> Add SDHC1 and SDHC2 support to the QCS615 Ride platform.
-> 
-> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
-> ---
 
-Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+This patch set adds rk3562 SoC and its evb support.
 
-Konrad
+The patch number is a little bit too big, some of them may need to split
+out for different maintainers, please let me know which patch need to
+split out.
+
+Test with GMAC, USB, PCIe, EMMC, SD Card.
+
+This patch set is base on the patche set for rk3576 evb1 support.
+
+
+David Wu (2):
+  ethernet: stmmac: dwmac-rk: Add gmac support for rk3562
+  ethernet: stmmac: dwmac-rk: Make the phy clock could be used for
+    external phy
+
+Finley Xiao (7):
+  clk: rockchip: add dt-binding header for rk3562
+  clk: rockchip: Add clock controller for the RK3562
+  dt-bindings: add power-domain header for RK3562 SoC
+  nvmem: rockchip-otp: Add support for rk3568-otp
+  nvmem: rockchip-otp: Add support for rk3562
+  arm64: dts: rockchip: add core dtsi for RK3562 Soc
+  arm64: dts: rockchip: Add RK3562 evb2 devicetree
+
+Frank Wang (1):
+  phy: rockchip: inno-usb2: add usb2 phy support for rk3562
+
+Jon Lin (1):
+  phy: rockchip-naneng-combo: Support rk3562
+
+Kever Yang (24):
+  dt-bindings: clock: add rk3562 cru bindings
+  dt-bindings: pinctrl: Add rk3562 pinctrl support
+  soc: rockchip: power-domain: add power domain support for rk3562
+  dt-bindings: rockchip-thermal: Support the RK3562 SoC compatible
+  dt-bindings: iio: adc: Add rockchip,rk3562-saradc string
+  dt-bindings: net: Add support for rk3562 dwmac
+  dt-bindings: nvmem: rockchip,otp: Add support for rk3562 and rk3568
+  dt-bindings: phy: rockchip: Add rk3562 naneng-combophy compatible
+  dt-bindings: phy: rockchip,inno-usb2phy: add rk3562
+  dt-bindings: PCI: dwc: rockchip: Add rk3562 support
+  dt-bindings: mmc: Add support for rk3562 eMMC
+  dt-bindings: mmc: rockchip-dw-mshc: Add rk3562 compatible string
+  dt-bindings: power: rockchip: Add bindings for rk3562
+  dt-bindings: i2c: i2c-rk3x: Add rk3562 compatible
+  dt-bindings: gpu: Add rockchip,rk3562-mali compatible
+  dt-bindings: watchdog: Add rk3562 compatible
+  dt-bindings: spi: Add rockchip,rk3562-spi compatible
+  dt-bindings: serial: snps-dw-apb-uart: Add support for rk3562
+  dt-bindings: usb: dwc3: add compatible for rk3562
+  dt-bindings: pwm: rockchip: Add rockchip,rk3562-pwm
+  dt-bindings: rockchip: pmu: Add rk3562 compatible
+  dt-bindings: soc: rockchip: Add rk3562 syscon compatibles
+  dt-bindings: arm: rockchip: Add rk3562 evb2 board
+  dt-bindings: mfd: syscon: Add rk3562 QoS register compatible
+
+Shaohan Yao (1):
+  thermal: rockchip: Support the rk3562 SoC in thermal driver
+
+Simon Xue (1):
+  iio: adc: rockchip_saradc: add rk3562
+
+Steven Liu (1):
+  pinctrl: rockchip: add rk3562 support
+
+ .../devicetree/bindings/arm/rockchip.yaml     |    5 +
+ .../devicetree/bindings/arm/rockchip/pmu.yaml |    2 +
+ .../bindings/clock/rockchip,rk3562-cru.yaml   |   62 +
+ .../bindings/gpu/arm,mali-bifrost.yaml        |    3 +-
+ .../devicetree/bindings/i2c/i2c-rk3x.yaml     |    1 +
+ .../bindings/iio/adc/rockchip-saradc.yaml     |    2 +
+ .../devicetree/bindings/mfd/syscon.yaml       |    2 +
+ .../bindings/mmc/rockchip-dw-mshc.yaml        |    1 +
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |    9 +-
+ .../bindings/net/rockchip-dwmac.yaml          |    5 +-
+ .../bindings/nvmem/rockchip,otp.yaml          |   49 +-
+ .../bindings/pci/rockchip-dw-pcie.yaml        |    1 +
+ .../phy/phy-rockchip-naneng-combphy.yaml      |    1 +
+ .../bindings/phy/rockchip,inno-usb2phy.yaml   |    3 +-
+ .../bindings/pinctrl/rockchip,pinctrl.yaml    |    1 +
+ .../power/rockchip,power-controller.yaml      |    1 +
+ .../devicetree/bindings/pwm/pwm-rockchip.yaml |    1 +
+ .../bindings/serial/snps-dw-apb-uart.yaml     |    1 +
+ .../devicetree/bindings/soc/rockchip/grf.yaml |    7 +
+ .../devicetree/bindings/spi/spi-rockchip.yaml |    1 +
+ .../bindings/thermal/rockchip-thermal.yaml    |    1 +
+ .../bindings/usb/rockchip,dwc3.yaml           |    3 +
+ .../bindings/watchdog/snps,dw-wdt.yaml        |    1 +
+ arch/arm64/boot/dts/rockchip/Makefile         |    1 +
+ .../boot/dts/rockchip/rk3562-evb2-v10.dts     |  520 ++++
+ .../boot/dts/rockchip/rk3562-pinctrl.dtsi     | 2352 +++++++++++++++++
+ arch/arm64/boot/dts/rockchip/rk3562.dtsi      | 1432 ++++++++++
+ drivers/clk/rockchip/Kconfig                  |    7 +
+ drivers/clk/rockchip/Makefile                 |    1 +
+ drivers/clk/rockchip/clk-rk3562.c             | 1111 ++++++++
+ drivers/clk/rockchip/clk.h                    |   39 +
+ drivers/iio/adc/rockchip_saradc.c             |   24 +-
+ .../net/ethernet/stmicro/stmmac/dwmac-rk.c    |  213 +-
+ drivers/nvmem/rockchip-otp.c                  |   97 +
+ drivers/phy/rockchip/phy-rockchip-inno-usb2.c |   49 +
+ .../rockchip/phy-rockchip-naneng-combphy.c    |  152 ++
+ drivers/pinctrl/pinctrl-rockchip.c            |  199 +-
+ drivers/pinctrl/pinctrl-rockchip.h            |    3 +-
+ drivers/pmdomain/rockchip/pm-domains.c        |   48 +-
+ drivers/thermal/rockchip_thermal.c            |  112 +-
+ include/dt-bindings/clock/rk3562-cru.h        |  733 +++++
+ include/dt-bindings/power/rk3562-power.h      |   35 +
+ 42 files changed, 7269 insertions(+), 22 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/clock/rockchip,rk3562-cru.yaml
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3562-evb2-v10.dts
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3562-pinctrl.dtsi
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3562.dtsi
+ create mode 100644 drivers/clk/rockchip/clk-rk3562.c
+ create mode 100644 include/dt-bindings/clock/rk3562-cru.h
+ create mode 100644 include/dt-bindings/power/rk3562-power.h
+
+-- 
+2.25.1
+
