@@ -1,76 +1,71 @@
-Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
+Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8522D13AD26
-	for <linux-mmc@vger.kernel.org>; Thu, 26 Dec 2024 18:53:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E7E84189B8F
+	for <linux-mmc@vger.kernel.org>; Thu, 26 Dec 2024 21:04:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735239200; cv=none; b=PKWOyb3L4l0B3YAR91ow5nmaknyY15k59KBHnrlGPdBY0uec5KtgHQFZoq9Ld/FRIz2qFO4cMVmQYVC/pNQ8D+9oPWz6CWLp1GQoV1bvmj094LXufqJavQG6Ztsa3eMsr5XKzswzS9TX2Yi7S/eo6y+67DLXZQBF1cauEnETjPw=
+	t=1735247059; cv=none; b=dG9+KF5zityBkYFXdEt1BIQLjEkNQR15W0qqzy4+G4G5YM7Tz8eQLQ4nk3iMAMdawafdTUKVtMOL3Khqd0ijqQyiqzvrQa1Op+hmH9aic37UUJt52p+n1PYqeqGtg8vO/OnYcEDvi36woI/IvSY/QId/d2KQbF1zHdy2Pl0GPgM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735239200; c=relaxed/simple;
-	bh=13Z8GaRHU4/OT9CQhwEKHJIYxYX3FGNMThTdgKVmNl4=;
+	s=arc-20240116; t=1735247059; c=relaxed/simple;
+	bh=w5LPUHK4LvFCZM0G2OA6ufsHRsK6Q16qHrgCK8A5E8o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=ukYyE95rJh9MBQQ3he/KOsp+XAjwBkLn2Jpnkb1to3ntHMSGPx9abm5UgiI2Nz7AqPLlmRmO0GF3QXurMTmvoygPug2han6SIoWU7VdNQTL6UPCH9US8XjnR+Ww791ETB3y+4AsIYTrLCknoE/I+Q4hgWzZI4ZodRdxttMyjxPs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=VyN3zGCu; arc=none smtp.client-ip=209.85.208.175
+	 Content-Type:Content-Disposition:In-Reply-To; b=nEhled19INSxLfBg+t0+MY/coE5MMPPu15kyHEucbVOss4JyUv4j8hy0vZHidcOWNlqEEluUpFAUpdZBd1nbIIFBm2sa6EHwWa01zGxC1RpacLuIJ5jt0eY4ZLLHx9sC0aQzgFK/jj3Xst5dy0jVQIZR0duo0E4GMPDQHFue030=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bjuUZmd2; arc=none smtp.client-ip=209.85.167.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="VyN3zGCu"
-Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-30036310158so61923261fa.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Dec 2024 10:53:17 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bjuUZmd2"
+Received: by mail-lf1-f47.google.com with SMTP id 2adb3069b0e04-53e3a37ae07so7259807e87.3
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Dec 2024 13:04:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1735239196; x=1735843996; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1735247055; x=1735851855; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=a0OvlSSe3WP6bZwJY44cWLBcqnhffi0ZNEXsKquszlk=;
-        b=VyN3zGCu8+2uyTFR+0sQUW/59qrE4Wt1HHcrZ86QjgozczUQL/sZHvYgZpB0pwTtcF
-         D3V+GQbkbd/dSvQLcJUT4+40sAlbiRntbejVCDE4Ctk+Fm5+lh1S5xim4ZGjxPUvdeKw
-         pIEW/w2j8sP9Zh/EKMeMfHUeONPyBTe0R6jRnevkyerZ1YcouJ26yZsVKxwXdG5vyOk+
-         ExL4zZzZsDHcCDFygbpNkH9mCApbaZYyDNrYXzXUrp0PHNn7mzACi4vSU9prWniDXDJF
-         3MKuRi4QOyTiMavOVuPNguiPHjnca3SqX9Pnu3GvOdrMRfvgg0a6YxzjcrYbz4fTXjeC
-         2c/g==
+        bh=GOwf980uHA6/rXG31emGACIj8be43/3tzDSjlpZoroI=;
+        b=bjuUZmd2dq1xFHXAG5BZCuA6fM5Vt0SDfxPyW9JKspW/gBMrMiMu+cU01/qPdnUDcD
+         +fwFP64Ik61c4bbg/sJ389HxLYvwuf5wCgYp23b9EL7pREVNxez3ymME5eDwzVb/h7zg
+         pse5ihY1aty3NHuWjfC/XjtE/9baVZTyLZqpkcfHriOeE+0UtYMEDFfUbe5GX3VNQZ3i
+         cVcHqTDmEBHhwyej1D6+VttR2PaefIEXTVVxW7oTKgJzlzZhMHRzN0zWc7bP7u5HuA5K
+         i/X4AfzUXT+1+kv2jdUN1UUikVAQd4zRzbVu9UsNnp3NrGVUALWLwbgQUPoo+ix7HuCv
+         t2Uw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735239196; x=1735843996;
+        d=1e100.net; s=20230601; t=1735247055; x=1735851855;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=a0OvlSSe3WP6bZwJY44cWLBcqnhffi0ZNEXsKquszlk=;
-        b=LEJQaUHSGNVnfT118S1i2CpPI5MopKQOOwGvdp+4PPa6RAOkk73alXUg8EN+m6JujS
-         KqSCjvKo8YKve1y4CYXLq3/4xDoLMa2BohmJHtvISNFVn8LG4M7lGZ22tjxyn4BtLQsN
-         Gj9Zm7Bo5N3gVEFJpkEQ05FxVc/w8qhiOYmx1EVKkLt3aMavNQJCAC8+PcYYZhLc3yV/
-         k1pgckj03ndzn/jMnyfOD9VbHNDJlKiFAI+dVFs3IdZEC4MxaPxyrWtkizCQYnCdL+8C
-         MTO6Z2LVTwN9Ml1BzVhfXTUCaIKN8nMwAART0p5+MNsmFBfytycklOOU7fLAc8lluV/x
-         12CA==
-X-Forwarded-Encrypted: i=1; AJvYcCWLMFibt5t2IAaAcGMGWLH0S0P9xPYOu5x2mMBuK4I2uO653TKbQhn33eNVed9r+YWNaA/fqNyOzT4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxtnSUF4OufEVRUE+UdQihAB89axJEl8shB4RjoO/FR+wacv9R3
-	8y/IQikjF8344KfK4scqOqFSUqffyP7/n9DpOK2K2/gSJLgUCrnleTVUiBYGoe8=
-X-Gm-Gg: ASbGncsQAIwMGFCT8D0srkrjwTI2eTVyZpkyetDSQOkSyQgGCHW0Y+Smng+54+P8HQV
-	9LlrROLL8695XO7Ci4zRPmW1lupl6wPKdNvne2eeyBpbJanFFUFu+R9wL4K074kbvc/m0uBUX/a
-	p3NXb9BSK/LkvfcZFRtD3MMzcwMdXBjR26wGSzJu2Y3Gqz41A3sv/XnbcO46I3Mzv5MCik7LWzu
-	pIWmJu462/QSl/5qePvkNyZPNx9iDjw04cG1ii4QPETRImQ6osi9jRYoJauyxVmhMrFTtDO3/9D
-	JU2XL2GKuFS9UX0LNDB98Bwyrfl241tpfSBb
-X-Google-Smtp-Source: AGHT+IEZHIrAx82+O02n29SUq8mtNrxqhdAl+c2Di+B8VETON4JDoKRjzks0wD+mTfbVkrQ8dOGgJA==
-X-Received: by 2002:a2e:be14:0:b0:302:1c90:58e8 with SMTP id 38308e7fff4ca-30468626193mr91659241fa.33.1735239195429;
-        Thu, 26 Dec 2024 10:53:15 -0800 (PST)
+        bh=GOwf980uHA6/rXG31emGACIj8be43/3tzDSjlpZoroI=;
+        b=kWzYfacsvfZcKbpFNfOqlBwUbS6ii5Zg0NTQgmBHmEKMHS9MBX4lTbSOuRLAOJV9Zi
+         w7q4Q8QjhawFfRdBp1OivpidO2uu/wksGk4Gd1mt4VgT+Vlmb7vLTCIlxoJEHfBlofYi
+         kPH3ficB3I9EngbUMZZwY2be4xbaIuDQ4Vm2a6mbGrxUVmJJVJFlBeE4Tpeejjl5nrl8
+         EvWFXLqNg9POzz1skqI2vmax5L5A8N+xP9a+kdRxPlNJvaKDBLmGNzMRfQXDGjJv5DJX
+         dF37MAPKtyAu7b3SnGQBEVxzGP6P4RPrrfzteAzaLl2pKQpDMztuab31ha8RRResJnRn
+         L0/A==
+X-Forwarded-Encrypted: i=1; AJvYcCV7of6XDCipqhvuUHLwQG2MpL6oQnevAUYSruynIq9qn6FfPZpbbB7dZ2VJeND8c9rpo1AaPd5jNoQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz0Y31iYHCg/DFQm0ZR3/vS6MBiIOb9AnYuI0PD1yzy2UJ3f5Qv
+	dssgKyqKRHU3ZleI76M2Y/Qar9Oa3EtHhFz+7EekX444GsQAKjm7SBwMqb4EARk=
+X-Gm-Gg: ASbGncvW+5iuDib0svO/6AHVea7yh9PYBDNxcsb0KPCVbVtLdNVJC8YdmrzVmDXjYWx
+	xGQC7zI2RMgG/+CWFWm5GR9IlXQC8rnqlw/hWPSVgGKZ7+Ci1k3K8VD1Zl0iXlOOfbE57oLgJrz
+	IR3J0+GHlQx/Hwr5CXTCydX+Lwl9ACnte+v2VgqNklG32y1xnUZKBQi8D6USgF8XBLiAkNvJy+L
+	GcDMzBPQFPJT3B5XrmtYJetj3Gz3CcFbSUwvtIhD92tr7sJfkgsYgCGDlUmFxoVqYMjeyBmkTEx
+	nEz/R0Gp9NXwm4IzG9fBrAyKYAiPPDdX4axi
+X-Google-Smtp-Source: AGHT+IFDzAcuGSZ7nNZvfRLyI+DWmKNLOa1eIbqZ8rhaJ3AWR0XJoCKwXjst6+yPjQDefJtkdGntGg==
+X-Received: by 2002:ac2:4e04:0:b0:539:f630:f233 with SMTP id 2adb3069b0e04-54229586f00mr7613430e87.57.1735247055082;
+        Thu, 26 Dec 2024 13:04:15 -0800 (PST)
 Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--b8c.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-3045b069f3csm23220331fa.88.2024.12.26.10.53.13
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-542238136f5sm2236642e87.116.2024.12.26.13.04.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Dec 2024 10:53:14 -0800 (PST)
-Date: Thu, 26 Dec 2024 20:53:12 +0200
+        Thu, 26 Dec 2024 13:04:13 -0800 (PST)
+Date: Thu, 26 Dec 2024 23:04:11 +0200
 From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To: Sachin Gupta <quic_sachgupt@quicinc.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
-	quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com, quic_narepall@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_rampraka@quicinc.com, quic_sartgarg@quicinc.com
-Subject: Re: [PATCH V2 2/2] mmc: sdhci-msm: Rectify DLL programming sequence
- for SDCC
-Message-ID: <otfof56qvqxyjaq6onor2f3egrt57h2xazncias72qnn4xjgz5@2aj2pyj5xmyl>
-References: <20241218091057.15625-1-quic_sachgupt@quicinc.com>
- <20241218091057.15625-3-quic_sachgupt@quicinc.com>
- <a2mnkliubpdryxdwsd33kccvnlb4fnyzik5ywxw4xhnimwdwsm@oxe34zogzfot>
- <bb60a145-1e8f-4004-b266-9f26a11440b9@quicinc.com>
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, 
+	linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	andersson@kernel.org, quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Correctly set the load for the
+ regulator
+Message-ID: <5q4wxz52mq6b73chi3o3xtspqbczycboeqiqsqnse6qg3vvbya@ih5rac2jqsrb>
+References: <20241226031845.2574669-1-quic_yuanjiey@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -79,668 +74,151 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <bb60a145-1e8f-4004-b266-9f26a11440b9@quicinc.com>
+In-Reply-To: <20241226031845.2574669-1-quic_yuanjiey@quicinc.com>
 
-On Thu, Dec 26, 2024 at 11:22:40AM +0530, Sachin Gupta wrote:
+On Thu, Dec 26, 2024 at 11:18:45AM +0800, Yuanjie Yang wrote:
+> Qualcomm regulator supports two power supply modes: HPM and LPM.
+> Currently, the sdhci-msm.c driver does not set the load to adjust
+> the current for eMMC and SD. If the regulator dont't set correct
+> load in LPM state, it will lead to the inability to properly
+> initialize eMMC and SD.
 > 
+> Set the correct regulator current for eMMC and SD to ensure that the
+> device can work normally even when the regulator is in LPM.
 > 
-> On 12/19/2024 11:24 AM, Dmitry Baryshkov wrote:
-> > On Wed, Dec 18, 2024 at 02:40:57PM +0530, Sachin Gupta wrote:
-> > > With the current DLL sequence stability issues for data
-> > > transfer seen in HS400 and HS200 modes.
-> > > 
-> > > "mmc0: cqhci: error IRQ status: 0x00000000 cmd error -84
-> > > data error 0"
-> > > 
-> > > Rectify the DLL programming sequence as per latest hardware
-> > > programming guide and also incorporate support for HS200 and
-> > > HS400 DLL settings using the device tree.
-> > 
-> > "foo also bar" usually points out that there should be two separate
-> > commits.
-> 
-> Thanks for review. I will split it into two patches.
-> 
-> > 
-> > > 
-> > > Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
-> > > Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-> > > Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
-> > > Signed-off-by: Jun Li <liju@codeaurora.org>
-> > 
-> > This is very strange and incorrect.
-> 
-> Thanks for review. I will fix the format.
+> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> ---
+> Changes in v3:
+> - Optimize the code logic and separate code for regulator vmmc and vqmmc
+> - Rebase on tag: next-20241217
 
-Well. If you write that you will fix the format, may I ask, how or what
-do you plan to fix?
+10 days old branch
 
+> - Link to v2: https://lore.kernel.org/all/20241127095029.3918290-1-quic_yuanjiey@quicinc.com/
 > 
-> > 
-> > > ---
-> > >   drivers/mmc/host/sdhci-msm.c | 372 +++++++++++++++++++++++++++++++++--
-> > >   1 file changed, 353 insertions(+), 19 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> > > index 2a5e588779fc..4ecb362f7f2a 100644
-> > > --- a/drivers/mmc/host/sdhci-msm.c
-> > > +++ b/drivers/mmc/host/sdhci-msm.c
-> > > @@ -28,6 +28,7 @@
-> > >   #define CORE_VERSION_MAJOR_SHIFT	28
-> > >   #define CORE_VERSION_MAJOR_MASK		(0xf << CORE_VERSION_MAJOR_SHIFT)
-> > >   #define CORE_VERSION_MINOR_MASK		0xff
-> > > +#define SDHCI_MSM_MIN_V_7FF		0x6e
-> > >   #define CORE_MCI_GENERICS		0x70
-> > >   #define SWITCHABLE_SIGNALING_VOLTAGE	BIT(29)
-> > > @@ -118,7 +119,8 @@
-> > >   #define CORE_PWRSAVE_DLL	BIT(3)
-> > >   #define DDR_CONFIG_POR_VAL	0x80040873
-> > > -
-> > > +#define DLL_CONFIG_3_POR_VAL	0x10
-> > > +#define TCXO_FREQ               19200000
-> > 
-> > What about the platforms where TCXO has different frequency?
-> > 
+> Changes in v2:
+> - Add enum msm_reg_type to optimize the code
+> - Delete redundant emmc type judgment
+> - Link to v1: https://lore.kernel.org/linux-arm-msm/20241122075048.2006894-1-quic_yuanjiey@quicinc.com/
 > 
-> All emmc targets have 192 Mhz as TCXO freq.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 64 ++++++++++++++++++++++++++++++++++--
+>  1 file changed, 62 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e00208535bd1..22811964ba61 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -134,9 +134,18 @@
+>  /* Timeout value to avoid infinite waiting for pwr_irq */
+>  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>  
+> +/* Max load for eMMC Vdd supply */
+> +#define MMC_VMMC_MAX_LOAD_UA	570000
+> +
+>  /* Max load for eMMC Vdd-io supply */
+>  #define MMC_VQMMC_MAX_LOAD_UA	325000
+>  
+> +/* Max load for SD Vdd supply */
+> +#define SD_VMMC_MAX_LOAD_UA	800000
+> +
+> +/* Max load for SD Vdd-io supply */
+> +#define SD_VQMMC_MAX_LOAD_UA	22000
+> +
+>  #define msm_host_readl(msm_host, host, offset) \
+>  	msm_host->var_ops->msm_readl_relaxed(host, offset)
+>  
+> @@ -1403,11 +1412,59 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+>  	return ret;
+>  }
+>  
+> -static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+> +static void msm_config_vmmc_regulator(struct mmc_host *mmc, bool hpm)
+> +{
+> +	int load;
+> +
+> +	if (!mmc->card) {
+> +		regulator_set_mode(mmc->supply.vmmc,
+> +				   hpm ? REGULATOR_MODE_NORMAL : REGULATOR_MODE_IDLE);
 
-So, it's not a TCXO freq, but some other base freq?
+Can there be other users of the regulator or is it an exclusive one?
+Because if there can be other users, you could have pulled the power
+from them.
 
-> 
-> > >   #define INVALID_TUNING_PHASE	-1
-> > >   #define SDHCI_MSM_MIN_CLOCK	400000
-> > > @@ -256,6 +258,19 @@ struct sdhci_msm_variant_info {
-> > >   	const struct sdhci_msm_offset *offset;
-> > >   };
-> > > +/*
-> > > + * DLL registers which needs be programmed with HSR settings.
-> > > + * Add any new register only at the end and don't change the
-> > > + * sequence.
-> > 
-> > Why?
-> 
-> I will update the comment message in next patchset.
+> +		return;
+> +	}
+> +
+> +	if (!mmc_card_mmc(mmc->card) &&
+> +	    !mmc_card_sd(mmc->card))
+> +		return;
+> +
+> +	if (mmc_card_mmc(mmc->card))
+> +		load = MMC_VMMC_MAX_LOAD_UA;
+> +	else if (mmc_card_sd(mmc->card))
+> +		load =  SD_VMMC_MAX_LOAD_UA;
 
-Well, you can respond to a question first. And once something is settled
-you can get that to the commit message. It might save some round-trip
-time.
+if (mmc_card_mmc(mmc->card) ||
+    mmc_card_sd(mmc->card))
 
-> 
-> > 
-> > > + */
-> > > +struct sdhci_msm_dll {
-> > > +	u32 dll_config[2];
-> > > +	u32 dll_config_2[2];
-> > > +	u32 dll_config_3[2];
-> > > +	u32 dll_usr_ctl[2];
-> > > +	u32 ddr_config[2];
-> > > +};
-> > > +
-> > >   struct sdhci_msm_host {
-> > >   	struct platform_device *pdev;
-> > >   	void __iomem *core_mem;	/* MSM SDCC mapped address */
-> > > @@ -264,6 +279,7 @@ struct sdhci_msm_host {
-> > >   	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
-> > >   	/* core, iface, cal and sleep clocks */
-> > >   	struct clk_bulk_data bulk_clks[4];
-> > > +	struct sdhci_msm_dll dll;
-> > >   #ifdef CONFIG_MMC_CRYPTO
-> > >   	struct qcom_ice *ice;
-> > >   #endif
-> > > @@ -292,6 +308,17 @@ struct sdhci_msm_host {
-> > >   	u32 dll_config;
-> > >   	u32 ddr_config;
-> > >   	bool vqmmc_enabled;
-> > > +	bool artanis_dll;
-> > > +};
-> > > +
-> > > +enum dll_init_context {
-> > > +	DLL_INIT_NORMAL,
-> > > +	DLL_INIT_FROM_CX_COLLAPSE_EXIT,
-> > > +};
-> > > +
-> > > +enum mode {
-> > > +	HS400, // equivalent to SDR104 mode for DLL.
-> > > +	HS200, // equivalent to SDR50 mode for DLL.
-> > >   };
-> > >   static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> > > @@ -778,6 +805,210 @@ static int msm_init_cm_dll(struct sdhci_host *host)
-> > >   	return 0;
-> > >   }
-> > > +static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-> > > +{
-> > > +	return SDHCI_MSM_MIN_CLOCK;
-> > > +}
-> > 
-> > Why??? Why do you need a function to return a static value?
-> > 
-> 
-> This is just rearrangement of the function. This function already exist,
-> moving here to avoid predeclaration.
-
-Okay. 
-
-> > > +
-> > > +static unsigned int sdhci_msm_get_clk_rate(struct sdhci_host *host, u32 req_clk)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +	struct clk *core_clk = msm_host->bulk_clks[0].clk;
-> > > +	unsigned int sup_clk;
-> > > +
-> > > +	if (req_clk < sdhci_msm_get_min_clock(host))
-> > > +		return sdhci_msm_get_min_clock(host);
-> > > +
-> > > +	sup_clk = clk_round_rate(core_clk, clk_get_rate(core_clk));
-> > > +
-> > > +	if (host->clock != msm_host->clk_rate)
-> > > +		sup_clk = sup_clk / 2;
-> > > +
-> > > +	return sup_clk;
-> > 
-> > Why?
-> 
-> Sorry, I did not understand your question. Can you please explain in detail.
-
-Please explain the maths. You get the rate from the clock, then you
-round it, but it is the rate that has just been returned, so there
-should be no need to round it. And after that there a division by two
-for some reason. So I've asked for an explanation for that code.
-
-> 
-> > 
-> > > +}
-> > > +
-> > > +/* Initialize the DLL (Programmable Delay Line) */
-> > > +static int sdhci_msm_configure_dll(struct sdhci_host *host, enum dll_init_context
-> > > +				 init_context, enum mode index)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-> > > +	struct mmc_host *mmc = host->mmc;
-> > > +	u32 ddr_cfg_offset, core_vendor_spec, config;
-> > > +	void __iomem *ioaddr = host->ioaddr;
-> > > +	unsigned long flags, dll_clock;
-> > > +	int rc = 0, wait_cnt = 50;
-> > > +
-> > > +	dll_clock = sdhci_msm_get_clk_rate(host, host->clock);
-> > > +	spin_lock_irqsave(&host->lock, flags);
-> > > +
-> > > +	core_vendor_spec = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-> > > +
-> > > +	/*
-> > > +	 * Always disable PWRSAVE during the DLL power
-> > > +	 * up regardless of its current setting.
-> > > +	 */
-> > > +	core_vendor_spec &= ~CORE_CLK_PWRSAVE;
-> > > +	writel_relaxed(core_vendor_spec, ioaddr + msm_offset->core_vendor_spec);
-> > > +
-> > > +	if (msm_host->use_14lpp_dll_reset) {
-> > > +		/* Disable CK_OUT */
-> > > +		config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-> > > +		config &= ~CORE_CK_OUT_EN;
-> > > +		writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +		/* Disable the DLL clock */
-> > > +		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-> > > +		config |= CORE_DLL_CLOCK_DISABLE;
-> > > +		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-> > > +	}
-> > > +
-> > > +	/*
-> > > +	 * Write 1 to DLL_RST bit of DLL_CONFIG register
-> > > +	 * and Write 1 to DLL_PDN bit of DLL_CONFIG register.
-> > > +	 */
-> > > +	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-> > > +	config |= (CORE_DLL_RST | CORE_DLL_PDN);
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/*
-> > > +	 * Configure DLL_CONFIG_3 and USER_CTRL
-> > > +	 * (Only applicable for 7FF projects).
-> > > +	 */
-> > > +	if (msm_host->core_minor >= SDHCI_MSM_MIN_V_7FF) {
-> > > +		writel_relaxed(msm_host->dll.dll_config_3[index],
-> > > +				ioaddr + msm_offset->core_dll_config_3);
-> > > +		writel_relaxed(msm_host->dll.dll_usr_ctl[index],
-> > > +				ioaddr + msm_offset->core_dll_usr_ctl);
-> > > +	}
-> > > +
-> > > +	/*
-> > > +	 * Set DDR_CONFIG since step 7 is setting TEST_CTRL that can be skipped.
-> > > +	 */
-> > > +	ddr_cfg_offset = msm_host->updated_ddr_cfg ? msm_offset->core_ddr_config
-> > > +					: msm_offset->core_ddr_config_old;
-> > > +
-> > > +	config = msm_host->dll.ddr_config[index];
-> > > +	writel_relaxed(config, ioaddr + ddr_cfg_offset);
-> > > +
-> > > +	/* Set DLL_CONFIG_2 */
-> > > +	if (msm_host->use_14lpp_dll_reset) {
-> > > +		u32 mclk_freq;
-> > > +		int cycle_cnt;
-> > > +
-> > > +		/*
-> > > +		 * Only configure the mclk_freq in normal DLL init
-> > > +		 * context. If the DLL init is coming from
-> > > +		 * CX Collapse Exit context, the host->clock may be zero.
-> > > +		 * The DLL_CONFIG_2 register has already been restored to
-> > > +		 * proper value prior to getting here.
-> > > +		 */
-> > > +		if (init_context == DLL_INIT_NORMAL) {
-> > > +			cycle_cnt = readl_relaxed(ioaddr +
-> > > +					msm_offset->core_dll_config_2)
-> > > +					& CORE_FLL_CYCLE_CNT ? 8 : 4;
-> > > +
-> > > +			mclk_freq = DIV_ROUND_CLOSEST_ULL(dll_clock * cycle_cnt, TCXO_FREQ);
-> > > +
-> > > +			if (dll_clock < 100000000) {
-> > > +				pr_err("%s: %s: Non standard clk freq =%u\n",
-> > > +				mmc_hostname(mmc), __func__, dll_clock);
-> > > +				rc = -EINVAL;
-> > > +				goto out;
-> > > +			}
-> > > +
-> > > +			config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-> > > +			config = (config & ~(0xFF << 10)) | (mclk_freq << 10);
-> > 
-> > GENMASK, FIELD_PREP?
-> 
-> Sure I will use the suggested macros.
-> 
-> > 
-> > > +			writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-> > > +		}
-> > > +		/* wait for 5us before enabling DLL clock */
-> > > +		udelay(5);
-> > > +	}
-> > > +
-> > > +	/*
-> > > +	 * Update the lower two bytes of DLL_CONFIG only with
-> > > +	 * HSR values. Since these are the static settings.
-> > > +	 */
-> > > +	config = (readl_relaxed(ioaddr + msm_offset->core_dll_config));
-> > > +	config |= (msm_host->dll.dll_config[index] & 0xffff);
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/* Wait for 52us */
-> > > +	spin_unlock_irqrestore(&host->lock, flags);
-> > > +	udelay(60);
-> > > +	spin_lock_irqsave(&host->lock, flags);
-> > > +
-> > > +	/*
-> > > +	 * Write 0 to DLL_RST bit of DLL_CONFIG register
-> > > +	 * and Write 0 to DLL_PDN bit of DLL_CONFIG register.
-> > > +	 */
-> > > +	config &= ~CORE_DLL_RST;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	config &= ~CORE_DLL_PDN;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
-> > > +	config |= CORE_DLL_RST;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
-> > > +	config &= ~CORE_DLL_RST;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/* Set CORE_DLL_CLOCK_DISABLE to 0 */
-> > > +	if (msm_host->use_14lpp_dll_reset) {
-> > > +		config = readl_relaxed(ioaddr + msm_offset->core_dll_config_2);
-> > > +		config &= ~CORE_DLL_CLOCK_DISABLE;
-> > > +		writel_relaxed(config, ioaddr + msm_offset->core_dll_config_2);
-> > > +	}
-> > > +
-> > > +	/* Set DLL_EN bit to 1. */
-> > > +	config = readl_relaxed(ioaddr + msm_offset->core_dll_config);
-> > > +	config |= CORE_DLL_EN;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/*
-> > > +	 * Wait for 8000 input clock. Here we calculate the
-> > > +	 * delay from fixed clock freq 192MHz, which turns out 42us.
-> > > +	 */
-> > > +	spin_unlock_irqrestore(&host->lock, flags);
-> > > +	udelay(50);
-> > > +	spin_lock_irqsave(&host->lock, flags);
-> > > +
-> > > +	/* Set CK_OUT_EN bit to 1. */
-> > > +	config |= CORE_CK_OUT_EN;
-> > > +	writel_relaxed(config, ioaddr + msm_offset->core_dll_config);
-> > > +
-> > > +	/*
-> > > +	 * Wait until DLL_LOCK bit of DLL_STATUS register
-> > > +	 * becomes '1'.
-> > > +	 */
-> > > +	while (!(readl_relaxed(ioaddr + msm_offset->core_dll_status) &
-> > > +		 CORE_DLL_LOCK)) {
-> > > +		/* max. wait for 50us sec for LOCK bit to be set */
-> > > +		if (--wait_cnt == 0) {
-> > > +			dev_err(mmc_dev(mmc), "%s: DLL failed to LOCK\n",
-> > > +			       mmc_hostname(mmc));
-> > > +			rc = -ETIMEDOUT;
-> > > +			goto out;
-> > > +		}
-> > > +		/* wait for 1us before polling again */
-> > > +		udelay(1);
-> > > +	}
-> > > +
-> > > +out:
-> > > +	if (core_vendor_spec & CORE_CLK_PWRSAVE) {
-> > > +		/* Reenable PWRSAVE as needed */
-> > > +		config = readl_relaxed(ioaddr + msm_offset->core_vendor_spec);
-> > > +		config |= CORE_CLK_PWRSAVE;
-> > > +		writel_relaxed(config, ioaddr + msm_offset->core_vendor_spec);
-> > > +	}
-> > > +	spin_unlock_irqrestore(&host->lock, flags);
-> > > +	return rc;
-> > > +}
-> > > +
-> > >   static void msm_hc_select_default(struct sdhci_host *host)
-> > >   {
-> > >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > @@ -900,14 +1131,35 @@ static void sdhci_msm_hc_select_mode(struct sdhci_host *host)
-> > >   		msm_hc_select_default(host);
-> > >   }
-> > > +static int sdhci_msm_init_dll(struct sdhci_host *host, enum dll_init_context init_context)
-> > > +{
-> > > +	unsigned char timing = host->mmc->ios.timing;
-> > > +	int ret;
-> > > +
-> > > +	if (timing == MMC_TIMING_UHS_SDR104 || timing == MMC_TIMING_MMC_HS400)
-> > > +		ret = sdhci_msm_configure_dll(host, DLL_INIT_NORMAL, HS400);
-> > > +	else
-> > > +		ret = sdhci_msm_configure_dll(host, DLL_INIT_NORMAL, HS200);
-> > > +
-> > > +	return ret;
-> > > +}
-> > > +
-> > > +static int sdhci_msm_dll_config(struct sdhci_host *host, enum dll_init_context init_context)
-> > > +{
-> > > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > > +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +
-> > > +	return msm_host->artanis_dll ? sdhci_msm_init_dll(host, init_context) :
-> > > +		msm_init_cm_dll(host);
-> > > +}
-> > > +
-> > >   static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
-> > >   {
-> > >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > >   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-> > >   	u32 config, calib_done;
-> > >   	int ret;
-> > > -	const struct sdhci_msm_offset *msm_offset =
-> > > -					msm_host->offset;
-> > >   	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
-> > > @@ -915,7 +1167,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
-> > >   	 * Retuning in HS400 (DDR mode) will fail, just reset the
-> > >   	 * tuning block and restore the saved tuning phase.
-> > >   	 */
-> > > -	ret = msm_init_cm_dll(host);
-> > > +	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-> > >   	if (ret)
-> > >   		goto out;
-> > > @@ -1003,7 +1255,7 @@ static int sdhci_msm_cdclp533_calibration(struct sdhci_host *host)
-> > >   	return ret;
-> > >   }
-> > > -static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
-> > > +static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host, enum mode index)
-> > >   {
-> > >   	struct mmc_host *mmc = host->mmc;
-> > >   	u32 dll_status, config, ddr_cfg_offset;
-> > > @@ -1014,7 +1266,6 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
-> > >   					sdhci_priv_msm_offset(host);
-> > >   	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
-> > > -
-> > 
-> > Unrelated, please drop.
-> 
-> I will fix it in next patchset.
-> 
-> > 
-> > >   	/*
-> > >   	 * Currently the core_ddr_config register defaults to desired
-> > >   	 * configuration on reset. Currently reprogramming the power on
-> > > @@ -1026,7 +1277,11 @@ static int sdhci_msm_cm_dll_sdc4_calibration(struct sdhci_host *host)
-> > >   		ddr_cfg_offset = msm_offset->core_ddr_config;
-> > >   	else
-> > >   		ddr_cfg_offset = msm_offset->core_ddr_config_old;
-> > > -	writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
-> > > +
-> > > +	if (msm_host->artanis_dll)
-> > > +		writel_relaxed(msm_host->dll.ddr_config[index], host->ioaddr + ddr_cfg_offset);
-> > > +	else
-> > > +		writel_relaxed(msm_host->ddr_config, host->ioaddr + ddr_cfg_offset);
-> > >   	if (mmc->ios.enhanced_strobe) {
-> > >   		config = readl_relaxed(host->ioaddr +
-> > > @@ -1083,11 +1338,10 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
-> > >   {
-> > >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > >   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> > > +	const struct sdhci_msm_offset *msm_offset = msm_host->offset;
-> > >   	struct mmc_host *mmc = host->mmc;
-> > > -	int ret;
-> > >   	u32 config;
-> > > -	const struct sdhci_msm_offset *msm_offset =
-> > > -					msm_host->offset;
-> > > +	int ret;
-> > >   	pr_debug("%s: %s: Enter\n", mmc_hostname(host->mmc), __func__);
-> > > @@ -1095,7 +1349,8 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
-> > >   	 * Retuning in HS400 (DDR mode) will fail, just reset the
-> > >   	 * tuning block and restore the saved tuning phase.
-> > >   	 */
-> > > -	ret = msm_init_cm_dll(host);
-> > > +	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-> > > +
-> > >   	if (ret)
-> > >   		goto out;
-> > > @@ -1115,7 +1370,7 @@ static int sdhci_msm_hs400_dll_calibration(struct sdhci_host *host)
-> > >   	if (msm_host->use_cdclp533)
-> > >   		ret = sdhci_msm_cdclp533_calibration(host);
-> > >   	else
-> > > -		ret = sdhci_msm_cm_dll_sdc4_calibration(host);
-> > > +		ret = sdhci_msm_cm_dll_sdc4_calibration(host, HS400);
-> > >   out:
-> > >   	pr_debug("%s: %s: Exit, ret %d\n", mmc_hostname(host->mmc),
-> > >   		 __func__, ret);
-> > > @@ -1154,7 +1409,8 @@ static int sdhci_msm_restore_sdr_dll_config(struct sdhci_host *host)
-> > >   		return 0;
-> > >   	/* Reset the tuning block */
-> > > -	ret = msm_init_cm_dll(host);
-> > > +	ret = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-> > > +
-> > >   	if (ret)
-> > >   		return ret;
-> > > @@ -1223,7 +1479,7 @@ static int sdhci_msm_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> > >   retry:
-> > >   	/* First of all reset the tuning block */
-> > > -	rc = msm_init_cm_dll(host);
-> > > +	rc = sdhci_msm_dll_config(host, DLL_INIT_NORMAL);
-> > >   	if (rc)
-> > >   		return rc;
-> > > @@ -1752,11 +2008,6 @@ static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
-> > >   	return clk_round_rate(core_clk, ULONG_MAX);
-> > >   }
-> > > -static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-> > > -{
-> > > -	return SDHCI_MSM_MIN_CLOCK;
-> > > -}
-> > > -
-> > >   /*
-> > >    * __sdhci_msm_set_clock - sdhci_msm clock control.
-> > >    *
-> > > @@ -2400,6 +2651,86 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
-> > >   	return ret;
-> > >   }
-> > > +static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
-> > > +					u32 **bw_vecs, int *len, u32 size)
-> > > +{
-> > > +	struct device_node *np = dev->of_node;
-> > > +	u32 *arr = NULL;
-> > > +	int ret = 0;
-> > > +	size_t sz;
-> > > +
-> > > +	if (!np) {
-> > > +		ret = -ENODEV;
-> > > +		goto out;
-> > > +	}
-> > > +	if (!of_get_property(np, prop_name, len)) {
-> > > +		ret = -EINVAL;
-> > > +		goto out;
-> > > +	}
-> > > +	sz = *len = *len / sizeof(*arr);
-> > 
-> > You obviously skipped checkpatch run. Please don't do that.
-> 
-> Before submitting the patchset I have already executed the checkpatch please
-> find the output.
-> 	 $ ./scripts/checkpatch.pl patch/*
-> 	-----------------------------
-> 	patch/0000-cover-letter.patch
-> 	-----------------------------
-> 	total: 0 errors, 0 warnings, 0 lines checked
-> 	
-> 	patch/0000-cover-letter.patch has no obvious style problems and is ready
-> for submission.
-> 	---------------------------------------------------------------------
-> 	patch/0001-mmc-sdhci-msm-Add-core_major-minor-to-msm_host-struc.patch
-> 	---------------------------------------------------------------------
-> 	total: 0 errors, 0 warnings, 18 lines checked
-> 	
-> 	patch/0001-mmc-sdhci-msm-Add-core_major-minor-to-msm_host-struc.patch has
-> no obvious style problems and is ready for submission.
-> 	---------------------------------------------------------------------
-> 	patch/0002-mmc-sdhci-msm-Rectify-DLL-programming-sequence-for-S.patch
-> 	---------------------------------------------------------------------
-> 	total: 0 errors, 0 warnings, 494 lines checked
-> 	
-> 	patch/0002-mmc-sdhci-msm-Rectify-DLL-programming-sequence-for-S.patch has
-> no obvious style problems and is ready for submission.
-
-Strangely enogh checkpatch.pl doesn't warn about this line, although it
-has the check for it:
-
-                if ($line =~ /^.\s*$Lval\s*=\s*$Lval\s*=(?!=)/) {
-                        CHK("MULTIPLE_ASSIGNMENTS",
-                            "multiple assignments should be avoided\n" . $herecurr);
-                }
-
-Running checkpatch.pl --strict will give you more things to fix though.
-
-And anyway, the API not so logical. You pass the size, then you return
-the number of elements through the len pointer. Please pass and return
-the same thing (e.g. pass the number of elements in the passed array,
-return the number of elements retrieved from DT).
-
-> 
-> > 
-> > > +	if (sz <= 0 || (size > 0 && (sz > size))) {
-> > > +		dev_err(dev, "%s invalid size\n", prop_name);
-> > > +		ret = -EINVAL;
-> > > +		goto out;
-> > > +	}
-> > > +
-> > > +	arr = devm_kzalloc(dev, sz * sizeof(*arr), GFP_KERNEL);
-> > > +	if (!arr) {
-> > > +		ret = -ENOMEM;
-> > > +		goto out;
-> > > +	}
-> > > +
-> > > +	ret = of_property_read_u32_array(np, prop_name, arr, sz);
-> > > +	if (ret < 0) {
-> > > +		dev_err(dev, "%s failed reading array %d\n", prop_name, ret);
-> > > +		goto out;
-> > > +	}
-> > > +	*bw_vecs = arr;
-> > > +out:
-> > > +	if (ret)
-> > > +		*len = 0;
-> > > +	return ret;
-> > > +}
-> > > +
-> > > +static int sdhci_msm_dt_parse_dll_info(struct device *dev, struct sdhci_msm_host *msm_host)
-> > > +{
-> > > +	int dll_table_len, dll_reg_count;
-> > > +	u32 *dll_table = NULL;
-> > > +	u32 dll_values[10];
-> > > +	int ret = 0, i;
-> > > +
-> > > +	if (sdhci_msm_dt_get_array(dev, "qcom,dll-hsr-list",
-> > > +		&dll_table, &dll_table_len, 0))
-> > > +		goto skip_dll;
-> > 
-> > Missing update for the bindings.
-> 
-> I will update in the next patchset.
-
-Please update your internal upstreaming site: bindings changes MUST
-always come before the corresponding driver changes. If it is already
-documented there, you probably have a demerit for not following the
-documented process.
-
-> 
-> > 
-> > > +
-> > > +	dll_reg_count = sizeof(struct sdhci_msm_dll) / sizeof(u32);
-> > > +
-> > > +	if (dll_table_len != dll_reg_count) {
-> > > +		dev_err(dev, "Number of HSR entries are not matching\n");
-> > > +		ret = -EINVAL;
-> > > +		goto skip_dll;
-> > > +	}
-> > > +
-> > > +	for (i = 0; i < 5; i++) {
-> > 
-> > Magic value 5, replace with ARRAY_SIZE
-> 
-> I will fix in next patchset.
-> 
-> > 
-> > > +		dll_values[2 * i] = dll_table[i];
-> > > +		dll_values[2 * i + 1] = dll_table[i + 5];
-> > > +	}
-> > > +
-> > > +	for (i = 0; i < 10; i++)
-> > > +		dll_table[i] = dll_values[i];
-> > 
-> > So three memory copies to rearrange the order of values? That sounds
-> > like a horrible solution.
-> 
-> I will fix in next patchset.
-> 
-> > 
-> > > +
-> > > +	memcpy(&msm_host->dll, dll_table, sizeof(struct sdhci_msm_dll));
-> > > +	msm_host->artanis_dll = true;
-> > > +
-> > > +skip_dll:
-> > > +	if (!dll_table) {
-> > > +		msm_host->artanis_dll = false;
-> > > +		dev_err(dev, "Failed to get dll hsr settings from dt\n");
-> > > +	}
-> > > +
-> > > +	return ret;
-> > > +}
-> > > +
-> > >   static int sdhci_msm_probe(struct platform_device *pdev)
-> > >   {
-> > >   	struct sdhci_host *host;
-> > > @@ -2446,6 +2777,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
-> > >   	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
-> > > +	if (sdhci_msm_dt_parse_dll_info(&pdev->dev, msm_host))
-> > > +		goto pltfm_free;
-> > > +
-> > >   	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
-> > >   	if (ret)
-> > >   		goto pltfm_free;
-> > > -- 
-> > > 2.17.1
-> > > 
-> > 
+> +	load = hpm ? load : 0;
+> +
+> +	regulator_set_load(mmc->supply.vmmc, load);
+> +
+> +	return;
+> +}
+> +
+> +static void msm_config_vqmmc_regulator(struct mmc_host *mmc, bool hpm)
+> +{
+> +	int load;
+> +
+> +	if (!mmc->card) {
+> +		regulator_set_mode(mmc->supply.vqmmc,
+> +				   hpm ? REGULATOR_MODE_NORMAL : REGULATOR_MODE_IDLE);
+> +		return;
+> +	}
+> +
+> +	if (!mmc_card_sd(mmc->card))
+> +		return;
+> +
+> +	load =  hpm ? SD_VQMMC_MAX_LOAD_UA : 0;
+> +
+> +	regulator_set_load(mmc->supply.vqmmc, load);
+> +
+> +	return;
+> +}
+> +
+> +static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
+> +			      struct mmc_host *mmc, bool hpm)
+>  {
+>  	if (IS_ERR(mmc->supply.vmmc))
+>  		return 0;
+>  
+> +	msm_config_vmmc_regulator(mmc, hpm);
+> +
+>  	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+>  }
+>  
+> @@ -1420,6 +1477,8 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+>  	if (msm_host->vqmmc_enabled == level)
+>  		return 0;
+>  
+> +	msm_config_vqmmc_regulator(mmc, level);
+> +
+>  	if (level) {
+>  		/* Set the IO voltage regulator to default voltage level */
+>  		if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+> @@ -1642,7 +1701,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  	}
+>  
+>  	if (pwr_state) {
+> -		ret = sdhci_msm_set_vmmc(mmc);
+> +		ret = sdhci_msm_set_vmmc(msm_host, mmc,
+> +					 pwr_state & REQ_BUS_ON);
+>  		if (!ret)
+>  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+>  					pwr_state & REQ_BUS_ON);
+> -- 
+> 2.34.1
 > 
 
 -- 
