@@ -1,91 +1,74 @@
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71EAF25948E;
-	Mon, 30 Dec 2024 08:46:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.197
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A80D1EEE6
+	for <linux-mmc@vger.kernel.org>; Tue, 31 Dec 2024 09:04:48 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735548419; cv=none; b=J1nrSb8VB+8qctcckUI0mYahzU/Es3+KW5yJTBBp2KAqvu7Dr9dTG378ZSzFFiz56nz6849lSfREOmmuRZeodq7yzVQt5jk6gOS9uO0r97fOF/alKzu04ZFStzInVnZjAtbfkq/qnjpoMaRIbHXT8i1Q8wmhRw8UMUlWh3Ct6Ig=
+	t=1735635889; cv=none; b=tQemAeT42M6KWABZB1F0LVPsnAJG9bIEYyWSe/tKx8UmdC2VpWTfO+h6RQfu8gBCgiLYgTstpGBPDpZ81tLUSZbmYOWwN0ZhrGn/u16VnWYS0klxSn0AFuVOvY0hKoDfxFBTSTiajw16jh1QwEkNLdcoEWC4BjX8LTN4olGHxtg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735548419; c=relaxed/simple;
-	bh=5qCsLO7/DPq0fAwnmdxvog17EUVkdcDvufsuKKDDU44=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=HUPVlPdka+b6H/G8tTctmNiBKt3PnVbB6I7nIkOkN0pmStxYssDthEMyWSSw90YQClHTDnVfZWFCWknnSB02bE2jxj6rUfB2dh6U+97lcWWNndVkjkxkG/PFF4DM449V2D1THsAVWGXrUi2FVs47rpKd12x62gx7h/6xEI6z9PI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=V2WVMabC; arc=none smtp.client-ip=217.70.183.197
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1735635889; c=relaxed/simple;
+	bh=+I5Cekh7nl5PjdpsvTTA+YVYPLd+/hqrqMJETUChOe4=;
+	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
+	 References:Subject; b=MiPYxFtIYD7a+Gm/5pPrC2GuqOETX9d7dZMoFGGiKt3vZSry+f6h0xz1rjLFS3y5gw2vuq7ZB0S3a65E6b0qk0mW5Ic82JOiuBZdBsiRt92gnR4OtiuUmotza7Ws73hKdKxpO/m85wz77QsCpoJF3/F3zLyqZ/bAK5JcEpX9QVw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m2TseZ+q; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="V2WVMabC"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 1E2C11C0006;
-	Mon, 30 Dec 2024 08:46:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-	t=1735548414;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=5qCsLO7/DPq0fAwnmdxvog17EUVkdcDvufsuKKDDU44=;
-	b=V2WVMabCR3tv3DYkj8ceVupPJhyavl3qhgOPs/I9FnR1jKneit/XiPGS4Oc3CUJ4NxgIDa
-	pLsgJlKUNCJfA515f2cbXKr4alkKR+evB+Nhem5PI6cI4VnnEOcC/HAK8JCJ1JdAfzJmTe
-	6dgsWTL9OpD5zUqe/8e95WW3QQ4Tp+4lMXZeQE2S90e4/GkcOWocy7y7wQ5JbxsZYJxu3k
-	9l1OiSjR1bbhRB8hcCLOCEgC5RZ0vKiojIFwD8vKUgqnyFwFYK6QTPAFa7ivLgOObUwIZw
-	2bJ9jpIfno95cevOBvtX5QOOsUSJQh9z8xuE9lsVYdYaV2AwFpnAnxqv/vl/Qg==
-From: Miquel Raynal <miquel.raynal@bootlin.com>
-To: Raphael Gallais-Pou <rgallaispou@gmail.com>
-Cc: Patrice Chotard <patrice.chotard@foss.st.com>,  Thinh Nguyen
- <Thinh.Nguyen@synopsys.com>,  Greg Kroah-Hartman
- <gregkh@linuxfoundation.org>,  Adrian Hunter <adrian.hunter@intel.com>,
-  Ulf Hansson <ulf.hansson@linaro.org>,  Richard Weinberger
- <richard@nod.at>,  Vignesh Raghavendra <vigneshr@ti.com>,  Damien Le Moal
- <dlemoal@kernel.org>,  Niklas Cassel <cassel@kernel.org>,  Alexandre
- Torgue <alexandre.torgue@foss.st.com>,  Jose Abreu <joabreu@synopsys.com>,
-  Andrew Lunn <andrew+netdev@lunn.ch>,  "David S. Miller"
- <davem@davemloft.net>,  Eric Dumazet <edumazet@google.com>,  Jakub
- Kicinski <kuba@kernel.org>,  Paolo Abeni <pabeni@redhat.com>,  Maxime
- Coquelin <mcoquelin.stm32@gmail.com>,  Mark Brown <broonie@kernel.org>,
-  linux-arm-kernel@lists.infradead.org,  linux-usb@vger.kernel.org,
-  linux-kernel@vger.kernel.org,  linux-mmc@vger.kernel.org,
-  linux-mtd@lists.infradead.org,  linux-ide@vger.kernel.org,
-  netdev@vger.kernel.org,  linux-stm32@st-md-mailman.stormreply.com,
-  linux-spi@vger.kernel.org
-Subject: Re: [PATCH 3/6] mtd: st_spi_fsm: Switch from CONFIG_PM_SLEEP guards
- to pm_sleep_ptr()
-In-Reply-To: <20241229-update_pm_macro-v1-3-c7d4c4856336@gmail.com> (Raphael
-	Gallais-Pou's message of "Sun, 29 Dec 2024 00:32:42 +0100")
-References: <20241229-update_pm_macro-v1-0-c7d4c4856336@gmail.com>
-	<20241229-update_pm_macro-v1-3-c7d4c4856336@gmail.com>
-User-Agent: mu4e 1.12.7; emacs 29.4
-Date: Mon, 30 Dec 2024 09:46:52 +0100
-Message-ID: <877c7ha77n.fsf@bootlin.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m2TseZ+q"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1FE2C4CED6;
+	Tue, 31 Dec 2024 09:04:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1735635888;
+	bh=+I5Cekh7nl5PjdpsvTTA+YVYPLd+/hqrqMJETUChOe4=;
+	h=From:Date:To:In-Reply-To:References:Subject:From;
+	b=m2TseZ+qY+xEiamBwQnEGzBR2oR5lVuxWCkATka5XPAVzXzjV8Hn9Icg9D30a/g54
+	 0UIHUnSsQYVNSGx1FsSCfU+VyXjxPVi0UjEraUrUPo2RtsJ+sjNKhBmHIzi45jiWLq
+	 dtrDtBYBX+GE6RlJhbPhU5jTI7zkcS0/QPXh2ywTxjP80xpfzyINyQFTVyk4VFhnVM
+	 QbsMXGR0I4AnZjna7TDykN/xr5pbAlnELMasgI7Q4is4P9Z7UBrWeLsM7iRWp3jhk+
+	 RsIkCOF45YaPjE4I2hsJUzK1fOswhSdsbq/zDa0nERfjbcvMi8x2jKPNvHpL8+ZOo3
+	 dlyJtZOcnmVlg==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id B3D1D380A964;
+	Tue, 31 Dec 2024 09:05:09 +0000 (UTC)
+From: Thomas Haschka via Bugspray Bot <bugbot@kernel.org>
+Date: Tue, 31 Dec 2024 09:05:13 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-GND-Sasl: miquel.raynal@bootlin.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, ricky_wu@realtek.com
+Message-ID: <20241231-b218821c9-029118b1d990@bugzilla.kernel.org>
+In-Reply-To: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
+References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
+Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
+ Microsoft Surface Go 2
+X-Bugzilla-Product: Drivers
+X-Bugzilla-Component: MMC/SD
+X-Mailer: bugspray 0.1-dev
 
-Hello Raphael,
+Thomas Haschka writes via Kernel.org Bugzilla:
 
-On 29/12/2024 at 00:32:42 +01, Raphael Gallais-Pou <rgallaispou@gmail.com> =
-wrote:
+I tried to revert the commit that you pointed out by applying the following patch on 6.12.5. 
 
-> Letting the compiler remove these functions when the kernel is built
-> without CONFIG_PM_SLEEP support is simpler and less error prone than the
-> use of #ifdef based kernel configuration guards.
+The card in question so still fails with error -95. 
 
-If that does not lead to any warning, I'm fine. However this kind of
-change is better received subsystem-wide than platform-wide, if you ever
-wish to go this route.
+For the moment I am stuck at 6.5.5. 
 
-> Link: https://lore.kernel.org/all/20240716180010.126987-1-rgallaispou@gma=
-il.com
+Thanks for helping out so far, but commit 
+0e4cac557531 misc: rtsx: Fix some platforms can not boot and move the
+l1ss judgment to probe
 
-This link however seems irrelevant.
+does not seem to be the root of the problem. 
 
-> Signed-off-by: Raphael Gallais-Pou <rgallaispou@gmail.com>
+All the best, 
+Thomas
 
-Thanks,
-Miqu=C3=A8l
+View: https://bugzilla.kernel.org/show_bug.cgi?id=218821#c9
+You can reply to this message to join the discussion.
+-- 
+Deet-doot-dot, I am a bot.
+Kernel.org Bugzilla (bugspray 0.1-dev)
+
