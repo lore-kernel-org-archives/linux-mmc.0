@@ -1,88 +1,81 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id EFD154431
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Jan 2025 12:49:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52CD14315E;
+	Thu,  2 Jan 2025 18:38:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735822173; cv=none; b=KQ0CExVDMysaeGmNrIzCLOw5cFjKmdtiul0qTVBYtm/43egcj/fLCMZ2zXWyztD+RF1GnQqfy20HJT5uRJwLO0LaMZr/OilAqbmkMdy+6eSVM25bqIbX0loJAvnLCQHPlPFj+LwwI/9wd/CVg6X6xwrgchohaXrDu/u30Df1wg8=
+	t=1735843101; cv=none; b=k4z8pz03Z0gOyx8FjwP9G/w79Mj7IgVS85f5a+Hq/T3go892CcPHd8CkrN43QAOt+llO11HVCPJyr2W0OGmglvK1/2MAM3972bVRsOwQvTX68akPj3Dp9vdzS4OCDiValENZ9fBydnUIUpR40SryrrVL0rhrC+PfGhFDGPXkC7A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735822173; c=relaxed/simple;
-	bh=UUYkoAmU6dLDhGR30yetWeVORSdo9VhQcDcLe0LE4RE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=IeYrQnlwSiGvsnEMfGimzZSm1z2tZ03nti2LaJRo2r30Muacmxb+BWz7nvd/SYYNdoA8yO3JaTPzwjsQT3gOd5WCTmk2aAufokIORup3l2T91O7FHUDY3+F7939yfkLLDA1lTmCOAeRlBD/8HQHkMNfJBsFgEuPLEgc1b5wELAc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 591CF11FB;
-	Thu,  2 Jan 2025 04:49:58 -0800 (PST)
-Received: from [10.1.34.17] (e127648.arm.com [10.1.34.17])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 598313F673;
-	Thu,  2 Jan 2025 04:49:29 -0800 (PST)
-Message-ID: <191d74ae-aefb-42fa-b96e-1904bfc4b329@arm.com>
-Date: Thu, 2 Jan 2025 12:49:27 +0000
+	s=arc-20240116; t=1735843101; c=relaxed/simple;
+	bh=nSBmEv7YrbcW+nsh4X7lXEP5ZHbxAIY85GquQsl40SM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KZ++5w6L6ljHwKyw5LnVm7GHwdx0YPdZ36l+5RBG5J/OT3CkOYFsaZxvCtd4OdNcLkgDXVxtBI7chipLCqaJNvhkUKZzk8E44MMpTVz8yEuEn4ALj1EOnayx0nGPU8djW81pJ3Ulzlu18ltvEwcvfnzaXsJU63LcG8j8dv5TYYw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=U5+1bRN4; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="U5+1bRN4"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66970C4CED6;
+	Thu,  2 Jan 2025 18:38:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1735843098;
+	bh=nSBmEv7YrbcW+nsh4X7lXEP5ZHbxAIY85GquQsl40SM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=U5+1bRN4nWutfGWtzVLQNdbz974nrdqTj/qm8FeBVioGjPfKZc5QxgpezcPtHDzck
+	 lliFu0642K7auEyqV1lxeJzGCU/1iPFZMnxCZ9gqCIAwaEOAqN0+zeBH6tv+65ZyN/
+	 18IqQQT2lVll+15WAitljEyBeg7Xs/7PgNRNIy6H2mwzpvXUOMZ2+cS1nsWENxKd6w
+	 wyEpEqJ9H0vT6WEF8iIAWKPV69R3J4pK7jUZein/f+l3uvdIN+R+W5IhedJEaaCzBK
+	 U/Od7qY1+rYZUtZseZ8G6WTwpv2cnEIHl3n9/T2A52cAPyqveArSfPLliznUM6DrOc
+	 ia/cxp03yJlmw==
+Date: Thu, 2 Jan 2025 18:38:16 +0000
+From: Eric Biggers <ebiggers@kernel.org>
+To: "Martin K. Petersen" <martin.petersen@oracle.com>,
+	Bjorn Andersson <andersson@kernel.org>
+Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org, Bartosz Golaszewski <brgl@bgdev.pl>,
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Avri Altman <avri.altman@wdc.com>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
+	Jens Axboe <axboe@kernel.dk>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v10 00/15] Support for hardware-wrapped inline encryption
+ keys
+Message-ID: <20250102183816.GC49952@google.com>
+References: <20241213041958.202565-1-ebiggers@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [eMMC] - Partition on eMMC boot block device is not visible
- anymore in kernel v6.1.53 and above
-To: "Torrelli, Maxime" <Maxime.Torrelli@conduent.com>,
- "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "Bove, Frederic" <Frederic.Bove@conduent.com>
-References: <PAYP264MB3440EA9BD04E467466A0DAE495142@PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM>
-Content-Language: en-US
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <PAYP264MB3440EA9BD04E467466A0DAE495142@PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20241213041958.202565-1-ebiggers@kernel.org>
 
-On 1/2/25 08:07, Torrelli, Maxime wrote:
-> Hello dear MMC community,
+On Thu, Dec 12, 2024 at 08:19:43PM -0800, Eric Biggers wrote:
+> Maintainers, please consider merging the following preparatory patches for 6.14:
 > 
-> I hope my request does not break any rule regarding this mailing list and its use. If it does, please let me know how to proceed.
+>   - UFS / SCSI tree: patches 1-4
+>   - MMC tree: patches 5-7
+>   - Qualcomm / MSM tree: patch 8
 
-It doesn't.
+Happy new year everyone.
 
-> 
-> We recently tried to migrate from kernel v5.10 to v6.6. During this migration we discovered that a partition stored in an eMMC boot disk was not visible anymore from the system (i.e. /dev/mmcblk2boot0p1 does not exist).
-> 
-> Please find below the detailed list of block disks of the eMMC:
->     * brw-rw---- 1 root disk 179,  0 Oct 10 17:41 /dev/mmcblk2
->     * brw-rw---- 1 root disk 179,  8 Oct 10 17:40 /dev/mmcblk2boot0
->     * brw-rw---- 1 root disk 179, 16 Oct 10 17:40 /dev/mmcblk2boot1
->     * brw-rw---- 1 root disk 179, 24 Oct 10 17:40 /dev/mmcblk2gp0
->     * brw-rw---- 1 root disk 179, 25 Oct 10 17:41 /dev/mmcblk2gp0p1
->     * brw-rw---- 1 root disk 179, 32 Oct 10 17:40 /dev/mmcblk2gp1
->     * brw-rw---- 1 root disk 179, 33 Oct 10 17:41 /dev/mmcblk2gp1p1
->     * brw-rw---- 1 root disk 179,  1 Oct 10 17:41 /dev/mmcblk2p1
->     * brw-rw---- 1 root disk 179,  2 Oct 10 17:41 /dev/mmcblk2p2
->     * crw------- 1 root root 243,  0 Oct 10 17:41 /dev/mmcblk2rpmb
-> 
-> After analysis, we discovered the reason. When the version v6.1.53 was released, a change in file block/ioctl.c added the following lines to the function "blkpg_do_ioctl":
->       > + if (disk->flags & GENHD_FL_NO_PART)
->       > +      return -EINVAL;
-> This check was then moved to block/partitions/core.c when v6.1.76 was released. This change added the following lines in the function "bdev_add_partition" are :
->       > + if (disk->flags & GENHD_FL_NO_PART) {
->       > +      ret = -EINVAL;
->       > +      goto out;
->       > + }
+We are 1 of 3 so far, with Ulf having applied patches 5-7.
 
-Seems to only be consistent now with the definition of GENHD_FL_NO_PART. Your real issue is
-commit f5b4d71f72c5 ("mmc: card: Prevent partition scan for the eMMC boot areas")
+Martin, can you consider applying patches 1-4?
 
-> 
-> With kernel v5.10 the partition /dev/mmcblk2boot0p1 was not visible at boot but a simple call to "partx -a /dev/mmcblk2boot0" allowed us to access this partition. With kernel v6.1.53 and above, "partx -a /dev/mmcblk2boot0" fails and we cannot access the partition.
-> 
-> What is the reason for this change ?
-> 
-> Is there any rule forbidding to create a partition in an eMMC boot block disk ?
+Bjorn, can you consider applying patch 8?
 
-It was just deemed unlikely to be useful since most systems use eMMC boot partition
-feature very early in the boot process to read blobs essentially.
+Additional reviews or acks from anyone on any of the patches in this series
+would always be appreciated, of course.
 
-What does yours do?
+Thank you!
 
-If you know the offset the partition is at you can pass that to mount.
+- Eric
