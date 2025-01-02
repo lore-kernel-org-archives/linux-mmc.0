@@ -1,63 +1,114 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f44.google.com (mail-ed1-f44.google.com [209.85.208.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77CB917BB32;
-	Thu,  2 Jan 2025 18:46:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBF2A1C36;
+	Thu,  2 Jan 2025 20:59:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735843582; cv=none; b=hSvkEvm0IqBtVA7PYqhVWDrzgn2BACPUsiqOHbZbA4fC0wxPYx+aKaiDONkZGarow3/csWNxCickaOc2z7AVO4FKjIT4yxWbieQji1PMSBf25Ep5ErzqwOMQS9fLjy07MBjnFh97SIQ0BtBEdbjsHTNIkcC5afawD48iwSVG0Zg=
+	t=1735851542; cv=none; b=RA9GAB8Gv4coBPp9yp8w9dgOGKtY+BlBiyeEfTkEHkes9s89PWDRCjK7jNk4J5/pH+t8HlsFHBXX6GW8a6++IlAivjo8gvPEgUh3CyNHxwa/WxVGgUm62zyFnXSxM5ZxiiwRYlg4ngalpNzitSe6SDyJFWZIkhVmrG/vQU64bzk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735843582; c=relaxed/simple;
-	bh=/Sd/cU88+j19ifuJEz2A+pTId8QI65pd+3Q1cqya6Ow=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=gvNmeddwmnqwLyat8AehZDt8Wou5pBeu5wUspFbhVQJ2gMCO0MsBmwjzM4uxzJaYWLCrU76k3+pz+sqnWkyybZNTBJC9QEX5qlQ0JeyoJWufl3byv9bYGVPlSBIIszVqfwnsrmEQOpIUv5gyOzYASJ9txUcTctu+DvQLHqGjP6M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rlvIF2LZ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1735851542; c=relaxed/simple;
+	bh=+CgKeDYLj+HJKfNp7tUUpSjF2+oHQmSTpayCXyz9aLo=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=IcGM+GRu4JiiXSe+mtC9kxFVCjN+18eljA9LbOuWnkMyk12Yiy7soC9JtW65i+ALk1ZCtPm6iWlEUGff+yrNzg0H5Qonnwbfsq4BbMIfAdRXZ477sLyYot6YHT/jiBw0bg+Glsn7A7HHQt3m7XDYcZoy71Qgtu4Gl6kSf6Q2SSQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=KEk/R7Ui; arc=none smtp.client-ip=209.85.208.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rlvIF2LZ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3A6AC4CED0;
-	Thu,  2 Jan 2025 18:46:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1735843581;
-	bh=/Sd/cU88+j19ifuJEz2A+pTId8QI65pd+3Q1cqya6Ow=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=rlvIF2LZPkziJ7m2ftOMtTu1CUHA0V5e3albpUs7hpSkYO2cbBic60U8GNL/l4BCU
-	 Rs8OogHOKwfh0CMKTv0gzhd9NNEC16TUxngkwYlPeuOyCeK9BY0Oheazx8DJ9lijwn
-	 ij0nwUq+9PDj+w7cnTibEAmAS/j3kt/UobaqRfnL6H2WytlO09V6MfS6Q2rV+HGJfz
-	 ySWb/9OXv1K4GmfR/BAC/T6YJG6xdM42FgalWdJrDDt4Rmpj5pxY5kjjJtnnm+6ogt
-	 NxGas/99pWxMPERYo2hfV0HA7lwixWJJC2bIlB1mMlzd8ueF0cINQD+y/8KS3F7jxV
-	 we6YwIzVOArLQ==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 713C9380A964;
-	Thu,  2 Jan 2025 18:46:43 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.13-rc6
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20250102123712.49642-1-ulf.hansson@linaro.org>
-References: <20250102123712.49642-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20250102123712.49642-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.13-rc2-2
-X-PR-Tracked-Commit-Id: 8d90a86ed053226a297ce062f4d9f4f521e05c4c
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 8c2d370154bab85f7f6a7dbaa9ec11e052e042d3
-Message-Id: <173584360192.2004976.12330369779356877602.pr-tracker-bot@kernel.org>
-Date: Thu, 02 Jan 2025 18:46:41 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KEk/R7Ui"
+Received: by mail-ed1-f44.google.com with SMTP id 4fb4d7f45d1cf-5d3dce16a3dso20440293a12.1;
+        Thu, 02 Jan 2025 12:59:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1735851539; x=1736456339; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=0kWXWi44B3HrD5CUe09lNd7VBLNzzP0xqVwo/jsaRdY=;
+        b=KEk/R7Ui18lsygQa1hAB7OBZtfyEMFSKRUmXQQhlaTO+xtd9TyNBtqHlPO6+ucY2Qy
+         Q3DXB13qjNTP/P7TSNRAP0lK9NnGZ8HvwwsZmLszeQIbEBoRqeUR9D3uhH8enJx0O51o
+         FvGWJEhWrmv7EiMWdUiKofGOumGAmdokARi142sEpFJWXLjCOCRvCcF/D4Uv41rJCQ56
+         wS8T6db0p8WrzSlM3XRay8p3WqyYUB7g7pIbm+B4R+aChOZODZQuR9+xqoHyBwIfCQmy
+         ygsw/i3Am6GYo/xjWerb4rRf/XL2s4aJBypvC8RUFxqX7uGbPitpW7+txXTbhoJKVH14
+         TCiQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1735851539; x=1736456339;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=0kWXWi44B3HrD5CUe09lNd7VBLNzzP0xqVwo/jsaRdY=;
+        b=iNPapP8T5CUtcjhRdZB4/D+5b8VU9SCDpJKs8I/QdBKCz6Bxc8RL3WwrndhDe8hnjc
+         N/0IFAOzjlnsG+39Lp/f2M5TVXgVgqK0jW1DrJYqxoT9bvoGuDIVJmXN184xqDaB30V0
+         0mZaCpJBVn2Fy9cI8YgHZyMhtQwPIvO1p2HyLEHk6aG39gy9DmVZFyo5p2oUkSO5Psyg
+         AhrRJbkaFPvEarHuEAj6WaKXOp5FMa0H8HLXzimnCM11DEXRurReg6snMBobKhHFJbPI
+         NPPH0bo2HjBtuEpsmKcAonCFpa/YZI042l78Hq0dh2Y4gjMXDaW3wbe3vZZsUl7aI1Ep
+         0DAw==
+X-Forwarded-Encrypted: i=1; AJvYcCUeYEwE0vQFofyOWab0vbXKlrKxycfJNm3mL5x927SkpOiRjIdDDHteGnoYdNs+YjCMUBQALU+pzsig@vger.kernel.org, AJvYcCWQlS2PgjlPUCTL5p5j5wT6YuljKUuwWL6wI4stJFFM9Zu7gyca72CKzRpvN07hpp+G5HW4Ff3qF4DYXED/@vger.kernel.org, AJvYcCWzNUL4k+oQlr835cg5xsbTsMurTuB+BLNPLlb4FkSwYUWj+5zGVfMm8ZObOL/CqByTkpxJFQ0htnrQswYpx+a3R8w=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyTVEohgGYp+xczNVJU31zCx1WJKzxsBDwZXgK20PXBjb3Wv/rz
+	H4e4ul84Ib50xlTgUTNP1FUFHeLuJz30xEmKCtKvnNYyH01VFfJ5
+X-Gm-Gg: ASbGncsSEUqmsVJF1hsxOs3IW/glm+ON12uupoKNxl0NdOrn4Y4grbuMQyCY6h+P8v1
+	2mRG98UW5UCDSlNtW0ThU1OILo1eKFGK/+cxl+tTuqXu89lirOSS9DrZNI7DR2hjtgMhuvDBB1U
+	Iy6F0YHqOqYEXSmwikb7Ne4yQnx2Rp4GnbqMKHvrajKtuxRB9mdE6TBLMF+wCcZUis+Tp1IACdT
+	bfZnmJNe5olxd469t02JMdok7Xf3U0MKuDGLkVx5dhkBVI+QZw9VmPJPN6IVMh60C0NB5Zkl482
+	fAvdCXjTdGQ=
+X-Google-Smtp-Source: AGHT+IH1piG7mdo0z8tlBALc36OjUwXqC1PidNSuEDYBGYwirYC4nN4TmpY6pCEYB6gUtkCJFaDu0g==
+X-Received: by 2002:a05:6402:4010:b0:5d3:f617:a003 with SMTP id 4fb4d7f45d1cf-5d802388f09mr47523330a12.4.1735851539030;
+        Thu, 02 Jan 2025 12:58:59 -0800 (PST)
+Received: from ivaylo-T580.. (85-118-76-61.mtel.net. [85.118.76.61])
+        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-5d80676f397sm19231026a12.22.2025.01.02.12.58.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Jan 2025 12:58:58 -0800 (PST)
+From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-samsung-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v1 0/5] arm64: dts: exynos8895: define usi and mmc nodes
+Date: Thu,  2 Jan 2025 22:58:41 +0200
+Message-ID: <20250102205846.223955-1-ivo.ivanov.ivanov1@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 
-The pull request you sent on Thu,  2 Jan 2025 13:37:12 +0100:
+Hey folks,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.13-rc2-2
+This patch series adds the required syscons for controlling USI, as well
+as defines all USIv1 nodes for Exynos8895 and adds support for utilizing
+the external SD card storage in dreamlte. Due to PMIC not being supported
+yet, we'll assume that the regulators are pre-enabled by the previous
+bootloader for vqmmc. (in our case uniLoader).
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/8c2d370154bab85f7f6a7dbaa9ec11e052e042d3
+The patchset relies on [1]. I also expect the exynos mmc binding
+maintainer to pick the specific-compat patch.
 
-Thank you!
+Best regards,
+Ivaylo
+
+[1]: https://lore.kernel.org/all/20250102204015.222653-1-ivo.ivanov.ivanov1@gmail.com/
+
+Ivaylo Ivanov (5):
+  dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for
+    exynos8895
+  arm64: dts: exynos8895: add syscon nodes for peric0/1 and fsys0/1
+  arm64: dts: exynos8895: define all usi nodes
+  arm64: dts: exynos8895: add a node for mmc
+  arm64: dts: exynos: exynos8895-dreamlte: enable support for microSD
+    storage
+
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml  |   1 +
+ .../boot/dts/exynos/exynos8895-dreamlte.dts   |  39 +
+ arch/arm64/boot/dts/exynos/exynos8895.dtsi    | 906 ++++++++++++++++++
+ 3 files changed, 946 insertions(+)
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.43.0
+
