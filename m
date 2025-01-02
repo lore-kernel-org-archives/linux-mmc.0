@@ -1,221 +1,287 @@
-Received: from esa.hc188666.iphmx.com (esa.hc188666.iphmx.com [68.232.145.191])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 820A1188938
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Jan 2025 08:08:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.145.191
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735805300; cv=fail; b=YqKOHwgCTsOw6JzOjziRnH6bDogSw2yFuxwdZthwh/nLITVz87Qemll+Ui8DzfG5WRgHlYIKlpnhJgq/B80lYqKgSNy8dc9DUavvykL6zAFs3hcRqsJi7Qcx69hS0oGq8IFObhVl5mUCnPgyjWfEof6CLBRGwxHKKprXilxUYTQ=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735805300; c=relaxed/simple;
-	bh=3pJfcRYunriUp/eb6OP7H9nlbzgE4k1XPFaJt+6UzjU=;
-	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=Y//5beGsREZIfaC0EaKMaILXYtH9wGsTMQVJNwWVxj8zldSAf4CeV7skpRw1tDWysKCToB4g5AdW+ikatbO9devh5DPLZ95OqbpL90pXGj8ubWmGdS7+4m6vrwosAs1O+CW618edSQ9xf3Hdo8b02tJGjkvFV19tMCUmy542uzQ=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=conduent.com; spf=pass smtp.mailfrom=conduent.com; dkim=pass (2048-bit key) header.d=conduent.com header.i=@conduent.com header.b=LMHGYu6U; dkim=pass (1024-bit key) header.d=conduent.com header.i=@conduent.com header.b=Z6zV+v6d; arc=fail smtp.client-ip=68.232.145.191
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=conduent.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=conduent.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AA4181A8F71
+	for <linux-mmc@vger.kernel.org>; Thu,  2 Jan 2025 10:48:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1735814912; cv=none; b=gloZ7vNfzPcI0G1d9LD0QIJ7N628yB9cz4KfVBWp2ui6WbdA/taRv4wbOHa8J19j13wDh418VTfc2bdZSaoER98oWO5hI8f6olRe+tZwMjXO5AnIbFo5+G6PJt+buQpOSHSU/Li4Vai3inno4J/AsP/m3wTWD0KZscwgCVT2vNU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1735814912; c=relaxed/simple;
+	bh=y6DMHxOijDlusyoIi9vYkliRXs2zYFrnr7b+Plgl+yg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=SYeKMuEgpKQQ8d4v4nz9GdYLQ147tInO4/piDnMVObamSJIN3uW7rWGb3BQ/L3F5G/Tb4yw/NRnPCfGx/Zi/PKpAhaqYtAun0bozDVIe35jxP6L8NNurU6N0u02SxhF9fZ8LROWH1TtVSE1PPpXKp7HG348I7yzgoKclPwtpL64=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=MsWnFG/w; arc=none smtp.client-ip=209.85.221.46
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=conduent.com header.i=@conduent.com header.b="LMHGYu6U";
-	dkim=pass (1024-bit key) header.d=conduent.com header.i=@conduent.com header.b="Z6zV+v6d"
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="MsWnFG/w"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-385de59c1a0so6822608f8f.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Jan 2025 02:48:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=conduent.com; i=@conduent.com; q=dns/txt; s=sept2021;
-  t=1735805298; x=1767341298;
-  h=from:to:cc:subject:date:message-id:
-   content-transfer-encoding:mime-version;
-  bh=3pJfcRYunriUp/eb6OP7H9nlbzgE4k1XPFaJt+6UzjU=;
-  b=LMHGYu6Un6seZBkJikxeF8XwKwldaHAHuyDMoUmt184HRxhZD6drZ+vE
-   eknHsRg7jl5wmOT3bICXta9QxwrSMkF2KDUcBa7i4uHCuHOg+Po/M26vW
-   /5wYTVZqrBSz+utBKaTJ/hduOTMb/Ru0cdK/1i7sBwmcjSlmEM/X3PsGy
-   hsIf7of61YrnwFDMuD+P3jJzqatoAKIrgpdOG1ZmfHHIvErHcIiWLOswl
-   V6R71h5/WEhvtLy6FtyfDS5LeuYA29ErifnIiKwcPjPR3c7NUdZDUmtk9
-   MBEM8VEicQyVyE8SSdh44YN9IREZ1bapbDkEEYFhvVNU7AxwYcnkgugYJ
-   Q==;
-X-CSE-ConnectionGUID: UxVMuoY/Tn6zz6bUVg4VOg==
-X-CSE-MsgGUID: QQimPx/0QLedwspdm3D1Ig==
-X-ThreatScanner-Verdict: Negative
-X-IronPort-AV: E=Sophos;i="6.12,284,1728964800"; 
-   d="scan'208";a="98953350"
-Received: from mail-francecentralazlp17010005.outbound.protection.outlook.com (HELO PA5P264CU001.outbound.protection.outlook.com) ([40.93.76.5])
-  by ob1.hc188666.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jan 2025 03:07:08 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=iqQWzN/75n/wvSJMBfOsq2cAuQ2RxFPnS1sUWblqZg7McnHpY+9s/C9J1gjLROxfuNIjyDc9PK9QTGS5/LFLg9ChDHfgRApGFzkjnWsdn8myfs8UwdU9bgJ2HD6iW8CapCS40FsCKnE/O4/4Lw+IhtDig7pjngcZN2Gj3r72OVA010xn+vIC5oMDEqrbp+Uwb70fy3GJ4L7NE20QsOyw/RukUtlRagySbQPSQ6A4FE+pzIJ3aEsuRdau/r+XrjRAq0ADbpPz5gbiprwlztfMiMV/jOAWmipA03lBDk3ALIXIc5UfBJ26NFldj3ZOI0NPuZ9JWR96hgQUkTYFJQOGSw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=3pJfcRYunriUp/eb6OP7H9nlbzgE4k1XPFaJt+6UzjU=;
- b=rCro74+SlRnvIRIYS3Qnd2dQVNcFzhBdaqUImZogc2jn4s6tiHj23vjenvDsxPEASo9He2ebMiWtvfBySdvx5FRwWTiI7u4kqxOF28p9WREkdCpLnIWmnjh3rH1z0QnYlMjh3MA+zHBwzjVtnI7EE2koHaK7kO5sVCaR+gMcHJ9qVTlEOu18Bp0iDpiUk+FzeQDPns/mqWnk0sOPExLyF5FiGaDoT8YosutXsdkZofenslIPPAFY2gBRGWeyY1yCjD1MAYfmOVCU2JsRKjNQ2KmbQSvKNzTqtH21aMuRuOHaLOkhRYrpjg1jr23wwUcrDc/SZpQPcqQoXtIxt4R3nw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=conduent.com; dmarc=pass action=none header.from=conduent.com;
- dkim=pass header.d=conduent.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=conduent.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3pJfcRYunriUp/eb6OP7H9nlbzgE4k1XPFaJt+6UzjU=;
- b=Z6zV+v6dPf7mfNlqt0Q0Zvihvk3dlXQLsc6Uzu5lohJUH5ZIwePY2AHxoMFKhVWFxSRAEi86WvBRHeETz+ywN6Mb27EUKU3jPFnkNoGpj/3cNQeFC7tpJv28pd63/+v9Zsw4MqOsOlcP4BDtviwPPt+zfv2DZ4KZrr4fyPtsr7k=
-Received: from PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:11c::12)
- by PR0P264MB2170.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:169::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8314.14; Thu, 2 Jan
- 2025 08:07:02 +0000
-Received: from PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM
- ([fe80::dcdb:eb6d:38ef:853a]) by PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM
- ([fe80::dcdb:eb6d:38ef:853a%6]) with mapi id 15.20.8314.013; Thu, 2 Jan 2025
- 08:07:02 +0000
-From: "Torrelli, Maxime" <Maxime.Torrelli@conduent.com>
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC: "Bove, Frederic" <Frederic.Bove@conduent.com>
-Subject: [eMMC] - Partition on eMMC boot block device is not visible anymore
- in kernel v6.1.53 and above
-Thread-Topic: [eMMC] - Partition on eMMC boot block device is not visible
- anymore in kernel v6.1.53 and above
-Thread-Index: AQHbXOpMPxhaTZEN9EGrb5ULucOC4g==
-Date: Thu, 2 Jan 2025 08:07:02 +0000
-Message-ID:
- <PAYP264MB3440EA9BD04E467466A0DAE495142@PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM>
-Accept-Language: en-US, fr-FR
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-msip_labels:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=conduent.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PAYP264MB3440:EE_|PR0P264MB2170:EE_
-x-ms-office365-filtering-correlation-id: 7e794f43-6653-4a24-a450-08dd2b047066
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|376014|1800799024|366016|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?b0dpcFJGMURZSjNhcEgrdk04U0JxV1JUUlRxSld5K016RlVQZDgyMXkyejhm?=
- =?utf-8?B?d3BFUGFCTW1rTDV1aGlrNWU2YmI1U1dYbk9VU1NKUGZtQVVsMnR6dGlzaFJo?=
- =?utf-8?B?K1JtSDluUDh0cmp1K2xYdG5OTXJGNnN2Z2NPejZRdUt4QnVDWVJRTzJqNVZV?=
- =?utf-8?B?ZnVIQm1vRTZ0eU95UU10K2hmaDdiajlENlNIZEVkV0lFR2g0ZmRUVnRvQkps?=
- =?utf-8?B?aVRQaC9PSnBVS1V6VnlXS2dQNGpZelowZkNXZHc5NDFvR2VxdXdSZmg3N29m?=
- =?utf-8?B?VDg5bEdjbE5jWHg1NUwwcXRMQjVDdzVMWk5JSEVHcnFuR21kemp0bkNNNFQx?=
- =?utf-8?B?R2MyWXArcCt4Z29ZMkdwRk1FcDFEOE1ucHVUdGdqWG9mRlNlNXJyTFlxaWpx?=
- =?utf-8?B?SDlicDRlSWswOTR2RUdwR1dZSEZyTS93aUtsMDU5RHFBTDF4ZzRVMUczc2c1?=
- =?utf-8?B?T2I2S0kwSldPYnlJb21VZytkS2lFQ0kzYTQrbjAvV1RraU1Rc1EyOVJlSW9i?=
- =?utf-8?B?UGJvRmtYSUxUV1Y3Q3ZQYzJlalJFSzBQZEc1L1oxVXdyMTdXalZDTVpSL093?=
- =?utf-8?B?a1Y0dXlhTk10RWtJeE02UTFtQU03bnQ3aG1zOUpJVnRCNDFZU09UNTM0UWpV?=
- =?utf-8?B?K3JEMVErc1I1K0ZxSGk3ZUYwditsbjJwS1lxM2psWWVQOCt3TmhSdnFBRWNO?=
- =?utf-8?B?UzZCejJtWHhObHRENHRWMFpWZ0J2R2ZjbENBMEhucHphNUtmYytSa1VkMzMy?=
- =?utf-8?B?eko0R2NnUmtaMVU3UllRUHp1V0hMNTVmRWF3dDhqZXZGSUV3dGcxVUxGa3Jz?=
- =?utf-8?B?dGVVNjB5dFIrZ2JCbTNHYkN5TzkwNUcycTBsM0ZJVEFqM2RORXI2aVJXc1ZG?=
- =?utf-8?B?SmViTWJPdVAzc1ozVTU1TVZSYUc0SHg2ZTdid21lKzF0QnNHSEZUR0tDRGQ1?=
- =?utf-8?B?QjVpWmpaZWNUMDhsM3haU2xpVjRsN3l6aHhjYVNtS2J0T25ZQmxmeEswOUdV?=
- =?utf-8?B?VmcvcHN5T1pQK3l6b1dOMkpVdGMzWUVjdWxZd2JrQm9DTWxIaFBNQjJndURG?=
- =?utf-8?B?L0U1bHRNZ0s3YVRMaDdsUHliN0c1cjV0bzc3VGxqNVRIdGhsdEtLa0JCaXhZ?=
- =?utf-8?B?d081TnZQNXRnY3RhOWhaZUhGcHNlNlRaa2k2Uk5MKzB5L1ZSbXU1a1I2YTgw?=
- =?utf-8?B?RU1FY295bElEQlJYNS9sRmdidHJoQUpuMkRST0NUaGtFOTlXZjFRcjQrRDFi?=
- =?utf-8?B?SFFNVnFLblVzS3NkQWpBbzNRNUdieFBvVitkSHBRbVowaHVOOG9rUjBpbkFr?=
- =?utf-8?B?RlZnSjFyYnQyS2c5N3E4aExEbUJJWHdUdmxDMGRVT050Yzh5NUg0Y3JidHp0?=
- =?utf-8?B?QUpsN2h3NWlZVUd5dURFaDNxYjE1Z3RxS2F6NjR1ZENXWG13MjhINXhFRm5U?=
- =?utf-8?B?cG5nTHE1aTM2WnBYZTYwQjBnVmhZMlZUdzVFOVR3aUxSTXhqc0tqY3hLKzZZ?=
- =?utf-8?B?QVBCYU90U01qZXdDRTdLU0dNYkpVSDFxR0ZsNy9ZV2UwWElNdHZkUktyaWFJ?=
- =?utf-8?B?TzBYbFNDSmNpdUdXaWRsSkdmcGFQUmJEWFU3WHdmemc1U2RFUVc0VEhrOHVD?=
- =?utf-8?B?TzRPd1ZBWVU4Si9DVEJjajA1ZUFxYm9FaS96Y1IvT2FVdGgwcVZkSEh0VnVl?=
- =?utf-8?B?SkRCd0txRkxiZkZWby9pbjlZV0VCN1FIOWgwSWhuTDdFclZhUTJnVVhHT0hJ?=
- =?utf-8?B?ak9rTTJqUU8rNlRTckdHbjFoZ3lKbjVpMzlRL25ta0R2WUhubTBXcmppaXB4?=
- =?utf-8?B?UjlrU3RpcDRZVjFKamxZN1Vnc2RURDM0QVpUOFdTeFJiTkZJZVhzanlPNUx0?=
- =?utf-8?B?cFhRWWM0Qi9IUUVpK2pvS1k5Mi95UWNvQWdoUDREZ2pveDdCcGQ1QVA5VHI5?=
- =?utf-8?Q?ydcBy17Q20/lilibpQDOpuxH/gUplZzu?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?OG5xeXVkNnNjdHVHZ1oySHlicXlRWXZhVUZjd2plTXVXZ1JkSkltNWtPVUpC?=
- =?utf-8?B?MDRZc25pbUJReFVjK1hXY2pyaWduaTduK05DRytlaktEV2IvV0JLY3BaUlVP?=
- =?utf-8?B?WmxXOHdhYm1vTHBsS3d2bkpCaWZZc0d5VHlkdDNrTHZOWVVnMm5iQWZsa3Y2?=
- =?utf-8?B?emRVaU5EaWNhTUhpRXhKdU9lbFZPNjdydUVzdkd5L2ZPS2ppMm1JYXo5MlNC?=
- =?utf-8?B?QStkZDlsWkdENno0ckEyUUthNElPVXlMWFpCTDFxV3ZuV21CRjh1WElkK29o?=
- =?utf-8?B?N05yNDFYK2pTTHpWaW1GRVB5c25Hd2l0UER0TzNHYlE0b24zam11b0xMb2J2?=
- =?utf-8?B?MU1CakxaWDJkSi9aYi9GMTZBVXJQZGt0amxWT05MTTZWZllvYXA4Z2RjbjB5?=
- =?utf-8?B?Kzdoa2RtL0VQb2t5bFJLMVpDQTdnaGJFeVpYRWRGNnFNLzFxL094OGdBRFFs?=
- =?utf-8?B?T2hGKy9FLzVHdTNDUFB1K0xUMnhFdzVkMjdSV3lzTnp3L3ZPa3hueUo1UnZm?=
- =?utf-8?B?R2xyZGtSQzRXUVBzTG5BZWxNbk8xZCtnR3BTSjJxcHF3c0tDb2M2TGsxMTlV?=
- =?utf-8?B?UlQ5eDZPSnpFcTl2eSs4K3F5alUvQzdQUzduZXVjekZjY2VBbEloUzB2YTdI?=
- =?utf-8?B?bFhjZUtwTnNnTXhKeEN4TEZzalp0NHQzbXdWYis2eC9VeXZIMW8zQkdVL01x?=
- =?utf-8?B?S0V6dlpKRlB0MVRvUFBwKyttUUxqTXJiRHN2T3JNMHlYcGlyNUNjK3hadHpU?=
- =?utf-8?B?U1dCSCtTUmF6enRqS0tRa2Y4UjQ0Q1Q5ZTBzTTNIVkpvb2cvaVhwWXl0SExQ?=
- =?utf-8?B?N1R4aDlTOTcrMm5vWlVMWUJNZ0NHRk9IUHhJak16QnRrLytBOXJnb2ZjUnJV?=
- =?utf-8?B?bGFXZldRSSthb3VHUVh5a3JDTHlSV0pUSmgyN0JLRk44Sk5iaXVrQTYyREdE?=
- =?utf-8?B?QUF3azY1TEFpQ2NlMHpOWEJVR1Rkc1RZNHZCMGdpNWsva0lSUUR5M0MwTWV3?=
- =?utf-8?B?WStaS1V3K0dBekJLOGJFQ04xcGw3T3k4TFoxSnljS3ZSTEJ0dkdEZUN4R09I?=
- =?utf-8?B?MkF6WjRrdDNrQnY2VU1BWVU4WU1SbU5Uc0FIYXd4VFd0akFCRHBsbjZTR29T?=
- =?utf-8?B?dytYYWh6VTdrYnZWeEIyTUdmcDBCYzhzY1grbThINnRIQ3dVckN2Q3N4YWtT?=
- =?utf-8?B?TkpmTDVZMXgvQWpZbEFwK1g2OFBRUUtLb0YxOEFEQXE1b2JjdUJiYllrM1p4?=
- =?utf-8?B?cDNydERWUlQ1WWwvajlLU0hwMFZnc29McXprMStUQjZzT1VCSE91RFQ1N0NE?=
- =?utf-8?B?MERTZVBxb0gzMVZISzVRNWJjTUxWc2xpNHpuM1docFYxMHFKKzBnbW9vL2Z6?=
- =?utf-8?B?MWhGazE4aE43RGJxUzB3NmxQS1Bmd0dVOHZHMHhHSzZtNUNMV2NsYVArWmRr?=
- =?utf-8?B?M3YyeDRXaTlZcWkxQVBrL1hJVkFmVEtPTjdBR09nMUt5WGx3cVFZMkJSY2k5?=
- =?utf-8?B?NVN2NVcxaGU3dTN1Q1c0TjM2SUtRZFdkd0dmKzN4MG1oTEVmVEpka0tGOHNr?=
- =?utf-8?B?LzRPeGhoTmhqNzV4eTdxVTdQdC8zRFpYS3BLd3paN2sxV1BXSVlZeUNtUktY?=
- =?utf-8?B?ZFhlYlViR2hvY21xOFYrSzJkS2txRk9leHRjN0pGZVNZSlhWdW0rdUZyZGtD?=
- =?utf-8?B?ZUFqRW91M0J1V1NiUUcrMU1BWXhoOVVqbjhVZGN5KzlHOGRZM1RCeGxNbys0?=
- =?utf-8?B?M2IrRXJwZHdGcmlhMGx2L3JSZHM1ajFPaUJzM1VsdldEVXB2eGJFREFpdldE?=
- =?utf-8?B?eGFNT1NHZUg5R3dmUmxNZVl0ZkZTRGgyQlIrRmRXTmgyYk9PeTAyNFBGQ1dO?=
- =?utf-8?B?M0NGRnpFMGpxYkF4emVXWDZVTHFReGlvcDlhc3RmME16M3N6a0lwczFNT3NJ?=
- =?utf-8?B?MWhkOG1EUFZLdnhmYzk5UGlwaHNicVZJNVNLOWVjQS9WVHpXdkU3eE0wTTd5?=
- =?utf-8?B?Q2JtYTZiR3JlVW1ZdG5Va01oTUg4a1J4SDZBaGUyenJMaDF5WXp5UlJXODdp?=
- =?utf-8?B?Mi84Y05QUmY4dTl4L2w1eDBHSEg2YTVMczMzS1FMOENYRUpxdkwzMk9ZS3FS?=
- =?utf-8?Q?DpwkFz0ZMsd3QrnR9NdEfKFzD?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        d=tuxon.dev; s=google; t=1735814908; x=1736419708; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:content-language:from
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=GFIpwGB23LANAByW/n2mcZ10YJezzuFXcnQMI/Wk7QU=;
+        b=MsWnFG/wxs89buC/0w56O97Z43uMiqdJ2nZ7Il9HLRr/0TKX3dY3yJQyjiljX/YbAl
+         UypWI7TwvJITo9n8vhMH5cZXq1IVH++uS4kDwGH6HMLUvlUUTwosiRl9p52opu2FCahD
+         dFZ7to11qUrv6oOB4GzCy3yn3bWsvrEIUjZKI0vgHGzvRpXMJT7qgUiy2aI4YrPx2h1D
+         PMm0BU7EDAOmjNvn0aRNYmJtcmpda6rsjPpeSgHiUoocIsCM0oOVzfQKuElm0lsM9djT
+         bXWYFL0XUgrlRxs/0bbcU5bbiokFqW+BKRsHY06wlKdwJMQVvJX6nBYc4kJ1IQZP1V/h
+         7Avw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1735814908; x=1736419708;
+        h=content-transfer-encoding:in-reply-to:content-language:from
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=GFIpwGB23LANAByW/n2mcZ10YJezzuFXcnQMI/Wk7QU=;
+        b=LJ2kS+nJ75zONIwSQSDiJJI6pOnM3Vw3YrXt4oW5IQ+SgXaRQ1lFvh/Y7sskPJFUWH
+         NpOG83wEc7fO2JcJA8GWJWuOvvK9QGPgFx190ALTUObwYjBGsBUVQXysnmNNJqrf2/1J
+         BdkxCZEsZ1sqit5A1w2+736t1xoYweOo7WOQpBiaLq2VkATnMClZIMkFb+8U+6AX7Tgm
+         QOI6L/JYCuq1vPz55YJRw3wv7r+JvpeMNoLmgQvrTColAC0gGEL4EAmo0j0pS4Z7iNNl
+         q1xg/kMmlzIWDq7eZfsHVy4NrZpDDgZFaYudHCaZrhIjbHXmuHj/SA42L3tNuDNTMO3T
+         MIGw==
+X-Forwarded-Encrypted: i=1; AJvYcCVVdR2xgWDKKepDHbrY6oucvaL+irEyELNCyEaiQyt0UGhqYxO6b/piVCeAjU71nvrM0CGQa7VeWv4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwkQRMwQqwecJkRCeBW//sWHrYPuP8chCUp6GPJbodPEgnDWH3O
+	uv/1dfB3yqCOm9T9905aFBANUGj+jWtBpqm9a4aSG9hULAmqrf1xdNuX2kC8YXE=
+X-Gm-Gg: ASbGncvLDa+d+aJR8uS5ynxkE/mU6YqxYQQLvgZ5JtbibSIUBNTHidIxsNOkcjo3Xx2
+	AiOq22XuDo5E4OIL9pVV92FEfpw1z7yJyiNvl94ji0zAzXpIGJ6gof2muf37LSgEDysBgQW7TWn
+	bj/AL9czqz2BPRpwfhR/i/TnljpLySMcWImoxKRVuu2nQFP0o1tVKaaCPPlXrT9ve9D3UmQNIHG
+	Pw3//wo0+7L3rrtSTrlgcbS7iSVLn0vC6n2UtqGGcKp6y7hdQgW9NC11l9YdqdIYA==
+X-Google-Smtp-Source: AGHT+IENVLtDm//0s4zoP3FVOCZty2tw9Mx4m7bERvCUo2OJSxiEnc/IIpjbgKoYlXyGt/2cKq0SdQ==
+X-Received: by 2002:adf:9b8a:0:b0:38a:4de1:ac6 with SMTP id ffacd0b85a97d-38a4de10f03mr11955498f8f.6.1735814907658;
+        Thu, 02 Jan 2025 02:48:27 -0800 (PST)
+Received: from [192.168.50.4] ([82.78.167.102])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38a1c89e140sm38648430f8f.79.2025.01.02.02.48.25
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 02 Jan 2025 02:48:27 -0800 (PST)
+Message-ID: <8361a42d-0c70-4a8c-b0a0-7056ba21b508@tuxon.dev>
+Date: Thu, 2 Jan 2025 12:48:25 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: conduent.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PAYP264MB3440.FRAP264.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7e794f43-6653-4a24-a450-08dd2b047066
-X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Jan 2025 08:07:02.1597
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 1aed4588-b8ce-43a8-a775-989538fd30d8
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 7V+wya7cuZcVvRyniVD6u3y967EbnCIWAtNDWPnd0DfF7iWyxz5Z+dplT8FF2TSQs9D6wGBDdARW+6EJU4/TFUVwalRbMnp1zPE3CGLJRdw=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PR0P264MB2170
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v4 08/13] clk: at91: sama7d65: add sama7d65 pmc driver
+To: Ryan.Wanner@microchip.com, robh@kernel.org, krzk+dt@kernel.org,
+ conor+dt@kernel.org, nicolas.ferre@microchip.com,
+ alexandre.belloni@bootlin.com, mturquette@baylibre.com, sboyd@kernel.org,
+ arnd@arndb.de
+Cc: dharma.b@microchip.com, mihai.sain@microchip.com,
+ romain.sioen@microchip.com, varshini.rajendran@microchip.com,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+ linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+References: <cover.1734723585.git.Ryan.Wanner@microchip.com>
+ <549fa8590fe9b4380e413f8eed87392f28754395.1734723585.git.Ryan.Wanner@microchip.com>
+From: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+Content-Language: en-US
+In-Reply-To: <549fa8590fe9b4380e413f8eed87392f28754395.1734723585.git.Ryan.Wanner@microchip.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-SGVsbG8gZGVhciBNTUMgY29tbXVuaXR5LAoKSSBob3BlIG15IHJlcXVlc3QgZG9lcyBub3QgYnJl
-YWsgYW55IHJ1bGUgcmVnYXJkaW5nIHRoaXMgbWFpbGluZyBsaXN0IGFuZCBpdHMgdXNlLiBJZiBp
-dCBkb2VzLCBwbGVhc2UgbGV0IG1lIGtub3cgaG93IHRvIHByb2NlZWQuCgpXZSByZWNlbnRseSB0
-cmllZCB0byBtaWdyYXRlIGZyb20ga2VybmVsIHY1LjEwIHRvIHY2LjYuIER1cmluZyB0aGlzIG1p
-Z3JhdGlvbiB3ZSBkaXNjb3ZlcmVkIHRoYXQgYSBwYXJ0aXRpb24gc3RvcmVkIGluIGFuIGVNTUMg
-Ym9vdCBkaXNrIHdhcyBub3QgdmlzaWJsZSBhbnltb3JlIGZyb20gdGhlIHN5c3RlbSAoaS5lLiAv
-ZGV2L21tY2JsazJib290MHAxIGRvZXMgbm90IGV4aXN0KS4KClBsZWFzZSBmaW5kIGJlbG93IHRo
-ZSBkZXRhaWxlZCBsaXN0IG9mIGJsb2NrIGRpc2tzIG9mIHRoZSBlTU1DOgogICAgKiBicnctcnct
-LS0tIDEgcm9vdCBkaXNrIDE3OSwgIDAgT2N0IDEwIDE3OjQxIC9kZXYvbW1jYmxrMgogICAgKiBi
-cnctcnctLS0tIDEgcm9vdCBkaXNrIDE3OSwgIDggT2N0IDEwIDE3OjQwIC9kZXYvbW1jYmxrMmJv
-b3QwCiAgICAqIGJydy1ydy0tLS0gMSByb290IGRpc2sgMTc5LCAxNiBPY3QgMTAgMTc6NDAgL2Rl
-di9tbWNibGsyYm9vdDEKICAgICogYnJ3LXJ3LS0tLSAxIHJvb3QgZGlzayAxNzksIDI0IE9jdCAx
-MCAxNzo0MCAvZGV2L21tY2JsazJncDAKICAgICogYnJ3LXJ3LS0tLSAxIHJvb3QgZGlzayAxNzks
-IDI1IE9jdCAxMCAxNzo0MSAvZGV2L21tY2JsazJncDBwMQogICAgKiBicnctcnctLS0tIDEgcm9v
-dCBkaXNrIDE3OSwgMzIgT2N0IDEwIDE3OjQwIC9kZXYvbW1jYmxrMmdwMQogICAgKiBicnctcnct
-LS0tIDEgcm9vdCBkaXNrIDE3OSwgMzMgT2N0IDEwIDE3OjQxIC9kZXYvbW1jYmxrMmdwMXAxCiAg
-ICAqIGJydy1ydy0tLS0gMSByb290IGRpc2sgMTc5LCAgMSBPY3QgMTAgMTc6NDEgL2Rldi9tbWNi
-bGsycDEKICAgICogYnJ3LXJ3LS0tLSAxIHJvb3QgZGlzayAxNzksICAyIE9jdCAxMCAxNzo0MSAv
-ZGV2L21tY2JsazJwMgogICAgKiBjcnctLS0tLS0tIDEgcm9vdCByb290IDI0MywgIDAgT2N0IDEw
-IDE3OjQxIC9kZXYvbW1jYmxrMnJwbWIKCkFmdGVyIGFuYWx5c2lzLCB3ZSBkaXNjb3ZlcmVkIHRo
-ZSByZWFzb24uIFdoZW4gdGhlIHZlcnNpb24gdjYuMS41MyB3YXMgcmVsZWFzZWQsIGEgY2hhbmdl
-IGluIGZpbGUgYmxvY2svaW9jdGwuY8KgYWRkZWQgdGhlIGZvbGxvd2luZyBsaW5lcyB0byB0aGUg
-ZnVuY3Rpb24gImJsa3BnX2RvX2lvY3RsIjoK4oCC4oCC4oCC4oCC4oCC4oCCPiArwqBpZiAoZGlz
-ay0+ZmxhZ3MgJiBHRU5IRF9GTF9OT19QQVJUKQrigILigILigILigILigILigII+ICvigILigILi
-gILigILigILigIJyZXR1cm4gLUVJTlZBTDsKVGhpcyBjaGVjayB3YXMgdGhlbiBtb3ZlZCB0byBi
-bG9jay9wYXJ0aXRpb25zL2NvcmUuY8Kgd2hlbiB2Ni4xLjc2wqB3YXMgcmVsZWFzZWQuIFRoaXMg
-Y2hhbmdlIGFkZGVkIHRoZSBmb2xsb3dpbmcgbGluZXMgaW4gdGhlIGZ1bmN0aW9uICJiZGV2X2Fk
-ZF9wYXJ0aXRpb24iwqBhcmUgOgrigILigILigILigILigILigII+ICsgaWYgKGRpc2stPmZsYWdz
-ICYgR0VOSERfRkxfTk9fUEFSVCkgewrigILigILigILigILigILigII+ICvigILigILigILigILi
-gILigIJyZXQgPSAtRUlOVkFMOwrigILigILigILigILigILigII+ICvigILigILigILigILigILi
-gIJnb3RvIG91dDsK4oCC4oCC4oCC4oCC4oCC4oCCPiArwqB9CgpXaXRoIGtlcm5lbCB2NS4xMCB0
-aGUgcGFydGl0aW9uIC9kZXYvbW1jYmxrMmJvb3QwcDEgd2FzIG5vdCB2aXNpYmxlIGF0IGJvb3Qg
-YnV0IGEgc2ltcGxlIGNhbGwgdG8gInBhcnR4IC1hIC9kZXYvbW1jYmxrMmJvb3QwIiBhbGxvd2Vk
-IHVzIHRvIGFjY2VzcyB0aGlzIHBhcnRpdGlvbi4gV2l0aCBrZXJuZWwgdjYuMS41MyBhbmQgYWJv
-dmUsICJwYXJ0eCAtYcKgL2Rldi9tbWNibGsyYm9vdDAiIGZhaWxzIGFuZCB3ZSBjYW5ub3QgYWNj
-ZXNzIHRoZSBwYXJ0aXRpb24uCgpXaGF0IGlzIHRoZSByZWFzb24gZm9yIHRoaXMgY2hhbmdlID8K
-CklzIHRoZXJlIGFueSBydWxlIGZvcmJpZGRpbmcgdG8gY3JlYXRlIGEgcGFydGl0aW9uIGluIGFu
-IGVNTUMgYm9vdCBibG9jayBkaXNrID8KCklzIHRoZXJlIGFueSB3YXkgd2UgY2FuIGFjY2VzcyB0
-aGlzIG1tY2JsayBib290IHBhcnRpdGlvbiB3aXRoIGtlcm5lbCB2Ni4xLjUzIGFuZCBhYm92ZSA/
-wqAKClRoYW5rcyBmb3IgeW91ciBoZWxwICEKCgpTYWx1dGF0aW9ucy9HcmVldGluZ3MsCsKgCk1h
-eGltZSBUT1JSRUxMSQo=
+Hi, Ryan,
+
+On 20.12.2024 23:07, Ryan.Wanner@microchip.com wrote:
+> From: Ryan Wanner <Ryan.Wanner@microchip.com>
+> 
+> Add clock support for SAMA7D65 SoC.
+> 
+> Increase maximum number of valid master clocks. The PMC for the SAMA7D65
+> requires 9 master clocks.
+> 
+> Increase maximum amount of PLLs to 9 to support SAMA7D65 SoC PLL
+> requirements.
+> 
+> Signed-off-by: Ryan Wanner <Ryan.Wanner@microchip.com>
+> Reviewed-by: Claudiu Beznea <claudiu.beznea@tuxon.dev>
+> ---
+>  drivers/clk/at91/Makefile          |    1 +
+>  drivers/clk/at91/clk-master.c      |    2 +-
+>  drivers/clk/at91/clk-sam9x60-pll.c |    2 +-
+>  drivers/clk/at91/pmc.c             |    1 +
+>  drivers/clk/at91/sama7d65.c        | 1375 ++++++++++++++++++++++++++++
+>  5 files changed, 1379 insertions(+), 2 deletions(-)
+>  create mode 100644 drivers/clk/at91/sama7d65.c
+> 
+
+[ ... ]
+
+> +
+> +	parent_hws[0] = md_slck_hw;
+> +	parent_hws[1] = td_slck_hw;
+> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
+> +	for (i = PCK_PARENT_HW_MCK1; i < ARRAY_SIZE(sama7d65_mckx); i++) {
+> +		u8 num_parents = 3 + sama7d65_mckx[i].ep_count;
+> +		struct clk_hw *tmp_parent_hws[8];
+> +		u32 *mux_table;
+> +
+> +		mux_table = kmalloc_array(num_parents, sizeof(*mux_table),
+> +					  GFP_KERNEL);
+> +		if (!mux_table)
+> +			goto err_free;
+> +
+> +		PMC_INIT_TABLE(mux_table, 3);
+> +		PMC_FILL_TABLE(&mux_table[3], sama7d65_mckx[i].ep_mux_table,
+> +			       sama7d65_mckx[i].ep_count);
+> +		for (j = 0; j < sama7d65_mckx[i].ep_count; j++) {
+> +			u8 pll_id = sama7d65_mckx[i].ep[j].pll_id;
+> +			u8 pll_compid = sama7d65_mckx[i].ep[j].pll_compid;
+> +
+> +			tmp_parent_hws[j] = sama7d65_plls[pll_id][pll_compid].hw;
+> +		}
+> +		PMC_FILL_TABLE(&parent_hws[3], tmp_parent_hws,
+> +			       sama7d65_mckx[i].ep_count);
+> +
+> +		hw = at91_clk_sama7g5_register_master(regmap, sama7d65_mckx[i].n,
+> +						      num_parents, NULL, parent_hws,
+> +						      mux_table, &pmc_mckX_lock,
+> +						      sama7d65_mckx[i].id,
+> +						      sama7d65_mckx[i].c,
+> +						      sama7d65_mckx[i].ep_chg_id);
+> +		alloc_mem[alloc_mem_size++] = mux_table;
+> +
+> +		if (IS_ERR(hw)) {
+> +			kfree(mux_table);
+
+Now mux_table is freed twice, once here, once in err_free section. Having
+mux_table added to alloc_mem[] is enough. I'll do the propoer adjustment
+while applying.
+
+> +			goto err_free;
+> +		}
+> +
+> +		sama7d65_mckx[i].hw = hw;
+> +		if (sama7d65_mckx[i].eid)
+> +			sama7d65_pmc->chws[sama7d65_mckx[i].eid] = hw;
+> +	}
+> +
+> +	parent_names[0] = "syspll_divpmcck";
+> +	parent_names[1] = "usbpll_divpmcck";
+> +	parent_names[2] = "main_osc";
+> +	hw = sam9x60_clk_register_usb(regmap, "usbck", parent_names, 3);
+> +	if (IS_ERR(hw))
+> +		goto err_free;
+> +
+> +	parent_hws[0] = md_slck_hw;
+> +	parent_hws[1] = td_slck_hw;
+> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
+> +	parent_hws[3] = sama7d65_plls[PLL_ID_SYS][PLL_COMPID_DIV0].hw;
+> +	parent_hws[4] = sama7d65_plls[PLL_ID_DDR][PLL_COMPID_DIV0].hw;
+> +	parent_hws[5] = sama7d65_plls[PLL_ID_GPU][PLL_COMPID_DIV0].hw;
+> +	parent_hws[6] = sama7d65_plls[PLL_ID_BAUD][PLL_COMPID_DIV0].hw;
+> +	parent_hws[7] = sama7d65_plls[PLL_ID_AUDIO][PLL_COMPID_DIV0].hw;
+> +	parent_hws[8] = sama7d65_plls[PLL_ID_ETH][PLL_COMPID_DIV0].hw;
+> +
+> +	for (i = 0; i < 8; i++) {
+> +		char name[6];
+> +
+> +		snprintf(name, sizeof(name), "prog%d", i);
+> +
+> +		hw = at91_clk_register_programmable(regmap, name, NULL, parent_hws,
+> +						    9, i,
+> +						    &programmable_layout,
+> +						    sama7d65_prog_mux_table);
+> +		if (IS_ERR(hw))
+> +			goto err_free;
+> +
+> +		sama7d65_pmc->pchws[i] = hw;
+> +	}
+> +
+> +	for (i = 0; i < ARRAY_SIZE(sama7d65_systemck); i++) {
+> +		hw = at91_clk_register_system(regmap, sama7d65_systemck[i].n,
+> +					      sama7d65_systemck[i].p, NULL,
+> +					      sama7d65_systemck[i].id, 0);
+> +		if (IS_ERR(hw))
+> +			goto err_free;
+> +
+> +		sama7d65_pmc->shws[sama7d65_systemck[i].id] = hw;
+> +	}
+> +
+> +	for (i = 0; i < ARRAY_SIZE(sama7d65_periphck); i++) {
+> +		hw = at91_clk_register_sam9x5_peripheral(regmap, &pmc_pcr_lock,
+> +							 &sama7d65_pcr_layout,
+> +							 sama7d65_periphck[i].n,
+> +							 NULL,
+> +							 sama7d65_mckx[sama7d65_periphck[i].p].hw,
+> +							 sama7d65_periphck[i].id,
+> +							 &sama7d65_periphck[i].r,
+> +							 sama7d65_periphck[i].chgp ? 0 :
+> +							 INT_MIN, 0);
+> +		if (IS_ERR(hw))
+> +			goto err_free;
+> +
+> +		sama7d65_pmc->phws[sama7d65_periphck[i].id] = hw;
+> +	}
+> +
+> +	parent_hws[0] = md_slck_hw;
+> +	parent_hws[1] = td_slck_hw;
+> +	parent_hws[2] = sama7d65_pmc->chws[PMC_MAIN];
+> +	parent_hws[3] = sama7d65_pmc->chws[PMC_MCK1];
+> +	for (i = 0; i < ARRAY_SIZE(sama7d65_gck); i++) {
+> +		u8 num_parents = 4 + sama7d65_gck[i].pp_count;
+> +		struct clk_hw *tmp_parent_hws[8];
+> +		u32 *mux_table;
+> +
+> +		mux_table = kmalloc_array(num_parents, sizeof(*mux_table),
+> +					  GFP_KERNEL);
+> +		if (!mux_table)
+> +			goto err_free;
+> +
+> +		PMC_INIT_TABLE(mux_table, 4);
+> +		PMC_FILL_TABLE(&mux_table[4], sama7d65_gck[i].pp_mux_table,
+> +			       sama7d65_gck[i].pp_count);
+> +		for (j = 0; j < sama7d65_gck[i].pp_count; j++) {
+> +			u8 pll_id = sama7d65_gck[i].pp[j].pll_id;
+> +			u8 pll_compid = sama7d65_gck[i].pp[j].pll_compid;
+> +
+> +			tmp_parent_hws[j] = sama7d65_plls[pll_id][pll_compid].hw;
+> +		}
+> +		PMC_FILL_TABLE(&parent_hws[4], tmp_parent_hws,
+> +			       sama7d65_gck[i].pp_count);
+> +
+> +		hw = at91_clk_register_generated(regmap, &pmc_pcr_lock,
+> +						 &sama7d65_pcr_layout,
+> +						 sama7d65_gck[i].n, NULL,
+> +						 parent_hws, mux_table,
+> +						 num_parents,
+> +						 sama7d65_gck[i].id,
+> +						 &sama7d65_gck[i].r,
+> +						 sama7d65_gck[i].pp_chg_id);
+> +		if (IS_ERR(hw))
+> +			goto err_free;
+> +
+> +		sama7d65_pmc->ghws[sama7d65_gck[i].id] = hw;
+> +		alloc_mem[alloc_mem_size++] = mux_table;
+
+This should have been added just after:
+
+		if (!mux_table)
+			goto err_free;
+
+I'll adjust it while applying.
+
+> +	}
+> +
+> +	of_clk_add_hw_provider(np, of_clk_hw_pmc_get, sama7d65_pmc);
+> +	kfree(alloc_mem);
+> +
+> +	return;
+> +
+> +err_free:
+> +	if (alloc_mem) {
+> +		for (i = 0; i < alloc_mem_size; i++)
+> +			kfree(alloc_mem[i]);
+> +		kfree(alloc_mem);
+> +	}
+> +
+> +	kfree(sama7d65_pmc);
+> +}
+> +
+> +/* Some clks are used for a clocksource */
+> +CLK_OF_DECLARE(sama7d65_pmc, "microchip,sama7d65-pmc", sama7d65_pmc_setup);
+
