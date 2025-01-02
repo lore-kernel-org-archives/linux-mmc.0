@@ -1,79 +1,63 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B76DA43173;
-	Thu,  2 Jan 2025 18:44:05 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77CB917BB32;
+	Thu,  2 Jan 2025 18:46:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735843445; cv=none; b=OjyNJD0NusVwj9pK4rONEmEzWGEHrkKZhpPuTbFFNkfT9SID3sSSYmHYN/hCoBcvli581wqaYhy13RK2MhtQSU1NhSnAdvBcF7XGX+yYwTn7PzLyMqRD7fkLvimBd/67Fh6UBwvuUjALhySx2iArfOMSmfxZivwbZbrp9TDf4cA=
+	t=1735843582; cv=none; b=hSvkEvm0IqBtVA7PYqhVWDrzgn2BACPUsiqOHbZbA4fC0wxPYx+aKaiDONkZGarow3/csWNxCickaOc2z7AVO4FKjIT4yxWbieQji1PMSBf25Ep5ErzqwOMQS9fLjy07MBjnFh97SIQ0BtBEdbjsHTNIkcC5afawD48iwSVG0Zg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735843445; c=relaxed/simple;
-	bh=bzCCR7I1hYB6mMtP87y2PHNk4bChXkKHtX8anutuhM0=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=i07wsqHSbSdrX0k2to2wRtD9NnBFzW8YkhbMz1vTFu8FRn3z8XZwMnkqHlPUkyLvQI+OR1QfyRyoNPe06u0oLydz8Ao4hCxFB/pBrgTrZ7KwIJgIu+sfw/TlkBfw4kFIVORHLDMThUnC+5HVFlwNNtuWA3XgTvCtpDKHAmWGhoE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=q2tBHY7R; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1735843582; c=relaxed/simple;
+	bh=/Sd/cU88+j19ifuJEz2A+pTId8QI65pd+3Q1cqya6Ow=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=gvNmeddwmnqwLyat8AehZDt8Wou5pBeu5wUspFbhVQJ2gMCO0MsBmwjzM4uxzJaYWLCrU76k3+pz+sqnWkyybZNTBJC9QEX5qlQ0JeyoJWufl3byv9bYGVPlSBIIszVqfwnsrmEQOpIUv5gyOzYASJ9txUcTctu+DvQLHqGjP6M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rlvIF2LZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="q2tBHY7R"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C02F1C4CED6;
-	Thu,  2 Jan 2025 18:44:04 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rlvIF2LZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3A6AC4CED0;
+	Thu,  2 Jan 2025 18:46:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1735843445;
-	bh=bzCCR7I1hYB6mMtP87y2PHNk4bChXkKHtX8anutuhM0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=q2tBHY7R4JhKArYRaLv4nJ746fLZDog3ea8uPpowXsNZFscEwoRVzKLK/iCbDvG9C
-	 tM0LejspIkmTD7RlTNjpXuSa/koKi3hQnQ7M5jSBMF7MpWGW5dts7e+8bjZiUbzYug
-	 tLEZTXcTooiysKrUmk8Dv7cyKbvZaobhcgBYamgRDqz7Bu6aaLDNorXGimoOH1mjPK
-	 5ZXY6efsx5LLtMvet2z218dtawUgGcTjLTzLFIEDdre+PnDnZpvnBfJHTNTpSFVOTD
-	 fCVYTfJH0Mltg3nJrtzgfOQiiMDLJw3eQkRu019mqVucMtj8DdpmVjdkyPs/2HaoDG
-	 WBxTJ40ROYCFQ==
-Date: Thu, 2 Jan 2025 18:44:03 +0000
-From: Eric Biggers <ebiggers@kernel.org>
-To: "Martin K. Petersen" <martin.petersen@oracle.com>
-Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org, Bartosz Golaszewski <brgl@bgdev.pl>,
-	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Alim Akhtar <alim.akhtar@samsung.com>,
-	Avri Altman <avri.altman@wdc.com>,
-	Bart Van Assche <bvanassche@acm.org>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-	Jens Axboe <axboe@kernel.dk>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v10 00/15] Support for hardware-wrapped inline encryption
- keys
-Message-ID: <20250102184403.GD49952@google.com>
-References: <20241213041958.202565-1-ebiggers@kernel.org>
- <yq1v7uxf4fd.fsf@ca-mkp.ca.oracle.com>
+	s=k20201202; t=1735843581;
+	bh=/Sd/cU88+j19ifuJEz2A+pTId8QI65pd+3Q1cqya6Ow=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=rlvIF2LZPkziJ7m2ftOMtTu1CUHA0V5e3albpUs7hpSkYO2cbBic60U8GNL/l4BCU
+	 Rs8OogHOKwfh0CMKTv0gzhd9NNEC16TUxngkwYlPeuOyCeK9BY0Oheazx8DJ9lijwn
+	 ij0nwUq+9PDj+w7cnTibEAmAS/j3kt/UobaqRfnL6H2WytlO09V6MfS6Q2rV+HGJfz
+	 ySWb/9OXv1K4GmfR/BAC/T6YJG6xdM42FgalWdJrDDt4Rmpj5pxY5kjjJtnnm+6ogt
+	 NxGas/99pWxMPERYo2hfV0HA7lwixWJJC2bIlB1mMlzd8ueF0cINQD+y/8KS3F7jxV
+	 we6YwIzVOArLQ==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 713C9380A964;
+	Thu,  2 Jan 2025 18:46:43 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.13-rc6
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20250102123712.49642-1-ulf.hansson@linaro.org>
+References: <20250102123712.49642-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20250102123712.49642-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.13-rc2-2
+X-PR-Tracked-Commit-Id: 8d90a86ed053226a297ce062f4d9f4f521e05c4c
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 8c2d370154bab85f7f6a7dbaa9ec11e052e042d3
+Message-Id: <173584360192.2004976.12330369779356877602.pr-tracker-bot@kernel.org>
+Date: Thu, 02 Jan 2025 18:46:41 +0000
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <yq1v7uxf4fd.fsf@ca-mkp.ca.oracle.com>
 
-On Thu, Jan 02, 2025 at 01:40:48PM -0500, Martin K. Petersen wrote:
-> 
-> Eric,
-> 
-> > This patchset adds support for hardware-wrapped inline encryption
-> > keys, a security feature supported by some SoCs. It adds the block and
-> > fscrypt framework for the feature as well as support for it with UFS
-> > on Qualcomm SoCs.
-> 
-> Applied patches 1-4 to 6.14/scsi-staging, thanks!
-> 
-> I had originally queued patch 1 in 6.13/scsi-fixes but moved it to 6.14
-> and kept the stable tag to accommodate the rest of the series. Hope
-> that's OK given the short runway we have left for this release.
+The pull request you sent on Thu,  2 Jan 2025 13:37:12 +0100:
 
-Yes, that's fine.  Thanks.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.13-rc2-2
 
-- Eric
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/8c2d370154bab85f7f6a7dbaa9ec11e052e042d3
+
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
