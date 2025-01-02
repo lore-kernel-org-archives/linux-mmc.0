@@ -1,63 +1,63 @@
-Received: from mail-wr1-f51.google.com (mail-wr1-f51.google.com [209.85.221.51])
+Received: from mail-ej1-f46.google.com (mail-ej1-f46.google.com [209.85.218.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C8F571917EB
-	for <linux-mmc@vger.kernel.org>; Thu,  2 Jan 2025 10:52:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0774B1A08DB
+	for <linux-mmc@vger.kernel.org>; Thu,  2 Jan 2025 11:34:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1735815142; cv=none; b=bjISKagsStUxdivmcAT2frGtSVUQLlrV/J3OeZGbo8XfZrrQHDy2cS+qQuOP9gwX8WvMfyeC5hvIH7nkYpP6Iuf/h5HmCwMOiKol/xNoO+ikp2QltMTXlZfyYT8RLrlszQ0unEUxspw68uZGtLAFWk80VKf0BoQJQdXUGwLke/g=
+	t=1735817677; cv=none; b=QQnPPHl15aTXxzAB+iEzstMHUjjtAz1Ab0V7tieeONqeq4lS+ceGY5RzxN8+RdyBWGheEk+qhLABPtpDGlqHD4SL59arZMBpo2uJ6753qz6HomCn5yz1iGUolFzzyqkLrufsr75bX/EfcTWypEaPsHtMaMGwxd0HD+IQa/D0LXs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1735815142; c=relaxed/simple;
-	bh=mMF/3PAWbT4cwYrfbRt7SNtYsxbQwYPfM12nGDJoqPQ=;
+	s=arc-20240116; t=1735817677; c=relaxed/simple;
+	bh=xZk5juEQTblPG6mT+mOtIaKkOYTA19ECmOyXXFnW3A4=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=EVPgrXJ4jhVo7BByNo9jAPI+LpxgjMuDJ67+gIDLl1wJJKT1VHlEbi6mVN4D5Y4Ca1MLkEAODTQXBHZKWE6PNcN2daSTnProMA7UvAK+fE+rpCAzLNqlz+VbyWFDMqgRjN8jJFYdVEUb1pchLXsAO+0LCz1d//mVzO/js8fJypA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=X1hbv+CW; arc=none smtp.client-ip=209.85.221.51
+	 In-Reply-To:Content-Type; b=SFtQWqWCzyTYhzKjZAqmVeHM4LBGgRsH2c6C+XBGForMZqLvNRc1UF7VI1uewt/b2TMv74Iqj5b/RtSmkbSdw5LGo2tMLa+vm+2c0jr7aXnUa+Az5beSA33LF+bcOWfV0fW1CbdTAi4rhKCheZ2yXndH/ehFEYDKUNqKJWUAYTk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=EM43osrj; arc=none smtp.client-ip=209.85.218.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="X1hbv+CW"
-Received: by mail-wr1-f51.google.com with SMTP id ffacd0b85a97d-38789e5b6a7so5676601f8f.1
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Jan 2025 02:52:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="EM43osrj"
+Received: by mail-ej1-f46.google.com with SMTP id a640c23a62f3a-aaec111762bso1648145366b.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Jan 2025 03:34:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=tuxon.dev; s=google; t=1735815139; x=1736419939; darn=vger.kernel.org;
+        d=tuxon.dev; s=google; t=1735817674; x=1736422474; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=ze9LqpjCGSWa0yPDrI54f/7UaaRjSHcJ6CR6aCivtOE=;
-        b=X1hbv+CW1mIXR5inMbIRSMeXu/iV+kika7xeuUAOOc8Pkj93e35QOzK2BTqlo9rkB2
-         RzdHFjnLfrc+iu2Fnh95De/rfhyxa+S2od0M4ya4jmKc+3yOnguowXtB7ze/BfM7isYa
-         1Pea5NJgMQSJfZs/yE/VahCSiqq1qRkPGZmaoaaEM3go+p0yh9aamPbIQDfpHJ2VN6lx
-         3qeHQowwLBkOlN/2rmEVHPOtblNIoI3zN3Y0obd8TjBN5F8adYUPZoxLBJGjbzkOlXRH
-         5eHJ6o8lkPYKCuK2NXcoXSm1ajMVv2XlO8+FxA7Hhd7eZKr+jGxO6f1drnVJWpW9+RKu
-         73eA==
+        bh=IJuTW2/wmv0Cni895FL84+N2QJ2H1fwMgsWcI7DGnW4=;
+        b=EM43osrjrSM15bPSCvRGvVR7Qmi1JctNay6HwZePyE0XwIjVEsfPuCmPRoykfMBIVe
+         EFejN/PzJGRW99/Zl+4S/u+k+wRbuaArdWcBNRmtNvwhsSepcY2aly2Ef/O8m0ewNfVL
+         SEMVZsV5Xrry2p7etoQBMXACAdPGCxGHSh6n8D2fim7yt4ttWzlyrWcYpYpiTjruGklM
+         MxqgaIRCBJSpPvG5wHKSVKoeoaTZqc6bd07MHoI/3p7WizITXFj1M/sp+T/esZ1fLI8C
+         WlKyll5dP+DAApSR6ScRLLXlC1jPCvJOLKbFnio75pcv1ZaahlvrvnrKU/770e6ZKOLR
+         Q1rQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1735815139; x=1736419939;
+        d=1e100.net; s=20230601; t=1735817674; x=1736422474;
         h=content-transfer-encoding:in-reply-to:content-language:from
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ze9LqpjCGSWa0yPDrI54f/7UaaRjSHcJ6CR6aCivtOE=;
-        b=XJDIEXuaiBrHU889n3/pdf3mYL4j61i2TtnMzcSA6rxSEQC+SPva5k/+BZhj+Zv7tD
-         C44pP6hhwuNA9dTPJPXXSwu1FIr8DwPkyiWf9w1Bh6VtxP14+fGP6qvoAX9Ul1a3IaWQ
-         vpBgw2p/Z0JJuDs4tyDB/Ed8hSzltE3NuoIEtu4bjdkc7+TUUd23hS2WbY75nrh+av9F
-         qncLB8r7J8m+R+xpC7p1NaloMgLWNa/DgfLDA4jFhipi+hTGzgRea/xXt060I696MIdp
-         WrafumLoSb9jwAag3VDNKCml1vrQEeUYYaL2TpL0wlYe1QYdQQY8r5dcUzzPWbmuw1Xf
-         CV0Q==
-X-Forwarded-Encrypted: i=1; AJvYcCWljqMv9pwzA8DmDpnk13K6KYYiFBoHrBcYu0FLAXkkjeBJQzjelgDvAIWLQ3UeclTH7iqg+21hfIw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzpbSZddlwVtJvIj9xHWlfAY691fANVtC5MtcmYzr27VPd4EXLZ
-	IGbAZ/SGfXL9K65o7P/FxaJof8qrq6BycNeS7Rhe55NbMbz9IMuSFsRr6I/EQmM=
-X-Gm-Gg: ASbGnctk0mBXzSkBMdmQxm4JeoZUlueOvRvgkX4xXSkCeZSt73m+pz39C8f84O79Y3F
-	Vbyux1VXRRlDfkEdjZdejJl6Bok2kA9kojhcFs5CODdChWMWsXn7Wb0NG7uQUtEFrieZAlyUDhE
-	Pxzz1qlt8ecMN+h233K8/ptbwhRLHLj5yIyVt9iB/sgVETiC3mY6wH7T0IE7jXTO4viWxothRky
-	HrdTK3M/f5LuxjK4SD1AQTbBLmDx1euQ9KHax1eo0Kht1IsXOOBYDgjGlEzvJs9jw==
-X-Google-Smtp-Source: AGHT+IEAXmh4Jm/fooPniPUd+cP6NsbK2SR6lviu3UydjCwVbdG5V5GA3GQCHI+v0JTIHRvlmZHUzQ==
-X-Received: by 2002:adf:ab0a:0:b0:38a:50fa:d582 with SMTP id ffacd0b85a97d-38a50faf3cemr11500112f8f.59.1735815139109;
-        Thu, 02 Jan 2025 02:52:19 -0800 (PST)
+        bh=IJuTW2/wmv0Cni895FL84+N2QJ2H1fwMgsWcI7DGnW4=;
+        b=WaeyqZDJ2wTk6IEyU/NgP+YqlMwaWjma98sJ/ibBFC+rwdtHfe+JsIWk0I5LVEhyAa
+         k+UlQ9PcHOL/jct3Cc/jeIUs2/78cUatxpoXcf9SMzT5DEnCES/aL66brPqczp74BymO
+         l4XGEbA4Fy+p+Me9TfjeDoxmO5aO+mmtucHHbzF/6jZX7VyFzdvAGTs68DMteAhcwEwd
+         QS+XqdtjH77EhnZjrG9xQgvyEYT3m/Z8T2tu7LIam0/leA08rimKEXwhEc92+7TbhyFW
+         JG05nwrDNq+NkvJEfqXeCZNzBcOzlbbwbFja5b9o2mi5l9YZfrFQk3ARvEk36VnDnDED
+         mVTA==
+X-Forwarded-Encrypted: i=1; AJvYcCX6Co1UWzqfX833bzdHktLrH0HqhmhmEl/GMNXpA3oK1WLLiWAKux9i2U5xBUzWenrty9twjcdn/4c=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwN/4DKgmQRR+ZPYe1wN0IXmzjRp14ZCuh5PCbE6jE1cbLGFz81
+	SItG7LEHlns8uDLpaZ56p71LnB9nTLBcecCsp2fY2wQsYhj6ZmFNX1WGWQX4ilw=
+X-Gm-Gg: ASbGncsjH4G/A2/C8NmFamEaS1s6aMS1D62D/H5Vee+Li2r55WImrL7hLf5L9vpcq4k
+	Png94G9z02NxnD7EojFUis9ugZqjtwUQBMpnaFCCl5gFMKTuN50mvfIwOIrDAHbCL59RF4F5aQH
+	qgOR8UseCvmmr8A979+dNq0GWXFGz51xRfptj/B6peJEhmlWHJf4b1UHKjD2SzhSL8A7awKzCH0
+	tGsQYvviNZfZE1vIwimJQBnMwRVa+tgkmfc06UryEUQ8txWJ2rT03LSRLnqSTK+0Q==
+X-Google-Smtp-Source: AGHT+IGIlULUY5OVKXjFZRKGpQ2k3iKZcvVspZWtEdWr47v7SWAFqOFAYEk9fc6/cC6JF/XKlQkXSw==
+X-Received: by 2002:a17:907:97c5:b0:aac:431:4ee7 with SMTP id a640c23a62f3a-aac2883fe8fmr4247597966b.5.1735817674243;
+        Thu, 02 Jan 2025 03:34:34 -0800 (PST)
 Received: from [192.168.50.4] ([82.78.167.102])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b3b295sm490098515e9.33.2025.01.02.02.52.16
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aac0e830daasm1761964966b.13.2025.01.02.03.34.32
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Jan 2025 02:52:18 -0800 (PST)
-Message-ID: <70aab1bc-1427-44ed-b516-843429d0bdfa@tuxon.dev>
-Date: Thu, 2 Jan 2025 12:52:16 +0200
+        Thu, 02 Jan 2025 03:34:33 -0800 (PST)
+Message-ID: <9f2025e3-5ec6-4a7d-8a4f-d04b343da912@tuxon.dev>
+Date: Thu, 2 Jan 2025 13:34:31 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -65,7 +65,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 09/13] ARM: dts: microchip: add sama7d65 SoC DT
+Subject: Re: [PATCH v4 00/13] Add support for SAMA7D65
 To: Ryan.Wanner@microchip.com, robh@kernel.org, krzk+dt@kernel.org,
  conor+dt@kernel.org, nicolas.ferre@microchip.com,
  alexandre.belloni@bootlin.com, mturquette@baylibre.com, sboyd@kernel.org,
@@ -77,32 +77,43 @@ Cc: dharma.b@microchip.com, mihai.sain@microchip.com,
  linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
  linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
 References: <cover.1734723585.git.Ryan.Wanner@microchip.com>
- <3f63aebc4b31da1b631ce7e6d76aa0046deeda6a.1734723585.git.Ryan.Wanner@microchip.com>
 From: Claudiu Beznea <claudiu.beznea@tuxon.dev>
 Content-Language: en-US
-In-Reply-To: <3f63aebc4b31da1b631ce7e6d76aa0046deeda6a.1734723585.git.Ryan.Wanner@microchip.com>
+In-Reply-To: <cover.1734723585.git.Ryan.Wanner@microchip.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-Hi, Ryan,
+
 
 On 20.12.2024 23:07, Ryan.Wanner@microchip.com wrote:
-> +		pioa: pinctrl@e0014000 {
-> +			compatible = "microchip,sama7d65-pinctrl", "microchip,sama7g5-pinctrl";
 
-Please also update the documentation with the fallback.
+[ ... ]
 
-> +			reg = <0xe0014000 0x800>;
-> +			interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks = <&pmc PMC_TYPE_PERIPHERAL 10>;
-> +			interrupt-controller;
-> +			#interrupt-cells = <2>;
-> +			gpio-controller;
-> +			#gpio-cells = <2>;
-> +		};
-> +
+>   dt-bindings: atmel-sysreg: add sama7d65 RAM and PIT
 
+Was already applied from v3
+
+>   dt-bindings: clocks: atmel,at91sam9x5-sckc: add sama7d65
+>   dt-bindings: clock: Add SAMA7D65 PMC compatible string
+
+Was already applied from v3
+
+>   dt-bindings: ARM: at91: Document Microchip SAMA7D65 Curiosity
+
+Was already applied from v3
+
+>   clk: at91: sama7d65: add sama7d65 pmc driver
+
+Applied to clk-microchip
+
+>   ARM: dts: at91: Add sama7d65 pinmux
+
+Was already applied from v3
+
+>   ARM: configs: at91: sama7: add new SoC config
+
+Was apready applied from v3
+
+>   ARM: at91: add new SoC sama7d65
+
+Applied to at91-soc, thanks!
