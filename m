@@ -1,61 +1,61 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
+Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8546F1A8408;
-	Sun,  5 Jan 2025 16:13:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B455D1C07EE;
+	Sun,  5 Jan 2025 16:13:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736093638; cv=none; b=QZylnQzIXBKbUYluEqic5L5JeVVodtjW+UgmWjFMZuuayrEfdFnoAUmYJZVY2K9JkqkWjGjS3OpGhco0rgSV1R9TzmxrYl7iuzDzcgpVqF+Ieyp5LZTrhsLnMV0ARkO5fISnmLKYahhycEMbAz0jlvhSYRh6TA63rIwKe9DIc3A=
+	t=1736093640; cv=none; b=URQpCb0W3MdqNX+zz88rbUOYwXtLvWlzldCLx0sBVHh8+5jMIIW+MzQpDklmVyhW0Q6wPDTylmVskIECTycRp1/Ek5gDnQV8Avy507JiUnZfE6jkMriwKwg+GTmyfuvhDmR38eVpK1CuULwiqourZtlMfioG5d+HmxKcv3ayqVU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736093638; c=relaxed/simple;
-	bh=xz9TkS8fZcmJTgdNAmHnREeigZQ5G/rApRQFHj9HL8c=;
+	s=arc-20240116; t=1736093640; c=relaxed/simple;
+	bh=dPKQ833edyEcVdeRaMAPYGGBsf88WVzIzfOKhY2RE2g=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=rUlm3na9FoQ8nCXO9HNC1AaW3lik/y9GRgA/+rck7FYiftUjCufgkUOB8CEWgQMxMZXGvtetwuOI8e+nP9XkuLRdTC4MA1gzVuueqt/X3tUi5N3aB9T+Xrk4aD1IknJfLedkVwAW9NoqK7b6ZNXc7KpWuEx23SZLqbM8tOH+dWs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ioVda0La; arc=none smtp.client-ip=209.85.128.44
+	 MIME-Version; b=PVU+EZ/gmZaW0gScWN66VZW4DWKm6IBMkHkNYfKHMAOqkSoe5vTGxwsyPIg59uuvUj3K4P3i4oH4hZMT0gqWduZFkttLLbHhR79DInUQ2N/YbS7UyuegGSmRf4khN+km9z8gB7Hcm+vzOz4azjsan4y2zMuMfLZ3aSALAZcq0iQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=POwWXbli; arc=none smtp.client-ip=209.85.128.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ioVda0La"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-43625c4a50dso93238435e9.0;
-        Sun, 05 Jan 2025 08:13:56 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="POwWXbli"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4361815b96cso90139135e9.1;
+        Sun, 05 Jan 2025 08:13:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736093635; x=1736698435; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1736093637; x=1736698437; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=rMcuEJIoEyeliFcoiN1rN1Xlq33F+vpylS/RXg2R5T8=;
-        b=ioVda0LazlHbAUjz/QVrONJuWZ9nfi+Rvw7Cz1JQ0SmNa7Bdei1oaJHbUBzq9K2ZBW
-         fpW6MVFECKWe1Uu0pJd/r9Ir7BozXT2Nnc9deZsHJ9f0mh53/zqPHPpfWbzGx4xjN7/v
-         FM2Ir8+3zxCl6I1S4ZEDQJsERFZUyPEqsZoWd73bG+nVH5wMU8U1ld6pzPvvnbyzFDg6
-         GGGrDmOtYHzepxHtiaHMAoLBHsJV1cAZ4Hv3ima3fk1QTXNKkItbbsaQnvXHqdt3xMsm
-         +frmGhe5j011A/LNkZ9x0AV1OuMwbiEGvlE8z/YpvyAIvBUX8xL2lV5oS/poB6k6mt/9
-         xtmw==
+        bh=tpWoGBpI5JjtqZNRK0ytQyJ2WYZd1lAvc/QlVyBoHrY=;
+        b=POwWXbliYKk1hWXSCIfcaSGUfeHdHnGwWGoHzfzG7jlvb6FqSeLpuWCl/YutjKhpQH
+         LOGY2nBlLkJhv+Yjf3a6FMAy4cUrjZpweq1FKRiaLz0KFwG2b31sC6Hglx7sHlpPWoFs
+         4mxzMlB1MraD+REOFvYirh0L0nvZnh0G6aJ1s68fnSCHWkYy6KQ5fzGWhz0KF6cs8ns0
+         lKm+D6d1RnvqlLyHqpvllWpyJModCJAIwMML8HSgYqlPkl62AwgY1DvrTlgbC/vYk4hS
+         ID60wIPYl2Ugu+w1LEMbXEvLHLSSiKHQvSDfYI7RK+oh2bsvY9MaoK5S2M9f+4Eeh7+F
+         8Cig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736093635; x=1736698435;
+        d=1e100.net; s=20230601; t=1736093637; x=1736698437;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=rMcuEJIoEyeliFcoiN1rN1Xlq33F+vpylS/RXg2R5T8=;
-        b=ceoDYrN+cnBTZzu0Pw2ZaoXVzOSnSpsCKzFADOUuEHgdQKL9BLcWcdF9l/J0RAasxy
-         bMsAI4G50ae8sa3APNktFKPBJRyMwkhV2/KuRSAPoFgC7L6oSKiNvqAE6j6SfsYYaC9B
-         AhyC6/VL/XsHpf+izzJS96TXMFZ7WGGOj1F0ievQkXEkZJfJAH3PsGcmMcLcc6qCas4i
-         Ja5q/YGVH65d8saz15GvfyetqpeIA2obtm03kcbrFHIkk8EwU8U3dp+JAaRnqW57D1mj
-         lmxzacGT0mRu8afNTW6jprKyCNGXaUOSXY6FZa4rNd3EAm3W0/AymvnO9qUbH20PX7/k
-         rSzg==
-X-Forwarded-Encrypted: i=1; AJvYcCUrKYLJH9lfzv1q1geRCb8S/PZ0sAXb/6s5GqJ/QoOkxyaUYSAM94LOj9fNNdr+H29u7IvQXRtslsYzTt71NBnl5B4=@vger.kernel.org, AJvYcCVQASjNXH6fJuj4e41Iwe8boHnkAb+WGwkwiOxsu5wnByPvGmZ7yt2ZT1gGnVk4qAi+MDm1jxin4zZT@vger.kernel.org, AJvYcCVeaPly3zbrLYEElefhBsUYBqLN77szdePQzlCKsJiSBn8ppngiSAXse2EbKZJdtvcEt/+e24QuwoS+ZOld@vger.kernel.org
-X-Gm-Message-State: AOJu0YxNv0wdyB/98yMnuo37npyHqu79GuPWgP6kdWnmNGfrmd6TQb6+
-	6MQuXbqrrvJ5+MVRNbIQwj5HwnYqHLZZZodf5IUYI/nDf3CgAm1I
-X-Gm-Gg: ASbGncs3aMRJpb9Peqxglp7oUeQz/IpvzWFbyN/+fYkUZi27QlFrNhnltJpSdjB3X0Q
-	IbJ5/gPP5kHu73HTWfclAUZq9UzlvbRfBKZzvGYAEXGnrAYSVOC10ogLlHLNbyL8El7juSpKDQu
-	Ew4pARvmFZgROsuogC8EGRl/2tatRAWVuECFRU0aqw+blR/PQSIPzUJygsV65Hm+eeEWAWj4o93
-	2Ut0RUT98zxU0t3TxY0SpY7vObynQn7DmLxgGNopWdGaY6wrQjfOrucvr0qATlcu/ePftE=
-X-Google-Smtp-Source: AGHT+IGi2vV5nk3t35IRdS2EtJiGq1THtyKt4WXcE+8E93rhZ7B0ooKHzQcnIOVx/iet4T+BYNL+oQ==
-X-Received: by 2002:a05:600c:35cb:b0:436:1c04:aa9a with SMTP id 5b1f17b1804b1-4366864379bmr470705475e9.14.1736093634661;
-        Sun, 05 Jan 2025 08:13:54 -0800 (PST)
+        bh=tpWoGBpI5JjtqZNRK0ytQyJ2WYZd1lAvc/QlVyBoHrY=;
+        b=MASFUW4zwTlPTs/cktsp8MUb5b6nCM7EFWrnu83dlwzjhWUJ3Q4ITRJYWb9unwEbp0
+         1M3Vq2+HVwIArry1b48f4R3B+KQaTKpkqtuoKb32r3pXlMjVa0CLveqb0lTgI++SGQJF
+         4/Trx8jcVzJxdL8FJ9yurdDtoNgYQEkhTGY8OAgTYOtEf/NhRAnVlwKCgv85ndc3sqQb
+         fVbHdq4Bs4Gu3YcBOU/uReW/haISOQdyVtSjXQrE4SP8bVuZH7JkyRE2rktGzEBWgxAP
+         edHXlMODepdxxaNLJFWEcSMBh3URXYqyuAbC7Vu2eUrT8Y8+jpcGJy14MfAjaUIaVQec
+         7UjQ==
+X-Forwarded-Encrypted: i=1; AJvYcCU8kQE8tix5Rj3JSHd5cjDZ85G6nPbGgWMg+Ex61qrsjP1BcbZqSnt/MjFaO0sonMo4Acd3z0QrnLyqG4R/@vger.kernel.org, AJvYcCVjcNzwvl7HwZ67oLa64TXHTDrxFPk+J8EK6yK0ZceIdT92leHkQCPv/D+m5y8ufafjlDQiypBCj4XV@vger.kernel.org, AJvYcCVpKpIdvZILQ1Zz3bmv5qGc1Wt0EhjcvV4AH7b6l8g4AIrPNcgtV+1gd90KmuLXGxLLXMdqOcIiQ2x4VG8ZfDI9WYg=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywxg13Yu1onFH1AN3QLUu0D++P4xUCgWbKm7WFWVCprFYmJUD5/
+	lFd9dPWERwceaZD4PMcAicehzy4gjygiRG5JNWuS0BlSruFvLlWp
+X-Gm-Gg: ASbGncu74/x2RLaWfZTC3I1Da37LFM9XKubncWSrpJ+aeAK1u6O/Rpdxa/jy9AwXXHI
+	v0H+JxHwVClta3ngSyVsFY6F9P8AxNyuyHNcWrmz51ySxmserpTFBjjA1VrWwFuu85RB4KpnNIG
+	EC+AHwnSdBMz4e1TSD/OLeUAuXVx69O+jzVAimVJrkdHPFtp4/Y7a42wss1C6iYMMOjx32aq7ve
+	wz4iNAoaCStT3/T/1F+afIAMJK5KQjWWSGpWoWCX2wgpfq5uygpD9HK4hp3AdO20Xj+yEM=
+X-Google-Smtp-Source: AGHT+IEIahAIdxXweRtn/KVasdlzqOJYFx1e5QhZ6PEatCcqDd10ca2+6lURrpEXAyef4HXhqfrY2A==
+X-Received: by 2002:a5d:6c65:0:b0:386:1cf9:b993 with SMTP id ffacd0b85a97d-38a221fff31mr46175844f8f.26.1736093636843;
+        Sun, 05 Jan 2025 08:13:56 -0800 (PST)
 Received: from ivaylo-T580.. ([94.131.202.183])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.53
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Jan 2025 08:13:54 -0800 (PST)
+        Sun, 05 Jan 2025 08:13:56 -0800 (PST)
 From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -68,9 +68,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	linux-samsung-soc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 4/6] arm64: dts: exynos8895: add a node for mmc
-Date: Sun,  5 Jan 2025 18:13:42 +0200
-Message-ID: <20250105161344.420749-5-ivo.ivanov.ivanov1@gmail.com>
+Subject: [PATCH v3 5/6] arm64: dts: exynos: exynos8895-dreamlte: enable support for microSD storage
+Date: Sun,  5 Jan 2025 18:13:43 +0200
+Message-ID: <20250105161344.420749-6-ivo.ivanov.ivanov1@gmail.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
 References: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
@@ -82,43 +82,70 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add an MMC node in order to allow devices with that SoC to make use of
-it. It's typically used as a secondary storage option for SD cards. In
-the vendor kernels, it's labelled as mmc_2, but since there don't seem to
-be any other blocks, treat it as the only MMC.
+Enable MMC for the Samsung Galaxy S8, used as external microSD card
+storage. Since the main PMIC is currently not supported, assume the
+required regulators are enabled by the previous bootloader.
 
 Signed-off-by: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 ---
- arch/arm64/boot/dts/exynos/exynos8895.dtsi | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ .../boot/dts/exynos/exynos8895-dreamlte.dts   | 32 +++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/exynos/exynos8895.dtsi b/arch/arm64/boot/dts/exynos/exynos8895.dtsi
-index eedbd1728..f92d2a8a2 100644
---- a/arch/arm64/boot/dts/exynos/exynos8895.dtsi
-+++ b/arch/arm64/boot/dts/exynos/exynos8895.dtsi
-@@ -1296,6 +1296,22 @@ pinctrl_fsys1: pinctrl@11430000 {
- 			interrupts = <GIC_SPI 342 IRQ_TYPE_LEVEL_HIGH>;
- 		};
+diff --git a/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts b/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
+index 3a376ab2b..6c4f8d4a9 100644
+--- a/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
++++ b/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
+@@ -16,6 +16,10 @@ / {
+ 	compatible = "samsung,dreamlte", "samsung,exynos8895";
+ 	chassis-type = "handset";
  
-+		mmc: mmc@11500000 {
-+			compatible = "samsung,exynos8895-dw-mshc-smu",
-+				     "samsung,exynos7-dw-mshc-smu";
-+			reg = <0x11500000 0x2000>;
-+			assigned-clocks = <&cmu_top CLK_MOUT_CMU_FSYS1_MMC_CARD>;
-+			assigned-clock-parents = <&cmu_top CLK_FOUT_SHARED4_PLL>;
-+			clocks = <&cmu_fsys1 CLK_GOUT_FSYS1_MMC_CARD_I_ACLK>,
-+				 <&cmu_fsys1 CLK_GOUT_FSYS1_MMC_CARD_SDCLKIN>;
-+			clock-names = "biu", "ciu";
-+			fifo-depth = <64>;
-+			interrupts = <GIC_SPI 341 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			status = "disabled";
-+		};
++	aliases {
++		mmc0 = &mmc;
++	};
 +
- 		pinctrl_abox: pinctrl@13e60000 {
- 			compatible = "samsung,exynos8895-pinctrl";
- 			reg = <0x13e60000 0x1000>;
+ 	chosen {
+ 		#address-cells = <2>;
+ 		#size-cells = <1>;
+@@ -95,6 +99,27 @@ &oscclk {
+ 	clock-frequency = <26000000>;
+ };
+ 
++&mmc {
++	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_bus1 &sd2_bus4 &sd2_cd>;
++	pinctrl-names = "default";
++
++	bus-width = <4>;
++	card-detect-delay = <200>;
++	cd-gpios = <&gpa1 5 GPIO_ACTIVE_LOW>;
++	clock-frequency = <800000000>;
++	disable-wp;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
++
++	/* TODO: Add regulators once PMIC is implemented */
++
++	samsung,dw-mshc-ciu-div = <3>;
++	samsung,dw-mshc-ddr-timing = <1 2>;
++	samsung,dw-mshc-sdr-timing = <0 3>;
++
++	status = "okay";
++};
++
+ &pinctrl_alive {
+ 	key_power: key-power-pins {
+ 		samsung,pins = "gpa2-4";
+@@ -123,4 +148,11 @@ key_wink: key-wink-pins {
+ 		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
+ 		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV1>;
+ 	};
++
++	sd2_cd: sd2-cd-pins {
++		samsung,pins = "gpa1-5";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
++		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV4>;
++	};
+ };
 -- 
 2.43.0
 
