@@ -1,61 +1,61 @@
 Received: from mail-wm1-f47.google.com (mail-wm1-f47.google.com [209.85.128.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B455D1C07EE;
-	Sun,  5 Jan 2025 16:13:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2515165F13;
+	Sun,  5 Jan 2025 16:14:13 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736093640; cv=none; b=URQpCb0W3MdqNX+zz88rbUOYwXtLvWlzldCLx0sBVHh8+5jMIIW+MzQpDklmVyhW0Q6wPDTylmVskIECTycRp1/Ek5gDnQV8Avy507JiUnZfE6jkMriwKwg+GTmyfuvhDmR38eVpK1CuULwiqourZtlMfioG5d+HmxKcv3ayqVU=
+	t=1736093655; cv=none; b=pJS2KMZvbuf6L3/P7ssIpVnnJk7Dctp7Etr6izZ4nMPNLNmXpZxMplpKGigG1fFT9sHPCAq9F4Wlgsq8rBg+0OtovqFtYCu6ZX38emPlj2Al46FfNzJuSLNEgl8ApFbwa1MlzcHemqqdNmwDZzBmwFbq2rq45mymu049D/FR55g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736093640; c=relaxed/simple;
-	bh=dPKQ833edyEcVdeRaMAPYGGBsf88WVzIzfOKhY2RE2g=;
+	s=arc-20240116; t=1736093655; c=relaxed/simple;
+	bh=Fy1C5rmX7BtaHWAWlfbpoCLIKCiNrHUVoyd8rzcg+/M=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PVU+EZ/gmZaW0gScWN66VZW4DWKm6IBMkHkNYfKHMAOqkSoe5vTGxwsyPIg59uuvUj3K4P3i4oH4hZMT0gqWduZFkttLLbHhR79DInUQ2N/YbS7UyuegGSmRf4khN+km9z8gB7Hcm+vzOz4azjsan4y2zMuMfLZ3aSALAZcq0iQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=POwWXbli; arc=none smtp.client-ip=209.85.128.47
+	 MIME-Version; b=JJQ8bG/KMuCTZ/1AHjYQjA4MX3oh00Pr2dEyqJsAIzvYooiEG9gB6BNXab1uGHl8csq0AsdL5Hfx8fhGNn12KZyLpAmS7bCHJcpVodTB6+cT1sYKGTn1MmRjaCFJr4u4P2lYb/PUtc7KQmAwamk+CNCtRRXe/yY5kXG5wCa4sjE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=azHeSu9Q; arc=none smtp.client-ip=209.85.128.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="POwWXbli"
-Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-4361815b96cso90139135e9.1;
-        Sun, 05 Jan 2025 08:13:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="azHeSu9Q"
+Received: by mail-wm1-f47.google.com with SMTP id 5b1f17b1804b1-436ce2ab251so11852685e9.1;
+        Sun, 05 Jan 2025 08:14:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736093637; x=1736698437; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1736093652; x=1736698452; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=tpWoGBpI5JjtqZNRK0ytQyJ2WYZd1lAvc/QlVyBoHrY=;
-        b=POwWXbliYKk1hWXSCIfcaSGUfeHdHnGwWGoHzfzG7jlvb6FqSeLpuWCl/YutjKhpQH
-         LOGY2nBlLkJhv+Yjf3a6FMAy4cUrjZpweq1FKRiaLz0KFwG2b31sC6Hglx7sHlpPWoFs
-         4mxzMlB1MraD+REOFvYirh0L0nvZnh0G6aJ1s68fnSCHWkYy6KQ5fzGWhz0KF6cs8ns0
-         lKm+D6d1RnvqlLyHqpvllWpyJModCJAIwMML8HSgYqlPkl62AwgY1DvrTlgbC/vYk4hS
-         ID60wIPYl2Ugu+w1LEMbXEvLHLSSiKHQvSDfYI7RK+oh2bsvY9MaoK5S2M9f+4Eeh7+F
-         8Cig==
+        bh=uOSez2kZNKPIr6/43vKUa8IfzgzZcFJWYi+Gr+NykBo=;
+        b=azHeSu9QUv0JGPbWUK5ypGQZMWSBqetdtoFemz56M79mF1EaNeaEbwaCOwcQ2a6yuW
+         SvP5HxLBnaj9ARjDlbobCWYU0rOcF/EIQo2xspCtH9UOUv6Jaf4GwcNs0KyMG7e0w7vY
+         bXYgwhWVBhHaxxnE+5AQWVJGvnj48mmPDNFxwt8aH+gKsQRQXAIDo/fsLgVmdu3ZNzVo
+         xYey2tEWBrTaSb92uVahFqmImq3eMGuJxyNQgHsAzs42KuMZl/wuvamGmmdofo4GdlUe
+         d2cLkjiobQqPHB6G3HnOFHWNGjDLk5kc6yee5KR43BZ+8/cPcu10SQpxtoRrvSpvh98Z
+         VMgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736093637; x=1736698437;
+        d=1e100.net; s=20230601; t=1736093652; x=1736698452;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=tpWoGBpI5JjtqZNRK0ytQyJ2WYZd1lAvc/QlVyBoHrY=;
-        b=MASFUW4zwTlPTs/cktsp8MUb5b6nCM7EFWrnu83dlwzjhWUJ3Q4ITRJYWb9unwEbp0
-         1M3Vq2+HVwIArry1b48f4R3B+KQaTKpkqtuoKb32r3pXlMjVa0CLveqb0lTgI++SGQJF
-         4/Trx8jcVzJxdL8FJ9yurdDtoNgYQEkhTGY8OAgTYOtEf/NhRAnVlwKCgv85ndc3sqQb
-         fVbHdq4Bs4Gu3YcBOU/uReW/haISOQdyVtSjXQrE4SP8bVuZH7JkyRE2rktGzEBWgxAP
-         edHXlMODepdxxaNLJFWEcSMBh3URXYqyuAbC7Vu2eUrT8Y8+jpcGJy14MfAjaUIaVQec
-         7UjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU8kQE8tix5Rj3JSHd5cjDZ85G6nPbGgWMg+Ex61qrsjP1BcbZqSnt/MjFaO0sonMo4Acd3z0QrnLyqG4R/@vger.kernel.org, AJvYcCVjcNzwvl7HwZ67oLa64TXHTDrxFPk+J8EK6yK0ZceIdT92leHkQCPv/D+m5y8ufafjlDQiypBCj4XV@vger.kernel.org, AJvYcCVpKpIdvZILQ1Zz3bmv5qGc1Wt0EhjcvV4AH7b6l8g4AIrPNcgtV+1gd90KmuLXGxLLXMdqOcIiQ2x4VG8ZfDI9WYg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywxg13Yu1onFH1AN3QLUu0D++P4xUCgWbKm7WFWVCprFYmJUD5/
-	lFd9dPWERwceaZD4PMcAicehzy4gjygiRG5JNWuS0BlSruFvLlWp
-X-Gm-Gg: ASbGncu74/x2RLaWfZTC3I1Da37LFM9XKubncWSrpJ+aeAK1u6O/Rpdxa/jy9AwXXHI
-	v0H+JxHwVClta3ngSyVsFY6F9P8AxNyuyHNcWrmz51ySxmserpTFBjjA1VrWwFuu85RB4KpnNIG
-	EC+AHwnSdBMz4e1TSD/OLeUAuXVx69O+jzVAimVJrkdHPFtp4/Y7a42wss1C6iYMMOjx32aq7ve
-	wz4iNAoaCStT3/T/1F+afIAMJK5KQjWWSGpWoWCX2wgpfq5uygpD9HK4hp3AdO20Xj+yEM=
-X-Google-Smtp-Source: AGHT+IEIahAIdxXweRtn/KVasdlzqOJYFx1e5QhZ6PEatCcqDd10ca2+6lURrpEXAyef4HXhqfrY2A==
-X-Received: by 2002:a5d:6c65:0:b0:386:1cf9:b993 with SMTP id ffacd0b85a97d-38a221fff31mr46175844f8f.26.1736093636843;
-        Sun, 05 Jan 2025 08:13:56 -0800 (PST)
+        bh=uOSez2kZNKPIr6/43vKUa8IfzgzZcFJWYi+Gr+NykBo=;
+        b=vgp3G81wdRnEn4QEr9jQg6LL0kwvw2aq5qfsLQ9fTvSya31S1md7eIrYfYEggNCSLR
+         ysJqt/XEm3dlc/yaHlTNSGe3qHvfbZPETMAx/IkkwU8Jaeeo0iBOdsGmddkxcj9v2R8q
+         mbNAAr8AZrNrMytGvXAc2jogM6THTTJKAbDoGm6+j7oRRHkiWyZBkUSYPizaGKecISr+
+         Zi6gqj8M0+T76lvbiyTOaUND+ZHu4qgbuDAHPXBBsL0xEOqEbH7DThb/8fXl7hMeRBOx
+         PV+4DYkOWfvKOAlioW3p3Rv6utO68kxSMEey2oMNgmJHqjjZr5O7mpego/affcJj6gaQ
+         V+4Q==
+X-Forwarded-Encrypted: i=1; AJvYcCU1gsVEqefeS/5zEQcCWuPNtD3dlOcUhxBlDZ+XSyy5fEY9+USiA2EI4EbQz0W/8jhryDXLXExN+lNTAHC2@vger.kernel.org, AJvYcCU9T76eVjQ2bP2dcHMAxWVr16Wf5SysLY3LQ4E/ZIha59VlTZ069WDQJ04CjiaZTkbK4gwtyPZXp0ZZ85G8rXjBvAA=@vger.kernel.org, AJvYcCW7GIEQ8nx6m6JXUJyM7BdpH45a0oXnFRHKPLO/8nHr3ApcpHZ0Y+2L6FU9T8aDSGOKjWG3nXrIg1EI@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxy31ghSICCaDxEOX5iM4b0oW0K1BIuSBOO/hvmWqc/ltzMGVCy
+	9WpXnNoG71jtX47hIFiasxZ8fjG+jU1dwIo6pMnmMpo2AsO+jX0WuvSLgA==
+X-Gm-Gg: ASbGncvfSPrqcPzihI067FR+HMewB+Wu4WrTlqbj2l7I5Yoo3o7DqBFhS5eeNh1iKgx
+	+ewI3SgLRslE5XzSLqNFVeOl35KhJAYOSo8jm2dzCtrzIOLlNaXRoQ/Cy6RsBJsNZeuDtZJAtnE
+	4xmv8Q8bn4pRPDOnFsABuVEREvqXeXCjmtXte0NCOc45w77y/FTuKuDo3KQB3P79gyy7l217zEt
+	2qImmDFaEstLTGWMLD/bP7B7v5V9mz2RB4Cd4HmmbK4hqEa6rkXnOL6y4zrWpuWWu8Jx2M=
+X-Google-Smtp-Source: AGHT+IGGn0UJF9DyGx4oUCveH4zyPEgOigjYmBULy/W6t7z/jQh21cbV2kifxL+XEIbanKLa1PZEkw==
+X-Received: by 2002:a05:600c:3b23:b0:431:60ec:7a96 with SMTP id 5b1f17b1804b1-43668b49950mr412180845e9.25.1736093652049;
+        Sun, 05 Jan 2025 08:14:12 -0800 (PST)
 Received: from ivaylo-T580.. ([94.131.202.183])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.55
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.14.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Jan 2025 08:13:56 -0800 (PST)
+        Sun, 05 Jan 2025 08:14:11 -0800 (PST)
 From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -68,9 +68,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	linux-samsung-soc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 5/6] arm64: dts: exynos: exynos8895-dreamlte: enable support for microSD storage
-Date: Sun,  5 Jan 2025 18:13:43 +0200
-Message-ID: <20250105161344.420749-6-ivo.ivanov.ivanov1@gmail.com>
+Subject: [PATCH v3 6/6] arm64: dts: exynos: exynos8895-dreamlte: enable support for the touchscreen
+Date: Sun,  5 Jan 2025 18:13:44 +0200
+Message-ID: <20250105161344.420749-7-ivo.ivanov.ivanov1@gmail.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
 References: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
@@ -82,69 +82,78 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Enable MMC for the Samsung Galaxy S8, used as external microSD card
-storage. Since the main PMIC is currently not supported, assume the
-required regulators are enabled by the previous bootloader.
+The Samsung Galaxy S8 uses a Samsung s6sy761 touchscreen over hsi2c23.
+Add a node for it in order to allow using the touchscreen as long as
+the previous bootloader has enabled the required regulators because
+there's no support for PMIC yet.
 
 Signed-off-by: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 ---
- .../boot/dts/exynos/exynos8895-dreamlte.dts   | 32 +++++++++++++++++++
- 1 file changed, 32 insertions(+)
+ .../boot/dts/exynos/exynos8895-dreamlte.dts   | 40 +++++++++++++++++++
+ 1 file changed, 40 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts b/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
-index 3a376ab2b..6c4f8d4a9 100644
+index 6c4f8d4a9..61e064af3 100644
 --- a/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
 +++ b/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dts
-@@ -16,6 +16,10 @@ / {
- 	compatible = "samsung,dreamlte", "samsung,exynos8895";
- 	chassis-type = "handset";
+@@ -10,6 +10,7 @@
+ #include <dt-bindings/gpio/gpio.h>
+ #include <dt-bindings/input/input.h>
+ #include <dt-bindings/interrupt-controller/irq.h>
++#include <dt-bindings/soc/samsung,exynos-usi.h>
  
-+	aliases {
-+		mmc0 = &mmc;
-+	};
-+
- 	chosen {
- 		#address-cells = <2>;
- 		#size-cells = <1>;
-@@ -95,6 +99,27 @@ &oscclk {
- 	clock-frequency = <26000000>;
- };
- 
-+&mmc {
-+	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_bus1 &sd2_bus4 &sd2_cd>;
-+	pinctrl-names = "default";
-+
-+	bus-width = <4>;
-+	card-detect-delay = <200>;
-+	cd-gpios = <&gpa1 5 GPIO_ACTIVE_LOW>;
-+	clock-frequency = <800000000>;
-+	disable-wp;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
-+
-+	/* TODO: Add regulators once PMIC is implemented */
-+
-+	samsung,dw-mshc-ciu-div = <3>;
-+	samsung,dw-mshc-ddr-timing = <1 2>;
-+	samsung,dw-mshc-sdr-timing = <0 3>;
-+
-+	status = "okay";
-+};
-+
- &pinctrl_alive {
- 	key_power: key-power-pins {
- 		samsung,pins = "gpa2-4";
-@@ -123,4 +148,11 @@ key_wink: key-wink-pins {
- 		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
- 		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV1>;
+ / {
+ 	model = "Samsung Galaxy S8 (SM-G950F)";
+@@ -93,6 +94,33 @@ wink-key {
+ 			wakeup-source;
+ 		};
  	};
 +
-+	sd2_cd: sd2-cd-pins {
-+		samsung,pins = "gpa1-5";
-+		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
-+		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
-+		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV4>;
++	/* TODO: Remove once PMIC is implemented  */
++	reg_placeholder: regulator-0 {
++		compatible = "regulator-fixed";
++		regulator-name = "reg-placeholder";
 +	};
++};
++
++&hsi2c_23 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	status = "okay";
++
++	touchscreen@48 {
++		compatible = "samsung,s6sy761";
++		reg = <0x48>;
++
++		/* TODO: Update once PMIC is implemented */
++		avdd-supply = <&reg_placeholder>;
++		vdd-supply = <&reg_placeholder>;
++
++		interrupt-parent = <&gpa1>;
++		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
++
++		pinctrl-0 = <&ts_int>;
++		pinctrl-names = "default";
++	};
+ };
+ 
+ &oscclk {
+@@ -155,4 +183,16 @@ sd2_cd: sd2-cd-pins {
+ 		samsung,pin-pud = <EXYNOS_PIN_PULL_UP>;
+ 		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV4>;
+ 	};
++
++	ts_int: ts-int-pins {
++		samsung,pins = "gpa1-0";
++		samsung,pin-function = <EXYNOS_PIN_FUNC_EINT>;
++		samsung,pin-pud = <EXYNOS_PIN_PULL_NONE>;
++		samsung,pin-drv = <EXYNOS7_PIN_DRV_LV1>;
++	};
++};
++
++&usi9 {
++	samsung,mode = <USI_MODE_I2C0_1>;
++	status = "okay";
  };
 -- 
 2.43.0
