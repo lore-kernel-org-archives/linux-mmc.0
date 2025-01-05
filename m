@@ -1,59 +1,61 @@
 Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D50C1292CE;
-	Sun,  5 Jan 2025 16:13:50 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B483E1537CE;
+	Sun,  5 Jan 2025 16:13:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736093631; cv=none; b=g6OVbNyigB128MQlZvSJX7zlFP0wS7SvculEKurWoavlMgiDp6s6+JtFeGhOg5OaLC6fX52DdX+I6AkiyJLilFkxROtS1g2nLUf5yvqMf8wgvzzQAkonspP8g24FIwUQk13EQrHeG7uLFpvKG1AHfkAPhMk6DADay856Ltd/1NI=
+	t=1736093633; cv=none; b=a9tZEUJFBf33DmyFaXb5WYxxhojODxPiTlb1ZE0ZRTfzZcFLEm297dI0jSBHJCO968Dg9OENjJnDA78ZMXYgl/6N0ko+WPfmpdbPZZxBwo9nH2iNdaJ6HPGxVSDdDexxKuDfredJri1LspLh9LKR1gQZ1goWGOt3DZ61KVSvK+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736093631; c=relaxed/simple;
-	bh=ir7eCNa0pUFT0PWxNzIJEnp2AeMywMR3paXMTK+TSbE=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=o9KyOFf/HW83oXWmOfCQ/DN4PI9qd//XQ8SlZKjdviaZkH3i4mkHi6dWxC03KbJUpWD+uQsUHYDNjbVG3g2r8bnPI9xKFjI1CE1ugD6RWD74ohiYSuqHw9zmEjd04w5eENjqlaByAZ6oP5joyAbxLhzCk5RyhggsrS7cxfBiay8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VhOnwqZQ; arc=none smtp.client-ip=209.85.128.50
+	s=arc-20240116; t=1736093633; c=relaxed/simple;
+	bh=mp5f3GluxxSGVLKmrhOfZsLf5dflolGGdTe071OeWsE=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=ZMhW5+W4U5Y6XM9DoGx4LB3JZ9SAKXqxk3rUQANA3ajWZEfgF2JsgPIa9STcmjlBKJ5DS+ZzQXwjSV8rl4Dj2RrMHTdO1C3ZK34jH5uap3OYm0l6PEbGLCSyG2oHPHo0ZcTAK/uUi3j/XjgHAnrBb9mOPU4ZOFIpPQgXIRrZ9eI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ExzVoImP; arc=none smtp.client-ip=209.85.128.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VhOnwqZQ"
-Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-436326dcb1cso90214145e9.0;
-        Sun, 05 Jan 2025 08:13:49 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ExzVoImP"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-436a39e4891so42026845e9.1;
+        Sun, 05 Jan 2025 08:13:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736093628; x=1736698428; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=1lchnjuFpSdhQx9L/rOYviPRo396F7o6vIvEXCybU6U=;
-        b=VhOnwqZQIIg/AG0yRBqtisdY4jUD3n4j+COJVMx2qHLETbBR9jG3FUBWp7noOfP/Fi
-         d2HZwLYtiGpqZOnOpa055og6ZeA37pVHYaVCIgeDyQRu54CA+We5o2puCgImlXrV9QBp
-         GPuCMHe7KMpCKBOKWpecLOFiYA3PMHT18nfrghX68DxgZ5/TEBoAGqqHLDQ02koW0/Ts
-         F3+d7vaV9K5Rlie20qlMaWrXI73Hn5HnMbR3rjk8zcD47xD/4/xElgl1GtrPEGqA0Hpb
-         rTAvaZiTMlDrkEo6VPfnf6PpTxQOvQFIuP2dSTbmWFktnVjNPyhXp+/MtBMpxy8ol+5n
-         GTsA==
+        d=gmail.com; s=20230601; t=1736093630; x=1736698430; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=T64IvUv2v2ctLBX091YAC+zdH2GYdiIMlzETmbUeq5o=;
+        b=ExzVoImPis5iJOw543M64fLhc1n2Nxxvw6pfmQD31CrE7swlwUMRYplJ6Z1q8LsHos
+         e74EYeSntzFQdpMmxLJwFGWpyxLXplmJtP8ekCYVRiFDeLvkvLFrY93KV1xD/H79QNE5
+         M//8QNROf1xxabB7XgrmMyLeVHLutFWbS1QCiydp3vrlAP0YuHCS+vUUUvMYpnqqpXRl
+         gseJs9B93eVv+u8Q7WoGtjYZI+R9Q8GCjaPOwtRsmyHIjhAWVSSgihnfWY/vAe2kVdQb
+         /3WryximM9hHYW2Lp9HJOgObpQpijm/+sE4hkF+5NblsH7K8D+UQGsYY+mBcD+Y28l2U
+         ZVDA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736093628; x=1736698428;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1lchnjuFpSdhQx9L/rOYviPRo396F7o6vIvEXCybU6U=;
-        b=GLi2gtOTd5ea7UjzCxk3J8t9SL10IzFpyd7ofbZ/nB09WLwdJuJXLV39iQ187gJnLI
-         UIG3vlJbnqf3mJNVs5z8Eby7StW2mCD1Jit9TP5L5QEPHdjWkan7v0aFVBSWAlWhxFqa
-         1XO828sAYY/CS+tzzsG1MjyjmxsZUz5Nmi5BhvujA9UE2jaULQm5XzZkbmgVOnDFLBLk
-         l/u/ZR0kpcBRCT6w7QFDB7d0VLElefZSvy53hCt005aOR22FB80X3NlARc1V1cmvxoz1
-         UvRA+mpj7SOTS9PyqZpEJiro/CPyiCFLtNjc0/Aifzlrl0yjAGx/7cQ3rjVZyOSup4W4
-         Od5g==
-X-Forwarded-Encrypted: i=1; AJvYcCUHlXl2JaxZLw9AEkLNMvpDx+TF5bJzlFnUpVdfdUmfgHOMw5lGp0mOQvG+uc2iFc8Qlr8IiEJ8cPJDk1QL@vger.kernel.org, AJvYcCWT42XxZv+7uyINjY4O5Uk08OkjJGrCv1WTV7k4bJUIWx+4N4PtY+yP78uNIFKePlFWGyWJ7YE6ykQCc4aiq1MempE=@vger.kernel.org, AJvYcCXYbDqlnbNb3GhkeYvibkXMDLD62bOUT+GjWTZMD/ypZYNpgdpWYMrqfGbFmf3bFkHA7td/4qPWHvq4@vger.kernel.org
-X-Gm-Message-State: AOJu0YzSdfIBmxqjTPC/YlbmR/pPAFB5v3rj7KLb6f7fv4mNaKvp6Pl0
-	m33a6DJG5Qvnfl0QoOsu/erp2dIf4ELDVrLBtW4WOXG6JUiCUVYI
-X-Gm-Gg: ASbGncsH5i8gfAdwqy5z2oCX0CANigAyg2QfowLcH9mRMyg1HMlgO0adkU20FRNRQuW
-	PVazXSQUE/koMPrRknv90qXCGtA4JERkyWK2RH4mxJ1deGf8oKKmNk1M6uBkYi4sWy3Xqhd5Weq
-	+NdbTzoZx5DjdjvqcAtjAYDu3nBT3mTll/iI23sb8Y9C7GMBs0UbJOawKt0GRcR1P9NLmETQQoh
-	HgouObdpCeEhbX2rnmzAzazLxS+cSQJ6ggVQeLyk2yMAvmEjbrIyhd7UvcCIcD8GnPFL7Y=
-X-Google-Smtp-Source: AGHT+IGw2sZkN+3zUikmgjWtTwI/TC0FpreoFdTU9b17v9+gno+YL3QK9BsYjEcviI4Uu8upAU04EA==
-X-Received: by 2002:a05:600c:68d7:b0:434:f270:a513 with SMTP id 5b1f17b1804b1-4366d357401mr442740625e9.29.1736093628312;
-        Sun, 05 Jan 2025 08:13:48 -0800 (PST)
+        d=1e100.net; s=20230601; t=1736093630; x=1736698430;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=T64IvUv2v2ctLBX091YAC+zdH2GYdiIMlzETmbUeq5o=;
+        b=S4Xj8JkCEdAtzQ3yWdTLgbzoUPlXitgYltylinEuGKTHoi92/yltWstUBfAKoDuUXm
+         foqI2HRVmRkhhD0pA5S4FQfun0Kp3VgVjKAjHysRmPdapW/GzEj998LvaYVCSZD5Mtad
+         fhvmMFerxtmzJYzW91U1yVPvyiJ7ZlyW63z3e9rnvJaPTA+FpyLTruDkGbKhXrHi6K0y
+         NMzK142KTCNtyx7y4QJ/qb0ZvirnrrRAus15q+UtX1cihmBBFC+m7Ul3tTclfL53mgEQ
+         PKKuRBnkKDxXgcr8qjBE7ANfAyfa3vCFgpha7m4qOvTRyCJjtZegiUp/pyI21ckVq42S
+         rwmQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUZGfuParHIUcwFqfq01W/j66xByjdkqcWhUvZQMm63KxluFsquCvjagErPuiOe9GGFvZ4r9TA/Mqu/@vger.kernel.org, AJvYcCVWea0qMip1sQSVWlEm8UP1bjvxyrN1QLEl4CNb+BQAXdxEaPFtmrvsbongECX0jQx8q4NPa6r3nWdcaF0XlclItm4=@vger.kernel.org, AJvYcCX0jn6zP00C5FVaGIyTqA1YG40Sy7XwBBDR5kaKQIlxCA3ecyZWNIfIhvf9FsFmNC/GhBsMoC9TrjYsm1CZ@vger.kernel.org
+X-Gm-Message-State: AOJu0YxM/xpZvk5eT7OpQtSiwnO+yaG9Sqgwf1FwM9gbkt2t//UfVRVU
+	pTUxG37k1qVRqtOPedvJO5BTT3doa6vhLg7eAO4cEKbuZeAH+yuL
+X-Gm-Gg: ASbGncuUl3iMQiafBFOua+fwAFrmFOLGQI2EkZS57dtQrvEzJSth1Jm50NzyBUL85up
+	OmuW6/ybQoPrLochzgdbs/GcHXAwqvnKhT3kQdy9ut262cxAhOoWI/YzW/TbBI1F5s+/zPs1C4j
+	u2Ml1sIKELD/fJANRYiRhkWkrwNyBgFvywUjSGNPHM9xu4O6Xmfw1hAw3TTQf7jbx1jD1TcZrTZ
+	TyanYTUFPZpnalgIEYHAI6WihN/wj1XgKXUNOJtDR7DThD7YZG39Mr3/VrITaXuZg4JiYE=
+X-Google-Smtp-Source: AGHT+IGYEUv6t4l2l4U84ZaLAmR9bjEsT9ICGKfsb4L61QXf0dhxU7S0Y+nrRYmb/VzwneK6WaOL5A==
+X-Received: by 2002:a05:600c:3b23:b0:434:a525:7257 with SMTP id 5b1f17b1804b1-43668b49a05mr413168025e9.21.1736093629968;
+        Sun, 05 Jan 2025 08:13:49 -0800 (PST)
 Received: from ivaylo-T580.. ([94.131.202.183])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.47
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Jan 2025 08:13:47 -0800 (PST)
+        Sun, 05 Jan 2025 08:13:49 -0800 (PST)
 From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -66,10 +68,12 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
 	linux-samsung-soc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH v3 0/6] arm64: dts: exynos8895: define usi and mmc nodes
-Date: Sun,  5 Jan 2025 18:13:38 +0200
-Message-ID: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
+Subject: [PATCH v3 1/6] dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for exynos8895
+Date: Sun,  5 Jan 2025 18:13:39 +0200
+Message-ID: <20250105161344.420749-2-ivo.ivanov.ivanov1@gmail.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
+References: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -78,52 +82,28 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Hey folks,
+Add samsung,exynos8895-dw-mshc-smu specific compatible to the bindings
+documentation. Since Samsung, as usual, likes reusing devices from older
+designs, use the samsung,exynos7-dw-mshc-smu compatible.
 
-This patch series adds the required syscons for controlling USI, as well
-as defines all USIv1 nodes for Exynos8895 and adds support for utilizing
-the external SD card storage in dreamlte as well as touchscreen. Due to
-PMIC not being supported yet, we'll assume that the regulators are
-pre-enabled by the previous bootloader for vqmmc, ts_vdd/avdd
-(in our case uniLoader).
+Signed-off-by: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml          | 1 +
+ 1 file changed, 1 insertion(+)
 
-The patchset relies on [1]. I also expect the exynos mmc binding
-maintainer to pick the specific-compat patch.
-
-Best regards,
-Ivaylo
-
-[1]: https://lore.kernel.org/all/20250105160346.418829-1-ivo.ivanov.ivanov1@gmail.com/
-
-Changes since v3:
-  - change USI_V2 constant to USI_MODE in the touchscreen support patch
+diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+index 5fe65795f..ef2d1d7c9 100644
+--- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+@@ -29,6 +29,7 @@ properties:
+               - samsung,exynos5433-dw-mshc-smu
+               - samsung,exynos7885-dw-mshc-smu
+               - samsung,exynos850-dw-mshc-smu
++              - samsung,exynos8895-dw-mshc-smu
+           - const: samsung,exynos7-dw-mshc-smu
  
-Changes since v2:
-  - add r-b from Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-  - drop hsi2c_pclk clock-name where it was left accidentally
-  - utilize _I_PCLK instead of _I_SCLK_USI for all usi hsi2c nodes
-  - move assigned-clocks properties to dtsi
-  - set mmc's clock-frequency to 800mhz as per vendor's dt
-  - add a pinctrl node describing cd-gpios
-  - drop the fixed gpio regulator
-  - add a new patch to the series for enabling s6sy761
-
-Ivaylo Ivanov (6):
-  dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for
-    exynos8895
-  arm64: dts: exynos8895: add syscon nodes for peric0/1 and fsys0/1
-  arm64: dts: exynos8895: define all usi nodes
-  arm64: dts: exynos8895: add a node for mmc
-  arm64: dts: exynos: exynos8895-dreamlte: enable support for microSD
-    storage
-  arm64: dts: exynos: exynos8895-dreamlte: enable support for the
-    touchscreen
-
- .../bindings/mmc/samsung,exynos-dw-mshc.yaml  |   1 +
- .../boot/dts/exynos/exynos8895-dreamlte.dts   |  72 ++
- arch/arm64/boot/dts/exynos/exynos8895.dtsi    | 908 ++++++++++++++++++
- 3 files changed, 981 insertions(+)
-
+   reg:
 -- 
 2.43.0
 
