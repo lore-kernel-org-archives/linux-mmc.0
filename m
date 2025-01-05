@@ -1,55 +1,75 @@
-Received: from esa6.hgst.iphmx.com (esa6.hgst.iphmx.com [216.71.154.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f50.google.com (mail-wm1-f50.google.com [209.85.128.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C525224FD
-	for <linux-mmc@vger.kernel.org>; Sun,  5 Jan 2025 12:17:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3D50C1292CE;
+	Sun,  5 Jan 2025 16:13:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736079463; cv=none; b=UxCq60npLwPxc2EKMn3uaGwAWfDkt72nrwG8dvYNSIy9MaIgr+aUCEY3INbwkeYqQWy/lkPMcMxgSac+mvozaQzPIo2tbDaPgrg6t98s+rX6m+oCramH8RWtg269/b7NcjSidOsf1f3IoyPRI53cMm6Oo9hBYyMAJq7wm660NU4=
+	t=1736093631; cv=none; b=g6OVbNyigB128MQlZvSJX7zlFP0wS7SvculEKurWoavlMgiDp6s6+JtFeGhOg5OaLC6fX52DdX+I6AkiyJLilFkxROtS1g2nLUf5yvqMf8wgvzzQAkonspP8g24FIwUQk13EQrHeG7uLFpvKG1AHfkAPhMk6DADay856Ltd/1NI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736079463; c=relaxed/simple;
-	bh=7P91Jo5VY4imh7oOdG9cLC711YcloVpy6qO8CIOzvew=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=VMomOM0ytwmvR4uKwjSeoRdrL6WvEw9Vsmka/uVMGEthyaMQI2ctOGKcLVQLLVzrJRb+cxiut1BYv0WiH0/q43wPBCEzLl4J1mcbU1Mcx73gbyuP5Alg0/2rzpe4Z+mXozAumUDlbdNxCmtbEsupf/e7vRPg0HT6ii1AZwi4ws0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=habIZUFY; arc=none smtp.client-ip=216.71.154.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1736093631; c=relaxed/simple;
+	bh=ir7eCNa0pUFT0PWxNzIJEnp2AeMywMR3paXMTK+TSbE=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=o9KyOFf/HW83oXWmOfCQ/DN4PI9qd//XQ8SlZKjdviaZkH3i4mkHi6dWxC03KbJUpWD+uQsUHYDNjbVG3g2r8bnPI9xKFjI1CE1ugD6RWD74ohiYSuqHw9zmEjd04w5eENjqlaByAZ6oP5joyAbxLhzCk5RyhggsrS7cxfBiay8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VhOnwqZQ; arc=none smtp.client-ip=209.85.128.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="habIZUFY"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1736079461; x=1767615461;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=7P91Jo5VY4imh7oOdG9cLC711YcloVpy6qO8CIOzvew=;
-  b=habIZUFYOOOUSJzsDicoL77snO60nyOWA2BuOLjOeyirtk/KfaDq7Ueo
-   xhaSBK1SnO9npJu58WOP9DO31sZBv1y7GB9jSNLXyZg6IbzBDxJVlabOE
-   vEUwMokc28t6mPpTKH2YR3CbDHTmoPKwyCSx+zsKeeVKSukykhkM4a5P6
-   Ljh3pI230mNDn0eqEc9/CcxUN+4FxHpKnmCwr1tCpq4cnAllMJu1yHLbJ
-   SCsA4kuXZ/i6glp1tqAuG4OSl8w6yqi21npdsyzGhwGeD2P/GSV2jmqU1
-   Aqz/sfD4ZxaY+twNTUNgE63mGaFRpnG0KBLFYd6tiHnhdBzTMxufXOPI0
-   g==;
-X-CSE-ConnectionGUID: XHJsoOUITeieekrS1eGDsA==
-X-CSE-MsgGUID: CRkretZDTcuKPxUuDoYC0Q==
-X-IronPort-AV: E=Sophos;i="6.12,290,1728921600"; 
-   d="scan'208";a="35021192"
-Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 05 Jan 2025 20:16:35 +0800
-IronPort-SDR: 677a6957_jzWOEQdfRnlzin1bvIV/tfrtMF0iLzxRQLrm8vYaSMxoAb0
- pnFT9ORLpo1VZcfc33VRKZPRiDdLkqMk9HlajwQ==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Jan 2025 03:13:28 -0800
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 05 Jan 2025 04:16:34 -0800
-From: Avri Altman <avri.altman@wdc.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VhOnwqZQ"
+Received: by mail-wm1-f50.google.com with SMTP id 5b1f17b1804b1-436326dcb1cso90214145e9.0;
+        Sun, 05 Jan 2025 08:13:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1736093628; x=1736698428; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1lchnjuFpSdhQx9L/rOYviPRo396F7o6vIvEXCybU6U=;
+        b=VhOnwqZQIIg/AG0yRBqtisdY4jUD3n4j+COJVMx2qHLETbBR9jG3FUBWp7noOfP/Fi
+         d2HZwLYtiGpqZOnOpa055og6ZeA37pVHYaVCIgeDyQRu54CA+We5o2puCgImlXrV9QBp
+         GPuCMHe7KMpCKBOKWpecLOFiYA3PMHT18nfrghX68DxgZ5/TEBoAGqqHLDQ02koW0/Ts
+         F3+d7vaV9K5Rlie20qlMaWrXI73Hn5HnMbR3rjk8zcD47xD/4/xElgl1GtrPEGqA0Hpb
+         rTAvaZiTMlDrkEo6VPfnf6PpTxQOvQFIuP2dSTbmWFktnVjNPyhXp+/MtBMpxy8ol+5n
+         GTsA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736093628; x=1736698428;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=1lchnjuFpSdhQx9L/rOYviPRo396F7o6vIvEXCybU6U=;
+        b=GLi2gtOTd5ea7UjzCxk3J8t9SL10IzFpyd7ofbZ/nB09WLwdJuJXLV39iQ187gJnLI
+         UIG3vlJbnqf3mJNVs5z8Eby7StW2mCD1Jit9TP5L5QEPHdjWkan7v0aFVBSWAlWhxFqa
+         1XO828sAYY/CS+tzzsG1MjyjmxsZUz5Nmi5BhvujA9UE2jaULQm5XzZkbmgVOnDFLBLk
+         l/u/ZR0kpcBRCT6w7QFDB7d0VLElefZSvy53hCt005aOR22FB80X3NlARc1V1cmvxoz1
+         UvRA+mpj7SOTS9PyqZpEJiro/CPyiCFLtNjc0/Aifzlrl0yjAGx/7cQ3rjVZyOSup4W4
+         Od5g==
+X-Forwarded-Encrypted: i=1; AJvYcCUHlXl2JaxZLw9AEkLNMvpDx+TF5bJzlFnUpVdfdUmfgHOMw5lGp0mOQvG+uc2iFc8Qlr8IiEJ8cPJDk1QL@vger.kernel.org, AJvYcCWT42XxZv+7uyINjY4O5Uk08OkjJGrCv1WTV7k4bJUIWx+4N4PtY+yP78uNIFKePlFWGyWJ7YE6ykQCc4aiq1MempE=@vger.kernel.org, AJvYcCXYbDqlnbNb3GhkeYvibkXMDLD62bOUT+GjWTZMD/ypZYNpgdpWYMrqfGbFmf3bFkHA7td/4qPWHvq4@vger.kernel.org
+X-Gm-Message-State: AOJu0YzSdfIBmxqjTPC/YlbmR/pPAFB5v3rj7KLb6f7fv4mNaKvp6Pl0
+	m33a6DJG5Qvnfl0QoOsu/erp2dIf4ELDVrLBtW4WOXG6JUiCUVYI
+X-Gm-Gg: ASbGncsH5i8gfAdwqy5z2oCX0CANigAyg2QfowLcH9mRMyg1HMlgO0adkU20FRNRQuW
+	PVazXSQUE/koMPrRknv90qXCGtA4JERkyWK2RH4mxJ1deGf8oKKmNk1M6uBkYi4sWy3Xqhd5Weq
+	+NdbTzoZx5DjdjvqcAtjAYDu3nBT3mTll/iI23sb8Y9C7GMBs0UbJOawKt0GRcR1P9NLmETQQoh
+	HgouObdpCeEhbX2rnmzAzazLxS+cSQJ6ggVQeLyk2yMAvmEjbrIyhd7UvcCIcD8GnPFL7Y=
+X-Google-Smtp-Source: AGHT+IGw2sZkN+3zUikmgjWtTwI/TC0FpreoFdTU9b17v9+gno+YL3QK9BsYjEcviI4Uu8upAU04EA==
+X-Received: by 2002:a05:600c:68d7:b0:434:f270:a513 with SMTP id 5b1f17b1804b1-4366d357401mr442740625e9.29.1736093628312;
+        Sun, 05 Jan 2025 08:13:48 -0800 (PST)
+Received: from ivaylo-T580.. ([94.131.202.183])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-43656b4274csm578250565e9.38.2025.01.05.08.13.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 05 Jan 2025 08:13:47 -0800 (PST)
+From: Ivaylo Ivanov <ivo.ivanov.ivanov1@gmail.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Avri Altman <avri.altman@wdc.com>,
-	Bean Huo <beanhuo@micron.com>
-Subject: [PATCH] mmc-utils: Add ffu modes documentation
-Date: Sun,  5 Jan 2025 14:14:07 +0200
-Message-Id: <20250105121407.71566-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-samsung-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH v3 0/6] arm64: dts: exynos8895: define usi and mmc nodes
+Date: Sun,  5 Jan 2025 18:13:38 +0200
+Message-ID: <20250105161344.420749-1-ivo.ivanov.ivanov1@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -58,41 +78,52 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add documentation entries for the recently added optional ffu modes,
-specifically, to exist in https://mmc-utils.readthedocs.io/en/latest/.
+Hey folks,
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
-Cc: Bean Huo <beanhuo@micron.com>
----
- docs/HOWTO.rst | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+This patch series adds the required syscons for controlling USI, as well
+as defines all USIv1 nodes for Exynos8895 and adds support for utilizing
+the external SD card storage in dreamlte as well as touchscreen. Due to
+PMIC not being supported yet, we'll assume that the regulators are
+pre-enabled by the previous bootloader for vqmmc, ts_vdd/avdd
+(in our case uniLoader).
 
-diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-index 0ce7279..095a9bd 100644
---- a/docs/HOWTO.rst
-+++ b/docs/HOWTO.rst
-@@ -35,7 +35,20 @@ Running mmc-utils
-         Print SCR data from <device path>. The device path should specify the scr file directory.
+The patchset relies on [1]. I also expect the exynos mmc binding
+maintainer to pick the specific-compat patch.
+
+Best regards,
+Ivaylo
+
+[1]: https://lore.kernel.org/all/20250105160346.418829-1-ivo.ivanov.ivanov1@gmail.com/
+
+Changes since v3:
+  - change USI_V2 constant to USI_MODE in the touchscreen support patch
  
-     ``ffu <image name> <device> [chunk-bytes]``
--        Run Field Firmware Update with <image name> on <device>. [chunk-bytes] is optional and defaults to its max - 512k. Should be in decimal bytes and sector aligned.
-+      Default mode.  Run Field Firmware Update with `<image name>` on `<device>`. `[chunk-bytes]` is optional and defaults to its max - 512k. Should be in decimal bytes and sector aligned.
-+
-+    ``opt_ffu1 <image name> <device> [chunk-bytes]``
-+      Optional FFU mode 1, it's the same as 'ffu', but uses CMD23+CMD25 for repeated downloads and remains in FFU mode until completion.
-+
-+    ``opt_ffu2 <image name> <device> [chunk-bytes]``
-+      Optional FFU mode 2, uses CMD25+CMD12 Open-ended Multiple-block write to download and remains in FFU mode until completion.
-+
-+    ``opt_ffu3 <image name> <device> [chunk-bytes]``
-+      Optional FFU mode 3, uses CMD24 Single-block write for downloading, exiting FFU mode after each block written.
-+
-+    ``opt_ffu4 <image name> <device> [chunk-bytes]``
-+      Optional FFU mode 4, uses CMD24 Single-block write for repeated downloads, remaining in FFU mode until completion.
-+
- 
-     ``erase <type> <start address> <end address> <device>``
-         Send Erase CMD38 with specific argument to the <device>. NOTE!: This will delete all user data in the specified region of the device. <type> must be one of: legacy, discard, secure-erase, secure-trim1, secure-trim2, or trim.
+Changes since v2:
+  - add r-b from Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+  - drop hsi2c_pclk clock-name where it was left accidentally
+  - utilize _I_PCLK instead of _I_SCLK_USI for all usi hsi2c nodes
+  - move assigned-clocks properties to dtsi
+  - set mmc's clock-frequency to 800mhz as per vendor's dt
+  - add a pinctrl node describing cd-gpios
+  - drop the fixed gpio regulator
+  - add a new patch to the series for enabling s6sy761
+
+Ivaylo Ivanov (6):
+  dt-bindings: mmc: samsung,exynos-dw-mshc: add specific compatible for
+    exynos8895
+  arm64: dts: exynos8895: add syscon nodes for peric0/1 and fsys0/1
+  arm64: dts: exynos8895: define all usi nodes
+  arm64: dts: exynos8895: add a node for mmc
+  arm64: dts: exynos: exynos8895-dreamlte: enable support for microSD
+    storage
+  arm64: dts: exynos: exynos8895-dreamlte: enable support for the
+    touchscreen
+
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml  |   1 +
+ .../boot/dts/exynos/exynos8895-dreamlte.dts   |  72 ++
+ arch/arm64/boot/dts/exynos/exynos8895.dtsi    | 908 ++++++++++++++++++
+ 3 files changed, 981 insertions(+)
+
 -- 
-2.25.1
+2.43.0
 
