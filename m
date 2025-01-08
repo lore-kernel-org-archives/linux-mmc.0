@@ -1,221 +1,153 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.21])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0AD951FCF55
-	for <linux-mmc@vger.kernel.org>; Wed,  8 Jan 2025 13:52:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC7541FE457;
+	Wed,  8 Jan 2025 16:37:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736344346; cv=none; b=EZTYnpsISuvNWibTJgqVtS6lO1WZFdMs201gjdhVw4G97nQ4nCCVhKSecxtbhJRWh56F9nQmLmat1sPq5NFx2FPVwxoCd2ch3kurHeWDAtwEOi6nPI8+d703JBVPLIdRIcEdi4+RCF/MnLh/A3pPQRtn3uf4De+EyKyeRz1STuY=
+	t=1736354242; cv=none; b=IH5BXPilbU9yE/F4TnACERCEHS4XDsmEuBJtSfqZzLOhm9bZrUNFMBxSTOSYaG9j5tTkloRjUNmyBwW4HVzyEZbHkS8R+ytd57S+s61QLIowaJRlFUKgeh92UQjD2O6+zQXHpfBQIbpTBGVIgrwhwrOf9pgciw4Twh2kVb4mrLA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736344346; c=relaxed/simple;
-	bh=J8jO6jNeUcGko2FuKznI2n/fGGWiIjL3JA2Jba2Myjs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Wa//MWSECwwxPJWNhcTXlR4QmaKKFgrMedFoXjoiBs2HCc3Vb6kpPgwvW9K2fha5G+9hDezplGRzHNlj1XIFdxINtoahTQ8C+mcakpihPpZPMEZHQIaE60qEqlDKtLEzxbmwQ+vJj8d4QUBQ3YPhXxS8Epo1uuCOLlQ9sDbW3Yo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=M7P23tRt; arc=none smtp.client-ip=198.175.65.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1736354242; c=relaxed/simple;
+	bh=IMcXXDdCAV533bHrMk2RPmqW4y8bePfWrlfqcCK5DkE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=sA0bnaX1GEFIlhiYj3AFObFWwc0jaAZ/VkRFbZfJrG336c9LicDcHB6fgLegMTF5+wXFU73hL39O8ACgRaXoeOPotNhjFBoVtfURQ6jfmECVqEOX8VN0BrRF0vMKID/DI07LSgwkeQD1w6IbcKBcwU+eQ0O32JU++mHlPhzirB4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jFNib8Tc; arc=none smtp.client-ip=209.85.221.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="M7P23tRt"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1736344344; x=1767880344;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=J8jO6jNeUcGko2FuKznI2n/fGGWiIjL3JA2Jba2Myjs=;
-  b=M7P23tRt6mJEWAHe9kYG+OZ+pnv/XPbI9dba7RSwKF5jflxONOpQNEDI
-   IFwxOUirRQjSHBhNa130C5wwS/oqGjZhMAdzJqvrRSPpZu/ZIdonuR5T/
-   L0u/4wT23+Pn5uErbuvJZ7GcFMAqpnjM4fP6ABtYhmgMvZTvBxrcHpbf+
-   c5kVBzEhNInHotbBg5XmUtvPvev5PV47qtN3muuqLX0lOsP/6YZJ0fZJh
-   xxARrj45f1hL+YHtrF9TTMHm46uSu1gzRMGnuG/6Eo7iflPGNekZ0B0P/
-   bhEOYpRGRJS+1hRDueIOoF1JkJRIijKUfkx1D7miLp8/GMP6W8TnlZDUP
-   Q==;
-X-CSE-ConnectionGUID: 4eB57L6xQ5GuHjr5x5wZQw==
-X-CSE-MsgGUID: h2wYjnoDSd+eZ58QHi25UA==
-X-IronPort-AV: E=McAfee;i="6700,10204,11309"; a="36453839"
-X-IronPort-AV: E=Sophos;i="6.12,298,1728975600"; 
-   d="scan'208";a="36453839"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by orvoesa113.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jan 2025 05:52:24 -0800
-X-CSE-ConnectionGUID: i9TBb6MlT2ObL9r7l6oUEQ==
-X-CSE-MsgGUID: bKkfujIvQQKG+7VTb9QfNw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.12,298,1728975600"; 
-   d="scan'208";a="103325076"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.115.59])
-  by fmviesa008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jan 2025 05:52:21 -0800
-Message-ID: <9e244402-7e1a-4799-a159-b940547b4085@intel.com>
-Date: Wed, 8 Jan 2025 15:52:13 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jFNib8Tc"
+Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-385eed29d17so8139755f8f.0;
+        Wed, 08 Jan 2025 08:37:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1736354239; x=1736959039; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=oaZvubb6b/5Y65DKB0twQiviVJsKDAVdNYBE/1h2cAM=;
+        b=jFNib8Tcc6fNerFTvUQMP7fWvVXhqIfzg92A1dQNnyH/yfgKcI9c4JYTa4I2WHH1Gm
+         hjlgdB9EvrVc15uK0XUEK/YKHuDIlzdO4rTFHW9qCmKakFB22seb9FE5N07Z5iPXbu7Z
+         WF9yskPVniMcKhlJ9txDkUw6VesILn4QiVjnXMs4ewSNPH8as6PjkXKgJKoE+PgBUw9T
+         wWwNZ9gAsPl8iiVavugD+YAb0LOYQnIZu7FiyjLTn3omKcy5NZZY5UucjLErVIFcE6fN
+         obiqDzs6PGj+4bAb/yQJZbVX4LyX4PHUk86rOIli0xqHfcs5Kxk2csedbvwpb+NOv0mt
+         2RSw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736354239; x=1736959039;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=oaZvubb6b/5Y65DKB0twQiviVJsKDAVdNYBE/1h2cAM=;
+        b=OOFiARjU5urB3Os20DvwHGQbI/OTETYLVJYgXHpY637CnUSc8D+jftSVCpablQKupM
+         zvsiCegs+Rau1SLDTwpd9TlZH9yY7F0eFSbbHzxnrEuEuahbQ4AmDx+Qs/CaA1Xx7zbu
+         BY0AvJ/Ech712FuoxKrH1g5ixVwKi3/pHLFdtGMrC5UxXocag/aLapW+E3u4qs4/AzfK
+         +COdCtHtud6CRKl3ijLhdmZmjZ9mCpF4uR7foGp7ERBqCzAOxsStqZtVCcugoAq8ov9r
+         FhwUt/rHamLsrNW/sTIZzSG813k0sHOx5kVrC9J9RxEohLkHjxaaHpnP5J9s7PVkRMFa
+         cSpg==
+X-Forwarded-Encrypted: i=1; AJvYcCUrMg0zeGeaWheDaYkesUjkGemFKaqVOHuHxvOsq6/OIG/UDA1RAyeK7UeDyEwsY2NRmVX0FxA4tz4s@vger.kernel.org, AJvYcCVB7uk5vpR+Vn2B9MfkJbUrco36sODkX2bGuOQdnDsdgWmfYpWCdpXh1Kd5YU7kt2ysCO45fv5JH5RQ@vger.kernel.org, AJvYcCVssmN/lbJvHnFQZbe0wzj3i8tP8Sa2Bem2ZakeoINWcE/MZim8QV6PEPOdX485ye1ZFw91LAv80Y/+0A==@vger.kernel.org, AJvYcCWNFiZNTT66kA3jIJxC3k5lZdxJai5D/icOo3zSKEO+nMRNqZFJJppt66tcJskqaQB1DwuVEfonHj6ywJ9C@vger.kernel.org, AJvYcCX+BtY4OQvO7OVBx1ol4H6aSSnBbiid1bGHspoHfThtsl8cgvfj+wFPWFDWNdaSBQVuE4ax6Vdu0vBNRBm5Rw==@vger.kernel.org, AJvYcCXImBRti1j1vpFqzUmDGyxWt1ZXQeIu+IMxlgZ0/RT5DeAux7oFkLmhE010uVQhWIo9tjztumCZHArU1I1WRtcfdHQ=@vger.kernel.org, AJvYcCXk/Lj8LDKyIgF/2hNoI2WyUnq+yO9Nc/Wsp0hfs9pysspko+CI4CzFwnaSwi5xkIbhXWsVcgMOgdfC@vger.kernel.org, AJvYcCXm3U27l2N+l99RO+eaEzMoasEv6db37UTBggdRspB/6/TzktDEdkqXBd4LP0IlOGO/5ccwQVLR5U2FUbA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwHRi3e20ecxCUZjFxUzaSYOedHcGK64NIyzpp7bLn9ukCBOh4d
+	w/bDFwp5IC/UF5L4FuevtfjVJmy13YTBQSoTGGcXSyj1IfR7A10C
+X-Gm-Gg: ASbGncvZ+Yj69hrg+mjA+7WB9GaRmoahSR6yXIPUzZ8OIoi0scVp6ZZPTtQGinEFiEY
+	ZZN6IR8Xs3ATTGYBry8XAvlQ6AOAwDThF+8smFEWmX7oNhqVN7cMtw3LcQFqEw8/MM3B2kxc/eR
+	RyWTfk7YiTXJMvlMXxd4LgxMhhcSrvmVH+1/Skp7ga4MD2Xd86I87GP+HppF1e/kaKHS5NWpQOm
+	i9bq4VoTwegaZumwzOZsvXDcIDONYeQ2k2Qpf2eqUdMW6ubspx/6xoM8zacHf3iTabE95PY85nE
+	+s4PzlvobSdaFWvmvD7UsMCYdbuCl9jGRnnFbLzNwNo=
+X-Google-Smtp-Source: AGHT+IHK2KDzhIt68MjkOew8+0ynFBPykBHBW0JWlGbcvjRJxnfeN213vuCJpkbuwwJfUjUouQWekQ==
+X-Received: by 2002:adf:ae59:0:b0:38a:88b8:97a9 with SMTP id ffacd0b85a97d-38a88b898b4mr2057382f8f.2.1736354238605;
+        Wed, 08 Jan 2025 08:37:18 -0800 (PST)
+Received: from orome (p200300e41f281900f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f28:1900:f22f:74ff:fe1f:3a53])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38a1c832c45sm52816674f8f.32.2025.01.08.08.37.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Jan 2025 08:37:17 -0800 (PST)
+Date: Wed, 8 Jan 2025 17:37:15 +0100
+From: Thierry Reding <thierry.reding@gmail.com>
+To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org, iommu@lists.linux.dev, 
+	linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, 
+	linux-rtc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Correct indentation and style in DTS example
+Message-ID: <6ugtusk3yhbr4rbuzompfb2apequpxtdpy3zk3xmrhowpne3nw@2h5cvtpd6qsw>
+X-NVConfidentiality: public
+References: <20250107131456.247610-1-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2] mmc: sdhci-of_dwcmshc: Change to dwcmshc_phy_init for
- reusing codes
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
-References: <CGME20241216105129epcas1p4f1ffe80586e9f7d4e4b5f7653dfde883@epcas1p4.samsung.com>
- <20241216105127.2180403-1-jh80.chung@samsung.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20241216105127.2180403-1-jh80.chung@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="3vdnth2dvkpxqrns"
+Content-Disposition: inline
+In-Reply-To: <20250107131456.247610-1-krzysztof.kozlowski@linaro.org>
 
-On 16/12/24 12:51, Jaehoon Chung wrote:
-> dwcmshc_phy_1_8v_init and dwcmshc_phy_3_3v_init differ only by a few
-> lines of code. This allow us to reuse code depending on voltage.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+--3vdnth2dvkpxqrns
+Content-Type: text/plain; protected-headers=v1; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+Subject: Re: [PATCH] dt-bindings: Correct indentation and style in DTS example
+MIME-Version: 1.0
+
+On Tue, Jan 07, 2025 at 02:14:56PM +0100, Krzysztof Kozlowski wrote:
+> DTS example in the bindings should be indented with 2- or 4-spaces and
+> aligned with opening '- |', so correct any differences like 3-spaces or
+> mixtures 2- and 4-spaces in one binding.
+>=20
+> No functional changes here, but saves some comments during reviews of
+> new patches built on existing code.
+>=20
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>=20
 > ---
-> Changelog V2:
-> - Add more conditions to clarify if it's MMC_SIGNAL_VOLTAGE_180
-> - Order the local variable according to Adrian's comment
-> - Use local variable to make more readable
+>=20
+> This applies cleanly on v6.13-rc6 and on next-20250107, so I expect no
+> conflicts between Rob's tree and other maintainers' trees.
+>=20
+> Rob,
+> Can you apply it to DT tree?
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 75 +++++++----------------------
->  1 file changed, 18 insertions(+), 57 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 7ea3da45db32..08a9b963fb1a 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -328,12 +328,18 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	sdhci_request(mmc, mrq);
->  }
->  
-> -static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
-> +static void dwcmshc_phy_init(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u32 rxsel = PHY_PAD_RXSEL_3V3;
->  	u32 val;
->  
-> +	if (priv->flags & FLAG_IO_FIXED_1V8 ||
-> +		(host->mmc->ios.timing & MMC_SIGNAL_VOLTAGE_180 &&
-> +		 host->flags & SDHCI_SIGNALING_180))
+>  .../arm/arm,trace-buffer-extension.yaml       |  10 +-
+>  .../bindings/arm/stm32/st,mlahb.yaml          |  20 +-
+>  .../bindings/dsp/mediatek,mt8195-dsp.yaml     |  42 ++--
+>  ...ntel,ixp4xx-network-processing-engine.yaml |  52 ++---
+>  .../bindings/fpga/xlnx,versal-fpga.yaml       |   2 +-
+>  .../bindings/interconnect/qcom,rpmh.yaml      |  28 +--
+>  .../bindings/iommu/riscv,iommu.yaml           |   6 +-
+>  .../devicetree/bindings/leds/leds-mt6360.yaml | 195 +++++++++---------
+>  .../devicetree/bindings/mips/brcm/soc.yaml    |  42 ++--
+>  .../misc/intel,ixp4xx-ahb-queue-manager.yaml  |   6 +-
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml |  78 +++----
+>  .../bindings/mtd/technologic,nand.yaml        |   2 +-
+>  .../bindings/nvmem/amlogic,meson6-efuse.yaml  |   2 +-
+>  .../bindings/pci/ti,j721e-pci-ep.yaml         |  34 +--
+>  .../bindings/power/reset/qcom,pon.yaml        |  62 +++---
+>  .../nvidia,tegra264-bpmp-shmem.yaml           |  15 +-
+>  .../bindings/rtc/renesas,rzn1-rtc.yaml        |  22 +-
+>  .../amlogic/amlogic,meson-gx-hhi-sysctrl.yaml |  26 +--
+>  .../bindings/soc/qcom/qcom,eud.yaml           |  38 ++--
+>  .../bindings/soc/ti/wkup-m3-ipc.yaml          |  32 +--
+>  20 files changed, 357 insertions(+), 357 deletions(-)
 
-Thanks for making the changes.  It looks like
-"&& host->flags & SDHCI_SIGNALING_180" is not needed
+Acked-by: Thierry Reding <treding@nvidia.com>
 
-> +		rxsel = PHY_PAD_RXSEL_1V8;
-> +
->  	/* deassert phy reset & set tx drive strength */
->  	val = PHY_CNFG_RSTN_DEASSERT;
->  	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> @@ -353,7 +359,7 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
->  	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
->  
->  	/* configure phy pads */
-> -	val = PHY_PAD_RXSEL_1V8;
-> +	val = rxsel;
->  	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
->  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
->  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> @@ -365,65 +371,24 @@ static void dwcmshc_phy_1_8v_init(struct sdhci_host *host)
->  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
->  	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
->  
-> -	val = PHY_PAD_RXSEL_1V8;
-> +	val = rxsel;
->  	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
->  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
->  	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
->  	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
->  
->  	/* enable data strobe mode */
-> -	sdhci_writeb(host, FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL),
-> -		     PHY_DLLDL_CNFG_R);
-> -
-> -	/* enable phy dll */
-> -	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> -}
-> -
-> -static void dwcmshc_phy_3_3v_init(struct sdhci_host *host)
-> -{
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> -	u32 val;
-> -
-> -	/* deassert phy reset & set tx drive strength */
-> -	val = PHY_CNFG_RSTN_DEASSERT;
-> -	val |= FIELD_PREP(PHY_CNFG_PAD_SP_MASK, PHY_CNFG_PAD_SP);
-> -	val |= FIELD_PREP(PHY_CNFG_PAD_SN_MASK, PHY_CNFG_PAD_SN);
-> -	sdhci_writel(host, val, PHY_CNFG_R);
-> -
-> -	/* disable delay line */
-> -	sdhci_writeb(host, PHY_SDCLKDL_CNFG_UPDATE, PHY_SDCLKDL_CNFG_R);
-> -
-> -	/* set delay line */
-> -	sdhci_writeb(host, priv->delay_line, PHY_SDCLKDL_DC_R);
-> -	sdhci_writeb(host, PHY_DLL_CNFG2_JUMPSTEP, PHY_DLL_CNFG2_R);
-> -
-> -	/* enable delay lane */
-> -	val = sdhci_readb(host, PHY_SDCLKDL_CNFG_R);
-> -	val &= ~(PHY_SDCLKDL_CNFG_UPDATE);
-> -	sdhci_writeb(host, val, PHY_SDCLKDL_CNFG_R);
-> +	if (priv->flags & FLAG_IO_FIXED_1V8 ||
-> +		(host->mmc->ios.timing & MMC_SIGNAL_VOLTAGE_180 &&
-> +		 host->flags & SDHCI_SIGNALING_180)) {
+--3vdnth2dvkpxqrns
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Probably neater to check rxsel e.g.
+-----BEGIN PGP SIGNATURE-----
 
-	if (rxcel == PHY_PAD_RXSEL_1V8) {
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmd+qbsACgkQ3SOs138+
+s6HTwg/9FTrBpsyb2c6RxUphewMFJvl+V6nLpfbmnIG7/hlhP5n2Rosba8pnC16d
+JnflQ606ls+DtDBqIImY3LYZcPjcRx/ddXj/H3o2NLFsbbTmOKGEJ6SPhi/YR4Is
+AFQMkKbLiMldJyCEH9X+NMmIOEGN44f9eHb6CSpLTAsgPYi2Ppi20vtS+ktX2N8V
+9hoO0I8YspPvsj3TqOf1vzPMM9aEb7L6norpLMW8MMIWnkUInUhW5gyxs/OPNma4
+OJs7ev/OrjPkBxACJwgiLtBGTVJR56080XgSm7GRqVMnR6NhOGMN/g5x/rrBjy0F
+5gprsK059F7h3/oyI5Wn315lnjP9VPjC0OIF08WHRlo0c5zA8TDKYQACT6obPHUh
+04nYCErIHSixvHlX91uKHGhfHA79vbttEXCIwrXiuUVOTcoMZBGCzv9njLBIoPdl
+v5wzOIzZ+V66lAbWRGTjMcRjO1bx0vM+QpmHvjlEQubggzHG0csIRQB/68wk6min
+F+kvzSh1aTJkTNUOYn6BBtbzqjCf8y5NHidBSXBWXhP308OXkwy7fUGqIfrIny7T
+41KrDRyFAMooM175JQmuMExgOcRi6fGKmvKQ0MXsNR4FTt9NZ5rvTnkxi1qH8uWv
+68sSPZB2xOA8iPax09mEhKUKuyYQPa+Ue1EZlHtc75XMisXE1SQ=
+=bVty
+-----END PGP SIGNATURE-----
 
-> +		u8 sel = FIELD_PREP(PHY_DLLDL_CNFG_SLV_INPSEL_MASK, PHY_DLLDL_CNFG_SLV_INPSEL);
->  
-> -	/* configure phy pads */
-> -	val = PHY_PAD_RXSEL_3V3;
-> -	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLUP);
-> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> -	sdhci_writew(host, val, PHY_CMDPAD_CNFG_R);
-> -	sdhci_writew(host, val, PHY_DATAPAD_CNFG_R);
-> -	sdhci_writew(host, val, PHY_RSTNPAD_CNFG_R);
-> -
-> -	val = FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> -	sdhci_writew(host, val, PHY_CLKPAD_CNFG_R);
-> -
-> -	val = PHY_PAD_RXSEL_3V3;
-> -	val |= FIELD_PREP(PHY_PAD_WEAKPULL_MASK, PHY_PAD_WEAKPULL_PULLDOWN);
-> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_P_MASK, PHY_PAD_TXSLEW_CTRL_P);
-> -	val |= FIELD_PREP(PHY_PAD_TXSLEW_CTRL_N_MASK, PHY_PAD_TXSLEW_CTRL_N);
-> -	sdhci_writew(host, val, PHY_STBPAD_CNFG_R);
-> +		sdhci_writeb(host, sel, PHY_DLLDL_CNFG_R);
-> +	}
->  
->  	/* enable phy dll */
->  	sdhci_writeb(host, PHY_DLL_CTRL_ENABLE, PHY_DLL_CTRL_R);
-> +
->  }
->  
->  static void th1520_sdhci_set_phy(struct sdhci_host *host)
-> @@ -433,11 +398,7 @@ static void th1520_sdhci_set_phy(struct sdhci_host *host)
->  	u32 emmc_caps = MMC_CAP2_NO_SD | MMC_CAP2_NO_SDIO;
->  	u16 emmc_ctrl;
->  
-> -	/* Before power on, set PHY configs */
-> -	if (priv->flags & FLAG_IO_FIXED_1V8)
-> -		dwcmshc_phy_1_8v_init(host);
-> -	else
-> -		dwcmshc_phy_3_3v_init(host);
-> +	dwcmshc_phy_init(host);
->  
->  	if ((host->mmc->caps2 & emmc_caps) == emmc_caps) {
->  		emmc_ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> @@ -1163,7 +1124,7 @@ static const struct sdhci_ops sdhci_dwcmshc_th1520_ops = {
->  	.get_max_clock		= dwcmshc_get_max_clock,
->  	.reset			= th1520_sdhci_reset,
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
-> -	.voltage_switch		= dwcmshc_phy_1_8v_init,
-> +	.voltage_switch		= dwcmshc_phy_init,
->  	.platform_execute_tuning = th1520_execute_tuning,
->  };
->  
-
+--3vdnth2dvkpxqrns--
