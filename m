@@ -1,153 +1,111 @@
-Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC7541FE457;
-	Wed,  8 Jan 2025 16:37:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88D1A20370B;
+	Wed,  8 Jan 2025 20:56:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736354242; cv=none; b=IH5BXPilbU9yE/F4TnACERCEHS4XDsmEuBJtSfqZzLOhm9bZrUNFMBxSTOSYaG9j5tTkloRjUNmyBwW4HVzyEZbHkS8R+ytd57S+s61QLIowaJRlFUKgeh92UQjD2O6+zQXHpfBQIbpTBGVIgrwhwrOf9pgciw4Twh2kVb4mrLA=
+	t=1736369810; cv=none; b=dteWvOHoZb0uvambthgAdChq8+PY52/a8OuiX0D6VdMBpxDXZosIJFM/KDs6gTEXThM5ucnJ86ebfGx6GnBRxYHeMxLznbGndCZZGZMz03VsWG/1Z+cir9PgQbr76V5+8q5epFJb1aUFjUSEKFPD3eS+YqcvmrQSIFkl9Qrq68U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736354242; c=relaxed/simple;
-	bh=IMcXXDdCAV533bHrMk2RPmqW4y8bePfWrlfqcCK5DkE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=sA0bnaX1GEFIlhiYj3AFObFWwc0jaAZ/VkRFbZfJrG336c9LicDcHB6fgLegMTF5+wXFU73hL39O8ACgRaXoeOPotNhjFBoVtfURQ6jfmECVqEOX8VN0BrRF0vMKID/DI07LSgwkeQD1w6IbcKBcwU+eQ0O32JU++mHlPhzirB4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jFNib8Tc; arc=none smtp.client-ip=209.85.221.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1736369810; c=relaxed/simple;
+	bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=sAlpbSLhyWfpR/lvyNMT1fCPj0fWgGqy44AIiPC3IhQqj1wM6joFBkWdU/HnQVcuj1cRNoTj7UGrziFzIHbsBGn+68upn5icLtSvPfsgHAelIsJ0mlTfvcyuMA0THX+FVI5Ne5eIo8/QhbKC/5Q+YVL7wV4v/JEB8jYz0PTlVQU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=He2xJxNk; arc=none smtp.client-ip=209.85.214.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jFNib8Tc"
-Received: by mail-wr1-f45.google.com with SMTP id ffacd0b85a97d-385eed29d17so8139755f8f.0;
-        Wed, 08 Jan 2025 08:37:20 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="He2xJxNk"
+Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-21661be2c2dso2457385ad.1;
+        Wed, 08 Jan 2025 12:56:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736354239; x=1736959039; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=oaZvubb6b/5Y65DKB0twQiviVJsKDAVdNYBE/1h2cAM=;
-        b=jFNib8Tcc6fNerFTvUQMP7fWvVXhqIfzg92A1dQNnyH/yfgKcI9c4JYTa4I2WHH1Gm
-         hjlgdB9EvrVc15uK0XUEK/YKHuDIlzdO4rTFHW9qCmKakFB22seb9FE5N07Z5iPXbu7Z
-         WF9yskPVniMcKhlJ9txDkUw6VesILn4QiVjnXMs4ewSNPH8as6PjkXKgJKoE+PgBUw9T
-         wWwNZ9gAsPl8iiVavugD+YAb0LOYQnIZu7FiyjLTn3omKcy5NZZY5UucjLErVIFcE6fN
-         obiqDzs6PGj+4bAb/yQJZbVX4LyX4PHUk86rOIli0xqHfcs5Kxk2csedbvwpb+NOv0mt
-         2RSw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736354239; x=1736959039;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+        d=googlemail.com; s=20230601; t=1736369809; x=1736974609; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=oaZvubb6b/5Y65DKB0twQiviVJsKDAVdNYBE/1h2cAM=;
-        b=OOFiARjU5urB3Os20DvwHGQbI/OTETYLVJYgXHpY637CnUSc8D+jftSVCpablQKupM
-         zvsiCegs+Rau1SLDTwpd9TlZH9yY7F0eFSbbHzxnrEuEuahbQ4AmDx+Qs/CaA1Xx7zbu
-         BY0AvJ/Ech712FuoxKrH1g5ixVwKi3/pHLFdtGMrC5UxXocag/aLapW+E3u4qs4/AzfK
-         +COdCtHtud6CRKl3ijLhdmZmjZ9mCpF4uR7foGp7ERBqCzAOxsStqZtVCcugoAq8ov9r
-         FhwUt/rHamLsrNW/sTIZzSG813k0sHOx5kVrC9J9RxEohLkHjxaaHpnP5J9s7PVkRMFa
-         cSpg==
-X-Forwarded-Encrypted: i=1; AJvYcCUrMg0zeGeaWheDaYkesUjkGemFKaqVOHuHxvOsq6/OIG/UDA1RAyeK7UeDyEwsY2NRmVX0FxA4tz4s@vger.kernel.org, AJvYcCVB7uk5vpR+Vn2B9MfkJbUrco36sODkX2bGuOQdnDsdgWmfYpWCdpXh1Kd5YU7kt2ysCO45fv5JH5RQ@vger.kernel.org, AJvYcCVssmN/lbJvHnFQZbe0wzj3i8tP8Sa2Bem2ZakeoINWcE/MZim8QV6PEPOdX485ye1ZFw91LAv80Y/+0A==@vger.kernel.org, AJvYcCWNFiZNTT66kA3jIJxC3k5lZdxJai5D/icOo3zSKEO+nMRNqZFJJppt66tcJskqaQB1DwuVEfonHj6ywJ9C@vger.kernel.org, AJvYcCX+BtY4OQvO7OVBx1ol4H6aSSnBbiid1bGHspoHfThtsl8cgvfj+wFPWFDWNdaSBQVuE4ax6Vdu0vBNRBm5Rw==@vger.kernel.org, AJvYcCXImBRti1j1vpFqzUmDGyxWt1ZXQeIu+IMxlgZ0/RT5DeAux7oFkLmhE010uVQhWIo9tjztumCZHArU1I1WRtcfdHQ=@vger.kernel.org, AJvYcCXk/Lj8LDKyIgF/2hNoI2WyUnq+yO9Nc/Wsp0hfs9pysspko+CI4CzFwnaSwi5xkIbhXWsVcgMOgdfC@vger.kernel.org, AJvYcCXm3U27l2N+l99RO+eaEzMoasEv6db37UTBggdRspB/6/TzktDEdkqXBd4LP0IlOGO/5ccwQVLR5U2FUbA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwHRi3e20ecxCUZjFxUzaSYOedHcGK64NIyzpp7bLn9ukCBOh4d
-	w/bDFwp5IC/UF5L4FuevtfjVJmy13YTBQSoTGGcXSyj1IfR7A10C
-X-Gm-Gg: ASbGncvZ+Yj69hrg+mjA+7WB9GaRmoahSR6yXIPUzZ8OIoi0scVp6ZZPTtQGinEFiEY
-	ZZN6IR8Xs3ATTGYBry8XAvlQ6AOAwDThF+8smFEWmX7oNhqVN7cMtw3LcQFqEw8/MM3B2kxc/eR
-	RyWTfk7YiTXJMvlMXxd4LgxMhhcSrvmVH+1/Skp7ga4MD2Xd86I87GP+HppF1e/kaKHS5NWpQOm
-	i9bq4VoTwegaZumwzOZsvXDcIDONYeQ2k2Qpf2eqUdMW6ubspx/6xoM8zacHf3iTabE95PY85nE
-	+s4PzlvobSdaFWvmvD7UsMCYdbuCl9jGRnnFbLzNwNo=
-X-Google-Smtp-Source: AGHT+IHK2KDzhIt68MjkOew8+0ynFBPykBHBW0JWlGbcvjRJxnfeN213vuCJpkbuwwJfUjUouQWekQ==
-X-Received: by 2002:adf:ae59:0:b0:38a:88b8:97a9 with SMTP id ffacd0b85a97d-38a88b898b4mr2057382f8f.2.1736354238605;
-        Wed, 08 Jan 2025 08:37:18 -0800 (PST)
-Received: from orome (p200300e41f281900f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f28:1900:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38a1c832c45sm52816674f8f.32.2025.01.08.08.37.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jan 2025 08:37:17 -0800 (PST)
-Date: Wed, 8 Jan 2025 17:37:15 +0100
-From: Thierry Reding <thierry.reding@gmail.com>
-To: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc: Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mediatek@lists.infradead.org, linux-arm-msm@vger.kernel.org, iommu@lists.linux.dev, 
-	linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, 
-	linux-rtc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Correct indentation and style in DTS example
-Message-ID: <6ugtusk3yhbr4rbuzompfb2apequpxtdpy3zk3xmrhowpne3nw@2h5cvtpd6qsw>
-X-NVConfidentiality: public
-References: <20250107131456.247610-1-krzysztof.kozlowski@linaro.org>
+        bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
+        b=He2xJxNkjg0mN1NwLLYsD9483580EGM0CCoGCOqOKbsOfr0i/WrCz3HjFiOX6HTWOi
+         uh1jGSAw4/BEpLjUFFD7/AIZBuWfqqUluH+G223u9t5rIc9nvc6noJKXTVgHT4H0oMuc
+         dZvIkXEVAi45R5DBVDlVDEeOorPnu+ZPJPCNfyPRnaCegLXOymn6oEum/RRitl3RVx1X
+         CQDg68DQmKcifL9C9+ISvX4j9o3GtCT/xbZpQh08VsTCOaZ6+P6M3s+HOuZqrGl61TXu
+         yOX03tn6fL67Kz/tRaiMLBZqDznQ+z5FZf/r0AN7FbERsu3ovKUCDZ/RA/6haZiIhV9V
+         bD6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736369809; x=1736974609;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
+        b=jQ6ZV4AU+RrFmH1DudC36h7ard4BttiL8vFcPO1AMSC8/dRkomQrIgZdIDMuy53ovI
+         LVw+m+BYc1ESnQmphEwScku0xdO+euxXc+ZQa2d8z5byYd+R2ehc60IYhmSEHApHca1U
+         2hOtO9sADl0VqYMT8MGxOeuhW7Z04fqpPMvZajMUnVjqV/MCEFjUky4jEaI7SGB2hYeZ
+         pPbDDvu4wEtjtvzCPk+yqg3UavGClyp2N89GE1RvVPXPnuI0fDS4QzXvYLW7dxob8U6M
+         PeLZQRz4MsYA0LHZg30EyRJiMWH4n2gmVrAxJ4skZnAWRmMflf5fdufYYJhR9XGaj0bT
+         q+Vg==
+X-Forwarded-Encrypted: i=1; AJvYcCWJSPUyiwPqSu3JKmNoEj/szg7lJqDznvFhEdWJh8JYsA2M8gMG4q7IB0f0uETrNCVQ09X4Pq4P2paM@vger.kernel.org, AJvYcCXURIOvPdIaar34gq3dl/ub551ZOy3anD5ixOaJL8HLgqW7ktE17a4lyenjF96yGYGxTOnt+hvHkuGC@vger.kernel.org, AJvYcCXsz9w6WaF24PZjiTXmkS5Ux2kWMb7GvSRDToriwqYNg5Imr7iJaMfFGp05Uz9YFd/PeJywIRcrHnxjzscy@vger.kernel.org
+X-Gm-Message-State: AOJu0YxrDgAq5Wwgi1REUoq/0QosujSpbWQTHwt7N2y7xsNiwMfqdaZG
+	g6VIsLybQY7lJttTOYCE0AJJszTQmLAnZfAdlYliByxdKHUoZdbP3QvH+SCBTskIfGWkdV2NhAd
+	FHV6Ey9VXoR75K/07HmtIMGUpzqQ=
+X-Gm-Gg: ASbGnct1jnNdzxQojWyS3TogKy+/6TuUrQTAGoex8atUbz0GxV6ISsgv4Mr9/0OThyB
+	x4r44EyNXDyoo0vC/ZwNNaT5atFrhwbKtJHJEZaj9kd4HmlOqEHi9iFoLgDAuou04b5ankTE=
+X-Google-Smtp-Source: AGHT+IGOW27FHokf8sgObdZCgih5wBSNSIeA7bOubCTLpiyN4Z4nB0G4BwyHZiUuJKOgDby83TB0PieIAwmC2MWNzz0=
+X-Received: by 2002:a17:903:41c3:b0:216:6590:d472 with SMTP id
+ d9443c01a7336-21a83f4e4f8mr59615275ad.21.1736369808857; Wed, 08 Jan 2025
+ 12:56:48 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="3vdnth2dvkpxqrns"
-Content-Disposition: inline
-In-Reply-To: <20250107131456.247610-1-krzysztof.kozlowski@linaro.org>
-
-
---3vdnth2dvkpxqrns
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
+References: <20241219-mmc-slot-v1-1-dfc747a3d3fb@microchip.com>
+ <20241219-scenic-revision-17da9231d61a@spud> <91dfdd42-6ddb-490f-acda-41ce55782959@microchip.com>
+ <CAFBinCCxZjuXL0duy3ePPDtL1oJS_GZiX3=djXpHR+-6gLkN_w@mail.gmail.com> <39be0bea-c207-4bcd-b464-ca93e91cec93@microchip.com>
+In-Reply-To: <39be0bea-c207-4bcd-b464-ca93e91cec93@microchip.com>
+From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date: Wed, 8 Jan 2025 21:56:37 +0100
+X-Gm-Features: AbW1kvb98S1fSQRIIu1Gd-WnPy0Ge9shDwipgShzVZZxxYskdFEoJKeN27AkIW0
+Message-ID: <CAFBinCAO0bpd7PXaVJWMby4Mqj1On5DaqNZua4V3gPUDms8=LA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: move compatible property to its
+ specific binding
+To: Dharma.B@microchip.com
+Cc: conor@kernel.org, ulf.hansson@linaro.org, robh@kernel.org, 
+	krzk+dt@kernel.org, conor+dt@kernel.org, neil.armstrong@linaro.org, 
+	khilman@baylibre.com, jbrunet@baylibre.com, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH] dt-bindings: Correct indentation and style in DTS example
-MIME-Version: 1.0
 
-On Tue, Jan 07, 2025 at 02:14:56PM +0100, Krzysztof Kozlowski wrote:
-> DTS example in the bindings should be indented with 2- or 4-spaces and
-> aligned with opening '- |', so correct any differences like 3-spaces or
-> mixtures 2- and 4-spaces in one binding.
->=20
-> No functional changes here, but saves some comments during reviews of
-> new patches built on existing code.
->=20
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->=20
-> ---
->=20
-> This applies cleanly on v6.13-rc6 and on next-20250107, so I expect no
-> conflicts between Rob's tree and other maintainers' trees.
->=20
-> Rob,
-> Can you apply it to DT tree?
-> ---
->  .../arm/arm,trace-buffer-extension.yaml       |  10 +-
->  .../bindings/arm/stm32/st,mlahb.yaml          |  20 +-
->  .../bindings/dsp/mediatek,mt8195-dsp.yaml     |  42 ++--
->  ...ntel,ixp4xx-network-processing-engine.yaml |  52 ++---
->  .../bindings/fpga/xlnx,versal-fpga.yaml       |   2 +-
->  .../bindings/interconnect/qcom,rpmh.yaml      |  28 +--
->  .../bindings/iommu/riscv,iommu.yaml           |   6 +-
->  .../devicetree/bindings/leds/leds-mt6360.yaml | 195 +++++++++---------
->  .../devicetree/bindings/mips/brcm/soc.yaml    |  42 ++--
->  .../misc/intel,ixp4xx-ahb-queue-manager.yaml  |   6 +-
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml |  78 +++----
->  .../bindings/mtd/technologic,nand.yaml        |   2 +-
->  .../bindings/nvmem/amlogic,meson6-efuse.yaml  |   2 +-
->  .../bindings/pci/ti,j721e-pci-ep.yaml         |  34 +--
->  .../bindings/power/reset/qcom,pon.yaml        |  62 +++---
->  .../nvidia,tegra264-bpmp-shmem.yaml           |  15 +-
->  .../bindings/rtc/renesas,rzn1-rtc.yaml        |  22 +-
->  .../amlogic/amlogic,meson-gx-hhi-sysctrl.yaml |  26 +--
->  .../bindings/soc/qcom/qcom,eud.yaml           |  38 ++--
->  .../bindings/soc/ti/wkup-m3-ipc.yaml          |  32 +--
->  20 files changed, 357 insertions(+), 357 deletions(-)
+Hi Dharma,
 
-Acked-by: Thierry Reding <treding@nvidia.com>
+On Wed, Jan 8, 2025 at 4:11=E2=80=AFAM <Dharma.B@microchip.com> wrote:
+[...]
+> "One issue is 'compatible' is required. Either that would have to be
+> dropped as required."
+>
+> Instead of just dropping it from "required:", I removed the property
+> itself and moved it to another binding.
+>
+> I will send a v2 by removing it from the required, will it be fine?
+For me this is fine.
 
---3vdnth2dvkpxqrns
-Content-Type: application/pgp-signature; name="signature.asc"
+My understanding is that if we drop the compatible property completely
+then any compatible string will be allowed (for example: compatible =3D
+"random,name"). This is because mmc-slot.yaml inherits the properties
+from mmc-controller-common.yaml which itself has
+"additionalProperties: true".
+However, if we allow it but make it optional it means that there's
+only two valid states:
+- no compatible property (on the Atmel / Microchip SoCs)
+- a compatible property with the value "mmc-slot" (as used on Amlogic
+Meson and Cavium Thunder SoCs)
+- (anything else is considered invalid)
 
------BEGIN PGP SIGNATURE-----
+Rob, Conor: can confirm this or correct me wherever I got something wrong.
+I hope that your feedback will help Dharma write a good patch
+description for v2.
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmd+qbsACgkQ3SOs138+
-s6HTwg/9FTrBpsyb2c6RxUphewMFJvl+V6nLpfbmnIG7/hlhP5n2Rosba8pnC16d
-JnflQ606ls+DtDBqIImY3LYZcPjcRx/ddXj/H3o2NLFsbbTmOKGEJ6SPhi/YR4Is
-AFQMkKbLiMldJyCEH9X+NMmIOEGN44f9eHb6CSpLTAsgPYi2Ppi20vtS+ktX2N8V
-9hoO0I8YspPvsj3TqOf1vzPMM9aEb7L6norpLMW8MMIWnkUInUhW5gyxs/OPNma4
-OJs7ev/OrjPkBxACJwgiLtBGTVJR56080XgSm7GRqVMnR6NhOGMN/g5x/rrBjy0F
-5gprsK059F7h3/oyI5Wn315lnjP9VPjC0OIF08WHRlo0c5zA8TDKYQACT6obPHUh
-04nYCErIHSixvHlX91uKHGhfHA79vbttEXCIwrXiuUVOTcoMZBGCzv9njLBIoPdl
-v5wzOIzZ+V66lAbWRGTjMcRjO1bx0vM+QpmHvjlEQubggzHG0csIRQB/68wk6min
-F+kvzSh1aTJkTNUOYn6BBtbzqjCf8y5NHidBSXBWXhP308OXkwy7fUGqIfrIny7T
-41KrDRyFAMooM175JQmuMExgOcRi6fGKmvKQ0MXsNR4FTt9NZ5rvTnkxi1qH8uWv
-68sSPZB2xOA8iPax09mEhKUKuyYQPa+Ue1EZlHtc75XMisXE1SQ=
-=bVty
------END PGP SIGNATURE-----
 
---3vdnth2dvkpxqrns--
+Best regards,
+Martin
