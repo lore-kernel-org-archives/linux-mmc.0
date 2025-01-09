@@ -1,111 +1,231 @@
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88D1A20370B;
-	Wed,  8 Jan 2025 20:56:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FC21A2D;
+	Thu,  9 Jan 2025 08:01:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736369810; cv=none; b=dteWvOHoZb0uvambthgAdChq8+PY52/a8OuiX0D6VdMBpxDXZosIJFM/KDs6gTEXThM5ucnJ86ebfGx6GnBRxYHeMxLznbGndCZZGZMz03VsWG/1Z+cir9PgQbr76V5+8q5epFJb1aUFjUSEKFPD3eS+YqcvmrQSIFkl9Qrq68U=
+	t=1736409662; cv=none; b=p9mvB3WAslM/oqgrjS7v8aEx07aolxWLXYl3YkyJUXFB1bxajvCdA7mqaCaDEU4QxOiWYwTGA7S+glW9Hm9N2xpNYtG/pbIyXkdF5sC+QhLIv9E1EyuJqm1UCOmG1flb6RoZiozP+YFDVzj+EiVnKTKGssnHGRklmydI5VWUWGg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736369810; c=relaxed/simple;
-	bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=sAlpbSLhyWfpR/lvyNMT1fCPj0fWgGqy44AIiPC3IhQqj1wM6joFBkWdU/HnQVcuj1cRNoTj7UGrziFzIHbsBGn+68upn5icLtSvPfsgHAelIsJ0mlTfvcyuMA0THX+FVI5Ne5eIo8/QhbKC/5Q+YVL7wV4v/JEB8jYz0PTlVQU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=He2xJxNk; arc=none smtp.client-ip=209.85.214.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	s=arc-20240116; t=1736409662; c=relaxed/simple;
+	bh=eDx+UcjNxJKQporAaWzEp2dBNC8i4r2ZJeVh28695GI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UkCPzq53bIzzxybGVvr8Yc5YCNTpEXIH0rbf2/p8TicG2mOn94alNwrYY7FTJwa2vNmn+l2pIOeN5HuQIVomU2QdzcFC4kiVT4J1RLPPeuCs7nDcuFSTPuS2rRBaiUQiizhAUUjS09haNwtYHXLjKWoK5dO0i/LyiL509iol3os=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=dUGYN/Fn; arc=none smtp.client-ip=192.198.163.14
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="He2xJxNk"
-Received: by mail-pl1-f179.google.com with SMTP id d9443c01a7336-21661be2c2dso2457385ad.1;
-        Wed, 08 Jan 2025 12:56:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1736369809; x=1736974609; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
-        b=He2xJxNkjg0mN1NwLLYsD9483580EGM0CCoGCOqOKbsOfr0i/WrCz3HjFiOX6HTWOi
-         uh1jGSAw4/BEpLjUFFD7/AIZBuWfqqUluH+G223u9t5rIc9nvc6noJKXTVgHT4H0oMuc
-         dZvIkXEVAi45R5DBVDlVDEeOorPnu+ZPJPCNfyPRnaCegLXOymn6oEum/RRitl3RVx1X
-         CQDg68DQmKcifL9C9+ISvX4j9o3GtCT/xbZpQh08VsTCOaZ6+P6M3s+HOuZqrGl61TXu
-         yOX03tn6fL67Kz/tRaiMLBZqDznQ+z5FZf/r0AN7FbERsu3ovKUCDZ/RA/6haZiIhV9V
-         bD6w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736369809; x=1736974609;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=QSdUqdwrauCyORBsaipaRx5uPIDRCF7bNyQAUTlnqs8=;
-        b=jQ6ZV4AU+RrFmH1DudC36h7ard4BttiL8vFcPO1AMSC8/dRkomQrIgZdIDMuy53ovI
-         LVw+m+BYc1ESnQmphEwScku0xdO+euxXc+ZQa2d8z5byYd+R2ehc60IYhmSEHApHca1U
-         2hOtO9sADl0VqYMT8MGxOeuhW7Z04fqpPMvZajMUnVjqV/MCEFjUky4jEaI7SGB2hYeZ
-         pPbDDvu4wEtjtvzCPk+yqg3UavGClyp2N89GE1RvVPXPnuI0fDS4QzXvYLW7dxob8U6M
-         PeLZQRz4MsYA0LHZg30EyRJiMWH4n2gmVrAxJ4skZnAWRmMflf5fdufYYJhR9XGaj0bT
-         q+Vg==
-X-Forwarded-Encrypted: i=1; AJvYcCWJSPUyiwPqSu3JKmNoEj/szg7lJqDznvFhEdWJh8JYsA2M8gMG4q7IB0f0uETrNCVQ09X4Pq4P2paM@vger.kernel.org, AJvYcCXURIOvPdIaar34gq3dl/ub551ZOy3anD5ixOaJL8HLgqW7ktE17a4lyenjF96yGYGxTOnt+hvHkuGC@vger.kernel.org, AJvYcCXsz9w6WaF24PZjiTXmkS5Ux2kWMb7GvSRDToriwqYNg5Imr7iJaMfFGp05Uz9YFd/PeJywIRcrHnxjzscy@vger.kernel.org
-X-Gm-Message-State: AOJu0YxrDgAq5Wwgi1REUoq/0QosujSpbWQTHwt7N2y7xsNiwMfqdaZG
-	g6VIsLybQY7lJttTOYCE0AJJszTQmLAnZfAdlYliByxdKHUoZdbP3QvH+SCBTskIfGWkdV2NhAd
-	FHV6Ey9VXoR75K/07HmtIMGUpzqQ=
-X-Gm-Gg: ASbGnct1jnNdzxQojWyS3TogKy+/6TuUrQTAGoex8atUbz0GxV6ISsgv4Mr9/0OThyB
-	x4r44EyNXDyoo0vC/ZwNNaT5atFrhwbKtJHJEZaj9kd4HmlOqEHi9iFoLgDAuou04b5ankTE=
-X-Google-Smtp-Source: AGHT+IGOW27FHokf8sgObdZCgih5wBSNSIeA7bOubCTLpiyN4Z4nB0G4BwyHZiUuJKOgDby83TB0PieIAwmC2MWNzz0=
-X-Received: by 2002:a17:903:41c3:b0:216:6590:d472 with SMTP id
- d9443c01a7336-21a83f4e4f8mr59615275ad.21.1736369808857; Wed, 08 Jan 2025
- 12:56:48 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="dUGYN/Fn"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1736409661; x=1767945661;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=eDx+UcjNxJKQporAaWzEp2dBNC8i4r2ZJeVh28695GI=;
+  b=dUGYN/FnFcyzab7QTKeidTzlRQrQRt1kyuAgjG1gsvUwvO5vAvEOFD60
+   VNAVmDh8U9W/Rma7OAp7nOT/yhfa1h3c+MAQs4PmOiiZdz2cT8mN+6ziC
+   UUvrv4X6s1QF3IvmcDm7n9N/Y0NsNNVz/ipGimEtAztBtWGpPtfmpMalY
+   xm9JYpVDbAoEA4X06ISEP7t3sNcnTnSLD7XxAj2Rl++cD36jzUsfE17FD
+   Fs1Uo7RjUtR0UxnEjrYIP270KIWdmf56FXz14znQtgVmazD7euR7u/+TW
+   rpRLiwg2XEGTCjt4e64Dl4rZwHLwBljW6itIUB30u3mlCfQcVsChri/rs
+   Q==;
+X-CSE-ConnectionGUID: YoEPECHKTPq9mMFAW5dNTw==
+X-CSE-MsgGUID: zz9P9ZNqTf2A8uuMp8nduQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11309"; a="36885563"
+X-IronPort-AV: E=Sophos;i="6.12,300,1728975600"; 
+   d="scan'208";a="36885563"
+Received: from fmviesa002.fm.intel.com ([10.60.135.142])
+  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jan 2025 00:01:00 -0800
+X-CSE-ConnectionGUID: LnKlZ02kQv6bffwGEkjrNw==
+X-CSE-MsgGUID: zLXXEqxaRta/UQvIJ4vh1g==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.12,224,1728975600"; 
+   d="scan'208";a="126625270"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.245.99.46])
+  by fmviesa002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Jan 2025 00:00:57 -0800
+Message-ID: <23b9c309-fe92-4d53-94f7-348bacaa52cb@intel.com>
+Date: Thu, 9 Jan 2025 10:00:49 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241219-mmc-slot-v1-1-dfc747a3d3fb@microchip.com>
- <20241219-scenic-revision-17da9231d61a@spud> <91dfdd42-6ddb-490f-acda-41ce55782959@microchip.com>
- <CAFBinCCxZjuXL0duy3ePPDtL1oJS_GZiX3=djXpHR+-6gLkN_w@mail.gmail.com> <39be0bea-c207-4bcd-b464-ca93e91cec93@microchip.com>
-In-Reply-To: <39be0bea-c207-4bcd-b464-ca93e91cec93@microchip.com>
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Wed, 8 Jan 2025 21:56:37 +0100
-X-Gm-Features: AbW1kvb98S1fSQRIIu1Gd-WnPy0Ge9shDwipgShzVZZxxYskdFEoJKeN27AkIW0
-Message-ID: <CAFBinCAO0bpd7PXaVJWMby4Mqj1On5DaqNZua4V3gPUDms8=LA@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: move compatible property to its
- specific binding
-To: Dharma.B@microchip.com
-Cc: conor@kernel.org, ulf.hansson@linaro.org, robh@kernel.org, 
-	krzk+dt@kernel.org, conor+dt@kernel.org, neil.armstrong@linaro.org, 
-	khilman@baylibre.com, jbrunet@baylibre.com, linux-mmc@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Correctly set the load for the
+ regulator
+To: Yuanjie Yang <quic_yuanjiey@quicinc.com>, ulf.hansson@linaro.org,
+ linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, dmitry.baryshkov@linaro.org,
+ andersson@kernel.org
+Cc: quic_tingweiz@quicinc.com, quic_zhgao@quicinc.com
+References: <20241226031845.2574669-1-quic_yuanjiey@quicinc.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20241226031845.2574669-1-quic_yuanjiey@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi Dharma,
+On 26/12/24 05:18, Yuanjie Yang wrote:
+> Qualcomm regulator supports two power supply modes: HPM and LPM.
+> Currently, the sdhci-msm.c driver does not set the load to adjust
+> the current for eMMC and SD. If the regulator dont't set correct
+> load in LPM state, it will lead to the inability to properly
+> initialize eMMC and SD.
+> 
+> Set the correct regulator current for eMMC and SD to ensure that the
+> device can work normally even when the regulator is in LPM.
+> 
+> Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+> ---
+> Changes in v3:
+> - Optimize the code logic and separate code for regulator vmmc and vqmmc
+> - Rebase on tag: next-20241217
+> - Link to v2: https://lore.kernel.org/all/20241127095029.3918290-1-quic_yuanjiey@quicinc.com/
+> 
+> Changes in v2:
+> - Add enum msm_reg_type to optimize the code
+> - Delete redundant emmc type judgment
+> - Link to v1: https://lore.kernel.org/linux-arm-msm/20241122075048.2006894-1-quic_yuanjiey@quicinc.com/
+> 
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 64 ++++++++++++++++++++++++++++++++++--
+>  1 file changed, 62 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e00208535bd1..22811964ba61 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -134,9 +134,18 @@
+>  /* Timeout value to avoid infinite waiting for pwr_irq */
+>  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
+>  
+> +/* Max load for eMMC Vdd supply */
+> +#define MMC_VMMC_MAX_LOAD_UA	570000
+> +
+>  /* Max load for eMMC Vdd-io supply */
+>  #define MMC_VQMMC_MAX_LOAD_UA	325000
+>  
+> +/* Max load for SD Vdd supply */
+> +#define SD_VMMC_MAX_LOAD_UA	800000
+> +
+> +/* Max load for SD Vdd-io supply */
+> +#define SD_VQMMC_MAX_LOAD_UA	22000
+> +
+>  #define msm_host_readl(msm_host, host, offset) \
+>  	msm_host->var_ops->msm_readl_relaxed(host, offset)
+>  
+> @@ -1403,11 +1412,59 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+>  	return ret;
+>  }
+>  
+> -static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
+> +static void msm_config_vmmc_regulator(struct mmc_host *mmc, bool hpm)
+> +{
+> +	int load;
+> +
+> +	if (!mmc->card) {
+> +		regulator_set_mode(mmc->supply.vmmc,
+> +				   hpm ? REGULATOR_MODE_NORMAL : REGULATOR_MODE_IDLE);
 
-On Wed, Jan 8, 2025 at 4:11=E2=80=AFAM <Dharma.B@microchip.com> wrote:
-[...]
-> "One issue is 'compatible' is required. Either that would have to be
-> dropped as required."
->
-> Instead of just dropping it from "required:", I removed the property
-> itself and moved it to another binding.
->
-> I will send a v2 by removing it from the required, will it be fine?
-For me this is fine.
+Why use regulator_set_mode() in this case but use regulator_set_load()
+otherwise?
 
-My understanding is that if we drop the compatible property completely
-then any compatible string will be allowed (for example: compatible =3D
-"random,name"). This is because mmc-slot.yaml inherits the properties
-from mmc-controller-common.yaml which itself has
-"additionalProperties: true".
-However, if we allow it but make it optional it means that there's
-only two valid states:
-- no compatible property (on the Atmel / Microchip SoCs)
-- a compatible property with the value "mmc-slot" (as used on Amlogic
-Meson and Cavium Thunder SoCs)
-- (anything else is considered invalid)
+Previous patches used the maximum 'max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA)'
+for the '!mmc->card' bus-on case, so why not:
 
-Rob, Conor: can confirm this or correct me wherever I got something wrong.
-I hope that your feedback will help Dharma write a good patch
-description for v2.
+static void msm_config_vmmc_regulator(struct mmc_host *mmc, bool hpm)
+{
+	int load;
 
+	if (!hpm)
+		load = 0;
+	else if (!mmc->card)
+		load = max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA);
+	else if (mmc_card_mmc(mmc->card))
+		load = MMC_VMMC_MAX_LOAD_UA;
+	else if (mmc_card_sd(mmc->card))
+		load =  SD_VMMC_MAX_LOAD_UA;
+	else
+		return;
 
-Best regards,
-Martin
+	regulator_set_load(mmc->supply.vmmc, load);
+}
+
+> +		return;
+> +	}
+> +
+> +	if (!mmc_card_mmc(mmc->card) &&
+> +	    !mmc_card_sd(mmc->card))
+> +		return;
+> +
+> +	if (mmc_card_mmc(mmc->card))
+> +		load = MMC_VMMC_MAX_LOAD_UA;
+> +	else if (mmc_card_sd(mmc->card))
+> +		load =  SD_VMMC_MAX_LOAD_UA;
+> +	load = hpm ? load : 0;
+> +
+> +	regulator_set_load(mmc->supply.vmmc, load);
+> +
+> +	return;
+
+'return' at the end of a function returning 'void' is not needed.
+
+> +}
+> +
+> +static void msm_config_vqmmc_regulator(struct mmc_host *mmc, bool hpm)
+> +{
+> +	int load;
+> +
+> +	if (!mmc->card) {
+> +		regulator_set_mode(mmc->supply.vqmmc,
+> +				   hpm ? REGULATOR_MODE_NORMAL : REGULATOR_MODE_IDLE);
+> +		return;
+> +	}
+> +
+> +	if (!mmc_card_sd(mmc->card))
+> +		return;
+> +
+> +	load =  hpm ? SD_VQMMC_MAX_LOAD_UA : 0;
+> +
+> +	regulator_set_load(mmc->supply.vqmmc, load);
+> +
+> +	return;
+
+'return' at the end of a function returning 'void' is not needed.
+
+> +}
+> +
+> +static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
+> +			      struct mmc_host *mmc, bool hpm)
+>  {
+>  	if (IS_ERR(mmc->supply.vmmc))
+>  		return 0;
+>  
+> +	msm_config_vmmc_regulator(mmc, hpm);
+> +
+>  	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+>  }
+>  
+> @@ -1420,6 +1477,8 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+>  	if (msm_host->vqmmc_enabled == level)
+>  		return 0;
+>  
+> +	msm_config_vqmmc_regulator(mmc, level);
+> +
+>  	if (level) {
+>  		/* Set the IO voltage regulator to default voltage level */
+>  		if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+> @@ -1642,7 +1701,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>  	}
+>  
+>  	if (pwr_state) {
+> -		ret = sdhci_msm_set_vmmc(mmc);
+> +		ret = sdhci_msm_set_vmmc(msm_host, mmc,
+> +					 pwr_state & REQ_BUS_ON);
+>  		if (!ret)
+>  			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+>  					pwr_state & REQ_BUS_ON);
+
