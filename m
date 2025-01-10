@@ -1,165 +1,144 @@
-Received: from mail-m32104.qiye.163.com (mail-m32104.qiye.163.com [220.197.32.104])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4338B2066F4;
-	Fri, 10 Jan 2025 08:34:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.104
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD71A207E0B
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 08:44:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736498072; cv=none; b=PZzb2QaGmoE4qa2SiqDbxSwezRAtc+QbHe0Wl9BmgTwXwa2jQhkC6cR4pUMT3G5+G/dv36JxWFAQPWcFrDBK1AB+K4mafnvgBwDQ07tCvaC9CPshJGNCSi65IG6/Q4XJbweaqi7PphCUpN3iDw2gPUoSI3KKfXjggAW/9Uiim8c=
+	t=1736498662; cv=none; b=P/KFrhfrIXFadozcaAeX98rg2j++ltJBkk/XaRUkXbYf8D+sSzJ4hM9E07lg/0ry1HdNROnsu+FLjMIDcVBlHkQhLtRNRSVbwqfyJlcDgVkReZL28wbWw3VvmV17ywXfaHe20Ony/i9chqdp5dPpjY8W14O9x5Jy/YbQiD0lASk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736498072; c=relaxed/simple;
-	bh=qEqPTF4nULWoVTAeKGSvjXgapT7N5A2egnTUmjMD040=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=KbV3dSDwk50QJXJWxszOm1L54bz24j7cZYXBGsQ+DGIK/WptC0bG5PeDQpSYJWksvwouiTdDb+W2iwK7/eMMbhuLCGimJ0VHcJ5lh/xMbpX4rMq4X6qotJrhpabLUwMTmxSHdewJcsGCOa637k/8hH2krkcySWr0FJMmBke9kPw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=VWXK7s8d; arc=none smtp.client-ip=220.197.32.104
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1736498662; c=relaxed/simple;
+	bh=bcs5XrixjJuICcKrOi0QLiwMCzGybnpSV1jIYpcaEdk=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ll9kN5oCp27raH+TH9HDzKtcD8TGaPn3T3PEFFjRJD4FI0oJw3BI4YnPe1ZJMxEyqRvSKEv04vaOishDKHy6Z24oFxsxNkeHpQpY67V5D5dz9Jn/APlrLLg2mSF4gkIFoS32JPyp4u4x+BUkfVRKVyHGNdhEcnXkDg/yFBr6wcU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=oqhdcaDh; arc=none smtp.client-ip=209.85.167.45
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="VWXK7s8d"
-Received: from [172.16.12.67] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 851e8425;
-	Fri, 10 Jan 2025 15:58:45 +0800 (GMT+08:00)
-Message-ID: <3460b2a3-9579-4a12-9eff-6e2f1a1cc91c@rock-chips.com>
-Date: Fri, 10 Jan 2025 15:58:44 +0800
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="oqhdcaDh"
+Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5401e6efffcso1929202e87.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 00:44:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1736498659; x=1737103459; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3J6ybie5MZTohAU5zO4AHtHmlS6SVT///Z6RnwOTF0I=;
+        b=oqhdcaDhpg7uKVN/GIznd4jiSK2ORwiXk9h/zpw9FR245bEuGdgGwuv+iH7nlP+B8m
+         9zSJy/VKhvJMc6ppvhGlbHo0DpM4g+sUf+393Z8NQE5l644lXXhX/hc02MoRYreuPbqy
+         1r7QVc8llQBVdCfRPVAL+k/Y9s9TGUl8HgbN9u680Qy4aSKB90ejT4XD+RT9i7blL+NE
+         cGP+WYt29uNl4d9Gw2WB4t37qzpLJXDzmBUYGtIqQZ/70PnLzFAUzfmBXAjKu9Q09iGx
+         +l7IMfhAkeuAw4F38csY9kRhSxRMk/6yUGsObLAkdEDRMnEffvi9RyOJf1veWr4qfHlw
+         KPfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736498659; x=1737103459;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=3J6ybie5MZTohAU5zO4AHtHmlS6SVT///Z6RnwOTF0I=;
+        b=GYchODoWtL23Ztg/k19QhOUJBUE9gmwsSQ2aq/c+vHwhC3pyMkn90oyFn5z6Wbv3Vk
+         5HyF1fLxt88dfafBIUq2Z2HU5EgJDhH8Ot1tXjICS3Iy1W2svAa227PjzepjLC1EDbCA
+         VKngsY/JdyJJyFT2kyOHfY/FmkyIVSDS3v0bEtLbX5lRNZz1EoxeFGOwum9QQuUPDVyx
+         rKa1WFttIBCzZkgaRs2PbUGV0VUadUiJYQAExw8if9O03PhXsSk1BRQWQkFT7Zlx3Hx8
+         no+LXvY438Zua0HjceeeBqQ75oXrsm0dzeDX6gUXCvafM8M2QwSte3OiWLs0eV+PDDkJ
+         jg6A==
+X-Forwarded-Encrypted: i=1; AJvYcCX52g6R9IFzIUClcQ3s3ymSEccnl3HG8CA8BY5bEk32YVsIQDnanTgzS11EF4m6NPDlTq2dUYXZYRc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxWu6I1Lb4kt7F0OjK0pPL7tl/70ftBsGh6mTvwcXdN/FGbV7n6
+	jv+DHkDzp0zmv14SA5edYbpSlzVIixja+/sCy6U5kYDW1PQWTZN5PcJbP1DN64gD8ike5xV6qJ/
+	tr0fLHxq7E+HEwsq8SWk+K6SWOJOm02+xB5InLA==
+X-Gm-Gg: ASbGnctQyjeOouyjH2aViwx2nZxi77w/6SvLDnCxgdF2pu/nwlnSMEGub2VooFkXUpW
+	u2Zjql+x+7HPAD7fkXHaIdNRcXC85oFa4/6Nl6isDeYyVMS0MTsVpfw+9TxR1jwiyeR8O
+X-Google-Smtp-Source: AGHT+IEyB2cuChMeX1r+nZtaJdP6Mzdmo0n9PGPsFhkwAW7ukTnXjzzz9a+MUocObbefl6A9T2AxU0IqAEz7Wjzjkhg=
+X-Received: by 2002:a05:6512:2399:b0:540:1ea7:44db with SMTP id
+ 2adb3069b0e04-542845b1aedmr3480546e87.4.1736498658964; Fri, 10 Jan 2025
+ 00:44:18 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 00/17] rockchip: Add rk3562 support
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: heiko@sntech.de, linux-rockchip@lists.infradead.org,
- Simon Xue <xxm@rock-chips.com>, Guenter Roeck <linux@roeck-us.net>,
- Mark Brown <broonie@kernel.org>, Chris Morgan <macromorgan@hotmail.com>,
- Frank Wang <frank.wang@rock-chips.com>, Jamie Iles <jamie@jamieiles.com>,
- Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org,
- Jonas Karlman <jonas@kwiboo.se>, Johan Jonker <jbx6244@gmail.com>,
- David Airlie <airlied@gmail.com>, dri-devel@lists.freedesktop.org,
- Sebastian Reichel <sebastian.reichel@collabora.com>,
- linux-i2c@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>,
- Simona Vetter <simona@ffwll.ch>, Elaine Zhang <zhangqing@rock-chips.com>,
- Conor Dooley <conor+dt@kernel.org>, Finley Xiao
- <finley.xiao@rock-chips.com>, Maxime Ripard <mripard@kernel.org>,
- =?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kw@linux.com>,
- FUKAUMI Naoki <naoki@radxa.com>, linux-pwm@vger.kernel.org,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Andy Yan <andyshrk@163.com>,
- linux-serial@vger.kernel.org, Michael Riesch
- <michael.riesch@wolfvision.net>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jiri Slaby <jirislaby@kernel.org>, Andi Shyti <andi.shyti@kernel.org>,
- devicetree@vger.kernel.org, Diederik de Haas <didi.debian@cknow.org>,
- linux-watchdog@vger.kernel.org, Rob Herring <robh@kernel.org>,
- Lee Jones <lee@kernel.org>,
- Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
- Wim Van Sebroeck <wim@linux-watchdog.org>,
- Shresth Prasad <shresthprasad7@gmail.com>, Tim Lunn <tim@feathertop.org>,
- Lorenzo Pieralisi <lpieralisi@kernel.org>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- linux-arm-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>,
- Jisheng Zhang <jszhang@kernel.org>, Dragan Simic <dsimic@manjaro.org>,
- Detlev Casanova <detlev.casanova@collabora.com>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org,
- linux-usb@vger.kernel.org,
- Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
- Thomas Zimmermann <tzimmermann@suse.de>,
- =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>
-References: <20241224094920.3821861-1-kever.yang@rock-chips.com>
- <sasnc2ocxnlfp4kprsobu5gkajjb5wdxhld73bg6xocgb3foah@yjmphtvpmyff>
-Content-Language: en-US
-From: Kever Yang <kever.yang@rock-chips.com>
-In-Reply-To: <sasnc2ocxnlfp4kprsobu5gkajjb5wdxhld73bg6xocgb3foah@yjmphtvpmyff>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGh4dTlYZGR1MSR1MTk5JGkJWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSUhCS0
-	NVSktLVUpCWQY+
-X-HM-Tid: 0a944f3909e403afkunm851e8425
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6OTY6FBw4LDIQPQ8VMiJKC0lO
-	K0kaCUlVSlVKTEhNT0JOQklCSkNLVTMWGhIXVRAeDR4JVQIaFRw7CRQYEFYYExILCFUYFBZFWVdZ
-	EgtZQVlOQ1VJSVVMVUpKT1lXWQgBWUFJQktCNwY+
-DKIM-Signature:a=rsa-sha256;
-	b=VWXK7s8da0RDYOHxSWhWmVquzr9JT8B4nkrF/smFefecdntF1wQ00XwWP/W6zJg+9nzjib8DolV9vW+B7e4x9e94nqGrRa3NUYOfsb8LiB93JM1o4goCzIFl5gMoV51sQZuv+O5c3/QadXRtYtLINbjhyZzW/2jq4/AD/N9qfGU=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=jhJHF5kfM0cVe+RkIB8dEyszOtU3eaBDxOU11VNcLG4=;
-	h=date:mime-version:subject:message-id:from;
+References: <20241213041958.202565-1-ebiggers@kernel.org>
+In-Reply-To: <20241213041958.202565-1-ebiggers@kernel.org>
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+Date: Fri, 10 Jan 2025 09:44:07 +0100
+X-Gm-Features: AbW1kvYIJl4nVvnVQIFwQlGZKMe8mAAA_MH2MqnfAcbAm7yp2J-zmj2cn1w9I5U
+Message-ID: <CAMRc=MdeZ_k9z+ZKW1ub0m9ymh3eABUU7ZRPY9TYHM_fc+D+qQ@mail.gmail.com>
+Subject: Re: [PATCH v10 00/15] Support for hardware-wrapped inline encryption keys
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Alim Akhtar <alim.akhtar@samsung.com>, 
+	Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>, 
+	Bjorn Andersson <andersson@kernel.org>, Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, 
+	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>, Jens Axboe <axboe@kernel.dk>, 
+	Konrad Dybcio <konradybcio@kernel.org>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	"Martin K . Petersen" <martin.petersen@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Krzysztof,
-
-     Thanks very much for your review.
-
-On 2024/12/27 15:38, Krzysztof Kozlowski wrote:
-> On Tue, Dec 24, 2024 at 05:49:03PM +0800, Kever Yang wrote:
->> This patch set adds rk3562 SoC and its evb support.
->>
->> Split out patches belong to different subsystem.
->>
->> Test with GMAC, USB, PCIe, EMMC, SD Card.
->>
->> This patch set is base on the patche set for rk3576 evb1 support.
->>
->> Changes in v2:
->> - Update in sort order
->> - remove grf in cru
->> - Update some properties order
->>
->> Finley Xiao (2):
->>    arm64: dts: rockchip: add core dtsi for RK3562 Soc
->>    arm64: dts: rockchip: Add RK3562 evb2 devicetree
->>
->> Kever Yang (15):
->>    dt-bindings: PCI: dwc: rockchip: Add rk3562 support
->>    dt-bindings: mmc: Add support for rk3562 eMMC
->>    dt-bindings: mmc: rockchip-dw-mshc: Add rk3562 compatible string
->>    dt-bindings: power: rockchip: Add bindings for rk3562
->>    dt-bindings: i2c: i2c-rk3x: Add rk3562 compatible
->>    dt-bindings: gpu: Add rockchip,rk3562-mali compatible
->>    dt-bindings: watchdog: Add rk3562 compatible
->>    dt-bindings: spi: Add rockchip,rk3562-spi compatible
->>    dt-bindings: serial: snps-dw-apb-uart: Add support for rk3562
->>    dt-bindings: usb: dwc3: add compatible for rk3562
->>    dt-bindings: pwm: rockchip: Add rockchip,rk3562-pwm
->>    dt-bindings: rockchip: pmu: Add rk3562 compatible
->>    dt-bindings: soc: rockchip: Add rk3562 syscon compatibles
->>    dt-bindings: arm: rockchip: Add rk3562 evb2 board
->>    dt-bindings: mfd: syscon: Add rk3562 QoS register compatible
-> You squezzed here like 12 different subsystems. Some of these changes
-> suggest missing drivers.
-I have split out all the patches with driver change as separate patch set.
-All the other dt-binding patches in this patchset is re-use the driver 
-without any change,
-but only add a new "rockchip, rk3562-" based compatible entry, and also 
-no more info
-need to explain in the commit message which I usually copy from commit 
-msg already in tree
-and change the soc to rk3562.
-I think this patch set will be clear enough for the new soc/board 
-support. So do you mean
-I have to send the 1st~15th of this patchset one by one separately so 
-that they can reach
-to different subsystems? I believe there is no much useful change for 
-the cc list is provide
-by the tool automatically and the commit msg can update as Uwe's 
-suggestion:
-
-	The PWM core on Rockchip's RK3562 is the same as the one already
-	included in RK3328. Extend the binding accordingly to allow
-
-		compatible = "rockchip,rk3562-pwm", "rockchip,rk3328-pwm";
-
-Thanks,
-- Kever
-
-
+On Fri, Dec 13, 2024 at 5:20=E2=80=AFAM Eric Biggers <ebiggers@kernel.org> =
+wrote:
 >
-> Please read basic upstreaming guide, some previous discussions and get
-> internal rock-chips help so we want repeat basics over and over.
+> This patchset is based on next-20241212 and is also available in git via:
 >
-> Bindings are with drivers. Send them to respective subsystems.
+>     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped=
+-keys-v10
 >
-> Best regards,
-> Krzysztof
+> This patchset adds support for hardware-wrapped inline encryption keys, a
+> security feature supported by some SoCs.  It adds the block and fscrypt
+> framework for the feature as well as support for it with UFS on Qualcomm =
+SoCs.
 >
+> This feature is described in full detail in the included Documentation ch=
+anges.
+> But to summarize, hardware-wrapped keys are inline encryption keys that a=
+re
+> wrapped (encrypted) by a key internal to the hardware so that they can on=
+ly be
+> unwrapped (decrypted) by the hardware.  Initially keys are wrapped with a
+> permanent hardware key, but during actual use they are re-wrapped with a
+> per-boot ephemeral key for improved security.  The hardware supports impo=
+rting
+> keys as well as generating keys itself.
 >
+> This differs from the existing support for hardware-wrapped keys in the k=
+ernel
+> crypto API (also called "hardware-bound keys" in some places) in the same=
+ way
+> that the crypto API differs from blk-crypto: the crypto API is for genera=
+l
+> crypto operations, whereas blk-crypto is for inline storage encryption.
+>
+> This feature is already being used by Android downstream for several year=
+s
+> (https://source.android.com/docs/security/features/encryption/hw-wrapped-=
+keys),
+> but on other platforms userspace support will be provided via fscryptctl =
+and
+> tests via xfstests (I have some old patches for this that need to be upda=
+ted).
+>
+> Maintainers, please consider merging the following preparatory patches fo=
+r 6.14:
+>
+>   - UFS / SCSI tree: patches 1-4
+>   - MMC tree: patches 5-7
+>   - Qualcomm / MSM tree: patch 8
+>
+
+IIUC The following patches will have to wait for the v6.15 cycle?
+
+[PATCH v10 9/15] soc: qcom: ice: make qcom_ice_program_key() take
+struct blk_crypto_key
+[PATCH v10 10/15] blk-crypto: add basic hardware-wrapped key support
+[PATCH v10 11/15] blk-crypto: show supported key types in sysfs
+[PATCH v10 12/15] blk-crypto: add ioctls to create and prepare
+hardware-wrapped keys
+[PATCH v10 13/15] fscrypt: add support for hardware-wrapped keys
+[PATCH v10 14/15] soc: qcom: ice: add HWKM support to the ICE driver
+[PATCH v10 15/15] ufs: qcom: add support for wrapped keys
+
+Bartosz
