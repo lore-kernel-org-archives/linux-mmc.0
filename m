@@ -1,55 +1,63 @@
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 858C616DEA9
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 08:57:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.143.124
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6E27212B28;
+	Fri, 10 Jan 2025 15:26:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736499431; cv=none; b=mRajLXi2S/yMFqhp9VqSYjVr4OIROSiaAr/apoBqd7iLEo5xdpwfpltkg/QNY9auRrDaYeD7qXxBXLtytNFbnKtkGuolLIxJTgCWPHg3HYhi6Jh/Wpce/wrpw7aV9KV1qtOmsaTtf6H1bNlC/Bk84buO2pQ3gxpqQ3mMJi18JnA=
+	t=1736522775; cv=none; b=UtabbpJNan7BBrc7f4KqZMyXZ+VboKljwFXkDx+s1ilfofneyX8CEJrxMvox6Nd3MQtlxstACsEOi0r5W3AzliafKoMrpT4AshH3FKDMPpMSVbn6oY2pgweItqLKvVIfTK6HZzdEWkqCb0rPG9VLuFl6pqHCaB6rOPioAh6i/2s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736499431; c=relaxed/simple;
-	bh=RndmShM25+mkRfUuMw4dDfcryOtO+IJ6YB89ubC8mwk=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=HnPHO/J706H+vA4ClPx2FC2c+wFXr2vPrIhXl+ov5l/K6dxbf5RvfI02OHxLEi3b57t6afLtNkZO0LKLmllzhBZliDPpFgLOPbREtCXo8MQsHRurr/vGnu0OEX2k2Dzps314/X2ht5yU7qKNOZFycpV7CTtMGxXQgvfVNj4CTOs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Bz74h2jS; arc=none smtp.client-ip=68.232.143.124
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1736522775; c=relaxed/simple;
+	bh=TzosbwHEdnIy/bEAra2YOoleYUa+ANh4p0cWMT0d+EE=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=bb1LFS3O296gkaSC3ul0v4YT7fc0jCF2xOtChvlzIQxpFDdH4Tz03usy63GvcYGyMUjcFty9tkbaaDQi175fgoyy4QIy626qmSElam/vNpZfvNduEIWzTCWwiZL9BoYAZF0U1sos/yLUSMOX5dovKaiE5GO4PcpRvOWVz4MFxsI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=dY687/Ty; arc=none smtp.client-ip=68.232.154.123
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Bz74h2jS"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1736499429; x=1768035429;
+	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="dY687/Ty"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1736522772; x=1768058772;
   h=from:to:cc:subject:date:message-id:mime-version:
    content-transfer-encoding;
-  bh=RndmShM25+mkRfUuMw4dDfcryOtO+IJ6YB89ubC8mwk=;
-  b=Bz74h2jSkH1Gm1lGmSxhTlYAjt788igiu9RLQbGVwoqKjmDnbyVZsE8r
-   a2Qqc43OXpNQLRlbsZyXDhCIuHZW/ZADkJZ1bcVppf1EPlSQKSIZl/LGK
-   efnHX8Unor2EGoxyG0oWRSC6+ENycds/CL/ZxohrHxFWyr22tUxlFD3da
-   M1Eff9d2g1ObAfQnIsI4lo/j4pEDH+OXWJcVJnx66KbCk/e+sX8iiLvF/
-   9ewk1DSSSv3wC8UzgGMwjEMCjOM6OGQ85F/0dYORDb7MuaNWUEMfOK3ob
-   UyfS/qcIqnYEYLdLeD6BJOrBwY0ImyG6SV7CF7OjTwrK9WTfY9+ZLB4eA
+  bh=TzosbwHEdnIy/bEAra2YOoleYUa+ANh4p0cWMT0d+EE=;
+  b=dY687/Tya6nXuk/ZIGvos4i70qElBLnGNtPTrzMOksPDGjJsUXCn9/zn
+   vDt6t4eSgpRzPu7+Hfw+Qj8Z4YncW1bHcBar1RRl0Ct4FS127oZc34Nwn
+   /D5h085ECP3HsTS04nhxEcTWw8LJhrg2pB5MJaKTq09OOVCDHS9YOuBga
+   BgePB9rr30FsLu0SRvLRpJcq6264P5zJ4Hl7wf3H31XoLq6LRt4CdqEhy
+   H9vJSC1X4y1tjuOgfU823AO3vRpK3Kj5lZfj2WjVEi8eicfE627DMHEMr
+   MQJ0XD/CXqBe1hbIRU1CaVXxQcesMbJqcYgPtSkSA9uYEFVnUWpt0WHOQ
    g==;
-X-CSE-ConnectionGUID: F6dwGNqTRpySTtyWcl1HCQ==
-X-CSE-MsgGUID: jmPNCkMcSQKyGYoUxd+3CQ==
-X-IronPort-AV: E=Sophos;i="6.12,303,1728921600"; 
-   d="scan'208";a="36152903"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 10 Jan 2025 16:57:08 +0800
-IronPort-SDR: 6780d35d_ANdV/vyvkIYvExYzQ2f6u6zvx60zVo+RgHKT+QsgH0I996g
- 6AbwAsX6VK2gAc2LSKqBFwH9g1zcsTKFa8Hau7A==
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 09 Jan 2025 23:59:25 -0800
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Jan 2025 00:57:07 -0800
-From: Avri Altman <avri.altman@wdc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Avri Altman <avri.altman@wdc.com>,
-	Daniel Custodio <Daniel.Custodio@wdc.com>
-Subject: [PATCH] mmc-utils: docs: Fix a typo
-Date: Fri, 10 Jan 2025 10:54:24 +0200
-Message-Id: <20250110085424.104849-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
+X-CSE-ConnectionGUID: 5GPtyWRDTC6ZDj4SFqiVRA==
+X-CSE-MsgGUID: Q023PzxzSBSbN5Hp498PUg==
+X-IronPort-AV: E=Sophos;i="6.12,303,1728975600"; 
+   d="scan'208";a="203886120"
+X-Amp-Result: SKIPPED(no attachment in message)
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa6.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Jan 2025 08:26:05 -0700
+Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.35; Fri, 10 Jan 2025 08:25:52 -0700
+Received: from ryan-Precision-3630-Tower.microchip.com (10.10.85.11) by
+ chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
+ 15.1.2507.35 via Frontend Transport; Fri, 10 Jan 2025 08:25:52 -0700
+From: <Ryan.Wanner@microchip.com>
+To: <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
+	<nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
+	<claudiu.beznea@tuxon.dev>, <mturquette@baylibre.com>, <sboyd@kernel.org>,
+	<arnd@arndb.de>
+CC: <dharma.b@microchip.com>, <mihai.sain@microchip.com>,
+	<romain.sioen@microchip.com>, <varshini.rajendran@microchip.com>,
+	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
+	<linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
+	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>, Ryan Wanner
+	<Ryan.Wanner@microchip.com>
+Subject: [PATCH v6 0/3] Add support for SAMA7D65
+Date: Fri, 10 Jan 2025 08:25:39 -0700
+Message-ID: <cover.1736522006.git.Ryan.Wanner@microchip.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,29 +65,89 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-Fix a typo in mmc-utils official repository address.
+From: Ryan Wanner <Ryan.Wanner@microchip.com>
 
-Reported-by: Daniel Custodio <Daniel.Custodio@wdc.com>
-Closes: https://github.com/avri-altman-wdc/mmc-utils/issues/1
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- docs/README.rst | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+This series adds support for the SAMA7D65 SoC.
 
-diff --git a/docs/README.rst b/docs/README.rst
-index dd07ffc..9606501 100644
---- a/docs/README.rst
-+++ b/docs/README.rst
-@@ -11,7 +11,7 @@ Source
- 
- mmc-utils resides in a git repo, the canonical place is:
- 
--https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc-utils.git
-+https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
- 
- 
- Mailing list
+V2 of this series [1].
+V3 of this series [2].
+V4 of this series [4].
+V5 of this series [6].
+
+For the pinctrl and pit64 timers those will have DTB warnings due to
+those bindings not being in the .yaml format.
+
+Changes v1->v2:
+- V1 set was sent incorrectly as multiple seprate patches v2 took all
+  those patches and put them in 1 thread.
+
+Changes v2->v3:
+- Correct the patch order to follow correct practice.
+- Correct flexcom dt-binding commit messge to reflect the changes in the
+  coding style.
+- Add missing SoB tags to patches.
+- Moved export clocks to DT patch to be included with the clock binding
+  patch.
+- Separate Kconfig changes and defconfig changes into different patches
+  and removed unused Kconfig params.
+- Correct confusing SoB and Co-developed chain.
+- Removed unsued nodes in DTSI file and sorted includes
+  alphanumerically.
+- Fix incorrect dts formatting.
+- Separate dts and pinmux changes into two patches.
+- Combine PLL and MCK changes into core clock driver patch.
+- Correct formatting in main clock driver.
+- MMC dt-binding changes are applied for next so have been removed from
+  the set [3].
+
+Changes v3->v4:
+- Collect all tags from maintainers.
+- Correct compile error on 11/13 and correct location of vendor specific
+  properties.
+- Add USB and UTMI selections to 12/13 to prevent compile errors due to
+  functions in the clock driver that use the USB clock system.
+- Add "microchip,sama7g5-pinctrl" compatible string as a fall back in
+  9/13.
+- Add missing kfree() to 8/13 to correctly handle error case.
+- Replace bad spacing with correct tab formatting on 7/13.
+
+Changes from v4->v5:
+- Remove patches that have been applied [5].
+- Update pinctrl dt-binding to use fallback formatting.
+
+Changes from v5->v6:
+- Remove patches that have been applied [6].
+- Correct incorrect spacing formatting on pinctrl dt-binding.
+- Reintroduce flexcom to the thread since it was removed due to an error
+  in collecting applied patches.
+
+Note:
+- For the SDHCI DTB error that patch has been removed do to it being
+applied see [3].
+- There are DTB errors on microchip,sama7d65-pit64b and
+  microchip,sama7d65-pinctrl, this is due to those bindings being .txt
+  files.
+
+1) https://lore.kernel.org/linux-arm-kernel/cover.1732030972.git.Ryan.Wanner@microchip.com/T/#m9691b4d58b62f36f6cbac1d06883c985766c2c0d
+2) https://lore.kernel.org/linux-arm-kernel/cover.1733505542.git.Ryan.Wanner@microchip.com/T/#m3b52978236907198f727424e69ef21c8898e95c8
+3) https://lore.kernel.org/linux-arm-kernel/cover.1732030972.git.Ryan.Wanner@microchip.com/T/#mccf6521c07e74e1c7dc61b09ae0ebdbbdde73a28
+4) https://lore.kernel.org/linux-arm-kernel/70d429086fd8e858d79ca2824ad8cc4a09e3fe5d.1734723585.git.Ryan.Wanner@microchip.com/T/#m918b8db23c8d30981263846a02dafc085e17de14
+5) https://lore.kernel.org/linux-arm-kernel/70d429086fd8e858d79ca2824ad8cc4a09e3fe5d.1734723585.git.Ryan.Wanner@microchip.com/T/#m69b8f11536e3b0ca3d69d125d0670c90412d4317
+6) https://lore.kernel.org/linux-arm-kernel/20250107160850.120537-1-Ryan.Wanner@microchip.com/T/#m54eaea3dc49c687865e3db33e286eeb29edd7cf0
+
+Dharma Balasubiramani (3):
+  dt-bindings: serial: atmel,at91-usart: add microchip,sama7d65-usart
+  dt-bindings: pinctrl: at91-pio4: add microchip,sama7d65-pinctrl
+  dt-bindings: mfd: atmel,sama5d2-flexcom: add
+    microchip,sama7d65-flexcom
+
+ .../devicetree/bindings/mfd/atmel,sama5d2-flexcom.yaml   | 9 ++++-----
+ .../bindings/pinctrl/atmel,at91-pio4-pinctrl.txt         | 1 +
+ .../devicetree/bindings/serial/atmel,at91-usart.yaml     | 1 +
+ 3 files changed, 6 insertions(+), 5 deletions(-)
+
 -- 
-2.25.1
+2.43.0
 
