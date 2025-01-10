@@ -1,144 +1,85 @@
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com [209.85.167.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD71A207E0B
-	for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 08:44:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 858C616DEA9
+	for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 08:57:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.143.124
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736498662; cv=none; b=P/KFrhfrIXFadozcaAeX98rg2j++ltJBkk/XaRUkXbYf8D+sSzJ4hM9E07lg/0ry1HdNROnsu+FLjMIDcVBlHkQhLtRNRSVbwqfyJlcDgVkReZL28wbWw3VvmV17ywXfaHe20Ony/i9chqdp5dPpjY8W14O9x5Jy/YbQiD0lASk=
+	t=1736499431; cv=none; b=mRajLXi2S/yMFqhp9VqSYjVr4OIROSiaAr/apoBqd7iLEo5xdpwfpltkg/QNY9auRrDaYeD7qXxBXLtytNFbnKtkGuolLIxJTgCWPHg3HYhi6Jh/Wpce/wrpw7aV9KV1qtOmsaTtf6H1bNlC/Bk84buO2pQ3gxpqQ3mMJi18JnA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736498662; c=relaxed/simple;
-	bh=bcs5XrixjJuICcKrOi0QLiwMCzGybnpSV1jIYpcaEdk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ll9kN5oCp27raH+TH9HDzKtcD8TGaPn3T3PEFFjRJD4FI0oJw3BI4YnPe1ZJMxEyqRvSKEv04vaOishDKHy6Z24oFxsxNkeHpQpY67V5D5dz9Jn/APlrLLg2mSF4gkIFoS32JPyp4u4x+BUkfVRKVyHGNdhEcnXkDg/yFBr6wcU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=oqhdcaDh; arc=none smtp.client-ip=209.85.167.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
+	s=arc-20240116; t=1736499431; c=relaxed/simple;
+	bh=RndmShM25+mkRfUuMw4dDfcryOtO+IJ6YB89ubC8mwk=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=HnPHO/J706H+vA4ClPx2FC2c+wFXr2vPrIhXl+ov5l/K6dxbf5RvfI02OHxLEi3b57t6afLtNkZO0LKLmllzhBZliDPpFgLOPbREtCXo8MQsHRurr/vGnu0OEX2k2Dzps314/X2ht5yU7qKNOZFycpV7CTtMGxXQgvfVNj4CTOs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=Bz74h2jS; arc=none smtp.client-ip=68.232.143.124
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="oqhdcaDh"
-Received: by mail-lf1-f45.google.com with SMTP id 2adb3069b0e04-5401e6efffcso1929202e87.3
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Jan 2025 00:44:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1736498659; x=1737103459; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3J6ybie5MZTohAU5zO4AHtHmlS6SVT///Z6RnwOTF0I=;
-        b=oqhdcaDhpg7uKVN/GIznd4jiSK2ORwiXk9h/zpw9FR245bEuGdgGwuv+iH7nlP+B8m
-         9zSJy/VKhvJMc6ppvhGlbHo0DpM4g+sUf+393Z8NQE5l644lXXhX/hc02MoRYreuPbqy
-         1r7QVc8llQBVdCfRPVAL+k/Y9s9TGUl8HgbN9u680Qy4aSKB90ejT4XD+RT9i7blL+NE
-         cGP+WYt29uNl4d9Gw2WB4t37qzpLJXDzmBUYGtIqQZ/70PnLzFAUzfmBXAjKu9Q09iGx
-         +l7IMfhAkeuAw4F38csY9kRhSxRMk/6yUGsObLAkdEDRMnEffvi9RyOJf1veWr4qfHlw
-         KPfg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736498659; x=1737103459;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=3J6ybie5MZTohAU5zO4AHtHmlS6SVT///Z6RnwOTF0I=;
-        b=GYchODoWtL23Ztg/k19QhOUJBUE9gmwsSQ2aq/c+vHwhC3pyMkn90oyFn5z6Wbv3Vk
-         5HyF1fLxt88dfafBIUq2Z2HU5EgJDhH8Ot1tXjICS3Iy1W2svAa227PjzepjLC1EDbCA
-         VKngsY/JdyJJyFT2kyOHfY/FmkyIVSDS3v0bEtLbX5lRNZz1EoxeFGOwum9QQuUPDVyx
-         rKa1WFttIBCzZkgaRs2PbUGV0VUadUiJYQAExw8if9O03PhXsSk1BRQWQkFT7Zlx3Hx8
-         no+LXvY438Zua0HjceeeBqQ75oXrsm0dzeDX6gUXCvafM8M2QwSte3OiWLs0eV+PDDkJ
-         jg6A==
-X-Forwarded-Encrypted: i=1; AJvYcCX52g6R9IFzIUClcQ3s3ymSEccnl3HG8CA8BY5bEk32YVsIQDnanTgzS11EF4m6NPDlTq2dUYXZYRc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxWu6I1Lb4kt7F0OjK0pPL7tl/70ftBsGh6mTvwcXdN/FGbV7n6
-	jv+DHkDzp0zmv14SA5edYbpSlzVIixja+/sCy6U5kYDW1PQWTZN5PcJbP1DN64gD8ike5xV6qJ/
-	tr0fLHxq7E+HEwsq8SWk+K6SWOJOm02+xB5InLA==
-X-Gm-Gg: ASbGnctQyjeOouyjH2aViwx2nZxi77w/6SvLDnCxgdF2pu/nwlnSMEGub2VooFkXUpW
-	u2Zjql+x+7HPAD7fkXHaIdNRcXC85oFa4/6Nl6isDeYyVMS0MTsVpfw+9TxR1jwiyeR8O
-X-Google-Smtp-Source: AGHT+IEyB2cuChMeX1r+nZtaJdP6Mzdmo0n9PGPsFhkwAW7ukTnXjzzz9a+MUocObbefl6A9T2AxU0IqAEz7Wjzjkhg=
-X-Received: by 2002:a05:6512:2399:b0:540:1ea7:44db with SMTP id
- 2adb3069b0e04-542845b1aedmr3480546e87.4.1736498658964; Fri, 10 Jan 2025
- 00:44:18 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="Bz74h2jS"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1736499429; x=1768035429;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=RndmShM25+mkRfUuMw4dDfcryOtO+IJ6YB89ubC8mwk=;
+  b=Bz74h2jSkH1Gm1lGmSxhTlYAjt788igiu9RLQbGVwoqKjmDnbyVZsE8r
+   a2Qqc43OXpNQLRlbsZyXDhCIuHZW/ZADkJZ1bcVppf1EPlSQKSIZl/LGK
+   efnHX8Unor2EGoxyG0oWRSC6+ENycds/CL/ZxohrHxFWyr22tUxlFD3da
+   M1Eff9d2g1ObAfQnIsI4lo/j4pEDH+OXWJcVJnx66KbCk/e+sX8iiLvF/
+   9ewk1DSSSv3wC8UzgGMwjEMCjOM6OGQ85F/0dYORDb7MuaNWUEMfOK3ob
+   UyfS/qcIqnYEYLdLeD6BJOrBwY0ImyG6SV7CF7OjTwrK9WTfY9+ZLB4eA
+   g==;
+X-CSE-ConnectionGUID: F6dwGNqTRpySTtyWcl1HCQ==
+X-CSE-MsgGUID: jmPNCkMcSQKyGYoUxd+3CQ==
+X-IronPort-AV: E=Sophos;i="6.12,303,1728921600"; 
+   d="scan'208";a="36152903"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 10 Jan 2025 16:57:08 +0800
+IronPort-SDR: 6780d35d_ANdV/vyvkIYvExYzQ2f6u6zvx60zVo+RgHKT+QsgH0I996g
+ 6AbwAsX6VK2gAc2LSKqBFwH9g1zcsTKFa8Hau7A==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 09 Jan 2025 23:59:25 -0800
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Jan 2025 00:57:07 -0800
+From: Avri Altman <avri.altman@wdc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@wdc.com>,
+	Daniel Custodio <Daniel.Custodio@wdc.com>
+Subject: [PATCH] mmc-utils: docs: Fix a typo
+Date: Fri, 10 Jan 2025 10:54:24 +0200
+Message-Id: <20250110085424.104849-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20241213041958.202565-1-ebiggers@kernel.org>
-In-Reply-To: <20241213041958.202565-1-ebiggers@kernel.org>
-From: Bartosz Golaszewski <brgl@bgdev.pl>
-Date: Fri, 10 Jan 2025 09:44:07 +0100
-X-Gm-Features: AbW1kvYIJl4nVvnVQIFwQlGZKMe8mAAA_MH2MqnfAcbAm7yp2J-zmj2cn1w9I5U
-Message-ID: <CAMRc=MdeZ_k9z+ZKW1ub0m9ymh3eABUU7ZRPY9TYHM_fc+D+qQ@mail.gmail.com>
-Subject: Re: [PATCH v10 00/15] Support for hardware-wrapped inline encryption keys
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Alim Akhtar <alim.akhtar@samsung.com>, 
-	Avri Altman <avri.altman@wdc.com>, Bart Van Assche <bvanassche@acm.org>, 
-	Bjorn Andersson <andersson@kernel.org>, Dmitry Baryshkov <dmitry.baryshkov@linaro.org>, 
-	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>, Jens Axboe <axboe@kernel.dk>, 
-	Konrad Dybcio <konradybcio@kernel.org>, 
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
-	"Martin K . Petersen" <martin.petersen@oracle.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Fri, Dec 13, 2024 at 5:20=E2=80=AFAM Eric Biggers <ebiggers@kernel.org> =
-wrote:
->
-> This patchset is based on next-20241212 and is also available in git via:
->
->     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped=
--keys-v10
->
-> This patchset adds support for hardware-wrapped inline encryption keys, a
-> security feature supported by some SoCs.  It adds the block and fscrypt
-> framework for the feature as well as support for it with UFS on Qualcomm =
-SoCs.
->
-> This feature is described in full detail in the included Documentation ch=
-anges.
-> But to summarize, hardware-wrapped keys are inline encryption keys that a=
-re
-> wrapped (encrypted) by a key internal to the hardware so that they can on=
-ly be
-> unwrapped (decrypted) by the hardware.  Initially keys are wrapped with a
-> permanent hardware key, but during actual use they are re-wrapped with a
-> per-boot ephemeral key for improved security.  The hardware supports impo=
-rting
-> keys as well as generating keys itself.
->
-> This differs from the existing support for hardware-wrapped keys in the k=
-ernel
-> crypto API (also called "hardware-bound keys" in some places) in the same=
- way
-> that the crypto API differs from blk-crypto: the crypto API is for genera=
-l
-> crypto operations, whereas blk-crypto is for inline storage encryption.
->
-> This feature is already being used by Android downstream for several year=
-s
-> (https://source.android.com/docs/security/features/encryption/hw-wrapped-=
-keys),
-> but on other platforms userspace support will be provided via fscryptctl =
-and
-> tests via xfstests (I have some old patches for this that need to be upda=
-ted).
->
-> Maintainers, please consider merging the following preparatory patches fo=
-r 6.14:
->
->   - UFS / SCSI tree: patches 1-4
->   - MMC tree: patches 5-7
->   - Qualcomm / MSM tree: patch 8
->
+Fix a typo in mmc-utils official repository address.
 
-IIUC The following patches will have to wait for the v6.15 cycle?
+Reported-by: Daniel Custodio <Daniel.Custodio@wdc.com>
+Closes: https://github.com/avri-altman-wdc/mmc-utils/issues/1
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ docs/README.rst | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-[PATCH v10 9/15] soc: qcom: ice: make qcom_ice_program_key() take
-struct blk_crypto_key
-[PATCH v10 10/15] blk-crypto: add basic hardware-wrapped key support
-[PATCH v10 11/15] blk-crypto: show supported key types in sysfs
-[PATCH v10 12/15] blk-crypto: add ioctls to create and prepare
-hardware-wrapped keys
-[PATCH v10 13/15] fscrypt: add support for hardware-wrapped keys
-[PATCH v10 14/15] soc: qcom: ice: add HWKM support to the ICE driver
-[PATCH v10 15/15] ufs: qcom: add support for wrapped keys
+diff --git a/docs/README.rst b/docs/README.rst
+index dd07ffc..9606501 100644
+--- a/docs/README.rst
++++ b/docs/README.rst
+@@ -11,7 +11,7 @@ Source
+ 
+ mmc-utils resides in a git repo, the canonical place is:
+ 
+-https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc-utils.git
++https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
+ 
+ 
+ Mailing list
+-- 
+2.25.1
 
-Bartosz
