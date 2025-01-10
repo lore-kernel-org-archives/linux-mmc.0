@@ -1,97 +1,114 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E350211700;
-	Fri, 10 Jan 2025 15:27:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EA4BD24B221;
+	Fri, 10 Jan 2025 19:10:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736522826; cv=none; b=qX2B7Vdtf+RhyQGIY5r1Wc91RvfEk0ftIuUnpIj/69jP+6iSgqGOxOZP76FMpsBTIXwNYU9SmIByHhfwBfo8Sa2rWQESD3zvToZeHPYorgZz4WqrSuDPSLP5zWMFgMPxDVOA5Bh+znnRsf/sSeWgdy7zd/PzvoREkI0zWY6TWJE=
+	t=1736536222; cv=none; b=sTJZUvSJhjfOuRFwHINFTZCH3sqC3plkYjBmJqhOVYhb9wT+1r4DFAUHeHM+io8GZ15qWLs9gDY/A6ca4BrkDjnXK3vpr4GwtSJFteYRY8J9eLBfxMr3bklGVF2kftoRQ2ETxUZDuySlPJNXa73hxkir7b45ePHLX8b4eiG8Zac=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736522826; c=relaxed/simple;
-	bh=tkTOYHY7R/B78zoatm15ZoMCaySho/QN7uoUcwZA5m0=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=k0+0qvrP3pHly67RRQuA1bsukKTsM4x+o3WcQYNLToZTfaPWy2LghZCEtJa42haMxNniGQgt/KHfKSz17xYeFBAjTL2UU37hs6nkZUh8oqTmACipjkGWZwnnLtuEUaQqZf3lIqfbnHH/5TiaWr5M7oqYlSS2iBTqS9QZWohuMYw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=hRA0fMXK; arc=none smtp.client-ip=68.232.154.123
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1736536222; c=relaxed/simple;
+	bh=abbuXe0efS2QoH5PhHzMi7xNGC82etU29gnMzoWoI/Q=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=LZuR84ylJcaluZFOZrC3wspEZ3eObEhYPjhEexu+7iyCFeCXgj+IXGkmpJq9Q2l2m2Kyusoryv8D3JRZS1+bv6lbydUjvxIjgq/J7DGM56QUT8HVV92kQXrgMWAKEI5JdlLE/G5ZTMp7L4Ip4vqngYreVCAOwScm3STV4B7KdNM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j9cnfvGh; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="hRA0fMXK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1736522824; x=1768058824;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=tkTOYHY7R/B78zoatm15ZoMCaySho/QN7uoUcwZA5m0=;
-  b=hRA0fMXKDUSdDep6+m1hhX29w7qO2H29bDUqQ59QXA2bEhii0sy7bypT
-   UkhSTbQmg33VjHkNtsif1QUt52q17kW6RvuxNVJZ6/3IggqpV/C/Ya39f
-   LeEA5U4JoT1VpRo7mIcZddikOTvv4jJ6LJUTIIhlPJPCW8ovZsqe1uEi0
-   6/Z+akRc0JO1DHFkeHCIJgFWwo8UAf3/813/Eax3ryB3QKSsgt0910haI
-   HTbYmYnxGIZZhbRQ0Q6uwrlE8mG3mIfHdlK6Ui6lojo8ds+utA+rCGJoc
-   rU73eWzqJ96Ed885/NjEyCeDO1U/8APQ/tF2pGLZmPET5qvnqlz3tM3Q4
-   w==;
-X-CSE-ConnectionGUID: EfVstCxrTPeDtavimu1NHw==
-X-CSE-MsgGUID: 52MgwlluTxOOs9zroo6fDg==
-X-IronPort-AV: E=Sophos;i="6.12,303,1728975600"; 
-   d="scan'208";a="203886132"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa6.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 10 Jan 2025 08:27:03 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Fri, 10 Jan 2025 08:25:52 -0700
-Received: from ryan-Precision-3630-Tower.microchip.com (10.10.85.11) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
- 15.1.2507.35 via Frontend Transport; Fri, 10 Jan 2025 08:25:52 -0700
-From: <Ryan.Wanner@microchip.com>
-To: <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
-	<nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
-	<claudiu.beznea@tuxon.dev>, <mturquette@baylibre.com>, <sboyd@kernel.org>,
-	<arnd@arndb.de>
-CC: <dharma.b@microchip.com>, <mihai.sain@microchip.com>,
-	<romain.sioen@microchip.com>, <varshini.rajendran@microchip.com>,
-	<devicetree@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-	<linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-	<linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-	<linux-spi@vger.kernel.org>, <linux-serial@vger.kernel.org>
-Subject: [PATCH v6 2/3] dt-bindings: pinctrl: at91-pio4: add microchip,sama7d65-pinctrl
-Date: Fri, 10 Jan 2025 08:25:41 -0700
-Message-ID: <821255840c09d8d9cebbb1f2daaedd8a7c138875.1736522006.git.Ryan.Wanner@microchip.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <cover.1736522006.git.Ryan.Wanner@microchip.com>
-References: <cover.1736522006.git.Ryan.Wanner@microchip.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j9cnfvGh"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 42E47C4CED6;
+	Fri, 10 Jan 2025 19:10:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1736536221;
+	bh=abbuXe0efS2QoH5PhHzMi7xNGC82etU29gnMzoWoI/Q=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=j9cnfvGhPribEablygATyI8cVaiAVMmdZ4x67bKDp5+0wzkYaydbp5k+y3SCoi5TO
+	 a0QggZ3C+xAbDTdqBQdX/U/CmMfgOdnhPNf96KqTfbXn09Cnrm1Xp4y2D+vJEdTkuX
+	 RaCIP5VCKuGDCqXsiDf0G5BTU0vRWp8pmNgjOu1MBMAeWCrmGhvUmFzAfZxXzCUjZX
+	 bj2AqhIxiLJp3OE6t9/YlO5/1A5ZvnWj+4c2qJvDqK09/iyJ+5tUghc+KEXYUCHowP
+	 JszbfYa/8cu3WAYKVCTzbGl0+PQbsMjtwBKMgISsDXXqMamRAZ0I+eRBL0eBYBoGjM
+	 LgSGugnselPBA==
+Date: Fri, 10 Jan 2025 19:10:19 +0000
+From: Eric Biggers <ebiggers@kernel.org>
+To: Bartosz Golaszewski <brgl@bgdev.pl>
+Cc: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org,
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Alim Akhtar <alim.akhtar@samsung.com>,
+	Avri Altman <avri.altman@wdc.com>,
+	Bart Van Assche <bvanassche@acm.org>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+	"James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
+	Jens Axboe <axboe@kernel.dk>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	"Martin K . Petersen" <martin.petersen@oracle.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v10 00/15] Support for hardware-wrapped inline encryption
+ keys
+Message-ID: <20250110191019.GA24424@google.com>
+References: <20241213041958.202565-1-ebiggers@kernel.org>
+ <CAMRc=MdeZ_k9z+ZKW1ub0m9ymh3eABUU7ZRPY9TYHM_fc+D+qQ@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+In-Reply-To: <CAMRc=MdeZ_k9z+ZKW1ub0m9ymh3eABUU7ZRPY9TYHM_fc+D+qQ@mail.gmail.com>
 
-From: Dharma Balasubiramani <dharma.b@microchip.com>
+On Fri, Jan 10, 2025 at 09:44:07AM +0100, Bartosz Golaszewski wrote:
+> On Fri, Dec 13, 2024 at 5:20 AM Eric Biggers <ebiggers@kernel.org> wrote:
+> >
+> > This patchset is based on next-20241212 and is also available in git via:
+> >
+> >     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped-keys-v10
+> >
+> > This patchset adds support for hardware-wrapped inline encryption keys, a
+> > security feature supported by some SoCs.  It adds the block and fscrypt
+> > framework for the feature as well as support for it with UFS on Qualcomm SoCs.
+> >
+> > This feature is described in full detail in the included Documentation changes.
+> > But to summarize, hardware-wrapped keys are inline encryption keys that are
+> > wrapped (encrypted) by a key internal to the hardware so that they can only be
+> > unwrapped (decrypted) by the hardware.  Initially keys are wrapped with a
+> > permanent hardware key, but during actual use they are re-wrapped with a
+> > per-boot ephemeral key for improved security.  The hardware supports importing
+> > keys as well as generating keys itself.
+> >
+> > This differs from the existing support for hardware-wrapped keys in the kernel
+> > crypto API (also called "hardware-bound keys" in some places) in the same way
+> > that the crypto API differs from blk-crypto: the crypto API is for general
+> > crypto operations, whereas blk-crypto is for inline storage encryption.
+> >
+> > This feature is already being used by Android downstream for several years
+> > (https://source.android.com/docs/security/features/encryption/hw-wrapped-keys),
+> > but on other platforms userspace support will be provided via fscryptctl and
+> > tests via xfstests (I have some old patches for this that need to be updated).
+> >
+> > Maintainers, please consider merging the following preparatory patches for 6.14:
+> >
+> >   - UFS / SCSI tree: patches 1-4
+> >   - MMC tree: patches 5-7
+> >   - Qualcomm / MSM tree: patch 8
+> >
+> 
+> IIUC The following patches will have to wait for the v6.15 cycle?
+> 
+> [PATCH v10 9/15] soc: qcom: ice: make qcom_ice_program_key() take
+> struct blk_crypto_key
+> [PATCH v10 10/15] blk-crypto: add basic hardware-wrapped key support
+> [PATCH v10 11/15] blk-crypto: show supported key types in sysfs
+> [PATCH v10 12/15] blk-crypto: add ioctls to create and prepare
+> hardware-wrapped keys
+> [PATCH v10 13/15] fscrypt: add support for hardware-wrapped keys
+> [PATCH v10 14/15] soc: qcom: ice: add HWKM support to the ICE driver
+> [PATCH v10 15/15] ufs: qcom: add support for wrapped keys
 
-Add pinctrl bindings for microchip sama7d65 SoC.
+Yes, that's correct.
 
-Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
-Signed-off-by: Ryan Wanner <Ryan.Wanner@microchip.com>
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
----
- .../devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt      | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt b/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-index 774c3c269c40..81a05a09f19f 100644
---- a/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-+++ b/Documentation/devicetree/bindings/pinctrl/atmel,at91-pio4-pinctrl.txt
-@@ -6,6 +6,7 @@ configure it.
- Required properties:
- - compatible:
- 	"atmel,sama5d2-pinctrl"
-+	"microchip,sama7d65-pinctrl", "microchip,sama7g5-pinctrl"
- 	"microchip,sama7g5-pinctrl"
- - reg: base address and length of the PIO controller.
- - interrupts: interrupt outputs from the controller, one for each bank.
--- 
-2.43.0
-
+- Eric
