@@ -1,112 +1,218 @@
-Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F403821506D;
-	Fri, 10 Jan 2025 21:17:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.177.32
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 358011547E7;
+	Sat, 11 Jan 2025 06:32:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736543876; cv=none; b=rhGAwPnsD7PCyaCYqj8win2vN6b3G9yqHIB1awk/RvzLP9+sVMlJheHWV9gzaHsLdXE8kRYiRH1xc1M8WVRnTUYySuxnHq+C7QsF0QimSUHuLjUV7ff8vKepEAK0vPR58qmyFKC/AkPbwXq3KzhKFXdEor7Es892+FSMkyWoMhc=
+	t=1736577152; cv=none; b=VwTkVt1OleavXQ9uHE+NlTh3OOtnkTnPyTsn+0TtO73tztWgEOuMqMXRhxTqY06ZUd4Sduqqwre8xfoQNp9hTWTpADjDbQDJVEPrx6U31qndLXFCghSdp2BMCGFIFl7hRl6Fpd8v6pmLNGXkRRhfo49E83pZqztZgwM56uPFaFg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736543876; c=relaxed/simple;
-	bh=gHTVtfqFaTl7kz/Aqg4ejB+gR6umXsXipAaIlpaZrss=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=dyQxVmQtfDJL/iG0tj7UeQRZ/UXiWTBGKUGrRSOZ4K2fImM4X6QBIXCCGpYdwZ9kYCh8V56G4p2ch0y5fENt7uCHDuSdPV1AutFSTyJZHBsvMwtUJvccUGxmsmXDVQ9v0UXrjTYdS5eN9ETvCd6sObs6VCpNMCgtY1sdZ3WdvMA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com; spf=pass smtp.mailfrom=oracle.com; dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b=alymwtPW; arc=none smtp.client-ip=205.220.177.32
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oracle.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oracle.com
+	s=arc-20240116; t=1736577152; c=relaxed/simple;
+	bh=BzP2ouTwnQQD9TJULB2LZIUBdwPr5rtnagkdMKgFz2Q=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=VD2g5g/qb8dvmFa5lTjtvIR4kaSFFJXq331ZohhWuD7MQOY+Yuf7cHp+VkLS/X0NRDn1Cx/yPXDHU7xXnpZQRmWvD/krNCo1nCFZi2vgbUrOADGDK82WaeUgmY3Iek0rpp6yuxvFB4cewpVVnBoJgMosc93Dq0pqz0nMW/QCFqY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=PGdB0ni0; arc=none smtp.client-ip=198.137.202.133
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="alymwtPW"
-Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
-	by mx0b-00069f02.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 50ALBw3H022284;
-	Fri, 10 Jan 2025 21:17:32 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	corp-2023-11-20; bh=ajGyttwmIKtn5/bP/iQzmbsjuv7wkTTYbWgojMBY5Lo=; b=
-	alymwtPWo/Aa6GaIoOEB1dotH9qAXc9sw1nafmX2o3cheLtUSxD9DbliFnqquIOl
-	mM4e3yzamBPWDFto4xs2f+4Q0Yr1u3dzd20DazV+8JD/RK/PDA7AqSPOLm5G60bq
-	ER0BAv5LgXgqfMjDH45g+Ihvl/rIQ51j/QO1spohV7lmKusXuVlsqxuEfZZEScVA
-	G8wALYVns7zEliH/6DML4qkEMMbvmjX0zWQujxJ13fEKlTs1cu/BLG42yA6dVx0v
-	1YfpuZg3zjpa0vbrmwqKTl/+f4spLZK0RSn3kpB3rFhWvAvsxp+OMSmfZdmMkbGX
-	8eQtqklXupnyHZEnNLaacw==
-Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.appoci.oracle.com [138.1.114.2])
-	by mx0b-00069f02.pphosted.com (PPS) with ESMTPS id 43xudcc0su-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 10 Jan 2025 21:17:31 +0000 (GMT)
-Received: from pps.filterd (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (8.18.1.2/8.18.1.2) with ESMTP id 50AKnpxi027091;
-	Fri, 10 Jan 2025 21:17:30 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTPS id 43xued5r5r-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Fri, 10 Jan 2025 21:17:30 +0000
-Received: from phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 50ALHQ1s034137;
-	Fri, 10 Jan 2025 21:17:30 GMT
-Received: from ca-mkp2.ca.oracle.com.com (mpeterse-ol9.allregionaliads.osdevelopmeniad.oraclevcn.com [100.100.251.135])
-	by phxpaimrmta01.imrmtpd1.prodappphxaev1.oraclevcn.com (PPS) with ESMTP id 43xued5r3k-3;
-	Fri, 10 Jan 2025 21:17:30 +0000
-From: "Martin K. Petersen" <martin.petersen@oracle.com>
-To: linux-block@vger.kernel.org, linux-fscrypt@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, Bartosz Golaszewski <brgl@bgdev.pl>,
-        Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        Eric Biggers <ebiggers@kernel.org>
-Cc: "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        "James E . J . Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Jens Axboe <axboe@kernel.dk>, Konrad Dybcio <konradybcio@kernel.org>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: (subset) [PATCH v10 00/15] Support for hardware-wrapped inline encryption keys
-Date: Fri, 10 Jan 2025 16:16:45 -0500
-Message-ID: <173654330182.638636.6890747703522161816.b4-ty@oracle.com>
-X-Mailer: git-send-email 2.46.2
-In-Reply-To: <20241213041958.202565-1-ebiggers@kernel.org>
-References: <20241213041958.202565-1-ebiggers@kernel.org>
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="PGdB0ni0"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+	Content-ID:Content-Description:In-Reply-To:References;
+	bh=JgjXS+/cEpO15uspwQhs/bCHN/H5hRYsjkj1heBZCD0=; b=PGdB0ni0ZE5I8lgMbntppiv3E1
+	1cx0tMVhYWL5FGOb6XokMUlJ4AS/CY9TLsf0J2IAfR9g3Gpdds18orFoJ/281abBu08p2/zE8B131
+	w1aa6knboUWtMqxU2mKKPcg18XZ5rLk8NBb8tQj468cvIN4bETIucs/HYj8yJUA4kd8mc3u4+C+ZD
+	qXG/+t5oZh6NjddUYZfxGJr4CXFE1FXohWWFomlWw/tpYvZOERuTnG168x9A/u+uGMbKo6i04gwIY
+	ZuSNUA+Ob91SOxIipsm7cT6BAxemSRsi6sSH09ZkQyQEd8g2CZ+ezmziEQmiVq97cs2KovYAyAc1x
+	DnFfU7sQ==;
+Received: from [50.53.2.24] (helo=bombadil.infradead.org)
+	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
+	id 1tWV2s-00000000Hra-39yo;
+	Sat, 11 Jan 2025 06:32:30 +0000
+From: Randy Dunlap <rdunlap@infradead.org>
+To: linux-kernel@vger.kernel.org
+Cc: Randy Dunlap <rdunlap@infradead.org>,
+	Maxim Levitsky <maximlevitsky@gmail.com>,
+	Alex Dubov <oakad@yahoo.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH] memstick: core: fix kernel-doc notation
+Date: Fri, 10 Jan 2025 22:32:30 -0800
+Message-ID: <20250111063230.910945-1-rdunlap@infradead.org>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-01-10_09,2025-01-10_03,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 spamscore=0 adultscore=0
- malwarescore=0 phishscore=0 bulkscore=0 mlxlogscore=999 suspectscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2411120000
- definitions=main-2501100164
-X-Proofpoint-ORIG-GUID: r9072SpeA4o0_1k9_Mso4XzKCRb-DUpt
-X-Proofpoint-GUID: r9072SpeA4o0_1k9_Mso4XzKCRb-DUpt
 
-On Thu, 12 Dec 2024 20:19:43 -0800, Eric Biggers wrote:
+Use the correct kernel-doc format for function parameters (':'
+instead of '-') to eliminate kernel-doc warnings.
+Add some "Returns:" notations to functions.
 
-> This patchset is based on next-20241212 and is also available in git via:
-> 
->     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped-keys-v10
-> 
-> This patchset adds support for hardware-wrapped inline encryption keys, a
-> security feature supported by some SoCs.  It adds the block and fscrypt
-> framework for the feature as well as support for it with UFS on Qualcomm SoCs.
-> 
-> [...]
+memstick.c:206: warning: Function parameter or struct member 'host' not described in 'memstick_detect_change'
+memstick.c:222: warning: Function parameter or struct member 'host' not described in 'memstick_next_req'
+memstick.c:222: warning: Function parameter or struct member 'mrq' not described in 'memstick_next_req'
+memstick.c:248: warning: Function parameter or struct member 'host' not described in 'memstick_new_req'
+memstick.c:265: warning: Function parameter or struct member 'mrq' not described in 'memstick_init_req_sg'
+memstick.c:265: warning: Function parameter or struct member 'tpc' not described in 'memstick_init_req_sg'
+memstick.c:265: warning: Function parameter or struct member 'sg' not described in 'memstick_init_req_sg'
+memstick.c:295: warning: Function parameter or struct member 'mrq' not described in 'memstick_init_req'
+memstick.c:295: warning: Function parameter or struct member 'tpc' not described in 'memstick_init_req'
+memstick.c:295: warning: Function parameter or struct member 'buf' not described in 'memstick_init_req'
+memstick.c:295: warning: Function parameter or struct member 'length' not described in 'memstick_init_req'
+memstick.c:366: warning: Function parameter or struct member 'card' not described in 'memstick_set_rw_addr'
+memstick.c:513: warning: Function parameter or struct member 'host' not described in 'memstick_add_host'
+memstick.c:549: warning: Function parameter or struct member 'host' not described in 'memstick_remove_host'
+memstick.c:571: warning: Function parameter or struct member 'host' not described in 'memstick_free_host'
+memstick.c:582: warning: Function parameter or struct member 'host' not described in 'memstick_suspend_host'
+memstick.c:594: warning: Function parameter or struct member 'host' not described in 'memstick_resume_host'
 
-Applied to 6.14/scsi-queue, thanks!
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Alex Dubov <oakad@yahoo.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/memstick/core/memstick.c |   46 +++++++++++++++++------------
+ 1 file changed, 27 insertions(+), 19 deletions(-)
 
-[02/15] ufs: crypto: add ufs_hba_from_crypto_profile()
-        https://git.kernel.org/mkp/scsi/c/75d0c649eca4
-[03/15] ufs: qcom: convert to use UFSHCD_QUIRK_CUSTOM_CRYPTO_PROFILE
-        https://git.kernel.org/mkp/scsi/c/30b32c647cf3
-[04/15] ufs: crypto: remove ufs_hba_variant_ops::program_key
-        https://git.kernel.org/mkp/scsi/c/409f21010d92
-
--- 
-Martin K. Petersen	Oracle Linux Engineering
+--- linux-next-20250108.orig/drivers/memstick/core/memstick.c
++++ linux-next-20250108/drivers/memstick/core/memstick.c
+@@ -200,7 +200,7 @@ static int memstick_dummy_check(struct m
+ 
+ /**
+  * memstick_detect_change - schedule media detection on memstick host
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_detect_change(struct memstick_host *host)
+ {
+@@ -210,13 +210,15 @@ EXPORT_SYMBOL(memstick_detect_change);
+ 
+ /**
+  * memstick_next_req - called by host driver to obtain next request to process
+- * @host - host to use
+- * @mrq - pointer to stick the request to
++ * @host: host to use
++ * @mrq: pointer to stick the request to
+  *
+  * Host calls this function from idle state (*mrq == NULL) or after finishing
+  * previous request (*mrq should point to it). If previous request was
+- * unsuccessful, it is retried for predetermined number of times. Return value
+- * of 0 means that new request was assigned to the host.
++ * unsuccessful, it is retried for predetermined number of times.
++ *
++ * Returns: value of 0 means that new request was assigned to the host.
++ * Otherwise a negative error code is returned.
+  */
+ int memstick_next_req(struct memstick_host *host, struct memstick_request **mrq)
+ {
+@@ -242,7 +244,7 @@ EXPORT_SYMBOL(memstick_next_req);
+ 
+ /**
+  * memstick_new_req - notify the host that some requests are pending
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_new_req(struct memstick_host *host)
+ {
+@@ -256,9 +258,9 @@ EXPORT_SYMBOL(memstick_new_req);
+ 
+ /**
+  * memstick_init_req_sg - set request fields needed for bulk data transfer
+- * @mrq - request to use
+- * @tpc - memstick Transport Protocol Command
+- * @sg - TPC argument
++ * @mrq: request to use
++ * @tpc: memstick Transport Protocol Command
++ * @sg: TPC argument
+  */
+ void memstick_init_req_sg(struct memstick_request *mrq, unsigned char tpc,
+ 			  const struct scatterlist *sg)
+@@ -281,10 +283,10 @@ EXPORT_SYMBOL(memstick_init_req_sg);
+ 
+ /**
+  * memstick_init_req - set request fields needed for short data transfer
+- * @mrq - request to use
+- * @tpc - memstick Transport Protocol Command
+- * @buf - TPC argument buffer
+- * @length - TPC argument size
++ * @mrq: request to use
++ * @tpc: memstick Transport Protocol Command
++ * @buf: TPC argument buffer
++ * @length: TPC argument size
+  *
+  * The intended use of this function (transfer of data items several bytes
+  * in size) allows us to just copy the value between request structure and
+@@ -360,7 +362,9 @@ static int h_memstick_set_rw_addr(struct
+ /**
+  * memstick_set_rw_addr - issue SET_RW_REG_ADDR request and wait for it to
+  *                        complete
+- * @card - media device to use
++ * @card: media device to use
++ *
++ * Returns: error setting for the current request
+  */
+ int memstick_set_rw_addr(struct memstick_dev *card)
+ {
+@@ -487,6 +491,8 @@ out_power_off:
+  * memstick_alloc_host - allocate a memstick_host structure
+  * @extra: size of the user private data to allocate
+  * @dev: parent device of the host
++ *
++ * Returns: %NULL on failure or the allocated &memstick_host pointer on success
+  */
+ struct memstick_host *memstick_alloc_host(unsigned int extra,
+ 					  struct device *dev)
+@@ -507,7 +513,9 @@ EXPORT_SYMBOL(memstick_alloc_host);
+ 
+ /**
+  * memstick_add_host - start request processing on memstick host
+- * @host - host to use
++ * @host: host to use
++ *
++ * Returns: %0 on success or a negative error code on failure
+  */
+ int memstick_add_host(struct memstick_host *host)
+ {
+@@ -543,7 +551,7 @@ EXPORT_SYMBOL(memstick_add_host);
+ 
+ /**
+  * memstick_remove_host - stop request processing on memstick host
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_remove_host(struct memstick_host *host)
+ {
+@@ -565,7 +573,7 @@ EXPORT_SYMBOL(memstick_remove_host);
+ 
+ /**
+  * memstick_free_host - free memstick host
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_free_host(struct memstick_host *host)
+ {
+@@ -576,7 +584,7 @@ EXPORT_SYMBOL(memstick_free_host);
+ 
+ /**
+  * memstick_suspend_host - notify bus driver of host suspension
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_suspend_host(struct memstick_host *host)
+ {
+@@ -588,7 +596,7 @@ EXPORT_SYMBOL(memstick_suspend_host);
+ 
+ /**
+  * memstick_resume_host - notify bus driver of host resumption
+- * @host - host to use
++ * @host: host to use
+  */
+ void memstick_resume_host(struct memstick_host *host)
+ {
