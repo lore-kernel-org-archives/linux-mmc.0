@@ -1,46 +1,69 @@
-Received: from bombadil.infradead.org (bombadil.infradead.org [198.137.202.133])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 358011547E7;
-	Sat, 11 Jan 2025 06:32:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.137.202.133
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 496201BD01E
+	for <linux-mmc@vger.kernel.org>; Sat, 11 Jan 2025 18:54:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736577152; cv=none; b=VwTkVt1OleavXQ9uHE+NlTh3OOtnkTnPyTsn+0TtO73tztWgEOuMqMXRhxTqY06ZUd4Sduqqwre8xfoQNp9hTWTpADjDbQDJVEPrx6U31qndLXFCghSdp2BMCGFIFl7hRl6Fpd8v6pmLNGXkRRhfo49E83pZqztZgwM56uPFaFg=
+	t=1736621656; cv=none; b=Oo+ucPgEzLf2FpDsFoWqbVQHUIE8xxdX507Aox8PFSEmHp5n/M94lL4OQUZVjWnPSfyQAPKHrXdJTAwG10Xisjp8dyG/PT91UBZqw3eUMkEEdVuiXuO6KGkvYN6oyaURXjdQ53adv9pYRhBl3gvkowdVsWzIBSB5SJ5fzT9r1SI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736577152; c=relaxed/simple;
-	bh=BzP2ouTwnQQD9TJULB2LZIUBdwPr5rtnagkdMKgFz2Q=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=VD2g5g/qb8dvmFa5lTjtvIR4kaSFFJXq331ZohhWuD7MQOY+Yuf7cHp+VkLS/X0NRDn1Cx/yPXDHU7xXnpZQRmWvD/krNCo1nCFZi2vgbUrOADGDK82WaeUgmY3Iek0rpp6yuxvFB4cewpVVnBoJgMosc93Dq0pqz0nMW/QCFqY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org; spf=none smtp.mailfrom=infradead.org; dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b=PGdB0ni0; arc=none smtp.client-ip=198.137.202.133
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=infradead.org
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=infradead.org
+	s=arc-20240116; t=1736621656; c=relaxed/simple;
+	bh=QOTxEnL65PeAOgGwFydnNMnEjIGt+/+sbPe9e2+1EIc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jUg7epKTaLfsSidwXSSj8sSHBGHJ2/gdSVZ8jpbrafb1o4jhhUciC0Z+qZVQlG5EPwRTQ+vbSBzYvvCwbGYCD6m4pBN5jz/xyEz5HRjtMWMkA6jiEZRHJKGEjyA6PS6qAKqxs3a8TNOir5LhUgf8fnGx3AIxPfjlkliH1UiZYbU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qL4uMMPL; arc=none smtp.client-ip=209.85.128.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="PGdB0ni0"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-	d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-	MIME-Version:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
-	Content-ID:Content-Description:In-Reply-To:References;
-	bh=JgjXS+/cEpO15uspwQhs/bCHN/H5hRYsjkj1heBZCD0=; b=PGdB0ni0ZE5I8lgMbntppiv3E1
-	1cx0tMVhYWL5FGOb6XokMUlJ4AS/CY9TLsf0J2IAfR9g3Gpdds18orFoJ/281abBu08p2/zE8B131
-	w1aa6knboUWtMqxU2mKKPcg18XZ5rLk8NBb8tQj468cvIN4bETIucs/HYj8yJUA4kd8mc3u4+C+ZD
-	qXG/+t5oZh6NjddUYZfxGJr4CXFE1FXohWWFomlWw/tpYvZOERuTnG168x9A/u+uGMbKo6i04gwIY
-	ZuSNUA+Ob91SOxIipsm7cT6BAxemSRsi6sSH09ZkQyQEd8g2CZ+ezmziEQmiVq97cs2KovYAyAc1x
-	DnFfU7sQ==;
-Received: from [50.53.2.24] (helo=bombadil.infradead.org)
-	by bombadil.infradead.org with esmtpsa (Exim 4.98 #2 (Red Hat Linux))
-	id 1tWV2s-00000000Hra-39yo;
-	Sat, 11 Jan 2025 06:32:30 +0000
-From: Randy Dunlap <rdunlap@infradead.org>
-To: linux-kernel@vger.kernel.org
-Cc: Randy Dunlap <rdunlap@infradead.org>,
-	Maxim Levitsky <maximlevitsky@gmail.com>,
-	Alex Dubov <oakad@yahoo.com>,
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qL4uMMPL"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4361e82e3c3so4381945e9.0
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Jan 2025 10:54:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1736621652; x=1737226452; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=9sjFILk91RRJfxDjv+tmpEvIXH9ca00fbQ4AEe6EAys=;
+        b=qL4uMMPLF7BBJ6wPs/Z/qK7DjTq+v/Dk2SUbLL1969K3+kGOaVy+k3o29MMwLvkVxm
+         eCTjgmSXyBUPCABO60zP5D+jcgjQJe1xtqKp2dXtEroEk+IHs1WVQDfrkFeLeKpsganz
+         7i1pfQTCn2r70YfqKf0BMVH/I6SAVXuw54ofg6CrEVuZqNP6t2xIHNmsJs0ip4Gu2VE2
+         gLzVbqKE5mvw6MMu5URMn2ecjYXGK5mmOpkqM3P2eDdtsivV3HdgsQNIwPZKX6vxZftP
+         x2QIlxQkCGoRDvpycGN5+Fjeol9BE7WWSsX9JBqfFl1DZujX+wH8xDiH/Y88EpPBy9aH
+         5nqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1736621652; x=1737226452;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=9sjFILk91RRJfxDjv+tmpEvIXH9ca00fbQ4AEe6EAys=;
+        b=LgO2a5+bLPnGqSZJAew7TpI0pxlQsO907Py4bM4ST9+mcewqdEvCR+8PcB5Iqb7RTd
+         18f8ZHpQO23oSE5QqQscoaZzdeXobn4BdZBVQpd5Br+KIOSuoiQQAdZ2fggo1fWJER3X
+         YLrtHgGqBZ7ajV+A3fkjlNfJvkWTohYd/HPPgYuRm5SZGZCy2n8dYGFMAVbQ0Ev0Swq4
+         rGJZZqshuUpxK4TzIEKyBrG5o0xrTyhev7CrS6l18bBKMxDSpbun/aETFRzdwONCP05X
+         gfSnVl7zqdHvxdaD5+5CdEbz3cdRNYXt+nN9UIVx1nkMaGcHLKQIm+3/FqLucQcfV80B
+         V47w==
+X-Forwarded-Encrypted: i=1; AJvYcCWrgClrzexpXJ7bF+X6CsKJ2rXs5Jx8QIJCd2Z/nbGvWF0FhfWqPw69WP/+TYhbhbJBu35uOOpAlFQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyw8l2TFSN/OQvk9upE9CcaWUF6bsE+p8aFIN1h8PL8BvQc4rMf
+	MpWWcbGWhXFQp9nd1dI5yqjdQIq9mL5Kki4elhuRr/Sr4Ghpepl7uMoGrVlN1eA=
+X-Gm-Gg: ASbGncsXq9A+2d6uqdQs0az8SgOsgk9pVUyR5ZvOlN8aKya53W1+VR322ffCGBhqtrq
+	hPqNRSYWEk87QAn55gVLPR2dtMqiG6Fcx9KrgGtH4VJSp7Qfez2czdMkDZ31l7YHg7/f3Cz9cVy
+	jtf6G9nuyfB5LqmUGHoGwHLjTvFY7niD+WvirXTe5qmy4VEPGxMn9nX9uwppGQjY18TyomJ47gu
+	o6AMkZbwKPCXbO4s2czy6haAr5sYy1lUJvTMFmWT9qPD2ONTtzRPkoVzEvOAZD0LmNi4ZY=
+X-Google-Smtp-Source: AGHT+IEJT2nPD6ZDPo5fhv4lY4oQ+8O3CsOA79cdNjxqQQS/GOueVkAx1d6ruRQG5kJRezObrpNKIw==
+X-Received: by 2002:a5d:64e9:0:b0:385:f79d:21a2 with SMTP id ffacd0b85a97d-38a87308a22mr5127113f8f.11.1736621651670;
+        Sat, 11 Jan 2025 10:54:11 -0800 (PST)
+Received: from krzk-bin.. ([178.197.223.165])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38a8e4c1ce5sm7977564f8f.94.2025.01.11.10.54.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 11 Jan 2025 10:54:11 -0800 (PST)
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH] memstick: core: fix kernel-doc notation
-Date: Fri, 10 Jan 2025 22:32:30 -0800
-Message-ID: <20250111063230.910945-1-rdunlap@infradead.org>
-X-Mailer: git-send-email 2.47.1
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH] mmc: hi3798mv200: Use syscon_regmap_lookup_by_phandle_args
+Date: Sat, 11 Jan 2025 19:54:09 +0100
+Message-ID: <20250111185410.183896-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,170 +72,51 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Use the correct kernel-doc format for function parameters (':'
-instead of '-') to eliminate kernel-doc warnings.
-Add some "Returns:" notations to functions.
+Use syscon_regmap_lookup_by_phandle_args() which is a wrapper over
+syscon_regmap_lookup_by_phandle() combined with getting the syscon
+argument.  Except simpler code this annotates within one line that given
+phandle has arguments, so grepping for code would be easier.
 
-memstick.c:206: warning: Function parameter or struct member 'host' not described in 'memstick_detect_change'
-memstick.c:222: warning: Function parameter or struct member 'host' not described in 'memstick_next_req'
-memstick.c:222: warning: Function parameter or struct member 'mrq' not described in 'memstick_next_req'
-memstick.c:248: warning: Function parameter or struct member 'host' not described in 'memstick_new_req'
-memstick.c:265: warning: Function parameter or struct member 'mrq' not described in 'memstick_init_req_sg'
-memstick.c:265: warning: Function parameter or struct member 'tpc' not described in 'memstick_init_req_sg'
-memstick.c:265: warning: Function parameter or struct member 'sg' not described in 'memstick_init_req_sg'
-memstick.c:295: warning: Function parameter or struct member 'mrq' not described in 'memstick_init_req'
-memstick.c:295: warning: Function parameter or struct member 'tpc' not described in 'memstick_init_req'
-memstick.c:295: warning: Function parameter or struct member 'buf' not described in 'memstick_init_req'
-memstick.c:295: warning: Function parameter or struct member 'length' not described in 'memstick_init_req'
-memstick.c:366: warning: Function parameter or struct member 'card' not described in 'memstick_set_rw_addr'
-memstick.c:513: warning: Function parameter or struct member 'host' not described in 'memstick_add_host'
-memstick.c:549: warning: Function parameter or struct member 'host' not described in 'memstick_remove_host'
-memstick.c:571: warning: Function parameter or struct member 'host' not described in 'memstick_free_host'
-memstick.c:582: warning: Function parameter or struct member 'host' not described in 'memstick_suspend_host'
-memstick.c:594: warning: Function parameter or struct member 'host' not described in 'memstick_resume_host'
+There is also no real benefit in printing errors on missing syscon
+argument, because this is done just too late: runtime check on
+static/build-time data.  Dtschema and Devicetree bindings offer the
+static/build-time check for this already.
 
-Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-Cc: Alex Dubov <oakad@yahoo.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
- drivers/memstick/core/memstick.c |   46 +++++++++++++++++------------
- 1 file changed, 27 insertions(+), 19 deletions(-)
+ drivers/mmc/host/dw_mmc-hi3798mv200.c | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
 
---- linux-next-20250108.orig/drivers/memstick/core/memstick.c
-+++ linux-next-20250108/drivers/memstick/core/memstick.c
-@@ -200,7 +200,7 @@ static int memstick_dummy_check(struct m
- 
- /**
-  * memstick_detect_change - schedule media detection on memstick host
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_detect_change(struct memstick_host *host)
+diff --git a/drivers/mmc/host/dw_mmc-hi3798mv200.c b/drivers/mmc/host/dw_mmc-hi3798mv200.c
+index cce174b5249b..5791a975a944 100644
+--- a/drivers/mmc/host/dw_mmc-hi3798mv200.c
++++ b/drivers/mmc/host/dw_mmc-hi3798mv200.c
+@@ -181,7 +181,6 @@ static int dw_mci_hi3798mv200_init(struct dw_mci *host)
  {
-@@ -210,13 +210,15 @@ EXPORT_SYMBOL(memstick_detect_change);
+ 	struct dw_mci_hi3798mv200_priv *priv;
+ 	struct device_node *np = host->dev->of_node;
+-	int ret;
  
- /**
-  * memstick_next_req - called by host driver to obtain next request to process
-- * @host - host to use
-- * @mrq - pointer to stick the request to
-+ * @host: host to use
-+ * @mrq: pointer to stick the request to
-  *
-  * Host calls this function from idle state (*mrq == NULL) or after finishing
-  * previous request (*mrq should point to it). If previous request was
-- * unsuccessful, it is retried for predetermined number of times. Return value
-- * of 0 means that new request was assigned to the host.
-+ * unsuccessful, it is retried for predetermined number of times.
-+ *
-+ * Returns: value of 0 means that new request was assigned to the host.
-+ * Otherwise a negative error code is returned.
-  */
- int memstick_next_req(struct memstick_host *host, struct memstick_request **mrq)
- {
-@@ -242,7 +244,7 @@ EXPORT_SYMBOL(memstick_next_req);
+ 	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
+ 	if (!priv)
+@@ -199,15 +198,12 @@ static int dw_mci_hi3798mv200_init(struct dw_mci *host)
+ 		return dev_err_probe(host->dev, PTR_ERR(priv->drive_clk),
+ 				     "failed to get enabled ciu-drive clock\n");
  
- /**
-  * memstick_new_req - notify the host that some requests are pending
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_new_req(struct memstick_host *host)
- {
-@@ -256,9 +258,9 @@ EXPORT_SYMBOL(memstick_new_req);
+-	priv->crg_reg = syscon_regmap_lookup_by_phandle(np, "hisilicon,sap-dll-reg");
++	priv->crg_reg = syscon_regmap_lookup_by_phandle_args(np, "hisilicon,sap-dll-reg",
++							     1, &priv->sap_dll_offset);
+ 	if (IS_ERR(priv->crg_reg))
+ 		return dev_err_probe(host->dev, PTR_ERR(priv->crg_reg),
+ 				     "failed to get CRG reg\n");
  
- /**
-  * memstick_init_req_sg - set request fields needed for bulk data transfer
-- * @mrq - request to use
-- * @tpc - memstick Transport Protocol Command
-- * @sg - TPC argument
-+ * @mrq: request to use
-+ * @tpc: memstick Transport Protocol Command
-+ * @sg: TPC argument
-  */
- void memstick_init_req_sg(struct memstick_request *mrq, unsigned char tpc,
- 			  const struct scatterlist *sg)
-@@ -281,10 +283,10 @@ EXPORT_SYMBOL(memstick_init_req_sg);
- 
- /**
-  * memstick_init_req - set request fields needed for short data transfer
-- * @mrq - request to use
-- * @tpc - memstick Transport Protocol Command
-- * @buf - TPC argument buffer
-- * @length - TPC argument size
-+ * @mrq: request to use
-+ * @tpc: memstick Transport Protocol Command
-+ * @buf: TPC argument buffer
-+ * @length: TPC argument size
-  *
-  * The intended use of this function (transfer of data items several bytes
-  * in size) allows us to just copy the value between request structure and
-@@ -360,7 +362,9 @@ static int h_memstick_set_rw_addr(struct
- /**
-  * memstick_set_rw_addr - issue SET_RW_REG_ADDR request and wait for it to
-  *                        complete
-- * @card - media device to use
-+ * @card: media device to use
-+ *
-+ * Returns: error setting for the current request
-  */
- int memstick_set_rw_addr(struct memstick_dev *card)
- {
-@@ -487,6 +491,8 @@ out_power_off:
-  * memstick_alloc_host - allocate a memstick_host structure
-  * @extra: size of the user private data to allocate
-  * @dev: parent device of the host
-+ *
-+ * Returns: %NULL on failure or the allocated &memstick_host pointer on success
-  */
- struct memstick_host *memstick_alloc_host(unsigned int extra,
- 					  struct device *dev)
-@@ -507,7 +513,9 @@ EXPORT_SYMBOL(memstick_alloc_host);
- 
- /**
-  * memstick_add_host - start request processing on memstick host
-- * @host - host to use
-+ * @host: host to use
-+ *
-+ * Returns: %0 on success or a negative error code on failure
-  */
- int memstick_add_host(struct memstick_host *host)
- {
-@@ -543,7 +551,7 @@ EXPORT_SYMBOL(memstick_add_host);
- 
- /**
-  * memstick_remove_host - stop request processing on memstick host
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_remove_host(struct memstick_host *host)
- {
-@@ -565,7 +573,7 @@ EXPORT_SYMBOL(memstick_remove_host);
- 
- /**
-  * memstick_free_host - free memstick host
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_free_host(struct memstick_host *host)
- {
-@@ -576,7 +584,7 @@ EXPORT_SYMBOL(memstick_free_host);
- 
- /**
-  * memstick_suspend_host - notify bus driver of host suspension
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_suspend_host(struct memstick_host *host)
- {
-@@ -588,7 +596,7 @@ EXPORT_SYMBOL(memstick_suspend_host);
- 
- /**
-  * memstick_resume_host - notify bus driver of host resumption
-- * @host - host to use
-+ * @host: host to use
-  */
- void memstick_resume_host(struct memstick_host *host)
- {
+-	ret = of_property_read_u32_index(np, "hisilicon,sap-dll-reg", 1, &priv->sap_dll_offset);
+-	if (ret)
+-		return dev_err_probe(host->dev, ret, "failed to get sample DLL register offset\n");
+-
+ 	host->priv = priv;
+ 	return 0;
+ }
+-- 
+2.43.0
+
