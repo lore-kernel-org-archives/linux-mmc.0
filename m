@@ -1,60 +1,62 @@
-Received: from mail-wm1-f41.google.com (mail-wm1-f41.google.com [209.85.128.41])
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 342DA1DB131;
-	Wed, 15 Jan 2025 07:30:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2A8FC1DB13C;
+	Wed, 15 Jan 2025 07:30:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736926256; cv=none; b=aRD+PD4T+Q2ASL0cqPfxfiamEx+gN6GfKZtwuIA9m/zLXQyxsR8Hg2lH4i8A5eN2QqwtCXL23p/vOYW4rlEqtD4ZASGWC4ZA3ztjqwOH2g2UWL2TYFjb85L7e045AXScIjBQbwIdiOte70toXi/iXSxW7co2dsVpQyTpr+eSQKc=
+	t=1736926257; cv=none; b=NotdGiCIi83R01bpG+jWeoAfKFbb+6A1VvEuHxF+vOjxdcrJkZRs4PyC/LF4ub7jPlG+O3xRVxCyH9vgapgPe3DbFHvnOZVm7H0DvEBjGqwq7kRv2rNvqyOnET7N2VaEo7oRcSDb/L3NiRW9MbeAO9dL6SfYtb98HHgAkUWt49c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736926256; c=relaxed/simple;
-	bh=oM1EB4cFnYlynwFkhBiDIvbZjdcLGpZtouZSqXeghC4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=XAkwWZ6eNjWbM2ZT8j2eY8nqn0keHTbPAkXuaX0DZM5F+kXhs2HMFrmlGzRXCI5oL+Wn6PlnHavXx5ciC1LbyJBnbEhX6OulbJgCLLUuLU134fz6abUaPfA5lk1F1HW94Zii4nEU6qzvm1jY1AdbXj8WPFilSAbWUbG9vL0YjtI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=HfM+ceYv; arc=none smtp.client-ip=209.85.128.41
+	s=arc-20240116; t=1736926257; c=relaxed/simple;
+	bh=diLtFnyDNcOyjKb5X1KbzPgDz8KY0pspKsa/HJVKHsQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=GlePzklrO2a/ykAszpU5Qbwcm7d+XsbYpv/umNl73Q4Nv2zSSL/Wtmf1k27b3khdfp8myOVhQp6zISBWiYHrULD7hVhkLtQqoiSZyo8uLTXJ8WZX8+7VUdmEYHRi6hHHgSEoG8z5nJ6NFGmIw3RqoPfcftLBTCzzSV6Ao8ikVt8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=lkeJWfRR; arc=none smtp.client-ip=209.85.128.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HfM+ceYv"
-Received: by mail-wm1-f41.google.com with SMTP id 5b1f17b1804b1-43622267b2eso65744215e9.0;
-        Tue, 14 Jan 2025 23:30:54 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lkeJWfRR"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-4362bae4d7dso45160235e9.1;
+        Tue, 14 Jan 2025 23:30:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1736926253; x=1737531053; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=8QiiE5a7XbqIEk5WkGXD7LJd07NSVV9giChXlOvXHt4=;
-        b=HfM+ceYv6dWEbRXStD8wc4XSeUwpxV/HLz/qVBeSJTR3HOL2LC+05hlBRo+GjZycPG
-         JgK5zUD33kMH7pZK5G8qokrUYKxL7oubfKuYyF6AfvDtllI82tIlltd8JcSMcSh3lqq1
-         1Ov4qytFkPjiNtyUgvrw1VLUWqjusFcXpNW0RLb9CXkqNBH0EWzRtelwgGbV7mhE9s4p
-         99d249z8QwkhV+BKhvz8JEawCs30rC04Qaz0WW+YmKwfeHpXB6cCBKE4a4F8qlQUaYrB
-         CZ0fQsYhkxakIQRb7v8YsZKJ/oQrIIVcNajgZhIrQWRa6ouS/qXVOF4hZWEgeylZsrL9
-         52Fg==
+        d=gmail.com; s=20230601; t=1736926254; x=1737531054; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rfc7yHRU9A77/4BsuDwrRLLhbG0qYCnEUsOYkaHwtVM=;
+        b=lkeJWfRRfjJTnxbnpS86qmz1i6LwtS6GPteS139sMiUU9ItKRVWc9/NgiqvopK5I1g
+         TTaHDXN1R3vHVNLhxRAI14Gb+Nag224b3hGS3Xj+VOnF8ycQy16Ip70z3zZtUDFRanXV
+         TcVFMsT0nyqMrDV/5CUruKybB0Qxzke6ZAQ2KtcNKEichW+S6VNuizvc2pawM2lZbCZ8
+         mrvKpdKHKCN64M6S5T9PyWWdf7vqL6hv6X3o175RE+MlYJ3OysDCNo39B26ijp1XUVJ4
+         wrY1+zZWmQ5s3boN99ZWX6U6l1xBTNNZEbUZQU0EDl/zDA3u9sBDv2EiBFdZNSE06dZQ
+         PoHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1736926253; x=1737531053;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8QiiE5a7XbqIEk5WkGXD7LJd07NSVV9giChXlOvXHt4=;
-        b=WKgLb/t9bRYb5ilG57Ahaqb+KsxmnodHLioRdD3hN20LGpCcWAX5WXlRqU1KBcQGGl
-         Xe3D7rvr+YkqDw1nkmZsliUVtvzMVgorK/90PaQY0Gprz4btR/tT3qau5tSR8BuuXwRm
-         UL7ZAMY0NEjXnqiznnyzKNTV7X27LQ1HOU1VTLSxZ4rdZHjRRY3CKxNCXonwbNFznT/R
-         3Eqst2jvxgemURDU53YzrmH4dcn1o6SvqC0KMDHmmcDleucd9UhKXxpZ29Wwq9B21vvB
-         AC/bn5agZSaOaUAlIw1aabjrNgpbrYIlyd5l8J0PSppB5NzUJBgdRBmKW3SfivykuwNq
-         1uXg==
-X-Forwarded-Encrypted: i=1; AJvYcCV+4YDPkE8IoXvpEuUm24TIXWAZP16k5H5eRPJwO5MK8uYEnXDi1KbnFTMfdJUJ50aedttxG+xFB5ti@vger.kernel.org, AJvYcCVP/4rFtjE2HNAA27akQEJYqpcNhZt5VhB2fKSFvMFDKGphgcPIZ/OaqgXMojqvswpGuOAtHgHd3/9/@vger.kernel.org, AJvYcCVtxyMqbMtvHebQqyObISTWt8+3+pV/4bbpoBvy4s6+WWvEJInzZ6h/TwHuRXZnsQwrjVmChvSaP8MGXhIK@vger.kernel.org
-X-Gm-Message-State: AOJu0YycWa2vZ92vq1rJENy1EvKIGBNX5NQkakT3WDbFvHdZB3Pgkz7p
-	q+wu3shqPbIvMd1fbaRf6HjwXSS2ZUOAcwivJyREQ6Ixo3Wt4HHC
-X-Gm-Gg: ASbGncu0cA0BuaBNsdPOHJWvvUxKOd8v+8URO928phOCBv8Mg9Z/qJJa3Eu9HUmC7X6
-	usqmaqixvLZ5reFvD2LYa7yfBochKYRNR/8cBhdBo5g1dxi3WMtL4RfC+3ya9DrkRABAuAeGw6q
-	YGALUAKFAuiPBK7YJL/BZQ1EbppRWFyp8+kN0Xb9IKdvRU+t3fJ9l58agSi82JKw5vB8DpanB5m
-	3IFOd3vPd/8ylFs4f7lty4yHvfqpPXlmSUKsmb/GeLp236+r7bo8ISCmFP35aecNvrYcvumqsK6
-	Vkiij9xtB+yEMAOFG4bF5KYKuA==
-X-Google-Smtp-Source: AGHT+IHVUwzQK1q+khSi8wZdNztGEsXhavyh8wvmq9P54ulqNuTuBzPt7kEEZDwFltEEBqAclFXm0g==
-X-Received: by 2002:a05:600c:a0a:b0:434:ff30:a159 with SMTP id 5b1f17b1804b1-436e255ded6mr270508535e9.0.1736926253029;
-        Tue, 14 Jan 2025 23:30:53 -0800 (PST)
+        d=1e100.net; s=20230601; t=1736926254; x=1737531054;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rfc7yHRU9A77/4BsuDwrRLLhbG0qYCnEUsOYkaHwtVM=;
+        b=xBp4+OirqBsqnvAthaSC9aBS7pPronZiIivmQAGMrvFP7020MvprDmkq6puxbz9Ipd
+         hEqhlZTxmbQI5f2P9ls6eQ1YQYlW4pORBPRFg8CZuzVYoCKQYg0lFzbA5TngOHCJqPXe
+         Ej5y0rU5fb2BarZcaH4i9KBbwRDn6jV1VwPoMUbek/+N1k+JOsS87ovWbPqGkaZfuAFg
+         J2OS9Ka3mwN9Lfe+X2L6c3VTEanEqvLxqf45MdgE73zRuJ8e1Y7tIia0lI7KqSJlySsi
+         qdO3uYidcP3WNaq4fa3SnEMGktjqF2E5kwbj23A+v/X+3uRE1aoc4fvDvJ93IXaN4bPk
+         njjg==
+X-Forwarded-Encrypted: i=1; AJvYcCUJ4viyYFnXTj/8dxgqgP8axMTBHS94NLoKO2vzPGCLDEW20ziHMZXBEjrpQzuJRO/ZUZyUF9b0GJ0ipDA3@vger.kernel.org, AJvYcCWlDTBwKEfJiZgh1F9V5K3r84IVmL9/bnY27/YxnvpQDUvuT/os1eZElhoJOYuNH2WqANIMuunAVu5Z@vger.kernel.org, AJvYcCXEb0KXfVO+e7ugXo7z6jyfzfZlhjWJimsZmiRjedTmWxWZyUvCDJQDdwm5Q+qsPdql0XkFoo0APhXk@vger.kernel.org
+X-Gm-Message-State: AOJu0YwQFY6IpLFOmlpZUTQFCMDAoxFzQo3cw1AQkQVB/i/mTpFZ2XrH
+	87easS7sYTjKgJmGT45dJRtCDKMHYq56JuFenMgQI3dk1lm5Th/H
+X-Gm-Gg: ASbGnctxQhR1qVdg/PzAhGRjjvPkSwto5OpbfW/jiDyP9t69aVfDnmAJi288JdnphEb
+	zMZjIj63310xEopuwzsL1hXviNEzvfEMfdSU/QLhzxOI0HX8mIp7Ifiw/TyMMt/xupMAlDZqoQ3
+	RW0dzIlkpL49aRay0xSzdbrW+s3xe4Tt5lLYiNzj9z5XZV8wln8Jbw0Y02++4q6ULTU8R4UV0Y5
+	PDDgUhuj+wm9YG185g/erUDkDZOZQNGRY2zPdpH4DJArSEzIgXbozziRliDAp4r9oN+18c+nhlg
+	uSyucJLwoRXEbGzLShC69regCg==
+X-Google-Smtp-Source: AGHT+IGfNQA9MdWtZcu0lFIOOfKNshqX7g+GdY8i9HXPqYU4BO9lxCOaxNz5u34Tmlm4uc6Zmf8FEQ==
+X-Received: by 2002:a05:600c:510a:b0:434:faa9:5266 with SMTP id 5b1f17b1804b1-436e26adfc9mr244453335e9.13.1736926254141;
+        Tue, 14 Jan 2025 23:30:54 -0800 (PST)
 Received: from localhost.localdomain (93-34-91-161.ip49.fastwebnet.it. [93.34.91.161])
-        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-437c7499932sm13313065e9.7.2025.01.14.23.30.51
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-437c7499932sm13313065e9.7.2025.01.14.23.30.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jan 2025 23:30:52 -0800 (PST)
+        Tue, 14 Jan 2025 23:30:53 -0800 (PST)
 From: Christian Marangi <ansuelsmth@gmail.com>
 To: Chaotian Jing <chaotian.jing@mediatek.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
@@ -71,10 +73,12 @@ To: Chaotian Jing <chaotian.jing@mediatek.com>,
 	linux-mediatek@lists.infradead.org,
 	upstream@airoha.com
 Cc: Christian Marangi <ansuelsmth@gmail.com>
-Subject: [PATCH 1/2] dt-bindings: mmc: mtk-sd: Add eMMC for AN7581
-Date: Wed, 15 Jan 2025 08:29:50 +0100
-Message-ID: <20250115073026.31552-1-ansuelsmth@gmail.com>
+Subject: [PATCH 2/2] mmc: mtk-sd: add support for AN7581 MMC Host
+Date: Wed, 15 Jan 2025 08:29:51 +0100
+Message-ID: <20250115073026.31552-2-ansuelsmth@gmail.com>
 X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20250115073026.31552-1-ansuelsmth@gmail.com>
+References: <20250115073026.31552-1-ansuelsmth@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -83,135 +87,140 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Document eMMC compatible for AN7581. This eMMC controller doesn't have
-regulator exposed to the system and have a single clock only for source
-clock and only default pintctrl.
+Add support for AN7581 MMC Host. The MMC Host controller is based on
+mt7622 with the difference of not having regulator supply and state_uhs
+pins and hclk clock.
 
-Rework the schema to permit these new requirements and make supply
-optional only for airoha,an7581-mmc compatible.
-
-Also provide an example for airoha,an7581-mmc.
+Some minor fixes are applied to check if the state_uhs pins are defined
+and make hclk optional for the new airoha compatible.
 
 Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
 ---
-This depends on patch merged in clk-next 
-bfe257f9780d8f77045a7da6ec959ee0659d2f98
+ drivers/mmc/host/mtk-sd.c | 55 ++++++++++++++++++++++++++++++++-------
+ 1 file changed, 46 insertions(+), 9 deletions(-)
 
- .../devicetree/bindings/mmc/mtk-sd.yaml       | 64 +++++++++++++++++--
- 1 file changed, 58 insertions(+), 6 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index f86ebd81f5a5..6dad5455b369 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -27,6 +27,7 @@ properties:
-           - mediatek,mt8183-mmc
-           - mediatek,mt8196-mmc
-           - mediatek,mt8516-mmc
-+          - airoha,an7581-mmc
-       - items:
-           - const: mediatek,mt7623-mmc
-           - const: mediatek,mt2701-mmc
-@@ -48,11 +49,11 @@ properties:
-   clocks:
-     description:
-       Should contain phandle for the clock feeding the MMC controller.
--    minItems: 2
-+    minItems: 1
-     maxItems: 7
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index efb0d2d5716b..9d6868883c91 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -666,6 +666,20 @@ static const struct mtk_mmc_compatible mt8196_compat = {
+ 	.support_new_rx = true,
+ };
  
-   clock-names:
--    minItems: 2
-+    minItems: 1
-     maxItems: 7
++static const struct mtk_mmc_compatible an7581_compat = {
++	.clk_div_bits = 12,
++	.recheck_sdio_irq = true,
++	.hs400_tune = false,
++	.pad_tune_reg = MSDC_PAD_TUNE0,
++	.async_fifo = true,
++	.data_tune = true,
++	.busy_check = true,
++	.stop_clk_fix = true,
++	.stop_dly_sel = 3,
++	.enhance_rx = true,
++	.support_64g = false,
++};
++
+ static const struct of_device_id msdc_of_ids[] = {
+ 	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+ 	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
+@@ -680,7 +694,7 @@ static const struct of_device_id msdc_of_ids[] = {
+ 	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
+ 	{ .compatible = "mediatek,mt8196-mmc", .data = &mt8196_compat},
+ 	{ .compatible = "mediatek,mt8516-mmc", .data = &mt8516_compat},
+-
++	{ .compatible = "airoha,an7581-mmc", .data = &an7581_compat},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(of, msdc_of_ids);
+@@ -1600,6 +1614,10 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
  
-   interrupts:
-@@ -72,7 +73,7 @@ properties:
-       Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
-       will be switched between GPIO mode and SDIO DAT1 mode, state_eint is mandatory in this
-       scenario.
--    minItems: 2
-+    minItems: 1
-     items:
-       - const: default
-       - const: state_uhs
-@@ -170,9 +171,6 @@ required:
-   - clock-names
-   - pinctrl-names
-   - pinctrl-0
--  - pinctrl-1
--  - vmmc-supply
--  - vqmmc-supply
++	/* Skip setting supply if not supported */
++	if (!mmc->supply.vqmmc)
++		return 0;
++
+ 	if (!IS_ERR(mmc->supply.vqmmc)) {
+ 		if (ios->signal_voltage != MMC_SIGNAL_VOLTAGE_330 &&
+ 		    ios->signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
+@@ -1699,7 +1717,9 @@ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ 				dev_dbg(host->dev, "SDIO eint irq: %d!\n", host->eint_irq);
+ 			}
  
- allOf:
-   - $ref: mmc-controller.yaml#
-@@ -335,6 +333,40 @@ allOf:
-             - const: axi_cg
-             - const: ahb_cg
+-			pinctrl_select_state(host->pinctrl, host->pins_uhs);
++			/* Skip setting uhs pins if not supported */
++			if (host->pins_uhs)
++				pinctrl_select_state(host->pinctrl, host->pins_uhs);
+ 		} else {
+ 			dev_pm_clear_wake_irq(host->dev);
+ 		}
+@@ -2036,6 +2056,10 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: airoha,an7581-mmc
-+    then:
-+      properties:
-+        clocks:
-+          items:
-+            - description: source clock
-+
-+        clock-names:
-+          items:
-+            - const: source
-+
-+        pinctrl-names:
-+          items:
-+            - const: default
-+    else:
-+      properties:
-+        clocks:
-+          minItems: 2
-+
-+        clock-names:
-+          minItems: 2
-+
-+        pinctrl-names:
-+          minItems: 2
-+
-+      required:
-+        - pinctrl-1
-+        - vmmc-supply
-+        - vqmmc-supply
-+
- unevaluatedProperties: false
+ 	msdc_set_buswidth(host, ios->bus_width);
  
- examples:
-@@ -389,5 +421,25 @@ examples:
-         vqmmc-supply = <&mt6397_vgp3_reg>;
-         mmc-pwrseq = <&wifi_pwrseq>;
-     };
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    #include <dt-bindings/clock/en7523-clk.h>
-+    mmc@1fa0e000 {
-+        compatible = "airoha,an7581-mmc";
-+        reg = <0x1fa0e000 0x1000>,
-+              <0x1fa0c000 0x60>;
-+        clocks = <&scuclk EN7581_CLK_EMMC>;
-+        clock-names = "source";
-+        interrupts = <GIC_SPI 170 IRQ_TYPE_LEVEL_HIGH>;
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&mmc_pins>;
-+        bus-width = <4>;
-+        max-frequency = <52000000>;
-+        disable-wp;
-+        cap-mmc-highspeed;
-+        non-removable;
++	/* Skip regulator if not supported */
++	if (!mmc->supply.vmmc)
++		goto skip_regulator;
 +
-+    };
+ 	/* Suspend/Resume will do power off/on */
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_UP:
+@@ -2071,6 +2095,7 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 	}
  
- ...
++skip_regulator:
+ 	if (host->mclk != ios->clock || host->timing != ios->timing)
+ 		msdc_set_mclk(host, ios->timing, ios->clock);
+ }
+@@ -2816,9 +2841,12 @@ static int msdc_of_clock_parse(struct platform_device *pdev,
+ 	if (IS_ERR(host->src_clk))
+ 		return PTR_ERR(host->src_clk);
+ 
+-	host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+-	if (IS_ERR(host->h_clk))
+-		return PTR_ERR(host->h_clk);
++	/* AN7581 SoC doesn't have hclk */
++	if (!device_is_compatible(&pdev->dev, "airoha,an7581-mmc")) {
++		host->h_clk = devm_clk_get(&pdev->dev, "hclk");
++		if (IS_ERR(host->h_clk))
++			return PTR_ERR(host->h_clk);
++	}
+ 
+ 	host->bus_clk = devm_clk_get_optional(&pdev->dev, "bus_clk");
+ 	if (IS_ERR(host->bus_clk))
+@@ -2926,10 +2954,13 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		return PTR_ERR(host->pins_default);
+ 	}
+ 
+-	host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
+-	if (IS_ERR(host->pins_uhs)) {
+-		dev_err(&pdev->dev, "Cannot find pinctrl uhs!\n");
+-		return PTR_ERR(host->pins_uhs);
++	/* AN7581 doesn't have state_uhs pins */
++	if (!device_is_compatible(&pdev->dev, "airoha,an7581-mmc")) {
++		host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
++		if (IS_ERR(host->pins_uhs)) {
++			dev_err(&pdev->dev, "Cannot find pinctrl uhs!\n");
++			return PTR_ERR(host->pins_uhs);
++		}
+ 	}
+ 
+ 	/* Support for SDIO eint irq ? */
+@@ -3010,6 +3041,12 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "Cannot ungate clocks!\n");
+ 		goto release_clk;
+ 	}
++
++	/* AN7581 without regulator require tune to OCR values */
++	if (device_is_compatible(&pdev->dev, "airoha,an7581-mmc") &&
++	    !mmc->ocr_avail)
++		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
++
+ 	msdc_init_hw(host);
+ 
+ 	if (mmc->caps2 & MMC_CAP2_CQE) {
 -- 
 2.45.2
 
