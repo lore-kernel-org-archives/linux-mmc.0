@@ -1,46 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 96F3623F262;
-	Wed, 15 Jan 2025 08:48:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 953F623F264;
+	Wed, 15 Jan 2025 08:51:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1736930904; cv=none; b=r8LZdiTSScxKKvFZp+tXILoAU1cF6Idbam15qW+rXpmzZKgAGK1O/AWtBEKal8602CHZENsVpzmV0rYQA323N53IgZd/I3dTqmZHTFVLI5fE+AaMNpXJYZdBc6AvEzUtrEVXpgne0dwfuvnZ7mIF9hFbKQNdNVkIF0+3YbPID/I=
+	t=1736931080; cv=none; b=hUgA1HVa1yFMy55EySnSflPfp/yAToFKBO3wxK4fAVFTeXFcLQb/IaaVVszfxkxVMJ3PPEEZIxsCkcR8PUaZQucBW24gGDoywOt1ye1qUYjhz6p6EjDJalUPTBDNJg2j6y3ki3M54h3jIP9PGWtCct6eQGrM4XZiUHldORERgC4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1736930904; c=relaxed/simple;
-	bh=fOXw5fOyRt7kI5Izd5k38cCPtug2wf6DvlV5sjdUlDc=;
+	s=arc-20240116; t=1736931080; c=relaxed/simple;
+	bh=GwlvPNaPX/8qtQSzF5HZ0CbwmzU3891kv5TaAZRdsyQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=spOfPGE2MaS5sexx95/FdwsjWvhgkX9EEaDRkPLSA+pzqMBX+wnucIYYvXEs/tsV/In3AEq5SS77iBh9JQ2JygvaN/YZGueXbcmHmd4XO4ZdRRitiaZ/6xBHezL0ohpWI1anXJuT7tBte+aZKFZg1th3FzoEF6+VP967WdxZrJM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uA/vsMSI; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=hKFsoxWpMBPhyZvDnyhiXnx8m80tGwMVkaobojs9U2uwlQu7QyUKieHOcUBfoQwI//Y2S7sNfW4pzJJ8fNDRyKiTVtLfjxJBNoYk76H4iG5sH45yyhUDeKebZkQjc177gzHQ0qbMUI2F/CrMij6UM5ly9sIpA4mfv/E3P5K8do8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rH0sF1vk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uA/vsMSI"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E3E7C4CEDF;
-	Wed, 15 Jan 2025 08:48:23 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rH0sF1vk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6126AC4CEDF;
+	Wed, 15 Jan 2025 08:51:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1736930904;
-	bh=fOXw5fOyRt7kI5Izd5k38cCPtug2wf6DvlV5sjdUlDc=;
+	s=k20201202; t=1736931080;
+	bh=GwlvPNaPX/8qtQSzF5HZ0CbwmzU3891kv5TaAZRdsyQ=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=uA/vsMSIDCY6rLfEq8TQ9XgQbg1CNxSMkghiE6jRdMUYtJcHkF1jev4UFzq7RxlG5
-	 cNy6+NTHnMzJ8cahf6NuzV1scc0AiA5IImn3W8FH2cC9L2+TF4LJk4RGTuODeQ04GN
-	 UV6hqUrDAFlz0m8wSWNRkTiDgkvfJVgILHtSlLSA207CvmwPP9nk7ppwgRgGXrQzx4
-	 1y5oFK+CUbvageMfCFni/T358jX5Eto7u7/iNTh4gsGy/gauNPGl0T+ZpJpG5vO1m4
-	 i+MwtUQtv2o7Xqxi+EDCPTi+M9PGW6nSoDaD3MfGEDfpCkZx09G4TwN6anhG/uAkp4
-	 JS1hd9D1/BJVA==
-Date: Wed, 15 Jan 2025 09:48:20 +0100
+	b=rH0sF1vkNx1L3XZR86dN2P0tkIbKx0cq7/VFJWk1hqRrbs+P5kaJmWPQBophzb7t7
+	 JNV2Xt3UDsKJ5zkok7ejBI4wME6Bjv2433J6mKbuyYrjv8TV4rcc3TwwR5GLWdICl3
+	 QQb0j9PWDphGTXNEwnQ1/ljAToRflqx+4YzOobwDC71fMcYPx0Uc92lcGE7cMHfO7f
+	 YKfm+Y3HaMlyIFtPXDJ5flLcG+hEXEz0ZHhgRfRjX8eC3Y5XywINkbjslgncWwFfMs
+	 07q81fNT7UrDUBb9jWtPaID6nOIahSdAoe92BDmxVHjCf6jBVuV1rUiwJdoPGSS6QA
+	 OkcQ8ZtKBiCpQ==
+Date: Wed, 15 Jan 2025 09:51:16 +0100
 From: Krzysztof Kozlowski <krzk@kernel.org>
 To: Christian Marangi <ansuelsmth@gmail.com>
-Cc: "Rob Herring (Arm)" <robh@kernel.org>, 
-	linux-mediatek@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Matthias Brugger <matthias.bgg@gmail.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, 
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, linux-mmc@vger.kernel.org, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Wenbin Mei <wenbin.mei@mediatek.com>, 
-	Conor Dooley <conor+dt@kernel.org>, upstream@airoha.com, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Matthias Brugger <matthias.bgg@gmail.com>, 
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>, Wenbin Mei <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, upstream@airoha.com
 Subject: Re: [PATCH 1/2] dt-bindings: mmc: mtk-sd: Add eMMC for AN7581
-Message-ID: <dvt3zgjfliu22uyvxrmuteiet32gb5qdn2u6fh3xw6qp4xohw5@vwtkrgsh7asm>
+Message-ID: <phnwf7vkincyeua3jhboi5pod7uwkigwc2ibpygrg7gezeh36d@gpx6krsqfbqe>
 References: <20250115073026.31552-1-ansuelsmth@gmail.com>
- <173693027082.3240418.16772447316188600820.robh@kernel.org>
- <67877449.df0a0220.cdd29.8807@mx.google.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -49,41 +47,151 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <67877449.df0a0220.cdd29.8807@mx.google.com>
+In-Reply-To: <20250115073026.31552-1-ansuelsmth@gmail.com>
 
-On Wed, Jan 15, 2025 at 09:39:34AM +0100, Christian Marangi wrote:
-> > dtschema/dtc warnings/errors:
-> > Error: Documentation/devicetree/bindings/mmc/mtk-sd.example.dts:104.31-32 syntax error
-> > FATAL ERROR: Unable to parse input tree
-> > make[2]: *** [scripts/Makefile.dtbs:131: Documentation/devicetree/bindings/mmc/mtk-sd.example.dtb] Error 1
-> > make[2]: *** Waiting for unfinished jobs....
-> > make[1]: *** [/builds/robherring/dt-review-ci/linux/Makefile:1506: dt_binding_check] Error 2
-> > make: *** [Makefile:251: __sub-make] Error 2
-> > 
-> > doc reference errors (make refcheckdocs):
-> > 
-> > See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20250115073026.31552-1-ansuelsmth@gmail.com
-> > 
-> > The base for the series is generally the latest rc1. A different dependency
-> > should be noted in *this* patch.
-> > 
-> > If you already ran 'make dt_binding_check' and didn't see the above
-> > error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> > date:
-> > 
-> > pip3 install dtschema --upgrade
-> > 
-> > Please check and re-submit after running the above command yourself. Note
-> > that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-> > your schema. However, it must be unset to test all examples with your schema.
-> >
+On Wed, Jan 15, 2025 at 08:29:50AM +0100, Christian Marangi wrote:
+> Document eMMC compatible for AN7581. This eMMC controller doesn't have
+> regulator exposed to the system and have a single clock only for source
+> clock and only default pintctrl.
 > 
-> Hi Rob, I think this fails as the CLK define is still not merged as said
-> this patch depends on bfe257f9780d8f77045a7da6ec959ee0659d2f98.
+> Rework the schema to permit these new requirements and make supply
+> optional only for airoha,an7581-mmc compatible.
 > 
-> Any hint how to make your bot work with that?
+> Also provide an example for airoha,an7581-mmc.
+> 
+> Signed-off-by: Christian Marangi <ansuelsmth@gmail.com>
+> ---
+> This depends on patch merged in clk-next 
+> bfe257f9780d8f77045a7da6ec959ee0659d2f98
+> 
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 64 +++++++++++++++++--
+>  1 file changed, 58 insertions(+), 6 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index f86ebd81f5a5..6dad5455b369 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -27,6 +27,7 @@ properties:
+>            - mediatek,mt8183-mmc
+>            - mediatek,mt8196-mmc
+>            - mediatek,mt8516-mmc
+> +          - airoha,an7581-mmc
 
-Don't use the define, but raw number or just some fake phandle.
+Please keep things ordered. The list is nicely ordered so far.
+
+>        - items:
+>            - const: mediatek,mt7623-mmc
+>            - const: mediatek,mt2701-mmc
+> @@ -48,11 +49,11 @@ properties:
+>    clocks:
+>      description:
+>        Should contain phandle for the clock feeding the MMC controller.
+> -    minItems: 2
+> +    minItems: 1
+>      maxItems: 7
+>  
+>    clock-names:
+> -    minItems: 2
+> +    minItems: 1
+>      maxItems: 7
+>  
+>    interrupts:
+> @@ -72,7 +73,7 @@ properties:
+>        Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
+>        will be switched between GPIO mode and SDIO DAT1 mode, state_eint is mandatory in this
+>        scenario.
+> -    minItems: 2
+> +    minItems: 1
+>      items:
+>        - const: default
+>        - const: state_uhs
+> @@ -170,9 +171,6 @@ required:
+>    - clock-names
+>    - pinctrl-names
+>    - pinctrl-0
+> -  - pinctrl-1
+> -  - vmmc-supply
+> -  - vqmmc-supply
+>  
+>  allOf:
+>    - $ref: mmc-controller.yaml#
+> @@ -335,6 +333,40 @@ allOf:
+>              - const: axi_cg
+>              - const: ahb_cg
+>  
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: airoha,an7581-mmc
+> +    then:
+> +      properties:
+> +        clocks:
+> +          items:
+> +            - description: source clock
+> +
+> +        clock-names:
+> +          items:
+> +            - const: source
+> +
+> +        pinctrl-names:
+> +          items:
+> +            - const: default
+> +    else:
+
+No else, you are now duplicating other "if:then" cases. There is already
+such for "reg" so it does not really make it more readable. Just be sure
+each variant has a strict, upper and lower, constraints.
+
+
+> +      properties:
+> +        clocks:
+> +          minItems: 2
+> +
+> +        clock-names:
+> +          minItems: 2
+> +
+> +        pinctrl-names:
+> +          minItems: 2
+> +
+> +      required:
+> +        - pinctrl-1
+> +        - vmmc-supply
+> +        - vqmmc-supply
+
+These should go to each variant's if:then: or separate if:then: covering
+all existing variants for the required fields.
+
+> +
+>  unevaluatedProperties: false
+>  
+>  examples:
+> @@ -389,5 +421,25 @@ examples:
+>          vqmmc-supply = <&mt6397_vgp3_reg>;
+>          mmc-pwrseq = <&wifi_pwrseq>;
+>      };
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/clock/en7523-clk.h>
+> +    mmc@1fa0e000 {
+> +        compatible = "airoha,an7581-mmc";
+> +        reg = <0x1fa0e000 0x1000>,
+> +              <0x1fa0c000 0x60>;
+> +        clocks = <&scuclk EN7581_CLK_EMMC>;
+> +        clock-names = "source";
+> +        interrupts = <GIC_SPI 170 IRQ_TYPE_LEVEL_HIGH>;
+> +        pinctrl-names = "default";
+> +        pinctrl-0 = <&mmc_pins>;
+> +        bus-width = <4>;
+> +        max-frequency = <52000000>;
+> +        disable-wp;
+> +        cap-mmc-highspeed;
+> +        non-removable;
+> +
+
+Drop blank line.
+
 
 Best regards,
 Krzysztof
