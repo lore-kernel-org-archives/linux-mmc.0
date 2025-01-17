@@ -1,50 +1,33 @@
-Received: from mx0b-001ae601.pphosted.com (mx0a-001ae601.pphosted.com [67.231.149.25])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A44F622D4CF;
-	Thu, 16 Jan 2025 16:55:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=67.231.149.25
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28109155300;
+	Fri, 17 Jan 2025 07:40:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737046549; cv=none; b=GuW79QyS79tuMf+86ph8Q1AqZZYvW0elDAT5OL9olr+ZRol8raeBuDOrTg7a5vYwgEbgYhuRN3y6S3B7RLmIzh26b2sB8BVcK2WjFK28ogSQD7+teNU8vh5snQuBhP2kTVWW8tFu5L54xtlbWq/WRRtIscjgwbu9eQ1h5QOrecE=
+	t=1737099615; cv=none; b=FnrVwQHwGzOIzpRMBn6G1yp6irKGmJ4xkCCb736jUtf4p+zOiQpmnZLxc5Q6eLQwTA2atEfV1cdTQlEHUv1Kk9mqwVpOZ5jaD22VndQwMZIrdQTjDzo4xIG7ytBecMfTD7JeGTlIDk86PrTsDbjPkLE+7zdfNkpHkYBP+nRq+aQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737046549; c=relaxed/simple;
-	bh=gtuZ+hsVLLsX0xEXqwJE0UJuE36ll5XqCz5O165H4Vg=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:CC:References:
-	 In-Reply-To:Content-Type; b=gkqyB4i00uohn5Aj9MsXVdd/iqYBCCpx2Kqtcghe92tvtiurr+x8kROsA3Tgx014bEvV8vJzO30wJlCQNkjxt2zI7oNh5V/uVTfTSLZDd+FTsK/9D4OITbW51eQ5rNVWIT0CPr32XSmrXfmrylDQOOed16kqiIoJl2P79JODdrg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=opensource.cirrus.com; spf=pass smtp.mailfrom=opensource.cirrus.com; dkim=pass (2048-bit key) header.d=cirrus.com header.i=@cirrus.com header.b=fZ9J6d2g; arc=none smtp.client-ip=67.231.149.25
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=opensource.cirrus.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=opensource.cirrus.com
+	s=arc-20240116; t=1737099615; c=relaxed/simple;
+	bh=1ESz7RubtNyYYbHByrMGtrCleH/G9c7UDAbirdy0PBw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=En2bx/gqYfGwNRlfdWZaGYKmf8WPFuHQR+toApoHPu1fRxRPK1qP8WkfTrSeDx5+OyD6cYw11HaSd6i2VBf4rnePxvkOmasoI9hFMvXQzx8FPCiRAB0HE6DnCzRv5rVUBLBgF64+DcMPd9apsqXfjpypEV0mOIKLSNAmjc83rk8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QC6/F2pF; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=cirrus.com header.i=@cirrus.com header.b="fZ9J6d2g"
-Received: from pps.filterd (m0077473.ppops.net [127.0.0.1])
-	by mx0a-001ae601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 50G7Qcxm023850;
-	Thu, 16 Jan 2025 10:55:27 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cirrus.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=
-	PODMain02222019; bh=czWs0Opb2V8LGfOqqS71wjGfzuuftPcG6sRh80tPJIk=; b=
-	fZ9J6d2gOTz23oovLGhGpBYUj4qiaNVIYrsY4uGk9y6LNLnko5+KSqS/oRq8dTop
-	dHOl40t/yuP70ZXG3g1GCmpveFpq4rGSaHZp6tqVY13AZeSg2iOAZqMt9Z1luwG5
-	+4Lk6Gi8Jle88Az8GhP9booTErPZXQ65BpcNKIkDqWUaRhO7z+D11wu0tyJx2MYL
-	/R6Kbc6WlvFedQ8GagotfctVH37FF/9E+jFaSKHqZpal8mYk0ak2q2bbJ5BMtL3g
-	x6HGsXNv1idfiWrg8LzRoZSoFaml7kuDUWEH9I+KAAOhCVPjEP7BgJXhy4gTdQ0F
-	F4s9qXciOgqaGv62AuQfIQ==
-Received: from ediex01.ad.cirrus.com ([84.19.233.68])
-	by mx0a-001ae601.pphosted.com (PPS) with ESMTPS id 443px4par6-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 16 Jan 2025 10:55:26 -0600 (CST)
-Received: from ediex01.ad.cirrus.com (198.61.84.80) by ediex01.ad.cirrus.com
- (198.61.84.80) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.13; Thu, 16 Jan
- 2025 16:55:24 +0000
-Received: from ediswmail9.ad.cirrus.com (198.61.86.93) by
- anon-ediex01.ad.cirrus.com (198.61.84.80) with Microsoft SMTP Server id
- 15.2.1544.13 via Frontend Transport; Thu, 16 Jan 2025 16:55:24 +0000
-Received: from [198.90.208.18] (ediswws06.ad.cirrus.com [198.90.208.18])
-	by ediswmail9.ad.cirrus.com (Postfix) with ESMTP id 17E05822562;
-	Thu, 16 Jan 2025 16:55:24 +0000 (UTC)
-Message-ID: <3968b172-01f7-4a75-a6f0-9be7ccc0ff5e@opensource.cirrus.com>
-Date: Thu, 16 Jan 2025 16:55:24 +0000
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QC6/F2pF"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A3547C4CEDD;
+	Fri, 17 Jan 2025 07:40:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1737099614;
+	bh=1ESz7RubtNyYYbHByrMGtrCleH/G9c7UDAbirdy0PBw=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=QC6/F2pFdiHiNyq5v+15wxfA0GCnNbTAdAyoq9HaU3BhVzn+yOxPGyBBwqI0iUEos
+	 YSyuMVd2dbgEuSxVw1vSpY4hIBFvdRBlVpVmBN+f/s/FHiZtWcOG+V9l45Hgofh1c9
+	 49+/tGzoVQ+8nEpeizUs5Zn8c6G44O3q3qn2FegUqQnJMRYcBvYTYdxlyW4RTqR16g
+	 0b5JM5NUMVVH242/cnY8bUVYNHILUx25doaVhXBFuEiKsxUZkJY4R9yTPM82zru2qa
+	 yKbLcH9v9CSnyJuVqlh9wTJZNvD38TuzND3R9CnUH0ONuVPGvZpbS/Ac3LQ9iGF1+9
+	 ECsYVHoOUPS7w==
+Message-ID: <e8f9e6cf-0414-4f27-ac4e-f1403b8ecc99@kernel.org>
+Date: Fri, 17 Jan 2025 08:40:07 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,89 +35,116 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-From: Richard Fitzgerald <rf@opensource.cirrus.com>
-Subject: Re: [PATCH v2 1/6] mmc: sdhci: Use EXPORT_PM_FN_NS_GPL() for
- exporting PM functions
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>,
-        Victor Shih
-	<victor.shih@genesyslogic.com.tw>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>
-References: <20241101101441.3518612-1-andriy.shevchenko@linux.intel.com>
- <20241101101441.3518612-2-andriy.shevchenko@linux.intel.com>
- <7b5fcb3e-e3e7-4d87-9a7b-5570e2e85a0e@intel.com>
- <Z1ccjxyxO0NMNbkm@smile.fi.intel.com>
- <4ee01e24-176e-46ac-9ecd-a0976490cbdc@intel.com>
- <Z4kiVLrPTDZr3J2K@smile.fi.intel.com>
-Content-Language: en-GB
-In-Reply-To: <Z4kiVLrPTDZr3J2K@smile.fi.intel.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Subject: Re: [PATCH 1/4] soc: qcom: ice: introduce devm_of_qcom_ice_get
+To: Tudor Ambarus <tudor.ambarus@linaro.org>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+ <ulf.hansson@linaro.org>, Abel Vesa <abel.vesa@linaro.org>,
+ Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+ "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+ "Martin K. Petersen" <martin.petersen@oracle.com>,
+ Eric Biggers <ebiggers@google.com>
+Cc: linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+ andre.draszik@linaro.org, peter.griffin@linaro.org, willmcvicker@google.com,
+ kernel-team@android.com
+References: <20250116-qcom-ice-fix-dev-leak-v1-0-84d937683790@linaro.org>
+ <20250116-qcom-ice-fix-dev-leak-v1-1-84d937683790@linaro.org>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20250116-qcom-ice-fix-dev-leak-v1-1-84d937683790@linaro.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Proofpoint-ORIG-GUID: 5xJtSbFD2MXYf9zSk6CG8QdHMvUU-lHO
-X-Proofpoint-GUID: 5xJtSbFD2MXYf9zSk6CG8QdHMvUU-lHO
-X-Authority-Analysis: v=2.4 cv=XdhzzJ55 c=1 sm=1 tr=0 ts=678939fe cx=c_pps a=uGhh+3tQvKmCLpEUO+DX4w==:117 a=uGhh+3tQvKmCLpEUO+DX4w==:17 a=IkcTkHD0fZMA:10 a=VdSt8ZQiCzkA:10 a=PRKCl3ImHmY6QAcEmcwA:9 a=QEXdDO2ut3YA:10
-X-Proofpoint-Spam-Reason: safe
 
-On 16/01/2025 3:14 pm, Andy Shevchenko wrote:
-> On Mon, Dec 09, 2024 at 07:11:41PM +0200, Adrian Hunter wrote:
->> On 9/12/24 18:36, Andy Shevchenko wrote:
->>> On Mon, Dec 09, 2024 at 12:38:59PM +0200, Adrian Hunter wrote:
->>>> On 1/11/24 12:11, Andy Shevchenko wrote:
->>>>> Switch from ugly ifdeffery to using EXPORT_PM_FN_NS_GPL()
->>>>> for exporting PM functions. This helps cleaning up the other
->>>>> SDHCI drivers in the future.
->>>>
->>>> It seems sdhci is the first code in the kernel to use
->>>> EXPORT_PM_FN_NS_GPL() but it was not asked for ;-)
->>>>
->>>> As such, can you fill in a little background.  I am not
->>>> sure what it achieves.  Why have CONFIG_PM if not to
->>>> #ifdef dependent code behind it?
->>>
->>> It makes sure that the code elimination happens at compile time and
->>
->> Does it eliminate the code?  Maybe I am missing something,
->> but it looks like it is still there:
-> 
-> Hmm... Indeed. My tests show the same. I believe these new macros were never
-> tested (and we have no users in the kernel).
-> 
-> Richard?
-> 
+On 16/01/2025 15:49, Tudor Ambarus wrote:
+> +
+> +static void devm_of_qcom_ice_put(struct device *dev, void *res)
+> +{
+> +	qcom_ice_put(*(struct qcom_ice **)res);
+> +}
+> +
+> +struct qcom_ice *devm_of_qcom_ice_get(struct device *dev)
 
-As I recall the intention wasn't to eliminate the code. It was to
-eliminate the EXPORT for code that had already been eliminated by other
-macros.
+That's exported function, you need kerneldoc here.
 
-A bunch of ugly macros were added a while back by someone to create PM
-callback functions so that the code would be eliminated if CONFIG_PM=n,
-without having to use __maybe_unused or ifdefs in the .c, And together
-with this, drivers were being zealously changed to use these macros to
-eliminated unused PM callbacks.
+> +{
+> +	struct qcom_ice *ice, **dr;
+> +
+> +	dr = devres_alloc(devm_of_qcom_ice_put, sizeof(*dr), GFP_KERNEL);
+> +	if (!dr)
+> +		return ERR_PTR(-ENOMEM);
+> +
+> +	ice = of_qcom_ice_get(dev);
+> +	if (!IS_ERR_OR_NULL(ice)) {
+> +		*dr = ice;
+> +		devres_add(dev, dr);
+> +	} else {
+> +		devres_free(dr);
+> +	}
+> +
+> +	return ice;
+> +}
+> +EXPORT_SYMBOL_GPL(devm_of_qcom_ice_get);
+> +
+>  static int qcom_ice_probe(struct platform_device *pdev)
+>  {
+>  	struct qcom_ice *engine;
+> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
+> index 5870a94599a2..d5f6a228df65 100644
+> --- a/include/soc/qcom/ice.h
+> +++ b/include/soc/qcom/ice.h
+> @@ -34,4 +34,6 @@ int qcom_ice_program_key(struct qcom_ice *ice,
+>  			 int slot);
+>  int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
+>  struct qcom_ice *of_qcom_ice_get(struct device *dev);
+> +struct qcom_ice *devm_of_qcom_ice_get(struct device *dev);
 
-But the macros assumed the PM functions were always local static.
-Sometimes a family of drivers for similar hardware share common code and
-the PM functions are exported so I added these macros to make the EXPORT
-also disappear. It's not great but it was based on an existing similar
-pattern.
+Put should be also added for completeness.
 
-I did also have patches that used the macros with the PM wrapper macros
-to eliminate the code and exports in the cs35l56 codec driver. But they
-got held up behind a large backlog of other work and are basically still
-sitting in a dark corner somewhere. At this point it doesn't seem worth
-the trouble to eliminate the PM callbacks, especially as we don't know
-of any platform that is using codecs like cs35l56 without PM. So really
-I don't mind if you remove these EXPORT macros.
 
->>> at the same time gives developer less uglified (by ifdeffery) code.
->>> It means there is less risk to miss anything of that which make become
->>> a compile-time warning of unused function, or even issues during linking
->>> with modules, etc.
->>>
->>> Should I update a commit message with that?
-> 
-
+Best regards,
+Krzysztof
