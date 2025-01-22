@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8021D214801
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:14 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E534211288
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:15 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737560714; cv=none; b=t28v4vOb5h3px8kML8ki8O+3cagdbYI6Z5og0XRoO2pYgEPHSx19SH3uY6tlZWScU057GdY10mq+hMMSnCLu82wmt8/w4SAYGbX5WuNp3Yq3617Eor1mYABb3l6J0rdVG1qK4v8EVYfrm4j/ogdJeGNdTvtzc61gU8ZOIjx0J5c=
+	t=1737560716; cv=none; b=H+vpCvGmvecDctzZhfg1mq1QwQNOXoyZhwHe35n9HlXT3TorNmFAInJNhX1+Un6qvfCsDCusRExUAiIQJPmGKQLHzFtU+Z6fvXXRThIlSlh3bO912PpiNgXFuUB3674mbOKIffgkh8uC1rd2eT7Yns5HRWFMi3Xn/NPjIYwQFEo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737560714; c=relaxed/simple;
-	bh=eRR2Yg0fLuIiGWveQvjRuW/zq1j/w4zNQMDUe18+vTQ=;
+	s=arc-20240116; t=1737560716; c=relaxed/simple;
+	bh=Cn+MM52ZLVdzlOnGtcKhpkIPYMn6VNz6IS9bCQVxftA=;
 	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=OUUSEBf93mHur3mFcQG7BSlS3EMkmgAwqSSLhjK9CoZw9nRos5hkH5Rbiged6L3IOVue9EInD1BTk/wwenJavCETrIMAYCZkljzaHeuCG2eYd6pgrHKIp2/y9/c9xRP2B5aHffej/hYK0n6poY0xoSYV1Y3PWBUDIMjgkuf0rcs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GISp1fRG; arc=none smtp.client-ip=10.30.226.201
+	 References:Subject; b=NQTgYm8mL031B0arxllYY2KAvkUE8qbCSaLB5ApK4o6WkO4o9tBQLdt3ChR2epIO4XQECd/vxMzMHQkzZwgu0aIUTGRY9lexQBy8u1nIB7+UzVlDEfucufY22HNcopowque25SYAURWznLEtjPWpnyf/HaZ88+P3UQhPKU7vEZw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=H0nRgZ8j; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GISp1fRG"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 041CEC4CED2;
-	Wed, 22 Jan 2025 15:45:14 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="H0nRgZ8j"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7D16AC4CED2;
+	Wed, 22 Jan 2025 15:45:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737560714;
-	bh=eRR2Yg0fLuIiGWveQvjRuW/zq1j/w4zNQMDUe18+vTQ=;
+	s=k20201202; t=1737560715;
+	bh=Cn+MM52ZLVdzlOnGtcKhpkIPYMn6VNz6IS9bCQVxftA=;
 	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=GISp1fRGvBkk5pQAD41yJmRZfGVF8PkU+189oe30PCkxi6LQ6LLW1mzh/GAVZ2/GZ
-	 HPbHE8OxnHQRy+M1XPfzEr6qYsXQB0prGmhwoxTAb8okFDTUcDr2UN8pGF1BExPxXi
-	 3mdheXGYqV5UW/XF9owtwcktydjpyZ9mlDNwfUdP0OhbYbnGfupYJi0IRfW5F5qYqq
-	 CK2lEhFU060anJwqyMhNz00cwN+1Xn7FBIF9GGifRoF++O8e4tNC77Hh6R3HutjSEY
-	 Py2dIEf7Iq3lsZxm+9MrggFma9O/r97YWF3ztQyeBXi4DZW9dtQZPNdgdLRNS+ZTit
-	 pLL4NSq9oc//g==
+	b=H0nRgZ8jIfeP14DS3rUgg4deI6vmIMnkoNi91oxuHU1RGnu6fFggY5P8tXMlCkPPV
+	 Xg+r3VWTjFCczp1aj5sdoHs6LcsD/spTJ73djShlbxCNVBsa2aJSM7Lv/xpa6j8H4r
+	 Iw0gLzCOc0tg7rMzExDEeh6tYcmZQbzMf2Xm+yf3guLXOk6v3d8iCSk26hqLQQewUJ
+	 e0mcDkKxClkQW6YHYPC0jBkQ1z23sIpZv5lAzmJRspSYjPRtGfJDFn60nBMuFWi67a
+	 JBAhNbMxLS1BDtnRskBcjUG1K/M9ZxPq+yWShGMvU4aeJl87xrebACR4JPO5UVQTe6
+	 PuQaxBkPM6sRQ==
 Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id ADF8A380AA62;
-	Wed, 22 Jan 2025 15:45:39 +0000 (UTC)
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 33DA0380AA62;
+	Wed, 22 Jan 2025 15:45:41 +0000 (UTC)
 From: Chris Clayton via Bugspray Bot <bugbot@kernel.org>
-Date: Wed, 22 Jan 2025 15:45:20 +0000
+Date: Wed, 22 Jan 2025 15:45:21 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Message-ID: <20250122-b204003c14-66e8de5dc6a8@bugzilla.kernel.org>
+Message-ID: <20250122-b204003c15-4a4081654d77@bugzilla.kernel.org>
 In-Reply-To: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 References: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 Subject: Re: RTS5229 built in card reader not detected after Linux 5.0.x
@@ -50,16 +50,10 @@ X-Mailer: bugspray 0.1-dev
 
 Chris Clayton writes via Kernel.org Bugzilla:
 
-I've reverted* bede03a579b3b4a036003c4862cc1baa4ddc351f and built the 5.4.0-40 kernel**.
-The RTS5229 card reader in my NUC6CAYH now works with both SD and MMC cards.
+I've done more investigating of this regression and I've narrowed it down to rtsx_pci_init_ocp() in drivers/misc/cardreader/rtsx_pcr.c. It is called by rtsx_pci_init_hw() (from the same source file. If a comment out that call, build and install the resultant kernel, the rts5229 reader and the card inserted in are detected and work fine. The machine is an Intel NUC Tall Arches Canyon NUC6CAYH Celeron J3455. I can't take this diagnosis any further because, as far as I can see, the only change the patch identified as the culprit (see comment 10 above) makes to rtsx_pci_init_ocp(), shouldn't be executed for the rts5229. So far, I've built and installed 5.7.12 and 5.4.54 the latter of which I am currently running on the machine. I think I tried an unpatched 5.7 series kernel earlier in my investagations and the card reader did not work. To be sure, I'll build an older 5.4 kernel that more closely matches the one currently included in Ubuntu 20.04, and check whether that works when rtsx_pc
+ i_init_ocp() is not called.
 
-* The commit does not revert cleanly because of some later changes. The manual fix up is not too difficult, however.
-
-** Actually, the build fails but after the modules have been built so the rtsx_pci.ko driver module is available in the build directory. I installed it by hand and then ran depmod manually. The build system is a maze of voodoo that I am still trying to untangle to get a full set of deb files produced. Nevertheless, my testing strongly suggests that commit bede03a579b3b4a036003c4862cc1baa4ddc351f is the culprit.
-
-I've also reverted the commit and built the resultant kernel on my (non-debian/ubuntu powered) laptop, which also has a card reader (RTL8411B PCI Express Card Reader) that needs this driver. That continues to work after he reversion.
-
-View: https://bugzilla.kernel.org/show_bug.cgi?id=204003#c14
+View: https://bugzilla.kernel.org/show_bug.cgi?id=204003#c15
 You can reply to this message to join the discussion.
 -- 
 Deet-doot-dot, I am a bot.
