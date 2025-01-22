@@ -1,62 +1,62 @@
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com [209.85.208.179])
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8BCC210F58
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 09:55:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67CA4210190
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 09:58:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737539738; cv=none; b=VuzN8/VdAwKLHlTCjrWroUk4J5oPWwML233y/xheDoL0ZLu/BYW4jip30VorUCrF2KQc9ZrKz42qAZrkXNc7kCm/aBBRBJtSskdor8zdWcy1jWh58tZQi89svUJPYtFU0+balHrY3WxZYsVD7IXCjHqxLNls1uOPXfOtsF6zR+k=
+	t=1737539886; cv=none; b=JxTJe/HWzFk0s75t21HCqUUPhQ42zMroBjO/+JlFK3pvdrIlcKq7OA8+KPN7uFb6tAaHiVUc6gYxlOnMRCkGhEVwUHEYNLz2gzHvAsUyUUI09CuhfF2Q9YjD/4Mu4x3S48yIeI6WueuwJt2KEr3RhutWdeSjqiYgQA8HdJ6su4U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737539738; c=relaxed/simple;
-	bh=A7skF+DaxCykLOeAdbWIBEemfXQfKaF/hi2Lg/ra9b8=;
+	s=arc-20240116; t=1737539886; c=relaxed/simple;
+	bh=0t93RCDXl/7xUXDW5W9vqPWXCfpMB16UsYpP/NqJ6Vc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cXE3bdSIQ6nkZO8D7EwGHru+LLqfdeuuTcG+ChkvO8WQd1G2/Ou3RPRhVM8IG0g+1CoYyvNb3so1Pe4xYBx4eqhHx1GK4p4TOyEIVD21DPInLbxxcYW+2qk+5x/QKJoR8qnA8uSlmcYKeUZSrcOvwUi0mV78U7FKXFBoBwBmzJQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mZ65s2Fn; arc=none smtp.client-ip=209.85.208.179
+	 Content-Type:Content-Disposition:In-Reply-To; b=RdWkPTCPE8r5pSbehbgoMLBuTXFLQ5cunpDgGEfNiIq6ml7QsrD/+xpxsa32d8DnMNQToJVoqk6wxVPX56SwnDzYZISksvH3xr0fnEFARUfq6LEY5VY1soIzbaDOq0DDzlhXoLZB4J5HgAxTcAz6aEC6hUI8krg+gKb9ilK6GB8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hscZqSrU; arc=none smtp.client-ip=209.85.167.49
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mZ65s2Fn"
-Received: by mail-lj1-f179.google.com with SMTP id 38308e7fff4ca-30613802a59so71873461fa.0
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 01:55:35 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hscZqSrU"
+Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-5401b7f7141so6010902e87.1
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 01:58:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1737539734; x=1738144534; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1737539882; x=1738144682; darn=vger.kernel.org;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=scV0mTsOi7ZzfUvIFazmqCl77AdAA0xM0waC6G2ecgo=;
-        b=mZ65s2FnOLQS37AXtF5gwU9InMa9kgOJzws6pSdQt5jc77Ah0J8jq7DmAsbdTlRrIs
-         wn+L1Ve8xc1aIymUv+ZOsfsN59h1FmIYfZQMOcegvxJJCzjXFF7718RUcTryHKXK9SIV
-         9mbeo1MleUOnutEO5TgK+hiMOdPY1JaftpWtOEr1q8e4r/Z0ZXr2psEgvOd/BHQR+AsT
-         7iEWY7+TMaSPIMVXPAHyV4ZRKcGRYiwzxVkG65JvjksIrnSZ+1SfyUH9ynwNF21W2RI5
-         mX4CAGYdSVsWTGjVOJR62csqHV91/FStO5pqLz7IYJyW8Eb9/Lqh+nWWeGCU/hWI5IvF
-         FaLQ==
+        bh=lt+7T/OfDgu/+TjLQdN9iffz+QngVPZRwwA8knqRWaI=;
+        b=hscZqSrUBpsdDJlvGazLsFUbKQwp1m+j+Ena3k9KzDptbkDyIYvkp4UNh8aIkBVZLI
+         8r/6MHfVQkrFZQHyw3qPHX6SKSZRfoZ4RnEO+C0hTNjP/jLXCuYF/Vwlo0azMReoTQTS
+         V3bPU9MBGXLS2ydWMPdxXWP3tMhVFyEpI2jsUla+a/kdlWDXbwX46wdVEM28/Arusq6k
+         Gpv0ekeTK9HNC+uvD9dvpRjTP8M3oO8RXkF/AfFy/Iam+YcZg57shlU5c21BUSQUn8DZ
+         YAg2ztwdL4rDU8l653TDwGFaxu8wo+3VcCLlJLMGskpBwaVSG/WvMUmMx3WKH7ePYz39
+         7+CQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737539734; x=1738144534;
+        d=1e100.net; s=20230601; t=1737539882; x=1738144682;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=scV0mTsOi7ZzfUvIFazmqCl77AdAA0xM0waC6G2ecgo=;
-        b=MMvy3vmmbfSnuINv8wClH5mMzDIJP8w+dTdAtQboq8SMMH1fytll8L0k1ATvvigTSK
-         NfW9wXNOgPA2lF2yNalZhfkpTk9C97z53/AuKpSlbAuZdpAm+ChmTqOk7folFDo5NP32
-         TWDTmV52ofMNOVgfyfIZ+SUzjeEPxtasGU2E0mdY6Lz5F9ylfu6Ni18V1PQbJqeyZtAo
-         LiCGx+549sf7w2H1XhO8RddrnyT5o/DUtHThkPkM+W6UbhPQ5g1j/fm60GwE/cCS7yNY
-         HBAxC/GlnbwTUHtDaQz8CUikD/Ejv1SxHaL3lSLD+hg1METphvdtbhOf4nEQW8IDJ3hN
-         9OrA==
-X-Forwarded-Encrypted: i=1; AJvYcCVxo5QgD1zYx6MjKoE/MxmXE3BOGRbrfb10KuH96+8ZnhV9lOcy4za6G4AhX4k5xKWLesf5ysxBaEA=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwBy+E4wRHnid1UJ4SQgmX/6GGn7JjdC7ZZ5xZuuVMSSQOIxdtj
-	Qx9C4BB9IVz3XsyNyxgXp15X8WIhWnB6GEX3KlE0oyjeUwQUhc1ujZNhJasZTQo=
-X-Gm-Gg: ASbGncuPv/LHSPMktPG/1ebJ62xImD5CfLc1ceGRjs4+qJzqu4SOWf96bI3tlzEV5UF
-	6nmALNQWzQvnx/xTJNym1WaYnaWyuXbqt3ZoTiwBrUt465O7cpQq3Pix5aarKDchLQ+QGzFqaqJ
-	3UkqwS6Mqctj5bdD+PNm86sUzeKpJm7wbZkNAxaaAVyqQTaMBfqJ3q0mEFPPQKQw0BbXp4UlnMn
-	S/CP5qefuGuyULf+dpGkRMGpqvugH166Di+e01tnYskZlr17rYFUp+79P4DcXBGwu7q0W22PIpe
-	c50pfhU0m6l8ylF7WdkZUqXyeQadze3D+tFTQzJFh66WQ/z6qg==
-X-Google-Smtp-Source: AGHT+IEyVRLyus5hXslfncouru7d589DBCXm5XQ6Y4wWqmqqzrIjL4zImkrlqZfNjmApRZhoecA7yw==
-X-Received: by 2002:a2e:bd89:0:b0:307:2bc6:5eae with SMTP id 38308e7fff4ca-3072c990274mr76013791fa.0.1737539733757;
-        Wed, 22 Jan 2025 01:55:33 -0800 (PST)
+        bh=lt+7T/OfDgu/+TjLQdN9iffz+QngVPZRwwA8knqRWaI=;
+        b=PV2ExksMoDlzANIrQUxIQD4qO73w1doj9i9h8aCq1kKtn8SIbDNyR+Fbwgz3okyMMq
+         LQ2u4ZmSWwk/y6zWbTujlGmVVX3fTjb9T1zUPPLXRyrnq/5UZg6sG3F1YBl6Qv9c2RpI
+         GH8+zF0awCSOtOqagdmK3U3nhfDjNxrCazqucUYZmrDvDue3+muuPiQ74oWv6/vI15o8
+         VhHIypdcg1diJpfaMueXHkIwKIBsGEOpJhsYKqCVF5VocmAqp2fXBqcIgtSPOvxWlnUb
+         tIhXN6/F9aSqPISCd9czvWqJ2hFV32zBvvNKIzJgKuOQFeXCwe+V4DLJ24BrkT0BWv8T
+         o0TQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWV7Yuoq/nqVeNPnU4umlpUMRPMULXlyvpotNMwO1eL+Z/V1aIuzg3di8K85uTpSdSlO344w7SJXYM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyRQuvaJilDUTks/7p9birxnZwOhCR3/q9e2CdepiAZkXrjp93v
+	Yzw6jhz0TllCQ6x9kamEPq8bUBty8wsJIdUUha1wnk68O3WnpnrX3V75MkT3p/A=
+X-Gm-Gg: ASbGnct6gdIV7tomxOP4t0SbJD1QS9OGyHKmCCGYq0b1ycGfpjDPBcYka4wU/BWPzjl
+	NozzeniHllqZhGMF90xa11l/QdGaW9fS21g7LcgzzEe8pvYcLxJHgGjKCztqfpk5Sf5e6AIcyAX
+	J3b7z5DxRflD9HRQMOIH+J0jW1xfHUmBxwJT5+fiNa6qZQ8rVZMbmI8aTB57+vviZDjI4/QDuq6
+	EQV7DtZ2J2JgNo5VfEcJddmUK7NsqHqVkTleRSlJNOF/j7Qe8t9tOwnYIVG+orUYrtHBr1Z3bUf
+	HQdhzWKJKGQTQ2VbJy2YbVwLhPGqfy0xhqcYf68JRQjrfsbsZQ==
+X-Google-Smtp-Source: AGHT+IHSPoERHwXBAu/mWABs14CcJsopKYTMwQjU2ZihLtIIx69YnItSD8BMvZFUb9/vqhUAaBtVuA==
+X-Received: by 2002:a05:6512:1084:b0:542:29b6:9c26 with SMTP id 2adb3069b0e04-5439c27d0c5mr7863371e87.47.1737539882463;
+        Wed, 22 Jan 2025 01:58:02 -0800 (PST)
 Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--b8c.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::b8c])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-3072a5013aesm25703591fa.89.2025.01.22.01.55.33
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-5439af7364esm2166480e87.162.2025.01.22.01.58.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 22 Jan 2025 01:55:33 -0800 (PST)
-Date: Wed, 22 Jan 2025 11:55:31 +0200
+        Wed, 22 Jan 2025 01:58:01 -0800 (PST)
+Date: Wed, 22 Jan 2025 11:57:59 +0200
 From: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 To: Sachin Gupta <quic_sachgupt@quicinc.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
@@ -66,11 +66,11 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
 	linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
 	quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com, quic_narepall@quicinc.com, 
 	quic_nitirawa@quicinc.com, quic_rampraka@quicinc.com, quic_sartgarg@quicinc.com
-Subject: Re: [PATCH V3 2/4] mmc: sdhci-msm: Add core_major, minor to msm_host
- structure
-Message-ID: <rvu75rn2m32eyjr4ogwz5tmns2bkv3mp4gaz562gjmxztnejsl@deslghsvjhmi>
+Subject: Re: [PATCH V3 3/4] mmc: sdhci-msm: Add Device tree parsing logic for
+ DLL settings
+Message-ID: <6xvsnmbnnvpmlgvmi42pt4d3ugkrxhrgrkp56szqhgh2foxe72@z4ildfxufq7j>
 References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-3-quic_sachgupt@quicinc.com>
+ <20250122094707.24859-4-quic_sachgupt@quicinc.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -79,48 +79,150 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250122094707.24859-3-quic_sachgupt@quicinc.com>
+In-Reply-To: <20250122094707.24859-4-quic_sachgupt@quicinc.com>
 
-On Wed, Jan 22, 2025 at 03:17:05PM +0530, Sachin Gupta wrote:
-> This change adds the core_major and core_minor variables to
-
-Please see Documentation/process/submitting-patches.rst, look for "[This
-patch] makes xyzzy do frotz", then update your internal documentation so
-that other engineers stop making the same mistake.
-
-> the msm_host structure, allowing these variables to be
-> accessed more easily throughout the msm_host context.
-> This update is necessary for an upcoming follow-up patch.
+On Wed, Jan 22, 2025 at 03:17:06PM +0530, Sachin Gupta wrote:
+> This update introduces the capability to configure HS200
+> and HS400 DLL settings via the device tree and parsing it.
 > 
 > Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
 > ---
->  drivers/mmc/host/sdhci-msm.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+>  drivers/mmc/host/sdhci-msm.c | 86 ++++++++++++++++++++++++++++++++++++
+>  1 file changed, 86 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index e00208535bd1..2a5e588779fc 100644
+> index 2a5e588779fc..cc7756a59c55 100644
 > --- a/drivers/mmc/host/sdhci-msm.c
 > +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -273,6 +273,8 @@ struct sdhci_msm_host {
->  	bool tuning_done;
->  	bool calibration_done;
->  	u8 saved_tuning_phase;
-> +	u8 core_major;
-> +	u16 core_minor;
->  	bool use_cdclp533;
->  	u32 curr_pwr_state;
->  	u32 curr_io_level;
-> @@ -2557,6 +2559,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	core_major = (core_version & CORE_VERSION_MAJOR_MASK) >>
->  		      CORE_VERSION_MAJOR_SHIFT;
->  	core_minor = core_version & CORE_VERSION_MINOR_MASK;
-> +
-> +	msm_host->core_major = core_major;
-> +	msm_host->core_minor = core_minor;
-> +
->  	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
->  		core_version, core_major, core_minor);
+> @@ -256,6 +256,19 @@ struct sdhci_msm_variant_info {
+>  	const struct sdhci_msm_offset *offset;
+>  };
 >  
+> +/*
+> + * DLL registers which needs be programmed with HSR settings.
+> + * Add any new register only at the end and don't change the
+> + * sequence.
+> + */
+> +struct sdhci_msm_dll {
+> +	u32 dll_config[2];
+> +	u32 dll_config_2[2];
+> +	u32 dll_config_3[2];
+> +	u32 dll_usr_ctl[2];
+> +	u32 ddr_config[2];
+> +};
+> +
+>  struct sdhci_msm_host {
+>  	struct platform_device *pdev;
+>  	void __iomem *core_mem;	/* MSM SDCC mapped address */
+> @@ -264,6 +277,7 @@ struct sdhci_msm_host {
+>  	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
+>  	/* core, iface, cal and sleep clocks */
+>  	struct clk_bulk_data bulk_clks[4];
+> +	struct sdhci_msm_dll dll;
+>  #ifdef CONFIG_MMC_CRYPTO
+>  	struct qcom_ice *ice;
+>  #endif
+> @@ -292,6 +306,7 @@ struct sdhci_msm_host {
+>  	u32 dll_config;
+>  	u32 ddr_config;
+>  	bool vqmmc_enabled;
+> +	bool artanis_dll;
+>  };
+>  
+>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
+> @@ -2400,6 +2415,74 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+>  	return ret;
+>  }
+>  
+> +static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
+> +				  u32 **bw_vecs, int *len)
+
+It just reads an array from the DT, please rename the bw_vecs param
+which is inaccurate in this case.
+
+> +{
+> +	struct device_node *np = dev->of_node;
+> +	u32 *arr = NULL;
+> +	int ret = 0;
+> +	int sz;
+> +
+> +	if (!np)
+> +		return -ENODEV;
+> +
+> +	if (!of_get_property(np, prop_name, &sz))
+> +		return -EINVAL;
+> +
+> +	sz = sz / sizeof(*arr);
+> +	if (sz <= 0)
+> +		return -EINVAL;
+> +
+> +	arr = devm_kzalloc(dev, sz * sizeof(*arr), GFP_KERNEL);
+> +	if (!arr)
+> +		return -ENOMEM;
+> +
+> +	ret = of_property_read_u32_array(np, prop_name, arr, sz);
+> +	if (ret) {
+> +		dev_err(dev, "%s failed reading array %d\n", prop_name, ret);
+> +		*len = 0;
+> +		return ret;
+> +	}
+> +
+> +	*bw_vecs = arr;
+> +	*len = sz;
+> +	ret = 0;
+> +
+> +	return ret;
+> +}
+> +
+> +static int sdhci_msm_dt_parse_dll_info(struct device *dev, struct sdhci_msm_host *msm_host)
+> +{
+> +	int dll_table_len, dll_reg_count;
+> +	u32 *dll_table = NULL;
+> +	int i;
+> +
+> +	msm_host->artanis_dll = false;
+> +
+> +	if (sdhci_msm_dt_get_array(dev, "qcom,dll-hsr-list",
+> +				   &dll_table, &dll_table_len))
+> +		return -EINVAL;
+> +
+> +	dll_reg_count = sizeof(struct sdhci_msm_dll) / sizeof(u32);
+> +
+> +	if (dll_table_len != dll_reg_count) {
+> +		dev_err(dev, "Number of HSR entries are not matching\n");
+> +		return -EINVAL;
+> +	}
+> +
+> +	for (i = 0; i < 2; i++) {
+> +		msm_host->dll.dll_config[i] = dll_table[i];
+> +		msm_host->dll.dll_config_2[i] = dll_table[i + 1];
+> +		msm_host->dll.dll_config_3[i] = dll_table[i + 2];
+> +		msm_host->dll.dll_usr_ctl[i] = dll_table[i + 3];
+> +		msm_host->dll.ddr_config[i] = dll_table[i + 4];
+> +	}
+> +
+> +	msm_host->artanis_dll = true;
+
+And the pointer to dll_table is lost, lingering for the driver lifetime.
+Please drop the devm_ part and kfree() it once it is not used anymore.
+
+> +
+> +	return 0;
+> +}
+> +
+>  static int sdhci_msm_probe(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host;
+> @@ -2446,6 +2529,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  
+>  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+>  
+> +	if (sdhci_msm_dt_parse_dll_info(&pdev->dev, msm_host))
+> +		goto pltfm_free;
+> +
+>  	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
+>  	if (ret)
+>  		goto pltfm_free;
 > -- 
 > 2.17.1
 > 
