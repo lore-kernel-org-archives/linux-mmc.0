@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD87421480C
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 419FD2147F3
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737560702; cv=none; b=HFB4Wv7zSPrIQZFal+uR1qI3876KFFO6Bm8hbsTNOjobbVovH7UN9sRzIzrWDyMgshF6366jybE8fEMNO4gRdZCOiibQgRSZMKDAH6TMg0xZxQ0tc+5d0b/6/71MoFpXF6X/O8nISJfDKGndmoczZLhjLazM6+kGgaFoSFUhNFM=
+	t=1737560705; cv=none; b=RwiqlCDcsEFemeAVxJLFrzB3AmLfdDtDl/5kQydXM3vBLDjN0/8VRD5flXZzOHXRH2NpofOPTR9KA5MOxqaSlDYOV3jD7zc6GvLHB7DyQ7Ez0AqLJLR6qwME2I6RbUevEdDOLxaf1HDuvowrKfAK+yZ0xv0Metx5g7WJyIVF73U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737560702; c=relaxed/simple;
-	bh=q/z7kOzONeEthRSRCFavfA/oyOet2Qv2xtVKv64O6f4=;
+	s=arc-20240116; t=1737560705; c=relaxed/simple;
+	bh=S1b2hVJTSaYZhwwo25V6ai8MKbPMX3txYzI8ejwF6r0=;
 	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=Nv5aaxZP8DfKfk7nMeqpxFs7RG7T4jtoRGVln8O2HcHxMbB4g5NI5avXraHqWH8BpXmSn29TwdoAlc7+incp6568c75MwbbJ25SoFj6fkla05JtURwTo4p0TADTTnQzYQMO6wtjb5NCyVeZpfd16/OPkYcrFjSq/+Llpohc3KzQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=T3A7f8Mt; arc=none smtp.client-ip=10.30.226.201
+	 References:Subject; b=ku/XWuulBXpxd7T50dsXL7wJ2hhDV91pG3irOEUgO5S1pWexoriNbuvl8XV/4scXVsONQFGxoru+utilcq58WHBIWz+/+xf/+rN8YN7jws2CG+WTSIQ6eoPhIxEn0nzF3HLDO4spdl5QEKFzsZ58Ir6/jnBVfcVfEiysAk8rY0o=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mMEQXSps; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="T3A7f8Mt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 45502C4CED2;
-	Wed, 22 Jan 2025 15:45:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mMEQXSps"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD5E7C4CED2;
+	Wed, 22 Jan 2025 15:45:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737560702;
-	bh=q/z7kOzONeEthRSRCFavfA/oyOet2Qv2xtVKv64O6f4=;
+	s=k20201202; t=1737560704;
+	bh=S1b2hVJTSaYZhwwo25V6ai8MKbPMX3txYzI8ejwF6r0=;
 	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=T3A7f8MtAnCKxxUWRqBGbheatO4Oq6o3suQOpX9FkbAC9Ftu+kTtFQ+2YQOVHlQWc
-	 NEzOnkwUaMg8BNP4OsY9eJ2hyX3fne5e+COgqGknc0d1x5/R+EM+Va69Ue8wFHXrAd
-	 P9rYcwef2Nzdhfk7gliDDRKoC6dXXoGJYm3BVb9L34RHYxGqxEbc+1mE8clh5hv/di
-	 YKFxaurFZUjI9vG2D27gS6BUnj1XzlUpHrksSzbc1KDlJ56O28QmdCyaLpgwj2DqoC
-	 JgXCYLuCSRsE++PR/Up209nPSCJ7ZxX/Cqkt/Fw/iUfxZSBDMUqqA0SNmf6pBk5rZv
-	 I6IY2nZPHFXYg==
+	b=mMEQXSpslJpWQkpx4zjOouz47/tZP0PbmXUnYluRwU9yKOl2QIDt4fcQatt1FKl0k
+	 7INN7HXzR8QiMqeH0qxDTU/sZcNgfVBBSuXLYGp0tq08gs5hjNtWae61M64HCyx4MY
+	 rahkigl2y9KQFgw8TGQZ2CoIiV2Pu/fLNDKogoHRsvjpuVnyDnvNQ3Utgh5JbxqUiw
+	 Gnr/xOolM32Yw3zyJ32294rfR7bG9/ylM63i+LKQmxYgylyJVh+yfO141Y+BowRqyD
+	 tZDpHwz/a1d+9tyEIFoYxPefGb4Ydmk3kGGaAtYyd8Rq93jGvoBFCMM1Jg9kOUSZ3g
+	 +6pzK08d1uDeg==
 Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id EB2C7380AA62;
-	Wed, 22 Jan 2025 15:45:27 +0000 (UTC)
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 712F7380AA62;
+	Wed, 22 Jan 2025 15:45:30 +0000 (UTC)
 From: David Lindstrom via Bugspray Bot <bugbot@kernel.org>
-Date: Wed, 22 Jan 2025 15:45:14 +0000
+Date: Wed, 22 Jan 2025 15:45:15 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Message-ID: <20250122-b204003c8-2b3e3f4a742c@bugzilla.kernel.org>
+Message-ID: <20250122-b204003c9-79fb6d59c9dc@bugzilla.kernel.org>
 In-Reply-To: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 References: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 Subject: Re: RTS5229 built in card reader not detected after Linux 5.0.x
@@ -50,20 +50,22 @@ X-Mailer: bugspray 0.1-dev
 
 David Lindstrom added an attachment on Kernel.org Bugzilla:
 
-Created attachment 283931
-MMC trace on SD card insertion, kernel 5.0.13
+Created attachment 283933
+MMC trace on SD card insertion, kernel 5.2.2
 
-SD card is detected correctly on kernel 5.0.13
+SD card is not detected on kernel 5.2.2
 Obtained using:
 
 echo 1 >  /sys/kernel/debug/tracing/events/mmc/enable 
 cat /sys/kernel/debug/tracing/trace_pipe > mmc_trace.txt
 
-File: mmc_trace-kernel-5.0.13.txt (text/plain)
-Size: 129.50 KiB
-Link: https://bugzilla.kernel.org/attachment.cgi?id=283931
+Mmc requests return cmd_err -110
+
+File: mmc_trace-kernel-5.2.2 (text/plain)
+Size: 32.22 KiB
+Link: https://bugzilla.kernel.org/attachment.cgi?id=283933
 ---
-MMC trace on SD card insertion, kernel 5.0.13
+MMC trace on SD card insertion, kernel 5.2.2
 
 You can reply to this message to join the discussion.
 -- 
