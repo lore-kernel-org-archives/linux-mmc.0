@@ -1,36 +1,36 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D5B7211288
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:17 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64751211288
+	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:19 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737560717; cv=none; b=hGfpjvdd6DQ7gnbh5dssWR587of9qWvm0ZKM6raQRCHa331AFF0Ttav8nkvE4Y+7kXlt8y5ZKX7bRjlItMuFfiRc3G2oxg0RX7rqRqFPisnOP4dfr0cvoHEbNo87ZeKOQwDSo+G7t/CdPs4wsf+Caq1OaR7Rk+Hw1n+/2Djsvu0=
+	t=1737560719; cv=none; b=YBMiahlFYs+yrZ1GD74PNWbZ6dh3VhmDAxGqgUNLmtV5YmnXer2z3hGLltFDasixOFzrr/jm8dj0SxtB9KapXn103ihxXp47ya0Onlnho9gpl6bgtqh1l1frcgAN0GXy6RKW4SIRF2xV2ewnRaLlaUerYXNY7L8hh/PhDIAPRqA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737560717; c=relaxed/simple;
-	bh=HJ4kkNPRinOK4HLje3gMG70Zu8vHO824v77F6BreM8Q=;
+	s=arc-20240116; t=1737560719; c=relaxed/simple;
+	bh=1HwJUNP8rpXyMvVOEK+8z7EmP2XfdMK9wyX48gkosMc=;
 	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=XSBzo6jgLxyxjpxMuu7EKIulLeJ4VIAYX81BXXPx+W6avIVp+4H5AVzyJ9Rir1DDxYGX1A2bzdU6/RxkAPpcPjkr0cNSqf+Q+mDbTnBJPClBEm0ejukkDhq44iNzSK2RSbxfpSzmKuEjnj5b9Xk00oKM56lN99sXr6Tgpd6iRnM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Bwgbm45Q; arc=none smtp.client-ip=10.30.226.201
+	 References:Subject; b=PtrAQKocU42Bl9spDXgGa9yqYl5OXbUdUM9TqfJfugbLbikgZLEbyOgBU7b5vrKnwWJIZDMAsKaQhIHFCVpP318e3ldmOpLgSOs+cQJ7XQon9IcwjD19v9h9exTip5sZOafsE3VmNJ+rK6SHZlXQl59XkhzaIQkCxkAY5QqGuVk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fYcDO4Tn; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Bwgbm45Q"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 012FDC4CED2;
-	Wed, 22 Jan 2025 15:45:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fYcDO4Tn"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 475BCC4CED2;
+	Wed, 22 Jan 2025 15:45:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737560717;
-	bh=HJ4kkNPRinOK4HLje3gMG70Zu8vHO824v77F6BreM8Q=;
+	s=k20201202; t=1737560719;
+	bh=1HwJUNP8rpXyMvVOEK+8z7EmP2XfdMK9wyX48gkosMc=;
 	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=Bwgbm45QebBanqqlA9eqk/K6Uljvs/MEnerKOUGyUvsaCC/AWyq7S8VeegiVwPUZw
-	 BU9oSvN02FR6/AtmEMer6GWGbt8Vid2fvLrii5CkqmRZsyQsab+U34HYecWuyWXV/B
-	 ITRuL4+24LlcgZpZRRDtoCAL/oUjZEVayo4Nhusuwc3WtkB+QU+32LPW8FJ+JDnnqm
-	 Cbna1ozDe/KyEYUyFkRsfLlSzMIWL4kvpSaBp8baoMJyqnB1qw9J1HISyd1Gjxa4AU
-	 4cqJVSr5S0L6JmI4z/AErvmsH/Z8aFTwSbw3bYreV7YCRXPh1YrwfawWgygGJUz0o9
-	 3ZUFS7xjnwK1Q==
+	b=fYcDO4TnQuVpROik/A6F0AThpL3M4SbX67XOnp99xMdKgcGVquymo0mhbHS8QN/R/
+	 M0R7McyRuc75Zh0xzd0TUxc4Cch+HvP2Rd/7lH7voFmDHXkOdG/GukfOyRFsnD/19l
+	 gCO509fxDSFr852XKMZUIaKBkvwUpUg2voQbW3eJnH83pkXUN5/qfz7qNtARuR1mQg
+	 XvJjcs6Ud8nPw9/FwS+hJMZ1cJ2hGaYMiqpaVAThF+k0Thc9pfyFs6yNs1n2jQ8Go7
+	 /rFm4ui92gsp38uMrPHwE2Kg8SSJJMr0b1s1tbu5Kx2PL4yGb7S202q9aQmDA93pa/
+	 wcKJ9AcddGl/g==
 Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id AEC0D380AA62;
-	Wed, 22 Jan 2025 15:45:42 +0000 (UTC)
-From: Chris Clayton via Bugspray Bot <bugbot@kernel.org>
-Date: Wed, 22 Jan 2025 15:45:22 +0000
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id EAF38380AA62;
+	Wed, 22 Jan 2025 15:45:44 +0000 (UTC)
+From: Yannis via Bugspray Bot <bugbot@kernel.org>
+Date: Wed, 22 Jan 2025 15:45:23 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,7 +40,7 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Message-ID: <20250122-b204003c16-9c24bb3803a9@bugzilla.kernel.org>
+Message-ID: <20250122-b204003c17-96905a135ddf@bugzilla.kernel.org>
 In-Reply-To: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 References: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
 Subject: Re: RTS5229 built in card reader not detected after Linux 5.0.x
@@ -48,15 +48,15 @@ X-Bugzilla-Product: Drivers
 X-Bugzilla-Component: MMC/SD
 X-Mailer: bugspray 0.1-dev
 
-Chris Clayton writes via Kernel.org Bugzilla:
+Yannis writes via Kernel.org Bugzilla:
 
-Following on from comment 15, I've patched and tested 5.4.44 (which Ubuntu's latest kernel seems to be based on) and the card reader works fine.
+I have tested the patch proposed in https://marc.info/?l=linux-kernel&m=159665699504104&w=2 on the Intel NUC7CJYH (RTS5529 is the onboard card reader) and I can now read/write on SD cards again.
 
-Despite saying that I could take this no further, I did push on a little further and I've isolated the code that causes the rts5229 to no longer work since bede03a579b3 was applied. I've also reported the bug to LKML - see https://marc.info/?l=linux-kernel&m=159639774221968
+This is under Ubuntu 20.04 with a standard Ubuntu 5.4.0-42-generic kernel.
 
-Since reverting bede03a579b3 on recent kernels needs manual intervention, I've devised a simple patch (against linux-5.7.12). It applies correctly to 5.8.0 too but with offsets. If it doesn't apply properly on other kernels  between 5.1-rc1 and 5.7.12, it is simple enough to apply manually.
+Thank you for the fix Chris.
 
-View: https://bugzilla.kernel.org/show_bug.cgi?id=204003#c16
+View: https://bugzilla.kernel.org/show_bug.cgi?id=204003#c17
 You can reply to this message to join the discussion.
 -- 
 Deet-doot-dot, I am a bot.
