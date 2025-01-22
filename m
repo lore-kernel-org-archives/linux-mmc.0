@@ -1,77 +1,63 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D96162139C8
-	for <linux-mmc@vger.kernel.org>; Wed, 22 Jan 2025 15:45:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF95A216391;
+	Wed, 22 Jan 2025 19:06:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737560739; cv=none; b=N68PEoPPbQOkSooTLPCfpTCDCdc59gwSlaVxmVjago+ZAes6tVAkqGfEMmubCLLk9mev4LwJZgigQnEJkW2jNFkVInk/gvphmG644Gb10Jt0vDFjA/gAISyJyRwnC/8uMUnrBYSuxda54hMc4MrRl4fhkIVsIv6aTeqkBe4tOeY=
+	t=1737572768; cv=none; b=hmy7olZB5oK4IhHaE0ugp1Q9ijBsFHk6nEZXnHCvz5Mfj91nrL/1uaLN2lfmulyyr8/FvdEGrAA6cJdZutywldv9U7F/QKuU8+m3v2rBAQXvHfkGECyrMCYvS7wUP0F1vD3S1l8W5ANGk4AlZnjDcgTNqYwRkZVE8vCYHCSVqTA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737560739; c=relaxed/simple;
-	bh=w+vnBfMenEv5ysER2euSd4rxuLq9uqDoRch/yeM67CI=;
-	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=HOvTaVyF6NEIV+LS2UvZ6eWeCNzpkJnkhfxiIIqaXbHNjdoVT554G2NeyA8jueq7+v2wHoSnW79T6Gy1YIoG8TQKm6g5/W4pIt2pGcX8bwNudOyokfzyV3GYNxqTeo4vlT9vbcUrmTCJx7Y8MqYtlDZs45pKNLJ9EKPwv71W6o4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=O2Vmod1j; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1737572768; c=relaxed/simple;
+	bh=uDcyu3iB8YI3bMQfQrGs1rI3Ib747CIZyqsYvURQoE4=;
+	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=GSdvHHMskhyjG4HKTCtDJJu27YitzmVXPFTXFNFzGMqqMu031Rlu+/B+7ysm3OiagmGxBusoLQ7x9qffUikGTJeyCcorDTjbPxbKaRE/wjqvaJHfMiWqeJib5jQXqgcRm8PYR+2tiIb16skBofTPLzIDYkotzOsj+gDO1PAKyZM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j/5dYbhL; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="O2Vmod1j"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BB46BC4CED2;
-	Wed, 22 Jan 2025 15:45:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j/5dYbhL"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B219AC4CED2;
+	Wed, 22 Jan 2025 19:06:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737560739;
-	bh=w+vnBfMenEv5ysER2euSd4rxuLq9uqDoRch/yeM67CI=;
-	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=O2Vmod1jsJnE0Gg3NyGg1v+IclhMvhrB16td3XGQyTL5sGxjg3xojByks2Uwn19pk
-	 rdnHi9rU2l9XnduE/njddxUYnrrqTcRRY+s5ZXn+QuuwXSPD2dL9GUcfBJV6cgLPBG
-	 z7FqDZNEYggZwlXKfX6qTUV4J0umLWTdUPhHX++0ZkDI+RXW6C9+a8p2/OTjhTPd09
-	 5Qd1PThQHg2WlExZLozolUgE3Fi6/gaYMlqA69xDOJtm/I3n42mf5YD45MBbzR8LCd
-	 xUTROkz81Dbteu+CIjdRpGzWXDwzdAX5TjAkCTgV8QZAAghQbwyTzJBwT8fLoB2C1M
-	 SbX/FNKhZ9KRA==
+	s=k20201202; t=1737572768;
+	bh=uDcyu3iB8YI3bMQfQrGs1rI3Ib747CIZyqsYvURQoE4=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+	b=j/5dYbhLj0P5lKqaJqgJJuol09qKsgEMZwfwEjj08oBdR/W4GkIKgEKDFta1wi1Bs
+	 W/wnOdxGSd7xhybPm5edxgpHdn8uw2kOqJPVQd8pMNZYtoNmjh/6Ec70tof3e9GVyR
+	 AE61T7EER5TxlnwXBIFBmrzrPs8YM3YrtbifMxfSV65/+7YKJ8JXZp+joo8rRewevh
+	 qHj4ywz3zORdiCn8oMi+nZj/Ie1fXCTfvAcLBkRegdIKihkPnqsN8DQvEoYfYM7bPQ
+	 xnfXSrbPZVJZsRm9FHIU1zGA1DPQhnWv/u/hnknqpzMEeid3Ai4+N58jMmmN5QaNbu
+	 aGwgr9ziFODwA==
 Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 710B3380AA62;
-	Wed, 22 Jan 2025 15:46:05 +0000 (UTC)
-From: Michael Garofalo via Bugspray Bot <bugbot@kernel.org>
-Date: Wed, 22 Jan 2025 15:45:34 +0000
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 71084380AA62;
+	Wed, 22 Jan 2025 19:06:34 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC updates for v6.14
+From: pr-tracker-bot@kernel.org
+In-Reply-To: <20250120145009.175499-1-ulf.hansson@linaro.org>
+References: <20250120145009.175499-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20250120145009.175499-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.14
+X-PR-Tracked-Commit-Id: 20a0c37e44063997391430c4ae09973e9cbc3911
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 2bf717b07969b6d9e9ba5bccd3ac778e9aeaab18
+Message-Id: <173757279306.783272.6915691369409290067.pr-tracker-bot@kernel.org>
+Date: Wed, 22 Jan 2025 19:06:33 +0000
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Message-ID: <20250122-b204003c28-c6290ac0f887@bugzilla.kernel.org>
-In-Reply-To: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
-References: <20250122-b204003c0-5776b9acf361@bugzilla.kernel.org>
-Subject: Re: RTS5229 built in card reader not detected after Linux 5.0.x
-X-Bugzilla-Product: Drivers
-X-Bugzilla-Component: MMC/SD
-X-Mailer: bugspray 0.1-dev
 
-Michael Garofalo writes via Kernel.org Bugzilla:
+The pull request you sent on Mon, 20 Jan 2025 15:50:09 +0100:
 
-I can still confirm this issue of the device not being detected, on Linux 6.12.10-arch1-1 from Arch Linux, on my ThinkPad T14 Gen 1 AMD, with a similar model card reader that utilizes the same 'rtsx_pci_sdmmc' driver, the RTS522A.
-My card is not detected until I unload and reload the 'rtsx_pci_sdmmc' driver.  After doing so, I get the same 'cannot verify voltage switch' message, though my card is then detected.
-It then remains detected as inserted forever, even if the card is removed, until the drivers are unloaded and reloaded once again.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.14
 
-My logs, if useful (187 is when I reloaded the module):
-$ sudo dmesg -w | grep -iE 'mmc|rtsx'
-[    1.144983] rtsx_pci 0000:04:00.0: enabling device (0000 -> 0002)
-[  187.573380] mmc0: cannot verify signal voltage switch
-[  187.690136] mmc0: new ultra high speed SDR50 SDHC card at address aaaa
-[  187.720150] mmcblk0: mmc0:aaaa SU04G 3.69 GiB
-[  187.735364]  mmcblk0: p1
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/2bf717b07969b6d9e9ba5bccd3ac778e9aeaab18
 
-My PCI device id:
-04:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS522A PCI Express Card Reader (rev 01)
+Thank you!
 
-I'd be happy to provide more info on this if useful.
-
-Appologies if I've done something wrong here, this is my first attempt at trying to use this Bugzilla.
-
-View: https://bugzilla.kernel.org/show_bug.cgi?id=204003#c28
-You can reply to this message to join the discussion.
 -- 
 Deet-doot-dot, I am a bot.
-Kernel.org Bugzilla (bugspray 0.1-dev)
-
+https://korg.docs.kernel.org/prtracker.html
