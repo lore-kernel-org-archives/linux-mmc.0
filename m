@@ -1,40 +1,62 @@
-Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97CDB1CDFBC;
-	Thu, 23 Jan 2025 12:33:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 168141C5F3C;
+	Thu, 23 Jan 2025 22:09:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737635641; cv=none; b=MR5iBcZJc6HbVM8aQeCF/hwg2PzIKCAKEvbq/nCgqprd2L8vyXo95Oelaj3gg0uU3XElLjoy8JQP/0AVMTzN3FwtHmrAG21Pkyp5MWiVKIbsS/pmIvRrbzD68DxQtoOLhziXB3fZJUnCiWmeVtU/xFzqB2L51LpfjTkGdUSTwQI=
+	t=1737670188; cv=none; b=ekKKrBmEi8vhJDAHTy1TxkyajQUVe9W2EVvh+MJ1S/NZ5HMP9vQNoLUnIupbb4RT5NnInUQ8wpaAWQ0ylYDDnZ6nK/ZDlYRuSiInhFx+yg9gpQYz6gB90rbUOJHGZL8OddgCi8FWEuu7QTWG2BgTabVSX2uM8s1uhJ73zaZLnok=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737635641; c=relaxed/simple;
-	bh=n+6IUxsW4H4bSYmqPQjoTK1FHxsbX9PDXmPVfDRcSqc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=YA5nfIIegt+2dsw7Xw1S6VcjqPRX+yS0delQRB+m4xzEOP8X+IrwszEb+xNa2LvU1uXO+eBFMoW5eg+591S8xYaQX5yzUMppIk1vFdR4A1MSRWrME3mVjrkmhadCfWm+6/tEvRi1BxVsZxMSYYqIJVP00e5ZUIKpgmIkKQid3SM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=iKqC1TmG; arc=none smtp.client-ip=148.251.105.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	s=arc-20240116; t=1737670188; c=relaxed/simple;
+	bh=of5cL6/+qOoRg9YP5cPEffaBHv1Z5kpbQkudvY2YUSk=;
+	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=rKrd2xfw4Q0YwceA1PMF5EGy8X1aPBI2tt/RNoKatyzm+GkBmWzyO3sNmkojzFq8s5GC7zBOWb4kXu/ij4VJJvGFvwRCAXA1Kei+WEnLQd8eZDtoQUY7VchaKEdKaKL1jLbAtVL/WNgKXa3QzAplkHp+CL9cfleI/KbAEf9DDcU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZKMIydx1; arc=none smtp.client-ip=209.85.219.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="iKqC1TmG"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1737635632;
-	bh=n+6IUxsW4H4bSYmqPQjoTK1FHxsbX9PDXmPVfDRcSqc=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=iKqC1TmGIEJd8D41d972RFZCbgfAmS39po+SUOviQ1ifkD3+wjyeNl9/FXkd6K3lB
-	 YK/JeW6Kc6YGEO8cl/roK6l1s06TFVHeFMvOHcSq6tM3thdgifIRvByM3uEvrl/AV/
-	 ZTHhN3bD15aa8ZZFrueQOE+HXL/lU4WkUDdDLfHpNcxaN45HNmMErGPShadqbIXopV
-	 TgfO5wKw3j6cSCZB7iFzG+g+MH16Z1DN4dATwMc4E3/GaV6IXj7TFXmKteDxz0SccF
-	 BzY0bcKsuAY56rIl3VHCMBEOvL7QqHt5Ji5d2ClaRZMucBC89MerMIN1LRLRodq1SX
-	 deiz0N0Xq+/nQ==
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id C017517E0DD8;
-	Thu, 23 Jan 2025 13:33:51 +0100 (CET)
-Message-ID: <4455b317-aeea-42ff-be55-020d52330219@collabora.com>
-Date: Thu, 23 Jan 2025 13:33:51 +0100
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZKMIydx1"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e54bd61e793so2548817276.2;
+        Thu, 23 Jan 2025 14:09:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1737670184; x=1738274984; darn=vger.kernel.org;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Dj1TvDjeoPrTYwF3xPoDAMnJ1BFBe+7LZouUD9pmMM8=;
+        b=ZKMIydx16b1+fMtggcIdDNsOdcckmSchN4/b1o2mbDjuM74L7oYdiyocAoZ5Qz7thX
+         FKeAcIs752r+zeEXcR7qSiJvOh5Bf2tjewo0OA+ATmBUIfBhNEuhW31haiCr3kMDfLTX
+         F/YWuyBuBozG+0FxHVE/oAYpjBJd2sLLMiPYL2UIcivKgNHbeKMgLYun3LVj0RPRQgd4
+         wWHgQ+BKwXtYyGP/Avw/KgvDrX5fotQPeu2kHp8lPzE+t4EpAr7DfkG/Uas213dG2i54
+         5aW2SK9h48UJyvEQE9wgG62bYnA8HQteXi4+YFNohiqeZ6LY0uNKyliEd0MF2K4q4P/N
+         AVRQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1737670184; x=1738274984;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=Dj1TvDjeoPrTYwF3xPoDAMnJ1BFBe+7LZouUD9pmMM8=;
+        b=IXJrYgusfdPeIVCuT2zi8ip0lJT63ZcQ7dRB8Yjkgf1v85Ka8BW+qLJ0RqFQRFffm+
+         coryiCOhQQamUbXHgGp9kH/RyBrKupb2TDOzHA/pGqQ9WPpTJdZnBvljeIJLI9jduZku
+         3/S0qBKzS36qdthZbElOWzZfG75oNIIfsct+mAE8gU9b3sXxoTuUuj/v3AqvtUwyrs76
+         jcUm0ghIUvrwpFUVCh5lSOsOFgbp4UpgNs+Hxp67cdmvhD2S4daiz0Q65iX7eGZTw5cM
+         Xyn4f0ENIOrkCIFVY2mnAyco3rvFluNIDTP4QvPl3OP88qpUUELvRP6m8C96O9csD3h0
+         Ubfg==
+X-Gm-Message-State: AOJu0YxreiHvUsdRUPA1fYAOSVrm6wCTTuJYAYyq3x/HlCUVvrjfoHhB
+	U8FhF2XnYfO5AbBjfGzCnn3EvJHQnHEUhZYSnMfUSNv6Vp/9WV/itGCLdw==
+X-Gm-Gg: ASbGncsyS6B5l4STTG5xWhwpUL6tPH8XYYUJ4vMRUL3o0R8BZ3G9WyK/XO5BI9bgA0b
+	q+pVIH3FOUInRRYfKC2/w63sSPB15IejWUZGT3t4O4Sl3jE1BOXHJNLRkJIMClFNhG/OdgL13yY
+	IqNHIs+lBDBfqOp3iJMA5kzfbs6VM7cW9QWvS6YYGP/Zgwp9ltvXSYYIdZRlVPmXgSOR2Mg0GOD
+	K14XdMUUMDs10KEesuWBjurDm1wzhvQbwlq3ubiSRyUV1yIwOKWk6522Y+mvfUQJtjXQvmHTb8e
+	NgHxHr0x
+X-Google-Smtp-Source: AGHT+IEfzkGQ0veUy80Cm/1qhWlsWovOBfH8N50gDSVNmJcqKnU18hBldbvejwZ1FSJWiq9J6Ywj6A==
+X-Received: by 2002:a05:690c:7346:b0:6ef:4a57:fc98 with SMTP id 00721157ae682-6f6eb672336mr221869717b3.16.1737670184314;
+        Thu, 23 Jan 2025 14:09:44 -0800 (PST)
+Received: from [10.118.1.247] ([204.156.190.21])
+        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f757a2de28sm1282807b3.111.2025.01.23.14.09.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 23 Jan 2025 14:09:43 -0800 (PST)
+Message-ID: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
+Date: Thu, 23 Jan 2025 16:09:43 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,41 +64,27 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: mtk-sd: Fix register settings for hs400(es) mode
-To: Andy-ld Lu <andy-ld.lu@mediatek.com>, ulf.hansson@linaro.org,
- matthias.bgg@gmail.com, wenbin.mei@mediatek.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org
-References: <20250123092644.7359-1-andy-ld.lu@mediatek.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 Content-Language: en-US
-In-Reply-To: <20250123092644.7359-1-andy-ld.lu@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+To: linux-omap@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+From: David Owens <daowens01@gmail.com>
+Subject: sdhci-omap: additional PM issue since 5.16
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
-Il 23/01/25 10:26, Andy-ld Lu ha scritto:
-> For hs400(es) mode, the 'hs400-ds-delay' is typically configured in the
-> dts. However, some projects may only define 'mediatek,hs400-ds-dly3',
-> which can lead to initialization failures in hs400es mode. CMD13 reported
-> response crc error in the mmc_switch_status() just after switching to
-> hs400es mode.
-> 
-> [    1.914038][   T82] mmc0: mmc_select_hs400es failed, error -84
-> [    1.914954][   T82] mmc0: error -84 whilst initialising MMC card
-> 
-> Currently, the hs400_ds_dly3 value is set within the tuning function. This
-> means that the PAD_DS_DLY3 field is not configured before tuning process,
-> which is the reason for the above-mentioned CMD13 response crc error.
-> 
-> Move the PAD_DS_DLY3 field configuration into msdc_prepare_hs400_tuning(),
-> and add a value check of hs400_ds_delay to prevent overwriting by zero when
-> the 'hs400-ds-delay' is not set in the dts. In addition, since hs400(es)
-> only tune the PAD_DS_DLY1, the PAD_DS_DLY2_SEL bit should be cleared to
-> bypass it.
-> 
-> Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
-> Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
+Hello,
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+I have a AM574x system and encountered an eMMC regression when upgrading from 5.15 to 6.1.38.  The eMMC is using mmc-hs200 powered at 1.8v.  Reads from /dev/mmcblk1boot0 will return expected data except when a delay of several seconds is inserted between reads.  With a delay between reads, the read will occasionally (~50% of the time) return garbage data.  Using hexdump, I was able to determine that the "bad" data is actually coming from /dev/mmcblk1, not /dev/mmcblk1boot0.  The same thing happens when reading from /dev/mmcblk1boot1.
 
+Much like a previous report in the linux-omap mailing list [1], I too was able to correct the regression by reverting the commit "mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM" [2].  Unlike the previous report, applying the sdhci-omap patch [3] did not resolve my issue.  Only reverting the original commit allowed for reliable reads from /dev/mmcblk1boot0.  I also don't see the same I/O errors mentioned in the previous posting.  Reads always succeed and return the correct amount of data, its just from the wrong device.
+
+[1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr/
+
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
+
+[3] https://lore.kernel.org/linux-omap/20240315234444.816978-1-romain.naour@smile.fr/T/#u
+
+Regards,
+
+Dave
 
