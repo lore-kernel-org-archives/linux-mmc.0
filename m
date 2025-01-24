@@ -1,90 +1,116 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 168141C5F3C;
-	Thu, 23 Jan 2025 22:09:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5668B13AC1;
+	Fri, 24 Jan 2025 07:39:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737670188; cv=none; b=ekKKrBmEi8vhJDAHTy1TxkyajQUVe9W2EVvh+MJ1S/NZ5HMP9vQNoLUnIupbb4RT5NnInUQ8wpaAWQ0ylYDDnZ6nK/ZDlYRuSiInhFx+yg9gpQYz6gB90rbUOJHGZL8OddgCi8FWEuu7QTWG2BgTabVSX2uM8s1uhJ73zaZLnok=
+	t=1737704352; cv=none; b=XHjHxtimQdfwq/PANglQTdKlCT33/Qh+2uf6NcQiXIV/tG7ZykZYSuqTAlcDl1z3MuHhbrODGAMm/vkZbGXjECDKFt2GvZlT5iZLPBfaBssCH+WdzTpVMYEMjyTlCf8F4OMMb/I1mXI/cEB4aKCGP3RXrws1c50rZvQwoLXNyRg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737670188; c=relaxed/simple;
-	bh=of5cL6/+qOoRg9YP5cPEffaBHv1Z5kpbQkudvY2YUSk=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=rKrd2xfw4Q0YwceA1PMF5EGy8X1aPBI2tt/RNoKatyzm+GkBmWzyO3sNmkojzFq8s5GC7zBOWb4kXu/ij4VJJvGFvwRCAXA1Kei+WEnLQd8eZDtoQUY7VchaKEdKaKL1jLbAtVL/WNgKXa3QzAplkHp+CL9cfleI/KbAEf9DDcU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZKMIydx1; arc=none smtp.client-ip=209.85.219.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1737704352; c=relaxed/simple;
+	bh=G8q15h6IsDOD4LQJQB5VGPoicFwDLIJTNfZolKmAslI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RGdFoH82ODgp25RIspgnvtMucGs8rYHhjcA4T+alKBmwdJelBW19BqqBZxZZLlBGPUBDo2VuWFvVwKIZ6mtSzaRXW4xC5zGVJk9ary27gDAwFoeAgHuG5cIlufnhHx/+vzjeoBj+nCYT2QeklTwYhMjd4Eb/3JX4XuYCCHMfWY8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=m299zHQB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZKMIydx1"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e54bd61e793so2548817276.2;
-        Thu, 23 Jan 2025 14:09:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1737670184; x=1738274984; darn=vger.kernel.org;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Dj1TvDjeoPrTYwF3xPoDAMnJ1BFBe+7LZouUD9pmMM8=;
-        b=ZKMIydx16b1+fMtggcIdDNsOdcckmSchN4/b1o2mbDjuM74L7oYdiyocAoZ5Qz7thX
-         FKeAcIs752r+zeEXcR7qSiJvOh5Bf2tjewo0OA+ATmBUIfBhNEuhW31haiCr3kMDfLTX
-         F/YWuyBuBozG+0FxHVE/oAYpjBJd2sLLMiPYL2UIcivKgNHbeKMgLYun3LVj0RPRQgd4
-         wWHgQ+BKwXtYyGP/Avw/KgvDrX5fotQPeu2kHp8lPzE+t4EpAr7DfkG/Uas213dG2i54
-         5aW2SK9h48UJyvEQE9wgG62bYnA8HQteXi4+YFNohiqeZ6LY0uNKyliEd0MF2K4q4P/N
-         AVRQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737670184; x=1738274984;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=Dj1TvDjeoPrTYwF3xPoDAMnJ1BFBe+7LZouUD9pmMM8=;
-        b=IXJrYgusfdPeIVCuT2zi8ip0lJT63ZcQ7dRB8Yjkgf1v85Ka8BW+qLJ0RqFQRFffm+
-         coryiCOhQQamUbXHgGp9kH/RyBrKupb2TDOzHA/pGqQ9WPpTJdZnBvljeIJLI9jduZku
-         3/S0qBKzS36qdthZbElOWzZfG75oNIIfsct+mAE8gU9b3sXxoTuUuj/v3AqvtUwyrs76
-         jcUm0ghIUvrwpFUVCh5lSOsOFgbp4UpgNs+Hxp67cdmvhD2S4daiz0Q65iX7eGZTw5cM
-         Xyn4f0ENIOrkCIFVY2mnAyco3rvFluNIDTP4QvPl3OP88qpUUELvRP6m8C96O9csD3h0
-         Ubfg==
-X-Gm-Message-State: AOJu0YxreiHvUsdRUPA1fYAOSVrm6wCTTuJYAYyq3x/HlCUVvrjfoHhB
-	U8FhF2XnYfO5AbBjfGzCnn3EvJHQnHEUhZYSnMfUSNv6Vp/9WV/itGCLdw==
-X-Gm-Gg: ASbGncsyS6B5l4STTG5xWhwpUL6tPH8XYYUJ4vMRUL3o0R8BZ3G9WyK/XO5BI9bgA0b
-	q+pVIH3FOUInRRYfKC2/w63sSPB15IejWUZGT3t4O4Sl3jE1BOXHJNLRkJIMClFNhG/OdgL13yY
-	IqNHIs+lBDBfqOp3iJMA5kzfbs6VM7cW9QWvS6YYGP/Zgwp9ltvXSYYIdZRlVPmXgSOR2Mg0GOD
-	K14XdMUUMDs10KEesuWBjurDm1wzhvQbwlq3ubiSRyUV1yIwOKWk6522Y+mvfUQJtjXQvmHTb8e
-	NgHxHr0x
-X-Google-Smtp-Source: AGHT+IEfzkGQ0veUy80Cm/1qhWlsWovOBfH8N50gDSVNmJcqKnU18hBldbvejwZ1FSJWiq9J6Ywj6A==
-X-Received: by 2002:a05:690c:7346:b0:6ef:4a57:fc98 with SMTP id 00721157ae682-6f6eb672336mr221869717b3.16.1737670184314;
-        Thu, 23 Jan 2025 14:09:44 -0800 (PST)
-Received: from [10.118.1.247] ([204.156.190.21])
-        by smtp.gmail.com with ESMTPSA id 00721157ae682-6f757a2de28sm1282807b3.111.2025.01.23.14.09.43
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 23 Jan 2025 14:09:43 -0800 (PST)
-Message-ID: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
-Date: Thu, 23 Jan 2025 16:09:43 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="m299zHQB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17CF9C4CEE1;
+	Fri, 24 Jan 2025 07:39:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1737704352;
+	bh=G8q15h6IsDOD4LQJQB5VGPoicFwDLIJTNfZolKmAslI=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=m299zHQBNHTeNuZe7VNB+LF7p7kkvbO6hOTPO+lJEXxWflhGCP7PfjAyksjh7ZFtr
+	 zVBMQXpSfdAMGULjTa/TeiskIvyYNus3JaqXfvj6BAlFIeOOaUlqSKcfinh1Q3mDt4
+	 dF91iFkYoDk3UiGmYMoZW2WH7XSR2z1TXf5BWpvQp0rxP10d4rgLv2OcLGSZRIYYa/
+	 ZTC1k2SfY02I6sZBiyahZj2BrJbiWUSekzEjdGQGBqwui2VARkTZoC+5s9aqfHxW85
+	 oN/E8967beb12RZ2B2HCLNAdqiX7wQxjl4h1K9s4/HSPnv9IuJEWVlxOX/927ZYb5E
+	 yLtNJHthUOciQ==
+Date: Fri, 24 Jan 2025 13:08:57 +0530
+From: Manivannan Sadhasivam <mani@kernel.org>
+To: Tudor Ambarus <tudor.ambarus@linaro.org>, \@thinkpad
+Cc: Krzysztof Kozlowski <krzk@kernel.org>,
+	Bjorn Andersson <andersson@kernel.org>,
+	Konrad Dybcio <konradybcio@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Abel Vesa <abel.vesa@linaro.org>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	"James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+	"Martin K. Petersen" <martin.petersen@oracle.com>,
+	Eric Biggers <ebiggers@google.com>, linux-arm-msm@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-scsi@vger.kernel.org, andre.draszik@linaro.org,
+	peter.griffin@linaro.org, willmcvicker@google.com,
+	kernel-team@android.com, stable@vger.kernel.org,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v2 0/4] soc: qcom: ice: fix dev reference leaked through
+ of_qcom_ice_get
+Message-ID: <20250124073857.qwnl4ozccsictom5@thinkpad>
+References: <20250117-qcom-ice-fix-dev-leak-v2-0-1ffa5b6884cb@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Content-Language: en-US
-To: linux-omap@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-From: David Owens <daowens01@gmail.com>
-Subject: sdhci-omap: additional PM issue since 5.16
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20250117-qcom-ice-fix-dev-leak-v2-0-1ffa5b6884cb@linaro.org>
 
-Hello,
+On Fri, Jan 17, 2025 at 02:18:49PM +0000, Tudor Ambarus wrote:
+> Hi!
+> 
+> Recently I've been pointed to this driver for an example on how consumers
+> can get a pointer to the supplier's driver data and I noticed a leak.
+> 
+> Callers of of_qcom_ice_get() leak the device reference taken by
+> of_find_device_by_node(). Introduce devm_of_qcom_ice_get().
+> Exporting qcom_ice_put() is not done intentionally as the consumers need
+> the ICE intance for the entire life of their device. Update the consumers
+> to use the devm variant and make of_qcom_ice_get() static afterwards.
+> 
+> This set touches mmc and scsi subsystems. Since the fix is trivial for
+> them, I'd suggest taking everything through the SoC tree with Acked-by
+> tags if people consider this fine. Note that the mmc and scsi patches
+> depend on the first patch that introduces devm_of_qcom_ice_get().
+> 
+> Thanks!
+> 
+> Signed-off-by: Tudor Ambarus <tudor.ambarus@linaro.org>
 
-I have a AM574x system and encountered an eMMC regression when upgrading from 5.15 to 6.1.38.  The eMMC is using mmc-hs200 powered at 1.8v.  Reads from /dev/mmcblk1boot0 will return expected data except when a delay of several seconds is inserted between reads.  With a delay between reads, the read will occasionally (~50% of the time) return garbage data.  Using hexdump, I was able to determine that the "bad" data is actually coming from /dev/mmcblk1, not /dev/mmcblk1boot0.  The same thing happens when reading from /dev/mmcblk1boot1.
+Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 
-Much like a previous report in the linux-omap mailing list [1], I too was able to correct the regression by reverting the commit "mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM" [2].  Unlike the previous report, applying the sdhci-omap patch [3] did not resolve my issue.  Only reverting the original commit allowed for reliable reads from /dev/mmcblk1boot0.  I also don't see the same I/O errors mentioned in the previous posting.  Reads always succeed and return the correct amount of data, its just from the wrong device.
+- Mani
 
-[1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr/
+> ---
+> Changes in v2:
+> - add kernel doc for newly introduced devm_of_qcom_ice_get().
+> - update cover letter and commit message of first patch.
+> - collect R-b and A-b tags.
+> - Link to v1: https://lore.kernel.org/r/20250116-qcom-ice-fix-dev-leak-v1-0-84d937683790@linaro.org
+> 
+> ---
+> Tudor Ambarus (4):
+>       soc: qcom: ice: introduce devm_of_qcom_ice_get
+>       mmc: sdhci-msm: fix dev reference leaked through of_qcom_ice_get
+>       scsi: ufs: qcom: fix dev reference leaked through of_qcom_ice_get
+>       soc: qcom: ice: make of_qcom_ice_get() static
+> 
+>  drivers/mmc/host/sdhci-msm.c |  2 +-
+>  drivers/soc/qcom/ice.c       | 51 ++++++++++++++++++++++++++++++++++++++++++--
+>  drivers/ufs/host/ufs-qcom.c  |  2 +-
+>  include/soc/qcom/ice.h       |  3 ++-
+>  4 files changed, 53 insertions(+), 5 deletions(-)
+> ---
+> base-commit: b323d8e7bc03d27dec646bfdccb7d1a92411f189
+> change-id: 20250110-qcom-ice-fix-dev-leak-bbff59a964fb
+> 
+> Best regards,
+> -- 
+> Tudor Ambarus <tudor.ambarus@linaro.org>
+> 
 
-[2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
-
-[3] https://lore.kernel.org/linux-omap/20240315234444.816978-1-romain.naour@smile.fr/T/#u
-
-Regards,
-
-Dave
-
+-- 
+மணிவண்ணன் சதாசிவம்
