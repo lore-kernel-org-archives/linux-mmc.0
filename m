@@ -1,62 +1,64 @@
-Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
+Received: from mail-io1-f50.google.com (mail-io1-f50.google.com [209.85.166.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1B6F1CDA04
-	for <linux-mmc@vger.kernel.org>; Fri, 24 Jan 2025 10:36:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B913170A1A;
+	Fri, 24 Jan 2025 17:15:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737715023; cv=none; b=Kkz6yr4R2MuOjB6iQBSTZj4exhklePNxx7/T8w+CB6/PHZjvMsDyQrt5ne+aH9dBf0j5QYzpawnbSyP2O+ojXE69AIx/ekzdw2011GFsIINjWBybP1U+AzJwEE4L1OBYWIku4JiqdgFl1XtpJw7BCRII+qQzvhPv3/S65P5Ooc4=
+	t=1737738914; cv=none; b=UbKe0wipHxWIxUCuYSknngRqHLr0Ld3viZhIavgUN9AvQeEXla+rDKbJqZMveE0XqXL/tFezSkdObnUCfpcpxMOzgAWld1lH6yidhvXzkQzH1IREJOHAlka1/sdfl07TIp1JT+8aasPxR3Vj5NTmKxO6RddJeSlak0opre+A9wc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737715023; c=relaxed/simple;
-	bh=ccIvxLHoKpTx1/8tkfp7al9tb1JQeF8Qm0KkvCLRzAQ=;
+	s=arc-20240116; t=1737738914; c=relaxed/simple;
+	bh=yV0/2JG6K1PtePd1HgCu8wBbcYVcnHaneyWi9lJezcc=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=gv1968xlaGYaBS06B+9MkQBfXp7PbTua4V3n+NYdDMyBBO2vx/KfwHv8sr4JN3UtUKOTHHIq3mZbHzFT488LjhI3YE/UA4YrGiLJG0XI1GnJip7IsLDBe6b+sRy3XxpzrqVQvjNPLyqFfIv+0/hY1vmL6HfSlrI6eKkn4qKSuCo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=smile.fr; spf=pass smtp.mailfrom=smile.fr; dkim=pass (1024-bit key) header.d=smile.fr header.i=@smile.fr header.b=yGSQ+xHO; arc=none smtp.client-ip=209.85.128.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=smile.fr
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=smile.fr
+	 In-Reply-To:Content-Type; b=Cet+35WUvYHPj99on3VYg9YDaBuKRIhwaBNn5wdvqdpBRS4+2WZwqhS453lZVlz9WKYl76305gVkkjZa7Ac8IIiU9TuZbVrEzu1xithkkR5nG8sHVIOM+JgGHHutKDf24XlGPW/easxXmOsXjRfDafOCCvjSt8aSo383Dy867QQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=DYnrBJUs; arc=none smtp.client-ip=209.85.166.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=smile.fr header.i=@smile.fr header.b="yGSQ+xHO"
-Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-4361f65ca01so19861975e9.1
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Jan 2025 02:36:58 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="DYnrBJUs"
+Received: by mail-io1-f50.google.com with SMTP id ca18e2360f4ac-844e9b83aaaso177773939f.3;
+        Fri, 24 Jan 2025 09:15:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=smile.fr; s=google; t=1737715017; x=1738319817; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1737738912; x=1738343712; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=gfzXbiuWN/qhkMVLVFhWWFAL+nq4OjChZkKMOhzHSGw=;
-        b=yGSQ+xHOX9jj0HvENfBa/+kGFNQdAxtI5fadH06SmeIMteNyUKhPtU5oLnUGzUypIF
-         IdJJRKKdPmQ6xaFCv0o5NCS0lkUfc95OUm9f4T8sTpvT/by7vHeCS//VaedMGjs7W6pb
-         +w1PttrFZgB7Ta7nNEhxfz+wlQP2wzx3N2r6Y=
+        bh=r7VIMZzme3IHV9iQs1l1VdHcL7Q4eudKwQ9+LWw8z6M=;
+        b=DYnrBJUsDKJkWvD1+HCzTk2qkMiB3S7dxNSEveNg6L0OLUSU7SnQui2V3M/DfWN9CH
+         DsLkW7FCBv18x2QM4iXdJJ7hh/+jhlZaKLkBgKHGQ7yVGCObQBwN8+Bn1gyrra2yv0EP
+         F04cx0TKzmef35D9YOCjszmwHGBJ7T+WWqpLeyNCm2/66cy2n3WWp1gyI7nq37//4LLq
+         96e1ZyuWyoJrFAm4zTqIT0TK6wfo5JRHySuCMs/s0eVkICpqiXFG2SpUuq+yc27rNj6w
+         KpPWL31V2f/ON4QJkwM0WP3foIOF4QubRZqyfRVi+PVlLYfr4gaZ07Nw2zlLdBpjxS5t
+         9VfA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1737715017; x=1738319817;
+        d=1e100.net; s=20230601; t=1737738912; x=1738343712;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=gfzXbiuWN/qhkMVLVFhWWFAL+nq4OjChZkKMOhzHSGw=;
-        b=HQD9DOqs4rUY5TOnQ11nV9Iv8diUExzDFHCzK+tAvpDzMo5r3c1nVWnYzbTM2pR7Hx
-         gNutlbdH5luZIHQNFSzO61rD9A2lfu/EdCZs2rlCca5GnpJ76+OjV4Silk7BE3C/0Avm
-         gz1WgTCTiNCe0WBCrED5L3ino3IidOEDgq86i6XxHHVo0usE323ZGg+ssWpcN04BTAhs
-         rX0HT6/tLckEjNL+FS2TK+UM0UPT521Y2JsfeSm/N5XyAiX02iMCnGM0RTPRSromC1jY
-         DxcM8dW3hrf+/ixJZmXo8bETQq3G+iI7BY0mbsEvpaale/mgheJG5SWo7PxN0/vwbtv6
-         4t7Q==
-X-Gm-Message-State: AOJu0YxvOzD8698N1btWo08owNP+T422/0pJk8XcnIElkxLGF1G/i+Xl
-	a0CFDeAP9/VKrlwcMayomnwvlwlThknMb2lTkx+mgY28WrzPQYh+n1OoF48SzIS9UepB8ZNz2DZ
-	e
-X-Gm-Gg: ASbGncsVTaymcFZi/fOvVs+Q6+1FWQen+ZH6b0V1BV5YWKmUKq1WQ/qcbyXlyLNpeCr
-	akcCx5y7T5lgCv795xQVQ3gYx80Z0dtVjwxligkVcgMUlxEC7BbUt3oJ12uNqcjm7troqZNhuvU
-	AWTkB+ILuK9vI/3c8gNC2TSGQUiHurx5pXJV5f26sDTOBmvkN6jG7P7rCbNbduI+fmvK9X14OKL
-	NuCS/cejMIZ9D2tbL+wPusQoRmto+EtBbIRxOA7pnaSikaBuh0SB5M6XtExs92tnW5LergH7cqb
-	MR3g9yUQ4T31gdUEzKrG3PUwm1LljNB5A+VKoN/Y+065NHxefST9S04H9UIpf+vBAZJg04g5bhT
-	xeWwZDWk0BnYFivhEJNAVmxQO8ioRWAFTp47QYBQl
-X-Google-Smtp-Source: AGHT+IHPrFf82v6k6SzKmhhNFnGZ+58JJbF3E156m6NSbU27wCHC8adaDkce/j7KdTcAIdd5H30LEg==
-X-Received: by 2002:a05:6000:1a8c:b0:385:e5d8:2bea with SMTP id ffacd0b85a97d-38bf56639c9mr25899644f8f.20.1737715016810;
-        Fri, 24 Jan 2025 02:36:56 -0800 (PST)
-Received: from ?IPV6:2a01:cb05:949d:5800:e3ef:2d7a:4131:71f? (2a01cb05949d5800e3ef2d7a4131071f.ipv6.abo.wanadoo.fr. [2a01:cb05:949d:5800:e3ef:2d7a:4131:71f])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38c2a1c3994sm2212888f8f.81.2025.01.24.02.36.56
+        bh=r7VIMZzme3IHV9iQs1l1VdHcL7Q4eudKwQ9+LWw8z6M=;
+        b=upm4cx2qswgXZ3OmzM8OZdFCFSO0f2JxkXMj5jKvGTa0VGnBfS4MZj6qkb8uV7MF8x
+         EVNSvOoJq/4pGHPOPs+ph6SiF6Zo+HzmPESTUuPyqOET7MUFx/bPGHCfywZGLMjWCmIW
+         JkbMUeVqkaDJAy3QcjVnvLGw163ngtX+JeId73yspqnVT6leSPnUNzJwIcZxDlPOaVMw
+         WEAr2VWh4oWcXW2IY9InhNE50ZWlVs18mpRdvl8xqAfu0b4wumDikKG1hYkiwHSjoXC3
+         Ye6reKJeYnt25TGlcZy23NF8PHDnNisrkkQmuuPWDEZJp0B4Q0bIvwYVxGLJBXaU/GHt
+         5pAw==
+X-Forwarded-Encrypted: i=1; AJvYcCU1uJAxZadPgTRv4lmL1xANvtOMYGc7Q68JRB9Iy2g+WdGQmN0++3wB2UUnsgNawlBlRrxCIHax6StE@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyz0BYMGap7OFDcZd4HbPXn6+TEImNm/kUUKCsGUS7g1p/fN8Lz
+	7MFphMlQZMo8V+EWyhbOTpQ6XrGTOoWGjTR/PpZ9GU+I8akuIERH
+X-Gm-Gg: ASbGnct5TmZ8cmZVr6k7ABogrJMq2APh/YpePe1GAZbkexFNkWxsD7fbEya1NP4phlI
+	m8c7gXBTyD4cxO2HO00FFANo64nFDeDwj4+I5tX7tvdJa/7ENlAx96dI0qCa3Y2tARe6r/WXLAQ
+	PBDhAjVmJJaGZSrD3y1vHGoqGA3kcPQ0sXkYAGIm/5IBsDpLog7wCgjcw/2r5lLM9yq4AaJxKsw
+	Tu046f6fMJTsIc98tcmzxl3bhOLZHKckEKux/HGWDOOxm1g3gNaAoMzj9+JjdK6hj2uw8c6HJJg
+	mQA7A+EnH0Y2KLsg5ISBr4z6AYjC74Js736OwDI0ffOCFTGvi39E
+X-Google-Smtp-Source: AGHT+IEvgiIo1Ln9ZzOZ3CuFUX1rhyHnd8TO0znQBcOk6PCidaMWjf0mB10VaiWWkMPNxhz5JArhqA==
+X-Received: by 2002:a05:6602:418a:b0:84a:7906:21e3 with SMTP id ca18e2360f4ac-851b623c48bmr2632053439f.7.1737738911765;
+        Fri, 24 Jan 2025 09:15:11 -0800 (PST)
+Received: from ?IPV6:2604:2d80:d295:4400:151:c3a9:e2c7:8a92? ([2604:2d80:d295:4400:151:c3a9:e2c7:8a92])
+        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4ec1da4ba29sm725513173.70.2025.01.24.09.15.10
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 24 Jan 2025 02:36:56 -0800 (PST)
-Message-ID: <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr>
-Date: Fri, 24 Jan 2025 11:36:55 +0100
+        Fri, 24 Jan 2025 09:15:11 -0800 (PST)
+Message-ID: <31717d89-432c-4b77-a974-99f7e6b97f97@gmail.com>
+Date: Fri, 24 Jan 2025 11:15:10 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -65,48 +67,84 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: sdhci-omap: additional PM issue since 5.16
-To: David Owens <daowens01@gmail.com>, linux-omap@vger.kernel.org
+To: Romain Naour <romain.naour@smile.fr>, linux-omap@vger.kernel.org
 Cc: linux-mmc@vger.kernel.org
 References: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
+ <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr>
 Content-Language: en-US
-From: Romain Naour <romain.naour@smile.fr>
-In-Reply-To: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
+From: David Owens <daowens01@gmail.com>
+In-Reply-To: <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Hello David,
+Hi Romain
 
-Le 23/01/2025 à 23:09, David Owens a écrit :
-> Hello,
-> 
-> I have a AM574x system and encountered an eMMC regression when upgrading from 5.15 to 6.1.38.  The eMMC is using mmc-hs200 powered at 1.8v.  Reads from /dev/mmcblk1boot0 will return expected data except when a delay of several seconds is inserted between reads.  With a delay between reads, the read will occasionally (~50% of the time) return garbage data.  Using hexdump, I was able to determine that the "bad" data is actually coming from /dev/mmcblk1, not /dev/mmcblk1boot0.  The same thing happens when reading from /dev/mmcblk1boot1.
-> 
-> Much like a previous report in the linux-omap mailing list [1], I too was able to correct the regression by reverting the commit "mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM" [2].  Unlike the previous report, applying the sdhci-omap patch [3] did not resolve my issue.  Only reverting the original commit allowed for reliable reads from /dev/mmcblk1boot0.  I also don't see the same I/O errors mentioned in the previous posting.  Reads always succeed and return the correct amount of data, its just from the wrong device.
+On 1/24/25 04:36, Romain Naour wrote:
+> Hello David,
+>
+> Le 23/01/2025 à 23:09, David Owens a écrit :
+>> Hello,
+>>
+>> I have a AM574x system and encountered an eMMC regression when upgrading from 5.15 to 6.1.38.  The eMMC is using mmc-hs200 powered at 1.8v.  Reads from /dev/mmcblk1boot0 will return expected data except when a delay of several seconds is inserted between reads.  With a delay between reads, the read will occasionally (~50% of the time) return garbage data.  Using hexdump, I was able to determine that the "bad" data is actually coming from /dev/mmcblk1, not /dev/mmcblk1boot0.  The same thing happens when reading from /dev/mmcblk1boot1.
+>>
+>> Much like a previous report in the linux-omap mailing list [1], I too was able to correct the regression by reverting the commit "mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM" [2].  Unlike the previous report, applying the sdhci-omap patch [3] did not resolve my issue.  Only reverting the original commit allowed for reliable reads from /dev/mmcblk1boot0.  I also don't see the same I/O errors mentioned in the previous posting.  Reads always succeed and return the correct amount of data, its just from the wrong device.
+> Interesting, can you share a test script to reproduce your issue?
 
-Interesting, can you share a test script to reproduce your issue?
+Here is a test script I've been running on my devices.  A failure is typically
+detected after a minute or two.  I include the eMMC part type in the output as
+we've used a couple different parts in production, all claiming to be compatible
+and I'm starting to wonder if the failure is a combination of the aggressive
+PM _and_ specific emmc parts.  The offset used in hexdump was just a place in
+both mmcblk1 and mmcblk1boot0 that was non-zero.  The issue happens using any
+offset.
 
-Why 6.1.38? nowadays the 6.1.x stable is 6.1.127 already.
-Can you test with the latest stable release?
+#!/bin/bash
 
-I believe this issue could be reproduced on the beaglebone-ai board (I don't
-have it).
+echo "Kernel:    $(uname -r)"
+echo "eMMC part: $(dmesg | grep 'mmcblk1: mmc1:0001' | awk '{print $5}')"
+BLK1=$(hexdump -C /dev/mmcblk1 -s 0x3fc000 -n 10 | head -n 1)
+BOOT=$(hexdump -C /dev/mmcblk1boot0 -s 0x3fc000 -n 10 | head -n 1)
 
-[1] https://www.beagleboard.org/boards/beaglebone-ai
+echo "/dev/mmcblk1:      ${BLK1}"
+echo "/dev/mmcblk1boot0: ${BOOT}"
 
-Best regards,
-Romain
+while [[ "$BLK1" != "$BOOT" ]]; do
+    sleep 20
+    BOOT=$(hexdump -C /dev/mmcblk1boot0 -s 0x3fc000 -n 10 | head -n 1)
+    echo "/dev/mmcblk1boot0: ${BOOT}"
+done
 
+echo "/dev/mmcblk1boot0 read failure"
 
-> 
-> [1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr/
-> 
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
-> 
-> [3] https://lore.kernel.org/linux-omap/20240315234444.816978-1-romain.naour@smile.fr/T/#u
-> 
-> Regards,
-> 
-> Dave
-> 
-> 
+>
+> Why 6.1.38? nowadays the 6.1.x stable is 6.1.127 already.
+> Can you test with the latest stable release?
 
+Good question.  I can certainly update to .127 but at the time we were shipping
+units we were on .38 so that's where I've been doing all my testing.  I'll let
+you know how running under .127 compares.
+
+>
+> I believe this issue could be reproduced on the beaglebone-ai board (I don't
+> have it).
+>
+> [1] https://www.beagleboard.org/boards/beaglebone-ai
+
+Thanks for the suggestion, I'll see if I can dig one up.
+
+>
+> Best regards,
+> Romain
+>
+>
+>> [1] https://lore.kernel.org/all/2e5f1997-564c-44e4-b357-6343e0dae7ab@smile.fr/
+>>
+>> [2] https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?id=3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
+>>
+>> [3] https://lore.kernel.org/linux-omap/20240315234444.816978-1-romain.naour@smile.fr/T/#u
+>>
+>> Regards,
+>>
+>> Dave
+>>
+>>
