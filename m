@@ -1,48 +1,44 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33DD3209F3B;
-	Sun, 26 Jan 2025 15:02:19 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 78C98215F46;
+	Sun, 26 Jan 2025 15:03:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737903739; cv=none; b=nNGT+dqVwakCyV8XgnwL5fB1HgyaSOLzBMGDDl1EBBNEfVOlbxubE740UPNcrRK9VNLxRXpwdIl+gdIJEvoFPH2H6JG1JnPtBTSgqNQK5a6TZDPuBLfdQDo6+7o+d7qc8iwk5JaoY6rVAuIA0Op+g+vYUW9ix0WAm437CQZQsvc=
+	t=1737903783; cv=none; b=sfSKprC2/KFBHrsZnNtxLcvwnTdaqCHRbTVrxScIHAD1MTF7/UVMvagQHqnmBOmQSivTMJy++4hPlnUAAo8nzarm//eBViD6nTsecSKomz+IRF/g6CnllS+Pu2W62legfyKWqDR26s73w0c54Kt6bdkofWvSUKVaupQ15gB6yRk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737903739; c=relaxed/simple;
-	bh=WUU5DtfN0aE3KW7oIl1FfUVR1fU5tIs7Hrz0gwxCS5g=;
+	s=arc-20240116; t=1737903783; c=relaxed/simple;
+	bh=fQFHNmD05joUar13jSrtNJ9mWNFlpz+3NRo4O2r0QCE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=oE+6QdTTn/V3C7yavCI8u1i4/jnBxcHbiW01VcCv5ucgM3T3g0vZX5S2iF4GkpLCQmIsH6VkXqoUfBhz09tMufjkaRR5F8oSb6AguVYppAqZjXb+K0A5xI4WwbCx3kSawiitowtP1LCfakQktqc3i+Rar3xIyJIYbhERqzIYWRk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ce1MNI1P; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=UuTTXbHVYwXikxYhtntWEbb6Bs1tmRU+R9XBhIC3tSP5OxxNQChs+1BywX1QU57iQteV2cOFWtrg3f4xQcjgSbqgREbIjdlaQruNuKCFm+kaHh7A0CTsK9RNF4UuffQbgEaHgb1vEbWsWgq+6hMZzQZpaEHxg/WQWw8aFcrG6DI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=iOMvJdNU; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ce1MNI1P"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91A86C4CEE2;
-	Sun, 26 Jan 2025 15:02:17 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="iOMvJdNU"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E9876C4CED3;
+	Sun, 26 Jan 2025 15:03:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1737903739;
-	bh=WUU5DtfN0aE3KW7oIl1FfUVR1fU5tIs7Hrz0gwxCS5g=;
+	s=k20201202; t=1737903783;
+	bh=fQFHNmD05joUar13jSrtNJ9mWNFlpz+3NRo4O2r0QCE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=ce1MNI1PLYVyNKJ0go8W451GqVE9rAdc3z2sWS4h85qoOLaPiU0xrcdU5VMPAg1/N
-	 6ju4IzmuUvc4yjE/ziEgO1Cqw4Icfzb74cEImxWA8Q7YbdY+LEG0hv7t5Qa1CDsSOC
-	 YsOSl4NABTTHLR3lucjnm7TzCrOUiBu9mLjWanqAk47/YKEHPl+DN6MaCLs4XboZZ9
-	 OKKw4zSwNm3Cj/wGA9YM46VRzmv4fYqHzsBCzIWY0Sl9ocNfjDPzuX23nPujAeLQ07
-	 VdD4B6JJSfZsd8ztedQYFkC94fhQt+lsAak7bsig3O1vq2W+6dD8yrL5oreYG0PWmv
-	 bjWX2Iw1Hg09w==
+	b=iOMvJdNUZb1XXdZFtmnuXHq+b/sUlft32A9HrGRROH8DXyIVBOOMP6YS6UGNJKMKF
+	 +/xml1xRrHOjvahry4+PLH4XKeJ1zhqfQt9lzwUOdWG7oRmxi+71mmcllA7cWiXGcM
+	 HcoHZOE75CAbbZwPs6OLvmwHfH0wq4/RiZ7z13/+149jc0iOFGg6DHCzcaOCFXkcWt
+	 OymMZ8vNkKGlkSu8gj4IaryFDmlLXTYP6Y9uTmG4+cWe5b6T5+9DIrbp8GhktYg4tc
+	 jMm71uhE695TJ8j+EaJ/K356eDA7E+0hTb54iQrXKFanhuCNw1G3wKySlO8tYYXddn
+	 W1605oBBZl65g==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
-Cc: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>,
-	Frank Li <Frank.Li@nxp.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Haibo Chen <haibo.chen@nxp.com>,
+Cc: Yuanjie Yang <quic_yuanjiey@quicinc.com>,
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Sasha Levin <sashal@kernel.org>,
-	shawnguo@kernel.org,
-	imx@lists.linux.dev,
+	adrian.hunter@intel.com,
 	linux-mmc@vger.kernel.org,
-	s32@nxp.com,
-	linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 6.12 04/29] mmc: sdhci-esdhc-imx: enable 'SDHCI_QUIRK_NO_LED' quirk for S32G
-Date: Sun, 26 Jan 2025 10:01:45 -0500
-Message-Id: <20250126150210.955385-4-sashal@kernel.org>
+	linux-arm-msm@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.12 24/29] mmc: sdhci-msm: Correctly set the load for the regulator
+Date: Sun, 26 Jan 2025 10:02:05 -0500
+Message-Id: <20250126150210.955385-24-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
 In-Reply-To: <20250126150210.955385-1-sashal@kernel.org>
 References: <20250126150210.955385-1-sashal@kernel.org>
@@ -57,36 +53,120 @@ X-Patchwork-Hint: Ignore
 X-stable-base: Linux 6.12.11
 Content-Transfer-Encoding: 8bit
 
-From: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
+From: Yuanjie Yang <quic_yuanjiey@quicinc.com>
 
-[ Upstream commit 0202dfbdc5dea70e213205aa42ab49a1a08aad3a ]
+[ Upstream commit 20a0c37e44063997391430c4ae09973e9cbc3911 ]
 
-Enable SDHCI_QUIRK_NO_LED quirk for S32G2/S32G3 variants as the controller
-does not have a LED signal line.
+Qualcomm regulator supports two power supply modes: HPM and LPM.
+Currently, the sdhci-msm.c driver does not set the load to adjust
+the current for eMMC and SD. If the regulator dont't set correct
+load in LPM state, it will lead to the inability to properly
+initialize eMMC and SD.
 
-Signed-off-by: Ciprian Marian Costea <ciprianmarian.costea@oss.nxp.com>
-Reviewed-by: Frank Li <Frank.Li@nxp.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
-Message-ID: <20241125083357.1041949-1-ciprianmarian.costea@oss.nxp.com>
+Set the correct regulator current for eMMC and SD to ensure that the
+device can work normally even when the regulator is in LPM.
+
+Signed-off-by: Yuanjie Yang <quic_yuanjiey@quicinc.com>
+Reviewed-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Link: https://lore.kernel.org/r/20250114083514.258379-1-quic_yuanjiey@quicinc.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-msm.c | 53 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 51 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ef3a44f2dff16..d84aa20f03589 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -303,6 +303,7 @@ static struct esdhc_soc_data usdhc_s32g2_data = {
- 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
- 			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
- 			| ESDHC_FLAG_SKIP_ERR004536 | ESDHC_FLAG_SKIP_CD_WAKE,
-+	.quirks = SDHCI_QUIRK_NO_LED,
- };
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 8716004fcf6c9..945d08531de37 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -134,9 +134,18 @@
+ /* Timeout value to avoid infinite waiting for pwr_irq */
+ #define MSM_PWR_IRQ_TIMEOUT_MS 5000
  
- static struct esdhc_soc_data usdhc_imx7ulp_data = {
++/* Max load for eMMC Vdd supply */
++#define MMC_VMMC_MAX_LOAD_UA	570000
++
+ /* Max load for eMMC Vdd-io supply */
+ #define MMC_VQMMC_MAX_LOAD_UA	325000
+ 
++/* Max load for SD Vdd supply */
++#define SD_VMMC_MAX_LOAD_UA	800000
++
++/* Max load for SD Vdd-io supply */
++#define SD_VQMMC_MAX_LOAD_UA	22000
++
+ #define msm_host_readl(msm_host, host, offset) \
+ 	msm_host->var_ops->msm_readl_relaxed(host, offset)
+ 
+@@ -1403,11 +1412,48 @@ static int sdhci_msm_set_pincfg(struct sdhci_msm_host *msm_host, bool level)
+ 	return ret;
+ }
+ 
+-static int sdhci_msm_set_vmmc(struct mmc_host *mmc)
++static void msm_config_vmmc_regulator(struct mmc_host *mmc, bool hpm)
++{
++	int load;
++
++	if (!hpm)
++		load = 0;
++	else if (!mmc->card)
++		load = max(MMC_VMMC_MAX_LOAD_UA, SD_VMMC_MAX_LOAD_UA);
++	else if (mmc_card_mmc(mmc->card))
++		load = MMC_VMMC_MAX_LOAD_UA;
++	else if (mmc_card_sd(mmc->card))
++		load = SD_VMMC_MAX_LOAD_UA;
++	else
++		return;
++
++	regulator_set_load(mmc->supply.vmmc, load);
++}
++
++static void msm_config_vqmmc_regulator(struct mmc_host *mmc, bool hpm)
++{
++	int load;
++
++	if (!hpm)
++		load = 0;
++	else if (!mmc->card)
++		load = max(MMC_VQMMC_MAX_LOAD_UA, SD_VQMMC_MAX_LOAD_UA);
++	else if (mmc_card_sd(mmc->card))
++		load = SD_VQMMC_MAX_LOAD_UA;
++	else
++		return;
++
++	regulator_set_load(mmc->supply.vqmmc, load);
++}
++
++static int sdhci_msm_set_vmmc(struct sdhci_msm_host *msm_host,
++			      struct mmc_host *mmc, bool hpm)
+ {
+ 	if (IS_ERR(mmc->supply.vmmc))
+ 		return 0;
+ 
++	msm_config_vmmc_regulator(mmc, hpm);
++
+ 	return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, mmc->ios.vdd);
+ }
+ 
+@@ -1420,6 +1466,8 @@ static int msm_toggle_vqmmc(struct sdhci_msm_host *msm_host,
+ 	if (msm_host->vqmmc_enabled == level)
+ 		return 0;
+ 
++	msm_config_vqmmc_regulator(mmc, level);
++
+ 	if (level) {
+ 		/* Set the IO voltage regulator to default voltage level */
+ 		if (msm_host->caps_0 & CORE_3_0V_SUPPORT)
+@@ -1642,7 +1690,8 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+ 	}
+ 
+ 	if (pwr_state) {
+-		ret = sdhci_msm_set_vmmc(mmc);
++		ret = sdhci_msm_set_vmmc(msm_host, mmc,
++					 pwr_state & REQ_BUS_ON);
+ 		if (!ret)
+ 			ret = sdhci_msm_set_vqmmc(msm_host, mmc,
+ 					pwr_state & REQ_BUS_ON);
 -- 
 2.39.5
 
