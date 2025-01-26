@@ -1,36 +1,41 @@
 Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 56ED125A653;
-	Sun, 26 Jan 2025 13:46:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id A1EF713AD38;
+	Sun, 26 Jan 2025 13:46:37 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1737899197; cv=none; b=hZkTq8dPko7OiuvOD1+6TCeWnVrOc0qGTyJMR1lTbU6xhcKw4oQ1Yl1cumMnKAkYMarMYnZ4Af+ACerUpWbd6R7RHPrB835vSpcjjrElhnrdmaW8qJch7VfusiT7mRSgF1SENVhTL+GTE5S6fos3n0g/dleej8rdHfGwB9UT7Ng=
+	t=1737899199; cv=none; b=gylAGoGdV+vWgwWg5yRuxXWJE4oLe0Hqq5XgJawi4d53T52z7WdC6Rlhe0ELXRh9LCZnvZ0+G3ExbAg4+9apVeRcC6qNffLJHPCkfCvS/AucERK4UyBOepclTwU1SyV8Dl+lxFg2SPv9yieTBm+weO3Nx9ccwbW6rFG/92LDEfg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1737899197; c=relaxed/simple;
-	bh=Vb02NKyELnELY3I/yYUO0jXrKgV2rrD3Lff16K8zYn0=;
+	s=arc-20240116; t=1737899199; c=relaxed/simple;
+	bh=INKL6nHCsQ+Ps9hi0BEkQBnShNAPDNsAnu0IjRcjQQ8=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=cATpdITJkiN9/DTHtnT0f7bDAa5peoKrIhfKh8R6qrdKcvMNnJnjRuTjLJEsJQXsjMtV4MvknfvmrxgklPTb6TzXXrd8R49FdQtCaTNicUKii/vmitzQt2446ycjw1lwYqz7uXB+qlETLvSPVxVr17GwgJyr6dGwyGSvf+uuU6E=
+	 MIME-Version; b=l/irSgjsPSWo3Fobl+DrlAm4J1VAYqqGlunMZl/v1Dpbw3UXC6dr76YyE+HoIcHq0DIM7vDiADelwfvHszUJ+dPVLsnQ1xgBc/M4qm3AFp1GDAubFTwrNLQlwYTFFt/TJHD3BoELHz+ZpDERmHMlHfFpG9m9cY9XJ34soPajfn8=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; arc=none smtp.client-ip=210.160.252.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
-X-CSE-ConnectionGUID: N1ZWdrq8Qyue9/rPNK8xTg==
-X-CSE-MsgGUID: Vcvu0F6pStGLkrXCb2hXVQ==
+X-CSE-ConnectionGUID: oFPefRJYRJOsQKIr3t+6YQ==
+X-CSE-MsgGUID: hMmFZpGcTCGWELUSNNSY2Q==
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 26 Jan 2025 22:46:33 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 26 Jan 2025 22:46:37 +0900
 Received: from localhost.localdomain (unknown [10.226.92.41])
-	by relmlir5.idc.renesas.com (Postfix) with ESMTP id 137914005016;
-	Sun, 26 Jan 2025 22:46:30 +0900 (JST)
+	by relmlir5.idc.renesas.com (Postfix) with ESMTP id B562840031F2;
+	Sun, 26 Jan 2025 22:46:23 +0900 (JST)
 From: Biju Das <biju.das.jz@bp.renesas.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>
 Cc: Biju Das <biju.das.jz@bp.renesas.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
 	Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
 	linux-renesas-soc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH 3/7] mmc: renesas_sdhi: Arrange local variables in reverse xmas tree order
-Date: Sun, 26 Jan 2025 13:46:05 +0000
-Message-ID: <20250126134616.37334-4-biju.das.jz@bp.renesas.com>
+Subject: [PATCH 1/7] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E support
+Date: Sun, 26 Jan 2025 13:46:03 +0000
+Message-ID: <20250126134616.37334-2-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250126134616.37334-1-biju.das.jz@bp.renesas.com>
 References: <20250126134616.37334-1-biju.das.jz@bp.renesas.com>
@@ -42,27 +47,66 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Arrange local variables in reverse xmas tree for probe().
+The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that
+of the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
+use SD_STATUS register to control voltage and power enable (internal
+regulator).
+
+For SD1 and SD2 channel we can either use gpio regulator or internal
+regulator (using SD_STATUS register) for voltage switching.
+
+Document RZ/G3E SDHI IP support.
 
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 20 +++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index f73b84bae0c4..6ea651409774 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -910,8 +910,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		       const struct renesas_sdhi_quirks *quirks)
- {
- 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
--	struct tmio_mmc_data *mmc_data;
- 	struct renesas_sdhi_dma *dma_priv;
-+	struct tmio_mmc_data *mmc_data;
- 	struct tmio_mmc_host *host;
- 	struct renesas_sdhi *priv;
- 	int num_irqs, irq, ret, i;
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+index af378b9ff3f4..ef3acf0f58e0 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -68,6 +68,9 @@ properties:
+               - renesas,sdhi-r9a08g045 # RZ/G3S
+               - renesas,sdhi-r9a09g011 # RZ/V2M
+           - const: renesas,rzg2l-sdhi
++      - items:
++          - const: renesas,sdhi-r9a09g047 # RZ/G3E
++          - const: renesas,sdhi-r9a09g057 # RZ/V2H(P)
+ 
+   reg:
+     maxItems: 1
+@@ -124,6 +127,7 @@ allOf:
+         compatible:
+           contains:
+             enum:
++              - renesas,sdhi-r9a09g047
+               - renesas,sdhi-r9a09g057
+               - renesas,rzg2l-sdhi
+     then:
+@@ -211,6 +215,22 @@ allOf:
+         sectioned off to be run by a separate second clock source to allow
+         the main core clock to be turned off to save power.
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: renesas,sdhi-r9a09g047
++    then:
++      properties:
++        vqmmc-regulator:
++          type: object
++          description: VQMMC SD regulator
++          $ref: /schemas/regulator/regulator.yaml#
++          unevaluatedProperties: false
++
++      required:
++        - vqmmc-regulator
++
+ required:
+   - compatible
+   - reg
 -- 
 2.43.0
 
