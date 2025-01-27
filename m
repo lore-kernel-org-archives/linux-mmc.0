@@ -1,66 +1,52 @@
-Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00300601.pphosted.com (mx0a-00300601.pphosted.com [148.163.146.64])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E01E1D932F
-	for <linux-mmc@vger.kernel.org>; Mon, 27 Jan 2025 22:12:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0B0C1DA10C;
+	Mon, 27 Jan 2025 23:46:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.146.64
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738015935; cv=none; b=MArTVJdWqaMyICeOkbDUOAVlVNAd2VFBD6Z/yr09mrB49LppMo3py/PX23YxnkJyXwgqNSZohc0ZsST3CmXvxhSVl3Y+pROXd/VJDfeJBJiM+FDyJqx7MwUpBsnd4dStT83QhPV4N97Z5JnXa3MSWVCtt6XZzdxJhUlu47iJGbc=
+	t=1738021591; cv=none; b=tq9mXB8L+WfTFJkPXs05BylM6+DK7yp7061gJm8QniFcU5+UYIrU14AuVRxDohLemhzNoy+IcFXiz5e6uT9CqrFXCVuqf2RBoA9Gjmf/4LcIEp63vpOyWCCvw0RP1ezF5uip1LBRB6bhPPF01gF3ui/lJjl1GREJa9FsEXnSPV8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738015935; c=relaxed/simple;
-	bh=/OZJ5nZbrRAlE19otGPqzJXN0XugB2gAMhb6M/0yjws=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=DqXVFHn0RmebfCDeyU7u4WIozXhiJAbhRJPBmAbyXFQ9D/8YeKMT7l+4Bf5EqVG2/60lbUk7E3MzIuwfpfNGCbUFjQFF1uXh4LP1r6pNl8Crh9eAxBhCFP8k4Xr3vAySlTXBtRGcaMmW7njJz/MgNuT/zlp77QhJDgYMYTMaSjU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BTx4alUM; arc=none smtp.client-ip=209.85.214.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1738021591; c=relaxed/simple;
+	bh=ZIeqTrvmbR9snqUYDscmNtkWd2EkzydSXkZq1MsgNEs=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=F2tde/YtKQGLfKyafAZAJQi2SwZv2LyVtwgQrY0zh5f9l1bn8r2Js89ye2QBjWNxo86kq2IOIfnhGRO/fWhjPafCdrmBn6zW64cGEQi2xWEU1icLHokZHaLwMpWAX1sD5gbebBcPNdnkigV8F430B+7taHH5xpFMJnm9//F5jnc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=D9ue6UdD; arc=none smtp.client-ip=148.163.146.64
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BTx4alUM"
-Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-2166f1e589cso11739615ad.3
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jan 2025 14:12:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1738015933; x=1738620733; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=xBn/vpa6bvh6++2BQkveffqsgeJvNmt2L4vG7ORqn8k=;
-        b=BTx4alUMsfLaIQ7Ek7Xu9U/XlYcdRiIIhIbGpzSlBIbAHRpO07bIjRqZLD5IFbohN9
-         Ec4Vci497t+AnsfyS4tBgPDgA7EJROkBmFRzifSCpBdYQTIJsKtSrNfwCInR8XBTAMuX
-         k50RPL6ZKt79h8t2+TIhmxZd4Du5aNOKYGOrRiZ2n6Vqzrk5GkwaW1BBskdqNBNGdzlF
-         V4UqizU/YIMY3DUf1ZBld/qttnf4O+wV/O+VWezgzLjegcICxCeX810SXGnORavs0Yjx
-         ID5xk19XqfDHEusU/6h05+DvTxwqJLGyosQrh+aE/rvvTi9hxl51JEF89Y/QL62BgmX4
-         6cgQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738015933; x=1738620733;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=xBn/vpa6bvh6++2BQkveffqsgeJvNmt2L4vG7ORqn8k=;
-        b=KjcFCYubD/wTHMdKmzIRJVh0VYj4OxYyiYcXX6YntBtdDkakRVzr0XR1GXZLCxTQ+X
-         OxAVBag7gVocXOjjw+U+2gmRNrWvoHnt+1TW7ukjA7K8BAPuKWwkTPDgLKjCbu7Aca59
-         fy8XmoGy51BXhk/o4yBqRtE0BT5o+8RfV/vuOPq+R5a7ATePyP/akMcKiRowei612a/N
-         cpZ4uJ7w9O2MAC0ioAio4mdoUyK0xLbtkoXQ/LFXe808vAO0qlSKpxrOcLoJYe/ANOn8
-         n+xF7bnmFgecADvMqSa1ZMiXoc3SGLoXnVMsJgJtmL1wDDJ0xEKLgQHAW4E4begwgxih
-         iPvw==
-X-Gm-Message-State: AOJu0Yw7bu/R/NZSxp+Vhi48bYRTE72Zh1IlWSMQRSnUBuH+sgesobc7
-	3+DulYAs6L8Jy8vSAXfrDvyjqDKk6ryIS+nqfW/FyLkteI81s2g+X6z1ua6NjdQ=
-X-Gm-Gg: ASbGncsXImhNnGp8y4Oufi/nJH0esFd1ngssB/g3kceVGlJO+RKv8yTWVOQ86r7MenV
-	qg4/qXHl7KDHox+C9phTmXQx6zPMQAYqHw103nkxXpEy8Z+7LeCbRi5N+otYvhRIybc4641q+8z
-	4c6vTf9EMGDXHaZ+fWb4WX9ef+wTbzO0GRFVE3hKNlIN9uC++lj9zbcxDGkLxg1ju4gfUR/GJG4
-	qAK4JWFqNxDx/84CW4xyl5plimYr8TOTha0DG3UYlabIn1sZ+efUHn2V7BwAaDMV49jCb1sjcks
-	0eY=
-X-Google-Smtp-Source: AGHT+IFfqBHFcALjGAEe+ktMEu6ipX2xwyZ8x18GP/34kF8B4TyBbDr3Sunbj+7Ohzc0mKN8fhgntQ==
-X-Received: by 2002:a17:902:cec6:b0:215:a3fb:b4d6 with SMTP id d9443c01a7336-21c3553b55dmr479415785ad.8.1738015932891;
-        Mon, 27 Jan 2025 14:12:12 -0800 (PST)
-Received: from localhost ([103.28.246.16])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21da3ea3032sm68400165ad.80.2025.01.27.14.12.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Jan 2025 14:12:12 -0800 (PST)
-From: sooraj <sooraj20636@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: sooraj <sooraj20636@gmail.com>
-Subject: [PATCH] mmc: sd: Fix incorrect capacity calculation for SDHC/SDXC/SDUC cards
-Date: Tue, 28 Jan 2025 03:42:26 -0500
-Message-ID: <20250128084226.15873-1-sooraj20636@gmail.com>
-X-Mailer: git-send-email 2.45.2
+	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="D9ue6UdD"
+Received: from pps.filterd (m0359308.ppops.net [127.0.0.1])
+	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 50RLPNSk016928;
+	Mon, 27 Jan 2025 22:38:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=PPS11142024; bh=v+pbfDrHMVpfCeucJRMI
+	kMFUsZoz0NpmEnB1H+pTTzQ=; b=D9ue6UdDXGIXuCTp0Gazzik35BVXaAhzBO6v
+	Uld6ZwOqzuHV015I7v006I8SIKiH2Yk2aMm2TLa4aBTwNnf34g9ZggD4LW9amNQ9
+	H0kh2rNQXJ6ZVryKRY5iKUN4xdbkQ/J2TuEPAzZ4RXldizK2VQkPX4pquoIh/yys
+	JeHCIeYWgiGfDAAadpaEu6TRI1dO+GbgI/CusSEHMTh7Gda9TFoJnGqejUCyxLaE
+	VIBL0THDYdxtrkG8cWTl2bJcNa2fWOBGtLLLLQqOUVr7ZEdrBOc7BJ7gIHjP42UM
+	ayUWmAJZQ6JyW7WNuCm0HVkRmoa4nKLZk4Rjs5QCyIrL/ovR7g==
+Received: from us-aus-excas-p2.ni.corp.natinst.com ([130.164.94.74])
+	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 44ej1y8sc3-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 27 Jan 2025 22:38:25 +0000 (GMT)
+Received: from us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) by
+ us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1258.28; Mon, 27 Jan 2025 16:38:24 -0600
+Received: from ershephe-ubuntu.amer.corp.natinst.com (172.18.68.32) by
+ us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
+ Server id 15.2.1258.28 via Frontend Transport; Mon, 27 Jan 2025 16:38:24
+ -0600
+From: Erick Shepherd <erick.shepherd@ni.com>
+To: <linux-kernel@vger.kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <york.yang@csr.com>, <ulf.hansson@linaro.org>,
+        Erick Shepherd <erick.shepherd@ni.com>
+Subject: [RFC PATCH 1/2] mmc: Update sdhci tune function to return errors
+Date: Mon, 27 Jan 2025 16:36:53 -0600
+Message-ID: <20250127223654.290904-1-erick.shepherd@ni.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -68,45 +54,42 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-ORIG-GUID: fDDuOaCe8ImDrnlpF02lRhZdD4oEkbbV
+X-Proofpoint-GUID: fDDuOaCe8ImDrnlpF02lRhZdD4oEkbbV
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-01-27_11,2025-01-27_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
+ mlxlogscore=372 bulkscore=0 mlxscore=0 spamscore=0 clxscore=1011
+ adultscore=0 phishscore=0 malwarescore=0 impostorscore=0
+ priorityscore=1501 suspectscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.19.0-2411120000 definitions=main-2501270177
 
-The capacity calculation for high-capacity SD cards (SDHC/SDXC/SDUC) used
-an incorrect bit shift (10 bits instead of 19 or 22), leading to severely
-underestimated storage capacities.
+Updates the sdhci_execute_tuning function to return the error code
+that was returned by the __sdhci_execute_tuning function.
+Previously this code was only stored in host->tuning_err and not
+actually returned.
 
-- For SDHC/SDXC (CSD structure version 1), the capacity is defined as:
-  `(C_SIZE + 1) * 512 KiB` (SD Physical Layer Spec v3.01, section 5.3.3).
-  This requires a left shift by 19 bits (2^19 = 512 KiB).
-
-- For SDUC (CSD structure version 2), the capacity is:
-  `(C_SIZE + 1) * 4096 KiB` (SD Physical Layer Spec v7.10, section 5.3.3),
-  requiring a left shift by 22 bits (2^22 = 4096 KiB).
-
-Update the shifts to 19 and 22 bits for versions 1 and 2 respectively,
-ensuring accurate capacity reporting. This resolves issues where cards
-(e.g., 64GB) were incorrectly identified as 1-4GB.
-
-Signed-off-by: sooraj <sooraj20636@gmail.com>
+Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
 ---
- drivers/mmc/core/sd.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index cc757b850e79..b60de859e978 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -172,7 +172,11 @@ static int mmc_decode_csd(struct mmc_card *card, bool is_sduc)
- 		else if (csd->c_size >= 0xFFFF)
- 			mmc_card_set_ext_capacity(card);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f4a7733a8ad2..b35b8917fa1e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2967,7 +2967,8 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
  
--		csd->capacity     = (1 + (typeof(sector_t))m) << 10;
-+		/* Correct the capacity calculation based on CSD structure version */
-+		if (csd_struct == 1)
-+			csd->capacity = (1 + (typeof(sector_t))m) << 19; /* SDHC/SDXC: (C_SIZE + 1) * 512KB */
-+		else
-+			csd->capacity = (1 + (typeof(sector_t))m) << 22; /* SDUC: (C_SIZE + 1) * 4096KB */
+ 	sdhci_start_tuning(host);
  
- 		csd->read_blkbits = 9;
- 		csd->read_partial = 0;
+-	host->tuning_err = __sdhci_execute_tuning(host, opcode);
++	err = __sdhci_execute_tuning(host, opcode);
++	host->tuning_err = err;
+ 
+ 	sdhci_end_tuning(host);
+ out:
 -- 
-2.45.2
+2.43.0
 
