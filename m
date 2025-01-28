@@ -1,148 +1,140 @@
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazon11010007.outbound.protection.outlook.com [52.101.229.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A45F5166F1A
-	for <linux-mmc@vger.kernel.org>; Tue, 28 Jan 2025 08:16:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.153.144
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52CF84A1D;
+	Tue, 28 Jan 2025 08:56:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.229.7
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738052207; cv=fail; b=snjQlOS+nk+xlwqcPNXo1kCxJ0QEnwR/K2T99JatEoTQwXIfIvXdmahBtPEEbyemgHK5/7pugNEcB/JLee4lJhQkir9MNHNQmNJTI9BP+dNVMuw7yjDCJLwXFa/kBNmtdKIlkchFw3vsTwMX5m5RAVetZHsE1ycpyfy1yivokeo=
+	t=1738054577; cv=fail; b=o0n4jP7RcCPlQXA3qDQ9PfdfFpZ/9xxMMl0B7uD1BBDRIwgMMklM9G99TYTProJoe9EqlAEPzJwHcstKgeLbPeDqYL1hfSfNZvdIEjwXh3DrGJ8/EZqj08+1Z9ZlqDzwg9J5ZtHB3Ms6GGPUEz1dpkyLN/Oc8B4PO/cuLvqGY6o=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738052207; c=relaxed/simple;
-	bh=7B+RzImE3xPnCEcqggRGYb1on9LpO+qFrSTffA3wM4w=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=n10sS9bTXBqZufOdzIAyd9jT2JgXiAUNDez0L66HlnN53PhAdXq6N39G82gUy0E2q4JYJcGacc7eVQy4rL6ADpVd2wcfyqPtjo3uyIKdh+rw5V/IHP6j2l1lJeBBG2Ei1NYtwRniMQdbhf4TdiuPrC4yaP7QFSyt3j2Hw2Tw0WI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com; spf=pass smtp.mailfrom=wdc.com; dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b=d9B/zbFf; dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b=XlJLVUT8; arc=fail smtp.client-ip=216.71.153.144
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=wdc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wdc.com
+	s=arc-20240116; t=1738054577; c=relaxed/simple;
+	bh=QeRZHxmB9Mz0fYotnEJ8m1v7iWB+Qnr/e/eINJWTPk0=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=JLgmgEUqRaE09nbpszGukDuGSDQ/l6XGUS2ia0s5upaUMfhlUc9vhGQTwYggONRRtU4Y/3UCW2DIcTSwvM+WyTNL7jfKVerdc/K6nGthMjXmwSxdQ+8FGzGCIP+1DCiFmQJONCRN+DKNnpPnEcB2EcF9+63AffkV10aD0POE/iM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=KLLebun6; arc=fail smtp.client-ip=52.101.229.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wdc.com header.i=@wdc.com header.b="d9B/zbFf";
-	dkim=pass (1024-bit key) header.d=sharedspace.onmicrosoft.com header.i=@sharedspace.onmicrosoft.com header.b="XlJLVUT8"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1738052205; x=1769588205;
-  h=from:to:subject:date:message-id:references:in-reply-to:
-   content-transfer-encoding:mime-version;
-  bh=7B+RzImE3xPnCEcqggRGYb1on9LpO+qFrSTffA3wM4w=;
-  b=d9B/zbFf5qzvn0W3YOJBltOYDc3bc1h0Y9PHV3AJX5cGc4ehOqxBr7Zl
-   19Ii61f+pFc3s9WXvT3nuoV00TxyjtC0qRsznFcTaCA+QiGIx5LUOb/Ea
-   r87poQaVpj9O+fvvcGUSlu8Z2k9zbzoPy7Wy+xH85PO4ltKnpNql0oazW
-   N6FKqJhUoyINKsFH561JRqf+eHCb/m51gi+NMppmYZLFz7RltWK/wMl31
-   fbi7u3E8rlVKHvoOLGf6PzM/mUPaY+Sjw1fMRJHiO1HT2/RhW8K+fc2UU
-   8tTBlFupHjMfxk+N2m/Ek/kYcmZV/bdeboPoRkPKPcsq1JpylLNVogPvI
-   w==;
-X-CSE-ConnectionGUID: bF96BOP2TxSmrW7gPmGnTg==
-X-CSE-MsgGUID: nqg1OzJGRI6jdKsqkPYJiA==
-X-IronPort-AV: E=Sophos;i="6.13,240,1732550400"; 
-   d="scan'208";a="37991670"
-Received: from mail-bl0pr05cu006.outbound1701.protection.outlook.com (HELO BL0PR05CU006.outbound.protection.outlook.com) ([40.93.2.10])
-  by ob1.hgst.iphmx.com with ESMTP; 28 Jan 2025 16:16:44 +0800
+	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="KLLebun6"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=G+SgkAy2X6V89AZvPcwkECMYx4tXSJCXp/i//tyUmIkRQLcMKJhS+wDNL6g5a5pzf+3TQnByWr4464lKTUXsR4y62VoSrMUCx/3iImHwR9xxNVFl+9Zm69UzL9jbOqtsiYVcve+zHMHjcuovNpwsrF6mWup61QmNKZ6/pbEV8VC+u13eJHtwo9wyI/2R9m4UdeFm7h+Rp+CwUh37tSh6Z+6xuI1epj8j62VpQVo1pwAHEa13l7uzheOp8YKCIRfwDHLikbrEqxLBgZt/UtBcG5JQTQenzddNAPPg6dBIT+Z3Z9KMuvw9DKIDJIxhrKzyCkF7evSdqgiq/wTE507iZA==
+ b=lBqWO8TpNAjC62QSwt6/FT4B2uWa7CH3Y9TqsmSyTG3pX9v4hfIrBqN5nV5PFx2Ht98JscNEDA/1mYXQZo2QRdUWsONcEoHbKJZIExua2G/KdBDXJosnRjcOnQzQHQqhBchWa5cum1FeObOSZ10zW/mpzXYAZfVIjG+GFYa7+Iwz/G7tr1kg/8GCOrZK29faBmFn9Ps/ijJ2X8IRj6E/uyoPtrPbfEH77K2zNSoJy0erHZwtWpbryQsuykx460W3RWP5crQTlxyb9PKH3McNqsrxd8sNA/YJK5X0QbAN6i4LOtyF/JU/4Xa/SbPxe9yFp8wnpnROCBfXcfysVn1o3Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=kZJmEOkPue4h58RfQPvVLlzfnQcnAVXZ2cHkaz7daew=;
- b=g0RAJLAE+ovRI01T/nqr0IvVfr3HQbGrfDA85edr5+/YSYPiBpPyLuWjRNyKrTw43O3VtU6VZ8GNqmv9ygPAFND/B2PgIODdxO3RI5tcZoANoAkV8Fsefib76Lq89AceEnFaeGOq82+jQ0SV1juiJGdXU7sy3y6b9EOWMyKZA7aI+u0eZnCZgFGhmbdKjEvU2S/raZarSrelJlUdaieKyF2+Jcce3u9PYoCa7ZupajeRMuaT25uy1XkBGdFZOSK0rIts5rut0ytmLfG8pW2zFkU66raYM0o3WAs8hT6KY1puI3pljXw8o58hlk4CS+BPS+eAC5iLXY2flvUNztFXGQ==
+ bh=sBzsEhZNMQTCnUlu253sYbwnUF3CQ0NjntUtx2zLjug=;
+ b=yQhShbuRU+d+P8h+fdoTkAtymTU20kk232m5nKQFmihEhxwzdl7ERnEww1yZ11GhGqAm9qfjkLjEONpzfy038tfy7cmTdeWwIb1epEiZ2fCWSJJtdY6fiTsL4Q6fYal/L3gCqRrTm7jlV3xU+1JvGOyE0xZodkShrJXYJrpR3h1HZ1RzcE1eyn7k/94EOdvIfOrFkMUO9y9I5HauoIvqcrzyrVtZ3ES+Pvx9UcIPtsoQZKnBKbxsx+PSEjboD0oOKA2TE9gr12vDQ4hJnz5DhhQdMKM2WIsNM0gVT/N87c1Wjw9fsLIczCces06b7zG0YRIlLW4D2YZLoJ23FbIHrg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
+ s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=kZJmEOkPue4h58RfQPvVLlzfnQcnAVXZ2cHkaz7daew=;
- b=XlJLVUT8l8T0a6YEKD2xES/yB4xDP1Hi3cL4HV1eOgWAy4febh3txlwpgwd0p94Td4qD5uFlsx4PCKu4pRJHtNlRfseE/xUC/mDILlS3H+TqwhbCPO/JcLH3SCl3Rzq2CzAEW1vauExBnNAQlWCpBuT8MiWmpig6ODJYwrU0nJ0=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- SA6PR04MB9237.namprd04.prod.outlook.com (2603:10b6:806:417::11) with
+ bh=sBzsEhZNMQTCnUlu253sYbwnUF3CQ0NjntUtx2zLjug=;
+ b=KLLebun6cW73zCdzpe8XV4akjF09EQMW7MQaKlvzP9rC3CsvVkIcoJ+G6icyIktlrHyHhFqcqp9lJmkfAE5C/uWDodSIfh4osEZ0UB3IZlmeBe6AW6/Qor7HhbkQ2jfe0OZT98f0uBZ1a+c0CS1pwQCMN8smUlRmxahISekC0WA=
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
+ by OSZPR01MB9377.jpnprd01.prod.outlook.com (2603:1096:604:1d9::6) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8377.18; Tue, 28 Jan
- 2025 08:16:41 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::bf16:5bed:e63:588f%4]) with mapi id 15.20.8377.021; Tue, 28 Jan 2025
- 08:16:41 +0000
-From: Avri Altman <Avri.Altman@wdc.com>
-To: sooraj <sooraj20636@gmail.com>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH] mmc: sd: Fix incorrect capacity calculation for
- SDHC/SDXC/SDUC cards
-Thread-Topic: [PATCH] mmc: sd: Fix incorrect capacity calculation for
- SDHC/SDXC/SDUC cards
-Thread-Index: AQHbcQiXrONIV/QAiUmrLTLQet6HrLMr1kHg
-Date: Tue, 28 Jan 2025 08:16:41 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8377.23; Tue, 28 Jan
+ 2025 08:56:07 +0000
+Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::86ef:ca98:234d:60e1]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
+ ([fe80::86ef:ca98:234d:60e1%2]) with mapi id 15.20.8377.021; Tue, 28 Jan 2025
+ 08:56:07 +0000
+From: Biju Das <biju.das.jz@bp.renesas.com>
+To: Rob Herring <robh@kernel.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>, Krzysztof Kozlowski
+	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, Geert Uytterhoeven
+	<geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang
+	<wsa+renesas@sang-engineering.com>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org"
+	<devicetree@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
+	<linux-renesas-soc@vger.kernel.org>, Prabhakar Mahadev Lad
+	<prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
+	<biju.das.au@gmail.com>
+Subject: RE: [PATCH 1/7] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
+ support
+Thread-Topic: [PATCH 1/7] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
+ support
+Thread-Index: AQHbb/i6FkLt8ccLmkOXuf2Zcpd28bMq/+OAgADkv+A=
+Date: Tue, 28 Jan 2025 08:56:07 +0000
 Message-ID:
- <DM6PR04MB65754682169CF936F637183DFCEF2@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20250128084226.15873-1-sooraj20636@gmail.com>
-In-Reply-To: <20250128084226.15873-1-sooraj20636@gmail.com>
-Accept-Language: en-US
+ <TY3PR01MB11346C3D39E9D7B311F37B2DF86EF2@TY3PR01MB11346.jpnprd01.prod.outlook.com>
+References: <20250126134616.37334-1-biju.das.jz@bp.renesas.com>
+ <20250126134616.37334-2-biju.das.jz@bp.renesas.com>
+ <20250127191607.GA698483-robh@kernel.org>
+In-Reply-To: <20250127191607.GA698483-robh@kernel.org>
+Accept-Language: en-GB, en-US
 Content-Language: en-US
 X-MS-Has-Attach:
 X-MS-TNEF-Correlator:
 authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
+ header.d=none;dmarc=none action=none header.from=bp.renesas.com;
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|SA6PR04MB9237:EE_
-x-ms-office365-filtering-correlation-id: 2d6eda9c-9b48-4999-9c6f-08dd3f74188c
-wdcipoutbound: EOP-TRUE
+x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OSZPR01MB9377:EE_
+x-ms-office365-filtering-correlation-id: b982d962-7648-42d8-e168-08dd3f799ab1
+x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|376014|366016|38070700018;
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|7416014|376014|1800799024|38070700018;
 x-microsoft-antispam-message-info:
- =?us-ascii?Q?R6cZNsGOhnbWr/7EssnL/Ff2Va65pMI3El6g26ZEc4iixPPn+NbzzwWmGQs7?=
- =?us-ascii?Q?KB0aFbD7BkH3BxqNegbXq17HPLvzhn/OI1hbRl2sxUd9Dcd8yvybcHGxognP?=
- =?us-ascii?Q?8+ycrKoCuVyS70yabGVF8+OldofRO8gAfNM/BJmNNUVurwOR30QIkb46pyTm?=
- =?us-ascii?Q?l64TjBRBOIgHhIpDQ4fkL8mZ6cDqgY25YHCOFQ71bvZCO00vDnzWsrZ2BS1C?=
- =?us-ascii?Q?y4GgjksiUBGqBLW8KxS5azE5jPrRfKQfVo9fTqQJiygNHGc+ugCl30BPiHXn?=
- =?us-ascii?Q?519+3SokYNBj+kQbWm+HqWN0Mv2BK6rVQJrC8+h/Kc2oAhAIGC7sVVGuH49i?=
- =?us-ascii?Q?mikmIM7VP0P+5FPIocsHua9M4f7JCCnsz6+zcDwWxanXX9Yj4QNrVMvpc2Es?=
- =?us-ascii?Q?uIliymMHqz70zijsUWRQOx6hZ5e55v7a7MnxcL1brk9bmcOrNAUzD8vRh+Vf?=
- =?us-ascii?Q?c0Go63qY/x1X7RBvLf3/mPW1960KQIYfiIqq2T/giTqEabsue3TETxMd0R1u?=
- =?us-ascii?Q?tbmBzrmfb6xgLxmUEuLWWPys3AAarMRM37kypBJEDQUtpboBGM3imSXruqTh?=
- =?us-ascii?Q?TG/9E3XLMipTyNzrA6+maBT8BllMKuGd3m34JJl240/lw6/V/pzfA1Ge8xZZ?=
- =?us-ascii?Q?HJCzmsRTmiS64f+fRNeN/qkndZv6gj9OuZGEEV8/WHd5Chve/WF3JIGSXBcl?=
- =?us-ascii?Q?IYy+xsgHUokFjQiEhDkMJocp6RsKrVSuXoe7Khk1tBnnIu5mf1wuRVZ6s9xP?=
- =?us-ascii?Q?fiUoM5PJfshNf/gtDvr1+n52mhCcLsxDh5aaKGvyZPpTkA5azLojoHAd3oyI?=
- =?us-ascii?Q?+LgA0b6bNHWSG5rPplkuK0DF0jSMq4DjRVTF7gR2IPORIrfDFCDNu5vz7LEg?=
- =?us-ascii?Q?akdaEGJJYYoQoJ4lWE0EGzv75KNearGqMdT0kNC+hE39QTesnL8JaN7J2yc/?=
- =?us-ascii?Q?Xie0B8DRbfdoW856wMCk7dOK0cH0HJ+ch8npmXKzgj30Op2mfwIeYwRlCnrR?=
- =?us-ascii?Q?aw0M/3UPZ767fxRJhhLxUGyC2aOo/kpTHBPhcL/UY5KLt4EzA/77nY6P1LCB?=
- =?us-ascii?Q?jQF+h6dL7jEnrPGasPguVk73XY8Feu17lR8ZUKAX74EG3QOyHbwxTjIyYCm0?=
- =?us-ascii?Q?HiPeRKC1VaVvSoZLLg0HOY5A0mN3EeaqjLGg39aYEejg+v/gwe5ymAU7K/f/?=
- =?us-ascii?Q?yM4cMdxRoeIjIQ6RuSxTKTiMt8p2hncwiRk24cBjBDf36bxt2Gf9ZeTvU2qr?=
- =?us-ascii?Q?1pLgtLevSPOZIC0a2l3FN2akNTKHfRP6FTfkBo7EQJbbTU6U365s/DFUQqI6?=
- =?us-ascii?Q?jDrQCdXTrnqn1aEwYrb+DhERwArrpTXj+pxqnWobpvaVI6Ct+OSVZngmWq3H?=
- =?us-ascii?Q?1p6CAM0LE5rwlXLsbJF3Rzw41g2v3c6ANKrMnd4/CQvYOGVczkRbHWkgzeT7?=
- =?us-ascii?Q?A8FNkEEPiWGFwgz1b8k+4WnnT3yyf1hB?=
+ =?us-ascii?Q?vwCNjWnLz/kmUCoSKad64bgQEPr7IDuK6roBoTNJcnLvli/Fb6ckO3aM7+Yu?=
+ =?us-ascii?Q?5ohLHdD446N07N8sbW7yHj4EZzxO8K6Wyjkg9U+li/Wau3vzm1TWSlVWrZBg?=
+ =?us-ascii?Q?/fZOb+eJsX6zGfnSPjnLQmBE8NEPqb2vmF5JugD//5j9QABu9iqPbxXb59T5?=
+ =?us-ascii?Q?ROcYB/B3lotHQ1+NoJ7V0vsuSvoe7fyzVaMRZp95Mt5RgIp9dyZI/lFYYHQA?=
+ =?us-ascii?Q?Xhwa3Xpuh48jpYZg1EOitd8rg2vsRSG64DLNB9wsIWPf2jF08X1rIm3gFaf4?=
+ =?us-ascii?Q?mvJ6q1dt/T9N8TsukdHHrRdTxqcvlU+/0wIw5pUYJNntacYaq4qwn7HQ5x9Q?=
+ =?us-ascii?Q?VUrphsE8FWMO8A/8V9TLT333iXFWg0xTe0ahK1iCqpcnzZuHRl8w1zohsugS?=
+ =?us-ascii?Q?W6PPgUMirAFrLA3qu1x/qrihYbbnCvQJ0C1cPbHbDVQL/wsdeyDgHx/GviZp?=
+ =?us-ascii?Q?1lurXOckmSTWYaf7EOy52GjUpFs+IFA6e16NhgPRXni6zI3GX0UcMP6e6k83?=
+ =?us-ascii?Q?i/4GiNZ4vBG2T3zRAQF55pGCZLKlwpHtN/ktDhyUN8KsVIfI/OFrWS7lOPT7?=
+ =?us-ascii?Q?JbKiTdcqO+eKgiTc0zrpA4W1VLg6sIegiCA2shA6swA+TaCJkuJptDljuj9I?=
+ =?us-ascii?Q?rLBzRg9SP55VvMdcO+IXxDDGy0aMJnS9MyjX4LnM8GquLuzFYqgnhVbyeSr9?=
+ =?us-ascii?Q?1cMRDUChSIMKnzanRdnMjedA1hfAqxnOAKKRv08ueb8zPzTHPgwffOU5UG8r?=
+ =?us-ascii?Q?Y6MGDA4IPqcSTQxGP/Xs7n3qLPaqhwhIfGOhSbw+sEa4GqnpL8GTZvE7KmEy?=
+ =?us-ascii?Q?ZzMFF5qt+T/Od/+fKszwTjzSqhplGMOEs0P2WLAZ+yOw0+udxExPJRMMX/e7?=
+ =?us-ascii?Q?TLKumaONUq8WXLOjdIK5TODhRQyx4Tjw845mvT6j3wTxK1GhdWwFJMMb4teJ?=
+ =?us-ascii?Q?Wu7McMWRcp356xxDn8fIXXg083DlLmdPWwaL1LF25dVbZo4BRCCd30ADMnxa?=
+ =?us-ascii?Q?cpXwgl8qyszIztqSMofKsfAbk+ikUa6+m9wPyfM7LlMAVFjxVllvbR1zSE8U?=
+ =?us-ascii?Q?/dM7x/9UiUmHh/IVxzVFAkSXGWoexHGz9YrZWswIyY2ok5y83R2gWG7uNjLS?=
+ =?us-ascii?Q?meCgCARQfjgth9/epeODN3/S+kWtOQmA9KwZvsyfKe6pMXPeMCr+3dj1zAJL?=
+ =?us-ascii?Q?iWLTyioplkxFBHEjovkQavrgNq1gtRYiTXF4RC3nLxDfTsqGhnRKAp1x4D1D?=
+ =?us-ascii?Q?RmxwBBEKBM0orQTvjCszv0TuEFigIE2kxC8TWYIq5Dp2FGmRotBxeWDKaF2u?=
+ =?us-ascii?Q?Og+9wrS0voIcsLSYTn6JfE6i/lkNo5aNxjZu8stzzeRfxNTxIsvjGyiNeiBD?=
+ =?us-ascii?Q?TJgojpZnSpnbsaS19JBmmuLP/YJLSvjFr4f3DM4/xmwOz8D+VhjWB4L8SB+V?=
+ =?us-ascii?Q?4bV2fxBtRb4/VcIULnXd+PdxcPUSqUfe?=
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(38070700018);DIR:OUT;SFP:1101;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(1800799024)(38070700018);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?eqg+eDkghNGoQeBQHAM1LR5ZLrBbxW9wAEhG1+LFY6Ix569TayiLMm1z9Qwk?=
- =?us-ascii?Q?ErCS2Bwzp7imWCgKgVTnBr7tEQLa5xlgtZGSZsZrs6Zd9+ce5Hy2q2ddW6j5?=
- =?us-ascii?Q?BWuTXPkhF1hsPUw9/io3p1VW4eC75ellqLfN63VQw2uE3DqMNuwK25FS3er3?=
- =?us-ascii?Q?hS+c52TyUGHgpBKQ9PnC0erTBN8wMgOR4bHBqnWVXzu17HQkqZupr3pg9XVH?=
- =?us-ascii?Q?Rl0cBLPluYh4jvzqa+JyB+PjOEUrOXYaR4S2mp+qeU8Xj+9KqTlZ7KZaBT3O?=
- =?us-ascii?Q?uyH2Ya6IDSTU1/xkWadSE4bDwdHDmHnFHXJUnC7dubEc6PMx6fPSS+207Q0S?=
- =?us-ascii?Q?+5UqverMZ0fSNtBpRQUF0YQJJlUsFWSYOlKtR8gN/5aNFgDblPWoan+rRIUU?=
- =?us-ascii?Q?q+ycygKgjJSZ4Uq5X/t7z/qaPG5MXKYeo3AbCdDTJBNy4HvU8LjYQxJcfpEf?=
- =?us-ascii?Q?RM8CKzdqwW7I7tyxUc3+/pTaUFDpuhlGiBdKjpi3o9o55pu68UMBvT/834ql?=
- =?us-ascii?Q?pOwMiKSuGUeUEACVf/naFJOsBeVHdZjXytx9gLYlpc3gTZXv8eddG2lGmag2?=
- =?us-ascii?Q?Do3czXWx1Lz3swvfaP0VPsVWVoiclUCPAkq1azwhMSJwEIhcBigXXO5HNuzY?=
- =?us-ascii?Q?Z5HxbYheHI4bfmRQZy+Ke62I75GM/PTqca7tGI7cJCcCwptO7atgt5MlK6AD?=
- =?us-ascii?Q?k4L+XCS/PFrQGjWDkcrcHOsJsWlxq2vONyJz8o3ZnLJiH6KknBSkt6HXVAc7?=
- =?us-ascii?Q?qOY+pVM7mbM8LTngPPl9w3HR9mq27RL3QsIRilmgbPLvovX/bGUw1FQvXBo1?=
- =?us-ascii?Q?2eowdZ2yKBwqb+dbKomtoVwM1Fjbt8BRs6OiiJNhhhqZXxh1rfPhSrCGO1bF?=
- =?us-ascii?Q?51WDjYoumoI5MaZeQduN9nzwdqUgiNpOVDJKaU5lAo6uHj/BshJcIgeNZSXh?=
- =?us-ascii?Q?rsgqIijvRVWodH7fKnmx0U+qME4yE5/dhOtYzbbMmZdRXLj8qk8XFOt5dI+J?=
- =?us-ascii?Q?HYtHjxtqFS0MTD5uiFCkZZR3up/fKFxt66nYVXBih6IVKLlFXA45G7AVFAfJ?=
- =?us-ascii?Q?nPvR50bhHo70uxpctyPZTlZ2Eq6G/kRPzqYldYF7xKLQrhE4nReHpaVubjBj?=
- =?us-ascii?Q?hicvJ6F7Lfca/f9y5IEGLv6iYl7qMBq4zEkB7+fidsHwTXu2JX//gXjf2N8b?=
- =?us-ascii?Q?jBi/ARZF0ZuzDJBnJJnf30fOsPygqD1pBxwGpxzXmpw6XGiqqcXIlXMN9fCX?=
- =?us-ascii?Q?6aEfe2lAXsbUtIG0PlmPmVV+eDQhPJi3Yka1N3493XAgzHFPTqDerEREclxH?=
- =?us-ascii?Q?fawiK9Gv8bBM9y/omvfQjcntGg/iUebQ8ZifvJ/B+WspzDKWEWxp+PBJEJrs?=
- =?us-ascii?Q?Uxnn35KHj/SR2/SUwfliOSWAnGi/yHgVWSxJnqw+lRy3IpfVspH07CDyhZs8?=
- =?us-ascii?Q?Q+eBuoyIacjxzjLEUhdUhYrvk3S79JlX0RRg1sBlNV+ctv+EICpC9NETVrFo?=
- =?us-ascii?Q?gm/eAwd9m01Dt4jwTv7cHjQBwqgkXXwhRkeAq/oeO6+gSj77U2tl6Vw6tIku?=
- =?us-ascii?Q?66KAKEKlocpA/S0LXMsdbYNKdmooFtLD2ugUKpEf?=
+ =?us-ascii?Q?ewDrgFefcfw1FJ4p1GABioZiYYet3HOfE4ScznjHkZGvaGCn5Y/d+zzie1KD?=
+ =?us-ascii?Q?Mbe6RY1wdVKGERziLiJ8ix8Tx3ciozEWGXN02vxO/oicyW+5/kvWTmVdsBFo?=
+ =?us-ascii?Q?6yE0ndeEr0uiuaDyfpMRqLrrc5JYCejLwdsrOui5laNd3j38ZOF9ex0mW7Ch?=
+ =?us-ascii?Q?OFSkichfxZrbEP624WteyE2Wd4MGdOmCgXLXISVCrvxYJY3pBtl0eXX3+lX/?=
+ =?us-ascii?Q?39SEL/mXozA7IuP9kHeNx6woPGB1MZfsaOSxm12mRNCSsXG1CIIy+Bra27Yi?=
+ =?us-ascii?Q?sJ+elraVIP3xtxMLbTSGwD7MewkMlNYiRgsp90IXatya3but79n5MmRzYVga?=
+ =?us-ascii?Q?1bMPvA/qshZxAj0aFl/n//dx6DcK3TIOO+qHk7IgVC1lXamhLCVhrcH2FU3N?=
+ =?us-ascii?Q?Ndh4jQ+0i/SqTwKMgsiealk18szEAd3QcxIkJK01tHxPTzC63MvVwBs2rjxI?=
+ =?us-ascii?Q?sEu0DezlA1I68LCJ/WskbNdgBWkDLWl2JV2JOh9X1hhoCZtdmvrqsyLiNlPH?=
+ =?us-ascii?Q?q5ugEi+cSn8t6HVcprpX8gZXU8U9pS7szpgFr7Ufx6XeduSgtJlgmuYm5Ff5?=
+ =?us-ascii?Q?U+XpaDQzSC3j8XIJOlGRR3nhTFGiPW+WUnKFUH3UZXcJr+IZooSZcnnO1Bqu?=
+ =?us-ascii?Q?lTCxJEztbgMYMmNulr3Im4Kebt8NDN6ShSRLtTC2NpPD+Q/wnpOkloWS48gW?=
+ =?us-ascii?Q?Bp/+QHjdlniX0z3gQsNWbvrFmTS8OY57hIjavX3gbqm8x0asf4JkAWpACju/?=
+ =?us-ascii?Q?gWrN8Kv6fV0SNHJ0rwOwzgncfPGT46JHG6pjcAI3TWck6fYaM7n1G2u6JOKT?=
+ =?us-ascii?Q?OH0rr1aZmtHnRS8Y62TH53s6p6lVBhokHy8kfdJCKn/X/i6CmImSuytjx6gz?=
+ =?us-ascii?Q?wjN3izv++2h5mxTCUI4Xs/8yL5A6fp7Fx8MVR0/pDMJoqsK3n8VCa8c4YnBA?=
+ =?us-ascii?Q?lz/zG0rrZRtT6Cy+IUN5oVgyqXPhRNk5vA4aJZh/8frLGjXd1XHxLSY7dQiw?=
+ =?us-ascii?Q?fFFGXlbQU8j+Kdasrdda0Jy+F20WFsCDJEWYevX/9cnSFJed8TsT0doTWSnz?=
+ =?us-ascii?Q?i1otmSjg9q2H/lwOsCg6BqkSUV8xEykZ5v8zuvGSZtDPdtlVWJWUm4xA1fsa?=
+ =?us-ascii?Q?kYtstyOuxVqOje85bbgo1dFJkodhHNm6SNyrRQrBubCUc357XXFngZIPKV/F?=
+ =?us-ascii?Q?Nb8OE1DviDWWATmrsGeaLlxeWmLkpHRlWR267dVRX38LOvi0ebRtOTwzyfvK?=
+ =?us-ascii?Q?w176GQi/Elhw341eOlbHMijDLw0cXqTUYuB1Ho2xSL4PfBrGkMYMwhwHTTZS?=
+ =?us-ascii?Q?ePzlxmJOWz68kRauTzNvtz+FrgsSuDZ1wXn6eFtlJKVyed7ZasFgaNKJXfwe?=
+ =?us-ascii?Q?t+3SqZxZQhEsaNIqTmIDaazBsfW1bac6L9GB/6k9sBvJoiVX6M7Vl/gtQcDK?=
+ =?us-ascii?Q?1XbTLI9xDH5HfTKlkQFsWqQ0cnYl698UdZ+FTnnIgvsVLJq7ws2WyJd24AZL?=
+ =?us-ascii?Q?IYlMyho4UUu6uDxhptv2+wEWGQ7j+WuRjSAK5E0okmuBTNR1RbRyHrI7gCjj?=
+ =?us-ascii?Q?3G6ioIqM2PKUxLnDP7j25096hETR3qznXYeNwlQIPTp7paAt0as6g6TzsraK?=
+ =?us-ascii?Q?8g=3D=3D?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -151,84 +143,95 @@ List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	SIadc9MnT7gfPv091ZPI4a0GFj667jXOk2GzaNvpcSidOJ3tW/q6vHSwKS/c2CfLllvsGJkN1edu2SU8Kv72rDa0QXa4ltJyvFT+p8O4AtugSzUnNtRvzoXylwm8UXvyl6CAbqGvDoNtB7FkARlmMFpdt/pHo/h51By8l9lYSREX1QieHnrNVvU8gvPzrZbB75jnWocj+Z4I6MLj4qLJmbXMe74hwsD3naCZW6mjQ+YesQJptAgOX8BYCJ+EPV32IdYyBIqgVDZ8OzdBa+HW6A4uly5yd1KOn4lUjsE8oQGmNQIhCCGA6oidJx12eDbBlzn4oyjdxgggxUvy/zpx72OAzigmBvvRW2foI6eF6HwmF7ZM8yB+NptjjDAAGVQ0eDDZziuFmV0jGv9WXY+xNYw736bLwH65HmCxHWXXjFGPL3kjXAXXx1PrdB+BcTVu9/f7JYMMX7injn6El2NyrGJZvm3X3xfKytOpCzz99d1ELl/WVlwokQJUNDJ2/lu9Gx+dtY9Qo6GGaXVy+J8cIO30I1ts+EuKvpQEBFM+ha6Fxw8fK6aWK8ZRUYnMoXvwmNQ1zqt7ahMJ68B9ZGZicxkmRDjBWFV+RZwr1j85J7Rry5wNCqhuWAEIVNgG3SxU
-X-OriginatorOrg: wdc.com
+X-OriginatorOrg: bp.renesas.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2d6eda9c-9b48-4999-9c6f-08dd3f74188c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Jan 2025 08:16:41.6932
+X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b982d962-7648-42d8-e168-08dd3f799ab1
+X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Jan 2025 08:56:07.4975
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 8jVvtXu243tgzJFCjEMhulfhqSTFHtM0Dq4IRuaxfNnASYcXbEfy3WjphXPSIAT2T2KpHGOSuiD+wp+ZHxqC1Q==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA6PR04MB9237
+X-MS-Exchange-CrossTenant-userprincipalname: PKnmYp7GVOUSVBNrGh0KHxkvLPzk79Lfbb0ZTSlolfdfyPW9PhhXr7NeLC22jRivhh+sJVBN9OuYkc20WRJoFxwzjri+KGaOJytokk0sjrc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSZPR01MB9377
 
-> The capacity calculation for high-capacity SD cards (SDHC/SDXC/SDUC) used
-> an incorrect bit shift (10 bits instead of 19 or 22), leading to severely
-> underestimated storage capacities.
->=20
-> - For SDHC/SDXC (CSD structure version 1), the capacity is defined as:
->   `(C_SIZE + 1) * 512 KiB` (SD Physical Layer Spec v3.01, section 5.3.3).
->   This requires a left shift by 19 bits (2^19 =3D 512 KiB).
->=20
-> - For SDUC (CSD structure version 2), the capacity is:
->   `(C_SIZE + 1) * 4096 KiB` (SD Physical Layer Spec v7.10, section 5.3.3)=
-,
->   requiring a left shift by 22 bits (2^22 =3D 4096 KiB).
->=20
-> Update the shifts to 19 and 22 bits for versions 1 and 2 respectively, en=
-suring
-> accurate capacity reporting. This resolves issues where cards (e.g., 64GB=
-)
-> were incorrectly identified as 1-4GB.
->=20
-> Signed-off-by: sooraj <sooraj20636@gmail.com>
-Please share the kernel info of your sd insert flow, e.g. something in the =
-form of:
-[ 5791.041876] mmc0: new ultra high speed SDR104 SDUC card at address d555
-[ 5791.041916] mmcblk mmc0:d555: calling add_quirk_sd
-[ 5791.042108] mmc0: calculated max. discard sectors 1957888 for timeout 60=
-000 ms
-[ 5791.042127] mmcblk0: mmc0:d555 SR04T 3.72 TiB
+Hi Rob,
 
-Also what your /sys/block/mmcblk<x>/size say?  where is <x> is your sd card=
- block device.
+Thanks for the feedback.
 
-Thanks,
-Avri
+> -----Original Message-----
+> From: Rob Herring <robh@kernel.org>
+> Sent: 27 January 2025 19:16
+> Subject: Re: [PATCH 1/7] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E =
+support
+>=20
+> On Sun, Jan 26, 2025 at 01:46:03PM +0000, Biju Das wrote:
+> > The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that of
+> > the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
+> > use SD_STATUS register to control voltage and power enable (internal
+> > regulator).
+> >
+> > For SD1 and SD2 channel we can either use gpio regulator or internal
+> > regulator (using SD_STATUS register) for voltage switching.
+> >
+> > Document RZ/G3E SDHI IP support.
+> >
+> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> > ---
+> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 20
+> > +++++++++++++++++++
+> >  1 file changed, 20 insertions(+)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > index af378b9ff3f4..ef3acf0f58e0 100644
+> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> > @@ -68,6 +68,9 @@ properties:
+> >                - renesas,sdhi-r9a08g045 # RZ/G3S
+> >                - renesas,sdhi-r9a09g011 # RZ/V2M
+> >            - const: renesas,rzg2l-sdhi
+> > +      - items:
+> > +          - const: renesas,sdhi-r9a09g047 # RZ/G3E
+> > +          - const: renesas,sdhi-r9a09g057 # RZ/V2H(P)
+> >
+> >    reg:
+> >      maxItems: 1
+> > @@ -124,6 +127,7 @@ allOf:
+> >          compatible:
+> >            contains:
+> >              enum:
+> > +              - renesas,sdhi-r9a09g047
+> >                - renesas,sdhi-r9a09g057
+> >                - renesas,rzg2l-sdhi
+> >      then:
+> > @@ -211,6 +215,22 @@ allOf:
+> >          sectioned off to be run by a separate second clock source to a=
+llow
+> >          the main core clock to be turned off to save power.
+> >
+> > +  - if:
+> > +      properties:
+> > +        compatible:
+> > +          contains:
+> > +            const: renesas,sdhi-r9a09g047
+> > +    then:
+> > +      properties:
+> > +        vqmmc-regulator:
+> > +          type: object
+> > +          description: VQMMC SD regulator
+> > +          $ref: /schemas/regulator/regulator.yaml#
+> > +          unevaluatedProperties: false
+> > +
+> > +      required:
+> > +        - vqmmc-regulator
+>=20
+> The driver treats this as optional. If this is required, then is
+> renesas,sdhi-r9a09g047 really compatible with renesas,sdhi-r9a09g057?
 
-> ---
->  drivers/mmc/core/sd.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
-> cc757b850e79..b60de859e978 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -172,7 +172,11 @@ static int mmc_decode_csd(struct mmc_card *card,
-> bool is_sduc)
->                 else if (csd->c_size >=3D 0xFFFF)
->                         mmc_card_set_ext_capacity(card);
->=20
-> -               csd->capacity     =3D (1 + (typeof(sector_t))m) << 10;
-> +               /* Correct the capacity calculation based on CSD structur=
-e version
-> */
-> +               if (csd_struct =3D=3D 1)
-> +                       csd->capacity =3D (1 + (typeof(sector_t))m) << 19=
-; /* SDHC/SDXC:
-> (C_SIZE + 1) * 512KB */
-> +               else
-> +                       csd->capacity =3D (1 + (typeof(sector_t))m) << 22=
-;
-> + /* SDUC: (C_SIZE + 1) * 4096KB */
->=20
->                 csd->read_blkbits =3D 9;
->                 csd->read_partial =3D 0;
-> --
-> 2.45.2
->=20
+Ok, I will make it optional for both renesas,sdhi-r9a09g057 and renesas,sdh=
+i-r9a09g047
+in the next version.
 
+Cheers,
+Biju
