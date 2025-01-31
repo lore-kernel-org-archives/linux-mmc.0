@@ -1,71 +1,92 @@
-Received: from relmlie5.idc.renesas.com (relmlor1.renesas.com [210.160.252.171])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1423E1C07C4;
-	Fri, 31 Jan 2025 11:29:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.171
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70A99136351;
+	Fri, 31 Jan 2025 17:17:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738322945; cv=none; b=e0wH7nFP1kdnO1FxS8UpffplugfBOfng0mFyZbHFqkaX4KOR9byyidy7eSWalGjQQIrtrYyeJ0+kuoP6GhEPE8QvL89Ac7FRsCtX8k0/72E8rFx6LYQYaE5nlckmkKuwwWxq/KMfH9Z6yvhLtCXmaS50BhzSE3hn4oqRpoj3+dQ=
+	t=1738343862; cv=none; b=OOk2hJ+TXpWVfmCiHBbreAIP5YRW3UNtLqyfWeBxGDs+I03AY2SX99WTYnEQ96J7OpsnsVug3jPKwzw4koa7Z4HnM5HVgk26aM0mH+nTzqD86vX7zVdjuOB/wTDmDu1KDNY9v94NVJDff4l8xickPwGXPSWZRuiVwHqIgKGw68I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738322945; c=relaxed/simple;
-	bh=lsJZzSjFldpjIYJOW3WkoCChEKLYHsyTqSyAnjTr5t0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Rv9sNRUhoUdu7naN+zx1bQ+G3047LVrvLhqGoiGgm2dnyqfnlA8TZSF5imh+C5YDtWq39ozhmcU2nz1c/Lo1bszzNXSt9wIwIqB7mUqEoN+9eTgrtDpo23pM8i/lc7urEA54rMY1wcuZjuoKo9kS3Augm7uBvTqggIDMXUDRtSU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; arc=none smtp.client-ip=210.160.252.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
-X-CSE-ConnectionGUID: GMbPr32MQ8uJTo77dglNZQ==
-X-CSE-MsgGUID: KlzpA1WURnSx6mcHbSRfFA==
-Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie5.idc.renesas.com with ESMTP; 31 Jan 2025 20:29:02 +0900
-Received: from localhost.localdomain (unknown [10.226.92.122])
-	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 517D942E445C;
-	Fri, 31 Jan 2025 20:28:52 +0900 (JST)
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Biju Das <biju.das.jz@bp.renesas.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
+	s=arc-20240116; t=1738343862; c=relaxed/simple;
+	bh=YUkx2+2MpIcN2520NWvGXz7CIn7+CYXPWNKN8Rh35Eo=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=dHuZnYmnvkP95/6ni4DgahZ9B0I+BffiVS3A+3FMnh4/oK99wi54rIUZeHJkyBjC73sW9P2eiCpvDBv9Fc5A//NElsonrlK40SJ8MUGqFrWe7l0BnzGrF2dSR+gwO0Q/r2JJNqd/jGvu3zEUYjWYomExnRHpXwbQIMfWR4O9lNA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GQhMM4sj; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GQhMM4sj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 554EFC4CED1;
+	Fri, 31 Jan 2025 17:17:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738343860;
+	bh=YUkx2+2MpIcN2520NWvGXz7CIn7+CYXPWNKN8Rh35Eo=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=GQhMM4sj1nCwStKx+TM22+JalOuTFvpGT3p24L9xIZFH3f48zh29Tlnd425CI75fF
+	 5r8xZXjsfVG7UcBoXm3wOLniI/gwYn7V2MflMOfWmT5QxjKcfeHTKZfj2vBGlonHsS
+	 4RL7PtVCyYGYKfSyRZfbg0dw0o+yzTP8vJh9bM6AQaz3wlXuJERrTfdLLAfxYxBkgS
+	 VZqBD3ZC51b68wifxiEiXvBxpqp5EJJjB5D/gcydlKQ0+GBQwkWwYwwjaNax8Jz/bO
+	 bdwWfI1YyRMepCp9SJmE3IfPlSm2VZkVRdSfIco2l5eej9wbW0E4XqBIiCFn1Vn3d6
+	 KzGC5I7D3fX7A==
+Date: Fri, 31 Jan 2025 17:17:35 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>,
-	Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>
-Subject: [PATCH v2 2/8] mmc: renesas_sdhi: Arrange local variables in reverse xmas tree order
-Date: Fri, 31 Jan 2025 11:28:45 +0000
-Message-ID: <20250131112849.120078-1-biju.das.jz@bp.renesas.com>
-X-Mailer: git-send-email 2.43.0
+	Biju Das <biju.das.au@gmail.com>
+Subject: Re: [PATCH v2 1/8] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
+ support
+Message-ID: <20250131-dangle-obtain-30ffa8a44083@spud>
+References: <20250131112429.119882-1-biju.das.jz@bp.renesas.com>
+ <20250131112429.119882-2-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="2aWd9LJ+bsJ8g84Q"
+Content-Disposition: inline
+In-Reply-To: <20250131112429.119882-2-biju.das.jz@bp.renesas.com>
 
-Arrange local variables in reverse xmas tree for probe().
 
-Reviewed-by: Tommaso Merciai <tommaso.merciai.xr@bp.renesas.com>
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-v1->v2:
- * Collected tags.
----
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+--2aWd9LJ+bsJ8g84Q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index f73b84bae0c4..6ea651409774 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -910,8 +910,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		       const struct renesas_sdhi_quirks *quirks)
- {
- 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
--	struct tmio_mmc_data *mmc_data;
- 	struct renesas_sdhi_dma *dma_priv;
-+	struct tmio_mmc_data *mmc_data;
- 	struct tmio_mmc_host *host;
- 	struct renesas_sdhi *priv;
- 	int num_irqs, irq, ret, i;
--- 
-2.43.0
+On Fri, Jan 31, 2025 at 11:24:16AM +0000, Biju Das wrote:
+> The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that
+> of the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
+> use SD_STATUS register to control voltage and power enable (internal
+> regulator), for non-fixed voltage (SD) MMC interface. However, it is
+> optional for fixed voltage MMC interface (eMMC).
+>=20
+> For SD1 and SD2 channels, we can either use gpio regulator or internal
+> regulator (using SD_STATUS register) for voltage switching.
+>=20
+> Document RZ/G3E SDHI IP support with optional internal regulator for
+> both RZ/G3E and RZ/V2H SoC.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
+
+--2aWd9LJ+bsJ8g84Q
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZ50FrwAKCRB4tDGHoIJi
+0mTTAP9hMeaxexsvfROzaDoowF7ghWEzn8zaXnkyG2lhXeJgGQEAwYRi02ArAkkT
+L5DAmPQ0lCwQs6yMpQ3EzuOUqoCoqQA=
+=x6j+
+-----END PGP SIGNATURE-----
+
+--2aWd9LJ+bsJ8g84Q--
