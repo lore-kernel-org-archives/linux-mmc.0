@@ -1,92 +1,153 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f51.google.com (mail-oo1-f51.google.com [209.85.161.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 70A99136351;
-	Fri, 31 Jan 2025 17:17:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53F3B1E9B1F
+	for <linux-mmc@vger.kernel.org>; Fri, 31 Jan 2025 20:24:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738343862; cv=none; b=OOk2hJ+TXpWVfmCiHBbreAIP5YRW3UNtLqyfWeBxGDs+I03AY2SX99WTYnEQ96J7OpsnsVug3jPKwzw4koa7Z4HnM5HVgk26aM0mH+nTzqD86vX7zVdjuOB/wTDmDu1KDNY9v94NVJDff4l8xickPwGXPSWZRuiVwHqIgKGw68I=
+	t=1738355088; cv=none; b=AsgqRkBy7yenHPEBvi/3F37tbC5DZ0ZohOZM6xBIsfVg/rN0SlEXbQkklaBix0FFKdf+QL2SlOGe/APPZwjGJRfHYqUV5YcRq7mEQV++SuPV5odr08KRptgXx/jFtKFiViFY9rKXExq0i1zOOMHYHpey6TF8R70bxdc6Xl7lspE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738343862; c=relaxed/simple;
-	bh=YUkx2+2MpIcN2520NWvGXz7CIn7+CYXPWNKN8Rh35Eo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=dHuZnYmnvkP95/6ni4DgahZ9B0I+BffiVS3A+3FMnh4/oK99wi54rIUZeHJkyBjC73sW9P2eiCpvDBv9Fc5A//NElsonrlK40SJ8MUGqFrWe7l0BnzGrF2dSR+gwO0Q/r2JJNqd/jGvu3zEUYjWYomExnRHpXwbQIMfWR4O9lNA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=GQhMM4sj; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1738355088; c=relaxed/simple;
+	bh=a4ev7NI00M+pqHz/c63lKpZN/tT3RLqqfUA5HRJSMsg=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=q4YmshYUHRdxd7MIyqjbI/847c8xfz/fbQXBV7AJbXFFZq5+SbO3pXNKC4YkKGgI5zGtIOnPNnus87uvOmbyEtakrmQOkuLkcv41wPv9BE1mD3HAPuL/knpxU5/iUdud8/d+paqzA05c6tSBCD+RLHU+Xr6/bpYwWiWnlgJ0228=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=ShBjLv2U; arc=none smtp.client-ip=209.85.161.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="GQhMM4sj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 554EFC4CED1;
-	Fri, 31 Jan 2025 17:17:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1738343860;
-	bh=YUkx2+2MpIcN2520NWvGXz7CIn7+CYXPWNKN8Rh35Eo=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=GQhMM4sj1nCwStKx+TM22+JalOuTFvpGT3p24L9xIZFH3f48zh29Tlnd425CI75fF
-	 5r8xZXjsfVG7UcBoXm3wOLniI/gwYn7V2MflMOfWmT5QxjKcfeHTKZfj2vBGlonHsS
-	 4RL7PtVCyYGYKfSyRZfbg0dw0o+yzTP8vJh9bM6AQaz3wlXuJERrTfdLLAfxYxBkgS
-	 VZqBD3ZC51b68wifxiEiXvBxpqp5EJJjB5D/gcydlKQ0+GBQwkWwYwwjaNax8Jz/bO
-	 bdwWfI1YyRMepCp9SJmE3IfPlSm2VZkVRdSfIco2l5eej9wbW0E4XqBIiCFn1Vn3d6
-	 KzGC5I7D3fX7A==
-Date: Fri, 31 Jan 2025 17:17:35 +0000
-From: Conor Dooley <conor@kernel.org>
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: Re: [PATCH v2 1/8] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
- support
-Message-ID: <20250131-dangle-obtain-30ffa8a44083@spud>
-References: <20250131112429.119882-1-biju.das.jz@bp.renesas.com>
- <20250131112429.119882-2-biju.das.jz@bp.renesas.com>
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="ShBjLv2U"
+Received: by mail-oo1-f51.google.com with SMTP id 006d021491bc7-5f88b61399dso1666960eaf.1
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Jan 2025 12:24:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1738355085; x=1738959885; darn=vger.kernel.org;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Jn/Ny7UFv/UH6iRtjr6jsBabEKLnDl2l7pEqvfjMtFM=;
+        b=ShBjLv2U1w+5zymjIFhU7poftN9OhcetisFQnk0H3B/pvg/7UdFSNU0zrwqwuqtNdA
+         nsFDff8ZM5KVXkXnc8UpScWb89BwAuyXMKVtsCOJstyRg2PC849jMkHfoCMS0leb8Gyz
+         fvxO4R7AG6gGp5b9COON2kYqJu2ZeP5sBPzS7zaFz/1jpuluYh/4xx9yPbLjX/Qn+z89
+         AmQeZdxZxlt/15AIidokGNHek0k2zF7zFflb0NdXF5uOLh06aZ5OBhf3oD3JiK0wtQFG
+         /yVyddYaQtIQKN5Cs1SZaxEAcf69u4iUJH9QTyWqP3aTZ/qc2kJA+J6kqXsdTyLmDf+f
+         DDnQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738355085; x=1738959885;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Jn/Ny7UFv/UH6iRtjr6jsBabEKLnDl2l7pEqvfjMtFM=;
+        b=UYl4Hs6dv2W+QuCJQm2iWTzndQweITWbZUaFQ2Ifo3mSVa6FFPiTx5ro03dtF09r1a
+         ov4UECQjoHo3WQuVgaG2dIRRG//+puDYkHpgHhTjwFmLdgVztrGDoVZmQWgRqqUzELaD
+         sI/ZjzajB3SZZIcSlG/0liNll80Ln01i99I4uwql0ohkUI8ZxwZjE923vu29dXs0Ksy8
+         pp6xRb/RBLfREfmo/S3JWDpN5a9c2HJHf7WndUZWf07di8uYagd4PaCc+SjXj1rl2qT2
+         UhoDQ/+leU7RZQSzrn9rc/h5VoWHVu6KLWy2MT3cfi8cDpI9h5j7z7ZcH7cL5iIVSQHA
+         u4AQ==
+X-Forwarded-Encrypted: i=1; AJvYcCW6L0Y0B63UAiIjCTVYx3vwPpgCH3h8BfQXB29Cr9F388yFzLz5DxynHZ+DiNtRhI4CBJ8qrr8UGBM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxFHhVQ/yFxZcKk29T5GlgFC0QO4HVFYMgfs+hq5luX4gTYw83k
+	1YnK1puvM9LVeF47+8dHOskh57ILN9Td1Ag0STXa7bFbDRADOaEImOqVqtkhfNw=
+X-Gm-Gg: ASbGnct8oeIW385f3L9eEN9/ZItK4v7FltIyIbU7HRgMhF2nshHNYL5fzgHtL+8n5SP
+	jg4q5JfC/JwkfVDDBdJBXkvBTQrLcD1tVbYRkujz0RggR0HZV1ianQMXJNn8cGUstuYl/0cq2j5
+	SKY86Pgd5l98V+B/dlDQi/PdhrabujyxFYu7PIC6v15IJfcBvHPcJUzF1adSjJm73COSQtbsRUR
+	T1ITwGwOF4WN9PPOhKy8g+H35pXcrGHIvH68lIrtlZmpaHYKHCEAYg0sU7me4O6QZMBIbRkjAzZ
+	p/d//89hcp1LKVzsT4CVWvwCAItEfc1yvtC8xDcDA2wA71c=
+X-Google-Smtp-Source: AGHT+IEA6MI3/eVAdqj25y/O52sPRoTGczW1O2gqmD31jZVU/w0qKc/rISzimaZq3KsB0lB7wfNBfQ==
+X-Received: by 2002:a05:6871:a581:b0:2b3:8c07:6461 with SMTP id 586e51a60fabf-2b38c07814dmr1466360fac.19.1738355085268;
+        Fri, 31 Jan 2025 12:24:45 -0800 (PST)
+Received: from [127.0.1.1] (ip98-183-112-25.ok.ok.cox.net. [98.183.112.25])
+        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-2b35623d2ffsm1403157fac.22.2025.01.31.12.24.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 31 Jan 2025 12:24:44 -0800 (PST)
+From: David Lechner <dlechner@baylibre.com>
+Subject: [PATCH 00/13] gpiolib: add gpiods_set_array_value_cansleep
+Date: Fri, 31 Jan 2025 14:24:40 -0600
+Message-Id: <20250131-gpio-set-array-helper-v1-0-991c8ccb4d6e@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="2aWd9LJ+bsJ8g84Q"
-Content-Disposition: inline
-In-Reply-To: <20250131112429.119882-2-biju.das.jz@bp.renesas.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAIgxnWcC/x3M3QpAQBBA4VfRXJvaHyKvIhfLjjUltlmJ5N1tL
+ r+Lcx5IJEwJuuIBoZMT71uGLguYFrcFQvbZYJSplbYaQ+QdEx3oRNyNC62RBEdfOWta2yhvIbd
+ RaObr//bD+35rVoI+ZwAAAA==
+X-Change-ID: 20250131-gpio-set-array-helper-bd4a328370d3
+To: Linus Walleij <linus.walleij@linaro.org>, 
+ Bartosz Golaszewski <brgl@bgdev.pl>, Andy Shevchenko <andy@kernel.org>, 
+ Geert Uytterhoeven <geert@linux-m68k.org>, 
+ Lars-Peter Clausen <lars@metafoo.de>, 
+ Michael Hennerich <Michael.Hennerich@analog.com>, 
+ Jonathan Cameron <jic23@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+ Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, 
+ Heiner Kallweit <hkallweit1@gmail.com>, 
+ Russell King <linux@armlinux.org.uk>, 
+ "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+ Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+ Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+ =?utf-8?q?Nuno_S=C3=A1?= <nuno.sa@analog.com>, 
+ Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
+ Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>
+Cc: linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org, 
+ netdev@vger.kernel.org, linux-phy@lists.infradead.org, 
+ linux-sound@vger.kernel.org, David Lechner <dlechner@baylibre.com>
+X-Mailer: b4 0.14.2
 
+This series was inspired by some minor annoyance I have experienced a
+few times in recent reviews.
 
---2aWd9LJ+bsJ8g84Q
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Calling gpiod_set_array_value_cansleep() can be quite verbose due to
+having so many parameters. In most cases, we already have a struct
+gpio_descs that contains the first 3 parameters so we end up with 3 (or
+often even 6) pointer indirections at each call site. Also, people have
+a tendency to want to hard-code the first argument instead of using
+struct gpio_descs.ndescs, often without checking that ndescs >= the
+hard-coded value.
 
-On Fri, Jan 31, 2025 at 11:24:16AM +0000, Biju Das wrote:
-> The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that
-> of the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
-> use SD_STATUS register to control voltage and power enable (internal
-> regulator), for non-fixed voltage (SD) MMC interface. However, it is
-> optional for fixed voltage MMC interface (eMMC).
->=20
-> For SD1 and SD2 channels, we can either use gpio regulator or internal
-> regulator (using SD_STATUS register) for voltage switching.
->=20
-> Document RZ/G3E SDHI IP support with optional internal regulator for
-> both RZ/G3E and RZ/V2H SoC.
->=20
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+So I'm proposing that we add a gpiods_set_array_value_cansleep()
+function that is a wrapper around gpiod_set_array_value_cansleep()
+that has struct gpio_descs as the first parameter to make it a bit
+easier to read the code and avoid the hard-coding temptation.
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
+I've just done gpiods_set_array_value_cansleep() for now since there
+were over 10 callers of this one. There aren't as many callers of
+the get and atomic variants, but we can add those too if this seems
+like a useful thing to do.
 
---2aWd9LJ+bsJ8g84Q
-Content-Type: application/pgp-signature; name="signature.asc"
+---
+David Lechner (13):
+      gpiolib: add gpiods_set_array_value_cansleep()
+      auxdisplay: seg-led-gpio: use gpiods_set_array_value_cansleep
+      bus: ts-nbus: validate ts,data-gpios array size
+      bus: ts-nbus: use gpiods_set_array_value_cansleep
+      gpio: max3191x: use gpiods_set_array_value_cansleep
+      iio: adc: ad7606: use gpiods_set_array_value_cansleep
+      iio: amplifiers: hmc425a: use gpiods_set_array_value_cansleep
+      iio: resolver: ad2s1210: use gpiods_set_array_value_cansleep
+      mmc: pwrseq_simple: use gpiods_set_array_value_cansleep
+      mux: gpio: use gpiods_set_array_value_cansleep
+      net: mdio: mux-gpio: use gpiods_set_array_value_cansleep
+      phy: mapphone-mdm6600: use gpiods_set_array_value_cansleep
+      ASoC: adau1701: use gpiods_set_array_value_cansleep
 
------BEGIN PGP SIGNATURE-----
+ drivers/auxdisplay/seg-led-gpio.c           |  3 +--
+ drivers/bus/ts-nbus.c                       | 10 ++++++----
+ drivers/gpio/gpio-max3191x.c                | 18 +++++++-----------
+ drivers/iio/adc/ad7606.c                    |  3 +--
+ drivers/iio/adc/ad7606_spi.c                |  3 +--
+ drivers/iio/amplifiers/hmc425a.c            |  3 +--
+ drivers/iio/resolver/ad2s1210.c             |  8 ++------
+ drivers/mmc/core/pwrseq_simple.c            |  3 +--
+ drivers/mux/gpio.c                          |  4 +---
+ drivers/net/mdio/mdio-mux-gpio.c            |  3 +--
+ drivers/phy/motorola/phy-mapphone-mdm6600.c |  4 +---
+ include/linux/gpio/consumer.h               |  7 +++++++
+ sound/soc/codecs/adau1701.c                 |  4 +---
+ 13 files changed, 31 insertions(+), 42 deletions(-)
+---
+base-commit: df4b2bbff898227db0c14264ac7edd634e79f755
+change-id: 20250131-gpio-set-array-helper-bd4a328370d3
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZ50FrwAKCRB4tDGHoIJi
-0mTTAP9hMeaxexsvfROzaDoowF7ghWEzn8zaXnkyG2lhXeJgGQEAwYRi02ArAkkT
-L5DAmPQ0lCwQs6yMpQ3EzuOUqoCoqQA=
-=x6j+
------END PGP SIGNATURE-----
+Best regards,
+-- 
+David Lechner <dlechner@baylibre.com>
 
---2aWd9LJ+bsJ8g84Q--
