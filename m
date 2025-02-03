@@ -1,153 +1,184 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 982C3205E11;
-	Mon,  3 Feb 2025 14:01:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7240C204C3B
+	for <linux-mmc@vger.kernel.org>; Mon,  3 Feb 2025 14:04:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738591297; cv=none; b=Hzl/acI3eI1Nz3s5M1ClZ3h1UJ0tP/NCNhw/myoKJE+IP6+Agw2mQnEf1ANX7PXGfFg/Q9sOZG0URdbTGD6SKNNq308koDgoalfV5lmP0nJfr6/NL6xkXJcGLBbF5EtucraPJLwJs023wjp2Dmx4JwcnsDC0Zoys+QjWzP/3Sao=
+	t=1738591478; cv=none; b=jB9gNrnd3/EbxZ3Ka6WFDphn+Oiim5tQhEnA862fslQxvJPvc+8z4+eJzG1EoCGp63kA6cgyG/Zul/doUwlQHn8aXK+H4oUxIDV8yN4yTedSshJf18HRCc0wquTvmdubEexKGats+G6QfbvlHQ1lClTvrN96o770WdVj7aCY7Kg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738591297; c=relaxed/simple;
-	bh=FUGVfpQsBsQZDnW8/29ndy6ufToxH4fLIZhk0OSH+vk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=PWJnpIQnCcw3Z4NRiEFoorB/w8iMP32SiN53w1b31k6F5Pw7JxrhgJsMXPOGjz26mB0yQg4luk8+sfI1aenKAjSWwNw9Jzw4k9Ip/wkMAg7F3K3rcY72wl2txrwAS1XJKqsfrocFLGv84RaC+Xzgt3ujFGzsazGp4WnvIAe7y0w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dxJQFzlt; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1738591478; c=relaxed/simple;
+	bh=2OIa1ZIrEwhXL5MsvNbrU11CTYqkfYM0Ww6BzG16qY8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Y3tS3RnmRBcg/BPDTeQpCoEME8PxcEZjUnKRjbFKIFSXCH5uEgpznzH5G8NZ+uBk49i4O6hpvZ1SsV20blGmzcAz1lUICuxzJn/ydpL+yPTOGsOUv7F659yDrAo/1+O6tqje5ttqD4XYqTJeeSn99c5rF2yDhDfUvED75DqSuVk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=j90kcpty; arc=none smtp.client-ip=209.85.128.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dxJQFzlt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 664D6C4CED2;
-	Mon,  3 Feb 2025 14:01:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1738591297;
-	bh=FUGVfpQsBsQZDnW8/29ndy6ufToxH4fLIZhk0OSH+vk=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=dxJQFzlt4BVNOgSQuojXmA9wuzm4juDMiaj0xfMOAE5qPk5Vzb1dY6VgLM/hLrYRI
-	 Zd9+pCEzYYVOR46Td4Mo1YEY21wDNc78e4E/NQu4MLG+yWelOi7uSJDHAR94Gq2Io2
-	 S/5g5li5Jhvv/wwVRI4ApfEeYqSP9+TuKxkXCOjaMGuMZGFoJXBSs7yJ/o4dYajCqM
-	 7sMqSFURdJ7oxQpQ7ZoOdRq4XLWiWKj1QXmNEhRzyyuYLgf26P1NSFzawTAN1FRBJ4
-	 ckEJtWX4+/sU6ftXPOVdiNouwo41UZKZrbT/T99jACiBEflDshR6f2c2lZ7XLI/b7z
-	 DPRk7DkWm7p3g==
-Message-ID: <9c8a9dee-92ba-47e4-b16b-ab47727d8057@kernel.org>
-Date: Mon, 3 Feb 2025 15:01:22 +0100
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="j90kcpty"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-6f14626c5d3so25128537b3.3
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Feb 2025 06:04:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1738591475; x=1739196275; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=3MiG8ILt8Yn9LtSo8zrEP73wfD//i7MORC/NBtgshl4=;
+        b=j90kcpty5ptvm7j5BK78SVi4pUcc3yTLzxSFQnNTRW8h6yd1kiLhJQ/PDC1A26hBFQ
+         v2UZeUKpQEeV2miSwkgl6fk4tHbc53WR9U+HMAwpFzIRJZsU+4NK3xMsgJ+UkxqHwcS8
+         0aDGFRurY61KDmaxSJwWHah6YktFQYo47bfzLqFb+9m0j9FqDbBpOrKre8PnJpuYMDvR
+         bAH8TP8mAIVrnaA+ZF67W3eW92mI2a3nvjDIwxMe4kikYGJMz6Y2I3WT8EUZDfz26oga
+         RjSUyHuA59F/oG9ReTf/cQ9/VSA2vSbQNWi5LDmqWRCTUQxCTpIllfVov6DppSmkkveJ
+         lEWQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738591475; x=1739196275;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=3MiG8ILt8Yn9LtSo8zrEP73wfD//i7MORC/NBtgshl4=;
+        b=kDqwZXrd69plfJlbAEcc+QLe2XU2zN7Z7UWvJWweYr2i7LFwbANsl3TBu3QUkEewjE
+         X3RisvbloTz7AsvOWg1qVqXcZh4GLfkrtMcyBPeNuSdSn7Os3txJ7V59V+FAgNvZ0CL5
+         i/kAW7eK2/VZPV6tn1FBj+RFFDEDZ3vza0XhyA3jVzFWyAwAUBTO4xW6n7EkQTItyTtU
+         sDH6KIK+3NX3H3ExXpfVP302CPwLEPFSEcGUbO3ESUwSSqbHODAYG5P/n3xBWvCReL6D
+         OCcoFkSPEpOOkdqY7uD5Oo6sTJhnruI7PLMrrRnbocoDKKDK939c00AK4GuJu815vQRw
+         8rwg==
+X-Forwarded-Encrypted: i=1; AJvYcCW+ZFy/XWRF+FL7aEHnx2Tk+1/y6cmExo5tKJYnIUfXvdJ7EWc4Jj/lCdqsn3W9X9PFzOBPkSPdNuE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxMJjwGxrumv1OILRfh3fTEUOfxjQIf/pZ5p0WVNPG7PZUurVlh
+	KDl7LfsXHhb6U2z+bkoAdOicw3lw9nN0RwfaXz1Fgb8NnRuZtyTOhPn12HfCNHDCLpjEKIyw1JO
+	EFPc5CwSRTygJYRuWD3hhZ/0b+7oX/Zj6K8/hCw==
+X-Gm-Gg: ASbGnctWHJiwCY1pj+yDAjuNj01gTeydKaUDRWIbqS7p/ZXXAMlA0Z8mKPx6zOPAJOw
+	D5xSmL2/YHFtYx+C6tp7R7vWkCBmbQ3XdT+y3IZqBesB5pzx1C5wBhN+YlSB2vjGN4Dy4D2DFyw
+	==
+X-Google-Smtp-Source: AGHT+IHLs3FLituH22CBJTCC44v20E2zGZEme1CuUalIEcbSHa4S1LzyVXjnSZYtsdh38rN7Sycwz9vIj9EtGuifSjM=
+X-Received: by 2002:a05:690c:994:b0:6f0:237e:fc67 with SMTP id
+ 00721157ae682-6f7a83fcefamr125534307b3.23.1738591475324; Mon, 03 Feb 2025
+ 06:04:35 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 02/33] dt-bindings: clock: add clock definitions for
- exynos7870 CMU
-To: Kaustabh Chakraborty <kauschluss@disroot.org>
-Cc: Rob Herring <robh@kernel.org>, Conor Dooley <conor@kernel.org>,
- Alim Akhtar <alim.akhtar@samsung.com>,
- Sylwester Nawrocki <s.nawrocki@samsung.com>,
- Chanwoo Choi <cw00.choi@samsung.com>,
- Michael Turquette <mturquette@baylibre.com>, Stephen Boyd
- <sboyd@kernel.org>, Tomasz Figa <tomasz.figa@gmail.com>,
- Linus Walleij <linus.walleij@linaro.org>,
- Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
- Jiri Slaby <jirislaby@kernel.org>, Lee Jones <lee@kernel.org>,
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
- Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>,
- Marek Szyprowski <m.szyprowski@samsung.com>, David Airlie
- <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- Andi Shyti <andi.shyti@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Jaehoon Chung <jh80.chung@samsung.com>,
- Vivek Gautam <gautam.vivek@samsung.com>,
- Thinh Nguyen <Thinh.Nguyen@synopsys.com>, Kees Cook <kees@kernel.org>,
- Tony Luck <tony.luck@intel.com>, "Guilherme G . Piccoli"
- <gpiccoli@igalia.com>, Sergey Lisov <sleirsgoevy@gmail.com>,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-clk@vger.kernel.org, linux-gpio@vger.kernel.org,
- linux-serial@vger.kernel.org, linux-phy@lists.infradead.org,
- linux-usb@vger.kernel.org, dri-devel@lists.freedesktop.org,
- linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
- linux-hardening@vger.kernel.org
-References: <20250203-exynos7870-v1-0-2b6df476a3f0@disroot.org>
- <20250202190758.14986-1-kauschluss@disroot.org>
- <20250203-enigmatic-remarkable-beagle-709955@krzk-bin>
- <c1249f2f6ac8a2f5a1dcb3bbbba647f9@disroot.org>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <c1249f2f6ac8a2f5a1dcb3bbbba647f9@disroot.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20250123092644.7359-1-andy-ld.lu@mediatek.com>
+In-Reply-To: <20250123092644.7359-1-andy-ld.lu@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 3 Feb 2025 15:03:59 +0100
+X-Gm-Features: AWEUYZnk_P6e6WT5mTt4ApkOyTMWhna0dJzCdBChCmPPxEjQ9bm-vcA95IzI1VE
+Message-ID: <CAPDyKFpXGoM+iYyMBtrnctPX_cJQv=tN52NunBRcfJecQzGy5A@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mtk-sd: Fix register settings for hs400(es) mode
+To: Andy-ld Lu <andy-ld.lu@mediatek.com>
+Cc: matthias.bgg@gmail.com, angelogioacchino.delregno@collabora.com, 
+	wenbin.mei@mediatek.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-mediatek@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 03/02/2025 13:40, Kaustabh Chakraborty wrote:
-> On 2025-02-03 07:54, Krzysztof Kozlowski wrote:
->> On Mon, Feb 03, 2025 at 12:37:58AM +0530, Kaustabh Chakraborty wrote:
->>> From: Sergey Lisov <sleirsgoevy@gmail.com>
->>>
->>> Add unique identifiers for exynos7870 clocks for every bank. It adds all
->>> clocks of CMU_MIF, CMU_DISPAUD, CMU_G3D, CMU_ISP, CMU_MFCMSCL, and
->>> CMU_PERI.
->>>
->>> Signed-off-by: Sergey Lisov <sleirsgoevy@gmail.com>
->>> Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
->>> ---
->>>  include/dt-bindings/clock/exynos7870.h | 324 +++++++++++++++++++++++++
->>>  1 file changed, 324 insertions(+)
->>
->> Look at git log - that's never a separate commit.
-> 
-> Hmm, I see past examples which are mixed.
-> 
-> 2ae5c2c3f8d586b709cf67efe94488be397d7544
-> Exynos850 CMU (c. 2021). CMU definitions are in a separate commit.
-> 
-> 591020a516720e9eba1c4b1748cb73b6748e445f
-> Exynos7885 CMU (c. 2021). CMU definitions are in a separate commit.
-> 
-Huh, indeed, my mistake.
+On Thu, 23 Jan 2025 at 10:26, Andy-ld Lu <andy-ld.lu@mediatek.com> wrote:
+>
+> For hs400(es) mode, the 'hs400-ds-delay' is typically configured in the
+> dts. However, some projects may only define 'mediatek,hs400-ds-dly3',
+> which can lead to initialization failures in hs400es mode. CMD13 reported
+> response crc error in the mmc_switch_status() just after switching to
+> hs400es mode.
+>
+> [    1.914038][   T82] mmc0: mmc_select_hs400es failed, error -84
+> [    1.914954][   T82] mmc0: error -84 whilst initialising MMC card
+>
+> Currently, the hs400_ds_dly3 value is set within the tuning function. This
+> means that the PAD_DS_DLY3 field is not configured before tuning process,
+> which is the reason for the above-mentioned CMD13 response crc error.
+>
+> Move the PAD_DS_DLY3 field configuration into msdc_prepare_hs400_tuning(),
+> and add a value check of hs400_ds_delay to prevent overwriting by zero when
+> the 'hs400-ds-delay' is not set in the dts. In addition, since hs400(es)
+> only tune the PAD_DS_DLY1, the PAD_DS_DLY2_SEL bit should be cleared to
+> bypass it.
+>
+> Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
+> Signed-off-by: Andy-ld Lu <andy-ld.lu@mediatek.com>
 
-Let's avoid that pattern, so binding headers are always part of bindings
-commit.
+Applied for fixes and by adding a stable-tags, thanks!
 
-Best regards,
-Krzysztof
+Kind regards
+Uffe
+
+
+> ---
+> Changes in v2:
+> - Change commit title from 'optimize' to 'Fix'
+> - Add a Fixes tag
+> - Change spaces back to tabs
+>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 31 ++++++++++++++++++++-----------
+>  1 file changed, 20 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 4b6e91372526..345ea91629e0 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -273,6 +273,7 @@
+>  #define MSDC_PAD_TUNE_CMD2_SEL   BIT(21)   /* RW */
+>
+>  #define PAD_DS_TUNE_DLY_SEL       BIT(0)         /* RW */
+> +#define PAD_DS_TUNE_DLY2_SEL      BIT(1)         /* RW */
+>  #define PAD_DS_TUNE_DLY1         GENMASK(6, 2)   /* RW */
+>  #define PAD_DS_TUNE_DLY2         GENMASK(11, 7)  /* RW */
+>  #define PAD_DS_TUNE_DLY3         GENMASK(16, 12) /* RW */
+> @@ -318,6 +319,7 @@
+>
+>  /* EMMC50_PAD_DS_TUNE mask */
+>  #define PAD_DS_DLY_SEL         BIT(16) /* RW */
+> +#define PAD_DS_DLY2_SEL                BIT(15) /* RW */
+>  #define PAD_DS_DLY1            GENMASK(14, 10) /* RW */
+>  #define PAD_DS_DLY3            GENMASK(4, 0)   /* RW */
+>
+> @@ -2504,13 +2506,23 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+>  {
+>         struct msdc_host *host = mmc_priv(mmc);
+> +
+>         host->hs400_mode = true;
+>
+> -       if (host->top_base)
+> -               writel(host->hs400_ds_delay,
+> -                      host->top_base + EMMC50_PAD_DS_TUNE);
+> -       else
+> -               writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
+> +       if (host->top_base) {
+> +               if (host->hs400_ds_dly3)
+> +                       sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
+> +                                     PAD_DS_DLY3, host->hs400_ds_dly3);
+> +               if (host->hs400_ds_delay)
+> +                       writel(host->hs400_ds_delay,
+> +                              host->top_base + EMMC50_PAD_DS_TUNE);
+> +       } else {
+> +               if (host->hs400_ds_dly3)
+> +                       sdr_set_field(host->base + PAD_DS_TUNE,
+> +                                     PAD_DS_TUNE_DLY3, host->hs400_ds_dly3);
+> +               if (host->hs400_ds_delay)
+> +                       writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
+> +       }
+>         /* hs400 mode must set it to 0 */
+>         sdr_clr_bits(host->base + MSDC_PATCH_BIT2, MSDC_PATCH_BIT2_CFGCRCSTS);
+>         /* to improve read performance, set outstanding to 2 */
+> @@ -2530,14 +2542,11 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
+>         if (host->top_base) {
+>                 sdr_set_bits(host->top_base + EMMC50_PAD_DS_TUNE,
+>                              PAD_DS_DLY_SEL);
+> -               if (host->hs400_ds_dly3)
+> -                       sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
+> -                                     PAD_DS_DLY3, host->hs400_ds_dly3);
+> +               sdr_clr_bits(host->top_base + EMMC50_PAD_DS_TUNE,
+> +                            PAD_DS_DLY2_SEL);
+>         } else {
+>                 sdr_set_bits(host->base + PAD_DS_TUNE, PAD_DS_TUNE_DLY_SEL);
+> -               if (host->hs400_ds_dly3)
+> -                       sdr_set_field(host->base + PAD_DS_TUNE,
+> -                                     PAD_DS_TUNE_DLY3, host->hs400_ds_dly3);
+> +               sdr_clr_bits(host->base + PAD_DS_TUNE, PAD_DS_TUNE_DLY2_SEL);
+>         }
+>
+>         host->hs400_tuning = true;
+> --
+> 2.46.0
+>
