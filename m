@@ -1,145 +1,137 @@
-Received: from mail-lj1-f171.google.com (mail-lj1-f171.google.com [209.85.208.171])
+Received: from mail-lf1-f48.google.com (mail-lf1-f48.google.com [209.85.167.48])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D382220765F
-	for <linux-mmc@vger.kernel.org>; Tue,  4 Feb 2025 08:52:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD96120A5DF
+	for <linux-mmc@vger.kernel.org>; Tue,  4 Feb 2025 10:42:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738659156; cv=none; b=o5LVw0GCdW9is4ho3RK52SrW/5uzEJzBPovHtn+8chWcy76J76Ha+NafMSwzSoaUQOfqTwIlJx3WsLhG9VwPgjfml6sX9GxY4vvkbCT+x8EyufBdsR8HbNkwtJVkaPLbFkET6me+ErqN1KY/hgs4hA46yEab8z2yFWuVJgxr8nk=
+	t=1738665781; cv=none; b=GBn3uLPirNQr93pOw4DbqSpVceMf/DGHe3g9GhddO+G1cQy/r+bvmQMfQ+1VyHVucDRzvcaI2Nuau6kRTqaRz/u3D1K4q9ZtP6yCIHDKWFF+lJoKIvj83ikf9b8JUwafwMGoUHR9Qso6yaBAv/cH6rjbJcpF0/uleKxKhjtV1nY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738659156; c=relaxed/simple;
-	bh=HutRJSMeJRnt/VeA6fBVfyfIzPoRWNej7hPpS/LJnd8=;
+	s=arc-20240116; t=1738665781; c=relaxed/simple;
+	bh=O9fK3I1pzwKP4nLc6/iAkvLdftAlb3h+THZJIPaOcUM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=B5miEs8O+qq+mfm88bP1RPVspOOa0jZA5fOXHFd+FpH7ti3K2zTFffKKXr48C+p2Zk63lzo1tARZ2ZZEKCoA20vvBVACTH91ro4xvZITu7zwDyPCNT2RXGLhDNAzSG+fuE0hrnTRpexJV8VkW59IOM4dr+2lx873YmNqER0jYmc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=QhySt0hM; arc=none smtp.client-ip=209.85.208.171
+	 To:Cc:Content-Type; b=OCvsnuIRFbosph2oU+ostgT2RtFY1FSHPmzfsFezaxqastPbKCkY4XKBJn6VsZ5nAv5A5mKdpMI0hEjcD5Ed0AM+G7qpTaDIH3klBNVY3V/ni5k/KQH63lQmqoe92Bm5cEu+aQoGpCYb0HAdS2IcYpEnQl6epIkXA0qL7gi0jpI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=I7lYGzHv; arc=none smtp.client-ip=209.85.167.48
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="QhySt0hM"
-Received: by mail-lj1-f171.google.com with SMTP id 38308e7fff4ca-30616d71bb0so54926051fa.3
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2025 00:52:33 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="I7lYGzHv"
+Received: by mail-lf1-f48.google.com with SMTP id 2adb3069b0e04-53e384e3481so375477e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Feb 2025 02:42:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1738659152; x=1739263952; darn=vger.kernel.org;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1738665777; x=1739270577; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HutRJSMeJRnt/VeA6fBVfyfIzPoRWNej7hPpS/LJnd8=;
-        b=QhySt0hMEJ0xvBA2+3D7NGwSBvsVzp33uDy7u2SBmZWVPuA/oVJKLlEyrFPUaMBEfa
-         xYGbBZCPgniM2k7OgdysO0kkVCgiDDElacQMcmi3VTrEeYZiKVOj9RfKjIdxJzv3gtUB
-         hQi4DbDpbG7I9V70l+ZxsMvRk8z02OtAnKx2vhIUnTY7UUkXtO1Oa3boVysr3xybcyqH
-         KRZ5lG8b8oRI4vacsT1F1TCtFwLEs8E67a9NHol6nqP6Z3bH7y2U2bbd6L5GOs7Kt/JA
-         ZaodQoPoTB4qzCaFPqSXjysyyU3lLuulcf2gyMHqDtVlVWhpFYG5+8SCJO9soFJeHpBP
-         wQFA==
+        bh=lE2w/bQJpX8Ezf3hOPnZ8S+RoX8BTDVVvaDLT5mRYhc=;
+        b=I7lYGzHvU0BIKzXN8+MYN6s/pBGNbsu18VNl0KVMsNRP/0bQJL0KbLWpSvTLgIL6fm
+         xZcumAOfZcd1ZZM1Au5prZx3JuRGG36Uddc6zNG5mX1QqVr1FbQfMafvYZXC5fUyxEN3
+         06zeMYaNVxPHWmxAVm4q9Ti5UiExaSR1/CSJLFFTfAjCc0HiNWwnTRWb8U2CRzz4v9ps
+         6GqUzZj4enmv9KiMdaKU8d/rIq95qB91+dXwCcx0WsdxsmlWhJQK0F0DKap/fnuPAI38
+         WbvBRHTiAy1yJb6bv6MqPpjRW6NncHqUQp3wjlw8d8nxjrklqtNTkb+rNH7Y61hLQJK7
+         lw6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738659152; x=1739263952;
+        d=1e100.net; s=20230601; t=1738665777; x=1739270577;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HutRJSMeJRnt/VeA6fBVfyfIzPoRWNej7hPpS/LJnd8=;
-        b=UfSIOWyFz3eNoTzVoe9LCgoijqh4NH4Hbn9QrTly2LChq2JNyFkxt0OCuFaF89BRDE
-         IVLnbceAmEOOsBx0gqnT2Qo/MEmDEHvGoJb9WrwOK5PPleJ00RnxVkb81GrtxOUyy0Ie
-         6WM1bA1D09UOmLvV9DZWFNgE0pDXKcURRjttxFIgpaZ6k96qfPzrb5ecITgo0ozd6wDW
-         Bp6FUfvlnjaWLbqo+XepA9TFMXFItfBIUmxEIgAg5k3CU7G7F3vlHZp0YybggE3CwbJL
-         ah4/5QpAFOd6uIF7cCtHwLJs6yuJR7OMB5XT0sh52dBkjXounGGiXRkSAS8pr5qBX8gi
-         U47A==
-X-Forwarded-Encrypted: i=1; AJvYcCXu13PbCB5DZ0+PkJJfS4kzSc6qD9I01oZVE+KWAbBQbFQch23okOHDM09DiFZw2PkuOFV02eRi9eQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwgpM4eXt0+hPi375BHFdLHfj8lWk/rUUvIu+hvONmT47GC+uxx
-	cKu3NonyWslngjPo/OYyIMp3zW+lNo0CFfaRLtdPEAm1DeV+kerU9FJ5B1MkWfeEWax5YwGm/JR
-	nTlEwAyr8jbLAlMaNOMxMyTAXFXn+lMS+LO49iQ==
-X-Gm-Gg: ASbGncsiwRbrvxaXlQYSTmMR6C5qNDD5yrZkBihCXIlVu1kmSNLRknPGyWLYTXK0twQ
-	e0adcNZB78ydJ5xmdZgtavaJ4390y4AfIVtXXQbMLjxC82e1Er8JjKcI4jl06u/9o7py0F4njq6
-	McFDdS3ySf3tkQmOwECpDRhLnHtWd8
-X-Google-Smtp-Source: AGHT+IF3lsa7S5YwWpfcQVRJJ5PSQIykvInkMIj9GBvAH9xqe0CZdk0yaxGhiayetNv5EouQr4rP2NIVzzgLrFTtrHU=
-X-Received: by 2002:a2e:a90d:0:b0:300:15d9:c625 with SMTP id
- 38308e7fff4ca-3079684af3emr90981231fa.14.1738659151822; Tue, 04 Feb 2025
- 00:52:31 -0800 (PST)
+        bh=lE2w/bQJpX8Ezf3hOPnZ8S+RoX8BTDVVvaDLT5mRYhc=;
+        b=RIrz5NmrsfgG2C0TTOd1WP2v1zPKAal1VM6t47unHYDlAIXojqXIVp15bjoWU+nVUZ
+         m/VMULU1SoNTvsipMvmAw1A0cvwLt9LKXgZIH1mqHMSMgCS8MjHmV3SHGS+HYjd30F9y
+         cMpKwrqBA6q+ZAkNnFXd6Gyi6Gqbc0mqtt1yQ3G/VXgy5xSdpCjS9BPq8j/UHizhDpwa
+         NOXf7WSLl3xCKKnRL26TGiFsza5fn6Obzbu5Usak1ODuxwwWQ/aBinx10+Ywon8P8ZB8
+         JkE+ehpiIKQHSSNtdQhFJtBiBV05RTy3P711wJEpmdbvwAgT8XQtc4HloWyjjp0DbrFI
+         7ARQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWMVgVgGn7QzQEQHl0xynJPf8m48Kv5aHusXUGBe0mv/6WRF+s2uIGgoukmtudekyFvhz6U9oQSeAU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyhIVL4XL2m3J/HV7lzXZjpA/1Hf6hZ7h7pBrlJUaRjJXF/ZJVd
+	/P5pTXF9cB/Sprfc32TnIP9AnmPC6O5kdDLpDJAe3krv9IghItt3EoS7h4q03XeoaQkjs3IaYTN
+	t6gSmgcq2FopUs81kHuI0R68h+HRktWEmK/VrsQ==
+X-Gm-Gg: ASbGncsXFPe0ajJ7UTpt3goBmAhP90kHu8ibviM+uCBUEluUUmsO0NvK0BDqjFzNzdT
+	hA3F5iRisAHKNTOpIOiTr/snZYDAFG0Qcd/mNo57NQoVlfMI++G8GBZKfRtB46dfX2FZAaLcnLf
+	fRgktGCIJuc2kPjkornf6S5ckMkgG+
+X-Google-Smtp-Source: AGHT+IE5CYBdpn6DfP3V68IEBp+LNXJHRO3XMVbiHUUscPeksGzYuA8lgJODapvJJrdvbNiLHm9bcRL2vHNots0NUJA=
+X-Received: by 2002:ac2:4f85:0:b0:542:2999:399c with SMTP id
+ 2adb3069b0e04-543e4c3cac2mr6409529e87.46.1738665776073; Tue, 04 Feb 2025
+ 02:42:56 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250131-gpio-set-array-helper-v1-0-991c8ccb4d6e@baylibre.com>
- <CAMRc=MdwQL8dWU5zF5fp+KUbC2RA2Q264by8HGXMg2k1rxhsTA@mail.gmail.com>
- <9931433b-5cde-4819-ac96-eea4f1f0f1f2@baylibre.com> <CAMRc=McEdcDs01BAKN5vg9POg_xxJBY1k8bfgiDN60C1-e_jow@mail.gmail.com>
- <072be5a9-e0fb-4073-85b3-4a8efcafae09@baylibre.com> <CAMRc=Meq_Gfhcjzx0vCL0JPzfnOcijFgB6AuqtsqgGn1eOTMVg@mail.gmail.com>
- <CAHp75Ve+iwrm8dx49+6C7xFJgTQrh3XumKVzKvnYY=00J-j43A@mail.gmail.com> <b1c35782-f717-4fe5-8a00-7f13b341b5dd@baylibre.com>
-In-Reply-To: <b1c35782-f717-4fe5-8a00-7f13b341b5dd@baylibre.com>
+References: <20250204060041.409950-1-ebiggers@kernel.org>
+In-Reply-To: <20250204060041.409950-1-ebiggers@kernel.org>
 From: Bartosz Golaszewski <brgl@bgdev.pl>
-Date: Tue, 4 Feb 2025 09:52:20 +0100
-X-Gm-Features: AWEUYZkoSkw9yp224bcw4kgu34MNb3lBM2F-Kpo3dstTt1XbKUZR_n5bPczpQE0
-Message-ID: <CAMRc=MdzeY7p8O2ovJ-Z9u-KzqfeEG7BxRvKHBHPrsFYDFAryA@mail.gmail.com>
-Subject: Re: [PATCH 00/13] gpiolib: add gpiods_set_array_value_cansleep
-To: David Lechner <dlechner@baylibre.com>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>, linux-gpio@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org, 
-	Linus Walleij <linus.walleij@linaro.org>, Andy Shevchenko <andy@kernel.org>, 
-	Geert Uytterhoeven <geert@linux-m68k.org>, Lars-Peter Clausen <lars@metafoo.de>, 
-	Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, 
-	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, =?UTF-8?B?TnVubyBTw6E=?= <nuno.sa@analog.com>, 
-	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>
+Date: Tue, 4 Feb 2025 11:42:45 +0100
+X-Gm-Features: AWEUYZnKZTyWo8D9zkwZDMqGx-d60ikbe91VkAnSO7h5ypwW4ujvIIcv_3fYFsw
+Message-ID: <CAMRc=Mf-iTgUM4K1c6NpsWL+dk9BP72rJsXKf6tCKUTB=SSizA@mail.gmail.com>
+Subject: Re: [PATCH v11 0/7] Support for hardware-wrapped inline encryption keys
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>, 
+	Gaurav Kashyap <quic_gaurkash@quicinc.com>, linux-fscrypt@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, 
+	linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Feb 3, 2025 at 11:39=E2=80=AFPM David Lechner <dlechner@baylibre.co=
-m> wrote:
+On Tue, Feb 4, 2025 at 7:03=E2=80=AFAM Eric Biggers <ebiggers@kernel.org> w=
+rote:
 >
-> On 2/1/25 1:47 PM, Andy Shevchenko wrote:
-> > On Sat, Feb 1, 2025 at 6:22=E2=80=AFPM Bartosz Golaszewski <brgl@bgdev.=
-pl> wrote:
-> >> On Sat, Feb 1, 2025 at 5:17=E2=80=AFPM David Lechner <dlechner@baylibr=
-e.com> wrote:
-> >>> On 2/1/25 10:14 AM, Bartosz Golaszewski wrote:
-> >>>> On Sat, Feb 1, 2025 at 5:09=E2=80=AFPM David Lechner <dlechner@bayli=
-bre.com> wrote:
-> >>>>> On 2/1/25 4:36 AM, Bartosz Golaszewski wrote:
-> >
-> > ...
-> >
-> >>>>>> This looks good to me except for one thing: the function prefix. I=
- would
-> >>>>>> really appreciate it if we could stay within the existing gpiod_ n=
-amespace and
-> >>>>>> not add a new one in the form of gpiods_.
-> >>>>>>
-> >>>>>> Maybe: gpiod_multiple_set_ or gpiod_collected_set...?
-> >>>>>
-> >>>>> I was waiting for someone to complain about the naming. ;-)
-> >>>>>
-> >>>>> I was going for as short as possible, but OK, the most obvious pref=
-ix to me
-> >>>>> would be `gpio_descs_...` (to match the first parameter). Any objec=
-tions to
-> >>>>> that?
-> >>>>
-> >>>> Yes, objection! As far as any exported interfaces go: in my book
-> >>>> "gpio_" is the prefix for legacy symbols we want to go away and
-> >>>> "gpiod_" is the prefix for current, descriptor-based API. Anything
-> >>>> else is a no-go. I prefer a longer name that starts with gpiod_ over
-> >>>> anything that's shorter but doesn't.
-> >>>
-> >>> Oops, that was a typo. I meant to write gpiod_descs_.
-> >>
-> >> Eh... the D in gpioD already stands for "GPIO Descriptor" but if
-> >> there's no better option in your opinion than I guess I can live with
-> >> that.
-> >
-> > gpiod_set_many_value_cansleep() ?
-> >
+> This patchset is based on v6.14-rc1 and is also available at:
 >
-> OK, taking all these suggestions into consideration along with having rec=
-ently
-> come across regmap_multi_reg_write(), I think I'll go with:
+>     git fetch https://git.kernel.org/pub/scm/fs/fscrypt/linux.git wrapped=
+-keys-v11
 >
-> gpiod_multi_set_value_cansleep()
+> This patchset adds support for hardware-wrapped inline encryption keys,
+> a security feature supported by some SoCs.  It adds the block and
+> fscrypt framework for the feature as well as support for it with UFS on
+> Qualcomm SoCs.
+>
+> This feature is described in full detail in the included Documentation
+> changes.  But to summarize, hardware-wrapped keys are inline encryption
+> keys that are wrapped (encrypted) by a key internal to the hardware so
+> that they can only be unwrapped (decrypted) by the hardware.  Initially
+> keys are wrapped with a permanent hardware key, but during actual use
+> they are re-wrapped with a per-boot ephemeral key for improved security.
+> The hardware supports importing keys as well as generating keys itself.
+>
+> This differs from the existing support for hardware-wrapped keys in the
+> kernel crypto API (also called "hardware-bound keys" in some places) in
+> the same way that the crypto API differs from blk-crypto: the crypto API
+> is for general crypto operations, whereas blk-crypto is for inline
+> storage encryption.
+>
+> This feature is already being used by Android downstream for several
+> years
+> (https://source.android.com/docs/security/features/encryption/hw-wrapped-=
+keys),
+> but on other platforms userspace support will be provided via fscryptctl
+> and tests via xfstests.  The tests have been merged into xfstests, and
+> they pass on the SM8650 HDK with the upstream kernel plus this patchset.
+>
+> This is targeting 6.15.  As per the suggestion from Jens
+> (https://lore.kernel.org/linux-block/c3407d1c-6c5c-42ee-b446-ccbab1643a62=
+@kernel.dk/),
+> I'd like patches 1-3 to be queued up into a branch that gets pulled into
+> the block tree.  I'll then take patches 4-7 through the fscrypt tree,
+> also for 6.15.  If I end up with too many merge conflicts by trying to
+> take patches 5-7 (given that this is a cross-subsystem feature), my
+> fallback plan will be to wait until 6.16 to land patches 5-7, when they
+> will finally be unblocked by the block patches having landed.
+>
+> Changed in v11:
+>   - Rebased onto v6.14-rc1.  Dropped the patches that were upstreamed in
+>     6.14, and put the block patches first in the series again.
+>   - Significantly cleaned up the patch "soc: qcom: ice: add HWKM support
+>     to the ICE driver".  Some of the notable changes were dropping the
+>     unnecessary support for HWKM v1, and replacing qcom_ice_using_hwkm()
+>     with qcom_ice_get_supported_key_type().
+>   - Consistently used and documented the EBADMSG error code for invalid
+>     hardware-wrapped keys.
+>   - Other minor cleanups.
+>
 
-Sounds good.
-
-Bart
+Tested-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org> # sm8650
