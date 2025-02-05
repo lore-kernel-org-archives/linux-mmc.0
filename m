@@ -1,53 +1,28 @@
-Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
+Received: from mx3.molgen.mpg.de (mx3.molgen.mpg.de [141.14.17.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 82C261FF1B3;
-	Wed,  5 Feb 2025 19:39:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0C1514F9FD;
+	Wed,  5 Feb 2025 21:48:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=141.14.17.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738784359; cv=none; b=Wp2wN6ya3Dgjie0dnTtDlC+KtsZsGVlmec3xzN+vBHvlfI3qhEb0l50E7TxXupAlXGL9npjKSa0NEJqlATw51758jyHKmSAZvxnkeBdfX4hmNbKdsBdfQkNeq7jk+2MidISEol6TILxzoPVIv32Uo7Myd/TvpIJHPwVwnUwF1cw=
+	t=1738792139; cv=none; b=PHTByazRCM4je6a5DzMQC5/QDs9aoavlplGbe2ZCoIIIiGxlT1u9pehYyMLDlR63TTZGU9d7+cCjf0IjJq57z/hJZ3MY/EbFnaJHQjmHojgaqWMVM/EFYOFxuxGw7eEaXbRZd+/lqSjeYNZ2YTzUqi4vKgZO1v1jmcoD0uoVDYc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738784359; c=relaxed/simple;
-	bh=zKOiOlHpbUp4kXpTzvoyfe5HyGDtgYP/N9y2FM6xobo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=C8aAHBLOAhR33NXFuhmIigO8NhXnJ1+PgbiX5POzBhfmzm49n41PqNNZCP8xXRviLMI9H7Mo0iqQjn0dwpPNh5cbfN9xlEUnDXSEBqFd07lRzHqF1AZCYNRgn33uHnmUPX7kBgJrcdt+WzrnHlBQXqlGYdddTx6GZL+o4YSSrEc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=gEriVhBj; arc=none smtp.client-ip=198.47.19.245
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="gEriVhBj"
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 515Jd8GQ3413358
-	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 5 Feb 2025 13:39:08 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1738784348;
-	bh=ZyjPaBbnb1ioUY1aZ/qbMWRhtW3CaVcbfAm0oTsy96M=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=gEriVhBjDKj6EJRF31VLgY0WLSgAG1iIbPaw4ULEj3TnywsHi2f5SKEE7UmorA8LL
-	 04aBEDy+Dw09lYoaLUJZb/ZCSG4ZHWkL8kaEPqw8yuHnjsSo5G9qIwgldrq1HX/fr7
-	 FzbYUnYqWr8ED1NhbtbB/hLfaR0OaeYv9CmmgWGI=
-Received: from DLEE107.ent.ti.com (dlee107.ent.ti.com [157.170.170.37])
-	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 515Jd8r0056138
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 5 Feb 2025 13:39:08 -0600
-Received: from lewvowa01.ent.ti.com (10.180.75.79) by DLEE107.ent.ti.com
- (157.170.170.37) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 5
- Feb 2025 13:39:08 -0600
-Received: from DLEE115.ent.ti.com (157.170.170.26) by lewvowa01.ent.ti.com
- (10.180.75.79) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2507.34; Wed, 5 Feb
- 2025 13:39:08 -0600
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE115.ent.ti.com
- (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 5 Feb 2025 13:39:07 -0600
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 515Jd8Bk032794;
-	Wed, 5 Feb 2025 13:39:08 -0600
-Message-ID: <93d7e958-be62-45b3-ba8f-d3e4cf2839bf@ti.com>
-Date: Wed, 5 Feb 2025 13:39:07 -0600
+	s=arc-20240116; t=1738792139; c=relaxed/simple;
+	bh=HGlN6Lerm3dgGJK7wrSbhUF1CVnE4TgF1Bj6J2HcwDY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=jshRCLEpafAOhLJTu8T/nemG9B+bHJxsd6pukuRGyzCAYcId/pDnwZyQZoL8wX1lJbjoCBflWEW5DXFrGqLdR918ApTAWEGWsPoBhFY8Sb1+/zKCxY0Rsi18Xb45GtjXIk1HyPd50nVQazTK8Lt/xBELJxVTLDW0X2vYKrzZckg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=molgen.mpg.de; spf=pass smtp.mailfrom=molgen.mpg.de; arc=none smtp.client-ip=141.14.17.11
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=molgen.mpg.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=molgen.mpg.de
+Received: from [10.59.18.202] (p57a7ad4d.dip0.t-ipconnect.de [87.167.173.77])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: pmenzel)
+	by mx.molgen.mpg.de (Postfix) with ESMTPSA id 6C6F761E64795;
+	Wed, 05 Feb 2025 22:48:25 +0100 (CET)
+Message-ID: <e30f47ea-396e-45c7-a2aa-d141d27dae4c@molgen.mpg.de>
+Date: Wed, 5 Feb 2025 22:48:24 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,66 +30,64 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] Revert "mmc: sdhci_am654: Add
- sdhci_am654_start_signal_voltage_switch"
-To: Josua Mayer <josua@solid-run.com>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <rabeeh@solid-run.com>, <jon@solid-run.com>, <stable@vger.kernel.org>
-References: <20250127-am654-mmc-regression-v2-1-9bb39fb12810@solid-run.com>
+Subject: Re: Linux warns `rtsx_pci 0000:3b:00.0: PM: dpm_run_callback():
+ pci_pm_resume returns -110`
+To: =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>, linux-pci@vger.kernel.org,
+ linux-pm@vger.kernel.org, regressions@lists.linux.dev,
+ Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+ LKML <linux-kernel@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>
+References: <d7246feb-4f3f-4d0c-bb64-89566b170671@molgen.mpg.de>
+ <027efc9e-bc70-49af-7d48-fb474533993d@linux.intel.com>
 Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <20250127-am654-mmc-regression-v2-1-9bb39fb12810@solid-run.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+From: Paul Menzel <pmenzel@molgen.mpg.de>
+In-Reply-To: <027efc9e-bc70-49af-7d48-fb474533993d@linux.intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Hi all,
+Dear Ilpo,
 
-On 1/27/25 2:12 PM, Josua Mayer wrote:
-> This reverts commit 941a7abd4666912b84ab209396fdb54b0dae685d.
+
+Thank you for your instant reply.
+
+
+Am 05.02.25 um 09:44 schrieb Ilpo Järvinen:
+> On Tue, 4 Feb 2025, Paul Menzel wrote:
 > 
-> This commit uses presence of device-tree properties vmmc-supply and
-> vqmmc-supply for deciding whether to enable a quirk affecting timing of
-> clock and data.
-> The intention was to address issues observed with eMMC and SD on AM62
-> platforms.
+>> #regzbot introduced: b46c89c08f41..aa22f4da2a46
+
+>> On the Intel Kaby Lake laptop Dell XPS 13 9360, at least Linux
+>> 6.13.0-07632-gaa22f4da2a46 logs the new warnings:
+
+(Just a side note, these are actually logged with level error.)
+
+>>      rtsx_pci 0000:3b:00.0: Unable to change power state from D0 to D3hot, device inaccessible
+>>      rtsx_pci 0000:3b:00.0: PM: dpm_run_callback(): pci_pm_resume returns -110
+>>      rtsx_pci 0000:3b:00.0: PM: failed to resume async: error -110
+>>
+>> These were not present up to including Linux 6.13.0-07078-gb46c89c08f41.
+>>
+>> It looks like the first warning is not always logged:
+>>
+>>      $ sudo dmesg | grep rtsx
+>>      [    8.612537] rtsx_pci 0000:3b:00.0: enabling device (0000 -> 0002)
+>>      [ 2010.081170] rtsx_pci 0000:3b:00.0: Unable to change power state from D0 to D3hot, device inaccessible
+>>      [ 2010.236503] rtsx_pci 0000:3b:00.0: PM: dpm_run_callback(): pci_pm_resume returns -110
+>>      [ 2010.236525] rtsx_pci 0000:3b:00.0: PM: failed to resume async: error -110
+>>      [ 4115.541202] rtsx_pci 0000:3b:00.0: PM: dpm_run_callback(): pci_pm_resume returns -110
+>>      [ 4115.541216] rtsx_pci 0000:3b:00.0: PM: failed to resume async: error -110
+>>
+>> Logs from Linux 6.14-rc1 are attached. Bisection is only possible after next
+>> Sunday.
 > 
-> This new quirk is however also enabled for AM64 breaking microSD access
-> on the SolidRun HimmingBoard-T which is supported in-tree since v6.11,
-> causing a regression. During boot microSD initialization now fails with
-> the error below:
+> Please try if this fix helps:
 > 
-> [    2.008520] mmc1: SDHCI controller on fa00000.mmc [fa00000.mmc] using ADMA 64-bit
-> [    2.115348] mmc1: error -110 whilst initialising SD card
-> 
-> The heuristics for enabling the quirk are clearly not correct as they
-> break at least one but potentially many existing boards.
-> 
-> Revert the change and restore original behaviour until a more
-> appropriate method of selecting the quirk is derived.
+> https://lore.kernel.org/linux-pci/20250131152913.2507-1-ilpo.jarvinen@linux.intel.com/
+
+Yes, after applying the patch these errors were *not* logged in three 
+ACPI S3 suspend/resume cycles.
 
 
-Somehow I missed these emails, apologies.
+Kind regards,
 
-Thanks for reporting this issue Josua.
-
-We do need this patch for am62x devices since it fixes timing issues
-with a variety of SD cards on those boards, but if there is a
-regression, too bad, patch had to be reverted.
-
-I will look again into how to implement this quirk, I think using the
-voltage regulator nodes to discover if we need this quirk might not have
-been a good idea, based on your explanation. I believe I did test the
-patch on am64x SK and am64x EVM boards and saw no boot issue there,
-so the issue seems related to the voltage regulator nodes existing in DT
-(the heuristics for enabling the quirk) as you call it.
-
-Again, thanks for reporting, will look into fixing this issue for am62x
-again soon.
-
-~ Judith
-
-
+Paul
