@@ -1,77 +1,94 @@
-Received: from mx0b-00300601.pphosted.com (mx0b-00300601.pphosted.com [148.163.142.35])
+Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DD7C2417C0;
-	Thu,  6 Feb 2025 23:03:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.142.35
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7105823BFB9;
+	Thu,  6 Feb 2025 23:54:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738883006; cv=none; b=J9K4DFYZldbwVScageM35gFzquFnfcuqkR7oAsrXEBZPMtLqkeedCnhVI/+meBvYVMiJqF+yf8pxjIHCJPOirtWvXHfRVq2KJPqD5OUKT2DKbgENtaYdnnEEFHTSJhxwVF/EGyUC2j1QetbedaCSCDru4ykL4RFQKmqks0ktq7Y=
+	t=1738886042; cv=none; b=p31FvfzBqdA9K/5CEPHeO3T7TqB6oV6spwYzE3tnAmr+JLL63YVYdve8a91HPS0LI2+DljRmP/RHPU/oVZwCmGlShx4uXlhm5Ix+KVHrldYrfxYh9ShZv8cDrB8hOdRN+JPBonywo7/r3PwjY0H3CjyOZP7t0eXady1oEwpe8iE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738883006; c=relaxed/simple;
-	bh=NlITSawW+DQyY3XY18sCOkBAch1CacQ0lSTqJ4cGwkQ=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=SNkcL9o+EieVWjVOXw45F+Iunb1PDYCE8+ryPjxI6hKEIh8iF+fJ1Eom7P7Yn2N8+9atFzEuasILT3wNDxrKNEeq1xEZxOppWMNXyY9KJPI7IDt1nnhgpUR/0RjC8oStSvTVMqs6C3MQX24wAydEZj23jPQJEfzQ4HBkU1LehXU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=oyWY7AGk; arc=none smtp.client-ip=148.163.142.35
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
+	s=arc-20240116; t=1738886042; c=relaxed/simple;
+	bh=sKG74MO9Ervs86b/Vu+wnBliMPOJbJqlCG4ip85mvx0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=QwDAlDV96n+lKydeXJ/pGil9cnbaJVuDGvqF7JD51f7y+kNtpfP4vDwRFoBTLYvQvZ0nV0b/eBy51euNgDe7xHzpkLG/yURfDQ8yCrmM510bsTkQ/3cJqHZoiMt0QNQ7WWjpDpMEcm6oAvrtDZnjUQcx33wt521jCBArWBiPxEY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Y5qSaZM/; arc=none smtp.client-ip=198.47.23.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="oyWY7AGk"
-Received: from pps.filterd (m0144091.ppops.net [127.0.0.1])
-	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 516JfwLF016203;
-	Thu, 6 Feb 2025 21:08:00 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=PPS11142024;
-	 bh=NlITSawW+DQyY3XY18sCOkBAch1CacQ0lSTqJ4cGwkQ=; b=oyWY7AGkQ3Gm
-	7s9cB4+OlHvtkTzuP5ykUCKcYxRDP07gd4OyC4jqFCJFzaHB/KBBku/FsVC4RcHI
-	PAHk0wLZmhaKRbhQixHJdkoc/Qvf3/+BCgbGJmhHF2TMP1A0wsQIrpCO3gEhMS6O
-	j+BerJYi2dbjR6B+7yaeoZwQhJn7WC2Lq29PPFCM75pp/lz19Dw+294i6N3ych5x
-	KfyuE/NnrR4kmEknR4Rzrd7K8ijIx7X4C6GZqOdnFfvrYKkS+QknYvg7qTUwYZ/W
-	+nnWS2kP19EFUDivEAtDuJGgAhY5PwzNpht0xzQi1+rGRXsy6CH8pYQN/v70trqm
-	WddNwrYtuA==
-Received: from us-aus-excas-p1.ni.corp.natinst.com ([130.164.94.73])
-	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 44n3fe0uma-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 06 Feb 2025 21:08:00 +0000 (GMT)
-Received: from us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) by
- us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.28; Thu, 6 Feb 2025 15:07:59 -0600
-Received: from ershephe-ubuntu.amer.corp.natinst.com (172.18.68.32) by
- us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) with Microsoft SMTP
- Server id 15.2.1258.28 via Frontend Transport; Thu, 6 Feb 2025 15:07:59 -0600
-From: Erick Shepherd <erick.shepherd@ni.com>
-To: <ulf.hansson@linaro.org>
-CC: <erick.shepherd@ni.com>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <york.yang@csr.com>
-Subject: RE: [RFC PATCH 1/2] mmc: Update sdhci tune function to return errors
-Date: Thu, 6 Feb 2025 15:07:59 -0600
-Message-ID: <20250206210759.2980489-1-erick.shepherd@ni.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <CAPDyKFoYfUBLLBh--Qhj0p5DFW36yOTo_dEAH7s4STvWzuK9fA@mail.gmail.com>
-References: <CAPDyKFoYfUBLLBh--Qhj0p5DFW36yOTo_dEAH7s4STvWzuK9fA@mail.gmail.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Y5qSaZM/"
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 516Nrgjl3717759
+	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+	Thu, 6 Feb 2025 17:53:42 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1738886022;
+	bh=LtFm2TQkrq/3ELtvJyhJA/YKyIt5JyaTds3OSrbiL58=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=Y5qSaZM/xLbydMpDodPMN2poddD9QNeVIvzAd5120XewL1F7iZ/yKnh4OLQ7iliu+
+	 M5QMc7AJTvEcQZMGikQzXpKr8Mh13rk7Ye61v56NUOjJX1Mi20rE3QN39hX1IoldMS
+	 H/kGOK5HA4B2V+GisyIZB3zIICzWIf8JwPNxDBqI=
+Received: from DFLE113.ent.ti.com (dfle113.ent.ti.com [10.64.6.34])
+	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTP id 516NrgQi099666;
+	Thu, 6 Feb 2025 17:53:42 -0600
+Received: from DFLE110.ent.ti.com (10.64.6.31) by DFLE113.ent.ti.com
+ (10.64.6.34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Thu, 6
+ Feb 2025 17:53:41 -0600
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE110.ent.ti.com
+ (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Thu, 6 Feb 2025 17:53:42 -0600
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 516Nrfgh010084;
+	Thu, 6 Feb 2025 17:53:41 -0600
+Message-ID: <26432c7c-1cc7-4870-9eda-ee8564d2d4a2@ti.com>
+Date: Thu, 6 Feb 2025 17:53:41 -0600
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain
-X-Proofpoint-GUID: H8mlLVAH0yprFrbyRf_I0wQnPritjK1D
-X-Proofpoint-ORIG-GUID: H8mlLVAH0yprFrbyRf_I0wQnPritjK1D
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-02-06_06,2025-02-05_03,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 clxscore=1015
- spamscore=0 bulkscore=0 adultscore=0 priorityscore=1501 impostorscore=0
- malwarescore=0 lowpriorityscore=0 phishscore=0 mlxlogscore=460
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2501170000 definitions=main-2502060167
+User-Agent: Mozilla Thunderbird
+Subject: Re: [RFC PATCH 1/2] mmc: Update sdhci tune function to return errors
+To: Erick Shepherd <erick.shepherd@ni.com>, <linux-kernel@vger.kernel.org>
+CC: <linux-mmc@vger.kernel.org>, <york.yang@csr.com>, <ulf.hansson@linaro.org>
+References: <20250127223654.290904-1-erick.shepherd@ni.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <20250127223654.290904-1-erick.shepherd@ni.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-Thank you for taking the time to review this. I'll resubmit the patch, pull=
- in Adrian,=0D
-and move the new field to the mmc_card struct.=0D
-=0D
-Regards=0D
-Erick=
+Hi Erick,
+
+On 1/27/25 4:36 PM, Erick Shepherd wrote:
+> Updates the sdhci_execute_tuning function to return the error code
+> that was returned by the __sdhci_execute_tuning function.
+> Previously this code was only stored in host->tuning_err and not
+> actually returned.
+> 
+> Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
+
+Reviewed-by: Judith Mendez <jm@ti.com>
+
+> ---
+>   drivers/mmc/host/sdhci.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f4a7733a8ad2..b35b8917fa1e 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2967,7 +2967,8 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>   
+>   	sdhci_start_tuning(host);
+>   
+> -	host->tuning_err = __sdhci_execute_tuning(host, opcode);
+> +	err = __sdhci_execute_tuning(host, opcode);
+> +	host->tuning_err = err;
+>   
+>   	sdhci_end_tuning(host);
+>   out:
+
