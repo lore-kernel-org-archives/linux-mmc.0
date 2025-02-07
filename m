@@ -1,130 +1,198 @@
-Received: from mail-il1-f175.google.com (mail-il1-f175.google.com [209.85.166.175])
+Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D7621D5AD8;
-	Fri,  7 Feb 2025 09:17:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 796391A4F12
+	for <linux-mmc@vger.kernel.org>; Fri,  7 Feb 2025 09:17:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738919840; cv=none; b=C6gAQLfzR8sVOnmNE9ynzbRVuEoohS6IGxjpUdx+WlnKs1PvVaJTZoWWH/VVc2rF224k1gS5naHO3kB2mq/B6NEnrj4MjSVKuJgTH3o94MEkzAn1EymUboS7aK9ry1tb43gS9WocBfid47RQdZa/beGeoljCEnVW2mgm1U5J5x8=
+	t=1738919854; cv=none; b=VlLUuYfxUkK0SUE2mkSBQBRMdOekwUgWzqJsvriKDO0neB8ZFy+BZMkov4vIa/zLDgqtgfqML6cQa3o+OYMej25ooLHYd8df23YVajEydrKqflvUPEBfhcqHa8HwCTyj9ay41kTUAjYmnBzop6HLlNSZZxAiWlCC7iE9escA8WA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738919840; c=relaxed/simple;
-	bh=gZaXz7XL6hd/UGWpNon4f9PYF3b0mzV4TxHZOcz4Sak=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=QZ3plTTDndS84yz4CkwbScFetHCdaKSff+AsZXIPJuQyQIYxO1zrkfenOELMSEe5oSyLYdVk5tLnaqqX9wz10xjtUKhrYeoeShFXxvhl0TCPcehBc0KuB5HQGeYt/nztfgC2bkSDLzHJNH2ERbkyuA2/W4eDkPB8zMxcwC1ZTKA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.166.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-il1-f175.google.com with SMTP id e9e14a558f8ab-3ce873818a3so15935775ab.1;
-        Fri, 07 Feb 2025 01:17:18 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738919837; x=1739524637;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+	s=arc-20240116; t=1738919854; c=relaxed/simple;
+	bh=4sLgzJdXEoCSFEANM5B681JYjIInCuX+heQpB/pWcXI=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=b9PO6XQwlZ2KfAzQiBgzC4OTvchyfFXjBG3qTmBq6xIL0+qhCvIEzyxrJeQIhTthIB5i3/MUYyns+rhnQDnf5STSVtTF1gqwUrFd3WQ1Hl0iuO3xwtaZ2e0/fato7/s32iSlf6v/4lJna5XZeHlSqJWcqyVGXSfny5uGfIaZdkU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PHrAczNh; arc=none smtp.client-ip=209.85.128.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PHrAczNh"
+Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-4361815b96cso12123835e9.1
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Feb 2025 01:17:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1738919851; x=1739524651; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=o4kJhOPtCECyINUZkXDqpO81cp9u410vUEkFnMeAGRE=;
-        b=psVmUxRbc7tPvjHIlZY9iE1kQfF2KVBfNj1bHv+Dw5tbAlmHLIPUpXEwJjoYdxllNG
-         mhQU/KiKPAzqtPmVhHjUDWcEIxVMlE0Yp3qnNyGTE92DrnzlT4/3jWCN4PtSTWQaWmG1
-         7uuGsr3ZHJfL3d8livOkBfu8KxH8VqxxfTJqkLxQOTaNI4wnSrIk7QVVxFnNFUZdmIwI
-         RQdoaoGgMPlZqERuQgJRjwWpbOeyKJYUha+uKUJzpRUIPygCJLKPoe2TD8TquRGoS2ZS
-         n69qg9p4NY0uz8aekY83rPacoBlI+kfq5ekbKgFJhJndH08WzILBi3JvRwi+EtY+wHmu
-         TTvQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU7aV51ddKRCrXKtzObRnPgOlCuoWEPKfzLw12VWkuXUP3Z0o5Zm3VVn6ymOLB/vuiIUVjMELGcavsL@vger.kernel.org, AJvYcCVtjtVaaFLkRoQPdcGaoloBn2RbxGtgKYfNMzQDxFn026UwUhXZ3oXBoCrJCwdjw3ut2Hsp7N4WxWrMRKrt@vger.kernel.org, AJvYcCVwHuRta5+BpcmmbUyqmnIYLF4BlcfLEYR/jQJIfYKuTqnyD+Nlbvwg1kiqqZTYmySx3W5LrW4XJa3Y@vger.kernel.org, AJvYcCX+vy/T2iO+hOeWf3pSYXepiPluQ4x1zp2Sj1tGhPJy1KhJplXrWeASZNgH6cAVieg1vwIeqicS7Lfz@vger.kernel.org, AJvYcCXdTZAW8YRE7pv9dsNbSqyf22zW/F/RN460WObUCULaAeF2oWP673EkDB95EclwPLpXh0na/SGcVKniil4=@vger.kernel.org, AJvYcCXwxOj8zyWmWutsyWjU5VgFrekoEgFVA7nPQU4I3ZOY0Zs3tLIE+Z54cV1ccHv7RzMd13GESPF/@vger.kernel.org
-X-Gm-Message-State: AOJu0YwE5ubkR5bOmMhuK4aEcs0gxBnNnkFpEL8Obb2ukt0OcSJuX/Q6
-	whpiZcshV1uZy3ezOSrLrODGqOcHntfBnj/15q/ldBU+kcmEE3/dgxcPexBC
-X-Gm-Gg: ASbGnct6GMwQzXLSjcBjT3RR2fW1DaZxkCSajpGuDAbIcGKwOwDsoihfs4KPmXmMlF6
-	dywMSH2WcNqHJYP/c/FlWVdU1oeiutdBRgmC5Wr6F8kWCC+2FKwxVS5blKk7Km0YLFDUZXtNXTG
-	1EqyoBsZeTBAqjzgBwj1/GbAn1ntQpxDYJ5GX8upGdC+PaOC+sM8+F5SguwtQwp+ep2D+Q7/VSR
-	Kt516lK2DhsuU1G7MXxpfkTjdfDSJmC6ob3fpwpTU0QRC06R/dMigB322zl9jhFYDPiPhwIf5s9
-	AnrIJGpDV6oay9GKvKyNI1zXby5icsijzjhM8X3i08imWdmWWIo3qg==
-X-Google-Smtp-Source: AGHT+IG043XEt5V/lr+jQskxWxCFLSi7BiNG4a20ljNVDAJMmu20cN9bDvLVgzdiBOpI7glFiTGhAA==
-X-Received: by 2002:a05:6e02:160d:b0:3d0:618c:1b17 with SMTP id e9e14a558f8ab-3d13dd38108mr20902755ab.7.1738919837393;
-        Fri, 07 Feb 2025 01:17:17 -0800 (PST)
-Received: from mail-io1-f53.google.com (mail-io1-f53.google.com. [209.85.166.53])
-        by smtp.gmail.com with ESMTPSA id 8926c6da1cb9f-4eccfacfee0sm673185173.82.2025.02.07.01.17.16
+        bh=Tq0arpYSvoFDp5urlt72DtEA/DJDLUpDJMGDTdBFzlc=;
+        b=PHrAczNhn7fTujUipW1TJDiEUqDY4YdUCwdGXWKRvDU4u2BNPMUg2BGWw8tJJEQ6rw
+         2Fb/bDRRkNPijUNNtH0MKHruGTMfII+L4FEJA+FH8lyedN4iuqcXpvvZTKej+KdiFQAJ
+         GBSvsfnU7UuGf2WAydbNz//MfHBogOIgZTm+mLXgD4WIfdqhPEIN5P4r0q8IxOwl4PaD
+         T2mvixFD4yQCCIwBJElvGyWrZ/yaI2TWqv9j84mH1Y9qXKzGhvS07QRLH0M3774SH3ok
+         fXCV1KoboC6PD4505w2+pdLI6+VME/qT8cuSMpzHXR6ubjbpr9CdPG9sSD31HEWKlJLw
+         gRCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1738919851; x=1739524651;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=Tq0arpYSvoFDp5urlt72DtEA/DJDLUpDJMGDTdBFzlc=;
+        b=F8oRvE6MLUE6mul2IRMTtR0LqBDe5/vruvnPXmR1hV2s6wxaIuI6LWH2JP1zfNAjl+
+         dLszkMP+W4TtzFsZyM22OSGP8ABeipQe7gi+2vflUr44RDkIRSfwULqxD9rutGFfIh8N
+         55WMqaNusePzul2D5UqdIelyfCVWLD14Pzfga/ziyHgju0x+ZxkHNFu65t86ZeOUeh2i
+         MSGEHjM7lKXBTdapf+11NoQInSSVwXmeifh5WogZsoa9u/Pub0Mc4a1on/PX9PnQmnz2
+         omM5c+so+QjkDDYDC1TVq5qP60eALuefaVxi5A2NOyBIhKsgw7F08UX7+BXUI2uETYxK
+         jiLw==
+X-Gm-Message-State: AOJu0YwORcOjDunzMyNLyzWqpmLj92csb9GhFspg8tq65602zu9r9asq
+	kkUbdGwIjkhx0CUrCCOw1l7ANEYpCbhLlScO93EMi8sbkOBLxnplIApLhUL1gbA=
+X-Gm-Gg: ASbGncuSxtoTKtdgHoo2910eDjjnWEsn35M60AvfzkdJSinjQDUklTmsz5ey3yp+xwK
+	1+cpSm6EzuEibgMYP70IUUFI3FZ0dZ4FSI6+VPmSGPhQk+jYwtDXCMJ5vGW/eg5gme6fXsbKWtq
+	x33/8DhTfAuDygNFuiHWXWgxnJThV3qodPQCIQwx/wtcq31x7aNs8geWkIMqKLRFKH2IieqKUsg
+	GecpBN3QRdQ+s7zZFPYyjAf46DBnegj/bJ1NmpYDjwKuIGLhnU0g6GT1KCzCR5yPyVSpJ84BWoO
+	w1745NA96fO4y+UDMzH2geW0LpfxP9IXQLM65Xgqai6HBr8h26HS8RKMrNskI6H24ZNN
+X-Google-Smtp-Source: AGHT+IGQfxMRIuGwsG2LhdgudYjnLLYSobR1Dg5dLuvm+yyL57tGU6pvxJPHQWM8uWlNOLtqEwvAaw==
+X-Received: by 2002:a05:600c:1d90:b0:436:faeb:2a1b with SMTP id 5b1f17b1804b1-43924991f5dmr20328145e9.13.1738919850827;
+        Fri, 07 Feb 2025 01:17:30 -0800 (PST)
+Received: from ?IPV6:2a01:e0a:982:cbb0:5b26:96be:712e:30cd? ([2a01:e0a:982:cbb0:5b26:96be:712e:30cd])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4391dca0179sm47187875e9.11.2025.02.07.01.17.29
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Feb 2025 01:17:16 -0800 (PST)
-Received: by mail-io1-f53.google.com with SMTP id ca18e2360f4ac-844e9b8b0b9so143334439f.0;
-        Fri, 07 Feb 2025 01:17:16 -0800 (PST)
-X-Forwarded-Encrypted: i=1; AJvYcCUEIPycsT2k50iQZgTDK8nsrVcE5vEIWJ2pL81Gp5Kghr9N/cSIPopfbQXUbqSqFxXk09irH9SST5v5@vger.kernel.org, AJvYcCUGjMfKX6bUWXjrzz8lMsj2LZZvsoqowBjF5bOSTDhppNIiw56OdEGNoDGQ8n00g/EloPUy1O0/7f3FabGu@vger.kernel.org, AJvYcCUUM/0e52LemMCo1O20BgFnDAn5IFEb6ot2DY8JxmnHHypZQk+MaA35gaPEGlZHnFfnmvaEgt8F3LSt@vger.kernel.org, AJvYcCUy8XA7RemWYcsi0p6GovRiCNH4UoRAZtgQR46Dprpcnv5ySWnewZml++KbhroXXiaE7XwqJ9ij@vger.kernel.org, AJvYcCW/SY1G7CH3gKqRSLlrWlK4UYw0QHETlMKBrP4ZjVmOLe7K1drfonFbQPcr477IYKHjVBHiQ1hjKOXh/Dg=@vger.kernel.org, AJvYcCWNUFvyaRae7OB0+yS/NL3qf2aZYIRftmwqPZBiCwoGKMXv3aRtDhS7fjSVtHvlgpeq0gwqKf8dFVVb@vger.kernel.org
-X-Received: by 2002:a05:6102:41a0:b0:4b2:5d63:ff72 with SMTP id
- ada2fe7eead31-4ba85e7d7e5mr1354232137.13.1738919445022; Fri, 07 Feb 2025
- 01:10:45 -0800 (PST)
+        Fri, 07 Feb 2025 01:17:30 -0800 (PST)
+Message-ID: <7180babd-302a-4f86-8770-bdd9f5c773cf@linaro.org>
+Date: Fri, 7 Feb 2025 10:17:29 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250206-gpio-set-array-helper-v2-0-1c5f048f79c3@baylibre.com> <20250206-gpio-set-array-helper-v2-1-1c5f048f79c3@baylibre.com>
-In-Reply-To: <20250206-gpio-set-array-helper-v2-1-1c5f048f79c3@baylibre.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Fri, 7 Feb 2025 10:10:33 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdU5tt5_t2SfYO3OUsHenu_0PhpKeLHktNdCx-W6zCEymw@mail.gmail.com>
-X-Gm-Features: AWEUYZmj9DYQSOmgGzGXyOkOE57CQ_wkxVouudAJc-ubVAUCMSn97Ipr2XIc-m4
-Message-ID: <CAMuHMdU5tt5_t2SfYO3OUsHenu_0PhpKeLHktNdCx-W6zCEymw@mail.gmail.com>
-Subject: Re: [PATCH v2 01/13] gpiolib: add gpiod_multi_set_value_cansleep()
-To: David Lechner <dlechner@baylibre.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Bartosz Golaszewski <brgl@bgdev.pl>, 
-	Andy Shevchenko <andy@kernel.org>, Lars-Peter Clausen <lars@metafoo.de>, 
-	Michael Hennerich <Michael.Hennerich@analog.com>, Jonathan Cameron <jic23@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, 
-	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, =?UTF-8?B?TnVubyBTw6E=?= <nuno.sa@analog.com>, 
-	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+From: neil.armstrong@linaro.org
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH RFC v2] dt-bindings: mmc: mmc-slot: make compatible
+ property optional
+To: Dharma.B@microchip.com, ulf.hansson@linaro.org, robh@kernel.org,
+ krzk+dt@kernel.org, conor+dt@kernel.org, khilman@baylibre.com,
+ jbrunet@baylibre.com, martin.blumenstingl@googlemail.com
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
+ linux-kernel@vger.kernel.org
+References: <20250205-mmc-slot-v2-1-da3c5f30e2d9@microchip.com>
+ <f6d7ffa0-6c08-45fb-9153-5e4aad1ca86a@linaro.org>
+ <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-Hi David,
+On 07/02/2025 10:02, Dharma.B@microchip.com wrote:
+> On 07/02/25 2:25 pm, Neil Armstrong wrote:
+>> EXTERNAL EMAIL: Do not click links or open attachments unless you know
+>> the content is safe
+>>
+>> On 05/02/2025 04:48, Dharma Balasubiramani wrote:
+>>> Remove the compatible property from the list of required properties and
+>>> mark it as optional.
+>>>
+>>> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+>>> ---
+>>> Changes in v2:
+>>> - Instead of moving the compatible string to the other binding, just
+>>> make it
+>>>     optional (remove from required list).
+>>> - Link to v1: https://lore.kernel.org/r/20241219-mmc-slot-v1-1-
+>>> dfc747a3d3fb@microchip.com
+>>> ---
+>>>    Documentation/devicetree/bindings/mmc/mmc-slot.yaml | 1 -
+>>>    1 file changed, 1 deletion(-)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml b/
+>>> Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+>>> index 1f0667828063..ca3d0114bfc6 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+>>> @@ -29,7 +29,6 @@ properties:
+>>>        maxItems: 1
+>>>
+>>>    required:
+>>> -  - compatible
+>>>      - reg
+>>
+>> If you remove it from here then it's still required in Documentation/
+>> devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+>> so please add it.
+> 
+> If moving the compatible to its specific binding isn't appropriate (as
+> per Conor),
+> and if removing it from the required list here doesn’t seem reasonable
+> to you,
+> then adding an unnecessary compatible string in our DTS files doesn’t
+> make sense to me.
+> 
+> What could be the solution then?
 
-On Thu, 6 Feb 2025 at 23:48, David Lechner <dlechner@baylibre.com> wrote:
-> Add a new gpiod_multi_set_value_cansleep() helper function with fewer
-> parameters than gpiod_set_array_value_cansleep().
->
-> Calling gpiod_set_array_value_cansleep() can get quite verbose. In many
-> cases, the first arguments all come from the same struct gpio_descs, so
-> having a separate function where we can just pass that cuts down on the
-> boilerplate.
->
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Signed-off-by: David Lechner <dlechner@baylibre.com>
+The solution is right but you modify the meson-mx-sdio bindings, so
+simply add compatible in a required list for the slot node.
 
-Thanks for your patch!
+Something like:
+========================================================================
+diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+index 022682a977c6..0d4d9ca6a8d9 100644
+--- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
++++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+@@ -60,6 +60,9 @@ patternProperties:
+        bus-width:
+          enum: [1, 4]
 
-> --- a/include/linux/gpio/consumer.h
-> +++ b/include/linux/gpio/consumer.h
-> @@ -655,4 +655,11 @@ static inline void gpiod_unexport(struct gpio_desc *desc)
->
->  #endif /* CONFIG_GPIOLIB && CONFIG_GPIO_SYSFS */
->
-> +static inline int gpiod_multi_set_value_cansleep(struct gpio_descs *descs,
-> +                                                unsigned long *value_bitmap)
-> +{
-> +       return gpiod_set_array_value_cansleep(descs->ndescs, descs->desc,
-> +                                             descs->info, value_bitmap);
++    required:
++      - compatible
++
+      unevaluatedProperties: false
 
-I am wondering whether this needs a check for !IS_ERR_OR_NULL(descs),
-to handle the !CONFIG_GPIOLIB and gpiod_get_array_optional() cases?
+========================================================================
 
-Slightly related: shouldn't gpiod_put_array() (both the implementation
-and the !CONFIG_GPIOLIB dummy) allow the caller to pass NULL, to
-streamline the gpiod_get_array_optional() case?
+Conor, Is it right ?
 
-> +}
-> +
->  #endif
+Neil
 
-Gr{oetje,eeting}s,
+>>
+>> Thanks,
+>> Neil
+>>
+>>>
+>>>    unevaluatedProperties: false
+>>>
+>>> ---
+>>> base-commit: 40b8e93e17bff4a4e0cc129e04f9fdf5daa5397e
+>>> change-id: 20241219-mmc-slot-0574889daea3
+>>>
+>>> Best regards,
+>>
+> 
+> 
 
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
