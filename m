@@ -1,142 +1,152 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D500E23F27E;
-	Fri,  7 Feb 2025 15:43:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F37041EB1A7;
+	Fri,  7 Feb 2025 16:03:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738942991; cv=none; b=PM/h/how+57tO1It0l9o7odv07eEUG0tsUKjx7hd8wv6pSXyfOGimA6zOU/nwp6ucn7B15eZBs5caB7JlByx9ynOHJSqPzqzTIyWevOOJiIifrck505wQ1t4RCHxfVXJIotDDNSxI3LPkErSZBXZFGOaEg1gGeYawLuAdTwWB+Y=
+	t=1738944200; cv=none; b=SZd6v0vN0PBCgN7enmY5tOyI6OxIC7KpU/lKh5TJGElbXc4Mj4WQlH1BVh1hdcg8Q9zOo8vQWIAtebFjisnlFOncHFkpGDr+bAXvgSD1tICLMypGuQr6VuyqRQdcX/Ib6NG9gX347jSyRprZ0rYn7IVdNQBMpf8lFfMOKtb1JyA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738942991; c=relaxed/simple;
-	bh=V/mJbsV2FpS/yrn+vg3Hob7Vj8vsVhpVXGKAdYRI+5k=;
+	s=arc-20240116; t=1738944200; c=relaxed/simple;
+	bh=OZqExQTgpVnAcofXSl/4YJt3huOhFICvFo1TvD+B5MQ=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=iQVFXIF+wvidEPLH50Wzxi+hDY3OZmAGrOGvjh5qk2L4RWWgIuYXbECV+rYX3ssnMZG4PC+SyYCiEUpDE81dUtETg1Tsdd3NUn0Gw0wppkAXxtSDaBpbS2G1cEHiqeoSUWQg8WxHxuFI+xk66M/U0tJ2qLvNkb9uDbN9kRvNcH4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jX6Z1EkM; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=d0cHaspm/JfC+OTbrhVcvWeNX18xH5YL0Me4RElRSeWPVmBZBS6dnX08Sl69/1MdJWjIly1JuaFBFHDVp2mmZrqj9nOpUaiYknZgXHMTuzMlpbJXMsqTIBQda6sC+1nV8PQvLxvfBn5HHzuV7iu9HjwylXiAjdShQw5pL4sC+wQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cCc+goyw; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jX6Z1EkM"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-21f5268cf50so13446825ad.1;
-        Fri, 07 Feb 2025 07:43:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1738942989; x=1739547789; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=UxhLoK7XAPc7+07p+MzQjz273lZ6TnGYiS+xzwBXJJs=;
-        b=jX6Z1EkM6hvx+zqfG4Jk8J4qv8Ahcwp3Qc6KaJf5Cr8DCYajF6YUT/pUVTnIObhkjH
-         ljHB64kpEnwRU2dcOKm8WuinRBXAGji18YcPFkmmtWBeAAsCWROdbyHb7KIKUmOt26os
-         gr/6IL3ZrCcagTXKd4FtfkgMIW3F63Kt2Jm9Vzn2K2DvGPBYGodmeQiOoY9n1/UFOzwz
-         rcHjVXF4MRLMOXyUC/WM/djIIJEIMZqn1RYNnee0VKeE4PTo/5tg99ByoyOEjSw8Iiv6
-         f67HLcLcOMEBOFVZcRutLL0uhf/otB8b8v7f9gQKdNHvdSuvnkKACKvfx/bKo4eAICsh
-         A9og==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738942989; x=1739547789;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=UxhLoK7XAPc7+07p+MzQjz273lZ6TnGYiS+xzwBXJJs=;
-        b=kqOQA5PW+tA2xQHDDT0qbljm74/nBi5tXFyRAEXCqhL2eSbG2GyxTgTC52DC72w+NX
-         6QlEPUTVbuQE99tBH7pJoD/VipxoK/NgskBfGswtzCB6HS6jJFE8XxdLr7hhGdUzMqHI
-         YR+asq3cdHCMzM3BORElwQjKn6JGP3qL3dFFLhrkH4vizlkdDwYeWt0M7sSgbmNmKZIC
-         tWD51ZTdX+x3uAx/b4uI0y/+d/luA2l4AJugNKj7zU1S5pDwTIvGhZzJV93YIane1fAB
-         aaW3hr2nTHVQ75vPH1s9magE04aEXxbME8dz6jA9NBEGip4qr3noGqFB4sf7fHZXWMWT
-         I8og==
-X-Forwarded-Encrypted: i=1; AJvYcCUv6X5YyW5AXTHhVEdLm+LA9ey99R6eZs1nGhIfNZPStcaGDUdrBCgjZojkFX+99RJ6eEloUev6bpQQUI8=@vger.kernel.org, AJvYcCV8YxcrmZldtl02mXnNsJAWGPVhhk/M8qLcL3+DIwSvD2FLrx8JUurp7x++6nOezOU06h40K81bzbih@vger.kernel.org, AJvYcCVWeTB/D8/ifaXQSK62Uj1Td8qNX+CGqMaDQpN01HxvtgDL1YqyBd1DPBP0NYzSdxUVa3/QN5n7Sczvi6WP@vger.kernel.org, AJvYcCWsOn9mldbwmvTJhK3O/m32CSggMm6sOuo+wA6T2GLv1ElmNhCkL3amiqHmWd1ZB36Zc7FtAeA0@vger.kernel.org, AJvYcCXhXqqJ9ZOxkw8FrUs6lQEIrzrZim9UGokFxqL0Kd5gmmgBQl5sGwZOGV+tMVaK4HnZW/SZnn9fJX5W@vger.kernel.org, AJvYcCXo2gvcNogiQe0Bw23U5E92Ki/SlFzzzVSB+3Yzc6Lj9iYqbrdQfzuI8ULdLyap9pyVuBhbsxnPyb/2@vger.kernel.org
-X-Gm-Message-State: AOJu0YxHjjNm5PvJkSAd31vtLXiYY2MZiYbTu0GJfurJSkKRnb2WFE4T
-	TUxvF1euBbRyB4ncBb/cKzy5ryPgtf+E0UlythUgLuMcvXMW7bJQpLpmytHX
-X-Gm-Gg: ASbGncsyaFazJVTwVL03mlfnq8L22tM3Eqi5ADevJm4SLcCKwfLSn384o9/KEb0MyDM
-	zQgj70IOMkil/smqWSQk3UGcDcdIcFE/cv+l6hIoGvArIR224x8I1ZdNqDtUderaAN+Ginob6zR
-	NFlTlKcbDkJjyw3qofLq7UsgJFMzL//EvxOHU8ftVkUcQkhEVqGP1oCzTRLFmNUP7HyUIwdNk7t
-	eDr2SjjxUJHROBl6HzXMixrYuTq3uktyE31UdPaFM2x6F9UJDvK9o2vcFXgrDc6uEJ3AnTdIq2m
-	20kFJevC2uL6nxs=
-X-Google-Smtp-Source: AGHT+IHksggvra53OzUJzI4zoRynwjPKZIRBW8flE8pNvut2OPynffqKQreS+fTXcRUSXiaAn6xL3A==
-X-Received: by 2002:a17:902:ce8c:b0:215:4a4e:9262 with SMTP id d9443c01a7336-21f4e1cc2e9mr47245225ad.8.1738942987478;
-        Fri, 07 Feb 2025 07:43:07 -0800 (PST)
-Received: from localhost ([216.228.125.131])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-21f368ce622sm31799335ad.241.2025.02.07.07.43.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Feb 2025 07:43:06 -0800 (PST)
-Date: Fri, 7 Feb 2025 10:43:04 -0500
-From: Yury Norov <yury.norov@gmail.com>
-To: David Lechner <dlechner@baylibre.com>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Andy Shevchenko <andy@kernel.org>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Lars-Peter Clausen <lars@metafoo.de>,
-	Michael Hennerich <Michael.Hennerich@analog.com>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Nuno =?iso-8859-1?Q?S=E1?= <nuno.sa@analog.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>,
-	Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org,
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org
-Subject: Re: [PATCH v2 04/13] bus: ts-nbus: use gpiod_multi_set_value_cansleep
-Message-ID: <Z6YqCOP2lVseW-i4@thinkpad>
-References: <20250206-gpio-set-array-helper-v2-0-1c5f048f79c3@baylibre.com>
- <20250206-gpio-set-array-helper-v2-4-1c5f048f79c3@baylibre.com>
- <CAHp75Vf+3pc84vV-900Ls64hM1M7Ji6Dmy8FPwL=n0=sJFSuVA@mail.gmail.com>
- <CAHp75Vdt5EU83mJrB7Sb_pgRNbhvCQ=F2Lyq7mQLAvV-w6cqEA@mail.gmail.com>
- <b1459947-18ec-4835-8891-5251d8f8c95e@baylibre.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cCc+goyw"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C931CC4CED1;
+	Fri,  7 Feb 2025 16:03:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1738944199;
+	bh=OZqExQTgpVnAcofXSl/4YJt3huOhFICvFo1TvD+B5MQ=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=cCc+goyw6gWdvp1Fsdw0g39SFhKTacSn3FidfRixezuSDjWxq/NjnMkQeAkCo3tEK
+	 QY5ha3hGNWuf8c05mPnoACbSSwhk9Wv1MocEhcAkL7X0G4KEL4yrQC05D5I66LTrYZ
+	 Yjh3HHNmjzmDngt9fTeZQITzVQZP2K+qpV8twbkTgWCh4jYP20FLf1ZLhFzcZJ0JEF
+	 4qmVOHbLszGngwpHWMTncxaouw1Beqru1sthhh0T6Kh+DrUKsEbUivPcPA3S4wY8Vm
+	 iBRfwPwSTmVrxJfRg5co9gh6AtyTxOYSLTMPJmBZsBniauB9pMt+EZBpHdh8zjNLxs
+	 GNd5+DeGkrv3Q==
+Date: Fri, 7 Feb 2025 16:03:14 +0000
+From: Conor Dooley <conor@kernel.org>
+To: neil.armstrong@linaro.org
+Cc: Dharma.B@microchip.com, ulf.hansson@linaro.org, robh@kernel.org,
+	krzk+dt@kernel.org, conor+dt@kernel.org, khilman@baylibre.com,
+	jbrunet@baylibre.com, martin.blumenstingl@googlemail.com,
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH RFC v2] dt-bindings: mmc: mmc-slot: make compatible
+ property optional
+Message-ID: <20250207-cheating-winking-1dace55a4341@spud>
+References: <20250205-mmc-slot-v2-1-da3c5f30e2d9@microchip.com>
+ <f6d7ffa0-6c08-45fb-9153-5e4aad1ca86a@linaro.org>
+ <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
+ <7180babd-302a-4f86-8770-bdd9f5c773cf@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="pz7qrlCazOFTDsBh"
+Content-Disposition: inline
+In-Reply-To: <7180babd-302a-4f86-8770-bdd9f5c773cf@linaro.org>
+
+
+--pz7qrlCazOFTDsBh
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <b1459947-18ec-4835-8891-5251d8f8c95e@baylibre.com>
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, Feb 07, 2025 at 09:23:56AM -0600, David Lechner wrote:
-> On 2/7/25 6:17 AM, Andy Shevchenko wrote:
-> > +Yury.
-> > 
-> > On Fri, Feb 7, 2025 at 2:15 PM Andy Shevchenko
-> > <andy.shevchenko@gmail.com> wrote:
-> >> On Fri, Feb 7, 2025 at 12:48 AM David Lechner <dlechner@baylibre.com> wrote:
-> > 
-> > ...
-> > 
-> >>>  static void ts_nbus_write_byte(struct ts_nbus *ts_nbus, u8 byte)
-> >>>  {
-> >>> -       struct gpio_descs *gpios = ts_nbus->data;
-> >>>         DECLARE_BITMAP(values, 8);
-> >>>
-> >>>         values[0] = byte;
-> >>>
-> >>> -       gpiod_set_array_value_cansleep(8, gpios->desc, gpios->info, values);
-> >>> +       gpiod_multi_set_value_cansleep(ts_nbus->data, values);
-> >>
-> >> As I said before, this is buggy code on BE64. Needs to be fixed.
-> > 
-> > Or isn't? Do we have a test case in bitmap for such a case?
-> > 
-> >>>  }
-> > 
-> > 
-> 
-> Maybe not the best style, but I don't think it is buggy. Bitmaps are always
-> handled in long-sized chunks and not cast to bytes so endianness doesn't affect
-> it. I didn't see an explicit test, but bitmap_read() and bitmap_write() use
-> array access like this so indirectly it is being tested.
+On Fri, Feb 07, 2025 at 10:17:29AM +0100, neil.armstrong@linaro.org wrote:
+> On 07/02/2025 10:02, Dharma.B@microchip.com wrote:
+> > On 07/02/25 2:25 pm, Neil Armstrong wrote:
+> > > EXTERNAL EMAIL: Do not click links or open attachments unless you know
+> > > the content is safe
+> > >=20
+> > > On 05/02/2025 04:48, Dharma Balasubiramani wrote:
+> > > > Remove the compatible property from the list of required properties=
+ and
+> > > > mark it as optional.
+> > > >=20
+> > > > Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+> > > > ---
+> > > > Changes in v2:
+> > > > - Instead of moving the compatible string to the other binding, just
+> > > > make it
+> > > >  =C2=A0=C2=A0 optional (remove from required list).
+> > > > - Link to v1: https://lore.kernel.org/r/20241219-mmc-slot-v1-1-
+> > > > dfc747a3d3fb@microchip.com
+> > > > ---
+> > > >  =C2=A0 Documentation/devicetree/bindings/mmc/mmc-slot.yaml | 1 -
+> > > >  =C2=A0 1 file changed, 1 deletion(-)
+> > > >=20
+> > > > diff --git a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml b/
+> > > > Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> > > > index 1f0667828063..ca3d0114bfc6 100644
+> > > > --- a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> > > > +++ b/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> > > > @@ -29,7 +29,6 @@ properties:
+> > > >  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 maxItems: 1
+> > > >=20
+> > > >  =C2=A0 required:
+> > > > -=C2=A0 - compatible
+> > > >  =C2=A0=C2=A0=C2=A0 - reg
+> > >=20
+> > > If you remove it from here then it's still required in Documentation/
+> > > devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+> > > so please add it.
+> >=20
+> > If moving the compatible to its specific binding isn't appropriate (as
+> > per Conor),
+> > and if removing it from the required list here doesn=E2=80=99t seem rea=
+sonable
+> > to you,
+> > then adding an unnecessary compatible string in our DTS files doesn=E2=
+=80=99t
+> > make sense to me.
+> >=20
+> > What could be the solution then?
+>=20
+> The solution is right but you modify the meson-mx-sdio bindings, so
+> simply add compatible in a required list for the slot node.
+>=20
+> Something like:
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.=
+yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+> index 022682a977c6..0d4d9ca6a8d9 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+> @@ -60,6 +60,9 @@ patternProperties:
+>        bus-width:
+>          enum: [1, 4]
+>=20
+> +    required:
+> +      - compatible
+> +
+>      unevaluatedProperties: false
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>=20
+> Conor, Is it right ?
 
-Not a bug, but direct addressing to bitmap elements is discouraged.
-I'd suggest using bitmap_write(values, byte, 0, 8) instead.
+Looks about right, ye.
 
-Thanks,
-Yury
+--pz7qrlCazOFTDsBh
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZ6YupQAKCRB4tDGHoIJi
+0lR7AQDXPOIB/dOY3/s7IOG1B+gKdzycmLoO1kXUzVZl9O+qDgEAvw94V1PMPp2c
+Ws95nHufVdgDH1bM8gATFJfYPq295wM=
+=tzxl
+-----END PGP SIGNATURE-----
+
+--pz7qrlCazOFTDsBh--
