@@ -1,198 +1,175 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
+Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 796391A4F12
-	for <linux-mmc@vger.kernel.org>; Fri,  7 Feb 2025 09:17:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B3D7A32C8B
+	for <linux-mmc@vger.kernel.org>; Fri,  7 Feb 2025 09:48:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1738919854; cv=none; b=VlLUuYfxUkK0SUE2mkSBQBRMdOekwUgWzqJsvriKDO0neB8ZFy+BZMkov4vIa/zLDgqtgfqML6cQa3o+OYMej25ooLHYd8df23YVajEydrKqflvUPEBfhcqHa8HwCTyj9ay41kTUAjYmnBzop6HLlNSZZxAiWlCC7iE9escA8WA=
+	t=1738921688; cv=none; b=gV2bydyVgMVr5VqTRgRoTf1ccltcQ7TjiiVXaG92I2ubyq/IrxeBxLOw2I5lnUC4fT0dHnAudv1WZlx+2eH3KLQVCeriBm6ZMfUAevHw8yvHMZ5iNdUMKh1J1QU/X7dcX+UPQYzd6U/sP2YFb/RUe8shryg01k+oWJExx19VoCE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1738919854; c=relaxed/simple;
-	bh=4sLgzJdXEoCSFEANM5B681JYjIInCuX+heQpB/pWcXI=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=b9PO6XQwlZ2KfAzQiBgzC4OTvchyfFXjBG3qTmBq6xIL0+qhCvIEzyxrJeQIhTthIB5i3/MUYyns+rhnQDnf5STSVtTF1gqwUrFd3WQ1Hl0iuO3xwtaZ2e0/fato7/s32iSlf6v/4lJna5XZeHlSqJWcqyVGXSfny5uGfIaZdkU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=PHrAczNh; arc=none smtp.client-ip=209.85.128.49
+	s=arc-20240116; t=1738921688; c=relaxed/simple;
+	bh=ZJAYWDeAfSNuuTW5xNrl9dA60NGzl85UUJgwVt7HSzM=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=bhDhJgdBGCEREBnjtK7NOBZDsO9O3LahwHFTuHcxjY3hlZ2iV81BCF3CVBdve3sZp4FYsenxX2Dire6lRavYd5NHhIqH8MWV3XWXX+IPuaTZXFZlvIgKVYRJlCBWqJVuvm9+itdh/aWQ2BGbr6l5kQzws11Ycar09oC0g5U01B8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=AuZiKwZC; arc=none smtp.client-ip=209.85.128.174
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="PHrAczNh"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-4361815b96cso12123835e9.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Feb 2025 01:17:32 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AuZiKwZC"
+Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-6f6ca3e8cdbso13688747b3.3
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Feb 2025 01:48:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1738919851; x=1739524651; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Tq0arpYSvoFDp5urlt72DtEA/DJDLUpDJMGDTdBFzlc=;
-        b=PHrAczNhn7fTujUipW1TJDiEUqDY4YdUCwdGXWKRvDU4u2BNPMUg2BGWw8tJJEQ6rw
-         2Fb/bDRRkNPijUNNtH0MKHruGTMfII+L4FEJA+FH8lyedN4iuqcXpvvZTKej+KdiFQAJ
-         GBSvsfnU7UuGf2WAydbNz//MfHBogOIgZTm+mLXgD4WIfdqhPEIN5P4r0q8IxOwl4PaD
-         T2mvixFD4yQCCIwBJElvGyWrZ/yaI2TWqv9j84mH1Y9qXKzGhvS07QRLH0M3774SH3ok
-         fXCV1KoboC6PD4505w2+pdLI6+VME/qT8cuSMpzHXR6ubjbpr9CdPG9sSD31HEWKlJLw
-         gRCg==
+        d=linaro.org; s=google; t=1738921684; x=1739526484; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eEK7srIgXJXdQr67Fg7HQYgRLAiGEeTLhNAT3vGh0e4=;
+        b=AuZiKwZC05Shr83w87ulFDaS4v5ZirpQW/K6PwRoCZ+MMWO4vRxGyxNa7iJ1cuVIzP
+         bypVtP51vqSMlNnXNoeRBK8LWdpzleq+/e/SFMd/TuvWA0HEq/osed9rNKMju9mDqu7h
+         25GTZPezUQQYPSWZ7cb6CCTU7DZLOEPBzuEtq8/EgTuiy/UgIjvlyoY8p6tkwMd0+Ewb
+         PEJQsq9EXBCC9pXUoEfLukqaldIfNjyTkyy2OAYXbMhO//vf/sF+TWqI5GnZXkKX3WPQ
+         3wk/Rn0LiwIBjOrCVe5Whk2ZU6syJ8GSnq3Z59vM2DtPPGYA/pyDqw2jJT5ayJpYq1qM
+         Ew+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1738919851; x=1739524651;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=Tq0arpYSvoFDp5urlt72DtEA/DJDLUpDJMGDTdBFzlc=;
-        b=F8oRvE6MLUE6mul2IRMTtR0LqBDe5/vruvnPXmR1hV2s6wxaIuI6LWH2JP1zfNAjl+
-         dLszkMP+W4TtzFsZyM22OSGP8ABeipQe7gi+2vflUr44RDkIRSfwULqxD9rutGFfIh8N
-         55WMqaNusePzul2D5UqdIelyfCVWLD14Pzfga/ziyHgju0x+ZxkHNFu65t86ZeOUeh2i
-         MSGEHjM7lKXBTdapf+11NoQInSSVwXmeifh5WogZsoa9u/Pub0Mc4a1on/PX9PnQmnz2
-         omM5c+so+QjkDDYDC1TVq5qP60eALuefaVxi5A2NOyBIhKsgw7F08UX7+BXUI2uETYxK
-         jiLw==
-X-Gm-Message-State: AOJu0YwORcOjDunzMyNLyzWqpmLj92csb9GhFspg8tq65602zu9r9asq
-	kkUbdGwIjkhx0CUrCCOw1l7ANEYpCbhLlScO93EMi8sbkOBLxnplIApLhUL1gbA=
-X-Gm-Gg: ASbGncuSxtoTKtdgHoo2910eDjjnWEsn35M60AvfzkdJSinjQDUklTmsz5ey3yp+xwK
-	1+cpSm6EzuEibgMYP70IUUFI3FZ0dZ4FSI6+VPmSGPhQk+jYwtDXCMJ5vGW/eg5gme6fXsbKWtq
-	x33/8DhTfAuDygNFuiHWXWgxnJThV3qodPQCIQwx/wtcq31x7aNs8geWkIMqKLRFKH2IieqKUsg
-	GecpBN3QRdQ+s7zZFPYyjAf46DBnegj/bJ1NmpYDjwKuIGLhnU0g6GT1KCzCR5yPyVSpJ84BWoO
-	w1745NA96fO4y+UDMzH2geW0LpfxP9IXQLM65Xgqai6HBr8h26HS8RKMrNskI6H24ZNN
-X-Google-Smtp-Source: AGHT+IGQfxMRIuGwsG2LhdgudYjnLLYSobR1Dg5dLuvm+yyL57tGU6pvxJPHQWM8uWlNOLtqEwvAaw==
-X-Received: by 2002:a05:600c:1d90:b0:436:faeb:2a1b with SMTP id 5b1f17b1804b1-43924991f5dmr20328145e9.13.1738919850827;
-        Fri, 07 Feb 2025 01:17:30 -0800 (PST)
-Received: from ?IPV6:2a01:e0a:982:cbb0:5b26:96be:712e:30cd? ([2a01:e0a:982:cbb0:5b26:96be:712e:30cd])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4391dca0179sm47187875e9.11.2025.02.07.01.17.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Feb 2025 01:17:30 -0800 (PST)
-Message-ID: <7180babd-302a-4f86-8770-bdd9f5c773cf@linaro.org>
-Date: Fri, 7 Feb 2025 10:17:29 +0100
+        d=1e100.net; s=20230601; t=1738921684; x=1739526484;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=eEK7srIgXJXdQr67Fg7HQYgRLAiGEeTLhNAT3vGh0e4=;
+        b=g+bY9i+Dx9hKqurawddDYI8pKlIcitBv0v6ZPOB4RBDA98ibqE5TIJ/rQ2fAs/rxH6
+         hLgXmSq/mRWXpeF4dB7D1l8JkHHjZuPJebOKL/rPy+a/BruWNdnPeKIjQuJYyalWSKHk
+         1ShdgHPtVFeyeQOpEfJqg213ERd7MdwWuJA8RJ9gjBsFuvs+y4885CW+Pac0O/W9IqGQ
+         jwyIK8oVQWdX26+lYqEe6hJOuWj7csZXW3U4+SkyfmlZqK8N33jKKxl7S736A8atxicN
+         naorGK77RUU+4VF6oTbaopzBYoLWIukn998+2zn8+LO5FyirjpzwnLq5WQ/pViQAf9RO
+         1nuQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXFVeFJLL5Cy8ZwalOyP1xNlJSJPUQXGvtn8CZJhfrrTiKS7sw5/3xOvVqCGAfly/5gAojWpQt2/jc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyhWuOERd6OH+Rnn8qz6xYDKy9IPiR0o8NXQ71dNm78pzzZj7w0
+	bWOuND5j6K8DZjPJFuJsV2wrLz/fceQ4m0wkBbutTBoXvZk8sMpeyuU5YklLPnadNmzT4ACay1L
+	Tfe8KTi/8gqCJLoOONnoa9iTzlqnvjiYIuiha4w==
+X-Gm-Gg: ASbGnctNEgz7TeIvVfujq4mXj0VNJus7CePv0DUzpSkDPJ63Z99Nr/DXVUxEn+DEPQs
+	JByQ1NA5TXizFjKsBoh+0CbLdVxMtw4Ynj4/RPhl8RDjxzq6kyTFf1UUbMkgeexZiBKRETavqgg
+	==
+X-Google-Smtp-Source: AGHT+IGaJbQYks+y9NqxM+qNlDYUH78x9F5VX2tG1O9YPe70PH5B1lWBp0wyp4yxEx4N6batSHVUPkLgj4MGDriydyE=
+X-Received: by 2002:a05:690c:6810:b0:6f9:3e3d:3f2e with SMTP id
+ 00721157ae682-6f9b2a07006mr20703297b3.33.1738921684631; Fri, 07 Feb 2025
+ 01:48:04 -0800 (PST)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: neil.armstrong@linaro.org
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [PATCH RFC v2] dt-bindings: mmc: mmc-slot: make compatible
- property optional
-To: Dharma.B@microchip.com, ulf.hansson@linaro.org, robh@kernel.org,
- krzk+dt@kernel.org, conor+dt@kernel.org, khilman@baylibre.com,
- jbrunet@baylibre.com, martin.blumenstingl@googlemail.com
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org,
- linux-kernel@vger.kernel.org
-References: <20250205-mmc-slot-v2-1-da3c5f30e2d9@microchip.com>
- <f6d7ffa0-6c08-45fb-9153-5e4aad1ca86a@linaro.org>
- <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+References: <20250206-gpio-set-array-helper-v2-0-1c5f048f79c3@baylibre.com> <CAMRc=Mf9WQjVXvea7tHx0MJG2H8Yqxw=zGqvjp7dfD7+=huDKw@mail.gmail.com>
+In-Reply-To: <CAMRc=Mf9WQjVXvea7tHx0MJG2H8Yqxw=zGqvjp7dfD7+=huDKw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 7 Feb 2025 10:47:28 +0100
+X-Gm-Features: AWEUYZnfTmLhFuLgJjE2ppjqoqNxz5h92L1nmRlGKxGgOfCbaSg6_8WxaR2gtUA
+Message-ID: <CAPDyKFoNuXpTEm1rLPvAgib+ugqr7XyETZhfrNr6ypOOKRwjXQ@mail.gmail.com>
+Subject: Re: [PATCH v2 00/13] gpiolib: add gpiod_multi_set_value_cansleep
+To: Bartosz Golaszewski <brgl@bgdev.pl>
+Cc: David Lechner <dlechner@baylibre.com>, Linus Walleij <linus.walleij@linaro.org>, 
+	Andy Shevchenko <andy@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, 
+	Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, 
+	Jonathan Cameron <jic23@kernel.org>, Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, 
+	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
+	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
+	Kishon Vijay Abraham I <kishon@kernel.org>, =?UTF-8?B?TnVubyBTw6E=?= <nuno.sa@analog.com>, 
+	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
+	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 07/02/2025 10:02, Dharma.B@microchip.com wrote:
-> On 07/02/25 2:25 pm, Neil Armstrong wrote:
->> EXTERNAL EMAIL: Do not click links or open attachments unless you know
->> the content is safe
->>
->> On 05/02/2025 04:48, Dharma Balasubiramani wrote:
->>> Remove the compatible property from the list of required properties and
->>> mark it as optional.
->>>
->>> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
->>> ---
->>> Changes in v2:
->>> - Instead of moving the compatible string to the other binding, just
->>> make it
->>>     optional (remove from required list).
->>> - Link to v1: https://lore.kernel.org/r/20241219-mmc-slot-v1-1-
->>> dfc747a3d3fb@microchip.com
->>> ---
->>>    Documentation/devicetree/bindings/mmc/mmc-slot.yaml | 1 -
->>>    1 file changed, 1 deletion(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml b/
->>> Documentation/devicetree/bindings/mmc/mmc-slot.yaml
->>> index 1f0667828063..ca3d0114bfc6 100644
->>> --- a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
->>> @@ -29,7 +29,6 @@ properties:
->>>        maxItems: 1
->>>
->>>    required:
->>> -  - compatible
->>>      - reg
->>
->> If you remove it from here then it's still required in Documentation/
->> devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
->> so please add it.
-> 
-> If moving the compatible to its specific binding isn't appropriate (as
-> per Conor),
-> and if removing it from the required list here doesn’t seem reasonable
-> to you,
-> then adding an unnecessary compatible string in our DTS files doesn’t
-> make sense to me.
-> 
-> What could be the solution then?
+On Fri, 7 Feb 2025 at 08:49, Bartosz Golaszewski <brgl@bgdev.pl> wrote:
+>
+> On Thu, Feb 6, 2025 at 11:48=E2=80=AFPM David Lechner <dlechner@baylibre.=
+com> wrote:
+> >
+> > This series was inspired by some minor annoyance I have experienced a
+> > few times in recent reviews.
+> >
+> > Calling gpiod_set_array_value_cansleep() can be quite verbose due to
+> > having so many parameters. In most cases, we already have a struct
+> > gpio_descs that contains the first 3 parameters so we end up with 3 (or
+> > often even 6) pointer indirections at each call site. Also, people have
+> > a tendency to want to hard-code the first argument instead of using
+> > struct gpio_descs.ndescs, often without checking that ndescs >=3D the
+> > hard-coded value.
+> >
+> > So I'm proposing that we add a gpiod_multi_set_value_cansleep()
+> > function that is a wrapper around gpiod_set_array_value_cansleep()
+> > that has struct gpio_descs as the first parameter to make it a bit
+> > easier to read the code and avoid the hard-coding temptation.
+> >
+> > I've just done gpiod_multi_set_value_cansleep() for now since there
+> > were over 10 callers of this one. There aren't as many callers of
+> > the get and atomic variants, but we can add those too if this seems
+> > like a useful thing to do.
+> >
+> > Maintainers, if you prefer to have this go through the gpio tree, pleas=
+e
+> > give your Acked-by:, otherwise I will resend what is left after the nex=
+t
+> > kernel release.
+> >
+> > ---
+> > Changes in v2:
+> > - Renamed new function from gpiods_multi_set_value_cansleep() to
+> >   gpiod_multi_set_value_cansleep()
+> > - Fixed typo in name of replaced function in all commit messages.
+> > - Picked up trailers.
+> > - Link to v1: https://lore.kernel.org/r/20250131-gpio-set-array-helper-=
+v1-0-991c8ccb4d6e@baylibre.com
+> >
+> > ---
+> > David Lechner (13):
+> >       gpiolib: add gpiod_multi_set_value_cansleep()
+> >       auxdisplay: seg-led-gpio: use gpiod_multi_set_value_cansleep
+> >       bus: ts-nbus: validate ts,data-gpios array size
+> >       bus: ts-nbus: use gpiod_multi_set_value_cansleep
+> >       gpio: max3191x: use gpiod_multi_set_value_cansleep
+> >       iio: adc: ad7606: use gpiod_multi_set_value_cansleep
+> >       iio: amplifiers: hmc425a: use gpiod_multi_set_value_cansleep
+> >       iio: resolver: ad2s1210: use gpiod_multi_set_value_cansleep
+> >       mmc: pwrseq_simple: use gpiod_multi_set_value_cansleep
+> >       mux: gpio: use gpiod_multi_set_value_cansleep
+> >       net: mdio: mux-gpio: use gpiod_multi_set_value_cansleep
+> >       phy: mapphone-mdm6600: use gpiod_multi_set_value_cansleep
+> >       ASoC: adau1701: use gpiod_multi_set_value_cansleep
+> >
+> >  drivers/auxdisplay/seg-led-gpio.c           |  3 +--
+> >  drivers/bus/ts-nbus.c                       | 10 ++++++----
+> >  drivers/gpio/gpio-max3191x.c                | 18 +++++++-----------
+> >  drivers/iio/adc/ad7606.c                    |  3 +--
+> >  drivers/iio/adc/ad7606_spi.c                |  3 +--
+> >  drivers/iio/amplifiers/hmc425a.c            |  3 +--
+> >  drivers/iio/resolver/ad2s1210.c             |  8 ++------
+> >  drivers/mmc/core/pwrseq_simple.c            |  3 +--
+> >  drivers/mux/gpio.c                          |  4 +---
+> >  drivers/net/mdio/mdio-mux-gpio.c            |  3 +--
+> >  drivers/phy/motorola/phy-mapphone-mdm6600.c |  4 +---
+> >  include/linux/gpio/consumer.h               |  7 +++++++
+> >  sound/soc/codecs/adau1701.c                 |  4 +---
+> >  13 files changed, 31 insertions(+), 42 deletions(-)
+> > ---
+> > base-commit: df4b2bbff898227db0c14264ac7edd634e79f755
+> > change-id: 20250131-gpio-set-array-helper-bd4a328370d3
+> >
+> > Best regards,
+> > --
+> > David Lechner <dlechner@baylibre.com>
+> >
+>
+> I can provide an immutable branch for the entire series for everyone
+> to pull or I can apply patch one, provide an immutable branch and
+> every subsystem can take their respective patches. What do you prefer?
 
-The solution is right but you modify the meson-mx-sdio bindings, so
-simply add compatible in a required list for the slot node.
+The changes look small and trivial to me. I wouldn't mind if you take
+them all (at least for mmc). An immutable branch would be good, if it
+turns out that we need to pull them.
 
-Something like:
-========================================================================
-diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
-index 022682a977c6..0d4d9ca6a8d9 100644
---- a/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
-+++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
-@@ -60,6 +60,9 @@ patternProperties:
-        bus-width:
-          enum: [1, 4]
-
-+    required:
-+      - compatible
-+
-      unevaluatedProperties: false
-
-========================================================================
-
-Conor, Is it right ?
-
-Neil
-
->>
->> Thanks,
->> Neil
->>
->>>
->>>    unevaluatedProperties: false
->>>
->>> ---
->>> base-commit: 40b8e93e17bff4a4e0cc129e04f9fdf5daa5397e
->>> change-id: 20241219-mmc-slot-0574889daea3
->>>
->>> Best regards,
->>
-> 
-> 
-
+Kind regards
+Uffe
