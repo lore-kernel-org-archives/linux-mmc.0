@@ -1,281 +1,152 @@
-Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6728A1DF256
-	for <linux-mmc@vger.kernel.org>; Sun,  9 Feb 2025 15:50:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E9B42F22;
+	Sun,  9 Feb 2025 16:30:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739116248; cv=none; b=Rg27Dp8rLrGr3l+RVukiLGA4ZMaBQtbg8dxBOton9fnxmjwN5OQntzZUGMg4CWoMBZSTWqiau4kc68IIJ+XCiKAjmPwOkGFT+XOSR+gmXqKFRbwNa5pUbMKdq8en6zsjU3G0G53JY/L0F9w1la5LV50qnfZA2e7bjIYYQy3n/GA=
+	t=1739118660; cv=none; b=YMrdoetWA5eki+1fW0jbGjm3FoPBTrZEPaytjYbeBNk39PPo/lut2JDYa1rNY5SvjC7xm/Sm7lOVSpBQ3LqckP0D78IAvgYNX90YCXtoBEytOlur032TgqFAy32NAR8Q+t/s/3j8/8D+8yryryciq+7vExIJCBX9H0bDzfuvxWA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739116248; c=relaxed/simple;
-	bh=3tTvuuiVnCPVSn8oE7K5yeOzQnMOW0db5YwDCMguaLo=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=g26BXtSydBupsUdqbNCXzYFauPmAW818oGn/5ccR7Y8drM67lPw6bGrfVOnnSGaiqKO7iLVhqDsxh6OMs8+nX84Rl/XCcsiySM2P53Pk+1Chdl98guVtW6Wq78ZdRpFpJtKahHsAV1khz7LIxyV1fS/80wwQNIJN1AeNbDsOUu0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=aVr+PACB; arc=none smtp.client-ip=209.85.214.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1739118660; c=relaxed/simple;
+	bh=YC2rqriZkGtxsnGNrpo+w727E3fLutw8c/kxR9sE+wQ=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=srUvoMoHPwYjrJrJZOJxVpuW+CaWRyCnY4Xl86yE1O3C6VICzylYaSP5wHXG+zEAZgNcGDse/650z64xVktSWzLV8Di8DT6FvILoukoq5Qm3uTRKz0z0kNWMaK8OP3TJv6LT5EfuKBMfhsL1OqUcGOM23e+hYI9sTlj8FvCkaP8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=X5moKQai; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aVr+PACB"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-21f44e7eae4so52265295ad.2
-        for <linux-mmc@vger.kernel.org>; Sun, 09 Feb 2025 07:50:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1739116246; x=1739721046; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=z+3e8LQ4+KCVM1ZlHvF+ScpOdJFsseLnvwjtZa8Jb9M=;
-        b=aVr+PACB9VG26qPt95YFGXicHmK+aWC1lxtpVI7fagTPPPPBNww3O4dCVqVNSmLtjQ
-         rC35qvTkFjPhZdDNTLRD6enqpAyOwL4akPZNHf1eOeWajHTlKpjobgNpObn7yV0nZEdF
-         CUSnV2F5Hy6UjmijrGZttCm2tNlkVAQ2IIfhnzt2oXxNdPKebQ5qH+Nf46Pz8xRPCUT8
-         3nBgqRrBAOFCW+EJkVAT0rSGJMAJ+9Kiv1bBBtZ3cl6wR3w7kOR4jEqzTJMgYLCfYqri
-         OMu8D9ILow8rSrAQETeOv8ghx4ocVTKgU1gr/je5UyiKpEpKhDSFLb8sf7KHm9s3PehC
-         Tfqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739116246; x=1739721046;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=z+3e8LQ4+KCVM1ZlHvF+ScpOdJFsseLnvwjtZa8Jb9M=;
-        b=enLoOjM1Gonn1Azsate4dvUk3f5lqfzOciF8/7AX3H49e+swY4XQA3oI5VnFnP48g7
-         iVhWAS9kxA5P/RnEg06eM2OYp1vhh8/EwN2NHBk1H4vJ1LW8atUKtLf4y3iac7seMVhH
-         9wQMNquJdfRgeZCv+ITQDeUAqhQK8RsIt4fq2RtKu0Xwx9gSkHrKs35yQse0HX2mmgF6
-         55M/lnuxs+qufp7WM2qW1dlkF0mHjQVwpVMa9ukyloFqhLWY+lKaPV4Jp0tlZh/hGyd2
-         vDPpykD+HFf+4+fDb9Dw/BqlNMclhaJ9bj0FLsZBCZSAPcmhA0O84d8hh207e+1Y9tMb
-         Whow==
-X-Forwarded-Encrypted: i=1; AJvYcCXRg4x+rKW3GgxmBWpUkGgzMcFvx8jxCCFE0GfHOnRIk2LySBCANgffMCDfJ4T2dAjTEUXkAoQq0TM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzUSsNA5I/bTTLQXHiMBLdV0svKpzN76+hA7GNb1nFo5xGMzzF7
-	zDwpdbsLtOr42J56NhK7M1+w+Lk6Q5jdKvBAlLuoHGciDQc/PhfqxNdcHnP5Bw==
-X-Gm-Gg: ASbGncuCMQiGnMJ/rBuv5MF+DMgGZ8RS92vdjR2qiWKntsctODH+ySumLqfy2OV+LBr
-	cq6IszGzEM6P8W/AzeayvnZlFVE6uHG4jjwp20npfSG6FLrrF8EzMD5fN56IzY9UPzTRGVGQ8V5
-	uqC812LfW0EEgfJdapWkNQfeHR4HREaGkDJNi40YjyA6XK7rE5G7QT1CRlhAjZcdiK2XAEETRqG
-	kBCHZy+Ve2UWZ+4OR6xYYeYa1IqzNj7EnbPlt+WB0LZqqSF0kjy+Vq6lqWBSzJ3qQiz7fTmiPuS
-	xQfy+JiREoRFv5wiWBjHowuKjqG9
-X-Google-Smtp-Source: AGHT+IE4gdu2yxLbkLWa2z+fxMD4SNoZKshd8ELUK0DWfD4+eLBEQB9U2Q8lXY9MpRroDTXbBu5Psw==
-X-Received: by 2002:a05:6a00:9289:b0:730:8d25:4c31 with SMTP id d2e1a72fcca58-7308d25550amr2078276b3a.8.1739116245689;
-        Sun, 09 Feb 2025 07:50:45 -0800 (PST)
-Received: from thinkpad ([220.158.156.173])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-73048ad2866sm6332220b3a.52.2025.02.09.07.50.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Feb 2025 07:50:45 -0800 (PST)
-Date: Sun, 9 Feb 2025 21:20:40 +0530
-From: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-	linux-fscrypt@vger.kernel.org, linux-mmc@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Bjorn Andersson <andersson@kernel.org>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Subject: Re: [PATCH v11 5/7] soc: qcom: ice: make qcom_ice_program_key() take
- struct blk_crypto_key
-Message-ID: <20250209155040.gnkf6xuhhzp5jnrw@thinkpad>
-References: <20250204060041.409950-1-ebiggers@kernel.org>
- <20250204060041.409950-6-ebiggers@kernel.org>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="X5moKQai"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 31867C4CEDD;
+	Sun,  9 Feb 2025 16:30:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1739118659;
+	bh=YC2rqriZkGtxsnGNrpo+w727E3fLutw8c/kxR9sE+wQ=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=X5moKQaiRuetTiE4ErahlW7gUbWdnZPi+/o8JdW/xW702jdtnTTCXoqRx49VYBycP
+	 j51yMJc6SUgq2tzClDIAGk1pKH/ptmylVNwNvPN392bEcCwUBemSbJ6fdChMkzIo1a
+	 IHoGsCF6LXs3369iZsAZDLLMXjsXpaCniu+3APo/1JCJO2O1o69m9DwOIyuOmky9HA
+	 p/jBHOxO8EocD7bzmVyuKnws+rx1ydv2Bo6klxwY6wwxsVlDk/ATrczKE1ntXYaYZA
+	 x5D20FtUtYvXqli0uBetUC7oZItt0B/wRtTDFm3NcsV1GdMnSb02bXZqrqHOf7FpgC
+	 HQgGUj3eVtAZA==
+Message-ID: <12c1fb05-6cf5-4fb3-9db8-730bc7f6cfc7@kernel.org>
+Date: Sun, 9 Feb 2025 17:30:52 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250204060041.409950-6-ebiggers@kernel.org>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH RFC 2/3] dt-bindings: mmc: brcm,sdhci-brcmstb: Add sdio
+ sharing support
+To: Kamal Dasu <kamal.dasu@broadcom.com>, ulf.hansson@linaro.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ adrian.hunter@intel.com, linux-mmc@vger.kernel.org, robh@kernel.org,
+ krzk+dt@kernel.org, conor+dt@kernel.org, wsa+renesas@sang-engineering.com
+Cc: f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
+ Kamal Dasu <kdasu@broadcom.com>
+References: <20250206220940.10553-1-kamal.dasu@broadcom.com>
+ <20250206220940.10553-3-kamal.dasu@broadcom.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20250206220940.10553-3-kamal.dasu@broadcom.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, Feb 03, 2025 at 10:00:39PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On 06/02/2025 23:09, Kamal Dasu wrote:
+> From: Kamal Dasu <kdasu@broadcom.com>
 > 
-> qcom_ice_program_key() currently accepts the key as an array of bytes,
-> algorithm ID, key size enum, and data unit size.  However both callers
-> have a struct blk_crypto_key which contains all that information.  Thus
-> they both have similar code that converts the blk_crypto_key into the
-> form that qcom_ice_program_key() wants.  Once wrapped key support is
-> added, the key type would need to be added to the arguments too.
+> Introduce emmc flash sharing support using hardware semaphore
+> and SDIO share register to synchronize between TZOS and linux.
 > 
-> Therefore, this patch changes qcom_ice_program_key() to take in all this
-> information as a struct blk_crypto_key directly.  The calling code is
-> updated accordingly.  This ends up being much simpler, and it makes the
-> key type be passed down automatically once wrapped key support is added.
-> 
-> Based on a patch by Gaurav Kashyap <quic_gaurkash@quicinc.com> that
-> replaced the byte array argument only.  This patch makes the
-> blk_crypto_key replace other arguments like the algorithm ID too,
-> ensuring that there remains only one source of truth.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> Signed-off-by: Kamal Dasu <kdasu@broadcom.com>
 
-For ufs-qcom:
+It's RFC, so I assume you do not expect review and then you can skip
+this and obviously it is also NAK for the patch (so maintainers won't
+take it).
 
-Acked-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+However if you actually expect review, then:
 
-- Mani
 
 > ---
->  drivers/mmc/host/sdhci-msm.c | 11 +----------
->  drivers/soc/qcom/ice.c       | 23 ++++++++++++-----------
->  drivers/ufs/host/ufs-qcom.c  | 11 +----------
->  include/soc/qcom/ice.h       | 22 +++-------------------
->  4 files changed, 17 insertions(+), 50 deletions(-)
+>  .../bindings/mmc/brcm,sdhci-brcmstb.yaml         | 16 +++++++++++++---
+>  1 file changed, 13 insertions(+), 3 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3c383bce4928f..2c926f566d053 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -1960,20 +1960,11 @@ static int sdhci_msm_ice_keyslot_program(struct blk_crypto_profile *profile,
->  					 unsigned int slot)
->  {
->  	struct sdhci_msm_host *msm_host =
->  		sdhci_msm_host_from_crypto_profile(profile);
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> index eee6be7a7867..b0ee39aeccb1 100644
+> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> @@ -27,15 +27,23 @@ properties:
+>            - const: brcm,sdhci-brcmstb
 >  
-> -	/* Only AES-256-XTS has been tested so far. */
-> -	if (key->crypto_cfg.crypto_mode != BLK_ENCRYPTION_MODE_AES_256_XTS)
-> -		return -EOPNOTSUPP;
-> -
-> -	return qcom_ice_program_key(msm_host->ice,
-> -				    QCOM_ICE_CRYPTO_ALG_AES_XTS,
-> -				    QCOM_ICE_CRYPTO_KEY_SIZE_256,
-> -				    key->bytes,
-> -				    key->crypto_cfg.data_unit_size / 512,
-> -				    slot);
-> +	return qcom_ice_program_key(msm_host->ice, slot, key);
->  }
->  
->  static int sdhci_msm_ice_keyslot_evict(struct blk_crypto_profile *profile,
->  				       const struct blk_crypto_key *key,
->  				       unsigned int slot)
-> diff --git a/drivers/soc/qcom/ice.c b/drivers/soc/qcom/ice.c
-> index 393d2d1d275f1..78780fd508f0b 100644
-> --- a/drivers/soc/qcom/ice.c
-> +++ b/drivers/soc/qcom/ice.c
-> @@ -159,41 +159,42 @@ int qcom_ice_suspend(struct qcom_ice *ice)
->  
->  	return 0;
->  }
->  EXPORT_SYMBOL_GPL(qcom_ice_suspend);
->  
-> -int qcom_ice_program_key(struct qcom_ice *ice,
-> -			 u8 algorithm_id, u8 key_size,
-> -			 const u8 crypto_key[], u8 data_unit_size,
-> -			 int slot)
-> +int qcom_ice_program_key(struct qcom_ice *ice, unsigned int slot,
-> +			 const struct blk_crypto_key *blk_key)
->  {
->  	struct device *dev = ice->dev;
->  	union {
->  		u8 bytes[AES_256_XTS_KEY_SIZE];
->  		u32 words[AES_256_XTS_KEY_SIZE / sizeof(u32)];
->  	} key;
->  	int i;
->  	int err;
->  
->  	/* Only AES-256-XTS has been tested so far. */
-> -	if (algorithm_id != QCOM_ICE_CRYPTO_ALG_AES_XTS ||
-> -	    key_size != QCOM_ICE_CRYPTO_KEY_SIZE_256) {
-> -		dev_err_ratelimited(dev,
-> -				    "Unhandled crypto capability; algorithm_id=%d, key_size=%d\n",
-> -				    algorithm_id, key_size);
-> +	if (blk_key->crypto_cfg.crypto_mode !=
-> +	    BLK_ENCRYPTION_MODE_AES_256_XTS) {
-> +		dev_err_ratelimited(dev, "Unsupported crypto mode: %d\n",
-> +				    blk_key->crypto_cfg.crypto_mode);
->  		return -EINVAL;
->  	}
->  
-> -	memcpy(key.bytes, crypto_key, AES_256_XTS_KEY_SIZE);
-> +	if (blk_key->size != AES_256_XTS_KEY_SIZE) {
-> +		dev_err_ratelimited(dev, "Incorrect key size\n");
-> +		return -EINVAL;
-> +	}
-> +	memcpy(key.bytes, blk_key->bytes, AES_256_XTS_KEY_SIZE);
->  
->  	/* The SCM call requires that the key words are encoded in big endian */
->  	for (i = 0; i < ARRAY_SIZE(key.words); i++)
->  		__cpu_to_be32s(&key.words[i]);
->  
->  	err = qcom_scm_ice_set_key(slot, key.bytes, AES_256_XTS_KEY_SIZE,
->  				   QCOM_SCM_ICE_CIPHER_AES_256_XTS,
-> -				   data_unit_size);
-> +				   blk_key->crypto_cfg.data_unit_size / 512);
->  
->  	memzero_explicit(&key, sizeof(key));
->  
->  	return err;
->  }
-> diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
-> index c3f0aa81ff983..9330022e98eec 100644
-> --- a/drivers/ufs/host/ufs-qcom.c
-> +++ b/drivers/ufs/host/ufs-qcom.c
-> @@ -193,21 +193,12 @@ static int ufs_qcom_ice_keyslot_program(struct blk_crypto_profile *profile,
->  {
->  	struct ufs_hba *hba = ufs_hba_from_crypto_profile(profile);
->  	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
->  	int err;
->  
-> -	/* Only AES-256-XTS has been tested so far. */
-> -	if (key->crypto_cfg.crypto_mode != BLK_ENCRYPTION_MODE_AES_256_XTS)
-> -		return -EOPNOTSUPP;
-> -
->  	ufshcd_hold(hba);
-> -	err = qcom_ice_program_key(host->ice,
-> -				   QCOM_ICE_CRYPTO_ALG_AES_XTS,
-> -				   QCOM_ICE_CRYPTO_KEY_SIZE_256,
-> -				   key->bytes,
-> -				   key->crypto_cfg.data_unit_size / 512,
-> -				   slot);
-> +	err = qcom_ice_program_key(host->ice, slot, key);
->  	ufshcd_release(hba);
->  	return err;
->  }
->  
->  static int ufs_qcom_ice_keyslot_evict(struct blk_crypto_profile *profile,
-> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
-> index 5870a94599a25..4cecc7f088b4b 100644
-> --- a/include/soc/qcom/ice.h
-> +++ b/include/soc/qcom/ice.h
-> @@ -4,34 +4,18 @@
->   */
->  
->  #ifndef __QCOM_ICE_H__
->  #define __QCOM_ICE_H__
->  
-> +#include <linux/blk-crypto.h>
->  #include <linux/types.h>
->  
->  struct qcom_ice;
->  
-> -enum qcom_ice_crypto_key_size {
-> -	QCOM_ICE_CRYPTO_KEY_SIZE_INVALID	= 0x0,
-> -	QCOM_ICE_CRYPTO_KEY_SIZE_128		= 0x1,
-> -	QCOM_ICE_CRYPTO_KEY_SIZE_192		= 0x2,
-> -	QCOM_ICE_CRYPTO_KEY_SIZE_256		= 0x3,
-> -	QCOM_ICE_CRYPTO_KEY_SIZE_512		= 0x4,
-> -};
-> -
-> -enum qcom_ice_crypto_alg {
-> -	QCOM_ICE_CRYPTO_ALG_AES_XTS		= 0x0,
-> -	QCOM_ICE_CRYPTO_ALG_BITLOCKER_AES_CBC	= 0x1,
-> -	QCOM_ICE_CRYPTO_ALG_AES_ECB		= 0x2,
-> -	QCOM_ICE_CRYPTO_ALG_ESSIV_AES_CBC	= 0x3,
-> -};
-> -
->  int qcom_ice_enable(struct qcom_ice *ice);
->  int qcom_ice_resume(struct qcom_ice *ice);
->  int qcom_ice_suspend(struct qcom_ice *ice);
-> -int qcom_ice_program_key(struct qcom_ice *ice,
-> -			 u8 algorithm_id, u8 key_size,
-> -			 const u8 crypto_key[], u8 data_unit_size,
-> -			 int slot);
-> +int qcom_ice_program_key(struct qcom_ice *ice, unsigned int slot,
-> +			 const struct blk_crypto_key *blk_key);
->  int qcom_ice_evict_key(struct qcom_ice *ice, int slot);
->  struct qcom_ice *of_qcom_ice_get(struct device *dev);
->  #endif /* __QCOM_ICE_H__ */
-> -- 
-> 2.48.1
-> 
+>    reg:
+> -    maxItems: 2
+> +    minItems: 2
 
--- 
-மணிவண்ணன் சதாசிவம்
+1. Missing constraint
+2. Please follow DTS coding style
+3. and finally this needs to be tested, so:
+
+<form letter>
+Please use scripts/get_maintainers.pl to get a list of necessary people
+and lists to CC. It might happen, that command when run on an older
+kernel, gives you outdated entries. Therefore please be sure you base
+your patches on recent Linux kernel.
+
+Tools like b4 or scripts/get_maintainer.pl provide you proper list of
+people, so fix your workflow. Tools might also fail if you work on some
+ancient tree (don't, instead use mainline) or work on fork of kernel
+(don't, instead use mainline). Just use b4 and everything should be
+fine, although remember about `b4 prep --auto-to-cc` if you added new
+patches to the patchset.
+
+You missed at least devicetree list (maybe more), so this won't be
+tested by automated tooling. Performing review on untested code might be
+a waste of time.
+
+Please kindly resend and include all necessary To/Cc entries.
+</form letter>
+
+Best regards,
+Krzysztof
