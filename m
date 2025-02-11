@@ -1,111 +1,125 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10B0126562F;
-	Tue, 11 Feb 2025 19:47:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BB1E4265604;
+	Tue, 11 Feb 2025 20:12:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739303234; cv=none; b=GffLN5LwqzZw4z+YYs2MryQ8L/9Si+vfrzcgWu2GEt0ITboQejxj1z5G++NtMi4V43MbHbJiy64U30L2Ey3Nkcd7tVwYG6JRo0BUU0t8F+SQUC0xziUqx5n6rgVhXmZLGmRMMJR9x2FtuDLTib4iFSCFCCr5ntPuww0Dnw/Kuig=
+	t=1739304752; cv=none; b=KSpL1GrOxs802uILj1VVLPyn0A9DR8nfsGyaQbZI7LroO0PcN3zyEM1Gt/rxSWgo/22/LpEz105DUkL5262q/HvZTihniPF+1fXBmSDCx90B1ebemO4FcUuIkYe5GvGcweQYQ09/Umpc3mZ5tCAqdw93lFo4AYtI1dAt+9tgrGY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739303234; c=relaxed/simple;
-	bh=l+iielRDD1bT9pM6nGbHot5GG7rZbmttCOx/HN/goU4=;
-	h=Date:From:To:Cc:Subject:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=Ai7Bo58oPVLetAIkrnXyZ3CjO8Yh0SbiStOI9oK9kmdlCHZegviRGvWFJyIK3xZ37TRL+q9sWRSgRr3yaZ+QkjdiNXkOc0c7Q2F0/1uYgGo1LcmZPOrz8+PuY0sdXwBmwCziJbrudKqFK4wM87cU0IwtBn4kqdGCM3pnD9BEqgo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=bqXsQQAK; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1739304752; c=relaxed/simple;
+	bh=v/Jok9KiEPoYdLkGoT5WJHe5oUzwY5NHLVXVVA+iJRY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=CfMhjuEV2GVOJhTsw8kJ43C5F9kzLzrXBrtroxPojWBpv7CJxfukOLR66qX5H/imvKEdjN5lvOd4c5Gam7o6EEAnqFMzXPT24XW3UQSZyC1sEmUkjqWbLNC7RjZwlAqhV2LB2o+4ZhQmDPMuh2NAYHzyRYURc/6sh8Li5m2c3mY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XgY9IZVp; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="bqXsQQAK"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99459C4CEDD;
-	Tue, 11 Feb 2025 19:47:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XgY9IZVp"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 105B3C4CEDD;
+	Tue, 11 Feb 2025 20:12:31 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1739303233;
-	bh=l+iielRDD1bT9pM6nGbHot5GG7rZbmttCOx/HN/goU4=;
-	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-	b=bqXsQQAKXNpcPIx/WGsrVudBGjDBJGYDzYGupkC/m/yjeYFTzw//u+4Rcck6JDRoN
-	 XRlVHoP6LL6Vpc++j6YQOc1DsslK488cxUTfjBxpEC9c9UZzchUrygtiU6dT9hnxAY
-	 YeMSdBEC7VF2X/KfFSzw41R+5Sh2XKND46lfId60Qm+76moulNskmn+88svpHL6ufB
-	 Tc730P46NE7W8EqNRAMkR6ro+ggaQ9xhIXaDusCaeBzYw2MaMshFiCra/pAFgWAYb2
-	 9qMHCJbUev6uUvd2s5BPOd+3p/QMKeWkkoYArIchnm9txu416uQI81b6hl/ueMlP81
-	 ik8UmeTWMLfHg==
-Date: Tue, 11 Feb 2025 19:46:58 +0000
-From: Jonathan Cameron <jic23@kernel.org>
-To: David Lechner <dlechner@baylibre.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, Bartosz Golaszewski
- <brgl@bgdev.pl>, Andy Shevchenko <andy@kernel.org>, Geert Uytterhoeven
- <geert@linux-m68k.org>, Lars-Peter Clausen <lars@metafoo.de>, Michael
- Hennerich <Michael.Hennerich@analog.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>, Andrew Lunn
- <andrew@lunn.ch>, Heiner Kallweit <hkallweit1@gmail.com>, Russell King
- <linux@armlinux.org.uk>, "David S. Miller" <davem@davemloft.net>, Eric
- Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo
- Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, Kishon Vijay
- Abraham I <kishon@kernel.org>, Nuno =?UTF-8?B?U8Oh?= <nuno.sa@analog.com>,
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
- netdev@vger.kernel.org, linux-phy@lists.infradead.org,
- linux-sound@vger.kernel.org
-Subject: Re: [PATCH v3 10/15] iio: resolver: ad2s1210: use bitmap_write
-Message-ID: <20250211194658.0cfb437b@jic23-huawei>
-In-Reply-To: <20250210-gpio-set-array-helper-v3-10-d6a673674da8@baylibre.com>
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
-	<20250210-gpio-set-array-helper-v3-10-d6a673674da8@baylibre.com>
-X-Mailer: Claws Mail 4.3.0 (GTK 3.24.48; x86_64-pc-linux-gnu)
+	s=k20201202; t=1739304752;
+	bh=v/Jok9KiEPoYdLkGoT5WJHe5oUzwY5NHLVXVVA+iJRY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=XgY9IZVp67cVbFI4jfVr7xHVisU4vQHZuG1uZWlCrEFpbmg/2dNn4b/SuQvmUd0eq
+	 CVT/QkfAtdvp0+v1yC0NXDVvzmV4xeu1X1dDyeOxYM13irap3UlVed8o3FtqY43MUV
+	 /yoASTYArEkmeTqV/2DOvzzVgE1ytQqwU8toQtqau5UpYjKg1ZsC7npOemFAo2CXP+
+	 bHKrvp8r80hHPa+g8Hd6z41qLUigcsUjraZ6ZBD6qBRWZkSWrx3f8TyqEF2bQYdNSQ
+	 ySnRzKmC3aBxnzOtNbZMA9AeGIj9pMbZR9kqDyfnwWWYfr+78qRfb/Vs7lfYelK/Y7
+	 k1zOIv5I20AsQ==
+Date: Tue, 11 Feb 2025 14:12:30 -0600
+From: Rob Herring <robh@kernel.org>
+To: Dharma.B@microchip.com
+Cc: neil.armstrong@linaro.org, ulf.hansson@linaro.org, krzk+dt@kernel.org,
+	conor+dt@kernel.org, khilman@baylibre.com, jbrunet@baylibre.com,
+	martin.blumenstingl@googlemail.com, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH RFC v2] dt-bindings: mmc: mmc-slot: make compatible
+ property optional
+Message-ID: <20250211201230.GA600687-robh@kernel.org>
+References: <20250205-mmc-slot-v2-1-da3c5f30e2d9@microchip.com>
+ <f6d7ffa0-6c08-45fb-9153-5e4aad1ca86a@linaro.org>
+ <003ffa44-c88a-4234-a54a-50cd1140982a@microchip.com>
+ <7180babd-302a-4f86-8770-bdd9f5c773cf@linaro.org>
+ <7de20917-3176-4e80-8ccd-9c01c037cc9a@microchip.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <7de20917-3176-4e80-8ccd-9c01c037cc9a@microchip.com>
 
-On Mon, 10 Feb 2025 16:33:36 -0600
-David Lechner <dlechner@baylibre.com> wrote:
+On Mon, Feb 10, 2025 at 05:28:27AM +0000, Dharma.B@microchip.com wrote:
+> On 07/02/25 2:47 pm, neil.armstrong@linaro.org wrote:
+> > EXTERNAL EMAIL: Do not click links or open attachments unless you know 
+> > the content is safe
+> > 
+> > On 07/02/2025 10:02, Dharma.B@microchip.com wrote:
+> >> On 07/02/25 2:25 pm, Neil Armstrong wrote:
+> >>> EXTERNAL EMAIL: Do not click links or open attachments unless you know
+> >>> the content is safe
+> >>>
+> >>> On 05/02/2025 04:48, Dharma Balasubiramani wrote:
+> >>>> Remove the compatible property from the list of required properties and
+> >>>> mark it as optional.
 
-> Replace bitmap array access with bitmap_write.
+The diff tells us that. Please say why 'compatible' being required is a 
+problem and needs to not be required.
+
+> >>>>
+> >>>> Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
+> >>>> ---
+> >>>> Changes in v2:
+> >>>> - Instead of moving the compatible string to the other binding, just
+> >>>> make it
+> >>>>     optional (remove from required list).
+> >>>> - Link to v1: https://lore.kernel.org/r/20241219-mmc-slot-v1-1-
+> >>>> dfc747a3d3fb@microchip.com
+> >>>> ---
+> >>>>    Documentation/devicetree/bindings/mmc/mmc-slot.yaml | 1 -
+> >>>>    1 file changed, 1 deletion(-)
+> >>>>
+> >>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml b/
+> >>>> Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> >>>> index 1f0667828063..ca3d0114bfc6 100644
+> >>>> --- a/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> >>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-slot.yaml
+> >>>> @@ -29,7 +29,6 @@ properties:
+> >>>>        maxItems: 1
+> >>>>
+> >>>>    required:
+> >>>> -  - compatible
+> >>>>      - reg
+> >>>
+> >>> If you remove it from here then it's still required in Documentation/
+> >>> devicetree/bindings/mmc/amlogic,meson-mx-sdio.yaml
+> >>> so please add it.
+> >>
+> >> If moving the compatible to its specific binding isn't appropriate (as
+> >> per Conor),
+> >> and if removing it from the required list here doesn’t seem reasonable
+> >> to you,
+> >> then adding an unnecessary compatible string in our DTS files doesn’t
+> >> make sense to me.
+> >>
+> >> What could be the solution then?
+> > 
+> > The solution is right but you modify the meson-mx-sdio bindings, so
+> > simply add compatible in a required list for the slot node.
 > 
-> Accessing the bitmap array directly is not recommended and now there is
-> a helper function that can be used.
+> Okay, we declare compatible as optional in the generic mmc-slot binding 
+> but make it required in the meson-mx-sdio binding, which inherits from it.
 > 
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Signed-off-by: David Lechner <dlechner@baylibre.com>
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+> So why not define the property directly in the meson-mx-sdio binding 
+> instead?
 
+Because mmc-slot.yaml is designed to be complete (hence 
+"unevaluatedProperties: false"). There's at least 2 bindings which use 
+it (with "mmc-slot" compatible). Leaving it at least prevents folks from 
+coming up with their own random compatible strings for mmc-slot.
 
-> ---
->  drivers/iio/resolver/ad2s1210.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/iio/resolver/ad2s1210.c b/drivers/iio/resolver/ad2s1210.c
-> index 7f18df790157f1e411fb70de193a49f0677c999f..04879e6d538bce664469c5f6759d8b1cedea16e9 100644
-> --- a/drivers/iio/resolver/ad2s1210.c
-> +++ b/drivers/iio/resolver/ad2s1210.c
-> @@ -46,6 +46,7 @@
->   */
->  
->  #include <linux/bitfield.h>
-> +#include <linux/bitmap.h>
->  #include <linux/bits.h>
->  #include <linux/cleanup.h>
->  #include <linux/clk.h>
-> @@ -180,7 +181,7 @@ static int ad2s1210_set_mode(struct ad2s1210_state *st, enum ad2s1210_mode mode)
->  	if (!gpios)
->  		return mode == st->fixed_mode ? 0 : -EOPNOTSUPP;
->  
-> -	bitmap[0] = mode;
-> +	bitmap_write(bitmap, mode, 0, 2);
->  
->  	return gpiod_multi_set_value_cansleep(gpios, bitmap);
->  }
-> @@ -1470,7 +1471,7 @@ static int ad2s1210_setup_gpios(struct ad2s1210_state *st)
->  			return dev_err_probe(dev, -EINVAL,
->  				      "requires exactly 2 resolution-gpios\n");
->  
-> -		bitmap[0] = st->resolution;
-> +		bitmap_write(bitmap, st->resolution, 0, 2);
->  
->  		ret = gpiod_multi_set_value_cansleep(resolution_gpios, bitmap);
->  		if (ret < 0)
-> 
-
+Rob
