@@ -1,90 +1,158 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D70141F236B;
-	Tue, 11 Feb 2025 09:42:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3DE9F1F37BC;
+	Tue, 11 Feb 2025 10:08:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739266978; cv=none; b=Ts7be3aYMhvRWD0p4ba3Fa6GXyH+7rSbk20M44lM+Ev6FbK5sLhy9xs01La8Nj0VjQt6/cUIvarxAt8reFyDyoKL7YZ/sqmGuw4Cd6R79ZgUdagVF8KoMhyB7ah+MTkPhvwmp+nt6UgxCX1t+hH0DxQuq8EviF6fJ/P8vqbc9Fc=
+	t=1739268496; cv=none; b=ojsC8NIwFKnAzeOcdaPkh0GzGvE1vLkK2xpqa2s6lZAV0rjra1dWZgzzLD+L35YoiWr90Dc9WRlBzQUMdp+xNv3hetbW7kwZhuhnG+Wed089DVp1hi54yLOyQBgGG1GskynPdQZK0RFGhFHmDPzjeOtiWHbwWSB/RnUpPrlq5CQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739266978; c=relaxed/simple;
-	bh=S+OWZYhmuRFerVGPqqcaVFrGlk+WLVmiJ239vssrjiM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=uW3vC4ZBL+NxlP8UUBPtD1ihYrkwNL1FQJQf29zhSEjcLQQbXF/H1qgVPs+X+grfEAPXd2xy6hbIebv8xKA9anJtFuKAPbUpnVSe/zm/drtGwYDGXH2+0+D4wgff0wfFn1/2jvm1ui2mDPaZfi6ivkGVW4XP6e9XlUbhU4DCYik=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=fail smtp.mailfrom=kernel.org; arc=none smtp.client-ip=192.198.163.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=kernel.org
-X-CSE-ConnectionGUID: lo5SNZqLRQGrU+UiaS7b4A==
-X-CSE-MsgGUID: kz54OLZJTeqAwDMLG1MhGg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11341"; a="50512950"
-X-IronPort-AV: E=Sophos;i="6.13,277,1732608000"; 
-   d="scan'208";a="50512950"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:42:56 -0800
-X-CSE-ConnectionGUID: aYZy757oTGGgjCvr/1BDnw==
-X-CSE-MsgGUID: 05tIZ9H+StaAmIWpBPA8UQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.13,277,1732608000"; 
-   d="scan'208";a="112427591"
-Received: from smile.fi.intel.com ([10.237.72.58])
-  by fmviesa007.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:42:50 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.98)
-	(envelope-from <andy@kernel.org>)
-	id 1thmmz-0000000ASai-3bzO;
-	Tue, 11 Feb 2025 11:42:45 +0200
-Date: Tue, 11 Feb 2025 11:42:45 +0200
-From: Andy Shevchenko <andy@kernel.org>
-To: David Lechner <dlechner@baylibre.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Lars-Peter Clausen <lars@metafoo.de>,
-	Michael Hennerich <Michael.Hennerich@analog.com>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Nuno =?iso-8859-1?Q?S=E1?= <nuno.sa@analog.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>,
-	Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org,
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org
-Subject: Re: [PATCH v3 06/15] gpio: max3191x: use
- gpiod_multi_set_value_cansleep
-Message-ID: <Z6sblZMR-D_B_ncX@smile.fi.intel.com>
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
- <20250210-gpio-set-array-helper-v3-6-d6a673674da8@baylibre.com>
+	s=arc-20240116; t=1739268496; c=relaxed/simple;
+	bh=f/vytJK+MtTyRhNtiMnVekp3UKcMihUn+7HgkrKqY3Y=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=Q/hC1YQzoMJ+Cqz8pgvOAG7gdxtblyy96u0D9hPzKFHCYTevdoqMuOvzq3UCzsghq8Gp+MtUx8vCFnN7WsZdQq1+3yUln+gSSUY8KNIsf5y+kZ83Do6UObuTm+9kBA88v222uMII5pZ2lf4KFdfCZlpNM3FbPDFoqVJAw6jnaDY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=ZnGESr8X; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="ZnGESr8X"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 51BA2QWs013667;
+	Tue, 11 Feb 2025 10:08:12 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:date:from:message-id:subject:to; s=qcppdkim1; bh=mjw/2uFMb5a+
+	7/cLGkARvsCKn1RmWhBraleHyNxVAnI=; b=ZnGESr8XYdbj0zDQoArebEkp18r+
+	tM56uFXRVNlu3MnUUeQh91suiLi/bgcv/XlcF+IacAibSim80kdkwTLNJJs4NLVc
+	w8o/mlaLiYvpU/rOg88fgD7CfplrVZ5jN7YTeKFgeC5Uq0NJMmQ+eDJNSSPnl7FF
+	9Vtz5laomUgZy//Xw1iLpirfbSlRk6vXPIJBpqch4hMdqGplpTUIvi9MRZFmMvtl
+	vv64vOa7eXCiWsck72sq3RNat8BkpTa7xVKU6UK1weQ9XqLsAoImwOcahj+9AXiF
+	oRCumVmyyPjkQfYASoISU/BIrFQwEQXdKoUHtaga0MoKRJnSd2UljMMWNQ==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 44p0dyq9vs-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 11 Feb 2025 10:08:12 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 51BA88ol002554;
+	Tue, 11 Feb 2025 10:08:08 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 44p0bkv363-1;
+	Tue, 11 Feb 2025 10:08:08 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 51BA884v002547;
+	Tue, 11 Feb 2025 10:08:08 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-spuppala-hyd.qualcomm.com [10.213.108.54])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 51BA87N8002546;
+	Tue, 11 Feb 2025 10:08:08 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 4137148)
+	id 2B4DF5000A7; Tue, 11 Feb 2025 15:38:07 +0530 (+0530)
+From: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_bhaskarv@quicinc.com, kernel@quicinc.com,
+        quic_neersoni@quicinc.com, quic_gaurkash@quicinc.com,
+        quic_spuppala@quicinc.com
+Subject: [PATCH v1] mmc: Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
+Date: Tue, 11 Feb 2025 15:38:07 +0530
+Message-Id: <20250211100807.26170-1-quic_spuppala@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: uQn-82TMq0woyhnfQsCwkm6k_nAklXmn
+X-Proofpoint-GUID: uQn-82TMq0woyhnfQsCwkm6k_nAklXmn
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-02-11_04,2025-02-10_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 bulkscore=0
+ clxscore=1015 lowpriorityscore=0 impostorscore=0 mlxlogscore=999
+ mlxscore=0 priorityscore=1501 spamscore=0 adultscore=0 phishscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2501170000 definitions=main-2502110063
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250210-gpio-set-array-helper-v3-6-d6a673674da8@baylibre.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 
-On Mon, Feb 10, 2025 at 04:33:32PM -0600, David Lechner wrote:
-> Reduce verbosity by using gpiod_multi_set_value_cansleep() instead of
-> gpiod_set_array_value_cansleep().
-> 
-> Also add max3191x_ namespace prefix to the driver's helper function
-> since we are changing the function signature anyway.
+Crypto reprogram all keys is called for each MMC runtime
+suspend/resume in current upstream design. If this is implemented
+as a non-interruptible call to TEE for security, the cpu core is
+blocked for execution while this call executes although the crypto
+engine already has the keys. For example, glitches in audio/video
+streaming applications have been observed due to this. Add the flag
+MMC_CAP2_DONT_REPROGRAM as part of host->caps2 to control reprogramming
+keys to crypto engine for socs which dont require this feature.
 
-With renamed function looks much better, thanks,
-Reviewed-by: Andy Shevchenko <andy@kernel.org>
+This patch addresses the following:
+- Addresses the comments from:
+  https://lore.kernel.org/lkml/20241006135530.17363-3-
+  quic_spuppala@quicinc.com/T/#m69c9ab538bd9efd54515646952d0d7d1d7c17690
+- Avoids reprogram of keys for Qualcomm SOCs only.
+- Ensures reprogram of all keys on host controller reset.
 
+Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+---
+ drivers/mmc/core/crypto.c    | 2 +-
+ drivers/mmc/host/sdhci-msm.c | 4 ++++
+ include/linux/mmc/host.h     | 3 +++
+ 3 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+index fec4fbf16a5b..d947cd1bbfe3 100644
+--- a/drivers/mmc/core/crypto.c
++++ b/drivers/mmc/core/crypto.c
+@@ -15,7 +15,7 @@
+ void mmc_crypto_set_initial_state(struct mmc_host *host)
+ {
+ 	/* Reset might clear all keys, so reprogram all the keys. */
+-	if (host->caps2 & MMC_CAP2_CRYPTO)
++	if (host->caps2 & MMC_CAP2_CRYPTO && !(host->caps2 & MMC_CAP2_DONT_REPROGRAM))
+ 		blk_crypto_reprogram_all_keys(&host->crypto_profile);
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4610f067faca..52207873e18d 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1865,6 +1865,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+ 	}
+ 
+ 	mmc->caps2 |= MMC_CAP2_CRYPTO;
++	mmc->caps2 |= MMC_CAP2_DONT_REPROGRAM;
+ 	return 0;
+ }
+ 
+@@ -2451,6 +2452,9 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+ 	usleep_range(200, 210);
+ 	reset_control_put(reset);
+ 
++	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
++		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
++
+ 	return ret;
+ }
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 68f09a955a90..d1e6fafca21c 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -459,6 +459,9 @@ struct mmc_host {
+ #define MMC_CAP2_CRYPTO		0
+ #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
++#ifdef CONFIG_MMC_CRYPTO
++#define MMC_CAP2_DONT_REPROGRAM	(1 << 29)
++#endif
+ 
+ 	bool			uhs2_sd_tran;	/* UHS-II flag for SD_TRAN state */
+ 	bool			uhs2_app_cmd;	/* UHS-II flag for APP command */
 -- 
-With Best Regards,
-Andy Shevchenko
-
+2.17.1
 
