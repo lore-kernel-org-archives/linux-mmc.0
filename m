@@ -1,38 +1,38 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC94B1BD9D2;
-	Tue, 11 Feb 2025 09:39:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DFF8E1F12F8;
+	Tue, 11 Feb 2025 09:41:14 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.11
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739266762; cv=none; b=p3YSNqtaLLxSY5kE6ZSCJxV7HNN4LhvJeRdb2FgOm9rpr/PwG1MLaQVFeYBN6LBl/H6bqP0iJ4FDqjYRilPNfTdMygI9qrfPdUOoej51gQ/d0UYBq12wHo0TaIbtiaUQyvhPyUT6lCtSbKWtv+tDyMi/lzdtoQoFJQ6cvbqYLv0=
+	t=1739266876; cv=none; b=XTBrjzBg4Qt4MVuRUee9OGVfdvnWRZn/mtuUVvU2dvLq8gHnkr/HhzmpSZMfDTqjI6XFw1ltzaLp317BNsPbbWwPYp+tZ7vDMtobZbCNs2zf0KSrcYH+qGjRSZJ9TU1wL3l0akpcOvSvM6jyXS9pBfI8GH+rKmHXUvAyq8yy7kI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739266762; c=relaxed/simple;
-	bh=FDMciW6TLpEAMbkjQIVGCNbvKy5Ug5oPSQE/94sMcPM=;
+	s=arc-20240116; t=1739266876; c=relaxed/simple;
+	bh=IkAWydMGs1r5rb0BA93bcr9XHfndvLruvy5SdIueU3E=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=p4Xcwmg0Y3b3C2eXnhuM1COgM0BRQodHZkgT5hU9MJxPMD9uht6vkSkA2gfTwOnZ9UgTz33HzRuk6C7d4qpm10yegoaZAl7/FITnCCbcE7+/qxdu4vNaVM3GURzzU4vkR3lwQFcRaq1OnSGBg7D1kSCnrS8OvVdIp12lprad09U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=fail smtp.mailfrom=kernel.org; arc=none smtp.client-ip=192.198.163.9
+	 Content-Type:Content-Disposition:In-Reply-To; b=X75kak0Nz9T7ddrFJLGi2H52EPUtzRPEUahPfjvwczfO/zhjJnTOfC2eUWiqxot/9+88vszbiQ95tvJ97SdxXrPFcG0W2CXXf5gw8yggPkPDRbLFbFnx6m+j95IH97+ChOn6Gnl3kL/dLhpN04SHMaCbXv0RCE0g1M36JsP/y7Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org; spf=fail smtp.mailfrom=kernel.org; arc=none smtp.client-ip=192.198.163.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=fail (p=quarantine dis=none) header.from=kernel.org
 Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=kernel.org
-X-CSE-ConnectionGUID: 8YpW5iXTSEGIQ/5t0VYFRQ==
-X-CSE-MsgGUID: Q0G+jQrCRISzqKzSRNH6Pg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11341"; a="50512301"
+X-CSE-ConnectionGUID: izygP/I+T8W8FPtZp56Vmg==
+X-CSE-MsgGUID: F4+jS7SXTxSxelIc1J6FJQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11341"; a="50510266"
 X-IronPort-AV: E=Sophos;i="6.13,277,1732608000"; 
-   d="scan'208";a="50512301"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:39:20 -0800
-X-CSE-ConnectionGUID: cJvLFL1FQAm1X4Xl9szJ9g==
-X-CSE-MsgGUID: WtVy6JKQSCiOBQl3Jo+Lvg==
+   d="scan'208";a="50510266"
+Received: from fmviesa001.fm.intel.com ([10.60.135.141])
+  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:41:10 -0800
+X-CSE-ConnectionGUID: M4q0L3FITbuvBztdQMvbJg==
+X-CSE-MsgGUID: Cg7Uozc6SoWKjkvUHvaTwQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.12,224,1728975600"; 
-   d="scan'208";a="112318016"
+   d="scan'208";a="143364716"
 Received: from smile.fi.intel.com ([10.237.72.58])
-  by orviesa010.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:39:13 -0800
+  by fmviesa001.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Feb 2025 01:41:03 -0800
 Received: from andy by smile.fi.intel.com with local (Exim 4.98)
 	(envelope-from <andy@kernel.org>)
-	id 1thmjV-0000000ASXJ-1H97;
-	Tue, 11 Feb 2025 11:39:09 +0200
-Date: Tue, 11 Feb 2025 11:39:09 +0200
+	id 1thmlH-0000000ASZ3-2ikX;
+	Tue, 11 Feb 2025 11:40:59 +0200
+Date: Tue, 11 Feb 2025 11:40:59 +0200
 From: Andy Shevchenko <andy@kernel.org>
 To: David Lechner <dlechner@baylibre.com>
 Cc: Linus Walleij <linus.walleij@linaro.org>,
@@ -57,10 +57,10 @@ Cc: Linus Walleij <linus.walleij@linaro.org>,
 	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org,
 	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
 	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org
-Subject: Re: [PATCH v3 01/15] gpiolib: add gpiod_multi_set_value_cansleep()
-Message-ID: <Z6savSGQhDGA_Z9k@smile.fi.intel.com>
+Subject: Re: [PATCH v3 05/15] bus: ts-nbus: use bitmap_get_value8()
+Message-ID: <Z6sbK96JEBpWoFWy@smile.fi.intel.com>
 References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
- <20250210-gpio-set-array-helper-v3-1-d6a673674da8@baylibre.com>
+ <20250210-gpio-set-array-helper-v3-5-d6a673674da8@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,20 +69,26 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250210-gpio-set-array-helper-v3-1-d6a673674da8@baylibre.com>
+In-Reply-To: <20250210-gpio-set-array-helper-v3-5-d6a673674da8@baylibre.com>
 Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 
-On Mon, Feb 10, 2025 at 04:33:27PM -0600, David Lechner wrote:
-> Add a new gpiod_multi_set_value_cansleep() helper function with fewer
-> parameters than gpiod_set_array_value_cansleep().
+On Mon, Feb 10, 2025 at 04:33:31PM -0600, David Lechner wrote:
+> Use bitmap_get_value8() instead of accessing the bitmap directly.
 > 
-> Calling gpiod_set_array_value_cansleep() can get quite verbose. In many
-> cases, the first arguments all come from the same struct gpio_descs, so
-> having a separate function where we can just pass that cuts down on the
-> boilerplate.
+> Accessing the bitmap directly is not considered good practice. We now
+> have a helper function that can be used instead, so let's use it.
 
-LGTM now,
+Thank you, LGTM (one minor thing you may address,
+or keep it as in the current variant of the patch),
+
 Reviewed-by: Andy Shevchenko <andy@kernel.org>
+
+...
+
+> +#include <linux/bitmap.h>
+>  #include <linux/bitops.h>
+
+bitmap.h implies bitops.h
 
 -- 
 With Best Regards,
