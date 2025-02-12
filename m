@@ -1,62 +1,62 @@
 Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DA6B2080F4
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 09:36:27 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E714E20B7FD
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 09:36:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739352989; cv=none; b=RHAzx/ajvrCCFqVm1oyajfIvEPmneJl2SAJv8RXkng6/GdhbDooOVH+b6Rn/fg0YEeeINvvR9eGDq4YZ4odQW7ee6FcHo02aQlCSSxblpUVHhwxAr5RMRN6pCyK97yM0vN2UpNhhnZQQXODVZTRRaBivdQd3reITWPWO+Rk2DR4=
+	t=1739353019; cv=none; b=Fwq5qlZE/b3y33hSaI5Cc2S136e6VOP8NCXMU6dhKNwnq7HgfPbjC2PF8ukew+mcp8fV8vThbS8tTW+CdDS5641wRUyPB5NF3XPaUWf47r7QCQafqN0h76UEV2/lL0dq0t9me/4eeZr331PnrQu/8NovHlU5Ak9089dUiZu8oBM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739352989; c=relaxed/simple;
-	bh=I7CFgTkt0jzyGzG4M7RjYnnbGhlCBrEk+jlNQ3TAQts=;
+	s=arc-20240116; t=1739353019; c=relaxed/simple;
+	bh=7KT0FF/FzIbIE6w2ehfIcEyeGHIB5NZeS2fUmYmWmwU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=GzJQ0wCoeXAioPkZkdsO5eC4mlU3gDVlExq2FW2UDFGELKuh2AmLZMMtaQYZb20KRD+F2pMmM+4Y4pz/GoZPRUIieJkpQrQUkvtjat+PFAdmiHDBnab637xpcc2P1ZFbBysIIOceUuLpyoV668xAt025ROZcbZ6AilJ2KM2xTqU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=QrIgjLpE; arc=none smtp.client-ip=209.85.128.51
+	 MIME-Version:Content-Type; b=a0t78fda63BKLBuqvTfENIL5KKuNmw1lcASZoMk4538UkIQ8wuh5GfqnVfsNhssO2L7+7V6/s3UCh6x8UyB1A0EBVhN71iJfGI8a5gDuveZwZv3hpb8OXCD8yXslf25KLxbIKGQ2N4x718H2jSXjcbqWhGWhY5oP/q0LbnzTlDA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=1bY7ylZ7; arc=none smtp.client-ip=209.85.128.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="QrIgjLpE"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-439350f1a0bso3858315e9.0
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 01:36:27 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="1bY7ylZ7"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-43948f77f1aso18295395e9.0
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 01:36:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1739352986; x=1739957786; darn=vger.kernel.org;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1739353016; x=1739957816; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SrbuHpRRCn2ojY6FY2MTuNNVYvVFb7ykFJzn4YLtY68=;
-        b=QrIgjLpEkIg4TvIfUDn3FaU9UtGn68UJuWXMMFjnw4pJIp7q01+sRhx2F0VZ4ntyrb
-         DTrq8sVzdwrJu4TaGKOY7n4aBTY3xdvnVEV6RW6DqZIv/2RDmCOBhHwewUPWzzIrta00
-         6z6P91/vFUQ0zF8LZCpJr9M3F5EY9/g8LjPGBEhOfymyTWlJxA4VzKyVrx12AKeSF+YZ
-         N7DVbbx7q2oHHAL1uMEw6zDoSO2LbkqwINA0HKNuZ2PGQp0DLiZj+skDYbmiuEAiXFsf
-         A0t/Z66W3OLN9cEEH23FX16CE5d+yhQDNxfHJo+KiM/hL2ihtEeKhNQeTCl+gYpINcHO
-         cFfg==
+        bh=NRhZaB3W6faFlCbku+LscU579s6QSzZfyLaHX9G8q1c=;
+        b=1bY7ylZ78sEe+qzdUjM2zmGfl1QOFXMRsX6hXdSa68HPLuyAOu9iJXDh0S+L6QuX6e
+         NGG0J80Xki52AuIezFQssR0b3LYZRjmc7w2Mi+gjGrz5fFn4u9aYZ9BEBvvJl2YQVLzm
+         34JyT8vew1VSBU9l4TeMWsrWJoOSZqen1K0wrXR5UVDzay1x1nMCl2fgAkqD0yTgz+6l
+         rvVXrBNSuIMhJtFa8EvuqyyKbBN1JrdwVZDhRpe+gGQDpssIr6uTkd3BnUVVRgbzh/6k
+         JwBUSbRHO5tJlDdyhhgPLpTIFpDVbsOizKfSb9nUArzef29+F7UPKxezK8ze/Pok4iI8
+         CHKA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739352986; x=1739957786;
+        d=1e100.net; s=20230601; t=1739353016; x=1739957816;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=SrbuHpRRCn2ojY6FY2MTuNNVYvVFb7ykFJzn4YLtY68=;
-        b=VfgDdlG3FXADDEAV+4UOKMAlz6j1Ip7eVUHoAnTNlPsMPlQLn5dS0np4e6oJwFrcOc
-         EawL3VsJHhiM6c8YExerPKbIZBtZpnJIGgBphZPi884XMtr2/jK+cbO69761g7pqzCjV
-         ero5W/gEnxpujHyl4qLNpt7FcMfLWzhVp0tqhYd+gkC6HntDbTEEvsjUTurxFnK1Qraa
-         /14rVBNFncPEPHlHazs1dyDGi3BmW64wVhEbBbZ6wqA196QUlY29d7tcX6zdHrKa5rxl
-         0nW4xeqr7xP4llo68F4zxiy9B/Dx/2oY1hQkFzlPFpe6Y5nusSTNV1hxqYpWtoFXUo74
-         22oA==
-X-Forwarded-Encrypted: i=1; AJvYcCWNj5TVAkg08dYDootyc9rxkMN4CGZmfDAYTfeHxD+ib2W9gbLLTn8gV1f7VPUu/fdrueWHEVxxcIk=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzqJcvNoQiiixSeKBnliYK4VRXg2woFnb4+5wYPxPTX9rG55vU0
-	M22Bjky9omw63PLbL5jkAW/7uwEsO+HxAIeHJjyu7w/I4g3MkAo499yyF0Dm42g=
-X-Gm-Gg: ASbGncvDe7Y5JhRS6P99ABACw9iRLvIZx3CFZU0OjgsySK7pFTTD9E/eYA0hPEn2Aaw
-	TCXX2Vq+Jbm4osabpNgVNwF5F2HWm0ZefJvCSysHA2PE3GTEawwNw2ASS0NazqKiFcgJwNSpMm9
-	ZAAfU1fUdzBR5W1sSvKSEyRT22xM80lTL7ihHliw4PkfT7lvqeDPCU/I92OaohZTJ22u5eoBrG4
-	DKbgtLRd0P6WFKCQs77ZICnwyVPc0mhq5z/ju6XGQ3ibdIXVm+4nQPHGI4sbHm9hs5SuN8weRXu
-	IBmeMJCm4cWS2Ec=
-X-Google-Smtp-Source: AGHT+IFudfgBGV0+IDygsdoLTA/5igyJSZtMJXjbCQPeBSc7oN4L55kdXKAZLq0JA2599sk+IrdqDA==
-X-Received: by 2002:a05:600c:3ac4:b0:434:f9ad:7222 with SMTP id 5b1f17b1804b1-439583b4e03mr18452935e9.7.1739352985575;
-        Wed, 12 Feb 2025 01:36:25 -0800 (PST)
+        bh=NRhZaB3W6faFlCbku+LscU579s6QSzZfyLaHX9G8q1c=;
+        b=WssfvJSy8hUOQxKmqlAwXu+9mCLm1xKrM1Ke7x2a1PJyxBj4MvKL96rjgrFELJJdFt
+         cb7j5i47zm3/xO/UqrY1CpMo4ijD6aV8qc3iddfedrMHu1kb4ku4817bHhboveuyeisY
+         1Vk+0DpqZITKHZTKjWB3xdO/uMFeuscS0Cc1MfB1oxBkW4HaHed5xYW8cBQ99cTZR8Ro
+         cfHy51L/mIP9nPO0VAUnehQc38Oy0nNAg/XOE8RgimdOhoe//bRu61kwxqbrzSYkHtsU
+         FxD/fQlGMyoHRk+J0MdreF6+0h2hgvO0hBI40zIr5gWCcYWlEM2ZPV5gf45du8PXrbRH
+         J2ZA==
+X-Forwarded-Encrypted: i=1; AJvYcCVpursc2C5A3PYN9jejKBL1LDRsgHW8L5n2uD0pxNj/VwMXr/D6yNx9K0Ar+VQMDeUQw+mcCpylWwA=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yywph3SfMd+EYMn8WM56t4apo46/ncwfiD9soWiXZQ0HF/ZN6HH
+	6vLmMcaBYREmRewztbvcB/NX8CU1O4YLovmgMYxh025zDjKRZM4P4lR7qXXCxls=
+X-Gm-Gg: ASbGncvRV0C7ZAO/ysa/YnOukPsMmHsyrqMnM0NZgONyTK9CHhvNSfouIL/2IrWpHAu
+	JF6ToNaT60SuQ1V7Q1XYfCxmWLoPwPljx+CF3nZkCCZVo8M2ZKzWoNIH+2W563bJUBougyj95Ba
+	2S8dKtzHTXdJyTHyxbFMaFhBOyfJ2Df7b2E6mLW0aPVAcki7HuxFkv8Kuxiox/P8aTcDt49ela+
+	ghsyYlnJbk2xCms3/Z/hGkjWCQ6L5cSVu+jVdKxV+1LJKUd+YGSJNb1c5EhJrwwJK0nnv1Fqy0M
+	2V8zRtLvdW/6zvA=
+X-Google-Smtp-Source: AGHT+IFQnul0kNzls6ThIvi1z7bQ429pLFDaGlT/FcOXJm3pTEnq6re0+Qc4O8V8syw5sWV5sK78UQ==
+X-Received: by 2002:a05:6000:188b:b0:38d:b34a:679 with SMTP id ffacd0b85a97d-38dea2cefc8mr1824460f8f.37.1739353016217;
+        Wed, 12 Feb 2025 01:36:56 -0800 (PST)
 Received: from brgl-uxlite.home ([2a01:cb1d:dc:7e00:521c:13af:4882:344c])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38dd8dee385sm9918965f8f.61.2025.02.12.01.36.24
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4395a078448sm14132935e9.34.2025.02.12.01.36.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 12 Feb 2025 01:36:25 -0800 (PST)
+        Wed, 12 Feb 2025 01:36:55 -0800 (PST)
 From: Bartosz Golaszewski <brgl@bgdev.pl>
 To: Linus Walleij <linus.walleij@linaro.org>,
 	Bartosz Golaszewski <brgl@bgdev.pl>,
@@ -93,8 +93,8 @@ Cc: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
 	Andy Shevchenko <andy.shevchenko@gmail.com>,
 	Jonathan Cameron <Jonathan.Cameron@huawei.com>
 Subject: Re: (subset) [PATCH v3 00/15] gpiolib: add gpiod_multi_set_value_cansleep
-Date: Wed, 12 Feb 2025 10:36:23 +0100
-Message-ID: <173935297467.10817.9536577313319553775.b4-ty@linaro.org>
+Date: Wed, 12 Feb 2025 10:36:53 +0100
+Message-ID: <173935301204.11039.10193374588878813157.b4-ty@linaro.org>
 X-Mailer: git-send-email 2.45.2
 In-Reply-To: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
 References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
@@ -126,8 +126,8 @@ On Mon, 10 Feb 2025 16:33:26 -0600, David Lechner wrote:
 
 Applied, thanks!
 
-[01/15] gpiolib: add gpiod_multi_set_value_cansleep()
-        commit: 91931af18bd22437e08e2471f5484d6fbdd8ab93
+[06/15] gpio: max3191x: use gpiod_multi_set_value_cansleep
+        commit: eb2e9c308d2882d9d364af048eb3d8336d41c4bb
 
 Best regards,
 -- 
