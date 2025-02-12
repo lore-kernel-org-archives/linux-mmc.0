@@ -1,52 +1,103 @@
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 62AD72080D5;
-	Wed, 12 Feb 2025 09:23:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.154.123
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DA6B2080F4
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 09:36:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739352194; cv=none; b=W4/IIJzZOjr+vdbE2BUnO2sXDeAOQd8VpJOfSH9OyFZNsuXQmHHfhkuy0cTDNX7INpvH+I2g9OGhOHmqDsImimG+z+DjBi+PyFlExXtJy89+fYLK4+zBoIzlPij7RIFiObM2nW3LOdiSi+/tSmiHSOKMflLflSW7o8K/Rig8pgk=
+	t=1739352989; cv=none; b=RHAzx/ajvrCCFqVm1oyajfIvEPmneJl2SAJv8RXkng6/GdhbDooOVH+b6Rn/fg0YEeeINvvR9eGDq4YZ4odQW7ee6FcHo02aQlCSSxblpUVHhwxAr5RMRN6pCyK97yM0vN2UpNhhnZQQXODVZTRRaBivdQd3reITWPWO+Rk2DR4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739352194; c=relaxed/simple;
-	bh=A1lTgaCSCPH+LFYIcMVq6NgsuaXTkZ36T56r0CfFEyU=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-ID:References:
-	 In-Reply-To:To:CC; b=AkVnrfo3ipLsp2nL+nL1fLLvi6f+NbxmDkfMKZp/60SaqhhUxPl8ai0nw47LKBxJlrIseEr4VKMrh/6qPksraOwL0+0swoSCUPEAfRoYahBY5YrTXionc/s9cWaxNlfsszPpk7knq1K8kYa4R3aNYA3HwoUBCSOsQtZHxQxrQ88=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com; spf=pass smtp.mailfrom=microchip.com; dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b=FgKCuSl0; arc=none smtp.client-ip=68.232.154.123
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=microchip.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=microchip.com
+	s=arc-20240116; t=1739352989; c=relaxed/simple;
+	bh=I7CFgTkt0jzyGzG4M7RjYnnbGhlCBrEk+jlNQ3TAQts=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=GzJQ0wCoeXAioPkZkdsO5eC4mlU3gDVlExq2FW2UDFGELKuh2AmLZMMtaQYZb20KRD+F2pMmM+4Y4pz/GoZPRUIieJkpQrQUkvtjat+PFAdmiHDBnab637xpcc2P1ZFbBysIIOceUuLpyoV668xAt025ROZcbZ6AilJ2KM2xTqU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=QrIgjLpE; arc=none smtp.client-ip=209.85.128.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=microchip.com header.i=@microchip.com header.b="FgKCuSl0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1739352192; x=1770888192;
-  h=from:date:subject:mime-version:content-transfer-encoding:
-   message-id:references:in-reply-to:to:cc;
-  bh=A1lTgaCSCPH+LFYIcMVq6NgsuaXTkZ36T56r0CfFEyU=;
-  b=FgKCuSl0mJhSoQ1wIGRf0gLBr4IQSLVtoXEaSB1a/FncVqG45VJPANed
-   r3dj+MaUHEBqBr3GMq5b8ykX67JsPRoel3DxRMJDeJ+rzS4a9MDnzJclV
-   xEiID50ZjBh6699qmSQoB4lDPl/bADqTUetEhhKlBK9p5OTQlhRZvEtKQ
-   df3Q1wldG5fDklGd6IyT1CcaI1fkFut8/1rNvwn7UwtDG4qiDRlJW5p5q
-   vXDVVczyd7SROrHyiGGNmh/he/h5e7Y2AQikeawYYNI+djlTw4G+v/phO
-   iKTQSvZoucQnSclOFV22JvJ22xapxTp4na78zYf1RRnWBhxveAmx3gsdH
-   w==;
-X-CSE-ConnectionGUID: Im7caqcMRgeiMBKdbNTopA==
-X-CSE-MsgGUID: Ydz9VnPsRnKzfMIBBjCRkg==
-X-IronPort-AV: E=Sophos;i="6.13,279,1732604400"; 
-   d="scan'208";a="37190268"
-X-Amp-Result: SKIPPED(no attachment in message)
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa4.microchip.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 12 Feb 2025 02:23:03 -0700
-Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.35; Wed, 12 Feb 2025 02:22:33 -0700
-Received: from [127.0.0.1] (10.10.85.11) by chn-vm-ex01.mchp-main.com
- (10.10.85.143) with Microsoft SMTP Server id 15.1.2507.35 via Frontend
- Transport; Wed, 12 Feb 2025 02:22:28 -0700
-From: Dharma Balasubiramani <dharma.b@microchip.com>
-Date: Wed, 12 Feb 2025 14:52:11 +0530
-Subject: [PATCH v3 2/2] dt-bindings: mmc: atmel,hsmci: Convert to json
- schema
+	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="QrIgjLpE"
+Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-439350f1a0bso3858315e9.0
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Feb 2025 01:36:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1739352986; x=1739957786; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=SrbuHpRRCn2ojY6FY2MTuNNVYvVFb7ykFJzn4YLtY68=;
+        b=QrIgjLpEkIg4TvIfUDn3FaU9UtGn68UJuWXMMFjnw4pJIp7q01+sRhx2F0VZ4ntyrb
+         DTrq8sVzdwrJu4TaGKOY7n4aBTY3xdvnVEV6RW6DqZIv/2RDmCOBhHwewUPWzzIrta00
+         6z6P91/vFUQ0zF8LZCpJr9M3F5EY9/g8LjPGBEhOfymyTWlJxA4VzKyVrx12AKeSF+YZ
+         N7DVbbx7q2oHHAL1uMEw6zDoSO2LbkqwINA0HKNuZ2PGQp0DLiZj+skDYbmiuEAiXFsf
+         A0t/Z66W3OLN9cEEH23FX16CE5d+yhQDNxfHJo+KiM/hL2ihtEeKhNQeTCl+gYpINcHO
+         cFfg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1739352986; x=1739957786;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SrbuHpRRCn2ojY6FY2MTuNNVYvVFb7ykFJzn4YLtY68=;
+        b=VfgDdlG3FXADDEAV+4UOKMAlz6j1Ip7eVUHoAnTNlPsMPlQLn5dS0np4e6oJwFrcOc
+         EawL3VsJHhiM6c8YExerPKbIZBtZpnJIGgBphZPi884XMtr2/jK+cbO69761g7pqzCjV
+         ero5W/gEnxpujHyl4qLNpt7FcMfLWzhVp0tqhYd+gkC6HntDbTEEvsjUTurxFnK1Qraa
+         /14rVBNFncPEPHlHazs1dyDGi3BmW64wVhEbBbZ6wqA196QUlY29d7tcX6zdHrKa5rxl
+         0nW4xeqr7xP4llo68F4zxiy9B/Dx/2oY1hQkFzlPFpe6Y5nusSTNV1hxqYpWtoFXUo74
+         22oA==
+X-Forwarded-Encrypted: i=1; AJvYcCWNj5TVAkg08dYDootyc9rxkMN4CGZmfDAYTfeHxD+ib2W9gbLLTn8gV1f7VPUu/fdrueWHEVxxcIk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzqJcvNoQiiixSeKBnliYK4VRXg2woFnb4+5wYPxPTX9rG55vU0
+	M22Bjky9omw63PLbL5jkAW/7uwEsO+HxAIeHJjyu7w/I4g3MkAo499yyF0Dm42g=
+X-Gm-Gg: ASbGncvDe7Y5JhRS6P99ABACw9iRLvIZx3CFZU0OjgsySK7pFTTD9E/eYA0hPEn2Aaw
+	TCXX2Vq+Jbm4osabpNgVNwF5F2HWm0ZefJvCSysHA2PE3GTEawwNw2ASS0NazqKiFcgJwNSpMm9
+	ZAAfU1fUdzBR5W1sSvKSEyRT22xM80lTL7ihHliw4PkfT7lvqeDPCU/I92OaohZTJ22u5eoBrG4
+	DKbgtLRd0P6WFKCQs77ZICnwyVPc0mhq5z/ju6XGQ3ibdIXVm+4nQPHGI4sbHm9hs5SuN8weRXu
+	IBmeMJCm4cWS2Ec=
+X-Google-Smtp-Source: AGHT+IFudfgBGV0+IDygsdoLTA/5igyJSZtMJXjbCQPeBSc7oN4L55kdXKAZLq0JA2599sk+IrdqDA==
+X-Received: by 2002:a05:600c:3ac4:b0:434:f9ad:7222 with SMTP id 5b1f17b1804b1-439583b4e03mr18452935e9.7.1739352985575;
+        Wed, 12 Feb 2025 01:36:25 -0800 (PST)
+Received: from brgl-uxlite.home ([2a01:cb1d:dc:7e00:521c:13af:4882:344c])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-38dd8dee385sm9918965f8f.61.2025.02.12.01.36.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Feb 2025 01:36:25 -0800 (PST)
+From: Bartosz Golaszewski <brgl@bgdev.pl>
+To: Linus Walleij <linus.walleij@linaro.org>,
+	Bartosz Golaszewski <brgl@bgdev.pl>,
+	Andy Shevchenko <andy@kernel.org>,
+	Geert Uytterhoeven <geert@linux-m68k.org>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	Michael Hennerich <Michael.Hennerich@analog.com>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Peter Rosin <peda@axentia.se>,
+	Andrew Lunn <andrew@lunn.ch>,
+	Heiner Kallweit <hkallweit1@gmail.com>,
+	Russell King <linux@armlinux.org.uk>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>,
+	Paolo Abeni <pabeni@redhat.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	=?UTF-8?q?Nuno=20S=C3=A1?= <nuno.sa@analog.com>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Mark Brown <broonie@kernel.org>,
+	Jaroslav Kysela <perex@perex.cz>,
+	Takashi Iwai <tiwai@suse.com>,
+	David Lechner <dlechner@baylibre.com>
+Cc: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+	linux-gpio@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-iio@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	netdev@vger.kernel.org,
+	linux-phy@lists.infradead.org,
+	linux-sound@vger.kernel.org,
+	Andy Shevchenko <andy.shevchenko@gmail.com>,
+	Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Subject: Re: (subset) [PATCH v3 00/15] gpiolib: add gpiod_multi_set_value_cansleep
+Date: Wed, 12 Feb 2025 10:36:23 +0100
+Message-ID: <173935297467.10817.9536577313319553775.b4-ty@linaro.org>
+X-Mailer: git-send-email 2.45.2
+In-Reply-To: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
+References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -54,229 +105,30 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-ID: <20250212-mmc-slot-v3-2-2bf288207040@microchip.com>
-References: <20250212-mmc-slot-v3-0-2bf288207040@microchip.com>
-In-Reply-To: <20250212-mmc-slot-v3-0-2bf288207040@microchip.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>, Kevin Hilman
-	<khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, "Martin
- Blumenstingl" <martin.blumenstingl@googlemail.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-amlogic@lists.infradead.org>,
-	<linux-kernel@vger.kernel.org>, Dharma Balasubiramani
-	<dharma.b@microchip.com>
-X-Mailer: b4 0.13.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1739352136; l=4768;
- i=dharma.b@microchip.com; s=20240209; h=from:subject:message-id;
- bh=A1lTgaCSCPH+LFYIcMVq6NgsuaXTkZ36T56r0CfFEyU=;
- b=Lcp/a3O6yv2QXnNOK3V/BtiNINsPT6P7qaEjWrE56J8XikZUjIugwaqJ43z6SzQYhqTQKUE30
- oVJfL27sDDBClvHBJjSY45HEGAHzmAEoUQ7mDXNEORYqUgBDn0+Uiws
-X-Developer-Key: i=dharma.b@microchip.com; a=ed25519;
- pk=kCq31LcpLAe9HDfIz9ZJ1U7T+osjOi7OZSbe0gqtyQ4=
+Content-Transfer-Encoding: 8bit
 
-Convert atmel,hsmci documentation to yaml format. The new file will inherit
-from mmc-controller.yaml.
+From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
 
-Signed-off-by: Dharma Balasubiramani <dharma.b@microchip.com>
----
- .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 106 +++++++++++++++++++++
- .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 --------------
- 2 files changed, 106 insertions(+), 73 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-new file mode 100644
-index 000000000000..feaa98e44955
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
-@@ -0,0 +1,106 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/atmel,hsmci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Atmel High-Speed MultiMedia Card Interface (HSMCI)
-+
-+description:
-+  The Atmel HSMCI controller provides an interface for MMC, SD, and SDIO memory
-+  cards.
-+
-+maintainers:
-+  - Nicolas Ferre <nicolas.ferre@microchip.com>
-+  - Aubin Constans <aubin.constans@microchip.com>
-+
-+allOf:
-+  - $ref: mmc-controller.yaml
-+
-+properties:
-+  compatible:
-+    const: atmel,hsmci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  dmas:
-+    maxItems: 1
-+
-+  dma-names:
-+    const: rxtx
-+
-+  clocks:
-+    maxItems: 1
-+
-+  clock-names:
-+    const: mci_clk
-+
-+  "#address-cells":
-+    const: 1
-+    description: Used for slot IDs.
-+
-+  "#size-cells":
-+    const: 0
-+
-+patternProperties:
-+  "^slot@[0-9]+$":
-+    $ref: mmc-slot.yaml
-+    description: A slot node representing an MMC, SD, or SDIO slot.
-+
-+    properties:
-+      reg:
-+        enum: [0, 1]
-+
-+    required:
-+      - reg
-+      - bus-width
-+
-+    unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - "#address-cells"
-+  - "#size-cells"
-+
-+anyOf:
-+  - required:
-+      - slot@0
-+  - required:
-+      - slot@1
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/clock/at91.h>
-+    mmc@f0008000 {
-+      compatible = "atmel,hsmci";
-+      reg = <0xf0008000 0x600>;
-+      interrupts = <12 IRQ_TYPE_LEVEL_HIGH>;
-+      clocks = <&mci0_clk>;
-+      clock-names = "mci_clk";
-+      #address-cells = <1>;
-+      #size-cells = <0>;
-+
-+      slot@0 {
-+        reg = <0>;
-+        bus-width = <4>;
-+        cd-gpios = <&pioD 15 0>;
-+        cd-inverted;
-+      };
-+
-+      slot@1 {
-+        reg = <1>;
-+        bus-width = <4>;
-+      };
-+    };
-+...
-diff --git a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt b/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-deleted file mode 100644
-index 07ad02075a93..000000000000
---- a/Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
-+++ /dev/null
-@@ -1,73 +0,0 @@
--* Atmel High Speed MultiMedia Card Interface
--
--This controller on atmel products provides an interface for MMC, SD and SDIO
--types of memory cards.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the atmel-mci driver.
--
--1) MCI node
--
--Required properties:
--- compatible: should be "atmel,hsmci"
--- #address-cells: should be one. The cell is the slot id.
--- #size-cells: should be zero.
--- at least one slot node
--- clock-names: tuple listing input clock names.
--	Required elements: "mci_clk"
--- clocks: phandles to input clocks.
--
--The node contains child nodes for each slot that the platform uses
--
--Example MCI node:
--
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	clock-names = "mci_clk";
--	clocks = <&mci0_clk>;
--
--	[ child node definitions...]
--};
--
--2) slot nodes
--
--Required properties:
--- reg: should contain the slot id.
--- bus-width: number of data lines connected to the controller
--
--Optional properties:
--- cd-gpios: specify GPIOs for card detection
--- cd-inverted: invert the value of external card detect gpio line
--- wp-gpios: specify GPIOs for write protection
--
--Example slot node:
--
--slot@0 {
--	reg = <0>;
--	bus-width = <4>;
--	cd-gpios = <&pioD 15 0>
--	cd-inverted;
--};
--
--Example full MCI node:
--mmc0: mmc@f0008000 {
--	compatible = "atmel,hsmci";
--	reg = <0xf0008000 0x600>;
--	interrupts = <12 4>;
--	#address-cells = <1>;
--	#size-cells = <0>;
--	slot@0 {
--		reg = <0>;
--		bus-width = <4>;
--		cd-gpios = <&pioD 15 0>
--		cd-inverted;
--	};
--	slot@1 {
--		reg = <1>;
--		bus-width = <4>;
--	};
--};
+On Mon, 10 Feb 2025 16:33:26 -0600, David Lechner wrote:
+> This series was inspired by some minor annoyance I have experienced a
+> few times in recent reviews.
+> 
+> Calling gpiod_set_array_value_cansleep() can be quite verbose due to
+> having so many parameters. In most cases, we already have a struct
+> gpio_descs that contains the first 3 parameters so we end up with 3 (or
+> often even 6) pointer indirections at each call site. Also, people have
+> a tendency to want to hard-code the first argument instead of using
+> struct gpio_descs.ndescs, often without checking that ndescs >= the
+> hard-coded value.
+> 
+> [...]
 
+Applied, thanks!
+
+[01/15] gpiolib: add gpiod_multi_set_value_cansleep()
+        commit: 91931af18bd22437e08e2471f5484d6fbdd8ab93
+
+Best regards,
 -- 
-2.43.0
-
+Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
