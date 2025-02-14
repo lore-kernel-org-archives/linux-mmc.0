@@ -1,146 +1,112 @@
-Received: from mail-wm1-f51.google.com (mail-wm1-f51.google.com [209.85.128.51])
+Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com [209.85.208.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 77CB6255E42
-	for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2025 10:21:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72898263C6F
+	for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2025 12:18:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739528465; cv=none; b=ZYBTm+nzxv2K0zlotKSFDY2bCvZrVekRj5V5prvsz7/qzX6xOsGW9Keqp6LZHiqxAhupNU6Jb9/L1t9rPxE3jI0dE3g+1NDdU19Ckiv3JxDWuADzukwOwr7uRgmlFK2ouVp67h17cc3/RTibDWDP8kerMUOFA+Ne46sHAjWbgnA=
+	t=1739535507; cv=none; b=j18jGla+9vhAv/BnWgqwtgt3JRafMqy/mxJAW0xHaHZGafj+2VOJ5gfiYTTTGxG/nmiauu+xrvqTubSEp9VLhLnUl8+V0I9v61Ap8MAojRxXUaldo/mNuq2gIOx9nDcEy3oVtJx8KOawVKnUesrfm1U2BYC1jVxZiPIp0zu+uuQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739528465; c=relaxed/simple;
-	bh=1lGizCsR7R+FyokmykNTUGHY1lzSxjHAe9z+jj/6a1E=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=W1BImtrACQHS2QwUqkd7/b3TDDeaq1xFtLtd1OfEo8Au6x24etbmkc8ka1Kxh+LjSkHnmE3QVd5dkuI4OBdo9P1Aavtb5IqMwqW6smXmiyNcMfF7kZA/btec8igqQ7x5RjVVCLSs5/WojN5Lz2aDt54F6yTGfpcxgOfh18xLHw0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=VGYh8Spi; arc=none smtp.client-ip=209.85.128.51
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
+	s=arc-20240116; t=1739535507; c=relaxed/simple;
+	bh=7adhrVeGo6H4LUVbse/IZZXrXiXQD9ZHuQw6udBALFI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gtwhNdaY//tUu06H/8RHAJWT/dBel7drz44tUwlaDQD7Ge0T2UHM+QZYa0VMpxopG6O8vXS8AwSUYGYvvZALpCOfOe7Ldw/dBLi2W+VQo0tzns2v+7Qycphqu/SmxOFa5yA0QhabTchLTfn7dr4dnsSKgrtD2JBIAO12UCNqbFE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=MhAdqCTr; arc=none smtp.client-ip=209.85.208.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="VGYh8Spi"
-Received: by mail-wm1-f51.google.com with SMTP id 5b1f17b1804b1-439685e14f1so3213595e9.3
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2025 02:21:03 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MhAdqCTr"
+Received: by mail-lj1-f175.google.com with SMTP id 38308e7fff4ca-30920855d5bso5506431fa.0
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Feb 2025 04:18:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1739528462; x=1740133262; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NLnRVw8CXaL8aivm+oTTQCZPxIVCt8DWL00ds7O1e6U=;
-        b=VGYh8SpiUpS/S1XOqhPcF+0eTnGV9rIy6ItXmOglkxFdbEzXe5CiPX6VCBQhsWVFIm
-         MxhWRAGP7beu+fAEe7tq75ziIXAqo9B5NrK/xsMNTTFjCWSwe3R38CD58IfVpxVvRWsq
-         S/UqOzaAeefpmnUCSaH5yIeqeWeDzHZ6ttI6a5TN8+86DpF7cgzEjMXXVnyGmE8OoQPA
-         +uInOqbOs6NDQWi4RXlB2+kW4z5BGBux307L3RpXUDhqydHAKsheawYAPO+doAqgvutK
-         UdcWSOMD9xVSbivv67M5YNLZ5Cf4XpgSeloT6ndMjMk3UnFEyy5s9uUPdTbiMFOtYaWg
-         8V+g==
+        d=linaro.org; s=google; t=1739535502; x=1740140302; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=XrzvjH3l79+hdw58qHfR52BGxRz04Zk6OgyBxJx9CpA=;
+        b=MhAdqCTresI8Ldo2NF1YLJwfP0rr36gW29O2N8ic2ZRptZhWMEUwi0YXqWuHqJ23KC
+         SrLrgKlNxLq0QAxewCsKDPSpV2fmeE973IwWia4/dS0LVBz2+YTcv7hxcTIvTiISQAkK
+         L60qzc8wL28gHsc29Zoq668HQ9Fw8wFFRqd5HqZ19KEUj++XwbD618rS+722WxILLTYp
+         GcZgYheHtSrR5ZMQliYzoFBYJ9KkSymWMNCe4ZuxM+7Pm7VlBqsvI9AE6QaycqnQs8qN
+         cp6hAbVVGjqLIOe7cr/f2Ko9K1h0wnFee9bnJV9v/TxNjPV0qvR3scOVWycozexc2UEV
+         Axqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739528462; x=1740133262;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NLnRVw8CXaL8aivm+oTTQCZPxIVCt8DWL00ds7O1e6U=;
-        b=BcawENDk0bO3DKV8GXcgpyyONvBF2irrAO68kvUkMNsnXYTXdobXxcWXvchuxyJ7FP
-         0h6wb1JO6hYiLR3YOqyU0SmrXTWoNFX4GAewZTyFufOMrhM5XMwjDNwO1TTqn/00+lQV
-         Bq3EkF+kzqrZMDiFk0h4tnAr5uFF2yBQ33q/3QAOeChmV59XDTzm+0gzINaJ1DjXZd2d
-         D5nnoUm4pbv86QxVcsK6Ffg00FVhAqYmyKGkZFHazVQ4ArgvuNVxdU284dCdSzNuepBn
-         oDReMLTZBp0ObU2qZNLYHmJuuXXRKE/Ae8igbAhrb4twCqzlhPjGzB7HmIQA8pbzZw3q
-         B3sg==
-X-Forwarded-Encrypted: i=1; AJvYcCWlDRJIN2d+mI/WX2haLyKvlAW6UfNTTCQNVHTgGAhy4wnxcqdzrFEy4x8de/XgXBlGMLxeKU2GS2U=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzzFv3N20GcM2DuFrVSDT/yIddL2+OI3CgMMvcf2saZll2W9MLR
-	9aq87Admx+8z/+Y5YIqV8gcB19jRfVSCtDF9OhdSP2gOTHFsjh8X6dJeizJas1g=
-X-Gm-Gg: ASbGncsKO13nqlcDkZzvpdst9kQ7SS/jFZKgYQ0BZJRlv4VJ9xN+hfRk6Dtp4vfoptB
-	2YoAJWAY/ke35GQU4JtdmBkk1yCeEaIqbTrBSljAGO8nHFxJtvCSMoJaB2JcoEgtNBXlWTKoZSz
-	QXhZZoTkyqh8hLv91tYj/0Kg4MN5t0yhf6vwHIw67Z3EGT7+rnuiXi1/6E/sy1/Z9YxMegMdnB1
-	m0oZbIBrFLkt+mHz+kIVztkWrx3pS04sLrJSPV2lJXlXyB9qxFdXHneyXCJrIBS7iBHdpoq8siT
-	2pgux4pCHA9QCA==
-X-Google-Smtp-Source: AGHT+IH0JLaEmWyKXH91k0R2F707+ITR4fD263SwynHCn2SZFyP0K4/kI1oydg9oxe4La6Y3ETiVQQ==
-X-Received: by 2002:a05:600c:35c1:b0:439:69fd:34b7 with SMTP id 5b1f17b1804b1-43969fd35f7mr14374675e9.3.1739528461685;
-        Fri, 14 Feb 2025 02:21:01 -0800 (PST)
-Received: from brgl-uxlite.home ([2a01:cb1d:dc:7e00:62cc:da7:7c42:97ac])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4395a06d237sm71463255e9.21.2025.02.14.02.20.59
+        d=1e100.net; s=20230601; t=1739535502; x=1740140302;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=XrzvjH3l79+hdw58qHfR52BGxRz04Zk6OgyBxJx9CpA=;
+        b=O+ZMA5OMh5mgoZ6cEUKzlKbuwlZwsmMaxILuM4YbldDY5QKoITG+VRWaFBIvfyx31A
+         S+lAUHybmKwzpMxj7te4TzIT3Sob2HSkmZSSIH2YPwW2s2IUxqIymR3JuRbITcnL+qQ5
+         Ho/7xB9MBqL7Xq05I6Awg6wU/8LbBgld+7lBl6/wbUbS/ap9UQTRe6ulH13cGiTbSOu6
+         IzJWjuDb8glCxZQEEIghJn1Nt4AYQNXRlVD6BR8BEaiZ1EdS7Clh32LGHscbAfeEqRn9
+         6u61yDqIkNSvgC4tSVqDFfrss49tw2wTJctM1SKP4DNZWJV0qlzYySq0PcsabTh857KF
+         YGxQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVdIRha1asX0ADa/FxrVweu9UGql6gYpT++fh2EaGIShHRzDg4k2ktaVMli/wSKGscTWz+pmpRjmIE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxaOr0scqL66tkZ0mNFz6NsZoMgln6S1pqn4wcRbtr1+1UPFmrz
+	dPanDig54itGBbPXfaD6WqIApvylTWB1rl9wOo9T+0AjPFwuPv7PETFXt4y8DOA=
+X-Gm-Gg: ASbGncu56FjicfsIEXt8xFsZndNoCWYiD+61QfZkOd0WCy0j8FQwL9yXwHqAhaOJyuK
+	XbGMukTfOO+TtzOzvGx2+4K3S/WVwmkIUbI94kWTiJFjmnTyuFM9O32KlcWQ32Ak2nv6hVptw8r
+	fZLVWSAd77UFBLmQJ4UwLLrfeOH6Iwxt4GS43stowtBgV3DEozpbUebL/Ncfx0+qBZTFmhCLlXy
+	MHaWvNLwsemQuZADvr3SxDYbCZEaCDrqp6xRBjr+qcv6WGEKVv8kmCSPQRpKd8CaLeCVprGHu8V
+	VMkZn/umypaY3aA/WyKC7RfFlujwkR8w+AcP3pXgqurBWmM10Zo+ohmlSlDMIMfdCg==
+X-Google-Smtp-Source: AGHT+IHGwPkIu7AEThobtQDnIS60RAWChZSIkpJXCQDqrg9REU22/CFOX8p/6/pVOccfoi684zy07Q==
+X-Received: by 2002:a2e:7d17:0:b0:309:1f60:82e9 with SMTP id 38308e7fff4ca-3091f60867emr5618761fa.10.1739535502348;
+        Fri, 14 Feb 2025 04:18:22 -0800 (PST)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-3092440033fsm777621fa.14.2025.02.14.04.18.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Feb 2025 02:21:00 -0800 (PST)
-From: Bartosz Golaszewski <brgl@bgdev.pl>
-To: Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Andy Shevchenko <andy@kernel.org>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Lars-Peter Clausen <lars@metafoo.de>,
-	Michael Hennerich <Michael.Hennerich@analog.com>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Peter Rosin <peda@axentia.se>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>,
-	Paolo Abeni <pabeni@redhat.com>,
-	Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	=?UTF-8?q?Nuno=20S=C3=A1?= <nuno.sa@analog.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>,
-	Jaroslav Kysela <perex@perex.cz>,
-	Takashi Iwai <tiwai@suse.com>,
-	David Lechner <dlechner@baylibre.com>
-Cc: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-	linux-gpio@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-iio@vger.kernel.org,
+        Fri, 14 Feb 2025 04:18:21 -0800 (PST)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
 	linux-mmc@vger.kernel.org,
-	netdev@vger.kernel.org,
-	linux-phy@lists.infradead.org,
-	linux-sound@vger.kernel.org,
-	Andy Shevchenko <andy.shevchenko@gmail.com>,
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Subject: Re: (subset) [PATCH v3 00/15] gpiolib: add gpiod_multi_set_value_cansleep
-Date: Fri, 14 Feb 2025 11:20:58 +0100
-Message-ID: <173952845012.57797.11986673064009251713.b4-ty@linaro.org>
-X-Mailer: git-send-email 2.45.2
-In-Reply-To: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
+	linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.14-rc3
+Date: Fri, 14 Feb 2025 13:18:20 +0100
+Message-ID: <20250214121820.100545-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
-From: Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+Hi Linus,
+
+Here's a PR with a couple of MMC fixes intended for v6.14-rc3. Details about the
+highlights are as usual found in the signed tag.
+
+Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
-On Mon, 10 Feb 2025 16:33:26 -0600, David Lechner wrote:
-> This series was inspired by some minor annoyance I have experienced a
-> few times in recent reviews.
-> 
-> Calling gpiod_set_array_value_cansleep() can be quite verbose due to
-> having so many parameters. In most cases, we already have a struct
-> gpio_descs that contains the first 3 parameters so we end up with 3 (or
-> often even 6) pointer indirections at each call site. Also, people have
-> a tendency to want to hard-code the first argument instead of using
-> struct gpio_descs.ndescs, often without checking that ndescs >= the
-> hard-coded value.
-> 
-> [...]
+The following changes since commit 2014c95afecee3e76ca4a56956a936e23283f05b:
 
-Applied, thanks!
+  Linux 6.14-rc1 (2025-02-02 15:39:26 -0800)
 
-[07/15] iio: adc: ad7606: use gpiod_multi_set_value_cansleep
-        commit: 8203bc81f025a3fb084357a3d8a6eb3053bc613a
-[08/15] iio: amplifiers: hmc425a: use gpiod_multi_set_value_cansleep
-        commit: e18d359b0a132eb6619836d1bf701f5b3b53299b
-[09/15] iio: resolver: ad2s1210: use gpiod_multi_set_value_cansleep
-        commit: 7920df29f0dd3aae3acd8a7115d5a25414eed68f
-[10/15] iio: resolver: ad2s1210: use bitmap_write
-        commit: a67e45055ea90048372066811da7c7fe2d91f9aa
-[11/15] mmc: pwrseq_simple: use gpiod_multi_set_value_cansleep
-        commit: 2a5920429897201f75ba026c8aa3488c792b3bd7
-[12/15] mux: gpio: use gpiod_multi_set_value_cansleep
-        commit: 47a7c4f58e1f9967eb0ea6c1cb2c29e0ad2edb1a
-[14/15] phy: mapphone-mdm6600: use gpiod_multi_set_value_cansleep
-        commit: c88aa68297390695b16fd9b7a33612257d8ef548
+are available in the Git repository at:
 
-Best regards,
--- 
-Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.14-rc1
+
+for you to fetch changes up to 3e68abf2b9cebe76c6cd4b1aca8e95cd671035a3:
+
+  mmc: mtk-sd: Fix register settings for hs400(es) mode (2025-02-03 13:34:50 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - mtk-sd: Fix register settings for hs400(es) mode
+ - sdhci_am654: Revert patch for start-signal-voltage-switch
+
+----------------------------------------------------------------
+Andy-ld Lu (1):
+      mmc: mtk-sd: Fix register settings for hs400(es) mode
+
+Josua Mayer (1):
+      Revert "mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch"
+
+ drivers/mmc/host/mtk-sd.c      | 31 ++++++++++++++++++++-----------
+ drivers/mmc/host/sdhci_am654.c | 30 ------------------------------
+ 2 files changed, 20 insertions(+), 41 deletions(-)
