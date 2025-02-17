@@ -1,138 +1,111 @@
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19AD3C8E0
-	for <linux-mmc@vger.kernel.org>; Sun, 16 Feb 2025 15:55:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 829E81A2380;
+	Mon, 17 Feb 2025 10:16:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1739721319; cv=none; b=qy3qeV38Z0cPaHdv8oSujxHX6KVlYS0Oh6oqonD8qu51nUa+v4a58Pd7HDNHqAxd4MFTqf14ORE8EECVzbUiMLP06MOR10bBG5txXc6vSGaEX4AbxraFnMwPZ4BMtzbx9EnIPkKPEni3w4aaJz2UMYQbo7c7avW0+akwTOpB1mg=
+	t=1739787367; cv=none; b=fJKOFoP4c9MUOIKT4AcFPMGzmwSUNNB1QDn9dBr6/saAa7IxGQw3UWe45gCCw++9IP4myDIfxUkosHMApT8lHjpf+X4nVBDz0bVvoU+0i8lNc4Ox0OtjhxRex4kQ/pMZwMN4d3YBZQaN1HQXArxkbvnLguo5ldb8+hrI+nFDr8c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1739721319; c=relaxed/simple;
-	bh=fmKJhAkPeYFVEblE7yGmDKB1vPuz4ognRbo9aIWQDQk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=n7Qwp2hlJRhm1854swfXyF4GF7vS+c15BWgPR7qZkOjCk3TVyavqLj3V//knc78q1VjgoepeAfaL6fm3lZCszSx0wxKTpAhx6F5JEZRX/3uyFgpSqQrB25w/8xY4Nhg1zfdZaRdDrk7Cwc+VmjqSByIAsKLrfMicJ3hZSZat/6Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl; spf=none smtp.mailfrom=bgdev.pl; dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b=u86vVIsY; arc=none smtp.client-ip=209.85.167.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=bgdev.pl
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=bgdev.pl
+	s=arc-20240116; t=1739787367; c=relaxed/simple;
+	bh=Dzn9lEoIN6eg5dYcexk1ycmvzDStXkXQ6o3w7H6EWXs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=ehqSWOFT//DlS/Xs2SEVqX9UMyYK+imfBepaDAeruj5scYu3rEsBab2p5K8NUxGb2dskEbV6cqIn/lE6o2XmdWrGEiZQbqSmgt+CEBf3gDCZWcLnZgdk06+D6yiF3YWZ9Um1i5rYGRVktysokYS3RHoCLyxOETkG227lWvkF7Yg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=F/pmuLRf; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bgdev-pl.20230601.gappssmtp.com header.i=@bgdev-pl.20230601.gappssmtp.com header.b="u86vVIsY"
-Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-546202d633dso246821e87.2
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Feb 2025 07:55:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=bgdev-pl.20230601.gappssmtp.com; s=20230601; t=1739721316; x=1740326116; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WkW3Uzq4pFyxE3zKB7NeWEe8NL5/OGKMv8Mar8FWkgQ=;
-        b=u86vVIsYDx9zfwa3/ZhSypq++5AbM/V257JopekX0hLcIC4BYNt3Kl8zNNr905sUjs
-         8C5IE/Gajx0Jr3Drzdn2hD+qxpej2YX30QNNItS/bJpK1D5zVstdlfNDcKygOYlgnuJ9
-         DRmMJoHs2oecxWqG6llTcp0vuJ8p67FHjJxyQ9U95z9btpw3eylcbftbZ9eamtOpDdh4
-         pHEsgIhZsqegEAN9IX/Ulo5IM3vvJ7ML8aTumKDzoRWg0OfkpipXYoWKTX2oTInxEg/+
-         bxKpn9UdzEUEGYblJLRKdD7jx5iQdZ1QAGHRp3IFJun4+tX91uWR2HL+Us2YaolE0fun
-         ShKQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1739721316; x=1740326116;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=WkW3Uzq4pFyxE3zKB7NeWEe8NL5/OGKMv8Mar8FWkgQ=;
-        b=uJkMql/VVsqHUMqm4VIhZzLiBsQOVk8k4hk9SE/AB/vYMO9d/SFtDFOBO8Ep4E8N76
-         AiELFCeGPk66D5rYx6dPI0aQcNKmI3At/uQXMYEZ7NU7AK9Ooqa/j2Lh0UMkjSna00kw
-         MIyf2Z/A8CivDh1U4NYdAywvgCdOFLZYT5tvOaK4wD/4X4uSfVahTCO28aa+e9bN4m4N
-         +dBypzr93SlXsMuNugN++JXUFkTpAitD7Hd1pZL2++IYGLKbZbU2LZZ+9S09nf0E6T4J
-         QR2TaxFZNpmjQErLVJsTUdLWYR+YHEerr+ER3Vg8waQi2XEFAXon7an78fcHPw7H37NX
-         EYew==
-X-Forwarded-Encrypted: i=1; AJvYcCU00G/bUdXFuet/kolrjSG+QU7QN322ms5cjEUkurQKgP4DF7MXEyhRCzIogCcbVC9XQeFc3V+xeTs=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxt2zo3/LtMcjMCjAlPH0fcPc4EBvEushEH7wIxgJ+/fIl86qFE
-	q/uyVOKCxJtytX8CCBG7qPT3NobF4zSQx8Ttw09zKg281O4MoXhYCy2clku95l1rwSm7DYk+xJk
-	ZEHjl1CjEZpdZb7f3ajaftRTS/tottaMe3yBpfg==
-X-Gm-Gg: ASbGncuXVxeLPMf0Xu4JKDjH6762l/mvvB4b/PmfLRqR3R3ww4sakxFYg/49gK8UOT3
-	fE/MVbjSKg/wl4NYb7YDjQ5Bj/gKkSDbeBNop4Ix6agyu8+RyHw0gRm+rzBCdLQ1ePL6ZZMw6zf
-	UlhMZbz3CMm0kTM0/WEF1rY/nK4gcN
-X-Google-Smtp-Source: AGHT+IG2BEfJtto7vZKlWMr7rwzaPz49+FDMar4oAHkHlYmVolmXyGHpWwSYEsdEq+L5tztvS5LmTmktUkAulacIOqw=
-X-Received: by 2002:a05:6512:3dab:b0:545:d72:95e5 with SMTP id
- 2adb3069b0e04-5452fe2e42cmr2095090e87.7.1739721315922; Sun, 16 Feb 2025
- 07:55:15 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="F/pmuLRf"
+Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 51H030c9002910;
+	Mon, 17 Feb 2025 10:15:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	7hjqKwAEjBQEmoqd+2ugTsyb6OUqNmOcwB/Gk2YNfnE=; b=F/pmuLRfn6c4NBZK
+	9tZU2fCc604KUl4L9SEJnQhanqQ6lJLmxSErU+937agx6vjAGZFIAeI3YH1CsbxC
+	T6S/HgwIt/Oet0N8C3RUuaTkdZwIsDqYpMgD+9HmbvXffg4qwS2tVm6bd3Tpswdt
+	iKswX/eVmDpCTwGS7t2u0aebKVmFzZE8fn0+/J5GOMkzefUxv6mJay6lpoUcZB2r
+	zvaRGlZu9D4/qLuANJ3oweI2Yy1mvdwKX/nt0fIsbZ8gzkmXSmPVATc0euUFs7eO
+	jXKMFOOG9diS6870nYkAdUHMdMzkBgIgG3LI42dIt/B62pZtLP/VZa5/pDo5IWL6
+	jVcWGA==
+Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 44ut7tsa2t-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 17 Feb 2025 10:15:50 +0000 (GMT)
+Received: from nasanex01b.na.qualcomm.com (nasanex01b.na.qualcomm.com [10.46.141.250])
+	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 51HAFn2o021933
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 17 Feb 2025 10:15:49 GMT
+Received: from [10.151.37.100] (10.80.80.8) by nasanex01b.na.qualcomm.com
+ (10.46.141.250) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Mon, 17 Feb
+ 2025 02:15:43 -0800
+Message-ID: <779a23f9-868a-4fe3-abc6-9240fd3ab491@quicinc.com>
+Date: Mon, 17 Feb 2025 15:45:24 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
- <173952845012.57797.11986673064009251713.b4-ty@linaro.org>
- <CAHp75VcjAFEdaDQAMXVMO96uxwz5byWZvybhq2fdL9ur4WP3rg@mail.gmail.com>
- <CAMRc=MefPRs-REL=OpuUFJe=MVbmeqqodp+wCxLCE8CQqdL4gQ@mail.gmail.com> <20250216142313.743af564@jic23-huawei>
-In-Reply-To: <20250216142313.743af564@jic23-huawei>
-From: Bartosz Golaszewski <brgl@bgdev.pl>
-Date: Sun, 16 Feb 2025 16:55:04 +0100
-X-Gm-Features: AWEUYZm8mDhVubH4-WZdsHqF8a_56E8frsslpTDc00yv0WTOnH25v97UXrDvKPg
-Message-ID: <CAMRc=Meq639NMz6TuOw=xQ_A8VDwA5OXoXU47JNt7x0C7jDtGQ@mail.gmail.com>
-Subject: Re: (subset) [PATCH v3 00/15] gpiolib: add gpiod_multi_set_value_cansleep
-To: Jonathan Cameron <jic23@kernel.org>
-Cc: Andy Shevchenko <andy.shevchenko@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, 
-	Andy Shevchenko <andy@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, 
-	Lars-Peter Clausen <lars@metafoo.de>, Michael Hennerich <Michael.Hennerich@analog.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>, 
-	Heiner Kallweit <hkallweit1@gmail.com>, Russell King <linux@armlinux.org.uk>, 
-	"David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>, 
-	Kishon Vijay Abraham I <kishon@kernel.org>, =?UTF-8?B?TnVubyBTw6E=?= <nuno.sa@analog.com>, 
-	Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
-	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, David Lechner <dlechner@baylibre.com>, 
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, linux-gpio@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org, 
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org, 
-	Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: (subset) [PATCH V5 0/6] Add minimal boot support for IPQ5424
+To: Bjorn Andersson <andersson@kernel.org>, <konradybcio@kernel.org>,
+        <robh@kernel.org>, <krzk+dt@kernel.org>, <conor+dt@kernel.org>,
+        <mturquette@baylibre.com>, <sboyd@kernel.org>,
+        <ulf.hansson@linaro.org>, <linus.walleij@linaro.org>,
+        <catalin.marinas@arm.com>, <p.zabel@pengutronix.de>,
+        <geert+renesas@glider.be>, <dmitry.baryshkov@linaro.org>,
+        <neil.armstrong@linaro.org>, <linux-arm-msm@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>
+CC: <quic_varada@quicinc.com>
+References: <20241028060506.246606-1-quic_srichara@quicinc.com>
+ <173085441672.26510.12002868497417768812.b4-ty@kernel.org>
+Content-Language: en-US
+From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <173085441672.26510.12002868497417768812.b4-ty@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01b.na.qualcomm.com (10.46.141.250)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 0vfDTzgoZsBo6oayox3MWP30CzYjNDKX
+X-Proofpoint-ORIG-GUID: 0vfDTzgoZsBo6oayox3MWP30CzYjNDKX
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1057,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-02-17_05,2025-02-13_01,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 spamscore=0
+ suspectscore=0 lowpriorityscore=0 malwarescore=0 impostorscore=0
+ mlxscore=0 mlxlogscore=842 clxscore=1011 phishscore=0 priorityscore=1501
+ adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2501170000 definitions=main-2502170090
 
-On Sun, Feb 16, 2025 at 3:23=E2=80=AFPM Jonathan Cameron <jic23@kernel.org>=
- wrote:
->
-> On Fri, 14 Feb 2025 15:37:48 +0100
-> Bartosz Golaszewski <brgl@bgdev.pl> wrote:
->
-> > On Fri, Feb 14, 2025 at 3:35=E2=80=AFPM Andy Shevchenko
-> > <andy.shevchenko@gmail.com> wrote:
-> > >
-> > > On Fri, Feb 14, 2025 at 12:21=E2=80=AFPM Bartosz Golaszewski <brgl@bg=
-dev.pl> wrote:
-> > > > On Mon, 10 Feb 2025 16:33:26 -0600, David Lechner wrote:
-> > > > > This series was inspired by some minor annoyance I have experienc=
-ed a
-> > > > > few times in recent reviews.
-> > >
-> > > ...
-> > >
-> > > > [07/15] iio: adc: ad7606: use gpiod_multi_set_value_cansleep
-> > > >         commit: 8203bc81f025a3fb084357a3d8a6eb3053bc613a
-> > > > [08/15] iio: amplifiers: hmc425a: use gpiod_multi_set_value_canslee=
-p
-> > > >         commit: e18d359b0a132eb6619836d1bf701f5b3b53299b
-> > > > [09/15] iio: resolver: ad2s1210: use gpiod_multi_set_value_cansleep
-> > > >         commit: 7920df29f0dd3aae3acd8a7115d5a25414eed68f
-> > > > [10/15] iio: resolver: ad2s1210: use bitmap_write
-> > > >         commit: a67e45055ea90048372066811da7c7fe2d91f9aa
-> > >
-> > > FWIW, Jonathan usually takes care of patch queue on weekends.
-> > > But whatever, it's not my business after all :-)
-> > >
-> >
-> > Too many conflicting suggestions. I just picked up all Acked patches. =
-=C2=AF\_(=E3=83=84)_/=C2=AF
->
-> Resolution of any issues 'should' be easy enough. Let's keep an eye on ho=
-w
-> it goes as other series hit Linux next.  Might be a little work to be don=
-e there
-> and by Linus in next merge window.
->
-> Jonathan
->
 
-I'm totally fine with removing the iio commits from my queue if you
-prefer to take them.
 
-Bartosz
+On 11/6/2024 6:23 AM, Bjorn Andersson wrote:
+> 
+> On Mon, 28 Oct 2024 11:35:00 +0530, Sricharan R wrote:
+>> From: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+>>
+>> The IPQ5424 is Qualcomm's 802.11be SoC for Routers, Gateways and
+>> Access Points.
+>>
+>> This series adds minimal board boot support for ipq5424-rdp466 board.
+>>
+>> [...]
+> 
+> Applied, thanks!
+> 
+> [6/6] arm64: defconfig: Enable IPQ5424 RDP466 base configs
+>        commit: fd516bb4f48fc527744cae42d8e156fb09bce157
+
+Hi Bjorn,
+    This patch is not appearing in mainline. Can you please
+    help ?
+
+Regards,
+  Sricharan
