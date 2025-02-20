@@ -1,153 +1,228 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B6BB1CAA9C;
-	Thu, 20 Feb 2025 10:17:50 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 7CD3E1AF0C8;
+	Thu, 20 Feb 2025 10:47:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740046671; cv=none; b=RiHTxx2hFX0LSYes9IYIghiq1FQ4eWhKd+fJFDMs1+0SslMLXIVOOgUYOl6cqSkCKmMCRtceIHiVIlfKR/7CZ059j/I6kZ30HbeQ0qBhJb1U17ZbujkzMkVIqz5DSHiwB1QwkKZ3tpC5kQgjjsn03els6z9/eJo8dWTtnGqgU4w=
+	t=1740048428; cv=none; b=bHZf1CFEjlEnfMVXmjZYHN8OwJ8bQicpsZClLTnQ2/dZ4zVMua6yaWjtomIHzEeOkDqBJ/AJLbInQ1E8p+LqLd/LEU12COw9sQSFb3pBkRV+0ABUZP9uKcqss8iGeOXtiSdmUiKHwmr3bfOASvSDqigTcXxot4yFDbqQTowv73o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740046671; c=relaxed/simple;
-	bh=jkjLMwlq7z/a7rNHFun0f7wbSTUHNvkofg4WYYRHwHA=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=c0A0UtH/ejwQ1ryyv74fxXQPzuK06FhrDVYr3sZuyqOWsmArmBGB3S9GgVKNmOQJjIqDs/CKZ1o7/2K8a7ZFwyIj8VzXssHgapKs2mMiJEJHuTpUKuY0iluc+Wm5VUE43sBTxiP+ClMWRsI8D64XdZl1F8l2R5OH1LPaA0hMNaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=XMTo2Saj; arc=none smtp.client-ip=10.30.226.201
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="XMTo2Saj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D387C4CED1;
-	Thu, 20 Feb 2025 10:17:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740046670;
-	bh=jkjLMwlq7z/a7rNHFun0f7wbSTUHNvkofg4WYYRHwHA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=XMTo2SajVS+RAzuwMNv21Gc3CE74kqNMrgwVPSd2T5vdbRhzgNmsOTa83rZcK2BCY
-	 fS/j9C9TZQHnLR2bmzP5am1G/zLuKLomhC2NKfXGOGVuXYoisyGwtv8l1RQU1wdfxZ
-	 ACc2PS4NQt67Zir2d9dihWR7pbfBv8srkPAQ57tbvLlSToj+7Eqvt/HvKuJVwRQN5o
-	 tOPg00ezB7GQYe/P+sINgM4SFHbCZkT/H2ASBf9FFeM6EqxosOPAbfyYCzUrKQxiLc
-	 ldKQtVAjbG7IjnvlV/oq+1S9CavyaVkT8UPWNWiALbAb+RqodmtwiLZ6hh1r5nvziU
-	 JooH6gi7E5ZvA==
-Date: Thu, 20 Feb 2025 10:17:42 +0000
-From: Simon Horman <horms@kernel.org>
-To: David Lechner <dlechner@baylibre.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Andy Shevchenko <andy@kernel.org>,
-	Geert Uytterhoeven <geert@linux-m68k.org>,
-	Lars-Peter Clausen <lars@metafoo.de>,
-	Michael Hennerich <Michael.Hennerich@analog.com>,
-	Jonathan Cameron <jic23@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>,
-	Andrew Lunn <andrew@lunn.ch>,
-	Heiner Kallweit <hkallweit1@gmail.com>,
-	Russell King <linux@armlinux.org.uk>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Vinod Koul <vkoul@kernel.org>,
-	Kishon Vijay Abraham I <kishon@kernel.org>,
-	Nuno =?utf-8?B?U8Oh?= <nuno.sa@analog.com>,
-	Liam Girdwood <lgirdwood@gmail.com>,
-	Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>,
-	Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org,
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org,
-	Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH v3 05/15] bus: ts-nbus: use bitmap_get_value8()
-Message-ID: <20250220101742.GR1615191@kernel.org>
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
- <20250210-gpio-set-array-helper-v3-5-d6a673674da8@baylibre.com>
+	s=arc-20240116; t=1740048428; c=relaxed/simple;
+	bh=8W28hdqjALpHKjZm3d/cnDoQbK3oKUu92wa37Lh/QAg=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=iifK8FcghAe2yVGHLN2cn6tvWQe6DtzucmopZn3Lh19b3AtkmznA7h8KMhIetJBlsZc+ZhflLRP6XKTdKGLrSuPEfm7tNgEGZzwCGMgA2tAiDcK2vVu1GIsP91iRaXCqUkTv4n2w0JqwAqKPJLK5NSNQo/WV11YYuoti5i6rGyo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id EF54E16A3;
+	Thu, 20 Feb 2025 02:47:23 -0800 (PST)
+Received: from [10.1.35.44] (e127648.arm.com [10.1.35.44])
+	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id C1FB33F59E;
+	Thu, 20 Feb 2025 02:47:03 -0800 (PST)
+Message-ID: <be715535-8931-489f-a2be-50aa6ec423a1@arm.com>
+Date: Thu, 20 Feb 2025 10:47:01 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250210-gpio-set-array-helper-v3-5-d6a673674da8@baylibre.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 4/6] mmc: core: add undervoltage handler for MMC/eMMC
+ devices
+To: Oleksij Rempel <o.rempel@pengutronix.de>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: kernel@pengutronix.de, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+ Mark Brown <broonie@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>,
+ =?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>
+References: <20250220074429.2906141-1-o.rempel@pengutronix.de>
+ <20250220074429.2906141-5-o.rempel@pengutronix.de>
+Content-Language: en-US
+From: Christian Loehle <christian.loehle@arm.com>
+In-Reply-To: <20250220074429.2906141-5-o.rempel@pengutronix.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-On Mon, Feb 10, 2025 at 04:33:31PM -0600, David Lechner wrote:
-> Use bitmap_get_value8() instead of accessing the bitmap directly.
+On 2/20/25 07:44, Oleksij Rempel wrote:
+> Introduce _mmc_handle_undervoltage() to handle undervoltage events for
+> MMC/eMMC devices. This function interrupts ongoing operations using HPI
+> and performs a controlled suspend. After completing the sequence, the card
+> is marked as removed to prevent further interactions.
 > 
-> Accessing the bitmap directly is not considered good practice. We now
-> have a helper function that can be used instead, so let's use it.
+> To support this, introduce __mmc_suspend() and __mmc_resume() as internal
+> helpers that omit mmc_claim_host()/mmc_release_host(), allowing them to be
+> called when the host is already claimed. Update mmc_shutdown() to skip the
+> normal shutdown sequence if the host is flagged as undervoltage to avoid
+> repeating of the shutdown procedure.
+
+"of" can be removed here.
+
+Given that this introduces large parts of the mmc handling IMO this commit
+deserves a lot more explanation of what steps exactly do for which cards
+and why.
+
 > 
-> Suggested-by: Andy Shevchenko <andy.shevchenko@gmail.com>
-u> Signed-off-by: David Lechner <dlechner@baylibre.com>
+> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 > ---
->  drivers/bus/ts-nbus.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/mmc.c | 81 +++++++++++++++++++++++++++++++++++-------
+>  1 file changed, 68 insertions(+), 13 deletions(-)
 > 
-> diff --git a/drivers/bus/ts-nbus.c b/drivers/bus/ts-nbus.c
-> index b4c9308caf0647a3261071d9527fffce77784af2..beac67f3b820377f8bb1fc4f4ee77e15ee240834 100644
-> --- a/drivers/bus/ts-nbus.c
-> +++ b/drivers/bus/ts-nbus.c
-> @@ -10,6 +10,7 @@
->   * TS-4600 SoM.
->   */
->  
-> +#include <linux/bitmap.h>
->  #include <linux/bitops.h>
->  #include <linux/gpio/consumer.h>
->  #include <linux/kernel.h>
-> @@ -107,7 +108,7 @@ static void ts_nbus_reset_bus(struct ts_nbus *ts_nbus)
->  {
->  	DECLARE_BITMAP(values, 8);
->  
-> -	values[0] = 0;
-> +	bitmap_set_value8(values, byte, 0);
-
-Hi David,
-
-byte doesn't appear to exist in the scope of this function.
-
-I tried this:
-
-	bitmap_set_value8(values, 0, 8);
-
-But when compiling with GCC 14.2.0 I see warnings that values
-is used uninitialised - bitmap_set_value8() appears to rely on
-it being so.
-
-  CC      drivers/bus/ts-nbus.o
-In file included from drivers/bus/ts-nbus.c:13:
-In function ‘bitmap_write’,
-    inlined from ‘ts_nbus_reset_bus’ at drivers/bus/ts-nbus.c:111:2:
-./include/linux/bitmap.h:818:12: error: ‘values’ is used uninitialized [-Werror=uninitialized]
-  818 |         map[index] &= (fit ? (~(mask << offset)) : ~BITMAP_FIRST_WORD_MASK(start));
-      |         ~~~^~~~~~~
-In file included from ./include/linux/kasan-checks.h:5,
-                 from ./include/asm-generic/rwonce.h:26,
-                 from ./arch/x86/include/generated/asm/rwonce.h:1,
-                 from ./include/linux/compiler.h:344,
-                 from ./include/linux/build_bug.h:5,
-                 from ./include/linux/bits.h:22,
-                 from ./include/linux/bitops.h:6,
-                 from ./include/linux/bitmap.h:8:
-drivers/bus/ts-nbus.c: In function ‘ts_nbus_reset_bus’:
-drivers/bus/ts-nbus.c:109:24: note: ‘values’ declared here
-  109 |         DECLARE_BITMAP(values, 8);
-      |                        ^~~~~~
-./include/linux/types.h:11:23: note: in definition of macro ‘DECLARE_BITMAP’
-   11 |         unsigned long name[BITS_TO_LONGS(bits)]
-      |                       ^~~~
-
-
->  
->  	gpiod_multi_set_value_cansleep(ts_nbus->data, values);
->  	gpiod_set_value_cansleep(ts_nbus->csn, 0);
-> @@ -151,7 +152,7 @@ static void ts_nbus_write_byte(struct ts_nbus *ts_nbus, u8 byte)
->  {
->  	DECLARE_BITMAP(values, 8);
->  
-> -	values[0] = byte;
-> +	bitmap_set_value8(values, byte, 8);
->  
->  	gpiod_multi_set_value_cansleep(ts_nbus->data, values);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 86b608843232..e626213e7a52 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -2104,8 +2104,8 @@ static int _mmc_flush_cache(struct mmc_host *host)
+>  	return err;
 >  }
-> 
-> -- 
-> 2.43.0
-> 
+>  
+> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> -			bool is_undervoltage)
+> +static int __mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +			 bool is_undervoltage)
+
+The is_undervoltage doesn't do anything? Did you forget something here?
+
+>  {
+>  	unsigned int notify_type;
+>  	int err = 0;
+> @@ -2115,8 +2115,6 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+>  	else
+>  		notify_type = EXT_CSD_POWER_OFF_LONG;
+>  
+> -	mmc_claim_host(host);
+> -
+>  	if (mmc_card_suspended(host->card))
+>  		goto out;
+>  
+> @@ -2140,7 +2138,18 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+>  		mmc_card_set_suspended(host->card);
+>  	}
+>  out:
+> +	return err;
+> +}
+> +
+> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +			bool is_undervoltage)
+> +{
+> +	int err;
+> +
+> +	mmc_claim_host(host);
+> +	err = __mmc_suspend(host, is_suspend, is_undervoltage);
+>  	mmc_release_host(host);
+> +
+>  	return err;
+>  }
+>  
+> @@ -2160,6 +2169,20 @@ static int mmc_suspend(struct mmc_host *host)
+>  	return err;
+>  }
+>  
+> +static int __mmc_resume(struct mmc_host *host)
+> +{
+> +	int err;
+> +
+> +	if (!mmc_card_suspended(host->card))
+> +		return 0;
+> +
+> +	mmc_power_up(host, host->card->ocr);
+> +	err = mmc_init_card(host, host->card->ocr, host->card);
+> +	mmc_card_clr_suspended(host->card);
+> +
+> +	return err;
+> +}
+> +
+>  /*
+>   * This function tries to determine if the same card is still present
+>   * and, if so, restore all state to it.
+> @@ -2169,16 +2192,9 @@ static int _mmc_resume(struct mmc_host *host)
+>  	int err = 0;
+>  
+>  	mmc_claim_host(host);
+> -
+> -	if (!mmc_card_suspended(host->card))
+> -		goto out;
+> -
+> -	mmc_power_up(host, host->card->ocr);
+> -	err = mmc_init_card(host, host->card->ocr, host->card);
+> -	mmc_card_clr_suspended(host->card);
+> -
+> -out:
+> +	err = __mmc_resume(host);
+>  	mmc_release_host(host);
+> +
+>  	return err;
+>  }
+>  
+> @@ -2189,6 +2205,9 @@ static int mmc_shutdown(struct mmc_host *host)
+>  {
+>  	int err = 0;
+>  
+> +	if (host->undervoltage)
+> +		return 0;
+> +
+
+Probably deserves a comment.
+
+>  	/*
+>  	 * In a specific case for poweroff notify, we need to resume the card
+>  	 * before we can shutdown it properly.
+> @@ -2280,6 +2299,41 @@ static int _mmc_hw_reset(struct mmc_host *host)
+>  	return mmc_init_card(host, card->ocr, card);
+>  }
+>  
+> +static int _mmc_handle_undervoltage(struct mmc_host *host)
+> +{
+> +	struct mmc_card *card = host->card;
+> +	int err = 0;
+> +
+> +	mmc_claim_host(host);
+> +
+> +	if (!host->card)
+> +		goto out;
+> +
+> +	if (mmc_can_poweroff_notify(host->card) &&
+> +		!(host->caps2 & MMC_CAP2_FULL_PWR_CYCLE))
+> +		err = __mmc_resume(host);
+
+I'm not sure I follow this.
+Why would we power-up a card that currently doesn't have power when we
+know we are about to powerfail it?
+
+> +
+> +	if (!err) {
+> +		err = mmc_interrupt_hpi(card);
+> +		if (err)
+> +			pr_err("%s: Interrupt HPI failed, error %d\n",
+> +				mmc_hostname(host), err);
+
+There's no point in calling this for SD but I don't see why it currently
+wouldn't be called for SD.
+
+> +
+> +		err = __mmc_suspend(host, false, true);
+> +	}
+> +
+> +	if (err)
+> +		pr_err("%s: Undervoltage emergency stop failed\n",
+> +			mmc_hostname(host));
+> +
+> +	mmc_card_set_removed(host->card);
+> +
+> +out:
+> +	mmc_release_host(host);
+> +
+> +	return err;
+> +}
+> +
+>  static const struct mmc_bus_ops mmc_ops = {
+>  	.remove = mmc_remove,
+>  	.detect = mmc_detect,
+> @@ -2292,6 +2346,7 @@ static const struct mmc_bus_ops mmc_ops = {
+>  	.hw_reset = _mmc_hw_reset,
+>  	.cache_enabled = _mmc_cache_enabled,
+>  	.flush_cache = _mmc_flush_cache,
+> +	.handle_undervoltage = _mmc_handle_undervoltage,
+>  };
+>  
+>  /*
+
