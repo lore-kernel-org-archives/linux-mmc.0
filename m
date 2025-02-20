@@ -1,234 +1,341 @@
-Received: from OS0P286CU011.outbound.protection.outlook.com (mail-japanwestazon11010036.outbound.protection.outlook.com [52.101.228.36])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 310A91E5721;
-	Thu, 20 Feb 2025 07:11:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.228.36
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740035518; cv=fail; b=JgX3UIf2KMYWYDQaEvWeUKDZLuc7wLGv5GnFCGoN9cl2ujzhmmRhSHHvuoxxkJQgl2qKx06VlYbo9KgXn98YpuxEqw1v5SPE/5ymlFgQWZ6J3ER2jvsKFmnVtKgMZKzwhu7x2DbYIwLebyf3HbSBpQq/Sltg38d73cpAq2XhyDw=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740035518; c=relaxed/simple;
-	bh=mjqWUtzoM675AzY6Y4xsoMrRYH5tHFm/sU6uUqZsUAA=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=b/V0fXr1NmeW1vFvMUwJ52PE4WaxtY2EadXaOpAJiQfaa0DVYGjfgf32GGL82SsIPiBiXuQspINKNoRtRD5EXDxNQor1oA7Fx64CBKUfMpLuhscnBVbPlSQ6Fbr2Zap+enGA/73RQBY7jG5PDYxac8meeoiVrAghJJbL3bPvfsw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b=cF5KiIRw; arc=fail smtp.client-ip=52.101.228.36
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=bp.renesas.com header.i=@bp.renesas.com header.b="cF5KiIRw"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=IEef6EXb2iW055ooKqY5LaLBUpnA9+m1MnahSCLfDNxmfbCfodzMKy3+rk3TpAgLmenlkzQJ5IMilvaFkUqoNnayV/BSgr7uQkAQgUTy5Cza3xEz6n11gUvL+VuD+mgKeLaBqzcAD9yIJAF5VisqH2/8b4YG6kiycgyVC6Ky7L9XiDgdLz6g4BvL1GRE7buSRihdtj8C3F2hSa8cxf4Cd0GJS7fsA/t+oeojsa2mq/j7o7qQC1LI9ZDmjfDzNiS6DEP8JVHJQoaeJMOHnrVLd97m6RTYFIxu1VutQ8uwEQUyL1s+ImKeJ9ksg7isia3X/XMdkGXSXATHYsRsT5jdEg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=VgNhVm58Vkd7wGvhPgiVzBPG4D1CguSxLW9LZSRHuuE=;
- b=MADaPQfAt5X1OlIficWcVlRnOMK9LxRytY39KKMuxeHSMmmFxTi3QLygeoXwkgRUN4vP4Bevkyoz447Cky9HZNqRMhK/ZJQVW8dXTxkb4QWOBDu07PMfZdt7tzVzFgFuP1utrv0SIHN91S8G7i9CbFRh2eSi4n4YW1dvSclpfqpChVIY1b1Sr9pYzK7xjfnXYPaISs54av/yXy9BkpsFMYRPCG8p46eGGmHucwZcgTk7bZg5+t/0C79v333nPLNJ3NgC+cUtvmOgre6vfa2xylbtW0Y+U/Z26y+bvhrw4oL/0sQQN2ZhS75z0vifhbn3m3wYux8VqZX1ceGZLC0H1A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=VgNhVm58Vkd7wGvhPgiVzBPG4D1CguSxLW9LZSRHuuE=;
- b=cF5KiIRwko0kyM8H4okGiTV7SpmcBzvLPjhndZf7ROlI9blWwa9GrQsWiPIZK7FQHYL/Y442KLlzuU53abLcEbJ61h8LWoldyxsmhzTW/vbZvNMw9YPyzyp0E8hrYqYfzoYUkmE5URzMOHEHAnlpFqZRCUh21U8Ls1PKSbtM14U=
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com (2603:1096:400:3d0::7)
- by OS3PR01MB7803.jpnprd01.prod.outlook.com (2603:1096:604:178::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8466.14; Thu, 20 Feb
- 2025 07:11:47 +0000
-Received: from TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::86ef:ca98:234d:60e1]) by TY3PR01MB11346.jpnprd01.prod.outlook.com
- ([fe80::86ef:ca98:234d:60e1%5]) with mapi id 15.20.8466.015; Thu, 20 Feb 2025
- 07:11:45 +0000
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang
-	<wsa+renesas@sang-engineering.com>
-CC: Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm
-	<magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org"
-	<devicetree@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org"
-	<linux-renesas-soc@vger.kernel.org>, Prabhakar Mahadev Lad
-	<prabhakar.mahadev-lad.rj@bp.renesas.com>, biju.das.au
-	<biju.das.au@gmail.com>, Rob Herring <robh@kernel.org>, Krzysztof Kozlowski
-	<krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
-Subject: RE: [PATCH v3 0/8] Add RZ/G3E SDHI support
-Thread-Topic: [PATCH v3 0/8] Add RZ/G3E SDHI support
-Thread-Index: AQHbeJzGvJIoLl8m3E2Od8hqLuKjDbNP236Q
-Date: Thu, 20 Feb 2025 07:11:45 +0000
-Message-ID:
- <TY3PR01MB11346306FD267025422957B3486C42@TY3PR01MB11346.jpnprd01.prod.outlook.com>
-References: <20250206134047.67866-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20250206134047.67866-1-biju.das.jz@bp.renesas.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TY3PR01MB11346:EE_|OS3PR01MB7803:EE_
-x-ms-office365-filtering-correlation-id: 0359eb8d-32de-4ad0-7e27-08dd517dd5a1
-x-ld-processed: 53d82571-da19-47e4-9cb4-625a166a4a2a,ExtAddr
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|7416014|1800799024|366016|38070700018;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?bF/VTYY+tD32bMw4R9mWEA9UDAnpHcg66zXnErYKdjvmNINjTcIK2SdlB6nn?=
- =?us-ascii?Q?mTC3ULVvn/I1a/pChGn8H1vNlyTsH7dUWJjE/drIGJUHheyXPUX+uqlwAnDM?=
- =?us-ascii?Q?4nF7VsYKbIp5+HyvxSmOfXl25qcjLnTEG1dzfncOWBJukFDVgzKIDaRYJawx?=
- =?us-ascii?Q?TSPIrCiQ1hFZLJWUbuDe8CW+PcyKi+W8T0+YakOjiAfdzKnp+GJtiWR3I8Up?=
- =?us-ascii?Q?dWwNjmlpn8cLT5mvgzSYhXbvvGdjfd47F6peNQhGe5cCw9dSYMXc8Yu1qXdK?=
- =?us-ascii?Q?FhQ0I76RKVBml5KCpqz5d8UQGKhy6sdPXuEQQcSI2rskGXsJKYu0j8FJr+1F?=
- =?us-ascii?Q?LJqUdvGR4ZgAhJtd7KdQNP60KkkP/Mafevtte5zJoPt4YSkYdgVrLfZSWNKk?=
- =?us-ascii?Q?Oxu3oZ514FKXhU/HiG4BCmg7M49v6DD9Aoo7qZvNwLqLiESDtNhEOq28utn1?=
- =?us-ascii?Q?ACJlEwfMxkgqyQEMCLoCrre3+qaPfkNnsTIJHauhDSNJuG/zHjwGkpkZDt47?=
- =?us-ascii?Q?ITh2PmIaaVsSQM0wOeLsuaG2gcyLcjrQyO1VWHuLwp1R1zMQ8YtWlQzgdoJT?=
- =?us-ascii?Q?oV0iNO/Fe5pMO8on3mpLOE2kXY2Cfo9JO0akB9BaHLZSYxXsHrYpCdav/WA+?=
- =?us-ascii?Q?ek0t5uBLKaVWcEUBykH2Wqb7wYOqSm6MA1sAPj8pxvRqQ8KeqeTMoTbNlfKd?=
- =?us-ascii?Q?GmG/aze4wbhNL2NNXovdVEXtDyD2J99DvP4klk7sk6vsKdqhId7BHglorLV9?=
- =?us-ascii?Q?dpbxGr7xmHRpX+B0vmv3qkuk0H6mg2I10pbtJTA4ugqSKe7H/Wz1/4YgWqau?=
- =?us-ascii?Q?Bb9pkIc0mLd3/qkHCWxI8z0mGQMWvh52+VmYPBJ/XLA41zoCJpnQnX/1g33C?=
- =?us-ascii?Q?n/At9pgAyq5/df/GPn5broqCoaFtjL+yEcgdNkbxYZ+I4iCU3Olk6wqTpE0n?=
- =?us-ascii?Q?sh7AMHe7U1Ggb97rsYzwYDtoCH0mO4jhoUoIcqOlqtOAENnJ0lpTuwP7lZ8F?=
- =?us-ascii?Q?7EobYPkFpcTUINk4l4aUr3encU+HN/JPR4NfxeoWQ4C2Y2HgIRh7mtGwME8j?=
- =?us-ascii?Q?2agEc3a96PO2plUjNzG8n+7U4P8MEHxSebQ5lSElJlKWq0cPoQ8qUfD37Bsa?=
- =?us-ascii?Q?m4aVCyC++bTnNd8eSEOs8LJVfnlHyQgC0U5nqh159S21JtYUsORm5RndnLgz?=
- =?us-ascii?Q?4LL1IBicX//qqHcHbCzBq07QOkY2L3PxKYkjWfwROjzk6ILmXiIXgsXO/gFD?=
- =?us-ascii?Q?tGjivNvGtxfZVKeW1fsu2BoQ/DCtuyy7QGdw0XXdEU3wBOywo6p/sVDFrDJe?=
- =?us-ascii?Q?gyC25hcHbJs+OvzQgjQMBZmw4wFXmAjbn+tJ5RaXUniKvTyA2mjHp+LM3f1k?=
- =?us-ascii?Q?mrZkTo9XKlY3+U7LMNVCpVMx8Z7CDgonnS+ffu9fzYq8o59VwrdT7y/nRoaO?=
- =?us-ascii?Q?xse7+Lmitq1pzDAq/Eey5pCGkvIpz4no?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY3PR01MB11346.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?1Hivw0uiXb4trqPIJ85zwTddcC5gYTfdILsq+iw+YStMOSvyxo8W6g0vvK/I?=
- =?us-ascii?Q?FMq3L276LuYeRud7FeTNlsBVeBoDhd9yoXGfwdf/8d4e55iYK6qDMI54sCqV?=
- =?us-ascii?Q?hF35FZL66h9hLAWOxIRzDxO/xJ2lxked+CSYM4DESwKrS0+piugCCSd7Gl7i?=
- =?us-ascii?Q?yyKsu93JACERKUZAg2Z2DWh1QwQqtq6IRIMsIZLKsG0FOZ23keLU0u7V//hX?=
- =?us-ascii?Q?Yl2NLFct5VCWRTMbSmVl7mpKW9+CkQQBkYmmuwkxaU9FQLVsa0RDdjykIk01?=
- =?us-ascii?Q?/JUrkFGDFVieVVB20DR4US0ZZvlkqUyKQU7STo9mlY2iH94259jnGXIfZplv?=
- =?us-ascii?Q?zyZrEev5bw7YDWrbmfjx7Y2s9J6LsP3gJp4nUa9L05WHxyabxsvJhQtq1EYN?=
- =?us-ascii?Q?Ae+H0AOH+vvfR3Lgv6CmZmLU7w6c6id/xgxFkuTpBe69e+VB3QyEJFaP+5Wg?=
- =?us-ascii?Q?zen2An35AwnxskfQfQcYYfH3DngnNITkiBzc2jwGVOSGyLsCLzhZyfhQMGS4?=
- =?us-ascii?Q?/KhEIQ48HAyIq/lY56BXOnXEL0Lnk8pX1gHqeUc9G5dj2Gr5x9Vq6/S9aPYe?=
- =?us-ascii?Q?XZE7RVus1OkWZFDFf2Iil8YtFXav/DbTMEtaluzmmoTsgx7J2JJ2nKAMHetw?=
- =?us-ascii?Q?9FtBv4IBiM1Iy6TLx7OQPKopiSf8lqR3aBs+PnC9uOnDTC05wcvo1hJ2k7G1?=
- =?us-ascii?Q?aUQoK/hc6zaj9yCNCpe1LzRvNuBtRdpSntXm7LoTVo8iaasDzQnYSh7IQmHE?=
- =?us-ascii?Q?tbrBPd1OgnilAytvaC1vDq0W8mOSHu33G5JOiDdQg9XnAJsb3Dg0+9krRwVH?=
- =?us-ascii?Q?W2/7pghbWc7SZh5TpvfC2IK3UmJeo+hzF/rUHrdEVlEp/pmq/P7zrWfVFRdp?=
- =?us-ascii?Q?qVbKp7CLSu9mtagxBkahPDaqvGoHY7mtHI/PjeGflIIUbUgObysJCC/Q+jjZ?=
- =?us-ascii?Q?p/UeuObHAdQYIaShSLsh1vPwUlVxvs8M/pwcGMkdy9gMBmEfmYinCesqYKpm?=
- =?us-ascii?Q?+kobDs2MxNhS+rnzbgseOOyt+ZZiFjQb7i/Jvgz/15YhApdnV0ZGwUdKn5aM?=
- =?us-ascii?Q?BSTYulrnCbaW6PRwU5K43AJFhdinMZaNWB5XoEhV71NeqBusSowHTvvNQw3j?=
- =?us-ascii?Q?LWoww273OBf9rjN9PtV+yFMLcgePIR5lWjsxq6/tV9mJha907+XFnUECuKd1?=
- =?us-ascii?Q?LY7BrSWLBbPjsaUg6gSh7V8oL684fHgupjqUwn/rCgj6mHvTGEXLY8kro5Jx?=
- =?us-ascii?Q?Fq5R6G1ZSAbqLzR1vYE9Zz9mA7YExEFGcUDnFFFOmhrH4sh+ARzTQSyZoxAj?=
- =?us-ascii?Q?PdrmLbPilBHzxhKBNUlizkljmeSzCB7emP5zMly7FbWnvuE3nw/327oBdLtl?=
- =?us-ascii?Q?M+9OWEVasqHbMI9DZDpZRfwuzKJ2lytKr7PZ+tiL3+isgTe99MIl/ZBjjLxb?=
- =?us-ascii?Q?pFQJ3x0BeGjHagHSt82/kY4hgy+Nu8hMEOm20TObF1So9URaE2Y0B4GQAy0f?=
- =?us-ascii?Q?UIcDOap8qqFIfBrDroaE31dQIZvdP/SyfX+g9WH07nxGBo5w/YNu+3lJD4c1?=
- =?us-ascii?Q?k51WB+08ZXVeN8k5sbqS+6ejmslphQ2tBtNzv4Wy9BxJ0+096O+N/QHsLano?=
- =?us-ascii?Q?Eg=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D88E1E9907
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2025 07:44:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1740037476; cv=none; b=ioVNsyRmFx6eYALlH0xbfIpEwe+zInIe03KZLV/G6JXXqdXSK/E2apYgu27zFTKZ7U1TBXLA8k5jIqBlzrWxSxqygXoErZZWpaBcpgl1DGlQNhKP665wrFlH1DoRAh/vHU5Xe9k9HTjl1++u126dS6QYROAaxr5XzWVDwZFojVo=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1740037476; c=relaxed/simple;
+	bh=Pajo6n58YQjMYvbXjpmcT2nx5LNJ3QUBwJ7/2kJOKqM=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=cHSYa98Qu7LroRtTbjicicZqi3lpPy7lH/+ztQTBSYhRxc627Gph5vxOPAaNvL80v6GuD8ZqJurz8ZJS5XpFYaXRtWIY23wR1Bit3KeDLiImV7DfYJ2khWSZk+OjyvhddRUGNjq87TcIMidYbnlT9JpS2d2XVScwdoAKsucoYA8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ore@pengutronix.de>)
+	id 1tl1EV-0004TP-1C; Thu, 20 Feb 2025 08:44:31 +0100
+Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1tl1EU-001tqO-1t;
+	Thu, 20 Feb 2025 08:44:30 +0100
+Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1tl1EU-00CC1u-1g;
+	Thu, 20 Feb 2025 08:44:30 +0100
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
+	kernel@pengutronix.de,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Mark Brown <broonie@kernel.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	=?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>,
+	Christian Loehle <christian.loehle@arm.com>
+Subject: [PATCH v2 1/6] mmc: core: Handle undervoltage events and register regulator notifiers
+Date: Thu, 20 Feb 2025 08:44:24 +0100
+Message-Id: <20250220074429.2906141-2-o.rempel@pengutronix.de>
+X-Mailer: git-send-email 2.39.5
+In-Reply-To: <20250220074429.2906141-1-o.rempel@pengutronix.de>
+References: <20250220074429.2906141-1-o.rempel@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY3PR01MB11346.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0359eb8d-32de-4ad0-7e27-08dd517dd5a1
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Feb 2025 07:11:45.3022
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 0UKLfoJfQdYEaZrulIMe41p8j1PSlJ2ccwh9Ho8PNq7Yj4HVUxabanQoIo0l4vBacID6TEQ+q5nO0CVEo/MOaHjy9SjJz9+Zo3DxTgAUim0=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS3PR01MB7803
+Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ore@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hi Ulf, Wolfram,
+Extend the MMC core to handle undervoltage events by implementing
+infrastructure to notify the MMC bus about voltage drops.
 
-> -----Original Message-----
-> From: Biju Das <biju.das.jz@bp.renesas.com>
-> Sent: 06 February 2025 13:40
-> Subject: [PATCH v3 0/8] Add RZ/G3E SDHI support
->=20
-> The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that of th=
-e RZ/V2H, but the SD0 channel
-> has only dedicated pins, so we must use SD_STATUS register to control vol=
-tage and power enable
-> (internal regulator).
->=20
-> For SD1 and SD2 channel we can either use gpio regulator or internal regu=
-lator (using SD_STATUS
-> register) for voltage switching.
->=20
-> For SD0, fixed voltage(eMMC) uses fixed regulator and non-fixed voltage
-> (SD) uses internal regulator.
->=20
-> v2->v3:
->  * Collected tags
->  * Renamed internal regulator labels vqmmc_sdhi{0..2}->sdhi{0..2}_vqmmc.
->  * Updated regulator phandles on SoM/Board dts.
->  * Dropped renaming the gpio regulator label vqmmc_sdhi1->vqmmc_sdhi1_gpi=
-o.
->  * Renamed node sd0emmc->sd0-emmc
->  * Renamed sd0-emmc-{ctrl,data,rst}->sd0-{ctrl,data,rst}
->  * Moved header file gpio.h from patch#6 to patch#8.
->  * Dropped overriding internal regulator name.
->  * Dropped #if guard in pinctrl node for SDHI0
->  * Renamed the label/node sdhi0_pins: sd0->sdhi0_usd_pins: sd0-usd.
-> v1->v2:
->  * Collected tags.
->  * Documented internal regulator as optional property for both RZ/G3E and
->    RZ/V2H SoCs.
->  * Updated commit description for regulator used in SD0 fixed and
->    non-fixed voltage case in patch#3.
->  * As the node enabling of internal regulator is controlled through statu=
-s,
->    added a check for device availability.
->  * Status of internal regulator is disabled in the SoC .dtsi. Override
->    the status in the board DTS when needed.
->  * Added support for enabling SDHI internal regulator in RZ/V2H
->  * Added missing header file gpio.h
->  * Used fixed regulator for eMMC on SD0 and dropped sd0-iovs pins for
->    eMMC.
->  * Sorted pinctrl nodes for sd2
->  * Enabled internal regulator for SD2.
->  * Added support for enabling SD on SDHI0
->  * Replaced the regulator usd_vdd_3p3v->reg_3p3v.
->  * Renamed the gpio-hog node sd1-pwr-en->sd1-pwr-en-hog.
->  * Sorted sd1 pin ctrl nodes.
->=20
-> Biju Das (8):
->   dt-bindings: mmc: renesas,sdhi: Document RZ/G3E support
->   mmc: renesas_sdhi: Arrange local variables in reverse xmas tree order
->   mmc: renesas_sdhi: Add support for RZ/G3E SoC
->   arm64: dts: renesas: r9a09g047: Add SDHI0-SDHI2 nodes
->   arm64: dts: renesas: r9a09g057: Add support for enabling SDHI internal
->     regulator
->   arm64: dts: renesas: rzg3e-smarc-som: Enable SDHI{0,2}
->   arm64: dts: renesas: rzg3e-smarc-som: Add support for enable SD on
->     SDHI0
->   arm64: dts: renesas: r9a09g047e57-smarc: Enable SDHI1
->=20
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml |  16 ++
->  arch/arm64/boot/dts/renesas/r9a09g047.dtsi    |  60 +++++++
->  .../boot/dts/renesas/r9a09g047e57-smarc.dts   |  49 ++++++
->  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  21 +++
->  .../boot/dts/renesas/renesas-smarc2.dtsi      |  18 ++
->  .../boot/dts/renesas/rzg3e-smarc-som.dtsi     | 154 ++++++++++++++++++
->  drivers/mmc/host/renesas_sdhi.h               |   1 +
->  drivers/mmc/host/renesas_sdhi_core.c          | 136 +++++++++++++++-
->  drivers/mmc/host/tmio_mmc.h                   |   5 +
->  9 files changed, 459 insertions(+), 1 deletion(-)
+Background & Decision at LPC24:
 
-Gentle ping.
+This solution was proposed and refined during LPC24 in the talk
+"Graceful Under Pressure: Prioritizing Shutdown to Protect Your Data in
+Embedded Systems," which aimed to address how Linux should handle power
+fluctuations in embedded devices to prevent data corruption or storage
+damage.
 
-Cheers,
-Biju
+At the time, multiple possible solutions were considered:
+1. Triggering a system-wide suspend or shutdown: when undervoltage is
+   detected, with device-specific prioritization to ensure critical
+   components shut down first.
+   - This approach was disliked by Greg Kroah-Hartman, as it introduced
+     complexity and was not suitable for all use cases.
+
+2. Notifying relevant devices through the regulator framework: to allow
+   graceful per-device handling.
+   - This approach was agreed upon as the most acceptable by participants
+     in the discussion, including Greg Kroah-Hartman, Mark Brown,
+     and Rafael J. Wysocki.
+   - This patch implements that decision by integrating undervoltage
+     handling into the MMC subsystem.
+
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/mmc/core/core.c      |  20 ++++++
+ drivers/mmc/core/core.h      |   2 +
+ drivers/mmc/core/regulator.c | 115 +++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h     |   8 +++
+ 4 files changed, 145 insertions(+)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5241528f8b90..3ee6d83eb354 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1399,6 +1399,26 @@ void mmc_power_cycle(struct mmc_host *host, u32 ocr)
+ 	mmc_power_up(host, ocr);
+ }
+ 
++/**
++ * mmc_handle_undervoltage - Handle an undervoltage event on the MMC bus
++ * @host: The MMC host that detected the undervoltage condition
++ *
++ * This function is called when an undervoltage event is detected on one of
++ * the MMC regulators.
++ *
++ * Returns: 0 on success or a negative error code on failure.
++ */
++int mmc_handle_undervoltage(struct mmc_host *host)
++{
++	if (!host->bus_ops->handle_undervoltage)
++		return 0;
++
++	dev_warn(mmc_dev(host), "%s: Undervoltage detected, initiating emergency stop\n",
++		 mmc_hostname(host));
++
++	return host->bus_ops->handle_undervoltage(host);
++}
++
+ /*
+  * Assign a mmc bus handler to a host. Only one bus handler may control a
+  * host at any given time.
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index fc9c066e6468..b77f053039ab 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -31,6 +31,7 @@ struct mmc_bus_ops {
+ 	int (*sw_reset)(struct mmc_host *);
+ 	bool (*cache_enabled)(struct mmc_host *);
+ 	int (*flush_cache)(struct mmc_host *);
++	int (*handle_undervoltage)(struct mmc_host *host);
+ };
+ 
+ void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
+@@ -59,6 +60,7 @@ void mmc_power_off(struct mmc_host *host);
+ void mmc_power_cycle(struct mmc_host *host, u32 ocr);
+ void mmc_set_initial_state(struct mmc_host *host);
+ u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
++int mmc_handle_undervoltage(struct mmc_host *host);
+ 
+ static inline void mmc_delay(unsigned int ms)
+ {
+diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
+index 3dae2e9b7978..d3f3eb8ea3d7 100644
+--- a/drivers/mmc/core/regulator.c
++++ b/drivers/mmc/core/regulator.c
+@@ -7,6 +7,7 @@
+ #include <linux/err.h>
+ #include <linux/log2.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/workqueue.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -262,6 +263,98 @@ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+ 
+ #endif /* CONFIG_REGULATOR */
+ 
++static void mmc_undervoltage_workfn(struct work_struct *work)
++{
++	struct mmc_supply *supply;
++	struct mmc_host *mmc;
++
++	supply = container_of(work, struct mmc_supply, uv_work);
++	mmc = container_of(supply, struct mmc_host, supply);
++
++	mmc_handle_undervoltage(mmc);
++}
++
++static int mmc_handle_regulator_event(struct mmc_host *mmc,
++				      const char *regulator_name,
++				      unsigned long event)
++{
++	switch (event) {
++	case REGULATOR_EVENT_UNDER_VOLTAGE:
++		if (mmc->undervoltage)
++			return NOTIFY_OK;
++
++		mmc->undervoltage = true;
++		queue_work(system_highpri_wq, &mmc->supply.uv_work);
++		break;
++	default:
++		return NOTIFY_DONE;
++	}
++
++	return NOTIFY_OK;
++}
++
++static int mmc_vmmc_notifier_callback(struct notifier_block *nb,
++				      unsigned long event, void *data)
++{
++	struct mmc_supply *supply;
++	struct mmc_host *mmc;
++
++	supply = container_of(nb, struct mmc_supply, vmmc_nb);
++	mmc = container_of(supply, struct mmc_host, supply);
++
++	return mmc_handle_regulator_event(mmc, "vmmc", event);
++}
++
++static int mmc_vqmmc_notifier_callback(struct notifier_block *nb,
++				       unsigned long event, void *data)
++{
++	struct mmc_supply *supply;
++	struct mmc_host *mmc;
++
++	supply = container_of(nb, struct mmc_supply, vqmmc_nb);
++	mmc = container_of(supply, struct mmc_host, supply);
++
++	return mmc_handle_regulator_event(mmc, "vqmmc", event);
++}
++
++static int mmc_vqmmc2_notifier_callback(struct notifier_block *nb,
++					unsigned long event, void *data)
++{
++	struct mmc_supply *supply;
++	struct mmc_host *mmc;
++
++	supply = container_of(nb, struct mmc_supply, vqmmc2_nb);
++	mmc = container_of(supply, struct mmc_host, supply);
++
++	return mmc_handle_regulator_event(mmc, "vqmmc2", event);
++}
++
++static void
++mmc_register_regulator_notifier(struct mmc_host *mmc,
++				struct regulator *regulator,
++				struct notifier_block *nb,
++				int (*callback)(struct notifier_block *,
++						unsigned long, void *),
++				const char *name)
++{
++	struct device *dev = mmc_dev(mmc);
++	int ret;
++
++	nb->notifier_call = callback;
++	ret = devm_regulator_register_notifier(regulator, nb);
++	if (ret)
++		dev_warn(dev, "Failed to register %s notifier: %pe\n", name,
++			 ERR_PTR(ret));
++}
++
++static void mmc_undervoltage_work_cleanup(void *data)
++{
++	struct mmc_supply *supply = data;
++
++	/* Ensure the work is canceled or flushed here */
++	cancel_work_sync(&supply->uv_work);
++}
++
+ /**
+  * mmc_regulator_get_supply - try to get VMMC and VQMMC regulators for a host
+  * @mmc: the host to regulate
+@@ -281,6 +374,13 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
+ 	mmc->supply.vqmmc2 = devm_regulator_get_optional(dev, "vqmmc2");
+ 
++	INIT_WORK(&mmc->supply.uv_work, mmc_undervoltage_workfn);
++
++	ret = devm_add_action_or_reset(dev, mmc_undervoltage_work_cleanup,
++				       &mmc->supply);
++	if (ret)
++		return dev_err_probe(dev, ret, "Failed to add cleanup action\n");
++
+ 	if (IS_ERR(mmc->supply.vmmc)) {
+ 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+ 			return dev_err_probe(dev, -EPROBE_DEFER,
+@@ -293,6 +393,11 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 			mmc->ocr_avail = ret;
+ 		else
+ 			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
++
++		mmc_register_regulator_notifier(mmc, mmc->supply.vmmc,
++						&mmc->supply.vmmc_nb,
++						mmc_vmmc_notifier_callback,
++						"vmmc");
+ 	}
+ 
+ 	if (IS_ERR(mmc->supply.vqmmc)) {
+@@ -301,12 +406,22 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 					     "vqmmc regulator not available\n");
+ 
+ 		dev_dbg(dev, "No vqmmc regulator found\n");
++	} else {
++		mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc,
++						&mmc->supply.vqmmc_nb,
++						mmc_vqmmc_notifier_callback,
++						"vqmmc");
+ 	}
+ 
+ 	if (IS_ERR(mmc->supply.vqmmc2)) {
+ 		if (PTR_ERR(mmc->supply.vqmmc2) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 		dev_dbg(dev, "No vqmmc2 regulator found\n");
++	} else {
++		mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc2,
++						&mmc->supply.vqmmc2_nb,
++						mmc_vqmmc2_notifier_callback,
++						"vqmmc2");
+ 	}
+ 
+ 	return 0;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 68f09a955a90..4e147ad82804 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -11,6 +11,7 @@
+ #include <linux/device.h>
+ #include <linux/fault-inject.h>
+ #include <linux/debugfs.h>
++#include <linux/workqueue.h>
+ 
+ #include <linux/mmc/core.h>
+ #include <linux/mmc/card.h>
+@@ -342,6 +343,12 @@ struct mmc_supply {
+ 	struct regulator *vmmc;		/* Card power supply */
+ 	struct regulator *vqmmc;	/* Optional Vccq supply */
+ 	struct regulator *vqmmc2;	/* Optional supply for phy */
++
++	struct notifier_block vmmc_nb;		/* Notifier for vmmc */
++	struct notifier_block vqmmc_nb;		/* Notifier for vqmmc */
++	struct notifier_block vqmmc2_nb;	/* Notifier for vqmmc2 */
++
++	struct work_struct uv_work;		/* Undervoltage work */
+ };
+ 
+ struct mmc_ctx {
+@@ -493,6 +500,7 @@ struct mmc_host {
+ 	unsigned int		retune_crc_disable:1; /* don't trigger retune upon crc */
+ 	unsigned int		can_dma_map_merge:1; /* merging can be used */
+ 	unsigned int		vqmmc_enabled:1; /* vqmmc regulator is enabled */
++	unsigned int		undervoltage:1;	 /* Undervoltage state */
+ 
+ 	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+-- 
+2.39.5
+
