@@ -1,175 +1,178 @@
-Received: from mail-ot1-f47.google.com (mail-ot1-f47.google.com [209.85.210.47])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69F3F214237
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2025 20:54:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D58F202F96;
+	Fri, 21 Feb 2025 09:24:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740084899; cv=none; b=fT/F65Rl0lkmYyfv9c4GffYHpYY2gNMQF6eReBsujLqrPwvooSVfI+tmjJsoJKOLT/JXHGH0qKK6GFMvW12vbkukodNM3x3GwGJV6vHmOCY31U9aFpDby/pY50SIa6vzezcKVWmH6irOcrq/zaSFhoQ3AQ5saMCuE+fEYlm7z9c=
+	t=1740129880; cv=none; b=KmhdntIVP9UB0FpbqQU5bf1gVnEVhY8NhWcuXP0TFh3pPA7YBU4HRZjZIM7mnqocOycB5UTk9cPqMmsFCmUQGJnZSJks/PAUvlNB3BKZqfnPqnHTboKuHhOJmeiQ8f/JgnMllWMyBv7pKjq9CN7/4N36PwtARAkxGOZapVDyZKk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740084899; c=relaxed/simple;
-	bh=Xc6o9obrZeidO3IrZs20EkZMwxxHvxTSWqEyw4C1voI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LUfjoClW/qdemcC8PLUZNHywFP9NoiPbF9Sy157w7eEPa8NXYitj4iE05s+LfzNlm2IBfHrGJcJxqbqNSPyL/HXd58z+KPnQUDIOMJza73ps6TNvI3gGL7/j54wYcZ+tZQ0CxZ+dowYvfRGbM5srYzOBxjcPuKCFsLwwfFUTMcs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=1dXXBJPK; arc=none smtp.client-ip=209.85.210.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1740129880; c=relaxed/simple;
+	bh=0XvHhHCp8UD0T0S2F3TcjKx5PbjsjRTd7om3G9mT0zA=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Oo71sZOxC8/iVD8YzYRbh/0cXwfM4XAS6Fk4mqlIu6iK2EvbpVKqTa2396fpPptNd8AJjVbBrM93WNnvHqQKtZabI9LgToykVcSH6g885ZiFJrTDVPLRBOayDO7f1lrmaRQ6ZQnd0ARj2FWUuyKN7z0duq3uLAwR0QYwo7etHII=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lG0mlwtJ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="1dXXBJPK"
-Received: by mail-ot1-f47.google.com with SMTP id 46e09a7af769-72714016741so780434a34.3
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Feb 2025 12:54:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1740084895; x=1740689695; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=lmfqNhipvTzpaPHouDLPUPBFfenRqD8FhVYBJFNu3b0=;
-        b=1dXXBJPKyl79MFL5kY+SZTVMp8uVM+kote9OOwmFCgKZymBx6jdSxG8PDQiRLbSRA8
-         tH+rTa1uqbAqzck8hq68ndXav2GgvFsjPdcV3XtjmJkCwuL2xLawOFMQswMJpB0a/67a
-         Zba8pUzG4LM8ucZ3o4Z4NM0lGhYGAnfbrqjeR2H5p4duEGR3wfJZdqEwPeymH7TMOR+y
-         sDk+n/NvSTlK/+2CYwbjl83wPxNd1wGvgyWbuAilVBCYBXDjFdxsa+mIEPU9pmahYppL
-         f1HdT8HaJPAtIZpPTNwwJHTQluH/ByMUCFdOOgB3wV+bKts9xv6E254vB+tiTdxv3tm5
-         08uA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1740084895; x=1740689695;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=lmfqNhipvTzpaPHouDLPUPBFfenRqD8FhVYBJFNu3b0=;
-        b=q3dvxK9uwh/LcyPsixNRQ6W6cyYnh20sXNojQheRFTZAJ0UIUOWeVybr3LOe5XUWT3
-         Is8V2qwu8dzj2HKVk/KtK+0YtBIlUnrXehZWZa7oP9MAaCmqAvgJJtG75VhSj4GPDnpe
-         G2Hfjy1BuEI3YF+HcbLs0/boOo01nxru321T4uxDvvVUf6mxt0zVDsHQW29zBGt32BHz
-         fZWpn33pE+ZeeS/K/5uz/nETtxKASgUYPsMD0JLPHSxuNzKp8tY7NnrFFPWpjAST7b5A
-         ix3+BTYgY9aMBQZ/aO+epewZX3o4bW6Kiogbn2mA3MDR5jciYawVK/Ebccuvn7cm2nO6
-         VRWw==
-X-Forwarded-Encrypted: i=1; AJvYcCVYUF6TpYWqNamMdUCZuh6//3jWiqdPrp5fvsGflmVKeLV8O2VpOna7hTbcNL9+RnEcJyYPCEAiDgc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx/ShG59Ov9JVLgrdt5ZkXNbLpY5cSPOvUOD3nkcAnkVfkA7zT8
-	+XuYpYfJP8vkLxwjKW01ZeKNGlx5LhFbdxkkTZDPVGK4ikR33HfG07eNs5dKE+8=
-X-Gm-Gg: ASbGncsv/T7qAN/pfvXLzqkaJ08iRVGOqEtfMXGJvX1k4X09NEKC+AVJ1qa+BJZmUJX
-	He84/SPztMW0vt0QHGNTmj5viFWgfAwEE0d5spp2OlbBKj5CERL4Zb3mQz4YrAZzB2fUCCQ0Hhq
-	5t/GHbruPXGtX8tnghtm5WeFOsBYeICgMVaONcgVEpOiQiz2WGlRSxEV+SjvE+VNr+mesBAMTmG
-	jirOwI9IST1cq0F/bOljvT6l2njH/wKVqn9kOHyF+qZvrV9z5UfbkQFljJXhMuplJU+Ju/pFSH4
-	oHxDTZ5EfNEe8pWMJZYHCCYBVmISAHkpqrJeH7mc98akEU+i+o5g
-X-Google-Smtp-Source: AGHT+IF3mi4w+ioATe/neRX31NhU+G5fVnUO+U3AY+NTTkR/32/joj3J25iUisGaUZnzV5dytcgeCw==
-X-Received: by 2002:a05:6830:3817:b0:727:4439:2079 with SMTP id 46e09a7af769-7274c563e6dmr324973a34.17.1740084895336;
-        Thu, 20 Feb 2025 12:54:55 -0800 (PST)
-Received: from [192.168.0.142] (ip98-183-112-25.ok.ok.cox.net. [98.183.112.25])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-7272a3751e0sm2223640a34.58.2025.02.20.12.54.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 20 Feb 2025 12:54:54 -0800 (PST)
-Message-ID: <4052fd7b-dd8c-4a5a-8f82-dd515de14d20@baylibre.com>
-Date: Thu, 20 Feb 2025 14:54:53 -0600
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lG0mlwtJ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 337D7C4CED6;
+	Fri, 21 Feb 2025 09:24:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1740129879;
+	bh=0XvHhHCp8UD0T0S2F3TcjKx5PbjsjRTd7om3G9mT0zA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=lG0mlwtJZr90iiEgPpXWZcAJeoQ7w6hJnCabn1hKI4nUWNnfPjKxHgPmjZFREDhIc
+	 sOo8AsSd9BxATe2pJaizh0r/gtKN58rIoyunLYb375hBIClvoL8TwtTtrD6DhhE3+P
+	 UM8ayvN8x4zuk2tBlPadja42ddXDzYbevhO/F2nD4jCoCyI22mBrX0h6K+7+y0aW7c
+	 /ddFCibmqojyrq+UHdQeAXco07No29ahVpM5/bJZrkeCjvxWdW4CXnlUeysngvx+Cr
+	 D+pqqRL9iuDE01WMcaZ8qKDPwjX8xWf9Jwfi+Q2fKt07we0zcfWHUWdxZHOZVZEYdb
+	 1YS0IduJaYf2A==
+Date: Fri, 21 Feb 2025 09:24:31 +0000
+From: Simon Horman <horms@kernel.org>
+To: David Lechner <dlechner@baylibre.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>,
+	Bartosz Golaszewski <brgl@bgdev.pl>,
+	Andy Shevchenko <andy@kernel.org>,
+	Geert Uytterhoeven <geert@linux-m68k.org>,
+	Lars-Peter Clausen <lars@metafoo.de>,
+	Michael Hennerich <Michael.Hennerich@analog.com>,
+	Jonathan Cameron <jic23@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, Peter Rosin <peda@axentia.se>,
+	Andrew Lunn <andrew@lunn.ch>,
+	Heiner Kallweit <hkallweit1@gmail.com>,
+	Russell King <linux@armlinux.org.uk>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	Vinod Koul <vkoul@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Nuno =?utf-8?B?U8Oh?= <nuno.sa@analog.com>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>,
+	Takashi Iwai <tiwai@suse.com>, linux-gpio@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-iio@vger.kernel.org,
+	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+	linux-phy@lists.infradead.org, linux-sound@vger.kernel.org,
+	Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH v3 05/15] bus: ts-nbus: use bitmap_get_value8()
+Message-ID: <20250221092431.GE1615191@kernel.org>
+References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
+ <20250210-gpio-set-array-helper-v3-5-d6a673674da8@baylibre.com>
+ <20250220101742.GR1615191@kernel.org>
+ <0084eef7-3831-4e62-acf1-6c2dc0e15dd1@baylibre.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 10/15] iio: resolver: ad2s1210: use bitmap_write
-To: Linus Walleij <linus.walleij@linaro.org>,
- Bartosz Golaszewski <brgl@bgdev.pl>, Andy Shevchenko <andy@kernel.org>,
- Geert Uytterhoeven <geert@linux-m68k.org>,
- Lars-Peter Clausen <lars@metafoo.de>,
- Michael Hennerich <Michael.Hennerich@analog.com>,
- Jonathan Cameron <jic23@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Peter Rosin <peda@axentia.se>, Andrew Lunn <andrew@lunn.ch>,
- Heiner Kallweit <hkallweit1@gmail.com>, Russell King
- <linux@armlinux.org.uk>, "David S. Miller" <davem@davemloft.net>,
- Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
- Paolo Abeni <pabeni@redhat.com>, Vinod Koul <vkoul@kernel.org>,
- Kishon Vijay Abraham I <kishon@kernel.org>, =?UTF-8?Q?Nuno_S=C3=A1?=
- <nuno.sa@analog.com>, Liam Girdwood <lgirdwood@gmail.com>,
- Mark Brown <broonie@kernel.org>, Jaroslav Kysela <perex@perex.cz>,
- Takashi Iwai <tiwai@suse.com>
-Cc: linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
- netdev@vger.kernel.org, linux-phy@lists.infradead.org,
- linux-sound@vger.kernel.org
-References: <20250210-gpio-set-array-helper-v3-0-d6a673674da8@baylibre.com>
- <20250210-gpio-set-array-helper-v3-10-d6a673674da8@baylibre.com>
-Content-Language: en-US
-From: David Lechner <dlechner@baylibre.com>
-In-Reply-To: <20250210-gpio-set-array-helper-v3-10-d6a673674da8@baylibre.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <0084eef7-3831-4e62-acf1-6c2dc0e15dd1@baylibre.com>
 
-On 2/10/25 4:33 PM, David Lechner wrote:
-> Replace bitmap array access with bitmap_write.
+On Thu, Feb 20, 2025 at 11:32:10AM -0600, David Lechner wrote:
+> On 2/20/25 4:17 AM, Simon Horman wrote:
+> > On Mon, Feb 10, 2025 at 04:33:31PM -0600, David Lechner wrote:
+> >> Use bitmap_get_value8() instead of accessing the bitmap directly.
+> >>
+> >> Accessing the bitmap directly is not considered good practice. We now
+> >> have a helper function that can be used instead, so let's use it.
+> >>
+> >> Suggested-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+> > u> Signed-off-by: David Lechner <dlechner@baylibre.com>
+> >> ---
+> >>  drivers/bus/ts-nbus.c | 5 +++--
+> >>  1 file changed, 3 insertions(+), 2 deletions(-)
+> >>
+> >> diff --git a/drivers/bus/ts-nbus.c b/drivers/bus/ts-nbus.c
+> >> index b4c9308caf0647a3261071d9527fffce77784af2..beac67f3b820377f8bb1fc4f4ee77e15ee240834 100644
+> >> --- a/drivers/bus/ts-nbus.c
+> >> +++ b/drivers/bus/ts-nbus.c
+> >> @@ -10,6 +10,7 @@
+> >>   * TS-4600 SoM.
+> >>   */
+> >>  
+> >> +#include <linux/bitmap.h>
+> >>  #include <linux/bitops.h>
+> >>  #include <linux/gpio/consumer.h>
+> >>  #include <linux/kernel.h>
+> >> @@ -107,7 +108,7 @@ static void ts_nbus_reset_bus(struct ts_nbus *ts_nbus)
+> >>  {
+> >>  	DECLARE_BITMAP(values, 8);
+> >>  
+> >> -	values[0] = 0;
+> >> +	bitmap_set_value8(values, byte, 0);
+> > 
+> > Hi David,
+> > 
+> > byte doesn't appear to exist in the scope of this function.
+> > 
+> > I tried this:
+> > 
+> > 	bitmap_set_value8(values, 0, 8);
+> > 
+> > But when compiling with GCC 14.2.0 I see warnings that values
+> > is used uninitialised - bitmap_set_value8() appears to rely on
+> > it being so.
 > 
-> Accessing the bitmap array directly is not recommended and now there is
-> a helper function that can be used.
+> Ah yes, I see the problem (I don't think this driver compiles with
+> allmodconfig so the compiler didn't catch it for me).
+
+Thanks, that would explain things.
+
+FWIIW, I think you can exercise this with allmodconfig by simply running:
+
+  make drivers/bus/ts-nbus.o
+
 > 
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> Signed-off-by: David Lechner <dlechner@baylibre.com>
-> ---
->  drivers/iio/resolver/ad2s1210.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+> > 
+> >   CC      drivers/bus/ts-nbus.o
+> > In file included from drivers/bus/ts-nbus.c:13:
+> > In function ‘bitmap_write’,
+> >     inlined from ‘ts_nbus_reset_bus’ at drivers/bus/ts-nbus.c:111:2:
+> > ./include/linux/bitmap.h:818:12: error: ‘values’ is used uninitialized [-Werror=uninitialized]
+> >   818 |         map[index] &= (fit ? (~(mask << offset)) : ~BITMAP_FIRST_WORD_MASK(start));
+> >       |         ~~~^~~~~~~
+> > In file included from ./include/linux/kasan-checks.h:5,
+> >                  from ./include/asm-generic/rwonce.h:26,
+> >                  from ./arch/x86/include/generated/asm/rwonce.h:1,
+> >                  from ./include/linux/compiler.h:344,
+> >                  from ./include/linux/build_bug.h:5,
+> >                  from ./include/linux/bits.h:22,
+> >                  from ./include/linux/bitops.h:6,
+> >                  from ./include/linux/bitmap.h:8:
+> > drivers/bus/ts-nbus.c: In function ‘ts_nbus_reset_bus’:
+> > drivers/bus/ts-nbus.c:109:24: note: ‘values’ declared here
+> >   109 |         DECLARE_BITMAP(values, 8);
+> >       |                        ^~~~~~
+> > ./include/linux/types.h:11:23: note: in definition of macro ‘DECLARE_BITMAP’
+> >    11 |         unsigned long name[BITS_TO_LONGS(bits)]
+> >       |                       ^~~~
+> > 
+> > 
+> >>  
+> >>  	gpiod_multi_set_value_cansleep(ts_nbus->data, values);
+> >>  	gpiod_set_value_cansleep(ts_nbus->csn, 0);
+> >> @@ -151,7 +152,7 @@ static void ts_nbus_write_byte(struct ts_nbus *ts_nbus, u8 byte)
+> >>  {
+> >>  	DECLARE_BITMAP(values, 8);
 > 
-> diff --git a/drivers/iio/resolver/ad2s1210.c b/drivers/iio/resolver/ad2s1210.c
-> index 7f18df790157f1e411fb70de193a49f0677c999f..04879e6d538bce664469c5f6759d8b1cedea16e9 100644
-> --- a/drivers/iio/resolver/ad2s1210.c
-> +++ b/drivers/iio/resolver/ad2s1210.c
-> @@ -46,6 +46,7 @@
->   */
->  
->  #include <linux/bitfield.h>
-> +#include <linux/bitmap.h>
->  #include <linux/bits.h>
->  #include <linux/cleanup.h>
->  #include <linux/clk.h>
-> @@ -180,7 +181,7 @@ static int ad2s1210_set_mode(struct ad2s1210_state *st, enum ad2s1210_mode mode)
->  	if (!gpios)
->  		return mode == st->fixed_mode ? 0 : -EOPNOTSUPP;
->  
-> -	bitmap[0] = mode;
-> +	bitmap_write(bitmap, mode, 0, 2);
->  
->  	return gpiod_multi_set_value_cansleep(gpios, bitmap);
->  }
-> @@ -1470,7 +1471,7 @@ static int ad2s1210_setup_gpios(struct ad2s1210_state *st)
->  			return dev_err_probe(dev, -EINVAL,
->  				      "requires exactly 2 resolution-gpios\n");
->  
-> -		bitmap[0] = st->resolution;
-> +		bitmap_write(bitmap, st->resolution, 0, 2);
->  
->  		ret = gpiod_multi_set_value_cansleep(resolution_gpios, bitmap);
->  		if (ret < 0)
+> We can fix by zero-initialing the bitmap.
 > 
+> 	DECLARE_BITMAP(values, 8) = { };
 
-There is actually a bug here pointed out in a similar patch. bitmap_write()
-only modifies the bitmap, so this introduces an unintialized use bug. [1]
-Here, we only use the bits that we set, so runtime behavior would not actually
-be buggy but still best to fully initialize the memory.
+Thanks, I confirmed that adding that to ts_nbus_reset_bus()
+makes the compiler happy. And it seems sensible to me.
 
-I'm a bit surprised that my local compiler and iio/testing both didn't catch that
-since GCC 14 caught it in the other driver.
+I guess that theoretically it should also be added to ts_nbus_write_byte(),
+although GCC has nothing to say about that either way.
 
-[1]: https://lore.kernel.org/linux-gpio/20250217132152.29d86d6c@jic23-huawei/T/#m3163d2c5db5b7376504d8ad6f23716f1119de761
+> Would you like me to send a new version of the patch?
 
-The fix is simple, we can zero-initialize the bitmap.
+It's not really my call. But I would expect that is a good next step.
 
-diff --git a/drivers/iio/resolver/ad2s1210.c b/drivers/iio/resolver/ad2s1210.c
-index 04879e6d538b..ab860cedecd1 100644
---- a/drivers/iio/resolver/ad2s1210.c
-+++ b/drivers/iio/resolver/ad2s1210.c
-@@ -176,7 +176,7 @@ struct ad2s1210_state {
- static int ad2s1210_set_mode(struct ad2s1210_state *st, enum ad2s1210_mode mode)
- {
- 	struct gpio_descs *gpios = st->mode_gpios;
--	DECLARE_BITMAP(bitmap, 2);
-+	DECLARE_BITMAP(bitmap, 2) = { };
- 
- 	if (!gpios)
- 		return mode == st->fixed_mode ? 0 : -EOPNOTSUPP;
-@@ -1427,7 +1427,7 @@ static int ad2s1210_setup_gpios(struct ad2s1210_state *st)
- 	struct device *dev = &st->sdev->dev;
- 	struct gpio_descs *resolution_gpios;
- 	struct gpio_desc *reset_gpio;
--	DECLARE_BITMAP(bitmap, 2);
-+	DECLARE_BITMAP(bitmap, 2) = { };
- 	int ret;
- 
- 	/* should not be sampling on startup */
-
+> >> -	values[0] = byte;
+> >> +	bitmap_set_value8(values, byte, 8);
+> >>  
+> >>  	gpiod_multi_set_value_cansleep(ts_nbus->data, values);
+> >>  }
