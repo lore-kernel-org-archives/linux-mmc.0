@@ -1,77 +1,76 @@
 Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E524C213E71;
-	Thu, 27 Feb 2025 07:50:42 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B704D4A1A;
+	Thu, 27 Feb 2025 07:57:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=68.232.143.124
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740642644; cv=fail; b=nE6BFJXbFlY7g9D6a0MheySrvn9V9kSjcbvJZQIiSdeKy1HexBPbT80ocm0wStB2OMkL69sBrpeG+M8Vr1ro0HTgIpyeQGGkwkmsuBDR8agZclwFOK2MGNVUW5te5VQG03OF5qz2k/Phc2kNMtXED40i4B70oRbnoTm7derys6Q=
+	t=1740643025; cv=fail; b=lCAzNulBhYW3n1MOZSLvq1lPyYs/8vParRaxcBvY7BnO0kj51Ob+NZXhmZbKqw7+1uN8hQGD3mjCXqCdWPPw8MuikBvEG5CeiUr1W7BKyUfUHkX8ELrHgv1t/sC2UjvafQ3Y+KPHmMWkfQwR13hgGY0g0R9UvS3FJrCqukixlBo=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740642644; c=relaxed/simple;
-	bh=//Inah7UKe0puilghYtZMqxoC28Vyhxl3HOCGDJB31g=;
+	s=arc-20240116; t=1740643025; c=relaxed/simple;
+	bh=hZGbAXv9EtGkARMWM6yeiySuS7lXlOn13053XY+AV5I=;
 	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=EyLYQYdmHSHERQROV4aBeexmyZegZib3D23c63DbbjaasG8Up9PykgUbrzo7gYGYicQ7iBUe5geIQfOytlV+uLUEfL5XsnkhIPXP5KGEbqpDYBWNBv5R2o39yDUnFw3XrNspUhG/oHd2qjv2/RUhc0pEUhOhwAz1HQH7x0BPX0E=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=ErXoKAOu; arc=fail smtp.client-ip=68.232.143.124
+	 Content-Type:MIME-Version; b=ut8MPjnee4BYaTYI4gN9QJ9hZNscE6HOYJTb0d+gEDVW3I8JvPK/hk3i4WXp8IeLIzlBr9XQtdy7Gq7YI+zvbuw/2sWuvV6jRuCJtyqqxHXuUsd9WdJ861j3h75aW3KWUbNBxaD91ne+UN9/oyfEg6yhdg9o4/oPE1AleKCqc1U=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=CEjYPgMq; arc=fail smtp.client-ip=68.232.143.124
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="ErXoKAOu"
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="CEjYPgMq"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkim.sandisk.com; t=1740642642; x=1772178642;
+  s=dkim.sandisk.com; t=1740643023; x=1772179023;
   h=from:to:cc:subject:date:message-id:references:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=//Inah7UKe0puilghYtZMqxoC28Vyhxl3HOCGDJB31g=;
-  b=ErXoKAOuoV3FupUQ9iXlx15zHBXXAnpHRvOowfitCwaT1cDHQVB2XMHi
-   L4bQCN8T5HPtXtp5zcLWzhY1NZopQi4JdXl8oylS9yswwk0M/pP29Fi63
-   ZdWvwKbTfzAbWp/XHS1Wh6gYSH1/2WkcEKUz5IluFQu6T7RtZ7yAdIZVn
-   Y7jYpvf986429iDVupmCt8OP7lkDG9NqxCLSfBthCK+l46D+LMaHXqeEm
-   E88gm1z8IMMoYzbNvLjtitBChFdSQderdVWm1ikGaHO7YtfccbdaR7Xtz
-   SFbElmUziI4TleAFDFxSfA6JFwzDkltjnOckNzby0Yur3bN4EA318kaY3
+  bh=hZGbAXv9EtGkARMWM6yeiySuS7lXlOn13053XY+AV5I=;
+  b=CEjYPgMqoNK/SYzvt+B5/l0XEouyR/qzDKMwjP4GAnmJCjclK4Nv8ekT
+   GUF2Raxd2GGq4jtiUc+egy1v1z5JSb2uwFCkRHCQWHnVRFBJ6DxYqo1Y2
+   ibiRF9PL3Dun+534NrWYdoi1YR/OcDqkXLATAjzKgMxazRLT6lrJs6cWI
+   vnd5aDj8gf/nHJ0JuT943WBRSu2FtllmEw8Cg2o7bznT5m4c8+pFGuGu6
+   FQ64L0Xdn0Cs+DCdGaBcY4m9FSAKs2yHhWuDsGIAR1VOkI+bR9olw8Ipg
+   jPuNQue9GBRwGY2aS+71vC/CEAKY3nY9QTWUklr54e1VDyiAUmQ5t2+pk
    Q==;
-X-CSE-ConnectionGUID: hVPNaeJcQ3qTLB3Gnm9Rnw==
-X-CSE-MsgGUID: iVNIm1p+RfyOP1UCOKj0Og==
+X-CSE-ConnectionGUID: 8N3SqJcEQoqo2S/t6GKOWA==
+X-CSE-MsgGUID: iliCWtYuTVuA/RJau4jeNg==
 X-IronPort-AV: E=Sophos;i="6.13,319,1732550400"; 
-   d="scan'208";a="40304942"
-Received: from mail-bn7nam10lp2042.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.42])
-  by ob1.hgst.iphmx.com with ESMTP; 27 Feb 2025 15:50:40 +0800
+   d="scan'208";a="40305490"
+Received: from mail-bn7nam10lp2044.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.44])
+  by ob1.hgst.iphmx.com with ESMTP; 27 Feb 2025 15:57:01 +0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=nx+cWLJJgpMAc2VgqS3VJ546AWwMWvPlTBgi21vr8dAzaisjV5wxeMrEFosDGTq2k/z28P36bbWKYpzklxH1el4M77/o/2L7VGwmX/tiQx/3qtfhYaI3nztlilHoN4p9keEsvONkN15wr6EY4/TPpLbLA+gKkQdllNpP0z61SSO9Ep92Qsw9pQVQubl/qIgu32cVorbChoMGmaCr2UkIhGQxvGGngAMptkwi6SVemLYvr0nZfAh6mTWBpmBANbK1K2p+V8EAII79aA6xPABH/LoGmmu9FLNsJSGa6q4nm37FUWVNe8fQuu0uWALHH4TRA+GIo0YcUaFiXOXmKqvqdw==
+ b=p8ps3vXPcxzdlezrRBNuHxPS7OjhchstkQj2PZw7x5QspQMkI8NIQ8vrd37j0x2Txq+Kvmt9YVEgtUGE+yWE3poutPeGeZDhOdwmR0a0oDq3F8MXLal+NrvtRpo+AjiqiFlX4kMHy+86Q9TLiEZ7+OzL3G5Eo2O9sERnAmf2qb1fmdfEki8Ub7WNKxuIhUEcf+7ITnk8CmcyDqN9xo7L51p9+d1m0slAnKzbZwdZFFRmlSgpLG9entMTwKhhO34cEtnBg+dmUw/4xE1rb36FHFTdRmz0HA/Dh/Wcpp+iNeG/OC5dXQRfCtxb3427bXNxWZQToWBA+H4OdZwq7E5gdQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=PbwbU9wSGEJ4GY6TJyJ6Cd3R7QIUYt9IER+ZoAO7nD0=;
- b=qPuqM07R+JumacQiMFEQAfDBEThRpLc+UKHansMGoK36mDW/yWVleI6YEK8meRofmuF8TQzRhR2zLs7Q8NrbjZ7vyawE2nJm4JXMcvMSHlXGfdylOzLEdOSxp8UhjnhJiFjWl5QpXwg0bM9znvpXJYgS9aBWjo8T8Bh/VcTLh90LufqqHVGhP1l+83jism9dhXsPkPPC5BdeQxdkZNo2aiHG2ONnDuGWVPVK6YuGjK6NHqpL9LqU8bZxu5jpL9rxb8xrgsb1PIeG6u9eO4mtXTc3pI77ktLVh0STL0j4LtTHOqGjm43yiM5GWiH9RJB7K7ecwpsLAVoMF6NQj9jACQ==
+ bh=epmLBVMYIo3Gun3nXbb1yW8ASoKC4epY8uaqtz2vPjk=;
+ b=fPg0z09E5YIIY2uTWOUpsty09OpqbnK9sic43/SdhF3GHMugpSFpwURkrz/9KlfICMJ+27RqUbjLqlJEaAM0EGhx61h+7RxEyc8EPJSZqIdcDV+rRp6+2up2aKsRgaanapgPIdIkAep0fhxCrXKpyrXZ8QzzfmP9EHYa4wLaT0Ur+gmb7iAOeKbZqlxae+fFYvd9FVgfALPjmVIK7nn5Z3P4W1KlQ52P10WU+T+kK+13BasJnhgKR2WpoVPlIoYDVE6hpWlltznwexsRCqc4xDARXH50qO7I16JQLTpmoNYHSDWvRtgP1xDS2p+q0g+m7iiuB5/nhNGa+qGp3tZw7w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
  dkim=pass header.d=sandisk.com; arc=none
 Received: from PH7PR16MB6196.namprd16.prod.outlook.com (2603:10b6:510:312::5)
- by CO6PR16MB4194.namprd16.prod.outlook.com (2603:10b6:303:b0::12) with
+ by MW5PR16MB4691.namprd16.prod.outlook.com (2603:10b6:303:19f::10) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8466.20; Thu, 27 Feb
- 2025 07:50:38 +0000
+ 2025 07:56:59 +0000
 Received: from PH7PR16MB6196.namprd16.prod.outlook.com
  ([fe80::e087:8329:baea:5808]) by PH7PR16MB6196.namprd16.prod.outlook.com
  ([fe80::e087:8329:baea:5808%7]) with mapi id 15.20.8445.013; Thu, 27 Feb 2025
- 07:50:38 +0000
+ 07:56:59 +0000
 From: Avri Altman <Avri.Altman@sandisk.com>
-To: Guan Wang <guan.wang.jy@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-CC: Avri Altman <avri.altman@wdc.com>, Adrian Hunter
-	<adrian.hunter@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Jens
- Axboe <axboe@kernel.dk>, "guan.wang.jy@renesas.com"
-	<guan.wang.jy@renesas.com>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH] mmc: block: add reset workaround for partition switch
- failures
-Thread-Topic: [PATCH] mmc: block: add reset workaround for partition switch
- failures
-Thread-Index: AQHbhnkI2Zb3iXnL20S8S3IGdxu6ELNaxv2w
-Date: Thu, 27 Feb 2025 07:50:38 +0000
+To: Dragan Simic <dsimic@manjaro.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>
+CC: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "git@hrdl.eu"
+	<git@hrdl.eu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH] mmc: core: Trim trailing whitespace from card product
+ names
+Thread-Topic: [PATCH] mmc: core: Trim trailing whitespace from card product
+ names
+Thread-Index: AQHbiIRj0DknErNpa0q3yWcdwT9nzrNayR3A
+Date: Thu, 27 Feb 2025 07:56:59 +0000
 Message-ID:
- <PH7PR16MB6196112328A147FC59643B76E5CD2@PH7PR16MB6196.namprd16.prod.outlook.com>
-References: <20250224045918.3321394-1-guan.wang.jy@renesas.com>
-In-Reply-To: <20250224045918.3321394-1-guan.wang.jy@renesas.com>
+ <PH7PR16MB6196EB7A2727F03A9CB0D6AFE5CD2@PH7PR16MB6196.namprd16.prod.outlook.com>
+References:
+ <fb7fcecae737f3e8b279854d7c853000527cba9a.1740597891.git.dsimic@manjaro.org>
+In-Reply-To:
+ <fb7fcecae737f3e8b279854d7c853000527cba9a.1740597891.git.dsimic@manjaro.org>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach:
@@ -79,72 +78,72 @@ X-MS-TNEF-Correlator:
 authentication-results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=sandisk.com;
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH7PR16MB6196:EE_|CO6PR16MB4194:EE_
-x-ms-office365-filtering-correlation-id: ca895420-29b4-455d-e643-08dd57036d43
+x-ms-traffictypediagnostic: PH7PR16MB6196:EE_|MW5PR16MB4691:EE_
+x-ms-office365-filtering-correlation-id: b1bb2116-7c6d-4207-adde-08dd5704504c
 wdcipoutbound: EOP-TRUE
 wdcip_bypass_spam_filter_specific_domain_inbound: TRUE
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|366016|10070799003|1800799024|38070700018;
+ BCL:0;ARA:13230040|366016|10070799003|1800799024|376014|38070700018;
 x-microsoft-antispam-message-info:
- =?us-ascii?Q?po5ZzDC6z0ebPSC85reDO+aycGgo5/GlMKOA+cpGwjigCIwJ3HjAV3m07aHd?=
- =?us-ascii?Q?B/XaMAjzKA4CIE/bvmelVO20MruwBRkCmm/yPbScJHdiWHcl/IOEbGF/sYmS?=
- =?us-ascii?Q?MAQ92n/i6q9iUmvTn6snJ5GEg0bWojW6rp+VzLIIzKoCbnv/B8PH59zHBonT?=
- =?us-ascii?Q?gRmYcKG/v2P3NlpcoqJByqM2xqjDsM1U2AZzlgKYSO10z4QLCQYr8VdmCjyX?=
- =?us-ascii?Q?4tdGXJpvBeoZr2kimMtFRDrNvMMdDtQCcNa2m9AN8DWD9jUYCMEq18Z/8Z8B?=
- =?us-ascii?Q?Rep1d+rdBMNxqO/LAHGAInTekR9P1xkcwr1Va4VAhbQ1fI+J87QP87cY1rOA?=
- =?us-ascii?Q?TBOiLlbl7NiXEnLC3YqzNg25vEnTTwFrbCabjBJ2Cum28bBxotLTNx9F/TRq?=
- =?us-ascii?Q?Ix0u0Lvz1jQyML55rXX/WUuf1d97XKPBINEGAcuExLODsDeMoGwz3IsKq1aS?=
- =?us-ascii?Q?4B0nkJarmnyn+8UbUmjuSO0ha6nEd+ivYmaRlxaW1F8RZ8t6wAJGEfLWdIR+?=
- =?us-ascii?Q?s+WEYqFbHbKJ3cojs4HLLyFUD/zfw5t5gJtNii3JrSwVY7rSTHgMmsMpUzIP?=
- =?us-ascii?Q?hO0zzPcoJ1X4skn18DKz7go+x0nOdvsXqXLTXkZ15yZUHMXl51oK7ukm+HY2?=
- =?us-ascii?Q?4oFnOS0drij0qftjnwTDN+ddHeINGPtuXPRHMacdhMjf+HVrDhl1cRWRf9jz?=
- =?us-ascii?Q?HjBz3W90OimZ5IkeSxNMgzzP0+iPYz9VJGzuOhnnl3WSKydyptToTm/eI0Ud?=
- =?us-ascii?Q?vER+FgEq8cj6TRTidgqbrxZMqHlCgXDIRMZD4BprE8hPthVczVpRHKoG+75t?=
- =?us-ascii?Q?xyDo8t+esCePd5Vr9OvBLvPkTX+p8/5UBgQIJPtyun289gaGCXYh/vUM5Bsm?=
- =?us-ascii?Q?561FIONBtQ9Cnp9IrSKq+ypbRvTTpuB7boZV/HHc/eYurj4zj9s9C9IV1OEb?=
- =?us-ascii?Q?uqQ5+dhYkZMc8AGD4chHmyC9+3tilsyTouAloAA77JK5cSRUt9UGkCFrBuvd?=
- =?us-ascii?Q?9SK9pRP2L61kjxPO8MbXEh3FDBwKEjzyyIffgqm2NU7JwCN09f9rB1NJtnJq?=
- =?us-ascii?Q?AIbcitJFnmEpLIOXSBW/+mox1xtOJv0EqCBL18hKlCC4O39R2evCDboYYYYU?=
- =?us-ascii?Q?GVT3WlRm8348yUjP/XCVsp0rV5yjhKzrDiGcjDL2oHaiS5KgAUab153LX5Ez?=
- =?us-ascii?Q?8qQ41CqeFrOAVwGn+ypXAMhNEhB0Do7OZKt67bu8qtHebaPPr0/QzgY1fqn5?=
- =?us-ascii?Q?/Hl8wHhZbr3egY5JvNJCWGNYASjZXbqFJdNUzD24GgmKNkQEToaP433lBM2B?=
- =?us-ascii?Q?OJutUCxh8vq/LFycGWQuMg0qhR0bJLrUu/J2dr5Ua48ZmVCh+LdzaNKqLnJ4?=
- =?us-ascii?Q?S5Skb6+LpEDrc4l5sH66atnHWzXaQ217iVH7zdQq414nFot7BEPjtQ9gN2xS?=
- =?us-ascii?Q?v9zkhabipvKkUk2E3QIMJig+d2ho2wpx?=
+ =?us-ascii?Q?126p8d/CYzr5+KFRY49K0oEkAtWag8BAF905DtWDPz5enkPUihy7Se6tE+I3?=
+ =?us-ascii?Q?iFgXIWwS2gEBjz5YqiaXLbRXcHCfvR6zowjPjhc7/zxE+v3O1LqMqdYKrXZN?=
+ =?us-ascii?Q?sea1Oz5qtpkeKGQD4QaPCMFP3cZkkpNGL1jey6x1m/ULkBqC+MNLiLbiqNAF?=
+ =?us-ascii?Q?Qg1ch65oZDLs90QHAovx+YAfOXLfjWsUhKZBazOc7YT6Fa3T3XZCm0FXhQvh?=
+ =?us-ascii?Q?ZS7HTpKzayq40wPHtkd7Siia2OGjOMSon5NP3wAb5cgAxyvnFGTfKkDAuE85?=
+ =?us-ascii?Q?lW8pLCBi57Bi9Gd3yLCKOtQbJLXvETHr6E67oRHfrfO6JLAxgCGEXFc5M0QN?=
+ =?us-ascii?Q?R1vrvjit+QKaVBAUES8t5RrRDbfzLEVU2YLEo+USV+vCBwq4qMx8Sy7e3Xzn?=
+ =?us-ascii?Q?EdE+s34XQSsRo4KhRVlV47Hffj9adoIFDSMNTzXD5fyp9Xg5lLfU7NmUMSlH?=
+ =?us-ascii?Q?pXixo/IAjJMqiDWm54F5uYYc6tDuaJmBJGyGzJZFBSC3HHaX1ulUgWTKnLDK?=
+ =?us-ascii?Q?HwxEM6Ai+of5evs5oOwROOXP6DRSDK06EkorKIREtfEQrS+N0/MO+yXrbbpf?=
+ =?us-ascii?Q?7Eckd1pOZms3bmuYZ4m/qUdNjwxNkBXGiCY18Hn1Wkg++l9ebAVW0Tyhki+4?=
+ =?us-ascii?Q?gxiVrwx8xI3p+AmIpv3SPCHym+e8kKnskaz3QghFbJYqyRJ/Au/8F5QWLW3m?=
+ =?us-ascii?Q?2QPTZkR07653VZoTEsnp6A1oP5Jkwz+DkW+1OgtpOtOYXENI7hdf7flWfXtW?=
+ =?us-ascii?Q?hsfcENzW7v8o1eMEzbwbmYvJyxdSXbdlhjfblkkcAg8cgZdJ9exGOLP+zAcN?=
+ =?us-ascii?Q?jMCSHszLERZJWitO5T1ZyAwDrdmO9js2+LLKOPf+rD9vz5TregOot+aKLj3E?=
+ =?us-ascii?Q?ECQ4blrsjkz1pynj2vKt6AsBq18fuwq68yGWsJcKvyebNAHQwyghVx/QpmH0?=
+ =?us-ascii?Q?DxWsnejdw/TTJUCbFPyzI2lfZZShV4pJUwsOd6tCwZLTbksIR1qjqNRUSNcl?=
+ =?us-ascii?Q?ugOtj9sc23TcdOpVrRu5zC+wOa1FRbVRiJoEjLSDrJZjBADfW7bA4nog4Beo?=
+ =?us-ascii?Q?3/4bMc567HakqREfNx6jDnIMsihJlP6HcfQDf9YNIemWEV9nLHoTfrhwo9Rp?=
+ =?us-ascii?Q?5DrDUnfY+npQg99CAuU6SVmwnDC1w+MOO6TORsq5K1oxSy6IKYfyKT4wtuhd?=
+ =?us-ascii?Q?57pKwON6oHAaplX8YIT3iw1EMVvHFmA9fCxoj3uM1UD9O5JYgXWREocgGtWm?=
+ =?us-ascii?Q?v4AZTJVsLCaHCO+3DJmWEtWAzbk5DTf3ykF8yl39UH3bdaDvnw2y8RYqYba8?=
+ =?us-ascii?Q?gpvrMfEO5xG5TUD+BRZ81Dr1zFE5Nv8fFxkNrfnAgq6kp/NNtNEo5FN2PuTw?=
+ =?us-ascii?Q?Zh9FF6fySkkfTAqp2ugT2KTDtDB+fCP2kjLqObUZNiTNgvU0uo8z+go+kXc7?=
+ =?us-ascii?Q?F2Fbki9QnzalyhgfyRCA+N3qdgxPbHXP?=
 x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR16MB6196.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(366016)(10070799003)(1800799024)(38070700018);DIR:OUT;SFP:1101;
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR16MB6196.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(10070799003)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
 x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?3JeaP+8OjrCDyQVl+3UySe67D3TjQRd5yDvFiSvv16b6/BFXyWjiSfJe0usg?=
- =?us-ascii?Q?trK8ZMlcAoZpP9zy9K9hXmckBzz/LWyhVo7/tUZjXbn9g1yOIuYTp2JCPrip?=
- =?us-ascii?Q?hhN6jx5tGhEvnRinjJZZpgAcI3TK22UiSI/WPvhgyvMG1kdXwl4sEcRV9WVs?=
- =?us-ascii?Q?F3kh2bICZemEeBYt6ISzEpeTAvj92DKmpd9QQnKtrTzF4X7iHC6iocy227Wv?=
- =?us-ascii?Q?KsG8n8EOwAY5Y8X4palREi68R193sptwpwVZY4QSiRS8FuNwp8yukK8/Bsc9?=
- =?us-ascii?Q?u4wmg8bN6eqXwnzUy/MdISvNND6GIOSXZIRmXvfrqbgw+h2X+Wv23rLqUzim?=
- =?us-ascii?Q?CF37cSNG9M7qkIz6l7da2gM6FOKDAeXxFR0MWfwBE/QlH7tSlZi0UK2dd4RP?=
- =?us-ascii?Q?Sds81naQZxeHfHf+9KJcrQEBZt4OxHSt+iPZBTQVDBfp1mT8/7Cv4FsG1gCo?=
- =?us-ascii?Q?amYBZSIdLwR2QTRRfYSB7o6gDyOKDAfuRN5pgLoe7kv/rjk1GtOq34t3mZz5?=
- =?us-ascii?Q?t8n66kFaMGPsespq/uyPRxRDnmJwJKQzNK7fpKe3JggxWNgNBMHF+f04JnAM?=
- =?us-ascii?Q?Sur8XuHYWrHz6dVn3XIkDsRNopPHNKUiUTznG0nVffAx9LcZiTvix2kf9qAA?=
- =?us-ascii?Q?Mmx11LuLJa6g5Rpguwi+/UxfySzHZqYUWNj2YFO17IXtIy20+4S/3heiIUbU?=
- =?us-ascii?Q?n4GyLacnTT8PvgF2dfJp1qC5T134XbtgKXPAOzgCzTruWA7dxu7wMIvoeii2?=
- =?us-ascii?Q?gM1NlQhGMjGIn0EF2ushJDyUXLUKVMqgZxD1bxgE/Fy1DWDtvsew90dUSl2s?=
- =?us-ascii?Q?nnNwiDG05ymIUbgYIEyscBXg0kgPSPiZ+sINjHMOrv1l0WtKDD/+VbmbkRWh?=
- =?us-ascii?Q?U7lGzat+sx6LkSRZhbWj9yTpp1/1eHkLBlYxfetI4lqoGKxv6oL2KHDGJ4pF?=
- =?us-ascii?Q?ntWMkkdnUai29T6k1wk5UJ4rrJoRHfIl/j6gsnvXO3WiOXJSxkwqL3nGuyBG?=
- =?us-ascii?Q?KXBXgvKNGBZD8Q9qa7RUdgy7aPLS901dEZAZc41QGmSR2PQ3ch3EgqwG2FUn?=
- =?us-ascii?Q?uOE9FmF8LySrklc4lihoJglB3yHU31HsTHyEqe5GJ4aGBWB8s9kqbOfSlrUg?=
- =?us-ascii?Q?P3Mbvmhc5TAVi8Skdzs294ys27vgZdgelel/xGI3fUvmN4dEzvuv41Y6n17X?=
- =?us-ascii?Q?rHlyuZmvmVfioUXfQJ8kjvoJHF05EaJZAAjMjuvwXRrLl4TBxB2u0fxIwttX?=
- =?us-ascii?Q?tTmd0wFOjiur4G31pN6uxgE5GUPk8MSwJMy3W19AGrwerxGSmG+CImxkaq9p?=
- =?us-ascii?Q?ZmH8Pva4GFsGl4uh2MKNmIKxDda1b807s/pr7Oxro4wV+yAJ9zQ1OqyixOOT?=
- =?us-ascii?Q?Tebr/6izXOtUyorKcpckaFqyvTuhoeyxwOF29wi/iahGuxc7GXVNaypKtmVG?=
- =?us-ascii?Q?RFJlIncwUNsps6TVNlM2u/s00bfpJF228LSEKW+n+E2853e0Ous2esIi/yF6?=
- =?us-ascii?Q?UqZhS4oH6uD0ffvn5CjbGfytLibAPPKXx5Dz/3OGsU1PTd4dY3pXB9ppzO2R?=
- =?us-ascii?Q?ICl8JqEmT4BHsNV6gxWkCnWUtenNzLWNp63sDaocstfLr9+/2K7MKwfKThje?=
- =?us-ascii?Q?YFBRKBbRgJMJPp3znKSmYTzmq0+bhBYCcrE+2PHNeYS7?=
+ =?us-ascii?Q?PBhBLxUaa7+SWV3z4qFjYl+byvZhP2aYfyl7MeTrem5TKGbTBwuDpI7Ykt8c?=
+ =?us-ascii?Q?UTVUB/LNLny4l7sC7LOkK2AdM4O/G3tvnOdYBi6HUY0XoQeryd3zL39PbQn6?=
+ =?us-ascii?Q?ijrMZLgVCfiJRAluvsYJTUAdNZ/i4Kwil5GHIoPa0eZf/8SeAcwYUq9vzAkS?=
+ =?us-ascii?Q?K4bUklfdUoWmI5ISJnzXD5mPI94rb7pyGCYgBfA2NP9b23+bVrQa/MVU77xS?=
+ =?us-ascii?Q?mL7tyuo1SPEKaRXWdjX6ptxFeTCvBy5bmmBQpXyrKomkyy006BbIJEqEcjm6?=
+ =?us-ascii?Q?B4tOdOAGiYamLLp8CI4OTcPPt5kZK8xWh0xtzGIVNKNSwtcw1hi53bfYxyWV?=
+ =?us-ascii?Q?gdVTMEMKEqX2tVtz+L6fHfWKlPg92gHsXD7y1AAzkbncw9xsJEtSpaY3kXCx?=
+ =?us-ascii?Q?DaIAMJevY5bWLsW3raeTCr4B5DHEZI1rFO8rlvjJTdVvrOK4VSt37KKHd2tF?=
+ =?us-ascii?Q?Dx83gDUjBQbk2U4Z/kTQyKvLA6qKiZSImSFtE/tYUDwQs8A6CJSr96U5hsKs?=
+ =?us-ascii?Q?swxL3CkI7tPIm6rdk5Z2z5Jpfqt8nf61wbbymlwn0pZrLrWKtwVX16xytGNr?=
+ =?us-ascii?Q?JFFik/CJESH3WqcMo1RhxtrVNZ7ngZYFlirRwrN4CNdrAqnOkrVnbdo3gloH?=
+ =?us-ascii?Q?vRVMOXHhOT4NreEwxGuU4FRXr+29ynqs0tQJ5yifWkyVbEm7ph9kS81QI1KU?=
+ =?us-ascii?Q?4Kn4gb+Qngfo6/yVJGt9KDRkhXcbGCYGAi3OaqAC1P3wbXY3/zQ4oAWBQWY+?=
+ =?us-ascii?Q?bfZqe2IWogLKId1FtK88P+ozs7wg2+Cjt+lHdUcirO2fobm6IgCyEpzKV8yV?=
+ =?us-ascii?Q?aRwn5Q1Gk0R+RkWvHALGrBxdnHZyaVEx6knHrAkZKisd4lq2On+nWd+R7Kg9?=
+ =?us-ascii?Q?rbXGnGw2+zoaSzQMfTLh/sRH4wqsGwdJy02GnKt1zGYf11s5U61nNppcnquI?=
+ =?us-ascii?Q?EZQAUP6j/dmwgMb2jjfMLlK7EIwOCWtHu94nVS7N+WHt67DPjftAQzIZ4CLp?=
+ =?us-ascii?Q?y/oXHpe8hslZZfJmisx2hOp+EL6NACElb5RqS7wF1h64qBS+60SbUh2DW0ng?=
+ =?us-ascii?Q?aAh6e2uvRgliH9I+e3RfjaWfYoYPzf4HoweNecuQlsEdX2e0Y2iUI2IDOB4Z?=
+ =?us-ascii?Q?0q1BgpbED6afPqV5CxfKjElhYyEcy+yndfcJPLkN+fLxvbaaT730RQ4KUETs?=
+ =?us-ascii?Q?yYmFsnukJpSOHeizopHP0vBxeNoX3bvnKwizJi87wTL+uUMg+o8QCQZGTiO2?=
+ =?us-ascii?Q?o3FkBW4r8L32Cbzw2PbKETcLk9zMZB29veGDXFnVyRzg0BH41wBeKXGzZT6T?=
+ =?us-ascii?Q?XTNzzJwnF3Mbdi9CS2hMuP8JyeirEEIEaqgAhtrZOu3AaYytX5kJcASrH+oY?=
+ =?us-ascii?Q?FRJPR2061l8tL/WJP1lvksuhNHMhS4dH4ca/EGL1qN0WjqK6xcsJdn8s3NRb?=
+ =?us-ascii?Q?HgmHis9YEaTRiKmSMpMJGqatEnGVinBjZZOEG/hxoFSn6nJMIgWdJgJBsNrd?=
+ =?us-ascii?Q?F4QmYPuxeMmoqxtlLOqnXPO2vGa45U6RxSxjSXh12XmbJLTlf8hu2Jh0BhSS?=
+ =?us-ascii?Q?g07kww+3xyvRQAiQZndgSWhS8nD4R4YEIGgBchYTPp73AlL/rO0eP94xngJa?=
+ =?us-ascii?Q?XIAIYq876oRNnFxtvYPktqGC11PaeP9bi+w2DLXIVF2L?=
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
@@ -155,95 +154,103 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	75w7KvWo/pg3F4U+weeuG4ZY6HIRF2e6ubQh/iWkW/1oxzld4SdUj6A8ebLe8yTDlpGrPPk4GPNS75qLeBfGnT0I/WwbMedy0QVbzqH4b1c2p+VihnzYuPT/dOtxrojE/F7FGMtPNyIUCo+fhXBh/Y/cehDWHQ/IzLIgOZddoPrWTLaGEMGmYZrQcfdlQ6FvkszQBVfHHHLYYwQw7Os9AOgbGmapMmdn6kk6y3TkKOwpdjfClCqHwYj7iNN1gRb9bbqaX9tbZHBqu5snPBF6yBuHDYUXpLpMSPD6/7nLOjn7QQlYD30M1lhnj8CZ0mdmC6S0qOlamBKGVzs438XSljft2hC1l30T0JJAp2bKlTYESiMDutGI1OWtpmcikKDVAjYkuNy5SOzqwFqnv/jJJYW9DcxIqICWqAeMt4gjQbwMPs/nX1XfSWBRif7IWfpVazE1HRQmoCO1aNaiXLb78dzNZJFCh5ajlELbCoYnP+tsDLnYEnHy8PrTn6rL9wYbdkzjrq8NuN7QOLpvHluZj2Po5zpuiCauNP8LV8decJbnaam78Ml9oAXe2x6mLeSW/6Vhiap5+aWITgBprAECB2fiFmmczJrFFFrdWTZ6IcYPjP86GWw3Mv9Z+9uZ13bis6HcYkHnqs0rMP0vF/z8BQ==
+	8LKrNhLgE75+KDKwxWXodANrHhmQ6PHNBxOezprxsFxRIb+dr3NO9azBmGAd28x2VWjtd9dBjajSBIgvfuOldiNVoFoRBhuPedhdZr5cEZU0ORPuAGUAs+rUfXNgC2TTB5h671dwpaxAI3bFU3oZxRPyh/J6s//UptLnbGdT99kTZ1PfiNMOlNZwC1PW8tNaOtIyW6INDp+a+u7y+UtAHhEEJGyfLWrjYZgUreE8acsQIHHfDO1Nk+GBO/k9p1NHKxKkk0AGsKsl86fEE0z2Vf54CDjlJjtOGf2R3q1cGgnXFkF289dmXX1nNdqB7u3Xv/xAy6HCJjxHZBGH26lZ4jomNgwvFIVHhg59grU22AnhR5crqGVEqLDTlk2uKuOr3bBt4Pe016yJJ8dn33CJZ25eYBk5zkIu0jGSkYt5ZFa9SQFTIbBNoQ04cnCSlLBKlmvrChtKV9en5KATzKP0RwWXv+jlPlZd0tHxu71FnaN1RcQ46gQ7PBQqofWM/+WHxUKLOaNypUOH8G5M0cfSqmJTbtg9mCsTjHCMBR1HL4FO1XD2suwKWKwG6k+ieN5NYF8y4L82aFhF/L7vAosBBfGf8e1UON/46+Dd3Vr6GS0vR+ngkdXbTkoEpEBf19INlcHh3lsvOMMhIjS4nUJdsA==
 X-OriginatorOrg: sandisk.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: PH7PR16MB6196.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ca895420-29b4-455d-e643-08dd57036d43
-X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Feb 2025 07:50:38.5657
+X-MS-Exchange-CrossTenant-Network-Message-Id: b1bb2116-7c6d-4207-adde-08dd5704504c
+X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Feb 2025 07:56:59.4673
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 5v3zVR38eHrMs6raPKvqnF7+U7TYeqH/S2LCeMVrpOT84aw9VDjnXZJnZzWLxvi557lTz+ND6p67ubYx9uMNWg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR16MB4194
+X-MS-Exchange-CrossTenant-userprincipalname: VIRtWXoGU/Oxska48OaZDnvRbQlJh+tXfroXMPM3iWvyUgbvSnbS8A/RVzTU3bqlaekcrtK1MTLBT+92DiRRdQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW5PR16MB4691
 
-Hi,
-> Some eMMC devices (e.g., BGSD4R and AIM20F) may enter an unresponsive
-> state
-> after encountering CRC errors during RPMB writes (CMD25). This prevents t=
-he
-> device from switching back to the main partition via CMD6, blocking furth=
-er
-> I/O operations.
-Different cards on the same platform?
-Can you share which platform, and few lines from the log supporting your an=
-alysis?
-
+> Product names for some eMMC chips can include trailing whitespace, which
+> seems to be rather uncommon, but makes emitted messages and /sys
+> properties
+> somewhat unsightly.  Here's such an example from a Pine64 PineNote, in
+> which
+> "Biwin ", as the eMMC product name, contains trailing whitespace:
 >=20
-> The root cause is suspected to be a firmware/hardware issue in specific
-> eMMC models. A workaround is to perform a hardware reset via
-> mmc_hw_reset()
-> when the partition switch fails, followed by a retry.
-Same fw bug in 2 different products?
-
-Why do we need to fix it here?
-The ioctl will eventually return an error, and reset is needed anyway.
-If the eMMC is the primary storage,  the platform is rebooting without bein=
-g aware what went wrong.
-
-Thanks,
-Avri
-
+>   mmc0: new HS200 MMC card at address 0001
+>   mmcblk0: mmc0:0001 Biwin  115 GiB
+>   mmcblk0: p1 p2 p3 p4 p5 p6 p7
+>   mmcblk0boot0: mmc0:0001 Biwin  4.00 MiB
+>   mmcblk0boot1: mmc0:0001 Biwin  4.00 MiB
+>   mmcblk0rpmb: mmc0:0001 Biwin  4.00 MiB, chardev (249:0)
 >=20
-> Add a workaround that:
-> 1. If initial partition switch fails after rpmb access
-> 2. Performs mmc card reset using mmc_hw_reset()
-> 3. Retries switching to main partition
-> This helps resolve cases where the device becomes unresponsive after
-> RPMB operations.
+> Trailing whitespace in /sys properties may even cause some unforeseen iss=
+ues
+> with some scripts, so let's have the trailing whitespace trimmed in produ=
+ct
+> names for eMMC chips.  Although not observed yet by the author of these
+> changes, the same trailing whitespace may appear in SD card product names=
+,
+> so let's trim them as well, which can't hurt.
 >=20
-> Signed-off-by: Guan Wang <guan.wang.jy@renesas.com>
+> Touch-up one commit as well, by using proper capitalization.
+>=20
+> Signed-off-by: Dragan Simic <dsimic@manjaro.org>
+Acked-by: Avri Altman <avri.altman@sandisk.com>
+
 > ---
->  drivers/mmc/core/block.c | 20 ++++++++++++++++++--
->  1 file changed, 18 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/mmc.c | 6 +++++-
+>  drivers/mmc/core/sd.c  | 4 ++++
+>  2 files changed, 9 insertions(+), 1 deletion(-)
 >=20
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 4830628510e6..29388786624c 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1174,8 +1174,24 @@ static void mmc_blk_issue_drv_op(struct
-> mmc_queue *mq, struct request *req)
->  				break;
->  		}
->  		/* Always switch back to main area after RPMB access */
-> -		if (rpmb_ioctl)
-> -			mmc_blk_part_switch(card, 0);
-> +		if (rpmb_ioctl) {
-> +			if (mmc_blk_part_switch(card, 0)) {
-> +				pr_warn("%s: failed to switch back to main
-> area, will reset and switch again\n",
-> +						md->disk->disk_name);
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 6a23be214543..1522fd2b517d 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -11,6 +11,7 @@
+>  #include <linux/of.h>
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+> +#include <linux/string.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/random.h>
+>  #include <linux/sysfs.h>
+> @@ -66,7 +67,7 @@ static int mmc_decode_cid(struct mmc_card *card)
+>=20
+>  	/*
+>  	 * The selection of the format here is based upon published
+> -	 * specs from sandisk and from what people have reported.
+> +	 * specs from SanDisk and from what people have reported.
+>  	 */
+>  	switch (card->csd.mmca_vsn) {
+>  	case 0: /* MMC v1.0 - v1.2 */
+> @@ -109,6 +110,9 @@ static int mmc_decode_cid(struct mmc_card *card)
+>  		return -EINVAL;
+>  	}
+>=20
+> +	/* some product names include trailing whitespace */
+> +	strim(card->cid.prod_name);
 > +
-> +				/*
-> +				 * Reset eMMC device if partition switch fails.
-> +				 * Some eMMC devices may get stuck by write
-> CRC error in RPMB,
-> +				 * preventing switch back to main partition.
-> This workaround
-> +				 * helps recover from this error state.
-> +				 */
-> +				mmc_hw_reset(card);
+>  	return 0;
+>  }
+>=20
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index cc757b850e79..8eba697d3d86 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -11,6 +11,7 @@
+>  #include <linux/sizes.h>
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+> +#include <linux/string.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/random.h>
+>  #include <linux/scatterlist.h>
+> @@ -95,6 +96,9 @@ void mmc_decode_cid(struct mmc_card *card)
+>  	card->cid.month			=3D unstuff_bits(resp, 8, 4);
+>=20
+>  	card->cid.year +=3D 2000; /* SD cards year offset */
 > +
-> +				if (mmc_blk_part_switch(card, 0))
-> +					pr_err("%s: failed to switch back to
-> main area even after reset\n",
-> +						   md->disk->disk_name);
-> +			}
-> +		}
->  		else if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
->  			mmc_cmdq_enable(card);
->  		break;
-> --
-> 2.25.1
+> +	/* some product names may include trailing whitespace */
+> +	strim(card->cid.prod_name);
+>  }
+>=20
+>  /*
 
