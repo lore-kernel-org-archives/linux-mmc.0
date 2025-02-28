@@ -1,53 +1,62 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 891F817A31A
-	for <linux-mmc@vger.kernel.org>; Fri, 28 Feb 2025 21:24:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 849BC1BDA99
+	for <linux-mmc@vger.kernel.org>; Fri, 28 Feb 2025 21:32:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740777881; cv=none; b=YRxaHIVNIvkq3s7ur6SO+6Hi0+pOWaowJK/xfbkrSLZ8IS/EfR1D0DFca3Xg7y28p9a+SNxpsKQluS5ukDcBLbFOlHT4BP7maeSFJilmJebaaqxZ4rvkhOjJ75aVubA7b0yiDz/YCnAeEayptnt63AnMLpDMkZeW+LoxTP5pjM8=
+	t=1740778375; cv=none; b=HXRYPwbRqrpFBgvho4hFjfVnSvNpDnBYXiF+vl7du7Ti9XUdd03o2jLNG3Ba1UODj6AYR5Q/7/ekSAuhPArodX+ScxFxKyjqbjiyAhbHhAP5sHcaLnYVF0UJvuXqFPhoOsvYv0Cbv6bENRc75t5kbCrEpQFZXNY8EABYuktSK54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740777881; c=relaxed/simple;
-	bh=PiF/znA9TOsmY+GaP/x14C+DjIvsVa121M6lAVA+eG4=;
+	s=arc-20240116; t=1740778375; c=relaxed/simple;
+	bh=0bn7nOO12Db1/cprnEbj+LcZrOhAAVUZyUCa/CQIcms=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lpatZjG9nlQY+7LbXAru4qSq1yXYYk96zX2IbG5B2Cp1zcZQfV+jykZPvimBvo8veiqpqdCK7+444oIt0b7PEpuoVtyZaNhOavfRUOJT0gdL24jF5iU9k7CLLUfOi72j4hETLcf5QY/Io5EOQ0cRjZlEnlrnQsFFy0Ia0KkFmVs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ejm8N4sG; arc=none smtp.client-ip=194.117.254.33
+	 Content-Type:Content-Disposition:In-Reply-To; b=h1HVDklkoOm25TchShlw67bm1MopnkdS1zluzUOUD82oiZ4grzB2VbE3WxhoPBtJ7/a3YNsaHGAFWzSx2eNi8tBDhFEdIWZ70qsa3BXjxqo7ZIUe6raMbvUZjWJ4J3VgY/VZ8i3eSSSt5CW1jbhLJADSJYbFjFzlvaCbkR3Y3Ho=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=AHZM/KW2; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ejm8N4sG"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="AHZM/KW2"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=ccid
-	/zde0a5V/EEv0mlYZdra3MrMn1pD7LcMo0wtoDE=; b=ejm8N4sGwogAqf5DexAp
-	El0tKeGiONwMv96u8Es9zsHlkMdGP+uAxJgFpMZBoIXCSuZbfCfIZjmFHbYxck9D
-	8mKf3HjPZaAMWI3iEG3jrTHFLIuoGEO2ZhxKJLj9oSKrtGMTdJyKPxKxkVsaGSD7
-	wFqw/kPih6BGbSCYs0hkLyIS7qEW1Xy/SyVU4p+CSgS9uFI+ihLtfD/1UwKqdvEP
-	26R4wZcPqyMdOIvJKVhfeLulCfD7mPZPOY8eNoX+732UeYh3WKRBTIRaTMZQE/D7
-	pzEd4f+G7/i9Vj9HKK0iyBToLL+PUSSisr7uHNC0jF5D6absaHQOviloIxVXTBr6
-	8A==
-Received: (qmail 1428424 invoked from network); 28 Feb 2025 22:24:34 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2025 22:24:34 +0100
-X-UD-Smtp-Session: l3s3148p1@XIzVbjovQs0gAQnoAE04AOw9xELqAtuS
-Date: Fri, 28 Feb 2025 22:24:34 +0100
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=0bn7
+	nOO12Db1/cprnEbj+LcZrOhAAVUZyUCa/CQIcms=; b=AHZM/KW2y8OvzP1SS/HP
+	f7rcyKf89+xVxVRx7NB+4z0c7wS3TDWUx77Lm/9+vodtjNTlHUGst9gH9gKcCLxI
+	A2AyUrF2+jUL+pXYHjFngBb2eexb04WV35TbUu85TrvRxLpzACreOY+QzwqsnjgN
+	rgHwepI/n/Crk9jZ3kxdI+8B43ZY1bVAyacHmBza2TJYI9VESXbeB+GC4OooLyrE
+	kxQ4ocvWVsX2tw0xTQln5KKksGEMbH9CCc1hN0Ug1xobUW0DiNZcHno8qMyD4LS5
+	bnHK8OVBCZGs8A+jGLQ2aGsaIUc6UqHBDzU8f6Z9Hi1GbmWrDiE/i6Ee9WI+m+74
+	ZQ==
+Received: (qmail 1430828 invoked from network); 28 Feb 2025 22:32:51 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2025 22:32:51 +0100
+X-UD-Smtp-Session: l3s3148p1@rzFwjDovNs0gAQnoAE04AOw9xELqAtuS
+Date: Fri, 28 Feb 2025 22:32:50 +0100
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: Re: [PATCH v4 2/2] mmc: renesas_sdhi: Add support for RZ/G3E SoC
-Message-ID: <Z8Ipkqod7SdGlDak@shikoro>
+	Biju Das <biju.das.au@gmail.com>,
+	Conor Dooley <conor.dooley@microchip.com>
+Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
+ support
+Message-ID: <Z8IrgjMTrYtGGAqL@shikoro>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	Biju Das <biju.das.jz@bp.renesas.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
+	Biju Das <biju.das.au@gmail.com>,
+	Conor Dooley <conor.dooley@microchip.com>
 References: <20250228124713.153979-1-biju.das.jz@bp.renesas.com>
- <20250228124713.153979-3-biju.das.jz@bp.renesas.com>
+ <20250228124713.153979-2-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,55 +64,56 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="6kxq6E+o9ifeNcAS"
+	protocol="application/pgp-signature"; boundary="ZyYpMZHhkxk/PH7b"
 Content-Disposition: inline
-In-Reply-To: <20250228124713.153979-3-biju.das.jz@bp.renesas.com>
+In-Reply-To: <20250228124713.153979-2-biju.das.jz@bp.renesas.com>
 
 
---6kxq6E+o9ifeNcAS
+--ZyYpMZHhkxk/PH7b
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Fri, Feb 28, 2025 at 12:47:08PM +0000, Biju Das wrote:
+> The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that
+> of the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
+> use SD_STATUS register to control voltage and power enable (internal
+> regulator), for non-fixed voltage (SD) MMC interface. However, it is
+> optional for fixed voltage MMC interface (eMMC).
+>=20
+> For SD1 and SD2 channels, we can either use gpio regulator or internal
+> regulator (using SD_STATUS register) for voltage switching.
+>=20
+> Document RZ/G3E SDHI IP support with optional internal regulator for
+> both RZ/G3E and RZ/V2H SoC.
+>=20
+> Acked-by: Conor Dooley <conor.dooley@microchip.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+
+=46rom what I know about bindings, this looks good to me.
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
-> +static struct regulator_desc renesas_sdhi_vqmmc_regulator = {
-> +	.of_match	= of_match_ptr("vqmmc-regulator"),
-> +	.owner		= THIS_MODULE,
-> +	.type		= REGULATOR_VOLTAGE,
-> +	.ops		= &renesas_sdhi_regulator_voltage_ops,
-> +	.volt_table	= renesas_sdhi_vqmmc_voltages,
-> +	.n_voltages	= ARRAY_SIZE(renesas_sdhi_vqmmc_voltages),
-> +};
-
-...
-
-> +		renesas_sdhi_vqmmc_regulator.name = "sdhi-vqmmc-regulator";
-> +		renesas_sdhi_vqmmc_regulator.of_match = of_match_ptr("vqmmc-regulator");
-> +		renesas_sdhi_vqmmc_regulator.type = REGULATOR_VOLTAGE;
-> +		renesas_sdhi_vqmmc_regulator.owner = THIS_MODULE;
-
-?
-
-Also, one space only before '=' in the struct initializer.
-
-
---6kxq6E+o9ifeNcAS
+--ZyYpMZHhkxk/PH7b
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfCKY4ACgkQFA3kzBSg
-KbZJ/Q//VT3N9uuN7+BBtVLyOChsO3sNaXNHHqrGiieTtsHArU8ye1N8nuWToO1W
-geLMm/7wn0SCjSdLkwspqJ8O/sEzf6kS0eBSDLWOg6OARzsD97odu3yjhFYlaYs0
-mLH01trGg0EVI0phYyZZvXOABHIt6buR5nRJk0QBGA1agb/bkcrN0NWuR8/TtETm
-GJzUIjVjtyg+q8uI30e/5YoNFI+/T7Y+nJwTvAqtB7up1Dpy+bxMi3YNIpYajGPZ
-6zgVQg+lZ91DuI2z2OM+XawY0ipIICMr4evehlfOe8h0J5QtZg66UvDKBstb398U
-iKKKm2tKN1CNr045y8sKejhjeSGqf03OkvUPsZSP7d7UBi31Jtull078hXKkT8WS
-ZKVxsBM/8vl4LUXV3kNbqPWOOSEI840gQIrQm/aRGT5HaaARC5X7pYgWxj+HlcZp
-hW79MW+07PUs+YVh028ijurRUshjGKQmjOoK5BcHthPZtdGuRRA0TI3fShr/KK20
-7x7Idq/tuZwb7gY98LF4QQdy0LkHiYPGq93hCljMAnMVqOhLO/pwvt7Cl5/ucy5g
-4WlbuaFRxm2OzfIXe3GgVCv3eLTRoTXELM2Of2NrU0IwgO3zVH8IvSlBsQX36ee/
-UWwVZYVi+PKNQteQm2CMkeqF2B6d8GyTpDW57wcfCviQkB00LsM=
-=Zl/L
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfCK4IACgkQFA3kzBSg
+KbYKnA//WpqYQBwjBnawRmKX3WoZzOW2NI8INuSlmCtOQ4hslf4eRRF+apnQWZ93
+KxvoFcq4M+CCreOn6JCSRIO0huhgMzb2IYfOa2XgeSUh8q3NkEwg8tyuezewGcJy
+B3zyaCJokDPHUOUGQxvX43nE7+DzbxUTsavGrDVDa0LKpYjIJvIf+k0+ID3GncO5
+qkoNP4KLHdcurSjtXrDlZoi2NSXGY4F5+P/1bL4gfxUZuSsM2waljrcbV7VqpVjI
+Wzv+Eei++WpTP9KPvXdhq9c9l36ebBABWSyTl6VQniYOoeWl3rL5hlZ9P0N6r6P5
+fKBvV67P+fEtvjxoGcK6rVHMdw7P0cSC8mKjrhIGLeAzRNcG2WqURX+J0FqjKAb3
+I2VSU8iXH6/h0eWWccJVQXDLX4NhCMpeRqiaCb0WKRjKl+gQ5vJS0YBYRWGW12WM
+DFHv8+4eDGb+oVHCcBr8ubmL8e/3ZYD3DoFfcGiSQKn/0ZAxf60lhkINGv8M4Lym
+lKhn46DUx0GexEkVjtbD6XL4D1bcgrWaYPsE/Wc+sJB++KmGhkjFS8wgzX36OIUA
+5yrd72NAyB56WdHESA/lOEMJ595y1JNnOscYfjV8J23C+SLzA4KHmnDDoHVAF6Xp
+8Ldg2rQhEmDmLjTsyWTwaa2vvz13/0+Bg2uLcE9doPUXMSqb0Gc=
+=uSff
 -----END PGP SIGNATURE-----
 
---6kxq6E+o9ifeNcAS--
+--ZyYpMZHhkxk/PH7b--
