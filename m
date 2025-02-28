@@ -1,73 +1,109 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CF18276D35;
-	Fri, 28 Feb 2025 20:16:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 891F817A31A
+	for <linux-mmc@vger.kernel.org>; Fri, 28 Feb 2025 21:24:36 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740773786; cv=none; b=dhtuKO1xy4CDBuf2pErh9OJVg7STkzKnUIGzamyRoouoRXth2H3s+Ynf77fEQYagxNNBHRAn7x5DonaMEmbIpC0d7ePSBV/qXNEYwGwXJTNYab6pBtuUjX0sGJhC1ws9xbB1iRrFfxIYjNCh4plRJzecvCURobTLVD8jRRYc1Eo=
+	t=1740777881; cv=none; b=YRxaHIVNIvkq3s7ur6SO+6Hi0+pOWaowJK/xfbkrSLZ8IS/EfR1D0DFca3Xg7y28p9a+SNxpsKQluS5ukDcBLbFOlHT4BP7maeSFJilmJebaaqxZ4rvkhOjJ75aVubA7b0yiDz/YCnAeEayptnt63AnMLpDMkZeW+LoxTP5pjM8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740773786; c=relaxed/simple;
-	bh=dzQqklMAZNYfmJATCpqkIwNah5vVcjjWwjEhWtWubkA=;
+	s=arc-20240116; t=1740777881; c=relaxed/simple;
+	bh=PiF/znA9TOsmY+GaP/x14C+DjIvsVa121M6lAVA+eG4=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=XzaPum426HBz0ne65qfdMKC1Q/4aGY2QjW5yQBdjNJGS9/ax/9xclescwSr4RaT1aIq87J5pLGPEDSkbJDuUqtFAR595pW1efcatfSV8uLS67rueExqnaeKcKabwB0Prc6923TLl1o81oBJEdkxJeXg5mFLJluFOzPQKF+NYWyI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HAOczFQg; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=lpatZjG9nlQY+7LbXAru4qSq1yXYYk96zX2IbG5B2Cp1zcZQfV+jykZPvimBvo8veiqpqdCK7+444oIt0b7PEpuoVtyZaNhOavfRUOJT0gdL24jF5iU9k7CLLUfOi72j4hETLcf5QY/Io5EOQ0cRjZlEnlrnQsFFy0Ia0KkFmVs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ejm8N4sG; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HAOczFQg"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 43D6DC4CEE2;
-	Fri, 28 Feb 2025 20:16:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1740773785;
-	bh=dzQqklMAZNYfmJATCpqkIwNah5vVcjjWwjEhWtWubkA=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=HAOczFQgs9pBBiUISu0r0SWsVgu8kYFsY1Wkng27PTVXjsNLrFM7brOWj9h2K5+z7
-	 IE7lz9pyqKTcPGkYBJKlxQgqBK2Qd5MP2jPW69WbuACJMaF/EySaL66jtXvIROUsx1
-	 qmb/k9JWxWdx9ICyNsdG5DfAJ39wV7RAYskskh7MR9Xz7weoEi9ZXHXyjBm2avwal5
-	 fehpSl3krSm+3b97qnTzeeRGOCEy+Q6nR5rXWuaAI3x/zwJX+xJxfowN+4LU4v0e1d
-	 asTr+0t4kYHl6HvBtRPJtWX8y8b8y5dQe0HFgml3UzRZX4/zWBQGVLY5SoUlf9MiaG
-	 QW9ONIim5XFsw==
-Date: Fri, 28 Feb 2025 14:16:23 -0600
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Kever Yang <kever.yang@rock-chips.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, heiko@sntech.de,
-	linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v3 03/15] dt-bindings: mmc: rockchip-dw-mshc: Add support
- for rk3562
-Message-ID: <174077378239.3585541.5147136924937452066.robh@kernel.org>
-References: <20250227111913.2344207-1-kever.yang@rock-chips.com>
- <20250227111913.2344207-4-kever.yang@rock-chips.com>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ejm8N4sG"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=ccid
+	/zde0a5V/EEv0mlYZdra3MrMn1pD7LcMo0wtoDE=; b=ejm8N4sGwogAqf5DexAp
+	El0tKeGiONwMv96u8Es9zsHlkMdGP+uAxJgFpMZBoIXCSuZbfCfIZjmFHbYxck9D
+	8mKf3HjPZaAMWI3iEG3jrTHFLIuoGEO2ZhxKJLj9oSKrtGMTdJyKPxKxkVsaGSD7
+	wFqw/kPih6BGbSCYs0hkLyIS7qEW1Xy/SyVU4p+CSgS9uFI+ihLtfD/1UwKqdvEP
+	26R4wZcPqyMdOIvJKVhfeLulCfD7mPZPOY8eNoX+732UeYh3WKRBTIRaTMZQE/D7
+	pzEd4f+G7/i9Vj9HKK0iyBToLL+PUSSisr7uHNC0jF5D6absaHQOviloIxVXTBr6
+	8A==
+Received: (qmail 1428424 invoked from network); 28 Feb 2025 22:24:34 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2025 22:24:34 +0100
+X-UD-Smtp-Session: l3s3148p1@XIzVbjovQs0gAQnoAE04AOw9xELqAtuS
+Date: Fri, 28 Feb 2025 22:24:34 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Biju Das <biju.das.jz@bp.renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Biju Das <biju.das.au@gmail.com>
+Subject: Re: [PATCH v4 2/2] mmc: renesas_sdhi: Add support for RZ/G3E SoC
+Message-ID: <Z8Ipkqod7SdGlDak@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+	Biju Das <biju.das.au@gmail.com>
+References: <20250228124713.153979-1-biju.das.jz@bp.renesas.com>
+ <20250228124713.153979-3-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="6kxq6E+o9ifeNcAS"
+Content-Disposition: inline
+In-Reply-To: <20250228124713.153979-3-biju.das.jz@bp.renesas.com>
+
+
+--6kxq6E+o9ifeNcAS
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250227111913.2344207-4-kever.yang@rock-chips.com>
 
 
-On Thu, 27 Feb 2025 19:19:01 +0800, Kever Yang wrote:
-> The dw-mshc core on Rockchip's RK3562 is the same as the one already
-> included in RK3288. Extend the binding accordingly to allow
-> 
-> 	compatible = "rockchip,rk3562-dw-mshc", "rockchip,rk3288-dw-mshc";
-> 
-> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
-> ---
-> 
-> Changes in v3:
-> - update commit msg
-> 
-> Changes in v2: None
-> 
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
+> +static struct regulator_desc renesas_sdhi_vqmmc_regulator = {
+> +	.of_match	= of_match_ptr("vqmmc-regulator"),
+> +	.owner		= THIS_MODULE,
+> +	.type		= REGULATOR_VOLTAGE,
+> +	.ops		= &renesas_sdhi_regulator_voltage_ops,
+> +	.volt_table	= renesas_sdhi_vqmmc_voltages,
+> +	.n_voltages	= ARRAY_SIZE(renesas_sdhi_vqmmc_voltages),
+> +};
 
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
+...
 
+> +		renesas_sdhi_vqmmc_regulator.name = "sdhi-vqmmc-regulator";
+> +		renesas_sdhi_vqmmc_regulator.of_match = of_match_ptr("vqmmc-regulator");
+> +		renesas_sdhi_vqmmc_regulator.type = REGULATOR_VOLTAGE;
+> +		renesas_sdhi_vqmmc_regulator.owner = THIS_MODULE;
+
+?
+
+Also, one space only before '=' in the struct initializer.
+
+
+--6kxq6E+o9ifeNcAS
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfCKY4ACgkQFA3kzBSg
+KbZJ/Q//VT3N9uuN7+BBtVLyOChsO3sNaXNHHqrGiieTtsHArU8ye1N8nuWToO1W
+geLMm/7wn0SCjSdLkwspqJ8O/sEzf6kS0eBSDLWOg6OARzsD97odu3yjhFYlaYs0
+mLH01trGg0EVI0phYyZZvXOABHIt6buR5nRJk0QBGA1agb/bkcrN0NWuR8/TtETm
+GJzUIjVjtyg+q8uI30e/5YoNFI+/T7Y+nJwTvAqtB7up1Dpy+bxMi3YNIpYajGPZ
+6zgVQg+lZ91DuI2z2OM+XawY0ipIICMr4evehlfOe8h0J5QtZg66UvDKBstb398U
+iKKKm2tKN1CNr045y8sKejhjeSGqf03OkvUPsZSP7d7UBi31Jtull078hXKkT8WS
+ZKVxsBM/8vl4LUXV3kNbqPWOOSEI840gQIrQm/aRGT5HaaARC5X7pYgWxj+HlcZp
+hW79MW+07PUs+YVh028ijurRUshjGKQmjOoK5BcHthPZtdGuRRA0TI3fShr/KK20
+7x7Idq/tuZwb7gY98LF4QQdy0LkHiYPGq93hCljMAnMVqOhLO/pwvt7Cl5/ucy5g
+4WlbuaFRxm2OzfIXe3GgVCv3eLTRoTXELM2Of2NrU0IwgO3zVH8IvSlBsQX36ee/
+UWwVZYVi+PKNQteQm2CMkeqF2B6d8GyTpDW57wcfCviQkB00LsM=
+=Zl/L
+-----END PGP SIGNATURE-----
+
+--6kxq6E+o9ifeNcAS--
