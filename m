@@ -1,119 +1,126 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 849BC1BDA99
-	for <linux-mmc@vger.kernel.org>; Fri, 28 Feb 2025 21:32:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB9071A254C;
+	Fri, 28 Feb 2025 22:11:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740778375; cv=none; b=HXRYPwbRqrpFBgvho4hFjfVnSvNpDnBYXiF+vl7du7Ti9XUdd03o2jLNG3Ba1UODj6AYR5Q/7/ekSAuhPArodX+ScxFxKyjqbjiyAhbHhAP5sHcaLnYVF0UJvuXqFPhoOsvYv0Cbv6bENRc75t5kbCrEpQFZXNY8EABYuktSK54=
+	t=1740780721; cv=none; b=mzUFPcgwg3oOj2hhlnXDkBzUsAtv96ouWqZuH7FGYjAztNQ2ww6r55MzUGgtBp8LVNA4mckGL1/rvqSiCJFvy/AFMM6l8Icq0y5uxao98Msix5DDHRzUJfY053PVFnDAbQwRJU7i0at0NAnGvc0ANYRYX+sj4npEgK0XcNLMseQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740778375; c=relaxed/simple;
-	bh=0bn7nOO12Db1/cprnEbj+LcZrOhAAVUZyUCa/CQIcms=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=h1HVDklkoOm25TchShlw67bm1MopnkdS1zluzUOUD82oiZ4grzB2VbE3WxhoPBtJ7/a3YNsaHGAFWzSx2eNi8tBDhFEdIWZ70qsa3BXjxqo7ZIUe6raMbvUZjWJ4J3VgY/VZ8i3eSSSt5CW1jbhLJADSJYbFjFzlvaCbkR3Y3Ho=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=AHZM/KW2; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1740780721; c=relaxed/simple;
+	bh=n0RDSDT7lrDfgY2gY0Jx1+2UsomVL7pe4VNMSvttegY=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=pCygiEf+cF+0lcBYaLrpC0A3kl3XHISBARAaqepMmzSBbxFHd0xhMF8oIJldMFt/zBo6uPw46cXHjSe7ubo9bj/uka+KaOJcXQVlEqAodLaHxFZK3k/mHWsH+5Rf5CQprgZkIkQXjn4LWd7GHd4zPdPSlY9IbtayRheicCtxbbk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=TyCXX+0Y; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="AHZM/KW2"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=0bn7
-	nOO12Db1/cprnEbj+LcZrOhAAVUZyUCa/CQIcms=; b=AHZM/KW2y8OvzP1SS/HP
-	f7rcyKf89+xVxVRx7NB+4z0c7wS3TDWUx77Lm/9+vodtjNTlHUGst9gH9gKcCLxI
-	A2AyUrF2+jUL+pXYHjFngBb2eexb04WV35TbUu85TrvRxLpzACreOY+QzwqsnjgN
-	rgHwepI/n/Crk9jZ3kxdI+8B43ZY1bVAyacHmBza2TJYI9VESXbeB+GC4OooLyrE
-	kxQ4ocvWVsX2tw0xTQln5KKksGEMbH9CCc1hN0Ug1xobUW0DiNZcHno8qMyD4LS5
-	bnHK8OVBCZGs8A+jGLQ2aGsaIUc6UqHBDzU8f6Z9Hi1GbmWrDiE/i6Ee9WI+m+74
-	ZQ==
-Received: (qmail 1430828 invoked from network); 28 Feb 2025 22:32:51 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Feb 2025 22:32:51 +0100
-X-UD-Smtp-Session: l3s3148p1@rzFwjDovNs0gAQnoAE04AOw9xELqAtuS
-Date: Fri, 28 Feb 2025 22:32:50 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="TyCXX+0Y"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Transfer-Encoding:Content-Type:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
+	List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=VZfcm07W8RwEaBy9lSmqnHo6WL11ba796zrsT4TrXJI=; b=TyCXX+0Y4INx6O+beYAL/qfnpw
+	xrOw0ZkMweR/I6PkMC5d1ncuABaxrCMZo/JxoY7hyf68suXi20D9bp/o5Jog748TyIWhA5xTtfdhJ
+	N/9WXodyRsorIeLIQ9+zLGNTYFHVsdtiPcbsloZD0vCvQINbv/s67+lmDR7NQnuJUO/+ETU16Om6R
+	1HlG2XdFsLUUWvKRrskWKV9dYBOCOtVuiwOaOjEGed51G+ukhAj1rBpT5OxC8+BgQa35paN0TGDQr
+	4hOOmhezcDXfbRRCWzsWXdkF0cebcaY93q/VeB5g6WxSIRp5W7DnHlnEvuEUKFlAL6zEGHxplPFXS
+	kAZzc4mQ==;
+Received: from i53875b47.versanet.de ([83.135.91.71] helo=localhost.localdomain)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1to8Zk-00040X-Sb; Fri, 28 Feb 2025 23:11:20 +0100
+From: Heiko Stuebner <heiko@sntech.de>
+To: Kever Yang <kever.yang@rock-chips.com>
+Cc: Heiko Stuebner <heiko@sntech.de>,
+	linux-rockchip@lists.infradead.org,
+	Simon Xue <xxm@rock-chips.com>,
+	Guenter Roeck <linux@roeck-us.net>,
+	linux-usb@vger.kernel.org,
+	Chris Morgan <macromorgan@hotmail.com>,
+	Frank Wang <frank.wang@rock-chips.com>,
+	Jamie Iles <jamie@jamieiles.com>,
+	Bjorn Helgaas <bhelgaas@google.com>,
+	linux-pci@vger.kernel.org,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Johan Jonker <jbx6244@gmail.com>,
+	David Airlie <airlied@gmail.com>,
+	dri-devel@lists.freedesktop.org,
+	linux-i2c@vger.kernel.org,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Simona Vetter <simona@ffwll.ch>,
+	Elaine Zhang <zhangqing@rock-chips.com>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>,
-	Conor Dooley <conor.dooley@microchip.com>
-Subject: Re: [PATCH v4 1/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G3E
- support
-Message-ID: <Z8IrgjMTrYtGGAqL@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+	Finley Xiao <finley.xiao@rock-chips.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
+	FUKAUMI Naoki <naoki@radxa.com>,
+	linux-pwm@vger.kernel.org,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>,
-	Conor Dooley <conor.dooley@microchip.com>
-References: <20250228124713.153979-1-biju.das.jz@bp.renesas.com>
- <20250228124713.153979-2-biju.das.jz@bp.renesas.com>
+	linux-serial@vger.kernel.org,
+	Michael Riesch <michael.riesch@wolfvision.net>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	ulf.hansson@linaro.org,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	devicetree@vger.kernel.org,
+	Diederik de Haas <didi.debian@cknow.org>,
+	linux-watchdog@vger.kernel.org,
+	Rob Herring <robh@kernel.org>,
+	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	Shresth Prasad <shresthprasad7@gmail.com>,
+	Tim Lunn <tim@feathertop.org>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	linux-arm-kernel@lists.infradead.org,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Dragan Simic <dsimic@manjaro.org>,
+	Mark Brown <broonie@kernel.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	Andy Yan <andy.yan@rock-chips.com>,
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <ukleinek@kernel.org>
+Subject: Re: (subset) [PATCH v3 00/15] rockchip: Add rk3562 SoC and evb support
+Date: Fri, 28 Feb 2025 23:10:48 +0100
+Message-ID: <174078063579.504376.4763347846550378295.b4-ty@sntech.de>
+X-Mailer: git-send-email 2.47.2
+In-Reply-To: <20250227111913.2344207-1-kever.yang@rock-chips.com>
+References: <20250227111913.2344207-1-kever.yang@rock-chips.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="ZyYpMZHhkxk/PH7b"
-Content-Disposition: inline
-In-Reply-To: <20250228124713.153979-2-biju.das.jz@bp.renesas.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
 
---ZyYpMZHhkxk/PH7b
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Thu, 27 Feb 2025 19:18:58 +0800, Kever Yang wrote:
+> This patch set adds rk3562 SoC and its evb support.
+> 
+> I have split out patches need driver change for different subsystem.
+> And all the modules with dt-binding document update in this patch set
+> do not need any driver change. I put them together to make it clear we
+> have a new SoC and board to use the new compatible. Please pick up the
+> patch for your subsystem, or please let me know if the patch has to
+> send separate.
+> 
+> [...]
 
-On Fri, Feb 28, 2025 at 12:47:08PM +0000, Biju Das wrote:
-> The SD/MMC block on the RZ/G3E ("R9A09G047") SoC is similar to that
-> of the RZ/V2H, but the SD0 channel has only dedicated pins, so we must
-> use SD_STATUS register to control voltage and power enable (internal
-> regulator), for non-fixed voltage (SD) MMC interface. However, it is
-> optional for fixed voltage MMC interface (eMMC).
->=20
-> For SD1 and SD2 channels, we can either use gpio regulator or internal
-> regulator (using SD_STATUS register) for voltage switching.
->=20
-> Document RZ/G3E SDHI IP support with optional internal regulator for
-> both RZ/G3E and RZ/V2H SoC.
->=20
-> Acked-by: Conor Dooley <conor.dooley@microchip.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Applied, thanks!
 
-=46rom what I know about bindings, this looks good to me.
+[05/15] dt-bindings: gpu: Add rockchip,rk3562-mali compatible
+        commit: 049e7ac203d51fdc3a739f5f28906788e8eeea03
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---ZyYpMZHhkxk/PH7b
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfCK4IACgkQFA3kzBSg
-KbYKnA//WpqYQBwjBnawRmKX3WoZzOW2NI8INuSlmCtOQ4hslf4eRRF+apnQWZ93
-KxvoFcq4M+CCreOn6JCSRIO0huhgMzb2IYfOa2XgeSUh8q3NkEwg8tyuezewGcJy
-B3zyaCJokDPHUOUGQxvX43nE7+DzbxUTsavGrDVDa0LKpYjIJvIf+k0+ID3GncO5
-qkoNP4KLHdcurSjtXrDlZoi2NSXGY4F5+P/1bL4gfxUZuSsM2waljrcbV7VqpVjI
-Wzv+Eei++WpTP9KPvXdhq9c9l36ebBABWSyTl6VQniYOoeWl3rL5hlZ9P0N6r6P5
-fKBvV67P+fEtvjxoGcK6rVHMdw7P0cSC8mKjrhIGLeAzRNcG2WqURX+J0FqjKAb3
-I2VSU8iXH6/h0eWWccJVQXDLX4NhCMpeRqiaCb0WKRjKl+gQ5vJS0YBYRWGW12WM
-DFHv8+4eDGb+oVHCcBr8ubmL8e/3ZYD3DoFfcGiSQKn/0ZAxf60lhkINGv8M4Lym
-lKhn46DUx0GexEkVjtbD6XL4D1bcgrWaYPsE/Wc+sJB++KmGhkjFS8wgzX36OIUA
-5yrd72NAyB56WdHESA/lOEMJ595y1JNnOscYfjV8J23C+SLzA4KHmnDDoHVAF6Xp
-8Ldg2rQhEmDmLjTsyWTwaa2vvz13/0+Bg2uLcE9doPUXMSqb0Gc=
-=uSff
------END PGP SIGNATURE-----
-
---ZyYpMZHhkxk/PH7b--
+Best regards,
+-- 
+Heiko Stuebner <heiko@sntech.de>
