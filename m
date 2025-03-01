@@ -1,37 +1,36 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93F121DD526;
-	Sat,  1 Mar 2025 10:43:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A32871ADC6C;
+	Sat,  1 Mar 2025 10:44:50 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740825835; cv=none; b=i/9c12ip4XTZErA2InH87bzW0phtlgUA3cc9uxDqnjO/ljQKkAu+Xcarx/EqxWxjbwAMY5+jwt8/+mmgbMfqQat2q6KoniB5KkdgdLA5U5rNkDh5Qp76QCOGGdS5QQFTqxZbI5fiRt1dQVlr2EspAbfK37pZm2248/Gs093PelM=
+	t=1740825892; cv=none; b=pFktpxL9pKYGMkkuVA6j+4Nlm5RmECXL/Wa8Q3CYMCz8/jlbAw3V9XJi4F/woVGDxT1rKYEbaR6jbJJnXwGtzLMcZ8K8SVpFU4nDHfankQ4D/lbBIlE3ruKe8TPpiw8Jqgt6bhmeW/95zEeWc0NHj6CXi1Y8hOiWSn615FZ5G9U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740825835; c=relaxed/simple;
+	s=arc-20240116; t=1740825892; c=relaxed/simple;
 	bh=zwk+LtszMoHSIYjGCAqbuOU0QSVYlP5K54ulz6VjFyA=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QLvqP4Ga8i+2wArRiNgotyzj0gYTPsKc2gE1Y7mQqKdQHMqLp9F5ljffrsWavkV3NNKX8lk1yKR1piecSyjRyigLO/GAVSZEQe1mlR6ZxZGJKbC4S/EXtoY1YiANk45U8OpcEeHWrMwMzmTEnKO/ETHtGSCOdG6N2pce46tFiAY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=WpKLDJjj; arc=none smtp.client-ip=178.21.23.139
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=HIXq5O62Y0FaLbG9h1v5tYESturMDSQ9AS8G3Rv/d6N0TbtbkCDo9R/SlUmvXT4uIPoTLGXofWeUoNzpYgbWVhuAG4ETZO7tKMT4YqKyRmPEzQvGlqRzRK+QOkGZrOa5t9gHIHrcMm0gWkUJITk2ZimagwqDtTz9JnrcxRXIlwA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=cusEpx7U; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="WpKLDJjj"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="cusEpx7U"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id 21B4825D15;
-	Sat,  1 Mar 2025 11:43:52 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id 0C37A25DBB;
+	Sat,  1 Mar 2025 11:44:49 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id ygrvAjcF8kzO; Sat,  1 Mar 2025 11:43:51 +0100 (CET)
+ id C-seUOwGjVr2; Sat,  1 Mar 2025 11:44:48 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1740825831; bh=zwk+LtszMoHSIYjGCAqbuOU0QSVYlP5K54ulz6VjFyA=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=WpKLDJjjycL5YphH8xb4T8i/1U35DpB9hvkImbiqAVf8w4H8Y7C4N/E+csmPuEuKu
-	 KsCz0FZWc2l1JIQSCfrMHT2M03HFnDsDN4hd6SQAAi4mGe7GEBc1ic7OJ7nLHp52xn
-	 WG9+gWc48PQy60j85cE7+1fnjquWnUNp/bLiCZN8YtZ62z2fCI7ZsThU0QZtbLPYPJ
-	 DTtIAZkMnHGRu2RXnQ0wgJdHphnGZFpI4wiywJCgn7yaDiYjggOPvKvtf3XWoHBjks
-	 IeWsZ1I1gN+6kbMc98oyvCjxHepKZu1J6DDt3i6jMVgWRTAC1MbwT2OzbzMpRGAmLx
-	 ml4//om/geNWQ==
+	t=1740825887; bh=zwk+LtszMoHSIYjGCAqbuOU0QSVYlP5K54ulz6VjFyA=;
+	h=From:To:Cc:Subject:Date;
+	b=cusEpx7U6cVra4Av0kljPG7s/Z+2Nkpmc/8HjdRJAnRK0zBim6wVGtKJJy6MsnYgS
+	 8vhw0HHivQdEFpTmerOrGX4j/wpzJf6x1lIFJUSAaPM/+cW0XRZLtD9X3L3naQxFhr
+	 eEerUaBziLo9TsazDr4n0qINaaJl+YF1k3IcD11IYOMkZJWDIZp03+FT8njZobFPXP
+	 eJ3z2BXwvMBApexnMNLbJc4juNpaMavnnFjNLYlqoDto5X6ehi/BPq0kbKKND/fmEZ
+	 3Qi7RqWA09iLcujtfmbTtluVyocqVifsp3v++OB/fAIUE7xHN/FCvW9FAdYW/RNeMW
+	 G1qR3zwddZjtQ==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -53,10 +52,8 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
 Subject: [PATCH 4/8] dt-bindings: clock: Add GRF clock definition for RK3528
-Date: Sat,  1 Mar 2025 10:42:46 +0000
-Message-ID: <20250301104250.36295-5-ziyao@disroot.org>
-In-Reply-To: <20250301104250.36295-1-ziyao@disroot.org>
-References: <20250301104250.36295-1-ziyao@disroot.org>
+Date: Sat,  1 Mar 2025 10:44:13 +0000
+Message-ID: <20250301104413.36335-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
