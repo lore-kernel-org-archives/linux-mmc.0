@@ -1,126 +1,94 @@
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB9071A254C;
-	Fri, 28 Feb 2025 22:11:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C12D1C5D79;
+	Sat,  1 Mar 2025 10:43:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740780721; cv=none; b=mzUFPcgwg3oOj2hhlnXDkBzUsAtv96ouWqZuH7FGYjAztNQ2ww6r55MzUGgtBp8LVNA4mckGL1/rvqSiCJFvy/AFMM6l8Icq0y5uxao98Msix5DDHRzUJfY053PVFnDAbQwRJU7i0at0NAnGvc0ANYRYX+sj4npEgK0XcNLMseQ=
+	t=1740825809; cv=none; b=iDWrdiXoWN1cb1ZYFnl8p7OCapdHprVMdAQyPXUNj35qwHD0YnYhuZ8XcbcrWe2wRljwrc6dmn5mOlSzjZC5wNGFsvbVpIm8IROiZGEUSPzAst8ssjFtjdXc95WPiR1u+JV/ZFhM8Es00WgFS9VqtQl+fs4xKyxcpAEh/PxLw2k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740780721; c=relaxed/simple;
-	bh=n0RDSDT7lrDfgY2gY0Jx1+2UsomVL7pe4VNMSvttegY=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=pCygiEf+cF+0lcBYaLrpC0A3kl3XHISBARAaqepMmzSBbxFHd0xhMF8oIJldMFt/zBo6uPw46cXHjSe7ubo9bj/uka+KaOJcXQVlEqAodLaHxFZK3k/mHWsH+5Rf5CQprgZkIkQXjn4LWd7GHd4zPdPSlY9IbtayRheicCtxbbk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=TyCXX+0Y; arc=none smtp.client-ip=185.11.138.130
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
+	s=arc-20240116; t=1740825809; c=relaxed/simple;
+	bh=WnMErFQKGyzYsxdI0ujG7rvJaR/CFTazd4MxR3w0Rdw=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gf7TeyppEUS0ZXfIo/g9BsvfkGjP7xmDokjNdGnGg+Xz8K1etJHEbOcaYu8yN7vqvL4Pk+9jiEG/xoEqGPHNV+fPSz1hsVyzJto9K98/Ty79atIUSEGSF8Oe6dJB1hPPWCoqAK4NXAzptr1R5nHJUQGP8pB6K2sm/1FVlTwtSWY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=EZiQOsYq; arc=none smtp.client-ip=178.21.23.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="TyCXX+0Y"
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
-	s=gloria202408; h=Content-Transfer-Encoding:Content-Type:MIME-Version:
-	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
-	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-	List-Subscribe:List-Post:List-Owner:List-Archive;
-	bh=VZfcm07W8RwEaBy9lSmqnHo6WL11ba796zrsT4TrXJI=; b=TyCXX+0Y4INx6O+beYAL/qfnpw
-	xrOw0ZkMweR/I6PkMC5d1ncuABaxrCMZo/JxoY7hyf68suXi20D9bp/o5Jog748TyIWhA5xTtfdhJ
-	N/9WXodyRsorIeLIQ9+zLGNTYFHVsdtiPcbsloZD0vCvQINbv/s67+lmDR7NQnuJUO/+ETU16Om6R
-	1HlG2XdFsLUUWvKRrskWKV9dYBOCOtVuiwOaOjEGed51G+ukhAj1rBpT5OxC8+BgQa35paN0TGDQr
-	4hOOmhezcDXfbRRCWzsWXdkF0cebcaY93q/VeB5g6WxSIRp5W7DnHlnEvuEUKFlAL6zEGHxplPFXS
-	kAZzc4mQ==;
-Received: from i53875b47.versanet.de ([83.135.91.71] helo=localhost.localdomain)
-	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.94.2)
-	(envelope-from <heiko@sntech.de>)
-	id 1to8Zk-00040X-Sb; Fri, 28 Feb 2025 23:11:20 +0100
-From: Heiko Stuebner <heiko@sntech.de>
-To: Kever Yang <kever.yang@rock-chips.com>
-Cc: Heiko Stuebner <heiko@sntech.de>,
-	linux-rockchip@lists.infradead.org,
-	Simon Xue <xxm@rock-chips.com>,
-	Guenter Roeck <linux@roeck-us.net>,
-	linux-usb@vger.kernel.org,
-	Chris Morgan <macromorgan@hotmail.com>,
-	Frank Wang <frank.wang@rock-chips.com>,
-	Jamie Iles <jamie@jamieiles.com>,
-	Bjorn Helgaas <bhelgaas@google.com>,
-	linux-pci@vger.kernel.org,
-	Jonas Karlman <jonas@kwiboo.se>,
-	Johan Jonker <jbx6244@gmail.com>,
-	David Airlie <airlied@gmail.com>,
-	dri-devel@lists.freedesktop.org,
-	linux-i2c@vger.kernel.org,
-	Shawn Lin <shawn.lin@rock-chips.com>,
-	Simona Vetter <simona@ffwll.ch>,
-	Elaine Zhang <zhangqing@rock-chips.com>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Finley Xiao <finley.xiao@rock-chips.com>,
-	Maxime Ripard <mripard@kernel.org>,
-	=?UTF-8?q?Krzysztof=20Wilczy=C5=84ski?= <kw@linux.com>,
-	FUKAUMI Naoki <naoki@radxa.com>,
-	linux-pwm@vger.kernel.org,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	linux-serial@vger.kernel.org,
-	Michael Riesch <michael.riesch@wolfvision.net>,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	ulf.hansson@linaro.org,
-	Jiri Slaby <jirislaby@kernel.org>,
-	Detlev Casanova <detlev.casanova@collabora.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	devicetree@vger.kernel.org,
-	Diederik de Haas <didi.debian@cknow.org>,
-	linux-watchdog@vger.kernel.org,
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="EZiQOsYq"
+Received: from mail01.disroot.lan (localhost [127.0.0.1])
+	by disroot.org (Postfix) with ESMTP id 2D81B25DBB;
+	Sat,  1 Mar 2025 11:43:24 +0100 (CET)
+X-Virus-Scanned: SPAM Filter at disroot.org
+Received: from layka.disroot.org ([127.0.0.1])
+ by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
+ id EC3Mny1iksiZ; Sat,  1 Mar 2025 11:43:22 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
+	t=1740825802; bh=WnMErFQKGyzYsxdI0ujG7rvJaR/CFTazd4MxR3w0Rdw=;
+	h=From:To:Cc:Subject:Date;
+	b=EZiQOsYqB3kMpB6EpYaGSf8co4UUq1tvB9+SYpPqC6XHSQA2L4QNRzW8yl7nB72f1
+	 GqPDxGQz6ElTk0i6U7eFTdWU6EOm+DDiuw9lksbmJdZtNiPXzRzUjpmCNiF386isKQ
+	 putn946KHxayUU9Iym2nHZmjGtKacKO6izBgYIcU5nACc5Nlk7XAkhNhfWpCbCFY2q
+	 jzTUVsCic9/AI8mtLUaErntianqZUvhp7mLy/Z258dmNF1/2yWN0LbcPt3t60cfgOs
+	 vytP3zPP1Q9+6lpX5hhgQf9wWxE02zFKufcVkWxAbyrSa5bMgZOLcs++jzOL8lrOMV
+	 /0CQyjINCzeAg==
+From: Yao Zi <ziyao@disroot.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
-	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
-	Wim Van Sebroeck <wim@linux-watchdog.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Frank Wang <frank.wang@rock-chips.com>,
 	Shresth Prasad <shresthprasad7@gmail.com>,
-	Tim Lunn <tim@feathertop.org>,
-	Lorenzo Pieralisi <lpieralisi@kernel.org>,
-	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Jonas Karlman <jonas@kwiboo.se>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
 	linux-arm-kernel@lists.infradead.org,
-	Jisheng Zhang <jszhang@kernel.org>,
-	Dragan Simic <dsimic@manjaro.org>,
-	Mark Brown <broonie@kernel.org>,
-	linux-mmc@vger.kernel.org,
+	linux-rockchip@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
-	linux-spi@vger.kernel.org,
-	Andy Yan <andy.yan@rock-chips.com>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Thomas Zimmermann <tzimmermann@suse.de>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <ukleinek@kernel.org>
-Subject: Re: (subset) [PATCH v3 00/15] rockchip: Add rk3562 SoC and evb support
-Date: Fri, 28 Feb 2025 23:10:48 +0100
-Message-ID: <174078063579.504376.4763347846550378295.b4-ty@sntech.de>
-X-Mailer: git-send-email 2.47.2
-In-Reply-To: <20250227111913.2344207-1-kever.yang@rock-chips.com>
-References: <20250227111913.2344207-1-kever.yang@rock-chips.com>
+	linux-clk@vger.kernel.org,
+	Yao Zi <ziyao@disroot.org>
+Subject: [PATCH 0/8] Support SD/SDIO controllers on RK3528
+Date: Sat,  1 Mar 2025 10:42:42 +0000
+Message-ID: <20250301104250.36295-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 
+RK3528 features two SDIO controllers and one SD/MMC controller. This
+series adds essential support for their tuning clocks, document the
+controller in dt-bindings and bring the SD/MMC one up on Radxa E20C
+board with pinctrl set up by the previous bootloader. Both HS and SDR104
+mode are verified.
 
-On Thu, 27 Feb 2025 19:18:58 +0800, Kever Yang wrote:
-> This patch set adds rk3562 SoC and its evb support.
-> 
-> I have split out patches need driver change for different subsystem.
-> And all the modules with dt-binding document update in this patch set
-> do not need any driver change. I put them together to make it clear we
-> have a new SoC and board to use the new compatible. Please pick up the
-> patch for your subsystem, or please let me know if the patch has to
-> send separate.
-> 
-> [...]
+Yao Zi (8):
+  dt-bindings: soc: rockchip: Add RK3528 VO GRF syscon
+  dt-bindings: soc: rockchip: Add RK3528 VPU GRF syscon
+  dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3528
+  dt-bindings: clock: Add GRF clock definition for RK3528
+  clk: rockchip: Support MMC clocks in GRF region
+  clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
+  arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
+  arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
 
-Applied, thanks!
+ .../bindings/mmc/rockchip-dw-mshc.yaml        |  1 +
+ .../devicetree/bindings/soc/rockchip/grf.yaml |  2 +
+ .../boot/dts/rockchip/rk3528-radxa-e20c.dts   | 14 +++++
+ arch/arm64/boot/dts/rockchip/rk3528.dtsi      | 62 +++++++++++++++++++
+ drivers/clk/rockchip/clk-mmc-phase.c          | 24 +++++--
+ drivers/clk/rockchip/clk-rk3528.c             | 56 +++++++++++++++--
+ drivers/clk/rockchip/clk.c                    | 42 +++++++++++++
+ drivers/clk/rockchip/clk.h                    | 23 ++++++-
+ .../dt-bindings/clock/rockchip,rk3528-cru.h   |  6 ++
+ 9 files changed, 220 insertions(+), 10 deletions(-)
 
-[05/15] dt-bindings: gpu: Add rockchip,rk3562-mali compatible
-        commit: 049e7ac203d51fdc3a739f5f28906788e8eeea03
-
-Best regards,
 -- 
-Heiko Stuebner <heiko@sntech.de>
+2.48.1
+
