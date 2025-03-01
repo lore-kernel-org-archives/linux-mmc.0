@@ -1,185 +1,126 @@
-Received: from smtp.forwardemail.net (smtp.forwardemail.net [121.127.44.73])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 14AD9EC5
-	for <linux-mmc@vger.kernel.org>; Sat,  1 Mar 2025 12:48:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=121.127.44.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1D7891D5CDB;
+	Sat,  1 Mar 2025 12:56:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740833287; cv=none; b=lXubUvEpiCpoSsqZKurRceD3RNYZogvdnpoD5XpOtGQBYkyZNI6Ap7rlPCAz+0tf9NA/MlfwVYtAkEe2xB/ASX6kfKqhkY2LNp96kkt0p458LGXTHJbGV3et9ZF7bQ96OcBcyjk3Vn/3GXRYR72YTOtGatqBP/KJpkHIXVpyLxc=
+	t=1740833769; cv=none; b=Dea8zx54YBD+dYZtnwE4SnykyCqsKxlCL24XWLkxveomj5n0SF2gUkWoci7nmXtzQD0JF+bCbkhfCTDP1hBgescJkEX1eAlc6Y3m5ipvG+e+kIq/2xTLAFqLX/4kszQtWZNvSiaDNzJzTK5QHhtV6uQQBSsPvUXPyMGJvD4PPds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740833287; c=relaxed/simple;
-	bh=3MCj/WCvoWMoAc4bJMk7a306JBmP9qXA6McF5MDfN30=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=J6XudRfQzdhv3+ez1Y5EUlen4jcd83TfrxzAZ8ejF4FeHPWtl3iFu+geBlSnnyoALw2RT9O5DpA5aCKE9uvh8OYGWU4TP6qNbfd60UU5z+ylOzKBkMUTBzclNq1lvya+L1FKti2buHxZ+5C+L642xfEEh9l6GtqVRPpx3yJTepA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se; dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b=NbkHCgcr; arc=none smtp.client-ip=121.127.44.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se
+	s=arc-20240116; t=1740833769; c=relaxed/simple;
+	bh=uz1g3qaKQVfqxor+NFXIvS/fObGoSqmtDDOoAu6OwGA=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=KQSl6bCQMjtSVGQwSOGq+XxzRp1Q8KW6/TdQMzAVD2X6YmPFthsAzouY7GXv47Rn3pwwNBfrsdS9SpzyTStn5Zc2MGMSNAnl6BUUOS7GyWT9KI6cc0shUdCWKqHRNNkcwlEWw6aeR/7JIJpSFMwJSXotZSqGzVp0JhJLIM5qpJc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=yrqnQ9n8; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b="NbkHCgcr"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kwiboo.se;
- h=Content-Transfer-Encoding: Content-Type: In-Reply-To: From: References:
- Cc: To: Subject: MIME-Version: Date: Message-ID; q=dns/txt;
- s=fe-e1b5cab7be; t=1740833278;
- bh=vlAHgpbS8ocJiIPCyubD8pMYmZoM/v7ggXzVGihd27E=;
- b=NbkHCgcrfZYtBXOqoYvN+WTx/Hvp41PezfJ9dSB25PNAfrduks0OGvuDx4sMqx4f/zFDGOxxO
- vOH8Pm2KXqf8I0oynEzZCbhuN2dnvTHa2mU+ekkA+RhhLg23bb5UUD8+UmFc878Ir/dgq3SjW/y
- ZYu/+6FAQh7wbGDWGZHfpqx251OPMCPIv5Vw0p3eMTVcbVRB8KzXHanm59W3OnYwzZVK5xtqseH
- p1s/Q07UBu1RmB3m8ikki/WL8UpU1bnvRFPal5n1ZwIF79oimMD1edFkK/vzyeJ1z1+yILT4y4b
- IPvGHE7D0Ft82tinhERWyJSspJklxrBLQ0c1n4Sfi4FQ==
-X-Forward-Email-ID: 67c301f890cf55d47dbe8d70
-X-Forward-Email-Sender: rfc822; jonas@kwiboo.se, smtp.forwardemail.net,
- 121.127.44.73
-X-Forward-Email-Version: 0.4.40
-X-Forward-Email-Website: https://forwardemail.net
-X-Complaints-To: abuse@forwardemail.net
-X-Report-Abuse: abuse@forwardemail.net
-X-Report-Abuse-To: abuse@forwardemail.net
-Message-ID: <9fd51bcb-3e6a-46b6-b1f7-ff16fa562d9e@kwiboo.se>
-Date: Sat, 1 Mar 2025 13:47:47 +0100
-Precedence: bulk
-X-Mailing-List: linux-mmc@vger.kernel.org
-List-Id: <linux-mmc.vger.kernel.org>
-List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
-List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers for
- RK3528
-To: Yao Zi <ziyao@disroot.org>
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="yrqnQ9n8"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
+	List-Subscribe:List-Post:List-Owner:List-Archive;
+	bh=QQbVUX9DGectl4cZrWM+928q6CAZcLW6ZWeZi0G8Co0=; b=yrqnQ9n8A3aSrv/NYvybjVGf10
+	ts1rw/5eQKEt40caJ4d+/dnSv5q4UHtWYEnHaUjswye8w0xjrMQOvq1E+6Sqg1as1RA0jOK1Mfmyk
+	rj1pt6cCZJQzHUf3kAuQ6ngCUWaLVl6EOn8dY5P/b6rrJPXbV70H38nAyAZaE0Crv9hNoRA9msWZc
+	9MOL5/Tcv3jQR/Xceg5I8sINY48k0koIl1W4wQ7syhBdlYbfB8LmVvMYMZqCU0cuyQPI5qJNdQglR
+	994u4Xh9A8I0AO3O4X65sHENstTs9ALMWwoh6wdMspFTG/MIgKVU3sUl9eC+vMd/0DTkaIvwisBVU
+	sa0ITHTw==;
+Received: from i53875b47.versanet.de ([83.135.91.71] helo=diego.localnet)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1toMNm-0008HZ-Vb; Sat, 01 Mar 2025 13:55:55 +0100
+From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
+To: Yao Zi <ziyao@disroot.org>, Jonas Karlman <jonas@kwiboo.se>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
- Michael Turquette <mturquette@baylibre.com>, Stephen Boyd
- <sboyd@kernel.org>, Frank Wang <frank.wang@rock-chips.com>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+ Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>,
+ Frank Wang <frank.wang@rock-chips.com>,
  Shresth Prasad <shresthprasad7@gmail.com>,
  Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
  Detlev Casanova <detlev.casanova@collabora.com>, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
  linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
  linux-clk@vger.kernel.org
-References: <20250301104250.36295-1-ziyao@disroot.org>
+Subject:
+ Re: [PATCH 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
+Date: Sat, 01 Mar 2025 13:55:53 +0100
+Message-ID: <3574922.QJadu78ljV@diego>
+In-Reply-To: <9fd51bcb-3e6a-46b6-b1f7-ff16fa562d9e@kwiboo.se>
+References:
+ <20250301104250.36295-1-ziyao@disroot.org>
  <20250301104749.36423-1-ziyao@disroot.org>
-Content-Language: en-US
-From: Jonas Karlman <jonas@kwiboo.se>
-In-Reply-To: <20250301104749.36423-1-ziyao@disroot.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+ <9fd51bcb-3e6a-46b6-b1f7-ff16fa562d9e@kwiboo.se>
+Precedence: bulk
+X-Mailing-List: linux-mmc@vger.kernel.org
+List-Id: <linux-mmc.vger.kernel.org>
+List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
+List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-Hi,
+Hey Joas,
 
-On 2025-03-01 11:47, Yao Zi wrote:
-> RK3528 features two SDIO controllers and one SD/MMC controller, describe
-> them in devicetree. Since their sample and drive clocks are located in
-> the VO and VPU GRFs, corresponding syscons are added to make these
-> clocks available.
-> 
-> Signed-off-by: Yao Zi <ziyao@disroot.org>
-> ---
->  arch/arm64/boot/dts/rockchip/rk3528.dtsi | 62 ++++++++++++++++++++++++
->  1 file changed, 62 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/rockchip/rk3528.dtsi b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-> index 5b334690356a..078c97fa1d9f 100644
-> --- a/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-> +++ b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-> @@ -7,6 +7,7 @@
->  #include <dt-bindings/interrupt-controller/arm-gic.h>
->  #include <dt-bindings/interrupt-controller/irq.h>
->  #include <dt-bindings/clock/rockchip,rk3528-cru.h>
-> +#include <dt-bindings/reset/rockchip,rk3528-cru.h>
->  
->  / {
->  	compatible = "rockchip,rk3528";
-> @@ -122,6 +123,16 @@ gic: interrupt-controller@fed01000 {
->  			#interrupt-cells = <3>;
->  		};
->  
-> +		vpu_grf: syscon@ff340000 {
-> +			compatible = "rockchip,rk3528-vpu-grf", "syscon";
+Am Samstag, 1. M=C3=A4rz 2025, 13:47:47 MEZ schrieb Jonas Karlman:
+> On 2025-03-01 11:47, Yao Zi wrote:
+> > RK3528 features two SDIO controllers and one SD/MMC controller, describe
+> > them in devicetree. Since their sample and drive clocks are located in
+> > the VO and VPU GRFs, corresponding syscons are added to make these
+> > clocks available.
+> >=20
+> > Signed-off-by: Yao Zi <ziyao@disroot.org>
+> > ---
+> >  arch/arm64/boot/dts/rockchip/rk3528.dtsi | 62 ++++++++++++++++++++++++
+> >  1 file changed, 62 insertions(+)
+> >=20
+> > diff --git a/arch/arm64/boot/dts/rockchip/rk3528.dtsi b/arch/arm64/boot=
+/dts/rockchip/rk3528.dtsi
+> > index 5b334690356a..078c97fa1d9f 100644
+> > --- a/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+> > +++ b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+> > @@ -7,6 +7,7 @@
+> >  #include <dt-bindings/interrupt-controller/arm-gic.h>
+> >  #include <dt-bindings/interrupt-controller/irq.h>
+> >  #include <dt-bindings/clock/rockchip,rk3528-cru.h>
+> > +#include <dt-bindings/reset/rockchip,rk3528-cru.h>
+> > =20
+> >  / {
+> >  	compatible =3D "rockchip,rk3528";
+> > @@ -122,6 +123,16 @@ gic: interrupt-controller@fed01000 {
+> >  			#interrupt-cells =3D <3>;
+> >  		};
+> > =20
+> > +		vpu_grf: syscon@ff340000 {
+> > +			compatible =3D "rockchip,rk3528-vpu-grf", "syscon";
+>=20
+> vpu_grf is also used for gmac1, so should possible be a "syscon",
+> "simple-mfd", or have I misunderstood when to use simple-mfd ?
 
-vpu_grf is also used for gmac1, so should possible be a "syscon",
-"simple-mfd", or have I misunderstood when to use simple-mfd ?
+simple-mfd is needed when the additional device is completely contained
+inside the particular syscon.
 
-> +			reg = <0x0 0xff340000 0x0 0x8000>;
-> +		};
-> +
-> +		vo_grf: syscon@ff360000 {
-> +			compatible = "rockchip,rk3528-vo-grf", "syscon";
+=46or example, the usb2phy0 on rk3588 is completely living inside the
+usb2phy0-grf.
 
-similar here, vo_grf is also used for gmac0.
+Similarly the power-domains are living inside the rk3588 pmugrf.
+But the pmugrf also contains more stuff, so the power-domains are a
+subset of the pmugrf.
 
-> +			reg = <0x0 0xff360000 0x0 0x10000>;
-> +		};
-> +
->  		cru: clock-controller@ff4a0000 {
->  			compatible = "rockchip,rk3528-cru";
->  			reg = <0x0 0xff4a0000 0x0 0x30000>;
-> @@ -251,5 +262,56 @@ uart7: serial@ffa28000 {
->  			reg-shift = <2>;
->  			status = "disabled";
->  		};
-> +
-> +		sdio0: mmc@ffc10000 {
-> +			compatible = "rockchip,rk3528-dw-mshc",
-> +				     "rockchip,rk3288-dw-mshc";
-> +			reg = <0x0 0xffc10000 0x0 0x4000>;
-> +			clocks = <&cru HCLK_SDIO0>,
-> +				 <&cru CCLK_SRC_SDIO0>,
-> +				 <&cru SCLK_SDIO0_DRV>,
-> +				 <&cru SCLK_SDIO0_SAMPLE>;
-> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-> +			fifo-depth = <0x100>;
-> +			interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <150000000>;
-> +			resets = <&cru SRST_H_SDIO0>;
-> +			reset-names = "reset";
-> +			status = "disabled";
-> +		};
-> +
-> +		sdio1: mmc@ffc20000 {
-> +			compatible = "rockchip,rk3528-dw-mshc",
-> +				     "rockchip,rk3288-dw-mshc";
-> +			reg = <0x0 0xffc20000 0x0 0x4000>;
-> +			clocks = <&cru HCLK_SDIO1>,
-> +				 <&cru CCLK_SRC_SDIO1>,
-> +				 <&cru SCLK_SDIO1_DRV>,
-> +				 <&cru SCLK_SDIO1_SAMPLE>;
-> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-> +			fifo-depth = <0x100>;
-> +			interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <150000000>;
-> +			resets = <&cru SRST_H_SDIO1>;
-> +			reset-names = "reset";
-> +			status = "disabled";
-> +		};
-> +
-> +		sdmmc: mmc@ffc30000 {
-> +			compatible = "rockchip,rk3528-dw-mshc",
-> +				     "rockchip,rk3288-dw-mshc";
-> +			reg = <0x0 0xffc30000 0x0 0x4000>;
-> +			clocks = <&cru HCLK_SDMMC0>,
-> +				 <&cru CCLK_SRC_SDMMC0>,
-> +				 <&cru SCLK_SDMMC_DRV>,
-> +				 <&cru SCLK_SDMMC_SAMPLE>;
-> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-> +			fifo-depth = <0x100>;
-> +			interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
-> +			max-frequency = <150000000>;
-> +			resets = <&cru SRST_H_SDMMC0>;
-> +			reset-names = "reset";
+Both of these above are a case for a simple-mfd.
 
-Suggest adding default pinctrl props here:
 
-  pinctrl-names = "default";
-  pinctrl-0 = <&sdmmc_bus4>, <&sdmmc_clk>, <&sdmmc_cmd>, <&sdmmc_det>;
+Similarly, gmac1 on rk3588 is ethernet@fe1c0000 , so a completely separate
+io-memory area, but references both the sysgrf as well as the php-grf
+as syscons for additional settings.
 
-And possible also for sdio0 and sdio1.
+So here the syscon does not need to be a simple-mfd.
 
-Regards,
-Jonas
 
-> +			status = "disabled";
-> +		};
->  	};
->  };
+Hope that helps a bit
+Heiko
+
 
