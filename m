@@ -1,37 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FD801D63F9;
-	Sat,  1 Mar 2025 10:48:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D85EB1CB332;
+	Sat,  1 Mar 2025 10:48:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1740826099; cv=none; b=CzdSg8zODNlhGvxsr4zupfrxHDEODyoPHYV5qdvlAAO0RWFvZi4Ha9f8uwHgQjypNRSOLGyVKR6uEo1hcSlLfjszPSbLGZRVmBEnd6gvlUrjf8SN4n67ajY4/DimLY2gSCBzMRUbRbcPB1sUygI37y7gUXccw4oAWnRZ664sPhQ=
+	t=1740826139; cv=none; b=jdAPjnvR8Zt+JKogbyx3Z1k5IyInxNIbNQRRjHepyQHZx8a6khozOn963tFtW1/WWmQy4xOMeaPigTYh9Wgq/jpA4MDsY1pDOZqLq9HOF7M7CRcJa1XNa+Zcw+3yMo6hVVsCUhUuLK83tTPaLQLuFLfXbd2hSZ4ULFLIlPJI/78=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1740826099; c=relaxed/simple;
-	bh=Mh8Scn9zD0vJo0No7F96OzW9299oqh4mWGc3Vb0A1ds=;
+	s=arc-20240116; t=1740826139; c=relaxed/simple;
+	bh=oH6NiGwxSjELVuqZw+4pyix8JS63OndzJmq8Erv5Xlo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=T7YqpasqZqCvNOXbEJ8BP8ZDV8y+d17dQgiQPKNlicm5kXQWl5WIDBsglDoTOkFzqx1UK7hxJKMKhdfvgHhbmYA6vZh5nO2Wm53AU84mWS35kW6xgSqMyh0ku7U6HrkR4Wt23+I4G34jWssmcIMK4dXnFhfZKmUWpnuxiTzFPIc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=gGpS1Q4g; arc=none smtp.client-ip=178.21.23.139
+	 MIME-Version; b=oXowfhYy+/0a3XLzb4jZTtkFgfsZN4YcPbVHvW0dmtRawBKPapBFygr4g6CJCswc00gqTkyMeDxm2k0fF4pgh117TmUXCA70AllYZy2mO2UQtEaYhelZikKkH2TOWBTP3S22p7b5IrvHVZkK1LoywYQ3p06FA5fWaNMZVECMNcc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=jRXEa/KY; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="gGpS1Q4g"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="jRXEa/KY"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id E125825D26;
-	Sat,  1 Mar 2025 11:48:16 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id 6472025F03;
+	Sat,  1 Mar 2025 11:48:56 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id ABOnEt0LCSoi; Sat,  1 Mar 2025 11:48:16 +0100 (CET)
+ id QwfR_2k6Scbh; Sat,  1 Mar 2025 11:48:55 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1740826096; bh=Mh8Scn9zD0vJo0No7F96OzW9299oqh4mWGc3Vb0A1ds=;
+	t=1740826135; bh=oH6NiGwxSjELVuqZw+4pyix8JS63OndzJmq8Erv5Xlo=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=gGpS1Q4gvX22ZL2StQFcA9v6V4lTov4KyfGyY8SbkgC9NdvsqsBrdONuWfEsXaiPq
-	 S8SS/jgo/LMV4d4A4RxetVonl8Tc2kJyugDXHIyZKAPVm2/6Si2Ho6M+TXRySYt2lo
-	 r7JHsfKeQUHjrkfsWogYwCf2ImobHxoHgO1ePmw75ZK/5rAF/7vIYaDJWvlCVRpTMh
-	 9haiqQkQLrVIekmf6mFYIyU09N95emzVGbUSVgjHLhVKGsjETM284kSaf+uc+j7P10
-	 97vvttQ3TCum9mi8xTj1IbF8Dcwm6dizlP+IsWzVLSzvughY7VOkNmi5ZcEAVt1PvT
-	 A6ncQ600BvgvQ==
+	b=jRXEa/KYzSTYx6difv4h7k7TYQziMtP99ob/mIgs3ma1mfrJ7aSoypYDqA+ilUxxZ
+	 2il0efJ4ux/87uqcqlb2WXSXx1uIdIz9znZYAsQahMh8hU1hSgNskNs79oznvgmMjG
+	 md3sBfksXF8cX5pUiapK8RGREeIX7IsfAUJOkojtLBQyYW9HIQzhydTPdnZraW+azD
+	 8j6/PM7ezUFXx61dDHExCsZqk21VCsx7hUXTFMi6hA0up1Nz/Vh8ygfVZn5ZXwGhjz
+	 fVbSynlyzYu12pMgt8+0c5tiX+YgHTNW6LjZqNa2Gn/t+D3TjOVkPIj2hG3u3NyVtq
+	 V+Q0uQDWRohBQ==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -52,9 +52,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
-Date: Sat,  1 Mar 2025 10:47:49 +0000
-Message-ID: <20250301104749.36423-1-ziyao@disroot.org>
+Subject: [PATCH 8/8] arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
+Date: Sat,  1 Mar 2025 10:48:35 +0000
+Message-ID: <20250301104835.36439-1-ziyao@disroot.org>
 In-Reply-To: <20250301104250.36295-1-ziyao@disroot.org>
 References: <20250301104250.36295-1-ziyao@disroot.org>
 Precedence: bulk
@@ -65,102 +65,42 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-RK3528 features two SDIO controllers and one SD/MMC controller, describe
-them in devicetree. Since their sample and drive clocks are located in
-the VO and VPU GRFs, corresponding syscons are added to make these
-clocks available.
+SD-card is available on Radxa E20C board.
 
 Signed-off-by: Yao Zi <ziyao@disroot.org>
 ---
- arch/arm64/boot/dts/rockchip/rk3528.dtsi | 62 ++++++++++++++++++++++++
- 1 file changed, 62 insertions(+)
+ arch/arm64/boot/dts/rockchip/rk3528-radxa-e20c.dts | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/rockchip/rk3528.dtsi b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-index 5b334690356a..078c97fa1d9f 100644
---- a/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
-@@ -7,6 +7,7 @@
- #include <dt-bindings/interrupt-controller/arm-gic.h>
- #include <dt-bindings/interrupt-controller/irq.h>
- #include <dt-bindings/clock/rockchip,rk3528-cru.h>
-+#include <dt-bindings/reset/rockchip,rk3528-cru.h>
+diff --git a/arch/arm64/boot/dts/rockchip/rk3528-radxa-e20c.dts b/arch/arm64/boot/dts/rockchip/rk3528-radxa-e20c.dts
+index d2cdb63d4a9d..473065aa4228 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3528-radxa-e20c.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3528-radxa-e20c.dts
+@@ -12,6 +12,10 @@ / {
+ 	model = "Radxa E20C";
+ 	compatible = "radxa,e20c", "rockchip,rk3528";
  
- / {
- 	compatible = "rockchip,rk3528";
-@@ -122,6 +123,16 @@ gic: interrupt-controller@fed01000 {
- 			#interrupt-cells = <3>;
- 		};
- 
-+		vpu_grf: syscon@ff340000 {
-+			compatible = "rockchip,rk3528-vpu-grf", "syscon";
-+			reg = <0x0 0xff340000 0x0 0x8000>;
-+		};
++	aliases {
++		mmc0 = &sdmmc;
++	};
 +
-+		vo_grf: syscon@ff360000 {
-+			compatible = "rockchip,rk3528-vo-grf", "syscon";
-+			reg = <0x0 0xff360000 0x0 0x10000>;
-+		};
-+
- 		cru: clock-controller@ff4a0000 {
- 			compatible = "rockchip,rk3528-cru";
- 			reg = <0x0 0xff4a0000 0x0 0x30000>;
-@@ -251,5 +262,56 @@ uart7: serial@ffa28000 {
- 			reg-shift = <2>;
- 			status = "disabled";
- 		};
-+
-+		sdio0: mmc@ffc10000 {
-+			compatible = "rockchip,rk3528-dw-mshc",
-+				     "rockchip,rk3288-dw-mshc";
-+			reg = <0x0 0xffc10000 0x0 0x4000>;
-+			clocks = <&cru HCLK_SDIO0>,
-+				 <&cru CCLK_SRC_SDIO0>,
-+				 <&cru SCLK_SDIO0_DRV>,
-+				 <&cru SCLK_SDIO0_SAMPLE>;
-+			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-+			fifo-depth = <0x100>;
-+			interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <150000000>;
-+			resets = <&cru SRST_H_SDIO0>;
-+			reset-names = "reset";
-+			status = "disabled";
-+		};
-+
-+		sdio1: mmc@ffc20000 {
-+			compatible = "rockchip,rk3528-dw-mshc",
-+				     "rockchip,rk3288-dw-mshc";
-+			reg = <0x0 0xffc20000 0x0 0x4000>;
-+			clocks = <&cru HCLK_SDIO1>,
-+				 <&cru CCLK_SRC_SDIO1>,
-+				 <&cru SCLK_SDIO1_DRV>,
-+				 <&cru SCLK_SDIO1_SAMPLE>;
-+			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-+			fifo-depth = <0x100>;
-+			interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <150000000>;
-+			resets = <&cru SRST_H_SDIO1>;
-+			reset-names = "reset";
-+			status = "disabled";
-+		};
-+
-+		sdmmc: mmc@ffc30000 {
-+			compatible = "rockchip,rk3528-dw-mshc",
-+				     "rockchip,rk3288-dw-mshc";
-+			reg = <0x0 0xffc30000 0x0 0x4000>;
-+			clocks = <&cru HCLK_SDMMC0>,
-+				 <&cru CCLK_SRC_SDMMC0>,
-+				 <&cru SCLK_SDMMC_DRV>,
-+				 <&cru SCLK_SDMMC_SAMPLE>;
-+			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
-+			fifo-depth = <0x100>;
-+			interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
-+			max-frequency = <150000000>;
-+			resets = <&cru SRST_H_SDMMC0>;
-+			reset-names = "reset";
-+			status = "disabled";
-+		};
+ 	chosen {
+ 		stdout-path = "serial0:1500000n8";
  	};
+@@ -20,3 +24,13 @@ chosen {
+ &uart0 {
+ 	status = "okay";
  };
++
++&sdmmc {
++	bus-width = <4>;
++	cap-mmc-highspeed;
++	cap-sd-highspeed;
++	disable-wp;
++	rockchip,default-sample-phase = <90>;
++	sd-uhs-sdr104;
++	status = "okay";
++};
 -- 
 2.48.1
 
