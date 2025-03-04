@@ -1,110 +1,99 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from mail-m155101.qiye.163.com (mail-m155101.qiye.163.com [101.71.155.101])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 67C53234989
-	for <linux-mmc@vger.kernel.org>; Mon,  3 Mar 2025 21:14:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 299FF8472;
+	Tue,  4 Mar 2025 12:30:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.101
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741036451; cv=none; b=bj/dMAGdmFH4iIatf5syGUDklcBop1GLIb18GnIdEAV7FQNVBwJBJuXGrpAP1k1ZlrYUJVRkHY1/cFDsvOpEt3Yv3f5YDNYKB83EyRBgXZMIb5SS2d4Y9cRiAO18ox0uzOgpkdRsY273nRcbwkWFtpKWabyWk2ygBbFjOFVMokQ=
+	t=1741091462; cv=none; b=IhuHOvqBJa/GYuVicifJEY1yrslbjBRqZU8K68QHurTipGQj6LuPnJG13k2zw/aiz+GoqNA47d2AmjsisIiWX2ngMErR5E1yX6sFJ878hEp4HabzfJc8MrZGYPAbXPcAIfds9g/9dF2JtCW4GtoiI6fUESHZf7wgWb1flOKEE/k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741036451; c=relaxed/simple;
-	bh=mDBzmWK3I8axUWvM9woFA784FHYmqHhL8aBgw+A6tUI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=lPv9nfB0q+b4jCg8zZ22+HNoxfhaVezx4+qfIBpisEfpqDIQDULS0cIOXNfnSyIRYFQ8SflESrBu5HCeEyzAt+oohCQ/0NQqCDcgnDYF9aEWDvlv3scCdIvmLiBD16PUQMnF7L1qmZCdfI/BmVaMYi0wAihCm8AZX3FTnclsRJI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=Rx4YJvKO; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Rx4YJvKO"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=mDBz
-	mWK3I8axUWvM9woFA784FHYmqHhL8aBgw+A6tUI=; b=Rx4YJvKO0W6r0LLNEenx
-	4mnUuW941ddvQFK33oUQILjbpLKP8a+T0FvAMVaf5YP1Lw+xdEnS6d371NBcCf1g
-	z6d06p6TVO0EXxtdHRDOoDLNoTofmy4pqo4TlPaLVcg/GpeGuyu6Kqoob3T38rjv
-	Q0mmkhwAOS0GQvOHOiXeeWZgDLueqRU0iQZ2OekGupwu9CWK97uPVEyW5QyJpDXZ
-	YHPBpLTiGP6RvMTripBAEKL/OhxTwaq7kPyK0GvoDK+j/qdytkYJv4e8gqLL/zqm
-	h85hzj4SCbPmeqny423pgV1q6WefnbJQbDz8ZioLFav1ewg5rn4kUBSjdwUtupSr
-	Lg==
-Received: (qmail 2350727 invoked from network); 3 Mar 2025 22:14:02 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Mar 2025 22:14:02 +0100
-X-UD-Smtp-Session: l3s3148p1@HhesonYvzMQujns6
-Date: Mon, 3 Mar 2025 22:14:02 +0100
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: Re: [PATCH v5 2/2] mmc: renesas_sdhi: Add support for RZ/G3E SoC
-Message-ID: <Z8Ybmol4j8wn1ARl@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-References: <20250303113812.88014-1-biju.das.jz@bp.renesas.com>
- <20250303113812.88014-3-biju.das.jz@bp.renesas.com>
+	s=arc-20240116; t=1741091462; c=relaxed/simple;
+	bh=rYlHgkTpoEM6pxnQ8HCOUgXk8SpwcrCOoqmJPZDKZsU=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=NDdgPSJMyJsIt/6+Bxc3GKqhV2x8h/Pk9HQPjTvO4G3gzIiCwVfVTkrFXMasnFkBb2LW/68s5cAcC1BiXgzWn+kFm05lEDWEAPiM7KvblEwHIIsLclYifn8ZboagV7YZEp3vm8rbNt3F+Mqt0TJ7glnbSaroJRKLBLhtIU5uICM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=jmu.edu.cn; spf=pass smtp.mailfrom=jmu.edu.cn; arc=none smtp.client-ip=101.71.155.101
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=jmu.edu.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=jmu.edu.cn
+Received: from amadeus-Vostro-3710.lan (unknown [IPV6:240e:3b3:2c02:1dd0:e9f1:cb9a:640c:3ba3])
+	by smtp.qiye.163.com (Hmail) with ESMTP id ce62fafc;
+	Tue, 4 Mar 2025 20:15:38 +0800 (GMT+08:00)
+From: Chukun Pan <amadeus@jmu.edu.cn>
+To: ziyao@disroot.org
+Cc: conor+dt@kernel.org,
+	cristian.ciocaltea@collabora.com,
+	detlev.casanova@collabora.com,
+	devicetree@vger.kernel.org,
+	frank.wang@rock-chips.com,
+	heiko@sntech.de,
+	jonas@kwiboo.se,
+	krzk+dt@kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-clk@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-rockchip@lists.infradead.org,
+	Chukun Pan <amadeus@jmu.edu.cn>
+Subject: Re: [PATCH 8/8] arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
+Date: Tue,  4 Mar 2025 20:10:36 +0800
+Message-Id: <20250304121036.1453284-1-amadeus@jmu.edu.cn>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20250301104835.36439-1-ziyao@disroot.org>
+References: <20250301104835.36439-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="P+WspBq8aIzrweOF"
-Content-Disposition: inline
-In-Reply-To: <20250303113812.88014-3-biju.das.jz@bp.renesas.com>
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkZGkpJVh5CThgfT0lMTR4aSVYeHw5VEwETFhoSFy
+	QUDg9ZV1kYEgtZQVlJT0seQUgZSEFJGEtJQUofH0tBHkIdSkEYGUIaQU1PSxhBSBkaSFlXWRYaDx
+	IVHRRZQVlPS0hVSktISk5MTlVKS0tVSkJLS1kG
+X-HM-Tid: 0a95611544ad03a2kunmce62fafc
+X-HM-MType: 10
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6OE06KDo6SDIOI0IQAzEUDwxK
+	HEoKFCpVSlVKTE9KS0JLTkhCT05MVTMWGhIXVRoWGh8eDgg7ERYOVR4fDlUYFUVZV1kSC1lBWUlP
+	Sx5BSBlIQUkYS0lBSh8fS0EeQh1KQRgZQhpBTU9LGEFIGRpIWVdZCAFZQUxLSjcG
 
+Hi,
 
---P+WspBq8aIzrweOF
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> +	aliases {
+> +		mmc0 = &sdmmc;
 
-On Mon, Mar 03, 2025 at 11:38:08AM +0000, Biju Das wrote:
-> The SDHI/eMMC IPs in the RZ/G3E SoC are similar to those=C2=A0in R-Car Ge=
-n3.
-> However, the RZ/G3E SD0 channel has Voltage level control and PWEN pin
-> support via SD_STATUS register.
->=20
-> internal regulator support is added to control the voltage levels of
-> the SD pins via sd_iovs/sd_pwen bits in SD_STATUS register by populating
-> vqmmc-regulator child node.
->=20
-> SD1 and SD2 channels have gpio regulator support and internal regulator
-> support. Selection of the regulator is based on the regulator phandle.
-> Similar case for SD0 fixed voltage (eMMC) that uses fixed regulator and
-> SD0 non-fixed voltage (SD0) that uses internal regulator.
->=20
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+s/mmc0/mmc1
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> +&sdmmc {
+> +	bus-width = <4>;
+> +	cap-mmc-highspeed;
+> +	cap-sd-highspeed;
 
-Thanks!
+I think for sdcard, only cap-sd-highspeed
+is needed, not cap-mmc-highspeed?
 
+> +	disable-wp;
 
---P+WspBq8aIzrweOF
-Content-Type: application/pgp-signature; name="signature.asc"
+Missing pinctrl.
 
------BEGIN PGP SIGNATURE-----
+> +	rockchip,default-sample-phase = <90>;
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfGG5EACgkQFA3kzBSg
-KbZHPw//fUxiJAY1/f05JLkfUnnIyqDTQa8Mq2QZ6D/KvnagJcaXSjb0PRPtPlrz
-7Uf/3hjoDfKAWDNd+b5WyIlyVt/FWq+E8i5cEuWTSpcCK/49J3secbnkjCabiMzr
-w5BxPFTPjex7qz2RUjkMT+pZ+M08Jrkd9qTa41nmJsv5d4R+Kx2WjKGAp9Oz1Scp
-XLAqPC/xwUl4Umq19m1yYXSlZGhdJpnGaqbkxL3g/n3cUPg+YF/wQCK22UJXWbn9
-jU13vd2E2dsX3TjiuPVu5JNtAqQmswKOxqm540LpdGXUHB2/Do5em9qYf4L88ESe
-u/Om4D6/fquA42buFba5Dr0UL5iNlBIjQUhs43vcbkACBXfRTSHBtMMbtdQtqz6U
-pfwRSbBp4Ch8S477nT9uH792tME5LCbTj9pHT5GVgABFFSM6WaqlDprTJy2/FjtH
-rxNZ5mfl1Rmh/XQ0gTIOog+QZpAbegf5sfKRz5HVi1EWU2XhroUxOuLcVfVRMNik
-iyJUN20Kcl+qVWG/jmMxL36Nl3QtNtqaiT9DOHwpaTcuNxxGW+Q52p17yYkn+8uK
-+b8Xfrgr0snI7+aAYI4Siuo7mU66ydeyPtojMHsHpaobUC/oKra8tKeOJRxV6v1V
-UGJUbkwOEEwGoOyps/5jlUywDVg4EhOxhTA2LnC+qfWmbiJJrOM=
-=fyAj
------END PGP SIGNATURE-----
+It seems that all rk3528 devices need to set this
+default phase, so maybe this can be placed in dtsi?
 
---P+WspBq8aIzrweOF--
+> +	sd-uhs-sdr104;
+
+The rk3528 devices uses gpio to switch IO voltage, maybe
+more modes should be added here like vendor kernel?
+And these devices use 3.3V IO voltage by default.
+
+	sd-uhs-sdr12;
+	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
+
+Thanks,
+Chukun
+
+-- 
+2.25.1
+
