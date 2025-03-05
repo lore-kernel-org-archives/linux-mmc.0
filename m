@@ -1,37 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87A85253F1C;
-	Wed,  5 Mar 2025 19:43:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9BB725485F;
+	Wed,  5 Mar 2025 19:43:10 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741203785; cv=none; b=C93liXNXqElNEqa9NThlcW6M/gTbCKj05ErL+tlQ4NExQGb//PN3kkmL94yX8dwdR5Kevxo6SpxsCV7tk0mwvPUDLIyartFYd+cJLyOWiuKFPLzeO9T5HnfSi/JSNjt/dnVW4T6vLWC1xqlqBVmDIhHkHD6F5xZT1CnVrYWRGRg=
+	t=1741203793; cv=none; b=QGKB/ldyvLm3XBwqdKFhU1o+7JOQ00CVbnY4gBrk3C9K4r/t47Mpc2/I0XGv1D2r6ay3sqU8N1fkf9K0kAD2bU2qpGTTtg703/9kiEdF/eTdKxRuGbnkxIa5ouDf3Tu3HY0cixea4fox4NYIn+4W2l17VwgjGN2mOMKvuIlmHSo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741203785; c=relaxed/simple;
-	bh=jLhEuZAavYZV64SFD7Jfb/eazJpNnOasV/OkFoMIEWY=;
+	s=arc-20240116; t=1741203793; c=relaxed/simple;
+	bh=+LUmQPB+tURq91r5Yr6zdu4bs85M0PK3opWSYhnifBY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QP1+B2jhvKA8JrAz9sGxNXVFa5WNqZ8U3UKaNJciUZ5c9p5djkBpGM4OWOFT51q8pHb7wOY2d8Xoxldch/drqWIFBH4FdKTDhPLQpQJekkGjFrzEerO9ezOPwXkUTt0YkL5+FH7Oskxt4gMKRTJ9VTTTStr+GrbVW8cw+c5J7OU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=aAjF6t+0; arc=none smtp.client-ip=178.21.23.139
+	 MIME-Version; b=Zis0D61uU1Zj9kDH6l478PB4NBk1uFial3AkkvVweIJs8vt1vYfE3wlKL8LvMZ+dLf7P+n3GgJb/WYY4BzvmNd/mCt4XQCOqJBx74iPmZwROfpnxfMVLbavL31i0LjVtkzs0bLGuMzymE+uDq+PSCBR9UVAHZ+/WdrGaKEnXO+Q=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=XQQG5nF+; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="aAjF6t+0"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="XQQG5nF+"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id ED2F722BBD;
-	Wed,  5 Mar 2025 20:43:01 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id F357B20D00;
+	Wed,  5 Mar 2025 20:43:08 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id YaINrH71oD8d; Wed,  5 Mar 2025 20:43:01 +0100 (CET)
+ id fcFUuhmvejPn; Wed,  5 Mar 2025 20:43:08 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1741203781; bh=jLhEuZAavYZV64SFD7Jfb/eazJpNnOasV/OkFoMIEWY=;
+	t=1741203788; bh=+LUmQPB+tURq91r5Yr6zdu4bs85M0PK3opWSYhnifBY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=aAjF6t+0Mp+5Ac154kaRZFoQrjsS69VITdRo4WfV+DCM4Fz+tSTt4TZjoaJGRn6VW
-	 6QLLpQ+s1MYkgi1Jyg10u0iLF+FNgX/Yt9L7VdA6zrZQuUEs+quulYovz0VR7VEOlP
-	 o6KoZ73Qv1EDBA30kC3Q8Gwm98SDcBxTU00jF5552jFx+CPZQtjeI97LtuG9hVyzT7
-	 QueAM9tNEAZDlZyL8HqTy8sJrVwbmVaNnAS04sJ1W/MKCxAm8Di4rDN2jx0OEfzKMk
-	 xz+AfnwLuC1hruI+XDJVCrsurE0UXAMNwFP7G3eywEkwU79UK0wXDNwAIb93+il0xv
-	 hOthnnI/LWZTg==
+	b=XQQG5nF+p1VSPixYAnYKKG3oBzbPUWg5oYFpWZV5o0jm9ODr0MIpT39jycMnDRltY
+	 ipl507d/b96y6EDS6ZyP+Co/ssH/He+ZQ9ERa2/3gELnGLa63AuUMnkensjJm6k/qg
+	 f+CH1Y/yipr3WBvWaLM3YrHl8BBjP+peLCIn4VWAA7qBYasfyXFz1Q2o6RzNJQGPsK
+	 TfMlqaMBGMuNH+vL+ylSH0ix1GKHX1VobJblgfEJ+es3T+2UWZ5654NxWSMc6w2NWL
+	 l7oKAg2GtM85dv+nv4iwKGbvC7wulY5OHDTHAqw6VALGSzfQZ9a7YwvgbWYlh5mdfu
+	 FWCZDQgNh6+sg==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -52,9 +52,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH v2 2/8] dt-bindings: soc: rockchip: Add RK3528 VPU GRF syscon
-Date: Wed,  5 Mar 2025 19:42:11 +0000
-Message-ID: <20250305194217.47052-3-ziyao@disroot.org>
+Subject: [PATCH v2 3/8] dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3528
+Date: Wed,  5 Mar 2025 19:42:12 +0000
+Message-ID: <20250305194217.47052-4-ziyao@disroot.org>
 In-Reply-To: <20250305194217.47052-1-ziyao@disroot.org>
 References: <20250305194217.47052-1-ziyao@disroot.org>
 Precedence: bulk
@@ -65,26 +65,26 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add compatible string for VPU GRF found on RK3528 SoC.
+Add RK3528 compatible string for SD/SDIO interface.
 
 Signed-off-by: Yao Zi <ziyao@disroot.org>
 Acked-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/soc/rockchip/grf.yaml | 1 +
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
-index 98a0670359f6..2f61c1b95fea 100644
---- a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
-+++ b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
-@@ -17,6 +17,7 @@ properties:
-               - rockchip,rk3288-sgrf
-               - rockchip,rk3528-ioc-grf
-               - rockchip,rk3528-vo-grf
-+              - rockchip,rk3528-vpu-grf
-               - rockchip,rk3566-pipe-grf
-               - rockchip,rk3568-pcie3-phy-grf
-               - rockchip,rk3568-pipe-grf
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+index 06df1269f247..ea0feb733e32 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+@@ -38,6 +38,7 @@ properties:
+               - rockchip,rk3328-dw-mshc
+               - rockchip,rk3368-dw-mshc
+               - rockchip,rk3399-dw-mshc
++              - rockchip,rk3528-dw-mshc
+               - rockchip,rk3568-dw-mshc
+               - rockchip,rk3588-dw-mshc
+               - rockchip,rv1108-dw-mshc
 -- 
 2.48.1
 
