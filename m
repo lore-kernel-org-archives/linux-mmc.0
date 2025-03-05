@@ -1,37 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BFBA32512D9;
-	Wed,  5 Mar 2025 19:46:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B1C26FC3;
+	Wed,  5 Mar 2025 19:46:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741203974; cv=none; b=PNYLP5LLKpwtTl0bdpS1bhS40wNTUUupdt5z5thBRAG0s+rkinx7TKWljS/pQULbMZkBfW1boz9jYGj3a3j5i0jyK9xtP4BY3nOYyFO2C92QyvZB+f8PjZbYhktQktQKwRUa+yQOK+W6/Uu/V73t/bFuqWBjkd4uyQFRKqO/Jhg=
+	t=1741203994; cv=none; b=WJxQfLsBhih6ph7894Hz5/o68yTD87YQ1p+0jygN/1xYh2E87HDw1Odub202Qq077pAzg88q0KCjpZQBeSazD5km6BD8q7W9Eh9a9lOgKk5d0XP9VqoDBKQexdthgWkqO/qnIO4z13YuIZkHTEeXXznMSDJkz+9UAUCTlaHnmU0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741203974; c=relaxed/simple;
-	bh=R4aIj3VtgP3nzRQODwLmtHA8je9xAP+QLEm/30cUmmY=;
+	s=arc-20240116; t=1741203994; c=relaxed/simple;
+	bh=PKjtU6X4d0BMYFIAHp85g3ctIB6zYtcVyxlZgZ0SqSY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CPWa6hgu8OrmVNnp+dMNivaCnZbX44tc0bDsl/GDCZQgKTZnYGttCkmx9kmeKZia9B9S2A9x1ORUBDd2Nty1/F9iFSOskds25y7gG1ccUcTHEKXoepPzXAnXmBdXYld9hs4w6vlYzPDvfbb0Oe043XsjhE0giA/eE4qOAlGIyCA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=JKF943m2; arc=none smtp.client-ip=178.21.23.139
+	 MIME-Version; b=oHkqjn6DuoqebqzLHKwxqaN7JBkU7BHV2xntA/qrnYRweg7fVUu2M4Nq0fqSihvlMuQDaRT5FKhg92JzXfHrroxbcmrNberaUMxTgjwnDu2oed6axObHe9pXhJsOy7CIngu+qzanI9e4++/KQ2zKB2rlMmABeuS9RCGSbk7tXJw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=BiglscAi; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="JKF943m2"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="BiglscAi"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id 3E9F02531A;
-	Wed,  5 Mar 2025 20:46:11 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id B1A4220262;
+	Wed,  5 Mar 2025 20:46:31 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id cYil4KX2Hwuh; Wed,  5 Mar 2025 20:46:06 +0100 (CET)
+ id WOTQifpnZT0D; Wed,  5 Mar 2025 20:46:31 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1741203966; bh=R4aIj3VtgP3nzRQODwLmtHA8je9xAP+QLEm/30cUmmY=;
+	t=1741203991; bh=PKjtU6X4d0BMYFIAHp85g3ctIB6zYtcVyxlZgZ0SqSY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=JKF943m2r/RcCtYecED58Aa3AyJLTt1QwBpTAaWpqPx0UpRv99NFmhJu0GXEG1990
-	 GxYLFVZfLXK5AO4sJhA3sRgnTl6pBhhejdJNck/NCYYETqyciBibHdAgNgiUTaTJkZ
-	 LbMrftGZU3hybWl9gOACPlvGucOk9LwcyZXCCjgjgEpoczRBrsKXahgEhK9lW2x0jM
-	 lllqWPHEWb6GjlV4X7B0jpmdPI0dCsEjlRB9aunxpqg2Jtd6EVC0zZ/jT5P3f7WtFA
-	 JtP2udhoY5lRD7xGGjrdH3mpbBKgV8ejCblXJWPeMjXSrYIXlzUumwkitZeMzaOLWt
-	 /WXcpUOScGRgw==
+	b=BiglscAiQIrOV5Ag4smqrsqVfPlteU387gDZeDB6HnUQACBGXv/6lFueYVyFntbvh
+	 L3Xm2vefp6rucwM+R4oNuEKBSlexIYb5lCs1sUqFYPkaqdeO3O104h7ejWW/ARPuw/
+	 cUQFpaKDw8hewlYjGXsSllhdKcxJZP8Uo5XI20DHMbniQULrDfOlf+zpA1yGPUWj34
+	 rJnF5j4YCUlDeZMdA4JdISHrh3eDIaGoG9U1prvwgC3NK3TEfml7BLaviafzZG6mwY
+	 J6PDqYI/EAoI8pMBrXOKwEKGhiS9seECw/SjOrHyA84AhiP+Uk1j1JmbfzJHTS0/1l
+	 /cIELJkUS+iNA==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -52,9 +52,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH v2 6/8] clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
-Date: Wed,  5 Mar 2025 19:45:44 +0000
-Message-ID: <20250305194544.47155-1-ziyao@disroot.org>
+Subject: [PATCH v2 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
+Date: Wed,  5 Mar 2025 19:46:11 +0000
+Message-ID: <20250305194612.47171-1-ziyao@disroot.org>
 In-Reply-To: <20250305194217.47052-1-ziyao@disroot.org>
 References: <20250305194217.47052-1-ziyao@disroot.org>
 Precedence: bulk
@@ -65,129 +65,104 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These clocks locate in VO and VPU GRF, serving for SD/SDIO controller
-tuning purpose. Add their definitions and register them in driver if
-corresponding GRF is available.
-
-GRFs are looked up by compatible to simplify devicetree binding.
+RK3528 features two SDIO controllers and one SD/MMC controller, describe
+them in devicetree. Since their sample and drive clocks are located in
+the VO and VPU GRFs, corresponding syscons are added to make these
+clocks available.
 
 Signed-off-by: Yao Zi <ziyao@disroot.org>
 ---
- drivers/clk/rockchip/clk-rk3528.c | 61 ++++++++++++++++++++++++++++---
- drivers/clk/rockchip/clk.h        |  3 ++
- 2 files changed, 58 insertions(+), 6 deletions(-)
+ arch/arm64/boot/dts/rockchip/rk3528.dtsi | 70 ++++++++++++++++++++++++
+ 1 file changed, 70 insertions(+)
 
-diff --git a/drivers/clk/rockchip/clk-rk3528.c b/drivers/clk/rockchip/clk-rk3528.c
-index b8b577b902a0..5c133a642ff9 100644
---- a/drivers/clk/rockchip/clk-rk3528.c
-+++ b/drivers/clk/rockchip/clk-rk3528.c
-@@ -10,6 +10,8 @@
- #include <linux/of.h>
- #include <linux/of_device.h>
- #include <linux/platform_device.h>
-+#include <linux/mfd/syscon.h>
-+#include <linux/minmax.h>
+diff --git a/arch/arm64/boot/dts/rockchip/rk3528.dtsi b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+index d3e2a64ff2d5..363023314e9c 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3528.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+@@ -130,6 +130,16 @@ gic: interrupt-controller@fed01000 {
+ 			#interrupt-cells = <3>;
+ 		};
  
- #include <dt-bindings/clock/rockchip,rk3528-cru.h>
- 
-@@ -1061,23 +1063,64 @@ static struct rockchip_clk_branch rk3528_clk_branches[] __initdata = {
- 			0, 1, 1),
- };
- 
-+static struct rockchip_clk_branch rk3528_vo_clk_branches[] __initdata = {
-+	MMC_GRF(SCLK_SDMMC_DRV, "sdmmc_drv", "cclk_src_sdmmc0",
-+			RK3528_SDMMC_CON(0), 1),
-+	MMC_GRF(SCLK_SDMMC_SAMPLE, "sdmmc_sample", "cclk_src_sdmmc0",
-+			RK3528_SDMMC_CON(1), 1),
-+};
++		vpu_grf: syscon@ff340000 {
++			compatible = "rockchip,rk3528-vpu-grf", "syscon";
++			reg = <0x0 0xff340000 0x0 0x8000>;
++		};
 +
-+static struct rockchip_clk_branch rk3528_vpu_clk_branches[] __initdata = {
-+	MMC_GRF(SCLK_SDIO0_DRV, "sdio0_drv", "cclk_src_sdio0",
-+			RK3528_SDIO0_CON(0), 1),
-+	MMC_GRF(SCLK_SDIO0_SAMPLE, "sdio0_sample", "cclk_src_sdio0",
-+			RK3528_SDIO0_CON(1), 1),
-+	MMC_GRF(SCLK_SDIO1_DRV, "sdio1_drv", "cclk_src_sdio1",
-+			RK3528_SDIO1_CON(0), 1),
-+	MMC_GRF(SCLK_SDIO1_SAMPLE, "sdio1_sample", "cclk_src_sdio1",
-+			RK3528_SDIO1_CON(1), 1),
-+};
++		vo_grf: syscon@ff360000 {
++			compatible = "rockchip,rk3528-vo-grf", "syscon";
++			reg = <0x0 0xff360000 0x0 0x10000>;
++		};
 +
- static int __init clk_rk3528_probe(struct platform_device *pdev)
- {
--	struct rockchip_clk_provider *ctx;
-+	unsigned long nr_vpu_branches = ARRAY_SIZE(rk3528_vpu_clk_branches);
-+	unsigned long nr_vo_branches = ARRAY_SIZE(rk3528_vo_clk_branches);
-+	unsigned long nr_branches = ARRAY_SIZE(rk3528_clk_branches);
-+	unsigned long nr_clks, nr_vo_clks, nr_vpu_clks;
- 	struct device *dev = &pdev->dev;
- 	struct device_node *np = dev->of_node;
--	unsigned long nr_branches = ARRAY_SIZE(rk3528_clk_branches);
--	unsigned long nr_clks;
-+	struct rockchip_clk_provider *ctx;
-+	struct regmap *vo_grf, *vpu_grf;
- 	void __iomem *reg_base;
- 
--	nr_clks = rockchip_clk_find_max_clk_id(rk3528_clk_branches,
--					       nr_branches) + 1;
--
- 	reg_base = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(reg_base))
- 		return dev_err_probe(dev, PTR_ERR(reg_base),
- 				     "could not map cru region");
- 
-+	nr_clks = rockchip_clk_find_max_clk_id(rk3528_clk_branches,
-+					       nr_branches) + 1;
+ 		cru: clock-controller@ff4a0000 {
+ 			compatible = "rockchip,rk3528-cru";
+ 			reg = <0x0 0xff4a0000 0x0 0x30000>;
+@@ -274,6 +284,66 @@ saradc: adc@ffae0000 {
+ 			resets = <&cru SRST_P_SARADC>;
+ 			reset-names = "saradc-apb";
+ 			#io-channel-cells = <1>;
++		};
 +
-+	vo_grf = syscon_regmap_lookup_by_compatible("rockchip,rk3528-vo-grf");
-+	if (!IS_ERR(vo_grf)) {
-+		nr_vo_clks = rockchip_clk_find_max_clk_id(rk3528_vo_clk_branches,
-+							  nr_vo_branches) + 1;
-+		nr_clks = max(nr_clks, nr_vo_clks);
-+	} else if (PTR_ERR(vo_grf) != -ENODEV) {
-+		return dev_err_probe(dev, PTR_ERR(vo_grf),
-+				     "failed to look up VO GRF\n");
-+	}
++		sdio0: mmc@ffc10000 {
++			compatible = "rockchip,rk3528-dw-mshc",
++				     "rockchip,rk3288-dw-mshc";
++			reg = <0x0 0xffc10000 0x0 0x4000>;
++			clocks = <&cru HCLK_SDIO0>,
++				 <&cru CCLK_SRC_SDIO0>,
++				 <&cru SCLK_SDIO0_DRV>,
++				 <&cru SCLK_SDIO0_SAMPLE>;
++			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
++			fifo-depth = <0x100>;
++			interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <150000000>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&sdio0_bus4>, <&sdio0_clk>, <&sdio0_cmd>,
++				    <&sdio0_det>, <&sdio0_pwren>;
++			resets = <&cru SRST_H_SDIO0>;
++			reset-names = "reset";
++			status = "disabled";
++		};
 +
-+	vpu_grf = syscon_regmap_lookup_by_compatible("rockchip,rk3528-vpu-grf");
-+	if (!IS_ERR(vpu_grf)) {
-+		nr_vpu_clks = rockchip_clk_find_max_clk_id(rk3528_vpu_clk_branches,
-+							   nr_vpu_branches) + 1;
-+		nr_clks = max(nr_clks, nr_vpu_clks);
-+	} else if (PTR_ERR(vpu_grf) != -ENODEV) {
-+		return dev_err_probe(dev, PTR_ERR(vpu_grf),
-+				     "failed to look up VPU GRF\n");
-+	}
++		sdio1: mmc@ffc20000 {
++			compatible = "rockchip,rk3528-dw-mshc",
++				     "rockchip,rk3288-dw-mshc";
++			reg = <0x0 0xffc20000 0x0 0x4000>;
++			clocks = <&cru HCLK_SDIO1>,
++				 <&cru CCLK_SRC_SDIO1>,
++				 <&cru SCLK_SDIO1_DRV>,
++				 <&cru SCLK_SDIO1_SAMPLE>;
++			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
++			fifo-depth = <0x100>;
++			interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <150000000>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&sdio1_bus4>, <&sdio1_clk>, <&sdio1_cmd>,
++				    <&sdio1_det>, <&sdio1_pwren>;
++			resets = <&cru SRST_H_SDIO1>;
++			reset-names = "reset";
++			status = "disabled";
++		};
 +
- 	ctx = rockchip_clk_init(np, reg_base, nr_clks);
- 	if (IS_ERR(ctx))
- 		return dev_err_probe(dev, PTR_ERR(ctx),
-@@ -1091,6 +1134,12 @@ static int __init clk_rk3528_probe(struct platform_device *pdev)
- 				     &rk3528_cpuclk_data, rk3528_cpuclk_rates,
- 				     ARRAY_SIZE(rk3528_cpuclk_rates));
- 	rockchip_clk_register_branches(ctx, rk3528_clk_branches, nr_branches);
-+	if (!IS_ERR(vo_grf))
-+		rockchip_clk_register_grf_branches(ctx, rk3528_vo_clk_branches,
-+						   vo_grf, nr_vo_branches);
-+	if (!IS_ERR(vpu_grf))
-+		rockchip_clk_register_grf_branches(ctx, rk3528_vpu_clk_branches,
-+						   vpu_grf, nr_vpu_branches);
++		sdmmc: mmc@ffc30000 {
++			compatible = "rockchip,rk3528-dw-mshc",
++				     "rockchip,rk3288-dw-mshc";
++			reg = <0x0 0xffc30000 0x0 0x4000>;
++			clocks = <&cru HCLK_SDMMC0>,
++				 <&cru CCLK_SRC_SDMMC0>,
++				 <&cru SCLK_SDMMC_DRV>,
++				 <&cru SCLK_SDMMC_SAMPLE>;
++			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
++			fifo-depth = <0x100>;
++			interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
++			max-frequency = <150000000>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&sdmmc_bus4>, <&sdmmc_clk>, <&sdmmc_cmd>,
++				    <&sdmmc_det>;
++			resets = <&cru SRST_H_SDMMC0>;
++			reset-names = "reset";
++			rockchip,default-sample-phase = <90>;
+ 			status = "disabled";
+ 		};
  
- 	rk3528_rst_init(np, reg_base);
- 
-diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
-index ec86ba1dd38c..f07cd1bb8952 100644
---- a/drivers/clk/rockchip/clk.h
-+++ b/drivers/clk/rockchip/clk.h
-@@ -217,6 +217,9 @@ struct clk;
- #define RK3528_CLKSEL_CON(x)		((x) * 0x4 + 0x300)
- #define RK3528_CLKGATE_CON(x)		((x) * 0x4 + 0x800)
- #define RK3528_SOFTRST_CON(x)		((x) * 0x4 + 0xa00)
-+#define RK3528_SDMMC_CON(x)		((x) * 0x4 + 0x24)
-+#define RK3528_SDIO0_CON(x)		((x) * 0x4 + 0x4)
-+#define RK3528_SDIO1_CON(x)		((x) * 0x4 + 0xc)
- #define RK3528_PMU_CLKSEL_CON(x)	((x) * 0x4 + 0x300 + RK3528_PMU_CRU_BASE)
- #define RK3528_PMU_CLKGATE_CON(x)	((x) * 0x4 + 0x800 + RK3528_PMU_CRU_BASE)
- #define RK3528_PCIE_CLKSEL_CON(x)	((x) * 0x4 + 0x300 + RK3528_PCIE_CRU_BASE)
 -- 
 2.48.1
 
