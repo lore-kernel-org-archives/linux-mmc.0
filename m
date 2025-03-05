@@ -1,37 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9BB725485F;
-	Wed,  5 Mar 2025 19:43:10 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51A8325485F;
+	Wed,  5 Mar 2025 19:43:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741203793; cv=none; b=QGKB/ldyvLm3XBwqdKFhU1o+7JOQ00CVbnY4gBrk3C9K4r/t47Mpc2/I0XGv1D2r6ay3sqU8N1fkf9K0kAD2bU2qpGTTtg703/9kiEdF/eTdKxRuGbnkxIa5ouDf3Tu3HY0cixea4fox4NYIn+4W2l17VwgjGN2mOMKvuIlmHSo=
+	t=1741203798; cv=none; b=jt/fEUYBNPWCQL1mlbzae841Me6TD7eeW8X0O3QPOZa9NX37bx4fUzGyx8CsQrelQY3sqybV+Qn5M/TPHX5YLGALhjl96Ir7MPjKh0+2VWTXEndxb7UBSDRdMctQeu8USxVipD2kJOvDqUQj/M+12cYhNcWOEbLJyUxRrE+BBjk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741203793; c=relaxed/simple;
-	bh=+LUmQPB+tURq91r5Yr6zdu4bs85M0PK3opWSYhnifBY=;
+	s=arc-20240116; t=1741203798; c=relaxed/simple;
+	bh=zwk+LtszMoHSIYjGCAqbuOU0QSVYlP5K54ulz6VjFyA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Zis0D61uU1Zj9kDH6l478PB4NBk1uFial3AkkvVweIJs8vt1vYfE3wlKL8LvMZ+dLf7P+n3GgJb/WYY4BzvmNd/mCt4XQCOqJBx74iPmZwROfpnxfMVLbavL31i0LjVtkzs0bLGuMzymE+uDq+PSCBR9UVAHZ+/WdrGaKEnXO+Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=XQQG5nF+; arc=none smtp.client-ip=178.21.23.139
+	 MIME-Version; b=qrV1dPppOmfC1yb0zlnWOLpFAARmLiCcWulh+rCU3z/xFh9Q/Bgmbf8B/eeqMVwlIbmSPpWLpRGNBIDxl47BOu+y2xQf9Y0j9GqNt2R1i+lYk85UIAugNZon1TiWs6s3ZtyDcN8vA5VpsfXMXQrQFK6SU8gccEDJz2Nx/YXDyOo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=dMOyrpQq; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="XQQG5nF+"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="dMOyrpQq"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id F357B20D00;
-	Wed,  5 Mar 2025 20:43:08 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id E157A2027D;
+	Wed,  5 Mar 2025 20:43:15 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id fcFUuhmvejPn; Wed,  5 Mar 2025 20:43:08 +0100 (CET)
+ id digvX98RG3a5; Wed,  5 Mar 2025 20:43:15 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1741203788; bh=+LUmQPB+tURq91r5Yr6zdu4bs85M0PK3opWSYhnifBY=;
+	t=1741203795; bh=zwk+LtszMoHSIYjGCAqbuOU0QSVYlP5K54ulz6VjFyA=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=XQQG5nF+p1VSPixYAnYKKG3oBzbPUWg5oYFpWZV5o0jm9ODr0MIpT39jycMnDRltY
-	 ipl507d/b96y6EDS6ZyP+Co/ssH/He+ZQ9ERa2/3gELnGLa63AuUMnkensjJm6k/qg
-	 f+CH1Y/yipr3WBvWaLM3YrHl8BBjP+peLCIn4VWAA7qBYasfyXFz1Q2o6RzNJQGPsK
-	 TfMlqaMBGMuNH+vL+ylSH0ix1GKHX1VobJblgfEJ+es3T+2UWZ5654NxWSMc6w2NWL
-	 l7oKAg2GtM85dv+nv4iwKGbvC7wulY5OHDTHAqw6VALGSzfQZ9a7YwvgbWYlh5mdfu
-	 FWCZDQgNh6+sg==
+	b=dMOyrpQqgPQSf1wp0pYbJprF2EN5v9yjL9wWhs8kYXE+EVTxh2kF/8EEXwp9LZlL5
+	 9JTvqmWW/8nK9FBxN/XPXaJLUOJkzM9DAobzzZGdIAuCK1Q4i93f3H4MQmtvVDLneF
+	 6VQro+WO3BjeGpP5rLXOExNnFhEohf+vCxfyTWYGDBg/sWisgkT7R6e6h2KLbMOEp/
+	 JG09CuDSUactnqyXv+S7yQcxMLSuwTT3xR7iji38yqDsNI0B7UapMRwNSJPcWh19gY
+	 FK9d+DtTS34YFuvaYGQYgzv35IYi9KaTwm4Tnj3NRMFNNmfUgPnkCkmmSv3EuF2fQo
+	 k5jQZ4B4aPBBQ==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -52,9 +52,9 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH v2 3/8] dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3528
-Date: Wed,  5 Mar 2025 19:42:12 +0000
-Message-ID: <20250305194217.47052-4-ziyao@disroot.org>
+Subject: [PATCH v2 4/8] dt-bindings: clock: Add GRF clock definition for RK3528
+Date: Wed,  5 Mar 2025 19:42:13 +0000
+Message-ID: <20250305194217.47052-5-ziyao@disroot.org>
 In-Reply-To: <20250305194217.47052-1-ziyao@disroot.org>
 References: <20250305194217.47052-1-ziyao@disroot.org>
 Precedence: bulk
@@ -65,26 +65,31 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Add RK3528 compatible string for SD/SDIO interface.
+These clocks are for SD/SDIO tuning purpose and come with registers
+in GRF syscon.
 
 Signed-off-by: Yao Zi <ziyao@disroot.org>
-Acked-by: Rob Herring (Arm) <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ include/dt-bindings/clock/rockchip,rk3528-cru.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index 06df1269f247..ea0feb733e32 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -38,6 +38,7 @@ properties:
-               - rockchip,rk3328-dw-mshc
-               - rockchip,rk3368-dw-mshc
-               - rockchip,rk3399-dw-mshc
-+              - rockchip,rk3528-dw-mshc
-               - rockchip,rk3568-dw-mshc
-               - rockchip,rk3588-dw-mshc
-               - rockchip,rv1108-dw-mshc
+diff --git a/include/dt-bindings/clock/rockchip,rk3528-cru.h b/include/dt-bindings/clock/rockchip,rk3528-cru.h
+index 55a448f5ed6d..0245a53fc334 100644
+--- a/include/dt-bindings/clock/rockchip,rk3528-cru.h
++++ b/include/dt-bindings/clock/rockchip,rk3528-cru.h
+@@ -414,6 +414,12 @@
+ #define MCLK_I2S2_2CH_SAI_SRC_PRE	402
+ #define MCLK_I2S3_8CH_SAI_SRC_PRE	403
+ #define MCLK_SDPDIF_SRC_PRE		404
++#define SCLK_SDMMC_DRV			405
++#define SCLK_SDMMC_SAMPLE		406
++#define SCLK_SDIO0_DRV			407
++#define SCLK_SDIO0_SAMPLE		408
++#define SCLK_SDIO1_DRV			409
++#define SCLK_SDIO1_SAMPLE		410
+ 
+ /* scmi-clocks indices */
+ #define SCMI_PCLK_KEYREADER		0
 -- 
 2.48.1
 
