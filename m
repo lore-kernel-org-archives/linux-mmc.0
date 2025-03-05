@@ -1,36 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D641C2512F6;
-	Wed,  5 Mar 2025 19:42:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 05D7725484C;
+	Wed,  5 Mar 2025 19:42:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741203776; cv=none; b=sc4wTNMA8iQkorMnKoBiPU3qi4KXFhimZH0ny6vUxys0x4Jx1tDFuM6eYISF+JrObbfZY3o/1T5qXzDVuKU499dG1SyzBdMsjEnU2PORMQQ1KTkJ74Nx668vDzxpZINZqAc6gvegCARwtLkXmoQv0QlPb0tqiYc79l9dG2ptU0A=
+	t=1741203778; cv=none; b=usmB9EDMxVl2bvxrxKjUF2sIbJDCCg+DVDeWuqpxT7igWJg7oZNPp+kBVWEFYXccJFaQx6AiKgOtcbkDTdkBcCLaOLiwHRLBgqOwQx3MPjPXL9e0q6vWoYT+yvazYAvhLSsKT7M/CebRKxs8jMV1XV+ZHutCmgLh+oKhHSpSW2Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741203776; c=relaxed/simple;
-	bh=xhnqWstTVBqsoGCfx5R5bpNmekaP3M85MkZUJ3rzXvI=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rFZDkFWb8XQHKNIaBtLQjQfk2KAaWJcgAQ34QOFUY3SSMh8OAfnZTFDmn0EIXsum1cn7RESCF71UEgKZIpRYFAKToFISPC0cc05jPzD02kMyMFcOd2ktv8u5VgZFGjZYJKP+jbb1JOijUaAyPi5wcBQ1tYLQCEA4viOZkJ10nOY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=BHsjmw1N; arc=none smtp.client-ip=178.21.23.139
+	s=arc-20240116; t=1741203778; c=relaxed/simple;
+	bh=0w6AH/+Pjx6GOhW5OHJloAK6RQNG/idzAG52ka4prcw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=cJDXbgT+l+2pDAfCgmfLmrelGrilF+ik0Txc7kAzpKfxXnA0m4Js8L/MHs/MZGAIKVwyQwtZZocG6pfdGXgDEv87OG0BeCb/Rc5Q3Z1Qe5+CEW5v3MF+07vyL7OVkggQR6IFTTvaBEh4F5oOB12kp+uQ53mxc6BXhpPY7ZpwoTA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=CCUvCB8b; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="BHsjmw1N"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="CCUvCB8b"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id AEBE820A23;
-	Wed,  5 Mar 2025 20:42:51 +0100 (CET)
+	by disroot.org (Postfix) with ESMTP id 1448C2027D;
+	Wed,  5 Mar 2025 20:42:55 +0100 (CET)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id jLjYbJU3XEKF; Wed,  5 Mar 2025 20:42:47 +0100 (CET)
+ id V19E6CI3sk-W; Wed,  5 Mar 2025 20:42:54 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1741203767; bh=xhnqWstTVBqsoGCfx5R5bpNmekaP3M85MkZUJ3rzXvI=;
-	h=From:To:Cc:Subject:Date;
-	b=BHsjmw1NIdU8Vfb/85SnYm8FxLRazHlpx5yPR5c2KLnT645/cqBdRgqVeP1bmahOi
-	 Oyp6VqYtoI/BEa/elWERqHd89ixylu8sBKE8rxrEnRVoid+OvpXsvkX7Q6JPxEaVDt
-	 IiQBPZB4NubJ6Z3cd2B7/SbjJ2Xs0cY1lg57sssGtcAgr3BNSma06qCVM98ISlDD//
-	 obyzDfFulvUggNZHymTaNuQ04t8grtiKHmM7qFwufypzqgvIF/vKKM+OgBqnmXH8wD
-	 8MuhLKl915iuJcwGltjGtit45NvV1dEhbqlBWE2WkChXC92a1g45kv0M7iz6vkJ+G/
-	 aSrEWYkQi/U0Q==
+	t=1741203774; bh=0w6AH/+Pjx6GOhW5OHJloAK6RQNG/idzAG52ka4prcw=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=CCUvCB8bjEPGJ4g2iFe1OWJh9DezYCD6hGDi7qqBtroOh4r2us2NHXo/AwvxH1J0C
+	 K4UNLv8h9Y0lQfENnRpz2wEC8hrgfhORvPyjZQSJBxi7pSpM1VqHYY+sGA/l7cOVS9
+	 RHwdSVr97y3tv+y6lY3g16M5U2cLwfQDz6N+9nm4lT2lfA7vb9+nMcTgZzw4OJ0HN7
+	 +iezGH+9E3MazcetypMtqGhNpo1lP7VUZzwmO4Cacl2jMqvCrOwFXFsmyeFRkiD+Wo
+	 46UpOqMgK8sYe2IMYOBW8CDeYUC68165Wgh7PLgGtiICPRVS/oV+9vsKNZ3tHTJ/ko
+	 5EXgzxDJlWGyQ==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -51,9 +52,11 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
 	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH v2 0/8] Support SD/SDIO controllers on RK3528
-Date: Wed,  5 Mar 2025 19:42:09 +0000
-Message-ID: <20250305194217.47052-1-ziyao@disroot.org>
+Subject: [PATCH v2 1/8] dt-bindings: soc: rockchip: Add RK3528 VO GRF syscon
+Date: Wed,  5 Mar 2025 19:42:10 +0000
+Message-ID: <20250305194217.47052-2-ziyao@disroot.org>
+In-Reply-To: <20250305194217.47052-1-ziyao@disroot.org>
+References: <20250305194217.47052-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,58 +65,26 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-RK3528 features two SDIO controllers and one SD/MMC controller. This
-series adds essential support for their tuning clocks, document the
-controller in dt-bindings and bring the SD/MMC one up on Radxa E20C
-board. Both HS and SDR104 mode are verified.
+Add compatible string for VO GRF found on RK3528 SoC.
 
-This is based on v2 of the SARADC series[1]
+Signed-off-by: Yao Zi <ziyao@disroot.org>
+Acked-by: Rob Herring (Arm) <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/soc/rockchip/grf.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-- Changed from v1
-  - Apply review tags
-  - Rebase on top of linux-rockchip/for-next and saradc v2 series
-  - rk3528 clock driver:
-    - explicitly include minmax.h, replace MAX() with more robust max()
-    - readability improvements
-    - fix error checks: ERR_PTR(-ENODEV), instead of ERR_PTR(ENODEV), is
-      returned when syscon_regmap_lookup_by_compatible() fails for missing
-      such syscon
-  - RK3528 devicetree
-    - Add default pinctrl
-    - Move the per-SoC property, rockchip,default-sample-phase, into the
-      SoC devicetree
-  - rk3528-radxa-e20c devicetree
-    - Assign sdcard to mmc1
-    - Add missing regulators
-    - Apply no-sdio for the sdmmc controller
-    - Sort nodes
-  - Link to v1: https://lore.kernel.org/all/20250301104250.36295-1-ziyao@disroot.org/
-
-Thanks for your time and review.
-
-[1]: https://lore.kernel.org/all/20250304201642.831218-1-jonas@kwiboo.se/
-
-Yao Zi (8):
-  dt-bindings: soc: rockchip: Add RK3528 VO GRF syscon
-  dt-bindings: soc: rockchip: Add RK3528 VPU GRF syscon
-  dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3528
-  dt-bindings: clock: Add GRF clock definition for RK3528
-  clk: rockchip: Support MMC clocks in GRF region
-  clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
-  arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
-  arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
-
- .../bindings/mmc/rockchip-dw-mshc.yaml        |  1 +
- .../devicetree/bindings/soc/rockchip/grf.yaml |  2 +
- .../boot/dts/rockchip/rk3528-radxa-e20c.dts   | 34 +++++++++
- arch/arm64/boot/dts/rockchip/rk3528.dtsi      | 70 +++++++++++++++++++
- drivers/clk/rockchip/clk-mmc-phase.c          | 24 +++++--
- drivers/clk/rockchip/clk-rk3528.c             | 61 ++++++++++++++--
- drivers/clk/rockchip/clk.c                    | 42 +++++++++++
- drivers/clk/rockchip/clk.h                    | 23 +++++-
- .../dt-bindings/clock/rockchip,rk3528-cru.h   |  6 ++
- 9 files changed, 252 insertions(+), 11 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+index b4ed4cb555bd..98a0670359f6 100644
+--- a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
++++ b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+@@ -16,6 +16,7 @@ properties:
+           - enum:
+               - rockchip,rk3288-sgrf
+               - rockchip,rk3528-ioc-grf
++              - rockchip,rk3528-vo-grf
+               - rockchip,rk3566-pipe-grf
+               - rockchip,rk3568-pcie3-phy-grf
+               - rockchip,rk3568-pipe-grf
 -- 
 2.48.1
 
