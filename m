@@ -1,68 +1,91 @@
-Received: from mail-m155101.qiye.163.com (mail-m155101.qiye.163.com [101.71.155.101])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp.forwardemail.net (smtp.forwardemail.net [121.127.44.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE6F81DF759;
-	Thu,  6 Mar 2025 09:02:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.101
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B20292080C5
+	for <linux-mmc@vger.kernel.org>; Thu,  6 Mar 2025 09:16:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=121.127.44.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741251747; cv=none; b=JO7Hl1bkT+VGaIz1hCbnRfHvj0cxzD7moAmwyjU4oMaPHZ7QUvwDahwxcLqgD0Rop3igE9engTPPzD8el3ilDeC12H4OhsmlvEXaZCBA8g7o7F7Nk7tHmq6QLCLyoeI4pnawwsHr3x+0mu9P7xIBYFqjVeKyj9HC2rHZ8/gSIDo=
+	t=1741252581; cv=none; b=P0rexdx+UddGbMhO4mYErOkC/XfGVfVcEoOrsTXWmJoNgKb4WbHdzWULVFCnAnHJxtMoC64qa3VUbVq3E9oVA+myhFFqNIFHAaK3KubIxFuS8ffDNFknCEf3g65f6415avexlSHe2HFLLWg1zAtC+AVJ0XjIWJ3Xc7SAhp1RyGs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741251747; c=relaxed/simple;
-	bh=D9/WEW6tyPw9DbuSZopa9attlAEU5bOtQtJOBNnThlg=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=fN02le5vkwQoB4H5sOq7BKybK4Z/aBRGb91v9bL4qIuWESP6HjyW2zU/HH65bdV2NX8ToZLVzH0kmCsAAGX39WubR+jfhSMLxcATxcZl8MjaJqaO60O/eeFH4jnhi80QkEwLiQgnvIBXcrblbsIxiPiBHrT9/SyHy8JVIvkTtiU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=jmu.edu.cn; spf=pass smtp.mailfrom=jmu.edu.cn; arc=none smtp.client-ip=101.71.155.101
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=jmu.edu.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=jmu.edu.cn
-Received: from amadeus-Vostro-3710.lan (unknown [119.122.215.89])
-	by smtp.qiye.163.com (Hmail) with ESMTP id d2603c59;
-	Thu, 6 Mar 2025 17:02:11 +0800 (GMT+08:00)
-From: Chukun Pan <amadeus@jmu.edu.cn>
-To: jonas@kwiboo.se
-Cc: conor+dt@kernel.org,
-	devicetree@vger.kernel.org,
-	heiko@sntech.de,
-	krzk+dt@kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-rockchip@lists.infradead.org,
-	Chukun Pan <amadeus@jmu.edu.cn>
-Subject: Re: [PATCH 0/3] rockchip: Add support for onboard eMMC on Radxa E20C
-Date: Thu,  6 Mar 2025 17:00:01 +0800
-Message-Id: <20250306090001.113127-1-amadeus@jmu.edu.cn>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20250305214108.1327208-1-jonas@kwiboo.se>
-References: <20250305214108.1327208-1-jonas@kwiboo.se>
+	s=arc-20240116; t=1741252581; c=relaxed/simple;
+	bh=ez7fXHbcJGYq2SnIqFCwWZQdodHUT0BjextfpLy9HLs=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=uR1d8yUwBZvZUebESeakNi5CRlcrNwYzn0dd+uhcFPuT1mUcIjc3nWPQRlSd8AMfUCGkjQRuSzm1uyoSe+QQWS8eYKhbGZU9N8hAP+31Zt37C2NBjQ0hO8wWbnHfOUClO9t1IHof2011ydAx6uGCCUB+Ssdsd3MyFmIECy1XaiU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se; dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b=odWYKnCV; arc=none smtp.client-ip=121.127.44.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b="odWYKnCV"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kwiboo.se;
+ h=Content-Transfer-Encoding: Content-Type: In-Reply-To: From: References:
+ Cc: To: Subject: MIME-Version: Date: Message-ID; q=dns/txt;
+ s=fe-e1b5cab7be; t=1741252570;
+ bh=U6wIo8sTMBr3RbRnbR8Rzc/ze/1O+F9622aQgZcZWCQ=;
+ b=odWYKnCVGaDPms2yTTGriGNTt27y6M/lLAyJTmNvD+xpvmcC63VS49U0KvMiCcArwIoOxVRHr
+ jM4XbYdz14+0p48RCGTwEWHSWZvJ9tg9GtyLzFGG6p7Yz+MQUGDrrsgSDNKn6pC0XYUeZHwJluN
+ pCKNDt+NItX+LhKgRgsvPSkhM+eo+OSgc+PNLwq0PeeO2zayn5axD37tSnbts6mwciooNkvEWtB
+ 4ndSk1mTisFVNUE4QHbrMpBLcKnxrTQsLPnlQUwSSH2HAKjkCFMEmOMA2oUTjwk4kUu6X1nCigj
+ sF03y5g3XjnbQUqvK9WRgIBWyCgOCfSqK7U5m6q30yZg==
+X-Forward-Email-ID: 67c967d67c40f20919024cb4
+X-Forward-Email-Sender: rfc822; jonas@kwiboo.se, smtp.forwardemail.net,
+ 121.127.44.73
+X-Forward-Email-Version: 0.4.40
+X-Forward-Email-Website: https://forwardemail.net
+X-Complaints-To: abuse@forwardemail.net
+X-Report-Abuse: abuse@forwardemail.net
+X-Report-Abuse-To: abuse@forwardemail.net
+Message-ID: <ccd8be6a-c8d4-407b-906a-e4788a365775@kwiboo.se>
+Date: Thu, 6 Mar 2025 10:16:00 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlCHR5PVkJOQktIQ0gdTE1MGVYeHw5VEwETFhoSFy
-	QUDg9ZV1kYEgtZQVlKSkJVSklJVUlKTlVDQllXWRYaDxIVHRRZQVlPS0hVSktISk5MTlVKS0tVSk
-	JLS1kG
-X-HM-Tid: 0a956ab0e16203a2kunmd2603c59
-X-HM-MType: 10
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MDo6Dww5SjJKIjwxDjgIPkIR
-	AS8wFENVSlVKTE9KSU5KTEhJQkxOVTMWGhIXVRoWGh8eDgg7ERYOVR4fDlUYFUVZV1kSC1lBWUpK
-	QlVKSUlVSUpOVUNCWVdZCAFZQUhISTcG
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/3] rockchip: Add support for onboard eMMC on Radxa E20C
+To: Chukun Pan <amadeus@jmu.edu.cn>
+Cc: conor+dt@kernel.org, devicetree@vger.kernel.org, heiko@sntech.de,
+ krzk+dt@kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+ linux-rockchip@lists.infradead.org
+References: <20250305214108.1327208-1-jonas@kwiboo.se>
+ <20250306090001.113127-1-amadeus@jmu.edu.cn>
+Content-Language: en-US
+From: Jonas Karlman <jonas@kwiboo.se>
+In-Reply-To: <20250306090001.113127-1-amadeus@jmu.edu.cn>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi,
+Hi Chukun,
 
-> Driver changes to use different delay and tap num is needed to be able
-> to support HS400 modes, something for a future series. With this HS200
-> mode should work:
+On 2025-03-06 10:00, Chukun Pan wrote:
+> Hi,
+> 
+>> Driver changes to use different delay and tap num is needed to be able
+>> to support HS400 modes, something for a future series. With this HS200
+>> mode should work:
+> 
+> I have tried HS200 mode on other rk3528 boards and it works fine,
+> so can we enable HS200 mode for Radxa E20C first?
 
-I have tried HS200 mode on other rk3528 boards and it works fine,
-so can we enable HS200 mode for Radxa E20C first?
+The host controller already report the HS200 mode, and as shown in cover
+letter HS200 mode is being enabled/used with this series.
 
-Thanks,
-Chukun
+However, the driver must use different tap/delay num for HS400(ES) modes.
+At top of [1] there is a commit that changes to use same tap/delay num
+as vendor kernel and what I have tested worked in U-Boot. That commit
+needs to be re-worked before it is ready. Also see [2] for pending work
+before I plan to complete before moving on to the dwcmshc driver.
 
--- 
-2.25.1
+[1] https://github.com/Kwiboo/linux-rockchip/commits/next-20250227-rk3528-rk3506/
+[2] https://github.com/Kwiboo/linux-rockchip/commits/next-20250305-rk3528/
+
+Regards,
+Jonas
+
+> 
+> Thanks,
+> Chukun
+> 
 
