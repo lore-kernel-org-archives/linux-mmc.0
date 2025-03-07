@@ -1,90 +1,176 @@
-Received: from mx0b-00300601.pphosted.com (mx0b-00300601.pphosted.com [148.163.142.35])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp.forwardemail.net (smtp.forwardemail.net [121.127.44.73])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7246C18A95A;
-	Fri,  7 Mar 2025 21:17:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.142.35
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D645B259CA9
+	for <linux-mmc@vger.kernel.org>; Fri,  7 Mar 2025 23:23:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=121.127.44.73
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741382276; cv=none; b=h/UgUgMw+UXl9Dh5nuemVTTee7dfDySqZIDm/AmNyGRyGxIXcW4UcR1n4/Oe3I4Ml0ID3AybYrhT0qP/woo3qidqxFRmyNZSgee/vUoIV+y8YrZ1h4Sdi20/t/1r5DW/beSWy3WtTJeQK3s7kmalBSCup/sNGKMGTemGQp9nb28=
+	t=1741389788; cv=none; b=hogMGd3rYQrcidJmnrOxGQnePuAGozyeBkpyGIueb4Na3BSKKAKCcA4py9+0izaVq8ShBhCR9UlLAld4V4v1pEQAe0IG17HVOZAEuPv33pRSXm7VtAJhKMhKMWrMNYC8jFQDcOx/MMfkAydaCK+mOSCR8wHEQUvWceE+o9tRdqI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741382276; c=relaxed/simple;
-	bh=9nqsUliP7VaF84mGly7RCjKUjk1uHgnRm+GdjGl+ogs=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=nriNps4u0Szr/YE9BDFWcPXfGeCgRCv0/MD2wwhndepapvntThV6TQyCIkqGTQvubxf7OhFzfIAwZcrr7TuK8XV3cuZs6CaheNUTv5fyBaeEaaf/deoN7oorm1qaAPU5bD5l1ajKgKAv6XoeoQTf0bCvbtQH55vmu+tAe31yvY4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=hX8zxLAZ; arc=none smtp.client-ip=148.163.142.35
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
+	s=arc-20240116; t=1741389788; c=relaxed/simple;
+	bh=G7ePHamfmNO0BgmpReDWmfPU5PII/oFI2xQp7oy/HtM=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=UkCxg3WmTWfQjZBJJ0xJdwWY+aea7PbjtYAvsPnuywwmxnkv/q8iZf6bwcAI678/2Ac+D/bSji8vkEMoPYCn7Lu53tLl954Uw+I3ECDdso/BJv2gnpJUk4GbZZtk00H2hE06gtxbnORA++XnQYVio9h0foqbAdIfO3DyeCR4TCM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se; dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b=gsBzhqP4; arc=none smtp.client-ip=121.127.44.73
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="hX8zxLAZ"
-Received: from pps.filterd (m0144091.ppops.net [127.0.0.1])
-	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 527Jsh3I016327;
-	Fri, 7 Mar 2025 21:17:21 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
-	:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=PPS11142024;
-	 bh=evfmT0wKrye5QUCPV7QKE75lidrnU57zijRq3rZQTdA=; b=hX8zxLAZ0kEv
-	Vh/S4b05aT82vAu7bn/v4MJQT3OnracBL9Zt3/8UETql6tUzxqAvvybZbfhipi3D
-	gWDcIz+5wOwEJYYrDIvBcbA9AODiKQBP+UI3RSKByQDpMx6ZOGQKkUBrJIenPs2X
-	oOusJWL1mC0nSH/sgR7a5AjAWq4KVIF4sIoiBL0YGRltL4B/JgQX8EAorBU95wXk
-	K2CALer0w/RIE7IwYWR4wYB8EyQoPe5972JWAzBeEN0qg9riB4G8m/1a2i+HwP9B
-	61/TQH4s6Ww1t8vLAMLxwsyt9JtiazluEJ62XtKTBG49gHV18HxT/FISUXUNFuR5
-	jtQvLccVIA==
-Received: from us-aus-excas-p1.ni.corp.natinst.com ([130.164.94.73])
-	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 4587c9100d-3
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 07 Mar 2025 21:17:21 +0000 (GMT)
-Received: from us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) by
- us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.28; Fri, 7 Mar 2025 15:17:11 -0600
-Received: from ershephe-ubuntu.amer.corp.natinst.com (172.18.68.32) by
- us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
- Server id 15.2.1258.28 via Frontend Transport; Fri, 7 Mar 2025 15:17:11 -0600
-From: Erick Shepherd <erick.shepherd@ni.com>
-To: <adrian.hunter@intel.com>
-CC: <andy-ld.lu@mediatek.com>, <avri.altman@wdc.com>, <cw9316.lee@samsung.com>,
-        <dsimic@manjaro.org>, <erick.shepherd@ni.com>, <keita.aihara@sony.com>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <quic_jjohnson@quicinc.com>, <ricardo@marliere.net>,
-        <ulf.hansson@linaro.org>, <victor.shih@genesyslogic.com.tw>,
-        <wsa+renesas@sang-engineering.com>
-Subject: Re: [RFC PATCH V2 2/2] mmc: allow card to disable tuning
-Date: Fri, 7 Mar 2025 15:17:11 -0600
-Message-ID: <20250307211711.1289730-1-erick.shepherd@ni.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <4030ee60-b607-4ddf-99d9-5348a741f7d5@intel.com>
-References: <4030ee60-b607-4ddf-99d9-5348a741f7d5@intel.com>
+	dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b="gsBzhqP4"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kwiboo.se;
+ h=Content-Transfer-Encoding: Content-Type: In-Reply-To: From: References:
+ Cc: To: Subject: MIME-Version: Date: Message-ID; q=dns/txt;
+ s=fe-e1b5cab7be; t=1741389779;
+ bh=Fhjx6pxvag6i+ct5LgrY68O1Q0Fj9xs6220lz64mf6E=;
+ b=gsBzhqP4mIo8jEhWBdt/q9VKVZ4cYEUOslZGQ4KyVmTZRtZo9elMzZAdTlghRTV9yi2jPyE6E
+ jaks9rKRHEp2SA0SYJS3HutEHWfhcWEQrBEkt8Tqf6dEB8uTX5xFWTIJBlv6nNPOHf8/YjqHw1Q
+ XmsRsmkKQdzhhNMRGDceRhln3IvPp3tmWXv0i5TJmNUPA3tjK5ZFYZ+QNx4ChvdqUnLvSZ08Td4
+ 5QzAaEMMx3q4UVuJ2vhaf7CmMKupeamzFpe2EwmvCTQly1886Uy9L7T9vK84q2g31aS+t2Gcilg
+ pHCZrMYyazlTDczumsy7qPtiShfktZ70tkkJuo9G/t6Q==
+X-Forward-Email-ID: 67cb7fcd789af4fdcbb0e87f
+X-Forward-Email-Sender: rfc822; jonas@kwiboo.se, smtp.forwardemail.net,
+ 121.127.44.73
+X-Forward-Email-Version: 0.4.40
+X-Forward-Email-Website: https://forwardemail.net
+X-Complaints-To: abuse@forwardemail.net
+X-Report-Abuse: abuse@forwardemail.net
+X-Report-Abuse-To: abuse@forwardemail.net
+Message-ID: <56181131-3e48-4c76-87c7-2388a9964727@kwiboo.se>
+Date: Sat, 8 Mar 2025 00:22:48 +0100
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain
-X-Proofpoint-ORIG-GUID: tSA50LPNpK80ZniGPDLIewM5dJCNaMms
-X-Proofpoint-GUID: tSA50LPNpK80ZniGPDLIewM5dJCNaMms
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-03-07_08,2025-03-07_01,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 impostorscore=0
- malwarescore=0 mlxscore=0 suspectscore=0 mlxlogscore=648 bulkscore=0
- adultscore=0 priorityscore=1501 spamscore=0 lowpriorityscore=0
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2502100000 definitions=main-2503070161
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers
+ for RK3528
+To: Yao Zi <ziyao@disroot.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>,
+ Michael Turquette <mturquette@baylibre.com>, Stephen Boyd
+ <sboyd@kernel.org>, Shresth Prasad <shresthprasad7@gmail.com>,
+ Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+ Detlev Casanova <detlev.casanova@collabora.com>,
+ Chukun Pan <amadeus@jmu.edu.cn>, linux-mmc@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-clk@vger.kernel.org
+References: <20250305194217.47052-1-ziyao@disroot.org>
+ <20250305194612.47171-1-ziyao@disroot.org>
+Content-Language: en-US
+From: Jonas Karlman <jonas@kwiboo.se>
+In-Reply-To: <20250305194612.47171-1-ziyao@disroot.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-> Does it tuning at all?  Maybe MMC_QUIRK_NO_UHS_DDR50_TUNING is a better=0D
-> name, then at the top of mmc_execute_tuning()=0D
-=0D
-> 	if ((card->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING) &&=0D
-> 	    host->ios->timing =3D=3D MMC_TIMING_UHS_DDR50)=0D
-> 		return 0;=0D
-=0D
-The card doesn't need to tune at all so I think this would work for us.=0D
-I'm not very familiar with using card quirks. What would be the best=0D
-way to set MMC_QUIRK_NO_UHS_DDR50_TUNING? Would it be set based on the=0D
-model of the card or should it be set after the initial tuning times=0D
-out?=0D
-=0D
-Regards,=0D
-Erick=
+Hi Yao Zi,
+
+On 2025-03-05 20:46, Yao Zi wrote:
+> RK3528 features two SDIO controllers and one SD/MMC controller, describe
+> them in devicetree. Since their sample and drive clocks are located in
+> the VO and VPU GRFs, corresponding syscons are added to make these
+> clocks available.
+> 
+> Signed-off-by: Yao Zi <ziyao@disroot.org>
+> ---
+>  arch/arm64/boot/dts/rockchip/rk3528.dtsi | 70 ++++++++++++++++++++++++
+>  1 file changed, 70 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3528.dtsi b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+> index d3e2a64ff2d5..363023314e9c 100644
+> --- a/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+> +++ b/arch/arm64/boot/dts/rockchip/rk3528.dtsi
+> @@ -130,6 +130,16 @@ gic: interrupt-controller@fed01000 {
+>  			#interrupt-cells = <3>;
+>  		};
+>  
+> +		vpu_grf: syscon@ff340000 {
+> +			compatible = "rockchip,rk3528-vpu-grf", "syscon";
+> +			reg = <0x0 0xff340000 0x0 0x8000>;
+> +		};
+> +
+> +		vo_grf: syscon@ff360000 {
+> +			compatible = "rockchip,rk3528-vo-grf", "syscon";
+> +			reg = <0x0 0xff360000 0x0 0x10000>;
+> +		};
+> +
+>  		cru: clock-controller@ff4a0000 {
+>  			compatible = "rockchip,rk3528-cru";
+>  			reg = <0x0 0xff4a0000 0x0 0x30000>;
+> @@ -274,6 +284,66 @@ saradc: adc@ffae0000 {
+>  			resets = <&cru SRST_P_SARADC>;
+>  			reset-names = "saradc-apb";
+>  			#io-channel-cells = <1>;
+> +		};
+
+Look like this patch accidentally drops status = "disabled" from the
+adc@ffae0000 node.
+
+Regards,
+Jonas
+
+> +
+> +		sdio0: mmc@ffc10000 {
+> +			compatible = "rockchip,rk3528-dw-mshc",
+> +				     "rockchip,rk3288-dw-mshc";
+> +			reg = <0x0 0xffc10000 0x0 0x4000>;
+> +			clocks = <&cru HCLK_SDIO0>,
+> +				 <&cru CCLK_SRC_SDIO0>,
+> +				 <&cru SCLK_SDIO0_DRV>,
+> +				 <&cru SCLK_SDIO0_SAMPLE>;
+> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+> +			fifo-depth = <0x100>;
+> +			interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
+> +			max-frequency = <150000000>;
+> +			pinctrl-names = "default";
+> +			pinctrl-0 = <&sdio0_bus4>, <&sdio0_clk>, <&sdio0_cmd>,
+> +				    <&sdio0_det>, <&sdio0_pwren>;
+> +			resets = <&cru SRST_H_SDIO0>;
+> +			reset-names = "reset";
+> +			status = "disabled";
+> +		};
+> +
+> +		sdio1: mmc@ffc20000 {
+> +			compatible = "rockchip,rk3528-dw-mshc",
+> +				     "rockchip,rk3288-dw-mshc";
+> +			reg = <0x0 0xffc20000 0x0 0x4000>;
+> +			clocks = <&cru HCLK_SDIO1>,
+> +				 <&cru CCLK_SRC_SDIO1>,
+> +				 <&cru SCLK_SDIO1_DRV>,
+> +				 <&cru SCLK_SDIO1_SAMPLE>;
+> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+> +			fifo-depth = <0x100>;
+> +			interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
+> +			max-frequency = <150000000>;
+> +			pinctrl-names = "default";
+> +			pinctrl-0 = <&sdio1_bus4>, <&sdio1_clk>, <&sdio1_cmd>,
+> +				    <&sdio1_det>, <&sdio1_pwren>;
+> +			resets = <&cru SRST_H_SDIO1>;
+> +			reset-names = "reset";
+> +			status = "disabled";
+> +		};
+> +
+> +		sdmmc: mmc@ffc30000 {
+> +			compatible = "rockchip,rk3528-dw-mshc",
+> +				     "rockchip,rk3288-dw-mshc";
+> +			reg = <0x0 0xffc30000 0x0 0x4000>;
+> +			clocks = <&cru HCLK_SDMMC0>,
+> +				 <&cru CCLK_SRC_SDMMC0>,
+> +				 <&cru SCLK_SDMMC_DRV>,
+> +				 <&cru SCLK_SDMMC_SAMPLE>;
+> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+> +			fifo-depth = <0x100>;
+> +			interrupts = <GIC_SPI 133 IRQ_TYPE_LEVEL_HIGH>;
+> +			max-frequency = <150000000>;
+> +			pinctrl-names = "default";
+> +			pinctrl-0 = <&sdmmc_bus4>, <&sdmmc_clk>, <&sdmmc_cmd>,
+> +				    <&sdmmc_det>;
+> +			resets = <&cru SRST_H_SDMMC0>;
+> +			reset-names = "reset";
+> +			rockchip,default-sample-phase = <90>;
+>  			status = "disabled";
+>  		};
+>  
+
