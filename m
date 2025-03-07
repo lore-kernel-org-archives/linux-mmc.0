@@ -1,102 +1,177 @@
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F26D921C19B;
-	Fri,  7 Mar 2025 14:42:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A51621D3C0;
+	Fri,  7 Mar 2025 15:48:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741358553; cv=none; b=njJWNqeo43yZ67lB40TPKc9i5zx9VggoaNG7dE1iM7q5pU3GjLmrrLJXkTYoWxbDWj3Bh0rPEKG4VYKRzmwHWrgXyjNJYEzKHrIr8sB1F5FLkSalQzcQB/U+A4IYg4TRxTZD/Q4nr69FajsDok54FVUBoNh0kmEr2pJm3B+pdb0=
+	t=1741362530; cv=none; b=Ni7uBcce2qygdhRWxdHjAR3RToOKjXpo+BtDWSMySE+3hekicRDRSavwbv15ckSCAFMr06nMKqe0e5IoyihkhDhKgIHAQJMDqzjleeG0syBbqztEtff8lZGbDLZiH4Ntd0M0xCmXloyyVacfX0eZJZb3zMvAlOqfE2vAuM8PSP4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741358553; c=relaxed/simple;
-	bh=2ONhu40tkgP5kCh3XYIPkx0LVTZwXwewKchD/BE7ANY=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=XIPAl6K9WuHggXKN3JcjpBLs/CfSQHPz/qMG95LlPRwlKiGSqW9KCtxqKQKLa+MMDKMXRexQy4nJSn2HwECsiCsBFYLIWwsHhkOxsXLEMGI8JGKcG2LeFyxEWY1TbiEgd/MS1u0ZPC25lwWxWjZtzkJsEN8iDqY9MW3kJr1jZuo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fZB1FK4f; arc=none smtp.client-ip=209.85.219.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1741362530; c=relaxed/simple;
+	bh=cbQpumLmb4zRxxzXeh/NJGWOgnbL/WBEsGAddfW0Fcc=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=PFSYQal552DnwhRrbqQpib3X76PHyER3wSfDrbv95coYIGKWFiSKWlNtWcsl6Ht6hmrP2eqPfqBHErSDnjQH0ZotXUqFicAhefzLWclUp0JrZ7ZXYGtsP8trzFKpDH9BO9yzlec12bzEA0jwr7I7GyIaAo9V83WN9/CQbpWxF6M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=N65vVkRX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fZB1FK4f"
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e4419a47887so1529510276.0;
-        Fri, 07 Mar 2025 06:42:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1741358551; x=1741963351; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=V3rLgkeZyfmW+Ovwa/la/l4Bicayimylex/nXnrU7tE=;
-        b=fZB1FK4faH/87CLSdc/Q4U7TkaW5Oav1HfS4I+1TNMKCoZ5UCLtsU6jaXbsYd1DQyL
-         0acDtHrgr3abXiFkSyiEBtR2fWA4KLqRD3D1AVWnKmrE7qnm8gaeWEbyrDXlMmDDuDn+
-         tUT/2X0gK7PWqtbVHJbB1slvOqk+Gf3xDO8Nhl8jXqMBIpW8LZ8mQRWx3hFLSTi19Mlw
-         FJcym+8A8I7qsxNLbEIFX5aqiKeP5qWZ5TJ0VoqbzuPdlz+MCzgnxS59szF7Xdmn/5N4
-         rdGPwPqJ0xOhdA4BrsLnMsqzXar8zYFmfiox0Adp6NlK6Z+tgfQs/e8EriKPmhkxr/KT
-         U1oQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741358551; x=1741963351;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=V3rLgkeZyfmW+Ovwa/la/l4Bicayimylex/nXnrU7tE=;
-        b=qMb51CLK9/i3bJle/kYjMGZ/OsyO92aLAxjpA4UYpRYvPO7HxqRCfb7RC5IXMIXuGQ
-         madRSKqLaiBlTCUf/z56+Svn2J8kMnOR8BLB6RFNdgM1SEdPQV3Ls3JLhF6T2JIL8agS
-         dBo/uadTPM34tUYaZxsMO8bIrJXKRZy9s72C0cLSea4pRLrfGcbgRRXGkGDRX3oEWKrx
-         JJ9r1MGjWnIQkLhigrzu7MNcNp0hSoBAM8NhbuAtoVDHLVzAfnqFhkKVZCLvHOjajNAB
-         KRVtwEoheuVgk+gdp0j15tLHvIEezbE5dxQk4ySIqks+y/Bi0Uo833FBRWRX4sfhLYPD
-         LvXg==
-X-Forwarded-Encrypted: i=1; AJvYcCUyPLhdoLmpKFUy+c8XwCgamK1ixpcLn3Ge/lorfFPc/bQ3PFTo7jjo/Xw9+55EQB5g0Y0RNPiDuFwHtQ==@vger.kernel.org, AJvYcCVZlrPa1MlUZG6kguFPaNEVXfc05Xi8MiaJJK817FW4/QjVSjrtJzxDULqaIK26ZYjEVVD9Z9iA60w=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxjGbiwnaeA4pY65BmyUfrELi0SDUVK+w2hvaExlHLWa+pPDOnW
-	jyBniTa4bI+xoAuO0vhI3CZ2Wur941RL+i3R1vJbuwMI06uL2V8Sets6c3QnFwQFA+6qgEpWrQr
-	KRqAhoAkHKuiWuu7EhZrtTqMwW9k=
-X-Gm-Gg: ASbGncuZKqCurHc0LWqKtb8gBkacGJ5Kpwvp+tLZqEPZeSoY8U0cxnNs+XfMpugOeK4
-	A1b1kE5BKFZWdV7g/UvPf/wwaCUQXb0RRpqq0A5y8BvkkTHsOtjwfZfUauEMdlfcUlRUtGknieX
-	BoiPmYO/tMUYrxrzFsNTjgT7LyI0o=
-X-Google-Smtp-Source: AGHT+IEaLs2ec+ex4cnd8ccBvUs29cQQbBkwr2OsisvzLc8I2AJEHn7HNqvTV8pIy1Cd0IsNhGACtqYUV9uCHdzlk44=
-X-Received: by 2002:a05:6902:1107:b0:e63:4a36:4317 with SMTP id
- 3f1490d57ef6-e635c18c0efmr4306756276.25.1741358550864; Fri, 07 Mar 2025
- 06:42:30 -0800 (PST)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="N65vVkRX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 314C7C4CED1;
+	Fri,  7 Mar 2025 15:48:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741362529;
+	bh=cbQpumLmb4zRxxzXeh/NJGWOgnbL/WBEsGAddfW0Fcc=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=N65vVkRX2qnTNsHI/Mryj3yrgzuscpAKf0NbItOKxb932B9Tb+1GNpcL+r80CVzSs
+	 /ueBhWKSiB3bJ7bGUc1946kLvdkvQc9PnKTvdKitZbw9VWvnl/A3JS+AA/JzYA5dXE
+	 PQvQPLjOSpKbNoA4Fyit4SuXtAyX6VeAKycEphJyepBR1hmKfg8MLhwIxbE9HWbtSq
+	 4vjrXvxpZSuGt7YkqB1uZskUNPLxeruSW3me2Zop8Z7Aaf0Yex6KHzNVSCuwlEY9BH
+	 1cJRbxta4F2xG52gXmzZVKXk2/Uk6IOiTaL8dO0oBKAcEDBjcHYQsuPnC9OdxUwiWE
+	 EJq3Hj/sTn2hg==
+Date: Fri, 7 Mar 2025 15:48:44 +0000
+From: Conor Dooley <conor@kernel.org>
+To: Axe Yang =?utf-8?B?KOadqOejiik=?= <Axe.Yang@mediatek.com>
+Cc: Wenbin Mei =?utf-8?B?KOaiheaWh+W9rCk=?= <Wenbin.Mei@mediatek.com>,
+	"conor+dt@kernel.org" <conor+dt@kernel.org>,
+	Chaotian Jing =?utf-8?B?KOS6leacneWkqSk=?= <Chaotian.Jing@mediatek.com>,
+	"robh@kernel.org" <robh@kernel.org>,
+	"matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+	"ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	"krzk+dt@kernel.org" <krzk+dt@kernel.org>,
+	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+	"linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>,
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	Andy-ld Lu =?utf-8?B?KOWNouS4nCk=?= <Andy-ld.Lu@mediatek.com>,
+	"devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+	Yong Mao =?utf-8?B?KOavm+WLhyk=?= <yong.mao@mediatek.com>,
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>,
+	Qingliang Li =?utf-8?B?KOm7juaZtOS6rik=?= <Qingliang.Li@mediatek.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: mtk-sd: add single burst switch
+Message-ID: <20250307-bust-diving-a57644a51543@spud>
+References: <20250306085028.5024-1-axe.yang@mediatek.com>
+ <20250306085028.5024-2-axe.yang@mediatek.com>
+ <3e84fda8-2566-4f18-8ef9-850c84789c34@collabora.com>
+ <f84800fac589429157cd84034ef2f4541d3486a7.camel@mediatek.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
- <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr> <31717d89-432c-4b77-a974-99f7e6b97f97@gmail.com>
- <9168d127-06a7-46e6-a7a2-f2e60032a50e@gmail.com> <b1a369e2-938b-49ed-b743-6562f0bb46f9@smile.fr>
- <CAOCHtYiBFNY9nFjtqsFFpqRKdxUif_fC7MVqZ7cffeD8rLSe2A@mail.gmail.com>
- <CAOCHtYiujoMoPHfSmyTrv_48wUn3TfaoiPEcMFB=V++MZXvuuQ@mail.gmail.com>
- <20250226170614.18a497f0@akair> <20250307042822.GE23206@atomide.com>
-In-Reply-To: <20250307042822.GE23206@atomide.com>
-From: Robert Nelson <robertcnelson@gmail.com>
-Date: Fri, 7 Mar 2025 08:42:02 -0600
-X-Gm-Features: AQ5f1JrHnQSsEsnURkPIFhS3CkXZbp7FzdhF3kzjb2B7KvbWlRM_opBWZ8aQXB0
-Message-ID: <CAOCHtYj-0KG2oMuyof1c35c=A8PaUfYPZFuLY_YDKmq-SV8h2g@mail.gmail.com>
-Subject: Re: sdhci-omap: additional PM issue since 5.16
-To: Tony Lindgren <tony@atomide.com>
-Cc: Andreas Kemnade <andreas@kemnade.info>, Romain Naour <romain.naour@smile.fr>, 
-	Aaro Koskinen <aaro.koskinen@iki.fi>, Kevin Hilman <khilman@baylibre.com>, 
-	Roger Quadros <rogerq@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Jason Kridner <jkridner@beagleboard.org>, "Aldea, Andrei" <a-aldea@ti.com>, David <daowens01@gmail.com>, 
-	linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="JvgKecrTkt2V/rEI"
+Content-Disposition: inline
+In-Reply-To: <f84800fac589429157cd84034ef2f4541d3486a7.camel@mediatek.com>
+
+
+--JvgKecrTkt2V/rEI
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, Mar 6, 2025 at 10:28=E2=80=AFPM Tony Lindgren <tony@atomide.com> wr=
-ote:
->
-> Best to revert the patch first until the issue has been fixed.
->
-> Based on the symptoms, it sounds like there might be a missing flush of
-> a posted write in the PM runtime suspend/resume path. This could cause
-> something in the sequence happen in the wrong order for some of the
-> related surrounding resources like power, clocks or interrupts.
->
+On Fri, Mar 07, 2025 at 06:59:03AM +0000, Axe Yang (=E6=9D=A8=E7=A3=8A) wro=
+te:
+> On Thu, 2025-03-06 at 10:19 +0100, AngeloGioacchino Del Regno wrote:
+> > External email : Please do not click links or open attachments until
+> > you have verified the sender or the content.
+> >=20
+> >=20
+> > Il 06/03/25 09:48, Axe Yang ha scritto:
+> > > Add 'mediatek,disable-single-burst' setting. This property can be
+> > > used to switch bus burst type, from single burst to INCR, which is
+> > > determined by the bus type within the IP. Some versions of the IP
+> > > are using AXI bus, thus this switch is necessary as 'single' is not
+> > > the burst type supported by the bus.
+> > >=20
+> > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> >=20
+> > I am mostly sure that this is not something to put in devicetree, but
+> > as
+> > platform data for specific SoC(s), as much as I'm mostly sure that
+> > all of
+> > the instances of the MSDC IP in one SoC will be *all* using either
+> > single
+> > or INCR.
+>=20
+> No, actually MSDC IPs in one SoC are using different versions.
+> Usually MSDC1 (index from 1) is used as eMMC host, the left hosts are
+> used as SD/SDIO hosts. They have similar designs, but there are still
+> difference.
+>=20
+> >=20
+> > So, I think I know the answer but I'll still ask just to be extremely
+> > sure:
+> >=20
+> > is there any MediaTek SoC that has different IP versions for
+> > different MSDC
+> > instances, and that hence require single burst on one instance and
+> > INCR on
+> > another instance?
+>=20
+> Yes. Actually every SoC has different IP versions for eMMC and SD/SDIO
+> host as I said.
+> e.g. For MT8168, signel burst bit should be set to 1 for eMMC Host, but
+> 0 for SD/SDIO Host.
+>=20
 
-Kington's hardware anaylizer said after CMD5/sleep in about 10us,
-instead of CMD5/wkup being called, it just resets the eMMC..  So
-someone deep within the sdhc/mmc layer might understand that. ;)
+Sounds like two different IPs that really should have different
+compatibles to me...
 
-Regards,
+> >=20
+> > And if there is - is there a pattern? Is it always SDIO requiring
+> > INCR or
+> > always eMMC/SD requiring it?
+> >=20
+> >=20
+>=20
+> No, there is no pattern. Both eMMC and SD/SDIO hosts need to be
+> configured base on IP version. There is no binding relationship between
+> eMMC/SD/SDIO and the burst type. eMMC burst type might be INCR or
+> single, same as SD/SDIO.
+>=20
+>=20
+> Regards,
+> Axe
+>=20
+>=20
+> >=20
+> > > ---
+> > >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 8 ++++++++
+> > >   1 file changed, 8 insertions(+)
+> > >=20
+> > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > index 0debccbd6519..6076aff0a689 100644
+> > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > @@ -100,6 +100,14 @@ properties:
+> > >       minimum: 0
+> > >       maximum: 0xffffffff
+> > >=20
+> > > +  mediatek,disable-single-burst:
+> > > +    $ref: /schemas/types.yaml#/definitions/flag
+> > > +    description:
+> > > +      Burst type setting. For some versions of the IP that do not
+> > > use
+> > > +      AHB bus, the burst type need to be switched to INCR.
+> > > +      If present, use INCR burst type.
+> > > +      If not present, use single burst type.
+> > > +
+> > >     mediatek,hs200-cmd-int-delay:
+> > >       $ref: /schemas/types.yaml#/definitions/uint32
+> > >       description:
+> >=20
+> >=20
+> >=20
 
---=20
-Robert Nelson
-https://rcn-ee.com/
+--JvgKecrTkt2V/rEI
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZ8sVWwAKCRB4tDGHoIJi
+0hRVAP9JFaU0LfHys70qFKw8YsFg94BJakg2ezMs8dUwmp2z1QD/cUINRP2md0VA
+qLxlWwCzLY6tY2JS7ftifR6/W+OfwQg=
+=ZH2G
+-----END PGP SIGNATURE-----
+
+--JvgKecrTkt2V/rEI--
