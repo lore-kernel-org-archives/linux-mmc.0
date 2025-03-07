@@ -1,121 +1,163 @@
-Received: from mail5.25mail.st (mail5.25mail.st [74.50.62.9])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9AC09DDC1;
-	Fri,  7 Mar 2025 04:28:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.50.62.9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CEE618DB09;
+	Fri,  7 Mar 2025 05:54:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741321733; cv=none; b=KUJJHXgGzPWhftuh+cMld9gkf1yAOJSB5NlBJcNqi68BDvPjIyCNkyPMdR5iuuRCUkoWQUdbEtj9Qri0y2llX3iawMqRXU7eK98EFyJtHc2U3f0CLZUWiGnFcA4FdFmQf4RCex9omBbO8YUepcxPzHTWEKC9qWD7jrPJocyub1w=
+	t=1741326896; cv=none; b=ejRbgi/pndb3JL8OmkeBuuBRu86K2Sn+wpDwkzxb+9yq7aJfBbAwV2z3YLzm5i6NDUvcG+d4KZOGIbSOL94s6akvEHklkk32cQKnLxol6haRB1YWhcJmKS/XvX+T8bnca3UbRysL3a5Q62dXBaezGqiYxyKwV8augEvigY7gsns=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741321733; c=relaxed/simple;
-	bh=bl/Iny20USHLhuGmL7JmnPpA0CC/5d5CikyAMxv6Fm0=;
+	s=arc-20240116; t=1741326896; c=relaxed/simple;
+	bh=OhobIH36SElrBRrR9xlBtbM4ljdbiJGVn6a0IJ6ZmIk=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=TYmkPPoM0u0maf8Sijuho/OWAr7nUUX5zyC5qiwU4HZevRixJ1+tMMGvMD51zVT/rdcbOPNHgZFdnF3bigKhzqHnNiMFbNb25smVBQN2fmAxiHY93ReVF6ljIY3hq91tcNetpJTdUvOhx0MtIexSmtufIMKIHYsP0U2eHHdmDDM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com; spf=fail smtp.mailfrom=atomide.com; dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b=h1WleRMO; arc=none smtp.client-ip=74.50.62.9
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=atomide.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=dl/OwVUXNM6zLyhgS6MBb/jDvQW8p9jaK3rx5hiMPwr3o8auvsjhiUPAC+ou4GHvtxQaR528szvS3bGAV7HuNRQhzeRDse1/PaHabSnvgMlfLE/fIL7xP3UM/AcHrGkcm2ZDgjefDPsyVMS76lzPmeh3fNMU5pJ3G0usBAmPQc8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=aQ1AS8QJ; arc=none smtp.client-ip=178.21.23.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b="h1WleRMO"
-Received: from localhost (91-158-86-216.elisa-laajakaista.fi [91.158.86.216])
-	by mail5.25mail.st (Postfix) with ESMTPSA id 489586050B;
-	Fri,  7 Mar 2025 04:28:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=atomide.com;
-	s=25mailst; t=1741321729;
-	bh=bl/Iny20USHLhuGmL7JmnPpA0CC/5d5CikyAMxv6Fm0=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=h1WleRMOjLjiunj4uQ3myvzhLlhd8XuaSlHKz0Kz04tA3tZOHL82qRaZ8lFWY4N7b
-	 6Q8D+vlO2sTz7aAwThzcZQ8/XMDocszuXoZunwzUgc2DjrVo3lJ9MxJbpIfs3yH5yI
-	 jr5GrSjK/ZAojRU3a2BNtFYppsUDv3j2/k5InVCpaakUE/xP+Kb11/PcAR4kJM7jV0
-	 u27fPQ2VlQ2bTuFsm43dmfK9A4VfoO15BPrb7/tMLqxrPYkDKjQgrv5xJMuYl+C6tL
-	 YPYRLkMSOMOxmtW6qZcjK5tJcRurEXwywINKKbKJJJb4CJpBkdbtaEG8zwYcgR5kVb
-	 019GMdXdmecpg==
-Date: Fri, 7 Mar 2025 06:28:22 +0200
-From: Tony Lindgren <tony@atomide.com>
-To: Andreas Kemnade <andreas@kemnade.info>
-Cc: Robert Nelson <robertcnelson@gmail.com>,
-	Romain Naour <romain.naour@smile.fr>,
-	Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Roger Quadros <rogerq@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Jason Kridner <jkridner@beagleboard.org>,
-	"Aldea, Andrei" <a-aldea@ti.com>, David <daowens01@gmail.com>,
-	linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: sdhci-omap: additional PM issue since 5.16
-Message-ID: <20250307042822.GE23206@atomide.com>
-References: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
- <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr>
- <31717d89-432c-4b77-a974-99f7e6b97f97@gmail.com>
- <9168d127-06a7-46e6-a7a2-f2e60032a50e@gmail.com>
- <b1a369e2-938b-49ed-b743-6562f0bb46f9@smile.fr>
- <CAOCHtYiBFNY9nFjtqsFFpqRKdxUif_fC7MVqZ7cffeD8rLSe2A@mail.gmail.com>
- <CAOCHtYiujoMoPHfSmyTrv_48wUn3TfaoiPEcMFB=V++MZXvuuQ@mail.gmail.com>
- <20250226170614.18a497f0@akair>
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="aQ1AS8QJ"
+Received: from mail01.disroot.lan (localhost [127.0.0.1])
+	by disroot.org (Postfix) with ESMTP id 790E223CA6;
+	Fri,  7 Mar 2025 06:54:52 +0100 (CET)
+X-Virus-Scanned: SPAM Filter at disroot.org
+Received: from layka.disroot.org ([127.0.0.1])
+ by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
+ id GEDfSjYbRJfd; Fri,  7 Mar 2025 06:54:48 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
+	t=1741326882; bh=OhobIH36SElrBRrR9xlBtbM4ljdbiJGVn6a0IJ6ZmIk=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To;
+	b=aQ1AS8QJQnkqsjN6cCDhEslz1d7op9C+MUyuNcjmdwVvv9aj/jf046pMvlSwTDFLe
+	 JdjylhVLOBu5OhPar3AT7/wLW/k+O2v2ezX4Doy9ucxYQBmKe6oCf2rnARVh5pszmC
+	 KwlRCPeupk9T7U6pren2Kc7QXQ1hrvzpRe/RejNap3+4k7EcpS4FAeoOE33YSKRLjg
+	 Frh7rHwFAuCkH4m56VZYphHMJgocffkPKppGe9TDWxWEZkd17G+lwUDzOgUzsyavHp
+	 7LeOKmEqw9Cl9yWRRWDyooo9qpSVouUh0mLS9VMCebr+YQ3TLxsQa1pODij+tF7YRf
+	 EHiDkQboMaEcw==
+Date: Fri, 7 Mar 2025 05:54:27 +0000
+From: Yao Zi <ziyao@disroot.org>
+To: Jonas Karlman <jonas@kwiboo.se>, Chukun Pan <amadeus@jmu.edu.cn>
+Cc: conor+dt@kernel.org, cristian.ciocaltea@collabora.com,
+	detlev.casanova@collabora.com, devicetree@vger.kernel.org,
+	heiko@sntech.de, krzk+dt@kernel.org,
+	linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-rockchip@lists.infradead.org
+Subject: Re: [PATCH v2 7/8] arm64: dts: rockchip: Add SDMMC/SDIO controllers
+ for RK3528
+Message-ID: <Z8qKEzmTFxhHKApG@pie>
+References: <20250305194612.47171-1-ziyao@disroot.org>
+ <20250306140009.384469-1-amadeus@jmu.edu.cn>
+ <Z8nPjjbZvpRJ2R5B@pie.lan>
+ <3d3db030-26e6-4fe1-9158-85f8cebef89c@kwiboo.se>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250226170614.18a497f0@akair>
+In-Reply-To: <3d3db030-26e6-4fe1-9158-85f8cebef89c@kwiboo.se>
 
-* Andreas Kemnade <andreas@kemnade.info> [250226 16:06]:
-> Am Wed, 26 Feb 2025 09:36:40 -0600
-> schrieb Robert Nelson <robertcnelson@gmail.com>:
+On Fri, Mar 07, 2025 at 12:05:16AM +0100, Jonas Karlman wrote:
+> On 2025-03-06 17:43, Yao Zi wrote:
+> > On Thu, Mar 06, 2025 at 10:00:09PM +0800, Chukun Pan wrote:
+> >> Hi,
+> >>
+> >>> +		sdio0: mmc@ffc10000 {
+> >>> +			compatible = "rockchip,rk3528-dw-mshc",
+> >>> +				     "rockchip,rk3288-dw-mshc";
+> >>> +			reg = <0x0 0xffc10000 0x0 0x4000>;
+> >>> +			clocks = <&cru HCLK_SDIO0>,
+> >>> +				 <&cru CCLK_SRC_SDIO0>,
+> >>> +				 <&cru SCLK_SDIO0_DRV>,
+> >>> +				 <&cru SCLK_SDIO0_SAMPLE>;
+> >>> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+> >>> +			fifo-depth = <0x100>;
+> >>> +			interrupts = <GIC_SPI 137 IRQ_TYPE_LEVEL_HIGH>;
+> >>> +			max-frequency = <150000000>;
+> >>> +			pinctrl-names = "default";
+> >>> +			pinctrl-0 = <&sdio0_bus4>, <&sdio0_clk>, <&sdio0_cmd>,
+> >>> +				    <&sdio0_det>, <&sdio0_pwren>;
+> >>
+> >> The sdio module is usually "non-removable", no need det,
+> >> and pwren may be other gpio (use mmc-pwrseq). So it should
+> >> be `pinctrl-0 = <&sdio0_bus4>, <&sdio0_clk>, <&sdio0_cmd>;`
+> > 
+> > This doesn't affect the fact that these two pins are assigned as
+> > functional pins for SDIO0, as pointed out by the datasheet[1].
+> > 
+> > But with more digging, I found the reference design[2] of Rockchip
+> > actually uses the two pins as normal GPIOs. This is more obvious in
+> > downstream devicetree of an EVB[3]. Most of the existing boards (Radxa
+> > 2A, ArmSOM Sige 1) follow the reference design.
+> > 
+> > For me, it's kind of surprising that the SDIO IP functions with two
+> > functional pins assigned as different modes. I'm not sure whether we
+> > should apply pin configuration for these two pins in the SoC devicetree.
+> > Jonas, what do you think about it?
 > 
-> > On Mon, Jan 27, 2025 at 3:20 PM Robert Nelson <robertcnelson@gmail.com> wrote:
-> > >  
-> > > > Thanks for testing.
-> > > >
-> > > > I'm able to reproduce the issue locally (using a kernel 6.1.112).
-> > > > It fail after the first sleep 20...
-> > > >
-> > > > If I remove MMC_CAP_AGGRESSIVE_PM from the sdhci-omap driver the issue is gone.
-> > > >
-> > > > About sdhci-omap driver, It's one of the only few enabling
-> > > > MMC_CAP_AGGRESSIVE_PM. I recently switched to a new project using a newer SoC
-> > > > but the eMMC driver doesn't event set MMC_CAP_AGGRESSIVE_PM.
-> > > >
-> > > > I'm wondering if MMC_CAP_AGGRESSIVE_PM is really safe (or compatible) for
-> > > > HS200/HS400 eMMC speed. Indeed, MMC_CAP_AGGRESSIVE_PM has been added to
-> > > > sdhci-omap driver to support SDIO WLAN device PM [1].
-> > > >
-> > > > I've found another similar report on the Beaglebone-black (AM335x SoC) [2].
-> > > >
-> > > > It seems the MMC_CAP_AGGRESSIVE_PM feature should only be enabled to SDIO cards.  
-> > >
-> > > We've been chasing this Bug in BeagleLand for a while. Had Kingston
-> > > run it thru their hardware debuggers.. On the BBB, once the eMMC is
-> > > suspended during idle, the proper 'wakeup' cmd is NOT sent over,
-> > > instead it forces a full reset. Eventually this kills the eMMC. Been
-> > > playing with this same revert for a day or so, with my personal setup,
-> > > it takes 3-4 Weeks (at idle every day) for it to finally die.. So i
-> > > won't be able to verify this 'really' fixes it till next month..  
-> > 
-> > Okay, it survived 4 weeks.. We really need to revert:
-> > 3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
-> > 
-> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=3edf588e7fe00e90d1dc7fb9e599861b2c2cf442
-> > 
-> > On every stable kernel back to v6.1.x, this commit is `killing`
-> > Kingston eMMC's on BeagleBone Black's in under 21 days.
-> > 
-> > By reverting the commit, I finally have a board that's survived the 3
-> > week timeline, (and a week more) with no issues.
-> > 
-> Is there any simple way to restrain it to only sdio devices to go
-> forward a bit?
+> I think it make sense to match the pins used by reference boards, i.e.
+> the pinconf most likely to be used by majority of boards that will use
+> the sdio interface.
 
-Best to revert the patch first until the issue has been fixed.
+Thanks, will take it.
 
-Based on the symptoms, it sounds like there might be a missing flush of
-a posted write in the PM runtime suspend/resume path. This could cause
-something in the sequence happen in the wrong order for some of the
-related surrounding resources like power, clocks or interrupts.
+> Of my RK3528 boards, only ArmSoM Sige1 use sdio for onboard wifi and
+> there I currently have following in my work-in-progress board DT [4]:
+> 
+>   pinctrl-names = "default";
+>   pinctrl-0 = <&sdio0_bus4>, <&sdio0_clk>, <&sdio0_cmd>, <&clkm1_32k_out>;
+> 
+> The Radxa ROCK 2A/2F seem to use USB for wifi/bt.
+> 
+> [4] https://github.com/Kwiboo/linux-rockchip/blob/next-20250305-rk3528/arch/arm64/boot/dts/rockchip/rk3528-armsom-sige1.dts
+> 
+> Regards,
+> Jonas
+> 
+> > 
+> >>> +			resets = <&cru SRST_H_SDIO0>;
+> >>> +			reset-names = "reset";
+> >>> +			status = "disabled";
+> >>> +		};
+> >>> +
+> >>> +		sdio1: mmc@ffc20000 {
+> >>> +			compatible = "rockchip,rk3528-dw-mshc",
+> >>> +				     "rockchip,rk3288-dw-mshc";
+> >>> +			reg = <0x0 0xffc20000 0x0 0x4000>;
+> >>> +			clocks = <&cru HCLK_SDIO1>,
+> >>> +				 <&cru CCLK_SRC_SDIO1>,
+> >>> +				 <&cru SCLK_SDIO1_DRV>,
+> >>> +				 <&cru SCLK_SDIO1_SAMPLE>;
+> >>> +			clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+> >>> +			fifo-depth = <0x100>;
+> >>> +			interrupts = <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
+> >>> +			max-frequency = <150000000>;
+> >>> +			pinctrl-names = "default";
+> >>> +			pinctrl-0 = <&sdio1_bus4>, <&sdio1_clk>, <&sdio1_cmd>,
+> >>> +				    <&sdio1_det>, <&sdio1_pwren>;
+> >>
+> >> Same here.
+> >>
+> >>> +			resets = <&cru SRST_H_SDIO1>;
+> >>> +			reset-names = "reset";
+> >>> +			status = "disabled";
+> >>> +		};
+> >>
+> >> Thanks,
+> >> Chukun
+> >>
+> >> -- 
+> >> 2.25.1
+> >>
+> > 
+> > Best regards,
+> > Yao Zi
+> > 
+> > [1]: https://github.com/DeciHD/rockchip_docs/blob/main/rk3528/Rockchip%C2%A0RK3528%C2%A0Datasheet%C2%A0V1.0-20230522.pdf
+> > [2]: https://github.com/DeciHD/rockchip_docs/blob/main/rk3528/RK3528_BOX_REF_V10_20230525.pdf
+> > [3]: https://github.com/rockchip-linux/kernel/blob/604cec4004abe5a96c734f2fab7b74809d2d742f/arch/arm64/boot/dts/rockchip/rk3528-evb1-ddr4-v10.dtsi#L128
+> 
 
-Regards,
-
-Tony
+Best regards,
+Yao Zi
