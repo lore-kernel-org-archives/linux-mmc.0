@@ -1,86 +1,86 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.18])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.11])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A45F114A4F9;
-	Fri,  7 Mar 2025 12:36:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.18
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6E2201E485;
+	Fri,  7 Mar 2025 13:02:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.11
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741351019; cv=fail; b=bIqPdi83mtSUuqV9eGACHjMjekZqdAlYIjGV6/49+9daC9kT/CB4oRxK3GBT1dJPlj116u/zmPgVmcj+LRmN2Hf3e/iElMYsvvsCWmnBg1aaM514OH8xyh3wYhhpxGDnaZt2tL9DScuaU7/qXCkTWEh/Vu7rLTyqyshnJSnIzJA=
+	t=1741352569; cv=fail; b=WNNQsViOyL3VyWv+rFnhClJbufk39v7ehd6qtPx5ul4UGttu5kh+/K+iy+C4FiGdlp1csYqXFN/NCLgY11Oqw4sGBBFxJTC+MdJaa7LIdclCbGGjoLMD+IblN0YPbYt1mBT4Yo19hr83w513334l4kKRYLj5nOnklz195OkMXiM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741351019; c=relaxed/simple;
-	bh=zNl8hsIfcP8AgJOrwZvXi6xKOfls1SiUiNPOruKYEpc=;
+	s=arc-20240116; t=1741352569; c=relaxed/simple;
+	bh=qB7NynSpiBaT5U/UtRPaFzBgz2FrYuwdqNlOrGKW1QY=;
 	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=Mlj/+66DfTFGSCLrVqFkSsBgSj8q0Ljh4U+0wPWccStgs2E0wIfOiNS6sbfyTzadZP0nUgl61fTFg5G17imSLn5D7Wp9C00cedlUChUu4Jg1eFbJ4H7SVRTwozYZ45iE0ex1AIQypC+NTl6YuLLkiN7xCuTtXlJX6JmArSlYW3w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=jIb4rGDZ; arc=fail smtp.client-ip=192.198.163.18
+	 Content-Type:MIME-Version; b=PydEkBjKrXSFAoh21bRV/0omeXSNfsPjHWEBsCm2V/Euo93Cj04ZrzNpFrRPZBUq5mNZBJKtrm+0q6K2Ei1pEYdZ5G2d5nv6AK/j9GLkDETc3eyneahlEAUeMoUCsvgcmAduTVonhPWfUzbneemyJGS/VzkIzZdstXYT3zSCiBc=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=gQBgbpPk; arc=fail smtp.client-ip=198.175.65.11
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="jIb4rGDZ"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="gQBgbpPk"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1741351018; x=1772887018;
+  t=1741352567; x=1772888567;
   h=message-id:date:subject:to:cc:references:from:
    in-reply-to:content-transfer-encoding:mime-version;
-  bh=zNl8hsIfcP8AgJOrwZvXi6xKOfls1SiUiNPOruKYEpc=;
-  b=jIb4rGDZ8Qi5HEvjGDBx3rolDsnuQpielMu64gVwiyrhRUKUED2KyR+c
-   /x1R9UUsPetGbRoO6PzdSJhBRT3WyljIx86uEyt4siOTIW1V2iiAuROra
-   vP09eR13jD9PoTlP0RsMOHdb3SGk3JSbiVES2iTkX1E2AkmCbxpta67jA
-   SgDsRReR8H7GlcQTY+wY6DYI4CpHZvFJqFu+A/cpGx/VfvMtrmzrorIS5
-   fH2wPo8kIkzNptscxIJOtAPAANNeCfMzE/f9Hu0GIkjCIybXJp+Vnc1rt
-   x0DgObTwOx98O+xip84TEcxFo1LSx8c/0Oo4/SbpdIIIPBlBAHNwLYT+l
-   A==;
-X-CSE-ConnectionGUID: rs1jovTOR3qGO4lz7UDqzw==
-X-CSE-MsgGUID: R0+n4PppRUSj66Wj29Rs5A==
-X-IronPort-AV: E=McAfee;i="6700,10204,11365"; a="41651497"
+  bh=qB7NynSpiBaT5U/UtRPaFzBgz2FrYuwdqNlOrGKW1QY=;
+  b=gQBgbpPk64BOi5zaasZsVYcCs7qOHpB5iPfn6pn5BoKVhDmfl/qByHWZ
+   k970RpjUYk0/M1z7oHsuaNNNjWmTMMIlctwJT1J8YejshIoufwyjgCPPC
+   LB99cuVq73hC4Nc/qiGpwrR3kCn05aWRTcP/FyjXXOyUGXrHyt62tqzHo
+   S66yXaZLVXp928iscF+FvzYD+rNU4SIq0Qs6n/MaTtLG5LVY/pO9+2/44
+   OE48TuHi0p8n9UEeWXY4s9v4pQVnKtDdTBE98abHAO3Ju7KDBWnjy2Z/0
+   zSYQ7JPccOQoOogKaR0XKlp6WkSrSELof8eW0sI62dzKqyZZRM8L5lu3/
+   g==;
+X-CSE-ConnectionGUID: p4m7tH4cTKmDmPDgS7iryQ==
+X-CSE-MsgGUID: aF/FXXaASwS9tM47krnxVQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11365"; a="52607115"
 X-IronPort-AV: E=Sophos;i="6.14,229,1736841600"; 
-   d="scan'208";a="41651497"
-Received: from fmviesa008.fm.intel.com ([10.60.135.148])
-  by fmvoesa112.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2025 04:36:56 -0800
-X-CSE-ConnectionGUID: Vvqk3zBnSISlFyJVz1XLpg==
-X-CSE-MsgGUID: bnSW+mWMQ6miclYYxKfShA==
+   d="scan'208";a="52607115"
+Received: from fmviesa004.fm.intel.com ([10.60.135.144])
+  by orvoesa103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2025 05:02:46 -0800
+X-CSE-ConnectionGUID: mwVV/UxIRWGAZJCredkL/w==
+X-CSE-MsgGUID: PUcAS4y5S+mY46rynsVpVQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.14,229,1736841600"; 
-   d="scan'208";a="119484531"
-Received: from orsmsx903.amr.corp.intel.com ([10.22.229.25])
-  by fmviesa008.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2025 04:36:56 -0800
-Received: from orsmsx603.amr.corp.intel.com (10.22.229.16) by
- ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.2.1544.14; Fri, 7 Mar 2025 04:36:55 -0800
+   d="scan'208";a="124411576"
+Received: from orsmsx902.amr.corp.intel.com ([10.22.229.24])
+  by fmviesa004.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2025 05:02:45 -0800
+Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
+ ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.14; Fri, 7 Mar 2025 05:02:44 -0800
 Received: from orsedg603.ED.cps.intel.com (10.7.248.4) by
- orsmsx603.amr.corp.intel.com (10.22.229.16) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.44 via Frontend Transport; Fri, 7 Mar 2025 04:36:55 -0800
-Received: from NAM04-DM6-obe.outbound.protection.outlook.com (104.47.73.42) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.14 via Frontend Transport; Fri, 7 Mar 2025 05:02:44 -0800
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (104.47.55.45) by
  edgegateway.intel.com (134.134.137.100) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.44; Fri, 7 Mar 2025 04:36:54 -0800
+ 15.1.2507.44; Fri, 7 Mar 2025 05:02:36 -0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=b6F4oQ5Q4X0XIB76TMYLUV5wiPyBLKzvRyCVMmMNLUxekqsyDg2scZA1gI0hvBQrKmn6S7yaYcN1RfYD3wRKEM4VM5MoaHlj5mJO1K2CJJF602PzlTZL8FT+k0nFdmBoMMzZ0ygH/xw4EU6l82tt+ImpBAn5gDkSyqid5V3iTWrYmewD1rv+OrqSyxjnHauplKr7ecb8I4t2BYiFpgRVBdZjKxVAUQ09Y/k/C7Voa8S+ONU+w7M3O/5xNHCjvIJBCI3nzCNdwZByDh/36Jy5WXJ0eZn22HGVXgT8+tQCUoCrStl+e5VJeAUvc2ZgJilwjrNCetRtlVY2kvugU/9A/g==
+ b=IMW28kiBftaZB5SpmNLzZkei9WpaTaRz7AIpFn8zHM16rzMfTOhuWo4WMCAtj6bUE3i3soiS+Cbv5plB3k5E9OGnbNEBVO0MRoTdYo6Ys2E6xIH3NtWzq8q7YW3qTyWfFM7uaMB+GrtXVNoq9h1CY0H/NBxrvYV9G82Gi+wVEDW/WgRxOijMJ6rux060/8hFSB7Fdxpr5zidRPLdMXI9qiG0FSFgFU0t8krgU0WigWqCC5H7NXVaC4LYgxStyFfzAOOtk69wgXtpg6DZj18C4Rkk9E9SbTuEDpIYgsZIMgDjCEIREVOyoWmx8/63dqnGj/DkFwizCRIk9QzMB3SK1Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WlL+qW2owfUyOZhQuxy+w1wU3+RCNH7rUsVCVdqDTx4=;
- b=A5ycm1IM6XZg3cWQRjID9cgvnNK9YOD6xBzbroAarLNkXY4CkA2LsAdL/VQ7TIZCn+gb1e1jY9eip8/2plEgrKt191JGGXir++YfvZo3S5trDS0b2BVFMfFmDQ0rKq4U7ivvrJ5pEfiv925MtC0k7jw6X+a/eCP60Ejmxz+khn3/kkkD8OvTakQo18uC7p6oZcL6NByIJqtmH+It6gjs4ZXsWuSm2AX4dwX7qVO100VekJA0k+fz9UDfmIUlbFgj5UmxY66Lg6srW1euuhHZjoAijvYh6Dus6S3j0Y5N+5g1jltXEt/0GCSMCS4kJv7CibyxZRAvKNfwwUZd5aS+Vg==
+ bh=DBhqEjFbHrqlDfvvehSoxzo+i0sKbVG8h1tW6QQbINo=;
+ b=Q1loJM5WNGOhp2tBdYxGP9m+yRdVa9fz9+Bf7vkHO3QVISWGKYFLVGvOiHL/lvIdEH6aTEluUtB1RfhiydiXkRgbCYLYsKcCLsDQP5RYU3oDmtzw7XUpPFj9WOc8tvjZejwDPlq83ugaxkhdaslSLd/OV1sORc0xN4JXN//6AS0nJUFWktHD+uMCQF5WAzy/EOegBCJQn6ZHi+Ir25bL4bzMhfnALTiRdUMRwwGfLhH+w63II+Lm50e6uL/ygamM4Zhg/5vZ+6RTqNzp9+33vAcGFJEf35iE1m795Pv0xL75Yh6TOzag27gQKQZCDl8yNFWlsfIfNe00PCe+1o/Taw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
  dkim=pass header.d=intel.com; arc=none
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=intel.com;
 Received: from BYAPR11MB3605.namprd11.prod.outlook.com (2603:10b6:a03:f5::33)
- by CO1PR11MB5027.namprd11.prod.outlook.com (2603:10b6:303:9d::13) with
+ by SN7PR11MB8112.namprd11.prod.outlook.com (2603:10b6:806:2ea::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8511.19; Fri, 7 Mar
- 2025 12:36:20 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8511.22; Fri, 7 Mar
+ 2025 13:02:19 +0000
 Received: from BYAPR11MB3605.namprd11.prod.outlook.com
  ([fe80::1c0:cc01:1bf0:fb89]) by BYAPR11MB3605.namprd11.prod.outlook.com
  ([fe80::1c0:cc01:1bf0:fb89%4]) with mapi id 15.20.8489.025; Fri, 7 Mar 2025
- 12:36:20 +0000
-Message-ID: <c7e98e11-38d2-40b4-a7d0-3a884cf8d8b8@intel.com>
-Date: Fri, 7 Mar 2025 14:36:09 +0200
+ 13:02:19 +0000
+Message-ID: <bb6dda27-e4ee-406e-bb29-828dab346b9f@intel.com>
+Date: Fri, 7 Mar 2025 15:02:11 +0200
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v3 6/6] mmc: sdhci: prevent command execution after
- undervoltage shutdown
+Subject: Re: [PATCH v3 4/6] mmc: core: add undervoltage handler for MMC/eMMC
+ devices
 To: Oleksij Rempel <o.rempel@pengutronix.de>, Ulf Hansson
 	<ulf.hansson@linaro.org>
 CC: <kernel@pengutronix.de>, <linux-kernel@vger.kernel.org>,
@@ -89,16 +89,16 @@ CC: <kernel@pengutronix.de>, <linux-kernel@vger.kernel.org>,
 	=?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>, Christian Loehle
 	<christian.loehle@arm.com>
 References: <20250221093918.3942378-1-o.rempel@pengutronix.de>
- <20250221093918.3942378-7-o.rempel@pengutronix.de>
+ <20250221093918.3942378-5-o.rempel@pengutronix.de>
 Content-Language: en-US
 From: Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20250221093918.3942378-7-o.rempel@pengutronix.de>
+In-Reply-To: <20250221093918.3942378-5-o.rempel@pengutronix.de>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: WA0P291CA0011.POLP291.PROD.OUTLOOK.COM
- (2603:10a6:1d0:1::23) To BYAPR11MB3605.namprd11.prod.outlook.com
+X-ClientProxiedBy: LO2P265CA0358.GBRP265.PROD.OUTLOOK.COM
+ (2603:10a6:600:d::34) To BYAPR11MB3605.namprd11.prod.outlook.com
  (2603:10b6:a03:f5::33)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -107,168 +107,345 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BYAPR11MB3605:EE_|CO1PR11MB5027:EE_
-X-MS-Office365-Filtering-Correlation-Id: 86018a97-5cba-49e2-befd-08dd5d74a8b1
+X-MS-TrafficTypeDiagnostic: BYAPR11MB3605:EE_|SN7PR11MB8112:EE_
+X-MS-Office365-Filtering-Correlation-Id: c69377e7-b20a-4733-eaba-08dd5d784af7
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|1800799024|366016|7416014|376014|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?b0Qwc1NLUVJBOUFUSkYvTk9ZVFQ2UEtGeEtobWdlZnNYVmdsOXFYZXdFQ3U1?=
- =?utf-8?B?ZUV1a0l2UEZtVWFuTWpuMUUwS3p4cG9PQkpaZWpZdzdPeEd5N0Q3bGpUT3dQ?=
- =?utf-8?B?dndhWnJCd0FGQmZmV3BDa3FpQm1LejRmVytycHlGRmhNZGJ2U3IrVUV0enJO?=
- =?utf-8?B?Y0VGUnFVQXdjUFU4WmtScXlReXB2d0tmTkcvb1hxVEp5RThYMVV4U2JBWVRR?=
- =?utf-8?B?YnVzQ2oxcGxzTlU3YVFYakFZZU1KNytvSW95cEhDR3hubk5qelZhYVFQNzdz?=
- =?utf-8?B?U20yVVltUWdLdE9zbEZKa1lFZVkyMDRHTmhuT2JDQ3NvSDFiZ3F0eUJBcVp0?=
- =?utf-8?B?RVQwYll4NGkvQzBEbUllRWE2S1JSeUljU1owL1BvUWJGb0YzRVcxdWxidGZ2?=
- =?utf-8?B?ckJJOE1hVk44eks3Z2huVnozZVF5M3dlN2pPZElyNE4xakx6OHpvUDVQcjVy?=
- =?utf-8?B?QzNNUk5QcGF2N2RrdUs1bmR4VExsWXkvSW1rNzZYVno4ZFg5MG1ramI5UWRv?=
- =?utf-8?B?d3lOemI1c2FmTjZYNE1oNDZOSU9SUnZoYVViWDAvQW5ock4xcE8va0Y3TFg2?=
- =?utf-8?B?K1Q0MGxSSlZXc1pWUzY2eGRqdHluZEFQUDdOUWRHeC9ubkhaTWM2MXd5YjRV?=
- =?utf-8?B?dHNEQlRkUFVjLzNvVzN4Sm1jdi9OSURreEtibUFyUENMSGVzZmMvZkdxSk1v?=
- =?utf-8?B?eUpGb2xoUVBuQXBMaldaN0lYVFhuNXFHcU03NU1YeS9qc2NZMjVka3d2bldZ?=
- =?utf-8?B?SHBrN3BzekEwNHNXQjg3RTBCQ0FXeWdQVHVTclk0WGk4SHZaU0t1Y2VVWjU0?=
- =?utf-8?B?Qy9VdTY3MzBKNmt3d1J0RnNBcmdFMzdTdlA5cEFSSERKeEVDbE9xeEUzZmEr?=
- =?utf-8?B?ZkpEOXg1YXJvM2U3ZVVlOUp0VlpzdW8zUVp5SFZ6WVBTNDJrOTNVRE8zcFh2?=
- =?utf-8?B?d0trckZrWko5U3JUQ1lhTkFpTFdieU45bXEyaWlFa0FMcldoOFBGeTdrT3hn?=
- =?utf-8?B?T0Uza0Q3T2thYVJoZVJCb043NlZxZ0JlRllZbXFya2dpaTR6SjN4cDNWNGc1?=
- =?utf-8?B?M0crVWJkTzFaTUorRWtOcnVxOVNXYnZncnNyRk9JOEZaUkhMVmpaNkVSSHMv?=
- =?utf-8?B?WUI1cnlVSS9UanY5ZFVIMWdlRkQwK2sySkxkWGpzdUZRWldQR1RqdUQwQU1K?=
- =?utf-8?B?REFvL0hDN3htbUpEMGw4WUliejdPQ3ZLeDN0K2ZzY09zampqcFJvWGNkVmlq?=
- =?utf-8?B?VFlaMktHK2x2OE1mY3JRb3FMbURQLzkyNk5RcEdtRmcvQzVHSzhRR3J2SnBB?=
- =?utf-8?B?anB1eWMxMlIyRk5iRjNyd2dJck0yWmV3Y3dLbTlxRHBHQi84UU1JZ1dsT1ZL?=
- =?utf-8?B?TjEwVzY5NFFJTUVTdjF3MmN6U0tDbnZhb083TzBEdHk1L1dybDNqeWtscThW?=
- =?utf-8?B?ZThMay8rYlFhbU0wbmd4dzUrU2FtNnU3VzJIVnYyYUlLN21oSExEd3YvNEY1?=
- =?utf-8?B?SVZUY2lZQlBIOG51ekNvMUcxREdJTWdvdnVubm12Ym9jaFpPVWtkRmlVYU4x?=
- =?utf-8?B?L0gyZWtnQnNva2pMbTFMRWZ1WUtERWVhdU45TzFsSEV6cTIvN284RlgzZWp5?=
- =?utf-8?B?NFo0RG1XcFdPcVlBc3lBSGgzYTdyeWhlOTNXVlJtS3A1SDRSdkl1elpvYlQy?=
- =?utf-8?B?N1NtQ01SN3cwam5jTGdIRVRsWWR2WkR1ZSswaERsSjZBOHVwN3FEa0E2Vy94?=
- =?utf-8?B?Skw4RE5xb3h6V0UySUJrTFk0TG45Q3VrejFweXVtS2VwUXdUSzZaMjdINHVv?=
- =?utf-8?B?ZHJlYjNxczZ0aE85N0dTbHBiS3RWRmN1dUFrZEYrNHhJbG5yRWZBN2NXd0M3?=
- =?utf-8?Q?/4NLKuBcGFBnE?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB3605.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(7416014)(376014)(7053199007);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|7416014|376014|1800799024;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?dFIxc3ExaDVsd3VITzdsanRZOCthbFhyNzFLbW9ycC9ORk1WR0pGTWduVVQ5?=
+ =?utf-8?B?Q1l4NWQvOUQwb2h6NyswVDRqb2JvYWRramJSaHVqRGYyeE1aSGM4dU9yMUZ1?=
+ =?utf-8?B?WnJvTitnOVZXbkVpWW5RM0dsQ0xFSTViRUJuWlVFVjhGUFR6UTNCaFdTbzdr?=
+ =?utf-8?B?QS83Vm1ScmgyOGxpa3pNMEpxM0xLN1JubGgvbEs2d21tOEJzZUZxelZYczNY?=
+ =?utf-8?B?NXF0TkdmMWxWdkpPZjMyc2tXZXV0cjlmV1ZONi9jSlFqa1ZvVWcrTVhNVFZw?=
+ =?utf-8?B?TUZLOWkvWW10aE84eGFOMWJQOFhRanVBZUtETnZMdzA0a3psS0tzSGdjcVlV?=
+ =?utf-8?B?eXB4V1Jyck5vS3psT2JQc3hZeS8rTWJGaGJWdTdFYVYyUk5tVzVrc0JMMVl3?=
+ =?utf-8?B?NW8vcW51VU5uV25Bdlp5aVcvc1FTbFpKeDZuZnl1dWxyck1NbERpUFd4R0J5?=
+ =?utf-8?B?cUZRbUVqNEw0RmVuM1B2R1hKUmV2R0xtTHI2UUc0d2R4T2Y2WElsem5KTFRG?=
+ =?utf-8?B?cUs3bkQwaHJjYzRSMkpIeHpuMEllV09VN1g5cHNUNTloZU9JUkp0TW14SWFy?=
+ =?utf-8?B?VkpSMUt6ZWJqbi95V2J0VmFCKzd1T3gzWU1JcG9hNC9tNzZDeHlnbmNUTld5?=
+ =?utf-8?B?aUlIbWlUZ1JvWjFuSW01UHBTbXJpaFdwenRINVNXS05EbHZCN0ZacE5ndHpQ?=
+ =?utf-8?B?UmhLYTRXc3E1YVpNZXZjN2F5Qi9yZXJ3THRpQzUyUjIraGcxWDZxR01KMER1?=
+ =?utf-8?B?OUhrdVBOZDZaZjhTdURIdkw4YzdtYmR0eFI1WWE0M1FzdFZqcllFN0UwcldJ?=
+ =?utf-8?B?algvMzArb3haNHdoMjlsZ3VKK3VCempoc1drN0pQdVBiUkpBOFNDZE5HYjk5?=
+ =?utf-8?B?bVV4RklSdXliS0NlQWdCMXRJZnU3T1N4di9lbWwrOUViUk02V282VU9GRDJ1?=
+ =?utf-8?B?VU9WSlZ2NnE5ZkpqTXp3VHZNcjBPUXVVVDg3LzN4MDhNMGRuN2Z4TTJLcEJt?=
+ =?utf-8?B?RVVJV21VYnAySlpoZXJPZURUdEhNNUI4ZWFENGtVY1B6NklRZllLK3l3Uktj?=
+ =?utf-8?B?SDlSdG0yS0F3UVQ1R3VhdFNScUZYb0pGSkpwY0ZJNWNDYzZxVVFjRHZQZXJW?=
+ =?utf-8?B?ZFB3NmlhcWwzMHRLc0FKWm9UUWtpN1FPVldJMkp2c1RGZzl2VDJHQ3lkRVBm?=
+ =?utf-8?B?N1ZPSi9yZCtvM1lidlZPcTAyWEJ6U3NZR0srMXhBWldXOWRaMWs2UDVVWTd5?=
+ =?utf-8?B?K3NNaFBSUExHemk5MUk4aW5pRllmMGlVS1NlTHdDTEVlYzhNZDJPclpSV1JU?=
+ =?utf-8?B?NVd6TGkwNkRjZ3NqWFc0VmxLdnRoRk1lN1NUbXA1LzFFK1NqZ1FKU3JKSzRU?=
+ =?utf-8?B?blFidFd3RmJaS2c5TkJUN2xFRW9RZ25zU3JPRUhtVnlGTXRKR1FWS0N5dHNi?=
+ =?utf-8?B?TGZSM1Ivek5rZzdGWG16Qk5SL1FEWVVVMkhobzV6WXZZNUJQczFnZklnVVg2?=
+ =?utf-8?B?M3ROeElmbGJHNi91bGppZUZzOGk4cGFEWnRDdExsdk14c0E1WjQyYzZmbnFy?=
+ =?utf-8?B?aEtKcHBrRG1xQWdwaG55U1EyTkZkekxHcUVueE1hemNydmZPZlhPRjNyQ0w0?=
+ =?utf-8?B?RUpIcXFsalFza0F5YVd0dDQ3T1FyVUhVeXZRM0ZLMVFYWFoxdjR3ZmhkNjNa?=
+ =?utf-8?B?b2lwcmlNN2w5YjBtOWo4RG9VRTlZNU01YkRWYVFPRkN3RzZvcU5XZGxzelZi?=
+ =?utf-8?B?LzlYU0Ixdi9MOXJFK3NoSmJFWWZJNmliMjNsQ0QrRTdFZXN3TnQyOXpsNmFh?=
+ =?utf-8?B?SG1CL3BuUUxjbENmbzY4Z1VmelBtY2hENTZzbGZ5bXdPVXhheEFxZFoyMEV2?=
+ =?utf-8?Q?blVYiRpsqsW/X?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB3605.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(7416014)(376014)(1800799024);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?MjdzODBuS21zZkR1Tk81ZGVBaUswbkwxdmhpWEhIbXJLRXR4eUpKcVBNSHJn?=
- =?utf-8?B?SEJPL2dESzIwN20rUEFqMDk1U09LSzQyTzlLOCtSTWZ5djFDSzlza0NSclhl?=
- =?utf-8?B?c1ZCTGxKMUoxL1F4UUhsSUFqajMrS1VFZ21SYWI4OC9OSUhQRlBRQ1ZJblRF?=
- =?utf-8?B?VjBCL3F5MFl2VkQ0Q1FUa0YwTEdZMDBLd3ZXVmxTcldKQ24vMUFxbms4Ykxz?=
- =?utf-8?B?L1lDK0ppQXYzK3ZvTUdwSXcySUpPUi8xeElUcitJTjJnT2dhRWZtSFl5TC82?=
- =?utf-8?B?NE9oeDhIbU8rM2FIekptamw0TGZ1M1l4L2dWc250WFA5ZU9ZNTFiUmIvZ2dT?=
- =?utf-8?B?eisxZnFZRXA2V0FuY3hNVjI4dy9aWWNnRnh4a25UbTBhVXVuTkJiUUkxelA3?=
- =?utf-8?B?bUtUUTgzeEV6KzVxQWZxQzF4RllnZ3FXZG1menZjS2Jia1N5NlhYVHBFMzdI?=
- =?utf-8?B?YVdQYTlIMTl2YmV4WUZxUktnbjkxYTd5bHBxZVNIclU3ZzlPa3VWU3E4WnZ1?=
- =?utf-8?B?WmdNalZQRlY4MjdSVTZUMkJTMElRNmUwT2NQVGZMVHdqTVlWdWZQd0NlVzVG?=
- =?utf-8?B?aXJHRDFkN1RoOGpHOVdnOG9kMU1iWVhvUkpBUTFGcWFGSXVBMUtPYmtkSGx0?=
- =?utf-8?B?dlNVMno5ejhXVmFQdi9RcnQwVnozUHNjWkk3SHpnelF3a3Q4Q21yTkI4ckZY?=
- =?utf-8?B?T2ZtWGNmalRaT1dBNGZyL2krUWlqMXdiRkxUY2VmSVBTejkxTWxyWkpPR0w5?=
- =?utf-8?B?aittZTZHeFEvYnBlSGZhSFBRM2Rra1pyMmxBZHZZWmI0V1NsTGxzakFTRFRW?=
- =?utf-8?B?OUp4RnY0aGhoKzFaeFlCak01SXdlTkN0aktxN3FXKzBoRnhFWnBQL0Q4ZGlR?=
- =?utf-8?B?ZURMdDZjSmM5UDZLMUdDcVFPMXhXT1QyMUNiVEtoTk4vYktsMFpKTEN2bzg2?=
- =?utf-8?B?MGVPcUltWjdHTDFLSVdFV1BKNXpKcGNvRHllQnhPQWJZdEdtSW9Wa0hDTlkx?=
- =?utf-8?B?RjJEK25ydTg1Q3dlSXlraGx1V0ZNUDM1M2t0WnRUdnpCWnh2Ny9VOVEvTE9Q?=
- =?utf-8?B?TER3TTI5ejZmYzRlUVZuazFnalRzWndadU4vWmRQdDNRc3ZQS1REWmwyWHQ3?=
- =?utf-8?B?RWgrR2hpVk5KOERZNWY0bXRvMDcvcXYyWXk0YjhCbjFCRkU1OGt3SDVvVVhy?=
- =?utf-8?B?bWxqbUs0VkFRem9YdndWVlNYTU53c0FocHN0bGpPQmtCQ2l3VHhPWlNrZkFU?=
- =?utf-8?B?V0gveE9ueWd1Sy8xZkMwVEVFcVJiQjVJajNBNklQbWUyd0JmNDZ0bk0xdk5Z?=
- =?utf-8?B?Q2s5bXVNUHZEMkNwbDkrU0dlMWE4UVBsYVl1UHl1bWV1dmVzYWdMelRRem9O?=
- =?utf-8?B?NlpMTzNCY2FURENhZmxNV2lRMHh0dzVGdUdBRWkvcEdHTzZ4OE1mdFVpTm1p?=
- =?utf-8?B?Z2JMMlFvUFBwVWxDSkt1TlFaMUcveFhNcmxGNDh5ZHUyTTVWWnkvZSszMElz?=
- =?utf-8?B?RVhvKzJGRmdxdjBNWS8yNWYyVU9sY2Z4Z1Jlalp1TXNBQXZRanJISHVrSGpE?=
- =?utf-8?B?cUF6Skc1RnVhSDcwUnlueWloV0dZbFBlYVhzeUswYUtaQis2b3hDVmJMa2tx?=
- =?utf-8?B?ZkJYQURhQm8rUWpMOTE0WEdIRktNaDlvc1hLL3lXQUxZRGl4MU8wWjZuUm9k?=
- =?utf-8?B?ZUV3MVFURGhmWllzMzV2ZWxJMmZyWENlNmVhbGtqSXVjM1ZCS0h1SnIrTlJi?=
- =?utf-8?B?RVN0czB2cXBtUlN6NVJ3Uk5abkU5cWZ6M1dCZkRmSk5EOEt2eDMrR0xYemFM?=
- =?utf-8?B?cnZjTHQ4RVQrK2hHdUd3Y0tEdW8rMjZuVDVhK0dYeHFqaGFMV2JhaWJpMmQr?=
- =?utf-8?B?RFkwR25Ybkg5am55QzVmbjk4aUFxMzlGdkZjTlZvZGt5SS9abEVXUCtFNnZL?=
- =?utf-8?B?TXpKWnlQY0c0ZUxqN1JFQ29Yek45Zmlxdi9YcU5KNVZMOU5lcGwzclNySXFk?=
- =?utf-8?B?NlNlWVVVSVlpVVlFTjJzVHJxSWQwQisxQncyWGNCOUlZQmcxYkx1T3ZnRmZx?=
- =?utf-8?B?cUtzQzhhckc0RXBsSFIycnpVdXg2dHhWNndkVnZaWERwUXBiVDRudE8xekVN?=
- =?utf-8?B?MWhkM3NoUHEzTWZRZEJ4M3dsOExFaGhGRHNnbVA2U3cxUDVTQlVxZG81RXl5?=
- =?utf-8?B?aGc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 86018a97-5cba-49e2-befd-08dd5d74a8b1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?RU9WbHRvNG1QejRjMXJjK3ZFbTFYRmVCaDJteGVyR2t0SGJQR1J0V1FCVkFz?=
+ =?utf-8?B?MElndW9jbHloWnhMYktES1I2QjVNQ1NLbk9aWXZuZTlGbEh0cjJ6MmgwOEFh?=
+ =?utf-8?B?TEdwOWI4dUdBMUpRV3E1dHNLUzNsVlRBZzlnU25oN3FvZDFhOFVUTUxnbEdV?=
+ =?utf-8?B?d1JBVm84VG9ZblpMODBwRDFRL3JuTjZiY3JobUNIOFhZTkJ2Z1FNbW5SZjlJ?=
+ =?utf-8?B?Rmp1MEVKVWtCblRDZ0JkUXhLYmdoa0ZnUnpYVExWK3lySzhLRkIyZGI1dFQ1?=
+ =?utf-8?B?OUN2R1BxS09mcU1ObkRUT3huN0hCZzNyK0NWVjg1S2tHczJDc1Ribk9HaElZ?=
+ =?utf-8?B?TER5cmF4Sm1oMk5ISmV6RkRwS0ZoUURweUdpZk1QdHBkdkM4VS9RZXNsazZX?=
+ =?utf-8?B?N2hSaTdUUzhBUys1eWM1YVVDZWxkcWFOZlppREVBcUhsSUo4YUtTT3Rhc09E?=
+ =?utf-8?B?Vmo4amV2Q3RJWFRRRXJHaTFMMmI2eGQxMFNBeEhkaGEzZEtRLyt1endnSWVG?=
+ =?utf-8?B?d3NRSnhlZ1VCRnBoZ3ZBY25qODVTa0lSUGZDU2daRlBENzBHZ1M5MUVkQTcw?=
+ =?utf-8?B?UWtRTjU2K2ZlUnJ6bTBIUFRsTHhYZ3c1MDFDVlNTVEtuVmV2YVozajMyMG5O?=
+ =?utf-8?B?Wkk3a2Q0OUFpR3d2R0hJNnY2dTI2cTZkclRVZ2NKNFJST20wWTJGU2N1bU51?=
+ =?utf-8?B?SVg2b014Y3V3S0RveUNCZ28wT2U3UVZzVFVPSDhOdDNoOG1ncXRaNUhtWHIr?=
+ =?utf-8?B?eUVsTEZreStwa2FmbERETloyaHpmRmxPMzQwa1E0ZHhZay84MUF4bHU3TEJE?=
+ =?utf-8?B?K2paSzJLdnJGQ3k0L2d3bUpOL3VoMWV0VUJPMDVORmN1S1Nac3lPc3FTOWJ2?=
+ =?utf-8?B?WkplQkdYN0hEd0FzNVNGRGoyOHNIMExMTlRjQytvVEtwU0IwLzZFQkRjbDdI?=
+ =?utf-8?B?RnI3OTdwb2FiUHhvdjZtbWZFckJQbUE3ZEtnWjVvdHdZZHUxbXFxM3V5YXFB?=
+ =?utf-8?B?bHVnTXpJOTZUMmJPR293THlueXMveEE0aFFvQ3pxZVl5QXV5MjB0SEtrcWJk?=
+ =?utf-8?B?Ky9rK1NHUENEdzFpazh2THcyZkxhN0paVVVObUZmYU9WUFFoa1VxTDc5RU9S?=
+ =?utf-8?B?NUNxajlhbFhpck1aNFM5VFZ1ZVJWMHZNNlJMNHhERlJiSE9UeWVoQjR5Zjdt?=
+ =?utf-8?B?YVUrbFdOUXp1Y0JwSkxUK00zN0ZJaGNFVld2OWd0V3JoMEhxS08vZEoyUWpk?=
+ =?utf-8?B?dEV5R3lKcXVyeGEvUzFCOEpVTmhCUnpjM1Z6RmJMb0U1Q0VCNUFtdVhrOHpB?=
+ =?utf-8?B?M0cvTkdZd2RrMkhUZVNxVUJZdXJsaFJGMzRSQ3dlMEFHSlFtVWNaSm1hbS9z?=
+ =?utf-8?B?SS9JNEExZmh1VEtXU0tYU0M5eDRMaS8wMXZnRFdsY1ZlektYbnZXdGE2VnpP?=
+ =?utf-8?B?MFo3aUFGLzM5WUNWTzRRMFl3bFVXanlnNENPNGE3K1dTclBTRWdJcURsamVD?=
+ =?utf-8?B?RlRBcEs5RDdYcVpFQWJvWE1XVW96bkNPOGFvc2NXNjloMVpkVWhoNVlDQndG?=
+ =?utf-8?B?cW9sR1RHaWVNelFQMG0wODBWV2hyWDI5YVJjUlBCZ1hmUi9IYmhrZGZBOXVJ?=
+ =?utf-8?B?ZTRsaGtLcFc1dWZHZnJacTY5T2NhSloxdTdkcU4yNDZHVlg2ZkNSYUYreWtY?=
+ =?utf-8?B?YXVLeUNsTjcvWWhxMWNXbzVDbm42VWdPcWhNYTljM0xOWmxtYlQwcWZ1TTVJ?=
+ =?utf-8?B?NjlzR3JLdzdXS2xnaDBEOFlsdkJWckgvK29iODJGdUJ2Mi9POUgxL09XREdj?=
+ =?utf-8?B?UjBMYWQ0OW9WV3pXK2tKQmNKRUt4UmUvcWZtd0ROS29zNlE5RGN6blNrTTlI?=
+ =?utf-8?B?MnZwY1FDdU5FS1R4S2g2dHo2QTRDd01oa0FZWTRiczN5dEpvVk9QWFJCQnZW?=
+ =?utf-8?B?UmZBdkdOeFJ0WFlVZ1VYeFV0bWVJN1RiKzBhcDFHR2hyRy9PWkRQRVV5L1hw?=
+ =?utf-8?B?ZjBHbTQrRkk0a0xMS0hDaUs3NjlLYlptWHU0UkFyUHZaVkVldSs5alRYTnM3?=
+ =?utf-8?B?SHFRaVJPcGtIeE9qWkZuZ0NmTlhoaFdPV2tMUW94L2NhMUJQa1hTOVpzSWd4?=
+ =?utf-8?B?TWswSHZpRUJ0RXZKOFJLVHFVR3hlUG9MNjdCME1RaGNhQy9TdFBzbkpQV2JY?=
+ =?utf-8?B?YlE9PQ==?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: c69377e7-b20a-4733-eaba-08dd5d784af7
 X-MS-Exchange-CrossTenant-AuthSource: BYAPR11MB3605.namprd11.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2025 12:36:20.0397
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 07 Mar 2025 13:02:19.4541
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: dyE1R6baLw7f1aKOhbZODS2oj202DHNHLB6Xj3KNUVoujX2j/5R6otzS7xoDTeL4yVCbAmpUZEuYG4kb2MXOQg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO1PR11MB5027
+X-MS-Exchange-CrossTenant-UserPrincipalName: GBf1ge4OcEU4t/uObrcdQwU/wIBDGjREL82+nKp3GPwKEyVfsFAS5c+QzKjBZq1N4CdAtEjsDNTREqq8bDySZw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR11MB8112
 X-OriginatorOrg: intel.com
 
 On 21/02/25 11:39, Oleksij Rempel wrote:
-> Introduce an emergency_stop flag in struct mmc_host to block further
-> MMC/SD commands after an undervoltage shutdown. If emergency_stop is
-> set, sdhci_send_command() will reject new requests with -EBUSY and log a
-> warning. This helps diagnose and identify code paths that may still
-> attempt writes after the undervoltage shutdown sequence has completed.
+> Introduce `_mmc_handle_undervoltage()` to handle undervoltage events for
+> MMC/eMMC devices. This function interrupts ongoing operations using High
+> Priority Interrupt (HPI) and performs a controlled suspend. After
+> completing the sequence, the card is marked as removed to prevent
+> further interactions, ensuring that no further commands are issued after
+> an emergency stop.
+
+Please cc me also, and since Avri and Christian have reviewed earlier
+versions, at least them too.
+
+I'd suggest cc'ing others too because at the moment there doesn't
+seem to be a lot of interest in this.
+
+> 
+> Implementation Details:
+> 1. **Interrupt ongoing operations**:
+>    - If the eMMC is executing a long-running operation (e.g., erase, trim,
+>      or write),
+
+Those cannot be happening if you have the host claimed.
+
+>      attempt to stop it using HPI (`mmc_interrupt_hpi()`).
+>    - If HPI fails, an error is logged, but the sequence continues.
+> 
+> 2. **Suspend the card in an emergency state**:
+>    - Call `__mmc_suspend()` with `is_undervoltage = true`, which ensures:
+>      - The power-off notification uses `EXT_CSD_POWER_OFF_SHORT`.
+>      - Cache flushing is skipped to minimize time delays.
+>      - If power-off notify is unsupported, alternative methods like sleep
+>        or deselect are used to transition the card into a safe state.
+> 
+> 3. **Mark the card as removed**:
+>    - This prevents further commands from being issued to the card after
+>      undervoltage shutdown, avoiding potential corruption.
+> 
+> To support this, introduce `__mmc_suspend()` and `__mmc_resume()` as
+> internal  helpers that omit `mmc_claim_host()/mmc_release_host()`,
+> allowing them to be  called when the host is already claimed.
+> 
+> The caller of `_mmc_handle_undervoltage()` is responsible for invoking
+> `mmc_claim_host()` before calling this function and `mmc_release_host()`
+> afterward to ensure exclusive access to the host during the emergency
+> shutdown process.
+> 
+> Device Handling Considerations:
+> - **For eMMC storage**: The new undervoltage handler applies the correct
+>   power-down sequence using power-off notify or alternative methods.
+> - **For SD cards**: The current implementation does not handle undervoltage
+>   events for SD cards. Future extensions may be needed to implement proper
+>   handling.
+> 
+> Testing:
+> This implementation was tested on an iMX8MP-based system, verifying that
+> the  undervoltage sequence correctly stops ongoing operations and
+> prevents further  MMC transactions after the event. The board had
+> approximately 100ms of available  power hold-up time. The Power Off
+> Notification was sent ~4ms after the board  was detached from the power
+> supply, allowing sufficient time for the eMMC to  handle the event
+> properly.
+> 
+> The testing was performed using a logic analyzer to monitor command
+> sequences and timing. While this method confirms that the expected
+> sequence was executed, it does not provide insights into the actual
+> internal behavior of the eMMC storage.
 > 
 > Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
 > ---
 > changes v3:
-> - add comments
+> - reword commit message.
+> - add comments in the code
+> - do not try to resume sleeping device
 > ---
->  drivers/mmc/core/mmc.c   | 7 +++++++
->  drivers/mmc/host/sdhci.c | 9 +++++++++
->  include/linux/mmc/host.h | 1 +
->  3 files changed, 17 insertions(+)
+>  drivers/mmc/core/mmc.c | 115 ++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 102 insertions(+), 13 deletions(-)
 > 
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index a50cdd550a22..0cd6b81d0678 100644
+> index 9270bde445ad..a50cdd550a22 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -2370,6 +2370,13 @@ static int _mmc_handle_undervoltage(struct mmc_host *host)
->  	 */
->  	mmc_card_set_removed(card);
+> @@ -2104,8 +2104,8 @@ static int _mmc_flush_cache(struct mmc_host *host)
+>  	return err;
+>  }
 >  
-> +	/*
-> +	 * Signal the host controller driver that we are in emergency stop mode.
-> +	 * This prevents any new storage requests from being issued, ensuring
-> +	 * that no further operations take place while in this state.
-> +	 */
-> +	host->emergency_stop = true;
+> -static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> -			bool is_undervoltage)
+> +static int __mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +			 bool is_undervoltage)
+>  {
+>  	unsigned int notify_type;
+>  	int err = 0;
+> @@ -2116,8 +2116,6 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+>  	else
+>  		notify_type = EXT_CSD_POWER_OFF_LONG;
+>  
+> -	mmc_claim_host(host);
+> -
+>  	if (mmc_card_suspended(host->card))
+>  		goto out;
+>  
+> @@ -2145,7 +2143,18 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+>  		mmc_card_set_suspended(host->card);
+>  	}
+>  out:
+> +	return err;
+> +}
+> +
+> +static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
+> +			bool is_undervoltage)
+> +{
+> +	int err;
+> +
+> +	mmc_claim_host(host);
+> +	err = __mmc_suspend(host, is_suspend, is_undervoltage);
+>  	mmc_release_host(host);
 > +
 >  	return err;
 >  }
 >  
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f4a7733a8ad2..8d67f27e7d9e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1658,6 +1658,15 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+> @@ -2165,6 +2174,20 @@ static int mmc_suspend(struct mmc_host *host)
+>  	return err;
+>  }
 >  
->  	WARN_ON(host->cmd);
->  
-> +	if (host->mmc->emergency_stop) {
-
-This is unnecessary.
-
-The host controller driver should not have to block requests
-because the mmc core layer should not be requesting them.
-
-We definitely wouldn't want to be duplicating this code in
-every host controller driver, so let's not start.
-
-> +		pr_warn("%s: Ignoring normal request, emergency stop is active\n",
-> +			mmc_hostname(host->mmc));
-> +		WARN_ON_ONCE(1);
+> +static int __mmc_resume(struct mmc_host *host)
+> +{
+> +	int err;
 > +
-> +		cmd->error = -EBUSY;
-> +		return true;
-> +	}
+> +	if (!mmc_card_suspended(host->card))
+> +		return 0;
 > +
->  	/* Initially, a command has no error */
->  	cmd->error = 0;
+> +	mmc_power_up(host, host->card->ocr);
+> +	err = mmc_init_card(host, host->card->ocr, host->card);
+> +	mmc_card_clr_suspended(host->card);
+> +
+> +	return err;
+> +}
+> +
+>  /*
+>   * This function tries to determine if the same card is still present
+>   * and, if so, restore all state to it.
+> @@ -2174,16 +2197,9 @@ static int _mmc_resume(struct mmc_host *host)
+>  	int err = 0;
 >  
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 4e147ad82804..5dfe2cdde59f 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -501,6 +501,7 @@ struct mmc_host {
->  	unsigned int		can_dma_map_merge:1; /* merging can be used */
->  	unsigned int		vqmmc_enabled:1; /* vqmmc regulator is enabled */
->  	unsigned int		undervoltage:1;	 /* Undervoltage state */
-> +	unsigned int		emergency_stop:1; /* Emergency stop. No transfers are allowed. */
+>  	mmc_claim_host(host);
+> -
+> -	if (!mmc_card_suspended(host->card))
+> -		goto out;
+> -
+> -	mmc_power_up(host, host->card->ocr);
+> -	err = mmc_init_card(host, host->card->ocr, host->card);
+> -	mmc_card_clr_suspended(host->card);
+> -
+> -out:
+> +	err = __mmc_resume(host);
+>  	mmc_release_host(host);
+> +
+>  	return err;
+>  }
 >  
->  	int			rescan_disable;	/* disable card detection */
->  	int			rescan_entered;	/* used with nonremovable devices */
+> @@ -2194,6 +2210,13 @@ static int mmc_shutdown(struct mmc_host *host)
+>  {
+>  	int err = 0;
+>  
+> +	/*
+> +	 * In case of undervoltage, the card will be powered off by
+> +	 * _mmc_handle_undervoltage()
+> +	 */
+> +	if (host->undervoltage)
+> +		return 0;
+> +
+>  	/*
+>  	 * In a specific case for poweroff notify, we need to resume the card
+>  	 * before we can shutdown it properly.
+> @@ -2285,6 +2308,71 @@ static int _mmc_hw_reset(struct mmc_host *host)
+>  	return mmc_init_card(host, card->ocr, card);
+>  }
+>  
+> +/**
+> + * _mmc_handle_undervoltage - Handle an undervoltage event for MMC/eMMC devices
+> + * @host: MMC host structure
+> + *
+> + * This function is triggered when an undervoltage condition is detected.
+> + * It attempts to safely stop ongoing operations and transition the device
+> + * into a low-power or safe state to prevent data corruption.
+> + *
+> + * Steps performed:
+> + * 1. If no card is present, return immediately.
+> + * 2. Attempt to interrupt any ongoing operations using High Priority Interrupt
+> + *    (HPI).
+> + * 3. Perform an emergency suspend using EXT_CSD_POWER_OFF_SHORT if possible.
+> + *    - If power-off notify is not supported, fallback mechanisms like sleep or
+> + *      deselecting the card are attempted.
+> + *    - Cache flushing is skipped to reduce execution time.
+> + * 4. Mark the card as removed to prevent further interactions after
+> + *    undervoltage.
+> + *
+> + * Note: This function does not handle host claiming or releasing. The caller
+> + *	 must ensure that the host is properly claimed before calling this
+> + *	 function and released afterward.
+> + *
+> + * Returns: 0 on success, or a negative error code if any step fails.
+> + */
+> +static int _mmc_handle_undervoltage(struct mmc_host *host)
+> +{
+> +	struct mmc_card *card = host->card;
+> +	int err = 0;
+> +
+> +	/* If there is no card attached, nothing to do */
+> +	if (!card)
+> +		return 0;
+> +
+> +	/*
+> +	 * Try to interrupt a long-running operation (such as an erase, trim,
+> +	 * or write) using High Priority Interrupt (HPI). This helps ensure
+> +	 * the card is in a safe state before power loss.
+> +	 */
+> +	err = mmc_interrupt_hpi(card);
+> +	if (err)
+> +		pr_err("%s: Interrupt HPI failed, error %d\n",
+> +			mmc_hostname(host), err);
+> +
+> +	/*
+> +	 * Perform an emergency suspend to power off the eMMC quickly.
+> +	 * This ensures the device enters a safe state before power is lost.
+> +	 * We first attempt EXT_CSD_POWER_OFF_SHORT, but if power-off notify
+> +	 * is not supported, we fall back to sleep mode or deselecting the card.
+> +	 * Cache flushing is skipped to minimize delay.
+> +	 */
+> +	err = __mmc_suspend(host, false, true);
+> +	if (err)
+> +		pr_err("%s: error %d doing suspend\n", mmc_hostname(host), err);
+> +
+> +	/*
+> +	 * Mark the card as removed to prevent further operations.
+> +	 * This ensures the system does not attempt to access the device
+> +	 * after an undervoltage event, avoiding potential corruption.
+> +	 */
+> +	mmc_card_set_removed(card);
+> +
+> +	return err;
+> +}
+> +
+>  static const struct mmc_bus_ops mmc_ops = {
+>  	.remove = mmc_remove,
+>  	.detect = mmc_detect,
+> @@ -2297,6 +2385,7 @@ static const struct mmc_bus_ops mmc_ops = {
+>  	.hw_reset = _mmc_hw_reset,
+>  	.cache_enabled = _mmc_cache_enabled,
+>  	.flush_cache = _mmc_flush_cache,
+> +	.handle_undervoltage = _mmc_handle_undervoltage,
+>  };
+>  
+>  /*
 
