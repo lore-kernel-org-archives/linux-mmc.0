@@ -1,77 +1,83 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39A40231A22;
-	Mon, 10 Mar 2025 16:42:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 994821DE3CA;
+	Mon, 10 Mar 2025 20:13:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741624920; cv=none; b=n2XqwbP1i6OH/iFGcaRff0v7Ca+AghmspeyJXSnxsoHbR1P97dRK4vv7XeWA31+oTw2rdZbOK2uOoGl89D2oQHK5BwSqcF4M35vbtgG9pOpYsPnF6ISGy8K/o3p/CG8D2oN757TKTW4QD09i7rVUpxIE0ChJW6Y0nfvRDFEUJMQ=
+	t=1741637587; cv=none; b=BeypKJx3iXkhjnu988qLr2tr63vlZU2Vf7Ez4L8//kHcJeDt2+k46xf5jiBM213D/XJurLjNASqV/U2opYH0eD8K+piPxPEFziiCLjmogjxeNpqy2JXfWwzoLuLiwFZMbnAPY562gt+LAMpueoX6js5HqV5PsCpgRlWhse9WUZM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741624920; c=relaxed/simple;
-	bh=AonGS/l9pN/Ns1XP5OZmwRVEfJkZ3sbj6I9acRs39sE=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=q50/nSn2zxdZLkVu1CoWEy35xpfB1OCNPu3CWJKYR82h6LDy+01CweaAIOdP3O2uOxiwBkadXNAftggazfxsbP+7hXJOPKS0yKDJLmJIxfH6HqSdDaEtMdQ3HcXSDDbxZYTXP+7tNWrC3SW0yiX099EUAnYK4xpHAM+bzRSZOBw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gut4zvA9; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1741637587; c=relaxed/simple;
+	bh=pwT39giEdOzrATke/Go754xjWmqpTejDczTvTc4LmLo=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=Ris8aekB42WerUuLGIAtF6H48NV8q1Lwi0EqLRmahOEdYRE7WX2kk9ZML4zuJBffPH2u6lGMU+5WtxQzVdiOt2LXnHC+otaBBcicDUxn3bp8M45znRkMuBEqGtRTiZfbI2jNbcOF3z0rQHKa4lxyFsseGJ1Xxg7LXBxOUEtl8M0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PvFJaMHd; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gut4zvA9"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A759CC4CEE5;
-	Mon, 10 Mar 2025 16:41:59 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PvFJaMHd"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75E97C4CEEA;
+	Mon, 10 Mar 2025 20:13:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1741624920;
-	bh=AonGS/l9pN/Ns1XP5OZmwRVEfJkZ3sbj6I9acRs39sE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=gut4zvA9kSCVVqb5oEIk8UB9IOhmL4oBHTFbGoJztp6Zqvb/DrD/Va8bPfj94dGwC
-	 ikHc7Eh8+LX8looTrA7reyhmYHHbJdEuhPR1H9QoyG28tfYDeyKy37medElaSpwPRu
-	 YJCkVJ/egYaHHU6+XQVehmImsNMchRh2RdUs8lJcKWr+EOrPc+udO/qXtYSaCARlHn
-	 14RAfMCjToz2fgO4f4I0b9o6xZ10Lyr0J2QSIpM6FM5o47pY2d0lkPV0qCEZsyycZP
-	 zJnC8XZ945L10nmbU+DpkCVRj1lPJzcj8oD0OPq8TiiuluI4Ddco+B4GQjzmZSd1Fp
-	 OXhceAqh5whUQ==
-Date: Mon, 10 Mar 2025 09:41:58 -0700
-From: Eric Biggers <ebiggers@kernel.org>
-To: Bjorn Andersson <andersson@kernel.org>
-Cc: Bartosz Golaszewski <brgl@bgdev.pl>, linux-fscrypt@vger.kernel.org,
-	linux-scsi@vger.kernel.org, linux-block@vger.kernel.org,
-	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-	Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-	Jens Axboe <axboe@kernel.dk>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Subject: Re: [PATCH v12 0/4] Driver and fscrypt support for HW-wrapped inline
- encryption keys
-Message-ID: <20250310164158.GA1701@sol.localdomain>
-References: <20250210202336.349924-1-ebiggers@kernel.org>
- <CAMRc=Md0fsB7Yfx9Au1pXi+7Y_5DQf2z430c9R+tyS9e60-y5w@mail.gmail.com>
- <20250302222336.GD2079@quark.localdomain>
+	s=k20201202; t=1741637587;
+	bh=pwT39giEdOzrATke/Go754xjWmqpTejDczTvTc4LmLo=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=PvFJaMHd1RdC/g5djtx22/46v3J0qj+Yc9d2cSCc5paDGT9IqCAr9+Qtb3VpOwbJP
+	 qU/BwFi1nA67/u6vFnq63ncp06yks3dG7bCewpylTwre3m2YOSNYu5gNYy7rjdNI27
+	 c/QGUicBRGAbxLi10hU+d7deZPr0mc56WF/HJNGE/U9kFPYzShWcPDyrqN6g5y47QV
+	 nm8rftZFmJzaGo0vBPBSiH5JwBjYN5yD1b5uiwUf+X7Vt2oVI3v7IOmzwMVqo9glbL
+	 aD8DtcoVJUQ/Um3KuV8e5DIcFJdcz1HvSr/pOjEjWeylgPZn3B27yxybGOVqZGS0J1
+	 SR13cVMqi3FfQ==
+From: Vinod Koul <vkoul@kernel.org>
+To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
+ Jernej Skrabec <jernej.skrabec@gmail.com>, 
+ Samuel Holland <samuel@sholland.org>, 
+ Andre Przywara <andre.przywara@arm.com>
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-sunxi@lists.linux.dev, linux-kernel@vger.kernel.org, 
+ Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
+ Wim Van Sebroeck <wim@linux-watchdog.org>, 
+ Guenter Roeck <linux@roeck-us.net>, linux-watchdog@vger.kernel.org, 
+ Thomas Gleixner <tglx@linutronix.de>, 
+ Kishon Vijay Abraham I <kishon@kernel.org>, linux-phy@lists.infradead.org
+In-Reply-To: <20250307005712.16828-1-andre.przywara@arm.com>
+References: <20250307005712.16828-1-andre.przywara@arm.com>
+Subject: Re: (subset) [PATCH v3 00/15] arm64: dts: allwinner: Add basic
+ Allwinner A523 support
+Message-Id: <174163758109.467704.5227333743858525157.b4-ty@kernel.org>
+Date: Tue, 11 Mar 2025 01:43:01 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250302222336.GD2079@quark.localdomain>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.14.2
 
-On Sun, Mar 02, 2025 at 02:23:36PM -0800, Eric Biggers wrote:
-> > > TBD whether these will land in 6.15 too, or wait until 6.16 when the
-> > > block patches that patches 2-4 depend on will have landed.
-> > >
-> > 
-> > Could Jens provide an immutable branch with these patches? I don't
-> > think there's a reason to delay it for another 3 months TBH.
+
+On Fri, 07 Mar 2025 00:56:57 +0000, Andre Przywara wrote:
+> this in an update to the series introducing the basic DT support for the
+> Allwinner A523 SoC. It now comes with DTs for three boards, using
+> slightly different packages of that SoC.[1]
+> Functionality-wise it relies on the pinctrl[2] and clock[3] support
+> series, though there are no direct code dependency series between the
+> series. Two binding patches from there are required to pass dtbs_check,
+> git put their patch IDs in the footer below.
+> Compared to v2 only small fixes in the NMI controller driver: renaming
+> the struct to better reflect its new usage, add adding the DS pin to
+> the eMMC pingroup list. Adding accrued tags on the way, many thanks to
+> the diligent reviewers! More detailed changelog below.
 > 
-> They don't seem to be on an immutable branch, so I'll just wait until the next
-> cycle, rather than trying to do something weird where I rebase the fscrypt tree
-> onto the block tree and also include driver patches.  TBH, I've already been
-> waiting 5 years to land this, so an extra 9 weeks is not a big deal :-)
-> 
-> The first patch "soc: qcom: ice: make qcom_ice_program_key() take struct
-> blk_crypto_key" does not depend on the block ones though, and it could land in
-> 6.15.  Bjorn, would you like to take that patch through your tree to get it out
-> of the way?
+> [...]
 
-Bjorn, could you apply patch 1 to your tree?  Thanks!
+Applied, thanks!
 
-- Eric
+[07/15] dt-bindings: phy: document Allwinner A523 USB-2.0 PHY
+        commit: 1f7af7f3c353ae3b384a66a82c5074ac28901160
+
+Best regards,
+-- 
+~Vinod
+
+
