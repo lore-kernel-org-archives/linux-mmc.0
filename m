@@ -1,85 +1,78 @@
-Received: from smtp1.ms.mff.cuni.cz (smtp-in1.ms.mff.cuni.cz [195.113.20.234])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 42F871EBA09;
-	Tue, 11 Mar 2025 11:27:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.113.20.234
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EBF8E225A32
+	for <linux-mmc@vger.kernel.org>; Tue, 11 Mar 2025 12:54:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741692426; cv=none; b=Ioq4qWG+fTQ93J9KAQclC3JMjAnQrvZReWGNBqBKeFKSNtJ6RFw73DHrc6J8oRXw9vQn2D0bNyTND5SC49dxXpr37SmmkvgD5vzqjRy8nDvikrtB2JilRLr2F7v2im0uyojO7o6DmAEgC3ibCJLS0fHYc22KUpZa1R7PdWKIupY=
+	t=1741697675; cv=none; b=nmifh1IBekK6+64QAeNLTbwmhjiIYUZzBaaWG7JFlMQWGbFse0FC/LKCpkF+X6V8mM/kwoLHpOKDXV8N9MLfGxK7Z8+oVPa4aMya2n9zxURDLKFsdtRpZUS86/eTxR//sboM6LLCvXqdil/xSIG+/D88SRC4366d3aKe4xJE7AM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741692426; c=relaxed/simple;
-	bh=fw+Gn7lVTmFQHX2G3+L709XHoTRr/Pnl+NP5DaQZweU=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:To:From:
-	 References:In-Reply-To; b=GMJJGMvSz17lyWPA0fOH+1EjqBFu0i6+LhA/3t43pfJBd5F0eM9gbsCxMo6RfBly1gMRCBYQWdpTcyppJ4l79baDv9iHkg+sSwBr0zaI4Z5/r4jJC4WCzrRstE1cpyQGY7kaCYZ8rV6BGfbbPxd2a+i30TwWiYaeejCFnUgD9M8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz; spf=pass smtp.mailfrom=matfyz.cz; dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b=kq/UFAtI; arc=none smtp.client-ip=195.113.20.234
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=matfyz.cz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=matfyz.cz
+	s=arc-20240116; t=1741697675; c=relaxed/simple;
+	bh=9sjBBWS9bpI3NZmO5G/TMQPP/DrdJFrc0FcE29rYoS4=;
+	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
+	 References:Subject; b=C8nwbKtdrL8pSuwrOWG3P5hrWoUKDigi6yd/U1bh/i9LNcOKsZQL0k+9j6lMrfvodRr4RYZpQk+HQmTMlAg+U/llVbi0lJ1ViJIQwl9i5o2FxHTfHwxSj3KliTMKT2Z6Rvak1OlFhcJI3JWCVLrkpwtk7whBTY4SmizCU4iaT14=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Kfk4hlLl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=mff.cuni.cz header.i=@mff.cuni.cz header.b="kq/UFAtI"
-X-SubmittedBy: id balejk@matfyz.cz subject /postalCode=110+2000/O=Univerzita+20Karlova/street=Ovocn+5CxC3+5CxBD+20trh+20560/5/ST=Praha,+20Hlavn+5CxC3+5CxAD+20m+5CxC4+5Cx9Bsto/C=CZ/CN=Karel+20Balej/emailAddress=balejk@matfyz.cz
-	serial F5FD910E8FE2121B897F7E55B84E351D
-	issued by /C=NL/O=GEANT+20Vereniging/CN=GEANT+20Personal+20CA+204
-	auth type TLS.CUNI
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mff.cuni.cz;
-	s=submission; t=1741692355; x=1742992355;
-	bh=fw+Gn7lVTmFQHX2G3+L709XHoTRr/Pnl+NP5DaQZweU=; h=From;
-	b=kq/UFAtIqSMucu4HI3iZlAgtVwVhOzpMtt3eb7CHhn/imNiexj3QCUul1NKSNqu1U
-	 FU873nUOeHpOMiioeU4wvDD97JtGMD2nZbD3KfBHFnCgUofTx3391f5KJOCElu8bLE
-	 dJzi/4uoXuzh2oGTxM7Nv35t0wBJ71hFCbzry/3uA5H+pf9wpz028QYqymYrGlnFld
-	 UjDfmurqYFolZvHmGm5XFA7epvrzSLM/2x0XH9u+cYehQp91HaWaVLRY6VgszmiVH1
-	 ob+8uIBArw5xIdBC7vAZD8cp4mPkF3aQ82SQYjtH6YykaA3YnYURQYfo6nDcfs/GLo
-	 2HJ1J0ZW8G2nQ==
-Received: from localhost (c-85-230-82-121.bbcust.telenor.se [85.230.82.121])
-	(authenticated)
-	by smtp1.ms.mff.cuni.cz (8.16.1/8.16.1) with ESMTPS id 52BBPpFx004169
-	(version=TLSv1.3 cipher=TLS_AES_256_GCM_SHA384 bits=256 verify=OK);
-	Tue, 11 Mar 2025 12:25:53 +0100 (CET)
-	(envelope-from balejk@matfyz.cz)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Kfk4hlLl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6E57DC4CEE9;
+	Tue, 11 Mar 2025 12:54:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741697674;
+	bh=9sjBBWS9bpI3NZmO5G/TMQPP/DrdJFrc0FcE29rYoS4=;
+	h=From:Date:To:In-Reply-To:References:Subject:From;
+	b=Kfk4hlLl/DU2omwOZI51ydtKR6OX1M1i+jAmjWx44K3DFm0JITGELXYNpHrXmh/Ne
+	 GLrC/BsvNW8m1+mt6SORSS2HNe1gjLG4eolBQbYTtrgDjhSrboDwTRtr/O5q0scst2
+	 5U0+H+KTMk+6maXYh4ienHr8j3shPYY/4RfItejSR25Gvupko5JzAC3dA1EkpMQkSg
+	 23eqrJ3PkoClV/DuI+6nZJUUX9A+lnkpzRMnXrvEc54OiQZAesVQGEuDuul0NRI/29
+	 EGnw1ie+AZwST/e+yd+NL+cFqFXdFUUQNM3WDDzRn5kn92t0U+EcSBB/qHczkqyY0o
+	 VT6caqyoUg0SA==
+Received: from [10.30.226.235] (localhost [IPv6:::1])
+	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id B32EB380AC1C;
+	Tue, 11 Mar 2025 12:55:09 +0000 (UTC)
+From: Adrian Hunter via Bugspray Bot <bugbot@kernel.org>
+Date: Tue, 11 Mar 2025 12:55:18 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Tue, 11 Mar 2025 12:25:56 +0100
-Message-Id: <D8DEEUPB16WF.154Y3AEPXT4L1@matfyz.cz>
-Cc: <phone-devel@vger.kernel.org>, <~postmarketos/upstreaming@lists.sr.ht>,
-        =?utf-8?q?Duje_Mihanovi=C4=87?= <duje.mihanovic@skole.hr>,
-        <stable@vger.kernel.org>, "linux-mmc" <linux-mmc@vger.kernel.org>,
-        "LKML"
- <linux-kernel@vger.kernel.org>,
-        "Daniel Mack" <daniel@zonque.org>,
-        "Haojian
- Zhuang" <haojian.zhuang@gmail.com>,
-        "Robert Jarzmik"
- <robert.jarzmik@free.fr>,
-        "Jisheng Zhang" <jszhang@kernel.org>,
-        "linux-arm-kernel@lists.infradead.org"
- <linux-arm-kernel@lists.infradead.org>
-Subject: Re: [RFC PATCH] mmc: sdhci-pxav3: set NEED_RSP_BUSY capability
-To: "Adrian Hunter" <adrian.hunter@intel.com>,
-        "Ulf Hansson"
- <ulf.hansson@linaro.org>
-From: "Karel Balej" <balejk@matfyz.cz>
-References: <20250310140707.23459-1-balejk@matfyz.cz>
- <727c857f-0234-417b-af5d-69b3ae064d0f@intel.com>
-In-Reply-To: <727c857f-0234-417b-af5d-69b3ae064d0f@intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+To: ricky_wu@realtek.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Message-ID: <20250311-b218821c14-1185eb2dfa30@bugzilla.kernel.org>
+In-Reply-To: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
+References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org>
+Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
+ Microsoft Surface Go 2
+X-Bugzilla-Product: Drivers
+X-Bugzilla-Component: MMC/SD
+X-Mailer: bugspray 0.1-dev
 
-Adrian Hunter, 2025-03-11T09:34:28+02:00:
-> On 10/03/25 16:07, Karel Balej wrote:
->> Set the MMC_CAP_NEED_RSP_BUSY capability for the sdhci-pxav3 host to
->> prevent conversion of R1B responses to R1. Without this, the eMMC card
->> in the samsung,coreprimevelte smartphone using the Marvell PXA1908 SoC
->
-> So that SoC is from 2015?
+Adrian Hunter writes via Kernel.org Bugzilla:
 
-Rather at least 2014 as that's the release year of the phone.
+On 21/02/25 16:55, bugzilla-daemon@kernel.org wrote:
+> https://bugzilla.kernel.org/show_bug.cgi?id=218821
+> 
+> --- Comment #13 from Thomas Haschka (haschka@gmail.com) ---
+> Created attachment 307693
+>   --> https://bugzilla.kernel.org/attachment.cgi?id=307693&action=edit
+> Patch for 6.12.16 which solves the problem on the surface go 2
+> 
+> By reversing the bisected commit it was possible to me to build this patch
+> for
+> the current 6.12.16 kernel which yields stable sd card operation on the 
+> surface go 2.
 
-> Is there anything more recent using this driver?
+I do not really see how that commit could affect the card, but it could
+be that it results in runtime suspend then runtime resume happening very
+close together.  If there were insufficient delays to allow voltage levels
+to reach the correct values, it could result in the card misbehaving as
+seen.
 
-Looking at the in-tree DTs using the compatibles offered by it, it seems
-that not really.
+View: https://bugzilla.kernel.org/show_bug.cgi?id=218821#c14
+You can reply to this message to join the discussion.
+-- 
+Deet-doot-dot, I am a bot.
+Kernel.org Bugzilla (bugspray 0.1-dev)
 
-K. B.
