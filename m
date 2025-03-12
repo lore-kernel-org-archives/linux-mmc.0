@@ -1,120 +1,123 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com [209.85.128.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A6708245015
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 12:46:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6C514A01
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 13:18:28 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741783585; cv=none; b=VwFJ9/+sPkJR93AXf1xoRm1KPGiKxf+kF8WW+7NgALHuILmjlKqeiTV4pW8ZS1+BzOMBOh+EjUsNu1NQrsfBtHqHvJ3kB4cxxaU0b650JLAzTskuSvMla+TgPea4p9reoCOT3CIow3nfXv9oWcr6OZ2G8Btmys+1DkL6z0mnBxU=
+	t=1741785510; cv=none; b=NWQ73sMNlVRAQIMtcWr5fbL7faRBOZN9fQq4sgaWM0OOwcSctLwinQ2/HqLjJFR4u9I8WJnzLxEnaLwXj1EkUggKBRdAKOOn1a16swCLHxPzAe/N7mjdJZ0u2kFBkoHbJ6V7SGljt1qIFscU4ke8ngNBVMk2pz/KQ/16ye8sFRE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741783585; c=relaxed/simple;
-	bh=rT44umO61lyoO9DXr5d6r9YQgIhVrLBNL/UeXtoUrIY=;
+	s=arc-20240116; t=1741785510; c=relaxed/simple;
+	bh=O06P188+t5IkMOcphaknKbtZTwStMyYbeSy3ILdznBw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Df/y76WJ8EVKSD3DGAHwgiQMahWIXRi8qlSBLNmljSGRETiZT0sngfKjr1CpuQaUSdfZZph1BCKx90abN76YKKdECCw3oYDAj/0fanFI7tNaXLZbb48OTyEvBYpqd+aawSPUMx3feKOZSYwW9jr4PvRoiNP7dWlnwUgrPjGhi7Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fBXkg9bV; arc=none smtp.client-ip=209.85.128.180
+	 To:Cc:Content-Type; b=T/TY3cd9aEvY/oQ+5j4DMf8bG+unzH+0HXBtMnld9j6LxxzFbzUVZsX4AQVF/LzxcCp+/s4485h8fdgrMom9WxufhWHiIJSGQbmyYcv6Upsjskv/+3nP6hhv/WCVivbFptE4xilg4fSGQhi89Y6Vvw+CALCxMxXmrFeWT4Jj8Xo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=cW5znQm+; arc=none smtp.client-ip=209.85.128.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fBXkg9bV"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-6fece18b3c8so39168857b3.3
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 05:46:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="cW5znQm+"
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-6fead317874so59255527b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 06:18:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1741783583; x=1742388383; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1741785508; x=1742390308; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=sViwNg0y7WJ+KLoniXqlUQyEPHY29WVhHgQ81dAhe8k=;
-        b=fBXkg9bVxiLbKt803cDZAyT2BivpWvDMKbfTo4aOYE58XTHZ+RaICPCEpwiTcGWI6D
-         1oyLFSjMK7Gv7Y9sT+OIpQPTjMptna2UPe8dVpNipQEbtzK9C+YqQcc9/VVVnBQr7bYD
-         RRXQO6XsS5vsBRU2S++FRVPatHvzJPI9b/BM8x6PxM/QMavc0L/NGKToh3hRZeilIDVS
-         PD7q28EK1mL4VYHjDLCXmidRnerlHLXEQgNhrgMHpQxGs2cFbgB+G//Sbg81DEsjQUXh
-         b8wQ+scBM0WjSf+uI1rROUr740cYwhu9TZKFtWa6YMl5LiNcQ+E9lbk2lDLDwEsJ6YdT
-         zIBw==
+        bh=O06P188+t5IkMOcphaknKbtZTwStMyYbeSy3ILdznBw=;
+        b=cW5znQm+YxZyBL0gizrTuUF7/JJWjsLGDEk+z/sV+cjcSGsUCu8y/P2ZUjtL+Dn+9v
+         kZaEGRg+7q8kh6gssOPWckEfU6p0QQ2BECfUL0BANWwotvHE5nLPRKj8uJmH4oL94gO1
+         Q4d02SZrn3bpjd1rEOGRW9+u9slnGvIJrgxYNf7MzDNVo1BmFZI/uqls+OMg08dg+uh0
+         a38xa3eJ1Ce14K0G0i8K+telHcyS+KfLV778SzDMVeG2BklzKh+iXEaKCqTj7GvGv+HO
+         c6k+gg60Dstgt8D17722d1ERF/C7FWZa/NHd8To2yxIpgoIzqeY2A7Df1HusIB474MOc
+         QrOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741783583; x=1742388383;
+        d=1e100.net; s=20230601; t=1741785508; x=1742390308;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=sViwNg0y7WJ+KLoniXqlUQyEPHY29WVhHgQ81dAhe8k=;
-        b=AtzypUHsPTln5CmQ9+52XzHj5s1Q+pDP8LzMEku9+UXoyL5ElMWKFztVAictxZcrv2
-         bxExyRa+xG3WLfxqmbk9fgvNBTBGPgsav+UY9uSsdxLjgPpveUzmCRsF6GTIxZuLiWs2
-         sgUBKOxnUZPJfb52Jc9YwRBSCLmybYKbeZnALK2rbVwvOFSpIyyvynm/sxfcPlmZkkJw
-         MFU2mG9qwGBeMCTZ5VfLFYqtL1uS7dc9CL7HkCVwm5yk6+SobJ6RWn9plU1sP3YJ6vv7
-         nT7ZKgeevEzAkTHc4Mn5BA1dGjWkzbZkQd/o9gn15kisZMclN23PgcA9cSJz2AQ0hngC
-         A9uQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXrV+gKQqTfJQXGZp+Y2wondWVR2tOKuarOW7Vkmw5KHhUI1XpNc3GXVlaEFO5B3PySr2jd/kpbCFc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywyg/pKK/VkFadv2uKlEIOKyT3HHLrL2yEd8dDQlwmXF8w0iGs7
-	muL3Y53vxCfHeIBEWiOQ/bVoE35W7pVkLkB5AJdT57F2uXvuOZbXQW4qf1dtMvtXFE3yP1mLral
-	rOnwYMhZp5cj6Cp9mfc2QtJ/QszJAVM5WHbxuJw==
-X-Gm-Gg: ASbGncsAeSrK90RALNfUQoY87GdTutR18sLEUckwEKzh891bjajLjeOfHhIJMYFVFU8
-	lVNe8dR/3KWCUNLfV/wDRu8BKMRBafl9sKmmusZ4wPhkJTOgTQgJMOI2hi2Mwi1apCASiXcKBoY
-	E3KRBgDPFM8PsMPsWoV1yqDeWxNxwiFoAZp340Xg==
-X-Google-Smtp-Source: AGHT+IGiqudn7469ieWl0fYIyw1X/RrsRHpanX6PpeUzQpQMkBATHeep6tkZov6yC/rhVxxMPza+6xdWdKNiLVEN/V8=
-X-Received: by 2002:a05:690c:6e0c:b0:6f9:aecf:ab0d with SMTP id
- 00721157ae682-6febf3855d0mr286780647b3.27.1741783582701; Wed, 12 Mar 2025
- 05:46:22 -0700 (PDT)
+        bh=O06P188+t5IkMOcphaknKbtZTwStMyYbeSy3ILdznBw=;
+        b=tK68dpIW92BUNTcccqoQCveMC1WGQWm0JUD1TxtD7eVhM3rpcYcTee/8/m2PLiRRct
+         Y57Cf6BtazyfoAML3F0O2WPx8fHd/CVMksZtXD7Oz3WDeEsaGfmvy5br5oUbJl8+OqD+
+         P4OQJ8d/zATuv+cqHRvBslNdKkFb4Dbp8fZ4h/Pg/PjcrE45PSdHGyD11/7KF3QtVQAR
+         RjYcTIta9+ZZA2QPrQTJ7cQxSPvqi9tZqqL7+KCMZOucbShdXfha2P/qZAEMyKRqh6tV
+         AI8MeLoFCJmJOwc3QIuxU7AYC6LuVNhXxYwuCaG0b0lUiaDs0tLQz9BL8H4Gka0deHdw
+         +IRA==
+X-Forwarded-Encrypted: i=1; AJvYcCVA09yN9qnNiXdGjHNut/vAdxp7XqPK6kZZLka6LA0ImBLZvvf4HRT5RENVgqcmWecmbB1wrieYkTw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxXTA3XWeShF5k7AkEkru0atGcky6vYifMMDeY8cwM3PUgxa6B7
+	GiQxBl+QgdIGV3P2hVBcAWqLX5TUPQei8NuncrhsarYG/S4kVQyk6SgYGFAMGx6hkiiEdiQlg1o
+	4m0JaUh4I3thMvLTm2NQRXnAV3STrIrufbsL9og==
+X-Gm-Gg: ASbGnctShn5+XJpUHH916gdsMI7n68RZmPYdWj/Z0bsxMz4wd34wJONuEd+S/VeG/1H
+	RyQ9W29m/5TvGQy0X4+du2OCHfv6wFFqJgE25XDf3nOvwUpjpOPUYDLMYIjhMaOhKFssGAu7gGB
+	GBIhIDtQjNeaX4/UdU57B6rp5G0DQ=
+X-Google-Smtp-Source: AGHT+IGyzl7GwHaLZh3ygs+nju2rxMd7dGI+ZgAL00mTmKBqCqVGTlKAadXsmQ+m/M2fSAfYzFe/Q76nG6skzC09EPE=
+X-Received: by 2002:a05:690c:6c02:b0:6e9:e097:718c with SMTP id
+ 00721157ae682-6febf2a450bmr305445347b3.6.1741785507753; Wed, 12 Mar 2025
+ 06:18:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org> <20250311-b218821c14-1185eb2dfa30@bugzilla.kernel.org>
-In-Reply-To: <20250311-b218821c14-1185eb2dfa30@bugzilla.kernel.org>
+References: <20250206220940.10553-1-kamal.dasu@broadcom.com>
+ <CAPDyKFq1ZbP4c9ECfM1SY+MEopf+dC19w9PkqXaUjevf=bPjcw@mail.gmail.com>
+ <115a59e1-75b2-4d09-bbf9-50dfcd2b62dd@broadcom.com> <PH7PR16MB61967C18645C64E582B222B6E5FD2@PH7PR16MB6196.namprd16.prod.outlook.com>
+ <d51a9d7a-b942-4c3b-93d2-65b1bb04c8da@broadcom.com>
+In-Reply-To: <d51a9d7a-b942-4c3b-93d2-65b1bb04c8da@broadcom.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 12 Mar 2025 13:45:45 +0100
-X-Gm-Features: AQ5f1JoZ704oVPlplX-IdaUO-rTwZCcupvKIEbeBN4RARe8ffdvOevUsMFz33dY
-Message-ID: <CAPDyKFoiYQAM5b+AGiebTbSW8GNs1ppjkYbAbs8mt1-kxX2GUA@mail.gmail.com>
-Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
- Microsoft Surface Go 2
-To: Adrian Hunter via Bugspray Bot <bugbot@kernel.org>, Thomas Haschka <thomas.haschka@tuwien.ac.at>, 
-	Adrian Hunter <adrian.hunter@intel.com>
-Cc: ricky_wu@realtek.com, linux-mmc@vger.kernel.org
+Date: Wed, 12 Mar 2025 14:17:52 +0100
+X-Gm-Features: AQ5f1JqTx3pgXMeqFgFpSDIaSNIKY2an6JSCt033D3YeuQR5aENCOVJYaG8WOzA
+Message-ID: <CAPDyKFrCjo8gGnxmXWP6V39N+b1o62VQH9zwMUNb2_+D3-qrdw@mail.gmail.com>
+Subject: Re: [PATCH RFC 0/3] mmc: sdhci-brcmstb: Add rpmb sharing support
+To: Florian Fainelli <florian.fainelli@broadcom.com>
+Cc: Avri Altman <Avri.Altman@sandisk.com>, Kamal Dasu <kamal.dasu@broadcom.com>, 
+	Jens Wiklander <jens.wiklander@linaro.org>, 
+	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, 
+	"linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, 
+	"adrian.hunter@intel.com" <adrian.hunter@intel.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "robh@kernel.org" <robh@kernel.org>, 
+	"krzk+dt@kernel.org" <krzk+dt@kernel.org>, "conor+dt@kernel.org" <conor+dt@kernel.org>, 
+	"wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>, 
+	"f.fainelli@gmail.com" <f.fainelli@gmail.com>, 
+	"bcm-kernel-feedback-list@broadcom.com" <bcm-kernel-feedback-list@broadcom.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 11 Mar 2025 at 13:54, Adrian Hunter via Bugspray Bot
-<bugbot@kernel.org> wrote:
+On Tue, 11 Feb 2025 at 18:01, Florian Fainelli
+<florian.fainelli@broadcom.com> wrote:
 >
-> Adrian Hunter writes via Kernel.org Bugzilla:
+> On 2/11/25 00:13, Avri Altman wrote:
+> >>>> This patch set adds support for Broadcom TZOS to read and write to
+> >>>> RPMB partition using synchronized access to the controller hardware.
+> > Practically it establishes a communication channel between the trust zone and the host controller regardless of the rpmb protocol.
+> > Or did I get it wrong?
 >
-> On 21/02/25 16:55, bugzilla-daemon@kernel.org wrote:
-> > https://bugzilla.kernel.org/show_bug.cgi?id=218821
-> >
-> > --- Comment #13 from Thomas Haschka (haschka@gmail.com) ---
-> > Created attachment 307693
-> >   --> https://bugzilla.kernel.org/attachment.cgi?id=307693&action=edit
-> > Patch for 6.12.16 which solves the problem on the surface go 2
-> >
-> > By reversing the bisected commit it was possible to me to build this patch
-> > for
-> > the current 6.12.16 kernel which yields stable sd card operation on the
-> > surface go 2.
->
-> I do not really see how that commit could affect the card, but it could
-> be that it results in runtime suspend then runtime resume happening very
-> close together.  If there were insufficient delays to allow voltage levels
-> to reach the correct values, it could result in the card misbehaving as
-> seen.
+> Rather than communication channel, I would describe it as an arbitration
+> scheme between N participants, with guaranteed forward progress and
+> fairness between all participants.
 
-I agree, it shouldn't. Unless, as you say, it somehow triggers our
-runtime PM callbacks for the SD card (mmc_sd_runtime_suspend() and
-mmc_sd_runtime_resume()) to trigger too frequently.
+A scheduler in the MMC controller HW?
 
-We have the runtime PM autosuspend timeout set default to 3000 ms. We
-are internally in mmc block layer reference counting runtime PM,
-rather than relying on the block layer to do this for us. Could it be
-that our autosuspend timeout gets overridden from the generic block
-layer, somehow?
-
-Anyway, I have suggested dropping MMC_CAP_AGGRESSIVE_PM from
-drivers/mmc/host/rtsx_pci_sdmmc.c, to see if that helps.
+Nevertheless, it means bypassing the I/O scheduler in Linux and the
+mmc block layer, kind of breaking "fairness" from Linux point of view.
 
 >
-> View: https://bugzilla.kernel.org/show_bug.cgi?id=218821#c14
-> You can reply to this message to join the discussion.
-> --
-> Deet-doot-dot, I am a bot.
-> Kernel.org Bugzilla (bugspray 0.1-dev)
->
+> The interest here is for one of those participants to own the eMMC
+> controller for a certain amount of time and indicate when it is done
+> with it. This is not specific to eMMC as this could scale to virtually
+> any piece of HW that is driven by transactions from a CPU, but the main
+> application is for allowing the Trusted OS to own the eMMC controller
+> for a short period of time in order to do its RPMB access, and then give
+> it back in the same state it found it to the next participant.
+
+Honestly, I think this is a really terrible idea, sorry.
+
+Data and communication with an eMMC needs to be synchronized and
+managed by a single owner. Having multiple clients with their own
+channel to the eMMC sounds prone to problems. Is each client going to
+have its own mmc protocol stack, dealing with eMMC initialization,
+data-synchronization and power-management, etc?
+
+As I said, we now have the RPMB subsystem for in-kernel access. Please
+use it instead.
 
 Kind regards
 Uffe
