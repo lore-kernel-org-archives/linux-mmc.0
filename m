@@ -1,89 +1,88 @@
 Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23F832451D7
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:25:28 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC6A5241129
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:25:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741778732; cv=none; b=GV/teNdirEHTtW3gXCgDvdKEBo8srkh8dNiNb6i7izbd3IUP3Wi1bLTaESuUjE6HsR/FJQxE0iH9GACH9HNptmrJbrRRCrqtCyQWPPiB6JpWEgc40E7QR4CplWkVCrTq184RBNFgtNE8Cfo2AHNeSyumXwJQh1kYdppsCHx6++o=
+	t=1741778734; cv=none; b=O/1bTrh2kCz12q1ARnIh0CQyqwDLe0SSdkH6LHGULbw4bUkifnmiGUwiPLOMM4dBSOXnUtIxiRl4q5/f/lOo5qgRUEaNiCND08x+YomJ57GdM1mUij21C+6uqa7Ns3hxFNDB23+omNROoaInXwx+4TTbV8f0tME3QlN/5bJ246Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741778732; c=relaxed/simple;
-	bh=1wvMq+p0b0LHsuXs2t0D9kgHbJ0JEDZN1CXO+LT+A8M=;
+	s=arc-20240116; t=1741778734; c=relaxed/simple;
+	bh=u09mix5wsyGZEee0OTLlbwtp/i5wIT9Jdm2M0t59Fs8=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LnzPakUlfrO4iY63pXJ5be76lVnTOzQQvLQsxuUi/mjXUBhRgfG37UCa+YISe5rnZ5Z63sMZSILNziV+ya1cladls2tn6WlBqgrr65kK9hsPVdeU/xm7xGJlhDVEguzkhp/9uy8Pq5y89WP7vVl9xsO/FyUtXuSk6eiQBjPlRnU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xcwtAeGv; arc=none smtp.client-ip=209.85.128.169
+	 To:Cc:Content-Type; b=buaDANcv0LQTLjW/EjOeCfM3qxApm6bVWw/FxLPS1KLr6FeKS7/yBT/TJoKZTXfBB5C5s4OA3DQn5JdMDETJqsZ8LKNPgRQf6HsCyGlImUBGBzfhuSMGmiuL86dixH9fVbkgxZTYaxPL9fMNSnnx3WbpE+RYk+M4O2fP+jaJBIk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=iGnJ2JUZ; arc=none smtp.client-ip=209.85.128.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xcwtAeGv"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-6fd80f30ba5so45991287b3.3
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:25:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="iGnJ2JUZ"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-6f6ca9a3425so64881487b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:25:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1741778728; x=1742383528; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1741778732; x=1742383532; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dadpUZC9V5c7MYnunblVKwFOdnOlHudqlcLRPnjOYeA=;
-        b=xcwtAeGvbeg29VdHPHF52EjNcGWPoR5CC9+YRm18s3q7zZx05h0nuhdSDn4PXwNQ36
-         5AnU1v+RXDRuvZkw/Xie1Vqmug+Rml08kdNbIZMj6wn3cdZ+1loJQX17nIOr9rpuyFfi
-         XNDuAPYl+b5bWJpTQJSlVhTTd2gV91T1WdxY7yy5vaIiePk5G56uIXnp/traCZSElQqi
-         G5xFeCKjYIeynp1l7fqes58uKFQiDmxkoTTb8zOxTFk71+WPqmza8wTAl2BidF3nbVY+
-         e38nuRQq7GEW3wX32WF8RYyaSvLLRvrigdRy7JbQeIEZlrrwq09gL7KvFYT0/3929tZp
-         N6Ng==
+        bh=6/mrslkYIqtp2+mq8p2Qz5J6MxbjiXwBJqUTb8Ezm9o=;
+        b=iGnJ2JUZrW2FGn1w6nR37KHuN7NGjmwSWyi7AJDrE9Qcd7cugwvA3uEYLKURXg1VRK
+         BtMNQrdkfHUSiexHhD/qGXBlT7o05BYSvgZp1nQSnb2iKd32SncyaKMCBw18s9EeIZME
+         oxG8GAwy8X1O+VN0gZhKH90rtqhVT/UKcOb70ANL2m3zXoMgNe37tRnWsFKXlUog1FyG
+         s9bA/jPxa/FMobh4O0bDX8eYgMC9lPq5uKk+KgFvj4HiJbP4r0me9mGSW9NE/MHyMHf5
+         czsEi/kKjYQbngMZd+ny+0igy5rtaTmODqlPfe1RHgl/YOCmpcpc5+jbQuEfp66dzFx1
+         eG7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741778728; x=1742383528;
+        d=1e100.net; s=20230601; t=1741778732; x=1742383532;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=dadpUZC9V5c7MYnunblVKwFOdnOlHudqlcLRPnjOYeA=;
-        b=ZfDq04vWFv2OUHbpHHBj2WuTxg0TOdAhF/ZBk4o3lpZO7oOo+F21KN+al4udN0lrZN
-         WteNYQHqmGbO1kYqivPl0rgArUFjcbSSh//VIoukQV5+zd3pk2wycPb7fj4oNInf/lD3
-         jqxibfSvlh96h6J/gKCugXuhXA/ANY+jQKCaRycT9K0ijLiiHzU34pZtyiIz8jEI6M+/
-         HKLWP7XYo6YmOi6LRkFIPxsdO4puaSKdAto7RPft1yfCynOHhT2VJWsKV/x4On+eCGBd
-         UcB2Ml3tCapOTiVT2GYZEqNfoVegbn/WIgLgoNl6YPEkYf2CyODmj8fhNNR0K8niZC57
-         iMsg==
-X-Forwarded-Encrypted: i=1; AJvYcCV3ySdFnnU5xwt0inpNVE4Dd297UssNjsrIN+2g/mNHsZ1LhuevlK+CSKvXeskfaMF0Uum6U9saYrY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzemWfmeeF/Sh+EfCLIB2YHmArdY/5RQg5kVZbeHtZp82+7+mBk
-	6ClacxnEaXsBLyponoGT0OylImD/HLhKE5B2UBgL7H0oA/XODidMejTQcor8TEyn1YMVHYzY1x7
-	SbXs8/xHRsSQqhYQNj1omk7qDfZgyW8+P9SKPDg==
-X-Gm-Gg: ASbGncuGbvq5DuDEktPEe/zI1/lM3zxK5kr3luaofcDHXxR4tHJ1ZyPpXhxea8LJWEz
-	F0Wg+zK36zvDBO7raqOZg3MR+e0ipxpM8acGc2HG1ZVVtJIYOUlNdskzbJKlL7c/BGgiBsUezuX
-	twbg1GdKpZUtX4bP4ARey8OH8zcPk=
-X-Google-Smtp-Source: AGHT+IEkegzJ/XAYlghTUeG+wVwA3ds93Wxe6yvoeV0jHqydpXmTqXQvt4bDvlouPz1OikUEEzcCwOPsAA9n/cL6aTA=
-X-Received: by 2002:a05:690c:3802:b0:6fb:4c11:61cf with SMTP id
- 00721157ae682-6febf2e67e6mr312924957b3.19.1741778728184; Wed, 12 Mar 2025
- 04:25:28 -0700 (PDT)
+        bh=6/mrslkYIqtp2+mq8p2Qz5J6MxbjiXwBJqUTb8Ezm9o=;
+        b=VqrRljV0np0tgVKAzm6RcCk2Gp2C06/jbg3s8JwJQ9S9xzFFzUb61kyMN/Mf8ch15F
+         ZUVslWj+oVB/J0voogD1ajMTQmJT5f/sj5BAOFTL+3zIzV0js/ex75kBN78S6x4wwu4B
+         u6Vp1qZdSaQ9JUn313MmDd05kQaVDHkxJ6YGKzDEoj8Cs0vT5p8kOTqAQ1R0P7OunRp5
+         HxXYSyKMs0Y+SpW4/Y2UQQDg0vOdCVgCo+LVKiBP9Ni0ujK0cDNKIN78/uL0RHRAOUFd
+         vzRAHAYXrxW7nNZ5CseT7DqOQwOblG6siOktFaVHN1x+24tNV8LXdgOKB+t0hi54PQ0S
+         vG4A==
+X-Forwarded-Encrypted: i=1; AJvYcCUq5jt5c0e3A0Fu8yi8NkKWJnga9NheSZsHRbQjnpmLqszHrYMQolYSc/ZEDmPqnUe8hZDOIW/MTtY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxHbS0ReOFQ3Q4mIrv1OHPQaOgTMZi8xh2h1X5onYzSWS+S0V3p
+	EkYRivdOG+GisTf4K5Z5rT30CG5NFywZaNVaJTRvklO/vPflZkhWYVg5pjnl7ofZdYKcwTmHtgX
+	rZ+JRc07SILjQp3Eyu86w4rM/qYYcn24Y7/Vvyw==
+X-Gm-Gg: ASbGncsgDuNqucO0sTIAyUnO1LdRfdOORasVhf096q3+BvRJj0xHmP8ANlUiBvQ76yj
+	6QO6/w11CN+MSCih/4MyZCJAlTddZBg6mL/lb+6mPQXKWWegCeRCqxMMZHcJF5ll8l4rBy9jEGw
+	0xpLjtyKzX9ktAQEwZaWYdLaIvl+TAF+RxndQJfg==
+X-Google-Smtp-Source: AGHT+IFk3gFp/cUReNnM9kzAsWOkTCM5MEQl/tCtb/z5liDbrUseKz74jkUx34wnEgejhu/lLK5rCnP3CIxzHqyLHXc=
+X-Received: by 2002:a05:690c:4c02:b0:6ef:652b:91cf with SMTP id
+ 00721157ae682-6ff0927951fmr104983367b3.27.1741778731810; Wed, 12 Mar 2025
+ 04:25:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250309055348.9299-1-ziyao@disroot.org> <20250309055348.9299-2-ziyao@disroot.org>
-In-Reply-To: <20250309055348.9299-2-ziyao@disroot.org>
+References: <20250305214108.1327208-1-jonas@kwiboo.se> <20250305214108.1327208-2-jonas@kwiboo.se>
+In-Reply-To: <20250305214108.1327208-2-jonas@kwiboo.se>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 12 Mar 2025 12:24:52 +0100
-X-Gm-Features: AQ5f1JoG4yNR3eqoseTNZhzIg7tVbmXvgNO4DfacKMnpZftoLIoMXOX2r6zD6_U
-Message-ID: <CAPDyKFp2UzcxfFz=8sREkj3x4DvfkfxU3utc0+e+uPS78Tn-+g@mail.gmail.com>
-Subject: Re: [PATCH v3 1/6] dt-bindings: mmc: rockchip-dw-mshc: Add compatible
+Date: Wed, 12 Mar 2025 12:24:56 +0100
+X-Gm-Features: AQ5f1JqH2hRXUwfz_vQkPX8i5gK9j7RB0dP4G_O77fuesZmjypeV_Lu2vr_DSTs
+Message-ID: <CAPDyKFqY+0MGsdZDBJ1AoDaDGrnXN=Gu3JNjuK0LoHfjT9JxiA@mail.gmail.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add compatible
  string for RK3528
-To: Yao Zi <ziyao@disroot.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Heiko Stuebner <heiko@sntech.de>, 
-	Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, 
-	Shresth Prasad <shresthprasad7@gmail.com>, 
-	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>, 
-	Detlev Casanova <detlev.casanova@collabora.com>, Jonas Karlman <jonas@kwiboo.se>, 
-	Chukun Pan <amadeus@jmu.edu.cn>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, 
-	linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
+To: Jonas Karlman <jonas@kwiboo.se>
+Cc: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Jisheng Zhang <jszhang@kernel.org>, Yao Zi <ziyao@disroot.org>, 
+	linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Sun, 9 Mar 2025 at 06:54, Yao Zi <ziyao@disroot.org> wrote:
+On Wed, 5 Mar 2025 at 22:41, Jonas Karlman <jonas@kwiboo.se> wrote:
 >
-> Add RK3528 compatible string for SD/SDIO interface.
+> The SDHCI controller in Rockchip RK3528 is similar to the one included
+> in RK3588.
 >
-> Signed-off-by: Yao Zi <ziyao@disroot.org>
-> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+> Add compatible string for the SDHCI controller in RK3528.
+>
+> Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
 
 Applied for next, thanks!
 
@@ -92,21 +91,24 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index 06df1269f247..ea0feb733e32 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -38,6 +38,7 @@ properties:
->                - rockchip,rk3328-dw-mshc
->                - rockchip,rk3368-dw-mshc
->                - rockchip,rk3399-dw-mshc
-> +              - rockchip,rk3528-dw-mshc
->                - rockchip,rk3568-dw-mshc
->                - rockchip,rk3588-dw-mshc
->                - rockchip,rv1108-dw-mshc
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index c3d5e0230af1..fb2115e805f5 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -14,7 +14,9 @@ properties:
+>    compatible:
+>      oneOf:
+>        - items:
+> -          - const: rockchip,rk3576-dwcmshc
+> +          - enum:
+> +              - rockchip,rk3528-dwcmshc
+> +              - rockchip,rk3576-dwcmshc
+>            - const: rockchip,rk3588-dwcmshc
+>        - enum:
+>            - rockchip,rk3568-dwcmshc
 > --
 > 2.48.1
 >
