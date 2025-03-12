@@ -1,128 +1,98 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 855901D63FF
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:41:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F00E51D63FF
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:41:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741779708; cv=none; b=NE2yTNn823qxS21H1aAAdt0cf4s9RB4hf/SICu1U53vfP8hLJm5hHkqJjdeYfSUMDlB1YIf/mO+I2JyfYI2LCYbLkIskCw0IWrCZbyEeQjzhS6YfUfnpf141DuK7Cr1AjdtsMo4t3jR02swteMeRi469dztw2va1OtnoZZP4Kd8=
+	t=1741779713; cv=none; b=EBUZmnUyceR+En2j6wk2PSingtYAB1FOIF2QbZLT1puHPKu263j1yYl4YGTx6pgEnMS8vOtPrfm6i9Vr3LrDGLbXeutI/P3KZfOqltRLIA1+y10LXCE9+/5X7PCGPBFnb6+bn2DUpfW3wGBlPIM+JVYhsB9ooROUfV9586sNBWM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741779708; c=relaxed/simple;
-	bh=7X6sEAaSMthvUSCexSRcw4P0r/3b9gVJHLUMo54hiyg=;
+	s=arc-20240116; t=1741779713; c=relaxed/simple;
+	bh=EyZJGTI+zYNOGGndCCXdh04eNzKAUwXKYAe7V43zfB0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mbWtzWFBE1DmX1eGouEJFJ3a3H/livqhiqZpGtQS8m39xMPz8uVHa5YPTGmi4q3JRwBQcPMhz1EwK3y5pFYe7B3etHgyJg5f2TQt/egKAvZFezsxTd9BoCWdW+KTVQmqKJMa+fgC0gPZiKmTsaFh9cO/gS1F1OPdx26cDxX3bpQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=bYSMV816; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=ReL51Od7j8z7WqhrWqaofP2QcOBMZ+3SR2BkAygvhUh4iDIX+xT5mvy9iJ51yGFi0wpxyBsH51+SoDhmG4DioV4TetXnj/iZLxVOI3D7JFRtXhRPJNyd+hTH/b0QdGMmETeHCjBGiUKkQVjsqXY+D1em2nVfEwVktgsenJi2Rb4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SooVH3wh; arc=none smtp.client-ip=209.85.128.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="bYSMV816"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-6f6ae4846c7so62079027b3.1
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:41:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SooVH3wh"
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6f74b78df93so63007597b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:41:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1741779705; x=1742384505; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1741779711; x=1742384511; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ioGw4y5xwbpIgtHn7hgYihYbHTQjfV1moGfCfOGeOos=;
-        b=bYSMV816QlLFGv6feQ6463knax1Jy0eAQk6jVYYGrQLuBkALk3ltKOC1+Dh46Xfvvd
-         H+5zbe0WxLkT0wAe2JlCIkPo3mvZoL0GNaUpwpXG2gVhLfH1Tx+hZvG7InXd9VVRgrPG
-         oSbtl87DO5GaHor77IzCz5+X/kKvvEZ8kiRsUU6UCnVeROCmX26pKUVi3NPkxM0432PI
-         CPg5765mxiF/XLFTqGR926cs6RuMwnrnqhSV2bMrbkK9gUs7xVACf6w5EkN/9c1S2IPu
-         qk3lr7K4UmDmcvTvMnb892zVvDZwqVimvrKpplTm9quVGPRx6DVtV98o2CnHo1SPUNwC
-         l3Rg==
+        bh=X5AbmgeCtEgyQCx7vuD5gs8jC4kK4Afqyip89boTm20=;
+        b=SooVH3whplong8XKwj2pID0QjVIQ+uSmL/uc+dXezDwmnsWIO2Z5PJ35RPSoTyYZW1
+         HufhzAdC407xFavVBF66v0d0C2+cJRMbRk/HpXoHZcLONdOxn+F3fWsuTn58/6Ui2hRC
+         cweCuJyiARi02dUQDRY5t8VXvDbp1ankT2mL10ffxJel5Kxhe+11GiBkPtVynvOzjNde
+         0biGeWFH0n5qn4uGhL0lmZTYeI6OiZZOtgUlk1cNPJWqrzA3uoOh+7XzzMZmyQ9IIxzX
+         cceCmEB5sl5hX9libdhI57HXP3SlSIpEb/seP+N7kOwU3MlCU+SHHAeRIJjEntoMDSs7
+         0uLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741779705; x=1742384505;
+        d=1e100.net; s=20230601; t=1741779711; x=1742384511;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=ioGw4y5xwbpIgtHn7hgYihYbHTQjfV1moGfCfOGeOos=;
-        b=buDmFTXhVlbIh2K8zw4Lg1pZCFYH7yrRon8sK+DgHdCQRgmJU2XfzMKlcg4XyMFu9C
-         j04ZMEHWmi7nqh8Ip7esrj8C8Azz4fzGCHr4CbrejHEmgRahhE8sKF6fw9e7Ln7WNmXH
-         3ZCZGqRsWA6hV53MdetA0StD3ZeUMaibh2jfPCuWAy+5JEvj8UrBpVEqRvYRbbpdb4U5
-         /S97Ts2ByhlZWdLEYGcT9MA0ho8g/YjmKQ/Rysgsyqyz8FhHQFs3rqA8Tf43Ol/42ce7
-         jZa+AH+nqSnK9Q59KuqWdblYhIwSsvWlTQC5qMU2UvcAlFj0oLv5Ep4RjwW+zffvDc1n
-         /dLA==
-X-Gm-Message-State: AOJu0YzqSSjzL3BR8p79hucp+TmsEy1QbKZtOvkubmHSpZ9F+Ofg5uJy
-	Ca1rBdo5ZK9XWSSQLjUQQzoECu7BBoUcMsD4+hv5ZPBlO+LbB/na7j4v6hRRLAGJyTucgWG+0EQ
-	jLc5UuSAmXcNbosFwLxzPfvTPqLmSmiTdCFsUe/ZkkTxzVArk
-X-Gm-Gg: ASbGncu99cNKZh9H0JUVf7rGeBiWswY5QIBqDPYwNoozfpMKuQavJC40JW+q0cTIyWY
-	TEId9Oxybwx3htgw/yF0cmmeqO7oCws84Y6rC1wRl36wguQh330XzJDqDVigBS46rmzJk1twuOa
-	orcoETqwZY6L+0vGF9ft73aGH1yns=
-X-Google-Smtp-Source: AGHT+IHvhWLQUiUWkHV6WopVzGhOdXoPO/sPMWXlvVVZUWs7sHwEx7+uWukZrPHcLwq150ydHhSigNY4wPa8RoKu8CY=
-X-Received: by 2002:a05:690c:a98:b0:6f9:9d40:35cb with SMTP id
- 00721157ae682-6ff091abebbmr104760167b3.6.1741779705583; Wed, 12 Mar 2025
- 04:41:45 -0700 (PDT)
+        bh=X5AbmgeCtEgyQCx7vuD5gs8jC4kK4Afqyip89boTm20=;
+        b=aUpbQnnY7UPwuklxP1wjC0wDNYHy+WB698+Su8+LDpFs/lBudk6QELJ9GKXQr+r8EB
+         dLDbrsO3hYHWVahPguPrWeW+Gd5nEFyPhhF+9AxR/gtkK53eDhtQoO5Qsu0wYayz6kHp
+         j0syCN+J+Wlx2HiFydQJfQwSs2I+LIC3oggyJQnzbbsTEx97dtBnBg/oG34HwQLpHB4H
+         s9M+KxCtEuIm/bqQcXzFWDVtdj7dYUEC4QGpd1nV4xQLkadhljGJnrdVyckHByJMm79j
+         ZVAxX0BVFv2kDUqbvPAP0sfUYLDGtr+reIATjfpxTEhAMtpecHdlLbCkKwnQigTTpc7E
+         Ubwg==
+X-Gm-Message-State: AOJu0YwgKoqJ3N3v6MKmYId51eGUTIGfSjON32b85+EmAjFdJ3LYXiJ2
+	9kWiRZOoIWv+FwEZMKeCnmlzb4fQkdVJ/0PnP0lu4R8Z5A90RVM+hz3yJV1Oegfgb/F44qLh8rs
+	gwSALJUHqnr5uPk7ZTBt2lldm9XNECGfXOJ0zZGFhACO8eCzd
+X-Gm-Gg: ASbGncvAN8whR6ygz1tF4ps5xzCCGGOGexeIaTbQfHciYqksHZ3lAplf5iReEpTmE9Z
+	iljYwGnX710khvhlIPrrv8v0jVa78D06SLXv/HRo5CNOgjeX0y6umbPCVae2/yM07bOcelE9aUX
+	BfRFLCMI7I1v/REcVmHYqa884nHbU=
+X-Google-Smtp-Source: AGHT+IEXqOrxMWd5mp7BfZxONhmq3dtMAJ3LKEBa9fxtIU4MEgyVcxr+nYVbdAy6cWqjffdWPTVQkKOI7uwcUB7U8tU=
+X-Received: by 2002:a05:690c:4c09:b0:6ef:7f89:d906 with SMTP id
+ 00721157ae682-6febf3b77c8mr268234537b3.33.1741779711037; Wed, 12 Mar 2025
+ 04:41:51 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250210063947.3298-1-avri.altman@wdc.com>
-In-Reply-To: <20250210063947.3298-1-avri.altman@wdc.com>
+References: <20250310055231.304728-1-avri.altman@sandisk.com>
+In-Reply-To: <20250310055231.304728-1-avri.altman@sandisk.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 12 Mar 2025 12:41:09 +0100
-X-Gm-Features: AQ5f1JoRm_A4xzxoSd1bYJg7afyVUPSMwhBq9YEFZBXqxwJEkt3ADAWn8NBwQSU
-Message-ID: <CAPDyKFpKo3DLECzfhCRnWO=jwo9s6TMaZWkk94_8yPfpg0iOkQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc-utils: Documentation: Add missing entry for
- "writeprotect user get" command
-To: Avri Altman <avri.altman@wdc.com>
-Cc: linux-mmc@vger.kernel.org, Christian Loehle <christian.loehle@arm.com>
+Date: Wed, 12 Mar 2025 12:41:15 +0100
+X-Gm-Features: AQ5f1JrBNcwGHkyQrxu4iFV2BDn8IY5VjqkL59AYiM1WwTHzBeZoL57ZEbQRTgM
+Message-ID: <CAPDyKFrVu-533nCWMV-8ze8gGkDNUnCpEBOsvqdtguqU2V3h0g@mail.gmail.com>
+Subject: Re: [PATCH 0/7] mmc-utils: lsmmc: Registers value as an argument
+To: Avri Altman <avri.altman@sandisk.com>
+Cc: linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 10 Feb 2025 at 07:42, Avri Altman <avri.altman@wdc.com> wrote:
+On Mon, 10 Mar 2025 at 06:55, Avri Altman <avri.altman@sandisk.com> wrote:
 >
-> This commit adds missing documentation for the "writeprotect user get"
-> command to both the man page (mmc.1) and the documentation page
-> (docs/HOWTO.rst).
+> The primary change allows the utility to accept register values as
+> arguments instead of reading them from their sysfs paths. This
+> enhancement improves flexibility, particularly in scenarios where
+> register values are obtained without access to the actual platform.
+> Patches 1 through 5 are preparatory cleanups and refactors to set the
+> stage for the main change in patch 6.
 >
-> The "writeprotect user get" command prints the user areas write protect
-> configuration for the specified device.
+> Avri Altman (7):
+>   mmc-utils: lsmmc: Break early in scr read
+>   mmc-utils: lsmmc: Remove redundant argument checks in do_read_<reg>
+>   mmc-utils: lsmmc: Pass program name to usage function
+>   mmc-utils: lsmmc: Update HOWTO to include CSD and CID read commands
+>   mmc-utils: lsmmc: Refactor register processing
+>   mmc-utils: lsmmc: Allow getting registers value as an argument
+>   mmc-utils: lsmmc: Update docs to include new options
 >
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+>  docs/HOWTO.rst |  14 +++-
+>  lsmmc.c        | 211 ++++++++++++++++++++++++++++++++-----------------
+>  mmc.1          |  18 ++++-
+>  3 files changed, 167 insertions(+), 76 deletions(-)
+>
 
 Applied to mmc-utils, thanks!
 
 Kind regards
 Uffe
-
-
->
-> ---
-> Changes in v2:
->  - Fix a typo (Christian)
-> ---
->  docs/HOWTO.rst | 3 +++
->  mmc.1          | 3 +++
->  2 files changed, 6 insertions(+)
->
-> diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
-> index 095a9bd..3902fa4 100644
-> --- a/docs/HOWTO.rst
-> +++ b/docs/HOWTO.rst
-> @@ -28,6 +28,9 @@ Running mmc-utils
->          If <number> is passed (0 or 1), only protect that particular eMMC boot partition, otherwise protect both. It will be write-protected until the next boot.
->          -p  Protect partition permanently instead. NOTE! -p is a one-time programmable (unreversible) change.
->
-> +    ``writeprotect user get <device>``
-> +        Print the user areas write protect configuration for <device>.
-> +
->      ``writeprotect user set <type> <start block> <blocks> <device>``
->          Set user area write protection.
->
-> diff --git a/mmc.1 b/mmc.1
-> index 543742c..2f7209c 100644
-> --- a/mmc.1
-> +++ b/mmc.1
-> @@ -27,6 +27,9 @@ If \fInumber\fR is passed (0 or 1), only protect that specified eMMC boot partit
->  .br
->  It will be write-protected until the next boot.
->  .TP
-> +.BI writeprotect " " user " " get " " \fIdevice\fR
-> +Print the user areas write protect configuration for <device>.
-> +.TP
->  .BI writeprotect " " user " " set " " \fItype\fR " " \fIstart\-block\fR " " \fIblocks\fR " " \fIdevice\fR
->  Set the write protect configuration for the specified region of the user area for the device.
->  .br
-> --
-> 2.25.1
->
