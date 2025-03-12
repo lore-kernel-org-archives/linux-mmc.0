@@ -1,119 +1,125 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
+Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BC0A248861
-	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:25:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E596F1D63FF
+	for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 11:41:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741778741; cv=none; b=KN3aE1+gbiZO4hsv3rEfiwiyFjo+KTyDPpccHPjVqW4A5lq9OYDXNuTdDM2J6dsidtihycKyVrjGDNjIK+iQ3dlUvAmwsqv69L4ypNf6hHrh8Y6HLkSY0nJXG5BOnh0sg/ip/Szp90SveREjhAf1vYB6B5fPev4A/E5Yvc5+/AE=
+	t=1741779695; cv=none; b=f0dG+XZO3u2KzGidt4GGqi1NXFKDXXrZMTEyxubKiABd58d6b9JWnMtESyfn6DKFv0Ts2oVQmbW8+OO/OdW+xH+vCFSmtecNBE1eq43ByqvF4zxZjebVkszyeUGt4miOLMokISBBdrOjNCHCjanQF6/dRxQTexHVZ76TKoGJ+6w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741778741; c=relaxed/simple;
-	bh=2mAjhQ38xaV59CAo8Jko5V6MNwT7CgxOmLCldmytZvU=;
+	s=arc-20240116; t=1741779695; c=relaxed/simple;
+	bh=Hfr8OMjeRYQrrUoqZYyJ4x09/UOphYrS/PiBPFEdw3o=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=kijDUpAv1BWjwW17maLENR1t3/mrkCxf0SP/NJUng5S8Jck00k4itW3W5r7K3fKhab8q26ZNbioWUxRNhHfMTvu+hKhcTxKNgxS2/uaeY5DKX+Q1bJOcG7q0m15D9hpeIIXuKsokrYO4kfEL8NNcaPUGtYhAYGTQDlLHodJJ/KA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=jxpRm+nE; arc=none smtp.client-ip=209.85.128.175
+	 To:Cc:Content-Type; b=P1I3KbuCfdOY2is1Uzp8mamH4G6n7mdNuI64I+Pqq+WQrKYnaGj9QGRPxY7z/RdjjOz9fohg/c4AyJPAv1FvTN0bDW7BiQYvDSaf0ssDauFjVLAeXftF9CjSAtyUUjkuKCRzeU3drgMbG4E24iWmObRdoBtOP2WuUMK3DYJ01l4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=J3Af76AB; arc=none smtp.client-ip=209.85.128.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="jxpRm+nE"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6fd9d9ae47cso61426777b3.3
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:25:38 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="J3Af76AB"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-6fead015247so49289877b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Mar 2025 04:41:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1741778738; x=1742383538; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1741779693; x=1742384493; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CiJA8cEstxgkTU1mTKMy0JGKZ+R8iGVjaXw2iJxWSRI=;
-        b=jxpRm+nEkoXRMGyl6NreHJi5FcZFYUPeFG3nP0OILD3JnWXmlhFnwctheTqM52YIK7
-         84Vh/1Mr+0H6zJ0w8xmQ4roiTVEopTFZ1mD1TTLCbxuONE6Ob+RRTYq50dagGU5tvsZh
-         YNfxCwhAcovKC5WmUH4se0D1kCGWYVPYJ1I3hOn/YgNn5NHx+HVeImF+alRgDVYmcd7L
-         HAB+I3y33GKkl01wvMOQd8EsDVlxbWK0E3Dw9fuhI5h3RKuuH/wgD1kwm6zGczR5x+gU
-         ftAtJYUcY9Cq0KGLU0iEjSDlMbULqZ7A9MdNu0By+zp8ZQGV9ktavjvoCwZNgtB7ToEC
-         DXGQ==
+        bh=9j/U4EQoiHgptz6boB/MjI8ID8/t5hKi1/d0T2PV2gc=;
+        b=J3Af76ABRVnPZ3wiswxq5nwCp0pIU0EhXhfBLyPY9Mrvf9LCH4qYTWwjdvF31GBQbe
+         dRHp2F2EbKmLm1OjGUF+0tYdAWoyxO4vp/X/GCTCtJZIRtLJm8K9MBp50BMjkEjVZKsP
+         HQiZ3T/Lkif1+PfGm652dAaKqrBzWRKv1ozgeeGXd2/H4IZurDuPZSB7yNUUl6cZ+C6p
+         e0s09RovtPuvu2kE5bqwaUjrGOhenZM5nDba3KvK5YeKIkiOLu9EswLK/houJbDtXAtZ
+         9RNdxhg5KRXpIsTeq0sUS6AgEkvbJfLcVrFVIA+U9Y3I8v5RU56UUD4MAj298mKb10to
+         7Sfg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741778738; x=1742383538;
+        d=1e100.net; s=20230601; t=1741779693; x=1742384493;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=CiJA8cEstxgkTU1mTKMy0JGKZ+R8iGVjaXw2iJxWSRI=;
-        b=ws1h77dKqYY8a9Q+0ZgXRSEauM+Y3gJPGWIvqPsFHfnTXnvGwc++w8pbxBOA94Xv0f
-         okegZsEJ0lOOih685ehiMKDXcBd4GHPi9R5gWmxVCGBRouPrnud1s8Hq/vHdE1ZNF36C
-         wssKwaKz+0U5+N4tyzn5FDHC/je5c+zRC8/2L1xhy8UaY9JdIOitr5uuQ1zuGL75Swpd
-         KnryWrIEbXmBvXvgsf69S0UP9FA21tZXqu6zwqedYE/3nPWjURLR8cQFF/zNlHdHyK4J
-         9OjW4rPjbz5XsND1ntWgcfS2N6r3rRVUdA2gPzUwjpzPKyt7kTX8qk9SYvAPBwNen5XP
-         2Ubw==
-X-Forwarded-Encrypted: i=1; AJvYcCVLWabPL27UMyfwbukZfK+trdXPcAYnnJDf/Ob6jQ9ENtOlyb4G1onb6wC8HADDK3sAv/HN5r+gEbo=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw5SBq8IoybBj3Ytj94TBOh5dcrPtvBHMXff+qxgKd+xbDisJp+
-	AF1YsCFCgLWgqIHl1N7l49vMMC2I+9MR2B7dGXdUep9ZJMe3IhqN4/xbBJWJy6n0QfSsVgKAN/B
-	ZX7J6djzukVAtnWjvIsk4+2+irVQ2TE7jpNCJnw==
-X-Gm-Gg: ASbGnct9YeE7ngVoevWj6ZoqZhF3nglDwJ9qlo1x0eJIImhNr9odanurAPHzDLgQQYp
-	tLLVdeLuJxCTa9OhOaY7MMVcSVnZdt9yFhCmM+6S2jUtwCyEJ3uImFlV9V1d8fVTfKWLicz0Tne
-	fFR/r1xD5x6PjHVATqIG7VNbTD7kg=
-X-Google-Smtp-Source: AGHT+IFsXLs0G0P0sl4PUE6UPS3JqqtQHaqryQbTsh+V2XVD4bcZpoq0lGo1l4XslguvHjeCee00G9KHRf+J4fl/2ps=
-X-Received: by 2002:a05:690c:4b13:b0:6fd:33a5:59a with SMTP id
- 00721157ae682-6ff091eaa41mr105598827b3.18.1741778737979; Wed, 12 Mar 2025
- 04:25:37 -0700 (PDT)
+        bh=9j/U4EQoiHgptz6boB/MjI8ID8/t5hKi1/d0T2PV2gc=;
+        b=RSvARGzzjAoFTCVzreQzHwwv+AX8k3GKM6W1pPAdTd6nWq/eapLjEHpMtlyd6AJh9I
+         /ttfZ9WbTns/LLwVO4YAmMiiW92FOcvt9zvKHtsVU/USmJwYay6+7J+ryUAjBk2oTpwY
+         9wuGvNwBk/+/dItALWg3OQh0j3gArC3AmEXnpYm8P28gPxTEDT9AOC8wG7Oz/QOvaLBC
+         w3HMcDQnINQ4PnQDxxX5TE3hvx3hgpyOKxhL77+2pKYzqC+BC9Jddq2+YBENgjI3bNNb
+         s76Dom4xVVELkMLSvZHTCP7L+daYw5r+to/nDlB9JNQjIK/xP7gNzirld1+94sYQ6ZKn
+         e/bA==
+X-Forwarded-Encrypted: i=1; AJvYcCV+pN8l6W6GMd1Ra80FLE1TWasa9xws4JrgDWgW0zjmyYBrBgP8Xr2cCAZzLH6UNoRQS7zWHpV9tZ0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzeNVEwCkzbaSkT9QcVQ5Akw+usI4loE9wwdsujeVcZzCtskDhg
+	CNNGqVfa9CPF/MpRGWEN5wPPQGBfKkXkS8DwHdXEdaOi/2WiUAmtNIGyHHeWS/XFsUgAKV8xPSx
+	nlu8syg4Xa/faVf/26fkNsRxCQboSSM8ygvXsbLWFz8jPPKnm
+X-Gm-Gg: ASbGnctMPDRNvR4Zb4HZrtXK9LI6v+YGQ0ulFmRCSQKhSOCEQMHg0jnaaOQbBSeZGTd
+	34MWyI3yfXIhVoGfSJlcyEMSs/ffK74nJQJDdLHoWpxFpEvqkmX8hgnhVJ1eX6/rFiT0x18Qcls
+	UpYJhNbt+tZg+Wo1uHIKTuSzc2wwg=
+X-Google-Smtp-Source: AGHT+IHH7uvA9yNgehQh/WvJpzE1DNm3tApCMv5rqkkOcqny/w/ZhYHeJeGOrtmKDOjQNX4IleJQ5b7Zm4VytQlV/xE=
+X-Received: by 2002:a05:690c:4b83:b0:6fd:2b7d:9a4e with SMTP id
+ 00721157ae682-6febf30734bmr319577817b3.18.1741779692875; Wed, 12 Mar 2025
+ 04:41:32 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250307005712.16828-1-andre.przywara@arm.com> <20250307005712.16828-3-andre.przywara@arm.com>
-In-Reply-To: <20250307005712.16828-3-andre.przywara@arm.com>
+References: <20250203172905.463629-1-gwendal@chromium.org> <BL0PR04MB656432C4EEB1A9EC3C6BDC0DFCF52@BL0PR04MB6564.namprd04.prod.outlook.com>
+In-Reply-To: <BL0PR04MB656432C4EEB1A9EC3C6BDC0DFCF52@BL0PR04MB6564.namprd04.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 12 Mar 2025 12:25:02 +0100
-X-Gm-Features: AQ5f1JpRnOY3arJkwpPqmP24JF8uLy0s3IwIKNA_9eLVMdzcVYtTB4PX7y_pSng
-Message-ID: <CAPDyKFoFesrcYPDNDsvU_mLdkTGE2=7TCFrYkdFW3bp_0fLSMg@mail.gmail.com>
-Subject: Re: [PATCH v3 02/15] dt-bindings: mmc: sunxi: add compatible strings
- for Allwinner A523
-To: Andre Przywara <andre.przywara@arm.com>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Chen-Yu Tsai <wens@csie.org>, 
-	Jernej Skrabec <jernej.skrabec@gmail.com>, Samuel Holland <samuel@sholland.org>, 
-	devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-sunxi@lists.linux.dev, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, Conor Dooley <conor.dooley@microchip.com>
+Date: Wed, 12 Mar 2025 12:40:57 +0100
+X-Gm-Features: AQ5f1JomwgZ8i077_9iFpZbF1ecTQpS7Pplx8R4KSPTSkDekFPV367E5OrYQJ10
+Message-ID: <CAPDyKFpFzBJvx1QxKytAs95_exCwj+HeDD7Pq7uMzqH1s69EwA@mail.gmail.com>
+Subject: Re: [PATCH v2] Makefile: fix conditional around sparse
+To: Avri Altman <Avri.Altman@wdc.com>
+Cc: Gwendal Grignou <gwendal@chromium.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 7 Mar 2025 at 01:57, Andre Przywara <andre.przywara@arm.com> wrote:
+On Mon, 3 Feb 2025 at 18:40, Avri Altman <Avri.Altman@wdc.com> wrote:
 >
-> The Allwinner A523 uses the same MMC IP as the D1.
+> > sparse would always be invoked, since `ifdef C` is always true afet `C ?= xx`.
+> > Instead, use ifeq to check if C is 0 or 1.
+> >
+> > Check that `make C=0` does not invoke sprase.
+> >
+> > Fixes f884bfe684f ("mmc-utils: Make functions static for local scope
+> > enforcement")
+> Nit sha1 should be 12 characters.
 >
-> Introduce the new specific compatible strings, and use them with
-> fallbacks to the D1 strings.
->
-> Signed-off-by: Andre Przywara <andre.przywara@arm.com>
-> Acked-by: Conor Dooley <conor.dooley@microchip.com>
+> >
+> > Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+> Reviewed-by: Avri Altman <avri.altman@wdc.com>
 
-Applied for next, thanks!
+Applied to mmc-utils, thanks!
 
 Kind regards
 Uffe
 
 
-> ---
->  .../devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml      | 4 ++++
->  1 file changed, 4 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> index 8e4c77b7e4ab9..9f3b1edacaa02 100644
-> --- a/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml
-> @@ -50,10 +50,14 @@ properties:
->            - enum:
->                - allwinner,sun20i-d1-emmc
->                - allwinner,sun50i-h616-emmc
-> +              - allwinner,sun55i-a523-emmc
->            - const: allwinner,sun50i-a100-emmc
->        - items:
->            - const: allwinner,sun50i-h616-mmc
->            - const: allwinner,sun50i-a100-mmc
-> +      - items:
-> +          - const: allwinner,sun55i-a523-mmc
-> +          - const: allwinner,sun20i-d1-mmc
->
->    reg:
->      maxItems: 1
-> --
-> 2.46.3
+> > ---
+> > Changes from v1:
+> > - added signature
+> > - add test line to enphasize it is not a revert.
+> >
+> >  Makefile | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/Makefile b/Makefile
+> > index 06ae0f7..c0284bb 100644
+> > --- a/Makefile
+> > +++ b/Makefile
+> > @@ -27,14 +27,14 @@ progs = mmc
+> >
+> >  # make C=1 to enable sparse - default
+> >  C ?= 1
+> > -ifdef C
+> > +ifeq "$(C)" "1"
+> >         check = sparse $(CHECKFLAGS) $(AM_CFLAGS)  endif
+> >
+> >  all: $(progs)
+> >
+> >  .c.o:
+> > -ifdef C
+> > +ifeq "$(C)" "1"
+> >         $(check) $<
+> >  endif
+> >         $(CC) $(CPPFLAGS) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
+> > --
+> > 2.48.1.362.g079036d154-goog
 >
