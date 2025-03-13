@@ -1,107 +1,72 @@
-Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0915E266B74
-	for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 13:34:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC397126C1E;
+	Thu, 13 Mar 2025 14:53:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741872901; cv=none; b=ZdXYHGiRVx8a15LP54oJGJNCZT/B04/p2msSJQMuSwnjhD+ndKFV/xUihwy/LPAjIoyZ8UxXMsvDqJWpSyanF5Sa1XdXmg68nhCYwDK88Pjdov3WbWpzYibEW5gQtqStMacCtOvHyI8IKMG9XWr6BozMnJVCQ6OHCyxedPXLYCk=
+	t=1741877592; cv=none; b=EgdmLkew8yPkINVLAPKfI8XXrglktUXBKBjGqxVjTKr4XpDzyOJRn/XfH5pk6J78MYtU2Zav1ZPNLTCUmessy+JT0TFk8dTxve6oSckPPD8knEfmKqvcsO9MHI2/m7iNBHnWtYrdqbW4BX2hAmPP6YUCwtv3/R6eESbLcR5oNKc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741872901; c=relaxed/simple;
-	bh=qhaY4/5zTvjHonk2Ygd1z88Hwh+JDzz+u6NL9wzreXo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=EI4KO+a89ZH3BTs46Ga3VKQPcRJe048P4smaFV1mh0DHghXxY4BlVedPxTZyRHoafDW5UabWTMmwDwwn3psDz+WUSuOPa6ICJhIKTv65k5Q0IRaMMh5sQZuILZe+GjvrPWP7g00MYYHu2auCZAbM0l7PiBugLmJZpUSzCpfEvPw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=a5+NLYin; arc=none smtp.client-ip=209.85.128.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1741877592; c=relaxed/simple;
+	bh=w52BMGEb/zNW6DRdLAa5vip7+Q6bfilfvxV8/qdG/Ak=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
+	 MIME-Version:Content-Type; b=Mb3E5Mt2Zi0arT7cWVva/w6YOThhNxFwb8Hn4MQuJWFMVnlT3sm99ylNpsAeSbBK7LzCoasD3UwnC59ee/xIDHQlWoHYK/gR1dgMTmvtpkHkaxGxDVVz4quWnskvfOXsaQvhD3RpjI+n9DdH04ewuSH3GXVbUejwHGAhJutL3XI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=dlk75RX4; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="a5+NLYin"
-Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6ff1e375a47so9128777b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 06:34:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1741872899; x=1742477699; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=goZAX+dBDiI0zopztQxeva3bR7XFx3WIKl9sxVOYVc8=;
-        b=a5+NLYinWjJ8Yb6hgL1BEOQSR112nvHIu8F/UV35TgQgnsMWaIrNyj/R6ncLyx3l8t
-         XsSRTNsQ62RZpZia6HQjRVDWOyUf8LV4KRRvFW0ktzf3UDGvxID5GFeKRe66CwH7FegM
-         uLslN14zoBO1EZwk181YgyOyTPd7BhCRAKuT8+6e4aSx2jLLDwb3oRpsygRy074G/RvP
-         8IXHLnPeJMwKjAwnt+yaMXZCXcHwA1+syvfc3IqYeVJe27eP/NqCeA2KwytEY19pI15v
-         jmG9ce0eGz7siV62YVGz+fFhYLmrBapb8RV0I9xlOQzbiqzh1xgzfs07ZzuO4xDwlxXJ
-         vaZw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741872899; x=1742477699;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=goZAX+dBDiI0zopztQxeva3bR7XFx3WIKl9sxVOYVc8=;
-        b=QHMKvDQmA+9jeWHjqt84EQ2owwZWuCo1FBYTv2DuJcoK1umaGfmRcJtt0VhODV6aV7
-         UnZ33spbSQsUp6zCpXAoY1Nz9VfGILzcP5lA4mgWAIqWA/Jqzs/VZicRudj4OyUQk9Yf
-         nBCHS75OE5+C+3Ai4ZXTRpvg0w5+YRlA9u3yc3NnJzSZMNNz4CWwqViL7G7xQcc/OLyC
-         XM9F81sd5AlAtuv4rvtRVIX/hF4jXeDWDoD12DLq+aOnnR1yfEH3d8Ps/Himj+C/22gB
-         psVc5GLbZmqnNO6XYVU1fTayehptIRtnhdyGKZy9SULNiojwzeNrIMmAdOwR/2XZX0mT
-         N/cg==
-X-Forwarded-Encrypted: i=1; AJvYcCUFxZXe8nXPE6HjlTgWTi2U/k7uVaiwVLKy2lVzUHZWU5wJZlZM0vcZxSySrJoLqcF0E20ObO2aXOQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzv4B0WQ9fb7PBRkCy5iOUhkd4HJeMOG+3H29iv5eDvz789l+v6
-	EHdrY1ZvwmZVgsfTtjc/8FRnY3zDCuDFbRgTbkm65TMqjtRjE4HwYD8ZESpaxnKc/2nZyYF7Yym
-	idoZaKc7gx5zUblgkp5yZFzAS8uZ+u9mO6VtjYg==
-X-Gm-Gg: ASbGncvw/OK0O74ikFwJ11ijhNirELU3P289hQh5g8xBM/p06LWTQlgyBSEd5UDZSyj
-	Fk3QoX/Uhe7zuOtWvQj6C06yYojgDugoKe/KI+MasBvhrvOixWB/rty+MvJXZ3QVnCjk7Y9WnWA
-	n2ZxBPcFYFP4xvYIsdWTxjIOcy8dw=
-X-Google-Smtp-Source: AGHT+IHsVXhdn58CSseKfqmn2D0WWPIyjD+MoKINReAEdbKZUj1fc+Dj3ndcB9pp8B3OG3dRcqsCbLer9btm/Mm5Ibw=
-X-Received: by 2002:a05:690c:3386:b0:6fd:6589:7957 with SMTP id
- 00721157ae682-6febf3e141amr369592357b3.32.1741872898816; Thu, 13 Mar 2025
- 06:34:58 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="dlk75RX4"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4519BC4CEDD;
+	Thu, 13 Mar 2025 14:53:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1741877591;
+	bh=w52BMGEb/zNW6DRdLAa5vip7+Q6bfilfvxV8/qdG/Ak=;
+	h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+	b=dlk75RX4BJJymKAK8ib8Bfq9GxVJVC5iw3D4UtFdjm3m2z8Pg2Q0X5iVmpCQ0sOnh
+	 uCT6cH49pKZGgqc62hABR3U7O1RQ5siUeNePNUP6Rq0fBAdTqYIriSK/ZoNx4Ai4ea
+	 pXhb/F+3VhgbaATFUYtUDKS6Ma968EHvM7riUwkHra5//pnsNNS/3akhiVw7GGCOIi
+	 aL+xpG5U+UgWe8c3YYiaykJg8kZhQDlU6Mxg501HsmyBYhfpBOeQaJSNZEc+Bxt5a7
+	 tAzNeP3CJQrOG15HT62bQh47ak3koZanZsE9XgkKjU7/pDnDSC8NiiVpSAsfhq1/B3
+	 EOlmQNs44gKaw==
+From: Lee Jones <lee@kernel.org>
+To: robh@kernel.org, krzk+dt@kernel.org, conor+dt@kernel.org, 
+ nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com, 
+ claudiu.beznea@tuxon.dev, mturquette@baylibre.com, sboyd@kernel.org, 
+ arnd@arndb.de, Ryan.Wanner@microchip.com
+Cc: dharma.b@microchip.com, mihai.sain@microchip.com, 
+ romain.sioen@microchip.com, varshini.rajendran@microchip.com, 
+ devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
+ linux-spi@vger.kernel.org, linux-serial@vger.kernel.org, 
+ Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <9656d46ee0255b9aba404d77d2d204376a9cb248.1736522006.git.Ryan.Wanner@microchip.com>
+References: <cover.1736522006.git.Ryan.Wanner@microchip.com>
+ <9656d46ee0255b9aba404d77d2d204376a9cb248.1736522006.git.Ryan.Wanner@microchip.com>
+Subject: Re: (subset) [PATCH v6 3/3] dt-bindings: mfd:
+ atmel,sama5d2-flexcom: add microchip,sama7d65-flexcom
+Message-Id: <174187758697.3701280.18234838828113464973.b4-ty@kernel.org>
+Date: Thu, 13 Mar 2025 14:53:06 +0000
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org> <20250313-b218821c16-4d4368864149@bugzilla.kernel.org>
-In-Reply-To: <20250313-b218821c16-4d4368864149@bugzilla.kernel.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 13 Mar 2025 14:34:22 +0100
-X-Gm-Features: AQ5f1JqiUMJo4D5gc8pV4EKGIHOUaErHNxvOelZ2gxQp4D5NjSDQGNlT3QlgsWg
-Message-ID: <CAPDyKFrfB2W9YBe+XR7=Tv67zivJ4bVt+SyuEH2evY+4KWN_MA@mail.gmail.com>
-Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
- Microsoft Surface Go 2
-To: Thomas Haschka via Bugspray Bot <bugbot@kernel.org>
-Cc: thomas.haschka@tuwien.ac.at, adrian.hunter@intel.com, ricky_wu@realtek.com, 
-	linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-Mailer: b4 0.15-dev-510f9
 
-On Thu, 13 Mar 2025 at 12:04, Thomas Haschka via Bugspray Bot
-<bugbot@kernel.org> wrote:
->
-> Thomas Haschka writes via Kernel.org Bugzilla:
->
-> As Uffe suggested i tried to remove MMC_CAP_AGGRESSIVE_PM from
-> drivers/mmc/host/rtsx_pci_sdmmc.c
->
-> I add the patch so that you can verify what I did.
+On Fri, 10 Jan 2025 08:25:42 -0700, Ryan.Wanner@microchip.com wrote:
+> Add flexcom binding documentation for sama7d65.
+> 
+> Consolidated entries into one enum to match proper coding style.
+> 
+> 
 
-The patch seems okay to me!
+Applied, thanks!
 
->
-> It did however not solve the problem.
+[3/3] dt-bindings: mfd: atmel,sama5d2-flexcom: add microchip,sama7d65-flexcom
+      commit: c37ee2ed38391eef476fea6af8eccd0d31f5ed98
 
-That was really surprising to me. So are you still getting the error
-"mmc0: error -95 doing runtime resume"? Or something else?
+--
+Lee Jones [李琼斯]
 
-If the same error occurs, I am puzzled. The code path should not be
-executed when MMC_CAP_AGGRESSIVE_PM is unset. Perhaps add a few prints
-in mmc_sd_runtime_suspend() to make sure what code path we are
-running?
-
-pr_err("%s: %s\n", mmc_hostname(host), __func__);
-
- if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
-                return 0;
-
-pr_err("%s: %s - AGGRESSIVE_PM\n", mmc_hostname(host), __func__);
-
-[...]
-
-Kind regards
-Uffe
