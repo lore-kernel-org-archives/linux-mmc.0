@@ -1,151 +1,153 @@
-Received: from mail-pl1-f171.google.com (mail-pl1-f171.google.com [209.85.214.171])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-00300601.pphosted.com (mx0a-00300601.pphosted.com [148.163.146.64])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4BA3268690
-	for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 15:13:41 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 21ECC13BAF1;
+	Thu, 13 Mar 2025 16:33:20 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.146.64
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741878827; cv=none; b=VMluk6lZihRwCnqHpB4//kXNsmdxPcObOuTHi+CbNZStaoYEbcePEZ9S7KONGo8fq6rpgip8vtyX5VJE32LmWOsJ9JbwhVIFLFj8BogUswtl/6hpX6CPn+/nEGPFLItk5wZFDtO4tAXqg4Vvxiq6gwR/KE9NrnwvBTFI9NZYJpA=
+	t=1741883602; cv=none; b=XXrBhFyhrpB0WMqtK2FVxHj0eyKuYtGKgjOoPHHAtHQ9tnMc1dZyG/WP0CLmQ9NGpOB2dLvfYdUeR8MKhAaSscFMgk7d5emSR3HX+p6Sr35rJbOxQCflOLLGyIXGHL4NbbS5OSgpjGb4U9qXEolC6ugBXNi7fYoeFKeKe7QRBPc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741878827; c=relaxed/simple;
-	bh=fJxfW2SO60LSZjE08ryPgcw3EaJ/8K92lDP2S5xhGvA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LPqH2uvCf3y5onKFMj/1Og8eowKWz6SzwBsWF3B+WVXfiHvufxhWLpHIzApNFHFRWM76FCdE9voZvNPmNBAGmCFFkgRtiVr71KOq5jHd0ex4ekfiuw7dWl/lLnghH82bXXLPPYM3I9I664HuleQI2c8THsoNtiUUF9XiSY9Tamo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=GOK0sdbG; arc=none smtp.client-ip=209.85.214.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
-Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
+	s=arc-20240116; t=1741883602; c=relaxed/simple;
+	bh=Fk1Sw38RsovrWcOEK9Wv4pDEmhMSab8WX+0qeLrb8VA=;
+	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=sCJ8qhVg/RiTpR9w+uGbbNzMTyCf8YHzCeZfosmqMLqj/QPMhxsC6Aq6ZVwDwGSKlxUlvjf5cgM7Q+uzp4EZAD6V7m58HBeyjkylAOk9qDY7sKWOy1L01o3GsvESzCHsnUR2S+O4KdKo7HPuzqB2CSwKJaPzbltArkjDx54B0no=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=ElKU9nVB; arc=none smtp.client-ip=148.163.146.64
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="GOK0sdbG"
-Received: by mail-pl1-f171.google.com with SMTP id d9443c01a7336-224191d92e4so23069495ad.3
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 08:13:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google; t=1741878821; x=1742483621; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=LtjPSYCYextd8p+081cZMv9XSGQU1Zsd9DWrufPXUHg=;
-        b=GOK0sdbG11u5OurIiq3TpSuv/nEG91FWuRhy/KO1o2me9bJTV4nNsMNHTn8AFIytpb
-         8xoheskVv4kgI+05jin+Wx7gq7BL1pQrY6xYlMVNa6CBG9jiU0jUfybt3+xvtJdZ9WXZ
-         Y7KQvzaKo+N6C2eszX5gtCYUeITNRfsPTMKH0=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741878821; x=1742483621;
-        h=content-transfer-encoding:in-reply-to:autocrypt:from
-         :content-language:references:cc:to:subject:user-agent:mime-version
-         :date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LtjPSYCYextd8p+081cZMv9XSGQU1Zsd9DWrufPXUHg=;
-        b=xPrvoDWn6qo2ENc7t/kq6jlrmWvPAG90AwRlbRn+YihYUns9o/5bUDtlVql4wk0SnD
-         egFqvDCNx3fFjdlp/CUE/y7mktMMUjz5LEEhwrOndUaldI0RbZNdaLCl71T9ZRgnmWqn
-         kuzDQkxfk5YCNPHRzpNxYOu3lxOnmXP2YIeAIDFGkIQjy8GDAjsbrHCAyuqzXb/mLqBb
-         7D28DnxBI9muZhsMwWRFElPSF7p78GPKDGRC8ansnsbLsLsMRb/whF3kXTABXnqIeywz
-         iUgDMhBKOuJAzIOaGyIbziUHnQ7JnhZ3xyVIPhabc4VuH8ztPYvLktpqIm5VTVm1AUr9
-         HMqA==
-X-Forwarded-Encrypted: i=1; AJvYcCWUXhcS2dGJSMET38bAtSUSYlvPyKklOYK0A/Cpndla7hFyZJDUNE/B3PJ1hi8vcMwZOGqSHSt6TYA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy+4wUwMrM8IWer2jOGBDydDwgX1ZBrJ4ChFi9BAUC1lA4DgA/g
-	HGWKZcJL653eBdTy39n/oy78OLEYgorlzYGJsCeYTuxkrYtNqJyyyZ9fCDNem/tK187RJ//MWmk
-	=
-X-Gm-Gg: ASbGnculJr/aBGfeKngYRBa4NrTqNzMc3NQgb0f03fWy2QuY6TjYuuSk5M4yGffEKnk
-	ZBbe68Sfu8AmgxwsYdqfRe7qbDvKJInQB/ic/fE3qra4isD6lWaKGwcAd7cwLJkITi7Y+ZTYIfI
-	yCIsswKqutLw9SIZwhvQ2b/AhwUTL7tUA4Op+z+YBKtGe/m2MDFQGaJR1CKGwGeaEOSi4oxSH5y
-	/JoamdPLmrGJfpPtq/pBQc3CZ36Yijg0v0ef4WU8KS5TryPoyrYGT1GLKdp0w3q3c2q4rXM2U6r
-	NSD3sv3y7waSO8ObhkxJE19zCa66FdN5jOLTa+/rTaC04KA9KuNHCVbOQ18vs9oVlIUYOFboc3Q
-	yIBXvlRgxHlapUdS/R+8=
-X-Google-Smtp-Source: AGHT+IH6rVvz6wUlxxNUwr/JAWpyXdb7amienre/dUzOfRJnNc3NkCdr7ltThD0dYTVCfDPZwdv9wQ==
-X-Received: by 2002:a17:902:ef4e:b0:223:628c:199 with SMTP id d9443c01a7336-22428c1cca9mr373944625ad.52.1741878821152;
-        Thu, 13 Mar 2025 08:13:41 -0700 (PDT)
-Received: from [192.168.1.3] (ip68-4-215-93.oc.oc.cox.net. [68.4.215.93])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-225c6bbebebsm14416825ad.201.2025.03.13.08.13.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 13 Mar 2025 08:13:39 -0700 (PDT)
-Message-ID: <06ee4b30-e4c8-4670-9054-b30827ca8931@broadcom.com>
-Date: Thu, 13 Mar 2025 08:13:39 -0700
+	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="ElKU9nVB"
+Received: from pps.filterd (m0142705.ppops.net [127.0.0.1])
+	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52DFsWO5018204;
+	Thu, 13 Mar 2025 16:32:25 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
+	:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=PPS11142024;
+	 bh=uGsSM+bjIB67eslV61aUbDQzWP1zi5zWBkuq/pqfoC8=; b=ElKU9nVBZO9a
+	TO35z+DGLtTdFG4BBKbbv4i22PDSFvBBVl6Kylbud3NG7kPxaCAzDRuPWm8U3HEW
+	UM7rqjVfqmIEl2mjB1K3+7JK4/w2LlG9aGudkpowfREqwe7QhYUn3bAN46qnk1Fe
+	58e0RB4dnU1Kh37lrxXxyHIP6OHO6LSYzjY++zMjgxpa2eO9fbcqtG/37BvjiCcI
+	6S5wFySn5X3qtWxPWCx/PV0ToKiV6i76Fvg+XgbhyG8i0S2GOK0108XE5ZSsvAVj
+	reJwm93JVlMheq/EreRr9X/dSXa6lv3hYKqCe8XyIM6fLhdhIADccG8EZVvRT+6H
+	/kJAaXuV1Q==
+Received: from us-aus-excas-p2.ni.corp.natinst.com ([130.164.94.74])
+	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 45c25ms2cf-2
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 13 Mar 2025 16:32:25 +0000 (GMT)
+Received: from us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) by
+ us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1258.28; Thu, 13 Mar 2025 11:32:23 -0500
+Received: from ershephe-ubuntu.amer.corp.natinst.com (172.18.68.32) by
+ us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) with Microsoft SMTP
+ Server id 15.2.1258.28 via Frontend Transport; Thu, 13 Mar 2025 11:32:23
+ -0500
+From: Erick Shepherd <erick.shepherd@ni.com>
+To: <adrian.hunter@intel.com>
+CC: <andy-ld.lu@mediatek.com>, <avri.altman@wdc.com>, <cw9316.lee@samsung.com>,
+        <dsimic@manjaro.org>, <erick.shepherd@ni.com>, <keita.aihara@sony.com>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <quic_jjohnson@quicinc.com>, <ricardo@marliere.net>,
+        <ulf.hansson@linaro.org>, <victor.shih@genesyslogic.com.tw>,
+        <wsa+renesas@sang-engineering.com>
+Subject: Re: [RFC PATCH V2 2/2] mmc: allow card to disable tuning
+Date: Thu, 13 Mar 2025 11:32:23 -0500
+Message-ID: <20250313163223.1514010-1-erick.shepherd@ni.com>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <65238f8f-46b8-41f2-a992-0d1a150ae8c1@intel.com>
+References: <65238f8f-46b8-41f2-a992-0d1a150ae8c1@intel.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: sdhci-brcmstb: add cqhci suspend/resume to PM ops
-To: Kamal Dasu <kamal.dasu@broadcom.com>, Al Cooper <alcooperx@gmail.com>,
- Broadcom internal kernel review list
- <bcm-kernel-feedback-list@broadcom.com>,
- Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Florian Fainelli <florian.fainelli@broadcom.com>,
- linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org
-Cc: stable@vger.kernel.org
-References: <20250311165946.28190-1-kamal.dasu@broadcom.com>
-Content-Language: en-US
-From: Florian Fainelli <florian.fainelli@broadcom.com>
-Autocrypt: addr=florian.fainelli@broadcom.com; keydata=
- xsBNBFPAG8ABCAC3EO02urEwipgbUNJ1r6oI2Vr/+uE389lSEShN2PmL3MVnzhViSAtrYxeT
- M0Txqn1tOWoIc4QUl6Ggqf5KP6FoRkCrgMMTnUAINsINYXK+3OLe7HjP10h2jDRX4Ajs4Ghs
- JrZOBru6rH0YrgAhr6O5gG7NE1jhly+EsOa2MpwOiXO4DE/YKZGuVe6Bh87WqmILs9KvnNrQ
- PcycQnYKTVpqE95d4M824M5cuRB6D1GrYovCsjA9uxo22kPdOoQRAu5gBBn3AdtALFyQj9DQ
- KQuc39/i/Kt6XLZ/RsBc6qLs+p+JnEuPJngTSfWvzGjpx0nkwCMi4yBb+xk7Hki4kEslABEB
- AAHNMEZsb3JpYW4gRmFpbmVsbGkgPGZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tPsLB
- IQQQAQgAywUCZWl41AUJI+Jo+hcKAAG/SMv+fS3xUQWa0NryPuoRGjsA3SAUAAAAAAAWAAFr
- ZXktdXNhZ2UtbWFza0BwZ3AuY29tjDAUgAAAAAAgAAdwcmVmZXJyZWQtZW1haWwtZW5jb2Rp
- bmdAcGdwLmNvbXBncG1pbWUICwkIBwMCAQoFF4AAAAAZGGxkYXA6Ly9rZXlzLmJyb2FkY29t
- Lm5ldAUbAwAAAAMWAgEFHgEAAAAEFQgJChYhBNXZKpfnkVze1+R8aIExtcQpvGagAAoJEIEx
- tcQpvGagWPEH/2l0DNr9QkTwJUxOoP9wgHfmVhqc0ZlDsBFv91I3BbhGKI5UATbipKNqG13Z
- TsBrJHcrnCqnTRS+8n9/myOF0ng2A4YT0EJnayzHugXm+hrkO5O9UEPJ8a+0553VqyoFhHqA
- zjxj8fUu1px5cbb4R9G4UAySqyeLLeqnYLCKb4+GklGSBGsLMYvLmIDNYlkhMdnnzsSUAS61
- WJYW6jjnzMwuKJ0ZHv7xZvSHyhIsFRiYiEs44kiYjbUUMcXor/uLEuTIazGrE3MahuGdjpT2
- IOjoMiTsbMc0yfhHp6G/2E769oDXMVxCCbMVpA+LUtVIQEA+8Zr6mX0Yk4nDS7OiBlvOwE0E
- U8AbwQEIAKxr71oqe+0+MYCc7WafWEcpQHFUwvYLcdBoOnmJPxDwDRpvU5LhqSPvk/yJdh9k
- 4xUDQu3rm1qIW2I9Puk5n/Jz/lZsqGw8T13DKyu8eMcvaA/irm9lX9El27DPHy/0qsxmxVmU
- pu9y9S+BmaMb2CM9IuyxMWEl9ruWFS2jAWh/R8CrdnL6+zLk60R7XGzmSJqF09vYNlJ6Bdbs
- MWDXkYWWP5Ub1ZJGNJQ4qT7g8IN0qXxzLQsmz6tbgLMEHYBGx80bBF8AkdThd6SLhreCN7Uh
- IR/5NXGqotAZao2xlDpJLuOMQtoH9WVNuuxQQZHVd8if+yp6yRJ5DAmIUt5CCPcAEQEAAcLB
- gQQYAQIBKwUCU8AbwgUbDAAAAMBdIAQZAQgABgUCU8AbwQAKCRCTYAaomC8PVQ0VCACWk3n+
- obFABEp5Rg6Qvspi9kWXcwCcfZV41OIYWhXMoc57ssjCand5noZi8bKg0bxw4qsg+9cNgZ3P
- N/DFWcNKcAT3Z2/4fTnJqdJS//YcEhlr8uGs+ZWFcqAPbteFCM4dGDRruo69IrHfyyQGx16s
- CcFlrN8vD066RKevFepb/ml7eYEdN5SRALyEdQMKeCSf3mectdoECEqdF/MWpfWIYQ1hEfdm
- C2Kztm+h3Nkt9ZQLqc3wsPJZmbD9T0c9Rphfypgw/SfTf2/CHoYVkKqwUIzI59itl5Lze+R5
- wDByhWHx2Ud2R7SudmT9XK1e0x7W7a5z11Q6vrzuED5nQvkhAAoJEIExtcQpvGagugcIAJd5
- EYe6KM6Y6RvI6TvHp+QgbU5dxvjqSiSvam0Ms3QrLidCtantcGT2Wz/2PlbZqkoJxMQc40rb
- fXa4xQSvJYj0GWpadrDJUvUu3LEsunDCxdWrmbmwGRKqZraV2oG7YEddmDqOe0Xm/NxeSobc
- MIlnaE6V0U8f5zNHB7Y46yJjjYT/Ds1TJo3pvwevDWPvv6rdBeV07D9s43frUS6xYd1uFxHC
- 7dZYWJjZmyUf5evr1W1gCgwLXG0PEi9n3qmz1lelQ8lSocmvxBKtMbX/OKhAfuP/iIwnTsww
- 95A2SaPiQZA51NywV8OFgsN0ITl2PlZ4Tp9hHERDe6nQCsNI/Us=
-In-Reply-To: <20250311165946.28190-1-kamal.dasu@broadcom.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-Proofpoint-GUID: XJTHY8tRz9hn534FshcTSJahoLDBL1A3
+X-Proofpoint-ORIG-GUID: XJTHY8tRz9hn534FshcTSJahoLDBL1A3
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-03-13_07,2025-03-11_02,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 clxscore=1015
+ spamscore=0 lowpriorityscore=0 adultscore=0 phishscore=0 mlxlogscore=938
+ impostorscore=0 priorityscore=1501 suspectscore=0 mlxscore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2502280000
+ definitions=main-2503130128
 
-
-
-On 3/11/2025 9:59 AM, Kamal Dasu wrote:
-> cqhci timeouts observed on brcmstb platforms during suspend:
->    ...
->    [  164.832853] mmc0: cqhci: timeout for tag 18
->    ...
-> 
-> Adding cqhci_suspend()/resume() calls to disable cqe
-> in sdhci_brcmstb_suspend()/resume() respectively to fix
-> CQE timeouts seen on PM suspend.
-> 
-> Fixes: d46ba2d17f90 ("mmc: sdhci-brcmstb: Add support for Command Queuing (CQE)")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-> ---
->   drivers/mmc/host/sdhci-brcmstb.c | 10 ++++++++++
->   1 file changed, 10 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index 0ef4d578ade8..48cdcba0f39c 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -503,8 +503,15 @@ static int sdhci_brcmstb_suspend(struct device *dev)
->   	struct sdhci_host *host = dev_get_drvdata(dev);
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->   	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-
-Hopefully this won't be causing a possibly uninitialized warning.
-
-Reviewed-by: Florian Fainelli <florian.fainelli@broadcom.com>
--- 
-Florian
-
+How does this look? I confirmed the changes stop the card from tuning=0D
+and prevent the I/O errors. I can submit a new patch since these=0D
+changes are substantially different than my initial ones.=0D
+=0D
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h=0D
+index 3205feb1e8ff..756f80024635 100644=0D
+--- a/drivers/mmc/core/card.h=0D
++++ b/drivers/mmc/core/card.h=0D
+@@ -89,6 +89,7 @@ struct mmc_fixup {=0D
+ #define CID_MANFID_MICRON       0x13=0D
+ #define CID_MANFID_SAMSUNG      0x15=0D
+ #define CID_MANFID_APACER       0x27=0D
++#define CID_MANFID_SWISSBIT     0x5D=0D
+ #define CID_MANFID_KINGSTON     0x70=0D
+ #define CID_MANFID_HYNIX	0x90=0D
+ #define CID_MANFID_KINGSTON_SD	0x9F=0D
+=0D
+=0D
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c=0D
+index 5241528f8b90..8962992f05aa 100644=0D
+--- a/drivers/mmc/core/core.c=0D
++++ b/drivers/mmc/core/core.c=0D
+@@ -937,6 +937,10 @@ int mmc_execute_tuning(struct mmc_card *card)=0D
+ 	if (!host->ops->execute_tuning)=0D
+ 		return 0;=0D
+ =0D
++	if ((card->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING) &&=0D
++	    host->ios.timing =3D=3D MMC_TIMING_UHS_DDR50)=0D
++		return 0;=0D
++=0D
+ 	if (host->cqe_on)=0D
+ 		host->cqe_ops->cqe_off(host);=0D
+=0D
+ =0D
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h=0D
+index 89b512905be1..7f893bafaa60 100644=0D
+--- a/drivers/mmc/core/quirks.h=0D
++++ b/drivers/mmc/core/quirks.h=0D
+@@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixu=
+ps[] =3D {=0D
+ 		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,=0D
+ 		   EXT_CSD_REV_ANY),=0D
+ =0D
++	/*=0D
++	 * Swissbit series S46-u cards throw I/O errors during tuning requests=0D
++	 * after the initial tuning request expectedly times out. This has=0D
++	 * only been observed on cards manufactured on 01/2019 that are using=0D
++	 * Bay Trail host controllers.=0D
++	 */=0D
++	_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1,=0D
++		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,=0D
++		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),=0D
++=0D
+ 	END_FIXUP=0D
+ };=0D
+=0D
+ =0D
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h=0D
+index 526fce581657..ddcdf23d731c 100644=0D
+--- a/include/linux/mmc/card.h=0D
++++ b/include/linux/mmc/card.h=0D
+@@ -329,6 +329,7 @@ struct mmc_card {=0D
+ #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache suppo=
+rt */=0D
+ #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until th=
+e write has occurred */=0D
+ #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD p=
+oweroff notify support */=0D
++#define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */=0D
+ =0D
+ 	bool			written_flag;	/* Indicates eMMC has been written since power on */=
+=0D
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */=0D
+-- =0D
+=0D
+Regards,=0D
+Erick=0D
