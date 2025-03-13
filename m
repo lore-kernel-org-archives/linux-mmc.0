@@ -1,120 +1,107 @@
-Received: from mail-io1-f47.google.com (mail-io1-f47.google.com [209.85.166.47])
+Received: from mail-yw1-f175.google.com (mail-yw1-f175.google.com [209.85.128.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A1907267711
-	for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 13:24:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.166.47
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0915E266B74
+	for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 13:34:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741872282; cv=none; b=LVfQc+VKWfLoskV146NOLnqRVa4GZXm0ZYT5Vk//qbvRUG1dHHh7+kCsxwFEu+kRZ/T1vZ97cONM2QNPUL/5P4Mx19H73mvK7MGdO/CPrItv3H02Q4fW5BBkgY+MstoC5AvOZHT5qPqG1bdvXqS8qEWPZsLC8tuGeEtQS6V5x9Q=
+	t=1741872901; cv=none; b=ZdXYHGiRVx8a15LP54oJGJNCZT/B04/p2msSJQMuSwnjhD+ndKFV/xUihwy/LPAjIoyZ8UxXMsvDqJWpSyanF5Sa1XdXmg68nhCYwDK88Pjdov3WbWpzYibEW5gQtqStMacCtOvHyI8IKMG9XWr6BozMnJVCQ6OHCyxedPXLYCk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741872282; c=relaxed/simple;
-	bh=oxBvzwvTrG82n8EJbBWNJ307/ROiMAIN3ZDd1Xbf3ig=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=YzWRZj1PSca/MSQUN9uM86aw4iPSSoQUTOKeWfjJEPTIKs7E0GykfTQgcGYxNOqmKtuWyhMsTe4+7vN0aNMCQ2LIucem+T25wrQFQ/bmmQr0q+oKin7NT68qDY+IBZDXZsZ78WXcUlZBzU1t9Y+5bG3NCPr+jyOds+BxMIyGuPc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk; spf=pass smtp.mailfrom=kernel.dk; dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b=CgRsHjrX; arc=none smtp.client-ip=209.85.166.47
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=kernel.dk
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=kernel.dk
+	s=arc-20240116; t=1741872901; c=relaxed/simple;
+	bh=qhaY4/5zTvjHonk2Ygd1z88Hwh+JDzz+u6NL9wzreXo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=EI4KO+a89ZH3BTs46Ga3VKQPcRJe048P4smaFV1mh0DHghXxY4BlVedPxTZyRHoafDW5UabWTMmwDwwn3psDz+WUSuOPa6ICJhIKTv65k5Q0IRaMMh5sQZuILZe+GjvrPWP7g00MYYHu2auCZAbM0l7PiBugLmJZpUSzCpfEvPw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=a5+NLYin; arc=none smtp.client-ip=209.85.128.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20230601.gappssmtp.com header.i=@kernel-dk.20230601.gappssmtp.com header.b="CgRsHjrX"
-Received: by mail-io1-f47.google.com with SMTP id ca18e2360f4ac-854a682d2b6so57690239f.0
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 06:24:40 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="a5+NLYin"
+Received: by mail-yw1-f175.google.com with SMTP id 00721157ae682-6ff1e375a47so9128777b3.1
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Mar 2025 06:34:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20230601.gappssmtp.com; s=20230601; t=1741872280; x=1742477080; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5PLsvEgnbim2yotRJtm3RxSyGerYXasNwsqr+/KVpS4=;
-        b=CgRsHjrXXRqq4vaPHAcHpS5QmNOKwPbwPx1qON250R6Zi2OYgAUJ+uhFKQuGASSWQm
-         rS7BY/yLPqLiuDxkl1/pXv7VWbJ7vDEGxpDH6GcG6/dLYajQjZHTa8KbZ+qumNySbDVQ
-         gz6YNnTe5EHVHnU/j+EU4aBDLYuPhD9jw0fqBgZkqKCCOAEfIOt1oGRotT9X1Ju/lCix
-         1bBdnCrP7jcTTY79NVlC35F9pvq8RTo3qnAo1c2m5X5xGbeUAbZETRvWLoKC6dh7aE6e
-         gLjgAv/qJFO5MTjp5mpC15RwBUcg8FbdNu6RlZel9/kWcHOY+Vi/o8qQR9Lpa2KJ1yXT
-         A59A==
+        d=linaro.org; s=google; t=1741872899; x=1742477699; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=goZAX+dBDiI0zopztQxeva3bR7XFx3WIKl9sxVOYVc8=;
+        b=a5+NLYinWjJ8Yb6hgL1BEOQSR112nvHIu8F/UV35TgQgnsMWaIrNyj/R6ncLyx3l8t
+         XsSRTNsQ62RZpZia6HQjRVDWOyUf8LV4KRRvFW0ktzf3UDGvxID5GFeKRe66CwH7FegM
+         uLslN14zoBO1EZwk181YgyOyTPd7BhCRAKuT8+6e4aSx2jLLDwb3oRpsygRy074G/RvP
+         8IXHLnPeJMwKjAwnt+yaMXZCXcHwA1+syvfc3IqYeVJe27eP/NqCeA2KwytEY19pI15v
+         jmG9ce0eGz7siV62YVGz+fFhYLmrBapb8RV0I9xlOQzbiqzh1xgzfs07ZzuO4xDwlxXJ
+         vaZw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1741872280; x=1742477080;
-        h=content-transfer-encoding:mime-version:date:message-id:subject
-         :references:in-reply-to:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=5PLsvEgnbim2yotRJtm3RxSyGerYXasNwsqr+/KVpS4=;
-        b=OBQTU8Ki+DuVniGuVEuWiFQ/3AvQ75N4c/skECj0kbN0Nanedcmc/raB4LMBgD9sIS
-         +dOBiteaDZDMPpfJHhsYAjj46BqPkzOR1aMndiDiGsAihcCZhHFVTLLv1BKZ/SZXLoGz
-         WZrElsja6ZRk9RYGNCVeVYyVI2iuRVN3w+p3o7Sm/qQRQV2Dav3vk6QJw86A+z+9rOLO
-         RxBlKmkMGkgXUjfrQuPZzhfikYp97tVUgkZPxA1qjWETrSdjsHToAqKM5DuiaYLXLS1Z
-         rGAAEI7LjzWQq50Rva1PaIRh/+AaiCkdwG11TWSNSS/H8ePu4LhqyIzTaDhSdZbbQr/k
-         RByw==
-X-Forwarded-Encrypted: i=1; AJvYcCUFjV43wlvjrbudOFzFk0ec6wqBjAwS25qfqO9lNxi6WtQKItXOIc0M4ftq+ZE5EmTOxOQnMr/vEeY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw/JWU2+YRyS3HYAP3YnTdYk1I4ankB3YBaIIIEke5K7a4ebNiJ
-	K83e10GIE6rSwLbAwXAezpfwXkf05BS7R4haRJCOVpS7B0EbpDQyGTWAJE8qnhE=
-X-Gm-Gg: ASbGnctwYvh9llUHUxq5U91c5C0TKZQcH7OlgkqIqMmLSPaYh2IFEm+qvOiyRy1Qbuu
-	rkj5EzqgxC6yodAWkIbEhGz66WSqVuTaqOW7mdcpxzq4WwdEegcDnFJu4oVH5ieX1ShUGoDVmsU
-	nxt9H0mTuafYiwRTNb68BBv2tCT5tEcq32dcmQmygQv88vOyzODe/XE5qdb2i762aPt7x4YQjEM
-	RtR49FFWTPtaDcRMfBh2GJ4Z1b6qWvDjvBwnk8VJSGy2si1wNeYuHAjFjM+0FcYfni40+adghYc
-	ViSV69lvrdNjRVvsvMA5p0J+LRZ1tiKb5MQ=
-X-Google-Smtp-Source: AGHT+IEer637uehs/daevOydns9iUer0NF8/Lop3Ui7LDoPjH6cMpb131IF3qkXQqxQNFL57dNEHAg==
-X-Received: by 2002:a05:6602:380d:b0:85b:5494:5519 with SMTP id ca18e2360f4ac-85b54946d71mr1891701439f.5.1741872279762;
-        Thu, 13 Mar 2025 06:24:39 -0700 (PDT)
-Received: from [127.0.0.1] ([96.43.243.2])
-        by smtp.gmail.com with ESMTPSA id ca18e2360f4ac-85db879e512sm31580739f.28.2025.03.13.06.24.37
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Mar 2025 06:24:39 -0700 (PDT)
-From: Jens Axboe <axboe@kernel.dk>
-To: "Md. Haris Iqbal" <haris.iqbal@ionos.com>, 
- Jack Wang <jinpu.wang@ionos.com>, "Michael S. Tsirkin" <mst@redhat.com>, 
- Jason Wang <jasowang@redhat.com>, Xuan Zhuo <xuanzhuo@linux.alibaba.com>, 
- =?utf-8?q?Eugenio_P=C3=A9rez?= <eperezma@redhat.com>, 
- Paolo Bonzini <pbonzini@redhat.com>, Stefan Hajnoczi <stefanha@redhat.com>, 
- =?utf-8?q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>, 
- Juergen Gross <jgross@suse.com>, 
- Stefano Stabellini <sstabellini@kernel.org>, 
- Oleksandr Tyshchenko <oleksandr_tyshchenko@epam.com>, 
- Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, Richard Weinberger <richard@nod.at>, 
- Zhihao Cheng <chengzhihao1@huawei.com>, 
- Miquel Raynal <miquel.raynal@bootlin.com>, 
- Vignesh Raghavendra <vigneshr@ti.com>, Sven Peter <sven@svenpeter.dev>, 
- Janne Grunau <j@jannau.net>, Alyssa Rosenzweig <alyssa@rosenzweig.io>, 
- Keith Busch <kbusch@kernel.org>, Christoph Hellwig <hch@lst.de>, 
- Sagi Grimberg <sagi@grimberg.me>, James Smart <james.smart@broadcom.com>, 
- Chaitanya Kulkarni <kch@nvidia.com>, 
- "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>, 
- "Martin K. Petersen" <martin.petersen@oracle.com>, 
- Anuj Gupta <anuj20.g@samsung.com>
-Cc: linux-block@vger.kernel.org, linux-kernel@vger.kernel.org, 
- virtualization@lists.linux.dev, xen-devel@lists.xenproject.org, 
- linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, 
- asahi@lists.linux.dev, linux-arm-kernel@lists.infradead.org, 
- linux-nvme@lists.infradead.org, linux-scsi@vger.kernel.org
-In-Reply-To: <20250313035322.243239-1-anuj20.g@samsung.com>
-References: <CGME20250313040150epcas5p347f94dac34fd2946dea51049559ee1de@epcas5p3.samsung.com>
- <20250313035322.243239-1-anuj20.g@samsung.com>
-Subject: Re: [PATCH] block: remove unused parameter
-Message-Id: <174187227786.18244.14269218969550436496.b4-ty@kernel.dk>
-Date: Thu, 13 Mar 2025 07:24:37 -0600
+        d=1e100.net; s=20230601; t=1741872899; x=1742477699;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=goZAX+dBDiI0zopztQxeva3bR7XFx3WIKl9sxVOYVc8=;
+        b=QHMKvDQmA+9jeWHjqt84EQ2owwZWuCo1FBYTv2DuJcoK1umaGfmRcJtt0VhODV6aV7
+         UnZ33spbSQsUp6zCpXAoY1Nz9VfGILzcP5lA4mgWAIqWA/Jqzs/VZicRudj4OyUQk9Yf
+         nBCHS75OE5+C+3Ai4ZXTRpvg0w5+YRlA9u3yc3NnJzSZMNNz4CWwqViL7G7xQcc/OLyC
+         XM9F81sd5AlAtuv4rvtRVIX/hF4jXeDWDoD12DLq+aOnnR1yfEH3d8Ps/Himj+C/22gB
+         psVc5GLbZmqnNO6XYVU1fTayehptIRtnhdyGKZy9SULNiojwzeNrIMmAdOwR/2XZX0mT
+         N/cg==
+X-Forwarded-Encrypted: i=1; AJvYcCUFxZXe8nXPE6HjlTgWTi2U/k7uVaiwVLKy2lVzUHZWU5wJZlZM0vcZxSySrJoLqcF0E20ObO2aXOQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzv4B0WQ9fb7PBRkCy5iOUhkd4HJeMOG+3H29iv5eDvz789l+v6
+	EHdrY1ZvwmZVgsfTtjc/8FRnY3zDCuDFbRgTbkm65TMqjtRjE4HwYD8ZESpaxnKc/2nZyYF7Yym
+	idoZaKc7gx5zUblgkp5yZFzAS8uZ+u9mO6VtjYg==
+X-Gm-Gg: ASbGncvw/OK0O74ikFwJ11ijhNirELU3P289hQh5g8xBM/p06LWTQlgyBSEd5UDZSyj
+	Fk3QoX/Uhe7zuOtWvQj6C06yYojgDugoKe/KI+MasBvhrvOixWB/rty+MvJXZ3QVnCjk7Y9WnWA
+	n2ZxBPcFYFP4xvYIsdWTxjIOcy8dw=
+X-Google-Smtp-Source: AGHT+IHsVXhdn58CSseKfqmn2D0WWPIyjD+MoKINReAEdbKZUj1fc+Dj3ndcB9pp8B3OG3dRcqsCbLer9btm/Mm5Ibw=
+X-Received: by 2002:a05:690c:3386:b0:6fd:6589:7957 with SMTP id
+ 00721157ae682-6febf3e141amr369592357b3.32.1741872898816; Thu, 13 Mar 2025
+ 06:34:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.3-dev-7b9b9
+References: <20240922-b218821c0-26591b0a1008@bugzilla.kernel.org> <20250313-b218821c16-4d4368864149@bugzilla.kernel.org>
+In-Reply-To: <20250313-b218821c16-4d4368864149@bugzilla.kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 13 Mar 2025 14:34:22 +0100
+X-Gm-Features: AQ5f1JqiUMJo4D5gc8pV4EKGIHOUaErHNxvOelZ2gxQp4D5NjSDQGNlT3QlgsWg
+Message-ID: <CAPDyKFrfB2W9YBe+XR7=Tv67zivJ4bVt+SyuEH2evY+4KWN_MA@mail.gmail.com>
+Subject: Re: RTS522A fails with "mmc: error -95 doing runtime resume" on
+ Microsoft Surface Go 2
+To: Thomas Haschka via Bugspray Bot <bugbot@kernel.org>
+Cc: thomas.haschka@tuwien.ac.at, adrian.hunter@intel.com, ricky_wu@realtek.com, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
+On Thu, 13 Mar 2025 at 12:04, Thomas Haschka via Bugspray Bot
+<bugbot@kernel.org> wrote:
+>
+> Thomas Haschka writes via Kernel.org Bugzilla:
+>
+> As Uffe suggested i tried to remove MMC_CAP_AGGRESSIVE_PM from
+> drivers/mmc/host/rtsx_pci_sdmmc.c
+>
+> I add the patch so that you can verify what I did.
 
-On Thu, 13 Mar 2025 09:23:18 +0530, Anuj Gupta wrote:
-> request_queue param is not used by blk_rq_map_sg and __blk_rq_map_sg.
-> remove it.
-> 
-> 
+The patch seems okay to me!
 
-Applied, thanks!
+>
+> It did however not solve the problem.
 
-[1/1] block: remove unused parameter
-      commit: 61667cb6644f6fb01eb8baa928e381c016b5ed7b
+That was really surprising to me. So are you still getting the error
+"mmc0: error -95 doing runtime resume"? Or something else?
 
-Best regards,
--- 
-Jens Axboe
+If the same error occurs, I am puzzled. The code path should not be
+executed when MMC_CAP_AGGRESSIVE_PM is unset. Perhaps add a few prints
+in mmc_sd_runtime_suspend() to make sure what code path we are
+running?
 
+pr_err("%s: %s\n", mmc_hostname(host), __func__);
 
+ if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+                return 0;
 
+pr_err("%s: %s - AGGRESSIVE_PM\n", mmc_hostname(host), __func__);
+
+[...]
+
+Kind regards
+Uffe
