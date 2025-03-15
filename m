@@ -1,150 +1,72 @@
-Received: from mx0b-00300601.pphosted.com (mx0b-00300601.pphosted.com [148.163.142.35])
+Received: from mx.skole.hr (mx2.hosting.skole.hr [161.53.165.186])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0B20D15B122;
-	Fri, 14 Mar 2025 19:59:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.142.35
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E365A17BBF;
+	Sat, 15 Mar 2025 16:25:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=161.53.165.186
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1741982345; cv=none; b=GOuKTUyeJSqvyRLQSN/b71TuCMgmqcDjS7JNXt+rWTR+k62ceRdYsLQ94VAzqYtpAEDHDxnlKBAawnz4Gx9AUS8H7zN59jnfPZYWiM7iPJeyB2vkaZ4qZ3WVRg/z/K+t0+nUgObxpOyho7+AS7iWoDLOiNr4rsuQZRrJl/GAhk8=
+	t=1742055927; cv=none; b=CcCwmb3N6+RigmldxpgCLwrEUzePiklQf88h8brMOz8SJ+9/+WnnMyniU8N8sDLA1eMqkwuWSqI03VnQoHM51DsgZx2kb6XfoeSrl2YpxUpir1slIgbUiEGJw06NgUynm08p9+apvUyzdaIB/YcGEiwg4svRIniW4R+km417P7M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1741982345; c=relaxed/simple;
-	bh=qpADqbD8cyaXnRCS5BTQv0v58wlWGnQ9E6uqvSF8Qlg=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=IN+vfH9OtpWAIipoZBYYPK84EVyDFX724eKv1jR1/YdYnK76UH6X1dx76iiIEw1dZuqcjmyK+gyuWpO98SmZUi9X6gN9w7lOAFh9Wf0LGWtbI4h0aFgvZVgFHwrGW5dXfMTPI1jOVG46aO6fxGul9OY6kXdTb56INKVb1Tj8Vjw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=TVTw6r72; arc=none smtp.client-ip=148.163.142.35
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="TVTw6r72"
-Received: from pps.filterd (m0144091.ppops.net [127.0.0.1])
-	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52EE8Rqg031097;
-	Fri, 14 Mar 2025 19:58:36 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
-	:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=PPS11142024; bh=k0NyECRggPo4eHprLwKw
-	atGq8Zg/3wV8nRq1tMaQXRI=; b=TVTw6r72q7R54erLeY+NmSGhFwHTSX7cuOGi
-	7MnvJ7l2fjhnu0jbOtwlVyJZhKJhzCu6+NQVA36lpbfp9DxFj5WsNFN0HobsXTE9
-	+Y4/4P/q2kqqvkSC4cAEgTILW9fIqZmKN+EIJiF1qkvpFAbk+NuhUIQly3aF7Zh4
-	40ekwzWreCyqQPyYhMZpBi+jShlcMFHcYtSU0av6x+kzI2GH3RBehPHlBGTs6yHj
-	F+RCv/tcDVifIqqKWRfy5OUKhyN86SE47NGBF/fqTUBgGi04vQ8HDAV3+x+bBnul
-	EeRg8hHozIWRuNfcSAdD4BZLI4H6HEmT8cBuKK+vVC0FArGOrA==
-Received: from us-aus-excas-p2.ni.corp.natinst.com ([130.164.94.74])
-	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 45cnxtvxy2-2
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 14 Mar 2025 19:58:35 +0000 (GMT)
-Received: from us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) by
- us-aus-excas-p2.ni.corp.natinst.com (130.164.68.18) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.28; Fri, 14 Mar 2025 14:58:34 -0500
-Received: from ershephe-ubuntu.amer.corp.natinst.com (172.18.68.32) by
- us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
- Server id 15.2.1258.28 via Frontend Transport; Fri, 14 Mar 2025 14:58:34
- -0500
-From: Erick Shepherd <erick.shepherd@ni.com>
-To: <linux-mmc@vger.kernel.org>
-CC: <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
-        <keita.aihara@sony.com>, <linux-kernel@vger.kernel.org>,
-        <avri.altman@wdc.com>, <wsa+renesas@sang-engineering.com>,
-        <jason.lai@genesyslogic.com.tw>, <jeff.johnson@oss.qualcomm.com>,
-        <victor.shih@genesyslogic.com.tw>, <andy-ld.lu@mediatek.com>,
-        <dsimic@manjaro.org>, <jonathan@raspberrypi.com>,
-        Erick Shepherd
-	<erick.shepherd@ni.com>
-Subject: [PATCH] mmc: Add quirk to disable DDR50 tuning
-Date: Fri, 14 Mar 2025 14:58:32 -0500
-Message-ID: <20250314195832.1588159-1-erick.shepherd@ni.com>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1742055927; c=relaxed/simple;
+	bh=OooLUublWM4AUomOTlrzjkR6hDHsebd4acX2bYkjReA=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=qV7J6Fv/M4wR8c39c7MyjqZsl7cGwhrFpLPEdMeZ1GgV5n2IE7tWbOLYwfV/DIYnpENYEZcogEKNT5S+dLrZ9ICE6Zfylc9IGzr7nrJF86ABSzckQ9StAn2iSv/loslwbS8SzmNSNiG2Mb2iVTwKPxXqsX4xJi/2hbyRkPxLP5w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=skole.hr; spf=pass smtp.mailfrom=skole.hr; arc=none smtp.client-ip=161.53.165.186
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=skole.hr
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=skole.hr
+Received: from mx2.hosting.skole.hr (localhost.localdomain [127.0.0.1])
+	by mx.skole.hr (mx.skole.hr) with ESMTP id 4E5CE830F8;
+	Sat, 15 Mar 2025 17:19:32 +0100 (CET)
+From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje.mihanovic@skole.hr>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+ Karel Balej <balejk@matfyz.cz>
+Cc: phone-devel@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
+ Karel Balej <balejk@matfyz.cz>, stable@vger.kernel.org
+Subject: Re: [RFC PATCH] mmc: sdhci-pxav3: set NEED_RSP_BUSY capability
+Date: Sat, 15 Mar 2025 17:18:30 +0100
+Message-ID: <12652295.O9o76ZdvQC@radijator>
+In-Reply-To: <20250310140707.23459-1-balejk@matfyz.cz>
+References: <20250310140707.23459-1-balejk@matfyz.cz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-ORIG-GUID: FJN8fU8j9H9iQ3fhKG6Qa2aZQFh3FcSg
-X-Proofpoint-GUID: FJN8fU8j9H9iQ3fhKG6Qa2aZQFh3FcSg
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1093,Hydra:6.0.680,FMLib:17.12.68.34
- definitions=2025-03-14_08,2025-03-14_01,2024-11-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 phishscore=0
- mlxlogscore=859 mlxscore=0 lowpriorityscore=0 bulkscore=0 spamscore=0
- impostorscore=0 clxscore=1011 suspectscore=0 adultscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.19.0-2502280000 definitions=main-2503140153
+Autocrypt: addr=duje.mihanovic@skole.hr;
+ keydata=
+ mDMEZokhzhYJKwYBBAHaRw8BAQdAWJZ0hsI/ytTqHGFV8x6tzd5sB596cTeeDB4CQsTf+wC0KER
+ 1amUgTWloYW5vdmnEhyA8ZHVqZUBkdWplbWloYW5vdmljLnh5ej6ImQQTFgoAQRYhBG3/QdYN8x
+ S1t2umMK0xk1JFj60DBQJmiSHOAhsDBQkJZgGABQsJCAcCAiICBhUKCQgLAgQWAgMBAh4HAheAA
+ AoJEK0xk1JFj60D1GABAJVSorZdMOlrp/oQtCSH/G53NE56x/JHA8VX+ZQBd/H3AP4/EcUf6eef
+ DUxVMh2bdkmuQKsVZGgOGiXpMksrVntWBrQpRHVqZSBNaWhhbm92acSHIDxkdWplLm1paGFub3Z
+ pY0Bza29sZS5ocj6ImQQTFgoAQRYhBG3/QdYN8xS1t2umMK0xk1JFj60DBQJmiSH/AhsDBQkJZg
+ GABQsJCAcCAiICBhUKCQgLAgQWAgMBAh4HAheAAAoJEK0xk1JFj60Dlw8A/i4lPOL7NaYoYePDq
+ l8MaJaR9qoUi+D+HtD3t0Koi7ztAQCdizXbuqP3AVNxy5Gpb1ozgp9Xqh2MRcNmJCHA1YhWAbg4
+ BGaJIc4SCisGAQQBl1UBBQEBB0DEc9JeA55OlZfWKgvmRgw6a/EpBQ8mDl6nQTBmnd1XHAMBCAe
+ IfgQYFgoAJhYhBG3/QdYN8xS1t2umMK0xk1JFj60DBQJmiSHOAhsMBQkJZgGAAAoJEK0xk1JFj6
+ 0DG5MA/iuo4l2GDEZ1Zf+XaS//8FwdXDO9nHkfbV2MHjF4NZXwAQDroMzBdMcqVvc8GABFlTTgG
+ j7KrRDz2HwWNyF8ZeprAQ==
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-Adds the MMC_QUIRK_NO_UHS_DDR50_TUNING quirk and updates
-mmc_execute_tuning() to return 0 if that quirk is set. This fixes an
-issue on certain Swissbit SD cards that do not support DDR50 tuning
-where tuning requests caused I/O errors to be thrown.
+On Monday, 10 March 2025 15:07:04 Central European Standard Time Karel Bale=
+j=20
+wrote:
+> Set the MMC_CAP_NEED_RSP_BUSY capability for the sdhci-pxav3 host to
+> prevent conversion of R1B responses to R1. Without this, the eMMC card
+> in the samsung,coreprimevelte smartphone using the Marvell PXA1908 SoC
+> with this mmc host doesn't probe with the ETIMEDOUT error originating in
+> __mmc_poll_for_busy.
 
-Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
----
- drivers/mmc/core/card.h   |  1 +
- drivers/mmc/core/core.c   |  4 ++++
- drivers/mmc/core/quirks.h | 10 ++++++++++
- include/linux/mmc/card.h  |  1 +
- 4 files changed, 16 insertions(+)
+Works fine for me on the same board.
 
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 3205feb1e8ff..756f80024635 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -89,6 +89,7 @@ struct mmc_fixup {
- #define CID_MANFID_MICRON       0x13
- #define CID_MANFID_SAMSUNG      0x15
- #define CID_MANFID_APACER       0x27
-+#define CID_MANFID_SWISSBIT     0x5D
- #define CID_MANFID_KINGSTON     0x70
- #define CID_MANFID_HYNIX	0x90
- #define CID_MANFID_KINGSTON_SD	0x9F
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5241528f8b90..8962992f05aa 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -937,6 +937,10 @@ int mmc_execute_tuning(struct mmc_card *card)
- 	if (!host->ops->execute_tuning)
- 		return 0;
- 
-+	if ((card->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING) &&
-+	    host->ios.timing == MMC_TIMING_UHS_DDR50)
-+		return 0;
-+
- 	if (host->cqe_on)
- 		host->cqe_ops->cqe_off(host);
- 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 89b512905be1..7f893bafaa60 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
- 		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
- 		   EXT_CSD_REV_ANY),
- 
-+	/*
-+	 * Swissbit series S46-u cards throw I/O errors during tuning requests
-+	 * after the initial tuning request expectedly times out. This has
-+	 * only been observed on cards manufactured on 01/2019 that are using
-+	 * Bay Trail host controllers.
-+	 */
-+	_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1,
-+		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
-+		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),
-+
- 	END_FIXUP
- };
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 526fce581657..ddcdf23d731c 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -329,6 +329,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
- #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
- #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
-+#define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
- 
- 	bool			written_flag;	/* Indicates eMMC has been written since power on */
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
--- 
-2.43.0
+Tested-by: Duje Mihanovi=C4=87 <duje.mihanovic@skole.hr>
+
+Regards,
+=2D-=20
+Duje
+
+
 
