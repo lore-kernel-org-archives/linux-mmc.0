@@ -1,144 +1,113 @@
-Received: from de-smtp-delivery-113.mimecast.com (de-smtp-delivery-113.mimecast.com [194.104.111.113])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-oo1-f51.google.com (mail-oo1-f51.google.com [209.85.161.51])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EBE31A5B98
-	for <linux-mmc@vger.kernel.org>; Mon, 17 Mar 2025 17:36:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.104.111.113
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9E39A17BBF
+	for <linux-mmc@vger.kernel.org>; Mon, 17 Mar 2025 22:06:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.161.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742232972; cv=none; b=P7OtoglcU0rM7CHH47XSa7NMuoMHWItr+g90ysMOLaF6Jcu7Uk09OOVoadhdkVMuGygc2zeVQKqIEW/iOGsCesL1z1xcT5YUS9sU0619kyW9anKgb2eYrGOAapZBgAw6mI6cBTnUm5wEN5lOPhAJL99C0le7OrYHN9f9Hfk01z0=
+	t=1742249180; cv=none; b=RbXmbYrEu++uSvz8MLtxdRdzPm0W8dbxXjRl9lQl+TyNpk2Qouqirgbe6/nF5LyD444uJHqFb+q/5RhO0Ymk2pvY6FLPmSUPbOkdCSp5Nr4eA8sFAZ10BfBz/Pp/xoVVQIdi74LsCJHdTOAOnzSbpWz6SbB+IHrSgH6yVr2nQ94=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742232972; c=relaxed/simple;
-	bh=qySI4OnPCejaqsYREjO5w43Y0R42PTGctKRJG8xDFMA=;
-	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=Ybteoxgst+Go2ULji8OM7Vw5CyJ6sMajx7od1agHanANu2Qc1yPKV36q9GcQUv9tBUUeyfsR7XKD7Lure7eTWbnk1lC6hjtnMA83TH51cHb1TM3pAEL8+maWF5dzpL7t7zcyk3InQal5kN8hawDY1bGLvy78h9BVLAPiYDLVkzE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=toradex.com; spf=pass smtp.mailfrom=toradex.com; dkim=pass (1024-bit key) header.d=toradex.com header.i=@toradex.com header.b=JZwCtLnU; arc=none smtp.client-ip=194.104.111.113
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=toradex.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=toradex.com
+	s=arc-20240116; t=1742249180; c=relaxed/simple;
+	bh=xtmNQAmiddO9PfxnK/vdLxIDc9tf8hJV8/EuKq1TCm0=;
+	h=From:To:Cc:Subject:Date:Message-Id; b=d16moEx6IIoOrsDjCaJM+972qGQgoMlTBlWKA1zdBG/Vwrpm9jre6a7FQqzJBkNwCdJJULwrjFvxL+M0iMy4fd2uiG+I1uB6/O6Q1SDSwNVblozvOUrg41E/9sPAX4ltuieWrQ2KuZ8hw+DkSbX9S/lCCd43Mr1+Q8RiHcL/jJ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com; spf=fail smtp.mailfrom=broadcom.com; dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b=digeJQvr; arc=none smtp.client-ip=209.85.161.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=broadcom.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=broadcom.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=toradex.com header.i=@toradex.com header.b="JZwCtLnU"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=toradex.com; s=toradex-com;
-	t=1742232967;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=qySI4OnPCejaqsYREjO5w43Y0R42PTGctKRJG8xDFMA=;
-	b=JZwCtLnUVZMKeDVObx1SP3slGZRGLIivY6Kob+xti+3MqmY4wHHerMnf3XDByQRhjBPR/i
-	NxjuG6V3sCKf3PzEfDNJWQTQAzYDFPaf4syVcsm5b8bQxeagfgUKYwxcbqAPa/MwA9MJ2h
-	+PehZV7PmEjXRW7uAU5V477sgxkGHJg=
-Received: from ZRAP278CU002.outbound.protection.outlook.com
- (mail-switzerlandnorthazlp17010001.outbound.protection.outlook.com
- [40.93.85.1]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- de-mta-12-m9TCG9quNXKAYVkrfa4IsQ-1; Mon, 17 Mar 2025 18:36:05 +0100
-X-MC-Unique: m9TCG9quNXKAYVkrfa4IsQ-1
-X-Mimecast-MFC-AGG-ID: m9TCG9quNXKAYVkrfa4IsQ_1742232965
-Received: from ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM (2603:10a6:910:34::12)
- by ZR2P278MB1109.CHEP278.PROD.OUTLOOK.COM (2603:10a6:910:60::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.33; Mon, 17 Mar
- 2025 17:36:04 +0000
-Received: from ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM
- ([fe80::d337:170d:b47a:e4be]) by ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM
- ([fe80::d337:170d:b47a:e4be%4]) with mapi id 15.20.8534.031; Mon, 17 Mar 2025
- 17:36:04 +0000
-From: =?iso-8859-1?Q?Jo=E3o_Paulo_Silva_Gon=E7alves?=
-	<joao.goncalves@toradex.com>
-To: "rust-for-linux@vger.kernel.org" <rust-for-linux@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	"linux-integrity@vger.kernel.org" <linux-integrity@vger.kernel.org>
-Subject: 
-Thread-Index: AQHbl2LooOsf7uMMp0CUUVsufjBe3Q==
-Date: Mon, 17 Mar 2025 17:36:04 +0000
-Message-ID: <ZR0P278MB0460DCEA52F66AEB5223C40989DF2@ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-msip_labels: 
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: ZR0P278MB0460:EE_|ZR2P278MB1109:EE_
-x-ms-office365-filtering-correlation-id: 63b4a392-f7a2-495a-819f-08dd657a3155
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|4022899009|366016|1800799024|376014|38070700018
-x-microsoft-antispam-message-info: =?iso-8859-1?Q?KKq/vgpyRLtkfZGyzt/LZYU1W4Ai9Ix1u5k4D/CaoJ/gF+MXhaQiCdPgPK?=
- =?iso-8859-1?Q?sB9bVjc2gP/BlGDnUcO8tYriov5ei+kXRPfokUxJ3qLsQfC9WIpH4SeMWS?=
- =?iso-8859-1?Q?WXW1PKMAaZ8Z2xUjt6bjCJzxX3ztGXZRxfXUVCXnGy6Z5rUwsTz17FKNEh?=
- =?iso-8859-1?Q?YPyXBiJoOI7UgIL1PsViVi3E71CeJaG3/ohUHtOWLp+J1yMdiiqxb5PkiK?=
- =?iso-8859-1?Q?1w7ID/rFa/Xwc1c/q2rN5Fv3MjSpUaW/L81c/7iicHX+nZduMLuuyMiDkJ?=
- =?iso-8859-1?Q?4l0OysUlrWD9YyHo9jlZp+IqPgT67PVxqJdrZqIKAEZV8w/sIoKZMc0MD0?=
- =?iso-8859-1?Q?0oDC8w24e4AjfS0OXMo/RRjfXighVebiU00iMTek6E/zy4YmkVbQqK2Z2P?=
- =?iso-8859-1?Q?XBpuJ7eHVHRcF6MbinwQs63MBz5wvecClu2DdFXXyeT5g+3AaCP39WLjzG?=
- =?iso-8859-1?Q?Z6shGi+75k4Lsr27u0jsDpUClelIergrgWTpjBInvdld6Ka+wmh/4ZNvcb?=
- =?iso-8859-1?Q?pBYcaZmyr5lbtximrxKpsmX970pt/3NBZVna1OEpjebk+PCLvBOZhC/w7z?=
- =?iso-8859-1?Q?rJQ58pn+/IVS91xAeGV096RbugIkLR+G2LNbNLJE3LbcOUUPAT8w6JOLeD?=
- =?iso-8859-1?Q?XSdY62ENikHtJVMQssrTzLZLfsBU6PDopKkXw+K4nvQM+qsEe9xipTT/3C?=
- =?iso-8859-1?Q?fecF5I1nWz7tqNhGfntarT0/uZujVlAs4sCLY7wgEgTyP+jWGqDOl5Uym3?=
- =?iso-8859-1?Q?gT1I1PoDViinCTy3kMaANSfUbQPg+LyNiGhl0vwo/oqfNpOlzDkeH2VKQG?=
- =?iso-8859-1?Q?kwA2FUHD8c9MODOzPBedKiGVMR9F4pNlVKof89giRdnNl6630obTWMn0MI?=
- =?iso-8859-1?Q?i49YRP4D190p/Vl8NYL9o22ifJuqM3VmgngfzGOeqkTDL2BIcb0Y9K8szm?=
- =?iso-8859-1?Q?XZpCX+E//z75kWauFCBou2QgORqXQAkCszYNg/oUWsMafdA+xdlZghaTUi?=
- =?iso-8859-1?Q?1bs+VuJOXotttHj9PKIUG2rPq11SgWTZ445Xcl2fCbLzA+Pl+iSXVGv127?=
- =?iso-8859-1?Q?X1Zl7yPnREp3iLPBow6nmqpQUCWwfYlobX5FcWmO+vYrlc0mHfXRYTEGZa?=
- =?iso-8859-1?Q?KUgSTEQf9FlWhzKbFozUDalBGEfRpYhkKcletkohprYVrt2Xxh9A8zwYgv?=
- =?iso-8859-1?Q?4GG93EkkGGFWYLfha1UdBg8Z1IZ3GkflxSnhye7w1yI/0XGikDa5ETYmHz?=
- =?iso-8859-1?Q?WTJIVja2EvBbAIbIM1avCo8vR88ahdEtkYCP4fjteeBD+GCO/sBCaRF+GR?=
- =?iso-8859-1?Q?dTOkxV+wOF0I3H/BZZSQF2zLoGC2uG1ayCvlx4e+DGUOOmeU8bXnkK1qd5?=
- =?iso-8859-1?Q?4qpF8OiHvbHhV44jZ5D8BxIH8M+4+A0soxucTqXpaEE9/usfzm8g3K5Nij?=
- =?iso-8859-1?Q?OVOAE+M1qwhZht+JuVQXwU6d08gYk7m8sN/ZUvCuStWz4Ge5QEEtq8jP9Z?=
- =?iso-8859-1?Q?V8u0LU5+6MMwyg/R07+yk6?=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:pt;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(4022899009)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1102
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?O3ZZ30fD2Dt5hQmMRhqSJa/YzHvMdB1oeVWRngZxDdmLXeR7h9dUIBHzD6?=
- =?iso-8859-1?Q?gcz/cTtZlbZ2UYosW4ANlXyzbDZStaGmzzSV+yCucSys9u0KQ+F0KroEOs?=
- =?iso-8859-1?Q?A315IeorS6YlLwdrL5AvYwdjLgF9KKsawnrDD5fRDFASV24GFU9dunngP4?=
- =?iso-8859-1?Q?56xHxf9ZxAOHMc0qAuA328cGHS1D+YRdllHFpP3Nwp16SO9Tg4ra8uAAP0?=
- =?iso-8859-1?Q?zcaP+F1p9QjBGoNSZS3w9xYvB84LJkHLZmXliFqyyLLX9WJMdK6pAw5hKO?=
- =?iso-8859-1?Q?iUMAtRKrn9s5H7JclF1hbN0GW5sF3iUd8tZLPPOQDfRMldTsV7jStwwtqB?=
- =?iso-8859-1?Q?xCEXR+5+LKFqxqGPFSxjIbXMeahW9INq4wynpraIRf9jzD0L8RxGUev7Ky?=
- =?iso-8859-1?Q?25CbHev7xDlkHEmadY4PhHJCFBvVF6yNxjfSeggbyymK7jpJ/8vqyT34B2?=
- =?iso-8859-1?Q?ykNLXWInx/5JKjr8VhVxDrdqP+wtGW449xuNRUOO1bPE83hGRJIWPcYOEP?=
- =?iso-8859-1?Q?PLcEKyjCsJcpVnLEWKVLRHXXsy+K3CzFVLXM2dIKyWXA0QaEY7yjknLYgl?=
- =?iso-8859-1?Q?lW/ERfV95TLLsDT9+NcfOLS+47iq/KdCrABHzIf5cesbZ5K0KoHrv/hQ5R?=
- =?iso-8859-1?Q?iHyIGjhaOR0G6x/G1LsnfgSU2E9eYQrOdtMWeJQel5uGGjAoiWXuWOi7yi?=
- =?iso-8859-1?Q?GgvyS+f9pbq7CWzOCCC/E/DAhP9TBY2NSQ4BLOPKwIU4Jrma7IBW6Z2a43?=
- =?iso-8859-1?Q?jsK8ClsaTYpG7sLf5DXivu0Q3s5KgcynkTSXC5bgWS3SW5+dgi1poltcB9?=
- =?iso-8859-1?Q?z14/TcB4FOL+742yP4eK64YOJ/Yhoj+jAbC0ieXDJlkXIJSM4SPgN8Q73j?=
- =?iso-8859-1?Q?SzvV/YG6vCDObkn4BYIc5MPxiShGN+QxWxzZuZMzUo/JVCtMxSsRYDL44n?=
- =?iso-8859-1?Q?C9ZUfp+7MIAwWuMQeXX28IjkvK+4GQL5T7Z7J9SExZ+aXFL3fG+QNqJsNw?=
- =?iso-8859-1?Q?s7kOvRdJgbz2hvJDsqqWP4N8HUKEaF0k/tACbi0ddzs0W4FDQOz2Xxk4KU?=
- =?iso-8859-1?Q?kWPZqY18Df8nvv3KnT5xJmZt0WqVgB3Y+AEnGWoDZZa2mmlmMafYzY926G?=
- =?iso-8859-1?Q?WQR8TLczmu3N2bO77Gf51ON3xYoQtlL7k3MTlB/rC6HAbME9Br7Z8COulx?=
- =?iso-8859-1?Q?qfmAfdUEykImp9f8pyxOwG1r90n9Vzxv+l+vRL2p9RhMVHe5w6ybZAaX1l?=
- =?iso-8859-1?Q?CbEG/BwYBJc70KyAjL6mnjP7FhSva8FqU52SNjQuXr/DR2d/uiXBR2hmH4?=
- =?iso-8859-1?Q?iihs1y2+AbcLupML5PzCT8/DnFJvHdNleLp3Pd9WxfDzjIcuTfnlHv1diZ?=
- =?iso-8859-1?Q?I26aH9/AgkQUUlGI+mSEkGqe09pedBAjoV6B2Wcx+HBPSugSU3I4X1SFzx?=
- =?iso-8859-1?Q?zKerSWrloc2jz5KRFHNufmeaqcWtRGqGjxlE7NgiDmanTm+c6ULvDwWiZA?=
- =?iso-8859-1?Q?lNWNHElPvJchR4TTdFNAmsfDr/dbFDnIKT/nH8OgmQ4PzqvW/cVcYI2JqS?=
- =?iso-8859-1?Q?zQWw6xkce9xctbXCFEV7WyLFGvWcv7PcyxeRsiB0EV5cLzMLa8144G7pHM?=
- =?iso-8859-1?Q?PQOFlIH3CDx546ngu9SCVTrlLabIXIQXwy?=
+	dkim=pass (1024-bit key) header.d=broadcom.com header.i=@broadcom.com header.b="digeJQvr"
+Received: by mail-oo1-f51.google.com with SMTP id 006d021491bc7-601a8b6c133so2652267eaf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Mar 2025 15:06:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=broadcom.com; s=google; t=1742249176; x=1742853976; darn=vger.kernel.org;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=X8dAYBGS5lFqHpqqLaiZQj84sBiG0WpKfeLOq4SIiUc=;
+        b=digeJQvrZM6XaT+cIa7PNlxs10nlv2zfz8W+OVUVflh7+MmxGfVKaUzTJZVy0Urf3B
+         m4NFM+vHYX/b7GcZ5nuem1ctWsRW4UXPvs0HH0N92enll/ym6FlVz42e5E40FEIvFsbf
+         geiIsPgI/BmrsKNXYUCKASMIpi//Sbp1/yld8=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742249176; x=1742853976;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=X8dAYBGS5lFqHpqqLaiZQj84sBiG0WpKfeLOq4SIiUc=;
+        b=daBX0I89QY20Bp8gXg7xwDNr3b6VJ4jmn3ivqOPxua6VNbMaWQKHpA2h6w7urmg8eH
+         i4z8psRtmXaiemH2LJDU7HXHFmQoBsOeS48LXhcB7ET9kT1FaJ1iWFKE5oIw1CHKuz59
+         sPCqFSgy5i0Z99fCiFU9J6EFKff8wayrRkfqcqTw5frq6Adj/fDRcQA1FdwVwl2MMOxI
+         OKRanFxIfNYwXONG+BaTLwxJYJwUtR+tCgKlddGB7BvKMnqBIeXYOnHlPll5qhBA7OaW
+         xQz+RBik9bgrEC7hyWagQy2iBG1qa2sZ0ibYdpixAKO0JcaUBhggjmsbqVkj9+dTDtpK
+         1HnA==
+X-Forwarded-Encrypted: i=1; AJvYcCX/b7IM2MYv7P3Dciz5tbAertBcu6lv5z9PQ03aJMpkdOmGXCEMU6MF7d7bLtAVeQ0uVBwXoXd44g0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxb9ZHcMrebZFO9wzUftXOlini87xyguw44Fxgq6lCQ3ezIeNQe
+	vI9BEYwxMsmoXYH9APPJGRkGupkrl30kwB2lBelnZxbs0tCw9OdSPg7F8s8jdw==
+X-Gm-Gg: ASbGncvg6spQev11RanSlVg96+WubyFwldHGTw145HABsRgmWQC++CK+RZZjhv0qTGQ
+	9ClQNgUm8KyrLTv2i5unnX9RlU00S8GHhO6Mk1FlP+AbEGjzRY/VQQArlY4qRqj/9hnRXh3BMZS
+	rft4lfKD9ea03v5Wqm8yyFwzhHgdeBgPj/a9u79BWzmfLKf7+phl2zYf5mGPBzXuPOZCx8vxsY3
+	vIwb2PzR5ORgSsEih+P4A41CQWzuicRTVz62Zceq9b0kvqGhP9vy4dKeFSAihGUZbZvIWZw+T5l
+	mxREpa/QR1Rue5Z482j1h5sAgb7kNwlXhvwSeIwrxgcmn/4bedEjd9zn1CDqlx4gGeApqptqW0d
+	rEsNEURSInD6liqM=
+X-Google-Smtp-Source: AGHT+IHnaexVn+wNtEptwMdzRuUiiapR8scruXC+PY3z3bzwyGdHYiE4KcGEWLneAJxno4ExoIYhaA==
+X-Received: by 2002:a05:6871:6011:b0:2b8:b76f:1196 with SMTP id 586e51a60fabf-2c71a1ce256mr601829fac.19.1742249176621;
+        Mon, 17 Mar 2025 15:06:16 -0700 (PDT)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id 586e51a60fabf-2c6712e5774sm2311980fac.31.2025.03.17.15.06.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Mar 2025 15:06:15 -0700 (PDT)
+From: Kamal Dasu <kamal.dasu@broadcom.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+	Asutosh Das <quic_asutoshd@quicinc.com>,
+	Ritesh Harjani <ritesh.list@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Subhash Jadavani <subhashj@codeaurora.org>,
+	linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Cc: bcm-kernel-feedback-list@broadcom.com,
+	Seunghwan Baek <sh8267.baek@samsung.com>,
+	stable@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Kamal Dasu <kamal.dasu@broadcom.com>
+Subject: [PATCH stable 5.4] mmc: cqhci: Fix checking of CQHCI_HALT state
+Date: Mon, 17 Mar 2025 18:00:45 -0400
+Message-Id: <20250317220306.44646-1-kamal.dasu@broadcom.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-X-OriginatorOrg: toradex.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: ZR0P278MB0460.CHEP278.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: 63b4a392-f7a2-495a-819f-08dd657a3155
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Mar 2025 17:36:04.4381
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: d9995866-0d9b-4251-8315-093f062abab4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 6yHONaXsJDE+X0INJxeNKwQBHn3enTccDE/DukeFAO8zqs2CcykRXayKYgLXEM50kFi9j51xpSlWxLIX1ZzYbmpQiJWNn/LbaaMrXG2Q/L0=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: ZR2P278MB1109
-X-Mimecast-Spam-Score: 0
-X-Mimecast-MFC-PROC-ID: -c0SEvPqxFxtGd-Jqbs5gkMVkzwEum5eItwWqPb2Dnc_1742232965
-X-Mimecast-Originator: toradex.com
-Content-Language: en-US
-Content-Type: text/plain; charset=WINDOWS-1252
-Content-Transfer-Encoding: quoted-printable
 
-unsubscribe=0A
+From: Seunghwan Baek <sh8267.baek@samsung.com>
+
+commit aea62c744a9ae2a8247c54ec42138405216414da upstream
+
+To check if mmc cqe is in halt state, need to check set/clear of CQHCI_HALT
+bit. At this time, we need to check with &, not &&.
+
+Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
+Cc: stable@vger.kernel.org
+Signed-off-by: Seunghwan Baek <sh8267.baek@samsung.com>
+Reviewed-by: Ritesh Harjani <ritesh.list@gmail.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Link: https://lore.kernel.org/r/20240829061823.3718-2-sh8267.baek@samsung.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
+---
+ drivers/mmc/host/cqhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci.c
+index 10b36b156562..ae9c184ed898 100644
+--- a/drivers/mmc/host/cqhci.c
++++ b/drivers/mmc/host/cqhci.c
+@@ -580,7 +580,7 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		cqhci_writel(cq_host, 0, CQHCI_CTL);
+ 		mmc->cqe_on = true;
+ 		pr_debug("%s: cqhci: CQE on\n", mmc_hostname(mmc));
+-		if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT) {
++		if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT) {
+ 			pr_err("%s: cqhci: CQE failed to exit halt state\n",
+ 			       mmc_hostname(mmc));
+ 		}
+-- 
+2.43.0
 
