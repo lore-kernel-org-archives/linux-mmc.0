@@ -1,155 +1,189 @@
-Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09B4F255E4D
-	for <linux-mmc@vger.kernel.org>; Wed, 19 Mar 2025 11:41:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D651539AD6;
+	Wed, 19 Mar 2025 16:26:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742384466; cv=none; b=lLQbhEu13L/FgtLC+Qt1HGkYzSi4yhYfQQO6q1SYrpmwmhWTOuWOWCKtY8r/2TNuSKvJMZpQE/RHPmr6WE2o27so5Z6/9YpssBqPbOR34ktcSm1UqUnBMB9hVfrmMzj+4brwS679Cdmt28isRzYDMXJ65jxdzUV1D3ZvyoY0dOk=
+	t=1742401571; cv=none; b=iEoD06Mfj866lVhY99HJmBr5N3VtkrkicbIrDMvICQ1VoLjIOTKLbs8HGeM9IypGPeEgOcwDIM3cUgnvlTcoJofkF9JnrlhRfUhc2nGA0D1JCncgoUi4GG4Z+Sd79WA0d6quwafrcIQ5MMgTW3OIInkn/RCGYbmSJVE1UHgw6No=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742384466; c=relaxed/simple;
-	bh=QN4TukBKcr7GCstePwybtb0ft9vY9vxyq4OwjIpkHrc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=cVylRB25UptKFlZ1QJS6XK/PVzpWl6XTcZF/5HDa0bI1cmxAB933kE/n7CaJOh7VUi09braRPyL5R4aNLNDzMnKadID7ygx9iGonVGh6mm/mpXX+c7R9B0/9JKcPh6gTE1k0+40lrAmuoEJP92S6UnJM2e0YV39hsKi8rw0IlQQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=V+qaj8ma; arc=none smtp.client-ip=209.85.218.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1742401571; c=relaxed/simple;
+	bh=JxCmPweMsh0+Rt53TtaclNYAL5gRgU57d1LEoHFDFNw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=Y81CXYfeMd7leBg/RpGtaRKOMnAvsFF8uuOFv7zq5DNaMStEyKgUHaKdLxp+OeptgK3FhocYAYMC71vfOl2hb418YvnEaMC2RnXLi3GJAKIAr+AJgwxU8PDf9NtJf1lFi9FhyP/ibUYrgE0DwNmwxcvSPKvoKhwpslFIy1iTVsA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=JWyyAMy2; arc=none smtp.client-ip=198.47.19.246
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V+qaj8ma"
-Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-ac2a089fbbdso118503566b.1
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Mar 2025 04:41:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1742384462; x=1742989262; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=i8MTVrzHn47D07QaIZqTqMn4oOq2XC0e3Is4UWL2ono=;
-        b=V+qaj8majjDdDl3HUtX0Pz5hHUyvEEPO8oFQIykMTLjWZZjnOPFUPfjB463wakD4D/
-         ZQPxlCl6woS4hg9Jc3M3t15AKavoQGeSVVK/mhabWs9ZDbxOHUh+Oz17l6+goIeDuhVH
-         T/9DzAUEjpst491JXCAgSwMHfKzmvafHiGf0HsnnfJH1R8u6/4+4hYB2yI1KmVPrzcIm
-         qS6vM4Y4cbB6zXYYwHhcLUPpC7n95iMtTzb4CHGd2iPgnm5K9YTcX3QEaXE0XnhALRVx
-         fYDtFjf5lwolfLipriEZ1Y0I0uMmRTPx3SZJ8E8oXZCDXFq3SdORI+hQtRCLt+XA/FT6
-         GPnQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742384462; x=1742989262;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=i8MTVrzHn47D07QaIZqTqMn4oOq2XC0e3Is4UWL2ono=;
-        b=i+4U+7tqq7e645qDF7GG4PXv8zUcYGPBVM9CykH1QEZ6vbaAH8Tey5ErOvM1RTwSfp
-         /pnYK2pgHad0c4cyEH/UuJ+WhTJCdNBOOpFdZEQhker1NbJrCae/zyRrKEIan5VLYSAp
-         QzkEUi5hM46U4tmxJiwf/uOAeB+vaNUCqCljS8XMid0yIR4IfBLk10ogYXPynkVL1IZj
-         bD/FRNGqh/Ztuth82/YwJYAnQa+1SJZ7S2Nd9A9e+H5EFrzOVc35s88drXX6xaxEL+4/
-         nWAvZYu1S1Jjb83gcpCuVNS5eKKgGlwdcZPDRVYImOm8RKa1mxN26mfH/5jO1ZF4cHbi
-         B+3w==
-X-Forwarded-Encrypted: i=1; AJvYcCXJ+4tkvt6atMRoObD7jFn7ATPWPdhqBCqQ4qc2ysPUHSjQyPMSX6tb4ng2uP74ko1ub6eJ6C5efeI=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxNmIRckcIVI6zJid8h+oUoiIlj1dL4xwBmMPSCDoktQhjFXBUW
-	2dNCoS0z86+CGy7DpsTDmSJ61Y28mzQPhvy2+ukxebtBh5G7z0CTYaUl04+LX0lCmQRPesBfKtn
-	gixq5xWJsxJDZibKElVPGAyACb4UDIqFmT41WkH36lVuAgi2t
-X-Gm-Gg: ASbGnctzyGdi2fHHrar8i20sm2iDD3onpmrh6tHbruKdTLtL9mhvEtARWCOGEEhGMUa
-	R13Uo2B+Ax5ev4n9ILuZuIPZqRb6K6O3Ok1Szjd/6V2Zyt3EAPIwKFVVQQZ7eags/nuYo9nrDc0
-	ioKNAJ5QOpXYx36Jv4ofmpYveOc0w=
-X-Google-Smtp-Source: AGHT+IG9mKS0iIWb3TO2ivefr79iMICflm2Da/NDX55DveFEcqxff+kn7i1aSb8ulYyq8ga428bcN003oK5dIc0IuVM=
-X-Received: by 2002:a17:907:3f17:b0:abf:6bba:9626 with SMTP id
- a640c23a62f3a-ac38f7c6017mr680301066b.12.1742384462329; Wed, 19 Mar 2025
- 04:41:02 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="JWyyAMy2"
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 52JGPtap368025
+	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 19 Mar 2025 11:25:55 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1742401555;
+	bh=8EunOXKbmJ/ARqV7n6jMGBLucBQE7UpQk6Ad1sq5D/k=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=JWyyAMy2kcOQt10nu8WW+JzQR2w1LlzSKj6UWBM7lvLFbkuntqZsjLoxi99XXKJmV
+	 PLU/nS+3qOnWCXgHXVMLC5qs37atr5OHf1ZZmGtJggMB7AhZv1iS00MEdltECw6UC8
+	 jEVNozRquBVBGB9XGrdMfH3kB3hygZLnDDqX015E=
+Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
+	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 52JGPtRa027485
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Wed, 19 Mar 2025 11:25:55 -0500
+Received: from DFLE102.ent.ti.com (10.64.6.23) by DFLE111.ent.ti.com
+ (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 19
+ Mar 2025 11:25:54 -0500
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE102.ent.ti.com
+ (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Wed, 19 Mar 2025 11:25:54 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 52JGPsKI080092;
+	Wed, 19 Mar 2025 11:25:54 -0500
+Message-ID: <3be2f0a1-65f9-4aa7-9c0b-1f4fe626be17@ti.com>
+Date: Wed, 19 Mar 2025 11:25:54 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250312121712.1168007-1-ulf.hansson@linaro.org>
- <CAOCHtYjGuw9szeChihrDZ39_2+w5xOverbp6mAjjLjR=QkK1zg@mail.gmail.com>
- <CAPDyKFqPdDjoECXeBqx0P+fpbgVN1g_jWM2fQiH8Mw6HGMSPNA@mail.gmail.com> <20250319035911.GB4957@atomide.com>
-In-Reply-To: <20250319035911.GB4957@atomide.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 19 Mar 2025 12:40:24 +0100
-X-Gm-Features: AQ5f1JoOnwE3rFuTS8HijWcK8WnN5Pk8S5_GLHE89xJrW0hiLHYLTnkhrSGUYQg
-Message-ID: <CAPDyKFpFcL=c2g72tHJUJbKYZqoxZ_puVy+hYMByGRFFN7n=ew@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-omap: Disable MMC_CAP_AGGRESSIVE_PM for eMMC/SD
-To: Tony Lindgren <tony@atomide.com>
-Cc: Robert Nelson <robertcnelson@gmail.com>, linux-mmc@vger.kernel.org, 
-	Adrian Hunter <adrian.hunter@intel.com>, Vignesh Raghavendra <vigneshr@ti.com>, 
-	David Owens <daowens01@gmail.com>, Romain Naour <romain.naour@smile.fr>, 
-	Andrei Aldea <andrei@ti.com>, Judith Mendez <jm@ti.com>, linux-omap@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] Revert "mmc: sdhci_am654: Add
+ sdhci_am654_start_signal_voltage_switch"
+To: "Sverdlin, Alexander" <alexander.sverdlin@siemens.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "adrian.hunter@intel.com"
+	<adrian.hunter@intel.com>,
+        "josua@solid-run.com" <josua@solid-run.com>
+CC: "rabeeh@solid-run.com" <rabeeh@solid-run.com>,
+        "stable@vger.kernel.org"
+	<stable@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>,
+        "jon@solid-run.com" <jon@solid-run.com>
+References: <20250127-am654-mmc-regression-v2-1-9bb39fb12810@solid-run.com>
+ <93d7e958-be62-45b3-ba8f-d3e4cf2839bf@ti.com>
+ <5c6e447ad9633f969cad7ed6641c8f6cfcc51237.camel@siemens.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <5c6e447ad9633f969cad7ed6641c8f6cfcc51237.camel@siemens.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On Wed, 19 Mar 2025 at 04:59, Tony Lindgren <tony@atomide.com> wrote:
->
-> * Ulf Hansson <ulf.hansson@linaro.org> [250317 10:51]:
-> > On Sun, 16 Mar 2025 at 21:54, Robert Nelson <robertcnelson@gmail.com> w=
-rote:
-> > >
-> > > On Wed, Mar 12, 2025 at 7:17=E2=80=AFAM Ulf Hansson <ulf.hansson@lina=
-ro.org> wrote:
-> > > >
-> > > > We have received reports about cards can become corrupt related to =
-the
-> > > > aggressive PM support. Let's make a partial revert of the change th=
-at
-> > > > enabled the feature.
-> > > >
-> > > > Reported-by: David Owens <daowens01@gmail.com>
-> > > > Reported-by: Romain Naour <romain.naour@smile.fr>
-> > > > Reported-by: Robert Nelson <robertcnelson@gmail.com>
-> > > > Tested-by: Robert Nelson <robertcnelson@gmail.com>
-> > > > Fixes: 3edf588e7fe0 ("mmc: sdhci-omap: Allow SDIO card power off an=
-d enable aggressive PM")
-> > > > Cc: stable@vger.kernel.org
-> > > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > > > ---
-> > > >  drivers/mmc/host/sdhci-omap.c | 4 ++--
-> > > >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci=
--omap.c
-> > > > index 54d795205fb4..26a9a8b5682a 100644
-> > > > --- a/drivers/mmc/host/sdhci-omap.c
-> > > > +++ b/drivers/mmc/host/sdhci-omap.c
-> > > > @@ -1339,8 +1339,8 @@ static int sdhci_omap_probe(struct platform_d=
-evice *pdev)
-> > > >         /* R1B responses is required to properly manage HW busy det=
-ection. */
-> > > >         mmc->caps |=3D MMC_CAP_NEED_RSP_BUSY;
-> > > >
-> > > > -       /* Allow card power off and runtime PM for eMMC/SD card dev=
-ices */
-> > > > -       mmc->caps |=3D MMC_CAP_POWER_OFF_CARD | MMC_CAP_AGGRESSIVE_=
-PM;
-> > > > +       /*  Enable SDIO card power off. */
-> > > > +       mmc->caps |=3D MMC_CAP_POWER_OFF_CARD;
-> > > >
-> > > >         ret =3D sdhci_setup_host(host);
-> > > >         if (ret)
-> > > > --
-> > > > 2.43.0
-> > > >
-> > >
-> > > Thanks Ulf, i also have this exact revert running on the target in ou=
-r
-> > > ci farm, i think we should be good.  But I'll validate it in 4 weeks!
-> > >
-> > > Regards,
-> > >
-> > > --
-> > > Robert Nelson
-> > > https://rcn-ee.com/
-> >
-> > Thanks Robert for helping out!
-> >
-> > In the meantime I decided to queue this up for next, to allow it to
-> > get more testing in linux-next.
->
-> Thanks looks good to me too.
->
-> Regards,
->
-> Tony
+Hi, Alexander,
 
-Thanks, I have added your Reviewed-by tag too.
+On 3/19/25 5:22 AM, Sverdlin, Alexander wrote:
+> Hi Judith, Ulf,
+> 
+> On Wed, 2025-02-05 at 13:39 -0600, Judith Mendez wrote:
+>> Hi all,
+>>
+>> On 1/27/25 2:12 PM, Josua Mayer wrote:
+>>> This reverts commit 941a7abd4666912b84ab209396fdb54b0dae685d.
+>>>
+>>> This commit uses presence of device-tree properties vmmc-supply and
+>>> vqmmc-supply for deciding whether to enable a quirk affecting timing of
+>>> clock and data.
+>>> The intention was to address issues observed with eMMC and SD on AM62
+>>> platforms.
+>>>
+>>> This new quirk is however also enabled for AM64 breaking microSD access
+>>> on the SolidRun HimmingBoard-T which is supported in-tree since v6.11,
+>>> causing a regression. During boot microSD initialization now fails with
+>>> the error below:
+>>>
+>>> [    2.008520] mmc1: SDHCI controller on fa00000.mmc [fa00000.mmc] using ADMA 64-bit
+>>> [    2.115348] mmc1: error -110 whilst initialising SD card
+>>>
+>>> The heuristics for enabling the quirk are clearly not correct as they
+>>> break at least one but potentially many existing boards.
+>>>
+>>> Revert the change and restore original behaviour until a more
+>>> appropriate method of selecting the quirk is derived.
+>>
+>>
+>> Somehow I missed these emails, apologies.
+>>
+>> Thanks for reporting this issue Josua.
+>>
+>> We do need this patch for am62x devices since it fixes timing issues
+>> with a variety of SD cards on those boards, but if there is a
+>> regression, too bad, patch had to be reverted.
+>>
+>> I will look again into how to implement this quirk, I think using the
+>> voltage regulator nodes to discover if we need this quirk might not have
+>> been a good idea, based on your explanation. I believe I did test the
+>> patch on am64x SK and am64x EVM boards and saw no boot issue there,
+>> so the issue seems related to the voltage regulator nodes existing in DT
+>> (the heuristics for enabling the quirk) as you call it.
+>>
+>> Again, thanks for reporting, will look into fixing this issue for am62x
+>> again soon.
+> 
+> does it mean, that 14afef2333af
+> ("arm64: dts: ti: k3-am62-main: Update otap/itap values") has to be reverted
+> as well, for the time being?
 
-Kind regards
-Uffe
+So sorry for the delay in response.
+
+Does this fix: ("arm64: dts: ti: k3-am62-main: Update otap/itap values")
+cause any issues for you?
+
+The otap/itap fix is actually setting tap settings according to the
+device datasheet since they were wrong in the first place.
+
+The values in the datasheet are the optimal tap settings for our
+boards based off of bench characterization results. If these values
+provide issues for you, please let me know.
+
+
+Changing topic:
+
+Going back to the reverted patch. What the patch does is that it
+tries to switch data launch from the rising clock edge to the
+falling clock edge if we find two voltage supplies for SD/SDIO, one
+for powering the SD/SDIO and another for IO voltage switch, or for
+the case that no voltage supplies exist (eMMC).
+
+(this was based off-of some internal debug that resulted with a
+request to unset V1P8_SIGNAL_ENA to fix timing issues)
+
+However, if you had one voltage supply, the patch should not have
+affected you at all and I am really confused why you see an issue
+downstream with only one voltage supply.
+
+That being said, I have dug up more information on V1P8_SIGNAL_ENA.
+If HIGH_SPEED_ENA is set or if V1P8_SIGNAL_ENA is set, these two bits
+are OR'd and if any of the two is set, then data launch always happens
+on rising clock edge. This should be the case for any of the UHS modes
+or > mmc_hs mode for MMC.
+
+If this is true, we should be setting HIGH_SPEED_ENA anyways for UHS
+modes and thus this patch should have done nothing in this sense, since
+data launch should still be happening on the rising clock edge.
+
+I am still digging up more information to make sure disabling
+V1P8_SIGNAL_ENA has no other implications.
+
+
+~ Judith
+
+
+
+
+
+
+
+
+
+
+
+
+
+
