@@ -1,138 +1,116 @@
-Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail5.25mail.st (mail5.25mail.st [74.50.62.9])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DAFB51A2C0E;
-	Tue, 18 Mar 2025 14:02:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A281D21324D;
+	Wed, 19 Mar 2025 03:59:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=74.50.62.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742306558; cv=none; b=N0tvmHgP++SJmWznQCXibyxkIsI9BsSInGkWU9Pt0TfyFjwuI8oCD20vX08+HrPAxzG1gDPIhfO6PRAePPfRVvPYUG9wcGnD5/Gi2m9J4B9DIiER8ylPI/5c0DnrB5123eVHQYT5txyl+lQeqsOiIAUNBI0MnTsZh62rkR3asZA=
+	t=1742356781; cv=none; b=AfokkCQnye/12RiiLhiuneq6OpKobqGoV2qEcWhxQxgFzaC8AmzZXMtakJn6zimZjBdoMy1vpk0xkt3ISxoHcLHetcIea8p99YP0iDdggeKFJcQ2lefk4EcvPxPsOqexAlvU3nlNBT5xfZsH4piN8injftfR63veiMGAbbAqoeo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742306558; c=relaxed/simple;
-	bh=5/H/RkdYCVBAtDQuOfxdiSWDTWx6gAPojS0OJOoPcU8=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=h2iMdFHBKJPKo5ijdQ9W26W0lFZL9E/dsXhTtwm9a8S/eFfNpAIJDc9y3Q/LCVwDtwgNOA2zX3gfOvD2zkWKkRNka6eZt+3zwocJEtngg8lJt8R6p7hNLMPGT83cHmtn8aKDXEvfUOHOpMNCqPcoN0dXK0v9Ua4kH75iDsZ53Kk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=PoHP/ZBM; arc=none smtp.client-ip=209.85.214.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1742356781; c=relaxed/simple;
+	bh=DgAPiSKYMiegwOXBfr9LT1fSR0n9A/vD3GZjzsXCD94=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=aY84rJYZVj1K0S0i7AkMlNamRHKBvqEK783zJv3hFQ8MpnDw6uY6G6NGqiJR1/6apLKHeMtPUoQRH1KTSQqU1oVWuo5c8tSAmI+Mup3lfwgxcEiILqdQx6YsjjmQpjZSFX9S2kpPpTNfcORZDCw4wRKS0tRkbufj3JRqbYHY1Wg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com; spf=fail smtp.mailfrom=atomide.com; dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b=YyM/B78G; arc=none smtp.client-ip=74.50.62.9
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=atomide.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=atomide.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PoHP/ZBM"
-Received: by mail-pl1-f176.google.com with SMTP id d9443c01a7336-22423adf751so97069165ad.2;
-        Tue, 18 Mar 2025 07:02:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1742306556; x=1742911356; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=5ZJUD9hlXsfSxFciC6LxZ0uWYlsr5EYH2X9weMPvlrs=;
-        b=PoHP/ZBMTVaddrPEMmkuA/WhRYU5HgfgrlUY8DhaGeKEZjhr7RfgUEH453MPioe+aK
-         BCvDWViSI3FH9goqKcGdEwgeuUQxkawoqYhTqAnHvGf0dZSaFhFFre+9Q0wfiXSk03vk
-         /ySY/2GhqH4xkeifvy65a5vAUg3rxZEGahUwd1VQXdwfYBlYYc00Rd0z5bTSFiY1Q4Vm
-         E1Wf2nLTNxmgFBHImP6LYJJTtNrv5KebylYGHg+mfOVhJl5rE88+HHHcRz05ENKiamcC
-         ZNesPRpxlJiivCMngORPDi2TXHFbVjXu8W8Agx6QpRGFckN5Dk82LIv8SV3O9jC9Q0It
-         RY0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742306556; x=1742911356;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=5ZJUD9hlXsfSxFciC6LxZ0uWYlsr5EYH2X9weMPvlrs=;
-        b=qjPx6fPMNyF9vJJMi0j1Rt7hm/2pClaOPEN8jkATMVO1KEQczbCgUpJLu667ZbDSE+
-         hhsnXEvr4mGDz+FbWtzE+rgkwZlPBRNmZ0d7xLM7wp9NgKaAEZLE3GSsFyFSUue44iiD
-         rotFGwIuOTOncwxJsMhZUuFL7szr1t4CRo2zD8+V1M0uv3uvPd41QYroSNmKKdhZ83Oy
-         yhUH3UfFcw+YbEFIVBetZzOEoBadc0END7pXp2WefKxa3Kf1jLGQFQ8DcJfytATwHdrC
-         R+X+ipjFwhrxrLHaYKryjfXuCXumZmjCZXz0StcdhnRFE+SVmDiTOTAFvhz5IG35H+J/
-         ToPQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUh20IHe9dUTKTY6QZX+E92N4FcRazTjhyPK6fg9k8g/ZML8gv2c8DoTyaC/zHRZirUYyavrFCWgcWEbA==@vger.kernel.org, AJvYcCUlu3Ad/bVDrLSwovqFo5MDsnzHzqba8J7SEZBEkC+uLjvSTbnDwu4Etu8c6NJwBmcX7ospARDMLl0p@vger.kernel.org, AJvYcCXvzpsZSTrme6EgjtlDhI7v7KuVFGp4+D3HBtd18LYdnqb0xQs2a+waSL/wzmb1q8yyLwoE4+/7RkxC1W8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzu/OJRnVuQZjTMnpsEVj0IHBeA8z2MxWnAMLLjEnUIBX7mrlCV
-	LivN9FzgMpTYjUmqyOyYQEWbh7xHD5GE+tMMEn4F+/bWEOSXfOkX
-X-Gm-Gg: ASbGncsrBVcdvzajJq7DnYGfEKIw/JL28mERukcaRGaixynwIfT+1y9/iNa8mqsFOdm
-	rAmSr/IqbI1yOlbDJ9pbNaoI+3HVU2YndI2r7zo+SFW9IuDqavK2Pw7xOOnuRbjE9M5HFOmP6j3
-	ODSlKEdklAjf3TxyVPz11LfrFbxqtdW5nKg+Fqn8gZuBP6gr/ZnssYVV/wwOetdoBJhZrHuftUc
-	u15dzGboEbNUr14rq9bbHn67ZXJh6lIuDGraTztBGwZ2SwaB8dCaG0m7JQ6qhl/PMCOUPesi506
-	Mx+OvbT6d6sJ8sa3vxcYGNgqnsJr1AcUHL7il3OLhAHCv6qPxIap7d0Qh+lkm2JRNKA4
-X-Google-Smtp-Source: AGHT+IFBMrJUOeX6rBVBtMeZCzWcnrPnjlWcpCe5GLKn61z7Cz4IG3HfxXUVA8uXqfUqXzbnDgPFsQ==
-X-Received: by 2002:a17:903:3c50:b0:224:1579:5e8e with SMTP id d9443c01a7336-225e0a3635emr228282065ad.1.1742306556109;
-        Tue, 18 Mar 2025 07:02:36 -0700 (PDT)
-Received: from localhost.localdomain ([183.242.254.176])
-        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-225c6bd547asm93998755ad.248.2025.03.18.07.02.31
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Tue, 18 Mar 2025 07:02:35 -0700 (PDT)
-From: Miaoqian Lin <linmq006@gmail.com>
-To: Aaro Koskinen <aaro.koskinen@iki.fi>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
-	Christian Loehle <christian.loehle@arm.com>,
-	Allen Pais <allen.lkml@gmail.com>,
-	Linus Walleij <linus.walleij@linaro.org>,
-	linux-omap@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Cc: linmq006@gmail.com
-Subject: [PATCH] mmc: omap: Fix memory leak in mmc_omap_new_slot
-Date: Tue, 18 Mar 2025 22:02:25 +0800
-Message-Id: <20250318140226.19650-1-linmq006@gmail.com>
-X-Mailer: git-send-email 2.39.5 (Apple Git-154)
+	dkim=pass (2048-bit key) header.d=atomide.com header.i=@atomide.com header.b="YyM/B78G"
+Received: from localhost (91-158-86-216.elisa-laajakaista.fi [91.158.86.216])
+	by mail5.25mail.st (Postfix) with ESMTPSA id 42B23603EE;
+	Wed, 19 Mar 2025 03:59:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=atomide.com;
+	s=25mailst; t=1742356778;
+	bh=DgAPiSKYMiegwOXBfr9LT1fSR0n9A/vD3GZjzsXCD94=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=YyM/B78Gw7Fn9o386HkL520wljBLIILUsJ+V4RF63Mcqb5vOX3NW8jF7xoICn3gBl
+	 9QJmxHOOhcdYPW2OTEqp6uOpSi59dnD1nFnwNwJ3EQsCyuk9gECINg6se+pnbwzAKP
+	 MmgeQGKGVJh/SJctXp+KZoLqbV8arm4GQeEvxOPQO66A6FIIyDWVpskxGZ2psAD7tj
+	 QiuHT6IKxR1tsGkiXfyAxbeLMWycby2uQuAvZ366UNJrYzKnFYqReVDJH0qGMlLERP
+	 UqiJ7zgciMypV38k2oeBosnEikYKuvfTIY4W3n8xZU7AybJNCqe0di6yRdvwpwQhpq
+	 XaCderVmNq4Yg==
+Date: Wed, 19 Mar 2025 05:59:11 +0200
+From: Tony Lindgren <tony@atomide.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Robert Nelson <robertcnelson@gmail.com>, linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	David Owens <daowens01@gmail.com>,
+	Romain Naour <romain.naour@smile.fr>, Andrei Aldea <andrei@ti.com>,
+	Judith Mendez <jm@ti.com>, linux-omap@vger.kernel.org,
+	linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-omap: Disable MMC_CAP_AGGRESSIVE_PM for
+ eMMC/SD
+Message-ID: <20250319035911.GB4957@atomide.com>
+References: <20250312121712.1168007-1-ulf.hansson@linaro.org>
+ <CAOCHtYjGuw9szeChihrDZ39_2+w5xOverbp6mAjjLjR=QkK1zg@mail.gmail.com>
+ <CAPDyKFqPdDjoECXeBqx0P+fpbgVN1g_jWM2fQiH8Mw6HGMSPNA@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFqPdDjoECXeBqx0P+fpbgVN1g_jWM2fQiH8Mw6HGMSPNA@mail.gmail.com>
 
-Add err_free_host label to properly pair mmc_alloc_host() with
-mmc_free_host() in GPIO error paths. The allocated host memory was
-leaked when GPIO lookups failed.
+* Ulf Hansson <ulf.hansson@linaro.org> [250317 10:51]:
+> On Sun, 16 Mar 2025 at 21:54, Robert Nelson <robertcnelson@gmail.com> wrote:
+> >
+> > On Wed, Mar 12, 2025 at 7:17 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >
+> > > We have received reports about cards can become corrupt related to the
+> > > aggressive PM support. Let's make a partial revert of the change that
+> > > enabled the feature.
+> > >
+> > > Reported-by: David Owens <daowens01@gmail.com>
+> > > Reported-by: Romain Naour <romain.naour@smile.fr>
+> > > Reported-by: Robert Nelson <robertcnelson@gmail.com>
+> > > Tested-by: Robert Nelson <robertcnelson@gmail.com>
+> > > Fixes: 3edf588e7fe0 ("mmc: sdhci-omap: Allow SDIO card power off and enable aggressive PM")
+> > > Cc: stable@vger.kernel.org
+> > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > > ---
+> > >  drivers/mmc/host/sdhci-omap.c | 4 ++--
+> > >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> > > index 54d795205fb4..26a9a8b5682a 100644
+> > > --- a/drivers/mmc/host/sdhci-omap.c
+> > > +++ b/drivers/mmc/host/sdhci-omap.c
+> > > @@ -1339,8 +1339,8 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+> > >         /* R1B responses is required to properly manage HW busy detection. */
+> > >         mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
+> > >
+> > > -       /* Allow card power off and runtime PM for eMMC/SD card devices */
+> > > -       mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_AGGRESSIVE_PM;
+> > > +       /*  Enable SDIO card power off. */
+> > > +       mmc->caps |= MMC_CAP_POWER_OFF_CARD;
+> > >
+> > >         ret = sdhci_setup_host(host);
+> > >         if (ret)
+> > > --
+> > > 2.43.0
+> > >
+> >
+> > Thanks Ulf, i also have this exact revert running on the target in our
+> > ci farm, i think we should be good.  But I'll validate it in 4 weeks!
+> >
+> > Regards,
+> >
+> > --
+> > Robert Nelson
+> > https://rcn-ee.com/
+> 
+> Thanks Robert for helping out!
+> 
+> In the meantime I decided to queue this up for next, to allow it to
+> get more testing in linux-next.
 
-Fixes: e519f0bb64ef ("ARM/mmc: Convert old mmci-omap to GPIO descriptors")
-Signed-off-by: Miaoqian Lin <linmq006@gmail.com>
----
- drivers/mmc/host/omap.c | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+Thanks looks good to me too.
 
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index 62252ad4e20d..3cdb2fc44965 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1272,19 +1272,25 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
- 	/* Check for some optional GPIO controls */
- 	slot->vsd = devm_gpiod_get_index_optional(host->dev, "vsd",
- 						  id, GPIOD_OUT_LOW);
--	if (IS_ERR(slot->vsd))
--		return dev_err_probe(host->dev, PTR_ERR(slot->vsd),
-+	if (IS_ERR(slot->vsd)) {
-+		r = dev_err_probe(host->dev, PTR_ERR(slot->vsd),
- 				     "error looking up VSD GPIO\n");
-+		goto err_free_host;
-+	}
- 	slot->vio = devm_gpiod_get_index_optional(host->dev, "vio",
- 						  id, GPIOD_OUT_LOW);
--	if (IS_ERR(slot->vio))
--		return dev_err_probe(host->dev, PTR_ERR(slot->vio),
-+	if (IS_ERR(slot->vio)) {
-+		r = dev_err_probe(host->dev, PTR_ERR(slot->vio),
- 				     "error looking up VIO GPIO\n");
-+		goto err_free_host;
-+	}
- 	slot->cover = devm_gpiod_get_index_optional(host->dev, "cover",
- 						    id, GPIOD_IN);
--	if (IS_ERR(slot->cover))
--		return dev_err_probe(host->dev, PTR_ERR(slot->cover),
-+	if (IS_ERR(slot->cover)) {
-+		r = dev_err_probe(host->dev, PTR_ERR(slot->cover),
- 				     "error looking up cover switch GPIO\n");
-+		goto err_free_host;
-+	}
- 
- 	host->slots[id] = slot;
- 
-@@ -1344,6 +1350,7 @@ static int mmc_omap_new_slot(struct mmc_omap_host *host, int id)
- 		device_remove_file(&mmc->class_dev, &dev_attr_slot_name);
- err_remove_host:
- 	mmc_remove_host(mmc);
-+err_free_host:
- 	mmc_free_host(mmc);
- 	return r;
- }
--- 
-2.39.5 (Apple Git-154)
+Regards,
 
+Tony
