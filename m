@@ -1,208 +1,257 @@
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2059.outbound.protection.outlook.com [40.107.21.59])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f50.google.com (mail-ej1-f50.google.com [209.85.218.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E811017A311;
-	Wed, 19 Mar 2025 10:23:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.21.59
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742379783; cv=fail; b=blPl0mfQtB81jHVixQvl8CiWbH8H0kBxoiuUCxWu5sT8KCHGiis74QAKZVRcFyfLHp/u9hF6Bz2Oiy381ueZQueyI28AtoYndnloG5hfhu3SuB8W2oq1oyPrAXfhFHIJspHSise6IdokQPjD0/bUIFT5saOCX+Qu8jOKL/0701g=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742379783; c=relaxed/simple;
-	bh=itFmWrBZ63/ZHCSS5b0Z9q0Pph1CD/tsWM4Ulyelb1s=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=VEqKH6YwI+WR9Pav/bqpE8d0+kOGwSb/wVvA8l563vmSapE+aYy4ewwA35OLGszKFEzESnnkagMkfeWFStdp6bZk2My+xW8qf3lQkl2ryzf+t5pjc7LNSVMWcbLwmHoNQZbWEYAirtnw3sMWByfQthEU1/DENVW8TZV6vb6fgxU=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com; spf=pass smtp.mailfrom=siemens.com; dkim=pass (2048-bit key) header.d=siemens.com header.i=@siemens.com header.b=MyLAby5I; arc=fail smtp.client-ip=40.107.21.59
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=siemens.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=siemens.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C46DD254B1F
+	for <linux-mmc@vger.kernel.org>; Wed, 19 Mar 2025 11:40:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.50
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1742384434; cv=none; b=t1ohYbIxzzyh8el9EkgKi0+Tb71OCL4TUQF6uA3H2FYmyU3fqr6HXLyTlvWItVGag+/qwT30IzljlRXcFN9dMwan4E8ctFFYIA2b3nu5/60EtOxUok89VclOg/gqcQHP1iRmqur3GDOWYPqsshRy9V3MiR6PPEdWVgLurBSJyC4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1742384434; c=relaxed/simple;
+	bh=GvQSOwF1xH0FZlOKPakW6KhIuzxRRubgM1HAP8GrOps=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UxQ0x7qpXWJnkKfYoAHNS3m9ACdTS3qIj+RC/29latGtjXEoSUOFZfWKZXIxkDUTGBEDfn4SncyWHhrZ4Dm3r7RA2BB7SUS6ONKtzR9T3dX6nK9xDRsK605DJJYv8j8B23nSrw/iLFm0rFCjnoTaeDJAWZE420q1SOwerIzgsYg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wIwkpfst; arc=none smtp.client-ip=209.85.218.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=siemens.com header.i=@siemens.com header.b="MyLAby5I"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=IviVE2Y8QQxxkhnz00uTXDHCLEpBjIzcfHoSvWW++C54yJF01GteXpZL347Pg0kG0v710wJOWs9AhjWWv3qOI0b0jPCMSjWrscRHb5IrJYrua3G4falo2oYt3TCNxEb1ab11q8CsrqIZK0v0EH0hf1GiMJyC39rSguHPP43uy9Ij3uOAWTzcwjx6J9qXgr8bjNdTtgfaZCY6Y7LPrG0t4hB2IqVJUzxeS5tRMu4k8l3bKgZXPOlqqOIYM7fepaaGWjn8Bck0ZnmpAtV1Yrj2aMRb2bApaxyLUVgyD9w3PndWPeOD6IHu2HEEwCszP/NpOXAxmOx1M5fxHBekXxQ9Gw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=itFmWrBZ63/ZHCSS5b0Z9q0Pph1CD/tsWM4Ulyelb1s=;
- b=FuMhhvNqZJ/gmqXT8lzmVYkH4+WTlPFGokV9BL53l5b+rwtsTbv7ChBVR2Hy5plZpWtVad7mWyhqGY2KoKywCE1fQlMO+DU0iFWrlB+Msmfp0hXtE1YzguM9NW4PYoU/GqJSr05uKy+ySw/Htq6KkBrR1yC8sDGdZQ3GtfJQKQHEwEwzceEs31AQ+Gq4y0fU/eDFZMLeUCID/ERTBkX60fup1rr2DuyTl0yYHV7Q5p+vFaE6qqqc/47a/A0A2rBdY3IGAitYfDg4QqHvvRi+Zhv0lFQbj/mKuDVXqvpZ/nDRW1OnmUGb9XuLUjFbo1zPgpGPRem0+Or1EPBlUgDy1w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=siemens.com; dmarc=pass action=none header.from=siemens.com;
- dkim=pass header.d=siemens.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=siemens.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=itFmWrBZ63/ZHCSS5b0Z9q0Pph1CD/tsWM4Ulyelb1s=;
- b=MyLAby5Ic8s9izcvOEd3v8fzaETIkVW4rnllBUgNlWrUrIQnLMYhT2UKcWTIurLLeGdUeX5ubtVKlV/qbrW6i0CREmjlMZBVlQv7h5032K396oRf1Rhp3/sD1E2qrePMg6GkeKxk86opObr6fkqLunDZJ9SceFX0RLNzBx6lNOAfypAlmXxtAaAeDfC3bYMZriB1KJxjGEPY2BCDhPg8qr6TCk6GUWp7jNdBPQs6HUI1Gt5DuHWxC0QElcjnb+QGq9EuzbZ3Q8jIBeP02iuVRccHAoepRkUGOG+EcbQ0eXIopq3D7A+tNafSSp131HY26j4uWZLERDKQ1J43l571gw==
-Received: from AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:20b:5b6::22)
- by VI1PR10MB3565.EURPRD10.PROD.OUTLOOK.COM (2603:10a6:800:138::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.33; Wed, 19 Mar
- 2025 10:22:57 +0000
-Received: from AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::baa6:3ada:fbe6:98f4]) by AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
- ([fe80::baa6:3ada:fbe6:98f4%7]) with mapi id 15.20.8534.034; Wed, 19 Mar 2025
- 10:22:57 +0000
-From: "Sverdlin, Alexander" <alexander.sverdlin@siemens.com>
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"adrian.hunter@intel.com" <adrian.hunter@intel.com>, "jm@ti.com" <jm@ti.com>,
-	"josua@solid-run.com" <josua@solid-run.com>
-CC: "rabeeh@solid-run.com" <rabeeh@solid-run.com>, "stable@vger.kernel.org"
-	<stable@vger.kernel.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, "jon@solid-run.com" <jon@solid-run.com>
-Subject: Re: [PATCH v2] Revert "mmc: sdhci_am654: Add
- sdhci_am654_start_signal_voltage_switch"
-Thread-Topic: [PATCH v2] Revert "mmc: sdhci_am654: Add
- sdhci_am654_start_signal_voltage_switch"
-Thread-Index: AQHbmLjihaETI62MZU2zGRTv5Js1gQ==
-Date: Wed, 19 Mar 2025 10:22:57 +0000
-Message-ID: <5c6e447ad9633f969cad7ed6641c8f6cfcc51237.camel@siemens.com>
-References: <20250127-am654-mmc-regression-v2-1-9bb39fb12810@solid-run.com>
-	 <93d7e958-be62-45b3-ba8f-d3e4cf2839bf@ti.com>
-In-Reply-To: <93d7e958-be62-45b3-ba8f-d3e4cf2839bf@ti.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-user-agent: Evolution 3.52.4 (3.52.4-2.fc40) 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=siemens.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: AS8PR10MB6867:EE_|VI1PR10MB3565:EE_
-x-ms-office365-filtering-correlation-id: f824a0c1-86ef-4afe-83c2-08dd66d004c6
-x-ms-exchange-atpmessageproperties: SA
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|366016|1800799024|376014|38070700018;
-x-microsoft-antispam-message-info:
- =?utf-8?B?TFQ3SmdvU0I5dkFLUTZycXllaExWazhveDV4SW9LNmRTN0FYSjFjQlVlMDc2?=
- =?utf-8?B?S05uMUtiOWdXZG5OQ1dZaU1WUnpvWk9GZlF1YVdHRlkyZlFFN1dCRk1kR0p4?=
- =?utf-8?B?SlJCOG03VXhvRW1nREZZcVhYZkNGdERyaC9PdndaNGlXZjBiWStyNzBpemM0?=
- =?utf-8?B?bStIS3EzUkZvTWxKeGdtMVF0QXVCNXRZdnFpcmxaeEcrWXZxWTVTa3lLMXpZ?=
- =?utf-8?B?b3RWTThad2J6RzhnZm01cmJXaVZKVXZOZStOVGNSQnlmaDhaS3gwZkZrYWZN?=
- =?utf-8?B?TGNxcWtWdUErcUtqY0ZVemNNSjFjN25yWG9kT1QrSm4vUXJrOW5wbjlkcUla?=
- =?utf-8?B?Nk1vVFUwSkhXZTVmenFCY2lmbTZpWGl4WmtkakZqV0M0UUxMamVzckNYbnVS?=
- =?utf-8?B?ZU5FNVF4U3k4NTZJcS9KSnV1UFg0bkhsejl1VmEyQ1MvUHNTWGJUS0JNR3Q5?=
- =?utf-8?B?cGQ2WXF0TDEwN1hMditzVEJOZXk2Y1o5TTcwTnF5SS8xMHJUS3FHL3FxSS83?=
- =?utf-8?B?NmpVcEY3NDRKaVRRemM5SjlraUVMeHJ2TElIaXBKRlBkQ2pGTWovakc0SEgy?=
- =?utf-8?B?UStHaDVWbDN3aHpQeGIyZVJ5bGhXMmYzSEhrMVl5WHNRR2RuaXRzM2J5TTJy?=
- =?utf-8?B?NktJMlQ2bHpuemNRSmU4SW81RThzcXR3QnQvbVFQU21uWTkrZEZaYXFsOFJm?=
- =?utf-8?B?N3BUUUJYOHByQnlUY0J5aVQyVWxka1lGWEVxSVJhUEZiQjhYTHZuK2NJWHVu?=
- =?utf-8?B?VmYrYUxqOExUQ3BkUUYxN3lyUnh1YW5KTmdqVDc1UHUzR2Y1clhQbExhOXMw?=
- =?utf-8?B?aW5xU2lGVmxlY1k2RUk4UW1GWlg3R0tzbW4yUXBuM2RtSmI5bjB5ZHFrTk9y?=
- =?utf-8?B?aEJlZk9RYUcxSk9ta3VYWE5mZFk1Z09pU0RwSXdXOWxaSEpGZnc4VUxpbUF2?=
- =?utf-8?B?K0RNOStUQmpvSTJ4Q1kwMUxFTFU1dzlxdGxXdDdWcGQ3NkVnREVQYVlxZXJV?=
- =?utf-8?B?bVFRZ1J4MVd3K0JXQWhDWmFnNzVTTUhBTGZFTzdwUUFoMXFqWG5iOElhTDF5?=
- =?utf-8?B?ekh1VU1SY01SNktiSmhvKzg0c2liZ01mMlpFS0NsSDFFZ1NYTU1jaS9Kd3d3?=
- =?utf-8?B?ajNKQ3lubWRKZ2Ivd3RBTHNxaXY0d3loQisyL1NXdk4wMXdlcXpmczdWbkZJ?=
- =?utf-8?B?YU15RnBGbE92RTdETDIyU3ovbHNwcXhNaUdIaWVSTk9GSTg5OEQzRlJoL0Ja?=
- =?utf-8?B?ajZRSnZacFJoa29nZHF6UDBkN0NhSVRyOFJsT0Zxc2o3cFZ5TWZTZG1NVWZq?=
- =?utf-8?B?ZUJvQVRXcjNpWDZRbmgyUEc4Rk1qRHY1NzZRNy9BTWQ4cnZiQ0NTdHZMbGxy?=
- =?utf-8?B?a29aN0tOWUFOOHNFc3RJMXpwamVTdGhUek93R2xnVFZ6L09VVXRvcXZscVh4?=
- =?utf-8?B?LzF5RWcrZloxNU0vbENhckF2blVwcUZFT3E3VmcvRGJNcmVHb1RPeEc1bkdD?=
- =?utf-8?B?Mm13VHhMSFFVTmpIYWYyUnZFNVJnbTN1b09udG9SOC8zWGl5UmxoTkt6VVl2?=
- =?utf-8?B?UnR5MHhuaGU5UmdiQ0RQd3dXbHVBUDJvS0JVbk9uelU0c3A0QytDQ1lFN1Z0?=
- =?utf-8?B?UUF6OUdJOFpPcEZQTVdRSDlXaFRUdWVqTWV4SVEwQkFHMWJhamxodzBzRzlh?=
- =?utf-8?B?TFlvRVhyQnc4Q05yRkp1VzMxZE5QaS9aUFRwRE1kTFczMEIxZUx1MW5NMGRK?=
- =?utf-8?B?NUhGVjVlVHVuZ0ZmV1B2SzgzNWhNT1hhTVVHc3ZvZjdKWjJRTUJDNEkwTjFX?=
- =?utf-8?B?VFRYcmZROWllNXlObGRORTVIMlFuanBHSXY3eDJJTXlRMzBVQmdpbVpOMnBW?=
- =?utf-8?B?OEdtYWxFenBHQnVTUXlZNldBYyt5R01HNkxqMkVUUXp6NVE9PQ==?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230040)(366016)(1800799024)(376014)(38070700018);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?utf-8?B?RXdienNvTHJaanNCNlFIMGJpSUVSdnU5aFpDbE5IL2YwVG9nblpDOEpvTXM3?=
- =?utf-8?B?RU94VER3T1BwemRUYUdqUHdVMG1OLzRaTFFJOHFHNVhEenlMMnNjQnNkK1E5?=
- =?utf-8?B?dzBPcHFibVJDVGNWbFZFYmd5WGxOSXlLeG0yWmE5VTdCeGVSNjlXUGY5UzVn?=
- =?utf-8?B?MGRxZllrM3ZiOHNFREFDQ3RFekh3TWIxSDFiVENQc2tMZGtubUFraEFCdDhR?=
- =?utf-8?B?VDM0ZVJ6WWhmZDdGM0pxVzBLOTQ0UlhoK3NyTWUrN2h6Mnd0Vm1jdy8yOG5p?=
- =?utf-8?B?Y0djcmJDYmhOd0hMRWZZRXpySU1zQjIzVzhHSkEwUVRzWEhMU3hYUzZhUWkr?=
- =?utf-8?B?bHpFU2xrYVpkdDZHSGE4OFNvUlBNMTFyYXlIaTRoVUd2aVUzM21FODdtNllT?=
- =?utf-8?B?NEduN1ZYVWhWbU96bEF0WHBkL1ZDL01RWDY4TXJDREFObHkyaFVGa0xzN0Ir?=
- =?utf-8?B?dDdiV3BQbVI1OW9xNm45UHJmS1A2V2RhVE9TRllCUitJeFRVcHc5cXdzclVQ?=
- =?utf-8?B?bk5WMHNGbjE1MUdITzIxM0FFcUhETVdoRlAvU214N0tRcGVwWjVyR3FsQ3ZK?=
- =?utf-8?B?UEc5SEJwcVIvbDdVYzB2RzFRSlg0TFdJMmhjcWE3WVhCcWF4ajQyZU8yRk83?=
- =?utf-8?B?QmpaeTdjTDZNM2luT1lQamtOWlVWNVBKQzJvcUhpQzA1UGhycm9UNFNPOU1w?=
- =?utf-8?B?Ulk0Y2l4a3plN3dQZHNiOTVGVmEvbGU5UTlzci9HbUplRXBxMG9PRlZEVUJ2?=
- =?utf-8?B?KzhkaHl1dWFNRlNPQ3cxQmErV0pBOXJJZDVYK2NtMVgxM3B6ZXdkYTg0OWQ4?=
- =?utf-8?B?N0JQWjlhdkxOSzdBeGdORHBkckZ2OFkvbUlQYWZnc2RQSG1UaEViTWxKeG1q?=
- =?utf-8?B?WTRjcmEvcC83K0VlUG5YblJnc0xML1UxdDVoQkhmSlphR2tWcGVTMDBmMFdh?=
- =?utf-8?B?MzNHa3NPVXNRbG9mbGlTOGY5dkxDODRqd2lTM0NwMmRhTHJhOEwyVU9QTEpT?=
- =?utf-8?B?SkF4Ny9lZlp1WUhhVlJ5VVF2bHo1eG1zQVFkN2pmR2l1MW5razJKblFpVnFa?=
- =?utf-8?B?bW9rM1NGcElsK1Z4dlpSellqN1o4MGdwMjMrTVAwUEUrYlFjTE1xUUpNQnZH?=
- =?utf-8?B?MitXM1FDdVl0L1RyUzg0azlhU3NjUTRqMUNlQzNHaTRvT3FFZUR5VjhMMGY1?=
- =?utf-8?B?MUNSMy9JZ3JrMDNpRkNIOUFBOE1qRUdXMkh3T3FlWWVubWFjMWxTQ2l0TFJk?=
- =?utf-8?B?ZG82Rm90VHg3K2lEeXNhTmlseS9LZ2llVWVrM1l0anBPMGI0ZTZZYS9sbk9W?=
- =?utf-8?B?RFBwNnZkRzh3OHZDSis1M1dFcUdsSlF6MWRUNC8xVDRobkRDU3FPTjBxblBi?=
- =?utf-8?B?dUsxd01GcXF1dyt5dVRpOUMxamVvSDNicWg1N3Z6Znorb2FKOWd1a1BqeHZw?=
- =?utf-8?B?dG11alRoOTRBSWdabXB6VjdDSlMrYjU1YlN0Ri84aGdERTBMcEtITTlyMGlH?=
- =?utf-8?B?alJrRjZCb29kdXZ4dTNGMkhBdStZR3pYRHIxVlZ3VU1UbWwxMjFNUWF6RmNR?=
- =?utf-8?B?MnlzdWRvWDlYRWxJN1BNQlNoZjQwTjZ6cGFiSTZNd04zYmVpL0l5TnRrcitV?=
- =?utf-8?B?STNHUGpKeldLSk91cW1Bb3dXMkYraTlsSTlVd1pzQ1RqdFFNWVhhREw2OHlk?=
- =?utf-8?B?SURSR1lLa3VoOER3KzdLMlBoRWhXNGMySmdiOFFxcGZiRDNMKzBkUzdYazFW?=
- =?utf-8?B?cHhxOStXRkkyZ2xFS3VJellrNkEyTG8zOWZwaERHcEYrUy9HR0E4OUtOTm5l?=
- =?utf-8?B?cXovTmVpRENiTC8rTURWdWNCcU55Q1pMOGtzNFlhRXhidlZFeWxjMmxXV0Ix?=
- =?utf-8?B?K0UwR2NGSmd6WjByb0xVM0ZIYmlicnhjV21VanVkVlNXdGVkRklvS2NOZU42?=
- =?utf-8?B?U0FyR3NpUzJMN3k0RHlFa0lwWE84S3R2Q0IyVDB3NlFVNGlEbE1OQkdBZkty?=
- =?utf-8?B?V2Fua2xUalNWcU5kVlVReENVNTJCMGJZNzVaaHhRS1JjaStHdTNyTkUzY1VE?=
- =?utf-8?B?cE1iN0cva1pPcjdvL1JsNmxLZXZtSnpDb05IcjV6Qy95Q1VkakMvWHJGSlNJ?=
- =?utf-8?B?TUZicTF2bWZJMHlGNjU2L2pwTS8vdkJZRUhPdmxLNFJlSEx6Y3htSUpNaTZv?=
- =?utf-8?Q?239KxJ/h0AdQ5cfJ/PCGJNs=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <6625A7482628CA4BABF697A129A799CD@EURPRD10.PROD.OUTLOOK.COM>
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wIwkpfst"
+Received: by mail-ej1-f50.google.com with SMTP id a640c23a62f3a-ac2a9a74d9cso1356726166b.1
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Mar 2025 04:40:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1742384431; x=1742989231; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZobRQyE82PrcfyAci98JM5F/Bf80o+9zGJoT1dqPqSU=;
+        b=wIwkpfst8xvsi0xwuml5lUSENs46QiU9//MB/rzqvsvjGQtH+Wk/m29V2voCwNvwhJ
+         M2QMZFJEoDxbbLdn96ebkitvTDSSp7XfSYSCHCUrmEg0dDfEL15Gtq8yn0q+1bn/4/IY
+         S5jt7vfB+O2R03HPml0U4iqLzPUpNsoUCkOSw8Iry6yM7uHhQ9qbhv/VMhPwlsNZUGc4
+         pdfmkZEv+6hayPuKo+SQ3TJm/oxKWE2R3rY5gQ3YKmMWqs+NYfy85BrNA9Nw0N04QuGX
+         kz0y7is+mKrUxD8eFvpZjgimUcV72JW8SJpnNGqqMSHuP/GPK8ZD8HeM9UJyyRTKvtt6
+         D4uw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742384431; x=1742989231;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ZobRQyE82PrcfyAci98JM5F/Bf80o+9zGJoT1dqPqSU=;
+        b=Q5vk+1Gte/iswVp+Av3lfs8ufbe7Nb+DCJwJHJRGFQt2ifBw6aq6C1giKUq3/xNKjj
+         JHzkJbDEEQ2CZCM9r/kO/CNH+MEooTHhnKumU5/UNTHshbdq7IolmCuke+y3nTKIqSJW
+         KiLzvSWk8XGds2suWA+pqk4u/9NFnnd1mVrS9tOeQr/AVYvkc9efhs+Mlt6QNjrDp1Wb
+         xV0JUQw/+JiqjGK1qsJtEFcy/EITObbvmQ/a89VAKCp/jLyDXSzlWwsDJNTgdSITkAfl
+         FauNTfnmVS6HZh2IiLTFxbhlzbdnK3CLVf6VQu1zUqUU0GXbVx5nnxeiDcwy723a+JhA
+         wdcA==
+X-Forwarded-Encrypted: i=1; AJvYcCVUqcAvEnznLjInKnk3GRi53XOU94rax3w1hav8kOXZh3xAx4yjZk2JeTCxMZSmvNfpT5y1PE5d2nM=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxoMcEoeEZj0Bddnhmjh0kyxrXqLXG/luKr79jxaWzG6umAJPcO
+	OO1f7yRpsOaV9BSuJPda9QIREJNIzjq4DBv5qvxgnFxFXbzrdpJBKexwK6I3Qdl3w7eISjQbL1w
+	Q9ICwpM5mgd29YgWhZAsi27Imai7pxmDUf2FQ/w==
+X-Gm-Gg: ASbGncs4/cV9mtHHfRYMYVEb5YWPV8P9sAEOoI0MbMejV+T7b9So48PWP9LW9fs8aEr
+	ONbv7FJ6JOFH4vSGSPUWouPHJaNvHuvU0p77b+PP0YFU5/16Lsn/M6mj27fMCgkyaUy8VfQWR2a
+	qjowToHnel4cUif8qFULOKpLA2p/c=
+X-Google-Smtp-Source: AGHT+IFS/PPGTdYtEdh2OXEgwTgKoJAR66wmbxIQaI6A3hPCkyHmNSnjXRFkqxtLCFGoBNAmk+plQIPi/A81gnmm/sY=
+X-Received: by 2002:a17:907:60c9:b0:abf:5fa3:cf96 with SMTP id
+ a640c23a62f3a-ac3b7c38f43mr238032566b.14.1742384430960; Wed, 19 Mar 2025
+ 04:40:30 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: siemens.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: AS8PR10MB6867.EURPRD10.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: f824a0c1-86ef-4afe-83c2-08dd66d004c6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 19 Mar 2025 10:22:57.5004
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 38ae3bcd-9579-4fd4-adda-b42e1495d55a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: eum7TExnZ0vcBzMC9OxaFhilkQpP3iP+iG1lVVJOlAwrTtL6HhKM7x7rPbUVK+st9YVuwT0aw5gXoyTjFZHb12rYVkTMdj1rHhrJwmx2z4c=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR10MB3565
+References: <4B7BC3E6E291E6F2+20250317101438.25650-1-luoqiu@kylinsec.com.cn>
+In-Reply-To: <4B7BC3E6E291E6F2+20250317101438.25650-1-luoqiu@kylinsec.com.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 19 Mar 2025 12:39:52 +0100
+X-Gm-Features: AQ5f1JoTSBQDmnilXX4f2ulXbMJwEZU9MPFIEYIubx8tpTqEivhTG9yRp9CEfB8
+Message-ID: <CAPDyKFqxezZ0zXhKzRewLB4OdrXU0Sc9DFHJwJ=Jozbjmo9UWQ@mail.gmail.com>
+Subject: Re: [PATCH] memstick: rtsx_usb_ms: Fix slab-use-after-free in rtsx_usb_ms_drv_remove
+To: Luo Qiu <luoqiu@kylinsec.com.cn>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, 
+	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <u.kleine-koenig@pengutronix.de>, 
+	Al Viro <viro@zeniv.linux.org.uk>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-SGkgSnVkaXRoLCBVbGYsDQoNCk9uIFdlZCwgMjAyNS0wMi0wNSBhdCAxMzozOSAtMDYwMCwgSnVk
-aXRoIE1lbmRleiB3cm90ZToNCj4gSGkgYWxsLA0KPiANCj4gT24gMS8yNy8yNSAyOjEyIFBNLCBK
-b3N1YSBNYXllciB3cm90ZToNCj4gPiBUaGlzIHJldmVydHMgY29tbWl0IDk0MWE3YWJkNDY2Njkx
-MmI4NGFiMjA5Mzk2ZmRiNTRiMGRhZTY4NWQuDQo+ID4gDQo+ID4gVGhpcyBjb21taXQgdXNlcyBw
-cmVzZW5jZSBvZiBkZXZpY2UtdHJlZSBwcm9wZXJ0aWVzIHZtbWMtc3VwcGx5IGFuZA0KPiA+IHZx
-bW1jLXN1cHBseSBmb3IgZGVjaWRpbmcgd2hldGhlciB0byBlbmFibGUgYSBxdWlyayBhZmZlY3Rp
-bmcgdGltaW5nIG9mDQo+ID4gY2xvY2sgYW5kIGRhdGEuDQo+ID4gVGhlIGludGVudGlvbiB3YXMg
-dG8gYWRkcmVzcyBpc3N1ZXMgb2JzZXJ2ZWQgd2l0aCBlTU1DIGFuZCBTRCBvbiBBTTYyDQo+ID4g
-cGxhdGZvcm1zLg0KPiA+IA0KPiA+IFRoaXMgbmV3IHF1aXJrIGlzIGhvd2V2ZXIgYWxzbyBlbmFi
-bGVkIGZvciBBTTY0IGJyZWFraW5nIG1pY3JvU0QgYWNjZXNzDQo+ID4gb24gdGhlIFNvbGlkUnVu
-IEhpbW1pbmdCb2FyZC1UIHdoaWNoIGlzIHN1cHBvcnRlZCBpbi10cmVlIHNpbmNlIHY2LjExLA0K
-PiA+IGNhdXNpbmcgYSByZWdyZXNzaW9uLiBEdXJpbmcgYm9vdCBtaWNyb1NEIGluaXRpYWxpemF0
-aW9uIG5vdyBmYWlscyB3aXRoDQo+ID4gdGhlIGVycm9yIGJlbG93Og0KPiA+IA0KPiA+IFsgICAg
-Mi4wMDg1MjBdIG1tYzE6IFNESENJIGNvbnRyb2xsZXIgb24gZmEwMDAwMC5tbWMgW2ZhMDAwMDAu
-bW1jXSB1c2luZyBBRE1BIDY0LWJpdA0KPiA+IFsgICAgMi4xMTUzNDhdIG1tYzE6IGVycm9yIC0x
-MTAgd2hpbHN0IGluaXRpYWxpc2luZyBTRCBjYXJkDQo+ID4gDQo+ID4gVGhlIGhldXJpc3RpY3Mg
-Zm9yIGVuYWJsaW5nIHRoZSBxdWlyayBhcmUgY2xlYXJseSBub3QgY29ycmVjdCBhcyB0aGV5DQo+
-ID4gYnJlYWsgYXQgbGVhc3Qgb25lIGJ1dCBwb3RlbnRpYWxseSBtYW55IGV4aXN0aW5nIGJvYXJk
-cy4NCj4gPiANCj4gPiBSZXZlcnQgdGhlIGNoYW5nZSBhbmQgcmVzdG9yZSBvcmlnaW5hbCBiZWhh
-dmlvdXIgdW50aWwgYSBtb3JlDQo+ID4gYXBwcm9wcmlhdGUgbWV0aG9kIG9mIHNlbGVjdGluZyB0
-aGUgcXVpcmsgaXMgZGVyaXZlZC4NCj4gDQo+IA0KPiBTb21laG93IEkgbWlzc2VkIHRoZXNlIGVt
-YWlscywgYXBvbG9naWVzLg0KPiANCj4gVGhhbmtzIGZvciByZXBvcnRpbmcgdGhpcyBpc3N1ZSBK
-b3N1YS4NCj4gDQo+IFdlIGRvIG5lZWQgdGhpcyBwYXRjaCBmb3IgYW02MnggZGV2aWNlcyBzaW5j
-ZSBpdCBmaXhlcyB0aW1pbmcgaXNzdWVzDQo+IHdpdGggYSB2YXJpZXR5IG9mIFNEIGNhcmRzIG9u
-IHRob3NlIGJvYXJkcywgYnV0IGlmIHRoZXJlIGlzIGENCj4gcmVncmVzc2lvbiwgdG9vIGJhZCwg
-cGF0Y2ggaGFkIHRvIGJlIHJldmVydGVkLg0KPiANCj4gSSB3aWxsIGxvb2sgYWdhaW4gaW50byBo
-b3cgdG8gaW1wbGVtZW50IHRoaXMgcXVpcmssIEkgdGhpbmsgdXNpbmcgdGhlDQo+IHZvbHRhZ2Ug
-cmVndWxhdG9yIG5vZGVzIHRvIGRpc2NvdmVyIGlmIHdlIG5lZWQgdGhpcyBxdWlyayBtaWdodCBu
-b3QgaGF2ZQ0KPiBiZWVuIGEgZ29vZCBpZGVhLCBiYXNlZCBvbiB5b3VyIGV4cGxhbmF0aW9uLiBJ
-IGJlbGlldmUgSSBkaWQgdGVzdCB0aGUNCj4gcGF0Y2ggb24gYW02NHggU0sgYW5kIGFtNjR4IEVW
-TSBib2FyZHMgYW5kIHNhdyBubyBib290IGlzc3VlIHRoZXJlLA0KPiBzbyB0aGUgaXNzdWUgc2Vl
-bXMgcmVsYXRlZCB0byB0aGUgdm9sdGFnZSByZWd1bGF0b3Igbm9kZXMgZXhpc3RpbmcgaW4gRFQN
-Cj4gKHRoZSBoZXVyaXN0aWNzIGZvciBlbmFibGluZyB0aGUgcXVpcmspIGFzIHlvdSBjYWxsIGl0
-Lg0KPiANCj4gQWdhaW4sIHRoYW5rcyBmb3IgcmVwb3J0aW5nLCB3aWxsIGxvb2sgaW50byBmaXhp
-bmcgdGhpcyBpc3N1ZSBmb3IgYW02MngNCj4gYWdhaW4gc29vbi4NCg0KZG9lcyBpdCBtZWFuLCB0
-aGF0IDE0YWZlZjIzMzNhZg0KKCJhcm02NDogZHRzOiB0aTogazMtYW02Mi1tYWluOiBVcGRhdGUg
-b3RhcC9pdGFwIHZhbHVlcyIpIGhhcyB0byBiZSByZXZlcnRlZA0KYXMgd2VsbCwgZm9yIHRoZSB0
-aW1lIGJlaW5nPw0KDQotLSANCkFsZXhhbmRlciBTdmVyZGxpbg0KU2llbWVucyBBRw0Kd3d3LnNp
-ZW1lbnMuY29tDQo=
+On Mon, 17 Mar 2025 at 11:21, Luo Qiu <luoqiu@kylinsec.com.cn> wrote:
+>
+> This fixes the following crash:
+>
+> ==================================================================
+> BUG: KASAN: slab-use-after-free in rtsx_usb_ms_poll_card+0x159/0x200 [rtsx_usb_ms]
+> Read of size 8 at addr ffff888136335380 by task kworker/6:0/140241
+>
+> CPU: 6 UID: 0 PID: 140241 Comm: kworker/6:0 Kdump: loaded Tainted: G            E      6.14.0-rc6+ #1
+> Tainted: [E]=UNSIGNED_MODULE
+> Hardware name: LENOVO 30FNA1V7CW/1057, BIOS S0EKT54A 07/01/2024
+> Workqueue: events rtsx_usb_ms_poll_card [rtsx_usb_ms]
+> Call Trace:
+>  <TASK>
+>  dump_stack_lvl+0x51/0x70
+>  print_address_description.constprop.0+0x27/0x320
+>  ? rtsx_usb_ms_poll_card+0x159/0x200 [rtsx_usb_ms]
+>  print_report+0x3e/0x70
+>  kasan_report+0xab/0xe0
+>  ? rtsx_usb_ms_poll_card+0x159/0x200 [rtsx_usb_ms]
+>  rtsx_usb_ms_poll_card+0x159/0x200 [rtsx_usb_ms]
+>  ? __pfx_rtsx_usb_ms_poll_card+0x10/0x10 [rtsx_usb_ms]
+>  ? __pfx___schedule+0x10/0x10
+>  ? kick_pool+0x3b/0x270
+>  process_one_work+0x357/0x660
+>  worker_thread+0x390/0x4c0
+>  ? __pfx_worker_thread+0x10/0x10
+>  kthread+0x190/0x1d0
+>  ? __pfx_kthread+0x10/0x10
+>  ret_from_fork+0x2d/0x50
+>  ? __pfx_kthread+0x10/0x10
+>  ret_from_fork_asm+0x1a/0x30
+>  </TASK>
+>
+> Allocated by task 161446:
+>  kasan_save_stack+0x20/0x40
+>  kasan_save_track+0x10/0x30
+>  __kasan_kmalloc+0x7b/0x90
+>  __kmalloc_noprof+0x1a7/0x470
+>  memstick_alloc_host+0x1f/0xe0 [memstick]
+>  rtsx_usb_ms_drv_probe+0x47/0x320 [rtsx_usb_ms]
+>  platform_probe+0x60/0xe0
+>  call_driver_probe+0x35/0x120
+>  really_probe+0x123/0x410
+>  __driver_probe_device+0xc7/0x1e0
+>  driver_probe_device+0x49/0xf0
+>  __device_attach_driver+0xc6/0x160
+>  bus_for_each_drv+0xe4/0x160
+>  __device_attach+0x13a/0x2b0
+>  bus_probe_device+0xbd/0xd0
+>  device_add+0x4a5/0x760
+>  platform_device_add+0x189/0x370
+>  mfd_add_device+0x587/0x5e0
+>  mfd_add_devices+0xb1/0x130
+>  rtsx_usb_probe+0x28e/0x2e0 [rtsx_usb]
+>  usb_probe_interface+0x15c/0x460
+>  call_driver_probe+0x35/0x120
+>  really_probe+0x123/0x410
+>  __driver_probe_device+0xc7/0x1e0
+>  driver_probe_device+0x49/0xf0
+>  __device_attach_driver+0xc6/0x160
+>  bus_for_each_drv+0xe4/0x160
+>  __device_attach+0x13a/0x2b0
+>  rebind_marked_interfaces.isra.0+0xcc/0x110
+>  usb_reset_device+0x352/0x410
+>  usbdev_do_ioctl+0xe5c/0x1860
+>  usbdev_ioctl+0xa/0x20
+>  __x64_sys_ioctl+0xc5/0xf0
+>  do_syscall_64+0x59/0x170
+>  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+>
+> Freed by task 161506:
+>  kasan_save_stack+0x20/0x40
+>  kasan_save_track+0x10/0x30
+>  kasan_save_free_info+0x36/0x60
+>  __kasan_slab_free+0x34/0x50
+>  kfree+0x1fd/0x3b0
+>  device_release+0x56/0xf0
+>  kobject_cleanup+0x73/0x1c0
+>  rtsx_usb_ms_drv_remove+0x13d/0x220 [rtsx_usb_ms]
+>  platform_remove+0x2f/0x50
+>  device_release_driver_internal+0x24b/0x2e0
+>  bus_remove_device+0x124/0x1d0
+>  device_del+0x239/0x530
+>  platform_device_del.part.0+0x19/0xe0
+>  platform_device_unregister+0x1c/0x40
+>  mfd_remove_devices_fn+0x167/0x170
+>  device_for_each_child_reverse+0xc9/0x130
+>  mfd_remove_devices+0x6e/0xa0
+>  rtsx_usb_disconnect+0x2e/0xd0 [rtsx_usb]
+>  usb_unbind_interface+0xf3/0x3f0
+>  device_release_driver_internal+0x24b/0x2e0
+>  proc_disconnect_claim+0x13d/0x220
+>  usbdev_do_ioctl+0xb5e/0x1860
+>  usbdev_ioctl+0xa/0x20
+>  __x64_sys_ioctl+0xc5/0xf0
+>  do_syscall_64+0x59/0x170
+>  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+>
+> Last potentially related work creation:
+>  kasan_save_stack+0x20/0x40
+>  kasan_record_aux_stack+0x85/0x90
+>  insert_work+0x29/0x100
+>  __queue_work+0x34a/0x540
+>  call_timer_fn+0x2a/0x160
+>  expire_timers+0x5f/0x1f0
+>  __run_timer_base.part.0+0x1b6/0x1e0
+>  run_timer_softirq+0x8b/0xe0
+>  handle_softirqs+0xf9/0x360
+>  __irq_exit_rcu+0x114/0x130
+>  sysvec_apic_timer_interrupt+0x72/0x90
+>  asm_sysvec_apic_timer_interrupt+0x16/0x20
+>
+> Second to last potentially related work creation:
+>  kasan_save_stack+0x20/0x40
+>  kasan_record_aux_stack+0x85/0x90
+>  insert_work+0x29/0x100
+>  __queue_work+0x34a/0x540
+>  call_timer_fn+0x2a/0x160
+>  expire_timers+0x5f/0x1f0
+>  __run_timer_base.part.0+0x1b6/0x1e0
+>  run_timer_softirq+0x8b/0xe0
+>  handle_softirqs+0xf9/0x360
+>  __irq_exit_rcu+0x114/0x130
+>  sysvec_apic_timer_interrupt+0x72/0x90
+>  asm_sysvec_apic_timer_interrupt+0x16/0x20
+>
+> The buggy address belongs to the object at ffff888136335000
+>  which belongs to the cache kmalloc-2k of size 2048
+> The buggy address is located 896 bytes inside of
+>  freed 2048-byte region [ffff888136335000, ffff888136335800)
+>
+> The buggy address belongs to the physical page:
+> page: refcount:0 mapcount:0 mapping:0000000000000000 index:0x0 pfn:0x136330
+> head: order:3 mapcount:0 entire_mapcount:0 nr_pages_mapped:0 pincount:0
+> flags: 0x17ffffc0000040(head|node=0|zone=2|lastcpupid=0x1fffff)
+> page_type: f5(slab)
+> raw: 0017ffffc0000040 ffff888100042f00 ffffea000417a000 dead000000000002
+> raw: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+> head: 0017ffffc0000040 ffff888100042f00 ffffea000417a000 dead000000000002
+> head: 0000000000000000 0000000000080008 00000000f5000000 0000000000000000
+> head: 0017ffffc0000003 ffffea0004d8cc01 ffffffffffffffff 0000000000000000
+> head: 0000000000000008 0000000000000000 00000000ffffffff 0000000000000000
+> page dumped because: kasan: bad access detected
+>
+> Memory state around the buggy address:
+>  ffff888136335280: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>  ffff888136335300: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+> >ffff888136335380: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>                    ^
+>  ffff888136335400: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+>  ffff888136335480: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+> ==================================================================
+>
+> Fixes: 6827ca573c03 ("memstick: rtsx_usb_ms: Support runtime power management")
+>
+> Signed-off-by: Luo Qiu <luoqiu@kylinsec.com.cn>
+
+Applied for next and by adding a stable tag, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/memstick/host/rtsx_usb_ms.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+> index 6eb892fd4d34..3878136227e4 100644
+> --- a/drivers/memstick/host/rtsx_usb_ms.c
+> +++ b/drivers/memstick/host/rtsx_usb_ms.c
+> @@ -813,6 +813,7 @@ static void rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+>
+>         host->eject = true;
+>         cancel_work_sync(&host->handle_req);
+> +       cancel_delayed_work_sync(&host->poll_card);
+>
+>         mutex_lock(&host->host_mutex);
+>         if (host->req) {
+> --
+> 2.48.1
+>
