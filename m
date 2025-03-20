@@ -1,104 +1,122 @@
-Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0723922157F
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:17:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 152921EB1B7
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:17:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742480235; cv=none; b=h9ewn0cosgpZrWdH+GPZd66SxM2ZTBhLw7qe2Kmm1Z0zCrFVMfZzD9Ngx9MbHkYoZ3NseetjAAQBQLdbRp8UsGTiwikW5LcHVTqdUdQn/Mu/S7TTJ1Ndr3bjcTfh+wrbBes7Rs5fgxvQ2cIvWhtR5rGfMFtlF8s/2GL2FPK5Mmg=
+	t=1742480242; cv=none; b=g+JsP1Jc57ricZ8N2zMW/nRBScCyNjOG78gePlCRrNNWOtHrFE3+I4h2U9+3azA0p7S6ktPXm0gBoawsVikzonlOcS4SU2dW63lfZawcPyDVqGh0QCuuydVir7kW1Dcavzhor6tJC7Bm7k/CZOSj7mh/3ud2/lKKNwQvMbFpzfs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742480235; c=relaxed/simple;
-	bh=rPTqBrER8bbSohUQihrKPzzyTRkgcKTD4rDojxLaHY4=;
+	s=arc-20240116; t=1742480242; c=relaxed/simple;
+	bh=IlVHcIUwTHDGDzWDxXw5mj5DevpjPK7OG62Ebrk4Y4w=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=d4oY6GA3BALbNmUe4QAvFUf3ZMUwqQUSmJEZsVS91OviT1BteET10/aGyFkFPhDdKIxD1gW4HMc4ac9sKMvS+UGXrGQUwnnVsYUxNGBUWSsxi4s8J0Alm6ebgjxJd41YDJY9U/CyImRnH/Mw3vus8A/6ITNG2dNxb4dXMIhFSm4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kxMuf85N; arc=none smtp.client-ip=209.85.128.179
+	 To:Cc:Content-Type; b=KvDWkI8ekt9RUYCUSe8uO/1fU1foSxYybnPQM4mDn7Fzn5HOEa0BXZHNO6mor5MiTpu8zaWu1xWUJSshB6ouBTEcml+SjKqXsL20zfpSvxeb4o3TDhTz9QG0NrZu7BRXfeAI1vSycy50NdbdZfkF1EManNBfAa8DqPShflNUO7s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=yH341I71; arc=none smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kxMuf85N"
-Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-6ff37565232so7548567b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:17:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="yH341I71"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-6efe4e3d698so8059387b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:17:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1742480233; x=1743085033; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1742480239; x=1743085039; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mSPzEa06K6xbln7BcUoZDUVAsWR8NylwhfXoE3kbxbk=;
-        b=kxMuf85Nyq8Uz0khjQYHHM7l0K4ur2oB0K1KkA0Qp7GFH24It/cHx2HZhyGPB+9bDY
-         FqP1I0gkk8GVY+jqMAjkGDoYPR9r4H3yuj70Qo78pYFalxfAeX00/6mWYU+bkfHXWHAz
-         Ob4aDHjRuGHkOIN0KFI+/5lo8CKeVNDZdCVt4UU7qSnq8shfuc3wSLjkE6jKEXaD6vUL
-         7g+VUBSQE27R0yBIff7won6qzM/xazrfeJbyl0d/RTJHOf8EzapJqY2/HzKLFE3XDaoz
-         PrjSYT1Lxc0/M+dB4oPDGy07DYhshyTn25mlhOm5meXMhdh3g/OJtRpMfvVDDK3qnaib
-         eouQ==
+        bh=xySvCJOLXrJepe3VbecFXnHY3VhWrdBNrIlRTw8Fv1g=;
+        b=yH341I713lDiSX1SY3WFEQA7JglWeuuC38Ol45MeEcnrxHS1VqM39X6+C5gVJOSC2+
+         ZGMThva2x7TJeYf756XsosMAqoIggCW9FfgecGRkicoyLLp2Ec7S5rc0icfqZ6edTETM
+         qktyBuOvF5VNVJHeh/4aHMQ4IZLbiuxgHM4FhODXv7voLi35xvvX4yyFkBr1H9SrHfET
+         D8O5XCr8U9JfLdwOZUtZMINP0Gxp/0lg4t5RE0PbcxPh937L5x05e07jLfqEFF/ZgTg+
+         8C8CokPFk7cLI5F84OOZ9HJD55pkrldGM/+CqOqtbuuOQuGTusYqMokVtVFbyIV5CGsk
+         Lo2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742480233; x=1743085033;
+        d=1e100.net; s=20230601; t=1742480239; x=1743085039;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mSPzEa06K6xbln7BcUoZDUVAsWR8NylwhfXoE3kbxbk=;
-        b=hY5bzMqByRrWEJcIs8CixIQdN3bwUfe3Smdp+91HmAoOOxl6AITOu3T1cuOhUGDnjM
-         cLmfO8JzS+0kBABTocgxYZBd5GgaKFBaELfYzpmOgdz+Bs9a5qtPOh2OB3MpSpKXSUh0
-         scqGAA2gEl349tiO8i6BxrXDlFoLY8J6rKPaNDe6gdsUZlX5gMAwdJmqDAgKbzfBLe15
-         DQaUg7lt/OkMCknIMq4Z+FqijbKOw0oqnHmIQh0bXbyeWqrPbSY5W/nSuC/K5NqE5Ilh
-         mEc7XJeqkxnIkqBNJSLNmzUj16H64Cv/hqRXSyTfTZBCManLTW+Ia3H5YK8In4YZ0NxT
-         0Y2g==
-X-Gm-Message-State: AOJu0YxibQxqmZcakYdlCG3L3FHzkWlmotJiFt1hycFaLXC9f7ouwBG5
-	qOnQ64R/ub9w9hWMNwGGzncsw22nM9DJs7E5KV7WRIElb+H7hk8GhumFkwWmjRqJew5UkstGx8d
-	NSYkvGrVVNZ3FqDW4NFcrBnFZQO85uVT6t2FksQ==
-X-Gm-Gg: ASbGncuK5RjavOvcP4kTU0FRULq9TBXq3K8b7ZU/38Gu7vbZSVq0ZqXvw4uvoTPeglp
-	yDC9DxSQ5ZeMcOURN4FrPWpB0Ruy25kerHaTryOGpvn7TXn70toE1il3N/s3rO8CljU0AfDs0Nc
-	PMGrx2ceLiuT/AwVJpgE/b6ZgTUS0=
-X-Google-Smtp-Source: AGHT+IG58zn3muxJcPC+CSbnOeLgLEZllcxv2SWaiofzXtAltr+aJzIZ+XhCtcJ/WCReayeozh4w0Qa7xV3hTEf3Uk4=
-X-Received: by 2002:a05:690c:4483:b0:6fe:bf9c:e7c9 with SMTP id
- 00721157ae682-7009bdc409amr96138787b3.0.1742480232765; Thu, 20 Mar 2025
- 07:17:12 -0700 (PDT)
+        bh=xySvCJOLXrJepe3VbecFXnHY3VhWrdBNrIlRTw8Fv1g=;
+        b=wLIbsXUR+J1fpfluk3bpKb+YeX+cbjktp+lVg0m7wYCvS/wCuogQwrv6FBZYTtbR3d
+         5+48dXd2qSJ2EEOKEtalpBJI+ik3AbOv4z9xEupuBqC9nTi5FSLO1lR6QYtRi5gVRSuG
+         O/UJp/0DgBzA/c3TO2n1VA0XGm3oYBZ8cOGjyyZdPIfWWmgoUTs+oDHR5mxISkr2H+Nv
+         8l5UEXNm3VvVgkib8Ecg6XfZboHy6bwkGfZ3WD3cjqjHpJWsLUYq5oqF7Xi7QK8gjAxJ
+         yKp1uGKyok+M9Esagdtakp67AFK4SpP2FJgbneiUgdjSFBlf4osd5+/HN3ufMjmR6ybz
+         xRyA==
+X-Gm-Message-State: AOJu0YwMFCmXZnJN/iLQyyg+iItNi42KtL2o9XLdsmo/eU7Nv6YI20bi
+	x58ZS507Uf6k9SO5XFmimGIuK2GS7J+Qvlabp3p5UTvVUoKYIJ8zRRQ4daKebEOx+2ud1CqUD7S
+	Ly7cabp+p7G9E1Yjy6pCmnrNziw0z/eF5YcIxFx8ZQBq6A9Gg
+X-Gm-Gg: ASbGncsZn3UzJtU5/NUrzLFvN1WPxbSj/lTNTHmMzaxN7pEATFZbTjVw4NjfDNBUuv3
+	FrlcJGgRW8wnHnN2ZNNwZ3yLItCIio1G5YeF56ZgqllAIGlLMliu5ZytDRRzEo/g3QJOPrqcMvF
+	CHcM32bMrCQUQiZfEMJVFw0SkeUeczxctl2acx6w==
+X-Google-Smtp-Source: AGHT+IGgko416faeQRVE2tkudUuv/QKn021Rg6RvuC8kA3YkTzF42evnEbm/C8UtKjUS0Ha5DCyXu9VOZNGFENIJ0+k=
+X-Received: by 2002:a05:690c:48c3:b0:6fd:4670:80e5 with SMTP id
+ 00721157ae682-700ac6e4fd7mr46108777b3.35.1742480238782; Thu, 20 Mar 2025
+ 07:17:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250319203642.778016-1-avri.altman@sandisk.com>
-In-Reply-To: <20250319203642.778016-1-avri.altman@sandisk.com>
+References: <20250314195021.1588090-1-erick.shepherd@ni.com> <5081fa69-32cb-4fd4-bad5-5f33032efc39@intel.com>
+In-Reply-To: <5081fa69-32cb-4fd4-bad5-5f33032efc39@intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 20 Mar 2025 15:16:36 +0100
-X-Gm-Features: AQ5f1Jr0LX6LnuxYjCAx_FqKpGJP-YCB_R_IiZF3pkzjYfxo5MdP8WREX6o8sd0
-Message-ID: <CAPDyKFrL26tCKoeM4RzNiWuMA8FqBWj6GhN_zx=vmfGRDMXWfg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Remove redundant null check
-To: Avri Altman <avri.altman@sandisk.com>
-Cc: linux-mmc@vger.kernel.org, Dan Carpenter <dan.carpenter@linaro.org>
+Date: Thu, 20 Mar 2025 15:16:43 +0100
+X-Gm-Features: AQ5f1Jq7_vidRskaRn7KoiZCLYWPvDdfRXWjX4kSgM-fVSs5UbHOgXr8XZ3krpg
+Message-ID: <CAPDyKFrOWHGVNHtKpaY02AXV9AV0NT6LoK2grcN9FTQmVOj7kA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: host: Wait for Vdd to settle on card power off
+To: Adrian Hunter <adrian.hunter@intel.com>, Erick Shepherd <erick.shepherd@ni.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 19 Mar 2025 at 21:40, Avri Altman <avri.altman@sandisk.com> wrote:
+On Thu, 20 Mar 2025 at 08:26, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> This change removes a redundant null check found by Smatch.
+> On 14/03/25 21:50, Erick Shepherd wrote:
+> > The SD spec version 6.0 section 6.4.1.5 requires that Vdd must be
+> > lowered to less than 0.5V for a minimum of 1 ms when powering off a
+> > card. Increase wait to 15 ms so that voltage has time to drain down
+> > to 0.5V and cards can power off correctly. Issues with voltage drain
+> > time were only observed on Apollo Lake and Bay Trail host controllers
+> > so this fix is limited to those devices.
+> >
+> > Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
 >
-> Fixes: 737d220bb2be ("mmc: core: Add open-ended Ext memory addressing")
-> Reported-by: Dan Carpenter <dan.carpenter@linaro.org>
-> Closes: https://lore.kernel.org/linux-mmc/345be6cd-f2f3-472e-a897-ca4b7c4cf826@stanley.mountain/
-> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
+> Can we leave a blank line after the block.  It was that way before.
+>
+> With that, you can add:
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Applied for next, thanks!
+Applied for next with the suggested change, thanks!
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/core/core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 5241528f8b90..ce08e0ea7fc1 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -335,7 +335,7 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->  {
->         int err;
+> > ---
+> >  drivers/mmc/host/sdhci-pci-core.c | 7 +++++--
+> >  1 file changed, 5 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> > index 1f0bd723f011..b1f7c11ea61e 100644
+> > --- a/drivers/mmc/host/sdhci-pci-core.c
+> > +++ b/drivers/mmc/host/sdhci-pci-core.c
+> > @@ -610,9 +610,12 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+> >
+> >       sdhci_set_power(host, mode, vdd);
+> >
+> > -     if (mode == MMC_POWER_OFF)
+> > +     if (mode == MMC_POWER_OFF) {
+> > +             if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD ||
+> > +                 slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_SD)
+> > +                     usleep_range(15000, 17500);
+> >               return;
+> > -
+> > +     }
 >
-> -       if (mrq->cmd && mrq->cmd->has_ext_addr)
-> +       if (mrq->cmd->has_ext_addr)
->                 mmc_send_ext_addr(host, mrq->cmd->ext_addr);
+> Blank line here
 >
->         init_completion(&mrq->cmd_completion);
-> --
-> 2.25.1
+> >       /*
+> >        * Bus power might not enable after D3 -> D0 transition due to the
+> >        * present state not yet having propagated. Retry for up to 2ms.
 >
