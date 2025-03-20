@@ -1,77 +1,71 @@
-Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
+Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com [209.85.167.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 72322225410
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:00:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5FB692AD16
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:16:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742479261; cv=none; b=UZyUlMtSr2vXfESlveZdBQYJ6hc6B0D4HfYtoRrc71St3jC887vn+LPgI/Az5ct4bCDtgxWhoG2XEPSNQGQuTXEISAhvUVoWVUThquyjOqyBBoKW9iHIdmrp5D7/0+UR3+61iWLRjDRNyZit4mVv9o/S7xo7nqQVS8ZJA9hc+fo=
+	t=1742480188; cv=none; b=D+sdY+SSAhmMViW/XlAfyb5Ohrsik5QlGwk3BsB2YWcSISxNJyKbkyJ6AvMxGHvD/nYdmUws+Uy6iT4TCGIHHQOpKTMw7+axZpqcspG4F35qTaPHzumi7Wizm8opzBzDIkGY7RwIOQ7nGCOiM7BDG99aFKACAXcC692APzoDwFM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742479261; c=relaxed/simple;
-	bh=tJcpx7kVoOVh62Qzq7CsqXZyteSS2xTmfx3MklEEb5g=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Qbcxnb7N4bJwSxpNZdEy+kLnkuom9g8F1cGzhwbw3B//NW0h1hMNcyO8AhUGkd5J0bq3bHU2OVRHUauCBBlRwQY7ryM1DTgs7Un5alr/PuA5KUzNIMsC8ylvOq4mrnPeGsz9wJCW818gDTXWvEOY5J7OdPG0wKwC3FegdLXcaAw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ovGwlYVK; arc=none smtp.client-ip=209.85.167.51
+	s=arc-20240116; t=1742480188; c=relaxed/simple;
+	bh=BG7oXm8HfnNGRZ+BgKfaO795/z90fQRMwxeOL+t6m1U=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZQPJgcJI2l06tbPuyCbthyKVAVqz5/5+cXStPPkiZD2lOwJJhPHeh0sSCUHhsn2u82WqRBMaZa/hHJxA3Jnl07nmUQ4fCI0bkmFqpC6Iv03bCA2qed5E/Qj2eIe5bVk6BGjmqoUFZ3IolulQgsrOFZx3ksFmOqCo4AJJOBKz2SE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=aaq+pKyC; arc=none smtp.client-ip=209.85.167.53
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ovGwlYVK"
-Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-548430564d9so861775e87.2
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:00:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aaq+pKyC"
+Received: by mail-lf1-f53.google.com with SMTP id 2adb3069b0e04-5499bd3084aso847780e87.0
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:16:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1742479257; x=1743084057; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+cpurPguaZZPLjWUcw85lV4P2hxnhe8DmTCMrQ+sP8E=;
-        b=ovGwlYVK5p5MCyM7n0n+8jzkYo3MDkQnvXTmQoBhq/Fjh5q1C8rjW8+ORWSc16MwdC
-         bfG2H8MJeRj1WXehec8O2cCg/yKJGsAJG6c2aSvvVjDVuAuWKHkNW7bKFLr9cHUW0cXS
-         OFIplJZpUJGcrZxpKZNOArUOjXFd8NcXyA4RNcOAfcjx8NcRArND8/CBRZlhB1k95wck
-         vEdwWTfLJR+uvJDNLiE6CdoXE4l9g9eBPfyoAzQh3ixQMw+V/7yzpV/DFJYm0fpcpumN
-         VvgkXx0rWCMtS6OCHQNWYM/7W048E8KX3lh+NXGxFqOEo6zAlH1+MZ/FuRNcD7rRE4IC
-         x7Iw==
+        d=linaro.org; s=google; t=1742480184; x=1743084984; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=KiuwvxdAhCBLo6Y0nk402oGwzDCK0nUCR/MeYHjI7FQ=;
+        b=aaq+pKyC3GwcCj6hmyd/mndnt3vLZ0Bcew+vEPZvml/WjzGWVBi3KC3quSLEGpHFa5
+         rocEjkThEM5l9YBT4DSuBaPywskSwLKsYOLqOBa/jpJZPxfhiN/54vMcRru1G795dsq6
+         1RJvH2sk4jJN1WQ5UZv1m6kYoQuKZyqA1tfMyTDI+TCCpQvlBANvsWXObUbv8bXApUdP
+         uMSFolZBc4ckEIJDGR68OtGJ5fBxhUn9fObdsBZ/UpjGnsNtFM62sazihVCgl/eNSN91
+         uAAwhAKOt8S1JBwzcnMtf/E6Eog/nbEVEL0zOhpsI2qn7BN/poAhN43X+6ogbwPHogrO
+         YQIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742479257; x=1743084057;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+cpurPguaZZPLjWUcw85lV4P2hxnhe8DmTCMrQ+sP8E=;
-        b=S2L7un5g3o4wgr3uXEKCPDn6XTzBB3qujvtxoJQwXl4Ipk3dQ1U31GtNqO7hE0TciH
-         bUQWhJZChyoHUi2bgME+7yKi9XLUnY2Xmb2FY3xR+GHZHgABwMpGVVJnUBs1omYnxqKE
-         IOCBIlkVPf2vcupABBfI03UBCCkW9W8Y5VL4N6ogXJZn07cB4c2g1Jw3N5hCVDOT3NNg
-         8EHYSgW8JDHksxjHaZU3dQRMKmh0GJh26z9JbDg1z3p8dx/oExIEc8IAMyfgiWtTdx3o
-         f2LOUFkAHegAFSC4tXck+CO2FI+P0oLB4h1Yq/oAbcxTZQQ7Yl/8Lg1EnyiBLMfHYkBY
-         wY3A==
-X-Gm-Message-State: AOJu0YyMGkKtLIlt8MBIwk32qI/6nPffDsFRMDcKq7pMSKWu/Ib9hLI7
-	Zdh0bKTkCPKUoXlap0I3crvwKA4ZuubxHvvyhDQ2d5SjILWDlYR14mrQycN6Kq8JDBfrJ7LiBj5
-	V
-X-Gm-Gg: ASbGncuwlVDjia4Y7g1K1zwUCuJ9Ik2bkt5vYagZb5KDqZnUYD6+5WV3qzfZmg9M16V
-	qwyFPCuLqQADMEasAuznSGTNilpotzgpVe+JTMC+Bf48xKqhahyNB4mfDSxhmZUseu3JuEUIIgW
-	MP3h49RqywjnU3ZfAmr5t0/4H9JSf68fkgmU7h0N/PgXcPpEswHfamCrJocYdEyWGPb5xeqlgjZ
-	fcpa4vzjaqZyB2MIkn09j+euTHHxLTcmnqUDpxN13u1sG2ySa0ivS7eqYj0/ntLigj+v/AdMPmk
-	yj+cuit8b31d8MJTx0KqEi26Gvq9DXfjd2Uu6O073b3JmDP46iZJrXHgL7lvuviQNAAF6oM8KAu
-	//Vd+3lF0bijcFUIdjgoa+PKuyXiFCA==
-X-Google-Smtp-Source: AGHT+IFI1fZrjfRWED8P3YwlNenPg/UaJprkHPw65/8Gv1KQD06yFcLy7lNo8+Ww7atrOreTQU9wBQ==
-X-Received: by 2002:a05:6512:400c:b0:549:9078:dd46 with SMTP id 2adb3069b0e04-54acb21a517mr2932004e87.43.1742479256977;
-        Thu, 20 Mar 2025 07:00:56 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1742480184; x=1743084984;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=KiuwvxdAhCBLo6Y0nk402oGwzDCK0nUCR/MeYHjI7FQ=;
+        b=RPZ6g1kqNGEoe7wzNjl664LPa+dLhWagXSX9suo32SVrMIDam7Lk4Y+RM/N1mjBbjh
+         xL7GqxTpRMAh4k0UfHEB+eryevVdiiqW5ngjbQyv0X7rk9BWjeMV/UvuQX5YOJZ/RGLZ
+         Wdt34X3DzP+26PkHIofZIwT27g6CJieUbvsbelwDZVuPafVI4Mg7PdJX4XMW0qgl2Wja
+         jfNMzzeZZ3XoKMnV5gWWL1qn1ci9DXCwr3NGYN9S6I7SiVXIdhbO7wmtmi4hxvpF/HZ2
+         lkYZQJzOSgjU2T1kNoL301TuZS/bci7wVFuBJK5poGGONwHpDrNuxa7/3QtCNeuZfqU4
+         GI/g==
+X-Forwarded-Encrypted: i=1; AJvYcCW7c1dGkmYLr4JRQSiK2eaBC+/7eVLHDaRRBKTt2FFwm3UdJYWNd0iSjH3hLohcYXFnTicdNSYfHz8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YySnbdYNuqHKw2t/y/yrHGLbrOHfDzVgEAibVIGTIPGrfjNmVOG
+	B8PIYwJEmK+e2jRz9ultDkxFEs2rL2HmROBknLxylyMwweu915kg7UJYNgRqvSsl4FvUBGVovWd
+	e
+X-Gm-Gg: ASbGncvWdSLQKY6m4y1NMwI+zetEsqXS+ZNdZND1NaffzcaXyJrwWmZcjcHU+jJ3dyh
+	h3M27zk9QYNmgGVaxFOMoEN+0/whiUQbDq6I7WUaiP9/UbcbNL3ocGzp68SvEBEW0Ixtf7H79i1
+	mN/urU7+gNcP9EodaiCRvPPfGA2hNJ44cFhyQzUWmFzYkVa79DSmfOt8w4CZSlBkJ56Xlc5efrY
+	P4lB58MVdUI54UTqxzXz8zkdsOMxmRPgob5k/eDD/GWbM6O/aeX+USChXkkLNCZJjFN0uD9u5Oq
+	IKG9Mkf8A0CzUbflADzPp5Or2ccWkx2RzCEeTMNG3N3Xw9aE8Xewp6StPrLjKA4z9+YRCgBkYox
+	jOFqzZdls/mjwVM+Y58U=
+X-Google-Smtp-Source: AGHT+IGq6ZMnqynS/LyosQzximB2DC5hiOhKm5mcuHaUP+x5dJQDT/ew7HjON49ahwTkD2EY/GpYaQ==
+X-Received: by 2002:a05:6512:693:b0:545:ae6:d73f with SMTP id 2adb3069b0e04-54acb21a725mr2921834e87.46.1742480184315;
+        Thu, 20 Mar 2025 07:16:24 -0700 (PDT)
 Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-549ba864dd9sm2295029e87.148.2025.03.20.07.00.54
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-549ba864e24sm2267110e87.107.2025.03.20.07.16.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Mar 2025 07:00:56 -0700 (PDT)
+        Thu, 20 Mar 2025 07:16:22 -0700 (PDT)
 From: Ulf Hansson <ulf.hansson@linaro.org>
-To: linux-mmc@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-	linux-renesas-soc@vger.kernel.org,
+To: Linus <torvalds@linux-foundation.org>,
+	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 5/5] mmc: core: Add support for graceful host removal for SD
-Date: Thu, 20 Mar 2025 15:00:36 +0100
-Message-ID: <20250320140040.162416-6-ulf.hansson@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.14-rc8
+Date: Thu, 20 Mar 2025 15:16:21 +0100
+Message-ID: <20250320141621.164515-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250320140040.162416-1-ulf.hansson@linaro.org>
-References: <20250320140040.162416-1-ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -80,69 +74,41 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-An mmc host driver may allow to unbind from its corresponding host device.
-If an SD card is attached to the host, the mmc core will just try to cut
-the power for it, without obeying to the SD spec that potentially may
-damage the card.
+Hi Linus,
 
-Let's fix this problem by implementing a graceful power-down of the card at
-host removal.
+Here's a PR with a couple of MMC fixes intended for v6.14-rc8. Details about the
+highlights are as usual found in the signed tag.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/sd.c | 25 +++++++++++++++----------
- 1 file changed, 15 insertions(+), 10 deletions(-)
+Please pull this in!
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 8eba697d3d86..cb4254a43f85 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1596,15 +1596,6 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 	return err;
- }
- 
--/*
-- * Host is being removed. Free up the current card.
-- */
--static void mmc_sd_remove(struct mmc_host *host)
--{
--	mmc_remove_card(host->card);
--	host->card = NULL;
--}
--
- /*
-  * Card detection - card is alive.
-  */
-@@ -1630,7 +1621,8 @@ static void mmc_sd_detect(struct mmc_host *host)
- 	mmc_put_card(host->card, NULL);
- 
- 	if (err) {
--		mmc_sd_remove(host);
-+		mmc_remove_card(host->card);
-+		host->card = NULL;
- 
- 		mmc_claim_host(host);
- 		mmc_detach_bus(host);
-@@ -1730,6 +1722,19 @@ static int _mmc_sd_suspend(struct mmc_host *host)
- 	return err;
- }
- 
-+/*
-+ * Host is being removed. Free up the current card and do a graceful power-off.
-+ */
-+static void mmc_sd_remove(struct mmc_host *host)
-+{
-+	get_device(&host->card->dev);
-+	mmc_remove_card(host->card);
-+
-+	_mmc_sd_suspend(host);
-+
-+	put_device(&host->card->dev);
-+	host->card = NULL;
-+}
- /*
-  * Callback for suspend
-  */
--- 
-2.43.0
+Kind regards
+Ulf Hansson
 
+
+The following changes since commit 80e54e84911a923c40d7bee33a34c1b4be148d7a:
+
+  Linux 6.14-rc6 (2025-03-09 13:45:25 -1000)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.14-rc4
+
+for you to fetch changes up to 723ef0e20dbb2aa1b5406d2bb75374fc48187daa:
+
+  mmc: sdhci-brcmstb: add cqhci suspend/resume to PM ops (2025-03-17 11:42:42 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci-brcmstb: Fix CQE suspend/resume support
+ - atmel-mci: Add a missing clk_disable_unprepare() in ->probe()
+
+----------------------------------------------------------------
+Gu Bowen (1):
+      mmc: atmel-mci: Add missing clk_disable_unprepare()
+
+Kamal Dasu (1):
+      mmc: sdhci-brcmstb: add cqhci suspend/resume to PM ops
+
+ drivers/mmc/host/atmel-mci.c     |  4 +++-
+ drivers/mmc/host/sdhci-brcmstb.c | 10 ++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
