@@ -1,126 +1,106 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-lj1-f178.google.com (mail-lj1-f178.google.com [209.85.208.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 978B6205E1C
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 08:48:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DA2B222580
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:00:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742460493; cv=none; b=qfDr2Oqbpi+3pvU6JI62vCMy4CQx8PMjY1UwzaJ9pAbqKDN6QzwoSTvoMO9ja6HgwM+ajsp32TGxKHf3yV/Qar9OGi2lURE7YnhRyT3PDCsLBumAHp2j9er8zxrycwL28koBahzULq3Es623RGlibubhUcPmZtKtel5M2ZrQQDo=
+	t=1742479254; cv=none; b=AfcJGCOwsxdTzpyCd2UVVXx0ob0KKExFVmcipXD16kggVYdsJpDPvg3SnX8CzYYEhewmvZN11fTO9ER5Gfbi8S37zanDODwkSYl9KXB8V3IIZR7WyTBvqY1dmxtf6S76w4ntVUKK4l2wsT01X7HGr8aWZvQfKZb1x2WJZ5ILQNQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742460493; c=relaxed/simple;
-	bh=o8z4NaQgu/h5yndTRbrfIfd+lPI/QqjiVU5mNoPtTLw=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PLWrCWIb3O0bFcS2DenD39Isg5TLr+8+Sq96gFK8kbytmKCQevMgLxzuuP0O3QJOrU8bmD2AsbDCbuS1LoRIQS9jJAporcSrtHuDTajOAIUk8OQ+21hiOGuN3hjzW1fHbTUjiVwieWFqfy3z0rru9A7b1rxuzHW9MNG/0qu3PCM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=qJIrCnTH; arc=none smtp.client-ip=209.85.128.178
+	s=arc-20240116; t=1742479254; c=relaxed/simple;
+	bh=j4UBzDHgk4sG7kqb/Znxr+FvEZ/5sfuewiW9AIFkVSw=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=KljY6c+27ywPmwSqp/q7cZILCorkHnGi/71JlQxk4EzayB7z12QlyqiNjRIiSx3j7WMZylz7V/N+hjFSLgIc0ui7U6kn45nrZoGyeaZ+BeSF7ZapOMo5i5gJ2DcsAy8T2AXglFqrq0HBhnEHervHS9peG1qI6JQnCB3dP3t4sQ4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=NKAeFCP+; arc=none smtp.client-ip=209.85.208.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qJIrCnTH"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6fee50bfea5so4083097b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 01:48:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="NKAeFCP+"
+Received: by mail-lj1-f178.google.com with SMTP id 38308e7fff4ca-30bfc79ad97so19698221fa.1
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:00:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1742460490; x=1743065290; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=o8z4NaQgu/h5yndTRbrfIfd+lPI/QqjiVU5mNoPtTLw=;
-        b=qJIrCnTH8t5Qvog3fgdyAtklsqnVjIMFTi4xdfOzHaPeSGGa3WP3feHbvq9AIURCyD
-         ovdcQgiVClapiuTnbdcwt3jhxt8etvAPsllRVP4sjdWQrp0FNbpex4TK3e4quRxSBWbM
-         EtAOUh2drnJc54d5EN1p8XODet6hhhVZu6FpBZy20ocuYJxt4HQnVtlrNycxiUHsy+lt
-         UnooXSrNpAqnwVYj4s0Se5+mV4rEHpom+3Ad1LCHbJvhS8orXA7fKmi+H3x3YZ8thqO4
-         v0xvinj1JbcMoojHNLCTivbuhtjIYkbU+SH9Ut8VsdM9vF02o+YRfKAr2j30G4uh1/Rp
-         v5GA==
+        d=linaro.org; s=google; t=1742479250; x=1743084050; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=c1plaKCpUseZn1Yu08x42hT09CM3UN2ZDD1b7XB7y9s=;
+        b=NKAeFCP+tJ9jaqQlMdRR3APcTkkrZ99hA0tP5R5qtxhXeC4jt9eDkkl2pqQq0OGDMh
+         aN/S9eJ+dzKpewWdQbaJEM2QB4jkSQBZIODAUhEp3pgrbdleSyLDkdTrAaersbQ0RTVj
+         q57b5hdc9wfCRVjktN3OnYDVC1peOBL0RdD0TAxHK+fCJc/WhGkwu5mTsGiXKneA6DFI
+         gyl16nK34SRjGjakXTzfnqWoudAhaLhfmPQs9FNkTgYSwNfFAf/dlFzUDjYCIMbPhkiC
+         xQj1ZeFRuaYWbruVlDNmfgC/wiBfgo9yN4J0UP1q8zWizr9JZlUZ7ZJyi9sEh0KlVw7B
+         Gktg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742460490; x=1743065290;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=o8z4NaQgu/h5yndTRbrfIfd+lPI/QqjiVU5mNoPtTLw=;
-        b=rvZ+sNy/B3yb+1ItsYG02cbOs69vCD/mArF0aab/+TG4tIZ7wTxKSBNwD7SiUstmtW
-         nOY5lzg7wPK8QuQYOB7lwqpGC51g3hOniJxY7Yx+/WvR1Gl4g+4j4EyprH/fISqzknGF
-         veVZ6t6+sHHpQ/3xVjFiMqIqH8lLEhafpWN3UEjZ8s2t8IqBugmfYcDA4OIciLvJTIfF
-         y+oQ+X7zqF9IACTwO6Tj77m11j8DqIlsa8fUHiDT8hYsh/067knk/7zfvxSmNTiRKUyr
-         NZ4CGq6lQrAQm5coglFKZ5PLlsnSHGjqkVUTW6Guz+6XdGtoRu2ocgRfopd4hhhoUM3I
-         lH6g==
-X-Forwarded-Encrypted: i=1; AJvYcCXuQt6dtCYWzScjQyrkhHt3Vk+z1vCQMEBYV4P4dkvtEIaJm9bRAlHRmKVo4HtwGbQONirJe5XprwY=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzQG0Z6mLJzl0OunGNfHe5Vg+7ci2I+uQb9bWnavihIfABbt8sS
-	eOFWHW/mUrv+P2ouSOaN+FPqicUSdtJar2+pvOsiOSpyhvjFjJQpok6UWCFbuWNMAyEJRUDg+0O
-	6H9R2WL+IiaIqdDkgcsHfFInfp2pv/FygieqLow==
-X-Gm-Gg: ASbGncvARUPw2/Hx1xCLfJ/vHA6HDadqA/RkDhyGpnRQtFt4fbeEkjyOKL8T0gVJ6vB
-	XHhTqIAUtbmIrKsNRO4ywLH1e7XmIm3p6sc85PFCylh+0rmN1StNjwkt64yWYn0kqLyJifnTyp6
-	qWrHDxuP6SLCAp4H0uB+SVoxCR7tM=
-X-Google-Smtp-Source: AGHT+IHIVadVMtqujK92R4Y+K/jNB3r/aKkrGIw0RRw5Tz1BPo11B74GdF/3FVkdSTE7W/WFkhnlr+w0ruioTmT/f+g=
-X-Received: by 2002:a05:690c:45c8:b0:6fe:e79f:bd8f with SMTP id
- 00721157ae682-7009c1289dcmr87213147b3.26.1742460490365; Thu, 20 Mar 2025
- 01:48:10 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1742479250; x=1743084050;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=c1plaKCpUseZn1Yu08x42hT09CM3UN2ZDD1b7XB7y9s=;
+        b=FOo3azgu20x4eWq2ye4vz42qS0Czsf6tjRk9bDEoUfSiMQsZykwcmqB3NQX47dy/z6
+         nYW8mb02fyVdidMbMPczcqB63mSAliXd/JVRE1S2OQXVfDm8aWXw6YMC77B+xmyp1WBy
+         27hNiNpBEJF5mVBfce+kWVJTLdfFcr9CMKkx6R+NV5hvEy2UK5Froq9Tns9WjgqhvYqd
+         HcxkN1/HlxTpc9kmBXaOdd8Zumh1FeY6aLBEL0z1ujKhN+N3AAhfRvqeGe3WnigudPnE
+         pCooimFCeuuTfXsf5gdo/SzJPVkTsM5tFFfcTCEH0uofGYpXRgDYeFNhwRKN5d6W9SSH
+         2v8g==
+X-Gm-Message-State: AOJu0Ywrm6N4XAftE3e81YBpHZVue7oYeEfI9SKmz9Se/lBxVsK7vki1
+	YhlMX4SNMFZ/+h2UvNpRHCbrpYW7fvgF2A/kW3V34uPtipzHiWIhAaSZi0qGGhblnazDobwrE1O
+	c
+X-Gm-Gg: ASbGncs6klFGLhCx2LkUzHRUy7+gbbHYd8bc/N9xL7Ez3gJiYWpDc1Rru1Zjy3w2gOI
+	LSRcYt8GSrJE+7S4WYxmKFZFvnFoGuSt0mSKz6by4x/7hGJDXGcdzIFtfnfrAfUgqI4qdMg5Ybm
+	5UpleK+yybhDoyOYrd1vcyI5d9JoeWpJ2Pb4T36XOnVNcXAUtBrEPPSWK40mLfRaXsgeEEpbE+D
+	JAlwDdqEeJzrcIzNYFvLb67fhYYiFQsi/hwfdnolL5oRiSlUeFCBbNwzJL5mccvurjl66HchK+7
+	8Z5+anpFMMwtgyGsREalLOW3FXzQ3J61iRYmUakS+bCWXLszAO1m9uVhTqVpPxVk2KxqrcwisEk
+	L6zg7DRCvsJNXIcbmR9Q=
+X-Google-Smtp-Source: AGHT+IGLDkayWqw+uQ+t5WY6cfFF97KDSfF4dlhtyKOD98B93BOTyBSUBT6MzlDFFxBRVZdolYijWg==
+X-Received: by 2002:a05:6512:304f:b0:549:6ae7:e679 with SMTP id 2adb3069b0e04-54acfa79c17mr1505467e87.3.1742479249732;
+        Thu, 20 Mar 2025 07:00:49 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-549ba864dd9sm2295029e87.148.2025.03.20.07.00.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Mar 2025 07:00:49 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 1/5] mmc: core: Convert mmc_can_poweroff_notify() into a bool
+Date: Thu, 20 Mar 2025 15:00:32 +0100
+Message-ID: <20250320140040.162416-2-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250320140040.162416-1-ulf.hansson@linaro.org>
+References: <20250320140040.162416-1-ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <1c5f72c4-3d55-4d62-b690-8c68b76a15d2@gmail.com>
- <f6732c49-a5b1-4a13-b9f6-c2d552b5e7e8@smile.fr> <31717d89-432c-4b77-a974-99f7e6b97f97@gmail.com>
- <9168d127-06a7-46e6-a7a2-f2e60032a50e@gmail.com> <b1a369e2-938b-49ed-b743-6562f0bb46f9@smile.fr>
- <CAOCHtYiBFNY9nFjtqsFFpqRKdxUif_fC7MVqZ7cffeD8rLSe2A@mail.gmail.com>
- <CAOCHtYiujoMoPHfSmyTrv_48wUn3TfaoiPEcMFB=V++MZXvuuQ@mail.gmail.com>
- <20250226170614.18a497f0@akair> <20250307042822.GE23206@atomide.com>
- <CAPDyKFo-ODVL0JUmeZj5-PgcYwT8Gab6-US9LNSOUGwn_-prPQ@mail.gmail.com> <20250320041418.GE4957@atomide.com>
-In-Reply-To: <20250320041418.GE4957@atomide.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 20 Mar 2025 09:47:34 +0100
-X-Gm-Features: AQ5f1JpaHc9uDg3HKu11VS8pniWI5RTqxoPZyawaVBPhNv5CO5Yj_kroGSdI6mQ
-Message-ID: <CAPDyKFqY-XtVrmXnkYbW+8XZ3eHukMKyG6FKXRh=vz4gmXujEQ@mail.gmail.com>
-Subject: Re: sdhci-omap: additional PM issue since 5.16
-To: Tony Lindgren <tony@atomide.com>
-Cc: Robert Nelson <robertcnelson@gmail.com>, Andreas Kemnade <andreas@kemnade.info>, 
-	Romain Naour <romain.naour@smile.fr>, Aaro Koskinen <aaro.koskinen@iki.fi>, 
-	Kevin Hilman <khilman@baylibre.com>, Roger Quadros <rogerq@kernel.org>, 
-	Jason Kridner <jkridner@beagleboard.org>, "Aldea, Andrei" <a-aldea@ti.com>, David <daowens01@gmail.com>, 
-	linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Thu, 20 Mar 2025 at 05:14, Tony Lindgren <tony@atomide.com> wrote:
->
-> Hi,
->
-> * Ulf Hansson <ulf.hansson@linaro.org> [250312 11:56]:
-> > On Fri, 7 Mar 2025 at 05:28, Tony Lindgren <tony@atomide.com> wrote:
-> > > Based on the symptoms, it sounds like there might be a missing flush of
-> > > a posted write in the PM runtime suspend/resume path. This could cause
-> > > something in the sequence happen in the wrong order for some of the
-> > > related surrounding resources like power, clocks or interrupts.
-> >
-> > SDIO is entirely different in this regard compared to eMMC/SD. So if
-> > there are no reports of issues I suggest we keep the SDIO part.
->
-> Hmm just wondering if you have any guesses what causes the eMMC/SD related
-> PM to break?
->
-> Regards,
->
-> Tony
+It's really a true/false value that matters, let's make it clear by
+returning a bool instead.
 
-Well, I have recently been looking a bit closer at the runtime PM
-support of the eMMC/SD card. We seem to have some kind of related
-problems [1], but I am not really sure yet.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-That said, I believe I may have found some *potential* issues and I am
-working on a few patches for it (for the mmc core), I will keep you
-and the people in $subject posted. Although, it's not quite clear to
-me, why these problems have turned up at this point and not a lot
-earlier. I have a feeling there is something that I am missing.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1522fd2b517d..3424bc9e20c5 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2007,7 +2007,7 @@ static int mmc_sleep(struct mmc_host *host)
+ 	return err;
+ }
+ 
+-static int mmc_can_poweroff_notify(const struct mmc_card *card)
++static bool mmc_can_poweroff_notify(const struct mmc_card *card)
+ {
+ 	return card &&
+ 		mmc_card_mmc(card) &&
+-- 
+2.43.0
 
-Also note that, if the problems are sdhci/sdhci-omap specific, it
-becomes a bit more difficult for me to help out.
-
-Luckily, it seems like David shared a pretty simple script with us,
-which should reproduce the problem in just a few minutes. There are
-also debugfs and the runtime PM-sysfs interface one can use to play
-with the behaviour of MMC_CAP_AGGRESSIVE_PM.
-
-Kind regards
-Uffe
-
-[1]
-https://bugzilla.kernel.org/show_bug.cgi?id=218821
-https://lore.kernel.org/all/CAPDyKFq4-fL3oHeT9phThWQJqzicKeA447WBJUbtcKPhdZ2d1A@mail.gmail.com/T/
