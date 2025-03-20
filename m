@@ -1,63 +1,63 @@
-Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com [209.85.167.43])
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com [209.85.167.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19983223311
-	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:00:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2D889222596
+	for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 14:00:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742479255; cv=none; b=kcKvhq8qxMySUmvBQ+GHZF4TO74XfLBkMzToC8HeAwkMF3V6ZWNPMb9t584R/Avw7IFAOc5JWDXlIVe7a6Q5lknAJ0Rc7U9biBwjKkwuRl715HUtkc0QH8fZ+T77PGZ23YtmYlycbuCVkRDsgPQtl3IP+NpJP6BKy7kW8FR4FaE=
+	t=1742479257; cv=none; b=VT+yQpm4C2MaMdtjVyhUgBrKCcQ0wGepSzzRDUtEtqv9gQ1kei1ASH84toKB/CgtgMySq8O1sGKU+hcPqoT/+gEB+6iGEnyjS+QZrPe3ShETKMtgISLFM3NQ/NGQ5rib9nH0oRko1Fn6AYwAp38o4WYjJKpaPsyGx+EBSgQiQdw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742479255; c=relaxed/simple;
-	bh=VhD8Av3HSuJHTUiv2cdROzFQDA9TdxYn3udhBrPmLPg=;
+	s=arc-20240116; t=1742479257; c=relaxed/simple;
+	bh=FLnJitILWx+gEhi0WoDSNfEnTW8g3N+Au1bp1k7MfuA=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=UswrhxKRjtwBuRsr8pzZaatx0QxPw5w5x9bywbuklOYPQPhJTmhPGT7d9kdr3OpPm2NsnDP0FEqkTzZN3a0TDgk8WXpui/hz+lNNxTRhI98kAnMVfh4NQwO+hkdxF0MZF2ioOn1wcRIhQ3BSfTU8EkN8jRJDBBcvQoXsK9uqhas=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=B1oLyqwG; arc=none smtp.client-ip=209.85.167.43
+	 MIME-Version; b=XWlKnMn1Nj8I/PpbYd+wBKuK1Et/v00uSG6nPO5RQaetOtwz2w3qhNg9zuLhynTVYCJdU8mGV6FnhGOH+ioZsjBQ2KpT1OB0Bfr4LweDBqhdZPwFF4s3XSXIZWwc2hj2wGlxU/ReklSyBC8Gof50AStvOxNulNPIsUmzMk8o8FU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=HguNeC+5; arc=none smtp.client-ip=209.85.167.42
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="B1oLyqwG"
-Received: by mail-lf1-f43.google.com with SMTP id 2adb3069b0e04-54991d85f99so2141473e87.1
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:00:52 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HguNeC+5"
+Received: by mail-lf1-f42.google.com with SMTP id 2adb3069b0e04-549b12ad16eso938312e87.0
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Mar 2025 07:00:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1742479251; x=1743084051; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1742479253; x=1743084053; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=RYAI2eqixUcWJERcq8+IYiHipQCgnbOCM34Jd7N+9HY=;
-        b=B1oLyqwGqyT03rP0GFXC82s/cDUh4gdQlsUNZve/uzwAbLZJk2y/RLv6ITzPYDRx2M
-         etIcDIxYMpHP57RLIZhziRzmc0pmXnh6xJxrEQ4wCJlOJWnuAOXjfRL8p/1D+XJZa07p
-         jbhbMWdRoS3f085uzNlQ+MhdThzt76ct++dW81eKzTEJkSmvKIZ2CopIVy2M5RwgQUIM
-         h3RHxuYwFMtB96hFhSI8hVSul1FnxSVF1LJLJP/K108g2vidlIeegvkzlKNBbiEqtybk
-         1JDdZblJdqSeS8IDdOU7cI3JSSFlb6avt5L5dvO7wxgKc2a9xlqvZZI4dYuHDkiPVtOW
-         nWNw==
+        bh=JRcl21cexCWaRdVFTtOPv6NXKn2Krk/8VDxch080WVM=;
+        b=HguNeC+5Asj8t7W5EQxp1P0Mdk38xtl486pVZ9ifvZMHfudMi0mhDGqRB/t8NUmkAp
+         sg5epSaSWeY5vAl8uahHBCtAQt61C6Xf702+FxlWQjT7jDlCGH+hZDj8RWtzKpG15nuT
+         HNF/689VhAfbmErOb/5EwIYFs4u6mwisVo2kvbzgnISS/HbAwUa61jDfNOfq3attw0E+
+         MHcP1KDV+QLVMdRisNRftG8skh+DEXHKShUZJ6T6B95Dhmuqb0/utVc5MRrlvNiR9Q1F
+         sGqhRIeiauB6tFC+IzAOCWB5dZUCSuDcV8K3Dovtrc2ishCUHYTqVMlvfphFPcn4s5Gy
+         O/Xw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1742479251; x=1743084051;
+        d=1e100.net; s=20230601; t=1742479253; x=1743084053;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=RYAI2eqixUcWJERcq8+IYiHipQCgnbOCM34Jd7N+9HY=;
-        b=cvGyaykcSPrL/SQKny0DTkly2HyoQNm+O0JglULyixquGsPjcu7Dhl4fOtcZP3jbO3
-         nmMiSB0x3r6/r6oHLXz0p/FR1lLxLUD5icABsOT2w9rdYXOrBh9992EfMgvGcw2s3dSY
-         EH9poUgrTyF/vXDDK1mE97ZfNxfzffszp8ivS6EG256s8Y7TZ5vTtU4MwI1rD1jw+q5j
-         s4lho0PprZihdh52RRgeNd3eBHVm4XnyMSzJ2U6/LKds0prh9YLLcOZiZqvzwUhqtW0Z
-         +INiW2ALH86OF9CuVarIRRvPIHAP0DRDq6VbqGWtdMHR3Z6R7GW2UjOi8ucL9aUQHzQx
-         LUxg==
-X-Gm-Message-State: AOJu0YzzOXck9pJ50qe9aWb+mb01D7wm7hqHeuHNZEtkNaG+kd3Hqd0Z
-	+Sqcwuj8woAOoySKHsPgoLqv0b2gpVvhbJ0yMtau9d56kH68Hf9JoMxIoPnBQTpdGm7oU+fZEZg
-	L
-X-Gm-Gg: ASbGncskuBu7Q0zN06aBcAENxTIIMVmid3JfIJfa1oA9O1N6SkxELaPwxHgtOS2YPF2
-	swddDA+4h+UB+Gb8v8dGwHACoKLXcSFxl1DTV+LvXfMpHnRX76QVLNSNpeBgsLT0QdRo5u471mj
-	Tt1DoZmjomk4vsZjNQM3QW+whX1OgHnPE2/x4fu00yEP2h+D729TXt2VPQuFJceJuObYIWOZLOR
-	agbU6XLGyBVVNMWIJN2cRXmn9vYa4s0nHv6RmgM/bShFp2ronFOc7fnQXvUsEsfKONNU+Rdkfti
-	F7bkqfQxYB2z2G5gVSYJAowp2UpaEcIwExXVC5GF+FrzE+4LMHNNDhI1tQyhySXvO7jgVyGasE7
-	FSPWm8mGQgQ+8utt0e8A=
-X-Google-Smtp-Source: AGHT+IE6l4M0DQlQYZg4ALvU5yllXDeu5+WFY7sQJFtppyPs0t//66RIGxg0FcrWHeDey/P2LeUHtw==
-X-Received: by 2002:a05:6512:39d6:b0:549:6309:2b9d with SMTP id 2adb3069b0e04-54acfaa1caamr1050147e87.13.1742479250703;
-        Thu, 20 Mar 2025 07:00:50 -0700 (PDT)
+        bh=JRcl21cexCWaRdVFTtOPv6NXKn2Krk/8VDxch080WVM=;
+        b=Bgu6WBSnF4TPgX3lMLjUG/XTYa/SQhQoQ/K88geiTiRQU1/poOzElCFVYhSUAUIFN9
+         h1jNK3vz3siipbPHQQ8W7x8jC6tXadD76L2FznCMyenmYPXAF7cgE3z5FYoiYcr2Yl0O
+         WEi8pwbInVfdCCUYkOXEEVSagyREtnryNsiuoBGCGZYeo1NMw30w5rx9OtRmUrZ/maB3
+         E6+G5jnLy6U2Xo67TRXFEwbzD29XUMio1eH4ODYUk/kqgRNoZVNYKlxXsVSirI+VW2gT
+         i0eEXb3yM0DwrjoqW2IPaDCQZAN4U4IJI0hl8g4YQW+ZxN3bul4WxEM9M508iMDcUlkw
+         2RWQ==
+X-Gm-Message-State: AOJu0YzNY808Q66J5U23nWVMjKoWH39Msu+pHiS1g3LBrEma3Rv0nanz
+	oJQuWGQBUwzh2ZvYJqkm6UH9DSulxTQIEFjs9aYXGz5y+XSWHY3MNw7amDtssLK9VnFYu3q5Z+G
+	Y
+X-Gm-Gg: ASbGncssmamamS+B6Xds2OcESa+7IEx4ZaRQehOs3jgfSdAuKNm576PpPXEVbuDo61G
+	CNncBxrUmHDCxXEeLjPPxmuBDrTqV8Flemgtr1nfeo9VQdu/wEf18xaZrdLqNcRfcYrNmw3fzYN
+	FzJE/k+0anU9/E/TyRnz9y3E4Ory5qJDdR+tZGUggpWHL4yB3rnjmYuDolcv1d9UCKZJV3YocKf
+	7pbkKzUHG5vLhmBYLvMd0RQ4eo26Z8DtwvCu3Hd2gavB964DLoB8YHvFnHwCL67lOa5gSRVNGkF
+	5kX//nHM8QbtgjGnkKe4MlTdINmeQPHh6h8ERLAcJz4dSjrIxytupUxms4duY51C7vIpGn37v1K
+	bTs93ndDXL2JworfMfdA=
+X-Google-Smtp-Source: AGHT+IHc1LVnOgavvev5XnkpmYMq0e6WzcUCiI3zOA5mhol2kloudBiNfkN+fIfm+6kKRlyIRy6cnQ==
+X-Received: by 2002:a05:6512:2255:b0:549:4416:df02 with SMTP id 2adb3069b0e04-54ad0678646mr1146949e87.41.1742479252674;
+        Thu, 20 Mar 2025 07:00:52 -0700 (PDT)
 Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-549ba864dd9sm2295029e87.148.2025.03.20.07.00.49
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-549ba864dd9sm2295029e87.148.2025.03.20.07.00.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 Mar 2025 07:00:50 -0700 (PDT)
+        Thu, 20 Mar 2025 07:00:51 -0700 (PDT)
 From: Ulf Hansson <ulf.hansson@linaro.org>
 To: linux-mmc@vger.kernel.org,
 	Ulf Hansson <ulf.hansson@linaro.org>
@@ -66,9 +66,9 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
 	linux-renesas-soc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 2/5] mmc: core: Further avoid re-storing power to the eMMC before a shutdown
-Date: Thu, 20 Mar 2025 15:00:33 +0100
-Message-ID: <20250320140040.162416-3-ulf.hansson@linaro.org>
+Subject: [PATCH 3/5] mmc: core: Convert into an enum for the poweroff-type for eMMC
+Date: Thu, 20 Mar 2025 15:00:34 +0100
+Message-ID: <20250320140040.162416-4-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250320140040.162416-1-ulf.hansson@linaro.org>
 References: <20250320140040.162416-1-ulf.hansson@linaro.org>
@@ -80,61 +80,111 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-To manage a graceful power-off of the eMMC card during platform shutdown,
-the preferred option is to use the poweroff-notification command.
+Currently we are only distinguishing between the suspend and the shutdown
+scenarios, which make a bool sufficient as in-parameter to the various PM
+functions for eMMC. However, to prepare for adding support for another
+scenario in a subsequent change, let's convert into using an enum.
 
-Due to an earlier suspend request the eMMC may already have been properly
-powered-off, hence we are sometimes leaving the eMMC in its current state.
-However, in one case when the host has MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND
-set we may unnecessarily restore the power to the eMMC, let's avoid this.
-
+Suggested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c | 17 ++++++++++++++---
- 1 file changed, 14 insertions(+), 3 deletions(-)
+ drivers/mmc/core/mmc.c | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3424bc9e20c5..400dd0449fec 100644
+index 400dd0449fec..60af88ac0213 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -2014,6 +2014,18 @@ static bool mmc_can_poweroff_notify(const struct mmc_card *card)
- 		(card->ext_csd.power_off_notification == EXT_CSD_POWER_ON);
+@@ -33,6 +33,11 @@
+ #define MIN_CACHE_EN_TIMEOUT_MS 1600
+ #define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
+ 
++enum mmc_poweroff_type {
++	MMC_POWEROFF_SUSPEND,
++	MMC_POWEROFF_SHUTDOWN,
++};
++
+ static const unsigned int tran_exp[] = {
+ 	10000,		100000,		1000000,	10000000,
+ 	0,		0,		0,		0
+@@ -2015,15 +2020,16 @@ static bool mmc_can_poweroff_notify(const struct mmc_card *card)
  }
  
-+static bool mmc_may_poweroff_notify(const struct mmc_host *host,
-+				    bool is_suspend)
-+{
-+	if (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE)
-+		return true;
-+
-+	if (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND && is_suspend)
-+		return true;
-+
-+	return !is_suspend;
-+}
-+
- static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+ static bool mmc_may_poweroff_notify(const struct mmc_host *host,
+-				    bool is_suspend)
++				    enum mmc_poweroff_type pm_type)
  {
- 	unsigned int timeout = card->ext_csd.generic_cmd6_time;
-@@ -2124,8 +2136,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE)
+ 		return true;
+ 
+-	if (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND && is_suspend)
++	if (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND &&
++	    pm_type == MMC_POWEROFF_SUSPEND)
+ 		return true;
+ 
+-	return !is_suspend;
++	return pm_type == MMC_POWEROFF_SHUTDOWN;
+ }
+ 
+ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+@@ -2120,11 +2126,13 @@ static int _mmc_flush_cache(struct mmc_host *host)
+ 	return err;
+ }
+ 
+-static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
++static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
+ {
++	unsigned int notify_type = EXT_CSD_POWER_OFF_SHORT;
+ 	int err = 0;
+-	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+-					EXT_CSD_POWER_OFF_LONG;
++
++	if (pm_type == MMC_POWEROFF_SHUTDOWN)
++		notify_type = EXT_CSD_POWER_OFF_LONG;
+ 
+ 	mmc_claim_host(host);
+ 
+@@ -2136,7 +2144,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
  		goto out;
  
  	if (mmc_can_poweroff_notify(host->card) &&
--	    ((host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) || !is_suspend ||
--	     (host->caps2 & MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND)))
-+	    mmc_may_poweroff_notify(host, is_suspend))
+-	    mmc_may_poweroff_notify(host, is_suspend))
++	    mmc_may_poweroff_notify(host, pm_type))
  		err = mmc_poweroff_notify(host->card, notify_type);
  	else if (mmc_can_sleep(host->card))
  		err = mmc_sleep(host);
-@@ -2191,7 +2202,7 @@ static int mmc_shutdown(struct mmc_host *host)
+@@ -2159,7 +2167,7 @@ static int mmc_suspend(struct mmc_host *host)
+ {
+ 	int err;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, MMC_POWEROFF_SUSPEND);
+ 	if (!err) {
+ 		pm_runtime_disable(&host->card->dev);
+ 		pm_runtime_set_suspended(&host->card->dev);
+@@ -2202,11 +2210,11 @@ static int mmc_shutdown(struct mmc_host *host)
  	 * before we can shutdown it properly.
  	 */
  	if (mmc_can_poweroff_notify(host->card) &&
--		!(host->caps2 & MMC_CAP2_FULL_PWR_CYCLE))
-+	    !mmc_may_poweroff_notify(host, true))
+-	    !mmc_may_poweroff_notify(host, true))
++	    !mmc_may_poweroff_notify(host, MMC_POWEROFF_SUSPEND))
  		err = _mmc_resume(host);
  
  	if (!err)
+-		err = _mmc_suspend(host, false);
++		err = _mmc_suspend(host, MMC_POWEROFF_SHUTDOWN);
+ 
+ 	return err;
+ }
+@@ -2230,7 +2238,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, MMC_POWEROFF_SUSPEND);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggressive suspend\n",
+ 			mmc_hostname(host), err);
 -- 
 2.43.0
 
