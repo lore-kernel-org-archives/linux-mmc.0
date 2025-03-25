@@ -1,326 +1,217 @@
-Received: from EUR02-DB5-obe.outbound.protection.outlook.com (mail-db5eur02on2061.outbound.protection.outlook.com [40.107.249.61])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com [209.85.208.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE65B194094;
-	Tue, 25 Mar 2025 09:42:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.249.61
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742895744; cv=fail; b=qxJb1mE8A/sqXIZfvlctL8gd++YGZGdyIFdbm6YqIiOdRZVnmGuYJRiXZeFZxcnAodqBxMqjp4aSZ2NRTvCqN8N4UZfrTEMKGtCggtaBLT5wg7XNmPp7kwwuUuclctO83H5BStxoF9pWdZ//B4sk32uJnMThpSERH4BaCkP0sVg=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742895744; c=relaxed/simple;
-	bh=9XT5/ZJQdjLkqpOIoxy3m0i99T5n3uwgeLGotvvisFs=;
-	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=tbBKNqwKF10SaWMGrTYpDy2a0UV9C58p2uHcaVedgXXkiZ3Eu06dCbAKbehKQbk7ldFen6N84a71I8mdYF1dQ39xb6HnPTCSyZZhj3deJ7BgnTHq78yXhUUu354Xu7b2B0U31Vfb/0Byemtgjbu0wqtxF7O1d+WNO0Whxg/Lfw8=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=Sjc4+OS9; arc=fail smtp.client-ip=40.107.249.61
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FD1119004B
+	for <linux-mmc@vger.kernel.org>; Tue, 25 Mar 2025 10:15:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.176
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1742897759; cv=none; b=J3zwqACy9RNN3mwmoPm8FsQnZkcguX9QwYSmV72QEhzXGCoaFpXL9pPWF7G/xD7JJpjFTbjpNM/WJNejhaF7QUidwGjO+OuHeWjqjPeo0YN8hu/uOZTsp0ItqRLK+uUYa9b5X8M489fMS1WLG8DZCKE8gEYJOsy3Kq9KyiAhVhs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1742897759; c=relaxed/simple;
+	bh=kq3z/F+bkdyrEEPxLj4aaSVutwseYeIy5wfytTS54JM=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=sz98kmRX4O6NF7xP6XoMYL4dR6Oun+Pj3WVTf0M+09Kdh6tkJR1PfK+APvK6o15qkYSid96Cq068l622DbjjFFaDvr9LYD22sGeAswalOGOIyhKx60yKVZClGb28+N5YIqz0GkauR160F+jVfOy6Yss3e0NjRWyc2Md8GB6gwTU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=RY4b7Rdb; arc=none smtp.client-ip=209.85.208.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="Sjc4+OS9"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=gKCfi4EPvR6lF5GI0ZZQsp9RwW9jiAHotuZ8WVktFqffWYF7lGWahSiLoGMHiM02yvogz/k8irxdHqMzA38g4aZ4VGGlPiHLHPBVO/Aq4Wqc1obDze3s3H3llTgwKkgyEa2nnjR3hXmDn8ltCchTXyQAjEyCvob5ZIZ/s9/OOealivmLqOxo44owFEzWuL8c77l6VD3CawSXS6MJ5H6Uv63e0qziMM9y5476nbz7D2uqU8R/eJPI8iQgcw7OKV7MAI2DkTPxxaubr0YMduDMnHRMcEYFbMbbs6JlQWrLirU68U+zRaf96RLQ2CK3XWdYuD55aGyvJEysIBB37WLnrA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=wRU/fbttq2z7Xxxx+us2YBQPyJl2UoNSXQi6HBJW5z0=;
- b=HzAskVLFQttqd+wfAoxNyR9RMEHwrQ1T9f9UM4QDC9wJXs2r2b3BoOokACnbyUsDIxPiFSxz7N7P+jQyXFavlCqtusHVyl42hOY9wg8MF8hVPJOvgNO5gKTBwOE5TiljsPaXl76TcJGcsDUPr/tnlKvliThJ2LVRzQWIhtDMtATWVejLVBbewMSFFzrTr/OqZI/P8hF5UnjMEz4fEZsr/0bDow6EdmFGlXtc+AL2lZF6f4yzGFYp+jsfH7uL13/+4A/Phg+Rr4HfsQklEaJAQ3Gm+tR2hYDqpHekhI9DAzkObUvj1AO10EK9DmBnYhpeGXTKfIZ7p3HDfY3Xm/58gw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=wRU/fbttq2z7Xxxx+us2YBQPyJl2UoNSXQi6HBJW5z0=;
- b=Sjc4+OS9ZFIuIrZhk1+jx92WK+dxtfpWo9H2XtSNwu4RzEsijFs06gzMN+pbbn3R7ebyt1+gQgYhs3lp8+GjNudIGcRQO8Lguk+t64L/Ndhw1MhfjcsveTQP+j0xIOeLwcFxjkvUeWhz6/7IHha1XOSAvXkqjKX+FJvaL29xDDUWI5M1YkrqYbOymJk2DFvqfOXWrOERZphGqPx2uSq9b0EbCtzREDBMC/yBRyHehSDlN07Awt4fLVYgIG7JnPWZPeB2NYSkmd317lrT5rVTlbxN8hrPTj4WdlVDHcefoYF6KD00KZ0gVOHcdSFwUw7JhW6wlZj6pR3b62er/9kP6A==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from DU2PR04MB8567.eurprd04.prod.outlook.com (2603:10a6:10:2d6::21)
- by AS1PR04MB9502.eurprd04.prod.outlook.com (2603:10a6:20b:4d0::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8534.42; Tue, 25 Mar
- 2025 09:42:19 +0000
-Received: from DU2PR04MB8567.eurprd04.prod.outlook.com
- ([fe80::4db:3dc0:c292:493a]) by DU2PR04MB8567.eurprd04.prod.outlook.com
- ([fe80::4db:3dc0:c292:493a%6]) with mapi id 15.20.8534.040; Tue, 25 Mar 2025
- 09:42:18 +0000
-From: ziniu.wang_1@nxp.com
-To: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org,
-	haibo.chen@nxp.com
-Cc: shawnguo@kernel.org,
-	s.hauer@pengutronix.de,
-	kernel@pengutronix.de,
-	festevam@gmail.com,
-	imx@lists.linux.dev,
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RY4b7Rdb"
+Received: by mail-lj1-f176.google.com with SMTP id 38308e7fff4ca-30db2c2c609so4044721fa.3
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Mar 2025 03:15:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1742897753; x=1743502553; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=kUX8G/ipswWdxea2g5yuXYGySDqu/Dr7lyepw+RoYJc=;
+        b=RY4b7RdbZBgZdMFPyRwUCqyXTtEeVadQnmXCPRBMq7C0+f6RYTGjvkE1nt1x/xtaNr
+         NFfLe0v2r6TBPI7WsaCofNSwZ8zc15PIz+pkQCNqPXdBM9G1TEAWhfPeAhuJAsXrz2A+
+         VThanqzu+c3WJy8N+CWJMjK/mfhP6fnbZNIeJcN+bCgSyDPR1ZXalflozN8woji/FmDR
+         Pq+6MrWgBflrGArCVQ7ZgDzHnnBI5qqZQqeYEwlQbCUQLBTSV+vV1OoZlsP/BJ+Zv/KL
+         J7qVV4B80ocBbuj0UOEUlUpU/X0T+FJrKItGGoiKT48eeeEtW9LC1lknsFF0jmHsgw17
+         ulKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1742897753; x=1743502553;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=kUX8G/ipswWdxea2g5yuXYGySDqu/Dr7lyepw+RoYJc=;
+        b=COD0p4tRLiLJ2DtDbSIDClYvWqK5GB72sL8PfcVGbMW13HM9EiF2KKNHr7L6ruYzdh
+         cswWXutkNQuJSNNGU/29jLiKoxfWppVulTszXPv7bIBV4UlJEvMvEZyL5+tm8pexTJ7g
+         X9KbiUW6Hyj3vRPPMLdmFcc/RhKF2nAUrkuW0tzxFPEr+Xm31k6JBFYf8dXDkzQcVroo
+         78yR4y9+HVFwt+vdIdgSQMg0QDmO1KUnobYgEmfufI99i3N22+knc5ZJdQ5VND2sA4i/
+         PmVU2mdxhDZ2EYX7xyZv77vIWLxoZ5YIlcR+765xz2QEKk0EI9txru851KM6bZHPVJyF
+         STWQ==
+X-Forwarded-Encrypted: i=1; AJvYcCV+PNfbg7UxSg1hbHMJ4Jxc3tRXCp4tZFsqAD4eAZD7y5aXihlSGoGHZZQPDWrDNFhZ3f7bb6PB6kU=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy7fJd8b6qKfTJPMQZ6PcDpFZvYIp77Mb68HyDnfyMAmFUs2ag+
+	DdbmCGuMdMcb0aO5R2eZne/TTQngEQC9QVpi2+niN2E9xGRybYZZ3fR4G3IfDD0=
+X-Gm-Gg: ASbGncuH/44u3FSEV2nKrqRZz01nQDPTR5lQiZ448PVlW3GIgXsvteWn/Tu+wR8V3vD
+	e/tlxhtOwJGeEiSYMeN4wjOUNiG9HTusqQ51VAfPG3nlwGcTx763DoZkBbWbF2KtVVYEuXtPL/a
+	Jg9vUd3Bu+oMotsx8ZsTl7TK6nAWKR9IE5E0sT1r1S14bEX9E50X3hGJ3vtkdy5WeHXITlj+L9G
+	Ag0Co3CDvNqIwiBUfoz39O62ZmJJdP+08bPRX1oHYYp+BMCrPmK8f8ki8hkJiLotIy2HwYVHmv3
+	8LbUz4uwpA0qLycxsQssaQ2ZG8V42WE9W8I1yUKNjz6Gz3UrgY7pZECA1KEK6uy/egEf6GgH+fV
+	F04t7TQ3m6cB5ujYHcdI=
+X-Google-Smtp-Source: AGHT+IHnO39V4+b6f1jfx33CjnYElfBanHZKx/akSem4UqrpMiaVwGrwOnGjhZ0e5y3d7myuygRTsQ==
+X-Received: by 2002:a05:651c:1546:b0:30b:b7c3:ea71 with SMTP id 38308e7fff4ca-30d7e222a65mr64186041fa.15.1742897753356;
+        Tue, 25 Mar 2025 03:15:53 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-30d7d910e86sm17475501fa.102.2025.03.25.03.15.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 25 Mar 2025 03:15:52 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: Linus <torvalds@linux-foundation.org>,
 	linux-mmc@vger.kernel.org,
-	s32@nxp.com,
-	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: host: sdhci-esdhc-imx: save tuning value for the card which keep power in suspend
-Date: Tue, 25 Mar 2025 17:43:30 +0800
-Message-Id: <20250325094330.2242646-1-ziniu.wang_1@nxp.com>
-X-Mailer: git-send-email 2.34.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: AM9P250CA0030.EURP250.PROD.OUTLOOK.COM
- (2603:10a6:20b:21c::35) To DU2PR04MB8567.eurprd04.prod.outlook.com
- (2603:10a6:10:2d6::21)
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v6.15
+Date: Tue, 25 Mar 2025 11:15:51 +0100
+Message-ID: <20250325101551.26387-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU2PR04MB8567:EE_|AS1PR04MB9502:EE_
-X-MS-Office365-Filtering-Correlation-Id: 822d59b0-64d2-4852-e224-08dd6b815575
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam:
-	BCL:0;ARA:13230040|7416014|52116014|366016|1800799024|376014|38350700014;
-X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?RROhDJm76jugiz4JesMC6uhj2U0AJUciyBaB7E3kDPNK8OzxEDCL6Gg985No?=
- =?us-ascii?Q?x6Gh29be3OACBBIt/lpPhjY3qfqVcEkaL63kxZDDF7Q0s/0DzvTqahv9Ohug?=
- =?us-ascii?Q?uAhtaX6gF7eGcHjuFabgZkzUlQeGl4fjbsCAGyFkQ1bid0jzmIX0SlkihClZ?=
- =?us-ascii?Q?piNgK5vB00gceJHRKy3/zKzilf9BPaLLy62XzTDwvYHW6+WMSN1vxVFguoim?=
- =?us-ascii?Q?9fJqc/KIDUTEr3PvK3BFw7Wkv5jy60Qmnrh4N2nhFTW2j5mQz2/56nFrQB3Z?=
- =?us-ascii?Q?/H29bhoVfjAydW7SahIyZoUSi77cpnQsBAgXE6j76ESJxtqLxe2aLuUZbq9p?=
- =?us-ascii?Q?rZWMXN77vFBCth2j9Q0VFnls6cjiVs2bvm6jIweudcXmpJnRgDnHI1nZdeBT?=
- =?us-ascii?Q?pTVvwvZDvyr/cIWDb+iiMaQeeJifn2wB7LNNmytE6cdzE6IOhVYAfZYeY906?=
- =?us-ascii?Q?a65QfJsvufXAnkeqqijkx1ROe+gEu1IybxLGAdZDRHk+ic5dRl34PHo0414l?=
- =?us-ascii?Q?Raj8SgM/vTpA8WQnu5XPqq+R+nFogBETbBxn6InZZiIdrCL/7AK/s3YYFlwX?=
- =?us-ascii?Q?ERgx9ejuL5a71VPO74uQeYOrEewnQE3uGaPw7yrbaH/uT1R5f1ISjAc6XIdm?=
- =?us-ascii?Q?GFVMvGR3PbNAZFbUCeRFj/qBUFdm8zqYN5Cd8mPUmQ+4J2RLormZAeWkzMT/?=
- =?us-ascii?Q?h7aSyjtvI7B94Ct4r5soss05ZbkUBcAIjXaldUnwh2v1YzpAE9SOYu/GzEiI?=
- =?us-ascii?Q?FYMXdOlJMNpRf46X+RDtReg2la9qImedRTzNA8GEREZWVggjlQF6wSnGSlwn?=
- =?us-ascii?Q?cyC4TAYCI1Q420ryCX4TUUZPQUJTwLMzY0duJcXdBh3NHt1KVxQUT+21fMlI?=
- =?us-ascii?Q?wFCW+jrnIPBfJ3Tx+GprwLc4gk5wfxIPnNv8WWuhYr7E003WoxYnueeWArR+?=
- =?us-ascii?Q?UbEHNUGoD/oet0DdG6u0VMpztjgaLmRDDNEi3CHBreXeCwrmRD+7yGlTkPD2?=
- =?us-ascii?Q?wrNO+2kPFEUeJM3Qw2fUxEH20w+UucMJGh+Yx9vow5xaAyzIQBC6KeexbMGL?=
- =?us-ascii?Q?j+taixuoaz7tVWNGD9D3rxgEKGX7Y5gvY6r6QsnBx/fHUBbBkCFaW0RfXsy+?=
- =?us-ascii?Q?cM+KYi/dGnjjuYLc8LY7fQHv4IQCsolAYh69LNWCUKEHCH4VVoRqM90QSZT1?=
- =?us-ascii?Q?iM9Pujz8iEropIFpohDsG6QlZFPodgqdEWJhPM9wDk3Fwa4w0nlUliFdYmqA?=
- =?us-ascii?Q?kb5k7tlvsjo0v4Bv0qXeFpf95iU4Y+v0WciWf0N41CGljrgOO291r1aYjzGj?=
- =?us-ascii?Q?96lqyHm0eTcVIHNTSpoOkD04RrQos+nV8N3iSCsu692d1Sf21qQR36raaT9t?=
- =?us-ascii?Q?uCmI7tOWnggkuOc0zTj1e8GwoX7fONH12WzN6pGYQXWCnG+RJwMNaNhbJtfj?=
- =?us-ascii?Q?nlca2n+U8ImAnAydjtHtLMvpu75vv8Ea?=
-X-Forefront-Antispam-Report:
-	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU2PR04MB8567.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(52116014)(366016)(1800799024)(376014)(38350700014);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?WWfdiZA07k6LRhPDAqncmcmOGm8waUNHDuhjHU++BDJD63sQpGVLSBTv6g6C?=
- =?us-ascii?Q?KSwfBcNC7t4L1A1OdYmoXNhEgb9iJ9VXsWDwfamPH5eu4h83Czn6aJxv0P2F?=
- =?us-ascii?Q?q7Y0FyO1y10M8nSI99IgySvICtiWATGLQdmF3Akju/R/v/9alPKsFfoSAzOn?=
- =?us-ascii?Q?W4QdQL+MRyKatOolRpsB4leNHgZSATDXJYbAu+xx94+3fQFhl0aIcXKwx9qL?=
- =?us-ascii?Q?UPP7NFbCpZvfUVoE8XvFrP6RnV/tJtZR65HiLcNYTZDz+pW/mUSy285SPuNN?=
- =?us-ascii?Q?wjchZ1Y3Ew7IGFwZuMPPyYrRCXYJUTDKRPXqymMiYioYybqxmWXrh7HxTXb9?=
- =?us-ascii?Q?O1VyJb+eHZGDnHZfpPmz3ufRKoSn99mS5X+0/3vwWjcK9P2RMs7Ancqmb6Bo?=
- =?us-ascii?Q?85iJLJRh/07XrwqAGma6ZU0+z/PF+V8OX25CE6Rnfq9iP06F8lbqIfhptIWT?=
- =?us-ascii?Q?HPDx3xhmFuXOPIWbwhmtHLv0hDW6Eiwt4Q9FLOxI/O2Hw1PU/jFZ/5d/nFmt?=
- =?us-ascii?Q?UM4p/X0zaPM+6nhcxcCYQxkXNvCzLIpozpfTgCWvs4hItgkh07Dlnp7YPN50?=
- =?us-ascii?Q?JvBFlCvdHmhOxAwcbLR3Cx7BwGpupb3LPFp2+q/YJHfaNEptSx64rtcmEcgv?=
- =?us-ascii?Q?DnaGlnEEdJWi/mAnxgthoIvU7jOlQKENqbgA1RKkSfPp46Q2zJ1O8Ib+9VaM?=
- =?us-ascii?Q?jq6oi6Z5QE5zlVrJcVaVmtKQh7uXy6hlWBiTjh4MbGPeSi6pw1oG1simNE2C?=
- =?us-ascii?Q?31sBFhKITK7lDFtMEuWjDDElyxpwLloY55dYjeh9qPu3BurMxJCjFu8POEiF?=
- =?us-ascii?Q?gyZdjlxUZC04Bd6B12qFNRT4rLPRYUA6FuoYFNmJEglG180AEhRoT9LWfE7u?=
- =?us-ascii?Q?J3ies5mMX6Q/wFsx65Sjnv52OZjKB7dO5scPr6PtxYfAquVRTcXA5ie7aZJk?=
- =?us-ascii?Q?GRxGeYgfB6OCwhXpkuZayXUlXFyQkOUp14vXpXGMS2m1G8UZl3pC48P3Lkmg?=
- =?us-ascii?Q?iPI6IknVKPXoqVtaIQAtyhVz7t467IqLeChg7b+S02Np7Af7+KMdnlbSlA9Y?=
- =?us-ascii?Q?JYvR0NEnEh9Drj/BB8cQ3rgUomU++B9CqGBRNX6+ynxUtoX+q4v5i4l1QQqY?=
- =?us-ascii?Q?gKUrNr1H1CV5yNSFMp9Y5PgynvgplV6arb5cpbzSiqZbQHQ6dMX/lYCA2/kV?=
- =?us-ascii?Q?s0Zk7Pd3p6PxrGybb/IjO4mRAHHcCRExXgehoslq3UAV8WdvnEQsEEjhG2Ma?=
- =?us-ascii?Q?jSNTSGpY+r2xeZQqxcWsD1CobAj5QJAZGPvV8oWDcL7vXMf3CCPqPiVcrZ/E?=
- =?us-ascii?Q?QpPTvc5Ma3FQtUPhHcbtqhd1NkQs6on1aYxb/G7FCh6cG5but0c32L8nSBlR?=
- =?us-ascii?Q?bFfmIBJXreR4gOz8Il7xlhUZaCLqAnSYcZN/7V86w4FOyP9fDgEKCuBfpBkY?=
- =?us-ascii?Q?Fs5fGFwxYUrbm268IPc9TgMUloTW87wdSN2YudMW4ooTiLkctOH87+Hahe6n?=
- =?us-ascii?Q?Syyj5eGCdb5ffByCO9f4W61AdNdFXdiQ1SJy41B1lgrlJWYc1533LR4A8QnD?=
- =?us-ascii?Q?NcqZKALPnGaMXvaZ9pCWrkXMoDzjbt6XbDOkw0h6?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 822d59b0-64d2-4852-e224-08dd6b815575
-X-MS-Exchange-CrossTenant-AuthSource: DU2PR04MB8567.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Mar 2025 09:42:18.9376
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: U7fV2Jli9c/wE2c4UcqjjBDtqSGl4syjLAs2wTaQdPG2b3QjPZiOqij7DsMnUcno4d+Fz9kBZ7nqtzncGMpPEA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS1PR04MB9502
+Content-Transfer-Encoding: 8bit
 
-From: Luke Wang <ziniu.wang_1@nxp.com>
+Hi Linus,
 
-For some SoCs like imx6ul(l/z) and imx7d, during system PM, usdhc will
-totally power off, so the internal tuning status will lost. Here add
-save/restore the tuning value for any command after system resume back
-when re-tuning hold.
+Here's the pull-request with updates for MMC and MEMSTICK for v6.15. Details
+about the highlights are as usual found in the signed tag.
 
-The tipical case is for the SDIO WIFI which contain flag MMC_PM_KEEP_POWER,
-it means this device will keep power during system PM. To save power, WIFI
-will switch to 1 bit mode, and switch back to 4 bit mode when resume back.
-According to spec, tuning command do not support in 1 bit mode. So when
-send cmd52 to switch back to 4 bit mode, need to hold re-tuning. But this
-cmd52 still need a correct sample point, otherwise will meet command CRC
-error, so need to keep the previous tuning value.
+Please pull this in!
 
-Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 90 +++++++++++++++++++++++++++++-
- 1 file changed, 88 insertions(+), 2 deletions(-)
+Kind regards
+Ulf Hansson
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ff78a7c6a04c..d3ac5f38a9eb 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -81,6 +81,9 @@
- #define  ESDHC_TUNE_CTRL_STEP		1
- #define  ESDHC_TUNE_CTRL_MIN		0
- #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
-+#define ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK		0x7f000000
-+#define ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_SHIFT	24
-+#define ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT	8
- 
- /* strobe dll register */
- #define ESDHC_STROBE_DLL_CTRL		0x70
-@@ -235,6 +238,7 @@ struct esdhc_platform_data {
- 	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
- 	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
- 	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
-+	unsigned int saved_tuning_delay_cell;	/* save the value of tuning delay cell */
- };
- 
- struct esdhc_soc_data {
-@@ -1057,7 +1061,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
--	u32 ctrl;
-+	u32 ctrl, tuning_ctrl;
- 	int ret;
- 
- 	/* Reset the tuning circuit */
-@@ -1071,6 +1075,16 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- 			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
- 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
- 			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-+			/*
-+			 * enable the std tuning just in case it cleared in
-+			 * sdhc_esdhc_tuning_restore.
-+			 */
-+			tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+			if (!(tuning_ctrl & ESDHC_STD_TUNING_EN)) {
-+				tuning_ctrl |= ESDHC_STD_TUNING_EN;
-+				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
-+			}
-+
- 			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
- 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-@@ -1149,7 +1163,8 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
- 	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
- 			ESDHC_MIX_CTRL_FBCLK_SEL;
- 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
--	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+	writel(val << ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT,
-+				host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
- 	dev_dbg(mmc_dev(host->mmc),
- 		"tuning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
- 			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
-@@ -1569,6 +1584,58 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
- 	}
- }
- 
-+static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	/*
-+	 * SD/eMMC do not need this tuning save because it will re-init
-+	 * after system resume back.
-+	 * Here save the tuning delay value for SDIO device since it may
-+	 * keep power during system PM. And for usdhc, only SDR50 and
-+	 * SDR104 mode for SDIO devide need to do tuning, and need to
-+	 * save/restore.
-+	 */
-+	if ((host->timing == MMC_TIMING_UHS_SDR50) ||
-+			(host->timing == MMC_TIMING_UHS_SDR104)) {
-+		reg = readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+		reg = (reg & ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK) >>
-+				ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_SHIFT;
-+		imx_data->boarddata.saved_tuning_delay_cell = reg;
-+	}
-+}
-+
-+static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	u32 reg;
-+
-+	if ((host->timing == MMC_TIMING_UHS_SDR50) ||
-+			(host->timing == MMC_TIMING_UHS_SDR104)) {
-+		/*
-+		 * restore the tuning delay value actually is a
-+		 * manual tuning method, so clear the standard
-+		 * tuning enable bit here. Will set back this
-+		 * ESDHC_STD_TUNING_EN in esdhc_reset_tuning()
-+		 * when trigger re-tuning.
-+		 */
-+		reg = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-+		reg &= ~ESDHC_STD_TUNING_EN;
-+		writel(reg, host->ioaddr + ESDHC_TUNING_CTRL);
-+
-+		reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+		reg |= ESDHC_MIX_CTRL_SMPCLK_SEL | ESDHC_MIX_CTRL_FBCLK_SEL;
-+		writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-+
-+		writel(imx_data->boarddata.saved_tuning_delay_cell <<
-+				ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_SHIFT,
-+				host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+	}
-+}
-+
- static void esdhc_cqe_enable(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1900,6 +1967,15 @@ static int sdhci_esdhc_suspend(struct device *dev)
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
- 		mmc_retune_needed(host->mmc);
- 
-+	/*
-+	 * For the device need to keep power during system PM, need
-+	 * to save the tuning delay value just in case the usdhc
-+	 * lost power during system PM.
-+	 */
-+	if (mmc_card_keep_power(host->mmc) &&
-+			(esdhc_is_usdhc(imx_data)))
-+		sdhc_esdhc_tuning_save(host);
-+
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
- 		return ret;
-@@ -1916,6 +1992,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
- static int sdhci_esdhc_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = pinctrl_pm_select_default_state(dev);
-@@ -1929,6 +2007,14 @@ static int sdhci_esdhc_resume(struct device *dev)
- 	if (ret)
- 		return ret;
- 
-+	/*
-+	 * restore the saved tuning delay value for the device which keep
-+	 * power during system PM.
-+	 */
-+	if (mmc_card_keep_power(host->mmc) &&
-+			(esdhc_is_usdhc(imx_data)))
-+		sdhc_esdhc_tuning_restore(host);
-+
- 	if (host->mmc->caps2 & MMC_CAP2_CQE)
- 		ret = cqhci_resume(host->mmc);
- 
--- 
-2.34.1
 
+The following changes since commit 723ef0e20dbb2aa1b5406d2bb75374fc48187daa:
+
+  mmc: sdhci-brcmstb: add cqhci suspend/resume to PM ops (2025-03-17 11:42:42 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.15
+
+for you to fetch changes up to c48e13e83513bd7eb4efffeeb562df9e4e1452d0:
+
+  mmc: core: Remove redundant null check (2025-03-21 09:48:37 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - atmel-mci: Convert DT bindings to json schema
+ - dw_mmc: Add support for the Exynos7870 variant
+ - dw_mmc-rockchip: Add support for the RK3562/3528 variants
+ - omap: Fix potential memory leak in the probe error path
+ - renesas_sdhi: Add support for RZ/G3E variants
+ - sdhci: Disable SD card clock before changing parameters
+ - sdhci-esdhc-imx: Add support for the i.MX94 variant
+ - sdhci-of-dwcmshc: Add support for the RK3562/RK3528 variants
+ - sdhci-omap: Disable aggressive PM for eMMC/SD-cards
+ - sdhci-pci-core: Wait for VDD to settle on card power off
+ - sdhci-pxav3: Fix busy-signalling by using MMC_CAP_NEED_RSP_BUSY
+ - sunxi-mmc: Add support for the A523 variant
+
+MEMSTICK:
+ - rtsx_usb_ms: Fix potential use-after-free during remove
+
+----------------------------------------------------------------
+Andre Przywara (2):
+      dt-bindings: mmc: sunxi: Simplify compatible string listing
+      dt-bindings: mmc: sunxi: add compatible strings for Allwinner A523
+
+Avri Altman (1):
+      mmc: core: Remove redundant null check
+
+Biju Das (2):
+      dt-bindings: mmc: renesas,sdhi: Document RZ/G3E support
+      mmc: renesas_sdhi: Add support for RZ/G3E SoC
+
+Dan Carpenter (1):
+      mmc: renesas_sdhi: fix error code in renesas_sdhi_probe()
+
+Dharma Balasubiramani (2):
+      dt-bindings: mmc: mmc-slot: Make compatible property optional
+      dt-bindings: mmc: atmel,hsmci: Convert to json schema
+
+Dr. David Alan Gilbert (1):
+      mmc: slot-gpio: Remove unused mmc_gpio_set_cd_isr
+
+Dragan Simic (1):
+      mmc: core: Trim trailing whitespace from card product names
+
+Erick Shepherd (2):
+      mmc: sdhci: Disable SD card clock before changing parameters
+      mmc: host: Wait for Vdd to settle on card power off
+
+Frank Li (2):
+      dt-bindings: mmc: Change to additionalProperties to fix fail detect Unevaluated property
+      dt-bindings: mmc: fsl-imx-esdhc: Add i.MX94 support
+
+Jaehoon Chung (1):
+      mmc: sdhci-of-dwcmshc: Change to dwcmshc_phy_init for reusing codes
+
+Jiri Slaby (SUSE) (1):
+      tty: mmc: sdio: use bool for cts and remove parentheses
+
+Jonas Karlman (1):
+      dt-bindings: mmc: sdhci-of-dwcmhsc: Add compatible string for RK3528
+
+Karel Balej (1):
+      mmc: sdhci-pxav3: set NEED_RSP_BUSY capability
+
+Kaustabh Chakraborty (3):
+      dt-bindings: mmc: samsung,exynos-dw-mshc: add exynos7870 support
+      mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
+      mmc: dw_mmc: add exynos7870 DW MMC support
+
+Kever Yang (2):
+      dt-bindings: mmc: Add support for rk3562 eMMC
+      dt-bindings: mmc: rockchip-dw-mshc: Add support for rk3562
+
+Luo Qiu (1):
+      memstick: rtsx_usb_ms: Fix slab-use-after-free in rtsx_usb_ms_drv_remove
+
+Miaoqian Lin (1):
+      mmc: omap: Fix memory leak in mmc_omap_new_slot
+
+Ulf Hansson (3):
+      mmc: Merge branch fixes into next
+      mmc: sdhci-omap: Disable MMC_CAP_AGGRESSIVE_PM for eMMC/SD
+      mmc: Merge branch fixes into next
+
+Yao Zi (1):
+      dt-bindings: mmc: rockchip-dw-mshc: Add compatible string for RK3528
+
+ .../bindings/mmc/allwinner,sun4i-a10-mmc.yaml      |  38 +++---
+ .../bindings/mmc/amlogic,meson-mx-sdio.yaml        |   3 +
+ .../devicetree/bindings/mmc/atmel,hsmci.yaml       | 106 +++++++++++++++++
+ .../devicetree/bindings/mmc/atmel-hsmci.txt        |  73 ------------
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |   1 +
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |   2 +-
+ .../devicetree/bindings/mmc/mmc-slot.yaml          |   1 -
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |  16 +++
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  |   2 +
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml       |   2 +
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   5 +-
+ drivers/memstick/host/rtsx_usb_ms.c                |   1 +
+ drivers/mmc/core/core.c                            |   2 +-
+ drivers/mmc/core/mmc.c                             |   6 +-
+ drivers/mmc/core/sd.c                              |   4 +
+ drivers/mmc/core/sdio_uart.c                       |   2 +-
+ drivers/mmc/core/slot-gpio.c                       |  12 --
+ drivers/mmc/host/dw_mmc-exynos.c                   |  41 ++++++-
+ drivers/mmc/host/dw_mmc.c                          |  94 ++++++++++++++-
+ drivers/mmc/host/dw_mmc.h                          |  27 +++++
+ drivers/mmc/host/omap.c                            |  19 ++-
+ drivers/mmc/host/renesas_sdhi.h                    |   1 +
+ drivers/mmc/host/renesas_sdhi_core.c               | 131 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-of-dwcmshc.c                |  72 +++--------
+ drivers/mmc/host/sdhci-omap.c                      |   4 +-
+ drivers/mmc/host/sdhci-pci-core.c                  |   6 +-
+ drivers/mmc/host/sdhci-pxav3.c                     |   1 +
+ drivers/mmc/host/sdhci.c                           |   9 +-
+ drivers/mmc/host/tmio_mmc.h                        |  10 ++
+ include/linux/mmc/slot-gpio.h                      |   1 -
+ 30 files changed, 508 insertions(+), 184 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/atmel,hsmci.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/atmel-hsmci.txt
