@@ -1,63 +1,64 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A7E615CD55;
-	Wed, 26 Mar 2025 03:59:26 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5F9A1A072C;
+	Wed, 26 Mar 2025 08:13:40 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1742961566; cv=none; b=VVpzEcSffGex68szGpj3WNstZDqjOJGSszMIUf8v/0zzzjB4+xpgzYrW3ba1Ysb14BqFb7GDN0q9tPkM/+uQEclzrgIL7t9WrnF6Q8uSj+o7x9S2CgLDAnjBUoyJtqVEtTfKkLW7JAK2Ob+U7mbJioDAD7sguIADhTxhCYn8LE4=
+	t=1742976822; cv=none; b=DNanHUuYLR++gHognPbzV72N7XPD65Y/+zQ1VTuaJadbawOl+9dJuLYcWhqcN/g11QOouy4OG1d6Y6GeoW+BN3Yyrfe2Nq4ExOZCOO7wM8ZMe064DWn+RPUAzEwvbGvmtSdZjtmdguyLuFF3q54RofJYq20PkglSb3xI1tXy/bU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1742961566; c=relaxed/simple;
-	bh=nZ1OzTKBGiiQgBCoJrJzCYaG0PlMP1aVR8mLEqH4h6Q=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=LRYvf07GeENs+FFtep7mZD+ZA9X+F+/H72irmKm9QMpoAamj1Uq0j62qqd9tL3c5hRTfyESD91/cb+A0IFD9+qbb7LYTAssMvdpJFpz8fRPYBV7l5pyv/kq97iMoujvA5hEetdUXB/1MjnBiMPFixQgavu+H34VBT5TjPFlkSoU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LaRcs3cs; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1742976822; c=relaxed/simple;
+	bh=mxd9NklVcoOr+WMrk13jMbsMArO4Lmm6XiRTjoB62+Y=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=ZSuClFrf31T5qMyPlKbhsh1ViFXbFStxuVEB7OMECIUXTCCIJBByRAlL8+Yy93CQ3CiGfXn8FqMqx5T26HuNpbXJmjjKevpIva5LP/ZqxLopXk0QLlPFZkl1kBr28A5B4EIul4/K+eTKdrnDirHSBjLXGnOpQE5uHpXs2lg3+UY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WmVrElu2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LaRcs3cs"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DFD9AC4CEEE;
-	Wed, 26 Mar 2025 03:59:25 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WmVrElu2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73E82C4CEE2;
+	Wed, 26 Mar 2025 08:13:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1742961565;
-	bh=nZ1OzTKBGiiQgBCoJrJzCYaG0PlMP1aVR8mLEqH4h6Q=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=LaRcs3csfd+ZFn149IumWgcc+YADU1f1ONAJCN3vAVO9YgPUGpZAAWlTjBVJiwzYz
-	 iIkdnCURAclyUO5n+XPDCdXUeEviPK60QxMifQixodJSE4nhZJVkII3B6AcsZ4E5jm
-	 lOrwUPzzGpYdtASQzCMOWSG8IpRvE1/5p0TpxgBWIGBr8/tzWSZcqzTVCqDqqE9MZW
-	 Q/3/fu8YZS9Tse27MySEyPAUUusgyAVqmaNoR7JEBbdlCLPnNjtARjUkvuN8/jkwDC
-	 f2fyxEuyX1aIU7enfGh3yvpACq5tlnrGvQCBQYZiA6YI93K9Rjt+IbDliCf6dj1YKe
-	 AEZR31/9j94iA==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id 7100E380DBFD;
-	Wed, 26 Mar 2025 04:00:03 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v6.15
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20250325101551.26387-1-ulf.hansson@linaro.org>
-References: <20250325101551.26387-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20250325101551.26387-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.15
-X-PR-Tracked-Commit-Id: c48e13e83513bd7eb4efffeeb562df9e4e1452d0
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 0163c8864bee0df6459fdb18ef9c0944368639e3
-Message-Id: <174296160213.837738.8600253655342727990.pr-tracker-bot@kernel.org>
-Date: Wed, 26 Mar 2025 04:00:02 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	s=k20201202; t=1742976820;
+	bh=mxd9NklVcoOr+WMrk13jMbsMArO4Lmm6XiRTjoB62+Y=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=WmVrElu2k6+b07kci6agVxrhNtwTVcVrEHwz/uJwdd0/tcqZu3PYR7K0pIxoWl9A4
+	 S1EmzqUUWkuuqtwPl44MWn4f4nwp/JpsEsR6XfFfAmWWsULn85BPrsrRrKqDgX8PSj
+	 qzw7LiC3GI2jy75clApJmZvt/jA9QNXEDmiqVLHDbMnd7QgMTAOBAnuIlzV06Xr/9T
+	 0ELkZRKuy0hzXjYf3r27PByyt8rtI0hDyz5iBhgOmip+M8s2xm8hi7Oc7Vr1HLdGtG
+	 V1ea5RHwiVek0BJ+ZwXlu7lmx+LXItRDH+djAwsdKWd7KzRbv13/29NFkbCag7lxyz
+	 iU2A/+Hj5cf6w==
+Date: Wed, 26 Mar 2025 09:13:36 +0100
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: marvell,xenon-sdhci: Allow
+ "dma-coherent" and "iommus"
+Message-ID: <20250326-accurate-remarkable-caiman-a73cd6@krzk-bin>
+References: <20250320-dt-marvell-mmc-v1-0-e51002ea0238@kernel.org>
+ <20250320-dt-marvell-mmc-v1-1-e51002ea0238@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20250320-dt-marvell-mmc-v1-1-e51002ea0238@kernel.org>
 
-The pull request you sent on Tue, 25 Mar 2025 11:15:51 +0100:
+On Thu, Mar 20, 2025 at 04:35:46PM -0500, Rob Herring (Arm) wrote:
+> The Marvell xenon-sdhci block can be cache-coherent and needs the
+> "dma-coherent" property. It can also be behind an IOMMU and needs the
+> "iommus" property.
+> 
+> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.15
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0163c8864bee0df6459fdb18ef9c0944368639e3
+Best regards,
+Krzysztof
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
