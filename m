@@ -1,118 +1,128 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19BE946BF;
-	Thu, 27 Mar 2025 09:33:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1C6E2135D0
+	for <linux-mmc@vger.kernel.org>; Thu, 27 Mar 2025 12:28:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743068005; cv=none; b=r0XBesJt1S5PX2XptubXv/FrJLcL61VNmI+tKzw6afxjUjVUjCAMpMx+rn3Llsi10mJ3Nih9ME8pcsH9nY4LRynRbcN14W6VWR08Mf9e1TzMEIausWMz3o4R0+hLEZu4xvDpyi1G3qHTIZaBZmXx3qeaQ1YKvYNIA3D1Jm9qhaI=
+	t=1743078484; cv=none; b=k+R/Xp4/o7y5vA0h0zRRE8SitMrTGSFTAb4KFI6NzQ898+MZGv60QWwdhHl7fY9tb4e9rpUc5P5fbtyvAzUSUGi8U+MbCo98gxoI964xyhFa2Fu5exxaQdUBa5nwqnV5pw643ietBeK034CurUCDb3u5PtgroqCi2woxBJL0X7I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743068005; c=relaxed/simple;
-	bh=YNClJrH/6e1Dbh2WpS6rrVYn/ndunKC5gv1xJfe069U=;
+	s=arc-20240116; t=1743078484; c=relaxed/simple;
+	bh=AaGkFZpautOPtNIWBgWQGF7TfFJYejda7uBwkLDZ2zU=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JN1FNZK64cU5VD+nz/LFnGzXSHXE5LDTf2x4BkS5YTe2ZE/rXDJyp8+3oT3ZFEJK1WRAOLBPcH64UNe0HZ1XMpLwbhG3IC4qx1pvsmnAiXfmKWXFehmmc79to2hYHQMaHHBBdyZw/k3bgwGuD867YMAKxy1Fr+wdwr4E82pA6K4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=UplFAUBB; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	 Content-Type:Content-Disposition:In-Reply-To; b=oLGBkQVQRdJ6hhZzMCNJoWjC0EiMWYr+IvT0u55YDVP0dEkPI3B9IMHCYAIf1M62Yw/T2j/NqWxVU2PAu+hqGHVDIEhgFVEEYi3R06X12prtwxQ1QXReKGJiyFzf3FStsmUEbM2cviIF6q8VLWKEKEzX4Qh1PXNe3I34VB2+0mE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=cQKVds6D; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="UplFAUBB"
-Received: from gaggiata.pivistrello.it (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id 59BF41FAC7;
-	Thu, 27 Mar 2025 10:33:18 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1743067998;
-	bh=78GL+QiKQ+5E/NSdfh6mkzgQppQMhSIUOSmEkzEVLQ8=;
-	h=Received:From:To:Subject;
-	b=UplFAUBBAPfNrEvetkl/PyOlSxnXjzZFTFe7zuyx9KmaKYN3joFaCEkxSTb4/oXkk
-	 6RpSbFxaRKYctavYUh5c4C7JEO1Z41/xfuMDFHvLFKG4L25jmtHcWHod3dsa0jnCQR
-	 Ci4ogRLz00JVzVBggVFS8SoquZUv1kDrc+qtU4EZHtfUfWsdk+yWulZ3lh6S6PCKes
-	 jAbITEiXHe8Wjt9mTvSZa5d+y5MbX2w0rKdvBSYs7Aeh9WGhYSEy9NUPK+9wwXcWOT
-	 d81EmE7DBsuVRY3ndM9n8dz1YuHctEivTd845XSfw8YYA8s7eQhm+R3JUvmoAoOu1E
-	 Ig+LONXHoidoA==
-Received: by gaggiata.pivistrello.it (Postfix, from userid 1000)
-	id 045E37F9D6; Thu, 27 Mar 2025 10:33:17 +0100 (CET)
-Date: Thu, 27 Mar 2025 10:33:17 +0100
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Sascha Hauer <s.hauer@pengutronix.de>
-Cc: Francesco Dolcini <francesco@dolcini.it>,
-	Brian Norris <briannorris@chromium.org>,
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="cQKVds6D"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=AaGk
+	FZpautOPtNIWBgWQGF7TfFJYejda7uBwkLDZ2zU=; b=cQKVds6D4OuSoXyoO/dh
+	Yocs56ryHH59lTHWPlamSchITa3MvdPq/qIRCIAfUp08h0k4mFAOcjDcqAaru7Ht
+	n8uUY5kDqMXnpqnFrYazLcispEBbUxE2J5f/EnE1uSVFta+lQ1Oz8XkCUMkMwzuH
+	uwwUPS+FMHRBCcQZB+N/rWRSk1sSe4kYn8jgzgpie42Tvi8eZy94GG+to1rWlmnD
+	y/R4rf0lb6w1KdGlPdpQKvxyrUd4uf3EK0lqeptf4IquuqFAxKUKJzypu0l5d46g
+	D6hC9bJfk6brv99nBxJsI1u2yq/SgK6X0eZ/GTQiq8CbkwCjoMhRNjKbiQ8KeHrR
+	sw==
+Received: (qmail 3987990 invoked from network); 27 Mar 2025 13:27:57 +0100
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 27 Mar 2025 13:27:57 +0100
+X-UD-Smtp-Session: l3s3148p1@lRR0FVIxZqsujnsv
+Date: Thu, 27 Mar 2025 13:27:56 +0100
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Prabhakar <prabhakar.csengg@gmail.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH do not merge 4/4] wifi: mwifiex: add iw61x support
-Message-ID: <Z-UbXduYmx2i0kxz@gaggiata.pivistrello.it>
-References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
- <20250326-mwifiex-iw61x-v1-4-ff875ed35efc@pengutronix.de>
- <Z-Pxx983jcb0GTtg@gaggiata.pivistrello.it>
- <Z-QHG0fyM8wRy2FH@pengutronix.de>
+	Linus Walleij <linus.walleij@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, linux-renesas-soc@vger.kernel.org,
+	linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH 15/15] arm64: defconfig: Enable Renesas RZ/V2N SoC
+Message-ID: <Z-VETFWFT5NksD7J@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Krzysztof Kozlowski <krzk@kernel.org>,
+	Prabhakar <prabhakar.csengg@gmail.com>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Linus Walleij <linus.walleij@linaro.org>,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Jiri Slaby <jirislaby@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Catalin Marinas <catalin.marinas@arm.com>,
+	Will Deacon <will@kernel.org>, linux-renesas-soc@vger.kernel.org,
+	linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	Biju Das <biju.das.jz@bp.renesas.com>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20250326143945.82142-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20250326143945.82142-16-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <41c6f512-47a5-4723-bbdc-64ed85ae8391@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="KizQkLAOEp/210C2"
+Content-Disposition: inline
+In-Reply-To: <41c6f512-47a5-4723-bbdc-64ed85ae8391@kernel.org>
+
+
+--KizQkLAOEp/210C2
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <Z-QHG0fyM8wRy2FH@pengutronix.de>
 
-On Wed, Mar 26, 2025 at 02:54:35PM +0100, Sascha Hauer wrote:
-> On Wed, Mar 26, 2025 at 01:23:35PM +0100, Francesco Dolcini wrote:
-> > On Wed, Mar 26, 2025 at 01:18:34PM +0100, Sascha Hauer wrote:
-> > > This adds iw61x aka SD9177 support to the mwifiex driver. It is named
-> > > SD9177 in the downstream driver, I deliberately chose the NXP name in
-> > > the driver.
-> > > 
-> > > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > > ---
-> > >  drivers/net/wireless/marvell/mwifiex/sdio.c | 79 +++++++++++++++++++++++++++++
-> > >  drivers/net/wireless/marvell/mwifiex/sdio.h |  3 ++
-> > >  include/linux/mmc/sdio_ids.h                |  3 ++
-> > >  3 files changed, 85 insertions(+)
-> > > 
-> > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > > index cbcb5674b8036..7b4045a40df57 100644
-> > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
-> > 
-> > ...
-> > 
-> > > @@ -3212,3 +3289,5 @@ MODULE_FIRMWARE(SD8978_SDIOUART_FW_NAME);
-> > >  MODULE_FIRMWARE(SD8987_DEFAULT_FW_NAME);
-> > >  MODULE_FIRMWARE(SD8997_DEFAULT_FW_NAME);
-> > >  MODULE_FIRMWARE(SD8997_SDIOUART_FW_NAME);
-> > > +MODULE_FIRMWARE(IW612_DEFAULT_FW_NAME);
-> > > +MODULE_FIRMWARE(IW612_SDIOUART_FW_NAME);
-> > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.h b/drivers/net/wireless/marvell/mwifiex/sdio.h
-> > > index 65d142286c46e..97759456314b0 100644
-> > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.h
-> > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.h
-> > > @@ -29,6 +29,9 @@
-> > >  #define SD8987_DEFAULT_FW_NAME "mrvl/sd8987_uapsta.bin"
-> > >  #define SD8997_DEFAULT_FW_NAME "mrvl/sdsd8997_combo_v4.bin"
-> > >  #define SD8997_SDIOUART_FW_NAME "mrvl/sdiouart8997_combo_v4.bin"
-> > > +#define IW612_DEFAULT_FW_NAME "nxp/sdsd_nw61x.bin"
-> > > +#define IW612_SDIOUART_FW_NAME "nxp/sd_w61x.bin"
-> > 
-> > Is there a way to have BT over SDIO with iw61x? I was sure only sd-uart was
-> > possible.
-> 
-> The communication to the Bluetooth module indeed is UART only.
-> 
-> I think nxp/sdsd_nw61x.bin contains firmwares for both the WiFi and
-> Bluetooth chip. When using this you can use the Bluetooth UART directly
-> without uploading a separate Bluetooth firmware.
-> 
-> nxp/sd_w61x.bin only contains the WiFi firmware, so you have to
-> upload a separate Bluetooth firmware over the UART interface.
 
-If that the case what you did here is not correct.
+> So the pattern will keep growing and none of you will ever bother to fix
+> it, because you have your patchset to throw over the wall.
 
-The 2 firmware files here are used file depending on the BT host interface used
-on the Wi-Fi/BT chip, and this is read from some strapping register. See commit
-255ca28a659d ("mwifiex: Select firmware based on strapping").
+I dare to say us Renesas people are not too bad at fixing stuff. In this
+particular case, I don't see a wide consensus that the above stuff is
+considered broken? Please point me to it if there is such. We are happy
+to discuss.
 
-BTW, this name sdsd_nw61x.bin is confusing, I would have expected this to be
-something like sduart_nw61x.bin.
 
-Francesco
+--KizQkLAOEp/210C2
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmflREgACgkQFA3kzBSg
+KbZr/g//TelLcMOOIS9o8lq5TK9vmeyE5CGHg7W0oBugLs+o1YietMaOgMmPload
+EIrIbMkKfNULW7EO2Or1V91Q9RmsjhlFBZKZ9B7n0VCogzfKe82UO4wzmqbVyta0
+762BIRFYHnKMrH+YSNe5voWIBoy20Tf3vqGIuDdi/G7feHmkogAsJQ9klyU3QU/S
+hDMgHtDa5amsVteTic6S55SnWy7VSk69q5JSM/BIjoYSxAdPRQI67pUOjDs4lCAk
+NChC8OKZaASyPJgkbveu8C9OxSRaVHO+yvVVHkVISIVfXIGBDEEAZoChYtW8ABE0
+wcIR7w1u0GulTnI8fdLOET1E+7bQYkxaY7cVTQs1yt5iqa5kBh5+fIAqLR8JEJEW
+WHre3BNwkt4TPt4uGPublOrGwDpq5nnPztFBGJAilnersV9dvxOI0+ZMVcZ1LxAi
+NcQHe/h+FF7RjAuq+Ho+/4jkQtX+3oJuUXjILIXOjat8JRyJNbD7GUf9BVtO8Oq+
+MMWRVWmWUmQNGeb34TYjBt88b6HWvr/qUTi3dweFNJD3i2Sq6xEctt+sU0K214SL
+BzES5xCL52LnyR886e1/Wx10E5ITl7Er7+hq4ct1wEHCQUA90xO248jbXgqsDjl+
+oIgHCjTHUjt93rzQmKdBCrAouvvIqNi9GwI3K15H/3zmTEDOlZU=
+=WWXu
+-----END PGP SIGNATURE-----
+
+--KizQkLAOEp/210C2--
