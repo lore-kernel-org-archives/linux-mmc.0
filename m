@@ -1,124 +1,133 @@
-Received: from mail-qt1-f178.google.com (mail-qt1-f178.google.com [209.85.160.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B92F81A9B5D;
-	Fri, 28 Mar 2025 15:09:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 09FCF1D5AAD
+	for <linux-mmc@vger.kernel.org>; Fri, 28 Mar 2025 15:10:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743174599; cv=none; b=dQCRNr0nB5BTjzSR24lW2ZcjBXdTjijn80c+yptxSoJnitvCsyBRzsCkEme2VdL/eBcRH2bwj762FLOvPD5d3WEM0DrDVDWN8otqVxV24EXX8vcDOnqisuMiqNIELV60VzUIqJnMWyfqTTEl3PxBdpzsIX/Ad3wEvGRSF4zLqyQ=
+	t=1743174642; cv=none; b=XeurhHX9pQqfolCqQUibSTI5adEW15pkOm8YhVLbjtnQJIzSaHxo78oQ+t3hJcw292uAuQzlnHeU9Au2GqNipASslnrfd9lqQnZCPfI5xahAnjCvvCmHzNE765B/2AGqGMRQXdzGapVLMHdMtpupPjDbWFk0RdzO180aE4c1NDE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743174599; c=relaxed/simple;
-	bh=ah3hu0AHfgkkvSk7ohighiuYRZJ2eQBgx9wMy2atfE8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=CWj5/ZuSM9jUS4WaWlqbjfAYF5eghbHMdVt+aNHZouWnlxRb3PIApixP5uzoogwRE9LPeXOIXspMZEAAXdPycC2G/W7X3hIkfsCRFOK1Gmz20rwvxqUX7L7ZdBaM2n4V2iJ2sDxj1rv9TQ4q4nO3bj8jQTBDI1xFzcVtbASkuZU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FHLVAD+L; arc=none smtp.client-ip=209.85.160.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FHLVAD+L"
-Received: by mail-qt1-f178.google.com with SMTP id d75a77b69052e-476b4c9faa2so30278521cf.3;
-        Fri, 28 Mar 2025 08:09:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1743174594; x=1743779394; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cHMi97rW5XnYmsHSdrUIP8vR+FvAoZCe/aUt1UwDlcM=;
-        b=FHLVAD+L6FJ+TMxJVfnj+uKJ8j8MiRsOgoZk/Z7nZiC2SoD3TS2zw+d7GDp0ZWhwaA
-         UyLlP8WCPvmEnOKB+LFgHi+19fiUSVwW3FObjtWAocAxXsLHiLJuUwZYwohVuGnyluze
-         0fyxaGCXZOjXSZbWrDQekCvAuyStvLRZAgDSoCpTy1NoER9e+47v0ifO63a0FtSwJab7
-         flBt+5/GswLgGEQQ2GyfVfgVuj4+a++0iaUz4fIIVWXlj/JZ4PUZ0pa3hiVNqbxKDbrv
-         vIsOuGZBD+bz+F26qVn/nvb6wvtonysnYL3gE9k0vxQN1NbN72R3ENi/5sTmIntJC83B
-         hvJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743174594; x=1743779394;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=cHMi97rW5XnYmsHSdrUIP8vR+FvAoZCe/aUt1UwDlcM=;
-        b=d5wLI3vhHM6mgjS+YYCbdm1EKEFXl76Sxo5lLOGXdrDa2Y3igN+O+Xx7F+DDS+yQOS
-         suwIC7myMqsk60txl1e2armLcOBww9oN0uEZQPSzeX1wuRY4RIUa09zlUIr443/8hJSV
-         hhpXVXzR3d2eCAbP9OIloCO+sfdfwNuD4QNYogbu6BgCJa07wx6K4PKU/NQ1qO+L0ZO3
-         2EW7PRH4aLKnhocuedPdMJtH7IAQMx3WL85L1erjksoHNKuLMmgaAnbMlasPin4Nv2Ca
-         KplwA0qa+CYoQtzVeXgcUBskVBZDq1ck2IVqfP2Gkee5AeOIVDAFmQ03QZn28/W4y90L
-         wi/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCUQHjnqiXQFXGT1ATOmemmUzX4imCM7AtNWk/NH1y3gUu9nA9LlorcSjOQ639Jjw7dLE1pH+YID5+uB@vger.kernel.org, AJvYcCW0TjCmEtPTDftIgDYU86jo45b8jtLtnPifLsrLOQAaEBhY6BpUS7PpNpRAPIfaLJVDpGyYveElrCPf@vger.kernel.org, AJvYcCWBXWZ1mSf8c0n4KVB/z5nYg4iWWyDStZkVvy6/xmrPbCYv0JQWyxtAmDaUxzPbH8k/Q++nJ613tZuAyba9@vger.kernel.org, AJvYcCWHB+sCY+l3BS/OSL4m0YLxuysErqQzm9lglTzTjyEgVYj+vkjXneit/aYOyzFs0/GLbc8MhG20TM049A==@vger.kernel.org, AJvYcCXMNhrz7t4pWfoIqZiADf+8EbU2lr+WyJ0gR/Bf+0b3lNm9AAKdqbEjC5lnaU/7+PLKvBTSzX1iq7X9LKiI@vger.kernel.org, AJvYcCXUIJ2/ugWvsbgDJsyHnxUH5A4H3eVAo1j5Oa09fF1wAYsE8k2xMSOZGHFQvts46VRGd1/8aVHazqzk@vger.kernel.org, AJvYcCXhyStjkeOs/BJCk3WahDm8wIEV2LMtGMQz49SRZaduktziZaLISJmQss5GPFNT+Q+/led+9DTENgfJBOl57+Xt1oc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyG32a+CugVQugGqzVQKta+XQwWfSWSBorp8Nj9XL03uL9viayy
-	wAVYqvOsCkFJK0eMX+DR3bQ+SyFaf2VEMiAGkH9B6UOtbrtCc4u0A2a/Q8qBiehKRzdAoUUWVG1
-	V7V07e12X6GkqbbpY4yqYhAFG/4g=
-X-Gm-Gg: ASbGnct4K+/9UAQNiSZBfGDbIi4p9G2OAmo4QObrl8CQ/PB7hIKVGlRTdJan+RMjD3H
-	XZA0jCup/hIgRlaJwc67xv9/pXnFQGzQUzdJCn5aTsn6VGGHfcXpWD23UY8ExZBC8Z/ae/ZQ03p
-	/q/ytbRFaamVyZO+KYpsd5pebMG1BQ32XP7XjyWMVhXa5jnK72qVM/SVhM
-X-Google-Smtp-Source: AGHT+IG4QqpaNQDy731U58i3bQqCRBN4wxgf2WnACwyQB2g5h8HohI9uM8ZQbNABaLBYgrNgY/+RPwYvoW7m6YupGso=
-X-Received: by 2002:a05:622a:580c:b0:476:b3f0:a905 with SMTP id
- d75a77b69052e-4776e07acccmr119111651cf.8.1743174594347; Fri, 28 Mar 2025
- 08:09:54 -0700 (PDT)
+	s=arc-20240116; t=1743174642; c=relaxed/simple;
+	bh=vREaxluqoOJihcdAvEAhXC/frbBK3xAmj2NukVk8Crg=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hQM+GOBAts2DFqqSrs+PaHoAIc9fbm2ReIVdEgVkOMOybfCw6L2dPk0oNbI6pXaCXMZzvvzL3XrYEC85/wZvHBdsKqCDri1XlT2/VooX90qrU1MLaWCKi95MAkCKkaui35K7GQQPNQ6AYG6mo0d5/ZrSL3g50yEAAPxTTEXlKGY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <sha@pengutronix.de>)
+	id 1tyBLq-0008Mo-2i; Fri, 28 Mar 2025 16:10:30 +0100
+Received: from pty.whiteo.stw.pengutronix.de ([2a0a:edc0:2:b01:1d::c5])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <sha@pengutronix.de>)
+	id 1tyBLp-0027Nq-2e;
+	Fri, 28 Mar 2025 16:10:29 +0100
+Received: from sha by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <sha@pengutronix.de>)
+	id 1tyBLp-003sBp-2I;
+	Fri, 28 Mar 2025 16:10:29 +0100
+Date: Fri, 28 Mar 2025 16:10:29 +0100
+From: Sascha Hauer <s.hauer@pengutronix.de>
+To: Francesco Dolcini <francesco@dolcini.it>
+Cc: Brian Norris <briannorris@chromium.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH do not merge 4/4] wifi: mwifiex: add iw61x support
+Message-ID: <Z-a75VNI9liliHz1@pengutronix.de>
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+ <20250326-mwifiex-iw61x-v1-4-ff875ed35efc@pengutronix.de>
+ <Z-Pxx983jcb0GTtg@gaggiata.pivistrello.it>
+ <Z-QHG0fyM8wRy2FH@pengutronix.de>
+ <Z-UbXduYmx2i0kxz@gaggiata.pivistrello.it>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250326143945.82142-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20250326143945.82142-16-prabhakar.mahadev-lad.rj@bp.renesas.com> <41c6f512-47a5-4723-bbdc-64ed85ae8391@kernel.org>
-In-Reply-To: <41c6f512-47a5-4723-bbdc-64ed85ae8391@kernel.org>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Fri, 28 Mar 2025 15:09:28 +0000
-X-Gm-Features: AQ5f1JorkyU3M-MDsNZEjTYwlCJiHquCQUVcPMiTcuQthITmDLDNSbYjZqb0KuM
-Message-ID: <CA+V-a8sT3sV4D-i84G8D1q1s_PBGCQagc=YGSvTfTWVYJsHoeA@mail.gmail.com>
-Subject: Re: [PATCH 15/15] arm64: defconfig: Enable Renesas RZ/V2N SoC
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Michael Turquette <mturquette@baylibre.com>, 
-	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jirislaby@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, 
-	Will Deacon <will@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Z-UbXduYmx2i0kxz@gaggiata.pivistrello.it>
+X-Sent-From: Pengutronix Hildesheim
+X-URL: http://www.pengutronix.de/
+X-Accept-Language: de,en
+X-Accept-Content-Type: text/plain
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: sha@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hi Krzysztof,
+On Thu, Mar 27, 2025 at 10:33:17AM +0100, Francesco Dolcini wrote:
+> On Wed, Mar 26, 2025 at 02:54:35PM +0100, Sascha Hauer wrote:
+> > On Wed, Mar 26, 2025 at 01:23:35PM +0100, Francesco Dolcini wrote:
+> > > On Wed, Mar 26, 2025 at 01:18:34PM +0100, Sascha Hauer wrote:
+> > > > This adds iw61x aka SD9177 support to the mwifiex driver. It is named
+> > > > SD9177 in the downstream driver, I deliberately chose the NXP name in
+> > > > the driver.
+> > > > 
+> > > > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> > > > ---
+> > > >  drivers/net/wireless/marvell/mwifiex/sdio.c | 79 +++++++++++++++++++++++++++++
+> > > >  drivers/net/wireless/marvell/mwifiex/sdio.h |  3 ++
+> > > >  include/linux/mmc/sdio_ids.h                |  3 ++
+> > > >  3 files changed, 85 insertions(+)
+> > > > 
+> > > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > > index cbcb5674b8036..7b4045a40df57 100644
+> > > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > 
+> > > ...
+> > > 
+> > > > @@ -3212,3 +3289,5 @@ MODULE_FIRMWARE(SD8978_SDIOUART_FW_NAME);
+> > > >  MODULE_FIRMWARE(SD8987_DEFAULT_FW_NAME);
+> > > >  MODULE_FIRMWARE(SD8997_DEFAULT_FW_NAME);
+> > > >  MODULE_FIRMWARE(SD8997_SDIOUART_FW_NAME);
+> > > > +MODULE_FIRMWARE(IW612_DEFAULT_FW_NAME);
+> > > > +MODULE_FIRMWARE(IW612_SDIOUART_FW_NAME);
+> > > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.h b/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > index 65d142286c46e..97759456314b0 100644
+> > > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > @@ -29,6 +29,9 @@
+> > > >  #define SD8987_DEFAULT_FW_NAME "mrvl/sd8987_uapsta.bin"
+> > > >  #define SD8997_DEFAULT_FW_NAME "mrvl/sdsd8997_combo_v4.bin"
+> > > >  #define SD8997_SDIOUART_FW_NAME "mrvl/sdiouart8997_combo_v4.bin"
+> > > > +#define IW612_DEFAULT_FW_NAME "nxp/sdsd_nw61x.bin"
+> > > > +#define IW612_SDIOUART_FW_NAME "nxp/sd_w61x.bin"
+> > > 
+> > > Is there a way to have BT over SDIO with iw61x? I was sure only sd-uart was
+> > > possible.
+> > 
+> > The communication to the Bluetooth module indeed is UART only.
+> > 
+> > I think nxp/sdsd_nw61x.bin contains firmwares for both the WiFi and
+> > Bluetooth chip. When using this you can use the Bluetooth UART directly
+> > without uploading a separate Bluetooth firmware.
+> > 
+> > nxp/sd_w61x.bin only contains the WiFi firmware, so you have to
+> > upload a separate Bluetooth firmware over the UART interface.
+> 
+> If that the case what you did here is not correct.
+> 
+> The 2 firmware files here are used file depending on the BT host interface used
+> on the Wi-Fi/BT chip, and this is read from some strapping register. See commit
+> 255ca28a659d ("mwifiex: Select firmware based on strapping").
+> 
+> BTW, this name sdsd_nw61x.bin is confusing, I would have expected this to be
+> something like sduart_nw61x.bin.
 
-Thank you for the review.
+You are right, there seem to be some things mixed up. I'll have a look
+into it for the next round.
 
-On Thu, Mar 27, 2025 at 7:43=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.or=
-g> wrote:
->
-> On 26/03/2025 15:39, Prabhakar wrote:
-> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> >
-> > Enable support for the Renesas RZ/V2N (R9A09G056) SoC in the ARM64
-> > defconfig.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > ---
-> >  arch/arm64/configs/defconfig | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfi=
-g
-> > index 11e7d0ad8656..c7b41f86c128 100644
-> > --- a/arch/arm64/configs/defconfig
-> > +++ b/arch/arm64/configs/defconfig
-> > @@ -1483,6 +1483,7 @@ CONFIG_ARCH_R9A07G054=3Dy
-> >  CONFIG_ARCH_R9A08G045=3Dy
-> >  CONFIG_ARCH_R9A09G011=3Dy
-> >  CONFIG_ARCH_R9A09G047=3Dy
-> > +CONFIG_ARCH_R9A09G056=3Dy
->
-> So the pattern will keep growing and none of you will ever bother to fix
-> it, because you have your patchset to throw over the wall.
->
-We are working on this internally, upon approval this change won't be
-needed anymore for the new Renesas SoCs.
+Sascha
 
-Cheers,
-Prabhakar
+-- 
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
