@@ -1,115 +1,94 @@
-Received: from mail-vk1-f171.google.com (mail-vk1-f171.google.com [209.85.221.171])
+Received: from mail-ej1-f47.google.com (mail-ej1-f47.google.com [209.85.218.47])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 874F44B5AE;
-	Fri, 28 Mar 2025 14:48:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9C3FC35958;
+	Fri, 28 Mar 2025 15:05:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.47
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743173305; cv=none; b=ZFW5c6kxPsbof/mEA/9An6/0hD6PCCOtPimdtbyxZJpSWOZSRbH0TA1Zs0Xy3u0Yz8zq0sFb9rqlfU25JS/QWEKUgy65mbvCwUGGb2u+vy9BxvfzOOHp559TGtBoYo9s0lR1H7U6xGLJITQXOfOyqBYUw/2lpdFrVYXZiNPw3Wg=
+	t=1743174320; cv=none; b=TFk92zJgGQZBFHgWw9FFdO8LF/tDr2BymQcRwqcDynTeJ6Ae4+VLtOABxnRLioObkvM4zROuvs51roOVa8vaCkcadXWCMdoaSYdukdYm68WfmdNd+0LiKQNlc/OJyRD04JpEqEDXSTdOualJ0BjpI0X+qXIu65ryBn3R9YB0BC4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743173305; c=relaxed/simple;
-	bh=W7R2gZBzWBuPUH9E8mLgn5iH+bIAruEwVlJhbgs2hj4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=PEXWsR7BsE5eXukrP97vKjW5qOSkyTCQ9GwxpjeBYxgnpmxVOt6/UTECxkOspsKvdEhZkVtkSlNLbr6uLPUYTQzHa5/NuSU+kkSvMI1UyIyhIJamOtt//WkaMEikbQq79wqtulWduS8+M4PEedgJ9T7Gl+AApItvBNYNBiZ6DHc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=fEaxdXBM; arc=none smtp.client-ip=209.85.221.171
+	s=arc-20240116; t=1743174320; c=relaxed/simple;
+	bh=yBAnWmBAgw5MP+8CrbHdbxviKnFNTXsTwW8n9ca0eQU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=sch9ndKiZHgUJCL3ebfnxveO7eXaYOT4PGEgbXDiEUgfzYujxh2nrdZDFhMW+/IKHVcEsETvqtNC4yz1X7CwqZkTDuec2WpHqxy6Yd4UPON9dPSLju3+JjTweJD4xyEUMaCF9fMPR6ig63pAJThoEx5ojUkfASBb4aFrNzCuTto=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=J4aDHu2q; arc=none smtp.client-ip=209.85.218.47
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fEaxdXBM"
-Received: by mail-vk1-f171.google.com with SMTP id 71dfb90a1353d-523d8c024dfso923280e0c.3;
-        Fri, 28 Mar 2025 07:48:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J4aDHu2q"
+Received: by mail-ej1-f47.google.com with SMTP id a640c23a62f3a-abbb12bea54so424152666b.0;
+        Fri, 28 Mar 2025 08:05:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1743173302; x=1743778102; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=W7R2gZBzWBuPUH9E8mLgn5iH+bIAruEwVlJhbgs2hj4=;
-        b=fEaxdXBMHI6Tya/9qDx2dRPCnIa6J43/9+EYLLDgHFQl4qMspEClgm4llYgrSYCLGJ
-         W5045Coc+Nxj4u9xoaibYQRHpCS5yOlCRT5D0a+zy0H93V98FxNYgRnjrCoqKfQIaW7F
-         UW8kQ8fWSilj9tlU4iOGEWwsnhch+Ed7PAqMv6CTAheKiwgLGG9cmK3fQJmnPNvCnT5I
-         zaaa+Nb9ow3J1qBeTvMX5FWsDYJHr+YgTv8MfGakmV9NFadm4gI7RFtnS1BC+GReRniV
-         fvKzq+OTRnSG7NDFN9YmAKnQMaDOBCaDfahw6FKeWFwozTwm+AqvK2ALzydRByLw6+oI
-         dfXQ==
+        d=gmail.com; s=20230601; t=1743174316; x=1743779116; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=yBAnWmBAgw5MP+8CrbHdbxviKnFNTXsTwW8n9ca0eQU=;
+        b=J4aDHu2qh+qL7NlFOsHN9NKI71fx0QIuQCPfNErXBzUg6DJ5YCS0lNP5iyJG0RvsQJ
+         xsRqfDtXxk4dlh4IcjBl+dYwIMOOcOw2qs6UHh+U1ZkJOHc80xzeMbdWojxgyTPQIxvP
+         sPO3tdiCJbvtQsBgDdc7/AcCIwaAUUg0cqTsAsVdulHHyKw/LByOHw4c1kij2TDCQ8pF
+         eryQyjgSXpudxqYqtePVvTroCdYCFsrJu11Y0vkkBR37khY3naZEE5VYE3X5xhcn2cmg
+         KWllNRaLcVSTIym+yJb464TeCvbn+/MYF2dx2VEkrIEauJxSvrvMHd5hTVrJK/IHJ9sy
+         9F0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1743173302; x=1743778102;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=W7R2gZBzWBuPUH9E8mLgn5iH+bIAruEwVlJhbgs2hj4=;
-        b=WCeAk4xT11R77IAEwAQSa6BXY//9OBH226NmljWzizNxOiU+ve3TrfaGDZt5uWngiD
-         bGCaNXQ9KEF1wSD2JU8OpTiFysB4eY1qBhc7KcgYUDuGVuqObTihuldaeRoM7mAP7nSa
-         zRe/CRUKVFhj0X3+g8P3n6+K/iSmTKVvX0tR1bTNjv7tl8jMecF6xYYheaHCt+GXDLE+
-         Y6Kuaj6jKVhyHaVtmQEroU7MJC5vVXQ1Hd8k4Yv/RCLKmizn00Dk7Vi35eYoGTSbYGTn
-         r5Q5ZhfqcYEW6DyF66Lof28d5TpmoKYd1lAdm5Que1qwQb3A0KUWClgV/g8tSLLm/iKm
-         Geqg==
-X-Forwarded-Encrypted: i=1; AJvYcCU/MxYVvYwHHH7ylatz19DBBUk/LOI7UwgG/VnvXDsgCQH20lD09MAA1jTAGQEYtj09M6qVkkwEGNTrxv56FhdlME8=@vger.kernel.org, AJvYcCVCMSYro1jl0cubRDemWmCCmHqmOUb0Fiaarz4b7bFBFrgX/TC+dkuP2x7XD88mQEA8maoUyUxHT07JJUM0@vger.kernel.org, AJvYcCVqa8pHK5yAP/RQIEkWwx4W5IHN7h1ILf+ZY8ju41XJVBhu/mEyyUYrO+uZC7jq0oedttB63JLBxJCf@vger.kernel.org, AJvYcCWUcwOp3V2FoHnL3uCkJs84sLYS3AIh0oia/CBiCX24cXVW0uwcs/5sp0x9OSlN0Qoc5SgcqXTUQLm7@vger.kernel.org, AJvYcCWblTKUnNgDNy1B7wPhGYP1y7tU9vDv9KMK/ivAtR51cHZBcy+xrbrypmN5B8VbqKbttf44mIiElYr6pC40@vger.kernel.org, AJvYcCX1c5iRtkyqo5+J735TLwPWpnmMl9/iqSGyle9+yWkMjX7wuCUm24R/To6JAPMzi2uhgHFHOpKQ3obJdw==@vger.kernel.org, AJvYcCXK1vO69tmDot6oBABiI9wnTuRtpyo+h9aB0GAN2D7hve63lAN5i8WndUwqcWJosOdLpOJ7AMi/luAR@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxexab2UG7SJk8fSFORMVFHcMuiSBZa3FHctQU8vGx8ollPlEHj
-	SkoQdnQu6Nj/Drkbaqe+viWB0BtKleHh9zfABZTDdsD7DGuOFJGZNgnoO2KP/hn5BNi1OkbOAXY
-	giEjPO+PTbMGzqWkyzprnIB6smus=
-X-Gm-Gg: ASbGncvRWMIWeYlOrH6aozR509CIv2fZtbrGmAQY/8kxQEy8n0c6HBiAYgHqTyWa7qE
-	oeE4PjyGGdaRsQfMIWf8kXH7LVqqAdrmskPSUefkqEjA4o1oPDYL5dh1bMYRBBsz5Q08rXhPJow
-	zx1zDHtje2on759CpWaBcDYWUyII+9560F1Nwz/mIXmZDV5MoF3+mZ37hp
-X-Google-Smtp-Source: AGHT+IHouldgTyP6Q/w4w6vBsXV6nSeyEMfHGqZjhRlDBBXFbUfgEyb6My2WMEzsfSI0GSy57EiD1BG9iD1i8bsYjz8=
-X-Received: by 2002:a05:6122:3d0a:b0:525:a70d:3110 with SMTP id
- 71dfb90a1353d-52600a8712bmr6248996e0c.8.1743173302143; Fri, 28 Mar 2025
- 07:48:22 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1743174316; x=1743779116;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=yBAnWmBAgw5MP+8CrbHdbxviKnFNTXsTwW8n9ca0eQU=;
+        b=mK6siI69C/Iyytkz2SP6YU4UWJ9RCTktepijFR2bEXZmvvlrvyLVpv+3PEUZxQD1gI
+         WsGidNEMU+Cv3H0+enr5nhdpLHQU+2/I6woMMfrbHTPFD7y58YM6k3O6/EbK0VVPwmsH
+         QjL0ILagepaY3n++4XyigxhjFCHv7A/rc/aErT4IofJ3vCnTGj5DYs+qBoJSV8rRFUKz
+         xpU+R97T9A58iw2LVid3rwvyXXFqpuZNNxpIEQ5kjqL0BI6wpqRFBm8QwQU9K+gHtNJS
+         wwD1Ju6CVBAyk5rePhrcYPWbX6wDGGEm2TEpGmt+1P+rIm2Q2/wZRUkoJlqpDXm02RiE
+         RrCA==
+X-Forwarded-Encrypted: i=1; AJvYcCVtqQJtgSEHRKsXt6O5v+wOSLlFseAxQlsB+NfbXqGFbdsnty/VQ0wQ4gnePfedFV8yxWi6+x05McOjXgwYvZI=@vger.kernel.org, AJvYcCVxr2JwUCRVKq5zfMpsmv4ffrEFAXAiw+vAFSlHWF2TDZHv0HOFE8ZjbdkKmSf7de0CalujvH+IxBpT@vger.kernel.org, AJvYcCX6mitfqoB5+pclQtzeSUFbabAPjWNZSZddO8tiVt9chLNKdUOzsOtZlG+tCkgM5ICedAwDPD5jadAK4sY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzI/gOyPtKuTNlLBaGQTUQYlwe+kbWthmFrnBlbaC6hjjQxY6t4
+	syIbDOpojbId/hPZLF+j9zloqF7OBeR5JJU/IoKUF4yk16FiZw1o
+X-Gm-Gg: ASbGncuLA5eoveLLjHR65ILIrRVnN5J+vMTFGGyegBqZSNpwa0omirWvdA5k3I4SvGs
+	DVrsh6RrulRd9RNEgW0bgI0iIy33okKn/SwLpo+UgExjEPv8xRjkqnNnPRUJIN0RLeblsZuyrIp
+	QgJOQKLLqXbkH85Xt6AVAWPkgr8fvg1KMYw3P/B6IvPjnu8mR2lDlvJZE3ik+0nKpAhi5WzQyRb
+	7slqCA0rHMa35baTw4Fz7RRkB4gFmdXY8rNz+cO6EzLsuFsFobSU611wTdDwKAXvvDrZ5VKsSeh
+	mNJC9trmDCjTPm7QJC19VckR2YRr7POEleNWPRm5Pse+FiKSGBIKHmF+2E/7GC5Zi4HN9FFGXYA
+	q5xw1XDZVNw==
+X-Google-Smtp-Source: AGHT+IHWk57vx99rlJfgQ42vdU2UnQJlrOL3Q7JbsZWIfDJj2d9tmTOHn7pyRMIDwZcmBZOmNRt2qw==
+X-Received: by 2002:a17:907:3609:b0:ac2:7a6d:c918 with SMTP id a640c23a62f3a-ac6fb157031mr825364666b.57.1743174315568;
+        Fri, 28 Mar 2025 08:05:15 -0700 (PDT)
+Received: from ernest.hoecke-nb (31-10-206-125.static.upc.ch. [31.10.206.125])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ac71967fdbbsm171192966b.135.2025.03.28.08.05.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 28 Mar 2025 08:05:15 -0700 (PDT)
+Date: Fri, 28 Mar 2025 16:05:14 +0100
+From: Ernest Van Hoecke <ernestvanhoecke@gmail.com>
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Brian Norris <briannorris@chromium.org>, 
+	Francesco Dolcini <francesco@dolcini.it>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH do not merge 4/4] wifi: mwifiex: add iw61x support
+Message-ID: <p5xukavek27sxpploi7wvx6mwew6ubh2wmckwmzqoxnfmal3jy@gfvn2u3af7kb>
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+ <20250326-mwifiex-iw61x-v1-4-ff875ed35efc@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250326143945.82142-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20250326143945.82142-3-prabhakar.mahadev-lad.rj@bp.renesas.com> <f03c3a6a-aa6c-47be-8a03-7486131f6d32@kernel.org>
-In-Reply-To: <f03c3a6a-aa6c-47be-8a03-7486131f6d32@kernel.org>
-From: "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date: Fri, 28 Mar 2025 14:47:56 +0000
-X-Gm-Features: AQ5f1Jr8bCu5jfB7gzVdmCLWSNd82UxgDWDDpWjIQfNCBC-6gPx3a_B0ei82wkA
-Message-ID: <CA+V-a8vx2VKoADpw5rG0jH6773=QiHB=reNYBr4ncYZGS-H+XQ@mail.gmail.com>
-Subject: Re: [PATCH 02/15] dt-bindings: soc: renesas: Document RZ/V2N EVK board
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Michael Turquette <mturquette@baylibre.com>, 
-	Stephen Boyd <sboyd@kernel.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, 
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jirislaby@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, 
-	Will Deacon <will@kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org, 
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org, 
-	linux-serial@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250326-mwifiex-iw61x-v1-4-ff875ed35efc@pengutronix.de>
 
-Hi Krzysztof,
+On Wed, Mar 26, 2025 at 01:18:34PM +0100, Sascha Hauer wrote:
+> This adds iw61x aka SD9177 support to the mwifiex driver. It is named
+> SD9177 in the downstream driver, I deliberately chose the NXP name in
+> the driver.
 
-Thank you for the review.
+Hi Sascha,
 
-On Thu, Mar 27, 2025 at 7:41=E2=80=AFAM Krzysztof Kozlowski <krzk@kernel.or=
-g> wrote:
->
-> On 26/03/2025 15:39, Prabhakar wrote:
-> > From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> >
-> > Add "renesas,rzv2n-evk" which targets the Renesas RZ/V2N ("R9A09G056")
-> > EVK board.
-> >
-> > Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > ---
-> Squash, previous patch makes no sense on its own.
->
-Agreed, I will squash this as patch patch 1/15.
+Thanks for sharing these patches. To test, I applied them to our
+downstream branch based on the NXP BSP 6.6.52-2.2.0 and can confirm that
+the driver works well on our iMX95-based board which uses a ublox
+MAYA-W260 (IW611) for WiFi (SDIO) and BT (UART). Both STA and AP mode
+looked good to me.
 
-> You, Renesas, already received exactly that feedback!
->
-I truly apologize for the oversight and appreciate your patience. I=E2=80=
-=99ll
-make sure this doesn=E2=80=99t happen again. Thank you for your understandi=
-ng.
-
-Cheers,
-Prabhakar
+Kind regards,
+Ernest
