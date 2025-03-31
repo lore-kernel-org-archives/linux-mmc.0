@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 868CC230BDB;
-	Mon, 31 Mar 2025 14:55:00 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A487923A9AD;
+	Mon, 31 Mar 2025 14:55:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743432900; cv=none; b=SAn3M+nKo5PJfPqL9COV9nvhTYG11kbosOJXcCkJZfDB+aMD0KHPdJRY2V+ZluZ0QF+5LkiknEeXfLjg58V+nF5arQKRxHFlDgUgGFUSZR/Hnxf4wWqyGE78gdNNqmigx0EXdef1FNdbsAUPQoBzrhKu4mS1I/YlraRG56ShpOs=
+	t=1743432951; cv=none; b=cnL+6x1xX84Ev241rInGNbATOR5VDn3ajHCGGqMdzCLvTa3W35+Vo0ZxVnSSTQmvNFSB8rvT2wQV9rovtmjFYEo9uMqHaDiSeArTfEDRF5tIdQbKxes4/ok339JyfsOcCKblro3IbyY6WugVLVU+1OQB+307eipIYYByW+MssVE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743432900; c=relaxed/simple;
-	bh=ddva4/P0C34+lvV4pBOstsyRUWJXeXQagxkiTeyBVtQ=;
+	s=arc-20240116; t=1743432951; c=relaxed/simple;
+	bh=NcT/hrnzRrIJVeDe2fXHIUpKPsKeQ7p3K4hVhXqhQQI=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=KBy0x6dSYfOvnobDlyLwL4FEdFzcT/RH73mUCdGWudR9MrJpnE0HFAQuGiO7Ik1cBdFFDVclLBVeR/i6Pv3rAOMtI57ckEn/0nAF/+Qo7UTqvA49g+MtWjF3Q1UdkfdLLzTgcidUU8njonTARZVMJZXgpymFaBPVbNXUlVzRQhE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=lTy0+H67; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Vnx8p+PVfvcCJe6f7Wn8YUcabqnQcMsiDAJjp5FEnTJT0f8osPk4dRXsda95KNd72ns30qhA+OqglJAFTyI5rfnUnB3zBJeUrSvvnpyeRjH8TtrNxLFqptGydwV8XBY4KoXKoy+bzu4CiMa5YTZ5Zln6K5ANy5HulAAWM5Gmoqo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jTgjcGrB; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="lTy0+H67"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 915D2C4CEE4;
-	Mon, 31 Mar 2025 14:54:59 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jTgjcGrB"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2FF6C4CEE3;
+	Mon, 31 Mar 2025 14:55:50 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743432900;
-	bh=ddva4/P0C34+lvV4pBOstsyRUWJXeXQagxkiTeyBVtQ=;
+	s=k20201202; t=1743432951;
+	bh=NcT/hrnzRrIJVeDe2fXHIUpKPsKeQ7p3K4hVhXqhQQI=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=lTy0+H670tj+YjtKHfCA00VybFyZqei859OzkunsA2/xZy1OCQrv6AsSPOt35nfVH
-	 E79P6znA8d06nBNsVTHLvOEhHLU7RrnZiIbA3CoMRNb0LlwfXLe6og7AuNjUmKqOLc
-	 zCXr0JqIEkRAF24KhXfIoghkCOR1DdDeiWiGayd1dyQdk2sCJjl/NzSyU7FZcprBdX
-	 AFSpuWzD4DAQWC2iIlDXKUbPlQCFoZqzVQkpkFm9/iokfUKOOpgAvr4GVFSJDF1M0n
-	 SO7Vkgaw24W/QvdUAoHE02d27FjVcC+oCGSEBkqlnR6eBCjLqHzyONkj35R575cfTh
-	 T2d+9N18CuaTQ==
+	b=jTgjcGrB8Sijq8vgvC7EP8cYWaykh7THqUJebKNMrGwAH2xHFyhELtS9lKFHoP3v4
+	 AxbAwV9g4nay7GAqG9RPmSejUkPEK6tp7EtaJCWONe7/yi51MEf+8bPuVQUP4ZFaDz
+	 U2frugzH3neVdqLSm6Pk1hUhezsOjW/9SLiSKVlySiDU66nuwQGfXqexeOjcHE1XlA
+	 uDAKGUz7nq2O4a/h4NOfD9s1g1l986n0GzVHsJvOjldmFI2Z4yTUFBo/BkNugk3O3L
+	 Wkmj9sXBUfEdMTBnmBprWOkimgm1OyYBo6IxKgp3us0FBbRYRrlPy7z8opuI5JSePA
+	 528UafbYV+KGA==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -34,12 +34,12 @@ Cc: Kaustabh Chakraborty <kauschluss@disroot.org>,
 	Sasha Levin <sashal@kernel.org>,
 	jh80.chung@samsung.com,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.13 20/24] mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
-Date: Mon, 31 Mar 2025 10:54:00 -0400
-Message-Id: <20250331145404.1705141-20-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.12 19/23] mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
+Date: Mon, 31 Mar 2025 10:55:05 -0400
+Message-Id: <20250331145510.1705478-19-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250331145404.1705141-1-sashal@kernel.org>
-References: <20250331145404.1705141-1-sashal@kernel.org>
+In-Reply-To: <20250331145510.1705478-1-sashal@kernel.org>
+References: <20250331145510.1705478-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -48,7 +48,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.13.9
+X-stable-base: Linux 6.12.21
 Content-Transfer-Encoding: 8bit
 
 From: Kaustabh Chakraborty <kauschluss@disroot.org>
@@ -70,7 +70,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 119 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 3cbda98d08d28..74f224647bf1e 100644
+index e9f6e4e622901..55158540c28cf 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
 @@ -2579,6 +2579,91 @@ static void dw_mci_pull_data64(struct dw_mci *host, void *buf, int cnt)
