@@ -1,57 +1,50 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CC2D4156237
-	for <linux-mmc@vger.kernel.org>; Mon, 31 Mar 2025 08:21:37 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 591B541AAC
+	for <linux-mmc@vger.kernel.org>; Mon, 31 Mar 2025 08:22:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743409299; cv=none; b=mCZFnEBV0eOSdrCKK6fmbozws0O9J3HovGJ6QgK+AZYJtTqA8vei4itYH/bGG4BCO7+kn+NBFmy5itzxZmVYnBBLHGaXDOfiERgT+wWF5T+5kS78ZvpTLlk5ajp/eo7H7AzUEp3sWsvnxm2cFZL2C5civXfq/K9pPW4dzr502IQ=
+	t=1743409379; cv=none; b=PL0cRu0skzrmxJiOMTqwDuqfCiNTJAetnG1ygYep65Y1E0uSkdAUtiDMx4L/qEX8GHSEmfvfK6DPOBpHJpF3hT1PvcYi/ZZPZ9Jg9YT3KJVmf9hlBP1v8tM1UXoAeUrjmaHuB9UnzTFmv7k9zwaTz3SCQhi/REuhlG9N/PUbyLg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743409299; c=relaxed/simple;
-	bh=O+d2Bq5InAfvbUtNRFvjOZz5U5I9ACs5cJ2k18Bq9Po=;
+	s=arc-20240116; t=1743409379; c=relaxed/simple;
+	bh=cErORlmBQ7cX4+LXkK8ApLOIo1/7j9xJiW1S2gw/lYA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=OW2OC4guQYlbVSC/jrq6mAh1ss76fcO9oWyYz5J8v+dQge8YsZBZcqD56rgjXAlBFYQregdQkBwvvqYZ38knTx+emHJm/VP02hJcMNnpMVo4G/1twR7NygLwKmaZ3033z1oSz+uS+Tl4vSGQajOgKNC66Vd9G/OcAXdqMce8jjw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=ZwMsEIm9; arc=none smtp.client-ip=194.117.254.33
+	 Content-Type:Content-Disposition:In-Reply-To; b=AdBufdTzUkN5+busSHOvvtd6vcYC/6+Nqbth0NfXCieNXKVz3SOBjyXJ1OAEZtFObrPjZNtlubbCQBC52d8gLw6Qc9SNaYfjXXOvGMqANnmrWcfV0d9Uxo7bbfUJLregSCAcZjmsprNBojB2tZv4Fnd3X8dS9KyC0mFsAet2GzE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=Kl/Hg3ek; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="ZwMsEIm9"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="Kl/Hg3ek"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=IGWw
-	8qFgg6eg9vPA7/4VvG1Ud5dlSzv88z9X1EKANhI=; b=ZwMsEIm97tnblwANkqUn
-	R9xFqxyhRf/wnXGkCAo8NoIczpB02JM3xHTcIuzwYe9xJhmRds/gjyRcIzh8VOPn
-	jt65hMsYprhnftXrFwCjokP+oUVab9LKHEoCC2aw/U+4YWNPmdbrJXuD6Tf94spL
-	M7QIOZ/aAX4pMIBg2nUOrTWe46y2lvm42AQ8ejV2yXnG77ahH7e2s/Sds200G4pE
-	3xiQC++fLm7QAYpYgVo50X6pjRpoQ8W5S89JLRKSvBWKL7vsc2nCJ/Sdx72pJ7/1
-	7HrMW2YxI9q6/inmPuF5qEc0qmgTflhWuqTOuA+fDOuOOn+/UUTS2lkef7ssTNVD
-	Tw==
-Received: (qmail 1154309 invoked from network); 31 Mar 2025 10:21:35 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Mar 2025 10:21:35 +0200
-X-UD-Smtp-Session: l3s3148p1@HvbAG58xULVQ8qei
-Date: Mon, 31 Mar 2025 10:21:35 +0200
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=cErO
+	RlmBQ7cX4+LXkK8ApLOIo1/7j9xJiW1S2gw/lYA=; b=Kl/Hg3ekxFnonu+zzm8J
+	3a+o7HH2Jwc1P42FUlhwjOYzKQ90xmVExpW76eD1buOe40PV6Bn+gbAGD8q2oQk+
+	aFUtcOjHirWZOE26NwbxanGMk4JMeViKWtw0B+Epoz08GAoy0Q+rm/36Axt10AhV
+	3GnlNYasEGHyZJQZy2tWg1kvk+Etciiufw6gxM/r0tsJHRGNh/aPaZTGBK7+1v6C
+	0cR3xc7Gd+grbcxZtVtjuXgyfiP0mOAagYX31hX840zWU5uHzHNpxMcjlIgs+K7i
+	c1Yfs5Ev1JC3ocd4clG52vt6McytzflKb/TuZe3m92BMgEVJeXf7yO39gx8KHEro
+	ng==
+Received: (qmail 1154732 invoked from network); 31 Mar 2025 10:22:55 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Mar 2025 10:22:55 +0200
+X-UD-Smtp-Session: l3s3148p1@wN1+IJ8xHNNQ8qei
+Date: Mon, 31 Mar 2025 10:22:54 +0200
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
 	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH 2/5] mmc: core: Further avoid re-storing power to the
- eMMC before a shutdown
-Message-ID: <Z-pQj6ynnfMa77fM@shikoro>
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 3/5] mmc: core: Convert into an enum for the
+ poweroff-type for eMMC
+Message-ID: <Z-pQ3rRm__8XLLrq@shikoro>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Avri Altman <Avri.Altman@sandisk.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-	"linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-	"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 References: <20250320140040.162416-1-ulf.hansson@linaro.org>
- <20250320140040.162416-3-ulf.hansson@linaro.org>
- <PH7PR16MB6196C3AC7A7B7CA99A70E7DDE5A02@PH7PR16MB6196.namprd16.prod.outlook.com>
+ <20250320140040.162416-4-ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -59,52 +52,47 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="wgxMxZN1D+yrS8rW"
+	protocol="application/pgp-signature"; boundary="/+qaW/Tbmx/7P+oU"
 Content-Disposition: inline
-In-Reply-To: <PH7PR16MB6196C3AC7A7B7CA99A70E7DDE5A02@PH7PR16MB6196.namprd16.prod.outlook.com>
+In-Reply-To: <20250320140040.162416-4-ulf.hansson@linaro.org>
 
 
---wgxMxZN1D+yrS8rW
+--/+qaW/Tbmx/7P+oU
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Mar 20, 2025 at 03:00:34PM +0100, Ulf Hansson wrote:
+> Currently we are only distinguishing between the suspend and the shutdown
+> scenarios, which make a bool sufficient as in-parameter to the various PM
+> functions for eMMC. However, to prepare for adding support for another
+> scenario in a subsequent change, let's convert into using an enum.
+>=20
+> Suggested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
-> > +static bool mmc_may_poweroff_notify(const struct mmc_host *host,
-> > +				    bool is_suspend)
-
-Maybe add some comments about the difference between
-mmc_can_poweroff_notify() and mmc_may_poweroff_notify()? Like make it
-super-obvious, so I will easily remember next year again :)
-
-> >  	if (mmc_can_poweroff_notify(host->card) &&
-> > -		!(host->caps2 & MMC_CAP2_FULL_PWR_CYCLE))
-> > +	    !mmc_may_poweroff_notify(host, true))
-> I guess this deserve some extra documentation because:
-> If MMC_CAP2_FULL_PWR_CYCLE is not set but MMC_CAP2_FULL_PWR_CYCLE_IN_SUSPEND is set,
-> !mmc_may_poweroff_notify(host, true) will evaluate to false while !(host->caps2 & MMC_CAP2_FULL_PWR_CYCLE) will evaluate to true.
-
-I agree, I neither get this. Another way to express my confusion is: Why
-do we set the 'is_suspend' flag to true in the shutdown function?
-
-
---wgxMxZN1D+yrS8rW
+--/+qaW/Tbmx/7P+oU
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfqUI8ACgkQFA3kzBSg
-KbbIYRAAtWtHSaWe6gFO7ulJ67U+Tcc+D4oNG8LbrsHZyxGjbtnxLqk9fT3df2L/
-u6dO08o7aSmjaOMSPa0EPxU8dCZbrznYKB+1chbvyS7r0FmsaEA1ljiAUgbJX6va
-S7xXlWTDTVz8CrrrPG3uABsDIIITMEohVu1ep0Lmm1Ilbewcqo7L+sE6ryqzJPrG
-BidhCyP2CjUdUMXoqOaIbiysbkoSbj07ekBf8DXtL7lBEt3BUkPqF6tpMcdwaJLi
-BOhyivvHVm9WZfo2eIlYChCzriGDZeQC/N5G8doV8bWHqlPL+LEYs7kIhe5jbO2N
-bZnOQQOVH6BwMJR2nqOhSCMndCHEC6jpeliRAPNf7esXdtR73N4B+h3Oq1e1BViv
-62Qiy7TsJ6/MYsmXehMsisP2Ccyjm6Qr1K+pbUMWGWO5uqr8JE+ZTIKqV9g/V0AV
-rpCxiJz6OCyNzMhocljXU0Yi0zVhnnflKPm3B8P2IXhmhaL4C4eSXCWqNRBxuh+h
-/H1k0G+NxJpisFevohp1es1CSLq0QvDft47mJx3il8/XbqaIG3W1VR74XOAvoWRD
-EzbGO0A+kSmOO8yMyY15vt7qMpldzQ6l4p54+nEa/fAY8We5xfOk7chy2Dv43HMu
-cqTBfroPOioEzw7qMl6gSwAUhvuSaDiPpejqzkVMxeIu9Rx8u2E=
-=xeJV
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfqUN4ACgkQFA3kzBSg
+KbYdJBAAn+H/xkOTFAwMpJMyS9GPI4+Nz4BHsz/lulbfNYNcpz0K4OkIEJir4Amn
+l1+DxXEBa0JI3T/4mvBr6QND6M/VN2KrZRTR032kZjDLKvOXnmyyCH/auYsOAi7I
+Ef2SWA6PeJpdEQEnmEz2w/pCvUJiQCsOU3r1q8jk5t2eNg229dwoOC0WMsHD/J5h
+I8KLLdAivcX9gDy/H4LSZiNM+kXwL72FcB0zkXrS1MDqYkdf0yecPY1+RbHogl1T
+9A1iQXhhijZaupQNNG+iukMABmRo7XSsh7sW6hGE6FR7GkrrcNt/2uF91SGVa3rm
+B8ohec7hOo4/1Yn7IXslwhvKDrUIme2xK/7ixMTm1wdAlWw2JN3dQuDgi2TSmtSv
+SUOO+Hcnn4w542Tti7je5Dou1iyNtiYq6/cDlhHT6rMaHA9cs1mvAufOlzvQMSsw
+lbBwWBwOO0rlgpu8E+uNdm+gw8xT7W0mJzMmEWmJFm2sMdaUDED55XhH69D3oLFz
+cZnpqIiCONZtL+llrgSsfK5F8WmFfzasxYWkSKTCAro5K6gehZkuKbIJWEKiqrym
+r0xZR15zfrMR8/Ryglv6t0Rxx6M2ZqbNjdweadRFRHr8AODbL9LBn9/YKj/yaJ2c
+/EixgVIehDsUVQhqK0hSlXj7VukYhtrxOJDMNkyubAwEt4A6Ing=
+=4/+G
 -----END PGP SIGNATURE-----
 
---wgxMxZN1D+yrS8rW--
+--/+qaW/Tbmx/7P+oU--
