@@ -1,84 +1,101 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23F233FFD;
-	Mon, 31 Mar 2025 06:50:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 255ED1A072A
+	for <linux-mmc@vger.kernel.org>; Mon, 31 Mar 2025 07:05:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743403844; cv=none; b=knizF28fJLk4LvMdu2oaqduNQ/9lU91NlIzhSgRWXwDlpN5NepbE9BLqoH+g6ARUN4LQsG2NrxncCNrE/j5G/HdHfq6ag5ZnVmZEWVF8O92/XbHm8NEZbvTk4uI1D7Xwlr/NUPGLZEc9Wbb2esuqj2UJLNf+9RdJqSPSV5+M12o=
+	t=1743404742; cv=none; b=AmJkaw5pwAkk7aYh727RwivfrIibJr+9pFTBbGNw7HfNKNZ5U1EnnxS1cCTVexIw+ZBNFqtTdkckFnhSZQyCM2/WKcv7swe3ykymizXlXsK83jiWow20qAiwR3Nlh+FfgWU1RTaOAF++hQlEp6vXNDY9XQlkhA0+Z1EOEZ7ipH0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743403844; c=relaxed/simple;
-	bh=a2bhOw9LufrjpJWPhs6wW6qBWYi7hoW0iouUqYM3Ti4=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=rOXACRU4OMI/Xd1tXQ/jtbIoRzD5O81rK3CIuRBdh2x/n5B+/b0NUzpJ9rQ/4awPc6dqGnnO7iogyNTU+bp0zC2RmkWM8yaWHUuabNsbkRaI1wwnaRtxG97snFn4Z67EctzIDHfbpoTAxFDooy/CVmE8oqjAd6bNAnd0DNxAq1U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=JxbXTq/e; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	s=arc-20240116; t=1743404742; c=relaxed/simple;
+	bh=tNR4Q8cdhO0cDwTQ89Rpe0pYrXsa1HjTyroTZsF11e0=;
+	h=Date:From:To:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=EprmgR/HESl7/6Tlw+2etGqev/mmZXKg57IXqIhFFi+kjV6iek0DMHZdu3ZH9chQuFbhhijhQa/Uj/SxZknRB4auS5qgfEJL+UBm/og2OedZCfiiW/xCYvelvuzxFF1VrNkTEYh89OzNR1cgF2wy3mr7CkuDH0vlmnkTAPl8VXU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=SMqo/lfR; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="JxbXTq/e"
-Received: from francesco-nb (31-10-206-125.static.upc.ch [31.10.206.125])
-	by mail11.truemail.it (Postfix) with ESMTPA id 50AA91F928;
-	Mon, 31 Mar 2025 08:50:31 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1743403831;
-	bh=syLrdCGImw/DTpeTx6IlSA6vfY4PduBhR9vKCELENX0=; h=From:To:Subject;
-	b=JxbXTq/eLXGlUx5tYKuRj23TtJUzu3R3k3DO1vk8c1Ux781PcAkqBmKYgtApD92gN
-	 la6cO1+1XGEiw7ONiMMqRslkMeCCHiJbHmMC0VmR4VHMFYgapXAEE0Dq9X7lP0MNtS
-	 s7d8DhkyxNlGI1xfNlG4lt7UHceFPUs1P8VaAIHZ1V3yXRJa3HW4vMbIvZP17zjeto
-	 yXrdZ0eFZA2Ju0qylCP6M2dJyYeXj+8RkFqf5WEXe+SrQPjIsRSr7jdK4uDOxk0S6Y
-	 ZdgOtt9mVAqWjWWylUkJcPcuKmJ//4C7zPXEdthd3f6pYaX82tRC5lbLUJA97cM0/n
-	 3oKEioKAWU4Vw==
-Date: Mon, 31 Mar 2025 08:50:26 +0200
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Sascha Hauer <s.hauer@pengutronix.de>, Jeff Chen <jeff.chen_1@nxp.com>,
-	Pete Hsieh <tsung-hsien.hsieh@nxp.com>
-Cc: Brian Norris <briannorris@chromium.org>,
-	Francesco Dolcini <francesco@dolcini.it>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
-Message-ID: <20250331065026.GA12444@francesco-nb>
-References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="SMqo/lfR"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=tNR4
+	Q8cdhO0cDwTQ89Rpe0pYrXsa1HjTyroTZsF11e0=; b=SMqo/lfRRmbI+RT6asN3
+	n1jza5mkl02RL2n+ARuU7sgLnZYb5Gf+VfTzN+sKU5Nrs+6Ju2+IQ3DzGsl0VaN5
+	QytmYKMNwOevrGaUjbow8qMXGXKO5z+IBuBpnDzG+oKU6ZuMjLjgi0Hb2whip0PN
+	51+jQ5/1exhdJjem7SFPGEw7fqaAo2YpiW2dxHlzyU2QnV6GiI82YB4wYPtvF/jA
+	qn+DQrKAN4QGBJoKbUuh+FQgMsPh3ptOo9ubKAXUtReTiHoGWagqI9M3k0CAgUiV
+	ysFzQiPR2RVu23FRoHC2HDnqMSYOph5DgHNlPZn0pSmnAk7T5KrZro1UYhD9Rcic
+	aA==
+Received: (qmail 1129435 invoked from network); 31 Mar 2025 09:05:37 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Mar 2025 09:05:37 +0200
+X-UD-Smtp-Session: l3s3148p1@oXQJDJ4xBrBQ8qei
+Date: Mon, 31 Mar 2025 09:05:36 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Ruslan Piasetskyi <ruslan.piasetskyi@gmail.com>, ulf.hansson@linaro.org,
+	salauyou.ihar@gmail.com, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: Fix error handling in
+ renesas_sdhi_probe
+Message-ID: <Z-o-wDYdfdKig5_p@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ruslan Piasetskyi <ruslan.piasetskyi@gmail.com>,
+	ulf.hansson@linaro.org, salauyou.ihar@gmail.com,
+	linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+References: <20250326220638.460083-1-ruslan.piasetskyi@gmail.com>
+ <Z-nAtQ-CZ8zMUWiK@shikoro>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="Hb6I+YkcuGQRP6Yz"
+Content-Disposition: inline
+In-Reply-To: <Z-nAtQ-CZ8zMUWiK@shikoro>
+
+
+--Hb6I+YkcuGQRP6Yz
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+Content-Transfer-Encoding: quoted-printable
 
-+Pete/Jesse @NXP
+On Mon, Mar 31, 2025 at 12:07:49AM +0200, Wolfram Sang wrote:
+> On Wed, Mar 26, 2025 at 11:06:38PM +0100, Ruslan Piasetskyi wrote:
+> > After moving tmio_mmc_host_probe down, error handling has to be
+> > adjusted.
+> >=20
+> > Fixes: 74f45de394d9 ("mmc: renesas_sdhi: register irqs before registeri=
+ng controller")
+> > Reviewed-by: Ihar Salauyou <salauyou.ihar@gmail.com>
+> > Signed-off-by: Ruslan Piasetskyi <ruslan.piasetskyi@gmail.com>
+>=20
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On Wed, Mar 26, 2025 at 01:18:30PM +0100, Sascha Hauer wrote:
-> This series adds iw61x support to the mwifiex driver. It works for me,
-> but is not yet ready to be merged. Some people showed interest in it, so
-> I am sending it here.
-> 
-> All testing and review feedback appreciated.
-> 
-> During startup I get these messages:
-> 
-> [   12.078010] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
-> [   12.078018] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
-> [   12.078024] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x23e
-> [   12.078029] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x25c
-> 
-> Not sure what these are about, I can't see these handled in the
-> downstream mwifiex driver as well. Could also be there is some parsing
-> error. Nevertheless the driver seems to work.
-> 
-> The series applies to v6.14, but should apply to my mwifiex cleanup
-> series as well.
-> 
-> Sascha
-> 
-> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+Also:
 
-Sharing this, so maybe you can help on having a way forward for iw61x
-chip supported with mainline Linux.
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Francesco
 
+--Hb6I+YkcuGQRP6Yz
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfqPrwACgkQFA3kzBSg
+KbaHghAAtnGmYUaSEALZT2+umgQanfx6c5PsESPug+KB7UeNK64IrTJ1GkDENfcO
+qmJdHWp30ymBO1wACwinZvU5+P/OFNe144cG3MhkkxGn46PP6dHDo71HQCVoqafK
+tFwr433kvd/3+o3rUYASkcrrdkg4YRIpwiyhTedIpETDTBj9FVuqeTYsw4jbBmj4
+oG6v9IOSxKsmAjvwb025Pf9ISrbH1gEz6jiP4eyj7tpgvkAI+9XL1N9smdLe9GAt
+OV1xS9nmiYk9W+HhGFTDY5VSoKWlFQRKwjS3y1febnrttczrAhnSzJEONMNVLRvy
+hOm/Y9kVHV4ptZoy9oU7gnYfMuHf4bth43oi7TWKUu8Apn54lGWnMK4IjFIlb0nO
+QGEfTRc3ab6E76nG3OhG76yZgH1gq0EGv6hX81E3f2juejws+v/zKotUw55gJoax
+xxc2ADmy4xJkmPtTzITqJn6tQuUGPDxE5RGIdrQ6Wv1JX4ozHfhjlcl/QTSAKvbB
+BI+DRTRHQXhgk4t8Ud+r69mFFO4GTzIu1TRg8btFAg+K/CwVxWvcH+nHtfOPUhtc
+E90AQWTCJTVrtb/RiqBZDJVQQUKHc5Yh2R8lJSHsl7qSoW3JdfsOg8v+3iPY5cC3
+C595plUaTiY9e4mIh5A/4eEyNjzvFtn16s2oviSxaZfY9fha3yE=
+=PNaQ
+-----END PGP SIGNATURE-----
+
+--Hb6I+YkcuGQRP6Yz--
