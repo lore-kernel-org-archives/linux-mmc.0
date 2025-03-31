@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A487923A9AD;
-	Mon, 31 Mar 2025 14:55:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E820245023;
+	Mon, 31 Mar 2025 14:56:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743432951; cv=none; b=cnL+6x1xX84Ev241rInGNbATOR5VDn3ajHCGGqMdzCLvTa3W35+Vo0ZxVnSSTQmvNFSB8rvT2wQV9rovtmjFYEo9uMqHaDiSeArTfEDRF5tIdQbKxes4/ok339JyfsOcCKblro3IbyY6WugVLVU+1OQB+307eipIYYByW+MssVE=
+	t=1743432995; cv=none; b=SHu7juvhQKIfkHHLsffdDgPYn/mihE3kMxOfinLCgoSubehpm+Vr22ffY6MDwTyWJc9ryKoDXo8yIunXsUAk0TQ7KCfHKCsfb6h/ATFOHXLmmKb3qDssFwMQHheGaPfn18hENSPGfrxmvN4rZv9lQu1N11YoF9kTQUmPVStv3bw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743432951; c=relaxed/simple;
-	bh=NcT/hrnzRrIJVeDe2fXHIUpKPsKeQ7p3K4hVhXqhQQI=;
+	s=arc-20240116; t=1743432995; c=relaxed/simple;
+	bh=lA+QaQljiQesUN59WH5UKZFP3SkaRVPB8jSliZS6XzY=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Vnx8p+PVfvcCJe6f7Wn8YUcabqnQcMsiDAJjp5FEnTJT0f8osPk4dRXsda95KNd72ns30qhA+OqglJAFTyI5rfnUnB3zBJeUrSvvnpyeRjH8TtrNxLFqptGydwV8XBY4KoXKoy+bzu4CiMa5YTZ5Zln6K5ANy5HulAAWM5Gmoqo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jTgjcGrB; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=npJxyevyPV7z+MyS9rTHhcav0j+svmSitKFK89GaSzsIcZcMAWTpRUKSwa37q4fXtstpmM1b1VRlvk3u1NnDzEpAS6fNsvGJjiYN9ivbEQUIUeeh26EuLFqenJEdCMgfdSifDXN2iQJJXP+ne1wEDmtc50GWJ8llbOP/1GhYnss=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=WLgwAJf9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jTgjcGrB"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B2FF6C4CEE3;
-	Mon, 31 Mar 2025 14:55:50 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="WLgwAJf9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D84BC4CEE9;
+	Mon, 31 Mar 2025 14:56:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743432951;
-	bh=NcT/hrnzRrIJVeDe2fXHIUpKPsKeQ7p3K4hVhXqhQQI=;
+	s=k20201202; t=1743432994;
+	bh=lA+QaQljiQesUN59WH5UKZFP3SkaRVPB8jSliZS6XzY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=jTgjcGrB8Sijq8vgvC7EP8cYWaykh7THqUJebKNMrGwAH2xHFyhELtS9lKFHoP3v4
-	 AxbAwV9g4nay7GAqG9RPmSejUkPEK6tp7EtaJCWONe7/yi51MEf+8bPuVQUP4ZFaDz
-	 U2frugzH3neVdqLSm6Pk1hUhezsOjW/9SLiSKVlySiDU66nuwQGfXqexeOjcHE1XlA
-	 uDAKGUz7nq2O4a/h4NOfD9s1g1l986n0GzVHsJvOjldmFI2Z4yTUFBo/BkNugk3O3L
-	 Wkmj9sXBUfEdMTBnmBprWOkimgm1OyYBo6IxKgp3us0FBbRYRrlPy7z8opuI5JSePA
-	 528UafbYV+KGA==
+	b=WLgwAJf9MavdkWCw9WlAoTKovSHpNwTBHsazeGaCFzM2kfjjHML+i3hoB0bKiop7o
+	 XbXjTtsfoz9QPsAUTb51otaMwLmIoQzaAwjJ+AxxZtdT8PFU3Db/cfUZMEKnUg5Y5I
+	 6OP/WA+RqVz2URLtHqjwDs2VGzNYf81+APGYXleaN5EYLF/xMXEAVjNZGDkfIK8Zls
+	 pP20NcsE1SBgKvuxUhhDM1ZeNEAWV+kapBSFG46LSB3aiXT5iNcde7f3Kk2JQmO5T0
+	 jiWnP9zDi2Peyih8xi70X79qGKc8yu7LATXKLNXzhbObwIc4ENAb2AXZmKQ/VMBIV3
+	 RsjviSiAcm/og==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -34,12 +34,12 @@ Cc: Kaustabh Chakraborty <kauschluss@disroot.org>,
 	Sasha Levin <sashal@kernel.org>,
 	jh80.chung@samsung.com,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.12 19/23] mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
-Date: Mon, 31 Mar 2025 10:55:05 -0400
-Message-Id: <20250331145510.1705478-19-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.6 16/19] mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
+Date: Mon, 31 Mar 2025 10:55:57 -0400
+Message-Id: <20250331145601.1705784-16-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250331145510.1705478-1-sashal@kernel.org>
-References: <20250331145510.1705478-1-sashal@kernel.org>
+In-Reply-To: <20250331145601.1705784-1-sashal@kernel.org>
+References: <20250331145601.1705784-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -48,7 +48,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.12.21
+X-stable-base: Linux 6.6.85
 Content-Transfer-Encoding: 8bit
 
 From: Kaustabh Chakraborty <kauschluss@disroot.org>
@@ -70,10 +70,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 119 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e9f6e4e622901..55158540c28cf 100644
+index 02bee7afab37e..f97caaa829f70 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2579,6 +2579,91 @@ static void dw_mci_pull_data64(struct dw_mci *host, void *buf, int cnt)
+@@ -2574,6 +2574,91 @@ static void dw_mci_pull_data64(struct dw_mci *host, void *buf, int cnt)
  	}
  }
  
@@ -165,7 +165,7 @@ index e9f6e4e622901..55158540c28cf 100644
  static void dw_mci_pull_data(struct dw_mci *host, void *buf, int cnt)
  {
  	int len;
-@@ -3379,8 +3464,13 @@ int dw_mci_probe(struct dw_mci *host)
+@@ -3374,8 +3459,13 @@ int dw_mci_probe(struct dw_mci *host)
  		width = 16;
  		host->data_shift = 1;
  	} else if (i == 2) {
@@ -182,10 +182,10 @@ index e9f6e4e622901..55158540c28cf 100644
  		host->data_shift = 3;
  	} else {
 diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 6447b916990dc..5463392dc8110 100644
+index 4ed81f94f7cab..af16dbb37f261 100644
 --- a/drivers/mmc/host/dw_mmc.h
 +++ b/drivers/mmc/host/dw_mmc.h
-@@ -281,6 +281,8 @@ struct dw_mci_board {
+@@ -280,6 +280,8 @@ struct dw_mci_board {
  
  /* Support for longer data read timeout */
  #define DW_MMC_QUIRK_EXTENDED_TMOUT            BIT(0)
@@ -194,7 +194,7 @@ index 6447b916990dc..5463392dc8110 100644
  
  #define DW_MMC_240A		0x240a
  #define DW_MMC_280A		0x280a
-@@ -472,6 +474,31 @@ struct dw_mci_board {
+@@ -471,6 +473,31 @@ struct dw_mci_board {
  #define mci_fifo_writel(__value, __reg)	__raw_writel(__reg, __value)
  #define mci_fifo_writeq(__value, __reg)	__raw_writeq(__reg, __value)
  
