@@ -1,84 +1,84 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31B58BE67
-	for <linux-mmc@vger.kernel.org>; Mon, 31 Mar 2025 06:44:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 23F233FFD;
+	Mon, 31 Mar 2025 06:50:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743403457; cv=none; b=sJswIQhG8mc6ect2MI0FNr/QOUec0ftRazTXSAnuSYpjMIKhY9sifkh49vDBKJhPxXTZY7T5z2ww6XA36jp19QPMjTbI4ZUItah8l/RJsLFoMLNiElggsRNVL10YhA/czhSU8cMFyRnLb4CJItztOQIF7evoVozeamGnZZ49hRg=
+	t=1743403844; cv=none; b=knizF28fJLk4LvMdu2oaqduNQ/9lU91NlIzhSgRWXwDlpN5NepbE9BLqoH+g6ARUN4LQsG2NrxncCNrE/j5G/HdHfq6ag5ZnVmZEWVF8O92/XbHm8NEZbvTk4uI1D7Xwlr/NUPGLZEc9Wbb2esuqj2UJLNf+9RdJqSPSV5+M12o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743403457; c=relaxed/simple;
-	bh=L9eQS5LRGLrf6MgkurT5HPQycpxQOrmbZ5qTqgJUZuU=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ELcNOaNEYmLLvTfd9ij74Q56o7bWrv/l3dY4N3YztTGCLgautZsKo0SShGX3Oqr7k25863xDmzTP2z9fn+QmZ3oBU+bq0+8pDxvQOMozMkd9miYO0pYSMukaT7cXUkvYtiLH27GSEfCkO8WBaSlGCmy154fjs+Y/vNckMGl9SZ4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=cFr9LRJ0; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1743403844; c=relaxed/simple;
+	bh=a2bhOw9LufrjpJWPhs6wW6qBWYi7hoW0iouUqYM3Ti4=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=rOXACRU4OMI/Xd1tXQ/jtbIoRzD5O81rK3CIuRBdh2x/n5B+/b0NUzpJ9rQ/4awPc6dqGnnO7iogyNTU+bp0zC2RmkWM8yaWHUuabNsbkRaI1wwnaRtxG97snFn4Z67EctzIDHfbpoTAxFDooy/CVmE8oqjAd6bNAnd0DNxAq1U=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=JxbXTq/e; arc=none smtp.client-ip=217.194.8.81
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="cFr9LRJ0"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:mime-version:content-transfer-encoding; s=k1; bh=CWhMMHXdY7wGZN
-	B48i2lMT30hIxIkaT6qwU4OIC1SBM=; b=cFr9LRJ0iF2mJu7eH46JcMemjz4H9b
-	Gudo4KSk/PrFHN6IB16fi1TDoyvberpSa0QPQX1aur/MBT7eN9OeVa7Tyjywba6d
-	+0gf87outXBf3FqmdB8WDwqptEzqNWRA/74v7NaKGz5O+hXVyHhtUc2miWN+4BpC
-	Z/uOnacWz/G/JnI82HNA1DffkILpcmUrACLteV0Ha1IMxBugrfki/7h/wLip80NG
-	uVqE58ESSdK8Okfg/ICbFPwu+266i1e7YA4T1jzPlwWJgimzFpI645OYLPkJOO/w
-	RDIns3TRrJBWeX9UIOTlNvwNUFAVNBw/bskwpVsFtLhjtt8X2IGpibQg==
-Received: (qmail 1123123 invoked from network); 31 Mar 2025 08:44:08 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Mar 2025 08:44:08 +0200
-X-UD-Smtp-Session: l3s3148p1@UVA1v50xiMBQ8qei
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="JxbXTq/e"
+Received: from francesco-nb (31-10-206-125.static.upc.ch [31.10.206.125])
+	by mail11.truemail.it (Postfix) with ESMTPA id 50AA91F928;
+	Mon, 31 Mar 2025 08:50:31 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
+	s=default; t=1743403831;
+	bh=syLrdCGImw/DTpeTx6IlSA6vfY4PduBhR9vKCELENX0=; h=From:To:Subject;
+	b=JxbXTq/eLXGlUx5tYKuRj23TtJUzu3R3k3DO1vk8c1Ux781PcAkqBmKYgtApD92gN
+	 la6cO1+1XGEiw7ONiMMqRslkMeCCHiJbHmMC0VmR4VHMFYgapXAEE0Dq9X7lP0MNtS
+	 s7d8DhkyxNlGI1xfNlG4lt7UHceFPUs1P8VaAIHZ1V3yXRJa3HW4vMbIvZP17zjeto
+	 yXrdZ0eFZA2Ju0qylCP6M2dJyYeXj+8RkFqf5WEXe+SrQPjIsRSr7jdK4uDOxk0S6Y
+	 ZdgOtt9mVAqWjWWylUkJcPcuKmJ//4C7zPXEdthd3f6pYaX82tRC5lbLUJA97cM0/n
+	 3oKEioKAWU4Vw==
+Date: Mon, 31 Mar 2025 08:50:26 +0200
+From: Francesco Dolcini <francesco@dolcini.it>
+To: Sascha Hauer <s.hauer@pengutronix.de>, Jeff Chen <jeff.chen_1@nxp.com>,
+	Pete Hsieh <tsung-hsien.hsieh@nxp.com>
+Cc: Brian Norris <briannorris@chromium.org>,
+	Francesco Dolcini <francesco@dolcini.it>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: renesas_sdhi: improve registering irqs
-Date: Mon, 31 Mar 2025 08:43:17 +0200
-Message-ID: <20250331064400.16677-2-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.47.2
+Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
+Message-ID: <20250331065026.GA12444@francesco-nb>
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
 
-The probe() function is convoluted enough, so merge sanity checks for
-number of irqs into one place. Also, change the error code for 'no irq'
-because ENXIO will not print a warning from the driver core.
++Pete/Jesse @NXP
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+On Wed, Mar 26, 2025 at 01:18:30PM +0100, Sascha Hauer wrote:
+> This series adds iw61x support to the mwifiex driver. It works for me,
+> but is not yet ready to be merged. Some people showed interest in it, so
+> I am sending it here.
+> 
+> All testing and review feedback appreciated.
+> 
+> During startup I get these messages:
+> 
+> [   12.078010] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> [   12.078018] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> [   12.078024] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x23e
+> [   12.078029] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x25c
+> 
+> Not sure what these are about, I can't see these handled in the
+> downstream mwifiex driver as well. Could also be there is some parsing
+> error. Nevertheless the driver seems to work.
+> 
+> The series applies to v6.14, but should apply to my mwifiex cleanup
+> series as well.
+> 
+> Sascha
+> 
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-Tested on a Renesas Spider board (R-Car S4)
+Sharing this, so maybe you can help on having a way forward for iw61x
+chip supported with mainline Linux.
 
- drivers/mmc/host/renesas_sdhi_core.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 8c83e203c516..4642fdb8bf65 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -1240,15 +1240,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 
- 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
- 
--	num_irqs = platform_irq_count(pdev);
--	if (num_irqs < 0) {
--		ret = num_irqs;
--		goto edisclk;
--	}
--
- 	/* There must be at least one IRQ source */
--	if (!num_irqs) {
--		ret = -ENXIO;
-+	num_irqs = platform_irq_count(pdev);
-+	if (num_irqs <= 0) {
-+		ret = num_irqs ?: -ENOENT;
- 		goto edisclk;
- 	}
- 
--- 
-2.47.2
+Francesco
 
