@@ -1,231 +1,195 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-00300601.pphosted.com (mx0b-00300601.pphosted.com [148.163.142.35])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7767F24C07E;
-	Mon, 31 Mar 2025 14:56:58 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EFDF212FB0;
+	Mon, 31 Mar 2025 22:14:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.163.142.35
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743433018; cv=none; b=HtlPde5osk8DbCVlHwKjg+a1Un/tAgUBmnLnTPXgCGW0qwp8y9QndT68H26NKbuLFqAjsTesRL2DOO1hczPmE36lBi1mFiASom5NJfqc9HooxfuCT5DZqSn7NlTiwejAgIfzA8b2S6HOwce451tnbhvqfDa+RfzFYipquye4T7A=
+	t=1743459275; cv=none; b=m0vCtioG6E02JE5e1hXisXd5YB9AKqqbh7imlOmbmHNBNRYDkbv8mJMhF2lCdU/CztOXGqLroou0O0+vNGVUZlmudTmS8tvNo5lK2nH8wlEauXPSe9WOnfftCEd5gR5rR2RWyXLxGgM1RmUQOMrzSVfQl/vADi7srPRfAe5Ds+8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743433018; c=relaxed/simple;
-	bh=QtTHlnH7LWdu4JlRXiAIGEBR7SRkB52s+WC/quhM0Vc=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=gNH28mqeLKtLt4xK+47rbRMXPCaFppHrZH/pnYy1/tAKpGj16hPQ54aNp1iWm81PaxXyMKx4CfxLXaGdWhdatBiGRcSjRBvFfv7E61YBris6cjsoH3FxS5XwLmZf4I2YOh+efPbcLMir/FYUwYAmwaYk8RGb0CcuCYEJEG9735k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nvDvwkV+; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1743459275; c=relaxed/simple;
+	bh=Omjqeb14TmXfSfFTHfsl8LkwOfJpDZqW/I1BPPX5Tfs=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=chqow9iNKFE+PS/r3D8oHtmLna89Dwe+7n8Wkp7sV7KYJGCc1o2iFk4PzXeHa96vdSymucAhf7Clw9CR+JiWMfoobJ4wZaX6IYm9cLCKJm1VR6jKhN7S5cajwG6xqCJNdrpVdDgc6C2MgQ4acMyMYEMe1T3o1Txd23H+QAwrb+E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com; spf=pass smtp.mailfrom=ni.com; dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b=t+9a43Z5; arc=none smtp.client-ip=148.163.142.35
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=ni.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ni.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nvDvwkV+"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82CBEC4CEE4;
-	Mon, 31 Mar 2025 14:56:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743433018;
-	bh=QtTHlnH7LWdu4JlRXiAIGEBR7SRkB52s+WC/quhM0Vc=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=nvDvwkV+eLgwKSBRTxhI+E+YNkREIwh6fAaBVkMZnADEoLnTC0yzSw3IFYh5Nf0kT
-	 IgBLLUYerSumWe7DUPhu6y2Syf6MGMe13S2L6wBUXGDjusv8Fjm7oqZCey5+mvDghc
-	 bzS3smuIK+dKnKc5bR4s+P0sjvFDOSDWBQ1/LBf2LWgpuftH86d5GjVuG+OzD+ck2m
-	 0ZDEOeak/7BAsOndh10ExM3jZMbl6XHZkPcYtMI9rGLpdNtNO9JgbeaDLkqUmFWbo0
-	 pM7BsGyT6X56XjiMnpckDNk+jPSUEOqS2gLzFgb3tHRvqh+xmm5pAOskF0jDnJ2wO6
-	 TJWJTZ4QbOJOA==
-From: Sasha Levin <sashal@kernel.org>
-To: linux-kernel@vger.kernel.org,
-	stable@vger.kernel.org
-Cc: Kaustabh Chakraborty <kauschluss@disroot.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Sasha Levin <sashal@kernel.org>,
-	jh80.chung@samsung.com,
-	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.1 7/9] mmc: dw_mmc: add a quirk for accessing 64-bit FIFOs in two halves
-Date: Mon, 31 Mar 2025 10:56:40 -0400
-Message-Id: <20250331145642.1706037-7-sashal@kernel.org>
-X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250331145642.1706037-1-sashal@kernel.org>
-References: <20250331145642.1706037-1-sashal@kernel.org>
+	dkim=pass (2048-bit key) header.d=ni.com header.i=@ni.com header.b="t+9a43Z5"
+Received: from pps.filterd (m0144092.ppops.net [127.0.0.1])
+	by mx0b-00300601.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 52VH9CfR032303;
+	Mon, 31 Mar 2025 22:13:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ni.com; h=cc
+	:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=PPS11142024; bh=oFvr8MrCcDO1CoeYhUQm
+	pM6YRTzZjomUqPcXSlcNFJI=; b=t+9a43Z5wa6G0Kh0MaANxO0+gEjx5lr35eSv
+	jn6dXe1rSUqctbDKxD0Bl7aQ5N2mlyiI69isuv6mTuqascLfJtOlezKjTaYQxKP/
+	TP5+TMA4ZPHFr6Aqa1FoqD317J6PI0YZUF8GptUK6HhHGaGRDAxeXsyS/2hi4bHb
+	dVfRBz/Clclq6SEARPGWyaAjwX9/FuouRKZTGeCjohmgciGS5MEZy8dRaboN0KXv
+	X3JyuNGbxTc3yOGaHyNWjKz8uNvRxy2jN7yyJxHgMzCuz9otLPnbPYZwHTMeqJQY
+	p+n475S+l0e71eIeqLLh30188Ptn79QYVzEMH3Vc+MwoprCA6w==
+Received: from us-aus-excas-p1.ni.corp.natinst.com ([130.164.94.73])
+	by mx0b-00300601.pphosted.com (PPS) with ESMTPS id 45qy6qbbww-2
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Mon, 31 Mar 2025 22:13:51 +0000 (GMT)
+Received: from us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) by
+ us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1258.28; Mon, 31 Mar 2025 17:13:39 -0500
+Received: from ershephe-ubuntu.ni.corp.natinst.com (172.18.68.33) by
+ us-aus-excas-p1.ni.corp.natinst.com (130.164.68.17) with Microsoft SMTP
+ Server id 15.2.1258.28 via Frontend Transport; Mon, 31 Mar 2025 17:13:39
+ -0500
+From: Erick Shepherd <erick.shepherd@ni.com>
+To: <linux-mmc@vger.kernel.org>
+CC: <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <keita.aihara@sony.com>, <linux-kernel@vger.kernel.org>,
+        <avri.altman@wdc.com>, <wsa+renesas@sang-engineering.com>,
+        <jason.lai@genesyslogic.com.tw>, <jeff.johnson@oss.qualcomm.com>,
+        <victor.shih@genesyslogic.com.tw>, <andy-ld.lu@mediatek.com>,
+        <dsimic@manjaro.org>, <jonathan@raspberrypi.com>,
+        Erick Shepherd
+	<erick.shepherd@ni.com>
+Subject: [PATCH v2] mmc: Add quirk to disable DDR50 tuning
+Date: Mon, 31 Mar 2025 17:13:37 -0500
+Message-ID: <20250331221337.1414534-1-erick.shepherd@ni.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.1.132
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-ORIG-GUID: zNxsMkL5vfSgs4L0ADYNtRDxzQ3hzTHg
+X-Proofpoint-GUID: zNxsMkL5vfSgs4L0ADYNtRDxzQ3hzTHg
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1095,Hydra:6.0.680,FMLib:17.12.68.34
+ definitions=2025-03-31_10,2025-03-27_02,2024-11-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 clxscore=1015
+ phishscore=0 mlxscore=0 priorityscore=1501 spamscore=0 lowpriorityscore=0
+ adultscore=0 suspectscore=0 malwarescore=0 mlxlogscore=999 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.19.0-2502280000
+ definitions=main-2503310152
 
-From: Kaustabh Chakraborty <kauschluss@disroot.org>
+Adds the MMC_QUIRK_NO_UHS_DDR50_TUNING quirk and updates
+mmc_execute_tuning() to return 0 if that quirk is set. This fixes an
+issue on certain Swissbit SD cards that do not support DDR50 tuning
+where tuning requests caused I/O errors to be thrown.
 
-[ Upstream commit 57c0902f8bec51add5a1eb908d8b876592725d81 ]
-
-In certain DW MMC implementations (such as in some Exynos7870
-controllers), 64-bit read/write is not allowed from a 64-bit FIFO.
-Add a quirk which facilitates accessing the 64-bit FIFO registers in two
-32-bit halves.
-
-Signed-off-by: Kaustabh Chakraborty <kauschluss@disroot.org>
-Link: https://lore.kernel.org/r/20250219-exynos7870-mmc-v2-2-b4255a3e39ed@disroot.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
 ---
- drivers/mmc/host/dw_mmc.c | 94 ++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/dw_mmc.h | 27 +++++++++++
- 2 files changed, 119 insertions(+), 2 deletions(-)
+ drivers/mmc/core/card.h   |  6 ++++++
+ drivers/mmc/core/quirks.h | 10 ++++++++++
+ drivers/mmc/core/sd.c     | 32 ++++++++++++++++++++++++--------
+ include/linux/mmc/card.h  |  1 +
+ 4 files changed, 41 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d0da4573b38cd..0822493c949e8 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2574,6 +2574,91 @@ static void dw_mci_pull_data64(struct dw_mci *host, void *buf, int cnt)
- 	}
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 3205feb1e8ff..9cbdd240c3a7 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -89,6 +89,7 @@ struct mmc_fixup {
+ #define CID_MANFID_MICRON       0x13
+ #define CID_MANFID_SAMSUNG      0x15
+ #define CID_MANFID_APACER       0x27
++#define CID_MANFID_SWISSBIT     0x5D
+ #define CID_MANFID_KINGSTON     0x70
+ #define CID_MANFID_HYNIX	0x90
+ #define CID_MANFID_KINGSTON_SD	0x9F
+@@ -294,4 +295,9 @@ static inline int mmc_card_broken_sd_poweroff_notify(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY;
  }
  
-+static void dw_mci_push_data64_32(struct dw_mci *host, void *buf, int cnt)
++static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
 +{
-+	struct mmc_data *data = host->data;
-+	int init_cnt = cnt;
-+
-+	/* try and push anything in the part_buf */
-+	if (unlikely(host->part_buf_count)) {
-+		int len = dw_mci_push_part_bytes(host, buf, cnt);
-+
-+		buf += len;
-+		cnt -= len;
-+
-+		if (host->part_buf_count == 8) {
-+			mci_fifo_l_writeq(host->fifo_reg, host->part_buf);
-+			host->part_buf_count = 0;
-+		}
-+	}
-+#ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-+	if (unlikely((unsigned long)buf & 0x7)) {
-+		while (cnt >= 8) {
-+			u64 aligned_buf[16];
-+			int len = min(cnt & -8, (int)sizeof(aligned_buf));
-+			int items = len >> 3;
-+			int i;
-+			/* memcpy from input buffer into aligned buffer */
-+			memcpy(aligned_buf, buf, len);
-+			buf += len;
-+			cnt -= len;
-+			/* push data from aligned buffer into fifo */
-+			for (i = 0; i < items; ++i)
-+				mci_fifo_l_writeq(host->fifo_reg, aligned_buf[i]);
-+		}
-+	} else
-+#endif
-+	{
-+		u64 *pdata = buf;
-+
-+		for (; cnt >= 8; cnt -= 8)
-+			mci_fifo_l_writeq(host->fifo_reg, *pdata++);
-+		buf = pdata;
-+	}
-+	/* put anything remaining in the part_buf */
-+	if (cnt) {
-+		dw_mci_set_part_bytes(host, buf, cnt);
-+		/* Push data if we have reached the expected data length */
-+		if ((data->bytes_xfered + init_cnt) ==
-+		    (data->blksz * data->blocks))
-+			mci_fifo_l_writeq(host->fifo_reg, host->part_buf);
-+	}
++	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
 +}
 +
-+static void dw_mci_pull_data64_32(struct dw_mci *host, void *buf, int cnt)
-+{
-+#ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
-+	if (unlikely((unsigned long)buf & 0x7)) {
-+		while (cnt >= 8) {
-+			/* pull data from fifo into aligned buffer */
-+			u64 aligned_buf[16];
-+			int len = min(cnt & -8, (int)sizeof(aligned_buf));
-+			int items = len >> 3;
-+			int i;
-+
-+			for (i = 0; i < items; ++i)
-+				aligned_buf[i] = mci_fifo_l_readq(host->fifo_reg);
-+
-+			/* memcpy from aligned buffer into output buffer */
-+			memcpy(buf, aligned_buf, len);
-+			buf += len;
-+			cnt -= len;
-+		}
-+	} else
-+#endif
-+	{
-+		u64 *pdata = buf;
-+
-+		for (; cnt >= 8; cnt -= 8)
-+			*pdata++ = mci_fifo_l_readq(host->fifo_reg);
-+		buf = pdata;
-+	}
-+	if (cnt) {
-+		host->part_buf = mci_fifo_l_readq(host->fifo_reg);
-+		dw_mci_pull_final_bytes(host, buf, cnt);
-+	}
-+}
-+
- static void dw_mci_pull_data(struct dw_mci *host, void *buf, int cnt)
- {
- 	int len;
-@@ -3374,8 +3459,13 @@ int dw_mci_probe(struct dw_mci *host)
- 		width = 16;
- 		host->data_shift = 1;
- 	} else if (i == 2) {
--		host->push_data = dw_mci_push_data64;
--		host->pull_data = dw_mci_pull_data64;
-+		if ((host->quirks & DW_MMC_QUIRK_FIFO64_32)) {
-+			host->push_data = dw_mci_push_data64_32;
-+			host->pull_data = dw_mci_pull_data64_32;
-+		} else {
-+			host->push_data = dw_mci_push_data64;
-+			host->pull_data = dw_mci_pull_data64;
-+		}
- 		width = 64;
- 		host->data_shift = 3;
- 	} else {
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 4ed81f94f7cab..af16dbb37f261 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -280,6 +280,8 @@ struct dw_mci_board {
+ #endif
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 89b512905be1..7f893bafaa60 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
+ 		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
+ 		   EXT_CSD_REV_ANY),
  
- /* Support for longer data read timeout */
- #define DW_MMC_QUIRK_EXTENDED_TMOUT            BIT(0)
-+/* Force 32-bit access to the FIFO */
-+#define DW_MMC_QUIRK_FIFO64_32                 BIT(1)
++	/*
++	 * Swissbit series S46-u cards throw I/O errors during tuning requests
++	 * after the initial tuning request expectedly times out. This has
++	 * only been observed on cards manufactured on 01/2019 that are using
++	 * Bay Trail host controllers.
++	 */
++	_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1,
++		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
++		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),
++
+ 	END_FIXUP
+ };
  
- #define DW_MMC_240A		0x240a
- #define DW_MMC_280A		0x280a
-@@ -471,6 +473,31 @@ struct dw_mci_board {
- #define mci_fifo_writel(__value, __reg)	__raw_writel(__reg, __value)
- #define mci_fifo_writeq(__value, __reg)	__raw_writeq(__reg, __value)
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index cc757b850e79..fc3416027033 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -613,6 +613,29 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
+ 	return 0;
+ }
  
 +/*
-+ * Some dw_mmc devices have 64-bit FIFOs, but expect them to be
-+ * accessed using two 32-bit accesses. If such controller is used
-+ * with a 64-bit kernel, this has to be done explicitly.
++ * Determine if the card should tune or not.
 + */
-+static inline u64 mci_fifo_l_readq(void __iomem *addr)
++static bool mmc_sd_use_tuning(struct mmc_card *card)
 +{
-+	u64 ans;
-+	u32 proxy[2];
++	/*
++	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
++	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
++	 */
++	if (mmc_host_is_spi(card->host))
++		return false;
 +
-+	proxy[0] = mci_fifo_readl(addr);
-+	proxy[1] = mci_fifo_readl(addr + 4);
-+	memcpy(&ans, proxy, 8);
-+	return ans;
++	switch (card->host->ios.timing) {
++	case MMC_TIMING_UHS_SDR50:
++	case MMC_TIMING_UHS_SDR104:
++		return true;
++	case MMC_TIMING_UHS_DDR50:
++		return !mmc_card_no_uhs_ddr50_tuning(card);
++	}
++
++	return false;
 +}
 +
-+static inline void mci_fifo_l_writeq(void __iomem *addr, u64 value)
-+{
-+	u32 proxy[2];
-+
-+	memcpy(proxy, &value, 8);
-+	mci_fifo_writel(addr, proxy[0]);
-+	mci_fifo_writel(addr + 4, proxy[1]);
-+}
-+
- /* Register access macros */
- #define mci_readl(dev, reg)			\
- 	readl_relaxed((dev)->regs + SDMMC_##reg)
+ /*
+  * UHS-I specific initialization procedure
+  */
+@@ -656,14 +679,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+ 	if (err)
+ 		goto out;
+ 
+-	/*
+-	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
+-	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
+-	 */
+-	if (!mmc_host_is_spi(card->host) &&
+-		(card->host->ios.timing == MMC_TIMING_UHS_SDR50 ||
+-		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
+-		 card->host->ios.timing == MMC_TIMING_UHS_SDR104)) {
++	if (mmc_sd_use_tuning(card)) {
+ 		err = mmc_execute_tuning(card);
+ 
+ 		/*
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 526fce581657..ddcdf23d731c 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -329,6 +329,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
+ #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
+ #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
++#define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
+ 
+ 	bool			written_flag;	/* Indicates eMMC has been written since power on */
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
 -- 
-2.39.5
+2.43.0
 
