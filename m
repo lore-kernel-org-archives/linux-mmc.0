@@ -1,87 +1,108 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7A9F52046B4;
-	Tue,  1 Apr 2025 14:00:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F1202080FD
+	for <linux-mmc@vger.kernel.org>; Tue,  1 Apr 2025 15:19:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743516020; cv=none; b=Ykga/aGuvjP/5LroynKEwM61Ilxl8AGrzGX6iLGWgRRBSvqiKEKU/+cfNUsQ+QgOI68dgvPcqwGeykrtG+4Iw5o7ApdfUsqwitFKzXZXP+THJbnRnoG0dclXJSopCw8NoDMOIOMqfxdzd8xkwKUYmhTJNxd2k4sHkZX7Iv+zKTE=
+	t=1743520802; cv=none; b=q34SOFHOo8+5a7gmD7I0lVT9l48/Q9vWgw1BLdm6GDBDLH0rS5lNmrDYV1uaUtMpaBvHqLvDR83APPHlXxdVmV/Wx3luaO8JNuJOfdgD9+WkUIyVcvQUkTveLX3VSVzbSNgPs91RljQ3V1MzBt6GcFleq+AJJY59JlTekxcixJU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743516020; c=relaxed/simple;
-	bh=og3p9HZYxTL6/bsdpwezmV/vVG5W2Xjv9xzDd7pmuRk=;
-	h=Date:Content-Type:MIME-Version:From:Cc:To:In-Reply-To:References:
-	 Message-Id:Subject; b=ll/TAJLCKYV/02ty6S0X07kWNHe7h3Xfteu+vqD1rcTvu5MgnPL0KpkpY2lpLQjCug+z0iGxFSOmHDb9g10fHcdW7AZN+jJw2zPca5jUwUd4JUcu9JJQVw9yfachjuCgiSy0Vw7FlCtF7DKkufKdUstjUu6APbL+o49d11AIXVc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uyr3ujcW; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1743520802; c=relaxed/simple;
+	bh=Bsrct6pT9P+xwQnjuDB+9ATEbtS79tHJ/rbWZlEHUFQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ll+e2Xgg9Pg3Az3MyNv93xD+pknNYSLj+DfyUzhnq6ZznW2Mpfakxzc/kqc7xrt2uhDC4rNsxG50xEGSmhxonSVX9LCKL9aPhI0Kgr1iAoIpTPWB1dqc/kfGSUOcdA1GpsmpUVeBNnWc4NLfA4ABEKHg0uhq1qQggkp2LtVaMeE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=afXea0NW; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uyr3ujcW"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBBDEC4CEE4;
-	Tue,  1 Apr 2025 14:00:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743516018;
-	bh=og3p9HZYxTL6/bsdpwezmV/vVG5W2Xjv9xzDd7pmuRk=;
-	h=Date:From:Cc:To:In-Reply-To:References:Subject:From;
-	b=uyr3ujcWlLWiWurappfwocLuldPM+LOjgDv10yMoZ6QIZ4noinwei7qyUugP4fBHn
-	 rVHwVGFKYNWEFrOzsfPdxCOv46+PTTP1EsDEvl+Sb2IdWQJ1uccV+92Yili6lXCxgE
-	 jLQwd1ggtGMV+QbKbToLwKkENpqHUS6T/uViDBIUzq/gQT/5XZ5Q+q1pIDP5T8j/Ba
-	 dRTPv/c7LgUvGMku7TroLanJcnYbsZJhJ4Q8OqjIgVoMjIzpskBQID1yUpUTPccXQn
-	 Va2ysCzlYAeoEYHvkwajz57o8Mtqjb56nq9eNGRPM1AWV1KVCH1zYTSnwWMh6uKLQO
-	 t6TdN6owF/9Xw==
-Date: Tue, 01 Apr 2025 09:00:16 -0500
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="afXea0NW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=ZpNG
+	Yt6N5k7DHHaYdl06H/yqoC6ND60vLLXsQPJabpI=; b=afXea0NWsAlEeGPshquq
+	dFrXvvBwBRwjL7CciXEjs/szZTYR2IjfN2FymEUM+SvVpdUodPWLP+wmbsy3o3yH
+	fGjptNe8NKEO01Cx7ZVs3PaVLug2TuhBf+/xG0abnN7Gv+qJkmGZU39y/IA5Xq6U
+	2NV5ObZAJ58VBEnjg/hrYmH2KStKY6X2X5h9fOHsaMsRon0p1FKydTJWw1LYSEfj
+	SbR2D3SCnmNI5HL/43zv4+yDBwNiAc8P4fPLe6PjzeG8H4emuSnGg6caD3WNQoT7
+	QbTk1UT0oUbXiMQylKGy8+kbTPe/XGlL6Rg+hpGods0XSjy7KGVbHVtVlL/vVBwf
+	Ug==
+Received: (qmail 1663192 invoked from network); 1 Apr 2025 17:19:56 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2025 17:19:56 +0200
+X-UD-Smtp-Session: l3s3148p1@ElGvEbkxyNsgAQnoAEfTAHFphPy3/0G7
+Date: Tue, 1 Apr 2025 17:19:55 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdhci: Add Renesas RZ/N1D
+Message-ID: <Z-wEGyV72abGuuvR@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	"Rob Herring (Arm)" <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+References: <20250401100837.29792-2-wsa+renesas@sang-engineering.com>
+ <174351601673.3283654.13923027888464994082.robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org, 
- linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, 
- Geert Uytterhoeven <geert+renesas@glider.be>, 
- Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-In-Reply-To: <20250401100837.29792-2-wsa+renesas@sang-engineering.com>
-References: <20250401100837.29792-2-wsa+renesas@sang-engineering.com>
-Message-Id: <174351601673.3283654.13923027888464994082.robh@kernel.org>
-Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdhci: Add Renesas RZ/N1D
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="Hjs8mf8LQAl2bpdS"
+Content-Disposition: inline
+In-Reply-To: <174351601673.3283654.13923027888464994082.robh@kernel.org>
 
 
-On Tue, 01 Apr 2025 12:08:37 +0200, Wolfram Sang wrote:
-> This instance has a wakeup irq defined. It is currently not used by the
-> driver.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.yaml | 23 ++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
-> 
+--Hjs8mf8LQAl2bpdS
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-My bot found errors running 'make dt_binding_check' on your patch:
 
-yamllint warnings/errors:
+> My bot found errors running 'make dt_binding_check' on your patch:
+>=20
+> yamllint warnings/errors:
+>=20
+> dtschema/dtc warnings/errors:
+> /builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/m=
+mc/arasan,sdhci.yaml: properties:interrupt-names: {'minItems': 1, 'maxItems=
+': 2, 'items': [{'const': 'int'}, {'const': 'wkup'}]} should not be valid u=
+nder {'required': ['maxItems']}
+> 	hint: "maxItems" is not needed with an "items" list
+> 	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
 
-dtschema/dtc warnings/errors:
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml: properties:interrupt-names: {'minItems': 1, 'maxItems': 2, 'items': [{'const': 'int'}, {'const': 'wkup'}]} should not be valid under {'required': ['maxItems']}
-	hint: "maxItems" is not needed with an "items" list
-	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
+Huh? Need to check why my scripts didn't report that. Sorry!
 
-doc reference errors (make refcheckdocs):
 
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20250401100837.29792-2-wsa+renesas@sang-engineering.com
+--Hjs8mf8LQAl2bpdS
+Content-Type: application/pgp-signature; name="signature.asc"
 
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
+-----BEGIN PGP SIGNATURE-----
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfsBBcACgkQFA3kzBSg
+Kbb4uxAAge1iacyEQ91QPAD8emshoeiLL65tK86da79+6yUwkaV4lkrdzTtQY36n
+M9XNsNdAlRiKqR8ejE5UZjN4qsbgyYQYDIe2Y++kfVjdp1Aquz8Z5MM8uAE+1ijJ
+JH81VYhNsNMSqVAyJvedkjpExrrhUrR26up/G0dHyu8nvozUEIan+F4tDSUq1GRR
+f0hbYV+WNF6IH+71jvx085j3yelI1ramzyZq9EvpBih9Ayl6uDQz+hQMTfPZ9BtV
+QCMqF20D4lLvjez7KRPJlBOKJD9V4s0Jip+AxdOQTRKjCWFGHS58m8NdnFzTllUr
+A/uOaYQMnuIIL8zm+p2BZKJ7jP/MPpm1604rSK+5esn+42tWH1gXAhoqw15bipPy
+YsTZ97tTt07fISyLObMf2dZMp8G+MlGrlTL6onBD4nxCUhyhtQLn5cuPK6PjfCp8
+jz/EjCGl45Kc19z0a3eUszL5HJa0epHrS+SP5qdch33Tqj8ln36idnIfXrzQNAWl
+HlyLA7vl7fd/pDtyz3bZAIl5yKuYqtWQ200Q5q98UW4mq2BrRQg9n5QbmmFtkp/S
+PAe+qgs1WcsURdl2+ImNqajMess1Ya7IblOnzsPR6T8SK7ycAfMPILD1J3NZ83P9
+mvcdrUcsp7RCS+dlRIENCFxriWNcTg1lpucxG33V3VDyM8ABgpM=
+=zBd6
+-----END PGP SIGNATURE-----
 
-pip3 install dtschema --upgrade
-
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
-
+--Hjs8mf8LQAl2bpdS--
