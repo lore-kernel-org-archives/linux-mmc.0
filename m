@@ -1,40 +1,40 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8738B1EFFB9
-	for <linux-mmc@vger.kernel.org>; Tue,  1 Apr 2025 09:58:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 87FD21EFFBF
+	for <linux-mmc@vger.kernel.org>; Tue,  1 Apr 2025 09:58:58 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743501540; cv=none; b=e7GwM834oW9k5OSkS18glk1h9llB1dWisYT8hSXLyq+lsPk4dwoHZetH/5of2+W+r6LCSey7ZZoVz9mU4pnncSy/FwmWCKUP4BTOG3c5Q8xYHv2sr8CXJvLtIzzc1HcfyisUC/fH6hL/Pl19FxxLp6RPR0WJEf7vnP/6JBm8TsQ=
+	t=1743501540; cv=none; b=KNZbphDtb11uE2nlr+Jys8GXzqMvVdwHPuFPJqPY/3WFhgSx4OZZz2VtuzBNkFfPM3UuIpcS6sfQTNiC8gY5JRPOuiB7sORYbRm4tFFU5JhWCXpJy5D13Un5v0/Dqv5qz0GJ/tTYtt0pGwJXrObBnb3iwEvgEg/79sZGkTy851A=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1743501540; c=relaxed/simple;
-	bh=1ndEXG+Fz7i1kj7ApEfdmFCuENrbuziGRLmJ2GiPWWc=;
+	bh=4MyBN7FIBxopeBKiwITGRdXVZW4wJ5oXni7JOtxJIy0=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=TOvri/3Z1MaEqOK+r90z7++B9sMdAJZvUcCxLprQLEchTtiV5bORXiWPe+rubBnbRfRDlXSheLTqaTkc0EyRQ494+SzHxk1jV9q81n9a009NWZQWMgNWAisNeO2g91TnBXpUE4hN9eSoT1eXHZsBo5N5tT8KCsRfHn+e4UdD+zM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=OMn+sb5Z; arc=none smtp.client-ip=194.117.254.33
+	 MIME-Version; b=qU7/7rtJ5E7m2uFqeNh7rrUcZkvjHiBJnXYNIN4CZCKoSUvmphqrWFERPgjmYdX/ur7FaTqdClz6hjVo6YWlG+T4c2AP5aacMKKiCjDTRhZxR0ZH4T07F312tvo5/NSkZ/cpNu+yLjvduiVl6cuiwWhY+QgMWn0CZYgNiOKrsPs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=jjRVlZlQ; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="OMn+sb5Z"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="jjRVlZlQ"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=from:to:cc:subject:date:message-id
 	:in-reply-to:references:mime-version:content-transfer-encoding;
-	 s=k1; bh=pVKyXLWp2yZfGHDW27WPPew2Z1HVOjtC8T8Tf0U/5UE=; b=OMn+sb
-	5ZVRH18pFDSyjhFAB6qcF7f196IOXdTm7jX0PHy/V2gpRlEyX3Tpy6kbK9bZNv2Z
-	tyk33I0gIJw50D/WQl2uLUTm3mrUaxWG+sla3mMSrTm0uKGg4TyAW++iIJzjFCa+
-	uxsYSptUwSCGZqHAEQ5hW2kbhZkNs7Q63t31Ui5v/V2SzQVLgvQqCojrGci37NZa
-	mhzzg13EULRZyK2t1C/wxrODtx6ki9h4tCzeZFpVHX+yiXRM75/3lO86SukhgXQF
-	cc4oRrWIk+Pn7cXIlqHzjoUX87kbVrrlp3L5OR3i3v3W0FjQ25hCs92yWd9l7v+d
-	Aw0ENvS/Co/Ye4RQ==
-Received: (qmail 1558824 invoked from network); 1 Apr 2025 11:58:55 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2025 11:58:55 +0200
-X-UD-Smtp-Session: l3s3148p1@uT2ylbQxVoIgAwDPXwSgADIEZgbhJYA3
+	 s=k1; bh=ChImba1yZvxWxDm9IGWpf6Bs0jfG5/oHLm9Gp6AUrMs=; b=jjRVlZ
+	lQoN/WIDpGcQiE8nuGvlc6eQxvip0aosBXcEzprfUhVEx75PHd8KPpy8QgMqi3bU
+	MCkD86TO58fSBEEI2RjXvHazBcep0rvYWPAhYZHnNVZWO52y+6m5sIfRDZLchP/F
+	fxnE1bz69IQm4WAdmI61Jaf2+tFVbvFYAovlYcQhZRIpMuJUVST02+0YV/8vuBZm
+	Q/N1OjQNZhXuWccJJy39mJCxqkrzwN7QMl+gUkA+d7VPP3/G/KfPhrMlGs8h6yfT
+	hzsXFclQwTWrch+Cj59SrvEcMNwUEpm/OsfgBbtCK4bZpuA1lme6Y8yAB1lGO3T7
+	Dy0PeGNfKQVdmFbA==
+Received: (qmail 1558845 invoked from network); 1 Apr 2025 11:58:56 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2025 11:58:56 +0200
+X-UD-Smtp-Session: l3s3148p1@RFy6lbQxYoIgAwDPXwSgADIEZgbhJYA3
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: linux-mmc@vger.kernel.org
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [RFC PATCH 09/11] mmc: rename mmc_can_trim() to mmc_card_can_trim()
-Date: Tue,  1 Apr 2025 11:58:45 +0200
-Message-ID: <20250401095847.29271-10-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 10/11] mmc: rename mmc_can_gpio_cd() to mmc_host_can_gpio_cd()
+Date: Tue,  1 Apr 2025 11:58:46 +0200
+Message-ID: <20250401095847.29271-11-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250401095847.29271-1-wsa+renesas@sang-engineering.com>
 References: <20250401095847.29271-1-wsa+renesas@sang-engineering.com>
@@ -47,134 +47,149 @@ MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
 mmc_can_* functions sometimes relate to the card and sometimes to the host.
-Make it obvious by renaming this function to include 'card'. Also, convert to
-proper bool type while we are here.
+Make it obvious by renaming this function to include 'host'.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/core/block.c    |  2 +-
- drivers/mmc/core/core.c     | 14 ++++++--------
- drivers/mmc/core/core.h     |  2 +-
- drivers/mmc/core/mmc.c      |  2 +-
- drivers/mmc/core/mmc_test.c |  4 ++--
- drivers/mmc/core/queue.c    |  2 +-
- 6 files changed, 12 insertions(+), 14 deletions(-)
+ drivers/mmc/core/slot-gpio.c     | 4 ++--
+ drivers/mmc/host/dw_mmc.c        | 6 +++---
+ drivers/mmc/host/mtk-sd.c        | 2 +-
+ drivers/mmc/host/sdhci.c         | 4 ++--
+ drivers/mmc/host/sunplus-mmc.c   | 2 +-
+ drivers/mmc/host/tmio_mmc_core.c | 4 ++--
+ include/linux/mmc/slot-gpio.h    | 2 +-
+ 7 files changed, 12 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 02a11a757360..63320cc441c1 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1284,7 +1284,7 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 	from = blk_rq_pos(req);
- 	nr = blk_rq_sectors(req);
- 
--	if (mmc_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
-+	if (mmc_card_can_trim(card) && !mmc_erase_group_aligned(card, from, nr))
- 		arg = MMC_SECURE_TRIM1_ARG;
- 	else
- 		arg = MMC_SECURE_ERASE_ARG;
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f451903891a1..a0e2dce70434 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1843,14 +1843,12 @@ bool mmc_card_can_erase(struct mmc_card *card)
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index 5fd455816393..82a933d86889 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -228,13 +228,13 @@ int mmc_gpiod_set_cd_config(struct mmc_host *host, unsigned long config)
  }
- EXPORT_SYMBOL(mmc_card_can_erase);
+ EXPORT_SYMBOL(mmc_gpiod_set_cd_config);
  
--int mmc_can_trim(struct mmc_card *card)
-+bool mmc_card_can_trim(struct mmc_card *card)
+-bool mmc_can_gpio_cd(struct mmc_host *host)
++bool mmc_host_can_gpio_cd(struct mmc_host *host)
  {
--	if ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN) &&
--	    (!(card->quirks & MMC_QUIRK_TRIM_BROKEN)))
--		return 1;
--	return 0;
-+	return ((card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN) &&
-+		(!(card->quirks & MMC_QUIRK_TRIM_BROKEN)));
+ 	struct mmc_gpio *ctx = host->slot.handler_priv;
+ 
+ 	return ctx->cd_gpio ? true : false;
  }
--EXPORT_SYMBOL(mmc_can_trim);
-+EXPORT_SYMBOL(mmc_card_can_trim);
+-EXPORT_SYMBOL(mmc_can_gpio_cd);
++EXPORT_SYMBOL(mmc_host_can_gpio_cd);
  
- bool mmc_card_can_discard(struct mmc_card *card)
+ /**
+  * mmc_gpiod_request_ro - request a gpio descriptor for write protection
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index bb596d169420..8b4d1a3cd178 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3622,7 +3622,7 @@ int dw_mci_runtime_suspend(struct device *dev)
+ 	clk_disable_unprepare(host->ciu_clk);
+ 
+ 	if (host->slot &&
+-	    (mmc_can_gpio_cd(host->slot->mmc) ||
++	    (mmc_host_can_gpio_cd(host->slot->mmc) ||
+ 	     !mmc_card_is_removable(host->slot->mmc)))
+ 		clk_disable_unprepare(host->biu_clk);
+ 
+@@ -3636,7 +3636,7 @@ int dw_mci_runtime_resume(struct device *dev)
+ 	struct dw_mci *host = dev_get_drvdata(dev);
+ 
+ 	if (host->slot &&
+-	    (mmc_can_gpio_cd(host->slot->mmc) ||
++	    (mmc_host_can_gpio_cd(host->slot->mmc) ||
+ 	     !mmc_card_is_removable(host->slot->mmc))) {
+ 		ret = clk_prepare_enable(host->biu_clk);
+ 		if (ret)
+@@ -3690,7 +3690,7 @@ int dw_mci_runtime_resume(struct device *dev)
+ 
+ err:
+ 	if (host->slot &&
+-	    (mmc_can_gpio_cd(host->slot->mmc) ||
++	    (mmc_host_can_gpio_cd(host->slot->mmc) ||
+ 	     !mmc_card_is_removable(host->slot->mmc)))
+ 		clk_disable_unprepare(host->biu_clk);
+ 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 345ea91629e0..66da4d7dc550 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -2977,7 +2977,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		mmc->f_min = DIV_ROUND_UP(host->src_clk_freq, 4 * 4095);
+ 
+ 	if (!(mmc->caps & MMC_CAP_NONREMOVABLE) &&
+-	    !mmc_can_gpio_cd(mmc) &&
++	    !mmc_host_can_gpio_cd(mmc) &&
+ 	    host->dev_comp->use_internal_cd) {
+ 		/*
+ 		 * Is removable but no GPIO declared, so
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 5f91b44891f9..4bffec30c508 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -158,7 +158,7 @@ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+ 	u32 present;
+ 
+ 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+-	    !mmc_card_is_removable(host->mmc) || mmc_can_gpio_cd(host->mmc))
++	    !mmc_card_is_removable(host->mmc) || mmc_host_can_gpio_cd(host->mmc))
+ 		return;
+ 
+ 	if (enable) {
+@@ -3744,7 +3744,7 @@ static bool sdhci_cd_irq_can_wakeup(struct sdhci_host *host)
  {
-@@ -1864,7 +1862,7 @@ EXPORT_SYMBOL(mmc_card_can_discard);
+ 	return mmc_card_is_removable(host->mmc) &&
+ 	       !(host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+-	       !mmc_can_gpio_cd(host->mmc);
++	       !mmc_host_can_gpio_cd(host->mmc);
+ }
  
- bool mmc_card_can_sanitize(struct mmc_card *card)
+ /*
+diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
+index 1cddea615a27..63279760239c 100644
+--- a/drivers/mmc/host/sunplus-mmc.c
++++ b/drivers/mmc/host/sunplus-mmc.c
+@@ -791,7 +791,7 @@ static int spmmc_get_cd(struct mmc_host *mmc)
  {
--	if (!mmc_can_trim(card) && !mmc_card_can_erase(card))
-+	if (!mmc_card_can_trim(card) && !mmc_card_can_erase(card))
- 		return false;
- 	if (card->ext_csd.sec_feature_support & EXT_CSD_SEC_SANITIZE)
- 		return true;
-@@ -1981,7 +1979,7 @@ unsigned int mmc_calc_max_discard(struct mmc_card *card)
- 		return card->pref_erase;
+ 	int ret = 0;
  
- 	max_discard = mmc_do_calc_max_discard(card, MMC_ERASE_ARG);
--	if (mmc_can_trim(card)) {
-+	if (mmc_card_can_trim(card)) {
- 		max_trim = mmc_do_calc_max_discard(card, MMC_TRIM_ARG);
- 		if (max_trim < max_discard || max_discard == 0)
- 			max_discard = max_trim;
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 3f7bd25e9557..622085cd766f 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -119,7 +119,7 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq);
+-	if (mmc_can_gpio_cd(mmc))
++	if (mmc_host_can_gpio_cd(mmc))
+ 		ret = mmc_gpio_get_cd(mmc);
  
- int mmc_erase(struct mmc_card *card, sector_t from, unsigned int nr, unsigned int arg);
- bool mmc_card_can_erase(struct mmc_card *card);
--int mmc_can_trim(struct mmc_card *card);
-+bool mmc_card_can_trim(struct mmc_card *card);
- bool mmc_card_can_discard(struct mmc_card *card);
- bool mmc_card_can_sanitize(struct mmc_card *card);
- bool mmc_card_can_secure_erase_trim(struct mmc_card *card);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 80bb0a68b037..6bd6fed59b9d 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1806,7 +1806,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	/* set erase_arg */
- 	if (mmc_card_can_discard(card))
- 		card->erase_arg = MMC_DISCARD_ARG;
--	else if (mmc_can_trim(card))
-+	else if (mmc_card_can_trim(card))
- 		card->erase_arg = MMC_TRIM_ARG;
- 	else
- 		card->erase_arg = MMC_ERASE_ARG;
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 190ae178da84..be2d2895b4c4 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -1746,7 +1746,7 @@ static int mmc_test_profile_trim_perf(struct mmc_test_card *test)
- 	struct timespec64 ts1, ts2;
- 	int ret;
+ 	if (ret < 0)
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 04c1c54df791..569b66d3d47a 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1179,11 +1179,11 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	if (mmc_can_gpio_ro(mmc))
+ 		_host->ops.get_ro = mmc_gpio_get_ro;
  
--	if (!mmc_can_trim(test->card))
-+	if (!mmc_card_can_trim(test->card))
- 		return RESULT_UNSUP_CARD;
+-	if (mmc_can_gpio_cd(mmc))
++	if (mmc_host_can_gpio_cd(mmc))
+ 		_host->ops.get_cd = mmc_gpio_get_cd;
  
- 	if (!mmc_card_can_erase(test->card))
-@@ -1863,7 +1863,7 @@ static int mmc_test_profile_seq_trim_perf(struct mmc_test_card *test)
- 	struct timespec64 ts1, ts2;
- 	int ret;
+ 	/* must be set before tmio_mmc_reset() */
+-	_host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
++	_host->native_hotplug = !(mmc_host_can_gpio_cd(mmc) ||
+ 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
+ 				  !mmc_card_is_removable(mmc));
  
--	if (!mmc_can_trim(test->card))
-+	if (!mmc_card_can_trim(test->card))
- 		return RESULT_UNSUP_CARD;
+diff --git a/include/linux/mmc/slot-gpio.h b/include/linux/mmc/slot-gpio.h
+index 1ed7b0d1e4f9..4f6a46c636ec 100644
+--- a/include/linux/mmc/slot-gpio.h
++++ b/include/linux/mmc/slot-gpio.h
+@@ -24,7 +24,7 @@ int mmc_gpiod_request_ro(struct mmc_host *host, const char *con_id,
+ int mmc_gpiod_set_cd_config(struct mmc_host *host, unsigned long config);
+ int mmc_gpio_set_cd_wake(struct mmc_host *host, bool on);
+ void mmc_gpiod_request_cd_irq(struct mmc_host *host);
+-bool mmc_can_gpio_cd(struct mmc_host *host);
++bool mmc_host_can_gpio_cd(struct mmc_host *host);
+ bool mmc_can_gpio_ro(struct mmc_host *host);
  
- 	if (!mmc_card_can_erase(test->card))
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index f65bf1717bbd..284856c8f655 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -186,7 +186,7 @@ static void mmc_queue_setup_discard(struct mmc_card *card,
- 	lim->max_hw_discard_sectors = max_discard;
- 	if (mmc_card_can_secure_erase_trim(card))
- 		lim->max_secure_erase_sectors = max_discard;
--	if (mmc_can_trim(card) && card->erased_byte == 0)
-+	if (mmc_card_can_trim(card) && card->erased_byte == 0)
- 		lim->max_write_zeroes_sectors = max_discard;
- 
- 	/* granularity must not be greater than max. discard */
+ #endif
 -- 
 2.47.2
 
