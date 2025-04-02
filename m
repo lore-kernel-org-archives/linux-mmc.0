@@ -1,108 +1,117 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F1202080FD
-	for <linux-mmc@vger.kernel.org>; Tue,  1 Apr 2025 15:19:58 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53C701BD01F
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Apr 2025 09:30:27 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743520802; cv=none; b=q34SOFHOo8+5a7gmD7I0lVT9l48/Q9vWgw1BLdm6GDBDLH0rS5lNmrDYV1uaUtMpaBvHqLvDR83APPHlXxdVmV/Wx3luaO8JNuJOfdgD9+WkUIyVcvQUkTveLX3VSVzbSNgPs91RljQ3V1MzBt6GcFleq+AJJY59JlTekxcixJU=
+	t=1743586232; cv=none; b=PDI/2nnjqRpLBwPoOHXLV07g+nB9TjqmE82Z24n5ovYv2/Cn0n9bdRC1/4xQl2V1gKJbrwC4yBZ7ccO5GIncBsnsjmAxiUVSldkVMbiWrxr6raQ4FEww2NT+sYzhF3JpGltQsh+1sHlsxSMGKqxj1Bcf0tL8/cmRbfpMfAYGGvU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743520802; c=relaxed/simple;
-	bh=Bsrct6pT9P+xwQnjuDB+9ATEbtS79tHJ/rbWZlEHUFQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ll+e2Xgg9Pg3Az3MyNv93xD+pknNYSLj+DfyUzhnq6ZznW2Mpfakxzc/kqc7xrt2uhDC4rNsxG50xEGSmhxonSVX9LCKL9aPhI0Kgr1iAoIpTPWB1dqc/kfGSUOcdA1GpsmpUVeBNnWc4NLfA4ABEKHg0uhq1qQggkp2LtVaMeE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=afXea0NW; arc=none smtp.client-ip=194.117.254.33
+	s=arc-20240116; t=1743586232; c=relaxed/simple;
+	bh=WbTPhVWxedKKlDRpHSVKR9pRf9IMYDDsbtLr2wksW6k=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fLOYPg2ABkt6moZA8zaJ5Bvv8iQQ+KvzHBvwvWD3tfJ0fQVOHmwSPcNTkjsaPhUSbDcBaZbkj24/NcApDFDW+k5oCCc4hG2WkM/fQVKx+jOkitRxjhYGUMq0AZE4bd+ptceGzxfDNjYBM+LD+iW/ENgiYVMzc8ZD0y71oBDy41A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=iH4PrTot; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="afXea0NW"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="iH4PrTot"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=ZpNG
-	Yt6N5k7DHHaYdl06H/yqoC6ND60vLLXsQPJabpI=; b=afXea0NWsAlEeGPshquq
-	dFrXvvBwBRwjL7CciXEjs/szZTYR2IjfN2FymEUM+SvVpdUodPWLP+wmbsy3o3yH
-	fGjptNe8NKEO01Cx7ZVs3PaVLug2TuhBf+/xG0abnN7Gv+qJkmGZU39y/IA5Xq6U
-	2NV5ObZAJ58VBEnjg/hrYmH2KStKY6X2X5h9fOHsaMsRon0p1FKydTJWw1LYSEfj
-	SbR2D3SCnmNI5HL/43zv4+yDBwNiAc8P4fPLe6PjzeG8H4emuSnGg6caD3WNQoT7
-	QbTk1UT0oUbXiMQylKGy8+kbTPe/XGlL6Rg+hpGods0XSjy7KGVbHVtVlL/vVBwf
-	Ug==
-Received: (qmail 1663192 invoked from network); 1 Apr 2025 17:19:56 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2025 17:19:56 +0200
-X-UD-Smtp-Session: l3s3148p1@ElGvEbkxyNsgAQnoAEfTAHFphPy3/0G7
-Date: Tue, 1 Apr 2025 17:19:55 +0200
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:mime-version:content-transfer-encoding; s=k1; bh=NJPez+zmY357+7
+	Cd+pSr7cOgjkhvf3BWFFdubDXobkw=; b=iH4PrToty3DXG+KNlTG4m/rbjX7Fpt
+	3tnvaWHfsNuXeBZGM0/DnuIeRu8VEe96DXBxnhBDBBEooyGCexGtEpPio2UTTfyf
+	d5SLHzCvaa7/lZ72lw2saUIonbcQpbj2EE2bnaueeARD2xzSgvlxvaS70Ilc8Gtc
+	XQ3a6iksVi7hmtmHvKM73Gs/o3Ql+RF4F4XSNwF7tHLeOMVOp1NDIMAWNHK4cZwJ
+	vNQ4JFnlSV16uYr0wWn+t4KkMblY3y7dL0+suWJfWILmjS0tGWk0F8uNyMwojTMO
+	bIeICRDQmnyU4HFbVvwFQwTTttAAo/ifyTkIG/LRZuKTsaE5J5dUYYFg==
+Received: (qmail 1923461 invoked from network); 2 Apr 2025 11:30:25 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 2 Apr 2025 11:30:25 +0200
+X-UD-Smtp-Session: l3s3148p1@B+SaTcgxqM4gAwDPXwtPACMWXeF3DZvE
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: "Rob Herring (Arm)" <robh@kernel.org>
-Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdhci: Add Renesas RZ/N1D
-Message-ID: <Z-wEGyV72abGuuvR@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	"Rob Herring (Arm)" <robh@kernel.org>,
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Magnus Damm <magnus.damm@gmail.com>, devicetree@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-References: <20250401100837.29792-2-wsa+renesas@sang-engineering.com>
- <174351601673.3283654.13923027888464994082.robh@kernel.org>
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org
+Subject: [PATCH v2] dt-bindings: mmc: arasan,sdhci: Add Renesas RZ/N1D
+Date: Wed,  2 Apr 2025 11:27:50 +0200
+Message-ID: <20250402093019.5639-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.47.2
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="Hjs8mf8LQAl2bpdS"
-Content-Disposition: inline
-In-Reply-To: <174351601673.3283654.13923027888464994082.robh@kernel.org>
+Content-Transfer-Encoding: 8bit
 
+This instance has a wakeup irq defined. It is currently not used by the
+driver.
 
---Hjs8mf8LQAl2bpdS
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
+Changes since v1:
+* dropped superfluous 'maxItems'
+* now checked also against 'dt_binding_check'
+  (Sorry, forgot this target in my scripts)
 
-> My bot found errors running 'make dt_binding_check' on your patch:
->=20
-> yamllint warnings/errors:
->=20
-> dtschema/dtc warnings/errors:
-> /builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/m=
-mc/arasan,sdhci.yaml: properties:interrupt-names: {'minItems': 1, 'maxItems=
-': 2, 'items': [{'const': 'int'}, {'const': 'wkup'}]} should not be valid u=
-nder {'required': ['maxItems']}
-> 	hint: "maxItems" is not needed with an "items" list
-> 	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml | 22 ++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
 
-Huh? Need to check why my scripts didn't report that. Sorry!
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+index 9075add020bf..d4605bbc7a57 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+@@ -38,6 +38,15 @@ allOf:
+             - items:
+                 - const: clk_out_sd1
+                 - const: clk_in_sd1
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: renesas,rzn1-sdhci
++    then:
++      properties:
++        interrupts:
++          minItems: 2
+ 
+ properties:
+   compatible:
+@@ -45,6 +54,10 @@ properties:
+       - const: arasan,sdhci-8.9a                # generic Arasan SDHCI 8.9a PHY
+       - const: arasan,sdhci-4.9a                # generic Arasan SDHCI 4.9a PHY
+       - const: arasan,sdhci-5.1                 # generic Arasan SDHCI 5.1 PHY
++      - items:
++          - const: renesas,r9a06g032-sdhci      # Renesas RZ/N1D SoC
++          - const: renesas,rzn1-sdhci           # Renesas RZ/N1 family
++          - const: arasan,sdhci-8.9a
+       - items:
+           - const: rockchip,rk3399-sdhci-5.1    # rk3399 eMMC PHY
+           - const: arasan,sdhci-5.1
+@@ -109,7 +122,14 @@ properties:
+       - const: gate
+ 
+   interrupts:
+-    maxItems: 1
++    minItems: 1
++    maxItems: 2
++
++  interrupt-names:
++    minItems: 1
++    items:
++      - const: int
++      - const: wkup
+ 
+   phys:
+     maxItems: 1
+-- 
+2.47.2
 
-
---Hjs8mf8LQAl2bpdS
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfsBBcACgkQFA3kzBSg
-Kbb4uxAAge1iacyEQ91QPAD8emshoeiLL65tK86da79+6yUwkaV4lkrdzTtQY36n
-M9XNsNdAlRiKqR8ejE5UZjN4qsbgyYQYDIe2Y++kfVjdp1Aquz8Z5MM8uAE+1ijJ
-JH81VYhNsNMSqVAyJvedkjpExrrhUrR26up/G0dHyu8nvozUEIan+F4tDSUq1GRR
-f0hbYV+WNF6IH+71jvx085j3yelI1ramzyZq9EvpBih9Ayl6uDQz+hQMTfPZ9BtV
-QCMqF20D4lLvjez7KRPJlBOKJD9V4s0Jip+AxdOQTRKjCWFGHS58m8NdnFzTllUr
-A/uOaYQMnuIIL8zm+p2BZKJ7jP/MPpm1604rSK+5esn+42tWH1gXAhoqw15bipPy
-YsTZ97tTt07fISyLObMf2dZMp8G+MlGrlTL6onBD4nxCUhyhtQLn5cuPK6PjfCp8
-jz/EjCGl45Kc19z0a3eUszL5HJa0epHrS+SP5qdch33Tqj8ln36idnIfXrzQNAWl
-HlyLA7vl7fd/pDtyz3bZAIl5yKuYqtWQ200Q5q98UW4mq2BrRQg9n5QbmmFtkp/S
-PAe+qgs1WcsURdl2+ImNqajMess1Ya7IblOnzsPR6T8SK7ycAfMPILD1J3NZ83P9
-mvcdrUcsp7RCS+dlRIENCFxriWNcTg1lpucxG33V3VDyM8ABgpM=
-=zBd6
------END PGP SIGNATURE-----
-
---Hjs8mf8LQAl2bpdS--
