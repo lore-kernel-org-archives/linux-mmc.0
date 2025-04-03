@@ -1,317 +1,370 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.11])
+Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D39322E3396;
-	Wed,  2 Apr 2025 17:23:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=192.198.163.11
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743614636; cv=fail; b=l2FrdXfms+rMuNPPPc8Dy7mhYHWHaYBmXu5uEY08G0Q11aZxShh8XchpImw/PuXTonf01sFUCKBb+u2Itv5Z1e9soziGe7zFJnoivZr9t4FVUDqaFM8japJQyWk56d/mR2f367Id/p5Ow+yd5c3k14/+yCkiLO7DafCVxZ6iX98=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743614636; c=relaxed/simple;
-	bh=zSlnF0JPsjR8YJzDZukYo3Rd8sL7HpwyNtKruYEFlxA=;
-	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=OORaPi7gKMVcDNV0ywN1/NNFclreYKuv572W4IlAEKUFUb6Xr8IiF1yG+5NH8gsJvH3dEsO/pOKE3tYaucHNRHbeN5qofMtQD+MAFdMECv9YgJpCjmKfFSNpXLgLz0mraBEzwYB5Jqye33hXlcC+sEf0OJoPN1P0HCaUuq/ARmk=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=LmFIcR3n; arc=fail smtp.client-ip=192.198.163.11
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B678B1624E0;
+	Thu,  3 Apr 2025 10:57:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1743677857; cv=none; b=HdkU9lfXww62F349HMSRiPpgYy/OtqzoRSSw1B5j7hSlEioG8bXCHYAkz54+SAOM7uHlrNDD4M6bh4nP4cfCfNxsHMTJP+gCTppXJX4I5Olzvtd8Itm5LhbQ0ZDBdMPEu2jYWwE6R+s7JrwvUxq70O656Oe3R6W/AzPrkUgwI7Q=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1743677857; c=relaxed/simple;
+	bh=tkw/pAVMikC8vZDLk5yz26i/hAbPheqhEpIiGxCaaGw=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=fkWHLEeBPLtPtEfw82RSEc/Qm0KvnPowsQ2sERPO7Eh2Iky+iP9HRf++M1pO7gkouaF6iv+k82M3vSzD+NeEmii+19cU47ADk5XBUTBC9JJuYJIdb0L25WPGb/o9I6ClH2IKCWlteKZr0CbsBh0RljIeD9AOguVg7LbuhAq0rLY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=AY8I1SS+; arc=none smtp.client-ip=148.251.105.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="LmFIcR3n"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1743614634; x=1775150634;
-  h=message-id:date:subject:to:cc:references:from:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=zSlnF0JPsjR8YJzDZukYo3Rd8sL7HpwyNtKruYEFlxA=;
-  b=LmFIcR3nR2H0uPMeX1mCqjfp8Ujj4UgOVEe/9ezoT+3+PCUvPhPFuykr
-   HzcN+wQZaDwwPb2/Qb0nwZ6iK9DqQKzXe8nOKAnIS6aPPAp7faoZi9uBf
-   d7TNfsEkZDwHyApfXBRuK3SvkOVWTsQKn7zA5lT3gv6XeCe05ABa2IpAl
-   CNf92MBQnQ8zTRmflPbJkdGIJvenrCCRPccleUCWaZJl90WDe3508IHqN
-   aySNSv22P2Yn9kkIjE4u1KMu0bYSgWnixsUJA+3WmhNO0r7Gk2yKpC4pT
-   TZnVmIIQmMehH3giu497EFdn818HtukqTUNaK6TOHzEZUQNaurkmwPh9K
-   w==;
-X-CSE-ConnectionGUID: jTAkeLtTTU6DXGBuTylifQ==
-X-CSE-MsgGUID: pL+UbyTmRuGJWBzT8Izb7A==
-X-IronPort-AV: E=McAfee;i="6700,10204,11392"; a="55660111"
-X-IronPort-AV: E=Sophos;i="6.15,182,1739865600"; 
-   d="scan'208";a="55660111"
-Received: from orviesa008.jf.intel.com ([10.64.159.148])
-  by fmvoesa105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Apr 2025 10:23:54 -0700
-X-CSE-ConnectionGUID: dM9mVr6XQC6RjFCZGX09sA==
-X-CSE-MsgGUID: fBTdSPf7QNCGrYOeOrTTbw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,182,1739865600"; 
-   d="scan'208";a="127666119"
-Received: from orsmsx903.amr.corp.intel.com ([10.22.229.25])
-  by orviesa008.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Apr 2025 10:23:54 -0700
-Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
- ORSMSX903.amr.corp.intel.com (10.22.229.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.14; Wed, 2 Apr 2025 10:23:53 -0700
-Received: from ORSEDG601.ED.cps.intel.com (10.7.248.6) by
- ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.14 via Frontend Transport; Wed, 2 Apr 2025 10:23:53 -0700
-Received: from NAM12-DM6-obe.outbound.protection.outlook.com (104.47.59.171)
- by edgegateway.intel.com (134.134.137.102) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.44; Wed, 2 Apr 2025 10:23:53 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=mdSsCUDBgqpAbHRHZ2s7uiGIqP0fRGvSUVc48EyvW1EgvWKDEMIhQQq+80M2YBCL4ai/k9nfLCL8Ha1YLXIdfXTT1h/dOmDx/XcNubh5mmCGOV1uHF4MJxwluNA9RtHuCX8rQAkxTXeR9DdKu7uXH3BqQnzVGd8NWHhnaSDZBsXt6ChYqAFzTtSb0x0RijBnJQfHkVh/+jbI45iTE5yTzhwuE7EeN4brWqTa70aykxy61yNlcbrfWtBUMM5Uk58LJEjB48/JFmyaWnIvjZYJcm5Af+w6KGcpQRl+ZlkBJhfm8GtU36bRgrIhdCej7ZMuJpMOaVOpo9PDpF+wCqhZOg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=v+3BjCrG9STGpUUVUi9bTb06eEuhZWW0Ib5O76kPcU0=;
- b=JK9bPtWzt31hPUfM0e45bKImf/+r2o8ZyJKy7klFAgQQefXYCaCN+z9tg5aifeIQuRZWa8/CbddF3tLFxG2CSHE+7shB9lsNNe1g4Y0AC4UilbIJXyGzX0Ki7mycXfYtyIn4zXMkD1alT4EmFUnoW7rwaIvjfwj4hdDT8uMAVCE61Djqkzd+PVt2Au50lAoFSr8TA1ZSMi5Sjv0OIRxFjYAT2W5/Yix3s2lrPrIwlBsXNcpSQzBMc8f+ktUZYKEieJcTNnS4ffvmceCsv6P+xU3MMXSXYDL4YbokOPYC/kLicsY/Y4V/xBxUTYy9SXjm5DyDQufs9Pev0/xd9yWnMg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=intel.com;
-Received: from DM6PR11MB3612.namprd11.prod.outlook.com (2603:10b6:5:13b::21)
- by BY1PR11MB8126.namprd11.prod.outlook.com (2603:10b6:a03:52e::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8583.41; Wed, 2 Apr
- 2025 17:23:50 +0000
-Received: from DM6PR11MB3612.namprd11.prod.outlook.com
- ([fe80::80bf:d25e:d9d:1228]) by DM6PR11MB3612.namprd11.prod.outlook.com
- ([fe80::80bf:d25e:d9d:1228%7]) with mapi id 15.20.8583.041; Wed, 2 Apr 2025
- 17:23:50 +0000
-Message-ID: <37fea39e-6687-4ad4-9dac-f09333953afa@intel.com>
-Date: Wed, 2 Apr 2025 20:23:41 +0300
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2] mmc: Add quirk to disable DDR50 tuning
-To: Erick Shepherd <erick.shepherd@ni.com>, <linux-mmc@vger.kernel.org>
-CC: <ulf.hansson@linaro.org>, <keita.aihara@sony.com>,
-	<linux-kernel@vger.kernel.org>, <avri.altman@wdc.com>,
-	<wsa+renesas@sang-engineering.com>, <jason.lai@genesyslogic.com.tw>,
-	<jeff.johnson@oss.qualcomm.com>, <victor.shih@genesyslogic.com.tw>,
-	<andy-ld.lu@mediatek.com>, <dsimic@manjaro.org>, <jonathan@raspberrypi.com>
-References: <20250331221337.1414534-1-erick.shepherd@ni.com>
-Content-Language: en-US
-From: Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20250331221337.1414534-1-erick.shepherd@ni.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: WA0P291CA0016.POLP291.PROD.OUTLOOK.COM
- (2603:10a6:1d0:1::28) To DM6PR11MB3612.namprd11.prod.outlook.com
- (2603:10b6:5:13b::21)
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="AY8I1SS+"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1743677853;
+	bh=tkw/pAVMikC8vZDLk5yz26i/hAbPheqhEpIiGxCaaGw=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=AY8I1SS+s6hcViJlt+RbH2FK2aegdngXe66s8ZBVLRHtc3y3l346QhzQImcPyMVuf
+	 xrtk7CdWeeGr4SOIQQi5V+ZAQ+2BSRktF9LGc5id2LRFqWPvMp1vmkvmHNaVFllM3R
+	 kEfbF9Au4BVBDfNFdd4tPraPiLzKrQqf/YlmGsfyf/Q5Y7qn9Ctc6eRr3xgo6iVjjO
+	 yNjcIvZKhkseDqweYUKgWsE4glxeFJhb9idRXwz0hUUYycMTZz9Ou88WVLEqdcLI9r
+	 Oy2ec2W8RI8EH4lStUSe7+jJ8nvpC1AVizD01z13oTcXBX0TcDviiM9R8uG+1r0cF4
+	 qXjIIdFuCdCRg==
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits))
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id 72DCB17E0F47;
+	Thu,  3 Apr 2025 12:57:32 +0200 (CEST)
+Message-ID: <736d0164-b672-4c3b-ad64-89c31482effb@collabora.com>
+Date: Thu, 3 Apr 2025 12:57:31 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6PR11MB3612:EE_|BY1PR11MB8126:EE_
-X-MS-Office365-Filtering-Correlation-Id: 53738142-ac4e-49e8-9db0-08dd720b2209
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;ARA:13230040|366016|376014|7416014|1800799024|7053199007;
-X-Microsoft-Antispam-Message-Info: =?utf-8?B?amVzc3BZQXA4cGVhRExtdFBBdTMxYTVLeXh6TjJNT0NBdjdYR2ZnNEpwOEtK?=
- =?utf-8?B?T1ZyanZMN1QwY3NIQVBWV3BjNDM4NC90dUtGV1NPK252RFAvNG5Ec1orY21s?=
- =?utf-8?B?aXU2a3lDbjJMYkJKZUhwaFZmakd3c3N0cVpoWGxxYjNjakpGNHJ6Sm1KNlM4?=
- =?utf-8?B?eWM1TDJyOHlRWitMWndUV29MWW9VbEFFbDdnU01TVGtkclVFQmNQSXc0MUha?=
- =?utf-8?B?UHV6OVkwZjNrZHVsRVJxeE1MWXRHVjJsSGlscU52dDJKZk5la2dmeFVFeDBv?=
- =?utf-8?B?T3NMV2VJYmVDUVdKK3JMRDVnb3NKd1dOZEJxY3dubUVVaE5oM3dncDAxTm9p?=
- =?utf-8?B?ZmV5alRva0ZHbW52OTBIajZXUEpyMFRRd2tJMlFHRGNHYm42bVc1OUI0WFFv?=
- =?utf-8?B?b3dnbnpTZnhlc2NFTnJtbklNQWxNY3RMNS9HZFI0T1JYZGVSZTRXOU00NHRi?=
- =?utf-8?B?SVE1Rk8rNWdaN2p0YjhQN3RLY3pjR0ZBTHNCSHNzY01WS0ExSUVYbGdZYkFv?=
- =?utf-8?B?QmRzeVZkY3ZKZEwvZzRlYURFV29VY3YvZEdYaTFpNzhScHVJWVY0Uzl2bUpY?=
- =?utf-8?B?VHpTQ2djYU1nS21WSGIrcGxUOCs0THBwbUVKdzJUeEdOekxJelh1ZW5hUjBx?=
- =?utf-8?B?Q1orTzFyZ3YrZEc3ZCtrS0h6Ky95S01OWWJsdnphYnQwQW05bTF4c0FDYVVR?=
- =?utf-8?B?cGpoSTNzWENTT3AwZDQ3RmZCemNoTTJSeHVVcTU3VUl2ei9IQUtSU29pNXk5?=
- =?utf-8?B?dDNSVHp3Mm1LSUMzUmFGdkVoUFlsYmV4R0Y4WmhmdVlsQnprd2lLSldBc2Jv?=
- =?utf-8?B?cWJNMVF4UEc1c010c0hOYlFzWVAxTVJZdVViZUhRL0R2VzV0d2RkRzVhSkx6?=
- =?utf-8?B?WmM2UXh0M2lPNlByUFpQTnI1eTM5RkkxTnltbzhuZkczQzk4M2tuU04xM0dO?=
- =?utf-8?B?YXQzaGRJRDl3NFZzeHQxUXFkVkpocFFQOEtYZnArY3N6UUJldWkzTnVoTzZ3?=
- =?utf-8?B?a0dkc3IxZjU3NThQeGNsUlcyUUV4VjFkWHVWSzB4ZTMzR3JyRDVyTmRVR1Ns?=
- =?utf-8?B?L0dWZ044N3FBT2pkNWdPaDNYSEdpQkI0ZmYxbCtyb2JEZ1U3N3ZqQmZkaFhH?=
- =?utf-8?B?QWZiYmx0elJ5UGtrMkJ4ZWJCUkgzZy9mY25NRW94NGZDNGVJOHJpelZoeEt4?=
- =?utf-8?B?a2pESW53MnlLUGw5NVBIbS9Ob1ZLL3ZlZnpRRHVycUQya3YrYWVmMHdpM1dk?=
- =?utf-8?B?SlhuVkdmMjNmN290c3JCZHRKSUlKaXNJUDExVWdRdGhFaklnZ0JwN0lZTnVj?=
- =?utf-8?B?ZzhmNWhTdElzbDhxT0VsMTlWWG9qUXo5anFuQkpuNUErR2M0dTBrNnJGUEpC?=
- =?utf-8?B?TDhXQndoZ253bVRWVVlEQ0FTZWdIbVpzREp3SThlQlBkUjlOZlZ5UnR5Qm5p?=
- =?utf-8?B?bkN2bU9yaHN1MG4zbWJwZTMxRUJEa09td1I2c1h5MXVvM0ZYSng4a3JpdW5L?=
- =?utf-8?B?OXQ3VERTaDZLUnJCaE9RZGZUVlcxNXJzbG0za3FEaTlUYkVWTmtLQ2orUmNG?=
- =?utf-8?B?b2FyRTZUTkpaMEdGNmlHdFBBUTlvTGk3SVdYZDhCOUxlVGExMkN5RnI1cmZV?=
- =?utf-8?B?MnlHU2Yyc1hJWlU4aGZ3SC9pSHBGbHFsTlBvZmZ0REFTRitMSDQyU0VLL1Vm?=
- =?utf-8?B?VXRJdFpWTTViV3RUVTFtUndmTTNWZDV0Q2NjTENNdUN5ZHhyZ2ptcUg3Vkh0?=
- =?utf-8?B?MG5EN05vTkZQbTlNV2l4RWovYlhIV3dEb1FING5qYUZ3M3RGV0xNTCtVN2Ju?=
- =?utf-8?B?UktKY3VxQWN4M2tnaHdVZlhkbUJqZlFoNU12THBYYmFiZmNVOE1ldEl0dm1k?=
- =?utf-8?Q?zH5XeN8DfkWaw?=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR11MB3612.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(7416014)(1800799024)(7053199007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?VUNzblhMN1dVVmw0REtuZnVFS0pKWVBpb1Q5REljQ2kzYkFnVXkyT2JJd3kx?=
- =?utf-8?B?MHE4SEVPQUozczdSY0V2aEw2MEFRN1ZQV05ncnZIQk04RXQwS1FHemNUYkVq?=
- =?utf-8?B?RjM4dDRpZnBtTVVUSHkySlJYR3Y2VmRXKzh4WFlBb3BFaDZwLzBpYUJkYlJI?=
- =?utf-8?B?aHdQWEF2eU9vV3VKQkQvdEZHWXYveFp0Q3Nna0VaUDFTNEUvSGc2dzJNQUFz?=
- =?utf-8?B?Z0Rid0ZJU0JRcFZMeFFteWVJemNMSks2YW50bGVsYXloMnNUOTE3V2ZVeENq?=
- =?utf-8?B?a1NLY1ZlVm0wREwwMEhsbTZFR3NtTEp0WWtqVXNkcHg2VnM5djFiWXdheFJI?=
- =?utf-8?B?Z1l5SzFuL0RGeC9lYVBtYis2bHhCV3hXUkRnUStQaDBGZTYwR2t5OS94T0V5?=
- =?utf-8?B?Y1lYSk1jUkkvNXlwRUc4NTQ5eEczRVJ6Nkc1TStOcXpvV0t6R0RJY1UwZ0pG?=
- =?utf-8?B?Tks3TkhXTUtQVzkwOUtRa3pEWjlXeURNdUJObUhMeGtnTzl4ZEtDS05aTlN2?=
- =?utf-8?B?RXB6ZjVRSWEzYlFJR3NDbnJ3OFVEQWhTaURSRDlTL2dZdEZlMUJtRVdzcUsz?=
- =?utf-8?B?d1FNRFZsWGdkd2xWUk1JQndhdjF0K25iSXRZNCt4VHRNQXgxNE8zVjY5ZmRW?=
- =?utf-8?B?eXl6aGFPWU9sTjVyQVF2eTFLTkFkeUFrZE0ySkp6ekdwemJZaTV2VUtEeXNJ?=
- =?utf-8?B?SGFlNGtQWkhxWGF1OFdDdkNsOFk0NHZ4ZzVsNS80cGZiY1c0SDVEZ0JYMlVU?=
- =?utf-8?B?NjBSUEx5K0lyYXU4aEFjdWt5TWZCb1pmSWhMQnc3UkkxVnR5OXFBWFdVSnk1?=
- =?utf-8?B?d2t4ZXZaVi84c0ZwUWJqVm5HTzhXQVpPUUdTdngzUU1mS3VGOUhKTXVaRS9O?=
- =?utf-8?B?QXJNY1F5enhleEFIUkJReHRPTnc0b3U0NmJkZEVtZzhaOExFSWhmZ3lxUmdu?=
- =?utf-8?B?b2dSNFRhQ09uTk10dmdtYzZSdVRlbEkrMm92Vy91aVBDREIrL3ZTWnc0UVZP?=
- =?utf-8?B?dDRlU01JbW1Jd2NBMVZHTGFBYm15eVhSeWVQWmFzdk50Q3R5Q0hIZGlXY1JJ?=
- =?utf-8?B?YWhLaHhNWGMzTDRuSHlXNTMvSy9jS1pLbXBFMUE4RkZKU1ZlRm15aDgwZXhZ?=
- =?utf-8?B?NVNJR0EybFhIVHpOVWg4OFM4Vk01dU55VlFuK0tKU2lLa3E4MzcwZENHT3ZW?=
- =?utf-8?B?RHdlWTdTM0RkOVE0TFRiNzNKNjRLNUc2WXNQVTR5NnZ5Z2hmeW40NjY0NkUy?=
- =?utf-8?B?VWFqa2hyQ1NWQUdHYUNDRENSMVl1cHNybHl6OUdnMGpMSnVvMDRpNWJNdGZ5?=
- =?utf-8?B?anBVQnM3OE11blF1dVprQnMzZWR6MnRmdjR1QzRaS1pWcUdXb3crSFQ3d2JE?=
- =?utf-8?B?MnFtejgrR0NUZ1ZlL05aQ0dxSlF4UThTanUvNGxXRjNJZEFpSWNqeVd5d1g1?=
- =?utf-8?B?S1NvSHpUN0RQQXFMTW1sUG5HVmxQK2dQUXZCMmRoKzNHOWN3bmN2WGFqQkZ0?=
- =?utf-8?B?eHhJV1pxS0hJZGRJQkdrdkFQajNwMFRNdWQ2bmRkQTV0S1FwQWNidkxiK2Ir?=
- =?utf-8?B?R1VxTmU4Q1ZicXZjYyszR2ZCVThpNUZQQzRVZk5ockhWUFZSNE9FbnRKQW13?=
- =?utf-8?B?S0V1aFB5ZHJBQlNlOGJXVklRcTFNeWRvWnhXbVhIZ1J4Wk95UWZGUURkZDFG?=
- =?utf-8?B?UXBxdE1pRFFXSlFCQ3B3MXdOejVVMkNidlBsUEZOMnUweHZVZUJFMk5lbEhz?=
- =?utf-8?B?WGgzdEFWTXhXRHNMdnNaMmhHQXFkM3U5YlltWWJ2VDF1Q2w5NEdXV1ZGZFBY?=
- =?utf-8?B?RkkyK3R1OXh4ekxwbWJPSUU3Q1JSdnd3VVpDSThleHM4aEIzQUpUY3BiNnha?=
- =?utf-8?B?MHJjVTlzT0Jub1cvZHF4Tjl6UERFMm4yOTY1c2s0UmpQR3pQQldqZ21SNVJO?=
- =?utf-8?B?RmY2cHgvOGZBNEd3NU1vWjRjOXY2cjdNVFVwY0FHY0JsYTRNTFZaNVBVMmZ4?=
- =?utf-8?B?ZEJ1LzNuQUQ4dWpwZytUZjFFbERRdnRuUTNjaVJTaTVXM0NOb2l3TFBOM3RF?=
- =?utf-8?B?bWtRYU5DcjBsbDhIcUdTY0lFSnRrTmJSMkdpbVRJRWtnSklDcXovYVVQci83?=
- =?utf-8?B?YVBQelk4dHlRVmJKRCtwYUxYR0VFQXJuSDFMdWJxT1V0cSttZkNLMjQ5cXR6?=
- =?utf-8?B?Snc9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 53738142-ac4e-49e8-9db0-08dd720b2209
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR11MB3612.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Apr 2025 17:23:50.1012
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Tl5ebEPFwS1zzVlwGPE5F2w4+NHHtI1wd7nnZmroADgcFpqVZZK4t72QCM4fN/O0rChavhZUeCVztC+wRZpVJQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY1PR11MB8126
-X-OriginatorOrg: intel.com
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: mtk-sd: add single burst switch
+To: =?UTF-8?B?QXhlIFlhbmcgKOadqOejiik=?= <Axe.Yang@mediatek.com>,
+ =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= <Wenbin.Mei@mediatek.com>,
+ "conor+dt@kernel.org" <conor+dt@kernel.org>,
+ =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?=
+ <Chaotian.Jing@mediatek.com>, "robh@kernel.org" <robh@kernel.org>,
+ "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+ "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+ "krzk+dt@kernel.org" <krzk+dt@kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+ "linux-mediatek@lists.infradead.org" <linux-mediatek@lists.infradead.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ =?UTF-8?B?QW5keS1sZCBMdSAo5Y2i5LicKQ==?= <Andy-ld.Lu@mediatek.com>,
+ "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+ =?UTF-8?B?WW9uZyBNYW8gKOavm+WLhyk=?= <yong.mao@mediatek.com>,
+ "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>,
+ =?UTF-8?B?UWluZ2xpYW5nIExpICjpu47mmbTkuq4p?= <Qingliang.Li@mediatek.com>
+References: <20250306085028.5024-1-axe.yang@mediatek.com>
+ <20250306085028.5024-2-axe.yang@mediatek.com>
+ <3e84fda8-2566-4f18-8ef9-850c84789c34@collabora.com>
+ <f84800fac589429157cd84034ef2f4541d3486a7.camel@mediatek.com>
+ <b09f618a-eaf9-4258-ae2d-67eff1cb249f@collabora.com>
+ <f8ce830d831aaba0d2748d31f8ba4a9915b7a14e.camel@mediatek.com>
+ <52d2f247a3058b96625bcdf5ab370282dfc9fb0e.camel@mediatek.com>
+ <3572d6e2-8950-4937-bed5-624bf5bde7f3@collabora.com>
+ <8958413b4138d815d582927f7702b35ffc20f122.camel@mediatek.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Content-Language: en-US
+In-Reply-To: <8958413b4138d815d582927f7702b35ffc20f122.camel@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On 1/04/25 01:13, Erick Shepherd wrote:
-> Adds the MMC_QUIRK_NO_UHS_DDR50_TUNING quirk and updates
-> mmc_execute_tuning() to return 0 if that quirk is set. This fixes an
-> issue on certain Swissbit SD cards that do not support DDR50 tuning
-> where tuning requests caused I/O errors to be thrown.
+Il 27/03/25 03:48, Axe Yang (杨磊) ha scritto:
+> On Tue, 2025-03-25 at 11:20 +0100, AngeloGioacchino Del Regno wrote:
+>> External email : Please do not click links or open attachments until
+>> you have verified the sender or the content.
+>>
+>>
+>> Il 25/03/25 03:41, Axe Yang (杨磊) ha scritto:
+>>> Hi Angelo,
+>>>
+>>> Any comment on this :D
+>>>
+>>
+>> Check inline reply below....
+>>
+>>> Regards,
+>>> Axe
+>>>
+>>> On Wed, 2025-03-12 at 14:30 +0800, axe.yang wrote:
+>>>> On Tue, 2025-03-11 at 10:47 +0100, AngeloGioacchino Del Regno
+>>>> wrote:
+>>>>> External email : Please do not click links or open attachments
+>>>>> until
+>>>>> you have verified the sender or the content.
+>>>>>
+>>>>>
+>>>>> Il 07/03/25 07:59, Axe Yang (杨磊) ha scritto:
+>>>>>> On Thu, 2025-03-06 at 10:19 +0100, AngeloGioacchino Del Regno
+>>>>>> wrote:
+>>>>>>> External email : Please do not click links or open
+>>>>>>> attachments
+>>>>>>> until
+>>>>>>> you have verified the sender or the content.
+>>>>>>>
+>>>>>>>
+>>>>>>> Il 06/03/25 09:48, Axe Yang ha scritto:
+>>>>>>>> Add 'mediatek,disable-single-burst' setting. This
+>>>>>>>> property
+>>>>>>>> can
+>>>>>>>> be
+>>>>>>>> used to switch bus burst type, from single burst to INCR,
+>>>>>>>> which
+>>>>>>>> is
+>>>>>>>> determined by the bus type within the IP. Some versions
+>>>>>>>> of
+>>>>>>>> the
+>>>>>>>> IP
+>>>>>>>> are using AXI bus, thus this switch is necessary as
+>>>>>>>> 'single'
+>>>>>>>> is
+>>>>>>>> not
+>>>>>>>> the burst type supported by the bus.
+>>>>>>>>
+>>>>>>>> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+>>>>>>>
+>>>>>>> I am mostly sure that this is not something to put in
+>>>>>>> devicetree,
+>>>>>>> but
+>>>>>>> as
+>>>>>>> platform data for specific SoC(s), as much as I'm mostly
+>>>>>>> sure
+>>>>>>> that
+>>>>>>> all of
+>>>>>>> the instances of the MSDC IP in one SoC will be *all* using
+>>>>>>> either
+>>>>>>> single
+>>>>>>> or INCR.
+>>>>>>
+>>>>>> No, actually MSDC IPs in one SoC are using different
+>>>>>> versions.
+>>>>>> Usually MSDC1 (index from 1) is used as eMMC host, the left
+>>>>>> hosts
+>>>>>> are
+>>>>>> used as SD/SDIO hosts. They have similar designs, but there
+>>>>>> are
+>>>>>> still
+>>>>>> difference.
+>>>>>>
+>>>>>>>
+>>>>>>> So, I think I know the answer but I'll still ask just to be
+>>>>>>> extremely
+>>>>>>> sure:
+>>>>>>>
+>>>>>>> is there any MediaTek SoC that has different IP versions
+>>>>>>> for
+>>>>>>> different MSDC
+>>>>>>> instances, and that hence require single burst on one
+>>>>>>> instance
+>>>>>>> and
+>>>>>>> INCR on
+>>>>>>> another instance?
+>>>>>>
+>>>>>> Yes. Actually every SoC has different IP versions for eMMC
+>>>>>> and
+>>>>>> SD/SDIO
+>>>>>> host as I said.
+>>>>>> e.g. For MT8168, signel burst bit should be set to 1 for eMMC
+>>>>>> Host,
+>>>>>> but
+>>>>>> 0 for SD/SDIO Host.
+>>>>>>
+>>>>>>>
+>>>>>>> And if there is - is there a pattern? Is it always SDIO
+>>>>>>> requiring
+>>>>>>> INCR or
+>>>>>>> always eMMC/SD requiring it?
+>>>>>>>
+>>>>>>>
+>>>>>>
+>>>>>> No, there is no pattern. Both eMMC and SD/SDIO hosts need to
+>>>>>> be
+>>>>>> configured base on IP version. There is no binding
+>>>>>> relationship
+>>>>>> between
+>>>>>> eMMC/SD/SDIO and the burst type. eMMC burst type might be
+>>>>>> INCR or
+>>>>>> single, same as SD/SDIO.
+>>>>>>
+>>>>>
+>>>>> Okay but if there are different IP versions, and AXI/AHB is
+>>>>> determined
+>>>>> by the IP version, why aren't you parsing the MAIN_VER/ECO_VER
+>>>>> registers of
+>>>>> the MSDC IP to check whether to use INCR or SINGLE?
+>>>>
+>>>>
+>>>> To address your concerns, I had further discussions with the
+>>>> designer.
+>>>> Their response was that the bus type and IP version are not bound
+>>>> together. This contradicts my previous statements, and I
+>>>> apologize
+>>>> for
+>>>> that.
+>>>> According to the designer's feedback, I must say that the single
+>>>> burst
+>>>> setting is indeed tied to the IC, but the granularity is such
+>>>> that it
+>>>> needs to be set individually for each host.
+>>>> Given the large number of ICs Mediatek currently has, adding
+>>>> burst
+>>>> type
+>>>> information for each host to the driver's compatible structure
+>>>> would
+>>>> mean adding hundreds(maybe thousands :() of lines to the driver
+>>>> for
+>>>> the
+>>>> compatible structures for *all previous SoCs* (currently there
+>>>> are
+>>>> only
+>>>> 13 compatible structures, and they can be reuse by new SoC). This
+>>>> approach seems very cumbersome.
+>>>>
+>>>> So I still believe that placing this setting in the DTS is a more
+>>>> appropriate approach.
+>>>>
+>>
+>> Hello Axe,
+>>
+>> sorry for the wait - this email fell through the cracks and I didn't
+>> see
+>> it at all, so thank you for the ping.
+>>
+>> Unfortunately, I don't think that this would be acceptable from a
+>> devicetree and/or
+>> bindings standpoint, but then you don't really need to modify the
+>> pdata for all of
+>> the currently supported SoCs to declare false, as false==0, which is
+>> the default.
+>>
+>> But maybe there's another way out of this.
+>>
+>> You said that this modification is done because some controllers are
+>> under AXI and
+>> some others are under AHB... I was doing some cleanups to this driver
+>> and doing so
+>> made me check a couple of things....
+>>
+>> When a MSDC controller is under AXI, there will be configuration for
+>> that in other
+>> registers - specifically, I'm wondering if the EMMC50_CFG2 register
+>> can be used to
+>> check if we are under an AHB to AXI wrapper or not.
+>>
+>> The idea is to read this register (offset 0x21c), [27:24] AXI_SET_LEN
+>> contains the
+>> number of beats per burst (from 1 to 16), and also [23:19]
+>> AXI_RX_OUTSTANDING_NUM
+>> contains the number of outstanding transfers (1 to 13).
+>>
+>> If a controller does not have an AXI2AHB Wrapper, or if it does not
+>> use the AXI bus
+>> this register should read zero I think?
+>>
+>> Especially the two fields that I mentioned before, those should read
+>> zero.
+>>
+>> That, especially because the hwaddr for the controllers is anyway and
+>> always long
+>> 0x1000 - and I think that the extra registers space, on controllers
+>> that don't have
+>> the EMMC50 registers (msdc1 and msdc2) should be still reserved to
+>> those and never
+>> used for anything else.
+>>
+>> Would that detection way work?
 > 
-> Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/core/card.h   |  6 ++++++
->  drivers/mmc/core/quirks.h | 10 ++++++++++
->  drivers/mmc/core/sd.c     | 32 ++++++++++++++++++++++++--------
->  include/linux/mmc/card.h  |  1 +
->  4 files changed, 41 insertions(+), 8 deletions(-)
+> Confirmed that this approach will work for all Soc and IP version. Thx.
 > 
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index 3205feb1e8ff..9cbdd240c3a7 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -89,6 +89,7 @@ struct mmc_fixup {
->  #define CID_MANFID_MICRON       0x13
->  #define CID_MANFID_SAMSUNG      0x15
->  #define CID_MANFID_APACER       0x27
-> +#define CID_MANFID_SWISSBIT     0x5D
->  #define CID_MANFID_KINGSTON     0x70
->  #define CID_MANFID_HYNIX	0x90
->  #define CID_MANFID_KINGSTON_SD	0x9F
-> @@ -294,4 +295,9 @@ static inline int mmc_card_broken_sd_poweroff_notify(const struct mmc_card *c)
->  	return c->quirks & MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY;
->  }
->  
-> +static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
-> +{
-> +	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
-> +}
-> +
->  #endif
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index 89b512905be1..7f893bafaa60 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
->  		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
->  		   EXT_CSD_REV_ANY),
->  
-> +	/*
-> +	 * Swissbit series S46-u cards throw I/O errors during tuning requests
-> +	 * after the initial tuning request expectedly times out. This has
-> +	 * only been observed on cards manufactured on 01/2019 that are using
-> +	 * Bay Trail host controllers.
-> +	 */
-> +	_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1,
-> +		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
-> +		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),
-> +
->  	END_FIXUP
->  };
->  
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index cc757b850e79..fc3416027033 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -613,6 +613,29 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->  	return 0;
->  }
->  
-> +/*
-> + * Determine if the card should tune or not.
-> + */
-> +static bool mmc_sd_use_tuning(struct mmc_card *card)
-> +{
-> +	/*
-> +	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
-> +	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
-> +	 */
-> +	if (mmc_host_is_spi(card->host))
-> +		return false;
-> +
-> +	switch (card->host->ios.timing) {
-> +	case MMC_TIMING_UHS_SDR50:
-> +	case MMC_TIMING_UHS_SDR104:
-> +		return true;
-> +	case MMC_TIMING_UHS_DDR50:
-> +		return !mmc_card_no_uhs_ddr50_tuning(card);
-> +	}
-> +
-> +	return false;
-> +}
-> +
->  /*
->   * UHS-I specific initialization procedure
->   */
-> @@ -656,14 +679,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
->  	if (err)
->  		goto out;
->  
-> -	/*
-> -	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
-> -	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
-> -	 */
-> -	if (!mmc_host_is_spi(card->host) &&
-> -		(card->host->ios.timing == MMC_TIMING_UHS_SDR50 ||
-> -		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
-> -		 card->host->ios.timing == MMC_TIMING_UHS_SDR104)) {
-> +	if (mmc_sd_use_tuning(card)) {
->  		err = mmc_execute_tuning(card);
->  
->  		/*
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 526fce581657..ddcdf23d731c 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -329,6 +329,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
->  #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
->  #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
-> +#define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
->  
->  	bool			written_flag;	/* Indicates eMMC has been written since power on */
->  	bool			reenable_cmdq;	/* Re-enable Command Queue */
+
+That's great to hear.
+
+Makes things much simpler and at this point that will even fix some other
+MediaTek SoCs at this point ;-)
+
+
+> Will send v2 after your register cleanup series accepted.
+
+Please feel free to send your v2 even right now, just add a note (not in the
+commit description) saying that your patch is based on top of my series.
+
+That will be fine.
+
+Also, if you could provide a review on my series, that would help speeding up
+things :-)
+
+Thanks,
+Angelo
+
+> 
+> Regards,
+> Axe
+> 
+>>
+>> If it would, we'd be again autodetecting whether to set or not the
+>> AXI single burst
+>> option in the patch bits...without relying on specifying anything
+>> manually, not in
+>> the devicetree, and not in the platform data :-)
+>>
+>> Cheers,
+>> Angelo
+>>
+>>>> Regards,
+>>>> Axe
+>>>>
+>>>>>
+>>>>> Cheers,
+>>>>> Angelo
+>>>>>
+>>>>>>
+>>>>>> Regards,
+>>>>>> Axe
+>>>>>>
+>>>>>>
+>>>>>>>
+>>>>>>>> ---
+>>>>>>>>      Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 8
+>>>>>>>> ++++++++
+>>>>>>>>      1 file changed, 8 insertions(+)
+>>>>>>>>
+>>>>>>>> diff --git a/Documentation/devicetree/bindings/mmc/mtk-
+>>>>>>>> sd.yaml
+>>>>>>>> b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>>>>> index 0debccbd6519..6076aff0a689 100644
+>>>>>>>> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>>>>> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>>>>>>> @@ -100,6 +100,14 @@ properties:
+>>>>>>>>          minimum: 0
+>>>>>>>>          maximum: 0xffffffff
+>>>>>>>>
+>>>>>>>> +  mediatek,disable-single-burst:
+>>>>>>>> +    $ref: /schemas/types.yaml#/definitions/flag
+>>>>>>>> +    description:
+>>>>>>>> +      Burst type setting. For some versions of the IP
+>>>>>>>> that
+>>>>>>>> do
+>>>>>>>> not
+>>>>>>>> use
+>>>>>>>> +      AHB bus, the burst type need to be switched to
+>>>>>>>> INCR.
+>>>>>>>> +      If present, use INCR burst type.
+>>>>>>>> +      If not present, use single burst type.
+>>>>>>>> +
+>>>>>>>>        mediatek,hs200-cmd-int-delay:
+>>>>>>>>          $ref: /schemas/types.yaml#/definitions/uint32
+>>>>>>>>          description:
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>
+>>>>>
+>>
+>>
 
