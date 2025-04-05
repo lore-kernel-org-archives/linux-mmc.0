@@ -1,172 +1,102 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 127BE221729;
-	Fri,  4 Apr 2025 23:16:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95C13DDCD
+	for <linux-mmc@vger.kernel.org>; Sat,  5 Apr 2025 17:31:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1743808592; cv=none; b=U/Dbu2G3GT5v7EmiR2Pj71ynURoGYL/wvPSYQZhK+ebzZ80R4Qha85ra/Oh+Uy7SL1YfugU1uM2n/1KPYNCWu/xB61RtnNZSuVUsdE4J3pK2xmj/hiyUfVY7jG5N/iKKWp6fcKdJfLPaFvsWjYz4nVzhQyPXc21B9DF6rtlOa+Q=
+	t=1743874267; cv=none; b=tXn6z7gZuF4hFkb8+Hwlwm0i5NGPf+tvgnpSl4pR0XD5+SsW0QvdErO/4SBjoxQuETLMBlYk//mhUXRjdhCJGUVn6W4wPCHHxxprLVrapkn1C+eKiiHz9l0ejusLZV7gbWEtN1iUOae8kfcMm5yGweK0h7o1rKo3TmCgKnLbD1U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1743808592; c=relaxed/simple;
-	bh=pLcNof6JbapOHK594mGu5j5X53Jvg5ctd3e5BUNyfVo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=jwzt1YgSLTB1qW3KQDWUKVUlbM8k/a5ts5CnsX39lvxIX8pqhXamuWgzx/ASQUV9bVU0aIre9+JhYNPEg8YJyYzQGuZWZjXk4tZlphyYJd4q1q57aO8UeItywyNuvYyhDE/giw+HKjXky7kYfXUGZDl2dnjA0uX8jofY9+2Zr68=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fbna1okn; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1743874267; c=relaxed/simple;
+	bh=rIhwcxPd2cxp8dRHI7A1y88SCNyUyk0Vxv1LwRO+ytY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=h+N01yh0EikxpuHtcPyCJCRX+rFpOQBYe+01KWF+8Kk9fzKix5DPUEAwTvuugXrZqlOFRepWsI3r3tRblmgYRmoy1M0GYPAy5+h7FPvyiPFdLDWUnw9WUNwhQuXYZiWUw49sTfxl74GaAqMsCBCmyCDhagNPjSEnw9qN6H1jxbg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=jodN/pIo; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fbna1okn"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 26F98C4CEF2;
-	Fri,  4 Apr 2025 23:16:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1743808591;
-	bh=pLcNof6JbapOHK594mGu5j5X53Jvg5ctd3e5BUNyfVo=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=fbna1oknD/ZvI3sOJ9ta/LdvxqmsuirwvEnENV50pL1QcyK7da3vftEpZj6/Cxgb4
-	 q1k77iXUU72vUtTLAksT9nyhStbjPVq03hV/lrtcnUoP0WoMKGQBh80iUGQiCR1pvQ
-	 HdzMCvMXYkygICv20K3WhoQcK8WSd+0OGhPZKZNzJn/EnPrWDNRd9W1nCu8raxlSq2
-	 xm3K7T3cb0x+sq6VaKm7tRVu+zOFWZ0HaWjD9HJDyVGh/yLgC7oLEpdNzmJJThGwm/
-	 It7aOt1YqU8wEfxfseXbChNlUT38umNQhrthUzYD9SIuk/LyzsvALf5rS65hGjfgRO
-	 lAlf2IH9X6Lfg==
-From: Eric Biggers <ebiggers@kernel.org>
-To: linux-scsi@vger.kernel.org
-Cc: linux-block@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-arm-msm@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-fscrypt@vger.kernel.org,
-	Bartosz Golaszewski <brgl@bgdev.pl>,
-	Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-	Bjorn Andersson <andersson@kernel.org>,
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>,
-	Jens Axboe <axboe@kernel.dk>,
-	Konrad Dybcio <konradybcio@kernel.org>,
-	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>
-Subject: [PATCH v13 3/3] ufs: qcom: add support for wrapped keys
-Date: Fri,  4 Apr 2025 16:15:32 -0700
-Message-ID: <20250404231533.174419-4-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250404231533.174419-1-ebiggers@kernel.org>
-References: <20250404231533.174419-1-ebiggers@kernel.org>
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="jodN/pIo"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=QU2L
+	hyDm7ZN+LndAt52NkDLC90jyX62wBlIqlPp9Ti0=; b=jodN/pIodPsO1z8eEquZ
+	kWzBLiHSuIFTuzLPMCTiuPjnOW7OAfzKlGWKQEeAhv5pOlPYWLDoxRgygHmYjYD3
+	tyjou5VOzPHriM15loIGR8L+NLFcZlTgxtgAQ/9Wa1T7hMLMLYgiIQi+RdfKoV05
+	SN1d4dfdA4HDVanQwf4DxyIR4n51Spx8G8Num+0afVMP2aBXoXWXjIQSVtPrw8Rt
+	w8hNF3j48sJsnCROYbxoc2KeMH3uHi+I2085q0eKyVLNJvPCgcdgzkgQjA9nvpIB
+	XixLjdvASkdReoesMYY6CwCt9xCvkIzOSj3StI2M5OGpBlZulMArlgkzb9J1010U
+	5w==
+Received: (qmail 3191545 invoked from network); 5 Apr 2025 19:30:54 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 5 Apr 2025 19:30:54 +0200
+X-UD-Smtp-Session: l3s3148p1@Q2R7XQsyoIgujnsA
+Date: Sat, 5 Apr 2025 19:30:54 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Rob Herring <robh@kernel.org>
+Cc: linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org
+Subject: Re: [PATCH v2] dt-bindings: mmc: arasan,sdhci: Add Renesas RZ/N1D
+Message-ID: <Z_FoztY6-E5qdDse@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Rob Herring <robh@kernel.org>, linux-renesas-soc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org
+References: <20250402093019.5639-2-wsa+renesas@sang-engineering.com>
+ <20250404160547.GA1521768-robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="BFVwm6d4lRMoywz+"
+Content-Disposition: inline
+In-Reply-To: <20250404160547.GA1521768-robh@kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
 
-Wire up the wrapped key support for ufs-qcom by implementing the needed
-methods in struct blk_crypto_ll_ops and setting the appropriate flag in
-blk_crypto_profile::key_types_supported.
+--BFVwm6d4lRMoywz+
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-For more information about this feature and how to use it, refer to
-the sections about hardware-wrapped keys in
-Documentation/block/inline-encryption.rst and
-Documentation/filesystems/fscrypt.rst.
 
-Based on patches by Gaurav Kashyap <quic_gaurkash@quicinc.com>.
-Reworked to use the custom crypto profile support.
+> > +    items:
+> > +      - const: int
+> > +      - const: wkup
+>=20
+> The standardized name is 'wakeup'.
 
-Acked-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Tested-by: Bartosz Golaszewski <bartosz.golaszewski@linaro.org> # sm8650
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- drivers/ufs/host/ufs-qcom.c | 51 ++++++++++++++++++++++++++++++++-----
- 1 file changed, 45 insertions(+), 6 deletions(-)
+I guess this overrides the naming in the datasheet. Will update!
 
-diff --git a/drivers/ufs/host/ufs-qcom.c b/drivers/ufs/host/ufs-qcom.c
-index 85040861ddc6e..46cca52aa6f11 100644
---- a/drivers/ufs/host/ufs-qcom.c
-+++ b/drivers/ufs/host/ufs-qcom.c
-@@ -154,15 +154,10 @@ static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
- 	}
- 
- 	if (IS_ERR_OR_NULL(ice))
- 		return PTR_ERR_OR_ZERO(ice);
- 
--	if (qcom_ice_get_supported_key_type(ice) != BLK_CRYPTO_KEY_TYPE_RAW) {
--		dev_warn(dev, "Wrapped keys not supported. Disabling inline encryption support.\n");
--		return 0;
--	}
--
- 	host->ice = ice;
- 
- 	/* Initialize the blk_crypto_profile */
- 
- 	caps.reg_val = cpu_to_le32(ufshcd_readl(hba, REG_UFS_CCAP));
-@@ -172,11 +167,11 @@ static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
- 	if (err)
- 		return err;
- 
- 	profile->ll_ops = ufs_qcom_crypto_ops;
- 	profile->max_dun_bytes_supported = 8;
--	profile->key_types_supported = BLK_CRYPTO_KEY_TYPE_RAW;
-+	profile->key_types_supported = qcom_ice_get_supported_key_type(ice);
- 	profile->dev = dev;
- 
- 	/*
- 	 * Currently this driver only supports AES-256-XTS.  All known versions
- 	 * of ICE support it, but to be safe make sure it is really declared in
-@@ -240,13 +235,57 @@ static int ufs_qcom_ice_keyslot_evict(struct blk_crypto_profile *profile,
- 	err = qcom_ice_evict_key(host->ice, slot);
- 	ufshcd_release(hba);
- 	return err;
- }
- 
-+static int ufs_qcom_ice_derive_sw_secret(struct blk_crypto_profile *profile,
-+					 const u8 *eph_key, size_t eph_key_size,
-+					 u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
-+{
-+	struct ufs_hba *hba = ufs_hba_from_crypto_profile(profile);
-+	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
-+
-+	return qcom_ice_derive_sw_secret(host->ice, eph_key, eph_key_size,
-+					 sw_secret);
-+}
-+
-+static int ufs_qcom_ice_import_key(struct blk_crypto_profile *profile,
-+				   const u8 *raw_key, size_t raw_key_size,
-+				   u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct ufs_hba *hba = ufs_hba_from_crypto_profile(profile);
-+	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
-+
-+	return qcom_ice_import_key(host->ice, raw_key, raw_key_size, lt_key);
-+}
-+
-+static int ufs_qcom_ice_generate_key(struct blk_crypto_profile *profile,
-+				     u8 lt_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct ufs_hba *hba = ufs_hba_from_crypto_profile(profile);
-+	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
-+
-+	return qcom_ice_generate_key(host->ice, lt_key);
-+}
-+
-+static int ufs_qcom_ice_prepare_key(struct blk_crypto_profile *profile,
-+				    const u8 *lt_key, size_t lt_key_size,
-+				    u8 eph_key[BLK_CRYPTO_MAX_HW_WRAPPED_KEY_SIZE])
-+{
-+	struct ufs_hba *hba = ufs_hba_from_crypto_profile(profile);
-+	struct ufs_qcom_host *host = ufshcd_get_variant(hba);
-+
-+	return qcom_ice_prepare_key(host->ice, lt_key, lt_key_size, eph_key);
-+}
-+
- static const struct blk_crypto_ll_ops ufs_qcom_crypto_ops = {
- 	.keyslot_program	= ufs_qcom_ice_keyslot_program,
- 	.keyslot_evict		= ufs_qcom_ice_keyslot_evict,
-+	.derive_sw_secret	= ufs_qcom_ice_derive_sw_secret,
-+	.import_key		= ufs_qcom_ice_import_key,
-+	.generate_key		= ufs_qcom_ice_generate_key,
-+	.prepare_key		= ufs_qcom_ice_prepare_key,
- };
- 
- #else
- 
- static inline void ufs_qcom_ice_enable(struct ufs_qcom_host *host)
--- 
-2.49.0
 
+--BFVwm6d4lRMoywz+
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmfxaMoACgkQFA3kzBSg
+KbYnow//YbLOFUr/VHl2OMan3dvt3mkJaftIYTTUdvbS68nc+OqtfRyPnO/yfL9K
+Ee7IWkv1j2VylXndY3yNYGG96od/DMMHAd3ArEM5aGyeGIrbwcHPzNqO3WwXepuR
+no96a1ceGuPSVm/vezndBa62yv9WQy9blH8RMBB1cIVuZjVwgnOWP0WUKH72+XnJ
+IO4sn4WBiPqYytF4t0cJ3JsI5O7e4n7/0JEcaEBYOWzD3Ncz1sXeTHsrC1TzpGCh
+gMiW/U83Wv4sOZ74J4Udt2Fr+hB99XNuRyUDb34GLT6cyr9jICGEsnLGcLkv2YV7
+P+mNWgEme1XaxDI19arYkSQKbWe+l2w3j6q4ssEplBn4mUiNunKqPV3AdqH4L0yK
+jQCwrVvZWQUNsGvLXyLYMblsuZ53CnVWcEP+EQtEBnemH1itpUi6G3WAjjcQKj31
+QEUD6M2PTl/CWChQnFaKcKZnRaIN+5Yw/8TeHIWg5GLwZrRTDfPU8tdQeXH6GXe+
+Llgd4jUc9LKAkigJUJ9khjwXF/0udNBayt3BCmfIAl9aiHkFL0EwQ9TK/KFybF7x
+kkpvJP3Yx88Uyf5wa65b/ueVMeDv+N1yFxMU7FRln8jCFGaSO4gaG2B7hYXFFp6W
+aYl2C6GWAXIWKFwKIS10fivaIeoMVL5DriWssmaCmqUU1SRwMLk=
+=lljL
+-----END PGP SIGNATURE-----
+
+--BFVwm6d4lRMoywz+--
