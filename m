@@ -1,169 +1,122 @@
-Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f171.google.com (mail-qk1-f171.google.com [209.85.222.171])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61CA31B87CF;
-	Mon,  7 Apr 2025 22:27:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6A87801;
+	Mon,  7 Apr 2025 23:32:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744064832; cv=none; b=I57V/G13QxxUjPryTdDgSdYfKs/jt+Dynu1IfztFo11FNd9PVPfd+LxDs/T98T8AP/4RD/JTVL4wGFlUqlhUHtemTNuHki7QC6cE/ShuMY9feWVwBTffZlli8KG2fRD8Yrwtiu0mGxhGlYOE4Qc8LhYvOy5X1ebJMBcWd7TGR80=
+	t=1744068743; cv=none; b=UfDWKgDnNzszohQLJWfPGIYKKz4gvZDIDj8zBQmCRc/1/DTBns3WzXWzMHKYB4mCtdfcQobDxVmQE1tNecFlkZ76ZQxroEMGXNkLA0sIamyHjbME2V6xF+uVZWPULekIODwWqMteZKwytt9IKMxxGt/M5YIa5bGgEmi8dSGNp/M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744064832; c=relaxed/simple;
-	bh=3J1mh/9jr3Z1l1jEQkPqepNo70bUmp7B+1t9mwsfq88=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=GYlE9IKTxFp/v/RHKukmIaoxNv2u/tkFfdX+RhvX/TLb++xKZwvH1WKplcfmFjVAGQ4jpQe3gKMqvCeOWKPQrvjjMKsulyRuIif65k8ztjqFOs/p1jXGKQDFMun0Vb912CYhpo9iPQv/yM0rSYqATbqH9Uin7PRw4am22iKONwI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=NSQ99gxV; arc=none smtp.client-ip=198.47.19.246
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1744068743; c=relaxed/simple;
+	bh=y0VMyqj2jrwxkMMoBpqQeCXfy0c7ujpzElgdYnxnprE=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Q8eRrmIxXZio4iXqN6178caapVIj4LzAvp+yc87k+aXOKfoajBuNzOiyfSqbbFLMGuY4igLTCogEkBfxjEEoxOmFsMAV+sP+zNHaQJ1JG02Hv+FdOAYsYSLCX2vd9K/Vzj+H3UtsyswiiqWT1/1cFEdnGGCdV9yMDP7LFqNNzNA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NO0ok/7V; arc=none smtp.client-ip=209.85.222.171
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="NSQ99gxV"
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR2Tr1032955
-	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 7 Apr 2025 17:27:02 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1744064822;
-	bh=YqPz2JfZvQwqwnoxsKSQiaQzed7EN3WPHYpwbOPCQEE=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=NSQ99gxVU1lCWYR+IbnjitnuPudRqnA5Y2y2UVoEjROqBtnCd/5L6lAtccAZTJqU8
-	 mX9Hpsv5vM76fuPY4a0gHMpuKfd8SahcEmqrEdJkzQmuVw7a7sKchqZi1R+YnUQVOy
-	 eBT0vrexkjEdLWOe98D6Fk+xh+bgxsWdT9/rRiBM=
-Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
-	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR2Mh084617
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Mon, 7 Apr 2025 17:27:02 -0500
-Received: from DLEE104.ent.ti.com (157.170.170.34) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 7
- Apr 2025 17:27:02 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE104.ent.ti.com
- (157.170.170.34) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Mon, 7 Apr 2025 17:27:02 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 537MR22A073249;
-	Mon, 7 Apr 2025 17:27:02 -0500
-From: Judith Mendez <jm@ti.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Josua Mayer
-	<josua@solid-run.com>, Moteen Shah <m-shah@ti.com>
-Subject: [PATCH 2/2] mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch
-Date: Mon, 7 Apr 2025 17:27:02 -0500
-Message-ID: <20250407222702.2199047-3-jm@ti.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250407222702.2199047-1-jm@ti.com>
-References: <20250407222702.2199047-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NO0ok/7V"
+Received: by mail-qk1-f171.google.com with SMTP id af79cd13be357-7c55500d08cso468745185a.0;
+        Mon, 07 Apr 2025 16:32:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744068740; x=1744673540; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=jJIvZC6BOhqiO/IQEbyhQ90MLD58EsSNP3rWCk4udso=;
+        b=NO0ok/7V9Dao8S50aFu2gAXouo/MYy9LTU+ozAcgQjk4k4UmScdXXXxXxqaH5Y6OGJ
+         SNL/prhNQbh8sQBPQ9Ju6U/dINgkaaDnxEb5y9go/exb2cSKBwlyrUTYk3s4u0v084x9
+         7Vzi6g6vSr/BSYmErI9j9cVGVDyuaBjemreD//ld6ljqk/vbOIDzzubTymuVfZajTmxr
+         uuKMleYEDVmqYewHsP8lWMU9bnIbH+CsPKLrLpChk+iMqXnjUb1Al2DNh5Ol/RnongxN
+         PNCK55n0wB9ZQ/x9H0BIhFuFtpKnegUvMf9zKJvFhsPhDe0MqPVvHf75NHz+ELASA1j8
+         niUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744068740; x=1744673540;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jJIvZC6BOhqiO/IQEbyhQ90MLD58EsSNP3rWCk4udso=;
+        b=JnB36knO2Mjgznk3WOCkpX56mfFndTMie+QX4k28DlPhjhH71g84/c69GyPAPA46OR
+         QK52vfUKqGFwZLoCA8Lr7X6YAAnIolKdmJRMCfMNDDonzttTc8xiULxlHztHU7PKMJ/K
+         mDHyEeePkYc4zEuGa2kTEk0z3rbL0HTZSJYazTTUwuZsC1nBnL0n3DXfCcYnIaVXS1KC
+         CTPBCiYzruy23ZJrAB6WW16HVqJUbE8XkuvD1lDcYmFGoX2hvfqAQJVInw/odG3o1fSX
+         nRuxFfCBzlfJ90qc3ggpx1rETlW/2959SQXCXdEimYvd1ED+GHlAXaw3b6fcVxj/B8Tl
+         kkQQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUU7HwrqLrIkB+lXmNCYS3z0q0KPoc6kTDNRyafRhOK/FAHl6a0Ja6AA2ZcPKOg4tyoCQ0AwYPFAUNV@vger.kernel.org, AJvYcCVcXaXjfqgKQep2iWf6icuEkYwyDMf3FaWQdHinjseh2IXaKN8q3if5ESLU4EUxIMgpbTjRJdq9ml19cLP5@vger.kernel.org, AJvYcCW/dkSlLBXV5u9u82zDEyU/YbP+ljoc4S6JLiNk+5HHWpUtJA2AOPBaORymKAVgfzYe6w6XIt4QvSrG@vger.kernel.org, AJvYcCWK7ee3bAcAmNuE8ECNpjIfR4jDtPKOTJ1cJIMpqn6D4QtvgCOzG+5Bn/ykOFC4Tv4Mz3FJBI7E8HfF@vger.kernel.org, AJvYcCWWqgPsJsXGccUqeuOYeNg9q2qKawWpgl2jL8Q/8ePn6ATDq8oqFj9RnMQdjHXCpCW5rXWrBGSSAe+Myys=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy8KKJwWLXwKK+2kSL6ee96xJriDesuzqlHxa1syEt4Sr758Qpr
+	tmxy+Sap0UkFLls/TEsuevjJb2mRvJhROKIIrBpsZ/dKXSObJFLq
+X-Gm-Gg: ASbGncu6RL8QYwQsxZkPbuzfgJ1vw4sPeHmMFYOS3KJ+VD4VttYnjrWoGKIk5cy0ZXq
+	9jSa6xG0oKFi8Ws8bGQuS5iwYLlIzOu1PMuSEH7vJ3rd0CPU8Rg127Dm33PTgmDrN7ssj8/UgfV
+	qq0otk2SwAsDVWdYABTGBFJ4yJ36FwpjQQNX6RT3KjFp9fPK1YmP2c/pVYfBJuC1R+up6p0sois
+	JRWb2AhRuyT+qDyon+Z/V5nbQHD3+Rhyo/cfwgRx1rC0PZr42tQs4HEz3gpoRdWKnLm+f6+sfQN
+	E3baHTpnlIIyOoatgYOX
+X-Google-Smtp-Source: AGHT+IEKkMIItDnAtEbc/6DeDUtD3EXh0WmABN9nky7dyvGG/jJvA+lzzO9SpmOhIoNbdRJ6S7A1Kw==
+X-Received: by 2002:a05:6214:762:b0:6e8:e828:820d with SMTP id 6a1803df08f44-6f0b74bfde0mr179951146d6.36.1744068740691;
+        Mon, 07 Apr 2025 16:32:20 -0700 (PDT)
+Received: from localhost ([2001:da8:7001:11::cb])
+        by smtp.gmail.com with UTF8SMTPSA id 6a1803df08f44-6ef0f00e821sm65227956d6.34.2025.04.07.16.32.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Apr 2025 16:32:20 -0700 (PDT)
+Date: Tue, 8 Apr 2025 07:31:44 +0800
+From: Inochi Amaoto <inochiama@gmail.com>
+To: Rob Herring <robh@kernel.org>, Inochi Amaoto <inochiama@gmail.com>
+Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Chen Wang <unicorn_wang@outlook.com>, Andi Shyti <andi.shyti@kernel.org>, 
+	Thomas Gleixner <tglx@linutronix.de>, Paul Walmsley <paul.walmsley@sifive.com>, 
+	Samuel Holland <samuel.holland@sifive.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Philipp Zabel <p.zabel@pengutronix.de>, Palmer Dabbelt <palmer@dabbelt.com>, 
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>, 
+	Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas Bonnefille <thomas.bonnefille@bootlin.com>, 
+	ghost <2990955050@qq.com>, Jarkko Nikula <jarkko.nikula@linux.intel.com>, 
+	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>, linux-hwmon@vger.kernel.org, 
+	devicetree@vger.kernel.org, sophgo@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Yixun Lan <dlan@gentoo.org>, Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH 7/9] dt-bindings: i2c: dw: Add Sophgo SG2044 SoC I2C
+ controller
+Message-ID: <eltevzydjle25nyte5xn5mwxssi26awl4l4sgrz3v7h7m7vgur@tajtirx3up3x>
+References: <20250407010616.749833-1-inochiama@gmail.com>
+ <20250407010616.749833-8-inochiama@gmail.com>
+ <20250407140232.GA2165777-robh@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250407140232.GA2165777-robh@kernel.org>
 
-The sdhci_start_signal_voltage_switch function sets
-V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
-V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
-edge (half cycle timing) or pos edge (full cycle timing) of
-clock.
+On Mon, Apr 07, 2025 at 09:02:32AM -0500, Rob Herring wrote:
+> On Mon, Apr 07, 2025 at 09:06:12AM +0800, Inochi Amaoto wrote:
+> > Add compatible string for Sophgo SG2044 SoC I2C controller which can be
+> > used specifically for the SG2044 SoC.
+> > 
+> > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> > ---
+> >  .../devicetree/bindings/i2c/snps,designware-i2c.yaml          | 4 ++++
+> >  1 file changed, 4 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml b/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> > index bc5d0fb5abfe..677b39865af0 100644
+> > --- a/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> > +++ b/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> > @@ -38,6 +38,10 @@ properties:
+> >            - const: snps,designware-i2c
+> >        - description: Baikal-T1 SoC System I2C controller
+> >          const: baikal,bt1-sys-i2c
+> > +      - description: Sophgo SoCs I2C controller
+> > +        items:
+> > +          - const: sophgo,sg2044-i2c
+> > +          - const: snps,designware-i2c
+> 
+> This is not a great pattern we've started. T-HEAD, Ocelot, and this 
+> should all be combined into 1 enum. The description here is not that 
+> useful.
+> 
 
-The sequence is to switch to 1.8 IO voltage, set V1P8_SIGNAL_ENA,
-change bus width, then update HIGH_SPEED_ENA & UHS_MODE_SELECT.
+I agree and am fine to do this.
 
-During bus width change is when eMMC failures are seen with
-Kingston eMMC. So, do not set V1P8_SIGNAL_ENA by default.
-V1P8_SIGNAL_ENA is anyways optional for eMMC and only affects
-timing on TI devices. For switching to DDR52, HS200, or HS400,
-we should rely on HIGH_SPEED_ENA, to switch to full cycle
-timing after the bus width is changed.
-
-Signed-off-by: Judith Mendez <jm@ti.com>
----
- drivers/mmc/host/sdhci_am654.c | 32 ++++++++++++++++++++++++++++++++
- 1 file changed, 32 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 67a64de4972c9..4e1156a2f1b8e 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -87,6 +87,7 @@
- #define CLOCK_TOO_SLOW_HZ	50000000
- #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
- #define RETRY_TUNING_MAX	10
-+#define BUS_WIDTH_8		8
- 
- /* Command Queue Host Controller Interface Base address */
- #define SDHCI_AM654_CQE_BASE_ADDR 0x200
-@@ -155,6 +156,7 @@ struct sdhci_am654_data {
- 	u32 tuning_loop;
- 
- #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
-+#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
- };
- 
- struct window {
-@@ -356,6 +358,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
- 	sdhci_set_clock(host, clock);
- }
- 
-+static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
-+	    ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		if (!IS_ERR(mmc->supply.vqmmc)) {
-+			ret = mmc_regulator_set_vqmmc(mmc, ios);
-+			if (ret < 0) {
-+				pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
-+				       mmc_hostname(mmc));
-+				return -EIO;
-+			}
-+		}
-+		return 0;
-+	}
-+
-+	return sdhci_start_signal_voltage_switch(mmc, ios);
-+}
-+
- static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
- {
- 	writeb(val, host->ioaddr + reg);
-@@ -819,6 +844,7 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
- 	struct device *dev = &pdev->dev;
- 	int drv_strength;
- 	int ret;
-+	u32 bus_width;
- 
- 	if (sdhci_am654->flags & DLL_PRESENT) {
- 		ret = device_property_read_u32(dev, "ti,trm-icp",
-@@ -860,6 +886,11 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
- 	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
- 		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
- 
-+	/* Suppress V1P8_SIGNAL_ENA for eMMC */
-+	device_property_read_u32(dev, "bus-width", &bus_width);
-+	if (bus_width == BUS_WIDTH_8)
-+		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
-+
- 	sdhci_get_of_property(pdev);
- 
- 	return 0;
-@@ -956,6 +987,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 		goto err_pltfm_free;
- 	}
- 
-+	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
- 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
- 
- 	pm_runtime_get_noresume(dev);
--- 
-2.49.0
-
+Regard,
+Inochi
