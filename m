@@ -1,61 +1,63 @@
-Received: from mail-lj1-f181.google.com (mail-lj1-f181.google.com [209.85.208.181])
+Received: from mail-lj1-f177.google.com (mail-lj1-f177.google.com [209.85.208.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 790701FDA8C
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Apr 2025 15:28:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 821E31FDE00
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Apr 2025 15:28:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744039689; cv=none; b=N5FJ8eMo4GtUp4oroOXvjz9TvgT8n7RES4aP4jUdbqLGfEK6jO5cXxefmK887JCC6X15kfYCVWrT/ahXZTuamByjncq+Fo4IISZYiBOyOq3hgYUIhWErQOmPJu94zx0g0qCKu0RVY83uuv1tG20Vndg2/addElt7IaQIXic8GNI=
+	t=1744039690; cv=none; b=BqoOCbcnzuWm9dGrb2xkxNThu1y58TNhsrLNXPk5yA3OUQKnjndeMTeHRv+qgUjIjFhIJal0ZrK7B+8XwFDs6167G1aDQ+0WBb3RoGr8gQKlXY7kyqtiFMkidIoQgr1+cTGMSLTuEGTqQ8DBN99qmm6+q6MZEVjN9QevM6Mkfso=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744039689; c=relaxed/simple;
-	bh=cLukb9C2aiYDFVtCN21ZKXnPdKtOqLTL6mgc0FrZp7M=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pLCSCKOFoZkPeGZ5hH8xXTTUKVsuFdnfpbJDunkjIDktDvYwVDesfWprDEM3w/U2gXO/lAUg1EfiHZPE8aJIy2VRTLHEEc6T4grKacklf/SFeVs71cwsFpN0/T/odfuDbCLbqVvLl+8/4qyUTg4u1dtKx+mAu5lngG+hdK79i5I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=I6OlnTRM; arc=none smtp.client-ip=209.85.208.181
+	s=arc-20240116; t=1744039690; c=relaxed/simple;
+	bh=AeCDJp54wAGtMg9CHmvKgr9djrzK4GgL9KpmTxPCRpU=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=pswHz/BKiDvS4prCZQKoDnF0dEE8oO1XaNWRIIDCQOHWwv02tEgOXIy4n1fNIiaZl8i0tSebspJrMe0v9Ku+H5zUyluqQm4po/95spfXobKBXZ+mtTrsqKGDzJ62MU4PT6C+n1h4BUwvLL49JP/3bP2jgtMTMRFSghljYvI9yZY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ip7+SdGj; arc=none smtp.client-ip=209.85.208.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="I6OlnTRM"
-Received: by mail-lj1-f181.google.com with SMTP id 38308e7fff4ca-30613802a59so47792171fa.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Apr 2025 08:28:07 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ip7+SdGj"
+Received: by mail-lj1-f177.google.com with SMTP id 38308e7fff4ca-307325f2436so47140691fa.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Apr 2025 08:28:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1744039685; x=1744644485; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Kq8efX9K/jKkGa5RDf6t3vrgLuokcYYa4oIPfqD6CjI=;
-        b=I6OlnTRM201vUy+ZXODPHeJkUzVDlZQyuP2bUYZepXdkKsibZMnX6iWhE50C5OQxRS
-         Ah+VBHZLo7oaOYAn7jzEUwyKVQtSfRIzMFZymjW1tFIeW+6obJJOALVJ0RQVjLMyyMDg
-         Dr0xs75cX2gcVZaFm793jtelXkQZ+GT95XZMPezG7A361vKj+yBGYx55X1bMimRLEhTR
-         9Ulcwqa0rYkPPDqL6P0MWRizljf0t6/iUJjvrtlGJFJ7VocjOfJOdRn22oFrEwrOh5UR
-         V8Y22Oqxu5CookFLPzBh3KoPAfUuoQMb9FQpyTZsfoMbcxj3KrblT78EZXVw6gXt5iKh
-         WbUw==
+        d=linaro.org; s=google; t=1744039686; x=1744644486; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Q0o6na0F8TAk6lCusT5NLJ6CNUgxmH5Vy2ajrZSzJE8=;
+        b=ip7+SdGjNUtgxOKuleuXElFbE+taTNOp21mE4yMEU060uNwuijy+AaNAIgkpy5Xe1b
+         BMWxoMO7/2KNMJoH92cbcDgPL+ydUOPzVhpS/06/At+OS13M4SJF5d7nhKoEcDyC5hUi
+         5NanepfdNLqTl4Q61rQwBk3tnjreCcerW+it/02yO8n4jjZGcdrXpwzTxyYZum723/JJ
+         FcoYbC51fXiVoSPfEJANbdIGK5a8t5q+l2R7ximUipadjB+CL+RCz/R4OqYMC1ErfNrx
+         kSU+eCd/j3VK8Z0DRfneu+J10UO7CXHJlJF3iOCObzF3e/LtcgZuQ9TVct9L2uWuB39S
+         kdHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744039685; x=1744644485;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Kq8efX9K/jKkGa5RDf6t3vrgLuokcYYa4oIPfqD6CjI=;
-        b=fR3yKH7HsQLH6QQob843FPkGZTLr2y1anQnSFXy6qhWTP0/EJlnaCyrk2IrrcnhbqT
-         MW9EwODQu/114B6cbX28Q8KCPf0/JfcJzXtxNlQKGSDsRw3mehEasv9cAijDkwRQBwk8
-         T6MuZ0s2vBalWhThQZAsZ3qIAAmM823X/QnVLAHTXKimVFu6OYk/Ex6T8uESYknr9gff
-         JxxlFApJc0tNXlfZZp+b/pO2ojb79Zj+AkWz4tR7RM6yrjfrmHrvyGsXqAsICgUeNABt
-         h3/jQJh95LQalUhsv6KvlVWWaAdDh8ljgHIwyZKIxASMNa6N5238RI5K0De5pO6Umkso
-         3eng==
-X-Gm-Message-State: AOJu0YxmBj70bvXZ0ZHPWwIXGGYCzmR1sz5z5ZoBgKQPwE7CQV+k/nYN
-	x19zLJN7K0OcArARlG5onZWdB2TfiRGq9R6lPfkQdMoAVOmn132ofF9wNxrOVClgEY/PvffNA5Q
-	x
-X-Gm-Gg: ASbGnctzJtrYyCCNShVW7+DRQOwcSPgk5taWCPGFhX1NRx9HeBL6MgD5RWBnrMQADTF
-	aqXMvsPAv07A7qdPYNoUzGppxIdCFBk1ogjnfMXFiz01Zzrytm193LblHxEWU7sRdOrZt6mO1r4
-	imyLGT7tkOGgO3niOwW0ZOoGiRs3IZPYVe12QvhLFEivWl4fJo19KU20zLtrAM4BG4DRwHglRvE
-	3aI+CiNeE2fsO7QMUb9CtQt6aGBYNUB88wX6Ad6OjB6UImqJR+jBhUjWtqvZcV9iSXnZtJMmyju
-	uV3WAVe+Nk9h/lYp7bdgrHxHPSw+PVdjyZzkX96uTAoVqVrMec7DxjIB93Ac+6yQZ5Tgj22kPAr
-	m989MbXEb/Y3UFzTELQ8=
-X-Google-Smtp-Source: AGHT+IFObqH9uOMbw/LDaPSoxjH4CdvHzcUd44Am3VfEgwwKnpzakyOKNpnsTiRoTRb5UeyoCfSx0w==
-X-Received: by 2002:a05:651c:1142:b0:30b:971c:96e6 with SMTP id 38308e7fff4ca-30f0c02cda3mr37282471fa.26.1744039685191;
-        Mon, 07 Apr 2025 08:28:05 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1744039686; x=1744644486;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Q0o6na0F8TAk6lCusT5NLJ6CNUgxmH5Vy2ajrZSzJE8=;
+        b=m4xbOLMGQaTCWuSguQp7YJBEP49x9OcZb5ckwrJKWspE0uWz7S8n+iEB2eFANu/RoT
+         Bqs6+EsRbOEjKPIjIvWi+/NopLGP7CBwEbYfQd3jVkZVjgbp9XRhDVtNDX9B2WLTsXbg
+         GuoqVSqWe0JzIoxLXgIbpiq5yMAjrQns6Tmx9jPBp+Irm26/zftXABl1Wv7YRq+UV9Ql
+         d/63JmYJV3XDEeoVRMJVacFbi2caKh02zLaYXIN+bv+7ZPtAJB4AqMYlu+9xzGd31Azq
+         j5/PvdykME9A6LDTOauAT+j7JOLJA+u1qJAHiveRmHniQVhLX16NKBSc7EcK9ydAV/18
+         SWEQ==
+X-Gm-Message-State: AOJu0YxswfjUOiP6/b/oBNVnt2Hv0yfD7IGrix2P1jGY3cPyrVWvChA+
+	WO18Pk7dA1PMPYm6LSTE1eDcvVb8GVHaulU9+uswvUC3ZKxSqOoY//uWCfuUQDid2P7No1zoW9T
+	c
+X-Gm-Gg: ASbGncvp/2QzQykfFDXL6YsEHFoQKS6eun/eYJMcG3aP/RGW51Aup6GtufIORd8Liye
+	Yphz3ykmekiUvmuJieVDshNn3mAtVGxf1mdp3c1h5Q0Pks/+uXm6nOhmA8chzCy/QTOBFdDZw1X
+	7ea87WWZlPXlkqtXWIFK4wFL3kN60KL0I4ngAUhlSNNcLQF03PhnCx9ItZQ8rtJYfgh5RIJ8/yo
+	jlTC7U//cNl5CZFXm5XeuIA/KGzsgmC5QYvzlySPyiffjL/4qtyC+oU1j/ofMtUqFCPFEugYuTT
+	t7zkRf7Aw0+e0t1r64YjDf+Ey5Ws6amCknoz1UD4vbXKJhSyD6bkAjVlNw6gCn1lNBWKgAyic1P
+	3Xrs718QDbz0BkWqiWRI=
+X-Google-Smtp-Source: AGHT+IGP9ssOV6pn79yVfRWiq3KAcys7QHTQQoul8wvyG5t+BivqElpyAW6czWaQuzr79w8RI0P1Cg==
+X-Received: by 2002:a05:651c:211c:b0:308:f860:7c1 with SMTP id 38308e7fff4ca-30f0c03c545mr42993461fa.30.1744039686432;
+        Mon, 07 Apr 2025 08:28:06 -0700 (PDT)
 Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-30f0314c62bsm16158691fa.61.2025.04.07.08.28.04
+        by smtp.gmail.com with ESMTPSA id 38308e7fff4ca-30f0314c62bsm16158691fa.61.2025.04.07.08.28.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Apr 2025 08:28:04 -0700 (PDT)
+        Mon, 07 Apr 2025 08:28:05 -0700 (PDT)
 From: Ulf Hansson <ulf.hansson@linaro.org>
 To: linux-mmc@vger.kernel.org,
 	Ulf Hansson <ulf.hansson@linaro.org>
@@ -64,11 +66,14 @@ Cc: Adrian Hunter <adrian.hunter@intel.com>,
 	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
 	Avri Altman <Avri.Altman@sandisk.com>,
 	linux-renesas-soc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH v2 0/5] mmc: core: Add support for graceful host removal for eMMC/SD
-Date: Mon,  7 Apr 2025 17:27:50 +0200
-Message-ID: <20250407152759.25160-1-ulf.hansson@linaro.org>
+	linux-kernel@vger.kernel.org,
+	Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH v2 1/5] mmc: core: Convert mmc_can_poweroff_notify() into a bool
+Date: Mon,  7 Apr 2025 17:27:51 +0200
+Message-ID: <20250407152759.25160-2-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250407152759.25160-1-ulf.hansson@linaro.org>
+References: <20250407152759.25160-1-ulf.hansson@linaro.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -77,38 +82,35 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
+It's really a true/false value that matters, let's make it clear by
+returning a bool instead.
+
+Reviewed-by: Avri Altman <avri.altman@sandisk.com>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
 Changes in v2:
-	- Added reviewed/tested-by tags.
-	- Updated patch 2.
+	- None.
 
-As pointed out by Wolfram Sang and already discussed at LKML [1] - an mmc host
-driver may allow to unbind from its corresponding host device. If there is and
-eMMC/SD card attached to the host, the mmc core will just try to cut the power
-for it, without trying to make a graceful power-off, thus potentially we could
-damage the card.
+---
+ drivers/mmc/core/mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This series intends to fix this problem for eMMC/SD cards.
-
-Please help to test and review!
-
-Kind regards
-Ulf Hansson
-
-[1]
-https://lore.kernel.org/all/20241007093447.33084-2-wsa+renesas@sang-engineering.com/
-
-Ulf Hansson (5):
-  mmc: core: Convert mmc_can_poweroff_notify() into a bool
-  mmc: core: Further avoid re-storing power to the eMMC before a
-    shutdown
-  mmc: core: Convert into an enum for the poweroff-type for eMMC
-  mmc: core: Add support for graceful host removal for eMMC
-  mmc: core: Add support for graceful host removal for SD
-
- drivers/mmc/core/mmc.c | 71 +++++++++++++++++++++++++++++-------------
- drivers/mmc/core/sd.c  | 25 +++++++++------
- 2 files changed, 64 insertions(+), 32 deletions(-)
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 1522fd2b517d..3424bc9e20c5 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2007,7 +2007,7 @@ static int mmc_sleep(struct mmc_host *host)
+ 	return err;
+ }
+ 
+-static int mmc_can_poweroff_notify(const struct mmc_card *card)
++static bool mmc_can_poweroff_notify(const struct mmc_card *card)
+ {
+ 	return card &&
+ 		mmc_card_mmc(card) &&
 -- 
 2.43.0
 
