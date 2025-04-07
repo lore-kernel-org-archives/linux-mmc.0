@@ -1,86 +1,112 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC4FF204F87;
-	Mon,  7 Apr 2025 15:49:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 982E02080C7
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Apr 2025 16:04:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744040971; cv=none; b=r2I0tiBtJ+PE7BG8pnzHCh89H1JSgyTiNjf2+f0kKIodM1kLrRhtGUZoNq+d84ZFj1MM5KnwR3ZwzAFlSkQB+IBvGlZGlzlykIeWeV0QUVspeWQOC+wO2dO56GyNsnQSTJ9odyYj7suyEC+wfbbU2kCjZXeu58sUe1WUNWYbJ5A=
+	t=1744041899; cv=none; b=oPlRxi48INv6jFD7kzI7Jllj93i6hdRW+CYS7aqm6pB/7Wi6daVKS8My+sq1wawbpQt4IQE92jLeAwiRraTygkxGImTN2bGxG5NA0TPpCWzNTu8ucZFY+6zWwW8iKQ8+lMNjqa4MUUWjRs6J24ZqL1lAhPSpzUqYnAWUdves/1E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744040971; c=relaxed/simple;
-	bh=z1Vo+dwaof12v9FJV1zldoq4gxlfm8goG7zQDI0UfYg=;
-	h=From:To:Cc:In-Reply-To:References:Subject:Message-Id:Date:
-	 MIME-Version:Content-Type; b=QQcSCpEr/dkk9E9jxqMv/UZC4HJPDW8lQ28tdpkhnBQfUT/GGV2f9Dulx4Bu0aoHHBkbRm9JchE08GbEHkNqCRsIMK4KIDJTe/05435WSr3nRaE2pjGLam64RNYG8mYShMpdTxxOvtoqSFshM185pwUeouPriKtjH59ZmooJoSA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 824D1C4CEDD;
-	Mon,  7 Apr 2025 15:49:31 +0000 (UTC)
-Received: from wens.tw (localhost [127.0.0.1])
-	by wens.tw (Postfix) with ESMTP id C8D385F9F2;
-	Mon,  7 Apr 2025 23:49:28 +0800 (CST)
-From: Chen-Yu Tsai <wens@csie.org>
-To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, 
- Jernej Skrabec <jernej.skrabec@gmail.com>, 
- Samuel Holland <samuel@sholland.org>, 
- Andre Przywara <andre.przywara@arm.com>
-Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-sunxi@lists.linux.dev, linux-kernel@vger.kernel.org, 
- Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, 
- Wim Van Sebroeck <wim@linux-watchdog.org>, 
- Guenter Roeck <linux@roeck-us.net>, linux-watchdog@vger.kernel.org, 
- Thomas Gleixner <tglx@linutronix.de>, Vinod Koul <vkoul@kernel.org>, 
- Kishon Vijay Abraham I <kishon@kernel.org>, linux-phy@lists.infradead.org
-In-Reply-To: <20250307005712.16828-1-andre.przywara@arm.com>
-References: <20250307005712.16828-1-andre.przywara@arm.com>
-Subject: Re: (subset) [PATCH v3 00/15] arm64: dts: allwinner: Add basic
- Allwinner A523 support
-Message-Id: <174404096879.829294.8545896192881134098.b4-ty@csie.org>
-Date: Mon, 07 Apr 2025 23:49:28 +0800
+	s=arc-20240116; t=1744041899; c=relaxed/simple;
+	bh=EsyAkb+E/Vx2Pf5QNAmePM6Wum91PuEAZobvU/Trbwo=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=nf9lgJsiP3OW5FOLJmyx4V+SGI9YK51Aa28i2DJ/hDg/lAtJqmtMgeMbny8rr+kknshYO9GmjHqFz08RNltLq749KErV3N1P2jJnZWWLx9s+N9GBiFPLlkw4mf0/FiDumN9w6hdUEhw/aXzhsOUYgG8gHqkVM+PJgYlWm207Yn8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=kcS6x+aT; arc=none smtp.client-ip=209.85.128.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kcS6x+aT"
+Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6ff2adbba3fso41943967b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Apr 2025 09:04:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1744041896; x=1744646696; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=PRtsR6xVM6ZICvsMHRTNEQJgU7qZB7aRP4KnHCrPc+w=;
+        b=kcS6x+aTkHj/AVvOgI2CTNrRZAoECZtH0huKHm5sGQYXCgKKbHgKJUu7xUdHmJsPXw
+         kqnncFElGFcyq7YSWVENNY3waCz7ZLqPwziALeSa5vNgSVfN+D3N3fqS0Ym4ITVgZQcn
+         I4MyRy2MiE06UqJFk7hSQ/Z8V1mxx6wJHRN/8/Gny0rETsUQ5ju9Xb04FNZOQe0Lcu5E
+         hGHeGQHDWhh5ayhTIEfSvWnwYscPFOTi4d7VofxvjxKieaEYQcxxoxsi1umVqaVw0oWk
+         VLDmLgF6ocM3s5Jxy+25dvnD53ZvYBxSOAMkD8JJrEPDQEiDyJ/RtoGQ22A2MdBSxL4W
+         69AQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744041896; x=1744646696;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PRtsR6xVM6ZICvsMHRTNEQJgU7qZB7aRP4KnHCrPc+w=;
+        b=HkN7tdHMS38067JgBpLT1H/euJJvL18troc2AdXSvCmw/ysIpfYfePa7psdrPMLzDW
+         Z7kJtESMzQ44R7fXvc9MuhHbRehFyQP375ivrzuvmHXW6MlqTKZcLNLU+BDMWrvjC1CT
+         0D5MhKpjQdL+GH9WLq9Nh/lum12O3OxWmj/0GVRfiK2nKT6L7CrPpHNb+B3ZejF2muVU
+         QpkluwnSCE964ISv45Zde1qwv0OWasd1+llUla6X5x0WKNtM+XsG0FdiEP5VICqOjgKW
+         xGOnIHEgV0BCNqhO3+DoMF+ItPAG1Q7CGZe8zdcsxBROtvtYyZTF7nDpquC9XR/7ayA5
+         uH+Q==
+X-Forwarded-Encrypted: i=1; AJvYcCU/VkRIrZjD0U2+9bwgkydQOLnr10ZHKDmK+MvjeZySIreSoFvkGc6/jpufsGDvUHyO3ysGWnPH8Co=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwMk6KL81Z/AsvJ5rnPxdL31YhHf5Q0bbBDThgzXfOcYXI+0lSO
+	1fQ6KquiN9im3HFpp4zGEPNA6Vpym9la2MuAMhtDv03r3/0ibDO2Ud6RNmg9p4qE1Exkl24TLWG
+	NA5CdQZtac46lGOdZZfPys/m0IIANOkrbyhKK8g==
+X-Gm-Gg: ASbGncsjIK3F89k9iqY3jhj4IpqiFxU12QNzN3rhLUosibqFTODhxw4eMhr4vQKfnBP
+	xiBtGhPPvE4JehsAqOy5aY30ti/CELdAqHo22Vh2t0hBW6zbjpYsCgJPc0jGMc7MzCHEAUO/0So
+	zJd4WRHvk90U63NndjQaZvCPzNQWQ=
+X-Google-Smtp-Source: AGHT+IEgtyhHcw5Jpgfae/63h0KNZCvI+qxXPeZypusFjvmWFk+cO1XtdFw/5d+hW1tCksobHOcrVkCj/XZ7Ug4xyF0=
+X-Received: by 2002:a05:690c:3686:b0:703:ac44:d37e with SMTP id
+ 00721157ae682-703f42fc111mr168754697b3.37.1744041896281; Mon, 07 Apr 2025
+ 09:04:56 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.14.2
+References: <20250320211922.1135669-1-robh@kernel.org>
+In-Reply-To: <20250320211922.1135669-1-robh@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 7 Apr 2025 18:04:19 +0200
+X-Gm-Features: ATxdqUH-tbXCaf4ePanPkHh6DiK3ftNM3BoL1J4Avf3yLjwSBSY2qumPHOTnSI8
+Message-ID: <CAPDyKFpzxK3AaEPsWjkgmPCjCO6u8NeWdZiStWst_Uzdda9MBA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: Remove redundant sdhci.txt
+To: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Fri, 07 Mar 2025 00:56:57 +0000, Andre Przywara wrote:
-> this in an update to the series introducing the basic DT support for the
-> Allwinner A523 SoC. It now comes with DTs for three boards, using
-> slightly different packages of that SoC.[1]
-> Functionality-wise it relies on the pinctrl[2] and clock[3] support
-> series, though there are no direct code dependency series between the
-> series. Two binding patches from there are required to pass dtbs_check,
-> git put their patch IDs in the footer below.
-> Compared to v2 only small fixes in the NMI controller driver: renaming
-> the struct to better reflect its new usage, add adding the DS pin to
-> the eMMC pingroup list. Adding accrued tags on the way, many thanks to
-> the diligent reviewers! More detailed changelog below.
-> 
-> [...]
+On Thu, 20 Mar 2025 at 22:19, Rob Herring (Arm) <robh@kernel.org> wrote:
+>
+> The properties in sdhci.txt are documented in sdhci-common.yaml, too.
+> Remove the txt binding.
+>
+> Signed-off-by: Rob Herring (Arm) <robh@kernel.org>
 
-Applied to dt-for-6.16 in git@github.com:linux-sunxi/linux-sunxi.git, thanks!
+Applied for next, thanks!
 
-[08/15] arm64: dts: allwinner: Add Allwinner A523 .dtsi file
-        commit: 35ac96f796649346c9b0440413dc6c5138249b3e
-[09/15] dt-bindings: vendor-prefixes: Add YuzukiHD name
-        commit: acf5b947cff1b991ceb7fa53c66555242ff4c87b
-[10/15] dt-bindings: arm: sunxi: Add new board names for A523 generation
-        commit: f9d55227839199e928a41574e41089288a43a2d6
-[11/15] arm64: dts: allwinner: a523: add Avaota-A1 router support
-        commit: 3a1883f32b9b5083883624f9b39a3c6edfa6d490
-[12/15] arm64: dts: allwinner: a523: add X96Q-Pro+ support
-        commit: 66611715c473a9820b65322c94401a367711acd7
-[13/15] arm64: dts: allwinner: a523: add Radxa A5E support
-        commit: 80e0fb4e491b4994434e42c33c1387a46b7986bc
-[14/15] dt-bindings: arm: sunxi: Add YuzukiHD Chameleon board name
-        commit: 7273c0e2e4229bca42c70e6f3c33f1756902301a
-[15/15] arm64: dts: allwinner: h616: add YuzukiHD Chameleon support
-        commit: 6d1cb8de157382facedf50f1a80ee033243b8494
+Kind regards
+Uffe
 
-Best regards,
--- 
-Chen-Yu Tsai <wens@csie.org>
 
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci.txt | 13 -------------
+>  1 file changed, 13 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci.txt b/Documentation/devicetree/bindings/mmc/sdhci.txt
+> deleted file mode 100644
+> index 0e9923a64024..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/sdhci.txt
+> +++ /dev/null
+> @@ -1,13 +0,0 @@
+> -The properties specific for SD host controllers. For properties shared by MMC
+> -host controllers refer to the mmc[1] bindings.
+> -
+> -  [1] Documentation/devicetree/bindings/mmc/mmc.txt
+> -
+> -Optional properties:
+> -- sdhci-caps-mask: The sdhci capabilities register is incorrect. This 64bit
+> -  property corresponds to the bits in the sdhci capability register. If the bit
+> -  is on in the mask then the bit is incorrect in the register and should be
+> -  turned off, before applying sdhci-caps.
+> -- sdhci-caps: The sdhci capabilities register is incorrect. This 64bit
+> -  property corresponds to the bits in the sdhci capability register. If the
+> -  bit is on in the property then the bit should be turned on.
+> --
+> 2.47.2
+>
