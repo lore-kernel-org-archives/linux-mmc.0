@@ -1,60 +1,60 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0E4E7146593;
-	Mon,  7 Apr 2025 13:40:03 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 275C7846D;
+	Mon,  7 Apr 2025 13:59:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744033204; cv=none; b=ntET27M5Xt2mTFs9UmmrTfZ7ERXDSeM9MibyK8GYqLvqIXRWjO0AhdazgJYWkcpsw8Fu7c71zpZnVXOdrJErBou9Y4jAW/pm0MLXF2fFQtv/d0Pdt3aQs+abnRpHC8DYMOg9inQyDbEy9s4Was0JZtcqN78e19tnW/qYhhdPeO4=
+	t=1744034366; cv=none; b=AD7+6xIM+Vlz+C6ur7MAbqUXYOvLPxoaGaOeX4x9PjwkRrVGCKhpiWT7rl6pWP3wHLCtg1ekF5mVr5YXpZxoX3l35MQot7uVEfWMwY87r8y32w9hkpjgJJfcWiZ29coV+J5K2LLNl9yBYjpvuMTb5FzSwt7gMwYQERC4UZJ41yQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744033204; c=relaxed/simple;
-	bh=3Jsy3U8ncbmDNsptsfF9HvnjrFQt4I1GMdj0SZq/fzs=;
+	s=arc-20240116; t=1744034366; c=relaxed/simple;
+	bh=8s2WBNabZQFxBl7Vpsud+lJ/8w8F8nDe+peMa/6CfYw=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=cUdGhBRDY6R9rlmmKEMkGjTiZWxOPYEnWcn8RxF12j3iMOKZjg6CbfCUpmmdhO/JDdR1zDBLSIU+3Ksy7YUHGj4y5AuAyrVRyxjdwuxRwAyGmRBTqmei5UAorUAaOtJBGYynWGv1HaeQ4kGY+myRximsvExnQ+HKiAI4TJVfKB4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jpOE4Xsi; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=tYzJXc+tTJiyN9YYSV/sUkLVC5EEFTqeGC00XtkizI/w8DNjJg/i19ETMtk8aYR4s9s2nOsSmlzCMH7ArsTqBDPhYHH0wfkHh/5tYM5KQ6tRVbe2SyT0U07cbMQwYs12cx6jCykp/O8Ld+MK+swnrR0jyzcYuHcKFKG8MjZGhRk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=HXG8+zHj; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jpOE4Xsi"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 020E2C4CEDD;
-	Mon,  7 Apr 2025 13:40:02 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="HXG8+zHj"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55286C4CEDD;
+	Mon,  7 Apr 2025 13:59:25 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744033203;
-	bh=3Jsy3U8ncbmDNsptsfF9HvnjrFQt4I1GMdj0SZq/fzs=;
+	s=k20201202; t=1744034365;
+	bh=8s2WBNabZQFxBl7Vpsud+lJ/8w8F8nDe+peMa/6CfYw=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=jpOE4XsiNPaNz5DJf0PaXDEDnphzgxL8k9uTxP0AKGzcklQGu3k6nKw5At/sHjQPU
-	 Nc/RE53PVfGHBx/bo2Vf4BGXZvw+ak/a/23PdGHvw8KarWw1loqMVgGPuJ/3I+NA2y
-	 U0+c9prQ+RnOJHvMy+aQ3KbglvYEdmWoUKnUhv4Km64VuFE6Yqic5sKz/VsUuVd4mA
-	 wG3nu0TNHb0lsdT2nIE6A3/IjeRBQ+glkfCN0M5VVzsB5NxiHl4G4+58kO0Edtwc7v
-	 1ujEUlavDc5/6ueEdJVqnhmgOUGenEcZhNtYTzlLuIhEPs7AVuC5Bd0DaSUF9Kxoyi
-	 YFPKeLz3gxmTA==
-Date: Mon, 7 Apr 2025 08:40:01 -0500
-From: Rob Herring <robh@kernel.org>
+	b=HXG8+zHjOCj+V48R59reR4E1O9Q2qp21nTZlonWp9Xyp0ycMi0V/9lST8jdTr0JrB
+	 dwa44fh0Om/zzKA0zGhuyNwgJ0BTsdSwrk6QZp8p3UGwoHZA0O0dLZiodAr4W829ZG
+	 TUxObNX6z/efLUgEv34gVPOMdySNc0fUQDCPZe7b4T3sGHYDcLThD8icihBOG8/kN+
+	 uTKEbi0PwlM+9+WH5COIS7hYG+6oEuN2nvg/YVU5dAjKKt/kHkgWwePWd4N/KkT1kq
+	 zDWY70pHKi3qVH9AjH7qXgKhX0cG6jwP/4slFVjbxAE6EyzKWkS5OHwpfyF+1fNF7s
+	 t2QGiCC2GYohQ==
+Date: Mon, 7 Apr 2025 08:59:24 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
 To: Inochi Amaoto <inochiama@gmail.com>
-Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
+Cc: Andi Shyti <andi.shyti@kernel.org>, linux-riscv@lists.infradead.org,
+	linux-hwmon@vger.kernel.org,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Chen Wang <unicorn_wang@outlook.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Paul Walmsley <paul.walmsley@sifive.com>,
-	Samuel Holland <samuel.holland@sifive.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Daniel Lezcano <daniel.lezcano@linaro.org>,
-	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
-	ghost <2990955050@qq.com>,
+	Guenter Roeck <linux@roeck-us.net>,
 	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
-	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>,
-	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
-	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
-	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
-	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
-	Longbin Li <looong.bin@gmail.com>
-Subject: Re: [PATCH 4/9] dt-bindings: reset: sophgo: Add SG2044 bindings.
-Message-ID: <20250407134001.GA2088093-robh@kernel.org>
+	Alexandre Ghiti <alex@ghiti.fr>, linux-kernel@vger.kernel.org,
+	Daniel Lezcano <daniel.lezcano@linaro.org>,
+	Yixun Lan <dlan@gentoo.org>, sophgo@lists.linux.dev,
+	Chao Wei <chao.wei@sophgo.com>, Longbin Li <looong.bin@gmail.com>,
+	linux-i2c@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
+	devicetree@vger.kernel.org, Conor Dooley <conor+dt@kernel.org>,
+	ghost <2990955050@qq.com>, Philipp Zabel <p.zabel@pengutronix.de>,
+	Chen Wang <unicorn_wang@outlook.com>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	linux-mmc@vger.kernel.org, Jisheng Zhang <jszhang@kernel.org>,
+	Jean Delvare <jdelvare@suse.com>,
+	Palmer Dabbelt <palmer@dabbelt.com>
+Subject: Re: [PATCH 5/9] dt-bindings: hwmon: Add Sophgo SG2044 external
+ hardware monitor support
+Message-ID: <174403436377.2164588.13246068752333809704.robh@kernel.org>
 References: <20250407010616.749833-1-inochiama@gmail.com>
- <20250407010616.749833-5-inochiama@gmail.com>
+ <20250407010616.749833-6-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -63,21 +63,20 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250407010616.749833-5-inochiama@gmail.com>
+In-Reply-To: <20250407010616.749833-6-inochiama@gmail.com>
 
-On Mon, Apr 07, 2025 at 09:06:09AM +0800, Inochi Amaoto wrote:
-> The SG2044 shares the same reset controller as SG2042, so it
-> is just enough to use the compatible string of SG2042 as a
-> basis.
 
-You can drop 'binding.' from the subject.
-
+On Mon, 07 Apr 2025 09:06:10 +0800, Inochi Amaoto wrote:
+> The MCU device on SG2044 exposes the same interface as SG2042, which is
+> already supported by the kernel.
 > 
-> Add compatible string for the reset controller of SG2044.
+> Add compatible string for monitor device of SG2044.
 > 
 > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
 > ---
->  .../devicetree/bindings/reset/sophgo,sg2042-reset.yaml     | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+>  .../devicetree/bindings/hwmon/sophgo,sg2042-hwmon-mcu.yaml  | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
 
 Acked-by: Rob Herring (Arm) <robh@kernel.org>
+
