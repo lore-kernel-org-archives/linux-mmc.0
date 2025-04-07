@@ -1,54 +1,54 @@
-Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B860225A40
-	for <linux-mmc@vger.kernel.org>; Mon,  7 Apr 2025 08:33:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC6F9225A20
+	for <linux-mmc@vger.kernel.org>; Mon,  7 Apr 2025 08:34:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744014837; cv=none; b=MQ/fnl4rJlF0mAqe8x5x1feXZJzFJ0ghGejoYaiUic3FnlQ97jlyLpr/3d22cUKDxXgvRPCfA86Ph5w1YKCneNL4pxtoTdkB6Ym7zVYtZCNaDpy1L8YvNdwJnpB7sj1++Zb350HoBLNH90FFySpacp8Z9e5+4FR3YEpGz1Xzbfg=
+	t=1744014842; cv=none; b=Uxnb68xwmX5SDWEi24zngqLUyccEsTqhPEPmEdTVH+y+z9R/GHwz3VTQqVs1baKIhfMV/He3CoLxBPI4XlPxBua8uQ6eV5uS2Yrfvu0sfMTd6vhHx2QmPG/DeUthizGajD4r9YTtRonBs9zwoJyU2QDZ+70luEnWDTMFArGEwgU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744014837; c=relaxed/simple;
-	bh=95zApcFzFaRBnwRLdAR5oF/u82+rEBIE9KjTUiDjfu0=;
+	s=arc-20240116; t=1744014842; c=relaxed/simple;
+	bh=cqn4jvG3cVHgoIMPxb7ME//tNbSCYE4xTotDfogc878=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=rQhNrRALtMPTn43Z4UW+GJGk0QeiPs44qtZRD+etMWbPpKWMjFVH0o8IQj9yt0aEM+vQ9T44b7jqt+5FQtgg7x5biGIR0Ma/sXbDghtz+0mgJRaLYEWz/x4QyE7kJuWwfOfFiYGEOuSiAIgjHepJ6meXeEBOi9ai7ASgpRjdzBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=gV5+ZFpU; arc=none smtp.client-ip=216.71.153.144
+	 MIME-Version; b=qbTlYW/TVppVqhrobFGWsVmfl5qY4GwEW3MIBNM7i63O1pbNn67uvVRwki7oaIe3FuGG97S87Y1Y3FQP09ZrO8l/ucbOUy6RZ23OfUl7HbL3zdZpq9RDNELBrjo1BgtGomSRIfvxzOIReuxHqh/Pvkt6NC6N3K7uUW9KqmtBNm8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=GnW3JmCL; arc=none smtp.client-ip=68.232.141.245
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="gV5+ZFpU"
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="GnW3JmCL"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkim.sandisk.com; t=1744014834; x=1775550834;
+  s=dkim.sandisk.com; t=1744014840; x=1775550840;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=95zApcFzFaRBnwRLdAR5oF/u82+rEBIE9KjTUiDjfu0=;
-  b=gV5+ZFpUJ/fvNwdqhqIjpVjuHTr+pOs/U0QRdSJs1Ax0o5GFVMhP8PmA
-   ECtEwvZONp0AJ8uM3QDlyPLsZG3a9/56N7pmH4wDAKLGaLX6HAS4dgB6C
-   vdD7fyds2cVraGF/5KlhuUqasgPjtPI1ZSpEGGeZltRTQMRIHHbfZXyFc
-   zVDqPM9JyZeUkvwq1LGYydU6R7PmpQtsK+MW7ZCrTXH0R7gdADRF69is7
-   +N0yoJiq43X7Eu3uTVnm5J91o4xqvuL+C0PNRjlo/MXvh4c0i24qkppKQ
-   rKrDoTjlJSgBTnhIvaXvGYxr/NFyg0ioFhcDGbhYbOerxmXJLBPV8gpyq
-   g==;
-X-CSE-ConnectionGUID: rZd60U65SP+Leo3Kw4Hsnw==
-X-CSE-MsgGUID: NjBB3oZsS4i+B1517nPS6Q==
+  bh=cqn4jvG3cVHgoIMPxb7ME//tNbSCYE4xTotDfogc878=;
+  b=GnW3JmCLA8tcv8w3Sz/Yp536AX4LMFJuLP3o1ZXHQGPJXEpCkUW/ajS4
+   tIs1W7jxP6k9xInElLxRKTDlc66EkDeGKoTD4n4oTROOGJQEEXayPMkJK
+   l5ZfqXvoR4gnGjwZfCkvGZ7folTCOurThH8hqucxFKZ9Ym26/z4myHjne
+   J7vQpnp3ftt/k78jwhmXu7QQ58vYgA/NF9WrDHo3zcLqmb88gDABX2yVS
+   CICa0mEfKERW2tFTPprNjGOcSYH0jdgGdNkHTRXg4LemPT7n4gaXAhv60
+   v660VLGQBhs3igIBNLdGPxTG5DqgexsWWus6Pp7sI5U1o2yCKLdg6toIF
+   w==;
+X-CSE-ConnectionGUID: IkRhB+9qRruL2CTZmTchfg==
+X-CSE-MsgGUID: vY4ZB8QJR6W7VGz4MLnppQ==
 X-IronPort-AV: E=Sophos;i="6.15,193,1739808000"; 
-   d="scan'208";a="72607406"
+   d="scan'208";a="72021587"
 Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Apr 2025 16:33:51 +0800
-IronPort-SDR: 67f37fef_rR9bk2k8eMoF60AARgUakkurtHBVeMP6rQ3x1MY8ZbH+Ip6
- 2Hensi4HRgeih2VK/xPAZ/7bFIrNx9hEbFrl1aw==
+  by ob1.hgst.iphmx.com with ESMTP; 07 Apr 2025 16:33:59 +0800
+IronPort-SDR: 67f37ff8_6yHKQdvOH7D+0hCSL5qEhQ4Gs8v5ugJbtf4zgAnSilL6hSu
+ SnE78a0lT0wB1gJhU72vV8CmUW0CxxaqwlezG+g==
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 07 Apr 2025 00:34:08 -0700
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 07 Apr 2025 00:34:17 -0700
 WDCIronportException: Internal
 Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 07 Apr 2025 01:33:50 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 07 Apr 2025 01:33:58 -0700
 From: Avri Altman <avri.altman@sandisk.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH 07/10] mmc-utils: Add secure write-protect mode enable/disable
-Date: Mon,  7 Apr 2025 11:28:30 +0300
-Message-Id: <20250407082833.108616-8-avri.altman@sandisk.com>
+Subject: [PATCH 08/10] mmc-utils: Enable/Disable write protect
+Date: Mon,  7 Apr 2025 11:28:31 +0300
+Message-Id: <20250407082833.108616-9-avri.altman@sandisk.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20250407082833.108616-1-avri.altman@sandisk.com>
 References: <20250407082833.108616-1-avri.altman@sandisk.com>
@@ -62,190 +62,90 @@ Content-Transfer-Encoding: 8bit
 
 From: Avri Altman <avri.altman@wdc.com>
 
-Allow toggling the SECURE_WP_EN field in the SECURE_WP_MODE_ENABLE part
-of Device Configuration area.  Access to the Device Configuration area
-is regulated via Authenticated Device Configuration write request.
+In secure write protected mode, the updatability of USER_WP[171],
+BOOT_WP[173], TMP_WRITE_PROTECT[12] and PERM_WRITE_PROTECT[13] are
+controlled by SECURE_WP_MASK bit in the SECURE _WP_MODE_CONFIG of the
+Authenticated Device Configuration Area.
+
+Setting it, enables updating WP related EXT_CSD and CSD fields, and
+clearing it vice versa.
+
+Access to the Authenticated Device Configuration Area is regulated via
+Authenticated Device Configuration Write Request.
 
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- mmc.c      |  23 ++++++++++++
- mmc_cmds.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |   2 ++
- 3 files changed, 129 insertions(+)
+ mmc.c      | 20 ++++++++++++++++++++
+ mmc_cmds.c | 14 ++++++++++++++
+ mmc_cmds.h |  2 ++
+ 3 files changed, 36 insertions(+)
 
 diff --git a/mmc.c b/mmc.c
-index b73dd24..0cffa5b 100644
+index 0cffa5b..578b00c 100644
 --- a/mmc.c
 +++ b/mmc.c
-@@ -197,6 +197,29 @@ static struct Command commands[] = {
- 		  "    mmc rpmb write-block /dev/mmcblk0rpmb 0x02 - -",
+@@ -220,6 +220,26 @@ static struct Command commands[] = {
+ 		  "    mmc rpmb secure-wp-mode-off /dev/block/mmcblk0 /dev/mmcblk0rpmb -",
  	  NULL
  	},
-+	{ do_rpmb_sec_wp_enable, 3,
-+	  "rpmb secure-wp-mode-on", "<dev> <rpmb device> <key file>\n"
-+		  "Enable Secure Write Protection mode.\n"
-+		  "The access to the write protection related EXT_CSD and\n"
-+		  "CSD fields depends on the value of SECURE_WP_MASK bit in\n"
-+		  "SECURE_WP_MODE_CONFIG field\n"
++	{ do_rpmb_sec_wp_mode_set, 3,
++	  "rpmb secure-wp-disable", "<dev> <rpmb device> <key file>\n"
++		  "Enabling updating WP related EXT_CSD and CSD fields.\n"
++		  "Applicable only if secure wp mode is enabled.\n"
 +		  "You can specify '-' instead of key\n"
 +		  "Example:\n"
 +		  "    echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | \\\n"
-+		  "    mmc rpmb secure-wp-mode-on /dev/block/mmcblk0 /dev/mmcblk0rpmb -",
++		  "    mmc rpmb secure-wp-disable /dev/block/mmcblk0 /dev/mmcblk0rpmb -",
 +	  NULL
 +	},
-+	{ do_rpmb_sec_wp_disable, 3,
-+	  "rpmb secure-wp-mode-off", "<dev> <rpmb device> <key file>\n"
-+		  "Legacy Write Protection mode.\n"
-+		  "TMP_WRITE_PROTECT[12] and PERM_WRITE_PROTECT[13] is updated by CMD27.\n"
-+		  "USER_WP[171], BOOT_WP[173] and BOOT_WP_STATUS[174] are updated by CMD6\n"
++	{ do_rpmb_sec_wp_mode_clear, 3,
++	  "rpmb secure-wp-enable", "<dev> <rpmb device> <key file>\n"
++		  "Disabling updating WP related EXT_CSD and CSD fields.\n"
++		  "Applicable only if secure wp mode is enabled.\n"
 +		  "You can specify '-' instead of key\n"
 +		  "Example:\n"
 +		  "    echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | \\\n"
-+		  "    mmc rpmb secure-wp-mode-off /dev/block/mmcblk0 /dev/mmcblk0rpmb -",
++		  "    mmc rpmb secure-wp-enable /dev/block/mmcblk0 /dev/mmcblk0rpmb -",
 +	  NULL
 +	},
  	{ do_cache_en, -1,
  	  "cache enable", "<device>\n"
  		"Enable the eMMC cache feature on <device>.\n"
 diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 80ac6ab..07bd9ad 100644
+index 07bd9ad..2ef4252 100644
 --- a/mmc_cmds.c
 +++ b/mmc_cmds.c
-@@ -2099,6 +2099,7 @@ enum rpmb_op_type {
- 	MMC_RPMB_READ_CNT  = 0x02,
- 	MMC_RPMB_WRITE     = 0x03,
- 	MMC_RPMB_READ      = 0x04,
-+	MMC_RPMB_CONF_WRITE = 0x06,
- 
- 	/* For internal usage only, do not use it directly */
- 	MMC_RPMB_READ_RESP = 0x05
-@@ -2210,6 +2211,7 @@ static int do_rpmb_op(int fd, const struct rpmb_frame *frame_in,
- 	switch(rpmb_type) {
- 	case MMC_RPMB_WRITE:
- 	case MMC_RPMB_WRITE_KEY:
-+	case MMC_RPMB_CONF_WRITE:
- 		if (out_cnt != 1) {
- 			err = -EINVAL;
- 			goto out;
-@@ -2498,6 +2500,108 @@ int do_rpmb_read_block(int nargs, char **argv)
- 	return ret;
+@@ -2602,6 +2602,20 @@ int do_rpmb_sec_wp_disable(int nargs, char **argv)
+ 	return rpmb_auth_write(nargs, argv, 1, 0, usage);
  }
  
-+static bool secure_wp_supported(char *device)
++int do_rpmb_sec_wp_mode_set(int nargs, char **argv)
 +{
-+	__u8 ext_csd[512];
-+	int fd;
++	char *usage = "Usage: mmc rpmb secure-wp-disable </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
 +
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		return false;
-+	}
-+
-+	if (read_extcsd(fd, ext_csd)) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		close(fd);
-+		return false;
-+	}
-+
-+	close(fd);
-+
-+	if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
-+		fprintf(stderr, "SECURE_WP_SUPPORT option is only available on devices >= MMC 5.0 %s\n", device);
-+		return false;
-+	}
-+
-+	return !!(ext_csd[EXT_CSD_SECURE_WP_INFO] & 1);
++	return rpmb_auth_write(nargs, argv, 2, 1, usage);
 +}
 +
-+static int rpmb_auth_write(int nargs, char **argv, uint16_t addr,
-+			   uint8_t config_data, char *usage)
++int do_rpmb_sec_wp_mode_clear(int nargs, char **argv)
 +{
-+	int ret, dev_fd;
-+	unsigned int cnt;
-+	struct rpmb_frame frame_in = {
-+		.req_resp    = htobe16(MMC_RPMB_CONF_WRITE),
-+		.block_count = htobe16(1),
-+		.addr	     = htobe16(addr),
-+	}, frame_out = {};
++	char *usage = "Usage: mmc rpmb secure-wp-enable </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
 +
-+	if (nargs != 4) {
-+		fprintf(stderr, "%s", usage);
-+		return EXIT_FAILURE;
-+	}
-+
-+	if (!secure_wp_supported(argv[1])) {
-+		fprintf(stderr, "secure wp not supported %s", argv[1]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	dev_fd = open(argv[2], O_RDWR);
-+	if (dev_fd < 0) {
-+		perror("device open");
-+		return EXIT_FAILURE;
-+	}
-+
-+	ret = rpmb_read_counter(dev_fd, &cnt);
-+	/* Check RPMB response */
-+	if (ret != 0) {
-+		printf("RPMB read counter operation failed, retcode 0x%04x\n", ret);
-+		goto out;
-+	}
-+	frame_in.write_counter = htobe32(cnt);
-+
-+	frame_in.data[255] = config_data; /* Byte 28 */
-+
-+	ret = rpmb_get_key(argv[3], &frame_in, NULL, true);
-+	if (ret) {
-+		printf("failed to read and apply key %d\n", ret);
-+		goto out;
-+	}
-+
-+	/* Execute RPMB op */
-+	ret = do_rpmb_op(dev_fd, &frame_in, &frame_out, 1);
-+	if (ret != 0) {
-+		perror("RPMB ioctl failed");
-+		goto out;
-+	}
-+
-+	/* Check RPMB response */
-+	if (frame_out.result != 0) {
-+		printf("RPMB operation failed, retcode 0x%04x\n",
-+		       be16toh(frame_out.result));
-+	}
-+
-+out:
-+	close(dev_fd);
-+	return ret;
-+}
-+
-+int do_rpmb_sec_wp_enable(int nargs, char **argv)
-+{
-+	char *usage = "Usage: mmc rpmb secure-wp-mode-on </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+
-+	return rpmb_auth_write(nargs, argv, 1, 1, usage);
-+}
-+
-+int do_rpmb_sec_wp_disable(int nargs, char **argv)
-+{
-+	char *usage = "Usage: mmc rpmb secure-wp-mode-off </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+
-+	return rpmb_auth_write(nargs, argv, 1, 0, usage);
++	return rpmb_auth_write(nargs, argv, 2, 0, usage);
 +}
 +
  int do_rpmb_write_block(int nargs, char **argv)
  {
  	int ret, dev_fd, data_fd;
 diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 407cbe6..873d9b2 100644
+index 873d9b2..61fe337 100644
 --- a/mmc_cmds.h
 +++ b/mmc_cmds.h
-@@ -39,6 +39,8 @@ int do_rpmb_write_key(int nargs, char **argv);
- int do_rpmb_read_counter(int nargs, char **argv);
- int do_rpmb_read_block(int nargs, char **argv);
+@@ -41,6 +41,8 @@ int do_rpmb_read_block(int nargs, char **argv);
  int do_rpmb_write_block(int nargs, char **argv);
-+int do_rpmb_sec_wp_enable(int nargs, char **argv);
-+int do_rpmb_sec_wp_disable(int nargs, char **argv);
+ int do_rpmb_sec_wp_enable(int nargs, char **argv);
+ int do_rpmb_sec_wp_disable(int nargs, char **argv);
++int do_rpmb_sec_wp_mode_set(int nargs, char **argv);
++int do_rpmb_sec_wp_mode_clear(int nargs, char **argv);
  int do_cache_en(int nargs, char **argv);
  int do_cache_dis(int nargs, char **argv);
  int do_ffu(int nargs, char **argv);
