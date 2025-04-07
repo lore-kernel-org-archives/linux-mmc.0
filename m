@@ -1,32 +1,32 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE8B5250F8;
-	Mon,  7 Apr 2025 14:00:16 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D53572C6A3;
+	Mon,  7 Apr 2025 14:02:33 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744034419; cv=none; b=WBI6tOIrXoq86GVuGiSYExgaOjCYyqCKXiqkkk0or9s8/oiBH87VBESMSMYfROQ8KwvhqNuDlkSXp9ERAOPqdiQX/zy0xvU/whl2gYFA95At9TZZDUQ+joTrFm/0Qx2tQfNc522u1RS5p0pgGX0gzRuG++8wx/tHVukrJemeb8Q=
+	t=1744034555; cv=none; b=bgJNmLQmsuq74JC2B0vkjHteTqRsEZvDJ4XkAzQZX0nYYtGb3Q/aA3sBjtkdF6bH9UbT71Syocjvk8BES82dXQ0kSHvrREdCic2kxlB72J+8ukbV9sBqHTr6weTAzCUvEMGB9Swk1JDORZ1sPJRuj/5ZpaqDVvGtCjMfR7GqCRc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744034419; c=relaxed/simple;
-	bh=5Cal73TGm2lWIHNlKA2mCZV0gIkjUPC5RFYDmMsmJfs=;
+	s=arc-20240116; t=1744034555; c=relaxed/simple;
+	bh=W3SHYCW2Ors5dixyvIPe8YB5LgdUl989Vud2NXgXX8o=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=qXMPwzkB5MQfnB8foh221ocstOrzvOBwRsyGDO1Z31/itNLe6jhUIkEyYO+sQGz+yr058cS/T88lDEpDwdVdbJMDCxGoE4lxF5iTJFzUKMXK8nRRIc4D4rnRY0QQcsu1ydIfiGzPtodeT4Lt5TBfgCRV2RuKLU6LgOBfB+IZKN4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=aygh3qc8; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=AV3azzfdZvqw2tHl/XwU900SOlCC7YvMXqs7r/KpzvTZJErAOQmtwnFCOiQ7byj0E8r+6qgCxeO239vQEojvrNfXaWm+0YwuyqKt0H9628Y1xQ6wBLD5Gze27qysiEkjBXBqTgQw1rOGJHeaX1hAojfdd/bLoX2+l0BbjD/rATw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Oh6ZWDP9; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="aygh3qc8"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E8DD2C4CEDD;
-	Mon,  7 Apr 2025 14:00:15 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Oh6ZWDP9"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 108F3C4CEDD;
+	Mon,  7 Apr 2025 14:02:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744034416;
-	bh=5Cal73TGm2lWIHNlKA2mCZV0gIkjUPC5RFYDmMsmJfs=;
+	s=k20201202; t=1744034553;
+	bh=W3SHYCW2Ors5dixyvIPe8YB5LgdUl989Vud2NXgXX8o=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=aygh3qc8NZeS9Y6m3Ubad39D8XuI9IH4E+efd5uoNMIDRgvJXxXAu7w0vxY1xwovV
-	 a1jg1BJ3h8hIYFl/rpsra04LUnbZTfkaOayuERL2stUyoZAv1Uszwu1wau4Zj4MePR
-	 VhzCZAeF8Orc6Vov5nF2/SItSsh/b1MfQMHaFq2FK5Ol7/+XKz1RO2P97YkilplU4p
-	 hBR6E4yrWrB+tPTtXcm+xKrhwcBSD9L/jhKo75033UGI7DIRF9U0QkuZf6PuHLYuau
-	 uaiTtqmdpU3yokh3Jix8UgpjPbh+XYjUO0jMrGcNZJHkVUGaqWE82e5ywhPFMnoJ/q
-	 cUaR//orv61lA==
-Date: Mon, 7 Apr 2025 09:00:15 -0500
+	b=Oh6ZWDP9gO1f5r6MxG/QQ4EWDh52V6RzQQ4W7G/Wc2DM7wj67nRy0OXFJbv5EybBe
+	 3E8lu4uRJh1oVrYXIzz8yV2GKMlDPbPy54XIRlSDZE4covfbvrht5pFYl27TMhAKgs
+	 KfQtzOwxVM+MCBPE6AjTY3U3+OKA7H20Mc9YLqJUADIOHD6Ais16TqBgY4N/Bt0An5
+	 W1NnfOgXPvjITsah7honbXqtG+6fz5TDUHnkJy5E0kcn1cpJ8TJCgHQWAqD3PdXEfk
+	 Jp8I1XN7InWFptl0b/MMeQ7KFCkdDDNhSgjMqxOGL9Z1cV5qU8QmVj68Cx69PAOViN
+	 o5zvSOgAi1mKw==
+Date: Mon, 7 Apr 2025 09:02:32 -0500
 From: Rob Herring <robh@kernel.org>
 To: Inochi Amaoto <inochiama@gmail.com>
 Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
@@ -51,11 +51,11 @@ Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
 	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
 	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
 	Longbin Li <looong.bin@gmail.com>
-Subject: Re: [PATCH 6/9] dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo
- SG2044 support
-Message-ID: <20250407140015.GA2164748-robh@kernel.org>
+Subject: Re: [PATCH 7/9] dt-bindings: i2c: dw: Add Sophgo SG2044 SoC I2C
+ controller
+Message-ID: <20250407140232.GA2165777-robh@kernel.org>
 References: <20250407010616.749833-1-inochiama@gmail.com>
- <20250407010616.749833-7-inochiama@gmail.com>
+ <20250407010616.749833-8-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -64,43 +64,37 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250407010616.749833-7-inochiama@gmail.com>
+In-Reply-To: <20250407010616.749833-8-inochiama@gmail.com>
 
-On Mon, Apr 07, 2025 at 09:06:11AM +0800, Inochi Amaoto wrote:
-> The sdhci IP of SG2044 is similar to it of SG2042. They
-> share the same clock and controller configuration.
-> 
-> Add compatible string for SG2044.
+On Mon, Apr 07, 2025 at 09:06:12AM +0800, Inochi Amaoto wrote:
+> Add compatible string for Sophgo SG2044 SoC I2C controller which can be
+> used specifically for the SG2044 SoC.
 > 
 > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
 > ---
->  .../devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml        | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+>  .../devicetree/bindings/i2c/snps,designware-i2c.yaml          | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index e6e604072d3c..47b5fc1b8e07 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -19,6 +19,9 @@ properties:
->                - rockchip,rk3562-dwcmshc
->                - rockchip,rk3576-dwcmshc
->            - const: rockchip,rk3588-dwcmshc
-> +      - items:
-> +          - const: sophgo,sg2044-dwcmshc
-> +          - const: sophgo,sg2042-dwcmshc
->        - enum:
->            - rockchip,rk3568-dwcmshc
->            - rockchip,rk3588-dwcmshc
-> @@ -74,7 +77,9 @@ allOf:
->        properties:
->          compatible:
->            contains:
-> -            const: sophgo,sg2042-dwcmshc
-> +            enum:
-> +              - sophgo,sg2042-dwcmshc
-> +              - sophgo,sg2044-dwcmshc
+> diff --git a/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml b/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> index bc5d0fb5abfe..677b39865af0 100644
+> --- a/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> +++ b/Documentation/devicetree/bindings/i2c/snps,designware-i2c.yaml
+> @@ -38,6 +38,10 @@ properties:
+>            - const: snps,designware-i2c
+>        - description: Baikal-T1 SoC System I2C controller
+>          const: baikal,bt1-sys-i2c
+> +      - description: Sophgo SoCs I2C controller
+> +        items:
+> +          - const: sophgo,sg2044-i2c
+> +          - const: snps,designware-i2c
 
-No need for this hunk because the new one has sophgo,sg2042-dwcmshc 
-already.
+This is not a great pattern we've started. T-HEAD, Ocelot, and this 
+should all be combined into 1 enum. The description here is not that 
+useful.
 
-Rob
+>        - description: T-HEAD TH1520 SoCs I2C controller
+>          items:
+>            - const: thead,th1520-i2c
+> -- 
+> 2.49.0
+> 
