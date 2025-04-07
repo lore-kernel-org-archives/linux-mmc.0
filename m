@@ -1,46 +1,46 @@
-Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
+Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4419C18E743;
-	Mon,  7 Apr 2025 22:27:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 61CA31B87CF;
+	Mon,  7 Apr 2025 22:27:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744064832; cv=none; b=tJHVg9T6HleQ/QyK6OArWDhFhxLNjXxRlG5ZBQt2bRnsHsPSU5gTfWr4a1juBaD3kcUD/A+8DodqbP/+WzDe1arbmQyWo5m4QwUXW9XPfJJ1nybWUParnzHCqOA0NVxU8pJcF1RMsjfwEcSdvpOJGTsAKHosw0fqNcv6iaf9Fiw=
+	t=1744064832; cv=none; b=I57V/G13QxxUjPryTdDgSdYfKs/jt+Dynu1IfztFo11FNd9PVPfd+LxDs/T98T8AP/4RD/JTVL4wGFlUqlhUHtemTNuHki7QC6cE/ShuMY9feWVwBTffZlli8KG2fRD8Yrwtiu0mGxhGlYOE4Qc8LhYvOy5X1ebJMBcWd7TGR80=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1744064832; c=relaxed/simple;
-	bh=QBBGdTOap4TTUmiPVlt8m+1Kw6mDb9jrIOwV2YJn2es=;
+	bh=3J1mh/9jr3Z1l1jEQkPqepNo70bUmp7B+1t9mwsfq88=;
 	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=dqwJ7icjd0+3hoh2ingDSc6TJOSl5ysMd9VKw7adgK4QGHyz+TBt5CeR4gZB3M6LGwaKbvsjW+ri6W9AaN8tp987qyBLNihPUS7pnRdXlbJz/jTuDWieHH05nJwkwMOP5cyalyCPc9pX1mtjLnbVP1vgz6Ek4r4TlHkBN8TF9H0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=YWJY8TYi; arc=none smtp.client-ip=198.47.23.235
+	 MIME-Version:Content-Type; b=GYlE9IKTxFp/v/RHKukmIaoxNv2u/tkFfdX+RhvX/TLb++xKZwvH1WKplcfmFjVAGQ4jpQe3gKMqvCeOWKPQrvjjMKsulyRuIif65k8ztjqFOs/p1jXGKQDFMun0Vb912CYhpo9iPQv/yM0rSYqATbqH9Uin7PRw4am22iKONwI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=NSQ99gxV; arc=none smtp.client-ip=198.47.19.246
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="YWJY8TYi"
-Received: from lelv0265.itg.ti.com ([10.180.67.224])
-	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR3KC984374
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="NSQ99gxV"
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR2Tr1032955
 	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 7 Apr 2025 17:27:03 -0500
+	Mon, 7 Apr 2025 17:27:02 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1744064823;
-	bh=ZzA8TVtzp+E7ibh8aZ6+b+ehe2yA3To0p+8jBVMjF2g=;
+	s=ti-com-17Q1; t=1744064822;
+	bh=YqPz2JfZvQwqwnoxsKSQiaQzed7EN3WPHYpwbOPCQEE=;
 	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=YWJY8TYimEExP/ZzSBc3YwmcZqtfZp/2bDxPpWsDJP2MaRr/5OBpP8uc1gIl/RFGk
-	 qJgYYoA4ZeY+IUOYeqBd8S6sgOX2oBF1XEyq7hoTpVnE3clMs23i5BTBe2UZd+D2Zm
-	 cUtD9ZSd2mPtFaB8zgnvxb8YE00L/5XCgN9n4e1g=
-Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
-	by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR3Xo026292
+	b=NSQ99gxVU1lCWYR+IbnjitnuPudRqnA5Y2y2UVoEjROqBtnCd/5L6lAtccAZTJqU8
+	 mX9Hpsv5vM76fuPY4a0gHMpuKfd8SahcEmqrEdJkzQmuVw7a7sKchqZi1R+YnUQVOy
+	 eBT0vrexkjEdLWOe98D6Fk+xh+bgxsWdT9/rRiBM=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 537MR2Mh084617
 	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Mon, 7 Apr 2025 17:27:03 -0500
-Received: from DFLE108.ent.ti.com (10.64.6.29) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+	Mon, 7 Apr 2025 17:27:02 -0500
+Received: from DLEE104.ent.ti.com (157.170.170.34) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 7
  Apr 2025 17:27:02 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE108.ent.ti.com
- (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE104.ent.ti.com
+ (157.170.170.34) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
  Frontend Transport; Mon, 7 Apr 2025 17:27:02 -0500
 Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 537MR229073249;
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 537MR22A073249;
 	Mon, 7 Apr 2025 17:27:02 -0500
 From: Judith Mendez <jm@ti.com>
 To: Adrian Hunter <adrian.hunter@intel.com>,
@@ -49,9 +49,9 @@ To: Adrian Hunter <adrian.hunter@intel.com>,
 CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         Josua Mayer
 	<josua@solid-run.com>, Moteen Shah <m-shah@ti.com>
-Subject: [PATCH 1/2] PENDING: mmc: sdhci*: Add set_hs_ena to sdhci_ops
-Date: Mon, 7 Apr 2025 17:27:01 -0500
-Message-ID: <20250407222702.2199047-2-jm@ti.com>
+Subject: [PATCH 2/2] mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch
+Date: Mon, 7 Apr 2025 17:27:02 -0500
+Message-ID: <20250407222702.2199047-3-jm@ti.com>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <20250407222702.2199047-1-jm@ti.com>
 References: <20250407222702.2199047-1-jm@ti.com>
@@ -65,184 +65,105 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-This patch adds set_hs_ena call to sdhci_ops so that host
-controller drivers have the option to implement a custom
-callback for SDHCI_CTRL_HISPD control.
+The sdhci_start_signal_voltage_switch function sets
+V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
+V1P8_SIGNAL_ENA determines whether to launch cmd/data on neg
+edge (half cycle timing) or pos edge (full cycle timing) of
+clock.
 
-On TI devices (for HS modes and legacy mode), timing was closed on
-half cycle timing. If any of HIGH_SPEED_ENA, UHS_MODE_SELECT, or
-V1P8_SIGNAL_ENA is set for these modes, host controller switches to
-full cycle timing which may cause read/write failures and/or cqe error
-logs.
+The sequence is to switch to 1.8 IO voltage, set V1P8_SIGNAL_ENA,
+change bus width, then update HIGH_SPEED_ENA & UHS_MODE_SELECT.
 
-So add set_hs_ena() to sdhci_ops so each host controller driver
-can implement their own .set_hs_ena callback.
-
-Also add sdhci_am654_set_hs_ena to sdhci_am654 driver and only set
-HIGH_SPEED_ENA, for modes > MMC_TIMING_SD_HS.
+During bus width change is when eMMC failures are seen with
+Kingston eMMC. So, do not set V1P8_SIGNAL_ENA by default.
+V1P8_SIGNAL_ENA is anyways optional for eMMC and only affects
+timing on TI devices. For switching to DDR52, HS200, or HS400,
+we should rely on HIGH_SPEED_ENA, to switch to full cycle
+timing after the bus width is changed.
 
 Signed-off-by: Judith Mendez <jm@ti.com>
 ---
- drivers/mmc/host/sdhci.c       | 55 +++++++++++++++++++++-------------
- drivers/mmc/host/sdhci.h       |  2 ++
- drivers/mmc/host/sdhci_am654.c | 16 ++++++++++
- 3 files changed, 53 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci_am654.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 5f78be7ae16d7..3a878cf0c59b9 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2355,6 +2355,27 @@ static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_i
- 	       (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
- }
- 
-+void sdhci_set_hs_ena(struct sdhci_host *host, unsigned char timing)
-+{
-+	u8 ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+
-+	if (timing == MMC_TIMING_SD_HS ||
-+	    timing == MMC_TIMING_MMC_HS ||
-+	    timing == MMC_TIMING_MMC_HS400 ||
-+	    timing == MMC_TIMING_MMC_HS200 ||
-+	    timing == MMC_TIMING_MMC_DDR52 ||
-+	    timing == MMC_TIMING_UHS_SDR50 ||
-+	    timing == MMC_TIMING_UHS_SDR104 ||
-+	    timing == MMC_TIMING_UHS_DDR50 ||
-+	    timing == MMC_TIMING_UHS_SDR25)
-+		ctrl |= SDHCI_CTRL_HISPD;
-+	else
-+		ctrl &= ~SDHCI_CTRL_HISPD;
-+
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_set_hs_ena);
-+
- void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -2436,23 +2457,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	    !sdhci_presetable_values_change(host, ios))
- 		return;
- 
--	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--
--	if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
--		if (ios->timing == MMC_TIMING_SD_HS ||
--		     ios->timing == MMC_TIMING_MMC_HS ||
--		     ios->timing == MMC_TIMING_MMC_HS400 ||
--		     ios->timing == MMC_TIMING_MMC_HS200 ||
--		     ios->timing == MMC_TIMING_MMC_DDR52 ||
--		     ios->timing == MMC_TIMING_UHS_SDR50 ||
--		     ios->timing == MMC_TIMING_UHS_SDR104 ||
--		     ios->timing == MMC_TIMING_UHS_DDR50 ||
--		     ios->timing == MMC_TIMING_UHS_SDR25)
--			ctrl |= SDHCI_CTRL_HISPD;
--		else
--			ctrl &= ~SDHCI_CTRL_HISPD;
--	}
--
- 	if (host->version >= SDHCI_SPEC_300) {
- 		u16 clk, ctrl_2;
- 
-@@ -2468,7 +2472,12 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
- 		}
- 
--		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+		if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
-+			if (host->ops->set_hs_ena)
-+				host->ops->set_hs_ena(host, ios->timing);
-+			else
-+				sdhci_set_hs_ena(host, ios->timing);
-+		}
- 
- 		if (!host->preset_enabled) {
- 			/*
-@@ -2510,8 +2519,14 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 		/* Re-enable SD Clock */
- 		host->ops->set_clock(host, host->clock);
--	} else
--		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	} else {
-+		if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
-+			if (host->ops->set_hs_ena)
-+				host->ops->set_hs_ena(host, ios->timing);
-+			else
-+				sdhci_set_hs_ena(host, ios->timing);
-+		}
-+	}
- }
- EXPORT_SYMBOL_GPL(sdhci_set_ios);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index cd0e35a805427..ebecb49792ca1 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -704,6 +704,7 @@ struct sdhci_ops {
- 	void		(*set_timeout)(struct sdhci_host *host,
- 				       struct mmc_command *cmd);
- 	void		(*set_bus_width)(struct sdhci_host *host, int width);
-+	void		(*set_hs_ena)(struct sdhci_host *host, unsigned char timing);
- 	void (*platform_send_init_74_clocks)(struct sdhci_host *host,
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
-@@ -857,6 +858,7 @@ int sdhci_get_ro(struct mmc_host *mmc);
- void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
- int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
- void sdhci_set_bus_width(struct sdhci_host *host, int width);
-+void sdhci_set_hs_ena(struct sdhci_host *host, unsigned char timing);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
- bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
- void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
 diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index f75c31815ab00..67a64de4972c9 100644
+index 67a64de4972c9..4e1156a2f1b8e 100644
 --- a/drivers/mmc/host/sdhci_am654.c
 +++ b/drivers/mmc/host/sdhci_am654.c
-@@ -429,6 +429,19 @@ static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return 0;
+@@ -87,6 +87,7 @@
+ #define CLOCK_TOO_SLOW_HZ	50000000
+ #define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
+ #define RETRY_TUNING_MAX	10
++#define BUS_WIDTH_8		8
+ 
+ /* Command Queue Host Controller Interface Base address */
+ #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+@@ -155,6 +156,7 @@ struct sdhci_am654_data {
+ 	u32 tuning_loop;
+ 
+ #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
++#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
+ };
+ 
+ struct window {
+@@ -356,6 +358,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
+ 	sdhci_set_clock(host, clock);
  }
  
-+static void sdhci_am654_set_hs_ena(struct sdhci_host *host, unsigned char timing)
++static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
 +{
-+	u8 ctrl = 0;
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
++	int ret;
 +
-+	if (timing > MMC_TIMING_SD_HS) {
-+		sdhci_set_hs_ena(host, timing);
-+	} else {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl &= ~SDHCI_CTRL_HISPD;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
++	    ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++		if (!IS_ERR(mmc->supply.vqmmc)) {
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
++			if (ret < 0) {
++				pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
++				       mmc_hostname(mmc));
++				return -EIO;
++			}
++		}
++		return 0;
 +	}
++
++	return sdhci_start_signal_voltage_switch(mmc, ios);
 +}
 +
- static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+ static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
  {
- 	int cmd_error = 0;
-@@ -578,6 +591,7 @@ static const struct sdhci_ops sdhci_am654_ops = {
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.set_bus_width = sdhci_set_bus_width,
-+	.set_hs_ena = sdhci_am654_set_hs_ena,
- 	.set_power = sdhci_set_power_and_bus_voltage,
- 	.set_clock = sdhci_am654_set_clock,
- 	.write_b = sdhci_am654_write_b,
-@@ -608,6 +622,7 @@ static const struct sdhci_ops sdhci_j721e_8bit_ops = {
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.set_bus_width = sdhci_set_bus_width,
-+	.set_hs_ena = sdhci_am654_set_hs_ena,
- 	.set_power = sdhci_set_power_and_bus_voltage,
- 	.set_clock = sdhci_am654_set_clock,
- 	.write_b = sdhci_am654_write_b,
-@@ -632,6 +647,7 @@ static const struct sdhci_ops sdhci_j721e_4bit_ops = {
- 	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.set_bus_width = sdhci_set_bus_width,
-+	.set_hs_ena = sdhci_am654_set_hs_ena,
- 	.set_power = sdhci_set_power_and_bus_voltage,
- 	.set_clock = sdhci_j721e_4bit_set_clock,
- 	.write_b = sdhci_am654_write_b,
+ 	writeb(val, host->ioaddr + reg);
+@@ -819,6 +844,7 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 	struct device *dev = &pdev->dev;
+ 	int drv_strength;
+ 	int ret;
++	u32 bus_width;
+ 
+ 	if (sdhci_am654->flags & DLL_PRESENT) {
+ 		ret = device_property_read_u32(dev, "ti,trm-icp",
+@@ -860,6 +886,11 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+ 	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
+ 		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
+ 
++	/* Suppress V1P8_SIGNAL_ENA for eMMC */
++	device_property_read_u32(dev, "bus-width", &bus_width);
++	if (bus_width == BUS_WIDTH_8)
++		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
++
+ 	sdhci_get_of_property(pdev);
+ 
+ 	return 0;
+@@ -956,6 +987,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 		goto err_pltfm_free;
+ 	}
+ 
++	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
+ 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+ 
+ 	pm_runtime_get_noresume(dev);
 -- 
 2.49.0
 
