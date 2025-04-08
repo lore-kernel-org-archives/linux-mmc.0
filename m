@@ -1,111 +1,124 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E4A9926AAAB
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Apr 2025 12:41:05 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C696278170
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Apr 2025 12:54:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744116068; cv=none; b=qtujpGKpAmOUTZ5oZ4OyPt/Z10zfHxtWH2zAurr4jGmxg0D2q27faMBItc76YT/44HJYZLPlz2paGnP4SLYacz06re9XrYa+R250d+yf/p30UD4jhDajGHG1ZMRcl4HiKA2b8friFtDWChsL+G1PaflSSBxYcHnZXBCOJxdp6+s=
+	t=1744116901; cv=none; b=tyQqV3bkLxWsp6A5H6ZC8Nb0PQNmiNe096YcjoW/Qj4RGKgnrZErkhsNGVqxk0weW3S6qWx/17tGWAR/qCwjs2FL5qbrHT1aKrgcDnHv41WsIoIs/RoN8A7dVedRogrh7mwfYfarlNCgxelqz9IVTC+YEN/6AFMRghL0grDB2I8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744116068; c=relaxed/simple;
-	bh=qLDMITlHkmBC9vQ1ZL9QNBFWIiCZvfOaQm2ASCOB0mU=;
+	s=arc-20240116; t=1744116901; c=relaxed/simple;
+	bh=r4MPn5KxjvOr4Rq45HUgATPOr8OD0EgPiS0EyQ/17RI=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Content-Type; b=LbQpN2KvTBdRKinujiJU+GlQZZcbjDIANQWFtcwiYPoE7aE2GbaEk+V25boquW1tdf4v0HpR5HBufW/DgJUmVIyWIm8rNQ7x/4zM/7ozr5kueLGos9l/2pvroUEBTXLxaBV9GhRn7Z4sERZ+3IWYz74lgWZl5aBoQ4dCciHQn2A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mro5MDSX; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=B4DRYb+ZscKGrmUFkyuzKReNiqifAqcbWX9EijYwjnxqi6/v5EklWb7Q4Udik6j8dXWZ+pFXVAy0fp0FFm5RJ/O8WTXxSQxPfTLB08Mg7vLpeFzOD/l3KhJ3D7DCDmvDDaJ0g1Gn4c/eWjrdcN2xudTxeK9lNthinPw1+YScrwk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XlmfdtPt; arc=none smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mro5MDSX"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-6ef7c9e9592so52187827b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Apr 2025 05:41:05 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XlmfdtPt"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-7042ac0f4d6so13045887b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Apr 2025 05:54:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1744116065; x=1744720865; darn=vger.kernel.org;
-        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=h31NWp5NG78cqvJiAi8jWfDqzeGt0I+RYA/Hp3KCiI4=;
-        b=mro5MDSXuxl+rI7To12fGqD9IiM/keuTFYIaWFjgLvnG2Jg6pDdRh8WcqsXF/O8vqa
-         JUkA2qC8vtbYpxA/VvXfvrdk5N1+SH6Q/wyXxmehvCNl/esLDj66lBRIRPWg99NlpLBN
-         OMfzZ/zdyJvGau5iJUtOoNN8sI3MC6lfqpWLTDYMQAnntEPeOUW9BJWNQHPBBjbLuepl
-         /QXr33wM8dRPceI2uG1NZssBGSF0swj7W8Msy4hME5mrvm2MRNH1Y+vIEBt3FdgemTWM
-         5rd+LzFBpfwwTNLciFGl7aR6H8tt9ZsvbYXqrrD/IcmzXDrhpjDJqmgEosxrQaPSUANf
-         0qxQ==
+        d=linaro.org; s=google; t=1744116898; x=1744721698; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=yk0jmNlqMc02tYB39edyin8JE2b7A3WmTNlfw1td2zw=;
+        b=XlmfdtPteNtmxLSaAFDZCgyC0gXBE4Q6LOV+ivJ5FKCJZuURNljXMOOq26YNmJliFy
+         Rszwth1hXnyLQx4yb9DhsErl4BweF5LI0V2BFbMpZTFiNjt2uY7YoxLfubbn9Wbpt+zg
+         hI1KGrIWi6VqA739abL87CzgvsNKJ1nDbOTMC9E2k7uKW41zkimJCDDHCodwP+zxROi2
+         hmg5lobOjZCjRQxMxGHD0qthbkQLznjRwWR1aIzkuNsCXygex5jezvYjQb5fDcuibkAF
+         uwPJVU5v0TafnLjbSk/C9IGm0JVbGdidheF3z6TF27NeuNNqHqdLQN1Bx1+kbi/gKOCY
+         L8lg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744116065; x=1744720865;
-        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=h31NWp5NG78cqvJiAi8jWfDqzeGt0I+RYA/Hp3KCiI4=;
-        b=SKGrjiNW5l2ztC1DgHADImGaUR+DJ6mA4EORvi2ZuIyAa/qBvFO1D2qPDtInT6A/zq
-         kmXLErZoK7g9TmNfTJ4L8X1WnqXHGZT4lgZpO/6yVdaHnHh31d4PQMy6T1r42/nM/Cx/
-         gM+t9Q6f8yaul2EgkSNdEXzjl1sPaXC8EFcs1jEafUfrAT6UpJZU5Fh5M/lIQAOHDZqc
-         VndFRueVfqUwVVe0mhIFV9clXulO/dDdh3l8tqNIqA5Pj4W+Mejr8qOjpR9LOqQ2jXOB
-         vuzygEM4ehu8OMDdMVXA+pencXUhG+FTHsoMsf4LUKmeP9KektStIcFAvdHeFKCUKU7c
-         WmUw==
-X-Forwarded-Encrypted: i=1; AJvYcCXztE4l4F3skuF53PxSDhRbBLereDCMN6USQxV+CDqCCeLMo+rIJvrBylYFskQNNm7PxKrBkt4l7bA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzsjgsa99akmkSjgk1MWiBngAJGlUC5qMMf7R/lMi6ccKL+aNpq
-	yFiMaffjaWSV8HXmBoIdhg6WmxgL3CLNpouAbFWLzXB2L6i4ykgyCvoc1nRhVVvVqCHUZyhBCPh
-	eMqPGYVSPwScu0d9xd+ccJ/mtT9AYCBiSLHxmtQ==
-X-Gm-Gg: ASbGnctuHXAgmhGlDZ5PbDFH4JU3YGPHOLscrE+7k4s26B2NKz92yacsuCxdIT+gaAE
-	7t8x4Coe49fusABYN6AwWBoP9WlZ8vV082FlBSTYiCAZNETycjy6yKe6AzruQ7pud7O6qw8CBGa
-	Kd5fxJqUgSRZrMAEDv3Dt3IA4FY/A=
-X-Google-Smtp-Source: AGHT+IFi2YP0XvF5bDF9Jq40DyUHv5Ek50fAkz+eQJ5TMfPtzso0IeWqwOf8skCDPmoe9EJ6s/zbwELjZkMpg6aQGmQ=
-X-Received: by 2002:a05:690c:b12:b0:703:b8f4:5b07 with SMTP id
- 00721157ae682-703e15fc48fmr281518977b3.26.1744116064907; Tue, 08 Apr 2025
- 05:41:04 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1744116898; x=1744721698;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yk0jmNlqMc02tYB39edyin8JE2b7A3WmTNlfw1td2zw=;
+        b=d/ZTwFQth6uRrKRQgsISHrtl25nDSNpxS5HmMOlqISncBs3qVoRe8bfqh5rePGbYV7
+         U/2uCvOoPzFgnJPFP73wsUNiKvmgNpknW85dUCtCHjyNbcks5BKTeBPoyrBD7tzGpjBc
+         gLpvF8RRKvzBpmFNt7ROxqROvCzyemqY3pLePVH3WtT4FHP6KoZfRvb1FBsqOLmJmobH
+         dsGYNN5uWuGk6sGeOMiwI+kTrDvnwmi6ocLpSU6IITCtqOLfUDGJ3wcZP3Vc+D387NlO
+         8EYfWSWbj0elR7TSj1yEu4zdTwnKZbLktaIBvPCEwUMToNPjgwMf6OfYgNdCj+3dglXN
+         aO9w==
+X-Forwarded-Encrypted: i=1; AJvYcCXLvSVJgG59HHjtKtW+OdviEIz+1pNRuxQwa30rYi3dPJIajl29LW30hYc69q+SQNCwu9lnxoDyFfY=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwkgcgC/M1qwZzrMYOzp4tZS6XUtcj4i785dVzkrB3COqaaAVVv
+	6xnG040xzHnA5jmjQ6q29H3E3uUIYlEfAuLPUEovgdw/HT8DRaw/A8P/POnx64B87kRfINmvW/g
+	KRmRyvX5/1daAm+34m5pCOVcslKZ0FAiGPeGhsQ==
+X-Gm-Gg: ASbGncuIlY3k/KK5QSpdU9cGNM4Xp1L+zRP4IhPOWID4IYKBxVENT+Cx0LsNvDm2uDl
+	VqVuqfA9TWkqsK2hbLgcTDz3kec82vrncp6HL8ov0Tie5xCXF4Oasno8/DyxUnnxdnjLurJCYBq
+	QdD4DkSlSO+TlrW1imFHUBTGyx2VM=
+X-Google-Smtp-Source: AGHT+IHTxHBd425yatfvjSy7aWzx/QfcCVYH5495z1ua7eNtDp8zPmcN+TAK9mP9YSF4OzEsmd0vPSFHANuJwlrpgWw=
+X-Received: by 2002:a05:690c:a84:b0:6f9:9d40:35cb with SMTP id
+ 00721157ae682-703f41267b0mr224639557b3.6.1744116898053; Tue, 08 Apr 2025
+ 05:54:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250407152759.25160-1-ulf.hansson@linaro.org>
- <20250407152759.25160-3-ulf.hansson@linaro.org> <Z_TZxXORT8H99qv4@shikoro>
-In-Reply-To: <Z_TZxXORT8H99qv4@shikoro>
+References: <20250404231533.174419-1-ebiggers@kernel.org>
+In-Reply-To: <20250404231533.174419-1-ebiggers@kernel.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 8 Apr 2025 14:40:29 +0200
-X-Gm-Features: ATxdqUFxgJAtDDVpsnTI2jHXWceVL4cabvWXC0qH_HhX-upbo0zNv7dP0b9TEt0
-Message-ID: <CAPDyKFoOfNWa6b0jF0-a-imKqdDJQrdJe65OaOj3D0upmS7VXw@mail.gmail.com>
-Subject: Re: [PATCH v2 2/5] mmc: core: Further avoid re-storing power to the
- eMMC before a shutdown
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Avri Altman <Avri.Altman@sandisk.com>, 
-	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date: Tue, 8 Apr 2025 14:54:21 +0200
+X-Gm-Features: ATxdqUF-OlOdEIxCE1qPuhQhC_jv3bjWDPwF3BCWGXm2DWhZIQfUgr8SjCy-Un8
+Message-ID: <CAPDyKFqmgUUWOmH-r20VSfNZW7KC4RX4BTobGHf5F3uuLZtj0A@mail.gmail.com>
+Subject: Re: [PATCH v13 0/3] Support for wrapped inline encryption keys on
+ Qualcomm SoCs
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: linux-scsi@vger.kernel.org, linux-block@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-fscrypt@vger.kernel.org, 
+	Bartosz Golaszewski <brgl@bgdev.pl>, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
+	Bjorn Andersson <andersson@kernel.org>, Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>, 
+	Jens Axboe <axboe@kernel.dk>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 8 Apr 2025 at 10:09, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Sat, 5 Apr 2025 at 01:16, Eric Biggers <ebiggers@kernel.org> wrote:
 >
+> Add support for hardware-wrapped inline encryption keys to the Qualcomm
+> ICE (Inline Crypto Engine) and UFS (Universal Flash Storage) drivers.
 >
-> > @@ -2187,11 +2198,12 @@ static int mmc_shutdown(struct mmc_host *host)
-> >       int err = 0;
-> >
-> >       /*
-> > -      * In a specific case for poweroff notify, we need to resume the card
-> > -      * before we can shutdown it properly.
-> > +      * If the card remains suspended at this point and it was done by using
-> > +      * the sleep-cmd (CMD5), we may need to re-initialize it first, to allow
-> > +      * us to send the preferred poweroff-notification cmd at shutdown.
-> >        */
-> >       if (mmc_can_poweroff_notify(host->card) &&
-> > -             !(host->caps2 & MMC_CAP2_FULL_PWR_CYCLE))
-> > +         !mmc_host_can_poweroff_notify(host, true))
+> I'd like these patches to be taken through the scsi tree for 6.16.
+> But the Qualcomm / msm tree would be okay too if that is preferred.
 >
-> Ooookay, I think I got this logic now. I think it makes sense to make it
-> more explicit in the comment, though:
+> The block layer framework for this feature was merged in 6.15; refer to
+> the "Hardware-wrapped keys" section of
+> Documentation/block/inline-encryption.rst.  This patchset wires it up
+> for the newer Qualcomm SoCs, such as SM8650, which have a HWKM (Hardware
+> Key Manager) and support the SCM calls needed to easily use it.
 >
-> "This is then the case when the card is able to handle poweroff
-> notifications in general but the host could not initiate those for
-> suspend."
+> Tested on the SM8650 HDK with xfstests, specifically generic/368 and
+> generic/369, in combination with the required fscrypt patch
+> https://lore.kernel.org/r/20250404225859.172344-1-ebiggers@kernel.org
+> which I plan to apply separately.
 >
-> Something like this?
+> Changed in v13:
+>    - Rebased onto latest upstream
+>    - Resent just the remaining driver patches
+>
+> For changes in v12 and earlier, see
+> https://lore.kernel.org/r/20250210202336.349924-1-ebiggers@kernel.org
+>
+> Eric Biggers (2):
+>   soc: qcom: ice: make qcom_ice_program_key() take struct blk_crypto_key
+>   ufs: qcom: add support for wrapped keys
+>
+> Gaurav Kashyap (1):
+>   soc: qcom: ice: add HWKM support to the ICE driver
+>
+>  drivers/mmc/host/sdhci-msm.c |  16 +-
+>  drivers/soc/qcom/ice.c       | 350 ++++++++++++++++++++++++++++++++---
+>  drivers/ufs/host/ufs-qcom.c  |  57 ++++--
+>  include/soc/qcom/ice.h       |  34 ++--
+>  4 files changed, 396 insertions(+), 61 deletions(-)
+>
 
-Well, in my opinion I think this would become a bit too much comments
-in the code.
+For the series and MMC parts:
 
-The rather long function-names "mmc_can_poweroff_notify" (that will
-change to mmc_card_can_poweroff_notify with your series) and
-"mmc_host_can_poweroff_notify" are rather self-explanatory, don't you
-think?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
 
 Kind regards
 Uffe
