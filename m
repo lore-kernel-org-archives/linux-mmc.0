@@ -1,115 +1,118 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7422E265637
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 13:14:26 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 10B132676C0
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 14:46:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744204468; cv=none; b=FPJHEXLbrsS1njBATjxYL2tRy8IPIz6Ko9zz+GVMuoi7fdCKeErGYhP60d+5nm0V/bAc7mFjxUyphwanQnxIpBz4wcvisSadh6la06Jp5bLttiA+iev9TdL8pFH11wxwb6r77BkvMvtttnr3QdweHeKsYgizCLq2gVw3w/jJbCw=
+	t=1744210022; cv=none; b=PzCBVC9GEzlBQDUekC/HItfhrIRxgq7MiuoVICmJ6lgN4Jt1o+oOlSgGlWcb/LbgNqlA0YhK0KCdV0emwkWAQH3hw7sgieB//kIyCt6/9+LIssx6qyWvzJ/VFTzQ1HkRPXQbC4X3oEkVaYzCzKYsH4ne9l4aS6RqNHpwlnk+3mY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744204468; c=relaxed/simple;
-	bh=7zbFeCLuI+K99uAK3B6Tbmrqzoz0Zborq7yQnLiljzs=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=JoU9owu4iu7XaNaU0mpLEztPtygbLjEMu2AlZ+eGlzV3TP+TdmT9XApUJfPWnQ2h6drJ9PG51FWhtrIW8Bqe7/pkH/YH53ce60YPMviH7ctbjF9V2q51EicwI46q7lBxqmAtkU2dYjp1QWswiUXgtoqkjnk5ghVjm4LOkboLZO4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rmNhFEZK; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1744210022; c=relaxed/simple;
+	bh=7IE7CzLlGIEDeDzFBbeZ7na5KMhV6xKbJ1Xr3DGJmvI=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=J7l+L8TfO9pGlIoravmwvLMNxFCeF2B93uuBS3R26mZq6wDoqoiWL9WoMsLxMsvDygwAPelxgmm2r83abaLLk6yuVwhVkuQ2f06tFrbCgQuqfkdqbhcQvJZiKFvaAD2BK3c9yua9/q4shxWBSfX0mudUuUa/F8yLUQsf5biDGK8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=GoEoS2jW; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rmNhFEZK"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-6fead015247so61286487b3.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2025 06:14:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1744204465; x=1744809265; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nZVX5PQPrfquBJMxVk5gyHF9PFmvV5mvI058XbwmWQ0=;
-        b=rmNhFEZK9TNfxgaKI861YjADyfu8zsHpCCnLswuweMje3foKiL9ac30+Q66ClekgH6
-         VOBaXnLOsiK5opGK64pFcZ7PsQfhkM+2F/8VdjFHKkfDe+YZl/mueG82d38VhHx97y/d
-         0LtGPLCV6XKrTIoOEQXyIFJR1/Kd/JK2FJ+IHUdAFZB+fK90QSsHmtAuse9cmBROTVuE
-         SSancx8yzCIMjiCtMJTUdyi/bqamxXAIh8ygxj6eDPJg7F29+nfU7gaLhNn8cIlBuD1h
-         g2b4p60EwMfJLoBdqO9suVUSLdnXJUuoY1LA6Y0PwoVtJV1DC0ex984ANDXvMrXp4k6a
-         KpEA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744204465; x=1744809265;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nZVX5PQPrfquBJMxVk5gyHF9PFmvV5mvI058XbwmWQ0=;
-        b=FukuwSkGaFGCTkyqpnMiVobQJXny6mujK+ek9iIAIO56mq/2c+6MQ6laLj2c3hXIr7
-         vTpms1nQwsYIJhyWUdd7iRBICoLtEf4TZYTVAQglH4R5HY6oz4gGG/D6kXAAPU+x8hoX
-         rRnQImKjTWtd0ZM1AzeliF8qTSJ1mzuKlo3B5YEJrhRNZK+ePB57nTcJZrqoFhsZXhDt
-         3YJYi7VfLBMxxNVWbTC1ESQ16JMvEShZqP+Z+0P8KzjY8jlA1qmx6gqCXAllFU0b84ay
-         4yyIXwApY6wmliUeiqsY8XZHz5uU2+DcSOBQwEw9zb4T68KfwBhmZEqcXNDdfVYaKlry
-         KLlw==
-X-Forwarded-Encrypted: i=1; AJvYcCXNGpyf8gBLJnNAfA3UErH/joStjGPCfFHzlzz3apF99z0xYGATaFm0JRR7AVywY3+SozV8wbCgByY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy2Tx+KarDeHyCWO19s3serQ6sc097i+qmZAorSQdMmNDnqtu8Q
-	VitRLM4PO25Jd9ilzdJacmfUV0t2ySdTmL7qo9wmuQAtyH8Loi7ZxkpyGQIKzfa1i6gxZ7z5aul
-	uh8hh6BupI5qFgUc3Cpl58QfgbM/V5rZwapmS4A==
-X-Gm-Gg: ASbGncuAwEcZgjEY1joW+xLq4QcVdwKWsdbS1aNKJ24AFg/SFyT0PCaABpvM0qM95JT
-	eVPapW6/49RlI5UqL0H2dxcQQOLAfu1+Qpc+Sw3UkM4XnPLYFbhLb9GHOE3Kz7JwPrR4TTRloxc
-	gAfuXpqZ0WQ17h5ppbwkuyC+A=
-X-Google-Smtp-Source: AGHT+IHbawswjfdH3sqFi36CBNn1RNgtkyGSJ/NGOXxL4dZhfzW2bxsKoLqgb75/B41CMWmJKQ4D2DTNItFMQGhMGyk=
-X-Received: by 2002:a05:690c:4482:b0:6f7:55a2:4cd8 with SMTP id
- 00721157ae682-7053ad41c01mr37577897b3.5.1744204465406; Wed, 09 Apr 2025
- 06:14:25 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="GoEoS2jW"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=SCOp
+	cFk7gHQHs1OFxzg4QWFbV6H3YTRCYuLWl97bTiE=; b=GoEoS2jWAbTXXMf7hE/L
+	SViTjzR0do75YYGNNKfrf6BaUhDpi3MAfSJrQgJM/gxBZXbkw93NavIUDBTOa5gH
+	QdncMgGkFCPxh52yNqLV2RmqCfDLQs0ZU7EwU0lzuXN/unTYSWycu3hT9lhlwUfZ
+	YYCaHiAVLDO4JqdtQO/xNPavKAqMH+cWJBbcQwHFpnEBeBiVm4qttNsTvJKDrx5y
+	K2fwzPRpAZ7ccFSv4+aiGG4zavhMJP6ak2zJlXXv1QdP7LsUnJQm7pZvJO00F7CM
+	rDyk/9gk/gfKfMUh+s9shbPfcUCouPWWqBNIptIWSEDpk6gXpiNPBVpitG1bb0gw
+	iQ==
+Received: (qmail 499862 invoked from network); 9 Apr 2025 16:46:55 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Apr 2025 16:46:55 +0200
+X-UD-Smtp-Session: l3s3148p1@rg9ailky2oogAwDPXyfYALbiJ46yNPq3
+Date: Wed, 9 Apr 2025 16:46:54 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Avri Altman <Avri.Altman@sandisk.com>,
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 2/5] mmc: core: Further avoid re-storing power to the
+ eMMC before a shutdown
+Message-ID: <Z_aIXqdWh8n-4LKo@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	Avri Altman <Avri.Altman@sandisk.com>,
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20250407152759.25160-1-ulf.hansson@linaro.org>
+ <20250407152759.25160-3-ulf.hansson@linaro.org>
+ <Z_TZxXORT8H99qv4@shikoro>
+ <CAPDyKFoOfNWa6b0jF0-a-imKqdDJQrdJe65OaOj3D0upmS7VXw@mail.gmail.com>
+ <Z_U7ogPkzZY9IVBB@shikoro>
+ <CAPDyKFooWDpmfJoCFwjED_Utw6HppjAN5JjBL9vcZW1LsKeOFg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250401195751834zbm34YDvwPeQf7ooZBCdh@zte.com.cn>
-In-Reply-To: <20250401195751834zbm34YDvwPeQf7ooZBCdh@zte.com.cn>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Apr 2025 15:13:49 +0200
-X-Gm-Features: ATxdqUFC3YjMsK4_mQfKP9WcVyJ3UW9jxF0KfI-w6NTkkAFGErDieKR4c5JNlbQ
-Message-ID: <CAPDyKFouaoE67WtdnQvohT9VjqCVC6CeFaCg0WZDWnVF5G+YNg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: alcor: Use str_read_write() helper
-To: shao.mingyin@zte.com.cn
-Cc: yang.yang29@zte.com.cn, xu.xin16@zte.com.cn, ye.xingchen@zte.com.cn, 
-	feng.wei8@zte.com.cn, u.kleine-koenig@baylibre.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-
-On Tue, 1 Apr 2025 at 13:58, <shao.mingyin@zte.com.cn> wrote:
->
-> From: Feng Wei <feng.wei8@zte.com.cn>
->
-> Remove hard-coded strings by using the str_read_write() helper.
->
-> Signed-off-by: Feng Wei <feng.wei8@zte.com.cn>
-> Signed-off-by: Shao Mingyin <shao.mingyin@zte.com.cn>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="IVp1hCCYVUUOWp80"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFooWDpmfJoCFwjED_Utw6HppjAN5JjBL9vcZW1LsKeOFg@mail.gmail.com>
 
 
-> ---
->  drivers/mmc/host/alcor.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
-> index b6b6dd677ae5..24abd3a93da9 100644
-> --- a/drivers/mmc/host/alcor.c
-> +++ b/drivers/mmc/host/alcor.c
-> @@ -20,6 +20,7 @@
->  #include <linux/irq.h>
->  #include <linux/interrupt.h>
->  #include <linux/platform_device.h>
-> +#include <linux/string_choices.h>
->
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
-> @@ -208,7 +209,7 @@ static void alcor_trf_block_pio(struct alcor_sdmmc_host *host, bool read)
->         len = min(host->sg_miter.length, blksize);
->
->         dev_dbg(host->dev, "PIO, %s block size: 0x%zx\n",
-> -               read ? "read" : "write", blksize);
-> +               str_read_write(read), blksize);
->
->         host->sg_miter.consumed = len;
->         host->blocks--;
-> --
-> 2.25.1
+--IVp1hCCYVUUOWp80
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+
+> I understand what you are saying and I agree. However, the problem is
+> that your concern applies to a lot more code in the mmc core, but this
+> condition.
+
+We can easily agree on that :)
+
+> Don't get me wrong, I don't mind useful comments and good
+> documentation, but perhaps what we are really missing is a general mmc
+> documentation that describes how the core is working and in particular
+> the power-management  part of it.
+
+That would be the ideal solution, no doubt.
+
+> Unfortunately, I don't think I will have the bandwidth currently to
+> work on this.
+
+Same here. Plus, I don't have a complete understanding of it. Obtaining
+this understanding and then write some docs about my findings would be
+awesome, of course. But -EBUSY, too...
+
+> That said, I am going to apply the $subject patch as is - but feel
+
+I still think that having the comment is better than not having it, but
+I accept your decision and will still be happy that we finally solved
+the power-off-notification issue \o/
+
+
+--IVp1hCCYVUUOWp80
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmf2iFoACgkQFA3kzBSg
+Kbb9yA/+K5nHnWkfdYzIQRtvVmq8BjP0yiApA6X2179mDo/DKGGd3K926JlTWfo0
+92Oe5vl1ldv8qIx1BuAGaBUWM4GIjolvwZw8skqOqKccti+JxodH3n6NIlytKxl6
+P4lUJsBNIWiS8l1xshj2/J9/BpE0u0CfmtzcBy5NOCNLWVrOJ3kCLUhc2bmWCru9
+HjGe/1BhYmonusL5JB7NtU9xfB4G6q+qdJy163oNqxIuqJpMPEw0pyv4f2t7+HTs
+UnEAnUEJJgzrkaw35QDFO10FltBh3zZ4UrJ+g3KeG4OJUTw/Ffz3tfBw2bRPmcBf
+NJy/qzIIh0fJv0Oz+5C7VPgP0UZddacMjdVbeZeY7FfGr/jZ4asxvATm7uWnkTik
+fiITvolagnx7gpMMGDEyIjzzRpL0oAwHvdju/wkgaC4bYTNg/kXpCoGfauzBPLAb
+IXHlzWpLHfjiU8llW9igMnIn3yTQ7tocx/aw28BXD1Ep5pom0flcrzZWY2g+NtEW
+PFxigTjPYz8D1vWQ9Q6zudTEGO27rZ8YB6pgSjHWIxYgwaEzjVyW2qG4e/a80Wmr
+EyDUFGPQQA713O1sD9cG/yHbUUy2ibqWo7lwx9yJU3wTKVUjRcrryq+Fa/9axKR5
+L1Wd+YewW7QMD8NgKny9tZbY23sWYODovEywk4qsoCrEwp19f68=
+=pjtg
+-----END PGP SIGNATURE-----
+
+--IVp1hCCYVUUOWp80--
