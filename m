@@ -1,83 +1,84 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A4D6D266562
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 13:14:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7422E265637
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 13:14:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744204465; cv=none; b=F+p4aFykQ6puJGs8w+Xz4m6Z2u/CLKSlFd2XyL2uTjOHl4/76g23YJ7V4/wyi6aOyVuSG7Qnk+CIu7in4Yl7pOvIHBJwVQfrvrcxKoEB66FVNNTOQZjSh7hvWy+Q5+VvodhK90YxC23JTNpJ+giNU6XhLpT2/2ZU5AUY/qzpbgM=
+	t=1744204468; cv=none; b=FPJHEXLbrsS1njBATjxYL2tRy8IPIz6Ko9zz+GVMuoi7fdCKeErGYhP60d+5nm0V/bAc7mFjxUyphwanQnxIpBz4wcvisSadh6la06Jp5bLttiA+iev9TdL8pFH11wxwb6r77BkvMvtttnr3QdweHeKsYgizCLq2gVw3w/jJbCw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744204465; c=relaxed/simple;
-	bh=ySJvfaqcIjQusXoLi91ha5mTlR84r6YRHDDkPiChFbI=;
+	s=arc-20240116; t=1744204468; c=relaxed/simple;
+	bh=7zbFeCLuI+K99uAK3B6Tbmrqzoz0Zborq7yQnLiljzs=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mVUk25rWNlCPViI0jtEPZ/bVl3Cf91EszappQLnrr5e3YkbFCR4Pw/dBtzjjCbUZ7GrgObSJGpg6vYqR41mp/ii9T5IybNVGqi8XK5J0zy9gO6dJa3XAFgggTYeMLOcsKKDjPFCEBFVSaBMAIuNgAJnCtoA2b2GNNvQzHydV3YE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gu86Sccr; arc=none smtp.client-ip=209.85.128.178
+	 To:Cc:Content-Type; b=JoU9owu4iu7XaNaU0mpLEztPtygbLjEMu2AlZ+eGlzV3TP+TdmT9XApUJfPWnQ2h6drJ9PG51FWhtrIW8Bqe7/pkH/YH53ce60YPMviH7ctbjF9V2q51EicwI46q7lBxqmAtkU2dYjp1QWswiUXgtoqkjnk5ghVjm4LOkboLZO4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rmNhFEZK; arc=none smtp.client-ip=209.85.128.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gu86Sccr"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-6fee50bfea5so55897367b3.1
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2025 06:14:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rmNhFEZK"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-6fead015247so61286487b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2025 06:14:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1744204461; x=1744809261; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1744204465; x=1744809265; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=UvXD6Vit4/XQjMh5TPDqTHybFGmBm72KRNvjczpWe7Q=;
-        b=gu86SccrI2mowXYBUQ9vRdTFzp+jPCXJ0LvIHDye9QRh6X8Y3/w2IM7ZjC45p6vnS2
-         I1VHRGJ7lEYqb2oMINlJo3okQIppjBaPR+d85hSg+syW02zF3zHLYMGnrgHc129UohHg
-         pA2PFd+OxPLbU6i03KEjAHNOmWh5a6Nbve8aXRY5DgSuF1x5Lrp7fR/MX87cMAH79xZ3
-         dJYU5muk03TKFQmaW+oqy5nOUHKCVL5h6QYJuBN/B4KxOHS0lAvbV5oPcspfyqwFN7iu
-         M03Kr7XO3PujPxVHoSAGeNiRJ1MOi132ixv5P3Pfxx7OZZmH+cY+yWzUcFUMzbNrE3wS
-         bpHg==
+        bh=nZVX5PQPrfquBJMxVk5gyHF9PFmvV5mvI058XbwmWQ0=;
+        b=rmNhFEZK9TNfxgaKI861YjADyfu8zsHpCCnLswuweMje3foKiL9ac30+Q66ClekgH6
+         VOBaXnLOsiK5opGK64pFcZ7PsQfhkM+2F/8VdjFHKkfDe+YZl/mueG82d38VhHx97y/d
+         0LtGPLCV6XKrTIoOEQXyIFJR1/Kd/JK2FJ+IHUdAFZB+fK90QSsHmtAuse9cmBROTVuE
+         SSancx8yzCIMjiCtMJTUdyi/bqamxXAIh8ygxj6eDPJg7F29+nfU7gaLhNn8cIlBuD1h
+         g2b4p60EwMfJLoBdqO9suVUSLdnXJUuoY1LA6Y0PwoVtJV1DC0ex984ANDXvMrXp4k6a
+         KpEA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744204461; x=1744809261;
+        d=1e100.net; s=20230601; t=1744204465; x=1744809265;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=UvXD6Vit4/XQjMh5TPDqTHybFGmBm72KRNvjczpWe7Q=;
-        b=Q+h///7FPrIyv2mmOQPJjz8ihpxT93zSlx+CX3SsiC9fmNA8l4K9nU2DasY0+qaKEh
-         TeY3RuA8BcioU6yJVN1DbPQFaeymbV4mAZS6rXPVYdgum2eYHlJPBafSr3KVYVkUEQmq
-         u6lqXSmuLzkHZYjyRW6mQyFUTqg5eN2e2hnJI5SE4lb4TFF9n5VhPBuCJwRhpyCIBZhE
-         ca9vX/u2vtjhGDSE8i2Ol/H7tbRNti6620M1w4D8GbZ+Bcg+M9VELGifO4s1J1UP2rNO
-         /my+dExjjmQbuIhZQ/VykiK2uRGFpcgZDGUBVi60RRdgWUmYuEDcbGUCZdQ2TRFPXpd4
-         JyCA==
-X-Forwarded-Encrypted: i=1; AJvYcCVqsxlbi01o/NYHESGjNoxnD4tRN+f8x0iQDdveHOPO+xPnSK0ebCM89CH/X3XWadj/ZDP9z/QGQQc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyyzAKCSWFd5LiTalbADmooghKF4XjTipJBEodt+UZ4QsP/ULqS
-	85I4IFGy5uInGt+Asf3b0aQpqJsB8tqwo74FGXEKEBnq/SuuQBY1jX0wahTROBDczg4U3MEbASV
-	gEvyYtKnDnu2ggE37bDQUWPTWmcYbee5u2t8+pg==
-X-Gm-Gg: ASbGncuzAADvyiObwF73WwU+rwbNTA5+FUSEnCDGQT37cpcZT3AVpR/Jiwd69h7xQo7
-	PoiT/dfLTdeSRfE1dqGo4YYFpyuvyooqyOqbg6rHrEdBqz78Nf2wnMtiqq5dyLEU35dbH/O6fff
-	SkxE5maiBeIicq2ju1RmbrPiSFSfUcdlh3mw==
-X-Google-Smtp-Source: AGHT+IF0dYUcGFOQShsjgMB7MWZa3hGFQ5HoYrn3mxhacjMhN42yQdkHkcaUjnE7l38towq7w5aGVEUc5+fQUoqpduA=
-X-Received: by 2002:a05:690c:6608:b0:703:c38a:229e with SMTP id
- 00721157ae682-7053ae70ab2mr35235947b3.26.1744204461697; Wed, 09 Apr 2025
- 06:14:21 -0700 (PDT)
+        bh=nZVX5PQPrfquBJMxVk5gyHF9PFmvV5mvI058XbwmWQ0=;
+        b=FukuwSkGaFGCTkyqpnMiVobQJXny6mujK+ek9iIAIO56mq/2c+6MQ6laLj2c3hXIr7
+         vTpms1nQwsYIJhyWUdd7iRBICoLtEf4TZYTVAQglH4R5HY6oz4gGG/D6kXAAPU+x8hoX
+         rRnQImKjTWtd0ZM1AzeliF8qTSJ1mzuKlo3B5YEJrhRNZK+ePB57nTcJZrqoFhsZXhDt
+         3YJYi7VfLBMxxNVWbTC1ESQ16JMvEShZqP+Z+0P8KzjY8jlA1qmx6gqCXAllFU0b84ay
+         4yyIXwApY6wmliUeiqsY8XZHz5uU2+DcSOBQwEw9zb4T68KfwBhmZEqcXNDdfVYaKlry
+         KLlw==
+X-Forwarded-Encrypted: i=1; AJvYcCXNGpyf8gBLJnNAfA3UErH/joStjGPCfFHzlzz3apF99z0xYGATaFm0JRR7AVywY3+SozV8wbCgByY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy2Tx+KarDeHyCWO19s3serQ6sc097i+qmZAorSQdMmNDnqtu8Q
+	VitRLM4PO25Jd9ilzdJacmfUV0t2ySdTmL7qo9wmuQAtyH8Loi7ZxkpyGQIKzfa1i6gxZ7z5aul
+	uh8hh6BupI5qFgUc3Cpl58QfgbM/V5rZwapmS4A==
+X-Gm-Gg: ASbGncuAwEcZgjEY1joW+xLq4QcVdwKWsdbS1aNKJ24AFg/SFyT0PCaABpvM0qM95JT
+	eVPapW6/49RlI5UqL0H2dxcQQOLAfu1+Qpc+Sw3UkM4XnPLYFbhLb9GHOE3Kz7JwPrR4TTRloxc
+	gAfuXpqZ0WQ17h5ppbwkuyC+A=
+X-Google-Smtp-Source: AGHT+IHbawswjfdH3sqFi36CBNn1RNgtkyGSJ/NGOXxL4dZhfzW2bxsKoLqgb75/B41CMWmJKQ4D2DTNItFMQGhMGyk=
+X-Received: by 2002:a05:690c:4482:b0:6f7:55a2:4cd8 with SMTP id
+ 00721157ae682-7053ad41c01mr37577897b3.5.1744204465406; Wed, 09 Apr 2025
+ 06:14:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250407092144.35268-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20250407092144.35268-1-biju.das.jz@bp.renesas.com>
+References: <20250401195751834zbm34YDvwPeQf7ooZBCdh@zte.com.cn>
+In-Reply-To: <20250401195751834zbm34YDvwPeQf7ooZBCdh@zte.com.cn>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Apr 2025 15:13:46 +0200
-X-Gm-Features: ATxdqUEjkzeXMVIPgTN-2xEByLyfZHo9DXGRUHrwmDK1e9Gasj0zeSRmlDSOjOU
-Message-ID: <CAPDyKFq9rrGDMP7npb1m+dcszTKo9X14sdbwbSEdGRudJ-fUFg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: Use of_get_available_child_by_name()
-To: Biju Das <biju.das.jz@bp.renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, 
-	linux-renesas-soc@vger.kernel.org, 
-	Geert Uytterhoeven <geert+renesas@glider.be>, 
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>, Biju Das <biju.das.au@gmail.com>
+Date: Wed, 9 Apr 2025 15:13:49 +0200
+X-Gm-Features: ATxdqUFC3YjMsK4_mQfKP9WcVyJ3UW9jxF0KfI-w6NTkkAFGErDieKR4c5JNlbQ
+Message-ID: <CAPDyKFouaoE67WtdnQvohT9VjqCVC6CeFaCg0WZDWnVF5G+YNg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: alcor: Use str_read_write() helper
+To: shao.mingyin@zte.com.cn
+Cc: yang.yang29@zte.com.cn, xu.xin16@zte.com.cn, ye.xingchen@zte.com.cn, 
+	feng.wei8@zte.com.cn, u.kleine-koenig@baylibre.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Mon, 7 Apr 2025 at 11:21, Biju Das <biju.das.jz@bp.renesas.com> wrote:
+On Tue, 1 Apr 2025 at 13:58, <shao.mingyin@zte.com.cn> wrote:
 >
-> Use the helper of_get_available_child_by_name() to simplify
-> renesas_sdhi_probe().
+> From: Feng Wei <feng.wei8@zte.com.cn>
 >
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> Remove hard-coded strings by using the str_read_write() helper.
+>
+> Signed-off-by: Feng Wei <feng.wei8@zte.com.cn>
+> Signed-off-by: Shao Mingyin <shao.mingyin@zte.com.cn>
 
 Applied for next, thanks!
 
@@ -86,27 +87,29 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_core.c | 7 +------
->  1 file changed, 1 insertion(+), 6 deletions(-)
+>  drivers/mmc/host/alcor.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index fa6526be3638..e26e7995754e 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -1166,12 +1166,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->         if (ret)
->                 goto efree;
+> diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
+> index b6b6dd677ae5..24abd3a93da9 100644
+> --- a/drivers/mmc/host/alcor.c
+> +++ b/drivers/mmc/host/alcor.c
+> @@ -20,6 +20,7 @@
+>  #include <linux/irq.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/string_choices.h>
 >
-> -       rcfg.of_node = of_get_child_by_name(dev->of_node, "vqmmc-regulator");
-> -       if (!of_device_is_available(rcfg.of_node)) {
-> -               of_node_put(rcfg.of_node);
-> -               rcfg.of_node = NULL;
-> -       }
-> -
-> +       rcfg.of_node = of_get_available_child_by_name(dev->of_node, "vqmmc-regulator");
->         if (rcfg.of_node) {
->                 rcfg.driver_data = priv->host;
->                 rdev = devm_regulator_register(dev, &renesas_sdhi_vqmmc_regulator, &rcfg);
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+> @@ -208,7 +209,7 @@ static void alcor_trf_block_pio(struct alcor_sdmmc_host *host, bool read)
+>         len = min(host->sg_miter.length, blksize);
+>
+>         dev_dbg(host->dev, "PIO, %s block size: 0x%zx\n",
+> -               read ? "read" : "write", blksize);
+> +               str_read_write(read), blksize);
+>
+>         host->sg_miter.consumed = len;
+>         host->blocks--;
 > --
-> 2.43.0
->
+> 2.25.1
