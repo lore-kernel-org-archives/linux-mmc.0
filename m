@@ -1,168 +1,113 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4AA8C25DD0B
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 13:05:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E02D269B1C
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Apr 2025 13:13:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744203916; cv=none; b=ZxVwnEJj295WaYqaIVixzgnH/S0KoQLH+Ji7U0noS26bHZ5tlyjutkV3JMkHrD07KJpPY+nIOwBqfnW8w6g0zeCOUn+P4AIOvJfydtgFD0bw3IIeFnBAHL2/X0qk1Fc0gcemJ5PIawa0h5dBYuDYLBXwvSfhSci4bgncJW3lem8=
+	t=1744204435; cv=none; b=KMIEkJy1zYm4mhs8aljjIwe2eiWuJMxLAWCuXloyE+bLOk3hiFYMJ+JXXs4cxVpgRMyWxOZQFqHvz451kq4eW+yLxsqMWtTuJnP9ASkfcUGS0k2giPvYuwCFccu1gW9z8FLmxtzhLjkAe+AJIG4Jtv9qNQuVJ0tsPkMrE+n7iqg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744203916; c=relaxed/simple;
-	bh=8qftagvfjmoYt1+fDk9WXpvjMtDWwgn0O2decNVAM3Q=;
+	s=arc-20240116; t=1744204435; c=relaxed/simple;
+	bh=GXpkFS7tVP64Nlgh1lK9A2cQXAjXNrZFdouOYc0HVqA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mtON0NtiI00VPVOhBK7hPPqZNbxvIdwS+jeVZ3ur+ezsJs+dGCz1UP2Kk3IE5g1t/jHtU4XdJ3My2ndZ+JCHJ3bZ8j0asNOnkQ7lK7kse43NOGXrQFVffyp8i/rC/6HnuoeLRPbmjnfFMPik2qrnPPLOPzOO7nbRhLahiIIu0lg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=O8I8sRHb; arc=none smtp.client-ip=209.85.128.177
+	 To:Content-Type; b=UQJR1Vmj0ZQG5z+4KNGMrcHmQpwVLggTgGVt0K57msbSscA4iil9xu/XAeR2hV3OGHR0YvxHQu5fnk9eKLjx9ph3u1zLERae5eGSx2pCkxXU48IAUokbAS/2vzWIi7qvL1tQqDS2eBnrC+WJV5xa1WvVHsHjrrKy2wcr9FJdsU4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IU3AMBNz; arc=none smtp.client-ip=209.85.128.176
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="O8I8sRHb"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-70433283ba7so17594287b3.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2025 06:05:13 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IU3AMBNz"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-7043db8491dso17515967b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Apr 2025 06:13:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1744203913; x=1744808713; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1d4Kj/+jBoQ/lsWd2+1iruPICBj1Kd2s6XSogc2V8og=;
-        b=O8I8sRHboUes3ol5Jp//pRoUSmigdJdhN9DDk2mhfdvStKr0VZdCGU625E9e4z61Eh
-         lQ7xf2D0uFz9jYwJS05l/MeakDRmYIvDs9D8JzTjHG6hoFhsx+kPz4+g1x9d4PwglWEf
-         Sm2unEdOIOi+b8xQZa/7P6FcYKH52/7nU9e3acGBk0OUEqfRs4ZfEjo2OJKRnYuWuhRX
-         n9zsiPQTdDi1Owm0Zn7I12/LjG6onMnIhB2M6ucRXcA/AvKX6aPGa6QdzKtV5z4zEKaB
-         NT9vyFpHUiihUv9wUJzHy2DFf5pcGuvitohtH+UZtm5Qkgk/tWHnLid7n0KIJqczIDSi
-         nrSQ==
+        d=linaro.org; s=google; t=1744204432; x=1744809232; darn=vger.kernel.org;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=ZfQ8vryUW9zvUThf3X/hXJPOdrNLb/SCOnUNjNdiRt0=;
+        b=IU3AMBNz95cV9gVTEojVgF32n1uW9o1F9j73Lb2DHk3G4EE8AGAvaBedr6QP+nDMxn
+         4S/oGSebJ/s5/N13EmQyfs72XViL231QoVOdzDEz2QNmrsYNm3jAqtVUGx84K59xxdxs
+         LZk1rCJh3eYVB7AxxPw2l9D9liqSgXnU//CNByr6ySx3m9KmOMNQmLyqd8tBusG6FN5B
+         tYU8rS8SRPl/P/u1RMl0LX27JMif6IhKZvjrvgtCXEj4wspleirPEGShxe+ohzmiczlr
+         +90Hm9QSYye3Ix4SGVkxRNsYOvEEugzSRHB5iTG3Q+LexZ9nl7jDgLH3xsRGz8KdWkd+
+         qmUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744203913; x=1744808713;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1d4Kj/+jBoQ/lsWd2+1iruPICBj1Kd2s6XSogc2V8og=;
-        b=AXHLwTavXPXDHx03OSqGaFEdKxVHDWLJd7vcu10YtlOcE4lQdRvLCmWCOEV/Vc9AO/
-         /bH97h+k1GgYWgzd8T5q15v2YjVhl/teSZR7qjXTjJ4uvXMXNXRbcB2RTFNHzEt1Rj1c
-         B/bX/5YZAnNW8JMA7VqU44DEdoER0XXc5AhlYbadLn4jDOfMyhhVvOB0RsPd/eac40Xi
-         mtuFchGDoWpUc2tpS+obR2td+hUzKeSsoWhO8+A6c6V7t1+3CUdkOPaGOEWUzQqbE/3p
-         n7u1JxOmrBTMqwqRbWrQ4KxESIxnF+qCv3M1DfUr20VwlWdPQeZNl+UPFDIK7rOWEDYD
-         Jfcw==
-X-Forwarded-Encrypted: i=1; AJvYcCVGFuIuUTGbSL0W0zTko7Y/nDj72hGW1lhA6oM/an31hXc3BSGTNHluRyoDKMYU3wbKdLXivwAWYV4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyyv/srIHvhGXjVGFIZVYOSfCtFnqDOLja4LBle5NcD/kxb5iHE
-	bl8DDo1UAr94Qf9iuy2G32TD+BsrDTMEpEobmHa29Sj3dZ+tK0dO637xVkpWiG2HZ94as6MCVbN
-	VMHPL0HUTYzGO2iTUe11zxeUrS1yc0SsqaZYNN6ZoxByfP801
-X-Gm-Gg: ASbGnctWTdko8Co2P/YRXano304oap/wjPI6mRFmGvMpIKXNJnYomwr1sF1ASEnOtDb
-	KE3aAF0uOTppRtcWt6dEj1npS0iGyAgcaI3WCQPFViteFjxArfyB/Bz384xqbmoQ8809Wyxicmg
-	IsswbQheflnU3fRgOv1530SzE=
-X-Google-Smtp-Source: AGHT+IEkEr688RqWZk/UFW+aFLhEVhnfHLhnS63mtOdasqviB60kL6L24sWq99KSc0ZiD+dQHcM2wGgQ6T0FmR5eTuw=
-X-Received: by 2002:a05:690c:6711:b0:6fb:b524:48bc with SMTP id
- 00721157ae682-705388d5192mr58242347b3.35.1744203913024; Wed, 09 Apr 2025
- 06:05:13 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1744204432; x=1744809232;
+        h=to:subject:message-id:date:from:in-reply-to:references:mime-version
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZfQ8vryUW9zvUThf3X/hXJPOdrNLb/SCOnUNjNdiRt0=;
+        b=ljNejiTzn0vdBuOup2CUx9n0kK5el+3lhNn+g4GguI4c8bhgXCVJqrfq5ks7P+3pSY
+         lEEdzs/j9MmmdPno3uVGF5ize+vlUecvqWMZse+gFr+hAvMoUGb2YVZzRnNMnXUIR16d
+         RzEXtUDvU9+x2/VyiJNiL1Z+sUaUVaZcP40dSgLyKrNyP+ltTUj3GXKQOvkIegjThLZg
+         dJ9IM/ZBnMN4G/qoO5gjpV3H53o1XRl0R1NrodGY4mjG9f+ncdn4CRt2rI9HKYvo5n2K
+         mC/WbK1CQ1Iqbyw+kUa9ARxv/tSSul2qcKNKIqFg4a5/m6wnBeQFT/W1R64OL4jyziU1
+         RlEA==
+X-Forwarded-Encrypted: i=1; AJvYcCXPLU4chVeLzVC7dlV36rDyfs3zVjVn9r/cNwGwAdp2Hnqce8qic4TtleZKtFBfGkHfNg+je/a2LBs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVYaVhHxcMFl4KpNgzSAOKYj8dPYzmqCOhP8qD+iFWx0byk7uf
+	AYjL9a8YZ3Xxq/tjSs7Y58oJ2eXLfg5MMc3CCkowJQVogQpsEDgqYQmc9yfsUWugGkAnBsoA/2/
+	YZ8eDfUYX7GowK6ufnH+yuonNtM9po7YGB0jIyQ==
+X-Gm-Gg: ASbGncs3DhKcynwyPx1+uLUJEhudfceoQcfqBw2dBtyddVmluyW+LIHnhPiiKv2Fw/d
+	buCaJIRxmbdIaNafp76VXXslFvOz+DlAyaym2Xf7F3fT1XyplScitxCKgfdqAX0M2tkFH3LZbw1
+	EaJa6mF3sLYIoZdroOAu3SkUb8f2Yfp0LTow==
+X-Google-Smtp-Source: AGHT+IGGLUQ2f6gi1PAjuUqFcZrhwocpf0+bdDQndpPucTj6+vJgCYNwU7MqR2ts9RwXmtso8QmdGEq/OB6lKYax9zw=
+X-Received: by 2002:a05:690c:450f:b0:6fd:2fcf:12f5 with SMTP id
+ 00721157ae682-705388d9191mr54765647b3.27.1744204432185; Wed, 09 Apr 2025
+ 06:13:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250401025123.895307-1-ricky_wu@realtek.com>
-In-Reply-To: <20250401025123.895307-1-ricky_wu@realtek.com>
+References: <20250407152759.25160-1-ulf.hansson@linaro.org>
+ <20250407152759.25160-3-ulf.hansson@linaro.org> <Z_TZxXORT8H99qv4@shikoro>
+ <CAPDyKFoOfNWa6b0jF0-a-imKqdDJQrdJe65OaOj3D0upmS7VXw@mail.gmail.com> <Z_U7ogPkzZY9IVBB@shikoro>
+In-Reply-To: <Z_U7ogPkzZY9IVBB@shikoro>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Apr 2025 15:04:37 +0200
-X-Gm-Features: ATxdqUFnxqtQgEeY9G3rMVrdTwVyrrp85v3mAMPpR_PXa_Z9J8dJz3PUBElpDoY
-Message-ID: <CAPDyKFpn5xB50eTomNM=4LbFDX4r154iY2Qk8GBiYb+vor0kbA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx: usb add 74 clocks in poweron flow
-To: Ricky Wu <ricky_wu@realtek.com>
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	viro@zeniv.linux.org.uk
+Date: Wed, 9 Apr 2025 15:13:16 +0200
+X-Gm-Features: ATxdqUGXuv9t1HllKVU2aDR6LmbCJvQdudIU2i9CZ6_wcvW0oh79KR01BuryXT8
+Message-ID: <CAPDyKFooWDpmfJoCFwjED_Utw6HppjAN5JjBL9vcZW1LsKeOFg@mail.gmail.com>
+Subject: Re: [PATCH v2 2/5] mmc: core: Further avoid re-storing power to the
+ eMMC before a shutdown
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Avri Altman <Avri.Altman@sandisk.com>, 
+	linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 1 Apr 2025 at 04:51, Ricky Wu <ricky_wu@realtek.com> wrote:
+On Tue, 8 Apr 2025 at 17:07, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> SD spec definition:
-> "Host provides at least 74 Clocks before issuing first command"
-> After 1ms for the voltage stable then start issuing the Clock signals
 >
-> add if statement to issue/stop the clock signal to card:
-> The power state from POWER_OFF to POWER_UP issue the signal to card,
-> POWER_UP to POWER_ON stop the signal
+> > The rather long function-names "mmc_can_poweroff_notify" (that will
+> > change to mmc_card_can_poweroff_notify with your series) and
+> > "mmc_host_can_poweroff_notify" are rather self-explanatory, don't you
+> > think?
 >
-> add 100ms delay in power_on to make sure the power cycle complete
+> Well, you are the boss here, but frankly, I don't think it is obvious
+> enough. I had to look twice and very closely to understand the logic.
+> Not because of the function name, but for the reason why 'is_suspend' is
+> true despite being in _shutdown(). Adrian was wondering about it the
+> first time, too. So, I honestly think the comment is
+>
+>   for a maintainer -> superfluous
+>   for a part-time-MMC-core-hacker -> helpful to remember
+>   for someone new to the code -> essential
+>
+> Something like this.
+>
 
-Why 100ms? That sounds a lot to me?
+I understand what you are saying and I agree. However, the problem is
+that your concern applies to a lot more code in the mmc core, but this
+condition.
 
-Is this fixing a real problem or is just trying to better follow the spec?
+Don't get me wrong, I don't mind useful comments and good
+documentation, but perhaps what we are really missing is a general mmc
+documentation that describes how the core is working and in particular
+the power-management  part of it. Unfortunately, I don't think I will
+have the bandwidth currently to work on this.
 
->
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
->  drivers/mmc/host/rtsx_usb_sdmmc.c | 28 +++++++++++++++++++++++++---
->  1 file changed, 25 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index d229c2b83ea9..e5820b2bb380 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -48,7 +48,7 @@ struct rtsx_usb_sdmmc {
->         bool                    ddr_mode;
->
->         unsigned char           power_mode;
-> -
-> +       unsigned char           prev_power_mode;
->  #ifdef RTSX_USB_USE_LEDS_CLASS
->         struct led_classdev     led;
->         char                    led_name[32];
-> @@ -952,6 +952,8 @@ static int sd_power_on(struct rtsx_usb_sdmmc *host)
->         struct rtsx_ucr *ucr = host->ucr;
->         int err;
->
-> +       msleep(100);
-> +
->         dev_dbg(sdmmc_dev(host), "%s\n", __func__);
->         rtsx_usb_init_cmd(ucr);
->         rtsx_usb_add_cmd(ucr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
-> @@ -1014,6 +1016,16 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
->                 unsigned char power_mode)
->  {
->         int err;
-> +       int power_mode_temp;
-> +       struct rtsx_ucr *ucr = host->ucr;
-> +
-> +       power_mode_temp = power_mode;
-> +
-> +       if ((power_mode == MMC_POWER_ON) && (host->power_mode == MMC_POWER_ON) &&
-> +                       (host->prev_power_mode == MMC_POWER_UP)) {
-> +               host->prev_power_mode = MMC_POWER_ON;
-> +               rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0x00);
-> +       }
->
->         if (power_mode != MMC_POWER_OFF)
->                 power_mode = MMC_POWER_ON;
-> @@ -1029,9 +1041,18 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
->                 err = sd_power_on(host);
->         }
->
-> -       if (!err)
-> -               host->power_mode = power_mode;
-> +       if (!err) {
-> +               if ((power_mode_temp == MMC_POWER_UP) && (host->power_mode == MMC_POWER_OFF)) {
-> +                       host->prev_power_mode = MMC_POWER_UP;
-> +                       rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN,
-> +                                       SD_CLK_TOGGLE_EN);
-> +               }
-> +
-> +               if ((power_mode_temp == MMC_POWER_OFF) && (host->power_mode == MMC_POWER_ON))
-> +                       host->prev_power_mode = MMC_POWER_OFF;
->
-> +               host->power_mode = power_mode;
-> +       }
->         return err;
->  }
->
-> @@ -1316,6 +1337,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
->         mmc->max_req_size = 524288;
->
->         host->power_mode = MMC_POWER_OFF;
-> +       host->prev_power_mode = MMC_POWER_OFF;
->  }
->
->  static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
-> --
-> 2.25.1
->
+That said, I am going to apply the $subject patch as is - but feel
+free to send a patch on top if you want to add and improve any further
+comments in the code. I would be happy to apply it!
 
 Kind regards
 Uffe
