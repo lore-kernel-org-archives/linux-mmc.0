@@ -1,276 +1,141 @@
-Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E20A41BF33F;
-	Wed,  9 Apr 2025 17:12:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A79FB1A9B3E;
+	Thu, 10 Apr 2025 06:37:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744218735; cv=none; b=h2eLx/u7VG4kVWokFldKLLsrtc8D64uoZsI2Gmib2W8rKfj2pbg5CGMNXeorzSVK4YyzsdOhJ4PbiJ6ahLyXf9O3tlZg5zZLBG7nZ0d7Wj8YyRzdV0Pbp7SVCOLbmFUtAsm9asSJCF5QJBTVbIXuNVCNFfnItvZmuRw8i1ks7kc=
+	t=1744267026; cv=none; b=lF4shmSz3Tgp48HyCkYYmzzGE9yEzcjTXWxIMdTHWjh6AzJna9Qqa1OuJEE1y8s3We3k0VN+qZ8L5ZUxTaIEf5QZxbyKsLAGvWjQvrJvEj/I0P7dslSak/VW3cjZoLEKmCbxmWQLsqZQkHdr4INSvqR3JWRyWvTowu4cQPnGFuE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744218735; c=relaxed/simple;
-	bh=NJ9nqQ/HqQW6VWoTACnv0h1lTMjSzqiuotglz3ecV5I=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=LreMHgw+qUrilQ2tKOZ6huzsaXTxWmpbpsOXsYySHIlJtYRsHOUadhSXfdg2krAa1lnVavSq/u0sPSMRFlxAjZZpDF1bQJQEWyvRo9ELwb70R+eYv1DdV9H8hdQR6S0wnDtpaWk3Rchi0ITgO5uRm+ykEjWvk5ni4VD8MjqXJYs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=rH4pr9On; arc=none smtp.client-ip=198.47.23.234
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1744267026; c=relaxed/simple;
+	bh=ANitbIeqB7CjA0+NS5rjVnO0iVQxflREFoyLFwYI2+c=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=nBddwtjkP7fnkfVTHpWGdohU348p/LoHNc+g4MCbwrOVHdbkUkdFxW6/gakE+Y46m53Y2ADnsHlfyRCURErUHL5hxUbb4GwXn/IaXXQqDBMKZ8GCP2u36k2WHKNLcNxOa2qjUeDZ9o2blDbp5U9me81RM7jzX29qrtNFpAluFQw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=qg4iBhvr; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="rH4pr9On"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 539HC0gs1039348
-	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 9 Apr 2025 12:12:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1744218720;
-	bh=HbxbbpJvLSMYgoAwnYVbl8Z4STLCfUPAEMIdO8+NPWo=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=rH4pr9On7+jdfgCM6LGDnGpwcF9J3hp/+HjCVrI8Iheg3bZuAfUvkf5V0Jbk1/L0v
-	 zLU6s4FT5GF7pI5TvErYpQonILW20pgss+OY1xvcim02mtFVt10VA4pKUUeGp9upAP
-	 gFgF0S6gboQqxgTEZzfae3yFkDpecUy+Vsma3TOI=
-Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 539HC0W1080987
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Wed, 9 Apr 2025 12:12:00 -0500
-Received: from DFLE102.ent.ti.com (10.64.6.23) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 9
- Apr 2025 12:11:59 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE102.ent.ti.com
- (10.64.6.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Wed, 9 Apr 2025 12:11:59 -0500
-Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 539HBxKZ001640;
-	Wed, 9 Apr 2025 12:11:59 -0500
-Message-ID: <ceb7869a-2bdd-4a13-ad63-6f29bb8a2ab9@ti.com>
-Date: Wed, 9 Apr 2025 12:11:59 -0500
+	dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="qg4iBhvr"
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 53A6auQV32994461, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=realtek.com; s=dkim;
+	t=1744267017; bh=ANitbIeqB7CjA0+NS5rjVnO0iVQxflREFoyLFwYI2+c=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=qg4iBhvrsJYdf4wFgmlUGTCVbnc5IibT2rjfJQejBd1L7Hyk8n7g+6FTYPUcu9WGP
+	 qnUDjpbWybMeNXw7qzUrlYeAsJo7RqYX//1OOdvvPXFFLgTrMoYyxWO7WniGAo/Gji
+	 /D6Kp9qO6dManWC7zQkDld4AfMgn7hfn2EZDD9T2mbdMiJwaKYi6gxqdJ+tfD0rdZb
+	 NWxyb2z2l95KbOsmlD/Aems0Je4GhyWZYg/RVyyMpapnzw+oOs53VyBDOAx+X3L9Md
+	 l7PqvyW5K/iz1JRX2lGxE3KVNo6WYUaDrLY/7FACG0rIKggtLROweUoz/KviMSzD/g
+	 S2mofgR0bAcoQ==
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/3.06/5.92) with ESMTPS id 53A6auQV32994461
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Thu, 10 Apr 2025 14:36:57 +0800
+Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Thu, 10 Apr 2025 14:36:57 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Thu, 10 Apr 2025 14:36:57 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547]) by
+ RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547%5]) with mapi id
+ 15.01.2507.035; Thu, 10 Apr 2025 14:36:57 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "viro@zeniv.linux.org.uk" <viro@zeniv.linux.org.uk>
+Subject: RE: [PATCH] mmc: rtsx: usb add 74 clocks in poweron flow
+Thread-Topic: [PATCH] mmc: rtsx: usb add 74 clocks in poweron flow
+Thread-Index: AQHborD2846vsF6F3E6a08GwR4gCjrOa1GaAgAFzDHA=
+Date: Thu, 10 Apr 2025 06:36:56 +0000
+Message-ID: <1fde0217fa544560888c3e6f4f5963f9@realtek.com>
+References: <20250401025123.895307-1-ricky_wu@realtek.com>
+ <CAPDyKFpn5xB50eTomNM=4LbFDX4r154iY2Qk8GBiYb+vor0kbA@mail.gmail.com>
+In-Reply-To: <CAPDyKFpn5xB50eTomNM=4LbFDX4r154iY2Qk8GBiYb+vor0kbA@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] PENDING: mmc: sdhci*: Add set_hs_ena to sdhci_ops
-To: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Adrian Hunter <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Josua Mayer <josua@solid-run.com>,
-        Moteen
- Shah <m-shah@ti.com>
-References: <20250407222702.2199047-1-jm@ti.com>
- <20250407222702.2199047-2-jm@ti.com>
- <CAPDyKFqx-G4NynanFWrspz7-uXXF74RfjcU-Sw2nq2JhL3LPuQ@mail.gmail.com>
-Content-Language: en-US
-From: Judith Mendez <jm@ti.com>
-In-Reply-To: <CAPDyKFqx-G4NynanFWrspz7-uXXF74RfjcU-Sw2nq2JhL3LPuQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-Hi Ulf,
-
-On 4/9/25 7:48 AM, Ulf Hansson wrote:
-> On Tue, 8 Apr 2025 at 00:27, Judith Mendez <jm@ti.com> wrote:
->>
->> This patch adds set_hs_ena call to sdhci_ops so that host
->> controller drivers have the option to implement a custom
->> callback for SDHCI_CTRL_HISPD control.
->>
->> On TI devices (for HS modes and legacy mode), timing was closed on
->> half cycle timing. If any of HIGH_SPEED_ENA, UHS_MODE_SELECT, or
->> V1P8_SIGNAL_ENA is set for these modes, host controller switches to
->> full cycle timing which may cause read/write failures and/or cqe error
->> logs.
->>
->> So add set_hs_ena() to sdhci_ops so each host controller driver
->> can implement their own .set_hs_ena callback.
->>
->> Also add sdhci_am654_set_hs_ena to sdhci_am654 driver and only set
->> HIGH_SPEED_ENA, for modes > MMC_TIMING_SD_HS.
->>
->> Signed-off-by: Judith Mendez <jm@ti.com>
-> 
-> What does "PENDING" mean or compared to "PATCH"? I guess you want some
-> review and test of this - or there anything else?
-
-So sorry, I meant to remove this PENDING tag, will remove for v2.
-Review would be just fine.
-
-> 
->> ---
->>   drivers/mmc/host/sdhci.c       | 55 +++++++++++++++++++++-------------
->>   drivers/mmc/host/sdhci.h       |  2 ++
->>   drivers/mmc/host/sdhci_am654.c | 16 ++++++++++
-> 
-> I think it would be better to split this up in two parts. One for
-> sdhci and one for sdhci_am654
-
-Sure no problem. Thanks
-.
-> 
-> Other than that I am going to defer to Adrian to see what he thinks about this.
-> 
-> Kind regards
-> Uffe
-> 
->>   3 files changed, 53 insertions(+), 20 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 5f78be7ae16d7..3a878cf0c59b9 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2355,6 +2355,27 @@ static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_i
->>                 (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
->>   }
->>
->> +void sdhci_set_hs_ena(struct sdhci_host *host, unsigned char timing)
->> +{
->> +       u8 ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> +
->> +       if (timing == MMC_TIMING_SD_HS ||
->> +           timing == MMC_TIMING_MMC_HS ||
->> +           timing == MMC_TIMING_MMC_HS400 ||
->> +           timing == MMC_TIMING_MMC_HS200 ||
->> +           timing == MMC_TIMING_MMC_DDR52 ||
->> +           timing == MMC_TIMING_UHS_SDR50 ||
->> +           timing == MMC_TIMING_UHS_SDR104 ||
->> +           timing == MMC_TIMING_UHS_DDR50 ||
->> +           timing == MMC_TIMING_UHS_SDR25)
->> +               ctrl |= SDHCI_CTRL_HISPD;
->> +       else
->> +               ctrl &= ~SDHCI_CTRL_HISPD;
->> +
->> +       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> +}
->> +EXPORT_SYMBOL_GPL(sdhci_set_hs_ena);
->> +
->>   void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
->>   {
->>          struct sdhci_host *host = mmc_priv(mmc);
->> @@ -2436,23 +2457,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>              !sdhci_presetable_values_change(host, ios))
->>                  return;
->>
->> -       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> -
->> -       if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
->> -               if (ios->timing == MMC_TIMING_SD_HS ||
->> -                    ios->timing == MMC_TIMING_MMC_HS ||
->> -                    ios->timing == MMC_TIMING_MMC_HS400 ||
->> -                    ios->timing == MMC_TIMING_MMC_HS200 ||
->> -                    ios->timing == MMC_TIMING_MMC_DDR52 ||
->> -                    ios->timing == MMC_TIMING_UHS_SDR50 ||
->> -                    ios->timing == MMC_TIMING_UHS_SDR104 ||
->> -                    ios->timing == MMC_TIMING_UHS_DDR50 ||
->> -                    ios->timing == MMC_TIMING_UHS_SDR25)
->> -                       ctrl |= SDHCI_CTRL_HISPD;
->> -               else
->> -                       ctrl &= ~SDHCI_CTRL_HISPD;
->> -       }
->> -
->>          if (host->version >= SDHCI_SPEC_300) {
->>                  u16 clk, ctrl_2;
->>
->> @@ -2468,7 +2472,12 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>                          sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->>                  }
->>
->> -               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> +               if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
->> +                       if (host->ops->set_hs_ena)
->> +                               host->ops->set_hs_ena(host, ios->timing);
->> +                       else
->> +                               sdhci_set_hs_ena(host, ios->timing);
->> +               }
->>
->>                  if (!host->preset_enabled) {
->>                          /*
->> @@ -2510,8 +2519,14 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>
->>                  /* Re-enable SD Clock */
->>                  host->ops->set_clock(host, host->clock);
->> -       } else
->> -               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> +       } else {
->> +               if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
->> +                       if (host->ops->set_hs_ena)
->> +                               host->ops->set_hs_ena(host, ios->timing);
->> +                       else
->> +                               sdhci_set_hs_ena(host, ios->timing);
->> +               }
->> +       }
->>   }
->>   EXPORT_SYMBOL_GPL(sdhci_set_ios);
->>
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index cd0e35a805427..ebecb49792ca1 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -704,6 +704,7 @@ struct sdhci_ops {
->>          void            (*set_timeout)(struct sdhci_host *host,
->>                                         struct mmc_command *cmd);
->>          void            (*set_bus_width)(struct sdhci_host *host, int width);
->> +       void            (*set_hs_ena)(struct sdhci_host *host, unsigned char timing);
->>          void (*platform_send_init_74_clocks)(struct sdhci_host *host,
->>                                               u8 power_mode);
->>          unsigned int    (*get_ro)(struct sdhci_host *host);
->> @@ -857,6 +858,7 @@ int sdhci_get_ro(struct mmc_host *mmc);
->>   void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
->>   int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
->>   void sdhci_set_bus_width(struct sdhci_host *host, int width);
->> +void sdhci_set_hs_ena(struct sdhci_host *host, unsigned char timing);
->>   void sdhci_reset(struct sdhci_host *host, u8 mask);
->>   bool sdhci_do_reset(struct sdhci_host *host, u8 mask);
->>   void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
->> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->> index f75c31815ab00..67a64de4972c9 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -429,6 +429,19 @@ static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>          return 0;
->>   }
->>
->> +static void sdhci_am654_set_hs_ena(struct sdhci_host *host, unsigned char timing)
->> +{
->> +       u8 ctrl = 0;
->> +
->> +       if (timing > MMC_TIMING_SD_HS) {
->> +               sdhci_set_hs_ena(host, timing);
->> +       } else {
->> +               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> +               ctrl &= ~SDHCI_CTRL_HISPD;
->> +               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> +       }
->> +}
->> +
->>   static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
->>   {
->>          int cmd_error = 0;
->> @@ -578,6 +591,7 @@ static const struct sdhci_ops sdhci_am654_ops = {
->>          .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->>          .set_uhs_signaling = sdhci_set_uhs_signaling,
->>          .set_bus_width = sdhci_set_bus_width,
->> +       .set_hs_ena = sdhci_am654_set_hs_ena,
->>          .set_power = sdhci_set_power_and_bus_voltage,
->>          .set_clock = sdhci_am654_set_clock,
->>          .write_b = sdhci_am654_write_b,
->> @@ -608,6 +622,7 @@ static const struct sdhci_ops sdhci_j721e_8bit_ops = {
->>          .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->>          .set_uhs_signaling = sdhci_set_uhs_signaling,
->>          .set_bus_width = sdhci_set_bus_width,
->> +       .set_hs_ena = sdhci_am654_set_hs_ena,
->>          .set_power = sdhci_set_power_and_bus_voltage,
->>          .set_clock = sdhci_am654_set_clock,
->>          .write_b = sdhci_am654_write_b,
->> @@ -632,6 +647,7 @@ static const struct sdhci_ops sdhci_j721e_4bit_ops = {
->>          .get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
->>          .set_uhs_signaling = sdhci_set_uhs_signaling,
->>          .set_bus_width = sdhci_set_bus_width,
->> +       .set_hs_ena = sdhci_am654_set_hs_ena,
->>          .set_power = sdhci_set_power_and_bus_voltage,
->>          .set_clock = sdhci_j721e_4bit_set_clock,
->>          .write_b = sdhci_am654_write_b,
->> --
->> 2.49.0
->>
-
+PiA+DQo+ID4gU0Qgc3BlYyBkZWZpbml0aW9uOg0KPiA+ICJIb3N0IHByb3ZpZGVzIGF0IGxlYXN0
+IDc0IENsb2NrcyBiZWZvcmUgaXNzdWluZyBmaXJzdCBjb21tYW5kIg0KPiA+IEFmdGVyIDFtcyBm
+b3IgdGhlIHZvbHRhZ2Ugc3RhYmxlIHRoZW4gc3RhcnQgaXNzdWluZyB0aGUgQ2xvY2sgc2lnbmFs
+cw0KPiA+DQo+ID4gYWRkIGlmIHN0YXRlbWVudCB0byBpc3N1ZS9zdG9wIHRoZSBjbG9jayBzaWdu
+YWwgdG8gY2FyZDoNCj4gPiBUaGUgcG93ZXIgc3RhdGUgZnJvbSBQT1dFUl9PRkYgdG8gUE9XRVJf
+VVAgaXNzdWUgdGhlIHNpZ25hbCB0byBjYXJkLA0KPiA+IFBPV0VSX1VQIHRvIFBPV0VSX09OIHN0
+b3AgdGhlIHNpZ25hbA0KPiA+DQo+ID4gYWRkIDEwMG1zIGRlbGF5IGluIHBvd2VyX29uIHRvIG1h
+a2Ugc3VyZSB0aGUgcG93ZXIgY3ljbGUgY29tcGxldGUNCj4gDQo+IFdoeSAxMDBtcz8gVGhhdCBz
+b3VuZHMgYSBsb3QgdG8gbWU/DQo+IA0KSGkgVWxmLA0KDQpUaGlzIDEwMG1zIGRlbGF5IGlzIHRv
+IGVuc3VyZSB0aGUgdm9sdGFnZSBpcyBiZWxvdyAwLjVWIGJlZm9yZSBwb3dlciBvbiBkdXJpbmcg
+YSBwb3dlciBjeWNsZSwNClRoZSBkZWxheXMgaW4gdGhlIG1tYyBjb3JlIGlzIG5vdCBzdWZmaWNp
+ZW50IGZvciB0aGUgcnRzeCB1c2IgZGV2aWNlLiANCkJlY2F1c2UgZHVyaW5nIHRoZSBjYXJkIHJl
+Y29nbml0aW9uIHByb2Nlc3MsIHRoZSBjYXJkIHBvd2VyIHdpbGwgYmUgdG9nZ2xlZCBvbmNlIGlu
+IDFtcy4NCklmIHRoZSBjYXJkIHBvd2VyIGlzIG5vdCBmdWxseSBkaXNjaGFyZ2VkIHdpdGhpbiB0
+aGF0IDFtcyBiZWZvcmUgYmVpbmcgdHVybmVkIG9uIGFnYWluLCANCkl0IG1heSBhZmZlY3QgdGhl
+IGNhcmQgcmVjb2duaXRpb24gDQoNCj4gSXMgdGhpcyBmaXhpbmcgYSByZWFsIHByb2JsZW0gb3Ig
+aXMganVzdCB0cnlpbmcgdG8gYmV0dGVyIGZvbGxvdyB0aGUgc3BlYz8NCj4gDQoNCldlIGZvdW5k
+IHNvbWUgY2FyZHMgbm90IGJlIHJlY29nbml6ZWQgaWYgbm90IGlzc3VlIHRoaXMgNzQgY2xvY2tz
+DQoNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFJpY2t5IFd1IDxyaWNreV93dUByZWFsdGVrLmNv
+bT4NCj4gPiAtLS0NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3VzYl9zZG1tYy5jIHwgMjgN
+Cj4gKysrKysrKysrKysrKysrKysrKysrKysrKy0tLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMjUg
+aW5zZXJ0aW9ucygrKSwgMyBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2
+ZXJzL21tYy9ob3N0L3J0c3hfdXNiX3NkbW1jLmMNCj4gPiBiL2RyaXZlcnMvbW1jL2hvc3QvcnRz
+eF91c2Jfc2RtbWMuYw0KPiA+IGluZGV4IGQyMjljMmI4M2VhOS4uZTU4MjBiMmJiMzgwIDEwMDY0
+NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF91c2Jfc2RtbWMuYw0KPiA+ICsrKyBi
+L2RyaXZlcnMvbW1jL2hvc3QvcnRzeF91c2Jfc2RtbWMuYw0KPiA+IEBAIC00OCw3ICs0OCw3IEBA
+IHN0cnVjdCBydHN4X3VzYl9zZG1tYyB7DQo+ID4gICAgICAgICBib29sICAgICAgICAgICAgICAg
+ICAgICBkZHJfbW9kZTsNCj4gPg0KPiA+ICAgICAgICAgdW5zaWduZWQgY2hhciAgICAgICAgICAg
+cG93ZXJfbW9kZTsNCj4gPiAtDQo+ID4gKyAgICAgICB1bnNpZ25lZCBjaGFyICAgICAgICAgICBw
+cmV2X3Bvd2VyX21vZGU7DQo+ID4gICNpZmRlZiBSVFNYX1VTQl9VU0VfTEVEU19DTEFTUw0KPiA+
+ICAgICAgICAgc3RydWN0IGxlZF9jbGFzc2RldiAgICAgbGVkOw0KPiA+ICAgICAgICAgY2hhciAg
+ICAgICAgICAgICAgICAgICAgbGVkX25hbWVbMzJdOw0KPiA+IEBAIC05NTIsNiArOTUyLDggQEAg
+c3RhdGljIGludCBzZF9wb3dlcl9vbihzdHJ1Y3QgcnRzeF91c2Jfc2RtbWMNCj4gKmhvc3QpDQo+
+ID4gICAgICAgICBzdHJ1Y3QgcnRzeF91Y3IgKnVjciA9IGhvc3QtPnVjcjsNCj4gPiAgICAgICAg
+IGludCBlcnI7DQo+ID4NCj4gPiArICAgICAgIG1zbGVlcCgxMDApOw0KPiA+ICsNCj4gPiAgICAg
+ICAgIGRldl9kYmcoc2RtbWNfZGV2KGhvc3QpLCAiJXNcbiIsIF9fZnVuY19fKTsNCj4gPiAgICAg
+ICAgIHJ0c3hfdXNiX2luaXRfY21kKHVjcik7DQo+ID4gICAgICAgICBydHN4X3VzYl9hZGRfY21k
+KHVjciwgV1JJVEVfUkVHX0NNRCwgQ0FSRF9TRUxFQ1QsIDB4MDcsDQo+ID4gU0RfTU9EX1NFTCk7
+IEBAIC0xMDE0LDYgKzEwMTYsMTYgQEAgc3RhdGljIGludA0KPiBzZF9zZXRfcG93ZXJfbW9kZShz
+dHJ1Y3QgcnRzeF91c2Jfc2RtbWMgKmhvc3QsDQo+ID4gICAgICAgICAgICAgICAgIHVuc2lnbmVk
+IGNoYXIgcG93ZXJfbW9kZSkgIHsNCj4gPiAgICAgICAgIGludCBlcnI7DQo+ID4gKyAgICAgICBp
+bnQgcG93ZXJfbW9kZV90ZW1wOw0KPiA+ICsgICAgICAgc3RydWN0IHJ0c3hfdWNyICp1Y3IgPSBo
+b3N0LT51Y3I7DQo+ID4gKw0KPiA+ICsgICAgICAgcG93ZXJfbW9kZV90ZW1wID0gcG93ZXJfbW9k
+ZTsNCj4gPiArDQo+ID4gKyAgICAgICBpZiAoKHBvd2VyX21vZGUgPT0gTU1DX1BPV0VSX09OKSAm
+JiAoaG9zdC0+cG93ZXJfbW9kZQ0KPiA9PSBNTUNfUE9XRVJfT04pICYmDQo+ID4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgKGhvc3QtPnByZXZfcG93ZXJfbW9kZSA9PQ0KPiBNTUNfUE9XRVJfVVAp
+KSB7DQo+ID4gKyAgICAgICAgICAgICAgIGhvc3QtPnByZXZfcG93ZXJfbW9kZSA9IE1NQ19QT1dF
+Ul9PTjsNCj4gPiArICAgICAgICAgICAgICAgcnRzeF91c2Jfd3JpdGVfcmVnaXN0ZXIodWNyLCBT
+RF9CVVNfU1RBVCwNCj4gU0RfQ0xLX1RPR0dMRV9FTiwgMHgwMCk7DQo+ID4gKyAgICAgICB9DQo+
+ID4NCj4gPiAgICAgICAgIGlmIChwb3dlcl9tb2RlICE9IE1NQ19QT1dFUl9PRkYpDQo+ID4gICAg
+ICAgICAgICAgICAgIHBvd2VyX21vZGUgPSBNTUNfUE9XRVJfT047IEBAIC0xMDI5LDkNCj4gKzEw
+NDEsMTggQEANCj4gPiBzdGF0aWMgaW50IHNkX3NldF9wb3dlcl9tb2RlKHN0cnVjdCBydHN4X3Vz
+Yl9zZG1tYyAqaG9zdCwNCj4gPiAgICAgICAgICAgICAgICAgZXJyID0gc2RfcG93ZXJfb24oaG9z
+dCk7DQo+ID4gICAgICAgICB9DQo+ID4NCj4gPiAtICAgICAgIGlmICghZXJyKQ0KPiA+IC0gICAg
+ICAgICAgICAgICBob3N0LT5wb3dlcl9tb2RlID0gcG93ZXJfbW9kZTsNCj4gPiArICAgICAgIGlm
+ICghZXJyKSB7DQo+ID4gKyAgICAgICAgICAgICAgIGlmICgocG93ZXJfbW9kZV90ZW1wID09IE1N
+Q19QT1dFUl9VUCkgJiYNCj4gKGhvc3QtPnBvd2VyX21vZGUgPT0gTU1DX1BPV0VSX09GRikpIHsN
+Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5wcmV2X3Bvd2VyX21vZGUgPSBNTUNf
+UE9XRVJfVVA7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcnRzeF91c2Jfd3JpdGVfcmVn
+aXN0ZXIodWNyLCBTRF9CVVNfU1RBVCwNCj4gU0RfQ0xLX1RPR0dMRV9FTiwNCj4gPiArICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RfQ0xLX1RPR0dMRV9FTik7DQo+ID4g
+KyAgICAgICAgICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIGlmICgocG93ZXJf
+bW9kZV90ZW1wID09IE1NQ19QT1dFUl9PRkYpICYmDQo+IChob3N0LT5wb3dlcl9tb2RlID09IE1N
+Q19QT1dFUl9PTikpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgaG9zdC0+cHJldl9wb3dl
+cl9tb2RlID0gTU1DX1BPV0VSX09GRjsNCj4gPg0KPiA+ICsgICAgICAgICAgICAgICBob3N0LT5w
+b3dlcl9tb2RlID0gcG93ZXJfbW9kZTsNCj4gPiArICAgICAgIH0NCj4gPiAgICAgICAgIHJldHVy
+biBlcnI7DQo+ID4gIH0NCj4gPg0KPiA+IEBAIC0xMzE2LDYgKzEzMzcsNyBAQCBzdGF0aWMgdm9p
+ZCBydHN4X3VzYl9pbml0X2hvc3Qoc3RydWN0DQo+IHJ0c3hfdXNiX3NkbW1jICpob3N0KQ0KPiA+
+ICAgICAgICAgbW1jLT5tYXhfcmVxX3NpemUgPSA1MjQyODg7DQo+ID4NCj4gPiAgICAgICAgIGhv
+c3QtPnBvd2VyX21vZGUgPSBNTUNfUE9XRVJfT0ZGOw0KPiA+ICsgICAgICAgaG9zdC0+cHJldl9w
+b3dlcl9tb2RlID0gTU1DX1BPV0VSX09GRjsNCj4gPiAgfQ0KPiA+DQo+ID4gIHN0YXRpYyBpbnQg
+cnRzeF91c2Jfc2RtbWNfZHJ2X3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQo+
+ID4gLS0NCj4gPiAyLjI1LjENCj4gPg0KPiANCj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
