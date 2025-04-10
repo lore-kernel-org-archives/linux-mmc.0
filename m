@@ -1,60 +1,39 @@
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7182A130A54;
-	Thu, 10 Apr 2025 07:53:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=60.244.123.138
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C6A1A20B207;
+	Thu, 10 Apr 2025 08:41:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744271606; cv=none; b=ZYFUnWqZzJqPa+rFzFcjF7w9JjQCqw6Ruojtw0A3QwA4JboI+m0NAclUdZ/EFFjfJhLuRY3V0Ltw4J1O7S3r3XXt1fL7YfL5kUcqsijr4xlnen3xgkL1SJydIrKPHSqgyKB3WNj6ielADD0xCb7RLbGQe3IFuOpB/IFY5A8gZDg=
+	t=1744274464; cv=none; b=JNscuxeS0SnmozWvOHTNAAnyPkmafNdPXXyLX6vgO4FW4mpeUCtlyrQaFZ5cgrleV4AboRT6OfCjIu9D4VDuYS0WLiUEfLM/KxtSX4KiryfhWGVKX2Km0eToiMAfxzT+w5CSjp3VN2+v7rAEvKQjdmVlUaY3sMOVux5aJfGSPng=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744271606; c=relaxed/simple;
-	bh=4aM4/WrwSTdQGyJjo2GJ5AOuh9vyMVJsPtf0eP4y7GM=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=eVYWTeC9vxYwBM0dhwuZLHnaHpIFtP+VaP6KEPlMKNEzwdvjPEpA5AuBKiNE3eKyyvY4E7cn6cTr7CIMUvgn1QoZ0KTPbyCyWqMau3QjmMQLyqrrI5aZwZo3hdlKmZhVbvp4SYmzWySXxYA+HZtvewEDK1bQ8qVy9ysxU/ydxBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=MZhgFVaZ; arc=none smtp.client-ip=60.244.123.138
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="MZhgFVaZ"
-X-UUID: de2f5e2e15e011f0aae1fd9735fae912-20250410
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=Tvm+drxaFLk25NxNGK6leQFz6UBSeg5ou+cb6osDu1M=;
-	b=MZhgFVaZA4LfxPGca9jXrpLBNGPxDIGUR/fdehXTmMQ8KFzpTSlax7L+ECgI/atLDTR5hQM6s97gVjl0FzNfuq1VvL1lMwIBFZ8Fm6UE1us4Qa0RxQ1gFY9HMTLPJezGY21jRzblIDHhJ/pNmKt6Rh5FY4HcHCbPe1Yp77AcPvs=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.2.1,REQID:bf93f68f-61e5-492a-ab45-5c351e19b710,IP:0,UR
-	L:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-	:release,TS:-25
-X-CID-META: VersionHash:0ef645f,CLOUDID:c7dc708d-f5b8-47d5-8cf3-b68fe7530c9a,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0|50,EDM:-3,IP:ni
-	l,URL:1,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES
-	:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULS
-X-UUID: de2f5e2e15e011f0aae1fd9735fae912-20250410
-Received: from mtkmbs09n1.mediatek.inc [(172.21.101.35)] by mailgw01.mediatek.com
-	(envelope-from <axe.yang@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 154427312; Thu, 10 Apr 2025 15:53:19 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.39; Thu, 10 Apr 2025 15:53:18 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n1.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1258.39 via Frontend Transport; Thu, 10 Apr 2025 15:53:17 +0800
-From: Axe Yang <axe.yang@mediatek.com>
-To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	<yong.mao@mediatek.com>, <qingliang.li@mediatek.com>,
-	<andy-ld.lu@mediatek.com>, Wenbin Mei <wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
-	Axe Yang <axe.yang@mediatek.com>
-Subject: [PATCH v2] mmc: mtk-sd: Add condition to enable 'single' burst type
-Date: Thu, 10 Apr 2025 15:52:47 +0800
-Message-ID: <20250410075314.6439-1-axe.yang@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	s=arc-20240116; t=1744274464; c=relaxed/simple;
+	bh=t2+OBeJgd6vIgnkDPi51zU+djJ+sYytL4w9vvY7Gjv8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Jug1J51YBxCysipayqRSNYwLfvOhlrCcjksOQ9WEkBYmrWmeqF3UMlZDu5PrVZSJU5OOMjNvYf07kc7nG0w0TuLNuv6M1N2rM78miFEO/JAhSSg03mqVEq68czZ0yMshAM61t0c2tTvDffQ9jMAD7u+HOXudOjvF0pHWmiPoTTY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.68.198])
+	by gateway (Coremail) with SMTP id _____8CxeXEZhPdnn7i2AA--.41468S3;
+	Thu, 10 Apr 2025 16:40:57 +0800 (CST)
+Received: from localhost.localdomain (unknown [223.64.68.198])
+	by front1 (Coremail) with SMTP id qMiowMDxH+UQhPdnGrJ3AA--.30039S2;
+	Thu, 10 Apr 2025 16:40:51 +0800 (CST)
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+To: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Huacai Chen <chenhuacai@kernel.org>,
+	Xuerui Wang <kernel@xen0n.name>,
+	loongarch@lists.linux.dev,
+	devicetree@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH v1 0/4] LoongArch: Introduce the Loongson-2K MMC host controller driver
+Date: Thu, 10 Apr 2025 16:40:34 +0800
+Message-ID: <cover.1744273956.git.zhoubinbin@loongson.cn>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,65 +41,65 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-MTK: N
+X-CM-TRANSID:qMiowMDxH+UQhPdnGrJ3AA--.30039S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
+X-Coremail-Antispam: 1Uk129KBj93XoW7ury8ArWDAFWDZr4kJrykCrX_yoW8Xw1Upa
+	13u3y3Kr4UCr43uF93Ga48Cry5u34fJ39rGanxJwn5Wa93u34UWryIkayYvrZxury8Jryx
+	ZFyrua18u3Z8GFXCm3ZEXasCq-sJn29KB7ZKAUJUUUU5529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUyEb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_JFI_Gr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Jr0_Gr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_
+	GcCE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0cIa020Ex4CE44I27wAqx4
+	xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jrv_JF1lYx0Ex4A2jsIE14v2
+	6r1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwCF04k20xvY0x0EwI
+	xGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480
+	Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7
+	IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr0_Gr1lIxAIcVCF04k2
+	6cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxV
+	AFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa7IU8zwZ7UUUUU==
 
-This change add a condition for 'single' burst type selection.
+Hi all:
 
-Read AXI_LEN field from EMMC50_CFG2(AHB2AXI wrapper) register, if the
-value is not 0, it means the HWIP is using AXI as AMBA bus, which do
-not support 'single' burst type.
+This patchset introduce the MMC host controller on Loongson-2K series
+CPUs.
 
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
-This change dependents on 'mmc: mtk-sd: Cleanups for register R/W':
+They are similar, except for the interface characteristics and the use of
+DMA engine, specifically, the Loongson-2K0500/Loongson-2K1000 use an
+externally shared APBDMA engine, while the Loongson-2K2000 uses an
+internally exclusive DMA.
 
-https://patchwork.kernel.org/project/linux-mediatek/cover/20250325110701.52623-1-angelogioacchino.delregno@collabora.com/
----
- drivers/mmc/host/mtk-sd.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
+Based on this, I'm splitting the driver into two patches.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index ceeae1aeac94..2e4bd5166c17 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -84,6 +84,7 @@
- #define EMMC51_CFG0	 0x204
- #define EMMC50_CFG0      0x208
- #define EMMC50_CFG1      0x20c
-+#define EMMC50_CFG2      0x21c
- #define EMMC50_CFG3      0x220
- #define SDC_FIFO_CFG     0x228
- #define CQHCI_SETTING	 0x7fc
-@@ -306,7 +307,10 @@
- /* EMMC50_CFG1 mask */
- #define EMMC50_CFG1_DS_CFG        BIT(28)  /* RW */
- 
--#define EMMC50_CFG3_OUTS_WR       GENMASK(4, 0)  /* RW */
-+/* EMMC50_CFG2 mask */
-+#define EMMC50_CFG2_AXI_SET_LEN   GENMASK(27, 24) /* RW */
-+
-+#define EMMC50_CFG3_OUTS_WR       GENMASK(4, 0)   /* RW */
- 
- #define SDC_FIFO_CFG_WRVALIDSEL   BIT(24)  /* RW */
- #define SDC_FIFO_CFG_RDVALIDSEL   BIT(25)  /* RW */
-@@ -1917,9 +1921,13 @@ static void msdc_init_hw(struct msdc_host *host)
- 	pb1_val |= FIELD_PREP(MSDC_PATCH_BIT1_CMDTA, 1);
- 	pb1_val |= MSDC_PB1_DDR_CMD_FIX_SEL;
- 
--	/* Set single burst mode, auto sync state clear, block gap stop clk */
--	pb1_val |= MSDC_PB1_SINGLE_BURST | MSDC_PB1_RSVD20 |
--		   MSDC_PB1_AUTO_SYNCST_CLR | MSDC_PB1_MARK_POP_WATER;
-+	/* Support 'single' burst type only when AXI_LEN is 0 */
-+	sdr_get_field(host->base + EMMC50_CFG2, EMMC50_CFG2_AXI_SET_LEN, &val);
-+	if (!val)
-+		pb1_val |= MSDC_PB1_SINGLE_BURST;
-+
-+	/* Set auto sync state clear, block gap stop clk */
-+	pb1_val |= MSDC_PB1_RSVD20 | MSDC_PB1_AUTO_SYNCST_CLR | MSDC_PB1_MARK_POP_WATER;
- 
- 	/* Set low power DCM, use HCLK for GDMA, use MSDC CLK for everything else */
- 	pb1_val |= MSDC_PB1_LP_DCM_EN | MSDC_PB1_RSVD3 |
+List of the patchset:
+Patch1: bindings for Loongson-2K0500/Loongson-2K1000;
+Patch2: driver for MMC controller using externally shared APBDMA engine;
+Patch3: bindings for Loongson-2K2000;
+Patch4: driver for MMC controller using internally exclusive DMA.
+
+Thanks.
+
+Binbin Zhou (4):
+  dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC controller binding
+  mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+  dt-bindings: mmc: loongson,ls2k-mmc: Add compatible for
+    Loongson-2K2000
+  mmc: loongson2: Add Loongson-2K2000 SD/SDIO controller driver
+
+ .../bindings/mmc/loongson,ls2k-mmc.yaml       | 110 +++
+ MAINTAINERS                                   |   8 +
+ drivers/mmc/host/Kconfig                      |  13 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/loongson2-mmc.c              | 781 ++++++++++++++++++
+ drivers/mmc/host/loongson2-mmc.h              | 224 +++++
+ 6 files changed, 1137 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+ create mode 100644 drivers/mmc/host/loongson2-mmc.c
+ create mode 100644 drivers/mmc/host/loongson2-mmc.h
+
+
+base-commit: 6b8dba9a7fdba6d669e4119e390a071e44383934
 -- 
-2.46.0
+2.47.1
 
