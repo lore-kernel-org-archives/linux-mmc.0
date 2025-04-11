@@ -1,128 +1,148 @@
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+Received: from fout-a7-smtp.messagingengine.com (fout-a7-smtp.messagingengine.com [103.168.172.150])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9EA4828137E;
-	Fri, 11 Apr 2025 05:41:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.61.82.184
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4764227D764;
+	Fri, 11 Apr 2025 05:45:58 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.150
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744350106; cv=none; b=RXxPeP666eWV/suQXT+RG67ggUlgSek2F02kJW9xMJyiB1o79RM7G8zAnSVpS7cj/YvVBlRB/StA3GUJndmlN5Y6TrAiA1XbrvWN8h1/h38dsV5JVNcTSlU63++BJjYLd7j4hU8JrIrFvISucA2QfOOw7MIZGnwoCNuw5JK8PmQ=
+	t=1744350361; cv=none; b=r8p1t3OB4pcBkv8zutmWn0ux6rgnBZ3D+8itv2D7KupQW9CJgsOPdssH9AdEqRaEVXv3iPrY6w2VObbwI56j7kQqyp16T0z+b+sQ4U/5Nf1kTbOPb5yc1LjbVns/B+3GizKMOK+e44uVInkcuWBuXiC+8/3yRc7dauOWkfx+MD0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744350106; c=relaxed/simple;
-	bh=qriyPMO1ibC8ioDySsSvLU5ijXvqtxPCpFVSERXUKaU=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=taJc2ja/b6SgWrrZNfphoeYQXu/mrmNzFEQ2Yu7Pm8GzbaBHI6NSutC67gKKD6em4imuhlAE1JISukd9VkKjYIsY/iRnj5g8M4gqhaCUleNF9Xt6m6ng6J/PYBpDte1NntIPzWvGC/no+KalOWVXDbAY/13PVTGWvqc4KANcWOo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com; spf=pass smtp.mailfrom=mediatek.com; dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b=ZGSORI51; arc=none smtp.client-ip=210.61.82.184
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=mediatek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=mediatek.com
+	s=arc-20240116; t=1744350361; c=relaxed/simple;
+	bh=rMjfAsbcAJJM6gcHLNJW6BIqfE6bVq7MmRShQ+goMPo=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=WghlQpS0XtMjDhKPwfVCO/EHzpBNyNSq8CRrUXC+PXDv24EDwOjZeTneq0Wc7pep9nTIftr8vP49YnnZyVzmLbzitzDWbWtJT2dhbgfTc274tssseEdeHXAk4F3X8Q07cMFp7zxUEQKfBRyzsdxkYs2uobcdtwPUUz6/hlecO/Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=Eb0uxLN+; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=izazvTEl; arc=none smtp.client-ip=103.168.172.150
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="ZGSORI51"
-X-UUID: a42a5622169711f08eb9c36241bbb6fb-20250411
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-	h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=B5tqHLMKf7g8Wxc9Q71D/XsmV0B59emr8eOs+ci5NQI=;
-	b=ZGSORI51ENGs8HTKctwhcJLU9SjYQXPhMCKsU0P5/Dp9cS32kGG1T0AKhZNeskanlGGicOVSESf9z9DJViPw3ROYboFuRqEYJ6qvWUxkGCImhqVR8WJG6d+6YBxW3fxPu7ixwrXQ1JCk3kX8HQ1ux5YmSgVmFbmfxrzzweaaVWY=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.2.1,REQID:1ea20e90-0b09-4886-920f-3304685c8918,IP:0,UR
-	L:0,TC:0,Content:-25,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-	:release,TS:-25
-X-CID-META: VersionHash:0ef645f,CLOUDID:84397b8d-f5b8-47d5-8cf3-b68fe7530c9a,B
-	ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0|50,EDM:-3,IP:ni
-	l,URL:1,File:nil,RT:nil,Bulk:nil,QS:nil,BEC:nil,COL:0,OSI:0,OSA:0,AV:0,LES
-	:1,SPR:NO,DKR:0,DKP:0,BRR:0,BRE:0,ARC:0
-X-CID-BVR: 0
-X-CID-BAS: 0,_,0,_
-X-CID-FACTOR: TF_CID_SPAM_SNR,TF_CID_SPAM_ULS
-X-UUID: a42a5622169711f08eb9c36241bbb6fb-20250411
-Received: from mtkmbs09n2.mediatek.inc [(172.21.101.94)] by mailgw02.mediatek.com
-	(envelope-from <axe.yang@mediatek.com>)
-	(Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-	with ESMTP id 903616265; Fri, 11 Apr 2025 13:41:39 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1258.39; Fri, 11 Apr 2025 13:41:38 +0800
-Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.2.1258.39 via Frontend Transport; Fri, 11 Apr 2025 13:41:37 +0800
-From: Axe Yang <axe.yang@mediatek.com>
-To: Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson
-	<ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	<yong.mao@mediatek.com>, <qingliang.li@mediatek.com>,
-	<andy-ld.lu@mediatek.com>, Wenbin Mei <wenbin.mei@mediatek.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-	<linux-arm-kernel@lists.infradead.org>, <linux-mediatek@lists.infradead.org>,
-	Axe Yang <axe.yang@mediatek.com>
-Subject: [RESEND v2] mmc: mtk-sd: Add condition to enable 'single' burst type
-Date: Fri, 11 Apr 2025 13:40:25 +0800
-Message-ID: <20250411054134.31822-1-axe.yang@mediatek.com>
-X-Mailer: git-send-email 2.46.0
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="Eb0uxLN+";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="izazvTEl"
+Received: from phl-compute-05.internal (phl-compute-05.phl.internal [10.202.2.45])
+	by mailfout.phl.internal (Postfix) with ESMTP id 55F281380264;
+	Fri, 11 Apr 2025 01:45:58 -0400 (EDT)
+Received: from phl-imap-11 ([10.202.2.101])
+  by phl-compute-05.internal (MEProxy); Fri, 11 Apr 2025 01:45:58 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1744350358;
+	 x=1744436758; bh=2r2Xn9Oh7pnBWDirUE0pyEjDwsfdPFlcNad3ZBGW7dY=; b=
+	Eb0uxLN+O72VQ+q7KFJ3YlgWIdkWmATJpMozu2JDxUE7FtJaRKB351qHfpXSFkr8
+	nVd/XM+D9+Anxp1C+LScXKMX8WL5RY/R38tf21Ma+RU0sdM4XHu3HUNSXHA5y9sy
+	F+i5xIK6wk73+NKsAesaHmewB0pDVQT11V8t+03Y3iK61wD+dzT+CTAO4a1tV+6J
+	BJVd6qOtbzVtIA3bOe3jHpDzkIn9D6hZBsH8N8yrX4MmL7I1V6MMybtazUGly8zn
+	sJyJ2LkTi63cia+nPXE8nqzULX+nFD+n1yPTvYeQTVcC6BaS5Scrvl3KRQwkj5TC
+	TOFS4Ou08SdZXWV96P3q3A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1744350358; x=
+	1744436758; bh=2r2Xn9Oh7pnBWDirUE0pyEjDwsfdPFlcNad3ZBGW7dY=; b=i
+	zazvTElxv8CI8vOmns6RjFlqtcmY2/93bgV8Nsmkg8CEIBw0D20onSN5Y0pVsPaB
+	kbOsm8c6/t7Dmx1AmAE4RysQGbuwBWhMs0Nr2ocA6hxgcF7GlFNyzE7BXGeUA7Pt
+	QjYBDYHPvk9/HWscq97fIKP+xrKZ0FMF/aWND9XNgOGG+pSsO2QR7yXqM8QAl65X
+	/4/VSpmzkTTKqo8PkJgnHpKcnikjbIMvvtKnUx0izzLGVYizGdoQPSRFXYy5lH1o
+	no94/F3S5w3Ll16qcsFCNhUyTBa0cDRHrW7kuGxNL3P4y3PszMxVztz0Xg3lL2E4
+	Ok3bDdE155/M8bxYH396A==
+X-ME-Sender: <xms:laz4ZyE-WfziFgzEyIzFgM6Xz73tdB0Cchr7CG82eMKKAtKnTbQZPw>
+    <xme:laz4ZzU2M8zmAq88YWf9g6Cj9eG4z54rMpmC_0HD-m4uF4Kr0ipf_vWmXGrYFtMUe
+    VmMAGtqBv6eSgjrRNE>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeefvddrtddtgddvuddutdduucetufdoteggodetrf
+    dotffvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdggtfgfnhhsuhgsshgtrhhisggv
+    pdfurfetoffkrfgpnffqhgenuceurghilhhouhhtmecufedttdenucesvcftvggtihhpih
+    gvnhhtshculddquddttddmnecujfgurhepofggfffhvfevkfgjfhfutgfgsehtjeertder
+    tddtnecuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnug
+    gsrdguvgeqnecuggftrfgrthhtvghrnhephfdthfdvtdefhedukeetgefggffhjeeggeet
+    fefggfevudegudevledvkefhvdeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrg
+    hmpehmrghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvgdpnhgspghrtghpthhtohep
+    udeipdhmohguvgepshhmthhpohhuthdprhgtphhtthhopehfvghsthgvvhgrmhesghhmrg
+    hilhdrtghomhdprhgtphhtthhopegrughrihgrnhdrhhhunhhtvghrsehinhhtvghlrdgt
+    ohhmpdhrtghpthhtoheprghrnhgusehkvghrnhgvlhdrohhrghdprhgtphhtthhopehshh
+    grfihnghhuoheskhgvrhhnvghlrdhorhhgpdhrtghpthhtohepuhhlfhdrhhgrnhhsshho
+    nheslhhinhgrrhhordhorhhgpdhrtghpthhtoheplhhinhhugidqrghrmhdqkhgvrhhnvg
+    hlsehlihhsthhsrdhinhhfrhgruggvrggurdhorhhgpdhrtghpthhtohepihhmgieslhhi
+    shhtshdrlhhinhhugidruggvvhdprhgtphhtthhopehsfedvsehngihprdgtohhmpdhrtg
+    hpthhtohephhgrihgsohdrtghhvghnsehngihprdgtohhm
+X-ME-Proxy: <xmx:laz4Z8IKvtoJqP56ctv3tQyAKSd7BtieQ4tgLLVIy6ByyFoPpgyhLg>
+    <xmx:laz4Z8FMUExgb0xf-CacLLzo4AEApBXcGmKJe8X8TsUhI4ltZrXxOQ>
+    <xmx:laz4Z4XYVf-VFMExVq50OsEBUVVkTPtr92r2gO4wrxJDvP5PUb7TXQ>
+    <xmx:laz4Z_NKl0ld5HPAIfhWc_Fa218TVCWTr-81H6Ld-os7JUziAEO1KA>
+    <xmx:lqz4Zx8I5GdkKpQsOWsXl2aMlcHCLE_dZPMN1vZ11m1-Zw3x16RxVP9r>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id B19172220073; Fri, 11 Apr 2025 01:45:57 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-ThreadId: Taf7f561cc211b9f6
+Date: Fri, 11 Apr 2025 07:45:27 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "Haibo Chen" <haibo.chen@nxp.com>, "Arnd Bergmann" <arnd@kernel.org>,
+ "Adrian Hunter" <adrian.hunter@intel.com>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>, "Shawn Guo" <shawnguo@kernel.org>,
+ "Sascha Hauer" <s.hauer@pengutronix.de>, "Luke Wang" <ziniu.wang_1@nxp.com>
+Cc: "Pengutronix Kernel Team" <kernel@pengutronix.de>,
+ "Fabio Estevam" <festevam@gmail.com>,
+ "Ciprian Costea" <ciprianmarian.costea@oss.nxp.com>,
+ "Josua Mayer" <josua@solid-run.com>,
+ "imx@lists.linux.dev" <imx@lists.linux.dev>,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ "NXP S32 Linux Team" <S32@nxp.com>,
+ "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>,
+ "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Message-Id: <cda876c9-7dbf-4af1-9fc1-cbd9f379252d@app.fastmail.com>
+In-Reply-To: 
+ <DU0PR04MB9496EAB4A567BDA8948D434690B62@DU0PR04MB9496.eurprd04.prod.outlook.com>
+References: <20250410140921.849213-1-arnd@kernel.org>
+ <DU0PR04MB9496EAB4A567BDA8948D434690B62@DU0PR04MB9496.eurprd04.prod.outlook.com>
+Subject: Re: [PATCH] mmc: esdhc-imx: convert to modern PM_OPS
 Content-Type: text/plain
-X-MTK: N
+Content-Transfer-Encoding: 7bit
 
-This change add a condition for 'single' burst type selection.
+On Fri, Apr 11, 2025, at 04:45, Bough Chen wrote:
+>> From: Arnd Bergmann <arnd@kernel.org>
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1586:13: error: unused function
+>> 'sdhc_esdhc_tuning_save' [-Werror,-Wunused-function]
+>>  1586 | static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
+>>       |             ^~~~~~~~~~~~~~~~~~~~~~
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1608:13: error: unused function
+>> 'sdhc_esdhc_tuning_restore' [-Werror,-Wunused-function]
+>>  1608 | static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
+>>       |             ^~~~~~~~~~~~~~~~~~~~~~~~~
+>> 
+>> Remove the #ifdef checks and instead use the better macros that silently drop
+>> the unused functions when PM is disabled.
+>
+> Thanks for this catching.
+>
+> How about add __maybe_unused to define this tuning_save/retore function?
 
-Read AXI_LEN field from EMMC50_CFG2(AHB2AXI wrapper) register, if the
-value is not 0, it means the HWIP is using AXI as AMBA bus, which do
-not support 'single' burst type.
+That sounds counterproductive.
 
-Suggested-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
----
-This change dependents on 'mmc: mtk-sd: Cleanups for register R/W':
+The new macros were introduced to allow removing all the pointless
+__maybe_unused annotations, I see no reason to stick with the
+legacy helpers here.
 
-https://patchwork.kernel.org/project/linux-mediatek/cover/20250325110701.52623-1-angelogioacchino.delregno@collabora.com/
----
- drivers/mmc/host/mtk-sd.c | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
+I did make a small mistake and ran into another warning later,
+but this fixup should address that:
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index ceeae1aeac94..2e4bd5166c17 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -84,6 +84,7 @@
- #define EMMC51_CFG0	 0x204
- #define EMMC50_CFG0      0x208
- #define EMMC50_CFG1      0x20c
-+#define EMMC50_CFG2      0x21c
- #define EMMC50_CFG3      0x220
- #define SDC_FIFO_CFG     0x228
- #define CQHCI_SETTING	 0x7fc
-@@ -306,7 +307,10 @@
- /* EMMC50_CFG1 mask */
- #define EMMC50_CFG1_DS_CFG        BIT(28)  /* RW */
- 
--#define EMMC50_CFG3_OUTS_WR       GENMASK(4, 0)  /* RW */
-+/* EMMC50_CFG2 mask */
-+#define EMMC50_CFG2_AXI_SET_LEN   GENMASK(27, 24) /* RW */
-+
-+#define EMMC50_CFG3_OUTS_WR       GENMASK(4, 0)   /* RW */
- 
- #define SDC_FIFO_CFG_WRVALIDSEL   BIT(24)  /* RW */
- #define SDC_FIFO_CFG_RDVALIDSEL   BIT(25)  /* RW */
-@@ -1917,9 +1921,13 @@ static void msdc_init_hw(struct msdc_host *host)
- 	pb1_val |= FIELD_PREP(MSDC_PATCH_BIT1_CMDTA, 1);
- 	pb1_val |= MSDC_PB1_DDR_CMD_FIX_SEL;
- 
--	/* Set single burst mode, auto sync state clear, block gap stop clk */
--	pb1_val |= MSDC_PB1_SINGLE_BURST | MSDC_PB1_RSVD20 |
--		   MSDC_PB1_AUTO_SYNCST_CLR | MSDC_PB1_MARK_POP_WATER;
-+	/* Support 'single' burst type only when AXI_LEN is 0 */
-+	sdr_get_field(host->base + EMMC50_CFG2, EMMC50_CFG2_AXI_SET_LEN, &val);
-+	if (!val)
-+		pb1_val |= MSDC_PB1_SINGLE_BURST;
-+
-+	/* Set auto sync state clear, block gap stop clk */
-+	pb1_val |= MSDC_PB1_RSVD20 | MSDC_PB1_AUTO_SYNCST_CLR | MSDC_PB1_MARK_POP_WATER;
- 
- 	/* Set low power DCM, use HCLK for GDMA, use MSDC CLK for everything else */
- 	pb1_val |= MSDC_PB1_LP_DCM_EN | MSDC_PB1_RSVD3 |
--- 
-2.46.0
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -2112,7 +2112,7 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
+                .name   = "sdhci-esdhc-imx",
+                .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+                .of_match_table = imx_esdhc_dt_ids,
+-               .pm     = &sdhci_esdhc_pmops,
++               .pm     = pm_ptr(&sdhci_esdhc_pmops),
+        },
+        .probe          = sdhci_esdhc_imx_probe,
+        .remove         = sdhci_esdhc_imx_remove,
 
+
+     Arnd
