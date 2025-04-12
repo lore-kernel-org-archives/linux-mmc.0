@@ -1,119 +1,179 @@
-Received: from mail-pl1-f172.google.com (mail-pl1-f172.google.com [209.85.214.172])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB599190468;
-	Sat, 12 Apr 2025 13:20:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.172
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744464020; cv=none; b=FsmxgytMByZ+XbATtxl2Y28yr0SPVRbW7BihjiwfHrnePXwOLHN1CEdOLtwxvEJRDFVgqaeUFlmVmmL2Z+qRY+oNYBnxNfnk0GXNaLP0Qr+DS4+ZyiM42tYwq4VcuESSda8X+MJydBqv/BN5h6KjfNuxbKLDs/o+MSR+IZy2Lbw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744464020; c=relaxed/simple;
-	bh=dx4pXrCL6WF6xs1Z7rH/KV9GDs6+4aaLKxuLLw63nDk=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=r8hCXcEMWA60aL4q7JKNN2MZ4lKJzXlXA/U7VyqG5vpGuVXPLoSyasrl4UZnOfuw64szo56rEQOJhR2vFrkSqkPmx1wvRv2/mAsjpCcd91JE/KtYiPfPyHEcrae0Fh2IUwIKUBTWY2ReIlq91sRU79XmYrtxJ+OEH5Z/ZrhteOI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=H8/R0PRc; arc=none smtp.client-ip=209.85.214.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC851148832;
+	Sat, 12 Apr 2025 20:45:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744490758; cv=pass; b=dlGk4ZzhELUwHEUgXhnceCJnCr1+RJzUi9/ZDCesVl1sRAvr/jQh/Q8LrqyJZryuy/sjOpAE3xw9RjzLsR16ms1TLb2S8Zopf/PzXwch4g3J5D8B3SPRxX8C6+jU4tSDiATaAlgWH+H+BwP7e2yBIZLUkkiZ5ApUzBglYUIuDAY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744490758; c=relaxed/simple;
+	bh=ntwujtdB35n8FOylzS58DbsgUrHCSdjp+UwNAlfu7KQ=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=ZPb+EXhGNiTEIzR5R2iIrAQFZc/SERIKUKX0DmtOilRcN7Vp5Zi2M9qdZcAYdlgerUe48SCXDoQ+w3OZ3b4kyZ5ly1st3Z3Ayvp6+dOQUVK1vzB52kEGCa2BpMAGO1o6atJQhJ7+Ldl5E+5E7joPYIOBkhjV2ih4Umx58IlpYwE=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=PPx1dBZw; arc=pass smtp.client-ip=136.143.188.112
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="H8/R0PRc"
-Received: by mail-pl1-f172.google.com with SMTP id d9443c01a7336-22409077c06so40198605ad.1;
-        Sat, 12 Apr 2025 06:20:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1744464018; x=1745068818; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=uP33+7PRmS4oJ2D1UnGQ8VItHy/+Gg/hnjlqLaempys=;
-        b=H8/R0PRc/oYbvE+dwN+UZJ8++QVKkjWDCNGP4bBS/UctSZ4Z+HjH0aB7U3YRlZi21H
-         TmaBa/QACdcLY9m/r9I8nkDYekis8V1eM9xceuBPL2VFS0UAg4BlaprBCiT6J1FvycpM
-         V58ETjZUS3ZHcmLPc1LbYsbyFP4aiwy1XRb9tfW0d9Cor89NilyGgEyqH17BMUsYvUyo
-         EkHE8pLgfwDwHvGTHXVKDBQNf0SRcb/CpuA7kb9ZW85UD9vTRFLxEyC/PW0t0VCfMsfH
-         l6XKEjHSQrj67HbYDbZpC3w+Ih5kCDhuZYiKz/igjJEkV4+tdX3ov6o+xpbOuzqJjyOG
-         Fr2Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744464018; x=1745068818;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=uP33+7PRmS4oJ2D1UnGQ8VItHy/+Gg/hnjlqLaempys=;
-        b=gkpQ67JRfcvXipwYny5CJ3rlI3CJnHLwqo5EWU19tUYxvusCF9hOeVPYiihOBgPb6x
-         GMyemYMHjH0Ie5VgYBTdAm68KuA7V8TyxTgM0uyHNT1noLbiFuarHnSe4AKJjAxW1nkx
-         8ZLwpDwoa47XFsHwgertlCL9tjq+mgsJa17guHiTifqq/QRvyprKM0B7HaLPWqc8cx7t
-         sd6jdr/gVHUxv4QWxfYXMFAo0pCR8X82V2J20beLWOjZsnR1I1xJO9xnE/PD1t2lTS0A
-         V4gyjBbPpjBFiqTA8tvjojASdPAQc2a77avYBW7dfLtygPRTgx31hhFYSnBkF/6WJbXe
-         SrsA==
-X-Forwarded-Encrypted: i=1; AJvYcCVPuEJyKLG9FOu5kHaAmjs0QSosYmrzvOjbBqLtIprEoo/n0gNBITDICEj0TKsNENRkjL2wWYxomeDj@vger.kernel.org, AJvYcCXSA6Tbm5EVPvCxGUra9Dd3lBsZ2WHzicFQE+MUhwAmnoydgwWpHmSsJg4cuOI1rJyIkhU9qxdnnxdRyOc=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy2Rz/TFT2YOmJ60wXDyvA+VOy8AHT5VOJ8PSsQAojrMhXyjCGr
-	x4ag26RNs+WcvoTtyDWjU/PIX18J3eGhjGLz2fSdQoI1SnV33Y2zJ1pGibXI
-X-Gm-Gg: ASbGncvLLnjY2ma8zhq8xc5agpG+Gb3f5Lpdk/3QEzFFt/CdUPFPsso+kXo3ctfkuLn
-	h+5//wm20W39xJYcQFWZ4SwfQ/tw8gQ1uDwEdky2iJ+cWywhIfrDwHcjBtLYyWqMjq5lq2tmifT
-	dJPXjt4cuRO6qMkL3d15oDg1PHSawt/v2XQ8XN9daEhAVSm3pidX/Aj5axJk+2Mj41QKGZrEHRG
-	xHibe2HF6Zv6tQ6ko16qtVXkS7OmKDZs0MtnhYdvAaDeQaHNIoGYVBUKJ/MYoYYRGLkVRxV+jyQ
-	XwgdaUPAJqEYeQ2WtqoSHD9hl1qPUi6493tcmFZO
-X-Google-Smtp-Source: AGHT+IEW/j+fkahXhVyvC5rfpcwM14BS/S5BDIbhgvg54bjaxj1uJKaNvJsGnehpHAEtLGKffdPYKA==
-X-Received: by 2002:a17:903:1c3:b0:223:5ace:eccf with SMTP id d9443c01a7336-22bea4bd7cemr81796825ad.25.1744464018010;
-        Sat, 12 Apr 2025 06:20:18 -0700 (PDT)
-Received: from hiago-nb ([2804:1b3:a7c3:a964:39d6:b67a:f7ea:283c])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22ac7c993a7sm67203975ad.146.2025.04.12.06.20.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 12 Apr 2025 06:20:17 -0700 (PDT)
-Date: Sat, 12 Apr 2025 10:20:12 -0300
-From: Hiago De Franco <hiagofranco@gmail.com>
-To: Judith Mendez <jm@ti.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-	Josua Mayer <josua@solid-run.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, Moteen Shah <m-shah@ti.com>,
-	Hiago De Franco <hiago.franco@toradex.com>
-Subject: Re: [PATCH 0/2] Fix V1P8_SIGNAL_ENA and HIGH_SPEED_ENA
-Message-ID: <20250412132012.xpjywokcpztb4jg4@hiago-nb>
-References: <20250407222702.2199047-1-jm@ti.com>
- <20250411130354.dc3sv3e7ruekkhkp@hiago-nb>
- <d8e45e50-f0eb-41d0-9c50-56147eaf262a@ti.com>
- <20250411194813.c4ft2uxgdiuza5cm@hiago-nb>
- <5f36ec5d-bb31-4b6c-aa4e-4ec48cb1d067@ti.com>
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="PPx1dBZw"
+ARC-Seal: i=1; a=rsa-sha256; t=1744490727; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=LkB4JmyPpInWvLyByLSXnrVwUoHwkko0u0pgw7pRQuJ8cnCjbEUOJ0QByfp1DVNc87WcDJdTrMjvwo8H5qW2VpVBpJSWsVzj6R8om4Q30l/xCX+SBth+ukcVpfgfLtb8nc4UDysXMqumpybjoBdxeRZGQZxCobR+eaW0vXtS3KU=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1744490727; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=Ck4o/n3lpkxAXlPzedzjCk/JD+YtxzckBUpPpLxJb6o=; 
+	b=Fzo2zKJFej2Ingwr3PPjnkPU4k2Tx7JeYwULVE9T7dUQInM5NcUNgiiYYNchX5aEEP6QRjH5WAr+2NFI+YpjblMo9DFui1YVEBcp+0sJkYh36Ew8f4qO92ZsCuoIJyzelTt8XS6bhYnUHDb7odjMJQGE/jII9Wblk1Nl1Nwd0M4=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
+	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1744490727;
+	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
+	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:To:To:Cc:Cc:Reply-To;
+	bh=Ck4o/n3lpkxAXlPzedzjCk/JD+YtxzckBUpPpLxJb6o=;
+	b=PPx1dBZwrk2/pChhtqkioqIHh5RKqd9VDJ4kk/HvIClo890Q6K1dNuh56IWPb7gc
+	kiUJs3fF6Kw2hc9BMcgj1UeuW0RqTiv3p5yuVarNCaePg7fDCPrXxjid8mD7W4TBTVd
+	eSCsikskvXbgOKRioptue4ke9eea40NL27KpXMJE=
+Received: by mx.zohomail.com with SMTPS id 1744490726578169.77104371916073;
+	Sat, 12 Apr 2025 13:45:26 -0700 (PDT)
+From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Date: Sat, 12 Apr 2025 22:45:08 +0200
+Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5f36ec5d-bb31-4b6c-aa4e-4ec48cb1d067@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com>
+X-B4-Tracking: v=1; b=H4sIANPQ+mcC/3WOyw6CMBREf4V07TW9ffBa+R+GRSlFGoFqi0Rj+
+ Hdr3RldzmTOzDxJMN6aQOrsSbxZbbBujoLtMqIHNZ8M2C5qwiiTlGMB/sxlkYOZJg29vUPR6RJ
+ VzgrBGInUxZtop8Zj89HeXG+xePmYpFXBgHbTZJc6W/M9SvAayTs82LA4/0hvVkzpv8MrAkInu
+ ehEpQT28qDdOKrWebWP7e8viRW0/M1ySquSlS22HL/YZtu2F2uNYI0bAQAA
+X-Change-ID: 20250317-rk3576-emmc-fix-7dc81a627422
+To: Shawn Lin <shawn.lin@rock-chips.com>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, 
+ Elaine Zhang <zhangqing@rock-chips.com>, 
+ Finley Xiao <finley.xiao@rock-chips.com>, 
+ Adrian Hunter <adrian.hunter@intel.com>
+Cc: Sebastian Reichel <sebastian.reichel@collabora.com>, 
+ Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
+ linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, 
+ Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+X-Mailer: b4 0.14.2
 
-Hi Judith,
+RK3576's power domains have a peculiar problem where the PD_NVM
+power domain, of which the sdhci controller is a part, seemingly does
+not have idempotent disable/enable. The end effect is that if PD_NVM
+gets turned off by the generic power domain logic because all the
+devices depending on it are suspended, then the next time the sdhci
+device is unsuspended, it'll hang the SoC as soon as it tries accessing
+the CQHCI registers.
 
-On Fri, Apr 11, 2025 at 04:55:39PM -0500, Judith Mendez wrote:
-> Actually this was one of the previous implementations, I should have that
-> original patch somewhere. My understanding was that we do not like adding
-> new DT properties if we can find a way to apply the quirk in the driver.
+RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
+added to the generic power domains API to handle what appears to be a
+similar hardware issue.
 
-Got it, makes sense. This will work fine with eMMC, but for the SD card
-I am not seeing other option. Maybe we could use both implementations?
+Use this new function to ask for the same treatment in the sdhci
+controller by giving rk3576 its own platform data with its own postinit
+function. The benefit of doing this instead of marking the power domains
+always on in the power domain core is that we only do this if we know
+the platform we're running on actually uses the sdhci controller. For
+others, keeping PD_NVM always on would be a waste, as they won't run
+into this specific issue. The only other IP in PD_NVM that could be
+affected is FSPI0. If it gets a mainline driver, it will probably want
+to do the same thing.
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 4e1156a2f1b8..db8ee66e76d8 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -888,7 +888,7 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
+Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+---
+Changes in v2:
+- Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
+  instead, after Ulf Hansson made me aware of its existence
+- Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 39 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
 
-        /* Suppress V1P8_SIGNAL_ENA for eMMC */
-        device_property_read_u32(dev, "bus-width", &bus_width);
--       if (bus_width == BUS_WIDTH_8)
-+       if (bus_width == BUS_WIDTH_8 || device_property_read_bool(dev, "ti,suppress-v1p8-ena"))
-                sdhci_am654->quirks |= SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA;
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a00aec05eff2da8197cc64690ba9665be756e54a 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -17,6 +17,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_domain.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/reset.h>
+ #include <linux/sizes.h>
+@@ -745,6 +746,28 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
+ 	}
+ }
+ 
++static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
++{
++	struct device *dev = mmc_dev(host->mmc);
++	int ret;
++
++	/*
++	 * This works around what appears to be a silicon bug, which makes the
++	 * PD_NVM power domain, which the sdhci controller on the RK3576 is in,
++	 * never come back the same way once it's turned off once. This can
++	 * happen during early kernel boot if no driver is using either PD_NVM
++	 * or its child power domain PD_SDGMAC for a short moment, leading to it
++	 * being turned off to save power. By keeping it on, sdhci suspending
++	 * won't lead to PD_NVM becoming a candidate for getting turned off.
++	 */
++	ret = dev_pm_genpd_rpm_always_on(dev, true);
++	if (ret && ret != -EOPNOTSUPP)
++		dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
++			 ERR_PTR(ret));
++
++	dwcmshc_rk35xx_postinit(host, dwc_priv);
++}
++
+ static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -1176,6 +1199,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+ 	.postinit = dwcmshc_rk35xx_postinit,
+ };
+ 
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_rk35xx_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++	},
++	.init = dwcmshc_rk35xx_init,
++	.postinit = dwcmshc_rk3576_postinit,
++};
++
+ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+ 	.pdata = {
+ 		.ops = &sdhci_dwcmshc_th1520_ops,
+@@ -1274,6 +1309,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+ 		.compatible = "rockchip,rk3588-dwcmshc",
+ 		.data = &sdhci_dwcmshc_rk35xx_pdata,
+ 	},
++	{
++		.compatible = "rockchip,rk3576-dwcmshc",
++		.data = &sdhci_dwcmshc_rk3576_pdata,
++	},
+ 	{
+ 		.compatible = "rockchip,rk3568-dwcmshc",
+ 		.data = &sdhci_dwcmshc_rk35xx_pdata,
 
-So the driver applies the quirk for eMMC and we set the DT property for
-SD card. Not sure which one is the best, but maybe it is another option.
-Let's see what Adrian also thinks about that.
+---
+base-commit: 64e9fdfc89a76fed38d8ddeed72d42ec71957ed9
+change-id: 20250317-rk3576-emmc-fix-7dc81a627422
 
-> 
-> If this implementation flies with the maintainers, then we can go back to DT
-> property implementation.
-> 
-> Adrian, is this fine with you?
-> 
-> ~ Judith
+Best regards,
+-- 
+Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
 
-Cheers,
-Hiago.
