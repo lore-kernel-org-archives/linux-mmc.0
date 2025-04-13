@@ -1,179 +1,149 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DC851148832;
-	Sat, 12 Apr 2025 20:45:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744490758; cv=pass; b=dlGk4ZzhELUwHEUgXhnceCJnCr1+RJzUi9/ZDCesVl1sRAvr/jQh/Q8LrqyJZryuy/sjOpAE3xw9RjzLsR16ms1TLb2S8Zopf/PzXwch4g3J5D8B3SPRxX8C6+jU4tSDiATaAlgWH+H+BwP7e2yBIZLUkkiZ5ApUzBglYUIuDAY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744490758; c=relaxed/simple;
-	bh=ntwujtdB35n8FOylzS58DbsgUrHCSdjp+UwNAlfu7KQ=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=ZPb+EXhGNiTEIzR5R2iIrAQFZc/SERIKUKX0DmtOilRcN7Vp5Zi2M9qdZcAYdlgerUe48SCXDoQ+w3OZ3b4kyZ5ly1st3Z3Ayvp6+dOQUVK1vzB52kEGCa2BpMAGO1o6atJQhJ7+Ldl5E+5E7joPYIOBkhjV2ih4Umx58IlpYwE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=PPx1dBZw; arc=pass smtp.client-ip=136.143.188.112
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C4F4517C210;
+	Sun, 13 Apr 2025 22:35:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.169
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744583753; cv=none; b=DYJ4KOAAYVisDu3e6u1rgLLvIGQWuYHdZifUL+T57+4O6Wgfd/wiKqiBiac6je8NnN3+9TXcMOJAfkLKmPRaNwqndpPdFWX4ER1LbF9CdsszB+/VOAemvctgdLorDDlge/OfiNtxLgQekdnS/A+cOshw0EqNLd9UGNQJOp4qrn8=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744583753; c=relaxed/simple;
+	bh=INPGhkFetjITTXnuZyQwyYqly3zYX7iaDoWJaIaXge8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=pZeHLfpqVPNoRylhbyWNFvedwGSHKJNkPScuNrhYP5L4pPuxEX+mWlFZHftPyo1F1eMcuJdvRAIHXO4AEITDhJW6QTYlP22JVF0mWtr8/rpLHig9nXTwfp6U2kTfyUtNSWsjiy2HOg9iiAnx1VLxxNRAFoXv9Anq3iq0RPjpTpk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=A1YZoYqY; arc=none smtp.client-ip=209.85.222.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="PPx1dBZw"
-ARC-Seal: i=1; a=rsa-sha256; t=1744490727; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=LkB4JmyPpInWvLyByLSXnrVwUoHwkko0u0pgw7pRQuJ8cnCjbEUOJ0QByfp1DVNc87WcDJdTrMjvwo8H5qW2VpVBpJSWsVzj6R8om4Q30l/xCX+SBth+ukcVpfgfLtb8nc4UDysXMqumpybjoBdxeRZGQZxCobR+eaW0vXtS3KU=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1744490727; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=Ck4o/n3lpkxAXlPzedzjCk/JD+YtxzckBUpPpLxJb6o=; 
-	b=Fzo2zKJFej2Ingwr3PPjnkPU4k2Tx7JeYwULVE9T7dUQInM5NcUNgiiYYNchX5aEEP6QRjH5WAr+2NFI+YpjblMo9DFui1YVEBcp+0sJkYh36Ew8f4qO92ZsCuoIJyzelTt8XS6bhYnUHDb7odjMJQGE/jII9Wblk1Nl1Nwd0M4=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
-	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1744490727;
-	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:To:To:Cc:Cc:Reply-To;
-	bh=Ck4o/n3lpkxAXlPzedzjCk/JD+YtxzckBUpPpLxJb6o=;
-	b=PPx1dBZwrk2/pChhtqkioqIHh5RKqd9VDJ4kk/HvIClo890Q6K1dNuh56IWPb7gc
-	kiUJs3fF6Kw2hc9BMcgj1UeuW0RqTiv3p5yuVarNCaePg7fDCPrXxjid8mD7W4TBTVd
-	eSCsikskvXbgOKRioptue4ke9eea40NL27KpXMJE=
-Received: by mx.zohomail.com with SMTPS id 1744490726578169.77104371916073;
-	Sat, 12 Apr 2025 13:45:26 -0700 (PDT)
-From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-Date: Sat, 12 Apr 2025 22:45:08 +0200
-Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A1YZoYqY"
+Received: by mail-qk1-f169.google.com with SMTP id af79cd13be357-7c5e39d1db2so209523085a.3;
+        Sun, 13 Apr 2025 15:35:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744583750; x=1745188550; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=q5YjA/KfpvY46CadYlUcHuNncn9tBNGFY7tmTjqFT+k=;
+        b=A1YZoYqY0GO1CpBafuev+rzWO92rsdtRwk5a0bNVjcSbSQy+7VsBo/rdPPevOFVlnJ
+         cixIlnXc2xDLmnHIPddyt8R3mmIx3kg1nLszBX4EBWI5INjgepqUMVhyvImjEmGRo6x3
+         6Y6tXxoXnHy7yyqR3B0urWd9ZuSn44Qg5GuOliEAEuaQecSus1+JfxaIqbziej2Fi611
+         tkc5TqtJaTxjzYAfv+daH1RgpbGSGcAtbK4HFvDNil4Np02WoIBqA6bzywB9NZFBlv8e
+         Ev7OBnCN2++irzAPiWskIfOlhN9rG7XoBJZJNn0x1Mt6+hug0QOdfo2hYa/7Rcg9oNiK
+         6VSw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744583750; x=1745188550;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=q5YjA/KfpvY46CadYlUcHuNncn9tBNGFY7tmTjqFT+k=;
+        b=Ukp1XUZKy8dvtC8eJ54WjgFScwxp+Nq/airMkjHvNVE3ix0vTLuTQYllVOhALCKSZQ
+         gVaDbsz4YERhNrT/w2J8RPmge5c8P5MWdLHhR6ZrjSxtLX8lFib2EqGlxlpQUt2cDn/o
+         Qw0MRdBhE88ZInuDrCxncCejZEh+c6RdR+TD3dBg/eRR799MKTIZycz917SHwhpHlaQP
+         Rxb69IYXnaEGVaqI66vtP3yzcIenCg7uNnn9E+x7viWXtGqjo8QdKik2FH/1NE9HZ982
+         JIbfsvRXRJAEh5gEmSpZQnB1R4sHH/5fZK//I/9HiRf14STmho08lpi+QBW8KL/W467J
+         ZMOw==
+X-Forwarded-Encrypted: i=1; AJvYcCUpRKHNUYeTJ6bL6sglB2NtizJNEQ67O7yTh70WN4gAF6ienszal03iZE6dQWHGiiGTq/7h8H7BCgRIuaH1@vger.kernel.org, AJvYcCVsp9VGLawnkZAIEVu4783E9Yw4/E5cCyO8DnsCH+CWGLnmiMqp1hxM/gQfJBsgScOI32sSQVwvHEO7@vger.kernel.org, AJvYcCWFacJ906yWauL5BSVDPPvih/e1dHE5kkODQj4WzHDxAal5V9N59bILqzHSYro3ZW1vANtRC43omLns@vger.kernel.org, AJvYcCXer7JKArpT2m9Z2dZkw97yO17IyiiTp2Wj4QMflpH1hh6hBpFaeW2Wse+AFRMez/dCX+oUmSdZIScW@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy3wMpLvsdTRNLjdWEqTRmE+Sy6yfCE56d9FcTdvxXKvSpi/xnu
+	PoGqyHbO5w2pmZ3JIqUMUa8yTI65ecu/+uwPypVpwH1kCU4vlCt+
+X-Gm-Gg: ASbGncucvYhsF+0u7DhyIs3ishE/QMTBwf8zgwKbK7hc9hyLmUvB6uPKFuEi4KzxcwE
+	reOaGZ/qC7L9NePJ8FhxqlU+6+7z8bgJlTTBFtchd7KNIhiUocq0rIwiY2vp6vvq1SJLookxUHP
+	/noG0mF5229koIN7vhaP19RKXESFgAfShRmf11MIpoy7eMsX5Il89vYAuvN4Q8P/3Cn/e6vNNEE
+	U1IJp7btOEKXX/Xy05QM0TSptJWK1X2gwbJC5kJfriL0C10LPd9ROjwh6AUOL0K0udRTBh+DJWE
+	pXYDVrCAh6aB5dRV
+X-Google-Smtp-Source: AGHT+IF4AYfNDX6fmR9rMqMQ3rY8l2Lo4PsLhdNiIgvJGGBJRv29yNF11cYAsmD/700LbzKyzcIlsA==
+X-Received: by 2002:a05:620a:2586:b0:7c5:9b12:f53c with SMTP id af79cd13be357-7c7af0b97femr1590502385a.5.1744583750449;
+        Sun, 13 Apr 2025 15:35:50 -0700 (PDT)
+Received: from localhost ([2001:da8:7001:11::cb])
+        by smtp.gmail.com with UTF8SMTPSA id af79cd13be357-7c7a8942eb8sm617762685a.12.2025.04.13.15.35.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 13 Apr 2025 15:35:50 -0700 (PDT)
+From: Inochi Amaoto <inochiama@gmail.com>
+To: Jean Delvare <jdelvare@suse.com>,
+	Guenter Roeck <linux@roeck-us.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Chen Wang <unicorn_wang@outlook.com>,
+	Inochi Amaoto <inochiama@gmail.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Alexandre Ghiti <alex@ghiti.fr>,
+	Daniel Lezcano <daniel.lezcano@linaro.org>,
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
+	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Chao Wei <chao.wei@sophgo.com>
+Cc: linux-hwmon@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	sophgo@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-i2c@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	linux-mmc@vger.kernel.org,
+	Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: [PATCH v2 00/10] riscv: sophgo: Introduce SG2044 SRD3-10 board support
+Date: Mon, 14 Apr 2025 06:34:54 +0800
+Message-ID: <20250413223507.46480-1-inochiama@gmail.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com>
-X-B4-Tracking: v=1; b=H4sIANPQ+mcC/3WOyw6CMBREf4V07TW9ffBa+R+GRSlFGoFqi0Rj+
- Hdr3RldzmTOzDxJMN6aQOrsSbxZbbBujoLtMqIHNZ8M2C5qwiiTlGMB/sxlkYOZJg29vUPR6RJ
- VzgrBGInUxZtop8Zj89HeXG+xePmYpFXBgHbTZJc6W/M9SvAayTs82LA4/0hvVkzpv8MrAkInu
- ehEpQT28qDdOKrWebWP7e8viRW0/M1ySquSlS22HL/YZtu2F2uNYI0bAQAA
-X-Change-ID: 20250317-rk3576-emmc-fix-7dc81a627422
-To: Shawn Lin <shawn.lin@rock-chips.com>, 
- Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, 
- Elaine Zhang <zhangqing@rock-chips.com>, 
- Finley Xiao <finley.xiao@rock-chips.com>, 
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: Sebastian Reichel <sebastian.reichel@collabora.com>, 
- Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
- linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
- linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
- linux-mmc@vger.kernel.org, 
- Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-X-Mailer: b4 0.14.2
+Content-Transfer-Encoding: 8bit
 
-RK3576's power domains have a peculiar problem where the PD_NVM
-power domain, of which the sdhci controller is a part, seemingly does
-not have idempotent disable/enable. The end effect is that if PD_NVM
-gets turned off by the generic power domain logic because all the
-devices depending on it are suspended, then the next time the sdhci
-device is unsuspended, it'll hang the SoC as soon as it tries accessing
-the CQHCI registers.
+Sophgo SG2044 SRD3-10 is an ATX board bases on Sophgo SG2044 SoC.
+This board includes 5 uart ports, 5 pcie x8 slots, 1 1G Ethernet port,
+1 microSD slot.
 
-RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
-added to the generic power domains API to handle what appears to be a
-similar hardware issue.
+Introduce basic support for this board and Sophgo SG2044 SoC
 
-Use this new function to ask for the same treatment in the sdhci
-controller by giving rk3576 its own platform data with its own postinit
-function. The benefit of doing this instead of marking the power domains
-always on in the power domain core is that we only do this if we know
-the platform we're running on actually uses the sdhci controller. For
-others, keeping PD_NVM always on would be a waste, as they won't run
-into this specific issue. The only other IP in PD_NVM that could be
-affected is FSPI0. If it gets a mainline driver, it will probably want
-to do the same thing.
+Changed from v1:
+- https://lore.kernel.org/all/20250407010616.749833-1-inochiama@gmail.com
+1. apply Rob's tag
+2. patch 1: new patch for grouping all similar compatible ids.
+3. patch 7: remove unnecessary compatible check
+4. patch 8: adapt for the new patch 1
+5. patch 9: fix copyright e-mail
 
-Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
----
-Changes in v2:
-- Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
-  instead, after Ulf Hansson made me aware of its existence
-- Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 39 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
+Inochi Amaoto (10):
+  dt-bindings: i2c: dw: merge duplicate compatible entry.
+  dt-bindings: timer: Add Sophgo SG2044 ACLINT timer
+  dt-bindings: interrupt-controller: Add Sophgo SG2044 CLINT mswi
+  dt-bindings: interrupt-controller: Add Sophgo SG2044 PLIC
+  dt-bindings: reset: sophgo: Add SG2044 bindings.
+  dt-bindings: hwmon: Add Sophgo SG2044 external hardware monitor
+    support
+  dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo SG2044 support
+  dt-bindings: i2c: dw: Add Sophgo SG2044 SoC I2C controller
+  dt-bindings: riscv: sophgo: Add SG2044 compatible string
+  riscv: dts: sophgo: Add initial device tree of Sophgo SRD3-10
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a00aec05eff2da8197cc64690ba9665be756e54a 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -17,6 +17,7 @@
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/platform_device.h>
-+#include <linux/pm_domain.h>
- #include <linux/pm_runtime.h>
- #include <linux/reset.h>
- #include <linux/sizes.h>
-@@ -745,6 +746,28 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
- 	}
- }
- 
-+static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	int ret;
-+
-+	/*
-+	 * This works around what appears to be a silicon bug, which makes the
-+	 * PD_NVM power domain, which the sdhci controller on the RK3576 is in,
-+	 * never come back the same way once it's turned off once. This can
-+	 * happen during early kernel boot if no driver is using either PD_NVM
-+	 * or its child power domain PD_SDGMAC for a short moment, leading to it
-+	 * being turned off to save power. By keeping it on, sdhci suspending
-+	 * won't lead to PD_NVM becoming a candidate for getting turned off.
-+	 */
-+	ret = dev_pm_genpd_rpm_always_on(dev, true);
-+	if (ret && ret != -EOPNOTSUPP)
-+		dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
-+			 ERR_PTR(ret));
-+
-+	dwcmshc_rk35xx_postinit(host, dwc_priv);
-+}
-+
- static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -1176,6 +1199,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
- 	.postinit = dwcmshc_rk35xx_postinit,
- };
- 
-+static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
-+	.pdata = {
-+		.ops = &sdhci_dwcmshc_rk35xx_ops,
-+		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-+		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-+	},
-+	.init = dwcmshc_rk35xx_init,
-+	.postinit = dwcmshc_rk3576_postinit,
-+};
-+
- static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
- 	.pdata = {
- 		.ops = &sdhci_dwcmshc_th1520_ops,
-@@ -1274,6 +1309,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
- 		.compatible = "rockchip,rk3588-dwcmshc",
- 		.data = &sdhci_dwcmshc_rk35xx_pdata,
- 	},
-+	{
-+		.compatible = "rockchip,rk3576-dwcmshc",
-+		.data = &sdhci_dwcmshc_rk3576_pdata,
-+	},
- 	{
- 		.compatible = "rockchip,rk3568-dwcmshc",
- 		.data = &sdhci_dwcmshc_rk35xx_pdata,
+ .../hwmon/sophgo,sg2042-hwmon-mcu.yaml        |    6 +-
+ .../bindings/i2c/snps,designware-i2c.yaml     |   12 +-
+ .../sifive,plic-1.0.0.yaml                    |    1 +
+ .../thead,c900-aclint-mswi.yaml               |    1 +
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml      |    3 +
+ .../bindings/reset/sophgo,sg2042-reset.yaml   |    7 +-
+ .../devicetree/bindings/riscv/sophgo.yaml     |    4 +
+ .../timer/thead,c900-aclint-mtimer.yaml       |    1 +
+ arch/riscv/boot/dts/sophgo/Makefile           |    1 +
+ arch/riscv/boot/dts/sophgo/sg2044-cpus.dtsi   | 3002 +++++++++++++++++
+ arch/riscv/boot/dts/sophgo/sg2044-reset.h     |  128 +
+ .../boot/dts/sophgo/sg2044-sophgo-srd3-10.dts |   32 +
+ arch/riscv/boot/dts/sophgo/sg2044.dtsi        |   86 +
+ 13 files changed, 3275 insertions(+), 9 deletions(-)
+ create mode 100644 arch/riscv/boot/dts/sophgo/sg2044-cpus.dtsi
+ create mode 100644 arch/riscv/boot/dts/sophgo/sg2044-reset.h
+ create mode 100644 arch/riscv/boot/dts/sophgo/sg2044-sophgo-srd3-10.dts
+ create mode 100644 arch/riscv/boot/dts/sophgo/sg2044.dtsi
 
----
-base-commit: 64e9fdfc89a76fed38d8ddeed72d42ec71957ed9
-change-id: 20250317-rk3576-emmc-fix-7dc81a627422
-
-Best regards,
--- 
-Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+--
+2.49.0
 
