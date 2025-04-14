@@ -1,192 +1,203 @@
-Received: from MA0PR01CU012.outbound.protection.outlook.com (mail-southindiaazolkn19011033.outbound.protection.outlook.com [52.103.67.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 53DEF23CE;
-	Mon, 14 Apr 2025 00:56:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.103.67.33
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744592206; cv=fail; b=uz4T5+Ty5Gdk4GD/pkVOy/kjbrvARGRBiMyi+n+9XCCM26aaf5SAV2r6fnthRqb1Y/MdIEcHVjTnZgv9CcP2vxcvkwWkmkdsMMWG4FUmJDUFm7FE/0AEFN3WeBPsum2YXiS21x7s4VopoSHZeRNX6tkQ+3eOXV4KF677MU2uLiM=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744592206; c=relaxed/simple;
-	bh=Z1OSMjZln/ZvJWKSNRngv+8k1+PQU/L37/L3712mKTo=;
-	h=Message-ID:Date:Subject:To:Cc:References:From:In-Reply-To:
-	 Content-Type:MIME-Version; b=NC8Fnu9DKEE6dtgG+NyAKEsaSbWLippdHyfV7TVwatwo8F8DrEFqFIYRFow8Jfy/g4hJ97pneFAxaz5Un3AR1BKM6+EDx3zLwpg8JlGWjSQVNjVJWk+UHlGC+S6xotoaTLN+t4h94fDOm51rWRmQVRZiIeiZ8pB79Szck3ZLYG4=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=HW19Op1i; arc=fail smtp.client-ip=52.103.67.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC6853C1F;
+	Mon, 14 Apr 2025 01:31:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744594306; cv=none; b=mmuuH8Io87A3lKFQGm265XJa/3MusJedMkEVkMSFu8ystHsEmL1QenLW3AM/FS065E+ZKlMvs+iQAbByFzsgZJIqk0wMAf7iywEWeVWjxG1CVXbPTG+BvbQUPbQqsWvwimlIJgum6iY2il0iQfphpZWKaqHGPm81LsxQQcZ/Hjs=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744594306; c=relaxed/simple;
+	bh=9xECK2ehynHxAbLBfaqh/9OBldVcrjO20TqR4gRuQUg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=pcY1i+837Yizqjwr0k0OzqU6seWR/ZxMNn3zuDHomW92pzuqNbGjHON+A0QMHU41ckz2eqNWGOWxQU0CJsQW9Q+Qi7OZPuV8BsXQzsTpFpipr6bZZNBoNCZ3M/h8vdIpxeSEMx31Kc8gRruhrbSwEVtwPBzUiW98ZSLKsxRVtok=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Bg8mCdtR; arc=none smtp.client-ip=209.85.208.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="HW19Op1i"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=kNSsHspb9ssVyuHWX5yHSnLoNbXnsGpiovD8ZXpFCoc77tSnglL5KdNZAlzfe8uJrU6ZDy26tTZtsdmTi+5QggRJv93C4bOBsY76BF+0TUyjNboiPnAzXpwGHF6Go5t5I6Bs90ndSMFCokqIl30gtJ7qNe1tb0VPzuvHFdIkepVLdO4xyZm0O626U1/Ok11OmlsYUngkc+UQg/LbIUE/1y15StjPB/jpmvDjZkgOA+q2fyyNfvfc+5IKNw+1zIS79/QAk7mpe25+HuDWRl6jGwwQeXSpTiKJE0TJXDP7GJL/Vt4Dpov5qI3G8SbKnO1RFlbjc0FYeubgH3QBbSvyew==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=nWbC/Tdshs5Bv0VWx760nYQkpZEb40p5HDtGlLNhRNU=;
- b=LUxCQNNzcj6Q1RMYWEemvVmflNGsTJ89hm5bC9nDcaKFWiUyKueqptY3lQUSc3M4uTgsErY8aZg+K/fv8nwWarjCGbiWN8ChfbMVjPMOl7dbDKwpEoiXKciS5sY7rX0T1EQoxfV81kBXTQVtDRJxcvqFTvt2ii977PlihTljiToTgZNKyzG4mIuudvMi4P9mE68FfjvqAT3g55cDSvi3N0h2OBOKmWtJdXWfp46QKnt2biV58ImgdLcw46Ww0VQRIyqJLMrxiMzDpdE+l8K5s1LTFSIHbZ4aUUBFX0yms/LxhOn+3dLRoZeO5aYeKYtULEWG/GNVlh0e5z5vAkoa3w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
- dkim=none; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nWbC/Tdshs5Bv0VWx760nYQkpZEb40p5HDtGlLNhRNU=;
- b=HW19Op1iMkhtlivxeUgfthS8hwCOu/fxRFBauDG8ByNXKqS/TK2bq11PFuDpLRs5vqfInJkaWRpHrUgfEEy6Gdt0Kjf8XtUtu54d32neIAGkNlcrjcc6OY1sopTrh4HInLPjFCt7sZBKGdcArZHLG66pWJyHroQe8X2IAWutTge24hoG5rFq7Y8Z2vZOdHEvcNnVNtYfYBlehW1z3H9l8WEMFr/cT0LWiDDm8lOZURblid92S7pUVQXmuWhXZSY7byqSD1iJPHhqdESIprWt6mbDGUjshMbeCYoP7YN4ImfVeLLV8BgG/fli5dSo2KC0ylOpCndh9PadsQ4Uu0VBYA==
-Received: from MA0P287MB2262.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:100::6)
- by MA0P287MB0019.INDP287.PROD.OUTLOOK.COM (2603:1096:a01:5c::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8632.34; Mon, 14 Apr
- 2025 00:56:33 +0000
-Received: from MA0P287MB2262.INDP287.PROD.OUTLOOK.COM
- ([fe80::ca81:3600:b1e4:fcf4]) by MA0P287MB2262.INDP287.PROD.OUTLOOK.COM
- ([fe80::ca81:3600:b1e4:fcf4%5]) with mapi id 15.20.8632.030; Mon, 14 Apr 2025
- 00:56:33 +0000
-Message-ID:
- <MA0P287MB2262A9CF72D959EC84049740FEB32@MA0P287MB2262.INDP287.PROD.OUTLOOK.COM>
-Date: Mon, 14 Apr 2025 08:56:26 +0800
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 07/10] dt-bindings: mmc: sdhci-of-dwcmhsc: Add Sophgo
- SG2044 support
-To: Inochi Amaoto <inochiama@gmail.com>, Jean Delvare <jdelvare@suse.com>,
- Guenter Roeck <linux@roeck-us.net>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Andi Shyti <andi.shyti@kernel.org>,
- Thomas Gleixner <tglx@linutronix.de>,
- Paul Walmsley <paul.walmsley@sifive.com>,
- Samuel Holland <samuel.holland@sifive.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel
- <p.zabel@pengutronix.de>, Palmer Dabbelt <palmer@dabbelt.com>,
- Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
- Daniel Lezcano <daniel.lezcano@linaro.org>,
- Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
- Jarkko Nikula <jarkko.nikula@linux.intel.com>,
- Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>
-Cc: linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
- sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
- linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
- linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
- Longbin Li <looong.bin@gmail.com>
-References: <20250413223507.46480-1-inochiama@gmail.com>
- <20250413223507.46480-8-inochiama@gmail.com>
-From: Chen Wang <unicorn_wang@outlook.com>
-In-Reply-To: <20250413223507.46480-8-inochiama@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SG2PR01CA0118.apcprd01.prod.exchangelabs.com
- (2603:1096:4:40::22) To MA0P287MB2262.INDP287.PROD.OUTLOOK.COM
- (2603:1096:a01:100::6)
-X-Microsoft-Original-Message-ID:
- <671b1e36-cf7d-4334-b486-f7cc41b9c87e@outlook.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bg8mCdtR"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-5e5bc066283so6031979a12.0;
+        Sun, 13 Apr 2025 18:31:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1744594303; x=1745199103; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=tBcdawRnzTZ8ZY4dlNm0WG8aDh/pMvgAkt6S8wOu0R0=;
+        b=Bg8mCdtRXLk6WY9Xgyj3mgnwVDW4xTMMP3JzkrodhhGUh7vYliZxvJi30mHYK/dQIY
+         mEl4umKkuB7kS3XCEh2e2XzkS//siiffetQc8iTlDByIaXgkAjW5jvqzKgEBFk0quwN2
+         yenxTQC4tLZWDshmqUm1UoRj7OrNXiBsLc4oe+SmCgn0wsYoLLqjW/4+253tieplz0va
+         mqItHsxvx+/KiV/QzQ3S6JrcUb5dUfRO9nysbC0zxjmJDmwpxbm+UE480ilR9tsFAxKI
+         CfWTyPwCwYAPOcAwevyUZxmIIGP6kQVwZPFnB9zOLszeDdcBpNylpZ+zVgMTlH9Ph3d1
+         RwVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1744594303; x=1745199103;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=tBcdawRnzTZ8ZY4dlNm0WG8aDh/pMvgAkt6S8wOu0R0=;
+        b=rLW0bVulM4Zi4z4r7f3eZHjTZTsL/YZN5lvlMLT8nkVIt0TsFVREbPblo/X/FWNJQo
+         kXvkJ8vJtAdqQ1nD950NE/CDS5AUH3HmB1Zi/b6JjuL2NsmqV7JHg7FQJ9gpuVwL8sQm
+         HnQ/sKUyANaNqhGfIn8r/8O1zcjVa0BvyYdJqdSzecq3jytXAkhWI/2x28ruu3T4vCgH
+         cd21Pwgvc87v6TGnQ0vO/ADp4jWt0qpF8c/Wy8qjl8zaIQpXtnuy0d8JgV9aoeLoNsx5
+         PLOFwypCCqLmT5uoPd5uVmUG9ubn71BmRjBRCi8fk7181dUaVb5yA8UrDGEURq1AWx1j
+         cTFg==
+X-Forwarded-Encrypted: i=1; AJvYcCWtDnbtoiRMWzeKGXjrIM3buajaSnK3pj8oAa+5Zt7962niCRJQXoYETwiov5YAGgyLbMrscIFzAO6V@vger.kernel.org, AJvYcCXSEVXgBXCWgG9lOqbDLW3LxNxg/UWNW4xA+9ioVdS6s/O26MleJZbm+DCmG4iacXIFMGcSrlV0wD5i@vger.kernel.org
+X-Gm-Message-State: AOJu0YwUcUa/9QTM/aOJ8GpTptMgpVq8q6jAt+ZKu/TIT8SKMSH1r+67
+	ajLGDAc7WsNwciC0O9suWmLJIniIAlD+Pgxrp/4e0ALZTn1h+GCacTFw0cHV6/Z+kw7TzLLR4MG
+	8fXBSR7I24aqHw1LXFDq0aQjnyIg=
+X-Gm-Gg: ASbGncsyUX8Tx4CoE0DP+XHcJ7YqjhECBaEk1Mf5a0x7N6gVEt8r3C5qgjPQZIdQyhg
+	jkqh4VjQwJF4M8eYjSs4aSWn39DX5YMUBr5PoBCOCjVlOHYVwtcoc8bGcMmd0lXHYWslvvIyaQb
+	HfUsCIUNrl23Jm3dyjuQVz
+X-Google-Smtp-Source: AGHT+IEWHVetZm0u5D2BM27qSiXz/lDX/oFTQJDOz5qkv2RHDUgoCD5ISwlVKLKNeGcIQw/0Z5POs6FbMsmeOjtQQVI=
+X-Received: by 2002:a05:6402:254a:b0:5ec:c990:b578 with SMTP id
+ 4fb4d7f45d1cf-5f36f67797amr8516043a12.19.1744594302836; Sun, 13 Apr 2025
+ 18:31:42 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: MA0P287MB2262:EE_|MA0P287MB0019:EE_
-X-MS-Office365-Filtering-Correlation-Id: 79b54e35-8597-42cc-eb37-08dd7aef3347
-X-Microsoft-Antispam:
-	BCL:0;ARA:14566002|461199028|5072599009|6090799003|8060799006|19110799003|7092599003|15080799006|440099028|3412199025;
-X-Microsoft-Antispam-Message-Info:
-	=?utf-8?B?NS9LV3lrM1k2UWNQMXVBN0Nhc0JPZUdjbjBBdE9wYzR1WDJtOVYrdjhTdTlK?=
- =?utf-8?B?RFZ5djQrUUZoWVNPd29CTkc3WVBBU0lLVkJPMlM5R21mcnBTU2NqalQ5dDhN?=
- =?utf-8?B?a3RHR1BKcVp6N2lkRUs5NEVYNFRHQVJIbWFtZGp4Ri9nOHQ5cVNOR08zS0xi?=
- =?utf-8?B?WkdHRy9jZ3FXS0lma04yYXVHU2ltRGgydDdIeXdYc2dGZVE1YWhpRXNUWUx6?=
- =?utf-8?B?MHJpYmxpNTVSRGVIUFdSZjRlVU4zazRVMHFiYXAvRFh1VDZvRHlNNk1qUU4x?=
- =?utf-8?B?VTdLSnU4M0lSZHE3c1lXb0h6MTVkRFJVWHhZZm9sSE82dVFYOEM3VWp6a3Fv?=
- =?utf-8?B?ZStiK0tubUZONmd0NGh0SEw4QS9ONURoRTRWdGJHTzk5a3JadlFQUy9PcEkv?=
- =?utf-8?B?Z1FYck9aYThaQUltdkNuZGlRdmU0T3ZJZksvaEdCMmxEaHp6RDJTSjQxQVFW?=
- =?utf-8?B?VitFQk1jV2pSOEZKNGFmd0U2VnhLb0xmcGV4SkNQSWMvVlVCRWNSaUhvNHRI?=
- =?utf-8?B?Qmwzbjc4Q2MveDhmR21zY05QZHVOVjhWOXFmcVlsS3IranY5T1EyL09mWm5K?=
- =?utf-8?B?aGNiME1FZm1ReldlK0FucTBVU2xHRW9xWXY2Z1pJRDBJbmp4dUhORE5Kcm5t?=
- =?utf-8?B?MmM5K2g4RnVlN1ZJbGJwVG1ramFTNjBUY1UwVTFsSmV5MjFVUTNZZVJISUht?=
- =?utf-8?B?SkRyaGRKOVVvaE1RL3dGWkFPdVphemRIOU1ZVDI1blRuc1ZuZ1VaMHdGMlpz?=
- =?utf-8?B?eGtlOFdJWThGTjIyYW11YURxdnhaTlJyMU55R2hmQzArYXVQZzZ0K3ZROFlt?=
- =?utf-8?B?RVNlMTlNb1dhMmdUdHd6S1BRVlgvVnlwOXp6RkdiV1duNnFLakNITFd0d2Qw?=
- =?utf-8?B?Ny9Kei9nOHB3dTBFM0YxSGI0STJuWFRIRFBZa2hzZ29BYURqZHlpWU5vcUI3?=
- =?utf-8?B?QVVva2k4V1BXMlRoL3NNVTZCU2t2V0hIeFdOMG5KSnBBMWVtS0IwMEN3RGhN?=
- =?utf-8?B?c01ia0loRWF4L29DSWhUcWJFNHB1NWt0UW1aTnpzWDIxRkZlS09XNkQ4VFlZ?=
- =?utf-8?B?WXZMcmVGelYzTUFSSGdUOURNRGhmOW1CbldWQmtteVJDZnFyWXhiTWNzTkQ0?=
- =?utf-8?B?K3VhZkJsLzlJSmhQbzdvSHZsNmt0MSt5V3VJNkpncSthRXd5VUhxbS92YXVu?=
- =?utf-8?B?VlE3WEd2SVhJemNMV2p3aWpzTWc4aWQzc3dWSG1lM0FBMUpmUUhHaDN6b0hk?=
- =?utf-8?B?Yk5HT2xicGNHS0RjVnNWdFJ2Vm14VnVzTEkwZEtZYWFZRWxseWpnWFRvNzJ5?=
- =?utf-8?B?dU00UVU4dVRFM3A4YWxTbGJpMVFvZnRweUJOM2V6dWtIZzdFUkM3ZXRaR1J1?=
- =?utf-8?B?SG9pSDRDOE14bTNaeWZpRzg2em92cUdMRTBJeEdDM3dNUnV0UnVwbm9pamk3?=
- =?utf-8?B?VHFXbTJCOWdNUW52NTdySzFtR25HMkxWQXU4Q1ExYXJJR0lNb1dPdEthOVdu?=
- =?utf-8?Q?vy1feUs3+aMInu6XcwbAA5S+fu2?=
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0:
-	=?utf-8?B?S3JuVXNPRDJlT3hWczFMWUZtOGswUWFNUE1YblQ5VjU0Qk5CNkgzbG96ZlBl?=
- =?utf-8?B?NXJuMmIwdHpZSy9BQmVJQzFwY2hBNzBrQnBvSm54MEpsd3NTTExOUXB2Q1lp?=
- =?utf-8?B?d2FpcUNOd0lrbmlraXpBRXFTcnNseHluSHFFKzNNRzVjWmVYSzRROHRpd3Rq?=
- =?utf-8?B?Y0lmeUZLWSt3MGtpZThqRUNDN014Q1dnY1ZEVWd0V1UwWnBDb0VVdGNHRVpP?=
- =?utf-8?B?Z2V5RTZUSEh2YTF1SkNGbkFXMUFSTWVaenV3MGN0UUIyYis0a1VYVS9oand4?=
- =?utf-8?B?Wnd5ZWtvaVorTVMvd0NrTXlKc3UzaUVvbHZaaVUvOUhpU3hGdVpCanQzajBH?=
- =?utf-8?B?SHVGeGN3OGVPT0QwWEhlL0FSUWlsaDF4WWFMVnhGbElZeVJ0OEplZjhGNTlE?=
- =?utf-8?B?Y2pzNTBIVnNxQUZTc0Erd1JRdk9sV3NTT2xkNjY2NWQ2OWtCWnFaWXBiNXgw?=
- =?utf-8?B?V2EwN3pKQnl0Ykl4OTc5KzZTM3lLYittSStNUmJLdjJyZ2VBTzIydXhBdGdS?=
- =?utf-8?B?eW5BcWs1L0QyNUJMdFFvalVaakVVRnZ1cTJ5Y3RpNWxtZjVhSXRoZUorMmE0?=
- =?utf-8?B?RXplTHRqZWdrY3BuSTU5QU82WU4rNmF6MWdNWEc4aS8rSjVNYjExd29NdDVy?=
- =?utf-8?B?c05FRzNUdGo3MHBReU9RVFB4ZlV0eVVnK3ZZNlkxMFl2WnJmb2tzWnVTMFFH?=
- =?utf-8?B?WG5KcGlnVTRXVVRWVG9IM1YzVWpsRmlMS2JObEJDMEs3WGNneThZZEF1NEQ0?=
- =?utf-8?B?RStoWVdTTzEyQ2U3WGkzT2MwWjFwM3h0Q0xZSWl6enZ0THVQeWFVcXJLRDg1?=
- =?utf-8?B?NFh6NGhkN1dmbnpJSGZWcHNwcDFSTFFJYUhKVmdzeExEcHNzTmppRTFCcUZV?=
- =?utf-8?B?ZSs0L3pPV0FGSlU2ZStBbFZ5VEJQQldRNmtzeERWamRFL2hLa2lGby8rVlJ0?=
- =?utf-8?B?MS84L25tYytRZUxqSE5zN2wxMlVRNEtHT3VJbGVPZEN1dmJZbmpXc3FQbVJh?=
- =?utf-8?B?UDJaZm9vN2FRbnBCeExuN3pQdzVEMEhpRmlrVGd4MVNLMjdjUVgxbDlDNWZ4?=
- =?utf-8?B?c1ZOOWR5V3k1aTVBR0VYMFBFaG8veHFPS1c3Nlp0R3p4TldTS3EwSEVTWGNX?=
- =?utf-8?B?QThLaWZ6ckFkNmpObWRreXdBVDN6NTc3U2g4VkdmVVF3ZkZKT1pna2VXUEwv?=
- =?utf-8?B?emJjM1JVSEpkcFdENUVGN0hyMnJXbWo1MmZPK1FjMmJuMDVjVkdIN3h1QmZ6?=
- =?utf-8?B?OU5KZytqT3hiVEdCM2RwZVFUV3ZmbnRmMjgvUlJRRVYzc0txUUdMZi9vd2pw?=
- =?utf-8?B?OWxPRFNwUGJVeG1jVnBSVEdJWGNKem5DbCt4S0VORjhra0tMdmtwUWcwQTNs?=
- =?utf-8?B?WVVnYzM4aU91bUUwVitCT2NWSkpINmd0YnM1V0M0aXkrTE1Zb1hZNGNYdmkz?=
- =?utf-8?B?dXdkQ0NMTG9aUnJnSzV2dm1DUE1vcDdPT0lCeEN2ZzRmUy9wcWJBazhoNkJn?=
- =?utf-8?B?UXRTWW1peVIrdExibUlySS8vOXZsd3EvdjUxL3Qyc3JzRE1uYVlMLzdJelQr?=
- =?utf-8?B?MjhYSGdsdFAwd3lxN2xhWW1sZUhtY2dCM0VnUWN5OUhseWI5T1MxL0JXUXRx?=
- =?utf-8?B?VkFZYnUrQlBxVlowTUJKbG9OZ2xKdDU2QU1RaDJjRDFnQitmbDRzM1JtN1k1?=
- =?utf-8?B?K0s5WGZZaE9Bb2xJcWh5KzRPeG1zVnpQemZOVk9Pb2tHVk5DYTZWMlA0SUgz?=
- =?utf-8?Q?/Kek3eVwqBJPIFeQ/L4jj1/HQYip1A/T/KLuf9F?=
-X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 79b54e35-8597-42cc-eb37-08dd7aef3347
-X-MS-Exchange-CrossTenant-AuthSource: MA0P287MB2262.INDP287.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Apr 2025 00:56:33.5064
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
-X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
-	00000000-0000-0000-0000-000000000000
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MA0P287MB0019
+References: <cover.1744273956.git.zhoubinbin@loongson.cn> <cefcd16d303936247b94bc13047c8a1861bb8330.1744273956.git.zhoubinbin@loongson.cn>
+ <20250411170535.GA3391061-robh@kernel.org>
+In-Reply-To: <20250411170535.GA3391061-robh@kernel.org>
+From: Binbin Zhou <zhoubb.aaron@gmail.com>
+Date: Mon, 14 Apr 2025 09:31:30 +0800
+X-Gm-Features: ATxdqUGXQwM-0SBsWpuCh-Gl2xc_HzNH9Z4F3bB7Sn1XybEc-5t-g0XOW9_YDmM
+Message-ID: <CAMpQs4L=aNY9okXq+m=x+WdDBpoLa8v1FQ39ZSY14Qb9joH7YA@mail.gmail.com>
+Subject: Re: [PATCH v1 3/4] dt-bindings: mmc: loongson,ls2k-mmc: Add
+ compatible for Loongson-2K2000
+To: Rob Herring <robh@kernel.org>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Rob:
+
+Thanks for your reply.
 
 
-On 2025/4/14 6:35, Inochi Amaoto wrote:
-> The sdhci IP of SG2044 is similar to it of SG2042. They
-> share the same clock and controller configuration.
+On Sat, Apr 12, 2025 at 1:05=E2=80=AFAM Rob Herring <robh@kernel.org> wrote=
+:
 >
-> Add compatible string for SG2044.
+> On Thu, Apr 10, 2025 at 04:40:37PM +0800, Binbin Zhou wrote:
+> > Add the devicetree compatible for Loongson-2K2000 EMMC/SD/SDIO controll=
+er.
+> >
+> > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> > ---
+> >  .../bindings/mmc/loongson,ls2k-mmc.yaml       | 47 ++++++++++++++++++-
+> >  1 file changed, 45 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.ya=
+ml b/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > index f3e94f5f3a35..24d217a9bbe6 100644
+> > --- a/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > @@ -9,6 +9,9 @@ title: The SD/SDIO/eMMC host controller for Loongson-2K=
+ family SoCs
+> >  description:
+> >    The MMC host controller on the Loongson-2K0500/2K1000 (using an exte=
+rnally
+> >    shared apbdma controller) provides the SD and SDIO device interfaces=
+.
+> > +  The two MMC host controllers on the Loongson-2K2000 are similar,
+> > +  except that they use internal exclusive DMA. one controller provides
+> > +  the eMMC interface and the other provides the SD/SDIO interface.
+> >
+> >  maintainers:
+> >    - Binbin Zhou <zhoubinbin@loongson.cn>
+> > @@ -21,8 +24,10 @@ properties:
+> >      enum:
+> >        - loongson,ls2k0500-mmc
+> >        - loongson,ls2k1000-mmc
+> > +      - loongson,ls2k2000-mmc
+> >
+> >    reg:
+> > +    minItems: 1
+> >      maxItems: 2
 >
-> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> ---
->   Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 3 +++
->   1 file changed, 3 insertions(+)
+> Missed this in the first patch, but you need to define what each entry
+> is.
+Are you thinking that =E2=80=9CminItems=E2=80=9D should be added in patch-1=
+?
+I'm not sure if I'm right, but for patch-1 (Loongson-2K1000), his reg
+count must be 2, so it doesn't need the =E2=80=9C minItems: 1=E2=80=9D limi=
+tation,
+whereas Loongson-2K2000 needs this limitation, and so it was put in
+this patch.
+
+Of course, for the reg description, it is true that I missed it, and I
+will add it in patch-1.
+
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index e6e604072d3c..5fb347167004 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -19,6 +19,9 @@ properties:
->                 - rockchip,rk3562-dwcmshc
->                 - rockchip,rk3576-dwcmshc
->             - const: rockchip,rk3588-dwcmshc
-> +      - items:
-> +          - const: sophgo,sg2044-dwcmshc
-> +          - const: sophgo,sg2042-dwcmshc
->         - enum:
->             - rockchip,rk3568-dwcmshc
->             - rockchip,rk3588-dwcmshc
+> >
+> >    interrupts:
+> > @@ -42,11 +47,31 @@ required:
+> >    - reg
+> >    - interrupts
+> >    - clocks
+> > -  - dmas
+> > -  - dma-names
+> >
+> >  unevaluatedProperties: false
+> >
+> > +if:
+> > +  properties:
+> > +    compatible:
+> > +      contains:
+> > +        enum:
+> > +          - loongson,ls2k0500-mmc
+> > +          - loongson,ls2k1000-mmc
+> > +
+> > +then:
+> > +  properties:
+> > +    reg:
+> > +      minItems: 2
+> > +
+> > +  required:
+> > +    - dmas
+> > +    - dma-names
+> > +
+> > +else:
+> > +  properties:
+> > +    reg:
+> > +      maxItems: 1
+> > +
+> >  examples:
+> >    - |
+> >      #include <dt-bindings/gpio/gpio.h>
+> > @@ -65,3 +90,21 @@ examples:
+> >          bus-width =3D <4>;
+> >          cd-gpios =3D <&gpio0 22 GPIO_ACTIVE_LOW>;
+> >      };
+> > +
+> > +  - |
+> > +    #include <dt-bindings/interrupt-controller/irq.h>
+> > +    #include <dt-bindings/clock/loongson,ls2k-clk.h>
+> > +
+> > +    mmc@79990000 {
+> > +        compatible =3D "loongson,ls2k2000-mmc";
+> > +        reg =3D <0x79990000 0x1000>;
+> > +        interrupt-parent =3D <&pic>;
+> > +        interrupts =3D <51 IRQ_TYPE_LEVEL_HIGH>;
+> > +        clocks =3D <&clk LOONGSON2_EMMC_CLK>;
+> > +        bus-width =3D <8>;
+> > +        non-removable;
+> > +        cap-mmc-highspeed;
+> > +        mmc-hs200-1_8v;
+> > +        no-sd;
+> > +        no-sdio;
+> > +    };
+> > --
+> > 2.47.1
+> >
 
-Reviewed-by: Chen Wang <unicorn_wang@outlook.com>
-
-Chen
-
-
+--
+Thanks.
+Binbin
