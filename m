@@ -1,53 +1,53 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0E6E2586C7;
-	Mon, 14 Apr 2025 08:09:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C12C725DB19;
+	Mon, 14 Apr 2025 10:33:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744618177; cv=none; b=t8d45btx2+HHrnzEP0OWM6Tmij2HFZViUNEIoZmWuKhsFl1lxls3T5Bj3v/qeuwGpp/kPGvpwP7+bJIjMg1N/lB+TVzUbEGTHDWXVVI06/AmEsbOYN/z1LKaO8E8tyBD1XUm47LGhs73rHquCSh3v4VNPJ28Uo7SSEynEX+C4/8=
+	t=1744626834; cv=none; b=KqKq303XovaqLoYXsKg3C6+BLyAQFJTffAF1lkWDlN3qXN4b8yVXIYPylQckr+cf1pOm54J83U8L2cxVyEyXQRzbWuFQBrxCK1yaL6ebWd+470xFa7m0Ahj9J0Le1mHSBWVx9XpMdQuDSaofcq4BkU+QlR3aq4bthu9HvXXPayY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744618177; c=relaxed/simple;
-	bh=h0j1Hfu+P4Ik7wn30u2UB2Z6uWgvo3dBsKVHdecR3uE=;
+	s=arc-20240116; t=1744626834; c=relaxed/simple;
+	bh=tNxmdbJyJCsDlhnWVkRufAgLz0rrYDPUHmfs4ziabXY=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GihPtHjlUyClWijOd2qsCpqdFLs7uGK35up08sy2QRPq0hNSl9nUYGa8yMo8gw0El/uoOVMVDFZBEwGdHCEeS3G1J9TSwSZRVviRm9SFme1/fs/roN3319yfPUNz8uEcYer87U2J6HtBzPw2YRioNviiayDUlePWoRcuzYgQ5nc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=nGk2Asg/; arc=none smtp.client-ip=192.198.163.14
+	 Content-Type:Content-Disposition:In-Reply-To; b=MQkm81KblFZxnD2uP/dddoqxKQhAZf+4PU7SlgYihdHYNWdNrY4/SjgWpAwW/ywtDY8FgXOlZpjyH0jnJQMDvN5o0W69dDE5XLo8h08gl1d8QZFHOl/jTwOH3xTKd2o6TIIBmsCBa9LdBwnIyNUfwGRRxkV774ZVsrfXXhW1rt4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=FS99yegp; arc=none smtp.client-ip=192.198.163.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="nGk2Asg/"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="FS99yegp"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1744618174; x=1776154174;
+  t=1744626832; x=1776162832;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=h0j1Hfu+P4Ik7wn30u2UB2Z6uWgvo3dBsKVHdecR3uE=;
-  b=nGk2Asg/XlFN1GEZg9NIPfKZ/POr27KDjT5Ijlf3CztjG+WMghXjzV25
-   OcZXlGkXusZ1+/s0E5tmEAi9KcjHx4jh4vwLvSmXXriLMAS6SXgxi1Szt
-   2cBSSnOSL2bTEMP7PTZYz3iF9zYnLkOgN4yf2/SvWVNJGFLfh40EAoITl
-   LikWR4JzEENdCZZnT46MhWZqDcWaPGVn3Z5Y03f5gjyKUkWTuHE2yk92G
-   V2gt0gXCmWrm04Wj1nKrGxtXzpIr4CVP7Ms7g/UzEPMzHivxXYtHkhjKu
-   AuxaI0WfMPwjOJro/F0MYhJu+VRtGzq1rGfCf0wqN2aiJfgyBhUj1SDa2
-   w==;
-X-CSE-ConnectionGUID: zNQwS6mjTEGwzCKN5+o0Ww==
-X-CSE-MsgGUID: JLaQMe3JSs+FW4oZimKk5A==
-X-IronPort-AV: E=McAfee;i="6700,10204,11402"; a="46239540"
-X-IronPort-AV: E=Sophos;i="6.15,211,1739865600"; 
-   d="scan'208";a="46239540"
-Received: from orviesa010.jf.intel.com ([10.64.159.150])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2025 01:09:33 -0700
-X-CSE-ConnectionGUID: HS0x0csZR3WR491+o8WFfw==
-X-CSE-MsgGUID: 5AiuT9BLSwOJ7JRHOjoxdw==
+  bh=tNxmdbJyJCsDlhnWVkRufAgLz0rrYDPUHmfs4ziabXY=;
+  b=FS99yegplKGCKCN38y4G/IzT28t0/nCS32iuIXcpioW0d8OEDzjpgJN6
+   VyC/qadSQv1RVcP4P92KZL6qvnJ3hKRoTuo2Fm+sLG9n86YsrMq9bXsvX
+   iFBmZ1NzhakO9sZTCiXVTJte/kpGatmLDGcuurUSOP6NGc8bx3s4JLHyM
+   tGQ5BSMB0vp/0Zjc0XnAJeks2g/YEswwTFTaF7OWyhze4/OT7o7ChtXpQ
+   HNoOjx5S+5UTDH+1LerBlx63No0OcJaOZlnJMO3LpEl4VkJdw5z6eNX4r
+   UKzvkt3Cmdb1d00m8n0fqvis4kLf3uQ58kBCfY3bt76NRwVgXDCPYO8vk
+   Q==;
+X-CSE-ConnectionGUID: hAi0lIvURCOuXgmk1yBe6g==
+X-CSE-MsgGUID: Y8Eio09cTJq5WSiviOpj1A==
+X-IronPort-AV: E=McAfee;i="6700,10204,11402"; a="71476336"
+X-IronPort-AV: E=Sophos;i="6.15,212,1739865600"; 
+   d="scan'208";a="71476336"
+Received: from fmviesa009.fm.intel.com ([10.60.135.149])
+  by fmvoesa101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Apr 2025 03:33:51 -0700
+X-CSE-ConnectionGUID: K/UBrM59Qzmd2+6CvrXB5A==
+X-CSE-MsgGUID: udIF/dz9R7yGQ2Gt7RpjYQ==
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,211,1739865600"; 
-   d="scan'208";a="129691082"
+X-IronPort-AV: E=Sophos;i="6.15,212,1739865600"; 
+   d="scan'208";a="130637665"
 Received: from lkp-server01.sh.intel.com (HELO b207828170a5) ([10.239.97.150])
-  by orviesa010.jf.intel.com with ESMTP; 14 Apr 2025 01:09:30 -0700
+  by fmviesa009.fm.intel.com with ESMTP; 14 Apr 2025 03:33:44 -0700
 Received: from kbuild by b207828170a5 with local (Exim 4.96)
 	(envelope-from <lkp@intel.com>)
-	id 1u4Esh-000DvK-09;
-	Mon, 14 Apr 2025 08:09:27 +0000
-Date: Mon, 14 Apr 2025 16:08:37 +0800
+	id 1u4H8I-000E4c-1U;
+	Mon, 14 Apr 2025 10:33:42 +0000
+Date: Mon, 14 Apr 2025 18:32:44 +0800
 From: kernel test robot <lkp@intel.com>
 To: Arnd Bergmann <arnd@kernel.org>, Haibo Chen <haibo.chen@nxp.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
@@ -55,14 +55,15 @@ To: Arnd Bergmann <arnd@kernel.org>, Haibo Chen <haibo.chen@nxp.com>,
 	Shawn Guo <shawnguo@kernel.org>,
 	Sascha Hauer <s.hauer@pengutronix.de>,
 	Luke Wang <ziniu.wang_1@nxp.com>
-Cc: oe-kbuild-all@lists.linux.dev, Arnd Bergmann <arnd@arndb.de>,
+Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+	Arnd Bergmann <arnd@arndb.de>,
 	Pengutronix Kernel Team <kernel@pengutronix.de>,
 	Fabio Estevam <festevam@gmail.com>,
 	Josua Mayer <josua@solid-run.com>, imx@lists.linux.dev,
 	linux-mmc@vger.kernel.org, s32@nxp.com,
 	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 Subject: Re: [PATCH] [v2] mmc: esdhc-imx: convert to modern PM_OPS
-Message-ID: <202504141551.hdiQj4os-lkp@intel.com>
+Message-ID: <202504141852.82kZm4nO-lkp@intel.com>
 References: <20250411085932.1902662-1-arnd@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -79,7 +80,7 @@ Hi Arnd,
 kernel test robot noticed the following build errors:
 
 [auto build test ERROR on v6.15-rc2]
-[also build test ERROR on linus/master next-20250411]
+[also build test ERROR on linus/master next-20250414]
 [If your patch is applied to the wrong git tree, kindly drop us a note.
 And when submitting patch, we suggest to use '--base' as documented in
 https://git-scm.com/docs/git-format-patch#_base_tree_information]
@@ -88,39 +89,37 @@ url:    https://github.com/intel-lab-lkp/linux/commits/Arnd-Bergmann/mmc-esdhc-i
 base:   v6.15-rc2
 patch link:    https://lore.kernel.org/r/20250411085932.1902662-1-arnd%40kernel.org
 patch subject: [PATCH] [v2] mmc: esdhc-imx: convert to modern PM_OPS
-config: i386-buildonly-randconfig-006-20250414 (https://download.01.org/0day-ci/archive/20250414/202504141551.hdiQj4os-lkp@intel.com/config)
-compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250414/202504141551.hdiQj4os-lkp@intel.com/reproduce)
+config: s390-allmodconfig (https://download.01.org/0day-ci/archive/20250414/202504141852.82kZm4nO-lkp@intel.com/config)
+compiler: clang version 18.1.8 (https://github.com/llvm/llvm-project 3b5b5c1ec4a3095ab096dd780e84d7ab81f3d7ff)
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250414/202504141852.82kZm4nO-lkp@intel.com/reproduce)
 
 If you fix the issue in a separate patch/commit (i.e. not just a new version of
 the same patch/commit), kindly add following tags
 | Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202504141551.hdiQj4os-lkp@intel.com/
+| Closes: https://lore.kernel.org/oe-kbuild-all/202504141852.82kZm4nO-lkp@intel.com/
 
 All errors (new ones prefixed by >>):
 
-   drivers/mmc/host/sdhci-esdhc-imx.c: In function 'sdhci_esdhc_suspend':
->> drivers/mmc/host/sdhci-esdhc-imx.c:1902:15: error: implicit declaration of function 'sdhci_suspend_host'; did you mean 'sdhci_add_host'? [-Werror=implicit-function-declaration]
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1902:8: error: call to undeclared function 'sdhci_suspend_host'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
     1902 |         ret = sdhci_suspend_host(host);
-         |               ^~~~~~~~~~~~~~~~~~
-         |               sdhci_add_host
-   drivers/mmc/host/sdhci-esdhc-imx.c: In function 'sdhci_esdhc_resume':
->> drivers/mmc/host/sdhci-esdhc-imx.c:1927:15: error: implicit declaration of function 'sdhci_resume_host'; did you mean 'sdhci_remove_host'? [-Werror=implicit-function-declaration]
+         |               ^
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1927:8: error: call to undeclared function 'sdhci_resume_host'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
     1927 |         ret = sdhci_resume_host(host);
-         |               ^~~~~~~~~~~~~~~~~
-         |               sdhci_remove_host
-   drivers/mmc/host/sdhci-esdhc-imx.c: In function 'sdhci_esdhc_runtime_suspend':
->> drivers/mmc/host/sdhci-esdhc-imx.c:1953:15: error: implicit declaration of function 'sdhci_runtime_suspend_host' [-Werror=implicit-function-declaration]
+         |               ^
+   drivers/mmc/host/sdhci-esdhc-imx.c:1927:8: note: did you mean 'sdhci_remove_host'?
+   drivers/mmc/host/sdhci.h:827:6: note: 'sdhci_remove_host' declared here
+     827 | void sdhci_remove_host(struct sdhci_host *host, int dead);
+         |      ^
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1953:8: error: call to undeclared function 'sdhci_runtime_suspend_host'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
     1953 |         ret = sdhci_runtime_suspend_host(host);
-         |               ^~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/sdhci-esdhc-imx.c: In function 'sdhci_esdhc_runtime_resume':
->> drivers/mmc/host/sdhci-esdhc-imx.c:1999:15: error: implicit declaration of function 'sdhci_runtime_resume_host' [-Werror=implicit-function-declaration]
+         |               ^
+>> drivers/mmc/host/sdhci-esdhc-imx.c:1999:8: error: call to undeclared function 'sdhci_runtime_resume_host'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
     1999 |         err = sdhci_runtime_resume_host(host, 0);
-         |               ^~~~~~~~~~~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
+         |               ^
+   4 errors generated.
 
 
-vim +1902 drivers/mmc/host/sdhci-esdhc-imx.c
+vim +/sdhci_suspend_host +1902 drivers/mmc/host/sdhci-esdhc-imx.c
 
 95f25efe0ce22e Wolfram Sang      2010-10-15  1879  
 04143fbaeb5799 Dong Aisheng      2016-07-12  1880  static int sdhci_esdhc_suspend(struct device *dev)
