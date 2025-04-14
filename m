@@ -1,77 +1,73 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9803D1A2630;
-	Mon, 14 Apr 2025 06:58:02 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6EADB158520;
+	Mon, 14 Apr 2025 07:27:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744613886; cv=none; b=F3YN/t86ZXcwOzX3uiLCO1FJJLMSFtKU5/EAxdJj379OdlxuPiwN+U0mQFptgz/A2zSTj8fKsH2s+BdsNd2LmbUuMXCf23D5xSkkaLZiEl3OK8uHbcSALOUlTNES55Wp3LIsmohIcHeYNhBp0f7Xcx4b0bjWwL+2eft/s7M+HDI=
+	t=1744615666; cv=none; b=mAWFkwao5FJUpkiGn3bFuxHvYVb1I+hj7SCOtRybc3tkXoGcgDAHu3yjP/cRg8XBxXYfmnTNmHzXKvG9Mxxd4HewX8RzO6g9bSYtGzFXFPMsLLNLkrmrX6OE006IdaCoMRDPQBHo5X9iS83GM59lacBEdLTYOj+ItdS6vdUXIP8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744613886; c=relaxed/simple;
-	bh=n/t0T2LD5+XE1o61sPRLxFj1AQFQPjSbWtSxyYjEU+Y=;
+	s=arc-20240116; t=1744615666; c=relaxed/simple;
+	bh=6t46hUDT3sRy0Y1X6ouDrUUHbzkpk+wzcw4qHxwvP4k=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=GgnOg+TOT/YJ+8puUE35bX/MvdI31EjMIgWtY1GJU5JrlnlfImdcsTPE0xCWujKBTgsXzgZHweDBns8DQlCuOqUmQazooxoLWAd6Yd+bhx+VQvczDa/kJdgNy2mrTxG+V+caSyyY1VcVABXLZV5WG3uDGcGbEZQAeQIHn8q8kTw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=OJPJRWC5; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
+	 Content-Type:Content-Disposition:In-Reply-To; b=VopR39ynaTHeZL6cWBip+sXUfNKoo3fqcPEcn8D6pdxoeYR840hr92Pzp1os3XigNHV4TyZ10d4WKxTojUwCddJmHgTYaUF8xCFztZuOZZjKZHajg9dy9YEk4H76V8zuO/HbvDnaVcoD5SdUBu4p5fNfDO20GvacAVMrPpZdcbM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QSC4JuZg; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="OJPJRWC5"
-Received: from francesco-nb (31-10-206-125.static.upc.ch [31.10.206.125])
-	by mail11.truemail.it (Postfix) with ESMTPA id 22FC81F94A;
-	Mon, 14 Apr 2025 08:51:23 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1744613483;
-	bh=Vuh+3+SJ1qs6GhiS50X+moaRPA+EOviYLwPNQVAmHdc=; h=From:To:Subject;
-	b=OJPJRWC5BlqANEjpu7kZUnFlGtt9qWHUKn9XvpGOeupNB3gJC0vBWkB3vFpainj9K
-	 KPj8yvoX8/7UP6YAd1xobbwfPKAvx6i7q+vhRsGyUBZ5ok9F+ttHwVvGGsLqH6hciA
-	 DgTIr7uQoZr2QXL9gCBe6MDCUXgoxRU9JwK3A/S6JPHF82LzlyuiWpspKh1sk9g8wr
-	 DcCGFaK3WeLAgA6oANNYpfW4zTdcrNmRgEd3ejYBSomJF/HZxoUOmAsShJpPZXdWXT
-	 +bdIm5j53jczYEwY186PZx19U3wNqPrWdDnudsXBwLm8B0s/ec+BW9w+cps4e2v+wU
-	 yIuNe2ycnAVjQ==
-Date: Mon, 14 Apr 2025 08:51:19 +0200
-From: Francesco Dolcini <francesco@dolcini.it>
-To: Judith Mendez <jm@ti.com>
-Cc: Hiago De Franco <hiagofranco@gmail.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Josua Mayer <josua@solid-run.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org, Moteen Shah <m-shah@ti.com>,
-	Hiago De Franco <hiago.franco@toradex.com>
-Subject: Re: [PATCH 0/2] Fix V1P8_SIGNAL_ENA and HIGH_SPEED_ENA
-Message-ID: <20250414065119.GA6309@francesco-nb>
-References: <20250407222702.2199047-1-jm@ti.com>
- <20250411130354.dc3sv3e7ruekkhkp@hiago-nb>
- <d8e45e50-f0eb-41d0-9c50-56147eaf262a@ti.com>
- <20250411194813.c4ft2uxgdiuza5cm@hiago-nb>
- <5f36ec5d-bb31-4b6c-aa4e-4ec48cb1d067@ti.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QSC4JuZg"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0610C4CEE2;
+	Mon, 14 Apr 2025 07:27:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1744615666;
+	bh=6t46hUDT3sRy0Y1X6ouDrUUHbzkpk+wzcw4qHxwvP4k=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=QSC4JuZgAwwn7OOZRWoFg9NutKwcwC3CKPZ+jd+afI88+aurFCl4GMgoUP/gtGKQB
+	 3KvR69xcLmbGUl48GAZuH2vMci3aKnPGeMQDfI8HueQ/LUPMcqBQsWaVXE3uYKG82G
+	 llnrJEMzhTUmkWzHTDY6M15cp0Act5sm2AGZiZVZ0NhpJiJ88ZOwCvo88t/NoGT+IL
+	 QevSlAOdp3R/ZIzgxKTd2MdcPHWbyX7MdmAU1yZnnzXUgq05wnObPp25tfIsxyy3NL
+	 jV23ZQpUCbMfGEMbOmcZOiGMhTNYID3IQadTucL3ybHa5JbGe7IH+Kw2ugKIqaO+Yq
+	 Z/rFXHJt9vKvg==
+Date: Mon, 14 Apr 2025 09:27:43 +0200
+From: Krzysztof Kozlowski <krzk@kernel.org>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Chen Wang <unicorn_wang@outlook.com>, 
+	Andi Shyti <andi.shyti@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
+	Paul Walmsley <paul.walmsley@sifive.com>, Samuel Holland <samuel.holland@sifive.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Daniel Lezcano <daniel.lezcano@linaro.org>, 
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>, Jarkko Nikula <jarkko.nikula@linux.intel.com>, 
+	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>, linux-hwmon@vger.kernel.org, 
+	devicetree@vger.kernel.org, sophgo@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Yixun Lan <dlan@gentoo.org>, Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH v2 01/10] dt-bindings: i2c: dw: merge duplicate
+ compatible entry.
+Message-ID: <20250414-strange-oxpecker-of-strength-dd6ef5@shite>
+References: <20250413223507.46480-1-inochiama@gmail.com>
+ <20250413223507.46480-2-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <5f36ec5d-bb31-4b6c-aa4e-4ec48cb1d067@ti.com>
+In-Reply-To: <20250413223507.46480-2-inochiama@gmail.com>
 
-Hello Judith
+On Mon, Apr 14, 2025 at 06:34:55AM GMT, Inochi Amaoto wrote:
+> Each vendor have an items entry of its own compatible, It is needless
+> and some can be merged as it share the same base "snps,designware-i2c"
+> compatible.
+> 
+> Merge the duplicate compatible entry into one item entry.
+> 
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
 
-On Fri, Apr 11, 2025 at 04:55:39PM -0500, Judith Mendez wrote:
-> My understanding was that we do not like adding new DT properties if
-> we can find a way to apply the quirk in the driver.
-...
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-> If this implementation flies with the maintainers, then we can go back to DT
-> property implementation.
+Best regards,
+Krzysztof
 
-Not sure if this is clear, but this patch is NOT working according to
-our tests, we would need to fix it in a different way.
-
-Francesco
-
-> 
-> 
-> 
-> 
-> 
-> 
