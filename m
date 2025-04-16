@@ -1,123 +1,106 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C9001F193D;
-	Wed, 16 Apr 2025 15:54:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F26F81DC04A;
+	Wed, 16 Apr 2025 16:59:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744818885; cv=none; b=YBUVOpp6Otg1poRmAGFikienfeA0t9yxMlzoyKyr/wsQ2sVxylEfFkapMDjF7PJX4Ik8EOAGoz/1hzIII+RX2vKsWEmpYJllUsi5NqwAC+YRULS2OTQWAeNNJVRmvuMyx2q5GT8MMLcDvfMhuwp7A3NjR2AMeyBtXtzw8SUdqnU=
+	t=1744822775; cv=none; b=Oh3F2csvBOVgbb8p3sHwQygt7NvZI2q922Jfy9o7dk6YWGQ2dHzT4r3NgVO7uTNROs40c/QzsJt0H22HPM5lrqw2awqQk/meMORIzMKS9AHSaEhx8Qzpgk46sbatjabAWDuZMh3fmv/RAqLUTVoIrRAVfocScHzQ8kSFfOk/3+c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744818885; c=relaxed/simple;
-	bh=BK6yw88CCQMOuS+aZ2Cf0kz3xcaYu31IAHaHB7+z3cw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=k4oZu9xVFXBRgOKJcFHrXbI7dDzqqWc46H3ZlgFA5NBZfJTQbxGvJzKMpAUL0ha0BHGs8dC2yjnark5FtC4L4+Dm8vES+YFefV0gFoF886YGjTjbyxztcKEwaV9hmsao+bQ+b5QzRVnJejT9UGaopLM/gbhoBiU53SKnzez/ebE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=CYsB7iLF; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1744822775; c=relaxed/simple;
+	bh=GqYHw0v/gtP59M6Lf3YVXV6rLfdQbRV82DntEGZnLQM=;
+	h=Message-ID:Date:MIME-Version:Subject:From:To:CC:References:
+	 In-Reply-To:Content-Type; b=OSh6F00sPLhzZcdjUsJU++/wkn1ZBgKondp4IN28PHGnzfIZwoGIUbQOpES3+9ml3UPntWQ6NXAstBJg64F1j1pOt+TIk0f0rxpjIv3SN3EPpB3FartKckzf6M6ggxb3T78vUwz6Zk60IBg7VEcn77v6cRITeUdM9UBaQIuVGhc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=sYx0ANO4; arc=none smtp.client-ip=198.47.23.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="CYsB7iLF"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9EF83C4CEE2;
-	Wed, 16 Apr 2025 15:54:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1744818883;
-	bh=BK6yw88CCQMOuS+aZ2Cf0kz3xcaYu31IAHaHB7+z3cw=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=CYsB7iLFu7CRO3Le0pvmC1k268EFLWH7CYrVAhgxHXz/hQKlGrhkytRRyfxhrFRLa
-	 kLWtrgRIFCVezFrhVYZi/slKn9mmAhE5BNzwbioipRzXvxBRe20qSGWRYEoBVVOn4C
-	 EHs3j8eTEtQA7Y1GrcktDJQf0XFLzKInpzctB45OjBhPa2rSJmMnw1aUcZjTSYAK6s
-	 CiSdKNvuxd/I+GZEiYg3us08A1t4SeJm1Z+KQq8BkAxgxhMAYAFQZ/tbuLHPWbWvlI
-	 i4d9EwJSJCI4WiRJ34sJF0ZXuEn3EmuFUh8xOpPzpJWwrT7Oh77TTOUTXNZWnb8eyN
-	 kDLHP3E9Of9dA==
-Date: Wed, 16 Apr 2025 10:54:42 -0500
-From: Rob Herring <robh@kernel.org>
-To: Alexey Charkov <alchark@gmail.com>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Andrew Lunn <andrew+netdev@lunn.ch>,
-	"David S. Miller" <davem@davemloft.net>,
-	Eric Dumazet <edumazet@google.com>,
-	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-	Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <ukleinek@kernel.org>,
-	Daniel Lezcano <daniel.lezcano@linaro.org>,
-	linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-	linux-pwm@vger.kernel.org
-Subject: Re: [PATCH 00/13] ARM: vt8500: DT bindings and dts updates
-Message-ID: <20250416155442.GA3255418-robh@kernel.org>
-References: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="sYx0ANO4"
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 53GGxGlt406925
+	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 16 Apr 2025 11:59:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1744822757;
+	bh=LBDgSFCK3SAhha4nzURy7p7QwmnfoixA9SlLrNVbvS0=;
+	h=Date:Subject:From:To:CC:References:In-Reply-To;
+	b=sYx0ANO4aIsQhL9y4OdgJM9Foaq1DmeMHvdSGp8Pvpb8NhfmzwHvjuuFdxRXUgZV9
+	 rdH6il6NOaLYoosMlKsR/U3YV41bhRYzBg/Qy5d8zJmCSnQ+Z3FpUMJzgdOlXzG6b8
+	 thc2Pjq3wstyEqH8UoZYKyNwMmhKS8v8dxPl9FqI=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 53GGxGQW122656
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Wed, 16 Apr 2025 11:59:16 -0500
+Received: from DLEE100.ent.ti.com (157.170.170.30) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 16
+ Apr 2025 11:59:16 -0500
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Wed, 16 Apr 2025 11:59:16 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 53GGxGPu105224;
+	Wed, 16 Apr 2025 11:59:16 -0500
+Message-ID: <3f31eded-4a7b-43f0-819f-a3be48cffc7b@ti.com>
+Date: Wed, 16 Apr 2025 11:59:16 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/2] Fix V1P8_SIGNAL_ENA and HIGH_SPEED_ENA
+From: Judith Mendez <jm@ti.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Josua Mayer
+	<josua@solid-run.com>, Moteen Shah <m-shah@ti.com>,
+        Hiago De Franco
+	<hiago.franco@toradex.com>
+References: <20250407222702.2199047-1-jm@ti.com>
+Content-Language: en-US
+In-Reply-To: <20250407222702.2199047-1-jm@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On Wed, Apr 16, 2025 at 12:21:25PM +0400, Alexey Charkov wrote:
-> Convert some more VT8500 related textual DT binding descriptions to
-> YAML schema, do minor dts correctness fixes, and add a DT for the
-> board I'm actually testing those on (VIA APC Rock).
-> 
-> While at that, also describe the PL310 L2 cache controller present on
-> WM8850/WM8950.
-> 
-> Note that this series is based upon Krzysztof's linux-dt/for-next
-> 
-> Signed-off-by: Alexey Charkov <alchark@gmail.com>
-> ---
-> Alexey Charkov (13):
->       dt-bindings: i2c: i2c-wmt: Convert to YAML
->       dt-bindings: interrupt-controller: via,vt8500-intc: Convert to YAML
->       dt-bindings: mmc: vt8500-sdmmc: Convert to YAML
->       dt-bindings: net: via-rhine: Convert to YAML
->       dt-bindings: pwm: vt8500-pwm: Convert to YAML
->       dt-bindings: timer: via,vt8500-timer: Convert to YAML
->       dt-bindings: arm: vt8500: Add VIA APC Rock/Paper boards
->       ARM: dts: vt8500: Add node address and reg in CPU nodes
->       ARM: dts: vt8500: Move memory nodes to board dts and fix addr/size
->       ARM: dts: vt8500: Use generic compatibles for EHCI
->       ARM: dts: vt8500: Use generic node name for the SD/MMC controller
->       ARM: dts: vt8500: Add VIA APC Rock/Paper board
->       ARM: dts: vt8500: Add L2 cache controller on WM8850/WM8950
-> 
->  Documentation/devicetree/bindings/arm/vt8500.yaml  | 19 ++++---
->  Documentation/devicetree/bindings/i2c/i2c-wmt.txt  | 24 ---------
->  .../devicetree/bindings/i2c/wm,wm8505-i2c.yaml     | 47 +++++++++++++++++
->  .../interrupt-controller/via,vt8500-intc.txt       | 16 ------
->  .../interrupt-controller/via,vt8500-intc.yaml      | 47 +++++++++++++++++
->  .../devicetree/bindings/mmc/vt8500-sdmmc.txt       | 23 --------
->  .../devicetree/bindings/mmc/wm,wm8505-sdhc.yaml    | 61 ++++++++++++++++++++++
->  .../devicetree/bindings/net/via,vt8500-rhine.yaml  | 41 +++++++++++++++
->  .../devicetree/bindings/net/via-rhine.txt          | 17 ------
->  .../devicetree/bindings/pwm/via,vt8500-pwm.yaml    | 43 +++++++++++++++
->  .../devicetree/bindings/pwm/vt8500-pwm.txt         | 18 -------
->  .../devicetree/bindings/timer/via,vt8500-timer.txt | 15 ------
->  .../bindings/timer/via,vt8500-timer.yaml           | 36 +++++++++++++
->  MAINTAINERS                                        |  7 ++-
->  arch/arm/boot/dts/vt8500/Makefile                  |  3 +-
->  arch/arm/boot/dts/vt8500/vt8500-bv07.dts           |  5 ++
->  arch/arm/boot/dts/vt8500/vt8500.dtsi               | 12 ++---
->  arch/arm/boot/dts/vt8500/wm8505-ref.dts            |  5 ++
->  arch/arm/boot/dts/vt8500/wm8505.dtsi               | 14 ++---
->  arch/arm/boot/dts/vt8500/wm8650-mid.dts            |  5 ++
->  arch/arm/boot/dts/vt8500/wm8650.dtsi               | 14 ++---
->  arch/arm/boot/dts/vt8500/wm8750-apc8750.dts        |  5 ++
->  arch/arm/boot/dts/vt8500/wm8750.dtsi               | 14 ++---
->  arch/arm/boot/dts/vt8500/wm8850-w70v2.dts          |  5 ++
->  arch/arm/boot/dts/vt8500/wm8850.dtsi               | 23 +++++---
->  arch/arm/boot/dts/vt8500/wm8950-apc-rock.dts       | 21 ++++++++
->  arch/arm/boot/dts/vt8500/wm8950.dtsi               | 11 ++++
->  27 files changed, 386 insertions(+), 165 deletions(-)
-> ---
-> base-commit: 62db22c2af6ce306943df5de6f5198ea9bd3d47b
+Hello Adrian,
 
-I could not apply this series for testing. What base is this? It is 
-unknown to anything I have. Please use most recent rc1 unless you have 
-a dependency then use recent linux-next or a branch in it.
+On 4/7/25 5:27 PM, Judith Mendez wrote:
+> For all TI devices, timing was closed For Legacy and HS modes in
+> half cycle timing, where data is launched on the negative edge of
+> clock and latched on the following positive edge of clock. The
+> switch to full cycle timing happens when any of HIGH_SPEED_ENA,
+> V1P8_SIGNAL_ENA, or UHS_MODE_SELECT is set.
+> 
+> Currently HIGH_SPEED_ENA is set for HS modes and violates timing
+> requirements for TI devices so add a .set_hs_ena callback in
+> sdhci_am654 driver so that HIGH_SPEED_ENA is not set for this mode.
+> 
+> There are eMMC boot failures seen with V1P8_SIGNAL_ENA with a
+> specific Kingston eMMC due to the sequencing when enumerating to
+> HS200 mode. Since V1P8_SIGNAL_ENA is optional for eMMC, do not
+> set V1P8_SIGNAL_ENA be default. This fix was previously merged in
+> the kernel, but was reverted due to the "heuristics for enabling
+> the quirk"[0]. The new implementation applies the quirk based-off of
+> bus width, which should not be an issue since there is no internal
+> LDO for MMC0 8bit wide interface and hence V1P8_SIGNAL_ENA should only
+> effect timing for MMC0 interface.
 
-Rob
+
+On this patch series, I am bringing back the fix for V1P8_SIGNAL_ENA,
+Ulf requested a change [0] which I am planning to do for v2. But I was
+hoping to get your opinion on whether Hiago's suggestion [1] is doable
+so I can add that as well to v2. Thanks for your attention.
+
+
+[0] 
+https://lore.kernel.org/linux-mmc/CAPDyKFqx-G4NynanFWrspz7-uXXF74RfjcU-Sw2nq2JhL3LPuQ@mail.gmail.com/
+[1] 
+https://lore.kernel.org/linux-mmc/20250412132012.xpjywokcpztb4jg4@hiago-nb/
+
+~ Judith
