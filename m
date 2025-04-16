@@ -1,418 +1,210 @@
-Received: from mail-ej1-f45.google.com (mail-ej1-f45.google.com [209.85.218.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from AS8PR03CU001.outbound.protection.outlook.com (mail-westeuropeazon11012012.outbound.protection.outlook.com [52.101.71.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E1B67A55
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Apr 2025 00:13:24 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.45
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744762407; cv=none; b=WrHIs8EEiaiOB6IRIyc9s1ubDPIE/08LZ2aKqyTC21rmjB+iawqJM61CFtbz+RPxwod4/g9wHGZW0S8lw1Y1HmlUTsmNvx0ABlJJO08Bu6SzXb8/qpDI415wh9TZld/JA6xYOMQtRJSmVv0pvhF3nHrTs54NMlPeYS7itmdzV6U=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744762407; c=relaxed/simple;
-	bh=lJRUbisq2xM53uic0rlcwOfMnNR9lWZjizEM/eS7lAs=;
-	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=rT0WZg2Nbf7mhGcGAK5AUhPFv+KbyXGJ57Ok7L11Zq+ZQdEKQYapWecxOcC98vMoLKr1pcB0wr/9jSxfNsfXki0FANZLENXUAWEdI8tJu669KTYV6zcbP5/9GOrigXnZFcJ64vArShbUJDx/OEclCJHLDZWfLh8xF9ImW+qt3Nc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=arista.com; spf=pass smtp.mailfrom=arista.com; dkim=pass (2048-bit key) header.d=arista.com header.i=@arista.com header.b=kNYFOBfk; arc=none smtp.client-ip=209.85.218.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=arista.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arista.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B089192B81;
+	Wed, 16 Apr 2025 02:42:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.71.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1744771366; cv=fail; b=jSOd5QJ8kBXy9ZvAoSFLvUlUy88/dm7M17blppQD3dSXAM9n79bbHIgq7RFznHg82zB9NDnn6bRTj2RrjF/2KRnc7B95ENYgdjWFrsEAbYoNo3wQ3AhzqoaykildLUzGyMaw5xh41//viNjnLkjsLTDIGhECJGWMU99qyqdEFcg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1744771366; c=relaxed/simple;
+	bh=0Sti0r8n5rdOhv18S4CLiB24/BT/zmQ/rKxtYz9n5sE=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=Ze4fEDFYEAWQ+faFccNSSGVBw7bkpieFuvegwZM8wn+MZ7x6kPsh4e5i2s1MBCyXR5I3/CrX30CEFyKavxmbF0fjHI3JQoNa+l9iFE8iTbYNdbuHzhWHzy3EfeTihorszh/gvz/z7HYbdt9PSAVySDQDiPAe1Io/lccPlMLJn8o=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=BHDx+j89; arc=fail smtp.client-ip=52.101.71.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arista.com header.i=@arista.com header.b="kNYFOBfk"
-Received: by mail-ej1-f45.google.com with SMTP id a640c23a62f3a-acb39c45b4eso35056766b.1
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Apr 2025 17:13:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=arista.com; s=google; t=1744762402; x=1745367202; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=QQEfOycosIUeagZIKLB3NYD7IJjYfX0nEy55Z/5xEX4=;
-        b=kNYFOBfkfXtEYfkAnrYxB+Lv5P9dzS0XgxjoGR7bW+0hrsT+CFuW3Q7RU0KKLAMAZD
-         UoRXWBw/bywqlqsTycufbzuoFnAWU4AEedajwQ0hqFnsaQHZqYyGp2buvgommKUYRP9Q
-         FS4funsAEIjJiuIY+RlMsBky6xYzH+KqlQCw6fAqtQAkVUsAYt0YYlCdmm84/JhjlCDV
-         GniVU1UscZL4OSmbJaJkfqzijs1+GkhDKoYHkd1Wkp8oYCLzwiiBDuKeL/gAxmrxXTme
-         c7fRrHd09jBv3oD4r7gpYWqX+JQuVPpRRn9N9LRtOC6IxHvJ/WZQ9HLAGShykrgnpzKa
-         Fpog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744762402; x=1745367202;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=QQEfOycosIUeagZIKLB3NYD7IJjYfX0nEy55Z/5xEX4=;
-        b=fJojmanVVkwLwxJ7PnmINblfgLfJhvf+29TN7ZCjPbqi/TnK79ezYyStnJvez99nkf
-         7aEifWPNe+Lws2rOpEISXTsRHJj/cuHZeT+gCAvO27TmqzzvMK322AYZSSd18WN6YvXD
-         zw4LKtRbtP5gOG4jInam+TzV7kaziAtcQxreOf0d7frO7x+TldwJroPcPQ/9fQuPRCqg
-         uNpc6v6SDCHVswaCwjvPCuftIM2F8ZCv7IN3afOEbg6itPIAybzcyO0IRJtDqVTtxBqi
-         W4PJHJp+G8aMaHV8Fs/R1BQ6xBxtEwx0lQyQJMB7/LBxNEumcFmlpU8uGvYI9icrSpIJ
-         OxWA==
-X-Gm-Message-State: AOJu0YwCWWv3eYV/IZ5+7xhGhjLEMGFnuq3akJekCPYHfCBrpDcSQNVS
-	7UOodfc3zKNihVt0ln7cjIp0QYIqw5L7z3DDSGKf/w+oHAWXzOJtUSq649XgLb4SFuOqv/wIy3F
-	icl4Jm19k36LkDGIQbq6ARLgdsxeJEAjcNKYS3UEB0cz5iCCGww==
-X-Gm-Gg: ASbGncvzIWTPamqAJIxGpkH4Xta72wxQv9+JN+/A7uqStmgAv9K11VVNwcx05H1zU0e
-	KmhUe22oPR2YlqdkXcH13o1w0E9UDFKyowdb3hcOFKsDZLs/rmNAUg1Lh7D4kmea6arG8BQeX2+
-	KHH+gLcHJQr1TdBg8IYFRZ/yeBbv2UwPeV9ExlhOMvG/X4EmmHTO3HzQ==
-X-Google-Smtp-Source: AGHT+IHgkMbrZoLCCHGwjn2wF67i6wc7uQBCZz5gTcttRuzrbN5gKFCh2mv16HWxBLhfNBMWrLVHWC5aCGyAmku66+c=
-X-Received: by 2002:a17:907:3d8c:b0:ac8:1bb3:35b0 with SMTP id
- a640c23a62f3a-acb3822b90amr82524266b.20.1744762402424; Tue, 15 Apr 2025
- 17:13:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="BHDx+j89"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=cLMXAgiOxXxmSO9bX7uBz8lAsHG0+4CH4CpPDx4Su2jcCynAakJ1MiL7yZ1EYlH6jOqjdeX/KjnMjcnTClpdPI2uqm8h7ZI/NC+oAmql96reuWm+MCBL61ACZb+twxYoAxz7dPY97sDHZz0l6QKi3IZYdLoQ0kGtyMqy15FBmKD7O4L9cVGQK2Mp5KahnFTo0hcoXxfIkQbRGfFMerA8AI07Fnccf51175RDRFEpicdgG9TI4p/Vz0mdYLeDhfx7lM4YoZf0Ojjl9T8H2NrwlG33pSo9xKqOTkSrysABHVyVAFZzGL/JD7lZG/JjwtNEJZdZajKvih8F7JLfMyT+dA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=QNGbLtmXDBOE5ky1SjPtAp53dAZVPH5fLrgwQjHC6AQ=;
+ b=PxRxnfGxHcAuIIlItRZCYWTVzbyIXTaS2q3eukqZwq6jsy1G+69lBAypbNCrjj7s/r9qJwi5ovQhK05LLzMmySMX3bbFO5cDxMunj45hBQjL/UPMBGoEUNm4SRmLSWjrMjYG+Z5w66cvBDUv2kiiH+v33GwkIcvW0vY/0aL+GDvcmrVIh4qsuRwixbNdu/w0vyTz0GMYOG9b4dHloRqPjDdiGy3WGkFW8NR395lZjMNORFw6qDhyrCf+is1vSNNijiiQI4eSv2htu+1QvwEWfFcZ5fyRrHmJbumI47aiNkrAp1lV3UScG3fXqqVjc+rYMBivIbrV8ACzD7JbbswbMg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=QNGbLtmXDBOE5ky1SjPtAp53dAZVPH5fLrgwQjHC6AQ=;
+ b=BHDx+j89fJUwwuKCNU+JYgMdRrD22U9LBvcpslBXiaQG86AtvGzjaR+MknW6/3LyJ2qGiepZvL7FDsM4/UP/HU3QAmx6Kh1vbTslJLxSLztGPnSCGNsbMiajsclPoY65KgAt51a69toRT5P7AMklsg6+8N/C6YkZVN+ORjVqx2D2XZ94Uk3qdXn0j5AReEmhY8hdz31bvzxqSTl7qsV4aZKFfwZzu1uXd7mDcneBpIatPFrUTiBsk/Te8oWqtx68bswc6BQmmrOm5Sd2UNQ12Py9yhhFX6/N7PGVrPvi4YQXB75tinuVxr5I8CH4NS4eJmaSyUAiVkzqw5syvs7sbg==
+Received: from DU2PR04MB8567.eurprd04.prod.outlook.com (2603:10a6:10:2d6::21)
+ by PA4PR04MB9440.eurprd04.prod.outlook.com (2603:10a6:102:2ac::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8632.31; Wed, 16 Apr
+ 2025 02:42:41 +0000
+Received: from DU2PR04MB8567.eurprd04.prod.outlook.com
+ ([fe80::4db:3dc0:c292:493a]) by DU2PR04MB8567.eurprd04.prod.outlook.com
+ ([fe80::4db:3dc0:c292:493a%5]) with mapi id 15.20.8632.030; Wed, 16 Apr 2025
+ 02:42:41 +0000
+From: Luke Wang <ziniu.wang_1@nxp.com>
+To: Arnd Bergmann <arnd@arndb.de>, Arnd Bergmann <arnd@kernel.org>, Bough Chen
+	<haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer
+	<s.hauer@pengutronix.de>
+CC: Pengutronix Kernel Team <kernel@pengutronix.de>, Fabio Estevam
+	<festevam@gmail.com>, Josua Mayer <josua@solid-run.com>,
+	"imx@lists.linux.dev" <imx@lists.linux.dev>, "linux-mmc @ vger . kernel .
+ org" <linux-mmc@vger.kernel.org>, dl-S32 <S32@nxp.com>,
+	"linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>
+Subject: RE: [EXT] [PATCH] [v2] mmc: esdhc-imx: convert to modern PM_OPS
+Thread-Topic: [EXT] [PATCH] [v2] mmc: esdhc-imx: convert to modern PM_OPS
+Thread-Index: AQHbqsAQEeWYoKBe402OH8kq6kt3qrOkEfDAgACkaYCAAOWuQA==
+Date: Wed, 16 Apr 2025 02:42:41 +0000
+Message-ID:
+ <DU2PR04MB856710E8F6D4AED4E03C760BEDBD2@DU2PR04MB8567.eurprd04.prod.outlook.com>
+References: <20250411085932.1902662-1-arnd@kernel.org>
+ <DU2PR04MB856729305860ED5C3C545771EDB22@DU2PR04MB8567.eurprd04.prod.outlook.com>
+ <3d544dbc-863d-4ac5-9839-aef3a36881d1@app.fastmail.com>
+In-Reply-To: <3d544dbc-863d-4ac5-9839-aef3a36881d1@app.fastmail.com>
+Accept-Language: en-US
+Content-Language: zh-CN
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DU2PR04MB8567:EE_|PA4PR04MB9440:EE_
+x-ms-office365-filtering-correlation-id: f5c40e2e-e2b7-41a5-ed42-08dd7c905bd6
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|366016|376014|1800799024|7416014|38070700018;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?RESgxcjIQ8NmVWnX0svOxcvkuT7VFEgtEY6h+Wix40wRyGUwox3k0Y/GU3mE?=
+ =?us-ascii?Q?64DcyQJCCU1IYG3X8I4odHuvyBdRvqiPk2wdZ63Aik2DXxMDlLbu1Gwtm+Eq?=
+ =?us-ascii?Q?BG/rs7Z3gmZxURpl06E63H9zYKsk2tElY9IvTwk+etwBSfbqT5E2cSXgNzFB?=
+ =?us-ascii?Q?qP0qZDJE7aFOjylYbWcLX5SEqkgeSfbY3UPJlkC43vD2RSoPOSfgUVua3CLN?=
+ =?us-ascii?Q?vv1TWtTf3Kmuohv284l1/tyy0pDDERCpcZadXtBS697GlVZ+qMGZ0hT/9Zmj?=
+ =?us-ascii?Q?KSAMDoeDljzNZ2MLx3HPM6ktTRVL0udKE4utDumnrDbBkf+uam0Cl6oTRkL2?=
+ =?us-ascii?Q?faB6hH0uHD5atPLYsVJN97oVD4eOuiKIZtfJlH7S1ZB23XdV+Zkj0jlvv20X?=
+ =?us-ascii?Q?M5qLamuC25MSmsm5Vn+4ztebKpCY159PdXMNQQr13IgjBpea7QxZGGq6mk/E?=
+ =?us-ascii?Q?j028f9E4ASXceiMbAT9pZi+sygCoQfjt2gIh4TBZAeei9eyy+KBIQTWPXfwy?=
+ =?us-ascii?Q?jNEQCnmbcANH+GeAZbKGpZS0KGBxqKvjqQoK+4BMA/zKBvPZMy6PTnh1+d02?=
+ =?us-ascii?Q?ayJs+/6H5QTaRj85ZDcqTaxBC2i23lbdWYMJBh2Hrq1jQx8SIzcmcyTBpTfz?=
+ =?us-ascii?Q?VUFCJDU/NzcLqOHQuC2MfgrQUtUdZEF18UPQSZDNJeICMOJylbak3mFeWYLb?=
+ =?us-ascii?Q?6XrTrha3Ir6FbOVd4SIvhMPbk5RQLz9CH+y2+6zMAyaizGctBfcvsJGJ1LiO?=
+ =?us-ascii?Q?KIwpQa6uMkrc2kXlCbPVq43WXHykVR/U22AEvFTZUEfH5UoeNC1zNKKBu72L?=
+ =?us-ascii?Q?zkeKrYIu2aDL2SYH3SfbNX2vast7Ps6zeD42ELt/R99WV3bv+F8rKmpWDWKE?=
+ =?us-ascii?Q?IxPz7pE1P7M/KXdm39Dh5XGxvQ5+OEazpuNiSt3lXlTp4m3oPyxnm+TNEGI1?=
+ =?us-ascii?Q?Kj8M4WrjvVi37LoP4eD8MdBmi7r+cYJegRFQt9Be++k4LKT8p1b/VGCQdXqv?=
+ =?us-ascii?Q?iQXNf30yrdeEPcLrTI8vESsN2rwMQwi4Pw0p3hYcbBwBsITpizNO52ZGoThe?=
+ =?us-ascii?Q?HHXWhn9Pj11mDAH7nPjJc8hwV2UzP2q1URURNQAaAq8w+mWieaqzQvtzcb1/?=
+ =?us-ascii?Q?IZHVes7m1PtfSCAg/B1Ty78g+ucY/o0N9/vRKHq0qlbrOcw1csZ0sMwPjcFt?=
+ =?us-ascii?Q?EyRnyoiz4SVA6b3r91Me2CaUrImcAGDWMZgmkwIzq6p+ja8bAIVTWgjBm8xR?=
+ =?us-ascii?Q?ZmTNajf6QjwfpB+1XKeVo0zWgBMAmgt1ZMoFZhp1yvEY0rW1c4UT30+N0cCi?=
+ =?us-ascii?Q?XoBk0+O4Tl7FT9eS7OSUsnnwp2Yfe/YQLHe8bk72SxcCWBGDmrXr1BIsVeaY?=
+ =?us-ascii?Q?l4lJUFTv1+tU5oA+prxbqKb3zj04On+wVejgCMYEEv/q3kG0LRwsXks9BwMh?=
+ =?us-ascii?Q?XqNchpBYTvdebrR0qaJC1R4M3RGZckfwqz0bDvlOEqpTA8PYG4bzBw=3D=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU2PR04MB8567.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(7416014)(38070700018);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?vINsDhHr//SyLLSsDf5kt5RlibbOBfpIQ1fFy3Jw445sR083ciT8b/YmAvFg?=
+ =?us-ascii?Q?ZaSqR+50W3SlO5hM2OHi4qXIG8RVHnvvasKE7FA5HlyhfY85LFGR7Mkc5kp4?=
+ =?us-ascii?Q?RY6/CqIyjZJe++D2UmzKp7krX4MlotEJPJqJ1ALPPq4+x4C6zw4hjf1jUdHJ?=
+ =?us-ascii?Q?cSUcRv1ChPXvDTs2SBlF56Ad+l6l5bkuJ4WS1Y5PwLe8lyY4C2CKfZrjbbUj?=
+ =?us-ascii?Q?GI8SwEvRhMfx8H0+iLhZDhoxFK2hxgnl3mGnInkxbIsat9eECn1v67TrBrJz?=
+ =?us-ascii?Q?Qw8wczbITnKwaJC1eWryhCvUf/2lPxGoja4/2+ZeYumb9EquwzxTS+coQlTp?=
+ =?us-ascii?Q?sKMYP4pv/Zz7WEC+3v0Mi8+acdFMJ5tM30rN/KTXsT3xWNYQowiWvuGl92v9?=
+ =?us-ascii?Q?8a5Ausw5Zs8IZabggxXsNhEwA6myyMf53FR9XmvldYWveuIyrMC9LiNl2Jy5?=
+ =?us-ascii?Q?6dvdhnCF5Xf8B4S5Dz9Tz7yDdP5ab7axDJrif7mYNV5jTXuHqPx2Apo4GRa8?=
+ =?us-ascii?Q?EtB+wM3ZPu/WsuoP9vVjLGd+PtquPaflKPJUmdSVy7GyyOfQkGvurOmNt3fR?=
+ =?us-ascii?Q?gVbm7Vyeqw3WvfwnUfnB5vU5k3OTenE/burQXDnHUul1bDI/jEFAWWiN40eX?=
+ =?us-ascii?Q?fCtTfyYPtOOQ9ZphgxLRX3wa2CTne8xSn4GLmHpe1hoIQCkrIr6XyQZMMT0x?=
+ =?us-ascii?Q?G+1sSLAANE1wuWjUuY3zj7vhtpJJpKeoDPGeYg+Sb3h5cYB1AMh/bEMMzDdt?=
+ =?us-ascii?Q?KspXF++YUzTTMBwN01cxxiSWjhYlwjk4cPrtQzfDRo4nRibfOoZPB554QE+/?=
+ =?us-ascii?Q?GRYWlKcTi7kLFoEY9OmTNtb3JBtAa8uDovoEivlNp+GIqenkaqq6g7BI65l4?=
+ =?us-ascii?Q?DEuEBjpfktSARZQ1s+65/G9RfdQe2K7pYZvdm/qURttqrMB0TKZZUfUEvUgq?=
+ =?us-ascii?Q?mWJ7384JRhbS2yiqll9b8Q45msyHCXXf+7DpPsplaFTalu/j5tHQdsLXPK13?=
+ =?us-ascii?Q?V5zG0AtO6k/QnaqZi9SRZvPHrPwxhpXVJd2R006pw8QBiZ5rFzJKXcMz5D5l?=
+ =?us-ascii?Q?0ZFDOizmZ6q1E6aE4byyuAAqtrvaEIcuXHcbgl6KL4WXiuUa2U1Mz9CSR+aQ?=
+ =?us-ascii?Q?um3J7pB7vjOfzDft4ClFd33mFyYyqfZ72mGLWoReYIOJLBMRXc5sX7UE1r2w?=
+ =?us-ascii?Q?rSKvWowxLHp2P0z/52naLpzqQCd4LjHWK2A/lapvtkcRiBZMn9fXlf2mClsy?=
+ =?us-ascii?Q?2tz+lj66WuBSPmjZ5GCGIPZPSrI5xZoa9RT0HMUgijr/vnGBrmktkOWwY0BX?=
+ =?us-ascii?Q?MHjNEFJelLsS+U0X5M1zpH2AZASbcsQLRCcJOk5TIGs2k/AXhaRtr09n68Cw?=
+ =?us-ascii?Q?wCwk7tQVddbhHrqKfzW6iruP/UeLpFl0UwZ8iDjaaQE/GQ3YSjX7bIrE1+a1?=
+ =?us-ascii?Q?rXKj9AguQuOSTvjo4CzVY/RIuMiAO4Y1XL1Cyi8VQd9zIEL0ka1v4VyEDqvV?=
+ =?us-ascii?Q?TNDemxgNIabCUMfV6kGJKa+0NO6N3Pf15PcQGjW8z7U38HtJpefZxdTg55Te?=
+ =?us-ascii?Q?38Tj3qpH4zoyg+aDtTPobD+UwEbIAKQOL/J3Zcf1?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-From: Prasad Koya <prasad@arista.com>
-Date: Tue, 15 Apr 2025 17:13:10 -0700
-X-Gm-Features: ATxdqUHrK06Yntk9OSP5_7oHWP7Umh4DoyMfNbQTm3Kkbpb3kJp9rBDQW-JzbUw
-Message-ID: <CAKh1g556YvHE9eib3WJG+mBHyyr88rxYSbNUHxpFYsUHcdOoUg@mail.gmail.com>
-Subject: eMMC timeout reproduction. Can I send a block of data from the host
- to the card with invalid CRC?
-To: linux-mmc@vger.kernel.org
-Cc: Baptiste Covolato <baptiste@arista.com>, Sushrut Shirole <sushrut@arista.com>, ulf.hansson@linaro.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-Hi
-
-We use eMMC as a boot drive. At a random time, maybe a month or an
-year of uptime, we run into an issue where we see the eMMC driver
-prints this in the kernel logs and the drive no longer responds after
-that. We see this issue in the field on linux kernel 4.19.142 and
-5.10.165. From the SDHCI register dump, it looks like CMD25 ran into a
-timeout first. After the first timeout, we see CMD12 in the second
-SDHCI register dump. Status returned by the card at that point in
-card_busy_detect() is 0xE00.
-
-I looked at the recent commits up to 6.15 and I do not see anything
-obvious that addresses issue like below.
-
-We are trying to reproduce the issue in our lab and understand the
-driver code. Is there a way I can send a block of data as part of
-CMD25 with invalid CRC?  Appreciate any pointers.
-
-Below are the kernel logs and some more information about our drive
-from debugfs.
-
-[43976878.027119] mmc0: Timeout waiting for hardware interrupt.
-[43976878.094848] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI R=
-EGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-[43976878.175087] mmc0: sdhci: Sys addr:  0xd3c00600 | Version:  0x00001002
-[43976878.255333] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x0000000d
-[43976878.335565] mmc0: sdhci: Argument:  0x00460810 | Trn mode: 0x00000023
-[43976878.415798] mmc0: sdhci: Present:   0x01ef0106 | Host ctl: 0x00000007
-[43976878.496029] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-[43976878.576261] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000207
-[43976878.656492] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-[43976878.736724] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
-[43976878.816958] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x000000ff
-[43976878.897189] mmc0: sdhci: Caps:      0x75fec8b2 | Caps_1:   0x00002501
-[43976878.977421] mmc0: sdhci: Cmd:       0x0000193a | Max curr: 0x00c80064
-[43976879.057651] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-[43976879.137882] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x00d04f01
-[43976879.218116] mmc0: sdhci: Host ctl2: 0x00000000
-[43976879.274385] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-[43976888.267487] mmc0: Timeout waiting for hardware interrupt.
-[43976888.335221] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI R=
-EGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-[43976888.415455] mmc0: sdhci: Sys addr:  0xd3c00600 | Version:  0x00001002
-[43976888.495687] mmc0: sdhci: Blk size:  0x00007200 | Blk cnt:  0x0000000d
-[43976888.575920] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
-[43976888.656150] mmc0: sdhci: Present:   0x01ef0006 | Host ctl: 0x00000007
-[43976888.736377] mmc0: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
-[43976888.816606] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x00000207
-[43976888.896829] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-[43976888.977051] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
-[43976889.057271] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x000000ff
-[43976889.137494] mmc0: sdhci: Caps:      0x75fec8b2 | Caps_1:   0x00002501
-[43976889.217718] mmc0: sdhci: Cmd:       0x00000c1b | Max curr: 0x00c80064
-[43976889.297948] mmc0: sdhci: Resp[0]:   0x00000c00 | Resp[1]:  0xffffffff
-[43976889.378178] mmc0: sdhci: Resp[2]:   0x320f5903 | Resp[3]:  0x00d04f01
-[43976889.458408] mmc0: sdhci: Host ctl2: 0x00000000
-[43976889.514671] mmc0: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D
-[43976891.203641] sdhci-pci 0000:00:14.7: Card stuck in wrong state!
-card_busy_detect status: 0xe00
-[43976891.309110] mmc0: cache flush error -110
-[43976892.599663] mmc0: tried to HW reset card, got error -110
-[43976892.599668] mmcblk0: recovery failed!
-[43976892.656500] print_req_error: I/O error, dev mmcblk0, sector 4589584
-[43976892.663560] sdhci-pci 0000:00:14.7: error -110 requesting status
-[43976892.734746] EXT4-fs warning (device mmcblk0p1):
-ext4_end_bio:317: I/O error 10 writing to inode 129797 (offset 0 size
-8192 starting block 573700)
-[43976892.809713] Buffer I/O error on device mmcblk0p1, logical block 57344=
-2
-[43976892.809741] mmcblk0: recovery failed!
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DU2PR04MB8567.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: f5c40e2e-e2b7-41a5-ed42-08dd7c905bd6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Apr 2025 02:42:41.4069
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: q7mkL/VKNs389iKERtxmcTU2y5q3lw1Gpeh8O4Baccad1K+L4lGBkTCTlqTIPn6ZrDsWRzDNrG++3tdd813UzQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB9440
 
 
-/sys/kernel/debug/mmc0/caps
-0x4007040f
-/sys/kernel/debug/mmc0/caps2
-0x00024000
-/sys/kernel/debug/mmc0/clock
-52000000
-/sys/kernel/debug/mmc0/ios
-clock:          52000000 Hz
-actual clock:   50000000 Hz
-vdd:            21 (3.3 ~ 3.4 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      2 (4 bits)
-timing spec:    1 (mmc high-speed)
-signal voltage: 0 (3.30 V)
-driver type:    0 (driver type B)
 
--bash-4.2# cat /sys/kernel/debug/mmc0/mmc0\:0001/ext_csd
-00000000000000000000000000000000010100c074000000000000000000000000010100000=
-000000000000000000000000000000000000000000000000000000000000001000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000020000020000000000100000000000000000000000000000000000000=
-00000000000000d701000701000000000500200000000000000100000000000000010001000=
-00000000007000200571f04030000000000080808080808000080eb000f1314080801011110=
-07200007010155110000000000000001640800000000ff19000400000002000000000000000=
-000010801010b02000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-0000000000000000000000000000000000
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-000000000000000000000000000000000000000000000000000000000000000000000000000=
-0000000000000000000000000000000000000001ffff00000000010307050003013c3c01010=
-100000000000000
--bash-4.2#
+> -----Original Message-----
+> From: Arnd Bergmann <arnd@arndb.de>
+> Sent: Tuesday, April 15, 2025 8:57 PM
+> To: Luke Wang <ziniu.wang_1@nxp.com>; Arnd Bergmann
+> <arnd@kernel.org>; Bough Chen <haibo.chen@nxp.com>; Adrian Hunter
+> <adrian.hunter@intel.com>; Ulf Hansson <ulf.hansson@linaro.org>; Shawn
+> Guo <shawnguo@kernel.org>; Sascha Hauer <s.hauer@pengutronix.de>
+> Cc: Pengutronix Kernel Team <kernel@pengutronix.de>; Fabio Estevam
+> <festevam@gmail.com>; Josua Mayer <josua@solid-run.com>;
+> imx@lists.linux.dev; linux-mmc @ vger . kernel . org <linux-
+> mmc@vger.kernel.org>; dl-S32 <S32@nxp.com>; linux-arm-
+> kernel@lists.infradead.org; linux-kernel@vger.kernel.org
+> Subject: Re: [EXT] [PATCH] [v2] mmc: esdhc-imx: convert to modern PM_OPS
+>=20
+> Caution: This is an external email. Please take care when clicking links =
+or
+> opening attachments. When in doubt, report the message using the 'Report
+> this email' button
+>=20
+>=20
+> On Tue, Apr 15, 2025, at 05:15, Luke Wang wrote:
+> > Hi Arnd,
+> >
+> > This patch has compilation issue because sdhci.c still uses #ifdef
+> > CONFIG_PM. Do you plan to send a new patch to fix? If not, I can send a
+> > patch to fix the compilation warning.
+>=20
+> Can you see if the change below is sufficient? I see I have that
+> in my randconfig tree and I did not see any problems with my
+> v2 patch and that. I probably added that one originally because
+> of some other build failure but then never sent it.
+>=20
 
--bash-4.2# ./mmcutils extcsd read /dev/mmcblk0
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-  Extended CSD rev 1.7 (MMC 5.0)
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+Yes, it works fine. No build warning/error with CONFIG_PM not set.
 
-Card Supported Command sets [S_CMD_SET: 0x01]
-HPI Features [HPI_FEATURE: 0x01]: implementation based on CMD13
-Background operations support [BKOPS_SUPPORT: 0x01]
-Max Packet Read Cmd [MAX_PACKED_READS: 0x3c]
-Max Packet Write Cmd [MAX_PACKED_WRITES: 0x3c]
-Data TAG support [DATA_TAG_SUPPORT: 0x01]
-Data TAG Unit Size [TAG_UNIT_SIZE: 0x03]
-Tag Resources Size [TAG_RES_SIZE: 0x00]
-Context Management Capabilities [CONTEXT_CAPABILITIES: 0x05]
-Large Unit Size [LARGE_UNIT_SIZE_M1: 0x07]
-Extended partition attribute support [EXT_SUPPORT: 0x03]
-Generic CMD6 Timer [GENERIC_CMD6_TIME: 0x19]
-Power off notification [POWER_OFF_LONG_TIME: 0xff]
-Cache Size [CACHE_SIZE] is 128 KiB
-Background operations status [BKOPS_STATUS: 0x00]
-1st Initialisation Time after programmed sector [INI_TIMEOUT_AP: 0x64]
-Power class for 52MHz, DDR at 3.6V [PWR_CL_DDR_52_360: 0x00]
-Power class for 52MHz, DDR at 1.95V [PWR_CL_DDR_52_195: 0x00]
-Power class for 200MHz at 3.6V [PWR_CL_200_360: 0x00]
-Power class for 200MHz, at 1.95V [PWR_CL_200_195: 0x00]
-Minimum Performance for 8bit at 52MHz in DDR mode:
- [MIN_PERF_DDR_W_8_52: 0x00]
- [MIN_PERF_DDR_R_8_52: 0x00]
-TRIM Multiplier [TRIM_MULT: 0x11]
-Secure Feature support [SEC_FEATURE_SUPPORT: 0x55]
-Boot Information [BOOT_INFO: 0x07]
- Device supports alternative boot method
- Device supports dual data rate during boot
- Device supports high speed timing during boot
-Boot partition size [BOOT_SIZE_MULTI: 0x20]
-Access size [ACC_SIZE: 0x07]
-High-capacity erase unit size [HC_ERASE_GRP_SIZE: 0x10]
- i.e. 8192 KiB
-High-capacity erase timeout [ERASE_TIMEOUT_MULT: 0x11]
-Reliable write sector count [REL_WR_SEC_C: 0x01]
-High-capacity W protect group size [HC_WP_GRP_SIZE: 0x01]
- i.e. 8192 KiB
-Sleep current (VCC) [S_C_VCC: 0x08]
-Sleep current (VCCQ) [S_C_VCCQ: 0x08]
-Sleep/awake timeout [S_A_TIMEOUT: 0x13]
-Sector Count [SEC_COUNT: 0x00eb8000]
- Device is block-addressed
-Minimum Write Performance for 8bit:
- [MIN_PERF_W_8_52: 0x08]
- [MIN_PERF_R_8_52: 0x08]
- [MIN_PERF_W_8_26_4_52: 0x08]
- [MIN_PERF_R_8_26_4_52: 0x08]
-Minimum Write Performance for 4bit:
- [MIN_PERF_W_4_26: 0x08]
- [MIN_PERF_R_4_26: 0x08]
-Power classes registers:
- [PWR_CL_26_360: 0x00]
- [PWR_CL_52_360: 0x00]
- [PWR_CL_26_195: 0x00]
- [PWR_CL_52_195: 0x00]
-Partition switching timing [PARTITION_SWITCH_TIME: 0x03]
-Out-of-interrupt busy timing [OUT_OF_INTERRUPT_TIME: 0x04]
-I/O Driver Strength [DRIVER_STRENGTH: 0x1f]
-Card Type [CARD_TYPE: 0x57]
- HS400 Dual Data Rate eMMC @200MHz 1.8VI/O
- HS200 Single Data Rate eMMC @200MHz 1.8VI/O
- HS Dual Data Rate eMMC @52MHz 1.8V or 3VI/O
- HS eMMC @52MHz - at rated device voltage(s)
- HS eMMC @26MHz - at rated device voltage(s)
-CSD structure version [CSD_STRUCTURE: 0x02]
-Command set [CMD_SET: 0x00]
-Command set revision [CMD_SET_REV: 0x00]
-Power class [POWER_CLASS: 0x00]
-High-speed interface timing [HS_TIMING: 0x01]
-Erased memory content [ERASED_MEM_CONT: 0x00]
-Boot configuration bytes [PARTITION_CONFIG: 0x00]
- Not boot enable
- No access to boot partition
-Boot config protection [BOOT_CONFIG_PROT: 0x00]
-Boot bus Conditions [BOOT_BUS_CONDITIONS: 0x00]
-High-density erase group definition [ERASE_GROUP_DEF: 0x01]
-Boot write protection status registers [BOOT_WP_STATUS]: 0x00
-Boot Area Write protection [BOOT_WP]: 0x00
- Power ro locking: possible
- Permanent ro locking: possible
- partition 0 ro lock status: not locked
- partition 1 ro lock status: not locked
-User area write protection register [USER_WP]: 0x00
-FW configuration [FW_CONFIG]: 0x00
-RPMB Size [RPMB_SIZE_MULT]: 0x20
-Write reliability setting register [WR_REL_SET]: 0x00
- user area: existing data is at risk if a power failure occurs during
-a write operation
- partition 1: existing data is at risk if a power failure occurs
-during a write operation
- partition 2: existing data is at risk if a power failure occurs
-during a write operation
- partition 3: existing data is at risk if a power failure occurs
-during a write operation
- partition 4: existing data is at risk if a power failure occurs
-during a write operation
-Write reliability parameter register [WR_REL_PARAM]: 0x05
- Device supports writing EXT_CSD_WR_REL_SET
- Device supports the enhanced def. of reliable write
-Enable background operations handshake [BKOPS_EN]: 0x00
-H/W reset function [RST_N_FUNCTION]: 0x00
-HPI management [HPI_MGMT]: 0x01
-Partitioning Support [PARTITIONING_SUPPORT]: 0x07
- Device support partitioning feature
- Device can have enhanced tech.
-Max Enhanced Area Size [MAX_ENH_SIZE_MULT]: 0x0001d7
- i.e. 3858432 KiB
-Partitions attribute [PARTITIONS_ATTRIBUTE]: 0x00
-Partitioning Setting [PARTITION_SETTING_COMPLETED]: 0x00
- Device partition setting NOT complete
-General Purpose Partition Size
- [GP_SIZE_MULT_4]: 0x000000
- [GP_SIZE_MULT_3]: 0x000000
- [GP_SIZE_MULT_2]: 0x000000
- [GP_SIZE_MULT_1]: 0x000000
-Enhanced User Data Area Size [ENH_SIZE_MULT]: 0x000000
- i.e. 0 KiB
-Enhanced User Data Start Address [ENH_START_ADDR]: 0x00000000
- i.e. 0 bytes offset
-Bad Block Management mode [SEC_BAD_BLK_MGMNT]: 0x00
-Periodic Wake-up [PERIODIC_WAKEUP]: 0x00
-Program CID/CSD in DDR mode support [PROGRAM_CID_CSD_DDR_SUPPORT]: 0x01
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[127]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[126]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[125]]: 0x20
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[124]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[123]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[122]]: 0x20
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[121]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[120]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[119]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[118]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[117]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[116]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[115]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[114]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[113]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[112]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[111]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[112]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[111]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[110]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[109]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[108]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[107]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[106]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[105]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[104]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[103]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[102]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[101]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[100]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[99]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[98]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[97]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[96]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[95]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[94]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[93]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[92]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[91]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[90]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[89]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[88]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[87]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[86]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[85]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[84]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[83]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[82]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[81]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[80]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[79]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[78]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[77]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[76]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[75]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[74]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[73]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[72]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[71]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[70]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[69]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[68]]: 0x01
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[67]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[66]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[65]]: 0x00
-Vendor Specific Fields [VENDOR_SPECIFIC_FIELD[64]]: 0x00
-Native sector size [NATIVE_SECTOR_SIZE]: 0x00
-Sector size emulation [USE_NATIVE_SECTOR]: 0x00
-Sector size emulation [USE_NATIVE_SECTOR]: 0x00
-Sector size [DATA_SECTOR_SIZE]: 0x00
-1st initialization after disabling sector size emulation [INI_TIMEOUT_EMU]:=
- 0x00
-Class 6 commands control [CLASS_6_CTRL]: 0x00
-Number of addressed group to be Released[DYNCAP_NEEDED]: 0x00
-Exception events control [EXCEPTION_EVENTS_CTRL]: 0x0000
-Exception events status[EXCEPTION_EVENTS_STATUS]: 0x0000
-Extended Partitions Attribute [EXT_PARTITIONS_ATTRIBUTE]: 0x0000
-Context configuration [CONTEXT_CONF[51]]: 0x00
-Context configuration [CONTEXT_CONF[50]]: 0x00
-Context configuration [CONTEXT_CONF[49]]: 0x00
-Context configuration [CONTEXT_CONF[48]]: 0x00
-Context configuration [CONTEXT_CONF[47]]: 0x00
-Context configuration [CONTEXT_CONF[46]]: 0x00
-Context configuration [CONTEXT_CONF[45]]: 0x00
-Context configuration [CONTEXT_CONF[44]]: 0x00
-Context configuration [CONTEXT_CONF[43]]: 0x00
-Context configuration [CONTEXT_CONF[42]]: 0x00
-Context configuration [CONTEXT_CONF[41]]: 0x00
-Context configuration [CONTEXT_CONF[40]]: 0x00
-Context configuration [CONTEXT_CONF[39]]: 0x00
-Context configuration [CONTEXT_CONF[38]]: 0x00
-Context configuration [CONTEXT_CONF[37]]: 0x00
-Packed command status [PACKED_COMMAND_STATUS]: 0x00
-Packed command failure index [PACKED_FAILURE_INDEX]: 0x00
-Power Off Notification [POWER_OFF_NOTIFICATION]: 0x01
-Control to turn the Cache ON/OFF [CACHE_CTRL]: 0x01
-Control to turn the Cache Barrier ON/OFF [BARRIER_CTRL]: 0x00
-eMMC Firmware Version:
-eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x0b
-eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x02
-eMMC Pre EOL information [EXT_CSD_PRE_EOL_INFO]: 0x01
-Secure Removal Type [SECURE_REMOVAL_TYPE]: 0x01
- information is configured to be removed by an erase of the physical memory
- Supported Secure Removal Type:
-  information removed by an erase of the physical memory
--bash-4.2#
-
-Thank you.
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+>=20
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index cd0e35a80542..4ee2695b0202 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -874,12 +874,10 @@ irqreturn_t sdhci_thread_irq(int irq, void *dev_id)=
+;
+>  void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+>                            dma_addr_t addr, int len, unsigned int cmd);
+>=20
+> -#ifdef CONFIG_PM
+>  int sdhci_suspend_host(struct sdhci_host *host);
+>  int sdhci_resume_host(struct sdhci_host *host);
+>  int sdhci_runtime_suspend_host(struct sdhci_host *host);
+>  int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset);
+> -#endif
+>=20
+>  void sdhci_cqe_enable(struct mmc_host *mmc);
+>  void sdhci_cqe_disable(struct mmc_host *mmc, bool recovery);
