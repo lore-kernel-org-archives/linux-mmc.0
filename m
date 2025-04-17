@@ -1,36 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A8F6315A868;
-	Thu, 17 Apr 2025 14:37:09 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 311572522B3;
+	Thu, 17 Apr 2025 14:37:14 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744900633; cv=none; b=bEZaB4QOdgbxQORLejGLWJGQwakkvSlOuJupERW9slDswbbF5S07jx+yWJgRl8DMbORX2eiPAC0RdWJ8zHSWIEOT4NqFh7+jqQpFLIJyQdrapUnWcO74Dc+hBQRKxv1y4BSWM0EJLiPlsQA1oz5GXdL+7jI3/om5bIqrQ5HyKoo=
+	t=1744900637; cv=none; b=DsLQE2+6ESvieaN/Ax8F2jt8SO4ERPumVAyEIjy2g9lKjP44Zn+O6OHpqFq5g94rkfj7EZfnSQQlYo33gfDCsRFxqNMww0Gi4KwTy3XTW0OrXyTNikwpwuCGW6n8sAtpfMckQVNKQ9u8ISzK9/sQjdtVLURmdYK1NV2tupCi2hc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744900633; c=relaxed/simple;
-	bh=sYtHglBTVqXwt7DqWYSQlT7eDYzzYmQoAxAuuz6prkY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=uRhFVX/ip4fnDGdKM8QHGK/dFW9fSpZD+CnjcUgHaLZeUO+dIL4dPtQjNq+df58ztabxmO22LXqSWAGuArbJpcSRESuMfSorP1FMGy6Op189vtv/zyBVY3o2otyRdBNjYVPg6j4WH9MF+GRI857ClmaI4AIRHgaRJSGntNU1Myw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=CtFTaMrS; arc=none smtp.client-ip=178.21.23.139
+	s=arc-20240116; t=1744900637; c=relaxed/simple;
+	bh=6edIhBaoWOfTotZiCQe2Htao2lyDgYNn+iXUNDszYqs=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Y9WeNNBL/CdDvE9gv3Irvh9hHlXRZQ5V9ym+bJZJm1uS3f3fBfmYw+/+Mbu46T4KhsqkH1zXokBFAtzb8bpJSWlhCdO9/twLp2um1Oy5EOybPA4QNmrij2OKTfgtrR/yUMpxPHBAe4akpladRZZVfM72/gcfebypvBLpGieO4GI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=WgQSCRhH; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="CtFTaMrS"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="WgQSCRhH"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id 79C0F2023B;
-	Thu, 17 Apr 2025 16:37:07 +0200 (CEST)
+	by disroot.org (Postfix) with ESMTP id 5940725984;
+	Thu, 17 Apr 2025 16:37:13 +0200 (CEST)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id 5kFlxYkdvA7D; Thu, 17 Apr 2025 16:37:06 +0200 (CEST)
+ id JHofJYrXWWn4; Thu, 17 Apr 2025 16:37:12 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1744900626; bh=sYtHglBTVqXwt7DqWYSQlT7eDYzzYmQoAxAuuz6prkY=;
-	h=From:To:Cc:Subject:Date;
-	b=CtFTaMrS9Q+TSxO0qI73LNZSjfy2Si13/GMGsEFMoe+/mbx6pkaJ4d7SQW1fH/MiM
-	 8eo6JtCxzDkmC7Yte3Imi8kjGbp0cE4ModoLDgaG2oCSKAyuaWnX6SP05y8mNHlvxn
-	 dDQPBNp83KXEqMK3ETDBlmz9i3oEAQ4DAqcm6rhg8eBjfX20HYjYhoEs0zKezUgaOK
-	 raFIThbYXrOOgl1zf/Ct5aMuNNm/1eG6JwtGJ6J3//yN0eKjp2sDvQXDRVxfoEQmZx
-	 zKMcAbvX+41WNYubZCIIx+HHNoy8A9gb/G6Ugh8v5oIHn3d48QS2Sgv/tsFLxIKmzp
-	 BmBrZEj1P1Ymw==
+	t=1744900632; bh=6edIhBaoWOfTotZiCQe2Htao2lyDgYNn+iXUNDszYqs=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References;
+	b=WgQSCRhHb3j6VTjSb7tAJl7FuhzDXhX21D04crHYaG2JOAxw2rx5kgcWY047ydd5C
+	 vjgUXdhfcX1B8CfGHrRSI0H4beVeA+vGXTqbA9KxVtSsIvU7TlArqb/83633nnM7WZ
+	 vCsURFm17faiN6K/nEOQWNw7OjV60A06Rqb19Y3ks2iOSqDX6BHpk0eAt010NoznfT
+	 TAN3WPRqDl6xcardsY7P8D+P4Gw8dKG1BzBdKQstI9NKkIVL7sgh7u8N04BXH760/1
+	 D8pihXbzU6ekDe4eV7j/6OXZrx5OGMle1DqvT0oKjGw/mAIZteNh8rAnDqiS7QjCOd
+	 tMJie+Pv0THSg==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -50,10 +51,13 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-rockchip@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
-	Yao Zi <ziyao@disroot.org>
-Subject: [PATCH v4 0/5] Support SD/SDIO controllers on RK3528
-Date: Thu, 17 Apr 2025 14:36:42 +0000
-Message-ID: <20250417143647.43860-1-ziyao@disroot.org>
+	Yao Zi <ziyao@disroot.org>,
+	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v4 1/5] dt-bindings: clock: Add GRF clock definition for RK3528
+Date: Thu, 17 Apr 2025 14:36:43 +0000
+Message-ID: <20250417143647.43860-2-ziyao@disroot.org>
+In-Reply-To: <20250417143647.43860-1-ziyao@disroot.org>
+References: <20250417143647.43860-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,63 +66,32 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-RK3528 features two SDIO controllers and one SD/MMC controller. This
-series adds essential support for their tuning clocks and brings the
-SD/MMC one up on Radxa E20C board. Both HS and SDR104 mode are verified.
+These clocks are for SD/SDIO tuning purpose and come with registers
+in GRF syscon.
 
-- Changed from v3
-  - Drop applied binding patch of MMC controller
-  - Rebase on top of linux-rockchip/for-next
-  - Link to v3: https://lore.kernel.org/all/20250309055348.9299-1-ziyao@disroot.org/
-- Changed from v2
-  - Apply review tags
-  - Rebase on top of linux-rockchip/for-next and drop applied patches
-  - RK3528 devicetree
-    - Fix accidentally dropped status property of saradc node
-    - drop det and pwren pinctrls for SDIO{0,1} according to the
-      reference design
-    - Correct max-frequency for SDIO{0,1}
-  - rk3528-radxa-e20c devicetree
-    - Don't disable sdio for sdmmc as claimed in the hw design guide
-  - Link to v2: https://lore.kernel.org/all/20250305194217.47052-1-ziyao@disroot.org/
-- Changed from v1
-  - Apply review tags
-  - Rebase on top of linux-rockchip/for-next and saradc v2 series
-  - rk3528 clock driver:
-    - explicitly include minmax.h, replace MAX() with more robust max()
-    - readability improvements
-    - fix error checks: ERR_PTR(-ENODEV), instead of ERR_PTR(ENODEV), is
-      returned when syscon_regmap_lookup_by_compatible() fails for missing
-      such syscon
-  - RK3528 devicetree
-    - Add default pinctrl
-    - Move the per-SoC property, rockchip,default-sample-phase, into the
-      SoC devicetree
-  - rk3528-radxa-e20c devicetree
-    - Assign sdcard to mmc1
-    - Add missing regulators
-    - Apply no-sdio for the sdmmc controller
-    - Sort nodes
-  - Link to v1: https://lore.kernel.org/all/20250301104250.36295-1-ziyao@disroot.org/
+Signed-off-by: Yao Zi <ziyao@disroot.org>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ include/dt-bindings/clock/rockchip,rk3528-cru.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-Thanks for your time and review.
-
-Yao Zi (5):
-  dt-bindings: clock: Add GRF clock definition for RK3528
-  clk: rockchip: Support MMC clocks in GRF region
-  clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
-  arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
-  arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
-
- .../boot/dts/rockchip/rk3528-radxa-e20c.dts   | 30 ++++++++
- arch/arm64/boot/dts/rockchip/rk3528.dtsi      | 69 +++++++++++++++++++
- drivers/clk/rockchip/clk-mmc-phase.c          | 24 +++++--
- drivers/clk/rockchip/clk-rk3528.c             | 61 ++++++++++++++--
- drivers/clk/rockchip/clk.c                    | 42 +++++++++++
- drivers/clk/rockchip/clk.h                    | 23 ++++++-
- .../dt-bindings/clock/rockchip,rk3528-cru.h   |  6 ++
- 7 files changed, 244 insertions(+), 11 deletions(-)
-
+diff --git a/include/dt-bindings/clock/rockchip,rk3528-cru.h b/include/dt-bindings/clock/rockchip,rk3528-cru.h
+index 55a448f5ed6d..0245a53fc334 100644
+--- a/include/dt-bindings/clock/rockchip,rk3528-cru.h
++++ b/include/dt-bindings/clock/rockchip,rk3528-cru.h
+@@ -414,6 +414,12 @@
+ #define MCLK_I2S2_2CH_SAI_SRC_PRE	402
+ #define MCLK_I2S3_8CH_SAI_SRC_PRE	403
+ #define MCLK_SDPDIF_SRC_PRE		404
++#define SCLK_SDMMC_DRV			405
++#define SCLK_SDMMC_SAMPLE		406
++#define SCLK_SDIO0_DRV			407
++#define SCLK_SDIO0_SAMPLE		408
++#define SCLK_SDIO1_DRV			409
++#define SCLK_SDIO1_SAMPLE		410
+ 
+ /* scmi-clocks indices */
+ #define SCMI_PCLK_KEYREADER		0
 -- 
 2.49.0
 
