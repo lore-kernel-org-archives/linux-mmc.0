@@ -1,37 +1,37 @@
 Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8700DA926;
-	Thu, 17 Apr 2025 19:19:12 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EB24204F6F;
+	Thu, 17 Apr 2025 19:21:45 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744917556; cv=none; b=ssXUplkZ0H5rzgyTLHWndd4osnEIfkRbyr7fAQ/99pcCfGpf5LoAyVkSPB8kLMTP5JxAuxOc0enG0JYDNgl+aeBcS8wEAiFsINDoR3lKuewGRw6fOJcogBmcc9CpxFmr8nd6YGo7kJTy5Cx9leB1zEMCP4H5JFt9hpsPMBP6n+c=
+	t=1744917707; cv=none; b=QT5RgMpJmzLBzrR9iU3nyiCv6D3rXAx4hTkdbFidlPn2MtumS0OYvJM+10d9Y5xFPqHqYKHgDhe71fIXuQjoWgmfVq8otK0f6+/Nez+5ruW8ZfmIpKhmBIaclJfMX/lYYnvdbnFTpLHpqgZqk+3jBGoNKhDPxWGIDN7LZPwsO30=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744917556; c=relaxed/simple;
-	bh=/nj1y7uyNI0Hnabe58fvjjxo0vJvoqiHg99tGLJatBY=;
+	s=arc-20240116; t=1744917707; c=relaxed/simple;
+	bh=+CJrjIh4/VkCR9Ybqlx3vcctOMBAaHCVFAGSaZdoljE=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=evJjSTm+EYAN3uEMZqRbOWGG+P0P8r986iW9jJa1AJcayQJkP/p9RBi+7Yf+XZ6DCtV1pKtrVf1rqP1jpazBnAslk6QIS/Shj099rshfkq+zbKzNBYqFdVI96xoJGImDdzMPTAJjNO4UAcfoq+HBCCA/5E1iahPS403IsuLxJI8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=uanQeqYx; arc=none smtp.client-ip=217.194.8.81
+	 Content-Type:Content-Disposition:In-Reply-To; b=omU5z5A6OhizlvMiDbyn+rwuHTf32Hhsmh59BkCNuHy1K3HEjg9F0zIAq8oI0egYRFP0tsXywi8eM0BLwQgl+fp+FSFAri5Rb5BoyKMv7gokdGaC3b5KAL34F4OPmL1GGphq/ft1LEFOywm7opEogx7mHeyMWo4eDCjUcu8vsOM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=j7BzJDCM; arc=none smtp.client-ip=217.194.8.81
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="uanQeqYx"
+	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="j7BzJDCM"
 Received: from gaggiata.pivistrello.it (93-49-2-63.ip317.fastwebnet.it [93.49.2.63])
-	by mail11.truemail.it (Postfix) with ESMTPA id 03BDF1F92A;
-	Thu, 17 Apr 2025 21:19:10 +0200 (CEST)
+	by mail11.truemail.it (Postfix) with ESMTPA id 2DA271F92A;
+	Thu, 17 Apr 2025 21:21:43 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1744917550;
-	bh=/nj1y7uyNI0Hnabe58fvjjxo0vJvoqiHg99tGLJatBY=;
+	s=default; t=1744917703;
+	bh=SmTfEmql7viKQprPI4sVhC3SKjpRUpkDnqbejsbLIq4=;
 	h=Received:From:To:Subject;
-	b=uanQeqYxqFvRax/3xVgk6FJqoBYuHcHoxtfhxY0qI8WkQnxQedkcq+ft0paGowzPf
-	 eSUwM0LOXEiwm8f9c1A+3eJ3oC78++iF7Xwn6vD5vBcv1KQJi3s1IDsxdzvDN2zQH1
-	 ME/IyObB2Gpo3hlBQKT7j0Q/9S37pCi4lamJPX4qyCUmSVSjo+jgVUQpipgi2WIW3Q
-	 EMzJl0GO3K7eKjwbu6JDPnhxZSxEvDnw8YS8c0CEjkmXeYrOkr4k6QEvoNbyd5E6g9
-	 8ig/j1kqcXKy3/rjMxEaIThKV1ViztAOfjuzX5YnwSytWrUcBnwlCLNieNM0YfcdS6
-	 aZ2Foix3DSeIg==
+	b=j7BzJDCMxWpkhLzVc+rQ0qe0zbtPv3utjuB7ZRYficnRyKbMkzdFhg4YqTuq67Iiq
+	 DeDEFr1hTOkfDEzz/4oYC20/xUtPFtAPgPBuDx5k2bp1/ej9QFtbXzSkvYiuYVSbdW
+	 5tvYdGat0vGvZpdSrjBmM07OBDYOLme77osH5oqnUtpAXlENetU3a+M3Gj0L4THxz6
+	 wqDFbdc3tZ2GUmsiAGzG3ha66fvBtLkyeLtVEHXWE+F9Logb+wAud+KS16e+AYB6qM
+	 +l4YiCGHIKRHhbq5ZW2ILVrzYR1v5Sp5/9uDKGOBDbYw5K03FAn76caDXwak2634TY
+	 oEx8q8dI62t8Q==
 Received: by gaggiata.pivistrello.it (Postfix, from userid 1000)
-	id A8A237F823; Thu, 17 Apr 2025 21:19:09 +0200 (CEST)
-Date: Thu, 17 Apr 2025 21:19:09 +0200
+	id DA19A7F823; Thu, 17 Apr 2025 21:21:42 +0200 (CEST)
+Date: Thu, 17 Apr 2025 21:21:42 +0200
 From: Francesco Dolcini <francesco@dolcini.it>
 To: Judith Mendez <jm@ti.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>,
@@ -43,11 +43,11 @@ Cc: Ulf Hansson <ulf.hansson@linaro.org>,
 	Josua Mayer <josua@solid-run.com>, Moteen Shah <m-shah@ti.com>,
 	Francesco Dolcini <francesco@dolcini.it>,
 	Hiago De Franco <hiagofranco@gmail.com>
-Subject: Re: [PATCH v2 2/2] dt-bindings: mmc: sdhci-am654: Add
- ti,suppress-v1p8-ena
-Message-ID: <aAFULUo9BMf306s3@gaggiata.pivistrello.it>
+Subject: Re: [PATCH v2 1/2] mmc: sdhci_am654: Add
+ sdhci_am654_start_signal_voltage_switch
+Message-ID: <aAFUxuhn_5RlbjdQ@gaggiata.pivistrello.it>
 References: <20250417182652.3521104-1-jm@ti.com>
- <20250417182652.3521104-3-jm@ti.com>
+ <20250417182652.3521104-2-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -56,22 +56,34 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250417182652.3521104-3-jm@ti.com>
+In-Reply-To: <20250417182652.3521104-2-jm@ti.com>
 
 Hello Judith,
-thanks for the patch.
 
-On Thu, Apr 17, 2025 at 01:26:52PM -0500, Judith Mendez wrote:
-> This patch documents ti,suppress-v1p8-ena which is a flag
-> used to suppress V1P8_SIGNAL_ENA in sdhci_am654 driver. This
-> quirk is necessary to fix fail init issues across various
-> types of SD cards tested on Sitara K3 SoCs.
+On Thu, Apr 17, 2025 at 01:26:51PM -0500, Judith Mendez wrote:
+> The sdhci_start_signal_voltage_switch function sets
+> V1P8_SIGNAL_ENA by default after switching to 1v8 signaling.
+> V1P8_SIGNAL_ENA has a timing component where it determines
+> whether to launch cmd/data on neg edge (half cycle timing)
+> or pos edge (full cycle timing) of clock. V1P8_SIGNAL_ENA also
+> has a voltage switch component where if there exists an internal
+> LDO, for SD this bit is used to switch from 3.3V to 1.8V IO
+> signal voltage.
+> 
+> The sequence is to switch to 1.8 IO voltage, set V1P8_SIGNAL_ENA,
+> change bus width, then update HIGH_SPEED_ENA & UHS_MODE_SELECT.
+> During bus width change is when eMMC failures are seen with
+> Kingston eMMC and various types SD cards across Sitara K3 SoCs.
+> 
+> So, add a quirk to suppress V1P8_SIGNAL_ENA and do not enable by
+> default for eMMC since it is anyways optional for this interface
+> and parse DT property: ti,fails-without-test-cd to apply the quirk
+> for SD cards.
+> 
+> Signed-off-by: Judith Mendez <jm@ti.com>
+> Suggested-by: Hiago De Franco <hiago.franco@toradex.com>
 
-bindings are supposed to describe the hardware, not the driver.
-
-You should rephrase the commit message and the description of the property with
-this in mind.
-
-In addition, I think that the dt-bindings is supposed to be before the driver
-patch in the series.
+Fixes: ac5a41b472b4 ("Revert "mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch"")
+Fixes: 941a7abd4666 ("mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch")
+Cc:stable@vger.kernel.org
 
