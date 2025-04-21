@@ -1,247 +1,137 @@
-Received: from mail-qt1-f179.google.com (mail-qt1-f179.google.com [209.85.160.179])
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6FA532750F3;
-	Fri, 18 Apr 2025 12:38:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18C0144C94;
+	Mon, 21 Apr 2025 03:00:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1744979927; cv=none; b=eFEMCJF2z4u4AQqWRgPeM3mtaCcGnwqAlYpKyGPlTLcXqlrovsH1t1g6iKqvSoceW0f0PXFWSmW8EwnKbWHerfYcm092Hd3hvS6TLG2Fl5JLttrweYSznghYU8W/g1ElZY8SKoscZlXFb1QySb09ibHZTVYWXLrBD0HZCBMcbzI=
+	t=1745204422; cv=none; b=LR7knpmvtQSgpn3/ebH1x6eaynRkeptlt8wXBgWYvljVUwp17FOljafgcrL3dCBnAthVtEnMqVQ7ubXI+jqZ82zBp/kluFL2jwhTidYNUc1ywPEWz9LKgHXVCy9ErUNQ0EjZF6cTQziXMVg4Sp7982C2R2E9ijq25z6buWLQjIY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1744979927; c=relaxed/simple;
-	bh=Sz2OvhT1YtRxCswr5Ix9aIntavDUyOJ8JgBM2MSHo+Q=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DT0aIjFftkumctMky2Iv3lNhuGEFwXq1rpgZPWuEMnProgzG2m2gMHmMqJzwnr0cM1GAeTMY2sQH1mx/r9az+fAYKflcntnYnzVK3v+YFbMkkKgflmBAVEqtzY7SKcyTe0eccyAAAklaluPNijuQ+BzH2UnQgkXTDeyKUwyh1a0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=SSgW0ree; arc=none smtp.client-ip=209.85.160.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1745204422; c=relaxed/simple;
+	bh=UuHrUYX1W7yHBu8AM642EYG+ilnGxuIr3kEp3UHs3YM=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:Content-Type; b=IAoljpYyv4D8aGrdGownenAL7jCrfO3G4Pu5F/WExQiUwKLp0iFwjMYEIhfFh/LE8AwyjghQAu0JZAM7WEyPqOR+R9xs2RyLCaW78GYq+CcMQxTQvGawZFab6Lwh3iJuklZsU9J5xvKkqku+lXCH6HyQqZ/PWmyi1nEaWgMfY8k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=ejRu1aiM; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SSgW0ree"
-Received: by mail-qt1-f179.google.com with SMTP id d75a77b69052e-4769bbc21b0so17288491cf.2;
-        Fri, 18 Apr 2025 05:38:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1744979924; x=1745584724; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ex4CZQWgxkClQmKHcyHVLX17Io0C6G4ejKLtSY01Ru4=;
-        b=SSgW0reeY78B1eoSwWx+CkIligLnZ2pFiR1IscalmP2AUFDIpNAgtXrOL9sxzIlV/g
-         K7ld9Sn02yEJ17DEC3wx0w8wFZSlOxgVSOz90fQUNe7Sq/ZmsjaNZUvRee4pRJghlr0a
-         CX2sn4HCQ1i2BmuaJKaKMhehTQgKQxNms7j5ALHgpYE8hlrMKnIyPBYtltEe5SirfWWt
-         F8aIeIl+BzI9UcBgxMmturYw0IaTtvdFhS4hsylyh2iTxxCGFVizQwBlYdEHywd+W5+r
-         kO4DZPPcCUiZgJuvc9vN7xUTCnjZJlkIKKz4OJXIFfmt2op+UPi+ConJNe6GU4OebZ8F
-         AXiA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1744979924; x=1745584724;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Ex4CZQWgxkClQmKHcyHVLX17Io0C6G4ejKLtSY01Ru4=;
-        b=U40Dik3n8ZLesvDT3Hbmxe6TicqFA2Bd+PTpkrdruX0W7cI9EqeIQUuhfL25Iqnuce
-         wntF/wArkD1ocWbE7rbkP2F3qlF/4FzBADShpWk1UQWRbAYbSKrXMN5+bKHRP+1Ml8lQ
-         orCo7QyYixtr0pAh/b6MhC/Ihukzj7qjkpBE7ZHBkQgCvaOqYdPE2FU21te2u2P0HS0Z
-         SNzaZ/XMtOziuqN40dTu9jsbXJlHiFoT+5r8IOg3mD6OxVp3OAFJL+unSeP5nqP+jFGS
-         IIRO5FvlQN2mhEA/OrC/aJsqobEMJZGjCShvXDzQ8vuRU9YeD8PCqsNEBO7a+SOMNsm0
-         NQbQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUAgmzvyuuPg+WsCzFfQZYNJWKcEbQmU8y5zVADdbhvtweYw7xdAhY85ZvMFotx0qLjgTHuo7xNc3nw@vger.kernel.org, AJvYcCUDU6faJciWOAcPzgIxWnUSPlYoRD7iCuwHLLBV2l5/S9BTjDR6FH4JMP6H6/ccAy0u2oN5nB5xzdjvG6Ha@vger.kernel.org, AJvYcCUweMNquWoF9KR2Z8CMboeoWwq/v8DtmVliBfGShLgbzcTb14M+tbWfBsEO+n1nOkvwt7wTu4bBUV8l@vger.kernel.org, AJvYcCV5sVeqbZ8YwWwVF9B0W55cXS8kpgISV399lw38YK8T7Diza/IcougdG+flYWg4YqdW4z6DIQFTdx0g@vger.kernel.org, AJvYcCWd6M+D4M0JXmjXEGfJe4JR7Og5CsyqrjLBA4w3FYWF7KyAnqg++vWC47NIlIG6IVDGdEtODaKcoWqg@vger.kernel.org, AJvYcCXlis+JTjApgiMTliaUXrPPFq2iO8rLrPHfXYKPdFw7u4fl0l6a1n2xiVca4unrjdygGynylxYz@vger.kernel.org
-X-Gm-Message-State: AOJu0YyEwIbWFeN/+J52IVcWjeQ1jt9p9uCvS9SzQ80mwOtCtYuoPpS6
-	T6Fw7HodvkHQMpKTzs8qtGZVKwdhEyVtO2fnJsHwCRxXsiTlTR1FE56asJz6/oGZu173kqOrQGR
-	4uFTgF9RGbbH2nhQ/+WEIkKTA7tA=
-X-Gm-Gg: ASbGncuQwctuvQCU/G9SEZe+VVKuIPsOB3uSs/RYBzyGW5piyQcGIYlWz/W7Yg73nmQ
-	xGyAH13GLuB6MVs6bejro6HFrOx5+gL1X0d6nxeHJuIDCPEBSLokPs2jS1Ppvv03QvvBUUXDzAI
-	NMqueRCsGN8UIbeDV0XVB8vz/iYeEX0VYfjNMUxKQz6rme0AsxMChBvw==
-X-Google-Smtp-Source: AGHT+IGB0+9rYEJMYSumpu6Vzq9goNJmJbJ95NPX/w0TApxD1IhEm9WvTNPQJ7w305XUYtnHZHJIiC78RgW25GjDsKk=
-X-Received: by 2002:a05:622a:1828:b0:476:8225:dac9 with SMTP id
- d75a77b69052e-47aec4c57a5mr39379541cf.45.1744979924108; Fri, 18 Apr 2025
- 05:38:44 -0700 (PDT)
+	dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="ejRu1aiM"
+X-SpamFilter-By: ArmorX SpamTrap 5.78 with qID 53L30B5L01389258, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=realtek.com; s=dkim;
+	t=1745204411; bh=UuHrUYX1W7yHBu8AM642EYG+ilnGxuIr3kEp3UHs3YM=;
+	h=From:To:Subject:Date:Message-ID:MIME-Version:
+	 Content-Transfer-Encoding:Content-Type;
+	b=ejRu1aiMtaQF39hTO2tdO+XJz10w0s51UFIiz7ENTcBTmuR4ezGXBXF7yt9ApU4HY
+	 6YwFCIcQ2HCU6uQKfCmUNTAXLivPskXE1V6yAO6tlSLvJ7JsuoV8Qua6AkBqEo/AZ1
+	 W8xHFBaUTHHZ+/bX9d4fif8OqvfP2Wno1jQqElLm2Y4SuGbut0grXd3JXOOCvV/8EB
+	 KTcf/zUgc96eJfaMOhe5HQiPLzE/Ht1ZhkhIiZThmo7rhc85TMECWrGzRVgYYkXmGN
+	 I4bmaAx3TtrYNOgp3Pm3dEcIzFCFeEg9Uzlnv1bIGCd3BEIOYqz31tysOg5U1htV6S
+	 FNJZp/Np2An/g==
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+	by rtits2.realtek.com.tw (8.15.2/3.06/5.92) with ESMTPS id 53L30B5L01389258
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Mon, 21 Apr 2025 11:00:11 +0800
+Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Mon, 21 Apr 2025 11:00:12 +0800
+Received: from RTEXH36505.realtek.com.tw (172.21.6.25) by
+ RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Mon, 21 Apr 2025 11:00:11 +0800
+Received: from localhost (172.22.144.1) by RTEXH36505.realtek.com.tw
+ (172.21.6.25) with Microsoft SMTP Server id 15.1.2507.39 via Frontend
+ Transport; Mon, 21 Apr 2025 11:00:11 +0800
+From: Ricky Wu <ricky_wu@realtek.com>
+To: <linux-kernel@vger.kernel.org>, <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <viro@zeniv.linux.org.uk>,
+        <ricky_wu@realtek.com>
+Subject: [PATCH v2] mmc: rtsx: usb add 74 clocks in poweron flow
+Date: Mon, 21 Apr 2025 11:00:08 +0800
+Message-ID: <20250421030008.1172901-1-ricky_wu@realtek.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
- <20250416-wmt-updates-v1-3-f9af689cdfc2@gmail.com> <20250416201407.GC3811555-robh@kernel.org>
- <CABjd4YyTKquLcYC+DVg_koi3p7AhqwBNiazCiC713DQKjCaBSA@mail.gmail.com>
-In-Reply-To: <CABjd4YyTKquLcYC+DVg_koi3p7AhqwBNiazCiC713DQKjCaBSA@mail.gmail.com>
-From: Alexey Charkov <alchark@gmail.com>
-Date: Fri, 18 Apr 2025 16:38:40 +0400
-X-Gm-Features: ATxdqUHZEjWs_YUTRnLI_mqfQ2sstLgHtYWGD2PkyOOwUEJjeYm4m7FuAwUHjuc
-Message-ID: <CABjd4Yxi4SLqsAk_fb9C=1BW6XjnZ8LQ_JKYu6KZ3TtMS0fnhg@mail.gmail.com>
-Subject: Re: [PATCH 03/13] dt-bindings: mmc: vt8500-sdmmc: Convert to YAML
-To: Rob Herring <robh@kernel.org>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>, Andi Shyti <andi.shyti@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
-	Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
-	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <ukleinek@kernel.org>, 
-	Daniel Lezcano <daniel.lezcano@linaro.org>, linux-arm-kernel@lists.infradead.org, 
-	linux-i2c@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	netdev@vger.kernel.org, linux-pwm@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 
-On Thu, Apr 17, 2025 at 10:25=E2=80=AFAM Alexey Charkov <alchark@gmail.com>=
- wrote:
->
-> On Thu, Apr 17, 2025 at 12:14=E2=80=AFAM Rob Herring <robh@kernel.org> wr=
-ote:
-> >
-> > On Wed, Apr 16, 2025 at 12:21:28PM +0400, Alexey Charkov wrote:
-> > > Rewrite the textual description for the WonderMedia SDMMC controller
-> > > as YAML schema, and switch the filename to follow the compatible
-> > > string.
-> > >
-> > > Signed-off-by: Alexey Charkov <alchark@gmail.com>
-> > > ---
-> > >  .../devicetree/bindings/mmc/vt8500-sdmmc.txt       | 23 --------
-> > >  .../devicetree/bindings/mmc/wm,wm8505-sdhc.yaml    | 61 ++++++++++++=
-++++++++++
-> > >  MAINTAINERS                                        |  1 +
-> > >  3 files changed, 62 insertions(+), 23 deletions(-)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt b=
-/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
-> > > deleted file mode 100644
-> > > index d7fb6abb3eb8c87e698ca4f30270c949878f3cbf..000000000000000000000=
-0000000000000000000
-> > > --- a/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
-> > > +++ /dev/null
-> > > @@ -1,23 +0,0 @@
-> > > -* Wondermedia WM8505/WM8650 SD/MMC Host Controller
-> > > -
-> > > -This file documents differences between the core properties describe=
-d
-> > > -by mmc.txt and the properties used by the wmt-sdmmc driver.
-> > > -
-> > > -Required properties:
-> > > -- compatible: Should be "wm,wm8505-sdhc".
-> > > -- interrupts: Two interrupts are required - regular irq and dma irq.
-> > > -
-> > > -Optional properties:
-> > > -- sdon-inverted: SD_ON bit is inverted on the controller
-> > > -
-> > > -Examples:
-> > > -
-> > > -sdhc@d800a000 {
-> > > -     compatible =3D "wm,wm8505-sdhc";
-> > > -     reg =3D <0xd800a000 0x1000>;
-> > > -     interrupts =3D <20 21>;
-> > > -     clocks =3D <&sdhc>;
-> > > -     bus-width =3D <4>;
-> > > -     sdon-inverted;
-> > > -};
-> > > -
-> > > diff --git a/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yam=
-l b/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yaml
-> > > new file mode 100644
-> > > index 0000000000000000000000000000000000000000..a7d962bc13c7ff70b5044=
-8201b0416efc7f787af
-> > > --- /dev/null
-> > > +++ b/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yaml
-> > > @@ -0,0 +1,61 @@
-> > > +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-> > > +%YAML 1.2
-> > > +---
-> > > +$id: http://devicetree.org/schemas/mmc/wm,wm8505-sdhc.yaml#
-> > > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > > +
-> > > +title: WonderMedia SOC SoC SDHCI Controller
-> > > +
-> > > +maintainers:
-> > > +  - Alexey Charkov <alchark@gmail.com>
-> > > +
-> > > +allOf:
-> > > +  - $ref: mmc-controller.yaml#
-> > > +
-> > > +properties:
-> > > +  compatible:
-> > > +    oneOf:
-> > > +      - const: wm,wm8505-sdhc
-> > > +      - items:
-> > > +          - const: wm,wm8650-sdhc
-> > > +          - const: wm,wm8505-sdhc
-> > > +      - items:
-> > > +          - const: wm,wm8750-sdhc
-> > > +          - const: wm,wm8505-sdhc
-> > > +      - items:
-> > > +          - const: wm,wm8850-sdhc
-> > > +          - const: wm,wm8505-sdhc
-> >
-> > Combine the last 3 entries into 1 using 'enum' for the 1st compatible.
->
-> Fair enough, will do.
->
-> > > +
-> > > +  reg:
-> > > +    maxItems: 1
-> > > +
-> > > +  clocks:
-> > > +    maxItems: 1
-> > > +
-> > > +  interrupts:
-> > > +    items:
-> > > +      - description: SDMMC controller interrupt
-> > > +      - description: SDMMC controller DMA interrupt
-> > > +
-> > > +  sdon-inverted:
-> > > +    type: boolean
-> > > +    description: SD_ON bit is inverted on the controller
-> >
-> > This implies I know what the non-inverted state is. If you know, please
-> > state that here.
->
-> This is a tricky one. The only answer I have is "it's inverted in
-> later versions vs. the first version I saw in the wild, and I'm not
-> sure if it's board related or IP version related - nor if the original
-> was active low or high". No docs, no schematics, no vendor left around
-> to chase for answers.
->
-> Will dig around some more and update the description if I succeed in
-> uncovering any further clues :)
+SD spec definition:
+"Host provides at least 74 Clocks before issuing first command"
 
-I've found some extra clues and would like to consult on the best way forwa=
-rd.
+add if statement to issue/stop the clock signal to card:
+The power state from POWER_OFF to POWER_UP issue the signal to card,
+POWER_UP to POWER_ON stop the signal
 
-It turns out (if my understanding of the decompiled binary-only WM8505
-vendor driver is correct) that all chips before (not including) WM8505
-rev. A2 treated their "clock stop" bit (register offset 0x08 a.k.a.
-SDMMC_BUSMODE, bit 0x10 a.k.a. BM_CST in vendor sources, BM_SD_OFF in
-mainline) as "set 1 to disable SD clock", while all the later versions
-treated it as "set 0 to disable SD clock". Which means that there are
-WM8505 based systems that rely on either of those behaviours, while
-any later chips need "set 0 to disable". This is not a board related
-quirk but an on-chip SDMMC controller revision related quirk.
+Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+---
 
-I'd love to switch to a compatible-based logic and drop the
-"sdon-inverted" flag altogether from the binding I'm writing, but here
-are my doubts where I'd love to consult.
+v2: remove delay 100ms in power_on
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 26 +++++++++++++++++++++++---
+ 1 file changed, 23 insertions(+), 3 deletions(-)
 
-* Looks like WM8505 rev. A2 needs a separate compatible string vs.
-prior WM8505. Can we have something like "wm,wm8505a2-sdhc" and
-"wm,wm8505-sdhc" respectively? WM8505a2 not being an actual chip name,
-but something discoverable by reading its hardware ID from a system
-configuration register at runtime
-* If I introduce new compatible strings for "wm,wm8650-sdhc",
-"wm,wm8750-sdhc", "wm,wm8850-sdhc" and "wm,wm8880-sdhc" in bindings,
-DTS and driver code, then the new driver and new DTB should work fine,
-and the DTS should pass schema checks. New driver code won't work with
-older DTB unless I keep the logic to parse "sdon-inverted" which
-wouldn't be part of the binding. Old driver code would not work with
-newer DTB except for pre-A2 versions of WM8505. Is that acceptable?
-* Existing DTS doesn't differentiate between pre-A2 vs. post-A2
-revisions of WM8505 and is bound to fail on the latter
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index d229c2b83ea9..1edfe2acf809 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -48,7 +48,7 @@ struct rtsx_usb_sdmmc {
+ 	bool			ddr_mode;
+ 
+ 	unsigned char		power_mode;
+-
++	unsigned char		prev_power_mode;
+ #ifdef RTSX_USB_USE_LEDS_CLASS
+ 	struct led_classdev	led;
+ 	char			led_name[32];
+@@ -1014,6 +1014,16 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
+ 		unsigned char power_mode)
+ {
+ 	int err;
++	int power_mode_temp;
++	struct rtsx_ucr *ucr = host->ucr;
++
++	power_mode_temp = power_mode;
++
++	if ((power_mode == MMC_POWER_ON) && (host->power_mode == MMC_POWER_ON) &&
++			(host->prev_power_mode == MMC_POWER_UP)) {
++		host->prev_power_mode = MMC_POWER_ON;
++		rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0x00);
++	}
+ 
+ 	if (power_mode != MMC_POWER_OFF)
+ 		power_mode = MMC_POWER_ON;
+@@ -1029,9 +1039,18 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
+ 		err = sd_power_on(host);
+ 	}
+ 
+-	if (!err)
+-		host->power_mode = power_mode;
++	if (!err) {
++		if ((power_mode_temp == MMC_POWER_UP) && (host->power_mode == MMC_POWER_OFF)) {
++			host->prev_power_mode = MMC_POWER_UP;
++			rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN,
++					SD_CLK_TOGGLE_EN);
++		}
++
++		if ((power_mode_temp == MMC_POWER_OFF) && (host->power_mode == MMC_POWER_ON))
++			host->prev_power_mode = MMC_POWER_OFF;
+ 
++		host->power_mode = power_mode;
++	}
+ 	return err;
+ }
+ 
+@@ -1316,6 +1335,7 @@ static void rtsx_usb_init_host(struct rtsx_usb_sdmmc *host)
+ 	mmc->max_req_size = 524288;
+ 
+ 	host->power_mode = MMC_POWER_OFF;
++	host->prev_power_mode = MMC_POWER_OFF;
+ }
+ 
+ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
+-- 
+2.25.1
 
-I realize that breaking backward/forward compatibility is undesirable,
-but frankly these systems seem to have few mainline users, and those
-people who do run mainline on them ought to be compiling the kernel
-and its DTB at the same time, because the firmware doesn't know
-anything about DT and any modern kernel can only be booted in
-"appended DTB" mode. I also don't know of any non-Linux code that
-might be using these device trees.
-
-Any guidance would be much appreciated.
-
-Best regards,
-Alexey
