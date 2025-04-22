@@ -1,183 +1,272 @@
-Received: from mail-qk1-f176.google.com (mail-qk1-f176.google.com [209.85.222.176])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5118B19D8B7;
-	Tue, 22 Apr 2025 09:01:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.176
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745312508; cv=none; b=L2OOGawpefzP0Qm0GynVdAp4r7OE57GdCJHTGJ1xcz9VSvWbuRrBmcC7OOfFXZpU1k/Usv69eLL8fbbzx2I3Mki5x9puxtYHaSJbFM8Oouc6CHbi4pbR6gHY2RSoCO+rihPDGJd9wYyDavajxoQgNbMA4h0UnbjTsfli/3Bpzv4=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745312508; c=relaxed/simple;
-	bh=xwAiim+BzPpGaX7BSuXBzGYxP0hQVbNoyy/nha9lMnc=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Z+NqTKpPAzkpvI30tkVd27xA/IZAcQSvTlRdV2TPRw3Z8DBgBJqFCgovPhqEIok7XsYz0kAuhKISvTvSWSnTuX4xpcFXHQjt+mapB/K+ldnkZk1rjpJSkgjesj53u2oQFMhvLP3XAMWik9sjm8avtMt0Kps0SnjEgs7vDuJgsiA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=X3y1EiME; arc=none smtp.client-ip=209.85.222.176
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 76CEF23F40C;
+	Tue, 22 Apr 2025 10:24:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=198.175.65.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1745317476; cv=fail; b=XFbyrOOcc7as2RFq++1MnDIDiNk44LHzywj3SRfVKBEVizhoaoNNY90rm43n7wDmCJn6av+6P6939SEuqNPxRA2Ma9zv1a+Dgo6tTKrKSZSR+CDXvCBdKsK2I2ccc1KAscj01PffcxqjW1OEYREA/ubTQPtiQHOAoykfsnhaZNQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1745317476; c=relaxed/simple;
+	bh=lfNHCRTH8a6jl0oVcv8nz8NB+aldepW3nopQq17rhbI=;
+	h=Message-ID:Date:Subject:To:CC:References:From:In-Reply-To:
+	 Content-Type:MIME-Version; b=FDg7eBZK+VqCcVCnnt7e/1Mz6jzf4iZcxxd+OfCi1U4ItLqlqbUrSDujq+hd0UEylx3NhnDrd727YBRzdSoiAN8aCCYgpKUS9WaHrYbKZr2fyprEG4QKpLAAQkYb9Z/qGSpt8BSy4xQTaFG08MKWrbO6bwrouL957G1qFmZHbOw=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=TxQeEdGn; arc=fail smtp.client-ip=198.175.65.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X3y1EiME"
-Received: by mail-qk1-f176.google.com with SMTP id af79cd13be357-7c5675dec99so458005385a.0;
-        Tue, 22 Apr 2025 02:01:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1745312506; x=1745917306; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=bI4tM5u6hlOmKAY3jmb6sm9muPDkxLfs7d3SJ5djx70=;
-        b=X3y1EiMEt9UYslUa1kg5GJxLXlxZpahsIz669QuQ2XdeSS4dNRHLZQ83L1nWko8U7o
-         7JI/5YdkZimREjEp6iqnAANmGoo0BAcviaA7NpTwrLkc7BOgyqE6K3VZdzQNw6gc+Q4m
-         G3uAV4aVaQd3fV6oM6CjaJGiv44Tzx4mOxjwcAHJ8mkZ7X9lraJC2+BasBmMOw42nw8R
-         LWnhLhssrJg1bcRBepDEASf4jKVpWacjs6Bv0IH0S4irfRNjf4Y1u951Y3QKMwwZuQsT
-         /v7KpGYu51cNBk7d5dvhWVKFFYGYVqdAeQGOsmkdcoajri/4Leul3Ejmpk7d0keANkzZ
-         rkMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745312506; x=1745917306;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=bI4tM5u6hlOmKAY3jmb6sm9muPDkxLfs7d3SJ5djx70=;
-        b=jQ+ZNiIYr1YmNIwXmZFyYnTRmNEd+huOCV6uf3L7Jwh0x722upnRmu2LR2cFlKusvJ
-         nulnu+LUh1/J8bi5Kki2isQXzgFEIPAeaTaF6deQYq3bvwqtYwoRHw84NZKqFj+A4dy5
-         imYMlRmI7dOqDqsS5ck9Mb3SGej0eedvec2lH5sz5y4RPeL9IwCBCPhElXcVDp3Xqkjo
-         YGJww1+oJMnGpxZ9wfD1hnAZUdhBjoTpJbGk+CdTjO1W9rsvLoqIK3AAMBB4wD390Tw+
-         S17AD4gUr5mv5HeQLeZ8tGKS/51OZtEuuIqVLJQngsXG4XpEr/U61YCoQkh1Vu3AkQZ7
-         zDAg==
-X-Forwarded-Encrypted: i=1; AJvYcCUUZfib64LKeYo/8C4gL9cBWF/i0zTtBI6GNaE6IE1CVb/9+qPDmoufvrnt6WC2EaE1b7PALO1x/B+N@vger.kernel.org, AJvYcCVIXf463i0d5xm5KvwvTnNA5RtvWDY3+XE+Xg8kSJ8zBXigDHJ1vsZMJVYXYpR2ETpeG83gpl8axfjJ@vger.kernel.org, AJvYcCW7pQJagTqNh3mjmn7isvA9qTTdoLiUTuMHlXFayuBQIe2O9t6cqn39SXi6SD7I6NO3cl/khslYxtek@vger.kernel.org, AJvYcCWgwa0UCnn1RTNUVeNhyW27K57DCJRX5ilpKAnOJdNgeovCNsHZWcsydck+RPdep5Fapm7GUt7W@vger.kernel.org, AJvYcCX5Suh7zeF+y3iMoq4xKPoyw5PWa1R2/HpsCxiWfxeqCLU5QdyQe0VDVzhezkzVGw2tIN500TQ2KqAJ@vger.kernel.org, AJvYcCXV/I+cAC3ybTHHn4h5rr7lzLIjVchDg6/i3jjOhX7pHfpRKoLj2MFu/nNEuQ23RNjFiCbu26TRXfmjPP5m@vger.kernel.org
-X-Gm-Message-State: AOJu0YyeGm7eVLm6XUyFg2Zc3Wsi+kFcg2caP9nEkmiB3KaTOxmSx0Hr
-	zZI0n4WtO192hoR8JteG+16veYHKSo4uhmbW7wcaRY+D+qn/t+np7duE0Po9CyDCOUVy6Dn9+TQ
-	geZw4U4rnB8XaDD2TyBW7OxU83vM=
-X-Gm-Gg: ASbGncs0ARJqzrwVxfQVOA4fhvoo2W/pR1t5LgWpkKq+8bMgPBD+OdIIylN8QxAgS6K
-	1r20SvH1DZp36BDFbjyH5MPEchB2PmxX0IumiNEKrXwdI4Q2W0plpbVK9GWrZ2Eioyc9bM6/HvI
-	LUMDFNTo2PMzTfRGpArVCytCOaV32bO2lX+I1f7LvhbiCdzsAijZ82rQ==
-X-Google-Smtp-Source: AGHT+IHPgdQcr6+EJ2c2GBm62vKYoe1rNLruGx6vpyIyteGjKou1apc6OLDwP+NZ9T6S5hjDnfeJTmR8mETK+wK+bzs=
-X-Received: by 2002:a05:620a:2684:b0:7c5:5909:18e5 with SMTP id
- af79cd13be357-7c927f6f84fmr1960081385a.3.1745312506200; Tue, 22 Apr 2025
- 02:01:46 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="TxQeEdGn"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1745317475; x=1776853475;
+  h=message-id:date:subject:to:cc:references:from:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=lfNHCRTH8a6jl0oVcv8nz8NB+aldepW3nopQq17rhbI=;
+  b=TxQeEdGnMewuIvbNccIRGLaL7i56SeJq7GzHuw8blcC+LjLSlDGuR/Kk
+   LbhxD6AulVEdxoFuwZ+8WEnropfoOxpPizEejwa4OoJ3wFmNSJ8sK8sBP
+   f3G+uG8wjApAhsD4EJ2Fi+7vUOqduAw2n+q14aSf1w7a/mgNV/B3QWOfN
+   Sn7v4LAA6i76gaFeKfVPvad0DZFwXJo9uTDU+xBr/063QB7DTVP9QpVhW
+   aRcMR1ijpRDPIBogP340qIFkgIFMl/n12yNPnJ/xycjrOzBgGvsIc1F4V
+   3PrtV8TNR2mybqEwCGRgls4lQRpx7V9QuwbwAdgzq+lqLztc0aYQAB+BN
+   w==;
+X-CSE-ConnectionGUID: kgnuR+ltT1ysM2TyC0CrhQ==
+X-CSE-MsgGUID: 5tZYujy8R1y8FPDh1CPTcg==
+X-IronPort-AV: E=McAfee;i="6700,10204,11410"; a="58237229"
+X-IronPort-AV: E=Sophos;i="6.15,230,1739865600"; 
+   d="scan'208";a="58237229"
+Received: from orviesa009.jf.intel.com ([10.64.159.149])
+  by orvoesa104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Apr 2025 03:24:34 -0700
+X-CSE-ConnectionGUID: PFOCNb2/TWWI7/iv+lEmkA==
+X-CSE-MsgGUID: /2vcUocFRpK/qHKPt7ivFw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.15,230,1739865600"; 
+   d="scan'208";a="131722794"
+Received: from orsmsx902.amr.corp.intel.com ([10.22.229.24])
+  by orviesa009.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Apr 2025 03:24:33 -0700
+Received: from ORSMSX901.amr.corp.intel.com (10.22.229.23) by
+ ORSMSX902.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.14; Tue, 22 Apr 2025 03:24:33 -0700
+Received: from orsedg603.ED.cps.intel.com (10.7.248.4) by
+ ORSMSX901.amr.corp.intel.com (10.22.229.23) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.14 via Frontend Transport; Tue, 22 Apr 2025 03:24:33 -0700
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (104.47.55.46) by
+ edgegateway.intel.com (134.134.137.100) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.44; Tue, 22 Apr 2025 03:24:33 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=ogof+4ZMZdRQWkyXkI4638qPP5KXQjBL6b5rZHgclyfgX6B+Zl0+lBocWbG6FFD2IuTrM+kVmGLkK6PUhq8E12L/qgmxB1+w4MNSfN8OgO9pZSAcA/y5f1DhU87Fz0P03v4F2tkTre7PRIdJ5mHX7eHV8deZlD82gFSbwoc0SSrI7/b8fMVfOEnL/Wfk7XtWIKJ2yR1tgpfRN0W+7bm8G94k4RLNy4m1fhg7tHHvpA9ejkl+jJ10R57XZPlC8eShvW/bfX2o2p5GfgOTo7oRxlI63NyRYTvOedskRk86hA22wmtDlNw5lE68qLeR8f7yVnW3Jc9iX7qaOWV3tsOC+g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=VpYWjOKyl8zmqpcCuvmHXfCojATvEgRKTmendezb2OM=;
+ b=Re8GI/yorDfijcl8iNaAIcNE/xASzHHrWLj4f254BA7OK2/KKJt1JJ+2V0v0MPV2vqyp2jR0iZgNXv/hfstVuFGS9sgLn9NPNofXXOu1mfPmmxzexxKmLhFymwcK+wwIwcEeITk991wZpL1W5/rwNaMbeUNCGjYXui/wGVZizFKvqIr1m12OTYPIbqC6PR7JDsxOT2K27aeNSDb0gjP3GHPZ8uSSZy8+4ZHLWHy6HEg033fj2O/hpQvSYMel6ylxVUmTHSuLDcrQ8p9gwQAdJte5jxrzK6jT7ucKLIhm6txVtN9s/xVQ3xPSTyRBHNu+/SpbCGUcVwEOsDYvw2jnnQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=intel.com;
+Received: from PH7PR11MB6054.namprd11.prod.outlook.com (2603:10b6:510:1d2::8)
+ by SA2PR11MB4794.namprd11.prod.outlook.com (2603:10b6:806:f9::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8655.35; Tue, 22 Apr
+ 2025 10:23:59 +0000
+Received: from PH7PR11MB6054.namprd11.prod.outlook.com
+ ([fe80::a255:8692:8575:1301]) by PH7PR11MB6054.namprd11.prod.outlook.com
+ ([fe80::a255:8692:8575:1301%2]) with mapi id 15.20.8655.031; Tue, 22 Apr 2025
+ 10:23:59 +0000
+Message-ID: <ac3546ef-bffa-47ac-9c65-c3250da5387d@intel.com>
+Date: Tue, 22 Apr 2025 13:23:50 +0300
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: calculate data timeout value
+ based on clock
+To: <ziniu.wang_1@nxp.com>, <ulf.hansson@linaro.org>, <haibo.chen@nxp.com>
+CC: <shawnguo@kernel.org>, <s.hauer@pengutronix.de>, <kernel@pengutronix.de>,
+	<festevam@gmail.com>, <imx@lists.linux.dev>, <linux-mmc@vger.kernel.org>,
+	<s32@nxp.com>, <linux-arm-kernel@lists.infradead.org>,
+	<linux-kernel@vger.kernel.org>
+References: <20250409072604.3410459-1-ziniu.wang_1@nxp.com>
+Content-Language: en-US
+From: Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20250409072604.3410459-1-ziniu.wang_1@nxp.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: WA1P291CA0005.POLP291.PROD.OUTLOOK.COM
+ (2603:10a6:1d0:19::28) To PH7PR11MB6054.namprd11.prod.outlook.com
+ (2603:10b6:510:1d2::8)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
- <20250416-wmt-updates-v1-3-f9af689cdfc2@gmail.com> <20250416201407.GC3811555-robh@kernel.org>
- <CABjd4YyTKquLcYC+DVg_koi3p7AhqwBNiazCiC713DQKjCaBSA@mail.gmail.com>
- <CABjd4Yxi4SLqsAk_fb9C=1BW6XjnZ8LQ_JKYu6KZ3TtMS0fnhg@mail.gmail.com> <14de236b-e2a7-4bde-986d-1e5ffddd01b4@kernel.org>
-In-Reply-To: <14de236b-e2a7-4bde-986d-1e5ffddd01b4@kernel.org>
-From: Alexey Charkov <alchark@gmail.com>
-Date: Tue, 22 Apr 2025 13:01:44 +0400
-X-Gm-Features: ATxdqUGmp6GiWAgqNWbO-0WSin1O6yJxUf9gHQTl5ZTyEce7EbX-dkQTVJBozo4
-Message-ID: <CABjd4YwpKYr3q06E7H3upFxyUT6uGg-Jzt2_FiyfS8R=j0ye8w@mail.gmail.com>
-Subject: Re: [PATCH 03/13] dt-bindings: mmc: vt8500-sdmmc: Convert to YAML
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Andi Shyti <andi.shyti@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>, 
-	Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
-	=?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <ukleinek@kernel.org>, 
-	Daniel Lezcano <daniel.lezcano@linaro.org>, linux-arm-kernel@lists.infradead.org, 
-	linux-i2c@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
-	netdev@vger.kernel.org, linux-pwm@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH7PR11MB6054:EE_|SA2PR11MB4794:EE_
+X-MS-Office365-Filtering-Correlation-Id: 1b72a532-2a33-443e-c078-08dd8187cb6e
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;ARA:13230040|7416014|376014|1800799024|366016|7053199007;
+X-Microsoft-Antispam-Message-Info: =?utf-8?B?aWluSlBPWVJhdWpoTTFXVU5XRjZJQVRxZEQ5dC9nVHhUSzlsaG9Qc0N2T0M2?=
+ =?utf-8?B?cnlmQTV4YWRCaUtSWTFkMnBHUHJRWXA5NVBsZnVCeDVqeENXV3h6V1FXbG5S?=
+ =?utf-8?B?TWRYNXVaa2g5QVFqNFg3aU5FWGsxbHdqU3RQenhqdFZXN1VqcXp4UEJuS1NE?=
+ =?utf-8?B?cWs3bnJQRHVLaGxnMDVRTytuUTE4bGZlQS9rb0dpNzlFRUY4bmJMZU8zM1Bx?=
+ =?utf-8?B?S3pyM1cvMnpMU3hDRzY5cFlaL252QjJITVpJdWxvT2h1ZjRBSk5zcjkwRWY5?=
+ =?utf-8?B?b3d1QURXK3JaRVFBd1ZLYUxvMXNWM2xQNlk4UnFydWVuNjBFeUtod29ZZXlX?=
+ =?utf-8?B?TzNlalBoY3lqUW9LYlgvbTlrUUNUd0lhT0EwTXFsWmpSVU95eTErSzkvTkVt?=
+ =?utf-8?B?TzRaenk0VkhaRWVmMlVkdllKQktRaDhHYkFpL29DQml3N2tkSmQxRzBuY25u?=
+ =?utf-8?B?WldTVHlHd0c0bWNJYS95NDVISTBlUGQ0ajVlOWF0VUtXOGkyWDVvY3l1S3BO?=
+ =?utf-8?B?Rm9UdzN4QWoyYXppa2RPWlFWUHJJVWJnT0x1OFBScVRya1N6V0dLSWhPMlNF?=
+ =?utf-8?B?YTRscFRrcjZPRXNxRUFQU1kyT25MRnIrTnpsRjlBOTBRaUc1UGdOR1Y2Y0pM?=
+ =?utf-8?B?NndnZVBhSGZDTWxLSDFuMWo0REUyQWo5OWdTQ0Rlc1huVldhZ3ozcTJNRG5W?=
+ =?utf-8?B?YS9wZnBMSkdMY2FVRE1NNExxWGdqVXRkeWVjOTVGdGIzSFJ6TmRyNytkTzZU?=
+ =?utf-8?B?MHE5QTJLL094NTgyK1UwRFNPUjZEVXVJdE9TTGFuRFNjc01NNFkwei8wcmNh?=
+ =?utf-8?B?c2dic1BDSW9EelZTT2JGZTNmUXJweE1nenVibHV0SkFZWjYrMUFXTzhZUVNG?=
+ =?utf-8?B?eXFoVmVhR3FrdUpFbDhmQXlLYkp5STBhRi9ZRVg1S2tBenBmTFlqbTBHQ3lK?=
+ =?utf-8?B?TnEzYjRzZ2dNN3JNQlB6cFVhZ1J0Qk1veU9qc0srU2pjSDVoNWRKWnNtUlVi?=
+ =?utf-8?B?SFd2TFRUeDg5ZGFVQWUxaVd1MXNoWW56WWtaeWllT3RjRGtkODhZeXd3bmNm?=
+ =?utf-8?B?NWRyYmR0N0Flb29lWEJoMWZRL1RsRnZ1RjFpMFd6U212OFJud0Y2b05uTndR?=
+ =?utf-8?B?NUtwL2syT2ZqbVZldkllakxjVWV5L0ZWdStqTUM1KzlWVWZRc1ZCSVU3bkZ2?=
+ =?utf-8?B?dTJtWCsxdGhCOWR2eGR0SkVhR0xvNXkvYXhsdlZjWFVMOWpMWjNIOFZsNGx6?=
+ =?utf-8?B?bEZyaVMxNHJ6OVI2KzJzenFNaC9GdG1UTUZIclFsMDg1SVhGUEZiQ1ZkMFdX?=
+ =?utf-8?B?YWEralZFWUJSNDRseEVNb3krKzhhUFVDdExuQ3M0SVZVRUYxQ0tFL1RZbSty?=
+ =?utf-8?B?WDNXdVgweEFETkdFZ2Z5V0I2SEhGZ1hoMmZDVXJJa25zZkZDaWxlV2FXNk9v?=
+ =?utf-8?B?cUJJZmhPMC9JM0hRcEhYWG9LNzV0c3pwNEdoZHRyeUxpNW0zVmRkZm5BbXhK?=
+ =?utf-8?B?OFdsZVlHMkZvSUx2T0dnL0pKN3lOeFNQVmNwajluN0Y4eWcvOFIrTzZ4V2V2?=
+ =?utf-8?B?YkpFbEsyemRhbUdiRFREa0JwcWRaZEV6Rmp3SXcvV3k2VVpZaHB0NHJtVlhN?=
+ =?utf-8?B?L25iRG4vNzRLWURwSndCYmk5Qy9XNnRUVDNQYTgyV3VJLytyZlZpbGM5a0Ft?=
+ =?utf-8?B?cXBzeHp5cFQ1WVV4ckN4eGhpeUNoRXREVWFpazU4cDQyMU1NZVVZcUpZcUhl?=
+ =?utf-8?B?RU1HVHRqdWFqOUFaSk9mWk9qWndPODlTeTJnV0VYR2wvRkVYY2Roa3VNVS9W?=
+ =?utf-8?B?NWYzaWt5YjdVbnpKTm1jRWRJdUFDQXRDb2RaMTNmYUlNaTkvcUpKU3IwRi9v?=
+ =?utf-8?B?UjZOODEvK0VMeUZJbkFZSnlCUEpNSWV6UkZETHU0N1dBNUxMNTJvaVhVdU1M?=
+ =?utf-8?Q?jMV2XsyMLR0=3D?=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR11MB6054.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(7416014)(376014)(1800799024)(366016)(7053199007);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?ZE0zSkRmMlJLMHQ3ZW03eUtwSHdFaVExK3RMQnMzSThyaTRUdGFMYUtSanUx?=
+ =?utf-8?B?dUk5anN3YW5QdjNSaE5FSGFzbFJIVU1SdGlCTW8vT1FHU3lSTmlxcEhLUmdh?=
+ =?utf-8?B?dklpdjkwMkRZaUxTVnRUbXovRnNTR0FFaTBuVXlEdDIrL2VSSlBhTFRoWWNt?=
+ =?utf-8?B?UlBkTUM0aDlGMjZMUjVxc2FVSW1oTDNxTStoaFlpTWZ1Ym1SYlZaU3RDYXlF?=
+ =?utf-8?B?Y3BPa084dFg3Tld0WHAybllqMlozNWtjYWgwYmQyejRBYnd2NFdNY1BuWEU2?=
+ =?utf-8?B?Z21ka0k4aG1tcWxqN3BwQnNGc0pFMTl5bEpXK2F2Zjg1Nm5nMTJYQzVucnFM?=
+ =?utf-8?B?ZHFzNWk1cmJaejJDUXZOYWNiN1BLUUhDamMrdHlSZkhUWUs0cmNTK044Z2Zv?=
+ =?utf-8?B?dzlSY1M1OTNTM0l4Z05CUFJCS2FSalZ2UlNPQUhPdmpaRHRDS2Z4VndVU2w1?=
+ =?utf-8?B?aEZYMmN4ak9YQVBlQy9DeWJQb1hIZzNsYWhOVkhFd0tWa3J3MU9aa3N3TXBU?=
+ =?utf-8?B?K09qQStGUU1hVEtHSG50S3graUpzNWlCM3JkV2JlSFlZbC9KWDBHdWkyaGZq?=
+ =?utf-8?B?cXlPcjE1UitHd3JMS1lxcUtoa2tYcTkxSXZ0d0JSL3Awd0pBNStpQi9YUER0?=
+ =?utf-8?B?NDRsZ2FpRmtTMlZLK2tZWkVmd2VJMWFYWEFFNXVGQVFmckhxUnVxMzhFOC9u?=
+ =?utf-8?B?aHdmWG5tSVhneE9kZGEwekZsQnFmOC96d1QyaCtFKzQvNk1ZRUVjM0ZkZWdH?=
+ =?utf-8?B?bzE5WkRCa09LVkZzWWN1dDdDaHhod2F6T1B2YjAxZ1U4NmlMSWR6NnFQNm9l?=
+ =?utf-8?B?enBFQ1Exdk9DdWFuYVg2NkZEMGZGdzVsYTFYSzhwbzhna2k5Z240QWl0SFR3?=
+ =?utf-8?B?VjNUL2Q5Ry95dzFCc0dCMnZTVndtVXB5S3NMUWtMSGNQckRtU1dqWVZxQWdW?=
+ =?utf-8?B?K0hEaUR1dTNBR3d3UjQxbTJqTFRsZ3g3TS9GU0VMbkp6Yld5SFRNVzVGRkxM?=
+ =?utf-8?B?b1FHWnlOb1BVS0JseWpvL01yZ2RCV3RiQ01PVnRuYUoyTDFqby84T2lKWHF1?=
+ =?utf-8?B?NFBwcHNQNThCUVhCaHpTV2JObmxuRFBvdDBQV1ltU3dYNlhnNjBhQVRyMlRp?=
+ =?utf-8?B?UXA3TXJkUkdJblU4K2RKMFdZckhXa1liMktQYnlSSEJWV1ljVm1PR25tbElM?=
+ =?utf-8?B?MnZGYVB4T1Q5Z1d4UFRobzdRelJ5azAxSXJtZndnQ3FOelVEQ3hQa21WNnU3?=
+ =?utf-8?B?MmN2dVErNHkxT3hlTWdqL2VOZUpQbzlBOWU3bm5PWHBIQUsxSDhwb1JVQStL?=
+ =?utf-8?B?OFhNTE03Z3gwR1E1aUtjMHRlRjFFeitpd1NlbUllcjNDUDRKQ2FHT3Z5VFJn?=
+ =?utf-8?B?L1o3NlBRT2ZvMlhteWxiOUE0a3pNTGFIVHUxT0tScGt1VUhPOWtjSVVUZmVI?=
+ =?utf-8?B?Vzhua2NvYW1SaHhZYkJuWHI5ZFJGSHVNTXFmcm1GS21qMXpSOStmbGo5eW1Z?=
+ =?utf-8?B?VzNaY2RrMExhb0M1WUZXb05WMlExdS9ML29GMTVPa2VzQ2pSWmxVck42dTIv?=
+ =?utf-8?B?b3FLTVB1d09ucE5BRDRENmprdjcyR09OYzgvdHNLeGRjdG5Hd294VGRuUTNj?=
+ =?utf-8?B?eXAvN3NydWdDL0VJQ3pQVE5uZmxPUHFtaEdhNEdJbU4zOWZqY2czZzhlaVdX?=
+ =?utf-8?B?cWFOdFZud1hUbGFyLzVYUWlpb0lxWmVYcXkzWGk5Z0xQM2xaUHV4U0pHa294?=
+ =?utf-8?B?Ui9VZnBaVVlGU0V5Nk5qNzB2S1daRDdiL1pGckE1TGdjZk5RNDhDU056bmpr?=
+ =?utf-8?B?Y0ROZHFRNHhJMlFtQkV3a0swc2N2SmI4WXpHcyt4dnZKeDdCR1ZnTzlUeWsx?=
+ =?utf-8?B?MEJ6VlQ1dThYOGtReVllWUhZS0ZnV3F1VDlObi9Tdm81WFl5TThVblFqdnVV?=
+ =?utf-8?B?VHlGNlBYWHg4YVJTUGp2TFc0MFlEUXlsZkRPTG12TFluN0FRTlpvNTlQV2ti?=
+ =?utf-8?B?SGxqL1I1MEJpcWphdkRxdGh6NnRUYzEvcGdySVlDZWhBN3RhaHNLejY4QWsz?=
+ =?utf-8?B?d0FUWlhLSU9lSWxtamJIUmVWNlRXTGtkbjJ2YkxtcnhCVFR4enNMSnlPaHB6?=
+ =?utf-8?B?YXV3SXVPUnlxYmRCUTgzMWJSa0R0OFoyR0QyemVSd3JoK2czQnRJazBoaTBo?=
+ =?utf-8?B?bXc9PQ==?=
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1b72a532-2a33-443e-c078-08dd8187cb6e
+X-MS-Exchange-CrossTenant-AuthSource: PH7PR11MB6054.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 22 Apr 2025 10:23:59.3279
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: WbE95tTuwitgyaSl4beKrz2ynaZFMO2XuWxQYmCAV9yH+RqCqtimCFpL3A3Yl8jteIwX38o/f9c1uUHQ4tpYRQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA2PR11MB4794
+X-OriginatorOrg: intel.com
 
-On Tue, Apr 22, 2025 at 12:08=E2=80=AFPM Krzysztof Kozlowski <krzk@kernel.o=
-rg> wrote:
->
-> On 18/04/2025 14:38, Alexey Charkov wrote:
-> >>
-> >>>> +
-> >>>> +  reg:
-> >>>> +    maxItems: 1
-> >>>> +
-> >>>> +  clocks:
-> >>>> +    maxItems: 1
-> >>>> +
-> >>>> +  interrupts:
-> >>>> +    items:
-> >>>> +      - description: SDMMC controller interrupt
-> >>>> +      - description: SDMMC controller DMA interrupt
-> >>>> +
-> >>>> +  sdon-inverted:
-> >>>> +    type: boolean
-> >>>> +    description: SD_ON bit is inverted on the controller
-> >>>
-> >>> This implies I know what the non-inverted state is. If you know, plea=
-se
-> >>> state that here.
-> >>
-> >> This is a tricky one. The only answer I have is "it's inverted in
-> >> later versions vs. the first version I saw in the wild, and I'm not
-> >> sure if it's board related or IP version related - nor if the original
-> >> was active low or high". No docs, no schematics, no vendor left around
-> >> to chase for answers.
-> >>
-> >> Will dig around some more and update the description if I succeed in
-> >> uncovering any further clues :)
-> >
-> > I've found some extra clues and would like to consult on the best way f=
-orward.
-> >
-> > It turns out (if my understanding of the decompiled binary-only WM8505
-> > vendor driver is correct) that all chips before (not including) WM8505
-> > rev. A2 treated their "clock stop" bit (register offset 0x08 a.k.a.
-> > SDMMC_BUSMODE, bit 0x10 a.k.a. BM_CST in vendor sources, BM_SD_OFF in
-> > mainline) as "set 1 to disable SD clock", while all the later versions
-> > treated it as "set 0 to disable SD clock". Which means that there are
-> > WM8505 based systems that rely on either of those behaviours, while
-> > any later chips need "set 0 to disable". This is not a board related
-> > quirk but an on-chip SDMMC controller revision related quirk.
-> >
-> > I'd love to switch to a compatible-based logic and drop the
-> > "sdon-inverted" flag altogether from the binding I'm writing, but here
-> > are my doubts where I'd love to consult.
-> >
-> > * Looks like WM8505 rev. A2 needs a separate compatible string vs.
-> > prior WM8505. Can we have something like "wm,wm8505a2-sdhc" and
-> > "wm,wm8505-sdhc" respectively? WM8505a2 not being an actual chip name,
-> > but something discoverable by reading its hardware ID from a system
-> > configuration register at runtime
->
-> Then maybe it can be fully detected runtime? E.g. via soc_id driver (see
-> drivers/soc/)?
+On 9/04/25 10:26, ziniu.wang_1@nxp.com wrote:
+> From: Luke Wang <ziniu.wang_1@nxp.com>
+> 
+> Calculate data timeout value based on clock instead of using max value.
+> 
+> Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 
-Thanks for pointing this out! Yes, it should work. A separate
-mini-driver to identify the SoC based on the system configuration
-register readings and a match table on soc_device_attribute inside the
-wmt-sdmmc driver to differentiate between different controller
-versions which are all identified as "wm,wm8505-sdhc" in current
-device trees.
+We overlooked that Haibo wanted the "bit[23]" comment dropped,
+but nevertheless:
 
-> > * If I introduce new compatible strings for "wm,wm8650-sdhc",
-> > "wm,wm8750-sdhc", "wm,wm8850-sdhc" and "wm,wm8880-sdhc" in bindings,
-> > DTS and driver code, then the new driver and new DTB should work fine,
-> > and the DTS should pass schema checks. New driver code won't work with
-> > older DTB unless I keep the logic to parse "sdon-inverted" which
-> > wouldn't be part of the binding. Old driver code would not work with
-> > newer DTB except for pre-A2 versions of WM8505. Is that acceptable?
-> > * Existing DTS doesn't differentiate between pre-A2 vs. post-A2
-> > revisions of WM8505 and is bound to fail on the latter
->
-> That's an old platform, so we should not break the ABI, thus drivers
-> must fully support old DTBs.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Noted, thanks.
+> ---
+> v1->v2:
+>  * Added SDHCI_TIMEOUT_CONTROL to esdhc_writeb_le()
+>  * Removed esdhc_set_timeout() to use common __sdhci_set_timeout().
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index ff78a7c6a04c..a34cabee5916 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -870,6 +870,16 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+>  
+>  		esdhc_clrset_le(host, mask, new_val, reg);
+>  		return;
+> +	case SDHCI_TIMEOUT_CONTROL:
+> +		/*
+> +		 * ESDHC_SYSTEM_CONTROL bit[23] used to control hardware reset
+> +		 * pin of the card. Write 0 to bit[23] will reset the card.
+> +		 * Only write DTOCV field here.
+> +		 */
+> +		esdhc_clrset_le(host, ESDHC_SYS_CTRL_DTOCV_MASK,
+> +				FIELD_PREP(ESDHC_SYS_CTRL_DTOCV_MASK, val),
+> +				ESDHC_SYSTEM_CONTROL);
+> +		return;
+>  	case SDHCI_SOFTWARE_RESET:
+>  		if (val & SDHCI_RESET_DATA)
+>  			new_val = readl(host->ioaddr + SDHCI_HOST_CONTROL);
+> @@ -1385,17 +1395,6 @@ static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
+>  	return esdhc_is_usdhc(imx_data) ? 1 << 29 : 1 << 27;
+>  }
+>  
+> -static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> -{
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+> -
+> -	/* use maximum timeout counter */
+> -	esdhc_clrset_le(host, ESDHC_SYS_CTRL_DTOCV_MASK,
+> -			esdhc_is_usdhc(imx_data) ? 0xF0000 : 0xE0000,
+> -			ESDHC_SYSTEM_CONTROL);
+> -}
+> -
+>  static u32 esdhc_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  {
+>  	int cmd_error = 0;
+> @@ -1432,7 +1431,6 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+>  	.get_min_clock = esdhc_pltfm_get_min_clock,
+>  	.get_max_timeout_count = esdhc_get_max_timeout_count,
+>  	.get_ro = esdhc_pltfm_get_ro,
+> -	.set_timeout = esdhc_set_timeout,
+>  	.set_bus_width = esdhc_pltfm_set_bus_width,
+>  	.set_uhs_signaling = esdhc_set_uhs_signaling,
+>  	.reset = esdhc_reset,
+> @@ -1777,6 +1775,8 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>  		 * to distinguish the card type.
+>  		 */
+>  		host->mmc_host_ops.init_card = usdhc_init_card;
+> +
+> +		host->max_timeout_count = 0xF;
+>  	}
+>  
+>  	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
 
-> > I realize that breaking backward/forward compatibility is undesirable,
-> > but frankly these systems seem to have few mainline users, and those
-> > people who do run mainline on them ought to be compiling the kernel
-> > and its DTB at the same time, because the firmware doesn't know
->
-> There might be other users of DTS and anyway what would be exactly the
-> benefit? This hardware aspect is already documented via sdon-inverted
-> property.
-
-The benefit is rather cosmetic (to properly describe different
-versions of this controller using SoC-specific compatible strings, and
-to avoid defining bindings for random vendor-specific properties such
-as sdon-inverted).
-
-Best regards,
-Alexey
