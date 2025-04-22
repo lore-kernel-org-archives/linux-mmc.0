@@ -1,136 +1,165 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0EF37C8DC
-	for <linux-mmc@vger.kernel.org>; Tue, 22 Apr 2025 15:44:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 279A62853F2
+	for <linux-mmc@vger.kernel.org>; Tue, 22 Apr 2025 15:44:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745336674; cv=none; b=qjGVqKWZbDsku57kQ43d+pidDG8uphUua87W6tsXbJFzmqsOCCDfz74saxfiFqoD2IAoXiF72EQQHB5Q0qjdUp9LoT4d+ImZRgB4uAzzTRMEfASxtUAJKVRH6KCxoMXbww0uj8VvTH8Vytdf2CqfrYe6UDEXrBTVaXe+F/BheH8=
+	t=1745336688; cv=none; b=JeV25S7aLIbIfAUS2pWobMUZ1hpW6R7aPlZSGTVJbw3ucwerjYfz7i5ps1HfZ8YObUEPVqdVX2p3ghSojtIfe3vB09++FuCGWNoxHUnkUAPWnevN4OnEAI2ekXSxxybQoWC53ueb5cN/Hnjpd0UNyhU32j9NKEXfiif0tozfzbU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745336674; c=relaxed/simple;
-	bh=gKQoJFotInQWyy0bBDn0U3U7riuTcTFLuqGN0TXPFQE=;
+	s=arc-20240116; t=1745336688; c=relaxed/simple;
+	bh=6qWLggXJPCM0HeOHIa65h9aywtSvV/SIK/9zjhWaRL4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RxjG6xmMHi169CrS2SO7xmzToEF/NmeLZcxpHIdbAggQ9Q/axBADoBo7Hg3M6L2cipsCq5hmWUHmZJvGR+JVmi2BT+Rrtf6LAXM00ECDSQhO7eADjKfKmfN0KOv60EHpagEw9X1xKgMBIfvJXU0+aFHMjTOQVyCHZxgoUV9XaYU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=eT0k5JUE; arc=none smtp.client-ip=209.85.128.177
+	 To:Cc:Content-Type; b=FPibrXMLEIg5kZasvg37qVkH9p84rsYB+0iejyMcZ68dWur36WIy/IotCgeB82eQlDV1DnFasTgAeF8J2VTnZ17nZvupn1w9ysHNJM9Gn56cd1VR4qopK7Gz+STMFH6/8/n57tQ6F1siM+6+khlak2JdT7G4VjyWt+z0uuub714=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=wHzEBB+1; arc=none smtp.client-ip=209.85.128.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eT0k5JUE"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-6ff4faf858cso37362387b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Apr 2025 08:44:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wHzEBB+1"
+Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-7081165a238so5950117b3.1
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Apr 2025 08:44:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745336671; x=1745941471; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1745336686; x=1745941486; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=GSyZz4bXdxEI1g3oFa+KF8sUj/15eMIzBlns+hYq338=;
-        b=eT0k5JUEO3rl0xEX6uXCG9Ila8dFX1vq+BO8Vermk0BUFSfGfcfn0tEqIQ9LOZpMnN
-         cN2d+Sfa1DE8mIcpAfSKCc52kD8xI/D8bUtW7W4y5XVFUZPjKFpix/2PNlZ6/QHBdDiq
-         A/ejyqMs+YuJsPvgAO0PPiqweJMxWfoQQGtgg29SWDsYkzb6ppitQD6uwD/wemUSOqFz
-         gv9ZR/ShDrjT6CbN+zsUN/mf8APlijH/R4WKVqDgg2Od5VgLEeoYz0TORHC8CKscgX+e
-         cRnFxJt/sCGZLQ5cRK9nDhj1vSgmlX/VJaQBJnW/JYIjzn2Dz4E7YgALngFNs0A4Fv4Y
-         tkHA==
+        bh=K9ngDNGkZRiVWGtgvkMRHPkUgF6S7Nt/Bo4JqOL13oI=;
+        b=wHzEBB+1kPHLOrimzfhjPKlF+K3jPwVA1atnc1A/1Qp7le3WyLqdfB7nIhFGu3vVfZ
+         TWAzA4c8MIv7hJXsb+XRWhKKUgmvehMcm2pS5Hfrx4kecITacbKFPD8eLpfzEN5iWXl3
+         tusm7r98rhlVVwf4Cl2hZyQTuChhUAB8JvXorPIdqMaI76fJHTr2XkO7+HNAY84ONnWA
+         ix0Y7oRPEqFg5JIEe5EVPJaeMhO35OHOTqGvcvunkBUF4wTfTubT0Ws8jB7F4c6u7Lyu
+         hClKhCL3iqyhvaSSNQDDnpBPURKNn4+SAVD3LJdfhqy+QV9o1E3iLErPWdyK6ivoc1eo
+         tsMg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745336671; x=1745941471;
+        d=1e100.net; s=20230601; t=1745336686; x=1745941486;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=GSyZz4bXdxEI1g3oFa+KF8sUj/15eMIzBlns+hYq338=;
-        b=DzyiVvJIt+wKzMBLZhOSTMBTM3UUg1AvvuuKpmJsAiTWcY85CeHHEYJcM328TgDEpa
-         hIv0xCHLp1bDM8zZdzHLJtz+ejrbrz9g2RSqJLdjX0de8Alf6J5hfxyNaroIhlDW9eUX
-         sPsf7kaWAHqPq2OMc6tgk7sNMZUonNKlFvpwxmg6tlTd7peKdkqLMNfMFkO33Mgw13f3
-         tgIrlplvUtVbqZUTRVKsagoPwkrIJUjB7JjLoG/Yvni4CH2U7iE7kGco1h/xFyCTHYxH
-         j7SkLD/qYY+e5RENVdcsZ7wJhRNqlGZ1JoPD4IjnRJG6UywbzcV9l6LCyZpLwQNCmexH
-         cM4Q==
-X-Gm-Message-State: AOJu0YzLzuJd9zQmZzUREAFO9BMONRCL+fxb+7M4VJLJb8dPIpLWK5Si
-	UtjrcomuN8uOqdxX4fUPVCn3RKkEah3g2RqCWcT6crl4x5469/WkM/WB5mKvyC6H0DWHbW/+5pX
-	9HSYGLJ20zixRBmADsNixb1qwyUYHLOlcCFnfZKfDYS+OW//w
-X-Gm-Gg: ASbGncul8gU0g2dYqL7AbPLswZ2slLnb+1NLt2VcPTptZZ8R75Svly3PmUAGrxTVxan
-	qJQkfvW4tdeLyCuij2C80krae66wE5x4j9tWrHdNNcdQ/YG7G2zJYD//0tO+VRQjLVyHFVuqpJ/
-	BgHuLynoVRlfxTV57Dc7gCMII=
-X-Google-Smtp-Source: AGHT+IFKvU6UcojAVl9vKrX3GkMk/emBHHhmch/isXYSWLpG5MOR+dUOh9RejTMMlveta8q6aERlHXyHeugKu5aIGfo=
-X-Received: by 2002:a05:690c:7013:b0:703:aea2:6bbb with SMTP id
- 00721157ae682-706cce10362mr247547217b3.31.1745336670939; Tue, 22 Apr 2025
- 08:44:30 -0700 (PDT)
+        bh=K9ngDNGkZRiVWGtgvkMRHPkUgF6S7Nt/Bo4JqOL13oI=;
+        b=s3bdmgGAxOGe59Aq2+8jg3cgQV1tPctigkfIckGS+2TQDF/Yf5pJpExFmKVvZUbo4N
+         G569pSCX4KPY6LMEVGZCwvG61ZJZHDndNa6kG81Th8Im2B6618HkPbAweIggGrn3FNeT
+         Pucrf+0tdBgK/fOZ5mMS30p/+xJZC80eUDqKLH8odU1hl52cO4Xj9DTYM41AGbd+oPkj
+         dWqQXDJVAXL9XAiyYth7iEeCVT3WuC8ZsZskT4f+jKrfTdqlIvAaM6yzXj2LwDeaSd7D
+         OUlRtjUSkNQKBMBCPHpxBTF/2cOMEihVodUcAmiC8dBtXkXhkT+HPu+Ck6CGZQtvYvxc
+         APVg==
+X-Forwarded-Encrypted: i=1; AJvYcCWzmWT2lhfvt6nMl4JA+N3cmm7ASHSsWqCjmcyKH5Us7aFPo/Ej9yv2wIJW7qWlLFFVnjBwYieWcL0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy1hjgbgwRb6cusoqv/wX6jcluS4VzG7bbxLzu/Epyk+45kvTV/
+	SRKISetXjQhYZMNHWVcjX8r8H0yLNqI3ydlqO7zquzLXGQ/80DgtukAjbf9KhcaZekGpRxTmF2e
+	P92kpeL4L30JyyZU/EDOsXbdnaUOUrBmpQyBtbIQgNrtw1EjU
+X-Gm-Gg: ASbGnct4OwkJyc1M9W8NtSodRLBqqa21Jb+6lDDXJ4O/sobhOZoRtqIfsIFHr0QlnUu
+	bo6/RR7HhG1LMJOnTykXre+hU1ttOXJXrhmmPMgfR7f9nM1B6WrbvTEU3J6JS+4u5FyjK7gehEW
+	0fur0K6HLA7kl/cQ7LTrXJA9E=
+X-Google-Smtp-Source: AGHT+IE3NCo/U+OdWL0RzxeIBOTKrxCpneJJYIv5a9wSEqVGqkMe/Lxmi2wisNM7ZZMHxbrfn2WvD6fXWik7UjeBc4U=
+X-Received: by 2002:a05:690c:6e0d:b0:6f6:d0a8:8d65 with SMTP id
+ 00721157ae682-706cce25937mr208437997b3.28.1745336685661; Tue, 22 Apr 2025
+ 08:44:45 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250401095847.29271-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20250401095847.29271-1-wsa+renesas@sang-engineering.com>
+References: <20250409072604.3410459-1-ziniu.wang_1@nxp.com> <ac3546ef-bffa-47ac-9c65-c3250da5387d@intel.com>
+In-Reply-To: <ac3546ef-bffa-47ac-9c65-c3250da5387d@intel.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 22 Apr 2025 17:43:55 +0200
-X-Gm-Features: ATxdqUEUB9ikX5N5ZOoCO65P2-8q5pTapWzCdDvH9kZOMZi5KBMIbwid_VbC89I
-Message-ID: <CAPDyKFpsJpLre2bO9T7gsSthsta9f3JXoXTGZbjTjWVXH47gCw@mail.gmail.com>
-Subject: Re: [RFC PATCH 00/11] mmc: rename mmc_can_* functions
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org
+Date: Tue, 22 Apr 2025 17:44:10 +0200
+X-Gm-Features: ATxdqUFxVnXPCSEBPjHmKlVJnatv7iIefwywUip8-eI--PGoBu-PH0qykz7ZccM
+Message-ID: <CAPDyKFpmK3ZGyqgXFsZ43aU_JG8JG-mw751Lcbk3PZ1_9xLnyQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: calculate data timeout value
+ based on clock
+To: ziniu.wang_1@nxp.com, Adrian Hunter <adrian.hunter@intel.com>
+Cc: haibo.chen@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de, 
+	kernel@pengutronix.de, festevam@gmail.com, imx@lists.linux.dev, 
+	linux-mmc@vger.kernel.org, s32@nxp.com, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 1 Apr 2025 at 11:58, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Tue, 22 Apr 2025 at 12:24, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> As mentioned in [1], here is a series which rename mmc_can_* functions
-> to names which include 'card' or 'host' in the name. I am only an
-> occasional MMC core hacker, and these namings would have made my life
-> quite easier in past times. So, here is my proposed change. Have a look
-> and let me know if you like it. Plain RFC for now. Notes:
+> On 9/04/25 10:26, ziniu.wang_1@nxp.com wrote:
+> > From: Luke Wang <ziniu.wang_1@nxp.com>
+> >
+> > Calculate data timeout value based on clock instead of using max value.
+> >
+> > Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 >
-> * This series is based on [1] which needs changes. My idea would be to
->   respin the series on rc1 right after it is out.
-> * I intentionally left mmc_can_retune() out because it seems more
->   consistent with all the other mmc_*_retune() functions
-> * Builds fine locally, tested on a Renesas Salvator-X with R-Car M3-W.
->   buildbots still need to check it, branch is here:
->   git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/mmc/unbind-power-off
->
-> What do you think?
->
->
-> [1] https://lore.kernel.org/r/20250320140040.162416-1-ulf.hansson@linaro.org
->
-> Wolfram Sang (11):
->   mmc: rename mmc_can_discard() to mmc_card_can_discard()
->   mmc: rename mmc_can_erase() to mmc_card_can_erase()
->   mmc: rename mmc_can_ext_csd() to mmc_card_can_ext_csd()
->   mmc: rename mmc_can_poweroff_notify() to
->     mmc_card_can_poweroff_notify()
->   mmc: rename mmc_can_reset() to mmc_card_can_reset()
->   mmc: rename mmc_can_sanitize() to mmc_card_can_sanitize()
->   mmc: rename mmc_can_secure_erase_trim() to
->     mmc_card_can_secure_erase_trim()
->   mmc: rename mmc_can_sleep() to mmc_card_can_sleep()
->   mmc: rename mmc_can_trim() to mmc_card_can_trim()
->   mmc: rename mmc_can_gpio_cd() to mmc_host_can_gpio_cd()
->   mmc: rename mmc_can_gpio_ro() to mmc_host_can_gpio_ro()
->
->  drivers/mmc/core/block.c             |  6 ++--
->  drivers/mmc/core/core.c              | 48 ++++++++++++----------------
->  drivers/mmc/core/core.h              | 10 +++---
->  drivers/mmc/core/mmc.c               | 30 ++++++++---------
->  drivers/mmc/core/mmc_ops.c           |  6 ++--
->  drivers/mmc/core/mmc_ops.h           |  2 +-
->  drivers/mmc/core/mmc_test.c          | 12 +++----
->  drivers/mmc/core/queue.c             |  6 ++--
->  drivers/mmc/core/slot-gpio.c         |  8 ++---
->  drivers/mmc/host/dw_mmc.c            |  6 ++--
->  drivers/mmc/host/mtk-sd.c            |  2 +-
->  drivers/mmc/host/renesas_sdhi_core.c |  2 +-
->  drivers/mmc/host/sdhci-omap.c        |  2 +-
->  drivers/mmc/host/sdhci.c             |  6 ++--
->  drivers/mmc/host/sunplus-mmc.c       |  2 +-
->  drivers/mmc/host/tmio_mmc_core.c     |  6 ++--
->  include/linux/mmc/slot-gpio.h        |  4 +--
->  17 files changed, 74 insertions(+), 84 deletions(-)
->
+> We overlooked that Haibo wanted the "bit[23]" comment dropped,
+> but nevertheless:
 
-Note that there are still some inconsistent naming of the functions
-that correspond to the host's capabilities, beyond this series. For
-example those we have in drivers/mmc/core/host.h. Would you mind
-sending another series to rename those too?
+I have dropped the comment when applying, no need for a re-send. I
+also added Haibo's reviewed-by tag.
 
-That said, $subject series applied for next, thanks!
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+>
+> > ---
+> > v1->v2:
+> >  * Added SDHCI_TIMEOUT_CONTROL to esdhc_writeb_le()
+> >  * Removed esdhc_set_timeout() to use common __sdhci_set_timeout().
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 24 ++++++++++++------------
+> >  1 file changed, 12 insertions(+), 12 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > index ff78a7c6a04c..a34cabee5916 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > @@ -870,6 +870,16 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+> >
+> >               esdhc_clrset_le(host, mask, new_val, reg);
+> >               return;
+> > +     case SDHCI_TIMEOUT_CONTROL:
+> > +             /*
+> > +              * ESDHC_SYSTEM_CONTROL bit[23] used to control hardware reset
+> > +              * pin of the card. Write 0 to bit[23] will reset the card.
+> > +              * Only write DTOCV field here.
+> > +              */
+> > +             esdhc_clrset_le(host, ESDHC_SYS_CTRL_DTOCV_MASK,
+> > +                             FIELD_PREP(ESDHC_SYS_CTRL_DTOCV_MASK, val),
+> > +                             ESDHC_SYSTEM_CONTROL);
+> > +             return;
+> >       case SDHCI_SOFTWARE_RESET:
+> >               if (val & SDHCI_RESET_DATA)
+> >                       new_val = readl(host->ioaddr + SDHCI_HOST_CONTROL);
+> > @@ -1385,17 +1395,6 @@ static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
+> >       return esdhc_is_usdhc(imx_data) ? 1 << 29 : 1 << 27;
+> >  }
+> >
+> > -static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> > -{
+> > -     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > -     struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+> > -
+> > -     /* use maximum timeout counter */
+> > -     esdhc_clrset_le(host, ESDHC_SYS_CTRL_DTOCV_MASK,
+> > -                     esdhc_is_usdhc(imx_data) ? 0xF0000 : 0xE0000,
+> > -                     ESDHC_SYSTEM_CONTROL);
+> > -}
+> > -
+> >  static u32 esdhc_cqhci_irq(struct sdhci_host *host, u32 intmask)
+> >  {
+> >       int cmd_error = 0;
+> > @@ -1432,7 +1431,6 @@ static struct sdhci_ops sdhci_esdhc_ops = {
+> >       .get_min_clock = esdhc_pltfm_get_min_clock,
+> >       .get_max_timeout_count = esdhc_get_max_timeout_count,
+> >       .get_ro = esdhc_pltfm_get_ro,
+> > -     .set_timeout = esdhc_set_timeout,
+> >       .set_bus_width = esdhc_pltfm_set_bus_width,
+> >       .set_uhs_signaling = esdhc_set_uhs_signaling,
+> >       .reset = esdhc_reset,
+> > @@ -1777,6 +1775,8 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+> >                * to distinguish the card type.
+> >                */
+> >               host->mmc_host_ops.init_card = usdhc_init_card;
+> > +
+> > +             host->max_timeout_count = 0xF;
+> >       }
+> >
+> >       if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+>
