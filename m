@@ -1,316 +1,182 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mail-m15592.qiye.163.com (mail-m15592.qiye.163.com [101.71.155.92])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C31601F7554
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 12:18:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD5EC9460;
+	Wed, 23 Apr 2025 13:29:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.92
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745410703; cv=none; b=Ia0jX4pOY+XQWLoVwumRkC1Cn3HXhFOEOOJahgSMsaoFPCTLXXxxvfNYSMdyWkVl1EQrHRjziCCrUOLkBkRM3mvKKLOZ0tX7zTOQWoZgwqYvm4ZHXZzCiJypj7nHIds3uxrFsFbP9H8Lhe+lmy1mDGeoOIk8q+vdB6hFsbqMUWU=
+	t=1745414952; cv=none; b=q2GDxC9bzsn12yY/cOJQsXwrgeRmf5GwUq8gl7+VYSWNF/WCQSLapsW9JsdnliItLQDZcCWKLR/7jmovRtFzBr9ouBgPOyrwK84mSTtSBlO2YEA6kqXsfhciQjCfw0BGYQumI3Z8WDL3ZIQh0PPHoc9oUxogL+jF0YDibGTduqA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745410703; c=relaxed/simple;
-	bh=tCHjkL1SLgoL2j2PMqkiNHKmGBzODwMfabfskxgGLgY=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=umVEKaSle5Yg/y58tvtx0RZRN/vGPreeHqUL9jZrRqvT9ajuz+92RfWqiC704suN12QvW54F3MW7a3yMkxdm+Za1vpCUMau7iBuvV0ieY4Jd+PUPnrGDYcBSSkIK3+CscMI/pGzd1UKXv0/PNgp5vlADFBruivXHZpEv1aLZ750=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Si+5gSsH; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1745414952; c=relaxed/simple;
+	bh=a150Pu+le3PUHIaPC7evLffms8yMxg22M67A+K8cG80=;
+	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
+	 In-Reply-To:Content-Type; b=FqZZ6GPfdc9/reAlH6151kLh52vPmG+HjV/8pjpBKKqSyDr9OzrFT2xLYxjWEetF6AIoZRyDuJDFmy23IKTvkkHKKkoPpVytx5FEyJHSFrW4DI0tPfDsDvQrFAhtfpQLTEQTVOizEdHB5XYx0rNEvOmomPn3IAy7Uthyv0lfUM4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=RnC7Hd5w; arc=none smtp.client-ip=101.71.155.92
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Si+5gSsH"
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 53NAZmDX003044
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 12:18:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	ioGfs5MtgxexvBjcj4mXKq9ldJm50YBOXelQWnDDA+w=; b=Si+5gSsH5Sq4CR5G
-	Zobx6D0+awRftNyIeqLD7wIQskcuztJErV9gBIQp2+U6xijczIIGrGoV3uMuvabf
-	cR2Xq8lPy7e8jzNEHDBW+Og4hF5TZymj9fK/dEZzsIqvbifYODTJbgyUohcQ64+u
-	0X4uPBqGFeeHEAdZ5+1hXskww8AEFCL86Squ1tM1exBkLb5iGs0PXfZdkADjR3M6
-	xq1FhOyRQWGM1oeaQTo0L0a/yBRvylt0hKZKgfCANbK3gwS0ayoj1gl7bPDuhqPG
-	LxAOgDlMO66Wd5eF2yvBd/PwJx6SGqzIu3vcrZc2MrGFEWvmTNoGel42tBrLw6u7
-	lJVAvQ==
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 466jgy22m7-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 12:18:18 +0000 (GMT)
-Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-7c555d4ad75so31768385a.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 05:18:18 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745410697; x=1746015497;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ioGfs5MtgxexvBjcj4mXKq9ldJm50YBOXelQWnDDA+w=;
-        b=RrgExIfZN/3Bhsea9JUmXLpxVpPZggucIuddC+7er4QuzeURL8gRj9p6/2Q6fVTNsq
-         nN+8C49b7XkLEqzfgJy++gFy3tlawd8Ur+sJZJ1A8xb1gg9XNxn+Bnb8JXX7c9s7Nemf
-         PZNGdpjK0ml/5z52kKHefhbkeI9bf82T+U3IT+OW3YIRyRdStSasMd4RCnvUN/U/uvSk
-         Y0PopgTDKXYPe+dPJhAgJeV81iN27JzzDLk0XzJx4P4XyV1NmrOtZfdBp4N/4F6EbBKD
-         HfBjepSfMcgeUvp5IoCBvJivI2KoAuNdLQfBWOlN5ONqr0x4M8vGQEFI7Qryfzffj4Rz
-         JNIA==
-X-Forwarded-Encrypted: i=1; AJvYcCV33xheteuA02XtKO7O5zxI7jIaLylfdSHIeL0RsGwwFVb3xH+0BJvyk0dS+IrijHO6vY+uDygj+N4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzn31nAgautR6gi4feGhBDV6oMUH3boMGuDPiudfGFpOc/5L6c4
-	ix/v0g9HysDWbhQ5adyjIML1Xy1fJeeFBI259l1QjjH3AvucBVBnCfEhYMA52K6oqwdIZJGewA3
-	voEMWchGA4iPluDM2bp1xctOnuUGVkuqlGinic02XRmaPzxdudde7rQht0DE=
-X-Gm-Gg: ASbGnctku7bwCAQKAxgadZSkTqbPLjWjpp/v5V4onG83Nb3AgFomxfbMcseh6zkrP7H
-	C7SKD8+FncgSCBJHrcoB49YHPsFFc/J7f2j3WNuMKv+PgSk5gTGs2oVAVTRLiTuDnBhB2BKQtci
-	qu9zG48zq1d7Wnpn/JuieLbXO/IoFJgKU3Obb4rIL6UG2D1Q4PewdP2AQWzX1O/xekDSJF5pFeQ
-	Zak1hQB1pXPAX4n4dOSmZcLKeo74gLdNTjuPp/Im+LcQIRIHGRFFcPWPELhSs72fcUsdco+gLzd
-	GiUQtbgdV4KEnKqpUrEtCJpv9x9lVXRM+qQu2vmd8+3TgAbji+F/ncfI6OnQ1nwEYiM=
-X-Received: by 2002:a05:620a:2492:b0:7c0:be0e:cb09 with SMTP id af79cd13be357-7c94d266c35mr148950785a.7.1745410697583;
-        Wed, 23 Apr 2025 05:18:17 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IEav1ZFFMWH2+h22EnPEjP1DswVCKNGIgBpCwJp2VazcB6M7t8R/W/1xgUW9/XgzClpBqzW6A==
-X-Received: by 2002:a05:620a:2492:b0:7c0:be0e:cb09 with SMTP id af79cd13be357-7c94d266c35mr148944985a.7.1745410697019;
-        Wed, 23 Apr 2025 05:18:17 -0700 (PDT)
-Received: from [192.168.65.183] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-acb6efadd51sm817256866b.179.2025.04.23.05.18.06
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 23 Apr 2025 05:18:16 -0700 (PDT)
-Message-ID: <e0a61158-6278-45bc-bc5c-fe35227bdbf1@oss.qualcomm.com>
-Date: Wed, 23 Apr 2025 14:18:05 +0200
+	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="RnC7Hd5w"
+Received: from [172.16.12.129] (unknown [58.22.7.114])
+	by smtp.qiye.163.com (Hmail) with ESMTP id 12d9c1966;
+	Wed, 23 Apr 2025 16:52:55 +0800 (GMT+08:00)
+Message-ID: <576e87c1-5c4c-bcc4-4d4f-6cf76bb1c591@rock-chips.com>
+Date: Wed, 23 Apr 2025 16:52:54 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 30/33] arm64: dts: qcom: Add dtsi for Snapdragon
- 730/730g/732g (SM7150) SoCs
-To: Danila Tikhonov <danila@jiaxyga.com>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
- <conor+dt@kernel.org>,
-        Lorenzo Pieralisi <lpieralisi@kernel.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck
- <linux@roeck-us.net>,
-        Rajendra Nayak <quic_rjendra@quicinc.com>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Bjorn Andersson
- <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Wesley Cheng <quic_wcheng@quicinc.com>, Vinod Koul <vkoul@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Souradeep Chowdhury <quic_schowdhu@quicinc.com>,
-        Lee Jones <lee@kernel.org>, Andrew Lunn <andrew+netdev@lunn.ch>,
-        "David S . Miller"
- <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>, Alex Elder <elder@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>, Andy Gross <agross@kernel.org>,
-        Srinivas Kandagatla <srini@kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Georgi Djakov <djakov@kernel.org>,
-        Loic Poulain <loic.poulain@oss.qualcomm.com>,
-        Robert Foss
- <rfoss@kernel.org>, Andi Shyti <andi.shyti@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd
- <sboyd@kernel.org>, Taniya Das <quic_tdas@quicinc.com>,
-        Sibi Sankar <quic_sibis@quicinc.com>, Will Deacon <will@kernel.org>,
-        Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
-        Imran Shaik <quic_imrashai@quicinc.com>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Jessica Zhang <quic_jesszhan@quicinc.com>,
-        David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
-        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Thomas Zimmermann <tzimmermann@suse.de>, Kees Cook <kees@kernel.org>,
-        Tony Luck <tony.luck@intel.com>,
-        "Guilherme G . Piccoli" <gpiccoli@igalia.com>,
-        David Wronek <david@mainlining.org>,
-        Jens Reidel <adrian@mainlining.org>
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-scsi@vger.kernel.org,
-        dmaengine@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
-        linux-remoteproc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-hardening@vger.kernel.org, linux@mainlining.org,
-        ~postmarketos/upstreaming@lists.sr.ht
-References: <20250422213137.80366-1-danila@jiaxyga.com>
- <20250422213137.80366-14-danila@jiaxyga.com>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <20250422213137.80366-14-danila@jiaxyga.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNDIzMDA4NCBTYWx0ZWRfX7cWy9VJwWA7o CCeiVl4rtt+VbWQnoKrzn5gdMZ2MWJAWXEcjC+IbJ+aknQs5nK1fCT+WiW4hhUkLdj96Gb9PtIx 7tyF6uMuw196q1o8o+XOy08vH3rw7hM59iBvPc+Cdz0dPMpfgtGG8iPNCyVyioUGRL8W7uxiZAV
- 0PbsdpHpafmoYCVlNBqdW+j9q7vzFms7LA/kb9FqfepSziqI24WJCOosW9WG6xyMKn58M8Xy54q pEkGBqNkYzlEHYpgwoL7xtOk8UU6nBA5b05P8Rv86RNUuHvcD71qfEVPVkLke/d1AeCkGVcwjcl iWOP/qpTdIUfpyTlwysFF674FubnGiACtYvUL/eqB40xglJ8sNwFGCeAdK8AwuI/+DETY/mx36R
- P8ciqUEpUOTe2gwmB1ZKS6H9GgUXZI2aOmBmD/bK37niOjovdqIwNoflXipUSwKWrEsSy4M+
-X-Proofpoint-GUID: YldNJi4riHJ7vv1sT_d7aK_jDnkh0cAv
-X-Proofpoint-ORIG-GUID: YldNJi4riHJ7vv1sT_d7aK_jDnkh0cAv
-X-Authority-Analysis: v=2.4 cv=M5VNKzws c=1 sm=1 tr=0 ts=6808da8a cx=c_pps a=HLyN3IcIa5EE8TELMZ618Q==:117 a=FpWmc02/iXfjRdCD7H54yg==:17 a=IkcTkHD0fZMA:10 a=XR8D0OoHHMoA:10 a=VwQbUJbxAAAA:8 a=KKAkSRfTAAAA:8 a=OuZLqq7tAAAA:8 a=7ibcVnAUAAAA:8
- a=uu6HZSQSBnFQn7oXV_IA:9 a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22 a=cvBusfyB2V15izCimMoJ:22 a=AKGiAy9iJ-JzxKVHQNES:22 a=HywIFdX19-EX8Ph82vJO:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.680,FMLib:17.12.80.40
- definitions=2025-04-23_07,2025-04-22_01,2025-02-21_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0
- lowpriorityscore=0 adultscore=0 spamscore=0 priorityscore=1501 mlxscore=0
- mlxlogscore=628 malwarescore=0 impostorscore=0 clxscore=1015
- suspectscore=0 phishscore=0 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2504070000
- definitions=main-2504230084
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.15.1
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
+ Sebastian Reichel <sebastian.reichel@collabora.com>,
+ Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com,
+ linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>,
+ Elaine Zhang <zhangqing@rock-chips.com>,
+ Adrian Hunter <adrian.hunter@intel.com>,
+ Finley Xiao <finley.xiao@rock-chips.com>
+Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
+To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+References: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUpMHVZPQkgeQ0NDTR1DTktWFRQJFh
+	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
+	hVSktLVUpCS0tZBg++
+X-HM-Tid: 0a9661d9a34909cckunm12d9c1966
+X-HM-MType: 1
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6PiI6Eio4MjJRHk5DH00sIk4f
+	FClPCkJVSlVKTE9OSEJDSExNQ0NDVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQU1ITUs3Bg++
+DKIM-Signature:a=rsa-sha256;
+	b=RnC7Hd5weLU8Y+dO7lw+qNXo5d9KvBzLVb+aVUMNqoaN0NsUAhQhIlmqyF0FTczFmkeyCtd9GFGHnNQlp/ayHDXVppu6C5/Ng/9BdEDorhQnw4roGSuN5xPaACTrfGi875qqzCKPXFvG2QgjGRSBVA2m4kGQfBaWB0RWl0HrU8Y=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
+	bh=dGYSU8yspLY+yzvc+cdwfSs2SpB2H9RhDGDPSqaDb24=;
+	h=date:mime-version:subject:message-id:from;
 
-On 4/22/25 11:31 PM, Danila Tikhonov wrote:
-> Add base dtsi for SM7150-AA/SM7150-AB/SM7150-AC SoCs
+在 2025/04/23 星期三 15:53, Nicolas Frattaroli 写道:
+> RK3576's power domains have a peculiar design where the PD_NVM power
+> domain, of which the sdhci controller is a part, seemingly does not have
+> idempotent runtime disable/enable. The end effect is that if PD_NVM gets
+> turned off by the generic power domain logic because all the devices
+> depending on it are suspended, then the next time the sdhci device is
+> unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
+> registers.
 > 
-> Co-developed-by: David Wronek <david@mainlining.org>
-> Signed-off-by: David Wronek <david@mainlining.org>
-> Co-developed-by: Jens Reidel <adrian@mainlining.org>
-> Signed-off-by: Jens Reidel <adrian@mainlining.org>
-> Signed-off-by: Danila Tikhonov <danila@jiaxyga.com>
+> RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
+> added to the generic power domains API to handle what appears to be a
+> similar hardware design.
+> 
+> Use this new function to ask for the same treatment in the sdhci
+> controller by giving rk3576 its own platform data with its own postinit
+> function. The benefit of doing this instead of marking the power domains
+> always on in the power domain core is that we only do this if we know
+> the platform we're running on actually uses the sdhci controller. For
+> others, keeping PD_NVM always on would be a waste, as they won't run
+> into this specific issue. The only other IP in PD_NVM that could be
+> affected is FSPI0. If it gets a mainline driver, it will probably want
+> to do the same thing.
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
 > ---
-
-[...]
-
-> +		cpu0: cpu@0 {
-> +			device_type = "cpu";
-> +			compatible = "qcom,kryo470";
-
-Please split this into Kryo 470 silver and gold, with the former being
-based on CA55 and the latter on CA76
-
-[...]
-
-> +	pmu-a55 {
-> +		compatible = "arm,cortex-a55-pmu";
-> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
-> +	};
+> Changes in v3:
+> - Reword comment and commit message to correct that this is not a
+>    silicon bug, but seemingly intentional design with regards to runtime
+>    power management.
+> - Link to v2: https://lore.kernel.org/r/20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com
+> 
+> Changes in v2:
+> - Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
+>    instead, after Ulf Hansson made me aware of its existence
+> - Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
+> ---
+>   drivers/mmc/host/sdhci-of-dwcmshc.c | 40 +++++++++++++++++++++++++++++++++++++
+>   1 file changed, 40 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a20d03fdd6a93ecc5229c71f825bade5ac730370 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -17,6 +17,7 @@
+>   #include <linux/module.h>
+>   #include <linux/of.h>
+>   #include <linux/platform_device.h>
+> +#include <linux/pm_domain.h>
+>   #include <linux/pm_runtime.h>
+>   #include <linux/reset.h>
+>   #include <linux/sizes.h>
+> @@ -745,6 +746,29 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
+>   	}
+>   }
+>   
+> +static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+> +{
+> +	struct device *dev = mmc_dev(host->mmc);
+> +	int ret;
 > +
-> +	pmu-a76 {
-> +		compatible = "arm,cortex-a78-pmu";
-> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
-> +	};
-
-Please update this, mimicking 
-
-2c06e0797c32 ("arm64: dts: qcom: sm8650: add PPI interrupt partitions for the ARM PMUs")
-
+> +	/*
+> +	 * This works around the design of the RK3576's power domains, which
+> +	 * makes the PD_NVM power domain, which the sdhci controller on the
+> +	 * RK3576 is in, never come back the same way once it's run-time
+> +	 * suspended once. This can happen during early kernel boot if no driver
+> +	 * is using either PD_NVM or its child power domain PD_SDGMAC for a
+> +	 * short moment, leading to it being turned off to save power. By
+> +	 * keeping it on, sdhci suspending won't lead to PD_NVM becoming a
+> +	 * candidate for getting turned off.
+> +	 */
+> +	ret = dev_pm_genpd_rpm_always_on(dev, true);
+> +	if (ret && ret != -EOPNOTSUPP)
+> +		dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
+> +			 ERR_PTR(ret));
 > +
-> +	psci {
-> +		compatible = "arm,psci-1.0";
-> +		method = "smc";
+> +	dwcmshc_rk35xx_postinit(host, dwc_priv);
+> +}
 > +
-> +		cpu_pd0: power-domain-cpu0 {
-> +			#power-domain-cells = <0>;
-> +			power-domains = <&cluster_pd>;
-> +			domain-idle-states = <&little_cpu_sleep_0
-> +					      &little_cpu_sleep_1>;
-
-<&foo>,
-<&foo2>;
-
-because they are phandles to separate things - DTC treats them equally
-though..
-
-[...]
-
-> +				interconnects = <&aggre1_noc MASTER_QUP_0 QCOM_ICC_TAG_ALWAYS
-> +						 &config_noc SLAVE_QUP_0 QCOM_ICC_TAG_ALWAYS>,
-> +						<&gem_noc MASTER_AMPSS_M0 QCOM_ICC_TAG_ALWAYS
-> +						 &config_noc SLAVE_QUP_0 QCOM_ICC_TAG_ALWAYS>,
-
-Paths involving AMPSS_M0 (the cpu endpoint) should be ACTIVE_ONLY,
-this applies to the entire file and all paths
-
-[...]
-
-> +		remoteproc_adsp: remoteproc@62400000 {
-> +			compatible = "qcom,sm7150-adsp-pas";
-> +			reg = <0x0 0x62400000 0x0 0x100>;
-
-This region is 0x10_000 long
-
-[...]
-
-> +		adreno_smmu: iommu@5040000 {
-> +			compatible = "qcom,sm7150-smmu-v2",
-> +				     "qcom,adreno-smmu",
-> +				     "qcom,smmu-v2";
-> +			reg = <0x0 0x05040000 0x0 0x10000>;
+>   static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
+>   {
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> @@ -1176,6 +1200,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+>   	.postinit = dwcmshc_rk35xx_postinit,
+>   };
+>   
+> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
+> +	.pdata = {
+> +		.ops = &sdhci_dwcmshc_rk35xx_ops,
+> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> +			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+> +	},
+> +	.init = dwcmshc_rk35xx_init,
+> +	.postinit = dwcmshc_rk3576_postinit,
+> +};
 > +
-> +			interrupts = <GIC_SPI 229 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 231 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 364 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 365 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 366 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 367 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 368 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 369 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 370 IRQ_TYPE_EDGE_RISING>,
-> +				     <GIC_SPI 371 IRQ_TYPE_EDGE_RISING>;
-> +
-> +			clocks = <&gpucc GPU_CC_AHB_CLK>,
-> +				 <&gcc GCC_GPU_MEMNOC_GFX_CLK>,
-> +				 <&gcc GCC_GPU_SNOC_DVM_GFX_CLK>;
-> +			clock-names = "ahb",
-> +				      "bus",
-> +				      "iface";
-> +
-> +			power-domains = <&gpucc CX_GDSC>;
-> +
-> +			#iommu-cells = <1>;
-> +			#global-interrupts = <2>;
-
-Add `dma-coherent` and check whether the GPU still works
-
-[...]
-
-> +		};
-> +
-> +		gmu: gmu@506a000 {
-> +			compatible = "qcom,adreno-gmu-618.0",
-> +				     "qcom,adreno-gmu";
-> +			reg = <0x0 0x0506a000 0x0 0x31000>,
-
-Make it 0x26_000 so that it doesn't leak into GPU_CC
-
-[...]
-
-> +		tsens0: thermal-sensor@c263000 {
-> +			compatible = "qcom,sm7150-tsens",
-> +				     "qcom,tsens-v2";
-> +			reg = <0x0 0x0c263000 0x0 0x1ff>, /* TM */
-> +			      <0x0 0x0c222000 0x0 0x1ff>; /* SROT */
-
-Please remove these comments
-
-[...]
-
-> +		intc: interrupt-controller@17a00000 {
-> +			compatible = "arm,gic-v3";
-> +			reg = <0x0 0x17a00000 0x0 0x10000>,  /* GICD */
-> +			      <0x0 0x17a60000 0x0 0x100000>; /* GICR * 8 */
-
-And these ones too
-
-[...]
-
-> +	thermal-zones {
-
-Please adjust this against 
-
-https://lore.kernel.org/linux-arm-msm/20250219-x1e80100-thermal-fixes-v1-0-d110e44ac3f9@linaro.org/
-
-(keep only critical trips with no sw cooling for the CPU, etc.)
-
-Konrad
+>   static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+>   	.pdata = {
+>   		.ops = &sdhci_dwcmshc_th1520_ops,
+> @@ -1274,6 +1310,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+>   		.compatible = "rockchip,rk3588-dwcmshc",
+>   		.data = &sdhci_dwcmshc_rk35xx_pdata,
+>   	},
+> +	{
+> +		.compatible = "rockchip,rk3576-dwcmshc",
+> +		.data = &sdhci_dwcmshc_rk3576_pdata,
+> +	},
+>   	{
+>   		.compatible = "rockchip,rk3568-dwcmshc",
+>   		.data = &sdhci_dwcmshc_rk35xx_pdata,
+> 
+> ---
+> base-commit: f34da179a4517854b2ffbe4bce8c3405bd9be04e
+> change-id: 20250317-rk3576-emmc-fix-7dc81a627422
+> 
+> Best regards,
