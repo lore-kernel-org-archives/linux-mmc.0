@@ -1,72 +1,117 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5458D28A40F;
-	Wed, 23 Apr 2025 15:55:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E4B128C5CA;
+	Wed, 23 Apr 2025 18:08:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745423719; cv=none; b=eI5V6q4vg04j5ejMDFY1RVpdK6ib25hq/kVoueb+y9ETMQwnowpnwYtvgjcpDuuwjZn/aq4mJfp7G4s/Wa/zgyVZXTfKJ7Ld6PVrbPw1WK9Oq2h1ZamnCx/ff5HA3zznj3uURKzCVVh1CPOfhtzLI3WWzaulbh0s38rlmj9QNCM=
+	t=1745431720; cv=none; b=lJzwUoNYPEgX8w7vKKscVN2roCj1+YFgAEGFoeq1quaHGj+cB0wNC4dj8wDNK1BGSzPHNVhVlk/wTU5oBpaSO6aNKtwlWl/lA79Nq8HB2d3jb46eeJif5degacRGz0vQhyC3eI1S5LDSpLXJiphWfPAIwa18qTAAlf73x5qFPko=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745423719; c=relaxed/simple;
-	bh=A/JbmNFtiekFMU17Tr7eADwSvSKXMsVykZ17Vq2oUnU=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=W8GRyCclOsAgGRyhH7/Nqe2N+Zhl7Wzl+40wL7HUXuyWGVGY1Q4jDNwVM1v/Eg50FHVBsc5gKeCiE0Dl2TT9OCYW1SssKxNfcD1k77YvbDjqaPD2lgjejomgMQIV9UUP4iTDM5I6uwYCIkhLyx9XtXQvSiuBWxvGJ/B32YnjW14=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=tQll1ySt; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745431720; c=relaxed/simple;
+	bh=+Ki4H7wivjI2Q8MWTECBILoqGHb0mMSFqBmPA79zYnk=;
+	h=Date:From:To:CC:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=juagi0Mtc6TKy8sjj+12V4cNPoUF8/PPizdwtdQA3tdWlvz95L/kgF/kGhSnxbCFPgj7+6wr0cMDc++kSjFo8nkbhU6KEO1rTYm8N25yv/SR6toeugKw9JNiWdFm6vN3jBuzeLPZFScnvWgBH9x3oEOPqXv545wfE9y5LQBwejI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=etJnk9LL; arc=none smtp.client-ip=198.47.19.245
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="tQll1ySt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9D4F3C4CEE2;
-	Wed, 23 Apr 2025 15:55:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745423717;
-	bh=A/JbmNFtiekFMU17Tr7eADwSvSKXMsVykZ17Vq2oUnU=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=tQll1yStHKhTaR4zdvp1Egn9CiTLoyK0QwNCsg+lODX9vRHTlby75pgxQ7RYZnmBz
-	 Ia+4p8llQPRG8162UsYv1YuHogzK8mdLPltMsszNlDtNVfuYckw9sb6xsOsdGqtVaN
-	 maFCB9opni+OJctVEsMTktj9LS15CoS7TCmybasjoCo+F76Dgn183Pj4840gKRWCZ2
-	 0wAPQ1cLgfGSm9gvArRJbtmPqUqfRufgAG6tybfMFZT9I7xF84xH0nf+d8i+zkD468
-	 n8HrrtWN5HTpu/aazWKW1DM3VXABQiDizV/as14RZd4zO8eyB8WYxJNdIVeaBzh08a
-	 JLNQsQRJhni3w==
-Date: Wed, 23 Apr 2025 10:55:16 -0500
-From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Alexey Charkov <alchark@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org,
-	Conor Dooley <conor+dt@kernel.org>, devicetree@vger.kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: vt8500-sdmmc: Convert to YAML
-Message-ID: <174542371550.599081.5723331661512709392.robh@kernel.org>
-References: <20250423-vt8500-sdmmc-binding-v2-1-ea4f17fd0638@gmail.com>
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="etJnk9LL"
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 53NI8ATV1615961
+	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 23 Apr 2025 13:08:10 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1745431690;
+	bh=EFWPuqQMAL7NxNHoKz6mQkM5FY+ToS1fRX2hOlbxr9M=;
+	h=Date:From:To:CC:Subject:References:In-Reply-To;
+	b=etJnk9LL5YyulNfARr1RPpEstaU5mXL0BY4HyWpMQ0Gf47Ckr+BDOp/N94jB/ydmO
+	 ugPHD9U1x8CCzjCg3DnCM7mcrF8MhJ/7/2c4LIGltEzVM+jJRoD3UW7d57RmnHaXVJ
+	 k3PysXHTXqvBiBCFZ3BfnwQkf08+VkB4hcdtvUrY=
+Received: from DFLE110.ent.ti.com (dfle110.ent.ti.com [10.64.6.31])
+	by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 53NI8AMr116997
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Wed, 23 Apr 2025 13:08:10 -0500
+Received: from DFLE113.ent.ti.com (10.64.6.34) by DFLE110.ent.ti.com
+ (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 23
+ Apr 2025 13:08:09 -0500
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DFLE113.ent.ti.com
+ (10.64.6.34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Wed, 23 Apr 2025 13:08:09 -0500
+Received: from localhost (uda0133052.dhcp.ti.com [128.247.81.232])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 53NI89wp126662;
+	Wed, 23 Apr 2025 13:08:09 -0500
+Date: Wed, 23 Apr 2025 13:08:09 -0500
+From: Nishanth Menon <nm@ti.com>
+To: Judith Mendez <jm@ti.com>, Josua Mayer <josua@solid-run.com>,
+        "Sverdlin,
+ Alexander" <alexander.sverdlin@siemens.com>
+CC: Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Vignesh Raghavendra
+	<vigneshr@ti.com>,
+        Tero Kristo <kristo@kernel.org>, Josua Mayer
+	<josua@solid-run.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        Francesco Dolcini
+	<francesco@dolcini.it>,
+        Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah
+	<m-shah@ti.com>,
+        <stable@vger.kernel.org>
+Subject: Re: [PATCH RESEND v3 0/3] Add ti,suppress-v1p8-ena
+Message-ID: <20250423180809.l3l6sfbwquaaazar@shrank>
+References: <20250422220512.297396-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <20250423-vt8500-sdmmc-binding-v2-1-ea4f17fd0638@gmail.com>
+In-Reply-To: <20250422220512.297396-1-jm@ti.com>
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
+On 17:05-20250422, Judith Mendez wrote:
+> Resend patch series to fix cc list
+> 
+> There are MMC boot failures seen with V1P8_SIGNAL_ENA on Kingston eMMC
+> and Microcenter/Patriot SD cards on Sitara K3 boards due to the HS200
+> initialization sequence involving V1P8_SIGNAL_ENA. Since V1P8_SIGNAL_ENA
+> is optional for eMMC, do not set V1P8_SIGNAL_ENA by default for eMMC.
+> For SD cards we shall parse DT for ti,suppress-v1p8-ena property to
+> determine whether to suppress V1P8_SIGNAL_ENA. Add new ti,suppress-v1p8-ena
+> to am62x, am62ax, and am62px SoC dtsi files since there is no internal LDO
+> tied to sdhci1 interface so V1P8_SIGNAL_ENA only affects timing.
+> 
+> This fix was previously merged in the kernel, but was reverted due
+> to the "heuristics for enabling the quirk"[0]. This issue is adressed
+> in this patch series by adding optional ti,suppress-v1p8-ena DT property
+> which determines whether to apply the quirk for SD.
+[...]
+> 
+> [0] https://lore.kernel.org/linux-mmc/20250127-am654-mmc-regression-v2-1-9bb39fb12810@solid-run.com/
 
-On Wed, 23 Apr 2025 14:53:29 +0400, Alexey Charkov wrote:
-> Rewrite the textual description for the WonderMedia SDMMC controller
-> as YAML schema, and switch the filename to follow the compatible
-> string.
-> 
-> Signed-off-by: Alexey Charkov <alchark@gmail.com>
-> ---
-> Split the series from v1 into separate bindings patches so as not to
-> spam all the subsystems with unrelated changes, per Rob's suggestion
-> 
-> Changes in v2:
-> - described the sdon-inverted property in greater detail (thanks Rob)
-> - dropped the hunk that updates MAINTAINERS for easier merging - will
->   be updated later in a single pass to cover all VT8500 related files
-> 
-> Link to v1: https://lore.kernel.org/all/20250416-wmt-updates-v1-3-f9af689cdfc2@gmail.com/
-> ---
->  .../devicetree/bindings/mmc/vt8500-sdmmc.txt       | 23 --------
->  .../devicetree/bindings/mmc/wm,wm8505-sdhc.yaml    | 66 ++++++++++++++++++++++
->  2 files changed, 66 insertions(+), 23 deletions(-)
-> 
+Why cant we use compatible to enable the quirk instead of blindly
+enabling for all IPs including ones that have onchip LDOs? That was the
+reason it failed in the first place for am64x.
 
-Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
+This is very much like a quirk that seems to go hand-in-hand with the
+compatible for am62-sdhci ?
 
+Is it worth exploring that option in the driver thread? from where I
+stand, this sounds very much like an issue that AM62x IP has, and should
+be handled by the driver instead of punting to dts to select where to
+use and not to use the quirk.
+
+-- 
+Regards,
+Nishanth Menon
+Key (0xDDB5849D1736249D) / Fingerprint: F8A2 8693 54EB 8232 17A3  1A34 DDB5 849D 1736 249D
