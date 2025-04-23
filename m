@@ -1,136 +1,188 @@
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com [209.85.128.48])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC1FC2676D9
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 07:26:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.48
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745393223; cv=none; b=PKBDJGkKuejQSY0VDUeEotd16nStrsBbo5P6gGLlGuFiZ9PhH0u+Ve/QgRHENjKFcMNw3zJbjxEfle73CsPnicGWUmNq+cuSJKwvx/cUhhKejAH9+vHyjVYBI+QQf1nP+RDTA6Mo/DGPmutlgCl3qPSui6fRsKK/9m7amMW3Pq0=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745393223; c=relaxed/simple;
-	bh=Jrbw0OKpQbJ1dFid4p4N4XtPsI8/qSLnEpsHW9bCCKg=;
-	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
-	 In-Reply-To:Content-Type; b=JhZawhuxbsFYyaRCfWCy6ty9/YmQ1TkKl1AaB1GCifoQLlj8DBM6d3AER0qW4h/EL3I/6hDJxkuUbgy/ilPTUGHXMUSK+/gpk6tVfygaXKOOyt9NuhsPtDTMj26unuHtuzZIK2dBb/6IOQlmTeK5f8nbvE+cImGql1y+iwHbQXA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WJsYG4G5; arc=none smtp.client-ip=209.85.128.48
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5614027A93A;
+	Wed, 23 Apr 2025 07:54:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1745394859; cv=pass; b=t9d9Nw/+fdd2or1tNOEntRTURodTNrcGrYzFBPOr3J9gDs4Z/oMN9mWRIgCIPAQG+Rna90T6wC+tO9WsRUuMmBf4wXmDprUiTtKp9/6/lcg3gHOHI2UC90TplE705k6S+ZdP2DiP/br7dKeZCD4+0FkeT6/pgPbj3GKxqt2/JWs=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1745394859; c=relaxed/simple;
+	bh=LGO4kk+bq2xXbKOrta1rlVIrB6tbMRDchCZNNF4pD+E=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=af2r4n/quTYVmXRvRKTtMOcKy1hHAjuHC0fcB13heCaYMyR4eVQLWEj7gj4Uzn0M3RduOlO8xcEDJ4x43ONybVxsBHa/nA1FMnBgV9qHRkP4rwyE5sjHsBHCXbO9RazGiZVj3pOg9KLOgHRY/eHB0Jt6KlCU6P2euFMIjvon8Lo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=EeQspoWr; arc=pass smtp.client-ip=136.143.188.112
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WJsYG4G5"
-Received: by mail-wm1-f48.google.com with SMTP id 5b1f17b1804b1-43cfebc343dso50853195e9.2
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 00:26:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745393218; x=1745998018; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=kn/kdeC0hIJ6fPjKrtocu5NnRgujubxfAbJ5Urbgh9w=;
-        b=WJsYG4G5Le7NxcMduHBEdH1Cuadj5L7FAZjqaEd5mYiMF/Qi6ppXkTUuDDk22WovVY
-         O7B5DQAXeTfnr8i6cS+KbgmElCDTMFYIy2ECwPXpJaB3JeoMNYQZ/2ll4krvLhDrl0ry
-         XWWTUjEF+7PJnsDC+7ryWRsgboKsQww8oCHwjnyrsKXY0gIeOF3zFgeZ4kyZGKIkcSA/
-         8PxE1bS7/EyDFy8xpBfc+BpcJI9Cro2kEeAw/dG8GeFSA4Ky0taUyAn5Rs/tCD4hcZAp
-         J/CUYtr3Rlwo+y9zOka/9al+MhVV66wL+2jOPfBCVsxlMCkn7Y45wIQSBrCGS1BpJrx8
-         qsYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745393218; x=1745998018;
-        h=content-transfer-encoding:in-reply-to:organization:autocrypt
-         :content-language:references:cc:to:subject:reply-to:from:user-agent
-         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=kn/kdeC0hIJ6fPjKrtocu5NnRgujubxfAbJ5Urbgh9w=;
-        b=olbDpDeR7x+ShByFNurPlxbuECypTW6pN+M86XnKbxqqyAQlEW1bPosmQwgPZPZi3y
-         QA1fRnQ9hrYQj+R4AVgGSZvC5uwDfdWmRE0aztx2zAmPltIOvPaxFIynFG615AHmnJVl
-         OpqZnTxmr9R2MNqoiJ70vWfoz2W+X+aKy8oI+RpI19iY8mVL3o/A4fvhZwm+REZ2Jlij
-         R67rQOA6tFnO/hUX3Tzmu4qZi3Tlz03jhR5tLaSb6K9dT/U+iYgxjzE+0ar7P2MYLV1W
-         2isbDVRgirn0HL2khH3ItqAUrgvWXg2MiqjGOV+nWpClzfXpguVU0AN+UF+41lMMA4W0
-         MyYQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUGynGkGWdFJeq6L2syynbRRH2i7m1tvvliF99OZ3Q6FkRp+8MU5GG6xp6FvtdQj7XSrblzj+rm5dc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwT0Pa1oRRhIai1KxmXglGbtQYetEyMsITCwb21vN4QYiF5tmej
-	fLlpseWBIlWAGn/fqypJB8O3ji7FynMpCozjwwCGmqWZLO4/HBONEmLiG6f6bI4=
-X-Gm-Gg: ASbGnctT9M/4YZh5DWqLB3cmQhArZYQOtA+ZENxQMWs6ROloyzvRrs+UN5okuRyakV3
-	xKc3ocLEtP6F3sKQF5+tnVw92zJ2lA01CHI+f5Wvs8f3RSvG/ztLorbKZ70NwrZtJO5jEmkzOxB
-	U5hjEjcUEaSjTbv+HM4SPabt1GyjxZ2Tv/9h7vni1+NlmVs0ELN5riMAX1lG5pDm4T/LYju1Htj
-	aGGT28BADu75ItDWUfZQq50DTusPrT6iepJBDx0L0SW97Ni/2ourrfqkv+03zeHgq/cAfB5mNDu
-	AIWqemVHYE6HSKjFYKU//r7imnZnc18D1DDIMPpccQOLKDxovr033mpp2b+JERzuQQj0m1XdpZ0
-	onvnFxlF43v8/0GcPHg==
-X-Google-Smtp-Source: AGHT+IGQjZAyp9xHW8ASlQKrR9fCiGMeMbCakgAb3SkKNca/+Rt6CnnTlRW63K73V1hHmlOCRLIMvA==
-X-Received: by 2002:a05:600c:1c8f:b0:43c:fe5e:f040 with SMTP id 5b1f17b1804b1-4406abffc5emr134620725e9.23.1745393218300;
-        Wed, 23 Apr 2025 00:26:58 -0700 (PDT)
-Received: from ?IPV6:2a01:e0a:3d9:2080:2835:c2f4:c226:77dd? ([2a01:e0a:3d9:2080:2835:c2f4:c226:77dd])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-44092db2bd5sm15015645e9.26.2025.04.23.00.26.57
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 23 Apr 2025 00:26:57 -0700 (PDT)
-Message-ID: <283096ad-ae1b-42b8-8312-b192f735fc80@linaro.org>
-Date: Wed, 23 Apr 2025 09:26:56 +0200
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="EeQspoWr"
+ARC-Seal: i=1; a=rsa-sha256; t=1745394828; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=l2QuKe/naQtdCK/UHh5fyBtiP47dQkbaOA1fo4k3vk0lt3/LssUVniRCYGSiocb+TOGDUKsYSYKPGUx9bvWQAx3+KylYPcHNY7Oce1Bj7j01l4Sj0CBcmVtLkSSlqyV3vx8g0rJQdiCtLd1xMY7vmSZKpESKYXr6wwV3keXBcjk=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1745394828; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=Oijd0aKBdyplMTnNPJrIqrieZmKmWwupu3pm2u3MJ64=; 
+	b=I0eHXxv5l1nsUJD8DGsbw644Z6TIdJ13y3TFHmlJYPiscH8PgMhQ2fjSlQRU6pfcNxbeAvDPTT6+VoQlo2/V2aOWmmsUO0WQ11xzvnoU4fw38B16cRlHrJC4X5GD1S73J5A5bTYzojG6oTPDQ//MlAocdlSGEQOxx1bLiD6+nf0=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
+	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1745394828;
+	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
+	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:To:To:Cc:Cc:Reply-To;
+	bh=Oijd0aKBdyplMTnNPJrIqrieZmKmWwupu3pm2u3MJ64=;
+	b=EeQspoWrECM8FVvMhgq0pxQ/UpzK7XmT0IycpYq3W6VvHXwbyCzFjicjSZzF0i/l
+	whh9XZv+NwxWQPWd+exftk33dP/V3kyOaL/uyuKlK7u++wPwiZE+os13oRmI+z38W/N
+	zJBF15oaarzdvGT2+83SaHD9tlrjQf92yYh/YIK4=
+Received: by mx.zohomail.com with SMTPS id 1745394825558639.0210285939858;
+	Wed, 23 Apr 2025 00:53:45 -0700 (PDT)
+From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Date: Wed, 23 Apr 2025 09:53:32 +0200
+Subject: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-From: Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [PATCH 00/33] Add support for Qualcomm Snapdragon SM7150 SoC and
- Google Pixel 4a
-To: Jens Reidel <adrian@mainlining.org>, Danila Tikhonov <danila@jiaxyga.com>
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
- linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org,
- netdev@vger.kernel.org, linux-scsi@vger.kernel.org,
- dmaengine@vger.kernel.org, linux-crypto@vger.kernel.org,
- linux-i2c@vger.kernel.org, linux-clk@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
- linux-remoteproc@vger.kernel.org, dri-devel@lists.freedesktop.org,
- linux-hardening@vger.kernel.org, linux@mainlining.org,
- ~postmarketos/upstreaming@lists.sr.ht, Connor Mitchell <c.dog29@hotmail.com>
-References: <20250422-sm7150-upstream-v1-0-bf9a9081631d@jiaxyga.com>
- <2ca2b774-fd7f-4612-b38d-f60e32ff6f9a@mainlining.org>
-Content-Language: en-US, fr
-Autocrypt: addr=neil.armstrong@linaro.org; keydata=
- xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
- GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
- BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
- qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
- 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
- AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
- OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
- Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
- YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
- GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
- UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
- GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
- yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
- QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
- SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
- 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
- Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
- oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
- M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
- 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
- KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
- 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
- QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
-Organization: Linaro
-In-Reply-To: <2ca2b774-fd7f-4612-b38d-f60e32ff6f9a@mainlining.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Message-Id: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
+X-B4-Tracking: v=1; b=H4sIAHucCGgC/3WOwW7DIBBEf8XiXCJ2AZvklP+IesCwTlDj0IKLW
+ kX+92DnECltjjOaeTNXlikFymzXXFmiEnKIlyrkW8PcyV6OxIOvmqFALSR0PH1I3bWcxtHxIfz
+ wzjsDtsVOIbLa+kxU7ZV4eL/rRF/fFTzdTdbbTNzFcQzTrintBjRPTrIlfAp5iul3fVNgTb8cL
+ sCBey2VV1urYNB7F89n28dkN5W+fFm7Spj/u1KIrUHTQy/hqbt8KfjYV4B/GVgZRgpqtbReDeK
+ ZMc/zDQ3pxEpfAQAA
+X-Change-ID: 20250317-rk3576-emmc-fix-7dc81a627422
+To: Shawn Lin <shawn.lin@rock-chips.com>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, 
+ Elaine Zhang <zhangqing@rock-chips.com>, 
+ Finley Xiao <finley.xiao@rock-chips.com>, 
+ Adrian Hunter <adrian.hunter@intel.com>
+Cc: Sebastian Reichel <sebastian.reichel@collabora.com>, 
+ Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
+ linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, 
+ Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+X-Mailer: b4 0.14.2
 
-Hi,
+RK3576's power domains have a peculiar design where the PD_NVM power
+domain, of which the sdhci controller is a part, seemingly does not have
+idempotent runtime disable/enable. The end effect is that if PD_NVM gets
+turned off by the generic power domain logic because all the devices
+depending on it are suspended, then the next time the sdhci device is
+unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
+registers.
 
-On 23/04/2025 00:07, Jens Reidel wrote:
-> Hi everyone,
-> 
-> apologies for the mess this created. Danila's mail provider ratelimited him halfway through sending the series and the attempt to re-try sending the second half an hour later ended up with a new message ID (I think due to not using --in-reply-to).
-> He asked me to let you know that this will be resolved later and the whole series will be re-sent once the problems are resolved.
+RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
+added to the generic power domains API to handle what appears to be a
+similar hardware design.
 
-The b4 web submission is a great alternative when the mail provider is rate limited:
-https://b4.docs.kernel.org/en/latest/contributor/send.html#web-endpoint
+Use this new function to ask for the same treatment in the sdhci
+controller by giving rk3576 its own platform data with its own postinit
+function. The benefit of doing this instead of marking the power domains
+always on in the power domain core is that we only do this if we know
+the platform we're running on actually uses the sdhci controller. For
+others, keeping PD_NVM always on would be a waste, as they won't run
+into this specific issue. The only other IP in PD_NVM that could be
+affected is FSPI0. If it gets a mainline driver, it will probably want
+to do the same thing.
 
-Neil
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+---
+Changes in v3:
+- Reword comment and commit message to correct that this is not a
+  silicon bug, but seemingly intentional design with regards to runtime
+  power management.
+- Link to v2: https://lore.kernel.org/r/20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com
 
-> 
-> Best regards,
-> Jens
+Changes in v2:
+- Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
+  instead, after Ulf Hansson made me aware of its existence
+- Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 40 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 40 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a20d03fdd6a93ecc5229c71f825bade5ac730370 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -17,6 +17,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_domain.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/reset.h>
+ #include <linux/sizes.h>
+@@ -745,6 +746,29 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
+ 	}
+ }
+ 
++static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
++{
++	struct device *dev = mmc_dev(host->mmc);
++	int ret;
++
++	/*
++	 * This works around the design of the RK3576's power domains, which
++	 * makes the PD_NVM power domain, which the sdhci controller on the
++	 * RK3576 is in, never come back the same way once it's run-time
++	 * suspended once. This can happen during early kernel boot if no driver
++	 * is using either PD_NVM or its child power domain PD_SDGMAC for a
++	 * short moment, leading to it being turned off to save power. By
++	 * keeping it on, sdhci suspending won't lead to PD_NVM becoming a
++	 * candidate for getting turned off.
++	 */
++	ret = dev_pm_genpd_rpm_always_on(dev, true);
++	if (ret && ret != -EOPNOTSUPP)
++		dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
++			 ERR_PTR(ret));
++
++	dwcmshc_rk35xx_postinit(host, dwc_priv);
++}
++
+ static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -1176,6 +1200,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+ 	.postinit = dwcmshc_rk35xx_postinit,
+ };
+ 
++static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
++	.pdata = {
++		.ops = &sdhci_dwcmshc_rk35xx_ops,
++		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++	},
++	.init = dwcmshc_rk35xx_init,
++	.postinit = dwcmshc_rk3576_postinit,
++};
++
+ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
+ 	.pdata = {
+ 		.ops = &sdhci_dwcmshc_th1520_ops,
+@@ -1274,6 +1310,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+ 		.compatible = "rockchip,rk3588-dwcmshc",
+ 		.data = &sdhci_dwcmshc_rk35xx_pdata,
+ 	},
++	{
++		.compatible = "rockchip,rk3576-dwcmshc",
++		.data = &sdhci_dwcmshc_rk3576_pdata,
++	},
+ 	{
+ 		.compatible = "rockchip,rk3568-dwcmshc",
+ 		.data = &sdhci_dwcmshc_rk35xx_pdata,
+
+---
+base-commit: f34da179a4517854b2ffbe4bce8c3405bd9be04e
+change-id: 20250317-rk3576-emmc-fix-7dc81a627422
+
+Best regards,
+-- 
+Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
 
