@@ -1,182 +1,181 @@
-Received: from mail-m15592.qiye.163.com (mail-m15592.qiye.163.com [101.71.155.92])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CD5EC9460;
-	Wed, 23 Apr 2025 13:29:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.92
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5EDE339A8
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 13:30:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745414952; cv=none; b=q2GDxC9bzsn12yY/cOJQsXwrgeRmf5GwUq8gl7+VYSWNF/WCQSLapsW9JsdnliItLQDZcCWKLR/7jmovRtFzBr9ouBgPOyrwK84mSTtSBlO2YEA6kqXsfhciQjCfw0BGYQumI3Z8WDL3ZIQh0PPHoc9oUxogL+jF0YDibGTduqA=
+	t=1745415040; cv=none; b=Z8zaGpDmwwzScL0C5SY6zXWf84zzo2nL/KhgEGGasqgkFoYzi2LQK1Y8N+M6f5hCeWh63RALNNorMZU6zf5FmtlSTv7hL1S/bOdNho+1lAqes/0I8suWkvy2HZVhcUqTB6l5n307N3wivHqkbTCpQCYsTQM3vPODp0Nj1CwB57U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745414952; c=relaxed/simple;
-	bh=a150Pu+le3PUHIaPC7evLffms8yMxg22M67A+K8cG80=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=FqZZ6GPfdc9/reAlH6151kLh52vPmG+HjV/8pjpBKKqSyDr9OzrFT2xLYxjWEetF6AIoZRyDuJDFmy23IKTvkkHKKkoPpVytx5FEyJHSFrW4DI0tPfDsDvQrFAhtfpQLTEQTVOizEdHB5XYx0rNEvOmomPn3IAy7Uthyv0lfUM4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=RnC7Hd5w; arc=none smtp.client-ip=101.71.155.92
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1745415040; c=relaxed/simple;
+	bh=WKYV1t5SeWLAIvo4ur1wBfNb7+r/gkkLurn3pxPhYaw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=XG044V4nMa/MpyfgZY3VuiBIt4KiiLyiLShE2pFeC3fHogxe8/2rwvMdJkkZLQEPUtUaeE9rYA1OI4TpCx1p143b6yvU3UDN2KenHsznyD7ad35YLS75zvqfAEuYRmUCLpqQwqCDIJHgr70xoTmGJnwM9POE9NvvmOSVVRaaqVA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=cMs/EHWK; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="RnC7Hd5w"
-Received: from [172.16.12.129] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 12d9c1966;
-	Wed, 23 Apr 2025 16:52:55 +0800 (GMT+08:00)
-Message-ID: <576e87c1-5c4c-bcc4-4d4f-6cf76bb1c591@rock-chips.com>
-Date: Wed, 23 Apr 2025 16:52:54 +0800
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="cMs/EHWK"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 53NAmZdu016562
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 13:30:37 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-type:date:from:in-reply-to:message-id:mime-version
+	:references:subject:to; s=qcppdkim1; bh=WbGQoV5TtWkaVGbUVN+WB0tm
+	HemlYXyNkVd6UejF+r4=; b=cMs/EHWKfrAVRpO315acQbgZZJrzBxOlSGiIOMx9
+	zwT6LIfesMxaap/QlbAfHn9MOEpnI0fRVwmxA4oyMrlws4IWwmii8eJ8i3ioCYtR
+	bCdeaFMKpfQhh4Jc2CIWxvAda6zIw7ph9ud54R262WevDmyWjR4Asu9QKasd9UH+
+	SdbCiI1VD5rM93gtiGwPgSaIx9azBicbu9aGd1zBPRLqrVmpPKYDx7QCElEmQaWO
+	RIOCuQ3F8Bnb8HBTLqNL3juAHUqf5V7GEu0g6MkQqEp17NbnWznTx3FbsX/hBr6f
+	gXq5Hrx5qouoGpzNHL6a2llVUK1gikagyits7xD3HpNiWA==
+Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com [209.85.222.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 466jh0a9eg-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 13:30:36 +0000 (GMT)
+Received: by mail-qk1-f198.google.com with SMTP id af79cd13be357-7c5e2872e57so1033907785a.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Apr 2025 06:30:36 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1745415035; x=1746019835;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WbGQoV5TtWkaVGbUVN+WB0tmHemlYXyNkVd6UejF+r4=;
+        b=H0IV76jAszG07UuuAf7r/OZQgaxRNLRgLZutE0T1QhiocFSu2hNR/luoVKR8JTJh41
+         qOnfZkfqV0kbJV6x2vY8DATPl0dQj8FP955ERrBpUgGhs7zNj4qa9pad4wfltdxv9oMC
+         WDoffqTWyCFuh3Di8IvIcR9+AH30N/lO7/rG2kt5B1DPw/EUC/g3t5vUF2iiCoqopDzG
+         K4xPTr5aA6myfShvfiD2QdqMOLEREglDqY5X7e7rtKlvcBKFqQbkK7JMmf6bkdTS9ZRp
+         85b+UiGoUhiX40KA9FsjEf7vbpken8HLbClyqWAvbJP1O2FrlYXqpCmdsgWMhl5UnYaa
+         xX1Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVkNPYsFKMK+33Q/Ehd16TwPA4c3DSU4xqXzNM31nosLnDsLw21GYNkx6YtRGA633jNKX1PoHzR8G0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw3492yziahxPj0gIHpFk0eegduJdN8DE1mjpwYrLJFi0Fgl1C1
+	+6156pPUOBH0zilRPAtlrbNeG1ue5GnbKV6O50giRgkEQzhCY9Z1TB+fwBLQbkM1t8Ssy3QI4es
+	hgdQWrONODf4l/urzVthD+X3MBQTsLdi+/GYU5Xcg4N5MdgfU0H8wQwwqhzI=
+X-Gm-Gg: ASbGncvZetjM7t7y3GXSVVW12P4a3oRzYKCeikiq3vqICVIr7ESyQ0eUKglTfHDxZKh
+	aItWi14OVe5MyzjJpAQB+rEKLj/p5V8MgN22BclKpRBwq8guELF6MwYiKi9ApSIVWTu3xU/6+Cn
+	n67yFVZk0FJ+gNLPToNSTWDptSqj0bpnLPtDvW3BCENhYRuI7swneV/6+iTfArqMFNdnQL+maiF
+	wIGQHovBSE10NLf/XBFesl5YGWwDhpDcOq4UaLE2srymNCmc/iDPS/ad8quUN/hSBKTPfAzT44q
+	/XnMUmPMLu1uC0lhiO9h17Wt3VOqJy1KUGldfRkkfWdGfE6wWl+FeevFFEm/0rYDZ3ifoKa2pOM
+	=
+X-Received: by 2002:a05:620a:370d:b0:7c5:5670:bd75 with SMTP id af79cd13be357-7c928038eadmr3337065585a.46.1745415035002;
+        Wed, 23 Apr 2025 06:30:35 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFXTfpWsbVAbU0ylBQYL51RHYlyc+81kcBQZEj2nboNhovZTX2+cu6ODjDZ2xy1hvKkUJMoaw==
+X-Received: by 2002:a05:620a:370d:b0:7c5:5670:bd75 with SMTP id af79cd13be357-7c928038eadmr3337049985a.46.1745415034096;
+        Wed, 23 Apr 2025 06:30:34 -0700 (PDT)
+Received: from eriador.lumag.spb.ru (2001-14ba-a0c3-3a00--7a1.rev.dnainternet.fi. [2001:14ba:a0c3:3a00::7a1])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-54d6e5cf767sm1524502e87.129.2025.04.23.06.30.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 23 Apr 2025 06:30:33 -0700 (PDT)
+Date: Wed, 23 Apr 2025 16:30:31 +0300
+From: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+To: Danila Tikhonov <danila@jiaxyga.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Lorenzo Pieralisi <lpieralisi@kernel.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rajendra Nayak <quic_rjendra@quicinc.com>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Wesley Cheng <quic_wcheng@quicinc.com>, Vinod Koul <vkoul@kernel.org>,
+        Kishon Vijay Abraham I <kishon@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Souradeep Chowdhury <quic_schowdhu@quicinc.com>,
+        Lee Jones <lee@kernel.org>, Andrew Lunn <andrew+netdev@lunn.ch>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>, Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, Alex Elder <elder@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>, Andy Gross <agross@kernel.org>,
+        Srinivas Kandagatla <srini@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Georgi Djakov <djakov@kernel.org>,
+        Loic Poulain <loic.poulain@oss.qualcomm.com>,
+        Robert Foss <rfoss@kernel.org>, Andi Shyti <andi.shyti@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, Taniya Das <quic_tdas@quicinc.com>,
+        Sibi Sankar <quic_sibis@quicinc.com>, Will Deacon <will@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
+        Imran Shaik <quic_imrashai@quicinc.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Jessica Zhang <quic_jesszhan@quicinc.com>,
+        David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+        Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Thomas Zimmermann <tzimmermann@suse.de>, Kees Cook <kees@kernel.org>,
+        Tony Luck <tony.luck@intel.com>,
+        "Guilherme G . Piccoli" <gpiccoli@igalia.com>,
+        David Wronek <david@mainlining.org>,
+        Jens Reidel <adrian@mainlining.org>, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-scsi@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        iommu@lists.linux.dev, linux-remoteproc@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-hardening@vger.kernel.org,
+        linux@mainlining.org, ~postmarketos/upstreaming@lists.sr.ht
+Subject: Re: [PATCH 27/33] soc: qcom: pd-mapper: Add support for SM7150
+Message-ID: <wi6azppohttfttjniktjsovstktalut6uhnxiiwekvqtjsw5gu@nstvkc7pv5bs>
+References: <20250422213137.80366-1-danila@jiaxyga.com>
+ <20250422213137.80366-11-danila@jiaxyga.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.15.1
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
- Sebastian Reichel <sebastian.reichel@collabora.com>,
- Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com,
- linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>,
- Elaine Zhang <zhangqing@rock-chips.com>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Finley Xiao <finley.xiao@rock-chips.com>
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
-To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-References: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGUpMHVZPQkgeQ0NDTR1DTktWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-X-HM-Tid: 0a9661d9a34909cckunm12d9c1966
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6PiI6Eio4MjJRHk5DH00sIk4f
-	FClPCkJVSlVKTE9OSEJDSExNQ0NDVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQU1ITUs3Bg++
-DKIM-Signature:a=rsa-sha256;
-	b=RnC7Hd5weLU8Y+dO7lw+qNXo5d9KvBzLVb+aVUMNqoaN0NsUAhQhIlmqyF0FTczFmkeyCtd9GFGHnNQlp/ayHDXVppu6C5/Ng/9BdEDorhQnw4roGSuN5xPaACTrfGi875qqzCKPXFvG2QgjGRSBVA2m4kGQfBaWB0RWl0HrU8Y=; c=relaxed/relaxed; s=default; d=rock-chips.com; v=1;
-	bh=dGYSU8yspLY+yzvc+cdwfSs2SpB2H9RhDGDPSqaDb24=;
-	h=date:mime-version:subject:message-id:from;
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250422213137.80366-11-danila@jiaxyga.com>
+X-Proofpoint-GUID: Bh3fi61raLKJXp6nOrD1R9OxfWWI0TF7
+X-Proofpoint-ORIG-GUID: Bh3fi61raLKJXp6nOrD1R9OxfWWI0TF7
+X-Authority-Analysis: v=2.4 cv=Fv0F/3rq c=1 sm=1 tr=0 ts=6808eb7d cx=c_pps a=qKBjSQ1v91RyAK45QCPf5w==:117 a=xqWC_Br6kY4A:10 a=kj9zAlcOel0A:10 a=XR8D0OoHHMoA:10 a=OuZLqq7tAAAA:8 a=7ibcVnAUAAAA:8 a=EUspDBNiAAAA:8 a=JQ2_29xaah9frsLSoU4A:9 a=CjuIK1q_8ugA:10
+ a=NFOGd7dJGGMPyQGDc5-O:22 a=AKGiAy9iJ-JzxKVHQNES:22 a=HywIFdX19-EX8Ph82vJO:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNDIzMDA5NCBTYWx0ZWRfXyK1IA7Hq8XI5 iOg44IE9ngm71eiUmw1AksmXG125Z2LIONeH9s4eqCakaFVSxKNr4EkVK3poPycqzLFS8xPSpxh Mz+EB+6WoqQdx9CH2xCCXBCN7NgNjrr0+UYew/8Ei6g3zQtdIU1Pky+aZ46JLctLJXwBPeD+WfI
+ Hy9Ec6CtD0Z6Mnu7tsFtF/OLCYWo+EWjd9PK6AKa/xidGsEXvTzkbOsopjMeHDaapHqjOxtIdbA NyTOKSL3zVKsjy6va1H3FpsKwfMWyXpDBGX+kgimCd41wXjBwf1+iO+UgGiD+IrCXmXEnoBRRmE xiBS1/4wUbk3IfEzE5jQmsh8NbBPVpjIwlO5nSjbnhhxE3YlCNxoc9Mm/wuvR0s5U+rFyTrGyiV
+ YxUsrdXHscb0pRNaNED/0TM7P+2+G3Zx42JZA8h103VbribG+zewMI/+IDyJPCLXDrycmuqm
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.680,FMLib:17.12.80.40
+ definitions=2025-04-23_08,2025-04-22_01,2025-02-21_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 mlxscore=0
+ malwarescore=0 mlxlogscore=827 priorityscore=1501 suspectscore=0
+ adultscore=0 bulkscore=0 clxscore=1011 spamscore=0 lowpriorityscore=0
+ phishscore=0 classifier=spam authscore=0 authtc=n/a authcc= route=outbound
+ adjust=0 reason=mlx scancount=1 engine=8.19.0-2504070000
+ definitions=main-2504230094
 
-在 2025/04/23 星期三 15:53, Nicolas Frattaroli 写道:
-> RK3576's power domains have a peculiar design where the PD_NVM power
-> domain, of which the sdhci controller is a part, seemingly does not have
-> idempotent runtime disable/enable. The end effect is that if PD_NVM gets
-> turned off by the generic power domain logic because all the devices
-> depending on it are suspended, then the next time the sdhci device is
-> unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
-> registers.
+On Wed, Apr 23, 2025 at 12:31:31AM +0300, Danila Tikhonov wrote:
+> From: Jens Reidel <adrian@mainlining.org>
 > 
-> RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
-> added to the generic power domains API to handle what appears to be a
-> similar hardware design.
+> SM7150 protection domains are the same as SC7180, with the subtle
+> difference that SM7150 has a CDSP.
 > 
-> Use this new function to ask for the same treatment in the sdhci
-> controller by giving rk3576 its own platform data with its own postinit
-> function. The benefit of doing this instead of marking the power domains
-> always on in the power domain core is that we only do this if we know
-> the platform we're running on actually uses the sdhci controller. For
-> others, keeping PD_NVM always on would be a waste, as they won't run
-> into this specific issue. The only other IP in PD_NVM that could be
-> affected is FSPI0. If it gets a mainline driver, it will probably want
-> to do the same thing.
+> Signed-off-by: Jens Reidel <adrian@mainlining.org>
+> Signed-off-by: Danila Tikhonov <danila@jiaxyga.com>
+> ---
+>  drivers/soc/qcom/qcom_pd_mapper.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+Reviewed-by: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+> 
 
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-> ---
-> Changes in v3:
-> - Reword comment and commit message to correct that this is not a
->    silicon bug, but seemingly intentional design with regards to runtime
->    power management.
-> - Link to v2: https://lore.kernel.org/r/20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com
-> 
-> Changes in v2:
-> - Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
->    instead, after Ulf Hansson made me aware of its existence
-> - Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
-> ---
->   drivers/mmc/host/sdhci-of-dwcmshc.c | 40 +++++++++++++++++++++++++++++++++++++
->   1 file changed, 40 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a20d03fdd6a93ecc5229c71f825bade5ac730370 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -17,6 +17,7 @@
->   #include <linux/module.h>
->   #include <linux/of.h>
->   #include <linux/platform_device.h>
-> +#include <linux/pm_domain.h>
->   #include <linux/pm_runtime.h>
->   #include <linux/reset.h>
->   #include <linux/sizes.h>
-> @@ -745,6 +746,29 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
->   	}
->   }
->   
-> +static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> +{
-> +	struct device *dev = mmc_dev(host->mmc);
-> +	int ret;
-> +
-> +	/*
-> +	 * This works around the design of the RK3576's power domains, which
-> +	 * makes the PD_NVM power domain, which the sdhci controller on the
-> +	 * RK3576 is in, never come back the same way once it's run-time
-> +	 * suspended once. This can happen during early kernel boot if no driver
-> +	 * is using either PD_NVM or its child power domain PD_SDGMAC for a
-> +	 * short moment, leading to it being turned off to save power. By
-> +	 * keeping it on, sdhci suspending won't lead to PD_NVM becoming a
-> +	 * candidate for getting turned off.
-> +	 */
-> +	ret = dev_pm_genpd_rpm_always_on(dev, true);
-> +	if (ret && ret != -EOPNOTSUPP)
-> +		dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
-> +			 ERR_PTR(ret));
-> +
-> +	dwcmshc_rk35xx_postinit(host, dwc_priv);
-> +}
-> +
->   static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
->   {
->   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1176,6 +1200,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->   	.postinit = dwcmshc_rk35xx_postinit,
->   };
->   
-> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
-> +	.pdata = {
-> +		.ops = &sdhci_dwcmshc_rk35xx_ops,
-> +		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> +			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-> +		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +			   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> +	},
-> +	.init = dwcmshc_rk35xx_init,
-> +	.postinit = dwcmshc_rk3576_postinit,
-> +};
-> +
->   static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
->   	.pdata = {
->   		.ops = &sdhci_dwcmshc_th1520_ops,
-> @@ -1274,6 +1310,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->   		.compatible = "rockchip,rk3588-dwcmshc",
->   		.data = &sdhci_dwcmshc_rk35xx_pdata,
->   	},
-> +	{
-> +		.compatible = "rockchip,rk3576-dwcmshc",
-> +		.data = &sdhci_dwcmshc_rk3576_pdata,
-> +	},
->   	{
->   		.compatible = "rockchip,rk3568-dwcmshc",
->   		.data = &sdhci_dwcmshc_rk35xx_pdata,
-> 
-> ---
-> base-commit: f34da179a4517854b2ffbe4bce8c3405bd9be04e
-> change-id: 20250317-rk3576-emmc-fix-7dc81a627422
-> 
-> Best regards,
+-- 
+With best wishes
+Dmitry
