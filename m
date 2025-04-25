@@ -1,452 +1,119 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 359F82459DD
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF9F2405ED;
+	Fri, 25 Apr 2025 11:42:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745579672; cv=none; b=Z5Ph9LAzN8NqmnCtUX3/8K1Gs7rGvcGzkBU0fg5MOEOqXIRSmPmUC/jJZEVX+VXB+3DJau6Ix3RojHD3KFXwkwIYVTnHPEjwh9sHq2K9mePQZkAuZIRz8ASHcdGl+JUbeJn0ZF4E8wFIobFNGQq5wHXfvEzlWaPwZvnrbBLeA1o=
+	t=1745581331; cv=none; b=WYAfp+LMDA6C7WK7b2yWTsPtKV0fbPEwycbmsqZ6M3qMdg/aNLiA147DSdpIxLoLHzvQdVwjIcmWD85WahaG1Qd/5IAXAsP8a3l6xX1sAs371uXCw7SMIlGU3Q1JUfSYfrCBGoyfILZ1KZHL2zTUj73GdSt/+T4dwktZpr7Pqts=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745579672; c=relaxed/simple;
-	bh=WDl768/k2XZPf3ix/tJOCX3vVhrNeIIJfYXHENX4OgA=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=sfLAu3yO8QU//YkpktDpPDQARXikB9IVdTRSDt1boOThvoLg6iywbmF7Y8aNJWY4oMQjBbsck1JY03Qd017reO4AbSU5fEgXGzaYcwps2rxGZ+bB8Ak5xCbk07aORg5woIGYg2slYziJI8NGV/kNmauXDZB4LbndFQ2Uo1cSAMI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=PrXfrRO2; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	s=arc-20240116; t=1745581331; c=relaxed/simple;
+	bh=XqWCGqFr+Qk22bk55zDX2A/iycSFun4icCcLXPqvBYc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DqIjoP1gcb1sPahnWNDCpbGNi1LNee4+f07Kg1hLdyJvcPd+ptAeZe84BLdzP7YGj5PK5WJ7DGcQLpWUBp8P3203WvLiUXBlBpd6KixcH2CG9vmwFX1MGMYkvKNvXDTDQbSxerharryEkH9iRwiEng6LEmq7BypM1E1i8+VJkp8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vs4QN92Y; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="PrXfrRO2"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:in-reply-to:references:mime-version:content-transfer-encoding;
-	 s=k1; bh=o8dZSj6KyBq+sXWqiCuImDo8ebOFxoaJEIPvwb07TS0=; b=PrXfrR
-	O2xtLZfyvIe6vPTcYRg5Dou5RftuFbip2Nc7PqEKqrTm4NJZZHhCP0MynbKELv5C
-	4h1478vP2vG7KrGHX5/p+awMxeTnd67yegwtGs0dOea5t68f1CddtjVvmFn56rUm
-	JZIQJR8c+4ak4ntivMrtVLJG4m6x0UvQG4D8kPrEDBgR76/DwCqznW7W8JWq9TpS
-	LrkO7alAa/EqccZtZMQFpsVDImunpGJCawhCGMY5FuOB82Z7qX+t7BvQsbsYFEra
-	ol375b635Zz+B/3afx0U+EAayhOQ0zKWTQmt3ar7lwuWCGbrmvxM/7XmnuYyWOkE
-	IzePCVpq7WDeeGDw==
-Received: (qmail 3801357 invoked from network); 25 Apr 2025 13:14:28 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Apr 2025 13:14:28 +0200
-X-UD-Smtp-Session: l3s3148p1@NPMGcJgzOpgujnsE
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Haibo Chen <haibo.chen@nxp.com>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>,
-	Fabio Estevam <festevam@gmail.com>,
-	Michal Simek <michal.simek@amd.com>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	Eugen Hristev <eugen.hristev@linaro.org>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Ben Dooks <ben-linux@fluff.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	Viresh Kumar <vireshk@kernel.org>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Hu Ziji <huziji@marvell.com>,
-	imx@lists.linux.dev,
-	s32@nxp.com,
-	linux-arm-kernel@lists.infradead.org,
-	linux-renesas-soc@vger.kernel.org
-Subject: [PATCH 11/11] mmc: rename mmc_retune_needed() to mmc_host_retune_needed()
-Date: Fri, 25 Apr 2025 13:14:07 +0200
-Message-ID: <20250425111414.2522-12-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.47.2
-In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
-References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vs4QN92Y"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30A3AC4CEE4;
+	Fri, 25 Apr 2025 11:42:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745581330;
+	bh=XqWCGqFr+Qk22bk55zDX2A/iycSFun4icCcLXPqvBYc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=Vs4QN92Yb0Ack/Zlqe0udjgPVzn3XkAaDdsmeLWdybquDFILqxYMJCyHeHwgsrg77
+	 mwq+ubM+CorxlRFxkMD7yzWeGJocvQT5GkOwocMhz0RJ0qCPeKHwv7e7UACNshA/44
+	 Q4ih2t4TKxI4CW49CgtSz+OLA8UNE0ySOePyjZBwNMMxnYU33zxgvPStNOxtDSSVHG
+	 6tb7X0wWEawtNc0/oE2hmXyACPLgJCjMwTFL/eeRLZNvM+TyBGDOuszSI3/fgkguBP
+	 8QF3uZWdFuBLJwsPStGVmgcp+/lpvywtYRnl3jZ2SRLfqaVRX53pYCIX3wJaIc1zRC
+	 pchpNZVJGAbcQ==
+Message-ID: <d9276f7a-67a2-4dca-ba7d-2571b8edd1de@kernel.org>
+Date: Fri, 25 Apr 2025 13:42:04 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 01/13] dt-bindings: i2c: i2c-wmt: Convert to YAML
+To: Alexey Charkov <alchark@gmail.com>, Andi Shyti <andi.shyti@kernel.org>,
+ Rob Herring <robh@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+ Thomas Gleixner <tglx@linutronix.de>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew+netdev@lunn.ch>,
+ "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
+ Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+ =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>,
+ Daniel Lezcano <daniel.lezcano@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-pwm@vger.kernel.org
+References: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
+ <20250416-wmt-updates-v1-1-f9af689cdfc2@gmail.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 fv0=
+In-Reply-To: <20250416-wmt-updates-v1-1-f9af689cdfc2@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-mmc_* functions sometimes relate to the card and sometimes to the host.
-Make it obvious by renaming this function to include 'host'.
+On 16/04/2025 10:21, Alexey Charkov wrote:
+> Rewrite the textual description for the WonderMedia I2C controller
+> as YAML schema, and switch the filename to follow the compatible
+> string.
+> 
+> The controller only supports two bus speeds (100kHz and 400kHz)
+> so restrict clock-frequency values accordingly.
+> 
+> Signed-off-by: Alexey Charkov <alchark@gmail.com>
+> ---
+>  Documentation/devicetree/bindings/i2c/i2c-wmt.txt  | 24 -----------
+>  .../devicetree/bindings/i2c/wm,wm8505-i2c.yaml     | 47 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  2 +-
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/core/core.c            | 4 ++--
- drivers/mmc/core/host.c            | 2 +-
- drivers/mmc/core/mmc_test.c        | 2 +-
- drivers/mmc/core/sdio.c            | 2 +-
- drivers/mmc/host/sdhci-acpi.c      | 4 ++--
- drivers/mmc/host/sdhci-esdhc-imx.c | 6 +++---
- drivers/mmc/host/sdhci-of-arasan.c | 2 +-
- drivers/mmc/host/sdhci-of-at91.c   | 2 +-
- drivers/mmc/host/sdhci-of-esdhc.c  | 2 +-
- drivers/mmc/host/sdhci-omap.c      | 2 +-
- drivers/mmc/host/sdhci-pci-core.c  | 6 +++---
- drivers/mmc/host/sdhci-pltfm.c     | 2 +-
- drivers/mmc/host/sdhci-pxav3.c     | 4 ++--
- drivers/mmc/host/sdhci-s3c.c       | 4 ++--
- drivers/mmc/host/sdhci-spear.c     | 2 +-
- drivers/mmc/host/sdhci-st.c        | 2 +-
- drivers/mmc/host/sdhci-xenon.c     | 2 +-
- drivers/mmc/host/sdhci.c           | 2 +-
- drivers/mmc/host/sdhci_am654.c     | 2 +-
- drivers/mmc/host/tmio_mmc_core.c   | 4 ++--
- include/linux/mmc/host.h           | 2 +-
- 21 files changed, 30 insertions(+), 30 deletions(-)
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 960d7f4a3503..c770a2835f23 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -146,7 +146,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
- 	    (mrq->stop && mrq->stop->error == -EILSEQ)))
--		mmc_retune_needed(host);
-+		mmc_host_retune_needed(host);
- 
- 	if (err && cmd->retries && mmc_host_is_spi(host)) {
- 		if (cmd->resp[0] & R1_SPI_ILLEGAL_COMMAND)
-@@ -493,7 +493,7 @@ void mmc_cqe_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	/* Flag re-tuning needed on CRC errors */
- 	if ((mrq->cmd && mrq->cmd->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ))
--		mmc_retune_needed(host);
-+		mmc_host_retune_needed(host);
- 
- 	trace_mmc_request_done(host, mrq);
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 651c62ea0848..c9c67716d665 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -214,7 +214,7 @@ static void mmc_retune_timer(struct timer_list *t)
- {
- 	struct mmc_host *host = from_timer(host, t, retune_timer);
- 
--	mmc_retune_needed(host);
-+	mmc_host_retune_needed(host);
- }
- 
- static void mmc_of_parse_timing_phase(struct device *dev, const char *prop,
-diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-index 503e4b2a7424..0293f2b7a9c8 100644
---- a/drivers/mmc/core/mmc_test.c
-+++ b/drivers/mmc/core/mmc_test.c
-@@ -1930,7 +1930,7 @@ static int mmc_test_rnd_perf(struct mmc_test_card *test, int write, int print,
- 		dev_addr = rnd_addr + test->card->pref_erase * ea +
- 			   ssz * mmc_test_rnd_num(range2);
- 		if (force_retuning)
--			mmc_retune_needed(test->card->host);
-+			mmc_host_retune_needed(test->card->host);
- 		ret = mmc_test_area_io(test, sz, dev_addr, write, 0, 0);
- 		if (ret)
- 			return ret;
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 3fa1bae6845c..bd2104e0f13c 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -1056,7 +1056,7 @@ static int mmc_sdio_suspend(struct mmc_host *host)
- 		mmc_power_off(host);
- 	} else if (host->retune_period) {
- 		mmc_retune_timer_stop(host);
--		mmc_retune_needed(host);
-+		mmc_host_retune_needed(host);
- 	}
- 
- 	mmc_release_host(host);
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index e6c5c82f64fa..630868203f9e 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -1001,7 +1001,7 @@ static int sdhci_acpi_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
-@@ -1031,7 +1031,7 @@ static int sdhci_acpi_runtime_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = sdhci_runtime_suspend_host(host);
- 	if (ret)
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b977d37e2684..2d78d7676967 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -2016,11 +2016,11 @@ static int sdhci_esdhc_suspend(struct device *dev)
- 	if ((imx_data->socdata->flags & ESDHC_FLAG_STATE_LOST_IN_LPMODE) &&
- 		(host->tuning_mode != SDHCI_TUNING_MODE_1)) {
- 		mmc_retune_timer_stop(host->mmc);
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 	}
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	/*
- 	 * For the device need to keep power during system PM, need
-@@ -2099,7 +2099,7 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
- 		return ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	imx_data->actual_clock = host->mmc->actual_clock;
- 	esdhc_pltfm_set_clock(host, 0);
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 8c29676ab662..979f19fd95f4 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -598,7 +598,7 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	if (sdhci_arasan->has_cqe) {
- 		ret = cqhci_suspend(host->mmc);
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 97988ed37467..8b36cdc6cf81 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -256,7 +256,7 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
- 	ret = sdhci_runtime_suspend_host(host);
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	clk_disable_unprepare(priv->gck);
- 	clk_disable_unprepare(priv->hclock);
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 002d0d59b992..829491c59d09 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -1243,7 +1243,7 @@ static int esdhc_of_suspend(struct device *dev)
- 	esdhc_proctl = sdhci_readl(host, SDHCI_HOST_CONTROL);
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	return sdhci_suspend_host(host);
- }
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 8897839ab2aa..98111e4253ec 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -1440,7 +1440,7 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
- 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	if (omap_host->con != -EINVAL)
- 		sdhci_runtime_suspend_host(host);
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 13a84b9309e0..b4b355f41bfa 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -86,7 +86,7 @@ static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
- 		host = slot->host;
- 
- 		if (chip->pm_retune && host->tuning_mode != SDHCI_TUNING_MODE_3)
--			mmc_retune_needed(host->mmc);
-+			mmc_host_retune_needed(host->mmc);
- 
- 		ret = sdhci_suspend_host(host);
- 		if (ret)
-@@ -167,7 +167,7 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
- 
- 		if (chip->rpm_retune &&
- 		    host->tuning_mode != SDHCI_TUNING_MODE_3)
--			mmc_retune_needed(host->mmc);
-+			mmc_host_retune_needed(host->mmc);
- 	}
- 
- 	return 0;
-@@ -1035,7 +1035,7 @@ static void glk_rpm_retune_wa(struct sdhci_pci_chip *chip, bool susp)
- 
- 	intel_host->rpm_retune_ok = true;
- 	chip->rpm_retune = true;
--	mmc_retune_needed(host->mmc);
-+	mmc_host_retune_needed(host->mmc);
- 	pr_info("%s: Requiring re-tune after rpm resume", mmc_hostname(host->mmc));
- }
- 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 62753d72198a..845f700dd454 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -193,7 +193,7 @@ int sdhci_pltfm_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 3fb56face3d8..ab83a39feed0 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -497,7 +497,7 @@ static int sdhci_pxav3_suspend(struct device *dev)
- 
- 	pm_runtime_get_sync(dev);
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 	ret = sdhci_suspend_host(host);
- 	pm_runtime_mark_last_busy(dev);
- 	pm_runtime_put_autosuspend(dev);
-@@ -532,7 +532,7 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
- 		return ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	clk_disable_unprepare(pxa->clk_io);
- 	if (!IS_ERR(pxa->clk_core))
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index bdf4dc0d6b77..a9524a0d7adc 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -695,7 +695,7 @@ static int sdhci_s3c_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	return sdhci_suspend_host(host);
- }
-@@ -719,7 +719,7 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
- 	ret = sdhci_runtime_suspend_host(host);
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	if (ourhost->cur_clk >= 0)
- 		clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index 770dc12b9ae9..c192c7d284b8 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -141,7 +141,7 @@ static int sdhci_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = sdhci_suspend_host(host);
- 	if (!ret)
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 4973e08a98f8..bfeb680d4be9 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -456,7 +456,7 @@ static int sdhci_st_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index 098f0ea45cbe..48b00b82d361 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -655,7 +655,7 @@ static int xenon_runtime_suspend(struct device *dev)
- 		return ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 	/*
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fd5681d1e31f..fa1924657ed6 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3635,7 +3635,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 				mmc_hostname(host->mmc));
- 
- 		if (intmask & SDHCI_INT_RETUNE)
--			mmc_retune_needed(host->mmc);
-+			mmc_host_retune_needed(host->mmc);
- 
- 		if ((intmask & SDHCI_INT_CARD_INT) &&
- 		    (host->ier & SDHCI_INT_CARD_INT)) {
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index f75c31815ab0..ffd40733d71c 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -1043,7 +1043,7 @@ static int sdhci_am654_runtime_suspend(struct device *dev)
- 	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	ret = cqhci_suspend(host->mmc);
- 	if (ret)
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index b71241f55df5..a2b35c1c8b62 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -224,7 +224,7 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
- 	}
- 
- 	if (host->mmc->card)
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- }
- 
- static void tmio_mmc_reset_work(struct work_struct *work)
-@@ -852,7 +852,7 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 
- 	/* Error means retune, but executed command was still successful */
- 	if (host->check_retune && host->check_retune(host, mrq))
--		mmc_retune_needed(host->mmc);
-+		mmc_host_retune_needed(host->mmc);
- 
- 	/* If SET_BLOCK_COUNT, continue with main command */
- 	if (host->mrq && !mrq->cmd->error) {
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 68f09a955a90..e49a3f502ecf 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -699,7 +699,7 @@ static inline bool mmc_card_uhs2(struct mmc_host *host)
- 
- void mmc_retune_timer_stop(struct mmc_host *host);
- 
--static inline void mmc_retune_needed(struct mmc_host *host)
-+static inline void mmc_host_retune_needed(struct mmc_host *host)
- {
- 	if (host->can_retune)
- 		host->need_retune = 1;
--- 
-2.47.2
-
+Best regards,
+Krzysztof
