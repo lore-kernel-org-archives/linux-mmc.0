@@ -1,41 +1,41 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 86E81242D94
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:24 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD730242D62
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:25 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745579667; cv=none; b=mxJ+/o82RPmjPbi7CNKAIngRXAzg1l4nVRk8mMINT/i+T/t9X7vlxPpw8ff4FQNqM1aX+f3kfTxPdinrwohuA3U4p5kKt2wFl2I0B+nIrIPKO3Yfy8qwZfK+naTbivLdoKfHo6+Lzpc79bf+XzMEvlZ5mss/ovPEACCwcttf28E=
+	t=1745579668; cv=none; b=FzZxkGavYCu19y3K50QgxE6360habXsHV51Jtx+nMdmvGyw3i/EZgWvlmbrmLGpFDcf+LkmK0NUDGOf09gsZ/rdBDbiZUAIeLwiadllYZZq/uiRLfgbFRA1S2cSWVMCq/FTY91ZEl2q1ibKsrNxyfR4RqaF323XzpeWlK148WzA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745579667; c=relaxed/simple;
-	bh=skAAao0twSQMDv8UagWZqdlByqTEeRtAliVHhVHTyIo=;
+	s=arc-20240116; t=1745579668; c=relaxed/simple;
+	bh=mmR0W1vXVi+xNHYLsvHs5YMSU7hYdanuaBY4YfkaZkQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=fDFwLZoYwm7+9oTQo1rMSSj/RMIsM2kxoaxVChQ5zCOBjnvJI3e7FyhGRI17TAxDqRkkViXmopBG/pdUp4kKkW+6TUMFd5FnwUagyRGEsrbJ05IRocTlWnU31ftRUH/i1FLnk1WFjCa8hCUYZxpWB1/4X8yj4QQuxgxCAjo1ADk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=h9Er39cD; arc=none smtp.client-ip=194.117.254.33
+	 MIME-Version; b=B8cf8nlvBkMk9voMGsg5A3yKVNfwmQiy37Gp/H3aIAaHp8ufAaSdamu4h4qJGIWL6qFVBRBXgKnQN6dGy5cYIijcCJOMYRhHAiMLCLWrMcfx32nTa66MMZr5Ep0woZenxtHXMjhmf4n585p8EdKOQ2riIk73zl9xnu3IVkwKsIg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=AzxL5Ffu; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="h9Er39cD"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="AzxL5Ffu"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=from:to:cc:subject:date:message-id
 	:in-reply-to:references:mime-version:content-transfer-encoding;
-	 s=k1; bh=8LnXtDCmxsVfPQ183EGlLMrJB92qetzGxF8LFfq6maw=; b=h9Er39
-	cDO+ICS6YhT9Zmxg1TnLgxjmooYOxLpIUBR1KLhh/EghP6Myka8qsnd2+UCEajow
-	Mx7WD2v+It4zLJXRJ63r8jKkNdDfKaK8tQYL0mtTM4gLshLApGUGwjOL4h9mPsuJ
-	iojeTi3BI4i1zdBI+m6oW8e6bxmt5LHo858Y62cQ6+AWQW+/RXPfECsjfiW+Td1j
-	wqSE2s3Cxq0sDi98hYNYRqpnNvISHu9yoycGKvlrjhinHaCebWHvWbXCLYSn3LT0
-	xbuNgdKjcnei4f0sWnP7HWFmPa8pkWEueO+1D5dXR1a4Xpk/b8iSNJYb08fZZMUy
-	jt+pU/+v79PuOi2w==
-Received: (qmail 3801263 invoked from network); 25 Apr 2025 13:14:23 +0200
+	 s=k1; bh=yehkrVqIYA1VSv84XKK+aGBzTLQQRKHS7yLajE9th+8=; b=AzxL5F
+	fumta4+uJ/hItuCFYfMNdb8lOjEwFa0i+mkhFNkaUzK7Z2b54+VndBfq/wR++gjz
+	4SddQk96rmrShRpRZojkBk7cQwzJyqZsNQK5ocRZm5xGTzFDepuAomxz8NMn/Fkj
+	ja7FW/H84gvs0qLNCMXjgyUe70F3ATmgKx8SABbopEieR5tn9clq2V5B1ZkZ/q9s
+	37IqFb7AX9CHPX8x9UubKyMHa+cDWQeeuxDG7yu80NK6uiXY87fzex0E1eo1r3kE
+	HCBEZ9/ZvbcNbIDLZL63XMHJxA2RJ5f5pVu1nqRG3E2kdYbe8bP6gPMswlkk5wOz
+	1CazO2kRqZAZ5uLQ==
+Received: (qmail 3801284 invoked from network); 25 Apr 2025 13:14:23 +0200
 Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Apr 2025 13:14:23 +0200
-X-UD-Smtp-Session: l3s3148p1@gM28b5gzHJgujnsE
+X-UD-Smtp-Session: l3s3148p1@YATJb5gzHpgujnsE
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 07/11] mmc: rename mmc_retune_unpause() to mmc_host_retune_unpause()
-Date: Fri, 25 Apr 2025 13:14:03 +0200
-Message-ID: <20250425111414.2522-8-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 08/11] mmc: rename mmc_retune_clear() to mmc_host_retune_clear()
+Date: Fri, 25 Apr 2025 13:14:04 +0200
+Message-ID: <20250425111414.2522-9-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.47.2
 In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
 References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
@@ -52,67 +52,50 @@ Make it obvious by renaming this function to include 'host'.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/core/block.c | 2 +-
- drivers/mmc/core/host.c  | 6 +++---
- drivers/mmc/core/host.h  | 2 +-
- 3 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/core/core.c | 2 +-
+ drivers/mmc/core/host.c | 2 +-
+ drivers/mmc/core/host.h | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 69469239bea4..97181d40dfcf 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -945,7 +945,7 @@ static int mmc_blk_part_switch_post(struct mmc_card *card,
- 	int ret = 0;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 352db90785cb..81657449fee1 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -947,7 +947,7 @@ int mmc_execute_tuning(struct mmc_card *card)
  
- 	if ((part_type & mask) == rpmb) {
--		mmc_retune_unpause(card->host);
-+		mmc_host_retune_unpause(card->host);
- 		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
- 			ret = mmc_cmdq_enable(card);
+ 	err = host->ops->execute_tuning(host, opcode);
+ 	if (!err) {
+-		mmc_retune_clear(host);
++		mmc_host_retune_clear(host);
+ 		mmc_host_retune_enable(host);
+ 		return 0;
  	}
 diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index db1f2ad6e7c6..0e67b6b2ea5b 100644
+index 0e67b6b2ea5b..651c62ea0848 100644
 --- a/drivers/mmc/core/host.c
 +++ b/drivers/mmc/core/host.c
-@@ -128,14 +128,14 @@ void mmc_host_retune_pause(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_host_retune_pause);
- 
--void mmc_retune_unpause(struct mmc_host *host)
-+void mmc_host_retune_unpause(struct mmc_host *host)
- {
- 	if (host->retune_paused) {
- 		host->retune_paused = 0;
- 		mmc_host_retune_release(host);
- 	}
- }
--EXPORT_SYMBOL(mmc_retune_unpause);
-+EXPORT_SYMBOL(mmc_host_retune_unpause);
- 
- /**
-  * mmc_host_retune_disable() - exit a transfer mode that requires retuning
-@@ -145,7 +145,7 @@ EXPORT_SYMBOL(mmc_retune_unpause);
-  */
- void mmc_host_retune_disable(struct mmc_host *host)
- {
--	mmc_retune_unpause(host);
-+	mmc_host_retune_unpause(host);
+@@ -148,7 +148,7 @@ void mmc_host_retune_disable(struct mmc_host *host)
+ 	mmc_host_retune_unpause(host);
  	host->can_retune = 0;
  	timer_delete_sync(&host->retune_timer);
- 	mmc_retune_clear(host);
+-	mmc_retune_clear(host);
++	mmc_host_retune_clear(host);
+ }
+ 
+ void mmc_retune_timer_stop(struct mmc_host *host)
 diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index e7757423e0fa..7db1239c91e0 100644
+index 7db1239c91e0..cf2d05706283 100644
 --- a/drivers/mmc/core/host.h
 +++ b/drivers/mmc/core/host.h
-@@ -19,7 +19,7 @@ void mmc_host_retune_hold(struct mmc_host *host);
- void mmc_host_retune_release(struct mmc_host *host);
- int mmc_host_retune(struct mmc_host *host);
+@@ -21,7 +21,7 @@ int mmc_host_retune(struct mmc_host *host);
  void mmc_host_retune_pause(struct mmc_host *host);
--void mmc_retune_unpause(struct mmc_host *host);
-+void mmc_host_retune_unpause(struct mmc_host *host);
+ void mmc_host_retune_unpause(struct mmc_host *host);
  
- static inline void mmc_retune_clear(struct mmc_host *host)
+-static inline void mmc_retune_clear(struct mmc_host *host)
++static inline void mmc_host_retune_clear(struct mmc_host *host)
  {
+ 	host->retune_now = 0;
+ 	host->need_retune = 0;
 -- 
 2.47.2
 
