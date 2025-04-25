@@ -1,44 +1,62 @@
 Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45CB5242D89
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC50D241CB7
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745579666; cv=none; b=hYZPJai4z7buuwsVOQi78hJ51565eh6ykfge3VaFkSc6POVpYtOvrzxEMVVBhkEdUl9WhXAU+hjDqUPzn20k+LkccfaFDZK5jQ7SPNLjgetDmvdsT+ACYg1aJT35sWJKFS2CaHRj1DgTa4QrJ3fDcIKEvUvPG+VjfZgSV1WBSjI=
+	t=1745579666; cv=none; b=ZV9n7Cxa6rY0IXzUaFjBPh8lLKLqipAC71GpBmOk7HB5g/dRMxP1wsO/lO6jz5t6Q0+GX7/B72CyrGDOsdhS3a9wmq0NpXLqU9b9MJWRx7hRldwntO+KIRt3lD7/ai08zORHSDIp49Zn+1IdkF2COLwAqpJc0AZ91Mzw79VKuQ8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1745579666; c=relaxed/simple;
-	bh=tKC+vURWtCOOe+c8P12arVQ7lL19yJem2nFbdcVhmtA=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=CtreYC0hXaNJAuhNSRLw7McroK5rOqq0FtH+JCpqpinzMgLZPrlSJMUndkRxguXWc9NqazFUVl0sfsm0yHrUSZ1aY8CTbq2ZkRjLi4Hbr3FHmhegdY3w8ZOhl8EDvmZx8wlvLdq8OUPkUK+5IH3eJU9jXkE2i0jiDnrjY/0X0qc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=bxS0M1YF; arc=none smtp.client-ip=194.117.254.33
+	bh=MqSP8Z0nXc/8f7+BF/EBoJufCUw7KWFrf+2ELO3mUyk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=GNjVqUgvPtNsSMOlmpz81QQ5qmn7yPAj8jIBPS3FgGdkwm+gwCzToPWBlaJLdOvxtci9VlSv+TfQA0BugLG+mjDb/2nn9iHmptQvsSBRV3ZmAhMmJwYrCgI5wgpLgCnZwzC8/dr9ko4VvUDg7N20owXYZ+sDKIQ63f/v6Vmsqaw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=dn38agaD; arc=none smtp.client-ip=194.117.254.33
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="bxS0M1YF"
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="dn38agaD"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
 	sang-engineering.com; h=from:to:cc:subject:date:message-id
-	:in-reply-to:references:mime-version:content-transfer-encoding;
-	 s=k1; bh=Gk5tmTYAGk3brXFN9hAeEf/E6QAIGn7Y1+P44izsl8U=; b=bxS0M1
-	YFNzbGdszCboSA4f4VTQgYDwF6MBzr4mceOulCV4dkJAecY7+47v/KIi7jJRAYTZ
-	+f0cTWkDCTmmOGSPxfjo5N/8TXSTL7VMGrvugUP3qVGJA5seyUHWHXn/XaChA5rm
-	8Ic387Zw5bk2QeuS7mYPTbnfw1sFWekM44MoORK0fKEPbh9CXX1V686ix0NI6Tcu
-	1iU5XJqEr8TWCvKKjcRb0S2liBXwJJORFZZT3kyvh+pWx0JtTEzLlgUjz1wP9g4m
-	bX7L9n0Jd4t1EBaiHviO1aRtx/q5qd5KIUfyUFv+7bEEa0UqdKKnJS+g81HLrMSf
-	VJZHJIXvY2Y5GygQ==
-Received: (qmail 3801161 invoked from network); 25 Apr 2025 13:14:19 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Apr 2025 13:14:19 +0200
-X-UD-Smtp-Session: l3s3148p1@FCt/b5gzdoYujnsE
+	:mime-version:content-transfer-encoding; s=k1; bh=LKxsj0nnE+lfD3
+	mVQ8izaMHHIpOy8/rQMYt7k5L622s=; b=dn38agaDMahHu4LoALW9s6sNr3NP3y
+	WLGeuX1acyIIzU4uaPYGEfWxRCAtLeIaDCqUSoUGY12YZ3sCNjDax1jztVGQMjkZ
+	6ydN6OlDCkadPmJc3/1geOFYRiTlK8eOjEe7BMJpiFg9jSBUQ9U8CmqRg2y//7Ji
+	wVZF1241/DeTBOCYhbTpMBoFotbo7/flpDhuAEWTL2t/KapTjW5VKXfRQ+2ji6fy
+	eGVKnPX66jcylv3Z1FEGcPBiaHH5aOrxOyAOykzO2G5gz7xRiRs3Y4h38aoPLpv/
+	pIxsBKLWGl7pIOPb6qp2czFGeQ4UAnztCvwZMDkyDDIEGGRdJ7z9NRgw==
+Received: (qmail 3801015 invoked from network); 25 Apr 2025 13:14:16 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Apr 2025 13:14:16 +0200
+X-UD-Smtp-Session: l3s3148p1@A2dRb5gzWoYujnsE
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 03/11] mmc: rename mmc_retune_hold() to mmc_host_retune_hold()
-Date: Fri, 25 Apr 2025 13:13:59 +0200
-Message-ID: <20250425111414.2522-4-wsa+renesas@sang-engineering.com>
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Alexandre Belloni <alexandre.belloni@bootlin.com>,
+	Aubin Constans <aubin.constans@microchip.com>,
+	Ben Dooks <ben-linux@fluff.org>,
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
+	Eugen Hristev <eugen.hristev@linaro.org>,
+	Fabio Estevam <festevam@gmail.com>,
+	Haibo Chen <haibo.chen@nxp.com>,
+	Hu Ziji <huziji@marvell.com>,
+	imx@lists.linux.dev,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	linux-arm-kernel@lists.infradead.org,
+	linux-renesas-soc@vger.kernel.org,
+	Michal Simek <michal.simek@amd.com>,
+	Nicolas Ferre <nicolas.ferre@microchip.com>,
+	Patrice Chotard <patrice.chotard@foss.st.com>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	s32@nxp.com,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Shawn Guo <shawnguo@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Vignesh Raghavendra <vigneshr@ti.com>,
+	Viresh Kumar <vireshk@kernel.org>
+Subject: [PATCH 00/11] mmc: rename mmc_retune_* to mmc_host_retune_*
+Date: Fri, 25 Apr 2025 13:13:56 +0200
+Message-ID: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.47.2
-In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
-References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,119 +65,53 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-mmc_* functions sometimes relate to the card and sometimes to the host.
-Make it obvious by renaming this function to include 'host'.
+As discussed previously[1], here is the next set of MMC core function
+renaming to indicate if an action is relevant for the host or for the
+card. Local build tests went fine, buildbots were happy too.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/core/core.c    | 4 ++--
- drivers/mmc/core/host.c    | 4 ++--
- drivers/mmc/core/host.h    | 2 +-
- drivers/mmc/core/mmc.c     | 2 +-
- drivers/mmc/core/mmc_ops.c | 6 +++---
- 5 files changed, 9 insertions(+), 9 deletions(-)
+[1] https://lore.kernel.org/r/CAPDyKFpsJpLre2bO9T7gsSthsta9f3JXoXTGZbjTjWVXH47gCw@mail.gmail.com
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index faa935ba30f0..5626444ec5a2 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -340,7 +340,7 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 
- 	init_completion(&mrq->cmd_completion);
- 
--	mmc_retune_hold(host);
-+	mmc_host_retune_hold(host);
- 
- 	if (mmc_card_removed(host->card))
- 		return -ENOMEDIUM;
-@@ -1612,7 +1612,7 @@ static int mmc_do_erase(struct mmc_card *card, sector_t from,
- 	bool use_r1b_resp;
- 	int err;
- 
--	mmc_retune_hold(card->host);
-+	mmc_host_retune_hold(card->host);
- 
- 	/*
- 	 * qty is used to calculate the erase timeout which depends on how many
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index b0d261bd54b8..d4cb207dcdac 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -123,7 +123,7 @@ void mmc_retune_pause(struct mmc_host *host)
- {
- 	if (!host->retune_paused) {
- 		host->retune_paused = 1;
--		mmc_retune_hold(host);
-+		mmc_host_retune_hold(host);
- 	}
- }
- EXPORT_SYMBOL(mmc_retune_pause);
-@@ -157,7 +157,7 @@ void mmc_retune_timer_stop(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_retune_timer_stop);
- 
--void mmc_retune_hold(struct mmc_host *host)
-+void mmc_host_retune_hold(struct mmc_host *host)
- {
- 	if (!host->hold_retune)
- 		host->retune_now = 1;
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index cf3a3894c2c8..3d8c7c9039b4 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -15,7 +15,7 @@ void mmc_unregister_host_class(void);
- 
- void mmc_host_retune_enable(struct mmc_host *host);
- void mmc_host_retune_disable(struct mmc_host *host);
--void mmc_retune_hold(struct mmc_host *host);
-+void mmc_host_retune_hold(struct mmc_host *host);
- void mmc_retune_release(struct mmc_host *host);
- int mmc_retune(struct mmc_host *host);
- void mmc_retune_pause(struct mmc_host *host);
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 413af7cf3143..32e77f5194fa 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1977,7 +1977,7 @@ static int mmc_sleep(struct mmc_host *host)
- 	int err;
- 
- 	/* Re-tuning can't be done once the card is deselected */
--	mmc_retune_hold(host);
-+	mmc_host_retune_hold(host);
- 
- 	err = mmc_deselect_cards(host);
- 	if (err)
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 66283825513c..bc30fd70fd99 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -610,7 +610,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	bool use_r1b_resp;
- 	unsigned char old_timing = host->ios.timing;
- 
--	mmc_retune_hold(host);
-+	mmc_host_retune_hold(host);
- 
- 	if (!timeout_ms) {
- 		pr_warn("%s: unspecified timeout for CMD6 - use generic\n",
-@@ -989,7 +989,7 @@ void mmc_run_bkops(struct mmc_card *card)
- 	    card->ext_csd.raw_bkops_status < EXT_CSD_BKOPS_LEVEL_2)
- 		return;
- 
--	mmc_retune_hold(card->host);
-+	mmc_host_retune_hold(card->host);
- 
- 	/*
- 	 * For urgent BKOPS status, LEVEL_2 and higher, let's execute
-@@ -1056,7 +1056,7 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
- 
- 	pr_debug("%s: Sanitize in progress...\n", mmc_hostname(host));
- 
--	mmc_retune_hold(host);
-+	mmc_host_retune_hold(host);
- 
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_SANITIZE_START,
- 			   1, timeout_ms, 0, true, false, 0);
+Wolfram Sang (11):
+  mmc: rename mmc_retune_enable() to mmc_host_retune_enable()
+  mmc: rename mmc_retune_disable() to mmc_host_retune_disable()
+  mmc: rename mmc_retune_hold() to mmc_host_retune_hold()
+  mmc: rename mmc_retune_release() to mmc_host_retune_release()
+  mmc: rename mmc_retune() to mmc_host_retune()
+  mmc: rename mmc_retune_pause() to mmc_host_retune_pause()
+  mmc: rename mmc_retune_unpause() to mmc_host_retune_unpause()
+  mmc: rename mmc_retune_clear() to mmc_host_retune_clear()
+  mmc: rename mmc_retune_hold_now() to mmc_host_retune_hold_now()
+  mmc: rename mmc_retune_recheck() to mmc_host_retune_recheck()
+  mmc: rename mmc_retune_needed() to mmc_host_retune_needed()
+
+ drivers/mmc/core/block.c           | 16 +++++++-------
+ drivers/mmc/core/core.c            | 28 ++++++++++++------------
+ drivers/mmc/core/host.c            | 34 +++++++++++++++---------------
+ drivers/mmc/core/host.h            | 22 +++++++++----------
+ drivers/mmc/core/mmc.c             |  8 +++----
+ drivers/mmc/core/mmc_ops.c         | 12 +++++------
+ drivers/mmc/core/mmc_test.c        |  4 ++--
+ drivers/mmc/core/sdio.c            |  6 +++---
+ drivers/mmc/core/sdio_io.c         |  4 ++--
+ drivers/mmc/host/sdhci-acpi.c      |  4 ++--
+ drivers/mmc/host/sdhci-esdhc-imx.c |  6 +++---
+ drivers/mmc/host/sdhci-of-arasan.c |  2 +-
+ drivers/mmc/host/sdhci-of-at91.c   |  2 +-
+ drivers/mmc/host/sdhci-of-esdhc.c  |  2 +-
+ drivers/mmc/host/sdhci-omap.c      |  2 +-
+ drivers/mmc/host/sdhci-pci-core.c  |  6 +++---
+ drivers/mmc/host/sdhci-pltfm.c     |  2 +-
+ drivers/mmc/host/sdhci-pxav3.c     |  4 ++--
+ drivers/mmc/host/sdhci-s3c.c       |  4 ++--
+ drivers/mmc/host/sdhci-spear.c     |  2 +-
+ drivers/mmc/host/sdhci-st.c        |  2 +-
+ drivers/mmc/host/sdhci-xenon.c     |  2 +-
+ drivers/mmc/host/sdhci.c           |  2 +-
+ drivers/mmc/host/sdhci_am654.c     |  2 +-
+ drivers/mmc/host/tmio_mmc_core.c   |  4 ++--
+ include/linux/mmc/host.h           |  2 +-
+ 26 files changed, 92 insertions(+), 92 deletions(-)
+
 -- 
 2.47.2
 
