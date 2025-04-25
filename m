@@ -1,248 +1,121 @@
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6A33E23535F
-	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 08:38:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.140.110.172
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AC5C8244685
+	for <linux-mmc@vger.kernel.org>; Fri, 25 Apr 2025 11:14:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745570292; cv=none; b=lXVbUvGRy3/oXtsf3ygRl+zWwYd6qJOxqh6zLxbFuADnXfnoZbu0E4e3XY2SVHbn4UUOb2R1rc0czLbiBN0466OjcrGt5+kZ7UKk1P4RqJ4MqjigMoQA+0Mk/KPgBsjvR4v1NtmegBM5DIQ6PXFYuYfQEKdojN/HWiPma3SOo/c=
+	t=1745579665; cv=none; b=T6drxuDHMBwxy4T85JRxRUmYGNdz0/JkTXXnZXdWAA9DCEo3X3PHGtFaX7Yt6OEnyByxi87bBJ7batryTdNjj8XeUIUUY0sCHjOA6H2uNEABxYgNxdtpGzd9yxjT2jBSP9OAYiPKwuMXAZgBcJfcnYeHLdrOXHv/s6pZ6+dTCZg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745570292; c=relaxed/simple;
-	bh=eqfJhtU47JgTZCPL4wqfGT1Xr+DMREXNxbMKQSlwrDI=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=r0/W6R+eDQw5iFj4MW3FEZZfKvMqJYQ5UCft+mdnz+S3615eYSk6qzt1p0HpM70lrU60nXNVwmRj8lCrw1cJU7RCvxTRSbKyXDEXU5qPnwd3fWZYCtwbed1+Ee+rcd20/g6rEFctGF/St80yeu+ePkUk7RgUuL1SrI6ozhxkiYI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com; spf=pass smtp.mailfrom=arm.com; arc=none smtp.client-ip=217.140.110.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arm.com
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-	by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 1B55F106F;
-	Fri, 25 Apr 2025 01:38:03 -0700 (PDT)
-Received: from [10.57.72.192] (unknown [10.57.72.192])
-	by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id AB3E63F66E;
-	Fri, 25 Apr 2025 01:38:07 -0700 (PDT)
-Message-ID: <a013b589-3288-429f-a1e7-84501afa63a5@arm.com>
-Date: Fri, 25 Apr 2025 09:38:05 +0100
+	s=arc-20240116; t=1745579665; c=relaxed/simple;
+	bh=z87LNsYZi3fNdqV6cBynWTcc70A4CLYgzMZ4KHbIYyg=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=WU2D6sdXlhqc4qcgmG8IK0m4/BaQO6/YDDMcjpHl11OUQJ9T4yN7hVDY92UTeBsNkRNKXU7ll6o5zVhQLgz+XcncWBTZ2O0Y0GDQrQXt6DZEvGF60j0OJZL98szFlVwXNfwnRbq8h+v64LP+VjMVyFG4ZfZo0pXQi6LmSD1UVok=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=OC4XCblA; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="OC4XCblA"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=from:to:cc:subject:date:message-id
+	:in-reply-to:references:mime-version:content-transfer-encoding;
+	 s=k1; bh=LK3O1YZdFpxihwZ+bfJfdOOvo+X2bYNcL70oK3S25Bw=; b=OC4XCb
+	lAjarn4ZSSAY+cQft+VyJiHK7gzEWPEL3GWb5XsL/Z4whh0jXX6dPr7U0p+EOQIU
+	UaojVpI1+RH5IjCCTPFt3Fev3IWsi9xpgVh4gW/ek+XYFsqUMnt9WZnDmrqR8xZ/
+	gCMXLK3OIKh8TRCVYsRYgNr+hQ4bvJVsSYH5LTA8fr8I6GeNrJ/gj0VJCd9Mz+jY
+	6Wecq0NhzowY0sDvRGD4XKDsDtfqGOXqt6kVlgsyVgcsHs16Pg1tnttPtYHG63hq
+	6t7Dy3/BSgNR4vcD4aC9MmuYc7O1+tRvvuT/5PN6JN2m3LSvynuwlnTjIIixppQE
+	9cf4WcvL6NvMDKdw==
+Received: (qmail 3801134 invoked from network); 25 Apr 2025 13:14:18 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Apr 2025 13:14:18 +0200
+X-UD-Smtp-Session: l3s3148p1@9eJvb5gzZoYujnsE
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH 02/11] mmc: rename mmc_retune_disable() to mmc_host_retune_disable()
+Date: Fri, 25 Apr 2025 13:13:58 +0200
+Message-ID: <20250425111414.2522-3-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.47.2
+In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
+References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: eMMC timeout reproduction. Can I send a block of data from the
- host to the card with invalid CRC?
-To: Prasad Koya <prasad@arista.com>
-Cc: Baptiste Covolato <baptiste@arista.com>,
- Sushrut Shirole <sushrut@arista.com>, linux-mmc@vger.kernel.org
-References: <CAKh1g556YvHE9eib3WJG+mBHyyr88rxYSbNUHxpFYsUHcdOoUg@mail.gmail.com>
- <fb21ad0b-b45f-4636-9d74-1e758c3b2879@arm.com>
- <CAKh1g55ErQRRsJSe6zEmp6mT6nAhEP_Br+HA8x5RvUa4B=4ERA@mail.gmail.com>
- <2343cad4-89aa-48c6-86e7-0c8847ecfe60@arm.com>
- <CAKh1g54=F286nv6zA4UTJeXfxhgNxBLata54ict99ibneBZdcQ@mail.gmail.com>
-Content-Language: en-US
-From: Christian Loehle <christian.loehle@arm.com>
-In-Reply-To: <CAKh1g54=F286nv6zA4UTJeXfxhgNxBLata54ict99ibneBZdcQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-On 4/25/25 05:59, Prasad Koya wrote:
-> Thanks Christian.
-> 
-> I tried CMD25 with a different block size (mrq->data->blksz = 514) and
-> I can see that the command was rejected with -EILSEQ (data->error =
-> -84). But the card wasn't stuck. After the command was rejected, I see
-> that the driver is sending CMD12 to signal the card the end of write.
-> I see this comment in sdhci.c. Is CMD25 called an "open-ended
-> multiblock transfer"?
+mmc_* functions sometimes relate to the card and sometimes to the host.
+Make it obvious by renaming this function to include 'host'.
 
-Yes indeed that's how that works.
-IIUC your hypothesis was "card gets stuck in busy when CMD25 data was sent
-with an invalid CRC"? That hypothesis you can now reject. (For open-ended
-CMD25 anyway, you can also try CMD23+CMD25 and CMD24 writes).
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/core/core.c | 2 +-
+ drivers/mmc/core/host.c | 4 ++--
+ drivers/mmc/core/host.h | 2 +-
+ drivers/mmc/core/mmc.c  | 2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
 
-> 
-> 1291     /*
-> 1292      * Need to send CMD12 if -
-> 1293      * a) open-ended multiblock transfer (no CMD23)
-> 1294      * b) error in multiblock transfer
-> 1295      */
-> 1296     if (data->stop &&
-> 1297         (data->error ||
-> 1298          !data->mrq->sbc)) {
-> :
-> 1308         } else {
-> 1309             /* Avoid triggering warning in sdhci_send_command() */
-> 1310             host->cmd = NULL;
-> 1311             sdhci_send_command(host, data->stop);
-> 1312         }
-> 
-> Here are my emmc traces:
-> 
->             bash-10454 [000] ....  6902.122069: mmc_request_start:
-> mmc0: start struct mmc_request[0000000001eb0468]: cmd_opcode=25
-> cmd_arg=0x3a0000 cmd_flags=0x35 cmd_retries=0 stop_opcode=12
-> stop_arg=0x0 stop_flags=0x1d stop_retries=0 sbc_opcode=0 sbc_arg=0x0
-> sbc_flags=0x0 sbc_retires=0 blocks=17 block_size=1719
-> blk_addr=15433700 data_flags=0x100 tag=0 can_retune=0 doing_retune=0
-> retune_now=0 need_retune=0 hold_retune=1 retune_period=0
->    rs:main Q:Reg-3221  [000] ..s.  6902.125240: mmc_request_done:
-> mmc0: end struct mmc_request[0000000001eb0468]: cmd_opcode=25
-> cmd_err=0 cmd_resp=0x900 0x0 0x0 0x0 cmd_retries=0 stop_opcode=12
-> stop_err=0 stop_resp=0xc00 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
-> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0
-> data_err=-84 tag=0 can_retune=0 doing_retune=0 retune_now=0
-> need_retune=0 hold_retune=1 retune_period=0
->             bash-10454 [000] ....  6902.126438: mmc_request_start:
-> mmc0: start struct mmc_request[000000001c8ae402]: cmd_opcode=13
-> cmd_arg=0x10000 cmd_flags=0x15 cmd_retries=0 stop_opcode=0
-> stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0
-> sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0
-> data_flags=0x0 tag=0 can_retune=0 doing_retune=0 retune_now=0
-> need_retune=0 hold_retune=1 retune_period=0
->             bash-10454 [000] ..s1  6902.126911: mmc_request_done:
-> mmc0: end struct mmc_request[000000001c8ae402]: cmd_opcode=13
-> cmd_err=0 cmd_resp=0x900 0x0 0x0 0x0 cmd_retries=0 stop_opcode=0
-> stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
-> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0
-> data_err=0 tag=0 can_retune=0 doing_retune=0 retune_now=0
-> need_retune=0 hold_retune=1 retune_period=0
-> 
-> For our customers, something from the host to the card gets the card
-> stuck. The status returned at that point is 0xe00. After CMD25 and
-> CMD12 that took 10s each to timeout, all subsequent commands from the
-> host fail immediately with -110 error.
-
-If the card is in busy it wont accept any new commands, so that's in
-line. The only question is why is it stuck in busy? (The spec
-mandates maximum busy times, they are sometimes violated by some card
-vendors (especially SD cards), but nothing on the order of 10s should be
-observed.)
-Have you contacted the card vendor about this? I don't see any hint
-on wrongdoing of the host here.
-
-
-> Is there any other forum where I can post such questions. I'm a newbie
-> to the driver. I'm looking at the JEDEC spec and trying to figure out
-> the implementation.
-
-Not that I'm aware of.
-
-> 
-> Thanks.
-> 
-> 
-> On Tue, Apr 22, 2025 at 2:54 PM Christian Loehle
-> <christian.loehle@arm.com> wrote:
->>
->> On 4/22/25 18:37, Prasad Koya wrote:
->>> Hi Christian
->>>
->>> Thanks for going over and replying.
->>>
->>> I couldn't find any ioctl() that changed host's block size in the 6.14
->>> tree. We are using 5.10 kernel.
->>
->> Works on any kernel since a long time.
->> You can find a caller instance in mmc-utils: mmc_cmds.c, the field is
->> called blksz, if you've already familiarized yourself with the test
->> module I'd say don't bother though.
->>
->>>
->>> I did try mmc_test module so I can modify an existing test case and
->>> make it a simple one. Hacking this module, I could call CMD16 via
->>> mmc_test_set_blksize() and set the block size to 514 (0x202). Below
->>> are the eMMC traces for this test. A CMD16, followed by CMD25 with
->>> data, stop opcode and then CMD13. The multi-block write seems to go
->>> fine.
->>
->> Sorry, misunderstanding here. I meant changing the blocksize of the
->> transfer for the host *without* letting the card know (by issuing CMD16).
->> So leave out the CMD16 part and you should achieve what you want.
->>
->>>
->>>             bash-3958  [001] .... 34861.450688: mmc_request_start:
->>> mmc0: start struct mmc_request[00000000fe878338]: cmd_opcode=16
->>> cmd_arg=0x202 cmd_flags=0x95 cmd_retries=5 stop_opcode=0 stop_arg=0x0
->>> stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0
->>> sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0
->>> can_retune=0 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1
->>> retune_period=0
->>>        in:imklog-2971  [000] ..s. 34861.450737: mmc_request_done:
->>> mmc0: end struct mmc_request[00000000fe878338]: cmd_opcode=16
->>> cmd_err=0 cmd_resp=0x20000900 0x0 0x0 0x0 cmd_retries=5 stop_opcode=0
->>> stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
->>> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0
->>> data_err=0 tag=0 can_retune=0 doing_retune=0 retune_now=0
->>> need_retune=0 hold_retune=1 retune_period=0
->>>             bash-3958  [001] .... 34861.451064: mmc_request_start:
->>> mmc0: start struct mmc_request[00000000c2f30356]: cmd_opcode=25
->>> cmd_arg=0x3a0000 cmd_flags=0x35 cmd_retries=0 stop_opcode=12
->>> stop_arg=0x0 stop_flags=0x1d stop_retries=0 sbc_opcode=0 sbc_arg=0x0
->>> sbc_flags=0x0 sbc_retires=0 blocks=128 block_size=512 blk_addr=0
->>> data_flags=0x100 tag=0 can_retune=0 doing_retune=0 retune_now=0
->>> need_retune=0 hold_retune=1 retune_period=0
->>>           <idle>-0     [000] ..s1 34861.456533: mmc_request_done:
->>> mmc0: end struct mmc_request[00000000c2f30356]: cmd_opcode=25
->>> cmd_err=0 cmd_resp=0x900 0x0 0x0 0x0 cmd_retries=0 stop_opcode=12
->>> stop_err=0 stop_resp=0xc00 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
->>> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=65536
->>> data_err=0 tag=0 can_retune=0 doing_retune=0 retune_now=0
->>> need_retune=0 hold_retune=1 retune_period=0
->>>             bash-3958  [001] .... 34861.456562: mmc_request_start:
->>> mmc0: start struct mmc_request[00000000e93d6161]: cmd_opcode=13
->>> cmd_arg=0x10000 cmd_flags=0x15 cmd_retries=0 stop_opcode=0
->>> stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0
->>> sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0
->>> data_flags=0x0 tag=0 can_retune=0 doing_retune=0 retune_now=0
->>> need_retune=0 hold_retune=1 retune_period=0
->>>    rs:main Q:Reg-2972  [000] ..s. 34861.456688: mmc_request_done:
->>> mmc0: end struct mmc_request[00000000e93d6161]: cmd_opcode=13
->>> cmd_err=0 cmd_resp=0x900 0x0 0x0 0x0 cmd_retries=0 stop_opcode=0
->>> stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0
->>> sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0
->>> data_err=0 tag=0 can_retune=0 doing_retune=0 retune_now=0
->>> need_retune=0 hold_retune=1 retune_period=0
->>>
->>> What we believe could be happening is an SEU that flips a bit in the
->>> data block after the host controller has sent the block on the DAT
->>> lines. Card should reject that after CRC mismatch. Does the card
->>> reject the command right when it sees a CRC mismatch or does it have
->>> to wait till all blocks and CMD12 is sent by the host?
->>
->> Open writes with CMD25-CMD12 indeed send all blocks until the card
->> can signal CRC error.
->>
->>>
->>> Thank you.
->>>
->>>
->>>
->>> On Wed, Apr 16, 2025 at 2:13 AM Christian Loehle
->>> <christian.loehle@arm.com> wrote:
->>>>
->>>> On 4/16/25 01:13, Prasad Koya wrote:
->>>>> Hi
->>>>>
->>>>> We use eMMC as a boot drive. At a random time, maybe a month or an
->>>>> year of uptime, we run into an issue where we see the eMMC driver
->>>>> prints this in the kernel logs and the drive no longer responds after
->>>>> that. We see this issue in the field on linux kernel 4.19.142 and
->>>>> 5.10.165. From the SDHCI register dump, it looks like CMD25 ran into a
->>>>> timeout first. After the first timeout, we see CMD12 in the second
->>>>> SDHCI register dump. Status returned by the card at that point in
->>>>> card_busy_detect() is 0xE00.
->>>>>
->>>>> I looked at the recent commits up to 6.15 and I do not see anything
->>>>> obvious that addresses issue like below.
->>>>>
->>>>> We are trying to reproduce the issue in our lab and understand the
->>>>> driver code. Is there a way I can send a block of data as part of
->>>>> CMD25 with invalid CRC?  Appreciate any pointers.
->>>>
->>>> CRC is appended by hardware, so it will always be correct.
->>>> What you can do though is change the blocksize of the transfer on the
->>>> host side (e.g. from 512 to 514 bytes) without changing it using CMD16.
->>>> The 2 bytes will be latched in as CRC by the card. Of course you won't
->>>> see the CRC ACK from the card in that case (as it clashes with the
->>>> hardware CRC signal from the host).
->>>> You can do all this using the ioctl interface in userspace btw.
->>
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b0901d3a0f67..faa935ba30f0 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -988,7 +988,7 @@ void mmc_set_initial_state(struct mmc_host *host)
+ 	if (host->cqe_on)
+ 		host->cqe_ops->cqe_off(host);
+ 
+-	mmc_retune_disable(host);
++	mmc_host_retune_disable(host);
+ 
+ 	if (mmc_host_is_spi(host))
+ 		host->ios.chip_select = MMC_CS_HIGH;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index e7bd8d415c6a..b0d261bd54b8 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -138,12 +138,12 @@ void mmc_retune_unpause(struct mmc_host *host)
+ EXPORT_SYMBOL(mmc_retune_unpause);
+ 
+ /**
+- * mmc_retune_disable() - exit a transfer mode that requires retuning
++ * mmc_host_retune_disable() - exit a transfer mode that requires retuning
+  * @host: host which should not retune anymore
+  *
+  * It is not meant for temporarily preventing retuning!
+  */
+-void mmc_retune_disable(struct mmc_host *host)
++void mmc_host_retune_disable(struct mmc_host *host)
+ {
+ 	mmc_retune_unpause(host);
+ 	host->can_retune = 0;
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 8989aa73c2a1..cf3a3894c2c8 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -14,7 +14,7 @@ int mmc_register_host_class(void);
+ void mmc_unregister_host_class(void);
+ 
+ void mmc_host_retune_enable(struct mmc_host *host);
+-void mmc_retune_disable(struct mmc_host *host);
++void mmc_host_retune_disable(struct mmc_host *host);
+ void mmc_retune_hold(struct mmc_host *host);
+ void mmc_retune_release(struct mmc_host *host);
+ int mmc_retune(struct mmc_host *host);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 621022348f33..413af7cf3143 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1238,7 +1238,7 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	mmc_set_bus_speed(card);
+ 
+ 	if (host->ops->execute_hs400_tuning) {
+-		mmc_retune_disable(host);
++		mmc_host_retune_disable(host);
+ 		err = host->ops->execute_hs400_tuning(host, card);
+ 		mmc_host_retune_enable(host);
+ 		if (err)
+-- 
+2.47.2
 
