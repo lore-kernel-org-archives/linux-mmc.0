@@ -1,33 +1,49 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CF9F2405ED;
-	Fri, 25 Apr 2025 11:42:10 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A25422586C4;
+	Fri, 25 Apr 2025 14:19:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745581331; cv=none; b=WYAfp+LMDA6C7WK7b2yWTsPtKV0fbPEwycbmsqZ6M3qMdg/aNLiA147DSdpIxLoLHzvQdVwjIcmWD85WahaG1Qd/5IAXAsP8a3l6xX1sAs371uXCw7SMIlGU3Q1JUfSYfrCBGoyfILZ1KZHL2zTUj73GdSt/+T4dwktZpr7Pqts=
+	t=1745590794; cv=none; b=tcKujb81vLm5UeX+1ilRsdI3n1fAhqV33kmT3tV8L8dLLwrEaigoMja+pz5Xb03LkrOMFeF7Pzo0H77QpgWHXYQZWpzGbdZ+6W4gAr8LjD5i3C6IHSpqmTrcG1+tAn+02K1vP7xG9bXEN14QPQYGSTcHfW3Qq5vDP+lScqkkToY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745581331; c=relaxed/simple;
-	bh=XqWCGqFr+Qk22bk55zDX2A/iycSFun4icCcLXPqvBYc=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DqIjoP1gcb1sPahnWNDCpbGNi1LNee4+f07Kg1hLdyJvcPd+ptAeZe84BLdzP7YGj5PK5WJ7DGcQLpWUBp8P3203WvLiUXBlBpd6KixcH2CG9vmwFX1MGMYkvKNvXDTDQbSxerharryEkH9iRwiEng6LEmq7BypM1E1i8+VJkp8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Vs4QN92Y; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1745590794; c=relaxed/simple;
+	bh=JQVnAF6dZO16oEBhuYTIAHl18b3ICR96jEOLGuSRRkU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=NrL48uZ9ZTPnWDKTcw9xkF1y3jWZ3mHxV+9VDmoY8AVayy10N3/ueHFbeABxuSkz+ZKBqMF5t0P1OYwJRtazl2dHwv4sB3FuEgLMyGRndYYIKajT3BOX2V/bO487Fy0SkzRM8lYY6x57IDqnxxvkhsJBow9YbRMfbMnqQVfBJDY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=CMPbCM5j; arc=none smtp.client-ip=198.47.23.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Vs4QN92Y"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 30A3AC4CEE4;
-	Fri, 25 Apr 2025 11:42:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1745581330;
-	bh=XqWCGqFr+Qk22bk55zDX2A/iycSFun4icCcLXPqvBYc=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Vs4QN92Yb0Ack/Zlqe0udjgPVzn3XkAaDdsmeLWdybquDFILqxYMJCyHeHwgsrg77
-	 mwq+ubM+CorxlRFxkMD7yzWeGJocvQT5GkOwocMhz0RJ0qCPeKHwv7e7UACNshA/44
-	 Q4ih2t4TKxI4CW49CgtSz+OLA8UNE0ySOePyjZBwNMMxnYU33zxgvPStNOxtDSSVHG
-	 6tb7X0wWEawtNc0/oE2hmXyACPLgJCjMwTFL/eeRLZNvM+TyBGDOuszSI3/fgkguBP
-	 8QF3uZWdFuBLJwsPStGVmgcp+/lpvywtYRnl3jZ2SRLfqaVRX53pYCIX3wJaIc1zRC
-	 pchpNZVJGAbcQ==
-Message-ID: <d9276f7a-67a2-4dca-ba7d-2571b8edd1de@kernel.org>
-Date: Fri, 25 Apr 2025 13:42:04 +0200
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="CMPbCM5j"
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 53PEJYF32958153
+	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Fri, 25 Apr 2025 09:19:34 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1745590774;
+	bh=K4BkpaId2cQLJVzZSSqTKt4CRWF10paVXfUx/kEGsA4=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=CMPbCM5jp4F3Yiw9uztBLruU7FwLSPkZCPZkjgPgu83Du9WlEqBsSUFSwdJRssoxx
+	 byDduY3gG7zoZlHvfRZ+X+hAjfSveFB5sYdb/Fb/61qQ4KoyUYMFjyGvNTkhGs1dB1
+	 ORfVLxKz1LC+E1C3d9M3R0gTLYVq7qklzrN7n9dc=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+	by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 53PEJYuU129550
+	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+	Fri, 25 Apr 2025 09:19:34 -0500
+Received: from DLEE100.ent.ti.com (157.170.170.30) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 25
+ Apr 2025 09:19:34 -0500
+Received: from lelvsmtp6.itg.ti.com (10.180.75.249) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Fri, 25 Apr 2025 09:19:34 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp6.itg.ti.com (8.15.2/8.15.2) with ESMTP id 53PEJXGO019327;
+	Fri, 25 Apr 2025 09:19:33 -0500
+Message-ID: <1c657cc6-7667-4a59-85d7-a6f6b29c169b@ti.com>
+Date: Fri, 25 Apr 2025 09:19:33 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,85 +51,76 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 01/13] dt-bindings: i2c: i2c-wmt: Convert to YAML
-To: Alexey Charkov <alchark@gmail.com>, Andi Shyti <andi.shyti@kernel.org>,
- Rob Herring <robh@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
- Thomas Gleixner <tglx@linutronix.de>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Andrew Lunn <andrew+netdev@lunn.ch>,
- "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
- =?UTF-8?Q?Uwe_Kleine-K=C3=B6nig?= <ukleinek@kernel.org>,
- Daniel Lezcano <daniel.lezcano@linaro.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, netdev@vger.kernel.org, linux-pwm@vger.kernel.org
-References: <20250416-wmt-updates-v1-0-f9af689cdfc2@gmail.com>
- <20250416-wmt-updates-v1-1-f9af689cdfc2@gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH RESEND v3 1/3] dt-bindings: mmc: sdhci-am654: Add
+ ti,suppress-v1p8-ena
+To: Krzysztof Kozlowski <krzk@kernel.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>, Nishanth Menon <nm@ti.com>,
+        Adrian
+ Hunter <adrian.hunter@intel.com>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof
+ Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Vignesh
+ Raghavendra <vigneshr@ti.com>,
+        Tero Kristo <kristo@kernel.org>, Josua Mayer
+	<josua@solid-run.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        Francesco Dolcini
+	<francesco@dolcini.it>,
+        Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah
+	<m-shah@ti.com>,
+        <stable@vger.kernel.org>
+References: <20250422220512.297396-1-jm@ti.com>
+ <20250422220512.297396-2-jm@ti.com>
+ <20250425-agile-imported-inchworm-6ae257@kuoka>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 fv0=
-In-Reply-To: <20250416-wmt-updates-v1-1-f9af689cdfc2@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <20250425-agile-imported-inchworm-6ae257@kuoka>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On 16/04/2025 10:21, Alexey Charkov wrote:
-> Rewrite the textual description for the WonderMedia I2C controller
-> as YAML schema, and switch the filename to follow the compatible
-> string.
+Hi Krzysztof,
+
+On 4/25/25 2:48 AM, Krzysztof Kozlowski wrote:
+> On Tue, Apr 22, 2025 at 05:05:10PM GMT, Judith Mendez wrote:
+>> Some Microcenter/Patriot SD cards and Kingston eMMC are failing init
+>> across Sitara K3 boards. Init failure is due to the sequence when
+>> V1P8_SIGNAL_ENA is set. The V1P8_SIGNAL_ENA has a timing component tied
+>> to it where if set, switch to full-cycle timing happens. The failing
+>> cards do not like change to full-cycle timing before changing bus
+>> width, so add flag to sdhci-am654 binding to suppress V1P8_SIGNAL_ENA
+>> before changing bus width. The switch to full-cycle timing should happen
+>> with HIGH_SPEED_ENA after change of bus width.
+>>
+>> Signed-off-by: Judith Mendez <jm@ti.com>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 5 +++++
+>>   1 file changed, 5 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> index 676a74695389..0f92bbf8e13b 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> @@ -201,6 +201,11 @@ properties:
+>>         and the controller is required to be forced into Test mode
+>>         to set the TESTCD bit.
+>>   
+>> +  ti,suppress-v1p8-ena:
 > 
-> The controller only supports two bus speeds (100kHz and 400kHz)
-> so restrict clock-frequency values accordingly.
+> Do not tell what the drivers should do, but tell what is the issue with
+> the hardware, e.g. some cards do not like full-cycle.... and this will
+> also hint you that it should be most likely generic, not specific to
+> this device.
 > 
-> Signed-off-by: Alexey Charkov <alchark@gmail.com>
-> ---
->  Documentation/devicetree/bindings/i2c/i2c-wmt.txt  | 24 -----------
->  .../devicetree/bindings/i2c/wm,wm8505-i2c.yaml     | 47 ++++++++++++++++++++++
->  MAINTAINERS                                        |  2 +-
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Thanks for your review, but this patch has been dropped in v4 since
+we adopted a new implementation [0] using compatible string.
 
-Best regards,
-Krzysztof
+[0] 
+https://lore.kernel.org/linux-devicetree/20250423180809.l3l6sfbwquaaazar@shrank/
+
+~ Judith
+
