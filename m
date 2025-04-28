@@ -1,104 +1,146 @@
-Received: from mail-qk1-f170.google.com (mail-qk1-f170.google.com [209.85.222.170])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 88C3D1DE4F3;
-	Sat, 26 Apr 2025 11:24:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 677F425E828
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 09:59:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745666654; cv=none; b=EMCsXlmJc1E2FXRT1XN6cQZoSMhgF2Ns5UNijJOuq4ZYGAshZYDzEsEHVpEO9qpYOIf1EViFifWtNkpL13GDielHd0m7UfkFM92ReWOcl5OSzw7Eql7ylQATZjU5ZnpXhl3uKI1dFdbsxoC8FJKimjjTSFGw+ik9jSTK1t96FMI=
+	t=1745834354; cv=none; b=fiqjBvf/daHVAYXoWA2A6Cw92w4+D84xzIREwRnEslnBvS+sB6tNa6gmoF+MdCrdivm7XpLrQfofIzBIM1zCstIFO+UkzjEG/gAMspouzWHhh/+dxp6Cy+UqHQS6lsGDoaphtM6ZKZJgFtHn+TiCdM18p6NbGME8PNYcshton44=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745666654; c=relaxed/simple;
-	bh=D56xyUsRNjS6kGwI5WFwC9fzpNAmFejvLD+smYXxh4w=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=c2KXie0zQr9Szpazl/uWyeSGTrY8uqYty7897KN2WqD7U1dzcMvg2BE2aw0FaB7Vk++EEZTxR0RcbInlBu059MIrjDI3emP33ntAMGyhS8FfXz53heMaYf0JU/xYQlXisHbsCfJ/diL2NUQAqvYhxkJ/Nu1YsRK4aMCt71oqrNQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=e7uDT957; arc=none smtp.client-ip=209.85.222.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1745834354; c=relaxed/simple;
+	bh=NnpDnaecEjaxgC/9EoeWEeuNxdMbouz16eL8rW7sxFI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=gKlKRVFUyOtgRfAq6g4qUxaqSsqZReWW18JYOpgpvmDs9mUBDKCGMIs9+8mxE7ZZp8ZxzlBlweBWePs4p430OvoTs14Q6ajOVc2MbLJRkloqzDelft4x3lXqRUM0cU5sZwOvDl0QEESt0yUfYIxrHApXuFFo81gU65N2W1D1rgA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=K2xZJeLH; arc=none smtp.client-ip=209.85.219.178
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="e7uDT957"
-Received: by mail-qk1-f170.google.com with SMTP id af79cd13be357-7c5e2fe5f17so330969485a.3;
-        Sat, 26 Apr 2025 04:24:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K2xZJeLH"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e730b8d934aso3090912276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 02:59:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1745666651; x=1746271451; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=pqnzJpyxKOv8D4bjtcYPnfE8mIr/LA4bSJZ1glU6cV8=;
-        b=e7uDT957IdMvj7RowpbWuXtZH6eGBnkIA5wpQHInNvhH+dEtcp+p7QZvv80Zdf9Zu+
-         bZVP3J/ytal60CLY2O7O6GgfyskmaENIjsoIo6xt+vYoJFIjEcALmU2lxkWD+EfnRlpJ
-         hsUEhyx5Bj5Cj+lCJka565tgMApXlMBbV7qqh8tU3l7DehGDTzfxXyhh5i6kuKyVMwVU
-         p+js1tkbaRxQV/rR5NW0gKY1UWsDU0V43Lr6eIbWPZUj3qhdAWyzZGrq9x5wFenLW19B
-         L+dLNa5h2u8WPFfoQoGwh4dSsIJf1dqUDOMe4dFkflpXktcoWs6MocQ/7oqtPYfFK0tC
-         2h3g==
+        d=linaro.org; s=google; t=1745834350; x=1746439150; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=ZgHog5j3bHubplZHipHB2WxTh+7XYb3lCIW6vc6Lfpk=;
+        b=K2xZJeLHgVf3Sd5eVouWDptnISu9bfHgNEp+GAMvTwnSj+YITypzptgv5Bubi6Ja/X
+         3tE/WrPX/C39HvzmAoKVo5d/517GkISPG3yzH/qPs+sfjg8uVbEQFXFpTOof3OaZ5Lw2
+         Dore7O4wOIDq57p8aRvtivif2D1kvFHog4t3kjHO4gKo9bVg7uoIb03KT6x3ix3+j7mI
+         Wjni7RscgwcKneQ8BJTnFB5y6PXde/TY+x6H77S2OkKf5Seb18GySoZ9p3mGwXxR0cK7
+         7jWOv8V00iMqV9STkqwZf1j6yweNdmRhbxFB7R5H/MgUg7H+pbBnIXNrK6BybKGVv1Pz
+         UAMg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745666651; x=1746271451;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pqnzJpyxKOv8D4bjtcYPnfE8mIr/LA4bSJZ1glU6cV8=;
-        b=QApXOoOPS5AZG6BVFhPCc7VJoDnyAC2mSfl7segIcN4cxgcuzdBCTX4LRyqdf5+bxc
-         x0EyXVo8o+auNFZTYyAMwG63PzmLG8M12HhW7uSNNFXNH7AWU8nUCKEPV+tKb/1l04bG
-         OwpURPkrtLFeceMluDZPL/xfX+FIoK/OHCcME7QCAtwERehFcqXxW1+yzQs3e4A0XYYC
-         n8qloNWTKZYzuj9PDinnOigf0p+k72GJW30/5c641YdnT2J4pvlA+voNbEUBJRG+iRKp
-         Kk7kqjPR0lbUewFN/+AZeZ1U4fvFWw9GwhrroF5PObzrDbLsVSaiGVSmohTvAdPgX5v+
-         i+zQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUlUznq0DrWVnDV+XsTX02NVzknSmxTENUop9MS2rq8De0hZ3qRGpn4jmOM+humEU+vXqOZeAp4mFUWlQsH@vger.kernel.org, AJvYcCUqj/SCVoIh4/f3YDmgL+4dha3XzJoyct5UofP5Vgy2supDIX8e93FZI1cL/Ecm3rNwqLnOY8BlVgfL@vger.kernel.org, AJvYcCVEbeSDFKoORc7FMpTvFHCh90UcBYTfAU1VCHW27iohQETdyfqpnQrQZqpTpstXgwhJ0tACroz+3gKB@vger.kernel.org, AJvYcCXcM676fNq03EStAySDszAUKnYlUooGRYJig0XRjDKPNa9MeyzBAcvBD3Lr6spiMcLwGH8AEF1AmSpG@vger.kernel.org
-X-Gm-Message-State: AOJu0YxfN29lvRR8T0NCwriFwzuygkNQMSC6jxqTABz9btAhkWJHzuKZ
-	84iU46l5/PBzBuRWC+IInqr0teZjc+i74/HYQphDc0DF+izMZuqb
-X-Gm-Gg: ASbGnct2C8sK+yTPT74Ds4z9nbCdzj/cqIqjIVdYlS6icdZyARyTxhG6gN3kItyJCgh
-	CaYGwWWsofB0wswszITWqW73M3hvPp0chCEql3Aw/wBYclZtYEY9BpRSxkK5M3ZoKLnMhg0vkUW
-	YvkL6ztif417EkcBy1+em87BVbSWIEPT+8+TK7TfKQ9LGitvVWGHOxUNeKYOb0i6uKLZ2pJkVlH
-	1CuxyyDNsXnBWGf1o48oDiQHSAJ30diqu0kngJ7ualrX44KmS5ed/xuWb2Zdc6aUh53i9RkOLx2
-	vG7OAAfpILiduy8W
-X-Google-Smtp-Source: AGHT+IHTJyjJW4zRKKH13NlfTIwZIg4GsuvT7hEkrKwp+YV3SS8iaJApxOfdun7TkRMs5S8LELbrRQ==
-X-Received: by 2002:a05:620a:460a:b0:7c5:562d:cd01 with SMTP id af79cd13be357-7c9606f9a48mr802679585a.16.1745666651286;
-        Sat, 26 Apr 2025 04:24:11 -0700 (PDT)
-Received: from localhost ([2001:da8:7001:11::cb])
-        by smtp.gmail.com with UTF8SMTPSA id af79cd13be357-7c958c91a10sm337284985a.22.2025.04.26.04.24.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 26 Apr 2025 04:24:10 -0700 (PDT)
-Date: Sat, 26 Apr 2025 19:23:58 +0800
-From: Inochi Amaoto <inochiama@gmail.com>
-To: Chen Wang <unicorn_wang@outlook.com>, 
-	Inochi Amaoto <inochiama@gmail.com>
-Cc: linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org, 
-	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, 
-	Longbin Li <looong.bin@gmail.com>, Jean Delvare <jdelvare@suse.com>, 
-	Guenter Roeck <linux@roeck-us.net>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Andi Shyti <andi.shyti@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
-	Paul Walmsley <paul.walmsley@sifive.com>, Samuel Holland <samuel.holland@sifive.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Daniel Lezcano <daniel.lezcano@linaro.org>, 
-	Thomas Bonnefille <thomas.bonnefille@bootlin.com>, Jarkko Nikula <jarkko.nikula@linux.intel.com>, 
-	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>
-Subject: Re: [PATCH v2 00/10] riscv: sophgo: Introduce SG2044 SRD3-10 board
- support
-Message-ID: <2feyvebloqdcxxzmywe6azmwnz7zqulh2lixhw53ciw2ldisch@n2q3duucrp2r>
-References: <20250413223507.46480-1-inochiama@gmail.com>
- <MA0P287MB22626253965E96829B7371A1FE872@MA0P287MB2262.INDP287.PROD.OUTLOOK.COM>
+        d=1e100.net; s=20230601; t=1745834350; x=1746439150;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ZgHog5j3bHubplZHipHB2WxTh+7XYb3lCIW6vc6Lfpk=;
+        b=lbgWxcofD4xpyyBsw9P+3sn67K5gdrS3coxYtBs1kQL/828qixTgCx3iH1cELdtMck
+         Wc6mj3g6WhJFRjuacdC8J0pbYZ/VFQ5+CY2q2JWxaS6H2I3pAuePwds/MEkvrV+aC1st
+         HetQ3mLqPuVX8MNNR5yuxa0mBHsoPEnrxgewoSqS3qSsAZmRMDwpPrkVLV1B+JbMwTRY
+         0GJGB7JDUvAhlfdU5VGILu1esYF6Ad9oLF9nnP+F7m/fRSF4XRhBzyS/5Sz/4foRIobl
+         Y/0QCmGBQs2pYXZj7vIUP2r2h9M6VMVmVlj+w0TUEX+OqMi+FQmHME5ZJHBxJF/Yn5T2
+         xc5A==
+X-Gm-Message-State: AOJu0Ywj6E/zGobxNKSOCYqTVcYOHw8ykoUaqZmwKSDZzy80YKUH9hmt
+	ir/DKoDYjSHQakLftVzuk2Bf5RHHbAV+pUgZZ4yCEfYogX0WvfZ0UkuloVWRSugIO/xK8hjLiL0
+	uJVg+kN0w3Q0aNozEo1z7Qziq/H5B5ICC2Ll88g==
+X-Gm-Gg: ASbGncu4evi/f6WTcKuMS/bmvwObizXnm04fplN0QKwjx3ym07Qaf3YjAagFKLkW8HJ
+	j5tdyJHjprA7RrrgwtxL2s+OcEUbGS/EWgFyHuWutw1rmBG7omZDPML0QsjpJQC5lG+TmSj1CwR
+	ydMS7GffHKpP3rRt6n80fPyO8=
+X-Google-Smtp-Source: AGHT+IGzqA988NBw7sdHyV2pa28mJrkNSc68Mx4LZTYc3yj0PJhv5acQ0zBwmMN9hv6uRI1W/EgLr/AniunkS+8k1Ek=
+X-Received: by 2002:a05:6902:2e05:b0:e6d:f157:c601 with SMTP id
+ 3f1490d57ef6-e7316aa4b6cmr12912739276.17.1745834350357; Mon, 28 Apr 2025
+ 02:59:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <MA0P287MB22626253965E96829B7371A1FE872@MA0P287MB2262.INDP287.PROD.OUTLOOK.COM>
+References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 28 Apr 2025 11:58:34 +0200
+X-Gm-Features: ATxdqUESjgj-C7jn03RVVXo_02Q8tUEdsDkHYmNdSurwgrXAz3FKSyh0hhQHxd4
+Message-ID: <CAPDyKFqxHd85DsUH6eZVyoocTDrvwNu+wTLRBq-jUwDY+2iFTg@mail.gmail.com>
+Subject: Re: [PATCH 00/11] mmc: rename mmc_retune_* to mmc_host_retune_*
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
+	Alexandre Belloni <alexandre.belloni@bootlin.com>, 
+	Aubin Constans <aubin.constans@microchip.com>, Ben Dooks <ben-linux@fluff.org>, 
+	Claudiu Beznea <claudiu.beznea@tuxon.dev>, Eugen Hristev <eugen.hristev@linaro.org>, 
+	Fabio Estevam <festevam@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Hu Ziji <huziji@marvell.com>, 
+	imx@lists.linux.dev, Jaehoon Chung <jh80.chung@samsung.com>, 
+	linux-arm-kernel@lists.infradead.org, linux-renesas-soc@vger.kernel.org, 
+	Michal Simek <michal.simek@amd.com>, Nicolas Ferre <nicolas.ferre@microchip.com>, 
+	Patrice Chotard <patrice.chotard@foss.st.com>, 
+	Pengutronix Kernel Team <kernel@pengutronix.de>, s32@nxp.com, Sascha Hauer <s.hauer@pengutronix.de>, 
+	Shawn Guo <shawnguo@kernel.org>, Vignesh Raghavendra <vigneshr@ti.com>, Viresh Kumar <vireshk@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 
-On Sat, Apr 26, 2025 at 03:36:41PM +0800, Chen Wang wrote:
-> Hi, Inochi,
-> 
-> Will you apply this patchset on sophgo/for-next? I see there are changes
-> just about dts/bindings.
-> 
-> Chen
-> 
+On Fri, 25 Apr 2025 at 13:14, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> As discussed previously[1], here is the next set of MMC core function
+> renaming to indicate if an action is relevant for the host or for the
+> card. Local build tests went fine, buildbots were happy too.
+>
+> [1] https://lore.kernel.org/r/CAPDyKFpsJpLre2bO9T7gsSthsta9f3JXoXTGZbjTjWVXH47gCw@mail.gmail.com
+>
+> Wolfram Sang (11):
+>   mmc: rename mmc_retune_enable() to mmc_host_retune_enable()
+>   mmc: rename mmc_retune_disable() to mmc_host_retune_disable()
+>   mmc: rename mmc_retune_hold() to mmc_host_retune_hold()
+>   mmc: rename mmc_retune_release() to mmc_host_retune_release()
+>   mmc: rename mmc_retune() to mmc_host_retune()
+>   mmc: rename mmc_retune_pause() to mmc_host_retune_pause()
+>   mmc: rename mmc_retune_unpause() to mmc_host_retune_unpause()
+>   mmc: rename mmc_retune_clear() to mmc_host_retune_clear()
+>   mmc: rename mmc_retune_hold_now() to mmc_host_retune_hold_now()
+>   mmc: rename mmc_retune_recheck() to mmc_host_retune_recheck()
+>   mmc: rename mmc_retune_needed() to mmc_host_retune_needed()
+>
+>  drivers/mmc/core/block.c           | 16 +++++++-------
+>  drivers/mmc/core/core.c            | 28 ++++++++++++------------
+>  drivers/mmc/core/host.c            | 34 +++++++++++++++---------------
+>  drivers/mmc/core/host.h            | 22 +++++++++----------
+>  drivers/mmc/core/mmc.c             |  8 +++----
+>  drivers/mmc/core/mmc_ops.c         | 12 +++++------
+>  drivers/mmc/core/mmc_test.c        |  4 ++--
+>  drivers/mmc/core/sdio.c            |  6 +++---
+>  drivers/mmc/core/sdio_io.c         |  4 ++--
+>  drivers/mmc/host/sdhci-acpi.c      |  4 ++--
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  6 +++---
+>  drivers/mmc/host/sdhci-of-arasan.c |  2 +-
+>  drivers/mmc/host/sdhci-of-at91.c   |  2 +-
+>  drivers/mmc/host/sdhci-of-esdhc.c  |  2 +-
+>  drivers/mmc/host/sdhci-omap.c      |  2 +-
+>  drivers/mmc/host/sdhci-pci-core.c  |  6 +++---
+>  drivers/mmc/host/sdhci-pltfm.c     |  2 +-
+>  drivers/mmc/host/sdhci-pxav3.c     |  4 ++--
+>  drivers/mmc/host/sdhci-s3c.c       |  4 ++--
+>  drivers/mmc/host/sdhci-spear.c     |  2 +-
+>  drivers/mmc/host/sdhci-st.c        |  2 +-
+>  drivers/mmc/host/sdhci-xenon.c     |  2 +-
+>  drivers/mmc/host/sdhci.c           |  2 +-
+>  drivers/mmc/host/sdhci_am654.c     |  2 +-
+>  drivers/mmc/host/tmio_mmc_core.c   |  4 ++--
+>  include/linux/mmc/host.h           |  2 +-
+>  26 files changed, 92 insertions(+), 92 deletions(-)
+>
 
-I can only take 2, 3, 4, 9, 10 for now. The left I think they
-should be take by the subsystem maintainers.
+Sorry if my suggestion was unclear. I only had the MMC_CAP|CAP2_*
+related functions in mind. I think we should leave the mmc_retune*
+functions as is as they are not "can" functions.
 
-Regards,
-Inochi
+mmc_host_cmd23, mmc_host_done_complete, mmc_boot_partition_access,
+mmc_host_uhs. All in drivers/mmc/core/host.h
+
+According to your earlier renaming series, we should rename these function too:
+mmc_host_can_cmd23, mmc_host_can_done_complete,
+mmc_host_can_boot_partition, mmc_host_can_uhs
+
+Does this make sense to you?
+
+Kind regards
+Uffe
