@@ -1,146 +1,79 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 677F425E828
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 09:59:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CC768836
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 12:34:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745834354; cv=none; b=fiqjBvf/daHVAYXoWA2A6Cw92w4+D84xzIREwRnEslnBvS+sB6tNa6gmoF+MdCrdivm7XpLrQfofIzBIM1zCstIFO+UkzjEG/gAMspouzWHhh/+dxp6Cy+UqHQS6lsGDoaphtM6ZKZJgFtHn+TiCdM18p6NbGME8PNYcshton44=
+	t=1745843691; cv=none; b=OfyV0TBG+6mI6geZZXy/XxCkabdHmYu6ntHizTgkk2FlF8D+Dlxa1j9Mu4PGGaC6mDFug+J0/aQwpqKLJjIMWkBiz1ktYTBUT+gkrnuutqOkXE9eV2V0MpLWCqWWa6sJVhLtw7unPjTWVLVax5z49czzwUkE/uPdyOTBtPORqS4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745834354; c=relaxed/simple;
-	bh=NnpDnaecEjaxgC/9EoeWEeuNxdMbouz16eL8rW7sxFI=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=gKlKRVFUyOtgRfAq6g4qUxaqSsqZReWW18JYOpgpvmDs9mUBDKCGMIs9+8mxE7ZZp8ZxzlBlweBWePs4p430OvoTs14Q6ajOVc2MbLJRkloqzDelft4x3lXqRUM0cU5sZwOvDl0QEESt0yUfYIxrHApXuFFo81gU65N2W1D1rgA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=K2xZJeLH; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1745843691; c=relaxed/simple;
+	bh=j6U6vsHpRSnRETRgTvNlHJmExKFzWrBH1r/Ekel6Wxw=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Krto6rkHFookmetGE2Pyp2klVt0e+UD9uqARDh4wWYlFaR5GQTa5DBirOrmYnHY1HdBVIMkm14kqNtaZPHXoTkkyz7XKg1FDgC5kLNFIW/LmjNpLXhOOEU2JWT85gVsurjJukNJUsMLfZywDPYqJIK/Deyn9qnwEWSRDJDyeWJs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=SBtGzYWP; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K2xZJeLH"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e730b8d934aso3090912276.2
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 02:59:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745834350; x=1746439150; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZgHog5j3bHubplZHipHB2WxTh+7XYb3lCIW6vc6Lfpk=;
-        b=K2xZJeLHgVf3Sd5eVouWDptnISu9bfHgNEp+GAMvTwnSj+YITypzptgv5Bubi6Ja/X
-         3tE/WrPX/C39HvzmAoKVo5d/517GkISPG3yzH/qPs+sfjg8uVbEQFXFpTOof3OaZ5Lw2
-         Dore7O4wOIDq57p8aRvtivif2D1kvFHog4t3kjHO4gKo9bVg7uoIb03KT6x3ix3+j7mI
-         Wjni7RscgwcKneQ8BJTnFB5y6PXde/TY+x6H77S2OkKf5Seb18GySoZ9p3mGwXxR0cK7
-         7jWOv8V00iMqV9STkqwZf1j6yweNdmRhbxFB7R5H/MgUg7H+pbBnIXNrK6BybKGVv1Pz
-         UAMg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745834350; x=1746439150;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZgHog5j3bHubplZHipHB2WxTh+7XYb3lCIW6vc6Lfpk=;
-        b=lbgWxcofD4xpyyBsw9P+3sn67K5gdrS3coxYtBs1kQL/828qixTgCx3iH1cELdtMck
-         Wc6mj3g6WhJFRjuacdC8J0pbYZ/VFQ5+CY2q2JWxaS6H2I3pAuePwds/MEkvrV+aC1st
-         HetQ3mLqPuVX8MNNR5yuxa0mBHsoPEnrxgewoSqS3qSsAZmRMDwpPrkVLV1B+JbMwTRY
-         0GJGB7JDUvAhlfdU5VGILu1esYF6Ad9oLF9nnP+F7m/fRSF4XRhBzyS/5Sz/4foRIobl
-         Y/0QCmGBQs2pYXZj7vIUP2r2h9M6VMVmVlj+w0TUEX+OqMi+FQmHME5ZJHBxJF/Yn5T2
-         xc5A==
-X-Gm-Message-State: AOJu0Ywj6E/zGobxNKSOCYqTVcYOHw8ykoUaqZmwKSDZzy80YKUH9hmt
-	ir/DKoDYjSHQakLftVzuk2Bf5RHHbAV+pUgZZ4yCEfYogX0WvfZ0UkuloVWRSugIO/xK8hjLiL0
-	uJVg+kN0w3Q0aNozEo1z7Qziq/H5B5ICC2Ll88g==
-X-Gm-Gg: ASbGncu4evi/f6WTcKuMS/bmvwObizXnm04fplN0QKwjx3ym07Qaf3YjAagFKLkW8HJ
-	j5tdyJHjprA7RrrgwtxL2s+OcEUbGS/EWgFyHuWutw1rmBG7omZDPML0QsjpJQC5lG+TmSj1CwR
-	ydMS7GffHKpP3rRt6n80fPyO8=
-X-Google-Smtp-Source: AGHT+IGzqA988NBw7sdHyV2pa28mJrkNSc68Mx4LZTYc3yj0PJhv5acQ0zBwmMN9hv6uRI1W/EgLr/AniunkS+8k1Ek=
-X-Received: by 2002:a05:6902:2e05:b0:e6d:f157:c601 with SMTP id
- 3f1490d57ef6-e7316aa4b6cmr12912739276.17.1745834350357; Mon, 28 Apr 2025
- 02:59:10 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="SBtGzYWP"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1745843690; x=1777379690;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=j6U6vsHpRSnRETRgTvNlHJmExKFzWrBH1r/Ekel6Wxw=;
+  b=SBtGzYWPhxScvofLawDvrnCysFAm7uWq+A1Z6ViHrMwL++AcqRLPM4H+
+   y/uK8eMtrR5V2bPoc/Uhf5XPloCDqZWmpY+1bfxeg+LZi332vvRft02Rp
+   OAqTFXsY5sm3nCRr4AKNrU0VJW0LQFZf6519qutx+4HkD7piDf56ik3/y
+   hHo7D7/3TjKWCDgmujIgaNbgdSlmw6UkpDs72xZpu6t8W+6/56UoozVsr
+   WDHwadrgCk/zvobGAdq7a8W4e5+H96HXdiGfYJ9UvfjTI4+2pHzDYlRlV
+   pWT4TgEIfYQBHMOVwCMCumw0iY0vGwWz73v6KJNzQHjTTfdZYFHe3Zsi5
+   w==;
+X-CSE-ConnectionGUID: b30uymjjTCuxveaOW2QPqQ==
+X-CSE-MsgGUID: YZNo5ScmTxm3Vyvsn0dKwg==
+X-IronPort-AV: E=Sophos;i="6.15,246,1739808000"; 
+   d="scan'208";a="79597944"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 28 Apr 2025 20:34:44 +0800
+IronPort-SDR: 680f67c3_D1o/nJcn9EP/n+1OQE4x2OPDkOEetheExn7N/gFUjbmBMTT
+ FqOs2CeaZtZzCc9QRN9P74fSTJnSn+jZC5l4sig==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Apr 2025 04:34:27 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Apr 2025 05:34:43 -0700
+From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH 0/4]  mmc-utils: Reuse the 'help' section for command usage handling
+Date: Mon, 28 Apr 2025 15:29:47 +0300
+Message-Id: <20250428122951.317055-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 28 Apr 2025 11:58:34 +0200
-X-Gm-Features: ATxdqUESjgj-C7jn03RVVXo_02Q8tUEdsDkHYmNdSurwgrXAz3FKSyh0hhQHxd4
-Message-ID: <CAPDyKFqxHd85DsUH6eZVyoocTDrvwNu+wTLRBq-jUwDY+2iFTg@mail.gmail.com>
-Subject: Re: [PATCH 00/11] mmc: rename mmc_retune_* to mmc_host_retune_*
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, 
-	Alexandre Belloni <alexandre.belloni@bootlin.com>, 
-	Aubin Constans <aubin.constans@microchip.com>, Ben Dooks <ben-linux@fluff.org>, 
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>, Eugen Hristev <eugen.hristev@linaro.org>, 
-	Fabio Estevam <festevam@gmail.com>, Haibo Chen <haibo.chen@nxp.com>, Hu Ziji <huziji@marvell.com>, 
-	imx@lists.linux.dev, Jaehoon Chung <jh80.chung@samsung.com>, 
-	linux-arm-kernel@lists.infradead.org, linux-renesas-soc@vger.kernel.org, 
-	Michal Simek <michal.simek@amd.com>, Nicolas Ferre <nicolas.ferre@microchip.com>, 
-	Patrice Chotard <patrice.chotard@foss.st.com>, 
-	Pengutronix Kernel Team <kernel@pengutronix.de>, s32@nxp.com, Sascha Hauer <s.hauer@pengutronix.de>, 
-	Shawn Guo <shawnguo@kernel.org>, Vignesh Raghavendra <vigneshr@ti.com>, Viresh Kumar <vireshk@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 25 Apr 2025 at 13:14, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> As discussed previously[1], here is the next set of MMC core function
-> renaming to indicate if an action is relevant for the host or for the
-> card. Local build tests went fine, buildbots were happy too.
->
-> [1] https://lore.kernel.org/r/CAPDyKFpsJpLre2bO9T7gsSthsta9f3JXoXTGZbjTjWVXH47gCw@mail.gmail.com
->
-> Wolfram Sang (11):
->   mmc: rename mmc_retune_enable() to mmc_host_retune_enable()
->   mmc: rename mmc_retune_disable() to mmc_host_retune_disable()
->   mmc: rename mmc_retune_hold() to mmc_host_retune_hold()
->   mmc: rename mmc_retune_release() to mmc_host_retune_release()
->   mmc: rename mmc_retune() to mmc_host_retune()
->   mmc: rename mmc_retune_pause() to mmc_host_retune_pause()
->   mmc: rename mmc_retune_unpause() to mmc_host_retune_unpause()
->   mmc: rename mmc_retune_clear() to mmc_host_retune_clear()
->   mmc: rename mmc_retune_hold_now() to mmc_host_retune_hold_now()
->   mmc: rename mmc_retune_recheck() to mmc_host_retune_recheck()
->   mmc: rename mmc_retune_needed() to mmc_host_retune_needed()
->
->  drivers/mmc/core/block.c           | 16 +++++++-------
->  drivers/mmc/core/core.c            | 28 ++++++++++++------------
->  drivers/mmc/core/host.c            | 34 +++++++++++++++---------------
->  drivers/mmc/core/host.h            | 22 +++++++++----------
->  drivers/mmc/core/mmc.c             |  8 +++----
->  drivers/mmc/core/mmc_ops.c         | 12 +++++------
->  drivers/mmc/core/mmc_test.c        |  4 ++--
->  drivers/mmc/core/sdio.c            |  6 +++---
->  drivers/mmc/core/sdio_io.c         |  4 ++--
->  drivers/mmc/host/sdhci-acpi.c      |  4 ++--
->  drivers/mmc/host/sdhci-esdhc-imx.c |  6 +++---
->  drivers/mmc/host/sdhci-of-arasan.c |  2 +-
->  drivers/mmc/host/sdhci-of-at91.c   |  2 +-
->  drivers/mmc/host/sdhci-of-esdhc.c  |  2 +-
->  drivers/mmc/host/sdhci-omap.c      |  2 +-
->  drivers/mmc/host/sdhci-pci-core.c  |  6 +++---
->  drivers/mmc/host/sdhci-pltfm.c     |  2 +-
->  drivers/mmc/host/sdhci-pxav3.c     |  4 ++--
->  drivers/mmc/host/sdhci-s3c.c       |  4 ++--
->  drivers/mmc/host/sdhci-spear.c     |  2 +-
->  drivers/mmc/host/sdhci-st.c        |  2 +-
->  drivers/mmc/host/sdhci-xenon.c     |  2 +-
->  drivers/mmc/host/sdhci.c           |  2 +-
->  drivers/mmc/host/sdhci_am654.c     |  2 +-
->  drivers/mmc/host/tmio_mmc_core.c   |  4 ++--
->  include/linux/mmc/host.h           |  2 +-
->  26 files changed, 92 insertions(+), 92 deletions(-)
->
+There is this custom in mmc-utils that has existed since time
+immemorial, to add a 'usage' print for each command, should it has been
+called with invalid arguments etc. Nonetheless, the `help` field of the
+`struct Command` exist for each command and is much more informative.
+Let's use it instead of all those per-command usage prints.
 
-Sorry if my suggestion was unclear. I only had the MMC_CAP|CAP2_*
-related functions in mind. I think we should leave the mmc_retune*
-functions as is as they are not "can" functions.
+Avri Altman (4):
+  mmc-utils: Remove unused adv_help member from struct Command
+  mmc-utils: Simplify and streamline print_help function
+  mmc-utils: Introduce a generic print_usage function
+  mmc-utils: Start to use the generic print_usage function
 
-mmc_host_cmd23, mmc_host_done_complete, mmc_boot_partition_access,
-mmc_host_uhs. All in drivers/mmc/core/host.h
+ mmc.c      |  98 ++++++++++---------------------------
+ mmc_cmds.c | 139 ++++++++++++++++++++++++++++++-----------------------
+ mmc_cmds.h |   4 ++
+ 3 files changed, 110 insertions(+), 131 deletions(-)
 
-According to your earlier renaming series, we should rename these function too:
-mmc_host_can_cmd23, mmc_host_can_done_complete,
-mmc_host_can_boot_partition, mmc_host_can_uhs
+-- 
+2.25.1
 
-Does this make sense to you?
-
-Kind regards
-Uffe
