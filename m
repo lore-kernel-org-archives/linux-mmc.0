@@ -1,482 +1,335 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com [209.85.128.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4DDD28836
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 12:35:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B2C827978F
+	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 15:10:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745843720; cv=none; b=E3VIVyX62PilGtu1DAnUa/wivgOn/AbQcgnl1WUcGB93W0oE3E3pHvLth8K6nkjMKtAqzmD41IaTwvjtf7ILvG8auCaG9cqK9J0kG1Y20eKRRdqNhxGz0y+DO576g0c+68zc2hJfPIfDwB6lFP5Pw0FeI+prxMPIZDRCp3YY2eU=
+	t=1745853021; cv=none; b=RabW1wmyo/oLmyQfxm20GF/mtYgBDqzyLMQML99sGSHfGsLIhbcpI/SE1Z7IFpClGAZ6CyC18VrzhzSWHPHOwmQODmK2TLhqwI2Q2zc4r4vqiSVv2QJ/N5+BTUyjEUvK2oMsVNyA9XTtEu3D7EGLus3cntN/t5s2z/JTRJjYdg8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745843720; c=relaxed/simple;
-	bh=fX7jYAJiDs3sjpg/B05kS4Hml9lwjJhnEZyqN+v7KRE=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=fBu0IhY9kWOzs2skBwTjuCEIE65kyzy9XOiSe+Qbk9M1MBXknqfcA7m7NgWRR8IuQGhzGyY1N0XJeXwjf998D2HBPLAVX3GbwLbAmiBMuDh/HyHUi57Lp7z7FlkJ50ZDH7spJmshmM5R2AP+V/LTJ4y6mOonjfgvhzMsLQsZUbU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=XritAvZh; arc=none smtp.client-ip=216.71.154.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
+	s=arc-20240116; t=1745853021; c=relaxed/simple;
+	bh=IqV5Nxk5VM45Sr0DmwdfE+y8FFviNPWnkCDiR3cFvyU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=DOaUvmgQYGtEdfganlYnA2o0gSZZKRu9Uf3XgM0d4diFQdJfCIZB71Oo9BZbE1+QcdFpN+BIUN2zyRJoIFKUIc8rHmO/l8Ld0oAq4gs0pnSfeQiO+QGDvhj0AH7IBOmCYUSuh1L2JhKLDgyc4Pk0hyeIxWL5JDqZQjNT6QGPJr8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=V7uGju3i; arc=none smtp.client-ip=209.85.128.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="XritAvZh"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkim.sandisk.com; t=1745843718; x=1777379718;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=fX7jYAJiDs3sjpg/B05kS4Hml9lwjJhnEZyqN+v7KRE=;
-  b=XritAvZh0l5PqTWxS821n25FzyYGCR3rYYJUXFnA03MyRiFxL66zjQ8b
-   lcVmDv9LFtFTfOXsTEZWemh3J6XUMcTNOa+TNHv+IFPOAfOLQtoj1Sbu/
-   fm0edl8cWyoAyjLpgdJpHb1JXEcFvo3GpjYP+MxTUia/Gz+s82164Dxtt
-   3KQexytNz+oDKNzjrgOGbvPD/pxR1ahe5kAmHApvVZrtoVUgQfihHcsRk
-   TVa6F4RTzq39VC7xDNAopadXTFcYswDgY/FiYzElx759mdRaLmOcLjfnc
-   CqDZeWRIhePU8f6nfby3FqAvxmozbW2LY/9XCKILJYlnBo1WzZ5fqp6jv
-   g==;
-X-CSE-ConnectionGUID: jGBEe1pURkuh8pdOc4/S3Q==
-X-CSE-MsgGUID: mB9EPaCHQ/Ki51xNqaYK2A==
-X-IronPort-AV: E=Sophos;i="6.15,246,1739808000"; 
-   d="scan'208";a="79598022"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 28 Apr 2025 20:35:17 +0800
-IronPort-SDR: 680f67e4_gFEHlKBSnsMuifqYnULjWoNcckZpXUNay55uLqQNhRj60+z
- LgB37Uw0WLgW6+hhDEQJpxRy7wSaAI10OCNo73w==
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Apr 2025 04:35:00 -0700
-WDCIronportException: Internal
-Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
-  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Apr 2025 05:35:16 -0700
-From: Avri Altman <avri.altman@sandisk.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-mmc@vger.kernel.org
-Cc: Avri Altman <avri.altman@sandisk.com>
-Subject: [PATCH 4/4] mmc-utils: Start to use the generic print_usage function
-Date: Mon, 28 Apr 2025 15:29:51 +0300
-Message-Id: <20250428122951.317055-5-avri.altman@sandisk.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20250428122951.317055-1-avri.altman@sandisk.com>
-References: <20250428122951.317055-1-avri.altman@sandisk.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="V7uGju3i"
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-702599fa7c5so46217207b3.1
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 08:10:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1745853017; x=1746457817; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=M1qLEl8i2+MNssowlwtDc36gKvk/tS5q/yrKQaTL7cc=;
+        b=V7uGju3i7iGXibBwykbfG8MDZVv+hj4xuRZye1F8eQgwaJjzS27EerLeDkn51iwYGV
+         LIsJ5gxMhD2OVsmjRnANoaMx2kBypAyl7/11tG5VIvZuuFCn+B01IRDx+oKMLZJK5J5U
+         QOJCPJI1/z+PJS39JaH8EeWJH5nZmBdFkRMzWKESQOYWHOohzIyqbmP08d9RvKozmOW/
+         87H0fRbxm7V5rVjmNGfaCafZsG4CWHjN82ZD8pzjPJqxDXLKiwG1w3+kXOagUEIp3Gta
+         mILBfXNbe06AviO/HkiQaf3XFVYnp2b3jM4s1x0t1hse3+dP5rYcV22KR+sZZQek8WUe
+         32MA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1745853017; x=1746457817;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=M1qLEl8i2+MNssowlwtDc36gKvk/tS5q/yrKQaTL7cc=;
+        b=TroOcDsSuAFvNQ1lcyGl716umj1j840nGblapqeyaZOmMfYEypQNP6uXDKFHO/m4M8
+         d1gGYwDQdlcM1bb8rcN0TeQdR2g3XCezakpvEnh7ONJuBYkVY71iTcqnCuRT0jM1Nkbt
+         X/jNmNShP4ynSrqZmjMTuGSfKFC7NB1RoLJk9bAtf34KVAHh+nlpKFNiGtk8eZcRLrxZ
+         QGp4N+12pt60r4MIjo73ZZXCjA8qSIS7wmz/wySgQ/NdkbeXyS8ibv9tFpBWfBUnzntZ
+         Y3A+kkKk3mX7cMrUu1t5Fbdce3ys2Pa1iha6ZojDhuTyAfP/B0NUe8iDznjk/7Z1UkyJ
+         P+lw==
+X-Forwarded-Encrypted: i=1; AJvYcCWPUQ31l4haGqggIrz67IujMcZC/vVdP2UZIOBFGVw992wP98tw7FCwfo5O70IZchEZSrssYNpBGdQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzUAAk5Pl0k8dLnuhWTHZk4N3RXyGdccoKnABSm7Ibij70QKOp6
+	n/FbZM75jjUDWXM0RZux51IUFKOO94Bvdk1HTee8G5O8kMrJuBUKgdLwnbQ+1Ti1KSJJ8XHoGYh
+	CF5t9Q7dM6B4hEZ3iYsyomQC6L8GabRh2kf9Jog==
+X-Gm-Gg: ASbGncsxNdtx85Q4OfgUubtsiXr8Y6mIgJ4YCNsZgaWy9tlcH1MqiovLm3O3POsrj3L
+	XFsqHvs+E8wNDXJPFiIHqdeDWDhtSQP49TNL6s+/CIRBNpSi/2P/1HmsxWCPVR8R6oKORRiF0VC
+	XFwfWTma+Ms3o46hh9dQyNrzA=
+X-Google-Smtp-Source: AGHT+IGHNOX0lCHKaBhgAkyCSaQvfkDOJurdh3fIEr+lGeqL18H1nLfQurUm4e+jX9zWc2VqfcLb4+sjjQCZ9/588Iw=
+X-Received: by 2002:a05:690c:61c8:b0:705:6afe:4580 with SMTP id
+ 00721157ae682-708544de4demr154443977b3.19.1745853017168; Mon, 28 Apr 2025
+ 08:10:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1744273956.git.zhoubinbin@loongson.cn> <8ff74bf9e821f5734462cebcc4b3fbaa09114e6c.1744273956.git.zhoubinbin@loongson.cn>
+In-Reply-To: <8ff74bf9e821f5734462cebcc4b3fbaa09114e6c.1744273956.git.zhoubinbin@loongson.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 28 Apr 2025 17:09:41 +0200
+X-Gm-Features: ATxdqUHjTUtvuNdL6JLM2StJ5Q0auwfvIxVrtRfgnYRp_tAJ5Nl-aVKYfe94-M4
+Message-ID: <CAPDyKFqqPktwrYs70o9To4OKVWss6wM5kCg0OuXY-k2ReESwig@mail.gmail.com>
+Subject: Re: [PATCH v1 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Huacai Chen <chenhuacai@kernel.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
+	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-This patch replaces hardcoded usage messages in multiple functions with
-calls to the generic `print_usage` function.
+On Thu, 10 Apr 2025 at 10:41, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+>
+> The MMC controllers on the Loongson-2K series CPUs are similar,
+> except for the interface characteristics and the use of DMA controllers.
+>
+> This patch describes the MMC controllers on the Loongson-2K0500/2K1000,
+> with the distinguishing feature being the use of an externally shared
+> APBDMA engine.
+>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 
-This refactoring simplifies the codebase by consolidating usage message
-logic into a single reusable function, ensuring consistency across all
-commands.
+Overall this looks good to me. A few things though, please have a look below.
 
-Signed-off-by: Avri Altman <avri.altman@sandisk.com>
----
- mmc_cmds.c | 139 ++++++++++++++++++++++++++++++-----------------------
- 1 file changed, 80 insertions(+), 59 deletions(-)
+> ---
+>  MAINTAINERS                      |   2 +
+>  drivers/mmc/host/Kconfig         |  13 +
+>  drivers/mmc/host/Makefile        |   1 +
+>  drivers/mmc/host/loongson2-mmc.c | 636 +++++++++++++++++++++++++++++++
+>  drivers/mmc/host/loongson2-mmc.h | 177 +++++++++
+>  5 files changed, 829 insertions(+)
+>  create mode 100644 drivers/mmc/host/loongson2-mmc.c
+>  create mode 100644 drivers/mmc/host/loongson2-mmc.h
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index d7e4bca..b2cc3d6 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -265,7 +265,7 @@ int do_writeprotect_boot_get(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc writeprotect boot get </path/to/mmcblkX>\n");
-+		print_usage(do_writeprotect_boot_get);
- 		exit(1);
- 	}
- 
-@@ -307,11 +307,7 @@ int do_writeprotect_boot_set(int nargs, char **argv)
- #endif
- 
- 	if (nargs < 1 + argi ||  nargs > 2 + argi) {
--		fprintf(stderr, "Usage: mmc writeprotect boot set "
--#ifdef DANGEROUS_COMMANDS_ENABLED
--			"[-p] "
--#endif
--			"</path/to/mmcblkX> [0|1]\n");
-+		print_usage(do_writeprotect_boot_set);
- 		exit(1);
- 	}
- 
-@@ -413,7 +409,7 @@ int do_writeprotect_user_get(int nargs, char **argv)
- 	int remain;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc writeprotect user get </path/to/mmcblkX>\n");
-+		print_usage(do_writeprotect_user_get);
- 		exit(1);
- 	}
- 
-@@ -560,8 +556,7 @@ int do_writeprotect_user_set(int nargs, char **argv)
- 	return ret;
- 
- usage:
--	fprintf(stderr,
--		"Usage: mmc writeprotect user set <type><start block><blocks><device>\n");
-+	print_usage(do_writeprotect_user_set);
- 	exit(1);
- }
- 
-@@ -572,7 +567,7 @@ int do_disable_512B_emulation(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc disable 512B emulation </path/to/mmcblkX>\n");
-+		print_usage(do_disable_512B_emulation);
- 		exit(1);
- 	}
- 
-@@ -623,7 +618,7 @@ int do_write_boot_en(int nargs, char **argv)
- 	int boot_area, send_ack;
- 
- 	if (nargs != 4) {
--		fprintf(stderr, "Usage: mmc bootpart enable <partition_number> <send_ack> </path/to/mmcblkX>\n");
-+		print_usage(do_write_boot_en);
- 		exit(1);
- 	}
- 
-@@ -694,7 +689,7 @@ int do_boot_bus_conditions_set(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 5) {
--		fprintf(stderr, "Usage: mmc: bootbus set <boot_mode> <reset_boot_bus_conditions> <boot_bus_width> <device>\n");
-+		print_usage(do_boot_bus_conditions_set);
- 		exit(1);
- 	}
- 
-@@ -762,11 +757,6 @@ static int do_hwreset(int value, int nargs, char **argv)
- 	int fd, ret;
- 	char *device;
- 
--	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc hwreset enable </path/to/mmcblkX>\n");
--		exit(1);
--	}
--
- 	device = argv[1];
- 
- 	fd = open(device, O_RDWR);
-@@ -810,11 +800,21 @@ static int do_hwreset(int value, int nargs, char **argv)
- 
- int do_hwreset_en(int nargs, char **argv)
- {
-+        if (nargs != 2) {
-+		print_usage(do_hwreset_en);
-+		exit(1);
-+	}
-+
- 	return do_hwreset(EXT_CSD_HW_RESET_EN, nargs, argv);
- }
- 
- int do_hwreset_dis(int nargs, char **argv)
- {
-+        if (nargs != 2) {
-+		print_usage(do_hwreset_dis);
-+		exit(1);
-+	}
-+
- 	return do_hwreset(EXT_CSD_HW_RESET_DIS, nargs, argv);
- }
- 
-@@ -826,7 +826,7 @@ int do_write_bkops_en(int nargs, char **argv)
- 	char *en_type;
- 
- 	if (nargs != 3) {
--		fprintf(stderr, "Usage: mmc bkops_en <auto|manual> </path/to/mmcblkX>\n");
-+		print_usage(do_write_bkops_en);
- 		exit(1);
- 	}
- 
-@@ -877,7 +877,7 @@ int do_status_get(int nargs, char **argv)
- 	__u8 state;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc status get </path/to/mmcblkX>\n");
-+		print_usage(do_status_get);
- 		exit(1);
- 	}
- 
-@@ -1166,7 +1166,7 @@ int do_create_gp_partition(int nargs, char **argv)
- 	unsigned long align;
- 
- 	if (nargs != 7) {
--		fprintf(stderr, "Usage: mmc gp create <-y|-n|-c> <length KiB> <partition> <enh_attr> <ext_attr> </path/to/mmcblkX>\n");
-+		print_usage(do_create_gp_partition);
- 		exit(1);
- 	}
- 
-@@ -1294,7 +1294,7 @@ int do_enh_area_set(int nargs, char **argv)
- 	unsigned long align;
- 
- 	if (nargs != 5) {
--		fprintf(stderr, "Usage: mmc enh_area set <-y|-n|-c> <start KiB> <length KiB> </path/to/mmcblkX>\n");
-+		print_usage(do_enh_area_set);
- 		exit(1);
- 	}
- 
-@@ -1441,7 +1441,7 @@ int do_write_reliability_set(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 4) {
--		fprintf(stderr,"Usage: mmc write_reliability set <-y|-n|-c> <partition> </path/to/mmcblkX>\n");
-+		print_usage(do_write_reliability_set);
- 		exit(1);
- 	}
- 
-@@ -1506,7 +1506,7 @@ int do_read_extcsd(int nargs, char **argv)
- 	const char *str;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc extcsd read </path/to/mmcblkX>\n");
-+		print_usage(do_read_extcsd);
- 		exit(1);
- 	}
- 
-@@ -2017,7 +2017,7 @@ int do_write_extcsd(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 4) {
--		fprintf(stderr, "Usage: mmc extcsd write <offset> <value> </path/to/mmcblkX>\n");
-+		print_usage(do_write_extcsd);
- 		exit(1);
- 	}
- 
-@@ -2049,7 +2049,7 @@ int do_sanitize(int nargs, char **argv)
- 	unsigned int timeout = 0;
- 
- 	if (nargs != 2 && nargs != 3) {
--		fprintf(stderr, "Usage: mmc sanitize </path/to/mmcblkX> [timeout_in_ms]\n");
-+		print_usage(do_sanitize);
- 		exit(1);
- 	}
- 
-@@ -2279,7 +2279,7 @@ int do_rpmb_write_key(int nargs, char **argv)
- 	}, frame_out = {};
- 
- 	if (nargs != 3) {
--		fprintf(stderr, "Usage: mmc rpmb write-key </path/to/mmcblkXrpmb> </path/to/key>\n");
-+		print_usage(do_rpmb_write_key);
- 		exit(1);
- 	}
- 
-@@ -2342,7 +2342,7 @@ int do_rpmb_read_counter(int nargs, char **argv)
- 	unsigned int cnt;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc rpmb read-counter </path/to/mmcblkXrpmb>\n");
-+		print_usage(do_rpmb_read_counter);
- 		exit(1);
- 	}
- 
-@@ -2382,7 +2382,7 @@ int do_rpmb_read_block(int nargs, char **argv)
- 	}, *frame_out_p;
- 
- 	if (nargs != 5 && nargs != 6) {
--		fprintf(stderr, "Usage: mmc rpmb read-block </path/to/mmcblkXrpmb> <address> <blocks count> </path/to/output_file> [/path/to/key]\n");
-+		print_usage(do_rpmb_read_block);
- 		exit(1);
- 	}
- 
-@@ -2530,7 +2530,7 @@ static bool secure_wp_supported(char *device)
- }
- 
- static int rpmb_auth_write(int nargs, char **argv, uint16_t addr,
--			   uint8_t config_data, char *usage)
-+			   uint8_t config_data)
- {
- 	int ret, dev_fd;
- 	unsigned int cnt;
-@@ -2540,10 +2540,8 @@ static int rpmb_auth_write(int nargs, char **argv, uint16_t addr,
- 		.addr	     = htobe16(addr),
- 	}, frame_out = {};
- 
--	if (nargs != 4) {
--		fprintf(stderr, "%s", usage);
--		return EXIT_FAILURE;
--	}
-+	if (nargs != 4)
-+		return -EINVAL;
- 
- 	if (!secure_wp_supported(argv[1])) {
- 		fprintf(stderr, "secure wp not supported %s", argv[1]);
-@@ -2590,7 +2588,7 @@ out:
- 	return ret;
- }
- 
--static int rpmb_auth_read(int nargs, char **argv, char *usage)
-+static int rpmb_auth_read(int nargs, char **argv)
- {
- 	int ret, dev_fd;
- 	struct rpmb_frame frame_in = {
-@@ -2598,10 +2596,8 @@ static int rpmb_auth_read(int nargs, char **argv, char *usage)
- 	}, frame_out = {};
- 	unsigned char key[32] = {};
- 
--	if (nargs != 3 && nargs != 4) {
--		fprintf(stderr, "%s", usage);
--		return EXIT_FAILURE;
--	}
-+	if (nargs != 3 && nargs != 4)
-+                return -EINVAL;
- 
- 	if (!secure_wp_supported(argv[1])) {
- 		fprintf(stderr, "secure wp not supported %s", argv[1]);
-@@ -2667,37 +2663,57 @@ out:
- 
- int do_rpmb_sec_wp_enable(int nargs, char **argv)
- {
--	char *usage = "Usage: mmc rpmb secure-wp-mode-on </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+        int ret;
- 
--	return rpmb_auth_write(nargs, argv, 1, 1, usage);
-+	ret = rpmb_auth_write(nargs, argv, 1, 1);
-+        if (ret == -EINVAL)
-+                print_usage(do_rpmb_sec_wp_enable);
-+
-+        return ret;
- }
- 
- int do_rpmb_sec_wp_disable(int nargs, char **argv)
- {
--	char *usage = "Usage: mmc rpmb secure-wp-mode-off </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+        int ret;
-+
-+        ret = rpmb_auth_write(nargs, argv, 1, 0);
-+        if (ret == -EINVAL)
-+                print_usage(do_rpmb_sec_wp_disable);
- 
--	return rpmb_auth_write(nargs, argv, 1, 0, usage);
-+        return ret;
- }
- 
- int do_rpmb_sec_wp_mode_set(int nargs, char **argv)
- {
--	char *usage = "Usage: mmc rpmb secure-wp-disable </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+        int ret;
- 
--	return rpmb_auth_write(nargs, argv, 2, 1, usage);
-+        ret = rpmb_auth_write(nargs, argv, 2, 1);
-+        if (ret == -EINVAL)
-+                print_usage(do_rpmb_sec_wp_mode_set);
-+
-+        return ret;
- }
- 
- int do_rpmb_sec_wp_mode_clear(int nargs, char **argv)
- {
--	char *usage = "Usage: mmc rpmb secure-wp-enable </path/to/mmcblkx> </path/to/mmcblkXrpmb> </path/to/key>\n";
-+        int ret;
-+
-+        ret = rpmb_auth_write(nargs, argv, 2, 0);
-+        if (ret == -EINVAL)
-+                print_usage(do_rpmb_sec_wp_mode_clear);
- 
--	return rpmb_auth_write(nargs, argv, 2, 0, usage);
-+        return ret;
- }
- 
- int do_rpmb_sec_wp_en_read(int nargs, char **argv)
- {
--	char *usage = "Usage: mmc rpmb secure-wp-enable-read <path/to/mmcblk0> </path/to/mmcblkXrpmb> [/path/to/key]\n";
-+        int ret;
- 
--	return rpmb_auth_read(nargs, argv, usage);
-+        ret = rpmb_auth_read(nargs, argv);
-+        if (ret == -EINVAL)
-+                print_usage(do_rpmb_sec_wp_en_read);
-+
-+        return ret;
- }
- 
- int do_rpmb_write_block(int nargs, char **argv)
-@@ -2711,7 +2727,7 @@ int do_rpmb_write_block(int nargs, char **argv)
- 	}, frame_out = {};
- 
- 	if (nargs != 5) {
--		fprintf(stderr, "Usage: mmc rpmb write-block </path/to/mmcblkXrpmb> <address> </path/to/input_file> </path/to/key>\n");
-+		print_usage(do_rpmb_write_block);
- 		exit(1);
- 	}
- 
-@@ -2791,11 +2807,6 @@ static int do_cache_ctrl(int value, int nargs, char **argv)
- 	int fd, ret;
- 	char *device;
- 
--	if (nargs != 2) {
--	       fprintf(stderr, "Usage: mmc cache enable </path/to/mmcblkX>\n");
--	       exit(1);
--	}
--
- 	device = argv[1];
- 
- 	fd = open(device, O_RDWR);
-@@ -2841,11 +2852,21 @@ static int do_cache_ctrl(int value, int nargs, char **argv)
- 
- int do_cache_en(int nargs, char **argv)
- {
-+        if (nargs != 2) {
-+		print_usage(do_cache_en);
-+		exit(1);
-+	}
-+
- 	return do_cache_ctrl(1, nargs, argv);
- }
- 
- int do_cache_dis(int nargs, char **argv)
- {
-+        if (nargs != 2) {
-+		print_usage(do_cache_dis);
-+		exit(1);
-+	}
-+
- 	return do_cache_ctrl(0, nargs, argv);
- }
- 
-@@ -2926,7 +2947,7 @@ int do_erase(int nargs, char **argv)
- 	__u32 arg, start, end;
- 
- 	if (nargs != 5) {
--		fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
-+		print_usage(do_erase);
- 		exit(1);
- 	}
- 
-@@ -3443,7 +3464,7 @@ int do_general_cmd_read(int nargs, char **argv)
- 	struct mmc_ioc_cmd idata;
- 
- 	if (nargs != 2 && nargs != 3) {
--		fprintf(stderr, "Usage: gen_cmd read </path/to/mmcblkX> [arg]\n");
-+		print_usage(do_general_cmd_read);
- 		exit(1);
- 	}
- 
-@@ -3515,7 +3536,7 @@ int do_softreset(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc softreset </path/to/mmcblkX>\n");
-+		print_usage(do_softreset);
- 		exit(1);
- 	}
- 
-@@ -3530,7 +3551,7 @@ int do_preidle(int nargs, char **argv)
- 	char *device;
- 
- 	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc preidle </path/to/mmcblkX>\n");
-+		print_usage(do_preidle);
- 		exit(1);
- 	}
- 
-@@ -3550,7 +3571,7 @@ int do_alt_boot_op(int nargs, char **argv)
- 	unsigned int boot_blocks, ext_csd_boot_size;
- 
- 	if (nargs != 3) {
--		fprintf(stderr, "Usage: mmc boot_op <boot_data_file> </path/to/mmcblkX>\n");
-+		print_usage(do_alt_boot_op);
- 		exit(1);
- 	}
- 	boot_data_file = argv[1];
--- 
-2.25.1
+I think we can put all code in the c-file, no need for a separate header file.
 
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 32c3733a764a..e218a3e204ef 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -13940,6 +13940,8 @@ M:      Binbin Zhou <zhoubinbin@loongson.cn>
+>  L:     linux-mmc@vger.kernel.org
+>  S:     Supported
+>  F:     Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> +F:     drivers/mmc/host/loongson2-mmc.c
+> +F:     drivers/mmc/host/loongson2-mmc.h
+>
+
+[...]
+
+> +static irqreturn_t loongson2_mmc_irq(int irq, void *dev_id)
+> +{
+> +       struct loongson2_mmc_host *host = dev_id;
+> +       struct mmc_command *cmd;
+> +       unsigned long iflags;
+> +       u32 dsts, imsk;
+> +
+> +       regmap_read(host->regmap, LOONGSON2_MMC_REG_INT, &imsk);
+> +       regmap_read(host->regmap, LOONGSON2_MMC_REG_DSTS, &dsts);
+> +
+> +       if ((dsts & LOONGSON2_MMC_DSTS_IRQ) &&
+> +           (imsk & LOONGSON2_MMC_INT_SDIOIRQ)) {
+> +               regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_INT,
+> +                                  LOONGSON2_MMC_INT_SDIOIRQ,
+> +                                  LOONGSON2_MMC_INT_SDIOIRQ);
+> +
+> +               mmc_signal_sdio_irq(host->mmc);
+
+mmc_signal_sdio_irq() is the legacy interface for managing SDIO irqs.
+
+Please convert to use sdio_signal_irq() instead, along with the
+->ack_sdio_irq() callback.
+
+> +               return IRQ_HANDLED;
+> +       }
+> +
+> +       spin_lock_irqsave(&host->lock, iflags);
+> +
+> +       if (host->state == STATE_NONE || host->state == STATE_FINALIZE ||
+> +           !host->mrq)
+> +               goto irq_out;
+> +
+> +       cmd = host->cmd_is_stop ? host->mrq->stop : host->mrq->cmd;
+> +       if (!cmd)
+> +               goto irq_out;
+> +
+> +       cmd->error = 0;
+> +
+> +       if (imsk & LOONGSON2_MMC_INT_CTIMEOUT) {
+> +               cmd->error = -ETIMEDOUT;
+> +               goto close_transfer;
+> +       }
+> +
+> +       if (imsk & LOONGSON2_MMC_INT_CSENT) {
+> +               if (host->state == STATE_RSPFIN || host->state == STATE_CMDSENT)
+> +                       goto close_transfer;
+> +
+> +               if (host->state == STATE_XFERFINISH_RSPFIN)
+> +                       host->state = STATE_XFERFINISH;
+> +       }
+> +
+> +       if (!cmd->data)
+> +               goto irq_out;
+> +
+> +       if (imsk & (LOONGSON2_MMC_INT_RXCRC | LOONGSON2_MMC_INT_TXCRC)) {
+> +               cmd->data->error = -EILSEQ;
+> +               goto close_transfer;
+> +       }
+> +
+> +       if (imsk & LOONGSON2_MMC_INT_DTIMEOUT) {
+> +               cmd->data->error = -ETIMEDOUT;
+> +               goto close_transfer;
+> +       }
+> +
+> +       if (imsk & LOONGSON2_MMC_INT_DFIN) {
+> +               if (host->state == STATE_XFERFINISH) {
+> +                       host->dma_complete = 1;
+> +                       goto close_transfer;
+> +               }
+> +
+> +               if (host->state == STATE_XFERFINISH_RSPFIN)
+> +                       host->state = STATE_RSPFIN;
+> +       }
+> +
+> +irq_out:
+> +       regmap_write(host->regmap, LOONGSON2_MMC_REG_INT, imsk);
+> +       spin_unlock_irqrestore(&host->lock, iflags);
+> +       return IRQ_HANDLED;
+> +
+> +close_transfer:
+> +       host->state = STATE_FINALIZE;
+> +       host->pdata->reorder_cmd_data(host, cmd);
+> +       regmap_write(host->regmap, LOONGSON2_MMC_REG_INT, imsk);
+> +       spin_unlock_irqrestore(&host->lock, iflags);
+> +       return IRQ_WAKE_THREAD;
+> +}
+
+[...]
+
+> +
+> +static int loongson2_mmc_resource_request(struct platform_device *pdev,
+> +                                         struct loongson2_mmc_host *host)
+> +{
+> +       struct device *dev = &pdev->dev;
+> +       void __iomem *base;
+> +       int ret, irq;
+> +
+> +       base = devm_platform_get_and_ioremap_resource(pdev, 0, &host->res);
+> +       if (IS_ERR(base))
+> +               return PTR_ERR(base);
+> +
+> +       host->regmap = devm_regmap_init_mmio(dev, base, &host->pdata->regmap_config);
+> +       if (IS_ERR(host->regmap))
+> +               return PTR_ERR(host->regmap);
+> +
+> +       host->clk = devm_clk_get_optional_enabled(dev, NULL);
+> +       if (IS_ERR(host->clk))
+> +               return PTR_ERR(host->clk);
+> +
+> +       if (host->clk) {
+> +               ret = devm_clk_rate_exclusive_get(dev, host->clk);
+> +               if (ret)
+> +                       return PTR_ERR(host->clk);
+> +
+> +               host->rate = clk_get_rate(host->clk);
+> +       } else {
+> +               /* For ACPI, we get rate through clock-frequency attribute */
+> +               device_property_read_u64(dev, "clock-frequency", &host->rate);
+
+Is ACPI supported too?
+
+> +       }
+> +
+> +       irq = platform_get_irq(pdev, 0);
+> +       if (irq < 0)
+> +               return irq;
+> +
+> +       ret = devm_request_threaded_irq(dev, irq, loongson2_mmc_irq,
+> +                                       loongson2_mmc_irq_worker,
+> +                                       IRQF_ONESHOT, "loongson2-mmc", host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = host->pdata->setting_dma(host, pdev);
+> +       if (ret)
+> +               return ret;
+> +
+> +       return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+> +}
+> +
+> +static int loongson2_mmc_probe(struct platform_device *pdev)
+> +{
+> +       struct device *dev = &pdev->dev;
+> +       struct loongson2_mmc_host *host;
+> +       struct mmc_host *mmc;
+> +       int ret;
+> +
+> +       mmc = mmc_alloc_host(sizeof(*host), dev);
+
+We have devm_mmc_alloc_host() too, perhaps worth to use it to simplify
+the code a bit.
+
+> +       if (!mmc) {
+> +               dev_err(dev, "Failed to alloc mmc host\n");
+> +               return -ENOMEM;
+> +       }
+> +
+> +       platform_set_drvdata(pdev, mmc);
+> +
+> +       host = mmc_priv(mmc);
+> +       host->mmc = mmc;
+> +       host->state = STATE_NONE;
+> +       spin_lock_init(&host->lock);
+> +
+> +       host->pdata = device_get_match_data(dev);
+> +       if (!host->pdata) {
+> +               dev_err(dev, "Failed to get match data\n");
+> +               ret = -EINVAL;
+> +               goto free_host;
+> +       }
+> +
+> +       ret = loongson2_mmc_resource_request(pdev, host);
+> +       if (ret) {
+> +               dev_err(dev, "Failed to request resource\n");
+> +               goto free_host;
+> +       }
+> +
+> +       mmc->ops = &loongson2_mmc_ops;
+> +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+
+How is power to the card controlled for these platforms?
+
+The preferred way is to use the regulator API to manage this - and the
+mmc core also provides a couple of helper functions for this, like
+mmc_regulator_get_supply(), for example.
+
+> +       mmc->f_min = DIV_ROUND_UP(host->rate, 256);
+> +       mmc->f_max = host->rate;
+> +       mmc->max_blk_count = 4095;
+> +       mmc->max_blk_size = 4095;
+> +       mmc->max_req_size = mmc->max_blk_count * mmc->max_blk_size;
+> +       mmc->max_segs = 1;
+> +       mmc->max_seg_size = mmc->max_req_size;
+> +
+> +       ret = mmc_of_parse(mmc);
+> +       if (ret) {
+> +               dev_err(dev, "Failed to parse device node\n");
+> +               goto free_dma;
+> +       }
+> +
+> +       ret = mmc_add_host(mmc);
+> +       if (ret) {
+> +               dev_err(dev, "Failed to add mmc host.\n");
+> +               goto free_dma;
+> +       }
+> +
+> +       return 0;
+> +
+> +free_dma:
+> +       host->pdata->release_dma(host, dev);
+> +free_host:
+> +       mmc_free_host(mmc);
+> +       return ret;
+> +}
+> +
+
+[...]
+
+Kind regards
+Uffe
