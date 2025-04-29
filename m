@@ -1,87 +1,53 @@
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C9952D0260
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 12:59:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 00CBE2D29BB;
+	Tue, 29 Apr 2025 14:15:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745931573; cv=none; b=nh8G27+b89SRB8aaqe/CiiRIgmRfXdoXCvYc0CjH00/RAb4sPXfdSr8Gn4zfGABtnxBNqxbekMADwGNl3GyZoijZxf2+8Mo3GpJgK9ln6AHWke/L3S6HiByNu9Oy2M5MW7NcURmmhI6qsRahiAgQzc5Xed7VB80WZYTfZ0nZYvE=
+	t=1745936157; cv=none; b=K+uagobktVl+xBNeJ/vqFiRopzc2oV9Fo/Rg0FS4L5oEK/lHt2yTGetjy7HDEhXAvub+ssYjniKA5vs8qRg3gXbVyP85H5p/5AuYwwIOkO32rh/8aq1cbLbynLrrPwXuMo1I408Vr/+Feprnu2skjOComzxymxtuInvE4zgTdio=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745931573; c=relaxed/simple;
-	bh=MjuK/lSg2gfnEJ1nryEr/psdW7THiGFlO+Gx0Qp8XhY=;
+	s=arc-20240116; t=1745936157; c=relaxed/simple;
+	bh=Eguz7VoDXnoR8Ggv8PmbdGUYJ1KeoxNUaPMyEWLjYfA=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=mltfZaibbpvB9UbdOrD+azZjAIDu2QP5B2/yaZBuD3hn3fcYj8dw80Q2YROzMFIPJfuHS/+xsXlCz5BpB5m8fdg4DPW3itFI7iULySeDM2HlYiO/lWbg+P9qAIhTKNOxB/GmFKFE5p/HsvHpkPwel2aevDv9BEC0C8/TXdo4Vwg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ki0qKgl6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Isbw33bq; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ki0qKgl6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Isbw33bq; arc=none smtp.client-ip=195.135.223.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
+	 Content-Type:Content-Disposition:In-Reply-To; b=UHeBQPG9jOq/pM+9hGVPX1kjjWQZRClFLawP/XE+RZsx5WbkzZl4rPOo4n6u4weQtVB9JlNLyix9jBDKZZvD5rO4QgxCU+98IsDY9w5hHGduxaT2blvSbe4wXk5CD4XmPdKPjfZxNpc9YlRtfRbvaOp2RGj07cu9zhObMbVd9bA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=q6lK2eW3; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ki0qKgl6";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Isbw33bq";
-	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ki0qKgl6";
-	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Isbw33bq"
-Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by smtp-out2.suse.de (Postfix) with ESMTPS id 72A3B1F391;
-	Tue, 29 Apr 2025 12:59:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1745931569; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
-	b=ki0qKgl6E5qcsG1lSg71g7+Tyz+w7icENL7VGX9dvDqjqqCWqmQQ7+XBm2SqNurWze4Y7z
-	vIOY+mrDeRMKjSLPlWviVq4M1BD9aG4O/rSza7Okfoizn1y5BBd5ZC48CZ+2yGBFwYLRm3
-	pbcRfyDpjWxj+s/EGP+UMJayNJloCcA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1745931569;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
-	b=Isbw33bq03+GreuAyzjBgP//PNMMUsFH2Vs3D6nYe0a0/8cKidwMg+4/w/S3dzdoIyB5Ys
-	+os3INoVfkjjugDw==
-Authentication-Results: smtp-out2.suse.de;
-	none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-	t=1745931569; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
-	b=ki0qKgl6E5qcsG1lSg71g7+Tyz+w7icENL7VGX9dvDqjqqCWqmQQ7+XBm2SqNurWze4Y7z
-	vIOY+mrDeRMKjSLPlWviVq4M1BD9aG4O/rSza7Okfoizn1y5BBd5ZC48CZ+2yGBFwYLRm3
-	pbcRfyDpjWxj+s/EGP+UMJayNJloCcA=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-	s=susede2_ed25519; t=1745931569;
-	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-	 mime-version:mime-version:content-type:content-type:
-	 in-reply-to:in-reply-to:references:references;
-	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
-	b=Isbw33bq03+GreuAyzjBgP//PNMMUsFH2Vs3D6nYe0a0/8cKidwMg+4/w/S3dzdoIyB5Ys
-	+os3INoVfkjjugDw==
-Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 533481340C;
-	Tue, 29 Apr 2025 12:59:29 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
-	by imap1.dmz-prg2.suse.org with ESMTPSA
-	id 09D4ETHNEGhaYAAAD6G6ig
-	(envelope-from <iivanov@suse.de>); Tue, 29 Apr 2025 12:59:29 +0000
-Date: Tue, 29 Apr 2025 15:59:28 +0300
-From: "Ivan T. Ivanov" <iivanov@suse.de>
-To: Francesco Dolcini <francesco@dolcini.it>
-Cc: Sascha Hauer <s.hauer@pengutronix.de>, Jeff Chen <jeff.chen_1@nxp.com>,
-	Pete Hsieh <tsung-hsien.hsieh@nxp.com>,
-	Brian Norris <briannorris@chromium.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
-Message-ID: <20250429125928.pw7k4raw52jyvyaj@localhost.localdomain>
-References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
- <20250331065026.GA12444@francesco-nb>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="q6lK2eW3"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8E58CC4CEE3;
+	Tue, 29 Apr 2025 14:15:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1745936156;
+	bh=Eguz7VoDXnoR8Ggv8PmbdGUYJ1KeoxNUaPMyEWLjYfA=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=q6lK2eW3Gpx25noiTu2sbDpKMnDbNpi2r7i35mS/8S0ekhxQPA4Z3cVbbtX2Yqtjg
+	 6lju0kR7Wfks3j+ZMmLfPaMo8PDEt6PzEFgkdLSmcLnax1wLBmR1wPjJG+6LX29nWU
+	 A+a/MS1is4JrQB642aUaQz7YDgKTCN9e1PAdGmT+bMx9pm1yS4RvbIJO1elMiuV11D
+	 rFVTVpZyMDYs5nQa+va7mpEdePdDSxeOhz1HY3F00DPAEqHLnYoUlKM8UJZJrfPVp7
+	 0vlAfOgJqv4L9mok283m/XuB7t8VwTY9reyj5QLeIpVywuttr2bfWkDVNPynbcRUWz
+	 KKXmGnKkOrOWg==
+Date: Tue, 29 Apr 2025 16:15:51 +0200
+From: Andi Shyti <andi.shyti@kernel.org>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Chen Wang <unicorn_wang@outlook.com>, linux-hwmon@vger.kernel.org, 
+	devicetree@vger.kernel.org, sophgo@lists.linux.dev, linux-kernel@vger.kernel.org, 
+	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	Yixun Lan <dlan@gentoo.org>, Longbin Li <looong.bin@gmail.com>, 
+	Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>, 
+	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
+	Paul Walmsley <paul.walmsley@sifive.com>, Samuel Holland <samuel.holland@sifive.com>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
+	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
+	Alexandre Ghiti <alex@ghiti.fr>, Daniel Lezcano <daniel.lezcano@linaro.org>, 
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>, Jarkko Nikula <jarkko.nikula@linux.intel.com>, 
+	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>
+Subject: Re: [PATCH v2 00/10] riscv: sophgo: Introduce SG2044 SRD3-10 board
+ support
+Message-ID: <egkwz23tyr3psl3eaqhzdhmvxlufem5vqdlwvl4y6henyeazuz@ch3oflv4ekw7>
+References: <20250413223507.46480-1-inochiama@gmail.com>
+ <MA0P287MB22626253965E96829B7371A1FE872@MA0P287MB2262.INDP287.PROD.OUTLOOK.COM>
+ <2feyvebloqdcxxzmywe6azmwnz7zqulh2lixhw53ciw2ldisch@n2q3duucrp2r>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -90,72 +56,24 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250331065026.GA12444@francesco-nb>
-X-Spam-Score: -4.30
-X-Spamd-Result: default: False [-4.30 / 50.00];
-	BAYES_HAM(-3.00)[99.99%];
-	NEURAL_HAM_LONG(-1.00)[-1.000];
-	NEURAL_HAM_SHORT(-0.20)[-1.000];
-	MIME_GOOD(-0.10)[text/plain];
-	MIME_TRACE(0.00)[0:+];
-	TO_MATCH_ENVRCPT_ALL(0.00)[];
-	ARC_NA(0.00)[];
-	FUZZY_BLOCKED(0.00)[rspamd.com];
-	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
-	RCVD_TLS_ALL(0.00)[];
-	FROM_HAS_DN(0.00)[];
-	MISSING_XM_UA(0.00)[];
-	FROM_EQ_ENVFROM(0.00)[];
-	TO_DN_SOME(0.00)[];
-	RCVD_COUNT_TWO(0.00)[2];
-	RCVD_VIA_SMTP_AUTH(0.00)[];
-	RCPT_COUNT_SEVEN(0.00)[9];
-	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo]
-X-Spam-Flag: NO
-X-Spam-Level: 
+In-Reply-To: <2feyvebloqdcxxzmywe6azmwnz7zqulh2lixhw53ciw2ldisch@n2q3duucrp2r>
 
 Hi,
 
-On 03-31 08:50, Francesco Dolcini wrote:
-> Message-ID: <20250331065026.GA12444@francesco-nb>
+On Sat, Apr 26, 2025 at 07:23:58PM +0800, Inochi Amaoto wrote:
+> On Sat, Apr 26, 2025 at 03:36:41PM +0800, Chen Wang wrote:
+> > Hi, Inochi,
+> > 
+> > Will you apply this patchset on sophgo/for-next? I see there are changes
+> > just about dts/bindings.
+> > 
+> > Chen
+> > 
 > 
-> +Pete/Jesse @NXP
-> 
-> On Wed, Mar 26, 2025 at 01:18:30PM +0100, Sascha Hauer wrote:
-> > This series adds iw61x support to the mwifiex driver. It works for me,
-> > but is not yet ready to be merged. Some people showed interest in it, so
-> > I am sending it here.
-> > 
-> > All testing and review feedback appreciated.
-> > 
-> > During startup I get these messages:
-> > 
-> > [   12.078010] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
-> > [   12.078018] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
-> > [   12.078024] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x23e
+> I can only take 2, 3, 4, 9, 10 for now. The left I think they
+> should be take by the subsystem maintainers.
 
-In the downstream driver, branch lf-6.12.3_1.0.0, t his seems to be
-MrvlIEtypes_fw_cap_info_t for things like:
+Please, go ahead. I just merged patch 1 and 8 in i2c/i2c-host.
 
-FW_CAPINFO_EXT_802_11AX, FW_CAPINFO_EXT_6G ....
-
-> > [   12.078029] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x25c
-> > 
-
-This looks like MrvlIEtypes_Secure_Boot_Uuid_t. Doesn't seems too
-important.
-
-> > Not sure what these are about, I can't see these handled in the
-> > downstream mwifiex driver as well. Could also be there is some parsing
-> > error. Nevertheless the driver seems to work.
-
-Yep, it is working. Thank you! I am testing this on FRDM-iMX93, which has
-IW612 revision 1.0.
-
-I have to use nxp/sd_w61x_v1.bin.se on this board and NULL firmware_sdiouart
-because it seems that firmware return 1 as "strap" value, even if WiFi
-is definitely connected over SDIO.
-
-Regards,
-Ivan
-
+Thanks,
+Andi
