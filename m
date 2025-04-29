@@ -1,151 +1,207 @@
-Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.223.130])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2531B27A122
-	for <linux-mmc@vger.kernel.org>; Mon, 28 Apr 2025 16:52:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5CD3726772E
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 08:25:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745859145; cv=none; b=b35SSvKzoAKb1yxdpLQy/o1eE8J7tvznTcvfGVFRzwNA1cMbLNZPXXEv+vs/r3gLNxowuUG+UNbWclyY1U3PEa1cwtO4NEGsXywPNlKhtv2dm+hW0JiG2m3WDsd8Rfnd8JNOgLLycjKoiFONDdLvgJZf3WV3Hf7Ubjp/7n33oOM=
+	t=1745915125; cv=none; b=AaNC/oJdSxSysHmW84o+ibDyHhS0ScyJxNY39a1XRjdH99sCphO5MQDzYtk+9ZBZgWji4+wwx/WunmyhSfCSppl1zcuV2KYh3f6P6f9tYAdRASOhh+Ibd2Yd70Np7lehCKiV3DImH+isme3RAPNk06oigzhldHztLeBXJvhj8I4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745859145; c=relaxed/simple;
-	bh=j19Ks5EGmI1WnlG2EGk5q+L/L88eu8vLaBzx3lB33ik=;
+	s=arc-20240116; t=1745915125; c=relaxed/simple;
+	bh=rH9UccWYWgoC73rk59ha/zTWI5jwNxSAoFCv2UVXiks=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=t3KVRp+xeR0kn7CzgYDCSjsR65zZbol90xzHTj49box2+/SZ4FMwFXHkfbKGev+cHW01ew+auCWq0mdzAeSsbZOCfyMm1UNKW26GVRKSbtPpLrMs8n8XXbTNIgE7YRn/5utzkeAvja4Nyj6KUZZil0w9J3TdCiApNKHZy1czwxo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=D0ZV+GRz; arc=none smtp.client-ip=194.117.254.33
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+	 Content-Type:Content-Disposition:In-Reply-To; b=fhvOKcmRI1adU0wt3mFxS3KmZzyYPn3GvGLQWsAmKql53gNeYvMMEyKgVpihXiKd43owGGnHj6ETzK727I+tBILMdStCC67oy42VtKijTEoe5UVpPny2fVF7VZlajjpeH3n0elp551nZhLEbJK7jw1HZeZaZrjelKgBy8tCwrzE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=dELq2YZa; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=a8EezwbS; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=dELq2YZa; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=a8EezwbS; arc=none smtp.client-ip=195.135.223.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="D0ZV+GRz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	sang-engineering.com; h=date:from:to:cc:subject:message-id
-	:references:mime-version:content-type:in-reply-to; s=k1; bh=NMTf
-	agBvOJ/X0U4hLNTqE+o7JZO5KBtrHGmCDcMdaJ0=; b=D0ZV+GRzXb35ajd6ChCZ
-	olHBJCrGbpWPddVQ4dwrqCRU+yMcIzQs4vEGfrXJgSa5gKdzmsSRYocrTK7DY7Hq
-	Pc+qPk3EDSRsnaaDKOZpYK6WY+Ncw2xqszgbh+BXZQsMGTHQjUmxI9ZAkEjDX+Ar
-	7aISt4vJSo2tS0VoNOXbieN7uyCuQIPsWclH8ZCX/CHwZ7RpYOVeAnIbBipm1J3m
-	6KwO8n1C4HJYRiBjLNePvczmbosqpRP+3KW7CdHvMDXZV+hmIbtJSopELlX9jHul
-	hYvhRwhm4WrFavm9tW+xdEtvM6CX1aBxrB/KepF1hAnzL4JM/uzGRE9BM4kTa2ts
-	fA==
-Received: (qmail 656501 invoked from network); 28 Apr 2025 18:52:20 +0200
-Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Apr 2025 18:52:20 +0200
-X-UD-Smtp-Session: l3s3148p1@ulXkgdkzEpIujnsd
-Date: Mon, 28 Apr 2025 18:52:20 +0200
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	Ben Dooks <ben-linux@fluff.org>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Eugen Hristev <eugen.hristev@linaro.org>,
-	Fabio Estevam <festevam@gmail.com>, Haibo Chen <haibo.chen@nxp.com>,
-	Hu Ziji <huziji@marvell.com>, imx@lists.linux.dev,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-renesas-soc@vger.kernel.org,
-	Michal Simek <michal.simek@amd.com>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>, s32@nxp.com,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Viresh Kumar <vireshk@kernel.org>
-Subject: Re: [PATCH 00/11] mmc: rename mmc_retune_* to mmc_host_retune_*
-Message-ID: <aA-yRD3FX5Nr9ypK@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Alexandre Belloni <alexandre.belloni@bootlin.com>,
-	Aubin Constans <aubin.constans@microchip.com>,
-	Ben Dooks <ben-linux@fluff.org>,
-	Claudiu Beznea <claudiu.beznea@tuxon.dev>,
-	Eugen Hristev <eugen.hristev@linaro.org>,
-	Fabio Estevam <festevam@gmail.com>, Haibo Chen <haibo.chen@nxp.com>,
-	Hu Ziji <huziji@marvell.com>, imx@lists.linux.dev,
-	Jaehoon Chung <jh80.chung@samsung.com>,
-	linux-arm-kernel@lists.infradead.org,
-	linux-renesas-soc@vger.kernel.org,
-	Michal Simek <michal.simek@amd.com>,
-	Nicolas Ferre <nicolas.ferre@microchip.com>,
-	Patrice Chotard <patrice.chotard@foss.st.com>,
-	Pengutronix Kernel Team <kernel@pengutronix.de>, s32@nxp.com,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Shawn Guo <shawnguo@kernel.org>,
-	Vignesh Raghavendra <vigneshr@ti.com>,
-	Viresh Kumar <vireshk@kernel.org>
-References: <20250425111414.2522-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFqxHd85DsUH6eZVyoocTDrvwNu+wTLRBq-jUwDY+2iFTg@mail.gmail.com>
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="dELq2YZa";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="a8EezwbS";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="dELq2YZa";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="a8EezwbS"
+Received: from imap1.dmz-prg2.suse.org (imap1.dmz-prg2.suse.org [IPv6:2a07:de40:b281:104:10:150:64:97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out1.suse.de (Postfix) with ESMTPS id C0D402174D;
+	Tue, 29 Apr 2025 08:25:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1745915115; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TT1i3hdS9mC/hejBjLiByhI9VE+EVpILxulgUDs+hHA=;
+	b=dELq2YZaKtBY7eVjiL8nHE2AhixSZMqmIVjkj95xbNc3uZeuvrbIWvAAO1iHDHW71KSoRo
+	ocIW5Ti9xvfuR0NPUMJsndZkdUM65cxUhIUPR4Yv2/Vl6JqC9u4ZIASwa9xVXGy5goOPcF
+	kipmKieIZ1JJ95ksgnVruPfkcwVgAAQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1745915115;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TT1i3hdS9mC/hejBjLiByhI9VE+EVpILxulgUDs+hHA=;
+	b=a8EezwbSKoJNBw6rWyp3fwavY0Z3JHCJnQvBVO71F6uGIgeVxvSrOhXRJwhBomXP+Pd4b4
+	FiYxAEUM6GfNGBDw==
+Authentication-Results: smtp-out1.suse.de;
+	dkim=pass header.d=suse.de header.s=susede2_rsa header.b=dELq2YZa;
+	dkim=pass header.d=suse.de header.s=susede2_ed25519 header.b=a8EezwbS
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1745915115; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TT1i3hdS9mC/hejBjLiByhI9VE+EVpILxulgUDs+hHA=;
+	b=dELq2YZaKtBY7eVjiL8nHE2AhixSZMqmIVjkj95xbNc3uZeuvrbIWvAAO1iHDHW71KSoRo
+	ocIW5Ti9xvfuR0NPUMJsndZkdUM65cxUhIUPR4Yv2/Vl6JqC9u4ZIASwa9xVXGy5goOPcF
+	kipmKieIZ1JJ95ksgnVruPfkcwVgAAQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1745915115;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=TT1i3hdS9mC/hejBjLiByhI9VE+EVpILxulgUDs+hHA=;
+	b=a8EezwbSKoJNBw6rWyp3fwavY0Z3JHCJnQvBVO71F6uGIgeVxvSrOhXRJwhBomXP+Pd4b4
+	FiYxAEUM6GfNGBDw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 9FC6513931;
+	Tue, 29 Apr 2025 08:25:15 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id J7PNJOuMEGgABQAAD6G6ig
+	(envelope-from <iivanov@suse.de>); Tue, 29 Apr 2025 08:25:15 +0000
+Date: Tue, 29 Apr 2025 11:25:15 +0300
+From: "Ivan T. Ivanov" <iivanov@suse.de>
+To: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Francesco Dolcini <francesco@dolcini.it>,
+	Brian Norris <briannorris@chromium.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH do not merge 4/4] wifi: mwifiex: add iw61x support
+Message-ID: <20250429082515.45yiafmd7uhyw66p@localhost.localdomain>
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+ <20250326-mwifiex-iw61x-v1-4-ff875ed35efc@pengutronix.de>
+ <Z-Pxx983jcb0GTtg@gaggiata.pivistrello.it>
+ <Z-QHG0fyM8wRy2FH@pengutronix.de>
+ <Z-UbXduYmx2i0kxz@gaggiata.pivistrello.it>
+ <Z-a75VNI9liliHz1@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="o5qLCpm8WOWShP3M"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqxHd85DsUH6eZVyoocTDrvwNu+wTLRBq-jUwDY+2iFTg@mail.gmail.com>
-
-
---o5qLCpm8WOWShP3M
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <Z-a75VNI9liliHz1@pengutronix.de>
+X-Rspamd-Queue-Id: C0D402174D
+X-Spam-Level: 
+X-Spamd-Result: default: False [-4.51 / 50.00];
+	BAYES_HAM(-3.00)[100.00%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	R_DKIM_ALLOW(-0.20)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MX_GOOD(-0.01)[];
+	RBL_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCVD_TLS_ALL(0.00)[];
+	ARC_NA(0.00)[];
+	MIME_TRACE(0.00)[0:+];
+	MISSING_XM_UA(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RECEIVED_SPAMHAUS_BLOCKED_OPENRESOLVER(0.00)[2a07:de40:b281:106:10:150:64:167:received];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	SPAMHAUS_XBL(0.00)[2a07:de40:b281:104:10:150:64:97:from];
+	FROM_EQ_ENVFROM(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	RCPT_COUNT_SEVEN(0.00)[7];
+	RCVD_COUNT_TWO(0.00)[2];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[suse.de:dkim,nxp.com:url,imap1.dmz-prg2.suse.org:helo,imap1.dmz-prg2.suse.org:rdns];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	DKIM_TRACE(0.00)[suse.de:+]
+X-Rspamd-Server: rspamd2.dmz-prg2.suse.org
+X-Rspamd-Action: no action
+X-Spam-Score: -4.51
+X-Spam-Flag: NO
 
-Hi Ulf,
+Hi,
 
-uuuh, I overlooked this mail, sorry!
+Thank you for your work on this!
 
-> Sorry if my suggestion was unclear. I only had the MMC_CAP|CAP2_*
-> related functions in mind. I think we should leave the mmc_retune*
-> functions as is as they are not "can" functions.
+On 03-28 16:10, Sascha Hauer wrote:
+> On Thu, Mar 27, 2025 at 10:33:17AM +0100, Francesco Dolcini wrote:
+> > On Wed, Mar 26, 2025 at 02:54:35PM +0100, Sascha Hauer wrote:
+> > > On Wed, Mar 26, 2025 at 01:23:35PM +0100, Francesco Dolcini wrote:
+> > > > On Wed, Mar 26, 2025 at 01:18:34PM +0100, Sascha Hauer wrote:
+> > > > > This adds iw61x aka SD9177 support to the mwifiex driver. It is named
+> > > > > SD9177 in the downstream driver, I deliberately chose the NXP name in
+> > > > > the driver.
+> > > > > 
+> > > > > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> > > > > ---
+> > > > >  drivers/net/wireless/marvell/mwifiex/sdio.c | 79 +++++++++++++++++++++++++++++
+> > > > >  drivers/net/wireless/marvell/mwifiex/sdio.h |  3 ++
+> > > > >  include/linux/mmc/sdio_ids.h                |  3 ++
+> > > > >  3 files changed, 85 insertions(+)
+> > > > > 
+> > > > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > > > index cbcb5674b8036..7b4045a40df57 100644
+> > > > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+> > > > 
+> > > > ...
+> > > > 
+> > > > > @@ -3212,3 +3289,5 @@ MODULE_FIRMWARE(SD8978_SDIOUART_FW_NAME);
+> > > > >  MODULE_FIRMWARE(SD8987_DEFAULT_FW_NAME);
+> > > > >  MODULE_FIRMWARE(SD8997_DEFAULT_FW_NAME);
+> > > > >  MODULE_FIRMWARE(SD8997_SDIOUART_FW_NAME);
+> > > > > +MODULE_FIRMWARE(IW612_DEFAULT_FW_NAME);
+> > > > > +MODULE_FIRMWARE(IW612_SDIOUART_FW_NAME);
+> > > > > diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.h b/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > > index 65d142286c46e..97759456314b0 100644
+> > > > > --- a/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > > +++ b/drivers/net/wireless/marvell/mwifiex/sdio.h
+> > > > > @@ -29,6 +29,9 @@
+> > > > >  #define SD8987_DEFAULT_FW_NAME "mrvl/sd8987_uapsta.bin"
+> > > > >  #define SD8997_DEFAULT_FW_NAME "mrvl/sdsd8997_combo_v4.bin"
+> > > > >  #define SD8997_SDIOUART_FW_NAME "mrvl/sdiouart8997_combo_v4.bin"
+> > > > > +#define IW612_DEFAULT_FW_NAME "nxp/sdsd_nw61x.bin"
+> > > > > +#define IW612_SDIOUART_FW_NAME "nxp/sd_w61x.bin"
+> > > > 
+> > > > Is there a way to have BT over SDIO with iw61x? I was sure only sd-uart was
+> > > > possible.
+> > > 
+> > > The communication to the Bluetooth module indeed is UART only.
+> > > 
+> > > I think nxp/sdsd_nw61x.bin contains firmwares for both the WiFi and
+> > > Bluetooth chip. When using this you can use the Bluetooth UART directly
+> > > without uploading a separate Bluetooth firmware.
+> > > 
+> > > nxp/sd_w61x.bin only contains the WiFi firmware, so you have to
+> > > upload a separate Bluetooth firmware over the UART interface.
+> > 
+> > If that the case what you did here is not correct.
+> > 
+> > The 2 firmware files here are used file depending on the BT host interface used
+> > on the Wi-Fi/BT chip, and this is read from some strapping register. See commit
+> > 255ca28a659d ("mwifiex: Select firmware based on strapping").
+> > 
+> > BTW, this name sdsd_nw61x.bin is confusing, I would have expected this to be
+> > something like sduart_nw61x.bin.
+> 
+> You are right, there seem to be some things mixed up. I'll have a look
+> into it for the next round.
+> 
 
-I agree. I suggested that in my initial series, too.
+Looking at downstream driver looks like based on chip revision firmware
+files will be different. My best finding on the firmware files naming about
+this chip was this thread [1] on the NXP forums.
 
-> mmc_host_cmd23, mmc_host_done_complete, mmc_boot_partition_access,
-> mmc_host_uhs. All in drivers/mmc/core/host.h
->=20
-> According to your earlier renaming series, we should rename these functio=
-n too:
-> mmc_host_can_cmd23, mmc_host_can_done_complete,
-> mmc_host_can_boot_partition, mmc_host_can_uhs
->=20
-> Does this make sense to you?
+Regards,
+Ivan
 
-I don't know these functions well, so you are probably right. I'll look
-into it. One question: do you really suggest:
+[1] https://community.nxp.com/t5/Other-NXP-Products/NXP-IW612-Kernel-Integration-amp-Firmware-Flashing-Issues/m-p/2056699#M27741
 
-mmc_boot_partition_access -> mmc_host_can_boot_partition
-
-or should it be:
-
-mmc_boot_partition_access -> mmc_host_can_boot_partition_access
-
-? I tend to think the first is better, just making sure.
-
-Happy hacking,
-
-   Wolfram
-
---o5qLCpm8WOWShP3M
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmgPskQACgkQFA3kzBSg
-KbZvrQ/+LPEzaS2oX6voGtGK+EtDoheeu/trBb1qVzlci3uL4fywdNc9C1/XTsmX
-bdfSNj6jRXTZ82tTT6kz/50Vdq/Eqw6Z8sAryK50bwG9tPgumH0pKRdX8wYdrsnF
-Z8wuhfxQ4v+1pMNu4HIKXzxrQC6jA7FtQg83ntmHARwAQcQ4xBJB0/Jw6DswVpD/
-zu4tKzLQeKmkVcfBt9JBaVLoV7iAHkYuZSg4h8iXL5ekF7V6Rv3o8siMi5HOiprz
-57BD+JOsbO5n+H4gfFpW3R+Pg5AjL3d0cklnb8LRnbaCNNMI1DpptYuQ9F5IHnD7
-VhFqOVsqrU37TthPTkmRmNyTgFcs+zB5e/iq7bMLgQsuOsw7hTJe117c8EEOTSAr
-9wkP31mpJW9t6jp+sl5DTxJbeOf5alN4FrlgPbh3LONnnCgb5pwYoI9AKHS4XzzA
-qshyCA6gLUAv8cH/m2pKuC3vBuc0gqdmiQl85X7Z0czAxeYe2NONA7PECQ3JN2+v
-OWMBFhVnY9pjMVkzc9LK+5I66HdZGs4dLFs/ta/OqTZX4gq1A+fT162ftKuD4mn+
-QjftHdJA103mEDU5H2vPzYRqp9jpSviPi+i0YRoE6xvVoEP2Ydln9q4iT28Bi7/9
-wSfl7Mekr9rKanJSSnzozRE0LNmY5H3BU/YyUvFf7BuV++VL/44=
-=/Qxa
------END PGP SIGNATURE-----
-
---o5qLCpm8WOWShP3M--
