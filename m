@@ -1,108 +1,83 @@
-Received: from mail-yw1-f174.google.com (mail-yw1-f174.google.com [209.85.128.174])
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A8C221504F
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 10:06:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.174
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 71E812BE7D3
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 10:07:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745921216; cv=none; b=foaPftvUptxg4c77eg0fhj/sk6exZFR1u10LK2Y7mmmnlKvjyxFfJF3VtByq0kEFRYkFcbBhhQaR9UaUEK7OWZXg0yeze6C8L/Vk5wyomZhAMy9yT0SUKNUF9yZUAVDxyoiglmtEg5VG8qcmwFeCtS7JRqUMGhorJ6KCTVfvK64=
+	t=1745921225; cv=none; b=mHmF3w3scajN4ZwKZPHLA35ke6GuFkXq4dGE3GAeNeyLL8PevIKKcUXy7pZSn3A/BD7fbAhTIDGhkpDUznUQupvyen8esqVEygqYtz01f0QRkw3SEPoNWO8ZwLOnk22U5NyQJ/J3DlYke4VV1WPV4zoWaY+TMwhvWSvw7CFbkl4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745921216; c=relaxed/simple;
-	bh=U1IL5hommBa2Wv+FExNOtEc9rkh+55OUse5MfWOqQog=;
+	s=arc-20240116; t=1745921225; c=relaxed/simple;
+	bh=ZanEZrl1MQTBJFkH/y5+fms6HZ1lW1UJH8TVe2y0Kws=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FXl8mTyX+UUNIH12YXAK6Ra4A+OBhPB1XWAn3ZZabyFmWnaxoIfCTrip44KbeAqZDCfRcJBP8aWKIakWSzjP7kVI1E9dIaws9qPP/p8+IxjtghX18M9CVkiL8ffeYh/6uJwyBDWsHz/iCWdpDIRnaxD5Jnbz4wSHJz1NM8cN62g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Ob2whYRQ; arc=none smtp.client-ip=209.85.128.174
+	 To:Cc:Content-Type; b=eEbOp6U6Rae98Vtmyiii8E2lQDntupVG8fzRA7b6awaKPt3DEYi1oTHUZkeHzgwlbPSCns8/Xn5aygEns1tM2KA6FWGZ01zkh757UlmS1dboOoyrPWFtoPA2HQFNfj0FPpTd0UnJVxJrxnJXIWHlycnJsR8YhN+6GF62hIcVfkk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=XAN3kQXT; arc=none smtp.client-ip=209.85.128.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ob2whYRQ"
-Received: by mail-yw1-f174.google.com with SMTP id 00721157ae682-6ff1e375a47so60446627b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 03:06:53 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="XAN3kQXT"
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-6ef60e500d7so53595397b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 03:07:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745921212; x=1746526012; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1745921222; x=1746526022; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=jjQQ1gbntdrSbZtDquO40Eje9JxI9rUu3v+V9iiuKlU=;
-        b=Ob2whYRQtHGuz040o1Ucs8I8eAspDDPbj4vLhNA0FLx/Y/oiYV96VC0mttv0FjUNPZ
-         3Ipo6SFq0eqtLtXCgioDx+cMcqYGw/tu56WRVC73K/Wl2HOl2ODxQyht1qSB//AQFYUi
-         N1T9lShMlKig3y7P43jcySKN/6Dzrkk1R8NRwN1FzcW72ixhZrn0QFVkdbofN0ssNW51
-         FpEOivK/XytpwPNQnSReEtYDC0eZ/nPM7AVeG+A1qHNiKgUyOSjeuSv+O5bl8M1lr/Kw
-         Bi70atzAWO3lV9svYeWGT7KOwJgEXF5VPX70n2faYnA2Th9wF9/KXUjhhlaj4SW4Nb+G
-         kQCw==
+        bh=g3Ew3/QJhFzeoXSRlNN1VxKNu1WmYD8oNT84srDahOU=;
+        b=XAN3kQXTwxYUwHug2FiI5ytwDGsSYy9irnfuXX/Pu8Cgg6dKbRoJjBZVF8tCA0o4d9
+         3rlYjtN2a2VM/bAQHT7Cy+13yKDIK767bYTFVDlUyis+kmg5tkM/hk0Kq0AJ7kI5rX4N
+         WHfMdH0k5ylS+4V/fN/RyoDy7t7oreeG/BZma5OBHZ+tKnNoz8ywtYRDUYpKECgqMOaV
+         Ju6W3qG68wrrnn6fj8YZYojf7J2JX1EuPnWh5FDAlhxyzmRlE+C0YM5nd+RiAXl4bkij
+         8mgseJhIeQxQM+mxdfEYXD4oOpxK9Q4Ai+IsIXCDUmJn+uINcWDhftJ57aKZ+zvYCjl+
+         BItQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745921212; x=1746526012;
+        d=1e100.net; s=20230601; t=1745921222; x=1746526022;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=jjQQ1gbntdrSbZtDquO40Eje9JxI9rUu3v+V9iiuKlU=;
-        b=F9X/y4MgPY2LdTO+XHBKDvi0G0xtaXeFbYW94WdEDfgv1hyYkdDWXt5XBmvq6ytNPB
-         k4PI9uhfPE1KjG1WjwXmJCxO3jYw2FrpvHrH8DQ5wBrJRf7iSIUrR94O7IyFFRIizqEB
-         m7xgTunqBLFQ0bgvIlGWCtwnIhcmgGzhuDsLvl9QJDW72iav9fsZvmGpMtjZ/7RHsJuj
-         pImFwDOtLDdmY1ckA9w8xC0Wsx/OT0/GvTzxN0lZKtNBU53TQEqK1NlOAqYHrtusZbOB
-         v+HpIkAySW+WVr9/OhiklvhCTG0xxke8lDKw8iZ+gy6oiOCMqelKZqjjrtVtnoTnFuZe
-         dLLQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUeQtevjSHfiDGigfYrNQdkzNgZ9CpRkfoaDMp2p19eNrsimMLT5N80irjVnv904Etk+/YBvcvvICQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YztQaplQrGbC+aWE97bsiowegC9PsftcsALjXT6KtcFlC3PmD/A
-	dOQirqIP/ZF/k1H+ycn5TyGgvPBn3yice6Oq43eedGFCflO2cGV/CVTJkjFbsMo4CvNsqmmfyCx
-	2LCul2ZgS/ZU2b6/7rlnsT9ERk28RIVvWiB4m6A==
-X-Gm-Gg: ASbGncvlqVFqxFN9bXxr7X2q+lG/yz8SGsT+VGyVrVyp6Osfo1Y7eRg+ndBiw+GphtE
-	cVjI71QTLXP2V/xwAysvhfOLYiDLfw1U2kVe8ldvbHingCnEve0HQLShlpVliDwe/Gho99NlrhK
-	s0SFoL49P9lBEseasLMwOuv4A=
-X-Google-Smtp-Source: AGHT+IG6WmWyhSGVmxVC3f3XCypyrDEpbVGX6ioUnUsJtVsCpx9/EXtlcANtXZwlnV6IGsG9Jd4CkmBcfsgDrtEzaaQ=
-X-Received: by 2002:a05:690c:3506:b0:703:b8f4:5b0e with SMTP id
- 00721157ae682-7085f236277mr162475347b3.28.1745921212260; Tue, 29 Apr 2025
- 03:06:52 -0700 (PDT)
+        bh=g3Ew3/QJhFzeoXSRlNN1VxKNu1WmYD8oNT84srDahOU=;
+        b=eqfylhS3WniVL4u2UOtYvQX3EPUx/pGwsnSyUim4Orp1d5FrI0yz3wAdf0lFlY1XB6
+         4syubDGTtk6sdK18WvyqRU4ECTmH2AKw7wS+obLnR/XwaEZ6RMivOKcy3eWO7yMSrDST
+         rixcN2wcTXRcxw04dxBWOOKiOBX2EDS75h55QRSt5LgRT3j4xupUDtmH8ANL9+BPM6SP
+         g0O/uBbviKl6obCP8VIdf3xy8fxZZwq/sX8LpcYg/EinJwSMsoFzoBSqShZddxur5xPE
+         vaAtzDdXI+HtBZy/5EUrbb5jOprwATjpqcnB7MSeR8NJn1q899jKRvpblZerFYYe4RNv
+         xxrw==
+X-Forwarded-Encrypted: i=1; AJvYcCVHE1aYYOdCnon0NBgZRI37AXQX1QpQKRnkfQ44+LTusNuJXfvol3k994YWAIZjvzPYcM8QQp4DKaA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwggiBgh1X5MCSKNN8N7777zGZqy1RAMIWVdGGxMCNUpy6L6t8I
+	kV7tWsYia9PX2331emu61efD+N6eGCbr7Q0geE3uLqHobghzIidhqqzIjcFfpF08v1Axe77jbG8
+	QDLSQAunlNv7G5J7TYccVO9QyxyP/C4yc+LbWMg==
+X-Gm-Gg: ASbGncs9Z+fKa6C4nF3vSekJ7iWLQPgeHXkE526qTRWinxFtg3EkP6DciNp7jZhR/Ju
+	cioplprYN1FDlCXJVLqPl6/ZbSEBZykFS6zV/PBr03hCEVn6nT5z70Sg5MwnZfAY5+S88D9J7SN
+	ax2gFxzOWWy61qvdtY3M9ImYk=
+X-Google-Smtp-Source: AGHT+IG76v7imH4Qmr1mZ2+FW38Kt9fhuFdotLsZyhENyHP+RbqVndMxng4jwgw0v2+7ykOIPXB+oYvsflTcyUn2X+o=
+X-Received: by 2002:a05:690c:81c6:b0:700:a93e:3302 with SMTP id
+ 00721157ae682-7089b43746emr20556137b3.37.1745921222377; Tue, 29 Apr 2025
+ 03:07:02 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
-In-Reply-To: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
+References: <20250423-vt8500-sdmmc-binding-v2-1-ea4f17fd0638@gmail.com>
+In-Reply-To: <20250423-vt8500-sdmmc-binding-v2-1-ea4f17fd0638@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 29 Apr 2025 12:06:16 +0200
-X-Gm-Features: ATxdqUGRQt2dS-dYXQNUSdM9bjw6NNZW_Ep_w3cK8lN-p_Z_PHKTCdtR2wWOe8s
-Message-ID: <CAPDyKFp5N23KCZwOTba6vGyk9eaS1-SjSqY52FfPDng-bahn6g@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
-To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, 
-	Elaine Zhang <zhangqing@rock-chips.com>, Finley Xiao <finley.xiao@rock-chips.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, 
-	Sebastian Reichel <sebastian.reichel@collabora.com>, 
-	Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
-	linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org
+Date: Tue, 29 Apr 2025 12:06:25 +0200
+X-Gm-Features: ATxdqUHP1S1wKEk1JriqHl-INpfSR9z-V8MbSWsNuh6Dtm-S1RKGwycj8hOUG1k
+Message-ID: <CAPDyKFotiXYeG7k4u1YFs9vE9hH+Ut29feZZvTBSFcthJp0+vg@mail.gmail.com>
+Subject: Re: [PATCH v2] dt-bindings: mmc: vt8500-sdmmc: Convert to YAML
+To: Alexey Charkov <alchark@gmail.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 23 Apr 2025 at 09:54, Nicolas Frattaroli
-<nicolas.frattaroli@collabora.com> wrote:
+On Wed, 23 Apr 2025 at 12:53, Alexey Charkov <alchark@gmail.com> wrote:
 >
-> RK3576's power domains have a peculiar design where the PD_NVM power
-> domain, of which the sdhci controller is a part, seemingly does not have
-> idempotent runtime disable/enable. The end effect is that if PD_NVM gets
-> turned off by the generic power domain logic because all the devices
-> depending on it are suspended, then the next time the sdhci device is
-> unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
-> registers.
+> Rewrite the textual description for the WonderMedia SDMMC controller
+> as YAML schema, and switch the filename to follow the compatible
+> string.
 >
-> RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
-> added to the generic power domains API to handle what appears to be a
-> similar hardware design.
->
-> Use this new function to ask for the same treatment in the sdhci
-> controller by giving rk3576 its own platform data with its own postinit
-> function. The benefit of doing this instead of marking the power domains
-> always on in the power domain core is that we only do this if we know
-> the platform we're running on actually uses the sdhci controller. For
-> others, keeping PD_NVM always on would be a waste, as they won't run
-> into this specific issue. The only other IP in PD_NVM that could be
-> affected is FSPI0. If it gets a mainline driver, it will probably want
-> to do the same thing.
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+> Signed-off-by: Alexey Charkov <alchark@gmail.com>
 
 Applied for next, thanks!
 
@@ -111,98 +86,127 @@ Uffe
 
 
 > ---
-> Changes in v3:
-> - Reword comment and commit message to correct that this is not a
->   silicon bug, but seemingly intentional design with regards to runtime
->   power management.
-> - Link to v2: https://lore.kernel.org/r/20250412-rk3576-emmc-fix-v2-1-830e653ad4f0@collabora.com
+> Split the series from v1 into separate bindings patches so as not to
+> spam all the subsystems with unrelated changes, per Rob's suggestion
 >
 > Changes in v2:
-> - Rewrite patch to use dev_pm_genpd_rpm_always_on in sdhci driver
->   instead, after Ulf Hansson made me aware of its existence
-> - Link to v1: https://lore.kernel.org/r/20250408-rk3576-emmc-fix-v1-1-3009828b1b31@collabora.com
+> - described the sdon-inverted property in greater detail (thanks Rob)
+> - dropped the hunk that updates MAINTAINERS for easier merging - will
+>   be updated later in a single pass to cover all VT8500 related files
+>
+> Link to v1: https://lore.kernel.org/all/20250416-wmt-updates-v1-3-f9af689cdfc2@gmail.com/
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 40 +++++++++++++++++++++++++++++++++++++
->  1 file changed, 40 insertions(+)
+>  .../devicetree/bindings/mmc/vt8500-sdmmc.txt       | 23 --------
+>  .../devicetree/bindings/mmc/wm,wm8505-sdhc.yaml    | 66 ++++++++++++++++++++++
+>  2 files changed, 66 insertions(+), 23 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 09b9ab15e4995f0bddf57dd309c010c849be40d9..a20d03fdd6a93ecc5229c71f825bade5ac730370 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -17,6 +17,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/platform_device.h>
-> +#include <linux/pm_domain.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/reset.h>
->  #include <linux/sizes.h>
-> @@ -745,6 +746,29 @@ static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv
->         }
->  }
->
-> +static void dwcmshc_rk3576_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> +{
-> +       struct device *dev = mmc_dev(host->mmc);
-> +       int ret;
+> diff --git a/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt b/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
+> deleted file mode 100644
+> index d7fb6abb3eb8c87e698ca4f30270c949878f3cbf..0000000000000000000000000000000000000000
+> --- a/Documentation/devicetree/bindings/mmc/vt8500-sdmmc.txt
+> +++ /dev/null
+> @@ -1,23 +0,0 @@
+> -* Wondermedia WM8505/WM8650 SD/MMC Host Controller
+> -
+> -This file documents differences between the core properties described
+> -by mmc.txt and the properties used by the wmt-sdmmc driver.
+> -
+> -Required properties:
+> -- compatible: Should be "wm,wm8505-sdhc".
+> -- interrupts: Two interrupts are required - regular irq and dma irq.
+> -
+> -Optional properties:
+> -- sdon-inverted: SD_ON bit is inverted on the controller
+> -
+> -Examples:
+> -
+> -sdhc@d800a000 {
+> -       compatible = "wm,wm8505-sdhc";
+> -       reg = <0xd800a000 0x1000>;
+> -       interrupts = <20 21>;
+> -       clocks = <&sdhc>;
+> -       bus-width = <4>;
+> -       sdon-inverted;
+> -};
+> -
+> diff --git a/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yaml b/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yaml
+> new file mode 100644
+> index 0000000000000000000000000000000000000000..5b55174e908836866fbba42336db94cb03f9137b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/wm,wm8505-sdhc.yaml
+> @@ -0,0 +1,66 @@
+> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/wm,wm8505-sdhc.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
 > +
-> +       /*
-> +        * This works around the design of the RK3576's power domains, which
-> +        * makes the PD_NVM power domain, which the sdhci controller on the
-> +        * RK3576 is in, never come back the same way once it's run-time
-> +        * suspended once. This can happen during early kernel boot if no driver
-> +        * is using either PD_NVM or its child power domain PD_SDGMAC for a
-> +        * short moment, leading to it being turned off to save power. By
-> +        * keeping it on, sdhci suspending won't lead to PD_NVM becoming a
-> +        * candidate for getting turned off.
-> +        */
-> +       ret = dev_pm_genpd_rpm_always_on(dev, true);
-> +       if (ret && ret != -EOPNOTSUPP)
-> +               dev_warn(dev, "failed to set PD rpm always on, SoC may hang later: %pe\n",
-> +                        ERR_PTR(ret));
+> +title: WonderMedia SoC SDHCI Controller
 > +
-> +       dwcmshc_rk35xx_postinit(host, dwc_priv);
-> +}
+> +maintainers:
+> +  - Alexey Charkov <alchark@gmail.com>
 > +
->  static int th1520_execute_tuning(struct sdhci_host *host, u32 opcode)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1176,6 +1200,18 @@ static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
->         .postinit = dwcmshc_rk35xx_postinit,
->  };
->
-> +static const struct dwcmshc_pltfm_data sdhci_dwcmshc_rk3576_pdata = {
-> +       .pdata = {
-> +               .ops = &sdhci_dwcmshc_rk35xx_ops,
-> +               .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> +                         SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-> +               .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +                          SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-> +       },
-> +       .init = dwcmshc_rk35xx_init,
-> +       .postinit = dwcmshc_rk3576_postinit,
-> +};
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
 > +
->  static const struct dwcmshc_pltfm_data sdhci_dwcmshc_th1520_pdata = {
->         .pdata = {
->                 .ops = &sdhci_dwcmshc_th1520_ops,
-> @@ -1274,6 +1310,10 @@ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
->                 .compatible = "rockchip,rk3588-dwcmshc",
->                 .data = &sdhci_dwcmshc_rk35xx_pdata,
->         },
-> +       {
-> +               .compatible = "rockchip,rk3576-dwcmshc",
-> +               .data = &sdhci_dwcmshc_rk3576_pdata,
-> +       },
->         {
->                 .compatible = "rockchip,rk3568-dwcmshc",
->                 .data = &sdhci_dwcmshc_rk35xx_pdata,
+> +properties:
+> +  compatible:
+> +    oneOf:
+> +      - const: wm,wm8505-sdhc
+> +      - items:
+> +          - const: wm,wm8650-sdhc
+> +          - const: wm,wm8505-sdhc
+> +      - items:
+> +          - const: wm,wm8750-sdhc
+> +          - const: wm,wm8505-sdhc
+> +      - items:
+> +          - const: wm,wm8850-sdhc
+> +          - const: wm,wm8505-sdhc
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    items:
+> +      - description: SDMMC controller interrupt
+> +      - description: SDMMC controller DMA interrupt
+> +
+> +  sdon-inverted:
+> +    type: boolean
+> +    description: All chips before (not including) WM8505 rev. A2 treated their
+> +      "clock stop" bit (register offset 0x08 a.k.a. SDMMC_BUSMODE, bit 0x10)
+> +      as "set 1 to disable SD clock", while all the later versions treated it
+> +      as "set 0 to disable SD clock". Set this property for later versions of
+> +      wm,wm8505-sdhc. On wm,wm8650-sdhc and later this property is implied and
+> +      does not need to be set explicitly
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    mmc@d800a000 {
+> +        compatible = "wm,wm8505-sdhc";
+> +        reg = <0xd800a000 0x1000>;
+> +        interrupts = <20>, <21>;
+> +        clocks = <&sdhc>;
+> +        bus-width = <4>;
+> +        sdon-inverted;
+> +    };
 >
 > ---
-> base-commit: f34da179a4517854b2ffbe4bce8c3405bd9be04e
-> change-id: 20250317-rk3576-emmc-fix-7dc81a627422
+> base-commit: 0af2f6be1b4281385b618cb86ad946eded089ac8
+> change-id: 20250423-vt8500-sdmmc-binding-01c6ce3f6678
 >
 > Best regards,
 > --
-> Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+> Alexey Charkov <alchark@gmail.com>
 >
