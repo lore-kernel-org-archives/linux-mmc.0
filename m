@@ -1,120 +1,161 @@
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.223.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DDA822BF3EB
-	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 10:07:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5C9952D0260
+	for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 12:59:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=195.135.223.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745921229; cv=none; b=GtXXQetfuv6mJMopXrhoQRZy8SBVCsG8USUupxkCVFqMWPPkzmZqIfScSrxvrESP6+IdRULdkaa48bQPD2Jmx9aOR/+5diDNCiZ3wOZrH5MXhzzHQG8UkX0fWCFOKI6lDKe9kwkERqsKNSvqATEPkuVsqEnwZD6dVPnjRwjuwVI=
+	t=1745931573; cv=none; b=nh8G27+b89SRB8aaqe/CiiRIgmRfXdoXCvYc0CjH00/RAb4sPXfdSr8Gn4zfGABtnxBNqxbekMADwGNl3GyZoijZxf2+8Mo3GpJgK9ln6AHWke/L3S6HiByNu9Oy2M5MW7NcURmmhI6qsRahiAgQzc5Xed7VB80WZYTfZ0nZYvE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745921229; c=relaxed/simple;
-	bh=g1tVxbnLGk3i5P6Pxoj8Qjo6872iN8ITjCbgI2W21Dg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nnsrWundi+kALLqklEEqvYk8QciYebJ/k8dG3qgnuH//O2P++VHt6YczP2ijqvK2DWrESmazBwV3h3urnCRDiYgLU5lk528GVqls+VxopEGIjPnTSaMlR80uhWaASTGMqlSgojNdKKYD+4KDndQa1xViZLDfbcKCSuQBaXZ96ck=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=vVod8pq8; arc=none smtp.client-ip=209.85.219.182
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1745931573; c=relaxed/simple;
+	bh=MjuK/lSg2gfnEJ1nryEr/psdW7THiGFlO+Gx0Qp8XhY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=mltfZaibbpvB9UbdOrD+azZjAIDu2QP5B2/yaZBuD3hn3fcYj8dw80Q2YROzMFIPJfuHS/+xsXlCz5BpB5m8fdg4DPW3itFI7iULySeDM2HlYiO/lWbg+P9qAIhTKNOxB/GmFKFE5p/HsvHpkPwel2aevDv9BEC0C8/TXdo4Vwg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de; spf=pass smtp.mailfrom=suse.de; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ki0qKgl6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Isbw33bq; dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b=ki0qKgl6; dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b=Isbw33bq; arc=none smtp.client-ip=195.135.223.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=suse.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=suse.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="vVod8pq8"
-Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-e6a8aa771e8so5022078276.3
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Apr 2025 03:07:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1745921227; x=1746526027; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=emtwuLYFhq/+dXPJNX/QT8Hgt+pr1K3s+G1bwQ8o3u0=;
-        b=vVod8pq8yoTc4wRQ69nfOjuZRgRLkxnYuLitHdLrdyp+BHWUVuzsh08veAufytzWmm
-         1vBq2hxdPjNcHkQGNx2YUWrEH8AaeSqWtoozELJ2Iu0LVC2mh/MAr9qj/gP6m6quNqQk
-         ilIj1S8TcVxs6422qjARIzFlUDGvx9rpmF0NtwH5q8WxXmBq6VazeNAhvZ3xGtsCwBmC
-         dvZvDsVnfv/33Wivv36hjJTIj1JijaBjm1KW+6MnoemrcvEuwu9eaIZLDcpJ/jZ9wbJh
-         yqMnlN6Ki5Z7vUcdrcN06PEkRYawYpaGsM9lqe/5hmxsbelP7fBef8+i6JoZnI7ulJxn
-         qeaQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745921227; x=1746526027;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=emtwuLYFhq/+dXPJNX/QT8Hgt+pr1K3s+G1bwQ8o3u0=;
-        b=oWSq59fTS5KNF3iN8MKfqoge5D6IGiWIT6/UFiu9Jt51F8BoqePhFLU3OEYoNbDZit
-         tvMv1BIimwdkd/prfaGy60kqn8r5iksUKtZowhoq4tC4MeG1MjUBoqhXBu7DylVD/JKH
-         aVSg5RHED45MkWtWVNQSPPwOrL5QajbUjUPaQZ74Oq0kibrpB9/iySrvTigooZSBqxp/
-         q1tg5GiY/kPOehAR2RywOe0Y9EhwUBnMO3kvkoV9wxHWR8NYmR7r/Xbx9VI7bqrwLLpi
-         Xe1MgY+HEI0EHeJIYmwjLiXRnDQk/POJnekQoKcSjEFJ7O7jSYkgosKBn9KtTHvPDM1e
-         15nA==
-X-Forwarded-Encrypted: i=1; AJvYcCU27PYi9TSVH6g68otrgWmsjUN9qS1680Qxf3lIPQ7ZXyrpY2YW3plUSmob7lAHPiyzbi+G7uP+WtA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxq/z0bRV+kWuxDySCLjTMGtfpW4ZG1mXvGuZSBt2NYYzHMVUE/
-	h6PtEsV3nd4gILus2rHRoYpCQTqvmxJUHc6oZJY8g/2Pnbihr6L29LLwnUzcBsw7vDx0v16w6+n
-	0ksquXtKBVV9Xh2Ov8XL/Va2Aim5HN8ilQJryX5RhayIisNvC
-X-Gm-Gg: ASbGncvD7ri0n2powog+i/UjdoLe0GpbZHu5aSycQdPtqCcJ1lDdMu4rYemxf1ooSXe
-	8Zy7DYZJ2YsZt/MBjlWvFir+AIiE6qQCM5erbAo+3LOi26ncbiNKQtXPdXJCpYfaEweXji5ZgLR
-	e+/bkyZ6jdEsEgWCnJjdAz9WI=
-X-Google-Smtp-Source: AGHT+IE+KQ5mhqCdAicmf7a28zsguJznUEdy53WKuiHnYymLVfd0/ONr455swN8mCtn+15YDbEpXrpy4cOjvjDDAfZo=
-X-Received: by 2002:a05:690c:a90:b0:6fd:33a5:59a with SMTP id
- 00721157ae682-7089af99460mr31745177b3.18.1745921226784; Tue, 29 Apr 2025
- 03:07:06 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ki0qKgl6";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Isbw33bq";
+	dkim=pass (1024-bit key) header.d=suse.de header.i=@suse.de header.b="ki0qKgl6";
+	dkim=permerror (0-bit key) header.d=suse.de header.i=@suse.de header.b="Isbw33bq"
+Received: from imap1.dmz-prg2.suse.org (unknown [10.150.64.97])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by smtp-out2.suse.de (Postfix) with ESMTPS id 72A3B1F391;
+	Tue, 29 Apr 2025 12:59:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1745931569; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
+	b=ki0qKgl6E5qcsG1lSg71g7+Tyz+w7icENL7VGX9dvDqjqqCWqmQQ7+XBm2SqNurWze4Y7z
+	vIOY+mrDeRMKjSLPlWviVq4M1BD9aG4O/rSza7Okfoizn1y5BBd5ZC48CZ+2yGBFwYLRm3
+	pbcRfyDpjWxj+s/EGP+UMJayNJloCcA=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1745931569;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
+	b=Isbw33bq03+GreuAyzjBgP//PNMMUsFH2Vs3D6nYe0a0/8cKidwMg+4/w/S3dzdoIyB5Ys
+	+os3INoVfkjjugDw==
+Authentication-Results: smtp-out2.suse.de;
+	none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+	t=1745931569; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
+	b=ki0qKgl6E5qcsG1lSg71g7+Tyz+w7icENL7VGX9dvDqjqqCWqmQQ7+XBm2SqNurWze4Y7z
+	vIOY+mrDeRMKjSLPlWviVq4M1BD9aG4O/rSza7Okfoizn1y5BBd5ZC48CZ+2yGBFwYLRm3
+	pbcRfyDpjWxj+s/EGP+UMJayNJloCcA=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+	s=susede2_ed25519; t=1745931569;
+	h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+	 mime-version:mime-version:content-type:content-type:
+	 in-reply-to:in-reply-to:references:references;
+	bh=LOpr0MmnZWLYeA72wI88/nqcTraiGo+BD0i31sE7Rtk=;
+	b=Isbw33bq03+GreuAyzjBgP//PNMMUsFH2Vs3D6nYe0a0/8cKidwMg+4/w/S3dzdoIyB5Ys
+	+os3INoVfkjjugDw==
+Received: from imap1.dmz-prg2.suse.org (localhost [127.0.0.1])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	by imap1.dmz-prg2.suse.org (Postfix) with ESMTPS id 533481340C;
+	Tue, 29 Apr 2025 12:59:29 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([2a07:de40:b281:106:10:150:64:167])
+	by imap1.dmz-prg2.suse.org with ESMTPSA
+	id 09D4ETHNEGhaYAAAD6G6ig
+	(envelope-from <iivanov@suse.de>); Tue, 29 Apr 2025 12:59:29 +0000
+Date: Tue, 29 Apr 2025 15:59:28 +0300
+From: "Ivan T. Ivanov" <iivanov@suse.de>
+To: Francesco Dolcini <francesco@dolcini.it>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>, Jeff Chen <jeff.chen_1@nxp.com>,
+	Pete Hsieh <tsung-hsien.hsieh@nxp.com>,
+	Brian Norris <briannorris@chromium.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org
+Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
+Message-ID: <20250429125928.pw7k4raw52jyvyaj@localhost.localdomain>
+References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
+ <20250331065026.GA12444@francesco-nb>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250424034610.441532-1-rdunlap@infradead.org>
-In-Reply-To: <20250424034610.441532-1-rdunlap@infradead.org>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 29 Apr 2025 12:06:30 +0200
-X-Gm-Features: ATxdqUGe1f7BXwgk8BKhjbgMOwlPjLa7A1c1xzU9Uqd9tqasf9-fMmdsvIXz7aE
-Message-ID: <CAPDyKFr3EN+Ss5qaFmQ1+42=t_cZ55PtggXMq8uVHPkYQy-uyw@mail.gmail.com>
-Subject: Re: [PATCH -next] mmc: sdhci-esdhc-imx: fix defined but not used warnings
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: linux-kernel@vger.kernel.org, Luke Wang <ziniu.wang_1@nxp.com>, 
-	linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>, imx@lists.linux.dev, 
-	s32@nxp.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250331065026.GA12444@francesco-nb>
+X-Spam-Score: -4.30
+X-Spamd-Result: default: False [-4.30 / 50.00];
+	BAYES_HAM(-3.00)[99.99%];
+	NEURAL_HAM_LONG(-1.00)[-1.000];
+	NEURAL_HAM_SHORT(-0.20)[-1.000];
+	MIME_GOOD(-0.10)[text/plain];
+	MIME_TRACE(0.00)[0:+];
+	TO_MATCH_ENVRCPT_ALL(0.00)[];
+	ARC_NA(0.00)[];
+	FUZZY_BLOCKED(0.00)[rspamd.com];
+	DKIM_SIGNED(0.00)[suse.de:s=susede2_rsa,suse.de:s=susede2_ed25519];
+	RCVD_TLS_ALL(0.00)[];
+	FROM_HAS_DN(0.00)[];
+	MISSING_XM_UA(0.00)[];
+	FROM_EQ_ENVFROM(0.00)[];
+	TO_DN_SOME(0.00)[];
+	RCVD_COUNT_TWO(0.00)[2];
+	RCVD_VIA_SMTP_AUTH(0.00)[];
+	RCPT_COUNT_SEVEN(0.00)[9];
+	DBL_BLOCKED_OPENRESOLVER(0.00)[imap1.dmz-prg2.suse.org:helo]
+X-Spam-Flag: NO
+X-Spam-Level: 
 
-On Thu, 24 Apr 2025 at 05:46, Randy Dunlap <rdunlap@infradead.org> wrote:
->
-> Fix warnings when CONFIG_PM=y and CONFIG_PM_SLEEP is not set by
-> surrounding the 2 functions with #ifdef CONFIG_PM_SLEEP.
->
-> drivers/mmc/host/sdhci-esdhc-imx.c:1659:13: warning: 'sdhc_esdhc_tuning_restore' defined but not used [-Wunused-function]
->  1659 | static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
-> drivers/mmc/host/sdhci-esdhc-imx.c:1637:13: warning: 'sdhc_esdhc_tuning_save' defined but not used [-Wunused-function]
->  1637 | static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
->
-> Fixes: 3d1eea493894 ("mmc: sdhci-esdhc-imx: Save tuning value when card stays powered in suspend")
-> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-> Cc: Luke Wang <ziniu.wang_1@nxp.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Haibo Chen <haibo.chen@nxp.com>
-> Cc: imx@lists.linux.dev
-> Cc: s32@nxp.com
+Hi,
 
-Applied for next, thanks!
+On 03-31 08:50, Francesco Dolcini wrote:
+> Message-ID: <20250331065026.GA12444@francesco-nb>
+> 
+> +Pete/Jesse @NXP
+> 
+> On Wed, Mar 26, 2025 at 01:18:30PM +0100, Sascha Hauer wrote:
+> > This series adds iw61x support to the mwifiex driver. It works for me,
+> > but is not yet ready to be merged. Some people showed interest in it, so
+> > I am sending it here.
+> > 
+> > All testing and review feedback appreciated.
+> > 
+> > During startup I get these messages:
+> > 
+> > [   12.078010] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> > [   12.078018] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0xff
+> > [   12.078024] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x23e
 
-Kind regards
-Uffe
+In the downstream driver, branch lf-6.12.3_1.0.0, t his seems to be
+MrvlIEtypes_fw_cap_info_t for things like:
 
+FW_CAPINFO_EXT_802_11AX, FW_CAPINFO_EXT_6G ....
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c |    2 ++
->  1 file changed, 2 insertions(+)
->
-> --- linux-next-20250423.orig/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ linux-next-20250423/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1634,6 +1634,7 @@ static void sdhci_esdhc_imx_hwinit(struc
->         }
->  }
->
-> +#ifdef CONFIG_PM_SLEEP
->  static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -1688,6 +1689,7 @@ static void sdhc_esdhc_tuning_restore(st
->                        host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
->         }
->  }
-> +#endif
->
->  static void esdhc_cqe_enable(struct mmc_host *mmc)
->  {
+> > [   12.078029] mwifiex_sdio mmc1:0001:1: Unknown GET_HW_SPEC TLV type: 0x25c
+> > 
+
+This looks like MrvlIEtypes_Secure_Boot_Uuid_t. Doesn't seems too
+important.
+
+> > Not sure what these are about, I can't see these handled in the
+> > downstream mwifiex driver as well. Could also be there is some parsing
+> > error. Nevertheless the driver seems to work.
+
+Yep, it is working. Thank you! I am testing this on FRDM-iMX93, which has
+IW612 revision 1.0.
+
+I have to use nxp/sd_w61x_v1.bin.se on this board and NULL firmware_sdiouart
+because it seems that firmware return 1 as "strap" value, even if WiFi
+is definitely connected over SDIO.
+
+Regards,
+Ivan
+
