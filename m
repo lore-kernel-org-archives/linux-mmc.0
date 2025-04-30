@@ -1,112 +1,90 @@
-Received: from mail-pl1-f175.google.com (mail-pl1-f175.google.com [209.85.214.175])
+Received: from mail-ot1-f41.google.com (mail-ot1-f41.google.com [209.85.210.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6DCD41373;
-	Wed, 30 Apr 2025 03:57:18 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E4F42DC775
+	for <linux-mmc@vger.kernel.org>; Wed, 30 Apr 2025 17:05:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1745985440; cv=none; b=UAkZk2sqFYI5rtXPQg8otYrmaQv+eTQCyS0/hB+dy+BnlOGgx6IJogD/paw0TFEIl79ozyWecISnRr+fETf9rSE0CS+K9UryVqArwwJmD4fgfOuEQwTEiwB8K8FCU+bCekzy+cK51MMZYP8Jrcc7XGx4LeSGT3L531A1W/d0elw=
+	t=1746032733; cv=none; b=aepinH+hQWL/q/TWdGxpclI4DjywQCJVmB0nuT6rK2414Bss1Gjtv36AxJdVfjIxu7BDkloZOykiWchlKwd3BJ3P9xn6PwRXx7EuA8LY8IxQjDMxIAb8yCCKRg+1fxdrxlGm5EFUOMclEFJN0sXJiLQaqhclRFbUvLUva63fzrM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1745985440; c=relaxed/simple;
-	bh=Nvuefhy7SkxmyXEjkN5uyEWBh1+CMbm33k3AWIeHcLg=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=NJuqnXecclNv5ylkR7SlhOVnctGSDlG+6XuPGDIORLb97WdNPdPw0ZgaKQQXln/90Z+IZmB9oCAlN0MaQ/xp9PYwVRK2q9EaCQcjJuJGLdQTOt0kgA7cH8PqJSj450mOsVBczwq3r/RZPh9jKbx1gZ8fIm6aDWUIYgngOqDkUzw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JuwZ7434; arc=none smtp.client-ip=209.85.214.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=roeck-us.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1746032733; c=relaxed/simple;
+	bh=BlhnkvAiNFXIzQRX9IBBcGYJLsplmR96ZGKCT9iMLV8=;
+	h=MIME-Version:From:Date:Message-ID:Subject:To:Cc:Content-Type; b=Q/LP07eYmTXLF5iYthQulEZV1oMvkr4xkG7WObOQkp8VlW/xe7XO3hu6I5uvFQyqKKCbqCvWn506XPhPZaL+zJMoVSNEJaEm53xZWbA4FmaDqzYPuAAVrOHzsoUcBN0ayko3iOeq5PDULODOGLLg0C5m9Rrv7GMleYJyFAXz3Ig=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=amarulasolutions.com; spf=pass smtp.mailfrom=amarulasolutions.com; dkim=pass (1024-bit key) header.d=amarulasolutions.com header.i=@amarulasolutions.com header.b=n4lUk3r7; arc=none smtp.client-ip=209.85.210.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=amarulasolutions.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amarulasolutions.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JuwZ7434"
-Received: by mail-pl1-f175.google.com with SMTP id d9443c01a7336-22409077c06so108937425ad.1;
-        Tue, 29 Apr 2025 20:57:18 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=amarulasolutions.com header.i=@amarulasolutions.com header.b="n4lUk3r7"
+Received: by mail-ot1-f41.google.com with SMTP id 46e09a7af769-72c09f8369cso10051a34.3
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Apr 2025 10:05:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1745985438; x=1746590238; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=VyLc3Zik1vXa0yun6h3Hm25QI+ZOjteMPcqNd+zv4kw=;
-        b=JuwZ7434hwk0XRDnDqIxjk2jwyhIajJZIFVQvDdYfNorEMpX0DMddQXMxrpW36oxry
-         W2Vt5Cz/3Yt5dgmcfap50Zi4NIzb+XgTZ6vS4fjnQrpqv4YGZdLoY1Ra76VfVBz/GxMI
-         974e5vjKiXuDJmsaMpGQxJsFffybD50SBlmeFOdnlvflFXWEIunLCHHnUxDnWRa/twL3
-         jEvEyZ81qQcsQnvP+kfpi7UYOAxytpi5JM6KUft3OrA6Fh2QvnYr71PXJIi0M6grkOSr
-         bmCdJRPAw2oE00/ZPlkJhGGvYkCOFs66TUf61SyoT/w/Bspk68kXF/HDjtV5ZYeJaQs1
-         go+A==
+        d=amarulasolutions.com; s=google; t=1746032731; x=1746637531; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=nzgLHRXnexID2ZP2y6jIKQlRtFLIO1mHssJjwTJJGmg=;
+        b=n4lUk3r7lOMhXfkUS6RvydThX4UArvEW2kqZ8uDXhnL1EPOm/ukVTqKXSx8vspLrTH
+         fFE65KGR0xx3Rf/FlkcMuqBywzk2QKRaD/66zWrfA7cdeex0NFsLYX3iohsx5iPQOOcS
+         NY1qKUXDfuKvG0VdHMpaPbk3yk2UCF2ToXqYQ=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1745985438; x=1746590238;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=VyLc3Zik1vXa0yun6h3Hm25QI+ZOjteMPcqNd+zv4kw=;
-        b=lmD49t6Lw+JSu1IHPKRg7am7OqXq8f0hhKqwf6G+pY/tC08O/CYRhln0f2UoIQHuRt
-         EsWHi+tS0QqoJyKW/Bdsb1ro12gTXqYZke6O/AVfIRD6t7yxDhJCZhdAnYXjWEss/8Lq
-         a0ma9aphYB9QTRPRAZZdDt+O025yUJmS8vBpHV0e6jeAPQ4eVjS0k38YtG8mD0hmtJ9v
-         ySMZvX2rSbdBIlfeh3fwvFYxbdPPxRJ7iruZfKXqh026t3E5azLIf/GoTQR6xSfdkfyA
-         AItZJoMimac3PN2/kv90Q55eFvS4/onTWjZouuXuu1NsOxnfXugjfgNcrva9YU087+ld
-         n0aA==
-X-Forwarded-Encrypted: i=1; AJvYcCUIQdhTr2OaI8xYYr5CflA9cqyooUoTCxKH1T6g/PYO8PGDTjkYitwcoA7ol3R6EPJ9WyxqmoDSr510@vger.kernel.org, AJvYcCUs93CBNSF7Uez+nmVeb4ZcCQnFBFXr9WqB2XR5Oxkupesh2GhIizes8Lw6NUXACmF7kqmwiCCO/0x4@vger.kernel.org, AJvYcCW4jbxhl8klzOpc+17wKzR4M3iXle2Yzm2IF6foglPq2xdvRHYWJsmF/2dzwjL6R78lKDWogXiq6lheRdJZ@vger.kernel.org, AJvYcCWY6ajZwZG5CEXrRjfdUkjRZlzILlKtdERs9OP6Kctly8Egi5XYsLDyAZtcm7Cn14FIlybxtFPUDv/j3rk=@vger.kernel.org, AJvYcCWj87wqkTgfRFzNQ6M+WL7elSi3H1T4OqtPHoPIJcPf2SK4Qe/4xYdbdlGQo/akBlAcAM3xRNEME+Iq@vger.kernel.org
-X-Gm-Message-State: AOJu0YwMLAfDn/aXMY00usU+YD+xfoB3p8wmRYLdT5QRIxvQhNN5rCFW
-	Ny3dYvP/Yq8sudit98AKOAQEtmtwaDXrWDAZ9NKfCnb0Fjoq45or
-X-Gm-Gg: ASbGncvp7lO4O0wimywMRH39b4GzXLJVVWad9SmrnYeinKgaoTSvXGDgAIQuwFpKzqp
-	vsfb2RD0YXDGaRn75LpNuzGYlvslHWYdD4EFEnVOcjzYsCklLOR3lZgU6xRZ725igucoOm+BcIe
-	ulA05/eNOFLWPHwwPXsk4DYugyKjN6PWCtF43NW7vaKhycOhUpmy7RYTc3mKFglDt3ElaRklVz9
-	BRWP1qrDsXOrX0kyUBY1nglp5oEiZ46iVs+DJC8JtJslPV3zmIVwZ1wiD8ZZFprfvGQISqp/3fS
-	NOXp/Bdz/voLczi3AW/BCjJesRLM9URzD4pO5CAaYiBMMgn5nAAEuA==
-X-Google-Smtp-Source: AGHT+IEaMGTDmHzgNvzoHNMd9tZbR/u1Q5bg83MPGafcuW9LIhwRqcxCq0Nvid7OBBWwbxOwjAE/Fw==
-X-Received: by 2002:a17:903:364d:b0:21b:b3c9:38ff with SMTP id d9443c01a7336-22df3576fbbmr27513405ad.37.1745985437588;
-        Tue, 29 Apr 2025 20:57:17 -0700 (PDT)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:da43:aeff:fecc:bfd5])
-        by smtp.gmail.com with ESMTPSA id d9443c01a7336-22db5100ab2sm111814375ad.183.2025.04.29.20.57.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Apr 2025 20:57:17 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date: Tue, 29 Apr 2025 20:57:15 -0700
-From: Guenter Roeck <linux@roeck-us.net>
-To: Inochi Amaoto <inochiama@gmail.com>
-Cc: Jean Delvare <jdelvare@suse.com>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Chen Wang <unicorn_wang@outlook.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Paul Walmsley <paul.walmsley@sifive.com>,
-	Samuel Holland <samuel.holland@sifive.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Daniel Lezcano <daniel.lezcano@linaro.org>,
-	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
-	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
-	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>,
-	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
-	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
-	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
-	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
-	Longbin Li <looong.bin@gmail.com>
-Subject: Re: [PATCH v2 06/10] dt-bindings: hwmon: Add Sophgo SG2044 external
- hardware monitor support
-Message-ID: <08bbfb1a-57cf-4133-bd03-147ce107aeb9@roeck-us.net>
-References: <20250413223507.46480-1-inochiama@gmail.com>
- <20250413223507.46480-7-inochiama@gmail.com>
+        d=1e100.net; s=20230601; t=1746032731; x=1746637531;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=nzgLHRXnexID2ZP2y6jIKQlRtFLIO1mHssJjwTJJGmg=;
+        b=Xe51XnvzggsDa0R3OqAJiIugKOCfkyigpcFa1TsH+Z/vm5qSMGAiCeAupa/T2vfMCM
+         YTO49eJKeQxL21Psjk7HxKoyXSRWrapEDR45IkIDqTb3mly+k+HFYqQxvb6Isr8t2ree
+         LnxubI2mG/AgOeYZPBBaI6pidDpH4PqS/RQURfgSi9IuyBLXZbOET7p2f4CbzbEbqU+C
+         iFH5ArKEqYkwBzRTcbVxHIw+K2kI0K1YdIoLDiWzqGc9RGk+Feqjt/Y3kGrV+RszC+ki
+         8WRE9lpgda2PxF4/AXga8Dqmq0Ts7hEN1MCkWcCyO98jpG+ayA1UcQO46BQcYW70I7zb
+         Rs5w==
+X-Gm-Message-State: AOJu0Yz5+939QaxAaBSvgv9ZNLnU+RujwIn9fdIwZk5LNhosK54rPuEp
+	sn7lUfFsgk69/ZzIoyDoeRf+xlnefoygi1KKnWg362arFnKHQAKCSfeIUCNkKnklj+UL3TUT7rV
+	IMDkEIOpJVKwtOXew4PZ2iAJNXkTnZJEfX9v+7ZJSYqBAxDpFtNg=
+X-Gm-Gg: ASbGnctDI3nSOXslWLrzZwIuxYuqXUtrXHui+0NGN8CAEijG6s2qtbBDAcSdm3IHMj8
+	xmQVXAREo0KGAScYN73PFFUu+9GRaViLXINQLsUM3uixuuuCtE+rjSrxe2zHG3bwfx7lBKZswxB
+	5rIYq6KhlYGNBTvBisRxaP+MTBSWVQ5w==
+X-Google-Smtp-Source: AGHT+IH8PwEMUgG8GAU26XyZrEwvYYAK9YcBzom/dnCu4bGQcYPmX3lob/pBdAZRPH5wV9ogxZRQlL4Cu9CKvZ3qbgk=
+X-Received: by 2002:a05:6830:398c:b0:72b:8c5a:7294 with SMTP id
+ 46e09a7af769-731c0a0681amr2783766a34.9.1746032731118; Wed, 30 Apr 2025
+ 10:05:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250413223507.46480-7-inochiama@gmail.com>
+From: Dario Binacchi <dario.binacchi@amarulasolutions.com>
+Date: Wed, 30 Apr 2025 19:05:20 +0200
+X-Gm-Features: ATxdqUGdRv3cDUvIP4Xr2ZZiD2wUQGSD8tvjN7UPhR1eHsx_Id_9Hpm1B6p1u1M
+Message-ID: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
+Subject: RFC: mmc-utils versioning
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Avri Altman <Avri.Altman@sandisk.com>
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Apr 14, 2025 at 06:35:00AM +0800, Inochi Amaoto wrote:
-> The MCU device on SG2044 exposes the same interface as SG2042, which is
-> already supported by the kernel.
-> 
-> Add compatible string for monitor device of SG2044.
-> 
-> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+Hello Ulf and Avri,
 
-Applied to hwmon-next.
+Would it be possible to tag future releases? That way, Buildroot's autobuild
+service would automatically notify the maintainers of the package of a
+new release,
+and in turn update the package with the latest changes.
 
-Thanks,
-Guenter
+Thanks and regards,
+Dario
+-- 
+Dario Binacchi
+
+Senior Embedded Linux Developer
+
+dario.binacchi@amarulasolutions.com
+
+__________________________________
+
+
+Amarula Solutions SRL
+
+Via Le Canevare 30, 31100 Treviso, Veneto, IT
+
+T. +39 042 243 5310
+info@amarulasolutions.com
+
+www.amarulasolutions.com
