@@ -1,94 +1,119 @@
-Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 026AF2749CB;
-	Mon,  5 May 2025 21:24:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 554841F4262;
+	Mon,  5 May 2025 21:39:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746480277; cv=none; b=BdOk8ngjApsZkAjqYa9XkqwPZfDClg/aZP8AKFWSogIQOYVMSNMUuv05Edc1q5+4fqgrTl75ihIjntJpbo3JN2og3BVvGCl5EsZhWHg4gZ+Nf6zp3kTr9UvWi652czGFoZcmCgRnXHLJw6gJqHjUVfTSVK1kFC4ghS3mGN54KUI=
+	t=1746481158; cv=none; b=Sf559Wiu0M774yK7xekuwI9XtwE/dAg8D+hVXcnGQRiVLv9gbq5TcSegWXzkGfOm2kBj9omC1O9+3XFNUd+CNPf+Wk/QH7TFOxXp9h77uouPLxBigGTXNDy3zWYh4CxjzVB9+fmFZX1ZpmaOXZ9DEQwqMvFa/WUsNYiNl7C3oWI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746480277; c=relaxed/simple;
-	bh=zJqaToRRd+EWgnbbC+sw2JqSytIFt/UF15dVawQhX+g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=P8Lae8pXB0Ef9kYFomVgxJFw1u7zGUNr22uNDYk6lI1sSG6HpJZi7LgTJXpfk3KnGBfagy8hnX7fwDethlsxcWa1MakvCggWqMn2/Kv0pD6H/SRluW+xHQA2Jpq1Qu6mQWBp70SBZKJyeSWcbMpZD7Zzkw3tWHlnISLJQYXjC2Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=nokAAiNX; arc=none smtp.client-ip=198.47.19.246
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1746481158; c=relaxed/simple;
+	bh=OFXDbJsxKqoQMWwXs8OFPxoxsBnWaETf9qmgoQvbyuQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=VL/QAOm/qZsWenHUxFvIxfgkrUKDpxIYlCNqCKr8iJHhnjS67t0CuyBwt2mADC8pSCogixXN6cHQNjxXub63+/Q1T/+ggdwZwjuuQNDJKvKm1kRGSUQr94DfktziW1XI979y7rGlgBQyenrm7Pb6Xy+DPKbLawfyy/GuiXRfCww=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=FeGwC3yb; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="nokAAiNX"
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTPS id 545LOMwM876295
-	(version=TLSv1.2 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Mon, 5 May 2025 16:24:22 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1746480262;
-	bh=F7LLIU8n02+Spa7/x+VOFmyc13ovyTwQ/Eu0VEiiCSw=;
-	h=Date:Subject:To:CC:References:From:In-Reply-To;
-	b=nokAAiNXqGYUokDhkdskIQljJr0Ci3lAn6WEJv6aCpZ5qmNSQhzXCcPu+z3EPNJT6
-	 kKCHUjkYbyu0rnhIUwXg7ExInjlVHcv3BqBVVvAoU8imRdS29c/QqizSl5LC8qF53Q
-	 KDfBaQZ3xTgtWjL/HlC9Pm4+llva5hALds4HVEoY=
-Received: from DLEE105.ent.ti.com (dlee105.ent.ti.com [157.170.170.35])
-	by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 545LOMBe074380
-	(version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-	Mon, 5 May 2025 16:24:22 -0500
-Received: from DLEE103.ent.ti.com (157.170.170.33) by DLEE105.ent.ti.com
- (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Mon, 5
- May 2025 16:24:22 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE103.ent.ti.com
- (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Mon, 5 May 2025 16:24:22 -0500
-Received: from [10.250.32.148] ([10.250.32.148])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 545LOMWw047564;
-	Mon, 5 May 2025 16:24:22 -0500
-Message-ID: <849a5e47-5b37-40e4-8b76-a58adb7e9b90@ti.com>
-Date: Mon, 5 May 2025 16:24:21 -0500
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="FeGwC3yb"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Type:Content-Transfer-Encoding:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID;
+	bh=6l/heqGk/UTexwAtKZZUGycS/exQ3H0HSuobkgefF30=; b=FeGwC3ybr75HKO+AnpNeCgzn/7
+	btsDdrILnjyQaO/niTyoI+k6DOd+zI2DjMDahPHyW1S+qJWTNi0H2Lsuz350DFJhPV9SdniI/GYLF
+	Xd6/nOyeAHNNPzl+xoOAk+ZZTV+7OO0R2i1m72KUSi3QcD3F/rhDfIWZANPyKk6VVRcAkk7JlkBcA
+	b5WQw9/xIH8e2CoRXD5XxQLqt9/LuYMAhN3ueSCZO5msI9Ov/3FC7AkVruNvjUz91YSu4TMHdDYAM
+	qU04+Mv/pU7+PdBUpTZ8J1GsDPHp6bp1sqi3O0R5XmJVeZPWsK+JK+IFeQoNNWGoc8JmzVDc3iyQ0
+	N1V1vSxg==;
+Received: from i53875a1d.versanet.de ([83.135.90.29] helo=diego.localnet)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1uC3Wk-00006o-S3; Mon, 05 May 2025 23:39:06 +0200
+From: Heiko =?UTF-8?B?U3TDvGJuZXI=?= <heiko@sntech.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
+ Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>,
+ Shresth Prasad <shresthprasad7@gmail.com>,
+ Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+ Detlev Casanova <detlev.casanova@collabora.com>,
+ Jonas Karlman <jonas@kwiboo.se>, Chukun Pan <amadeus@jmu.edu.cn>,
+ Yao Zi <ziyao@disroot.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org,
+ linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+ Yao Zi <ziyao@disroot.org>,
+ Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Subject: Re: [PATCH v4 2/5] clk: rockchip: Support MMC clocks in GRF region
+Date: Mon, 05 May 2025 23:39:05 +0200
+Message-ID: <2737556.Isy0gbHreE@diego>
+In-Reply-To: <20250417143647.43860-3-ziyao@disroot.org>
+References:
+ <20250417143647.43860-1-ziyao@disroot.org>
+ <20250417143647.43860-3-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v4 0/2] Add SDHCI_QUIRK2_SUPPRESS_V1P8_ENA
-To: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>
-CC: Josua Mayer <josua@solid-run.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
-        Francesco Dolcini
-	<francesco@dolcini.it>,
-        Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah
-	<m-shah@ti.com>
-References: <20250424180036.1541568-1-jm@ti.com>
-Content-Language: en-US
-From: "Mendez, Judith" <jm@ti.com>
-In-Reply-To: <20250424180036.1541568-1-jm@ti.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-Hi all,
+Hi,
 
-On 4/24/2025 1:00 PM, Judith Mendez wrote:
-> There are MMC boot failures seen with V1P8_SIGNAL_ENA on Kingston eMMC and
-> Microcenter/Patriot SD cards on am62* Sitara K3 boards due to the HS200
-> initialization sequence involving V1P8_SIGNAL_ENA. Since V1P8_SIGNAL_ENA
-> is optional for eMMC and only affects timing for host controllers using
-> ti,am62-sdhci compatible so far, add a new platform data structure for am62
-> compatible and append the new SDHCI_QUIRK2_SUPPRESS_V1P8_ENA quirk.
-> 
-> This fix was previously merged in the kernel, but was reverted due
-> to the "heuristics for enabling the quirk"[0]. This issue is adressed
-> in this patch series by adding the quirk based on compatible string,
-> ensuring the quirk is never applied to devices with internal LDOs, then
-> V1P8_SIGNAL_ENA also has a voltage component tied to it.
+Am Donnerstag, 17. April 2025, 16:36:44 Mitteleurop=C3=A4ische Sommerzeit s=
+chrieb Yao Zi:
+> Registers of MMC drive/sample clocks in Rockchip RV1106 and RK3528
+> locate in GRF regions. Adjust MMC clock code to support register
+> operations through regmap. Also add a helper to ease registration of GRF
+> clocks.
+>=20
+> Signed-off-by: Yao Zi <ziyao@disroot.org>
 
-Gentle ping on this, are there any comments or any issues with this
-type of implementation?
+> diff --git a/drivers/clk/rockchip/clk.c b/drivers/clk/rockchip/clk.c
+> index cbf93ea119a9..ce2f3323d84e 100644
+> --- a/drivers/clk/rockchip/clk.c
+> +++ b/drivers/clk/rockchip/clk.c
+> @@ -590,6 +590,7 @@ void rockchip_clk_register_branches(struct rockchip_c=
+lk_provider *ctx,
+>  				list->name,
+>  				list->parent_names, list->num_parents,
+>  				ctx->reg_base + list->muxdiv_offset,
+> +				NULL, 0,
+>  				list->div_shift
+>  			);
+>  			break;
+> @@ -619,6 +620,11 @@ void rockchip_clk_register_branches(struct rockchip_=
+clk_provider *ctx,
+>  			break;
+>  		case branch_linked_gate:
+>  			/* must be registered late, fall-through for error message */
+> +		case branch_mmc_grf:
+> +			/*
+> +			 * must be registered through rockchip_clk_register_grf_branches,
+> +			 * fall-through for error message
+> +			 */
+>  			break;
 
-Thanks,
+please don't create separate structures for specific clock-types.
+Being able to "just define" clock branches is helpful and starting
+to require separate blocks just causes issues down the road.
 
-~ Judith
+=46or handling multiple GRF sources, I just merged Nicolas' patches for
+handling auxiliary GRFs [0] and GRF-gate clock type [1] .
+
+So ideally, please base off from there.
+
+Thanks a lot
+Heiko
+
+
+[0] https://git.kernel.org/pub/scm/linux/kernel/git/mmind/linux-rockchip.gi=
+t/commit/?id=3D70a114daf2077472e58b3cac23ba8998e35352f4
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/mmind/linux-rockchip.gi=
+t/commit/?id=3De277168cabe9fd99e647f5dad0bc846d5d6b0093
+
 
