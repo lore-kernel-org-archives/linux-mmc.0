@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CF12F39B0AB;
-	Mon,  5 May 2025 23:14:02 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9367D3ABCED;
+	Mon,  5 May 2025 23:18:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746486843; cv=none; b=jPjmPg3aCEE+BmaHv7d2iCjJxBmZvIYri7QNp8QY9m04DQsPowrpSPLetXP8yq4yzY0HODVnb8LTsVCumYS9INu6ds5dQBhQFNix8aR699Sa8lgqlcACWYdaMzblj8k233XN0vBIuFhRPwOnLvUBmvHXtoIcnnfK28S/XQ8GJ2I=
+	t=1746487133; cv=none; b=mWd+tt4KXwsLfLgxOM9XiFkkCnP5PNJiGfwhPEir9RELGAIZSbVxOt1hHvMksetka0d8u3QZhw2PnlSZI2rjnLE706IoXvWVhUl11ys2P6TKAdbz914uq7MxxYzFJ+gvAzygYpR0rJal90COfesDSk5+4o6zntfSBiTOuNcI4XE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746486843; c=relaxed/simple;
-	bh=Bb3FVwCJZU1r7vkPPX0Vf8mmsX2k6QL9Zn8OJXMbrK4=;
+	s=arc-20240116; t=1746487133; c=relaxed/simple;
+	bh=nIX6dAu7nHokct7Zpqf++O3ihvA03NDTXHAFE7Cw9OE=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=JSava8RMunqEmBfJBBQ4Vu5MmNRI3EV8/hF6DmWPZ21F89U9Bzp+az4RgAKxBxxocYAe91yFUZL6uhwSL+xn1o0rXGvly7DqboNH6o8Yf983bWu0RpXRJQnfH66rNQ91oywxZTC7Vmy5/meJpo1IFuI9xIsNcGpnr41LpdBHQ50=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=gSxJKWcj; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Lbp6+gzwk+rsw6hVFYUV5kNJn/2wz33Y8get74A2c8cikDm51go1Xdq6cKsD0GZjEHzSYm6NTZHFzjoyOCFO7myrQXRAKMMvUhOZPEaNhKD8WDMrE7IgWq7SHpFBTKjpQMVSwwBv1Gg5RSAneZ8MvVWxKFrk3iCyOYh2wHzAXV8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Tqyvnmex; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="gSxJKWcj"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EAD9CC4CEEF;
-	Mon,  5 May 2025 23:14:01 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Tqyvnmex"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A03B4C4CEED;
+	Mon,  5 May 2025 23:18:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746486842;
-	bh=Bb3FVwCJZU1r7vkPPX0Vf8mmsX2k6QL9Zn8OJXMbrK4=;
+	s=k20201202; t=1746487133;
+	bh=nIX6dAu7nHokct7Zpqf++O3ihvA03NDTXHAFE7Cw9OE=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=gSxJKWcjcpS//cs7LtBB7Qt4s/vlHAugz18TeKLlkAx496iVUy65wBhE3Xo/4y0mB
-	 fQjwd+y0P/J2sJZZjqwnCMgvtQgpoijZf7QrACw4cMb5fWhjSiVUfkMmTv6gOL9Nim
-	 XyFGK8wgmeKKzGK0JOAWiy5uWgAj6jdeyVQ8Purd7yTkRM5sJ2/4utwQsXhOCDC6jK
-	 cFCgIuCAro4+m67izSKKYVzYtor6UVSP328vubQI1MBfTqyVq8usZ841vcuHU83aJC
-	 8kEb7rbynaMmPmbOHh5J29DTXjukCB22+N4fA0sNMltrSe7poCR+EV7IZtoz1fE6XX
-	 FBD1hR3JaXNDw==
+	b=Tqyvnmex8g7oJanCw2CdyTSEqei2pnQqxOFykV7JDUIU9iMG3VssJL0LXRv4ardqL
+	 WGuk+D4Wz+MBSioyWSp6xApVpdXdY9XuBDBMdLx01nbryFC3YsJzzHWJ/vCro/XP4c
+	 xLs0cuCk9K/E4mF2yzkn1hMTxxIuNSS0wdZKpCwS6jAsa67CAf5k7ogiZGjZyeawPm
+	 9i82iaq04uXuKmiaRDacslO84v3kU6jHsXNDw3haAS4lG+qnJdtoYBo3JUIP3Um0JJ
+	 zZ045ZYzf76cPQELQb6Ocj3MC1PQZIb5fkoOHwdpkRwy2fzW68JX+rDvrJrPQJG7VN
+	 ilVfkLp5CMsag==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
@@ -34,12 +34,12 @@ Cc: Erick Shepherd <erick.shepherd@ni.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Sasha Levin <sashal@kernel.org>,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.15 020/153] mmc: host: Wait for Vdd to settle on card power off
-Date: Mon,  5 May 2025 19:11:07 -0400
-Message-Id: <20250505231320.2695319-20-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.10 016/114] mmc: host: Wait for Vdd to settle on card power off
+Date: Mon,  5 May 2025 19:16:39 -0400
+Message-Id: <20250505231817.2697367-16-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250505231320.2695319-1-sashal@kernel.org>
-References: <20250505231320.2695319-1-sashal@kernel.org>
+In-Reply-To: <20250505231817.2697367-1-sashal@kernel.org>
+References: <20250505231817.2697367-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -48,7 +48,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 5.15.181
+X-stable-base: Linux 5.10.237
 Content-Transfer-Encoding: 8bit
 
 From: Erick Shepherd <erick.shepherd@ni.com>
@@ -72,10 +72,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index bdb82c1265edc..b4226ba1a1b33 100644
+index 67d9dd2165ec7..3769595693531 100644
 --- a/drivers/mmc/host/sdhci-pci-core.c
 +++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -677,8 +677,12 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+@@ -666,8 +666,12 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
  
  	sdhci_set_power(host, mode, vdd);
  
