@@ -1,102 +1,94 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E8B72DAF9C;
-	Mon,  5 May 2025 22:59:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E60A12820B9;
+	Mon,  5 May 2025 23:07:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746485961; cv=none; b=YqnDDwtuMl39JHWh29LN1owvi8xq8qVaudas9BKvOtZq1cgXVn2w1t31gDMMr1zrE3NIX7yyYQiF/Z3QbcG7bB3GHmhetIVZxNPFK1A9FtVegHTvgKcJrgRZDXZiR+CproF+CQBZlCU/IjdusNhsbrRwisURtkPbHA8WJss8qAg=
+	t=1746486444; cv=none; b=tuKxSlKDEtuxR49P48L700Q5c6mOjqzB3w4qJQ+4L3Y04WYwdC4xZhCA3aTQ8SbeTdVLM+UNYLxYRCoXJiKcGvkjQYGa8KTNzRHHS2+j5cOqRn+DRhcN+DiERUmc6EBnBkgY5sfA4ETkepmyfbge5NFPAXrbq4+Sq7L9xkOYjRI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746485961; c=relaxed/simple;
-	bh=I4mmtZS7oQaOkP9zUMPZmkH9iP7ipojAwNds0yRWv34=;
+	s=arc-20240116; t=1746486444; c=relaxed/simple;
+	bh=Kv5EsO+4YkFNwXXL8BuUkKTNw09Hsbyxwyz1iv/3W/M=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=tPKYIIjuQYlbjqH+NdvFR4ZQaGXiR7Ey0m67TYmDzAnY6jL7Nkep/tsqzV6p9CjyQYAdXICzdQEmeaWTzr50s/lf/jkVOQvhogL8wLl/1rSUrXfIZvpr9/z4HqU8ToHStL6fnTCTeeRjEOmrq/ahbPcCCQqwAJIaWe1dmQ76AZQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=hweJKF+K; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=G7IVPn/kuOKeUUT8KRx1MKH35T6F87Vqq13rzUBvUGglY3iP+aO8jdYqDpc6PZEMicF0vqN2Yvtq0R5VyuIBGKtCot4cGnXahSydT8cZKk3K51faYhR2+B+JzGLsxO8gXajAGPfIjSO+LACcPIlMuMyevL4xUjEIiIVzjxgEDB0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=P5jnoY+6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="hweJKF+K"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 06AA9C4CEED;
-	Mon,  5 May 2025 22:59:19 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="P5jnoY+6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9BAC9C4CEED;
+	Mon,  5 May 2025 23:07:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746485961;
-	bh=I4mmtZS7oQaOkP9zUMPZmkH9iP7ipojAwNds0yRWv34=;
+	s=k20201202; t=1746486442;
+	bh=Kv5EsO+4YkFNwXXL8BuUkKTNw09Hsbyxwyz1iv/3W/M=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=hweJKF+KZXeF+OMZyhIVv+ZpAcBDYTnneVt2d+OX12RIBty5mZz5f044gBtrfgrg1
-	 RDYTaHOwm9HznDxf7JadJjB1DVEfKAzGzmZvKQuP+ZnnkAdHMxKCXDUcTZLs+tWxEh
-	 nGt0wDF7eo2kCK6YhIrB/p4fc27JLvgWnnaUvt1gCcVV6xUtBk7d+KoWz/5evz4yyM
-	 nD1rpVWdNv3uqtfz1pHtxCo8ge1ABfqdUtjucGDMIIEfn+RUoIHjBcCN3qrhLWFuZs
-	 /5R3l5idPFYKcZUP8LFVnC4gTHanBEnlGqpmRz77y3y9ELY25Zn1H2RVGphnr3BGDW
-	 Uibykhx2dogqw==
+	b=P5jnoY+6SkkfMyTMCUNWv8CHB+MZnqWfxS1Z2BokT8Rk3qocKO9Rr/iTHXyhrfr4Q
+	 sARaa9Q/TP67GXbtqCnY9pMJn602GnRksxvyUvgul3BjpS8YTfdSyPPtlNJCEH+qZc
+	 sX0wCf+FoHaJavj+BA2JtGKsPegwmmD0dGN5ACV4ufjsKRb4IyTfZ5r57kaqBBLRQt
+	 kEX6oj2Mbt+fymTe5RvGbK6TgGcyFwMfu4wxz0KJXlromqys5ZXAxxZF6fdtUPBGIQ
+	 B65eP03aKZeFBBnhdjwzCGzcY1mUGPhDW2ddrUoJgTy78LvMkJBaAxVbhEQAsPmxWl
+	 bssaA98wBf38A==
 From: Sasha Levin <sashal@kernel.org>
 To: linux-kernel@vger.kernel.org,
 	stable@vger.kernel.org
 Cc: Erick Shepherd <erick.shepherd@ni.com>,
-	Kyle Roeschley <kyle.roeschley@ni.com>,
-	Brad Mouring <brad.mouring@ni.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Sasha Levin <sashal@kernel.org>,
 	linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.6 087/294] mmc: sdhci: Disable SD card clock before changing parameters
-Date: Mon,  5 May 2025 18:53:07 -0400
-Message-Id: <20250505225634.2688578-87-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.1 030/212] mmc: host: Wait for Vdd to settle on card power off
+Date: Mon,  5 May 2025 19:03:22 -0400
+Message-Id: <20250505230624.2692522-30-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250505225634.2688578-1-sashal@kernel.org>
-References: <20250505225634.2688578-1-sashal@kernel.org>
+In-Reply-To: <20250505230624.2692522-1-sashal@kernel.org>
+References: <20250505230624.2692522-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.6.89
+X-stable-base: Linux 6.1.136
 Content-Transfer-Encoding: 8bit
 
 From: Erick Shepherd <erick.shepherd@ni.com>
 
-[ Upstream commit fb3bbc46c94f261b6156ee863c1b06c84cf157dc ]
+[ Upstream commit 31e75ed964582257f59156ce6a42860e1ae4cc39 ]
 
-Per the SD Host Controller Simplified Specification v4.20 §3.2.3, change
-the SD card clock parameters only after first disabling the external card
-clock. Doing this fixes a spurious clock pulse on Baytrail and Apollo Lake
-SD controllers which otherwise breaks voltage switching with a specific
-Swissbit SD card.
+The SD spec version 6.0 section 6.4.1.5 requires that Vdd must be
+lowered to less than 0.5V for a minimum of 1 ms when powering off a
+card. Increase wait to 15 ms so that voltage has time to drain down
+to 0.5V and cards can power off correctly. Issues with voltage drain
+time were only observed on Apollo Lake and Bay Trail host controllers
+so this fix is limited to those devices.
 
-Signed-off-by: Kyle Roeschley <kyle.roeschley@ni.com>
-Signed-off-by: Brad Mouring <brad.mouring@ni.com>
 Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/20250211214645.469279-1-erick.shepherd@ni.com
+Link: https://lore.kernel.org/r/20250314195021.1588090-1-erick.shepherd@ni.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-pci-core.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9796a3cb3ca62..f32429ff905ff 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2035,10 +2035,15 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 5a5cc40d4bc37..c71d9956b398d 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -613,8 +613,12 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
  
- 	host->mmc->actual_clock = 0;
+ 	sdhci_set_power(host, mode, vdd);
  
--	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	if (clk & SDHCI_CLOCK_CARD_EN)
-+		sdhci_writew(host, clk & ~SDHCI_CLOCK_CARD_EN,
-+			SDHCI_CLOCK_CONTROL);
- 
--	if (clock == 0)
-+	if (clock == 0) {
-+		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+-	if (mode == MMC_POWER_OFF)
++	if (mode == MMC_POWER_OFF) {
++		if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD ||
++		    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BYT_SD)
++			usleep_range(15000, 17500);
  		return;
 +	}
  
- 	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
- 	sdhci_enable_clk(host, clk);
+ 	/*
+ 	 * Bus power might not enable after D3 -> D0 transition due to the
 -- 
 2.39.5
 
