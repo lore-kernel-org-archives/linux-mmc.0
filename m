@@ -1,90 +1,89 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 657F0846C
-	for <linux-mmc@vger.kernel.org>; Mon,  5 May 2025 13:20:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 83225259CA4
+	for <linux-mmc@vger.kernel.org>; Mon,  5 May 2025 13:30:03 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746451215; cv=none; b=SId2JhYKqQvaaSeCpJf+04IhkQ4JAfRzR1VtSPOvECA2jADPwbW7q/hlAA5YAJga4q+UHVWJFmEm7NfIrZo4M82x4XKpmNgQ3n17d/ugVx3McOcsgd2b3LQ09lbVM7Tj+pPROD1SV8hYNmox+Cbhyrr9kUPa7U5T7l2KImMKMUI=
+	t=1746451805; cv=none; b=Lpdj77dkyCVQB3i1lxbmSxPg25Ws8wyPpIwXy4lkQq7NqisiYjFoxxDqN5aQu/qiYYWMQN5Jzt1dlEiaGVw8aVYowsHI0vY/hZTqWXC0RrEShTYr0+8/2Gy8nBz2ZxhbnIq2PxlUgQ0g2WKLmGgNE0WYxi/aYmMxOw7VOqr2IOA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746451215; c=relaxed/simple;
-	bh=1nIUIrEpwOXGJJoJF25EtbbyvEfEBQaAzOY8nVHsKSQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bTPtPHheSW+5m9Fpr/vZfu+Sapfy75IlAQ+HZJkEOistUtFAA6PZhQ1j7oX9iOFe0EylMsdXEuOiIJdrz7v5Q/D414MukQglMuZ9uhuE9NIYgB/jMUP0PejMf9OBMiiBjanCvenpil4QhsE8vw5g503XvZI3dqy3QyoCBD+sNzQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=CMpJsZUu; arc=none smtp.client-ip=209.85.219.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="CMpJsZUu"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e730ea57804so4704268276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 05 May 2025 06:20:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1746451212; x=1747056012; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1nIUIrEpwOXGJJoJF25EtbbyvEfEBQaAzOY8nVHsKSQ=;
-        b=CMpJsZUuOIdQk5AsG9DnZykZ+xsOtjU+LHgDH0tCuRSurcgfeEchVTJJc8fqKsSLWw
-         ZRjpwAbhTawo5IlQ152AHpL1CiQP8eGxt+T7q3QkS/mwDVLIABj8/7KB7wpn3b/uOf/0
-         M0UGQXMvEq0ZfxaH210Cax5A8tutj6murHH8VDDx9/QTT8fVP7xGnFJ8dTJg9jybZOg3
-         MB61iSsabEKU7ExETbTsXGcaY2x3IJjS8u/Pae+s1Lkkhsl8blSHuIFa7p1pC5wEJeja
-         uJ+MDaQ9K0RfO7ClbGtnEIJTH8/MM3RO6bMj4EiECkoDXdSkJ/KdyakVBGNTQdfis5ko
-         z0mA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746451212; x=1747056012;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=1nIUIrEpwOXGJJoJF25EtbbyvEfEBQaAzOY8nVHsKSQ=;
-        b=NVp2xJ5sX2ssn+g4yr+FClTjqdyjITZyobpSWzhi0mOJh9BK2k2hinAb1t4akNO0Cy
-         HecYgPBY6PWZ+2BYqT+CC/crlCJGPd2g0FYr0UkieCqmC8ix2ye/oQfJcKCH0RYb9ase
-         /zXmXQ58bN/eh+81wJ37W6aHFFZOLoAMqqbaMxrG598ZBxhu/orlKnawXE2xe0PsyU3H
-         5u2dipQ+v+9YMgJlQjOLY1NJd7jryKkgetTUVUgyqLNByK7NwvmMsZxucVG8tthRKSBJ
-         ZCr174kbqs+txlXo0Kzax7+uzHbfKLVu7fr0ZDsv+cIKBRN5vUPYN7vfWPbJxnh/coOm
-         vUUg==
-X-Gm-Message-State: AOJu0YzKDSo91Mam6ihNI9rzlHvWpaglh0hYNUlk4t1f9vPV1Ka7mjUq
-	y8AhICtuIbS8CirpqGMls0xYNsy184adnESsq4TltO68Llb+2b7egmDsG2wEFinR5W64IN1gEKR
-	Z1otHv07u56xoZgTjDQhNbUFG3Y6E7/V5PdK97/SiJfu5UH/c
-X-Gm-Gg: ASbGncsIgL44JNh8ej/D+JumsH56gPWrFe799oDsgRzDjTnUWnVRIM9471sSrUzjW6V
-	nipuemxwF0LqAcqKUSqKrD08IPtMu706rSm0Gvij+dair51YQccsyPWCIePzzgrEZjd81kYMmuS
-	TfEvvXR9xNhd+m8PIbD+ysMI8=
-X-Google-Smtp-Source: AGHT+IF+P/+RQPOlbwGvlfAV8eYBKG2g8dLKf5L3pF20PuV36XS/pKMo3XFaHb0+JM2HJMOiwIM99Fq2ezV/kNrOAL4=
-X-Received: by 2002:a05:6902:154a:b0:e73:40bb:3304 with SMTP id
- 3f1490d57ef6-e75649df004mr15316734276.1.1746451212211; Mon, 05 May 2025
- 06:20:12 -0700 (PDT)
+	s=arc-20240116; t=1746451805; c=relaxed/simple;
+	bh=nxv8omxoWylB/thmP6M3rQdOrACdO/QSPsp7iDIySd0=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=GmZQfVpvIcx/qxP/EH5jgr/Hqv5mJ1Qw18lNEJjOmPd8Og9thZ59rwBwYjUuRS1QCLZWPBiOpk4PeR9enV43lOJ16uMDg0+FxieONko3bQhdKm/3hBMcVKpOgw2yrba8gEI6d5lFUYASoFVy+1xwRHw6M9RKAj7IwlD+dKzJDLs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uBvsv-0001kY-OL; Mon, 05 May 2025 15:29:29 +0200
+Received: from lupine.office.stw.pengutronix.de ([2a0a:edc0:0:900:1d::4e] helo=lupine)
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uBvsr-001EmE-2j;
+	Mon, 05 May 2025 15:29:25 +0200
+Received: from pza by lupine with local (Exim 4.96)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uBvsr-000KtU-2N;
+	Mon, 05 May 2025 15:29:25 +0200
+Message-ID: <a21bc1518141c38b064360ff4c2b7953bfdfda41.camel@pengutronix.de>
+Subject: Re: [PATCH v2 05/10] dt-bindings: reset: sophgo: Add SG2044
+ bindings.
+From: Philipp Zabel <p.zabel@pengutronix.de>
+To: Inochi Amaoto <inochiama@gmail.com>, Jean Delvare <jdelvare@suse.com>, 
+ Guenter Roeck <linux@roeck-us.net>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>,  Conor Dooley
+ <conor+dt@kernel.org>, Chen Wang <unicorn_wang@outlook.com>, Andi Shyti
+ <andi.shyti@kernel.org>,  Thomas Gleixner <tglx@linutronix.de>, Paul
+ Walmsley <paul.walmsley@sifive.com>, Samuel Holland
+ <samuel.holland@sifive.com>, Ulf Hansson <ulf.hansson@linaro.org>, Palmer
+ Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, Alexandre
+ Ghiti <alex@ghiti.fr>,  Daniel Lezcano <daniel.lezcano@linaro.org>, Thomas
+ Bonnefille <thomas.bonnefille@bootlin.com>, Jarkko Nikula
+ <jarkko.nikula@linux.intel.com>, Jisheng Zhang <jszhang@kernel.org>, Chao
+ Wei <chao.wei@sophgo.com>
+Cc: linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org, 
+ sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
+ linux-i2c@vger.kernel.org,  linux-riscv@lists.infradead.org,
+ linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, Longbin Li
+ <looong.bin@gmail.com>
+Date: Mon, 05 May 2025 15:29:25 +0200
+In-Reply-To: <20250413223507.46480-6-inochiama@gmail.com>
+References: <20250413223507.46480-1-inochiama@gmail.com>
+	 <20250413223507.46480-6-inochiama@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
-In-Reply-To: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 5 May 2025 15:19:35 +0200
-X-Gm-Features: ATxdqUFRGGumz4woAM-eLjfovWh1QtOtlibzcaNV0eahRnMhVL_j9cupmTyyFbk
-Message-ID: <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
-Subject: Re: RFC: mmc-utils versioning
-To: Dario Binacchi <dario.binacchi@amarulasolutions.com>
-Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@sandisk.com>
-Content-Type: text/plain; charset="UTF-8"
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: p.zabel@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-On Wed, 30 Apr 2025 at 19:05, Dario Binacchi
-<dario.binacchi@amarulasolutions.com> wrote:
->
-> Hello Ulf and Avri,
->
-> Would it be possible to tag future releases? That way, Buildroot's autobuild
-> service would automatically notify the maintainers of the package of a
-> new release,
-> and in turn update the package with the latest changes.
+On Mo, 2025-04-14 at 06:34 +0800, Inochi Amaoto wrote:
+> The SG2044 shares the same reset controller as SG2042, so it
+> is just enough to use the compatible string of SG2042 as a
+> basis.
+>=20
+> Add compatible string for the reset controller of SG2044.
+>=20
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+> Reviewed-by: Chen Wang <unicorn_wang@outlook.com>
 
-It's certainly doable. Setting a tag is simple, but having a more
-formal release-cycle with release-notes, etc, is to me a bit too much.
+Applied patch 5 to reset/next, thanks!
 
-Would just a tag be okay with some kind of summary of the updates
-since the last tag?
+[05/10] dt-bindings: reset: sophgo: Add SG2044 bindings.
+        https://git.pengutronix.de/cgit/pza/linux/commit/?id=3D1c64de886b88
 
-We need Avri's opinion on this too.
+regards
+Philipp
 
-Kind regards
-Uffe
