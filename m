@@ -1,84 +1,108 @@
-Received: from mail11.truemail.it (mail11.truemail.it [217.194.8.81])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2648019995E;
-	Mon,  5 May 2025 07:33:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.194.8.81
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DEA7741C63
+	for <linux-mmc@vger.kernel.org>; Mon,  5 May 2025 12:48:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746430394; cv=none; b=ZZJIKsau3Kx2zUqvUEBN+AZlc/8qcI/4iSZdmo1AL2/A/jU4NPMTrnO69Cv+F3O3O9kp2StQjZVlnmdSY6CLp5sF7Ce+K6IDz8oiEuypur1SfznnN/G3UtJYtPD24C0/v8ITWgN39/mPYxEmROXkmNpbDi+k7Y3WpdNo722u0LY=
+	t=1746449339; cv=none; b=SiK7k66N+uUW4RS+pv3Ns384iuw8/WT+VmM1fgJ3fv3bikKz+2Pn70+2VFIxEN3vs7DE9vcF0OBEYyd83Ao1jj1dIJGiTSVGkfO2SfJnNIxbRzvK6Elm4bbETmtQME9FE0muvqDg5UjtuvNy4s+dP9eA93foOKoJvvKt+gvJkK0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746430394; c=relaxed/simple;
-	bh=o9Ua9es+nDQSCTMlF2S5n70GzvrIm3GZj9ppMhDTiO8=;
+	s=arc-20240116; t=1746449339; c=relaxed/simple;
+	bh=qOiDsPGyW52iz27gqPAj4k3cSNTm4gcs8TGRaSPcHeg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=gWu3mur00NrRfbx5l3ejOjVnIi0rEucBSBEZj58qkDwtRX8FO3yjv9MBextWEODpq2t/gO3bTpHg1THiDG8zzM224PTT5Pu1/WjINtWNo7/OoOejzZuYpAsBEKYLZu7I13n38dt7FQ6wApdT3I4mul/5qF+W4DpYflQWQq+4980=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it; spf=pass smtp.mailfrom=dolcini.it; dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b=XSwnb6jG; arc=none smtp.client-ip=217.194.8.81
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dolcini.it
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dolcini.it header.i=@dolcini.it header.b="XSwnb6jG"
-Received: from francesco-nb (248.201.173.83.static.wline.lns.sme.cust.swisscom.ch [83.173.201.248])
-	by mail11.truemail.it (Postfix) with ESMTPA id 98E3E1F842;
-	Mon,  5 May 2025 09:33:00 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dolcini.it;
-	s=default; t=1746430381;
-	bh=/zksZ8p8UU1t+kGoN2N2Kk+JAb77n7Fw4YIg48JHLvo=; h=From:To:Subject;
-	b=XSwnb6jGDpr1y0ta615f3VPtth08iehvZCxcn5LdnaodpKe+HSAJ3/US6VskIKZMY
-	 1XYDDlYzIhgEUl9KthaarKKGUCgX+22Dnd0z07Py9D7cxW1Pg56W/QooSmwN7UldfL
-	 gu06tdtucnyd/hHvLKe8NbVBucRuLuJHNrE9r5+LaoA8Ficm9rLENY/f3yBLlahn/q
-	 0Utt/4sdkeexqCy1qnAbqkwMaDHcAPqsUhXSJ+g/Otgm6qCdZd3mdCVsYRxaT9btKu
-	 PyAbzMAg9Q+v09LgNmb5v+Nlnq6Y0beou9IC6xmEhQuzimXRTRgDOi9esSaK+qYkQN
-	 aPcBFyz2fSPvw==
-Date: Mon, 5 May 2025 09:32:55 +0200
-From: Francesco Dolcini <francesco@dolcini.it>
-To: "Ivan T. Ivanov" <iivanov@suse.de>
-Cc: Francesco Dolcini <francesco@dolcini.it>,
-	Sascha Hauer <s.hauer@pengutronix.de>,
-	Jeff Chen <jeff.chen_1@nxp.com>,
-	Pete Hsieh <tsung-hsien.hsieh@nxp.com>,
-	Brian Norris <briannorris@chromium.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH do not merge 0/4] wifi: mwifiex: add iw61x support
-Message-ID: <20250505073255.GA12817@francesco-nb>
-References: <20250326-mwifiex-iw61x-v1-0-ff875ed35efc@pengutronix.de>
- <20250331065026.GA12444@francesco-nb>
- <20250429125928.pw7k4raw52jyvyaj@localhost.localdomain>
+	 Content-Type:Content-Disposition:In-Reply-To; b=G1zCxG+i1wkPWpQm1pQQlcCcEZgIaizPD63J8oQemXw7q+PsrEPOK3kDQuUZPeGYaR2Oi0GOhT+ygcoR9PLFwoU0Gm+w7Fw/0PgpQJbHYRDq7ndfYXxna5jWkOd7m3IKR967fMr5210R1BS26c2DhGoeipClfZp4rIlZ4wlI8Tw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <ore@pengutronix.de>)
+	id 1uBvFe-0000yT-BA; Mon, 05 May 2025 14:48:54 +0200
+Received: from pty.whiteo.stw.pengutronix.de ([2a0a:edc0:2:b01:1d::c5])
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1uBvFd-001ESa-0i;
+	Mon, 05 May 2025 14:48:53 +0200
+Received: from ore by pty.whiteo.stw.pengutronix.de with local (Exim 4.96)
+	(envelope-from <ore@pengutronix.de>)
+	id 1uBvFd-004cTk-0D;
+	Mon, 05 May 2025 14:48:53 +0200
+Date: Mon, 5 May 2025 14:48:53 +0200
+From: Oleksij Rempel <o.rempel@pengutronix.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: kernel@pengutronix.de, linux-kernel@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+	Mark Brown <broonie@kernel.org>,
+	"Rafael J. Wysocki" <rafael@kernel.org>,
+	=?utf-8?B?U8O4cmVu?= Andersen <san@skov.dk>,
+	Christian Loehle <christian.loehle@arm.com>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	Avri Altman <Avri.Altman@sandisk.com>
+Subject: Re: [PATCH v4 0/4] mmc: handle undervoltage events and prevent eMMC
+ corruption
+Message-ID: <aBiztawScUfcLELt@pengutronix.de>
+References: <20250310102229.381887-1-o.rempel@pengutronix.de>
+ <CAPDyKFrC56BBJk=YAPWCCNYNqFAoY74_yH0ZXfNQEiDhaA2xJg@mail.gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20250429125928.pw7k4raw52jyvyaj@localhost.localdomain>
+In-Reply-To: <CAPDyKFrC56BBJk=YAPWCCNYNqFAoY74_yH0ZXfNQEiDhaA2xJg@mail.gmail.com>
+X-Sent-From: Pengutronix Hildesheim
+X-URL: http://www.pengutronix.de/
+X-Accept-Language: de,en
+X-Accept-Content-Type: text/plain
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ore@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-On Tue, Apr 29, 2025 at 03:59:28PM +0300, Ivan T. Ivanov wrote:
-> On 03-31 08:50, Francesco Dolcini wrote:
-> > Message-ID: <20250331065026.GA12444@francesco-nb>
-> > On Wed, Mar 26, 2025 at 01:18:30PM +0100, Sascha Hauer wrote:
-> > > This series adds iw61x support to the mwifiex driver. It works for me,
-> > > but is not yet ready to be merged. Some people showed interest in it, so
-> > > I am sending it here.
+Hi Ulf,
 
-...
+Sorry for very late replay,
 
-> > > Not sure what these are about, I can't see these handled in the
-> > > downstream mwifiex driver as well. Could also be there is some parsing
-> > > error. Nevertheless the driver seems to work.
+On Thu, Mar 20, 2025 at 03:36:32PM +0100, Ulf Hansson wrote:
+> Hi Oleksij,
 > 
-> Yep, it is working. Thank you! I am testing this on FRDM-iMX93, which has
-> IW612 revision 1.0.
+> On Mon, 10 Mar 2025 at 11:22, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
+> >
+> > changes v4:
+> > - drop HPI and SDHCI related patches
+> >
+> > This patch set introduces a framework for handling undervoltage events
+> > in the MMC subsystem. The goal is to improve system reliability by
+> > ensuring graceful handling of power fluctuations that could otherwise
+> > lead to metadata corruption, potentially rendering the eMMC chip
+> > unusable or causing significant data loss.
 > 
-> I have to use nxp/sd_w61x_v1.bin.se on this board and NULL firmware_sdiouart
-> because it seems that firmware return 1 as "strap" value, even if WiFi
-> is definitely connected over SDIO.
+> Thanks for posting this! I will spend some time reviewing this next
+> week and let you know my comments then.
+> 
+> However, I just wanted to let you know that I just posted a series [1]
+> (forgot to cc you, sorry), which also reworks the way _mmc_suspend()
+> understands what scenario it should be running. I am guessing that
+> re-work is simplifying for your $subject series too. Maybe you would
+> like to have a look?
 
-Wi-Fi is always connected over SDIO (for IW61x), the strapping is
-related to the interface used for BT. In the past it was common to have
-options for having BT over SDIO or UART or USB, but for IW61x it seems
-that UART is the only available option.
+Ah, very nice. The integration of undervoltage support is easier now.
 
-Francesco
+I rebased by match on top of mmc/next branch and do some testing
+tomorrow. If you have no other comments I'll send updated patches after
+testing.
 
+By the way, are you on embedded recipes this year?
+
+Best Regards,
+Oleksij
+-- 
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
