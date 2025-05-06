@@ -1,123 +1,131 @@
-Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
+Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4B1171865E3
-	for <linux-mmc@vger.kernel.org>; Tue,  6 May 2025 07:49:15 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB4244B1E79;
+	Tue,  6 May 2025 09:22:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746517759; cv=none; b=WNrQFLGxudt3VTd1yfqznQt0IlvPnWyHvxfnpcUN5FD3zwePG5EoJwfdXUd0Mv/kLUppx018ddoJAgjDIlKWAee28YwOQfhIhlSL6tkUO9jpfIi8nWZu8/dClG+e4vUBgsg3/PA7hrvARrYoqIjMKYNdu+mQ1g3v9EtNAz8DkCY=
+	t=1746523383; cv=none; b=OCSH1lpUg/Pxt8aF3+VkaBigMjgJNL4F2UaaWjo6jRL6MaUWBmJ0nu+pEFbVN+SkCdaoycI+yvs/cEfrMQsTgKBxHNAFZS3GzHVehXwvkcd+O8po+bYS4hOeM8heYJt8RioS+Dmp3u3cGLV/d7Z3cW+fY//COLFfpK4X9FKjKFA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746517759; c=relaxed/simple;
-	bh=2s4awz1pq6AtOnxGpTgUA0plXoOmwpwHHRh+n0HME8E=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=dPtwHBeWYcNsTQS4mU/z0pJtNCOASPLfm9XzANiieNQIqR9iGC9DxOI5bsUJE8Yo1YthC6+TpKUgMxgetYhFlLoSNKtIHOos+yLTY9L1Jb/1BSJOt2kq2ZjfV6srZ0kYI7za2SKqtmQj6qVhxsKFUKvcn06zCzbK3RLKdDVuV/M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=amarulasolutions.com; spf=pass smtp.mailfrom=amarulasolutions.com; dkim=pass (1024-bit key) header.d=amarulasolutions.com header.i=@amarulasolutions.com header.b=lVLaDQrE; arc=none smtp.client-ip=209.85.128.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=amarulasolutions.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=amarulasolutions.com
+	s=arc-20240116; t=1746523383; c=relaxed/simple;
+	bh=8YC/nlUWpEAJFTkya/c4smmCYNL/U+/Jg0o0Xd67Nvk=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=mcs02XMQigYAsCNDR2s6FvQAeeEsKU9EHNzEDLdWhF0Q+OnhxviKVTeowliVb3k9H8p6raaLIqwlaFBSRTah3xwa5GDwZnu43x/tLY+tsiFquu58DtVJ5fQLSC74fD7hTYlHYyK+Eet+coHCxuhwdB9ifZYyEEYdnnN6YQunSSo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=SQrXhASu; arc=none smtp.client-ip=178.21.23.139
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=amarulasolutions.com header.i=@amarulasolutions.com header.b="lVLaDQrE"
-Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-6fead015247so47692277b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 06 May 2025 00:49:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=amarulasolutions.com; s=google; t=1746517755; x=1747122555; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2s4awz1pq6AtOnxGpTgUA0plXoOmwpwHHRh+n0HME8E=;
-        b=lVLaDQrECaweQYzHcuEnrn4h0nYxDU5DZQPA4sYVvzQpFvNfJ8F1peqyTy2pX5JR0I
-         K/w4yolF/9QiKRRM1BS4VV51QPA3u1IbDyO67/iTQFvFalaEXFFAb5qWPa4EZLGW6daJ
-         hiZ1kVVpyw49+TL8ZYI8zpEWldbfHyrLzsazo=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746517755; x=1747122555;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=2s4awz1pq6AtOnxGpTgUA0plXoOmwpwHHRh+n0HME8E=;
-        b=bPpXl+0WqHPums/53oN1YNMehY+ldALmXNKpUArp0JrD0SIQ75uTqoF/EYmmI62X5c
-         8GGuD8z/Fhxa7d8lQ8Vhr1ud4VQeFXqlTPcuBmGH8XmItbp63Qh/7dRhWLgN6rT1MPP6
-         0QcOEpElXFrfWiJcQ8smunoTodg2NxI6iJ+43V2G0q+L92O7NQo6bWWTx2MxJd/w0flb
-         1WkhXdL7McyAMfxlp94F7plwkyU8CtEOwZLWc8Tgy70smAEGQax3760OAx/vbGwMtQ6C
-         9DXi7G3EHFSYK9URfEU+4YlHvVIWN2ZCXBsBtWV5nLoqbgbtVeLFheLjKrrOWqE6VxuY
-         IrTA==
-X-Gm-Message-State: AOJu0YxS6asXusWHOHNWAto91a9xvVqoR6XCFZhRPK5mmEagHKfusEuW
-	NzD0yLSduLfu6W1LtBcSObiZ9+MgpJR6QfacG7t39kyCrNDnA9Lg0JALW9keenRjQlDzrXMQnrD
-	9EV4DHTt4XyNb6u/z0xxcajwFYaMg5y6eAZTvrg==
-X-Gm-Gg: ASbGnctdnRIBcrpGvqgDi9EPuFp2qivNXR/bRXSy+pEgHjCHU93kzx1hCDl7hyPBjD7
-	Vi8PeX2S1BrHISZ78dNXNBtuISuv3qiG0NEIzAkVNuZEsDoaOf6bmSK/xe9T6LolzIGHl61GAEn
-	dbY0iGCwCzzQtQTXdqxhK/Uei2BfejKw==
-X-Google-Smtp-Source: AGHT+IG/mu3CpdjkKTUwmHgQG1stWfab87juNB8A51aCqpzBhgiz/eoy4qBG3MFH7fc2Dw0Zc+sON13BcgurKmteqN0=
-X-Received: by 2002:a05:690c:4a07:b0:708:11c7:d200 with SMTP id
- 00721157ae682-708eaeceb4fmr118978097b3.4.1746517755119; Tue, 06 May 2025
- 00:49:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="SQrXhASu"
+Received: from mail01.disroot.lan (localhost [127.0.0.1])
+	by disroot.org (Postfix) with ESMTP id D02F520731;
+	Tue,  6 May 2025 11:22:57 +0200 (CEST)
+X-Virus-Scanned: SPAM Filter at disroot.org
+Received: from layka.disroot.org ([127.0.0.1])
+ by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
+ id ETRcuLb97ySV; Tue,  6 May 2025 11:22:57 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
+	t=1746523377; bh=8YC/nlUWpEAJFTkya/c4smmCYNL/U+/Jg0o0Xd67Nvk=;
+	h=From:To:Cc:Subject:Date;
+	b=SQrXhASu87Ica13iGsBGL3hk/3b74IZ8UdE9gfAXvfCJpvbOJbELKAkUrgOOwQNNN
+	 +iZTHypK30d7KowSXDM7FsxHWtgTSdBct9iIDq/pzCDrYNBsohvfUW5Eq3ktTlpUD/
+	 maSDpQTD+dFEE/Zzhy+GVDpUoU1YxaIV8XTYPDCuWt3HaESekUZEhBCKoBkNLANiyG
+	 VTaWI2RL6OAnha+091ncXvB914teqnKFfRnE2n/CBjm8Z/waAjSfBzvabHFo8KA4Yv
+	 2fGLcKHUao6O0zf1+1NWAmsC9bXMJpGiDItexlX4d1rtinhc25jmJOsNFpKuuW6De6
+	 E2TBuSwgABhuw==
+From: Yao Zi <ziyao@disroot.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Shresth Prasad <shresthprasad7@gmail.com>,
+	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Chukun Pan <amadeus@jmu.edu.cn>
+Cc: linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	linux-clk@vger.kernel.org,
+	Yao Zi <ziyao@disroot.org>
+Subject: [PATCH v5 0/5] Support SD/SDIO controllers on RK3528
+Date: Tue,  6 May 2025 09:22:01 +0000
+Message-ID: <20250506092206.46143-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
- <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
-In-Reply-To: <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
-From: Dario Binacchi <dario.binacchi@amarulasolutions.com>
-Date: Tue, 6 May 2025 09:49:04 +0200
-X-Gm-Features: ATxdqUHZUyCh4YVBOgn8b4xlgUzdnb2ism4TsFOHJVReG3TwNlvw0LE3LebvnKQ
-Message-ID: <CABGWkvr2TPKkqQKYZkx7u0rhf4xyg7WNg6H7+hdpETSqv6MF2w@mail.gmail.com>
-Subject: Re: RFC: mmc-utils versioning
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Avri Altman <avri.altman@sandisk.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-Hello Ulf,
+RK3528 features two SDIO controllers and one SD/MMC controller. This
+series adds essential support for their tuning clocks and brings the
+SD/MMC one up on Radxa E20C board. Both HS and SDR104 mode are verified.
 
-On Mon, May 5, 2025 at 3:20=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
- wrote:
->
-> On Wed, 30 Apr 2025 at 19:05, Dario Binacchi
-> <dario.binacchi@amarulasolutions.com> wrote:
-> >
-> > Hello Ulf and Avri,
-> >
-> > Would it be possible to tag future releases? That way, Buildroot's auto=
-build
-> > service would automatically notify the maintainers of the package of a
-> > new release,
-> > and in turn update the package with the latest changes.
->
-> It's certainly doable. Setting a tag is simple, but having a more
-> formal release-cycle with release-notes, etc, is to me a bit too much.
->
-> Would just a tag be okay with some kind of summary of the updates
-> since the last tag?
+- Changed from v4
+  - rk3528 clock driver
+    - Switch to auxiliary GRF
+    - drop rockchip_clk_register_grf_branches
+    - Rename branch_mmc_grf to branch_grf_mmc to make style consistent
+      (with branch_grf_gate)
+  - Link to v4: https://lore.kernel.org/all/20250417143647.43860-1-ziyao@disroot.org/
+- Changed from v3
+  - Drop applied binding patch of MMC controller
+  - Rebase on top of linux-rockchip/for-next
+  - Link to v3: https://lore.kernel.org/all/20250309055348.9299-1-ziyao@disroot.org/
+- Changed from v2
+  - Apply review tags
+  - Rebase on top of linux-rockchip/for-next and drop applied patches
+  - RK3528 devicetree
+    - Fix accidentally dropped status property of saradc node
+    - drop det and pwren pinctrls for SDIO{0,1} according to the
+      reference design
+    - Correct max-frequency for SDIO{0,1}
+  - rk3528-radxa-e20c devicetree
+    - Don't disable sdio for sdmmc as claimed in the hw design guide
+  - Link to v2: https://lore.kernel.org/all/20250305194217.47052-1-ziyao@disroot.org/
+- Changed from v1
+  - Apply review tags
+  - Rebase on top of linux-rockchip/for-next and saradc v2 series
+  - rk3528 clock driver:
+    - explicitly include minmax.h, replace MAX() with more robust max()
+    - readability improvements
+    - fix error checks: ERR_PTR(-ENODEV), instead of ERR_PTR(ENODEV), is
+      returned when syscon_regmap_lookup_by_compatible() fails for missing
+      such syscon
+  - RK3528 devicetree
+    - Add default pinctrl
+    - Move the per-SoC property, rockchip,default-sample-phase, into the
+      SoC devicetree
+  - rk3528-radxa-e20c devicetree
+    - Assign sdcard to mmc1
+    - Add missing regulators
+    - Apply no-sdio for the sdmmc controller
+    - Sort nodes
+  - Link to v1: https://lore.kernel.org/all/20250301104250.36295-1-ziyao@disroot.org/
 
-Yes, I think so
+Thanks for your time and review.
 
-Thanks and regards,
-Dario
->
-> We need Avri's opinion on this too.
->
-> Kind regards
-> Uffe
+Yao Zi (5):
+  dt-bindings: clock: Add GRF clock definition for RK3528
+  clk: rockchip: Support MMC clocks in GRF region
+  clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
+  arm64: dts: rockchip: Add SDMMC/SDIO controllers for RK3528
+  arm64: dts: rockchip: Enable SD-card interface on Radxa E20C
 
+ .../boot/dts/rockchip/rk3528-radxa-e20c.dts   | 30 +++++++
+ arch/arm64/boot/dts/rockchip/rk3528.dtsi      | 69 ++++++++++++++++
+ drivers/clk/rockchip/clk-mmc-phase.c          | 24 +++++-
+ drivers/clk/rockchip/clk-rk3528.c             | 82 +++++++++++++++++--
+ drivers/clk/rockchip/clk.c                    | 17 +++-
+ drivers/clk/rockchip/clk.h                    | 22 ++++-
+ .../dt-bindings/clock/rockchip,rk3528-cru.h   |  6 ++
+ 7 files changed, 236 insertions(+), 14 deletions(-)
 
+-- 
+2.49.0
 
---=20
-
-Dario Binacchi
-
-Senior Embedded Linux Developer
-
-dario.binacchi@amarulasolutions.com
-
-__________________________________
-
-
-Amarula Solutions SRL
-
-Via Le Canevare 30, 31100 Treviso, Veneto, IT
-
-T. +39 042 243 5310
-info@amarulasolutions.com
-
-www.amarulasolutions.com
