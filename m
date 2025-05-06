@@ -1,15 +1,16 @@
 Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AD74268FF9
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AC71268684
 	for <linux-mmc@vger.kernel.org>; Tue,  6 May 2025 09:51:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746525092; cv=none; b=De8ONYGIfpUVSQBXFJXAdlv5apzSW2N0uPajzzDeBF+kNdqTQ6KIxBbJsQVLo30VZ0xVKjfl/P18d7wJ2B6Y9BfgioT6ggXUqsbM6TMN5yoYAAPPZWS8MqlcmuuVPsjzqybE06ehtBhqMRTN48wipY2VB2/rUl0i1DLKll97Tmo=
+	t=1746525092; cv=none; b=ZTEAeqdAF3r4/YPXxPh/eLr8W1DzFvj/gafyEgsCu5OFIg6qK5XSb84VjR+FwIsbpoichNI2DzpeXg9Hi+VKH+2aaiGG49BLhGZtv7YPd/WC74jWIQCimKBcaG1ERa8iFohI7nabUhoaTqah6jULhtci/doP6ihswe+q9+UVcYI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1746525092; c=relaxed/simple;
-	bh=+8hgmQMkMUP7qTpXr+fdL0ZmZlS89PQR8pMDgpeqz6I=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=q/2zCGKssut6+SG6YOrFhbMzprouLCfwZ3+x+QbiOEuCGqpdnBwBd4FJjdcum+dfPoHArtS0S994y36U92aw0iOGw2UABnoCQS8xdxRJPqvWdpHb00cmHgzrhAi4UirEcok+sH3DO737zh1Bt85i0s6uaxlAWuYLZM2I6usNq+g=
+	bh=o5kt/QV+MPk6gBTy1bzmdhHQ87VP4aY+c4VSaP8gPWI=;
+	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
+	 MIME-Version; b=XYm3vDjIjz23ZkpUqftqSfFF9cQ0EeRKLIzl7VJk9B7Ail8L9hr5bK6aAcZQ4AIE3m4+OkG7GdAqgMk6mMX3axujgt7fzZgU1HqNFB0OVGVybZQ6+oVKvlnfLHhOf+jy6LU/saj+A4bR0w39aOQGOx5bncAZN8N48PwFnk0f9Jo=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
@@ -17,16 +18,16 @@ Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
 	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
 	(Exim 4.92)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExM-00059y-Qx; Tue, 06 May 2025 11:51:20 +0200
+	id 1uCExM-0005A2-Qx; Tue, 06 May 2025 11:51:20 +0200
 Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
 	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 	(Exim 4.96)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-001NB0-2U;
+	id 1uCExL-001NB5-2q;
 	Tue, 06 May 2025 11:51:19 +0200
 Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-009Oay-2B;
+	id 1uCExL-009Obc-2Y;
 	Tue, 06 May 2025 11:51:19 +0200
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 To: Ulf Hansson <ulf.hansson@linaro.org>
@@ -41,10 +42,12 @@ Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
 	Christian Loehle <christian.loehle@arm.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Avri Altman <Avri.Altman@sandisk.com>
-Subject: [PATCH v5 0/4] mmc: handle undervoltage events and prevent eMMC corruption
-Date: Tue,  6 May 2025 11:51:14 +0200
-Message-Id: <20250506095118.2239459-1-o.rempel@pengutronix.de>
+Subject: [PATCH v5 4/4] mmc: block: abort requests and suppress errors after undervoltage shutdown
+Date: Tue,  6 May 2025 11:51:18 +0200
+Message-Id: <20250506095118.2239459-5-o.rempel@pengutronix.de>
 X-Mailer: git-send-email 2.39.5
+In-Reply-To: <20250506095118.2239459-1-o.rempel@pengutronix.de>
+References: <20250506095118.2239459-1-o.rempel@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -57,86 +60,44 @@ X-SA-Exim-Mail-From: ore@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
 X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-changes v5:
-- Rebased on top of mmc/next after introduction of enum mmc_poweroff_type
-- Replaced boolean undervoltage parameter with MMC_POWEROFF_UNDERVOLTAGE
-- Dropped unused __mmc_resume() helper
-- Updated commit messages accordingly
-changes v4:
-- drop HPI and SDHCI related patches
+Extend the existing card removal checks in mmc_blk_mq_complete_rq() and
+mmc_mq_queue_rq() to also account for the undervoltage state. If the host
+has entered undervoltage shutdown, mark requests as quiet and abort them
+early to prevent unnecessary retries and error logging. This ensures no
+further operations are attempted on the card after an emergency stop.
 
-This patch set introduces a framework for handling undervoltage events
-in the MMC subsystem. The goal is to improve system reliability by
-ensuring graceful handling of power fluctuations that could otherwise
-lead to metadata corruption, potentially rendering the eMMC chip
-unusable or causing significant data loss.
+Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+---
+ drivers/mmc/core/block.c | 2 +-
+ drivers/mmc/core/queue.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-## Problem Statement
-
-Power fluctuations and sudden losses can leave eMMC devices in an
-undefined state, leading to severe consequences. The worst case can
-result in metadata corruption, making the entire storage inaccessible.
-While some eMMC devices promise to handle such situations internally,
-experience shows that some chip variants are still affected. This has
-led vendors to take a more protective approach, implementing external
-undervoltage handling as a precautionary measure to avoid costly field
-failures and returns.
-
-The existence of the "Power Off Notification" feature in the eMMC
-standard itself serves as indirect evidence that this is a real-world
-issue.  While some projects have already faced the consequences of
-ignoring this problem (often at significant cost), specific cases cannot
-be disclosed due to NDAs.
-
-## Challenges and Implementation Approach
-
-1. **Raising awareness of the problem**: While vendors have used
-   proprietary solutions for years, a unified approach is needed upstream.
-   This patch set is a first step in making that happen.
-
-2. **Finding an acceptable implementation path**: There are multiple
-   ways to handle undervoltage - either in the kernel or in user space,
-   through a global shutdown mechanism, or using the regulator framework.
-   This patch set takes the kernel-based approach but does not prevent
-   future extensions, such as allowing user-space handoff once available.
-
-3. **Preparing for vendor adoption and testing**: By providing a
-   structured solution upstream, this patch set lowers the barrier for
-   vendors to standardize their undervoltage handling instead of relying on
-   fragmented, out-of-tree implementations.
-
-## Current Limitations
-
-This patch set is an initial step and does not yet cover all possible
-design restrictions or edge cases. Future improvements may include
-better coordination with user space and enhancements based on broader
-testing.
-
-## Testing Details
-
-The implementation was tested on an iMX8MP-based system. The board had
-approximately 100ms of available power hold-up time. The Power Off
-Notification was sent ~4ms after the board was detached from the power
-supply, allowing sufficient time for the eMMC to handle the event
-properly.  Tests were conducted under both idle conditions and active
-read/write operations.
-
-Oleksij Rempel (4):
-  mmc: core: Handle undervoltage events and register regulator notifiers
-  mmc: core: Add MMC_POWEROFF_UNDERVOLTAGE support in _mmc_suspend()
-  mmc: core: add undervoltage handler for MMC/eMMC devices
-  mmc: block: abort requests and suppress errors after undervoltage
-    shutdown
-
- drivers/mmc/core/block.c     |   2 +-
- drivers/mmc/core/core.c      |  30 +++++++++
- drivers/mmc/core/core.h      |   2 +
- drivers/mmc/core/mmc.c       |  89 +++++++++++++++++++++++--
- drivers/mmc/core/queue.c     |   2 +-
- drivers/mmc/core/regulator.c | 124 +++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h     |   8 +++
- 7 files changed, 249 insertions(+), 8 deletions(-)
-
---
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 585c2b274d98..2f07610d3c35 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2129,7 +2129,7 @@ static void mmc_blk_mq_complete_rq(struct mmc_queue *mq, struct request *req)
+ 	} else if (mqrq->retries++ < MMC_MAX_RETRIES) {
+ 		blk_mq_requeue_request(req, true);
+ 	} else {
+-		if (mmc_card_removed(mq->card))
++		if (mmc_card_removed(mq->card) || mq->card->host->undervoltage)
+ 			req->rq_flags |= RQF_QUIET;
+ 		blk_mq_end_request(req, BLK_STS_IOERR);
+ 	}
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index 284856c8f655..1dd71ea6927d 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -239,7 +239,7 @@ static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
+ 	bool get_card, cqe_retune_ok;
+ 	blk_status_t ret;
+ 
+-	if (mmc_card_removed(mq->card)) {
++	if (mmc_card_removed(mq->card) || mq->card->host->undervoltage) {
+ 		req->rq_flags |= RQF_QUIET;
+ 		return BLK_STS_IOERR;
+ 	}
+-- 
 2.39.5
 
