@@ -1,37 +1,37 @@
 Received: from layka.disroot.org (layka.disroot.org [178.21.23.139])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D9D7D265CDF;
-	Tue,  6 May 2025 09:23:07 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 39DF326B2D3;
+	Tue,  6 May 2025 09:23:11 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=178.21.23.139
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746523389; cv=none; b=GTdGtK8MGWxD4sYc9cpg7R3t8foymKLZF79E57SfKRSkgpDj/MK9V6AJVggqvcmH6Dfhz+HCbH2IkCuPU1E7kQ5+V6BHF/2Pkq6yHam29WHUsjsyYG1XIpgMg0CFoPt/Di++kRqH37WY5c0fNRM0f1Kfcz3K6UXRETB+8+Sj/Ao=
+	t=1746523394; cv=none; b=cU0PXc2zP8l0AbGFJ76WK8ssap5v3vW63KZ+9vvXWF5cr61QPYLbeTINQEYYN7GwtT/qpr8aDBitHMPwohDTZPldd6HEJx5MDRrTaCtp77poi+bl5c1e/6oGoTudlWOaE4LwKtxIJepu+yf9QUCbxRLOcIE1reRktQBxI9//Ki8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746523389; c=relaxed/simple;
-	bh=6edIhBaoWOfTotZiCQe2Htao2lyDgYNn+iXUNDszYqs=;
+	s=arc-20240116; t=1746523394; c=relaxed/simple;
+	bh=KooZtKiKIS4kYyX45xKSekDnpaeKvpGX35KgXvdXVHQ=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=UGCxM3Z1an8EQm3M80Z4AjEU4u9t8KupsVc4c45B+ei60DMEegsmlhZYimRnCK9pby6cF1+ZrZUjt1c9qG1VtLSU0rauasdeFA8GLf62VQ9NkielsmJZsgB7rUngxOaCzJYspsdDos6w8ORkEUcyBRqW/Fktg7/ZbslExaVFJAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=PEXv7FAk; arc=none smtp.client-ip=178.21.23.139
+	 MIME-Version; b=onObgsxwp5JrrUZkJtxG6QeNoZXwVxMg9C2cj0oXERje1nheJ/lpHTemNTVmhCNzfxeKZxZaQs9Ud1diGCSXVxUiFyfoqAYYzV8fqDQYnbk/aUWlk2vU0qk1a57SrR34/2RkRh+4/OCH9pnKmRUx9oM5+4Meg61/zPrVFPPETJ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org; spf=pass smtp.mailfrom=disroot.org; dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b=ed7ByAIg; arc=none smtp.client-ip=178.21.23.139
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=disroot.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=disroot.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="PEXv7FAk"
+	dkim=pass (2048-bit key) header.d=disroot.org header.i=@disroot.org header.b="ed7ByAIg"
 Received: from mail01.disroot.lan (localhost [127.0.0.1])
-	by disroot.org (Postfix) with ESMTP id C1D7725DAD;
-	Tue,  6 May 2025 11:23:05 +0200 (CEST)
+	by disroot.org (Postfix) with ESMTP id 9AE7E20731;
+	Tue,  6 May 2025 11:23:10 +0200 (CEST)
 X-Virus-Scanned: SPAM Filter at disroot.org
 Received: from layka.disroot.org ([127.0.0.1])
  by localhost (disroot.org [127.0.0.1]) (amavis, port 10024) with ESMTP
- id zlEt75JLCS3Q; Tue,  6 May 2025 11:23:05 +0200 (CEST)
+ id k22TyXZw3tdZ; Tue,  6 May 2025 11:23:09 +0200 (CEST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=disroot.org; s=mail;
-	t=1746523383; bh=6edIhBaoWOfTotZiCQe2Htao2lyDgYNn+iXUNDszYqs=;
+	t=1746523389; bh=KooZtKiKIS4kYyX45xKSekDnpaeKvpGX35KgXvdXVHQ=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References;
-	b=PEXv7FAkxF4Xaa98EkEnBJK1K56wPSHTU6h3KDcDodfS1SefgI90HkoQkjRXl9ppj
-	 8Ix9WzY/s+fAyzLvmbZmP6siIXGYWRDwcIzJGFkPeSRJDkZO8Ibf5aLiX/6QLjRZNJ
-	 6tc+AsN4A4FPklIPjI4A/btU9LSUAiYfjqEu8bJU0ajsdEcdxoPMV88wYV151zKhkG
-	 bEG++nFZDsrt+hvpkFl8kydzf9S2oEwm74djD07VmMSEkzmwyu11AFrjG82pREBdYZ
-	 PU93gdXc9XknOZEzjALI1jmJan6D+/lqWPMUlhXUeK3HRBbQO3qKGmwQU6i6PeOoP8
-	 GHF2kerJMDVDQ==
+	b=ed7ByAIgowDl7L0wG80IcxpsdGwUKPtgYkC0yox0lGF7IbJbHwXQskqS0yUH293Hr
+	 PsCtNUxUGCEUrajTEArkxU8PveJb/P0b1hCZBWiQb5IMC/Tp8IcRqqyY20LqqgErK9
+	 OCtxQ4rILSDLBgKjc9V5jvEJ9R6cQwJj5Dgor4jhaLcaV2TJi1+2KlwBrn1mVb9eB0
+	 DLRVf1DlbGCFBgqJ/PayVoZvYXHsJlmb8F0HwBFg09Mn7+WUsHLKIc98bEwsHmjCN1
+	 HNa+QjwNXoLl3VbHfw/Csh7OESXIS7mQQ0u/VelPLqs2rAdiz5sM8uRMmKo+GlEq9H
+	 O0dgixJFL0dPw==
 From: Yao Zi <ziyao@disroot.org>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -51,11 +51,10 @@ Cc: linux-mmc@vger.kernel.org,
 	linux-rockchip@lists.infradead.org,
 	linux-kernel@vger.kernel.org,
 	linux-clk@vger.kernel.org,
-	Yao Zi <ziyao@disroot.org>,
-	Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v5 1/5] dt-bindings: clock: Add GRF clock definition for RK3528
-Date: Tue,  6 May 2025 09:22:02 +0000
-Message-ID: <20250506092206.46143-2-ziyao@disroot.org>
+	Yao Zi <ziyao@disroot.org>
+Subject: [PATCH v5 2/5] clk: rockchip: Support MMC clocks in GRF region
+Date: Tue,  6 May 2025 09:22:03 +0000
+Message-ID: <20250506092206.46143-3-ziyao@disroot.org>
 In-Reply-To: <20250506092206.46143-1-ziyao@disroot.org>
 References: <20250506092206.46143-1-ziyao@disroot.org>
 Precedence: bulk
@@ -66,32 +65,169 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-These clocks are for SD/SDIO tuning purpose and come with registers
-in GRF syscon.
+Registers of MMC drive/sample clocks in Rockchip RV1106 and RK3528
+locate in GRF regions. Adjust MMC clock code to support register
+operations through regmap.
 
 Signed-off-by: Yao Zi <ziyao@disroot.org>
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
- include/dt-bindings/clock/rockchip,rk3528-cru.h | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/clk/rockchip/clk-mmc-phase.c | 24 ++++++++++++++++++++----
+ drivers/clk/rockchip/clk.c           | 17 ++++++++++++++---
+ drivers/clk/rockchip/clk.h           | 17 ++++++++++++++++-
+ 3 files changed, 50 insertions(+), 8 deletions(-)
 
-diff --git a/include/dt-bindings/clock/rockchip,rk3528-cru.h b/include/dt-bindings/clock/rockchip,rk3528-cru.h
-index 55a448f5ed6d..0245a53fc334 100644
---- a/include/dt-bindings/clock/rockchip,rk3528-cru.h
-+++ b/include/dt-bindings/clock/rockchip,rk3528-cru.h
-@@ -414,6 +414,12 @@
- #define MCLK_I2S2_2CH_SAI_SRC_PRE	402
- #define MCLK_I2S3_8CH_SAI_SRC_PRE	403
- #define MCLK_SDPDIF_SRC_PRE		404
-+#define SCLK_SDMMC_DRV			405
-+#define SCLK_SDMMC_SAMPLE		406
-+#define SCLK_SDIO0_DRV			407
-+#define SCLK_SDIO0_SAMPLE		408
-+#define SCLK_SDIO1_DRV			409
-+#define SCLK_SDIO1_SAMPLE		410
+diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
+index 91012078681b..b3ed8e7523e5 100644
+--- a/drivers/clk/rockchip/clk-mmc-phase.c
++++ b/drivers/clk/rockchip/clk-mmc-phase.c
+@@ -9,11 +9,14 @@
+ #include <linux/clk-provider.h>
+ #include <linux/io.h>
+ #include <linux/kernel.h>
++#include <linux/regmap.h>
+ #include "clk.h"
  
- /* scmi-clocks indices */
- #define SCMI_PCLK_KEYREADER		0
+ struct rockchip_mmc_clock {
+ 	struct clk_hw	hw;
+ 	void __iomem	*reg;
++	struct regmap	*grf;
++	int		grf_reg;
+ 	int		shift;
+ 	int		cached_phase;
+ 	struct notifier_block clk_rate_change_nb;
+@@ -54,7 +57,12 @@ static int rockchip_mmc_get_phase(struct clk_hw *hw)
+ 	if (!rate)
+ 		return 0;
+ 
+-	raw_value = readl(mmc_clock->reg) >> (mmc_clock->shift);
++	if (mmc_clock->grf)
++		regmap_read(mmc_clock->grf, mmc_clock->grf_reg, &raw_value);
++	else
++		raw_value = readl(mmc_clock->reg);
++
++	raw_value >>= mmc_clock->shift;
+ 
+ 	degrees = (raw_value & ROCKCHIP_MMC_DEGREE_MASK) * 90;
+ 
+@@ -134,8 +142,12 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+ 	raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
+ 	raw_value |= delay_num << ROCKCHIP_MMC_DELAYNUM_OFFSET;
+ 	raw_value |= nineties;
+-	writel(HIWORD_UPDATE(raw_value, 0x07ff, mmc_clock->shift),
+-	       mmc_clock->reg);
++	raw_value = HIWORD_UPDATE(raw_value, 0x07ff, mmc_clock->shift);
++
++	if (mmc_clock->grf)
++		regmap_write(mmc_clock->grf, mmc_clock->grf_reg, raw_value);
++	else
++		writel(raw_value, mmc_clock->reg);
+ 
+ 	pr_debug("%s->set_phase(%d) delay_nums=%u reg[0x%p]=0x%03x actual_degrees=%d\n",
+ 		clk_hw_get_name(hw), degrees, delay_num,
+@@ -189,7 +201,9 @@ static int rockchip_mmc_clk_rate_notify(struct notifier_block *nb,
+ 
+ struct clk *rockchip_clk_register_mmc(const char *name,
+ 				const char *const *parent_names, u8 num_parents,
+-				void __iomem *reg, int shift)
++				void __iomem *reg,
++				struct regmap *grf, int grf_reg,
++				int shift)
+ {
+ 	struct clk_init_data init;
+ 	struct rockchip_mmc_clock *mmc_clock;
+@@ -208,6 +222,8 @@ struct clk *rockchip_clk_register_mmc(const char *name,
+ 
+ 	mmc_clock->hw.init = &init;
+ 	mmc_clock->reg = reg;
++	mmc_clock->grf = grf;
++	mmc_clock->grf_reg = grf_reg;
+ 	mmc_clock->shift = shift;
+ 
+ 	clk = clk_register(NULL, &mmc_clock->hw);
+diff --git a/drivers/clk/rockchip/clk.c b/drivers/clk/rockchip/clk.c
+index 34d96aa7cd51..0cba7e7e0c42 100644
+--- a/drivers/clk/rockchip/clk.c
++++ b/drivers/clk/rockchip/clk.c
+@@ -509,8 +509,10 @@ void rockchip_clk_register_branches(struct rockchip_clk_provider *ctx,
+ 		clk = NULL;
+ 
+ 		/* for GRF-dependent branches, choose the right grf first */
+-		if ((list->branch_type == branch_muxgrf || list->branch_type == branch_grf_gate) &&
+-				list->grf_type != grf_type_sys) {
++		if ((list->branch_type == branch_muxgrf		||
++		     list->branch_type == branch_grf_gate	||
++		     list->branch_type == branch_grf_mmc) &&
++		    list->grf_type != grf_type_sys) {
+ 			hash_for_each_possible(ctx->aux_grf_table, agrf, node, list->grf_type) {
+ 				if (agrf->type == list->grf_type) {
+ 					grf = agrf->grf;
+@@ -612,6 +614,16 @@ void rockchip_clk_register_branches(struct rockchip_clk_provider *ctx,
+ 				list->name,
+ 				list->parent_names, list->num_parents,
+ 				ctx->reg_base + list->muxdiv_offset,
++				NULL, 0,
++				list->div_shift
++			);
++			break;
++		case branch_grf_mmc:
++			clk = rockchip_clk_register_mmc(
++				list->name,
++				list->parent_names, list->num_parents,
++				0,
++				grf, list->muxdiv_offset,
+ 				list->div_shift
+ 			);
+ 			break;
+@@ -641,7 +653,6 @@ void rockchip_clk_register_branches(struct rockchip_clk_provider *ctx,
+ 			break;
+ 		case branch_linked_gate:
+ 			/* must be registered late, fall-through for error message */
+-			break;
+ 		}
+ 
+ 		/* none of the cases above matched */
+diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
+index ebaed429a30d..d411de7a6f4a 100644
+--- a/drivers/clk/rockchip/clk.h
++++ b/drivers/clk/rockchip/clk.h
+@@ -619,7 +619,9 @@ struct clk *rockchip_clk_register_cpuclk(const char *name,
+ 
+ struct clk *rockchip_clk_register_mmc(const char *name,
+ 				const char *const *parent_names, u8 num_parents,
+-				void __iomem *reg, int shift);
++				void __iomem *reg,
++				struct regmap *grf, int grf_reg,
++				int shift);
+ 
+ /*
+  * DDRCLK flags, including method of setting the rate
+@@ -664,6 +666,7 @@ enum rockchip_clk_branch_type {
+ 	branch_grf_gate,
+ 	branch_linked_gate,
+ 	branch_mmc,
++	branch_grf_mmc,
+ 	branch_inverter,
+ 	branch_factor,
+ 	branch_ddrclk,
+@@ -1030,6 +1033,18 @@ struct rockchip_clk_branch {
+ 		.div_shift	= shift,			\
+ 	}
+ 
++#define MMC_GRF(_id, cname, pname, offset, shift, grftype)	\
++	{							\
++		.id		= _id,				\
++		.branch_type	= branch_grf_mmc,		\
++		.name		= cname,			\
++		.parent_names	= (const char *[]){ pname },	\
++		.num_parents	= 1,				\
++		.muxdiv_offset	= offset,			\
++		.div_shift	= shift,			\
++		.grf_type	= grftype,			\
++	}
++
+ #define INVERTER(_id, cname, pname, io, is, if)			\
+ 	{							\
+ 		.id		= _id,				\
 -- 
 2.49.0
 
