@@ -1,367 +1,199 @@
-Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6B03B26A0DD
-	for <linux-mmc@vger.kernel.org>; Tue,  6 May 2025 09:51:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746525092; cv=none; b=KR+/EULoDdXoaWxiR1YArftP05k9nKaRlUbmIXV8VU5qXyVt9wAHJE0aCzgBC/zhxvTEd5D0Hv0zlM1CrKClh/3JFokbv86ftNz64d9hE7CGwr+sZNZ6ehQl/U+UHr3lPWBA/ud5Ru8zhBZXyWM+xw3K84GG2zpL3Yxamycyt9Q=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746525092; c=relaxed/simple;
-	bh=XPqcfqGhQze9vL3FIbNUTmGYnY4ON4Mzdk72Xpg2NYs=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=Hs39PCWEc7WqH4gQHUhY/BBE4PaAITZcyNPCkae3IJyx9ZYpqy+mGov6iHvSZH0abrNlSz/lGASeI1WWRs5qJtsyMUCXM9MN86+rg7hDJHUcHhVHzQN3ZIq05x54M/pbZlTOTW9vBezYndOJd6FTYQqhr+V1q3Y4edg1/9EePxA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-	(Exim 4.92)
-	(envelope-from <ore@pengutronix.de>)
-	id 1uCExM-00059z-Qw; Tue, 06 May 2025 11:51:20 +0200
-Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
-	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-	(Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-001NB1-2c;
-	Tue, 06 May 2025 11:51:19 +0200
-Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
-	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-009Ob7-2G;
-	Tue, 06 May 2025 11:51:19 +0200
-From: Oleksij Rempel <o.rempel@pengutronix.de>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
-	kernel@pengutronix.de,
-	linux-kernel@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-	Mark Brown <broonie@kernel.org>,
-	"Rafael J. Wysocki" <rafael@kernel.org>,
-	=?UTF-8?q?S=C3=B8ren=20Andersen?= <san@skov.dk>,
-	Christian Loehle <christian.loehle@arm.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Avri Altman <Avri.Altman@sandisk.com>
-Subject: [PATCH v5 1/4] mmc: core: Handle undervoltage events and register regulator notifiers
-Date: Tue,  6 May 2025 11:51:15 +0200
-Message-Id: <20250506095118.2239459-2-o.rempel@pengutronix.de>
-X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250506095118.2239459-1-o.rempel@pengutronix.de>
-References: <20250506095118.2239459-1-o.rempel@pengutronix.de>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 52DE01DED60
+	for <linux-mmc@vger.kernel.org>; Tue,  6 May 2025 19:42:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1746560558; cv=fail; b=PZNbwLCQGGY/23cfT/H3uNDoKVXaFcVZE7IJSeL4Ywv95NcqE6mzoDmWkFrtUqrOEWbvAcQeEj9M3+YS7nj2P8oBMebuUqYSJxl/tT8SO+k2CHcstfWDULaY7U+mg01+jZ1PDEkSMwJALwfAvtcqgU4k4r2PvVrFGp1zadRh/Pg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1746560558; c=relaxed/simple;
+	bh=fwKiTf1SP7OUckwRhmcY+eEzSocZD4Vv5b/UPAjkaSk=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=UUkdUbBFWDkG+YTFGtnCpqBCrHIbev34PiwNj0RocmRcN0fI82Z+KPmk/jSf44fKhi6SyQnNRf4Q/I9fUtd1M92FW4lJ3/01wsex/iXgHuasG2t5AQlj5527kimrvFfVOFtKLgzBmpWaF+50Wwkwj4vYHn1p9TfUtjCRBXV8ymg=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=1zwYJGQt; arc=fail smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="1zwYJGQt"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1746560556; x=1778096556;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=fwKiTf1SP7OUckwRhmcY+eEzSocZD4Vv5b/UPAjkaSk=;
+  b=1zwYJGQtKihpbNvdgdROx3iHMOo6auS82ecOJDGZZLP3JUqcqIBYT+ni
+   wwQ3cjsZRRCP+faQ9/I9J17pmyWovQ+swliDUT/TYum3bcXLdg7txml6X
+   +DKI8YO+UDL2odn4nkerp3s2y5LnukYlyEdn8OykvWiZJsyF8GK4hxuRt
+   YPaebq5HChrRXO5y3dz23E+VxCIJuvpgQjj9j3ZnBmzniMSJ+ogm9jdul
+   3L/nj6z3UYg1+UJFxg2MPROv2CW36FbwivXgAeD5t5IslfOjWyPMo2+Mx
+   uYXx8kBOFV7qpCFu/TfSQ3ZFyL1T+GtCONM0RoPgzDuG7s6SCGTOJViyH
+   w==;
+X-CSE-ConnectionGUID: mpN0xSfOTa+MAzaoLayV3A==
+X-CSE-MsgGUID: n8w6GsQhQquyOHkVS/8aLw==
+X-IronPort-AV: E=Sophos;i="6.15,267,1739808000"; 
+   d="scan'208";a="81342177"
+Received: from mail-bn8nam04lp2047.outbound.protection.outlook.com (HELO NAM04-BN8-obe.outbound.protection.outlook.com) ([104.47.74.47])
+  by ob1.hgst.iphmx.com with ESMTP; 07 May 2025 03:42:35 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=Hn/v3V4Aq5xeFfCKqXiiLX5ZVyVQq7aOe5EFNlKxSHGtkEEtS/cN9Fnz7jMbUf38H+v+XPJwg66QS2TSM51G0sr5Iji9Uj6tA/n4MMDrFG8jtRMfYlgBwbnBk2NKp0O3c4VMdsiPoE4EYtD2aAmMFg5gfH3AhtqX1KtZ3lywkoGlCcC4bYBkPohBUv/Vnorh+flGSIJX+7mYV8QgIUfXkBYTB9z42+kY5T+9IUYq8SRnHzfYiB+ckTQjCmpkloUknRhtC4IHxNq+joM6fSClUL3POonBp/bF8pgsC/CtquaO1/M7lhZG/F2CT06B1q8EsamhhXW1qzn3dQu1mXxFfg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fwKiTf1SP7OUckwRhmcY+eEzSocZD4Vv5b/UPAjkaSk=;
+ b=KfRfSkV+4AvVDntDdOO7KqK9lg9qiFkaV1IdbAZjvnXBonZV4KI5k5tAmzWkSPIPjuZRWncPocbJ6op7wTYJTd3hj48ZkuybZRvHo63Sn5P5FAzJYguieLMKCgrrmoUv20BSSc/hsfVzGW/IEW5hq1d9FKL5vrOuorNUIxgDezI41avmwSMXoXz73QCYpHD0jEFDunj0uRhIvYd6HxZHDXQpw+9y+zwPpCnwfmjIyBgGpbOHNeKuQVxAGT+tmx2xgpw4oyaaqVvcqMTnp3W4TwsvX04/m6XFNqQ7rhpYQ+s69QWT+VdhkVtKqDKYl1SD+m04/f/fZTQQ3mjtYiREFA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
+ dkim=pass header.d=sandisk.com; arc=none
+Received: from PH7PR16MB6196.namprd16.prod.outlook.com (2603:10b6:510:312::5)
+ by PH7PR16MB5115.namprd16.prod.outlook.com (2603:10b6:510:2bb::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8699.26; Tue, 6 May
+ 2025 19:42:26 +0000
+Received: from PH7PR16MB6196.namprd16.prod.outlook.com
+ ([fe80::436c:8204:2171:b839]) by PH7PR16MB6196.namprd16.prod.outlook.com
+ ([fe80::436c:8204:2171:b839%5]) with mapi id 15.20.8699.026; Tue, 6 May 2025
+ 19:42:26 +0000
+From: Avri Altman <Avri.Altman@sandisk.com>
+To: Dario Binacchi <dario.binacchi@amarulasolutions.com>, Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: RFC: mmc-utils versioning
+Thread-Topic: RFC: mmc-utils versioning
+Thread-Index: AQHbufIY6yy7oWpkvkaN0QBX5RMRQLPEDMyAgAE1/ACAAMcCwA==
+Date: Tue, 6 May 2025 19:42:26 +0000
+Message-ID:
+ <PH7PR16MB61969260F3C367D70860F211E589A@PH7PR16MB6196.namprd16.prod.outlook.com>
+References:
+ <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
+ <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
+ <CABGWkvr2TPKkqQKYZkx7u0rhf4xyg7WNg6H7+hdpETSqv6MF2w@mail.gmail.com>
+In-Reply-To:
+ <CABGWkvr2TPKkqQKYZkx7u0rhf4xyg7WNg6H7+hdpETSqv6MF2w@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=sandisk.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PH7PR16MB6196:EE_|PH7PR16MB5115:EE_
+x-ms-office365-filtering-correlation-id: 84c111e1-719f-47c6-2305-08dd8cd62152
+x-ms-exchange-atpmessageproperties: SA
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|1800799024|376014|366016|38070700018;
+x-microsoft-antispam-message-info:
+ =?utf-8?B?OTBUTlhrYkhtMkRMUXVzQkFwN0xuK2RKcGFKREIvNXZwdmd3SmFaTFA5YUph?=
+ =?utf-8?B?NkcxTGR5Y3dqVkZpS1N2WWZOZ2xGa1BzUjFiRW5mTzk5M3BtVFVNdkp1Qllh?=
+ =?utf-8?B?UUdUODFpeFZnRTZiTldFM1dYa2dKMS9Nalc2d2YvaDQ5L1psanBQZmJJaDBR?=
+ =?utf-8?B?MVlGaTN2Nm5laUJGWmtnZTJzMFBhZ01iRnVqMFlkT0MwOTBnMDcwWFBBaFpB?=
+ =?utf-8?B?ckk2MlJ5OG9VMmZYQkg4UCt0a3VyM2ZJS3Nsa2ZtWS9hM1haQzdGbktYUWgr?=
+ =?utf-8?B?MVRLTXhtbmZwSVJVaXN2aWg2d1FGUlU0eVU3bUwyQlpyNEtEY0g4Z2JSTktT?=
+ =?utf-8?B?aUEvdGlCK3pWVVZTck9YV01hRW9YRmNNNjRyK1FINHR6TXpTYlR4UFowdmI3?=
+ =?utf-8?B?NjBHZDN3RkZhYndKNk9vRWtsUVRiSHIweVppWFhzTEt4cXFxZGxFb2xxUTdX?=
+ =?utf-8?B?elJLS1gxeGFLazZFQVdzcW5iTnVNUWJzc1pMaXJpZ2VlUkFjTjJ2SE54aFM1?=
+ =?utf-8?B?WllRbnNqNzZCTEpDajBZK0NiUzNJZjR2cWllYWpJcUlmVGJFZmtiSkJZWGxq?=
+ =?utf-8?B?bFZWUE1TeEJmTnV2bXBJSEUwU280RU56NzFlcXUreXd1Zm93eXhKaXZQZVZU?=
+ =?utf-8?B?bHVvUDkvN3U2dmNxYkp5aVZKLzVqRDhoVm9iSWtvQ0N5enNZNWE2ZFBjR1c0?=
+ =?utf-8?B?QWxySXZBYm1qbWtMYnY1dldhOGpBWjdYMTBtLzAvWFFuRkFTYTZaYmtWekN6?=
+ =?utf-8?B?eUhyS3gxYTFOWGJaMk8yYnVGcDRKN2dXV2V4ZDQ2emtwSkdmK1JWVS95UUwy?=
+ =?utf-8?B?MDN4Q2thbS9pdmxJcjIvZklXbE5ENmRiRjNhOHpKTzFORFVFODVvVkx1dk4r?=
+ =?utf-8?B?bHhnMEdDbFlvcXcxWStFVUVvVFV4UFR1NEN2OGdSaEh6UVA1NUhZU09Gc1Rz?=
+ =?utf-8?B?MzdhUWxEQ0VCbDVaUlc3K01BeDVZZHR1WDIrVXRsYmZuSUdwNVNyNzF3Nmsx?=
+ =?utf-8?B?aEVrTHREdXgwMi9FYzdCNld6ZXpKaGF2eWVtRVh4aWNDQmJSZ3VDclE3UGlq?=
+ =?utf-8?B?SDdhZ2ZPeDhKdndvaHhUcTFOcHZROUIxUjlFT2l0OGNGZ1F4ZXR4ZEVQb3h4?=
+ =?utf-8?B?NnRpNVFlMVZzaHovQWEybmt5VWNKYVB5VGk0OVBVVkUyMTJMTjN0b0xHdFJr?=
+ =?utf-8?B?blQzTzlLalhmbmFwVm5yRVhuMUQwWk56QndYeU9YNkZwKzEySTlNbVhxcTFW?=
+ =?utf-8?B?d2dPdTBxMVRuWGY2UUxmckpwV283NWpPWjRUQlZ6RXliWmtLZkN3SWdpSzgy?=
+ =?utf-8?B?dE4zZFFMbzlHeHU1bEFIL3c0NWU4YjhPS1kwWlUydVZGeTcwR3d1MnhyZ2x5?=
+ =?utf-8?B?enl5aGkwUEVOZmEyMys5MFJnUFZGQXlROWxSUmpBcWpQcjI1ZzQvSUl1dU84?=
+ =?utf-8?B?TzJ5eEpSUjJ4UklnbUlPdTI2K1lnUjI0Nm1Md1Z0VW9iL2ZmVHRqOGFhYmRW?=
+ =?utf-8?B?M1FUQWJpNzkrZUtWK1RsVjhFckR2OVFlL3k0OFBOblNvc2o3ZDR6cmJGR0o4?=
+ =?utf-8?B?RjV2QWlmTzNqbWJGSlZTcktFeERNQjVEMTJ0aHlzbzZNRmhVTlpzL0wrVTRa?=
+ =?utf-8?B?eG9IMVJmM1ZKVlRyS0k1Ujlkb2RNR1J4cHMxZEd1UzNWTWJTQjNhMEtoa1p4?=
+ =?utf-8?B?TEhCL3J4ZVU4WjQ4T1gvZU9YNmlIOEhhUXdRUHR0TGpoYzBWd1VvcUFhZ0hS?=
+ =?utf-8?B?cW91LzJ5QmR4ODM5YXhLVDU3U0hnSFg0cWZaUEFqVzRHQTJMME9qa2g2RFJq?=
+ =?utf-8?B?bEI1UVZQeGVubmQrdW51N21Hc3o1WnpMM2gxdmJVVWZQYnVyNmthMFRub0Rn?=
+ =?utf-8?B?VjJkVjRFTHpIcUE4WENSdWFybmpHd2VLY3NRWVBXZC9VclNNNWUzbFA3YXZ4?=
+ =?utf-8?B?NjdlREllVDFLOWYvTDJ5NDEvRzB4cE1XSnNKY0htS2VUQ000UXVndzhIWnYx?=
+ =?utf-8?B?dFQyYU0vVkpRPT0=?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR16MB6196.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(376014)(366016)(38070700018);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?utf-8?B?cldPdGtJZnk2TXlWdlYvSzgzdjBmcmQwWXVxbXl4T1VxZEhETUZsUDhTTXly?=
+ =?utf-8?B?YXo5a05BT2dpVlZ5K3RJQndUc05UYjJMS0RmcFFTYUN0UWJ0TXNuSGdCdTVL?=
+ =?utf-8?B?bSt6T0NhZHdQVmRqWjZtaTJiS2IyaGgxSzhmY1FRMUlMVVREa1VXcXpqSnNi?=
+ =?utf-8?B?WlVQbForS0w3anZoYUZCVUNvQzQzcUpFY1g0L3Fxa0hpZnM1VmROZUNXQ2ZM?=
+ =?utf-8?B?TnVVb3RabWxBZEFEcCtCUkFkN1dpMXNkNU5paG1Td0xaZkNLS3hCWHpDVU5i?=
+ =?utf-8?B?dyt0M0xXcE9ENHlOMmI1V2pOWGtjZ3VuTmZFdEV1b0EwRnBsQVJOZjhpLzNo?=
+ =?utf-8?B?VXBBZGY3d1M3aHFsN1dQRWVYNHRrNTdXazM3cGE0N2FqZ2F3QkRZT1Uwa3NJ?=
+ =?utf-8?B?WFgyTXladWxOMk9peFB6eWVJNkt2VHJvQUJMa3NoTGhjTEZueE1idXo1TWRv?=
+ =?utf-8?B?eTJKeS83R3loWFFhdUV3UHRkNENBdjVxcUNGcnVpQitpQUd1QmR6NWNnRG13?=
+ =?utf-8?B?S0pQS1JPeWN3NDRhVVBHekFoanVNTEYrdkUyOXVQOEpYSlU5UUs4bm5QQTls?=
+ =?utf-8?B?OVYwU0pOTHMxMFlkVXNjWjZMbzdMN1RDS25qQlhmNWJvZC9DOHBQd3dNa0s1?=
+ =?utf-8?B?Q2JGcklPcUl2Ym5WNUJRRmNMVzF3cUlyOW1Kb3dNQ1FzRzR5WXYvMi96SkFy?=
+ =?utf-8?B?WUkrcE5CUmhRUTlMTGJLNnAwTU9kNjdWMlpnNUdTQlRBdi95K1lLNzNJL3RF?=
+ =?utf-8?B?M1A4d3RaRklBTmkxTU44YzlTUnJIMlB1MkNXMEJnbWlVc1hHQ0lRMTZIUTJI?=
+ =?utf-8?B?YWtmbXgxZ1lydFJhWUpwanEvU0ZnQThOOVZMWEVMUFJhMUljUmtzdGR1RVNQ?=
+ =?utf-8?B?UWdFcGhwOWtDMkdaaVAxdWNURUdrd1djWEQwd05BNWswMmhzQmJIaUQ0ZWM1?=
+ =?utf-8?B?cjVyRXRPM2ZhSzFRT01oc1pYbnF5WWdhd1Y2aUkyeHVNczRRQnN0WEpSU214?=
+ =?utf-8?B?T0ZxRjFzS3g1b3BkMWdCZUJlSEtSUlVuOTVucTBLRXVOYlMya05SaTNSd0Zt?=
+ =?utf-8?B?cW44YnVLRWN0dFBObHBKYnM2T2ljQm1rNVZ4ZU9nMXloUGllWXdIRC8wUmo5?=
+ =?utf-8?B?emNWTkxRYnJ4Qzlvbm5mUEFKUnlpRHl0cVJ3cmhmV1RaL3QvRjdPZ1d1dGJr?=
+ =?utf-8?B?RmZmc1VvSS9lTEFBNk5OdnZmRGpqdng3dmxPdnhFNEV1SzlNV3lyMm1McDM1?=
+ =?utf-8?B?NElxYVVWY1Bjb2ZVanR2cm8vQWhaR0twUGhiaVVvR0ZUQmY5Mmx1aEJHdW4w?=
+ =?utf-8?B?NGNZUU5NNk5OVWJ2NWdvVjJHemJVR2swTXJ3ZHprYWhVUXZuVlN5ZDNyRHhT?=
+ =?utf-8?B?WW1Ec0I0NzRoTFUyNndNdDU2NnFxeExPb0RuSnlGUEt0OGowTGtiOGFmVUV1?=
+ =?utf-8?B?WUxXdGRPejRZU252b1ZUNWpiVmVXbWpLZGo3eWJGM3FianZjWFFFTThscE1E?=
+ =?utf-8?B?WDhzNjVrOWhuM3lLZFpFSGRNdjFSWUMreis5ZzdPOEtNMVJ3VUJNdVdRSm5N?=
+ =?utf-8?B?WSsvajVVelF0aFFPNEVmTjJ4aWUydytoVTFaN1l5TkxaN3J6a25mUWNlYWs3?=
+ =?utf-8?B?L3c3Z1dSMzBTK3FhOGh1MFA0SDFzWmJpMWwwSlVjSFpvQ0ZlQ0tYRVVMclBB?=
+ =?utf-8?B?ZkhCYjl5SlBkbTEvbFJ1dTZCamVWRjdwMXd5SWl1R3E1ajFSVjQrTVViRjNH?=
+ =?utf-8?B?NWVCWGF6YVV2OXBZWERlNDE4VDR5SS9vTVpDMW04M1NLZjZ4MVNmb3hnZ1JO?=
+ =?utf-8?B?MURDS2YrWjJ5UlUwaTZSY1B1SEh6d0hoMmFXWTRaUGVzdGV4MUdoSWNGZklp?=
+ =?utf-8?B?L0FFT3lIWWRxZWdGd3I3a1pML3F3a0tLWURpS1BDQmdKdWJBTnRGWDJJMzds?=
+ =?utf-8?B?ZGZNbDk0Q2ViSmxYZWNCQ0NjMDRXRjFHQUNHSkJpWkJabGJiVGRQTGx5M1BK?=
+ =?utf-8?B?VWsvMmNOMElnM2RFanlybzJad1BpdU9JRUdzZloxVnZnckN6Z0tqNGp4TkJi?=
+ =?utf-8?B?eHh0UjRUWnlHa1NTUlpEUUlBWGptelBKUW4xZzhOQzd1Yyt6UzhTQWtwdXNJ?=
+ =?utf-8?Q?b7pnZgDDZQ5py/YUSwwocNwux?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ore@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	Hwf5bZ+0fJL9/49akU5ygu5P8tw2y9eetMGd+z4nrnbRBkSKUAoQOqn0lQMvbLvftwfc2P/b/J4td0y1MK8mfEW/ppk5ZeXh7jwpGynSWgYJ4OnsifnR4u2orYS0vKIfsmQRzkAG5tLRbo5E0qFJ8N/nWVC+ha98ftUS8Ydyvd4EQVxFoLuu2ciNOi8r8T4LzgHUdTC7PF1HmjTUrW7zZkStNdpsgi4tVXzYNLetcZJQ1Jq67eydyMh5PzlV+LA/EO2iuHyx8/pVP6BaB36AgTm4gtqFmoqfdP0LL7KQEp/Dy/+EsUXqbcw/2GcEClCd8XgXaaYNKwUE17LE79Btgwo2B18JYUC50qdp1S/9FFAM0Dtqdo01DQ9akKgqRIyeQk0nH8loRAYspanlfcckzs/LgYJg+2uSho9ffIp6s6werXwWH1PNtGBcESIQQCYJepVQTv+DW1oWIjghnHKhCbv1T3lXVTnGBQGAiq+8Ucxg74i2ChQqAwZXbne6oCYx/0/cN8F2uOLi3LH55ydFwihzyjFFr8phxf/M+PBRivyQu5tT2XgUt9fZ4jYjDoXYBuQ6PKVi2tida6UfSvIwVOH5wcnZHFxo+H9Oyhk2Gl4SEqg6zI8HnlXd7tov7Bs8
+X-OriginatorOrg: sandisk.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PH7PR16MB6196.namprd16.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 84c111e1-719f-47c6-2305-08dd8cd62152
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 May 2025 19:42:26.5724
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: SgZO6tXXGWbAOFWj8S3YieuV03+W5XQJpQJ896db1BqdSz3G1Mh6HfUzYOKkxvzCmk71/nZ0z+DHdaqgZPZRNA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR16MB5115
 
-Extend the MMC core to handle undervoltage events by implementing
-infrastructure to notify the MMC bus about voltage drops.
-
-Background & Decision at LPC24:
-
-This solution was proposed and refined during LPC24 in the talk
-"Graceful Under Pressure: Prioritizing Shutdown to Protect Your Data in
-Embedded Systems," which aimed to address how Linux should handle power
-fluctuations in embedded devices to prevent data corruption or storage
-damage.
-
-At the time, multiple possible solutions were considered:
-1. Triggering a system-wide suspend or shutdown: when undervoltage is
-   detected, with device-specific prioritization to ensure critical
-   components shut down first.
-   - This approach was disliked by Greg Kroah-Hartman, as it introduced
-     complexity and was not suitable for all use cases.
-
-2. Notifying relevant devices through the regulator framework: to allow
-   graceful per-device handling.
-   - This approach was agreed upon as the most acceptable by participants
-     in the discussion, including Greg Kroah-Hartman, Mark Brown,
-     and Rafael J. Wysocki.
-   - This patch implements that decision by integrating undervoltage
-     handling into the MMC subsystem.
-
-Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
----
-changes v3:
-- filter supported cards at early stage
-- add locking in mmc_handle_regulator_event()
-- claim/release host in mmc_handle_undervoltage()
----
- drivers/mmc/core/core.c      |  30 +++++++++
- drivers/mmc/core/core.h      |   2 +
- drivers/mmc/core/regulator.c | 124 +++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h     |   8 +++
- 4 files changed, 164 insertions(+)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index a0e2dce70434..c502d83417cc 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1399,6 +1399,36 @@ void mmc_power_cycle(struct mmc_host *host, u32 ocr)
- 	mmc_power_up(host, ocr);
- }
- 
-+/**
-+ * mmc_handle_undervoltage - Handle an undervoltage event on the MMC bus
-+ * @host: The MMC host that detected the undervoltage condition
-+ *
-+ * This function is called when an undervoltage event is detected on one of
-+ * the MMC regulators.
-+ *
-+ * Returns: 0 on success or a negative error code on failure.
-+ */
-+int mmc_handle_undervoltage(struct mmc_host *host)
-+{
-+	int ret;
-+
-+	mmc_claim_host(host);
-+
-+	if (!host->bus_ops->handle_undervoltage) {
-+		mmc_release_host(host);
-+		return 0;
-+	}
-+
-+	dev_warn(mmc_dev(host), "%s: Undervoltage detected, initiating emergency stop\n",
-+		 mmc_hostname(host));
-+
-+	ret = host->bus_ops->handle_undervoltage(host);
-+
-+	mmc_release_host(host);
-+
-+	return ret;
-+}
-+
- /*
-  * Assign a mmc bus handler to a host. Only one bus handler may control a
-  * host at any given time.
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 622085cd766f..31e5918f6e95 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -31,6 +31,7 @@ struct mmc_bus_ops {
- 	int (*sw_reset)(struct mmc_host *);
- 	bool (*cache_enabled)(struct mmc_host *);
- 	int (*flush_cache)(struct mmc_host *);
-+	int (*handle_undervoltage)(struct mmc_host *host);
- };
- 
- void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-@@ -59,6 +60,7 @@ void mmc_power_off(struct mmc_host *host);
- void mmc_power_cycle(struct mmc_host *host, u32 ocr);
- void mmc_set_initial_state(struct mmc_host *host);
- u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
-+int mmc_handle_undervoltage(struct mmc_host *host);
- 
- static inline void mmc_delay(unsigned int ms)
- {
-diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-index 3dae2e9b7978..1074567e242f 100644
---- a/drivers/mmc/core/regulator.c
-+++ b/drivers/mmc/core/regulator.c
-@@ -7,6 +7,7 @@
- #include <linux/err.h>
- #include <linux/log2.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/workqueue.h>
- 
- #include <linux/mmc/host.h>
- 
-@@ -262,6 +263,107 @@ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
- 
- #endif /* CONFIG_REGULATOR */
- 
-+static void mmc_undervoltage_workfn(struct work_struct *work)
-+{
-+	struct mmc_supply *supply;
-+	struct mmc_host *mmc;
-+
-+	supply = container_of(work, struct mmc_supply, uv_work);
-+	mmc = container_of(supply, struct mmc_host, supply);
-+
-+	mmc_handle_undervoltage(mmc);
-+}
-+
-+static int mmc_handle_regulator_event(struct mmc_host *mmc,
-+				      const char *regulator_name,
-+				      unsigned long event)
-+{
-+	unsigned long flags;
-+
-+	switch (event) {
-+	case REGULATOR_EVENT_UNDER_VOLTAGE:
-+		/* Currently we support only MMC cards */
-+		spin_lock_irqsave(&mmc->lock, flags);
-+		if (mmc->undervoltage || !mmc->card ||
-+		    !mmc_card_mmc(mmc->card)) {
-+			spin_unlock_irqrestore(&mmc->lock, flags);
-+			return NOTIFY_OK;
-+		}
-+
-+		mmc->undervoltage = true;
-+		spin_unlock_irqrestore(&mmc->lock, flags);
-+
-+		queue_work(system_highpri_wq, &mmc->supply.uv_work);
-+		break;
-+	default:
-+		return NOTIFY_DONE;
-+	}
-+
-+	return NOTIFY_OK;
-+}
-+
-+static int mmc_vmmc_notifier_callback(struct notifier_block *nb,
-+				      unsigned long event, void *data)
-+{
-+	struct mmc_supply *supply;
-+	struct mmc_host *mmc;
-+
-+	supply = container_of(nb, struct mmc_supply, vmmc_nb);
-+	mmc = container_of(supply, struct mmc_host, supply);
-+
-+	return mmc_handle_regulator_event(mmc, "vmmc", event);
-+}
-+
-+static int mmc_vqmmc_notifier_callback(struct notifier_block *nb,
-+				       unsigned long event, void *data)
-+{
-+	struct mmc_supply *supply;
-+	struct mmc_host *mmc;
-+
-+	supply = container_of(nb, struct mmc_supply, vqmmc_nb);
-+	mmc = container_of(supply, struct mmc_host, supply);
-+
-+	return mmc_handle_regulator_event(mmc, "vqmmc", event);
-+}
-+
-+static int mmc_vqmmc2_notifier_callback(struct notifier_block *nb,
-+					unsigned long event, void *data)
-+{
-+	struct mmc_supply *supply;
-+	struct mmc_host *mmc;
-+
-+	supply = container_of(nb, struct mmc_supply, vqmmc2_nb);
-+	mmc = container_of(supply, struct mmc_host, supply);
-+
-+	return mmc_handle_regulator_event(mmc, "vqmmc2", event);
-+}
-+
-+static void
-+mmc_register_regulator_notifier(struct mmc_host *mmc,
-+				struct regulator *regulator,
-+				struct notifier_block *nb,
-+				int (*callback)(struct notifier_block *,
-+						unsigned long, void *),
-+				const char *name)
-+{
-+	struct device *dev = mmc_dev(mmc);
-+	int ret;
-+
-+	nb->notifier_call = callback;
-+	ret = devm_regulator_register_notifier(regulator, nb);
-+	if (ret)
-+		dev_warn(dev, "Failed to register %s notifier: %pe\n", name,
-+			 ERR_PTR(ret));
-+}
-+
-+static void mmc_undervoltage_work_cleanup(void *data)
-+{
-+	struct mmc_supply *supply = data;
-+
-+	/* Ensure the work is canceled or flushed here */
-+	cancel_work_sync(&supply->uv_work);
-+}
-+
- /**
-  * mmc_regulator_get_supply - try to get VMMC and VQMMC regulators for a host
-  * @mmc: the host to regulate
-@@ -281,6 +383,13 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
- 	mmc->supply.vqmmc2 = devm_regulator_get_optional(dev, "vqmmc2");
- 
-+	INIT_WORK(&mmc->supply.uv_work, mmc_undervoltage_workfn);
-+
-+	ret = devm_add_action_or_reset(dev, mmc_undervoltage_work_cleanup,
-+				       &mmc->supply);
-+	if (ret)
-+		return dev_err_probe(dev, ret, "Failed to add cleanup action\n");
-+
- 	if (IS_ERR(mmc->supply.vmmc)) {
- 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
- 			return dev_err_probe(dev, -EPROBE_DEFER,
-@@ -293,6 +402,11 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 			mmc->ocr_avail = ret;
- 		else
- 			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
-+
-+		mmc_register_regulator_notifier(mmc, mmc->supply.vmmc,
-+						&mmc->supply.vmmc_nb,
-+						mmc_vmmc_notifier_callback,
-+						"vmmc");
- 	}
- 
- 	if (IS_ERR(mmc->supply.vqmmc)) {
-@@ -301,12 +415,22 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 					     "vqmmc regulator not available\n");
- 
- 		dev_dbg(dev, "No vqmmc regulator found\n");
-+	} else {
-+		mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc,
-+						&mmc->supply.vqmmc_nb,
-+						mmc_vqmmc_notifier_callback,
-+						"vqmmc");
- 	}
- 
- 	if (IS_ERR(mmc->supply.vqmmc2)) {
- 		if (PTR_ERR(mmc->supply.vqmmc2) == -EPROBE_DEFER)
- 			return -EPROBE_DEFER;
- 		dev_dbg(dev, "No vqmmc2 regulator found\n");
-+	} else {
-+		mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc2,
-+						&mmc->supply.vqmmc2_nb,
-+						mmc_vqmmc2_notifier_callback,
-+						"vqmmc2");
- 	}
- 
- 	return 0;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 68f09a955a90..4e147ad82804 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -11,6 +11,7 @@
- #include <linux/device.h>
- #include <linux/fault-inject.h>
- #include <linux/debugfs.h>
-+#include <linux/workqueue.h>
- 
- #include <linux/mmc/core.h>
- #include <linux/mmc/card.h>
-@@ -342,6 +343,12 @@ struct mmc_supply {
- 	struct regulator *vmmc;		/* Card power supply */
- 	struct regulator *vqmmc;	/* Optional Vccq supply */
- 	struct regulator *vqmmc2;	/* Optional supply for phy */
-+
-+	struct notifier_block vmmc_nb;		/* Notifier for vmmc */
-+	struct notifier_block vqmmc_nb;		/* Notifier for vqmmc */
-+	struct notifier_block vqmmc2_nb;	/* Notifier for vqmmc2 */
-+
-+	struct work_struct uv_work;		/* Undervoltage work */
- };
- 
- struct mmc_ctx {
-@@ -493,6 +500,7 @@ struct mmc_host {
- 	unsigned int		retune_crc_disable:1; /* don't trigger retune upon crc */
- 	unsigned int		can_dma_map_merge:1; /* merging can be used */
- 	unsigned int		vqmmc_enabled:1; /* vqmmc regulator is enabled */
-+	unsigned int		undervoltage:1;	 /* Undervoltage state */
- 
- 	int			rescan_disable;	/* disable card detection */
- 	int			rescan_entered;	/* used with nonremovable devices */
--- 
-2.39.5
-
+PiBIZWxsbyBVbGYsDQo+IA0KPiBPbiBNb24sIE1heSA1LCAyMDI1IGF0IDM6MjDigK9QTSBVbGYg
+SGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gd3JvdGU6DQo+ID4NCj4gPiBPbiBX
+ZWQsIDMwIEFwciAyMDI1IGF0IDE5OjA1LCBEYXJpbyBCaW5hY2NoaQ0KPiA+IDxkYXJpby5iaW5h
+Y2NoaUBhbWFydWxhc29sdXRpb25zLmNvbT4gd3JvdGU6DQo+ID4gPg0KPiA+ID4gSGVsbG8gVWxm
+IGFuZCBBdnJpLA0KPiA+ID4NCj4gPiA+IFdvdWxkIGl0IGJlIHBvc3NpYmxlIHRvIHRhZyBmdXR1
+cmUgcmVsZWFzZXM/IFRoYXQgd2F5LCBCdWlsZHJvb3Qncw0KPiA+ID4gYXV0b2J1aWxkIHNlcnZp
+Y2Ugd291bGQgYXV0b21hdGljYWxseSBub3RpZnkgdGhlIG1haW50YWluZXJzIG9mIHRoZQ0KPiA+
+ID4gcGFja2FnZSBvZiBhIG5ldyByZWxlYXNlLCBhbmQgaW4gdHVybiB1cGRhdGUgdGhlIHBhY2th
+Z2Ugd2l0aCB0aGUNCj4gPiA+IGxhdGVzdCBjaGFuZ2VzLg0KPiA+DQo+ID4gSXQncyBjZXJ0YWlu
+bHkgZG9hYmxlLiBTZXR0aW5nIGEgdGFnIGlzIHNpbXBsZSwgYnV0IGhhdmluZyBhIG1vcmUNCj4g
+PiBmb3JtYWwgcmVsZWFzZS1jeWNsZSB3aXRoIHJlbGVhc2Utbm90ZXMsIGV0YywgaXMgdG8gbWUg
+YSBiaXQgdG9vIG11Y2guDQo+ID4NCj4gPiBXb3VsZCBqdXN0IGEgdGFnIGJlIG9rYXkgd2l0aCBz
+b21lIGtpbmQgb2Ygc3VtbWFyeSBvZiB0aGUgdXBkYXRlcw0KPiA+IHNpbmNlIHRoZSBsYXN0IHRh
+Zz8NCj4gDQo+IFllcywgSSB0aGluayBzbw0KTG9va3MgZ29vZCB0byBtZSBhcyB3ZWxsLg0KDQpU
+aGFua3MsDQpBdnJpDQo=
