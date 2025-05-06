@@ -1,16 +1,15 @@
 Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6ACE0268FDA
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AD74268FF9
 	for <linux-mmc@vger.kernel.org>; Tue,  6 May 2025 09:51:28 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746525091; cv=none; b=KxQ+NEwGLQIAFPOYX0tPavRIWfcS6xpXuLvdOH8YDWhrT4rjNxK0mdUTiVHw7u6wh+rRi6oW+2WUU6K006gvqUnTmL7u0Qv57zmzGFdKisO4nhSP8uqH1WauPhU67QwfujG41ha077IlgBMVUp7pDZo8Do++gbDbEWlsOJrl+D4=
+	t=1746525092; cv=none; b=De8ONYGIfpUVSQBXFJXAdlv5apzSW2N0uPajzzDeBF+kNdqTQ6KIxBbJsQVLo30VZ0xVKjfl/P18d7wJ2B6Y9BfgioT6ggXUqsbM6TMN5yoYAAPPZWS8MqlcmuuVPsjzqybE06ehtBhqMRTN48wipY2VB2/rUl0i1DLKll97Tmo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746525091; c=relaxed/simple;
-	bh=h6F18a9yRJCnpkFBzA1kXOdGvY0tbDdOckV3r/y7RFw=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=d1r/03fk/ghygJ/LpJIWUoEwJ+sjW3FgKSHcUBxdlT0FfrxdsmMhCUYZ2hzDG+RcqJ1zPSewdZ9OyZDzfaVHgdWQBYYqE9gEcwTRviQGba4yTFZSWXcSxqIY9rG3CWid7QeGBglSdLbxp3GwUhUIGU7mC25Z5IO9EK2jNrFHqEU=
+	s=arc-20240116; t=1746525092; c=relaxed/simple;
+	bh=+8hgmQMkMUP7qTpXr+fdL0ZmZlS89PQR8pMDgpeqz6I=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=q/2zCGKssut6+SG6YOrFhbMzprouLCfwZ3+x+QbiOEuCGqpdnBwBd4FJjdcum+dfPoHArtS0S994y36U92aw0iOGw2UABnoCQS8xdxRJPqvWdpHb00cmHgzrhAi4UirEcok+sH3DO737zh1Bt85i0s6uaxlAWuYLZM2I6usNq+g=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
@@ -18,16 +17,16 @@ Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
 	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
 	(Exim 4.92)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExM-0005A1-Qw; Tue, 06 May 2025 11:51:20 +0200
+	id 1uCExM-00059y-Qx; Tue, 06 May 2025 11:51:20 +0200
 Received: from dude04.red.stw.pengutronix.de ([2a0a:edc0:0:1101:1d::ac])
 	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 	(Exim 4.96)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-001NB3-2m;
+	id 1uCExL-001NB0-2U;
 	Tue, 06 May 2025 11:51:19 +0200
 Received: from ore by dude04.red.stw.pengutronix.de with local (Exim 4.96)
 	(envelope-from <ore@pengutronix.de>)
-	id 1uCExL-009ObS-2T;
+	id 1uCExL-009Oay-2B;
 	Tue, 06 May 2025 11:51:19 +0200
 From: Oleksij Rempel <o.rempel@pengutronix.de>
 To: Ulf Hansson <ulf.hansson@linaro.org>
@@ -42,12 +41,10 @@ Cc: Oleksij Rempel <o.rempel@pengutronix.de>,
 	Christian Loehle <christian.loehle@arm.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Avri Altman <Avri.Altman@sandisk.com>
-Subject: [PATCH v5 3/4] mmc: core: add undervoltage handler for MMC/eMMC devices
-Date: Tue,  6 May 2025 11:51:17 +0200
-Message-Id: <20250506095118.2239459-4-o.rempel@pengutronix.de>
+Subject: [PATCH v5 0/4] mmc: handle undervoltage events and prevent eMMC corruption
+Date: Tue,  6 May 2025 11:51:14 +0200
+Message-Id: <20250506095118.2239459-1-o.rempel@pengutronix.de>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250506095118.2239459-1-o.rempel@pengutronix.de>
-References: <20250506095118.2239459-1-o.rempel@pengutronix.de>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,194 +57,86 @@ X-SA-Exim-Mail-From: ore@pengutronix.de
 X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
 X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Introduce `_mmc_handle_undervoltage()` to handle undervoltage events for
-MMC/eMMC devices. This function performs a controlled suspend. After
-completing the sequence, the card is marked as removed to prevent
-further interactions, ensuring that no further commands are issued after
-an emergency stop.
+changes v5:
+- Rebased on top of mmc/next after introduction of enum mmc_poweroff_type
+- Replaced boolean undervoltage parameter with MMC_POWEROFF_UNDERVOLTAGE
+- Dropped unused __mmc_resume() helper
+- Updated commit messages accordingly
+changes v4:
+- drop HPI and SDHCI related patches
 
-Implementation Details:
-1. **Suspend the card in an emergency state**:
-   - Call `__mmc_suspend()` with `MMC_POWEROFF_UNDERVOLTAGE`, which ensures:
-     - The power-off notification uses `EXT_CSD_POWER_OFF_SHORT`.
-     - Cache flushing is skipped to minimize time delays.
-     - If power-off notify is unsupported, alternative methods like sleep
-       or deselect are used to transition the card into a safe state.
+This patch set introduces a framework for handling undervoltage events
+in the MMC subsystem. The goal is to improve system reliability by
+ensuring graceful handling of power fluctuations that could otherwise
+lead to metadata corruption, potentially rendering the eMMC chip
+unusable or causing significant data loss.
 
-2. **Mark the card as removed**:
-   - This prevents further commands from being issued to the card after
-     undervoltage shutdown, avoiding potential corruption.
+## Problem Statement
 
-To support this, introduce `__mmc_suspend()` as an internal helper that
-omits `mmc_claim_host()/mmc_release_host()`, allowing it to be called
-when the host is already claimed.
+Power fluctuations and sudden losses can leave eMMC devices in an
+undefined state, leading to severe consequences. The worst case can
+result in metadata corruption, making the entire storage inaccessible.
+While some eMMC devices promise to handle such situations internally,
+experience shows that some chip variants are still affected. This has
+led vendors to take a more protective approach, implementing external
+undervoltage handling as a precautionary measure to avoid costly field
+failures and returns.
 
-The caller of `_mmc_handle_undervoltage()` is responsible for invoking
-`mmc_claim_host()` before calling this function and `mmc_release_host()`
-afterward to ensure exclusive access to the host during the emergency
-shutdown process.
+The existence of the "Power Off Notification" feature in the eMMC
+standard itself serves as indirect evidence that this is a real-world
+issue.  While some projects have already faced the consequences of
+ignoring this problem (often at significant cost), specific cases cannot
+be disclosed due to NDAs.
 
-Device Handling Considerations:
-- **For eMMC storage**: The new undervoltage handler applies the correct
-  power-down sequence using power-off notify or alternative methods.
-- **For SD cards**: The current implementation does not handle undervoltage
-  events for SD cards. Future extensions may be needed to implement proper
-  handling.
+## Challenges and Implementation Approach
 
-Testing:
-This implementation was tested on an iMX8MP-based system, verifying that
-the undervoltage sequence correctly stops ongoing operations and
-prevents further MMC transactions after the event. The board had
+1. **Raising awareness of the problem**: While vendors have used
+   proprietary solutions for years, a unified approach is needed upstream.
+   This patch set is a first step in making that happen.
+
+2. **Finding an acceptable implementation path**: There are multiple
+   ways to handle undervoltage - either in the kernel or in user space,
+   through a global shutdown mechanism, or using the regulator framework.
+   This patch set takes the kernel-based approach but does not prevent
+   future extensions, such as allowing user-space handoff once available.
+
+3. **Preparing for vendor adoption and testing**: By providing a
+   structured solution upstream, this patch set lowers the barrier for
+   vendors to standardize their undervoltage handling instead of relying on
+   fragmented, out-of-tree implementations.
+
+## Current Limitations
+
+This patch set is an initial step and does not yet cover all possible
+design restrictions or edge cases. Future improvements may include
+better coordination with user space and enhancements based on broader
+testing.
+
+## Testing Details
+
+The implementation was tested on an iMX8MP-based system. The board had
 approximately 100ms of available power hold-up time. The Power Off
 Notification was sent ~4ms after the board was detached from the power
 supply, allowing sufficient time for the eMMC to handle the event
-properly.
+properly.  Tests were conducted under both idle conditions and active
+read/write operations.
 
-The testing was performed using a logic analyzer to monitor command
-sequences and timing. While this method confirms that the expected
-sequence was executed, it does not provide insights into the actual
-internal behavior of the eMMC storage.
+Oleksij Rempel (4):
+  mmc: core: Handle undervoltage events and register regulator notifiers
+  mmc: core: Add MMC_POWEROFF_UNDERVOLTAGE support in _mmc_suspend()
+  mmc: core: add undervoltage handler for MMC/eMMC devices
+  mmc: block: abort requests and suppress errors after undervoltage
+    shutdown
 
-Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
----
-changes v5:
-- Rebased on top of patch introducing enum mmc_poweroff_type
-- Updated call to __mmc_suspend() to use MMC_POWEROFF_UNDERVOLTAGE
-- Dropped __mmc_resume() helper, as it is no longer needed
-- Updated commit message to reflect API change and code removal
-changes v4:
-- Drop HPI step.
-changes v3:
-- reword commit message.
-- add comments in the code
-- do not try to resume sleeping device
----
- drivers/mmc/core/mmc.c | 76 ++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 73 insertions(+), 3 deletions(-)
+ drivers/mmc/core/block.c     |   2 +-
+ drivers/mmc/core/core.c      |  30 +++++++++
+ drivers/mmc/core/core.h      |   2 +
+ drivers/mmc/core/mmc.c       |  89 +++++++++++++++++++++++--
+ drivers/mmc/core/queue.c     |   2 +-
+ drivers/mmc/core/regulator.c | 124 +++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h     |   8 +++
+ 7 files changed, 249 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index b67de2b62830..2ea5756a54e2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -2120,7 +2120,7 @@ static int _mmc_flush_cache(struct mmc_host *host)
- 	return err;
- }
- 
--static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
-+static int __mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- {
- 	unsigned int notify_type = EXT_CSD_POWER_OFF_SHORT;
- 	int err = 0;
-@@ -2128,8 +2128,6 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 	if (pm_type == MMC_POWEROFF_SHUTDOWN)
- 		notify_type = EXT_CSD_POWER_OFF_LONG;
- 
--	mmc_claim_host(host);
--
- 	if (mmc_card_suspended(host->card))
- 		goto out;
- 
-@@ -2156,7 +2154,17 @@ static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
- 		mmc_card_set_suspended(host->card);
- 	}
- out:
-+	return err;
-+}
-+
-+static int _mmc_suspend(struct mmc_host *host, enum mmc_poweroff_type pm_type)
-+{
-+	int err;
-+
-+	mmc_claim_host(host);
-+	err = __mmc_suspend(host, pm_type);
- 	mmc_release_host(host);
-+
- 	return err;
- }
- 
-@@ -2219,6 +2227,13 @@ static int mmc_shutdown(struct mmc_host *host)
- {
- 	int err = 0;
- 
-+	/*
-+	 * In case of undervoltage, the card will be powered off by
-+	 * _mmc_handle_undervoltage()
-+	 */
-+	if (host->undervoltage)
-+		return 0;
-+
- 	/*
- 	 * If the card remains suspended at this point and it was done by using
- 	 * the sleep-cmd (CMD5), we may need to re-initialize it first, to allow
-@@ -2309,6 +2324,60 @@ static int _mmc_hw_reset(struct mmc_host *host)
- 	return mmc_init_card(host, card->ocr, card);
- }
- 
-+/**
-+ * _mmc_handle_undervoltage - Handle an undervoltage event for MMC/eMMC devices
-+ * @host: MMC host structure
-+ *
-+ * This function is triggered when an undervoltage condition is detected.
-+ * It attempts to transition the device into a low-power or safe state to
-+ * prevent data corruption.
-+ *
-+ * Steps performed:
-+ * 1. If no card is present, return immediately.
-+ * 2. Perform an emergency suspend using EXT_CSD_POWER_OFF_SHORT if possible.
-+ *    - If power-off notify is not supported, fallback mechanisms like sleep or
-+ *      deselecting the card are attempted.
-+ *    - Cache flushing is skipped to reduce execution time.
-+ * 3. Mark the card as removed to prevent further interactions after
-+ *    undervoltage.
-+ *
-+ * Note: This function does not handle host claiming or releasing. The caller
-+ *	 must ensure that the host is properly claimed before calling this
-+ *	 function and released afterward.
-+ *
-+ * Returns: 0 on success, or a negative error code if any step fails.
-+ */
-+static int _mmc_handle_undervoltage(struct mmc_host *host)
-+{
-+	struct mmc_card *card = host->card;
-+	int err;
-+
-+	/* If there is no card attached, nothing to do */
-+	if (!card)
-+		return 0;
-+
-+	/*
-+	 * Perform an emergency suspend to power off the eMMC quickly.
-+	 * This ensures the device enters a safe state before power is lost.
-+	 * We first attempt EXT_CSD_POWER_OFF_SHORT, but if power-off notify
-+	 * is not supported, we fall back to sleep mode or deselecting the card.
-+	 * Cache flushing is skipped to minimize delay.
-+	 */
-+	err = __mmc_suspend(host, MMC_POWEROFF_UNDERVOLTAGE);
-+	if (err)
-+		pr_err("%s: undervoltage suspend failed: %pe\n",
-+		       mmc_hostname(host), ERR_PTR(err));
-+
-+	/*
-+	 * Mark the card as removed to prevent further operations.
-+	 * This ensures the system does not attempt to access the device
-+	 * after an undervoltage event, avoiding potential corruption.
-+	 */
-+	mmc_card_set_removed(card);
-+
-+	return err;
-+}
-+
- static const struct mmc_bus_ops mmc_ops = {
- 	.remove = mmc_remove,
- 	.detect = mmc_detect,
-@@ -2321,6 +2390,7 @@ static const struct mmc_bus_ops mmc_ops = {
- 	.hw_reset = _mmc_hw_reset,
- 	.cache_enabled = _mmc_cache_enabled,
- 	.flush_cache = _mmc_flush_cache,
-+	.handle_undervoltage = _mmc_handle_undervoltage,
- };
- 
- /*
--- 
+--
 2.39.5
 
