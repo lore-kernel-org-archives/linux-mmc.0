@@ -1,127 +1,119 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.12])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E95DF223DD4;
-	Wed,  7 May 2025 07:45:04 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.12
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B39F976410
+	for <linux-mmc@vger.kernel.org>; Wed,  7 May 2025 10:07:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746603906; cv=none; b=EOjPdLrN8Li0+yzMlfRmdfmgCMNzZ9ZNxxRnltasMVjpJ+7uf9a51jGbX9ZT7x/lE3h9jpyiJhCOMzdPjvRvlt0oSERvKCnCuXEkUFqI83AcDzp56hObqLzJ75FQjVe3uE1jhX+rKvwuPC4ZilOMl1YFuq2HMKFdsoE2gmWPa9c=
+	t=1746612441; cv=none; b=kbPSZ0yg/zVjU3lXb73qkPwPHv2vWuiDqzf9uSNTQiJwMRcBvKmFyQ7R00qvRvcRXxZy4FbEwdDL24pfjv8Tm9WOy3eOWBpgN1+0C4dYE8QCypsXKvpM9Tt18LTEt/yoXOZ+7/dkLVL1kNSz8S6/FBUh6qpcIg/Uq85vIVTkW1E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746603906; c=relaxed/simple;
-	bh=QXHYEKAW9/CqJfMG4iKzrn7ClrN8rdtrlRVJuX/TCQQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KDbxoyrIpZzh+HNrlbqqLkFO/CxOgUSF/3kFg8yYPmMwR+xbNn4styezPxHPJHgH5ON2uOnYcEXcIhUx1siEXrQYuV4G/sWAMj9PLD1cRipg9ZfjVVarsbxqmxS3egOjgw5IaYwWKhh4wyovqTOexqC2WZ1st0lnheXpDgsi6b4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Vk5NjMBo; arc=none smtp.client-ip=192.198.163.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1746612441; c=relaxed/simple;
+	bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=a73z6JEwDhE/63FhaFD8qiPUm4E3y6EpuU4WOC37EJMKRcw3RwWM5MyQVd1HR7sruwz4Ju0ylmaoaYm9m5uwfq9Cp+X4DLjTDsheSn71ogDw3bxhAcXg3hG/jc9FoMsu6JCyKNNmews7Qvu6nYxgZ5Qrwrk2vqjX5r9Qzfx9aAw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rY1xlu84; arc=none smtp.client-ip=209.85.128.176
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Vk5NjMBo"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1746603905; x=1778139905;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=QXHYEKAW9/CqJfMG4iKzrn7ClrN8rdtrlRVJuX/TCQQ=;
-  b=Vk5NjMBoPWQ1IAuznQtrPiLNc+UUk1drUUwl9mkk6Xch9Mt8WSqyD5Gy
-   2RGzy8DZgO4ENTbssO+bfz0cwz5YyZqUV6V+wK7qGvBaWjZ1AWP/VFnm9
-   lDYXvYILeTHvgnDRSnbv7ayp+vyxLvlVJ3aLzdSh1mBefn+r8vVFHF4ek
-   2VD+gA45R6Umr2L1aJBINBMEfaRGO9m7c7Jb1kW2dvQ+fNK1QpwYu7JDV
-   +E55sj9dCvKGL3vtUlVepDQZux9oPkmuVk1PMwjg/+tmSVHvG32lpMm9S
-   frUOIuKA0jAnyGJVl53WQGmIkcFW0VyqPV2ZnvigT2bcw8O2Mg6xdyvy2
-   Q==;
-X-CSE-ConnectionGUID: KXspD03AQteDVkIgTBuOOQ==
-X-CSE-MsgGUID: PciXOhbKRHmphuqNw0JDYw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11425"; a="52133191"
-X-IronPort-AV: E=Sophos;i="6.15,268,1739865600"; 
-   d="scan'208";a="52133191"
-Received: from fmviesa007.fm.intel.com ([10.60.135.147])
-  by fmvoesa106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 May 2025 00:45:03 -0700
-X-CSE-ConnectionGUID: E1qZMY2HTZGgYsJVYG+Cvw==
-X-CSE-MsgGUID: gTAUAlcERN+/lUFCdLWGCw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,268,1739865600"; 
-   d="scan'208";a="135875090"
-Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
-  by fmviesa007.fm.intel.com with ESMTP; 07 May 2025 00:44:52 -0700
-Received: from kbuild by 1992f890471c with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1uCZSU-0007LT-05;
-	Wed, 07 May 2025 07:44:50 +0000
-Date: Wed, 7 May 2025 15:44:01 +0800
-From: kernel test robot <lkp@intel.com>
-To: Yixun Lan <dlan@gentoo.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Adrian Hunter <adrian.hunter@intel.com>
-Cc: oe-kbuild-all@lists.linux.dev, Alex Elder <elder@riscstar.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-riscv@lists.infradead.org, spacemit@lists.linux.dev,
-	linux-kernel@vger.kernel.org, Yixun Lan <dlan@gentoo.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-k1: add support for SpacemiT K1 SoC
-Message-ID: <202505071416.Rll3WhPR-lkp@intel.com>
-References: <20250501-20-k1-sdhci-v2-2-3e7005fae29b@gentoo.org>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rY1xlu84"
+Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-70907505121so31193007b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 07 May 2025 03:07:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1746612438; x=1747217238; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
+        b=rY1xlu84X4yKuLQgCitZVi3SL7Qyoav5xc/8mCq15uclBbmugfeYviwvf9cIUwZzI8
+         uwxYMgd1U16fXU2lU7Wi5Re46yJ1JPZNAHLhJSCor+N14ZvO75r0MqGFxxE3by/oFtk9
+         Mxv2C9GlVetrbVp31zKdvIWMLV+Cfr+ixDf2HQ4EqaCgKeYr3LvvkY8FDQVnRWpINwqo
+         BlzXCHFExCJmjTBbv0j6rQwrUfnG++osn/7frK+LCH719NawraIt6m/IVSmD1ifjchKY
+         ibnl8pz5niWCCno6S6xm4n26s0/C6ota5sfdx/z5jElE577ruHVbJwr8zjOQBDVXwoK3
+         gnaQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1746612438; x=1747217238;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
+        b=fi33SpLCGQztQ7dcwejqfv4GB9TUQWSWylb6AvUe+xS7kWVYd7HECg/sZAK237mr3q
+         WQWRcfe7q6y1ezSo/eEaRprHE1dP3dWqyn8oOSdSwRexbGOPs8WTnSH9KBJ29vbMFeAY
+         3W+EI7DqxMIKt7czsIJMSStxVapOM0KBxDkjRWpWOEcq0HRcrL4DLU/pfgHRhL23K4gH
+         31fEq64d+aA7CI+GqqAqTAW1P5AymR7rAqOYRSKLBmnMtf5reqmq1VXBbekn1REElJ67
+         SfK0bCcU13DX9AeyUSAZZgPpdYgqDkNSIWwPRjlwgdyJPuBmrCkGcC9ynTuJgFtuiSKB
+         Lc8A==
+X-Forwarded-Encrypted: i=1; AJvYcCV4J9UYqBv6gOb1Wu/z4rsu1zGUjsdn/hnCw6JBC2Wn9DKTuvkLJobYJWLDuHxQlVdRCJ3GZLd4gg8=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzu8SiWjU5Qxt1OaJWAjSLVyp2LiWZzI/Ii40YE7vGlQ3n7/I71
+	KIlG4OBzIlPvhk4ZFz8CD2BxEL5hbjNBCJYS0XJfgQwcGzoZBYFpw6LI8qBKMr0wYuAbpqIsaEV
+	bS8eWlokIBMOfWeKWqMC+J3ZJ5Mi8V+6olZSevw==
+X-Gm-Gg: ASbGncsi/ZoL70eprqZYfGfntLqK/k6SCmaqDZewMqlXY82dDE6dWwc38c5JomxY9eh
+	nlTfmyY2L8+oiiylN2Ne7oDCRl7xcG0/4U6nYzpD15ai+/zQqwq7EpifO5dCyU1uOGCS4t2uCgF
+	YL7o8Cqi+S8cCtYPcvtQFTatY=
+X-Google-Smtp-Source: AGHT+IEV79egu8e4UvpIUvdJCfcIcPMJxfxr5jDTf97vlyq+0HGlgOhowy+MGUt6cKShlqc8T6OgIEGPHpx5CQcQYS8=
+X-Received: by 2002:a05:690c:6f0a:b0:706:b2f9:1a7d with SMTP id
+ 00721157ae682-70a1dad9a4emr35012877b3.33.1746612438579; Wed, 07 May 2025
+ 03:07:18 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250501-20-k1-sdhci-v2-2-3e7005fae29b@gentoo.org>
+References: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
+ <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
+ <CABGWkvr2TPKkqQKYZkx7u0rhf4xyg7WNg6H7+hdpETSqv6MF2w@mail.gmail.com> <PH7PR16MB61969260F3C367D70860F211E589A@PH7PR16MB6196.namprd16.prod.outlook.com>
+In-Reply-To: <PH7PR16MB61969260F3C367D70860F211E589A@PH7PR16MB6196.namprd16.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 7 May 2025 12:06:42 +0200
+X-Gm-Features: ATxdqUFNAvk52cxYXhlAI9jPHfn3Zc5FqsXHxSB8WOK4wlbpUPmLRNJgXxYR4yo
+Message-ID: <CAPDyKFpZMq7J9Q8wwt0_mR2Kv_2=-=gd7g5edksuyyG=tROx-A@mail.gmail.com>
+Subject: Re: RFC: mmc-utils versioning
+To: Avri Altman <Avri.Altman@sandisk.com>
+Cc: Dario Binacchi <dario.binacchi@amarulasolutions.com>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Hi Yixun,
+On Tue, 6 May 2025 at 21:42, Avri Altman <Avri.Altman@sandisk.com> wrote:
+>
+> > Hello Ulf,
+> >
+> > On Mon, May 5, 2025 at 3:20=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.=
+org>
+> > wrote:
+> > >
+> > > On Wed, 30 Apr 2025 at 19:05, Dario Binacchi
+> > > <dario.binacchi@amarulasolutions.com> wrote:
+> > > >
+> > > > Hello Ulf and Avri,
+> > > >
+> > > > Would it be possible to tag future releases? That way, Buildroot's
+> > > > autobuild service would automatically notify the maintainers of the
+> > > > package of a new release, and in turn update the package with the
+> > > > latest changes.
+> > >
+> > > It's certainly doable. Setting a tag is simple, but having a more
+> > > formal release-cycle with release-notes, etc, is to me a bit too much=
+.
+> > >
+> > > Would just a tag be okay with some kind of summary of the updates
+> > > since the last tag?
+> >
+> > Yes, I think so
+> Looks good to me as well.
+>
+> Thanks,
+> Avri
 
-kernel test robot noticed the following build warnings:
+Okay. I guess making an initial release with version 1.0 is the next
+step, unless you have some other suggestions. I will look into it
+soon.
 
-[auto build test WARNING on 0af2f6be1b4281385b618cb86ad946eded089ac8]
+Not sure we need to decide on what frequency we should do releases, I
+guess we can decide on a case-by-case basis, depending on what we have
+applied lately.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Yixun-Lan/dt-bindings-mmc-spacemit-sdhci-add-support-for-K1-SoC/20250501-165846
-base:   0af2f6be1b4281385b618cb86ad946eded089ac8
-patch link:    https://lore.kernel.org/r/20250501-20-k1-sdhci-v2-2-3e7005fae29b%40gentoo.org
-patch subject: [PATCH v2 2/2] mmc: sdhci-of-k1: add support for SpacemiT K1 SoC
-config: i386-allmodconfig (https://download.01.org/0day-ci/archive/20250507/202505071416.Rll3WhPR-lkp@intel.com/config)
-compiler: gcc-12 (Debian 12.2.0-14) 12.2.0
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250507/202505071416.Rll3WhPR-lkp@intel.com/reproduce)
+Any other comments?
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202505071416.Rll3WhPR-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
-   drivers/mmc/host/sdhci-of-k1.c: In function 'spacemit_sdhci_reset':
->> drivers/mmc/host/sdhci-of-k1.c:88:33: warning: variable 'pdev' set but not used [-Wunused-but-set-variable]
-      88 |         struct platform_device *pdev;
-         |                                 ^~~~
-
-
-vim +/pdev +88 drivers/mmc/host/sdhci-of-k1.c
-
-    85	
-    86	static void spacemit_sdhci_reset(struct sdhci_host *host, u8 mask)
-    87	{
-  > 88		struct platform_device *pdev;
-    89	
-    90		pdev = to_platform_device(mmc_dev(host->mmc));
-    91		sdhci_reset(host, mask);
-    92	
-    93		if (mask != SDHCI_RESET_ALL)
-    94			return;
-    95	
-    96		spacemit_sdhci_setbits(host, PHY_FUNC_EN | PHY_PLL_LOCK, SDHC_PHY_CTRL_REG);
-    97	
-    98		spacemit_sdhci_clrsetbits(host, PHY_DRIVE_SEL,
-    99					  RX_BIAS_CTRL | FIELD_PREP(PHY_DRIVE_SEL, 4),
-   100					  SDHC_PHY_PADCFG_REG);
-   101	
-   102		if (!(host->mmc->caps2 & MMC_CAP2_NO_MMC))
-   103			spacemit_sdhci_setbits(host, MMC_CARD_MODE, SDHC_MMC_CTRL_REG);
-   104	}
-   105	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+Kind regards
+Uffe
