@@ -1,119 +1,103 @@
-Received: from mail-yw1-f176.google.com (mail-yw1-f176.google.com [209.85.128.176])
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B39F976410
-	for <linux-mmc@vger.kernel.org>; Wed,  7 May 2025 10:07:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 19F193398A
+	for <linux-mmc@vger.kernel.org>; Wed,  7 May 2025 10:15:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746612441; cv=none; b=kbPSZ0yg/zVjU3lXb73qkPwPHv2vWuiDqzf9uSNTQiJwMRcBvKmFyQ7R00qvRvcRXxZy4FbEwdDL24pfjv8Tm9WOy3eOWBpgN1+0C4dYE8QCypsXKvpM9Tt18LTEt/yoXOZ+7/dkLVL1kNSz8S6/FBUh6qpcIg/Uq85vIVTkW1E=
+	t=1746612925; cv=none; b=XoOMhBLUsj21oJqsx54++xpp53wNVp5Jie0PEKFnnn+1Re7tTe++4LfQja/BfMsYKItygmjBD4oDBoSgP44o7jCJAIWF9j0FFxHGnFAxubjxc9G2LdQYrMKqyjlOCam0DsNVO5XhkvvHB7c5PONxG44DSduy4PzHfhacn2pqJpw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746612441; c=relaxed/simple;
-	bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
+	s=arc-20240116; t=1746612925; c=relaxed/simple;
+	bh=2kKyy8TPxu6MBP3b/ij0sX+z00C9OeGG/fZ7S8SZYZM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=a73z6JEwDhE/63FhaFD8qiPUm4E3y6EpuU4WOC37EJMKRcw3RwWM5MyQVd1HR7sruwz4Ju0ylmaoaYm9m5uwfq9Cp+X4DLjTDsheSn71ogDw3bxhAcXg3hG/jc9FoMsu6JCyKNNmews7Qvu6nYxgZ5Qrwrk2vqjX5r9Qzfx9aAw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rY1xlu84; arc=none smtp.client-ip=209.85.128.176
+	 To:Cc:Content-Type; b=J1qGF4ezL7fgTPS65geGPQBftUr9yaLVpHo76pVDaH0vKnvQ/3805ftXTwB3M6LFldBZGLAjWULtADcvANEuZXjp5HgbkKNmd7Qj1zECRVAugpSJWnJgFofjFB4+WCT9U5b/KYJDLaryZO7Nn4IboOUTQcw/kcLUC5Xjkq2zkp4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hRRgM2MV; arc=none smtp.client-ip=209.85.219.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rY1xlu84"
-Received: by mail-yw1-f176.google.com with SMTP id 00721157ae682-70907505121so31193007b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 07 May 2025 03:07:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hRRgM2MV"
+Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-e730ea57804so791977276.1
+        for <linux-mmc@vger.kernel.org>; Wed, 07 May 2025 03:15:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1746612438; x=1747217238; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
-        b=rY1xlu84X4yKuLQgCitZVi3SL7Qyoav5xc/8mCq15uclBbmugfeYviwvf9cIUwZzI8
-         uwxYMgd1U16fXU2lU7Wi5Re46yJ1JPZNAHLhJSCor+N14ZvO75r0MqGFxxE3by/oFtk9
-         Mxv2C9GlVetrbVp31zKdvIWMLV+Cfr+ixDf2HQ4EqaCgKeYr3LvvkY8FDQVnRWpINwqo
-         BlzXCHFExCJmjTBbv0j6rQwrUfnG++osn/7frK+LCH719NawraIt6m/IVSmD1ifjchKY
-         ibnl8pz5niWCCno6S6xm4n26s0/C6ota5sfdx/z5jElE577ruHVbJwr8zjOQBDVXwoK3
-         gnaQ==
+        d=linaro.org; s=google; t=1746612923; x=1747217723; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=2kKyy8TPxu6MBP3b/ij0sX+z00C9OeGG/fZ7S8SZYZM=;
+        b=hRRgM2MV/iQBwhiuQYzkAPHVZRoyEWZUUVimEu63aEilVu1uR46cjSkLhir+G1uddi
+         F4SljYjHhMhJ7tDQc+4IDGNg/XNtD+0EezwfqXkJ6/sF7fdCJ6HMV3fuKvRpnyONAwa3
+         TdCMHDVQg8cCMtUvfEM3cPnSeYwc+N9ATfI6Id1UZCQghhmC770k9OA9wUQuTLbi0Qo3
+         dhFIfPCqm6E9e2aGhTQu/SexqNJe/yhOOClj3pfffnrtyYD7jptXgm5n4ENya5exBTm1
+         lvQEK5h3HQdVH12ov0zNJnmjjzlwpS9VsLXbab3mNClKzkyQdDjTb5v0V7h/ZeGfCGpj
+         O0gw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746612438; x=1747217238;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=BE46vYq34BY6Z5CfSBscVv/F+21bvYjevWf8j2itf6Y=;
-        b=fi33SpLCGQztQ7dcwejqfv4GB9TUQWSWylb6AvUe+xS7kWVYd7HECg/sZAK237mr3q
-         WQWRcfe7q6y1ezSo/eEaRprHE1dP3dWqyn8oOSdSwRexbGOPs8WTnSH9KBJ29vbMFeAY
-         3W+EI7DqxMIKt7czsIJMSStxVapOM0KBxDkjRWpWOEcq0HRcrL4DLU/pfgHRhL23K4gH
-         31fEq64d+aA7CI+GqqAqTAW1P5AymR7rAqOYRSKLBmnMtf5reqmq1VXBbekn1REElJ67
-         SfK0bCcU13DX9AeyUSAZZgPpdYgqDkNSIWwPRjlwgdyJPuBmrCkGcC9ynTuJgFtuiSKB
-         Lc8A==
-X-Forwarded-Encrypted: i=1; AJvYcCV4J9UYqBv6gOb1Wu/z4rsu1zGUjsdn/hnCw6JBC2Wn9DKTuvkLJobYJWLDuHxQlVdRCJ3GZLd4gg8=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzu8SiWjU5Qxt1OaJWAjSLVyp2LiWZzI/Ii40YE7vGlQ3n7/I71
-	KIlG4OBzIlPvhk4ZFz8CD2BxEL5hbjNBCJYS0XJfgQwcGzoZBYFpw6LI8qBKMr0wYuAbpqIsaEV
-	bS8eWlokIBMOfWeKWqMC+J3ZJ5Mi8V+6olZSevw==
-X-Gm-Gg: ASbGncsi/ZoL70eprqZYfGfntLqK/k6SCmaqDZewMqlXY82dDE6dWwc38c5JomxY9eh
-	nlTfmyY2L8+oiiylN2Ne7oDCRl7xcG0/4U6nYzpD15ai+/zQqwq7EpifO5dCyU1uOGCS4t2uCgF
-	YL7o8Cqi+S8cCtYPcvtQFTatY=
-X-Google-Smtp-Source: AGHT+IEV79egu8e4UvpIUvdJCfcIcPMJxfxr5jDTf97vlyq+0HGlgOhowy+MGUt6cKShlqc8T6OgIEGPHpx5CQcQYS8=
-X-Received: by 2002:a05:690c:6f0a:b0:706:b2f9:1a7d with SMTP id
- 00721157ae682-70a1dad9a4emr35012877b3.33.1746612438579; Wed, 07 May 2025
- 03:07:18 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1746612923; x=1747217723;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=2kKyy8TPxu6MBP3b/ij0sX+z00C9OeGG/fZ7S8SZYZM=;
+        b=XYKZ94NftQeOXzRsn2rXyF7cGOW0eaMAbHeyvutjVhmgQ+Neu6+KJI0r6i3XU9B+eV
+         d87sWqS4SYiRgReTpPk/B2BwIBDtUuQmgJeB/0bLx8/NI7YaH7pJ5geOENxsNJmcEeqx
+         glkZ4pDCn24RTXZIyeFV5uGM5Zc6zFEuyLeFEf5Rv6eDAXAnpbeKsM3nnOtBwRP/EZK0
+         ZZFLevVnw07nppkCozBLojRwtooLsZ9dmqBenRQmu4fq7YZp38z07ERFjqzSbXjrauBr
+         UyXySYUnkosRtADuUG1kkQ6cQiSSu/j0dW0LKJ9zu88hNrcqZNWqa6GicN32vUjjAZ0Y
+         0rOA==
+X-Forwarded-Encrypted: i=1; AJvYcCWuSYU9bFWIAx0sy0q/OefghlhIh8j+QVNt53RolZz1HmFvX/C4jnbVwm4on5YMfzXqcCOpqiKXXdw=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyemRBhm3sn7QimnneU594R2uXk/ANDfA8Oo4GYb7tViyIg3Hte
+	W1EHxk9unIZb94jgK7Nz1kEIznIgK7ccQs0LJ0a5uuPmg2l+gkAmIh1oBEFlRIa9XBATy77Y4kr
+	ni4JR8E7COiBN0U5p3IN3dIf8dmaN885uBCBf9w==
+X-Gm-Gg: ASbGnctJOvsnUmzXa4nUls2RiEqoGZDjY9AiNdwz1ceTWJWGbG28C6BvzwbtU7W40EF
+	8KCPk7AElH0oEflyohw2rdlne7tRKh/OpUdtv2iejaIcHHHFyvu+qZtk63MomaTRBFd2OISjn8Y
+	fUliCyflY4HESGT+r9CLyVUR4=
+X-Google-Smtp-Source: AGHT+IHn1ks68akd/coDPAZmpIe7HBhUWeUxWUjOEFaKQwyjN7TisAzrwAQkABAtcJbUHO6Ilz6E9OB4Vk7BnH+3K28=
+X-Received: by 2002:a05:6902:2085:b0:e73:1749:ed9c with SMTP id
+ 3f1490d57ef6-e788df80016mr3214287276.24.1746612922947; Wed, 07 May 2025
+ 03:15:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CABGWkvp-peEfhc57-+g+_w4DWWqdWVgw6CFF0tS7yjGsTtTufQ@mail.gmail.com>
- <CAPDyKFqWRDTqXjkb84BG=Kid+MQO_R-cJNcYFB3scnEhhsX46g@mail.gmail.com>
- <CABGWkvr2TPKkqQKYZkx7u0rhf4xyg7WNg6H7+hdpETSqv6MF2w@mail.gmail.com> <PH7PR16MB61969260F3C367D70860F211E589A@PH7PR16MB6196.namprd16.prod.outlook.com>
-In-Reply-To: <PH7PR16MB61969260F3C367D70860F211E589A@PH7PR16MB6196.namprd16.prod.outlook.com>
+References: <20250424180036.1541568-1-jm@ti.com> <849a5e47-5b37-40e4-8b76-a58adb7e9b90@ti.com>
+In-Reply-To: <849a5e47-5b37-40e4-8b76-a58adb7e9b90@ti.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 7 May 2025 12:06:42 +0200
-X-Gm-Features: ATxdqUFNAvk52cxYXhlAI9jPHfn3Zc5FqsXHxSB8WOK4wlbpUPmLRNJgXxYR4yo
-Message-ID: <CAPDyKFpZMq7J9Q8wwt0_mR2Kv_2=-=gd7g5edksuyyG=tROx-A@mail.gmail.com>
-Subject: Re: RFC: mmc-utils versioning
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: Dario Binacchi <dario.binacchi@amarulasolutions.com>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date: Wed, 7 May 2025 12:14:47 +0200
+X-Gm-Features: ATxdqUEux_B3oamDrHorDmmQFHbu6nx5l7WSCGenWjG9wHyx8Pn_JFsTs1UaTDY
+Message-ID: <CAPDyKFpMo3a_MZuD1q+JFEa4VqHeoJ-SegviJfd322jkV29+Pw@mail.gmail.com>
+Subject: Re: [PATCH v4 0/2] Add SDHCI_QUIRK2_SUPPRESS_V1P8_ENA
+To: "Mendez, Judith" <jm@ti.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Josua Mayer <josua@solid-run.com>, 
+	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	Nishanth Menon <nm@ti.com>, Francesco Dolcini <francesco@dolcini.it>, 
+	Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah <m-shah@ti.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 6 May 2025 at 21:42, Avri Altman <Avri.Altman@sandisk.com> wrote:
+On Mon, 5 May 2025 at 23:24, Mendez, Judith <jm@ti.com> wrote:
 >
-> > Hello Ulf,
-> >
-> > On Mon, May 5, 2025 at 3:20=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.=
-org>
-> > wrote:
-> > >
-> > > On Wed, 30 Apr 2025 at 19:05, Dario Binacchi
-> > > <dario.binacchi@amarulasolutions.com> wrote:
-> > > >
-> > > > Hello Ulf and Avri,
-> > > >
-> > > > Would it be possible to tag future releases? That way, Buildroot's
-> > > > autobuild service would automatically notify the maintainers of the
-> > > > package of a new release, and in turn update the package with the
-> > > > latest changes.
-> > >
-> > > It's certainly doable. Setting a tag is simple, but having a more
-> > > formal release-cycle with release-notes, etc, is to me a bit too much=
-.
-> > >
-> > > Would just a tag be okay with some kind of summary of the updates
-> > > since the last tag?
-> >
-> > Yes, I think so
-> Looks good to me as well.
+> Hi all,
 >
-> Thanks,
-> Avri
+> On 4/24/2025 1:00 PM, Judith Mendez wrote:
+> > There are MMC boot failures seen with V1P8_SIGNAL_ENA on Kingston eMMC and
+> > Microcenter/Patriot SD cards on am62* Sitara K3 boards due to the HS200
+> > initialization sequence involving V1P8_SIGNAL_ENA. Since V1P8_SIGNAL_ENA
+> > is optional for eMMC and only affects timing for host controllers using
+> > ti,am62-sdhci compatible so far, add a new platform data structure for am62
+> > compatible and append the new SDHCI_QUIRK2_SUPPRESS_V1P8_ENA quirk.
+> >
+> > This fix was previously merged in the kernel, but was reverted due
+> > to the "heuristics for enabling the quirk"[0]. This issue is adressed
+> > in this patch series by adding the quirk based on compatible string,
+> > ensuring the quirk is never applied to devices with internal LDOs, then
+> > V1P8_SIGNAL_ENA also has a voltage component tied to it.
+>
+> Gentle ping on this, are there any comments or any issues with this
+> type of implementation?
 
-Okay. I guess making an initial release with version 1.0 is the next
-step, unless you have some other suggestions. I will look into it
-soon.
+It looks reasonable to me. Although, in general I think we are trying
+to avoid adding new sdhci quirks, perhaps there are good reasons to do
+it in this case.
 
-Not sure we need to decide on what frequency we should do releases, I
-guess we can decide on a case-by-case basis, depending on what we have
-applied lately.
-
-Any other comments?
+I am deferring to Adrian to make the decision.
 
 Kind regards
 Uffe
