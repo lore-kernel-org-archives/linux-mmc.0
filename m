@@ -1,205 +1,123 @@
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5E5DF212FB8;
-	Wed,  7 May 2025 06:32:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.174
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 9186621D590;
+	Wed,  7 May 2025 07:28:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746599542; cv=none; b=RR2pIe1MEwZ745zEKuzBYO58iJzwMcoAu6NPzvRKxjmQqFH1OstflM1FvGsMDu5XWDhkaUJgtgtum30dbx52f2kuvT/HLk0N/IbQSGfqDKG4MNLWQs8XsfIhb+jiAWqkQZEicBZ15kE0oRPudV673NOS+FhBk59eyP8iEtzC5rg=
+	t=1746602918; cv=none; b=khw4SsP8F2isSHD8twhauKh/nx/BIgFkx9HMSG4vNgIX7wicmjp8fLqep4+WTfCkyISajIb7BFUViOhtyuWBIH+QdXUtSMEVLwev5uViDZVREgphbzNQErYLZCE8sUAzMykPOyKeQbqoefugNhL6aFDOsfFjdxM7883pbNsmAHY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746599542; c=relaxed/simple;
-	bh=gVnr8TnU5oBPUOllfUkHDqgYRsX0nAzlPey3pz8QsSw=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=QasUDT1vK8VkqEtMU40dhGQjAn0Z975l/mi9stsuSFZ8lIN10JEAZN4PKWURWYjk0O9Rz3v/crq1LyIJ3A+OSfM9P+YSvZveAqQK80/7jMMGJLwPQhLUyu4ZA/TgON81FITBNMSoaZekOKm+PGbtec5O3hRoSuR9nRck/Njl9ps=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CTDPSW8X; arc=none smtp.client-ip=209.85.214.174
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CTDPSW8X"
-Received: by mail-pl1-f174.google.com with SMTP id d9443c01a7336-22423adf751so73716855ad.2;
-        Tue, 06 May 2025 23:32:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1746599540; x=1747204340; darn=vger.kernel.org;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=8YWstoYnxasTg7tshxJbl1B8GWpQGF7X65mCdPOf1/0=;
-        b=CTDPSW8XZD6Be5HIisLjLIaoiMkLL+tFC3VX20M9GpI3SJ4sTDsfGG2F+2eJe39jil
-         Kuwqv0YbbIX9xMcjzuDPCybuWdNbY5+k1qwGFFOm7cFb3xJsRjj7m5VbcpVUCeRhJYW1
-         nR4EE6cFHwTD9L0HhPoOQ3ULbBZ13deEr9y7fpevOJNXziUMZiy/qa3OvSYifuYCA6u9
-         2m1W0FTUUIjP2YtJa1Xy1pBADwLZDRvIE7fyYozCSYGH8b85oKm43TDr4J1oqI9ZGZni
-         lX10LqHrdjov8II0//0Ln0pRfqtvrn85aaxbhx5+0Q+agImUNIoSEVqCQLcNi9dOC86C
-         2CbQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746599540; x=1747204340;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=8YWstoYnxasTg7tshxJbl1B8GWpQGF7X65mCdPOf1/0=;
-        b=Xmra7d4lMoScKSu3/rFpLaw2V8YkaKCR3RCRmc3wOSZxd3IH50ky7oQKiHR6nmRCN5
-         /7DD8e/QphKK0855yemNE1CPVhqwLZc2AsUFXML0kFIA1pTWBOHy7frfFRtTyiH7W9Gm
-         HEerklEXhvTyvrvJjTHXEBH0UIbWjI41x0VtR3ZKcqyxiqCzLGW2t1RUTTcChbhUZko3
-         g9/q51pkIkuue1GQb+QmUHGBpaHud7vZKUsRHOM+Aq7lIw5KCqSDvjQxStrh7o5AAJrj
-         Y4CNvIRrgLBYkC/xIQMt4c97dAMrLT9kS//REQOhgldJCbm7yhdBqpIGTxEJtUne+QcU
-         l9wg==
-X-Forwarded-Encrypted: i=1; AJvYcCUiuDM1SaLiHzsuRUTTW5kBZHt6dCLnXSbRvyIXc9OBwXevHs0Jm5nYfX5x/gyE250cyguEI9UpeNGq@vger.kernel.org, AJvYcCUrYaSoFQYvt8i0VoY4+edgAqILpV+Nt+nWm/c93jOU5CBhJOpvdpOntte1phCQtJYmqK7o829LllG8nQ==@vger.kernel.org, AJvYcCXjlFAiQtHOXG7Q+ZZXRWfUvdXBey8oRcYbP+pCDz6CIUPPHcsIdDeYEtKnYonXOOf+xtEl8qiyLrPqJKo=@vger.kernel.org
-X-Gm-Message-State: AOJu0YypSrY+x+D4XmHzF2Yrmf3KI3d0NIfbbyWmHej44rPgAdaDvB4t
-	SahReigSv940o/+rBTHzfWM2R8CbJZwqD/4ODbGFph4dg+sOKem1
-X-Gm-Gg: ASbGncv20WHx/MywniplRnNDO4HdNVIvyQk53hXCRgRtALFba9xHjdImKQev6nvTGuD
-	/0m/utw2DD4/upia7NDJnGT0pK07TRTCmp0serW+aaO1Hn2ghhs76ac0wswN7lxcD6cLgPlVgLI
-	YAzF/O3fEdSlfmYhJzM06FH/FUl4GufS8u64ouXB2Dis66hWCnaBKLIR3TUjkjZad6mviRjhhtH
-	Sv9E/re79+cfQCUHiUgIqBPc3GyMa6jpqB75DsSR8wtsAqSOfioJHxNSQ3eqLokbyAg/LnKVChg
-	PtJ5IeRNtWGlt9hNGV4XBKCI92O5L42oJuvRrQACIUt0NKgEPhM=
-X-Google-Smtp-Source: AGHT+IGJ/qWe5PPqzuHBICQzeHVIVKp5crJzNNKXqyBfyk7uaOLcOkz/tYZnutpwUCMI1zF55cUgKQ==
-X-Received: by 2002:a17:902:e844:b0:22c:3609:97ed with SMTP id d9443c01a7336-22e5ec9e997mr25272325ad.30.1746599540530;
-        Tue, 06 May 2025 23:32:20 -0700 (PDT)
-Received: from Black-Pearl. ([122.162.204.119])
-        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-22e15229384sm85805295ad.206.2025.05.06.23.32.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 06 May 2025 23:32:20 -0700 (PDT)
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-Date: Wed, 07 May 2025 06:29:36 +0000
-Subject: [PATCH 2/2] dt-binding: mmc: microchip,sdhci-pic32: convert text
- based binding to json schema
+	s=arc-20240116; t=1746602918; c=relaxed/simple;
+	bh=1Rew0YZuYxM+n14JYaOIHTvOV12a+aiXbDY3qnhh2dU=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=gRlGCgLNhpJdOQ3n5izAUfX09bYpH9jFq+iibqF/VgYrMM38iYI9MCpj1vNgxtSSxiw5LAdlxjO9l0jShQIqurAQksdWX2ULnHNYMDFzbNYpO19wIHiGBrn6YYtVwWlUL6AKAUxc2Ql2KPdy9Qp4cxNpkSpZ3BgW18n+uqLDrf8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.68.186])
+	by gateway (Coremail) with SMTP id _____8AxHHKaCxtoCeHXAA--.26331S3;
+	Wed, 07 May 2025 15:28:26 +0800 (CST)
+Received: from localhost.localdomain (unknown [223.64.68.186])
+	by front1 (Coremail) with SMTP id qMiowMBxn8WVCxtoGna5AA--.12969S2;
+	Wed, 07 May 2025 15:28:22 +0800 (CST)
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+To: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Rob Herring <robh+dt@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Huacai Chen <chenhuacai@kernel.org>,
+	Xuerui Wang <kernel@xen0n.name>,
+	loongarch@lists.linux.dev,
+	devicetree@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH v2 0/4] LoongArch: Introduce the Loongson-2K MMC host controller driver
+Date: Wed,  7 May 2025 15:28:04 +0800
+Message-ID: <cover.1746581751.git.zhoubinbin@loongson.cn>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250507-mchp-sdhci-v1-2-ed29de05295a@gmail.com>
-References: <20250507-mchp-sdhci-v1-0-ed29de05295a@gmail.com>
-In-Reply-To: <20250507-mchp-sdhci-v1-0-ed29de05295a@gmail.com>
-To: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, 
- Thomas Bogendoerfer <tsbogend@alpha.franken.de>, 
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-mips@vger.kernel.org, 
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, 
- Charan Pedumuru <charan.pedumuru@gmail.com>
-X-Mailer: b4 0.14.2
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qMiowMBxn8WVCxtoGna5AA--.12969S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
+X-Coremail-Antispam: 1Uk129KBj93XoW7ury8ArWDAFWDZr4kJrykCrX_yoW8Zr1kpa
+	15u343tF4UJr43CFn3Ga48Ary5urWfJ3srGanxGw1kGay3u34UX3sayFWFvay3ury8Gry7
+	XFyrua1ru3WUCrXCm3ZEXasCq-sJn29KB7ZKAUJUUUU5529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUvYb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
+	6rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l57IF6xkI12xvs2x26I8E6xACxx1l5I
+	8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26r1Y6r17McIj6I8E87Iv67AK
+	xVW8JVWxJwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41lc7CjxVAaw2AFwI
+	0_JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG
+	67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MI
+	IYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E
+	14v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVWUJV
+	W8JwCI42IY6I8E87Iv6xkF7I0E14v26r1j6r4UYxBIdaVFxhVjvjDU0xZFpf9x07jreOLU
+	UUUU=
 
-Update text binding to YAML.
-Changes during conversion:
-Add appropriate include statements for interrupts and clock-names
-to resolve errors identified by `dt_binding_check` and `dtbs_check`.
+Hi all:
 
-Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
----
- .../bindings/mmc/microchip,sdhci-pic32.txt         | 29 ----------
- .../bindings/mmc/microchip,sdhci-pic32.yaml        | 66 ++++++++++++++++++++++
- 2 files changed, 66 insertions(+), 29 deletions(-)
+This patchset introduce the MMC host controller on Loongson-2K series
+CPUs.
 
-diff --git a/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.txt b/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.txt
-deleted file mode 100644
-index f064528effed31f30d1d1c6e0b49c02e215d99af..0000000000000000000000000000000000000000
---- a/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.txt
-+++ /dev/null
-@@ -1,29 +0,0 @@
--* Microchip PIC32 SDHCI Controller
--
--This file documents differences between the core properties in mmc.txt
--and the properties used by the sdhci-pic32 driver.
--
--Required properties:
--- compatible: Should be "microchip,pic32mzda-sdhci"
--- interrupts: Should contain interrupt
--- clock-names: Should be "base_clk", "sys_clk".
--               See: Documentation/devicetree/bindings/resource-names.txt
--- clocks: Phandle to the clock.
--          See: Documentation/devicetree/bindings/clock/clock-bindings.txt
--- pinctrl-names: A pinctrl state names "default" must be defined.
--- pinctrl-0: Phandle referencing pin configuration of the SDHCI controller.
--             See: Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt
--
--Example:
--
--	sdhci@1f8ec000 {
--		compatible = "microchip,pic32mzda-sdhci";
--		reg = <0x1f8ec000 0x100>;
--		interrupts = <191 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&rootclk REF4CLK>, <&rootclk PB5CLK>;
--		clock-names = "base_clk", "sys_clk";
--		bus-width = <4>;
--		cap-sd-highspeed;
--		pinctrl-names = "default";
--		pinctrl-0 = <&pinctrl_sdhc1>;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.yaml b/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.yaml
-new file mode 100644
-index 0000000000000000000000000000000000000000..ca0ca7df9ee991d8402bc4c62b1235ef5db2e85f
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.yaml
-@@ -0,0 +1,66 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/microchip,sdhci-pic32.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Microchip PIC32 SDHI Controller
-+
-+description:
-+  The Microchip PIC32 family of microcontrollers (MCUs) includes models with
-+  Secure Digital Host Controller Interface (SDHCI) controllers, allowing them
-+  to interface with Secure Digital (SD) cards. This interface is used for reading,
-+  writing, and managing data on SD cards, enabling storage and data transfer
-+  capabilities in embedded systems.
-+
-+allOf:
-+  - $ref: mmc-controller.yaml
-+
-+maintainers:
-+  - Ulf Hansson <ulf.hansson@linaro.org>
-+
-+properties:
-+  compatible:
-+    const: microchip,pic32mzda-sdhci
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 2
-+
-+  clock-names:
-+    items:
-+      - const: base_clk
-+      - const: sys_clk
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - pinctrl-names
-+  - pinctrl-0
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/clock/microchip,pic32-clock.h>
-+    mmc@1f8ec000 {
-+        compatible = "microchip,pic32mzda-sdhci";
-+        reg = <0x1f8ec000 0x100>;
-+        interrupts = <191 IRQ_TYPE_LEVEL_HIGH>;
-+        clocks = <&rootclk REF4CLK>, <&rootclk PB5CLK>;
-+        clock-names = "base_clk", "sys_clk";
-+        bus-width = <4>;
-+        cap-sd-highspeed;
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&pinctrl_sdhc1>;
-+    };
-+...
+They are similar, except for the interface characteristics and the use of
+DMA engine, specifically, the Loongson-2K0500/Loongson-2K1000 use an
+externally shared APBDMA engine, while the Loongson-2K2000 uses an
+internally exclusive DMA.
 
+Based on this, I'm splitting the driver into two patches.
+
+List of the patchset:
+Patch1: bindings for Loongson-2K0500/Loongson-2K1000;
+Patch2: driver for MMC controller using externally shared APBDMA engine;
+Patch3: bindings for Loongson-2K2000;
+Patch4: driver for MMC controller using internally exclusive DMA.
+
+Thanks.
+
+-------
+V2:
+
+patch(1/4):
+ - Add reg define for each reg entry.
+
+patch(2/4):
+ - Put all code in the c-file;
+ - Use mmc_from_priv() instead of host->mmc;
+ - Use sdio_signal_irq() instead of mmc_signal_sdio_irq();
+ - Use devm_mmc_alloc_host() instead of mmc_alloc_host();
+ - Use mmc_regulator_get_supply();
+
+patch(4/4):
+ - Add fix_cmd_interrupt function which is needed by Loongson-2K2000.
+
+Link to V1:
+https://lore.kernel.org/linux-mmc/cover.1744273956.git.zhoubinbin@loongson.cn/
+
+Binbin Zhou (4):
+  dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC controller binding
+  mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+  dt-bindings: mmc: loongson,ls2k-mmc: Add compatible for
+    Loongson-2K2000
+  mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver
+
+ .../bindings/mmc/loongson,ls2k-mmc.yaml       |  112 ++
+ MAINTAINERS                                   |    7 +
+ drivers/mmc/host/Kconfig                      |   13 +
+ drivers/mmc/host/Makefile                     |    1 +
+ drivers/mmc/host/loongson2-mmc.c              | 1007 +++++++++++++++++
+ 5 files changed, 1140 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+ create mode 100644 drivers/mmc/host/loongson2-mmc.c
+
+
+base-commit: 9e12816f9a6195f1f5b7c5dc2e388c2458411b97
 -- 
-2.43.0
+2.47.1
 
