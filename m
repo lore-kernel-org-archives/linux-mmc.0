@@ -1,108 +1,131 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8C00027A139;
-	Thu,  8 May 2025 15:09:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B59B4278E44;
+	Thu,  8 May 2025 18:31:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.11.138.130
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746716999; cv=none; b=salbWHv0T74jV5bhoFVnslLP7r8iQDK5tunwZZ9r5zmoLl9SNYY9cgghq4ddtnU0YZAkIHAmy2fSotwOCsiMHwkKv6kjpZeUskVRFEJhh1qvBX2cqjhRoUaH59LT9b1tbyWs9k0BN6N0KQg2bVNGrxPWDtY2WY9JYNetQgdaXCI=
+	t=1746729072; cv=none; b=F3qRBtIm1h6inaqyHvcPrnGEvOrXP4dUOypa4QYesgDJ8z/1JWPzfEA1YZnpuN/RpPfW4Uh6hfOb5a/F4RZWtUVnqtYbbriDYhck1uY9C8tri1X/Mk/7O/U+Zzbcce57bg14RnsOofyPaQjQOdmeSvJ0lCdTM0MmKQhPYLlA2ag=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746716999; c=relaxed/simple;
-	bh=t34MMBMvfQim8CEA91C4auO/k4Ql4/Xe46xy2Wb35JA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=RVCfJIp+Sx3D35ik6cKkHX3oE9vQ8X9/JYCVPu/csQPPnlkvmqFPfsJdUEDcsPAe9wOP5OqbM+rApcPvn8C+dLHehzSlH0vSh/pGh3c3dYJyxnRWDZg5QxnQKlz8TRcQSA36T6CQoW0r2VQv5uVLPImJ2u2yUjI4G9s9hJ7fHGE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=TcoLPAgh; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1746729072; c=relaxed/simple;
+	bh=V5gf55hXPX0qq/TTam1PSJX1LbH9PfNYfCT1v2WldW4=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=euVEZpNpuZb5dCIBctKjI2wcILvdGIoACO5Ha8YXJxwjgtRf/1oM5HHX/LNCvghiKTK90m4zsHfkWxUsNadKsmIC0PQ7UWG3fcCCIl4osN56sHOo7BAL8X1RoQJuLLY/WIIvGL+Qqfp/ki4XOeP7ldAMh5sFvfbSYoir2LZOzgo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de; spf=pass smtp.mailfrom=sntech.de; dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b=y7dGOpSa; arc=none smtp.client-ip=185.11.138.130
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=sntech.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sntech.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="TcoLPAgh"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A201CC4CEED;
-	Thu,  8 May 2025 15:09:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1746716999;
-	bh=t34MMBMvfQim8CEA91C4auO/k4Ql4/Xe46xy2Wb35JA=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=TcoLPAgh8wT5N0YGVl/YNYaOfyqcygNyciRozUz4xoPagwCuDyroz0r2tyMIGpAAg
-	 XwEbBrsQXsjbedF8zJCh05XA8h30CS+wUGrQzC+T0T0yffxGlQ9BSs9vkpPMtzZfTF
-	 S9NBFKpB3joav6BjwAMXkj3PVjTY5a/frCPX7YPc6QYoiIK0JH6993SJY9uEtNE7HG
-	 g4PEH838gwjbt6XcLehxrHZbi7JKO0wUfziCHtO9GR2hKnZmkMCUK9MLDYUxTMK1ma
-	 L/vi2eVu08SjfeHOg1yq37ym4PJFGKMM9ZA5YsZ/kI3Ep+dIEWVL4c63HLlPLyPVz1
-	 lCFtQqyR3jwXw==
-Message-ID: <3049a09f-f1c4-4c44-bced-53adcbb5731e@kernel.org>
-Date: Thu, 8 May 2025 17:09:54 +0200
+	dkim=pass (2048-bit key) header.d=sntech.de header.i=@sntech.de header.b="y7dGOpSa"
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=sntech.de;
+	s=gloria202408; h=Content-Transfer-Encoding:Content-Type:MIME-Version:
+	References:In-Reply-To:Message-ID:Date:Subject:Cc:To:From:Sender:Reply-To:
+	Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+	Resent-To:Resent-Cc:Resent-Message-ID;
+	bh=mZvOWQHwZVwyJf6BVvOEiNtKPaJ2rgizuAGd5TEgutw=; b=y7dGOpSaTguEXKJjJT2GCbwAz1
+	RF10UCNO6oVUQkWcapDMzWaIp3xCxC/6ApPzPPXZEqtjTgK4hiShc0zDrHGbzYazGixvUr/xmxTV2
+	YrksQtRrKsCRkzJruR+BOuwyuo6xkDyaUVU6cWXRyI3Ol36uv7V8YtaAoTMMRaZTmR46gL2Q/cl8i
+	GkenBKWdoMfABDY3drgeAAZ6ubvfMRkA30bMqiEw59PKenfkzeZxVjhn1INTEyYUsBnORgsaQNQbm
+	87A+Wxe5hj1BlWVZcWh1uhmAIGI7uebz385DD1vSWPXmXZIJ+yxg87ZGftezCdNm2Ll1UB0XJGK4g
+	ApFqhayw==;
+Received: from [61.8.144.177] (helo=localhost.localdomain)
+	by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.94.2)
+	(envelope-from <heiko@sntech.de>)
+	id 1uD61M-0000vi-RN; Thu, 08 May 2025 20:31:00 +0200
+From: Heiko Stuebner <heiko@sntech.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Shresth Prasad <shresthprasad7@gmail.com>,
+	Cristian Ciocaltea <cristian.ciocaltea@collabora.com>,
+	Detlev Casanova <detlev.casanova@collabora.com>,
+	Jonas Karlman <jonas@kwiboo.se>,
+	Chukun Pan <amadeus@jmu.edu.cn>,
+	Yao Zi <ziyao@disroot.org>
+Cc: Heiko Stuebner <heiko@sntech.de>,
+	linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org,
+	linux-kernel@vger.kernel.org,
+	linux-clk@vger.kernel.org
+Subject: Re: (subset) [PATCH v5 0/5] Support SD/SDIO controllers on RK3528
+Date: Thu,  8 May 2025 20:30:47 +0200
+Message-ID: <174672902826.1927548.11499970123396406769.b4-ty@sntech.de>
+X-Mailer: git-send-email 2.47.2
+In-Reply-To: <20250506092206.46143-1-ziyao@disroot.org>
+References: <20250506092206.46143-1-ziyao@disroot.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/2] mips: dts: pic32: pic32mzda: Rename the sdhci
- nodename to match with common mmc-controller binding
-To: Charan Pedumuru <charan.pedumuru@gmail.com>, Rob Herring
- <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>,
- Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
- Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-mips@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <20250507-mchp-sdhci-v1-0-ed29de05295a@gmail.com>
- <20250507-mchp-sdhci-v1-1-ed29de05295a@gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250507-mchp-sdhci-v1-1-ed29de05295a@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-On 07/05/2025 08:29, Charan Pedumuru wrote:
-> Rename the sdhci nodename from "sdhci@" to "mmc@" to align with
-> linux common mmc-controller binding.
+
+On Tue, 06 May 2025 09:22:01 +0000, Yao Zi wrote:
+> RK3528 features two SDIO controllers and one SD/MMC controller. This
+> series adds essential support for their tuning clocks and brings the
+> SD/MMC one up on Radxa E20C board. Both HS and SDR104 mode are verified.
 > 
-> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
-> ---
+> - Changed from v4
+>   - rk3528 clock driver
+>     - Switch to auxiliary GRF
+>     - drop rockchip_clk_register_grf_branches
+>     - Rename branch_mmc_grf to branch_grf_mmc to make style consistent
+>       (with branch_grf_gate)
+>   - Link to v4: https://lore.kernel.org/all/20250417143647.43860-1-ziyao@disroot.org/
+> - Changed from v3
+>   - Drop applied binding patch of MMC controller
+>   - Rebase on top of linux-rockchip/for-next
+>   - Link to v3: https://lore.kernel.org/all/20250309055348.9299-1-ziyao@disroot.org/
+> - Changed from v2
+>   - Apply review tags
+>   - Rebase on top of linux-rockchip/for-next and drop applied patches
+>   - RK3528 devicetree
+>     - Fix accidentally dropped status property of saradc node
+>     - drop det and pwren pinctrls for SDIO{0,1} according to the
+>       reference design
+>     - Correct max-frequency for SDIO{0,1}
+>   - rk3528-radxa-e20c devicetree
+>     - Don't disable sdio for sdmmc as claimed in the hw design guide
+>   - Link to v2: https://lore.kernel.org/all/20250305194217.47052-1-ziyao@disroot.org/
+> - Changed from v1
+>   - Apply review tags
+>   - Rebase on top of linux-rockchip/for-next and saradc v2 series
+>   - rk3528 clock driver:
+>     - explicitly include minmax.h, replace MAX() with more robust max()
+>     - readability improvements
+>     - fix error checks: ERR_PTR(-ENODEV), instead of ERR_PTR(ENODEV), is
+>       returned when syscon_regmap_lookup_by_compatible() fails for missing
+>       such syscon
+>   - RK3528 devicetree
+>     - Add default pinctrl
+>     - Move the per-SoC property, rockchip,default-sample-phase, into the
+>       SoC devicetree
+>   - rk3528-radxa-e20c devicetree
+>     - Assign sdcard to mmc1
+>     - Add missing regulators
+>     - Apply no-sdio for the sdmmc controller
+>     - Sort nodes
+>   - Link to v1: https://lore.kernel.org/all/20250301104250.36295-1-ziyao@disroot.org/
+> 
+> [...]
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Applied, thanks!
+
+[1/5] dt-bindings: clock: Add GRF clock definition for RK3528
+      commit: 8a023e86f3d999007f2687952afe78ef34a6aa91
+[2/5] clk: rockchip: Support MMC clocks in GRF region
+      commit: 621ba4d9f6db560a7406fd732af1b495ff5aa103
+[3/5] clk: rockchip: rk3528: Add SD/SDIO tuning clocks in GRF region
+      commit: 306d2f5ddaa765f04ffb54fc9437a6318f904b53
 
 Best regards,
-Krzysztof
+-- 
+Heiko Stuebner <heiko@sntech.de>
