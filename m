@@ -1,463 +1,211 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+Received: from mail-ed1-f49.google.com (mail-ed1-f49.google.com [209.85.208.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6F5B01DBB0C
-	for <linux-mmc@vger.kernel.org>; Thu,  8 May 2025 23:00:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8DDB1BA53;
+	Fri,  9 May 2025 01:22:19 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1746745233; cv=none; b=GwjyQUd3maBNWYnLbuMBGqs4364R5m4ohhYD4BqmB1oMpNcHGL99Q5RzCboyMJPJfKBusXppvyPyRfwsKUY2n01W7AfMhHDQHyPwyGXezOnGLk/rH29HMTQG/xNYC/sHLTaFlObkwIbtIvvJXrM+BmF7Uwuh+PvpshkH7rdH8QA=
+	t=1746753741; cv=none; b=By/HVePNzcgqa819vlB3LguqSYE7DKkjtLspiY0oitFygOEkoOifwIR0rHXfPC/ZSW5VKVgm7F1okizGZ4Xb7sBaDcyt4mFmWQEjwrrtKMjc518CQStbpGfYfLpEU/PkzVpog9tTPCgjGnPBEk3JziEZOjfk4vIN7EAKLlJny1s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1746745233; c=relaxed/simple;
-	bh=fMmw7OIovbFo5qKQquhjY8dK2KzaNwruMuVDAEtq/aw=;
+	s=arc-20240116; t=1746753741; c=relaxed/simple;
+	bh=K4PGaR75ciFMqUOd832iToV1R6IR+RU5ebaSxi/j4Qw=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FKUUug3xTkSa1G/On2RxqolQz/ro5+30isvgQz/8oz7+n3f4OmvsKPPnFjsSLNqmp8hyFTQCYjMJjw6evO2DQR6YQoqhh/L+tt4ajiTFLbvJMKadP4MRJcIdkPDLE991XKPFDiOLWsh4yKtj7BZ0RoIs1jLEAhiDp0qU/X7/GFQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=m2iEmm2m; arc=none smtp.client-ip=209.85.219.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=biOE+1oeBqlAlpTxIjAhWjWfDTizDsIz9wF0F1PFfYo0XvTkPFxKdTaOS+vW4YoskNdYAT37OHqRyh82vLzGMEuPs1sqDmR4tObBkEga8XCQkHrlj9AyJbEm63sDlosnasysPS6dhAgNAM+CCQZzLqTyXyxD3zoYNOaoNpVMPgI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=OpnSyjbC; arc=none smtp.client-ip=209.85.208.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="m2iEmm2m"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e78e38934baso1679403276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 08 May 2025 16:00:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OpnSyjbC"
+Received: by mail-ed1-f49.google.com with SMTP id 4fb4d7f45d1cf-5fca7c14715so314059a12.3;
+        Thu, 08 May 2025 18:22:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1746745230; x=1747350030; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=+bapZu+7+8ii9uaxEr00bkaFLq2Btk4QlNw3sk4w/X8=;
-        b=m2iEmm2mJ6EuWnAurBQbTlNnlP3VGhL0Qz80c9T3bOrVOPhfeX+Uq9GWlU+Bc7N0BF
-         20ODGOH5Sux/o0RjnvtO7f7ASA+WzwLqQWY+e1QXxZflq0o2M7Ub1AR9z7jvSPCKEc59
-         JkwnwnOhAkgk5XUaYBbiX4y8mCahEmU2nWYZhyCDyUMrQA1DZzn3W+DoD3e58+09qJ5G
-         qXybVtb8ZwfebjqfNUJX3LB9mrhgHIlPNKigBVx9O/Kl3BkXVZNiyFehLbupBGckIfeq
-         Y81F2U4vId6hd9OUBNComYcFCLv1uemzTsR/0KfCn5kk8fmi54yHe6u8dEtBixdOWJYX
-         E0mw==
+        d=gmail.com; s=20230601; t=1746753738; x=1747358538; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=urXW+BAEYO0CkFqXFETFIXtaSE/jSUmIp1lzCTyc1Ko=;
+        b=OpnSyjbCUV7VJEzq6CcZlTxeB7qoCeBPokq4t3sKCp+9jAmV1wBmt+RLacwXv52xIo
+         dRaUc+0euqsRY4pSiAe0UeWB9QfEPokFdjiDv+c75OpQkMqpf6hGdI8czX2HCUMo3q6R
+         Pf7shq8PcO8IY/5fq62Q3JO65FTOeH3C/vrzpZ16sadU06gtUkiCDzRZpjQROKp5Hmzr
+         6MfX3IQ7GHjGNGf/10ollDvatA/FeOOwrTeq0L9VycR8r6/DsRApPLWFnN5LJKA0hqD6
+         pKCgUI0oI2y26REYEDKKbF5KFcc6MDSMuTLrRgjtkLjZsrBQY8ddfJA2MDIV7RVO2HhD
+         yRhA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1746745230; x=1747350030;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+bapZu+7+8ii9uaxEr00bkaFLq2Btk4QlNw3sk4w/X8=;
-        b=dZT5xqNVxxFX1MOpFyPc9hFpCu0sBCUNbo2avKXXaTGg03B9USFqISHGRJ7CQE90t3
-         +hXm1L+jHl71JYYmbavwAEJWP/Oyi1iGBNI0vJY+8pa5Kioo9bxIIbfHTmav09wQVX9N
-         lxr5deW9i02sFuC7QDtTJ/AJhn1Ao3SQe8qI6eWgxWw2Q1yZR8oFQGy8VLIePuUmL7g7
-         HEAvXPf0nO4A4PmHfVeBPgJtH99Q/jnZCzeF1B7Idu5TJ/9dOtL8OExLfmrB4pZ9MUZL
-         8khLzBTS+VSGUZevha61vDODNn9bN/s0tUKu/cdqm2aTDXFSU7MJWSOxDO+Cwci8H3Ni
-         sG7A==
-X-Forwarded-Encrypted: i=1; AJvYcCV6+KfWvLkFVcLvk8gcXzDF85q9A2OtIV1S5wuxMKzu2JNYKEbZMn2kfceFf0IPA04BaJQAEP7l/Mw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz7huUqA5Yz8Z2XxzMXjFUm1zeyeeJsPZiOCerc24drBjHR4O+Y
-	dTk4d+C0j3MGuPi+wZ9y41R15fy9BS7JEMlDntmq5jU4+9F9HpK2LL0iF2QuSEfg0Hh0+uVeTzK
-	VXsWsjUm/C2LnvYYjL9pBHTLQsBR0EXOB9zipiA==
-X-Gm-Gg: ASbGncuqr2h+If98iVzCqIoERJAM/I14Db0l9Qge08rC7wI8PuYVj2i5YJ6J2XCgNkZ
-	cKOMEg4iRACPX18Z+cLduOOgbMJySyvAEpEbPf7zeElwjsbKgXVhRH9xvUeeQjtTT155R67zwkw
-	0U40gAOIR8AhgO+puiKUAvF3o=
-X-Google-Smtp-Source: AGHT+IFBK34kEw6k9Gbs7tpztCZHQCppLlMyx6P7FSEVBCzMKhZuqQC6LR0YjDuCIV/mZwKmjxcJETe3mXUTbTSis8M=
-X-Received: by 2002:a05:6902:490e:b0:e75:bea4:5ea4 with SMTP id
- 3f1490d57ef6-e78fdda3cd1mr1712002276.46.1746745230131; Thu, 08 May 2025
- 16:00:30 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1746753738; x=1747358538;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=urXW+BAEYO0CkFqXFETFIXtaSE/jSUmIp1lzCTyc1Ko=;
+        b=v5nwXs4IgJ/vaZJkmDkQgUL2CKzACTCUFsjma6OJFv1u1FemYQfenXoOkCqjr/Ajl7
+         Zlqq/a/aM1VseqTsuJDYGlj3IG88nrHjdNy5PiuM73RBxdDJ6QPnxQ39snHsayzwBdF0
+         4wJO9zIRgyH6VvUI259Q4fZBPIQLXsjJx89W0Mdmwtz+ZHr1x6QdyqxvLQy1VpyU/dD6
+         xAY1vRRTrryq1Ipg2zTXzdmIsJxK6VXRPZJEAnlpob/PRaT1ws0+dptNZaJlFuwG2rgo
+         0xkQnq0JlnkOZk7S+5JTC3j6YDeo6djQsF7bw/ZevekAQX7pxMtARb1SUsQ7oBdWuIeN
+         SaQA==
+X-Forwarded-Encrypted: i=1; AJvYcCUuTbnXX5lQiRzcMa4gHUr54luwLuITAtoJGU7KDPH+axGsD6y9/eKBSVNW4RY80EfIH7LLUIs123eD@vger.kernel.org, AJvYcCWuwO3cuaTW33GOkahnrJ99/w4S28PyjWwm5+U/y/oIorvP7GLgc7rSdTkI1QCP9wb2yPDBoY4UKFJB@vger.kernel.org
+X-Gm-Message-State: AOJu0YztrRVrL/q6oxB1HDaaFH4+AtkD5KJcCVnblF9cz452FX6LNtUV
+	YDruw+2X/A+md523sGDha130f1GaJqvI03s/K3IVgEJkZkcVNd2FZflRFNyK+MGuE/Nc7QtHHcV
+	HYWFsbe1/3vxVFsafEgbcXixrsDZoPcuFeoMicg==
+X-Gm-Gg: ASbGncvfOPCIGP3IMxBp65VXhLo0pc4BIrEr0+IeCScC43wJdZQCxcHHHPDgIj7dDsS
+	6PgUpIWbFM5gvkoGu3E3HlrJ6vXhVUeopwwH0xmxIjaTy5Q6pgkUBI/mjQPqt6lhbGG2G1Yel2m
+	pBT17LGDDBulyt67Me4WP1WTA=
+X-Google-Smtp-Source: AGHT+IG2yYw5OGqGhpOyx+XnDgtzOgA6aRoQHB5oRpX+l9WDFgc4JXXQWpqa2bxCVpEseQx7FJIg89wUOdn5bAAsT6g=
+X-Received: by 2002:a17:907:a08b:b0:acb:5583:6fe0 with SMTP id
+ a640c23a62f3a-ad218f46a45mr159357766b.15.1746753737638; Thu, 08 May 2025
+ 18:22:17 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250506095118.2239459-1-o.rempel@pengutronix.de> <20250506095118.2239459-2-o.rempel@pengutronix.de>
-In-Reply-To: <20250506095118.2239459-2-o.rempel@pengutronix.de>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 9 May 2025 00:59:54 +0200
-X-Gm-Features: ATxdqUHVSpTTECsTQ-EyBxjlXRV1bMtNFM8zH5maGVUUJfC8dy1QtleF_mwdIhY
-Message-ID: <CAPDyKFqa3Fh4UB1LuSk=i9ri_odZHyv289jQT98uCoW1jZT+bA@mail.gmail.com>
-Subject: Re: [PATCH v5 1/4] mmc: core: Handle undervoltage events and register
- regulator notifiers
-To: Oleksij Rempel <o.rempel@pengutronix.de>
-Cc: kernel@pengutronix.de, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, 
-	Mark Brown <broonie@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>, =?UTF-8?Q?S=C3=B8ren_Andersen?= <san@skov.dk>, 
-	Christian Loehle <christian.loehle@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, 
-	Avri Altman <Avri.Altman@sandisk.com>
+References: <cover.1746581751.git.zhoubinbin@loongson.cn> <9b5a416143d5d5da7084f3a868cf01e6827cd653.1746581751.git.zhoubinbin@loongson.cn>
+ <20250508-snagged-amber-432ed9bf3d41@spud>
+In-Reply-To: <20250508-snagged-amber-432ed9bf3d41@spud>
+From: Binbin Zhou <zhoubb.aaron@gmail.com>
+Date: Fri, 9 May 2025 09:22:04 +0800
+X-Gm-Features: AX0GCFszpYExKXqggR86Q3nXf_ADQFMcMy3VvuQnohu3_YCcAHHZlnBuOYM2quk
+Message-ID: <CAMpQs4LXvdd-=r15t2Fbm1xjQKBp8nvxQMR=UU7n0bXHS3MDHQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC
+ controller binding
+To: Conor Dooley <conor@kernel.org>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Huacai Chen <chenhuacai@kernel.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
+	devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 6 May 2025 at 11:51, Oleksij Rempel <o.rempel@pengutronix.de> wrote:
+Hi Conor:
+
+Thanks for your review.
+
+On Thu, May 8, 2025 at 11:01=E2=80=AFPM Conor Dooley <conor@kernel.org> wro=
+te:
 >
-> Extend the MMC core to handle undervoltage events by implementing
-> infrastructure to notify the MMC bus about voltage drops.
+> On Wed, May 07, 2025 at 03:28:05PM +0800, Binbin Zhou wrote:
+> > Add the Loongson-2K SoC's SD/SDIO/eMMC controller binding with DT schem=
+a
+> > format using json-schema.
+> >
+> > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> > ---
+> >  .../bindings/mmc/loongson,ls2k-mmc.yaml       | 69 +++++++++++++++++++
+> >  MAINTAINERS                                   |  6 ++
+> >  2 files changed, 75 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k=
+-mmc.yaml
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.ya=
+ml b/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > new file mode 100644
+> > index 000000000000..97a0853399f1
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > @@ -0,0 +1,69 @@
+> > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/mmc/loongson,ls2k-mmc.yaml#
 >
-> Background & Decision at LPC24:
->
-> This solution was proposed and refined during LPC24 in the talk
-> "Graceful Under Pressure: Prioritizing Shutdown to Protect Your Data in
-> Embedded Systems," which aimed to address how Linux should handle power
-> fluctuations in embedded devices to prevent data corruption or storage
-> damage.
->
-> At the time, multiple possible solutions were considered:
-> 1. Triggering a system-wide suspend or shutdown: when undervoltage is
->    detected, with device-specific prioritization to ensure critical
->    components shut down first.
->    - This approach was disliked by Greg Kroah-Hartman, as it introduced
->      complexity and was not suitable for all use cases.
->
-> 2. Notifying relevant devices through the regulator framework: to allow
->    graceful per-device handling.
->    - This approach was agreed upon as the most acceptable by participants
->      in the discussion, including Greg Kroah-Hartman, Mark Brown,
->      and Rafael J. Wysocki.
->    - This patch implements that decision by integrating undervoltage
->      handling into the MMC subsystem.
->
+> Filename matching a compatible please.
+> Otherwise this looks okay to me.
 
-It is certainly nice to get all this information when reviewing, but
-for a commit message, I think it may be a bit too much.
-
-Would you mind trying to focus on describing what patch does in more
-detail instead?
-
-I would appreciate it if the above information could be put as general
-information instead, along with the version information below "---".
-
-> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
-
-The above said, from a top level point of view I think the approach
-makes perfect sense. Thanks for working on this!
-
-> ---
-> changes v3:
-> - filter supported cards at early stage
-> - add locking in mmc_handle_regulator_event()
-> - claim/release host in mmc_handle_undervoltage()
-> ---
->  drivers/mmc/core/core.c      |  30 +++++++++
->  drivers/mmc/core/core.h      |   2 +
->  drivers/mmc/core/regulator.c | 124 +++++++++++++++++++++++++++++++++++
->  include/linux/mmc/host.h     |   8 +++
->  4 files changed, 164 insertions(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index a0e2dce70434..c502d83417cc 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1399,6 +1399,36 @@ void mmc_power_cycle(struct mmc_host *host, u32 ocr)
->         mmc_power_up(host, ocr);
->  }
->
-> +/**
-> + * mmc_handle_undervoltage - Handle an undervoltage event on the MMC bus
-> + * @host: The MMC host that detected the undervoltage condition
-> + *
-> + * This function is called when an undervoltage event is detected on one of
-> + * the MMC regulators.
-> + *
-> + * Returns: 0 on success or a negative error code on failure.
-> + */
-> +int mmc_handle_undervoltage(struct mmc_host *host)
-> +{
-> +       int ret;
-> +
-> +       mmc_claim_host(host);
-
-Rather than claiming the host we need to make sure we don't race with
-card/host removal, which are those paths that may clear the
-host->bus_ops.
-
-In other words, I think we should call __mmc_stop_host() here, to
-avoid a card being removed.
-
-Moreover we need to extend mmc_stop_host() to unregister the regulator
-notifier to make sure host removal doesn't race with a call to
-mmc_handle_undervoltage().
-
-Or potentially we could use mmc_add|remove_card() for where the
-registering|unregistering the regulator notifier, let me think about
-it some more, it's getting late over here.
-
-> +
-> +       if (!host->bus_ops->handle_undervoltage) {
-> +               mmc_release_host(host);
-> +               return 0;
-> +       }
-> +
-> +       dev_warn(mmc_dev(host), "%s: Undervoltage detected, initiating emergency stop\n",
-> +                mmc_hostname(host));
-> +
-> +       ret = host->bus_ops->handle_undervoltage(host);
-> +
-> +       mmc_release_host(host);
-> +
-> +       return ret;
-> +}
-> +
->  /*
->   * Assign a mmc bus handler to a host. Only one bus handler may control a
->   * host at any given time.
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index 622085cd766f..31e5918f6e95 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -31,6 +31,7 @@ struct mmc_bus_ops {
->         int (*sw_reset)(struct mmc_host *);
->         bool (*cache_enabled)(struct mmc_host *);
->         int (*flush_cache)(struct mmc_host *);
-> +       int (*handle_undervoltage)(struct mmc_host *host);
->  };
->
->  void mmc_attach_bus(struct mmc_host *host, const struct mmc_bus_ops *ops);
-> @@ -59,6 +60,7 @@ void mmc_power_off(struct mmc_host *host);
->  void mmc_power_cycle(struct mmc_host *host, u32 ocr);
->  void mmc_set_initial_state(struct mmc_host *host);
->  u32 mmc_vddrange_to_ocrmask(int vdd_min, int vdd_max);
-> +int mmc_handle_undervoltage(struct mmc_host *host);
->
->  static inline void mmc_delay(unsigned int ms)
->  {
-> diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-> index 3dae2e9b7978..1074567e242f 100644
-> --- a/drivers/mmc/core/regulator.c
-> +++ b/drivers/mmc/core/regulator.c
-> @@ -7,6 +7,7 @@
->  #include <linux/err.h>
->  #include <linux/log2.h>
->  #include <linux/regulator/consumer.h>
-> +#include <linux/workqueue.h>
->
->  #include <linux/mmc/host.h>
->
-> @@ -262,6 +263,107 @@ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
->
->  #endif /* CONFIG_REGULATOR */
->
-> +static void mmc_undervoltage_workfn(struct work_struct *work)
-
-So devm_regulator_register_notifier() doesn't provide us with an
-asynchronous notification-interface. In this way, it becomes the
-notified consumer's responsibility to know what fits best on a case by
-case basis, possibly delaying others. I guess this has been discussed
-earlier?
-
-Don't get me wrong, I think the async/workqueue fits well with MMC.
-Yet, it seems like it would be nice to have an async interface too.
-
-> +{
-> +       struct mmc_supply *supply;
-> +       struct mmc_host *mmc;
-> +
-> +       supply = container_of(work, struct mmc_supply, uv_work);
-> +       mmc = container_of(supply, struct mmc_host, supply);
-> +
-> +       mmc_handle_undervoltage(mmc);
-> +}
-> +
-> +static int mmc_handle_regulator_event(struct mmc_host *mmc,
-> +                                     const char *regulator_name,
-> +                                     unsigned long event)
-> +{
-> +       unsigned long flags;
-> +
-> +       switch (event) {
-> +       case REGULATOR_EVENT_UNDER_VOLTAGE:
-> +               /* Currently we support only MMC cards */
-> +               spin_lock_irqsave(&mmc->lock, flags);
-> +               if (mmc->undervoltage || !mmc->card ||
-> +                   !mmc_card_mmc(mmc->card)) {
-> +                       spin_unlock_irqrestore(&mmc->lock, flags);
-> +                       return NOTIFY_OK;
-> +               }
-> +
-> +               mmc->undervoltage = true;
-> +               spin_unlock_irqrestore(&mmc->lock, flags);
-
-Rather than having to do the above checks, how about instead
-registering the notifier only in cases when it makes sense? For eMMC
-for example. In this way we would need to do anything here, but only
-queue the work.
-
-Another option is to defer to let mmc_handle_undervoltage() bail out,
-if the bus_ops->handle_undervoltage() has not been assigned for the
-card type. That should be good enough too, I think. Right?
-
-> +
-> +               queue_work(system_highpri_wq, &mmc->supply.uv_work);
-> +               break;
-> +       default:
-> +               return NOTIFY_DONE;
-> +       }
-> +
-> +       return NOTIFY_OK;
-> +}
-> +
-> +static int mmc_vmmc_notifier_callback(struct notifier_block *nb,
-> +                                     unsigned long event, void *data)
-> +{
-> +       struct mmc_supply *supply;
-> +       struct mmc_host *mmc;
-> +
-> +       supply = container_of(nb, struct mmc_supply, vmmc_nb);
-> +       mmc = container_of(supply, struct mmc_host, supply);
-> +
-> +       return mmc_handle_regulator_event(mmc, "vmmc", event);
-> +}
-> +
-> +static int mmc_vqmmc_notifier_callback(struct notifier_block *nb,
-> +                                      unsigned long event, void *data)
-> +{
-> +       struct mmc_supply *supply;
-> +       struct mmc_host *mmc;
-> +
-> +       supply = container_of(nb, struct mmc_supply, vqmmc_nb);
-> +       mmc = container_of(supply, struct mmc_host, supply);
-> +
-> +       return mmc_handle_regulator_event(mmc, "vqmmc", event);
-> +}
-> +
-> +static int mmc_vqmmc2_notifier_callback(struct notifier_block *nb,
-> +                                       unsigned long event, void *data)
-> +{
-> +       struct mmc_supply *supply;
-> +       struct mmc_host *mmc;
-> +
-> +       supply = container_of(nb, struct mmc_supply, vqmmc2_nb);
-> +       mmc = container_of(supply, struct mmc_host, supply);
-> +
-> +       return mmc_handle_regulator_event(mmc, "vqmmc2", event);
-> +}
-
-Looks a bit too much to have one callback per regulator type. Please
-convert into using one function.
-
-> +
-> +static void
-> +mmc_register_regulator_notifier(struct mmc_host *mmc,
-> +                               struct regulator *regulator,
-> +                               struct notifier_block *nb,
-> +                               int (*callback)(struct notifier_block *,
-> +                                               unsigned long, void *),
-> +                               const char *name)
-> +{
-> +       struct device *dev = mmc_dev(mmc);
-> +       int ret;
-> +
-> +       nb->notifier_call = callback;
-> +       ret = devm_regulator_register_notifier(regulator, nb);
-> +       if (ret)
-> +               dev_warn(dev, "Failed to register %s notifier: %pe\n", name,
-> +                        ERR_PTR(ret));
-> +}
-> +
-> +static void mmc_undervoltage_work_cleanup(void *data)
-> +{
-> +       struct mmc_supply *supply = data;
-> +
-> +       /* Ensure the work is canceled or flushed here */
-> +       cancel_work_sync(&supply->uv_work);
-> +}
-> +
->  /**
->   * mmc_regulator_get_supply - try to get VMMC and VQMMC regulators for a host
->   * @mmc: the host to regulate
-> @@ -281,6 +383,13 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
->         mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
->         mmc->supply.vqmmc2 = devm_regulator_get_optional(dev, "vqmmc2");
->
-> +       INIT_WORK(&mmc->supply.uv_work, mmc_undervoltage_workfn);
-
-Probably better to add this in mmc_alloc_host().
-
-> +
-> +       ret = devm_add_action_or_reset(dev, mmc_undervoltage_work_cleanup,
-> +                                      &mmc->supply);
-> +       if (ret)
-> +               return dev_err_probe(dev, ret, "Failed to add cleanup action\n");
-> +
->         if (IS_ERR(mmc->supply.vmmc)) {
->                 if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
->                         return dev_err_probe(dev, -EPROBE_DEFER,
-> @@ -293,6 +402,11 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
->                         mmc->ocr_avail = ret;
->                 else
->                         dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
-> +
-> +               mmc_register_regulator_notifier(mmc, mmc->supply.vmmc,
-> +                                               &mmc->supply.vmmc_nb,
-> +                                               mmc_vmmc_notifier_callback,
-> +                                               "vmmc");
-
-As I indicated earlier, I think we should register this far later
-during card-init. Somewhere *after* we have assigned the
-host->bus_ops. So in mmc_attach_mmc() or possibly in mmc_add_card() -
-if we want to make it more generic for SD/SDIO too.
-
-Also note that SD cards may support a graceful power-off via
-sd_poweroff_notify().
-
->         }
->
->         if (IS_ERR(mmc->supply.vqmmc)) {
-> @@ -301,12 +415,22 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
->                                              "vqmmc regulator not available\n");
->
->                 dev_dbg(dev, "No vqmmc regulator found\n");
-> +       } else {
-> +               mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc,
-> +                                               &mmc->supply.vqmmc_nb,
-> +                                               mmc_vqmmc_notifier_callback,
-> +                                               "vqmmc");
-
-vqmmc is for signal (I/O) voltage for eMMC and SD/SDIO. Do we need
-really a notifier for this?
-
->         }
->
->         if (IS_ERR(mmc->supply.vqmmc2)) {
->                 if (PTR_ERR(mmc->supply.vqmmc2) == -EPROBE_DEFER)
->                         return -EPROBE_DEFER;
->                 dev_dbg(dev, "No vqmmc2 regulator found\n");
-> +       } else {
-> +               mmc_register_regulator_notifier(mmc, mmc->supply.vqmmc2,
-> +                                               &mmc->supply.vqmmc2_nb,
-> +                                               mmc_vqmmc2_notifier_callback,
-> +                                               "vqmmc2");
->         }
-
-vqmmc2 is at this point only used for SD UHS-II cards and there are no
-proper power-management in regards to graceful power-down support
-implement for this yet.
-
-I suggest we ignore vqmmc2 for now in regards to the notifiers.
+Yes, I forgot about this point, it will be renamed to
+loongson,ls2k0500-mmc.yaml.
 
 >
->         return 0;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 68f09a955a90..4e147ad82804 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -11,6 +11,7 @@
->  #include <linux/device.h>
->  #include <linux/fault-inject.h>
->  #include <linux/debugfs.h>
-> +#include <linux/workqueue.h>
->
->  #include <linux/mmc/core.h>
->  #include <linux/mmc/card.h>
-> @@ -342,6 +343,12 @@ struct mmc_supply {
->         struct regulator *vmmc;         /* Card power supply */
->         struct regulator *vqmmc;        /* Optional Vccq supply */
->         struct regulator *vqmmc2;       /* Optional supply for phy */
-> +
-> +       struct notifier_block vmmc_nb;          /* Notifier for vmmc */
-> +       struct notifier_block vqmmc_nb;         /* Notifier for vqmmc */
-> +       struct notifier_block vqmmc2_nb;        /* Notifier for vqmmc2 */
-> +
-> +       struct work_struct uv_work;             /* Undervoltage work */
->  };
->
->  struct mmc_ctx {
-> @@ -493,6 +500,7 @@ struct mmc_host {
->         unsigned int            retune_crc_disable:1; /* don't trigger retune upon crc */
->         unsigned int            can_dma_map_merge:1; /* merging can be used */
->         unsigned int            vqmmc_enabled:1; /* vqmmc regulator is enabled */
-> +       unsigned int            undervoltage:1;  /* Undervoltage state */
->
->         int                     rescan_disable; /* disable card detection */
->         int                     rescan_entered; /* used with nonremovable devices */
-> --
-> 2.39.5
->
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: The SD/SDIO/eMMC host controller for Loongson-2K family SoCs
+> > +
+> > +description:
+> > +  The MMC host controller on the Loongson-2K0500/2K1000 (using an exte=
+rnally
+> > +  shared apbdma controller) provides the SD and SDIO device interfaces=
+.
+> > +
+> > +maintainers:
+> > +  - Binbin Zhou <zhoubinbin@loongson.cn>
+> > +
+> > +allOf:
+> > +  - $ref: mmc-controller.yaml#
+> > +
+> > +properties:
+> > +  compatible:
+> > +    enum:
+> > +      - loongson,ls2k0500-mmc
+> > +      - loongson,ls2k1000-mmc
+> > +
+> > +  reg:
+> > +    items:
+> > +      - description: Loongson-2K MMC controller registers.
+> > +      - description: APB DMA config register for Loongson-2K MMC contr=
+oller.
+> > +
+> > +  interrupts:
+> > +    maxItems: 1
+> > +
+> > +  clocks:
+> > +    maxItems: 1
+> > +
+> > +  dmas:
+> > +    maxItems: 1
+> > +
+> > +  dma-names:
+> > +    const: rx-tx
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> > +  - interrupts
+> > +  - clocks
+> > +  - dmas
+> > +  - dma-names
+> > +
+> > +unevaluatedProperties: false
+> > +
+> > +examples:
+> > +  - |
+> > +    #include <dt-bindings/gpio/gpio.h>
+> > +    #include <dt-bindings/interrupt-controller/irq.h>
+> > +    #include <dt-bindings/clock/loongson,ls2k-clk.h>
+> > +
+> > +    mmc@1fe2c000 {
+> > +        compatible =3D "loongson,ls2k1000-mmc";
+> > +        reg =3D <0x1fe2c000 0x68>,
+> > +              <0x1fe00438 0x8>;
+> > +        interrupt-parent =3D <&liointc0>;
+> > +        interrupts =3D <31 IRQ_TYPE_LEVEL_HIGH>;
+> > +        clocks =3D <&clk LOONGSON2_APB_CLK>;
+> > +        dmas =3D <&apbdma1 0>;
+> > +        dma-names =3D "rx-tx";
+> > +        bus-width =3D <4>;
+> > +        cd-gpios =3D <&gpio0 22 GPIO_ACTIVE_LOW>;
+> > +    };
+> > diff --git a/MAINTAINERS b/MAINTAINERS
+> > index 96b827049501..5bf74aa63299 100644
+> > --- a/MAINTAINERS
+> > +++ b/MAINTAINERS
+> > @@ -13935,6 +13935,12 @@ S:   Maintained
+> >  F:   Documentation/devicetree/bindings/hwinfo/loongson,ls2k-chipid.yam=
+l
+> >  F:   drivers/soc/loongson/loongson2_guts.c
+> >
+> > +LOONGSON-2 SOC SERIES MMC/SD/SDIO CONTROLLER DRIVER
+> > +M:   Binbin Zhou <zhoubinbin@loongson.cn>
+> > +L:   linux-mmc@vger.kernel.org
+> > +S:   Maintained
+> > +F:   Documentation/devicetree/bindings/mmc/loongson,ls2k-mmc.yaml
+> > +
+> >  LOONGSON-2 SOC SERIES PM DRIVER
+> >  M:   Yinbo Zhu <zhuyinbo@loongson.cn>
+> >  L:   linux-pm@vger.kernel.org
+> > --
+> > 2.47.1
+> >
 
-Kind regards
-Uffe
+--
+Thanks.
+Binbin
