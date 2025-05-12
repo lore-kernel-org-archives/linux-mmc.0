@@ -1,76 +1,86 @@
-Received: from smtp.gentoo.org (woodpecker.gentoo.org [140.211.166.183])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA33E2571C1;
-	Mon, 12 May 2025 07:56:43 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=140.211.166.183
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30DC225A2C7;
+	Mon, 12 May 2025 16:54:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747036606; cv=none; b=THcDCAppe9lCzxfJacrIL8guC5qIW3YE83m8HpecVyhLbqmrwLNW12zilhwT6UuJVmNRBQLQiuWQD4McuVSqsI6DANyfHS/JUr0bJoCzGP7isfraX1/w++e0tSuEYYDE1Dkrj0skDrDJt61sxfh9dpAn/xN9ZbbIBOonREQkM5c=
+	t=1747068886; cv=none; b=gNNFWj6AnUW+n8BfJtVDLe9VdQp5Pv3F2eYbi+zyEMV2bBngfs1QdD2vv01wrQ3ElRcbntLhxMUUayv+C31Ct4MKEqHK8e5BSHm98GYrFIISHYM6Dj8dqWGgXg1SktidNW097xTIAXYJ1bttu4B0Bq20ekJyuBkWfxLxbGiiX54=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747036606; c=relaxed/simple;
-	bh=PgXCrcSqbmGKQgd+vDtbz7ViPzj24hgYgF8x853UbYs=;
+	s=arc-20240116; t=1747068886; c=relaxed/simple;
+	bh=GHfBzMz6hvOT4FNqopeQP9A6JOY7MLEh312/qsRWIQc=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=JfTA2NdfU5ODTBDqCpQ6zUA0tAHnfvUVvwZO9YiSqxKd8PFI/UireUWdxl+ERKVwbfY1QOdUwS8qZNPyyhjWThpuU72JgmIWn1odWHtiHOSvwl8dKGhA+IByGfW1jANtJmp/QvB+rdIV8gd0j9iM05dRnoQNjoPF3lPiHAZNQaw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gentoo.org; spf=pass smtp.mailfrom=gentoo.org; arc=none smtp.client-ip=140.211.166.183
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gentoo.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gentoo.org
-Received: from localhost (unknown [116.232.18.56])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange ECDHE (prime256v1) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: dlan)
-	by smtp.gentoo.org (Postfix) with ESMTPSA id 867583430F3;
-	Mon, 12 May 2025 07:56:42 +0000 (UTC)
-Date: Mon, 12 May 2025 07:56:31 +0000
-From: Yixun Lan <dlan@gentoo.org>
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, Alex Elder <elder@riscstar.com>,
-	Inochi Amaoto <inochiama@gmail.com>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-riscv@lists.infradead.org,
-	spacemit@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 2/2] mmc: sdhci-of-k1: add support for SpacemiT K1 SoC
-Message-ID: <20250512075631-GYA517379@gentoo>
-References: <20250509-20-k1-sdhci-v3-0-526c35feaa20@gentoo.org>
- <20250509-20-k1-sdhci-v3-2-526c35feaa20@gentoo.org>
- <4cee9284-8f71-4214-8bc2-48bcb4030e40@intel.com>
+	 Content-Type:Content-Disposition:In-Reply-To; b=qaLWhraFrr2QZyd1mkAQStejcCw2GGOniGUG+Cie5HWijvECIklSw4E9wDuS9uoboGFB9N/JSCae7dhcIoiPbxh4v+5szCS8LUj4C6vkNzlyemRLh+WRepX8PiSf1OyJUrR6p/BK4kxr6Hc67mR9YQzedwPwZSaHAgFZLssBXOY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F219FC4CEE7;
+	Mon, 12 May 2025 16:54:44 +0000 (UTC)
+Date: Mon, 12 May 2025 18:54:43 +0200
+From: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To: Danila Tikhonov <danila@jiaxyga.com>
+Cc: Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Lorenzo Pieralisi <lpieralisi@kernel.org>, "Rafael J . Wysocki" <rafael@kernel.org>, 
+	Viresh Kumar <viresh.kumar@linaro.org>, Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>, 
+	Wim Van Sebroeck <wim@linux-watchdog.org>, Guenter Roeck <linux@roeck-us.net>, 
+	Rajendra Nayak <quic_rjendra@quicinc.com>, Jassi Brar <jassisinghbrar@gmail.com>, 
+	Bjorn Andersson <andersson@kernel.org>, Konrad Dybcio <konradybcio@kernel.org>, 
+	Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>, 
+	Daniel Lezcano <daniel.lezcano@linaro.org>, Zhang Rui <rui.zhang@intel.com>, 
+	Lukasz Luba <lukasz.luba@arm.com>, Thomas Gleixner <tglx@linutronix.de>, 
+	Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Wesley Cheng <quic_wcheng@quicinc.com>, 
+	Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Souradeep Chowdhury <quic_schowdhu@quicinc.com>, 
+	Lee Jones <lee@kernel.org>, Andrew Lunn <andrew+netdev@lunn.ch>, 
+	"David S . Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, Alex Elder <elder@kernel.org>, 
+	Alim Akhtar <alim.akhtar@samsung.com>, Avri Altman <avri.altman@wdc.com>, 
+	Bart Van Assche <bvanassche@acm.org>, Andy Gross <agross@kernel.org>, 
+	Srinivas Kandagatla <srini@kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, 
+	Georgi Djakov <djakov@kernel.org>, Loic Poulain <loic.poulain@oss.qualcomm.com>, 
+	Robert Foss <rfoss@kernel.org>, Andi Shyti <andi.shyti@kernel.org>, 
+	Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>, 
+	Taniya Das <quic_tdas@quicinc.com>, Sibi Sankar <quic_sibis@quicinc.com>, 
+	Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>, 
+	Joerg Roedel <joro@8bytes.org>, Imran Shaik <quic_imrashai@quicinc.com>, 
+	Mathieu Poirier <mathieu.poirier@linaro.org>, Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Jessica Zhang <quic_jesszhan@quicinc.com>, 
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Maxime Ripard <mripard@kernel.org>, 
+	Thomas Zimmermann <tzimmermann@suse.de>, Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>, 
+	"Guilherme G . Piccoli" <gpiccoli@igalia.com>, David Wronek <david@mainlining.org>, 
+	Jens Reidel <adrian@mainlining.org>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org, linux-watchdog@vger.kernel.org, 
+	linux-usb@vger.kernel.org, linux-phy@lists.infradead.org, linux-mmc@vger.kernel.org, 
+	netdev@vger.kernel.org, linux-scsi@vger.kernel.org, dmaengine@vger.kernel.org, 
+	linux-crypto@vger.kernel.org, linux-i2c@vger.kernel.org, linux-clk@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev, linux-remoteproc@vger.kernel.org, 
+	dri-devel@lists.freedesktop.org, linux-hardening@vger.kernel.org, linux@mainlining.org, 
+	~postmarketos/upstreaming@lists.sr.ht
+Subject: Re: [PATCH 20/33] dt-bindings: i2c: qcom-cci: Add the SM7150
+ compatible
+Message-ID: <20250512-incredible-radiant-jackrabbit-d0c77b@kuoka>
+References: <20250422213137.80366-1-danila@jiaxyga.com>
+ <20250422213137.80366-4-danila@jiaxyga.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <4cee9284-8f71-4214-8bc2-48bcb4030e40@intel.com>
+In-Reply-To: <20250422213137.80366-4-danila@jiaxyga.com>
 
-Hi Ulf,
-
-On 09:04 Mon 12 May     , Adrian Hunter wrote:
-> On 09/05/2025 16:22, Yixun Lan wrote:
-> > The SDHCI controller found in SpacemiT K1 SoC features SD,
-> > SDIO, eMMC support, such as:
-> > 
-> > - Compatible for 4-bit SDIO 3.0 UHS-I protocol, up to SDR104
-> > - Compatible for 4-bit SD 3.0 UHS-I protocol, up to SDR104
-> > - Compatible for 8bit eMMC5.1, up to HS400
-> > 
-> > Signed-off-by: Yixun Lan <dlan@gentoo.org>
+On Wed, Apr 23, 2025 at 12:31:24AM GMT, Danila Tikhonov wrote:
+> Add the SM7150 CCI device string compatible.
 > 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
+> Signed-off-by: Danila Tikhonov <danila@jiaxyga.com>
+> ---
+>  Documentation/devicetree/bindings/i2c/qcom,i2c-cci.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 
-If this isn't too late (as v6.15-rc6 is tagged), I'd like to seek
-the opportunity to queue for v6.16 as no big changes during these
-two review cycles..
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-I also know people who would expect to have a full rootfs support,
-and this driver is sufficient to bring eMMC up and will make their
-life of development easy..
+Best regards,
+Krzysztof
 
-But if you have different opinion, then I'm totally fine to delay
-it to next merge window, thanks
-
--- 
-Yixun Lan (dlan)
