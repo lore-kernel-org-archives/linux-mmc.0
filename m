@@ -1,143 +1,138 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.13])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qk1-f181.google.com (mail-qk1-f181.google.com [209.85.222.181])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D7591A4F12;
-	Tue, 13 May 2025 02:09:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B2161C8601;
+	Tue, 13 May 2025 04:19:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747102197; cv=none; b=lRIZmdn4bmjKNKCm7A4OTAIkhBCZjPRS6fZpfhvvZQmCDtM+sRSh+I+kVWZ0cKrbMQ5nb0uxBZKyR8dzyWcnGzZfwOM6MbDCsQQzgbfEoI/V56WQ37PlnXbNuat+FevL+qKBCX3jUDUL/PVwGz+rnwlSuIAFAmtvRYeLkOjb+58=
+	t=1747109953; cv=none; b=fhPQ6sV6Wp2RMS95TfOS6I7S8e3gPF/YyFEtm7mLKAHVGiL9ztzavl31+zl8k8tDH8WG9me3WC1D9gdGleBev1kvvgw/1vJp+oDy0lBJSSKkigibDQVxOkdSlAXEWFgngM5Mu2oKFqQ1+uyn6x0bBLpIqjPR/UizwZMK+I9F+wQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747102197; c=relaxed/simple;
-	bh=jli27B/5jY90qrTVnL5B2hPffaX2OOJy3Y08w33Rh5k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=FuN1kQ1lhNPiplEbd/L/jfkcqGuONW2jd0K9zXYGumPDxofO/Fz2kg2xfX/vTdMkRFE8UcTpRhHyi49NphpNVe5yx5NjWfk2+9PlhUG48fFBBjZU6yq16z3U7mRVW9Gf4NrWaE6BT1F0K+X3Fxhgh72DatQSNH2Ff6PpT0fpweE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=hp9k/4Ph; arc=none smtp.client-ip=198.175.65.13
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1747109953; c=relaxed/simple;
+	bh=T+3x9Od6e/lqvamBfshpd2ms4FrKOSPZgnkhArtmF8o=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=aEG/Sw81ZjfX5GmU+JJFHdToKjGNbnf4a5P19CP3ffi0FrBbdPaKXSi+qlnmLNuLgUTUNe5A25iCa7Nh2Nbs3Bb3uvmnpi5m9ZjIfbpUDTlBQLHPAChZa78UnBb1lnyJ6bKk18TNa5L93EXFucAhkLLBuozg+f9NRkDdHPOkeMg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BdhnYKmD; arc=none smtp.client-ip=209.85.222.181
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="hp9k/4Ph"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1747102195; x=1778638195;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=jli27B/5jY90qrTVnL5B2hPffaX2OOJy3Y08w33Rh5k=;
-  b=hp9k/4PhH6ghE1rnd/ara5/AxElT6QQCUyO7gmtydZvIoTvJLDkD8vJU
-   PTbx+BPAyNqFdfBL5kODfEvBX8+/WSOBg4UVTCp3hjIRu7rt157hfgY2W
-   0GVFdb2ReIsCJ/2sxdGTUBkjocQPtb6QxSk8sgC5lmBghP4BIVYYyhXiJ
-   zvOTfSHrBre94rQ0Brck8Wz79+2g05llqdyZS7exAdnFvxEwUjlAD+Jwn
-   tneFra/yQll+OP64dHBJSJlRT/u4dw1sol6iL/veXFEOVePaudlmJXkbn
-   gMAl9zsbBe76FSB8gY4tndiG+QZZ4HFJmmPMrklnsQeJ+H1uCJFL0xNYi
-   g==;
-X-CSE-ConnectionGUID: KGf8opHJRVedZndU3LAJBQ==
-X-CSE-MsgGUID: JAsDETEUQEiObh63foGZsw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11431"; a="59929229"
-X-IronPort-AV: E=Sophos;i="6.15,284,1739865600"; 
-   d="scan'208";a="59929229"
-Received: from fmviesa001.fm.intel.com ([10.60.135.141])
-  by orvoesa105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 May 2025 19:09:55 -0700
-X-CSE-ConnectionGUID: 4KmA8ZP2Q1Kxb+NIqTdIWA==
-X-CSE-MsgGUID: 3YBxHFhgQvCuzV2Ed3pDKQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,284,1739865600"; 
-   d="scan'208";a="168642027"
-Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
-  by fmviesa001.fm.intel.com with ESMTP; 12 May 2025 19:09:51 -0700
-Received: from kbuild by 1992f890471c with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1uEf5Z-000FaV-2Y;
-	Tue, 13 May 2025 02:09:49 +0000
-Date: Tue, 13 May 2025 10:09:40 +0800
-From: kernel test robot <lkp@intel.com>
-To: Binbin Zhou <zhoubinbin@loongson.cn>,
-	Binbin Zhou <zhoubb.aaron@gmail.com>,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	Rob Herring <robh+dt@kernel.org>,
-	Krzysztof Kozlowski <krzk@kernel.org>,
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BdhnYKmD"
+Received: by mail-qk1-f181.google.com with SMTP id af79cd13be357-7c55500d08cso571756085a.0;
+        Mon, 12 May 2025 21:19:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747109949; x=1747714749; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CbE8qOEQ8Cewj2pW9YzTwebuhpk4BnHjgjL+T/zo0qQ=;
+        b=BdhnYKmDhujv+fpU7SDwNquHJHVcECZf7DgngjcNPhWEaWoKQg23zM47MfBClh455o
+         94Xwp3uBfXsVmc+lZuVSOe36O5PL9hxtl4+jxpGcsMTR+YY7W1muTLini5l3mSGxqkes
+         L3wAiu8eRFtl2VsQM7CKMedW1vcpLmXOL91govBQ0jYZsN/8mChqNUfI8U/+18qnXAMo
+         QmUHnZzLeDG1ElAD6j2qKcBQE7KqX1koiLxpvuKoFYrdGbrEwPLbZPQc/Fz966Nd45sG
+         +BnOhGn8VA3MhNfkhr8IzqRTO6Yc7q3hQ4sr64/LRmNiWpXjTKZZJeVa6G9jT5Dric/E
+         zyJA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747109949; x=1747714749;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=CbE8qOEQ8Cewj2pW9YzTwebuhpk4BnHjgjL+T/zo0qQ=;
+        b=COEaupu+ZA4lzmx4PMJ7FWtlQFjZW4YS3CW2WpyR5tmYWhpihmJQrVa40POE6OHV3r
+         ymwtxLWhRzCbEhbZwvdvpXKNwkCsexFsf1s3cA8fTEDuATjMI7uFCJPf8bma/X7WC/NK
+         +KjgfFzSS++EJQXbMdRb0Sq9PRnS8J9HdzXt6J5XxMebw3Y3P8+i893YWclrVxx3zteF
+         jXB3FTpUGclmRzeXjX2/yErnoSGS5Pp52+2b1uH51wgkrqaIqhuIRTvzd9A6ejJh7fXn
+         DejJ7NIrg6fsgo/36s1ZtvbNlW2DhH+/00U84l7ZnPUPdoq956zfRuR9pAJdM0NXyY75
+         Fr0Q==
+X-Forwarded-Encrypted: i=1; AJvYcCVCZeMwz4z/ToHkpVB8i7yQ0Olk0DeqYmDRaQAcUCU7JJfMKZl4wELA8ziAD8seKlVTvxQPUEK/fq6x@vger.kernel.org, AJvYcCVHUdRTtHgbX4Rurc6YkkdCuY//3zS0fwxhmtwTeAEDo9qq44BiAasdb82AkxVNcAcgfUbp40cAAx8Bu0v9@vger.kernel.org, AJvYcCVLAVtoNHeRL7/b6EOUqlevHMdWO1504Xw/1SWHrWTvMK13Koz5lqzSuKrNsafOscTw82iwkMyip79F@vger.kernel.org, AJvYcCWHOUMwl8oH1kCmRDDuOlBFzi7Oe4Egy6gTDwCLWkNVtETzOvday5lXos4wvxXyAwYaL3vfj46kleKl@vger.kernel.org
+X-Gm-Message-State: AOJu0YybwKUZd4B1BdErcb6f4zO0UpWm9dDL/or0e/FDvdmynQYS4x5l
+	/RYXDknvly6b637c0+qy+wXPv5fDotYrkV6NWKZZoTJ/WERmKnHz
+X-Gm-Gg: ASbGncukiKqSUGfTltsJCrKQf8gL7PIXT2al5AKfwP7/Or5aWRfdclBB2CHICethDdc
+	eCJGZbscrFTbLi8xogeTj281qNENlQHqHUjQtoDxKeZ6u7xq9baQfypDEGLxD8MScgbPDtfgM+L
+	F/5dNtld0vz2JVdaUsjrVO0w23fb9lnAoGn6tYirLlwLClvDG3CnzFDlynE4JJjLUnM+t35Ia9v
+	e0ErLHuhDK3VS/adGeUHARJ/RnXIc6epqUr7vGF61RAo2/8xChwu4UGEUnkIXcCzDMoVNOVyGla
+	lm7Do7DM21oZIARwZSEDFvAS1iI=
+X-Google-Smtp-Source: AGHT+IGaGXEPNSY7gDD/YfTu/S9mOVv0B4S4N0WdSovqwATeGF5yrD8SEU/YDNwaJa71opCgKDqwWg==
+X-Received: by 2002:a05:620a:40cc:b0:7cd:1ebe:9ad8 with SMTP id af79cd13be357-7cd1ebe9b28mr177227385a.10.1747109949442;
+        Mon, 12 May 2025 21:19:09 -0700 (PDT)
+Received: from localhost ([2001:da8:7001:11::cb])
+        by smtp.gmail.com with UTF8SMTPSA id af79cd13be357-7cd00f6423esm652274985a.30.2025.05.12.21.19.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 May 2025 21:19:09 -0700 (PDT)
+From: Inochi Amaoto <inochiama@gmail.com>
+To: Jean Delvare <jdelvare@suse.com>,
+	Guenter Roeck <linux@roeck-us.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
 	Conor Dooley <conor+dt@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: oe-kbuild-all@lists.linux.dev, Xuerui Wang <kernel@xen0n.name>,
-	loongarch@lists.linux.dev, devicetree@vger.kernel.org,
-	linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v2 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO
- controller driver
-Message-ID: <202505130918.uanOGxju-lkp@intel.com>
-References: <1308b6ca9ffc2674cc0f089cfd163da87e53a8cd.1746581751.git.zhoubinbin@loongson.cn>
+	Chen Wang <unicorn_wang@outlook.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>,
+	Alexandre Ghiti <alex@ghiti.fr>,
+	Daniel Lezcano <daniel.lezcano@linaro.org>,
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
+	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
+	Jisheng Zhang <jszhang@kernel.org>,
+	Chao Wei <chao.wei@sophgo.com>,
+	Inochi Amaoto <inochiama@gmail.com>
+Cc: linux-hwmon@vger.kernel.org,
+	devicetree@vger.kernel.org,
+	sophgo@lists.linux.dev,
+	linux-kernel@vger.kernel.org,
+	linux-i2c@vger.kernel.org,
+	linux-riscv@lists.infradead.org,
+	linux-mmc@vger.kernel.org,
+	Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: Re: (subset) [PATCH v2 00/10] riscv: sophgo: Introduce SG2044 SRD3-10 board support
+Date: Tue, 13 May 2025 12:18:22 +0800
+Message-ID: <174710989164.597941.2410446871539052309.b4-ty@gmail.com>
+X-Mailer: git-send-email 2.49.0
+In-Reply-To: <20250413223507.46480-1-inochiama@gmail.com>
+References: <20250413223507.46480-1-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1308b6ca9ffc2674cc0f089cfd163da87e53a8cd.1746581751.git.zhoubinbin@loongson.cn>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 
-Hi Binbin,
+On Mon, 14 Apr 2025 06:34:54 +0800, Inochi Amaoto wrote:
+> Sophgo SG2044 SRD3-10 is an ATX board bases on Sophgo SG2044 SoC.
+> This board includes 5 uart ports, 5 pcie x8 slots, 1 1G Ethernet port,
+> 1 microSD slot.
+> 
+> Introduce basic support for this board and Sophgo SG2044 SoC
+> 
+> Changed from v1:
+> - https://lore.kernel.org/all/20250407010616.749833-1-inochiama@gmail.com
+> 1. apply Rob's tag
+> 2. patch 1: new patch for grouping all similar compatible ids.
+> 3. patch 7: remove unnecessary compatible check
+> 4. patch 8: adapt for the new patch 1
+> 5. patch 9: fix copyright e-mail
+> 
+> [...]
 
-kernel test robot noticed the following build warnings:
+Applied to for-next, thanks!
 
-[auto build test WARNING on 9e12816f9a6195f1f5b7c5dc2e388c2458411b97]
+[02/10] dt-bindings: timer: Add Sophgo SG2044 ACLINT timer
+        https://github.com/sophgo/linux/commit/1e76b39eda76f7317ab75dacccaeda5a5b02c519
+[03/10] dt-bindings: interrupt-controller: Add Sophgo SG2044 CLINT mswi
+        https://github.com/sophgo/linux/commit/a3cc46f7925b6b48e80c70815e3f637abcda77b9
+[04/10] dt-bindings: interrupt-controller: Add Sophgo SG2044 PLIC
+        https://github.com/sophgo/linux/commit/a7470f20e271203494b4cd427e687c12649f0087
+[09/10] dt-bindings: riscv: sophgo: Add SG2044 compatible string
+        https://github.com/sophgo/linux/commit/9ee1f97cf3e1743591ae76324d96082c8fb496d8
+[10/10] riscv: dts: sophgo: Add initial device tree of Sophgo SRD3-10
+        https://github.com/sophgo/linux/commit/c8b1ca99c8485036cefa962aead3a0c57cb27d3f
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Binbin-Zhou/dt-bindings-mmc-Add-Loongson-2K-SD-SDIO-eMMC-controller-binding/20250507-153435
-base:   9e12816f9a6195f1f5b7c5dc2e388c2458411b97
-patch link:    https://lore.kernel.org/r/1308b6ca9ffc2674cc0f089cfd163da87e53a8cd.1746581751.git.zhoubinbin%40loongson.cn
-patch subject: [PATCH v2 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
-config: csky-randconfig-r112-20250513 (https://download.01.org/0day-ci/archive/20250513/202505130918.uanOGxju-lkp@intel.com/config)
-compiler: csky-linux-gcc (GCC) 14.2.0
-reproduce: (https://download.01.org/0day-ci/archive/20250513/202505130918.uanOGxju-lkp@intel.com/reproduce)
+Thanks,
+Inochi
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202505130918.uanOGxju-lkp@intel.com/
-
-sparse warnings: (new ones prefixed by >>)
->> drivers/mmc/host/loongson2-mmc.c:534:41: sparse: sparse: incorrect type in assignment (different base types) @@     expected unsigned int [usertype] @@     got restricted __be32 [usertype] @@
-   drivers/mmc/host/loongson2-mmc.c:534:41: sparse:     expected unsigned int [usertype]
-   drivers/mmc/host/loongson2-mmc.c:534:41: sparse:     got restricted __be32 [usertype]
-
-vim +534 drivers/mmc/host/loongson2-mmc.c
-
-   500	
-   501	static int loongson2_reorder_cmd_list[] = { SD_APP_SEND_SCR, SD_APP_SEND_NUM_WR_BLKS,
-   502						    SD_APP_SD_STATUS, MMC_SEND_WRITE_PROT,
-   503						    SD_SWITCH };
-   504	
-   505	/*
-   506	 * According to SD spec, ACMD13, ACMD22, ACMD51 and CMD30
-   507	 * response datas has different byte order with usual data packets.
-   508	 * However sdio controller will send these datas in usual data format,
-   509	 * so we need to adjust these datas to a protocol consistent byte order.
-   510	 */
-   511	static void loongson2_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
-   512						   struct mmc_command *cmd)
-   513	{
-   514		struct scatterlist *sg;
-   515		u32 *data;
-   516		int i, j;
-   517	
-   518		if (mmc_cmd_type(cmd) != MMC_CMD_ADTC)
-   519			return;
-   520	
-   521		for (i = 0; i < ARRAY_SIZE(loongson2_reorder_cmd_list); i++)
-   522			if (cmd->opcode == loongson2_reorder_cmd_list[i])
-   523				break;
-   524	
-   525		if (i == ARRAY_SIZE(loongson2_reorder_cmd_list))
-   526			return;
-   527	
-   528		for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
-   529			data = sg_virt(&sg[i]);
-   530			for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
-   531				if (cmd->opcode == SD_SWITCH)
-   532					data[j] = bitrev8x4(data[j]);
-   533				else
- > 534					data[j] = cpu_to_be32(data[j]);
-   535		}
-   536	}
-   537	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
