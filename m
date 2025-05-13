@@ -1,124 +1,118 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-lj1-f174.google.com (mail-lj1-f174.google.com [209.85.208.174])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E9C7E269D1B;
-	Tue, 13 May 2025 14:27:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747146464; cv=pass; b=RnDFoEvPgP1Pw9CubvlWQ/xf89uNUude9NfFjnzuY3rlE8bzVFidpNhvKibNqJdh5JYZuyw4nYlgVo4TGQ5aIHanVTjCB8i4lquvoGXNn5akiKoEDuEOLYw42EA4ngTs7LRd0+Yn/GCz1AtKGk360rvseDs+mEbgOBxvOhXEO5k=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747146464; c=relaxed/simple;
-	bh=qrm7iQ0BdPOTxoVtofacn+8/rrDJ538eLVyyVWrv16g=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=sh+SfAv1XG0ILVEmQw/V+E8/U4e/DNOeRF9S/uEt6/eAMieCVepQaUaxo7frGqXPC2uO/U9egUk4RgzZ4agZy30WNQoPGcn6E6y4eVg8xzZ/ki81P6aKcFn6G1078h/o9jppaaxRt7Yzgg4GizIhBqKXYfOOBu9GHcJXOyQrfMI=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=TL9bA5j1; arc=pass smtp.client-ip=136.143.188.112
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A13821A01CC
+	for <linux-mmc@vger.kernel.org>; Tue, 13 May 2025 14:33:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.174
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747146804; cv=none; b=Pua1ntQP+SB3myV+6iG3ypSRKzzJnN7/zaqWENHfUsu9NojT+JJOII8/xEnOefJIykjCDYhExFefFMTBkH0TWPCeLebCoxIMmpg6XnLqYxcU46PiZgC7TW4ZF+cWUZcq9X11CKD0kEllN8tK3jlQ8f8PNqWsSxv1fJSouyDEBJU=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747146804; c=relaxed/simple;
+	bh=iQEF7nznmEycoRdRwifBr5zcStMelsRnNg7k+aa6KwY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=VWU99sdvWZ0AUD0+maC9g3SqxBXrVg8qNPvu7fkEywUAuv+mQ82GJaIv5NLdmF+PZ/TvhMf3VlxlJS0tP6q3+kw/W2VlkKhrnkMspH09DgD55jHnFy8HfECz3NbFldhhwnwq8lGvQkXIuK1qvWm74V6Ze7sHhU0RdVDnRE5vH0w=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Z8gzNNuu; arc=none smtp.client-ip=209.85.208.174
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="TL9bA5j1"
-ARC-Seal: i=1; a=rsa-sha256; t=1747146434; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=ANqNFwZEb+ZFYow3aFAQoyO/1Ud2AXpFUIBSle0bCo8FVYBcNiP+i1HJVeS9GxYppl7HJpmC+qZl37HtRPkZXcPEOXkDBCQ/zrr8dgKo5uei6H47cW+QVV7ZXJHw8+jUnBeKS3gYXF9OXPTulAsAQCmtDNFdp0Tbw/DhN5W4wsg=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1747146434; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=S8HvFU+C7sIo5Yzd4dl6ojrhAT/ghV8MpikwHZzYzPM=; 
-	b=juo7qhHanaIrojtSIzpy4DRVsL0LxCZof/Ml9fpsJ0EWTj5tH9ljTvKL658u060IhnGxO0kOeBj1jr4KDs4a0RM2Ff4rELQ6Xo0dB7Amhs30S12gFTnGp+viG8MZG4T5h0EJuFWABukZ5OjIvp4EG54KMCC1prBrdmXWOVtR1t0=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
-	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1747146434;
-	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=S8HvFU+C7sIo5Yzd4dl6ojrhAT/ghV8MpikwHZzYzPM=;
-	b=TL9bA5j1wnQEzElGt0exkEIhE0Vo7i6xr6vp0qX6xbOLsv8oU234w/eH/ZX6PJJ4
-	goH3Vq90j1+kAQio1s0ScSTAfdctQvB99CVnqDrQkokNPU2LuRPEm7T3kvOY7xyhf0T
-	oVg9Lwl4xwFaLP7+KQ2QJZqRJPmFWFuGHhXf4uT8=
-Received: by mx.zohomail.com with SMTPS id 1747146427338952.0201359300785;
-	Tue, 13 May 2025 07:27:07 -0700 (PDT)
-From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>,
- Elaine Zhang <zhangqing@rock-chips.com>,
- Finley Xiao <finley.xiao@rock-chips.com>,
- Adrian Hunter <adrian.hunter@intel.com>,
- Sebastian Reichel <sebastian.reichel@collabora.com>,
- Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com,
- linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
-Date: Tue, 13 May 2025 16:27:02 +0200
-Message-ID: <6154950.lOV4Wx5bFT@workhorse>
-In-Reply-To:
- <CAPDyKFp5N23KCZwOTba6vGyk9eaS1-SjSqY52FfPDng-bahn6g@mail.gmail.com>
-References:
- <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
- <CAPDyKFp5N23KCZwOTba6vGyk9eaS1-SjSqY52FfPDng-bahn6g@mail.gmail.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z8gzNNuu"
+Received: by mail-lj1-f174.google.com with SMTP id 38308e7fff4ca-30db3f3c907so55123911fa.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 May 2025 07:33:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1747146800; x=1747751600; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=6C+eOPgBkYyfSbaSp3zhH361dNsffIyxJdkkZYVPmTA=;
+        b=Z8gzNNuuEhC9ToJQBXiF5ZFqeeBi1WceWyKf71VHr6WiImWo31odsQdUVlm1PvTvsA
+         lknjbDZB7X/B9T0zGlVhdfvQrpg9Ghr/22cTvMzDP2oiGvO2RG7Vh5AQcSgR4gj7EXti
+         rvbqSSNBzQ8gtjBFzFk7JqoXHTmf2d+kglEP1IYmNsd635FGJ3uHY2U6lvYe9fPCvx3J
+         q7iIngoTIvA4+HP8iab5vMXw4PnXlRq100/q/UbF40pJf23ssspCeS4gWloPRh1Zgukj
+         3vVaLmrZqJn31ScAa403D2/XzpwahA9FDoMgNNQLzGFwFpIW5URs7hDIRj8GOP3ME3AK
+         OWhA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747146800; x=1747751600;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6C+eOPgBkYyfSbaSp3zhH361dNsffIyxJdkkZYVPmTA=;
+        b=OmA//OmoSHK6cg4L9oI3TkT/uoXW5Io+kVv/0fnWzkfwjM5mi4QJVLP1D5DhtoRK/y
+         FjafBQcbddmyTQ+d4ONjwAECaUiTk1eIGDpKk0kg5ch6zcqySdAGjl3Sv7rJbcMxJgXg
+         hklZWO4qBB3YvkDh3Mi9W39NelYJmYxGJrV2bN5OLhGM8gfJlNhuZ/8hlqydGw3v9fhv
+         qmHTMOl8Igtdu7QVBqsjg9/GvjCBt2Y9VtX2Rp94y56BxumIF9XaG8JJ0KbAWP24knSI
+         UFY+fCvdHtDQV43lUOzWi9vRP22im5mDyt+euu+7wtuFU/xe9XxTg7E3d77GucqPMlFS
+         Cv2g==
+X-Forwarded-Encrypted: i=1; AJvYcCXrW1jGSUwdaS9b4PukB2e+8fl0Sq7odj+XxQVsf4nA7Mb+dcVkiQEVz/YlRtzhla/YJ8hx1AqeI98=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwDxkpCnwSpI1EfMfShnfm1FKnJ5wZtxwNigGVcUiXxGMHUXhMb
+	Q35PQDHgEW3FAH1NVmOBHYtgBhPEYNoRsdI/mXJhTu+0Cv5A8RlWMrRaeF0YWyeHAvqRWoNsqf7
+	YW/xcCg==
+X-Gm-Gg: ASbGncvLWkT+t+2PvT0ZiSHbx6P+PU1D3svYFs7Fpo6mb/db+za3r0mb1FTLmggo/la
+	DlxIO1ErB6L1EeQ9bkg+9Y2I968078Fj+lh4AtYwH+yG1M0yBxUDnc/CqkRPhjQkJ1uhh9ulXZw
+	qiFsGReHWgT5A7QWyVD6O5IXSYOKygU/8NnjWKGSCLiDMhFNVoiwNZKLJ/6rDQUhfbASNSW02Rd
+	VeM0jc3Ugws6BqVucJyx/ltrZQZ1aWqRdh097mS7zXYTNjN6Wv9DKDI9q6sTmxz0obgTeOYdMbq
+	1FkypoxOgl9CR5BYqAYajx6n3a3ja7da3mGSG7PI+bgW3xMGYjM4lDweBiuXmfJL6h9MlhpqMWx
+	cH3JnYb3giVjcRw==
+X-Google-Smtp-Source: AGHT+IEBNTH4zw64AEMKKTiN2s5UEu33251ThUx0I1Ms2D2DvDbTNPIeVXC3gTvYmyig2JEqJ5+Vcw==
+X-Received: by 2002:a5d:650b:0:b0:3a1:f655:c5b2 with SMTP id ffacd0b85a97d-3a1f655c5femr12440694f8f.39.1747146789207;
+        Tue, 13 May 2025 07:33:09 -0700 (PDT)
+Received: from mai.linaro.org (146725694.box.freepro.com. [130.180.211.218])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a1f58ecadfsm16357348f8f.22.2025.05.13.07.33.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 13 May 2025 07:33:08 -0700 (PDT)
+Date: Tue, 13 May 2025 16:33:06 +0200
+From: Daniel Lezcano <daniel.lezcano@linaro.org>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Chen Wang <unicorn_wang@outlook.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
+	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
+	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>,
+	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
+	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
+	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
+	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH v2 02/10] dt-bindings: timer: Add Sophgo SG2044 ACLINT
+ timer
+Message-ID: <aCNYItP6SWImMvFv@mai.linaro.org>
+References: <20250413223507.46480-1-inochiama@gmail.com>
+ <20250413223507.46480-3-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20250413223507.46480-3-inochiama@gmail.com>
 
-On Tuesday, 29 April 2025 12:06:16 Central European Summer Time Ulf Hansson wrote:
-> On Wed, 23 Apr 2025 at 09:54, Nicolas Frattaroli
-> <nicolas.frattaroli@collabora.com> wrote:
-> >
-> > RK3576's power domains have a peculiar design where the PD_NVM power
-> > domain, of which the sdhci controller is a part, seemingly does not have
-> > idempotent runtime disable/enable. The end effect is that if PD_NVM gets
-> > turned off by the generic power domain logic because all the devices
-> > depending on it are suspended, then the next time the sdhci device is
-> > unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
-> > registers.
-> >
-> > RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
-> > added to the generic power domains API to handle what appears to be a
-> > similar hardware design.
-> >
-> > Use this new function to ask for the same treatment in the sdhci
-> > controller by giving rk3576 its own platform data with its own postinit
-> > function. The benefit of doing this instead of marking the power domains
-> > always on in the power domain core is that we only do this if we know
-> > the platform we're running on actually uses the sdhci controller. For
-> > others, keeping PD_NVM always on would be a waste, as they won't run
-> > into this specific issue. The only other IP in PD_NVM that could be
-> > affected is FSPI0. If it gets a mainline driver, it will probably want
-> > to do the same thing.
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> > Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+On Mon, Apr 14, 2025 at 06:34:56AM +0800, Inochi Amaoto wrote:
+> Like SG2042, SG2044 implements an enhanced ACLINT, so add necessary
+> compatible string for SG2044 SoC.
 > 
-> Applied for next, thanks!
-> 
-> Kind regards
-> Uffe
-> 
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+> ---
 
-Hi Uffe,
+Applied patch 2, thanks!
 
-I was wondering whether we can get this into 6.15 as a fix as well, as 6.15
-should already have the genpd API additions this requires AFAIU.
+-- 
 
-Fixes tag could be something like:
+ <http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
 
-  Fixes: cfee1b507758 ("pmdomain: rockchip: Add support for RK3576 SoC")
-
-but may need some more flavorings to keep the stable robot overlords from
-trying to apply it to 6.14 and earlier and then starting the robot uprising
-in your inbox when they notice the API is missing.
-
-I originally left out the Fixes tag on the rewrite of this using the new
-API because I wanted to avoid those awkward backport scenarios for a fairly
-freshly supported SoC, but it'd be great to have this in 6.15 because that
-will be with us for a full release cycle to come.
-
-Kind regards,
-Nicolas Frattaroli
-
-
-
+Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
+<http://twitter.com/#!/linaroorg> Twitter |
+<http://www.linaro.org/linaro-blog/> Blog
