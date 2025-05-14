@@ -1,116 +1,150 @@
-Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 688FD18F2FC
-	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 14:18:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56BA91DB13E
+	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 15:13:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747232316; cv=none; b=BK/jtbkfAYpmgDtQeZKXqG1WfuXRdFIPCvruJxbiGwAoHnSHvlhqA8UG3IsKOg2rDZJsVU2oYZdzK6hNKbDQri79q4OatMsnQ8g9S6Ynyo8Zqh7HY0mVD39dPEROm118R4niSGQMVXcj2jLKhACRYb10UBgxYvp0J7SDuPUrI1w=
+	t=1747235603; cv=none; b=XP7LFSiJYrdJagnE76BUhyt7RTL4DtHEEspi4k5T8tuykw9tRqBDt7EGUq0Vg/IqYhrdNq28W2Fy8jrxK+2nRABBP+lg4xLCT1QuPR4QiswjAkrZ+mJ+vY62Obi2uJVr+DEZKGLzGCLnj2o+Kbbdf2kOfAR7OcsQWvDuYfamn7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747232316; c=relaxed/simple;
-	bh=jHsA7WLaZAQUssN/Gkcz6ehZZJvqAMZ8Q9SHY06sn3U=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=KQqcz0vQjclio3jZuSTqZnJzsxaKlkyMbMHeswcO/oUF24hCO5wCC7PWT8anEC0lBuV+GSrree+Kj/AQn6MU8x1KadIASEaJT1auQhC20eUoFehtTg9/wWsrI592R6kZEDTYKJURvbET8eOxB1/rNE/ZjdTa44b8wKcYMhdamvk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SRxzxuTT; arc=none smtp.client-ip=209.85.221.42
+	s=arc-20240116; t=1747235603; c=relaxed/simple;
+	bh=zMHHBnI6m3mo0ePFTe0uKSZzTUP9WZHZ7T2iGlRV0+Y=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=Jl5eJbBAL1DRMb7jsUiEbZLrmDs+Gd8JIC/7VNp3t02+4e4HfDdPJOqi7ZRCuxawh8YAUG7+YrBRUoswPx9EgypQCSru3PTuX+9UxOBfCW5bVT/kkhH5RujpLk7GksnPqez6Fa8Jt/0nqxfEOoL9gJBpkkROGXYYdqi0rLbpKAI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=U6hhd98V; arc=none smtp.client-ip=209.85.219.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SRxzxuTT"
-Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-3a1f5d2d91eso4022038f8f.1
-        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 07:18:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U6hhd98V"
+Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e78f70cd327so1039661276.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 08:13:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1747232313; x=1747837113; darn=vger.kernel.org;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=rUz3GV+6dO1qGU9AwxqVGKIzfxuE+8NTURqqLEaoFC8=;
-        b=SRxzxuTTbN8XuYsKfshneQIHrI5xt+1ppK/djF2971+1Vy2jJPp8qGCBQSi44Lb3On
-         IoSuu9bwVirXecmJZr9wN/SZAibIDkPiBFbvrcXYxq0f98nanuoIxGhmRSAyzdjLHn5Z
-         YZKICCCExK5lvbtaJQgGdWOGmTvhVZcFRCqwYWm3XJhDVXnqgyvMjz2UdAr1be+8IZft
-         GSwAoc2v6qsQsTaW+4fQaie8L7gyAEzYNzB/oEPtcw96/OzG7FAL32/1E2iSwYUPTDyC
-         MYWAjiNwuJ3Fxb4m/AL66Yj9MckfVVP019Uv49fTE5zB2LAg7Jk+e2Al5kuc6sbDDRq5
-         GmPA==
+        d=linaro.org; s=google; t=1747235600; x=1747840400; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=J8jj6jRyHpEahWPL1bxwBIDklu0Ui7Dm+eEH5GeKLrc=;
+        b=U6hhd98VBx26nUxFA6BDVx8Z/bzUuTd56wtcK0gpFeIay6o/Q+foCbWD5VEDLMzd0T
+         kHE2SFzJh1kPQPY+76WjoNkIF+kT6v0Lriqkzk2u+BUw77LsMSjtXs5rKPaogRgY7AUJ
+         bonLvuYToOi7YddGdy0OHEa6nTHQdplYgiY3oZBJSJ8J3gRJAtcECrON8ZIpT9RPgz2j
+         ifz/ZBmjTv7S5msxL7Oc1yK/+LSwpfyvv6AeqYrK2qhAf3OwWnnib/VqejHRUAYpBdvD
+         lgyD+w6qm7yES5SsrZECvyZE279SLI+uItobFN8q8NvsH93hvK8WjJv+GuQqQAQLIwUD
+         bogw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747232313; x=1747837113;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=rUz3GV+6dO1qGU9AwxqVGKIzfxuE+8NTURqqLEaoFC8=;
-        b=Y9qgbvoLwSPMHIoO92i+Q52BoKJC3uRsqNyoo3uV7sirO1TfnstfcuDFhXEEyxjpgB
-         4/pq/RCtlox1ZymabJYHcuYXnlni3XF7V8UkokM6TwlYWP31X7TyNXsYMeKD5V8b0eLy
-         CVi5wwJ9yI47V3mZkHxFaPdeHtGbv5B/F/e9T3ScsjbkEaRhfWo9OmPArfxI7lLpXudI
-         7G4T2ogy+lMxWBBjB/yCuKy5HZseLF4CnPwoWYeXpZt858wyLjVK4k+oI71sCb+LBKUn
-         ELUqK7OO9Us24NI/Q6n7VdOD68ShXnXJJx+gwA0zeEPe4hx8KjfFK8vPUiNceTtShzfg
-         41yA==
-X-Forwarded-Encrypted: i=1; AJvYcCXLR5Y+NeA1/egSP452yZKm3LwjI1fCljUfz/OT04ISGc+33nFzryIKt2v4LSaH36iT1KDpBUxMiu4=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzYKIdDvuhgLX/CH3ZcXmKkIOwptMHx3HdMig4KgwSl0CSNL1fx
-	0hDdNvGXZQIUch9/9LygNAI1pvtLDq2E3Ji0ygXd7BX3i8lpBNmnFbwPDLwuX30=
-X-Gm-Gg: ASbGncsDAy+HLvQP8P9oriyvluUavmkwFFSQG0zXKptDbebjIu/VI0jBb3467FXW449
-	sfmieKKbJur8XpFcC1kpq9xPWa41XJ3G3ZUBw21wl91SFyWpebYGDH3nCSgDakfcYZv+EZmvNT9
-	EAAwuB2/FeM4WVNJedyeULPoSr0YP4p2Ffc8+OVIgnGyrbP2Ig7Xk/J8c+hgZo+ywKjOEkO3vPU
-	l+fnllLybFOKCv3nKt3NUrVwKbXWhb+GHmYBAtKQauHle/8/aJdxhAPLaZiME21hRuYoxSzJ0dj
-	24dERAdC8W+2s0oLduMZzXYRvu88BFgS8+6FQiqdSoWcCFblEbSCLNMeKfR50zrdEoIYSeENKeF
-	0JKDbtSMG6DM2rw==
-X-Google-Smtp-Source: AGHT+IH4+d+Pry2CNpgKUNvxX7a5CyUBEerUkhvVVYoJxhPCGMW/etsCZMqBlMg4OuejtHCSPvBihg==
-X-Received: by 2002:a05:6000:40c9:b0:391:39fb:59c8 with SMTP id ffacd0b85a97d-3a3496c1ebdmr3217848f8f.25.1747232312583;
-        Wed, 14 May 2025 07:18:32 -0700 (PDT)
-Received: from mai.linaro.org (146725694.box.freepro.com. [130.180.211.218])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a1f5a4c5f6sm19729450f8f.86.2025.05.14.07.18.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 May 2025 07:18:31 -0700 (PDT)
-Date: Wed, 14 May 2025 16:18:29 +0200
-From: Daniel Lezcano <daniel.lezcano@linaro.org>
-To: Inochi Amaoto <inochiama@gmail.com>
-Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Chen Wang <unicorn_wang@outlook.com>,
-	Andi Shyti <andi.shyti@kernel.org>,
-	Thomas Gleixner <tglx@linutronix.de>,
-	Paul Walmsley <paul.walmsley@sifive.com>,
-	Samuel Holland <samuel.holland@sifive.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Philipp Zabel <p.zabel@pengutronix.de>,
-	Palmer Dabbelt <palmer@dabbelt.com>,
-	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
-	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
-	ghost <2990955050@qq.com>,
-	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
-	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>,
-	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
-	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
-	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
-	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
-	Longbin Li <looong.bin@gmail.com>
-Subject: Re: [PATCH 1/9] dt-bindings: timer: Add Sophgo SG2044 ACLINT timer
-Message-ID: <aCSmNRTVXQ51xj0m@mai.linaro.org>
-References: <20250407010616.749833-1-inochiama@gmail.com>
- <20250407010616.749833-2-inochiama@gmail.com>
+        d=1e100.net; s=20230601; t=1747235600; x=1747840400;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=J8jj6jRyHpEahWPL1bxwBIDklu0Ui7Dm+eEH5GeKLrc=;
+        b=aoMaNogQYMjuyi0gBWplKeCF8Tcky+r33513jSKiPRr6KdWb2V1D/LOqpzeopeS5M2
+         w1w2wFnzQ10Py0Y2P49WNP61roSs6xUsp6pEU8AvHPGSREnyjvwWnaTzbq2evef9a3QE
+         RydFajtcwqclrCZS7cKlTSwR2Vukskjratnq7hqesHnPF7ba2k5O+ojvLe2Z6h0tMZdB
+         PTzg+q0cXi9OnAAzFUNxXKBPLvvsf2dyyeoXNmhmX8X5Hn6+1btmAVjblrbQp8O3LLkN
+         VgL8XgYTeHXaTt9oGzyv/q9FVMWdn9fsUNuj9e/vBeaU09vybHnfpAqQ00M1XbzqN8yZ
+         Rnng==
+X-Forwarded-Encrypted: i=1; AJvYcCVsDZYWQ9y24mSxGg97b5RpR5zq+03rfM1aOdZLZfRcCn7BJUm1KKOBCC8KgoGpl5P1VqiVeitQcQg=@vger.kernel.org
+X-Gm-Message-State: AOJu0Ywur2aBkHkuPmB6weHdhFgZBMVxZ8hHsFic4uUTXGC+SBeRj1x0
+	hWvjJNeX7fRSZwKNMADV9ASGtF87wXTBDFRRG+InqsWxh7JUt1GIXQSyXDYaIELe6OJyuw1cInQ
+	buVjsASoZTLejNyGr0RLhbVfCToqDV+KFX4rvuw==
+X-Gm-Gg: ASbGncvK14Zjkf61h8Bew8unx/k435xF/B60SDni/B0Qs4yqGQ/kQnPdr3bKsTaYou/
+	rba5Bb3P2Q8/CltVSNNbJWO13tkRO+5Gra2naNqD70HDamxwC+enAyifAwwHDst43D9gvn2U0On
+	u0z6/D7DffZmpSlMlrwp/FfAxYbpOszm4=
+X-Google-Smtp-Source: AGHT+IHfG4IdFhrynlohLcjINUvWUYxudJNltoIen2Onw6R0djfVvCV0/FdSfcdQNubeHC89QVS5keitmH669vIpZ7M=
+X-Received: by 2002:a05:6902:2389:b0:e78:f538:1c54 with SMTP id
+ 3f1490d57ef6-e7b2bde5e59mr11105285276.4.1747235600229; Wed, 14 May 2025
+ 08:13:20 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20250407010616.749833-2-inochiama@gmail.com>
+References: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
+ <CAPDyKFp5N23KCZwOTba6vGyk9eaS1-SjSqY52FfPDng-bahn6g@mail.gmail.com> <6154950.lOV4Wx5bFT@workhorse>
+In-Reply-To: <6154950.lOV4Wx5bFT@workhorse>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 14 May 2025 17:12:44 +0200
+X-Gm-Features: AX0GCFtDU_yTZnx-ehoHmNHeQ7h0DL35V2e2RHKt0pgXDptXnpjYmnfRRnWBnck
+Message-ID: <CAPDyKFpohUibXp_ReVquAxYHY7vZ28P1XmOCTU5GPQdLKYEaNg@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
+To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, 
+	Elaine Zhang <zhangqing@rock-chips.com>, Finley Xiao <finley.xiao@rock-chips.com>, 
+	Adrian Hunter <adrian.hunter@intel.com>, 
+	Sebastian Reichel <sebastian.reichel@collabora.com>, 
+	Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
+	linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Apr 07, 2025 at 09:06:06AM +0800, Inochi Amaoto wrote:
-> Like SG2042, SG2044 implements an enhanced ACLINT, so add necessary
-> compatible string for SG2044 SoC.
-> 
-> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> ---
+On Tue, 13 May 2025 at 16:27, Nicolas Frattaroli
+<nicolas.frattaroli@collabora.com> wrote:
+>
+> On Tuesday, 29 April 2025 12:06:16 Central European Summer Time Ulf Hansson wrote:
+> > On Wed, 23 Apr 2025 at 09:54, Nicolas Frattaroli
+> > <nicolas.frattaroli@collabora.com> wrote:
+> > >
+> > > RK3576's power domains have a peculiar design where the PD_NVM power
+> > > domain, of which the sdhci controller is a part, seemingly does not have
+> > > idempotent runtime disable/enable. The end effect is that if PD_NVM gets
+> > > turned off by the generic power domain logic because all the devices
+> > > depending on it are suspended, then the next time the sdhci device is
+> > > unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
+> > > registers.
+> > >
+> > > RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
+> > > added to the generic power domains API to handle what appears to be a
+> > > similar hardware design.
+> > >
+> > > Use this new function to ask for the same treatment in the sdhci
+> > > controller by giving rk3576 its own platform data with its own postinit
+> > > function. The benefit of doing this instead of marking the power domains
+> > > always on in the power domain core is that we only do this if we know
+> > > the platform we're running on actually uses the sdhci controller. For
+> > > others, keeping PD_NVM always on would be a waste, as they won't run
+> > > into this specific issue. The only other IP in PD_NVM that could be
+> > > affected is FSPI0. If it gets a mainline driver, it will probably want
+> > > to do the same thing.
+> > >
+> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> > > Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+> >
+> > Applied for next, thanks!
+> >
+> > Kind regards
+> > Uffe
+> >
+>
+> Hi Uffe,
+>
+> I was wondering whether we can get this into 6.15 as a fix as well, as 6.15
+> should already have the genpd API additions this requires AFAIU.
 
-Applied, thanks
+Sure, it makes perfect sense!
 
--- 
+>
+> Fixes tag could be something like:
+>
+>   Fixes: cfee1b507758 ("pmdomain: rockchip: Add support for RK3576 SoC")
+>
+> but may need some more flavorings to keep the stable robot overlords from
+> trying to apply it to 6.14 and earlier and then starting the robot uprising
+> in your inbox when they notice the API is missing.
+>
+> I originally left out the Fixes tag on the rewrite of this using the new
+> API because I wanted to avoid those awkward backport scenarios for a fairly
+> freshly supported SoC, but it'd be great to have this in 6.15 because that
+> will be with us for a full release cycle to come.
 
- <http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
+I added the fixes tag and a stable tag to point out that it should be
+applied only for v6.15+.
 
-Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
-<http://twitter.com/#!/linaroorg> Twitter |
-<http://www.linaro.org/linaro-blog/> Blog
+>
+> Kind regards,
+> Nicolas Frattaroli
+>
+>
+>
+
+Kind regards
+Uffe
