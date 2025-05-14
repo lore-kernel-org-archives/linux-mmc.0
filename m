@@ -1,108 +1,95 @@
-Received: from mail-qv1-f53.google.com (mail-qv1-f53.google.com [209.85.219.53])
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C69653D984;
-	Wed, 14 May 2025 01:17:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 28EF22260C
+	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 03:25:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747185430; cv=none; b=sfbN9WxxUCUkOIrCzHihjlUbXqBsxcPnZr/7H0OtxfHYoyY5Rw2gCUajjwgOZXT5FrxG66YwtKPjV6KuAVeEaTsbNtBH7JEWr/oqoT7z5+26H5v9Wx6b+b3llKm7MJE2i5J5ta/9B+fzlcF3CbmE/2WuhBfah6uUL8/sq8QCnAM=
+	t=1747193131; cv=none; b=TNjwDJvi0BllUWPg0Ar07AMf1mkFJ4PvtQis29BKgeNEy2oPqamKuXm0eU0jwp2leIiAvUNLo8bG8G6stsCDNrmSn1H4yhHc7GEMuP7IZm2Ro2hDCsmg3cMP749SAQM700HuzCFnYvMdrLCPLsEqrF24+Bxi51DsC1QftPEZWIY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747185430; c=relaxed/simple;
-	bh=nSrQLIIz5NOYeKv3kZaGWloZT+mJKQ6M7Z/Z39vrA4M=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=G9kttIrdSA4BDmVb5XdFaZEMNhbM2TFE/BCTLdNvhS9bdCu9yPsVwDdMf4YwRInw0NCporIIXmqAdbawdcXWTy5Um/JyMIqPhpdoNGTqqFTI+CYzvpKW7223lLJBwwNvGJdd6PNfm2Q4LUrrjfw7i0xL9loKMK45DiQSxGwnjko=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=NWdg4JyX; arc=none smtp.client-ip=209.85.219.53
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747193131; c=relaxed/simple;
+	bh=Mc9mXQgSwcQPbjOT+Qs3Pe85a+0ySdSOvWXwnq2Tp80=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=UG8kvth+ResQmB5Jlg2ZPwONBOuoC3jORMVJCG1TGGixKOoleTFGvKiv0VPJ4ji7RnFGMfzoNFjAjl0NV6ofiD0MJ6uejy+IGSpxbB9jXaUBcFy+PaWv54KJIRuSJzqR7rs2QELyes1npbXzpjyktgKeYytHMv0rTlLJwlmbJvc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=OPgRfYwB; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="NWdg4JyX"
-Received: by mail-qv1-f53.google.com with SMTP id 6a1803df08f44-6f5373067b3so88991426d6.2;
-        Tue, 13 May 2025 18:17:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747185427; x=1747790227; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=nEaVOh/9lfsZXQCmNPE6lSqX4P2H8nzTwz/gMp/qKyg=;
-        b=NWdg4JyX+k3PGBStFbWwTw1A7SF6FnE9w9WR1oBl0IbO9YbLgS2Ym+ChmRdGA4m/2v
-         n40tn5RWhUDlCWOgzfKW4zUHDJxN3ZsEvYhXwsTQyWwsEpa6rANqgJLMmWJwzKKhx+2H
-         hU5/XxuGbjtVtCrRVWLAT2mqMxxrvNNw5oQJP860lF1E2BRAyiUNFBQERLqHBwK7KOj9
-         KfHdOxxsSmAsrlxZLZ4guj11L/WDGN03utEM4U5LXkj5ykiyzy8aLxwsbVSgACr6Fzw6
-         G8HGT0hDFqp74ZbLsoDrf92l2HF4X7ZX7xj0wQpf8WeQByz/O32qkD6HsmbQ0EtJWuDz
-         OBOA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747185427; x=1747790227;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nEaVOh/9lfsZXQCmNPE6lSqX4P2H8nzTwz/gMp/qKyg=;
-        b=E2e3kNPUAP/9tfAE7ICVzc2YXe76mmfk0H1AbOhmoU+miWI8fAbDajTdSMvHMCmHs3
-         e0A8iZ7U2vt6rfSX+uSwVjd2S+1osy4qOaYbMXX4OWyPeC8RPd6tPuYke0JRgaeARp9v
-         EDpGNHILYg95mta92hohu9MFiNyfPtg7xOa9LIFrN1g/PZfekMYDUKYgHXF3pBO928v/
-         HjjjmXsWFSrseB2snmRJtCNSisb5Ipe+d+04V8fPSskBvfGntIV8DvF56alb0AV5YY82
-         xF9ovAtxzmmVhxSJUPTepA19aDggQeMTepmgxypPtUv8ef7WrsxxvY8Ol88LzdoJDhyW
-         zT/w==
-X-Forwarded-Encrypted: i=1; AJvYcCUdzOOHr2ij+GdVONp47UVhytscV3icsMi1tdqCVQbVMQA7kt1gaZWQyTXqNlfBlOhnwLYVVaPU7IWY@vger.kernel.org, AJvYcCVjn13RECH4tglXPaDJDuMYX+qNMVmKEGiBz2+ZjunfYPZDeQYiLVkAYFjq+5XLWTtP/NRJP6lktEIKnQLn@vger.kernel.org, AJvYcCVpEiOlSllR1f6W4SpjBG7nkUT/4ihMthXxrPlNvv0kvilJXJJ1GyS9hDcG7FhG8iyAoirSM6OTHHM9@vger.kernel.org, AJvYcCVpigvjM6nC3jsaWFQ1fSvDWkM1BAaxbxP/0SVP/u0k2j9ztg6gavanyG8BTQmmU0WnDUCIHS03JVai@vger.kernel.org, AJvYcCXhminsnedlBW3vF7JvAO0IGqGISrcNIZrMBMMrPr3e1kDJl9YibzxgnluSDHfH23jBIci8Xzhj83EDlVA=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyry1cmqnmo1rSGHOU5znnjYgaD+CceGxCAJWWSQ+EY7U+B488J
-	eyJotgQ0msaqSeS8WVpodfZamOXj/Wi+Mh8MrOxzvtPpvtTF7RAF
-X-Gm-Gg: ASbGncs+XNjovWJGQyftVMo+1Ys6K6pFLMgfB2BXbRupm9x8IbgOCeyhkOKmheuKlpX
-	+gGuX43KEC82fG0VWmmT+aRlU2FrfZbRrxQYqfe5s82aQCTorhpHZvvFJoEBfzYMgT2Fy5GWjkt
-	/TzPgNlyabfWMa77M/mPaVndE61+z1d5Q9MzvRzcjdpB8nQo5GzAZXkNkNJ7bk4cYlVWkwoxbIM
-	5Bd/zdFhWBHC3wr0qfPIny/SxWfJXRpNn3Ha5gvqWQmJC4S0XEFMX1ZZpaJ0WAsQqdiC2LRcR0O
-	VYoo3bbPD/9DzG7IFSWpNEY6vkI=
-X-Google-Smtp-Source: AGHT+IFq80xt7wr+N4Is1nsHfkVqlHuQBXPmL2/8vRvaUgO/7OiqL00yD+wmu1pLVR3Zg8H9LoV5EQ==
-X-Received: by 2002:a05:6214:2468:b0:6d4:238e:35b0 with SMTP id 6a1803df08f44-6f896e4c936mr24184336d6.17.1747185427543;
-        Tue, 13 May 2025 18:17:07 -0700 (PDT)
-Received: from localhost ([2001:da8:7001:11::cb])
-        by smtp.gmail.com with UTF8SMTPSA id 6a1803df08f44-6f6e39f588asm74175596d6.49.2025.05.13.18.17.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 May 2025 18:17:07 -0700 (PDT)
-Date: Wed, 14 May 2025 09:16:35 +0800
-From: Inochi Amaoto <inochiama@gmail.com>
-To: Daniel Lezcano <daniel.lezcano@linaro.org>, 
-	Inochi Amaoto <inochiama@gmail.com>
-Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>, 
-	Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Chen Wang <unicorn_wang@outlook.com>, 
-	Andi Shyti <andi.shyti@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, 
-	Paul Walmsley <paul.walmsley@sifive.com>, Samuel Holland <samuel.holland@sifive.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Philipp Zabel <p.zabel@pengutronix.de>, 
-	Palmer Dabbelt <palmer@dabbelt.com>, Albert Ou <aou@eecs.berkeley.edu>, 
-	Alexandre Ghiti <alex@ghiti.fr>, Thomas Bonnefille <thomas.bonnefille@bootlin.com>, 
-	Jarkko Nikula <jarkko.nikula@linux.intel.com>, Jisheng Zhang <jszhang@kernel.org>, 
-	Chao Wei <chao.wei@sophgo.com>, linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org, 
-	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org, 
-	linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>, 
-	Longbin Li <looong.bin@gmail.com>
-Subject: Re: [PATCH v2 02/10] dt-bindings: timer: Add Sophgo SG2044 ACLINT
- timer
-Message-ID: <g45xqtuit7apkduwsfsmw7giqttrb7kjtobejs44rtslx37ynp@ugic2medlczo>
-References: <20250413223507.46480-1-inochiama@gmail.com>
- <20250413223507.46480-3-inochiama@gmail.com>
- <aCNYItP6SWImMvFv@mai.linaro.org>
+	dkim=temperror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="OPgRfYwB"
+X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 54E3PICz81139837, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=realtek.com; s=dkim;
+	t=1747193119; bh=Mc9mXQgSwcQPbjOT+Qs3Pe85a+0ySdSOvWXwnq2Tp80=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=OPgRfYwBsFzcDkv+A+xokMxzbxxykSBRrMF1zeT1MDw1u9rmW3yNoYuvM2EYd2EQf
+	 4G0RMcz2towuL+fq3AuMmdDmWHhfj9Hw1s9DyB07LQyyxKu1XT5X4lojS//1E+WXj7
+	 vJP2z3TOgREk8ii7kVUG7MA09ocbfbVJ7ZaVY6vZwzoM4BhhOiBbXEHqypuuvNi01/
+	 Dw+0y8cmPmee7a+xtSgNfueMLifLmk1oWNtzkpGPuUYEaJDg1jJQB0OPSsSaT0bj/v
+	 pq0uDDmbpdlKIvp1UoL0AWYwTClqVzHoYe0w5ic7Jf96KtySOUTWwJybarB7wp/CX0
+	 szCm+ikCITF6g==
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+	by rtits2.realtek.com.tw (8.15.2/3.13/5.93) with ESMTPS id 54E3PICz81139837
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 14 May 2025 11:25:19 +0800
+Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Wed, 14 May 2025 11:25:18 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Wed, 14 May 2025 11:25:18 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547]) by
+ RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547%5]) with mapi id
+ 15.01.2507.035; Wed, 14 May 2025 11:25:18 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        "Matwey V. Kornilov"
+	<matwey.kornilov@gmail.com>
+CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: mmc_test framework: failures at rtsx_usb
+Thread-Topic: mmc_test framework: failures at rtsx_usb
+Thread-Index: AQHbwA8P98EWcfpcGk2ALwHWbNlL+rPRfZiw
+Date: Wed, 14 May 2025 03:25:18 +0000
+Message-ID: <44f8111b468d4f438991d04d951dc06d@realtek.com>
+References: <CAJs94Ebmyf_5BWNvSRa2O+3oEcwnYFN4Zs-BP5_fPqxQsxKvzw@mail.gmail.com>
+ <CAPDyKFo-NDg74vVEk_jU6T8vXqigVzhYuVNYjqJ=Ye9nnjE67Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFo-NDg74vVEk_jU6T8vXqigVzhYuVNYjqJ=Ye9nnjE67Q@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <aCNYItP6SWImMvFv@mai.linaro.org>
 
-On Tue, May 13, 2025 at 04:33:06PM +0200, Daniel Lezcano wrote:
-> On Mon, Apr 14, 2025 at 06:34:56AM +0800, Inochi Amaoto wrote:
-> > Like SG2042, SG2044 implements an enhanced ACLINT, so add necessary
-> > compatible string for SG2044 SoC.
-> > 
-> > Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
-> > Acked-by: Rob Herring (Arm) <robh@kernel.org>
-> > ---
-> 
-> Applied patch 2, thanks!
-> 
-
-Thanks, as you take this patch, I will drop this one in our repo
-to avoid duplicate.
-
-Regards,
-Inochi
+PiBPbiBNb24sIDUgTWF5IDIwMjUgYXQgMjA6NTYsIE1hdHdleSBWLiBLb3JuaWxvdg0KPiA8bWF0
+d2V5Lmtvcm5pbG92QGdtYWlsLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBIZWxsbywNCj4gPg0KPiA+
+DQo+ID4gSSd2ZSBqdXN0IHJ1biBtbWNfdGVzdCBzdWl0ZSBvbiBydHN4X3VzYiBtbWMgaG9zdCBj
+b250cm9sbGVyIG1vZHVsZQ0KPiA+IHdpdGggUlRTNTE3MCBoYXJkd2FyZSBhdHRhY2hlZC4NCj4g
+PiBLZXJuZWwgdmVyc2lvbiBpcyA2LjE0LjAuIFRoZSBmb2xsb3dpbmcgZm91ciB0ZXN0IGhhcyBi
+ZWVuIGZhaWxlZDoNCj4gPg0KPiA+IE1heSAwNSAyMTowNjo0NyBsb2NhbGhvc3QubG9jYWxkb21h
+aW4ga2VybmVsOiBtbWMwOiBUZXN0IGNhc2UgMTUuDQo+ID4gUHJvcGVyIHhmZXJfc2l6ZSBhdCB3
+cml0ZSAoc3RhcnQgZmFpbHVyZSkuLi4NCj4gPiBNYXkgMDUgMjE6MDY6NDcgbG9jYWxob3N0Lmxv
+Y2FsZG9tYWluIGtlcm5lbDogbW1jMDogUmVzdWx0OiBGQUlMRUQgTWF5DQo+ID4gMDUgMjE6MDY6
+NDcgbG9jYWxob3N0LmxvY2FsZG9tYWluIGtlcm5lbDogbW1jMDogVGVzdCBjYXNlIDE2Lg0KPiA+
+IFByb3BlciB4ZmVyX3NpemUgYXQgcmVhZCAoc3RhcnQgZmFpbHVyZSkuLi4NCj4gPiBNYXkgMDUg
+MjE6MDY6NTcgbG9jYWxob3N0LmxvY2FsZG9tYWluIGtlcm5lbDogbW1jMDogUmVzdWx0OiBGQUlM
+RUQgTWF5DQo+ID4gMDUgMjE6MDY6NTcgbG9jYWxob3N0LmxvY2FsZG9tYWluIGtlcm5lbDogbW1j
+MDogVGVzdCBjYXNlIDE3Lg0KPiA+IFByb3BlciB4ZmVyX3NpemUgYXQgd3JpdGUgKG1pZHdheSBm
+YWlsdXJlKS4uLg0KPiA+IE1heSAwNSAyMTowNjo1NyBsb2NhbGhvc3QubG9jYWxkb21haW4ga2Vy
+bmVsOiBtbWMwOiBSZXN1bHQ6IEZBSUxFRCBNYXkNCj4gPiAwNSAyMTowNjo1NyBsb2NhbGhvc3Qu
+bG9jYWxkb21haW4ga2VybmVsOiBtbWMwOiBUZXN0IGNhc2UgMTguDQo+ID4gUHJvcGVyIHhmZXJf
+c2l6ZSBhdCByZWFkIChtaWR3YXkgZmFpbHVyZSkuLi4NCj4gPiBNYXkgMDUgMjE6MDc6MDggbG9j
+YWxob3N0LmxvY2FsZG9tYWluIGtlcm5lbDogbW1jMDogUmVzdWx0OiBGQUlMRUQNCj4gPg0KPiA+
+IFNob3VsZCBJIG5vcm1hbGx5IHJlcG9ydCBpdCBvciBpdCBpcyBrbm93biBub3QgdG8gd29yaz8N
+Cj4gPg0KDQpIaSBNYXR3ZXksDQoNCkkgaGF2ZSBub3QgdXNlZCB0aGUgbW1jX3Rlc3Qgc3VpdGUg
+YmVmb3JlLiANCkNvdWxkIHlvdSBwcm92aWRlIG1lIHdpdGggeW91ciBleHBlcmltZW50YWwgcHJv
+Y2VkdXJlIGFuZCBzdGVwcz8NCg0KUmlja3kNCg0KPiANCj4gSSBoYXZlIGxvb3BlZCBpbiBSaWNr
+eSBXdSBmcm9tIFJlYWx0ZWssIGxldCdzIHNlZSBpZiBoZSBoYXMgc29tZSBjb21tZW50cyB0bw0K
+PiB0aGlzLg0KPiANCj4gSSBwZXJzb25hbGx5IGhhdmVuJ3QgdXNlZCBtbWNfdGVzdCBmb3IgcnRz
+eF91c2IsIHNvIEkgY2FuJ3QgdGVsbCBpZiB0aGVzZSBhcmUgcmVhbA0KPiBwcm9ibGVtcy4NCj4g
+DQo+IEtpbmQgcmVnYXJkcw0KPiBVZmZlDQo=
