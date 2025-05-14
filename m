@@ -1,147 +1,114 @@
-Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1118228030E
-	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 18:26:34 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5D9E22882A8;
+	Wed, 14 May 2025 18:44:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747247196; cv=none; b=n8OY16ZAOGOT6HqVNRsaga6NJTI3atG89CbU7R33xAhAL3111bF//bQfzcMVL4ToA9mjzz4d+WXomBxQch4CTuhJtJEEuLvcVgBaZgtDt3QqNkvRdHOqKiCDBJDAznyZYaKKbYi4/i8i4UXLfq1LmtJUqRy1lxEteVOXdOOIF2k=
+	t=1747248271; cv=none; b=UAHkOeORFW3Xqd7ssq9ypcb40INNzob1mdIKM4GThxNUD8j5QxmNN/cXyPxcKEGUXT0pGsz9tI4zB3Y9ZXG8VRBTszUxBG5wl/vyN0sZsji9q/evJBYUz9uwWgogRH0Ct7fPxqQAC57ExK+Slcl8E96JjgSERn8AOntNuvGTwPY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747247196; c=relaxed/simple;
-	bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FyaJjEHa9lrYgLR2JCB6BrNG+vNrAeyvp5PyLZYQFm57DuHEWtlA454e9aZZIcUjvRTHiIgNcDVYTT7mib67YCbmsjwuLnyjdduImJGYRqAvjw3MdB528DJBEeYkpjso36Pmfw1EIpARVyqnHuKIZrm+4llyDyRZsOqOOVHfj/Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mfOZAGia; arc=none smtp.client-ip=209.85.210.175
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747248271; c=relaxed/simple;
+	bh=Cfm72KHPHjpJ3mEVdxevFjdi0RZmu1Tw2rX5MxcaV9c=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=gM32Q8lq//g9BNqgmWNc4AY+Ic7KtGRA1LQHw+zEunxp1sMueucp7hHOBWkA1WU3YBQ6IRwr1GWaahw4MUcILP/Ko+LmFIIrO3vIusj073rXZG5zBFgpXq/hKDWSlXlxf040SsjHi77sczGxNQju9LOP5yKxOfzT+oksHp258L0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=fiDx2PUw; arc=none smtp.client-ip=198.47.23.235
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mfOZAGia"
-Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7418e182864so193433b3a.1
-        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 11:26:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747247194; x=1747851994; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
-        b=mfOZAGiazI8mlZiITTv+mF/234A1ysltzk6sy4ZbJOusvXgPVMR0OBODuotUof1dD6
-         e/oFjlbmRc3OyB0z2HVbVbnMlxZZWKxvb0j7T1VrPjIS4Yev3C+VjYdYhTa+Es7mE/27
-         mfwzZaIRJ4OhTK4Z9Ff3DTYdWIjYG5+XXxPhKePctDFWnCEP4jfQiGj+psYHpOo2ghJ1
-         gCZSeLeVkTKbMjuikzH7cbuAEUD5TYkQ0UPwOLQdiiJ+1iEQGvfbVTpQP3lIdkbNsslz
-         3IgW6eddPogj+uiITp0y5AsvblkeEq2+oZ9IvjfaFzDp2GXqN3CpH8GTQ91DL3l2sg0m
-         L91A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747247194; x=1747851994;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
-        b=UoGDsu8BNDP+Yd8h84BLJ6CRoLXoQB8qzcLbzyDiZuDZg+ltR1Vd6Z2yGxZX394M4F
-         zQ2lEv30VKD3qJMZQgoYTekg+SWh/PuNHcvxGYbBgO4Ui6l9iwAxhuyz65PMnTj5qSUx
-         k7wzcAJGAIDhnOqeDfl0V+etPEpKBO0FiiLRh4dranbdrVXXSNd+6EAkoj9TdK+voc1u
-         OiGEyZrVSjOHIPTRwUvUMpgTvti6uCQMDmDyVYbcrD9DLqYQ6U69wtnHCPydtG8w+sbJ
-         MlojP0xGs34aF+hz2TaDc0Cvg0woOAxHQdLvPvp49MbK5wwonG5yNPhYCxj1gJ1nKfXY
-         gBSw==
-X-Forwarded-Encrypted: i=1; AJvYcCXL7iPceIHnijvuiW5kah2D+CuBZ9BlGaNnNTPUeMFEdcxz3jojAw5b8U7v0jj2I+3yA51eWIl/qPg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwwWGJQZDj5Cr8N1TRn+X7ho+gcS8ddvMawQpsJz95DcC0AjKoh
-	tkAfjP5AHqm2knyG/Rm8PeLXSjgndkX55wdcoqsTjzkusK+kK0dMqBuZ5MhEpOeGvVZLLpwCiLB
-	wQRmHRJ7pjuHfpc9JUUvueH2/1EzVcjUi
-X-Gm-Gg: ASbGncti8jJocx8NljIHZ+u18X/cY1KqMElXSK9fAO80RT8j/wNnfNXwUPy/I1XQKoh
-	x44btaveBWxe7VTWrxewDoMKkDy07BUd2qyWIzKsuCL58n0Exjq8AhRmWteSYLNeTXHG5A0++UQ
-	hdY4W2msgpYKSBH5EOJScgymAWbN7tww==
-X-Google-Smtp-Source: AGHT+IEEZiff/RnANP282wSBsSVA8alwgoQ7QXOvLPcJikCOmDzN8Dk8cJY11ArU00sjNDudqRJDJzpZW/Pj1L50bOo=
-X-Received: by 2002:a17:903:f86:b0:224:11fc:40c0 with SMTP id
- d9443c01a7336-231980cbea5mr65163535ad.11.1747247194041; Wed, 14 May 2025
- 11:26:34 -0700 (PDT)
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="fiDx2PUw"
+Received: from lelvem-sh01.itg.ti.com ([10.180.77.71])
+	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTP id 54EIiHq93491750;
+	Wed, 14 May 2025 13:44:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1747248258;
+	bh=j4huf+pjoLBdGdp5HHE13FYd6EiUoz1nox0QBs0LEos=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=fiDx2PUwBd6vkq74f6eTISYXaf9I/kMg9MB5Cc78GmaVQDdh3a007JIjMxTjSM1aA
+	 4DVuQWGwCNvL/u3AVHnp3Jcjc9UiYlHh+TX3fPZ8OtVAHqrmHyWooVlp3T0O3zGY3g
+	 NggJNXgCXP1BCHflfmkYow1frpFTvDCXwqZZMuoc=
+Received: from DLEE107.ent.ti.com (dlee107.ent.ti.com [157.170.170.37])
+	by lelvem-sh01.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 54EIiHbI2335529
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Wed, 14 May 2025 13:44:17 -0500
+Received: from DLEE106.ent.ti.com (157.170.170.36) by DLEE107.ent.ti.com
+ (157.170.170.37) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Wed, 14
+ May 2025 13:44:17 -0500
+Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DLEE106.ent.ti.com
+ (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
+ Frontend Transport; Wed, 14 May 2025 13:44:16 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 54EIiHnw049959;
+	Wed, 14 May 2025 13:44:17 -0500
+Message-ID: <483c7c41-4dd4-4ab8-ab09-bd301de2e540@ti.com>
+Date: Wed, 14 May 2025 13:44:17 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <CAJs94Ebmyf_5BWNvSRa2O+3oEcwnYFN4Zs-BP5_fPqxQsxKvzw@mail.gmail.com>
- <CAPDyKFo-NDg74vVEk_jU6T8vXqigVzhYuVNYjqJ=Ye9nnjE67Q@mail.gmail.com> <44f8111b468d4f438991d04d951dc06d@realtek.com>
-In-Reply-To: <44f8111b468d4f438991d04d951dc06d@realtek.com>
-From: "Matwey V. Kornilov" <matwey.kornilov@gmail.com>
-Date: Wed, 14 May 2025 21:26:22 +0300
-X-Gm-Features: AX0GCFuQCmqS3cTl7WgbF-1LkLjzthp4UVfDjXkcktRc8qGHU1YKQ7o0ygzJaJA
-Message-ID: <CAJs94EazC1uN+D41Ykih5tioD5F9f+wjWkz-kdSHxuM-NbM9NA@mail.gmail.com>
-Subject: Re: mmc_test framework: failures at rtsx_usb
-To: Ricky WU <ricky_wu@realtek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v5] mmc: sdhci_am654: Add SDHCI_QUIRK2_SUPPRESS_V1P8_ENA
+ quirk to am62 compatible
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>
+CC: Josua Mayer <josua@solid-run.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
+        Francesco Dolcini
+	<francesco@dolcini.it>,
+        Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah
+	<m-shah@ti.com>
+References: <20250514002513.1179186-1-jm@ti.com>
+ <d3222aeb-4920-41a2-a8d7-2551115ab776@intel.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <d3222aeb-4920-41a2-a8d7-2551115ab776@intel.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-=D1=81=D1=80, 14 =D0=BC=D0=B0=D1=8F 2025=E2=80=AF=D0=B3. =D0=B2 06:25, Rick=
-y WU <ricky_wu@realtek.com>:
->
-> > On Mon, 5 May 2025 at 20:56, Matwey V. Kornilov
-> > <matwey.kornilov@gmail.com> wrote:
-> > >
-> > > Hello,
-> > >
-> > >
-> > > I've just run mmc_test suite on rtsx_usb mmc host controller module
-> > > with RTS5170 hardware attached.
-> > > Kernel version is 6.14.0. The following four test has been failed:
-> > >
-> > > May 05 21:06:47 localhost.localdomain kernel: mmc0: Test case 15.
-> > > Proper xfer_size at write (start failure)...
-> > > May 05 21:06:47 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
-y
-> > > 05 21:06:47 localhost.localdomain kernel: mmc0: Test case 16.
-> > > Proper xfer_size at read (start failure)...
-> > > May 05 21:06:57 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
-y
-> > > 05 21:06:57 localhost.localdomain kernel: mmc0: Test case 17.
-> > > Proper xfer_size at write (midway failure)...
-> > > May 05 21:06:57 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
-y
-> > > 05 21:06:57 localhost.localdomain kernel: mmc0: Test case 18.
-> > > Proper xfer_size at read (midway failure)...
-> > > May 05 21:07:08 localhost.localdomain kernel: mmc0: Result: FAILED
-> > >
-> > > Should I normally report it or it is known not to work?
-> > >
->
-> Hi Matwey,
->
-> I have not used the mmc_test suite before.
-> Could you provide me with your experimental procedure and steps?
->
-> Ricky
->
+Hi Adrian,
 
-Hi,
+On 5/14/25 4:10 AM, Adrian Hunter wrote:
+> On 14/05/2025 03:25, Judith Mendez wrote:
+>> Add a new struct for platform data for the ti,am62-sdhci compatible to
+>> apply additional quirks, namely "SDHCI_QUIRK2_SUPPRESS_V1P8_ENA", to
+>> host controllers with am62 compatible.
+> 
+> Could add:
+> 
+> Note, the fix was originally introduced by commit 941a7abd4666
+> ("mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch") but was
+> found to be applied too broadly and had to be reverted.
 
-I did as described in the documentation. First, the kernel was rebuilt
-with CONFIG_MMC_TEST=3Dm. I run this kernel in a KVM based virtual
-machine with the USB device passed through inside. Then I attached an
-microSD card (attention: the data will be lost, so this should be card
-for testing) and did some magic:
+Sure I can add for v6
 
-modprobe mmc_test
-echo 'mmc0:1234' > /sys/bus/mmc/drivers/mmcblk/unbind
-echo 'mmc0:1234' > /sys/bus/mmc/drivers/mmc_test/bind
-echo 0 > /sys/kernel/debug/mmc0/mmc0:1234/test
+...
 
-The latter means to run all the tests. The results are located in dmesg.
+>>   
+>> +static const struct sdhci_pltfm_data sdhci_am62_4bit_pdata = {
+>> +	.ops = &sdhci_j721e_4bit_ops,
+>> +	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+>> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>> +};
+> 
+> sdhci_am62_4bit_pdata is the same as sdhci_j721e_4bit_pdata
 
-> >
-> > I have looped in Ricky Wu from Realtek, let's see if he has some commen=
-ts to
-> > this.
-> >
-> > I personally haven't used mmc_test for rtsx_usb, so I can't tell if the=
-se are real
-> > problems.
-> >
-> > Kind regards
-> > Uffe
+oh right sdhci_am62_4bit_pdata can be removed. thanks. will fix for v6
 
+Judith
 
+> 
+>> +
+>> +static const struct sdhci_am654_driver_data sdhci_am62_4bit_drvdata = {
+>> +	.pdata = &sdhci_am62_4bit_pdata,
+>> +	.flags = IOMUX_PRESENT,
+>> +	.quirks = SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA,
+>> +};
+>> +
 
---=20
-With best regards,
-Matwey V. Kornilov
+...
+
