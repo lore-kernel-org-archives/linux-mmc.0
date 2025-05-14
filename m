@@ -1,120 +1,116 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f42.google.com (mail-wr1-f42.google.com [209.85.221.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31293274660;
-	Wed, 14 May 2025 11:12:08 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 688FD18F2FC
+	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 14:18:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747221130; cv=none; b=UJUkTMiIddmDNZkiQFWiz8Tpmh/RpCB10YbH4SiQ1k+M2s2E+avnDMivBOzUka0cGhF+InSp7cORXLXmg7DKaiZlScbSn/mzY0eZNDpJXrcXTeD2IzNkURNA8c02rWGKDeBB0ZySYZygOAFM7TOLMYeAjQ2Fm0v+LQ4l0dV6hCg=
+	t=1747232316; cv=none; b=BK/jtbkfAYpmgDtQeZKXqG1WfuXRdFIPCvruJxbiGwAoHnSHvlhqA8UG3IsKOg2rDZJsVU2oYZdzK6hNKbDQri79q4OatMsnQ8g9S6Ynyo8Zqh7HY0mVD39dPEROm118R4niSGQMVXcj2jLKhACRYb10UBgxYvp0J7SDuPUrI1w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747221130; c=relaxed/simple;
-	bh=fGENwVCbv5FAl23VQVhGJhL7mKWawg7rz15OWL9A3oM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References; b=GSuieDZsWJbe5jb5ht/dQlH+Hg35VHqjKyVagfavepruXwSof7ce92oTHt+BJuvfXMNF02BHWED0gqCOZb2VlitZHNpzPA6k4tmSrGk6AKT7HPcEscasFPEsA+eejkZjluVCxEJt6+tpqi69VNHpvcMtvUjDW6snCzUPnh1DRf8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=lJWRGsXq; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
+	s=arc-20240116; t=1747232316; c=relaxed/simple;
+	bh=jHsA7WLaZAQUssN/Gkcz6ehZZJvqAMZ8Q9SHY06sn3U=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=KQqcz0vQjclio3jZuSTqZnJzsxaKlkyMbMHeswcO/oUF24hCO5wCC7PWT8anEC0lBuV+GSrree+Kj/AQn6MU8x1KadIASEaJT1auQhC20eUoFehtTg9/wWsrI592R6kZEDTYKJURvbET8eOxB1/rNE/ZjdTa44b8wKcYMhdamvk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SRxzxuTT; arc=none smtp.client-ip=209.85.221.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="lJWRGsXq"
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54EAuogu012655;
-	Wed, 14 May 2025 11:12:07 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:date:from:in-reply-to:message-id:references:subject:to; s=
-	qcppdkim1; bh=pgWmG9XpBGKvrmuf44Q57jGgbxAKC1iXH0u+e7BDa/k=; b=lJ
-	WRGsXqlSEj4LxaPbVWAt3SKwgYQcYE4wttikRqyZdIVDKSwhlV+7DSvhiSUZJzXG
-	WC/j0GZfA0ONL0tyVzZ2C5CN0ZfzBCXjHgVD8oJYnUeUGPnwFlqVxi1rFBsD1ij3
-	cLEItlataG6Pnkboc6Uc+e4xvLIkHMSP+N/Z/NfT+rDWJN3078/TlVqy8PxEUYx3
-	5+RkKyoRtjvnpgewuWcBGRtGaOnI66/Z0Dw/KOjvCdYUnSSv1z9U1kbaf6oZDhJ7
-	6x3AUrDUv14cm+O0g36/Q4YxKyFFonvE9MChy2bs3SR2H3WKOAnkK83qkn1+A6Jc
-	JhprBOcqg+SacdbqhY3Q==
-Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 46mbcyjegv-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 14 May 2025 11:12:07 +0000 (GMT)
-Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 54EBC4Ji008632;
-	Wed, 14 May 2025 11:12:04 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 46hyvm3g4v-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
-	Wed, 14 May 2025 11:12:04 +0000
-Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 54EBC3PU008615;
-	Wed, 14 May 2025 11:12:03 GMT
-Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
-	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 54EBC3v5008603;
-	Wed, 14 May 2025 11:12:03 +0000
-Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
-	id B7CE75000C0; Wed, 14 May 2025 16:42:02 +0530 (+0530)
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
-        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
-        Sarthak Garg <quic_sartgarg@quicinc.com>
-Subject: [PATCH V2 2/2] mmc: sdhci-msm: Enable force hw reset during cqe recovery
-Date: Wed, 14 May 2025 16:41:55 +0530
-Message-Id: <20250514111155.10896-3-quic_sartgarg@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20250514111155.10896-1-quic_sartgarg@quicinc.com>
-References: <20250514111155.10896-1-quic_sartgarg@quicinc.com>
-X-QCInternal: smtphost
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: LQWUspixiVJ9QTgcgvRhUnjhh9JV0bya
-X-Proofpoint-ORIG-GUID: LQWUspixiVJ9QTgcgvRhUnjhh9JV0bya
-X-Authority-Analysis: v=2.4 cv=JszxrN4C c=1 sm=1 tr=0 ts=68247a87 cx=c_pps
- a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
- a=dt9VzEwgFbYA:10 a=COk6AnOGAAAA:8 a=QyXUC8HyAAAA:8 a=utWEQhmKpaP70r5422AA:9
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTE0MDA5OCBTYWx0ZWRfX8+0OOOW+eGQR
- YFII00faMMgkaclsYA8UeOgcOQAeHDO4/9iIWO9mgKT/p4iHaZ/Ym+IbpXoeeJaDUJYkKzJIDNk
- f29Cszagwv2eHd8+yvhpvVrcRMpmh35yM6F12tF1sVVl5V7ZP5XsJgRV3MzqITSxfP1Vl9YIfLz
- BeMcmRCcDiQ6dPlArNlsA1YbRmEC7RLq3QedPXyTX8oCazRwZKLDnbL5gMFbiervkV6LY7uncgZ
- EJsraxrzTnG7/zw56cJ0QqYTXDvcRVzqGmpZ8fCzYftBwP2J56xc+T6NJ2OM31Hp8CHH3XM7emA
- 1sEYa9ce5go08LiGpqX+MetYBlpNTXCPbzJAv0m6q48gV+nzKOu9ozbYidYy6CCU+4x7NVzHmcm
- L7P81hfmuWwI3pld9CIGCRfRc2bjkIrAxkmnMwjcDiRcsTm2fko4L9/FM6onbt/aum1FPWNs
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-14_03,2025-05-14_02,2025-02-21_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 priorityscore=1501 suspectscore=0 mlxlogscore=999 bulkscore=0
- malwarescore=0 mlxscore=0 adultscore=0 phishscore=0 spamscore=0
- lowpriorityscore=0 clxscore=1015 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505070000 definitions=main-2505140098
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SRxzxuTT"
+Received: by mail-wr1-f42.google.com with SMTP id ffacd0b85a97d-3a1f5d2d91eso4022038f8f.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 07:18:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1747232313; x=1747837113; darn=vger.kernel.org;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=rUz3GV+6dO1qGU9AwxqVGKIzfxuE+8NTURqqLEaoFC8=;
+        b=SRxzxuTTbN8XuYsKfshneQIHrI5xt+1ppK/djF2971+1Vy2jJPp8qGCBQSi44Lb3On
+         IoSuu9bwVirXecmJZr9wN/SZAibIDkPiBFbvrcXYxq0f98nanuoIxGhmRSAyzdjLHn5Z
+         YZKICCCExK5lvbtaJQgGdWOGmTvhVZcFRCqwYWm3XJhDVXnqgyvMjz2UdAr1be+8IZft
+         GSwAoc2v6qsQsTaW+4fQaie8L7gyAEzYNzB/oEPtcw96/OzG7FAL32/1E2iSwYUPTDyC
+         MYWAjiNwuJ3Fxb4m/AL66Yj9MckfVVP019Uv49fTE5zB2LAg7Jk+e2Al5kuc6sbDDRq5
+         GmPA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747232313; x=1747837113;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=rUz3GV+6dO1qGU9AwxqVGKIzfxuE+8NTURqqLEaoFC8=;
+        b=Y9qgbvoLwSPMHIoO92i+Q52BoKJC3uRsqNyoo3uV7sirO1TfnstfcuDFhXEEyxjpgB
+         4/pq/RCtlox1ZymabJYHcuYXnlni3XF7V8UkokM6TwlYWP31X7TyNXsYMeKD5V8b0eLy
+         CVi5wwJ9yI47V3mZkHxFaPdeHtGbv5B/F/e9T3ScsjbkEaRhfWo9OmPArfxI7lLpXudI
+         7G4T2ogy+lMxWBBjB/yCuKy5HZseLF4CnPwoWYeXpZt858wyLjVK4k+oI71sCb+LBKUn
+         ELUqK7OO9Us24NI/Q6n7VdOD68ShXnXJJx+gwA0zeEPe4hx8KjfFK8vPUiNceTtShzfg
+         41yA==
+X-Forwarded-Encrypted: i=1; AJvYcCXLR5Y+NeA1/egSP452yZKm3LwjI1fCljUfz/OT04ISGc+33nFzryIKt2v4LSaH36iT1KDpBUxMiu4=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzYKIdDvuhgLX/CH3ZcXmKkIOwptMHx3HdMig4KgwSl0CSNL1fx
+	0hDdNvGXZQIUch9/9LygNAI1pvtLDq2E3Ji0ygXd7BX3i8lpBNmnFbwPDLwuX30=
+X-Gm-Gg: ASbGncsDAy+HLvQP8P9oriyvluUavmkwFFSQG0zXKptDbebjIu/VI0jBb3467FXW449
+	sfmieKKbJur8XpFcC1kpq9xPWa41XJ3G3ZUBw21wl91SFyWpebYGDH3nCSgDakfcYZv+EZmvNT9
+	EAAwuB2/FeM4WVNJedyeULPoSr0YP4p2Ffc8+OVIgnGyrbP2Ig7Xk/J8c+hgZo+ywKjOEkO3vPU
+	l+fnllLybFOKCv3nKt3NUrVwKbXWhb+GHmYBAtKQauHle/8/aJdxhAPLaZiME21hRuYoxSzJ0dj
+	24dERAdC8W+2s0oLduMZzXYRvu88BFgS8+6FQiqdSoWcCFblEbSCLNMeKfR50zrdEoIYSeENKeF
+	0JKDbtSMG6DM2rw==
+X-Google-Smtp-Source: AGHT+IH4+d+Pry2CNpgKUNvxX7a5CyUBEerUkhvVVYoJxhPCGMW/etsCZMqBlMg4OuejtHCSPvBihg==
+X-Received: by 2002:a05:6000:40c9:b0:391:39fb:59c8 with SMTP id ffacd0b85a97d-3a3496c1ebdmr3217848f8f.25.1747232312583;
+        Wed, 14 May 2025 07:18:32 -0700 (PDT)
+Received: from mai.linaro.org (146725694.box.freepro.com. [130.180.211.218])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a1f5a4c5f6sm19729450f8f.86.2025.05.14.07.18.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 May 2025 07:18:31 -0700 (PDT)
+Date: Wed, 14 May 2025 16:18:29 +0200
+From: Daniel Lezcano <daniel.lezcano@linaro.org>
+To: Inochi Amaoto <inochiama@gmail.com>
+Cc: Jean Delvare <jdelvare@suse.com>, Guenter Roeck <linux@roeck-us.net>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Chen Wang <unicorn_wang@outlook.com>,
+	Andi Shyti <andi.shyti@kernel.org>,
+	Thomas Gleixner <tglx@linutronix.de>,
+	Paul Walmsley <paul.walmsley@sifive.com>,
+	Samuel Holland <samuel.holland@sifive.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Philipp Zabel <p.zabel@pengutronix.de>,
+	Palmer Dabbelt <palmer@dabbelt.com>,
+	Albert Ou <aou@eecs.berkeley.edu>, Alexandre Ghiti <alex@ghiti.fr>,
+	Thomas Bonnefille <thomas.bonnefille@bootlin.com>,
+	ghost <2990955050@qq.com>,
+	Jarkko Nikula <jarkko.nikula@linux.intel.com>,
+	Jisheng Zhang <jszhang@kernel.org>, Chao Wei <chao.wei@sophgo.com>,
+	linux-hwmon@vger.kernel.org, devicetree@vger.kernel.org,
+	sophgo@lists.linux.dev, linux-kernel@vger.kernel.org,
+	linux-i2c@vger.kernel.org, linux-riscv@lists.infradead.org,
+	linux-mmc@vger.kernel.org, Yixun Lan <dlan@gentoo.org>,
+	Longbin Li <looong.bin@gmail.com>
+Subject: Re: [PATCH 1/9] dt-bindings: timer: Add Sophgo SG2044 ACLINT timer
+Message-ID: <aCSmNRTVXQ51xj0m@mai.linaro.org>
+References: <20250407010616.749833-1-inochiama@gmail.com>
+ <20250407010616.749833-2-inochiama@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20250407010616.749833-2-inochiama@gmail.com>
 
-Enable force hw reset during cqe recovery to make recovery more robust.
+On Mon, Apr 07, 2025 at 09:06:06AM +0800, Inochi Amaoto wrote:
+> Like SG2042, SG2044 implements an enhanced ACLINT, so add necessary
+> compatible string for SG2044 SoC.
+> 
+> Signed-off-by: Inochi Amaoto <inochiama@gmail.com>
+> ---
 
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-msm.c | 3 +++
- 1 file changed, 3 insertions(+)
+Applied, thanks
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 66c0d1ba2a33..711252ad24a9 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2730,6 +2730,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 
-+	/* Enable force hw reset during cqe recovery */
-+	msm_host->mmc->cqe_recovery_reset_always = true;
-+
- 	/* Set the timeout value to max possible */
- 	host->max_timeout_count = 0xF;
- 
 -- 
-2.17.1
 
+ <http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
+
+Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
+<http://twitter.com/#!/linaroorg> Twitter |
+<http://www.linaro.org/linaro-blog/> Blog
