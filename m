@@ -1,150 +1,147 @@
-Received: from mail-yb1-f171.google.com (mail-yb1-f171.google.com [209.85.219.171])
+Received: from mail-pf1-f175.google.com (mail-pf1-f175.google.com [209.85.210.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 56BA91DB13E
-	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 15:13:21 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.171
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1118228030E
+	for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 18:26:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747235603; cv=none; b=XP7LFSiJYrdJagnE76BUhyt7RTL4DtHEEspi4k5T8tuykw9tRqBDt7EGUq0Vg/IqYhrdNq28W2Fy8jrxK+2nRABBP+lg4xLCT1QuPR4QiswjAkrZ+mJ+vY62Obi2uJVr+DEZKGLzGCLnj2o+Kbbdf2kOfAR7OcsQWvDuYfamn7Y=
+	t=1747247196; cv=none; b=n8OY16ZAOGOT6HqVNRsaga6NJTI3atG89CbU7R33xAhAL3111bF//bQfzcMVL4ToA9mjzz4d+WXomBxQch4CTuhJtJEEuLvcVgBaZgtDt3QqNkvRdHOqKiCDBJDAznyZYaKKbYi4/i8i4UXLfq1LmtJUqRy1lxEteVOXdOOIF2k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747235603; c=relaxed/simple;
-	bh=zMHHBnI6m3mo0ePFTe0uKSZzTUP9WZHZ7T2iGlRV0+Y=;
+	s=arc-20240116; t=1747247196; c=relaxed/simple;
+	bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Jl5eJbBAL1DRMb7jsUiEbZLrmDs+Gd8JIC/7VNp3t02+4e4HfDdPJOqi7ZRCuxawh8YAUG7+YrBRUoswPx9EgypQCSru3PTuX+9UxOBfCW5bVT/kkhH5RujpLk7GksnPqez6Fa8Jt/0nqxfEOoL9gJBpkkROGXYYdqi0rLbpKAI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=U6hhd98V; arc=none smtp.client-ip=209.85.219.171
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=FyaJjEHa9lrYgLR2JCB6BrNG+vNrAeyvp5PyLZYQFm57DuHEWtlA454e9aZZIcUjvRTHiIgNcDVYTT7mib67YCbmsjwuLnyjdduImJGYRqAvjw3MdB528DJBEeYkpjso36Pmfw1EIpARVyqnHuKIZrm+4llyDyRZsOqOOVHfj/Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=mfOZAGia; arc=none smtp.client-ip=209.85.210.175
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="U6hhd98V"
-Received: by mail-yb1-f171.google.com with SMTP id 3f1490d57ef6-e78f70cd327so1039661276.1
-        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 08:13:21 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mfOZAGia"
+Received: by mail-pf1-f175.google.com with SMTP id d2e1a72fcca58-7418e182864so193433b3a.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 May 2025 11:26:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1747235600; x=1747840400; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=J8jj6jRyHpEahWPL1bxwBIDklu0Ui7Dm+eEH5GeKLrc=;
-        b=U6hhd98VBx26nUxFA6BDVx8Z/bzUuTd56wtcK0gpFeIay6o/Q+foCbWD5VEDLMzd0T
-         kHE2SFzJh1kPQPY+76WjoNkIF+kT6v0Lriqkzk2u+BUw77LsMSjtXs5rKPaogRgY7AUJ
-         bonLvuYToOi7YddGdy0OHEa6nTHQdplYgiY3oZBJSJ8J3gRJAtcECrON8ZIpT9RPgz2j
-         ifz/ZBmjTv7S5msxL7Oc1yK/+LSwpfyvv6AeqYrK2qhAf3OwWnnib/VqejHRUAYpBdvD
-         lgyD+w6qm7yES5SsrZECvyZE279SLI+uItobFN8q8NvsH93hvK8WjJv+GuQqQAQLIwUD
-         bogw==
+        d=gmail.com; s=20230601; t=1747247194; x=1747851994; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
+        b=mfOZAGiazI8mlZiITTv+mF/234A1ysltzk6sy4ZbJOusvXgPVMR0OBODuotUof1dD6
+         e/oFjlbmRc3OyB0z2HVbVbnMlxZZWKxvb0j7T1VrPjIS4Yev3C+VjYdYhTa+Es7mE/27
+         mfwzZaIRJ4OhTK4Z9Ff3DTYdWIjYG5+XXxPhKePctDFWnCEP4jfQiGj+psYHpOo2ghJ1
+         gCZSeLeVkTKbMjuikzH7cbuAEUD5TYkQ0UPwOLQdiiJ+1iEQGvfbVTpQP3lIdkbNsslz
+         3IgW6eddPogj+uiITp0y5AsvblkeEq2+oZ9IvjfaFzDp2GXqN3CpH8GTQ91DL3l2sg0m
+         L91A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747235600; x=1747840400;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=J8jj6jRyHpEahWPL1bxwBIDklu0Ui7Dm+eEH5GeKLrc=;
-        b=aoMaNogQYMjuyi0gBWplKeCF8Tcky+r33513jSKiPRr6KdWb2V1D/LOqpzeopeS5M2
-         w1w2wFnzQ10Py0Y2P49WNP61roSs6xUsp6pEU8AvHPGSREnyjvwWnaTzbq2evef9a3QE
-         RydFajtcwqclrCZS7cKlTSwR2Vukskjratnq7hqesHnPF7ba2k5O+ojvLe2Z6h0tMZdB
-         PTzg+q0cXi9OnAAzFUNxXKBPLvvsf2dyyeoXNmhmX8X5Hn6+1btmAVjblrbQp8O3LLkN
-         VgL8XgYTeHXaTt9oGzyv/q9FVMWdn9fsUNuj9e/vBeaU09vybHnfpAqQ00M1XbzqN8yZ
-         Rnng==
-X-Forwarded-Encrypted: i=1; AJvYcCVsDZYWQ9y24mSxGg97b5RpR5zq+03rfM1aOdZLZfRcCn7BJUm1KKOBCC8KgoGpl5P1VqiVeitQcQg=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywur2aBkHkuPmB6weHdhFgZBMVxZ8hHsFic4uUTXGC+SBeRj1x0
-	hWvjJNeX7fRSZwKNMADV9ASGtF87wXTBDFRRG+InqsWxh7JUt1GIXQSyXDYaIELe6OJyuw1cInQ
-	buVjsASoZTLejNyGr0RLhbVfCToqDV+KFX4rvuw==
-X-Gm-Gg: ASbGncvK14Zjkf61h8Bew8unx/k435xF/B60SDni/B0Qs4yqGQ/kQnPdr3bKsTaYou/
-	rba5Bb3P2Q8/CltVSNNbJWO13tkRO+5Gra2naNqD70HDamxwC+enAyifAwwHDst43D9gvn2U0On
-	u0z6/D7DffZmpSlMlrwp/FfAxYbpOszm4=
-X-Google-Smtp-Source: AGHT+IHfG4IdFhrynlohLcjINUvWUYxudJNltoIen2Onw6R0djfVvCV0/FdSfcdQNubeHC89QVS5keitmH669vIpZ7M=
-X-Received: by 2002:a05:6902:2389:b0:e78:f538:1c54 with SMTP id
- 3f1490d57ef6-e7b2bde5e59mr11105285276.4.1747235600229; Wed, 14 May 2025
- 08:13:20 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1747247194; x=1747851994;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ANgO1hKvlB56oJF7H73XtrDpnhVSl3zyWEHbVgw86y0=;
+        b=UoGDsu8BNDP+Yd8h84BLJ6CRoLXoQB8qzcLbzyDiZuDZg+ltR1Vd6Z2yGxZX394M4F
+         zQ2lEv30VKD3qJMZQgoYTekg+SWh/PuNHcvxGYbBgO4Ui6l9iwAxhuyz65PMnTj5qSUx
+         k7wzcAJGAIDhnOqeDfl0V+etPEpKBO0FiiLRh4dranbdrVXXSNd+6EAkoj9TdK+voc1u
+         OiGEyZrVSjOHIPTRwUvUMpgTvti6uCQMDmDyVYbcrD9DLqYQ6U69wtnHCPydtG8w+sbJ
+         MlojP0xGs34aF+hz2TaDc0Cvg0woOAxHQdLvPvp49MbK5wwonG5yNPhYCxj1gJ1nKfXY
+         gBSw==
+X-Forwarded-Encrypted: i=1; AJvYcCXL7iPceIHnijvuiW5kah2D+CuBZ9BlGaNnNTPUeMFEdcxz3jojAw5b8U7v0jj2I+3yA51eWIl/qPg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwwWGJQZDj5Cr8N1TRn+X7ho+gcS8ddvMawQpsJz95DcC0AjKoh
+	tkAfjP5AHqm2knyG/Rm8PeLXSjgndkX55wdcoqsTjzkusK+kK0dMqBuZ5MhEpOeGvVZLLpwCiLB
+	wQRmHRJ7pjuHfpc9JUUvueH2/1EzVcjUi
+X-Gm-Gg: ASbGncti8jJocx8NljIHZ+u18X/cY1KqMElXSK9fAO80RT8j/wNnfNXwUPy/I1XQKoh
+	x44btaveBWxe7VTWrxewDoMKkDy07BUd2qyWIzKsuCL58n0Exjq8AhRmWteSYLNeTXHG5A0++UQ
+	hdY4W2msgpYKSBH5EOJScgymAWbN7tww==
+X-Google-Smtp-Source: AGHT+IEEZiff/RnANP282wSBsSVA8alwgoQ7QXOvLPcJikCOmDzN8Dk8cJY11ArU00sjNDudqRJDJzpZW/Pj1L50bOo=
+X-Received: by 2002:a17:903:f86:b0:224:11fc:40c0 with SMTP id
+ d9443c01a7336-231980cbea5mr65163535ad.11.1747247194041; Wed, 14 May 2025
+ 11:26:34 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250423-rk3576-emmc-fix-v3-1-0bf80e29967f@collabora.com>
- <CAPDyKFp5N23KCZwOTba6vGyk9eaS1-SjSqY52FfPDng-bahn6g@mail.gmail.com> <6154950.lOV4Wx5bFT@workhorse>
-In-Reply-To: <6154950.lOV4Wx5bFT@workhorse>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 14 May 2025 17:12:44 +0200
-X-Gm-Features: AX0GCFtDU_yTZnx-ehoHmNHeQ7h0DL35V2e2RHKt0pgXDptXnpjYmnfRRnWBnck
-Message-ID: <CAPDyKFpohUibXp_ReVquAxYHY7vZ28P1XmOCTU5GPQdLKYEaNg@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: add PD workaround on RK3576
-To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, 
-	Elaine Zhang <zhangqing@rock-chips.com>, Finley Xiao <finley.xiao@rock-chips.com>, 
-	Adrian Hunter <adrian.hunter@intel.com>, 
-	Sebastian Reichel <sebastian.reichel@collabora.com>, 
-	Detlev Casanova <detlev.casanova@collabora.com>, kernel@collabora.com, 
-	linux-pm@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, 
-	linux-mmc@vger.kernel.org
+References: <CAJs94Ebmyf_5BWNvSRa2O+3oEcwnYFN4Zs-BP5_fPqxQsxKvzw@mail.gmail.com>
+ <CAPDyKFo-NDg74vVEk_jU6T8vXqigVzhYuVNYjqJ=Ye9nnjE67Q@mail.gmail.com> <44f8111b468d4f438991d04d951dc06d@realtek.com>
+In-Reply-To: <44f8111b468d4f438991d04d951dc06d@realtek.com>
+From: "Matwey V. Kornilov" <matwey.kornilov@gmail.com>
+Date: Wed, 14 May 2025 21:26:22 +0300
+X-Gm-Features: AX0GCFuQCmqS3cTl7WgbF-1LkLjzthp4UVfDjXkcktRc8qGHU1YKQ7o0ygzJaJA
+Message-ID: <CAJs94EazC1uN+D41Ykih5tioD5F9f+wjWkz-kdSHxuM-NbM9NA@mail.gmail.com>
+Subject: Re: mmc_test framework: failures at rtsx_usb
+To: Ricky WU <ricky_wu@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 13 May 2025 at 16:27, Nicolas Frattaroli
-<nicolas.frattaroli@collabora.com> wrote:
+=D1=81=D1=80, 14 =D0=BC=D0=B0=D1=8F 2025=E2=80=AF=D0=B3. =D0=B2 06:25, Rick=
+y WU <ricky_wu@realtek.com>:
 >
-> On Tuesday, 29 April 2025 12:06:16 Central European Summer Time Ulf Hansson wrote:
-> > On Wed, 23 Apr 2025 at 09:54, Nicolas Frattaroli
-> > <nicolas.frattaroli@collabora.com> wrote:
+> > On Mon, 5 May 2025 at 20:56, Matwey V. Kornilov
+> > <matwey.kornilov@gmail.com> wrote:
 > > >
-> > > RK3576's power domains have a peculiar design where the PD_NVM power
-> > > domain, of which the sdhci controller is a part, seemingly does not have
-> > > idempotent runtime disable/enable. The end effect is that if PD_NVM gets
-> > > turned off by the generic power domain logic because all the devices
-> > > depending on it are suspended, then the next time the sdhci device is
-> > > unsuspended, it'll hang the SoC as soon as it tries accessing the CQHCI
-> > > registers.
+> > > Hello,
 > > >
-> > > RK3576's UFS support needed a new dev_pm_genpd_rpm_always_on function
-> > > added to the generic power domains API to handle what appears to be a
-> > > similar hardware design.
 > > >
-> > > Use this new function to ask for the same treatment in the sdhci
-> > > controller by giving rk3576 its own platform data with its own postinit
-> > > function. The benefit of doing this instead of marking the power domains
-> > > always on in the power domain core is that we only do this if we know
-> > > the platform we're running on actually uses the sdhci controller. For
-> > > others, keeping PD_NVM always on would be a waste, as they won't run
-> > > into this specific issue. The only other IP in PD_NVM that could be
-> > > affected is FSPI0. If it gets a mainline driver, it will probably want
-> > > to do the same thing.
+> > > I've just run mmc_test suite on rtsx_usb mmc host controller module
+> > > with RTS5170 hardware attached.
+> > > Kernel version is 6.14.0. The following four test has been failed:
 > > >
-> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> > > Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+> > > May 05 21:06:47 localhost.localdomain kernel: mmc0: Test case 15.
+> > > Proper xfer_size at write (start failure)...
+> > > May 05 21:06:47 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
+y
+> > > 05 21:06:47 localhost.localdomain kernel: mmc0: Test case 16.
+> > > Proper xfer_size at read (start failure)...
+> > > May 05 21:06:57 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
+y
+> > > 05 21:06:57 localhost.localdomain kernel: mmc0: Test case 17.
+> > > Proper xfer_size at write (midway failure)...
+> > > May 05 21:06:57 localhost.localdomain kernel: mmc0: Result: FAILED Ma=
+y
+> > > 05 21:06:57 localhost.localdomain kernel: mmc0: Test case 18.
+> > > Proper xfer_size at read (midway failure)...
+> > > May 05 21:07:08 localhost.localdomain kernel: mmc0: Result: FAILED
+> > >
+> > > Should I normally report it or it is known not to work?
+> > >
+>
+> Hi Matwey,
+>
+> I have not used the mmc_test suite before.
+> Could you provide me with your experimental procedure and steps?
+>
+> Ricky
+>
+
+Hi,
+
+I did as described in the documentation. First, the kernel was rebuilt
+with CONFIG_MMC_TEST=3Dm. I run this kernel in a KVM based virtual
+machine with the USB device passed through inside. Then I attached an
+microSD card (attention: the data will be lost, so this should be card
+for testing) and did some magic:
+
+modprobe mmc_test
+echo 'mmc0:1234' > /sys/bus/mmc/drivers/mmcblk/unbind
+echo 'mmc0:1234' > /sys/bus/mmc/drivers/mmc_test/bind
+echo 0 > /sys/kernel/debug/mmc0/mmc0:1234/test
+
+The latter means to run all the tests. The results are located in dmesg.
+
 > >
-> > Applied for next, thanks!
+> > I have looped in Ricky Wu from Realtek, let's see if he has some commen=
+ts to
+> > this.
+> >
+> > I personally haven't used mmc_test for rtsx_usb, so I can't tell if the=
+se are real
+> > problems.
 > >
 > > Kind regards
 > > Uffe
-> >
->
-> Hi Uffe,
->
-> I was wondering whether we can get this into 6.15 as a fix as well, as 6.15
-> should already have the genpd API additions this requires AFAIU.
 
-Sure, it makes perfect sense!
 
->
-> Fixes tag could be something like:
->
->   Fixes: cfee1b507758 ("pmdomain: rockchip: Add support for RK3576 SoC")
->
-> but may need some more flavorings to keep the stable robot overlords from
-> trying to apply it to 6.14 and earlier and then starting the robot uprising
-> in your inbox when they notice the API is missing.
->
-> I originally left out the Fixes tag on the rewrite of this using the new
-> API because I wanted to avoid those awkward backport scenarios for a fairly
-> freshly supported SoC, but it'd be great to have this in 6.15 because that
-> will be with us for a full release cycle to come.
 
-I added the fixes tag and a stable tag to point out that it should be
-applied only for v6.15+.
-
->
-> Kind regards,
-> Nicolas Frattaroli
->
->
->
-
-Kind regards
-Uffe
+--=20
+With best regards,
+Matwey V. Kornilov
