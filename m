@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1B5F243946;
-	Fri, 16 May 2025 13:12:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7057729405;
+	Fri, 16 May 2025 13:17:43 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747401135; cv=none; b=d+iNuHA33UESa23bWTqBTrUTN7QmrWXHfdl+3YKCZlvCFAqivBvn332LLjU6EJxoQS1PLRCaWLj/DbDw+WkRBH0y0dlZu8dbeHg5XyA1/AT9fVAx0Z/RPzvuYes8airpTeBPdN+Z0+pjTWcKbuzN7RZxl7692q7qtR8ZEmAjyD0=
+	t=1747401463; cv=none; b=cpKhpsUEfjQf3UrLq+eq1S142RPJg0cfyRf85v7JBPS7pRbvXrf85kdCj01lGhVMWtshRj4ZZr5PLUy3etigZnvMPGif80Dulti8Y/MrDge6coyVn2QSPX/y/Iy7Fb3SoATtn8nob0ml4q5sOvWSOD1gHDXpNM7C69PTsrqC7CY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747401135; c=relaxed/simple;
-	bh=LIxhz0Ikkb6uhXfsYATNN0zoJH5c6DUtaKMEfAc+aBk=;
+	s=arc-20240116; t=1747401463; c=relaxed/simple;
+	bh=WaeCnVBazQ+YlcBWxAdDSDvj9AsqW9s0Dw/UGULgngY=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=pDAcH/2FHlHwwzb6uTWYUPew8Z/7QiwPABich0Q1c+Go0agsrZiMiMvl/Z1w0xW/UvBtPBh+q7WmRV0WSC0z36M/B2ZXHTxBSPi0fDuwhtLcG+z68RENEg24w3OfCUfw5wlGBgxQ89EzyifII4x02AShYzJN4xJOv5CQGm5FAxw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=vPDrwwwv; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=Yr1gPYLaBacbH2B8iI5bW5WQLqBDCx9OfiKxR0OIFw5iKBCCzoh+oH9tlHS+gZzmqO8NFdnideRFzeBZaidUfA/6rvBfpbxEFlbpjeeIEpShhkmLS2AVF/CUD1yVKEFq1UmFbkm7d4hRfyifq9w4z8N8zDtisnLoODvgrJ6eLVA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=L1ezGQT+; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="vPDrwwwv"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5F614C4CEF4;
-	Fri, 16 May 2025 13:12:12 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="L1ezGQT+"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9F482C4CEE4;
+	Fri, 16 May 2025 13:17:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747401135;
-	bh=LIxhz0Ikkb6uhXfsYATNN0zoJH5c6DUtaKMEfAc+aBk=;
+	s=k20201202; t=1747401463;
+	bh=WaeCnVBazQ+YlcBWxAdDSDvj9AsqW9s0Dw/UGULgngY=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=vPDrwwwvQ2xDcxDXAL8gNsaOcLAvIqyIE1CtyizfeMQCuNT0TZdcbI6vhnQvTvroQ
-	 cr1PtUfweGB9rPToytDxG7ZxJNAEyy3xnOF/JxQrs/BfvZNVwSAe3cVmrudQlTw3Y7
-	 YxTJk99uj3ZyE0fQ4NK7jk/5jNfItWApA+iC5fgU/U9lNzT9L4mwTW/jEMzrNihOkB
-	 ednVZsTF11dT1ttteIgBdwIEu+Kz0A7fgHQdPKXVfHVadUF2b9RGTVoIvXbqh28e18
-	 cw4ZL4GwbsDvpdhecizHs2wM8I2k8eOwZ5sBqRqjk2OFYbnh7D4WTB9CSlHHCZSRyK
-	 0lw9OFm5y53ww==
-Message-ID: <f13fe182-b5e5-4938-8260-24f8f60e8f83@kernel.org>
-Date: Fri, 16 May 2025 15:12:10 +0200
+	b=L1ezGQT+JmrNZJauTjpvV2Q4ADhQBcbCfrmtpv/q8h5oJt8m+2kaWXGEo7XcttxCA
+	 LSo3E84yYZIoQGGT5F7C8Rm2xiqt4gcuARDO+6YZv1ciFWG7oiRalVDg23iL/p1HE5
+	 WwfD/ziAODaPhw5oAehb+1a7NfC3fXhSDYGUaqcN8isNcpfmFe5J9+tUxn4gLwZhIw
+	 0pKydHTIqdvB9GqUmHR9K8zlxp1erohaj9hnrM7Zq5uqRt3oQtRKrMphvOmyEGxGOt
+	 McRvcTmIGlICejAtCPKFFl5bUGlu281xxwyAjfCe6KgSOE54NjAX9QLEa2LSEC+r32
+	 xqu0ZAMfCZA9w==
+Message-ID: <15bbeaaf-6dcc-49ce-baff-03692fcb90a9@kernel.org>
+Date: Fri, 16 May 2025 15:17:37 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,7 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1 1/2] dt-bindings: sdhci: eswin: Documentation for
- eic7700 SoC
+Subject: Re: [PATCH v1 2/2] sdhci: eswin: Add eic7700 sdhci driver
 To: dongxuyang@eswincomputing.com, ulf.hansson@linaro.org, robh@kernel.org,
  krzk+dt@kernel.org, conor+dt@kernel.org, linux-mmc@vger.kernel.org,
  devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -44,7 +43,7 @@ To: dongxuyang@eswincomputing.com, ulf.hansson@linaro.org, robh@kernel.org,
 Cc: ningyu@eswincomputing.com, linmin@eswincomputing.com,
  xuxiang@eswincomputing.com
 References: <20250516091259.774-1-dongxuyang@eswincomputing.com>
- <20250516091650.832-1-dongxuyang@eswincomputing.com>
+ <20250516091727.887-1-dongxuyang@eswincomputing.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -90,217 +89,489 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250516091650.832-1-dongxuyang@eswincomputing.com>
+In-Reply-To: <20250516091727.887-1-dongxuyang@eswincomputing.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On 16/05/2025 11:16, dongxuyang@eswincomputing.com wrote:
-> From: Xuyang Dong <dongxuyang@eswincomputing.com>
-> 
-> Add device tree binding documentation for the ESWIN
-> eic7700 sdhci controller module.
-> 
-> Signed-off-by: Xiang Xu <xuxiang@eswincomputing.com>
-> Signed-off-by: Xuyang Dong <dongxuyang@eswincomputing.com>
-> ---
-
-
-Folks,you need to slow down because you are sending patchsets with the
-same issues, thus we need to repeat the same review comments. Learn from
-the review first.
-
->  .../bindings/mmc/eswin,sdhci-eic7700.yaml     | 131 ++++++++++++++++++
->  1 file changed, 131 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/eswin,sdhci-eic7700.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/eswin,sdhci-eic7700.yaml b/Documentation/devicetree/bindings/mmc/eswin,sdhci-eic7700.yaml
-> new file mode 100644
-> index 000000000000..d4826f2aa619
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/eswin,sdhci-eic7700.yaml
-> @@ -0,0 +1,131 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/eswin,sdhci-eic7700.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+On 16/05/2025 11:17, dongxuyang@eswincomputing.com wrote:
+> +	if (of_property_read_u32(np, "#clock-cells", &num_clks) < 0)
+> +		return 0;
 > +
-> +title: ESWIN EIC7700 SoC SDHCI controller
+> +	ret = eswin_sdhci_sdio_register_sdcardclk(eswin_sdhci_sdio, clk_xin,
+> +						  dev);
+> +	if (ret)
+> +		return ret;
 > +
-> +maintainers:
-> +  - Shuang Liang <liangshuang@eswincomputing.com>
-> +  - Xuyang Dong <dongxuyang@eswincomputing.com>
+> +	if (num_clks) {
+> +		ret = eswin_sdhci_sdio_register_sampleclk(eswin_sdhci_sdio,
+> +							  clk_xin, dev);
+> +		if (ret) {
+> +			eswin_sdhci_sdio_unregister_sdclk(dev);
+> +			return ret;
+> +		}
+> +	}
 > +
-> +allOf:
-> +  - $ref: /schemas/mmc/mmc-controller.yaml#
+> +	return 0;
+> +}
 > +
-> +properties:
-> +  compatible:
-> +    const: eswin,eic7700-emmc-sdhci
+> +static int eswin_sdhci_sdio_add_host(struct eswin_sdhci_data *eswin_sdhci_sdio)
+> +{
+> +	struct sdhci_host *host = eswin_sdhci_sdio->host;
+
+Why do you have two probes for one driver?
+
+> +	struct cqhci_host *cq_host;
+> +	bool dma64;
+> +	int ret;
 > +
-> +  reg:
-> +    maxItems: 1
-> +    description: Common configuration registers
+> +	if (!eswin_sdhci_sdio->has_cqe)
+> +		return sdhci_add_host(host);
+> +
+> +	ret = sdhci_setup_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	cq_host = devm_kzalloc(host->mmc->parent, sizeof(*cq_host), GFP_KERNEL);
+> +	if (!cq_host) {
+> +		ret = -ENOMEM;
+> +		goto cleanup;
+> +	}
+> +
+> +	cq_host->mmio = host->ioaddr + ESWIN_SDHCI_SD_CQE_BASE_ADDR;
+> +	cq_host->ops = &eswin_sdhci_sdio_cqhci_ops;
+> +
+> +	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> +	if (dma64)
+> +		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +
+> +	ret = cqhci_init(cq_host, host->mmc, dma64);
+> +	if (ret)
+> +		goto cleanup;
+> +
+> +	ret = __sdhci_add_host(host);
+> +	if (ret)
+> +		goto cleanup;
+> +
+> +	return 0;
+> +
+> +cleanup:
+> +	sdhci_cleanup_host(host);
+> +	return ret;
+> +}
+> +
+> +static int eswin_sdhci_sdio_probe(struct platform_device *pdev)
+> +{
+> +	int ret;
+> +	struct clk *clk_xin;
+> +	struct clk *clk_spll2_fout3;
+> +	struct clk *clk_mux;
+> +	struct sdhci_host *host;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct device *dev = &pdev->dev;
+> +	struct device_node *np = dev->of_node;
+> +	struct eswin_sdhci_data *eswin_sdhci_sdio;
+> +	const struct eswin_sdhci_of_data *data;
+> +	unsigned int val = 0;
+> +
+> +	data = of_device_get_match_data(dev);
+> +	host = sdhci_pltfm_init(pdev, data->pdata, sizeof(*eswin_sdhci_sdio));
+> +
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	eswin_sdhci_sdio = sdhci_pltfm_priv(pltfm_host);
+> +	eswin_sdhci_sdio->host = host;
+> +	eswin_sdhci_sdio->has_cqe = false;
+> +
+> +	sdhci_get_of_property(pdev);
+> +
+> +	eswin_sdhci_sdio->clk_ops = data->clk_ops;
+> +	eswin_sdhci_sdio->clk_ahb = devm_clk_get(dev, "clk_ahb");
+> +	if (IS_ERR(eswin_sdhci_sdio->clk_ahb)) {
+> +		ret = dev_err_probe(dev, PTR_ERR(eswin_sdhci_sdio->clk_ahb),
+> +				    "clk_ahb clock not found.\n");
+> +		goto err_pltfm_free;
+> +	}
+> +
+> +	clk_xin = devm_clk_get(dev, "clk_xin");
+> +	if (IS_ERR(clk_xin)) {
+> +		ret = dev_err_probe(dev, PTR_ERR(clk_xin),
+> +				    "clk_xin clock not found.\n");
+> +		goto err_pltfm_free;
+> +	}
+> +
+> +	clk_spll2_fout3 = devm_clk_get(dev, "clk_spll2_fout3");
+> +
+> +	if (IS_ERR(clk_spll2_fout3)) {
+> +		ret = dev_err_probe(dev, PTR_ERR(clk_spll2_fout3),
+> +				    "clk_spll2_fout3 clock not found.\n");
+> +		goto err_pltfm_free;
+> +	}
+> +
+> +	if (of_device_is_compatible(np, "eswin,sdhci-sdio")) {
+> +		clk_mux = devm_clk_get(dev, "clk_mux1_1");
+> +		if (IS_ERR(clk_mux)) {
+> +			ret = dev_err_probe(dev, PTR_ERR(clk_mux),
+> +					    "clk_mux1_1 clock not found.\n");
+> +			goto err_pltfm_free;
+> +		}
+> +		/*switch the core clk source*/
+> +		clk_set_parent(clk_mux, clk_spll2_fout3);
+> +	}
+> +
+> +	ret = clk_prepare_enable(eswin_sdhci_sdio->clk_ahb);
+> +	if (ret) {
+> +		dev_err(dev, "Unable to enable AHB clock.\n");
+> +		goto err_pltfm_free;
+> +	}
+> +	/* If clock-frequency property is set, use the provided value */
+> +	if (pltfm_host->clock && pltfm_host->clock != clk_get_rate(clk_xin)) {
+> +		ret = clk_set_rate(clk_xin, pltfm_host->clock);
+> +		if (ret) {
+> +			dev_err(&pdev->dev, "Failed to set SD clock rate\n");
+> +			goto clk_dis_ahb;
+> +		}
+> +	}
+> +
+> +	ret = clk_prepare_enable(clk_xin);
+> +	if (ret) {
+> +		dev_err(dev, "Unable to enable SD clock.\n");
+> +		goto clk_dis_ahb;
+> +	}
+> +
+> +	pltfm_host->clk = clk_xin;
+> +	ret = eswin_sdhci_sdio_register_sdclk(eswin_sdhci_sdio, clk_xin, dev);
+> +	if (ret)
+> +		goto clk_disable_all;
+> +
+> +	ret = eswin_sdhci_reset_init(dev, eswin_sdhci_sdio);
+> +	if (ret < 0) {
+> +		dev_err(dev, "failed to reset\n");
+> +		goto clk_disable_all;
+> +	}
+> +
+> +	eswin_sdhci_sdio->crg_regmap = syscon_regmap_lookup_by_phandle(
+> +		pdev->dev.of_node, "eswin,syscrg_csr");
+> +	if (IS_ERR(eswin_sdhci_sdio->crg_regmap)) {
+> +		dev_dbg(&pdev->dev, "No syscrg_csr phandle specified\n");
+> +		goto clk_disable_all;
+> +	}
+> +
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 1, &eswin_sdhci_sdio->crg_core_clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_core_clk (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 2, &eswin_sdhci_sdio->crg_aclk_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_aclk_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 3, &eswin_sdhci_sdio->crg_cfg_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_cfg_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +
+> +	eswin_sdhci_sdio->hsp_regmap = syscon_regmap_lookup_by_phandle(
+> +		dev->of_node, "eswin,hsp_sp_csr");
+> +	if (IS_ERR(eswin_sdhci_sdio->hsp_regmap)) {
+> +		dev_dbg(dev, "No hsp_sp_csr phandle specified\n");
+> +		goto clk_disable_all;
+> +	}
+> +
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,hsp_sp_csr",
+> +					 2, &eswin_sdhci_sdio->hsp_int_status);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get hsp_int_status (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,hsp_sp_csr",
+> +					 3, &eswin_sdhci_sdio->hsp_pwr_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get hsp_pwr_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +
+> +	regmap_write(eswin_sdhci_sdio->hsp_regmap,
+> +		     eswin_sdhci_sdio->hsp_int_status, MSHC_INT_CLK_STABLE);
+> +	regmap_write(eswin_sdhci_sdio->hsp_regmap,
+> +		     eswin_sdhci_sdio->hsp_pwr_ctrl, MSHC_HOST_VAL_STABLE);
+> +
+> +	if (!of_property_read_u32(dev->of_node, "delay_code", &val))
+> +		eswin_sdhci_sdio->phy.delay_code = val;
+> +
+> +	if (!of_property_read_u32(dev->of_node, "drive-impedance-ohm", &val))
+> +		eswin_sdhci_sdio->phy.drive_impedance =
+> +			eswin_convert_drive_impedance_ohm(pdev, val);
+> +
+> +	if (of_property_read_bool(dev->of_node, "enable-cmd-pullup"))
+> +		eswin_sdhci_sdio->phy.enable_cmd_pullup = ENABLE;
+> +	else
+> +		eswin_sdhci_sdio->phy.enable_cmd_pullup = DISABLE;
+> +
+> +	if (of_property_read_bool(dev->of_node, "enable-data-pullup"))
+> +		eswin_sdhci_sdio->phy.enable_data_pullup = ENABLE;
+> +	else
+> +		eswin_sdhci_sdio->phy.enable_data_pullup = DISABLE;
+> +
+> +	eswin_sdhci_dt_parse_clk_phases(dev, &eswin_sdhci_sdio->clk_data);
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret) {
+> +		ret = dev_err_probe(dev, ret, "parsing dt failed.\n");
+> +		goto unreg_clk;
+> +	}
+> +
+> +	ret = eswin_sdhci_sdio_add_host(eswin_sdhci_sdio);
+> +	if (ret)
+> +		goto unreg_clk;
+> +
+> +	pm_runtime_set_active(&pdev->dev);
+> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> +	pm_runtime_use_autosuspend(&pdev->dev);
+> +	pm_suspend_ignore_children(&pdev->dev, 1);
+> +	pm_runtime_enable(&pdev->dev);
+> +
+> +	return 0;
+> +
+> +unreg_clk:
+> +	eswin_sdhci_sdio_unregister_sdclk(dev);
+> +clk_disable_all:
+> +	clk_disable_unprepare(clk_xin);
+> +clk_dis_ahb:
+> +	clk_disable_unprepare(eswin_sdhci_sdio->clk_ahb);
+> +err_pltfm_free:
+> +	sdhci_pltfm_free(pdev);
+> +	return ret;
+> +}
 
-Blank line, drop description
 
-> +  "#address-cells":
-> +    const: 1
-
-Blank line
-
-> +  "#size-cells":
-> +    const: 1
-
-This is wrong.
-
-Why do you need these properties?  You are duplicating (and wrongly) MMC
-schema.
-
+....
 
 > +
-> +  interrupts:
-> +    maxItems: 1
+> +static int eswin_sdhci_probe(struct platform_device *pdev)
+> +{
+> +	int ret;
+> +	struct clk *clk_xin;
+> +	struct sdhci_host *host;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct device *dev = &pdev->dev;
+> +	struct eswin_sdhci_data *eswin_sdhci;
+> +	const struct eswin_sdhci_of_data *data;
+> +	unsigned int val = 0;
 > +
-> +  assigned-clocks:
-> +    maxItems: 1
-> +    description: should contain "core_clk" phandle + clock-specifier pairs.
+> +	data = of_device_get_match_data(dev);
+> +	host = sdhci_pltfm_init(pdev, data->pdata, sizeof(*eswin_sdhci));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
 > +
-> +  assigned-clock-rates:
-> +    maxItems: 1
-
-Drop both properties. Do you see this anywhere in the bindings?
-
+> +	pltfm_host = sdhci_priv(host);
+> +	eswin_sdhci = sdhci_pltfm_priv(pltfm_host);
+> +	eswin_sdhci->host = host;
+> +	eswin_sdhci->clk_ops = data->clk_ops;
 > +
-> +  clocks:
-> +    minItems: 2
+> +	eswin_sdhci->clk_ahb = devm_clk_get(dev, "clk_ahb");
 
-No list items instead.
+Undocumented ABI
 
-> +    description: handles to clock for the sdhci controller.
+Anyway, drop clk_ in property name.
 
-Drop description
-
+> +	if (IS_ERR(eswin_sdhci->clk_ahb)) {
+> +		ret = dev_err_probe(dev, PTR_ERR(eswin_sdhci->clk_ahb),
+> +				    "clk_ahb clock not found.\n");
+> +		goto err_pltfm_free;
+> +	}
 > +
-> +  clock-names:
-> +    minItems: 2
-> +    description: the name of each clock.
+> +	clk_xin = devm_clk_get(dev, "clk_xin");
 
-No, list items instead. Do you see any bindings written like that?
+drop clk_ in property name.
 
+> +	if (IS_ERR(clk_xin)) {
+> +		ret = dev_err_probe(dev, PTR_ERR(clk_xin),
+> +				    "clk_xin clock not found.\n");
+> +		goto err_pltfm_free;
+> +	}
 > +
-> +  clock-output-names:
-> +    maxItems: 1
+> +	ret = clk_prepare_enable(eswin_sdhci->clk_ahb);
+
+So just use devm_clk_get_enabled.
+
+> +	if (ret) {
+> +		dev_err(dev, "Unable to enable AHB clock.\n");
+> +		goto err_pltfm_free;
+> +	}
 > +
-> +  '#clock-cells':
-> +    enum: [0]
-> +    description:
-> +      With this property in place we will export one clock
-> +      representing the Card Clock. These clocks are expected to be
-> +      consumed by our PHY.
+> +	ret = clk_prepare_enable(clk_xin);
+> +	if (ret) {
+> +		dev_err(dev, "Unable to enable SD clock.\n");
+> +		goto clk_dis_ahb;
+> +	}
 > +
-> +  resets:
-> +    description: resets to be used by the controller.
-
-Missing constraints. Drop description, useless.
-
+> +	ret = eswin_sdhci_reset_init(dev, eswin_sdhci);
+> +	if (ret < 0) {
+> +		dev_err(dev, "failed to reset\n");
+> +		goto clk_disable_all;
+> +	}
 > +
-> +  reset-names:
-> +    description: names of the resets listed in resets property in the same order.
+> +	eswin_sdhci->crg_regmap = syscon_regmap_lookup_by_phandle(
 
-Drop property
+Use wrapper for getting the arguments.
 
+> +		pdev->dev.of_node, "eswin,syscrg_csr");
+> +	if (IS_ERR(eswin_sdhci->crg_regmap)) {
+> +		dev_dbg(&pdev->dev, "No syscrg_csr phandle specified\n");
+> +		goto clk_disable_all;
+> +	}
 > +
-> +  bus-width:
-> +    enum: [4, 8]
-> +    description: for emmc bus-width is 8, for sdio bus-width is 4.
-
-Why do you need it? Look at other bindings.
-
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 1, &eswin_sdhci->crg_core_clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_core_clk (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 2, &eswin_sdhci->crg_aclk_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_aclk_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,syscrg_csr",
+> +					 3, &eswin_sdhci->crg_cfg_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get crg_cfg_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
 > +
-> +  eswin,hsp_sp_csr:
-
-Look at DTS coding style first. What characters are allowed in properties?
-
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    description: hsp_sp_csr regs to be used by the controller.
-
-For what purpose?
-
-> +    items:
-> +      - description: phandle to HSP_SP_CSR register block
-> +      - description: status register offset
-> +      - description: control register offset
-> +      - description: configuration register offset
+> +	eswin_sdhci->hsp_regmap = syscon_regmap_lookup_by_phandle(
+> +		dev->of_node, "eswin,hsp_sp_csr");
+> +	if (IS_ERR(eswin_sdhci->hsp_regmap)) {
+> +		dev_dbg(dev, "No hsp_sp_csr phandle specified\n");
+> +		goto clk_disable_all;
+> +	}
 > +
-> +  eswin,syscrg_csr:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    description: syscrg_csr regs to be used by the controller.
-
-For what purpose?
-
-
-> +    items:
-> +      - description: phandle to SYS_CRG_CSR register block
-> +      - description: status register offset
-> +      - description: control register offset
-> +      - description: configuration register offset
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,hsp_sp_csr",
+> +					 2, &eswin_sdhci->hsp_int_status);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get hsp_int_status (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
+> +	ret = of_property_read_u32_index(pdev->dev.of_node, "eswin,hsp_sp_csr",
+> +					 3, &eswin_sdhci->hsp_pwr_ctrl);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "can't get hsp_pwr_ctrl (%d)\n", ret);
+> +		goto clk_disable_all;
+> +	}
 > +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - assigned-clocks
-> +  - assigned-clock-rates
-> +  - clocks
-> +  - clock-names
-> +  - clock-output-names
-> +  - resets
-> +  - reset-names
-> +  - bus-width
-> +  - eswin,hsp_sp_csr
-> +  - eswin,syscrg_csr
+> +	regmap_write(eswin_sdhci->hsp_regmap, eswin_sdhci->hsp_int_status,
+> +		     MSHC_INT_CLK_STABLE);
+> +	regmap_write(eswin_sdhci->hsp_regmap, eswin_sdhci->hsp_pwr_ctrl,
+> +		     MSHC_HOST_VAL_STABLE);
 > +
-> +unevaluatedProperties: false
+> +	if (!of_property_read_u32(dev->of_node, "delay_code", &val))
+
+NAK, undocumented ABI.
+
+> +		eswin_sdhci->phy.delay_code = val;
 > +
-> +examples:
-> +  - |
+> +	if (!of_property_read_u32(dev->of_node, "drive-impedance-ohm", &val))
+
+NAK
+
+> +		eswin_sdhci->phy.drive_impedance =
+> +			eswin_convert_drive_impedance_ohm(pdev, val);
 > +
+> +	if (of_property_read_bool(dev->of_node, "enable-cmd-pullup"))
 
-Drop blank line
+NAK
 
-> +    sdhci_emmc: mmc@50450000 {
-
-Drop label
-
-> +      compatible = "eswin,eic7700-emmc-sdhci";
-> +      reg = <0x50450000 0x10000>;
-> +      interrupt-parent = <&plic>;
-> +      interrupts = <79>;
-> +      clocks = <&clock 554>, <&clock 546>;
-> +      clock-names = "clk_xin", "clk_ahb";
-> +      assigned-clocks = <&clock 554>;
-> +      assigned-clock-rates = <200000000>;
-> +      clock-output-names = "emmc_cardclock";
-> +      #clock-cells = <0>;
+> +		eswin_sdhci->phy.enable_cmd_pullup = ENABLE;
+> +	else
+> +		eswin_sdhci->phy.enable_cmd_pullup = DISABLE;
 > +
-> +      resets = <&reset 7 (1 << 6)>,
-> +        <&reset 7 (1 << 3)>,
-> +        <&reset 7 (1 << 19)>,
-> +        <&reset 7 (1 << 23)>;
-> +      reset-names = "txrx_rst", "phy_rst", "prstn", "arstn";
-> +
-> +      core-clk-reg = <0x51828160>;
-> +      disable-cqe-dcmd;
-> +      bus-width = <8>;
-> +      non-removable;
-> +      mmc-hs400-1_8v;
-> +      max-frequency = <200000000>;
-> +      eswin,hsp_sp_csr = <&hsp_sp_csr 0x1038 0x508 0x50c>;
-> +      eswin,syscrg_csr = <&sys_crg 0x160 0x148 0x14c>;
-> +      status = "disabled";
+> +	if (of_property_read_bool(dev->of_node, "enable-data-pullup"))
 
-No, drop.
+NAK
+
+
+> +		eswin_sdhci->phy.enable_data_pullup = ENABLE;
+> +	else
+> +		eswin_sdhci->phy.enable_data_pullup = DISABLE;
+> +
+> +	if (of_property_read_bool(dev->of_node, "enable-strobe-pulldown"))
+> +		eswin_sdhci->phy.enable_strobe_pulldown = ENABLE;
+> +	else
+> +		eswin_sdhci->phy.enable_strobe_pulldown = DISABLE;
+> +
+> +	sdhci_get_of_property(pdev);
+> +
+> +	pltfm_host->clk = clk_xin;
+> +
+> +	ret = eswin_sdhci_register_sdclk(eswin_sdhci, clk_xin, dev);
+> +	if (ret)
+> +		goto clk_disable_all;
+> +
+> +	eswin_sdhci_dt_parse_clk_phases(dev, &eswin_sdhci->clk_data);
+> +
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret) {
+> +		ret = dev_err_probe(dev, ret, "parsing dt failed.\n");
+> +		goto unreg_clk;
+> +	}
+> +
+> +	if (of_device_is_compatible(dev->of_node, "eswin,sdhci-5.1")) {
+
+NAK, there is no such compatible. If you tested your DTS, you would spot it.
+
+This driver is in really poor shape.
+
+> +		host->mmc_host_ops.hs400_enhanced_strobe =
+> +			eswin_sdhci_hs400_enhanced_strobe;
+> +		eswin_sdhci->has_cqe = true;
+> +		host->mmc->caps2 |= MMC_CAP2_CQE;
+> +
+> +		if (!of_property_read_bool(dev->of_node, "disable-cqe-dcmd"))
+> +			host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+> +	}
+> +
+> +	sdhci_enable_v4_mode(eswin_sdhci->host);
+> +
+> +	ret = eswin_sdhci_add_host(eswin_sdhci);
+> +	if (ret)
+> +		goto unreg_clk;
+> +
+> +	return 0;
+> +
+> +unreg_clk:
+> +	eswin_sdhci_unregister_sdclk(dev);
+> +clk_disable_all:
+> +	clk_disable_unprepare(clk_xin);
+> +clk_dis_ahb:
+> +	clk_disable_unprepare(eswin_sdhci->clk_ahb);
+> +err_pltfm_free:
+> +	sdhci_pltfm_free(pdev);
+> +	return ret;
+> +}
+> +
+> +static void eswin_sdhci_remove(struct platform_device *pdev)
+> +{
+> +	int ret;
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct eswin_sdhci_data *eswin_sdhci = sdhci_pltfm_priv(pltfm_host);
+> +	struct clk *clk_ahb = eswin_sdhci->clk_ahb;
+> +
+> +	sdhci_pltfm_remove(pdev);
+> +
+> +	if (eswin_sdhci->txrx_rst) {
+> +		ret = reset_control_assert(eswin_sdhci->txrx_rst);
+> +		WARN_ON(ret != 0);
+
+Drop. You can print some useful error msg, but you cannot have WARNs. It
+not useful at all.
 
 
 Best regards,
