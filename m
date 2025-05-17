@@ -1,197 +1,135 @@
-Received: from fllvem-ot04.ext.ti.com (fllvem-ot04.ext.ti.com [198.47.19.246])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.10])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E24452222B2;
-	Fri, 16 May 2025 20:31:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.246
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 51CF87263A;
+	Sat, 17 May 2025 01:57:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.10
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747427500; cv=none; b=YAFNF1CKFW/xv97rQKsdKGIp8s5eIHB9pYbMtfesQf8taW3noJcthgOZEDa/i19uTI/b/zzld5UeTcmQ+O/z0DQz9n7T9tyOYrRtQAaFKkv4eAWZAiL6oEB/3wC7jwAX2GJ9KBYRwwpk5gZYKfBDEuTdFhGSxS8/PscU83bC0FQ=
+	t=1747447076; cv=none; b=nWkJCTviOfnhrk/76MihB9TO3g1F2fy6HZ4zhsZRipEe43hR/32eFHB0YcNZB6xX7dahBk5JDgyjMrsdx4FeSggR1qc323R3GdUvs76+PVaf2x0ntOS+yvoGWrRVqqhcS9zFfePCZf2+54sfwClm3sXEjETrE86FbUfZZU+5nPo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747427500; c=relaxed/simple;
-	bh=qTJ9PhQppKfr6sTEGZkSzY3sxbqWKV4iAdv2JVLwdh0=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=HtTy1yQwWNJ1w4WibJVVkjs3Efll+saj6OiVEv7/bgyaAjtoW1HsHPEanOrcLdUZx/ub0v34/r5oYFhk67QWOuGSsmbGfAaHBKT3ZmXgR4L0aLTA7s7I1rKJWIeJ9NRBqVyq67XKLQbtTGbpV/+jpEqc4nvGwKMZ+bXWR3cwgBE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=KFfuKVI4; arc=none smtp.client-ip=198.47.19.246
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1747447076; c=relaxed/simple;
+	bh=FmgRQ+EscTRmQQR8dfEbqgf1KgXjBGzBaLIEKQ/fD+0=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=hRqq5mnBNAM1bjaeNtUNzA1gm8LEq/Gt7ZoWMT323VF6af2NNM6bBh/NwUoPmhNhkS0GbjidtW6ObsLRPaYWb+25C/MF0rm0QJz48ZzOgmL8vHOxMI06LecT9BzJgcte592Uy1jFIIDKYytUZzpxqtQkCjGotFj/EsLZBfA6ZGE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Z2pxkC6Q; arc=none smtp.client-ip=198.175.65.10
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="KFfuKVI4"
-Received: from fllvem-sh04.itg.ti.com ([10.64.41.54])
-	by fllvem-ot04.ext.ti.com (8.15.2/8.15.2) with ESMTP id 54GKVMEg3823228;
-	Fri, 16 May 2025 15:31:22 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1747427482;
-	bh=q5jd8Ds/yfDobLR7+jYkuWBZogZM9/eXyQcFuNW2VFY=;
-	h=From:To:CC:Subject:Date;
-	b=KFfuKVI415YzdgFKokiz4dnQ0gNrn7QgHjeDd8ASyuLJpfa9DukQGk+SN73Gdvyh6
-	 gPDOZVgmeBCrdLGzSfZ+cJ05XXqbiy7VzUCkzuJLFIF93Mj8NtknRsmxGsLyxpc2oY
-	 c+nv8UhPQyIlMznRiGCCpUzi57iszYGUCWJHsuwI=
-Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
-	by fllvem-sh04.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 54GKVMMJ156872
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Fri, 16 May 2025 15:31:22 -0500
-Received: from DFLE110.ent.ti.com (10.64.6.31) by DFLE114.ent.ti.com
- (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23; Fri, 16
- May 2025 15:31:21 -0500
-Received: from lelvsmtp5.itg.ti.com (10.180.75.250) by DFLE110.ent.ti.com
- (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.23 via
- Frontend Transport; Fri, 16 May 2025 15:31:22 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvsmtp5.itg.ti.com (8.15.2/8.15.2) with ESMTP id 54GKVL0a020449;
-	Fri, 16 May 2025 15:31:21 -0500
-From: Judith Mendez <jm@ti.com>
-To: Judith Mendez <jm@ti.com>, Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf
- Hansson <ulf.hansson@linaro.org>
-CC: Josua Mayer <josua@solid-run.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, Nishanth Menon <nm@ti.com>,
-        Francesco Dolcini
-	<francesco@dolcini.it>,
-        Hiago De Franco <hiagofranco@gmail.com>, Moteen Shah
-	<m-shah@ti.com>
-Subject: [PATCH v6] mmc: sdhci_am654: Add SDHCI_QUIRK2_SUPPRESS_V1P8_ENA quirk to am62 compatible
-Date: Fri, 16 May 2025 15:31:21 -0500
-Message-ID: <20250516203121.3736379-1-jm@ti.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Z2pxkC6Q"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1747447074; x=1778983074;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=FmgRQ+EscTRmQQR8dfEbqgf1KgXjBGzBaLIEKQ/fD+0=;
+  b=Z2pxkC6QERHhRaRYOZZAKdkpNZg5Yneo4GXZejNjxbLA/N2noezjYQRG
+   QZRzpkrluY50c9Q63i6+wbPtYQR2hXes8+TxgzVMTyUzOuTlHx/RYsSAg
+   t2Y+Qbdpww1ZJoa/GuGBTwmcAJPkYH+PaTbHgsidpvgJ5oDrD209rd/1o
+   Ty1UqkJsAIFwUHm9X0JuIHHAXAYRAX0UUkVfvPo259e6A9LiDGQVQa5pT
+   g6/zkiTbLMoqjuiGjys8sOOWQn9i5UJVLeUiodrLtTP+fiLE8LYY3qdLP
+   bi08kUvJ1bQP5Qwa2UyE+Ra+s1Q2HhkGupHGeg13jLzwLsWCgcZwUXfJa
+   Q==;
+X-CSE-ConnectionGUID: pBp9fDGKSQejR3av0iRa8w==
+X-CSE-MsgGUID: vjM1RIC7TFOT6twXlkTRfw==
+X-IronPort-AV: E=McAfee;i="6700,10204,11435"; a="66837685"
+X-IronPort-AV: E=Sophos;i="6.15,295,1739865600"; 
+   d="scan'208";a="66837685"
+Received: from fmviesa006.fm.intel.com ([10.60.135.146])
+  by orvoesa102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 May 2025 18:57:53 -0700
+X-CSE-ConnectionGUID: T1Ku9bK9RD6dtiQ2cV06CA==
+X-CSE-MsgGUID: CF37wRNaRXGebK4IQ2l5Cw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.15,295,1739865600"; 
+   d="scan'208";a="138771775"
+Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
+  by fmviesa006.fm.intel.com with ESMTP; 16 May 2025 18:57:50 -0700
+Received: from kbuild by 1992f890471c with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1uG6o8-000Jrn-0Z;
+	Sat, 17 May 2025 01:57:48 +0000
+Date: Sat, 17 May 2025 09:57:43 +0800
+From: kernel test robot <lkp@intel.com>
+To: dongxuyang@eswincomputing.com, ulf.hansson@linaro.org, robh@kernel.org,
+	krzk+dt@kernel.org, conor+dt@kernel.org, linux-mmc@vger.kernel.org,
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+	adrian.hunter@intel.com, p.zabel@pengutronix.de,
+	shanchun1218@gmail.com
+Cc: oe-kbuild-all@lists.linux.dev, ningyu@eswincomputing.com,
+	linmin@eswincomputing.com, xuxiang@eswincomputing.com,
+	Xuyang Dong <dongxuyang@eswincomputing.com>
+Subject: Re: [PATCH v1 2/2] sdhci: eswin: Add eic7700 sdhci driver
+Message-ID: <202505170947.NTFfubuO-lkp@intel.com>
+References: <20250516091727.887-1-dongxuyang@eswincomputing.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250516091727.887-1-dongxuyang@eswincomputing.com>
 
-Add a new struct for platform data for the ti,am62-sdhci compatible to
-apply additional quirks, namely "SDHCI_QUIRK2_SUPPRESS_V1P8_ENA", to
-host controllers with am62 compatible.
+Hi,
 
-Note, the fix was originally introduced by commit 941a7abd4666
-("mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch") but was
-found to be applied too broadly and had to be reverted.
+kernel test robot noticed the following build errors:
 
-This fixes MMC init failures seen across am62x boards.
+[auto build test ERROR on robh/for-next]
+[also build test ERROR on linus/master ulf-hansson-mmc-mirror/next v6.15-rc6 next-20250516]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Fixes: ac5a41b472b4 ("Revert "mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch"")
-Fixes: 941a7abd4666 ("mmc: sdhci_am654: Add sdhci_am654_start_signal_voltage_switch")
-Cc: stable@vger.kernel.org
-Suggested-by: Nishanth Menon <nm@ti.com>
-Signed-off-by: Judith Mendez <jm@ti.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
-Changes since v5:
-- Drop sdhci_am62_4bit_pdata
-- Pick Adrians tag
-- Add note to commit message
+url:    https://github.com/intel-lab-lkp/linux/commits/dongxuyang-eswincomputing-com/dt-bindings-sdhci-eswin-Documentation-for-eic7700-SoC/20250516-171918
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
+patch link:    https://lore.kernel.org/r/20250516091727.887-1-dongxuyang%40eswincomputing.com
+patch subject: [PATCH v1 2/2] sdhci: eswin: Add eic7700 sdhci driver
+config: arc-allmodconfig (https://download.01.org/0day-ci/archive/20250517/202505170947.NTFfubuO-lkp@intel.com/config)
+compiler: arc-linux-gcc (GCC) 14.2.0
+reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250517/202505170947.NTFfubuO-lkp@intel.com/reproduce)
 
-Tested on am62x SK, am64x EVM and am64x SK. Tested-bys are welcome
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202505170947.NTFfubuO-lkp@intel.com/
 
-Link to v5:
-https://lore.kernel.org/linux-mmc/20250514002513.1179186-1-jm@ti.com/
-Link to v4:
-https://lore.kernel.org/linux-mmc/20250424180036.1541568-1-jm@ti.com/
-Link to v3 RESEND:
-https://lore.kernel.org/linux-mmc/8678d284-db12-451a-b789-2b75f9932f9f@ti.com
-Link to v2:
-https://lore.kernel.org/linux-mmc/20250417182652.3521104-1-jm@ti.com/
-Link to v1:
-https://lore.kernel.org/linux-mmc/20250407222702.2199047-1-jm@ti.com/
----
- drivers/mmc/host/sdhci_am654.c | 35 +++++++++++++++++++++++++++++++++-
- 1 file changed, 34 insertions(+), 1 deletion(-)
+All errors (new ones prefixed by >>):
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index f75c31815ab0..73385ff4c0f3 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -155,6 +155,7 @@ struct sdhci_am654_data {
- 	u32 tuning_loop;
- 
- #define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
-+#define SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA BIT(1)
- };
- 
- struct window {
-@@ -166,6 +167,7 @@ struct window {
- struct sdhci_am654_driver_data {
- 	const struct sdhci_pltfm_data *pdata;
- 	u32 flags;
-+	u32 quirks;
- #define IOMUX_PRESENT	(1 << 0)
- #define FREQSEL_2_BIT	(1 << 1)
- #define STRBSEL_4_BIT	(1 << 2)
-@@ -356,6 +358,29 @@ static void sdhci_j721e_4bit_set_clock(struct sdhci_host *host,
- 	sdhci_set_clock(host, clock);
- }
- 
-+static int sdhci_am654_start_signal_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	if ((sdhci_am654->quirks & SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA) &&
-+	    ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		if (!IS_ERR(mmc->supply.vqmmc)) {
-+			ret = mmc_regulator_set_vqmmc(mmc, ios);
-+			if (ret < 0) {
-+				pr_err("%s: Switching to 1.8V signalling voltage failed,\n",
-+				       mmc_hostname(mmc));
-+				return -EIO;
-+			}
-+		}
-+		return 0;
-+	}
-+
-+	return sdhci_start_signal_voltage_switch(mmc, ios);
-+}
-+
- static u8 sdhci_am654_write_power_on(struct sdhci_host *host, u8 val, int reg)
- {
- 	writeb(val, host->ioaddr + reg);
-@@ -650,6 +675,12 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
- 	.flags = IOMUX_PRESENT,
- };
- 
-+static const struct sdhci_am654_driver_data sdhci_am62_4bit_drvdata = {
-+	.pdata = &sdhci_j721e_4bit_pdata,
-+	.flags = IOMUX_PRESENT,
-+	.quirks = SDHCI_AM654_QUIRK_SUPPRESS_V1P8_ENA,
-+};
-+
- static const struct soc_device_attribute sdhci_am654_devices[] = {
- 	{ .family = "AM65X",
- 	  .revision = "SR1.0",
-@@ -872,7 +903,7 @@ static const struct of_device_id sdhci_am654_of_match[] = {
- 	},
- 	{
- 		.compatible = "ti,am62-sdhci",
--		.data = &sdhci_j721e_4bit_drvdata,
-+		.data = &sdhci_am62_4bit_drvdata,
- 	},
- 	{ /* sentinel */ }
- };
-@@ -906,6 +937,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 	pltfm_host = sdhci_priv(host);
- 	sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
- 	sdhci_am654->flags = drvdata->flags;
-+	sdhci_am654->quirks = drvdata->quirks;
- 
- 	clk_xin = devm_clk_get(dev, "clk_xin");
- 	if (IS_ERR(clk_xin)) {
-@@ -940,6 +972,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 		goto err_pltfm_free;
- 	}
- 
-+	host->mmc_host_ops.start_signal_voltage_switch = sdhci_am654_start_signal_voltage_switch;
- 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
- 
- 	pm_runtime_get_noresume(dev);
+   In file included from include/linux/device.h:25,
+                    from include/linux/platform_device.h:13,
+                    from drivers/mmc/host/sdhci-pltfm.h:12,
+                    from drivers/mmc/host/sdhci-eic7700.h:14,
+                    from drivers/mmc/host/sdhci-of-eic7700-sdio.c:13:
+>> drivers/mmc/host/sdhci-of-eic7700-sdio.c:972:36: error: 'eswin_sdhci_sdio_runtime_suspend' undeclared here (not in a function); did you mean 'eswin_sdhci_sdio_reset'?
+     972 |                 SET_RUNTIME_PM_OPS(eswin_sdhci_sdio_runtime_suspend,
+         |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/linux/pm.h:337:28: note: in definition of macro 'RUNTIME_PM_OPS'
+     337 |         .runtime_suspend = suspend_fn, \
+         |                            ^~~~~~~~~~
+   drivers/mmc/host/sdhci-of-eic7700-sdio.c:972:17: note: in expansion of macro 'SET_RUNTIME_PM_OPS'
+     972 |                 SET_RUNTIME_PM_OPS(eswin_sdhci_sdio_runtime_suspend,
+         |                 ^~~~~~~~~~~~~~~~~~
+>> drivers/mmc/host/sdhci-of-eic7700-sdio.c:973:36: error: 'eswin_sdhci_sdio_runtime_resume' undeclared here (not in a function); did you mean 'eswin_sdhci_sdio_dumpregs'?
+     973 |                                    eswin_sdhci_sdio_runtime_resume, NULL)};
+         |                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   include/linux/pm.h:338:27: note: in definition of macro 'RUNTIME_PM_OPS'
+     338 |         .runtime_resume = resume_fn, \
+         |                           ^~~~~~~~~
+   drivers/mmc/host/sdhci-of-eic7700-sdio.c:972:17: note: in expansion of macro 'SET_RUNTIME_PM_OPS'
+     972 |                 SET_RUNTIME_PM_OPS(eswin_sdhci_sdio_runtime_suspend,
+         |                 ^~~~~~~~~~~~~~~~~~
 
-base-commit: 8566fc3b96539e3235909d6bdda198e1282beaed
+
+vim +972 drivers/mmc/host/sdhci-of-eic7700-sdio.c
+
+   968	
+   969	static const struct dev_pm_ops eswin_sdhci_sdio_pmops = {
+   970		SET_SYSTEM_SLEEP_PM_OPS(eswin_sdhci_sdio_suspend,
+   971					eswin_sdhci_sdio_resume)
+ > 972			SET_RUNTIME_PM_OPS(eswin_sdhci_sdio_runtime_suspend,
+ > 973					   eswin_sdhci_sdio_runtime_resume, NULL)};
+   974	
+
 -- 
-2.49.0
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
