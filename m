@@ -1,94 +1,121 @@
-Received: from smtp.forwardemail.net (smtp.forwardemail.net [121.127.44.73])
+Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 801F11F4701
-	for <linux-mmc@vger.kernel.org>; Sun, 18 May 2025 22:07:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=121.127.44.73
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 880C3647;
+	Mon, 19 May 2025 00:30:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747606060; cv=none; b=kTWZ6ZfcFq4VxqqzU19Qi+J0GH24HE7hVrYEDmtJ0MjFBoLRpPM2BHyiuIEeQB4Kyp3GpRNgupT7jLLU0O6glQoy/67pDzk4ZolGn7lHRbFKgJ2Xf0s/aDMdw8y9/rmsKmjm//gXG7UCj1/AoQ8x5V8xVbTZpuhbKfSbt2OnpW8=
+	t=1747614639; cv=none; b=DpLkYhX6EUoB6lnyH9HJWhHD3FdTCIRyRmZBfCHuagrqPKVC61+1u+uNuAypJ+oyQydpxMJ2QlgJ/ch2MDXguuPmGPxVQ0iKfkZXsoXJlFFRpuIbBmnYt1nzEYgoOhai06sZzhy4+nKyRUBh+vI9ME9oxARA8hVd4+XD8HH2Pgs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747606060; c=relaxed/simple;
-	bh=BM/558NIb/OQWzTPVj4yzIGBsEsv0oJQTjiJ9z3MSy4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=PfasoliUsHHcbxecrYmRTbmEddvLCunJmuZOTNhWo0efbQP1T2V/CzfVVts20UQCSXGCGyqCG0ZD160Gh+tj1o8kEwZLY2YCT9jNTy1yMgvPDPoZpGOWMT4bPq9bvF8vezSI0AFHg6QcSu6FpBD+UhHdJ4UJuPPq8TKdsc9Nb10=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se; dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b=crrVtVe1; arc=none smtp.client-ip=121.127.44.73
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=kwiboo.se
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fe-bounces.kwiboo.se
+	s=arc-20240116; t=1747614639; c=relaxed/simple;
+	bh=77cgIMDcmdpoj7u9MW6cGrdMx12B10ZtExO7zFr5mpg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=g/wcUturChedGsmwCCdSo8YocyBBvwHlo29RiETGH7EfdqIkxNA9PICYKDnofy8KrBkzpXlZW3eg71G8v6OqTWLTqXRNONiNufyuqRuAlJPkGe2zxwPGyDhZheJXBkhIbGvUeP22b3AMqEuqc367QIaXkY5dYE+7SU67AGq7HFs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WtgX7Pqh; arc=none smtp.client-ip=209.85.208.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kwiboo.se header.i=@kwiboo.se header.b="crrVtVe1"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kwiboo.se;
- h=Content-Transfer-Encoding: MIME-Version: References: In-Reply-To:
- Message-ID: Date: Subject: Cc: To: From; q=dns/txt; s=fe-e1b5cab7be;
- t=1747606057; bh=JuYEKWBVukLDcGbYOqkONpNdiBoEcCXdcXXV5j7NdiE=;
- b=crrVtVe1lFeit85tleXMWUN2E12gYcD8eQUk8UozeUvoPRun+MW5+4dxwmstDK8WEJlrM13SH
- 3pUMqB19fsmNpiZOw5xWZtnCeHP+BbWcs6rSzgzFzTd9mHN2/Z0j+vz8sLDOR4hk8D7qxUUnGrW
- Cyrwp24/Abcdg6W5Cbk/VAecTPXL91dLyOLHNOP9tkIUogkRJ7fwjJ/TPJL8mVwvHUhP9Y2XHAw
- hV358oTMq9pP51a4mZQrWaYSXH8wthTv9lpjodKfB6bYH3+JJF/ZrYTa4yiXUwYM5WfVl64AFKA
- 2D9FVscMeFKR+NfWYagfnlKfbi1l7UtksTHC+MFf+pcA==
-X-Forward-Email-ID: 682a5a2678cae75fbd8d46da
-X-Forward-Email-Sender: rfc822; jonas@kwiboo.se, smtp.forwardemail.net,
- 121.127.44.73
-X-Forward-Email-Version: 1.0.3
-X-Forward-Email-Website: https://forwardemail.net
-X-Complaints-To: abuse@forwardemail.net
-X-Report-Abuse: abuse@forwardemail.net
-X-Report-Abuse-To: abuse@forwardemail.net
-From: Jonas Karlman <jonas@kwiboo.se>
-To: Heiko Stuebner <heiko@sntech.de>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Jisheng Zhang <jszhang@kernel.org>
-Cc: Yao Zi <ziyao@disroot.org>,
-	Chukun Pan <amadeus@jmu.edu.cn>,
-	linux-rockchip@lists.infradead.org,
-	linux-pm@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	Jonas Karlman <jonas@kwiboo.se>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH 5/9] dt-bindings: mmc: sdhci-of-dwcmhsc: Allow use of a power-domain
-Date: Sun, 18 May 2025 22:06:52 +0000
-Message-ID: <20250518220707.669515-6-jonas@kwiboo.se>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250518220707.669515-1-jonas@kwiboo.se>
-References: <20250518220707.669515-1-jonas@kwiboo.se>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WtgX7Pqh"
+Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-601ad859ec0so2146502a12.0;
+        Sun, 18 May 2025 17:30:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747614636; x=1748219436; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+zZ0c40jKjgoeIz9/1kYziaj3iHfaPjGRI99QCa579w=;
+        b=WtgX7PqhKH8LSDDo42oadTbuRmQP3SpPGkA7Q10TUC9LpwCge+oU7lgfkRFOXZ179h
+         OllLvZj/fSMtKdlyAajMdbTGAU+N913yZXjhYQMEX/kdCJlYLCmPxcdyvSSn2P0fTCon
+         aEjpK3zveBt2Ufv1h7CG71002++1qYkGNDL14dWN4c/cMDhCuLeD6euyNGT78/acgtaE
+         gHFrjaK5JU7oz8OhY9eNks4Jmp+VmatksqeSkqLio5y/BuoWHXFw4S6az5mjOSZm+I6l
+         XTezQH8DrJtZyKZUGUN948WQX+eNVcH4E+byC9gZr/AjB1HqeuLj6HVgQhpDi6GaU18E
+         QNpQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747614636; x=1748219436;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+zZ0c40jKjgoeIz9/1kYziaj3iHfaPjGRI99QCa579w=;
+        b=YM7406Td5f3ZoyHnsJYewDlSCFLRtGsA2UmTj1jBAQi1SsTwluOpTrgRGb3C7f0zDt
+         U5snq1hxHpDykviy4ux8wvroXRobB1VmwTrVY4r49QDzCvHWZ1HPPc1hiRZPnvYtgPYX
+         neeB0owwIoZ5EKxoyM4VfvIJvke6R5qrqotL8ux1Meqh597t5lvgFS4Mn61XZok2VaoL
+         AXUg5zniT3egxSIA8n2rLg/lMcYzRokl+wdmdKJPmg9x/uxqHmc0clpBPGHIT/O6pSo+
+         itYIZMtB7diiXOYhk8gSf1CFwx64s2IzDwwR0ZUtFrYLNPULwYm2C5XAtF5Ff26Vu1Tu
+         1M2w==
+X-Forwarded-Encrypted: i=1; AJvYcCVlVdiGDzlk85rYUQ9fagbSHyN7uip0nsTtC1U0jkOcqMBGHZA/vCxTWPZCVVwFO9U2UslsxHsZe1X5@vger.kernel.org, AJvYcCWNqhWttB7EzmQtsBiHat6h2AzJJTfXhB+tH1xb3t+tgkrSHnhZiYJNJKX33m12EwkYRpxEfne9nE/7N7E=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwvtqKtO+p8vSIWkgeoueoS0Oz8nMRtD5YlC3fLwwVCM3I9aavp
+	Wgc3LpSM2Yy+G3XSj1/iuMCRoMHCj1NoQVhoQqya58SL6pYg8yfwXebBqa39zuDPx7H91717ERs
+	UMw0DPURijRB5IYUcga3pSIzBXuk0THc=
+X-Gm-Gg: ASbGnctu8yrdv3zX4hyQ6SQ+ybeQGiFUAPeb5td37/WdXBKEyYTJmKsC7aWaqg6yjVO
+	B9bOjToLj8rkViDCcgWYmsQ6ZDE9mxD+3dkIaUsLwDeIUP5TId+/AWr8G+bnbXQb81hqUBFavMW
+	dCOSop/jcuk5nHekm0Mx/qlnDMl9TLgHL+
+X-Google-Smtp-Source: AGHT+IG0JdoFcsroNTrhTPd2Y2eeFajo8woP1y65TWcnzJNLIb3V/XYqMW9UAqYolimHY/C4f96WgU0qnhGEjlGrNOY=
+X-Received: by 2002:a17:907:f496:b0:ad4:d0bf:f4a9 with SMTP id
+ a640c23a62f3a-ad52d4cd771mr974896166b.21.1747614635747; Sun, 18 May 2025
+ 17:30:35 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20250516092716.3918-1-victorshihgli@gmail.com>
+In-Reply-To: <20250516092716.3918-1-victorshihgli@gmail.com>
+From: Ben Chuang <benchuanggli@gmail.com>
+Date: Mon, 19 May 2025 08:30:24 +0800
+X-Gm-Features: AX0GCFvd_Y36qTnQjTl-mdiM7794fHMBTyb7UOUec0P-lKMasuCd1UFL_CdxXc4
+Message-ID: <CACT4zj-aev64sXTjw1CyHY-C9avAD2_jj9JqtrCDp+-SH+05pA@mail.gmail.com>
+Subject: Re: [PATCH V1 0/2] Adjust some error messages for SD UHS-II
+ initialization process
+To: Victor Shih <victorshihgli@gmail.com>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-The commit 7e856617a1f3 ("dt-bindings: mmc: Add support for rk3576
-eMMC") limited use of power-domains to Rockchip RK3576.
+Hi,
 
-Remove the power-domains: false to allow use of power-domains with more
-controllers, e.g. with SDHCI on Rockchip RK3528.
+These patches were contributed by Victor alone. Please remove my
+'Signed-off-by'.
 
-Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
----
- Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 4 ----
- 1 file changed, 4 deletions(-)
+Best regards,
+Ben Chuang
 
-diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-index 5fb347167004..f882219a0a26 100644
---- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-@@ -120,10 +120,6 @@ allOf:
-       required:
-         - power-domains
- 
--    else:
--      properties:
--        power-domains: false
--
- unevaluatedProperties: false
- 
- examples:
--- 
-2.49.0
-
+On Fri, May 16, 2025 at 5:27=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
+m> wrote:
+>
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+>
+> Summary
+> =3D=3D=3D=3D=3D=3D=3D
+> It is normal that errors will occur when using non-UHS-II card to enter
+> the UHS-II card initialization process. We should not be producing error
+> messages and register dumps. Therefore, switch the error messages to debu=
+g
+> mode and register dumps to dynamic debug mode.
+>
+> Patch structure
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> patch#1: for core
+> patch#2: for sdhci
+>
+> Changes in v1 (May. 16, 2025)
+> * Rebase on latest mmc/next.
+> * Patch#1: Adjust some error messages for SD UHS-II cards.
+> * Patch#2: Adjust some error messages and register dump for SD UHS-II car=
+d
+>
+> Victor Shih (2):
+>   mmc: core: Adjust some error messages for SD UHS-II cards
+>   mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
+>     UHS-II card
+>
+>  drivers/mmc/core/sd_uhs2.c    |  8 ++++++--
+>  drivers/mmc/host/sdhci-uhs2.c | 18 +++++++++---------
+>  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
+>  3 files changed, 31 insertions(+), 11 deletions(-)
+>
+> --
+> 2.43.0
+>
