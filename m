@@ -1,244 +1,160 @@
-Received: from mail-pg1-f169.google.com (mail-pg1-f169.google.com [209.85.215.169])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DE7D15B135;
-	Mon, 19 May 2025 05:08:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7C641C5D59
+	for <linux-mmc@vger.kernel.org>; Mon, 19 May 2025 11:03:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747631303; cv=none; b=LHA71CIkFiHTNbOVZaVYAl6U1+nPmbxd5BE3exd0+fDZeMFGWLeu75GEKRoI8mqSrMKcL6eSXjmRg9dNcGulLv7OSREDpyDzNZ2vlAaGkjZJcgTuy24zvcYg8Rgq3B2RmEFJOnlGBs40Q4A6LVtACaUwUauxJDLnqF4ibc8gAUA=
+	t=1747652642; cv=none; b=uYmqkGtCmlVOCBHSYTHRcn87AIrMwa9dwC+QxRqtNZRU3oVm0nbQJH8YpBUVFgLMrvJmcLgy1UdrpiR0keWv86TU73JI9yf7mgGWAwXtQY0SLn0ReRtzPAX3zwvhfcz80IxmzichUrUgJmxPEECJdSmz+eYcdl5uH2BDWTqxWxc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747631303; c=relaxed/simple;
-	bh=+5uQRfunz6MK8/PF2kn3g7bE2yl482T3Sfm+L9qP65U=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=LZjxaEDBGpkLH6tf3xy3H+Ssh1APR1IBhKcvYb9K7gozxVOBlwTxXeJLxAzwVq0l6yrRl0NxyZvezO8jD7RVa6JgqYgH4wMG/FeWc8f0ILxmPR5wrpfaW+gVUCxz35XgiruEhSgA1vW2LwGemqk2/rbI1Y+drYbmbczbsD86ooE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LuuJkNFa; arc=none smtp.client-ip=209.85.215.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1747652642; c=relaxed/simple;
+	bh=1RBzsBUZFE4oAcdXsB1WfJqMcomnc+3kLNPimm2/Js0=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=e8WlGyg2siZU1GMv4lT0hYbMDSnVgxH0JWTJ3rPyMJMRPJkAeT35yO0mUaShNn43M67A49wt1cqfIEkl8VPC8nacdUl8Bpi2hbwhsSHC0wZd9c+9mqz1ChkQnLb0b8T/VD8TvMfp6GmLjrDysKU/NTPLRKkBBwyYe6aN4XB0tF0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=rr8LjH/g; arc=none smtp.client-ip=209.85.128.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LuuJkNFa"
-Received: by mail-pg1-f169.google.com with SMTP id 41be03b00d2f7-b074d908e56so2492260a12.2;
-        Sun, 18 May 2025 22:08:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="rr8LjH/g"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-70b50e0566fso38390917b3.0
+        for <linux-mmc@vger.kernel.org>; Mon, 19 May 2025 04:03:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747631301; x=1748236101; darn=vger.kernel.org;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=xwD16IY+mV1vOg/kDG6DOdFjfPbkL9odEag4Ga7a+G8=;
-        b=LuuJkNFaNVtZQH22rYD7EKrrGVzEHfe5d1nR02WGGjrufWutnxN9T+91EUjHi1/F55
-         y4HOc7rlbKGiv705TryzmDLdDPU1V1bGwQe1bFLosad19zyvYlkNc44BBIeI/XE0y77X
-         07w8IhzMCM6A6PSVAbd8j43LW9+h2e3+hE5TyXOLEppm9AiXSN7twYzXWZ5vwCtMcM53
-         mkWDjS5wSSaZU2teKmjBrwFtVkQyODuyb1euZGa/j+D1yB4Q7GBcSktlbEqiSrYXpNmm
-         UzHvqydmDNAeG0lrVd1peD4UFvXtQCBWjWjFJu5ijKcXQvxaQdPFWVQYW0KX/sQUYp6q
-         21Rw==
+        d=linaro.org; s=google; t=1747652638; x=1748257438; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=m2xHnKKd+aDHtHX8yu3cDHfKWt8EXdtJaGR+RnU/oP8=;
+        b=rr8LjH/gG4slvKuc0V76sG5OVPs0h3bjANayyI78wvCtvXieViWL/2vgvQSJDSNDlQ
+         qmBO6+5FsWPwfCV6tX1LWzDY/EvW5mpCHC3348LCPbhPnKa3LfmGZ6QYBcFqQS8KMx2/
+         pfszTrEE/qsvmpMAB3BNTtf77f5mT2sDhInafL/jczjbyrgaBViY5vRVN54kgvkIV0Gn
+         m4P1SAkijwOt3ijVO5pWvVRHYYSqgmrjF4vVpd2+Lb9d5ayVuCbgrOcdI1SypE5Qwd5Q
+         xCk4LTj4syBZG9AegaylZQgzG0oE1uz+lJksuG2Sh6OTdTIPpXVjvDMyXmrCpH1B8sqL
+         U7Dg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747631301; x=1748236101;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=xwD16IY+mV1vOg/kDG6DOdFjfPbkL9odEag4Ga7a+G8=;
-        b=sp+OyrDl3Fpu7xoPjow8mMQSI4eh7Dt2SZSlTwMeVQgUCZlsWWGAVAIx/glsBEe0Xg
-         koTiQef8UeivApVQuRXl/v58JOLuxLZuNbsXA3PABlRGNe5cVzp5SmAXPCIRLb45NfsX
-         2/yrPboGOD1xF1A2UGz7s132iO3WDVLxdlgn+IC/A08cV61qhmKC4fcJPU/G44OHQ1Eq
-         ho9lYcgOndW2gm5uRzGNfijbgXeYLKiWku8tzqReMxnOK35oWa3GLLO0fFl2lFVLsweD
-         sAZ+NszB9Wep7QASVrCSxWyRmbHrbY7JHWrfIl9a1ZI97rzEJpEQNyDuAzpqzpK58BQw
-         XQyA==
-X-Forwarded-Encrypted: i=1; AJvYcCVtvNMXL+5UlWVJ2itV59Dk6nV3VI3iGxlvdpa5MmUT2CGdxOfNAVkiahTNxcXj7AqTKkGvVsHv87O1@vger.kernel.org, AJvYcCW3LZJFdi+ATLay1QwTUx9SIbb07eDGe2jYfnLEvBC6jQoBTN6Mer6xODf4sWwFFCE+Nmu3xn7kXcB09Ec9@vger.kernel.org
-X-Gm-Message-State: AOJu0YyNF+fMlxiOofs3CiSZ2XCyReZIijN65tr/1txfS3ycX431cb4U
-	c7jKa+c8xP9nrDtL9HPUz2p6XcbMmSFnbtTHLRS7WNwNS1YRB7g0q5PE
-X-Gm-Gg: ASbGncunqA+9qRyMMCJe7vGqletGtNBmOivm1HW1Qvf8s3XjDBf0Crfz/SU+Mv5q2VE
-	bsIiTG//C87+tOS7ReFNRf7rOKrjt5DYjrB3tmDKe886EaR09llGshyyIXFTo7o1iz6ubgA+oNT
-	anpDv4FiFHg3DXS9NiHvZ8xuH9dmd7HBVdMc7Lx2ILc6DKHE4tQeVgyPmaZJkFwW+QEIfx0qx00
-	oyBhD9NQGjZ1iZnmVH5yC4RQ42idvT4K+WzJFAgt3nwxm05KLQrrbIE97h113h2odE+eXHKwDnG
-	DAof8xP5PkibJNeGALpZrlbkyo2Gbot12PTfAy2CwNSYQAGZSyGzDZSCdxMkEULWdaUQjCxuv1+
-	nvUayqHds3hM=
-X-Google-Smtp-Source: AGHT+IH1Es9V7bpGSmK5k3mh2cazGmbf4vrH1kHrZdJfLjtCFQhaKIOHJ1kkKU2QJM7iDgNER1ixxA==
-X-Received: by 2002:a05:6a20:728e:b0:215:df90:b298 with SMTP id adf61e73a8af0-2170ce19eaemr15743817637.26.1747631301368;
-        Sun, 18 May 2025 22:08:21 -0700 (PDT)
-Received: from [192.168.1.6] ([171.61.103.229])
-        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b26eb081aafsm5322931a12.47.2025.05.18.22.08.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 18 May 2025 22:08:21 -0700 (PDT)
-Message-ID: <6065e339-704c-4081-b4be-ab86417b9ec7@gmail.com>
-Date: Mon, 19 May 2025 10:38:17 +0530
+        d=1e100.net; s=20230601; t=1747652638; x=1748257438;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=m2xHnKKd+aDHtHX8yu3cDHfKWt8EXdtJaGR+RnU/oP8=;
+        b=nzcpzI46UDY551fK5O13cVIpkUqckVl2KkSoOo2aJ+qlyxH4R6KQTy+PsIUCHmYLmo
+         nP5Z5TYrkX5QjFeXcHayv9v1R5rSUByVxhsWR1GVZmqeA8OFm1imSTq820PJgar7c/lP
+         RIlNUhGPm/tZkjNBUpYKMU3mNvLu13ojmeYHJgWqhI3aRAV4qSc/nYGqEevR98fL6Yi5
+         +HdnUrlrd/UCEFOnRyytwiozOLGVQ2Zc/6i45YfSIh4PACS3al/XDLkRfcVKR4Qf1uTp
+         fVP0fl/maxMuTVekZPkSQMmeT63OSYnRpNZ8fbe777VXyG300Fc8gcNoafngSbWMXnAa
+         u/1w==
+X-Forwarded-Encrypted: i=1; AJvYcCVKDyrt7RsWTDaRiVkzWETVDviBYx3sYo1dFuzwT055XiPt3L2ZIDqAqrem9WCzxuRdB1ScvnVFhqo=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzy0phuUqHgb3k5enCTVPq6/ITBjCulebl0w6nzPCPk2MTB1JTR
+	Wo/OLu3UxtzQE7vSFoarEIKpU1Vt78V+xHYRmNxOG3YWqjdTjgQ6LcHIX6Yz/eASyIVXMeystit
+	0DyvLTO37wwarYeIZ/xE21GZPjP8j1MN063zRb+RGEQ==
+X-Gm-Gg: ASbGnct6A8K2Jug+yYfGLBQCxOXaRmZaSUdkC6/H4X5pn18l8F+RSi/GpsLy/w/l1p5
+	AJY5mBXBritBfiXVLlYuJuVipxCVTvurvNY+qoyE7CgM2MizIUBjoD5hUoObtaLMLpjRSpw9fMK
+	aqS69lwurMzFR7DvlmAcK5wF/6RebyFyZ8GA==
+X-Google-Smtp-Source: AGHT+IFBUb2/Xms/raeEGwi+8becFxoSstWr/BLkHMpPNO+AziHGedBdCZ+gSklzRXJEASSnQ0GOSObcwPcchKsfqNQ=
+X-Received: by 2002:a05:6902:170a:b0:e7b:6893:d5ec with SMTP id
+ 3f1490d57ef6-e7b6d40269emr15160872276.20.1747652638618; Mon, 19 May 2025
+ 04:03:58 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: ti-omap: convert text based binding to
- json schema
-To: Krzysztof Kozlowski <krzk@kernel.org>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20250510-ti-omap-v1-1-588b0ccb1823@gmail.com>
- <b18bc629-6bf6-4490-be98-033b771ecda7@gmail.com>
- <ecf3565a-e0ec-4848-a157-d0b5d1770b11@kernel.org>
-Content-Language: en-US
-From: Charan Pedumuru <charan.pedumuru@gmail.com>
-In-Reply-To: <ecf3565a-e0ec-4848-a157-d0b5d1770b11@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <cover.1746581751.git.zhoubinbin@loongson.cn> <1308b6ca9ffc2674cc0f089cfd163da87e53a8cd.1746581751.git.zhoubinbin@loongson.cn>
+In-Reply-To: <1308b6ca9ffc2674cc0f089cfd163da87e53a8cd.1746581751.git.zhoubinbin@loongson.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Mon, 19 May 2025 13:03:22 +0200
+X-Gm-Features: AX0GCFtVcITX1kDzetWV6A9kXMJvvFjktirKyT439flna1xTvzKDXV6wLcfl6Dc
+Message-ID: <CAPDyKFouNpdnQSXBxRmKhECyojrT_TkCpgg01GHbzQpuYFvEZg@mail.gmail.com>
+Subject: Re: [PATCH v2 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
+On Wed, 7 May 2025 at 09:28, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+>
+> The MMC controllers on the Loongson-2K series CPUs are similar,
+> except for the interface characteristics and the use of DMA controllers.
+>
+> This patch describes the MMC controllers on the Loongson-2K0500/2K1000,
+> with the distinguishing feature being the use of an externally shared
+> APBDMA engine.
+>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 
+[...]
 
-On 12-05-2025 01:48, Krzysztof Kozlowski wrote:
-> On 10/05/2025 19:20, Charan Pedumuru wrote:
->>
->>
->> On 10-05-2025 22:07, Charan Pedumuru wrote:
->>> Convert TI MMC host controller binding to YAML format. It's a
->>> straight-forward conversion of the typical mmc host controller.
-> 
-> 
-> Not really - you added properties.
-> 
-> 
->>>
->>> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/ti-omap.txt  | 26 ---------
->>>  Documentation/devicetree/bindings/mmc/ti-omap.yaml | 61 ++++++++++++++++++++++
->>>  2 files changed, 61 insertions(+), 26 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.txt b/Documentation/devicetree/bindings/mmc/ti-omap.txt
->>> deleted file mode 100644
->>> index 02fd31cf361d6ed893ec2f9eb8368b358ab2bae1..0000000000000000000000000000000000000000
->>> --- a/Documentation/devicetree/bindings/mmc/ti-omap.txt
->>> +++ /dev/null
->>> @@ -1,26 +0,0 @@
->>> -* TI MMC host controller for OMAP1 and 2420
->>> -
-> 
-> ...
-> 
->>> -	};
->>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.yaml b/Documentation/devicetree/bindings/mmc/ti-omap.yaml
-> 
-> 
-> Filename based on the compatible. Didn't you get exactly such feedback
-> already?
+> +
+> +static void loongson2_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> +{
+> +       struct loongson2_mmc_host *host = mmc_priv(mmc);
 
-Yes, I will rename it.
+As we now have support for regulators, we should use them here too.
 
-> 
->>> new file mode 100644
->>> index 0000000000000000000000000000000000000000..3660f54550e0ee46d3a7cfa3f531d95802f1e2fb
->>> --- /dev/null
->>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap.yaml
->>> @@ -0,0 +1,61 @@
->>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->>> +%YAML 1.2
->>> +---
->>> +$id: http://devicetree.org/schemas/mmc/ti-omap.yaml#
->>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->>> +
->>> +title: TI MMC host controller for OMAP1 and 2420
->>> +
->>> +description:
->>> +  The MMC Host controller for TI OMAP1 and 2420 family provides
->>> +  an interface for MMC, SD and SDIO types of memory cards.
->>> +
->>> +allOf:
->>> +  - $ref: mmc-controller.yaml
->>> +
->>> +maintainers:
->>> +  - Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> 
-> No, this is supposed someone responsible for the device, not subsystem
-> maintainer.
-> 
+Some something along the lines of this at MMC_POWER_OFF:
+if (!IS_ERR(mmc->supply.vmmc))
+      mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
 
-Okay.
+and at MMC_POWER_UP:
+if (!IS_ERR(mmc->supply.vmmc))
+      mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
 
->>> +
->>> +properties:
->>> +  compatible:
->>> +    const: ti,omap2420-mmc
->>> +
->>> +  reg:
->>> +    maxItems: 1
->>> +
->>> +  interrupts:
->>> +    maxItems: 1
->>> +
->>> +  dmas:
->>> +    maxItems: 2
->>> +
->>> +  dma-names:
->>> +    items:
->>> +      - const: tx
->>> +      - const: rx
->>> +
->>> +  ti,hwmods:
->>> +    items:
->>> +      pattern: "^msdi[0-9]+$"
-> 
-> Missing type: string-array
-> min/maxItems?
-> 
+> +
+> +       switch (ios->power_mode) {
+> +       case MMC_POWER_ON:
 
-I think the type can be string, will modify defining type and maxItems. If it's string-array, the defaults can only be "msdi0" and "msdi1". So, I thought to define pattern with string type.
+Is the fallthrough really what we want here?
 
->>> +
->>> +required:
->>> +  - compatible
->>> +  - reg
->>> +  - interrupts
->>> +  - dmas
->>> +  - dma-names
-> 
-> That's a change - binding did not mention it, did not make it required.
-> Every change should be explain in commit msg.
-> 
->>> +  - ti,hwmods
->>> +
->>> +unevaluatedProperties: false
->>> +
->>> +examples:
->>> +  - |
->>> +    mmc@4809c000 {
->>> +        compatible = "ti,omap2420-mmc";
->>> +        ti,hwmods = "msdi1";
->>> +        reg = <0x4809c000 0x80>;
->>> +        interrupts = <83>;
->>
->> Forgot to include irq interrupt-controller header and use it for the interrupts, will change in next revision.
-> 
-> Header does not look like used...
+MMC_POWER_ON is used quite frequently when changing various ios
+settings when the core calls mmc_set_ios(). MMC_POWER_UP is set only
+once in mmc_power_up().
 
-Yeah, will change the interrupts format to take header format.
+> +       case MMC_POWER_UP:
+> +               regmap_write(host->regmap, LOONGSON2_MMC_REG_CTL, LOONGSON2_MMC_CTL_RESET);
+> +               mdelay(10);
+> +               regmap_write(host->regmap, LOONGSON2_MMC_REG_CTL, LOONGSON2_MMC_CTL_EXTCLK);
+> +               regmap_write(host->regmap, LOONGSON2_MMC_REG_INT, LOONGSON2_MMC_IEN_ALL);
+> +               regmap_write(host->regmap, LOONGSON2_MMC_REG_IEN, LOONGSON2_MMC_INT_CLEAR);
+> +               break;
+> +       case MMC_POWER_OFF:
+> +               regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_CTL,
+> +                                  LOONGSON2_MMC_CTL_RESET, LOONGSON2_MMC_CTL_RESET);
+> +               return;
+> +       default:
+> +               return;
+> +       }
+> +
+> +       loongson2_mmc_set_clk(host, ios);
+> +
+> +       host->bus_width = ios->bus_width;
+> +}
+> +
 
-> 
->>
->>
->>> +        dmas = <&sdma 61 &sdma 62>;
-> 
-> But here you need two <> phandles.
+[...]
 
-Sure, I will rewrite them in 2 different phandles separated by , .
+> +
+> +static void loongson2_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
+> +{
+> +       struct loongson2_mmc_host *host = mmc_priv(mmc);
+> +
+> +       regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_IEN,
+> +                          LOONGSON2_MMC_INT_SDIOIRQ, enable);
+> +}
+> +
+> +static struct mmc_host_ops loongson2_mmc_ops = {
+> +       .request        = loongson2_mmc_request,
+> +       .set_ios        = loongson2_mmc_set_ios,
+> +       .get_ro         = mmc_gpio_get_ro,
+> +       .get_cd         = mmc_gpio_get_cd,
+> +       .enable_sdio_irq = loongson2_mmc_enable_sdio_irq,
 
-> 
->>> +        dma-names = "tx", "rx";
->>> +    };
->>> +...
->>>
->>> ---
->>> base-commit: 3e039dcc9c1320c0d33ddd51c372dcc91d3ea3c7
->>> change-id: 20250502-ti-omap-12655fa9db3e
->>>
->>> Best regards,
->>
-> 
-> 
-> Best regards,
-> Krzysztof
+The ->ack_sdio_irq() callback needs to be implemented too.
 
--- 
-Best Regards,
-Charan.
+Moreover we need to set MMC_CAP2_SDIO_IRQ_NOTHREAD.
 
+[...]
+
+Kind regards
+Uffe
