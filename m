@@ -1,121 +1,244 @@
-Received: from mail-ed1-f53.google.com (mail-ed1-f53.google.com [209.85.208.53])
+Received: from mail-pg1-f169.google.com (mail-pg1-f169.google.com [209.85.215.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 880C3647;
-	Mon, 19 May 2025 00:30:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DE7D15B135;
+	Mon, 19 May 2025 05:08:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747614639; cv=none; b=DpLkYhX6EUoB6lnyH9HJWhHD3FdTCIRyRmZBfCHuagrqPKVC61+1u+uNuAypJ+oyQydpxMJ2QlgJ/ch2MDXguuPmGPxVQ0iKfkZXsoXJlFFRpuIbBmnYt1nzEYgoOhai06sZzhy4+nKyRUBh+vI9ME9oxARA8hVd4+XD8HH2Pgs=
+	t=1747631303; cv=none; b=LHA71CIkFiHTNbOVZaVYAl6U1+nPmbxd5BE3exd0+fDZeMFGWLeu75GEKRoI8mqSrMKcL6eSXjmRg9dNcGulLv7OSREDpyDzNZ2vlAaGkjZJcgTuy24zvcYg8Rgq3B2RmEFJOnlGBs40Q4A6LVtACaUwUauxJDLnqF4ibc8gAUA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747614639; c=relaxed/simple;
-	bh=77cgIMDcmdpoj7u9MW6cGrdMx12B10ZtExO7zFr5mpg=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=g/wcUturChedGsmwCCdSo8YocyBBvwHlo29RiETGH7EfdqIkxNA9PICYKDnofy8KrBkzpXlZW3eg71G8v6OqTWLTqXRNONiNufyuqRuAlJPkGe2zxwPGyDhZheJXBkhIbGvUeP22b3AMqEuqc367QIaXkY5dYE+7SU67AGq7HFs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=WtgX7Pqh; arc=none smtp.client-ip=209.85.208.53
+	s=arc-20240116; t=1747631303; c=relaxed/simple;
+	bh=+5uQRfunz6MK8/PF2kn3g7bE2yl482T3Sfm+L9qP65U=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=LZjxaEDBGpkLH6tf3xy3H+Ssh1APR1IBhKcvYb9K7gozxVOBlwTxXeJLxAzwVq0l6yrRl0NxyZvezO8jD7RVa6JgqYgH4wMG/FeWc8f0ILxmPR5wrpfaW+gVUCxz35XgiruEhSgA1vW2LwGemqk2/rbI1Y+drYbmbczbsD86ooE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=LuuJkNFa; arc=none smtp.client-ip=209.85.215.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WtgX7Pqh"
-Received: by mail-ed1-f53.google.com with SMTP id 4fb4d7f45d1cf-601ad859ec0so2146502a12.0;
-        Sun, 18 May 2025 17:30:37 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LuuJkNFa"
+Received: by mail-pg1-f169.google.com with SMTP id 41be03b00d2f7-b074d908e56so2492260a12.2;
+        Sun, 18 May 2025 22:08:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747614636; x=1748219436; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+zZ0c40jKjgoeIz9/1kYziaj3iHfaPjGRI99QCa579w=;
-        b=WtgX7PqhKH8LSDDo42oadTbuRmQP3SpPGkA7Q10TUC9LpwCge+oU7lgfkRFOXZ179h
-         OllLvZj/fSMtKdlyAajMdbTGAU+N913yZXjhYQMEX/kdCJlYLCmPxcdyvSSn2P0fTCon
-         aEjpK3zveBt2Ufv1h7CG71002++1qYkGNDL14dWN4c/cMDhCuLeD6euyNGT78/acgtaE
-         gHFrjaK5JU7oz8OhY9eNks4Jmp+VmatksqeSkqLio5y/BuoWHXFw4S6az5mjOSZm+I6l
-         XTezQH8DrJtZyKZUGUN948WQX+eNVcH4E+byC9gZr/AjB1HqeuLj6HVgQhpDi6GaU18E
-         QNpQ==
+        d=gmail.com; s=20230601; t=1747631301; x=1748236101; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=xwD16IY+mV1vOg/kDG6DOdFjfPbkL9odEag4Ga7a+G8=;
+        b=LuuJkNFaNVtZQH22rYD7EKrrGVzEHfe5d1nR02WGGjrufWutnxN9T+91EUjHi1/F55
+         y4HOc7rlbKGiv705TryzmDLdDPU1V1bGwQe1bFLosad19zyvYlkNc44BBIeI/XE0y77X
+         07w8IhzMCM6A6PSVAbd8j43LW9+h2e3+hE5TyXOLEppm9AiXSN7twYzXWZ5vwCtMcM53
+         mkWDjS5wSSaZU2teKmjBrwFtVkQyODuyb1euZGa/j+D1yB4Q7GBcSktlbEqiSrYXpNmm
+         UzHvqydmDNAeG0lrVd1peD4UFvXtQCBWjWjFJu5ijKcXQvxaQdPFWVQYW0KX/sQUYp6q
+         21Rw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747614636; x=1748219436;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+zZ0c40jKjgoeIz9/1kYziaj3iHfaPjGRI99QCa579w=;
-        b=YM7406Td5f3ZoyHnsJYewDlSCFLRtGsA2UmTj1jBAQi1SsTwluOpTrgRGb3C7f0zDt
-         U5snq1hxHpDykviy4ux8wvroXRobB1VmwTrVY4r49QDzCvHWZ1HPPc1hiRZPnvYtgPYX
-         neeB0owwIoZ5EKxoyM4VfvIJvke6R5qrqotL8ux1Meqh597t5lvgFS4Mn61XZok2VaoL
-         AXUg5zniT3egxSIA8n2rLg/lMcYzRokl+wdmdKJPmg9x/uxqHmc0clpBPGHIT/O6pSo+
-         itYIZMtB7diiXOYhk8gSf1CFwx64s2IzDwwR0ZUtFrYLNPULwYm2C5XAtF5Ff26Vu1Tu
-         1M2w==
-X-Forwarded-Encrypted: i=1; AJvYcCVlVdiGDzlk85rYUQ9fagbSHyN7uip0nsTtC1U0jkOcqMBGHZA/vCxTWPZCVVwFO9U2UslsxHsZe1X5@vger.kernel.org, AJvYcCWNqhWttB7EzmQtsBiHat6h2AzJJTfXhB+tH1xb3t+tgkrSHnhZiYJNJKX33m12EwkYRpxEfne9nE/7N7E=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwvtqKtO+p8vSIWkgeoueoS0Oz8nMRtD5YlC3fLwwVCM3I9aavp
-	Wgc3LpSM2Yy+G3XSj1/iuMCRoMHCj1NoQVhoQqya58SL6pYg8yfwXebBqa39zuDPx7H91717ERs
-	UMw0DPURijRB5IYUcga3pSIzBXuk0THc=
-X-Gm-Gg: ASbGnctu8yrdv3zX4hyQ6SQ+ybeQGiFUAPeb5td37/WdXBKEyYTJmKsC7aWaqg6yjVO
-	B9bOjToLj8rkViDCcgWYmsQ6ZDE9mxD+3dkIaUsLwDeIUP5TId+/AWr8G+bnbXQb81hqUBFavMW
-	dCOSop/jcuk5nHekm0Mx/qlnDMl9TLgHL+
-X-Google-Smtp-Source: AGHT+IG0JdoFcsroNTrhTPd2Y2eeFajo8woP1y65TWcnzJNLIb3V/XYqMW9UAqYolimHY/C4f96WgU0qnhGEjlGrNOY=
-X-Received: by 2002:a17:907:f496:b0:ad4:d0bf:f4a9 with SMTP id
- a640c23a62f3a-ad52d4cd771mr974896166b.21.1747614635747; Sun, 18 May 2025
- 17:30:35 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1747631301; x=1748236101;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=xwD16IY+mV1vOg/kDG6DOdFjfPbkL9odEag4Ga7a+G8=;
+        b=sp+OyrDl3Fpu7xoPjow8mMQSI4eh7Dt2SZSlTwMeVQgUCZlsWWGAVAIx/glsBEe0Xg
+         koTiQef8UeivApVQuRXl/v58JOLuxLZuNbsXA3PABlRGNe5cVzp5SmAXPCIRLb45NfsX
+         2/yrPboGOD1xF1A2UGz7s132iO3WDVLxdlgn+IC/A08cV61qhmKC4fcJPU/G44OHQ1Eq
+         ho9lYcgOndW2gm5uRzGNfijbgXeYLKiWku8tzqReMxnOK35oWa3GLLO0fFl2lFVLsweD
+         sAZ+NszB9Wep7QASVrCSxWyRmbHrbY7JHWrfIl9a1ZI97rzEJpEQNyDuAzpqzpK58BQw
+         XQyA==
+X-Forwarded-Encrypted: i=1; AJvYcCVtvNMXL+5UlWVJ2itV59Dk6nV3VI3iGxlvdpa5MmUT2CGdxOfNAVkiahTNxcXj7AqTKkGvVsHv87O1@vger.kernel.org, AJvYcCW3LZJFdi+ATLay1QwTUx9SIbb07eDGe2jYfnLEvBC6jQoBTN6Mer6xODf4sWwFFCE+Nmu3xn7kXcB09Ec9@vger.kernel.org
+X-Gm-Message-State: AOJu0YyNF+fMlxiOofs3CiSZ2XCyReZIijN65tr/1txfS3ycX431cb4U
+	c7jKa+c8xP9nrDtL9HPUz2p6XcbMmSFnbtTHLRS7WNwNS1YRB7g0q5PE
+X-Gm-Gg: ASbGncunqA+9qRyMMCJe7vGqletGtNBmOivm1HW1Qvf8s3XjDBf0Crfz/SU+Mv5q2VE
+	bsIiTG//C87+tOS7ReFNRf7rOKrjt5DYjrB3tmDKe886EaR09llGshyyIXFTo7o1iz6ubgA+oNT
+	anpDv4FiFHg3DXS9NiHvZ8xuH9dmd7HBVdMc7Lx2ILc6DKHE4tQeVgyPmaZJkFwW+QEIfx0qx00
+	oyBhD9NQGjZ1iZnmVH5yC4RQ42idvT4K+WzJFAgt3nwxm05KLQrrbIE97h113h2odE+eXHKwDnG
+	DAof8xP5PkibJNeGALpZrlbkyo2Gbot12PTfAy2CwNSYQAGZSyGzDZSCdxMkEULWdaUQjCxuv1+
+	nvUayqHds3hM=
+X-Google-Smtp-Source: AGHT+IH1Es9V7bpGSmK5k3mh2cazGmbf4vrH1kHrZdJfLjtCFQhaKIOHJ1kkKU2QJM7iDgNER1ixxA==
+X-Received: by 2002:a05:6a20:728e:b0:215:df90:b298 with SMTP id adf61e73a8af0-2170ce19eaemr15743817637.26.1747631301368;
+        Sun, 18 May 2025 22:08:21 -0700 (PDT)
+Received: from [192.168.1.6] ([171.61.103.229])
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b26eb081aafsm5322931a12.47.2025.05.18.22.08.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 18 May 2025 22:08:21 -0700 (PDT)
+Message-ID: <6065e339-704c-4081-b4be-ab86417b9ec7@gmail.com>
+Date: Mon, 19 May 2025 10:38:17 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250516092716.3918-1-victorshihgli@gmail.com>
-In-Reply-To: <20250516092716.3918-1-victorshihgli@gmail.com>
-From: Ben Chuang <benchuanggli@gmail.com>
-Date: Mon, 19 May 2025 08:30:24 +0800
-X-Gm-Features: AX0GCFvd_Y36qTnQjTl-mdiM7794fHMBTyb7UOUec0P-lKMasuCd1UFL_CdxXc4
-Message-ID: <CACT4zj-aev64sXTjw1CyHY-C9avAD2_jj9JqtrCDp+-SH+05pA@mail.gmail.com>
-Subject: Re: [PATCH V1 0/2] Adjust some error messages for SD UHS-II
- initialization process
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, HL.Liu@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] dt-bindings: mmc: ti-omap: convert text based binding to
+ json schema
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org
+References: <20250510-ti-omap-v1-1-588b0ccb1823@gmail.com>
+ <b18bc629-6bf6-4490-be98-033b771ecda7@gmail.com>
+ <ecf3565a-e0ec-4848-a157-d0b5d1770b11@kernel.org>
+Content-Language: en-US
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+In-Reply-To: <ecf3565a-e0ec-4848-a157-d0b5d1770b11@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 
-Hi,
 
-These patches were contributed by Victor alone. Please remove my
-'Signed-off-by'.
 
-Best regards,
-Ben Chuang
+On 12-05-2025 01:48, Krzysztof Kozlowski wrote:
+> On 10/05/2025 19:20, Charan Pedumuru wrote:
+>>
+>>
+>> On 10-05-2025 22:07, Charan Pedumuru wrote:
+>>> Convert TI MMC host controller binding to YAML format. It's a
+>>> straight-forward conversion of the typical mmc host controller.
+> 
+> 
+> Not really - you added properties.
+> 
+> 
+>>>
+>>> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/ti-omap.txt  | 26 ---------
+>>>  Documentation/devicetree/bindings/mmc/ti-omap.yaml | 61 ++++++++++++++++++++++
+>>>  2 files changed, 61 insertions(+), 26 deletions(-)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.txt b/Documentation/devicetree/bindings/mmc/ti-omap.txt
+>>> deleted file mode 100644
+>>> index 02fd31cf361d6ed893ec2f9eb8368b358ab2bae1..0000000000000000000000000000000000000000
+>>> --- a/Documentation/devicetree/bindings/mmc/ti-omap.txt
+>>> +++ /dev/null
+>>> @@ -1,26 +0,0 @@
+>>> -* TI MMC host controller for OMAP1 and 2420
+>>> -
+> 
+> ...
+> 
+>>> -	};
+>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.yaml b/Documentation/devicetree/bindings/mmc/ti-omap.yaml
+> 
+> 
+> Filename based on the compatible. Didn't you get exactly such feedback
+> already?
 
-On Fri, May 16, 2025 at 5:27=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
-m> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Summary
-> =3D=3D=3D=3D=3D=3D=3D
-> It is normal that errors will occur when using non-UHS-II card to enter
-> the UHS-II card initialization process. We should not be producing error
-> messages and register dumps. Therefore, switch the error messages to debu=
-g
-> mode and register dumps to dynamic debug mode.
->
-> Patch structure
-> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> patch#1: for core
-> patch#2: for sdhci
->
-> Changes in v1 (May. 16, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#1: Adjust some error messages for SD UHS-II cards.
-> * Patch#2: Adjust some error messages and register dump for SD UHS-II car=
-d
->
-> Victor Shih (2):
->   mmc: core: Adjust some error messages for SD UHS-II cards
->   mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
->     UHS-II card
->
->  drivers/mmc/core/sd_uhs2.c    |  8 ++++++--
->  drivers/mmc/host/sdhci-uhs2.c | 18 +++++++++---------
->  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
->  3 files changed, 31 insertions(+), 11 deletions(-)
->
-> --
-> 2.43.0
->
+Yes, I will rename it.
+
+> 
+>>> new file mode 100644
+>>> index 0000000000000000000000000000000000000000..3660f54550e0ee46d3a7cfa3f531d95802f1e2fb
+>>> --- /dev/null
+>>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap.yaml
+>>> @@ -0,0 +1,61 @@
+>>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>>> +%YAML 1.2
+>>> +---
+>>> +$id: http://devicetree.org/schemas/mmc/ti-omap.yaml#
+>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>>> +
+>>> +title: TI MMC host controller for OMAP1 and 2420
+>>> +
+>>> +description:
+>>> +  The MMC Host controller for TI OMAP1 and 2420 family provides
+>>> +  an interface for MMC, SD and SDIO types of memory cards.
+>>> +
+>>> +allOf:
+>>> +  - $ref: mmc-controller.yaml
+>>> +
+>>> +maintainers:
+>>> +  - Ulf Hansson <ulf.hansson@linaro.org>
+> 
+> 
+> No, this is supposed someone responsible for the device, not subsystem
+> maintainer.
+> 
+
+Okay.
+
+>>> +
+>>> +properties:
+>>> +  compatible:
+>>> +    const: ti,omap2420-mmc
+>>> +
+>>> +  reg:
+>>> +    maxItems: 1
+>>> +
+>>> +  interrupts:
+>>> +    maxItems: 1
+>>> +
+>>> +  dmas:
+>>> +    maxItems: 2
+>>> +
+>>> +  dma-names:
+>>> +    items:
+>>> +      - const: tx
+>>> +      - const: rx
+>>> +
+>>> +  ti,hwmods:
+>>> +    items:
+>>> +      pattern: "^msdi[0-9]+$"
+> 
+> Missing type: string-array
+> min/maxItems?
+> 
+
+I think the type can be string, will modify defining type and maxItems. If it's string-array, the defaults can only be "msdi0" and "msdi1". So, I thought to define pattern with string type.
+
+>>> +
+>>> +required:
+>>> +  - compatible
+>>> +  - reg
+>>> +  - interrupts
+>>> +  - dmas
+>>> +  - dma-names
+> 
+> That's a change - binding did not mention it, did not make it required.
+> Every change should be explain in commit msg.
+> 
+>>> +  - ti,hwmods
+>>> +
+>>> +unevaluatedProperties: false
+>>> +
+>>> +examples:
+>>> +  - |
+>>> +    mmc@4809c000 {
+>>> +        compatible = "ti,omap2420-mmc";
+>>> +        ti,hwmods = "msdi1";
+>>> +        reg = <0x4809c000 0x80>;
+>>> +        interrupts = <83>;
+>>
+>> Forgot to include irq interrupt-controller header and use it for the interrupts, will change in next revision.
+> 
+> Header does not look like used...
+
+Yeah, will change the interrupts format to take header format.
+
+> 
+>>
+>>
+>>> +        dmas = <&sdma 61 &sdma 62>;
+> 
+> But here you need two <> phandles.
+
+Sure, I will rewrite them in 2 different phandles separated by , .
+
+> 
+>>> +        dma-names = "tx", "rx";
+>>> +    };
+>>> +...
+>>>
+>>> ---
+>>> base-commit: 3e039dcc9c1320c0d33ddd51c372dcc91d3ea3c7
+>>> change-id: 20250502-ti-omap-12655fa9db3e
+>>>
+>>> Best regards,
+>>
+> 
+> 
+> Best regards,
+> Krzysztof
+
+-- 
+Best Regards,
+Charan.
+
