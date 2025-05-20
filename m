@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 1B58913635C
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:46:33 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5BD7E14F9FB
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:46:34 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747741595; cv=none; b=TFFxDTIKXqoB/GW+llZ4lPAb1FDwqUch02wDaSsMOCnn5YjUoNWCGm0t9LgFexFDbrYfWJzNg6AKMkbnz/JYWqfSsg4diuw2+sXcoK7Gc7Fq8u6vE0/7pnN50yvr0E8yelRpVCye72REptwNlbJxCwnG7109WhU39VSqvbW7K5c=
+	t=1747741597; cv=none; b=apMDZ3Q+LMpxkv/MUwDlBGnbxAw/8pq+MbVvEkh4NLIgPqwySKuT4vHlu7OTssH4zNeVrio5BJY83Uy6bOJa6Dx6LEyzy6K8O6v+dhpmDlmlq5R99Gz4k4/OAEtgGNAUvGUQ5q9mf5tjt0i3aae4mxGgKd7izl3C6e/qbO7Qh1M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747741595; c=relaxed/simple;
-	bh=bFKtZr01sDR9wTaPjaJ0aHKssimVSQ3vZUljPf9Ikdo=;
+	s=arc-20240116; t=1747741597; c=relaxed/simple;
+	bh=2G41TG/dvH+0ROwF0dAsoyirhC8fqAxQbOsRDj6XTDU=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=DatpdgpaHkBzxcvHdFMUdk+4msHWN+YYpGT9Pu//CW/lZeg0CZv3mIUwL5aLdL3dk4PYDHEOWZgEKtj3Zfw7Mn0DxRPIBI9jrn2ljTzWu7N1NvPIl04Sw1hLSXfXF3ckWFdhLXY+zxVhP//PBKe/RdXP3Rre1THaut1q9FA9xAs=
+	 MIME-Version; b=qbkbuvy05WhjhwQRxz1oLbP+zQxIGkAFliPRIbnpAhO3+B5vNS6a+Bv4dxQVwnA6b7iHoDAJljJ4CgLmkqnFDC/VqwREiiL1xCFoMCtCd46zdlWYEmWrXzDmScmCnzdbwTDQowxNEH7/urCne61mncLEfYwYI36F+DgtR7GUczU=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8DxzOKYayxo9F3zAA--.358S3;
-	Tue, 20 May 2025 19:46:32 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8BxrnKZayxo+F3zAA--.785S3;
+	Tue, 20 May 2025 19:46:33 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMCx7xuUayxoqzvjAA--.55558S4;
-	Tue, 20 May 2025 19:46:32 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMCx7xuUayxoqzvjAA--.55558S5;
+	Tue, 20 May 2025 19:46:33 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -25,9 +25,9 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH 22/36] mmc: rtsx_usb_sdmmc: Use devm_mmc_alloc_host() helper
-Date: Tue, 20 May 2025 19:46:17 +0800
-Message-ID: <6405ce02fcf3039e09cf66c8460e3933730722b3.1747739323.git.zhoubinbin@loongson.cn>
+Subject: [PATCH 23/36] mmc: sdricoh_cs: Use devm_mmc_alloc_host() helper
+Date: Tue, 20 May 2025 19:46:18 +0800
+Message-ID: <69d56e4910e475e3b95ceffb8ff82daeec1cd0ef.1747739323.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1747739323.git.zhoubinbin@loongson.cn>
 References: <cover.1747739323.git.zhoubinbin@loongson.cn>
@@ -38,14 +38,14 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCx7xuUayxoqzvjAA--.55558S4
+X-CM-TRANSID:qMiowMCx7xuUayxoqzvjAA--.55558S5
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7uw4rJw17XF1xWrWDtF1UJwc_yoW8JFyfpa
-	15XFWxKrWYgF45K34UJa1DCa4rCa4aqayI9rWUZ34xXwn8G34ktr95CFyaqF1rJFykAFsI
-	gFs5Zr4ruF15WFgCm3ZEXasCq-sJn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoW7Ww17Zr48AryruF48CF4DGFX_yoW8Wry7pF
+	Z8Xa4YkrykXF1Sqw45Aa15uryrWw40g3y8KayxKws3J39F9asrtrn29FyFqFyrCFWkJan3
+	XF1UKw1Dur1qqabCm3ZEXasCq-sJn29KB7ZKAUJUUUU8529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
 	0xBIdaVrnRJUUU9jb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
 	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
 	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
 	xVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYIkI8VC2zVCFFI0UMc
@@ -56,44 +56,60 @@ X-Coremail-Antispam: 1Uk129KBj93XoW7uw4rJw17XF1xWrWDtF1UJwc_yoW8JFyfpa
 	0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWDJVCq3wCI42IY6xIIjxv2
 	0xvEc7CjxVAFwI0_Gr1j6F4UJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z2
 	80aVAFwI0_Gr1j6F4UJwCI42IY6I8E87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2Kfnx
-	nUUI43ZEXa7IU5IoGPUUUUU==
+	nUUI43ZEXa7IU5gFxUUUUUU==
 
 Use new function devm_mmc_alloc_host() to simplify the code.
 
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/rtsx_usb_sdmmc.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/sdricoh_cs.c | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index d229c2b83ea9..9c5d695d04b1 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1334,7 +1334,7 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
- 
- 	dev_dbg(&(pdev->dev), ": Realtek USB SD/MMC controller found\n");
- 
--	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
-+	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(*host));
- 	if (!mmc)
- 		return -ENOMEM;
- 
-@@ -1368,7 +1368,6 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
- #ifdef RTSX_USB_USE_LEDS_CLASS
- 		led_classdev_unregister(&host->led);
- #endif
--		mmc_free_host(mmc);
- 		pm_runtime_disable(&pdev->dev);
- 		return ret;
+diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
+index 57b8c1a96756..481cb552c2b4 100644
+--- a/drivers/mmc/host/sdricoh_cs.c
++++ b/drivers/mmc/host/sdricoh_cs.c
+@@ -403,9 +403,9 @@ static int sdricoh_init_mmc(struct pci_dev *pci_dev,
  	}
-@@ -1406,7 +1405,6 @@ static void rtsx_usb_sdmmc_drv_remove(struct platform_device *pdev)
- 	led_classdev_unregister(&host->led);
- #endif
+ 	/* allocate privdata */
+ 	mmc = pcmcia_dev->priv =
+-	    mmc_alloc_host(sizeof(struct sdricoh_host), &pcmcia_dev->dev);
++	    devm_mmc_alloc_host(&pcmcia_dev->dev, sizeof(*host));
+ 	if (!mmc) {
+-		dev_err(dev, "mmc_alloc_host failed\n");
++		dev_err(dev, "devm_mmc_alloc_host failed\n");
+ 		result = -ENOMEM;
+ 		goto unmap_io;
+ 	}
+@@ -431,7 +431,7 @@ static int sdricoh_init_mmc(struct pci_dev *pci_dev,
+ 	if (sdricoh_reset(host)) {
+ 		dev_dbg(dev, "could not reset\n");
+ 		result = -EIO;
+-		goto free_host;
++		goto unmap_io;
+ 	}
  
+ 	result = mmc_add_host(mmc);
+@@ -440,8 +440,6 @@ static int sdricoh_init_mmc(struct pci_dev *pci_dev,
+ 		dev_dbg(dev, "mmc host registered\n");
+ 		return 0;
+ 	}
+-free_host:
 -	mmc_free_host(mmc);
- 	pm_runtime_disable(&pdev->dev);
- 	platform_set_drvdata(pdev, NULL);
+ unmap_io:
+ 	pci_iounmap(pci_dev, iobase);
+ 	return result;
+@@ -483,10 +481,8 @@ static void sdricoh_pcmcia_detach(struct pcmcia_device *link)
+ 		mmc_remove_host(mmc);
+ 		pci_iounmap(host->pci_dev, host->iobase);
+ 		pci_dev_put(host->pci_dev);
+-		mmc_free_host(mmc);
+ 	}
+ 	pcmcia_disable_device(link);
+-
+ }
  
+ #ifdef CONFIG_PM
 -- 
 2.47.1
 
