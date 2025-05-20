@@ -1,161 +1,223 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pg1-f182.google.com (mail-pg1-f182.google.com [209.85.215.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EDD819F137
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 12:58:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 957BE19F135;
+	Tue, 20 May 2025 13:12:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747745913; cv=none; b=MdJuZHcXcVrGpBk6GzAxWfgSAlXa4YkjIyl1T0R91eYGoOL1iqBSrrC0x1zH2gGwYJxBt+RQG9fa3CEUQGoTij/55SOz2hF1GuVvD5Xv1siVD9lci/gPhq1gsAf5pZeZkuVDa6P3naHLR+8xhhr/6MfOgLS8fCeCoIjNYbiAppc=
+	t=1747746742; cv=none; b=nCBet2xHvBpn7o72O5QgzZqgpkTfCV3hCRXmN1dFT/x3vDf1OEJmk37d/BQK9a0TAG8KFatko0vkYw9I6moHcfOXPm2kIV8dNZOEU9Nc1E/vO0cgHNUNSY4l/cqvVVeBU//4VA+PFKcGURH/klmYian3e5a4QaoMmR6zlU2N1tM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747745913; c=relaxed/simple;
-	bh=uWJkDdDR++E6BNAjgdO6Ln7KmKXNKcq/2qAK9KOMjpo=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=NZJoq03ADUH3kLsO0iKwSjPrgdMYb/sv/UdRxpnKqmQm/0RX9NUtgsSV7/tizlrc4QelHVmPnH2zGQUqaSC99xlLjK7LVdOuXN/g8ZDUfNZKFmIkMPl5Wj3k2ETGcCOZ4l7i2N16qaXhgiBRgfOyLkD41gtehUgKeW3YnTs8gDU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rm4PC1Sl; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1747746742; c=relaxed/simple;
+	bh=mSWd+3T3kaVWyXpU6vbkPIGE9sAmeeMJHzrtO7YHLWs=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=VHUeYGah5+dC4RnUgojBrXvOIU8TTdSUENKthMixny2+uF7T1tB7seSNzrDKFLNFfHLKZLDt6R1QF4ZLfVDmUwkT5jejrqzWHaUttBaU2YD6Zp4nMXlTkZc+qQ0dY8gPpTNzbHOMw8WAwJDQBob2EQJdZqDgBwYQWxt9OKFoIbE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=VT4qn6iY; arc=none smtp.client-ip=209.85.215.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rm4PC1Sl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02687C4CEE9
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 12:58:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747745913;
-	bh=uWJkDdDR++E6BNAjgdO6Ln7KmKXNKcq/2qAK9KOMjpo=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=rm4PC1SlCFvcbNKzklhRV3kyqr/RmS/rbAPZHdpRY9j9+uosugKhkls7r4PHIJM4+
-	 wkG0nUxJUW3eGDVHKNCgLOWXGqoe0nsrOAC0L/idhFbDSZDFm+q9oWQcmIUm4h14oh
-	 ZHohZ7Yg1iq46VgYRtuTyb2jWGi1sKSfHq4u8S/2fVkNueE3d4hoV6k+ljy5tzthsz
-	 S2WFOYt3xyZDMe3gmhc2+DMrFgtVI0UWR+MemLpPl8pnVrHygD4U6qjpSFrhOTWlGK
-	 /96TXg9rnDL65ilFY0jN2+CW30+9U2RBxqG4kB1SIh13yhWlnNb6VfNMo0ztXZuiYT
-	 SBPHIogpLw9fw==
-Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6021d01298cso503497a12.3
-        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 05:58:32 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCWVMy99ggtWfNNsZpNB4Ba/gCx2rQWN2YCfqceYJZKJs6gihRpCwRWVjH38pRly18swGTeBPQIrt1A=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx34wvcMFNUkhCiVYVb2ZFxWGnUvjHtedwlx6tbWz+s5Jj+rj8q
-	/1vlofBlKrAmTviA5FG2ZKJhVuR/Kyn31ENW4Nn2HBdpv78t+rnLzktQQo/AjtuL437UpHFSoRv
-	eLfmd8k/BGOEm55nQS9OlTbR1vjObNUM=
-X-Google-Smtp-Source: AGHT+IEBFPy7IvZ6gjhcrVnRFKabb1qycwp4Io23zgV81Z1f6RovWx9TupY5t8tqxR4Pwagt4UXUXDEAknUGrztc3M0=
-X-Received: by 2002:a05:6402:4315:b0:602:1832:c18b with SMTP id
- 4fb4d7f45d1cf-6021832d6a8mr1289172a12.24.1747745911599; Tue, 20 May 2025
- 05:58:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VT4qn6iY"
+Received: by mail-pg1-f182.google.com with SMTP id 41be03b00d2f7-b26f7d2c1f1so3746326a12.0;
+        Tue, 20 May 2025 06:12:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747746738; x=1748351538; darn=vger.kernel.org;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=eW89hvXQZc25oGOOzJxJK44/BxyPnPZbqF3pwcANOrE=;
+        b=VT4qn6iYWx5JF+FF6j8RZq2Msn0R+np3CumHc3421NmcOH1oLlTr3zNGKxBRkV4uhS
+         29S3n9a1MUMuTMDkHykahKz7QCKpokz7V2wE/6EwLWTAA6xwh/A87bmUPRRZPa2LWUfo
+         sqvGg/UVmaEnVX1GZjrq89ixM9+7vBfHNJSx685P1G3UGLz32whqKThhBCL7bSPhykR8
+         hQwdAB2PY0xh9X0uu6A05ilaUEyRr0ayBfFy1R5VQU+YGAaO12kb/G3nkm8hXGGoRauT
+         PcYicUoPve6qD1V9s6SzZxI45MLX2cDz8wwPWcg+6+naScje865JP5mHj3o6VVy9nufo
+         w1IQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747746738; x=1748351538;
+        h=cc:to:message-id:content-transfer-encoding:mime-version:subject
+         :date:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=eW89hvXQZc25oGOOzJxJK44/BxyPnPZbqF3pwcANOrE=;
+        b=wHn+zDPZtZEom/BG9Oe+ur28w0m5x7XXHLJfEg/Nap47QPAIBKwKviSYsfBqn/115X
+         iZaLYDLUBgj7mXir+r5kdEhV1JIGkOTPnmgUxjX2gsbRrori+x4tStmRro+uKQ644Z2H
+         dfO9LzisixC2ZXVcLF03Li15/ptK+qhmPpAn8fea4943gV+ewBQiETwPDXsaQggv+z0f
+         VJc2QhYD6iiEkYkJQFrQBg499Ligzh0sgFF3UcUD6FftQcJgKVRtczg6raWCdoZxE5H5
+         Q9lDbCOP4hr+o0smWR8XQ9sEby2jRElSXVHcxBCbkLaZJhU9yTbQojRmX+m7L4A9LO1O
+         OWMw==
+X-Forwarded-Encrypted: i=1; AJvYcCVC/vUiTWVgCsV9NBGp3ft4PE8yhwczvzwulCsrHNhvs3mo3AVEyZTPmsBM24EFB4a/0GhF/P2FZJ+b@vger.kernel.org, AJvYcCWjPonhJ9Lx1Mz74R1JvV+XQsnrnX0AbCkHz4rS/3l16i+5ePgbQLDxlQnxKQuVz7emFrUEsFK5IOBaLeJ3@vger.kernel.org
+X-Gm-Message-State: AOJu0YzFG1t5NEH1adtk1f5HiDkcp0WbNeG/bfzR3QCGq6lDA6eNVYFb
+	vv0VnM1tDXrO8FfZjORVEJX4u1BTNuB1T1carS+c/lCWtBZkjw48UCF6
+X-Gm-Gg: ASbGnct5A47G2zNlPv/7WDq3m7Oj6Mp8YDTOKFNrt9a+LbU4XGYPyax4DaLjhGnIv+4
+	85IZT3H5CAXY93+gCzzFOxsAGtDiM0sx8iJ0/rYIXlINvsPhl2+PTwqDvvw1KXRYe7PQwHUWhzD
+	GmmSh57XsUvzRqPHhcYkNl+LckDm/sur3Tl7kAHfIG6kN6Bub7KDuUE2hgBrQQ8ksWxim3cfOmi
+	uQObxGpbhZGQtazG2JBelse+Wdr/siiUFjfqP33mFgQCE0gUe+NXXZ676u/p8IaQJaRpcI7eb7b
+	oyGlyb0aIvplAn77VRPGp/6XF0W1NbqPZQoABXIHg4DlqcpOx9Oncf4wbEZH/g==
+X-Google-Smtp-Source: AGHT+IEgPrOh+e0Ok2pBjqx2FEU+n+NU8LQOp6kbrf99aONsnomlV5HlexSaIVKGxL9Qi4mIi6UZ3Q==
+X-Received: by 2002:a17:902:d543:b0:22f:af3f:bf22 with SMTP id d9443c01a7336-231de3ba64fmr216846845ad.42.1747746737607;
+        Tue, 20 May 2025 06:12:17 -0700 (PDT)
+Received: from Black-Pearl. ([110.227.160.208])
+        by smtp.googlemail.com with ESMTPSA id d9443c01a7336-231d4edb063sm76105605ad.255.2025.05.20.06.12.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 20 May 2025 06:12:17 -0700 (PDT)
+From: Charan Pedumuru <charan.pedumuru@gmail.com>
+Date: Tue, 20 May 2025 13:12:03 +0000
+Subject: [PATCH v3] dt-bindings: mmc: ti-omap2420-mmc: convert text based
+ binding to json schema
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1747739323.git.zhoubinbin@loongson.cn>
-In-Reply-To: <cover.1747739323.git.zhoubinbin@loongson.cn>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Tue, 20 May 2025 20:58:21 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H6qwjZJmNYCTG3F-Ufg4suK7+Fh9xUkg3sb=ORKqDesxg@mail.gmail.com>
-X-Gm-Features: AX0GCFvJuKqsWzUL7OPA03wudMjLbTZTG-vLFuRaltWY6VoqWjN-_54RwKTYrLU
-Message-ID: <CAAhV-H6qwjZJmNYCTG3F-Ufg4suK7+Fh9xUkg3sb=ORKqDesxg@mail.gmail.com>
-Subject: Re: [PATCH 00/36] mmc: Cleanup mmc_alloc_host() usage
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250520-ti-omap-v3-1-aa845b301c4c@gmail.com>
+X-B4-Tracking: v=1; b=H4sIAKJ/LGgC/02MwQqDMBAFf0X23JRkQ0rsqf9Rekhi1IVqJJHQI
+ v57o5TW4zzezALJR/IJrtUC0WdKFMYC8lSB683YeUZNYUCOiiuObCYWBjMxgRelWlM3Vnoo7yn
+ 6ll576f4o3FOaQ3zv4Sy29dsQ/NfIggmmtLbcOSs0yls3GHqeXRhga2Q8evXfw+Kh4Y11XLe2d
+ kdvXdcPgt2wsdYAAAA=
+X-Change-ID: 20250502-ti-omap-12655fa9db3e
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+ Conor Dooley <conor+dt@kernel.org>, Tony Lindgren <tony@atomide.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+ linux-kernel@vger.kernel.org, Charan Pedumuru <charan.pedumuru@gmail.com>
+X-Mailer: b4 0.14.2
 
-Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+Convert TI MMC host controller binding to YAML format.
+Changes during Conversion:
+- Add new properties 'dma', 'dma-names' under required.
+- Define two separate phandles for 'dmas' in the examples.
+- Include appropriate header file for interrupts and use
+  it in the examples.
 
-On Tue, May 20, 2025 at 7:45=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn=
-> wrote:
->
-> Hi all:
->
-> Since the devm_mmc_alloc_host() helper was already available, I tried to
-> start cleaning up the use of mmc_alloc_host().
->
-> To make it easier to review the patchset, I decided to split it into two =
-parts.
-> As the first part, this patchset contains cleanup for drivers other than =
-sdhci.
->
-> Of course, the sdhci part I have ready in my repository.
->
-> Thanks.
->
-> Binbin Zhou (36):
->   mmc: alcor: Use devm_mmc_alloc_host() helper
->   mmc: atmel: Use devm_mmc_alloc_host() helper
->   mmc: au1xmmc: Use devm_mmc_alloc_host() helper
->   mmc: bcm2835: Use devm_mmc_alloc_host() helper
->   mmc: cavium: Use devm_mmc_alloc_host() helper
->   mmc: cb710: Use devm_mmc_alloc_host() helper
->   mmc: davinci_mmc: Use devm_mmc_alloc_host() helper
->   mmc: dw_mmc: Use devm_mmc_alloc_host() helper
->   mmc: jz4740: Use devm_mmc_alloc_host() helper
->   mmc: litex_mmc: Use devm_mmc_alloc_host() helper
->   mmc: meson-mx-sdhc: Use devm_mmc_alloc_host() helper
->   mmc: mmci: Use devm_mmc_alloc_host() helper
->   mmc: moxart-mmc: Use devm_mmc_alloc_host() helper
->   mmc: mvsdio: Use devm_mmc_alloc_host() helper
->   mmc: mxcmmc: Use devm_mmc_alloc_host() helper
->   mmc: mxs-mmc: Use devm_mmc_alloc_host() helper
->   mmc: omap: Use devm_mmc_alloc_host() helper
->   mmc: omap_hsmmc: Use devm_mmc_alloc_host() helper
->   mmc: owl-mmc: Use devm_mmc_alloc_host() helper
->   mmc: pxamci: Use devm_mmc_alloc_host() helper
->   mmc: rtsx_pci: Use devm_mmc_alloc_host() helper
->   mmc: rtsx_usb_sdmmc: Use devm_mmc_alloc_host() helper
->   mmc: sdricoh_cs: Use devm_mmc_alloc_host() helper
->   mmc: ish_mmicf: Use devm_mmc_alloc_host() helper
->   mmc: tifm_sd: Use devm_mmc_alloc_host() helper
->   mmc: toshsd: Use devm_mmc_alloc_host() helper
->   mmc: usdhi6ro10: Use devm_mmc_alloc_host() helper
->   mmc: ushc: Use devm_mmc_alloc_host() helper
->   mmc: via-sdmmc: Use devm_mmc_alloc_host() helper
->   mmc: vub300: Use devm_mmc_alloc_host() helper
->   mmc: wbsd: Use devm_mmc_alloc_host() helper
->   mmc: wmt-sdmmc: Use devm_mmc_alloc_host() helper
->   mmc: tmio: Use devm_mmc_alloc_host() helper
->   mmc: sunxi: Use devm_mmc_alloc_host() helper
->   mmc: mmc_spi: Use devm_mmc_alloc_host() helper
->   mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
->
->  drivers/mmc/host/alcor.c             | 20 ++++---------
->  drivers/mmc/host/atmel-mci.c         |  7 ++---
->  drivers/mmc/host/au1xmmc.c           | 14 +++-------
->  drivers/mmc/host/bcm2835.c           |  5 +---
->  drivers/mmc/host/cavium.c            | 10 ++-----
->  drivers/mmc/host/cb710-mmc.c         |  5 +---
->  drivers/mmc/host/davinci_mmc.c       | 22 +++++----------
->  drivers/mmc/host/dw_mmc.c            | 15 ++++------
->  drivers/mmc/host/jz4740_mmc.c        | 40 +++++++++-----------------
->  drivers/mmc/host/litex_mmc.c         | 12 +-------
->  drivers/mmc/host/meson-mx-sdhc-mmc.c | 13 +--------
->  drivers/mmc/host/meson-mx-sdio.c     | 20 ++++++-------
->  drivers/mmc/host/mmc_spi.c           |  4 +--
->  drivers/mmc/host/mmci.c              | 31 ++++++++------------
->  drivers/mmc/host/moxart-mmc.c        | 40 ++++++++++----------------
->  drivers/mmc/host/mvsdio.c            | 24 +++++-----------
->  drivers/mmc/host/mxcmmc.c            | 31 +++++++-------------
->  drivers/mmc/host/mxs-mmc.c           | 31 ++++++++------------
->  drivers/mmc/host/omap.c              | 25 ++++++-----------
->  drivers/mmc/host/omap_hsmmc.c        | 18 ++++--------
->  drivers/mmc/host/owl-mmc.c           | 37 +++++++++---------------
->  drivers/mmc/host/pxamci.c            | 42 ++++++++++------------------
->  drivers/mmc/host/renesas_sdhi_core.c |  6 +---
->  drivers/mmc/host/rtsx_pci_sdmmc.c    |  5 +---
->  drivers/mmc/host/rtsx_usb_sdmmc.c    |  4 +--
->  drivers/mmc/host/sdricoh_cs.c        | 10 ++-----
->  drivers/mmc/host/sh_mmcif.c          | 17 ++++-------
->  drivers/mmc/host/sunxi-mmc.c         | 22 ++++++---------
->  drivers/mmc/host/tifm_sd.c           |  7 +----
->  drivers/mmc/host/tmio_mmc.h          |  1 -
->  drivers/mmc/host/tmio_mmc_core.c     | 18 ++----------
->  drivers/mmc/host/toshsd.c            |  4 +--
->  drivers/mmc/host/uniphier-sd.c       |  8 ++----
->  drivers/mmc/host/usdhi6rol0.c        | 30 +++++++-------------
->  drivers/mmc/host/ushc.c              |  4 +--
->  drivers/mmc/host/via-sdmmc.c         |  7 ++---
->  drivers/mmc/host/vub300.c            | 16 ++++-------
->  drivers/mmc/host/wbsd.c              |  4 +--
->  drivers/mmc/host/wmt-sdmmc.c         |  8 ++----
->  39 files changed, 195 insertions(+), 442 deletions(-)
->
->
-> base-commit: eb68ba4af6da720caaf752b5618220efd5cf31dc
-> --
-> 2.47.1
->
+Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+---
+Changes in v3:
+- Changed maintainer to Tony Lindgren.
+- Redefine 'ti,hwmods' with $ref under properties.
+- Modify subject prefix with ti,omap2420-mmc.
+- Link to v2: https://lore.kernel.org/r/20250519-ti-omap-v2-1-2a0dbc08fb9c@gmail.com
+
+Changes in v2:
+- Added include statement for irq interrupt controller and
+  modified the interrupts under property to use header.
+- Changed maintainer to Rob Herring.
+- Defined two seperate phandles for 'dmas' under examples.
+- Rename the YAML file name to the compatible 'ti,omap2420-mmc'.
+- Added missing type and maxItems to 'ti,hwmods' under properties.
+- Link to v1: https://lore.kernel.org/r/20250510-ti-omap-v1-1-588b0ccb1823@gmail.com
+---
+ .../devicetree/bindings/mmc/ti,omap2420-mmc.yaml   | 66 ++++++++++++++++++++++
+ Documentation/devicetree/bindings/mmc/ti-omap.txt  | 26 ---------
+ 2 files changed, 66 insertions(+), 26 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
+new file mode 100644
+index 0000000000000000000000000000000000000000..61fd4244b92cb3b76db1a765933ebb2af2ccae28
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
+@@ -0,0 +1,66 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/ti,omap2420-mmc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: TI MMC host controller for OMAP1 and 2420
++
++description:
++  The MMC Host controller for TI OMAP1 and 2420 family provides
++  an interface for MMC, SD and SDIO types of memory cards.
++
++allOf:
++  - $ref: mmc-controller.yaml
++
++maintainers:
++  - Tony Lindgren <tony@atomide.com>
++
++properties:
++  compatible:
++    const: ti,omap2420-mmc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  dmas:
++    maxItems: 2
++
++  dma-names:
++    items:
++      - const: tx
++      - const: rx
++
++  ti,hwmods:
++    $ref: /schemas/types.yaml#/definitions/string
++    description:
++      List of hwmod names (ascii strings), that comes from the OMAP
++      HW documentation, attached to a device. Must contain at least
++      one hwmod.
++    pattern: "^msdi[0-9]+$"
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - dmas
++  - dma-names
++  - ti,hwmods
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    mmc@4809c000 {
++        compatible = "ti,omap2420-mmc";
++        ti,hwmods = "msdi1";
++        reg = <0x4809c000 0x80>;
++        interrupts = <83 IRQ_TYPE_LEVEL_HIGH>;
++        dmas = <&sdma 61>, <&sdma 62>;
++        dma-names = "tx", "rx";
++    };
++...
+diff --git a/Documentation/devicetree/bindings/mmc/ti-omap.txt b/Documentation/devicetree/bindings/mmc/ti-omap.txt
+deleted file mode 100644
+index 02fd31cf361d6ed893ec2f9eb8368b358ab2bae1..0000000000000000000000000000000000000000
+--- a/Documentation/devicetree/bindings/mmc/ti-omap.txt
++++ /dev/null
+@@ -1,26 +0,0 @@
+-* TI MMC host controller for OMAP1 and 2420
+-
+-The MMC Host Controller on TI OMAP1 and 2420 family provides
+-an interface for MMC, SD, and SDIO types of memory cards.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the omap mmc driver.
+-
+-Note that this driver will not work with omap2430 or later omaps,
+-please see the omap hsmmc driver for the current omaps.
+-
+-Required properties:
+-- compatible: Must be "ti,omap2420-mmc", for OMAP2420 controllers
+-- ti,hwmods: For 2420, must be "msdi<n>", where n is controller
+-  instance starting 1
+-
+-Examples:
+-
+-	msdi1: mmc@4809c000 {
+-		compatible = "ti,omap2420-mmc";
+-		ti,hwmods = "msdi1";
+-		reg = <0x4809c000 0x80>;
+-		interrupts = <83>;
+-		dmas = <&sdma 61 &sdma 62>;
+-		dma-names = "tx", "rx";
+-	};
+
+---
+base-commit: 3e039dcc9c1320c0d33ddd51c372dcc91d3ea3c7
+change-id: 20250502-ti-omap-12655fa9db3e
+
+Best regards,
+-- 
+Charan Pedumuru <charan.pedumuru@gmail.com>
+
