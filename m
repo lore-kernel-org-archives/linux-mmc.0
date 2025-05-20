@@ -1,198 +1,151 @@
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CDEA04B1E72
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 08:37:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.42
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747730223; cv=fail; b=mxDW8BQb/3eXhVI9BZJq8/jJJAWbfrIvz6Z1aJhrcAl3eT2cGN2635s+xqlBVH0NpjzCGx9QIpkg/Quq6Rz2X0OuDR3LknUjI2ukmzNYlDQYvts4DdBpSSO5EuVZQAgZPB93S6l6UjqMPC/D7u7uZtF7rw+qkClqjiy9fELZMtY=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747730223; c=relaxed/simple;
-	bh=F2hR/QOiQ+kuJMZwolnApQyJJ3BmaX57/NzAqo2EkXE=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=CRNyAAmlm8yMDd69RPEtIloIfkKqpejGG45xq0AFZ5maIPi9QSnUpqZhcXZFqZ6Ep4DwXe3wxZaKyR8s5+QI/HLJEVk+BhgOEfzl0/523Y1s4ua6wXwPY4QFXYzCunwegM77/7JUlxATMSCK6MmLskwp74ggCqxmHQWeBCzbrTE=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=vqNnuQku; arc=fail smtp.client-ip=216.71.154.42
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0C8E4261596;
+	Tue, 20 May 2025 09:15:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747732533; cv=none; b=HQY7GmpGCvKIjUZHPXoK93kffZKragLu6xYW1lYH+PRJjuhpABCFY7NVMnbYbOf7BzCTCet5cvtE5KZYZCNvHJP1wcWSk6iJKj/e6yXLieewVKJx/YlVXcGXVQXoby2rXaFyVzA8KE5PiSOhSoP/sq7IORf7ADrAypNcr1pvWt4=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747732533; c=relaxed/simple;
+	bh=cZCPsc0axY6vwzg6GVxYmN7cC4sJ0+7gHL+hQv9JZn0=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=Gb3blejcP/ogYyed+3ZSbSYiJBLCxWk5+AsayWrCl6mUa1HaaxC7UjzOMEivwq5NbIYIJ8COWFN7LViuDTZ7ft7r8eCPcH9HhhOsaHsPZ/3XgVYyMI6kZYmBDrfdQogtiReTbhHcYcTwc/r7tFfIpCqF0zqHQahHDd1btuOxJ9g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=ZE0YVX5E; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="vqNnuQku"
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkim.sandisk.com; t=1747730222; x=1779266222;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=F2hR/QOiQ+kuJMZwolnApQyJJ3BmaX57/NzAqo2EkXE=;
-  b=vqNnuQkuSt7Bv5vn2GVPGtmOORaJfM0XYDEkD7YrrBV8+YpuMeZ570gj
-   g5cVuBRzabacvdQ2KFXnvAo2VZBf9yzqF2lhcvsSQLO0/ZdlpK7zSztA5
-   FXn2EVpxHqqzFxUuhQfBb1ZSfxvfHagPrCuTN+E1OA6WwNOXyJaH5CNmV
-   MKdBz1Vwta+LW4EPYokTcNLI6lVGGPq6XC6MytO9W+WJuD6zTJZzsTu+l
-   d//zO9D0SxjUVJlz8EM3NR2nY9OJcb2Qoez0KkepRRqOwkifFkAVY4xjk
-   9sBogS/nd33b5hr8LmNhgF4Xb5p2aH03MOUeABNlBEnUykmif5pO0wx/k
-   Q==;
-X-CSE-ConnectionGUID: /ku9rWayQzK1g7zT2czJHg==
-X-CSE-MsgGUID: UEkuTna9TjKM3VhRKoSHLg==
-X-IronPort-AV: E=Sophos;i="6.15,302,1739808000"; 
-   d="scan'208";a="84591050"
-Received: from mail-mw2nam10lp2049.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.49])
-  by ob1.hgst.iphmx.com with ESMTP; 20 May 2025 16:36:55 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=hi85iYSmfzah/BhsjEQy/DBJGQ8XULb0d2XW2Sz9ZzXuKiy25dPU8fbJfkbdCCxe1G+OrDCdKvBmUJfFhbPcBoSgNYuqRk4ujIP+CfGVT7vi48evtFOfmYRWYS0mylUr6LIZeB08r9UOPSSM6K2cPa8/zfVVoca7b8j0tY0TYeS0e+wReMVAgMyxaq9hTbgPbuZpWK/0WWmshbMUF2y18HLmYtD7+FCD8y34VDSWSYjeVoxTq0s+KzlG76HofjSZFbvZGBjRwoNbVBlnK4b0qfTWwpPUPyQqHYl0po5fO85+nFnOwI75ttZi4QNCRXkHaEb6zK/nnw0xenskYhIqCQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=eaySLobzYo7WA/TNjhdCnZxXIX8FFsz0qX80WzS9aMo=;
- b=ud+efhG+GLk+s+YGIwzTem1rhZbeqaB/qcGpQqU408HL6nz4zXHaRzwzqskysz5adynSs9f55aJ0tKHym4k/CAzkXbR8vC+x2qzAKgKdA2ShjxJSFaqOqMikgINPwDEX5FILoSYoG0tbJiEN7n22lfaCowsukCIFMxZu4RxeBmCe8z3pHLWyCg/uvV3hJ1D1ClxMJQKrUvr170aSy3ITgs89fozUqfeJ9boToiqJvUYuunjsQ5A/NatjfH+hy89TTbJ1GIDQwdN3XbyhmAKVcqhgzMEZabAgtlOdgQCL4Ddu5TlNGnsrM3sQuqllY+mYREfCNQc5iX6jXus0Wov9PQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
- dkim=pass header.d=sandisk.com; arc=none
-Received: from PH7PR16MB6196.namprd16.prod.outlook.com (2603:10b6:510:312::5)
- by DS0PR16MB5389.namprd16.prod.outlook.com (2603:10b6:8:167::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8746.30; Tue, 20 May
- 2025 08:36:52 +0000
-Received: from PH7PR16MB6196.namprd16.prod.outlook.com
- ([fe80::436c:8204:2171:b839]) by PH7PR16MB6196.namprd16.prod.outlook.com
- ([fe80::436c:8204:2171:b839%5]) with mapi id 15.20.8746.030; Tue, 20 May 2025
- 08:36:52 +0000
-From: Avri Altman <Avri.Altman@sandisk.com>
-To: Loic Poulain <loic.poulain@oss.qualcomm.com>, "ulf.hansson@linaro.org"
-	<ulf.hansson@linaro.org>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH] mmc: card: Scan the eMMC boot areas for partition table
-Thread-Topic: [PATCH] mmc: card: Scan the eMMC boot areas for partition table
-Thread-Index: AQHbv1eFmGIX/DVh60WoLjnN3nQlFLPbRPWA
-Date: Tue, 20 May 2025 08:36:52 +0000
-Message-ID:
- <PH7PR16MB61963BD3A3CDEB4F9D982BDEE59FA@PH7PR16MB6196.namprd16.prod.outlook.com>
-References: <20250507134538.575912-1-loic.poulain@oss.qualcomm.com>
-In-Reply-To: <20250507134538.575912-1-loic.poulain@oss.qualcomm.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=sandisk.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: PH7PR16MB6196:EE_|DS0PR16MB5389:EE_
-x-ms-office365-filtering-correlation-id: 8fa101b0-faca-4f13-0173-08dd9779789f
-x-ms-exchange-atpmessageproperties: SA
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;ARA:13230040|376014|1800799024|366016|38070700018;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?Kod4ko1huSpa9WaoYokHQxYxHCocrt2vvdNjWiPrI5XrNFy3UV/x3SdI2+aR?=
- =?us-ascii?Q?1paWWcSgXu3DSKT8tO142zSxUtAKwTW/qR3p1sN5Q50xgafJKCKM7Ar66JmX?=
- =?us-ascii?Q?FBByUn+5R30/WKC0K6lCnp0KZDB2zaFQLi2bs4lx8i5Ao6mQ820Uuq+iBwcy?=
- =?us-ascii?Q?UqhJO/rM5vQfMM1VbpaFs9XcZ/nxqOEVZEyKgj355f95ZbtLK1Dh8RcXDWeK?=
- =?us-ascii?Q?AMFB0g/rJzKhXg0AX+Y4m6tVaKv/FwGqKh4c5BDnGHWo+pnTKFzcyhyFbeR+?=
- =?us-ascii?Q?tfT2yWphCp5GtQtlQCLht2X+sPjj8iKR9jzzSIqaDM9E5EAF6TcQtvEDIc0j?=
- =?us-ascii?Q?Ie6XVu7TUqOw3mwW9UfF5cKaVz1rMjf8Pa2zrI/7EuTLoq49VAndqQVUROil?=
- =?us-ascii?Q?AZe6j7AxK2c2+vxMqcSSTTTFCQqvTUdo7keFffk7cq/U9DnsUQvPskirYErp?=
- =?us-ascii?Q?lsvzvcbqnvKAP/2G9usuoCL/Esh+mWoXBhB/M+OoSlziTPXx8OKicgjOjDio?=
- =?us-ascii?Q?Nw5lDbm/x/OzNiHq0MTGwtgCg8kvS7uC5lHY3V6VwRbFUGjE1NmaINncs2Sj?=
- =?us-ascii?Q?vzdm6KiQq2X8WLpvvLrXcZenYgr8bGFwqsycXC+QlESiEaHecghMusKma1I/?=
- =?us-ascii?Q?rDHJZdETDvYbr9ceRm1Rn3+BUm8aPM/9lAM8wjhOMGJApx7x2EoSUdXC4UOJ?=
- =?us-ascii?Q?eWlADDsR1HI3bf7syYh2/ufZXsPHqGH7YuZmbAnovBED2sonUkBr8yKsED7n?=
- =?us-ascii?Q?JXl0zMgTHzhBqom1WkQsFsMQxhnlvhdOCfpcgD0r1B/cmtMyFGPkxZ0IObz5?=
- =?us-ascii?Q?JfuBnfSGik/4ywRDC0CfSUNLihov74OxXeG25oJObecUDfALcBEhDZA1YuaA?=
- =?us-ascii?Q?zeIHz9CbgDicNnmCD3qOaASL853VtObxoqcL0+rQxU7R5XY7fES3VLjd6MEj?=
- =?us-ascii?Q?I+70HG0G0FJ/DJw2MgsvUzitr2foGtMnlDxvgKSMFziQHlmPSuhjHgaon9SY?=
- =?us-ascii?Q?pexRahGBGTbGvoMeRwsy+veJLNr1u/elbeWn6tDuVmNXjJECmRWFkuOiFs10?=
- =?us-ascii?Q?gnF8zrsRA9Uk1rFhVrIuCf97ORWy9iaLxvEsYQW1w6WGaieCXdvGUShzDjcO?=
- =?us-ascii?Q?CwLvZQdSp55dCBOXgM7g67yb85Rd1HEtldMLpUXXAZTnJ3oAckxsDjNbPNlc?=
- =?us-ascii?Q?2OIhfK2uMU3NambnvWNF4cxt6W6MVwyi6I1Ej2R4XPD+XeYxnI3F+GD48C01?=
- =?us-ascii?Q?0SsaktoO1y1hp/Vc5pEJn6k2ScsStJhsLqRWb5UPZy3oMhNDfMz/NiWwTIRJ?=
- =?us-ascii?Q?0C6p8XScTZoC5kiCYURNr0ENj8AzZDSlvzsAB4BbygKlGEMVeZl8UcO+Nagu?=
- =?us-ascii?Q?2HLDvaXg05QvYyNgV0avi0ZyQ+f3QbPkNM1wTRTk66NMQupuaP5S+HFdSOnS?=
- =?us-ascii?Q?XDA/XVJiYav4tcSi+9ESqCoTwTX1v0cUDI2fNaUQM4f5Ey9uK8/zlw=3D=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR16MB6196.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(1800799024)(366016)(38070700018);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?C0LzecAyfArUoHhm7jec+X9HnPjKqH1+f70q349FYfTWvchST4yrXe/U//01?=
- =?us-ascii?Q?o2Ty9v5MJ9sccKp/Bn327Pk4xgKzOZQpiQbL8XXNfrRNRRn6CiIlbfEbDvp8?=
- =?us-ascii?Q?pbyPLNIeHHIfqXRWSqRLo9f3ROqT4OtHp7JcsbzU8AurQDrHxcmFayzQBNT6?=
- =?us-ascii?Q?o6IzUcnqGX2R3V2zUa810hpSHqtj9gTViDn9OhaO0uLtJLuAg36IdoNqqJQj?=
- =?us-ascii?Q?lrKad7Nimf+XO5QjAMt4FyPNPi4pm6Vk82ewB7gfl9uAUed2f3NSlBeRT/K5?=
- =?us-ascii?Q?fVnVbk/wGdSj1NECFCPs3eVoBDZlEkMmCVMfM9T3r8p+lXnrmrWXbEOS3/qG?=
- =?us-ascii?Q?u9w9OlKbpRXhzUgLY4i1H/TfEJ91XI9Mi5QY0Sew/H4qBNjwdXh7qd9Won/2?=
- =?us-ascii?Q?NOczhuXrxDW2U13CRW/3VAq1USQ63h2teiyzIOCDlcSfY9Hc5nNY+oemOdFk?=
- =?us-ascii?Q?clwl/1Cv+vDZBfL7mMhllYrDk3cIFElFiTuxIqVyhCzGdkwfCIDKLnOgdnmC?=
- =?us-ascii?Q?gX3qM921/wgXQfKouzDbDIlBv8YCaXhjAaDW0KjTRDny1e0VGrgVGM3IbwOr?=
- =?us-ascii?Q?5WuDVdSLSGbiqrMP9pM7MUAs51l3PGYr1jYNRunXYlizvxslSuuYWsNSvxIP?=
- =?us-ascii?Q?dH/JaQzpDtQ3/7faTYci49hulyiusJDOPncOLVE93gwZzvWD4CI+zOyPuk/m?=
- =?us-ascii?Q?wGS5wfrXqM/LJ6c+yCOZn9ez5ooEOyR02nmgRfD6Mxmg7RjQXcDFozLO+1oA?=
- =?us-ascii?Q?+MrU4kjASv+b+K3jSV9jNnAP/17wYoULAUVSQoOgjFCeQgG28istP6+IfETT?=
- =?us-ascii?Q?MLsO1rV89BUvspOuU7xNrJsDfmTwbI9qG2US6qsHNyL/QV+c4STjKUbuq1zy?=
- =?us-ascii?Q?QkPtZT+vL8JFWeETWE0QVmFKlwf4eaZJZ9WyEM3I/Z5gCI1j384LwBg8uUzM?=
- =?us-ascii?Q?5JlWJa2qv0QUyv6jSjxS3iUOakzkq6Des3zP0kl7qXEtkyyFIvVL2fHXyazZ?=
- =?us-ascii?Q?L7X/btBJHgXpfSm8sbwcK6PdkEptGUeXvLVMUwrXr99OxshRBo4BJrGHrcPx?=
- =?us-ascii?Q?CpvwBmtfoVGQYqhnQ1zbqKElV401N3W85MBGD086a37MshalOS8rE9hiRl6d?=
- =?us-ascii?Q?mtArbdsOqLdfSoEEyIwixTqfpH8ORvTJ4vFSMo6n/r2QzjFWacKVpMtrwJJ9?=
- =?us-ascii?Q?qvrXJHfBz0uT9KfZ6VGmYyl9jflzlIxa9xe6XTs8oDnXFDwKYJ/XMQ9q1MNZ?=
- =?us-ascii?Q?BEvBo41L5SHSIU3LdqgEUNPM47P/wsFthCKeclXLCaZ/ztdv9tpeo0MFHCq/?=
- =?us-ascii?Q?WXIDTPH+PF0WiCDOdgTX9yd54h2m59vYINZmaZIIiMlduai5AjGw/jvtLE1e?=
- =?us-ascii?Q?fTM5QH0y+WaaEVAyqj7LdzCvSR9sgY4IDg5A6glZqNgxuH0bAycRiJ61OU2/?=
- =?us-ascii?Q?gaynRNHJKI9zWA4NsOARZgzmCp5WZ/UPDL6LpzwnHQlroAIVuZnLJ7W+sU51?=
- =?us-ascii?Q?w5/GaEi8NSEFwBgrieNvqS3xqyK7dNLlXKYWhElp1o4ZnG1ZjT/KAx0684bT?=
- =?us-ascii?Q?ovZ3xuUNIu3IHc/j8tsrH8J8OJ0G7Ajt/paIq92E?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="ZE0YVX5E"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54K80lD6027736;
+	Tue, 20 May 2025 09:15:27 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	Csf3v73qcTg/6a2zKpEnV119AkhPy4Kn1isOqUWbZAQ=; b=ZE0YVX5EolMHSJGM
+	q5jJ3uYYP/KL+FTCVRXv7UkXS2Cvap8vin4eYRbqAqiUKFdf0w3qoE7fvVagEunF
+	kaN06u3s/moAzcHk+rLbMAgMpKlhT5yCoSncepFgEfk5cDDQGZ+EGaJCISctuAGu
+	CKu+IprmMLbF8MFH/Q777l02z+tYAoNVwwwHDcuoQn1ADytIO8DGe1XpzCQtjn12
+	7P3lVTliY+w4VTZxyapOHFMdbNkYwOJWR7iawVrACXIyk/mcMlFXGtQZ4Ia66Vgy
+	ZbzM4EKmzsivQMGEYfqM2+B+mOgz2hkUljWtFoRwuEUmzldS002Z+44FhjbRq4Ap
+	1x6V2Q==
+Received: from nasanppmta04.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 46pjm4y971-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 20 May 2025 09:15:27 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 54K9FQm1025996
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 20 May 2025 09:15:26 GMT
+Received: from [10.218.0.120] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Tue, 20 May
+ 2025 02:15:17 -0700
+Message-ID: <478e86ca-4638-4b90-9a36-ed411b547f7a@quicinc.com>
+Date: Tue, 20 May 2025 14:45:15 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
-	5Dry3S5TNsLMP3A5+O43MPT+RDmhbx4XTJh0OCi+vKJ5Zb10EMLBHrJ1+lFBBWkgyONntrGs+CTH3a5m57Pcw8yCYtI6HyzOdstp5oR1zyG+Dv71ORJkQuXx+ad1pSdsOJ32N/ytG8r/Schdy6gq22Q1RA+CFUPxNaAN1pVwc3VaDPC6iFS4x0wXtyxAemWXDk4mmtszP/u2jYHRY3QlAYcK0OnMy1Gg2I6lOpeppxo4wSqP/vyupYCLQ54Q4agCKVfX1U9/Omn2SW0yP9M32HTS0D3mjFxiA8dzq5rvE376mlWAKd7hSf4fW/sb/4eVNJEq6Xp7CvEw1unYS8tm9bhXBrahgqL32JFezDrO1thx2sPYpqVontypAEMySGvp7duhNVru+/fC2mXI+bvSZHfc/e3o5dIEbkZ+lOK+YJYGGx/UXvJ5cSGFmKOYTn4PYuU7nBmQqu8D5LtTNmMDpudb7aCdLVgasLn3w3iTK3s1MYEjheOwGO0/Bi/sLZvucg59R3Ip0MtmDqFFaWK7IUZCBEGp4tu7iFSj49ANj8/sGhnaHvFS/Ez3a9ZlJh+VnqD5CHpVF83whuHSpi9Mo4RMS9jGfH7G0fQ1lZ+FNNFtZC917CrTYecENfx60r2l4bkYXuUDksjemi+ck9EVXg==
-X-OriginatorOrg: sandisk.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: PH7PR16MB6196.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8fa101b0-faca-4f13-0173-08dd9779789f
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 May 2025 08:36:52.6731
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 0/K2YWntqqc8pkh9asYrupMXAZ63Z+f5dDw6vwJGHg67TOgKDp1EP9ufExz9g9YruHyZVs+CSOROE5habjPKVg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR16MB5389
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1 1/3] dt-bindings: mmc: qcom: Document level shifter
+ flag for SD card
+Content-Language: en-US
+To: Krzysztof Kozlowski <krzk@kernel.org>
+CC: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma
+	<bhupesh.sharma@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_sachgupt@quicinc.com>, <quic_bhaskarv@quicinc.com>,
+        <quic_narepall@quicinc.com>, <kernel@quicinc.com>
+References: <20241107080505.29244-1-quic_sartgarg@quicinc.com>
+ <20241107080505.29244-2-quic_sartgarg@quicinc.com>
+ <qffggh2ld2cw7d3eqwaerzicerhvdqojwsasherx7dgoda42b7@bigsjxr6vtao>
+ <ba49151a-e32d-438d-8a2a-50840368a87c@quicinc.com>
+ <8c6d37bb-8e07-4e44-bef1-f4376b54b853@kernel.org>
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <8c6d37bb-8e07-4e44-bef1-f4376b54b853@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=dIimmPZb c=1 sm=1 tr=0 ts=682c482f cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=dt9VzEwgFbYA:10 a=COk6AnOGAAAA:8
+ a=VhTX7d0uqKoKWHOLC50A:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-ORIG-GUID: pHuSY4N49Epo46v-eH-X7Ozbh5dpumRz
+X-Proofpoint-GUID: pHuSY4N49Epo46v-eH-X7Ozbh5dpumRz
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTIwMDA3NSBTYWx0ZWRfXwhXGJ8iLtsSd
+ kgoRwa1JFmJAK2hfyTjWS92gZeBcBH7Kcesz8r03V0nAABDuECsAAWJj/40wob328X7eQc3cN5a
+ TOYl5pRmmwfmTs/f3KatvN+dwC2GgIw4QCmlo4C7BmLHjR+PNJfN3PQhK3Z6//cj2zahNMsd6ae
+ r6imi1ZC0p1GllxM5QYHmNRla15OuKNNu7hQ4xWQMBoRDFPW7SB8ICjXieXy+lsj30pJ6ublGN5
+ P6qpHxLPYpokjR1RnRt2z5sT9DzWRUOLEfVVQc1vn0QaQOvoPvxB1TTJSr8/eiAOCnPT+6CzCYG
+ pKxLF3tfKdHEEz6/ZABJuk2TAD63Rb2FHSV/ZZFFa1yZMGyGGptmqfVsj7gDbmM44nKmKiy7inu
+ Lw7olSzRaieDoIOl5u2n1KuKk5hL9MsJFNuNxwIh7joGHo3q7XIQVr6PsDKPJExG2kRWa3A2
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
+ definitions=2025-05-20_04,2025-05-16_03,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 mlxscore=0 bulkscore=0 malwarescore=0 suspectscore=0
+ impostorscore=0 clxscore=1015 phishscore=0 adultscore=0 priorityscore=1501
+ mlxlogscore=897 spamscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505070000
+ definitions=main-2505200075
 
-> It appears that some vendors provision the boot areas with valid part
-> tables (GPT) in order to have identifiable partitions for device and
-> firmware specific data, such has the qualcomm CDT (Qualcomm Config
-> Data Table). Additionally, these boot areas can be utilized to host
-> device-specific IDs, calibration data, and other critical information.
->=20
-> Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
-> ---
->  drivers/mmc/core/block.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 4830628510e6..c81925194509 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2655,7 +2655,7 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->  	md->disk->private_data =3D md;
->  	md->parent =3D parent;
->  	set_disk_ro(md->disk, md->read_only || default_ro);
-> -	if (area_type & (MMC_BLK_DATA_AREA_RPMB |
-> MMC_BLK_DATA_AREA_BOOT))
-> +	if (area_type & MMC_BLK_DATA_AREA_RPMB)
->  		md->disk->flags |=3D GENHD_FL_NO_PART;
-Given that the boot area is now exposed to accidental overwrites,
-Maybe add here a proper comment. Also even advise on boot wp options.
 
-Thanks,
-Avri
 
->=20
->  	/*
-> --
-> 2.34.1
->=20
+On 5/20/2025 12:48 PM, Krzysztof Kozlowski wrote:
+> On 20/05/2025 08:58, Sarthak Garg wrote:
+>>
+>>
+>> On 11/7/2024 3:29 PM, Krzysztof Kozlowski wrote:
+>>> On Thu, Nov 07, 2024 at 01:35:03PM +0530, Sarthak Garg wrote:
+>>>> Introduce a flag to indicate if the Qualcomm platform has a level
+>>>> shifter for SD cards. With level shifter addition some extra delay is
+>>>> seen on RX data path leading to CRC errors. To compensate these delays
+>>>> and avoid CRC errors below things needs to be done:
+>>>>
+>>>> 1) Enable tuning for SDR50 mode
+>>>> 2) Limit HS mode frequency to 37.5MHz from 50MHz
+>>>>
+>>>> Add this flag for all targets with a level shifter to handle these
+>>>> issues for SD card.
+>>>>
+>>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>>> ---
+>>>>    Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 3 +++
+>>>>    1 file changed, 3 insertions(+)
+>>>>
+>>>
+>>> This wasn't tested, so just short review - platform means SoC usually,
+>>> so this looks SoC specific, thus implied by compatible.
+>>>   > Best regards,
+>>> Krzysztof
+>>>
+>>
+>> Sure will redesign this logic and use compatible in patch V2.
+> 
+> Hi, I hope you are well and that was just some mishap, but I cannot help
+> but notice that you received review within two hours after posting
+> patch, but now you responded to my review after 6 months.
+> 
+> Sometimes I really consider reviewing at the end of 2 weeks - the usual
+> maximum time frame.
+> 
+> Best regards,
+> Krzysztof
 
+Sorry I was on a break.
+My apologies that I couldn't give a heads up for this in advance.
+I have started this activity again and will be actively working now.
