@@ -1,65 +1,65 @@
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com [209.85.210.172])
+Received: from mail-pf1-f181.google.com (mail-pf1-f181.google.com [209.85.210.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2414678F3E;
-	Tue, 20 May 2025 04:36:55 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A563737160;
+	Tue, 20 May 2025 05:11:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747715820; cv=none; b=FprbelXiBPr6gaysS+Gv05eEXFpL5fgzMfBTMbH/ybj38UMobGJx2tkw6b82EwHeyeaFvU24VCHf/Ov+KfzGajXWnVBG/Hm/lfNZXv67yu4VdKYVpszA0UCn6GjmxOdcw3QFaBuc4mH9WmyUVeV7u4SqFdQLmeUsFCxXku6qNk8=
+	t=1747717899; cv=none; b=QGfgFAdddDmpiWVG9B3+VNlUsF/YtgDC/3M4lpB9t8x+X63CMeTMbElsb+NIrgh5a5L1vlykqCrmHcas/KwZT4X9sTnIlbbLhC/lHCMQLsX9EMpjG+/Eqt9qlA2xMyGlXJ94q+e+nvnhRdDRCdDLNBFu62/EVzyuK/u2xWmvq6w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747715820; c=relaxed/simple;
-	bh=NhQGxhQ0yL17B3iT/BXjOM4IQOEzGgZC+klQ1+d1vtA=;
+	s=arc-20240116; t=1747717899; c=relaxed/simple;
+	bh=HdEsU/vKDhUc8Tz+yA+qkYHOA5NaaS3F+dEaMd7qq5A=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=DlI/Y9/isg+V3/DCA6GbwLUe5HO6kZ1ccIFEh5U3/WkVg/moEzmkJS6UjMBq3uVSrJ5ZOdXWfgeahZczKEZ/uQ1Eg5S4dw1j8weSuPMdQgb5TSaI9WLMK3OyxOJ/yyTckvSakDJMKsTHP/eAch6ebKUMcoWJWjhCQh+L71KDDxg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FpLi3S0G; arc=none smtp.client-ip=209.85.210.172
+	 In-Reply-To:Content-Type; b=rHE98vwVOxjeSMa5AtKbdeJgqVKomFj0YyOcgRfOInM+9tEvIVJUw47QR9WaMSeawXdIxkdC5vlezRVIANBgKG/iwLcLHyZUbPfdjljKY2yO4mYHiuIZgSGWNCa9sDf+KuWi1fOLXHIdLP0GFDqAzoj9rHrnQc8OrG9pwfzDmPk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=m4CszZvF; arc=none smtp.client-ip=209.85.210.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FpLi3S0G"
-Received: by mail-pf1-f172.google.com with SMTP id d2e1a72fcca58-736c277331eso5477637b3a.1;
-        Mon, 19 May 2025 21:36:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="m4CszZvF"
+Received: by mail-pf1-f181.google.com with SMTP id d2e1a72fcca58-742c9907967so2048291b3a.1;
+        Mon, 19 May 2025 22:11:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747715815; x=1748320615; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1747717897; x=1748322697; darn=vger.kernel.org;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=SeMG9YLsg9XEA0NyUbXcqanyVq8FyPe8fnf9/EUxX8Y=;
-        b=FpLi3S0GgRwxxwpG5LXXZ09RgPoQJAgUGxwnLacjdUC24t9f8JwVteKH0jMquTqH5v
-         GWiEMUeWfbc0T9R48uZd1Egv0l/3wu/jb0YnxqLKMQq/ggmOVwd+fhxFqTVsg+VQ2RiN
-         8ksZ6p/gvXRenkwZPeUvOmJJ1Ndp7AyXaE9ulSiS5zCxzEzgjWIVCyjOz+NLb7e1xhfC
-         h9vh5IW8eB1o/xOpkCj1F5b4F3qMvAHk9aL2AxkflHWuYqnW9KFoT+EFg6FzkHEHodWR
-         KM+wsAU3DxWpSvAMiVa2W6KvQxxtLCtopq6AJMJK5uIOJk+0xuWFmAhj/X3NuG/9/1uA
-         snig==
+        bh=2RErO6BFlJ5rM/uW4yaFT4DzP3zQVUN3N08kf90qHkk=;
+        b=m4CszZvFU3EOMP6jMtBjrQ8eIeSp2yKf+FoMmA+6gWJAEtB+zIKqNfX/LV+5v9zVMt
+         BEqG1XHjiMFoRuaiI+gSUIWW3QahK/tz4wqHZZEuoeNkFtae1E4Ch5dIvtm5pmTh1Yru
+         hl1kzLRdIuFy+Rw+YIcQLMkCPe0tc8/vGbHG/rSq6R1R/ordV4BDIRlw85e+Z97L9zqy
+         gk6xEDG4aRwqCC+R+Zy5pLmsnd2zO2HV5JKR3Z70E2ToTEJvNIvLcp+idUa4VyNm2Q8Y
+         LP/ClP0H1unX+p9ZiYrAEd7ui28ejYruAEIu2/RlEn4nC+uqUfr3HjZc2GASzLpvIVKM
+         zayQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747715815; x=1748320615;
+        d=1e100.net; s=20230601; t=1747717897; x=1748322697;
         h=content-transfer-encoding:in-reply-to:from:content-language
          :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=SeMG9YLsg9XEA0NyUbXcqanyVq8FyPe8fnf9/EUxX8Y=;
-        b=betgChvQuUZHmG/qfecBa60Skmq8KQ03P+I/r4erfIdolCbfl3UQNeZfhryFphTpjm
-         NtH23A+qRgcNijY2aWM1tW1y52JAoqMAZdEGQfHLkEXpT90CcxMYnOjuQwlcZh5EAHJg
-         25fUWOJ9gIBCTG6zSMHKrwpu172hpJKyI5zgUWkzPmMQy/DlAIgA6Mv018y3i+bdp9NF
-         eahEWXwiyjDClZ74Z55NZSZ8hvpZ8B5lsdo2/AkNxPhSVfeU1VXb2Q3gOY7rXI5Z/eWb
-         r1/WoK52DLeaM6tgo/Qfu1A1qXobWBeCt0JEyHJkR0BMa6ibrqU9m7wqmVT7Fem0K9Wa
-         IqMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXJChYSinpWRHqTNB08cS8rb0vmtA2bCf4vXOv8a8xaSlwCiIMiUpo3XWjBvMa7VM0ew8kgcBxFLhgA@vger.kernel.org, AJvYcCXJraCox+CGmveWXwryUkInUmeB/LjB9PLr/OtN8b59dFkctDBrZO0ZLUdekmSCB9vyoLrY/X0NyEsXEJAm@vger.kernel.org, AJvYcCXySua2aMuBgejtV9u8GRc0W0s8K+WdrDmp/a7i09dzxR7e9pa2F+luZUgyo+PT6EbuRyveElnPFpFO@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz+zkzsQtp8N3Do+xMjeXqE4xNCdVu9ZznMfEx8bUBI02Yn8bTe
-	RymnvAKP3JYCNCgpZwnDiEUc8WqwHREHzEKFMjgYg/646YJ8N5ne+bIHkofcXg==
-X-Gm-Gg: ASbGnct9ndmAAqEjGOdF+EEJc3dNvxRRjNctu3PTHv+r4X/wRIT2vxSKplGdkoyRM5o
-	fPy5S1vypmKpne1fOuAODPURKfVxSKlsbkXVBKtTFyOY4tWQ73TwRKhzkMa7nV5a+ngbj0GTGDq
-	MBJAIUDm/6NgivSATQIR06h1du1tD9Kg+lQIRIqAA4QUr1NfGSLDgqbA4ZehJO6evxfz4p/I35k
-	x2n6vQOwMGvn3rR/COqg2++DLsPKASDDyOfefUDRZxK/0Fs5Zgf4jDfZGMIEX1TbyqQ/jLnWWgc
-	ek1oLc7MY8hoUI0U8iA9ndS2axh773dWDVON9yxUqiCZC0aC7V8jHUG13i24o4S5fk40tgPesw=
+        bh=2RErO6BFlJ5rM/uW4yaFT4DzP3zQVUN3N08kf90qHkk=;
+        b=IaEHh4UYKyBh6sAmmF4PzDrHZfG2D0/LQ/IsqYSi4NreDc5V9t42sKGa8ZmYmsZ7I3
+         VnnSK4myxqOQ9lTHBwPiaKz8bYBodqyW9DGFYL8+x17Cnyw6+YgUwDGPMxWQdABZCXrs
+         h5UohfNECwHxJcvg01jUorvtklccoeO4G2IZ4naZXBQhEWPy/4w/2l34WAw6zXridAz6
+         9zu4/p0f3p2Ry+bhL+v0eqzX/TUwUNITbGm640F2Xw3+XHarsf4UPdt4ggXX3c+u8l/d
+         9gs8owmRAegvRP0oib1Di1T2lr307WThjTBiBE3fnZ+wcK3TVJdzLHT00CtE09jFDWlX
+         024g==
+X-Forwarded-Encrypted: i=1; AJvYcCU+Yzk/6ivD2zkSpaFrzHgE74gwckLcSEABPI9VYt4B+HM1pr3O1V4aJttfOfAcHQM+iV/TH9ec6xNjV4O7@vger.kernel.org, AJvYcCVDoy4UUUZ0iDgIwreXXD7E5IBRd44wBp+7BOMuJ0/Y3hPLyZrKfw3uYfA+gTcUHT6tgIx2OwHMyp45@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy7vhtrAVLEGQATs/1S16o8UG7z9nKEOTlgAkzG5xvlKltc2Ky+
+	j0JiM4ade+QVkNZ3A16ZxXyXtEtZboN8WVHrjnUUsDXxVHAnrr9181G1FquGag==
+X-Gm-Gg: ASbGncsR1a+dKUMYGhY5LGKfLYcXVyt5fI4AOxZC4KfKYjpFSK4RGx+gNAKGTilSMwH
+	3tv8DUBKPacf+H1cPgGm4CYbSMwUiYjoMhMVFwu3KrSdGgnyEGBW5UCRdkyLW/jn39u53AZ8MZW
+	RF3lCY3sa9Vfk7jMEXmL5pQv7dE0UTeNQdHvSLuiteO+Gj/3sPg+OWKTGOuUiRxOCIOrK4Qbbs9
+	yrZeUAgC/3k2CpagAixGi18KmCHhaV0c0+goSvilpG9Q24bjroMlSoQr4MCDUCCWoCpAzaiSblW
+	PExGL5A2OiqjDS9dG+NK8261LtG9whXuX9qe76mhixSN7Uit2aiUrg2tV8us5IpXFQ2NChQqRg=
 	=
-X-Google-Smtp-Source: AGHT+IHy+xxixyPtO+j4BLklrYKrnGOzYdiHTF+lhvpKzK6Qdz+fUN73wAY5ibkqoMQMBWP5ADq8Zg==
-X-Received: by 2002:a05:6a21:3384:b0:215:dc32:e993 with SMTP id adf61e73a8af0-2165f5e3ebbmr24708840637.3.1747715815231;
-        Mon, 19 May 2025 21:36:55 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEWTUNR2FRJIka6CyDy9SWDCxKCJ+8wbGCOhL82yEnOfAldWJP5tTVsjxdQFJpZTAt0DI716A==
+X-Received: by 2002:a05:6a20:3d83:b0:1f5:8cc8:9cc5 with SMTP id adf61e73a8af0-216219c7ff4mr27248129637.34.1747717896780;
+        Mon, 19 May 2025 22:11:36 -0700 (PDT)
 Received: from [192.168.1.6] ([27.57.94.111])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a98a0ca7sm7029193b3a.158.2025.05.19.21.36.51
+        by smtp.gmail.com with ESMTPSA id 41be03b00d2f7-b26eaf70df5sm7151896a12.28.2025.05.19.22.11.33
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 19 May 2025 21:36:54 -0700 (PDT)
-Message-ID: <314cdaf1-b989-4cae-a275-d962186bd46c@gmail.com>
-Date: Tue, 20 May 2025 10:06:50 +0530
+        Mon, 19 May 2025 22:11:35 -0700 (PDT)
+Message-ID: <97474249-7d4b-4a74-b2c2-13b89db1dc6f@gmail.com>
+Date: Tue, 20 May 2025 10:41:31 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,74 +69,50 @@ MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
 Subject: Re: [PATCH v2] dt-bindings: mmc: ti-omap: convert text based binding
  to json schema
-To: Conor Dooley <conor@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org
 References: <20250519-ti-omap-v2-1-2a0dbc08fb9c@gmail.com>
- <20250519-unstamped-tabasco-05d9c7223289@spud>
+ <6a3a7e99-8d45-4e44-8014-14d182de5dd6@kernel.org>
 Content-Language: en-US
 From: Charan Pedumuru <charan.pedumuru@gmail.com>
-In-Reply-To: <20250519-unstamped-tabasco-05d9c7223289@spud>
+In-Reply-To: <6a3a7e99-8d45-4e44-8014-14d182de5dd6@kernel.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 
 
-On 19-05-2025 21:29, Conor Dooley wrote:
-> On Mon, May 19, 2025 at 01:11:17PM +0000, Charan Pedumuru wrote:
->> Convert TI MMC host controller binding to YAML format.
->> Changes during Conversion:
->> - Add new properties 'dma', 'dma-names' under required.
->> - Define two separate phandles for 'dmas' in the examples.
->> - Include appropriate header file for interrupts and use
->>   it in the examples.
->>
->> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
->> ---
->> Changes in v2:
->> - Added include statement for irq interrupt controller and
->>   modified the interrupts under property to use header.
->> - Changed maintainer to Rob Herring.
->> - Defined two seperate phandles for 'dmas' under examples.
->> - Rename the YAML file name to the compatible 'ti,omap2420-mmc'.
->> - Added missing type and maxItems to 'ti,hwmods' under properties.
->> - Link to v1: https://lore.kernel.org/r/20250510-ti-omap-v1-1-588b0ccb1823@gmail.com
->> ---
->>  .../devicetree/bindings/mmc/ti,omap2420-mmc.yaml   | 64 ++++++++++++++++++++++
->>  Documentation/devicetree/bindings/mmc/ti-omap.txt  | 26 ---------
->>  2 files changed, 64 insertions(+), 26 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
->> new file mode 100644
->> index 0000000000000000000000000000000000000000..195db77e0063b867f318ffc6b5f8811adb531515
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/ti,omap2420-mmc.yaml
->> @@ -0,0 +1,64 @@
->> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/mmc/ti,omap2420-mmc.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+On 19-05-2025 21:36, Krzysztof Kozlowski wrote:
+> On 19/05/2025 15:11, Charan Pedumuru wrote:
 >> +
->> +title: TI MMC host controller for OMAP1 and 2420
->> +
->> +description:
->> +  The MMC Host controller for TI OMAP1 and 2420 family provides
->> +  an interface for MMC, SD and SDIO types of memory cards.
->> +
->> +allOf:
->> +  - $ref: mmc-controller.yaml
->> +
->> +maintainers:
->> +  - Rob Herring <robh@kernel.org>
+>> +  ti,hwmods:
+>> +    maxItems: 1
+>> +    items:
+>> +      type: string
 > 
-> This patch looks fine, but I don't want to ack this with Rob's name
-> there. Tony Lindgren <tony@atomide.com> wrote the original binding
-> as far as I saw from a quick check, maybe he's a more suitable pick?
+> That's not really correct. That's just a string, so no items, no
+> maxItems and use proper ref, not type string.
 
-Sure, I will add Tony to the maintainers then.
+Okay, I will define string definition using $ref
+
+ 
+> 
+>> +      pattern: "^msdi[0-9]+$"
+>> +
+>> +required:
+>> +  - compatible
+>> +  - reg
+>> +  - interrupts
+>> +  - dmas
+>> +  - dma-names
+>> +  - ti,hwmods
+>> +
+> 
+> 
+> Best regards,
+> Krzysztof
 
 -- 
 Best Regards,
