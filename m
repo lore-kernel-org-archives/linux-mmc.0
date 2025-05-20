@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 516A927CCDF
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:45:34 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 50CDC27A47C
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:45:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747741539; cv=none; b=Oii9lJlKnxHvPvK1xEiq/h9lxSp42yx0iZBFVIf0ofWoFICdr4Djbv2vIuteQFBQrBT4V2H8qlelGo13071GhZinj1JxbWaD4BpSeolBZg0wKFDkDFmBzbGbJ/W85Xn+aYQavmQQ2hXILCwmjUN8R5gMv7CXr0w6WlJZWVX/0co=
+	t=1747741540; cv=none; b=jZFEO0Obo5dENH9J5dWhjdB6ctTS0TFlwrzZx2K+05BJIAx2PtMgQ4cdSQTpYzJSMvj1hU2IByZNC+HlR+IRiciyevkLHHp17EzeO9BhfH5HMlQNxRpyrSm9hjYqKIyCXNM/+dZDNVxwFAQ8s51WeN5Jpz9o4Uugdh9uFBr+/No=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747741539; c=relaxed/simple;
-	bh=TScy9bpHjCrzVZkfOYieWzvs8Fik4KwEdhFgGjPI6E0=;
+	s=arc-20240116; t=1747741540; c=relaxed/simple;
+	bh=/zxnaibJBEI1LJFYQxTykq8jaHDmgcIg7L1YEVww9oY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=fBurqahFAtCf9g5al9sINjnucX9SeWKZU2XgZOH+DRX23kg4opoPcTVVddHjdUYYOYIqjYfgYWFq+YzFwmTlleXXIc3jCkzgST4GEWOsYdedLFfk/xczkGzIEOnHXImwXUPkaCQrwSY8TNVOTTxResyP2zKICStB6BukocJqsN8=
+	 MIME-Version; b=p4Invk+lgJOmBGazE+ri1EBw1MtrZ/TUPWyOGVrF3+Oqr5kc8+wR3Y82aYhH2yifNd9g6S0v0v+cXFodNEFevzU9yD979mhPc0r8tbdL9UYyFfCz5LmhfwrEk+QntvAhu9GjwJpSMrGN7FfmIhIfMctTMRhPsLe5SFR+VT9UCX8=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8AxquBdayxodl3zAA--.24768S3;
-	Tue, 20 May 2025 19:45:33 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8DxOGpeayxoe13zAA--.2782S3;
+	Tue, 20 May 2025 19:45:34 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMBxHcVbayxoSzvjAA--.56747S2;
-	Tue, 20 May 2025 19:45:32 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMBxHcVbayxoSzvjAA--.56747S3;
+	Tue, 20 May 2025 19:45:33 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -25,10 +25,10 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 08/36] mmc: dw_mmc: Use devm_mmc_alloc_host() helper
-Date: Tue, 20 May 2025 19:45:22 +0800
-Message-ID: <91abf20686995829ad2f01d04aed175fc1733d0c.1747739323.git.zhoubinbin@loongson.cn>
+	Paul Cercueil <paul@crapouillou.net>
+Subject: [PATCH 09/36] mmc: jz4740: Use devm_mmc_alloc_host() helper
+Date: Tue, 20 May 2025 19:45:23 +0800
+Message-ID: <4cc3bd3fa2d1592b34699619bf235a09cce79f96.1747739323.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1747739323.git.zhoubinbin@loongson.cn>
 References: <cover.1747739323.git.zhoubinbin@loongson.cn>
@@ -39,14 +39,14 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMBxHcVbayxoSzvjAA--.56747S2
+X-CM-TRANSID:qMiowMBxHcVbayxoSzvjAA--.56747S3
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7WFy5GFyrJr17Jw17Zw4DZFc_yoW8Zr4UpF
-	43W34akr4kAF4fG3ykAw4qgr13A3yFgrWUGrWDWw4Fvw17Jr1qya1Duay8tF95GFW8J3Wx
-	WF45Zr45u3ZrZFgCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoWxWFWrCF1xXF4rJFy3tw1rZrc_yoW5Cryxpa
+	93JF9xKrW8GF4Yg39rGa1UA3WrXr18t3yIg3yxXw4xAw15Kr1qkwn5CFyFqFyrJFykJw1I
+	gFsrWr18AFWUXFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUU9jb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	0xBIdaVrnRJUUU90b4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
 	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
 	0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
 	6rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYI
@@ -55,80 +55,105 @@ X-Coremail-Antispam: 1Uk129KBj93XoW7WFy5GFyrJr17Jw17Zw4DZFc_yoW8Zr4UpF
 	8JMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMxCIbckI1I0E14v26r1Y
 	6r17MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7
 	AF67AKxVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26F1j6w1UMIIF0xvE
-	2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcV
-	C2z280aVAFwI0_Gr0_Cr1lIxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2Kfnx
-	nUUI43ZEXa7IU0yxRDUUUUU==
+	2Ix0cI8IcVCY1x0267AKxVWxJVW8Jr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0x
+	vEx4A2jsIE14v26r4j6F4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVj
+	vjDU0xZFpf9x07j6sjUUUUUU=
 
 Use new function devm_mmc_alloc_host() to simplify the code.
 
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Paul Cercueil <paul@crapouillou.net>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/dw_mmc.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+ drivers/mmc/host/jz4740_mmc.c | 40 ++++++++++++-----------------------
+ 1 file changed, 13 insertions(+), 27 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2bfcc47dcf3e..06ffa65df181 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3008,7 +3008,7 @@ static int dw_mci_init_slot(struct dw_mci *host)
- 	struct dw_mci_slot *slot;
- 	int ret;
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index bd1662e275d4..3a623323aef3 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -1042,7 +1042,7 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 	struct mmc_host *mmc;
+ 	struct jz4740_mmc_host *host;
  
--	mmc = mmc_alloc_host(sizeof(struct dw_mci_slot), host->dev);
-+	mmc = devm_mmc_alloc_host(host->dev, sizeof(*slot));
- 	if (!mmc)
+-	mmc = mmc_alloc_host(sizeof(struct jz4740_mmc_host), &pdev->dev);
++	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(*host));
+ 	if (!mmc) {
+ 		dev_err(&pdev->dev, "Failed to alloc mmc host structure\n");
  		return -ENOMEM;
- 
-@@ -3024,18 +3024,18 @@ static int dw_mci_init_slot(struct dw_mci *host)
- 	/*if there are external regulators, get them*/
- 	ret = mmc_regulator_get_supply(mmc);
- 	if (ret)
--		goto err_host_allocated;
-+		return ret;
- 
- 	if (!mmc->ocr_avail)
- 		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+@@ -1054,31 +1054,24 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 	host->version = (enum jz4740_mmc_version)device_get_match_data(&pdev->dev);
  
  	ret = mmc_of_parse(mmc);
- 	if (ret)
--		goto err_host_allocated;
-+		return ret;
+-	if (ret) {
+-		dev_err_probe(&pdev->dev, ret, "could not parse device properties\n");
+-		goto err_free_host;
+-	}
++	if (ret)
++		return dev_err_probe(&pdev->dev, ret,
++				     "could not parse device properties\n");
  
- 	ret = dw_mci_init_slot_caps(slot);
- 	if (ret)
--		goto err_host_allocated;
-+		return ret;
+ 	mmc_regulator_get_supply(mmc);
  
- 	/* Useful defaults if platform data is unset. */
- 	if (host->use_dma == TRANS_MODE_IDMAC) {
-@@ -3065,17 +3065,13 @@ static int dw_mci_init_slot(struct dw_mci *host)
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq < 0) {
+-		ret = host->irq;
+-		goto err_free_host;
+-	}
++	if (host->irq < 0)
++		return host->irq;
  
- 	ret = mmc_add_host(mmc);
- 	if (ret)
--		goto err_host_allocated;
-+		return ret;
+ 	host->clk = devm_clk_get(&pdev->dev, "mmc");
+-	if (IS_ERR(host->clk)) {
+-		ret = PTR_ERR(host->clk);
+-		dev_err(&pdev->dev, "Failed to get mmc clock\n");
+-		goto err_free_host;
+-	}
++	if (IS_ERR(host->clk))
++		return dev_err_probe(&pdev->dev, PTR_ERR(host->clk),
++				     "Failed to get mmc clock\n");
  
- #if defined(CONFIG_DEBUG_FS)
- 	dw_mci_init_debugfs(slot);
- #endif
+ 	host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &host->mem_res);
+-	if (IS_ERR(host->base)) {
+-		ret = PTR_ERR(host->base);
+-		goto err_free_host;
+-	}
++	if (IS_ERR(host->base))
++		return PTR_ERR(host->base);
  
- 	return 0;
--
--err_host_allocated:
+ 	mmc->ops = &jz4740_mmc_ops;
+ 	if (!mmc->f_max)
+@@ -1118,10 +1111,8 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 
+ 	ret = request_threaded_irq(host->irq, jz_mmc_irq, jz_mmc_irq_worker, 0,
+ 			dev_name(&pdev->dev), host);
+-	if (ret) {
+-		dev_err(&pdev->dev, "Failed to request irq: %d\n", ret);
+-		goto err_free_host;
+-	}
++	if (ret)
++		return dev_err_probe(&pdev->dev, ret, "Failed to request irq\n");
+ 
+ 	jz4740_mmc_clock_disable(host);
+ 	timer_setup(&host->timeout_timer, jz4740_mmc_timeout, 0);
+@@ -1152,9 +1143,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+ 		jz4740_mmc_release_dma_channels(host);
+ err_free_irq:
+ 	free_irq(host->irq, host);
+-err_free_host:
 -	mmc_free_host(mmc);
--	return ret;
+-
+ 	return ret;
  }
  
- static void dw_mci_cleanup_slot(struct dw_mci_slot *slot)
-@@ -3083,7 +3079,6 @@ static void dw_mci_cleanup_slot(struct dw_mci_slot *slot)
- 	/* Debugfs stuff is cleaned up by mmc core */
- 	mmc_remove_host(slot->mmc);
- 	slot->host->slot = NULL;
--	mmc_free_host(slot->mmc);
+@@ -1172,8 +1160,6 @@ static void jz4740_mmc_remove(struct platform_device *pdev)
+ 
+ 	if (host->use_dma)
+ 		jz4740_mmc_release_dma_channels(host);
+-
+-	mmc_free_host(host->mmc);
  }
  
- static void dw_mci_init_dma(struct dw_mci *host)
+ static int jz4740_mmc_suspend(struct device *dev)
 -- 
 2.47.1
 
