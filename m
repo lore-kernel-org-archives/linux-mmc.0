@@ -1,139 +1,152 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D748B126BFA
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 09:16:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4C40D27C84F
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:45:10 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747732597; cv=none; b=bVJiLdL4Am19Sy3dDctmuhqbJCJEE87XnRe3OyN5lbuLF0DNcqNiZlVZZD91NHPHTJySmQ8e0x7W58NkSwPDV6FD4eHbZwlYbGr6oSpKtOLW6ZWGmB0ZcYiRu9PUi9Zb+z34a4Z9YDC1WZmu9z2vzoyBKq1eRu8C0KY2M/zOHe4=
+	t=1747741513; cv=none; b=cYIhhHJ7Ynec7VFOityMm2jOgm7E+W2xe/eus1iqvOjPQ4OeXwyiuxm3EZ0L+9fAvu92Y3JsoMIu8oMAQsz6EYm+aydGOEnbAp6W8RrO25OVR3HYnjkdHOxADg4CWoQULCDDu982PMqBzpLNT6lGtfOiMbokWW+Udk+ceDi1sYA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747732597; c=relaxed/simple;
-	bh=DeX7wLvXQ62fy3Ty6alTXE03sXWD+dywuzc51HCa3nM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=AEN+HAz9aFCWdiPkiggUNaUtfSpTs9D4HX167KhC2vSdLlW9q4SzmjRghjICC4jJlfLnFu4bLQ/m6vxqHwu/5Es4I9zWpRhfb6tBCSQWcMfWOY3TboByTCiRGfSPi5FiQXu7BiwiVwd0NeRZlyqfzbwWXXtgY4znJTtMlHYTq4Q=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=nnFEqODo; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="nnFEqODo"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54K4Vesf023337
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 09:16:35 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	LHIKeeyRiwuJPRAF5kDA8ET8445+AZFvYVJHBWlPckc=; b=nnFEqODoHmRoTtPW
-	JYI7A/SFgOgKwJN2Z2UJekMdfMDI1Ce7klJw3KenlDGJmDj3SDcATIhAdfcxnFTw
-	CpdahgQ+m3GPgAwNN1h6FwLAF3Hov89m42bwb67SYiCrAhI0eZ+PuwZb/4/FQ1da
-	Z/hYoLz7sqSY2PriNt3eCtD+vfSVw11tEiY9Iv7yQGrRGuSQh9jM0GDJVzi0GyAY
-	t8bKRzWYTQirVaWCIVR+cLqgEPLHXH06O8B4n1o/F8Q++3vf8JzfbH03/WOub0+G
-	Amccp/ejNsXQq+afoXh4rJhyadFvntnIS7G4da/kNF8C7eJVNVLRngkOZVYGwHsD
-	PGDl3A==
-Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com [209.85.160.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 46r041ut8e-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 09:16:34 +0000 (GMT)
-Received: by mail-qt1-f199.google.com with SMTP id d75a77b69052e-4767e6b4596so93432981cf.2
-        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 02:16:34 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747732593; x=1748337393;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=LHIKeeyRiwuJPRAF5kDA8ET8445+AZFvYVJHBWlPckc=;
-        b=k+IHPIxaUqQRxMp5fenR74DwA/Inc9abbb+0+mudBtB0b66WAYCtHIyA8ki4rOXorP
-         RPm0bLsUHdcwm1HxRmfDoFhYzPSZAcihwa4h7fe83LkfIaVazRK6z0Qx6PlU4y8s4iSL
-         xzLVxYkOz35JtIRF290t7SIJDEgKq8v+gOZfOi3oAsNhcKrFUMSEitjkwy5SEJrNyjAD
-         9gENhcr2wy4UdlRox7mWvyIwW7y178nmh379bREzAYF2xecl/GIN7R9ZFbsFoIw5CUhW
-         JSDKlIn9bfztBkUOF4fAgwjULvKisKg75IXdgeDB0caSESi0A6Np5ryKWi29q7p/nyQd
-         +zUw==
-X-Forwarded-Encrypted: i=1; AJvYcCXJCIqgBakLhdUFRLFV5eAwMWmZTcq9gVpugvgd1unSt+FP9fhEEt5R7qnF+PbsIuicdr9oLFXCSqs=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzOLmKtkM+AxS6JCiztazsXyKwaKnnKXz/gBGgAOpPkNgc/PyUD
-	DJugrZXSSxJuAMkHqopwcpEe+6TlZN2Az0OIzKcTvK+gV0ztZgPXYdm8FzgznFfJ/pRQOp4GK4i
-	bDgaka1qAQxzuYHZ4texMIPAHeOv2fKhcy2UL+Z1qeBZ4EOPhZYyLgN6UHKZpCCNfOcP/uILoI3
-	pzwhUVbZ7ZmXImLD6dB2xPv/f7AiE5fIrJBokb4TfLnvl2Aw==
-X-Gm-Gg: ASbGncv3q18D0m/AtieYgDFnoTi+9WNzR64U204OmInofEefaSCKuK4IdoB7BQ9nq+B
-	k78NmcYGVuHkhPlON+UiqItiiyKQE/3xlVzkNzvA/7Fkd/kssJUK1xLh1anTxGbG3XvYi/A==
-X-Received: by 2002:a05:622a:1b29:b0:477:1f2f:1717 with SMTP id d75a77b69052e-494ae3ba064mr244025341cf.20.1747732593445;
-        Tue, 20 May 2025 02:16:33 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IFfipv/F8VAB+nPMXH9W3KTZibrLVddwVc+EJ0ucDp4/cLOwlHGpgRd5GCanb4XOTkrqkWUvPDRyQOy5rjSyiM=
-X-Received: by 2002:a05:622a:1b29:b0:477:1f2f:1717 with SMTP id
- d75a77b69052e-494ae3ba064mr244025131cf.20.1747732593065; Tue, 20 May 2025
- 02:16:33 -0700 (PDT)
+	s=arc-20240116; t=1747741513; c=relaxed/simple;
+	bh=j+r8Rcd4Ah5Qk9ZewKdntNqFYd3PSCIPw+KQT2uQe50=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=ZMeUvwdaUk+FSwb0YxIY+xr/kvLpYcJZ7D21nrcRK/1e+M+5tPZGPQrJEWNeY5252/SKUyynAzbbkpfBcPrw9s60baUECcuYczep+056Ihzj/lHqUQN42YWmxK8JsiSk+tJJ7phVuITKY5rPqme7ug+BmgJSJnHKt8wkpH/xgoM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.69.3])
+	by gateway (Coremail) with SMTP id _____8BxYa8_ayxoQl3zAA--.25580S3;
+	Tue, 20 May 2025 19:45:03 +0800 (CST)
+Received: from localhost.localdomain (unknown [223.64.69.3])
+	by front1 (Coremail) with SMTP id qMiowMDxPcU9ayxoEzvjAA--.56744S2;
+	Tue, 20 May 2025 19:45:03 +0800 (CST)
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+To: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Huacai Chen <chenhuacai@kernel.org>,
+	linux-mmc@vger.kernel.org,
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH 00/36] mmc: Cleanup mmc_alloc_host() usage
+Date: Tue, 20 May 2025 19:44:49 +0800
+Message-ID: <cover.1747739323.git.zhoubinbin@loongson.cn>
+X-Mailer: git-send-email 2.47.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250507134538.575912-1-loic.poulain@oss.qualcomm.com> <PH7PR16MB61963BD3A3CDEB4F9D982BDEE59FA@PH7PR16MB6196.namprd16.prod.outlook.com>
-In-Reply-To: <PH7PR16MB61963BD3A3CDEB4F9D982BDEE59FA@PH7PR16MB6196.namprd16.prod.outlook.com>
-From: Loic Poulain <loic.poulain@oss.qualcomm.com>
-Date: Tue, 20 May 2025 11:16:21 +0200
-X-Gm-Features: AX0GCFsdEMUfrNRgX502KEYQu2qKQ96zu8Ia5W2CCXQrOqcf48vC_LHGTlQi0t4
-Message-ID: <CAFEp6-1VkG4JpsTFS1w6X=7vXwoQabSbb4DeG1PUTCb+vm8XPQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: card: Scan the eMMC boot areas for partition table
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTIwMDA3NSBTYWx0ZWRfXxKVYQlvd8yM3
- myKbHRqFjuC4Eo2bZ+R3PPpoG5NxWbCYljSxW5NzxmBxzFr8vvo6Q751J/6fe8PJ4p5AikQk7zf
- n8ewWXKoYcwfMmtrpPbsuw5bFL+P+O9KMLScf+NGxVb6d50+ZJPCfVX+zVmz1DIWFzmoTzlr1aW
- BhzsZhcscrJnCc3omZIrXqlMvoxEFpsJrj40tJCW5ke80Bpg3ePBceSBD6JBqZjXnUP3fgEspUe
- EK6zyWu62qOF+if7sHU/L9QKc5zY8B3uDbqte6tLUK/CI4n8mVdz9jFXEmuXm8mm2t5CivEVB2u
- Y3o7/lzhmuo/GWT3UwHlVepzYW1w1GauyB2dBwKe5JQls4EyMrGCktYOTklgyzNa+6wt7poHpzD
- +O2thocOck/UcFpplBFz6buAzn3IK6dFFa5VmKpHo6TNpTTb5fjh6m/hp/0SwFOIhjYy9bVX
-X-Proofpoint-ORIG-GUID: wSFdUV75giLbp4BnqWHixVXTzA2Ylgty
-X-Proofpoint-GUID: wSFdUV75giLbp4BnqWHixVXTzA2Ylgty
-X-Authority-Analysis: v=2.4 cv=HIjDFptv c=1 sm=1 tr=0 ts=682c4872 cx=c_pps
- a=WeENfcodrlLV9YRTxbY/uA==:117 a=IkcTkHD0fZMA:10 a=dt9VzEwgFbYA:10
- a=InJrZTXqAAAA:8 a=EUspDBNiAAAA:8 a=Z-KoOJIlDxAInEDke3kA:9 a=QEXdDO2ut3YA:10
- a=kacYvNCVWA4VmyqE58fU:22 a=WwJ7OKCui7YMbFU4sWpb:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-20_04,2025-05-16_03,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 lowpriorityscore=0 adultscore=0 mlxscore=0 clxscore=1015
- bulkscore=0 suspectscore=0 spamscore=0 priorityscore=1501 malwarescore=0
- impostorscore=0 mlxlogscore=999 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505070000 definitions=main-2505200075
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qMiowMDxPcU9ayxoEzvjAA--.56744S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
+X-Coremail-Antispam: 1Uk129KBj93XoWxXry5Cw45uF1rXrykGr1DXFc_yoWrCF43pF
+	4agryavr4DJr43Wry7Jwn0ka4rZw18WayIg3WIqw1rZFyjkFyUGrsrCFyIqF98CFy8JFZ3
+	XF45Gw1Uur1rGacCm3ZEXasCq-sJn29KB7ZKAUJUUUU8529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUyEb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_
+	GcCE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0cIa020Ex4CE44I27wAqx4
+	xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jr0_Jr4lYx0Ex4A2jsIE14v2
+	6r1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwCF04k20xvY0x0EwI
+	xGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r18MI8I3I0E7480
+	Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7
+	IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr0_Gr1lIxAIcVCF04k2
+	6cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxV
+	AFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa7IU8czVUUUUUU==
 
-On Tue, May 20, 2025 at 10:36=E2=80=AFAM Avri Altman <Avri.Altman@sandisk.c=
-om> wrote:
->
-> > It appears that some vendors provision the boot areas with valid part
-> > tables (GPT) in order to have identifiable partitions for device and
-> > firmware specific data, such has the qualcomm CDT (Qualcomm Config
-> > Data Table). Additionally, these boot areas can be utilized to host
-> > device-specific IDs, calibration data, and other critical information.
-> >
-> > Signed-off-by: Loic Poulain <loic.poulain@oss.qualcomm.com>
-> > ---
-> >  drivers/mmc/core/block.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > index 4830628510e6..c81925194509 100644
-> > --- a/drivers/mmc/core/block.c
-> > +++ b/drivers/mmc/core/block.c
-> > @@ -2655,7 +2655,7 @@ static struct mmc_blk_data
-> > *mmc_blk_alloc_req(struct mmc_card *card,
-> >       md->disk->private_data =3D md;
-> >       md->parent =3D parent;
-> >       set_disk_ro(md->disk, md->read_only || default_ro);
-> > -     if (area_type & (MMC_BLK_DATA_AREA_RPMB |
-> > MMC_BLK_DATA_AREA_BOOT))
-> > +     if (area_type & MMC_BLK_DATA_AREA_RPMB)
-> >               md->disk->flags |=3D GENHD_FL_NO_PART;
-> Given that the boot area is now exposed to accidental overwrites,
-> Maybe add here a proper comment. Also even advise on boot wp options.
+Hi all:
 
-AFAIK, it's not more exposed than before, we may indeed register
-additional mmcblk0boot0pX block devices, but the underlying hw boot
-partition is still (software) write protected by default.
+Since the devm_mmc_alloc_host() helper was already available, I tried to
+start cleaning up the use of mmc_alloc_host().
 
-Regards,
-Loic
+To make it easier to review the patchset, I decided to split it into two parts.
+As the first part, this patchset contains cleanup for drivers other than sdhci.
+
+Of course, the sdhci part I have ready in my repository.
+
+Thanks.
+
+Binbin Zhou (36):
+  mmc: alcor: Use devm_mmc_alloc_host() helper
+  mmc: atmel: Use devm_mmc_alloc_host() helper
+  mmc: au1xmmc: Use devm_mmc_alloc_host() helper
+  mmc: bcm2835: Use devm_mmc_alloc_host() helper
+  mmc: cavium: Use devm_mmc_alloc_host() helper
+  mmc: cb710: Use devm_mmc_alloc_host() helper
+  mmc: davinci_mmc: Use devm_mmc_alloc_host() helper
+  mmc: dw_mmc: Use devm_mmc_alloc_host() helper
+  mmc: jz4740: Use devm_mmc_alloc_host() helper
+  mmc: litex_mmc: Use devm_mmc_alloc_host() helper
+  mmc: meson-mx-sdhc: Use devm_mmc_alloc_host() helper
+  mmc: mmci: Use devm_mmc_alloc_host() helper
+  mmc: moxart-mmc: Use devm_mmc_alloc_host() helper
+  mmc: mvsdio: Use devm_mmc_alloc_host() helper
+  mmc: mxcmmc: Use devm_mmc_alloc_host() helper
+  mmc: mxs-mmc: Use devm_mmc_alloc_host() helper
+  mmc: omap: Use devm_mmc_alloc_host() helper
+  mmc: omap_hsmmc: Use devm_mmc_alloc_host() helper
+  mmc: owl-mmc: Use devm_mmc_alloc_host() helper
+  mmc: pxamci: Use devm_mmc_alloc_host() helper
+  mmc: rtsx_pci: Use devm_mmc_alloc_host() helper
+  mmc: rtsx_usb_sdmmc: Use devm_mmc_alloc_host() helper
+  mmc: sdricoh_cs: Use devm_mmc_alloc_host() helper
+  mmc: ish_mmicf: Use devm_mmc_alloc_host() helper
+  mmc: tifm_sd: Use devm_mmc_alloc_host() helper
+  mmc: toshsd: Use devm_mmc_alloc_host() helper
+  mmc: usdhi6ro10: Use devm_mmc_alloc_host() helper
+  mmc: ushc: Use devm_mmc_alloc_host() helper
+  mmc: via-sdmmc: Use devm_mmc_alloc_host() helper
+  mmc: vub300: Use devm_mmc_alloc_host() helper
+  mmc: wbsd: Use devm_mmc_alloc_host() helper
+  mmc: wmt-sdmmc: Use devm_mmc_alloc_host() helper
+  mmc: tmio: Use devm_mmc_alloc_host() helper
+  mmc: sunxi: Use devm_mmc_alloc_host() helper
+  mmc: mmc_spi: Use devm_mmc_alloc_host() helper
+  mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
+
+ drivers/mmc/host/alcor.c             | 20 ++++---------
+ drivers/mmc/host/atmel-mci.c         |  7 ++---
+ drivers/mmc/host/au1xmmc.c           | 14 +++-------
+ drivers/mmc/host/bcm2835.c           |  5 +---
+ drivers/mmc/host/cavium.c            | 10 ++-----
+ drivers/mmc/host/cb710-mmc.c         |  5 +---
+ drivers/mmc/host/davinci_mmc.c       | 22 +++++----------
+ drivers/mmc/host/dw_mmc.c            | 15 ++++------
+ drivers/mmc/host/jz4740_mmc.c        | 40 +++++++++-----------------
+ drivers/mmc/host/litex_mmc.c         | 12 +-------
+ drivers/mmc/host/meson-mx-sdhc-mmc.c | 13 +--------
+ drivers/mmc/host/meson-mx-sdio.c     | 20 ++++++-------
+ drivers/mmc/host/mmc_spi.c           |  4 +--
+ drivers/mmc/host/mmci.c              | 31 ++++++++------------
+ drivers/mmc/host/moxart-mmc.c        | 40 ++++++++++----------------
+ drivers/mmc/host/mvsdio.c            | 24 +++++-----------
+ drivers/mmc/host/mxcmmc.c            | 31 +++++++-------------
+ drivers/mmc/host/mxs-mmc.c           | 31 ++++++++------------
+ drivers/mmc/host/omap.c              | 25 ++++++-----------
+ drivers/mmc/host/omap_hsmmc.c        | 18 ++++--------
+ drivers/mmc/host/owl-mmc.c           | 37 +++++++++---------------
+ drivers/mmc/host/pxamci.c            | 42 ++++++++++------------------
+ drivers/mmc/host/renesas_sdhi_core.c |  6 +---
+ drivers/mmc/host/rtsx_pci_sdmmc.c    |  5 +---
+ drivers/mmc/host/rtsx_usb_sdmmc.c    |  4 +--
+ drivers/mmc/host/sdricoh_cs.c        | 10 ++-----
+ drivers/mmc/host/sh_mmcif.c          | 17 ++++-------
+ drivers/mmc/host/sunxi-mmc.c         | 22 ++++++---------
+ drivers/mmc/host/tifm_sd.c           |  7 +----
+ drivers/mmc/host/tmio_mmc.h          |  1 -
+ drivers/mmc/host/tmio_mmc_core.c     | 18 ++----------
+ drivers/mmc/host/toshsd.c            |  4 +--
+ drivers/mmc/host/uniphier-sd.c       |  8 ++----
+ drivers/mmc/host/usdhi6rol0.c        | 30 +++++++-------------
+ drivers/mmc/host/ushc.c              |  4 +--
+ drivers/mmc/host/via-sdmmc.c         |  7 ++---
+ drivers/mmc/host/vub300.c            | 16 ++++-------
+ drivers/mmc/host/wbsd.c              |  4 +--
+ drivers/mmc/host/wmt-sdmmc.c         |  8 ++----
+ 39 files changed, 195 insertions(+), 442 deletions(-)
+
+
+base-commit: eb68ba4af6da720caaf752b5618220efd5cf31dc
+-- 
+2.47.1
+
