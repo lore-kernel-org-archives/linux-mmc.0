@@ -1,72 +1,94 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-qt1-f177.google.com (mail-qt1-f177.google.com [209.85.160.177])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CA52F289E1F;
-	Tue, 20 May 2025 20:01:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C3A1F24BBFA
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 20:23:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747771277; cv=none; b=KW76CrKm6F8CxpJNz2odOY3+83VewWOAcGFwedBdTzcvQXTct+f6nZZ4q0D/nwMrMJqe1lwVdEHF0kMb5n6ZyonI7TWz1gY1vRISEYl5P6xRzcYIkE1z31c4WOWiHKtdu/JoeyEK7BnfeO462x7ueyw+nlj8SO4xzvlFlvA/SDY=
+	t=1747772612; cv=none; b=gUkfxESbRPBM2RkgTGtOBCsfcaryaMMp//te4FdJlUIFg+L6C6MRIyiU0NS4OM/mCX2P0Y6VdT4eFM5m7Uz+8gLmsWraOOFQMH2j2MNmehLt7wWt/G9ilq4mCJth1cG/jX3VdW7Dr8TRe7/JsBDPNKbxpjjOtJAahVdfhsHZhOQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747771277; c=relaxed/simple;
-	bh=ZhAAhyi7KBLB1twgdfejQUFumQAN8ZKWTtuSA8sOxPc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Oax4tcYVNA0smpqGc+Ifz1wHJ/tc8vHF4+T9Fl/tqIceVHcw0dij37PpqYUhr9Uz2L6UoQSmjRdAigqVtck/MaDAm+2wTugPFR0/6FMAB6Llog1EK25D5XqBPcunfz0y9IR8CSyyq2IqkhQAD5X0KP/mqf5mZVUIlSuTay0RqaQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=SovhHJTm; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1747772612; c=relaxed/simple;
+	bh=oYpaPErouim5e8jjbN1s5ypfsN55rf1ipfr8rTDawBg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=EVBX7vFxJjrpmN1mNjWdq3379/l4mIpf2OflFkGtIB6B6t6YIvOa+FOtkEU2xerdz82X50qnEN0cW2pZ7Y/mNRqmAOdm0rizriQfVs+sDOuHm7BU6l0rgcvgNjjL3URKm1moUQdjt8R7b8xeeW4I5LOS7Tt4UFWFPlvxnaBb5yo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=A0r+kv3/; arc=none smtp.client-ip=209.85.160.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="SovhHJTm"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0F2B7C4CEE9;
-	Tue, 20 May 2025 20:01:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1747771277;
-	bh=ZhAAhyi7KBLB1twgdfejQUFumQAN8ZKWTtuSA8sOxPc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=SovhHJTm19Xuu/BO0qAL+8mJ2aA2CvJx/CzW4dCN5wrzM1Bvgyg3DkWf7ZEWx1oIl
-	 zHyM2J1i32NEY2GEAR5eCimerLmqJrbEAKn64KN42ZJBxKVnV1QOjy6cuXGSQRp4fP
-	 H61/jYHvV9mK9dw6qfdpW27LqG31Twa6paGDvT9fs8Fl5hzGGIeiux9QRqLzEvis/r
-	 aeGjMpZIn1eG8Ga4KVLJG0TSrpugIcmL2ReJuJjKGduowp7Cw/ZY6kx7Twm/QUK9RO
-	 MjlcXCUHk9ew9uZZLilR4pnib+GRurD8PaJDQVNaHPrU5/n+243px+JhHWNZQaYjOU
-	 CCegz8fa6L64Q==
-Date: Tue, 20 May 2025 15:01:15 -0500
-From: Rob Herring <robh@kernel.org>
-To: Charan Pedumuru <charan.pedumuru@gmail.com>
-Cc: Krzysztof Kozlowski <krzk@kernel.org>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: ti-omap: convert text based binding
- to json schema
-Message-ID: <20250520200115.GB1261173-robh@kernel.org>
-References: <20250519-ti-omap-v2-1-2a0dbc08fb9c@gmail.com>
- <6a3a7e99-8d45-4e44-8014-14d182de5dd6@kernel.org>
- <97474249-7d4b-4a74-b2c2-13b89db1dc6f@gmail.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="A0r+kv3/"
+Received: by mail-qt1-f177.google.com with SMTP id d75a77b69052e-476ae781d21so59381021cf.3
+        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 13:23:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747772609; x=1748377409; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=SXXPip/Q04crlMPesamVwv1y1I72yIpwUIynmj5zYbk=;
+        b=A0r+kv3/LAL7ptSe/HyDgPzBu2L6nguNSr/lLPQ2drq2C9HB7n0HcONw6lCjcFLTRa
+         w2LZHn1rczslNeNQ0GU1uKsn0VV9RzmmA6nMzQeZeaHR+ls3IGMXtdYwUQB8/q4X+Etz
+         ZUjy4peNmdmHjc3yN/GWw06jmSbC8GGAMFlHzLzN4ptwf479I726Wkh/Km/g6hhyf8uc
+         GkOPP5+A578Yi9Fr5QIpdE20olo0TiZMr3H2Bp0QQPYoVv5l3FfMT6lcoKY7/dQDlLfO
+         dKDMjCp91Ey5cNvK82D6eaagtNctHrTryuFu9Nxv9dsQKgk5bSbtkkJgfUjeL3DLacjn
+         sabg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747772609; x=1748377409;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=SXXPip/Q04crlMPesamVwv1y1I72yIpwUIynmj5zYbk=;
+        b=W9MTgIVc88w0kgjmd6X53Lk2HQ5p0v2+1x4IpUySiK7OgQs5WUFDLix57tfUcYmYOc
+         bs7zO43NeCg08OQO8DVQ2q91eZsRQDvKQzlKjDIdZ4p557zVa98O6/+d4zVDtpkrrroo
+         MECOqsH7kwS+FgSP/IIvlXm4diQFgFx49p32jOGI7wEODKeldBrGmzqAjklN8ma1971H
+         s63A9cZbfjDNT4kecuA6qRjTx8pBgExUJuA1UY1PVrsb+g5SLyltnd1UCFGp095GkyI+
+         ZOVhfdIpnGi1fsr3cHc7TsHrshnUVHqOV5MrmWamv6HM9O2ZHnbY502fV3iTkCS7Qxgr
+         LxKQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVI+3mrehUdausc6nF48YToEwBsLLAepVVS4uZYfp+IMYB9qyr4qSMS+WZqaYawPhdRPl3X9l7inPM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy9mgSxa/BBVXHzl+EhpHaEtCkt4cCDgcgJGYgwLYc8ymvlsrgT
+	cOVdrt3Vv8jlY8ODlRxQtYmK0rRZkc5xXVc1QU7dHh9TaKJhR+MUPJP/tA8IPnTjOyFSzy26Pmr
+	TVyWiLWYdtmWWMEgHMzYj/tBqv38A7S8=
+X-Gm-Gg: ASbGncte7ShzCcTrwZE26bCsQgm64FWfmriqh/aI73M1iu3En+23QmvJ6XujbqM4+c5
+	qLFzAYpEUh016f8kbynkwS1lr2EL3NlVxbNk8aCTZAM9GE5oo57i5eiHvTN+a3rEyrBRipj8F/r
+	ua3lsjqVyYX+0vcL0GTTrNNPfUEV6z6Jp+fDanUFYBxFymvw0C9TRGnxEGouj+jPTcHQ==
+X-Google-Smtp-Source: AGHT+IEJ4vVT8ay7Rc5gU4eCtGme7kuzMxrgPCXqV3qQQua5p+VJt/G4/ZF+BZp6aIbzN5ys9+yz32NzXP2hFVNO0Ks=
+X-Received: by 2002:a05:622a:40c3:b0:476:a895:7e87 with SMTP id
+ d75a77b69052e-494b096c66amr288661741cf.48.1747772609635; Tue, 20 May 2025
+ 13:23:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <97474249-7d4b-4a74-b2c2-13b89db1dc6f@gmail.com>
+References: <cover.1747739323.git.zhoubinbin@loongson.cn> <67c3e1fa54a40ae118214791df1cc9c5de0a9df0.1747739323.git.zhoubinbin@loongson.cn>
+In-Reply-To: <67c3e1fa54a40ae118214791df1cc9c5de0a9df0.1747739323.git.zhoubinbin@loongson.cn>
+From: Alexey Charkov <alchark@gmail.com>
+Date: Wed, 21 May 2025 00:23:26 +0400
+X-Gm-Features: AX0GCFtf2YSTe_hKsmfua2Jzoz_owjF9LkM_JltRGzGcTmNuKMlxJ1Tt0sqplNI
+Message-ID: <CABjd4Yw9m9zBsVz5+Sgw=uaxAbhBWuKY5XbE0QUNgRL-2dAKAQ@mail.gmail.com>
+Subject: Re: [PATCH 32/36] mmc: wmt-sdmmc: Use devm_mmc_alloc_host() helper
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 20, 2025 at 10:41:31AM +0530, Charan Pedumuru wrote:
-> 
-> 
-> On 19-05-2025 21:36, Krzysztof Kozlowski wrote:
-> > On 19/05/2025 15:11, Charan Pedumuru wrote:
-> >> +
-> >> +  ti,hwmods:
-> >> +    maxItems: 1
-> >> +    items:
-> >> +      type: string
-> > 
-> > That's not really correct. That's just a string, so no items, no
-> > maxItems and use proper ref, not type string.
-> 
-> Okay, I will define string definition using $ref
+On Tue, May 20, 2025 at 3:47=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn=
+> wrote:
+>
+> Use new function devm_mmc_alloc_host() to simplify the code.
+>
+> Cc: Alexey Charkov <alchark@gmail.com>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 8 ++------
+>  1 file changed, 2 insertions(+), 6 deletions(-)
 
-You can actually just omit it and just have 'pattern'. Anything that's a 
-pattern is implicitly a string.
+Tested on my VIA APC Rock board (WonderMedia WM8950 based).
 
-Rob
+Acked-by: Alexey Charkov <alchark@gmail.com>
+
+Thanks a lot!
+
+Best regards,
+Alexey
