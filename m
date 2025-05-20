@@ -1,57 +1,41 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1CBD41A5B8F
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 12:43:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EDD819F137
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 12:58:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747744998; cv=none; b=N8mVg5N1itCf0t74NzRJ2mVWEEo+QMjBIgXLQtlTj3whk4LdwUKaCiDB1xZ7MLm8Rx+Bi2YHppI0jGTShNSekc1AUnZ/DAnLwp50rQxrw8VwqZZUZW2n6Ak6asP4DJBDJRqXfi686jCgTh9mAVUrKuoc6wXH2qymUF3Ojy3SjNU=
+	t=1747745913; cv=none; b=MdJuZHcXcVrGpBk6GzAxWfgSAlXa4YkjIyl1T0R91eYGoOL1iqBSrrC0x1zH2gGwYJxBt+RQG9fa3CEUQGoTij/55SOz2hF1GuVvD5Xv1siVD9lci/gPhq1gsAf5pZeZkuVDa6P3naHLR+8xhhr/6MfOgLS8fCeCoIjNYbiAppc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747744998; c=relaxed/simple;
-	bh=fzWUePvgRtISpxT+IUrlu+GsAWbIyx/Vih4QfDSSMy8=;
+	s=arc-20240116; t=1747745913; c=relaxed/simple;
+	bh=uWJkDdDR++E6BNAjgdO6Ln7KmKXNKcq/2qAK9KOMjpo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=UMdS3kI1uXQqDVy8lKpgkBLWNBNcVblzw+FDz/0MzcaV0lv8uTG7nbSkOresmz0FCOcU/a/0xGYFGuEzEfRsQdHnWg0D2uv8sRJEH1T08hP/HhvB604bYq/4HNZxJtOpwEwHpqjHIp8w8ESMaFIdyGHW5IUNr1aNtStGG7/HaOk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=IDXFQqxe; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	 To:Cc:Content-Type; b=NZJoq03ADUH3kLsO0iKwSjPrgdMYb/sv/UdRxpnKqmQm/0RX9NUtgsSV7/tizlrc4QelHVmPnH2zGQUqaSC99xlLjK7LVdOuXN/g8ZDUfNZKFmIkMPl5Wj3k2ETGcCOZ4l7i2N16qaXhgiBRgfOyLkD41gtehUgKeW3YnTs8gDU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rm4PC1Sl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IDXFQqxe"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e7b962a156cso2226496276.0
-        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 05:43:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1747744996; x=1748349796; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mAdLL8bjf+4SXaiaT2N57D3b5Mx3EwDmE14pGyhpzn4=;
-        b=IDXFQqxe4M2IxuRiZ7ymDJ07aqP84ck1qTrh64rGNl2jmRwwNqNDgoEm+FyUhk7fu5
-         bdcgfPmNvx3s+NDObZeJ6On4Q+3wu9wOCaaEZHmxJFBWgqye3gL5/Hix4yEG0lCWtPTb
-         wF9FG8ZLAuhOZqfyVIZJA74KukVPlaxmmzAiRgba5JzeZ278HHi/IS6TtEBX8FofHrE9
-         kIa+yUYNj96OlKQhvFrCQCnZKbI2nZbM6LRgxPVzhHQhIz+TYsyhgP7iboRjkHYsGD2e
-         BEf3VQ2slEEAVtUrG78mh+JfZA0RTEA+Z1mUHN6cYofD59EZ7qZWTffdayr3/9Nq24Bx
-         3iEA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747744996; x=1748349796;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=mAdLL8bjf+4SXaiaT2N57D3b5Mx3EwDmE14pGyhpzn4=;
-        b=vc0SJirT+1gJiOfn79iqsWV1Q5kl9Ek/1sBpSKzlFJ4Orag9kxc1FqKjQB1ut+3S7X
-         o4fquxFP1L/0Y4o1zChuHoebdf8qiHC5Ob6RK82qqvg67x43kX5q1bdisg9KL0Cy7fSl
-         S0tmFcbnDJsy/ozFzDPxjc2VYulrtrDvuoDbfs4y2Hbx9USE2WPrjzYZ6x8xUEzJa0Rm
-         VYwkk1YoPKfSfO7oBtIDXfyoDjM1uPlEPrnOyZfn07+h5D8PAhdQ2Qc2wJlcB7dnF/rk
-         a3R8ZQfYeDEfUZG1JwxBY+z2WsTnGI4UBTpmltcuaW1QMARU5U4n4AqYM/QahynmuYAf
-         xNNA==
-X-Forwarded-Encrypted: i=1; AJvYcCVIium07W3UzJGTrZSehQHlEPQrHx6fpmEA2YVb00Zj0xT+CgcllxgFJOxxFHuZn0cbiJed0S9sqpY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw/kViJYAqQMloLUBUQM64sd36YsqaNK3Ii5WdV4O9kk3SC8BMK
-	e2ukCCWgZtkTvRwy6MZFZ37PPWqdGd1o2JPxN5NlRKSIWxLqt4E/DITsIQ6aunBiiQtss/O+pac
-	F0RSWQ+8A/y4vvRf9sRqsQlWORCVKylBWn+MZWYJVhQ==
-X-Gm-Gg: ASbGncvyUCdc0ftTetV8NULyVWYH7v6B2eV4OmBfCAlPrloraXtRIDCpa9QcR4Ikrh0
-	c07L/QIeICsYfkvtVQKbXResHIO06/beD/b8zSCfHM/vbkiyjJv4ENKsst0rzPR3fz7U7MlKHXK
-	9WaEpOlFEaQObUfuifEUcvfuGrpPytRt6yMg==
-X-Google-Smtp-Source: AGHT+IGW2bA2NXbJH/SQxIhR+cBgUJpEkaSzvHPNWyGO6BJpM8jFHVYJeFP5PDoID4Qmy9RACFdygecHiVHvzvbLrWQ=
-X-Received: by 2002:a05:6902:2387:b0:e7b:843a:2b61 with SMTP id
- 3f1490d57ef6-e7b843a30ebmr18909407276.20.1747744995918; Tue, 20 May 2025
- 05:43:15 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rm4PC1Sl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02687C4CEE9
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 12:58:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1747745913;
+	bh=uWJkDdDR++E6BNAjgdO6Ln7KmKXNKcq/2qAK9KOMjpo=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=rm4PC1SlCFvcbNKzklhRV3kyqr/RmS/rbAPZHdpRY9j9+uosugKhkls7r4PHIJM4+
+	 wkG0nUxJUW3eGDVHKNCgLOWXGqoe0nsrOAC0L/idhFbDSZDFm+q9oWQcmIUm4h14oh
+	 ZHohZ7Yg1iq46VgYRtuTyb2jWGi1sKSfHq4u8S/2fVkNueE3d4hoV6k+ljy5tzthsz
+	 S2WFOYt3xyZDMe3gmhc2+DMrFgtVI0UWR+MemLpPl8pnVrHygD4U6qjpSFrhOTWlGK
+	 /96TXg9rnDL65ilFY0jN2+CW30+9U2RBxqG4kB1SIh13yhWlnNb6VfNMo0ztXZuiYT
+	 SBPHIogpLw9fw==
+Received: by mail-ed1-f42.google.com with SMTP id 4fb4d7f45d1cf-6021d01298cso503497a12.3
+        for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 05:58:32 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCWVMy99ggtWfNNsZpNB4Ba/gCx2rQWN2YCfqceYJZKJs6gihRpCwRWVjH38pRly18swGTeBPQIrt1A=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx34wvcMFNUkhCiVYVb2ZFxWGnUvjHtedwlx6tbWz+s5Jj+rj8q
+	/1vlofBlKrAmTviA5FG2ZKJhVuR/Kyn31ENW4Nn2HBdpv78t+rnLzktQQo/AjtuL437UpHFSoRv
+	eLfmd8k/BGOEm55nQS9OlTbR1vjObNUM=
+X-Google-Smtp-Source: AGHT+IEBFPy7IvZ6gjhcrVnRFKabb1qycwp4Io23zgV81Z1f6RovWx9TupY5t8tqxR4Pwagt4UXUXDEAknUGrztc3M0=
+X-Received: by 2002:a05:6402:4315:b0:602:1832:c18b with SMTP id
+ 4fb4d7f45d1cf-6021832d6a8mr1289172a12.24.1747745911599; Tue, 20 May 2025
+ 05:58:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -60,25 +44,32 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 References: <cover.1747739323.git.zhoubinbin@loongson.cn>
 In-Reply-To: <cover.1747739323.git.zhoubinbin@loongson.cn>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 20 May 2025 14:42:39 +0200
-X-Gm-Features: AX0GCFuRotE4BjBTH7yf3PUbsszYl6agtldG-ga4X_VrtoDnNSxLWHlZhtdTJec
-Message-ID: <CAPDyKFpobCvPdYBBr1G4g7wCG0eZ7S4=vG7CTPxnS811ts3iPw@mail.gmail.com>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Tue, 20 May 2025 20:58:21 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H6qwjZJmNYCTG3F-Ufg4suK7+Fh9xUkg3sb=ORKqDesxg@mail.gmail.com>
+X-Gm-Features: AX0GCFvJuKqsWzUL7OPA03wudMjLbTZTG-vLFuRaltWY6VoqWjN-_54RwKTYrLU
+Message-ID: <CAAhV-H6qwjZJmNYCTG3F-Ufg4suK7+Fh9xUkg3sb=ORKqDesxg@mail.gmail.com>
 Subject: Re: [PATCH 00/36] mmc: Cleanup mmc_alloc_host() usage
 To: Binbin Zhou <zhoubinbin@loongson.cn>
 Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 20 May 2025 at 13:45, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+
+On Tue, May 20, 2025 at 7:45=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn=
+> wrote:
 >
 > Hi all:
 >
 > Since the devm_mmc_alloc_host() helper was already available, I tried to
 > start cleaning up the use of mmc_alloc_host().
 >
-> To make it easier to review the patchset, I decided to split it into two parts.
-> As the first part, this patchset contains cleanup for drivers other than sdhci.
+> To make it easier to review the patchset, I decided to split it into two =
+parts.
+> As the first part, this patchset contains cleanup for drivers other than =
+sdhci.
 >
 > Of course, the sdhci part I have ready in my repository.
 >
@@ -162,13 +153,9 @@ On Tue, 20 May 2025 at 13:45, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
 >  drivers/mmc/host/wbsd.c              |  4 +--
 >  drivers/mmc/host/wmt-sdmmc.c         |  8 ++----
 >  39 files changed, 195 insertions(+), 442 deletions(-)
-
-That's a nice changelog. :-)
-
-I have looked through the changes and they all look good to me. Just a
-minor typo in the commit-msg-header of patch24, which I took care of.
-
-So, applied for next, thanks!
-
-Kind regards
-Uffe
+>
+>
+> base-commit: eb68ba4af6da720caaf752b5618220efd5cf31dc
+> --
+> 2.47.1
+>
