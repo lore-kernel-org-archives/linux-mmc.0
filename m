@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4ECF62777FC
-	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:45:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4F09613635C
+	for <linux-mmc@vger.kernel.org>; Tue, 20 May 2025 11:46:04 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747741556; cv=none; b=LznypQ/pRHOwWovt8rg9/Qyn4wywMVkZSygI5kko3pzmJRS6vnd+TpFqVb7glbPKYJfazXW79LS4B/vVhVohaCNZJl6hZZY82mY4GoN+27TZj6+4vt/H33SInPxdbHtqDdgli2MHbILq0+ov6IAbTTl41De8BzX87REnIVRf4oI=
+	t=1747741566; cv=none; b=kA9SUIjHRQ3G6ZUmxPEWTCJiKLDRAyrKHMkl4U3w3lPgJcdrH3knFpriLvktPGOjNfA5d7a338w0aScT3LP3+hgInyWoWh1ayltQT15lU+qXRYs9Ynfb5NWcPDwq+OpY9P7LL0MWQ8OnuWHBWokV/3GCG1dMZE+okLZBnZJzjQc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747741556; c=relaxed/simple;
-	bh=j9eddem62AHB0xTJJjM7ImIDui4YRt1O94iIHmwcDdM=;
+	s=arc-20240116; t=1747741566; c=relaxed/simple;
+	bh=NnFAqEiN0hN25EaNXIwTyH16oFrNI6tR4YM+qirO5hE=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=QfiZ4vWpdQWy1hebT0t6BW4GhLfHyzT4FMQL9RV6dHMSFYGXVdhJmBxlySXGdUvN3YpRMpjumjA2o1veydtoKzW5zvHq9RyGp651H51cSR13KxFm+mOlYsdL3/ArwQ4Zdx8ZLelg3vKrpIc4Lr6DpUICUdV3fn33CFBWTC/2A00=
+	 MIME-Version; b=NhswzFOb1WP/d8EZ173VKRPmJZryYuFsF622+ktDvz3sISTC9XTVW+zANghYN59vQ9vtbsKuFrhLBclKBi/7NOauT+MUJ1+woBCCHn49wQAOdFQUDCqLrM5NWu3vUo0SyVJFCja7TnSoZANGRJ6tgaCNSPHUlBblLsCzWnIcNWg=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8CxbWtwayxorl3zAA--.275S3;
-	Tue, 20 May 2025 19:45:52 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8AxDGt7ayxowl3zAA--.178S3;
+	Tue, 20 May 2025 19:46:03 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMAxzMRoayxoYTvjAA--.58140S4;
-	Tue, 20 May 2025 19:45:50 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMDxH+V5ayxohzvjAA--.57175S2;
+	Tue, 20 May 2025 19:46:02 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -25,10 +25,10 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Russell King <linux@armlinux.org.uk>
-Subject: [PATCH 12/36] mmc: mmci: Use devm_mmc_alloc_host() helper
-Date: Tue, 20 May 2025 19:45:33 +0800
-Message-ID: <3d74a74d69462c61a0788cdf7a0a41b41007c56c.1747739323.git.zhoubinbin@loongson.cn>
+	Nicolas Pitre <nico@fluxnic.net>
+Subject: [PATCH 14/36] mmc: mvsdio: Use devm_mmc_alloc_host() helper
+Date: Tue, 20 May 2025 19:45:49 +0800
+Message-ID: <774eb17d8df663f1adde6084c89a76d98dda68d4.1747739323.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1747739323.git.zhoubinbin@loongson.cn>
 References: <cover.1747739323.git.zhoubinbin@loongson.cn>
@@ -39,11 +39,11 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMAxzMRoayxoYTvjAA--.58140S4
+X-CM-TRANSID:qMiowMDxH+V5ayxohzvjAA--.57175S2
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoWxuryUXF4xKrykCrW8Gry3trc_yoW5Xr47pa
-	n3JF9Igry5Gr43W39xJwnrJF1rGr48t3yxGr97W34xXw1YyrWDK3ZY9FWFqF95AFWkJF43
-	WF4UJ34UuF9FvFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoW7CFyrtw18Cr48tFy3Ww4fXrc_yoW8ArW7pa
+	s3JFy3KFW7AF4YgryDKw4UGFyY9r1xta48KrW8Ww1kJw1Ykr4qqrn3CFW0qFZ5AFykGF1a
+	gF1UtFW8uFy7AFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
 	0xBIdaVrnRJUUU9Ib4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
 	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
@@ -61,95 +61,68 @@ X-Coremail-Antispam: 1Uk129KBj93XoWxuryUXF4xKrykCrW8Gry3trc_yoW5Xr47pa
 
 Use new function devm_mmc_alloc_host() to simplify the code.
 
-Cc: Russell King <linux@armlinux.org.uk>
+Cc: Nicolas Pitre <nico@fluxnic.net>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/mmci.c | 31 +++++++++++--------------------
- 1 file changed, 11 insertions(+), 20 deletions(-)
+ drivers/mmc/host/mvsdio.c | 24 +++++++-----------------
+ 1 file changed, 7 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b790c3c3c8f9..c70c64f8adc4 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -2223,7 +2223,7 @@ static int mmci_probe(struct amba_device *dev,
- 			return -ENOMEM;
- 	}
+diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
+index 912ffacbad88..5c738862054b 100644
+--- a/drivers/mmc/host/mvsdio.c
++++ b/drivers/mmc/host/mvsdio.c
+@@ -706,11 +706,9 @@ static int mvsd_probe(struct platform_device *pdev)
+ 	if (irq < 0)
+ 		return irq;
  
--	mmc = mmc_alloc_host(sizeof(struct mmci_host), &dev->dev);
-+	mmc = devm_mmc_alloc_host(&dev->dev, sizeof(*host));
- 	if (!mmc)
- 		return -ENOMEM;
+-	mmc = mmc_alloc_host(sizeof(struct mvsd_host), &pdev->dev);
+-	if (!mmc) {
+-		ret = -ENOMEM;
+-		goto out;
+-	}
++	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(*host));
++	if (!mmc)
++		return -ENOMEM;
  
-@@ -2234,7 +2234,7 @@ static int mmci_probe(struct amba_device *dev,
- 
- 	ret = mmci_of_parse(np, mmc);
- 	if (ret)
--		goto host_free;
-+		return ret;
- 
- 	/*
- 	 * Some variant (STM32) doesn't have opendrain bit, nevertheless
-@@ -2242,19 +2242,15 @@ static int mmci_probe(struct amba_device *dev,
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+@@ -724,11 +722,9 @@ static int mvsd_probe(struct platform_device *pdev)
+ 	 * fixed rate clock).
  	 */
- 	if (!variant->opendrain) {
- 		host->pinctrl = devm_pinctrl_get(&dev->dev);
--		if (IS_ERR(host->pinctrl)) {
--			dev_err(&dev->dev, "failed to get pinctrl");
--			ret = PTR_ERR(host->pinctrl);
--			goto host_free;
--		}
-+		if (IS_ERR(host->pinctrl))
-+			return dev_err_probe(&dev->dev, PTR_ERR(host->pinctrl),
-+					     "failed to get pinctrl\n");
- 
- 		host->pins_opendrain = pinctrl_lookup_state(host->pinctrl,
- 							    MMCI_PINCTRL_STATE_OPENDRAIN);
--		if (IS_ERR(host->pins_opendrain)) {
--			dev_err(mmc_dev(mmc), "Can't select opendrain pins\n");
--			ret = PTR_ERR(host->pins_opendrain);
--			goto host_free;
--		}
-+		if (IS_ERR(host->pins_opendrain))
-+			return dev_err_probe(&dev->dev, PTR_ERR(host->pins_opendrain),
-+					     "Can't select opendrain pins\n");
- 	}
- 
- 	host->hw_designer = amba_manf(dev);
-@@ -2263,14 +2259,12 @@ static int mmci_probe(struct amba_device *dev,
- 	dev_dbg(mmc_dev(mmc), "revision = 0x%01x\n", host->hw_revision);
- 
- 	host->clk = devm_clk_get(&dev->dev, NULL);
+ 	host->clk = devm_clk_get(&pdev->dev, NULL);
 -	if (IS_ERR(host->clk)) {
--		ret = PTR_ERR(host->clk);
--		goto host_free;
+-		dev_err(&pdev->dev, "no clock associated\n");
+-		ret = -EINVAL;
+-		goto out;
 -	}
 +	if (IS_ERR(host->clk))
-+		return PTR_ERR(host->clk);
++		return dev_err_probe(&pdev->dev, -EINVAL, "no clock associated\n");
++
+ 	clk_prepare_enable(host->clk);
  
- 	ret = clk_prepare_enable(host->clk);
- 	if (ret)
--		goto host_free;
-+		return ret;
+ 	mmc->ops = &mvsd_ops;
+@@ -787,12 +783,7 @@ static int mvsd_probe(struct platform_device *pdev)
+ 	return 0;
  
- 	if (variant->qcom_fifo)
- 		host->get_rx_fifocnt = mmci_qcom_get_rx_fifocnt;
-@@ -2491,8 +2485,6 @@ static int mmci_probe(struct amba_device *dev,
- 
-  clk_disable:
- 	clk_disable_unprepare(host->clk);
-- host_free:
--	mmc_free_host(mmc);
+ out:
+-	if (mmc) {
+-		if (!IS_ERR(host->clk))
+-			clk_disable_unprepare(host->clk);
+-		mmc_free_host(mmc);
+-	}
+-
++	clk_disable_unprepare(host->clk);
  	return ret;
  }
  
-@@ -2522,7 +2514,6 @@ static void mmci_remove(struct amba_device *dev)
+@@ -808,7 +799,6 @@ static void mvsd_remove(struct platform_device *pdev)
  
- 		mmci_dma_release(host);
+ 	if (!IS_ERR(host->clk))
  		clk_disable_unprepare(host->clk);
--		mmc_free_host(mmc);
- 	}
+-	mmc_free_host(mmc);
  }
  
+ static const struct of_device_id mvsdio_dt_ids[] = {
 -- 
 2.47.1
 
