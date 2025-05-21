@@ -1,191 +1,185 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from EUR05-DB8-obe.outbound.protection.outlook.com (mail-db8eur05on2074.outbound.protection.outlook.com [40.107.20.74])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 31F6721CC59
-	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 15:41:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747842095; cv=none; b=Lvvhhj4tWiHfTXHxbSX8nf/n3pPRsQdW8yimIm8UaEBqeTQfOkVoZJIMWbVsgIa+Y10SOcgiVsN2ZYpgsWlXjBqc872fTBkgw2zVH5Lf8fjXGH0dDQqvnfav8ca2A9RthYpYygN/QREMSRWEdZAk2K4rVCsFWxmTvKNT3ykCAIQ=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747842095; c=relaxed/simple;
-	bh=0Hm0voyeDVNLto4h3bUVaIJA2qzEuKKWBY8Rt1tYC7Y=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=uzLwZxa8Tj2126XndIF7Uidt4CKkEpWBEWZ128atcwc5uMfXjxUqLqGYuK+Jk3pJMKv68YEbhL7HyczYkmXw1q/YIVV08IaDDbUC63KBYwY0PXwYBqJdv2zNMRnqyGUq+610cUbqB+xCqY9MZXSZh96iF/PosEk1hOXGEnVEpEY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=B7IMEbTG; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1EA3D21B18B;
+	Wed, 21 May 2025 15:46:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.20.74
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1747842381; cv=fail; b=SszK/fr8XEqYEiAKJk1pbIN1fTGGQ6ohvhntya5AwZBdvIXo71vTMQ9mcSFfaYs3zqueWI/7iASKasVFo5wrmv7s/Lx9dB54jwXVdG0INkIhwtz/37WYwMacX8Plx64vQUhsXD/CMd6ROOukIIqRCpdOkfogmbJ3fGeVjw3zFtg=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1747842381; c=relaxed/simple;
+	bh=pjgQOsRDeC8DTKoeeXu9vKX+PNE3PuUyiei5t2iuVMU=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:Content-Type:
+	 Content-Disposition:In-Reply-To:MIME-Version; b=oy/EAEZUEb5OCG6QDHPHgSIL/JOjocCBmmemB6tXR/auV/PcCPaHmlP527xRESrD8iUtD3yUg40gCa2vWNn45ZCKloHrgvIVfpQjUDLCZf04bTIb1GHBmDl9Bspn5IIpLhy9zCDJ1PDibqPyBqcf6RzCliv+2PEJnghqEqrbX9Q=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=NHEdSFd9; arc=fail smtp.client-ip=40.107.20.74
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="B7IMEbTG"
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 54L9XLEY013519
-	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 15:41:33 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	11xIrqs7y33esKOfbwtRMscbBQ+xSYJyjFlpp1MuMfc=; b=B7IMEbTGShkwi76/
-	Ixsqiho8zgp9Eae1mE6FPZiZayqVcz9zQ9p9WgC2WgMqZd2drKbPeGs5swIsjhFP
-	kvh9G8MbVBxKyNAvisHQ2XeS5rtedgq+iLDdau/SWbV/y32cyzNgJzi3HbwTR2Q/
-	65pwKZMuV+ArOrAQat12+JNHl9B8fnW3MpR4VFXMOvN6K+WdrDIxkl7sAWRbm0P/
-	W5CjVMHnW9GrVRQDaB2KIZM0NpbUwdpt3feL+Sn1x8b8NwotyDqJkqTvJ88YfYrB
-	/8IUAuS8RAbZkB2W2ABwNj3DTb7ePwaD+ua6Vxhqz10GwkjfRaBbMJc5oS+vnMef
-	+mo2PQ==
-Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 46rwh5bgpn-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 15:41:33 +0000 (GMT)
-Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-478f78ff9beso212691321cf.1
-        for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 08:41:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747842092; x=1748446892;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=11xIrqs7y33esKOfbwtRMscbBQ+xSYJyjFlpp1MuMfc=;
-        b=X0Sq+8bXY1wOewRI22zWdrX2Upm9Biq40TyTl8vXx2tb6Gd3aOhOo36jyjusD/6nGI
-         ks05jnWrMsrgwUG/aJr/KTRARXsOt5nfcbv/7grQQmotLqlLNcSY+Q43muVPwycQrI1b
-         Nss9IKfFUDr4e7smlm6Dom1H/qHi16NVbMvefVkI1cBknTiDrPqjNXoazpP1idCyoWxy
-         NzlggchehSXSGahCHZ4YAyRw7BTYBFk/PlyrBotihyVpqYv3FQHbR1h89WiHkBbdIEYK
-         AUYzHL5UdYa6Cj8q3F9GVzoM91Mk6yYGkKeRu/pPtzaREnzVXbq6cx3xlmhyNA1OYnCX
-         J6vw==
-X-Forwarded-Encrypted: i=1; AJvYcCU2PABIqHD3z43o59DvOXF0qQBIxpgaOjj5pd4WkotE1V5Cv77CySWi3nzd1/9dKV9YLxFH+gEwwOE=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwkIJ6Nf87GAWHMtcIevUol5dXaOVTnB1LB2pcs0Bgf6hQ3pGiw
-	EWvqwH/ySCJMKGXp3kDMc2eoy85quWjgZk1yToDLqNvnA6yllpak+3G6usF03lR2nm0QB0aH4uH
-	c0XoUkjwclR4pdYJFQvn2iHqtSL2cnfPqSKfeHx1S/qeOgSNF3ixpe6lEoRS5GF4=
-X-Gm-Gg: ASbGncsyLUf6petS47qm72PA6zgHpZgK6N6xEOXevH1/LTQMBOqBqsTZZuWKgZ8O+Wm
-	Rh44pFYIFCvDiFvwTc6S/EXFDto4tkK1iSkOZRhVPt5uWf2itxPoXtd8qc8qoKsdmRpflGtSRMS
-	ojEGpQUaU/7MA35OIbXgg1R0IrtPvb7HJsDJnk8LudRP6GDZ4dDXN1L837f+i92jhKcjeZnpLFW
-	BVgdMo5ryVKKTObEhkt8GMgL37MX+lHjboL56N9tGsO3Tzn2qoX6nLivnKdjPNVTaTa7hT8LvHM
-	zQtPIMR3VeDbFyMqA2NtBoApcC/8fdbi4t4CgHjkfHGLs7GQpvLn+Q6iqB4B8kRVgxSxdyENeki
-	AGZWx+O6MvQ1Q3djaQlmQVSfZRs3OdsD2pr4oetb8U3N+mSwOQoRc8inZmhnEVaJ5
-X-Received: by 2002:a05:622a:5c96:b0:477:64b0:6a21 with SMTP id d75a77b69052e-494b07d98e2mr375789601cf.23.1747842091614;
-        Wed, 21 May 2025 08:41:31 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHzymVPyAEezG0iALlrdblH7qdHofBk2xTG0MRCZc7og2yUqLNV3+TUUJqDglHgQSrVGu3AZg==
-X-Received: by 2002:a05:622a:5c96:b0:477:64b0:6a21 with SMTP id d75a77b69052e-494b07d98e2mr375789091cf.23.1747842091152;
-        Wed, 21 May 2025 08:41:31 -0700 (PDT)
-Received: from ?IPV6:2001:14bb:c7:69ba:b852:d3f4:8957:5a1e? (2001-14bb-c7-69ba-b852-d3f4-8957-5a1e.rev.dnainternet.fi. [2001:14bb:c7:69ba:b852:d3f4:8957:5a1e])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-55208f7b362sm389589e87.236.2025.05.21.08.41.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 21 May 2025 08:41:30 -0700 (PDT)
-Message-ID: <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
-Date: Wed, 21 May 2025 18:41:27 +0300
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="NHEdSFd9"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=NYLAtXRWOWwdyrov4oU+ijztADWowURT+YSli8hN/p2dQ6/nAhj9e1OxnwRn+DtxVKPEVVpfUYGcV/hpdA/eUf+jW8rgYCU0Ax4os1YS0qM6ka5DsSrGzYu+2Rkqfx1626kSShf/aztnToAAmfQ49ceBaFuGJsRK8GMGvEJ8EATCi6/OnblWDxGbw2f/wWDgCgzIz2Qm7hckG28xfJvOL/Vrl2k6qo1XkluIAFXuz8c4xG0NiIXqmFg9O4G3cPbOcbMP/61kJihqyMtVXitHZ4spo1gpyxTyyGI8CDVCL9Cbj+dMywgUHwZ4FbQ6pLpIyEum4wTBHMwgBmzLKLelYA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=LNgPqmDBeMzAZxt/N4624fE1ZMVlerBvs5HHjs6qOhs=;
+ b=tr/iSUZjNk3o2BMYs7Ax30gZmWKrfAWzXwneWzSaBcEp0KJY5eOcwCQ6JJG3++bIpXBtiofwSNn6J7DTnZxuy1WY/09o719BvU+IXfBmCMTI0Iq93LmRe5yS5LDAAEHjjA1kV06WR5FVJ/W2F2F80+WsIFL7rzgUbpVEc2cmds7jgtFaWC/lNGqLyUUT/Fu8nM+l+AjfkdQkTM0cw2rd5X+fQHWa3/6fwsQLgXQtXs2aIHWwtcbqPaVtvka1m2ArrEnZIXZBnL0Rk7A3LBShARMdKra2yL5nyP/Zr69hsyt3MbVxVKsRZNlBTyaIUTkPakVQAJZCRzkQJsHhloDXOA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=LNgPqmDBeMzAZxt/N4624fE1ZMVlerBvs5HHjs6qOhs=;
+ b=NHEdSFd9vFpEI3mhmaiLMRMNDi+Dp2zCH4QRITKpYILCMIAJ2gJwDGEtef977RDXrzt8LaJoe9rcH6Ac69XsnpQntA/G109Eq+it37L4Tad5V8VYB4ZvatBU9LtU6wYXJ4v+IGfJWsw0MO1BU/l2bLiI2CFggXyn4hnGNPVgpgYsqggcVmlA2PUxbLbdNp7TrZrlQJqghFkviL2JHwT/+bZOO76qfsTzf/rLsZf5jr3EJ8mGMBK1FRMxzu1VXhmQIdlqalTs95MJhcKRvbIIFO+gJ1uBRUSS49BdnHdEJQiKSrtxQdrVHhZEZwW6iOOIlvMH9GKu5yuEG+UrnN47Tw==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
+ by VI1PR04MB9931.eurprd04.prod.outlook.com (2603:10a6:800:1d4::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8746.30; Wed, 21 May
+ 2025 15:46:16 +0000
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06%2]) with mapi id 15.20.8746.030; Wed, 21 May 2025
+ 15:46:15 +0000
+Date: Wed, 21 May 2025 11:46:08 -0400
+From: Frank Li <Frank.li@nxp.com>
+To: ziniu.wang_1@nxp.com
+Cc: haibo.chen@nxp.com, adrian.hunter@intel.com, ulf.hansson@linaro.org,
+	linux-mmc@vger.kernel.org, shawnguo@kernel.org,
+	s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+	imx@lists.linux.dev, s32@nxp.com,
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: inherit pins_100mhz from
+ pins_200mhz when unconfigured
+Message-ID: <aC31QJpomsFWN++7@lizhi-Precision-Tower-5810>
+References: <20250521112042.266111-1-ziniu.wang_1@nxp.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250521112042.266111-1-ziniu.wang_1@nxp.com>
+X-ClientProxiedBy: PH8P220CA0032.NAMP220.PROD.OUTLOOK.COM
+ (2603:10b6:510:348::10) To PAXPR04MB9642.eurprd04.prod.outlook.com
+ (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
- qualcomm controllers
-To: Sarthak Garg <quic_sartgarg@quicinc.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_bhaskarv@quicinc.com, kernel@quicinc.com
-References: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
- <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
- <10c90fee-ce7f-4034-9028-4252f19cb67f@quicinc.com>
- <CAA8EJpoLLDXFQk-ViuaioKrECzMV0aUrcOj4v+Ufs4oHY53mrw@mail.gmail.com>
- <064d3eed-c2ea-4b41-85b2-d2a5a922f8c7@quicinc.com>
- <ehgjdszjr34xppmkrkicb4pnq326nor26tqu2ekop6ew2j3y3h@pm45aiipzuc5>
- <48c73675-a73f-46f1-81a9-f701a2cf00a5@quicinc.com>
- <c1ebdaf1-92bb-4f73-bca9-35246d7c10e1@oss.qualcomm.com>
- <ca83b841-aea0-4233-93fe-02a7b5985af4@quicinc.com>
-Content-Language: en-US
-From: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-In-Reply-To: <ca83b841-aea0-4233-93fe-02a7b5985af4@quicinc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNTIxMDE1MyBTYWx0ZWRfX3f3VIUJZPanA
- kiyFlCdVbsxY+CErqBqL/jQdIe2mhjH6ziCdDF2vr6jVb6SvFl/It94HRZA03NzgxEykhFtytgJ
- nGc/0GF4DiDBqhXn3KrEY280/+X07z0VXbGVnEENcJHp5WxhSLplr+pfehDJDNVhZwsUfuifTY7
- sFUjasySVWnthZD+OR2bgkECdruBY5HyUAARFp/SEeKwjpUEDL5ZExLN1uq9k+JwXCSFDkvws4V
- n+NXM/gE5ySMF6VG9grEnMh6//gG2nQBKeWRCkKPlgam0s+T+izi8vd8q6qPg/9zv0R0KBOnpja
- 6HWKQCA4UO5PYg0cm/dWjtIB/3kO6U/6vLtLu5HtMAgx7w1uct5YImu0dukdbXDaxD5e6rreDqL
- JMcv3LFdp5JeBXibSgZgngO5WwUFwosNeBht0Iuj5M+8FGivhvnx+HD0U8Q8XUuj1e4o8r8T
-X-Authority-Analysis: v=2.4 cv=XeWJzJ55 c=1 sm=1 tr=0 ts=682df42d cx=c_pps
- a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=xqWC_Br6kY4A:10 a=IkcTkHD0fZMA:10
- a=dt9VzEwgFbYA:10 a=COk6AnOGAAAA:8 a=Kn0oP55XQ_SHoSlfIoAA:9 a=3ZKOabzyN94A:10
- a=QEXdDO2ut3YA:10 a=dawVfQjAaf238kedN5IG:22 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: qp34FJM-lVILNGEZvzYpdWYo8syRdqGk
-X-Proofpoint-ORIG-GUID: qp34FJM-lVILNGEZvzYpdWYo8syRdqGk
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-05-21_05,2025-05-20_03,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- phishscore=0 clxscore=1015 mlxlogscore=999 mlxscore=0 bulkscore=0 spamscore=0
- suspectscore=0 impostorscore=0 adultscore=0 malwarescore=0 lowpriorityscore=0
- priorityscore=1501 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505160000
- definitions=main-2505210153
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|VI1PR04MB9931:EE_
+X-MS-Office365-Filtering-Correlation-Id: 3bdb4787-9b7e-4559-35c1-08dd987e9edd
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|376014|7416014|52116014|366016|1800799024|38350700014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?gNYuBgPsGolYgt0h0AsVSD+AO6k/nbetKX06HMaWZnOr4CNSsGttM9ud6O/u?=
+ =?us-ascii?Q?FfFO+hdcc8iZp5tec4LR8LRM47a6JwJenNWPct29d/OhO26kodSZCQfwslJu?=
+ =?us-ascii?Q?2jwpjjknc6hJcjvk6x2/X5Gx/CvhQx7LdEPinL7VA7AmYEO2/8+4Zzy1A9l5?=
+ =?us-ascii?Q?VELqf6FTtRE8VCSrEL9Zq88pVdteJcmBHXq4zJKR8lHzM7s0ZLYIMHct9Bwv?=
+ =?us-ascii?Q?o7HOtx5TYGjwehB4PfH38K50cR32Mse6TET0n8DQTTKcwuruJvAQwfvtd4/b?=
+ =?us-ascii?Q?ikqwuE3ZWLU8czKlun4fYqZoRj8F3wEdGgcqYRYcKxFJEzpikORhSsgq+nEl?=
+ =?us-ascii?Q?xnlGrxRfJyb+5DmcolwfWgSWXU/UetoTSaSd/+oo0IleLcYMQTrsdd0tjhTq?=
+ =?us-ascii?Q?qsGrahCR+RCvuM2qILjbEf9gUo4mdLskT9nJaGkfzOnzHt5in0h3ZBvxBaiw?=
+ =?us-ascii?Q?ijAloOKjiSyjIj/jmlYKKygBjBuDOqoq5gDQu3faeI6GlbSEoncI+LQks0jk?=
+ =?us-ascii?Q?uAA9QEFHHvraO0Z64xAlOqMl9koKTSNIguCh5OrtxEBlLfs/eW000l2qvKK+?=
+ =?us-ascii?Q?SxsUWJB9aM+71jJ0f1l5Ii7k+X6nYLf8Dxnert1sFUn9BOSH7yeU79GHuqmH?=
+ =?us-ascii?Q?dGUbEIgZYAk6sPig0VlVMzKpW2BgxqTylBiHg5y+SBDvIhrfG1JMM+0ocvL9?=
+ =?us-ascii?Q?e0sF8zKczqUK7JTV7hpCz99ihXWrA7jJCTLi0LmTHvqjVidgfMoqPpUlxFDV?=
+ =?us-ascii?Q?J+PMvkQPNOOlj2+sV4qdvwWiGu4WxecfUKIHCVK9zZyE42nM8tTJLzmVyVvj?=
+ =?us-ascii?Q?Iw0h/Vwg6Jvg3uLo8Q6EkyI9waI+bJPgOpTPdtf1sxPukhSSWW5Wj9PUbTWf?=
+ =?us-ascii?Q?26I9PYK5GW/Z9amPVsrrztccpHu3YrqIE3EK6H7Rb8VZyBCiDYE8U6lBbSbB?=
+ =?us-ascii?Q?p9f3vrbbGzTPWHSQHyHBk9U2byYsCET72F/gR8EWQWB+8Is1MUbSaRg4I9tk?=
+ =?us-ascii?Q?FYLyDYuUgZKapL58MRbvEEz4iotiibvf0fiWxM+3zvJ3sa6xkSVhT4mWiIgL?=
+ =?us-ascii?Q?SczTw2qNt8t/B5TzhFtUshdS1oGj7Vv/thoisEKKNxG4FoXUmJZmwukqWjuw?=
+ =?us-ascii?Q?KCrFSR00dAhMflP6u8ZyqF+a3IjVtOaoWzkprJTrxSS70IsrlWOev2wYG+23?=
+ =?us-ascii?Q?xwWZM4suha8xw0f4eC9GfvzJn9rSladj4osKjiyfNsF4Lp/pIC1731sUCA/g?=
+ =?us-ascii?Q?Mx7yl2ULTa5vJHEpfZYTUL0kU+MeijsUVQ0PfrbV0jgHgN58+2zdlkvffJKe?=
+ =?us-ascii?Q?oOFuQ7P40EHiRWNzmuu79Ospg5BU+9RBsz6kvYfu5PCRUGQElx2fAlseDPwj?=
+ =?us-ascii?Q?8XYhFTHf6reuGUB7jds65pWva8RWhNAOzUTaPCBve5Cpal4GTUkRdaF7kxDV?=
+ =?us-ascii?Q?Frfk4z02LIQ3gakuk5P78a42Jp8J4Mp6Zgndgnue6LFlZmacI4FLIw=3D=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(52116014)(366016)(1800799024)(38350700014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?DSHrfjX6Bcr6MxrZAXlTWR7imYihgGWiaZoitihqnGyL9FhC0oIyBWfYBt46?=
+ =?us-ascii?Q?4THyr7LZU9eIweH7xwF8+B0NI88GA2+C8odGQCU8aJhk8HYUcgzyZtOtaSW1?=
+ =?us-ascii?Q?PRJqAjl3jDdCtxBxlpZwK4UfzWc8IJvzGqooMHidB/FbVJ/xZlSNCkOUj9gt?=
+ =?us-ascii?Q?wFwQk+GZNaABRtxeaJZRrPNYFpAIUPvx2SIoho4KDyDEXazz47IuZbYlcM47?=
+ =?us-ascii?Q?ao3jNRsBVC2fHXo7NektQLAwFWwlDq3/PU4wjVucqvfnhrQlMSuJqrLSK25V?=
+ =?us-ascii?Q?XTWpBdakedlh/3vE0GVIa5DU4BPpE3ymLRX9gtSJqcz/inL6bLqXBxLW+C7o?=
+ =?us-ascii?Q?IANQXXpkChXvnIP1BGJTebBICaqIhV2WPvXGr093rIG7ylZ17Vil9GfpZgus?=
+ =?us-ascii?Q?k+5Rb1Pd2zsb7IJH2CiLFMlBLt1cfuSdziEmq5u+cMNq2Dfp1YW6yhoXDthF?=
+ =?us-ascii?Q?RBE88h5yojCxIPjKWozFChAQrB2C1u5s2D6CvNYeQhpYDf5XInerH5jFqANT?=
+ =?us-ascii?Q?btLKALYHEGeZl9ygxrcT6VShi+QhVyuCE96CoFaydLzf2YDDRU2jZbA0qW/f?=
+ =?us-ascii?Q?p6XE8/S4wWT6j8ywIdCc5djjnsHe/i8XLuWvMgGduGbWc3tue5UWYZVEVQEF?=
+ =?us-ascii?Q?c2gtXU0Wi6vJf7o+Rzserksd1p4u+3rOmae/QvAouHWeXoGKo9eM5N3dZ+Ao?=
+ =?us-ascii?Q?l3BdsbEM50Sr3o8MNZDuYYZAysxBn6iY3UtebStQ01UojkbF+CMtQfkWO/z+?=
+ =?us-ascii?Q?HkXLzNjQcOnLVd5bf96BYBwPUHbpZVNzsJeZXB5n6LGpNjK4iVmQEXI6ANy+?=
+ =?us-ascii?Q?BBgNRyteQifGBnTD79vcKXxqjkCKWwDennpf9NluHqH9CSDXYpnCGVCsrZvs?=
+ =?us-ascii?Q?s+E5GiaAwtpEdv4TEJH8jxJ3wX5Txbcz3I3u2SC2akYUNni93r1y2Fhktwe9?=
+ =?us-ascii?Q?MHRcGMH2aoSS3/rxFhLgpUalFtcrZjMi7fkWp+F2DnXgphD/35abiHVi811A?=
+ =?us-ascii?Q?y/LceN0gwiz1ekD4oefvP/VY9Gz35b6dRnYZ39PAZ7kNu5yAkxagFzoJy6Hi?=
+ =?us-ascii?Q?LOmCcOQhI5LWqcDVUKyh9voTVGzvRDoLsgSpEA9JXm1AWI3c0FWn4/1sOe70?=
+ =?us-ascii?Q?f0HoqY9KAipzBnTtSULs2uMGedToaUGhx/ZUoqRBRIrn5WV2VLbVY1NTLTpC?=
+ =?us-ascii?Q?ZHQdf7lYaAbQBOu+FVU02/knLKOz718siOGAabqd47PHt0LdV5BzJIs5PPvs?=
+ =?us-ascii?Q?+1eVKu8dNC57DB+3nILI9F2jQknlTewYpIRQaxw6ICzZ3uEgzL8CFcyzQhzn?=
+ =?us-ascii?Q?4eb7oR/LNOGKVs++ukOyTNf+Xx0IT+Oy/NQbMqrYt6ax/sdN+xBBPq97uzrR?=
+ =?us-ascii?Q?MawSG0/OBhwdY5MiwpRao1+KV2yridMfdM9VOHUtuFxYPTT1msw2s3pzTd5s?=
+ =?us-ascii?Q?1d3r0HZYVXx1kfwpRLqf3PF2I8Bv/19cf7lGL/jerMqsaR/Y1WGxsovK0xJE?=
+ =?us-ascii?Q?cedOoPkbsJxv8O4bffQ9OnqICcSBQYopQOETSotnbNW/o4cox1Eb/LCEBuNl?=
+ =?us-ascii?Q?/ENL+2+u097HytPUIzwXzPvhJLkFdXllmLvoq3j5?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3bdb4787-9b7e-4559-35c1-08dd987e9edd
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 May 2025 15:46:15.7998
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: oiIhBhSh5DoxvQoZIgKBTgV2XzeIdRvJz0cnjkpSW+38yBenrNHUy0MqW6k23PPsYaBHQFnmM3gmxj6K0/Vweg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB9931
 
-On 21/05/2025 18:36, Sarthak Garg wrote:
-> 
-> 
-> On 5/21/2025 8:19 PM, Dmitry Baryshkov wrote:
->> On 21/05/2025 17:35, Sarthak Garg wrote:
->>>
->>>
->>> On 5/21/2025 6:25 PM, Dmitry Baryshkov wrote:
->>>> On Wed, May 21, 2025 at 12:46:49PM +0530, Sarthak Garg wrote:
->>>>>
->>>>>
->>>>> On 11/15/2024 6:53 PM, Dmitry Baryshkov wrote:
->>>>>> On Fri, 15 Nov 2024 at 12:23, Sarthak Garg 
->>>>>> <quic_sartgarg@quicinc.com> wrote:
->>>>>>>
->>>>>>>
->>>>>>>
->>>>>>> On 11/4/2024 4:19 PM, Dmitry Baryshkov wrote:
->>>>>>>> On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
->>>>>>>>> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
->>>>>>>>> This enables runtime PM for eMMC/SD card.
->>>>>>>>
->>>>>>>> Could you please mention, which platforms were tested with this 
->>>>>>>> patch?
->>>>>>>> Note, upstream kernel supports a lot of platforms, including 
->>>>>>>> MSM8974, I
->>>>>>>> think the oldest one, which uses SDHCI.
->>>>>>>>
->>>>>>>
->>>>>>> This was tested with qdu1000 platform.
->>>>>>
->>>>>> Are you sure that it won't break other platforms?
->>>>>>
->>>>>
->>>>> Thanks for your valuable comment.
->>>>> I am not sure about the older platforms so to avoid issues on older
->>>>> platforms we can enable this for all SDCC version 5.0 targets ?
->>>>
->>>> No, there are still a lot of platforms. Either explain why this is
->>>> required for all v5 platforms (and won't break those) or find some 
->>>> other
->>>> way, e.g. limit the change to QDU1000, explaining why it is _not_
->>>> applicable to other platforms.
->>>>
->>>
->>> Thanks for your comment.
->>
->> No need to.
->>  >> I agree with your concern but for me also its not possible to test on
->>> all the platforms.
->>
->> Sure.
->> >> Lets say if I want to enable this caps for QDU1000 for which it has
->>> been tested and on any other upcoming target after testing, then how 
->>> can I proceed to enable?
->>
->> Let's start from the beginning: why do you want to enable it on QDU1000?
->>
-> 
-> QDU1000 is one latest available target where we have enabled this and 
-> tested. This has been enabled to save power.
+On Wed, May 21, 2025 at 07:20:42PM +0800, ziniu.wang_1@nxp.com wrote:
+> From: Luke Wang <ziniu.wang_1@nxp.com>
+>
+> On some new i.MX platforms, hardware guidelines recommend using identical
+> pin configurations for SDR50/DDR50 (100MHz) and SDR104/HS400 (200MHz)
+> modes. But defining two identical pinctrl for 100MHz and 200MHz in dts
+> creates redundancy. In this case, omit explicit 100MHz configuration,
+> driver will inherit 100MHz pinctrl from 200MHz.
 
-Isn't it a powered device? How much power is the save? Is it worth it?
+It is quite strange inherit low freq setting from high freq setting.
 
--- 
-With best wishes
-Dmitry
+Orignal method that decide support SDR50/DDR50/SDR104/HS400 abuse the
+pinctrl state usage.
+
+Frank
+
+>
+> Preserves existing behavior if 100MHz is configured but 200MHz not (e.g,
+> imx8mp-navq.dts usdhc1 supports SDR50/DDR50 but SDR104/HS400 not).
+>
+> Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index f206b562a6e3..dfd8be5000c8 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1810,6 +1810,9 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>  						ESDHC_PINCTRL_STATE_100MHZ);
+>  		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+>  						ESDHC_PINCTRL_STATE_200MHZ);
+> +
+> +		if (IS_ERR_OR_NULL(imx_data->pins_100mhz))
+> +			imx_data->pins_100mhz = imx_data->pins_200mhz;
+>  	}
+>
+>  	/* call to generic mmc_of_parse to support additional capabilities */
+> --
+> 2.34.1
+>
