@@ -1,98 +1,102 @@
-Received: from cstnet.cn (smtp21.cstnet.cn [159.226.251.21])
-	(using TLSv1.2 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+Received: from rere.qmqm.pl (rere.qmqm.pl [91.227.64.183])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E983B2367C0;
-	Wed, 21 May 2025 08:39:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=159.226.251.21
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 704762367D4
+	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 09:53:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.227.64.183
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747816768; cv=none; b=Y/ok+5i+tBx6fWLnY1P66yvQ1j00799DbhqMqqHgcTBnJlUkEsCQTy5lPl7GI5S6K8PWxw4+8lh7+fk0XzfnAEHpClGIa05Af+TIDSIVx5epnSPSXTnhj15MiKppezAejA+8J0SqAVpR/v5o4kSOH69edSUHqQCWUA/MxfrkctY=
+	t=1747821200; cv=none; b=CBxnH4s+JooLVAbRjGjdIwGZhL5SBaOVWhwFfw6I+Ci/WAN9xF5alIC4/JIPdrNqe3QKriGKEEPovKlumZSKnL2FnCXGQjBBxcsFvg+U3s1vnROUhlLLLS/QsJ+M3uWFHHvliCHKNsPDaGC3WL00v2aQTzB8HkbeYl4YoQAC7CE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747816768; c=relaxed/simple;
-	bh=7zLmzQ7OpMriiPhIS/LNVnD+rTOcckAQUownjGSaiS0=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=sMaBu76wrO4PXMsW07aXz2xoBTrAUKz4OzeAvKmoWt88xaSAEUPalmmixkeGZJfEHz2rYO4u/TRS4e4yA3FYU+xMvKQdYK1MY2b/uV5FDdh//K1sVgrE+EYhPiT+wG5wI5G6O0HHFiaGzHESQN6D56AOsSz0Jgp1dKOwfGnOUNg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn; spf=pass smtp.mailfrom=iscas.ac.cn; arc=none smtp.client-ip=159.226.251.21
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=iscas.ac.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=iscas.ac.cn
-Received: from localhost.localdomain (unknown [124.16.141.245])
-	by APP-01 (Coremail) with SMTP id qwCowAAXf74pkS1oZuXmAQ--.4439S2;
-	Wed, 21 May 2025 16:39:11 +0800 (CST)
-From: Wentao Liang <vulab@iscas.ac.cn>
-To: adrian.hunter@intel.com,
-	vigneshr@ti.com,
-	ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Wentao Liang <vulab@iscas.ac.cn>,
-	stable@vger.kernel.org
-Subject: [PATCH v2] mmc: sdhci-omap: Add error handling for sdhci_runtime_suspend_host()
-Date: Wed, 21 May 2025 16:38:46 +0800
-Message-ID: <20250521083846.718-1-vulab@iscas.ac.cn>
-X-Mailer: git-send-email 2.42.0.windows.2
+	s=arc-20240116; t=1747821200; c=relaxed/simple;
+	bh=NTJzN20q+36MQF1iYvGUm0Ef0xWHEEbxpCxDz/JhkEM=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=pdqwg6fVDFviEozb74NoXRwdDwUawlq2RcDnjcBj8GaCwuC1544+W7C0AKyPX8KjM669bsvkBVVjkepRFKwcInV5C1cZbqUAgMfZxdhS0gZj385glChC9eg6/jXOpEjUi+BWHUavyL17zvJZu5nbzWTr3zx/LY6AECageupMyTg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl; spf=pass smtp.mailfrom=rere.qmqm.pl; dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b=hTyjUe3n; arc=none smtp.client-ip=91.227.64.183
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rere.qmqm.pl
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="hTyjUe3n"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+	t=1747820883; bh=NTJzN20q+36MQF1iYvGUm0Ef0xWHEEbxpCxDz/JhkEM=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=hTyjUe3nf0JY9MBFJJb5yLaTooYXDCKPuPWbbsVpzzAI5u89buBeJILTBCVrS9vO4
+	 Qg1KiSJxMbDeSu7AzSpYhN4fHQHIAxrZfi8wX80/4C8oopFOz1UqUJN4o4s/cGqv5n
+	 g99hJBh+FBk7Alro4vVceLtpN+7/7TYAGOULR6Dt05NQtEtPXWO9Pqbge5b/tiE/It
+	 LGM+h3Py622fJmaTDLxTwIhbiXqQvkyiEJj96Z4gBGAOxoKQn6tNx0Meebj7IU7X9n
+	 YxosR2l59ymuRKRFNvHXjIYFcJmBiUXAKX/JYyYG4ThNivG/L4yaEVvV1Z7GuraEjx
+	 iZQ3RoaSjTLzg==
+Received: from remote.user (localhost [127.0.0.1])
+	by rere.qmqm.pl (Postfix) with ESMTPSA id 4b2RS32hmKz6Q;
+	Wed, 21 May 2025 11:48:03 +0200 (CEST)
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 1.0.7 at mail
+Date: Wed, 21 May 2025 11:48:02 +0200
+From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 06/36] mmc: cb710: Use devm_mmc_alloc_host() helper
+Message-ID: <aC2hUpVu8R7cPQTW@qmqm.qmqm.pl>
+References: <cover.1747739323.git.zhoubinbin@loongson.cn>
+ <4fa83917fec4ec648b12cb1ac1fc0626c15c0946.1747739323.git.zhoubinbin@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-2
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qwCowAAXf74pkS1oZuXmAQ--.4439S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7tryftFy7ZFyDKw47tF4kCrg_yoW8Gw13pa
-	n0grW29r48Ww1FkF4kJan2vryFg345KrWjy3s8Xw1ruw4IkrW5KFsrCFyYvF1UKr13Ganr
-	XF18XayUCFyYyaUanT9S1TB71UUUUU7qnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-	9KBjDU0xBIdaVrnRJUUUvj14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-	rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-	1l84ACjcxK6xIIjxv20xvE14v26r4j6ryUM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4U
-	JVWxJr1l84ACjcxK6I8E87Iv67AKxVW8Jr0_Cr1UM28EF7xvwVC2z280aVCY1x0267AKxV
-	WxJr0_GcWle2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2Wl
-	Yx0E2Ix0cI8IcVAFwI0_Jr0_Jr4lYx0Ex4A2jsIE14v26r4j6F4UMcvjeVCFs4IE7xkEbV
-	WUJVW8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lc7CjxVAaw2AF
-	wI0_JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4
-	xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1D
-	MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I
-	0E14v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVW8
-	JVWxJwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUej
-	jgDUUUU
-X-CM-SenderInfo: pyxotu46lvutnvoduhdfq/1tbiDAUJA2gtfVNegQABs2
+In-Reply-To: <4fa83917fec4ec648b12cb1ac1fc0626c15c0946.1747739323.git.zhoubinbin@loongson.cn>
 
-The sdhci_omap_runtime_suspend() calls sdhci_runtime_suspend_host() but
-does not handle the return value. A proper implementation can be found
-in sdhci_am654_runtime_suspend().
+On Tue, May 20, 2025 at 07:45:07PM +0800, Binbin Zhou wrote:
+> Use new function devm_mmc_alloc_host() to simplify the code.
 
-Add error handling for sdhci_runtime_suspend_host(). Return the error
-code if the suspend fails.
+Acked-by: "Micha³ Miros³aw" <mirq-linux@rere.qmqm.pl>
 
-Fixes: 51189eb9ddc8 ("mmc: sdhci-omap: Fix a lockdep warning for PM runtime init")
-Cc: stable@vger.kernel.org # 5.19
-Signed-off-by: Wentao Liang <vulab@iscas.ac.cn>
----
-v2: Fix code error.
 
- drivers/mmc/host/sdhci-omap.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+> Cc: "Micha³ Miros³aw" <mirq-linux@rere.qmqm.pl>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> ---
+>  drivers/mmc/host/cb710-mmc.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+> index d741c1f9cf87..8787e7f49e94 100644
+> --- a/drivers/mmc/host/cb710-mmc.c
+> +++ b/drivers/mmc/host/cb710-mmc.c
+> @@ -692,7 +692,7 @@ static int cb710_mmc_init(struct platform_device *pdev)
+>  	int err;
+>  	u32 val;
+>  
+> -	mmc = mmc_alloc_host(sizeof(*reader), cb710_slot_dev(slot));
+> +	mmc = devm_mmc_alloc_host(cb710_slot_dev(slot), sizeof(*reader));
+>  	if (!mmc)
+>  		return -ENOMEM;
+>  
+> @@ -741,7 +741,6 @@ static int cb710_mmc_init(struct platform_device *pdev)
+>  	dev_dbg(cb710_slot_dev(slot), "mmc_add_host() failed: %d\n", err);
+>  
+>  	cb710_set_irq_handler(slot, NULL);
+> -	mmc_free_host(mmc);
+>  	return err;
+>  }
+>  
+> @@ -764,8 +763,6 @@ static void cb710_mmc_exit(struct platform_device *pdev)
+>  	cb710_write_port_16(slot, CB710_MMC_CONFIGB_PORT, 0);
+>  
+>  	cancel_work_sync(&reader->finish_req_bh_work);
+> -
+> -	mmc_free_host(mmc);
+>  }
+>  
+>  static struct platform_driver cb710_mmc_driver = {
+> -- 
+> 2.47.1
+> 
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-index 54d795205fb4..f09f78cf244d 100644
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -1438,12 +1438,16 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
- 
- 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
- 		mmc_retune_needed(host->mmc);
- 
--	if (omap_host->con != -EINVAL)
--		sdhci_runtime_suspend_host(host);
-+	if (omap_host->con != -EINVAL) {
-+		ret = sdhci_runtime_suspend_host(host);
-+		if (ret)
-+			return ret;
-+	}
- 
- 	sdhci_omap_context_save(omap_host);
- 
 -- 
-2.42.0.windows.2
-
+Micha³ Miros³aw
