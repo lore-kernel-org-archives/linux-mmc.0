@@ -1,102 +1,138 @@
-Received: from rere.qmqm.pl (rere.qmqm.pl [91.227.64.183])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-vk1-f179.google.com (mail-vk1-f179.google.com [209.85.221.179])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 704762367D4
-	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 09:53:17 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=91.227.64.183
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 45BD211185;
+	Wed, 21 May 2025 10:45:40 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747821200; cv=none; b=CBxnH4s+JooLVAbRjGjdIwGZhL5SBaOVWhwFfw6I+Ci/WAN9xF5alIC4/JIPdrNqe3QKriGKEEPovKlumZSKnL2FnCXGQjBBxcsFvg+U3s1vnROUhlLLLS/QsJ+M3uWFHHvliCHKNsPDaGC3WL00v2aQTzB8HkbeYl4YoQAC7CE=
+	t=1747824341; cv=none; b=NSH+ROMGuYLQZ1I2lfFn9YZyeAy9WmAznAL9ga5DAx/7K7Ft8ichv6DK18Fa9yepzJPkacJlADrJUlR4ZWFpigy0urQIgm4tnocNTWuTrrgAmimQk2CnQq44SqTFgzulsXyskgaccVLv1KUwsjr0+0zeIaDGXGImFKCumQOr/8s=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747821200; c=relaxed/simple;
-	bh=NTJzN20q+36MQF1iYvGUm0Ef0xWHEEbxpCxDz/JhkEM=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=pdqwg6fVDFviEozb74NoXRwdDwUawlq2RcDnjcBj8GaCwuC1544+W7C0AKyPX8KjM669bsvkBVVjkepRFKwcInV5C1cZbqUAgMfZxdhS0gZj385glChC9eg6/jXOpEjUi+BWHUavyL17zvJZu5nbzWTr3zx/LY6AECageupMyTg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl; spf=pass smtp.mailfrom=rere.qmqm.pl; dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b=hTyjUe3n; arc=none smtp.client-ip=91.227.64.183
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=rere.qmqm.pl
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rere.qmqm.pl
+	s=arc-20240116; t=1747824341; c=relaxed/simple;
+	bh=nBFVOBAzCwLiPJlbF86jc8AtqkeBEhLpQjQSOowZjjA=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=cNiX53OocDNxLq53cgqg+Gme14Q3AuDHCVGp1pWI/fYiNYcYMZIOV9ALztSEVPBiLgLeEj2z6lmCbylaSaoqF3jXakT3VcFNlF7NaJAif3CX9/efrOqCGeRxvtxFoo/0rpJPHRRF22j81UW3wLx3c5xI+bofEAzaMJ3jBtidDNY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=GgCsJyWM; arc=none smtp.client-ip=209.85.221.179
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=rere.qmqm.pl header.i=@rere.qmqm.pl header.b="hTyjUe3n"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
-	t=1747820883; bh=NTJzN20q+36MQF1iYvGUm0Ef0xWHEEbxpCxDz/JhkEM=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=hTyjUe3nf0JY9MBFJJb5yLaTooYXDCKPuPWbbsVpzzAI5u89buBeJILTBCVrS9vO4
-	 Qg1KiSJxMbDeSu7AzSpYhN4fHQHIAxrZfi8wX80/4C8oopFOz1UqUJN4o4s/cGqv5n
-	 g99hJBh+FBk7Alro4vVceLtpN+7/7TYAGOULR6Dt05NQtEtPXWO9Pqbge5b/tiE/It
-	 LGM+h3Py622fJmaTDLxTwIhbiXqQvkyiEJj96Z4gBGAOxoKQn6tNx0Meebj7IU7X9n
-	 YxosR2l59ymuRKRFNvHXjIYFcJmBiUXAKX/JYyYG4ThNivG/L4yaEVvV1Z7GuraEjx
-	 iZQ3RoaSjTLzg==
-Received: from remote.user (localhost [127.0.0.1])
-	by rere.qmqm.pl (Postfix) with ESMTPSA id 4b2RS32hmKz6Q;
-	Wed, 21 May 2025 11:48:03 +0200 (CEST)
-X-Virus-Status: Clean
-X-Virus-Scanned: clamav-milter 1.0.7 at mail
-Date: Wed, 21 May 2025 11:48:02 +0200
-From: =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 06/36] mmc: cb710: Use devm_mmc_alloc_host() helper
-Message-ID: <aC2hUpVu8R7cPQTW@qmqm.qmqm.pl>
-References: <cover.1747739323.git.zhoubinbin@loongson.cn>
- <4fa83917fec4ec648b12cb1ac1fc0626c15c0946.1747739323.git.zhoubinbin@loongson.cn>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GgCsJyWM"
+Received: by mail-vk1-f179.google.com with SMTP id 71dfb90a1353d-52413efd0d3so2016519e0c.2;
+        Wed, 21 May 2025 03:45:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747824339; x=1748429139; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jI7WFIT3oOKIZEUz+s1sh9xGeM7AAYe8al+Kc062RVw=;
+        b=GgCsJyWMiKpMzYcSoGwtjStkmAJWc0fdtemUTTcstDwNp1kA/K1PfW7+8+Wh41pGPA
+         pCPoN1v1ZSTRta5iA/MhQE9615NJcZGNOlQtlWOe3gHXuTSsdj/3FhJAToxnT9WTqlaI
+         m3LXS8auofXfLaf85v/FRqP3F6DdlvM4vD/gKx19Xv6XnK+gzDuAhJjiC7vGb9PaWa80
+         2wtKNDjXZeZiOCold/kkgMI2Qovg68X3hdgcsxCrU8IBSA/NOc7zvoxGSyneDuGrY8qa
+         a3CCtdBvyxHsETkHHgL8V5JiR+w8133amMnKDVO/KBjmFL1HhIRRck4Ytrg/2/DuGt4I
+         fylw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747824339; x=1748429139;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=jI7WFIT3oOKIZEUz+s1sh9xGeM7AAYe8al+Kc062RVw=;
+        b=PwbFlq/AdMfadDgGLuyB4YkyfoPbVwYAZIpt3oDqdGz+hENGWOdta3bZhlzLkaNoD8
+         hi6Lfg4VjG19+8SToSd/SwHC83odachefCnY9r51eaP5mNp9xiUMkaxp19UwJn3YHPQI
+         uLAYYnW5VnjvJsSWIbn4R2VuSfMk1j2S19QtDnsb6UFS0ZlGbUL7lL410AMvcsR+xGsH
+         e4Uo7evHkq7vIljGY5LgVeTQk7AOmBNcoy0YQ2PLVx3tKokDAhkjy4zDkKQHmP5tVKs7
+         EOBmE1Er6DUe1jJzJYzTaztPa0RNgNdwqI6W3caoXD3hWOhn5d6BU3xld5SXraQqdKpK
+         6uFg==
+X-Forwarded-Encrypted: i=1; AJvYcCWLpXh6rvKpQQvurlkph9jTvvATJqiDYj1JZXj8zo3b2DqdEKIDUQC9bIvRvXCu5abDt5jn7lngX/NM@vger.kernel.org, AJvYcCXjNGuvkTAFHJKC6cevnUrN5CspP4O2wnbKXqfxevt3SPFcq8uL9B9VYhFZnzhCPVvyEX/3+hMmSoDeePs=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxCkhAJoIt7I2oE2EUjYZXiVfV8LJCU1RIjd3RCTls1icdaXyPB
+	JC4CjhMrHK0Tr+XW5DfBL2xiFd56osKldc11Q4Kvm4kcL+Cio66/TGMrjb0AY3wvyX03YO6s/Ry
+	/aPO9mPEVhtIj3H6qatXyuJ3m78gLB9wJIZr7
+X-Gm-Gg: ASbGncvoNA9wEN4TQiozHh/Dnkp37nRJ/MqbtDHS7lmzcqjTqRmzk4ldxXeoXOpXK36
+	P8kQXphrm98xv0ThAk15uv7mK2c5BXxG+UlpJNENrhSPWrSLXzjPfpo/pYW0SqMCP271mj4+QXo
+	u/wAVbKF8Jer8zK+F3NtTn7CXFiEhOO+whtTYAdvwVrlPjGZ8y09gpz+AUEP3FB1BatA==
+X-Google-Smtp-Source: AGHT+IFWF5OsgsU1QzpUJixobWdrzKZcXKaR0HkmiUChadkshUDPW61+RL/bvsQALDrLp7/ocx0XIQLx8Ht21EVNx+k=
+X-Received: by 2002:a05:6122:da7:b0:52d:b8fc:991f with SMTP id
+ 71dfb90a1353d-52dbce2ab91mr16664934e0c.6.1747824338903; Wed, 21 May 2025
+ 03:45:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-2
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <4fa83917fec4ec648b12cb1ac1fc0626c15c0946.1747739323.git.zhoubinbin@loongson.cn>
+References: <20250516092716.3918-1-victorshihgli@gmail.com>
+ <20250516092716.3918-2-victorshihgli@gmail.com> <CAPDyKFrKRw2kOQ9Gq=eCmm0N24hSEamNeCWGzC6X-Qg33ad-gw@mail.gmail.com>
+In-Reply-To: <CAPDyKFrKRw2kOQ9Gq=eCmm0N24hSEamNeCWGzC6X-Qg33ad-gw@mail.gmail.com>
+From: Victor Shih <victorshihgli@gmail.com>
+Date: Wed, 21 May 2025 18:45:26 +0800
+X-Gm-Features: AX0GCFtUXh2b2WmqbWg3oVW5IpySFiz1dAa98yuROK1LERLAVrWp1wc5Otj8SME
+Message-ID: <CAK00qKBRtBfWe_vGKz7Bbw3ZZfY4bxXiFDd3bSqzwdqP9hK01A@mail.gmail.com>
+Subject: Re: [PATCH V1 1/2] mmc: core: Adjust some error messages for SD
+ UHS-II cards
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
+	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, May 20, 2025 at 07:45:07PM +0800, Binbin Zhou wrote:
-> Use new function devm_mmc_alloc_host() to simplify the code.
+On Mon, May 19, 2025 at 8:10=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Fri, 16 May 2025 at 11:27, Victor Shih <victorshihgli@gmail.com> wrote=
+:
+> >
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > Adjust some error messages to debug mode to avoid causing
+> > misunderstanding it is an error.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/core/sd_uhs2.c | 8 ++++++--
+> >  1 file changed, 6 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
+> > index 1c31d0dfa961..58c4cef37f7c 100644
+> > --- a/drivers/mmc/core/sd_uhs2.c
+> > +++ b/drivers/mmc/core/sd_uhs2.c
+> > @@ -36,6 +36,10 @@
+> >  #include "sd_ops.h"
+> >  #include "mmc_ops.h"
+> >
+> > +#define DRIVER_NAME "sd_uhs2"
+> > +#define DBG(f, x...) \
+> > +       pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
+> > +
+>
+> We don't need a macro for this, just use a pr_debug() below instead.
+>
 
-Acked-by: "Micha³ Miros³aw" <mirq-linux@rere.qmqm.pl>
+Hi, Ulf
 
+I will drop this macro and use pr_debug() instead in the next version.
 
-> Cc: "Micha³ Miros³aw" <mirq-linux@rere.qmqm.pl>
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-> ---
->  drivers/mmc/host/cb710-mmc.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-> index d741c1f9cf87..8787e7f49e94 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -692,7 +692,7 @@ static int cb710_mmc_init(struct platform_device *pdev)
->  	int err;
->  	u32 val;
->  
-> -	mmc = mmc_alloc_host(sizeof(*reader), cb710_slot_dev(slot));
-> +	mmc = devm_mmc_alloc_host(cb710_slot_dev(slot), sizeof(*reader));
->  	if (!mmc)
->  		return -ENOMEM;
->  
-> @@ -741,7 +741,6 @@ static int cb710_mmc_init(struct platform_device *pdev)
->  	dev_dbg(cb710_slot_dev(slot), "mmc_add_host() failed: %d\n", err);
->  
->  	cb710_set_irq_handler(slot, NULL);
-> -	mmc_free_host(mmc);
->  	return err;
->  }
->  
-> @@ -764,8 +763,6 @@ static void cb710_mmc_exit(struct platform_device *pdev)
->  	cb710_write_port_16(slot, CB710_MMC_CONFIGB_PORT, 0);
->  
->  	cancel_work_sync(&reader->finish_req_bh_work);
-> -
-> -	mmc_free_host(mmc);
->  }
->  
->  static struct platform_driver cb710_mmc_driver = {
-> -- 
-> 2.47.1
-> 
+Thanks, Victor Shih
 
--- 
-Micha³ Miros³aw
+> >  #define UHS2_WAIT_CFG_COMPLETE_PERIOD_US  (1 * 1000)
+> >  #define UHS2_WAIT_CFG_COMPLETE_TIMEOUT_MS 100
+> >
+> > @@ -91,8 +95,8 @@ static int sd_uhs2_phy_init(struct mmc_host *host)
+> >
+> >         err =3D host->ops->uhs2_control(host, UHS2_PHY_INIT);
+> >         if (err) {
+> > -               pr_err("%s: failed to initial phy for UHS-II!\n",
+> > -                      mmc_hostname(host));
+> > +               DBG("%s: failed to initial phy for UHS-II!\n",
+> > +                   mmc_hostname(host));
+> >         }
+> >
+> >         return err;
+> > --
+> > 2.43.0
+> >
+>
+> Kind regards
+> Uffe
