@@ -1,143 +1,109 @@
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 66834239E91
-	for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 12:45:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A572226FD8D;
+	Wed, 21 May 2025 12:53:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747831537; cv=none; b=YeeHIbWASMTpG0CJGnc/FU9VIxUw2dDMdMY2fgtDmNNouRo387mzobJ8+11fdDokLYB0fxX8XxIG837X++H+EKrrMOxa15xUivnNYRY1+nP0G3H8uatSXuhiHO+ODin4ZmtLtGbFyxyRCyfMlknx5DEwEAf2HTZDxjVbQk7KLVw=
+	t=1747832021; cv=none; b=tEU1dqUwV2zDPH8bS+6VbZlwQB8YqHu2la9GiSh95OmwjXFAxXljcSHSfPlrvG8tWgRuqW+yUK3Rwr9Y7inv/VqHf1/jG7VuVH4iB47i/TMm6EVqQ8yyCMXS0iOGM3lQf/bPmgdrqXLC769rj6qqUWEQi+I89DiD+pqx//n/CPo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747831537; c=relaxed/simple;
-	bh=n6rPJCx9/rJo0cLsi6xMccKyA/Zz3SsJyR7Z4cGd+a0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Z1GXXxe7rZHU69N9vfaXRMd2eBk4Jep5sr5snKBZKLL56RTAIHx8Ar8J7gpqVC+VjVFrWcGlHyiT929ErIbNZdiPM4RIUSUYgjwUJKOwaEHKoHTF5Bj2p0KFABSE1z/y8L0SLs9ZTz9NS5DBEtaATLIowTlLKw4DhE5fr7xultY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YZx/UHjF; arc=none smtp.client-ip=209.85.219.181
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1747832021; c=relaxed/simple;
+	bh=S742c3peeJQHm86+s66gSTwef+VkJOCaiUZ+BG1R2hs=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=czYF7Icuc/nxfAT5tjGNd1ApjEKoohhhIvy8ZFR8To5m2uDNo7KPRNNbjhZIwBWxnttTWF8mNMq2NxIvipnG7l3y+3Do//9wellWI+Z/eX8avkMKX7MEqMMCUeSxxupFiN5cdQbD2m9EeBm0S4t624CNMxAatxFZ2V/Uc/jaHNs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=eHq7U6ax; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YZx/UHjF"
-Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e7b962a1518so3207371276.1
-        for <linux-mmc@vger.kernel.org>; Wed, 21 May 2025 05:45:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1747831534; x=1748436334; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BTGEEcDJ4Rf44o/m0iYLH1IvvxWp6S4La78m9u7l9Dk=;
-        b=YZx/UHjFwVO5rOU9UXwOJSAPsreG8JzSLus3yRDPteIOIFiy+W67QaC3Vasdh08t7V
-         FkO/62TkvqBiXXAY5koYLZEPTCA0H4gVVlm86mXGUxzhnhhR/cyY6FZnYHYHrJwYipGO
-         sYHbP8MRteQ/WHmQFHS4oHY2U0Noc1CWBF9usMTocSZs/k/OhwC8DBN49unrQc2NkJVB
-         LskJCu9Yov9M6NTmOWj9DymiAPzIPT2vJEc94/MqzcnjLnTifsXCtpLb5kp3FiW66GMv
-         WsW/QORveau1b+jV4qKZb8YEmTFwES7gwBLuUKmD+Gr37E3Ky+bXV8M7veZVW1mqZUvN
-         j1Nw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747831534; x=1748436334;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=BTGEEcDJ4Rf44o/m0iYLH1IvvxWp6S4La78m9u7l9Dk=;
-        b=Tpgubg9Ag1E++595PDhvilpfeF/vbZybk7qhyzrxP2i4a2t76mssPGXuMLGLi8DfHk
-         QzGRT51FKcvXDrGZxkA5z1v9t5KaGtX9HFXT0auPeSo+/OKSIlMqh64QZafRtSQQIlr9
-         juKdoZsAxRRmwDVJvMxBTzPfPrS9Q0f6Vsqq/NQb7s1d+mtc3+T5qs1OrxCLKSC79VyN
-         xdcYPddEyFd8bWEr+GhZw9Nox6YA96dUqrLwYNhnu5YvJG+/NNvkQGlOuDlwu84nIOEo
-         4aQ3gQgz62NbdW6p3AyumU6QCxCCVdLrSznPaM7g+WVajqwm73Navp6gtdiUJIYf6Qe3
-         x60Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVlQNyHO43EECKbCSbZe+jIyu32taW/hvsYmWTQx1o0Lwb3ySS5LSukIhc91u8xSjPWCquTpaQrJoQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxs6fZW+7KxNJlhx6xgr8n30gIMf4jksG44QoyWpioCLf51Kmci
-	pmbQuFWXiH0aFYGEZ+UsoMVeMfXcTA+Mq81Kk1KCe0cJA6V7M1/1+nh2opCQQxzH6/Aq/UZqKkz
-	oHhy8CIJ26GH4eanC+JiyyjiW4BGwG0pYgP2t/vdjEg==
-X-Gm-Gg: ASbGncs0yx88uxKSZRoxifKPN7sJjSkzcgZD+n6DJI79ShkaFirkUFiWSrqEJe24I/j
-	s3L6AdYT+QFsh0O4DZb4XKbyczEuhUUW/yejK1qRpV72Za79gxlgYpn8WLZVNrHrPfWBb3ONlbL
-	aIN5Dbw2yGZpjcv5E/ffOnBh1NAVX3iU01+w==
-X-Google-Smtp-Source: AGHT+IFdZAN7WRv6VPS5cGJ3gLPs22mEKo408MqP93yw+t5BEIMPcUMP1HhYDPUHVSuVMpda74VHpQZ4hE6QblI0FRQ=
-X-Received: by 2002:a05:6902:120c:b0:e7d:6717:b4f with SMTP id
- 3f1490d57ef6-e7d67171335mr718291276.20.1747831534201; Wed, 21 May 2025
- 05:45:34 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="eHq7U6ax"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1747832019; x=1779368019;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=S742c3peeJQHm86+s66gSTwef+VkJOCaiUZ+BG1R2hs=;
+  b=eHq7U6axh0rnT/Li7NgXz5Py4TRCX9biQsZC15r9BzRVXw2+n2SFLm0O
+   hzPMc1Uj1Ljhw0+97Xj7i6c1GSWYwZenFkeSjS8IhfOJANtOex8ioxMJ+
+   Vyq3kfOVB8WKdpkXc0/3+mfJsF+8bhdzdtTMQc7wyAv25h3MQrN7QKLq5
+   RcY1kI8SiTaU87sZBj6o3a7RXXW7iaDhDnbW9hoZZmO93XeeivDJ35ooR
+   AFnB2YCHGHB3emaXHqJsTc3oEcSuo72KJZx3dUIA2V7fW8Sg0jXGVRUYs
+   DXutoRiPcTxuQQEjFFq7NjD//7mwu+nl1l5PRdBnju5D/GhuoLJzwu49y
+   Q==;
+X-CSE-ConnectionGUID: v0RV1nXsQSm59eRgbltNJA==
+X-CSE-MsgGUID: ygw/yh9OTeKdoAFal0Tmpw==
+X-IronPort-AV: E=Sophos;i="6.15,303,1739808000"; 
+   d="scan'208";a="84726615"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 21 May 2025 20:53:33 +0800
+IronPort-SDR: 682dbe86_fLr9avrVQp5o0m1t0wz46Iy7a2f65kid+vxk3h7W7PIX4lf
+ M8nQXOtrdf6zFhkoZSZljjKOt7JxyyzfW7UF5LA==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 May 2025 04:52:38 -0700
+WDCIronportException: Internal
+Received: from avri-office.ad.shared (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.142])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 21 May 2025 05:53:31 -0700
+From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>,
+	stable@vger.kernel.org
+Subject: [PATCH] mmc: core: sd: Apply BROKEN_SD_DISCARD quirk earlier
+Date: Wed, 21 May 2025 15:48:20 +0300
+Message-Id: <20250521124820.554493-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.25.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250516092716.3918-1-victorshihgli@gmail.com>
- <20250516092716.3918-3-victorshihgli@gmail.com> <CAPDyKFqCo2-9fYYAoNpmJf7XOiTvLM07hQks1io-S0MvmbAjCQ@mail.gmail.com>
- <CAK00qKAEN9+aA_7_YEGjjgovNG78du7+wmMyB4D0jZjzzcFNbA@mail.gmail.com>
-In-Reply-To: <CAK00qKAEN9+aA_7_YEGjjgovNG78du7+wmMyB4D0jZjzzcFNbA@mail.gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 21 May 2025 14:44:58 +0200
-X-Gm-Features: AX0GCFvdjxqAmgbrTOzHHBpAjrwEOM3dIarU_X-Ow71DNc9AeVmuEv_ZWGrofdM
-Message-ID: <CAPDyKFqsKqw2Oy2_JCK9ts1DytkMo86snWw9-OdxYwJfNWbnqw@mail.gmail.com>
-Subject: Re: [PATCH V1 2/2] mmc: sdhci-uhs2: Adjust some error messages and
- register dump for SD UHS-II card
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>, 
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 
-On Wed, 21 May 2025 at 12:45, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> On Mon, May 19, 2025 at 8:25=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
-> >
-> > On Fri, 16 May 2025 at 11:27, Victor Shih <victorshihgli@gmail.com> wro=
-te:
-> > >
-> > > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > >
-> > > Adjust some error messages to debug mode and register dump to dynamic
-> > > debug mode to avoid causing misunderstanding it is an error.
-> >
-> > Dumping the register may be useful for the debug level, I am not sure.
-> > Maybe Adrian has an opinion?
-> >
-> > >
-> > > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > > ---
-> > >  drivers/mmc/host/sdhci-uhs2.c | 18 +++++++++---------
-> > >  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
-> > >  2 files changed, 25 insertions(+), 9 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-u=
-hs2.c
-> > > index c53b64d50c0d..9ff867aee985 100644
-> > > --- a/drivers/mmc/host/sdhci-uhs2.c
-> > > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > > @@ -99,8 +99,8 @@ void sdhci_uhs2_reset(struct sdhci_host *host, u16 =
-mask)
-> > >         /* hw clears the bit when it's done */
-> > >         if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask),=
- 10,
-> > >                                      UHS2_RESET_TIMEOUT_100MS, true, =
-host, SDHCI_UHS2_SW_RESET)) {
-> > > -               pr_warn("%s: %s: Reset 0x%x never completed. %s: clea=
-n reset bit.\n", __func__,
-> > > -                       mmc_hostname(host->mmc), (int)mask, mmc_hostn=
-ame(host->mmc));
-> > > +               DBG("%s: %s: Reset 0x%x never completed. %s: clean re=
-set bit.\n", __func__,
-> > > +                   mmc_hostname(host->mmc), (int)mask, mmc_hostname(=
-host->mmc));
-> >
-> > As I said on patch1, please use pr_debug() and drop the macro.
-> >
->
-> Hi, Ulf
->
-> This macro has been defined in previous patches not the first time it
-> has appeared here,
-> are we still going to drop this macro?
+Move the BROKEN_SD_DISCARD quirk for certain SanDisk SD cards from the
+`mmc_blk_fixups[]` to `mmc_sd_fixups[]`. This ensures the quirk is
+applied earlier in the device initialization process, aligning with the
+reasoning in [1]. Applying the quirk sooner prevents the kernel from
+incorrectly enabling discard support on affected cards during initial
+setup.
 
-Yes, please.
+[1] https://lore.kernel.org/all/20240820230631.GA436523@sony.com
 
-We don't have macros for other log-prints, so let's not use a macro
-for debug prints either.
+Fixes: 07d2872bf4c8 ("mmc: core: Add SD card quirk for broken discard")
+Signed-off-by: Avri Altman <avri.altman@sandisk.com>
+Cc: stable@vger.kernel.org
+---
+ drivers/mmc/core/quirks.h | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-[...]
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index 7f893bafaa60..c417ed34c057 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -44,6 +44,12 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
+ 		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
+ 		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),
+ 
++	/*
++	 * Some SD cards reports discard support while they don't
++	 */
++	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
++		  MMC_QUIRK_BROKEN_SD_DISCARD),
++
+ 	END_FIXUP
+ };
+ 
+@@ -147,12 +153,6 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
+-	/*
+-	 * Some SD cards reports discard support while they don't
+-	 */
+-	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
+-		  MMC_QUIRK_BROKEN_SD_DISCARD),
+-
+ 	END_FIXUP
+ };
+ 
+-- 
+2.25.1
 
-Kind regards
-Uffe
