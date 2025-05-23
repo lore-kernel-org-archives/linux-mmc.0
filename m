@@ -1,115 +1,130 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.17])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E52D287514;
-	Fri, 23 May 2025 08:22:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.17
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFB8F2030A;
+	Fri, 23 May 2025 10:32:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747988554; cv=none; b=heuAI2Q85sc8H9w3OkmVmByf8eDJRnwrgZH1tOq5ZrfCi7Wz3c2gHCHK/ofgQKdYFk+//hnZt8UqRr7w9tCTkQGWSDe482I1635tPQ5qAVMINFjL9n9d8xR5mZpcpewZhZKl+Q5k8XhEO22EuOhrU03/2TRNvKGluPQ9J2sKo50=
+	t=1747996334; cv=none; b=Goftkp+AFJy31jZJcUw/UdCG2fqS6AIYhKCyRC7M78B6XzDG4zezLWqRhldta2AvlOYAzMr2u37HunYTlHGUXr+pTqIQW+eNbOEI5jxvcRvY0ujlvfFERKK40Eo48uoHwoBtN4+YB7y5sPkM/BUEd+pcFdEny8qixh4ublwyt7o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747988554; c=relaxed/simple;
-	bh=UktUFNhQpzGrRsFIwIpfLH+M+oX8xvKnPJijRRpkYXw=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=u6h2iaxDOoenDtqbOMO3nrJi40D/1cR4M/z6Py0o5oGAOgn56bBh9n9Cx86a+JyybXZ3ynVCqi8NAfD5TgklCbqr8irIotUd2HZuoZwt58dvze/jcH5LB+T1vdCvr9WgRqxDgmgbviEQYNBdvigp2NfeeroqREE4uccBfS+7m+A=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=Stt5DONs; arc=none smtp.client-ip=192.198.163.17
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1747996334; c=relaxed/simple;
+	bh=jIYh/6bc4wL9vcfvlEIvB9D5jxaJ78Mjtur15kqQS+E=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RvPN/8hWbdCqQflAJRF489/1trKjPQoxKMtToeDiqphSQ3FX7u7fqfa+2EbEvg7bUVFN1yvOpSIlDr1GgJsryufXp500GsXCdXwh7Km9aqZg7ASNgFJjLLCDHjnR5c8EAy4nF/eNoqgdnqoVqBgY/Os9XQXueq544zWKXrPKG1g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TC2ZhyUF; arc=none smtp.client-ip=209.85.210.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="Stt5DONs"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1747988551; x=1779524551;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=UktUFNhQpzGrRsFIwIpfLH+M+oX8xvKnPJijRRpkYXw=;
-  b=Stt5DONsvmIfK2WZG9FTPw2qyKadJxtgoahCGHecpBrD+z6xvmid6h0+
-   Hj20Xqh9A3w8kYbM0W4AblzKN8Ro+ZNmAJQ61pTrBICrLJuKKdh8Xp/R/
-   2oKFmBI1slTiuZHq9RFeCly40MX/v2myazl2MJy1YKC6BZa2bOmJ+QJSt
-   UKjs/v01N/0SaPM8fyKJ35VqB+F+wIHLHWRKLvAIlL+PH1ROOBm0ckU4I
-   63VdiXcRPbYG1phFh5hKBuRT7bKBHzkl5z+XlPnk5av4UuJEejWNgAe5e
-   o+5zrmoPqtvl0OJyMZxxrqRpmZxIrO4Rfl9tFQ45sGPOwzHblRXWJN1tp
-   Q==;
-X-CSE-ConnectionGUID: 8vDrfgkuR567uKLSTNS3Ew==
-X-CSE-MsgGUID: bn/XULBITO+ifnGZz3qerg==
-X-IronPort-AV: E=McAfee;i="6700,10204,11441"; a="49958777"
-X-IronPort-AV: E=Sophos;i="6.15,308,1739865600"; 
-   d="scan'208";a="49958777"
-Received: from orviesa004.jf.intel.com ([10.64.159.144])
-  by fmvoesa111.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2025 01:22:31 -0700
-X-CSE-ConnectionGUID: hbdtZnCZSp+nEANc3d6+Yw==
-X-CSE-MsgGUID: aGhX6r3rRwu6bK0N6bagxA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,308,1739865600"; 
-   d="scan'208";a="146032463"
-Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
-  by orviesa004.jf.intel.com with ESMTP; 23 May 2025 01:22:28 -0700
-Received: from kbuild by 1992f890471c with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1uINfe-000QC8-0N;
-	Fri, 23 May 2025 08:22:26 +0000
-Date: Fri, 23 May 2025 16:21:55 +0800
-From: kernel test robot <lkp@intel.com>
-To: Paul Alvin <alvin.paulp@amd.com>, michal.simek@amd.com,
-	adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev, git@amd.com,
-	alvin.paulp@amd.com, linux-arm-kernel@lists.infradead.org,
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add shutdown callback
-Message-ID: <202505231550.RaoPUrmq-lkp@intel.com>
-References: <20250522094932.4187301-1-alvin.paulp@amd.com>
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TC2ZhyUF"
+Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-742af848148so5439871b3a.1;
+        Fri, 23 May 2025 03:32:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1747996332; x=1748601132; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=THc8iOaJlRsjCnvhYfuHbJ12u/7t2Oz03yFyxpoGts0=;
+        b=TC2ZhyUFYDM+nMNH7MHI8K7qbPdMLB/+r90ke9Shso6fYoAUsq7b/n5FFje2YYGYWN
+         HcaAJKhvaSAghhsjGoc+FsSj0o3zciRWS4cuXo0jd/4pys/yp/V7s+/VqHU+HztuQMR/
+         a02yudq1Yt3dIEDcvUdqU4X1p9cW+l6UF45G8yRdGzMBGauOGfkDlJf6qFT++ze/pCEt
+         Vt93dXV/eK59F6L86RbtbMeZInmZDyNA5wJax00Pj49f/lF6xy18rkjs5mtSQ0OVwXen
+         119A6f4aF5udGZOO5wAS1nUDkTr8p9jDYTSYoQ2Hkpzr0iBZBdtB4lWkSkM5YcVd+qlB
+         7dtA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1747996332; x=1748601132;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=THc8iOaJlRsjCnvhYfuHbJ12u/7t2Oz03yFyxpoGts0=;
+        b=wqlbGq4gqd1BL1EqDpv5ZJIqJ6yy2T16DubksWczixSJ1nzf5nvzjgzwZvsM1aYr2s
+         fSX5VX1ZR++jg0CAoiOeGRd6aKE/yyCxmsvUGfY7h0vIi0RpO+3M3qMIl+SJ8eHovHMP
+         OkfdxT/utR75T7bk4jq98Uzh73gxJ1tnIc7KBPfXC7qQMBO2TQBYl63zIc0FbhPe4CSG
+         UqqQCOAdFKuBKkcA7CRZtx/P9yBtnLzw40sjDC4O1SWFwgO0/vzcGSTQ8ghgBuQeO0ZE
+         mWDbyqEY0P2DhIcgIxJnGcUPbGDNyNWoWpeY5yd6tPyxztlD/FCP2HeGzgpMCX0OVaSR
+         WdgA==
+X-Forwarded-Encrypted: i=1; AJvYcCVQtQKvZpaXsDqM6wpnOIdt05eXAz7fnWN6vEMhYi3mJxutbQikNVeWGYUU/cYnOMSEDdqkqU4+JKK4cVc=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwrBJmdV5pUrrbjpXvMnAeu50vxIed/K1DNwwm/vsS/ANQHzfDq
+	hyw/96845uZUP+czL5AxfEvhkJ3mirJEEs+r1BZuVWjDJul+k2RXMAJbtI/MiA==
+X-Gm-Gg: ASbGncv2JKQqpbrENbNYwFXNw7piTHbTSAgrII8nkKr2Qy0w6lxl7NUd7v7Kg47M426
+	xZAl6mHuGOeLPiqadXYsK5fceLIZFcKKhVQeVJjrqjsmEVcNw/EDG7KUK40t5HZl0g55Df2WTW4
+	PzQZqnbP35vikJDkZLHxx4yjEOHoVq9srta2C/t+05XFw4XtejCnHhaEZ9LpQmbRu2io18ZD4Xq
+	PYJgj9rf7DLlT11y1TV4WwRsgw/kX9cISklBTE1azDd01pyQAJKGnMc0HterCBhTvehVzVoYYLr
+	M4nUqf6q4o5uE5KaOTu9hAvRF/U79dnF37GfuiUNIaPoEMvcvNqHb5q0Xgc=
+X-Google-Smtp-Source: AGHT+IGDZOYZ1jIZrHrn9ZVQHI6uGlPbZ1eT4Zz6ihDrB4t+V8r8iOO6IjES6v3dP1iNd719hH8ayA==
+X-Received: by 2002:a05:6a00:3c86:b0:730:75b1:7219 with SMTP id d2e1a72fcca58-745ed87cc07mr4164866b3a.12.1747996331847;
+        Fri, 23 May 2025 03:32:11 -0700 (PDT)
+Received: from victorshih.. ([2402:7500:577:397a:c299:a1bd:2b60:56b8])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a970c882sm13066424b3a.55.2025.05.23.03.32.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 May 2025 03:32:11 -0700 (PDT)
+From: Victor Shih <victorshihgli@gmail.com>
+To: ulf.hansson@linaro.org,
+	adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	benchuanggli@gmail.com,
+	HL.Liu@genesyslogic.com.tw,
+	Greg.tu@genesyslogic.com.tw,
+	Ben.Chuang@genesyslogic.com.tw,
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V2 0/2] Adjust some error messages for SD UHS-II initialization process
+Date: Fri, 23 May 2025 18:31:50 +0800
+Message-ID: <20250523103152.6210-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250522094932.4187301-1-alvin.paulp@amd.com>
+Content-Transfer-Encoding: 8bit
 
-Hi Paul,
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-kernel test robot noticed the following build errors:
+Summary
+=======
+It is normal that errors will occur when using non-UHS-II card to enter
+the UHS-II card initialization process. We should not be producing error
+messages and register dumps. Therefore, switch the error messages to debug
+mode and register dumps to dynamic debug mode.
 
-[auto build test ERROR on v6.15-rc7]
-[also build test ERROR on linus/master next-20250522]
-[cannot apply to xilinx-xlnx/master]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Patch structure
+===============
+patch#1: for core
+patch#2: for sdhci
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Paul-Alvin/mmc-sdhci-of-arasan-Add-shutdown-callback/20250522-175110
-base:   v6.15-rc7
-patch link:    https://lore.kernel.org/r/20250522094932.4187301-1-alvin.paulp%40amd.com
-patch subject: [PATCH] mmc: sdhci-of-arasan: Add shutdown callback
-config: arm64-randconfig-002-20250523 (https://download.01.org/0day-ci/archive/20250523/202505231550.RaoPUrmq-lkp@intel.com/config)
-compiler: clang version 16.0.6 (https://github.com/llvm/llvm-project 7cbf1a2591520c2491aa35339f227775f4d3adf6)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250523/202505231550.RaoPUrmq-lkp@intel.com/reproduce)
+Changes in v2 (May. 23, 2025)
+* Rebase on latest mmc/next.
+* Patch#1: Drop the use of DBG macro and use pr_debug() instead.
+* Patch#2: Drop the use of DBG macro in some function
+           and use pr_debug() instead.
 
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202505231550.RaoPUrmq-lkp@intel.com/
+----------------- original cover letter from v1 -----------------
+Summary
+=======
+It is normal that errors will occur when using non-UHS-II card to enter
+the UHS-II card initialization process. We should not be producing error
+messages and register dumps. Therefore, switch the error messages to debug
+mode and register dumps to dynamic debug mode.
 
-All errors (new ones prefixed by >>):
+Patch structure
+===============
+patch#1: for core
+patch#2: for sdhci
 
->> drivers/mmc/host/sdhci-of-arasan.c:2063:2: error: call to undeclared function 'sdhci_arasan_suspend'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-           sdhci_arasan_suspend(dev);
-           ^
-   1 error generated.
+Changes in v1 (May. 16, 2025)
+* Rebase on latest mmc/next.
+* Patch#1: Adjust some error messages for SD UHS-II cards.
+* Patch#2: Adjust some error messages and register dump for SD UHS-II card
 
+Victor Shih (2):
+  mmc: core: Adjust some error messages for SD UHS-II cards
+  mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
+    UHS-II card
 
-vim +/sdhci_arasan_suspend +2063 drivers/mmc/host/sdhci-of-arasan.c
-
-  2058	
-  2059	static void sdhci_arasan_shutdown(struct platform_device *pdev)
-  2060	{
-  2061		struct device *dev = &pdev->dev;
-  2062	
-> 2063		sdhci_arasan_suspend(dev);
-  2064	}
-  2065	
+ drivers/mmc/core/sd_uhs2.c    |  8 ++++++--
+ drivers/mmc/host/sdhci-uhs2.c | 18 +++++++++---------
+ drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
+ 3 files changed, 31 insertions(+), 11 deletions(-)
 
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.43.0
+
