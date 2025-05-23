@@ -1,60 +1,62 @@
-Received: from mail-pf1-f182.google.com (mail-pf1-f182.google.com [209.85.210.182])
+Received: from mail-pf1-f178.google.com (mail-pf1-f178.google.com [209.85.210.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AFB8F2030A;
-	Fri, 23 May 2025 10:32:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.182
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AAAAA2030A;
+	Fri, 23 May 2025 10:32:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1747996334; cv=none; b=Goftkp+AFJy31jZJcUw/UdCG2fqS6AIYhKCyRC7M78B6XzDG4zezLWqRhldta2AvlOYAzMr2u37HunYTlHGUXr+pTqIQW+eNbOEI5jxvcRvY0ujlvfFERKK40Eo48uoHwoBtN4+YB7y5sPkM/BUEd+pcFdEny8qixh4ublwyt7o=
+	t=1747996340; cv=none; b=TwCQSNBEH6xhog0wehQqNCGo9ogjyfwx6TcoGJ4y80ioVOysw0chBHWxaFMzhAlpH8cTOkjXQAEPJp+UVG4AjyakKgHvX/zwJMb28uJKAnwDp4KgqyiUF+o6yTnZbE8csbWH4zrj0QrPZbkhRojLTPUEOAJkj+bLVzXfjDVWUv8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1747996334; c=relaxed/simple;
-	bh=jIYh/6bc4wL9vcfvlEIvB9D5jxaJ78Mjtur15kqQS+E=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=RvPN/8hWbdCqQflAJRF489/1trKjPQoxKMtToeDiqphSQ3FX7u7fqfa+2EbEvg7bUVFN1yvOpSIlDr1GgJsryufXp500GsXCdXwh7Km9aqZg7ASNgFJjLLCDHjnR5c8EAy4nF/eNoqgdnqoVqBgY/Os9XQXueq544zWKXrPKG1g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=TC2ZhyUF; arc=none smtp.client-ip=209.85.210.182
+	s=arc-20240116; t=1747996340; c=relaxed/simple;
+	bh=sdUImjzjVy4p7BDx4hRMRTA3WkUJEPjx2WrucSq/Rhk=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=qi1YcWq5EsQJkVrujh2t858sjQuGsjWpcjTL5sWO92uLl0JNBRjF191XUE5nIPMJACoLahxEAjGR9lNKRPqPwI1YxuTAf24EZfZtvV+9eWPn7oPlq9S4AwQ1BX5xWZXe+9DY35Yhxea5dp6Adjw6dYRm+ryH8I+mDnxkcnwIm58=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RN+z9Tz9; arc=none smtp.client-ip=209.85.210.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="TC2ZhyUF"
-Received: by mail-pf1-f182.google.com with SMTP id d2e1a72fcca58-742af848148so5439871b3a.1;
-        Fri, 23 May 2025 03:32:12 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RN+z9Tz9"
+Received: by mail-pf1-f178.google.com with SMTP id d2e1a72fcca58-7399838db7fso698551b3a.0;
+        Fri, 23 May 2025 03:32:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1747996332; x=1748601132; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=THc8iOaJlRsjCnvhYfuHbJ12u/7t2Oz03yFyxpoGts0=;
-        b=TC2ZhyUFYDM+nMNH7MHI8K7qbPdMLB/+r90ke9Shso6fYoAUsq7b/n5FFje2YYGYWN
-         HcaAJKhvaSAghhsjGoc+FsSj0o3zciRWS4cuXo0jd/4pys/yp/V7s+/VqHU+HztuQMR/
-         a02yudq1Yt3dIEDcvUdqU4X1p9cW+l6UF45G8yRdGzMBGauOGfkDlJf6qFT++ze/pCEt
-         Vt93dXV/eK59F6L86RbtbMeZInmZDyNA5wJax00Pj49f/lF6xy18rkjs5mtSQ0OVwXen
-         119A6f4aF5udGZOO5wAS1nUDkTr8p9jDYTSYoQ2Hkpzr0iBZBdtB4lWkSkM5YcVd+qlB
-         7dtA==
+        d=gmail.com; s=20230601; t=1747996336; x=1748601136; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=D8iSHQXbhi/neDEe92uz7f1bQeL28XTLFAqRPlVNKA4=;
+        b=RN+z9Tz9DxUSNScgzUnINk00rDHKVaxCiwvPY+0uLDdYsNyRHGdXRJq7cnuJlAP4Ev
+         WYQByNhlaUSI26KPj4kHOQNAWINpBgo8bNVuhXnjCpd/z4JUmktJGc6t2j5Xt2QYr98a
+         iaKJ02HBHZY6HVkodNQ7FzOGkZmzmhHmjaCg8ZbZgTGG3w0V27cDhBduad7Wyp/TIXRz
+         P4LCVJ8+y1ZgTYZJg2D7HIa80hEFLQWaHNcAeo6yIEg/RiAS8sIcYCLqYXBGsB02id3k
+         lwH1v3dbsCZ9s7nK1K1cZhLsuhSvYIQIm/Y/NndjSQ3J2giIWi/TWGrp/yr4ESBGPSTu
+         cF9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1747996332; x=1748601132;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=THc8iOaJlRsjCnvhYfuHbJ12u/7t2Oz03yFyxpoGts0=;
-        b=wqlbGq4gqd1BL1EqDpv5ZJIqJ6yy2T16DubksWczixSJ1nzf5nvzjgzwZvsM1aYr2s
-         fSX5VX1ZR++jg0CAoiOeGRd6aKE/yyCxmsvUGfY7h0vIi0RpO+3M3qMIl+SJ8eHovHMP
-         OkfdxT/utR75T7bk4jq98Uzh73gxJ1tnIc7KBPfXC7qQMBO2TQBYl63zIc0FbhPe4CSG
-         UqqQCOAdFKuBKkcA7CRZtx/P9yBtnLzw40sjDC4O1SWFwgO0/vzcGSTQ8ghgBuQeO0ZE
-         mWDbyqEY0P2DhIcgIxJnGcUPbGDNyNWoWpeY5yd6tPyxztlD/FCP2HeGzgpMCX0OVaSR
-         WdgA==
-X-Forwarded-Encrypted: i=1; AJvYcCVQtQKvZpaXsDqM6wpnOIdt05eXAz7fnWN6vEMhYi3mJxutbQikNVeWGYUU/cYnOMSEDdqkqU4+JKK4cVc=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwrBJmdV5pUrrbjpXvMnAeu50vxIed/K1DNwwm/vsS/ANQHzfDq
-	hyw/96845uZUP+czL5AxfEvhkJ3mirJEEs+r1BZuVWjDJul+k2RXMAJbtI/MiA==
-X-Gm-Gg: ASbGncv2JKQqpbrENbNYwFXNw7piTHbTSAgrII8nkKr2Qy0w6lxl7NUd7v7Kg47M426
-	xZAl6mHuGOeLPiqadXYsK5fceLIZFcKKhVQeVJjrqjsmEVcNw/EDG7KUK40t5HZl0g55Df2WTW4
-	PzQZqnbP35vikJDkZLHxx4yjEOHoVq9srta2C/t+05XFw4XtejCnHhaEZ9LpQmbRu2io18ZD4Xq
-	PYJgj9rf7DLlT11y1TV4WwRsgw/kX9cISklBTE1azDd01pyQAJKGnMc0HterCBhTvehVzVoYYLr
-	M4nUqf6q4o5uE5KaOTu9hAvRF/U79dnF37GfuiUNIaPoEMvcvNqHb5q0Xgc=
-X-Google-Smtp-Source: AGHT+IGDZOYZ1jIZrHrn9ZVQHI6uGlPbZ1eT4Zz6ihDrB4t+V8r8iOO6IjES6v3dP1iNd719hH8ayA==
-X-Received: by 2002:a05:6a00:3c86:b0:730:75b1:7219 with SMTP id d2e1a72fcca58-745ed87cc07mr4164866b3a.12.1747996331847;
-        Fri, 23 May 2025 03:32:11 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1747996336; x=1748601136;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=D8iSHQXbhi/neDEe92uz7f1bQeL28XTLFAqRPlVNKA4=;
+        b=RFTprsEcF20zjI3HVj99/SUGas3/M5efGjJfdGqngt9eN6q8rOg9e2bU9jIsYDygdZ
+         9zMLue8q8lte15P/sw7i8S+YT6RgfWQUsvpK0S3wg7zfLS4kwE+sy6EQkJsDz9niDnii
+         K7fK4WEiNnwWbR0AtlTMSQCX8u4UywF4FmUnXmj3VXZrYYZtDkkMPc/6VGMCHXZCBNyy
+         AgU3wEZUWQW2yZX6EK1tSZTIrviG3I70yDKcKDOjbKGWVs6r+wzI3uQns7Sm+YEqEC4N
+         8lwynE6RUbfB2THUBaSAG+RhpPcX6gFEYIRhha8VpTodONpRtuAqPq2603XPnk+0BYVl
+         aZaw==
+X-Forwarded-Encrypted: i=1; AJvYcCX9jf33A2ZHlh0dIe+2PiiiJsZy1BYwhKN4x9S4yAUkPmcqFN53PKNT7NQLbzMY12Q/irz0PfUzzPzour0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YydQBfZjXkFK70NrTLxCYINrY5XdYybIMRj3Dsji1NCanmIuby9
+	oD+oL7dArklLLaHKEF7I+i6qdWieR6ac1gXKxYIXnZuga/MXGMgYQUOo
+X-Gm-Gg: ASbGnctiJKrhVK7R5MDGzBsJyw4c2iPEbgyc4ynSRkwMKdYBpsCU8J3MsQlghr8awk+
+	DWerllPVAyMbALG2sNGiBHjHLyhj2Ci4cZbysdT1ceI7qWJGWQ7bKRte+RtNofXmnhstZOfROab
+	6HJyuIFJyr/3elqr8mFi22QGXbi7Ea+oAVhK2HxUpMm0d4ZP/2l/ImmLoos3CSZqiotOKHswRrD
+	6joONXgJBUtU5a6vszvVItU4IhDBj0ib6jfWpPTvBd09mq+pVgLc/RaDv0y/Dx4vAV9YZCtIuuc
+	4ypwOxrbtzEuVNXoorijpFm2P+hlhsLwqynjbmTXL0+QydF3lpzVNk8mdAU=
+X-Google-Smtp-Source: AGHT+IHufaITHtJYcUn1e/g0m+GZ8BuemgNVkhxv2EVoe/tt7bkqtLb4EkoMrNt8q8k6E0QXEYgcFg==
+X-Received: by 2002:a05:6a00:138d:b0:742:ccf9:317a with SMTP id d2e1a72fcca58-745ece8e29fmr4094017b3a.12.1747996335775;
+        Fri, 23 May 2025 03:32:15 -0700 (PDT)
 Received: from victorshih.. ([2402:7500:577:397a:c299:a1bd:2b60:56b8])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a970c882sm13066424b3a.55.2025.05.23.03.32.05
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-742a970c882sm13066424b3a.55.2025.05.23.03.32.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 May 2025 03:32:11 -0700 (PDT)
+        Fri, 23 May 2025 03:32:15 -0700 (PDT)
 From: Victor Shih <victorshihgli@gmail.com>
 To: ulf.hansson@linaro.org,
 	adrian.hunter@intel.com
@@ -64,11 +66,15 @@ Cc: linux-mmc@vger.kernel.org,
 	HL.Liu@genesyslogic.com.tw,
 	Greg.tu@genesyslogic.com.tw,
 	Ben.Chuang@genesyslogic.com.tw,
+	Victor Shih <victorshihgli@gmail.com>,
+	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
 	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V2 0/2] Adjust some error messages for SD UHS-II initialization process
-Date: Fri, 23 May 2025 18:31:50 +0800
-Message-ID: <20250523103152.6210-1-victorshihgli@gmail.com>
+Subject: [PATCH V2 1/2] mmc: core: Adjust some error messages for SD UHS-II cards
+Date: Fri, 23 May 2025 18:31:51 +0800
+Message-ID: <20250523103152.6210-2-victorshihgli@gmail.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250523103152.6210-1-victorshihgli@gmail.com>
+References: <20250523103152.6210-1-victorshihgli@gmail.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -79,52 +85,41 @@ Content-Transfer-Encoding: 8bit
 
 From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Summary
-=======
-It is normal that errors will occur when using non-UHS-II card to enter
-the UHS-II card initialization process. We should not be producing error
-messages and register dumps. Therefore, switch the error messages to debug
-mode and register dumps to dynamic debug mode.
+Adjust some error messages to debug mode to avoid causing
+misunderstanding it is an error.
 
-Patch structure
-===============
-patch#1: for core
-patch#2: for sdhci
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+---
+ drivers/mmc/core/sd_uhs2.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-Changes in v2 (May. 23, 2025)
-* Rebase on latest mmc/next.
-* Patch#1: Drop the use of DBG macro and use pr_debug() instead.
-* Patch#2: Drop the use of DBG macro in some function
-           and use pr_debug() instead.
-
------------------ original cover letter from v1 -----------------
-Summary
-=======
-It is normal that errors will occur when using non-UHS-II card to enter
-the UHS-II card initialization process. We should not be producing error
-messages and register dumps. Therefore, switch the error messages to debug
-mode and register dumps to dynamic debug mode.
-
-Patch structure
-===============
-patch#1: for core
-patch#2: for sdhci
-
-Changes in v1 (May. 16, 2025)
-* Rebase on latest mmc/next.
-* Patch#1: Adjust some error messages for SD UHS-II cards.
-* Patch#2: Adjust some error messages and register dump for SD UHS-II card
-
-Victor Shih (2):
-  mmc: core: Adjust some error messages for SD UHS-II cards
-  mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
-    UHS-II card
-
- drivers/mmc/core/sd_uhs2.c    |  8 ++++++--
- drivers/mmc/host/sdhci-uhs2.c | 18 +++++++++---------
- drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
- 3 files changed, 31 insertions(+), 11 deletions(-)
-
+diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
+index 1c31d0dfa961..58c4cef37f7c 100644
+--- a/drivers/mmc/core/sd_uhs2.c
++++ b/drivers/mmc/core/sd_uhs2.c
+@@ -36,6 +36,10 @@
+ #include "sd_ops.h"
+ #include "mmc_ops.h"
+ 
++#define DRIVER_NAME "sd_uhs2"
++#define DBG(f, x...) \
++	pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
++
+ #define UHS2_WAIT_CFG_COMPLETE_PERIOD_US  (1 * 1000)
+ #define UHS2_WAIT_CFG_COMPLETE_TIMEOUT_MS 100
+ 
+@@ -91,8 +95,8 @@ static int sd_uhs2_phy_init(struct mmc_host *host)
+ 
+ 	err = host->ops->uhs2_control(host, UHS2_PHY_INIT);
+ 	if (err) {
+-		pr_err("%s: failed to initial phy for UHS-II!\n",
+-		       mmc_hostname(host));
++		DBG("%s: failed to initial phy for UHS-II!\n",
++		    mmc_hostname(host));
+ 	}
+ 
+ 	return err;
 -- 
 2.43.0
 
