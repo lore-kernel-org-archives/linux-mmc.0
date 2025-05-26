@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id B54271BF33F
-	for <linux-mmc@vger.kernel.org>; Mon, 26 May 2025 06:07:13 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 4731A13B284
+	for <linux-mmc@vger.kernel.org>; Mon, 26 May 2025 06:07:22 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748239635; cv=none; b=p7y0r9f83ZC76vh+nzOcyzWaO6ckX+h7NAPAYsHoqcDLQbAli7HL9JZTIu6tsgz8V8XVw4SFCDLzm8lz1XZT5OidyY4ogOfnCJwoKsxh7SUCgbMZ9LsxIIwUqcguknoh2qeYerxoMandXIzQDaI7Vh7UIYG6s8uwe0DiqLuzsp4=
+	t=1748239644; cv=none; b=cjkfMX9GePoQYaWQiFVzZz4pKq4oG7QOhmwepZjKX3kWu0dXHndVBM+WY6z2C9UGBPgbwIWT1wc8JHHo1sLI90vPNbn05Yrg6Ke2fMBlCxN4c6OpS2WHST/afPsNcf786QtWse83+rasa+q2HTC1S3stD+dMs8ieDSXv8jUHPgI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748239635; c=relaxed/simple;
-	bh=ttmkjWUL6ZDoUy6TISeJKm9PHALVgThUOaSQDA82LF4=;
+	s=arc-20240116; t=1748239644; c=relaxed/simple;
+	bh=eTHwQur+daQr6dXXt9mw1saNPw1MfMD5Rv47td6F7IY=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=DK49LHSSnA5cyve9Xv601RenVkQ1VdWXAmCig6++jwJMfcSWEw34pLtIfvJV2+CX4YTwIZofqS4hcNJG4DgPGgFEIYEquvA4C4mDPlLJ1K6EkK+Wp/dkeILgsfWfYsKfX9xKFngExMn5v/94tX0dhN0TdqTXdCTZ1WGDd5BtP/Y=
+	 MIME-Version; b=qGHNBAOlhlyyRFrgGm5WI5jJI2wHTmGivLmKnW6xieFnGAbMiVe19G0sd6MpzSJpyWmiV8ULGfAmvsw+Gi9fmenIu1y3N/FE0LZNrYtdyCwZdmxgHyPDTJ3Ckbc7dx8G5KntCU4yJZnaYDMT1JOfSLZwocrh8w/VGylelMNABks=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8BxXWsOBTRoBob8AA--.13646S3;
-	Mon, 26 May 2025 14:07:10 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8DxWOEYBTRoI4b8AA--.13385S3;
+	Mon, 26 May 2025 14:07:20 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMDxH+ULBTRoqQTyAA--.32455S5;
-	Mon, 26 May 2025 14:07:10 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMDxu8QXBTRowwTyAA--.30311S2;
+	Mon, 26 May 2025 14:07:20 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -26,9 +26,9 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH 27/34] mmc: sdhci-pxav2: Drop the use of sdhci_pltfm_free()
-Date: Mon, 26 May 2025 14:07:00 +0800
-Message-ID: <c8dbb91d5719d44f5d708f139e82f5765da9882b.1747792905.git.zhoubinbin@loongson.cn>
+Subject: [PATCH 28/34] mmc: sdhci-pxav3: Drop the use of sdhci_pltfm_free()
+Date: Mon, 26 May 2025 14:07:09 +0800
+Message-ID: <001ea395e816d8dc057d06729d929247261dd9be.1747792905.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1747792905.git.zhoubinbin@loongson.cn>
 References: <cover.1747792905.git.zhoubinbin@loongson.cn>
@@ -39,11 +39,11 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMDxH+ULBTRoqQTyAA--.32455S5
+X-CM-TRANSID:qMiowMDxu8QXBTRowwTyAA--.30311S2
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7tFyUJr4rJFy7Ww1fZrWDtrc_yoW8Cw47pF
-	s3JFW3KrWUGr4rK3sxXwnrZF1rCw1jgayUK3s5Cw1xXa98tr1DKws3CFW0qFyrAFWkKw13
-	XF4UZryUCa9rZabCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoW7tw1rGr17XFykJryDKrW7GFX_yoW8Gr1rpa
+	18GryvkrZrWrWrKas8JwnF9FyUKF12gayFgFW5Gwn7GFWakryktF4fAFy0qFy5XrW8Gws3
+	Xr10qr48CFyUu3XCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
 	0xBIdaVrnRJUUUP0b4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
 	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
@@ -64,63 +64,41 @@ use, sdhci_pltfm_free() is no longer needed.
 
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-pxav2.c | 26 ++++++--------------------
- 1 file changed, 6 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index 45b6f0891c47..76346353dc55 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -258,7 +258,6 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
- 	struct sdhci_host *host = NULL;
- 	const struct sdhci_pxa_variant *variant;
- 
--	int ret;
- 	struct clk *clk, *clk_core;
- 
- 	host = sdhci_pltfm_init(pdev, NULL, sizeof(*pxav2_host));
-@@ -271,19 +270,14 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
- 	clk = devm_clk_get_optional_enabled(dev, "io");
- 	if (!clk)
- 		clk = devm_clk_get_enabled(dev, NULL);
--	if (IS_ERR(clk)) {
--		ret = PTR_ERR(clk);
--		dev_err_probe(dev, ret, "failed to get io clock\n");
--		goto free;
--	}
-+	if (IS_ERR(clk))
-+		return dev_err_probe(dev, PTR_ERR(clk), "failed to get io clock\n");
- 	pltfm_host->clk = clk;
- 
- 	clk_core = devm_clk_get_optional_enabled(dev, "core");
--	if (IS_ERR(clk_core)) {
--		ret = PTR_ERR(clk_core);
--		dev_err_probe(dev, ret, "failed to enable core clock\n");
--		goto free;
--	}
-+	if (IS_ERR(clk_core))
-+		return dev_err_probe(dev, PTR_ERR(clk_core),
-+				     "failed to enable core clock\n");
- 
- 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA
- 		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
-@@ -332,15 +326,7 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
- 		pxav2_host->pinctrl = NULL;
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3fb56face3d8..7173a0296738 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -389,8 +389,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		pxa->clk_io = devm_clk_get(dev, NULL);
+ 	if (IS_ERR(pxa->clk_io)) {
+ 		dev_err(dev, "failed to get io clock\n");
+-		ret = PTR_ERR(pxa->clk_io);
+-		goto err_clk_get;
++		return PTR_ERR(pxa->clk_io);
  	}
- 
--	ret = sdhci_add_host(host);
--	if (ret)
--		goto free;
--
--	return 0;
--
--free:
+ 	pltfm_host->clk = pxa->clk_io;
+ 	clk_prepare_enable(pxa->clk_io);
+@@ -466,8 +465,6 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ err_mbus_win:
+ 	clk_disable_unprepare(pxa->clk_io);
+ 	clk_disable_unprepare(pxa->clk_core);
+-err_clk_get:
 -	sdhci_pltfm_free(pdev);
--	return ret;
-+	return sdhci_add_host(host);
+ 	return ret;
  }
  
- static struct platform_driver sdhci_pxav2_driver = {
+@@ -485,8 +482,6 @@ static void sdhci_pxav3_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(pxa->clk_io);
+ 	clk_disable_unprepare(pxa->clk_core);
+-
+-	sdhci_pltfm_free(pdev);
+ }
+ 
+ #ifdef CONFIG_PM_SLEEP
 -- 
 2.47.1
 
