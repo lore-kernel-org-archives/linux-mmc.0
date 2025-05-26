@@ -1,100 +1,111 @@
-Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C5ACBEC2
-	for <linux-mmc@vger.kernel.org>; Sat, 24 May 2025 03:37:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id C8CEC145346
+	for <linux-mmc@vger.kernel.org>; Mon, 26 May 2025 06:05:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748057828; cv=none; b=ZIYJeDbcJpcwp51n+0SQHdjD1XXeMhdNAJhawg0fmSQFZLwmC3LGpouDcDJYld6lVugHZ1eiq2oJO5XjXDw300hMYrB+35youj/xr+NERtRNJZtR+nAZYLmEyjg5FlzFKrGQl5LWvFeFlAkwW7PBW/EX043yTUyP/sSqpwvKvAc=
+	t=1748239549; cv=none; b=PBwllfAF3yJFffgcJS4G3ZlyIWsjEoAej4ST8dwYhwnNWqeQvP0qpPtojnyAzl1hOhsnJBhWwjMwoh3+AQwUFxbBN/wA/iskUpvnt17cDrIbiU1n+IOJhgoAbwcPW9V4rdZrwakIhwreii8ZHlxP0n/GUuOV+eMAqmJcOq/bxa8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748057828; c=relaxed/simple;
-	bh=HZUjP9DRLExC2MegUevOuNq5YTdWxx60XiFHjOgIso0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=FY9R9EXrllViGOVzlQcszTwfrr53IZHJUlAQzdz1Os4PvDtayF0+KWDIGQuSUh59OqH4nvpITpxU+oZYriNTf4Pv2NUB5d50TpnqQcCubCP71QvHzdOMXjl1BcFZdklbYGpNi5AGbwMoLB50TEhnDo1S84T1WquDfEohqXFyy5w=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YTbSmGtb; arc=none smtp.client-ip=209.85.128.52
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YTbSmGtb"
-Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-43cfe63c592so4966105e9.2
-        for <linux-mmc@vger.kernel.org>; Fri, 23 May 2025 20:37:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748057825; x=1748662625; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HZUjP9DRLExC2MegUevOuNq5YTdWxx60XiFHjOgIso0=;
-        b=YTbSmGtbS7Iz7Cb1TNK6/0131DEhmo6aKwWN1gqDE3Sc8kaI/nXQJ1SEpZ5vq6/7RQ
-         CuHonFZW/+D2yYMoP/WXFaRNpub986sdfjr5T/Fbq7ePUaVeRr3wNfmGbiObpT2ry2zV
-         NbNHXYRGqyy9zHLhdoHdJL5omUkFjLNIPJIDSj0TJJWwwQ39VehtRK6Y39P2D0iCVCcy
-         vE3TTKLO+KwseNQNTZBe20tvAbTmTNYqE3i7SUd/wBYIcIFx4cmr/8KR6z2ATB+42hV8
-         A6BQp7GOzJiC0EdIue5YpaMTWgpR3zmKCSjux+ecIbmWeQMc49rUOE2PrI209lBuqoug
-         mYow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748057825; x=1748662625;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=HZUjP9DRLExC2MegUevOuNq5YTdWxx60XiFHjOgIso0=;
-        b=QwyZ+nLwc/61L+KWZoEq7XM6YCWjtsY5xIyvTR87k9eVXbv94OiOGGOKvdOx7k2p/2
-         cNRwtPyMpNZp+3TqA/Us4YRBT6usthwHQ/aI/fZ+Tbg2NcUKRWq1x0aV4gV+ardSeNnj
-         jGZmJm8Hgti/s3SEC/PzXagYyLoiVWD1/2DYkGJTnQyhI6tNAzEiL92+cnUseMhtMk8T
-         rJVXXSvqNJ+bwhoPrzNNJzWzlG3YMFpD+lq3QaoVMo9HpM7ru71lf4KZEt3N+dpCTJVO
-         fG/pFw6RiAmY8sYpqFHv4FOCDjbZiDWg3AyzkUl2BeSyCCwGFvJa5WB/G/aVhH0PHwFZ
-         RsVQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVVFm/m+5JsGJ6j87xMORRzYxo+sJTVhcLkc2ZmV5UBLfh4Zr06ZPteUmhNCMIo+2KtwMp5JccZirQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzgV7/kbFyUicygKxTy5Mb2qH/xU8yeF20rnQGRncD9fDYawtK9
-	1eTY/ZOVUbqUaUA4Ps2/MGlE8s3RYuhsCJOtaOY38cDX5F5e5vj8djtheKU12LrEDg5VOnhowvG
-	lR4MJQT82o0ehhyqjclblzsShy/xVSBD/Ww==
-X-Gm-Gg: ASbGncv33+vxgiiIupIzSzQWt43/hJRFW70I/zXLWraZLy3o5tDtDOAnK4kL7XX0Cmw
-	jLL/s8bPFO7RkwuVH2sihGpUdyKUlvoV3QZTTMHyTinboeAhlH53+MLefYqo9gUvz2KkmSWCoR4
-	NXyBiCxGDgaEOkALLW3O8ARiI/TGyvrLgx
-X-Google-Smtp-Source: AGHT+IEXK3b1q1v3G2QV1+L7Oguque5944lnL/8BDSJE+mERRf2eU3QheyaJ2iHwkMt6Gy/M5SSYFodRnJqCoJrGcAU=
-X-Received: by 2002:a17:907:6d0c:b0:ad5:3156:2c04 with SMTP id
- a640c23a62f3a-ad85b113991mr130029566b.25.1748057814659; Fri, 23 May 2025
- 20:36:54 -0700 (PDT)
+	s=arc-20240116; t=1748239549; c=relaxed/simple;
+	bh=gfpr/1wqtco9OvLUIFWOGhn0cdLJmwWVakMWvOH6p3U=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=u9SWP9992MRYy5pN00D7rz5daP1VmKYcXzN+tN6i6RReawF6qB/ojBzKaVEBXKTNKMVrLFjnn+IEH0X73pYtVmX3USIvLzOMEOl6Dtx48JJ5EELX1/YStL3jpft/naX9P1ZRiGPj9Lhx03GYZQsxDhh7SVtZxqXbmqmfnCy92x8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.69.3])
+	by gateway (Coremail) with SMTP id _____8CxbWu4BDRoF4X8AA--.13522S3;
+	Mon, 26 May 2025 14:05:44 +0800 (CST)
+Received: from localhost.localdomain (unknown [223.64.69.3])
+	by front1 (Coremail) with SMTP id qMiowMBxb8e1BDRo2APyAA--.30366S3;
+	Mon, 26 May 2025 14:05:44 +0800 (CST)
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+To: Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>
+Cc: Huacai Chen <chenhuacai@kernel.org>,
+	linux-mmc@vger.kernel.org,
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH 01/34] mmc: sdhci: Use devm_mmc_alloc_host() helper
+Date: Mon, 26 May 2025 14:05:30 +0800
+Message-ID: <6fd5afb003982bb5edbf95f76b605686223730e0.1747792905.git.zhoubinbin@loongson.cn>
+X-Mailer: git-send-email 2.47.1
+In-Reply-To: <cover.1747792905.git.zhoubinbin@loongson.cn>
+References: <cover.1747792905.git.zhoubinbin@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250510031945.1004129-1-git@thegavinli.com> <CAPDyKFq8evHyh_0QacZq=d36vXfrs3vFPsAuCyFdv3BKh0SP2A@mail.gmail.com>
-In-Reply-To: <CAPDyKFq8evHyh_0QacZq=d36vXfrs3vFPsAuCyFdv3BKh0SP2A@mail.gmail.com>
-From: Gavin Li <gfl3162@gmail.com>
-Date: Fri, 23 May 2025 23:36:43 -0400
-X-Gm-Features: AX0GCFvSXXIv8uNxbQqCY43CPxNbfkTEexuXRcgQi91Uk6SgW-m3UppWcgPcpzQ
-Message-ID: <CA+GxvY4ByPW4HVJfww2v674f-y5kuqKmY=EB8mD5jnRcy+HmPg@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: rtsx_usb_sdmmc: add parameter to always poll for
- card presence
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>, 
-	linux-mmc@vger.kernel.org, Gavin Li <git@thegavinli.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qMiowMBxb8e1BDRo2APyAA--.30366S3
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
+X-Coremail-Antispam: 1Uk129KBj93XoWxJF1UKw1xCr1xur18ur1ktFc_yoW8WFWUpF
+	45XryUCr4UGF15GryDJws8u34rWw1j9ryDK34fXw1rZFWqy34UGFsrCFWUtFy5AFyUt3WS
+	qF4DWr15ury8JabCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUU9Yb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r126r13M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Gr0_Xr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVW8Jr0_Cr1UM28EF7xvwVC2z280aVCY1x0267AK
+	xVW8Jr0_Cr1UM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07
+	AIYIkI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWU
+	AVWUtwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7V
+	AKI48JMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMxCIbckI1I0E14v2
+	6r1Y6r17MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17
+	CEb7AF67AKxVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1I6r4UMIIF
+	0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIx
+	AIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x0267AKxVWUJVW8JbIYCTnIWIev
+	Ja73UjIFyTuYvjxU2-txDUUUU
 
-On Mon, May 19, 2025 at 7:50=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
+Use new function devm_mmc_alloc_host() to simplify the code.
 
-> Moving this problem to userspace seems wrong to me. We should be able
-> to do the right thing in the kernel.
+Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+---
+ drivers/mmc/host/sdhci.c | 9 +--------
+ drivers/mmc/host/sdhci.h | 1 -
+ 2 files changed, 1 insertion(+), 9 deletions(-)
 
-Unfortunately, I don't have access to the datasheet for the RTS5179 or rela=
-ted
-chips. This is what I could do to get my own hardware working, and it doesn=
-'t
-make sense to revert to polling mode for all users if the interrupt
-mode detection
-works and reduces power consumption.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 32fa0b2bb912..c40caa3f003f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4076,7 +4076,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 
+ 	WARN_ON(dev == NULL);
+ 
+-	mmc = mmc_alloc_host(sizeof(struct sdhci_host) + priv_size, dev);
++	mmc = devm_mmc_alloc_host(dev, sizeof(struct sdhci_host) + priv_size);
+ 	if (!mmc)
+ 		return ERR_PTR(-ENOMEM);
+ 
+@@ -5000,13 +5000,6 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ EXPORT_SYMBOL_GPL(sdhci_remove_host);
+ 
+-void sdhci_free_host(struct sdhci_host *host)
+-{
+-	mmc_free_host(host->mmc);
+-}
+-
+-EXPORT_SYMBOL_GPL(sdhci_free_host);
+-
+ /*****************************************************************************\
+  *                                                                           *
+  * Driver init/exit                                                          *
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f9d65dd0f2b2..58291a6f093d 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -811,7 +811,6 @@ static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
+ #endif /* CONFIG_MMC_SDHCI_IO_ACCESSORS */
+ 
+ struct sdhci_host *sdhci_alloc_host(struct device *dev, size_t priv_size);
+-void sdhci_free_host(struct sdhci_host *host);
+ 
+ static inline void *sdhci_priv(struct sdhci_host *host)
+ {
+-- 
+2.47.1
 
-> We should be able to detect if we are running the broken HW and in
-> that case, set the flag based on that, right?
-
-I don't know of a way to do so, especially since I don't have non-broken HW
-in my possession. On my hardware, once the device enters autosuspend,
-inserting a card does not trigger a wakeup. I'm hoping that there's a way t=
-o
-detect the broken HW via a hardware revision register or something similar.
-
-Thanks,
-Gavin
