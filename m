@@ -1,110 +1,115 @@
-Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2AFC225C6E5
-	for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 14:23:06 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BA72E2798E2
+	for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 14:35:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748355788; cv=none; b=l37k5ZfMOss79Pqligote5s5yQNaUAij0LaHVJgsIG9ColKsiHsSFEuiy5kuYbcnC7s2fQgSGMqzuCuv8q6JBpPGH6p3hfc5bfh0QBClHcrRM+G0cZ+4kxVSUu8BPdOTRd4vlqUg6VqNd0eEVQWaiUtzuFfg8L4VB4QIA0y1zFQ=
+	t=1748356541; cv=none; b=TSMbuz4dGvJGTTZ+EWO/S0DQ5Hol0Z/kt8VG5uZXyV/+AqP39ZY09whMRyM7J2Wu1tl1b3/SXEwg+4jcsFfZmbddOSiESiwI6oBl1P4DZ3IgLOMMWu/2twcIg8JHo6BgbtE4t33porROlNe3sU4tCYrIotOieF52F32YtCWrhbQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748355788; c=relaxed/simple;
-	bh=GeB62PA6t8IjCpMcu13Hcc0CWge31sKUx6kCXDcp0xs=;
+	s=arc-20240116; t=1748356541; c=relaxed/simple;
+	bh=cja1fI2Ef3oVRN3ln1uZZNmEEcLeGhxoGld828CPx80=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=fPOOV4FZskAxMWgu7+CjAO89I9JU0LVzcUrhssetnL0o/wu3DN9dtntuXDfivv+vEgz7qT48nNa8mGVp12RGzX3nAiD7k6PlNW/+H1gGEqhY8eoCOS+y/gAJzCNrmPDQmY6v4PWIb0o0FKiQA6TD5JVKUTMwK1Q38jBkwJOlFPA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=KuEV+Mu9; arc=none smtp.client-ip=209.85.219.170
+	 To:Cc:Content-Type; b=EvRlQ8LNogw6WVVgnEhOKkETlBOvCSZMJS0epLc10vU4CAug78r2DaY/fjCiXx5iNq6+1l2cqoAwuvno+6CxShI5NkMKr+atbzv9BVRo1TWPzzDiMLMo0qeh2BxCeNzuJdil38H6ltzjBrtP7O+A5AATWOtlCDHVQKu9uS/PIcg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=xvPqjRMn; arc=none smtp.client-ip=209.85.219.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="KuEV+Mu9"
-Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e7dcd60c092so376280276.3
-        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 07:23:06 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xvPqjRMn"
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e740a09eb00so2495254276.0
+        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 07:35:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1748355786; x=1748960586; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GeB62PA6t8IjCpMcu13Hcc0CWge31sKUx6kCXDcp0xs=;
-        b=KuEV+Mu9KKe765my+JosExzT7MP3Qu3NxFkWyFpFbfoELseaQwqEysI6SZt6pmr0qH
-         j6uhV+iXqrbMn30jvFP9vQtQaZpo9RLdWmmXc8kDVaCJSBCwpJR7H85nOuGQrmmR2kkd
-         brWlXfTKdO1YlTWF0O6zdacN61AfQ6BK0yL2kpZybx3O/P6QYKdluku/CqU+YFRopTbX
-         3zaVDd22+8w4U2KbtcXBPBcE4N5oFqHU7t5p6fJziEB4mV135wQCUAEL4L8ous8ZqF/x
-         el60O0kuKsImZ0bSzvE8mb9lhZmy0JK3jPr0Met4OCAQ/K9UJpkrS7daCvmQDz1bqB5t
-         U4EA==
+        d=linaro.org; s=google; t=1748356539; x=1748961339; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=yj61DsrMeMWCwZPL0JbzQgDWQkQXCn/QcX+T8FgoNzQ=;
+        b=xvPqjRMndl8VaAuVu28EhZ3fiuY1ORRfSQL0nHxMFtK1z/+H19fDl3DxJ5xWXeogld
+         RLwlB2hUdcNGLyafkf/Jv4SEtLYkU7oOdGKG3EUZLiqMxN6ssGaJMbwWXm7Ig8lVCJN2
+         7hDiKkLS1+cBo2J/01XBPXB1TTTxECskge+1IQjnNdzysbu6vPlFksSoIz04GjCQrpyM
+         59TDBOlGjYWt6drZFxxqGTH4ci+9UdBpXT36qtk0jFetQNyieOsQBeHyh885eX1xUnPH
+         bzDG3+Si3d2PlruJA89w3byT2BQe6wwcWp5TOpJK2PblyliJn6xSADqATpSC0jYcsdWX
+         vMYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748355786; x=1748960586;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=GeB62PA6t8IjCpMcu13Hcc0CWge31sKUx6kCXDcp0xs=;
-        b=mHFlDYmpoMUAJIKOp4iG2nrIgwRgrZImuxRgKIoH9boNGC9QlgjiZhyGWfOC8RIP5L
-         AQXWOMMVsoDA9UTF2b75QXz2HXXOidzXW422sTgqmeMCXufCAfh1gXe95B9J/ZMjsste
-         e3GunQ+dx2DaISamqzVIA9Y2siOPmfdcLTwqSPPllj4E6HiQuaFNPvD9KwH0yCD8JB7d
-         KDFX/twMN0XQAHGM8VRzAlJ6Il8sp8YWYL0apJCE4g4S8W9qqDqijs1grRQ48LIT047f
-         EM1OOkNFbr+z58t5LZf7DIwPONpcsg0EIIRd4S1MUSqkg00SwpvpVOdQxC5TPHO/FSxA
-         GSLQ==
-X-Gm-Message-State: AOJu0YwH4UJbIDKSXxABJa5pCTqh5GmyJS6cfSQvGoH2gxjI2WGkkMhG
-	tdIXoPx+yiMH3+C34PiITMM9Xz1SdIPJzTV8ZK6/pNf854twafGtIq3o41smtxxYQYigC0AqQxy
-	fw6FrI2Du9GxbMpAXCuVid5dWUZLxnjBC7HaC4+4VK5n2aeiwExnMfIA=
-X-Gm-Gg: ASbGncutkG6wDJKmdFsSKHlHdjmZuMMqFFpV4pCcDQ4oMWxvqUUv7xGqnujbhc9gC+x
-	oAT2s55VTpsw7j/vjndIv5GSNusBdt0W7Y8VyfaBG93VjBvLSGcgedfhKkiJG+rc8GDRjnp5Rfg
-	Uo8CKJUqWqwbiQe+9xOeYzJnDYxNwQTU17aA==
-X-Google-Smtp-Source: AGHT+IGdG13wbjfNkvb/R+LmaTJPj7Myx+iTsl0puM5AVsMSqytz8ICXBA0GvvrlgsdZY2OyK9J1gW/U7NQdPsRhzxM=
-X-Received: by 2002:a05:6902:2b08:b0:e7d:6437:2408 with SMTP id
- 3f1490d57ef6-e7d91d4b1f6mr14555908276.40.1748355786006; Tue, 27 May 2025
- 07:23:06 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1748356539; x=1748961339;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yj61DsrMeMWCwZPL0JbzQgDWQkQXCn/QcX+T8FgoNzQ=;
+        b=JcIytgABw36x07dFGXt57LMPXI3aHPSraq2hRIiV6gR/yuJfPGsPqCULG1V3nP9CnQ
+         KI78pmC71xilwzMFmdAZWlzwuXdyRVzJP8tJQCPSB2HAdvmVP6uwuYmKXRHQv5/WluBK
+         CeSzF25uQ1aCAaNf9Nc0fhBao9otERe15yZP9VkEwod1ThRQm2nk8pIV2qIAcn9cmf00
+         UoCxC+iA90oAT2IdvOzNtOn+zx25lWnxhNeD7VmrG0RxVrnCt42FU9aBAUPxjpHNiMeS
+         Wb4nJdUZc185RwebHR3OLxjzKZcUwkm8fCj3pub3hnV3ZKTJz5mFkNe94i1JrBFqKiZz
+         pUHQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWwnh8Grte3ntyXtJjJyhIng0HlRXualdmk6l/bZuP96EA1G/RgQsggJTyVIj+4lZ3dhEkzo0HexEE=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwNqBVItYASsMazzAZckorELdxtj8dhgxnMGXcgYRIoPdZJAEHB
+	BB9ZSAgnRNzHITg6xd4rsZzHPMkeuH5BUlzuPzYz3n/EdgrsQGE04fxi9/zkZB9YfY+Re874aQ6
+	rRNWxcqcJfVAQ5MNp//oT9DfcOovPcwLXEJ7ON0RoiA==
+X-Gm-Gg: ASbGnctbQA/KqNF+Poe5VoIKCmXf3O+w5d152dypDMhBlcWVODKEp/TDdJlX8B2sW2C
+	MRg7taw8uNKwDZQ3jfHtKUSFZ0feclPOXRvEqL/L1yt3Iuvdh74NrhuQFZy/NJNXkqtddYNckWA
+	C3xaYniUNC4VDFhArkTMzEXGmZ4+oSCFP+yA==
+X-Google-Smtp-Source: AGHT+IEza78A9ENnR5O8Dofyx/Pw9tLHJHiZMGvlW4NPAPac1rNHq3hR3Ihr49/HMPreqV7/1zrs+KoKNzJJUGDnh9A=
+X-Received: by 2002:a05:6902:100f:b0:e7d:c9f4:ed80 with SMTP id
+ 3f1490d57ef6-e7dc9f4ef2bmr2892226276.34.1748356538436; Tue, 27 May 2025
+ 07:35:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250510031945.1004129-1-git@thegavinli.com> <CAPDyKFq8evHyh_0QacZq=d36vXfrs3vFPsAuCyFdv3BKh0SP2A@mail.gmail.com>
- <CA+GxvY4ByPW4HVJfww2v674f-y5kuqKmY=EB8mD5jnRcy+HmPg@mail.gmail.com>
-In-Reply-To: <CA+GxvY4ByPW4HVJfww2v674f-y5kuqKmY=EB8mD5jnRcy+HmPg@mail.gmail.com>
+References: <20250523105745.6210-1-quic_sartgarg@quicinc.com> <d0d3c2c0-d5ab-484d-835b-3a76055cad55@oss.qualcomm.com>
+In-Reply-To: <d0d3c2c0-d5ab-484d-835b-3a76055cad55@oss.qualcomm.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 27 May 2025 16:22:30 +0200
-X-Gm-Features: AX0GCFvVw5zx2ezgMVxOD0HqONpZolDYT8Ly-0SYWDxKVgt99n0SlW0ZZipno3M
-Message-ID: <CAPDyKFrXnVkOatAF_adg67LxfU7YOqeR_49_u2mOQLntQcCBfg@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: rtsx_usb_sdmmc: add parameter to always poll for
- card presence
-To: =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>, 
-	Gavin Li <gfl3162@gmail.com>
-Cc: linux-mmc@vger.kernel.org, Gavin Li <git@thegavinli.com>
+Date: Tue, 27 May 2025 16:35:02 +0200
+X-Gm-Features: AX0GCFuCVqmDKFBGxj-r9MWTg0HcX-1n2QZgpIUWBloETdc9Q6k3WIWR9wYHE2g
+Message-ID: <CAPDyKFoKh6KLtn6-Rvttt9zKh2fk7T28t_jC7KC8peYE+RkL5Q@mail.gmail.com>
+Subject: Re: [PATCH V2 0/3] Add level shifter support for qualcomm SOC's
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+Cc: Sarthak Garg <quic_sartgarg@quicinc.com>, Bjorn Andersson <andersson@kernel.org>, 
+	Konrad Dybcio <konradybcio@kernel.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, linux-arm-msm@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, quic_cang@quicinc.com, quic_nguyenb@quicinc.com, 
+	quic_rampraka@quicinc.com, quic_pragalla@quicinc.com, 
+	quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com, 
+	quic_bhaskarv@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Sat, 24 May 2025 at 05:37, Gavin Li <gfl3162@gmail.com> wrote:
+On Fri, 23 May 2025 at 20:25, Konrad Dybcio
+<konrad.dybcio@oss.qualcomm.com> wrote:
 >
-> On Mon, May 19, 2025 at 7:50=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
+> On 5/23/25 12:57 PM, Sarthak Garg wrote:
+> > Add level shifter support for qualcomm SOC's.
+> >
+> > - Changed from v1
+> >     - As suggested by Krzysztof Kozlowski redesigned logic to use
+> >     compatible property for adding this level shifter support.
+> >     - Addressed Adrian Hunter comments on V1 with resepect to
+> >       checkpatch.
+> >     - Cleared the bits first and then set bits in
+> >       sdhci_msm_execute_tuning as suggested by Adrian Hunter.
+> >     - Upated the if condition logic in msm_set_clock_rate_for_bus_mode
+> >       as suggested by Adrian Hunter.
 >
-> > Moving this problem to userspace seems wrong to me. We should be able
-> > to do the right thing in the kernel.
+> During internal review I suggested we could introduce a generic quirk,
+> perhaps called "max-hs-frequency" which would update this
+> currently-constant value:
 >
-> Unfortunately, I don't have access to the datasheet for the RTS5179 or re=
-lated
-> chips. This is what I could do to get my own hardware working, and it doe=
-sn't
-> make sense to revert to polling mode for all users if the interrupt
-> mode detection
-> works and reduces power consumption.
+> ---------------- drivers/mmc/core/sd.c ----------------
+> if (status[13] & SD_MODE_HIGH_SPEED)
+>         card->sw_caps.hs_max_dtr = HIGH_SPEED_MAX_DTR;
+> -------------------------------------------------------
+>
+> (50 MHz)
+>
+> which I believe is where it comes from
 
-Agree!
+I agree that a DT property for the mmc controller would make sense.
 
->
-> > We should be able to detect if we are running the broken HW and in
-> > that case, set the flag based on that, right?
->
-> I don't know of a way to do so, especially since I don't have non-broken =
-HW
-> in my possession. On my hardware, once the device enters autosuspend,
-> inserting a card does not trigger a wakeup. I'm hoping that there's a way=
- to
-> detect the broken HW via a hardware revision register or something simila=
-r.
-
-Yes, something along those lines would make sense. Let's see if Ricky
-can advise us on how to move forward.
+Although, this seems limited to SD UHS-I speed modes, so perhaps
+"max-sd-uhs-frequency" would be a better name for it?
 
 Kind regards
 Uffe
