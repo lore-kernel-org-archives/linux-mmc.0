@@ -1,103 +1,180 @@
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+Received: from mail-oa1-f49.google.com (mail-oa1-f49.google.com [209.85.160.49])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AFEB2DCC0C
-	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 03:10:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 290461367
+	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 03:32:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748401862; cv=none; b=nZcMRV1+xeHmDFJ26/WsYEadwrjZb14q/3dn77XJHHWjvZlMp6yTMMq42DqxU+rHwz/DNktFo7nH5Lngh+WyQnPoMbaO5I5MMvXmZ1cNXqp4jqdmnD9uXcRTnI55QFuoGQCl2LgCnl31+DZ3XImddYpM5+XxXZ7+zmfn6rkIFRU=
+	t=1748403152; cv=none; b=YxTgJP7SQ94yA7+BpRU5+7vsZFBv2/hXuhkPdVDfXFuSbsCERIGtcc0l/73fw2mjJpbTsEvrr0l6HyK4b9E8dfR85Jnp6Awj+fe/ZpDBEovexuFU9aWg3y1R4DJm0Jo7zxiBdKTfI6Id+BWaCwmbt+mElshgGkZoReowAARIiBs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748401862; c=relaxed/simple;
-	bh=lmYjRBpfYj/b7ClN2tldw2CVutBgJh3WPJv4h0gS33U=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=Fq/9lTroH4+uolo2yTFqbwFoLGEwzzctsdQ2AruUX6xDK5anzSQiDSFzvNx4lhZXm8Vdba+FOT6vYS76CML8fmMYXn2UzNyPSja8UdHaUO0qP/tcz7RmFDpLBrhPY3ERJOh9awieldEKJrShuG45AhC9EdFKqOonKqA7zz+nhYI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=permerror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b=SYKuFeqS; arc=none smtp.client-ip=211.75.126.72
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
+	s=arc-20240116; t=1748403152; c=relaxed/simple;
+	bh=0QpmczGoIMlKNXsUuJXj3GdcqzR6pwkdBHyH9N65OIU=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=LA/v2KPFRNIog1vV+bNs5oQ5vvr3pJ9XsJCMRLZ53faSoq/kKaq9Vjt7MpReQvslIblGIZajZBlyyppitWh/IA7j0X5quvRMHG+3mb5MGFpD7EBC3/vdVQxddVFYoZ+NMskyxIiyYeIQzaBXuLD7kjtqnQD7MEJCxZtfQZwDq5g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZXYu+lJB; arc=none smtp.client-ip=209.85.160.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=permerror (0-bit key) header.d=realtek.com header.i=@realtek.com header.b="SYKuFeqS"
-X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 54S3AdNT23101357, This message is accepted by code: ctloc85258
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
-	t=1748401840; bh=lmYjRBpfYj/b7ClN2tldw2CVutBgJh3WPJv4h0gS33U=;
-	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:Content-Transfer-Encoding:MIME-Version;
-	b=SYKuFeqSyIasHawGaHrXFpWt6M2j00aI1BlIDwVvnnG+zYdhWdYcP+NrqcHzH7S0P
-	 NdIzjkwDNCfNS0U5/gNY8S3/FyJ8P4pDekyBZPACH8Y4EbzTvR/1EmesAvMQ/fRfuA
-	 VZBXujJgmhWtt6dahXhygP9sxgCV2kTgV1Fq/UMSCvgWzcgY0nUgMqBamttwb9rQ9l
-	 3FKeXtPkI8/n1hJI8/Aco0F3TH7guxSa0j3RXVo21ooZyZg2FNQHHoK9RZWTcGQvrX
-	 Xv6QjLVaOE7L6kyoV0VCbfi+H9IQrw6mCOB/DJvN8AU0nRi/UYLBdmO2GhK0/5ObCY
-	 OGyvK5+cYo8XQ==
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-	by rtits2.realtek.com.tw (8.15.2/3.13/5.93) with ESMTPS id 54S3AdNT23101357
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-	Wed, 28 May 2025 11:10:39 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.39; Wed, 28 May 2025 11:10:38 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.2507.35; Wed, 28 May 2025 11:10:38 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547]) by
- RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547%5]) with mapi id
- 15.01.2507.035; Wed, 28 May 2025 11:10:38 +0800
-From: Ricky WU <ricky_wu@realtek.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Gavin Li <gfl3162@gmail.com>
-CC: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Gavin Li
-	<git@thegavinli.com>
-Subject: RE: [PATCH v1] mmc: rtsx_usb_sdmmc: add parameter to always poll for card presence
-Thread-Topic: [PATCH v1] mmc: rtsx_usb_sdmmc: add parameter to always poll for
- card presence
-Thread-Index: AQHbyLRLEO85hY+bKkSWaK7QQ1CcTrPgop2AgAVrbQCAAU/bUA==
-Date: Wed, 28 May 2025 03:10:38 +0000
-Message-ID: <b843b011bebd4dc18f9b9da290958ded@realtek.com>
-References: <20250510031945.1004129-1-git@thegavinli.com>
- <CAPDyKFq8evHyh_0QacZq=d36vXfrs3vFPsAuCyFdv3BKh0SP2A@mail.gmail.com>
- <CA+GxvY4ByPW4HVJfww2v674f-y5kuqKmY=EB8mD5jnRcy+HmPg@mail.gmail.com>
- <CAPDyKFrXnVkOatAF_adg67LxfU7YOqeR_49_u2mOQLntQcCBfg@mail.gmail.com>
-In-Reply-To: <CAPDyKFrXnVkOatAF_adg67LxfU7YOqeR_49_u2mOQLntQcCBfg@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZXYu+lJB"
+Received: by mail-oa1-f49.google.com with SMTP id 586e51a60fabf-2cc57330163so2422346fac.2
+        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 20:32:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1748403149; x=1749007949; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=HWw3TzzmW76PuMGCvGJVQBcS6fcJ72imE1BYjd+nGQE=;
+        b=ZXYu+lJBlmbbuKTUTiSlI/NKP34xhJ8tNI9H8+VsW9fmjJaHLNWKCmIYhfuIyeDaBJ
+         RuycK3ATbndbZkt8R37djPAHrUDKx79rEnXOvBWoBT59LaxykwJbMt7dBRsVRt0W9R/L
+         pZk78FnAJwP+qQaW5jNS8HZzjZdQ3pRfB2mnnxi3YdeeaN5yxvgOaEPN6RsEUPYLzNAd
+         8E1yeEdeCwVTSDlFI9qNnwtfBsmceq0rg7snM8d460ugA74FcmI2rSsjxIfmoBc72RGb
+         cP8TNSI+GGjhh4H8IFsqqHZ0mmRvbnDEg/FSsYvRwOyWk/Oqym4gQjquAuVNmUsNZFth
+         Q5mQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748403149; x=1749007949;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=HWw3TzzmW76PuMGCvGJVQBcS6fcJ72imE1BYjd+nGQE=;
+        b=trQXSBWq1vZJINUnlwtRFAqlPyicgX7ubuubOZZa5V0udQXcy24vuG5Bd8j1an+pI8
+         +YHOaYmFgQ3Hy7WyJQYfYbu8felq/yLRKUO1Fs98d6+88sYmjNfywG4NaAZYzyuKyO74
+         i4Y8z7n4bdSBU7z/bHNeiE4NcjIWKh/AoTm+x3/juIDR5ZbkKFfGzIecCmW2zjaJqnZD
+         8LH2ArKhsGigD+v/eSS2GOV+FBx8AGAssexoZW8gmVOm59imXxXrA2DCFIEk8QvyImyA
+         zpgup18rKBsSTwlxZGsspZGe2uJyq20QEoLQ3UE1zWBc9ZwomFnRU2zdxqR/xps2uZRt
+         qApQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXBQkhOxaothLCrngiUZw81D/QOwVww4ecsH5xQ65+VuBCYOYnJspmZKVb21o3dzQEA5QpyDhUEJ5w=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwzOGgLzPsTSGcHfJb4f5pmVVDkRiCWPW97TMDlhsJ7h8WK8X4/
+	237VfaEfwp9JI8E92WpapJ5cs5b+t2LltKhYxW5R/BvUVElYjGQrI8j7NY8kXLUtiBCOU4FOWNf
+	K/0iik7P/WsvMWnW55O/O9QklItWCCio=
+X-Gm-Gg: ASbGncvBzDeDZe9u21dxDxq2EUEoYevgufEY4+7A3oJhQGUXBaCDUP+mBu5wm2q6QE3
+	HH7V9BlkvG+QkGtqCzgJ6rCn5RM88ob+9+TWt1BEJbZJIIwW2kpJw8ijCa8Xx6SXTE6nrJ6qiK7
+	yBfJnCJBg8M3Y8MC3JTE5OdWjyMcxLK2L4tKBbsEjXBmbB15sa4JhZnxPE3/9NuxQ=
+X-Google-Smtp-Source: AGHT+IFsZ3w7HUvwTw0Wcrl7ZQ0q+G3x9OaCP4Yw9thK4cvJcPAB+FU/5QjbQlJD5cYFRQQqGcf/zmkzEwMTC0yLIVI=
+X-Received: by 2002:a05:6870:7d8e:b0:2d5:25b6:ec14 with SMTP id
+ 586e51a60fabf-2e8e0f237e9mr280147fac.15.1748403149035; Tue, 27 May 2025
+ 20:32:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+References: <cover.1747792905.git.zhoubinbin@loongson.cn> <d7994a2655d27bc2cb6d740345747292b67e4a25.1747792905.git.zhoubinbin@loongson.cn>
+In-Reply-To: <d7994a2655d27bc2cb6d740345747292b67e4a25.1747792905.git.zhoubinbin@loongson.cn>
+From: Chunyan Zhang <zhang.lyra@gmail.com>
+Date: Wed, 28 May 2025 11:31:52 +0800
+X-Gm-Features: AX0GCFsrjQTmqConBdGUgn8ZKXQRvomBVv2B2ZkebJ3K7mumYhW2x49Sn0IapiQ
+Message-ID: <CAAfSe-vJuiM0yCLBhr7WmtoZxEdRNo9x7fn9Mm5dztQ6BpLzJQ@mail.gmail.com>
+Subject: Re: [PATCH 29/34] mmc: sdhci-sprd: Drop the use of sdhci_pltfm_free()
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org, 
+	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>
+Content-Type: text/plain; charset="UTF-8"
 
-PiBPbiBTYXQsIDI0IE1heSAyMDI1IGF0IDA1OjM3LCBHYXZpbiBMaSA8Z2ZsMzE2MkBnbWFpbC5j
-b20+IHdyb3RlOg0KPiA+DQo+ID4gT24gTW9uLCBNYXkgMTksIDIwMjUgYXQgNzo1MOKAr0FNIFVs
-ZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiB3cm90ZToNCj4gPg0KPiA+ID4g
-TW92aW5nIHRoaXMgcHJvYmxlbSB0byB1c2Vyc3BhY2Ugc2VlbXMgd3JvbmcgdG8gbWUuIFdlIHNo
-b3VsZCBiZQ0KPiA+ID4gYWJsZSB0byBkbyB0aGUgcmlnaHQgdGhpbmcgaW4gdGhlIGtlcm5lbC4N
-Cj4gPg0KPiA+IFVuZm9ydHVuYXRlbHksIEkgZG9uJ3QgaGF2ZSBhY2Nlc3MgdG8gdGhlIGRhdGFz
-aGVldCBmb3IgdGhlIFJUUzUxNzkgb3INCj4gPiByZWxhdGVkIGNoaXBzLiBUaGlzIGlzIHdoYXQg
-SSBjb3VsZCBkbyB0byBnZXQgbXkgb3duIGhhcmR3YXJlIHdvcmtpbmcsDQo+ID4gYW5kIGl0IGRv
-ZXNuJ3QgbWFrZSBzZW5zZSB0byByZXZlcnQgdG8gcG9sbGluZyBtb2RlIGZvciBhbGwgdXNlcnMg
-aWYNCj4gPiB0aGUgaW50ZXJydXB0IG1vZGUgZGV0ZWN0aW9uIHdvcmtzIGFuZCByZWR1Y2VzIHBv
-d2VyIGNvbnN1bXB0aW9uLg0KPiANCj4gQWdyZWUhDQo+IA0KPiA+DQo+ID4gPiBXZSBzaG91bGQg
-YmUgYWJsZSB0byBkZXRlY3QgaWYgd2UgYXJlIHJ1bm5pbmcgdGhlIGJyb2tlbiBIVyBhbmQgaW4N
-Cj4gPiA+IHRoYXQgY2FzZSwgc2V0IHRoZSBmbGFnIGJhc2VkIG9uIHRoYXQsIHJpZ2h0Pw0KPiA+
-DQo+ID4gSSBkb24ndCBrbm93IG9mIGEgd2F5IHRvIGRvIHNvLCBlc3BlY2lhbGx5IHNpbmNlIEkg
-ZG9uJ3QgaGF2ZQ0KPiA+IG5vbi1icm9rZW4gSFcgaW4gbXkgcG9zc2Vzc2lvbi4gT24gbXkgaGFy
-ZHdhcmUsIG9uY2UgdGhlIGRldmljZSBlbnRlcnMNCj4gPiBhdXRvc3VzcGVuZCwgaW5zZXJ0aW5n
-IGEgY2FyZCBkb2VzIG5vdCB0cmlnZ2VyIGEgd2FrZXVwLiBJJ20gaG9waW5nDQo+ID4gdGhhdCB0
-aGVyZSdzIGEgd2F5IHRvIGRldGVjdCB0aGUgYnJva2VuIEhXIHZpYSBhIGhhcmR3YXJlIHJldmlz
-aW9uIHJlZ2lzdGVyDQo+IG9yIHNvbWV0aGluZyBzaW1pbGFyLg0KPiANCj4gWWVzLCBzb21ldGhp
-bmcgYWxvbmcgdGhvc2UgbGluZXMgd291bGQgbWFrZSBzZW5zZS4gTGV0J3Mgc2VlIGlmIFJpY2t5
-IGNhbg0KPiBhZHZpc2UgdXMgb24gaG93IHRvIG1vdmUgZm9yd2FyZC4NCj4gDQoNCkhpIEdhdmlu
-LA0KDQpJ4oCZbSBub3QgZW50aXJlbHkgY2xlYXIgb24gd2hhdCB0aGUgYWN0dWFsIGlzc3VlIGlz
-IGF0IHRoaXMgcG9pbnQuIEluaXRpYWxseSwgdGhlcmUgd2FzIG1lbnRpb24gb2Yg4oCcc29tZSBS
-VFM1MTc54oCm4oCdIGFuZCBsYXRlciwgDQrigJxicm9rZW4gaGFyZHdhcmXigKbigJ0gd2FzIGJy
-b3VnaHQgdXAuDQpDb3VsZCB5b3UgcGxlYXNlIGNsYXJpZnkg4oCUIGlzIHRoaXMgcHJvYmxlbSBo
-YXBwZW5pbmcgb25seSBvbiBjZXJ0YWluIHBsYXRmb3Jtcz8gT3IgaXMgaXQgc29tZXRoaW5nIGVs
-c2U/DQoNCkhJIFVpZiwNCg0KSXMgaXQgZ2VuZXJhbGx5IHRydWU/IFRoYXQgZGV2aWNlcyB1c2lu
-ZyB0aGUgTU1DX0NBUF9ORUVEU19QT0xMIGZsYWcgbWF5IG5vdCBmdWxseSBzdXBwb3J0IHJ1bnRp
-bWVfc3VzcGVuZCwNClNpbmNlIHRoZXkgcmVseSBvbiBwb2xsaW5nIHJhdGhlciB0aGFuIGludGVy
-cnVwdHMuDQpUaGlzIGNhbiBwcmV2ZW50IHRoZSBkZWNpY2VzIG9yIGhvc3QgY29udHJvbGxlciBm
-cm9tIHJlYWNoaW5nIGRlZXBlciBwb3dlci1zYXZpbmcgc3RhdGVzLg0KDQoNCj4gS2luZCByZWdh
-cmRzDQo+IFVmZmUNCg==
+On Mon, 26 May 2025 at 14:07, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+>
+> Since the devm_mmc_alloc_host() helper is already in
+> use, sdhci_pltfm_free() is no longer needed.
+>
+> Cc: Orson Zhai <orsonzhai@gmail.com>
+> Cc: Baolin Wang <baolin.wang@linux.alibaba.com>
+> Cc: Chunyan Zhang <zhang.lyra@gmail.com>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+
+Reviewed-by: Chunyan Zhang <zhang.lyra@gmail.com>
+
+Thanks,
+Chunyan
+
+> ---
+>  drivers/mmc/host/sdhci-sprd.c | 33 ++++++++++-----------------------
+>  1 file changed, 10 insertions(+), 23 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index db5e253b0f79..a5dec1a0e934 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -764,7 +764,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>
+>         ret = mmc_of_parse(host->mmc);
+>         if (ret)
+> -               goto pltfm_free;
+> +               return ret;
+>
+>         if (!mmc_card_is_removable(host->mmc))
+>                 host->mmc_host_ops.request_atomic = sdhci_sprd_request_atomic;
+> @@ -778,34 +778,26 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>         if (!IS_ERR(sprd_host->pinctrl)) {
+>                 sprd_host->pins_uhs =
+>                         pinctrl_lookup_state(sprd_host->pinctrl, "state_uhs");
+> -               if (IS_ERR(sprd_host->pins_uhs)) {
+> -                       ret = PTR_ERR(sprd_host->pins_uhs);
+> -                       goto pltfm_free;
+> -               }
+> +               if (IS_ERR(sprd_host->pins_uhs))
+> +                       return PTR_ERR(sprd_host->pins_uhs);
+>
+>                 sprd_host->pins_default =
+>                         pinctrl_lookup_state(sprd_host->pinctrl, "default");
+> -               if (IS_ERR(sprd_host->pins_default)) {
+> -                       ret = PTR_ERR(sprd_host->pins_default);
+> -                       goto pltfm_free;
+> -               }
+> +               if (IS_ERR(sprd_host->pins_default))
+> +                       return PTR_ERR(sprd_host->pins_default);
+>         }
+>
+>         clk = devm_clk_get(&pdev->dev, "sdio");
+> -       if (IS_ERR(clk)) {
+> -               ret = PTR_ERR(clk);
+> -               goto pltfm_free;
+> -       }
+> +       if (IS_ERR(clk))
+> +               return PTR_ERR(clk);
+>         sprd_host->clk_sdio = clk;
+>         sprd_host->base_rate = clk_get_rate(sprd_host->clk_sdio);
+>         if (!sprd_host->base_rate)
+>                 sprd_host->base_rate = SDHCI_SPRD_CLK_DEF_RATE;
+>
+>         clk = devm_clk_get(&pdev->dev, "enable");
+> -       if (IS_ERR(clk)) {
+> -               ret = PTR_ERR(clk);
+> -               goto pltfm_free;
+> -       }
+> +       if (IS_ERR(clk))
+> +               return PTR_ERR(clk);
+>         sprd_host->clk_enable = clk;
+>
+>         clk = devm_clk_get(&pdev->dev, "2x_enable");
+> @@ -814,7 +806,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>
+>         ret = clk_prepare_enable(sprd_host->clk_sdio);
+>         if (ret)
+> -               goto pltfm_free;
+> +               return ret;
+>
+>         ret = clk_prepare_enable(sprd_host->clk_enable);
+>         if (ret)
+> @@ -891,9 +883,6 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>
+>  clk_disable:
+>         clk_disable_unprepare(sprd_host->clk_sdio);
+> -
+> -pltfm_free:
+> -       sdhci_pltfm_free(pdev);
+>         return ret;
+>  }
+>
+> @@ -907,8 +896,6 @@ static void sdhci_sprd_remove(struct platform_device *pdev)
+>         clk_disable_unprepare(sprd_host->clk_sdio);
+>         clk_disable_unprepare(sprd_host->clk_enable);
+>         clk_disable_unprepare(sprd_host->clk_2x_enable);
+> -
+> -       sdhci_pltfm_free(pdev);
+>  }
+>
+>  static const struct of_device_id sdhci_sprd_of_match[] = {
+> --
+> 2.47.1
+>
