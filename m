@@ -1,63 +1,68 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CEFD078F54;
-	Wed, 28 May 2025 00:29:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 733ED1EB2F
+	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 00:44:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748392188; cv=none; b=SZmtNh6KgbU+PGEMOuF77JaO/jBeESt32L7bu769296BP4v3dyjjMA+ZPzonD9b7AsQ00C4ehAt75B1x+pzOxnX+v3tu5b0vObR45whJNXkeK4+VFlOIKzMcfYurpfa1BViVgxC+GJTrAR8cib2S9Ndp+YayGhsC1HgXVpme/xk=
+	t=1748393053; cv=none; b=YfsQ1sdmXUT0XBsOdb2iFNLwpEkC0lwafTj2jGLjwptfPqUEG3R2T52a/6ImTPGksY+9+gbsh0BPvQUNCWy0kgHx1b+41mMGWu23/GbjXoRVZr/N3GT2SW6/DoukBaeQzEaLa8reiarsQ3E4sRdbbTORlsOfRiqbWCdBA9Hr8Bo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748392188; c=relaxed/simple;
-	bh=OOzw/9gLBVWa3L5a2EoeiGi1y++Ll4vl8Nha9XSA/c0=;
-	h=Subject:From:In-Reply-To:References:Message-Id:Date:To:Cc; b=JwdToS/DdM0R4PZFMDJFM6OH9X3dpeAwwHiUOrGbLLPhx5NQAXTtsbOuJFYprQcv62cE6/EZGcwmpivCzs1PtqrPGP0ay/JussqvFcQtIbgcX37/2Xh2a8dss0/I8mabkdn2tqVYFQ0zOhYkdr5clzNcKa9EHd0Oz0+/ZefIP38=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KhPHc6ns; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748393053; c=relaxed/simple;
+	bh=bW4crBIy9PqA9JTflIEcujZLjdIxJW8V1rpT69gqPkM=;
+	h=Message-ID:Subject:From:To:Cc:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=esQgjMJN87USlbQafMF76xIwYHFFsAogMdrYJ2txX93MprMwEiKg5dQYb9YGFEpvqLFaJIrLR/TvU3WdLN8RMJFtEXvTTPR0eCmr0cvEV9fmkDeJ18AjSgLuImlUbIJOkuDxyHF6AhafyCR1njkC7zcBfmJQlrFNc5fArl2SMMI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=aDrfu7Ua; arc=none smtp.client-ip=203.29.241.158
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KhPHc6ns"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 54688C4CEE9;
-	Wed, 28 May 2025 00:29:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748392188;
-	bh=OOzw/9gLBVWa3L5a2EoeiGi1y++Ll4vl8Nha9XSA/c0=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-	b=KhPHc6nszMV7Id0eXJXtrFexr9SGSNan4blxqfogpeJG0iMoIZ20UA/c1+Lrztc7c
-	 Q0PX8N2nd7vx/yZAW+BucrNriHc8YJTQYYOxaTeG5sqOtIw8Ic68eeEJfDHD+ooz0A
-	 sQ7fniXBEV9pS6iJZ5xYUtnHY+qIzgU5TS/RqwY9hdobue3Qm47GUqig1F63y443AN
-	 hm+GcEoCQhlwGdqVnQxfUDbaQmqT0SsrZjYftDnAcv2LlasfVby+vEBtsfULlLCA5V
-	 X/BHVRrVDY3WHPcXFCXzk4D3wj87JlBWBJJq7h/bGwSgyIVD1rtEVTXwYxrFfqhNtg
-	 g652S277f/PUw==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id AE084380AAE2;
-	Wed, 28 May 2025 00:30:23 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC updates for v6.16
-From: pr-tracker-bot@kernel.org
-In-Reply-To: <20250527113353.209435-1-ulf.hansson@linaro.org>
-References: <20250527113353.209435-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20250527113353.209435-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.16
-X-PR-Tracked-Commit-Id: d2c6acff6386f43ed307822454b970c831c48f1b
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 35a8b02e071a83dd2d42a8446a00a56f6147dc06
-Message-Id: <174839222228.1837144.18311807369660071021.pr-tracker-bot@kernel.org>
-Date: Wed, 28 May 2025 00:30:22 +0000
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="aDrfu7Ua"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=codeconstruct.com.au; s=2022a; t=1748393043;
+	bh=bW4crBIy9PqA9JTflIEcujZLjdIxJW8V1rpT69gqPkM=;
+	h=Subject:From:To:Cc:Date:In-Reply-To:References;
+	b=aDrfu7UaYHEsGM5716KG0K+1v8ehAR+fHjDkTlTL9OlVwzHZqwZoUuqC8qfIs766z
+	 MBeP9oD7moryEudsoNWE4xMLYoa2TUmleQY0TtBxqcjlkS4tykuSS83O7fFUWZLxmj
+	 qLitCvUfZCcEvqpahC14pyyJs0TkKvdEw4vKDc8djXf+lRm7xb/w4zDLqDDYzCxIdO
+	 V9t0qvSktbdHf5lK67zwCYoL0Jar/hESdviRfPQZ/1X2HbkKJnnR6kLhLn9UyoEdXP
+	 I3ZjXhu/cDF2CeIfwTjbTOFWPlTI3aLJ/gb+eh2N4dNSqbvPtLjKg+nKI8lMcO+T3c
+	 geXWB+/rlA9MA==
+Received: from [192.168.68.112] (unknown [180.150.112.166])
+	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 9BE6C832CD;
+	Wed, 28 May 2025 08:44:00 +0800 (AWST)
+Message-ID: <753cd65ebf659972c8a33e5f8e579b9fa8738682.camel@codeconstruct.com.au>
+Subject: Re: [PATCH 18/34] mmc: sdhci-of-aspeed: Drop the use of
+ sdhci_pltfm_free()
+From: Andrew Jeffery <andrew@codeconstruct.com.au>
+To: Binbin Zhou <zhoubinbin@loongson.cn>, Binbin Zhou
+ <zhoubb.aaron@gmail.com>,  Huacai Chen <chenhuacai@loongson.cn>, Ulf
+ Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org, Joel
+ Stanley <joel@jms.id.au>, linux-aspeed@lists.ozlabs.org,
+ openbmc@lists.ozlabs.org
+Date: Wed, 28 May 2025 10:13:59 +0930
+In-Reply-To: <dfc7e01a6134e421ae3aa8da3221f67d59706d0d.1747792905.git.zhoubinbin@loongson.cn>
+References: <cover.1747792905.git.zhoubinbin@loongson.cn>
+	 <dfc7e01a6134e421ae3aa8da3221f67d59706d0d.1747792905.git.zhoubinbin@loongson.cn>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
+MIME-Version: 1.0
 
-The pull request you sent on Tue, 27 May 2025 13:33:53 +0200:
+On Mon, 2025-05-26 at 14:06 +0800, Binbin Zhou wrote:
+> Since the devm_mmc_alloc_host() helper is already in
+> use,=C2=A0
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.16
+This doesn't appear to be true? aspeed_sdhci_probe() calls
+sdhci_pltfm_init(), and following that through eventually we call
+mmc_alloc_host() (the non-devm_ variant).
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/35a8b02e071a83dd2d42a8446a00a56f6147dc06
+That said, there are some error paths in aspeed_sdhci_probe() where we
+leak the object. Improving the code would be helpful, but my
+understanding is this patch isn't right.
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Andrew
