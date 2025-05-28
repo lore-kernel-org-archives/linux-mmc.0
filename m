@@ -1,180 +1,118 @@
-Received: from mail-oa1-f49.google.com (mail-oa1-f49.google.com [209.85.160.49])
+Received: from mail-ej1-f52.google.com (mail-ej1-f52.google.com [209.85.218.52])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 290461367
-	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 03:32:29 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 02E3AF4E2
+	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 04:42:35 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748403152; cv=none; b=YxTgJP7SQ94yA7+BpRU5+7vsZFBv2/hXuhkPdVDfXFuSbsCERIGtcc0l/73fw2mjJpbTsEvrr0l6HyK4b9E8dfR85Jnp6Awj+fe/ZpDBEovexuFU9aWg3y1R4DJm0Jo7zxiBdKTfI6Id+BWaCwmbt+mElshgGkZoReowAARIiBs=
+	t=1748407357; cv=none; b=NDxZP6eD5d8/k8TXTtCxQSGIMQJQkHlN6lrBqoGqhdyLOGmWThv7LD9X6ag//wo2xfZr4XpWhJ0zSAC3uBtQzQqlhxMZhvSC43cNSISgd19TpnfpINRfXYEwoYK4/pLRSu3dLKNATkcXU96eMDMXEabgqwyV1cprqBlsWEJbH9I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748403152; c=relaxed/simple;
-	bh=0QpmczGoIMlKNXsUuJXj3GdcqzR6pwkdBHyH9N65OIU=;
+	s=arc-20240116; t=1748407357; c=relaxed/simple;
+	bh=layjEZbuK9DZgYTVOe+T5k43sSsea/w/pxaoexRdSHo=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LA/v2KPFRNIog1vV+bNs5oQ5vvr3pJ9XsJCMRLZ53faSoq/kKaq9Vjt7MpReQvslIblGIZajZBlyyppitWh/IA7j0X5quvRMHG+3mb5MGFpD7EBC3/vdVQxddVFYoZ+NMskyxIiyYeIQzaBXuLD7kjtqnQD7MEJCxZtfQZwDq5g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ZXYu+lJB; arc=none smtp.client-ip=209.85.160.49
+	 To:Cc:Content-Type; b=I8W8xzy/SN0ND/GsKSwbdlUjhjFPJPGZrRjWDr+iEAdCkRvvYlcIWJGvjfOXoJlXyxq8MT25TDqaCbZNIsuMK+UAYnBq4GDuWpcTXmSHOXuNXYf8KhrS3LhiVjAmGSteO1Q5QcYtntM+U0AM2VJVScpzivXtUnNKjKNh7SdF8eI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FHLRtPHO; arc=none smtp.client-ip=209.85.218.52
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ZXYu+lJB"
-Received: by mail-oa1-f49.google.com with SMTP id 586e51a60fabf-2cc57330163so2422346fac.2
-        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 20:32:29 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FHLRtPHO"
+Received: by mail-ej1-f52.google.com with SMTP id a640c23a62f3a-ad51ef2424bso843423266b.0
+        for <linux-mmc@vger.kernel.org>; Tue, 27 May 2025 21:42:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748403149; x=1749007949; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=HWw3TzzmW76PuMGCvGJVQBcS6fcJ72imE1BYjd+nGQE=;
-        b=ZXYu+lJBlmbbuKTUTiSlI/NKP34xhJ8tNI9H8+VsW9fmjJaHLNWKCmIYhfuIyeDaBJ
-         RuycK3ATbndbZkt8R37djPAHrUDKx79rEnXOvBWoBT59LaxykwJbMt7dBRsVRt0W9R/L
-         pZk78FnAJwP+qQaW5jNS8HZzjZdQ3pRfB2mnnxi3YdeeaN5yxvgOaEPN6RsEUPYLzNAd
-         8E1yeEdeCwVTSDlFI9qNnwtfBsmceq0rg7snM8d460ugA74FcmI2rSsjxIfmoBc72RGb
-         cP8TNSI+GGjhh4H8IFsqqHZ0mmRvbnDEg/FSsYvRwOyWk/Oqym4gQjquAuVNmUsNZFth
-         Q5mQ==
+        d=gmail.com; s=20230601; t=1748407354; x=1749012154; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WKdIaa8Maem09e2r8/gXhNTUzjBO19cqMb+s9YDilRk=;
+        b=FHLRtPHO7dHWhBrN2FG9nIWf1f+6SW5LDelXm7NwkaaEAPzeVyOIyZq34lU+00ZSLm
+         +134reeRatgirIP1yiSs/7NGXHRhUgnNc6If/J7mabQJSU9IWXEo/ObZzlmYf+5lG15X
+         KFq1eFqrD9oD1RX0rfzFl9Gi4F0X/Pl5u7v9xW9kxg4DeyXsC9HXu80FX00Qwl9r4K1Z
+         djT2MoRFREtF88dlPs9gRuPtjQqbnDR8NUdwWRGaXc1y1JjKpY3X8Ppq0tPSsBpABl/w
+         bMo7SxwruJ2Syab/VbAsNDNRzBDXMmosvasd60XvOdbCeUX9rzX/BYqQcoez1zCG16IT
+         Jc0w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748403149; x=1749007949;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=HWw3TzzmW76PuMGCvGJVQBcS6fcJ72imE1BYjd+nGQE=;
-        b=trQXSBWq1vZJINUnlwtRFAqlPyicgX7ubuubOZZa5V0udQXcy24vuG5Bd8j1an+pI8
-         +YHOaYmFgQ3Hy7WyJQYfYbu8felq/yLRKUO1Fs98d6+88sYmjNfywG4NaAZYzyuKyO74
-         i4Y8z7n4bdSBU7z/bHNeiE4NcjIWKh/AoTm+x3/juIDR5ZbkKFfGzIecCmW2zjaJqnZD
-         8LH2ArKhsGigD+v/eSS2GOV+FBx8AGAssexoZW8gmVOm59imXxXrA2DCFIEk8QvyImyA
-         zpgup18rKBsSTwlxZGsspZGe2uJyq20QEoLQ3UE1zWBc9ZwomFnRU2zdxqR/xps2uZRt
-         qApQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXBQkhOxaothLCrngiUZw81D/QOwVww4ecsH5xQ65+VuBCYOYnJspmZKVb21o3dzQEA5QpyDhUEJ5w=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwzOGgLzPsTSGcHfJb4f5pmVVDkRiCWPW97TMDlhsJ7h8WK8X4/
-	237VfaEfwp9JI8E92WpapJ5cs5b+t2LltKhYxW5R/BvUVElYjGQrI8j7NY8kXLUtiBCOU4FOWNf
-	K/0iik7P/WsvMWnW55O/O9QklItWCCio=
-X-Gm-Gg: ASbGncvBzDeDZe9u21dxDxq2EUEoYevgufEY4+7A3oJhQGUXBaCDUP+mBu5wm2q6QE3
-	HH7V9BlkvG+QkGtqCzgJ6rCn5RM88ob+9+TWt1BEJbZJIIwW2kpJw8ijCa8Xx6SXTE6nrJ6qiK7
-	yBfJnCJBg8M3Y8MC3JTE5OdWjyMcxLK2L4tKBbsEjXBmbB15sa4JhZnxPE3/9NuxQ=
-X-Google-Smtp-Source: AGHT+IFsZ3w7HUvwTw0Wcrl7ZQ0q+G3x9OaCP4Yw9thK4cvJcPAB+FU/5QjbQlJD5cYFRQQqGcf/zmkzEwMTC0yLIVI=
-X-Received: by 2002:a05:6870:7d8e:b0:2d5:25b6:ec14 with SMTP id
- 586e51a60fabf-2e8e0f237e9mr280147fac.15.1748403149035; Tue, 27 May 2025
- 20:32:29 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1748407354; x=1749012154;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=WKdIaa8Maem09e2r8/gXhNTUzjBO19cqMb+s9YDilRk=;
+        b=LOGQUFmW+3QFRruhq4X7+YwHsiofpV84M25sjVQjQSNKfwO9ZF+MaAMMDUbEgApqFq
+         PJAAmISQGCgQohcKYXfyOCK5zkaf+b+k4SJCjTVvhnv70Rgc4pLMfdje+QrwU5KTXpx6
+         IBcLn+8/qMJt2deXcjjdzUHKD6Zx3lQ1+9X+obS6aTZN6QVnGv4mhrEOI+2og+NYYuSO
+         3b3NP4bqA9UlJ30IUH1VBgOCPQDAjAxPKmG1CirVXYSzel2TzROKs/vciS5s5/mDPssc
+         PjnlMRjpklga90I9EkICJQ1mgBBw+r+FzvNGuJ7389GQeqBvOIZoKh/nmtJCidysCnOx
+         FSRw==
+X-Forwarded-Encrypted: i=1; AJvYcCUKF/xBBc6I6fhFdJGJfj5tHWhAoYIyTMBWAi2MDfj7s9h0VN8cxdprdXImS2k8wpqVdRBC5MXeV8g=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxws5IyY715MhjgtkkAz0Aq5hADffUHQDGl1S+Pz5snZ6IJDOUJ
+	KJjuVQ6HYHm2VwxvjymDAB6LHitE9iLyCRfB9SIVGRMMMYE+RK4HZfhtXnZmvqA/hiwWL+HAC1+
+	Q9u/EgxQ1+SScWbfjCBEeInSjtbDgTUc=
+X-Gm-Gg: ASbGnctyFqeiM4ICcyU6bzlZxrHv8TwO+U9hKCLV794TgUz/e5vewS2RG6I3QMGavTQ
+	UFh8ozVHW/nOIy0+Xk5E35cW4jZ+ptbhqLywkkzOGUVGVarynzhtSAASoEUyUCektQJVR0P21Gb
+	jD88e7xRkbBccmnx/4OaqYPCRGwOwRNzbB
+X-Google-Smtp-Source: AGHT+IGIknskN8t5Mo9Bx6fWIoVobETE5Dm+e4jPUV8dy20m2qOh347Ci6qwsLs/e3BB6jtvTCXy+Cj/Ej26l8dZAXQ=
+X-Received: by 2002:a17:907:2ce5:b0:ad8:89f8:3f51 with SMTP id
+ a640c23a62f3a-ad889f8419fmr552069066b.6.1748407354032; Tue, 27 May 2025
+ 21:42:34 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1747792905.git.zhoubinbin@loongson.cn> <d7994a2655d27bc2cb6d740345747292b67e4a25.1747792905.git.zhoubinbin@loongson.cn>
-In-Reply-To: <d7994a2655d27bc2cb6d740345747292b67e4a25.1747792905.git.zhoubinbin@loongson.cn>
-From: Chunyan Zhang <zhang.lyra@gmail.com>
-Date: Wed, 28 May 2025 11:31:52 +0800
-X-Gm-Features: AX0GCFsrjQTmqConBdGUgn8ZKXQRvomBVv2B2ZkebJ3K7mumYhW2x49Sn0IapiQ
-Message-ID: <CAAfSe-vJuiM0yCLBhr7WmtoZxEdRNo9x7fn9Mm5dztQ6BpLzJQ@mail.gmail.com>
-Subject: Re: [PATCH 29/34] mmc: sdhci-sprd: Drop the use of sdhci_pltfm_free()
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+References: <cover.1747792905.git.zhoubinbin@loongson.cn> <dfc7e01a6134e421ae3aa8da3221f67d59706d0d.1747792905.git.zhoubinbin@loongson.cn>
+ <753cd65ebf659972c8a33e5f8e579b9fa8738682.camel@codeconstruct.com.au>
+In-Reply-To: <753cd65ebf659972c8a33e5f8e579b9fa8738682.camel@codeconstruct.com.au>
+From: Binbin Zhou <zhoubb.aaron@gmail.com>
+Date: Wed, 28 May 2025 12:42:21 +0800
+X-Gm-Features: AX0GCFvNqOzXkxY_eVqYydfapsa-dE3X-UyFZQRp7gfRCGdy1sKC6L7_7xZ-rCE
+Message-ID: <CAMpQs4LchvbX5-1Gr_epq42DSdfj0uegdqaG2Vh=X2DULSbaWA@mail.gmail.com>
+Subject: Re: [PATCH 18/34] mmc: sdhci-of-aspeed: Drop the use of sdhci_pltfm_free()
+To: Andrew Jeffery <andrew@codeconstruct.com.au>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
 	Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, 
 	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org, 
-	Orson Zhai <orsonzhai@gmail.com>, Baolin Wang <baolin.wang@linux.alibaba.com>
+	Joel Stanley <joel@jms.id.au>, linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Mon, 26 May 2025 at 14:07, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
->
-> Since the devm_mmc_alloc_host() helper is already in
-> use, sdhci_pltfm_free() is no longer needed.
->
-> Cc: Orson Zhai <orsonzhai@gmail.com>
-> Cc: Baolin Wang <baolin.wang@linux.alibaba.com>
-> Cc: Chunyan Zhang <zhang.lyra@gmail.com>
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+Hi Andrew:
 
-Reviewed-by: Chunyan Zhang <zhang.lyra@gmail.com>
+Thanks for your reply.
 
-Thanks,
-Chunyan
+On Wed, May 28, 2025 at 8:44=E2=80=AFAM Andrew Jeffery
+<andrew@codeconstruct.com.au> wrote:
+>
+> On Mon, 2025-05-26 at 14:06 +0800, Binbin Zhou wrote:
+> > Since the devm_mmc_alloc_host() helper is already in
+> > use,
+>
+> This doesn't appear to be true? aspeed_sdhci_probe() calls
+> sdhci_pltfm_init(), and following that through eventually we call
+> mmc_alloc_host() (the non-devm_ variant).
+>
+> That said, there are some error paths in aspeed_sdhci_probe() where we
+> leak the object. Improving the code would be helpful, but my
+> understanding is this patch isn't right.
 
-> ---
->  drivers/mmc/host/sdhci-sprd.c | 33 ++++++++++-----------------------
->  1 file changed, 10 insertions(+), 23 deletions(-)
+Sorry, I have a different thought.
+In the original code, there does seem to be a leakage of objects, for examp=
+le:
+
+pltfm_host->clk =3D devm_clk_get(&pdev->dev, NULL);
+        if (IS_ERR(pltfm_host->clk))
+                return PTR_ERR(pltfm_host->clk);
+
+With this error path, we should goto err_pltfm_free;
+
+Now, I have replaced mmc_alloc_host() with devm_mmc_alloc_host() in
+Patch-1[1], so I don't think there will be any error path leakage of
+objects.
+
+[1]: https://lore.kernel.org/all/6fd5afb003982bb5edbf95f76b605686223730e0.1=
+747792905.git.zhoubinbin@loongson.cn/
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index db5e253b0f79..a5dec1a0e934 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -764,7 +764,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->
->         ret = mmc_of_parse(host->mmc);
->         if (ret)
-> -               goto pltfm_free;
-> +               return ret;
->
->         if (!mmc_card_is_removable(host->mmc))
->                 host->mmc_host_ops.request_atomic = sdhci_sprd_request_atomic;
-> @@ -778,34 +778,26 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->         if (!IS_ERR(sprd_host->pinctrl)) {
->                 sprd_host->pins_uhs =
->                         pinctrl_lookup_state(sprd_host->pinctrl, "state_uhs");
-> -               if (IS_ERR(sprd_host->pins_uhs)) {
-> -                       ret = PTR_ERR(sprd_host->pins_uhs);
-> -                       goto pltfm_free;
-> -               }
-> +               if (IS_ERR(sprd_host->pins_uhs))
-> +                       return PTR_ERR(sprd_host->pins_uhs);
->
->                 sprd_host->pins_default =
->                         pinctrl_lookup_state(sprd_host->pinctrl, "default");
-> -               if (IS_ERR(sprd_host->pins_default)) {
-> -                       ret = PTR_ERR(sprd_host->pins_default);
-> -                       goto pltfm_free;
-> -               }
-> +               if (IS_ERR(sprd_host->pins_default))
-> +                       return PTR_ERR(sprd_host->pins_default);
->         }
->
->         clk = devm_clk_get(&pdev->dev, "sdio");
-> -       if (IS_ERR(clk)) {
-> -               ret = PTR_ERR(clk);
-> -               goto pltfm_free;
-> -       }
-> +       if (IS_ERR(clk))
-> +               return PTR_ERR(clk);
->         sprd_host->clk_sdio = clk;
->         sprd_host->base_rate = clk_get_rate(sprd_host->clk_sdio);
->         if (!sprd_host->base_rate)
->                 sprd_host->base_rate = SDHCI_SPRD_CLK_DEF_RATE;
->
->         clk = devm_clk_get(&pdev->dev, "enable");
-> -       if (IS_ERR(clk)) {
-> -               ret = PTR_ERR(clk);
-> -               goto pltfm_free;
-> -       }
-> +       if (IS_ERR(clk))
-> +               return PTR_ERR(clk);
->         sprd_host->clk_enable = clk;
->
->         clk = devm_clk_get(&pdev->dev, "2x_enable");
-> @@ -814,7 +806,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->
->         ret = clk_prepare_enable(sprd_host->clk_sdio);
->         if (ret)
-> -               goto pltfm_free;
-> +               return ret;
->
->         ret = clk_prepare_enable(sprd_host->clk_enable);
->         if (ret)
-> @@ -891,9 +883,6 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->
->  clk_disable:
->         clk_disable_unprepare(sprd_host->clk_sdio);
-> -
-> -pltfm_free:
-> -       sdhci_pltfm_free(pdev);
->         return ret;
->  }
->
-> @@ -907,8 +896,6 @@ static void sdhci_sprd_remove(struct platform_device *pdev)
->         clk_disable_unprepare(sprd_host->clk_sdio);
->         clk_disable_unprepare(sprd_host->clk_enable);
->         clk_disable_unprepare(sprd_host->clk_2x_enable);
-> -
-> -       sdhci_pltfm_free(pdev);
->  }
->
->  static const struct of_device_id sdhci_sprd_of_match[] = {
-> --
-> 2.47.1
->
+> Andrew
+
+--=20
+Thanks.
+Binbin
