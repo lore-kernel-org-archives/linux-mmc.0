@@ -1,164 +1,159 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 153D31FE461;
-	Wed, 28 May 2025 08:02:48 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 93244247285
+	for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 08:06:34 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748419369; cv=none; b=Z+xUKMqP46q4XczV1xZ/H/+Hfc5sNffIPhi/LBFgjtBilF6G00eXbo59wTjV72OsxcBIHV8PYJkBB5VlrzVhHXjFlofXr9s6d5GT53VtL0ugoRt2nyac7ZVHagw0DMH364KBxzzM9us/rwZkOZHVoAHopX25PjDncCzhJ79Om7I=
+	t=1748419597; cv=none; b=mGVYZR9hgxzeLuTW8ZEv93W5gjfnD7MNq9v+HnkkzhxhpPQ3FLkOoHMRrxZ9ethC+6PAtnKFyGO0zh4C/bo4xqbnlbyh3slhRFsd6Ii3jWW9uWRp+a2IuHmFTZEsCh4Co6d1USNAoeQM7qe+NMom+/telHfhYxnn+VQZnj+4E08=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748419369; c=relaxed/simple;
-	bh=3FSWHD3qycKECEg7gTlnngzs/HUVLk9BvvfwY+tVfLE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=SLMe08ScgF78P0rMFNe//mHimCkFrj9DAiWN7TLBeAiZ+fql5Orh3Eggxp+dbZtiHg2zzS2ueIwlDLxocZYdpg3kLQb8JW1nZFi9KcjLYLaouH+6CUsuldvj05n2haAM85E2HeV//3f+cYmJekCxluNN04bvffXtOv1tCF+0iMw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=rn4vKWs7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1748419597; c=relaxed/simple;
+	bh=9aS71v4MqdOX4d+3h/cp+qDxSVUNo3PgLpdj1Xmp59E=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=iKWaFg0UF5PR4Vm1ZghMOGEauAbnxgw9Y+3fzfT3w0dAGV0dgOOHDLG45WIrZduC46OmhmIFfZs/LIrWwiVRyfDqNMhIWVOklTZUIu9XdjWELuV/ADOfUdphQsjaaEHuiYbHuA/hUXuWoN8tSVZY3NJADa2kqLfiLNro+d/wUCs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=pNDdVYDs; arc=none smtp.client-ip=209.85.221.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="rn4vKWs7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 607EFC4CEE7;
-	Wed, 28 May 2025 08:02:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748419368;
-	bh=3FSWHD3qycKECEg7gTlnngzs/HUVLk9BvvfwY+tVfLE=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=rn4vKWs71TYxMUa4t4D/2mddYUg7lGsD4WkIzi3nAZgLs1UwBY9gKnUpUEDpVuUvD
-	 2D/w/sQwvLNig2fzR/axh1JZFSegHYBLd4FWzecx7MRz55sqYpGQm3VFRcteVCer6+
-	 GSn7qyFcCi/p7nxa93guRNeh926DEQZ9HTzLPEykRNCUKf67SuLnACLNcmHU5sC+2B
-	 9NXCHFx+WoNlArj133YrUumlqaNklkUfdJLev4XkbEsA4o44BRi2sqYMimE5L3B73Y
-	 GcwJQxeDJ7oDl71uSK0SYNE0hIrThz+igjqRdUQUzxEmFWnT/ZJVRRKE3FnIx7CRNw
-	 6q8BuM2eEIBpA==
-Message-ID: <1c7e9077-c213-40a9-92f4-07e813a3d151@kernel.org>
-Date: Wed, 28 May 2025 10:02:44 +0200
+	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="pNDdVYDs"
+Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-3a3771c0f8cso3012191f8f.3
+        for <linux-mmc@vger.kernel.org>; Wed, 28 May 2025 01:06:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1748419593; x=1749024393; darn=vger.kernel.org;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=eDvKODaueiqUuQ2WNdyFZMJz1MoP1CVSh6fEWb3gbU4=;
+        b=pNDdVYDs0FW+BbJscZyxEEtpwGxdJnokIUApWeWKs1WICs7zsTKBGVUUomi1GfPaz4
+         0dh7CxWkbtVW12KFtSuEJVG1B8+AomqQ9amczGADhlXhekHM4URJ1obN5tp7M5b7NPXc
+         ZSIx4C2cBnGcWcFQCi6eN0eg9tU+Uw3eyjN78EeNdvYikOLNUsTgHPdV9gWYWui9CdWU
+         lEC4LH035drOd8ZvmpcASe784zD6ywLKl9+g5GCmSZ6hxAy2ntq0hO2mqvbS9Aga17HT
+         rqLQJxpmHTyzJ8nCYRPW068Z1Xy0IeyixBwK661bKdjP+JuAQsvSwMUxCfzUZfg90RL9
+         BdiA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748419593; x=1749024393;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=eDvKODaueiqUuQ2WNdyFZMJz1MoP1CVSh6fEWb3gbU4=;
+        b=ApZ8NStz3/STCokAXaLbJlo4wJO7opWYeiVsxRWRS7DnGfbpAi8MLDP3zTB3vPI2tN
+         HV3k4UeIeDtZAtA8QB5bNn7qWfrC0Hdp1SBN7gwNcwEucCMgfPWGiSllGBCA6fb/f0dC
+         PGya+zrpqg/DOMD97xILp2s4onPmRGpSl1J5F25yfFRxfrswipdp+en2vigLr5EXGDFI
+         qlqogDiugdRsr1Qf5m8petYMvqeb6my3WtlPE6wItopzW8mFdDEEhBGCBVlkZ5v9LERH
+         n0IFWlVGxBV922yZ2Jz/BupE41umF8ZOWxwXa4hmFRIUw9XQPsrRhrQ43GwWBfKkYDa8
+         gHIQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVcYkkxgYa9NQczai/Sp2OnLgP+1KNUQ7rN3gbiZyxYqb0mSzecibBCkEMlTUGu25K74jo7gnqzkPA=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyH9mCVdaxutfonODg40alga7qeaudey8dkaGc2oETDtd2+n3ex
+	YM0R+z8+K/v43jvIvLqWUDhKdV7CBJIEXGn6NV6xnQGxB9uPtJVy4yPqIYspPC0Ev9JiGY4rlQb
+	RH5/U
+X-Gm-Gg: ASbGncu0bHPYi5hlfZETVVdIbauE+7JrKs82HTYAPHlQTbcsIPmWCE7ei+q+jHZ7kht
+	+M1TNOKTAoPQdfpEaJzoXTzN0QOvdC0G/8hvIBF85HDxKygRoIVDEJfWaV3kQDPeUo/IwJqBT3R
+	Ye7Pv872j+blkEDfob6fWjU9zcwTU9t4h7xF9jKRPtY0HXhoXXJrMuIRGu+SJmbUpT08+hBkITd
+	oC2l6SrPDiLn7BV4lRljQqM1Lr4J7huZWHH14KAaaBg+CRVRdYpBeTm61I3d0iXlc757Hgd+T7h
+	UOTjnMYxgk2RnFBCMYo/ojTI5oHyDLItp9hvFuY/HgiUIbN/TWg1/rs9mIiDhtgzWwr3vW50NBU
+	Rwc9zLHkYWvydnxB902jdFWT1x8vAwQ==
+X-Google-Smtp-Source: AGHT+IG9h5NYLd00vQcPJEz8Z49Q+NpFyTMSUOAWWfRaPbJu0cJF1dNPnKrf5+abwKYX43wp/t6HsQ==
+X-Received: by 2002:a5d:5846:0:b0:3a4:dd63:4ae0 with SMTP id ffacd0b85a97d-3a4dd634d88mr7660802f8f.35.1748419592810;
+        Wed, 28 May 2025 01:06:32 -0700 (PDT)
+Received: from archlinux (host-80-116-51-117.pool80116.interbusiness.it. [80.116.51.117])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a4eac8aeb2sm784003f8f.58.2025.05.28.01.06.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 28 May 2025 01:06:32 -0700 (PDT)
+Date: Wed, 28 May 2025 10:05:12 +0200
+From: Angelo Dureghello <adureghello@baylibre.com>
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, 
+	Huacai Chen <chenhuacai@loongson.cn>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Adrian Hunter <adrian.hunter@intel.com>, Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 13/34] mmc: sdhci-esdhc-mcf: Drop the use of
+ sdhci_pltfm_free()
+Message-ID: <3d45oxfr4okjn4wyevt2kot6ahvv3xba77yo44637pyo3jhc23@6z6ofqu5nmwk>
+References: <cover.1747792905.git.zhoubinbin@loongson.cn>
+ <15e9ab28d6b5caa6e34f343b146fc2201f4a848f.1747792905.git.zhoubinbin@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] dt-bindings: mmc: ti,da830-mmc: convert text based
- binding to json schema
-To: Charan Pedumuru <charan.pedumuru@gmail.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org
-References: <20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJoF1BKBQkWlnSaAAoJEBuTQ307
- QWKbHukP/3t4tRp/bvDnxJfmNdNVn0gv9ep3L39IntPalBFwRKytqeQkzAju0whYWg+R/rwp
- +r2I1Fzwt7+PTjsnMFlh1AZxGDmP5MFkzVsMnfX1lGiXhYSOMP97XL6R1QSXxaWOpGNCDaUl
- ajorB0lJDcC0q3xAdwzRConxYVhlgmTrRiD8oLlSCD5baEAt5Zw17UTNDnDGmZQKR0fqLpWy
- 786Lm5OScb7DjEgcA2PRm17st4UQ1kF0rQHokVaotxRM74PPDB8bCsunlghJl1DRK9s1aSuN
- hL1Pv9VD8b4dFNvCo7b4hfAANPU67W40AaaGZ3UAfmw+1MYyo4QuAZGKzaP2ukbdCD/DYnqi
- tJy88XqWtyb4UQWKNoQqGKzlYXdKsldYqrLHGoMvj1UN9XcRtXHST/IaLn72o7j7/h/Ac5EL
- 8lSUVIG4TYn59NyxxAXa07Wi6zjVL1U11fTnFmE29ALYQEXKBI3KUO1A3p4sQWzU7uRmbuxn
- naUmm8RbpMcOfa9JjlXCLmQ5IP7Rr5tYZUCkZz08LIfF8UMXwH7OOEX87Y++EkAB+pzKZNNd
- hwoXulTAgjSy+OiaLtuCys9VdXLZ3Zy314azaCU3BoWgaMV0eAW/+gprWMXQM1lrlzvwlD/k
- whyy9wGf0AEPpLssLVt9VVxNjo6BIkt6d1pMg6mHsUEVzsFNBFVDXDQBEADNkrQYSREUL4D3
- Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
- MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
- OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
- GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
- 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
- YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
- 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
- BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
- JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
- 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
- YpsFAmgXUF8FCRaWWyoACgkQG5NDfTtBYptO0w//dlXJs5/42hAXKsk+PDg3wyEFb4NpyA1v
- qmx7SfAzk9Hf6lWwU1O6AbqNMbh6PjEwadKUk1m04S7EjdQLsj/MBSgoQtCT3MDmWUUtHZd5
- RYIPnPq3WVB47GtuO6/u375tsxhtf7vt95QSYJwCB+ZUgo4T+FV4hquZ4AsRkbgavtIzQisg
- Dgv76tnEv3YHV8Jn9mi/Bu0FURF+5kpdMfgo1sq6RXNQ//TVf8yFgRtTUdXxW/qHjlYURrm2
- H4kutobVEIxiyu6m05q3e9eZB/TaMMNVORx+1kM3j7f0rwtEYUFzY1ygQfpcMDPl7pRYoJjB
- dSsm0ZuzDaCwaxg2t8hqQJBzJCezTOIkjHUsWAK+tEbU4Z4SnNpCyM3fBqsgYdJxjyC/tWVT
- AQ18NRLtPw7tK1rdcwCl0GFQHwSwk5pDpz1NH40e6lU+NcXSeiqkDDRkHlftKPV/dV+lQXiu
- jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
- zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
- XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250523-davinci-mmc-v1-1-ceebd8352d9c@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <15e9ab28d6b5caa6e34f343b146fc2201f4a848f.1747792905.git.zhoubinbin@loongson.cn>
 
-On 23/05/2025 15:34, Charan Pedumuru wrote:
-> Convert TI Highspeed MMC host controller binding to YAML format. Add
-> 'clocks' property to resolve errors identified by 'dtb_check'.
+Hi Binbin,
+
+sorry, seen now it was invoked in 1/34.
+
+Acked-by: Angelo Dureghello <adureghello@baylibre.com>
+
+On 26.05.2025 14:06, Binbin Zhou wrote:
+> Since the devm_mmc_alloc_host() helper is already in
+> use, sdhci_pltfm_free() is no longer needed.
 > 
-> Signed-off-by: Charan Pedumuru <charan.pedumuru@gmail.com>
+> Cc: Angelo Dureghello <adureghello@baylibre.com>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 > ---
->  .../devicetree/bindings/mmc/davinci_mmc.txt        | 32 -----------
->  .../devicetree/bindings/mmc/ti,da830-mmc.yaml      | 62 ++++++++++++++++++++++
->  2 files changed, 62 insertions(+), 32 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-mcf.c | 25 +++++++------------------
+>  1 file changed, 7 insertions(+), 18 deletions(-)
 > 
-
-
-A nit, subject: drop second/last, redundant "binding". The "dt-bindings"
-prefix is already stating that these are bindings.
-See also:
-https://elixir.bootlin.com/linux/v6.7-rc8/source/Documentation/devicetree/bindings/submitting-patches.rst#L18
-
-"convert to DT Schema"
-
-
-
-...
-
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml
-> +
-> +maintainers:
-> +  - Rob Herring <robh@kernel.org>
-
-No, I really doubt Rob cares about this hardware.
-
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - ti,da830-mmc
-> +      - ti,dm355-mmc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 2
-> +
-
-This wasn't in original binding. You need to document this in the commit
-msg. Also, list the items.
-
-> +  dmas:
-> +    maxItems: 2
-> +
-> +  dma-names:
-> +    items:
-> +      - const: rx
-> +      - const: tx
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-
-why interrupts are required?
-
-
-Best regards,
-Krzysztof
+> diff --git a/drivers/mmc/host/sdhci-esdhc-mcf.c b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> index 327662ba5bd9..375fce5639d7 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-mcf.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-mcf.c
+> @@ -426,28 +426,22 @@ static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
+>  	host->flags |= SDHCI_AUTO_CMD12;
+>  
+>  	mcf_data->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
+> -	if (IS_ERR(mcf_data->clk_ipg)) {
+> -		err = PTR_ERR(mcf_data->clk_ipg);
+> -		goto err_exit;
+> -	}
+> +	if (IS_ERR(mcf_data->clk_ipg))
+> +		return PTR_ERR(mcf_data->clk_ipg);
+>  
+>  	mcf_data->clk_ahb = devm_clk_get(&pdev->dev, "ahb");
+> -	if (IS_ERR(mcf_data->clk_ahb)) {
+> -		err = PTR_ERR(mcf_data->clk_ahb);
+> -		goto err_exit;
+> -	}
+> +	if (IS_ERR(mcf_data->clk_ahb))
+> +		return PTR_ERR(mcf_data->clk_ahb);
+>  
+>  	mcf_data->clk_per = devm_clk_get(&pdev->dev, "per");
+> -	if (IS_ERR(mcf_data->clk_per)) {
+> -		err = PTR_ERR(mcf_data->clk_per);
+> -		goto err_exit;
+> -	}
+> +	if (IS_ERR(mcf_data->clk_per))
+> +		return PTR_ERR(mcf_data->clk_per);
+>  
+>  	pltfm_host->clk = mcf_data->clk_per;
+>  	pltfm_host->clock = clk_get_rate(pltfm_host->clk);
+>  	err = clk_prepare_enable(mcf_data->clk_per);
+>  	if (err)
+> -		goto err_exit;
+> +		return err;
+>  
+>  	err = clk_prepare_enable(mcf_data->clk_ipg);
+>  	if (err)
+> @@ -485,9 +479,6 @@ static int sdhci_esdhc_mcf_probe(struct platform_device *pdev)
+>  	clk_disable_unprepare(mcf_data->clk_ipg);
+>  unprep_per:
+>  	clk_disable_unprepare(mcf_data->clk_per);
+> -err_exit:
+> -	sdhci_pltfm_free(pdev);
+> -
+>  	return err;
+>  }
+>  
+> @@ -502,8 +493,6 @@ static void sdhci_esdhc_mcf_remove(struct platform_device *pdev)
+>  	clk_disable_unprepare(mcf_data->clk_ipg);
+>  	clk_disable_unprepare(mcf_data->clk_ahb);
+>  	clk_disable_unprepare(mcf_data->clk_per);
+> -
+> -	sdhci_pltfm_free(pdev);
+>  }
+>  
+>  static struct platform_driver sdhci_esdhc_mcf_driver = {
+> -- 
+> 2.47.1
+> 
