@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 3BE7E1E521
-	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:58:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 80E312248B9
+	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:58:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748523512; cv=none; b=MwPZeHDBSPUktiPGcVHg4KPLDxqG/8yhRb58pTOTNhz4ia19olSUUXWQSCBSwjWJCXM+GiQag6bR7/z98vhOZe7g1mKsJ4cmsQXTQY44sxbY95v865rt70elLS+pQTh0DG7dtEPbKmdTA4hrQ+c+7m/bfJ2L+Iv5hzr+pdf5H8c=
+	t=1748523514; cv=none; b=p8LyKxRxs0hSZBDzwz3OXWjiwWiH6YhUPAJxmNzDrL1ljCrOA7mhE0+ielue0TtXB1bWWCh1Poj5SF/NEzvd41oSnt1ZbY42ISlgpKDR04V+jy0bjAOoTf7h8xtLNsKUdX1A4MHCCqlSk97pgSne6GGsd96TNDnYhJRiTs62xU0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748523512; c=relaxed/simple;
-	bh=EuViignEqGJ2xcmTanXp3nv41YCwmVpguTdePU2PsRA=;
+	s=arc-20240116; t=1748523514; c=relaxed/simple;
+	bh=5d11tTRtQO2mRDQJaugb4Voeu8E174QjBaSNlBtyFpM=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=T03LNbQQ92ZZJ5rLrcSxu54gkHdxX09A2pmB07NEWyovRtQDjZumqeHFdmZeJ5H4X6H0LciA29cHFPWs6VzLxhuzATaEnAK87ArzKX3V0l1kA6bFzVv7SWWMu4QSqRG47j+/Yzqbtoi71+FTCB5L7EpbztFHndXmrJT7m1WjESY=
+	 MIME-Version; b=EMJ6uRIvenQ0j6TDub5o2QnxTB0rikfI8SW+DDQGCjmDeoT6W3EVK37llMQACPLtNNp5N0ilsg9MveXwF4FZ91Zk47wmQgP3ZUupWMpQs7HabMUhEDFCkJDI2GB+4ztjH8hALpzCKE7i7UHh1wTX3zIkbmB7UHmNB7Tlapm4y8Y=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8Bx3670WThoSCoCAQ--.3987S3;
-	Thu, 29 May 2025 20:58:28 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8CxbWv3WThoVyoCAQ--.21872S3;
+	Thu, 29 May 2025 20:58:31 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMAxzMTyWThonbL6AA--.57145S2;
-	Thu, 29 May 2025 20:58:28 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMAxzMTyWThonbL6AA--.57145S3;
+	Thu, 29 May 2025 20:58:29 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -26,10 +26,12 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH v2 02/35] mmc: sdhci-acpi: Drop the use of sdhci_free_host()
-Date: Thu, 29 May 2025 20:58:15 +0800
-Message-ID: <1445d38edc9d40758221bc5c6db349e916ef3247.1748515612.git.zhoubinbin@loongson.cn>
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Taichi Sugaya <sugaya.taichi@socionext.com>,
+	Takao Orito <orito.takao@socionext.com>
+Subject: [PATCH v2 03/35] mmc: sdhci-milbeaut: Drop the use of sdhci_free_host()
+Date: Thu, 29 May 2025 20:58:16 +0800
+Message-ID: <2bc20782d2c04586fdf83d15f6791622ac928fb6.1748515612.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1748515612.git.zhoubinbin@loongson.cn>
 References: <cover.1748515612.git.zhoubinbin@loongson.cn>
@@ -40,55 +42,95 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMAxzMTyWThonbL6AA--.57145S2
+X-CM-TRANSID:qMiowMAxzMTyWThonbL6AA--.57145S3
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj9xXoWrtF48try3Aw13Jw48Ar43Jwc_yoWfurc_Ca
-	s8ZrZ7Wry8CrWvy34Utw1Sv34YgFna9F1kuFWrt395ua4Iq34kCayxur1rAry3Za1v9FW3
-	C34rGr4xur4YyosvyTuYvTs0mTUanT9S1TB71UUUUjUqnTZGkaVYY2UrUUUUj1kv1TuYvT
-	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
-	cSsGvfJTRUUUbaxYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
-	vaj40_Wr0E3s1l1IIY67AEw4v_JrI_Jryl8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
-	w2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
-	W8Jr0_Cr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
-	6rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYI
-	kI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWrXVW3
-	AwAv7VC2z280aVAFwI0_Cr0_Gr1UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwI
-	xGrwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwCFI7km07C267AKxVWU
-	XVWUAwC20s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67
-	kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVW7JVWDJwCI42IY
-	6xIIjxv20xvEc7CjxVAFwI0_Cr0_Gr1UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42
-	IY6I8E87Iv67AKxVWxJVW8Jr1lIxAIcVC2z280aVCY1x0267AKxVW8Jr0_Cr1UYxBIdaVF
-	xhVjvjDU0xZFpf9x07j4WlkUUUUU=
+X-Coremail-Antispam: 1Uk129KBj93XoW7tr1DWr1kGFW7AF13Cw4DGFX_yoW8Zw4Dpa
+	1rXFyFyrWUuF4rtF93Jw4UZ3W5A3yxKay8Ka4rWw4kJa1ayryDtrnakFy8Z3WrJryktw43
+	WF4UtF48uFWkZFbCm3ZEXasCq-sJn29KB7ZKAUJUUUU3529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUBlb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
+	xVW0oVCq3wAaw2AFwI0_JF0_Jw1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0c
+	Ia020Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_ZF0_
+	GryDMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x
+	0EwIxGrwCY1x0262kKe7AKxVWUAVWUtwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkE
+	bVWUJVW8JwCFI7km07C267AKxVWUAVWUtwC20s026c02F40E14v26r1j6r18MI8I3I0E74
+	80Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0
+	I7IYx2IY67AKxVW7JVWDJwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr1j6F4UJwCI42IY6x
+	AIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr1j6F4UJwCI42IY6I8E87Iv
+	6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnUUI43ZEXa7IU0Ta0PUUUUU==
 
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_free_host() is no longer needed.
 
+Cc: Taichi Sugaya <sugaya.taichi@socionext.com>
+Cc: Takao Orito <orito.takao@socionext.com>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-acpi.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sdhci-milbeaut.c | 19 ++++++-------------
+ 1 file changed, 6 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index e6c5c82f64fa..1e38a881a859 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -948,7 +948,6 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
- 	if (c->slot && c->slot->free_slot)
- 		c->slot->free_slot(pdev);
+diff --git a/drivers/mmc/host/sdhci-milbeaut.c b/drivers/mmc/host/sdhci-milbeaut.c
+index a4675456f9c7..bda71d5966dc 100644
+--- a/drivers/mmc/host/sdhci-milbeaut.c
++++ b/drivers/mmc/host/sdhci-milbeaut.c
+@@ -258,7 +258,7 @@ static int sdhci_milbeaut_probe(struct platform_device *pdev)
  
--	sdhci_free_host(c->host);
- 	return err;
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+-		goto err;
++		return ret;
+ 
+ 	platform_set_drvdata(pdev, host);
+ 
+@@ -267,23 +267,19 @@ static int sdhci_milbeaut_probe(struct platform_device *pdev)
+ 	host->irq = irq;
+ 
+ 	host->ioaddr = devm_platform_ioremap_resource(pdev, 0);
+-	if (IS_ERR(host->ioaddr)) {
+-		ret = PTR_ERR(host->ioaddr);
+-		goto err;
+-	}
++	if (IS_ERR(host->ioaddr))
++		return PTR_ERR(host->ioaddr);
+ 
+ 	if (dev_of_node(dev)) {
+ 		sdhci_get_of_property(pdev);
+ 
+ 		priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
+-		if (IS_ERR(priv->clk_iface)) {
+-			ret = PTR_ERR(priv->clk_iface);
+-			goto err;
+-		}
++		if (IS_ERR(priv->clk_iface))
++			return PTR_ERR(priv->clk_iface);
+ 
+ 		ret = clk_prepare_enable(priv->clk_iface);
+ 		if (ret)
+-			goto err;
++			return ret;
+ 
+ 		priv->clk = devm_clk_get(&pdev->dev, "core");
+ 		if (IS_ERR(priv->clk)) {
+@@ -308,8 +304,6 @@ static int sdhci_milbeaut_probe(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->clk);
+ err_clk:
+ 	clk_disable_unprepare(priv->clk_iface);
+-err:
+-	sdhci_free_host(host);
+ 	return ret;
  }
  
-@@ -972,8 +971,6 @@ static void sdhci_acpi_remove(struct platform_device *pdev)
+@@ -324,7 +318,6 @@ static void sdhci_milbeaut_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->clk_iface);
+ 	clk_disable_unprepare(priv->clk);
  
- 	if (c->slot && c->slot->free_slot)
- 		c->slot->free_slot(pdev);
--
--	sdhci_free_host(c->host);
+-	sdhci_free_host(host);
+ 	platform_set_drvdata(pdev, NULL);
  }
  
- static void __maybe_unused sdhci_acpi_reset_signal_voltage_if_needed(
 -- 
 2.47.1
 
