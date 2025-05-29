@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 8E3B61E521
-	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:59:20 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 3DFC51E521
+	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:59:23 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748523562; cv=none; b=tmg5S6ZuXzKT5D535LVahmSvC6Ti2WARIHggvm58mJJY2ySr/ZBe5SOrtRBV3lw1mrM8ZF8iNyWwkb0YZ3BDil/ctk2fi2rrJ4J2mUHszDY3GOjNqHGYkxLZcH8oOfKUWws7os+gUwRtUNryougDKX3C9AcB6TS5oZlDv9u5uLs=
+	t=1748523564; cv=none; b=DFxDxJFH6VhPQjY9iCYWKAcYygOLvqZT7T3c76b21ymCrGxlFuNqtyqE9QSBRkpXY7oAi8B+3rMMLRLr44aRr5oVRtpRSAQ2286SEYuRWh4cfLQpXIWZn6+WzJ3JNppx7u80wpxdc0T1BUcJdxYrQXYiLsm0m24b5XeJ7ol08sI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748523562; c=relaxed/simple;
-	bh=MZTAUful6TiovHK5m6J5KqSJEBmVwdZKVChy/db1yqA=;
+	s=arc-20240116; t=1748523564; c=relaxed/simple;
+	bh=VVyLoyqLfnbWPc0o9HzgpO6Lg2imktz1hofimjFC76s=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=SHAqntJ0fgZUFB5JDeOasV2ZVzsuKBIul1+2d7cuM+O0cZohg9RY5lly2lmtbgXpwD9AXOnktfrWZzmEmxCa5hrHGktbphlz8ynxHMhh2lAKzhid+sxg6TkiX18jMqeKdqOwIXAKURxpS9v4UUMy9IZ2DoFOc6l8TWNlTY/18OU=
+	 MIME-Version; b=cRBnNM3ZcP27bojkbo1ghUYLAnocGAgMDbS9hyQqKfse2ws6Ia2CfSxGz5yz00lzZ09+4mGiPKaJa5LU/FQDR2EOu8bZ786RBgm6Ku5vyaqvAJJWa4FD0c4CBl2vHZ7deDhb7p6GRSKJ0oixmuhKpTxdBb5IU1WYuXlv080hz44=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8BxnnMnWjho5ioCAQ--.52130S3;
-	Thu, 29 May 2025 20:59:19 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8BxLHIpWjho8CoCAQ--.52662S3;
+	Thu, 29 May 2025 20:59:21 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMCxrhskWjhoLrP6AA--.5809S2;
-	Thu, 29 May 2025 20:59:18 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMCxrhskWjhoLrP6AA--.5809S3;
+	Thu, 29 May 2025 20:59:21 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -27,12 +27,12 @@ Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
 	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Florian Fainelli <florian.fainelli@broadcom.com>,
-	Ray Jui <rjui@broadcom.com>,
-	Scott Branden <sbranden@broadcom.com>
-Subject: [PATCH v2 08/35] mmc: sdhci-bcm-kona: Drop the use of sdhci_pltfm_free()
-Date: Thu, 29 May 2025 20:59:07 +0800
-Message-ID: <57774cdac695fa5fa6a3bc444e77f37fb20fa46d.1748515612.git.zhoubinbin@loongson.cn>
+	Kamal Dasu <kamal.dasu@broadcom.com>,
+	Al Cooper <alcooperx@gmail.com>,
+	Florian Fainelli <florian.fainelli@broadcom.com>
+Subject: [PATCH v2 09/35] mmc: sdhci-brcmstb: Drop the use of sdhci_pltfm_free()
+Date: Thu, 29 May 2025 20:59:08 +0800
+Message-ID: <c33ee7f6ff805541e64688947ab7dc224bec095b.1748515612.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1748515612.git.zhoubinbin@loongson.cn>
 References: <cover.1748515612.git.zhoubinbin@loongson.cn>
@@ -43,11 +43,11 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCxrhskWjhoLrP6AA--.5809S2
+X-CM-TRANSID:qMiowMCxrhskWjhoLrP6AA--.5809S3
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj9xXoWrKFyDKr15uF18uF1kXF4kXwc_yoWfWFXE9F
-	45Xrs7GF18CrZa934ktay3Ar1vyFnYgr1kWF1xK3y3ury8Zwn5Gay7urn8Z345urs0kFZ8
-	Aw1rur1Iv3yrGosvyTuYvTs0mTUanT9S1TB71UUUUj7qnTZGkaVYY2UrUUUUj1kv1TuYvT
+X-Coremail-Antispam: 1Uk129KBj9xXoWruF4UZw17WF17Jw4ftrW7Jrc_yoW3urg_Ca
+	45urs7GF18urWv934ktasIkryvy3ZYgr4kWF18KrW3u3s7Xw1DGFWxZrnxZ3yDZr4vkFW5
+	Aa1fWw4xA3y0kosvyTuYvTs0mTUanT9S1TB71UUUUj7qnTZGkaVYY2UrUUUUj1kv1TuYvT
 	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
 	cSsGvfJTRUUUbkxYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
 	vaj40_Wr0E3s1l1IIY67AEw4v_Jrv_JF1l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
@@ -67,26 +67,25 @@ X-Coremail-Antispam: 1Uk129KBj9xXoWrKFyDKr15uF18uF1kXF4kXwc_yoWfWFXE9F
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_pltfm_free() is no longer needed.
 
+Cc: Kamal Dasu <kamal.dasu@broadcom.com>
+Cc: Al Cooper <alcooperx@gmail.com>
 Cc: Florian Fainelli <florian.fainelli@broadcom.com>
-Cc: Ray Jui <rjui@broadcom.com>
-Cc: Scott Branden <sbranden@broadcom.com>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-bcm-kona.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/host/sdhci-brcmstb.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index fda911fb28e5..0f2a84f769b6 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -304,8 +304,6 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	clk_disable_unprepare(pltfm_priv->clk);
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 48cdcba0f39c..efc2f3bdc631 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -485,7 +485,6 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	return res;
  
- err_pltfm_free:
+ err:
 -	sdhci_pltfm_free(pdev);
--
- 	dev_err(dev, "Probing of sdhci-pltfm failed: %d\n", ret);
- 	return ret;
+ 	clk_disable_unprepare(base_clk);
+ 	return res;
  }
 -- 
 2.47.1
