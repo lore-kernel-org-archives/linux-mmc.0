@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 5E73117BA5
-	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 13:26:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 3B1A619ABB6
+	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 13:28:32 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748525215; cv=none; b=qkBx/fKbzXxJF0D3cglPHu/M2xOdU4iMkGLuxDsb3FqsvXcifOTljg+tJiTdDikyNS/0wUWHWNwxgacWLHlTYADa+Pdc9RdqdOkXrim4knVvD/Lt4tsmFz6f1jq5zMca8RRru4LspyASTkb1MsvIwbaHlwmdVfSGOF+ok3Awcmo=
+	t=1748525315; cv=none; b=jnXXy+BAozZBj61Nx4s1IwW5QEzNEN4S2gSVRo4s16hmL5hCi27omcNbrf8MSGrs+FvcCTa8gFoU+OZ7MfZF4NryPzmZsxpCiy65FwH5F8JCocFkCs/hNaslOjSI5b+cOl+Tf1lcc2C0a15D3FcRWiQMjsN/0N2hsnmtBYST6+0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748525215; c=relaxed/simple;
-	bh=rVF3aQGH+Yn8v6IciWZUi4ekpjWBlpKtAqmWaKH/Ads=;
+	s=arc-20240116; t=1748525315; c=relaxed/simple;
+	bh=EThD0uoKX65lqL99A4Rw4RlszGGeFkI2ed46uRhpGNw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=GxuDonWMb2z1wFxeyQdkyx9BT+qmbTIB87KzT9Bz4/gP+q9VBOfKJVJuwHnJe2nUN/2C3kSHPeDSLlvKhmsHUR9CC9Cd2eoVt6D4T5pmYL/Jlhr4Ynf6aV2nPU1Wr8+VsZHaL/auiUvjsO4PzO6FkngWrEuqZdyRBbc2DF2VAM4=
+	 MIME-Version; b=CmH0QWY5pjPMqBD0ys/4PLlWwjGVdvOEDwJZaNFdxB9QjsGEabRgin4Aq24GI6KA7F+2MG90yHb8vRuXi6qIhz4E0DKus+zvSb70kihYU/klt8nUxKipw2mhr+eyhOdyJ+3raDQbc797Bl/7tq4aZlNuSWq3BzO5By8z0XJA7N0=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8AxDGuaYDhorDcCAQ--.21735S3;
-	Thu, 29 May 2025 21:26:51 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8DxOGr_YDhoTjgCAQ--.24864S3;
+	Thu, 29 May 2025 21:28:31 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMCx_caYYDhovcL6AA--.61312S2;
-	Thu, 29 May 2025 21:26:50 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMBxn8X7YDhogMP6AA--.57071S2;
+	Thu, 29 May 2025 21:28:30 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -27,9 +27,9 @@ Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
 	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH v2 34/35] mmc: sdhci_f_sdh30: Drop the use of sdhci_pltfm_free()
-Date: Thu, 29 May 2025 21:26:40 +0800
-Message-ID: <67f1605538ad3e0994cbac5297178032da39290b.1748515612.git.zhoubinbin@loongson.cn>
+Subject: [PATCH v2 35/35] mmc: sdhci: Drop sdhci_free_host()/sdhci_pltfm_free() definitions
+Date: Thu, 29 May 2025 21:28:18 +0800
+Message-ID: <57ce5c1bd33badc3f1519c446509a1538663af4d.1748515612.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1748515612.git.zhoubinbin@loongson.cn>
 References: <cover.1748515612.git.zhoubinbin@loongson.cn>
@@ -40,73 +40,94 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCx_caYYDhovcL6AA--.61312S2
+X-CM-TRANSID:qMiowMBxn8X7YDhogMP6AA--.57071S2
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7WF43AFWrJrW8Xw15tr18Zwc_yoW8Gr48pa
-	n5JrWvyr48ur4FkF98Aw1DZa1Ykw4xKayxKa45K395Ja1Yk3s2yrnayFy0qF15Aryrtr4f
-	Wr4UJa18CFWDuwbCm3ZEXasCq-sJn29KB7ZKAUJUUUU7529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoWxCF1UAFW7JF4rJw15JFykCrX_yoW5XrWDpa
+	15Xry7Gr48GF1rWryDGw1DZ34rWw1j934UK345Jw4FqayUK34DtFsxAFWjyry5ZFWDt3WS
+	qF1qvF1rur95J3XCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUBCb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	0xBIdaVrnRJUUUBKb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
 	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
 	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
-	6rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYI
-	kI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVW3AVW8
-	Xw1lYx0Ex4A2jsIE14v26r4UJVWxJr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7V
-	AKI48JM4x0Y40E4IxF1VCIxcxG6Fyj6r4UJwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE
-	7xkEbVWUJVW8JwCFI7km07C267AKxVWUXVWUAwC20s026c02F40E14v26r1j6r18MI8I3I
-	0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAI
-	cVC0I7IYx2IY67AKxVW7JVWDJwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Cr0_Gr1UMIIF0x
-	vE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVW8Jr0_Cr1UMIIF0xvEx4A2
-	jsIEc7CjxVAFwI0_Gr1j6F4UJbIYCTnIWIevJa73UjIFyTuYvjxUgPxhDUUUU
+	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
+	xVW0oVCq3wAaw2AFwI0_Jrv_JF1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0c
+	Ia020Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_ZF0_
+	GryDMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x
+	0EwIxGrwACjcxG6xCI17CEII8vrVW3JVW8Jr1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC
+	6x0Yz7v_Jr0_Gr1l4IxYO2xFxVAFwI0_Jrv_JF1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s
+	026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF
+	0xvE2Ix0cI8IcVAFwI0_Ar0_tr1lIxAIcVC0I7IYx2IY6xkF7I0E14v26F4j6r4UJwCI42
+	IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr1j6F4UJwCI42IY6I8E
+	87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnUUI43ZEXa7IU5Q0ePUUUUU==
 
-Since the devm_mmc_alloc_host() helper is already in use,
-sdhci_pltfm_free() is no longer needed.
+From now on, all calls to sdhci_free_host()/sdhci_pltfm_free() have been
+cleaned up, so we can just delete their definitions.
 
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci_f_sdh30.c | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-pltfm.c | 5 -----
+ drivers/mmc/host/sdhci-pltfm.h | 1 -
+ drivers/mmc/host/sdhci.c       | 6 ------
+ drivers/mmc/host/sdhci.h       | 1 -
+ 4 files changed, 13 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index ee66e4f3683d..e9b934e159ad 100644
---- a/drivers/mmc/host/sdhci_f_sdh30.c
-+++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -133,20 +133,18 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
--		goto err;
-+		return ret;
- 
- 	if (dev_of_node(dev)) {
- 		sdhci_get_of_property(pdev);
- 
- 		priv->clk_iface = devm_clk_get(&pdev->dev, "iface");
--		if (IS_ERR(priv->clk_iface)) {
--			ret = PTR_ERR(priv->clk_iface);
--			goto err;
--		}
-+		if (IS_ERR(priv->clk_iface))
-+			return PTR_ERR(priv->clk_iface);
- 
- 		ret = clk_prepare_enable(priv->clk_iface);
- 		if (ret)
--			goto err;
-+			return ret;
- 
- 		priv->clk = devm_clk_get(&pdev->dev, "core");
- 		if (IS_ERR(priv->clk)) {
-@@ -200,9 +198,6 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 	clk_disable_unprepare(priv->clk);
- err_clk:
- 	clk_disable_unprepare(priv->clk_iface);
--err:
--	sdhci_pltfm_free(pdev);
--
- 	return ret;
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index aedbcd32713a..7f6ac636f040 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -146,11 +146,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
  }
+ EXPORT_SYMBOL_GPL(sdhci_pltfm_init);
  
+-void sdhci_pltfm_free(struct platform_device *pdev)
+-{
+-}
+-EXPORT_SYMBOL_GPL(sdhci_pltfm_free);
+-
+ int sdhci_pltfm_init_and_add_host(struct platform_device *pdev,
+ 				  const struct sdhci_pltfm_data *pdata,
+ 				  size_t priv_size)
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index b81d5b0fd616..9c32e8a289d6 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -97,7 +97,6 @@ static inline void sdhci_get_of_property(struct platform_device *pdev)
+ extern struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 					  const struct sdhci_pltfm_data *pdata,
+ 					  size_t priv_size);
+-extern void sdhci_pltfm_free(struct platform_device *pdev);
+ 
+ extern int sdhci_pltfm_init_and_add_host(struct platform_device *pdev,
+ 					 const struct sdhci_pltfm_data *pdata,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index ee5a5ae4db31..c40caa3f003f 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -5000,12 +5000,6 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 
+ EXPORT_SYMBOL_GPL(sdhci_remove_host);
+ 
+-void sdhci_free_host(struct sdhci_host *host)
+-{
+-}
+-
+-EXPORT_SYMBOL_GPL(sdhci_free_host);
+-
+ /*****************************************************************************\
+  *                                                                           *
+  * Driver init/exit                                                          *
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f9d65dd0f2b2..58291a6f093d 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -811,7 +811,6 @@ static inline u8 sdhci_readb(struct sdhci_host *host, int reg)
+ #endif /* CONFIG_MMC_SDHCI_IO_ACCESSORS */
+ 
+ struct sdhci_host *sdhci_alloc_host(struct device *dev, size_t priv_size);
+-void sdhci_free_host(struct sdhci_host *host);
+ 
+ static inline void *sdhci_priv(struct sdhci_host *host)
+ {
 -- 
 2.47.1
 
