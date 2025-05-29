@@ -1,471 +1,177 @@
-Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.14])
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8038019EED3;
-	Thu, 29 May 2025 01:23:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15261B67F;
+	Thu, 29 May 2025 08:08:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748481798; cv=none; b=RF56s0D7kBy2D7Y2YDQ/+t/rw3JFweuZAnNHfQjKd+dcB74NViLSJaEN9e3vwDLZAwu/8Le9P40CVzrjha2ptuy1Dq9KgkGDPwdeihWjiII9L/Dr9xzmIKeyOdOq3x0LEIOGb3qtp6FyaYO3uIn8xtxdkZTHcm3vD1hLfmfk3SI=
+	t=1748506136; cv=none; b=JnYL0jmd0f4AUAi7VkAl2lZ/lv1noyPdbByuPTqCWmiljbLKgZzxT9UPehn6BfvbCUnwrnNrk2pwWvQNzxw63ficvQSZfeWKovWSsoD3Y2WG2fIHa1xJaaLOWB6CWWMJJe6bejlWXQrCz12yyGlRW+aNk5nrS8nnNqXuB4ga3QA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748481798; c=relaxed/simple;
-	bh=QK5xN4iAYIy2de7G5LO7XNLDgkJPP8EX5G46RfYKVLc=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=nq46AWulQavxj8yMpGruaSEHvCAPE5yWcY7KUo7O5pOIcncMXSfACiJGKlo0Pnjg/SzhloolOQ0fwJH2o5VwYF1gpn6bE4+peOxjPXP/FkwUPOXSOPUAMaD/jgfYtN2qolpLz5nFIf8B57iCtbX7RLxNol9P399asgwlO/2myVA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=CoaBlnhK; arc=none smtp.client-ip=192.198.163.14
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
+	s=arc-20240116; t=1748506136; c=relaxed/simple;
+	bh=X6J2EZGtcDFFf1QChLOELilViAGYllQkhXFuw2otxaE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:References:Cc:From:
+	 In-Reply-To:Content-Type; b=qQT8qb6QmOI/xEhkWhSBYnjwhA/RDnEPeYZoayc8o78TmTilN7bvoCvpWfiTA+kDlZH7HiRLvewcKFJCD/y5Wt1LagrdePs0cqMEaRKZfdXAH9/PjISUN4bMC0win+hV45Jf2U0dPQGSIN/4qzeWbz3Pu1BMDx1nmgo24KyE1GY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=oaTwYbCg; arc=none smtp.client-ip=212.227.17.22
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="CoaBlnhK"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1748481796; x=1780017796;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=QK5xN4iAYIy2de7G5LO7XNLDgkJPP8EX5G46RfYKVLc=;
-  b=CoaBlnhK5J7wjLA/RyIy6QH926JST/iGD9hCKfyWj3capBboYRhpXUpT
-   iq63DgiD4Z5rCIE4ai8xII6MP5pHGjGkGNIkqtIgKaOa+arf9B6vrvJUM
-   F9Gm6Y/JSvOpuRu6OqZIjJOnr1GicEn995sSlhussz/nme66GEM4inojw
-   kqaptTYUmPLazgFxYtYE/bTO68xXlbSjtQ18pjUvUVQfkg2nzqp2qg/KB
-   eb9j4GSy/8kHK9lD/gwAVN98JH99icO+Rtjkmf398ebUf1w+8rm+ppH7E
-   cZ0O31Qe2YNKMMDlVFuxHfu2lGCXR+1MmiAsr4UaWQVmyRZi0zzw3RykI
-   g==;
-X-CSE-ConnectionGUID: VrhSMW5nR+q4CyxQtZkEOg==
-X-CSE-MsgGUID: tmqs0J3LTKSQWbAqSb79Kw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11447"; a="50633425"
-X-IronPort-AV: E=Sophos;i="6.15,322,1739865600"; 
-   d="scan'208";a="50633425"
-Received: from fmviesa002.fm.intel.com ([10.60.135.142])
-  by fmvoesa108.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 May 2025 18:23:15 -0700
-X-CSE-ConnectionGUID: vqbz4hkqSHqszwGlJQuVbA==
-X-CSE-MsgGUID: ouBExTf0Q8KhqOEZkzz4Dw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="6.15,322,1739865600"; 
-   d="scan'208";a="166563202"
-Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
-  by fmviesa002.fm.intel.com with ESMTP; 28 May 2025 18:23:12 -0700
-Received: from kbuild by 1992f890471c with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1uKRzB-000WDC-2S;
-	Thu, 29 May 2025 01:23:09 +0000
-Date: Thu, 29 May 2025 09:22:57 +0800
-From: kernel test robot <lkp@intel.com>
-To: Albert Yang <yangzh0906@thundersoft.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Ge Gordon <gordon.ge@bst.ai>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>,
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-	linux-kernel@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>,
-	Shan-Chun Hung <shanchun1218@gmail.com>,
-	Arnd Bergmann <arnd@arndb.de>,
-	AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>,
-	Peter Robinson <pbrobinson@gmail.com>,
-	Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-	Albert Yang <yangzh0906@thundersoft.com>
-Subject: Re: [PATCH v1 5/9] mmc: sdhci: add Black Sesame Technologies BST
- C1200 controller driver
-Message-ID: <202505290935.IfNyJVFA-lkp@intel.com>
-References: <20250528085453.481320-1-yangzh0906@thundersoft.com>
+	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="oaTwYbCg"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
+	s=s31663417; t=1748506132; x=1749110932; i=wahrenst@gmx.net;
+	bh=5UdOdgiI5zxoMEjvek8mnmCqj8OoSdpXbP1HCHQdtxo=;
+	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
+	 References:Cc:From:In-Reply-To:Content-Type:
+	 Content-Transfer-Encoding:cc:content-transfer-encoding:
+	 content-type:date:from:message-id:mime-version:reply-to:subject:
+	 to;
+	b=oaTwYbCgkcGhpT4VUXzhhal2aGmlUD3F8gkQaVyopbdKkXsd7O3HPPZ0KFDJpVAv
+	 Dbfv2DY/29UcVOUX+6Pub4firuPyFx6TEtC/3ml8ziPyrDydoZoiKiH0BXDEL1E+I
+	 IunUSOZw+bsLxSAAus/B98G8M0h01Iht7V2O+R2Oo8NCKb3UBPZXon2jkclAstMrw
+	 /psFUd4tYPeR0rXUV14KECBT49SuUdVkdMZeWJSwsd3+SwzMt8CCUaOvk/qM+Qc6g
+	 sDiCb9sDMoCsNahVbRHvx5DgpG6X44AKaPSPN6IN3tIqf3H1a3wJOycQRvmEduFhG
+	 aAY7wlF4VB35f/ZURw==
+X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
+Received: from [192.168.1.104] ([91.41.216.208]) by mail.gmx.net (mrgmx104
+ [212.227.17.168]) with ESMTPSA (Nemesis) id 1MbzyJ-1utcI03T4x-00fQ8P; Thu, 29
+ May 2025 10:08:51 +0200
+Message-ID: <892d352c-8639-4837-a7b6-6706ec35ac7b@gmx.net>
+Date: Thu, 29 May 2025 10:08:50 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250528085453.481320-1-yangzh0906@thundersoft.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 1/1] dt-bindings: mmc: mxs-mmc: change ref to
+ mmc-controller-common.yaml from mmc-controller.yaml
+To: Frank Li <Frank.Li@nxp.com>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+ Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>,
+ Pengutronix Kernel Team <kernel@pengutronix.de>,
+ Fabio Estevam <festevam@gmail.com>
+References: <20250528222433.727633-1-Frank.Li@nxp.com>
+Content-Language: en-US
+Cc: "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS"
+ <devicetree@vger.kernel.org>,
+ "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE"
+ <linux-arm-kernel@lists.infradead.org>,
+ "open list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <imx@lists.linux.dev>,
+ "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..."
+ <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+From: Stefan Wahren <wahrenst@gmx.net>
+Autocrypt: addr=wahrenst@gmx.net; keydata=
+ xjMEZ1dOJBYJKwYBBAHaRw8BAQdA7H2MMG3q8FV7kAPko5vOAeaa4UA1I0hMgga1j5iYTTvN
+ IFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+wo8EExYIADcWIQT3FXg+ApsOhPDN
+ NNFuwvLLwiAwigUCZ1dOJAUJB4TOAAIbAwQLCQgHBRUICQoLBRYCAwEAAAoJEG7C8svCIDCK
+ JQ4BAP4Y9uuHAxbAhHSQf6UZ+hl5BDznsZVBJvH8cZe2dSZ6AQCNgoc1Lxw1tvPscuC1Jd1C
+ TZomrGfQI47OiiJ3vGktBc44BGdXTiQSCisGAQQBl1UBBQEBB0B5M0B2E2XxySUQhU6emMYx
+ f5QR/BrEK0hs3bLT6Hb9WgMBCAfCfgQYFggAJhYhBPcVeD4Cmw6E8M000W7C8svCIDCKBQJn
+ V04kBQkHhM4AAhsMAAoJEG7C8svCIDCKJxoA/i+kqD5bphZEucrJHw77ujnOQbiKY2rLb0pE
+ aHMQoiECAQDVbj827W1Yai/0XEABIr8Ci6a+/qZ8Vz6MZzL5GJosAA==
+In-Reply-To: <20250528222433.727633-1-Frank.Li@nxp.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:EjTI9J4dGsDiQy9sInFfttZwWAJ1r5kykoL7b9hCsFgH5NbL1LX
+ 7OX+iqRNF3k69KTIV2tiLqXjUAwfPA1eV6+DkRF7dPyJNdhgLzGLEUvkNUj16xgjQP6DfUs
+ NusR/Hbyinp21BwcaRyGFVIg/TVelnH7R31Nd0TB+ICOqn9bd8RGgp9sH0JIkOlEJsFJnrd
+ 5mYDbSEb5LiIZU0X3LCdQ==
+X-Spam-Flag: NO
+UI-OutboundReport: notjunk:1;M01:P0:RvCdwBGOh/U=;MuzvyMicLeznzIzkbQWlBD99GgU
+ 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
 
-Hi Albert,
+Hi Frank,
 
-kernel test robot noticed the following build errors:
+thanks for the patch.
 
-[auto build test ERROR on robh/for-next]
-[also build test ERROR on arm64/for-next/core soc/for-next krzk/for-next krzk-dt/for-next krzk-mem-ctrl/for-next linus/master v6.15 next-20250528]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Am 29.05.25 um 00:24 schrieb Frank Li:
+> Change ref to mmc-controller-common.yaml from mmc-controller.yaml becaus=
+e
+> imx23/imx28 use dual mode controller (spi and mmc). So default dts node
+> name use spi instead of mmc. The legancy reason, it use difference
+legacy reason ?
+> compatible string to distringuish work mode (spi / mmc).
+>
+> Fix below CHECK_DTB warnings:
+> arch/arm/boot/dts/nxp/mxs/imx23-olinuxino.dtb: spi@80010000 (fsl,imx23-m=
+mc): $nodename:0: 'spi@80010000' does not match '^mmc(@.*)?$'
+>
+> Additional add clocks property.
+>
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
+> ---
+>   Documentation/devicetree/bindings/mmc/mxs-mmc.yaml | 5 ++++-
+>   1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml b/Docume=
+ntation/devicetree/bindings/mmc/mxs-mmc.yaml
+> index 32e512a68ed61..ca40ca92f858d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
+> @@ -17,7 +17,7 @@ description: |
+>     and the properties used by the mxsmmc driver.
+>  =20
+>   allOf:
+> -  - $ref: mmc-controller.yaml
+> +  - $ref: mmc-controller-common.yaml#
+>  =20
+>   properties:
+>     compatible:
+> @@ -31,6 +31,9 @@ properties:
+>     interrupts:
+>       maxItems: 1
+>  =20
+> +  clocks:
+> +    maxItems: 1
+> +
+The patch looks good, but shouldn't "clocks" be a required property ?
+>     dmas:
+>       maxItems: 1
+>  =20
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Albert-Yang/dt-bindings-vendor-prefixes-Add-Black-Sesame-Technologies-Co-Ltd/20250528-190614
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-patch link:    https://lore.kernel.org/r/20250528085453.481320-1-yangzh0906%40thundersoft.com
-patch subject: [PATCH v1 5/9] mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
-config: hexagon-allmodconfig (https://download.01.org/0day-ci/archive/20250529/202505290935.IfNyJVFA-lkp@intel.com/config)
-compiler: clang version 17.0.6 (https://github.com/llvm/llvm-project 6009708b4367171ccdbf4b5905cb6a803753fe18)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250529/202505290935.IfNyJVFA-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202505290935.IfNyJVFA-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-   drivers/mmc/host/sdhci-of-bst-c1200.c:64:6: warning: no previous prototype for function 'sdhci_bst_print_vendor' [-Wmissing-prototypes]
-      64 | void sdhci_bst_print_vendor(struct sdhci_host *host)
-         |      ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:64:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-      64 | void sdhci_bst_print_vendor(struct sdhci_host *host)
-         | ^
-         | static 
-   drivers/mmc/host/sdhci-of-bst-c1200.c:153:6: warning: no previous prototype for function 'sdhci_enable_bst_clk' [-Wmissing-prototypes]
-     153 | void sdhci_enable_bst_clk(struct sdhci_host *host, unsigned int clk)
-         |      ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:153:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-     153 | void sdhci_enable_bst_clk(struct sdhci_host *host, unsigned int clk)
-         | ^
-         | static 
-   drivers/mmc/host/sdhci-of-bst-c1200.c:245:6: warning: no previous prototype for function 'sdhci_set_bst_clock' [-Wmissing-prototypes]
-     245 | void sdhci_set_bst_clock(struct sdhci_host *host, unsigned int clock)
-         |      ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:245:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-     245 | void sdhci_set_bst_clock(struct sdhci_host *host, unsigned int clock)
-         | ^
-         | static 
-   drivers/mmc/host/sdhci-of-bst-c1200.c:323:6: warning: unused variable 'val' [-Wunused-variable]
-     323 |         u32 val;
-         |             ^~~
->> drivers/mmc/host/sdhci-of-bst-c1200.c:607:18: error: call to undeclared function 'FIELD_GET'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
-     607 |         host->max_clk = FIELD_GET(SDHCI_CLOCK_V3_BASE_MASK, host->caps);
-         |                         ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:513:6: warning: variable 'max_clk' set but not used [-Wunused-but-set-variable]
-     513 |         u32 max_clk;
-         |             ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:515:7: warning: variable 'enable_vqmmc' set but not used [-Wunused-but-set-variable]
-     515 |         bool enable_vqmmc = false;
-         |              ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:507:5: warning: no previous prototype for function 'bst_sdhci_setup_host' [-Wmissing-prototypes]
-     507 | int bst_sdhci_setup_host(struct sdhci_host *host)
-         |     ^
-   drivers/mmc/host/sdhci-of-bst-c1200.c:507:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-     507 | int bst_sdhci_setup_host(struct sdhci_host *host)
-         | ^
-         | static 
-   7 warnings and 1 error generated.
-
-
-vim +/FIELD_GET +607 drivers/mmc/host/sdhci-of-bst-c1200.c
-
-   506	
-   507	int bst_sdhci_setup_host(struct sdhci_host *host)
-   508	{
-   509		struct mmc_host *mmc;
-   510		u32 max_current_caps;
-   511		unsigned int ocr_avail;
-   512		unsigned int override_timeout_clk;
-   513		u32 max_clk;
-   514		int ret = 0;
-   515		bool enable_vqmmc = false;
-   516	
-   517		WARN_ON(!host);
-   518		if (!host)
-   519			return -EINVAL;
-   520	
-   521		mmc = host->mmc;
-   522	
-   523		/*
-   524		 * If there are external regulators, get them. Note this must be done
-   525		 * early before resetting the host and reading the capabilities so that
-   526		 * the host can take the appropriate action if regulators are not
-   527		 * available.
-   528		 */
-   529		if (!mmc->supply.vqmmc) {
-   530			ret = mmc_regulator_get_supply(mmc);
-   531			if (ret)
-   532				return ret;
-   533			enable_vqmmc  = true;
-   534		}
-   535	
-   536		pr_info("Version:   0x%08x | Present:  0x%08x\n",
-   537			sdhci_readw(host, SDHCI_HOST_VERSION),
-   538			sdhci_readl(host, SDHCI_PRESENT_STATE));
-   539		pr_info("Caps:      0x%08x | Caps_1:   0x%08x\n",
-   540			sdhci_readl(host, SDHCI_CAPABILITIES),
-   541			sdhci_readl(host, SDHCI_CAPABILITIES_1));
-   542	
-   543		sdhci_read_caps(host);
-   544	
-   545		override_timeout_clk = host->timeout_clk;
-   546	
-   547		host->flags |= SDHCI_USE_SDMA;
-   548	
-   549		if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-   550			if (host->ops->set_dma_mask)
-   551				ret = host->ops->set_dma_mask(host);
-   552			else
-   553				ret = bst_sdhci_set_dma_mask(host);
-   554	
-   555			if (!ret && host->ops->enable_dma)
-   556				ret = host->ops->enable_dma(host);
-   557	
-   558			if (ret) {
-   559				pr_warn("%s: No suitable DMA available - falling back to PIO\n",
-   560					mmc_hostname(mmc));
-   561				host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-   562	
-   563				ret = 0;
-   564			}
-   565		}
-   566	
-   567		if (host->flags & SDHCI_USE_ADMA) {
-   568			dma_addr_t dma;
-   569			void *buf;
-   570	
-   571			if (!(host->flags & SDHCI_USE_64_BIT_DMA))
-   572				host->alloc_desc_sz = SDHCI_ADMA2_32_DESC_SZ;
-   573			else if (!host->alloc_desc_sz)
-   574				host->alloc_desc_sz = SDHCI_ADMA2_64_DESC_SZ(host);
-   575	
-   576			host->desc_sz = host->alloc_desc_sz;
-   577			host->adma_table_sz = host->adma_table_cnt * host->desc_sz;
-   578	
-   579			host->align_buffer_sz = SDHCI_MAX_SEGS * SDHCI_ADMA2_ALIGN;
-   580			/*
-   581			 * Use zalloc to zero the reserved high 32-bits of 128-bit
-   582			 * descriptors so that they never need to be written.
-   583			 */
-   584			buf = dma_alloc_coherent(mmc_dev(mmc),
-   585						 host->align_buffer_sz + host->adma_table_sz,
-   586						 &dma, GFP_KERNEL);
-   587			if (!buf) {
-   588				pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
-   589					mmc_hostname(mmc));
-   590				host->flags &= ~SDHCI_USE_ADMA;
-   591			} else if ((dma + host->align_buffer_sz) &
-   592				   (SDHCI_ADMA2_DESC_ALIGN - 1)) {
-   593				pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
-   594					mmc_hostname(mmc));
-   595				host->flags &= ~SDHCI_USE_ADMA;
-   596				dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
-   597						  host->adma_table_sz, buf, dma);
-   598			} else {
-   599				host->align_buffer = buf;
-   600				host->align_addr = dma;
-   601	
-   602				host->adma_table = buf + host->align_buffer_sz;
-   603				host->adma_addr = dma + host->align_buffer_sz;
-   604			}
-   605		}
-   606	
- > 607		host->max_clk = FIELD_GET(SDHCI_CLOCK_V3_BASE_MASK, host->caps);
-   608	
-   609		host->max_clk *= 1000000;
-   610		if (host->max_clk == 0 || host->quirks &
-   611				SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN) {
-   612			if (!host->ops->get_max_clock) {
-   613				pr_err("%s: Hardware doesn't specify base clock frequency.\n",
-   614				       mmc_hostname(mmc));
-   615				ret = -ENODEV;
-   616				goto undma;
-   617			}
-   618			host->max_clk = host->ops->get_max_clock(host);
-   619		}
-   620	
-   621		/*
-   622		 * Set host parameters.
-   623		 */
-   624		max_clk = host->max_clk;
-   625	
-   626		if (host->ops->get_min_clock)
-   627			mmc->f_min = host->ops->get_min_clock(host);
-   628	
-   629		if (!(host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK)) {
-   630			host->timeout_clk = FIELD_GET(SDHCI_TIMEOUT_CLK_MASK, host->caps);
-   631	
-   632			if (host->caps & SDHCI_TIMEOUT_CLK_UNIT)
-   633				host->timeout_clk *= 1000;
-   634	
-   635			if (host->timeout_clk == 0) {
-   636				if (!host->ops->get_timeout_clock) {
-   637					pr_err("%s: Hardware doesn't specify timeout clock frequency.\n",
-   638					       mmc_hostname(mmc));
-   639					ret = -ENODEV;
-   640					goto undma;
-   641				}
-   642	
-   643				host->timeout_clk =
-   644					DIV_ROUND_UP(host->ops->get_timeout_clock(host),
-   645						     1000);
-   646			}
-   647	
-   648			if (override_timeout_clk)
-   649				host->timeout_clk = override_timeout_clk;
-   650	
-   651			mmc->max_busy_timeout = host->ops->get_max_timeout_count ?
-   652				host->ops->get_max_timeout_count(host) : 1 << 27;
-   653			mmc->max_busy_timeout /= host->timeout_clk;
-   654		}
-   655	
-   656		mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_CMD23;
-   657		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-   658	
-   659		if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
-   660			host->flags |= SDHCI_AUTO_CMD12;
-   661	
-   662		/*
-   663		 * A controller may support 8-bit width, but the board itself
-   664		 * might not have the pins brought out.  Boards that support
-   665		 * 8-bit width must set "mmc->caps |= MMC_CAP_8_BIT_DATA;" in
-   666		 * their platform code before calling sdhci_add_host(), and we
-   667		 * won't assume 8-bit width for hosts without that CAP.
-   668		 */
-   669		if (!(host->quirks & SDHCI_QUIRK_FORCE_1_BIT_DATA))
-   670			mmc->caps |= MMC_CAP_4_BIT_DATA;
-   671	
-   672		if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
-   673			mmc->caps &= ~MMC_CAP_CMD23;
-   674	
-   675		if (host->caps & SDHCI_CAN_DO_HISPD)
-   676			mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-   677	
-   678		/* Any UHS-I mode in caps implies SDR12 and SDR25 support. */
-   679		if (host->caps1 & (SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
-   680				   SDHCI_SUPPORT_DDR50))
-   681			mmc->caps |= MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-   682	
-   683		/* SDR104 supports also implies SDR50 support */
-   684		if (host->caps1 & SDHCI_SUPPORT_SDR104) {
-   685			mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
-   686			/* SD3.0: SDR104 is supported so (for eMMC) the caps2
-   687			 * field can be promoted to support HS200.
-   688			 */
-   689			if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
-   690				mmc->caps2 |= MMC_CAP2_HS200;
-   691		}
-   692	
-   693		if ((mmc->caps2 & MMC_CAP2_HSX00_1_2V) &&
-   694		    (IS_ERR(mmc->supply.vqmmc) ||
-   695		     !regulator_is_supported_voltage(mmc->supply.vqmmc, 1100000,
-   696						     1300000)))
-   697			mmc->caps2 &= ~MMC_CAP2_HSX00_1_2V;
-   698	
-   699		/* Does the host need tuning for SDR50? */
-   700		if (host->caps1 & SDHCI_USE_SDR50_TUNING)
-   701			host->flags |= SDHCI_SDR50_NEEDS_TUNING;
-   702	
-   703		/* Driver Type(s) (A, C, D) supported by the host */
-   704		if (host->caps1 & SDHCI_DRIVER_TYPE_A)
-   705			mmc->caps |= MMC_CAP_DRIVER_TYPE_A;
-   706		if (host->caps1 & SDHCI_DRIVER_TYPE_C)
-   707			mmc->caps |= MMC_CAP_DRIVER_TYPE_C;
-   708		if (host->caps1 & SDHCI_DRIVER_TYPE_D)
-   709			mmc->caps |= MMC_CAP_DRIVER_TYPE_D;
-   710	
-   711		/* Initial value for re-tuning timer count */
-   712		host->tuning_count = FIELD_GET(SDHCI_RETUNING_TIMER_COUNT_MASK,
-   713					       host->caps1);
-   714	
-   715		/*
-   716		 * In case Re-tuning Timer is not disabled, the actual value of
-   717		 * re-tuning timer will be 2 ^ (n - 1).
-   718		 */
-   719		if (host->tuning_count)
-   720			host->tuning_count = 1 << (host->tuning_count - 1);
-   721	
-   722		/* Re-tuning mode supported by the Host Controller */
-   723		host->tuning_mode = FIELD_GET(SDHCI_RETUNING_MODE_MASK, host->caps1);
-   724	
-   725		ocr_avail = 0;
-   726	
-   727		if (host->caps & SDHCI_CAN_VDD_330) {
-   728			ocr_avail |= MMC_VDD_32_33 | MMC_VDD_33_34;
-   729	
-   730			mmc->max_current_330 = FIELD_GET(SDHCI_MAX_CURRENT_330_MASK,
-   731							 max_current_caps) *
-   732							SDHCI_MAX_CURRENT_MULTIPLIER;
-   733		}
-   734		if (host->caps & SDHCI_CAN_VDD_300) {
-   735			ocr_avail |= MMC_VDD_29_30 | MMC_VDD_30_31;
-   736	
-   737			mmc->max_current_300 = FIELD_GET(SDHCI_MAX_CURRENT_300_MASK,
-   738							 max_current_caps) *
-   739							SDHCI_MAX_CURRENT_MULTIPLIER;
-   740		}
-   741		if (host->caps & SDHCI_CAN_VDD_180) {
-   742			ocr_avail |= MMC_VDD_165_195;
-   743	
-   744			mmc->max_current_180 = FIELD_GET(SDHCI_MAX_CURRENT_180_MASK,
-   745							 max_current_caps) *
-   746							SDHCI_MAX_CURRENT_MULTIPLIER;
-   747		}
-   748	
-   749		/* If OCR set by host, use it instead. */
-   750		if (host->ocr_mask)
-   751			ocr_avail = host->ocr_mask;
-   752	
-   753		/* If OCR set by external regulators, give it highest prio. */
-   754		if (mmc->ocr_avail)
-   755			ocr_avail = mmc->ocr_avail;
-   756	
-   757		mmc->ocr_avail = ocr_avail;
-   758		mmc->ocr_avail_sdio = ocr_avail;
-   759		if (host->ocr_avail_sdio)
-   760			mmc->ocr_avail_sdio &= host->ocr_avail_sdio;
-   761		mmc->ocr_avail_sd = ocr_avail;
-   762		if (host->ocr_avail_sd)
-   763			mmc->ocr_avail_sd &= host->ocr_avail_sd;
-   764		else /* normal SD controllers don't support 1.8V */
-   765			mmc->ocr_avail_sd &= ~MMC_VDD_165_195;
-   766		mmc->ocr_avail_mmc = ocr_avail;
-   767		if (host->ocr_avail_mmc)
-   768			mmc->ocr_avail_mmc &= host->ocr_avail_mmc;
-   769	
-   770		if ((mmc->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
-   771				  MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
-   772				  MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR)) ||
-   773		    (mmc->caps2 & (MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)))
-   774			host->flags |= SDHCI_SIGNALING_180;
-   775	
-   776		spin_lock_init(&host->lock);
-   777	
-   778		/*
-   779		 * Maximum number of sectors in one transfer. Limited by SDMA boundary
-   780		 * size (512KiB). Note some tuning modes impose a 4MiB limit, but this
-   781		 * is less anyway.
-   782		 */
-   783		mmc->max_req_size = 524288;
-   784		/*
-   785		 * Maximum number of segments. Depends on if the hardware
-   786		 * can do scatter/gather or not.
-   787		 */
-   788		mmc->max_segs = 1;
-   789		mmc->max_req_size = min_t(size_t, mmc->max_req_size,
-   790					  dma_max_mapping_size(mmc_dev(mmc)));
-   791	
-   792		mmc->max_seg_size = mmc->max_req_size;
-   793	
-   794		mmc->max_blk_size = (host->caps & SDHCI_MAX_BLOCK_MASK) >>
-   795				SDHCI_MAX_BLOCK_SHIFT;
-   796	
-   797		mmc->max_blk_size = 512 << mmc->max_blk_size;
-   798	
-   799		/*
-   800		 * Maximum block count.
-   801		 */
-   802		mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
-   803	
-   804		if (mmc->max_segs == 1)
-   805			/* This may alter mmc->*_blk_* parameters */
-   806			// bst sdhci must reallocate bounce buffer
-   807			bst_sdhci_allocate_bounce_buffer(host);
-   808	
-   809		return 0;
-   810	
-   811	undma:
-   812		if (host->align_buffer)
-   813			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
-   814					  host->adma_table_sz, host->align_buffer,
-   815					  host->align_addr);
-   816		host->adma_table = NULL;
-   817		host->align_buffer = NULL;
-   818	
-   819		return ret;
-   820	}
-   821	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
