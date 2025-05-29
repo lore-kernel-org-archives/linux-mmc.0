@@ -1,177 +1,174 @@
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2084.outbound.protection.outlook.com [40.107.94.84])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 15261B67F;
-	Thu, 29 May 2025 08:08:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.17.22
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748506136; cv=none; b=JnYL0jmd0f4AUAi7VkAl2lZ/lv1noyPdbByuPTqCWmiljbLKgZzxT9UPehn6BfvbCUnwrnNrk2pwWvQNzxw63ficvQSZfeWKovWSsoD3Y2WG2fIHa1xJaaLOWB6CWWMJJe6bejlWXQrCz12yyGlRW+aNk5nrS8nnNqXuB4ga3QA=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748506136; c=relaxed/simple;
-	bh=X6J2EZGtcDFFf1QChLOELilViAGYllQkhXFuw2otxaE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:References:Cc:From:
-	 In-Reply-To:Content-Type; b=qQT8qb6QmOI/xEhkWhSBYnjwhA/RDnEPeYZoayc8o78TmTilN7bvoCvpWfiTA+kDlZH7HiRLvewcKFJCD/y5Wt1LagrdePs0cqMEaRKZfdXAH9/PjISUN4bMC0win+hV45Jf2U0dPQGSIN/4qzeWbz3Pu1BMDx1nmgo24KyE1GY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net; spf=pass smtp.mailfrom=gmx.net; dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b=oaTwYbCg; arc=none smtp.client-ip=212.227.17.22
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=gmx.net
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmx.net
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BE09F28DEE2;
+	Thu, 29 May 2025 10:49:07 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.94.84
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1748515749; cv=fail; b=sAuM9gRpKrpp+g3G2Qg0gqXf0W5aHG23sNfAnY26osoFadJBGDZmEmCN2dupZouhRXdCS4mhCM0B/+YSoyXXrj49P+6QU6x6BiEd7hhFxJwWw4AG2KkdHbwYLWLX4a6YU6tZguVyxcHN4bKRSVxf5Z5J/lXyeKXtRALx27K5XLY=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1748515749; c=relaxed/simple;
+	bh=15y8xPab6+PaKvNagfe/WDj6SgwH955IUhcw+jjpFCQ=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=VkPlIfO7aoKFR9KYJv0i8huqGO0hWz9Z5c+ukCDfyqel4ilN1TJCjyhSsxxokBij5/mK5PPagpliAKf8XKCqbscEtoZkijFiHT/JsbvNo7qdYi+zJ4oQbCL8fDHkbf7Jm/lkhdhmUZ7tewXRPybk79ExcEB/9xawWCkaITNoETU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com; spf=fail smtp.mailfrom=amd.com; dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b=HgR2A9yw; arc=fail smtp.client-ip=40.107.94.84
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=amd.com
+Authentication-Results: smtp.subspace.kernel.org; spf=fail smtp.mailfrom=amd.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmx.net header.i=wahrenst@gmx.net header.b="oaTwYbCg"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=gmx.net;
-	s=s31663417; t=1748506132; x=1749110932; i=wahrenst@gmx.net;
-	bh=5UdOdgiI5zxoMEjvek8mnmCqj8OoSdpXbP1HCHQdtxo=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:Subject:To:
-	 References:Cc:From:In-Reply-To:Content-Type:
-	 Content-Transfer-Encoding:cc:content-transfer-encoding:
-	 content-type:date:from:message-id:mime-version:reply-to:subject:
-	 to;
-	b=oaTwYbCgkcGhpT4VUXzhhal2aGmlUD3F8gkQaVyopbdKkXsd7O3HPPZ0KFDJpVAv
-	 Dbfv2DY/29UcVOUX+6Pub4firuPyFx6TEtC/3ml8ziPyrDydoZoiKiH0BXDEL1E+I
-	 IunUSOZw+bsLxSAAus/B98G8M0h01Iht7V2O+R2Oo8NCKb3UBPZXon2jkclAstMrw
-	 /psFUd4tYPeR0rXUV14KECBT49SuUdVkdMZeWJSwsd3+SwzMt8CCUaOvk/qM+Qc6g
-	 sDiCb9sDMoCsNahVbRHvx5DgpG6X44AKaPSPN6IN3tIqf3H1a3wJOycQRvmEduFhG
-	 aAY7wlF4VB35f/ZURw==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from [192.168.1.104] ([91.41.216.208]) by mail.gmx.net (mrgmx104
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MbzyJ-1utcI03T4x-00fQ8P; Thu, 29
- May 2025 10:08:51 +0200
-Message-ID: <892d352c-8639-4837-a7b6-6706ec35ac7b@gmx.net>
-Date: Thu, 29 May 2025 10:08:50 +0200
+	dkim=pass (1024-bit key) header.d=amd.com header.i=@amd.com header.b="HgR2A9yw"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=v+aaESt9jGlgO/aQam/RvVfG2Em1vdvka1ouYaWhwMOLOtQ+AjwCxckKaxIRucOCR32Mv9YCie73V2YoIBENrq0t9TV9w+gs/de7PT07tjM7H0AKDReJW32Qh1xgQF6IGKtlibRFKGbuWuG4AkxmVyEPAIZrWJgF+IGwbHtwZnCrltDmkPJrjg0xBRNCaNRdCscZtCncdfSu3B5f1BmMCXXnl+CqQkoCoawS1EQEM+dJTIdAq+ZLBNH74+vLj05JDfDaCQEa85OQlcuUsuEQNPU259I0ynk/Hi3KLf3dN6JN8/g+HyQGH+sO6595YKwVG0IIhBNLSMsJOqkhpeBnvQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Dxk32XT30AdQKw6UduYwujbUwqlCcLMbGl622/eV9dc=;
+ b=X3OTukt8yylwilpuxVDL5SrH6o+p5Xu46D/klWTMqS2BYmZPXHCLVwjWJHVe7olS5xskTCQE2F9tqfqKrMwq1TYwDTV19UQkpnV3GITTrtfvNcT47tNlTur1AlrkrFNNFujEgGPnOFxfwLJQWJdNy3g7Qb4flk3SH2PwdCOiOLUoc2EULrHNtsO8kJbjatV1W2v91fcoaDDLdDmXin/nILrqYOmS1xsLGBMspKCRuJMjdUN1Qal+I0ogqJaEIPHMcaTH8ivOJBgtIBj0SQCNs7AoAqcj6h1huy7G3rtTg7MaAlw/40g2QjxCYB5FKOBeX8Jio9pfIrx8C9g6W+kUyQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none (0)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Dxk32XT30AdQKw6UduYwujbUwqlCcLMbGl622/eV9dc=;
+ b=HgR2A9yw71/ZfF0eETpLSlc96UaKbGdD8FdC+yMCUnE8qA82q/qz73nKTiafSg39504pQ+vr+87YSrxkLyEEbDWo0x+7RxVv/Q8pYjE8fO8ktbIiXNFudfYhwGIh1Lcu8UqUlgVVsvOU8/2z8glZWUEuvV1f1tBnUu/gKR7loYk=
+Received: from MW4P221CA0017.NAMP221.PROD.OUTLOOK.COM (2603:10b6:303:8b::22)
+ by SJ1PR12MB6027.namprd12.prod.outlook.com (2603:10b6:a03:48a::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8769.30; Thu, 29 May
+ 2025 10:49:05 +0000
+Received: from SJ1PEPF00001CEB.namprd03.prod.outlook.com
+ (2603:10b6:303:8b:cafe::70) by MW4P221CA0017.outlook.office365.com
+ (2603:10b6:303:8b::22) with Microsoft SMTP Server (version=TLS1_3,
+ cipher=TLS_AES_256_GCM_SHA384) id 15.20.8769.18 via Frontend Transport; Thu,
+ 29 May 2025 10:49:05 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ SJ1PEPF00001CEB.mail.protection.outlook.com (10.167.242.27) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.8769.18 via Frontend Transport; Thu, 29 May 2025 10:49:05 +0000
+Received: from SATLEXMB05.amd.com (10.181.40.146) by SATLEXMB04.amd.com
+ (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.39; Thu, 29 May
+ 2025 05:49:02 -0500
+Received: from SATLEXMB04.amd.com (10.181.40.145) by SATLEXMB05.amd.com
+ (10.181.40.146) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.39; Thu, 29 May
+ 2025 05:49:01 -0500
+Received: from xhdlakshmis40.xilinx.com (10.180.168.240) by SATLEXMB04.amd.com
+ (10.181.40.145) with Microsoft SMTP Server id 15.1.2507.39 via Frontend
+ Transport; Thu, 29 May 2025 05:48:59 -0500
+From: Paul Alvin <alvin.paulp@amd.com>
+To: <michal.simek@amd.com>, <adrian.hunter@intel.com>,
+	<ulf.hansson@linaro.org>
+CC: <git@amd.com>, <alvin.paulp@amd.com>,
+	<linux-arm-kernel@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
+	<linux-kernel@vger.kernel.org>
+Subject: [PATCH v2] mmc: sdhci-of-arasan: Add shutdown callback
+Date: Thu, 29 May 2025 16:18:53 +0530
+Message-ID: <20250529104853.1987456-1-alvin.paulp@amd.com>
+X-Mailer: git-send-email 2.44.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: mxs-mmc: change ref to
- mmc-controller-common.yaml from mmc-controller.yaml
-To: Frank Li <Frank.Li@nxp.com>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
- Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>,
- Pengutronix Kernel Team <kernel@pengutronix.de>,
- Fabio Estevam <festevam@gmail.com>
-References: <20250528222433.727633-1-Frank.Li@nxp.com>
-Content-Language: en-US
-Cc: "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS"
- <devicetree@vger.kernel.org>,
- "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE"
- <linux-arm-kernel@lists.infradead.org>,
- "open list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" <imx@lists.linux.dev>,
- "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..."
- <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
-From: Stefan Wahren <wahrenst@gmx.net>
-Autocrypt: addr=wahrenst@gmx.net; keydata=
- xjMEZ1dOJBYJKwYBBAHaRw8BAQdA7H2MMG3q8FV7kAPko5vOAeaa4UA1I0hMgga1j5iYTTvN
- IFN0ZWZhbiBXYWhyZW4gPHdhaHJlbnN0QGdteC5uZXQ+wo8EExYIADcWIQT3FXg+ApsOhPDN
- NNFuwvLLwiAwigUCZ1dOJAUJB4TOAAIbAwQLCQgHBRUICQoLBRYCAwEAAAoJEG7C8svCIDCK
- JQ4BAP4Y9uuHAxbAhHSQf6UZ+hl5BDznsZVBJvH8cZe2dSZ6AQCNgoc1Lxw1tvPscuC1Jd1C
- TZomrGfQI47OiiJ3vGktBc44BGdXTiQSCisGAQQBl1UBBQEBB0B5M0B2E2XxySUQhU6emMYx
- f5QR/BrEK0hs3bLT6Hb9WgMBCAfCfgQYFggAJhYhBPcVeD4Cmw6E8M000W7C8svCIDCKBQJn
- V04kBQkHhM4AAhsMAAoJEG7C8svCIDCKJxoA/i+kqD5bphZEucrJHw77ujnOQbiKY2rLb0pE
- aHMQoiECAQDVbj827W1Yai/0XEABIr8Ci6a+/qZ8Vz6MZzL5GJosAA==
-In-Reply-To: <20250528222433.727633-1-Frank.Li@nxp.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:EjTI9J4dGsDiQy9sInFfttZwWAJ1r5kykoL7b9hCsFgH5NbL1LX
- 7OX+iqRNF3k69KTIV2tiLqXjUAwfPA1eV6+DkRF7dPyJNdhgLzGLEUvkNUj16xgjQP6DfUs
- NusR/Hbyinp21BwcaRyGFVIg/TVelnH7R31Nd0TB+ICOqn9bd8RGgp9sH0JIkOlEJsFJnrd
- 5mYDbSEb5LiIZU0X3LCdQ==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:RvCdwBGOh/U=;MuzvyMicLeznzIzkbQWlBD99GgU
- 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
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+Received-SPF: None (SATLEXMB05.amd.com: alvin.paulp@amd.com does not designate
+ permitted sender hosts)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SJ1PEPF00001CEB:EE_|SJ1PR12MB6027:EE_
+X-MS-Office365-Filtering-Correlation-Id: 450e0de8-8851-4431-3558-08dd9e9e6e78
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|36860700013|82310400026|376014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?qqFOLf/Ie6XndznW4ERRij5J1ESdM5Gd2YB4J4j0pZS12PUEvTTJZ1pNhkGZ?=
+ =?us-ascii?Q?k93tpCiXseoysNUmQydkSgC0Ezplv/EAb/Ragh/X3cezIVyAuD7+1GXQdqcY?=
+ =?us-ascii?Q?HwQlFBtDxnhMdDMwO29pFXSBD1KTv/oToR4TN+ikexpiL22Z8FrwPx3U+MQl?=
+ =?us-ascii?Q?0q9hZ3PDXmpCiEQ6jEc1KjdId3z9m9wlEkoeIGOsySlyEWpAJGT2a1rXqaZv?=
+ =?us-ascii?Q?YrFWieFn5y5ZHvy3ei70tTsmxATu8NZZPini7Ai7Ob04isJ/A0N3QT5TyuLa?=
+ =?us-ascii?Q?On5RYGUn7m3rMb3vMqhsGYjuwgoX0+5397UojUqtbVyoc4uUV54E4SKacQm7?=
+ =?us-ascii?Q?0O69GVIDSAB0+eSn9U8k9RxqMuVjBWgycBUFK5FMk8wvkq7eyNAwgVByw7Jn?=
+ =?us-ascii?Q?BfTc3OIhITXTGZ1+JW3984i9pslKpSNq8PkFMxJAl8zuPpneRM2lXEfABnE9?=
+ =?us-ascii?Q?nG5UuZUVI/9GmZmXPnguyoPi+jTeyKI1cHkNpGIdZlN2i7lGTfGkHxxSsRHU?=
+ =?us-ascii?Q?W8qOXk7aPsUzMp03jZj42aV8z6Qgr9jYGEtzPBJBMeSRADvM81QSTU1aNg2N?=
+ =?us-ascii?Q?Eq1woW63EBOGQ0EnWXkMQuBlh0rbAnZuJ6wAyHImNGYpn+YOV0kv3Erz4K+3?=
+ =?us-ascii?Q?XiSIpLR2OIWuPfIKkaTTeEWHBJ/keJPepprU23/yNy9lyRLW4MB0kn8e1oKT?=
+ =?us-ascii?Q?9Pr5jani4pM7OaObonrPedz+cdiZeFJ99+1clDyGqPc0jfJlCl/jkzoUBMfB?=
+ =?us-ascii?Q?KstUOBGJ9ECaJWX6DadEciZhf4VxEfOv0QtVVzJGfHluLwmMK4BgZT/KjsGE?=
+ =?us-ascii?Q?/pywx0CanbxIcT3PsmtZ/5CQCREhr0K0QT4Yp8/09icRPRSW5xWy9KapCffZ?=
+ =?us-ascii?Q?Kj+LZLgHNyCNXn5zAJ85GTPfuioXgtNALUdISI7zKuQX8fwK2S1He4GcutWY?=
+ =?us-ascii?Q?aur2F1g/iwWgJ+UNJ0XRENiHWCTYw/4/7IArOiIs3W5/GBQZBDELaehZT/Jk?=
+ =?us-ascii?Q?fpAeIcdV6W6oMGR5MmHbt26asnvWwJbmIGovUOSm/jBCXxRnbLdyAQpjdASm?=
+ =?us-ascii?Q?efYPZpnI2K3shO66YlsKJJsMCex4oG93Rv/DQrvn1Mn33bX4HDE3d7yXE9t5?=
+ =?us-ascii?Q?cy51oDKHFjPY4wPVTn/mIdU99llB4kHteXVlB0iTUI8im3xpvOblnKL8CRkO?=
+ =?us-ascii?Q?1GlnMdGwSv5S8yBU7rfw4vjXsUzqEV+IqYSO9Mrp1AOLmPonQZDrCQUB50g5?=
+ =?us-ascii?Q?ejts9PErnfE3TzOf+KCHfsaBh84P6pwAM2JShwA2D52fm0XPyDRVLGEY/f8Y?=
+ =?us-ascii?Q?UekgsbTdIIlmwepAmsTpTWGblA1PGLM0ran6cLDEy5x7J+x6Qixp8Kbvjh49?=
+ =?us-ascii?Q?dCyI/eSgH3J0APhao4eJsz0mgdfpLkKyx4da46ktaoXhkVmlfCO2hdc9Tb6/?=
+ =?us-ascii?Q?Wi2vvwD9XxldQHW6uaWJJbJLbGpp3bkniLCzlqsIdaDT3EIjWny78sdH0OI6?=
+ =?us-ascii?Q?AcMdaWVVAaOlqV0IsH6cnxAHpQZRzt9ukwzx?=
+X-Forefront-Antispam-Report:
+	CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230040)(1800799024)(36860700013)(82310400026)(376014);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 May 2025 10:49:05.0575
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 450e0de8-8851-4431-3558-08dd9e9e6e78
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource:
+	SJ1PEPF00001CEB.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ1PR12MB6027
 
-Hi Frank,
+Implement shutdown hook to suspend host and disable all mmc clocks to
+increase power saving during shutdown or reboot.
 
-thanks for the patch.
+Signed-off-by: Paul Alvin <alvin.paulp@amd.com>
+---
 
-Am 29.05.25 um 00:24 schrieb Frank Li:
-> Change ref to mmc-controller-common.yaml from mmc-controller.yaml becaus=
-e
-> imx23/imx28 use dual mode controller (spi and mmc). So default dts node
-> name use spi instead of mmc. The legancy reason, it use difference
-legacy reason ?
-> compatible string to distringuish work mode (spi / mmc).
->
-> Fix below CHECK_DTB warnings:
-> arch/arm/boot/dts/nxp/mxs/imx23-olinuxino.dtb: spi@80010000 (fsl,imx23-m=
-mc): $nodename:0: 'spi@80010000' does not match '^mmc(@.*)?$'
->
-> Additional add clocks property.
->
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->   Documentation/devicetree/bindings/mmc/mxs-mmc.yaml | 5 ++++-
->   1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml b/Docume=
-ntation/devicetree/bindings/mmc/mxs-mmc.yaml
-> index 32e512a68ed61..ca40ca92f858d 100644
-> --- a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
-> @@ -17,7 +17,7 @@ description: |
->     and the properties used by the mxsmmc driver.
->  =20
->   allOf:
-> -  - $ref: mmc-controller.yaml
-> +  - $ref: mmc-controller-common.yaml#
->  =20
->   properties:
->     compatible:
-> @@ -31,6 +31,9 @@ properties:
->     interrupts:
->       maxItems: 1
->  =20
-> +  clocks:
-> +    maxItems: 1
-> +
-The patch looks good, but shouldn't "clocks" be a required property ?
->     dmas:
->       maxItems: 1
->  =20
+Changes in v2:
+- Make use of platform suspend instead of driver suspend as driver
+  suspend will only get defined if PMC_SLEEP is configured which 
+  results in build failure if it is not configured.
+- Updated commit description.
+
+ drivers/mmc/host/sdhci-of-arasan.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 8c29676ab662..4abdad3c4e5b 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -2056,6 +2056,11 @@ static void sdhci_arasan_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(clk_ahb);
+ }
+ 
++static void sdhci_arasan_shutdown(struct platform_device *pdev)
++{
++	sdhci_pltfm_suspend(&pdev->dev);
++}
++
+ static struct platform_driver sdhci_arasan_driver = {
+ 	.driver = {
+ 		.name = "sdhci-arasan",
+@@ -2065,6 +2070,7 @@ static struct platform_driver sdhci_arasan_driver = {
+ 	},
+ 	.probe = sdhci_arasan_probe,
+ 	.remove = sdhci_arasan_remove,
++	.shutdown = sdhci_arasan_shutdown,
+ };
+ 
+ module_platform_driver(sdhci_arasan_driver);
+-- 
+2.44.1
 
