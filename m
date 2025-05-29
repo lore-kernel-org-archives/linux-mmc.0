@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 36E421E521
-	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:59:36 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 535A21E521
+	for <linux-mmc@vger.kernel.org>; Thu, 29 May 2025 12:59:39 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748523577; cv=none; b=UkIcT5X2RXR6I9avoC4X62zCHEbtvNGxoHPkwPKiQ6p5pzaZhpF1kUc8PYHMLzEUAysz51eWezxY/AiAS6vxQqV8TP62M+9y59IIuhBbyr+smNZNg84MzdeMpePyER35FglnGtFAWLu/B45RFVdIGvHtqW+xi6QKQcKun60hTss=
+	t=1748523581; cv=none; b=QYXuZLTCGZIFk6MXcM1pa8i08YYoQmdsiZ+vuUBc8DGXKP5pwXEsTRM85+mR/0ey3M40FujSt7DflwQrCqU4ljzbDq6+oR/86/AUrhDA4VBEFg1kPz9q2+yw8jTpretU06emL0oo6cmNTbVIKlg/fqRRnZUmxwPqSffVWpAF4U4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748523577; c=relaxed/simple;
-	bh=ZpqY0xzpWUmYu0TWy6m2JoWok74D5NE7JsWUJJX9LTU=;
+	s=arc-20240116; t=1748523581; c=relaxed/simple;
+	bh=whOgY4obm5sejv9+knFQ4aUVqk9pycZmCT+rov5Rrlc=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=WI4pzpUY8HJKAgKKJ7jbmhJNAo8lIl3i8oZ4rgWLQa7lDfl70eI0h1FN14d6v+x4MLWDhr96cHkMkEfHdk6U4YEscikp2Lvy3cXhSYtYw/9o0uT9MMS55XOHobmzm3vN1kHr5bOzq4yD2RDSEbzQSH0pd/RwG6l2ma7TwWAYHZI=
+	 MIME-Version; b=RJ890s5iGaoA93F4Rx3Z/hwUAhSp84eTg59GxbkSeUwZUtRVRXv2shzgfLfgq7u+1ALXBBQYKeywLCj3i0DH3t3lvZ27qsoEetRGTnkFVwAxW/weuQaxWd/b7PHFAkLnYrfcPCFWXyf3M0CTYUcVFA2JSHl1rn4i29tMY0LcUHA=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8CxvOI2WjhoESsCAQ--.24544S3;
-	Thu, 29 May 2025 20:59:34 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8Bxlmk5WjhoGSsCAQ--.21794S3;
+	Thu, 29 May 2025 20:59:37 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMBx3MQ0WjhoV7P6AA--.54884S2;
-	Thu, 29 May 2025 20:59:33 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMBx3MQ0WjhoV7P6AA--.54884S3;
+	Thu, 29 May 2025 20:59:37 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -27,9 +27,9 @@ Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
 	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH v2 10/35] mmc: sdhci-cadence: Drop the use of sdhci_pltfm_free()
-Date: Thu, 29 May 2025 20:59:18 +0800
-Message-ID: <ecec19e09e053f39b7a31d16238a559073de4a67.1748515612.git.zhoubinbin@loongson.cn>
+Subject: [PATCH v2 11/35] mmc: sdhci-dove: Drop the use of sdhci_pltfm_free()
+Date: Thu, 29 May 2025 20:59:19 +0800
+Message-ID: <891999b41fd6baa7ae1835d398040626aff36aff.1748515612.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1748515612.git.zhoubinbin@loongson.cn>
 References: <cover.1748515612.git.zhoubinbin@loongson.cn>
@@ -40,86 +40,58 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMBx3MQ0WjhoV7P6AA--.54884S2
+X-CM-TRANSID:qMiowMBx3MQ0WjhoV7P6AA--.54884S3
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7tw47XF4Dtr47WF1DJr45CFX_yoW8Ar13pa
-	1rAFZ3Cr18XF4rCrZ3Zwsrur1Ykw429ayDKFWrCw1xXrZIk3yUtr1xAFyjqFZ8trW8Ka1r
-	WF4qyr98uF98A3XCm3ZEXasCq-sJn29KB7ZKAUJUUUU7529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUBEb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
-	xVW0oVCq3wAaw2AFwI0_Jrv_JF1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0c
-	Ia020Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_ZF0_
-	GryDMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x
-	0EwIxGrwACjcxG6xCI17CEII8vrVW3JVW8Jr1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC
-	6x0Yz7v_Jr0_Gr1l4IxYO2xFxVAFwI0_Jrv_JF1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s
-	026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF
-	0xvE2Ix0cI8IcVAFwI0_tr0E3s1lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4UJVWxJr1lIx
-	AIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26r4UJVWxJr1lIxAIcVC2
-	z280aVCY1x0267AKxVW8Jr0_Cr1UYxBIdaVFxhVjvjDU0xZFpf9x07bOq2NUUUUU=
+X-Coremail-Antispam: 1Uk129KBj9xXoW7Jr4DXF45Zr1rGF48uw1DCFX_yoWfAwcEka
+	43XFWxGryrCrWxW347tF1ayryxKFnI9r1kurW8KFWag348Xr1DWay7Zr1Du34UuF18CFW3
+	Cr43Gw1xZw4jyosvyTuYvTs0mTUanT9S1TB71UUUUjUqnTZGkaVYY2UrUUUUj1kv1TuYvT
+	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
+	cSsGvfJTRUUUb6AYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
+	vaj40_Wr0E3s1l1IIY67AEw4v_Jrv_JF1l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
+	w2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
+	W8Jr0_Cr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
+	6rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYI
+	kI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVW3AVW8
+	Xw1lYx0Ex4A2jsIE14v26r4UJVWxJr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7V
+	AKI48JM4x0Y40E4IxF1VCIxcxG6Fyj6r4UJwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE
+	7xkEbVWUJVW8JwCFI7km07C267AKxVWUXVWUAwC20s026c02F40E14v26r1j6r18MI8I3I
+	0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_Jw0_GFylIxkGc2Ij64vIr41lIxAI
+	cVC0I7IYx2IY67AKxVWDJVCq3wCI42IY6xIIjxv20xvEc7CjxVAFwI0_Gr1j6F4UJwCI42
+	IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Gr1j6F4UJwCI42IY6I8E
+	87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnUUI43ZEXa7IU5Q0ePUUUUU==
 
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_pltfm_free() is no longer needed.
 
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-cadence.c | 21 ++++++---------------
- 1 file changed, 6 insertions(+), 15 deletions(-)
+ drivers/mmc/host/sdhci-dove.c | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index a94b297fcf2a..a37e6a1f5127 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -515,7 +515,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
- 	if (data->init) {
- 		ret = data->init(pdev);
- 		if (ret)
--			goto free;
-+			return ret;
- 	}
- 	sdhci_enable_v4_mode(host);
- 	__sdhci_read_caps(host, &version, NULL, NULL);
-@@ -524,33 +524,24 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
+index 77034b13fa66..dbfaee4a5ada 100644
+--- a/drivers/mmc/host/sdhci-dove.c
++++ b/drivers/mmc/host/sdhci-dove.c
+@@ -79,17 +79,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
  
  	ret = mmc_of_parse(host->mmc);
  	if (ret)
--		goto free;
+-		goto err_sdhci_add;
 +		return ret;
- 
- 	sdhci_cdns_phy_param_parse(dev->of_node, priv);
- 
- 	ret = sdhci_cdns_phy_init(priv);
- 	if (ret)
--		goto free;
-+		return ret;
- 
- 	if (host->mmc->caps & MMC_CAP_HW_RESET) {
- 		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
--		if (IS_ERR(priv->rst_hw)) {
--			ret = dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
-+		if (IS_ERR(priv->rst_hw))
-+			return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
- 					    "reset controller error\n");
--			goto free;
--		}
- 		if (priv->rst_hw)
- 			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
- 	}
  
 -	ret = sdhci_add_host(host);
 -	if (ret)
--		goto free;
+-		goto err_sdhci_add;
 -
 -	return 0;
--free:
+-
+-err_sdhci_add:
 -	sdhci_pltfm_free(pdev);
 -	return ret;
 +	return sdhci_add_host(host);
  }
  
- #ifdef CONFIG_PM_SLEEP
+ static const struct of_device_id sdhci_dove_of_match_table[] = {
 -- 
 2.47.1
 
