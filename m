@@ -1,43 +1,45 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3292623D281;
-	Fri, 30 May 2025 12:39:43 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD59322DF87;
+	Fri, 30 May 2025 12:39:46 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748608784; cv=none; b=tdtoB/rDQMsI6LPFFreZFFgVcq3KZeEHg8iSMeYVjg03XWdUOSuoySMPC3jknUHuC1A6k3HsnZYXNJ8Ljxd0O335/wDAJEwF9VTkouyWyvmC1g+NYcfiqpmG/kA+UiZRpZTmdBIBv0U8hvwhVWPgxSGhF+WiOYjAMaxLo006/iE=
+	t=1748608786; cv=none; b=Po60t/9F7uHTJTUdglirSNcZAhwm+c3KRqn6P+WpbfFHSnJfzs2CiK2P98gT5oeUSkL0NW5rslg8adPQKLs6nsf2szRCGg9Gt/gtfiYRnIO458FZblVir3wGy5Hi5gDisuCN4CldSw+1XQ+I7cwgREHvEcI/3R26/rGtyrcj2gs=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748608784; c=relaxed/simple;
-	bh=VTG8mc+5tZdUqmJU5Xxg5ZojBns19z0NgHe4lBHwX/4=;
+	s=arc-20240116; t=1748608786; c=relaxed/simple;
+	bh=WCfPEgF7U60SODsr12OJ4UDT8DSIMuvTRTm+GCIA8F0=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=VpkKpDs/r9w0rMqxAwGp9gNsfuw/pnGLj8njbzQxy+FGoco1ckyNjBYH24EzBY+W3zGHXW8GKU1aafTLitCXWz7TP+g8tZ+7+4vlKDccwGAmSLrwpZViqqJYQ5WFnfX4M/+XWe/mdLunxEA8hiJh15nuBac9Oo/dZ3K2nEDjgto=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JrdwjpEl; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=G7npqcmfD27ThJE5OjKAxsyTVaFkppOjdShcLjP4ebcEvVRgSLEeRhDi2v9QGzPP/c/0Y7rl7E4jiKsbBWJw+X8uSd251XN6+XEGDp3BmutmZcVlgM+OtVN/WOrTbGMAZ5fzOA968vs3ULoJQMnTlY1inPRdpSCxo8Jxrt56lsU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=QugkCWIk; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JrdwjpEl"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CBE31C4CEEB;
-	Fri, 30 May 2025 12:39:42 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="QugkCWIk"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49E54C4CEF0;
+	Fri, 30 May 2025 12:39:45 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748608783;
-	bh=VTG8mc+5tZdUqmJU5Xxg5ZojBns19z0NgHe4lBHwX/4=;
+	s=k20201202; t=1748608786;
+	bh=WCfPEgF7U60SODsr12OJ4UDT8DSIMuvTRTm+GCIA8F0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=JrdwjpElGV9mmXKY4fEu3MP6p8eoI9rDukhGSADF+YuXTaDRNgJSdAz/axcScGVkd
-	 xtoZSKadnArumN+Ud+9vFRB+MHtsBeV9+pGK15lchysYYpNVW5fmObhZHA1fnxdZ83
-	 0gTCZGpdGb4450lUfpBtJENA/eVl1InemC+BOqHB5Vuhr/mh3fuE1mJdlXySroPmEf
-	 kyf4Wc6BCvAMP6xc14Lx+g8/qRTBUHSn0MeHfeENHD/vapMU27RdUXMkWo/uRa8QiD
-	 SpqxP7B2AS1Za6HGxjN+6TqIpDkHCuUJYukRPjtH3+k4I1ymGR2cv/MRFA6i9l0dh0
-	 jLlko6MI18+pA==
+	b=QugkCWIk+lc+prLUscbvxu03O1lou4bXaxBNeV49i7Y3LGfDzkdnYkJrZa/kFwkQz
+	 4525Y2hIW6ZiY3p+fnYmCZJ+CsgzJNcjTlkNepTxC1wyLQ66RiDWsMc8K7SNHd2CX0
+	 I04DiEjyc8wi0IhC9EIuGL8JAGUpCbdtv2w7t0GRyoBQ4QeHl0yXIDP/YKfDH44rxp
+	 +GET6VwFRtLrvuCmuAmzvkENx3SLJBXGkFhHaOwx+JBElZLwrPhf0+8t5jZvJsrIGC
+	 hqsRAaTSITpnYE4mC5LgHWyccUo8AIKjnfgWUbTDMSy8rY6U2oQavg1iDekTGILR7u
+	 bWybTzfjKlJfQ==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
-Cc: Erick Shepherd <erick.shepherd@ni.com>,
+Cc: Luke Wang <ziniu.wang_1@nxp.com>,
 	Adrian Hunter <adrian.hunter@intel.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>,
 	Sasha Levin <sashal@kernel.org>,
+	shawnguo@kernel.org,
 	linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.14 07/28] mmc: Add quirk to disable DDR50 tuning
-Date: Fri, 30 May 2025 08:39:13 -0400
-Message-Id: <20250530123934.2574748-7-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.14 09/28] mmc: sdhci-esdhc-imx: Save tuning value when card stays powered in suspend
+Date: Fri, 30 May 2025 08:39:15 -0400
+Message-Id: <20250530123934.2574748-9-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
 In-Reply-To: <20250530123934.2574748-1-sashal@kernel.org>
 References: <20250530123934.2574748-1-sashal@kernel.org>
@@ -50,178 +52,251 @@ MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
 X-stable-base: Linux 6.14.9
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-From: Erick Shepherd <erick.shepherd@ni.com>
+From: Luke Wang <ziniu.wang_1@nxp.com>
 
-[ Upstream commit 9510b38dc0ba358c93cbf5ee7c28820afb85937b ]
+[ Upstream commit c63d25cdc59ae2891b39ba2da950910291d9bcbf ]
 
-Adds the MMC_QUIRK_NO_UHS_DDR50_TUNING quirk and updates
-mmc_execute_tuning() to return 0 if that quirk is set. This fixes an
-issue on certain Swissbit SD cards that do not support DDR50 tuning
-where tuning requests caused I/O errors to be thrown.
+For SoCs like i.MX6UL(L/Z) and i.MX7D, USDHC powers off completely during
+system power management (PM), causing the internal tuning status to be
+lost. To address this, save the tuning value when system suspend and
+restore it for any command issued after system resume when re-tuning is
+held.
 
-Signed-off-by: Erick Shepherd <erick.shepherd@ni.com>
+A typical case involves SDIO WiFi devices with the MMC_PM_KEEP_POWER and
+MMC_PM_WAKE_SDIO_IRQ flag, which retain power during system PM. To
+conserve power, WiFi switches to 1-bit mode and restores 4-bit mode upon
+resume. As per the specification, tuning commands are not supported in
+1-bit mode. When sending CMD52 to restore 4-bit mode, re-tuning must be
+held. However, CMD52 still requires a correct sample point to avoid CRC
+errors, necessitating preservation of the previous tuning value.
+
+Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/20250331221337.1414534-1-erick.shepherd@ni.com
+Link: https://lore.kernel.org/r/20250328112517.2624806-1-ziniu.wang_1@nxp.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
 
-**YES** This commit should be backported to stable kernel trees. Here's
-my detailed analysis: ## Bug Fix Classification This is clearly a
-**bugfix**, not a new feature. The commit fixes I/O errors that occur on
-specific Swissbit SD cards when DDR50 tuning is attempted. The commit
-message explicitly states: "This fixes an issue on certain Swissbit SD
-cards that do not support DDR50 tuning where tuning requests caused I/O
-errors to be thrown." ## Code Change Analysis ### 1. **Minimal and
-Targeted Changes** The changes are very focused and follow established
-kernel patterns: - **New quirk flag**: `MMC_QUIRK_NO_UHS_DDR50_TUNING
-(1<<18)` in `include/linux/mmc/card.h` - **Helper function**:
-`mmc_card_no_uhs_ddr50_tuning()` in `drivers/mmc/core/card.h` -
-**Specific card targeting**: Only affects Swissbit cards (manufacturer
-ID 0x5D) with specific model/date criteria - **Logic refactoring**:
-Extracts tuning decision into `mmc_sd_use_tuning()` function ### 2.
-**Low Risk Implementation** The implementation uses the existing MMC
-quirk infrastructure, which is well-tested: - Follows the same pattern
-as Similar Commit #2 (marked YES for backport) - Uses standard
-`_FIXUP_EXT()` macro with precise card identification - Only affects the
-specific problematic cards, leaving all others unchanged ### 3.
-**Controlled Scope** The quirk is highly specific: ```c
-_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1, 0, -1ull,
-SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd, MMC_QUIRK_NO_UHS_DDR50_TUNING,
-EXT_CSD_REV_ANY), ``` This targets only Swissbit cards with model
-"0016G", OEM ID 0x5342, manufactured in January 2019. ## Comparison with
-Similar Commits This commit closely matches **Similar Commit #2** (YES
-for backport), which also: - Adds quirk handling for specific hardware
-issues - Makes minimal, contained changes - Fixes real user-facing
-problems - Uses existing infrastructure Unlike **Similar Commit #1** (NO
-for backport), this commit: - Fixes an existing bug rather than adding
-new functionality - Doesn't introduce new interfaces or capabilities -
-Has minimal risk of regression ## User Impact Without this fix, affected
-Swissbit SD cards would be **unusable** due to I/O errors during tuning.
-This represents a significant hardware compatibility issue that makes
-the cards completely non-functional on affected systems. ## Stable Tree
-Criteria Compliance ✅ **Important bugfix**: Fixes I/O errors on specific
-hardware ✅ **Minimal risk**: Uses established quirk infrastructure ✅
-**No architectural changes**: Follows existing patterns ✅ **Contained
-scope**: Only affects specific problematic cards ✅ **No new features**:
-Pure hardware compatibility fix The commit follows the stable tree rule
-that quirks for hardware compatibility issues are generally acceptable
-for backporting when they fix real problems with minimal risk.
+Based on my analysis of the commit message, code changes, and
+examination of the kernel repository, here is my assessment: **YES**
+This commit should be backported to stable kernel trees. **Extensive
+Analysis:** **1. Bug Fix Nature:** This commit fixes a specific bug
+affecting SDIO WiFi devices on i.MX6UL(L/Z) and i.MX7D SoCs during
+system suspend/resume cycles. The problem occurs when: - SDIO devices
+maintain power during suspend (MMC_PM_KEEP_POWER) - USDHC hardware
+completely loses power despite software flags - Tuning values are lost,
+causing CRC errors on resume - This affects real-world WiFi
+functionality **2. Code Analysis - Key Changes:** The commit adds three
+main components: a) **Data Structure Addition** (line ~241): ```c
+unsigned int saved_tuning_delay_cell; /bin /bin.usr-is-merged /boot /dev
+/etc /home /init /lib /lib.usr-is-merged /lib64 /lost+found /media /mnt
+/opt /proc /root /run /sbin /sbin.usr-is-merged /snap /srv /sys /tmp
+/usr /var save the value of tuning delay cell model/ prompt/ src/
+target/ ``` This adds storage for the tuning value in the platform data
+structure. b) **Tuning Save Function** (`sdhc_esdhc_tuning_save`): ```c
+if (host->timing == MMC_TIMING_UHS_SDR50 || host->timing ==
+MMC_TIMING_UHS_SDR104) { reg = readl(host->ioaddr +
+ESDHC_TUNE_CTRL_STATUS); reg =
+FIELD_GET(ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK, reg);
+imx_data->boarddata.saved_tuning_delay_cell = reg; } ``` This safely
+reads and stores the current tuning delay value for modes that require
+tuning. c) **Tuning Restore Function** (`sdhc_esdhc_tuning_restore`):
+```c reg = readl(host->ioaddr + ESDHC_TUNING_CTRL); reg &=
+~ESDHC_STD_TUNING_EN; writel(reg, host->ioaddr + ESDHC_TUNING_CTRL); reg
+= readl(host->ioaddr + ESDHC_MIX_CTRL); reg |= ESDHC_MIX_CTRL_SMPCLK_SEL
+| ESDHC_MIX_CTRL_FBCLK_SEL; writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+writel(FIELD_PREP(ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_MASK,
+imx_data->boarddata.saved_tuning_delay_cell), host->ioaddr +
+ESDHC_TUNE_CTRL_STATUS); ``` This carefully restores the tuning value by
+manually configuring the hardware registers. **3. Risk Assessment - Very
+Low Risk:** - **Conditional Execution**: Both save/restore functions
+only execute when specific conditions are met: -
+`mmc_card_keep_power(host->mmc)` AND `mmc_card_wake_sdio_irq(host->mmc)`
+AND `esdhc_is_usdhc(imx_data)` - Only affects SDR50/SDR104 timing modes
+- Only targets specific SoC families (i.MX6UL(L/Z), i.MX7D) - **Register
+Manipulation Safety**: The code uses proper field masking (`FIELD_GET`,
+`FIELD_PREP`) and follows existing patterns in the driver - **No
+Architectural Changes**: This is purely a state preservation mechanism,
+doesn't change driver architecture **4. Comparison with Similar
+Commits:** Looking at the reference commits: - **Similar Commit #4
+(YES)**: Also fixes SDIO suspend/resume tuning issues with
+`mmc_retune_hold_now()` - **Similar Commit #5 (YES)**: Also addresses
+tuning-related problems by disabling CMD CRC checks This new commit
+follows the same pattern of fixing specific SDIO tuning issues with
+targeted, low-risk changes. **5. Hardware-Specific Nature:** The fix
+targets specific hardware (i.MX SoCs) where USDHC loses power despite
+software flags. This hardware-specific bug affects real users with SDIO
+WiFi cards and has a clear, contained solution. **6. Clear Problem
+Statement:** The commit message clearly describes the problem: "CMD52
+still requires a correct sample point to avoid CRC errors, necessitating
+preservation of the previous tuning value." This is a well-defined
+technical issue with a specific solution. **Conclusion:** This is a
+contained, hardware-specific bug fix that addresses real-world WiFi
+functionality issues on specific i.MX SoCs. The changes are
+conservative, well-guarded by conditions, and follow established
+patterns in the subsystem. The risk of regression is very low while the
+benefit to affected users is significant.
 
- drivers/mmc/core/card.h   |  6 ++++++
- drivers/mmc/core/quirks.h | 10 ++++++++++
- drivers/mmc/core/sd.c     | 32 ++++++++++++++++++++++++--------
- include/linux/mmc/card.h  |  1 +
- 4 files changed, 41 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 88 +++++++++++++++++++++++++++++-
+ 1 file changed, 86 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 3205feb1e8ff6..9cbdd240c3a7d 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -89,6 +89,7 @@ struct mmc_fixup {
- #define CID_MANFID_MICRON       0x13
- #define CID_MANFID_SAMSUNG      0x15
- #define CID_MANFID_APACER       0x27
-+#define CID_MANFID_SWISSBIT     0x5D
- #define CID_MANFID_KINGSTON     0x70
- #define CID_MANFID_HYNIX	0x90
- #define CID_MANFID_KINGSTON_SD	0x9F
-@@ -294,4 +295,9 @@ static inline int mmc_card_broken_sd_poweroff_notify(const struct mmc_card *c)
- 	return c->quirks & MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY;
- }
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ff78a7c6a04c9..7e8addaed697e 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -81,6 +81,8 @@
+ #define  ESDHC_TUNE_CTRL_STEP		1
+ #define  ESDHC_TUNE_CTRL_MIN		0
+ #define  ESDHC_TUNE_CTRL_MAX		((1 << 7) - 1)
++#define  ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK	GENMASK(30, 24)
++#define  ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_MASK	GENMASK(14, 8)
  
-+static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
-+{
-+	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
-+}
-+
- #endif
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 89b512905be14..7f893bafaa607 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
- 		   MMC_QUIRK_BROKEN_SD_CACHE | MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY,
- 		   EXT_CSD_REV_ANY),
- 
-+	/*
-+	 * Swissbit series S46-u cards throw I/O errors during tuning requests
-+	 * after the initial tuning request expectedly times out. This has
-+	 * only been observed on cards manufactured on 01/2019 that are using
-+	 * Bay Trail host controllers.
-+	 */
-+	_FIXUP_EXT("0016G", CID_MANFID_SWISSBIT, 0x5342, 2019, 1,
-+		   0, -1ull, SDIO_ANY_ID, SDIO_ANY_ID, add_quirk_sd,
-+		   MMC_QUIRK_NO_UHS_DDR50_TUNING, EXT_CSD_REV_ANY),
-+
- 	END_FIXUP
+ /* strobe dll register */
+ #define ESDHC_STROBE_DLL_CTRL		0x70
+@@ -235,6 +237,7 @@ struct esdhc_platform_data {
+ 	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+ 	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
+ 	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
++	unsigned int saved_tuning_delay_cell;	/* save the value of tuning delay cell */
  };
  
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index cc757b850e798..fc3416027033d 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -613,6 +613,29 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
- 	return 0;
+ struct esdhc_soc_data {
+@@ -1057,7 +1060,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+-	u32 ctrl;
++	u32 ctrl, tuning_ctrl;
+ 	int ret;
+ 
+ 	/* Reset the tuning circuit */
+@@ -1071,6 +1074,16 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+ 			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+ 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+ 			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
++			/*
++			 * enable the std tuning just in case it cleared in
++			 * sdhc_esdhc_tuning_restore.
++			 */
++			tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
++			if (!(tuning_ctrl & ESDHC_STD_TUNING_EN)) {
++				tuning_ctrl |= ESDHC_STD_TUNING_EN;
++				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
++			}
++
+ 			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+ 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+ 			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+@@ -1149,7 +1162,8 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+ 	reg |= ESDHC_MIX_CTRL_EXE_TUNE | ESDHC_MIX_CTRL_SMPCLK_SEL |
+ 			ESDHC_MIX_CTRL_FBCLK_SEL;
+ 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+-	writel(val << 8, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
++	writel(FIELD_PREP(ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_MASK, val),
++	       host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+ 	dev_dbg(mmc_dev(host->mmc),
+ 		"tuning with delay 0x%x ESDHC_TUNE_CTRL_STATUS 0x%x\n",
+ 			val, readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS));
+@@ -1569,6 +1583,57 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+ 	}
  }
  
-+/*
-+ * Determine if the card should tune or not.
-+ */
-+static bool mmc_sd_use_tuning(struct mmc_card *card)
++static void sdhc_esdhc_tuning_save(struct sdhci_host *host)
 +{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	u32 reg;
++
 +	/*
-+	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
-+	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
++	 * SD/eMMC do not need this tuning save because it will re-init
++	 * after system resume back.
++	 * Here save the tuning delay value for SDIO device since it may
++	 * keep power during system PM. And for usdhc, only SDR50 and
++	 * SDR104 mode for SDIO device need to do tuning, and need to
++	 * save/restore.
 +	 */
-+	if (mmc_host_is_spi(card->host))
-+		return false;
-+
-+	switch (card->host->ios.timing) {
-+	case MMC_TIMING_UHS_SDR50:
-+	case MMC_TIMING_UHS_SDR104:
-+		return true;
-+	case MMC_TIMING_UHS_DDR50:
-+		return !mmc_card_no_uhs_ddr50_tuning(card);
++	if (host->timing == MMC_TIMING_UHS_SDR50 ||
++	    host->timing == MMC_TIMING_UHS_SDR104) {
++		reg = readl(host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
++		reg = FIELD_GET(ESDHC_TUNE_CTRL_STATUS_TAP_SEL_PRE_MASK, reg);
++		imx_data->boarddata.saved_tuning_delay_cell = reg;
 +	}
-+
-+	return false;
 +}
 +
- /*
-  * UHS-I specific initialization procedure
-  */
-@@ -656,14 +679,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 	if (err)
- 		goto out;
++static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	u32 reg;
++
++	if (host->timing == MMC_TIMING_UHS_SDR50 ||
++	    host->timing == MMC_TIMING_UHS_SDR104) {
++		/*
++		 * restore the tuning delay value actually is a
++		 * manual tuning method, so clear the standard
++		 * tuning enable bit here. Will set back this
++		 * ESDHC_STD_TUNING_EN in esdhc_reset_tuning()
++		 * when trigger re-tuning.
++		 */
++		reg = readl(host->ioaddr + ESDHC_TUNING_CTRL);
++		reg &= ~ESDHC_STD_TUNING_EN;
++		writel(reg, host->ioaddr + ESDHC_TUNING_CTRL);
++
++		reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
++		reg |= ESDHC_MIX_CTRL_SMPCLK_SEL | ESDHC_MIX_CTRL_FBCLK_SEL;
++		writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
++
++		writel(FIELD_PREP(ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_MASK,
++				  imx_data->boarddata.saved_tuning_delay_cell),
++		       host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
++	}
++}
++
+ static void esdhc_cqe_enable(struct mmc_host *mmc)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -1900,6 +1965,15 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
  
--	/*
--	 * SPI mode doesn't define CMD19 and tuning is only valid for SDR50 and
--	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
--	 */
--	if (!mmc_host_is_spi(card->host) &&
--		(card->host->ios.timing == MMC_TIMING_UHS_SDR50 ||
--		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
--		 card->host->ios.timing == MMC_TIMING_UHS_SDR104)) {
-+	if (mmc_sd_use_tuning(card)) {
- 		err = mmc_execute_tuning(card);
++	/*
++	 * For the device need to keep power during system PM, need
++	 * to save the tuning delay value just in case the usdhc
++	 * lost power during system PM.
++	 */
++	if (mmc_card_keep_power(host->mmc) && mmc_card_wake_sdio_irq(host->mmc) &&
++	    esdhc_is_usdhc(imx_data))
++		sdhc_esdhc_tuning_save(host);
++
+ 	ret = sdhci_suspend_host(host);
+ 	if (ret)
+ 		return ret;
+@@ -1916,6 +1990,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ static int sdhci_esdhc_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
  
- 		/*
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 526fce5816575..ddcdf23d731c4 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -329,6 +329,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_SD_CACHE	(1<<15)	/* Disable broken SD cache support */
- #define MMC_QUIRK_BROKEN_CACHE_FLUSH	(1<<16)	/* Don't flush cache until the write has occurred */
- #define MMC_QUIRK_BROKEN_SD_POWEROFF_NOTIFY	(1<<17) /* Disable broken SD poweroff notify support */
-+#define MMC_QUIRK_NO_UHS_DDR50_TUNING	(1<<18) /* Disable DDR50 tuning */
+ 	ret = pinctrl_pm_select_default_state(dev);
+@@ -1929,6 +2005,14 @@ static int sdhci_esdhc_resume(struct device *dev)
+ 	if (ret)
+ 		return ret;
  
- 	bool			written_flag;	/* Indicates eMMC has been written since power on */
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
++	/*
++	 * restore the saved tuning delay value for the device which keep
++	 * power during system PM.
++	 */
++	if (mmc_card_keep_power(host->mmc) && mmc_card_wake_sdio_irq(host->mmc) &&
++	    esdhc_is_usdhc(imx_data))
++		sdhc_esdhc_tuning_restore(host);
++
+ 	if (host->mmc->caps2 & MMC_CAP2_CQE)
+ 		ret = cqhci_resume(host->mmc);
+ 
 -- 
 2.39.5
 
