@@ -1,155 +1,435 @@
-Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.14])
+Received: from mgamail.intel.com (mgamail.intel.com [192.198.163.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 200AC234973
-	for <linux-mmc@vger.kernel.org>; Fri, 30 May 2025 15:06:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.14
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D88F235057
+	for <linux-mmc@vger.kernel.org>; Fri, 30 May 2025 16:57:01 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=192.198.163.9
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748617593; cv=none; b=LXl6wBHzgQVDo6uDaOQx5c+V8eT4lMzZyd7NVfxOXQ91OREGuI8AIL/4u+WL3p46UaSznDXHGEDPM1tRJvlkv1lA4hq6K1MD9878CUjO/qzWuQWxoww5Rc9h9fmrvOjYNh47ogdwF+uylru+bWuKoXQw2HrE3XQSRmGziHwyT/w=
+	t=1748624223; cv=none; b=Z3K2z6XktqD3Pb1vz+5CT/N1o8TJWXGU5aqkg/xStADax1AIDwMPFoa26RKMYJwIBFbhSA3USy/wJGxFVwGnwuejvRekCvLDURTOEJ7xKB44QngsyuTS0d8zALZf37EEGUDVkCWKJTlm0YPrC7825YXVuaJ2HDFTg2e2Jf4Yx9o=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748617593; c=relaxed/simple;
-	bh=ZCvmrxN0r+pSdIzQoEagLM/oBx7scbk+wpbnyKhTWFI=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=on+iuDEIgVFHr6Tn979g3b1snNfa5vUoBDf8tBC4V4lyOT+w7hrSqKtzxbOkMycfP17bWPBerc7VeChipMC26hWenvMn6KzUozA5K9xeYQlVdhMHSnCttguiT2Bkf3s/hSDCrIGdK9967rIjvLHYsIv/KwGdyJ+SMdIH4YgmsCk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=DeCLZUuh; arc=none smtp.client-ip=198.175.65.14
+	s=arc-20240116; t=1748624223; c=relaxed/simple;
+	bh=ZzkMu2eswU0XrtqbnA3EJLuo4ciC5dil8kpg4aNzLB4=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=kDuOB280TxAiBHuzJ3PRjf7Ro4D2JkvCeelCkAB4MbG+evg9O3R48zUge+frYwHKV28hj9AU5sq5W6KVwEeGkZwUuDMC+GY+DDd1IL4MhwJch+TmZgbRRtbG0yENK7b93f6ioqcHdcry4mK4nuK3j6M9Xjj5uV6JyZZrj8BrRF4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=BUXXO/O0; arc=none smtp.client-ip=192.198.163.9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="DeCLZUuh"
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="BUXXO/O0"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1748617592; x=1780153592;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=ZCvmrxN0r+pSdIzQoEagLM/oBx7scbk+wpbnyKhTWFI=;
-  b=DeCLZUuhHLsQHZtJK5owsr+yp/w6c44EjQ5PTzkh5XEnlLNtRaea3COe
-   5uuouwj+q/9/YkT3uwBrirI07Y7Mf7bxW2JgAIwcJLHJ4cNT+S/SHgrj8
-   rm3qTDtapUDFXhQ2HJL9k0GgWXH8RpQkViAFfJpJDSYfFEUDiRhw5Zzz0
-   VhqMqw6Rp3wb1zXVE4B02Gr8qzPsId0NQKyIQ2M1wp0BglYKz1GH9opNL
-   v1ji/KnsTZnq2obNkKjPmsDpU8qRtFk3rxwSIM2O+MCkJvCQsJ/gTf8Ge
-   NMvdcLE77uDriLv2iwJXlfHF4MC+7QeQND46cq5vwlmMMdkdmv3AQluea
-   w==;
-X-CSE-ConnectionGUID: JpeL4xyuQsG7Qdqs6oja4Q==
-X-CSE-MsgGUID: lSa0rTP0TJ61ytlwi3TDkw==
-X-IronPort-AV: E=McAfee;i="6700,10204,11449"; a="54511358"
+  t=1748624222; x=1780160222;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=ZzkMu2eswU0XrtqbnA3EJLuo4ciC5dil8kpg4aNzLB4=;
+  b=BUXXO/O06Kf5pIW4mh6KoSnjXuzej/ylu53hc9Ipd3ucNzS0VqvUb0/3
+   CA/0xQvtvuVD+TIh5dJRWsbMe8v6XLwNDm8MSRMcWDcQw+pmSo8uQFlHg
+   2QKLt7l7SJlMUqVR6pi3as6hxzU4DT6xAkw46yCiC+1Uq7d7oTpWmjHl9
+   e6d0VbZ1CY0wqYm+lOv3D4tUfR4mlq8g9vTF933r6C1uHfQyX9dTA+UOU
+   bo7f3aTDTNK3AstNqxdy8Npge7BJjBipHmZqIxeMnuM0RyZj+i7TyTuRU
+   SEiOr/1Mphast0fNhGsQ7oN2z2h/2EUl69aRJzFa9G8mYsfHypHeYZC26
+   Q==;
+X-CSE-ConnectionGUID: nKH1kJ1LQNeLk5s2VG13Pw==
+X-CSE-MsgGUID: szTH/9PZQ72YJqVpbXEqCQ==
+X-IronPort-AV: E=McAfee;i="6700,10204,11449"; a="61392244"
 X-IronPort-AV: E=Sophos;i="6.16,196,1744095600"; 
-   d="scan'208";a="54511358"
-Received: from fmviesa006.fm.intel.com ([10.60.135.146])
-  by orvoesa106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 May 2025 08:06:32 -0700
-X-CSE-ConnectionGUID: hsejwFi4S9+9nDb9Y6uGBw==
-X-CSE-MsgGUID: Qd5osiNhSbaf69bqLl4g8w==
+   d="scan'208";a="61392244"
+Received: from orviesa010.jf.intel.com ([10.64.159.150])
+  by fmvoesa103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 May 2025 09:57:01 -0700
+X-CSE-ConnectionGUID: 5Z3YRrHgRs+SBwa0vm4qxQ==
+X-CSE-MsgGUID: KYxMK9MhSRiTFOyBG83Idg==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="6.16,196,1744095600"; 
-   d="scan'208";a="143735986"
-Received: from lkp-server01.sh.intel.com (HELO 1992f890471c) ([10.239.97.150])
-  by fmviesa006.fm.intel.com with ESMTP; 30 May 2025 08:06:27 -0700
-Received: from kbuild by 1992f890471c with local (Exim 4.96)
-	(envelope-from <lkp@intel.com>)
-	id 1uL1JR-000Xic-0p;
-	Fri, 30 May 2025 15:06:25 +0000
-Date: Fri, 30 May 2025 23:06:24 +0800
-From: kernel test robot <lkp@intel.com>
-To: Adrian Hunter <adrian.hunter@intel.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-	Haibo Chen <haibo.chen@nxp.com>,
+   d="scan'208";a="143892391"
+Received: from oandoniu-mobl3.ger.corp.intel.com (HELO localhost.localdomain) ([10.245.244.173])
+  by orviesa010-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 May 2025 09:56:56 -0700
+From: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Haibo Chen <haibo.chen@nxp.com>,
 	Aubin Constans <aubin.constans@microchip.com>,
 	Eugen Hristev <eugen.hristev@collabora.com>,
-	Karel Balej <balejk@matfyz.cz>, Ben Dooks <ben-linux@fluff.org>,
+	Karel Balej <balejk@matfyz.cz>,
+	Ben Dooks <ben-linux@fluff.org>,
 	Jaehoon Chung <jh80.chung@samsung.com>,
-	Hu Ziji <huziji@marvell.com>, Judith Mendez <jm@ti.com>,
-	Andrew Davis <afd@ti.com>, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci: Return void from
- sdhci_runtime_suspend_host() and sdhci_runtime_resume_host()
-Message-ID: <202505302212.ZprBxoVy-lkp@intel.com>
-References: <20250530122018.37250-1-adrian.hunter@intel.com>
+	Hu Ziji <huziji@marvell.com>,
+	Judith Mendez <jm@ti.com>,
+	Andrew Davis <afd@ti.com>,
+	linux-mmc@vger.kernel.org
+Subject: [PATCH V2] mmc: sdhci: Return void from sdhci_runtime_suspend_host() and sdhci_runtime_resume_host()
+Date: Fri, 30 May 2025 19:56:43 +0300
+Message-ID: <20250530165643.141295-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.48.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250530122018.37250-1-adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 
-Hi Adrian,
+It does not seem like these functions will ever need the return value,
+which is presently always zero.
 
-kernel test robot noticed the following build warnings:
+Simplify the usage by making the return type 'void' instead.
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on ulf-hansson-mmc-mirror/next v6.15 next-20250530]
-[cannot apply to shawnguo/for-next]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Adrian-Hunter/mmc-sdhci-Return-void-from-sdhci_runtime_suspend_host-and-sdhci_runtime_resume_host/20250530-202113
-base:   linus/master
-patch link:    https://lore.kernel.org/r/20250530122018.37250-1-adrian.hunter%40intel.com
-patch subject: [PATCH] mmc: sdhci: Return void from sdhci_runtime_suspend_host() and sdhci_runtime_resume_host()
-config: i386-buildonly-randconfig-002-20250530 (https://download.01.org/0day-ci/archive/20250530/202505302212.ZprBxoVy-lkp@intel.com/config)
-compiler: clang version 20.1.2 (https://github.com/llvm/llvm-project 58df0ef89dd64126512e4ee27b4ac3fd8ddf6247)
-reproduce (this is a W=1 build): (https://download.01.org/0day-ci/archive/20250530/202505302212.ZprBxoVy-lkp@intel.com/reproduce)
-
-If you fix the issue in a separate patch/commit (i.e. not just a new version of
-the same patch/commit), kindly add following tags
-| Reported-by: kernel test robot <lkp@intel.com>
-| Closes: https://lore.kernel.org/oe-kbuild-all/202505302212.ZprBxoVy-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
->> drivers/mmc/host/sdhci-esdhc-imx.c:2103:6: warning: variable 'ret' is used uninitialized whenever 'if' condition is false [-Wsometimes-uninitialized]
-    2103 |         if (host->mmc->caps2 & MMC_CAP2_CQE) {
-         |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/sdhci-esdhc-imx.c:2123:9: note: uninitialized use occurs here
-    2123 |         return ret;
-         |                ^~~
-   drivers/mmc/host/sdhci-esdhc-imx.c:2103:2: note: remove the 'if' if its condition is always true
-    2103 |         if (host->mmc->caps2 & MMC_CAP2_CQE) {
-         |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/sdhci-esdhc-imx.c:2101:9: note: initialize the variable 'ret' to silence this warning
-    2101 |         int ret;
-         |                ^
-         |                 = 0
-   1 warning generated.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
 
-vim +2103 drivers/mmc/host/sdhci-esdhc-imx.c
+Changes in V2:
 
-04143fbaeb5799 Dong Aisheng      2016-07-12  2094  
-2788ed42cdd755 Ulf Hansson       2016-07-27  2095  #ifdef CONFIG_PM
-89d7e5c131228a Dong Aisheng      2013-11-04  2096  static int sdhci_esdhc_runtime_suspend(struct device *dev)
-89d7e5c131228a Dong Aisheng      2013-11-04  2097  {
-89d7e5c131228a Dong Aisheng      2013-11-04  2098  	struct sdhci_host *host = dev_get_drvdata(dev);
-89d7e5c131228a Dong Aisheng      2013-11-04  2099  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-070e6d3ff5a696 Jisheng Zhang     2016-02-16  2100  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-89d7e5c131228a Dong Aisheng      2013-11-04  2101  	int ret;
-89d7e5c131228a Dong Aisheng      2013-11-04  2102  
-bb6e358169bf62 BOUGH CHEN        2019-01-07 @2103  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-bb6e358169bf62 BOUGH CHEN        2019-01-07  2104  		ret = cqhci_suspend(host->mmc);
-bb6e358169bf62 BOUGH CHEN        2019-01-07  2105  		if (ret)
-bb6e358169bf62 BOUGH CHEN        2019-01-07  2106  			return ret;
-bb6e358169bf62 BOUGH CHEN        2019-01-07  2107  	}
-bb6e358169bf62 BOUGH CHEN        2019-01-07  2108  
-5ef4a6a3b9ceac Adrian Hunter     2025-05-30  2109  	sdhci_runtime_suspend_host(host);
-89d7e5c131228a Dong Aisheng      2013-11-04  2110  
-d38dcad4e7b48f Adrian Hunter     2017-03-20  2111  	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-d38dcad4e7b48f Adrian Hunter     2017-03-20  2112  		mmc_retune_needed(host->mmc);
-d38dcad4e7b48f Adrian Hunter     2017-03-20  2113  
-3602785b341a95 Michael Trimarchi 2018-01-04  2114  	imx_data->actual_clock = host->mmc->actual_clock;
-3602785b341a95 Michael Trimarchi 2018-01-04  2115  	esdhc_pltfm_set_clock(host, 0);
-89d7e5c131228a Dong Aisheng      2013-11-04  2116  	clk_disable_unprepare(imx_data->clk_per);
-89d7e5c131228a Dong Aisheng      2013-11-04  2117  	clk_disable_unprepare(imx_data->clk_ipg);
-89d7e5c131228a Dong Aisheng      2013-11-04  2118  	clk_disable_unprepare(imx_data->clk_ahb);
-89d7e5c131228a Dong Aisheng      2013-11-04  2119  
-1c4989b000aeac BOUGH CHEN        2019-04-29  2120  	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
-d1b98305916bc0 Rafael J. Wysocki 2020-02-12  2121  		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
-1c4989b000aeac BOUGH CHEN        2019-04-29  2122  
-89d7e5c131228a Dong Aisheng      2013-11-04  2123  	return ret;
-89d7e5c131228a Dong Aisheng      2013-11-04  2124  }
-89d7e5c131228a Dong Aisheng      2013-11-04  2125  
+	Fix warning reported by kernel test robot:
+		drivers/mmc/host/sdhci-esdhc-imx.c:2103:6:
+		warning: variable 'ret' is used uninitialized
+		whenever 'if' condition is false
+		[-Wsometimes-uninitialized]
 
+
+ drivers/mmc/host/sdhci-acpi.c      |  8 +++-----
+ drivers/mmc/host/sdhci-esdhc-imx.c | 12 +++---------
+ drivers/mmc/host/sdhci-of-at91.c   |  8 ++++----
+ drivers/mmc/host/sdhci-pci-core.c  | 19 ++++---------------
+ drivers/mmc/host/sdhci-pxav3.c     |  8 +++-----
+ drivers/mmc/host/sdhci-s3c.c       | 10 ++++------
+ drivers/mmc/host/sdhci-xenon.c     |  9 ++-------
+ drivers/mmc/host/sdhci.c           |  8 ++------
+ drivers/mmc/host/sdhci.h           |  4 ++--
+ drivers/mmc/host/sdhci_am654.c     |  8 ++------
+ 10 files changed, 29 insertions(+), 65 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index e6c5c82f64fa..d04c633f2b59 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -1028,14 +1028,11 @@ static int sdhci_acpi_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+ 	struct sdhci_host *host = c->host;
+-	int ret;
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+ 
+-	ret = sdhci_runtime_suspend_host(host);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_suspend_host(host);
+ 
+ 	sdhci_acpi_reset_signal_voltage_if_needed(dev);
+ 	return 0;
+@@ -1047,7 +1044,8 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+ 
+ 	sdhci_acpi_byt_setting(&c->pdev->dev);
+ 
+-	return sdhci_runtime_resume_host(c->host, 0);
++	sdhci_runtime_resume_host(c->host, 0);
++	return 0;
+ }
+ 
+ #endif
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ac187a8798b7..089ed0ccd9c4 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -2106,9 +2106,7 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+ 			return ret;
+ 	}
+ 
+-	ret = sdhci_runtime_suspend_host(host);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_suspend_host(host);
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+@@ -2122,7 +2120,7 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
+ 		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
+ 
+-	return ret;
++	return 0;
+ }
+ 
+ static int sdhci_esdhc_runtime_resume(struct device *dev)
+@@ -2152,17 +2150,13 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 
+ 	esdhc_pltfm_set_clock(host, imx_data->actual_clock);
+ 
+-	err = sdhci_runtime_resume_host(host, 0);
+-	if (err)
+-		goto disable_ipg_clk;
++	sdhci_runtime_resume_host(host, 0);
+ 
+ 	if (host->mmc->caps2 & MMC_CAP2_CQE)
+ 		err = cqhci_resume(host->mmc);
+ 
+ 	return err;
+ 
+-disable_ipg_clk:
+-	clk_disable_unprepare(imx_data->clk_ipg);
+ disable_per_clk:
+ 	clk_disable_unprepare(imx_data->clk_per);
+ disable_ahb_clk:
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 97988ed37467..8f12ba6a4f90 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -251,9 +251,8 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+-	int ret;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
++	sdhci_runtime_suspend_host(host);
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+@@ -262,7 +261,7 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+ 	clk_disable_unprepare(priv->hclock);
+ 	clk_disable_unprepare(priv->mainck);
+ 
+-	return ret;
++	return 0;
+ }
+ 
+ static int sdhci_at91_runtime_resume(struct device *dev)
+@@ -300,7 +299,8 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 	}
+ 
+ out:
+-	return sdhci_runtime_resume_host(host, 0);
++	sdhci_runtime_resume_host(host, 0);
++	return 0;
+ }
+ #endif /* CONFIG_PM */
+ 
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 13a84b9309e0..7f66d426c3c2 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -152,18 +152,15 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
+ {
+ 	struct sdhci_pci_slot *slot;
+ 	struct sdhci_host *host;
+-	int i, ret;
+ 
+-	for (i = 0; i < chip->num_slots; i++) {
++	for (int i = 0; i < chip->num_slots; i++) {
+ 		slot = chip->slots[i];
+ 		if (!slot)
+ 			continue;
+ 
+ 		host = slot->host;
+ 
+-		ret = sdhci_runtime_suspend_host(host);
+-		if (ret)
+-			goto err_pci_runtime_suspend;
++		sdhci_runtime_suspend_host(host);
+ 
+ 		if (chip->rpm_retune &&
+ 		    host->tuning_mode != SDHCI_TUNING_MODE_3)
+@@ -171,26 +168,18 @@ static int sdhci_pci_runtime_suspend_host(struct sdhci_pci_chip *chip)
+ 	}
+ 
+ 	return 0;
+-
+-err_pci_runtime_suspend:
+-	while (--i >= 0)
+-		sdhci_runtime_resume_host(chip->slots[i]->host, 0);
+-	return ret;
+ }
+ 
+ static int sdhci_pci_runtime_resume_host(struct sdhci_pci_chip *chip)
+ {
+ 	struct sdhci_pci_slot *slot;
+-	int i, ret;
+ 
+-	for (i = 0; i < chip->num_slots; i++) {
++	for (int i = 0; i < chip->num_slots; i++) {
+ 		slot = chip->slots[i];
+ 		if (!slot)
+ 			continue;
+ 
+-		ret = sdhci_runtime_resume_host(slot->host, 0);
+-		if (ret)
+-			return ret;
++		sdhci_runtime_resume_host(slot->host, 0);
+ 	}
+ 
+ 	return 0;
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 3fb56face3d8..450d2d0e0c39 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -525,11 +525,8 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+-	int ret;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_suspend_host(host);
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+@@ -551,7 +548,8 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+ 	if (!IS_ERR(pxa->clk_core))
+ 		clk_prepare_enable(pxa->clk_core);
+ 
+-	return sdhci_runtime_resume_host(host, 0);
++	sdhci_runtime_resume_host(host, 0);
++	return 0;
+ }
+ #endif
+ 
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index bdf4dc0d6b77..dedc4e3a217e 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -714,9 +714,8 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
+ 	struct clk *busclk = ourhost->clk_io;
+-	int ret;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
++	sdhci_runtime_suspend_host(host);
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+@@ -724,7 +723,7 @@ static int sdhci_s3c_runtime_suspend(struct device *dev)
+ 	if (ourhost->cur_clk >= 0)
+ 		clk_disable_unprepare(ourhost->clk_bus[ourhost->cur_clk]);
+ 	clk_disable_unprepare(busclk);
+-	return ret;
++	return 0;
+ }
+ 
+ static int sdhci_s3c_runtime_resume(struct device *dev)
+@@ -732,13 +731,12 @@ static int sdhci_s3c_runtime_resume(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_s3c *ourhost = to_s3c(host);
+ 	struct clk *busclk = ourhost->clk_io;
+-	int ret;
+ 
+ 	clk_prepare_enable(busclk);
+ 	if (ourhost->cur_clk >= 0)
+ 		clk_prepare_enable(ourhost->clk_bus[ourhost->cur_clk]);
+-	ret = sdhci_runtime_resume_host(host, 0);
+-	return ret;
++	sdhci_runtime_resume_host(host, 0);
++	return 0;
+ }
+ #endif
+ 
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 098f0ea45cbe..15a76f8accea 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -648,11 +648,8 @@ static int xenon_runtime_suspend(struct device *dev)
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+-	int ret;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_suspend_host(host);
+ 
+ 	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+ 		mmc_retune_needed(host->mmc);
+@@ -687,9 +684,7 @@ static int xenon_runtime_resume(struct device *dev)
+ 		priv->restore_needed = false;
+ 	}
+ 
+-	ret = sdhci_runtime_resume_host(host, 0);
+-	if (ret)
+-		goto out;
++	sdhci_runtime_resume_host(host, 0);
+ 	return 0;
+ out:
+ 	clk_disable_unprepare(pltfm_host->clk);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 32fa0b2bb912..9e0941f5023a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3863,7 +3863,7 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 
+ EXPORT_SYMBOL_GPL(sdhci_resume_host);
+ 
+-int sdhci_runtime_suspend_host(struct sdhci_host *host)
++void sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+ 
+@@ -3880,12 +3880,10 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	host->runtime_suspended = true;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+ 
+-int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
++void sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
+ {
+ 	struct mmc_host *mmc = host->mmc;
+ 	unsigned long flags;
+@@ -3931,8 +3929,6 @@ int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
+ 	sdhci_enable_card_detection(host);
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdhci_runtime_resume_host);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f9d65dd0f2b2..6ccb21e50ee4 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -879,8 +879,8 @@ bool sdhci_enable_irq_wakeups(struct sdhci_host *host);
+ void sdhci_disable_irq_wakeups(struct sdhci_host *host);
+ int sdhci_suspend_host(struct sdhci_host *host);
+ int sdhci_resume_host(struct sdhci_host *host);
+-int sdhci_runtime_suspend_host(struct sdhci_host *host);
+-int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset);
++void sdhci_runtime_suspend_host(struct sdhci_host *host);
++void sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset);
+ #endif
+ 
+ void sdhci_cqe_enable(struct mmc_host *mmc);
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 73385ff4c0f3..e4d9faa05e11 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -1082,9 +1082,7 @@ static int sdhci_am654_runtime_suspend(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_suspend_host(host);
+ 
+ 	/* disable the clock */
+ 	clk_disable_unprepare(pltfm_host->clk);
+@@ -1106,9 +1104,7 @@ static int sdhci_am654_runtime_resume(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
+-	ret = sdhci_runtime_resume_host(host, 0);
+-	if (ret)
+-		return ret;
++	sdhci_runtime_resume_host(host, 0);
+ 
+ 	ret = cqhci_resume(host->mmc);
+ 	if (ret)
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests/wiki
+2.48.1
+
