@@ -1,31 +1,31 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A289B27144D;
-	Sun,  1 Jun 2025 23:39:53 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73007324361;
+	Sun,  1 Jun 2025 23:42:09 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748821193; cv=none; b=pwDNNBngsFAilljYBFsEeF3EwSfBLOd8j8JwYOFL4JgWoKUvcZ9e03R/oAS3fOOR5YVpfCCDM5peLF9QaRK967lnRoPGnA4HBgEPcYI4BrP6jXJtCRwyWUFEG/LzEdx33MGB/qD5CHnLVd302V+I89skRAZYp7mXbz8Vw2yGWVo=
+	t=1748821329; cv=none; b=SSvxcip4rDwoCP8MP2FMwX5KHOZwYjmVuL0+9QK45H69Vng2AuXIYm0PY6aloOdBFkuum4qFJ2R+ByKJDRmFQEbRt6ZgAiR+ceJhqYuy7LXz4K3IuCSkmEG8ilOiQMDVZPvFx5irAw4pVHgb6Uf+tzIcgut8rb7J4KzvXUwaoPc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748821193; c=relaxed/simple;
-	bh=fOnsBg/VhUtA4bBbip0N9HGhzwNCbivG0QhYyGCUaLY=;
+	s=arc-20240116; t=1748821329; c=relaxed/simple;
+	bh=zUfq0zFpOPmCH2FwqFhbmCTHG6iP26/GpUSnxPwZZkY=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=kCOpBYIQNJM7rPXK6iTxJyQ73l0WxxSponUDc5u6RJY5t/Dz/9ZB+M02ufxHsdG5Baj3rtx8gzAAE3w7UBeAgRSxZb7PSrghh77Jh1VIQ4PyLRAr+Ag4fhDwnWuf8gRtjvojLiFi3QI+0F2JXZEq3Fw/pMmY4kJ2/LInTg6I2wk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=g5ot6bqk; arc=none smtp.client-ip=10.30.226.201
+	 MIME-Version; b=Fk6lnk00k4OmOJybE9aiUW1E1piugwRt9RwqNCfSebTsOxQJe2enzi6rokntcm6K7G8iskgxOtJrQkfRMNbxbc/LAnPJwvdgAY5bIJcb3k2/HA8dlk8xfuYkgNIXTVohUXFlZg/+iVsuVb9TCOMpTGFr3tIYd5YfHQyo3J2eJzg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=uTCZ/Yxl; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g5ot6bqk"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A64E0C4CEEE;
-	Sun,  1 Jun 2025 23:39:51 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="uTCZ/Yxl"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B6A9C4CEEE;
+	Sun,  1 Jun 2025 23:42:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1748821193;
-	bh=fOnsBg/VhUtA4bBbip0N9HGhzwNCbivG0QhYyGCUaLY=;
+	s=k20201202; t=1748821329;
+	bh=zUfq0zFpOPmCH2FwqFhbmCTHG6iP26/GpUSnxPwZZkY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-	b=g5ot6bqkSmmknxtnljRGoa0YEbMJSkYSS+oXtzq9JkKWgsUOrp9Nx04K3TOC1MBte
-	 zlNq/7xrhLOzHEXuoEO820zn6vvK2ZnJN45ua0m7aDJEt44VN+JHEMUvvit5DMKKYG
-	 BJ3Mi0yBBJ0woF4flm2zaIxm6dZUGhMn7b1d+GqgS/+W7vwnJ83E5XeDgM2T6Mqgkj
-	 6jUjmQQWHb2BhjKso1Xab/1azlTx5Ocsl4B7alNj+dlJAqQYm4VxEPRPdYlMhvMGPt
-	 +K6RGAEffI2+GmYtaYlHUi1FWqRqZp+0vcUkfXQgIUiuJgUlMmmMsEqSlHYCQVJpzo
-	 8p+ZoxEnBoN2A==
+	b=uTCZ/Yxlpvp+v7qtPgq9puOp08PrF5Bo6WiH8wwvGmMxFfChXQS3pXaMVdXN1sNaH
+	 kNh/FoF18dR2iTll9eu/FssHWQjM8IV+UW195P/jEXAWcLV88Y9zxnKcRheQZPxHil
+	 DUueniU/BVTV9lisHvpwJzbUJudBsNCpZTXpoetUr10Lv8WqOfCKZfCYMZHD9UDJ4/
+	 KWlSuLl+6jiTKqLczAOFMoanxvrMstUE8pNSspldeW+Pt2NyQsS2O0NUiemLu7m8dh
+	 BuuB8OVCeWZdADdUdV962ToyZCtsewLZ8VaBaWKSEQzX4BSq3QV2AnqGGcX8uYhOSC
+	 kNhb05DITJgzQ==
 From: Sasha Levin <sashal@kernel.org>
 To: patches@lists.linux.dev,
 	stable@vger.kernel.org
@@ -37,16 +37,17 @@ Cc: Erick Shepherd <erick.shepherd@ni.com>,
 	keita.aihara@sony.com,
 	dsimic@manjaro.org,
 	jonathan@raspberrypi.com,
+	wsa+renesas@sang-engineering.com,
 	victor.shih@genesyslogic.com.tw,
 	cw9316.lee@samsung.com,
 	linux-mmc@vger.kernel.org,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.6 56/66] mmc: Add quirk to disable DDR50 tuning
-Date: Sun,  1 Jun 2025 19:37:33 -0400
-Message-Id: <20250601233744.3514795-56-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.1 50/58] mmc: Add quirk to disable DDR50 tuning
+Date: Sun,  1 Jun 2025 19:40:03 -0400
+Message-Id: <20250601234012.3516352-50-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.5
-In-Reply-To: <20250601233744.3514795-1-sashal@kernel.org>
-References: <20250601233744.3514795-1-sashal@kernel.org>
+In-Reply-To: <20250601234012.3516352-1-sashal@kernel.org>
+References: <20250601234012.3516352-1-sashal@kernel.org>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -55,7 +56,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
-X-stable-base: Linux 6.6.92
+X-stable-base: Linux 6.1.140
 Content-Transfer-Encoding: 8bit
 
 From: Erick Shepherd <erick.shepherd@ni.com>
@@ -144,7 +145,7 @@ index 8476754b1b170..fe0b2fa3bb89d 100644
 +
  #endif
 diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 89b512905be14..7f893bafaa607 100644
+index 12c90b567ce38..d05f220fdeee3 100644
 --- a/drivers/mmc/core/quirks.h
 +++ b/drivers/mmc/core/quirks.h
 @@ -34,6 +34,16 @@ static const struct mmc_fixup __maybe_unused mmc_sd_fixups[] = {
@@ -165,7 +166,7 @@ index 89b512905be14..7f893bafaa607 100644
  };
  
 diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index f02c3e5eb5c85..a06f3011e2b58 100644
+index 819af50ae175c..557c4ee1e2770 100644
 --- a/drivers/mmc/core/sd.c
 +++ b/drivers/mmc/core/sd.c
 @@ -618,6 +618,29 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
