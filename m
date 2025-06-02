@@ -1,159 +1,203 @@
-Received: from ix-euc1.prod.hydra.sophos.com (ix-euc1.prod.hydra.sophos.com [94.140.18.111])
+Received: from AM0PR02CU008.outbound.protection.outlook.com (mail-westeuropeazon11013021.outbound.protection.outlook.com [52.101.72.21])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 861E02222AF
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Jun 2025 13:53:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=94.140.18.111
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748872383; cv=none; b=UEVOa+ZxB+ncrLZM/hby5swCl+MCJoe4SdJRsYterS4zO5V+rXkAbBCVaFbmEcq+/+kYtCcKYE0x0KQRz1zcUo55EKoLriTOZbKId7fRPcNuNsqUxg4Pt2D4AA/4GcEChARUTTNXfkbhlXEJKAq9UaaT3WU6f1SIHqvmMVzU53g=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748872383; c=relaxed/simple;
-	bh=2HQuHMyJNs2kiSqNTZdNNhHXkOhHCn2yBYqwjGGZbh4=;
-	h=From:To:CC:Subject:Date:Message-ID:Content-Type:MIME-Version; b=dhpIxtIuOuikvsU/hRCR7jCcIurKKKgFe+le0clXDZrGnV/1n7kzSrND95/x4NZYN/a3MCguU8/o4hot0o21jqi13UQzIl41CQllLeyF5V/HVEavP35NMugUW8I9w7YN+JakHSUXnOy2OcGUxWME0jM2nTIGkkEEyyESYEUv04k=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=wut.de; spf=pass smtp.mailfrom=wut.de; dkim=pass (2048-bit key) header.d=wut.de header.i=@wut.de header.b=BmewAmFB; dkim=pass (2048-bit key) header.d=mail-dkim-eu-central-1.prod.hydra.sophos.com header.i=@mail-dkim-eu-central-1.prod.hydra.sophos.com header.b=OSJBKj9M; arc=none smtp.client-ip=94.140.18.111
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=wut.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=wut.de
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F13B72C3267;
+	Mon,  2 Jun 2025 15:02:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.72.21
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1748876528; cv=fail; b=K0Zy546qczB95X6X+hfaUEmEfYGgQKqVmovtOuGHEua8GUgBFR2W8KC1dnXpjds0o5spjrEC7M5AkYkki6Ek9K2bZjUD9soUiEwVKGZn8zn9qjyXpv3Ka91HID/yqDaa0GXWThucaC++jMzkNhROKYdktxbjV1p1RFJ9sfIld/E=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1748876528; c=relaxed/simple;
+	bh=343Xz6RTerf4vGtDGvpJOaNSsojVXGDygy30wdTioYg=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=uVCmbBvBy/13EWVXID+dwwymdDwljBLVq0g4nKJXy6ZQOy9H71izlheSAaXDElSchnxC77zq5foAk3gk6ikTrydfKny8OK5Xp+mNhwAVkL1ABdbMJ+PKxueLP6D8rMHNROV7a4QspfNHVQKf1KrMTdwyZWRLPXi9s9qBOYfAJ90=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com; spf=pass smtp.mailfrom=nxp.com; dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b=cWWs0uTq; arc=fail smtp.client-ip=52.101.72.21
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=nxp.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=nxp.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=wut.de header.i=@wut.de header.b="BmewAmFB";
-	dkim=pass (2048-bit key) header.d=mail-dkim-eu-central-1.prod.hydra.sophos.com header.i=@mail-dkim-eu-central-1.prod.hydra.sophos.com header.b="OSJBKj9M"
-Received: from id-euc1.prod.hydra.sophos.com (ip-172-20-0-70.eu-central-1.compute.internal [172.20.0.70])
-	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-	(No client certificate requested)
-	by ix-euc1.prod.hydra.sophos.com (Postfix) with ESMTPS id 4b9w6f68wPz6S1
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Jun 2025 13:43:54 +0000 (UTC)
-Received: from ip-172-20-0-196.eu-central-1.compute.internal (ip-172-20-0-196.eu-central-1.compute.internal [127.0.0.1])
-	by id-euc1.prod.hydra.sophos.com (Postfix) with ESMTP id 4b9w6V75hVzdZMp
-	for <linux-mmc@vger.kernel.org>; Mon,  2 Jun 2025 13:43:46 +0000 (UTC)
-X-Sophos-Product-Type: Gateway
-X-Sophos-Email-ID: 982dcad0f6c840ea9e9a3b553c039a7b
-Received: from mail.wut.de (mail.wut.de [87.193.174.109])
- (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
- (No client certificate requested)
- by relay-eu-central-1.prod.hydra.sophos.com (Postfix) with ESMTPS id
- 4b9w6T55GmznTVW; Mon,  2 Jun 2025 13:43:45 +0000 (UTC)
-From: Simon Lindhorst <S.Lindhorst@wut.de>
-To: "'linux-mmc@vger.kernel.org'" <linux-mmc@vger.kernel.org>
-CC: "'avri.altman@wdc.com'" <avri.altman@wdc.com>, "'ulf.hansson@linaro.org'"
- <ulf.hansson@linaro.org>
-Subject: [PATCH] command "rpmb write-key" not working
-Thread-Topic: [PATCH] command "rpmb write-key" not working
-Thread-Index: AdvTu+/iKCLrzJ2pQsyPxtiaraZZQg==
-Date: Mon, 2 Jun 2025 13:44:26 +0000
-Message-ID: <fa67d9b9358a4eeab2cb43471b08c2ec@wut.de>
-Accept-Language: de-DE, en-US
-Content-Language: de-DE
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=nxp.com header.i=@nxp.com header.b="cWWs0uTq"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=SEpMw1BGxXegj1nIAjbf4JpgTqsqezZ6n4lE5GeQstY9EEMjWXM7jOJ8siif2ULfsMrEmxJ6w3D4ozjuAdaenOLFC8Cb1nc+EX6vLsggwKbhDRtZzm+80RqoeiqkGma56agVlI1l3t4NrIIjoqYi+s9+8ShJ6j4cn9LXyu1PahovWgg8VZs81Z6ZkI+0KHiaDuYxh9IpEk7t7cMO3qnF+cWKmaxYFR5fFbtRUBvi37jNCw1emgBPOb6y18dYkgxc1C54DMy+mb/OOghSJU09y5Nna9LZIlRy70P3dgxqsZhmjrjK/f5KYYjaFzGbWlZhoqt/ssJWORk48QfyoFbAQQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=yQnsWIcj/5zCDGNG5be6pKkRU9FfeS5LYYT9K9r3KZQ=;
+ b=JHyRS1sZpUk0AeAbfOXNt+nR4hKtuLGWl7tKM0HOsdcKY5kYtxpCNmeI91vxW3Tz2NdBqegvt71OvOyJc7Kd8sprfnEwV9GYD8GPZYjW3enp+lyLQZZgnIX60zUCJGUgJczXe7e+b86bnAztCMPJxEFExnUpwlj4DJofMKJcxmXFWz/bH1eK7VmvbWTafg1eY9qu/zAHwAUBD3jMemKsCsPw2O+Z8OqFyyONNPbc/uWv/523Wd+ECuIOxrQ3509TzWaGnKic0GyjDhRm59Uwb5LneuVA3S6TLSIRS78KWn9iZ9/4aG0ks2RW4QqS4TwwS2fazilt2/5UltFKNQWSGg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=yQnsWIcj/5zCDGNG5be6pKkRU9FfeS5LYYT9K9r3KZQ=;
+ b=cWWs0uTqjCIbE38dchCD2yrKz1wDXe1XH7XFEbmmIq0uuKT+0Xtit0+9JXc+UpAts84Z8E1xRN5wl41J72PxZ+jtfYc5i88dPGm7ZbTX1c4c7Q2IKril66yyIl6wg/ND4wQq+UJcupnwCTemjugTfdETzrEXiILjAtko8kB8bNBDqv2WEov8aa5u8X0QTjCzBlfbln+RGj2LU1wO9NmiYnwWMOcM/94GDW+YbzkYbGaPE0NccTW/DBgs3wHpjqr0FWQ+xYiLXFPA6xFuAejueJAJwV3E3vwyAX4lAobweSAtracvngFC9T+wQzoo2IVsl0tJwXy/TLTNhLF11FOwUA==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com (2603:10a6:102:240::14)
+ by PA3PR04MB11107.eurprd04.prod.outlook.com (2603:10a6:102:4b2::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8769.26; Mon, 2 Jun
+ 2025 15:02:03 +0000
+Received: from PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06]) by PAXPR04MB9642.eurprd04.prod.outlook.com
+ ([fe80::9126:a61e:341d:4b06%6]) with mapi id 15.20.8769.025; Mon, 2 Jun 2025
+ 15:02:02 +0000
+From: Frank Li <Frank.Li@nxp.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Rob Herring <robh@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Shawn Guo <shawnguo@kernel.org>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Pengutronix Kernel Team <kernel@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS),
+	imx@lists.linux.dev (open list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE),
+	linux-arm-kernel@lists.infradead.org (moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE),
+	linux-kernel@vger.kernel.org (open list)
+Cc: imx@lists.linux.dev,
+	wahrenst@gmx.net
+Subject: [PATCH v2 1/1] dt-bindings: mmc: mxs-mmc: change ref to mmc-controller-common.yaml from mmc-controller.yaml
+Date: Mon,  2 Jun 2025 11:01:47 -0400
+Message-Id: <20250602150147.947883-1-Frank.Li@nxp.com>
+X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SJ0PR13CA0213.namprd13.prod.outlook.com
+ (2603:10b6:a03:2c1::8) To PAXPR04MB9642.eurprd04.prod.outlook.com
+ (2603:10a6:102:240::14)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X_Sophos_TLS_Connection: OPP_TLS_1_3
-X_Sophos_TLS_Delivery: true
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1748871866; 
- s=sophosd6ff3c4761c84b34a4cc368d61ad26fa; d=wut.de;
- h=Content-Type:Date:Subject:CC:To:From;
- bh=2HQuHMyJNs2kiSqNTZdNNhHXkOhHCn2yBYqwjGGZbh4=;
- b=BmewAmFBIJO1neSaWGlrPjyvbLVv4XsYZFBXEVUuBVjehQTK4P8R0KK7vyTCrav5
- IrwvVevkSsBmmbciB06LydT8rFe5ya4gFExA73jA9SPNCsg7plPozTyL2VGb3F+Nkfi
- m+JqlZATd07TYnV02N3UKgvbETyEXj2X06i/om83UHSElk5OvUMLiK2jDkbbjahOFzz
- Qs9OXpM7uYJRqIbsX1vPD0CPchd9dB2r4F6Y84rJXR+yb3ar3UcVG67HtY7R5JE31Io
- 2dsdGeY4y47b7CZTmWsv1BbIvAbXbev8NkaEjTHNhRQEJuOnHeosEjLOPe2nOzQYhXr
- 9ccWu17k9g==
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1748871866; 
- s=v1; d=mail-dkim-eu-central-1.prod.hydra.sophos.com;
- h=Content-Type:Date:Subject:CC:To:From;
- bh=2HQuHMyJNs2kiSqNTZdNNhHXkOhHCn2yBYqwjGGZbh4=;
- b=OSJBKj9MKvkOlWlWhs/JR6fP7oN3bmreH688RRc1dsKtW6o1Kb3d4rIr38bWklKb
- dC86wPS9e60V66c+PEPCYURl22ct0r5m48EfwEs9EiQ8TSY++WqI4WC319p7MucLW9s
- rcxTaYC24ULPK5o0TuSd6O4k+uEREJgfI7TijisyuOWjYSKs18Mc7Vs/F4J4Epjy6MP
- u7pUKyOopzjtv7QO7PDYhhg630ZORBBuzgtIcdGFRlzlVsLO5qSQpTFQUr8z52y4I1/
- bFF3+s692RZaEvQZLBCIE4GWreGNYeP01eGMRni3qa8oyakealN8EC3KTbVRXkXFCLB
- BmNtgCfEsw==
-X-Sophos-Email: [eu-central-1] Antispam-Engine: 6.0.2,
- AntispamData: 2025.6.2.131228
-X-LASED-SpamProbability: 0.085099
-X-LASED-Hits: BODYTEXTP_SIZE_3000_LESS 0.000000, BODY_SIZE_1000_LESS 0.000000,
- BODY_SIZE_2000_LESS 0.000000, BODY_SIZE_5000_LESS 0.000000,
- BODY_SIZE_7000_LESS 0.000000, BODY_SIZE_900_999 0.000000,
- CTE_QUOTED_PRINTABLE 0.000000, HTML_00_01 0.050000, HTML_00_10 0.050000,
- LEGITIMATE_SIGNS 0.000000, MULTIPLE_RCPTS 0.100000,
- MULTIPLE_REAL_RCPTS 0.000000, NO_CTA_URI_FOUND 0.000000,
- NO_FUR_HEADER 0.000000, NO_URI_HTTPS 0.000000, OUTBOUND 0.000000,
- OUTBOUND_SOPHOS 0.000000, SENDER_NO_AUTH 0.000000, SUPERLONG_LINE 0.050000,
- SUSP_DH_NEG 0.000000, TO_NAME_IS_ADDY 0.000000, __ANY_URI 0.000000,
- __BODY_NO_MAILTO 0.000000, __BULK_NEGATE 0.000000, __CC_NAME 0.000000,
- __CC_NAME_DIFF_FROM_ACC 0.000000, __CC_REAL_NAMES 0.000000, __CT 0.000000,
- __CTE 0.000000, __CTYPE_CHARSET_QUOTED 0.000000, __CT_TEXT_PLAIN 0.000000,
- __DQ_NEG_DOMAIN 0.000000, __DQ_NEG_HEUR 0.000000, __DQ_NEG_IP 0.000000,
- __FROM_DOMAIN_NOT_IN_BODY 0.000000, __FUR_RDNS_SOPHOS 0.000000,
- __HAS_CC_HDR 0.000000, __HAS_FROM 0.000000, __HAS_MSGID 0.000000,
- __IMP_FROM_MY_ORG 0.000000, __JSON_HAS_SCHEMA_VERSION 0.000000,
- __JSON_HAS_TENANT_DOMAINS 0.000000, __JSON_HAS_TENANT_ID 0.000000,
- __JSON_HAS_TENANT_SCHEMA_VERSION 0.000000, __JSON_HAS_TRACKING_ID 0.000000,
- __MIME_BOUND_CHARSET 0.000000, __MIME_TEXT_ONLY 0.000000,
- __MIME_TEXT_P 0.000000, __MIME_TEXT_P1 0.000000, __MIME_VERSION 0.000000,
- __MSGID_32HEX 0.000000, __MULTIPLE_RCPTS_CC_X2 0.000000,
- __NO_HTML_TAG_RAW 0.000000, __OUTBOUND_SOPHOS 0.000000,
- __OUTBOUND_SOPHOS_FUR 0.000000, __OUTBOUND_SOPHOS_FUR_IP 0.000000,
- __OUTBOUND_SOPHOS_FUR_RDNS 0.000000, __PRODUCT_TYPE_GATEWAY 0.000000,
- __RCVD_FROM_DOMAIN 0.000000, __SANE_MSGID 0.000000, __SCAN_D_NEG2 0.000000,
- __SCAN_D_NEG_HEUR2 0.000000, __SUBJ_ALPHA_END 0.000000,
- __SUBJ_STARTS_S_BRACKETS 0.000000, __TO_MALFORMED_2 0.000000,
- __TO_NAME 0.000000, __TO_NAME_DIFF_FROM_ACC 0.000000, __TO_NO_NAME 0.000000,
- __TO_REAL_NAMES 0.000000, __URI_MAILTO 0.000000, __URI_NO_WWW 0.000000,
- __URI_NS 0.000000
-X-Sophos-Email-Transport-Route: opps_tls_13:
-X-LASED-Impersonation: False
-X-LASED-Spam: NonSpam
-X-Sophos-MH-Mail-Info-Key: NGI5dzZmNjh3UHo2UzEtMTcyLjIwLjAuMzY=
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PAXPR04MB9642:EE_|PA3PR04MB11107:EE_
+X-MS-Office365-Filtering-Correlation-Id: 39ded934-49f5-4d14-b485-08dda1e66e99
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|1800799024|52116014|376014|7416014|366016|38350700014|921020;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?W15gsVBa1TJgaJjkG7lohFWxYiZjjnZwRug2u07Xh0OZbUw6RU+mac/wERJL?=
+ =?us-ascii?Q?BgJRm8cw9VEV9SCEBfbCQirMwvzqOzFx2y9X0103egTCfP+UIP4u2Th6BJl2?=
+ =?us-ascii?Q?lbb5Oy6WlceKp642CXlyjPqfkH0Rt00N8VV/vERHsVrBauONv4GENYKMokax?=
+ =?us-ascii?Q?Jur18Ck8uzhZayFHqOOrsqVSsyT2Ddea5UA4DeTtdcBIKmz8V632yCEcR75B?=
+ =?us-ascii?Q?KtJsvpJ5/1b0K7UAwvE9REXo8h00qjThsFpizec94vJmCejdJtjQRwL80zgv?=
+ =?us-ascii?Q?VUQLw2biyz7weWnAJqVOSlY3de06ytQjFLdWg9xmmYghr9BKTnO7ft230Uko?=
+ =?us-ascii?Q?0yDg+nM7cuCZtkWXFqjfliehQy3lzHM1THXyMuuIh1lSUd3IpPsvZDzYdF46?=
+ =?us-ascii?Q?Q8mQF9yxAJU8RxdYmzBNnZNjciOL54Stvp0joDjifat5FfZdYvBUHi27fD1Q?=
+ =?us-ascii?Q?gsv4B0qIL/VqVv77498qKe8/gMlizebwWgLj28JRQbNF11OSh05J9Q9P6Vfk?=
+ =?us-ascii?Q?gixS/qc0NEyDkL9WBv/f5v7P8yjX+5COWnMwBnhn106CtY6LlHJ9H5UMEq+b?=
+ =?us-ascii?Q?tSvNO6RtmljT6/pFSazRLYlyskMj+NTR97F3ml4Nr7UH3h0DL8MRyBrwWXki?=
+ =?us-ascii?Q?4K9DjnVXuuR6ch06ggxdanYSTAgqj63KYiU2m2oTxNJI/FlObU5vsGxZKLdu?=
+ =?us-ascii?Q?Po9hnpduC3VNiGUdKa5QmEuTEYlTKAmbr+p0uR4RIvmMiJjmLU3p/5MwSfge?=
+ =?us-ascii?Q?XR2UuDuAPvWM+TQEwLmH4bNwqah4zhCp7fCUNALX0+OBBK1MTm/TAWONwz7p?=
+ =?us-ascii?Q?O/b+OoAk8HMRpaXZKHfNpyhU6eoKwn41YZ3HbKr3Yl9gTUPHqI0nxL/3XYVM?=
+ =?us-ascii?Q?d1qAg2sb85X3MjAolk6vpVhQgFM8aDsm1oFOOK0By4XCf0XBG6n6XhGmiw7X?=
+ =?us-ascii?Q?K+wTycMJLQsKReE87HwYOKXPF4UY5EgDTdrR3mz+JV95fdDU8jbcn/R9XBLG?=
+ =?us-ascii?Q?Kas0Kb1hemDd58JJHRTVLxEECS2yPdKrLDo678YzKwJdyYCQEK0rAJBqHrBV?=
+ =?us-ascii?Q?ikGeqNsRyIFcpIY8anmPQ/Mh+ee69BKNWsNC3tCuDNstZG6eqOPJIPrHDDOP?=
+ =?us-ascii?Q?HrXAVqbks8edNO1ZNCtDB+vWl97OzCLpTdJkYyHQD1bzlLokUP0cyK+dF58g?=
+ =?us-ascii?Q?t2zdqtdUQv5TNtKzHp3X1Q3JE51RDCop5Hk5ooe7P6CjcyKkptcIGz/ROHyd?=
+ =?us-ascii?Q?4Q3cytndqHNPleAWutmGW/9me9XWD7SlxVYHDS+gOs/F55UhsMS5PKUsJTS8?=
+ =?us-ascii?Q?XfVwvwlnHdBN661FK1MYbA9RBqk1xo6O+RxbnquLlAaBFtyf72Qr0M8oDpqj?=
+ =?us-ascii?Q?rStkVlBLmXw+VtD7gj0vVUF0Mk/vbzFsJYXWC1jx1hOwEozg+53Lh8eKw42A?=
+ =?us-ascii?Q?xXOyL/salzzWsFjqUfqUlM8Kvf4l6G6P+4DXnR/fvntNn4fOA0x6vCwtwb6m?=
+ =?us-ascii?Q?APGJn1Oo3uSpXVo=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PAXPR04MB9642.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(52116014)(376014)(7416014)(366016)(38350700014)(921020);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?L4hcOyI84+V6T5RyHowTSu66IBelxjbHMz8sjJmF/hgIy9TQmfxeiZqUsEfJ?=
+ =?us-ascii?Q?btT640X18BI+Lj2OXFYRRUISkSQioGG0jAeEEH+mXbwMDAVk/kDa38JEfdkD?=
+ =?us-ascii?Q?ZjodekZldAMxiI8nC0dliFFnxA5u02ir77bP59AexCfQJn+xlVuDDqaoJM3F?=
+ =?us-ascii?Q?mOoW+8bGJX7MSXtzfAd0op56sNMgZGYjvdJeTQZ14JQLgBo9z9i2PhCx2oEX?=
+ =?us-ascii?Q?BhrwheQzDfPoKSOZXeWaf3MPj3UeHUiyloA7PsRG/zKU47IAURFQSCr7XTo4?=
+ =?us-ascii?Q?+TcIQLfhfftgK1KCp3r/Hj910I3xH6McnsviZilzYbR7o3/yCboc7nnKcLQ4?=
+ =?us-ascii?Q?qeldgOzTn2SbsFr3c0cQ9UJDHGmOw5RmKSW+yrsHtuYarSN1jV+WKjZc1N9g?=
+ =?us-ascii?Q?r7Y08cD1WzTaRTOc6yqv/R+P46oBbjSTFQaPaqW2cY/oRsi9dJf290ABpVGp?=
+ =?us-ascii?Q?Z8bcvAX3B73RoWotPUBqhS72Eih2EdDSpknjCNHeqVKYeKDStKQHuRXuLVoI?=
+ =?us-ascii?Q?R1b1l9qACg59IkM2R42CTymxQ5UUW+PanFTGmaB1f8xE/i3j22pZaFDJBz74?=
+ =?us-ascii?Q?bmAtDbGmAd1xlqtDE9kb37iMaPKflnsTXp5tJ2rXmAIX4ZWGgCN+K6yginOi?=
+ =?us-ascii?Q?ywPpNSckBAtHpaqN6wPGHo9sAouR4fnaMx67xqQ+2zMqSho/3JqN1G+vkwff?=
+ =?us-ascii?Q?iQ1+bWH/UX4UQtzqOLsYGaOb2uRQL11nIYpqzeJ4T3slD+RPGWBQ0YqVZzK3?=
+ =?us-ascii?Q?28uoIDZnSQ/Sh1T+Az5X6RTywPjPe0eQa/5jJMiyyy3L1r2yUeMdQ9RfCVv7?=
+ =?us-ascii?Q?d6Q+S7zX+09ijPpbVz+sMoDr/RCVGMwQ+dbK5BNZbv8+vu7RoMq8OX71ngtu?=
+ =?us-ascii?Q?Az9zdWjmI/BVjKamAK1SdHdRkAlvnyL5h4fL1SSr69p40h8Qnt5HiqMS0VHY?=
+ =?us-ascii?Q?aUW6YiNmNrorVXqB+EHlShOTIhhWaZV/eDx4cbhwxnEFii42W4YRRZ0/0zIG?=
+ =?us-ascii?Q?USXdvGu0meOOrJjOGwhCGaGeBnY7q4sy7NrS4j94X0ftL7upXdk0rMUXQAX6?=
+ =?us-ascii?Q?bS9+BbFMXVdGdthYNpczccBCCugGbTJKY6v6w30Sila+6OK/cwCUTgo9Dqgp?=
+ =?us-ascii?Q?cI7XVpo/Ep/OwzhpEWy18O9eJswyvssOUnXRTDgJpWZG4o4t4hqTEs+KaRfv?=
+ =?us-ascii?Q?Qg2WZAYqFH+W0j9xgfP43YLUFryIm6txrn3/yRvboovB6Qa3T2k4WxtcZgK3?=
+ =?us-ascii?Q?wC/Oxvkctgu4Tmh34TnXH8xSaxKxJE/lN/yVwVnuY3+3Z1ubuj1aIvzUMfKx?=
+ =?us-ascii?Q?omzE+gWsEoFI4uT7U9woQHZ+LgQBX77NFh3+lW0pHQp7bq9cvPrz3ypyLvVC?=
+ =?us-ascii?Q?yiIColwN3hk5elUTZ6Lf87aLSCcgsroU0LPeWdxuo38io2NyMtLRsx8T+tol?=
+ =?us-ascii?Q?rypNr2i37e8BugTw8MP1W5RaeBznmEBjMfle1PqMl2MeXJ6zvtOu9l+FBbcV?=
+ =?us-ascii?Q?4f6EcXzuvfQX+q0YkBBpfpiObkN7tu9LMdele9MF22rlr2zdGfoYVSuPgDF7?=
+ =?us-ascii?Q?5+IRsNK5SvD2BikmHyE=3D?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 39ded934-49f5-4d14-b485-08dda1e66e99
+X-MS-Exchange-CrossTenant-AuthSource: PAXPR04MB9642.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Jun 2025 15:02:02.8804
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: cchrKuyNX04bj3xpMYWH/m5YFsed4BbAm6SQCLfRivdKO+6fuL7Q5CXyoEGQnGLJ55R6amJvu4nIYuS3mXJO7Q==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA3PR04MB11107
 
-Hello,
+Change ref to mmc-controller-common.yaml from mmc-controller.yaml because
+imx23/imx28 use dual mode controller (spi and mmc). So default dts node
+name use spi instead of mmc. The legacy reason, it use difference
+compatible string to distringuish work mode (spi / mmc).
 
-I am wondering how the call "rpmb write-key" works. Isn't it the case that =
-the content of the keyfile is read in, but not stored in the structure "str=
-uct rpmb_frame" before "ret =3D do_rpmb_op(dev_fd, &frame_in, &frame_out, 1=
-);" (mmc_cmds.c:2296)?
+Fix below CHECK_DTB warnings:
+arch/arm/boot/dts/nxp/mxs/imx23-olinuxino.dtb: spi@80010000 (fsl,imx23-mmc): $nodename:0: 'spi@80010000' does not match '^mmc(@.*)?$'
 
-If I am right, I suggest the following patch:
+Additional add clocks property.
 
-Fixes: rpmb write-key did not work
-
-Fixes: 05051e40351c ("mmc-utils: Refactor RPMB key handling into a separate=
- function ")
-Signed-off-by: Simon Lindhorst <s.lindhorst@wut.de>
+Signed-off-by: Frank Li <Frank.Li@nxp.com>
 ---
- mmc_cmds.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+change in v2
+- add clocks to required
+- fix typo legancy in commit message
+---
+ Documentation/devicetree/bindings/mmc/mxs-mmc.yaml | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index b2cc3d6..7994223 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2289,7 +2289,7 @@ int do_rpmb_write_key(int nargs, char **argv)
- =09=09exit(1);
- =09}
-=20
--=09ret =3D rpmb_get_key(argv[2], &frame_in, NULL, false);
-+=09ret =3D rpmb_get_key(argv[2], &frame_in, frame_in.key_mac, false);
- =09if (ret)
- =09=09return ret;
- =09/* Execute RPMB op */
---=20
-2.43.0
+diff --git a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml b/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
+index 32e512a68ed61..f71db2229909d 100644
+--- a/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
++++ b/Documentation/devicetree/bindings/mmc/mxs-mmc.yaml
+@@ -17,7 +17,7 @@ description: |
+   and the properties used by the mxsmmc driver.
+ 
+ allOf:
+-  - $ref: mmc-controller.yaml
++  - $ref: mmc-controller-common.yaml#
+ 
+ properties:
+   compatible:
+@@ -31,6 +31,9 @@ properties:
+   interrupts:
+     maxItems: 1
+ 
++  clocks:
++    maxItems: 1
++
+   dmas:
+     maxItems: 1
+ 
+@@ -41,6 +44,7 @@ required:
+   - compatible
+   - reg
+   - interrupts
++  - clocks
+   - dmas
+   - dma-names
+ 
+-- 
+2.34.1
 
--- Unsere Aussagen k=F6nnen Irrt=FCmer und Missverst=E4ndnisse enthalten.
--- Bitte pr=FCfen Sie die Aussagen f=FCr Ihren Fall, bevor Sie Entscheidung=
-en auf Grundlage dieser Aussagen treffen.
----------------------------------------------------------------------------=
----------------------------
-Wiesemann & Theis GmbH | Porschestr. 12 | D-42279 Wuppertal=20
-Gesch=E4ftsf=FChrer: Tobias Theis (M. Eng.)=20
-Amtsgericht Wuppertal | HRB 6377 | Infos zum Datenschutz: https://www.wut.d=
-e/datenschutz
-Tel. +49 202/2680-0 | Fax +49 202/2680-265 | https://www.wut.de
