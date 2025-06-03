@@ -1,58 +1,58 @@
-Received: from mail-pl1-f180.google.com (mail-pl1-f180.google.com [209.85.214.180])
+Received: from mail-pl1-f182.google.com (mail-pl1-f182.google.com [209.85.214.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 73BA22C3259
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 20:03:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9A66F224256
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 20:49:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748980981; cv=none; b=IQPBQNSRQSsA9RnUBIwpVGpRKq7ERVI425pFvFtfJIFJNFtrVQ1rXte7q+1/sh78sw9GqQn1vpMIGzg0PnQMR6dIH50cPwoZvTfZ/dg4kBDUnq6u+vu6Yc3pDe8RzaIgVcTjCJ/kOxewWZ9bgyZgs3APc+yPJ5B/Sj3MRlsv/2Q=
+	t=1748983772; cv=none; b=XxlPXu4qofvTQjPPYBDA1c43pDrgbKtmwM4tlrbrZPj6eNKSCJnC7GmGqz57gTqdMHYpckcg5t2V9w5ss3Qkc2cwuRJn21d22TpHJLHBCilWiS5T9Ug5m9KoEFD/TlDF1Any0isfLpUDXLPNWsvAcwXvA9PYGeY3FMF9iNBRmp0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748980981; c=relaxed/simple;
-	bh=goHusBMVRCDppDDvXatzueZJ7OJjVoJkP0enqCySv1k=;
+	s=arc-20240116; t=1748983772; c=relaxed/simple;
+	bh=YlwGKC6HtcuENaK3I37u7a5DuucmksNFLWx+nRhDb6c=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Q1e1bt9htMBC1fn0J4xFKA0ZbzY4O4m8KSgWriEBYD7lrA9Mrm+oRdAqL/RncG5+pbmIuwbFRD1G79Qpy180Z+bwHMt9YZD9Djcog1akCanXmce23Aqw8961C42axFe3h3H08TTlzEyXQnmui4tbARHJUat6bizlGeSyAjc1h5s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=M7Co2jqh; arc=none smtp.client-ip=209.85.214.180
+	 To:Cc:Content-Type; b=bbniQRRB5Lq+uEs2tK4cP2lJMeKtsLbZ/zT2ol7Qi4YpiPfypByx7R4vvxsx2dsy0vFdEQWQzjCdDgpvyRb4NILxAbsQnNswaCVizORe/IRNdsfeCYjDiK/MiypmOYTsZziVcWs2xrAySKJgCuAgmhCO5dIFk5wMA5/q/VEi8dk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=CSQPZmy6; arc=none smtp.client-ip=209.85.214.182
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="M7Co2jqh"
-Received: by mail-pl1-f180.google.com with SMTP id d9443c01a7336-2301ac32320so57013715ad.1
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Jun 2025 13:03:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="CSQPZmy6"
+Received: by mail-pl1-f182.google.com with SMTP id d9443c01a7336-231e8553248so58731785ad.1
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jun 2025 13:49:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1748980979; x=1749585779; darn=vger.kernel.org;
+        d=googlemail.com; s=20230601; t=1748983770; x=1749588570; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=goHusBMVRCDppDDvXatzueZJ7OJjVoJkP0enqCySv1k=;
-        b=M7Co2jqhOW/yMyLgwIKsx5B9xy3xIBXDhaS3/6CTjJhrLawbQYI8R8zkj4My82xiDK
-         Of8NXSppJY5edAZ7zjh1rdFxa3yXYd+oQrwJ33XC6/rVy3XFrZDBll6DLE9f7D7yoFQQ
-         Eibju3JrL1uefXXuutydfC23+QS4SRRivWu7O2gjVZT2GcfBliFRjGQSThlaKoUTFYiQ
-         aJZDZTnl+SHSwSlx2+8kKGEnDOsIpp6XpX9C1SRt60BrTtUcSDRHyZzWEQ7C5l/zNWPV
-         ZMAdjUvCkzUxtGiqZ9ia0+JEyAOCEEhxFaRbKMA6Pn9V7XiXz0yxFVFVKB3RkFmYqBGw
-         m+Vw==
+        bh=BT6b8lrgqqFgJL1GBl4bDuZB9RiEcEu9mJDEkOukBE8=;
+        b=CSQPZmy6yb3BHiwLtSYQdWy8lJt5SFwrtlDwqRQ9BC6CxLh+/mz8X7ITWh8v79Xfbm
+         hnwlvEsWZXN3xXZEs86mhe/XxTCFEjcisOSKFAGST/1jefytBIS80ZBAnU64veu48tXA
+         beLmRqo4Ll8JaFfTMjnrOD8gydUFGv4iUUZYFpkJVTbncH9E7yIjsdhCMPPZH5lofpXm
+         jmaH7Lfyd9eqML/vDQtAx3VJ7L5tZ/OzuQhETTtUh7xNAsxumv3kIhJ+bUsQqJHFxveJ
+         S9OBVjOg5dt2UveMfbyDQ8J2druohQlJoGQA7UDXPx7J33+uNjKYo30ixOJ5wmtaz3QG
+         jnDA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748980979; x=1749585779;
+        d=1e100.net; s=20230601; t=1748983770; x=1749588570;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=goHusBMVRCDppDDvXatzueZJ7OJjVoJkP0enqCySv1k=;
-        b=Hl/EU/i7Pwd8nshK+1G6lDWoslQSJbP2/vAKyGWaz7Lh7E0qrqUjF5uK+ZxvKDLJ0E
-         e8r5FGRrozhMjlrM+CtK3iDsM2ow9rx5GQ9nautxeoDvFn9El1TCCd8z5iKquFyq6fZg
-         uKKiIgwfjFy8j5LCEKz4sO1YiUlePSIjCSgJEB8Zc3p7ZbNpCNQPGNXoVkJDsVVCB1XT
-         D+PPusMCxNLqceEFPkgan0ElKpfGyE3Osp0/gENSHIB89yxp/gBAhiptfOjQ3Of8gzat
-         VGUPPVJD5V5vhivljYvfZ4QkvyPoNYhIjLLUV4X3kP9ro/BoIpTa68eEys+fTg4qZBjJ
-         uSwg==
-X-Forwarded-Encrypted: i=1; AJvYcCXhENeDj2+0KezNj/5+8TGqU+W2fPZ53iKxbf/Jh+vCL9nHIRcY2qdZAleBa9+xzZx+aPxW8oOya24=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzwRgBalhooV0/NnhiwwkjzA1DPh0VWWtLcbf6DTXj28gbKZR7/
-	C+DWiDsAlbT0he4vdLPRyPaI4v7Dlnuc9182u4ibCaOV/amcRGlIO82czqIzaDOrHAgDMXgHtZo
-	Utf0QE2Of35Ql6M40yZaWC4TG/wth4TU=
-X-Gm-Gg: ASbGnct3zCTf0C102LTbcjjfYGsA5DQxJAVfG4GMjXlmTSHPfB/yLeu6r/kJSdsjPC/
-	XM/v4I0JWjHdcLeLxltThYeI+rpxv4GhGsRJTZ/WsQ7JmWFQ2KkXGQOymSv1fmBQ6H1B20/MX5H
-	4OCSvza6PMgQn203hQ0ZylwxQUegQzTBmopQBLJ/lt2rb/iqKGpUwtOYAu/Nyt2bXFdA==
-X-Google-Smtp-Source: AGHT+IFtmS1mRommJ8MTkeFJwlhiYQi9DZ7pKoUkfBSjN2zupob6rpPcp2pyQ0X0juqPVddSGYKDkJlzvCZ8uMCxpFk=
-X-Received: by 2002:a17:902:ce81:b0:232:1daf:6f06 with SMTP id
- d9443c01a7336-235e120c3b6mr670445ad.47.1748980979658; Tue, 03 Jun 2025
- 13:02:59 -0700 (PDT)
+        bh=BT6b8lrgqqFgJL1GBl4bDuZB9RiEcEu9mJDEkOukBE8=;
+        b=irzBV2M/SEFMucivQqiHHnoEo6F+ty/hYVPAOonVN29T/A0sN/Ame9o51oe/r/PDX1
+         m6XHNvKJhzP4mx6G2dplmDQd1NBJsM5dSHDdNw0hxET52GCw8WpWhPVSt1Cd0o8FZKc+
+         dU1W2ESJYS2XnpXHoGIzcYiNxDYZ0BPUsa3qVCFuX5Dg+LA8Ko3CDmg+IEN9Ei04Xiej
+         BbYxEPuNbxSk/NTbJjcKL6LxSkH7DmRoq+GgRmpXIeiTNAvEsvxGlDQpTqe2LMLsglhn
+         RXR8P+bEll30WCVvBi6BtJEasR3eeraPS2YeD5YrJWsyMgqU5U4rPDkrPC8OOwmBaD95
+         kRDg==
+X-Forwarded-Encrypted: i=1; AJvYcCVbICStOLTxx3s31kIXC5UWxzmTIyuFLby08va+50adYUIuYYUPYDjkPowQ4hMNf1oy+Qkl761BwXk=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyVyrd7KKnQKxsjGDnj9eejil9TqCyl6N28tjZTaF833P6NGMC9
+	SIRHmHl2a1czMx7fD4VIQDsIMrWZZbIWoEbdpJhcSHGQEkZM51XQcXnux78LSzePXLSwtCkmCab
+	F3yKtB5W/F17aGRmHq3bv8aFNERMutPY=
+X-Gm-Gg: ASbGncvbVjJfsGoA6PqfvR0k1kvQcRi2kdwMJAmwnKYUpa9Q2jdel0zpJR1fRoJzLJD
+	/Qu64rBKNHoAfxgTuqhJ009ULZUW+B0Ru+7BxZKftR4vRfrHqr9dP3thyOh+P2NLPoVtEQZbOU6
+	KiTmJv2iSnBWjQDTCnFHnj9g2+e3siIZ+TgNw/EaBECMEyFzsov3M8RdPcWBGx6fivUQ==
+X-Google-Smtp-Source: AGHT+IEM3YZaQX/A60Zzpx+ejHtbnFOdvWodIDgGuggyqOdN87fV84SwLE33oXuthYUpwqvTC8pwe0V3yf770qdNxi8=
+X-Received: by 2002:a17:902:e80c:b0:22f:b6d6:2737 with SMTP id
+ d9443c01a7336-235e112bd77mr3137775ad.10.1748983769781; Tue, 03 Jun 2025
+ 13:49:29 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -62,9 +62,9 @@ MIME-Version: 1.0
 References: <cover.1748933789.git.zhoubinbin@loongson.cn> <68e752931552e95667191c2641076a1bfaea3dc6.1748933789.git.zhoubinbin@loongson.cn>
 In-Reply-To: <68e752931552e95667191c2641076a1bfaea3dc6.1748933789.git.zhoubinbin@loongson.cn>
 From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Tue, 3 Jun 2025 22:02:48 +0200
-X-Gm-Features: AX0GCFvdsydQ2xBkD6N-_T4hQANQRAiZAoSsCIiqiOBj4-vlOTPuCE4oBrflOoc
-Message-ID: <CAFBinCAOT+ZKp2CqtTBwdiwrJtJrzAHDZfOKZfOLfrwNbmJjZA@mail.gmail.com>
+Date: Tue, 3 Jun 2025 22:49:18 +0200
+X-Gm-Features: AX0GCFteOM7ZMyh-EJrDItvjGO_dZWpdc3mR1pxM7ueqGcCcSsZZMDA6354FhmQ
+Message-ID: <CAFBinCA6f6jJQZEgHTiK8FqXW=v465a5rB0BZutDhct-4yhX_Q@mail.gmail.com>
 Subject: Re: [PATCH v3 36/36] mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
 To: Binbin Zhou <zhoubinbin@loongson.cn>
 Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
@@ -74,6 +74,8 @@ Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>,
 	linux-amlogic@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+
+Hello,
 
 On Tue, Jun 3, 2025 at 2:28=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn>=
  wrote:
@@ -87,5 +89,43 @@ On Tue, Jun 3, 2025 at 2:28=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn>=
 > Cc: linux-amlogic@lists.infradead.org
 > Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
 > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-successfully tested on my Meson8b Odroid-C1:
-Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> ---
+>  drivers/mmc/host/meson-mx-sdio.c | 20 ++++++++------------
+>  1 file changed, 8 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx=
+-sdio.c
+> index e0ae5a0c9670..b6cb475f1a5f 100644
+> --- a/drivers/mmc/host/meson-mx-sdio.c
+> +++ b/drivers/mmc/host/meson-mx-sdio.c
+> @@ -640,7 +640,7 @@ static int meson_mx_mmc_probe(struct platform_device =
+*pdev)
+>         else if (IS_ERR(slot_pdev))
+>                 return PTR_ERR(slot_pdev);
+>
+> -       mmc =3D mmc_alloc_host(sizeof(*host), &slot_pdev->dev);
+> +       mmc =3D devm_mmc_alloc_host(&slot_pdev->dev, sizeof(*host));
+This change is fine at runtime (on my Odroid-C1 board) but it can lead
+to a use-after-free issue.
+meson_mx_mmc_register_clks() devm_ registers two clocks and uses
+host->controller_dev as device.
+This leads to the fact that during driver removal struct
+meson_mx_mmc_host is free'd before host->controller_dev, which means
+the clocks are also free'd after struct meson_mx_mmc_host is already
+gone. The problem here: the clocks need the struct clk_divider and
+struct clk_fixed_factor from struct meson_mx_mmc_host.
+
+I don't understand why I'm not seeing any problems with this patch at
+runtime - maybe what I'm describing is just a theoretical issue
+(because it would only it if something would access the clocks between
+freeing struct meson_mx_mmc_host and removal of the clocks a few
+milliseconds later).
+
+What are your thoughts on this?
+If we're concerned about the potential UAF then I can refactor
+meson_mx_mmc_register_clks() first and then apply this patch
+afterwards.
+
+
+Best regards,
+Martin
