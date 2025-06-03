@@ -1,163 +1,141 @@
-Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id ED0841B393C
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 12:28:40 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC92C1E519;
+	Tue,  3 Jun 2025 12:54:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748953722; cv=none; b=IT1yxdqsD4enRQjqyoT0iQtKYBDEMm2ZaBV+7iqr24c/Bu4dIMGWLcFsGascAT7DzArJctcElgjIzCI7L9gG1rUuNVe7h3o5+VvkqMWO/0nyDogD2pRbzVRPtV7grUifcQK13OR/SuEkbXi/nrHYQdgGAiOSDufw5NaiaWeRuR8=
+	t=1748955301; cv=none; b=ktcTVk8q+8PEbBp7ksktc3BJVWwOYPPJo2CuyAXG0bZIhhEoXugMRATUPMQtA+HLW+VVXUR8ngCs3LTcqDR4GK1bNJKfelsOG+UIiuLeCmg4/tDr2Ys4Em6YLx/c5I6lsncofpGh62F+HMuFn5D79BoJyeSsr2FziHu/Tod4lUo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748953722; c=relaxed/simple;
-	bh=+nQuC2qfqJhVcLImTcVzQZjzjfUHfpr0i+Wc4YhPCMY=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=LaghIoUhYXWHe/DFLkIsHamme33JldaSPLmOMvn58lwkP6k7NGXQKVlxAVUXUumNOLGMC/qYvNdj+ZyPkKWnTm5sSbX1R6jti/8yZv/HxY6HN0bYDUnGGbQBKgt/V8TSPM9odZQ/FUPmk7aLh1H8AmVp5olcG9LLuXmry2xTqTg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
-Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8Axx2l36j5o_TYKAQ--.64367S3;
-	Tue, 03 Jun 2025 20:28:39 +0800 (CST)
-Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMAxj8Vv6j5ofg8HAQ--.25897S4;
-	Tue, 03 Jun 2025 20:28:38 +0800 (CST)
-From: Binbin Zhou <zhoubinbin@loongson.cn>
-To: Binbin Zhou <zhoubb.aaron@gmail.com>,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Huacai Chen <chenhuacai@kernel.org>,
-	linux-mmc@vger.kernel.org,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-	linux-amlogic@lists.infradead.org
-Subject: [PATCH v3 36/36] mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
-Date: Tue,  3 Jun 2025 20:28:22 +0800
-Message-ID: <68e752931552e95667191c2641076a1bfaea3dc6.1748933789.git.zhoubinbin@loongson.cn>
-X-Mailer: git-send-email 2.47.1
-In-Reply-To: <cover.1748933789.git.zhoubinbin@loongson.cn>
-References: <cover.1748933789.git.zhoubinbin@loongson.cn>
+	s=arc-20240116; t=1748955301; c=relaxed/simple;
+	bh=/dAIwu0T7tzFgg3iCU6rIlWG6qfNpoFwGXKYEKntOA8=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=WSK8fKrAsmC/cE/29zp45GbCrcP07r8hIxv/65rbX7OVstGMUGPQrR5mw1QRcR6PvU+BB/tNU10nDgC6psCWSVo+JdTSn69JyqnQmf4i/Z0syuAtMHWETXJmPXYSN2BLuaRmS6r6lqrLI02puSf+2gaKtnLvJsoDbzZiqtKq/0c=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=O1k0ysze; arc=none smtp.client-ip=209.85.218.41
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="O1k0ysze"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-ad88105874aso879499366b.1;
+        Tue, 03 Jun 2025 05:54:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1748955298; x=1749560098; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=K+UZHJ2oORlm9mx4aNJvJN/pklH00QSvht/GBCe488k=;
+        b=O1k0yszeg3Maje+qroPtFB/G7tmsthYgSuF9mjxU+G/MWgGnJTtOm93U8h5Bwv3mL6
+         kleV48tdz+p3xVED5umuwtXKgkf941/wS2XOnpX+BSbc8OnjrHH1HiR6E+wH6fOmL0SU
+         +aMbdRSTERPVnAhDjZ1HqlCR/7WOHwn63Dot/veoWLqguoMhuUTb5m8yghG60PcyYSV4
+         IPwKrmmRrsJkrOfYKevGlBLsDUBLuBwuvHiHzxheFdbqI24f8GMXu/LogLD8kWjXDh2v
+         CvTcPs03huF5s8Ac03VZ26sOMnq6N1VhYZXs5yUw7Xnq5vNS/Y0cWg+iCnvsId2tL262
+         Wzfw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1748955298; x=1749560098;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=K+UZHJ2oORlm9mx4aNJvJN/pklH00QSvht/GBCe488k=;
+        b=FqyPEZUoNy5gwjGL09pfSbjhYFYq+/W5U9tQIGdU18XvNoNp8CwmpTBZAqn3N3Uk0r
+         EzbrIU5tGJpqa8Z9Q4aW9CyKdJXSINMRKI2O8bdpvOe4fq9lGnJZ9/bMKQGmN7JNefYU
+         ac1Ao59dVPk77pBj4iSHZxVmRyxftAgFZVgR9YCw/jOe54sTd92GL+EWWRniD+fSKD4h
+         gAydd/pA1EuZniR8FeswqLmnDab3yd1eSGeQbDKmrzN8DSC19ubP4mNftbn+TMHMFSkl
+         HaiS3AOiV7KgzdJrFgW11ajc62c/PdOSlJhKvQVsMcZ1xHLma1Df1zjaNBWH3layJ5XN
+         PrEw==
+X-Forwarded-Encrypted: i=1; AJvYcCUO9nY+igG3cSESzDv/kD6MCZLoTiUBVF9WdEQA3At7bF4+wm7/M6CiHphVyOEpspxGT3jAXrTU9UoE@vger.kernel.org, AJvYcCUkzEP3dY5/JBle+P8+Y7ArEdUTLKqjRUmRfhgrj88is9LHfbNVBfapa8s2JtmypuJ3OWaNRF3vLGY2@vger.kernel.org
+X-Gm-Message-State: AOJu0Yxucih+vrwvh0tBP7yQ4a/pmCCeMwFc5oilW6OLwhjNGYmlthq4
+	NgYN/KRM8JhlaMHw1Vaj+uGKOhMxK7ZxD/nfidAKi+mE5qkI4TlTgotPfHuvoHoj+8j6YOna4U8
+	Ta8mxvtgiJTJIlgad3Pu02DBdsUIy1k4=
+X-Gm-Gg: ASbGncvT4WRSmrUlOamhS0S1GLJ+a8Tz4F/j0NMqSvbnYaJ6jy5g5V7SIJWyjqKRRxd
+	mWiq4MTyp1uY4o7teQh+o3SebFqjKdf+qR63fF+W2SEeI9YRWYHfYTfMXVj5dmydUmsGDoTQvlc
+	Yw0hElRE1xUnoifJ4Wu5RlYMVBDw63TzVPTl2hJtTdbUM=
+X-Google-Smtp-Source: AGHT+IGDlW8MDdTNB0VgQWuhPiBRj/aK0GGHFCiZpthrYERZp7ysLrGJPfPS797EiAjNE1OLiGDDU5eJieuTQScgWVA=
+X-Received: by 2002:a17:907:7b8c:b0:ad8:8529:4fa5 with SMTP id
+ a640c23a62f3a-adb32580593mr2018270166b.46.1748955297934; Tue, 03 Jun 2025
+ 05:54:57 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMAxj8Vv6j5ofg8HAQ--.25897S4
-X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoWxur1DJw1xAw4xZw15uF4UAwc_yoW5ZFy8pF
-	n7WFnrKr48ur4Yg395Ja1Ut3Wjg3yjqay8WrWfWw1fWw4YkrWDtF92kFy0qF48ArykZ3Wx
-	GF4Yg3ykAa4DXFcCm3ZEXasCq-sJn29KB7ZKAUJUUUUx529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUm0b4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
-	xVW0oVCq3wAaw2AFwI0_JF0_Jw1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqjxCEc2xF0c
-	Ia020Ex4CE44I27wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Gryq
-	6s0DMcIj6I8E87Iv67AKxVW8Jr0_Cr1UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x
-	0EwIxGrwACjcxG6xCI17CEII8vrVW3JVW8Jr1lc7CjxVAaw2AFwI0_JF0_Jw1l42xK82IY
-	c2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1l4IxYO2xFxVAFwI0_JF0_Jw1lx2IqxV
-	Aqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q
-	6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_tr0E3s1lIxAIcVC0I7IYx2IY6x
-	kF7I0E14v26r4UJVWxJr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE
-	14v26r4UJVWxJr1lIxAIcVC2z280aVCY1x0267AKxVW8Jr0_Cr1UYxBIdaVFxhVjvjDU0x
-	ZFpf9x07b3iihUUUUU=
+References: <cover.1746581751.git.zhoubinbin@loongson.cn> <704447268706b1b9f25bbe9d15459163d0ac3404.1746581751.git.zhoubinbin@loongson.cn>
+ <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com>
+In-Reply-To: <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com>
+From: Binbin Zhou <zhoubb.aaron@gmail.com>
+Date: Tue, 3 Jun 2025 20:54:44 +0800
+X-Gm-Features: AX0GCFti6lVzu3WMi3d-hrNdeeTMc5uSmRkY_kyrecCt1CVJXaWP6obNQRLY6Cg
+Message-ID: <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
+Subject: Re: [PATCH v2 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC
+ controller driver
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Use new function devm_mmc_alloc_host() to simplify the code.
+Hi Ulf:
 
-Cc: Neil Armstrong <neil.armstrong@linaro.org>
-Cc: Kevin Hilman <khilman@baylibre.com>
-Cc: Jerome Brunet <jbrunet@baylibre.com>
-Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: linux-amlogic@lists.infradead.org
-Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
-Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
----
- drivers/mmc/host/meson-mx-sdio.c | 20 ++++++++------------
- 1 file changed, 8 insertions(+), 12 deletions(-)
+Sorry for the late reply.
 
-diff --git a/drivers/mmc/host/meson-mx-sdio.c b/drivers/mmc/host/meson-mx-sdio.c
-index e0ae5a0c9670..b6cb475f1a5f 100644
---- a/drivers/mmc/host/meson-mx-sdio.c
-+++ b/drivers/mmc/host/meson-mx-sdio.c
-@@ -640,7 +640,7 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
- 	else if (IS_ERR(slot_pdev))
- 		return PTR_ERR(slot_pdev);
- 
--	mmc = mmc_alloc_host(sizeof(*host), &slot_pdev->dev);
-+	mmc = devm_mmc_alloc_host(&slot_pdev->dev, sizeof(*host));
- 	if (!mmc) {
- 		ret = -ENOMEM;
- 		goto error_unregister_slot_pdev;
-@@ -658,13 +658,13 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
- 	host->base = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 	}
- 
- 	irq = platform_get_irq(pdev, 0);
- 	if (irq < 0) {
- 		ret = irq;
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 	}
- 
- 	ret = devm_request_threaded_irq(host->controller_dev, irq,
-@@ -672,28 +672,28 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
- 					meson_mx_mmc_irq_thread, IRQF_ONESHOT,
- 					NULL, host);
- 	if (ret)
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 
- 	host->core_clk = devm_clk_get(host->controller_dev, "core");
- 	if (IS_ERR(host->core_clk)) {
- 		ret = PTR_ERR(host->core_clk);
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 	}
- 
- 	host->parent_clk = devm_clk_get(host->controller_dev, "clkin");
- 	if (IS_ERR(host->parent_clk)) {
- 		ret = PTR_ERR(host->parent_clk);
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 	}
- 
- 	ret = meson_mx_mmc_register_clks(host);
- 	if (ret)
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 
- 	ret = clk_prepare_enable(host->core_clk);
- 	if (ret) {
- 		dev_err(host->controller_dev, "Failed to enable core clock\n");
--		goto error_free_mmc;
-+		goto error_unregister_slot_pdev;
- 	}
- 
- 	ret = clk_prepare_enable(host->cfg_div_clk);
-@@ -721,8 +721,6 @@ static int meson_mx_mmc_probe(struct platform_device *pdev)
- 	clk_disable_unprepare(host->cfg_div_clk);
- error_disable_core_clk:
- 	clk_disable_unprepare(host->core_clk);
--error_free_mmc:
--	mmc_free_host(mmc);
- error_unregister_slot_pdev:
- 	of_platform_device_destroy(&slot_pdev->dev, NULL);
- 	return ret;
-@@ -741,8 +739,6 @@ static void meson_mx_mmc_remove(struct platform_device *pdev)
- 
- 	clk_disable_unprepare(host->cfg_div_clk);
- 	clk_disable_unprepare(host->core_clk);
--
--	mmc_free_host(host->mmc);
- }
- 
- static const struct of_device_id meson_mx_mmc_of_match[] = {
--- 
-2.47.1
+On Mon, May 19, 2025 at 7:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+> wrote:
+>
+> On Wed, 7 May 2025 at 09:28, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+> >
+> > This patch describes the two MMC controllers of the Loongson-2K2000 SoC=
+,
+> > one providing an eMMC interface and the other exporting an SD/SDIO
+> > interface.
+> >
+> > Compared to the Loongson-2K1000's MMC controllers, their internals are
+> > similar, except that we use an internally exclusive DMA engine instead =
+of
+> > an externally shared APBDMA engine.
+> >
+> > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+>
+> [...]
+>
+> > +
+> > +static void ls2k2000_mmc_fix_cmd_interrupt(struct loongson2_mmc_host *=
+host,
+> > +                                          struct mmc_command *cmd)
+> > +{
+> > +       int val;
+> > +
+> > +       if (cmd->opcode !=3D MMC_WRITE_BLOCK && cmd->opcode !=3D MMC_WR=
+ITE_MULTIPLE_BLOCK)
+> > +               return;
+> > +
+> > +       regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS, =
+val,
+> > +                                (val & LOONGSON2_MMC_FSTS_TXFULL), 0, =
+500);
+>
+> Can you please elaborate on what goes on here?
 
+This is a controller hardware issue. We need to wait until the Tx FIFO
+full flag is set before sending the write command. Otherwise, a data
+timeout will occur.
+>
+> Note that, the mmc core uses a couple of different options to manage
+> busy detection monitoring on DAT0, for those commands that need it.
+>
+> *) MMC_CAP_WAIT_WHILE_BUSY - if the host HW and the driver for it
+> supports IRQ based busy-detection.
+> *) host_ops->card_busy() callback if the HW can poll the DAT0 manually
+> for busy-detection.
+> *) Polling by using CMD13.
+>
+> [...]
+>
+> Kind regards
+> Uffe
+
+--
+Thanks.
+Binbin
