@@ -1,141 +1,150 @@
-Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
+Received: from mail-pf1-f171.google.com (mail-pf1-f171.google.com [209.85.210.171])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EC92C1E519;
-	Tue,  3 Jun 2025 12:54:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD153229B12
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 13:34:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.171
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748955301; cv=none; b=ktcTVk8q+8PEbBp7ksktc3BJVWwOYPPJo2CuyAXG0bZIhhEoXugMRATUPMQtA+HLW+VVXUR8ngCs3LTcqDR4GK1bNJKfelsOG+UIiuLeCmg4/tDr2Ys4Em6YLx/c5I6lsncofpGh62F+HMuFn5D79BoJyeSsr2FziHu/Tod4lUo=
+	t=1748957686; cv=none; b=bJLPHsKxamazaHA1Zd1nANhtoTBXc/SMgvQovOfYp0qtKRIOA9vJ6EuLDpiKx3acGmpuXliLq7hgTHGz+Ur3C2UgpV333/APImY5IeyZSE5VfPOf6aAiGbnlc0OrGPWKGcMKWP1sOQ9hNzeNz8KT4Kt9V5VGVf9JzEneUkISYD4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748955301; c=relaxed/simple;
-	bh=/dAIwu0T7tzFgg3iCU6rIlWG6qfNpoFwGXKYEKntOA8=;
+	s=arc-20240116; t=1748957686; c=relaxed/simple;
+	bh=SrhzCvdR8YuAr+YwML3vHp57imhJuC83RgqHYrjmhx0=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=WSK8fKrAsmC/cE/29zp45GbCrcP07r8hIxv/65rbX7OVstGMUGPQrR5mw1QRcR6PvU+BB/tNU10nDgC6psCWSVo+JdTSn69JyqnQmf4i/Z0syuAtMHWETXJmPXYSN2BLuaRmS6r6lqrLI02puSf+2gaKtnLvJsoDbzZiqtKq/0c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=O1k0ysze; arc=none smtp.client-ip=209.85.218.41
+	 To:Cc:Content-Type; b=OFYRDdiIHmwKqecH4LTDY7MJe7y64I8ciOhhEoniCj9jSnFukZHnVqfBCxc5Le3oMWOTdpzDOL3bkAnFjAmbK6JhMSPVWUvLyy5TQtiIoGL6aUImDGpqR4qYewJjLCuQJ3MnZLP1vkgNj28lofdX5/tnWZcDSxN0z9JdoeHt1wc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=QnixcVQ7; arc=none smtp.client-ip=209.85.210.171
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="O1k0ysze"
-Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-ad88105874aso879499366b.1;
-        Tue, 03 Jun 2025 05:54:59 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QnixcVQ7"
+Received: by mail-pf1-f171.google.com with SMTP id d2e1a72fcca58-747c2cc3419so2976926b3a.2
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jun 2025 06:34:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1748955298; x=1749560098; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1748957684; x=1749562484; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=K+UZHJ2oORlm9mx4aNJvJN/pklH00QSvht/GBCe488k=;
-        b=O1k0yszeg3Maje+qroPtFB/G7tmsthYgSuF9mjxU+G/MWgGnJTtOm93U8h5Bwv3mL6
-         kleV48tdz+p3xVED5umuwtXKgkf941/wS2XOnpX+BSbc8OnjrHH1HiR6E+wH6fOmL0SU
-         +aMbdRSTERPVnAhDjZ1HqlCR/7WOHwn63Dot/veoWLqguoMhuUTb5m8yghG60PcyYSV4
-         IPwKrmmRrsJkrOfYKevGlBLsDUBLuBwuvHiHzxheFdbqI24f8GMXu/LogLD8kWjXDh2v
-         CvTcPs03huF5s8Ac03VZ26sOMnq6N1VhYZXs5yUw7Xnq5vNS/Y0cWg+iCnvsId2tL262
-         Wzfw==
+        bh=trNEQykqDi6CfLI+wLybBJ7HMWeWXO7YE3wr77B1xOU=;
+        b=QnixcVQ7uVIxanRezK6GA2VzVz75DJ6GbYeoLh321poklUGqAfdeCq4XeuptDJzP/O
+         FgKehu2ezbv+dHJPvQnFcDK+p7T0fYPgA4FWeAXEzb4eIzuSrIwRM6JS1QrxAnntuBqw
+         dIov0senltaHMOhKzlIIIQRSs0rAYDa3zV9YzNngDg9ZSs/dxcBkaikW41g1XB/lNP0J
+         8kYEHEHeoOUVxOzyJrRTIzYL58n0egoyrgvcQ/jitfRuuk7IRU7ke9cRlGsCZ64BF6Y2
+         dsbOjZMZJZr7S4yyZ/riVqo89PwLxTATi8eYEdjAuP+QXgZhDrA/vCtZObBNRRtbFlzX
+         J9vg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1748955298; x=1749560098;
+        d=1e100.net; s=20230601; t=1748957684; x=1749562484;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=K+UZHJ2oORlm9mx4aNJvJN/pklH00QSvht/GBCe488k=;
-        b=FqyPEZUoNy5gwjGL09pfSbjhYFYq+/W5U9tQIGdU18XvNoNp8CwmpTBZAqn3N3Uk0r
-         EzbrIU5tGJpqa8Z9Q4aW9CyKdJXSINMRKI2O8bdpvOe4fq9lGnJZ9/bMKQGmN7JNefYU
-         ac1Ao59dVPk77pBj4iSHZxVmRyxftAgFZVgR9YCw/jOe54sTd92GL+EWWRniD+fSKD4h
-         gAydd/pA1EuZniR8FeswqLmnDab3yd1eSGeQbDKmrzN8DSC19ubP4mNftbn+TMHMFSkl
-         HaiS3AOiV7KgzdJrFgW11ajc62c/PdOSlJhKvQVsMcZ1xHLma1Df1zjaNBWH3layJ5XN
-         PrEw==
-X-Forwarded-Encrypted: i=1; AJvYcCUO9nY+igG3cSESzDv/kD6MCZLoTiUBVF9WdEQA3At7bF4+wm7/M6CiHphVyOEpspxGT3jAXrTU9UoE@vger.kernel.org, AJvYcCUkzEP3dY5/JBle+P8+Y7ArEdUTLKqjRUmRfhgrj88is9LHfbNVBfapa8s2JtmypuJ3OWaNRF3vLGY2@vger.kernel.org
-X-Gm-Message-State: AOJu0Yxucih+vrwvh0tBP7yQ4a/pmCCeMwFc5oilW6OLwhjNGYmlthq4
-	NgYN/KRM8JhlaMHw1Vaj+uGKOhMxK7ZxD/nfidAKi+mE5qkI4TlTgotPfHuvoHoj+8j6YOna4U8
-	Ta8mxvtgiJTJIlgad3Pu02DBdsUIy1k4=
-X-Gm-Gg: ASbGncvT4WRSmrUlOamhS0S1GLJ+a8Tz4F/j0NMqSvbnYaJ6jy5g5V7SIJWyjqKRRxd
-	mWiq4MTyp1uY4o7teQh+o3SebFqjKdf+qR63fF+W2SEeI9YRWYHfYTfMXVj5dmydUmsGDoTQvlc
-	Yw0hElRE1xUnoifJ4Wu5RlYMVBDw63TzVPTl2hJtTdbUM=
-X-Google-Smtp-Source: AGHT+IGDlW8MDdTNB0VgQWuhPiBRj/aK0GGHFCiZpthrYERZp7ysLrGJPfPS797EiAjNE1OLiGDDU5eJieuTQScgWVA=
-X-Received: by 2002:a17:907:7b8c:b0:ad8:8529:4fa5 with SMTP id
- a640c23a62f3a-adb32580593mr2018270166b.46.1748955297934; Tue, 03 Jun 2025
- 05:54:57 -0700 (PDT)
+        bh=trNEQykqDi6CfLI+wLybBJ7HMWeWXO7YE3wr77B1xOU=;
+        b=Q0OAfoFRDKyBkXLVXkVaSu3T/FsgXzIJbdqOiavbGHLF6fwccCxCTfTY9bCiybHWxo
+         cTIccBhpm608P9aATplbWwYvMb4Qdwu2f5BytWR7pNyVFUXNMINmGzYx6ZqjH9DfuEEB
+         kL0tpi/u+h8USbwwAX2B+rdxtPj+aqyzznPiA0jEE9OcsJCiWHl6G1Dqe1hmFtPr9Fpq
+         WYOSdaJ5J3jIKh8VpsMZQju0AE7SGHSdIZqTYajb8t4Xu7DOAuNq+o1Vwl6+xffcPlWI
+         Em4Yg6AznXs0jAjB6IuKALkhIhJC14pp8x9EPAonSnEI9NbaQiXDhr1EAWrNvmSgBBeA
+         OaPA==
+X-Forwarded-Encrypted: i=1; AJvYcCUSgc/cfIMs9UXNxeHiIhw53BxA8mRc7xhssZ/K8+TXrnGIJNNXmIyPJA1qqBazCNmS6JzhSjx3PYI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YySpo3g2D2zSz8YJxL4pX/LMUPoS/31G4mvWI/6bjD1lQ020rvn
+	vT+gTPfgn27Z0kn6mUYUNuMcfL4k46fobSpVo0DZaEqYcOkbkEG+ak6ihr7GbBmFjgLswFK0kQu
+	Z8lORvLGZvhUmTPWOkIpG2piDKP7piT0gsg6f
+X-Gm-Gg: ASbGnctxg/On+X8z2+OkrAk8BYF2/WV1HO9KuMbpcPNKWjf/P3ht3SaPaAvufdhwoN3
+	eTtCxyLDm+4Bsc7EnzxXOTB0qXIAt3YLjyyJ2A4hC3jDORdi4d8ct/QOFO1B2P9HofvkauF9Hoi
+	T95rvhZoXzLDaHc55rYUiTBf78SfSYBuPIjIeCcXXfeqTzPLoeLkSJrK/DE1+UZniY
+X-Google-Smtp-Source: AGHT+IHhWi1qtCAZfHrBmZFFUS5eIhspUwqpuRxatCXVCYGjm/rPbNwgSo176ui+AKedax9GXTrgjGFVYrdyMcWkuxc=
+X-Received: by 2002:a05:6a00:1793:b0:736:50d1:fc84 with SMTP id
+ d2e1a72fcca58-747c1c5f723mr21877575b3a.21.1748957684000; Tue, 03 Jun 2025
+ 06:34:44 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1746581751.git.zhoubinbin@loongson.cn> <704447268706b1b9f25bbe9d15459163d0ac3404.1746581751.git.zhoubinbin@loongson.cn>
- <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com>
-In-Reply-To: <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com>
-From: Binbin Zhou <zhoubb.aaron@gmail.com>
-Date: Tue, 3 Jun 2025 20:54:44 +0800
-X-Gm-Features: AX0GCFti6lVzu3WMi3d-hrNdeeTMc5uSmRkY_kyrecCt1CVJXaWP6obNQRLY6Cg
-Message-ID: <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
-Subject: Re: [PATCH v2 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC
- controller driver
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
-	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+References: <cover.1748933789.git.zhoubinbin@loongson.cn> <7da94643484f7184be40fa517a8a74ce3cdefe19.1748933789.git.zhoubinbin@loongson.cn>
+In-Reply-To: <7da94643484f7184be40fa517a8a74ce3cdefe19.1748933789.git.zhoubinbin@loongson.cn>
+From: Manuel Lauss <manuel.lauss@gmail.com>
+Date: Tue, 3 Jun 2025 15:34:06 +0200
+X-Gm-Features: AX0GCFvc-Rj0xrqJlyuASFH3G_0A7CzwCw-355bTxWMzz-YLhiBr1FXRjybkYdo
+Message-ID: <CAOLZvyG-vxBnYaPD-AuEyhjmXU-DQNOEmZUJVYcsLkOgdOObHA@mail.gmail.com>
+Subject: Re: [PATCH v3 03/36] mmc: au1xmmc: Use devm_mmc_alloc_host() helper
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Ulf Hansson <ulf.hansson@linaro.org>, Huacai Chen <chenhuacai@kernel.org>, 
 	linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-Hi Ulf:
+Hello,
 
-Sorry for the late reply.
+On Tue, Jun 3, 2025 at 2:25=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn>=
+ wrote:
+>
+> Use new function devm_mmc_alloc_host() to simplify the code.
+>
+> Cc: Manuel Lauss <manuel.lauss@gmail.com>
+> Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> ---
+>  drivers/mmc/host/au1xmmc.c | 14 ++++----------
+>  1 file changed, 4 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+> index 057d42307832..85470773650d 100644
+> --- a/drivers/mmc/host/au1xmmc.c
+> +++ b/drivers/mmc/host/au1xmmc.c
+> @@ -937,11 +937,10 @@ static int au1xmmc_probe(struct platform_device *pd=
+ev)
+>         struct resource *r;
+>         int ret, iflag;
+>
+> -       mmc =3D mmc_alloc_host(sizeof(struct au1xmmc_host), &pdev->dev);
+> +       mmc =3D devm_mmc_alloc_host(&pdev->dev, sizeof(*host));
+>         if (!mmc) {
+>                 dev_err(&pdev->dev, "no memory for mmc_host\n");
+> -               ret =3D -ENOMEM;
+> -               goto out0;
+> +               return -ENOMEM;
+>         }
+>
+>         host =3D mmc_priv(mmc);
+> @@ -953,14 +952,14 @@ static int au1xmmc_probe(struct platform_device *pd=
+ev)
+>         r =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         if (!r) {
+>                 dev_err(&pdev->dev, "no mmio defined\n");
+> -               goto out1;
+> +               return ret;
+>         }
+>
+>         host->ioarea =3D request_mem_region(r->start, resource_size(r),
+>                                            pdev->name);
+>         if (!host->ioarea) {
+>                 dev_err(&pdev->dev, "mmio already in use\n");
+> -               goto out1;
+> +               return ret;
+>         }
+>
+>         host->iobase =3D ioremap(r->start, 0x3c);
+> @@ -1109,9 +1108,6 @@ static int au1xmmc_probe(struct platform_device *pd=
+ev)
+>  out2:
+>         release_resource(host->ioarea);
+>         kfree(host->ioarea);
+> -out1:
+> -       mmc_free_host(mmc);
+> -out0:
+>         return ret;
+>  }
+>
+> @@ -1151,8 +1147,6 @@ static void au1xmmc_remove(struct platform_device *=
+pdev)
+>                 iounmap((void *)host->iobase);
+>                 release_resource(host->ioarea);
+>                 kfree(host->ioarea);
+> -
+> -               mmc_free_host(host->mmc);
+>         }
+>  }
 
-On Mon, May 19, 2025 at 7:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
->
-> On Wed, 7 May 2025 at 09:28, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
-> >
-> > This patch describes the two MMC controllers of the Loongson-2K2000 SoC=
-,
-> > one providing an eMMC interface and the other exporting an SD/SDIO
-> > interface.
-> >
-> > Compared to the Loongson-2K1000's MMC controllers, their internals are
-> > similar, except that we use an internally exclusive DMA engine instead =
-of
-> > an externally shared APBDMA engine.
-> >
-> > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
->
-> [...]
->
-> > +
-> > +static void ls2k2000_mmc_fix_cmd_interrupt(struct loongson2_mmc_host *=
-host,
-> > +                                          struct mmc_command *cmd)
-> > +{
-> > +       int val;
-> > +
-> > +       if (cmd->opcode !=3D MMC_WRITE_BLOCK && cmd->opcode !=3D MMC_WR=
-ITE_MULTIPLE_BLOCK)
-> > +               return;
-> > +
-> > +       regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS, =
-val,
-> > +                                (val & LOONGSON2_MMC_FSTS_TXFULL), 0, =
-500);
->
-> Can you please elaborate on what goes on here?
+This is also fine with me.
 
-This is a controller hardware issue. We need to wait until the Tx FIFO
-full flag is set before sending the write command. Otherwise, a data
-timeout will occur.
->
-> Note that, the mmc core uses a couple of different options to manage
-> busy detection monitoring on DAT0, for those commands that need it.
->
-> *) MMC_CAP_WAIT_WHILE_BUSY - if the host HW and the driver for it
-> supports IRQ based busy-detection.
-> *) host_ops->card_busy() callback if the HW can poll the DAT0 manually
-> for busy-detection.
-> *) Polling by using CMD13.
->
-> [...]
->
-> Kind regards
-> Uffe
-
---
-Thanks.
-Binbin
+Manuel
