@@ -1,34 +1,33 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6C81222FF4C
-	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 12:27:51 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 6AFB023182D
+	for <linux-mmc@vger.kernel.org>; Tue,  3 Jun 2025 12:27:53 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1748953674; cv=none; b=K2oj+Bz4FSpJciPkKKAVuoQGnC2bTnFKl6tP5DeGudCDxYZ2m/K4aJByn2UXzciBM/WtPf9TKlXT8dVof14bHx/m/4MWoZmTcgbHLUP2RZ5nCT34SoGYoAO2yJmOei3pJfKPqc+84aI7/FxEMCa6wFehizF12Rum3RJIIIBnq+Q=
+	t=1748953675; cv=none; b=cqgUP3aj8uodF5Fg2DXlteHqJDPXElnk3odlCnxaaQKRM0mLU2VzkMVRycHNmACI0Fx6xr8tOSEIakLMsnYPVAeGr2PRsL9dAdD5UU6qxjKv2Khao5+hbaLqFcXh020G52q2nx8n28lW9/HVWnWphGgGBcUL9MIUPVPf0AAEPss=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1748953674; c=relaxed/simple;
-	bh=znFMvwqkafLHRm9XMP5wM3oUXSPF3Qivo9UW+Ltz4wA=;
+	s=arc-20240116; t=1748953675; c=relaxed/simple;
+	bh=eDVkwh8bYvYp181LnaxDTCaEvFJafXRydxC6apjTKzw=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=GFNwhqUpXNvqZn+nXY5Kxr/N5C/6BmZQQ8ZoBdAtYJCYlQd+Cr7OsX4JdgQD9y1YFsG8VO7GQpJxb4DSABULzUNvvoM9Sxrh06lmgz0CsApN1XaAALq06aFPkxBBn5OsEAaM3G/sQVaLlB8IR7lQoXyVElHKkJvOZS+ZRd45Lpk=
+	 MIME-Version; b=AUyCccCGhlsf07vFByl9Nd0qnBviwsTLJF4F7RyEl8EkvdfS972nm3+UdPETVzkU818RRFbZyJyJjgkaGBSMZobBDh+yION22wEUmDuhkmiSBQuDrq4cJK252IyAf0FnQ2QFh6EAZwCb6zJT44ToMiC6vEO2RPNByqHg4hcr5Yc=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8AxnOJG6j5ohzYKAQ--.63570S3;
-	Tue, 03 Jun 2025 20:27:51 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8CxeXFI6j5ojTYKAQ--.32574S3;
+	Tue, 03 Jun 2025 20:27:52 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMAxDcVE6j5o8A4HAQ--.21232S3;
-	Tue, 03 Jun 2025 20:27:50 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMAxDcVE6j5o8A4HAQ--.21232S4;
+	Tue, 03 Jun 2025 20:27:51 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
 	Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Alex Dubov <oakad@yahoo.com>
-Subject: [PATCH v3 25/36] mmc: tifm_sd: Use devm_mmc_alloc_host() helper
-Date: Tue,  3 Jun 2025 20:27:35 +0800
-Message-ID: <84a31172bb4c26e3ef41f99ebb4c37fa101bfaac.1748933789.git.zhoubinbin@loongson.cn>
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH v3 26/36] mmc: toshsd: Use devm_mmc_alloc_host() helper
+Date: Tue,  3 Jun 2025 20:27:36 +0800
+Message-ID: <23c80160c93c868353d2444100a592e8ba5d2f90.1748933789.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1748933789.git.zhoubinbin@loongson.cn>
 References: <cover.1748933789.git.zhoubinbin@loongson.cn>
@@ -39,68 +38,63 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMAxDcVE6j5o8A4HAQ--.21232S3
+X-CM-TRANSID:qMiowMAxDcVE6j5o8A4HAQ--.21232S4
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj9xXoWrKr45uw1ftrW7XF1rWF1kCrX_yoWkZFcEk3
-	y0qFn2gry8AFZ8W34Ykr1fZry5ta1vgr4q9F1rtw43AF1Iq3s5GFn7Zrn8ZrWUuws8CFWr
-	Ar1rJr1xZFyDGosvyTuYvTs0mTUanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUj1kv1TuYvT
-	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
-	cSsGvfJTRUUUb38YFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
-	vaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
-	w2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
-	W8Jr0_Cr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
-	6rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l57IF6xkI12xvs2x26I8E6xACxx1l5I
-	8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26Fy26r45twAv7VC2z280aVAF
-	wI0_Gr1j6F4UJwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41lF7xvrVCFI7
-	AF6II2Y40_Zr0_Gr1UMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I
-	3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxV
-	WUAVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26w1j6s0DMIIF0xvE2Ix0cI8I
-	cVCY1x0267AKxVW8Jr0_Cr1UMIIF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87
-	Iv67AKxVW8Jr0_Cr1UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr1j6F4UJbIYCTnIWIevJa73
-	UjIFyTuYvjxUqxpnDUUUU
+X-Coremail-Antispam: 1Uk129KBj93XoW7ZFWfZw4xJF45Zw18XF1UJwc_yoW8JFyUpF
+	WfJa4YkrWUJr15Wa4UJa4UuryrWrWIv3yrGFW0vw1xW3s8Aa4vqrs7CFy2qF1rJFWvyF13
+	ZayUtr1F9F1Ut3XCm3ZEXasCq-sJn29KB7ZKAUJUUUU5529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUU9jb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AK
+	xVW0oVCq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYIkI8VC2zVCFFI0UMc
+	02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVW3AVW8Xw1lYx0Ex4A2jsIE
+	14v26r4UJVWxJr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4x0Y40E4I
+	xF1VCIxcxG6Fyj6r4UJwCF04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC2
+	0s026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI
+	0_JF0_Jw1lIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWDJVCq3wCI42IY6xIIjxv2
+	0xvEc7CjxVAFwI0_Gr1j6F4UJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z2
+	80aVAFwI0_Gr1j6F4UJwCI42IY6I8E87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2Kfnx
+	nUUI43ZEXa7IU5gFxUUUUUU==
 
 Use new function devm_mmc_alloc_host() to simplify the code.
 
-Cc: Alex Dubov <oakad@yahoo.com>
 Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/tifm_sd.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ drivers/mmc/host/toshsd.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
-index 713223f2d377..92b438003576 100644
---- a/drivers/mmc/host/tifm_sd.c
-+++ b/drivers/mmc/host/tifm_sd.c
-@@ -947,7 +947,7 @@ static int tifm_sd_probe(struct tifm_dev *sock)
- 		return rc;
- 	}
+diff --git a/drivers/mmc/host/toshsd.c b/drivers/mmc/host/toshsd.c
+index 497791ffada6..e5f7f8abafc0 100644
+--- a/drivers/mmc/host/toshsd.c
++++ b/drivers/mmc/host/toshsd.c
+@@ -612,7 +612,7 @@ static int toshsd_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
+ 	if (ret)
+ 		return ret;
  
--	mmc = mmc_alloc_host(sizeof(struct tifm_sd), &sock->dev);
-+	mmc = devm_mmc_alloc_host(&sock->dev, sizeof(*host));
- 	if (!mmc)
- 		return -ENOMEM;
- 
-@@ -982,10 +982,7 @@ static int tifm_sd_probe(struct tifm_dev *sock)
- 
- 	if (!rc)
- 		rc = mmc_add_host(mmc);
--	if (!rc)
--		return 0;
- 
+-	mmc = mmc_alloc_host(sizeof(struct toshsd_host), &pdev->dev);
++	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(*host));
+ 	if (!mmc) {
+ 		ret = -ENOMEM;
+ 		goto err;
+@@ -669,7 +669,6 @@ static int toshsd_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
+ release:
+ 	pci_release_regions(pdev);
+ free:
 -	mmc_free_host(mmc);
- 	return rc;
+ 	pci_set_drvdata(pdev, NULL);
+ err:
+ 	pci_disable_device(pdev);
+@@ -685,7 +684,6 @@ static void toshsd_remove(struct pci_dev *pdev)
+ 	free_irq(pdev->irq, host);
+ 	pci_iounmap(pdev, host->ioaddr);
+ 	pci_release_regions(pdev);
+-	mmc_free_host(host->mmc);
+ 	pci_set_drvdata(pdev, NULL);
+ 	pci_disable_device(pdev);
  }
- 
-@@ -1015,8 +1012,6 @@ static void tifm_sd_remove(struct tifm_dev *sock)
- 	spin_unlock_irqrestore(&sock->lock, flags);
- 	mmc_remove_host(mmc);
- 	dev_dbg(&sock->dev, "after remove\n");
--
--	mmc_free_host(mmc);
- }
- 
- #ifdef CONFIG_PM
 -- 
 2.47.1
 
