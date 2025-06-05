@@ -1,95 +1,60 @@
-Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B70819CC11;
-	Thu,  5 Jun 2025 05:56:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E76313D24D;
+	Thu,  5 Jun 2025 13:03:33 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749103019; cv=none; b=BeqpkuCDliDIhedoXmJ+28wP6KoH7yDADLELb8m3iMUZt03WjvnEtNJCeWFiwm2iioDrDrplijRKOvch5MpLMPL+Yt0MxaA6PpQN+AFF1f2d+hnRByaBIzIT/GVxuwhrNQQSpmf3graf3UPg/4C08H56z/P9CuxgMc5FGxFpBE0=
+	t=1749128615; cv=none; b=Gzd7SzZKSAoWwcWjXBM0DVBUndruRdN0KPxHzSZ3HfkQdx6K/9EfpaBT89BXd1CIIsZ+KPq5B0uAQEj/RDpcN523i1ONJaDyXpgrkQjJV5sp1BkEoPXsweYjajqkHEN3qx/Bao0jWHo1Tnde2ivdVDOnSqzEkdsWCoygxZbkeBQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749103019; c=relaxed/simple;
-	bh=WkkGM08VMW5SFQ/+XIX9f/SVjIxnmSZqqyIBTfQ8hC4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=a3l67iWc/u0iMGyVQ3OxZzKSedLr53TN/rEfqx3cxp2tl/2QPQpFd4t1VWh5RWrpH/rTFeQF0BHODJMM+Cs3IcCFpPJ0CerYgWQW9Hg+ouhENnFkNeSXcnwN0NAmr2anib7HaqwSUJZ1f6zb8HGm54IlUI3PKs1lp1rLpoxAwdI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=D96Hid6K; arc=none smtp.client-ip=148.251.105.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	s=arc-20240116; t=1749128615; c=relaxed/simple;
+	bh=5+namEfMQIGPYgmHxqTNqELm22XPrHRhndFiys8WzEw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=RWC14o+nuSZ+ACWt7H8f+AtOPJabdSsLBWSozss/w3VtuAoaM1H0oBkKJCCZRcQOCpoer5qMYoWmFy2/DjRVVS000SYEDfqXNl5M5VXtfhzyN3MIkJ+ZMZrONKto8jT0mlAUFU9r0BBXVH8EKALt+U1g/QwyGEFXlAadbuEqaNQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cVk8lrP6; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="D96Hid6K"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1749103015;
-	bh=WkkGM08VMW5SFQ/+XIX9f/SVjIxnmSZqqyIBTfQ8hC4=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=D96Hid6Kq7JQS22naS6+/J1Gkoyyed/yJCJAXYhRomHGd88EpOq8yAz7u5mfEQb7N
-	 E6YbQBMT0iTOrL4EVumEKOOji6CTok4mZqPDP1Ng0VI5rUrFjAgJ1FdmRLew5Z5cYP
-	 drDyKTf5/1/E6r5vN5DdOTy/6j6u9gvjN/Wz0kqi4JcYht0PmSodjHV+VHtL4zzrCU
-	 y0m40domMY+T8E2H6i9A+vL/zZzBAHhbe7og8/uKCDp6xCEWqFChcU9AmZamASRHVJ
-	 BpvccimnTvVV3IyLv69tOEsAQQ8zjG13PPnHoW3Pb4opcT16e9DoQo5m/qUE0/Y24S
-	 NPbKP/DBp/fYQ==
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-	(No client certificate requested)
-	(Authenticated sender: kholk11)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id 0361C17E010B;
-	Thu,  5 Jun 2025 07:56:54 +0200 (CEST)
-Message-ID: <f40e7b31-5bb2-4d1d-8687-6f728ea255be@collabora.com>
-Date: Thu, 5 Jun 2025 07:56:54 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cVk8lrP6"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C836C4CEE7;
+	Thu,  5 Jun 2025 13:03:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1749128613;
+	bh=5+namEfMQIGPYgmHxqTNqELm22XPrHRhndFiys8WzEw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=cVk8lrP6Tnl/DfcbWfV7fHloYVRc9fE0uVQHvqBEu1ZfHg86NKTKpSQH283CveosV
+	 368XEv/a0UurV1WBbOvm8x6kEWIjG/WKB9DFFv+L7R9LO/fYw/CsOstz/oohf6Gxwk
+	 0uw9VKOZfrTUDOfwW4vgux+B07D4hu8EAK3tXTupVK5VuP82L2d5JacJizjYVJk2Xo
+	 kkQ4LlYlFqUSW9Ioa+JelbqK81vc0Hn6PxqEzLhHpYqureRbKB57jjteRFiHWz+6xR
+	 iOazyAumKPp2ykgLLMWdPHen9izS6rfGTk7dTOVi3Xqj3q2d72kyAWalW2oyIN+dKc
+	 3lp6zMB1Hl7kQ==
+Date: Thu, 5 Jun 2025 08:03:31 -0500
+From: Rob Herring <robh@kernel.org>
+To: Michal Simek <michal.simek@amd.com>
+Cc: linux-kernel@vger.kernel.org, monstr@monstr.eu, michal.simek@xilinx.com,
+	git@xilinx.com, Adrian Hunter <adrian.hunter@intel.com>,
+	Conor Dooley <conor+dt@kernel.org>,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	"open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>,
+	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdhci: Make interrupt optional
+Message-ID: <20250605130331.GA2370690-robh@kernel.org>
+References: <a527f5adffc6efe4c1ad2ccc40e1e095d73efe74.1749027112.git.michal.simek@amd.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH] mtk-sd: Fix a pagefault in dma_unmap_sg() for not
- prepared data
-To: "Masami Hiramatsu (Google)" <mhiramat@kernel.org>,
- Chaotian Jing <chaotian.jing@mediatek.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Matthias Brugger <matthias.bgg@gmail.com>
-Cc: Sergey Senozhatsky <senozhatsky@chromium.org>, linux-mmc@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-mediatek@lists.infradead.org
-References: <174908565814.4056588.769599127120955383.stgit@mhiramat.tok.corp.google.com>
-From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Content-Language: en-US
-In-Reply-To: <174908565814.4056588.769599127120955383.stgit@mhiramat.tok.corp.google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <a527f5adffc6efe4c1ad2ccc40e1e095d73efe74.1749027112.git.michal.simek@amd.com>
 
-Il 05/06/25 03:07, Masami Hiramatsu (Google) ha scritto:
-> From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
-> 
-> mtk-msdc driver causes a kernel crash after swiotlb buffer is full.
-> 
-> ---
-> mtk-msdc 11240000.mmc: swiotlb buffer is full (sz: 16384 bytes), total 32768 (slots), used 32732 (slots)
-> mtk-msdc 11240000.mmc: msdc_track_cmd_data: cmd=18 arg=0397A6F8; host->error=0x00000004
-> Unable to handle kernel paging request at virtual address ffffffffc0001fc0
-> ---
-> 
-> When swiotlb buffer is full, the dma_map_sg() returns 0 to
-> msdc_prepare_data(), but it does not check it and sets the
-> MSDC_PREPARE_FLAG.
-> 
-> swiotlb_tbl_map_single() /* prints "swiotlb buffer is full" */
->    <-swiotlb_map()
->      <-dma_direct_map_page()
->        <-dma_direct_map_sg()
->          <-__dma_map_sg_attrs()
->            <-dma_map_sg_attrs()
->              <-dma_map_sg()  /* returns 0 (pages mapped) */
->                <-msdc_prepare_data()
-> 
-> Then, the msdc_unprepare_data() checks MSDC_PREPARE_FLAG and calls
-> dma_unmap_sg() with unmapped pages. It causes a page fault.
-> 
-> To fix this problem, Do not set MSDC_PREPARE_FLAG if dma_map_sg()
-> fails because this is not prepared.
-> 
-> Fixes: 208489032bdd ("mmc: mediatek: Add Mediatek MMC driver")
-> Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+On Wed, Jun 04, 2025 at 10:51:54AM +0200, Michal Simek wrote:
+> Bootloader (as U-Boot) is not using interrupt which doesn't need to be even
+> described in DT that's why make interrupt optional property.
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+That's true for 'interrupts' everywhere. It could also be true for 
+clocks, resets, etc. If the h/w always has the resource, it should be 
+required in DT.
 
+Rob
