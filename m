@@ -1,232 +1,198 @@
-Received: from mail-vs1-f45.google.com (mail-vs1-f45.google.com [209.85.217.45])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8AF902C3242;
-	Fri,  6 Jun 2025 10:33:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95CA327FB35;
+	Fri,  6 Jun 2025 10:47:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749205983; cv=none; b=kNowh+Ho+8CjdaxTPK6vZnLevVkoV6+D5MwwYwxaU+C/mMcigAkG+gWsroXa5PtiuoMLeNde+6hUzbCtMu0nZWWjTcnoCtZxXzjV+foA6Xwd34+a4siHiUe0fyJd/cxZhF4gvwOQIs57cT/cIoxbB5ebi7gXfEQOPSzp1+KCHC4=
+	t=1749206873; cv=none; b=TEN0P7P86Yj8l3lI3GaTPcLFsDAcE+Fqzx8jlbgh0SictIGE4zXN4UWhu9yMPfz147gyDC85LqlxYKEw+OfUhvcMT0LlVQ6KCO575MGyCmZ4/nUhJEnIMsFWqO+wGTzMBprj1OsRMILY7LDlaYqeMTnHBuruXvFXvW4unB9XcvM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749205983; c=relaxed/simple;
-	bh=EWmGOY2fETYBex1yy7JXLNMgL5UaZwO+d6xDM+yA6e0=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=frryZTqEWRwUv19O5AWMNw61u6t0UnMZW3TukSuPveKhYSzGFTPMAhxn0eYc1EvfgXN1q9pEWnFKIGDmnsoxNJrkpkHWXgVtW3SOO15GFXHwUjca/2k8m6WwGfeu/GRF9X5/yy6GmcvDuWOf2czgRPR5ofkrn5kIBf/BMUaGYOQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=BlNAwxvu; arc=none smtp.client-ip=209.85.217.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1749206873; c=relaxed/simple;
+	bh=QskOF1fBwiApH4/AwXD144gfb0R5kxegs360iIkwX4A=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=cs0EoqcDChiEeES+uQG2O2lYLn7hWAhQwE5KRMq9HqVYmlOtobqqbhfVaZAu4CdnCDLBjcc6+5rD/ZOTbbTC37xF8jkcZKHohP+fCR6dNNPEyLFqaeOafsCkObEpawFUEI9BeZG56X8mU2RnJp76mStxwY+leOLILKAec/mp5FU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=neHZTkBR; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BlNAwxvu"
-Received: by mail-vs1-f45.google.com with SMTP id ada2fe7eead31-4e45cfc3a26so1394467137.0;
-        Fri, 06 Jun 2025 03:33:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1749205980; x=1749810780; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=MSCRtgJh3mrO0HRWQido0oMhIOru4mIvGKrAajD/acI=;
-        b=BlNAwxvuHpX4hfRJypQKHlqlxXJA4jap2RDxYgXnURCbtBOss+ILN9pUyXBwRImxdk
-         n6giTy1JIpyniLI6+oN8hltZ9z63Bg06TYp1FZk0rGOhd2m9XvoxJDPU6hJyKBKR0mcL
-         ULlS+3cnR4qT8ovoYBCNche/0bwkUHwH8Zf4ryz5wdTKtL8fTuhPjQH0WHczCvCyKha9
-         RjmPaC9xeKkmrwNY1G6u8ex/EutQAKsJ66NVb93lj5MBGVtDzPjoaevaEcl2C0X/ozSL
-         FJqEgqnR9F0QSd1AKsuvA+NgK1l06PLVAAMcphxDdYBBHbsjOzXdipa84jqzY/TJuDsH
-         V4TA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749205980; x=1749810780;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=MSCRtgJh3mrO0HRWQido0oMhIOru4mIvGKrAajD/acI=;
-        b=qPVbIWHfZ5OI5WBnNkRyOgXHhNOd/D2c5PUse3jsKre8qHY3ry9JtkmuekpVz4NzPk
-         P8ygVxjLdw7NdKOTAPt5WIW9vnwX7js+bvTooHxugRf+WUXr+XmlX1qR0tLLgDfRDbLu
-         dxjizr2P54dUEBplw5ihi3Rg67yjdFSVQeML4kDtCbmTaONg6w2t2A8b0N05sVnsbcl4
-         RFEcWX9G/S5f6q6eRrM5LYu5NaBgiEMOFKKOjIs0YjPGgQqflRl3SFRGnOdaQAsXWxWn
-         Qdkh9vf7t7zwNKvIAfC0r7jQRSdsEoqxiS3+T3muLF+pa5NNejj1QSBpBiuIKTFYtUiL
-         8zTg==
-X-Forwarded-Encrypted: i=1; AJvYcCVQGHBZb0s5kPvh7rRwPGbXS/+AKOcANJ9EDxlB8v2Hq/7HH8zGYljNh5xFy71aAF862H7fZCMVt8pRYmc=@vger.kernel.org, AJvYcCVrVhUo7sXmfW1Y4bQH/WCTTLDoirP7/juFNzOXIHD6js+KmOiperJBR6ysRD/IL0UlpVpatWNJTAeG@vger.kernel.org
-X-Gm-Message-State: AOJu0YzDyDFxZS3mV9pJo3/61eXHxbrlq9/Jt0MFofiAoyfFLqSryc+j
-	yv5lSTYnbPzp778A5yUJiqbWqXPm6rIDz+5z4eFV3nj0aFSlqKNhnYi6v2h/BdMpxZ29R+qrqZ5
-	d+kB0U6cprZBruGX6zYJfaEfXI2qouJ67gua7
-X-Gm-Gg: ASbGnctVlY+6MrhW+Kr63y+LOOcrkmyn7ums1foahEAThRJy7vDEq6HseZbde4DNVBy
-	WDFwG3JLjg2/Vqjob5QDDAr3BopcIDJ3y3gCN7FxkRg4xdj9JzTj4xnWNtMaoY8u6bWmdleOgwr
-	gWhW1GInSPzSP/ypQM5TwJgsRyOGhgg0DdRmQqyz4KYz8IYSuVS71489dogpuvOdndmw==
-X-Google-Smtp-Source: AGHT+IGOU9vZErXkR16hmHisOuyevRgplZOoNNGLBXXZWihYYDanMFHkCRIUkTwK/lR/zMYAuNMpHitCjxQNZcxLuYs=
-X-Received: by 2002:a05:6122:338a:b0:530:ba70:cfc9 with SMTP id
- 71dfb90a1353d-530e5025eb2mr2261725e0c.0.1749205969153; Fri, 06 Jun 2025
- 03:32:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="neHZTkBR"
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5565pR89006326;
+	Fri, 6 Jun 2025 10:47:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:message-id
+	:mime-version:subject:to; s=qcppdkim1; bh=hAPSsiUdvJ416pcpm4p/aT
+	AD3Uul2pKU2G/WCD7xAW4=; b=neHZTkBR04EjSx8zUJeogduVY9E1GMt4xf7fDx
+	b0IBRXIF/cfpRO7RoQKutkBh4Q/NeMuZVNDD5VMw6PYHyhCghNoQdfs4219bvTMt
+	ubXNhtwA9hYvQhDrmCOMkU4MhwHWhDbtrLKb6aeVl4PnRG1C1IMjDpV2YEE4Rh8w
+	wqPGyPRq0ERfaBDT89JPkkfalZ7FudRN219clT+W+z43UUeMEFRWyo0TJS5IBBVn
+	Cr5iuRUJKRXEYH2Zqz1XT2ngUSRIYqM3+lFmgWIu/5dBDvNdUM4uGUhHur7mxQaG
+	grQMnZUme6Yt3xFA11++0bWZ9Axfa06p0NxNyQEBpsjT4kOA==
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 471g8t4bud-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 06 Jun 2025 10:47:46 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 556AlkAK001122
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 6 Jun 2025 10:47:46 GMT
+Received: from hu-dmukhopa-hyd.qualcomm.com (10.80.80.8) by
+ nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1544.9; Fri, 6 Jun 2025 03:47:38 -0700
+From: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>
+CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <kernel@quicinc.com>,
+        Eric Biggers
+	<ebiggers@kernel.org>,
+        Neeraj Soni <quic_neersoni@quicinc.com>,
+        "Debraj
+ Mukhopadhyay" <quic_dmukhopa@quicinc.com>,
+        Ram Prakash Gupta
+	<quic_rampraka@quicinc.com>,
+        Nitin Rawat <quic_nitirawa@quicinc.com>,
+        "Sachin
+ Gupta" <quic_sachgupt@quicinc.com>,
+        Bhaskar Valaboju
+	<quic_bhaskarv@quicinc.com>,
+        Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Seshu Madhavi Puppala
+	<quic_spuppala@quicinc.com>
+Subject: [PATCH v2] mmc: Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
+Date: Fri, 6 Jun 2025 16:17:14 +0530
+Message-ID: <20250606104714.1501297-1-quic_dmukhopa@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250523110155.10451-1-victorshihgli@gmail.com>
- <20250523110155.10451-3-victorshihgli@gmail.com> <20d2730f-1e1b-4f47-b208-201468e21029@intel.com>
-In-Reply-To: <20d2730f-1e1b-4f47-b208-201468e21029@intel.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Fri, 6 Jun 2025 18:32:36 +0800
-X-Gm-Features: AX0GCFuCsh_QPaMAcJWsev2oqyRwidon6gRsisjqQtww0hDLSd6tUsDIB2dWTJ4
-Message-ID: <CAK00qKB3QZZjXFvwQazE7iYG_W-0PgsQzYWWTMKt8fAr5ePiyw@mail.gmail.com>
-Subject: Re: [PATCH RESEND V2 2/2] mmc: sdhci-uhs2: Adjust some error messages
- and register dump for SD UHS-II card
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw, 
-	Ben.Chuang@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: LrZwEgCPuoX7sMsO1t2kE6T5iZhrp6zt
+X-Authority-Analysis: v=2.4 cv=EPcG00ZC c=1 sm=1 tr=0 ts=6842c752 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=6IFa9wvqVegA:10 a=VwQbUJbxAAAA:8 a=COk6AnOGAAAA:8
+ a=1QBs8BvCmvQ6mH5QngwA:9 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: LrZwEgCPuoX7sMsO1t2kE6T5iZhrp6zt
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjA2MDA5NyBTYWx0ZWRfX/ryXZDAnRGlG
+ OjiKXRUYxye73XvmkJr3Ne9b5DaMrdDswdbF4fOr6goipqfAw2wG/Kf9U2/nx3JS+qwyGJyN5/8
+ U8qg0hzGLNIbY9SfKn5KxEQ+ySI+RM7loyrSDjTv4PgsFmRFzv5dY6McaBh6ZSOy/6+dKXJBOrn
+ enRtDZF8vNj/71Gacq6ElUDiWN1WCwJFzq0wvEU8loaQXJETHjrjeSCOgWHE257GHJQPmTjDNrB
+ lmy5in2ui9nxzsK70ft0rHOwJfceZ0I/mKo0xVHw1WLtKH3uWCtRDnxvgStDI7B1BUa/Bn8dygV
+ k12BkOanWeXpaFSntQ/5NPN+T9JNdvFYDMaluJwhH4Qgb4BDgo7nym/aWdsbvUlZsG7AfC7l8ey
+ pjmAwKwxsx8ZVNpZXOHOHzwYkG9pgCpzCGiZj9Uf5xRRBHfjwIBF4wclFzsB2WNGyR5iJQ3M
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
+ definitions=2025-06-06_03,2025-06-05_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ spamscore=0 suspectscore=0 bulkscore=0 priorityscore=1501 phishscore=0
+ impostorscore=0 lowpriorityscore=0 adultscore=0 malwarescore=0 mlxscore=0
+ clxscore=1011 mlxlogscore=946 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2506060097
 
-On Wed, May 28, 2025 at 8:10=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 23/05/2025 14:01, Victor Shih wrote:
-> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >
-> > Adjust some error messages to debug mode and register dump to dynamic
-> > debug mode to avoid causing misunderstanding it is an error.
-> >
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> I think Ulf asked for the drivers/mmc/host/sdhci.h change to be
-> a separate patch.
->
-> In any case:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
+Crypto reprogram all keys is called for each MMC runtime
+suspend/resume in current upstream design. If this is implemented
+as a non-interruptible call to TEE for security, the cpu core is
+blocked for execution while this call executes although the crypto
+engine already has the keys. For example, glitches in audio/video
+streaming applications have been observed due to this. Add the flag
+MMC_CAP2_DONT_REPROGRAM as part of host->caps2 to control reprogramming
+keys to crypto engine for socs which dont require this feature.
 
-Hi, Adrian
+Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
+Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
 
-I left this part out, I'll resend the patch for the new series to
-match this thing,
-and I will also keep your acked tag.
+---
 
-Thanks, Victor Shih
+Changes in v2:
+- Renamed MMC_CAP2_DONT_REPROGRAM to MMC_CAP2_CRYPTO_NO_REPROG for
+  improved clarity.
+- Defined MMC_CAP2_CRYPTO_NO_REPROG for MMC targets that do not support
+  a Crypto Engine.
+- Restricted the usage of struct crypto_profile to MMC devices that
+  support a Crypto Engine.
 
-> > ---
-> >  drivers/mmc/host/sdhci-uhs2.c | 20 ++++++++++----------
-> >  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
-> >  2 files changed, 26 insertions(+), 10 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs=
-2.c
-> > index c53b64d50c0d..0efeb9d0c376 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.c
-> > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > @@ -99,8 +99,8 @@ void sdhci_uhs2_reset(struct sdhci_host *host, u16 ma=
-sk)
-> >       /* hw clears the bit when it's done */
-> >       if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
-> >                                    UHS2_RESET_TIMEOUT_100MS, true, host=
-, SDHCI_UHS2_SW_RESET)) {
-> > -             pr_warn("%s: %s: Reset 0x%x never completed. %s: clean re=
-set bit.\n", __func__,
-> > -                     mmc_hostname(host->mmc), (int)mask, mmc_hostname(=
-host->mmc));
-> > +             pr_debug("%s: %s: Reset 0x%x never completed. %s: clean r=
-eset bit.\n", __func__,
-> > +                      mmc_hostname(host->mmc), (int)mask, mmc_hostname=
-(host->mmc));
-> >               sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
-> >               return;
-> >       }
-> > @@ -335,8 +335,8 @@ static int sdhci_uhs2_interface_detect(struct sdhci=
-_host *host)
-> >       if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_IF_DETE=
-CT),
-> >                             100, UHS2_INTERFACE_DETECT_TIMEOUT_100MS, t=
-rue,
-> >                             host, SDHCI_PRESENT_STATE)) {
-> > -             pr_warn("%s: not detect UHS2 interface in 100ms.\n", mmc_=
-hostname(host->mmc));
-> > -             sdhci_dumpregs(host);
-> > +             pr_debug("%s: not detect UHS2 interface in 100ms.\n", mmc=
-_hostname(host->mmc));
-> > +             sdhci_dbg_dumpregs(host, "UHS2 interface detect timeout i=
-n 100ms");
-> >               return -EIO;
-> >       }
-> >
-> > @@ -345,8 +345,8 @@ static int sdhci_uhs2_interface_detect(struct sdhci=
-_host *host)
-> >
-> >       if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_LANE_SY=
-NC),
-> >                             100, UHS2_LANE_SYNC_TIMEOUT_150MS, true, ho=
-st, SDHCI_PRESENT_STATE)) {
-> > -             pr_warn("%s: UHS2 Lane sync fail in 150ms.\n", mmc_hostna=
-me(host->mmc));
-> > -             sdhci_dumpregs(host);
-> > +             pr_debug("%s: UHS2 Lane sync fail in 150ms.\n", mmc_hostn=
-ame(host->mmc));
-> > +             sdhci_dbg_dumpregs(host, "UHS2 Lane sync fail in 150ms");
-> >               return -EIO;
-> >       }
-> >
-> > @@ -417,12 +417,12 @@ static int sdhci_uhs2_do_detect_init(struct mmc_h=
-ost *mmc)
-> >               host->ops->uhs2_pre_detect_init(host);
-> >
-> >       if (sdhci_uhs2_interface_detect(host)) {
-> > -             pr_warn("%s: cannot detect UHS2 interface.\n", mmc_hostna=
-me(host->mmc));
-> > +             pr_debug("%s: cannot detect UHS2 interface.\n", mmc_hostn=
-ame(host->mmc));
-> >               return -EIO;
-> >       }
-> >
-> >       if (sdhci_uhs2_init(host)) {
-> > -             pr_warn("%s: UHS2 init fail.\n", mmc_hostname(host->mmc))=
-;
-> > +             pr_debug("%s: UHS2 init fail.\n", mmc_hostname(host->mmc)=
-);
-> >               return -EIO;
-> >       }
-> >
-> > @@ -504,8 +504,8 @@ static int sdhci_uhs2_check_dormant(struct sdhci_ho=
-st *host)
-> >       if (read_poll_timeout(sdhci_readl, val, (val & SDHCI_UHS2_IN_DORM=
-ANT_STATE),
-> >                             100, UHS2_CHECK_DORMANT_TIMEOUT_100MS, true=
-, host,
-> >                             SDHCI_PRESENT_STATE)) {
-> > -             pr_warn("%s: UHS2 IN_DORMANT fail in 100ms.\n", mmc_hostn=
-ame(host->mmc));
-> > -             sdhci_dumpregs(host);
-> > +             pr_debug("%s: UHS2 IN_DORMANT fail in 100ms.\n", mmc_host=
-name(host->mmc));
-> > +             sdhci_dbg_dumpregs(host, "UHS2 IN_DORMANT fail in 100ms")=
-;
-> >               return -EIO;
-> >       }
-> >       return 0;
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index f9d65dd0f2b2..70ada1857a4c 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -900,4 +900,20 @@ void sdhci_switch_external_dma(struct sdhci_host *=
-host, bool en);
-> >  void sdhci_set_data_timeout_irq(struct sdhci_host *host, bool enable);
-> >  void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *=
-cmd);
-> >
-> > +#if defined(CONFIG_DYNAMIC_DEBUG) || \
-> > +     (defined(CONFIG_DYNAMIC_DEBUG_CORE) && defined(DYNAMIC_DEBUG_MODU=
-LE))
-> > +#define SDHCI_DBG_ANYWAY 0
-> > +#elif defined(DEBUG)
-> > +#define SDHCI_DBG_ANYWAY 1
-> > +#else
-> > +#define SDHCI_DBG_ANYWAY 0
-> > +#endif
-> > +
-> > +#define sdhci_dbg_dumpregs(host, fmt)                                 =
-       \
-> > +do {                                                                 \
-> > +     DEFINE_DYNAMIC_DEBUG_METADATA(descriptor, fmt);                 \
-> > +     if (DYNAMIC_DEBUG_BRANCH(descriptor) || SDHCI_DBG_ANYWAY)       \
-> > +             sdhci_dumpregs(host);                                   \
-> > +} while (0)
-> > +
-> >  #endif /* __SDHCI_HW_H */
->
+Changes in v1:
+- Addressed the comments from:
+  https://lore.kernel.org/lkml/20241006135530.17363-3-
+  quic_spuppala@quicinc.com/T/#m69c9ab538bd9efd54515646952d0d7d1d7c17690
+- Avoided reprogram of keys for Qualcomm SOCs only.
+- Ensured reprogram of all keys on host controller reset.
+
+---
+
+ drivers/mmc/core/crypto.c    | 2 +-
+ drivers/mmc/host/sdhci-msm.c | 6 ++++++
+ include/linux/mmc/host.h     | 5 +++++
+ 3 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+index fec4fbf16a5b..d41672e2856e 100644
+--- a/drivers/mmc/core/crypto.c
++++ b/drivers/mmc/core/crypto.c
+@@ -15,7 +15,7 @@
+ void mmc_crypto_set_initial_state(struct mmc_host *host)
+ {
+ 	/* Reset might clear all keys, so reprogram all the keys. */
+-	if (host->caps2 & MMC_CAP2_CRYPTO)
++	if (host->caps2 & MMC_CAP2_CRYPTO && !(host->caps2 & MMC_CAP2_CRYPTO_NO_REPROG))
+ 		blk_crypto_reprogram_all_keys(&host->crypto_profile);
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 66c0d1ba2a33..ee6783555f2e 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1920,6 +1920,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
+ 	}
+ 
+ 	mmc->caps2 |= MMC_CAP2_CRYPTO;
++	mmc->caps2 |= MMC_CAP2_CRYPTO_NO_REPROG;
+ 	return 0;
+ }
+ 
+@@ -2497,6 +2498,11 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+ 	usleep_range(200, 210);
+ 	reset_control_put(reset);
+ 
++#ifdef CONFIG_MMC_CRYPTO
++	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
++		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
++#endif
++
+ 	return ret;
+ }
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 68f09a955a90..af3b3720aa9c 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -459,6 +459,11 @@ struct mmc_host {
+ #define MMC_CAP2_CRYPTO		0
+ #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
++#ifdef CONFIG_MMC_CRYPTO
++#define MMC_CAP2_CRYPTO_NO_REPROG	(1 << 29)	/* Host does not support inline crypto key reprogramming */
++#else
++#define MMC_CAP2_CRYPTO_NO_REPROG	0
++#endif
+ 
+ 	bool			uhs2_sd_tran;	/* UHS-II flag for SD_TRAN state */
+ 	bool			uhs2_app_cmd;	/* UHS-II flag for APP command */
+-- 
+2.34.1
+
