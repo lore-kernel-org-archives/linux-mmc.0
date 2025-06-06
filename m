@@ -1,70 +1,74 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 95CA327FB35;
-	Fri,  6 Jun 2025 10:47:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 464162B9BC;
+	Fri,  6 Jun 2025 11:01:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749206873; cv=none; b=TEN0P7P86Yj8l3lI3GaTPcLFsDAcE+Fqzx8jlbgh0SictIGE4zXN4UWhu9yMPfz147gyDC85LqlxYKEw+OfUhvcMT0LlVQ6KCO575MGyCmZ4/nUhJEnIMsFWqO+wGTzMBprj1OsRMILY7LDlaYqeMTnHBuruXvFXvW4unB9XcvM=
+	t=1749207693; cv=none; b=H5qYuU2JVCAdXGAzTEI/r6w9T9+qHtQQO+T1K1qphdtatuIkn1fDrwKdkFkgbiUoB/KEjLaAI+6uTESCCTDKZ23ac2rN049S1I/IVr7qHth+pMceiIie6v4Vo3pWCMzxFewrvj46Ov8TyiGFLxhz35M1rkdXEzYvAMAB4DhwAUg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749206873; c=relaxed/simple;
-	bh=QskOF1fBwiApH4/AwXD144gfb0R5kxegs360iIkwX4A=;
-	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=cs0EoqcDChiEeES+uQG2O2lYLn7hWAhQwE5KRMq9HqVYmlOtobqqbhfVaZAu4CdnCDLBjcc6+5rD/ZOTbbTC37xF8jkcZKHohP+fCR6dNNPEyLFqaeOafsCkObEpawFUEI9BeZG56X8mU2RnJp76mStxwY+leOLILKAec/mp5FU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=neHZTkBR; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1749207693; c=relaxed/simple;
+	bh=xT5xCkZ1JFFONaYP0IT32OFGyChvPSzHHY99QK6deuA=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=OeeUP28aK92SeakHYgqeRMdcvshC4d0DuR3ArS1CiaZNodMfgAraCMwaWPo/kkBT1Il0+YBWijZARjb82No4w3hysOE+0FcyFtkjQGh6SVMDzkHMcS2klhuTI4zKUHI8+IqQwt6v5E+FrqPeb8VGWFfAdi9cgcW98ukhnQwbdGk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Mguw66Xl; arc=none smtp.client-ip=209.85.214.170
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="neHZTkBR"
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5565pR89006326;
-	Fri, 6 Jun 2025 10:47:47 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:message-id
-	:mime-version:subject:to; s=qcppdkim1; bh=hAPSsiUdvJ416pcpm4p/aT
-	AD3Uul2pKU2G/WCD7xAW4=; b=neHZTkBR04EjSx8zUJeogduVY9E1GMt4xf7fDx
-	b0IBRXIF/cfpRO7RoQKutkBh4Q/NeMuZVNDD5VMw6PYHyhCghNoQdfs4219bvTMt
-	ubXNhtwA9hYvQhDrmCOMkU4MhwHWhDbtrLKb6aeVl4PnRG1C1IMjDpV2YEE4Rh8w
-	wqPGyPRq0ERfaBDT89JPkkfalZ7FudRN219clT+W+z43UUeMEFRWyo0TJS5IBBVn
-	Cr5iuRUJKRXEYH2Zqz1XT2ngUSRIYqM3+lFmgWIu/5dBDvNdUM4uGUhHur7mxQaG
-	grQMnZUme6Yt3xFA11++0bWZ9Axfa06p0NxNyQEBpsjT4kOA==
-Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 471g8t4bud-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 06 Jun 2025 10:47:46 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 556AlkAK001122
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 6 Jun 2025 10:47:46 GMT
-Received: from hu-dmukhopa-hyd.qualcomm.com (10.80.80.8) by
- nasanex01a.na.qualcomm.com (10.52.223.231) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1544.9; Fri, 6 Jun 2025 03:47:38 -0700
-From: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>
-CC: <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <kernel@quicinc.com>,
-        Eric Biggers
-	<ebiggers@kernel.org>,
-        Neeraj Soni <quic_neersoni@quicinc.com>,
-        "Debraj
- Mukhopadhyay" <quic_dmukhopa@quicinc.com>,
-        Ram Prakash Gupta
-	<quic_rampraka@quicinc.com>,
-        Nitin Rawat <quic_nitirawa@quicinc.com>,
-        "Sachin
- Gupta" <quic_sachgupt@quicinc.com>,
-        Bhaskar Valaboju
-	<quic_bhaskarv@quicinc.com>,
-        Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        Sarthak Garg <quic_sartgarg@quicinc.com>,
-        Seshu Madhavi Puppala
-	<quic_spuppala@quicinc.com>
-Subject: [PATCH v2] mmc: Avoid reprogram all keys to Inline Crypto Engine for MMC runtime suspend resume
-Date: Fri, 6 Jun 2025 16:17:14 +0530
-Message-ID: <20250606104714.1501297-1-quic_dmukhopa@quicinc.com>
-X-Mailer: git-send-email 2.34.1
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Mguw66Xl"
+Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-235f9ea8d08so13239515ad.1;
+        Fri, 06 Jun 2025 04:01:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1749207690; x=1749812490; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=UDajbAe57kbFd3lsA+awvfcHj7NkUKCVzc3fJfrdtwM=;
+        b=Mguw66Xl1nByGQFsakpywgxn9pOYoxEp2R+WuBTCKhrR1dW5ZBVeJeEFCthtWjc9WN
+         d7DxT2fn3coYj3IXMChH8JKX33dPiKkPzoC4cJs54MtyBG2ELFkNDdicIthWGyK/FK6Y
+         bTRfNyZjbC+IjPtVNpL/aHY/+5GHv03FYni6H4idlVATX1ltkkTIhZJuc5TVa+r543RK
+         aC+GBQEH3fTMCtO1Xphq5IOfba8v2/p20i3fxRotty4izsdZTSLLZAm/2dkHuwI7hzeN
+         xcqdl8yWEagtXDks+20dq3vUMY8eoRf0WPX7az7d3dyTDvlgHdl3XTlmMF9vWyXxHa3R
+         TbtQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749207690; x=1749812490;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UDajbAe57kbFd3lsA+awvfcHj7NkUKCVzc3fJfrdtwM=;
+        b=Q3pCZd6RJn+QNsazPTkiCzZ0vENod2zlf0oXQJeY0xTpVjtlQRjx33apDUIbtOh857
+         P/Vj4Fuq3KIjlnGwoNwCmvC1SG86uGIYIOC8n4TvpPLdpEwTCgCvckzjGtQHX0cCH6DO
+         GFK82LbXf7DJhkq1wDkd5rrVnki0LA0Mg1HgBoQ0wob1/yXEFB3tkxGAtXD+9k1Spm4K
+         J8ZcNq/ZiwHUzfrn8sdNTkOdvB1oIC8RrtxQBq9dHZYQpuMvYoaQhppwDTMIpiDJhj2i
+         ffZPV2oQa8cRXiXbQdoHEjLKW2wfWPUz2sRXxS1fC62eJCZLLS4Ftyd1Uh1ksD/xbQTM
+         qqyQ==
+X-Forwarded-Encrypted: i=1; AJvYcCX1aEE/b/s50WWNisY63jpy4MlQgPSDzpX6SmNnt0Afvjo2Wj/SLLUudwl3TY4b5R76uNZg5LJwhDUGKaM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw8gycjU5OdXRvYY/XK0cPXZo036fj+hQDuGttxCG5mTpCQjoBO
+	WjHLZCayPoli63UZX+ozDsDhyKquOq85/TFoONwwCyy11ODUlDpGlg8E
+X-Gm-Gg: ASbGncsC6xGVbG3cDhIbj7lPTwyXnmgqlrntLHJKYnpL4rr1oPBtNwnwJUyFmn/tXw3
+	gbSU1LFk8qoLtn8gSiJgsgOuyrA4lNH86ySpDRxf8oM4oLBwMiWcKbHQzSB36qmye0Qgy4/TC6J
+	42M4SmO7/+TKTbhSBHpxITTApUbs/VxaF7viby2n4qPVOFB2fwo0q27sZwgTiN/BsjWhJP0y1df
+	KsKmmwnpz3yFaWV5FgUwOgqYXZmleuKymQmVypqk2DNdh+gh3qOQVa68MlH3kXTdwth6Ur/6GN6
+	vwFDIxHCNFqD5j77lc4Q9zSgM1zA+CxGmUUX1afR3zzRM/uFdBcYZEvv1Uq930i2tGoQCA==
+X-Google-Smtp-Source: AGHT+IEuQ5XKtuQPYr1CK/mvEDG3WWgyFUsrOC+Ax+xUPhXLsT1tDc1xNFSLcRAlbvPTptb4pA5B5g==
+X-Received: by 2002:a17:902:da4b:b0:234:a66d:cce5 with SMTP id d9443c01a7336-23601ed6398mr45797085ad.46.1749207690331;
+        Fri, 06 Jun 2025 04:01:30 -0700 (PDT)
+Received: from victorshih.. ([2402:7500:477:464b:b7fc:d546:e798:4fbc])
+        by smtp.gmail.com with ESMTPSA id d9443c01a7336-23603406aa9sm10095565ad.188.2025.06.06.04.01.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 06 Jun 2025 04:01:29 -0700 (PDT)
+From: Victor Shih <victorshihgli@gmail.com>
+To: ulf.hansson@linaro.org,
+	adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	benchuanggli@gmail.com,
+	ben.chuang@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	Greg.tu@genesyslogic.com.tw,
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V3 0/3] Adjust some error messages for SD UHS-II initialization process
+Date: Fri,  6 Jun 2025 19:01:18 +0800
+Message-ID: <20250606110121.96314-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -72,127 +76,74 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: LrZwEgCPuoX7sMsO1t2kE6T5iZhrp6zt
-X-Authority-Analysis: v=2.4 cv=EPcG00ZC c=1 sm=1 tr=0 ts=6842c752 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=6IFa9wvqVegA:10 a=VwQbUJbxAAAA:8 a=COk6AnOGAAAA:8
- a=1QBs8BvCmvQ6mH5QngwA:9 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: LrZwEgCPuoX7sMsO1t2kE6T5iZhrp6zt
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjA2MDA5NyBTYWx0ZWRfX/ryXZDAnRGlG
- OjiKXRUYxye73XvmkJr3Ne9b5DaMrdDswdbF4fOr6goipqfAw2wG/Kf9U2/nx3JS+qwyGJyN5/8
- U8qg0hzGLNIbY9SfKn5KxEQ+ySI+RM7loyrSDjTv4PgsFmRFzv5dY6McaBh6ZSOy/6+dKXJBOrn
- enRtDZF8vNj/71Gacq6ElUDiWN1WCwJFzq0wvEU8loaQXJETHjrjeSCOgWHE257GHJQPmTjDNrB
- lmy5in2ui9nxzsK70ft0rHOwJfceZ0I/mKo0xVHw1WLtKH3uWCtRDnxvgStDI7B1BUa/Bn8dygV
- k12BkOanWeXpaFSntQ/5NPN+T9JNdvFYDMaluJwhH4Qgb4BDgo7nym/aWdsbvUlZsG7AfC7l8ey
- pjmAwKwxsx8ZVNpZXOHOHzwYkG9pgCpzCGiZj9Uf5xRRBHfjwIBF4wclFzsB2WNGyR5iJQ3M
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-06-06_03,2025-06-05_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 suspectscore=0 bulkscore=0 priorityscore=1501 phishscore=0
- impostorscore=0 lowpriorityscore=0 adultscore=0 malwarescore=0 mlxscore=0
- clxscore=1011 mlxlogscore=946 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2506060097
 
-Crypto reprogram all keys is called for each MMC runtime
-suspend/resume in current upstream design. If this is implemented
-as a non-interruptible call to TEE for security, the cpu core is
-blocked for execution while this call executes although the crypto
-engine already has the keys. For example, glitches in audio/video
-streaming applications have been observed due to this. Add the flag
-MMC_CAP2_DONT_REPROGRAM as part of host->caps2 to control reprogramming
-keys to crypto engine for socs which dont require this feature.
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
-Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
+Summary
+=======
+It is normal that errors will occur when using non-UHS-II card to enter
+the UHS-II card initialization process. We should not be producing error
+messages and register dumps. Therefore, switch the error messages to debug
+mode and register dumps to dynamic debug mode.
 
----
+Patch structure
+===============
+patch#1:    for core
+patch#2-#3: for sdhci
 
-Changes in v2:
-- Renamed MMC_CAP2_DONT_REPROGRAM to MMC_CAP2_CRYPTO_NO_REPROG for
-  improved clarity.
-- Defined MMC_CAP2_CRYPTO_NO_REPROG for MMC targets that do not support
-  a Crypto Engine.
-- Restricted the usage of struct crypto_profile to MMC devices that
-  support a Crypto Engine.
+Changes in v3 (June. 06, 2025)
+* Rebase on latest mmc/next.
+* Patch#2: Separate the helper function in V2 patch#2 into V3 patch#2.
 
-Changes in v1:
-- Addressed the comments from:
-  https://lore.kernel.org/lkml/20241006135530.17363-3-
-  quic_spuppala@quicinc.com/T/#m69c9ab538bd9efd54515646952d0d7d1d7c17690
-- Avoided reprogram of keys for Qualcomm SOCs only.
-- Ensured reprogram of all keys on host controller reset.
+----------------- original cover letter from v2 -----------------
+Summary
+=======
+It is normal that errors will occur when using non-UHS-II card to enter
+the UHS-II card initialization process. We should not be producing error
+messages and register dumps. Therefore, switch the error messages to debug
+mode and register dumps to dynamic debug mode.
 
----
+Patch structure
+===============
+patch#1: for core
+patch#2: for sdhci
 
- drivers/mmc/core/crypto.c    | 2 +-
- drivers/mmc/host/sdhci-msm.c | 6 ++++++
- include/linux/mmc/host.h     | 5 +++++
- 3 files changed, 12 insertions(+), 1 deletion(-)
+Changes in v2 (May. 23, 2025)
+* Rebase on latest mmc/next.
+* Patch#1: Drop the use of DBG macro and use pr_debug() instead.
+* Patch#2: Drop the use of DBG macro in some function
+           and use pr_debug() instead.
 
-diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
-index fec4fbf16a5b..d41672e2856e 100644
---- a/drivers/mmc/core/crypto.c
-+++ b/drivers/mmc/core/crypto.c
-@@ -15,7 +15,7 @@
- void mmc_crypto_set_initial_state(struct mmc_host *host)
- {
- 	/* Reset might clear all keys, so reprogram all the keys. */
--	if (host->caps2 & MMC_CAP2_CRYPTO)
-+	if (host->caps2 & MMC_CAP2_CRYPTO && !(host->caps2 & MMC_CAP2_CRYPTO_NO_REPROG))
- 		blk_crypto_reprogram_all_keys(&host->crypto_profile);
- }
- 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 66c0d1ba2a33..ee6783555f2e 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -1920,6 +1920,7 @@ static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
- 	}
- 
- 	mmc->caps2 |= MMC_CAP2_CRYPTO;
-+	mmc->caps2 |= MMC_CAP2_CRYPTO_NO_REPROG;
- 	return 0;
- }
- 
-@@ -2497,6 +2498,11 @@ static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
- 	usleep_range(200, 210);
- 	reset_control_put(reset);
- 
-+#ifdef CONFIG_MMC_CRYPTO
-+	if (host->mmc->caps2 & MMC_CAP2_CRYPTO)
-+		blk_crypto_reprogram_all_keys(&host->mmc->crypto_profile);
-+#endif
-+
- 	return ret;
- }
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 68f09a955a90..af3b3720aa9c 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -459,6 +459,11 @@ struct mmc_host {
- #define MMC_CAP2_CRYPTO		0
- #endif
- #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
-+#ifdef CONFIG_MMC_CRYPTO
-+#define MMC_CAP2_CRYPTO_NO_REPROG	(1 << 29)	/* Host does not support inline crypto key reprogramming */
-+#else
-+#define MMC_CAP2_CRYPTO_NO_REPROG	0
-+#endif
- 
- 	bool			uhs2_sd_tran;	/* UHS-II flag for SD_TRAN state */
- 	bool			uhs2_app_cmd;	/* UHS-II flag for APP command */
+----------------- original cover letter from v1 -----------------
+Summary
+=======
+It is normal that errors will occur when using non-UHS-II card to enter
+the UHS-II card initialization process. We should not be producing error
+messages and register dumps. Therefore, switch the error messages to debug
+mode and register dumps to dynamic debug mode.
+
+Patch structure
+===============
+patch#1: for core
+patch#2: for sdhci
+
+Changes in v1 (May. 16, 2025)
+* Rebase on latest mmc/next.
+* Patch#1: Adjust some error messages for SD UHS-II cards.
+* Patch#2: Adjust some error messages and register dump for SD UHS-II card
+
+Victor Shih (3):
+  mmc: core: Adjust some error messages for SD UHS-II cards
+  mmc: sdhci: Add a helper function for dump register in dynamic debug
+    mode
+  mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
+    UHS-II card
+
+ drivers/mmc/core/sd_uhs2.c    |  4 ++--
+ drivers/mmc/host/sdhci-uhs2.c | 20 ++++++++++----------
+ drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
+ 3 files changed, 28 insertions(+), 12 deletions(-)
+
 -- 
-2.34.1
+2.43.0
 
