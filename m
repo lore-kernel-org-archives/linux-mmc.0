@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 592321F17E8
-	for <linux-mmc@vger.kernel.org>; Sat,  7 Jun 2025 07:35:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id DC7361EA7CC
+	for <linux-mmc@vger.kernel.org>; Sat,  7 Jun 2025 07:35:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749281731; cv=none; b=a0ze47b6uBTKaHLUTH0+EMU1PD7jKBr5GqP1iojozzRG0N+pAs8evDNrpx5Wl3HhJigSCE75y5Gkq6SiiBzVLTGwuQ4fU0meMoV2KoXu0Gz7ygBXOoa6MrS0f+Nb7EV9jo9nqtwMJ1IQGjiEZ3lMFPkxZG8VZZ7FBpBYWN03/6Y=
+	t=1749281759; cv=none; b=DkpZiios4lXzVSoyHue4huYT4ZgN9qWE27kq9gWOZAsXfB6JdrzrIaUTAi85PHZK7z3qfLZ1jpFgRy4qdj55iIhRfqrJZgKpu/XnzbtBhDWpDKr18JGexPlqFisOQMgVXgc7EYG88bwGxPoRNH+7uWou/P7wZo3spHngRbwd9Y0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749281731; c=relaxed/simple;
-	bh=W85MBCxfQQGtZ6jIX9xyIbINI/93AwLVBkOiCLwSFrk=;
+	s=arc-20240116; t=1749281759; c=relaxed/simple;
+	bh=KYGXxpSi9PfoZaHWreTYDSznlMU9tjDg6fBQe1fnVes=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=ejrYQOMhypwPKzS5cxzO53qdTo/fNPN7TgORjmXQvzVuDZYyauQ99V/BgQh1ZZh0ym7HvB8bzfEkFRkjJwdkhjUeWy/+SLSl7NcZWYuvMgtxSnnaoDS4jcMnu1c+3ByWBNAwAv476LCrgwhX/Kdr0JwSc4GIYqJF0Rq/f0RjhkA=
+	 MIME-Version; b=itc26Q/lXqFWIHQbcHs8yH+VsFPGPHT0lQiY12xzHyUc55/JZat6laU3cgWbKcoBG3FjxzqEH809kFvhoky8WM24zdLfx3N3GpD4nRX1pdDxxU/2p/Jh0n081HeL4+BGlNxPeTuEx/Ve3B6DXuaZND0sFGOxsrCnSw3uHp0qlo4=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8CxPuPA60NoqBUPAQ--.5611S3;
-	Sat, 07 Jun 2025 15:35:28 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8AxDGvc60NoxBUPAQ--.40668S3;
+	Sat, 07 Jun 2025 15:35:56 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMBx3xu460Noj50OAQ--.58136S5;
-	Sat, 07 Jun 2025 15:35:26 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMCxPsfa60NouZ0OAQ--.49038S2;
+	Sat, 07 Jun 2025 15:35:55 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -26,12 +26,10 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Ben Dooks <ben-linux@fluff.org>,
-	Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH v3 05/35] mmc: sdhci-s3c: Drop the use of sdhci_free_host()
-Date: Sat,  7 Jun 2025 15:35:09 +0800
-Message-ID: <f22a17de11dc03c5bdeb4ebbdc6aec8429c1c20f.1749127796.git.zhoubinbin@loongson.cn>
+	Binbin Zhou <zhoubinbin@loongson.cn>
+Subject: [PATCH v3 06/35] mmc: sdhci-spear: Drop the use of sdhci_free_host()
+Date: Sat,  7 Jun 2025 15:35:42 +0800
+Message-ID: <fde959d1021c165ede971644f3db7e06ce7c6180.1749127796.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1749127796.git.zhoubinbin@loongson.cn>
 References: <cover.1749127796.git.zhoubinbin@loongson.cn>
@@ -42,84 +40,85 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMBx3xu460Noj50OAQ--.58136S5
+X-CM-TRANSID:qMiowMCxPsfa60NouZ0OAQ--.49038S2
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7tr1kZF1xCr4UAFW5KFy8JFc_yoW8Cr4DpF
-	WfWFWUtrW7WF1FqF98Jw4DZ3WYkw12qay8KrWrWw1kAFyYyrWktF4S9Fy0qF9YqFykGa13
-	CF4Utr4UuFyDXwbCm3ZEXasCq-sJn29KB7ZKAUJUUUU3529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoW7tr1kZF1UZF4fJFyxtFyktFc_yoW8Cry5pa
+	93XFZ3KrWfWF4rKrZ8Jw1DZ3WYyr40qayIga4fGwn7J3y5tryDtrn3CFy0qFyrJF95J3yf
+	WF1vqry8CF9rXwcCm3ZEXasCq-sJn29KB7ZKAUJUUUU7529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUUBlb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	0xBIdaVrnRJUUU9vb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
 	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
 	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26F4UJVW0owA2z4x0Y4vEx4A2jsIEc7CjxVAF
-	wI0_Cr1j6rxdM2kKe7AKxVWUAVWUtwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07
+	wI0_Cr1j6rxdM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07
 	AIYIkI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVW3
 	AVW8Xw1lYx0Ex4A2jsIE14v26F4j6r4UJwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2
-	Ij64vIr41lc7CjxVAaw2AFwI0_JF0_Jw1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Y
-	z7v_Jr0_Gr1l4IxYO2xFxVAFwI0_JF0_Jw1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x
-	8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE
-	2Ix0cI8IcVAFwI0_Ar0_tr1lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4UJVWxJr1lIxAIcV
-	CF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4A2jsIE14v26F4j6r4UJwCI42IY6I8E87Iv
-	6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnUUI43ZEXa7IU0wqXPUUUUU==
+	Ij64vIr41l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1l4IxYO2xFxVAF
+	wI0_Jrv_JF1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zV
+	AF1VAY17CE14v26r1q6r43MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_tr0E3s1l
+	IxAIcVC0I7IYx2IY6xkF7I0E14v26r4UJVWxJr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r
+	1xMIIF0xvEx4A2jsIE14v26F4j6r4UJwCI42IY6I8E87Iv6xkF7I0E14v26r4UJVWxJrUv
+	cSsGvfC2KfnxnUUI43ZEXa7IU0rhLUUUUUU==
 
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_free_host() is no longer needed.
 
-Cc: Ben Dooks <ben-linux@fluff.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-s3c.c | 16 ++++------------
- 1 file changed, 4 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci-spear.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index bdf4dc0d6b77..51d20d483acd 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -507,15 +507,13 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 	sc = sdhci_priv(host);
- 
- 	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--	if (!pdata) {
--		ret = -ENOMEM;
--		goto err_pdata_io_clk;
--	}
-+	if (!pdata)
-+		return -ENOMEM;
- 
- 	if (pdev->dev.of_node) {
- 		ret = sdhci_s3c_parse_dt(&pdev->dev, host, pdata);
- 		if (ret)
--			goto err_pdata_io_clk;
-+			return ret;
- 	} else {
- 		memcpy(pdata, pdev->dev.platform_data, sizeof(*pdata));
- 	}
-@@ -532,8 +530,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
- 	sc->clk_io = devm_clk_get(dev, "hsmmc");
- 	if (IS_ERR(sc->clk_io)) {
- 		dev_err(dev, "failed to get io clock\n");
--		ret = PTR_ERR(sc->clk_io);
--		goto err_pdata_io_clk;
-+		return PTR_ERR(sc->clk_io);
+diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+index 770dc12b9ae9..fa0f8aeb7ee0 100644
+--- a/drivers/mmc/host/sdhci-spear.c
++++ b/drivers/mmc/host/sdhci-spear.c
+@@ -59,7 +59,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	if (IS_ERR(host->ioaddr)) {
+ 		ret = PTR_ERR(host->ioaddr);
+ 		dev_dbg(&pdev->dev, "unable to map iomem: %d\n", ret);
+-		goto err_host;
++		goto err;
  	}
  
- 	/* enable the local io clock and keep it running for the moment. */
-@@ -661,9 +658,6 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
-  err_no_busclks:
- 	clk_disable_unprepare(sc->clk_io);
+ 	host->hw_name = "sdhci";
+@@ -67,7 +67,7 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	host->irq = platform_get_irq(pdev, 0);
+ 	if (host->irq < 0) {
+ 		ret = host->irq;
+-		goto err_host;
++		goto err;
+ 	}
+ 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
  
-- err_pdata_io_clk:
+@@ -78,13 +78,13 @@ static int sdhci_probe(struct platform_device *pdev)
+ 	if (IS_ERR(sdhci->clk)) {
+ 		ret = PTR_ERR(sdhci->clk);
+ 		dev_dbg(&pdev->dev, "Error getting clock\n");
+-		goto err_host;
++		goto err;
+ 	}
+ 
+ 	ret = clk_prepare_enable(sdhci->clk);
+ 	if (ret) {
+ 		dev_dbg(&pdev->dev, "Error enabling clock\n");
+-		goto err_host;
++		goto err;
+ 	}
+ 
+ 	ret = clk_set_rate(sdhci->clk, 50000000);
+@@ -110,8 +110,6 @@ static int sdhci_probe(struct platform_device *pdev)
+ 
+ disable_clk:
+ 	clk_disable_unprepare(sdhci->clk);
+-err_host:
 -	sdhci_free_host(host);
--
+ err:
+ 	dev_err(&pdev->dev, "spear-sdhci probe failed: %d\n", ret);
  	return ret;
- }
+@@ -130,7 +128,6 @@ static void sdhci_remove(struct platform_device *pdev)
  
-@@ -685,8 +679,6 @@ static void sdhci_s3c_remove(struct platform_device *pdev)
- 	pm_runtime_disable(&pdev->dev);
- 
- 	clk_disable_unprepare(sc->clk_io);
--
+ 	sdhci_remove_host(host, dead);
+ 	clk_disable_unprepare(sdhci->clk);
 -	sdhci_free_host(host);
  }
  
