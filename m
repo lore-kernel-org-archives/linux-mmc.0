@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 7944842A83;
-	Sat,  7 Jun 2025 07:52:29 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 250D742A83
+	for <linux-mmc@vger.kernel.org>; Sat,  7 Jun 2025 07:52:51 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749282751; cv=none; b=JlozDp+gUfRI98A0cUgaYslx5tE1nPvaxhQexVUyLxD1m4U+v5OoIo1Cuq0S64fADzFzvAp3QUcgtuyq92AxdZ3NfL9IAViCmQmIQ0DFeN1E22J9ZmmERYDxoN7YKMhlUTvZUF6h6i6S64V0Ba8V6stJk1pCA++wq11aGDG6MaE=
+	t=1749282773; cv=none; b=FSf1LE/vr2rbCOsp1upIsMIuhdj2VlQxiHxaBgFdVnRc6Um8S6yifXeOHRTLDma/9ciu84emSEO40H2U0X89Y5RPt9z6Iiwi9cKumyfZ+UZeMO5PJ/FFlfYYG57b/itK+AFe9Mj4/Qw1+HF1J0LTF8grsPXEaqbhm9n4smxYUNI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749282751; c=relaxed/simple;
-	bh=NNc/Qya68Pqu2BaUk5YCLfe344htnliiaLl+9up7ktA=;
+	s=arc-20240116; t=1749282773; c=relaxed/simple;
+	bh=8n9fLSa4o/mjVy32rNYbcGPlbOTmaBv1UCBCbtxSTVg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Zwd5hzJQeUVOTPA4Vt+HH5/3dBdR0vqjJ2EXLFCbGkDA2nWq4rrFSJCzm9euGGx2mwoiOwsyJzAzvayISDHR2Mu5PvMfD3sZ0yBawFSIX5pWb2qmzrsbS1ohg9DDyzYA1wB7CHLM6RlhnfwsEvt9C4/JzZCCubU0xBZ1ABM0EWw=
+	 MIME-Version; b=T0qHIS3VjiYqFvsrr/9wGUuebJ0CUfemAKMne5WtmdFZgzWKHU39+V0bP5p2ezEIQgivpvUZdWEo/Y+8HQ0CKf4akKoYlGOgl/TwsuclC6ZmMoLjD84MiDbj9BVtUK86kifOxLvDsJIlfoMazlpYyDT9ha3IGzuqHxuilb+em30=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8DxQK+870NoJxkPAQ--.5731S3;
-	Sat, 07 Jun 2025 15:52:28 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8AxmnHS70NoMxkPAQ--.40607S3;
+	Sat, 07 Jun 2025 15:52:50 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMDxvhu570No0aIOAQ--.58689S2;
-	Sat, 07 Jun 2025 15:52:27 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMAxzMTQ70No76IOAQ--.46561S2;
+	Sat, 07 Jun 2025 15:52:49 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -27,12 +27,10 @@ Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
 	Binbin Zhou <zhoubinbin@loongson.cn>,
-	Thierry Reding <thierry.reding@gmail.com>,
-	Jonathan Hunter <jonathanh@nvidia.com>,
-	linux-tegra@vger.kernel.org
-Subject: [PATCH v3 31/35] mmc: sdhci-tegra: Drop the use of sdhci_pltfm_free()
-Date: Sat,  7 Jun 2025 15:52:16 +0800
-Message-ID: <cee82eaad0392838fbe1fab8e2301e680d34c0c5.1749127796.git.zhoubinbin@loongson.cn>
+	Hu Ziji <huziji@marvell.com>
+Subject: [PATCH v3 32/35] mmc: sdhci-xenon: Drop the use of sdhci_pltfm_free()
+Date: Sat,  7 Jun 2025 15:52:39 +0800
+Message-ID: <e7c52155f04fc270400985b70514800c23fd5565.1749127796.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1749127796.git.zhoubinbin@loongson.cn>
 References: <cover.1749127796.git.zhoubinbin@loongson.cn>
@@ -43,11 +41,11 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMDxvhu570No0aIOAQ--.58689S2
+X-CM-TRANSID:qMiowMAxzMTQ70No76IOAQ--.46561S2
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW7ZrW8Xw4kKF4fXr4fCF1fXwc_yoW8CFW5pF
-	4DJFWIkr4xWr4FkFyDGwnrZa45Cr129ay7K3s5Kwn7A398JryDGFn3AFyjvFWrAFykK3W8
-	XF1UKF18CF9rWabCm3ZEXasCq-sJn29KB7ZKAUJUUUUx529EdanIXcx71UUUUU7KY7ZEXa
+X-Coremail-Antispam: 1Uk129KBj93XoW7WFy5WF4xAr4DZFy5Cw1fKrX_yoW8Ww1xpa
+	93tFy5Ka17WFWUK3s0qw4DZF15Jw42gay8Kry5Gw1kG3yakrW5trsayFW8ZF4rJFykKw4f
+	W3WDtFW8uas8C3XCm3ZEXasCq-sJn29KB7ZKAUJUUUUx529EdanIXcx71UUUUU7KY7ZEXa
 	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
 	0xBIdaVrnRJUUUmFb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
 	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
@@ -67,62 +65,54 @@ X-Coremail-Antispam: 1Uk129KBj93XoW7ZrW8Xw4kKF4fXr4fCF1fXwc_yoW8CFW5pF
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_pltfm_free() is no longer needed.
 
-Cc: Thierry Reding <thierry.reding@gmail.com>
-Cc: Jonathan Hunter <jonathanh@nvidia.com>
-Cc: linux-tegra@vger.kernel.org
+Cc: Hu Ziji <huziji@marvell.com>
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-tegra.c | 9 +++------
- 1 file changed, 3 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-xenon.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index b2f5c3f8b839..c811297185d8 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1693,7 +1693,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 098f0ea45cbe..41a2c26e2431 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -532,14 +532,13 @@ static int xenon_probe(struct platform_device *pdev)
  
- 	rc = mmc_of_parse(host->mmc);
- 	if (rc)
--		goto err_parse_dt;
-+		return rc;
+ 	if (dev->of_node) {
+ 		pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+-		if (IS_ERR(pltfm_host->clk)) {
+-			err = PTR_ERR(pltfm_host->clk);
+-			dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
+-			goto free_pltfm;
+-		}
++		if (IS_ERR(pltfm_host->clk))
++			return dev_err_probe(&pdev->dev, PTR_ERR(pltfm_host->clk),
++					     "Failed to setup input clk.\n");
++
+ 		err = clk_prepare_enable(pltfm_host->clk);
+ 		if (err)
+-			goto free_pltfm;
++			return err;
  
- 	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
-@@ -1739,7 +1739,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		if (IS_ERR(clk)) {
- 			rc = PTR_ERR(clk);
- 			if (rc == -EPROBE_DEFER)
--				goto err_power_req;
-+				return rc;
- 
- 			dev_warn(&pdev->dev, "failed to get tmclk: %d\n", rc);
- 			clk = NULL;
-@@ -1750,7 +1750,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		if (rc) {
- 			dev_err(&pdev->dev,
- 				"failed to enable tmclk: %d\n", rc);
--			goto err_power_req;
-+			return rc;
- 		}
- 
- 		tegra_host->tmclk = clk;
-@@ -1811,8 +1811,6 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- err_clk_get:
- 	clk_disable_unprepare(tegra_host->tmclk);
- err_power_req:
--err_parse_dt:
+ 		priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
+ 		if (IS_ERR(priv->axi_clk)) {
+@@ -603,8 +602,6 @@ static int xenon_probe(struct platform_device *pdev)
+ 	clk_disable_unprepare(priv->axi_clk);
+ err_clk:
+ 	clk_disable_unprepare(pltfm_host->clk);
+-free_pltfm:
 -	sdhci_pltfm_free(pdev);
- 	return rc;
+ 	return err;
  }
  
-@@ -1831,7 +1829,6 @@ static void sdhci_tegra_remove(struct platform_device *pdev)
- 	pm_runtime_force_suspend(&pdev->dev);
- 
- 	clk_disable_unprepare(tegra_host->tmclk);
+@@ -623,8 +620,6 @@ static void xenon_remove(struct platform_device *pdev)
+ 	xenon_sdhc_unprepare(host);
+ 	clk_disable_unprepare(priv->axi_clk);
+ 	clk_disable_unprepare(pltfm_host->clk);
+-
 -	sdhci_pltfm_free(pdev);
  }
  
- static int __maybe_unused sdhci_tegra_runtime_suspend(struct device *dev)
+ #ifdef CONFIG_PM_SLEEP
 -- 
 2.47.1
 
