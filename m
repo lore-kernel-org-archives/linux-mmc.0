@@ -1,23 +1,23 @@
 Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id CAD1D1EA7CC
-	for <linux-mmc@vger.kernel.org>; Sat,  7 Jun 2025 07:36:59 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 3CA991F4192
+	for <linux-mmc@vger.kernel.org>; Sat,  7 Jun 2025 07:37:03 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749281821; cv=none; b=uupQ+U1tGQKnfFqfmN9SI5iRZ8tCBVVjJM8vRBegDGf/d9dvYR2P3u3JSxHP0H9JRY4mxXyvFszSaZiVf9OdMnsGbMgBZ5YsJAkiYnj7PnH1CVub2KiW1VhjTsTuYpIeTI2qpYYGN4T4i077jiG1JXal9/uylCiC9UOTXLO3onY=
+	t=1749281825; cv=none; b=mYEGAJeMDrZscIjFPZHDGsGPgje4hI9IL5TBvUjRy0V92ThCV2y2PsIeQsKKlUmrCw1sSzqZoF7voEdR7PHl3/3rcrKKfmlKrFHSO/OKbirOydnNEVMZ3o8/T3kNl0KxQENsJa1Z2I8gGoxUsn2Bs2c4jGQJUxXCfwZs3ucosrM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749281821; c=relaxed/simple;
-	bh=whOgY4obm5sejv9+knFQ4aUVqk9pycZmCT+rov5Rrlc=;
+	s=arc-20240116; t=1749281825; c=relaxed/simple;
+	bh=3eDQBmQ+AJhNduv18t4R/1/3dV1qU6B9vBte766ow8Q=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=lyrjJZ11ovrsvY46X4EMYN7m8+kvDEB+x1RRw/b2Mv1k+ymDnw3evecsG9SzVTQXF3bAKalESVFUAG/N6XI0+uiWsl4T0Jw1aGjGsfQ3uCYEyg+NLJAgiRE8s/QnQtIjilDg1pTI40s+zqAQwTPMtBa63+a9Bf8azH7Zc410WYk=
+	 MIME-Version; b=cbiUnLoxMhy8VweRpQDO4DuGPuJ0/Ynvh9VtkfV74pUAo8VvlO8jlJ5zoNh1HJF4HD9xYocIy6Pu3ls6JDQrtQ9sbgllOyTxRzFuV+F804egWwdxpBMvIupBfvj+WrZqRaa5M+YWPvNxGgCG8Sk5U1oryitxuQosYwIl4/OkhhQ=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
 Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
 Received: from loongson.cn (unknown [223.64.69.3])
-	by gateway (Coremail) with SMTP id _____8BxYa8a7ENoEBYPAQ--.661S3;
-	Sat, 07 Jun 2025 15:36:58 +0800 (CST)
+	by gateway (Coremail) with SMTP id _____8Bxjawd7ENoHBYPAQ--.7319S3;
+	Sat, 07 Jun 2025 15:37:01 +0800 (CST)
 Received: from localhost.localdomain (unknown [223.64.69.3])
-	by front1 (Coremail) with SMTP id qMiowMCxPscX7ENoO54OAQ--.49043S3;
-	Sat, 07 Jun 2025 15:36:57 +0800 (CST)
+	by front1 (Coremail) with SMTP id qMiowMCxPscX7ENoO54OAQ--.49043S4;
+	Sat, 07 Jun 2025 15:37:00 +0800 (CST)
 From: Binbin Zhou <zhoubinbin@loongson.cn>
 To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 	Huacai Chen <chenhuacai@loongson.cn>,
@@ -26,10 +26,15 @@ To: Binbin Zhou <zhoubb.aaron@gmail.com>,
 Cc: Huacai Chen <chenhuacai@kernel.org>,
 	linux-mmc@vger.kernel.org,
 	Andrew Jeffery <andrew@codeconstruct.com.au>,
-	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH v3 11/35] mmc: sdhci-dove: Drop the use of sdhci_pltfm_free()
-Date: Sat,  7 Jun 2025 15:36:44 +0800
-Message-ID: <54f34c130c0906700b45c749eb24682651c7ab06.1749127796.git.zhoubinbin@loongson.cn>
+	Binbin Zhou <zhoubinbin@loongson.cn>,
+	Haibo Chen <haibo.chen@nxp.com>,
+	Shawn Guo <shawnguo@kernel.org>,
+	Sascha Hauer <s.hauer@pengutronix.de>,
+	Fabio Estevam <festevam@gmail.com>,
+	imx@lists.linux.dev
+Subject: [PATCH v3 12/35] mmc: sdhci-esdhc-imx: Drop the use of sdhci_pltfm_free()
+Date: Sat,  7 Jun 2025 15:36:45 +0800
+Message-ID: <9b9014749a9870a9cb3c2818fe9b38c013cb46ca.1749127796.git.zhoubinbin@loongson.cn>
 X-Mailer: git-send-email 2.47.1
 In-Reply-To: <cover.1749127796.git.zhoubinbin@loongson.cn>
 References: <cover.1749127796.git.zhoubinbin@loongson.cn>
@@ -40,58 +45,61 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCxPscX7ENoO54OAQ--.49043S3
+X-CM-TRANSID:qMiowMCxPscX7ENoO54OAQ--.49043S4
 X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj9xXoW7Jr4DXF45Zr1rGF48uw1DCFX_yoWfAwcEka
-	43XFWxGryrCrWxW347tF1ayryxKFnI9r1kurW8KFWag348Xr1DWay7Zr1Du34UuF18CFW3
-	Cr43Gw1xZw4jyosvyTuYvTs0mTUanT9S1TB71UUUUjUqnTZGkaVYY2UrUUUUj1kv1TuYvT
-	s0mT0YCTnIWjqI5I8CrVACY4xI64kE6c02F40Ex7xfYxn0WfASr-VFAUDa7-sFnT9fnUUI
-	cSsGvfJTRUUUbDxYFVCjjxCrM7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E6xAIw20EY4v20x
-	vaj40_Wr0E3s1l1IIY67AEw4v_Jrv_JF1l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxS
-	w2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxV
-	W8Jr0_Cr1UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AK
-	xVWxJr0_GcWln4kS14v26r1Y6r17M2AIxVAIcxkEcVAq07x20xvEncxIr21l57IF6xkI12
-	xvs2x26I8E6xACxx1l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xIIjxv20xvE14v26Fy2
-	6r45twAv7VC2z280aVAFwI0_Gr1j6F4UJwAm72CE4IkC6x0Yz7v_Jr0_Gr1lF7xvr2IYc2
-	Ij64vIr41lF7xvrVCFI7AF6II2Y40_Zr0_Gr1UMxAIw28IcxkI7VAKI48JMxC20s026xCa
-	FVCjc4AY6r1j6r4UMxCIbckI1I0E14v26r1Y6r17MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2
-	IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI
-	42IY6xIIjxv20xvE14v26w1j6s0DMIIF0xvE2Ix0cI8IcVCY1x0267AKxVW8Jr0_Cr1UMI
-	IF0xvE42xK8VAvwI8IcIk0rVWUJVWUCwCI42IY6I8E87Iv67AKxVW8Jr0_Cr1UMIIF0xvE
-	x4A2jsIEc7CjxVAFwI0_Gr1j6F4UJbIYCTnIWIevJa73UjIFyTuYvjxUgPxhDUUUU
+X-Coremail-Antispam: 1Uk129KBj93XoWrtF15CFWrGr1fuF1kGFyfGrX_yoW8Jr4DpF
+	48Wr4Ykr47Jr95t3s0kw1DuF15t3W293yjkrW3W3yrWrW5Kryqqr4SyFyUtr1YyFW8Ka1F
+	qFWvqr4UCFy7twcCm3ZEXasCq-sJn29KB7ZKAUJUUUUf529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUmFb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIE14v26F4UJVW0owA2z4x0Y4vEx4A2jsIEc7CjxVAF
+	wI0_Cr1j6rxdM2kKe7AKxVWUAVWUtwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07
+	AIYIkI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVW3
+	AVW8Xw1lYx0Ex4A2jsIE14v26r4UJVWxJr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48Icx
+	kI7VAKI48JM4x0Y40E4IxF1VCIxcxG6Fyj6r4UJwCY1x0262kKe7AKxVWUAVWUtwCF04k2
+	0xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwCFI7km07C267AKxVWUAVWUtwC20s
+	026c02F40E14v26r1j6r18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_
+	Jw0_GFylIxkGc2Ij64vIr41lIxAIcVC0I7IYx2IY67AKxVWDJVCq3wCI42IY6xIIjxv20x
+	vEc7CjxVAFwI0_Gr1j6F4UJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcVC2z280
+	aVAFwI0_Gr1j6F4UJwCI42IY6I8E87Iv6xkF7I0E14v26r4UJVWxJrUvcSsGvfC2KfnxnU
+	UI43ZEXa7IU5mXdUUUUUU==
 
 Since the devm_mmc_alloc_host() helper is already in use,
 sdhci_pltfm_free() is no longer needed.
 
+Cc: Haibo Chen <haibo.chen@nxp.com>
+Cc: Shawn Guo <shawnguo@kernel.org>
+Cc: Sascha Hauer <s.hauer@pengutronix.de>
+Cc: Fabio Estevam <festevam@gmail.com>
+Cc: imx@lists.linux.dev
 Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 ---
- drivers/mmc/host/sdhci-dove.c | 12 ++----------
- 1 file changed, 2 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-dove.c b/drivers/mmc/host/sdhci-dove.c
-index 77034b13fa66..dbfaee4a5ada 100644
---- a/drivers/mmc/host/sdhci-dove.c
-+++ b/drivers/mmc/host/sdhci-dove.c
-@@ -79,17 +79,9 @@ static int sdhci_dove_probe(struct platform_device *pdev)
- 
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
--		goto err_sdhci_add;
-+		return ret;
- 
--	ret = sdhci_add_host(host);
--	if (ret)
--		goto err_sdhci_add;
--
--	return 0;
--
--err_sdhci_add:
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index ac187a8798b7..011b60d21a80 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1973,7 +1973,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ free_sdhci:
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
+ 		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
 -	sdhci_pltfm_free(pdev);
--	return ret;
-+	return sdhci_add_host(host);
+ 	return err;
  }
  
- static const struct of_device_id sdhci_dove_of_match_table[] = {
+@@ -1997,8 +1996,6 @@ static void sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ 
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
+ 		cpu_latency_qos_remove_request(&imx_data->pm_qos_req);
+-
+-	sdhci_pltfm_free(pdev);
+ }
+ 
+ #ifdef CONFIG_PM_SLEEP
 -- 
 2.47.1
 
