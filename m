@@ -1,126 +1,149 @@
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 47F35258CD7
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Jun 2025 13:26:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 57484258CCE
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Jun 2025 14:25:24 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749475618; cv=none; b=LjEePeRJBO9Mw7mP6WWZGSgzdeOqoUWrD0Q2coufO2orIs81B5IwGWU3CjimOZ1xOgHT22nTGXf2XabH+nUM6zJE2dTaCOf3CG/ltCrXOggI/2QuCQL7uDlmhDTdGh9Ln8jyXalTJcMz8ly/4/2NH9el+MF4dAB1B3UXiHSPKDg=
+	t=1749479126; cv=none; b=fsaueP2eyoHc5YKwV7ZD8WvVIn90d+AVsymk5bZmoxrkNWs26ueN42Aw3wcI0awHv2okDx9AsjFiffK2DAkoARJTVOZE2Hzn9jy5PZJ7b3589mBMjJrl3zXw2A2gXArZmcsii9wIvnbMHLTy2AE77+iHdpDI+dVP//OgzCzkAtE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749475618; c=relaxed/simple;
-	bh=KsFwIrR3yyZx5H44934iQzkL8sKWbowPXtwXD39xdts=;
+	s=arc-20240116; t=1749479126; c=relaxed/simple;
+	bh=RMxwU4uMw3X/ihqmtoM44ZozrFhIFNNLFQWT28zbLhA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=S0XqtH3/jZAlEGUaZKFXsmxmYY3sfeXMlUh0rTJJhbWyVZLO+UwPq1QoMpHWRJnzvxIe57IAwXc5OXIuuBCBkvgxKr2/XES0GQxCf11k0L6oEj2QXbslUtGNlh12V775Sz2xhvzOueqfAFI5qJP7n7O/+x/Z1+NbYLdBfFeGL+M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ze1kJeQt; arc=none smtp.client-ip=209.85.219.181
+	 To:Cc:Content-Type; b=GHHI9e6vSY2DcUqhBzjC69uhx1SNk84y/jYH6KoD+XYkh1bcjDKvaJTNs/cqX/H4RlyPQjCCbpEhd31iDVxsF++X84obBilYwF0IvmgFHeFlsyASvOkpw7bRwQHsQD8K8c0BOkah70750FaH8lTPX9GKszsRv82b1x2EflGM+lk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=j6Lwfr5N; arc=none smtp.client-ip=209.85.219.178
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ze1kJeQt"
-Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e819aa98db9so2227560276.3
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jun 2025 06:26:56 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="j6Lwfr5N"
+Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e81cf6103a6so1166775276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jun 2025 07:25:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1749475615; x=1750080415; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1749479123; x=1750083923; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mAiRbciuoiorHgM5EFNBfKf1XaHXDRt4R+Ad1zIscbE=;
-        b=ze1kJeQt659RsJQI+FVZ9v6fkijd+LulZCFVO+7hsyQ6EJakqjoyJZvKC2RlIhXVQB
-         Tv8lLBtD/ZCxI4OgL/1gXkSt09/xyhhlM52frik24Tfpffg+sGo8mF2eMbOqpRkkoy1F
-         0x08QCncmXDbFBA1hfe5G7CdGl3oCD9QQrG0lBWFt8Wv1oocNK7DSmaR9t5MM5tErk6B
-         xOozEC5f8U9BD75Cw5AP5FwhK2PBWio2l01KzEN2/hIjJj77/BvIGrJakAvzfYQQ1AAS
-         dYWlYDIUM5kHwYXBvT9c6pjUvf87obpsgTd7hGAz7s0hMXm3qJQZwtiLhPoOX04vmZNv
-         8FKA==
+        bh=JG77WgKR93x/LtBVjZqNlrO3c6x5SGKIjmb1nd9PqZU=;
+        b=j6Lwfr5NFTdWmemEYQWY0nTCpZPhhYfyqxHkoZ2ddojw0GEL3gMx3xCkZIn2vwRTlL
+         E6UXbY7IQ/0g4IVgIGnbNaZ/gxm5oRBIDIYRYQEhbMxt+Thn0NrWjMN3F0ovVkhJe4GG
+         yw05st3McYHu6ZY6iGC2hLTkcMyBUmzErotaPyalagrRGwnstr1Qcn/NSpLeDYIvT4Gf
+         2j+wGXmMvzaY35esVGr6wpUQw5+rBR2PgaQVfz45c4IXSYM5htldPfVCpNMtizfyv++c
+         Zpz0JazrTG4aBvTbIoknXFHkNu/ggZR25cIT8M3rGxD5mrdUvcc4bKW0X8l3S8ZC84Xt
+         T24g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749475615; x=1750080415;
+        d=1e100.net; s=20230601; t=1749479123; x=1750083923;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mAiRbciuoiorHgM5EFNBfKf1XaHXDRt4R+Ad1zIscbE=;
-        b=Oe+9cmY9u6Ca5vJhh7PrnF8athCNWpy/gU8AU9VKVSKX6zdyVE3Ge6WgGYVdhkwqW3
-         wtgk3doV0sAaxZEenUZ2xpCLAKMlHrLr0mHNrEWfuuGaBZp1D4O6QqWkNKPh7P4L2fgm
-         +7Ql1n5+1efxHQSvnXyIjCy00C2reIyCubEGoeNq4HuGJP55/R5oKDQpVVwVauUpOHsU
-         PLhsoefF0qxt159ncDi1wZ9AXcLW335jQ/XYJ2AtKOX4pymmMEKM6tpP0xraVPGA8yMj
-         GhrEIOGOGHC3c3nVaeYdFJzTPAcNxcyia+L1Ee/dQUNA32NCDomwKpTmdAYeIV8qJ4/r
-         Og1g==
-X-Forwarded-Encrypted: i=1; AJvYcCWo009uYI12LSmVDHrOapqbbcN47CBmI3NQvwdkA3mkDpg/DCkw3IK9MCnGNN5tbZKD5duJULJqVoY=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yzma3Gx0afqPRAJcz5uvf+qsge437WPKOGWW3TTEjX2Li6O4doX
-	rzUuQPZFDXZVtz9m8W3HyaaP7445PQqe22Pft3K82HHdpQ3MXdU+ifrPkQ0cbA9EvVcDCSIUYYY
-	1j1QneZBkYPM5tvbDvkm4Rc+V8o6zbuCKwXUO73ALTA==
-X-Gm-Gg: ASbGncs4N02/49LygUqg1MRQdfp+NNw4VtyY2rTUOYF2nOKZhHkiwKrlUl3PtLUy0CA
-	Z+qslW8pHHXJiHF4zNS1B5xKkqtpYDJXd57Fe8GoXLAwVkBui+e1CHu3NchcZ1zcQICx2mbblD5
-	glNeX/mZhzZ7qXUAwWnJjZEOrraWTH7nnGo4jVEvBzY65K
-X-Google-Smtp-Source: AGHT+IEdp4Uo8DXeT5EnMuQJvMNr8+WtEiGeMqcg+uuVjNdRmH13ttSqp1H/4vx3AbsAuwuDP4cRp1d7FkuP24yL/II=
-X-Received: by 2002:a05:6902:98f:b0:e7d:7b06:c567 with SMTP id
- 3f1490d57ef6-e81a226a49dmr18772294276.8.1749475615295; Mon, 09 Jun 2025
- 06:26:55 -0700 (PDT)
+        bh=JG77WgKR93x/LtBVjZqNlrO3c6x5SGKIjmb1nd9PqZU=;
+        b=ukSF1TXM8fLcRqt2FsgNh+WZ3RjSLEbc9SpTue3aLjFK7Er1HW/ciU9oKq+YaR9FHI
+         7Oq6e9JPcb4NabWo+c6DD0ftiNbOQgyP2sLCtK4jEAl3vH3hTKM7tXX70UfeST5i7A5y
+         MHILd5AULoiNaPRgQy2cQ/AEUah2LQYCZp/kn6DfED/DWMjy3MMTrVKy2G4LO5+OmAtH
+         VERVtF31bHYuvPb6a31/Yl77jLB33E2FFzXyktBknEv9d7uugWIdo5/dEUBXvJr6j/zV
+         CWnUNGFTUl1hHs1rPgbEwKqAsgxqKkwppgJu8v8SUdtz739bJlEdbBTwjKp6c0DsIAXS
+         kV6w==
+X-Forwarded-Encrypted: i=1; AJvYcCVX0/pMmL/hauV6pURKKx3LU6HukEVvhYYKv8wvhYJNWMizW+2scfNz+eLb9XfwxnLe4gMy1jEu9bQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzW02z0D3FS30N8SMp9GUzCZdgsx2XVPHdsjwgZl5BnohGaYhsk
+	HVnpyM+EuRuikxDMm+iPApI/3o6fW4qxc/fzzr9U6N+MaRgLQ0RuqpPYG31yu7Be8ITuIEKsTdq
+	GY86zVZ7jf3VyLi341yOH8uP6flGk2bCUhNkmiWl8aQ==
+X-Gm-Gg: ASbGncvlPOu2bz4KyDhGZuk/kwyFU7sEQKAdNuwaDdbck8KsRYwN29u9WE38RS+vns+
+	X0mqq2g0XzzTZeBqE73MwvLlZV3EPR0x+7V6/D34ZeBylMjETk00atOy8cwQOIbKhhkvDBjxaV1
+	vhhtR5760wuE8yiuNzvg2/7nVZoZW9bJflg7xn63OON1OJ
+X-Google-Smtp-Source: AGHT+IHLNEnuAme9eHASfWL8QqGkVGxEwvncLnTk7Ne6+v13yqzaemTTYFnukN2K2Zr05hKAsZjb76xfzqBgFfZg0J4=
+X-Received: by 2002:a05:6902:690c:b0:e81:d3db:9e53 with SMTP id
+ 3f1490d57ef6-e81d3db9eb3mr5064016276.32.1749479123336; Mon, 09 Jun 2025
+ 07:25:23 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250529104853.1987456-1-alvin.paulp@amd.com>
-In-Reply-To: <20250529104853.1987456-1-alvin.paulp@amd.com>
+References: <20250521033134.112671-1-ziniu.wang_1@nxp.com>
+In-Reply-To: <20250521033134.112671-1-ziniu.wang_1@nxp.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Jun 2025 15:26:19 +0200
-X-Gm-Features: AX0GCFsV0kgRqKk0VesGIpH7txHIuNQCBKwAYohUvjNa9Wq16CR9xgCE78X7Q9Y
-Message-ID: <CAPDyKFok6Ftr6OAHpy_qL3S17cecHT9f2tKWagCd+KvVFSmAFA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Add shutdown callback
-To: Paul Alvin <alvin.paulp@amd.com>
-Cc: michal.simek@amd.com, adrian.hunter@intel.com, git@amd.com, 
-	linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+Date: Mon, 9 Jun 2025 16:24:47 +0200
+X-Gm-Features: AX0GCFsxQzRzF0fm7fx2jH_zKPRXvTdReaWYtTKHfDZG8Ytl7CNAKn6UVwNB5jk
+Message-ID: <CAPDyKFogKcwssmQXSDQ+WFBP5iPMOHaK9RSAmRtn89MUnTJb=w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: do not change pinctrl state in
+ suspend if function irq is wakeup source
+To: ziniu.wang_1@nxp.com
+Cc: haibo.chen@nxp.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de, 
+	festevam@gmail.com, imx@lists.linux.dev, s32@nxp.com, 
+	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, 
+	Frank Li <frank.li@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Thu, 29 May 2025 at 12:49, Paul Alvin <alvin.paulp@amd.com> wrote:
++ Frank
+
+On Wed, 21 May 2025 at 05:30, <ziniu.wang_1@nxp.com> wrote:
 >
-> Implement shutdown hook to suspend host and disable all mmc clocks to
-> increase power saving during shutdown or reboot.
+> From: Haibo Chen <haibo.chen@nxp.com>
+>
+> pinctrl sleep state may config the pin mux to certain function to save
+> power in system PM. But if usdhc is setting as wakeup source, like
+> the card interrupt(SDIO) or card insert interrupt, it depends on the
+> related pin mux configured to usdhc function pad.
+> e.g. To support card interrupt(SDIO interrupt), it need the pin is
+> config as usdhc DATA[1] function pin.
+>
+> Find the issue on imx93-11x11-evk board, SDIO WiFi in band interrupt
+> can't wakeup system because the pinctrl sleep state config the DATA[1]
+> pin as GPIO function.
+>
+> For this case, do not change the pinctrl state in suspend.
+>
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
 
-So how long is the shutdown process for the platform? What do we really gain?
+I have followed the discussion and I agree that there is room for
+additional improvements (such as adding a new pinctrl state).
 
-In general we don't quite care about power-savings during shutdown, as
-we are going to turn off things anyway, right?
+In any case, I still think $subject patch is the first step to take,
+to fix the current problems. So, applied for next, thanks!
+
+Note that, we may want this for stable kernels too, but perhaps easier
+to manage that by manual backports as this depends on commit
+676a83855614 ("mmc: host: sdhci-esdhc-imx: refactor the system PM
+logic") too.
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: Paul Alvin <alvin.paulp@amd.com>
+
 > ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
 >
-> Changes in v2:
-> - Make use of platform suspend instead of driver suspend as driver
->   suspend will only get defined if PMC_SLEEP is configured which
->   results in build failure if it is not configured.
-> - Updated commit description.
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 5f1c45b2bd5d..f206b562a6e3 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -2057,12 +2057,20 @@ static int sdhci_esdhc_suspend(struct device *dev)
+>                 ret = sdhci_enable_irq_wakeups(host);
+>                 if (!ret)
+>                         dev_warn(dev, "Failed to enable irq wakeup\n");
+> +       } else {
+> +               /*
+> +                * For the device which works as wakeup source, no need
+> +                * to change the pinctrl to sleep state.
+> +                * e.g. For SDIO device, the interrupt share with data pin,
+> +                * but the pinctrl sleep state may config the data pin to
+> +                * other function like GPIO function to save power in PM,
+> +                * which finally block the SDIO wakeup function.
+> +                */
+> +               ret = pinctrl_pm_select_sleep_state(dev);
+> +               if (ret)
+> +                       return ret;
+>         }
 >
->  drivers/mmc/host/sdhci-of-arasan.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+> -       ret = pinctrl_pm_select_sleep_state(dev);
+> -       if (ret)
+> -               return ret;
+> -
+>         ret = mmc_gpio_set_cd_wake(host->mmc, true);
 >
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 8c29676ab662..4abdad3c4e5b 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -2056,6 +2056,11 @@ static void sdhci_arasan_remove(struct platform_device *pdev)
->         clk_disable_unprepare(clk_ahb);
->  }
->
-> +static void sdhci_arasan_shutdown(struct platform_device *pdev)
-> +{
-> +       sdhci_pltfm_suspend(&pdev->dev);
-> +}
-> +
->  static struct platform_driver sdhci_arasan_driver = {
->         .driver = {
->                 .name = "sdhci-arasan",
-> @@ -2065,6 +2070,7 @@ static struct platform_driver sdhci_arasan_driver = {
->         },
->         .probe = sdhci_arasan_probe,
->         .remove = sdhci_arasan_remove,
-> +       .shutdown = sdhci_arasan_shutdown,
->  };
->
->  module_platform_driver(sdhci_arasan_driver);
+>         /*
 > --
-> 2.44.1
+> 2.34.1
 >
