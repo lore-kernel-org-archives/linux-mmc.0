@@ -1,170 +1,104 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com [209.85.219.181])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1B31825D1FB
-	for <linux-mmc@vger.kernel.org>; Mon,  9 Jun 2025 14:25:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0A0B625D53B
+	for <linux-mmc@vger.kernel.org>; Mon,  9 Jun 2025 14:25:38 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.181
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749479136; cv=none; b=l8CcfmHoGtv4YQi8JSc5JUOuFiZg3IhItwpPnvJHdzLsnL7/4hT2+VQqiZcQ+VaazNVG/QQ3eht+IyUhTCE20vrxxzAJv5HBtQmxNk+DC54FfM5Fh29VWqZ4+5Y8Wvu0OxsBTLyALOBzN2jIt0moIio/jJM5iI+zhZgSd3qVChM=
+	t=1749479140; cv=none; b=HK6IElduVIeGGmZEpiyDmgzXuG8NU0aNPfLNsfGj55rGjwaJ34xXLQeL6fMTNt5wwInUksfIJnJQmIIoISYKp4dVrTDvKl/79eKJH25sxCpYYATQzPj13jnJ3PIB0Udz3i+d2A9c9B+b3dI41fjIJTD+ocfYERqljW+K7isUuNo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749479136; c=relaxed/simple;
-	bh=7Q9lxvzufrlgaieFsmmIoaVB9+vEIKHKjtHXHbbeTcI=;
+	s=arc-20240116; t=1749479140; c=relaxed/simple;
+	bh=kyCZGylePIRPc6/p6l1PQEVjFz3QH7t1Uv+tm5q9j3E=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=DxTaWa+d2wv+A6DjegsOpH4zsr4ruW+vCkbLc7xgRuBbZ3HVPOLRSc6EYmzr3WJ8y8iXd2oLHhSrrHSkpJe8FqloyW5oWHbnMrGKJWHEBTR90fifnPnfDG4CScX8yIGMSgD1FSHlDPNN2Oo78HbFWKYKLTVoeHLx3IY5WDieiKs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=aN/QgR9s; arc=none smtp.client-ip=209.85.219.178
+	 To:Cc:Content-Type; b=ZkZIHLqljazEoWxbZxgoODMkLa+5kacbHLBIEdc/yEZtQTn0lC3/mTZxoWraefKgDB2Gi5wRNKxjyv/cJZNu3cbH5t75dsJ/WOzuiNmG3g+IH5GdTbve3MuD/SHbIMtVoG5pw2ecmCpp9YM7fsFNzMRrkJKSvnFFOeV40o77w18=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=doyGoE8O; arc=none smtp.client-ip=209.85.219.181
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="aN/QgR9s"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e7db5c13088so3402451276.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jun 2025 07:25:33 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="doyGoE8O"
+Received: by mail-yb1-f181.google.com with SMTP id 3f1490d57ef6-e812fc35985so3839543276.0
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jun 2025 07:25:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1749479133; x=1750083933; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1749479138; x=1750083938; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Qs9yDBCL9OQQ2dpuHj/+WEzZXErX2MF2uYZnoNM7uA4=;
-        b=aN/QgR9sWBUPeQ/ZC6YJuXVA9Y7NzKYqh37KQnnHER8Wex+E7ga/Gmy98YRPgsdszY
-         Lm3zOwCT7jbXNeD4PeQ3CrV3HjFFv84ST1bLhRe+EMPMKi0NPRlezS64IPakt+uNcIdz
-         xuL0Uz26g+o3DhhJJVm/Ngf8AmeW/q/jDqxY+rqJt7ZndP39j2mmQi/eq3xdlYxI1ECU
-         0P8IOK5fmG7T8wB7nYtOZ79rGbes3INw8Ub+6LhLPYh4JZfHKIhLeVVedTG07ShV7NA/
-         jEkU46411IR0GWzzyNhcEVuPPF5poc4LLLDZAWthTuAXHpnn9X+r2qkvm3MDA38ISMx/
-         +Yjw==
+        bh=08IPBfBcl0I5u93yG1iOBKn0aIO2SlE43zAjUb4+G4A=;
+        b=doyGoE8ORQ3JlonlZN5qvcxXaQbFwtRKpqrjatygXlexRIQkHaXjCxieATh2AVUeUG
+         lX8nfz/e9y13pnNPNyie/GFg2e8L/vLD7pMjuYbJSidCQdw+YULlKP6F6oTpACjsXoYK
+         rG5it7WepOfigGMd7wZLHOhgSKVRwUEIBcjbhumWXVPeREmI0R2jbv4UXpIPtuHIlj1P
+         xyIv8OXh88rPTvIjRIu52EKx4gs8DQwp8jBx8N3f/Yzvg34/zgOo99yVV1jY16+C6GpL
+         AiLH6/p/DIZp5KmYsNpaF6zT7sV9tkux9CK/93uAtaT3nR4J78rXiUZZ9eVJcOY4kcqB
+         Lomg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749479133; x=1750083933;
+        d=1e100.net; s=20230601; t=1749479138; x=1750083938;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Qs9yDBCL9OQQ2dpuHj/+WEzZXErX2MF2uYZnoNM7uA4=;
-        b=rsomnIkFuOYavzoBhKmjdFyb6ut6mc8yZFJ83jEwK6VTh0qEgcglqNLfH7Yr+SMz38
-         jINrMxghr8cN2+GXd1pSqBnHc+F0phA9JT2k9RHBIRFw9C4D8qdlx0XFgWWKUVneDB7s
-         KjpBeCOCRwEe253mH2NzlXqnPWZJjKtVnb0CoQHwpC3NF4fPstF0Aq6txeBB65pM1P4L
-         BItsziJmU8TWICghmlHNbdDho8Xd2ZIH4GKSXcB3noltO6GnWG1JjlEaTF+pbTz9Cl+p
-         AOhZENd/k0nZiuh6HazkgxCZbocPNsobI8A1dFgTGfeOLhUZBjbTX3uITrbtABFz47Sz
-         Osfg==
-X-Forwarded-Encrypted: i=1; AJvYcCUkCACkRv8Ic6ktHioUEs+Vswx8aYCNMesBzdjTGmEvX6AhQwZBt4oZ1zvzAdps3MDlq0k92MfEf2Q=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz0KKU7nQAFC1zdCwjJCcTyVkK0sah/8DPXqHXPSYwUNNAhPJXb
-	AiNXEwjn7/2k1IIE13KFRyDXum5j4e0ZExbjNBVThnLgl7QaB2E4Z86CeZ/c0/Fn8Wp8cUJGKrC
-	a/jDtvZi7ZuwiHPxb1I3Q0lpb7OBI21AnVVV32SpoGA==
-X-Gm-Gg: ASbGncsUQ5GqW0U+FgN2pFamZW9BawGTo7mdKhNfoOzBvQTgJghpVSRVG/LNXzeZyHL
-	5w0Zv7O5YvCRsH01UdtCTnZpBUAgvsT5Lc7lQeGRdoos40TeTitbGp95Lnx/GCD+r92rwNaIgRU
-	ecQMMZO7YnRjUTuZGZNkKskaMzMBiMUdYKZQ==
-X-Google-Smtp-Source: AGHT+IG9S1xNruNzhNFugEoEcohrFQLqoxTMTaqwCUIforBGu07/WXI6ZQ6WYR+jbUueu4Zz7wktb1J3/XAbxy5DAZ0=
-X-Received: by 2002:a05:6902:1005:b0:e7d:a290:9532 with SMTP id
- 3f1490d57ef6-e81efde986amr99713276.6.1749479132960; Mon, 09 Jun 2025 07:25:32
- -0700 (PDT)
+        bh=08IPBfBcl0I5u93yG1iOBKn0aIO2SlE43zAjUb4+G4A=;
+        b=w1mqYoH3e8/GGlEPw6QBQYI0XNjoAFW4fM5f6yrZAGE9otI0ZxItDKPRSxYr5o3r61
+         H98OqYMHxUnkkhkJkFe88EOqWoSyumpmLSWLTL/LUIEYqaS+5bIU6xvFoJ6jX7CM05Ex
+         Il5znUrRiOMU+N5OkfD45tkxRcFH1FT7e6F8QliYv+NIVZElEuiZ4NA50c6bnW2EwFpb
+         sMPGujOHBafcRaZ4FJuFPt9PUIQSvD2zQd2g5IQv5zhrDDRGl98xtQj2TFFz12524KRA
+         fc/+I39vVFQWA3DtgAG9faxCFukXJMUl1IiAC63VCxno1YHpBtrrX0mtnFjLz/XuCryD
+         tyBQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWATQRy7WJ03+P9wC/5zbEOmUVzFUOvpMh1gmwgC6tmVe+1K8SB7T8lAkwrEXbJNF/MDndEQ7TXKQQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyTpLkhypFoGz6uJIbizCc7JjD9t9pOFVx3g0ZegBY6dmohkwXp
+	82MLDunLrUVAtXFU5nXuaDCkuAfne+u5Xk+ynCK/y1rcjQOErEKzY+5pEU05Jk/VtxfLd2f4VpT
+	OJ6tIJoG/o/Zrac1tPFqhIdm4XhUnIHbnjJBreVYhVA==
+X-Gm-Gg: ASbGncs2DinT0eV1RxCBUlV/PN6eMNzSWfAJ8DE9EkrY7gwDGQWERswqt7Lz9NVpDZU
+	V78Lvn+B7gwGqzgysNbQFkhMsi7u5EEAo6n+d2Dz8isDRGUddE2s4VcPNWHreMLw538h8TnZg1W
+	TXlsStQIZTUEvihlRNPEVMlvcubLrDeq9yQl6+o22r9YfU
+X-Google-Smtp-Source: AGHT+IFJR4aUEYQFFbDZaS8lUqINbO+uSj5liG0a2YzJSs3reQoye8CT00DeZ0MCmOmCgc5uVI1W+JPgVoRQgVJQkXI=
+X-Received: by 2002:a05:6902:2d82:b0:e81:9581:4b8d with SMTP id
+ 3f1490d57ef6-e81a22e28damr12881553276.27.1749479137932; Mon, 09 Jun 2025
+ 07:25:37 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250521025502.112030-1-ziniu.wang_1@nxp.com> <20250521025502.112030-2-ziniu.wang_1@nxp.com>
-In-Reply-To: <20250521025502.112030-2-ziniu.wang_1@nxp.com>
+References: <20250523-21-k1-sdhci-v1-0-9f293116a7e7@gentoo.org>
+In-Reply-To: <20250523-21-k1-sdhci-v1-0-9f293116a7e7@gentoo.org>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 9 Jun 2025 16:24:57 +0200
-X-Gm-Features: AX0GCFto9k3Gr4YCVyXjpM_DIPE3WFVihsUYF7aq38OAJZNQC3fiKNoXcigrZNg
-Message-ID: <CAPDyKFoHqhgWqy4EeQ2vr0eQgCnUkSf6SLyKEVLzar30Sy7OHQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: optimize clock loopback
- selection with dummy pad support
-To: ziniu.wang_1@nxp.com
-Cc: haibo.chen@nxp.com, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de, 
-	festevam@gmail.com, imx@lists.linux.dev, s32@nxp.com, 
-	linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Date: Mon, 9 Jun 2025 16:25:02 +0200
+X-Gm-Features: AX0GCFurOqp9D4c4_5rdTPaeyNA34lDzrdQDOcopYfWdJ2pwCdIenMEDwksvwR0
+Message-ID: <CAPDyKFqUkjG8=f35CmGmTjN60_HzGnF7XihK7t8X1KA=kNSGig@mail.gmail.com>
+Subject: Re: [PATCH 0/2] sdhci: spacemit: improvement of register defintion
+ and HW busy detection
+To: Yixun Lan <dlan@gentoo.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-riscv@lists.infradead.org, 
+	spacemit@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 21 May 2025 at 04:53, <ziniu.wang_1@nxp.com> wrote:
+On Fri, 23 May 2025 at 16:47, Yixun Lan <dlan@gentoo.org> wrote:
 >
-> From: Luke Wang <ziniu.wang_1@nxp.com>
+> These series address two comments from Ulf during the review cycle
+> of version 2 [1].
 >
-> For legacy platforms without dummy pad:
-> When clock <= 100MHz: Set ESDHC_MIX_CTRL_FBCLK_SEL to 0 (external clock
-> pad loopback) for better bus clock proximity.
-> When clock > 100MHz: Set ESDHC_MIX_CTRL_FBCLK_SEL to 1 (internal clock
-> loopback) to avoid signal reflection noise at high frequency.
+> - improve register/BITs definition to make them less generic
+> - drop MMC_CAP_WAIT_WHILE_BUSY flag to disable HW busy detection,
+>   this is tested on Bananapi-F3 board.
 >
-> For i.MX94/95 with dummy pad support:
-> Keep ESDHC_MIX_CTRL_FBCLK_SEL at 0 for all speed mode. Hardware
-> automatically substitutes clock pad loopback with dummy pad loopback
-> when available, eliminating signal reflections while preserving better
-> bus clock proximity.
+> Link: https://lore.kernel.org/all/CAPDyKFoDWS6DWdKOaxTDEYeKv3hjVDoR7XGi19nESVssc-RG8g@mail.gmail.com/ [1]
+> Signed-off-by: Yixun Lan <dlan@gentoo.org>
+> ---
+> Yixun Lan (2):
+>       mmc: sdhci-of-k1: make register definition vendor specific
+>       mmc: sdhci-of-k1: disable HW busy detection
 >
-> Signed-off-by: Luke Wang <ziniu.wang_1@nxp.com>
+>  drivers/mmc/host/sdhci-of-k1.c | 140 +++++++++++++++++++++--------------------
+>  1 file changed, 72 insertions(+), 68 deletions(-)
+> ---
+> base-commit: f7f05c5ea4af0f28cccfa49fe1af65e85dba5ef6
+> change-id: 20250522-21-k1-sdhci-c987fd67c82f
+>
+> Best regards,
+> --
+> Yixun Lan
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 25 +++++++++++++++++++++----
->  1 file changed, 21 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index c448a53530a5..5f1c45b2bd5d 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -212,6 +212,9 @@
->  /* The IP does not have GPIO CD wake capabilities */
->  #define ESDHC_FLAG_SKIP_CD_WAKE                BIT(18)
->
-> +/* the controller has dummy pad for clock loopback */
-> +#define ESDHC_FLAG_DUMMY_PAD           BIT(19)
-> +
->  #define ESDHC_AUTO_TUNING_WINDOW       3
->
->  enum wp_types {
-> @@ -348,6 +351,15 @@ static struct esdhc_soc_data usdhc_imx8mm_data = {
->         .quirks = SDHCI_QUIRK_NO_LED,
->  };
->
-> +static struct esdhc_soc_data usdhc_imx95_data = {
-> +       .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING
-> +                       | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-> +                       | ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> +                       | ESDHC_FLAG_STATE_LOST_IN_LPMODE
-> +                       | ESDHC_FLAG_DUMMY_PAD,
-> +       .quirks = SDHCI_QUIRK_NO_LED,
-> +};
-> +
->  struct pltfm_imx_data {
->         u32 scratchpad;
->         struct pinctrl *pinctrl;
-> @@ -392,6 +404,8 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
->         { .compatible = "fsl,imx7ulp-usdhc", .data = &usdhc_imx7ulp_data, },
->         { .compatible = "fsl,imx8qxp-usdhc", .data = &usdhc_imx8qxp_data, },
->         { .compatible = "fsl,imx8mm-usdhc", .data = &usdhc_imx8mm_data, },
-> +       { .compatible = "fsl,imx94-usdhc", .data = &usdhc_imx95_data, },
-> +       { .compatible = "fsl,imx95-usdhc", .data = &usdhc_imx95_data, },
->         { .compatible = "fsl,imxrt1050-usdhc", .data = &usdhc_imxrt1050_data, },
->         { .compatible = "nxp,s32g2-usdhc", .data = &usdhc_s32g2_data, },
->         { /* sentinel */ }
-> @@ -1424,9 +1438,10 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->                 break;
->         }
->
-> -       if (timing == MMC_TIMING_UHS_SDR104 ||
-> -           timing == MMC_TIMING_MMC_HS200 ||
-> -           timing == MMC_TIMING_MMC_HS400)
-> +       if (!(imx_data->socdata->flags & ESDHC_FLAG_DUMMY_PAD) &&
-> +           (timing == MMC_TIMING_UHS_SDR104 ||
-> +            timing == MMC_TIMING_MMC_HS200 ||
-> +            timing == MMC_TIMING_MMC_HS400))
->                 m |= ESDHC_MIX_CTRL_FBCLK_SEL;
->         else
->                 m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-> @@ -1678,7 +1693,9 @@ static void sdhc_esdhc_tuning_restore(struct sdhci_host *host)
->                 writel(reg, host->ioaddr + ESDHC_TUNING_CTRL);
->
->                 reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> -               reg |= ESDHC_MIX_CTRL_SMPCLK_SEL | ESDHC_MIX_CTRL_FBCLK_SEL;
-> +               reg |= ESDHC_MIX_CTRL_SMPCLK_SEL;
-> +               if (!(imx_data->socdata->flags & ESDHC_FLAG_DUMMY_PAD))
-> +                       reg |= ESDHC_MIX_CTRL_FBCLK_SEL;
->                 writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
->
->                 writel(FIELD_PREP(ESDHC_TUNE_CTRL_STATUS_DLY_CELL_SET_PRE_MASK,
-> --
-> 2.34.1
->
