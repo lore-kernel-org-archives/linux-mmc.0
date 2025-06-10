@@ -1,33 +1,36 @@
 Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 8FECB1D5CC7;
-	Tue, 10 Jun 2025 07:31:04 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 89D431D5CC7;
+	Tue, 10 Jun 2025 07:31:07 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749540667; cv=none; b=MBis1/dHTbb45DAUyo0GM7ixTXQHoDSOkXj2VJDcK8GBIrIbWtnB/f2pCqsCGl5YgnPFg7FYhxKllaNs3fNLmgwbeA2OcR4hJ1I2FbxkWkSAaseiVkCZnC9e0+E9N4B05ZWSaDpebzFx7Cf/wJ65/h7cUFK812o1UPxYVjAHTfk=
+	t=1749540669; cv=none; b=jFZ2tA1c9vhW+TDvQ9KLu+2sGhxTjY4Wnlbh0pyTHMJOm2XJqGXOxp4mdmxDrs6xaore/pSuWRCoJIGNyPyXvbJE7Zbz/HIesy1uJbnVsDWK2uVLstSX91QUZn4965pIVYzcvMVOcoIXqwIlkmrlmE+u45dRtlm0P9KxKeHmo5E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749540667; c=relaxed/simple;
-	bh=26tVSt8f1MPboWi2tg6Yi62RNxnrigzIO/5t6WjgNCQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=BfcE87nUzbUFhwhW0yl1EzPi3seigoGiSTwwoafi2Kh0N2WbYWK0M47LCRwYs+5PI2pRe+yH1Cfg68Tg3r8QJvZp6zjj8gLDF9t6Nq+gHEpvfwCExRCbRT09qg+IdmKWvL6gl8jJRhIyfKXC8yXtpLxxJ+F509XBXfkyYbk/VgY=
+	s=arc-20240116; t=1749540669; c=relaxed/simple;
+	bh=OBtVgU8vgs3cWwHr8KKNaK9220wgxe+RjiUrt+hp8Xc=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=Laa9yqtlzh5VdSPSRoryCnptXfD1vMIZkPIyPkCAT5N+lcnmsMHJzkBz/rvzTuomDbJirbm/TiPMhyoPfXHgMtm95gViSPwp7FpGnN6y04+TDYilBqoz8MJJM+Mb48vQs71coAxeCut2kA5388rGH5nwF7MW03ODZTAdMqG4KmE=
 ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=renesas.com; spf=pass smtp.mailfrom=renesas.com; arc=none smtp.client-ip=210.160.252.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=renesas.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=renesas.com
-X-CSE-ConnectionGUID: HIP4XrZEQhWoRIC3hI4bUQ==
-X-CSE-MsgGUID: e8tAcXgCRFOnvEF+HnXbiA==
+X-CSE-ConnectionGUID: 5e+y066YQpWSRutAOD9EsA==
+X-CSE-MsgGUID: prp5yKFfToG3qJS+Wk1Pbg==
 Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie6.idc.renesas.com with ESMTP; 10 Jun 2025 16:25:54 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 10 Jun 2025 16:25:55 +0900
 Received: from shimoda-ggear.. (unknown [10.166.13.45])
-	by relmlir6.idc.renesas.com (Postfix) with ESMTP id E37414178CC8;
-	Tue, 10 Jun 2025 16:25:54 +0900 (JST)
+	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 08B6241791AE;
+	Tue, 10 Jun 2025 16:25:55 +0900 (JST)
 From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 To: wsa+renesas@sang-engineering.com,
 	ulf.hansson@linaro.org
 Cc: linux-mmc@vger.kernel.org,
 	linux-renesas-soc@vger.kernel.org,
 	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH 0/2] mmc: host: renesas_sdhi: Fix incorrect auto retuning for an SDIO card
-Date: Tue, 10 Jun 2025 16:25:43 +0900
-Message-ID: <20250610072545.2001435-1-yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH 2/2] mmc: host: renesas_sdhi: Fix incorrect auto retuning for an SDIO card
+Date: Tue, 10 Jun 2025 16:25:45 +0900
+Message-ID: <20250610072545.2001435-3-yoshihiro.shimoda.uh@renesas.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250610072545.2001435-1-yoshihiro.shimoda.uh@renesas.com>
+References: <20250610072545.2001435-1-yoshihiro.shimoda.uh@renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,37 +41,120 @@ Content-Transfer-Encoding: 8bit
 
 This host controller is possible to change incorrect tap if an SDIO
 card is used because DAT1 is used for interrupt signal on SDIO standard
-but the contoller doesn't take care of it. So, in the worst case,
+but the controller doesn't take care of it. So, in the worst case,
 this behavior causes a CRC error.
 
-To resolve the issue, add some new ops into the tmio core and
-add fixed code into the renesas_sdhi driver.
+To resolve the issue, this driver uses manual correction mode instead
+of auto correction if an SDIO card is used. Also, even if DAT1 is
+mismatched on an SDIO card, this driver will not change the TAP.
 
-This patch set tested on RZ/G2M (r8a774a1-hihope-rzg2m-ex.dtb) with
-EmbeddedArtists 1ZM module.
-
-Before I don't apply this patch set, the RVSCNTL value was changed
-unexpectidly like below.
-
-[  687.103589] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000701
-...
-[  768.490979] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000501
-[  768.500307] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000401
-[  768.509640] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000501
-[  768.518947] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000501
-[  768.528217] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000501
-[  768.537494] renesas_sdhi_internal_dmac ee100000.mmc: renesas_sdhi_auto_correction: rvscntl = 00000601
-
-Yoshihiro Shimoda (2):
-  mmc: host: tmio: Add .sdio_irq()
-  mmc: host: renesas_sdhi: Fix incorrect auto retuning for an SDIO card
-
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
  drivers/mmc/host/renesas_sdhi.h      |  1 +
  drivers/mmc/host/renesas_sdhi_core.c | 48 ++++++++++++++++++++++++----
- drivers/mmc/host/tmio_mmc.h          |  1 +
- drivers/mmc/host/tmio_mmc_core.c     |  5 ++-
- 4 files changed, 47 insertions(+), 8 deletions(-)
+ 2 files changed, 42 insertions(+), 7 deletions(-)
 
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index 291ddb4ad9bed..084964cecf9d8 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -85,6 +85,7 @@ struct renesas_sdhi {
+ 	u32 scc_tappos_hs400;
+ 	const u8 *adjust_hs400_calib_table;
+ 	bool needs_adjust_hs400;
++	bool card_is_sdio;
+ 
+ 	/* Tuning values: 1 for success, 0 for failure */
+ 	DECLARE_BITMAP(taps, BITS_PER_LONG);
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index e6fa3ed425606..c49e3faa0ef3b 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -686,9 +686,8 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
+ 	/* Set SCC */
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, priv->tap_set);
+ 
+-	/* Enable auto re-tuning */
+ 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+-		       SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN |
++		       (priv->card_is_sdio ? 0 : SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN) |
+ 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+ 
+ 	return 0;
+@@ -778,6 +777,14 @@ static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_
+ 		if (bad_taps & BIT(new_tap % priv->tap_num))
+ 			return test_bit(error_tap % priv->tap_num, priv->smpcmp);
+ 	} else {
++		if (!priv->card_is_sdio &&
++		    !(val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)) {
++			u32 smpcmp = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP);
++
++			/* DAT1 is unmatched because of an SDIO irq */
++			if (smpcmp & (BIT(17) | BIT(1)))
++				return false;
++		}
+ 		if (val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)
+ 			return true;    /* need retune */
+ 		else if (val & SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPUP)
+@@ -828,11 +835,14 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host,
+ 	if (mmc_doing_tune(host->mmc))
+ 		return false;
+ 
+-	if (((mrq->cmd->error == -ETIMEDOUT) ||
+-	     (mrq->data && mrq->data->error == -ETIMEDOUT)) &&
+-	    ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
+-	     (host->ops.get_cd && host->ops.get_cd(host->mmc))))
+-		ret |= true;
++	/* mrq can be NULL to check SCC error on SDIO irq without any request */
++	if (mrq) {
++		if (((mrq->cmd->error == -ETIMEDOUT) ||
++		     (mrq->data && mrq->data->error == -ETIMEDOUT)) &&
++		    ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
++		     (host->ops.get_cd && host->ops.get_cd(host->mmc))))
++			ret |= true;
++	}
+ 
+ 	if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL) &
+ 	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN)
+@@ -843,6 +853,28 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host,
+ 	return ret;
+ }
+ 
++static void renesas_sdhi_init_card(struct mmc_host *mmc, struct mmc_card *card)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct renesas_sdhi *priv = host_to_priv(host);
++
++	/*
++	 * This controller cannot do auto-retune with SDIO irqs, so we
++	 * then need to enforce manual correction. However, when tuning,
++	 * mmc->card is not populated yet, so we don't know if the card
++	 * is SDIO. init_card provides this information earlier, so we
++	 * keep a copy of it.
++	 */
++	priv->card_is_sdio = mmc_card_sdio(card);
++}
++
++static void renesas_sdhi_sdio_irq(struct tmio_mmc_host *host)
++{
++	/* This controller requires retune when an SDIO irq occurs */
++	if (renesas_sdhi_check_scc_error(host, NULL))
++		mmc_retune_needed(host->mmc);
++}
++
+ static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host, u32 bit)
+ {
+ 	int timeout = 1000;
+@@ -1227,6 +1259,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 			dev_warn(&host->pdev->dev, "Unknown clock rate for tuning\n");
+ 
+ 		host->check_retune = renesas_sdhi_check_scc_error;
++		host->sdio_irq = renesas_sdhi_sdio_irq;
++		host->ops.init_card = renesas_sdhi_init_card;
+ 		host->ops.execute_tuning = renesas_sdhi_execute_tuning;
+ 		host->ops.prepare_hs400_tuning = renesas_sdhi_prepare_hs400_tuning;
+ 		host->ops.hs400_downgrade = renesas_sdhi_disable_scc;
 -- 
 2.43.0
 
