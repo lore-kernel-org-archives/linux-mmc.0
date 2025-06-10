@@ -1,71 +1,71 @@
-Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com [209.85.167.49])
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5DCD128C879
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 11:16:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 916A328DF3E
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 11:16:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749554211; cv=none; b=j4Q9+p4ovU3DomV9a8Uajvy7N4x3wMmoKUuhgboLvIQzoKtq8IHdEvLXPxmCOld3PKBdv+Vp8nep64CplrDW1IkkIyMMMOMUYPndRFgdHHK2COoxsbyYcZleAeH310zQWVjNazRcB5H/EL7JpWzWIUaDfDUHMKkH44Wj6hNGX0w=
+	t=1749554212; cv=none; b=cYStIdj2qyEq9vlSD2bXLNxNPfygpJB3OlR4W/YaER4ALCa6XnCNTiY9UI9S1hEIONxf6OMUx4L/ZuO5Ay5WmSWZixp2DcFEW7Pip6peo1qEN+p2eXAcysIuXF1H4JY0lRNqOeZol5e3sDJLWAxlVCelAKuMrcrKt5gHqbNIXZA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749554211; c=relaxed/simple;
-	bh=Q2G+6qC4eXTH3lTxHkq3eblVciHhR4sMPJfXSbMcZXs=;
+	s=arc-20240116; t=1749554212; c=relaxed/simple;
+	bh=RUnyAMGtHh+/vEL4sflSpEFAoSQObmIYvyugmKssooo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=d+QK06TXBPyBlBLCx+1sMztAMHF4bMlJ3wRgfPhwvf/QpRrpLemyvyqjsyCg8yLJpM8PU+gLxQconDqjGGowazSpAVzzBn35c/iPMPCeae9Ft3+gv8eoUZgiysquEkahotjkOwtwXNrA3Vs2V1cUQdbGZSti8KRjurSRbn2SB/U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=K3Sbiz9/; arc=none smtp.client-ip=209.85.167.49
+	 MIME-Version; b=cufkDmHgxiV3g0ror23gjFZbs/24xdb7oOnGAbc47HSP3szea2bWIWbleW6zme677iE0Z5z7fF425NffVEkUb8tQIwjJUhvYC0+fLNKzaYGxPC5Y7mo1kSAOEidXCIorBcXxp9hhAILk0KtoTByZjDHItrIkXqJ9PVP+qdF3y1g=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=fEj2Gubg; arc=none smtp.client-ip=209.85.167.51
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K3Sbiz9/"
-Received: by mail-lf1-f49.google.com with SMTP id 2adb3069b0e04-552206ac67aso6449931e87.2
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 04:16:48 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fEj2Gubg"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-55220699ba8so6676927e87.2
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 04:16:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1749554207; x=1750159007; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1749554208; x=1750159008; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wb7O/WfyRrI7BVa8uAeHS7SpLGTdVUHqO49VpFjc3ic=;
-        b=K3Sbiz9/ydJUT61nEBgHGRWgUAxRmf2A5lbQhaTtJ3lH25p2Xg+ObsJrhs0To3KtXj
-         LVH5bQKcs0XdZ5Uv/2yE+lM8DT7qE8ExHJzFFpJ4qc1DiadOb1JPwlTjKv7Hem7Bgl5S
-         Gxl7C6u0GMjYnrbEg3vTSNkJPKyt4yMP+lNYXSqtK1nCLKHbXkqWEP7Szp4EBPGCd/sB
-         y8CMhov3xxpLh56a2mnbsu2DJ58eI9ORnvICrjxiT1bhR7FuuGgrK9DqjDxhMkM6PjIf
-         dMTZJGForgji1gWABYdiNET59PUnn+XkzLlP/F/SRmNZqHKzhCnOvQp+SOdMj0cN8+cq
-         LV3Q==
+        bh=GWS6iCfw+rN1nm0C9pkCk8oe46JcwKDDliTDyR8kmr0=;
+        b=fEj2Gubg1GXhS1CkD/hOnUPCBm08bI3qFh3o/zUwJROXgMYYo+8o3hi8wYssqdjGLH
+         V3bPoW7jN1eymaKUH0rTb3Ev+EY77Sbfcdbx8Iz4S8GvTtMcGsIdj7FvfXRCtg5QYyIm
+         PHSpcRtGyH65gnsymHmoZVsNd2nF2TS7YgL5G5/ySbTyrZyyOxSV+7wsDjJPZVuXbMTz
+         3HOR6Wm2hkDdvjbJcf4xy20+3Se1Ew1ZQhB9sUwGuuJEKP2gXpMlahYU6F93XVD8kzNS
+         J+qrDHigdjuHNxYgO98lpbUqHJLMoYVifCpE9tENjchJwwVZdqFiFEFuEPZMLind3jmv
+         ULmQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749554207; x=1750159007;
+        d=1e100.net; s=20230601; t=1749554208; x=1750159008;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=wb7O/WfyRrI7BVa8uAeHS7SpLGTdVUHqO49VpFjc3ic=;
-        b=ZBES4+BrPgNQAbSHq1Ghd+0Kc9fvUJuyhJRI+56FQuyhFgTgMYI+Qbv8Wiw0S0l6d6
-         H1u8T1bj7FbaEuXwoylOBpPrbVqsv85zshfbuNjp3997DVMjkxUwwFFeok/9knjNFnWe
-         dCHFM7oPPcnLrBYH0L0UWbCH041aAb6gWWEC0x0tEp5YeDG/3erW7dy/xc+NdRbHstGy
-         SJrM25sKz+KVFPaQVU71fBSVdLtHJT+S4grMGpgrxAEmk1Chn+zTm2EYuRdn9LYJA3qP
-         I3qQm22xwNuT+PQP/gH1S+AJ+JAWAQ7uhdIytSwYy/iAg6DXTa92f3v0DCpG6ux8APYj
-         zvyQ==
-X-Gm-Message-State: AOJu0Yx7Kfx9PQ6ODjv44HAG6mo7pOtD/mA7F3MM0VkY5O5L1mQCKYAv
-	c81sdDnhLA7i/kdCVzDA7XOTf2AsYyB1Z2uyxec8LNa+OiG4mH/cJ7qbHoB4DA7RtONWGHvVG3J
-	peAe8u6k=
-X-Gm-Gg: ASbGncu0KaXc10hvFY5rDcp6uuG9zhUG/Uy7cfbvJY4iFDmpqdP8lP4Q+SROYkmHoSn
-	A3PXeCCTOK7JsczltP1efS+ahlCUcLhd6tXMiSonqjhGPPATON6djSCNlyZCaJQXJuEMD/Ul2UB
-	h9bC7TnbbadCL1xJ3WnPNpP7z/7mOG380IChrs9VqzCQJiWPb4FCY3GZKoOyahHdj4mDtYm4Tin
-	0DLU3djJ5NXt/9selsLUaT2NpPGcM87USGXpBRlMbM4lylIBp2HALa0rLToTvP3dLspYVsbbHet
-	EVizFHv2hVXV99YQrTvU+T96+6u0TfDT5IUxwiDpbRZiRtcO0ilHqcgrDAOToDA84H7KOgnRv9t
-	LpbgSL38t8c+qmOe341KnTgD6knZttUG6C1DP
-X-Google-Smtp-Source: AGHT+IGcJjeSLPZhPYZFF9acT9CaBa+tleHeWD/nvlbTe8RESEGmC/LAyYSFCjwYD71GvdSbOrVrtw==
-X-Received: by 2002:a05:6512:3b82:b0:553:5e35:b250 with SMTP id 2adb3069b0e04-55366c0262bmr4758736e87.32.1749554207032;
-        Tue, 10 Jun 2025 04:16:47 -0700 (PDT)
+        bh=GWS6iCfw+rN1nm0C9pkCk8oe46JcwKDDliTDyR8kmr0=;
+        b=o9dk2ePqEeS7nAL2Cqh+iGolGqy/DbUryxFTLMGvNYyLAXDzlb+oSpmX5rHNOovQhD
+         3nXoeDKmsd6Y+zAFxw2ggZ+MIuTdh00dTTwyHKlgUfcVR+vEdIlhLOCl03+YIjIupwaC
+         uqdlnbIt//JsiKGHlEd7V5wAie8yX+1kwQClclpTRhqZ4KZpq3VBe1mco6Nt3eioeKCp
+         karjAPq9AYJpX2qPKsnjONO4PvkJiH0rwwnfiiFMsvDTosXuWUGmB2OLVo8Wjci4A6me
+         pGWcqfp5p2OtpEoobRRboMtNlAxVeSueRpAyCN7BswUmbu7qeXpfVvOXN06W5gxJ5pnR
+         ZvMA==
+X-Gm-Message-State: AOJu0Ywzrr6qxTY/zLPvIRcJRnsvuYnRIF0ayDKkDL2LKCn244Zo3PK3
+	GcPkWDSp4tluc9JTJM4w5uOEoadMtaorgoBy9LEDut8/zKUwqR+8Ib17nVCuPpEyXLT2mBNmIno
+	a9mnVyn8=
+X-Gm-Gg: ASbGncvjpdcGT6hbtuEUwTqWbB3nDhMxTcAqwPwVMqhsWxeNyuDb/L43e5iFSWf5YJ7
+	HCl3eHw1P1KcFQfEIeu0PxOWcvOylgikGCfV6qKLpDlq/Om/xUjelv+Q4olgytx7/9z83wEqrPC
+	az1UAUOaqTdumrP+DWx3zepe0IaMlp4fA04TT51d93qcLKC1hJc6G4ddU+6JdBAWwpPNjdXr887
+	sbswfwHXT4XbgSfdLU3LTpcR8GnOH5nZBp/BaqRHedmqvFnDcEaD+Q6cQ1GB17odUTQKkJoNIor
+	MhSxKohSfT8P0EdWSjStkl8CFsfUOEtyvH3NSwsswhD+qG6ozVDFW3p7boG8iTmv1ri/Abx4J1D
+	ujwm8CYhlWiazioUg8MXtFR/aFdbReVype0pi
+X-Google-Smtp-Source: AGHT+IHE+pv8n7aP2OaZM/clNWkmC54/7jafLxvDCyYVgdGlQISWH7wYhIrRa9Iq6Ak/oNlfAese7A==
+X-Received: by 2002:a05:6512:3e06:b0:553:291f:92d with SMTP id 2adb3069b0e04-55366c38ec2mr4260599e87.57.1749554208364;
+        Tue, 10 Jun 2025 04:16:48 -0700 (PDT)
 Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-55367722481sm1500146e87.126.2025.06.10.04.16.45
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-55367722481sm1500146e87.126.2025.06.10.04.16.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Jun 2025 04:16:45 -0700 (PDT)
+        Tue, 10 Jun 2025 04:16:47 -0700 (PDT)
 From: Ulf Hansson <ulf.hansson@linaro.org>
 To: linux-mmc@vger.kernel.org,
 	Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Ricky Wu <ricky_wu@realtek.com>,
 	linux-kernel@vger.kernel.org
-Subject: [PATCH 3/4] mmc: rtsx_usb_sdmmc: Convert sd_set_power_mode() into void
-Date: Tue, 10 Jun 2025 13:16:25 +0200
-Message-ID: <20250610111633.504366-4-ulf.hansson@linaro.org>
+Subject: [PATCH 4/4] mmc: rtsx_usb_sdmmc: Re-work the code in sd_set_power_mode()
+Date: Tue, 10 Jun 2025 13:16:26 +0200
+Message-ID: <20250610111633.504366-5-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250610111633.504366-1-ulf.hansson@linaro.org>
 References: <20250610111633.504366-1-ulf.hansson@linaro.org>
@@ -77,45 +77,55 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-The sdmmc_set_ios() is the only caller of sd_set_power_mode() and it
-ignores the return code. Let's therefore convert sd_set_power_mode() into a
-void function instead.
+It's only at MMC_POWER_OFF and at MMC_POWER_UP when some operations must be
+carried out in sd_set_power_mode(). The code is a bit obfuscated in this
+regards. Let's convert it into a switch-case-clause to make this clear.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/rtsx_usb_sdmmc.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index c204cdeaee3e..af45bac019d2 100644
+index af45bac019d2..c1fdcc334c8f 100644
 --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
 +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1010,7 +1010,7 @@ static int sd_power_off(struct rtsx_usb_sdmmc *host)
- 	return sd_pull_ctl_disable_qfn24(ucr);
- }
- 
--static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
-+static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
- 		unsigned char power_mode)
+@@ -1015,22 +1015,30 @@ static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
  {
  	int err;
-@@ -1019,7 +1019,7 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
- 		power_mode = MMC_POWER_ON;
  
+-	if (power_mode != MMC_POWER_OFF)
+-		power_mode = MMC_POWER_ON;
+-
  	if (power_mode == host->power_mode)
--		return 0;
-+		return;
+ 		return;
  
- 	if (power_mode == MMC_POWER_OFF) {
+-	if (power_mode == MMC_POWER_OFF) {
++	switch (power_mode) {
++	case MMC_POWER_OFF:
  		err = sd_power_off(host);
-@@ -1034,7 +1034,6 @@ static int sd_set_power_mode(struct rtsx_usb_sdmmc *host,
+ 		if (err)
+ 			dev_dbg(sdmmc_dev(host), "power-off (err = %d)\n", err);
+ 		pm_runtime_put_noidle(sdmmc_dev(host));
+-	} else {
++		break;
++
++	case MMC_POWER_UP:
+ 		pm_runtime_get_noresume(sdmmc_dev(host));
+ 		err = sd_power_on(host);
+ 		if (err)
+ 			dev_dbg(sdmmc_dev(host), "power-on (err = %d)\n", err);
++		break;
++
++	case MMC_POWER_ON:
++	case MMC_POWER_UNDEFINED:
++		break;
++
++	default:
++		break;
  	}
  
  	host->power_mode = power_mode;
--	return err;
- }
- 
- static int sd_set_timing(struct rtsx_usb_sdmmc *host,
 -- 
 2.43.0
 
