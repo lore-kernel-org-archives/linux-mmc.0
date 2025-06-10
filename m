@@ -1,230 +1,132 @@
-Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5EB0B207DF7;
-	Mon,  9 Jun 2025 23:23:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8B4661F8691;
+	Tue, 10 Jun 2025 04:41:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749511383; cv=none; b=lheKGYfCkdlCJjPwVphLpK3zdvynhhIfDb3zgTkPmozlZ8Z78tpQVhqQxBx0E5GAwwpjaQqSmaJHssmQAL+rqQakPZdKXulySAGCoqTAir7k0tyV0S1oJ0vsTOw4ck21e8H9uqrYz2k0bHtm4okf7fjrYVWu1RK68gI+Vp6I0Bo=
+	t=1749530477; cv=none; b=sL+iP/pJZlzUlXn4U4Pdo1tZ9I7j6w9hwZjLIKG//Nbpk7G9jMRqOa8pVdY4ztA/NIssxdfM3heMVFaywj0ukf7CdoWmJgJpFC4OlCk4JOjsxWVHxwPB2g9E7zF1XAYXGxeLtrbFY4cvuzb7xcGEoFaxJGrPFLfabzD54EQeFeM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749511383; c=relaxed/simple;
-	bh=GdmsI7pMe6v/Vb2RwbymOBoTQNKut9pfHgdX/4pQmfg=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=Ox304dGLg/l9tckMCAJh/MSXUXS90IXcOT1N7wpOHovF6iJca8F3u7JljfUHmDp53UGwsv/hvqoq8XvtVpFz0svG+N9XN0bDUd5bPZtEKqdlsj0clZgyrPKleRBUDZ6I9h7tdwVDnfHC+0GkjiUMBsnEZbs7XB2dRnB02TBuzIU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bx/VALp3; arc=none smtp.client-ip=209.85.128.44
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1749530477; c=relaxed/simple;
+	bh=Pyjffi+nSLucRE3vgdFGEa3GGlSbXak0lR4GOVC8Kpw=;
+	h=Date:From:To:Cc:Subject:Message-Id:In-Reply-To:References:
+	 Mime-Version:Content-Type; b=UbZOXfFgi9MewbIp6RBuZyuLQ4rR2pJMmyRWSKYbuqBn3uVQNncSEhbFj78Px23Ob9A8WI3YWK4WLvihzZso6C2w8lsmWJPAVBEJtMHkTYxRmED0/Q2ibHvzzKozzsg4zx0dIT1XbQBpYotdK8hqBKY0vIhEmX/LmprvKBVnm2k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LVurc5Da; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bx/VALp3"
-Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-43ea40a6e98so61122385e9.1;
-        Mon, 09 Jun 2025 16:23:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1749511380; x=1750116180; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ELsjYCnl30x0OWnQc2oxYh9eQERmhciiDwYyV/AXmGs=;
-        b=bx/VALp3xvedkaPNE2q0wjpRnjFZ0HaJe7v2GPzvp4h5qfiAFpnyD9TxT/pK8BElHv
-         PMVnW4VxTEB0DwhsPFm+ipDPccLiR2KPrNUkdjqP63uEgcD/6ONNnN/fIh8Qqid5RTmk
-         5QWkwU3t7+egTCg67nfpMvmqPuflCt8wExA1s390YGzN1FnrAp6fHSNII+MK0hhjMv/0
-         WVfV2UbeYIKuDTdwSDk8UKk43KLlKCRsq/ukI8B3uDdhvAeUVti3kkQ75NfZV+d/EQ3i
-         t0enbEHchFq/Z3dB/mn7fbabSH3a3qUpnDeqjU8Hu5iB7xe7e81IaK4BlUeF/rTlgIPP
-         7ouA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749511380; x=1750116180;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ELsjYCnl30x0OWnQc2oxYh9eQERmhciiDwYyV/AXmGs=;
-        b=rGPvm4uYcTtvOEp1FuudOdHNtc2SHqTRInM79GOQJ2C20PIV/OQYg4me6DOzqKHfxP
-         3u0dIjDwvj1cdVsibcRf++C5X9mi+No7PFQ6/FtSNlWSiVE6flA0HxSf5ommogvbAWMF
-         foAIIKNymeFCF0fsAY3KPL5qUOIQJHcccbvpXGzeoThj9LH9bglxyyJeRwZTAeqABo3X
-         sm2yVCx4J31CXCVkbPhda9xIO9Hdh3bkWVP+nDD9GXFWjgeZ6dmufhuaOlHY0qSc/6JL
-         0/+7yHakXblq3S2He35TYwPY3++Eq0QWiqf9USFTEhJKD8WGhtKzPym2g6J7IN8ujuKP
-         HXjQ==
-X-Forwarded-Encrypted: i=1; AJvYcCUlxnn+XpoKOKpr+rwNiuVUgIYVikTSy0bVdX/WUomoPDHPuLEcsahYzYPexyAqtL/LcEfjFfguL+99o/DNhDx8m+A=@vger.kernel.org, AJvYcCVPYaryMiOYmwjnWMDnUTg+GaHi7C8sRp1ucxtBSigTUejpxFEKfVpySvCAP+u0s8Vzh3Vw9CcE8Ygi@vger.kernel.org, AJvYcCXsr1oSNo1WIumrsZC6a6giXa2vOgUD0sYtF6dQrIPuLl9T0MRPC1vegkzDGIaZowJGmZ0Ww0tt5fkdBpSH@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx+56UZEu4xFB6Ev06v7wv4m+jEtpUXWNRQzJxPLBEkmcaAOiod
-	e0UJsnaI5Mbo4xPxH8Wce21WYucRfVyZagFPSxqq3p3Pz7j/JNH5qtxn
-X-Gm-Gg: ASbGncuHyRuBlZ4/NVftf1IiZoW8zOpJehW5RxqCKc+TFu7narBOOmVRNkBknlIQSzr
-	hGKU8P3FSt0JVaBv79sCrwfoQbMQFvYZ55ZJ8ferMnzds+b5G9JUMPLTI+7m4ABCoQ/AjJqo1HB
-	6ABM8tDglFSXIMZ7PZIE+rzHPtQp9UVv2e0U+cx3BhW2Xe+KsGZQHHmtTjUD8ccy3xE6B5qYTRF
-	av3pAbiDXbatT5JdNLFdB6ZNN8H6FZeG2c/1+N3BqEFeIOXP/GcpAW0FtjCkeQ1EoiJ+sdYm8X8
-	nbmBY4EQHT6SsI20IdQeoZ1ZfJrP6WBxDwnBWUfpqYBD0apgoV0oV4c8NDcdGm4MszT9e7v7bsK
-	wp39xt6hiDQ==
-X-Google-Smtp-Source: AGHT+IF6nRboebQvBMDZ9PylTL/iJQYYbClRKdB2q0jcR/5cIyx48mQMOjg4Jo64SXDvFWnpnztQuA==
-X-Received: by 2002:a05:600c:c8a:b0:43c:efed:733e with SMTP id 5b1f17b1804b1-4531de198ccmr4089515e9.14.1749511379666;
-        Mon, 09 Jun 2025 16:22:59 -0700 (PDT)
-Received: from iku.Home ([2a06:5906:61b:2d00:3c26:913e:81d:9d46])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-45307678020sm74573255e9.15.2025.06.09.16.22.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 09 Jun 2025 16:22:59 -0700 (PDT)
-From: Prabhakar <prabhakar.csengg@gmail.com>
-X-Google-Original-From: Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org,
-	devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Prabhakar <prabhakar.csengg@gmail.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>,
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and RZ/N2H support
-Date: Tue, 10 Jun 2025 00:22:53 +0100
-Message-ID: <20250609232253.514220-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.49.0
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LVurc5Da"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B956FC4CEEF;
+	Tue, 10 Jun 2025 04:41:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1749530477;
+	bh=Pyjffi+nSLucRE3vgdFGEa3GGlSbXak0lR4GOVC8Kpw=;
+	h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+	b=LVurc5Da7zoxb7qboPt7il++of/iF6QU4W6ngC9c9cH9Q5Zm3udHMWscCLozL/j85
+	 4wE9GPCewfsBRWY/U8pBfIS6emzt4I4nEZexQ/2Vd25NweixBY+HWoI+KHnKthbius
+	 F9yp8PG2S9bEFIJqz9zPveWqbADBzoqQUHwcsYoM1hngikMoB7HadHgeZzG311ss3m
+	 MK+YscFAOvLeGWsJbdSkAyb0DurXCHjGwtcWfoi23LQFMXYgoCTKh8NvYrARwnLQmd
+	 CT5BeuTSzCoPiYsd2NPwNo775+RP9ngcS9qRoKlrTJzmPVg3rLsfJGohBzUTO+NFH2
+	 tyNkq39TThvvg==
+Date: Tue, 10 Jun 2025 13:41:14 +0900
+From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger
+ <matthias.bgg@gmail.com>, AngeloGioacchino Del Regno
+ <angelogioacchino.delregno@collabora.com>, Sergey Senozhatsky
+ <senozhatsky@chromium.org>, linux-mmc@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-mediatek@lists.infradead.org
+Subject: Re: [PATCH] mtk-sd: Fix a pagefault in dma_unmap_sg() for not
+ prepared data
+Message-Id: <20250610134114.5ce2c929b683be6e4f228f2b@kernel.org>
+In-Reply-To: <CAPDyKFrejbW1d+jSSJE4K8Zb08CeMHiH9pC=Sr=Y51Lyy4Fhow@mail.gmail.com>
+References: <174908565814.4056588.769599127120955383.stgit@mhiramat.tok.corp.google.com>
+	<CAPDyKFrejbW1d+jSSJE4K8Zb08CeMHiH9pC=Sr=Y51Lyy4Fhow@mail.gmail.com>
+X-Mailer: Sylpheed 3.8.0beta1 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 
-From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On Mon, 9 Jun 2025 16:25:24 +0200
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
-(a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
-the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
-allowing reuse of the existing driver without modifications.
+> On Thu, 5 Jun 2025 at 03:07, Masami Hiramatsu (Google)
+> <mhiramat@kernel.org> wrote:
+> >
+> > From: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+> >
+> > mtk-msdc driver causes a kernel crash after swiotlb buffer is full.
+> >
+> > ---
+> > mtk-msdc 11240000.mmc: swiotlb buffer is full (sz: 16384 bytes), total 32768 (slots), used 32732 (slots)
+> > mtk-msdc 11240000.mmc: msdc_track_cmd_data: cmd=18 arg=0397A6F8; host->error=0x00000004
+> > Unable to handle kernel paging request at virtual address ffffffffc0001fc0
+> > ---
+> >
+> > When swiotlb buffer is full, the dma_map_sg() returns 0 to
+> > msdc_prepare_data(), but it does not check it and sets the
+> > MSDC_PREPARE_FLAG.
+> >
+> > swiotlb_tbl_map_single() /* prints "swiotlb buffer is full" */
+> >   <-swiotlb_map()
+> >     <-dma_direct_map_page()
+> >       <-dma_direct_map_sg()
+> >         <-__dma_map_sg_attrs()
+> >           <-dma_map_sg_attrs()
+> >             <-dma_map_sg()  /* returns 0 (pages mapped) */
+> >               <-msdc_prepare_data()
+> >
+> > Then, the msdc_unprepare_data() checks MSDC_PREPARE_FLAG and calls
+> > dma_unmap_sg() with unmapped pages. It causes a page fault.
+> >
+> > To fix this problem, Do not set MSDC_PREPARE_FLAG if dma_map_sg()
+> > fails because this is not prepared.
+> >
+> > Fixes: 208489032bdd ("mmc: mediatek: Add Mediatek MMC driver")
+> > Signed-off-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+> 
+> Applied for fixes and by adding a stable-tag, thanks!
+> 
+> Note that it looked like the patch was not entirely correctly
+> formatted, but I fixed it up when applying. Please have a look at the
+> fixes branch to make sure things look okay to you.
 
-Update the binding schema to reflect differences: unlike RZ/V2H(P),
-RZ/T2H and RZ/N2H do not require the `resets` property and use only a
-single clock instead of four.
+Thank for applying and fixing!
 
-Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
----
- .../devicetree/bindings/mmc/renesas,sdhi.yaml | 88 +++++++++++--------
- 1 file changed, 53 insertions(+), 35 deletions(-)
+Thank you,
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 7563623876fc..7d524646da8d 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -72,6 +72,8 @@ properties:
-           - enum:
-               - renesas,sdhi-r9a09g047 # RZ/G3E
-               - renesas,sdhi-r9a09g056 # RZ/V2N
-+              - renesas,sdhi-r9a09g077 # RZ/T2H
-+              - renesas,sdhi-r9a09g087 # RZ/N2H
-           - const: renesas,sdhi-r9a09g057 # RZ/V2H(P)
- 
-   reg:
-@@ -129,59 +131,75 @@ allOf:
-         compatible:
-           contains:
-             enum:
--              - renesas,sdhi-r9a09g057
--              - renesas,rzg2l-sdhi
-+              - renesas,sdhi-r9a09g077
-+              - renesas,sdhi-r9a09g087
-     then:
-       properties:
-+        resets: false
-         clocks:
--          items:
--            - description: IMCLK, SDHI channel main clock1.
--            - description: CLK_HS, SDHI channel High speed clock which operates
--                           4 times that of SDHI channel main clock1.
--            - description: IMCLK2, SDHI channel main clock2. When this clock is
--                           turned off, external SD card detection cannot be
--                           detected.
--            - description: ACLK, SDHI channel bus clock.
-+          description: ACLK, SDHI channel bus clock.
-+          maxItems: 1
-         clock-names:
--          items:
--            - const: core
--            - const: clkh
--            - const: cd
--            - const: aclk
--      required:
--        - clock-names
--        - resets
-+          const: aclk
-     else:
-       if:
-         properties:
-           compatible:
-             contains:
-               enum:
--                - renesas,rcar-gen2-sdhi
--                - renesas,rcar-gen3-sdhi
--                - renesas,rcar-gen4-sdhi
-+                - renesas,sdhi-r9a09g057
-+                - renesas,rzg2l-sdhi
-       then:
-         properties:
-           clocks:
--            minItems: 1
--            maxItems: 3
--          clock-names:
--            minItems: 1
--            uniqueItems: true
-             items:
--              - const: core
--              - enum: [ clkh, cd ]
--              - const: cd
--      else:
--        properties:
--          clocks:
--            minItems: 1
--            maxItems: 2
-+              - description: IMCLK, SDHI channel main clock1.
-+              - description: CLK_HS, SDHI channel High speed clock which operates
-+                             4 times that of SDHI channel main clock1.
-+              - description: IMCLK2, SDHI channel main clock2. When this clock is
-+                             turned off, external SD card detection cannot be
-+                             detected.
-+              - description: ACLK, SDHI channel bus clock.
-           clock-names:
--            minItems: 1
-             items:
-               - const: core
-+              - const: clkh
-               - const: cd
-+              - const: aclk
-+        required:
-+          - clock-names
-+          - resets
-+      else:
-+        if:
-+          properties:
-+            compatible:
-+              contains:
-+                enum:
-+                  - renesas,rcar-gen2-sdhi
-+                  - renesas,rcar-gen3-sdhi
-+                  - renesas,rcar-gen4-sdhi
-+        then:
-+          properties:
-+            clocks:
-+              minItems: 1
-+              maxItems: 3
-+            clock-names:
-+              minItems: 1
-+              uniqueItems: true
-+              items:
-+                - const: core
-+                - enum: [ clkh, cd ]
-+                - const: cd
-+        else:
-+          properties:
-+            clocks:
-+              minItems: 1
-+              maxItems: 2
-+            clock-names:
-+              minItems: 1
-+              items:
-+                - const: core
-+                - const: cd
- 
-   - if:
-       properties:
+> 
+> Kind regards
+> Uffe
+> 
+> 
+> 
+> > ---
+> >  drivers/mmc/host/mtk-sd.c |    3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > index 345ea91629e0..3594010bc229 100644
+> > --- a/drivers/mmc/host/mtk-sd.c
+> > +++ b/drivers/mmc/host/mtk-sd.c
+> > @@ -827,9 +827,10 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
+> >  static void msdc_prepare_data(struct msdc_host *host, struct mmc_data *data)
+> >  {
+> >         if (!(data->host_cookie & MSDC_PREPARE_FLAG)) {
+> > -               data->host_cookie |= MSDC_PREPARE_FLAG;
+> >                 data->sg_count = dma_map_sg(host->dev, data->sg, data->sg_len,
+> >                                             mmc_get_dma_dir(data));
+> > +               if (data->sg_count)
+> > +                       data->host_cookie |= MSDC_PREPARE_FLAG;
+> >         }
+> >  }
+> >
+> >
+
+
 -- 
-2.49.0
-
+Masami Hiramatsu (Google) <mhiramat@kernel.org>
