@@ -1,142 +1,143 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f49.google.com (mail-ed1-f49.google.com [209.85.208.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A0771EA84;
-	Tue, 10 Jun 2025 13:12:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B1E872BFC66
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 13:16:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749561157; cv=none; b=Hl8vwHC7EBlQtmpdMTrpA4qMCTxiqKAN8XLhS8aM/Ki32oMj/gnimSu+JSGhSdHLelmki+hqP1LpKROb1GXD26eBFEwu3uEAMwkPJx8hA6+2vbrw927rATXxFXB0JoDbYp9asla2sZvqU1R5JWzpwn8UQLL0kHHgz3bAp6Jg8Dk=
+	t=1749561389; cv=none; b=nB6kuU8wDXkjZETcxQaA4O4D3ue6DD1l3T2t2ytfsnT1eKgDRsggjGjEWnNJo+eDaRiKOrWaWarwrD87TPsMsht8XjY/xRG1ObFhXjFAzkyPIwYW+fjljlQQAdQ0kc3G9M8rc2WJCU7VQZP0KBl59eF+2wRtaMvRM0MHjMQT25g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749561157; c=relaxed/simple;
-	bh=6oeZOytuYucvgLaM0ld/mM9EhcHGSBHO4kacpgrnfFs=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=KBoxSJQQ6GIYHknnnk7tufBmOta7IjZhSmfH9fOdyxkpbu1F0HqMfTVIZGvvNGMLd70t3tb6fQk/dMGhYMOVML2ptC8cEyXD0n3Y12/lsfutp9+7x73vhygtBVTcqWVZCWa9Ftq3V0HqWY57if7p4g3fAVVuj4mb2hm23N2B06I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=cJrz0K17; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1749561389; c=relaxed/simple;
+	bh=35s+gkpc8FB40Kh0km79x/nXdEnw7kIVxVZiRBlNFMI=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=hEgg1FLmKrWZPi0g/3/UVehFXXnEk3FZAsFpDxKRYtghLsSD/N2xC6Ea4ck7eS0q8BalnSAWEVUvJnkneTm27RbBE6p1qejzrm6L/qw270HKi15nwHmifHWNWwtiaX+ZbcZ7/6gIvDckSHTX40p8KTlCAJygrkmB74OxcjkGd+8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=n3dF8LzC; arc=none smtp.client-ip=209.85.208.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="cJrz0K17"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0059CC4CEED;
-	Tue, 10 Jun 2025 13:12:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749561157;
-	bh=6oeZOytuYucvgLaM0ld/mM9EhcHGSBHO4kacpgrnfFs=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=cJrz0K17Y0hZnBOUk77bxf7bCBmMz9u5xDYUECv8lvhSejz5p3qZJo5+Y7aNsTSqY
-	 3ufUa7OQhdRckVp6+HKwR7RyPsR77ygrhwsEq4thghrn3WG0Wi5JyIdvLOr72Y1Z6g
-	 jywKOd54b333xJHejkdCSRfWXq6RINhD9q3zZ/PGYRve7ceZbzvPptPDtyQmxCIdgV
-	 3vR1sJVBdOYWc/siKUnPpXaTjwvmGzROu9dWKsFUlwU2z82PSlLnw4Y8o/Mh0z3sDn
-	 sXv8gN95onojXWTwYhYJtaGzIGuOa8V2zIYNCHHG51aeQx9N5m+bYAfcY3hWlHKFCu
-	 swW9Zz8EXPlFA==
-Message-ID: <2bed4569-27a9-4173-af32-e6016c88f2c9@kernel.org>
-Date: Tue, 10 Jun 2025 15:12:31 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="n3dF8LzC"
+Received: by mail-ed1-f49.google.com with SMTP id 4fb4d7f45d1cf-607fbc13725so2808578a12.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 06:16:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1749561386; x=1750166186; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=CJeK9rG6Ths2SZ1ZdDQMz2djUId3vdrXzdXhMg+ZqiM=;
+        b=n3dF8LzCrtajAsY2ba9QpEuK5fB4izays9ezxCKpf/UmkpqiRrm4BaljYB+VYHmrFs
+         Wl3sUj8VrkY5sUL6PZwmQ1FzdMAWUz7XYtyYjrxPwczmqH623QafC+cnXWJhbDmEGQHu
+         oXwxg1lZiOQATTCi3+IqkN7cNQcPmOWtG/Md2rr6e+H1ctZBEFnZ1Zg1N2GQ7JkR9TmE
+         1eXl+LEz6tU4DDIj5uAwPlbYthKYnXAkwVbU4MxyNVMYy6lnIxdUt+OCcWUvFQWYMJ4k
+         DYSgAw8Qu+W0g+eEvRabVWVhLAPL+WcCG1Oj68SiJAD0IUrDqjitVRXuOC1aEOk+8tH8
+         EoLg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749561386; x=1750166186;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=CJeK9rG6Ths2SZ1ZdDQMz2djUId3vdrXzdXhMg+ZqiM=;
+        b=Yd0JrcZIlN3T8ZoRhWo9QQb6+TtxCJlEhuPNrtBOkl7O5U8Kacj9aDfedV45cfXtqz
+         VlUQZOrtXz56UZBaY4Rs4/EiaYsR/EPnGIeRXc4CD2DnHG9qtNuQMGFT6k0N1ttjLx6l
+         bjmohe1OYVNeahm8yCpBOdhBkQE9SzQhVacD5hkD4HZar3fvGJoirmMWrKCbeAmrWFly
+         TH0et2ebth+UNTggi5NQah7372rz55wLxUmJcdm44A3DmypIBemxDh6qyPLITodUH1Wm
+         hiZabtGY5zFx+kke8tpzkh2kOU2IDG0l0ohH7zg6LV9Tt+2MBB1H2/Yvql7ljEWcR7pG
+         a95Q==
+X-Gm-Message-State: AOJu0Yy9bZGXVPCELoQFeiG8OlU000+x2IPxWUE36pR7agJMIsMjzMwB
+	w/mtp8DF7X3Ukbs9VWhDhV6wnlQl/eDX/G28hP2bupMohgAOIocbXGut0r0wLRqqgBevMuhRri3
+	qStM62IADCssQTkYJqAHoM1fTk1WTnYomZ99Fovl8xA==
+X-Gm-Gg: ASbGncvzt7PFQL1OUyyOGpIWcHvUB7HLZX41rHtdE/3SXZEUDiYtCGEZU2Wr2UUrauK
+	DKpU4ZlykMiH2WRAD9kC7F5bjaa+tg+0fIczd3RtJHz/JENf73SaW6s869qJqbJZRVrMoybJOZo
+	GrnLvQn8gFjI4QG5VovTS30W6AtvzhDaZKlWVWaKy4bKQK/9wKiAXADUU=
+X-Google-Smtp-Source: AGHT+IEGBNLTiJIUfeqDCS5+HTzBZeIeM8Rbt6us4EQSJhgvb9TmHAe0x/FqIU1mMLL3og+s/aF8vkCUO36KSvPuzUk=
+X-Received: by 2002:a17:906:f58c:b0:ad5:5302:4023 with SMTP id
+ a640c23a62f3a-ade1ab2217amr1630823566b.44.1749561385920; Tue, 10 Jun 2025
+ 06:16:25 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Sachin Gupta <quic_sachgupt@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com,
- quic_mapa@quicinc.com, quic_nitirawa@quicinc.com, quic_sartgarg@quicinc.com,
- Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
- <e0f43fc7-2f38-335d-1515-c97594a55566@quicinc.com>
- <18053999-c337-47e5-b6df-72c2be6a72df@kernel.org>
- <3b75fe83-85c5-f0d3-c5db-481ef133d6de@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <3b75fe83-85c5-f0d3-c5db-481ef133d6de@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <fa67d9b9358a4eeab2cb43471b08c2ec@wut.de>
+In-Reply-To: <fa67d9b9358a4eeab2cb43471b08c2ec@wut.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 10 Jun 2025 15:15:48 +0200
+X-Gm-Features: AX0GCFvih7gAL1WRI-oezVShgRxL486qbtX2riwRdRQIfOZUB5WYBAIhShGO2Go
+Message-ID: <CAPDyKFpcdabed0jZ-QrAz58JDiVQVxG8y4wjNcxe880KimrLFA@mail.gmail.com>
+Subject: Re: [PATCH] command "rpmb write-key" not working
+To: Simon Lindhorst <S.Lindhorst@wut.de>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "avri.altman@wdc.com" <avri.altman@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 10/06/2025 15:07, Ram Prakash Gupta wrote:
-> 
-> On 6/10/2025 6:23 PM, Krzysztof Kozlowski wrote:
->> On 10/06/2025 14:07, Ram Prakash Gupta wrote:
->>> Hi Krzysztof,
->>>
->>> Thanks for your comment, The Qualcomm Engineer who initiated this work,
->>> is no longer working on this and I am taking up the responsibility to continue
->>> on this work. I have started to check this and will start with addressing your
->>> comment next.
->>>
->>> Thanks,
->>> Ram
->>>
->>> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
->>>> On 22/01/2025 10:47, Sachin Gupta wrote:
->> Above timeline is interesting:
->> 1. Patch sent on 22nd January.
->> 2. I provided comments few hours later, the same day.
->> 3. Silence.
->> 4. Employee changes job.
->> 5. Five months later...
->>
->> Not your fault Ram of course, but above timeline is not a responsible
->> way of upstreaming patches.
->>
->> Best regards,
->> Krzysztof
-> 
-> my apologies for this, I will give inputs internally to improve process
-> for changing hands.
+On Mon, 2 Jun 2025 at 15:43, Simon Lindhorst <S.Lindhorst@wut.de> wrote:
+>
+> Hello,
+>
+> I am wondering how the call "rpmb write-key" works. Isn't it the case tha=
+t the content of the keyfile is read in, but not stored in the structure "s=
+truct rpmb_frame" before "ret =3D do_rpmb_op(dev_fd, &frame_in, &frame_out,=
+ 1);" (mmc_cmds.c:2296)?
 
+That's a weird commit message. Please try to better describe what the
+patch does and why we need it.
 
-Not your fault, don't worry.
+>
+> If I am right, I suggest the following patch:
 
-Best regards,
-Krzysztof
+No need to state that here. We certainly consider your patch just by
+sending it to us.
+
+>
+> Fixes: rpmb write-key did not work
+
+Please add a commit hash to the fixes tag, similar as below.
+
+>
+> Fixes: 05051e40351c ("mmc-utils: Refactor RPMB key handling into a separa=
+te function ")
+> Signed-off-by: Simon Lindhorst <s.lindhorst@wut.de>
+
+Thanks for the patch, but I am not able to apply this as it's not
+correctly formatted/sent - according to
+https://www.kernel.org/doc/html/latest/process/submitting-patches.html
+
+Please give it another try by sending a new version, but first, I
+strongly encourage you to first do some homework by reading
+submitting-patches.html.
+
+Kind regards
+Uffe
+
+> ---
+>  mmc_cmds.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b2cc3d6..7994223 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2289,7 +2289,7 @@ int do_rpmb_write_key(int nargs, char **argv)
+>                 exit(1);
+>         }
+>
+> -       ret =3D rpmb_get_key(argv[2], &frame_in, NULL, false);
+> +       ret =3D rpmb_get_key(argv[2], &frame_in, frame_in.key_mac, false)=
+;
+>         if (ret)
+>                 return ret;
+>         /* Execute RPMB op */
+> --
+> 2.43.0
+>
+> -- Unsere Aussagen k=C3=B6nnen Irrt=C3=BCmer und Missverst=C3=A4ndnisse e=
+nthalten.
+> -- Bitte pr=C3=BCfen Sie die Aussagen f=C3=BCr Ihren Fall, bevor Sie Ents=
+cheidungen auf Grundlage dieser Aussagen treffen.
+> -------------------------------------------------------------------------=
+-----------------------------
+> Wiesemann & Theis GmbH | Porschestr. 12 | D-42279 Wuppertal
+> Gesch=C3=A4ftsf=C3=BChrer: Tobias Theis (M. Eng.)
+> Amtsgericht Wuppertal | HRB 6377 | Infos zum Datenschutz: https://www.wut=
+.de/datenschutz
+> Tel. +49 202/2680-0 | Fax +49 202/2680-265 | https://www.wut.de
