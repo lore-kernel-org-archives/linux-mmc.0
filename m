@@ -1,138 +1,152 @@
-Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 314AA2C17A3
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 12:53:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9383D298242
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 12:57:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749560015; cv=none; b=teugzKw3i+S5Pdpelf+7a5hBIjAM4G3hkWg8oF18+VgdfXkrqt1DKwxNjAoQDP39UUuLeppE5R57RiJTmtdU4i9F1gaAfmcjK2JzNpEMKh4A3Ku5j5YxjYpAQ/4hVsHFp2BDp4/kB58n6bqvGqapNf7eAOI3vwfx98QHIYkJq7Y=
+	t=1749560244; cv=none; b=ZECpTeoZsPICwmxu4Z9PSWBXtSb4aIxirti7LorgWY6t5CfFyAZjZ7xZ/vHu8J1JhURoi0WiAQWW9AmjDH/qw5Y/0kTCpTA+VOGDX4mFNCkyTITsfU8RUgQC5VlaaBdAUa+LYHUaL45hiu8T4Em57wOBsFlA4pUOu8skzPIn+Vc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749560015; c=relaxed/simple;
-	bh=BdEOtlwKT5cm8r2CwV8DPp+MGOvYNyQWEEliBnZf68w=;
+	s=arc-20240116; t=1749560244; c=relaxed/simple;
+	bh=qhIVpEZDZOmir5ypQGJPM5AKAogRaLno5vHtbx9uYco=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mBQtdnfCN00lvQxYLq9WgKFbpDqSawIvv52Cvj2CXOUpDuo+BOmsOkiGhq8aJiT4rJpzZmvIaQo+Fo2GdE+dKfyMMPq/cND5SQng1g9qjpItPN6dVp3xcchQ19XmJMhiFUOyoxH5R080xS31BH7/+IlioO+e0lo6Wh7Ud+w1qa4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JEHtCXEb; arc=none smtp.client-ip=209.85.218.53
+	 To:Cc:Content-Type; b=bm96HV1YrazRhONyXiwTW/HkZxKCRSy+Hr+78RIApTXD+O1YhDEExSchAn8IEw+oFRnwWAc8mqWurjiGPADXyJScG/C7yLoGdX869HfZonsKuDAjQxMBFVRll7a3SAmkeiXTOF52pzKe5A5koo5Rz9n9oPOtUTS/KF804lgPPdQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Iw+pYu9w; arc=none smtp.client-ip=209.85.218.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JEHtCXEb"
-Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-adb2bb25105so864100566b.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 05:53:32 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Iw+pYu9w"
+Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-ade5ca8bc69so308936666b.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 05:57:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1749560011; x=1750164811; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ua43JbNUP+RRPO3HRaTeqoeNTy0CSQSVsdia/VGFSEg=;
-        b=JEHtCXEbzOuiQwxAWbrFgpoH1kg3gXqgolDuApgn/XttVi+ZBDshB2ZecwisSQl60R
-         lBpk3PX0665VCIEILCp8SlNQO9vXMeNB/5tv8v+A9rDRe//eWBHHc3jvdKhNx/ls3tPN
-         GCVDdq3z+VmSUG1eoI3RlMEzmPC6rgRkTNOQn2QMumqIiuKKBimCIG019Mr05uTUWc0O
-         /8csdJqAfMLU+vz8YWZkHWo5pU21HUZJoHwTuf3Wwa/P523LGSuU2K7t3M7HS2nzu/Vc
-         dZetiT3HSM/7Ip5nbjgwm4I/+pjFwUbU334vuR+x4kfBN2Q6CrAnNkp0S3G9VdyvmFKS
-         MpoQ==
+        d=linaro.org; s=google; t=1749560241; x=1750165041; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=CUkJhWRp3L7SGl8YQInLtuEOp8CfW807ly4f8cXAKNg=;
+        b=Iw+pYu9wj8TPnjtMho6jQXgdksId+1akOTNdyrRNkjp//ulZJygzb8PR/ptjfENVEI
+         qug6n8lx5eEN39bQeDG9LdswoQDdg7oM6tPa84afyw/Zwf58Z+Q10R3ezILP38VgBNfO
+         lj/6JHFZTa4kdC0TkJElVfoiBOW8k8tb4UMBiZ3sqPVgh3hjBzsQV8EHramZhcy/pqrF
+         ySDl7jug2TIDUOj/25BZqQOoX3A1qbYbhOeEU1NnnEuVlrqlcmJB9WWlIswr/rUtafI7
+         bIf7a+zyhni8VvJsMj/V+BVS1ivtdMQFmz7M9z5H5COhbIbZgd57LRx8AdVUS7G+MziH
+         W2Xg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749560011; x=1750164811;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Ua43JbNUP+RRPO3HRaTeqoeNTy0CSQSVsdia/VGFSEg=;
-        b=tx7VTkOAWcQhcsj9QCcF9MDEmj8j87hlvUiBJyGHs2E1rgYTbtkVzuBIBMdFjoMC0d
-         OqeflxY4yqIXCkWtEuIDJTPxyMQl6jDVcxLJQIx8Leo46KtsF9OVaW9bEsvnobGBLsnX
-         LhSnsVlqvDlpH/pORf8Oz3AfLW0l72DBZdpnE8GUT4h5/GMbVE5Qi2UNo4Iqq1DXLrhd
-         BqL/OOEu9Axmnpw1vjS7/PoCFAK9cZWQARv2H9eq6k9lN/wkjdiHs2vy1HNG/wVMdwqQ
-         7FBZLMCvBu5U+TYIELI/crOM14ZutbLg3i9QTfp6pTPNS08jDF5AnSlwUhPqoOiCK/wd
-         vR5Q==
-X-Forwarded-Encrypted: i=1; AJvYcCXsLL6UGtn04iQXHj2Uq8vJd3agqwNMCMnXBGwKdLMQ0FAcsqGS+EXNxtsqzYiHssVC4WW0D2AG1w0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzdAq+CqVDbLBgd/q3In3HL55NL7U5Ar/2NOsZqr/4HzpmLazwy
-	zyXupT49xWAIdQr1IwZOlwcSt21ISk7y64cwdsGv5DtWnZ0OHjpNM5c0Iu+SaclvsXXmSZVmIuw
-	vNo2WwEKEWKXHR58S+qkVvYtMqnYoY3JVkIy+jK3W4Q==
-X-Gm-Gg: ASbGncvwXyiyZH/auVC+EDRxq94f3S/3GxdwR4rmUOkYJI8/Nbj2Tt1+l0DX0qUk3Jo
-	njpLw//LG2BBkUjqlxU0w3iuIZlMQ/bFhJfRrlz4ZJRt7DjwL7lHsaB+k+Ij1yX8fNXiRJ53LQk
-	HCcciboLE2cuEdHD1FV5BC2DNL0BYUa5jsM4pS1zYyV03j
-X-Google-Smtp-Source: AGHT+IE0dnXtTd0cJKE4NbTH+mEK1zcSfNIzItd4LPIjOHRSwOojAZ1aIgIzoBnogv+j1Y6Xx9Qy218nbJLUy1UaMQg=
-X-Received: by 2002:a17:907:94c8:b0:ad8:91e4:a91c with SMTP id
- a640c23a62f3a-ade1aab9825mr1680318466b.29.1749560011469; Tue, 10 Jun 2025
- 05:53:31 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1749560241; x=1750165041;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=CUkJhWRp3L7SGl8YQInLtuEOp8CfW807ly4f8cXAKNg=;
+        b=kVzvLFotPdnlBgYI9bAqfooeaCEoUFwC19+R+KBArauc+2vIF5SNeqT9iRHix07TlA
+         f2nRG146H7X0BMlc/7tRj8x7ayfrwfFSa6xiPL0E+g+gzy8SsrfAloKNuCurEM+cb2ew
+         TByRW/Z95CxzcUnC23NOKH9TvLrbP3POxcFPdVGuPzYlgSTrHpheGhHJ709LAjth162Y
+         +3b7KwG0eScSfXnqFM0Q/Hn+6nwJ+Fwl/+aGOsjM5p/WqHOWek+qYRFd2G/wRl9q1orz
+         N1Aa+XMqAUTQmLUqwPamQsYAZQbEc0oRJMW3Mmo0Cx26j8415QG+vOeQ8+G2DMhMzx0Y
+         +6mA==
+X-Forwarded-Encrypted: i=1; AJvYcCUpEFa/YnMp6eYWe7D+nNavWRmGerCUfs9pws3nfkYMiwd4AA/DUCqgP2toD7FaH4P2aOK0YWvhGTU=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzTJnNfLGU6FH3Gu8BmOWMl8zAkfMhKXSoVv8o1RVPOoB+47Nih
+	M4VakSvSF7NJsBya6MCEQrKkR7/Mhuom+gU5kQQ4Isy7uJMCQl75AxFjkGxBfy87i9S8bdBKS2Q
+	PDGwIwyhA8+DLD16nyHGlSEsy6ztPt1sJPCP24z96mw==
+X-Gm-Gg: ASbGnctoNkq+2nWmOzMJBC4CnXH2Qo8GWdPUfsbmDa3Re3wLjTgf1Wouxg2z2Y3rYfB
+	JvLgzZVE29Bi+rRcEZEdA9m25+eat3Lux/1gmV+6CjiOq12KDFTGYw06Yt8OdQDttR+VAum9SD0
+	d6N/X491eUtUiE0vg1lmkKOCSS40BzoN1cwsZIyGF8f+3W
+X-Google-Smtp-Source: AGHT+IFnoTHHifJTlb/W9AH+wSprRlJ6AOhC3m2qBRGlahZc+wsPlXhKLbork72DQJ3HMf/KrBrC0eU+kRMagyP2nkg=
+X-Received: by 2002:a17:907:d644:b0:ad8:8689:2cc6 with SMTP id
+ a640c23a62f3a-ade1ab2216fmr1457025566b.47.1749560240911; Tue, 10 Jun 2025
+ 05:57:20 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1746581751.git.zhoubinbin@loongson.cn> <704447268706b1b9f25bbe9d15459163d0ac3404.1746581751.git.zhoubinbin@loongson.cn>
- <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com> <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
-In-Reply-To: <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
+References: <20250606110121.96314-1-victorshihgli@gmail.com>
+In-Reply-To: <20250606110121.96314-1-victorshihgli@gmail.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Jun 2025 14:52:52 +0200
-X-Gm-Features: AX0GCFv5tUexuVjVKPNZfCscSU_1kpR3xlCvzeNqP1bE90dtiqOaTc7DD1DnFvo
-Message-ID: <CAPDyKFo5BjZsst=vXhU8Rv2HN-Ewy8vwnyFkZdo1-XCXX0_wsA@mail.gmail.com>
-Subject: Re: [PATCH v2 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC
- controller driver
-To: Binbin Zhou <zhoubb.aaron@gmail.com>
-Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
-	Conor Dooley <conor+dt@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
-	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
-	linux-mmc@vger.kernel.org
+Date: Tue, 10 Jun 2025 14:56:42 +0200
+X-Gm-Features: AX0GCFtz58qEc2pH3XdErcJzGd3l9xp3ByR8YdkuPCCJGBGEv9OQcWr7tPHik30
+Message-ID: <CAPDyKFrpHvrgjG2xOYPoPwUf1NNyBM+fGaO+AgPpZ1CMZYrqgg@mail.gmail.com>
+Subject: Re: [PATCH V3 0/3] Adjust some error messages for SD UHS-II
+ initialization process
+To: Victor Shih <victorshihgli@gmail.com>
+Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
+	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
+	Greg.tu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Tue, 3 Jun 2025 at 14:54, Binbin Zhou <zhoubb.aaron@gmail.com> wrote:
+On Fri, 6 Jun 2025 at 13:01, Victor Shih <victorshihgli@gmail.com> wrote:
 >
-> Hi Ulf:
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
 >
-> Sorry for the late reply.
+> Summary
+> =======
+> It is normal that errors will occur when using non-UHS-II card to enter
+> the UHS-II card initialization process. We should not be producing error
+> messages and register dumps. Therefore, switch the error messages to debug
+> mode and register dumps to dynamic debug mode.
 >
-> On Mon, May 19, 2025 at 7:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
-rg> wrote:
-> >
-> > On Wed, 7 May 2025 at 09:28, Binbin Zhou <zhoubinbin@loongson.cn> wrote=
-:
-> > >
-> > > This patch describes the two MMC controllers of the Loongson-2K2000 S=
-oC,
-> > > one providing an eMMC interface and the other exporting an SD/SDIO
-> > > interface.
-> > >
-> > > Compared to the Loongson-2K1000's MMC controllers, their internals ar=
-e
-> > > similar, except that we use an internally exclusive DMA engine instea=
-d of
-> > > an externally shared APBDMA engine.
-> > >
-> > > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-> >
-> > [...]
-> >
-> > > +
-> > > +static void ls2k2000_mmc_fix_cmd_interrupt(struct loongson2_mmc_host=
- *host,
-> > > +                                          struct mmc_command *cmd)
-> > > +{
-> > > +       int val;
-> > > +
-> > > +       if (cmd->opcode !=3D MMC_WRITE_BLOCK && cmd->opcode !=3D MMC_=
-WRITE_MULTIPLE_BLOCK)
-> > > +               return;
-> > > +
-> > > +       regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS=
-, val,
-> > > +                                (val & LOONGSON2_MMC_FSTS_TXFULL), 0=
-, 500);
-> >
-> > Can you please elaborate on what goes on here?
+> Patch structure
+> ===============
+> patch#1:    for core
+> patch#2-#3: for sdhci
 >
-> This is a controller hardware issue. We need to wait until the Tx FIFO
-> full flag is set before sending the write command. Otherwise, a data
-> timeout will occur.
+> Changes in v3 (June. 06, 2025)
+> * Rebase on latest mmc/next.
+> * Patch#2: Separate the helper function in V2 patch#2 into V3 patch#2.
+>
+> ----------------- original cover letter from v2 -----------------
+> Summary
+> =======
+> It is normal that errors will occur when using non-UHS-II card to enter
+> the UHS-II card initialization process. We should not be producing error
+> messages and register dumps. Therefore, switch the error messages to debug
+> mode and register dumps to dynamic debug mode.
+>
+> Patch structure
+> ===============
+> patch#1: for core
+> patch#2: for sdhci
+>
+> Changes in v2 (May. 23, 2025)
+> * Rebase on latest mmc/next.
+> * Patch#1: Drop the use of DBG macro and use pr_debug() instead.
+> * Patch#2: Drop the use of DBG macro in some function
+>            and use pr_debug() instead.
+>
+> ----------------- original cover letter from v1 -----------------
+> Summary
+> =======
+> It is normal that errors will occur when using non-UHS-II card to enter
+> the UHS-II card initialization process. We should not be producing error
+> messages and register dumps. Therefore, switch the error messages to debug
+> mode and register dumps to dynamic debug mode.
+>
+> Patch structure
+> ===============
+> patch#1: for core
+> patch#2: for sdhci
+>
+> Changes in v1 (May. 16, 2025)
+> * Rebase on latest mmc/next.
+> * Patch#1: Adjust some error messages for SD UHS-II cards.
+> * Patch#2: Adjust some error messages and register dump for SD UHS-II card
+>
+> Victor Shih (3):
+>   mmc: core: Adjust some error messages for SD UHS-II cards
+>   mmc: sdhci: Add a helper function for dump register in dynamic debug
+>     mode
+>   mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
+>     UHS-II card
+>
+>  drivers/mmc/core/sd_uhs2.c    |  4 ++--
+>  drivers/mmc/host/sdhci-uhs2.c | 20 ++++++++++----------
+>  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
+>  3 files changed, 28 insertions(+), 12 deletions(-)
+>
+> --
+> 2.43.0
+>
 
-Okay, thanks for clarifying. Please add a comment in the code about
-this as I think it useful to know.
-
-Moreover, I think we should have the value of the timeout specified in a de=
-fine.
-
-[...]
+The series applied for next, thanks!
 
 Kind regards
 Uffe
