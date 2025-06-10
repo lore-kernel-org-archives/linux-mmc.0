@@ -1,127 +1,90 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from mail-lf1-f51.google.com (mail-lf1-f51.google.com [209.85.167.51])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9468E1FC11F;
-	Tue, 10 Jun 2025 11:16:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7CF8C1DF72C
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 11:16:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.51
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749554171; cv=none; b=s2hUPOt9DNG1qwATmSkp6lxZkFHN3kf7KQ3k2/N++JD+wyujjjBBABU/h5pkdqFyrSiDOVMOKKSDQE3byoR/1gszl2LyuPpXU8s7klOmuUmkTILjtAzLRkYtkND+QaWbz0fwQ7INSzdS2NGj0RxJ5Seae0/NDuQ/M7Kb+8hjflY=
+	t=1749554206; cv=none; b=MGqnQwrMzEMKpw4UThLvqUrS0Ar9CLhiJz5Cl0NcFvsb2tcdmiGcYJtYmZg0oWyWXjWTeO+tBzQQfrOm9ZpW0hkeJ4EBTixbByWSWoLgxI9Rt2j6kKo80XpJgfXNBPySKDxhSzwcwcLIVosHyKFfeswA0HlpK5t9C0ye8KWxFSE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749554171; c=relaxed/simple;
-	bh=D7KyxkcZSxzGKy1V/faBVg7FuKmcilDq6PoMewqvjTQ=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=IW/Y7wWrh28Puj0I0blcqni4gic+p1Z58mynKhIyMDHj0uCLj3oCnbYEufIrX8Sw9xUxLiVC7GiT9lKs+dacJzgTJG3+inLNJnNNGOyAasi4mmJryqlYCVj6w0ZlfuPzTb+30+ogs4HhaH9wGFcp1G5zWIL+BguFubyg4w3n1ww=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=YLEnMIqx; arc=none smtp.client-ip=209.85.128.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1749554206; c=relaxed/simple;
+	bh=D7oAsKh48TB+BaBDonDWriP/CliLu8zUNY994H+Nruc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jcuO/fWSuKhnVebE1ZyGaLJraDqtDMlv+ekJhQdY6pPm+1W6RE6Xy3v05DXq+SGcuoSgvWRQE2HXT8WLc7xWOf7h5Wpvs7hVtPFlNQlDuigYZryHMJNcN0mrm05tvib2uBv6QjTwGM0ZBiwbEjTGCzHzXIhcC0r3I4ulBmXbxc0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=dzKk29I+; arc=none smtp.client-ip=209.85.167.51
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YLEnMIqx"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4531e146a24so4116955e9.0;
-        Tue, 10 Jun 2025 04:16:09 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="dzKk29I+"
+Received: by mail-lf1-f51.google.com with SMTP id 2adb3069b0e04-553644b8f56so4910851e87.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 04:16:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1749554168; x=1750158968; darn=vger.kernel.org;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=3hI2dqT0ewY2kzj7s0/ei/Swu1TBfaU4ijVd9GNzdrs=;
-        b=YLEnMIqx67NR4FmzsF9iNxvEAvnCvmIOTWhwePBUg9NmY/zAkvnx/A7p0dnMFeYNQb
-         c4J60PQ20QH9kDL7jZGnTszXt5YuYEzAphbPcnB0e7K10N2hQaC3h6r4uE9mz94o2R5V
-         hDd5d+LE72ommKtTJaEII0l8z84H96aklxQdDtduLxwR5b5/Gt22xj7MgMm6Z3JGce2t
-         +nDgMcVvaq/EFOINcnjC6TjgrWwxjbTH3wVatbuXLkEDj6Dhe4AFpfSUyoZFNSa5W/gn
-         9hbWvUfuypflWbWD2P068y/mWEqGOaA9wr/3w1wlRPrErLdiIZQGD/gSHIXCCDtvRQqf
-         mPOg==
+        d=linaro.org; s=google; t=1749554202; x=1750159002; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=59+jyY5FeA0lTSpLcCkeMwgce/BtI56CDI+w9Y0BpO8=;
+        b=dzKk29I+o+wLNLEP1oOGiSn75ewICsytPnq156KqUfcU0rwD8H86PgrC45lKeEWUT3
+         Ne3ReOMXMY3zfYWzgdaKqib4TcZjcZsuv7sFqG7lEcqfDArE9nuIb4KDZW3LsaIaTXes
+         FyExUYwfyfhZ/GGyTGqeQJqyLIm8WPwliGDLfPhC0DapsZz1WNG9JuRSe/MvziYhwOxk
+         wMDm4WleWmjyw3SpfTV3EuW2SYawX5RBSRzJ9EWWPwEpWSUo/voj9ZrWslW/z9E5Dnc5
+         nNEUE9AQAM+jNl0FkbzxL7ElkSDNXkBeKOJtujjLXs3TzzeSSgEnyXW2TX8Vy/4dssWU
+         h2IQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749554168; x=1750158968;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3hI2dqT0ewY2kzj7s0/ei/Swu1TBfaU4ijVd9GNzdrs=;
-        b=PeZ4+7qyVdgkPeTSMoEqvtqWO4nx6090lgktG5uqZCk02aoKr09BBtG8ZzPZ5o08lc
-         2fMc5CY6MhBCLQCw5UWmpQ80nO7/JkV2ZGUbq1YPqAXmZneLEMank0T54HarFnkx8sjE
-         B4SK+wNODmF1tcBwFThcb8ulhgQtiAX+BvAzpsmJTIAa9l3qANsFo/KczHMmCz9xLUyE
-         z7a4186mIF2kxq94SElmhBDm1B7W7cChiPqVBqobJhNe/s1haqYLwLuDi0chciLr56Ak
-         SYRrBluV1dsfaCQa7lfG36jrRwJjR5pjHVMA94lSDQ0c7COGr8j9XfCS+NtDeJvZqNmu
-         OOZQ==
-X-Forwarded-Encrypted: i=1; AJvYcCVpvF8VSQvkO+gykhH9k9aDS8ix03qUuoINLHlInYqeOt8yEvsbET0eFsAsltdvYMEFX5OKwfz3fW3JgjM=@vger.kernel.org, AJvYcCWQ77FZ05pW/Z4CK0Ne85/dXIQpGjOa0SAW8gCbc4M1ipVgmNXK3M3ig3Pb5eYpKOD0PuFZlxfjk6w=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx9St9FMk8BLSOnF/4dY88Mrxd4D2XIQ4GGCFjI57GyHkmDZjk2
-	+N3vkyj3Lg0P5/hCzpCxGyx4r2cYPMKBwOKYKZvRmREjbXLqQ7n5wUNLQpt+GQ==
-X-Gm-Gg: ASbGncvTmRBb+ud0CofiZQ3BY8xsfYU6+Zo9v12alilAdbedrU7loZ7QRUgQrjyer9N
-	pFHG5qTWH8eqmKQHi+MZf6wWG5SzPo+HP1+xqG3EZECkzvNcu9hMRYw/AcFVMp//fd4VaDFyw2c
-	O9vUIEwD3nb/sWRn7Kh//Uq39XN27V6ecaxlQiHOYABP3BsrWHpkfxVcZZV3BNuOExjE+cSEc5X
-	9pkv2tkxEwFNm7I4rfdFY86obnryHBe1Q4TQLOKeTtGh1VabuqjkHMdyVgNOewxX2dbMXwEkKG0
-	TvRQEXYu4xEYtJa50zG7Mo+sU7CwTi+61F1SlMuS3TGEGrDT/v1UEf7zFKGm2cnTrCqnC8CdKHZ
-	R6gRg1NJ4zqTnuifQDcnjBHMLNUSyPp7EGV3wEVWOMxdfkqsaYic6qnRgMUQ=
-X-Google-Smtp-Source: AGHT+IF7BT5QXh90tRkhK/zLFoIo4VFwt5P5v8wbGtOKAd7GULY1I0tpQRrSQASSWp974nOdOyRAlA==
-X-Received: by 2002:a05:600c:310c:b0:44a:ac77:26d5 with SMTP id 5b1f17b1804b1-4531de049ddmr22202205e9.14.1749554167813;
-        Tue, 10 Jun 2025 04:16:07 -0700 (PDT)
-Received: from orome (p200300e41f281b00f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f28:1b00:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3a53229da18sm12214459f8f.19.2025.06.10.04.16.06
+        d=1e100.net; s=20230601; t=1749554202; x=1750159002;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=59+jyY5FeA0lTSpLcCkeMwgce/BtI56CDI+w9Y0BpO8=;
+        b=kGrQxVI8mhBn0bVJYQ04NHt91buPGRfP66c+q/u3chM20bgS3E667aFCJkj86HjK1P
+         vfAIYriSXBc4PUOceie8iV/DMaHP+iRw6Dl1hnw0WHRdSPUBFkL9TSuVKstRgWcuvJbV
+         7Yb+ECX2aHzTI4ZJcS+6G3ieQrQDqhfW4Pw/DHJOdIpBYP9cpKAkdkIE75GymGBBsOWB
+         9wBfMVb+wb9ZTJmW8gKotZtjBq9t/tj8RZcfNMsMmOJJopt1qLc/K9RE+FIOVEhIB247
+         /iQLqtL4bhMoPNkvwl0wrxwux7ekKEDkm2SW9zEYpDGt23FiD814JMkc52XbnOdWamZw
+         dFzw==
+X-Gm-Message-State: AOJu0YyfrH08UpEdox7G8TFCa+oCPR2Wyog5HFc0RzLYC1B38FWa++BZ
+	pd8xFoTJW8BeQBf6z3ieSM9ZPsSppqnw8g6ulHn9ONA3B6jG+pmAK/kVbP7EohCc4IVI8AMoSnn
+	TgnPf8Ec=
+X-Gm-Gg: ASbGncvO9e+jh26MSaVUZIjXllIFW5PogsX3xejXXixA2UgUmN2t+mr5jazi87Sb2ly
+	gZxpg/G8wtsociHSzSlaNfpJod9IATImhscrbvp5RbRnr6wXn+JnyytwwTfYpUdpsoP9BLpkGbz
+	f5Cg3dWQ7ZowB5F8U16VIxEffvKyrtzWj222uB/Z2U/dzHqkq/j/Dnm5tSIwDBXdGm5TIfVkIL3
+	RkNrEvqEPX2nCArQ+Y5VgdQR/7YClsPyo6ICIkTxcouUk8K/DGFRpWRyEMSdyXCij1oKwqxncau
+	d0IazuDCZPhe5L31a2JlLw7Ij9MyEkKJBNTDSUaCDymRNLbETkl9Z7utugoiJI5MkkahszauG1Z
+	CJgfMxhwE3sKSSSbyMFUnoWpvaqCJ6eWDMwdJ
+X-Google-Smtp-Source: AGHT+IHOFjelHxd1QOwaYBTXbZfIYjxJcofXqOv7vfCY5jo1kSfya97flIWsOjBIeuzmXmniz8VjQg==
+X-Received: by 2002:a05:6512:1328:b0:553:2190:fef9 with SMTP id 2adb3069b0e04-553947c5d42mr567301e87.34.1749554202325;
+        Tue, 10 Jun 2025 04:16:42 -0700 (PDT)
+Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
+        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-55367722481sm1500146e87.126.2025.06.10.04.16.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 10 Jun 2025 04:16:06 -0700 (PDT)
-Date: Tue, 10 Jun 2025 13:16:04 +0200
-From: Thierry Reding <thierry.reding@gmail.com>
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, 
-	Huacai Chen <chenhuacai@loongson.cn>, Ulf Hansson <ulf.hansson@linaro.org>, 
-	Adrian Hunter <adrian.hunter@intel.com>, Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org, 
-	Andrew Jeffery <andrew@codeconstruct.com.au>, Jonathan Hunter <jonathanh@nvidia.com>, 
-	linux-tegra@vger.kernel.org
-Subject: Re: [PATCH v3 31/35] mmc: sdhci-tegra: Drop the use of
- sdhci_pltfm_free()
-Message-ID: <sucetdedqorwjsnw4k3vvzhq2ewd4tg7buv3hzi5basap3pr6n@d3xb6zdf3ijy>
-References: <cover.1749127796.git.zhoubinbin@loongson.cn>
- <cee82eaad0392838fbe1fab8e2301e680d34c0c5.1749127796.git.zhoubinbin@loongson.cn>
+        Tue, 10 Jun 2025 04:16:41 -0700 (PDT)
+From: Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ricky Wu <ricky_wu@realtek.com>,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH 0/4] mmc: rtsx_usb_sdmmc: Improve sd_set_power_mode()
+Date: Tue, 10 Jun 2025 13:16:22 +0200
+Message-ID: <20250610111633.504366-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="g4ed2hcukbwej34k"
-Content-Disposition: inline
-In-Reply-To: <cee82eaad0392838fbe1fab8e2301e680d34c0c5.1749127796.git.zhoubinbin@loongson.cn>
+Content-Transfer-Encoding: 8bit
 
+The code in sd_set_power_mode() is a bit obfuscated and also has some minor
+issue in its error-path. This small series addresses these problems.
 
---g4ed2hcukbwej34k
-Content-Type: text/plain; protected-headers=v1; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH v3 31/35] mmc: sdhci-tegra: Drop the use of
- sdhci_pltfm_free()
-MIME-Version: 1.0
+Ulf Hansson (4):
+  mmc: rtsx_usb_sdmmc: Fix error-path in sd_set_power_mode()
+  mmc: rtsx_usb_sdmmc: Print debug-messages at power-on/off errors
+  mmc: rtsx_usb_sdmmc: Convert sd_set_power_mode() into void
+  mmc: rtsx_usb_sdmmc: Re-work the code in sd_set_power_mode()
 
-On Sat, Jun 07, 2025 at 03:52:16PM +0800, Binbin Zhou wrote:
-> Since the devm_mmc_alloc_host() helper is already in use,
-> sdhci_pltfm_free() is no longer needed.
->=20
-> Cc: Thierry Reding <thierry.reding@gmail.com>
-> Cc: Jonathan Hunter <jonathanh@nvidia.com>
-> Cc: linux-tegra@vger.kernel.org
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 9 +++------
->  1 file changed, 3 insertions(+), 6 deletions(-)
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 31 ++++++++++++++++++++-----------
+ 1 file changed, 20 insertions(+), 11 deletions(-)
 
-Acked-by: Thierry Reding <treding@nvidia.com>
+-- 
+2.43.0
 
---g4ed2hcukbwej34k
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmhIE/QACgkQ3SOs138+
-s6Fx9g/7BEbpJzW5xpWSwKNz+BLaVfI+Wvz5lpMJmfeYFiH/FDRZbGNtETzt/OFw
-TVMEZQCwivNU804x2Qh6hg0mwkXJW1rNGZtV5IDdufZ2FMlkF08FWDqrQxVfHFqr
-RtmybUjQex5+xcgWTwlf2uycx4DM/GrHmrez0cTdGSKjonUtKss6djdWpq1mwZ/F
-BOnS8WsSwtbt/+gQaeMInP2OrRcPorTyIUndBUvu0iNbxrEIpCguU1FZ/Js1LDM3
-ZBZWTh4viryODYS1SbjBmNJx/t1vir4B7q1E93nu9p3y9u+O6IqDVTUFwsGXgC/2
-7Bzn/AD9SD7TXp6sP9wI+Fy56TRjRbur20vUydKkbeEA5iy/jarlG/wQCqfCM1hk
-YFkAKey+s9XtrXKTYFFD7F4ZA0fyJiAZG5onU4M7AUI7/CWlUezdm820AY7rsMiF
-hSpb/WSe4nKN7AvfCuAuW4srIdkI1dYLm3Bk6TWoZz4wFwC4t5ThBmNdLaYOZGJD
-gDnEW1TfLHogjwnTdS0tlF4QQygMi5vcWnyGewDpC2xYFAlw70OL9vF2KhYhMRt2
-jvlCbH9/ySj53t2FcgqqAE5sjBrxK9eeb37GZMb9ZSJMFU0uStDk98gJ6d1ENiJk
-DM9ZzNFZWxhtmjuJBXd/yMGIM6w1XSV63G2Eo3dzuRwczP/Y4KM=
-=U/5m
------END PGP SIGNATURE-----
-
---g4ed2hcukbwej34k--
