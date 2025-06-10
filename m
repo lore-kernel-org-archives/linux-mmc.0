@@ -1,160 +1,92 @@
-Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 89D431D5CC7;
-	Tue, 10 Jun 2025 07:31:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.172
+Received: from mail.zeus03.de (zeus03.de [194.117.254.33])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 482E427FD7E
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 08:23:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=194.117.254.33
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749540669; cv=none; b=jFZ2tA1c9vhW+TDvQ9KLu+2sGhxTjY4Wnlbh0pyTHMJOm2XJqGXOxp4mdmxDrs6xaore/pSuWRCoJIGNyPyXvbJE7Zbz/HIesy1uJbnVsDWK2uVLstSX91QUZn4965pIVYzcvMVOcoIXqwIlkmrlmE+u45dRtlm0P9KxKeHmo5E=
+	t=1749543798; cv=none; b=SkZC4DI2u+Ud3CpwLYcizmKmYN8VkigrtWxQ68qI76pvcVS5yeYqirNqk4mGFBUc3si3zMt0UFjt19IHgxcV+jdj15Y2yBJLJbaCdTGsmtPWscNBcYiY9EU1aXU624D4aR8YY0+jXMdJvIShfFGswZhtWGgL6AqmXHVivz/VAEE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749540669; c=relaxed/simple;
-	bh=OBtVgU8vgs3cWwHr8KKNaK9220wgxe+RjiUrt+hp8Xc=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=Laa9yqtlzh5VdSPSRoryCnptXfD1vMIZkPIyPkCAT5N+lcnmsMHJzkBz/rvzTuomDbJirbm/TiPMhyoPfXHgMtm95gViSPwp7FpGnN6y04+TDYilBqoz8MJJM+Mb48vQs71coAxeCut2kA5388rGH5nwF7MW03ODZTAdMqG4KmE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=renesas.com; spf=pass smtp.mailfrom=renesas.com; arc=none smtp.client-ip=210.160.252.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=renesas.com
-X-CSE-ConnectionGUID: 5e+y066YQpWSRutAOD9EsA==
-X-CSE-MsgGUID: prp5yKFfToG3qJS+Wk1Pbg==
-Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie6.idc.renesas.com with ESMTP; 10 Jun 2025 16:25:55 +0900
-Received: from shimoda-ggear.. (unknown [10.166.13.45])
-	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 08B6241791AE;
-	Tue, 10 Jun 2025 16:25:55 +0900 (JST)
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To: wsa+renesas@sang-engineering.com,
-	ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH 2/2] mmc: host: renesas_sdhi: Fix incorrect auto retuning for an SDIO card
-Date: Tue, 10 Jun 2025 16:25:45 +0900
-Message-ID: <20250610072545.2001435-3-yoshihiro.shimoda.uh@renesas.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250610072545.2001435-1-yoshihiro.shimoda.uh@renesas.com>
+	s=arc-20240116; t=1749543798; c=relaxed/simple;
+	bh=0MgVW9/FtuP76vuXmk+ZR3q4fzt+A4O7VN6kAzR4ExQ=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=lipF0M4DdX0JNfS0D6egGkGsxQRDrJFuvrBCRLhv9BtjOARHdR0m5gEPM9wTBXsk256cWFnwQ0ERhtIpGBeZrarSmRtnRT3AY+L41N/jg1mGDDiNyq9NSN8GxygAhCw3W5VMeVqQn6t7Wx1BxOdlBVVLt553SYB6/WMNVm5H8+Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com; spf=pass smtp.mailfrom=sang-engineering.com; dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b=TpW+txz1; arc=none smtp.client-ip=194.117.254.33
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sang-engineering.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="TpW+txz1"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	sang-engineering.com; h=date:from:to:cc:subject:message-id
+	:references:mime-version:content-type:in-reply-to; s=k1; bh=0MgV
+	W9/FtuP76vuXmk+ZR3q4fzt+A4O7VN6kAzR4ExQ=; b=TpW+txz1qRq7OA61rV6Z
+	VGyQ6xfeC1WkkCXmmGMxaHfQepBsDgRw1p7xJjxCmE2FvGD78FlaH/cV8pM/0yHM
+	0O9vZ4dzaA2sCYBuW6mLEFCWWW6DCAvukknvUPFQ3z/p+RUy5mVIgvIXvXKRv9YL
+	Q4xAwKe/5LwZhf4AiCPgnnlv6VedZcyLX0bdYKOLYiBGct9rgzr8iJSlKkmrnPYZ
+	LetZg4k3LgVv8jioIuXWr7q3wAn5wyng3nFZJuYoAeJk7fIIkH02xQwtFtavwfZJ
+	xUil1yPcbcC0IcPauI6OktbL7AOB87ntYVjCEf2JalYcx0/VWp0+YGR5pZqOUVh6
+	pw==
+Received: (qmail 2789934 invoked from network); 10 Jun 2025 10:23:03 +0200
+Received: by mail.zeus03.de with UTF8SMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 10 Jun 2025 10:23:03 +0200
+X-UD-Smtp-Session: l3s3148p1@5CDAZzM3cMYujnuC
+Date: Tue, 10 Jun 2025 10:23:03 +0200
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+To: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH 1/2] mmc: host: tmio: Add .sdio_irq()
+Message-ID: <aEfrZ-MHFmgnBpEE@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+	ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org
 References: <20250610072545.2001435-1-yoshihiro.shimoda.uh@renesas.com>
+ <20250610072545.2001435-2-yoshihiro.shimoda.uh@renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="CUNouKspj6LHLQL7"
+Content-Disposition: inline
+In-Reply-To: <20250610072545.2001435-2-yoshihiro.shimoda.uh@renesas.com>
 
-This host controller is possible to change incorrect tap if an SDIO
-card is used because DAT1 is used for interrupt signal on SDIO standard
-but the controller doesn't take care of it. So, in the worst case,
-this behavior causes a CRC error.
 
-To resolve the issue, this driver uses manual correction mode instead
-of auto correction if an SDIO card is used. Also, even if DAT1 is
-mismatched on an SDIO card, this driver will not change the TAP.
+--CUNouKspj6LHLQL7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi.h      |  1 +
- drivers/mmc/host/renesas_sdhi_core.c | 48 ++++++++++++++++++++++++----
- 2 files changed, 42 insertions(+), 7 deletions(-)
+On Tue, Jun 10, 2025 at 04:25:44PM +0900, Yoshihiro Shimoda wrote:
+> Renesas SDHI controller requires vender specific handling when
+> an SDIO irq occurs. So, add .sdio_irq() to the tmio core.
+>=20
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 291ddb4ad9bed..084964cecf9d8 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -85,6 +85,7 @@ struct renesas_sdhi {
- 	u32 scc_tappos_hs400;
- 	const u8 *adjust_hs400_calib_table;
- 	bool needs_adjust_hs400;
-+	bool card_is_sdio;
- 
- 	/* Tuning values: 1 for success, 0 for failure */
- 	DECLARE_BITMAP(taps, BITS_PER_LONG);
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index e6fa3ed425606..c49e3faa0ef3b 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -686,9 +686,8 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
- 	/* Set SCC */
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, priv->tap_set);
- 
--	/* Enable auto re-tuning */
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
--		       SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN |
-+		       (priv->card_is_sdio ? 0 : SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN) |
- 		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
- 
- 	return 0;
-@@ -778,6 +777,14 @@ static bool renesas_sdhi_manual_correction(struct tmio_mmc_host *host, bool use_
- 		if (bad_taps & BIT(new_tap % priv->tap_num))
- 			return test_bit(error_tap % priv->tap_num, priv->smpcmp);
- 	} else {
-+		if (!priv->card_is_sdio &&
-+		    !(val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)) {
-+			u32 smpcmp = sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP);
-+
-+			/* DAT1 is unmatched because of an SDIO irq */
-+			if (smpcmp & (BIT(17) | BIT(1)))
-+				return false;
-+		}
- 		if (val & SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR)
- 			return true;    /* need retune */
- 		else if (val & SH_MOBILE_SDHI_SCC_RVSREQ_REQTAPUP)
-@@ -828,11 +835,14 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host,
- 	if (mmc_doing_tune(host->mmc))
- 		return false;
- 
--	if (((mrq->cmd->error == -ETIMEDOUT) ||
--	     (mrq->data && mrq->data->error == -ETIMEDOUT)) &&
--	    ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
--	     (host->ops.get_cd && host->ops.get_cd(host->mmc))))
--		ret |= true;
-+	/* mrq can be NULL to check SCC error on SDIO irq without any request */
-+	if (mrq) {
-+		if (((mrq->cmd->error == -ETIMEDOUT) ||
-+		     (mrq->data && mrq->data->error == -ETIMEDOUT)) &&
-+		    ((host->mmc->caps & MMC_CAP_NONREMOVABLE) ||
-+		     (host->ops.get_cd && host->ops.get_cd(host->mmc))))
-+			ret |= true;
-+	}
- 
- 	if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL) &
- 	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN)
-@@ -843,6 +853,28 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host,
- 	return ret;
- }
- 
-+static void renesas_sdhi_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+
-+	/*
-+	 * This controller cannot do auto-retune with SDIO irqs, so we
-+	 * then need to enforce manual correction. However, when tuning,
-+	 * mmc->card is not populated yet, so we don't know if the card
-+	 * is SDIO. init_card provides this information earlier, so we
-+	 * keep a copy of it.
-+	 */
-+	priv->card_is_sdio = mmc_card_sdio(card);
-+}
-+
-+static void renesas_sdhi_sdio_irq(struct tmio_mmc_host *host)
-+{
-+	/* This controller requires retune when an SDIO irq occurs */
-+	if (renesas_sdhi_check_scc_error(host, NULL))
-+		mmc_retune_needed(host->mmc);
-+}
-+
- static int renesas_sdhi_wait_idle(struct tmio_mmc_host *host, u32 bit)
- {
- 	int timeout = 1000;
-@@ -1227,6 +1259,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 			dev_warn(&host->pdev->dev, "Unknown clock rate for tuning\n");
- 
- 		host->check_retune = renesas_sdhi_check_scc_error;
-+		host->sdio_irq = renesas_sdhi_sdio_irq;
-+		host->ops.init_card = renesas_sdhi_init_card;
- 		host->ops.execute_tuning = renesas_sdhi_execute_tuning;
- 		host->ops.prepare_hs400_tuning = renesas_sdhi_prepare_hs400_tuning;
- 		host->ops.hs400_downgrade = renesas_sdhi_disable_scc;
--- 
-2.43.0
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+
+--CUNouKspj6LHLQL7
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmhH62cACgkQFA3kzBSg
+Kba9sBAAobQFJHaXzbB+Q4EfgWceC/+iDOzekDB8rEH7JqE7l0nM3JVw0H81KUJV
+kAdj7ILWVfqzbdJYqUWefyyibphIFGmAhEY4gmrn1yK3ZO9bZDHll0XZo4HDHfu7
+zJSbweaHpcxQuKg6l/2qC3RvvAxYPTU9WWjoshWitNUrwGDEbH9ivw9ekLMq5wB7
+JdoivD8Q9wPUUzYgNR8JGpXzTQnipEYoAAxG0WEzyfYs+Fp/0MUBhJXnHEiprM8D
+rBnjINJ1oA7eS4wxq1gy0vvZCs0kkBUhBcO3XHQvaFXUq7LgHr4tHuDB+UCiEYFl
+9BeW2etIDlcKXNik/7d9WtQ6/lF11+s+9IuMV3I/NL2RaTUKkAlDTcCvXMfVR3IS
+srVkSKeuyNT7Zl/LdF0JGLMq40Ta+0JGoTXJ7kJrMSGElc9dmC894OeEf5RVORs4
+9flSWCfF1P4SH4ilYiFoRz9oWfp/QsT+vOzLX9RvLuOUb7cjI/7mAKl1KaOhsTyR
+uoiA/bFcSCAyxIFoZPtpzVRWWwsxXdD/UgE3sqjjfk/ARW+3v1oaMyh5P6WbHvry
+1hSZi26Ac4gjcZnzAk5Lufq45t8H7FdOV6NjuPSedEKMz18fjoPSOhH0hMVs0IAx
+yusLMRn7s5YZmW7iS2ZcscvIJCnVr356mlsE3AqewFBKK8GpZz0=
+=AxQK
+-----END PGP SIGNATURE-----
+
+--CUNouKspj6LHLQL7--
