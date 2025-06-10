@@ -1,129 +1,138 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f53.google.com (mail-ej1-f53.google.com [209.85.218.53])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1E8A6299933;
-	Tue, 10 Jun 2025 12:53:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 314AA2C17A3
+	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 12:53:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749559994; cv=none; b=GCqh8P+I+I5kos6uMkjFAaFjHJp4tPegKl3azxMhaPJ9Th+ZYbc8TaoK3xCMTuN6aYtgljEBJOxx7eaG0gLm2AlsgM8tSXZ3KafHWHBTcKgCxHm1MG6HcdTOnc1VhXUAAR+bbRetnLBSLVw4oD/sJivaYw6ASbJftZBLoAPXw08=
+	t=1749560015; cv=none; b=teugzKw3i+S5Pdpelf+7a5hBIjAM4G3hkWg8oF18+VgdfXkrqt1DKwxNjAoQDP39UUuLeppE5R57RiJTmtdU4i9F1gaAfmcjK2JzNpEMKh4A3Ku5j5YxjYpAQ/4hVsHFp2BDp4/kB58n6bqvGqapNf7eAOI3vwfx98QHIYkJq7Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749559994; c=relaxed/simple;
-	bh=ISYaAhggFyjnVtTWRorHjZCRnq1DLz9VGr6XjpJVG7U=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=g6GjAuLXvUq+dxQMoMDir02SKqSnHOGaIDfipvf71OQwpqcKdWxf0SOBjIMeppvGGyiVTHJaLwbjliBbqCJ2brkIyhkwrBNNYOfWpZoz5n3SSCPUIZ6ytWElPVjkDHXFyyYk0LCIB5U4BWG/l0q5TrXVurnhVUSNE7j9mIjhnYo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=fgWOMiAc; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1749560015; c=relaxed/simple;
+	bh=BdEOtlwKT5cm8r2CwV8DPp+MGOvYNyQWEEliBnZf68w=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=mBQtdnfCN00lvQxYLq9WgKFbpDqSawIvv52Cvj2CXOUpDuo+BOmsOkiGhq8aJiT4rJpzZmvIaQo+Fo2GdE+dKfyMMPq/cND5SQng1g9qjpItPN6dVp3xcchQ19XmJMhiFUOyoxH5R080xS31BH7/+IlioO+e0lo6Wh7Ud+w1qa4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=JEHtCXEb; arc=none smtp.client-ip=209.85.218.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="fgWOMiAc"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3FBDC4CEED;
-	Tue, 10 Jun 2025 12:53:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1749559993;
-	bh=ISYaAhggFyjnVtTWRorHjZCRnq1DLz9VGr6XjpJVG7U=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=fgWOMiAcTYjMjBVI/Z4s8WvdzFuQ5LLsV3FLWEMo670XZ8buZ8OyjsASrIcMoICvv
-	 ri+y5rf8Fd0oO3DTqf3TIlGOPeWMN3uEVC5cGejHpHgbiPihsaReBiUWLM2k/L6BB1
-	 NXK7SR4smEjC3+tjlGjZ7ew1jxrOUciLQukf5Dehj7exiI0ZI5f0TO2k1ePWhAja7l
-	 Mz9QPWA0QK4kEXcIEBccMRau4e3jrSL8iXExIip8EROw0iQygCM7cr8JahGGGU7QHn
-	 Lmdwkixbvw6TBHsvPwE9Q7CG74fyxEAxW/AgeKAEzJTuPtS3Q+LTPzhyjqD4Q2ZHQL
-	 fERVymuPdEBfQ==
-Message-ID: <18053999-c337-47e5-b6df-72c2be6a72df@kernel.org>
-Date: Tue, 10 Jun 2025 14:53:08 +0200
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JEHtCXEb"
+Received: by mail-ej1-f53.google.com with SMTP id a640c23a62f3a-adb2bb25105so864100566b.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 05:53:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1749560011; x=1750164811; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Ua43JbNUP+RRPO3HRaTeqoeNTy0CSQSVsdia/VGFSEg=;
+        b=JEHtCXEbzOuiQwxAWbrFgpoH1kg3gXqgolDuApgn/XttVi+ZBDshB2ZecwisSQl60R
+         lBpk3PX0665VCIEILCp8SlNQO9vXMeNB/5tv8v+A9rDRe//eWBHHc3jvdKhNx/ls3tPN
+         GCVDdq3z+VmSUG1eoI3RlMEzmPC6rgRkTNOQn2QMumqIiuKKBimCIG019Mr05uTUWc0O
+         /8csdJqAfMLU+vz8YWZkHWo5pU21HUZJoHwTuf3Wwa/P523LGSuU2K7t3M7HS2nzu/Vc
+         dZetiT3HSM/7Ip5nbjgwm4I/+pjFwUbU334vuR+x4kfBN2Q6CrAnNkp0S3G9VdyvmFKS
+         MpoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1749560011; x=1750164811;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Ua43JbNUP+RRPO3HRaTeqoeNTy0CSQSVsdia/VGFSEg=;
+        b=tx7VTkOAWcQhcsj9QCcF9MDEmj8j87hlvUiBJyGHs2E1rgYTbtkVzuBIBMdFjoMC0d
+         OqeflxY4yqIXCkWtEuIDJTPxyMQl6jDVcxLJQIx8Leo46KtsF9OVaW9bEsvnobGBLsnX
+         LhSnsVlqvDlpH/pORf8Oz3AfLW0l72DBZdpnE8GUT4h5/GMbVE5Qi2UNo4Iqq1DXLrhd
+         BqL/OOEu9Axmnpw1vjS7/PoCFAK9cZWQARv2H9eq6k9lN/wkjdiHs2vy1HNG/wVMdwqQ
+         7FBZLMCvBu5U+TYIELI/crOM14ZutbLg3i9QTfp6pTPNS08jDF5AnSlwUhPqoOiCK/wd
+         vR5Q==
+X-Forwarded-Encrypted: i=1; AJvYcCXsLL6UGtn04iQXHj2Uq8vJd3agqwNMCMnXBGwKdLMQ0FAcsqGS+EXNxtsqzYiHssVC4WW0D2AG1w0=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzdAq+CqVDbLBgd/q3In3HL55NL7U5Ar/2NOsZqr/4HzpmLazwy
+	zyXupT49xWAIdQr1IwZOlwcSt21ISk7y64cwdsGv5DtWnZ0OHjpNM5c0Iu+SaclvsXXmSZVmIuw
+	vNo2WwEKEWKXHR58S+qkVvYtMqnYoY3JVkIy+jK3W4Q==
+X-Gm-Gg: ASbGncvwXyiyZH/auVC+EDRxq94f3S/3GxdwR4rmUOkYJI8/Nbj2Tt1+l0DX0qUk3Jo
+	njpLw//LG2BBkUjqlxU0w3iuIZlMQ/bFhJfRrlz4ZJRt7DjwL7lHsaB+k+Ij1yX8fNXiRJ53LQk
+	HCcciboLE2cuEdHD1FV5BC2DNL0BYUa5jsM4pS1zYyV03j
+X-Google-Smtp-Source: AGHT+IE0dnXtTd0cJKE4NbTH+mEK1zcSfNIzItd4LPIjOHRSwOojAZ1aIgIzoBnogv+j1Y6Xx9Qy218nbJLUy1UaMQg=
+X-Received: by 2002:a17:907:94c8:b0:ad8:91e4:a91c with SMTP id
+ a640c23a62f3a-ade1aab9825mr1680318466b.29.1749560011469; Tue, 10 Jun 2025
+ 05:53:31 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Sachin Gupta <quic_sachgupt@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com,
- quic_mapa@quicinc.com, quic_narepall@quicinc.com, quic_nitirawa@quicinc.com,
- quic_sartgarg@quicinc.com
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
- <e0f43fc7-2f38-335d-1515-c97594a55566@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <e0f43fc7-2f38-335d-1515-c97594a55566@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <cover.1746581751.git.zhoubinbin@loongson.cn> <704447268706b1b9f25bbe9d15459163d0ac3404.1746581751.git.zhoubinbin@loongson.cn>
+ <CAPDyKFo4n=K5-SeKFpCm-0u4Bbk-E0XqUrx+KSK1yuZa35a7ug@mail.gmail.com> <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
+In-Reply-To: <CAMpQs4JCaUzJXgcQwiWOoJ0YAj=ORnyaK0dC3-GamV-cbyhNnA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 10 Jun 2025 14:52:52 +0200
+X-Gm-Features: AX0GCFv5tUexuVjVKPNZfCscSU_1kpR3xlCvzeNqP1bE90dtiqOaTc7DD1DnFvo
+Message-ID: <CAPDyKFo5BjZsst=vXhU8Rv2HN-Ewy8vwnyFkZdo1-XCXX0_wsA@mail.gmail.com>
+Subject: Re: [PATCH v2 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC
+ controller driver
+To: Binbin Zhou <zhoubb.aaron@gmail.com>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Huacai Chen <chenhuacai@kernel.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On 10/06/2025 14:07, Ram Prakash Gupta wrote:
-> Hi Krzysztof,
-> 
-> Thanks for your comment, The Qualcomm Engineer who initiated this work,
-> is no longer working on this and I am taking up the responsibility to continue
-> on this work. I have started to check this and will start with addressing your
-> comment next.
-> 
-> Thanks,
-> Ram
-> 
-> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
->> On 22/01/2025 10:47, Sachin Gupta wrote:
+On Tue, 3 Jun 2025 at 14:54, Binbin Zhou <zhoubb.aaron@gmail.com> wrote:
+>
+> Hi Ulf:
+>
+> Sorry for the late reply.
+>
+> On Mon, May 19, 2025 at 7:17=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
+rg> wrote:
+> >
+> > On Wed, 7 May 2025 at 09:28, Binbin Zhou <zhoubinbin@loongson.cn> wrote=
+:
+> > >
+> > > This patch describes the two MMC controllers of the Loongson-2K2000 S=
+oC,
+> > > one providing an eMMC interface and the other exporting an SD/SDIO
+> > > interface.
+> > >
+> > > Compared to the Loongson-2K1000's MMC controllers, their internals ar=
+e
+> > > similar, except that we use an internally exclusive DMA engine instea=
+d of
+> > > an externally shared APBDMA engine.
+> > >
+> > > Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+> >
+> > [...]
+> >
+> > > +
+> > > +static void ls2k2000_mmc_fix_cmd_interrupt(struct loongson2_mmc_host=
+ *host,
+> > > +                                          struct mmc_command *cmd)
+> > > +{
+> > > +       int val;
+> > > +
+> > > +       if (cmd->opcode !=3D MMC_WRITE_BLOCK && cmd->opcode !=3D MMC_=
+WRITE_MULTIPLE_BLOCK)
+> > > +               return;
+> > > +
+> > > +       regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS=
+, val,
+> > > +                                (val & LOONGSON2_MMC_FSTS_TXFULL), 0=
+, 500);
+> >
+> > Can you please elaborate on what goes on here?
+>
+> This is a controller hardware issue. We need to wait until the Tx FIFO
+> full flag is set before sending the write command. Otherwise, a data
+> timeout will occur.
 
-Above timeline is interesting:
-1. Patch sent on 22nd January.
-2. I provided comments few hours later, the same day.
-3. Silence.
-4. Employee changes job.
-5. Five months later...
+Okay, thanks for clarifying. Please add a comment in the code about
+this as I think it useful to know.
 
-Not your fault Ram of course, but above timeline is not a responsible
-way of upstreaming patches.
+Moreover, I think we should have the value of the timeout specified in a de=
+fine.
 
-Best regards,
-Krzysztof
+[...]
+
+Kind regards
+Uffe
