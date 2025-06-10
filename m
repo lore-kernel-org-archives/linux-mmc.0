@@ -1,152 +1,138 @@
-Received: from mail-ej1-f41.google.com (mail-ej1-f41.google.com [209.85.218.41])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9383D298242
-	for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 12:57:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.41
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 122BA19A;
+	Tue, 10 Jun 2025 13:07:26 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749560244; cv=none; b=ZECpTeoZsPICwmxu4Z9PSWBXtSb4aIxirti7LorgWY6t5CfFyAZjZ7xZ/vHu8J1JhURoi0WiAQWW9AmjDH/qw5Y/0kTCpTA+VOGDX4mFNCkyTITsfU8RUgQC5VlaaBdAUa+LYHUaL45hiu8T4Em57wOBsFlA4pUOu8skzPIn+Vc=
+	t=1749560848; cv=none; b=D/iX2lhN3vxuK48m0i/taI5Ouv2qUMjzjX1O91ilmRH4asuGYxgZRUNJjeXq8AyUi8Ohcv9egrgoqscWHdbqdpoKpBtfF+yQzSyK+XjAnc2WwFkh0SPVDkCvzDGYNI2tdn/E1NVC6XLU4c6VZBWY8rRaM6zNFhYtBMNqOn/5p5E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749560244; c=relaxed/simple;
-	bh=qhIVpEZDZOmir5ypQGJPM5AKAogRaLno5vHtbx9uYco=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=bm96HV1YrazRhONyXiwTW/HkZxKCRSy+Hr+78RIApTXD+O1YhDEExSchAn8IEw+oFRnwWAc8mqWurjiGPADXyJScG/C7yLoGdX869HfZonsKuDAjQxMBFVRll7a3SAmkeiXTOF52pzKe5A5koo5Rz9n9oPOtUTS/KF804lgPPdQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Iw+pYu9w; arc=none smtp.client-ip=209.85.218.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1749560848; c=relaxed/simple;
+	bh=JGBU6yuMcEu9jaDvH7qVhIiGmXq1vguIdg7PTe9Agks=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=D4kdeRFd2iYhtW5Sdu54IT+EsRVK8t5uXVIbJ+FvR9FjNvfGuyC1uX3OfM4Ze5+57MS2fD0MCfOek1MgbLJCKrlfq28fsidDklAz79EDOR0WTEXqYtIgFydoJZSC0Oq0tgCdrMQw+Yv6VqdedquAHZcKQblii4HJ6kGHqLRbNSw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=do8T6Pio; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Iw+pYu9w"
-Received: by mail-ej1-f41.google.com with SMTP id a640c23a62f3a-ade5ca8bc69so308936666b.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jun 2025 05:57:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1749560241; x=1750165041; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=CUkJhWRp3L7SGl8YQInLtuEOp8CfW807ly4f8cXAKNg=;
-        b=Iw+pYu9wj8TPnjtMho6jQXgdksId+1akOTNdyrRNkjp//ulZJygzb8PR/ptjfENVEI
-         qug6n8lx5eEN39bQeDG9LdswoQDdg7oM6tPa84afyw/Zwf58Z+Q10R3ezILP38VgBNfO
-         lj/6JHFZTa4kdC0TkJElVfoiBOW8k8tb4UMBiZ3sqPVgh3hjBzsQV8EHramZhcy/pqrF
-         ySDl7jug2TIDUOj/25BZqQOoX3A1qbYbhOeEU1NnnEuVlrqlcmJB9WWlIswr/rUtafI7
-         bIf7a+zyhni8VvJsMj/V+BVS1ivtdMQFmz7M9z5H5COhbIbZgd57LRx8AdVUS7G+MziH
-         W2Xg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749560241; x=1750165041;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=CUkJhWRp3L7SGl8YQInLtuEOp8CfW807ly4f8cXAKNg=;
-        b=kVzvLFotPdnlBgYI9bAqfooeaCEoUFwC19+R+KBArauc+2vIF5SNeqT9iRHix07TlA
-         f2nRG146H7X0BMlc/7tRj8x7ayfrwfFSa6xiPL0E+g+gzy8SsrfAloKNuCurEM+cb2ew
-         TByRW/Z95CxzcUnC23NOKH9TvLrbP3POxcFPdVGuPzYlgSTrHpheGhHJ709LAjth162Y
-         +3b7KwG0eScSfXnqFM0Q/Hn+6nwJ+Fwl/+aGOsjM5p/WqHOWek+qYRFd2G/wRl9q1orz
-         N1Aa+XMqAUTQmLUqwPamQsYAZQbEc0oRJMW3Mmo0Cx26j8415QG+vOeQ8+G2DMhMzx0Y
-         +6mA==
-X-Forwarded-Encrypted: i=1; AJvYcCUpEFa/YnMp6eYWe7D+nNavWRmGerCUfs9pws3nfkYMiwd4AA/DUCqgP2toD7FaH4P2aOK0YWvhGTU=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzTJnNfLGU6FH3Gu8BmOWMl8zAkfMhKXSoVv8o1RVPOoB+47Nih
-	M4VakSvSF7NJsBya6MCEQrKkR7/Mhuom+gU5kQQ4Isy7uJMCQl75AxFjkGxBfy87i9S8bdBKS2Q
-	PDGwIwyhA8+DLD16nyHGlSEsy6ztPt1sJPCP24z96mw==
-X-Gm-Gg: ASbGnctoNkq+2nWmOzMJBC4CnXH2Qo8GWdPUfsbmDa3Re3wLjTgf1Wouxg2z2Y3rYfB
-	JvLgzZVE29Bi+rRcEZEdA9m25+eat3Lux/1gmV+6CjiOq12KDFTGYw06Yt8OdQDttR+VAum9SD0
-	d6N/X491eUtUiE0vg1lmkKOCSS40BzoN1cwsZIyGF8f+3W
-X-Google-Smtp-Source: AGHT+IFnoTHHifJTlb/W9AH+wSprRlJ6AOhC3m2qBRGlahZc+wsPlXhKLbork72DQJ3HMf/KrBrC0eU+kRMagyP2nkg=
-X-Received: by 2002:a17:907:d644:b0:ad8:8689:2cc6 with SMTP id
- a640c23a62f3a-ade1ab2216fmr1457025566b.47.1749560240911; Tue, 10 Jun 2025
- 05:57:20 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="do8T6Pio"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55A8XvAZ029862;
+	Tue, 10 Jun 2025 13:07:21 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	JGBU6yuMcEu9jaDvH7qVhIiGmXq1vguIdg7PTe9Agks=; b=do8T6Pio0Og8JEsZ
+	NzDdZCF3GcmsR6vOOXu+AWgAjNb7X72ddrCyIXwxBL2/uA9xUsxWGNuvFOk/RPGW
+	ssSxGCxNkHmV859nBfZ5xhUsXgmc8PnBnVIAJOcetu2ns6sZAAy7+5xECd4xggMO
+	cO+mhY8v4eIx/T+aQjr0V6hM/yFnLQqFGglgr5FoFC8sdx1SpisZf2TEdbAjX3gc
+	gQAuFbuBR1eCNbmtevX9ViGeDG2oFKOmdfkvTJGyVYELIATUf95J6Gw09/Fnml/c
+	xdNvowJiwLsLoel2p5JZx45bw5Zg83wfY66BwS/3ksCdPvofwOeYy/vU6fRmdCl1
+	JA99ZQ==
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 474eqchdb2-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 10 Jun 2025 13:07:21 +0000 (GMT)
+Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
+	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 55AD7Ki1002349
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 10 Jun 2025 13:07:20 GMT
+Received: from [10.217.216.18] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Tue, 10 Jun
+ 2025 06:07:15 -0700
+Message-ID: <3b75fe83-85c5-f0d3-c5db-481ef133d6de@quicinc.com>
+Date: Tue, 10 Jun 2025 18:37:12 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250606110121.96314-1-victorshihgli@gmail.com>
-In-Reply-To: <20250606110121.96314-1-victorshihgli@gmail.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 10 Jun 2025 14:56:42 +0200
-X-Gm-Features: AX0GCFtz58qEc2pH3XdErcJzGd3l9xp3ByR8YdkuPCCJGBGEv9OQcWr7tPHik30
-Message-ID: <CAPDyKFrpHvrgjG2xOYPoPwUf1NNyBM+fGaO+AgPpZ1CMZYrqgg@mail.gmail.com>
-Subject: Re: [PATCH V3 0/3] Adjust some error messages for SD UHS-II
- initialization process
-To: Victor Shih <victorshihgli@gmail.com>
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, benchuanggli@gmail.com, 
-	ben.chuang@genesyslogic.com.tw, HL.Liu@genesyslogic.com.tw, 
-	Greg.tu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.10.0
+Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
+ HS200 modes
+Content-Language: en-US
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Sachin Gupta
+	<quic_sachgupt@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, "Rob
+ Herring" <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        "Conor
+ Dooley" <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <quic_mapa@quicinc.com>,
+        <quic_nitirawa@quicinc.com>, <quic_sartgarg@quicinc.com>
+References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
+ <20250122094707.24859-2-quic_sachgupt@quicinc.com>
+ <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
+ <e0f43fc7-2f38-335d-1515-c97594a55566@quicinc.com>
+ <18053999-c337-47e5-b6df-72c2be6a72df@kernel.org>
+From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
+In-Reply-To: <18053999-c337-47e5-b6df-72c2be6a72df@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjEwMDEwMiBTYWx0ZWRfX5o5lYcdz9Uj4
+ Kp5Om5Lvf4iRs6CFmtyztKCWZ8wrBai6SWCVWzuPTnYGGeFuZ/udDShCTTsv9LdYO4sDNxRauOM
+ E7Spn+cAsYkGcAVuGXfU/BEe1t6cKcymrPvew/PXnX/xi9r7KT5ZzWrQc7PAsCnmuNxT9I0A7Y8
+ wUJRAeqoOP0vxPDQXasOdD2yr4LWqwj7ajejDgUxTD31uzz8c87zH+SrzK3U8hWvj7+hl9ZXK2p
+ c9jasM1jf67aevnff4XYNvtwvEZxja04kvgzU/F4DfX2+1I5YPPucPAWqek8qmz70u7V+Zq6YjG
+ sgEeUQ7nlZi+WzdLcV3tvEs8Vm1ooGRuRlzrpjfTDGmIK/b6cZQZoRsgbBg0H+VCdVtJmrvvxqq
+ 7yGjgz/ptYPDIdpslArBj2QoMNFcdWWSj1LM7VdvuFMWfLO/PAOj6ibih3fsahNtkLOzT34a
+X-Authority-Analysis: v=2.4 cv=Q7TS452a c=1 sm=1 tr=0 ts=68482e09 cx=c_pps
+ a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10
+ a=tplrWfVxwPniNMw0LL4A:9 a=QEXdDO2ut3YA:10
+X-Proofpoint-GUID: 5-G7pzJu0YH_cMYSW9WaKP5MyQBHE-3V
+X-Proofpoint-ORIG-GUID: 5-G7pzJu0YH_cMYSW9WaKP5MyQBHE-3V
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
+ definitions=2025-06-10_05,2025-06-10_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 phishscore=0 mlxscore=0 spamscore=0 mlxlogscore=999
+ bulkscore=0 clxscore=1015 lowpriorityscore=0 adultscore=0 impostorscore=0
+ priorityscore=1501 malwarescore=0 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2506100102
 
-On Fri, 6 Jun 2025 at 13:01, Victor Shih <victorshihgli@gmail.com> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Summary
-> =======
-> It is normal that errors will occur when using non-UHS-II card to enter
-> the UHS-II card initialization process. We should not be producing error
-> messages and register dumps. Therefore, switch the error messages to debug
-> mode and register dumps to dynamic debug mode.
->
-> Patch structure
-> ===============
-> patch#1:    for core
-> patch#2-#3: for sdhci
->
-> Changes in v3 (June. 06, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#2: Separate the helper function in V2 patch#2 into V3 patch#2.
->
-> ----------------- original cover letter from v2 -----------------
-> Summary
-> =======
-> It is normal that errors will occur when using non-UHS-II card to enter
-> the UHS-II card initialization process. We should not be producing error
-> messages and register dumps. Therefore, switch the error messages to debug
-> mode and register dumps to dynamic debug mode.
->
-> Patch structure
-> ===============
-> patch#1: for core
-> patch#2: for sdhci
->
-> Changes in v2 (May. 23, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#1: Drop the use of DBG macro and use pr_debug() instead.
-> * Patch#2: Drop the use of DBG macro in some function
->            and use pr_debug() instead.
->
-> ----------------- original cover letter from v1 -----------------
-> Summary
-> =======
-> It is normal that errors will occur when using non-UHS-II card to enter
-> the UHS-II card initialization process. We should not be producing error
-> messages and register dumps. Therefore, switch the error messages to debug
-> mode and register dumps to dynamic debug mode.
->
-> Patch structure
-> ===============
-> patch#1: for core
-> patch#2: for sdhci
->
-> Changes in v1 (May. 16, 2025)
-> * Rebase on latest mmc/next.
-> * Patch#1: Adjust some error messages for SD UHS-II cards.
-> * Patch#2: Adjust some error messages and register dump for SD UHS-II card
->
-> Victor Shih (3):
->   mmc: core: Adjust some error messages for SD UHS-II cards
->   mmc: sdhci: Add a helper function for dump register in dynamic debug
->     mode
->   mmc: sdhci-uhs2: Adjust some error messages and register dump for SD
->     UHS-II card
->
->  drivers/mmc/core/sd_uhs2.c    |  4 ++--
->  drivers/mmc/host/sdhci-uhs2.c | 20 ++++++++++----------
->  drivers/mmc/host/sdhci.h      | 16 ++++++++++++++++
->  3 files changed, 28 insertions(+), 12 deletions(-)
->
-> --
-> 2.43.0
->
 
-The series applied for next, thanks!
+On 6/10/2025 6:23 PM, Krzysztof Kozlowski wrote:
+> On 10/06/2025 14:07, Ram Prakash Gupta wrote:
+>> Hi Krzysztof,
+>>
+>> Thanks for your comment, The Qualcomm Engineer who initiated this work,
+>> is no longer working on this and I am taking up the responsibility to continue
+>> on this work. I have started to check this and will start with addressing your
+>> comment next.
+>>
+>> Thanks,
+>> Ram
+>>
+>> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
+>>> On 22/01/2025 10:47, Sachin Gupta wrote:
+> Above timeline is interesting:
+> 1. Patch sent on 22nd January.
+> 2. I provided comments few hours later, the same day.
+> 3. Silence.
+> 4. Employee changes job.
+> 5. Five months later...
+>
+> Not your fault Ram of course, but above timeline is not a responsible
+> way of upstreaming patches.
+>
+> Best regards,
+> Krzysztof
 
-Kind regards
-Uffe
+my apologies for this, I will give inputs internally to improve process
+for changing hands.
+
