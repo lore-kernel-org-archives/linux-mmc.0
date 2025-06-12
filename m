@@ -1,148 +1,187 @@
-Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 24FE5298981;
-	Thu, 12 Jun 2025 15:47:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.54
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749743226; cv=none; b=XzUT1zmoP2R77lqZulzE3xi6oQ5r5ua3gm6hyHMkoHa/L8aenwO+7hIwXkRH4tK86bwf7LrsUkfoH/qwX6g2ntMM6fLPwtNhkaU0wuz0C3zRRSXw2TM2VlcvNbp7GVbSK051s0OKGlRqjiqelq5D2O/V1xq7vDfjEI26EIvd2vU=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749743226; c=relaxed/simple;
-	bh=vNcsy78aPJRMhKatRWi9xj79PLlzWbaRLkahV7pD2bQ=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=HMukbNv52fdoi9hKspfuhfPKnyxdhP84OKU6AAHvVfZ9YZt73dNmABugMWO8jbdAuOOn7I0WOOWRBZACSAzubPCJ06Vlbxn7eeOV0PLIgqwztZXE0caKi+cKQa8Tj2LzMqGq6+tkX+YqaXqqwOqmQj5jtjpvJlvSbsRzNy4aZb8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.210.54
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Received: by mail-ot1-f54.google.com with SMTP id 46e09a7af769-735b2699d5dso622014a34.0;
-        Thu, 12 Jun 2025 08:47:03 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1749743222; x=1750348022;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=v3v8mwRDyh/Lxs2ZLJeteIKuaFRTtoVQJYNHS5rfYrc=;
-        b=d+ZYoJ4Jhw0gVrscxXoQeDET0Ec+9EBdVBm3Q8iHGda4KLk5iy4bM0Cr2w/wCXWM2U
-         j4Y0M5efV8bGEt4hWyCglZ31lEW9ofGmJ3SsNUTfEaciF6f2obFGeIj2ueIY2whR8a2D
-         fcnwte9EephFED/NqqKXvdBwG46aCp5xkpVq6O1s5EO3TPMlglhhLrs2W0UpbXF/u/rI
-         ucXPh/wyq+dVHBJcR1ted0NV8NDlG/0mFJ+yqSL88bNW59Afai6nCTmsJWPcshvQ51O+
-         uyh14tZKowvkgOdlBc/mmUQXn+w5Dc5AU6JumgBUxXTrdDr9SVrHhgUwBmcdh5sIiKzA
-         Ma+Q==
-X-Forwarded-Encrypted: i=1; AJvYcCW7hhKxwyNNYTKZ4v4USmC1Z/x3c/tZR0euxHEhNMldOfFh9p6afzPclO+I5Sx2saBxEMjK+hkg6gZI@vger.kernel.org, AJvYcCWZenJa7g+4Imu+t5HupbfOmwhk/dzwhsKI9U0kFu6XdLr/maxhyWKlc2KnqGzU8lRaMW+oOIDCoAZ7z8Pz3AeQM4E=@vger.kernel.org, AJvYcCWdIMze/wsIcOEFYkXThgq5o4IP5auELELDOwVw4XWbBVYrFDg2M+soF6kbv12olrz7K6xyDKS9PJNkAv5F@vger.kernel.org, AJvYcCXhem58xFIbfaM5Xi9OAaI+4vXHEr4cmjBWQy8DEYpKihOu09pWdXXtfpDPoHRhp+pCUkYfNlEwKcHn@vger.kernel.org
-X-Gm-Message-State: AOJu0YxTQTM2OR9ZRfd0MvQqC8DsOOfy7N3UI0Mc4PpKg9AGEHgdd11v
-	nC9ffY0LPhNSgDsBM3VNcKpjnVXRrwX8vl0ZVn61WQoHCcaRRBjjQA2YtrngzqRy
-X-Gm-Gg: ASbGncvGcoqNqAYN+RzeEtpIFhvrqcn99LOtbBVy3idmebpt4BemXw53P9LDvhhJfRr
-	aa7YhVJ9DucgrREMN5VoNRCDeOkijWwQEqhYhr+I5v/wwUSNPXICz0i9cPgx68o42+fRf+3Ri5o
-	6SEpOG0uanmfzZBLOSUJVqLi/INn5VOiyv7YtsFX2rVqbMv5escMFlB3N96gsnyvxL4IkHGK4HQ
-	5v+VtHyvVy5ekwL+JzilhTJ6wWPbHCAfp8pVDiq7UaQW2OH33BJM/5eAbOb3JCC6FGXQa443uzt
-	3RZqcu62Fp3iKe9Ii3FgZeFuVr4rPMVZeAB/fGWBjMVd+ueKaIh1NDSsXYT19cfhAvESQoEVmD7
-	a2ely5abmeH4Zwv6rx6SgYfJ+
-X-Google-Smtp-Source: AGHT+IHaUEuGSuWlDEqKkub8wpW1ucqoVPR36bAXR7DPN1JzMYcRMRfW4XQgABqAWuk/PME9Rgu1Dg==
-X-Received: by 2002:a05:6830:2716:b0:72a:1d2a:4acf with SMTP id 46e09a7af769-73a24d3790amr179457a34.17.1749743221978;
-        Thu, 12 Jun 2025 08:47:01 -0700 (PDT)
-Received: from mail-ot1-f45.google.com (mail-ot1-f45.google.com. [209.85.210.45])
-        by smtp.gmail.com with ESMTPSA id 46e09a7af769-73a16c2519dsm307286a34.32.2025.06.12.08.47.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 12 Jun 2025 08:47:01 -0700 (PDT)
-Received: by mail-ot1-f45.google.com with SMTP id 46e09a7af769-72c172f1de1so717681a34.3;
-        Thu, 12 Jun 2025 08:47:01 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCVI68FGmBnPMBi9QXzSe+jQ2kp8R27+WHQxerOUfHD5Y8qLWC3Zbu9rzqFByQh/U/9o6fqXbt1bUXzr@vger.kernel.org, AJvYcCWemWIl9T1miDc98IhshcDk9Sqix3YJxIG0Yp4us4NZ9ZdSmCKQEpHTI3PeiYcfyIr8Vf+/7t7EgYATwKwoMCitFjM=@vger.kernel.org, AJvYcCWkVJWbc3wwPbdusOuvmUATcL4mxR+4vrVyHiF3Ei/UVoJySCC5WGVdZ7MIduKlNkJxnzFOHpmteCos@vger.kernel.org, AJvYcCXuotu01c+/plKmsrSsPdeqk4prcXN2pDa+WOxQyBACzkEdS5GWFdMPOhtwG1ns6TP2Vzf39if+GlP2DJhC@vger.kernel.org
-X-Received: by 2002:a05:6102:5e96:b0:4c1:9526:a636 with SMTP id
- ada2fe7eead31-4e7e10f50camr349416137.15.1749743209891; Thu, 12 Jun 2025
- 08:46:49 -0700 (PDT)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC93429B79A;
+	Thu, 12 Jun 2025 18:57:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1749754666; cv=pass; b=CdfuQOfkrxx1YsSAoWiLn/32KcTzQ6j9Z5T2e8qh3CpStaY4cqMAm0iY1ZkmyuObez+wLM728E12tGyu8gc+1E3XOZ7co8v6xuCibB2DfyEJSYCdoV8Xdqq+mhDtZC48O2Wrhqab+0/jJEeT5PkGXXonoFzZ5sNuOwkzQxP7rFQ=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1749754666; c=relaxed/simple;
+	bh=DOjLcN7JYMWYvv8PMGFF9zi/uwWzwjQlakjixJIMOh0=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=qLxYLr/xbhaUv3g4R3JN4hC88SU5WrNe3nebsmi4t35b6vMSHmAKBWlnY8vLueDbxbZLaHjXvuuU8sKHMSLitWgJvP+l9bNFvfH6Q8Ax9DYUqLAQrXaMx0qtMnWZKriA12Zo80ErbDFW8aTsuOI4H3jjOFcRfMEZR00/jx5x2jo=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=DDS22aPh; arc=pass smtp.client-ip=136.143.188.12
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="DDS22aPh"
+ARC-Seal: i=1; a=rsa-sha256; t=1749754599; cv=none; 
+	d=zohomail.com; s=zohoarc; 
+	b=VjTrVaWfz9jfeFDYITSFocj41PBevLpWCKD+yFugt6G1+9d/Hw9jBQso8N/gjAPvpi60iwOZlPdJti4Lm1c8Stdx7ZAV2s32I+igmfs7sfjSiZzNcOGemQ8U3YJi+genYO6P68iKZU887RanvFG2jmIT4EG6ifQWvG3TTwOzVmc=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
+	t=1749754599; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=IjOHGVHF7xIfJfArpDhRS/Px27x14OeLJOrr4ltwi/o=; 
+	b=Hv21Y4ICiKV6kkRup/0kBvaRTAUVqzMvXMTU7oOyjqRyNnKpWlnVTSU85nEPPqG4UtY6ATHj7UGqD9ilByEshaOxWumLRru0Myi5xN/KMure37YfQFtqQmaal02l69q9GpbUglMNHzB8ITpQ0V3kVy+XbtmczpJfHsjaGkX3vq4=
+ARC-Authentication-Results: i=1; mx.zohomail.com;
+	dkim=pass  header.i=collabora.com;
+	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
+	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1749754599;
+	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
+	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:References:In-Reply-To:To:To:Cc:Cc:Reply-To;
+	bh=IjOHGVHF7xIfJfArpDhRS/Px27x14OeLJOrr4ltwi/o=;
+	b=DDS22aPhBDFhm0N/TbbfWtmcvGpPgih6ABqWtgdiQi1WLz5vBE40IBeFLnhixWy+
+	XeH5bQ1OypUI3HKN9tCAk6z/OJYWnm4DYfBAd0Uz/qp47NLT/xrxRESq5KVRWH0tPYk
+	0l1ydpt0eehm25ZaFWLKUMNlC9fEHBBWV4iUkEww=
+Received: by mx.zohomail.com with SMTPS id 1749754596390629.9899321699246;
+	Thu, 12 Jun 2025 11:56:36 -0700 (PDT)
+From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Date: Thu, 12 Jun 2025 20:56:03 +0200
+Subject: [PATCH 01/20] bitfield: introduce HWORD_UPDATE bitfield macros
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250609232253.514220-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <20250609232253.514220-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Date: Thu, 12 Jun 2025 17:46:38 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWoWqrMKgNSYN_NDOtROD-SAq7ProhREPJTEBTOPCeH=A@mail.gmail.com>
-X-Gm-Features: AX0GCFtB1-0j_AdqxYDoMV8XG5IqGj5fPflPp82t1i2uRjTV37hMgoSfJPN5Lrw
-Message-ID: <CAMuHMdWoWqrMKgNSYN_NDOtROD-SAq7ProhREPJTEBTOPCeH=A@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and
- RZ/N2H support
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20250612-byeword-update-v1-1-f4afb8f6313f@collabora.com>
+References: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
+In-Reply-To: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
+To: Yury Norov <yury.norov@gmail.com>, 
+ Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
+ Jaehoon Chung <jh80.chung@samsung.com>, 
+ Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, 
+ Shreeya Patel <shreeya.patel@collabora.com>, 
+ Mauro Carvalho Chehab <mchehab@kernel.org>, 
+ Sandy Huang <hjc@rock-chips.com>, Andy Yan <andy.yan@rock-chips.com>, 
+ Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, 
+ Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>, 
+ David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>, 
+ Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>, 
+ Nicolas Frattaroli <frattaroli.nicolas@gmail.com>, 
+ Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, 
+ Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>, 
+ Andrew Lunn <andrew+netdev@lunn.ch>, 
+ "David S. Miller" <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>, 
+ Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>, 
+ Maxime Coquelin <mcoquelin.stm32@gmail.com>, 
+ Alexandre Torgue <alexandre.torgue@foss.st.com>, 
+ Shawn Lin <shawn.lin@rock-chips.com>, 
+ Lorenzo Pieralisi <lpieralisi@kernel.org>, 
+ =?utf-8?q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>, 
+ Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>, 
+ Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>, 
+ MyungJoo Ham <myungjoo.ham@samsung.com>, 
+ Kyungmin Park <kyungmin.park@samsung.com>, Qin Jian <qinjian@cqplus1.com>, 
+ Michael Turquette <mturquette@baylibre.com>, 
+ Stephen Boyd <sboyd@kernel.org>, Nathan Chancellor <nathan@kernel.org>, 
+ Nick Desaulniers <nick.desaulniers+lkml@gmail.com>, 
+ Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>
+Cc: kernel@collabora.com, linux-kernel@vger.kernel.org, 
+ linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+ linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org, 
+ dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org, 
+ linux-sound@vger.kernel.org, netdev@vger.kernel.org, 
+ linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org, 
+ linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev, 
+ Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+X-Mailer: b4 0.14.2
 
-Hi Prabhakar,
+Hardware of various vendors, but very notably Rockchip, often uses
+32-bit registers where the upper 16-bit half of the register is a
+write-enable mask for the lower half.
 
-On Tue, 10 Jun 2025 at 01:23, Prabhakar <prabhakar.csengg@gmail.com> wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
->
-> Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
-> (a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
-> the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
-> allowing reuse of the existing driver without modifications.
->
-> Update the binding schema to reflect differences: unlike RZ/V2H(P),
-> RZ/T2H and RZ/N2H do not require the `resets` property and use only a
-> single clock instead of four.
->
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+This type of hardware setup allows for more granular concurrent register
+write access.
 
-Thanks for your patch!
+Over the years, many drivers have hand-rolled their own version of this
+macro, usually without any checks, often called something like
+HIWORD_UPDATE or FIELD_PREP_HIWORD, commonly with slightly different
+semantics between them.
 
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -129,59 +131,75 @@ allOf:
->          compatible:
->            contains:
->              enum:
-> -              - renesas,sdhi-r9a09g057
-> -              - renesas,rzg2l-sdhi
-> +              - renesas,sdhi-r9a09g077
-> +              - renesas,sdhi-r9a09g087
->      then:
->        properties:
-> +        resets: false
->          clocks:
-> -          items:
-> -            - description: IMCLK, SDHI channel main clock1.
-> -            - description: CLK_HS, SDHI channel High speed clock which operates
-> -                           4 times that of SDHI channel main clock1.
-> -            - description: IMCLK2, SDHI channel main clock2. When this clock is
-> -                           turned off, external SD card detection cannot be
-> -                           detected.
-> -            - description: ACLK, SDHI channel bus clock.
-> +          description: ACLK, SDHI channel bus clock.
+Clearly there is a demand for such a macro, and thus the demand should
+be satisfied in a common header file.
 
-According to the documentation, this is the SDHI high speed clock...
+Add two macros: HWORD_UPDATE, and HWORD_UPDATE_CONST. The latter is a
+version that can be used in initializers, like FIELD_PREP_CONST. The
+macro names are chosen to not clash with any potential other macros that
+drivers may already have implemented themselves, while retaining a
+familiar name.
 
-> +          maxItems: 1
->          clock-names:
-> -          items:
-> -            - const: core
-> -            - const: clkh
-> -            - const: cd
-> -            - const: aclk
-> -      required:
-> -        - clock-names
-> -        - resets
-> +          const: aclk
+Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+---
+ include/linux/bitfield.h | 47 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
 
-... i.e. clkhs.
-
-The rest LGTM.
-
-Gr{oetje,eeting}s,
-
-                        Geert
+diff --git a/include/linux/bitfield.h b/include/linux/bitfield.h
+index 6d9a53db54b66c0833973c880444bd289d9667b1..b90d88db7405f95b78cdd6f3426263086bab5aa6 100644
+--- a/include/linux/bitfield.h
++++ b/include/linux/bitfield.h
+@@ -8,6 +8,7 @@
+ #define _LINUX_BITFIELD_H
+ 
+ #include <linux/build_bug.h>
++#include <linux/limits.h>
+ #include <linux/typecheck.h>
+ #include <asm/byteorder.h>
+ 
+@@ -142,6 +143,52 @@
+ 		(((typeof(_mask))(_val) << __bf_shf(_mask)) & (_mask))	\
+ 	)
+ 
++/**
++ * HWORD_UPDATE() - prepare a bitfield element with a mask in the upper half
++ * @_mask: shifted mask defining the field's length and position
++ * @_val:  value to put in the field
++ *
++ * HWORD_UPDATE() masks and shifts up the value, as well as bitwise ORs the
++ * result with the mask shifted up by 16.
++ *
++ * This is useful for a common design of hardware registers where the upper
++ * 16-bit half of a 32-bit register is used as a write-enable mask. In such a
++ * register, a bit in the lower half is only updated if the corresponding bit
++ * in the upper half is high.
++ */
++#define HWORD_UPDATE(_mask, _val)					 \
++	({								 \
++		__BF_FIELD_CHECK(_mask, ((u16) 0U), _val,		 \
++				 "HWORD_UPDATE: ");			 \
++		(((typeof(_mask))(_val) << __bf_shf(_mask)) & (_mask)) | \
++		((_mask) << 16);					 \
++	})
++
++/**
++ * HWORD_UPDATE_CONST() - prepare a constant bitfield element with a mask in
++ *                        the upper half
++ * @_mask: shifted mask defining the field's length and position
++ * @_val:  value to put in the field
++ *
++ * HWORD_UPDATE_CONST() masks and shifts up the value, as well as bitwise ORs
++ * the result with the mask shifted up by 16.
++ *
++ * This is useful for a common design of hardware registers where the upper
++ * 16-bit half of a 32-bit register is used as a write-enable mask. In such a
++ * register, a bit in the lower half is only updated if the corresponding bit
++ * in the upper half is high.
++ *
++ * Unlike HWORD_UPDATE(), this is a constant expression and can therefore
++ * be used in initializers. Error checking is less comfortable for this
++ * version.
++ */
++#define HWORD_UPDATE_CONST(_mask, _val)					  \
++	(								  \
++		FIELD_PREP_CONST(_mask, _val) |				  \
++		(BUILD_BUG_ON_ZERO(const_true((u64) (_mask) > U16_MAX)) + \
++		 ((_mask) << 16))					  \
++	)
++
+ /**
+  * FIELD_GET() - extract a bitfield element
+  * @_mask: shifted mask defining the field's length and position
 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.49.0
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
