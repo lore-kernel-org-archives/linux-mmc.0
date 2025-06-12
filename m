@@ -1,44 +1,44 @@
-Received: from sender4-pp-f112.zoho.com (sender4-pp-f112.zoho.com [136.143.188.112])
+Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EB893231848;
-	Thu, 12 Jun 2025 18:57:44 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.112
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7484D2C326E;
+	Thu, 12 Jun 2025 18:57:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749754666; cv=pass; b=saZF6HIrIwGFdnQXinIFCqkjJfWhukNwedONaTWMMhrABi5UrESNwIaxO0C9w322qdZaCIIEFTHMV456SdNiS3ri2M1M5E8ZCw/56jmkkb7u70sUNA5+o096Tcdgqbohblq/ARzIaYPVWFP6BLYVHzayfvOeiUkqVAd9twPimgY=
+	t=1749754667; cv=pass; b=FNmpTmSmnRpXZr/qYHM2EXp5tdYLcqEejodTW+vQEn2Qzb235aF4PgGcynaClA5wUSdtrKdjSS/zgGn/tp85+C9Mhky0+d/qO9+/pNAqqCTGgRjpJMuda0HpmMRIYeKfj0rwAzDqwyckmzIx9ybH2nZ5C63uoEjxxWug5TmVtHM=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749754666; c=relaxed/simple;
-	bh=b+dKmim5PkqdFHEDm8rDTlvaShKECyBfh9QBB4KITWs=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=R7kpC8KLv0zUlC88q6FAbCR/QdN/UqxAHr4WJaQM6/HW3m1njSa6kCF1wfsdnOBHW5JVhJFfcz8Wy5+9t3mPSeAOOQzwEbrn7j4kZIcdS0O3j5JtzHJ8Z1kNOLb4xEl+4SOEamE6FLKmRhLxZqWD0aN/kbinlAUBiN/wjHa/s6s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=XzC/xsR7; arc=pass smtp.client-ip=136.143.188.112
+	s=arc-20240116; t=1749754667; c=relaxed/simple;
+	bh=GjqLcBib/nO1uY9a2Xsi0ojlm3OCO3xFjcV+GE0tHD8=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=g8FXkcyNmW7LmPLYPpc5T1eay3zyUSzDDBk9vwF+fA2o9scpWebuZqdX6xP8OomHdE/mxve0cgxes5lYXWdgnURwmSDLUtR0gGtOFbtZlGs6B9ZypJVTeuHsH9IPztcgGlN3coYCl5GVUiFWQMx3vJJpcnh+Tb/XyliLrOLJ8jM=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=UZUo86zW; arc=pass smtp.client-ip=136.143.188.12
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="XzC/xsR7"
-ARC-Seal: i=1; a=rsa-sha256; t=1749754584; cv=none; 
+	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="UZUo86zW"
+ARC-Seal: i=1; a=rsa-sha256; t=1749754611; cv=none; 
 	d=zohomail.com; s=zohoarc; 
-	b=EdJZfDxsprpXvjM+Msqvvl1RDspq+yjB9A4hg93KgWxptseH4FFSNtHttZfa1cgcz5kNlnLzyywmUD+Sgl2hH44HzK9gHBFlBm3asaHSydn4R+Ch3wwpnnc5tLDvWAbqFHjpoG6BnF/OF7/tky45/4LIwJ1NPCssaAeZnc/+bso=
+	b=V0WkL+xDBUTkj8l5JoD3LEPCljeiKVGyhZ8GcRJ49yRjZGGSBFLv2RAQRdL9T7Zi8kKm74IMX+5B3iX8ljK0yDF7YYTaz86odGJy18gqK33EGnzje0YAmFQ7BdVL8iA4T4eI0rFQTp/evtDANpI+MtHJ7NNo7GvUcI/4J2ID6Bw=
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1749754584; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:MIME-Version:Message-ID:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=iOnbYnaE1YbBtaVTatR6PeV03EiI8qVZV78p6KFGMJk=; 
-	b=dD1ImpFvj4DitiIHZ6VirMaIkNElMH+Liqr6H3WikImv1JXhL5B3J/Lf2jb+3E+5ZtpDXMRQg79yx/njiAOLmn+Kqi9x3tNjTdD7M5LFSIp7SeTNfE+TwFYH6pXsMcF9LUmzDgrZP2QO4yG+zvllSyeXFPLnG5FrnaHuFvt7iac=
+	t=1749754611; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
+	bh=DarWK7YPJq6pqkvjh7CGHmvB+wvXuAPmewqRywjtBX4=; 
+	b=V0zKlVltUdg8N3ut9gm43dWDIYF80MiZAQQTuK8B/s2QiIkbPwtVFBdmUVN/MMJvFB+KeO/jYr/57EHdj+sIAxI6cbt5b+wZqM7pJA/UG7ACxpIKtVQ6lUMcu5+uMn5IikhLPO997VUmFxH3M/BbJ4fonrFCj5wsEhpyS1iuyJ4=
 ARC-Authentication-Results: i=1; mx.zohomail.com;
 	dkim=pass  header.i=collabora.com;
 	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
 	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1749754584;
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1749754611;
 	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:Subject:Subject:Date:Date:Message-Id:Message-Id:MIME-Version:Content-Type:Content-Transfer-Encoding:To:To:Cc:Cc:Reply-To;
-	bh=iOnbYnaE1YbBtaVTatR6PeV03EiI8qVZV78p6KFGMJk=;
-	b=XzC/xsR7Xr/DpJiXhQHzQo5ryxr5+gW5+MLUrocYGyhR0dLCFAp/BzFD1hLwpIkl
-	hvQMX1pm8vJpdtfxstY7gf9C0XQ5PLueP//xoPjWNN7aSX8Xfl2rdWZoa7VO7MmoC05
-	MSWjuK5+KIi3CAPTZlg7KtbtVH3YNmUUq3yBXeCM=
-Received: by mx.zohomail.com with SMTPS id 17497545829051009.0539110789078;
-	Thu, 12 Jun 2025 11:56:22 -0700 (PDT)
+	h=From:From:Date:Date:Subject:Subject:MIME-Version:Content-Type:Content-Transfer-Encoding:Message-Id:Message-Id:References:In-Reply-To:To:To:Cc:Cc:Reply-To;
+	bh=DarWK7YPJq6pqkvjh7CGHmvB+wvXuAPmewqRywjtBX4=;
+	b=UZUo86zWHUxCQfBKaHZwcSseZIzCrqJCqp01Yr78vggCBGxruo4LrRzstrsi9R85
+	YIjfv7lOgtS9Qf2MBixc+6sxpX1tgOw9nnYE0/EKsvCIKtGrcVz56NpMPlcVCGNKFb2
+	BaxN8FaQ4Nm7/ujuDnpUOM00DhxwmsqNBm3seWKU=
+Received: by mx.zohomail.com with SMTPS id 1749754609724123.44033815930106;
+	Thu, 12 Jun 2025 11:56:49 -0700 (PDT)
 From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-Subject: [PATCH 00/20] BYEWORD_UPDATE: unifying (most) HIWORD_UPDATE macros
-Date: Thu, 12 Jun 2025 20:56:02 +0200
-Message-Id: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
+Date: Thu, 12 Jun 2025 20:56:04 +0200
+Subject: [PATCH 02/20] mmc: dw_mmc-rockchip: switch to HWORD_UPDATE macro
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -47,10 +47,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIAMIiS2gC/yXMQQ6DIBCF4auQWXcaMIqJV2lcIEzbWSh2QFtjv
- LukLr+XvH+HRMKUoFM7CK2cOE4F5qbAv930IuRQDJWuGm2NxmGjb5SAyxxcJqzrxmsi17YmQDn
- NQk/+/YOP/rLQZyndfI0wuETo4zhy7tRq78aieAP9cZw6r1InjQAAAA==
-X-Change-ID: 20250610-byeword-update-445c0eea771d
+Message-Id: <20250612-byeword-update-v1-2-f4afb8f6313f@collabora.com>
+References: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
+In-Reply-To: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
 To: Yury Norov <yury.norov@gmail.com>, 
  Rasmus Villemoes <linux@rasmusvillemoes.dk>, 
  Jaehoon Chung <jh80.chung@samsung.com>, 
@@ -91,115 +90,53 @@ Cc: kernel@collabora.com, linux-kernel@vger.kernel.org,
  Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
 X-Mailer: b4 0.14.2
 
-This series was spawned by [1], where I was asked to move every instance
-of HIWORD_UPDATE et al that I could find to a common macro in the same
-series that I am introducing said common macro.
+The era of hand-rolled HIWORD_UPDATE macros is over, at least for those
+drivers that use constant masks.
 
-The first patch of the series introduces the two new macros in
-bitfield.h, called HWORD_UPDATE and HWORD_UPDATE_CONST. The latter can
-be used in initializers.
-
-This macro definition checks that the mask fits, and that the value fits
-in the mask. Like FIELD_PREP, it also shifts the value up to the mask,
-so turning off a bit does not require using the mask as a value. Masks
-are also required to be contiguous, like with FIELD_PREP.
-
-For each definition of such a macro, the driver(s) that used it were
-evaluated for three different treatments:
- - full conversion to the new macro, for cases where replacing the
-   implementation of the old macro wouldn't have worked, or where the
-   conversion was trivial. These are the most complex patches in this
-   series, as they sometimes have to pull apart definitions of masks
-   and values due to the new semantics, which require a contiguous
-   mask and shift the value for us.
- - replacing the implementation of the old macro with an instance of the
-   new macro, done where I felt it made the patch much easier to review
-   because I didn't want to drop a big diff on people.
- - skipping conversion entirely, usually because the mask is
-   non-constant and it's not trivial to make it constant. Sometimes an
-   added complication is that said non-constant mask is either used in a
-   path where runtime overhead may not be desirable, or in an
-   initializer.
-
-Left out of conversion:
- - drivers/mmc/host/sdhci-of-arasan.c: mask is non-constant.
- - drivers/phy/rockchip/phy-rockchip-inno-csidphy.c: mask is
-   non-constant likely by way of runtime pointer dereferencing, even if
-   struct and members are made const.
- - drivers/clk/rockchip/clk.h: way too many clock drivers use non-const
-   masks in the context of an initializer.
-
-I will not be addressing these 3 remaining users in this series, as
-implementing a runtime checked version on top of this and verifying that
-it doesn't cause undue overhead just for 3 stragglers is a bit outside
-the scope of wanting to get my RK3576 PWM series unblocked. Please have
-mercy.
-
-In total, I count 19 different occurrences of such a macro fixed out of
-22 I found. The vast majority of these patches have either undergone
-static testing to ensure the values end up the same during development,
-or have been verified to not break the device the driver is for at
-runtime. Only a handful are just compile-tested, and the individual
-patches remark which ones those are.
-
-This took a lot of manual work as this wasn't really something that
-could be automated: code had to be refactored to ensure masks were
-contiguous, made sense to how the hardware actually works and to human
-readers, were constant, and that the code uses unshifted values.
-
-https://lore.kernel.org/all/aD8hB-qJ4Qm6IFuS@yury/ [1]
+Switch to the new HWORD_UPDATE macro in bitfield.h, which has error
+checking. Instead of redefining the driver's HIWORD_UPDATE macro in this
+case, replace the two only instances of it with the new macro, as I
+could test that they result in an equivalent value.
 
 Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
 ---
-Nicolas Frattaroli (20):
-      bitfield: introduce HWORD_UPDATE bitfield macros
-      mmc: dw_mmc-rockchip: switch to HWORD_UPDATE macro
-      soc: rockchip: grf: switch to HWORD_UPDATE_CONST macro
-      media: synopsys: hdmirx: replace macros with bitfield variants
-      drm/rockchip: lvds: switch to HWORD_UPDATE macro
-      phy: rockchip-emmc: switch to HWORD_UPDATE macro
-      drm/rockchip: dsi: switch to HWORD_UPDATE* macros
-      drm/rockchip: vop2: switch to HWORD_UPDATE macro
-      phy: rockchip-samsung-dcphy: switch to HWORD_UPDATE macro
-      drm/rockchip: dw_hdmi_qp: switch to HWORD_UPDATE macro
-      drm/rockchip: inno-hdmi: switch to HWORD_UPDATE macro
-      phy: rockchip-usb: switch to HWORD_UPDATE macro
-      drm/rockchip: dw_hdmi: switch to HWORD_UPDATE* macros
-      ASoC: rockchip: i2s-tdm: switch to HWORD_UPDATE_CONST macro
-      net: stmmac: dwmac-rk: switch to HWORD_UPDATE macro
-      PCI: rockchip: switch to HWORD_UPDATE* macros
-      PCI: dw-rockchip: switch to HWORD_UPDATE macro
-      PM / devfreq: rockchip-dfi: switch to HWORD_UPDATE macro
-      clk: sp7021: switch to HWORD_UPDATE macro
-      phy: rockchip-pcie: switch to HWORD_UPDATE macro
+ drivers/mmc/host/dw_mmc-rockchip.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
- drivers/clk/clk-sp7021.c                           |  21 +--
- drivers/devfreq/event/rockchip-dfi.c               |  26 ++--
- drivers/gpu/drm/rockchip/dw-mipi-dsi-rockchip.c    | 142 ++++++++++-----------
- drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c        |  80 ++++++------
- drivers/gpu/drm/rockchip/dw_hdmi_qp-rockchip.c     |  68 +++++-----
- drivers/gpu/drm/rockchip/inno_hdmi.c               |  11 +-
- drivers/gpu/drm/rockchip/rockchip_drm_vop2.h       |   1 -
- drivers/gpu/drm/rockchip/rockchip_lvds.h           |  21 +--
- drivers/gpu/drm/rockchip/rockchip_vop2_reg.c       |  14 +-
- .../media/platform/synopsys/hdmirx/snps_hdmirx.h   |   5 +-
- drivers/mmc/host/dw_mmc-rockchip.c                 |   7 +-
- drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c     |   3 +-
- drivers/pci/controller/dwc/pcie-dw-rockchip.c      |  39 +++---
- drivers/pci/controller/pcie-rockchip.h             |  35 ++---
- drivers/phy/rockchip/phy-rockchip-emmc.c           |   3 +-
- drivers/phy/rockchip/phy-rockchip-pcie.c           |  72 +++--------
- drivers/phy/rockchip/phy-rockchip-samsung-dcphy.c  |  10 +-
- drivers/phy/rockchip/phy-rockchip-usb.c            |  51 +++-----
- drivers/soc/rockchip/grf.c                         |  35 +++--
- include/linux/bitfield.h                           |  47 +++++++
- sound/soc/rockchip/rockchip_i2s_tdm.h              |   4 +-
- 21 files changed, 342 insertions(+), 353 deletions(-)
----
-base-commit: d9946fe286439c2aeaa7953b8c316efe5b83d515
-change-id: 20250610-byeword-update-445c0eea771d
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index baa23b51773127b4137f472581259b61649273a5..9e3d17becf65ffb60fe3d32d2cdec341fbd30b1e 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -5,6 +5,7 @@
+ 
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+ #include <linux/of_address.h>
+@@ -24,8 +25,6 @@
+ #define ROCKCHIP_MMC_DELAYNUM_OFFSET	2
+ #define ROCKCHIP_MMC_DELAYNUM_MASK	(0xff << ROCKCHIP_MMC_DELAYNUM_OFFSET)
+ #define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC	60
+-#define HIWORD_UPDATE(val, mask, shift) \
+-		((val) << (shift) | (mask) << ((shift) + 16))
+ 
+ static const unsigned int freqs[] = { 100000, 200000, 300000, 400000 };
+ 
+@@ -148,9 +147,9 @@ static int rockchip_mmc_set_internal_phase(struct dw_mci *host, bool sample, int
+ 	raw_value |= nineties;
+ 
+ 	if (sample)
+-		mci_writel(host, TIMING_CON1, HIWORD_UPDATE(raw_value, 0x07ff, 1));
++		mci_writel(host, TIMING_CON1, HWORD_UPDATE(GENMASK(11, 1), raw_value));
+ 	else
+-		mci_writel(host, TIMING_CON0, HIWORD_UPDATE(raw_value, 0x07ff, 1));
++		mci_writel(host, TIMING_CON0, HWORD_UPDATE(GENMASK(11, 1), raw_value));
+ 
+ 	dev_dbg(host->dev, "set %s_phase(%d) delay_nums=%u actual_degrees=%d\n",
+ 		sample ? "sample" : "drv", degrees, delay_num,
 
-Best regards,
 -- 
-Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+2.49.0
 
