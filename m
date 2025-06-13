@@ -1,122 +1,127 @@
-Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E95C92D2382;
-	Fri, 13 Jun 2025 10:15:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5A0F72D5C63;
+	Fri, 13 Jun 2025 11:12:37 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1749809736; cv=none; b=NR00+fm32/N12qoD4XCO9Neq2GxyfIeCl1jZNoLyLZo0jCDjW/MMseDzwcV+JSS8k1XmNmH08wW/CdZfcLU0Q9IQ1l6zK+qBbl5ixBmuUQAVB6So8HfAB1B2iI0KBDYkSXKtj28UXpuL4OVN4eVTGCjsbfOzRgSo+66UJ5HQ7tQ=
+	t=1749813157; cv=none; b=SIE0oH12zaJNGQgTffdst6kxIlvMHSdHjKBEYy+I2T6tBLLm1saRCC7H6t+Oeby9jOEwmRYks9xmPIF8QrY9j0yTcZQ9MT4hLokl2PyDMnYrnU3AKhmYs+G+X3KWaJNG3W+rmJyX31Qq8VbqNmjvlQW1EWa7vNTy6dO7O9ssolU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1749809736; c=relaxed/simple;
-	bh=CZqYmHg36RMSs1ABWyY6d1Bd8dHgzQog9KqyX+oH+Lk=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=a0fzXDBTbSbvWb6aJqdaGIHtHWiBOT4Lkt7HEfBZg1qcJXwau5daPy3eYPvflP2V02GECQNi+FML2RTG59O7klCbOJJYzGKcT2UK2dQuHDZpV6JRPNrzx1V9oW5L8Tflf4e0fK026h99fdtPuExGJZ7MpPKzkaI1zR4lY4sCaHY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=hPYQPpsa; arc=none smtp.client-ip=148.251.105.195
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
+	s=arc-20240116; t=1749813157; c=relaxed/simple;
+	bh=3JSffdcKG1BEdfLxDkvCLXE5WcpkgQe1rrYaCHuFNrw=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=gxwTZXmvmzlIjd4Wtz6vucKvPu0KgqWuIKw28WuizKOHJ7y3czPBm4Rur1Ps/ffXaM7s8DybRV8AjDdtHSSR0JHY6HSTPCpnO8/dVsa/60T+DKMWwm5bopFKdY+SEnPiwvXWy++8WUKPaPr290dXLifV2tuCDI/ePYyZOb/x6sw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=g4kKdw9S; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="hPYQPpsa"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-	s=mail; t=1749809732;
-	bh=CZqYmHg36RMSs1ABWyY6d1Bd8dHgzQog9KqyX+oH+Lk=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=hPYQPpsaE6puBxDXojLRDR1BTHvBiTT4DxSG2fp1VqTMJGRFbuJJG9mBWuT6S8Bhr
-	 GH0D+YbNoCyVr+h96i86944sAcuSmZLne4zxBO3F4kCdhNHKR+erVRWSOdpRz5lkDJ
-	 wY3NGcTphnUWlnonyAZlr/MmsZ1ZUm7B3a21XR6MEdqCyWPtw1eDSKQfxHqeiXE/r/
-	 hvmq1iQxB0FK7FYlrQJP97uQsqXPN0+n5N4IzzY0wwQPO40YQ1uuhdQnWhVLglsS+l
-	 +qENCeLTD07E8uz/NptSuuyh6+6BgDSlhteAfq4VUg8WXqdhlx+FW5AizQL6LAj3BC
-	 E0C8nbLHeNTdw==
-Received: from [192.168.1.90] (unknown [212.93.144.165])
-	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-	 key-exchange X25519 server-signature RSA-PSS (4096 bits))
-	(No client certificate requested)
-	(Authenticated sender: cristicc)
-	by bali.collaboradmins.com (Postfix) with ESMTPSA id 2A22C17E00AC;
-	Fri, 13 Jun 2025 12:15:30 +0200 (CEST)
-Message-ID: <c8e3081f-cd0c-48c0-8934-bd81fd681943@collabora.com>
-Date: Fri, 13 Jun 2025 13:15:15 +0300
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="g4kKdw9S"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6EE8AC4CEF1;
+	Fri, 13 Jun 2025 11:12:26 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1749813156;
+	bh=3JSffdcKG1BEdfLxDkvCLXE5WcpkgQe1rrYaCHuFNrw=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=g4kKdw9SM2bno1fEAUiCi6mw5ZmG2oOwM9TdgZeIyT1IQbX7X77HcJ1LYqfuskboa
+	 JGRT3GgKJU7HfdKVHhEwM6RbZVBVlK/P5c4ZU4IqGpHDoM9jVWM/ytqZuhOEoKayrO
+	 xTsq76VB+ZzyRppRpOMFJJN6JOHbjdwagkrEFx3Ng0/lhqAyAceklyVmJaQug8641Q
+	 JSHHo90KaBC05xuTm1/zTU/9LwbDwYf8mzg7yZYfDEuuM89nlEVvUy9Ws3qrTN5xaj
+	 +W1kJlaU5hXI6P9GIWNe9FGwWwkVeh7uwqDhoiXxU9TaeL0RzbPSSxvPd6dZscVPeL
+	 2OG33FATjlbqg==
+Date: Fri, 13 Jun 2025 12:12:23 +0100
+From: Mark Brown <broonie@kernel.org>
+To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+Cc: Yury Norov <yury.norov@gmail.com>,
+	Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+	Jaehoon Chung <jh80.chung@samsung.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Heiko Stuebner <heiko@sntech.de>,
+	Shreeya Patel <shreeya.patel@collabora.com>,
+	Mauro Carvalho Chehab <mchehab@kernel.org>,
+	Sandy Huang <hjc@rock-chips.com>,
+	Andy Yan <andy.yan@rock-chips.com>,
+	Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
+	Maxime Ripard <mripard@kernel.org>,
+	Thomas Zimmermann <tzimmermann@suse.de>,
+	David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
+	Vinod Koul <vkoul@kernel.org>,
+	Kishon Vijay Abraham I <kishon@kernel.org>,
+	Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
+	Liam Girdwood <lgirdwood@gmail.com>,
+	Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
+	Andrew Lunn <andrew+netdev@lunn.ch>,
+	"David S. Miller" <davem@davemloft.net>,
+	Eric Dumazet <edumazet@google.com>,
+	Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+	Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+	Alexandre Torgue <alexandre.torgue@foss.st.com>,
+	Shawn Lin <shawn.lin@rock-chips.com>,
+	Lorenzo Pieralisi <lpieralisi@kernel.org>,
+	Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
+	Manivannan Sadhasivam <mani@kernel.org>,
+	Rob Herring <robh@kernel.org>, Bjorn Helgaas <bhelgaas@google.com>,
+	Chanwoo Choi <cw00.choi@samsung.com>,
+	MyungJoo Ham <myungjoo.ham@samsung.com>,
+	Kyungmin Park <kyungmin.park@samsung.com>,
+	Qin Jian <qinjian@cqplus1.com>,
+	Michael Turquette <mturquette@baylibre.com>,
+	Stephen Boyd <sboyd@kernel.org>,
+	Nathan Chancellor <nathan@kernel.org>,
+	Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
+	Bill Wendling <morbo@google.com>,
+	Justin Stitt <justinstitt@google.com>, kernel@collabora.com,
+	linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org,
+	dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org,
+	linux-sound@vger.kernel.org, netdev@vger.kernel.org,
+	linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org,
+	linux-pm@vger.kernel.org, linux-clk@vger.kernel.org,
+	llvm@lists.linux.dev
+Subject: Re: [PATCH 14/20] ASoC: rockchip: i2s-tdm: switch to
+ HWORD_UPDATE_CONST macro
+Message-ID: <f38ea320-8eaa-4eea-85c1-63d44c8d359a@sirena.org.uk>
+References: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
+ <20250612-byeword-update-v1-14-f4afb8f6313f@collabora.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 13/20] drm/rockchip: dw_hdmi: switch to HWORD_UPDATE*
- macros
-To: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>,
- Yury Norov <yury.norov@gmail.com>,
- Rasmus Villemoes <linux@rasmusvillemoes.dk>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson
- <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>,
- Shreeya Patel <shreeya.patel@collabora.com>,
- Mauro Carvalho Chehab <mchehab@kernel.org>, Sandy Huang
- <hjc@rock-chips.com>, Andy Yan <andy.yan@rock-chips.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>,
- Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller"
- <davem@davemloft.net>, Eric Dumazet <edumazet@google.com>,
- Jakub Kicinski <kuba@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
- Maxime Coquelin <mcoquelin.stm32@gmail.com>,
- Alexandre Torgue <alexandre.torgue@foss.st.com>,
- Shawn Lin <shawn.lin@rock-chips.com>,
- Lorenzo Pieralisi <lpieralisi@kernel.org>,
- =?UTF-8?Q?Krzysztof_Wilczy=C5=84ski?= <kwilczynski@kernel.org>,
- Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>,
- Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>,
- MyungJoo Ham <myungjoo.ham@samsung.com>,
- Kyungmin Park <kyungmin.park@samsung.com>, Qin Jian <qinjian@cqplus1.com>,
- Michael Turquette <mturquette@baylibre.com>, Stephen Boyd
- <sboyd@kernel.org>, Nathan Chancellor <nathan@kernel.org>,
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>
-Cc: kernel@collabora.com, linux-kernel@vger.kernel.org,
- linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-rockchip@lists.infradead.org, linux-media@vger.kernel.org,
- dri-devel@lists.freedesktop.org, linux-phy@lists.infradead.org,
- linux-sound@vger.kernel.org, netdev@vger.kernel.org,
- linux-stm32@st-md-mailman.stormreply.com, linux-pci@vger.kernel.org,
- linux-pm@vger.kernel.org, linux-clk@vger.kernel.org, llvm@lists.linux.dev
-References: <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
- <20250612-byeword-update-v1-13-f4afb8f6313f@collabora.com>
-Content-Language: en-US
-From: Cristian Ciocaltea <cristian.ciocaltea@collabora.com>
-In-Reply-To: <20250612-byeword-update-v1-13-f4afb8f6313f@collabora.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+	protocol="application/pgp-signature"; boundary="EoywhozqJ8iTP5HR"
+Content-Disposition: inline
+In-Reply-To: <20250612-byeword-update-v1-14-f4afb8f6313f@collabora.com>
+X-Cookie: Use extra care when cleaning on stairs.
 
-Hi Nicolas,
 
-On 6/12/25 9:56 PM, Nicolas Frattaroli wrote:
+--EoywhozqJ8iTP5HR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Thu, Jun 12, 2025 at 08:56:16PM +0200, Nicolas Frattaroli wrote:
 > The era of hand-rolled HIWORD_UPDATE macros is over, at least for those
 > drivers that use constant masks.
-> 
-> Remove this driver's very own HIWORD_UPDATE macro, and replace all
-> instances of it with equivalent instantiations of HWORD_UPDATE or
-> HWORD_UPDATE_CONST, depending on whether it's in an initializer.
-> 
-> This gives us better error checking, and a centrally agreed upon
-> signature for this macro, to ease in code comprehension.
-> 
-> Because HWORD_UPDATE/HWORD_UPDATE_CONST shifts the value to the mask
-> (like FIELD_PREP et al do), a lot of macro instantiations get easier to
-> read.
-> 
-> This was tested on an RK3568 ODROID M1, as well as an RK3399 ROCKPro64.
-> 
-> Signed-off-by: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
+>=20
+> Replace the implementation of this driver's HIWORD_UPDATE macro with an
+> instance of HWORD_UPDATE_CONST. The const variant is chosen here because
+> some of the header defines are then used in initializers.
 
-This again LGTM and I could verify the RK3568 related bits on my Radxa
-ROCK 3A board.
+Acked-by: Mark Brown <broonie@kernel.org>
 
-Reviewed-by: Cristian Ciocaltea <cristian.ciocaltea@collabora.com>
-Tested-by: Cristian Ciocaltea <cristian.ciocaltea@collabora.com>
+--EoywhozqJ8iTP5HR
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Cheers,
-Cristian
+-----BEGIN PGP SIGNATURE-----
 
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmhMB5YACgkQJNaLcl1U
+h9Bobgf/dsPkAlIpLO/GS4oVRLlRiPIWa/agIoUuXFfDugqesR7MdX12gZHAzJ9s
+BnznMlPSuOjDnlFPdVpRCgVr4iPfs88ixFAuy/SjKEjvV8VYAUBEs1sg2JykJyMZ
+SkQ69/Iii/uButuWqecqljEHZvL7j67axT7KsEimeZ1zynLexrz7vtE6t4P8p+YE
+7qrc1oKA5kjXrIug8enyLvuLzI75M7MfzuRaooCPej44mc4bjqpuH6zXCxPzAWt9
+0LEzYDn7kdMZ5Yn0Vp35b8uKRqPdQs1heacEsmiHmKPfvnY/klYg1G9M71t9OVpm
+EE2sy3C4QrYbYl73/UBH9Z7zoN/X2A==
+=9PDr
+-----END PGP SIGNATURE-----
+
+--EoywhozqJ8iTP5HR--
