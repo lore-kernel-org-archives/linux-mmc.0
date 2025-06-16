@@ -1,165 +1,142 @@
-Received: from sender4-op-o12.zoho.com (sender4-op-o12.zoho.com [136.143.188.12])
+Received: from metis.whiteo.stw.pengutronix.de (metis.whiteo.stw.pengutronix.de [185.203.201.7])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 499792E426F;
-	Mon, 16 Jun 2025 12:29:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=pass smtp.client-ip=136.143.188.12
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750076980; cv=pass; b=HEWHxZqVzGJKDzvuqji1IZzNljDrfN6mi/EfIKJjhRyye0EIEpCpXnf4PnWKJN2E9vMIhFxfstZrBd1IHlPD/iHDpIUljl/6YooTwWY7N43C5SxquB7pR3YUAQYbuF0k4FphPSiCdVheATBmYIZOelMscSbs1cYW6IE0OBYtUro=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750076980; c=relaxed/simple;
-	bh=D1nrTM3OWHNa73fOHQSyszn7QncKX5gjfoZAZmCJOV4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=BnSDdjzZrs6Ime/JhO+xrLVzYrPNxjiqoR0QB0GSqEzfldVp9Z7MTfdKrvZf0lpK64jSk1lD30LjlbFTWg5e1j5yffov4muejJqeXl8CYR5vnuD6i1tEyjZe6yrEKvZ86zpXU1LvbFFy27Jflk1gGc2A7/fb69qFSv8lfTvc+/s=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b=VTK5V0/V; arc=pass smtp.client-ip=136.143.188.12
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=collabora.com header.i=nicolas.frattaroli@collabora.com header.b="VTK5V0/V"
-ARC-Seal: i=1; a=rsa-sha256; t=1750076894; cv=none; 
-	d=zohomail.com; s=zohoarc; 
-	b=Kn8MGUt3qBaOkBsleWMs/iI7evtX+3Ii+lWmXB8xOO8yonT/tDL4OfelfnPrGyP69Xa6GXt64PMxsM5vBn5YsaN0I5GeJUR7YvPCpzogaDpzyN7GW1fehBmHRRYpAHqyTyzXBh1S8/TsCf+p6V2AaB6zIxcJ7XJ+dTVZeTb4YRc=
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=zohomail.com; s=zohoarc; 
-	t=1750076894; h=Content-Type:Content-Transfer-Encoding:Cc:Cc:Date:Date:From:From:In-Reply-To:MIME-Version:Message-ID:References:Subject:Subject:To:To:Message-Id:Reply-To; 
-	bh=lS5jmrsM1AStlE4Oaeas/EKugjJN944zsH8rQcQ3FAk=; 
-	b=gZpW6CMh7kONQtxIuB9S8BJSCJKsvjeGsHGDKmIuXDXZlzskn5bJwbdnpsUcmAghdjwm7D9LGAU4Rel8QeQKW1q+5kRysuw841yRbvXfifnWduhN2bYLxbuLNXEh2MTtxoVgPSUuojnwR8DpXHHIQwqbIosI/MoGhZqfAJbm5mE=
-ARC-Authentication-Results: i=1; mx.zohomail.com;
-	dkim=pass  header.i=collabora.com;
-	spf=pass  smtp.mailfrom=nicolas.frattaroli@collabora.com;
-	dmarc=pass header.from=<nicolas.frattaroli@collabora.com>
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; t=1750076894;
-	s=zohomail; d=collabora.com; i=nicolas.frattaroli@collabora.com;
-	h=From:From:To:To:Cc:Cc:Subject:Subject:Date:Date:Message-ID:In-Reply-To:References:MIME-Version:Content-Transfer-Encoding:Content-Type:Message-Id:Reply-To;
-	bh=lS5jmrsM1AStlE4Oaeas/EKugjJN944zsH8rQcQ3FAk=;
-	b=VTK5V0/Vh8vG0ADUhZJqoWC8GNkp9+Edtt7f54cvlzORP0TBC3O3iXDcIRVP1bPg
-	diBzmzi3jUJX7MfK81EwTr1m9SPAyKZNsnywz/gVppbbf7/4KM7BIphS3UCg/GYBOZD
-	MzraVGJabGmAR/4cao207oI0XAYOJPvc3s7lJ85s=
-Received: by mx.zohomail.com with SMTPS id 1750076891122319.76650013837536;
-	Mon, 16 Jun 2025 05:28:11 -0700 (PDT)
-From: Nicolas Frattaroli <nicolas.frattaroli@collabora.com>
-To: Robin Murphy <robin.murphy@arm.com>, Yury Norov <yury.norov@gmail.com>,
- Jakub Kicinski <kuba@kernel.org>, Jani Nikula <jani.nikula@linux.intel.com>
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>,
- Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- Heiko Stuebner <heiko@sntech.de>,
- Shreeya Patel <shreeya.patel@collabora.com>,
- Mauro Carvalho Chehab <mchehab@kernel.org>, Sandy Huang <hjc@rock-chips.com>,
- Andy Yan <andy.yan@rock-chips.com>,
- Maarten Lankhorst <maarten.lankhorst@linux.intel.com>,
- Maxime Ripard <mripard@kernel.org>, Thomas Zimmermann <tzimmermann@suse.de>,
- David Airlie <airlied@gmail.com>, Simona Vetter <simona@ffwll.ch>,
- Vinod Koul <vkoul@kernel.org>, Kishon Vijay Abraham I <kishon@kernel.org>,
- Nicolas Frattaroli <frattaroli.nicolas@gmail.com>,
- Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>,
- Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>,
- Andrew Lunn <andrew+netdev@lunn.ch>, "David S. Miller" <davem@davemloft.net>,
- Eric Dumazet <edumazet@google.com>, Paolo Abeni <pabeni@redhat.com>,
- Maxime Coquelin <mcoquelin.stm32@gmail.com>,
- Alexandre Torgue <alexandre.torgue@foss.st.com>,
- Shawn Lin <shawn.lin@rock-chips.com>,
- Lorenzo Pieralisi <lpieralisi@kernel.org>,
- Krzysztof =?UTF-8?B?V2lsY3p5xYRza2k=?= <kwilczynski@kernel.org>,
- Manivannan Sadhasivam <mani@kernel.org>, Rob Herring <robh@kernel.org>,
- Bjorn Helgaas <bhelgaas@google.com>, Chanwoo Choi <cw00.choi@samsung.com>,
- MyungJoo Ham <myungjoo.ham@samsung.com>,
- Kyungmin Park <kyungmin.park@samsung.com>, Qin Jian <qinjian@cqplus1.com>,
- Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@kernel.org>,
- Nathan Chancellor <nathan@kernel.org>,
- Nick Desaulniers <nick.desaulniers+lkml@gmail.com>,
- Bill Wendling <morbo@google.com>, Justin Stitt <justinstitt@google.com>,
- linux-pm@vger.kernel.org, netdev@vger.kernel.org, llvm@lists.linux.dev,
- linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
- dri-devel@lists.freedesktop.org, linux-clk@vger.kernel.org,
- linux-rockchip@lists.infradead.org, linux-sound@vger.kernel.org,
- linux-pci@vger.kernel.org, linux-phy@lists.infradead.org,
- kernel@collabora.com, linux-stm32@st-md-mailman.stormreply.com,
- linux-arm-kernel@lists.infradead.org, linux-media@vger.kernel.org
-Subject: Re: [PATCH 01/20] bitfield: introduce HWORD_UPDATE bitfield macros
-Date: Mon, 16 Jun 2025 14:27:55 +0200
-Message-ID: <3361713.44csPzL39Z@workhorse>
-In-Reply-To: <aEw7LBpmkfOqZgf1@yury>
-References:
- <20250612-byeword-update-v1-0-f4afb8f6313f@collabora.com>
- <1437fe89-341b-4b57-b1fa-a0395081e941@arm.com> <aEw7LBpmkfOqZgf1@yury>
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EBBB2BEC28
+	for <linux-mmc@vger.kernel.org>; Mon, 16 Jun 2025 13:22:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=185.203.201.7
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1750080171; cv=none; b=qByQ1d4iVRjok95jGczg3KbtYoSspNhiPnZhaSzhsIL4pud4K0oOOhjKCmdV03Ipfw1DO3X+ZsJL1stRWUEsQK2lwiP1XHivrv2YMOgFS6pCneXVNCzVL8FO+zkMKzH9ciw46tV5wufVYfLPDYxx1R4dVTEx3hcRY+4awewYURY=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1750080171; c=relaxed/simple;
+	bh=SfDNrgkiyxr1e5rAONZhMJ5nG8Q58jojguyKXEUxd+I=;
+	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=mVuiu9Z8PjxgUhM9ZhHu2TaBjUSoj0VifzEP/sO3haBeBWr9aYG45HCgdScpIw3JrGQH5S9YeeNY88yZiN93zlRbaZm/bK09uQTrl+lLU9fm7ap5ERJJnszFHiufdLWK4p+FvtqJo27p1eAseZrhuHmMRJ7RT+wPc4ZaJeRsP80=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de; spf=pass smtp.mailfrom=pengutronix.de; arc=none smtp.client-ip=185.203.201.7
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=pengutronix.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=pengutronix.de
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+	by metis.whiteo.stw.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+	(Exim 4.92)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uR9n5-0003xV-Cd; Mon, 16 Jun 2025 15:22:23 +0200
+Received: from lupine.office.stw.pengutronix.de ([2a0a:edc0:0:900:1d::4e] helo=lupine)
+	by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+	(Exim 4.96)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uR9n4-003oWd-0b;
+	Mon, 16 Jun 2025 15:22:22 +0200
+Received: from pza by lupine with local (Exim 4.96)
+	(envelope-from <p.zabel@pengutronix.de>)
+	id 1uR9n4-000VBo-0L;
+	Mon, 16 Jun 2025 15:22:22 +0200
+Message-ID: <6aeab5e5b616b1e690c2622d6599c5228a391e69.camel@pengutronix.de>
+Subject: Re: [PATCH 1/8] mmc: sdhci-of-aspeed: Fix sdhci software reset
+ can't be cleared issue.
+From: Philipp Zabel <p.zabel@pengutronix.de>
+To: Cool Lee <cool_lee@aspeedtech.com>, andrew@codeconstruct.com.au, 
+	adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au, 
+	linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
+Date: Mon, 16 Jun 2025 15:22:21 +0200
+In-Reply-To: <20250615035803.3752235-2-cool_lee@aspeedtech.com>
+References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
+	 <20250615035803.3752235-2-cool_lee@aspeedtech.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="utf-8"
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: p.zabel@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.whiteo.stw.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 
-Hello,
+On So, 2025-06-15 at 11:57 +0800, Cool Lee wrote:
+> Replace sdhci software reset by scu reset from top.
+>=20
+> Signed-off-by: Cool Lee <cool_lee@aspeedtech.com>
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 55 +++++++++++++++++++++++++++++-
+>  1 file changed, 54 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-=
+of-aspeed.c
+> index d6de010551b9..01bc574272eb 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -13,6 +13,7 @@
+>  #include <linux/of.h>
+>  #include <linux/of_platform.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/reset.h>
+>  #include <linux/spinlock.h>
+> =20
+>  #include "sdhci-pltfm.h"
+> @@ -39,6 +40,7 @@
+>  struct aspeed_sdc {
+>  	struct clk *clk;
+>  	struct resource *res;
+> +	struct reset_control *rst;
+> =20
+>  	spinlock_t lock;
+>  	void __iomem *regs;
+> @@ -328,13 +330,58 @@ static u32 aspeed_sdhci_readl(struct sdhci_host *ho=
+st, int reg)
+>  	return val;
+>  }
+> =20
+> +static void aspeed_sdhci_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_priv;
+> +	struct aspeed_sdhci *aspeed_sdhci;
+> +	struct aspeed_sdc *aspeed_sdc;
+> +	u32 save_array[7];
+> +	u32 reg_array[] =3D {SDHCI_DMA_ADDRESS,
+> +			SDHCI_BLOCK_SIZE,
+> +			SDHCI_ARGUMENT,
+> +			SDHCI_HOST_CONTROL,
+> +			SDHCI_CLOCK_CONTROL,
+> +			SDHCI_INT_ENABLE,
+> +			SDHCI_SIGNAL_ENABLE};
+> +	int i;
+> +	u16 tran_mode;
+> +	u32 mmc8_mode;
+> +
+> +	pltfm_priv =3D sdhci_priv(host);
+> +	aspeed_sdhci =3D sdhci_pltfm_priv(pltfm_priv);
+> +	aspeed_sdc =3D aspeed_sdhci->parent;
+> +
+> +	if (!IS_ERR(aspeed_sdc->rst)) {
+> +		for (i =3D 0; i < ARRAY_SIZE(reg_array); i++)
+> +			save_array[i] =3D sdhci_readl(host, reg_array[i]);
+> +
+> +		tran_mode =3D sdhci_readw(host, SDHCI_TRANSFER_MODE);
+> +		mmc8_mode =3D readl(aspeed_sdc->regs);
+> +
+> +		reset_control_assert(aspeed_sdc->rst);
+> +		mdelay(1);
+> +		reset_control_deassert(aspeed_sdc->rst);
+> +		mdelay(1);
 
-On Friday, 13 June 2025 16:52:28 Central European Summer Time Yury Norov wrote:
-> On Fri, Jun 13, 2025 at 02:54:50PM +0100, Robin Murphy wrote:
-> > On 2025-06-12 7:56 pm, Nicolas Frattaroli wrote:
-> > > Hardware of various vendors, but very notably Rockchip, often uses
-> > > 32-bit registers where the upper 16-bit half of the register is a
-> > > write-enable mask for the lower half.
-> > > 
-> > > This type of hardware setup allows for more granular concurrent register
-> > > write access.
-> > > 
-> > > Over the years, many drivers have hand-rolled their own version of this
-> > > macro, usually without any checks, often called something like
-> > > HIWORD_UPDATE or FIELD_PREP_HIWORD, commonly with slightly different
-> > > semantics between them.
-> > > 
-> > > Clearly there is a demand for such a macro, and thus the demand should
-> > > be satisfied in a common header file.
-> > > 
-> > > Add two macros: HWORD_UPDATE, and HWORD_UPDATE_CONST. The latter is a
-> > > version that can be used in initializers, like FIELD_PREP_CONST. The
-> > > macro names are chosen to not clash with any potential other macros that
-> > > drivers may already have implemented themselves, while retaining a
-> > > familiar name.
-> > 
-> > Nit: while from one angle it indeed looks similar, from another it's even
-> > more opaque and less meaningful than what we have already. Personally I
-> > cannot help but see "hword" as "halfword", so logically if we want 32+32-bit
-> > or 8+8-bit variants in future those would be WORD_UPDATE() and
-> > BYTE_UPDATE(), right? ;)
-> > 
-> > It's also confounded by "update" not actually having any obvious meaning at
-> > this level without all the implicit usage context. FWIW my suggestion would
-> > be FIELD_PREP_WM_U16, such that the reader instantly sees "FIELD_PREP with
-> > some additional semantics", even if they then need to glance at the
-> > kerneldoc for clarification that WM stands for writemask (or maybe WE for
-> > write-enable if people prefer). Plus it then leaves room to easily support
-> > different sizes (and potentially even bonkers upside-down Ux_WM variants?!)
-> > without any bother if we need to.
-> 
-> I like the idea. Maybe even shorter: FIELD_PREP_WM16()?
-> 
+Why are there delays here ...
 
-I do think FIELD_PREP_WM16() is a good name. If everyone is okay with this
-as a name, I will use it in v2 of the series. And by "everyone" I really
-mean everyone should get their hot takes in before the end of the week,
-as I intend to send out a v2 on either Friday or the start of next week
-to keep the ball rolling, but I don't want to reroll a 20 patch series
-with a trillion recipients more than is absolutely necessary.
+[...]
+> @@ -535,6 +582,12 @@ static int aspeed_sdc_probe(struct platform_device *=
+pdev)
+> =20
+>  	spin_lock_init(&sdc->lock);
+> =20
+> +	sdc->rst =3D devm_reset_control_get(&pdev->dev, NULL);
+> +	if (!IS_ERR(sdc->rst)) {
+> +		reset_control_assert(sdc->rst);
+> +		reset_control_deassert(sdc->rst);
 
-To that end, I'd also like to get some other naming choices clarified.
+... but not here?
 
-As I gathered, these two macros should best be placed in its own header.
-Is include/linux/hw_bitfield.h a cromulent choice, or should we go with
-include/linux/hw_bits.h?
-
-Furthermore, should it be FIELD_PREP_WM16_CONST or FIELD_PREP_CONST_WM16?
-I'm personally partial to the former.
-
-And finally, is it okay if I leave out refactoring Intel's
-_MASKED_FIELD() or should I see if I can at least replace its
-implementation while I'm at it?
-
-For less opinionated changes, I'll also change all the `U` literal
-suffixes to `UL` wherever I've added them. As I understand it, it doesn't
-really make a difference in these instances, but `UL` is more prevalent
-in the kernel.
-
-Kind regards,
-Nicolas Frattaroli
-
-
+regards
+Philipp
