@@ -1,35 +1,35 @@
 Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5F6392E06DB;
-	Tue, 17 Jun 2025 13:26:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE34F2DE20F;
+	Tue, 17 Jun 2025 13:26:17 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.196
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750166780; cv=none; b=G1oFMj903ONP6OKfyhwvNu1HDXrDRy45GV8Egn51+xgx/Svv2Sc7RRTe3gbNBROSi81QqTPbxLv1stM7Oc2ztk42mZiDnm1UFPhQ5ikDFN+ZDmlB2HU/YTbNKa1eUIMSlqQwMvSIqY6LTVm2NuGY8yBAJdhSIDZqpiUWSoIPVIc=
+	t=1750166781; cv=none; b=KjDU/WnokFDDhDR0ZdbyxqsrlU5gtPY1k02ZA2PZfeC8W4Q0FPEqpgVG14lF65G2TAv+tskbjP/30OVRRCMVK0EYhNBx1QlOAMk4b92T0l/N9ASzxBUcjzDdCz2zB8wGHoFiv9qlz5h0/AEZo4YojeIDmm6oYt8II7ZEMe6/mEw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750166780; c=relaxed/simple;
-	bh=/PwIrXHKsekaTOtUAKwZ3fI6+uz0OpAG9bccR7KLoRw=;
+	s=arc-20240116; t=1750166781; c=relaxed/simple;
+	bh=57dggzw2T6pyelDs4MZNPa4a4VhFuF/7yGNWm6ASIVo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=fW+j1zgzimHcII7tKOKljdzvbI0QxNtiypKUgkCTABLl/r2zVwnQb8NV6khQowRksYOFEIQ65rH5o030MLTQV4FoqyEGOHl7ShbGi1d78PVwpxWDagkActbUBH/RNrVoH04MijtEvZkGCXgUhHNBD4qQxu4tkLeTOQks1C1zxcw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=jIclc5On; arc=none smtp.client-ip=217.70.183.196
+	 MIME-Version:Content-Type; b=AGXRG6yj/PVoON3DmDokPqzVtSlEvFIt62u4+7EbojeCGm2ozB6hb1XLlx61BZqK7UhTVWmzJezKQ8ccEXdnThUrqSqu1XDypcODXDY7jrjQbnIN0sqv1QgHp1mQCVJdnXSGqM/NHURWcpeDgsSfDLraG98dZKg/xIK5yZJXjGo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=Qw0Tf1MS; arc=none smtp.client-ip=217.70.183.196
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="jIclc5On"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 8134A44366;
-	Tue, 17 Jun 2025 13:26:10 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="Qw0Tf1MS"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id CBE8143B15;
+	Tue, 17 Jun 2025 13:26:08 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-	t=1750166771;
+	t=1750166769;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=9UuUbDQ77v0Yk2YTtdmfjftSGpOtzNg2ucow3Et6vyQ=;
-	b=jIclc5Onln67ME0cmXr2LbgczHn7hfujLyhEsctiMnXt2XzFvMx4d12Itrv9MTpDk2FvlO
-	8ZgsyXhPeLPZZx9zoOby7pnKyzwZTLCRbqqPVqXEnFYXnpD5qmE+je+ErRRi/mRsIM9K2z
-	y3hoFbW3kyzQw85lRCRb5WqpMPYz5rYc8vF0NMN6qVyrp1CYcpLkaNaJkupBpxW9lmmnS+
-	yuDka9Bu57CJxhxrdCgigNuE2iyEYn8Zh7Z8IPKRFyT/NYDUF3J0yDs6S1i7+NN82MGX1J
-	RtMRm1HwKAL3htpmg0Bi9kgKWWBUVeW+NiDobQ26vK5Z+4E07d005iZkDdgzNA==
+	bh=glk/OwejqhkRZSqbsrxolLDDbkvejcmIfKpjFozQd28=;
+	b=Qw0Tf1MSwnXCdVU9BAINY6MrEbWZlGgPuiaN+UA+xnaQ8kV+Z5mVAFtRcCOHhe1NQ6WzsO
+	xBovLYuT26u7apVoLOtOG5i/c9K+ChiKvjIfPBLSaOLjfWSte3SWLik3K9VfVZ56ynqAQ4
+	DaP/8b7fC+1LtyL8Vc2ULjF0CB99SQwG0V+h5t8bs+PB5Erhi6E6d3xFvaZkHpJZzzxcWn
+	DoXlQZIahYdM6JWGUb5I3uZ2WoShB+WRoAJhbzEpR85XGerPHZDCVppFLNVhUOlQYu2zd3
+	V+aN733MXy97LXVcgCHrpQwHxgsj9sXhG7bhaFr5bmuegZepn0hlGy3vjnfV2w==
 From: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Rob Herring <robh@kernel.org>,
@@ -47,9 +47,9 @@ Cc: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>,
 	linux-kernel@vger.kernel.org,
 	linux-mips@vger.kernel.org,
 	"Thomas Petazzoni" <thomas.petazzoni@bootlin.com>
-Subject: [PATCH 5/6] MIPS: mobileye: dts: eyeq5: add the emmc controller
-Date: Tue, 17 Jun 2025 15:25:55 +0200
-Message-ID: <1846b26773eb48cc970bba1524e9d2a7a612a2e3.1750156323.git.benoit.monin@bootlin.com>
+Subject: [PATCH 3/6] MIPS: mobileye: dts: eyeq6h: add the emmc controller
+Date: Tue, 17 Jun 2025 15:25:53 +0200
+Message-ID: <9b482b7469695b303269dba26b476ac70695dc3a.1750156323.git.benoit.monin@bootlin.com>
 X-Mailer: git-send-email 2.49.0
 In-Reply-To: <cover.1750156323.git.benoit.monin@bootlin.com>
 References: <cover.1750156323.git.benoit.monin@bootlin.com>
@@ -67,29 +67,28 @@ X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtddvgddvlecutefuodetggdotefrodf
  ehkvghrnhgvlhdrohhrghdprhgtphhtthhopehvlhgrughimhhirhdrkhhonhgurhgrthhivghvsehmohgsihhlvgihvgdrtghomhdprhgtphhtthhopehgrhgvghhorhihrdgtlhgvmhgvnhhtsegsohhothhlihhnrdgtohhmpdhrtghpthhtohepthhhvghordhlvggsrhhunhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehtshgsohhgvghnugesrghlphhhrgdrfhhrrghnkhgvnhdruggv
 X-GND-Sasl: benoit.monin@bootlin.com
 
-Add the MMC/SDHCI controller found in the eyeQ5 SoC. It is based on the
+Add the MMC/SDHCI controller found in the eyeQ6 SoC. It is based on the
 cadence sd4hc controller and support modes up to HS400 enhanced strobe.
 
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- arch/mips/boot/dts/mobileye/eyeq5.dtsi | 22 ++++++++++++++++++++++
+ arch/mips/boot/dts/mobileye/eyeq6h.dtsi | 22 ++++++++++++++++++++++
  1 file changed, 22 insertions(+)
 
-diff --git a/arch/mips/boot/dts/mobileye/eyeq5.dtsi b/arch/mips/boot/dts/mobileye/eyeq5.dtsi
-index a84e6e720619..e15d9ce0bdf4 100644
---- a/arch/mips/boot/dts/mobileye/eyeq5.dtsi
-+++ b/arch/mips/boot/dts/mobileye/eyeq5.dtsi
-@@ -178,6 +178,28 @@ timer {
- 				clocks = <&olb EQ5C_CPU_CORE0>;
- 			};
+diff --git a/arch/mips/boot/dts/mobileye/eyeq6h.dtsi b/arch/mips/boot/dts/mobileye/eyeq6h.dtsi
+index dabd5ed778b7..bbd463435ad6 100644
+--- a/arch/mips/boot/dts/mobileye/eyeq6h.dtsi
++++ b/arch/mips/boot/dts/mobileye/eyeq6h.dtsi
+@@ -109,6 +109,28 @@ olb_east: system-controller@d3358000 {
+ 			clock-names = "ref";
  		};
-+
-+		emmc: sdhci@2200000 {
+ 
++		emmc: sdhci@d8010000 {
 +			compatible = "mobileye,eyeq-sd4hc", "cdns,sd4hc";
-+			reg = <0 0x2200000 0x0 0x1000>;
++			reg = <0 0xd8010000 0x0 0x1000>;
 +			interrupt-parent = <&gic>;
-+			interrupts = <GIC_SHARED 10 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&olb EQ5C_PER_EMMC>;
++			interrupts = <GIC_SHARED 91 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&olb_south EQ6HC_SOUTH_DIV_EMMC>;
 +			bus-width = <8>;
 +			max-frequency = <200000000>;
 +			mmc-ddr-1_8v;
@@ -105,6 +104,7 @@ index a84e6e720619..e15d9ce0bdf4 100644
 +			cdns,phy-dll-delay-sdclk-hsmmc = <32>;
 +			cdns,phy-dll-delay-strobe = <32>;
 +		};
- 	};
- };
- 
++
+ 		olb_south: system-controller@d8013000 {
+ 			compatible = "mobileye,eyeq6h-south-olb", "syscon";
+ 			reg = <0x0 0xd8013000 0x0 0x1000>;
