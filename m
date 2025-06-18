@@ -1,48 +1,49 @@
 Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6AAE128FF;
-	Wed, 18 Jun 2025 02:32:01 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A615155A4E;
+	Wed, 18 Jun 2025 02:32:48 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750213923; cv=none; b=HiRA0Dw0/Awygydr/uqBWfQ+rDBhsrG206QvHMgUbnqkyaKo7jgNevCvb21HO6qERxpKcvuwdX8CGW+8/47f0fueMfpZImPI2xBob9n/LeKoDZD0uh0XBnUGumg44d6WXLDVzDyax2TTidcTaOHaFYUNAiDX+g+ZTX8nUYHwLiU=
+	t=1750213969; cv=none; b=LY8hNeq2nSEWOFl+vU02+6A8Q3QerBoxMjBJxl2vAokv2ZqennEMMOCmu2Pw7GWOQziP6UcvhXTGljnmtTpN7j5xNTIL8MZJuI8UDScI0syVZ5CX/kAEOxC8TFUgWjYHZDv7qHBeb9NBplomRrLTO8hU+QWYB858XbM3jb9CQ+E=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750213923; c=relaxed/simple;
-	bh=5w2Af1Jd9y0kTfL6+QwFGQsdZng73ylLHR9SKZwxbcA=;
+	s=arc-20240116; t=1750213969; c=relaxed/simple;
+	bh=AR29u6dqmK6ehegRcbbijgUNzEMQNsv2oGLo6lBr3lU=;
 	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=nm2twK3C8FHSLc7Cx2+Nbq1KdAboPyrDw6QTsAYIaZ2mj8w+FCNyuSdSszuGPy2x7jJmrpr8MB973gn52YkQ5CuVQrlHz6QMfAZaDU/S8X6GR4WsIkwVQcPvU3G1oMPi//9mOeGO8+bx70oC/Z0t+FPhDBDbSrKG8MKWKUei6g8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=D1ApaUu6; arc=none smtp.client-ip=203.29.241.158
+	 Content-Type:MIME-Version; b=U2LHd4bB9u9nb2CUCU8Ip0bnjS/t6FKvN7x5TD+KiVtdmq//X+WbtMufwCZjfnfAM9Ynb2xmvCq/VFbgKdl25sxBsHae8NCOSMD14A7XgGBmTVto8igSCcAdJ241qYtdWwrbNR66wY0CtRgeL8XWqjVoiGkJErtoXotkUH2b6vA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=c8yy43Lx; arc=none smtp.client-ip=203.29.241.158
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="D1ApaUu6"
+	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="c8yy43Lx"
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=codeconstruct.com.au; s=2022a; t=1750213919;
-	bh=5w2Af1Jd9y0kTfL6+QwFGQsdZng73ylLHR9SKZwxbcA=;
+	d=codeconstruct.com.au; s=2022a; t=1750213966;
+	bh=AR29u6dqmK6ehegRcbbijgUNzEMQNsv2oGLo6lBr3lU=;
 	h=Subject:From:To:Date:In-Reply-To:References;
-	b=D1ApaUu65B6n7BORQfZgfZI75rDOOGgQ2KZxM3MsyAiG+y20/oS3ylMcHaHGgLWlC
-	 k36KJr1hjBpsmpw7tuEKuB0Uca+twWgeUQd6Ent5763Hsm2zOvyGo0F+7271ZVPeZq
-	 xlMNXaof04BvnBCE/7I5S0qVj8p0KEiq8IMhRQQ4aYobDg5DemOnj2azyt3JNu7V+C
-	 wsm9n1HzRs2a571dN9lHM5KPX5PQqJPZh3s4zYs/9ADbuKPlzoXh6NRJiQts28zBV7
-	 Bp85gKcDILHOMdYYeQrGghEK84q3SCJW0+N79TtXWabDgGfARWaCFVi1zLCO11vnG/
-	 iHk1Ebbaw6Zfw==
+	b=c8yy43LxWxntWCAOlzFtJQAOwl4vSyG4RXS1nvNxQc2BzJW8ypHz9yJ/Q90//MlXV
+	 Oma6DS17CsIYdYRhl7qtRMRRNMGkjbmYg9nghh3dwVcaQRzZfuxE02c1a5bZjdhAo3
+	 Ly4x5rwRK9gQVoI+Z4+3xall0uLUpOT/BSZd5gP0dZJizBU8SYGXQ/1fxPTjpxg8ps
+	 aP63LasTIY3Wz2orNMECmD7DHxpPJhxCYsqKSZyoTA/wP9rpX3VgIZyn+mkCuw9Cj2
+	 AXoxBORWQHcrQ0M29SNwhxuMI3DwYyC1A5RRqoEODdIkV0n5ewfG0ESnqm4NN0a37C
+	 i2LWYha0Dx0Fw==
 Received: from [192.168.68.112] (unknown [180.150.112.166])
-	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 24E91640A0;
-	Wed, 18 Jun 2025 10:31:58 +0800 (AWST)
-Message-ID: <750e6e51e0943e50162851ca8df2befcea3e9bbe.camel@codeconstruct.com.au>
-Subject: Re: [PATCH 2/8] mmc: sdhci-of-aspeed: Add runtime tuning
+	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 60A1D640A0;
+	Wed, 18 Jun 2025 10:32:45 +0800 (AWST)
+Message-ID: <100bed083e9a98432888c0b1db8cbc445f96cd64.camel@codeconstruct.com.au>
+Subject: Re: [PATCH 3/8] mmc: sdhci-of-aspeed: Patch HOST_CONTROL2 register
+ missing after top reset
 From: Andrew Jeffery <andrew@codeconstruct.com.au>
 To: Cool Lee <cool_lee@aspeedtech.com>, adrian.hunter@intel.com, 
 	ulf.hansson@linaro.org, joel@jms.id.au, p.zabel@pengutronix.de, 
 	linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org, 
 	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
 	linux-kernel@vger.kernel.org
-Date: Wed, 18 Jun 2025 12:01:57 +0930
-In-Reply-To: <20250615035803.3752235-3-cool_lee@aspeedtech.com>
+Date: Wed, 18 Jun 2025 12:02:44 +0930
+In-Reply-To: <20250615035803.3752235-4-cool_lee@aspeedtech.com>
 References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
-	 <20250615035803.3752235-3-cool_lee@aspeedtech.com>
+	 <20250615035803.3752235-4-cool_lee@aspeedtech.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: quoted-printable
 User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -51,87 +52,13 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 
-T24gU3VuLCAyMDI1LTA2LTE1IGF0IDExOjU3ICswODAwLCBDb29sIExlZSB3cm90ZToKPiBBZGQg
-c3VwcG9ydCBmb3IgcnVudGltZSB0dW5pbmcgaW4gdGhlIEFzcGVlZCBTREhDSSBkcml2ZXIuCj4g
-VXNpbmcgdGhlIHRpbWluZyBwaGFzZSByZWdpc3RlciB0byBhZGp1c3QgdGhlIGNsb2NrIHBoYXNl
-IHdpdGggbW1jCj4gdHVuaW5nIGNvbW1hbmQgdG8gZmluZCB0aGUgbGVmdCBhbmQgcmlnaHQgYm91
-bmRhcnkuCj4gCj4gU2lnbmVkLW9mZi1ieTogQ29vbCBMZWUgPGNvb2xfbGVlQGFzcGVlZHRlY2gu
-Y29tPgo+IC0tLQo+IMKgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hc3BlZWQuYyB8IDY4ICsr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKwo+IMKgMSBmaWxlIGNoYW5nZWQsIDY4IGluc2Vy
-dGlvbnMoKykKPiAKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hc3Bl
-ZWQuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXNwZWVkLmMKPiBpbmRleCAwMWJjNTc0
-MjcyZWIuLjVlNWFlMTg5NDQ1NiAxMDA2NDQKPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNp
-LW9mLWFzcGVlZC5jCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hc3BlZWQuYwo+
-IEBAIC0yNCw2ICsyNCw3IEBACj4gwqAjZGVmaW5lIEFTUEVFRF9TRENfUEhBU0XCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqAweGY0Cj4gwqAjZGVmaW5lwqDCoCBBU1BFRURfU0RDX1MxX1BI
-QVNFX0lOwqDCoMKgwqDCoMKgwqBHRU5NQVNLKDI1LCAyMSkKPiDCoCNkZWZpbmXCoMKgIEFTUEVF
-RF9TRENfUzBfUEhBU0VfSU7CoMKgwqDCoMKgwqDCoEdFTk1BU0soMjAsIDE2KQo+ICsjZGVmaW5l
-wqDCoCBBU1BFRURfU0RDX1MwX1BIQVNFX0lOX1NISUZUwqAgMTYKPiDCoCNkZWZpbmXCoMKgIEFT
-UEVFRF9TRENfUzFfUEhBU0VfT1VUwqDCoMKgwqDCoMKgR0VOTUFTSygxNSwgMTEpCj4gwqAjZGVm
-aW5lwqDCoCBBU1BFRURfU0RDX1MxX1BIQVNFX0lOX0VOwqDCoMKgwqBCSVQoMTApCj4gwqAjZGVm
-aW5lwqDCoCBBU1BFRURfU0RDX1MxX1BIQVNFX09VVF9FTsKgwqDCoEdFTk1BU0soOSwgOCkKPiBA
-QCAtMzc1LDYgKzM3Niw3MiBAQCBzdGF0aWMgdm9pZCBhc3BlZWRfc2RoY2lfcmVzZXQoc3RydWN0
-IHNkaGNpX2hvc3QgKmhvc3QsIHU4IG1hc2spCj4gwqDCoMKgwqDCoMKgwqDCoHNkaGNpX3Jlc2V0
-KGhvc3QsIG1hc2spOwo+IMKgfQo+IMKgCj4gK3N0YXRpYyBpbnQgYXNwZWVkX3NkaGNpX2V4ZWN1
-dGVfdHVuaW5nKHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0LCB1MzIgb3Bjb2RlKQo+ICt7Cj4gK8Kg
-wqDCoMKgwqDCoMKgc3RydWN0IHNkaGNpX3BsdGZtX2hvc3QgKnBsdGZtX3ByaXY7Cj4gK8KgwqDC
-oMKgwqDCoMKgc3RydWN0IGFzcGVlZF9zZGhjaSAqc2RoY2k7Cj4gK8KgwqDCoMKgwqDCoMKgc3Ry
-dWN0IGFzcGVlZF9zZGMgKnNkYzsKPiArwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgZGV2aWNlICpkZXY7
-Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoHUzMiB2YWwsIGxlZnQsIHJpZ2h0LCBlZGdlOwo+ICvCoMKg
-wqDCoMKgwqDCoHUzMiB3aW5kb3csIG9sZHdpbmRvdyA9IDAsIGNlbnRlcjsKPiArwqDCoMKgwqDC
-oMKgwqB1MzIgaW5fcGhhc2UsIG91dF9waGFzZSwgZW5hYmxlX21hc2ssIGludmVydGVkID0gMDsK
-PiArCj4gK8KgwqDCoMKgwqDCoMKgZGV2ID0gbW1jX2Rldihob3N0LT5tbWMpOwo+ICvCoMKgwqDC
-oMKgwqDCoHBsdGZtX3ByaXYgPSBzZGhjaV9wcml2KGhvc3QpOwo+ICvCoMKgwqDCoMKgwqDCoHNk
-aGNpID0gc2RoY2lfcGx0Zm1fcHJpdihwbHRmbV9wcml2KTsKPiArwqDCoMKgwqDCoMKgwqBzZGMg
-PSBzZGhjaS0+cGFyZW50Owo+ICsKPiArwqDCoMKgwqDCoMKgwqBvdXRfcGhhc2UgPSByZWFkbChz
-ZGMtPnJlZ3MgKyBBU1BFRURfU0RDX1BIQVNFKSAmIEFTUEVFRF9TRENfUzBfUEhBU0VfT1VUOwo+
-ICsKPiArwqDCoMKgwqDCoMKgwqBlbmFibGVfbWFzayA9IEFTUEVFRF9TRENfUzBfUEhBU0VfT1VU
-X0VOIHwgQVNQRUVEX1NEQ19TMF9QSEFTRV9JTl9FTjsKPiArCj4gK8KgwqDCoMKgwqDCoMKgLyoK
-PiArwqDCoMKgwqDCoMKgwqAgKiBUaGVyZSBhcmUgdHdvIHdpbmRvdyB1cG9uIGNsb2NrIHJpc2lu
-ZyBhbmQgZmFsbGluZyBlZGdlLgo+ICvCoMKgwqDCoMKgwqDCoCAqIEl0ZXJhdGUgZWFjaCB0YXAg
-ZGVsYXkgdG8gZmluZCB0aGUgdmFsaWQgd2luZG93IGFuZCBjaG9vc2UgdGhlCj4gK8KgwqDCoMKg
-wqDCoMKgICogYmlnZ2VyIG9uZSwgc2V0IHRoZSB0YXAgZGVsYXkgYXQgdGhlIG1pZGRsZSBvZiB3
-aW5kb3cuCj4gK8KgwqDCoMKgwqDCoMKgICovCj4gK8KgwqDCoMKgwqDCoMKgZm9yIChlZGdlID0g
-MDsgZWRnZSA8IDI7IGVkZ2UrKykgewo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBp
-ZiAoZWRnZSA9PSAxKQo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgaW52ZXJ0ZWQgPSBBU1BFRURfU0RIQ0lfVEFQX1BBUkFNX0lOVkVSVF9DTEs7Cj4gKwo+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqB2YWwgPSAob3V0X3BoYXNlIHwgZW5hYmxl
-X21hc2sgfCAoaW52ZXJ0ZWQgPDwgQVNQRUVEX1NEQ19TMF9QSEFTRV9JTl9TSElGVCkpOwo+ICsK
-PiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgLyogZmluZCB0aGUgbGVmdCBib3VuZGFy
-eSAqLwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBmb3IgKGxlZnQgPSAwOyBsZWZ0
-IDwgQVNQRUVEX1NESENJX05SX1RBUFMgKyAxOyBsZWZ0KyspIHsKCkJpdCBvZiBhIG5pdCwgYnV0
-IG1heWJlIGBsZWZ0IDw9IEFTUEVFRF9TREhDSV9OUl9UQVBTYCByYXRoZXIgdGhhbiArIDE/Cgo+
-ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaW5fcGhhc2Ug
-PSB2YWwgfCAobGVmdCA8PCBBU1BFRURfU0RDX1MwX1BIQVNFX0lOX1NISUZUKTsKPiArwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHdyaXRlbChpbl9waGFzZSwg
-c2RjLT5yZWdzICsgQVNQRUVEX1NEQ19QSEFTRSk7Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgaWYgKCFtbWNfc2VuZF90dW5pbmcoaG9zdC0+bW1j
-LCBvcGNvZGUsIE5VTEwpKQo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGJyZWFrOwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqB9Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAvKiBmaW5kIHRo
-ZSByaWdodCBib3VuZGFyeSAqLwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBmb3Ig
-KHJpZ2h0ID0gbGVmdCArIDE7IHJpZ2h0IDwgQVNQRUVEX1NESENJX05SX1RBUFMgKyAxOyByaWdo
-dCsrKSB7Cgo8PSBhZ2FpbiBoZXJlIGlmIHlvdSBhZ3JlZS4KCj4gK8KgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBpbl9waGFzZSA9IHZhbCB8IChyaWdodCA8PCBB
-U1BFRURfU0RDX1MwX1BIQVNFX0lOX1NISUZUKTsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoHdyaXRlbChpbl9waGFzZSwgc2RjLT5yZWdzICsgQVNQRUVE
-X1NEQ19QSEFTRSk7Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgaWYgKG1tY19zZW5kX3R1bmluZyhob3N0LT5tbWMsIG9wY29kZSwgTlVMTCkpCj4g
-K8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgYnJlYWs7Cj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoH0KPiArCj4gK8Kg
-wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHdpbmRvdyA9IHJpZ2h0IC0gbGVmdDsKPiArwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgZGV2X2luZm8oZGV2LCAidHVuaW5nIHdpbmRvdyA9
-ICVkXG4iLCB3aW5kb3cpOwoKSSB0aGluayB0aGlzIHNob3VsZCBiZSBkZXZfZGJnKCkgcmF0aGVy
-IHRoYW4gZGV2X2luZm8oKS4gVHVuaW5nIGRhdGEgaXMKbm90IHNvbWV0aGluZyB0aGF0IHNob3Vs
-ZCBub3JtYWxseSBiZSBwcmludGVkLiBJJ2QgYWxzbyBwcmludCB0aGUKdmFsdWVzIG9mIGxlZnQg
-YW5kIHJpZ2h0LCBmb3IgcmVmZXJlbmNlLgoKPiArCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoGlmICh3aW5kb3cgPiBvbGR3aW5kb3cpIHsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoG9sZHdpbmRvdyA9IHdpbmRvdzsKPiArwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoGNlbnRlciA9ICgoKHJpZ2h0IC0g
-MSkgKyBsZWZ0KSAvIDIpIHwgaW52ZXJ0ZWQ7Cj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoH0KPiArwqDCoMKgwqDCoMKgwqB9Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoHZhbCA9IChvdXRf
-cGhhc2UgfCBlbmFibGVfbWFzayB8IChjZW50ZXIgPDwgQVNQRUVEX1NEQ19TMF9QSEFTRV9JTl9T
-SElGVCkpOwo+ICvCoMKgwqDCoMKgwqDCoHdyaXRlbCh2YWwsIHNkYy0+cmVncyArIEFTUEVFRF9T
-RENfUEhBU0UpOwo+ICsKPiArwqDCoMKgwqDCoMKgwqBkZXZfaW5mbyhkZXYsICJ0dW5pbmcgcmVz
-dWx0PSV4XG4iLCB2YWwpOwoKZGV2X2RiZygpIGFnYWluLgoKQ2hlZXJzLAoKQW5kcmV3Cg==
+On Sun, 2025-06-15 at 11:57 +0800, Cool Lee wrote:
+> HOST_CONTROL2 register will be cleared after top reset,
+> it needs to be saved/resotred while reset.
+>=20
+> Signed-off-by: Cool Lee <cool_lee@aspeedtech.com>
+
+Please squash this into the first patch.
+
+Andrew
 
