@@ -1,109 +1,89 @@
-Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A81118027;
-	Wed, 18 Jun 2025 02:39:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 64A2E7DA6D;
+	Wed, 18 Jun 2025 02:48:22 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=211.75.126.72
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750214354; cv=none; b=W/mPQUK351dduooe9eHb9r3MZuLvPJBMat0HV6d9BEoPaFtVbmttkBS8RnhYzrGUIWg9NXMvAjcV29KZwoPJCV60rjtnBpx4czuXjgj+UeqHEmJ5bV6VqkfjkF+r9+TsqdD8gcqKO2TxNVgVSWOOh8fmD982U3l+8OAn8qk0Yq4=
+	t=1750214906; cv=none; b=c7/z1yF7cFJsBdDWS4+b/dyh7gy5XBMu4110Bn0Q5afkKwOgK7ESqk1vGGYrX2RTQwJIXL6ifqrFVLsBjxkq7lHoFCwlDlygsunOLTUBlK59q2Uhqqj7hbwWYJmqkObEJB3lIJtpPovgX2DUJ1Ih5nFPzYPSBQqIW0INAgG+SsI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750214354; c=relaxed/simple;
-	bh=ItE5LTzozOsAetn4WQ1Ta5UuaFaBQiatwV/mVr7BE8o=;
-	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
-	 Content-Type:MIME-Version; b=CUJAdnL9MquEEoAN0chXXTHcGjgLIDvAgA0THVnDN0j7qnsJyUtHn6DREpoudZNT6d3Eell1MS1j3atWAcJJXu3wC/Vqts2+IVRkPuJ+4jwcnDW7hIfrMeYPrsDW5+lZW201CL4v3pRyFM4OUhHjBAx0Xy81CIRxCvK6yy2ToPU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=ZtGpREki; arc=none smtp.client-ip=203.29.241.158
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
+	s=arc-20240116; t=1750214906; c=relaxed/simple;
+	bh=MmG86US1i5lVu0QKL5KZj9VJGyCU6VYH01ff5apDY8w=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=qtCOoFnuIwQs9vQAx4eTRCC6LjDH0vJhsLZy/VVDAxuorPlOXTdSAoUNYPVYISlwtIvWdNXQb/bTTnH+BBITffQqyaSjTpoHWM+1sODJYx7xqy7mk49OTf3i70c+T1HQanLkpGwJUwvOEcXRG5B7xjGBmhcoU1g0KjvJj1ilwxA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com; spf=pass smtp.mailfrom=realtek.com; dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b=pxbgGIu1; arc=none smtp.client-ip=211.75.126.72
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=realtek.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=realtek.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="ZtGpREki"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-	d=codeconstruct.com.au; s=2022a; t=1750214351;
-	bh=ItE5LTzozOsAetn4WQ1Ta5UuaFaBQiatwV/mVr7BE8o=;
-	h=Subject:From:To:Date:In-Reply-To:References;
-	b=ZtGpREkifDbhmwhg2Hx21YfFGNN5FATZloYBSy9QAEOF99qh6fJHo5f403fiT+n8U
-	 4FcnEVWY4wrFYt4YRuXe4l7+I7Oo7d+iuOq97XWwkZr/Lfv+Q3sx7PN29en12bv49m
-	 ml9ZlQb6WjoHcN7TCUEWWgOcnXNL30c+yLDptTUitxnR54Wq3kI3My3AaVwrsnNC2I
-	 nAiIn88vAoz0vjz+LXr27bBzSN5cjwx7OwPUwlB9K8/grSYrQfLCNEmjQ1huFZWa2X
-	 dIRzLWpYPaUfcrMMgMHCRq4v79zAPpt5zfGqJ2H3Bf/ICByT3TyLUmE0RP0RqaCLfV
-	 YV5lLooh72UKA==
-Received: from [192.168.68.112] (unknown [180.150.112.166])
-	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 86EA0640A0;
-	Wed, 18 Jun 2025 10:39:09 +0800 (AWST)
-Message-ID: <4c380a2936fc5c1f37750f231eb48edc17aefa68.camel@codeconstruct.com.au>
-Subject: Re: [PATCH 4/8] mmc: sdhci-of-aspeed: Get max clockk by using
- default api
-From: Andrew Jeffery <andrew@codeconstruct.com.au>
-To: Cool Lee <cool_lee@aspeedtech.com>, adrian.hunter@intel.com, 
-	ulf.hansson@linaro.org, joel@jms.id.au, p.zabel@pengutronix.de, 
-	linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org, 
-	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
-	linux-kernel@vger.kernel.org
-Date: Wed, 18 Jun 2025 12:09:09 +0930
-In-Reply-To: <20250615035803.3752235-5-cool_lee@aspeedtech.com>
-References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
-	 <20250615035803.3752235-5-cool_lee@aspeedtech.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.46.4-2 
+	dkim=pass (2048-bit key) header.d=realtek.com header.i=@realtek.com header.b="pxbgGIu1"
+X-SpamFilter-By: ArmorX SpamTrap 5.80 with qID 55I2mI4y93466503, This message is accepted by code: ctloc85258
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=realtek.com; s=dkim;
+	t=1750214898; bh=MmG86US1i5lVu0QKL5KZj9VJGyCU6VYH01ff5apDY8w=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:Content-Transfer-Encoding:MIME-Version;
+	b=pxbgGIu1AoaZZqsTOn9s/YzjAvT22fjrtepnNwACpmc5WDSoxBdy4LZwV2UOGupiN
+	 IWBaKnBNQzUWFeNNSSzV12RnOQ8gwvewZVzYmHP4Cuif8oTq3OziQSwSMHwWUrEO+K
+	 KGG6JrGqPnIuBrE8kSfFWHUocdGJq7JtYtjv9bc7sE1RpvaLx+D9hO36qEMGKUA32C
+	 Q8dXFA4Iq+kZjXLdR94WflVV/vP4uvm6Z3TPDlvKIrEw69JLAoqFpfLSD/09+ayw5O
+	 eo+zF0nJZmnzpxsTb3LyIhxAfD09r4OcYMMLuvDsaDI/6IfuSdeEXSeJFtCjzayX2W
+	 b0eZi/FWE/3aA==
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+	by rtits2.realtek.com.tw (8.15.2/3.13/5.93) with ESMTPS id 55I2mI4y93466503
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+	Wed, 18 Jun 2025 10:48:18 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.39; Wed, 18 Jun 2025 10:48:24 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS01.realtek.com.tw (172.21.6.94) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2507.35; Wed, 18 Jun 2025 10:48:24 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547]) by
+ RTEXMBS01.realtek.com.tw ([fe80::f5bd:6ac9:46d:9547%5]) with mapi id
+ 15.01.2507.035; Wed, 18 Jun 2025 10:48:24 +0800
+From: Ricky WU <ricky_wu@realtek.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>
+CC: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH 0/4] mmc: rtsx_usb_sdmmc: Improve sd_set_power_mode()
+Thread-Topic: [PATCH 0/4] mmc: rtsx_usb_sdmmc: Improve sd_set_power_mode()
+Thread-Index: AQHb2fkpc9tL27IUrEi8V1hOvXeHv7QG5RoAgAFcnqA=
+Date: Wed, 18 Jun 2025 02:48:24 +0000
+Message-ID: <20cf2c65afc342aaa0b07c938bd41171@realtek.com>
+References: <20250610111633.504366-1-ulf.hansson@linaro.org>
+ <CAPDyKFpWrBDQjUdGkhnRVxrYGLMfqmyd9U8Kv44aRZWwhqTG3A@mail.gmail.com>
+In-Reply-To: <CAPDyKFpWrBDQjUdGkhnRVxrYGLMfqmyd9U8Kv44aRZWwhqTG3A@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+x-kse-serverinfo: RTEXMBS01.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+X-KSE-AntiSpam-Interceptor-Info: fallback
 
-On Sun, 2025-06-15 at 11:57 +0800, Cool Lee wrote:
-> Don't limit clock frequency by f_max.
->=20
-> Signed-off-by: Cool Lee <cool_lee@aspeedtech.com>
-> ---
-> =C2=A0drivers/mmc/host/sdhci-of-aspeed.c | 10 +---------
-> =C2=A01 file changed, 1 insertion(+), 9 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-=
-of-aspeed.c
-> index 10160a706334..2bdd93a3f91f 100644
-> --- a/drivers/mmc/host/sdhci-of-aspeed.c
-> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
-> @@ -288,14 +288,6 @@ static void aspeed_sdhci_set_clock(struct sdhci_host=
- *host, unsigned int clock)
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0sdhci_enable_clk(host, cl=
-k);
-> =C2=A0}
-> =C2=A0
-> -static unsigned int aspeed_sdhci_get_max_clock(struct sdhci_host *host)
-> -{
-> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (host->mmc->f_max)
-> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0return host->mmc->f_max;
-> -
-> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0return sdhci_pltfm_clk_get_max=
-_clock(host);
-> -}
-> -
-> =C2=A0static void aspeed_sdhci_set_bus_width(struct sdhci_host *host, int=
- width)
-> =C2=A0{
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0struct sdhci_pltfm_host *=
-pltfm_priv;
-> @@ -446,7 +438,7 @@ static int aspeed_sdhci_execute_tuning(struct sdhci_h=
-ost *host, u32 opcode)
-> =C2=A0static const struct sdhci_ops aspeed_sdhci_ops =3D {
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.read_l =3D aspeed_sdhci_=
-readl,
-> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.set_clock =3D aspeed_sdh=
-ci_set_clock,
-> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.get_max_clock =3D aspeed_sdhc=
-i_get_max_clock,
-> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.get_max_clock =3D sdhci_pltfm=
-_clk_get_max_clock,
-
-This was used to limit the maximum bus speed via the devicetree. See:
-
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?=
-h=3Dv6.16-rc2&id=3D0a0e8d7501cda79c9b20f6011814e2ec9b473ade
-
-Why remove it? There's no discussion of the motivation in the commit
-message.
-
-Andrew
+PiBPbiBUdWUsIDEwIEp1biAyMDI1IGF0IDEzOjE2LCBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25A
+bGluYXJvLm9yZz4gd3JvdGU6DQo+ID4NCj4gPiBUaGUgY29kZSBpbiBzZF9zZXRfcG93ZXJfbW9k
+ZSgpIGlzIGEgYml0IG9iZnVzY2F0ZWQgYW5kIGFsc28gaGFzIHNvbWUNCj4gPiBtaW5vciBpc3N1
+ZSBpbiBpdHMgZXJyb3ItcGF0aC4gVGhpcyBzbWFsbCBzZXJpZXMgYWRkcmVzc2VzIHRoZXNlIHBy
+b2JsZW1zLg0KPiA+DQo+ID4gVWxmIEhhbnNzb24gKDQpOg0KPiA+ICAgbW1jOiBydHN4X3VzYl9z
+ZG1tYzogRml4IGVycm9yLXBhdGggaW4gc2Rfc2V0X3Bvd2VyX21vZGUoKQ0KPiA+ICAgbW1jOiBy
+dHN4X3VzYl9zZG1tYzogUHJpbnQgZGVidWctbWVzc2FnZXMgYXQgcG93ZXItb24vb2ZmIGVycm9y
+cw0KPiA+ICAgbW1jOiBydHN4X3VzYl9zZG1tYzogQ29udmVydCBzZF9zZXRfcG93ZXJfbW9kZSgp
+IGludG8gdm9pZA0KPiA+ICAgbW1jOiBydHN4X3VzYl9zZG1tYzogUmUtd29yayB0aGUgY29kZSBp
+biBzZF9zZXRfcG93ZXJfbW9kZSgpDQo+ID4NCj4gPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3Vz
+Yl9zZG1tYy5jIHwgMzENCj4gPiArKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tDQo+ID4g
+IDEgZmlsZSBjaGFuZ2VkLCAyMCBpbnNlcnRpb25zKCspLCAxMSBkZWxldGlvbnMoLSkNCj4gPg0K
+PiA+IC0tDQo+ID4gMi40My4wDQo+ID4NCj4gDQo+IFJpY2t5LCBJIHdvdWxkIGFwcHJlY2lhdGUg
+eW91ciBmZWVkYmFjayBvbiB0aGVzZSB0b28uIE9yIGF0IGxlYXN0IGFuIGFjay4NCg0KSGkgVWxm
+LA0KU29ycnksIEkgZm9yZ290IHRvIHJlcGx5IHRoaXMgcGF0Y2gsDQpUaGlzIHBhdGNoIGlzIGZp
+bmUgZm9yIG1lLCBhbmQgdGhpcyBhbHNvIHdvcmsgd2VsbA0KVGhhbmsgeW91DQoNCg0KPiANCj4g
+S2luZCByZWdhcmRzDQo+IFVmZmUNCg==
