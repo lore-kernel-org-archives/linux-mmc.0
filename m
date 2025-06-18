@@ -1,159 +1,172 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from SEYPR02CU001.outbound.protection.outlook.com (mail-koreacentralazon11013065.outbound.protection.outlook.com [40.107.44.65])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6302B27FB05;
-	Wed, 18 Jun 2025 09:08:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750237712; cv=none; b=aK2m9g96EFxyEQfBcLKPRnhu3qfCKMEToxqPKiGjF+UQHgHAsi3eUXhmv3GL8XakccmmT67aEBcW/Sxn7k0S+8P8f6pcdT4ZDt0bTKMK38EQ7Nd6FZBNLng6hBYsOAr9GN4xsXUlQuDIx+2fnHx8qhgylsboSjf0ayi+n0TgtDc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750237712; c=relaxed/simple;
-	bh=0+sFPaL0Jxk/lHkLW2jW5q8iyj0drtqRimLRRflGR2g=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=C2E/zmLGCQte8kU0/4h9KZvBON7ojkdgEfI0wSUUKewDvdb5m3wK3hVBlhz6yz2ZHAi/Ns9fc+t1Lz7YlcVnTlwdf/MAqnW9m5WcmOyDjKPp4VZ2ULb5qe2XtrM4AfliPxP885dq8S8Mr1u9RijL7uUUmvXt7miiFod0CZxRK3I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=jbXRXq5t; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 108F928A1F5;
+	Wed, 18 Jun 2025 12:00:15 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.44.65
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1750248018; cv=fail; b=WQ4LjMLY2q9pakTjyOZ/uf3sebOTVC84e0e53yxss2YZuu7oJv2NHVu5Sx+uX2NUKXlFAm7u4lsuj6XyNKQwudJW0Wdw3nCiWGPhBmj/jIG8/Y7GQLj/wS46bYeH16/0AEpiSmFIh9O+huLwSsMsMxwpjFdlwYlZh6HypDwDuwU=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1750248018; c=relaxed/simple;
+	bh=0UcwidRhs4HM0s6FirYpPtre4ABkJACLibiY6K/U0oc=;
+	h=From:To:Cc:Subject:Date:Message-Id:Content-Type:MIME-Version; b=cyq9tNtAM/MUkTH46KyhgoxqCfBZa5adYfR6D6S5jCbGxIe/ypffJWdR+Ba64ndxgL8gRP0P6sj/RaFqGc26pr242liaDhnzD7swbOnt3tsVugvUbnqK5P6IOibHov3Q449DM6P4mq0lKBqJpow2K2ysBzZDVgpu1te/v27PwXs=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com; spf=pass smtp.mailfrom=vivo.com; dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b=qBRwmI7B; arc=fail smtp.client-ip=40.107.44.65
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=vivo.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=vivo.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="jbXRXq5t"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D355C4CEE7;
-	Wed, 18 Jun 2025 09:08:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750237712;
-	bh=0+sFPaL0Jxk/lHkLW2jW5q8iyj0drtqRimLRRflGR2g=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=jbXRXq5tUgwuXlqsPmr98Q76JjsK8O0wF4ENkwfqKXqrq5prpRJaUQHybfahmUmyI
-	 sx/w3FdMLK7QM5s5pbpZgvmjP5g2XOlLoYOq5M8Nn9K4AqVYGirStcqpHMm/py5E09
-	 rhkfMEIZg5ma2udO8n8cfhsEIN606wTgpF/1MP/OUuHUT10oGLDlWW/ysTRF5w7ZBu
-	 RVrkaj7qzkbtvhIUQQ3W9VAMhcDsUqoCoM0g2V72LrnjW/hXhgsvNs1ND/62h/tiTu
-	 2knv0aOtTMUbe9veX7CV3JVEm0RG3nqV21u5ToSZi/FbDqqkioxO535tJv1yQ6wNQ/
-	 +/LCe1olud25Q==
-Message-ID: <a3796e76-d597-4c0d-ae7c-d042cce564a5@kernel.org>
-Date: Wed, 18 Jun 2025 11:08:25 +0200
+	dkim=pass (2048-bit key) header.d=vivo.com header.i=@vivo.com header.b="qBRwmI7B"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=KfcAg7qCGT/C+PejE69RZni3fHD5Wg4QrcBAk8upBJ3W6vwC/INTGIkFER3+XsK/pqRiSWvPBz4v0DyodlzcGjcuPdy54zLiohx/q1ZpkLTtWZlAVQYFFulUSxRX18aQp+ErgWbBvVOAcMgzCCkn+AXASe9en+Ke6XOIiy79Bbfvf5HS4ktGoTvM2xgwhlifnZFofgohSuM4ziqHn3Ld6OepmfkHp5Wdg7qu+GWnr2CceGcWxk6eM5R3+BpmkEdyf6CpNo946n+gFiJBZ/fAjFAHYfHYb8lzAm462gLEuO+BZ+vdvunKpIWBRv5LTlXbHFFYz1n0k1/r5w64+/o11A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ksC+2Pgba7wFQGH8xSn4kJCnrrZPxInTr/u+m3VrGRs=;
+ b=FyH69aEzlUnWRcnx385VU0/yILFLa7nozx+IdFModXhFPM3qP8lk7hgfH6GJOz9Tk6iO+GXfUIVMz3dRegap95a4eYM9sbpAQj4b2zK3qaC/KcTFHuhkPlUc3Rh4wf1/mOVxVdjFgiLCs6pad7DRpwCtrjBaNIDIhzTbj5kquaFG7qif0vm1gVoRqZ5i6HVIJi3ZLYYmmU2LHrcg70e9cW0NS1O+ivnBGpnUdDt/0gKc59J3Xxr7Irgy9ffuPmHjftu3nn9rGN28N0zNZjCCVNc66BstUFuLaBl3rJ0NhpFPLbOEcvtakb7BLXmKM2Fqn6190Xtexqlu1Jsnh0Kuiw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
+ dkim=pass header.d=vivo.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ksC+2Pgba7wFQGH8xSn4kJCnrrZPxInTr/u+m3VrGRs=;
+ b=qBRwmI7BClIT+4szKgT37qHwtHzI3SS1rxZ42K2t/J03ENOSH5r3yiGos9oCACXx67srIGnWX2BsX7tJ+EqPoS1xjfKDfYIZkTY61ZMET/r0W7EGmz6ufMjn8BBS75RveYND/foD89oASCRB/mFGSNN0XtrpNjOaCQ5xV9Nqnnxp9HFudJlcLL9kk19eKPYyaLNXMTwRIbuftlUjeRzY/TOJ/MPqoaWS2AMrLn7dYm+ZUzLzgruo/QVXM2rNPM/YxwyD+5ijZGV2yKhPMtpARYSL8spf1aWlde2TSPLo3j5teUIiYAaTbUBOjHboxoOqTQe+z99v843RRSBYCP5wug==
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=vivo.com;
+Received: from SEZPR06MB5022.apcprd06.prod.outlook.com (2603:1096:101:48::5)
+ by TYZPR06MB7283.apcprd06.prod.outlook.com (2603:1096:405:a5::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8835.30; Wed, 18 Jun
+ 2025 12:00:07 +0000
+Received: from SEZPR06MB5022.apcprd06.prod.outlook.com
+ ([fe80::710a:6dd4:e9a6:59a7]) by SEZPR06MB5022.apcprd06.prod.outlook.com
+ ([fe80::710a:6dd4:e9a6:59a7%4]) with mapi id 15.20.8857.016; Wed, 18 Jun 2025
+ 12:00:07 +0000
+From: Li Dong <lidong@vivo.com>
+To: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND...),
+	linux-kernel@vger.kernel.org (open list)
+Cc: opensource.kernel@vivo.com,
+	lidong@vivo.com
+Subject: [PATCH v1] mmc: Convert ternary operator to str_plural() helper
+Date: Wed, 18 Jun 2025 19:59:54 +0800
+Message-Id: <20250618115954.10260-1-lidong@vivo.com>
+X-Mailer: git-send-email 2.39.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR01CA0179.apcprd01.prod.exchangelabs.com
+ (2603:1096:4:28::35) To SEZPR06MB5022.apcprd06.prod.outlook.com
+ (2603:1096:101:48::5)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
- max-sd-hs-frequency property
-To: Sarthak Garg <quic_sartgarg@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
- quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
-References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
- <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
- <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
- <d1ffbcf5-967a-4c1e-9f2c-becc5fb6c6ed@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- xsFNBFVDQq4BEAC6KeLOfFsAvFMBsrCrJ2bCalhPv5+KQF2PS2+iwZI8BpRZoV+Bd5kWvN79
- cFgcqTTuNHjAvxtUG8pQgGTHAObYs6xeYJtjUH0ZX6ndJ33FJYf5V3yXqqjcZ30FgHzJCFUu
- JMp7PSyMPzpUXfU12yfcRYVEMQrmplNZssmYhiTeVicuOOypWugZKVLGNm0IweVCaZ/DJDIH
- gNbpvVwjcKYrx85m9cBVEBUGaQP6AT7qlVCkrf50v8bofSIyVa2xmubbAwwFA1oxoOusjPIE
- J3iadrwpFvsZjF5uHAKS+7wHLoW9hVzOnLbX6ajk5Hf8Pb1m+VH/E8bPBNNYKkfTtypTDUCj
- NYcd27tjnXfG+SDs/EXNUAIRefCyvaRG7oRYF3Ec+2RgQDRnmmjCjoQNbFrJvJkFHlPeHaeS
- BosGY+XWKydnmsfY7SSnjAzLUGAFhLd/XDVpb1Een2XucPpKvt9ORF+48gy12FA5GduRLhQU
- vK4tU7ojoem/G23PcowM1CwPurC8sAVsQb9KmwTGh7rVz3ks3w/zfGBy3+WmLg++C2Wct6nM
- Pd8/6CBVjEWqD06/RjI2AnjIq5fSEH/BIfXXfC68nMp9BZoy3So4ZsbOlBmtAPvMYX6U8VwD
- TNeBxJu5Ex0Izf1NV9CzC3nNaFUYOY8KfN01X5SExAoVTr09ewARAQABzSVLcnp5c3p0b2Yg
- S296bG93c2tpIDxrcnprQGtlcm5lbC5vcmc+wsGVBBMBCgA/AhsDBgsJCAcDAgYVCAIJCgsE
- FgIDAQIeAQIXgBYhBJvQfg4MUfjVlne3VBuTQ307QWKbBQJoF1BKBQkWlnSaAAoJEBuTQ307
- QWKbHukP/3t4tRp/bvDnxJfmNdNVn0gv9ep3L39IntPalBFwRKytqeQkzAju0whYWg+R/rwp
- +r2I1Fzwt7+PTjsnMFlh1AZxGDmP5MFkzVsMnfX1lGiXhYSOMP97XL6R1QSXxaWOpGNCDaUl
- ajorB0lJDcC0q3xAdwzRConxYVhlgmTrRiD8oLlSCD5baEAt5Zw17UTNDnDGmZQKR0fqLpWy
- 786Lm5OScb7DjEgcA2PRm17st4UQ1kF0rQHokVaotxRM74PPDB8bCsunlghJl1DRK9s1aSuN
- hL1Pv9VD8b4dFNvCo7b4hfAANPU67W40AaaGZ3UAfmw+1MYyo4QuAZGKzaP2ukbdCD/DYnqi
- tJy88XqWtyb4UQWKNoQqGKzlYXdKsldYqrLHGoMvj1UN9XcRtXHST/IaLn72o7j7/h/Ac5EL
- 8lSUVIG4TYn59NyxxAXa07Wi6zjVL1U11fTnFmE29ALYQEXKBI3KUO1A3p4sQWzU7uRmbuxn
- naUmm8RbpMcOfa9JjlXCLmQ5IP7Rr5tYZUCkZz08LIfF8UMXwH7OOEX87Y++EkAB+pzKZNNd
- hwoXulTAgjSy+OiaLtuCys9VdXLZ3Zy314azaCU3BoWgaMV0eAW/+gprWMXQM1lrlzvwlD/k
- whyy9wGf0AEPpLssLVt9VVxNjo6BIkt6d1pMg6mHsUEVzsFNBFVDXDQBEADNkrQYSREUL4D3
- Gws46JEoZ9HEQOKtkrwjrzlw/tCmqVzERRPvz2Xg8n7+HRCrgqnodIYoUh5WsU84N03KlLue
- MNsWLJBvBaubYN4JuJIdRr4dS4oyF1/fQAQPHh8Thpiz0SAZFx6iWKB7Qrz3OrGCjTPcW6ei
- OMheesVS5hxietSmlin+SilmIAPZHx7n242u6kdHOh+/SyLImKn/dh9RzatVpUKbv34eP1wA
- GldWsRxbf3WP9pFNObSzI/Bo3kA89Xx2rO2roC+Gq4LeHvo7ptzcLcrqaHUAcZ3CgFG88CnA
- 6z6lBZn0WyewEcPOPdcUB2Q7D/NiUY+HDiV99rAYPJztjeTrBSTnHeSBPb+qn5ZZGQwIdUW9
- YegxWKvXXHTwB5eMzo/RB6vffwqcnHDoe0q7VgzRRZJwpi6aMIXLfeWZ5Wrwaw2zldFuO4Dt
- 91pFzBSOIpeMtfgb/Pfe/a1WJ/GgaIRIBE+NUqckM+3zJHGmVPqJP/h2Iwv6nw8U+7Yyl6gU
- BLHFTg2hYnLFJI4Xjg+AX1hHFVKmvl3VBHIsBv0oDcsQWXqY+NaFahT0lRPjYtrTa1v3tem/
- JoFzZ4B0p27K+qQCF2R96hVvuEyjzBmdq2esyE6zIqftdo4MOJho8uctOiWbwNNq2U9pPWmu
- 4vXVFBYIGmpyNPYzRm0QPwARAQABwsF8BBgBCgAmAhsMFiEEm9B+DgxR+NWWd7dUG5NDfTtB
- YpsFAmgXUF8FCRaWWyoACgkQG5NDfTtBYptO0w//dlXJs5/42hAXKsk+PDg3wyEFb4NpyA1v
- qmx7SfAzk9Hf6lWwU1O6AbqNMbh6PjEwadKUk1m04S7EjdQLsj/MBSgoQtCT3MDmWUUtHZd5
- RYIPnPq3WVB47GtuO6/u375tsxhtf7vt95QSYJwCB+ZUgo4T+FV4hquZ4AsRkbgavtIzQisg
- Dgv76tnEv3YHV8Jn9mi/Bu0FURF+5kpdMfgo1sq6RXNQ//TVf8yFgRtTUdXxW/qHjlYURrm2
- H4kutobVEIxiyu6m05q3e9eZB/TaMMNVORx+1kM3j7f0rwtEYUFzY1ygQfpcMDPl7pRYoJjB
- dSsm0ZuzDaCwaxg2t8hqQJBzJCezTOIkjHUsWAK+tEbU4Z4SnNpCyM3fBqsgYdJxjyC/tWVT
- AQ18NRLtPw7tK1rdcwCl0GFQHwSwk5pDpz1NH40e6lU+NcXSeiqkDDRkHlftKPV/dV+lQXiu
- jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
- zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
- XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <d1ffbcf5-967a-4c1e-9f2c-becc5fb6c6ed@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SEZPR06MB5022:EE_|TYZPR06MB7283:EE_
+X-MS-Office365-Filtering-Correlation-Id: 1b7adb77-d69f-4517-502e-08ddae5faaaa
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam:
+	BCL:0;ARA:13230040|52116014|376014|366016|1800799024|38350700014;
+X-Microsoft-Antispam-Message-Info:
+	=?us-ascii?Q?8nXSBzF9oESdcadVy0eWplsnffJKrrzJtD8aHn2CC/b/ugVBbX8/WUBoWmjz?=
+ =?us-ascii?Q?LmSgvjrYcuRWtJJN7bxy2/IyzXpk2J83NvqqONyhvZR34DQ1WhHU22xcmhS1?=
+ =?us-ascii?Q?WU0K0KaYE867cHVuNRx8NDEkTgmoktDGnuMwYq/TLTVA9M+CGm1YUDTLhxT4?=
+ =?us-ascii?Q?YFK9kW6MTpogtYui7fy1oHzMJlm3V4AjCVLEEg1nRFL9kKk7umBhAuKz5JdY?=
+ =?us-ascii?Q?Zfum/Y1bhp5IEHGDX4OdLVCOMCsgcNqxB/4vjk3fbeAlUYPz5UliR6O3LrBg?=
+ =?us-ascii?Q?iywkqS8YIyoWZGECKaTIp6pHZAgVrbIA1BQGGT0y0ZRVDJNlGbecBn/NUuIg?=
+ =?us-ascii?Q?rXYCFqX6SKVyD6j4d0lCpp7ZYbO055e4aOuURD7QVvjszrM61dohVaX7RDU5?=
+ =?us-ascii?Q?eUtybCEQzSO0Z6OWrdyGab2F6O09XW4/ZvpHkVX5Dn0sJQ/S6dfaZ13LqvJC?=
+ =?us-ascii?Q?AlOSrwewh57stbCkFpu6waVtvvsKb+8SKCZYCqkoH7dzYJrFmVVg+eAxZHdq?=
+ =?us-ascii?Q?5z49QwWoBDPu9zhP1vaLcd6wqwRT3JV0QmXXie+P390B1GmH67NCQHrI9kae?=
+ =?us-ascii?Q?CYNe0zhrDzgUXrG6I2/2/dIayW0HbDx2IVveObrxN0A/2d/uEtp3kDR5T+it?=
+ =?us-ascii?Q?fZnSFIcqBCNdSIVjb+/qMqO9exPSa3La/Lm1NqwmUPOy5KwKDCN/nsiCLSLM?=
+ =?us-ascii?Q?6J5rPZJlsIa2rsEz+DVFo085832jaUlISxESF4DTn0+zeQq5UE/1FO+N4bDc?=
+ =?us-ascii?Q?MGv96k7IKnBJfGKMCD0len3lRk9RYvn4Zms0d8OhSFr9y2djq5t+0bA1smED?=
+ =?us-ascii?Q?fAUSf+SbvDvztDVzC2zsqP3ksGv035JoHtd4tCSTog57+SG+J1ZF7meYdQOc?=
+ =?us-ascii?Q?mACbn8XCLelFXHrFyMhgdoOajGyMKyQC1CAOW7JqWWiRgF0dtCx8YOVNrupD?=
+ =?us-ascii?Q?kIRhNgZu8MOGdlR6Ge5SVR0HHPTwV8sHFqG5QYPMTgCQZCda4fxn7YRuDa4E?=
+ =?us-ascii?Q?JJKJ1WcY3zIaYZEQaNqib7nf59i4gTxyqquGkDezm3cpgKUnmUDEEe5khVie?=
+ =?us-ascii?Q?21UZLxPWdsg90FDFVVExvODcQw/eRvc64qPswjZ0S5pC/AtNEjFw0qKv5UA0?=
+ =?us-ascii?Q?WRWF40I9wvB+/y5R8UvRArs1P1LYIvApDwo7wI46ffyikrJloupvHLRTrhFg?=
+ =?us-ascii?Q?JuVPaBlaNMYq3SNmFT88ZuJC+JSXWmE6yVxqMPX9VqeeBVln6gLwdCVNMZPL?=
+ =?us-ascii?Q?am/CAl9/xsmmVMdHBsO/DFvGYVF2WebYRd0Sn3Pke7hEa31XQdkrlKKtu0jh?=
+ =?us-ascii?Q?kHOfrLIU1XTf4eu0LdAmefHbSy5iCAleTxDe7lh2DoMAz5zaTXD+1cbDDVLB?=
+ =?us-ascii?Q?i3eLFB7wrXUBl/hsYBnaIMwrQmhQv/6HuaD9tezkpEIPs2s7RQVzZHv2OmK8?=
+ =?us-ascii?Q?gZ7gSifIzKQbMetd+9mmwRiQTH2Quf114Act6uBgbCZefGybKy23bA=3D=3D?=
+X-Forefront-Antispam-Report:
+	CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEZPR06MB5022.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(52116014)(376014)(366016)(1800799024)(38350700014);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0:
+	=?us-ascii?Q?WfKFxQbx1iM/n5JXGeD0fjCLCxu9HtnBZWYdiZXQhwcKCQhb+CiVO+h2gIc5?=
+ =?us-ascii?Q?VXexpN5/KGRYr0nAFc7+44iKQurcBK9/Hw4SBq7CerbNMHBZY0TC1RAFSDVA?=
+ =?us-ascii?Q?j1YMd+50H99XEQ7Trg9BxQ9tZyWliwQ0vZG0IVYYWJDETA9pvnYPymNimG2q?=
+ =?us-ascii?Q?jjRJH692X12yd90pdkO88aREo0NWQdUGhTvD/nozV3ahnVw/Zm2G4GbMkmVv?=
+ =?us-ascii?Q?yy4UBP3vibNvIUcswoapULd9LgqG+fZ6etkZO4vmPCjjphE2+IA1oC9cQQP2?=
+ =?us-ascii?Q?aNO+iDNUogpkG/mMVTGcLV9rDAJ2rGTnaScpuTdkXWLJ1YOaaGsxFrNRknao?=
+ =?us-ascii?Q?bIzCecYe/1QGI3ciPSnFkNrkiWT8Dm+M+L4NPo9C9Fz8+ENOLOZjpG0rVS3M?=
+ =?us-ascii?Q?hfBI6q/36W0Rx9xTGD0OCnRWsZ52V+HYRL1jFoC1e29GB/TidIJOuy3luBU6?=
+ =?us-ascii?Q?+LtUtbwQn5jb3tNr43D5aE+CjAOvHdNoZQ0km7RBN7fMkDJxlDMvoiHS9Ur/?=
+ =?us-ascii?Q?sMjWEkYjd04+vQE5dIr7dBEITOIs3dn60nFwLc9nazwDoahpxW5uWBx8IrBR?=
+ =?us-ascii?Q?PuSHaa7qDpQYhLB0wHlu34+55zfcXmrzJf2l4ELKhCkG3H5iwOS7eEYc329c?=
+ =?us-ascii?Q?vCV9by3o2UmjUB9HWp6Yig9TAp9crjzl499A4KPs2dn3D6Ln1o1+umAhdZ4l?=
+ =?us-ascii?Q?LsnSbhemrWtV7TmYMiu+nNiSdU3ZL438/l8irdE+6p0NGXI3SS5VE9FrZA37?=
+ =?us-ascii?Q?80t3T5ZhOvmG8vvicKfcEGPBSoDvd/J1MCatGPE2OwQo/vbIiGdPpZGI/3oq?=
+ =?us-ascii?Q?TbJk90tWNQSK0Wlydz61VMEfcAiMv7c5Fc6ErIfJCqd+pNS1pDowbjLvjpqg?=
+ =?us-ascii?Q?h7X/cSOgWMFPzcbH0DOh2dV+d3PuShq7CalW0Ysc/n/hbmpmTAcz4CgeZ/tb?=
+ =?us-ascii?Q?blZrp/npZHcxVrfvonp3oWfCny/qFx1t8sSrBN77BkB2uwOEyJGpzsZchW74?=
+ =?us-ascii?Q?1Xsv/KuxNfWSC2ReM5OYQnuJSJIVpMhsVDgRdQbsz1A9LHOcWmkLLUu6J8nA?=
+ =?us-ascii?Q?EiVv0i28uratfumszu/siZLmnGFLieJeD5l/wpDNoIrjaiZpj/A6/YHp65f1?=
+ =?us-ascii?Q?bsiezjXaRsnGeMnrlrHnd4S9wOpTZRCUHkzxSkcrUT9x45QtE0ipOyUy5wxN?=
+ =?us-ascii?Q?RUeyO2xxYpcJ3MKT266jbN1ymUJBZKiVqYard1rtMcAak/NIY+A7JgTpKHjF?=
+ =?us-ascii?Q?AfNa4HlUvwym6xHFZkcA2rL1UF8hf1MIlpT5vFwkQ1uOiCmRfooG1Lq00Swo?=
+ =?us-ascii?Q?vzK3tF5lnsFF6Di9zcIJUetZnLfTWrknoTrzNMb1U6xd4aJCGwua7rADtbr3?=
+ =?us-ascii?Q?0jhJGWSFM6H6xid+jMPcIVU5YO8pHwDuFF2eWErqwpicTG+y5BeNZw7Q5f4g?=
+ =?us-ascii?Q?qSOpw8HIvPRi/j8VseO1r6KMyeeAV8DfKrTmR9JSOfFREwyM4NH1QAKR5T67?=
+ =?us-ascii?Q?OSj18T2ohtu9AFga1liQWtuI0zkgy3dbQPxF803hOs74uXXJNXxe0oOfZGcr?=
+ =?us-ascii?Q?9aAkIcG4ND1uTBN0deOX232vYEnacZ/pCTwmmW9b?=
+X-OriginatorOrg: vivo.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1b7adb77-d69f-4517-502e-08ddae5faaaa
+X-MS-Exchange-CrossTenant-AuthSource: SEZPR06MB5022.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jun 2025 12:00:06.8539
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9DvOjDKloOBMTZZdvTTAPwjuz5dvrnmk1Vo8qxnXA4PzksN9jXCTax68PtRJs5pXYHYZmEEnAiWU72zm9S1nDQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR06MB7283
 
-On 18/06/2025 10:38, Sarthak Garg wrote:
-> 
-> 
-> On 6/18/2025 1:13 PM, Krzysztof Kozlowski wrote:
->> On 18/06/2025 09:28, Sarthak Garg wrote:
->>> Introduce a new optional device tree property `max-sd-hs-frequency` to
->>> limit the maximum frequency (in Hz) used for SD cards operating in
->>> High-Speed (HS) mode.
->>>
->>> This property is useful for platforms with vendor-specific hardware
->>> constraints, such as the presence of a level shifter that cannot
->>> reliably support the default 50 MHz HS frequency. It allows the host
->>> driver to cap the HS mode frequency accordingly.
->>>
->>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
->>> ---
->>>   .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
->>>   1 file changed, 10 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>> index 9a7235439759..1976f5f8c401 100644
->>> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>> @@ -93,6 +93,16 @@ properties:
->>>       minimum: 400000
->>>       maximum: 384000000
->>>   
->>> +  max-sd-hs-frequency:
->>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>> +    description: |
->>> +      Maximum frequency (in Hz) to be used for SD cards operating in
->>> +      High-Speed (HS) mode. This is useful for platforms with vendor-specific
->>> +      limitations, such as the presence of a level shifter that cannot support
->>> +      the default 50 MHz HS frequency or other.
->>> +    minimum: 400000
->>> +    maximum: 50000000
->>
->> This might be fine, but your DTS suggests clearly this is SoC compatible
->> deducible, which I already said at v1.
->>
->> So now you send v3 which is the same as v1, so you get the same comments.
->>
->> Best regards,
->> Krzysztof
-> 
-> Introducing this flag no longer becomes SoC compatible because as per 
-> discussions in V2 patchset with Ulf and Konrad this new property can be 
-> used by any vendor who wants to limit the HS mode frequency due to any 
-> reason. Thats why moved to this generic approach again in V3 as compared 
-> to compatible based approach in V2.
+Replace direct ternary condition check with existing helper function
+str_plural() to improve code readability and maintain consistency.
 
-The are no arguments provided in favor, so my review from v1 stays. You
-get the same comments.
+Signed-off-by: Li Dong <lidong@vivo.com>
+---
+ drivers/mmc/host/cb710-mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
+index d741c1f9cf87..52f9cf7dbc7f 100644
+--- a/drivers/mmc/host/cb710-mmc.c
++++ b/drivers/mmc/host/cb710-mmc.c
+@@ -8,6 +8,7 @@
+ #include <linux/module.h>
+ #include <linux/pci.h>
+ #include <linux/delay.h>
++#include <linux/string_choices.h>
+ #include "cb710-mmc.h"
+ 
+ #define CB710_MMC_REQ_TIMEOUT_MS	2000
+@@ -215,7 +216,7 @@ static void cb710_mmc_set_transfer_size(struct cb710_slot *slot,
+ 		((count - 1) << 16)|(blocksize - 1));
+ 
+ 	dev_vdbg(cb710_slot_dev(slot), "set up for %zu block%s of %zu bytes\n",
+-		count, count == 1 ? "" : "s", blocksize);
++		count, str_plural(count), blocksize);
+ }
+ 
+ static void cb710_mmc_fifo_hack(struct cb710_slot *slot)
+-- 
+2.39.0
+
