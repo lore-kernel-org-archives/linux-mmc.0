@@ -1,365 +1,155 @@
-Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id CA34D2063E7
-	for <linux-mmc@vger.kernel.org>; Wed, 18 Jun 2025 08:08:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id ECCCA27F01C;
+	Wed, 18 Jun 2025 08:38:57 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750234112; cv=none; b=rWfyxXCQ5Eapz6s9wCGWufE2YsqmAl88r/d8VHSsVY8MoEdFXd4CkWD4epV1OAFEJO5jyzp1oteezTiwpn870NiC5lU/1gjfpwxC3yFB2trNotfl4hLL+UTIMZ+6VhtrkpRJu9DOChMtMdlWAsRZVpsh1OGldcThdBO7yOVoAUw=
+	t=1750235940; cv=none; b=FyX4gKtmmIhHlneprQFeBpSqPWF7j6V46tsJj4FR98eodt4qrvFLoXVpWdOWb36VriUTuXKV7mssT0WyB9XA+KRWSVfeomR7/QI0AwhrFg+2mMD8D/CSkpLZdG0fCB3rSG24F1xiZzqgqYJ+QI5gJ+9Tvu7XERspC41Cn0cXTQQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750234112; c=relaxed/simple;
-	bh=wzwQZeasVMRkHr61n+fWYE9vEQ48cjy89Q9a4nBoJmk=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=EmKOsg7dtvkdHP26XuokQvGMu9kC1WqYt6irrwN6A7aI16TXKP5zh3+YisYFDoKePjcMx4EAiL3zY0u/xbsL4I685PSxjVeXbU7b+BkR2ZARpbqH9TTQLTmjhxvIOYQ6ZIsf9oldUQ9SZRznwIj6klzw5q0ZReZv2to7KBY8u7M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
-Received: from loongson.cn (unknown [223.64.68.149])
-	by gateway (Coremail) with SMTP id _____8DxQK_0c1JosPsYAQ--.22608S3;
-	Wed, 18 Jun 2025 16:08:20 +0800 (CST)
-Received: from localhost.localdomain (unknown [223.64.68.149])
-	by front1 (Coremail) with SMTP id qMiowMCx_cbtc1Jou0kfAQ--.34407S2;
-	Wed, 18 Jun 2025 16:08:13 +0800 (CST)
-From: Binbin Zhou <zhoubinbin@loongson.cn>
-To: Binbin Zhou <zhoubb.aaron@gmail.com>,
-	Huacai Chen <chenhuacai@loongson.cn>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Huacai Chen <chenhuacai@kernel.org>,
-	Xuerui Wang <kernel@xen0n.name>,
-	loongarch@lists.linux.dev,
-	linux-mmc@vger.kernel.org,
-	wanghongliang@loongson.cn,
-	Binbin Zhou <zhoubinbin@loongson.cn>
-Subject: [PATCH v3 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver
-Date: Wed, 18 Jun 2025 16:08:03 +0800
-Message-ID: <aa9cfb9707334cd2e56692397dd4f54c418262ce.1750216134.git.zhoubinbin@loongson.cn>
-X-Mailer: git-send-email 2.47.1
-In-Reply-To: <cover.1750216134.git.zhoubinbin@loongson.cn>
-References: <cover.1750216134.git.zhoubinbin@loongson.cn>
+	s=arc-20240116; t=1750235940; c=relaxed/simple;
+	bh=G+RSgIidmcc8+QlaQIEFM32LREvOAiomoXRxkIQlspE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=SLocqFa0L7/VPWu2zdvvbyBW8s7HY3Xax4j4QeI4owiO2aXv9gTR2Y1U4OVUwrw27P7IUsebAfjyF/TM4xXDxle2Qp8c3gkG1zpI/5Omxr8bM9zKFv61nnrnVLOGztE0KdAXRg3hzwHCIBGBfMQz4/E7mcjH7tVywXPaIRx5rFw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=hbzfTJRU; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="hbzfTJRU"
+Received: from pps.filterd (m0279864.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55I1Sa34013276;
+	Wed, 18 Jun 2025 08:38:52 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	AdD1WMfEdHKmW1Nn/+epgWe5n6XWQmEaz5wsJjHmz0I=; b=hbzfTJRUbsFYS9oc
+	mlKqTjwIAKScx9r7wd5UdBrOQLAiGqwqSihhGRDqujkc+AQFfj1j2A05iZsuiLvc
+	jP57iXgYwjLkxoC1AH186WOvAyEMdw7afclmnfh0ZVBzegW44mt29Qy3IPY/d+Xc
+	7J6/QjDgChtdswH9kAfQi0sFvuV8aIhP1MK3Zzh0XasgTJn6K+pZiQTc/NNUriPl
+	aclzKdk2hhWWpUOZPKa1dvk2kEXa9D9/mrjoiuvNBzSFuXArcQgXxDDZuFyF5at9
+	8a/JKwjduC1tc0OB7GQEgMfyoZaXrA/5NuVz3C5APxFnorcVw7ewNfWlXGjJOcfy
+	Ptkbqw==
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47928mkbv6-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 18 Jun 2025 08:38:52 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA05.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 55I8cp5N001427
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 18 Jun 2025 08:38:51 GMT
+Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Wed, 18 Jun
+ 2025 01:38:45 -0700
+Message-ID: <d1ffbcf5-967a-4c1e-9f2c-becc5fb6c6ed@quicinc.com>
+Date: Wed, 18 Jun 2025 14:08:43 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID:qMiowMCx_cbtc1Jou0kfAQ--.34407S2
-X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
-X-Coremail-Antispam: 1Uk129KBj93XoW3ur45Cw17Cr18JryUJrWDGFX_yoWkXw47pF
-	y5A3y5KrW5tr4S9ry0qFWUu343ZrWaqryYkFZrWr15Zw1xtw18uw1DGFyfXFy5KrykGFyx
-	Za1Du3yDua9rXwbCm3ZEXasCq-sJn29KB7ZKAUJUUUUr529EdanIXcx71UUUUU7KY7ZEXa
-	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
-	0xBIdaVrnRJUUU9jb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
-	IYs7xG6rWj6s0DM7CIcVAFz4kK6r1Y6r17M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
-	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
-	0_Cr0_Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v2
-	6rxl6s0DM2kKe7AKxVWUXVWUAwAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYI
-	kI8VC2zVCFFI0UMc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUtVWr
-	XwAv7VC2z280aVAFwI0_Gr0_Cr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI4
-	8JMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMxCIbckI1I0E14v26r1Y
-	6r17MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7
-	AF67AKxVWUtVW8ZwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26ryj6F1UMIIF0xvE
-	2Ix0cI8IcVCY1x0267AKxVW8JVWxJwCI42IY6xAIw20EY4v20xvaj40_Jr0_JF4lIxAIcV
-	C2z280aVAFwI0_Gr0_Cr1lIxAIcVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2Kfnx
-	nUUI43ZEXa7IU8EeHDUUUUU==
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
+ max-sd-hs-frequency property
+Content-Language: en-US
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski
+	<krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Bjorn Andersson
+	<andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>
+CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
+References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
+ <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
+ <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjE4MDA3NCBTYWx0ZWRfXz24EQlnluwGA
+ rGsyGORj7o6N8rDG6iEBTDC6/05nuguF5lxOyRIGhqrxMFwf8oDswdSpuDcGaWSn7QhjnM32YBx
+ EOFLL+Olt54mGmMacsIwJM6tWVxVfyxneaurY5pJa5LimqyqeseQkVvuDc8cFNepEL0KqZccowr
+ 1F7HC4xnA1gg1IBtsj4PkuMepbG1vi/geccE7KxsUgJFfn1Hs8+KIMJw/87TD8hGiL5HYF+PqnW
+ rabRLU/WmM/iEzwLg6b84AvUnB2VYYXwGKyvjkvPfQmiEFVK4tLI+OHCBilN+2nroBZzKaiW5sy
+ DVMb404WeEZitsb8x8spSZuow9MChXbbWJr2KmkOwF/kY5IPXwv80QiYAhmcG2lek/TezMb7J2R
+ TgfbdnPZGpR3b5KX0mO7OAb37KAzvDIGQXlIn5/Zx53R8IEb70bYnrOd4WqnxhpSNxIf1lR4
+X-Authority-Analysis: v=2.4 cv=fvbcZE4f c=1 sm=1 tr=0 ts=68527b1c cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8
+ a=n2guzD_OBVmuCnK1DsEA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: pjTl4ENulpfPvlypMoUHlMtLEwvLTWTZ
+X-Proofpoint-ORIG-GUID: pjTl4ENulpfPvlypMoUHlMtLEwvLTWTZ
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
+ definitions=2025-06-18_03,2025-06-18_02,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 lowpriorityscore=0 bulkscore=0 priorityscore=1501
+ mlxlogscore=999 phishscore=0 clxscore=1015 mlxscore=0 impostorscore=0
+ adultscore=0 spamscore=0 suspectscore=0 classifier=spam authscore=0
+ authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2506180074
 
-This patch describes the two MMC controllers of the Loongson-2K2000 SoC,
-one providing an eMMC interface and the other exporting an SD/SDIO
-interface.
 
-Compared to the Loongson-2K1000's MMC controllers, their internals are
-similar, except that we use an internally exclusive DMA engine instead of
-an externally shared APBDMA engine.
 
-Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
----
- drivers/mmc/host/loongson2-mmc.c | 212 +++++++++++++++++++++++++++++++
- 1 file changed, 212 insertions(+)
+On 6/18/2025 1:13 PM, Krzysztof Kozlowski wrote:
+> On 18/06/2025 09:28, Sarthak Garg wrote:
+>> Introduce a new optional device tree property `max-sd-hs-frequency` to
+>> limit the maximum frequency (in Hz) used for SD cards operating in
+>> High-Speed (HS) mode.
+>>
+>> This property is useful for platforms with vendor-specific hardware
+>> constraints, such as the presence of a level shifter that cannot
+>> reliably support the default 50 MHz HS frequency. It allows the host
+>> driver to cap the HS mode frequency accordingly.
+>>
+>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>> ---
+>>   .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
+>>   1 file changed, 10 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> index 9a7235439759..1976f5f8c401 100644
+>> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>> @@ -93,6 +93,16 @@ properties:
+>>       minimum: 400000
+>>       maximum: 384000000
+>>   
+>> +  max-sd-hs-frequency:
+>> +    $ref: /schemas/types.yaml#/definitions/uint32
+>> +    description: |
+>> +      Maximum frequency (in Hz) to be used for SD cards operating in
+>> +      High-Speed (HS) mode. This is useful for platforms with vendor-specific
+>> +      limitations, such as the presence of a level shifter that cannot support
+>> +      the default 50 MHz HS frequency or other.
+>> +    minimum: 400000
+>> +    maximum: 50000000
+> 
+> This might be fine, but your DTS suggests clearly this is SoC compatible
+> deducible, which I already said at v1.
+> 
+> So now you send v3 which is the same as v1, so you get the same comments.
+> 
+> Best regards,
+> Krzysztof
 
-diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-index 872f5dc21b21..75144221a821 100644
---- a/drivers/mmc/host/loongson2-mmc.c
-+++ b/drivers/mmc/host/loongson2-mmc.c
-@@ -44,6 +44,18 @@
- #define LOONGSON2_MMC_REG_DATA		0x40 /* Data Register */
- #define LOONGSON2_MMC_REG_IEN		0x64 /* Interrupt Enable Register */
- 
-+/* EMMC DLL Mode Registers */
-+#define LOONGSON2_MMC_REG_DLLVAL	0xf0 /* DLL Master Lock-value Register */
-+#define LOONGSON2_MMC_REG_DLLCTL	0xf4 /* DLL Control Register */
-+#define LOONGSON2_MMC_REG_DELAY		0xf8 /* DLL Delayed Parameter Register */
-+#define LOONGSON2_MMC_REG_SEL		0xfc /* Bus Mode Selection Register */
-+
-+/* Exclusive DMA R/W Registers */
-+#define LOONGSON2_MMC_REG_WDMA_LO	0x400
-+#define LOONGSON2_MMC_REG_WDMA_HI	0x404
-+#define LOONGSON2_MMC_REG_RDMA_LO	0x800
-+#define LOONGSON2_MMC_REG_RDMA_HI	0x804
-+
- /* Bitfields of control register */
- #define LOONGSON2_MMC_CTL_ENCLK		BIT(0)
- #define LOONGSON2_MMC_CTL_EXTCLK	BIT(1)
-@@ -109,6 +121,9 @@
- #define LOONGSON2_MMC_DSTS_RESUME	BIT(15)
- #define LOONGSON2_MMC_DSTS_SUSPEND	BIT(16)
- 
-+/* Bitfields of FIFO Status Register */
-+#define LOONGSON2_MMC_FSTS_TXFULL	BIT(11)
-+
- /* Bitfields of interrupt register */
- #define LOONGSON2_MMC_INT_DFIN		BIT(0)
- #define LOONGSON2_MMC_INT_DTIMEOUT	BIT(1)
-@@ -136,6 +151,41 @@
- #define LOONGSON2_MMC_IEN_ALL		GENMASK(9, 0)
- #define LOONGSON2_MMC_INT_CLEAR		GENMASK(9, 0)
- 
-+/* Bitfields of DLL master lock-value register */
-+#define LOONGSON2_MMC_DLLVAL_DONE	BIT(8)
-+
-+/* Bitfields of DLL control register */
-+#define LOONGSON2_MMC_DLLCTL_TIME	GENMASK(7, 0)
-+#define LOONGSON2_MMC_DLLCTL_INCRE	GENMASK(15, 8)
-+#define LOONGSON2_MMC_DLLCTL_START	GENMASK(23, 16)
-+#define LOONGSON2_MMC_DLLCTL_CLK_MODE	BIT(24)
-+#define LOONGSON2_MMC_DLLCTL_START_BIT	BIT(25)
-+#define LOONGSON2_MMC_DLLCTL_TIME_BPASS	GENMASK(29, 26)
-+
-+#define LOONGSON2_MMC_DELAY_PAD		GENMASK(7, 0)
-+#define LOONGSON2_MMC_DELAY_RD		GENMASK(15, 8)
-+
-+#define LOONGSON2_MMC_SEL_DATA		BIT(0)	/* 0: SDR, 1: DDR */
-+#define LOONGSON2_MMC_SEL_BUS		BIT(0)	/* 0: EMMC, 1: SDIO */
-+
-+/* Internal dma controller registers */
-+
-+/* Bitfields of Global Configuration Register */
-+#define LOONGSON2_MMC_DMA_64BIT_EN	BIT(0) /* 1: 64 bit support */
-+#define LOONGSON2_MMC_DMA_UNCOHERENT_EN	BIT(1) /* 0: cache, 1: uncache */
-+#define LOONGSON2_MMC_DMA_ASK_VALID	BIT(2)
-+#define LOONGSON2_MMC_DMA_START		BIT(3) /* DMA start operation */
-+#define LOONGSON2_MMC_DMA_STOP		BIT(4) /* DMA stop operation */
-+#define LOONGSON2_MMC_DMA_CONFIG_MASK	GENMASK_ULL(4, 0) /* DMA controller config bits mask */
-+
-+/* Bitfields of ndesc_addr field of HW descriptor */
-+#define LOONGSON2_MMC_DMA_DESC_EN	BIT(0) /*1: The next descriptor is valid */
-+#define LOONGSON2_MMC_DMA_DESC_ADDR_LOW	GENMASK(31, 1)
-+
-+/* Bitfields of cmd field of HW descriptor */
-+#define LOONGSON2_MMC_DMA_INT		BIT(1)	/* Enable DMA interrupts */
-+#define LOONGSON2_MMC_DMA_DATA_DIR	BIT(12) /* 1: write to device, 0: read from device */
-+
- /* Loongson-2K1000 SDIO2 DMA routing register */
- #define LS2K1000_SDIO_DMA_MASK		GENMASK(17, 15)
- #define LS2K1000_DMA0_CONF		0x0
-@@ -180,6 +230,8 @@ struct loongson2_mmc_host {
- 	struct resource *res;
- 	struct clk *clk;
- 	u64 rate;
-+	void *sg_cpu;
-+	dma_addr_t sg_dma;
- 	int dma_complete;
- 	struct dma_chan *chan;
- 	int cmd_is_stop;
-@@ -192,6 +244,7 @@ struct loongson2_mmc_host {
- struct loongson2_mmc_pdata {
- 	const struct regmap_config *regmap_config;
- 	void (*reorder_cmd_data)(struct loongson2_mmc_host *host, struct mmc_command *cmd);
-+	void (*fix_data_timeout)(struct loongson2_mmc_host *host, struct mmc_command *cmd);
- 	int (*setting_dma)(struct loongson2_mmc_host *host, struct platform_device *pdev);
- 	int (*prepare_dma)(struct loongson2_mmc_host *host, struct mmc_data *data);
- 	void (*release_dma)(struct loongson2_mmc_host *host, struct device *dev);
-@@ -282,6 +335,9 @@ static void loongson2_mmc_send_request(struct mmc_host *mmc)
- 		return;
- 	}
- 
-+	if (host->pdata->fix_data_timeout)
-+		host->pdata->fix_data_timeout(host, cmd);
-+
- 	loongson2_mmc_send_command(host, cmd);
- 
- 	/* Fix deselect card */
-@@ -426,6 +482,36 @@ static irqreturn_t loongson2_mmc_irq(int irq, void *devid)
- 	return IRQ_WAKE_THREAD;
- }
- 
-+static void loongson2_mmc_dll_mode_init(struct loongson2_mmc_host *host)
-+{
-+	u32 val, pad_delay, delay, ret;
-+
-+	regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_SEL,
-+			   LOONGSON2_MMC_SEL_DATA, LOONGSON2_MMC_SEL_DATA);
-+
-+	val = FIELD_PREP(LOONGSON2_MMC_DLLCTL_TIME, 0xc8)
-+	    | FIELD_PREP(LOONGSON2_MMC_DLLCTL_INCRE, 0x1)
-+	    | FIELD_PREP(LOONGSON2_MMC_DLLCTL_START, 0x1)
-+	    | FIELD_PREP(LOONGSON2_MMC_DLLCTL_CLK_MODE, 0x1)
-+	    | FIELD_PREP(LOONGSON2_MMC_DLLCTL_START_BIT, 0x1)
-+	    | FIELD_PREP(LOONGSON2_MMC_DLLCTL_TIME_BPASS, 0xf);
-+
-+	regmap_write(host->regmap, LOONGSON2_MMC_REG_DLLCTL, val);
-+
-+	ret = regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_DLLVAL, val,
-+				       (val & LOONGSON2_MMC_DLLVAL_DONE), 0, 4000);
-+	if (ret < 0)
-+		return;
-+
-+	regmap_read(host->regmap, LOONGSON2_MMC_REG_DLLVAL, &val);
-+	pad_delay = FIELD_GET(GENMASK(7, 1), val);
-+
-+	delay = FIELD_PREP(LOONGSON2_MMC_DELAY_PAD, pad_delay)
-+	      | FIELD_PREP(LOONGSON2_MMC_DELAY_RD, pad_delay + 1);
-+
-+	regmap_write(host->regmap, LOONGSON2_MMC_REG_DELAY, delay);
-+}
-+
- static void loongson2_mmc_set_clk(struct loongson2_mmc_host *host, struct mmc_ios *ios)
- {
- 	u32 pre;
-@@ -438,6 +524,10 @@ static void loongson2_mmc_set_clk(struct loongson2_mmc_host *host, struct mmc_io
- 
- 	regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_CTL,
- 			   LOONGSON2_MMC_CTL_ENCLK, LOONGSON2_MMC_CTL_ENCLK);
-+
-+	/* EMMC DLL mode setting */
-+	if (ios->timing == MMC_TIMING_UHS_DDR50 || ios->timing == MMC_TIMING_MMC_DDR52)
-+		loongson2_mmc_dll_mode_init(host);
- }
- 
- static void loongson2_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-@@ -655,6 +745,127 @@ static struct loongson2_mmc_pdata ls2k1000_mmc_pdata = {
- 	.release_dma		= loongson2_mmc_release_external_dma,
- };
- 
-+static const struct regmap_config ls2k2000_mmc_regmap_config = {
-+	.reg_bits = 32,
-+	.val_bits = 32,
-+	.reg_stride = 4,
-+	.max_register = LOONGSON2_MMC_REG_RDMA_HI,
-+};
-+
-+static void ls2k2000_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
-+					  struct mmc_command *cmd)
-+{
-+	struct scatterlist *sg;
-+	u32 *data;
-+	int i, j;
-+
-+	if (cmd->opcode != SD_SWITCH || mmc_cmd_type(cmd) != MMC_CMD_ADTC)
-+		return;
-+
-+	for_each_sg(cmd->data->sg, sg, cmd->data->sg_len, i) {
-+		data = sg_virt(&sg[i]);
-+		for (j = 0; j < (sg_dma_len(&sg[i]) / 4); j++)
-+			data[j] = bitrev8x4(data[j]);
-+	}
-+}
-+
-+/*
-+ * This is a controller hardware defect. Single/multiple block write commands
-+ * must be sent after the TX FULL flag is set, otherwise a data timeout interrupt
-+ * will occur.
-+ */
-+static void ls2k2000_mmc_fix_data_timeout(struct loongson2_mmc_host *host,
-+					  struct mmc_command *cmd)
-+{
-+	int val;
-+
-+	if (cmd->opcode != MMC_WRITE_BLOCK && cmd->opcode != MMC_WRITE_MULTIPLE_BLOCK)
-+		return;
-+
-+	regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS, val,
-+				 (val & LOONGSON2_MMC_FSTS_TXFULL), 0, 500);
-+}
-+
-+static int loongson2_mmc_prepare_internal_dma(struct loongson2_mmc_host *host,
-+					      struct mmc_data *data)
-+{
-+	struct loongson2_dma_desc *pdes = (struct loongson2_dma_desc *)host->sg_cpu;
-+	struct mmc_host *mmc = mmc_from_priv(host);
-+	dma_addr_t next_desc = host->sg_dma;
-+	struct scatterlist *sg;
-+	int reg_lo, reg_hi;
-+	u64 dma_order;
-+	int i, ret;
-+
-+	ret = dma_map_sg(mmc_dev(mmc), data->sg, data->sg_len,
-+			 mmc_get_dma_dir(data));
-+	if (!ret)
-+		return -ENOMEM;
-+
-+	for_each_sg(data->sg, sg, data->sg_len, i) {
-+		pdes[i].len = sg_dma_len(&sg[i]) / 4;
-+		pdes[i].step_len = 0;
-+		pdes[i].step_times = 1;
-+		pdes[i].mem_addr = lower_32_bits(sg_dma_address(&sg[i]));
-+		pdes[i].high_mem_addr = upper_32_bits(sg_dma_address(&sg[i]));
-+		pdes[i].apb_addr = host->res->start + LOONGSON2_MMC_REG_DATA;
-+		pdes[i].cmd = LOONGSON2_MMC_DMA_INT;
-+
-+		if (data->flags & MMC_DATA_READ) {
-+			reg_lo = LOONGSON2_MMC_REG_RDMA_LO;
-+			reg_hi = LOONGSON2_MMC_REG_RDMA_HI;
-+		} else {
-+			pdes[i].cmd |= LOONGSON2_MMC_DMA_DATA_DIR;
-+			reg_lo = LOONGSON2_MMC_REG_WDMA_LO;
-+			reg_hi = LOONGSON2_MMC_REG_WDMA_HI;
-+		}
-+
-+		next_desc += sizeof(struct loongson2_dma_desc);
-+		pdes[i].ndesc_addr = lower_32_bits(next_desc) |
-+				     LOONGSON2_MMC_DMA_DESC_EN;
-+		pdes[i].high_ndesc_addr = upper_32_bits(next_desc);
-+	}
-+
-+	/* Setting the last descriptor enable bit */
-+	pdes[i - 1].ndesc_addr &= ~LOONGSON2_MMC_DMA_DESC_EN;
-+
-+	dma_order = (host->sg_dma & ~LOONGSON2_MMC_DMA_CONFIG_MASK) |
-+		    LOONGSON2_MMC_DMA_64BIT_EN |
-+		    LOONGSON2_MMC_DMA_START;
-+
-+	regmap_write(host->regmap, reg_hi, upper_32_bits(dma_order));
-+	regmap_write(host->regmap, reg_lo, lower_32_bits(dma_order));
-+
-+	return 0;
-+}
-+
-+static int loongson2_mmc_set_internal_dma(struct loongson2_mmc_host *host,
-+					  struct platform_device *pdev)
-+{
-+	host->sg_cpu = dma_alloc_coherent(&pdev->dev, PAGE_SIZE,
-+					  &host->sg_dma, GFP_KERNEL);
-+	if (!host->sg_cpu)
-+		return -ENOMEM;
-+
-+	memset(host->sg_cpu, 0, PAGE_SIZE);
-+	return 0;
-+}
-+
-+static void loongson2_mmc_release_internal_dma(struct loongson2_mmc_host *host,
-+					       struct device *dev)
-+{
-+	dma_free_coherent(dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
-+}
-+
-+static struct loongson2_mmc_pdata ls2k2000_mmc_pdata = {
-+	.regmap_config		= &ls2k2000_mmc_regmap_config,
-+	.reorder_cmd_data	= ls2k2000_mmc_reorder_cmd_data,
-+	.fix_data_timeout	= ls2k2000_mmc_fix_data_timeout,
-+	.setting_dma		= loongson2_mmc_set_internal_dma,
-+	.prepare_dma		= loongson2_mmc_prepare_internal_dma,
-+	.release_dma		= loongson2_mmc_release_internal_dma,
-+};
-+
- static int loongson2_mmc_resource_request(struct platform_device *pdev,
- 					  struct loongson2_mmc_host *host)
- {
-@@ -777,6 +988,7 @@ static void loongson2_mmc_remove(struct platform_device *pdev)
- static const struct of_device_id loongson2_mmc_of_ids[] = {
- 	{ .compatible = "loongson,ls2k0500-mmc", .data = &ls2k0500_mmc_pdata },
- 	{ .compatible = "loongson,ls2k1000-mmc", .data = &ls2k1000_mmc_pdata },
-+	{ .compatible = "loongson,ls2k2000-mmc", .data = &ls2k2000_mmc_pdata },
- 	{ },
- };
- MODULE_DEVICE_TABLE(of, loongson2_mmc_of_ids);
--- 
-2.47.1
-
+Introducing this flag no longer becomes SoC compatible because as per 
+discussions in V2 patchset with Ulf and Konrad this new property can be 
+used by any vendor who wants to limit the HS mode frequency due to any 
+reason. Thats why moved to this generic approach again in V3 as compared 
+to compatible based approach in V2.
