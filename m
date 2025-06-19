@@ -1,114 +1,107 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from mail-vs1-f50.google.com (mail-vs1-f50.google.com [209.85.217.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B81D722A4FA
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 11:20:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0DE5C184F;
+	Thu, 19 Jun 2025 13:53:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750332049; cv=none; b=PxOsWN6EH6y6xaYkG4WTy0IK5s7uAMQzOXelgu9CsGV6kYh2b2u1ah4NA2t3X6yAxQUzfB0d+z5ZjaVOpWm3UqbV9KKkEmBWroUSkb9YHBbDtFKSZEdwy7NbXupJvscRx9knMan6of3vPyaSolQKumj153Mb6xFvL43kQQXhTP8=
+	t=1750341233; cv=none; b=NMCSZS43AYl0HHGJn/DK8iN6us/4dWgtQ5uh1vuaWjalObHV61yzexBi9sLk+EiD7iEWVRnK+jtQs9mxNKq4N2n/bYhX57MfD3MqRWo2VZmiSLv0zclG6HYzcOGlVXSA/TtXqBEbjQxPpJ7EWSAxCosz1ktA2EMSK6RkoiAJqcc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750332049; c=relaxed/simple;
-	bh=XpZIkc7P5Gd1VuFF2PalUhlkQmpyy96hiOjrxM3sEQ0=;
+	s=arc-20240116; t=1750341233; c=relaxed/simple;
+	bh=jbuVcEQNcpWsySlTNzCfRCPoLDuhcy4k1y3UpuSk3zQ=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=uKKV0L0XdHNZfjKf+Ll95fMMOzzVefJp+gLinoD8kJCMvxhNtEeVMVbpI/zu8GBeEKgqe6Fg5bn/h0iFFZr366E7sMYtOAvCHtvz7algPIQofLJyoJSItIfT1+/RKCpES8bZKI8c/zcaJDWlw41eloViFeF2YuC9K3zSNP3GIWc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=zdsQXYpX; arc=none smtp.client-ip=209.85.219.173
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zdsQXYpX"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e81f8679957so640751276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 04:20:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1750332047; x=1750936847; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=3uY/q1REvshZb8ZqHUx9YD6JUoQdmd+nZPMlg3OsvzY=;
-        b=zdsQXYpXVisf1CJIU4EnSp4YmM8puBrrdznHJONd5UdRrcIhikIUBQfpIfFPLckDGq
-         8tGtrDZ/8Xd2Elfxk8xQM+Rc8+udr9SRlYbieUwXF6mii0wfhfbMZKk3jmA6YdB96ZPM
-         RtWX3tloMg2s2aQwPdKuQ53yHR0Gvb1FOH36ng3WV37ZLNE4i8xvmmiOAKrRVFPFnTVI
-         iuxRzpNuUrwxNqkh7jWXPaxekT48TmHMv3r60KdMH6q18kSrqjOKIu82QHTnGKW60MJA
-         qc+84D9ONaS6tDAxCo3r1HZ4si1C/HNgSLsg8JCFtUtXb816WVt49jJ5ds3hFI0wfs5X
-         bvvw==
+	 To:Cc:Content-Type; b=Zid5La+37tvuJG/8QEM3otlRlsBFqaYpxequ/GM82dWmpckzqlJuWdSoOKI1ClMUqH2O27mTPsJ9VZmYvc+6cGgok9z+fw7oxL4C/iX2nln5a9+310Qb2mFnf0StoUUL1spTqvZRGB5MZ7EfDz/0wiBZ71BFmW6bK+E7NYRi5pY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org; spf=pass smtp.mailfrom=gmail.com; arc=none smtp.client-ip=209.85.217.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=linux-m68k.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Received: by mail-vs1-f50.google.com with SMTP id ada2fe7eead31-4e7feaae0e1so612351137.2;
+        Thu, 19 Jun 2025 06:53:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750332047; x=1750936847;
+        d=1e100.net; s=20230601; t=1750341230; x=1750946030;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=3uY/q1REvshZb8ZqHUx9YD6JUoQdmd+nZPMlg3OsvzY=;
-        b=gGEfE/TWE5GdoIv2EWcuD0FSN56h0Zj99Fh+pyaeRKuM098+NAqXTPk0pqrD/eRvwL
-         FXydYnkl/sT5hwn7r3aYFHJBk9gf+7PhpvPFEPFrZo6pgR8uvQDIdaTebhTOIjlwBwKU
-         DS5fwHufjdUWO7X/K5QGXxCFU2rCpBOmKl7GenvIy8fdWGlF3mC+vmJIqBYGP6kvEfLF
-         5vh3BlGoD59wFtCKwY0NaFB83yLOVnEpGlNv+/F6gFe+/B6GY11uiuqP4QA5dge0kaNM
-         3MZk3AVQhlIDxkv0mj+qPtq2S53626Kdp16ZzaIc1Whqzww+hyNbS69Y8H4iI9tWzFGc
-         VuMQ==
-X-Forwarded-Encrypted: i=1; AJvYcCU9i9hrg2E959+aqUnYLdzKHQR8PnrhtwnyUjX/Symm8CxHGQeQ372SrZnDxuzt1+2EZ1jTb/AVvvM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzmaSrGVEAXNeOtT8V4ztf6kxHUN50/RGK004QsxuO+z338aw6F
-	QZeds8VDVwIrLIpr9lWFarwdHOKY590CLXn9AhaFsC3zJiMGfWNZWAyYpL4no9WcOtVTeLM5464
-	L6ZjUYqTt0STXIpJhpBtnwsl3qv+IrHw2D79yExJqqQ==
-X-Gm-Gg: ASbGncvgjnr8+cEEjOZImJ8okYzc9tyHNPW6URDGRdo0qUA/83ydtKPINiBPl7Enl7t
-	aCLq4ra2wslWD5dfRvANdAyVyliFOmPuinHdwuLmE4VKWsqflwqN2Pgrq4tPLLUvkbIXFzX1OCn
-	EbgX16C5HGp0p4i2A7kgsPRe3PncMesodz/Us0vaxGo5GK
-X-Google-Smtp-Source: AGHT+IHrlSuM7JSJr8c9kgmdvNp08MZcOS3NLfvvFtN8yWrHuOaNzCEtscvrXyTnnzpxByEh5NvJmKrao7BhkBqsCeY=
-X-Received: by 2002:a05:6902:cc6:b0:e81:b080:31df with SMTP id
- 3f1490d57ef6-e822acf0121mr26619202276.36.1750332046758; Thu, 19 Jun 2025
- 04:20:46 -0700 (PDT)
+        bh=MoPSVoobirA1Jie2WgJhd5VaFqdO4CfR1E2iehiwxA8=;
+        b=AbIS9204khZ6GHGZhGLCJ5AU+pAqz5jUuHez4/FrD8pauRCS+SsolV7l1Dfb2nQ5bX
+         31uAsarHr8apja/VBf1PazvLN2QriPvl1IrD1V3uP47C3kjmYmJ4hNczV9kJU8Qx+KGm
+         nFBTiC3t5PHxQMQ82d6foQmmwWl4W0Jgu2V2sH6Be65FOvNw9Wi5X7dXZP7DuGwSgPxE
+         9kktiWhaFDmMFR88gwJC11ZofSp11YKjuh095RGblOUfgpNkIIjFummiegm3gw3omzNb
+         L9dDZwaTtIydsph1sLZPDcdRCy+tpmYXP+C3VE1zQ6URl3lVi+wFNnWDvhVNHkbOuR2U
+         EO/w==
+X-Forwarded-Encrypted: i=1; AJvYcCUke4WD2k1Zkw56MDev3SCpNAr541KiofPfxUjr/gQdyaGT/41RsEkjjs4ZewNFGig1TPl/KIgjPrDWkarK@vger.kernel.org, AJvYcCVfw63d3b252Xi95l/ci4OCuS8SSYMGoyKzFrAaFGGDFzAK9VrPEOPoIryfY/pw+OkcxcP2XFW1ebgGV/78Bq3Xmqo=@vger.kernel.org, AJvYcCWXrU0EJn+2qL8psacQYStiWX/dkVk7oq7pj0A88NAzyPqAMyQ4ZSRdITQvsq1pY4K/+N4+qW7WUYlj@vger.kernel.org, AJvYcCXBOLupczT/lHfz6pyROrKFez/4JyKgc3aRyIv7NuOwpuXrV4AJMfchHewdAjOppCGwXoTy1mwnVrbR@vger.kernel.org
+X-Gm-Message-State: AOJu0YzEYcgOeuywLosR5o6lqyfbbLw0RF1bLPHbIkHcvfmXH+jEz1BM
+	VlAyOdc3//pJV9grazjFruWWkSOTF201TT8VlvFgyCwRCxLSY7DbvbUVcep+Z13p
+X-Gm-Gg: ASbGncsCQ7tuumLCnDgoAMmkw1/oZZa9NAvIM9HySzYZwI+XSFPLuA9x+U8Fb3JDqIU
+	GPjDFj3iutT2+11HzNuuE6cruHWcRh8EnlEogWeZtvnqLJXtp/QwfOS3q/x3A3ab1PgGfQoD4CB
+	0a0YceHRXl3AI6K8yHcTA4R5IvtEqVchPHmaxlQMx9ymuqimH+j5F1Ugmbb+sCL5KElIK4AkiB2
+	d7l70K9FHSQDM8wCBNs0k0w5TbccUroUr6ryx5GGtDStV+ylE9T9O8TF7/AHlqM8+ofCZgnLmuF
+	IcWOm71EAbWR5HIYZS9OhI+1yOMmGpcdmz6SxpRqCTqWoQ50dQmetTF71vICDGbBdJGbeKL0oy7
+	/1KNvLUyxWaA3y6eL+ekvDP0t
+X-Google-Smtp-Source: AGHT+IGWdKM89yu3kE4tT3SjGn20Z4EBuQJz4kGfhBK8mn4HqHBXTaOjulTY/vDUXTYGzPBK90T0cQ==
+X-Received: by 2002:a05:6102:50a1:b0:4e6:d7af:a7b1 with SMTP id ada2fe7eead31-4e7f6163427mr14694112137.10.1750341229857;
+        Thu, 19 Jun 2025 06:53:49 -0700 (PDT)
+Received: from mail-vs1-f45.google.com (mail-vs1-f45.google.com. [209.85.217.45])
+        by smtp.gmail.com with ESMTPSA id a1e0cc1a2514c-87f23915d10sm1724859241.7.2025.06.19.06.53.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 19 Jun 2025 06:53:49 -0700 (PDT)
+Received: by mail-vs1-f45.google.com with SMTP id ada2fe7eead31-4e9a7b4a412so753182137.0;
+        Thu, 19 Jun 2025 06:53:48 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCVdg9rjo4rdyw/7+SshZw14MNpXtG7PFmMKuUEGahpBwzYuIVenDZ+Ol2gcHiuhZT3gjz8hc/vahZlbFTZVzOHN79c=@vger.kernel.org, AJvYcCW6lkJR4V+o/teFww+PdUKEir26QeQZuxEQqoxVFSznIod+3o+pgasMjnALDiUT9XuowtpgdGe0Y+80fJLq@vger.kernel.org, AJvYcCWYbkawcV+rtx7dlj8W6VpJP7zYvIPxq+VZBeA0lEf3O2Jao7twNZfnMmEWughGleVCywFiU1EZRA7Y@vger.kernel.org, AJvYcCWhV4+h04Z3wl4r+NAuWLFl+p+2c5oeN+QyPm2L9b+xodhY6Kx6R40lKgGUVpeApy1BoC+7CwXmfj9R@vger.kernel.org
+X-Received: by 2002:a05:6102:4bcd:b0:4e4:5df7:a10a with SMTP id
+ ada2fe7eead31-4e7f6207960mr14871581137.16.1750341227938; Thu, 19 Jun 2025
+ 06:53:47 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250618115954.10260-1-lidong@vivo.com>
-In-Reply-To: <20250618115954.10260-1-lidong@vivo.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 19 Jun 2025 13:20:11 +0200
-X-Gm-Features: AX0GCFsNapXRX5ie9F9QwLX0kkV34NiQ3-bC4aojojmuuwqKhvpcjI7kJ4y7s9Q
-Message-ID: <CAPDyKFqJuWC+XtC-WByRAeXPT=i4W4L5GzVKvs4+th4Fo4BNKA@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: Convert ternary operator to str_plural() helper
-To: Li Dong <lidong@vivo.com>
-Cc: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, 
-	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, 
-	opensource.kernel@vivo.com
+References: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Date: Thu, 19 Jun 2025 15:53:36 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVmL9pg8x7pgL8snX785t=6TjWEb8Uf=HBZrNd7ja9kvw@mail.gmail.com>
+X-Gm-Features: Ac12FXzJ3ul_7CaAThumFqH4rNWfG9mp9Nr35_ms6nH3U3z0tjEM4hn8sQS6LlE
+Message-ID: <CAMuHMdVmL9pg8x7pgL8snX785t=6TjWEb8Uf=HBZrNd7ja9kvw@mail.gmail.com>
+Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and
+ RZ/N2H support
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
+	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	Biju Das <biju.das.jz@bp.renesas.com>, 
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 
-On Wed, 18 Jun 2025 at 14:00, Li Dong <lidong@vivo.com> wrote:
+On Tue, 17 Jun 2025 at 18:49, Prabhakar <prabhakar.csengg@gmail.com> wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 >
-> Replace direct ternary condition check with existing helper function
-> str_plural() to improve code readability and maintain consistency.
+> Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
+> (a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
+> the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
+> allowing reuse of the existing driver without modifications.
 >
-> Signed-off-by: Li Dong <lidong@vivo.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+> Update the binding schema to reflect differences: unlike RZ/V2H(P),
+> RZ/T2H and RZ/N2H do not require the `resets` property and use only a
+> two clocks instead of four.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 > ---
->  drivers/mmc/host/cb710-mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/cb710-mmc.c b/drivers/mmc/host/cb710-mmc.c
-> index d741c1f9cf87..52f9cf7dbc7f 100644
-> --- a/drivers/mmc/host/cb710-mmc.c
-> +++ b/drivers/mmc/host/cb710-mmc.c
-> @@ -8,6 +8,7 @@
->  #include <linux/module.h>
->  #include <linux/pci.h>
->  #include <linux/delay.h>
-> +#include <linux/string_choices.h>
->  #include "cb710-mmc.h"
->
->  #define CB710_MMC_REQ_TIMEOUT_MS       2000
-> @@ -215,7 +216,7 @@ static void cb710_mmc_set_transfer_size(struct cb710_slot *slot,
->                 ((count - 1) << 16)|(blocksize - 1));
->
->         dev_vdbg(cb710_slot_dev(slot), "set up for %zu block%s of %zu bytes\n",
-> -               count, count == 1 ? "" : "s", blocksize);
-> +               count, str_plural(count), blocksize);
->  }
->
->  static void cb710_mmc_fifo_hack(struct cb710_slot *slot)
-> --
-> 2.39.0
->
+> v1->v2:
+> - Added the high speed clock to the clocks list.
+
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
