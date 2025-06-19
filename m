@@ -1,107 +1,194 @@
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com [209.85.219.173])
+Received: from mail-yb1-f170.google.com (mail-yb1-f170.google.com [209.85.219.170])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C2A2A3085A3
-	for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 11:17:30 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 35CC6224254
+	for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 11:20:25 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.170
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750331852; cv=none; b=QNxUhqqyyE+Unt6PeA5EDvClJlr486wDd4Q4CSnFNXCJXOrBVjRQeWuTCKjpDZE/ePjkglReIT8EHGDluMkDqBf0I3EFrMqEeqCqEjpQyBIxUyxMq4Zn4D2Sr17ibPc0zzM4lVtf0jfpU181q5STBNJHDVSXrz+b/aC6ENWqhBk=
+	t=1750332027; cv=none; b=PeGfDKcndM3SZzgf8IjpyyIqr+1SFpMkMkB78E4zRMCld1McjHGUs3cmxjvvzn9MVItZq8UrociFotRXoLxipTSerI4GhAxOTJSON9NlNBZi/zlpoUJ1RVTz4xPyf+sh2m8y4b242/w0qzUnvZDvBZ2DYRCBIQ7go0tkdXJSZgc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750331852; c=relaxed/simple;
-	bh=mYKkW1d1dYg24CoZ6W4kNCFB4Z1f5LKuwmNT0MUMe6g=;
+	s=arc-20240116; t=1750332027; c=relaxed/simple;
+	bh=FXi+WJFW6Bobw2TGfYECgvzHUdtyEQiafbcUsvYvnjE=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=J8vfqM9TWF3xA2kg4x7VJ1DnBBCdxJSeWvcwx3TB/5twbuRwaWl21wEGPsozXt20BotrwSpsp2wu9jk50YWk9ZRPo61RcmhH+qENQMFCRDixgLUl4E5z5TjH4aHkBe+tSz84qyqN2QDzLHGG862Sq+w/7Yen8vp30jWGKz6P5LU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=RPPbWgWZ; arc=none smtp.client-ip=209.85.219.173
+	 To:Cc:Content-Type; b=sxOelvpO6gSj9p2oW//e3JZNGnyOHP1iaainFs40UgAN7D6pVlfX95ye/zV8+eSxbGOQBxz7j1ecLT0TPstPU2zhrQAaWA15/iswkJis72qduFWwjusYVU2bdtPuTYKSvJxY9Z9hiZIQJ3RnKbVkcpawGIpGLa6/8VrTqjmpJgo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=oR7R4NCr; arc=none smtp.client-ip=209.85.219.170
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RPPbWgWZ"
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-e817b40d6e7so619484276.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 04:17:30 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oR7R4NCr"
+Received: by mail-yb1-f170.google.com with SMTP id 3f1490d57ef6-e7dc89108bfso594226276.3
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jun 2025 04:20:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1750331850; x=1750936650; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1750332024; x=1750936824; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mYKkW1d1dYg24CoZ6W4kNCFB4Z1f5LKuwmNT0MUMe6g=;
-        b=RPPbWgWZ3b/pxMtvFdFHgAUtb2yGHmj/yHWRrk957WgXgl3ma8scVu/7Cu7KqY2oaz
-         bomnUHBoTY+s5h/luVs5plkCB5ZAUSMLwyiwubM8UtnF6EEVEjYFHUUULpIGy4cykNev
-         I6oZgwQrk9ET4rdRlkFdLZvzgMHyDbG3sGy9fTudL9t9+s6UrgLASqa5aKXP6SxQUf0V
-         mxUpvsy/oahqJaDSAjvk91X2mrUxVreLGmqyteCjenHDgman9eO1N6eTXiwsStpos2bl
-         cbxgbP9zBqViD/kwt0i2FgOrAxrAcrn3S9GChlXXitq3BmdJuVpkA5Mj/TXwtZoU7lp9
-         TrsQ==
+        bh=467MwhcOj3OTm9X3gDenyOsQFlDrz8h86HfbcY3/KmA=;
+        b=oR7R4NCrIYuabvrpdUEw9FIOn8shh/WFbUtWUdB01X2kDgZXW7qdn2luSPxox/SMHa
+         dHXmo2Rc8EvWpL1Wwldy/4FBGflJD+byNBkRQwVhrcFwe89IA2o4zTVOsKyOPfcHxamm
+         +wjpQedF019rJTFwscTMbAtMYn1IweTVh6CK4GTKSSPIQcDQ2zGH13qW5Fs/WSCyo4bM
+         oyha5dvMRRutGM0B8wW8StORP0lGR4IcBMJJTbTIzmiyckNIpYzfuC/89a7KybnYkRMd
+         8v0OVfSXd7sx8DMuXfk98+dJRV10nRO11YunwLRgoRXa1Yj15c5XfvG0YpRww0qeDweU
+         /Exg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750331850; x=1750936650;
+        d=1e100.net; s=20230601; t=1750332024; x=1750936824;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mYKkW1d1dYg24CoZ6W4kNCFB4Z1f5LKuwmNT0MUMe6g=;
-        b=SBC2hrevZVJHTRj7Yn91E5K8KB0vpGCIB5soQLPYPXXOwNGhJv1X5Bmo3a0HCMMrza
-         bBqolJ0lJsk7l9H6U4Z/FxSXOncD3U85qUnUMAeWygvPYd8+kUnKrklzYLjn2miBAtwU
-         /WJsAGiYJnxFXx56V+Nmv22Dm72HBuILkbCNyvwkVDEfqYncgWRkHAwBIefXS+mx0ujY
-         6FToqV98dU8PcDyxtvePW0KVFGwcj7HaRVSgqUa3QY6x952W9GfITa5ZWkjBk5p9XZ5h
-         nHC2aEJTmRLUlLSOqwHa7sVdx1U0OW/c1jr4SBACg0IxrshmqpN+nCZ9tL/cjpasAo6X
-         07Pg==
-X-Gm-Message-State: AOJu0Yz0/i/KDgejIrrHosSWS20stROIHYsoi0JhRYtGyPg13rydTts7
-	/HTbWDWDW3fFQdNEMUpD5zqYhubB++bG9PjU3sBWYDShjip+/IDk779tnZiyPtijENJh7aizIEJ
-	QtFeGDwwgGS3UTJVP4iokenewX61MAKp7ioScDGoBsx8lu6U6NeQn
-X-Gm-Gg: ASbGncum67Dkr1pqUAHnFX35ztMtMO7RfUlHDtcj/YBJ9SoQGyROcIY9RiFxIjRMM2X
-	adm7sy9PNRl9D5rANC5hrFQRw1o/KH8g4HdVhkS9iTggTCtp6sXi0Vw/OATUQ5uHadEiePEOMMT
-	VvnfdujVPKNxOqqK6/9gViNXre13vkXueDFZAtvIsQYFkh
-X-Google-Smtp-Source: AGHT+IE/cxYVSFrO4k3qiLFu5u8Gl9CVu6FBcDegfi4/MD23jtLAMkBXpd0LZuvcSPO77mVKkeV5pppBbo0RgUnlLo0=
-X-Received: by 2002:a05:6902:4786:b0:e7e:fa65:8fd8 with SMTP id
- 3f1490d57ef6-e822acc6cd6mr25400635276.17.1750331849619; Thu, 19 Jun 2025
- 04:17:29 -0700 (PDT)
+        bh=467MwhcOj3OTm9X3gDenyOsQFlDrz8h86HfbcY3/KmA=;
+        b=nZ0xDoCa5YkboNDVDpSi/aCF6yzvIpGLEN6rNmD9kUA3os6SAWEV9Qywl65IdzGixF
+         4QfcfCDAH+rgInxI01guEi2cfXQMaFxenyD3C/1owFwGkuvX+4YngxB8jTeTCNe9glxT
+         qCN9e0jNrUzTVnsxgAd4S8LqXgNK2xMGN7ihiTHwjiUZWjSuTjYKiZFiPUAx5hRF3HFN
+         ylqlE4LMWstLLRhKorg8C4HuTpEncAMA1obEO+VzZ1DeZhKIKpxGvVcoqfk4sAnA8z0r
+         6QKRtPRkXT6PRnboQUxY0JB3P4EKF7FJNsS3Gq5VAijmSBMH0fTFO9TcqbSS1nGp1AE6
+         HO0w==
+X-Forwarded-Encrypted: i=1; AJvYcCUCpxGOzFiJrK1ZafyHWiHHq2tuIU+tpxp3bDQJ/KqZ0Aeo5Zo2pZ3sr3Qbj5+eXtz0hONnk+yIcSg=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxP/6gh9VZqDc0mpY33F+46/4VYWiyzyGrIm3gEMYIeUk8whrEx
+	MfwWjICk3QqH0XrwpFiOA8HtH0yvyKCiXr55yF9z5roE6E1r8Ve+qDdDHhKVT6SNMRXqwB2RbeF
+	hZEVfqmiFXbILgO1q055cYTCe2ncZENo0eJltaDYyHw==
+X-Gm-Gg: ASbGnct7ZeqFeUt8xlEStMDX4HcoZsojVOW0ifhSejzh0bYEvsKWPsVbfl7RUFDf9EG
+	0CwzTVn895Qxh2r2pIOTlcTFwawLb6NRw2OfovT6c8VQwNqAWqgpcWx/At1sA3dwx5XfOfEtge0
+	EGm/NmXBZLcgQvMCTJiTZ/tIZMdFZe+pUpMDRH8+a1MZt7
+X-Google-Smtp-Source: AGHT+IHRXIFy/zQgQr+M/cZ9NbXzt8mygDIY1SH+YXKHF+bDlhEZcmMrRNyxfeACY5rdl3i5+Zn53uVgaTwardN428c=
+X-Received: by 2002:a05:6902:1102:b0:e82:4ba:9488 with SMTP id
+ 3f1490d57ef6-e822ac2e7ecmr24672214276.1.1750332024251; Thu, 19 Jun 2025
+ 04:20:24 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <b7c85fa9-1b70-4ca2-893e-4f0e9399c97e@ti.com>
-In-Reply-To: <b7c85fa9-1b70-4ca2-893e-4f0e9399c97e@ti.com>
+References: <cover.1748933789.git.zhoubinbin@loongson.cn>
+In-Reply-To: <cover.1748933789.git.zhoubinbin@loongson.cn>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 19 Jun 2025 13:16:53 +0200
-X-Gm-Features: AX0GCFsUhPZOWt_M-Z68N6BGmBEHM0fxLSn-nKripo5_7YfoqdugP0Cbf6CvS2U
-Message-ID: <CAPDyKFqtgJdinyDEnLr0=OY9w8TH=uMZNGQpgkstPAus94deww@mail.gmail.com>
-Subject: Re: mmc: Synchronization of in-band SDIO IRQ
-To: "Nemanov, Michael" <michael.nemanov@ti.com>
-Cc: linux-mmc@vger.kernel.org
+Date: Thu, 19 Jun 2025 13:19:47 +0200
+X-Gm-Features: AX0GCFvJ7lveyQFDsHZcc2Ek0exFBVdLvd9_cvBpRWnOaFe3wPbYGeACI1AkpjM
+Message-ID: <CAPDyKFpiQ7aAgHM8-QTDOgu2oBajg9vL-+RKw0VMqUPrMf6Qag@mail.gmail.com>
+Subject: Re: [PATCH v3 00/36] mmc: Cleanup mmc_alloc_host() usage
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Huacai Chen <chenhuacai@kernel.org>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 20 May 2025 at 18:54, Nemanov, Michael <michael.nemanov@ti.com> wrote:
+On Tue, 3 Jun 2025 at 14:25, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
 >
-> Hi,
+> Hi all:
 >
-> I'm working on a WLAN driver that will use SDIO transport and will
-> support both GPIO and SDIO IRQ sources (only 1 source will be selected
-> at runtime).
-> During driver cleanup there is a need to synchronize the IRQ handler and
-> guarantee it is no longer running. For GPIO IRQs is trivial via
-> synchronize_irq(). For SDIO IRQs I see no similar option and thinking
-> about possible solution.
+> Since the devm_mmc_alloc_host() helper was already available, I tried to
+> start cleaning up the use of mmc_alloc_host().
+>
+> To make it easier to review the patchset, I decided to split it into two parts.
+> As the first part, this patchset contains cleanup for drivers other than sdhci.
+>
+> Of course, the sdhci part I have ready in my repository.
+>
+> Thanks.
+>
+> -----
+> V3:
+> - Collect Reviewed-by and Acked-by tags.
+> Patch-18
+>   - Fix build warning by lkp:
+>         https://lore.kernel.org/all/202505230421.P12fqPfB-lkp@intel.com/
+>
+> Link to V2:
+> https://lore.kernel.org/all/cover.1747877175.git.zhoubinbin@loongson.cn/
+>
+> V2:
+> - Collect Reviewed-by and Acked-by tags.
+> Patch-24
+>   - Correct subject title: ish_mmicf -> sh_mmicf.
+> Patch-34
+>   - Fix cheap build error.
+>
+> Link to V1:
+> https://lore.kernel.org/all/cover.1747739323.git.zhoubinbin@loongson.cn/
+>
+> Binbin Zhou (36):
+>   mmc: alcor: Use devm_mmc_alloc_host() helper
+>   mmc: atmel: Use devm_mmc_alloc_host() helper
+>   mmc: au1xmmc: Use devm_mmc_alloc_host() helper
+>   mmc: bcm2835: Use devm_mmc_alloc_host() helper
+>   mmc: cavium: Use devm_mmc_alloc_host() helper
+>   mmc: cb710: Use devm_mmc_alloc_host() helper
+>   mmc: davinci_mmc: Use devm_mmc_alloc_host() helper
+>   mmc: dw_mmc: Use devm_mmc_alloc_host() helper
+>   mmc: jz4740: Use devm_mmc_alloc_host() helper
+>   mmc: litex_mmc: Use devm_mmc_alloc_host() helper
+>   mmc: meson-mx-sdhc: Use devm_mmc_alloc_host() helper
+>   mmc: mmci: Use devm_mmc_alloc_host() helper
+>   mmc: moxart-mmc: Use devm_mmc_alloc_host() helper
+>   mmc: mvsdio: Use devm_mmc_alloc_host() helper
+>   mmc: mxcmmc: Use devm_mmc_alloc_host() helper
+>   mmc: mxs-mmc: Use devm_mmc_alloc_host() helper
+>   mmc: omap: Use devm_mmc_alloc_host() helper
+>   mmc: omap_hsmmc: Use devm_mmc_alloc_host() helper
+>   mmc: owl-mmc: Use devm_mmc_alloc_host() helper
+>   mmc: pxamci: Use devm_mmc_alloc_host() helper
+>   mmc: rtsx_pci: Use devm_mmc_alloc_host() helper
+>   mmc: rtsx_usb_sdmmc: Use devm_mmc_alloc_host() helper
+>   mmc: sdricoh_cs: Use devm_mmc_alloc_host() helper
+>   mmc: sh_mmicf: Use devm_mmc_alloc_host() helper
+>   mmc: tifm_sd: Use devm_mmc_alloc_host() helper
+>   mmc: toshsd: Use devm_mmc_alloc_host() helper
+>   mmc: usdhi6ro10: Use devm_mmc_alloc_host() helper
+>   mmc: ushc: Use devm_mmc_alloc_host() helper
+>   mmc: via-sdmmc: Use devm_mmc_alloc_host() helper
+>   mmc: vub300: Use devm_mmc_alloc_host() helper
+>   mmc: wbsd: Use devm_mmc_alloc_host() helper
+>   mmc: wmt-sdmmc: Use devm_mmc_alloc_host() helper
+>   mmc: tmio: Use devm_mmc_alloc_host() helper
+>   mmc: sunxi: Use devm_mmc_alloc_host() helper
+>   mmc: mmc_spi: Use devm_mmc_alloc_host() helper
+>   mmc: meson-mx-sdio: Use devm_mmc_alloc_host() helper
+>
+>  drivers/mmc/host/alcor.c             | 20 ++++---------
+>  drivers/mmc/host/atmel-mci.c         |  7 ++---
+>  drivers/mmc/host/au1xmmc.c           | 14 +++-------
+>  drivers/mmc/host/bcm2835.c           |  5 +---
+>  drivers/mmc/host/cavium.c            | 10 ++-----
+>  drivers/mmc/host/cb710-mmc.c         |  5 +---
+>  drivers/mmc/host/davinci_mmc.c       | 22 +++++----------
+>  drivers/mmc/host/dw_mmc.c            | 15 ++++------
+>  drivers/mmc/host/jz4740_mmc.c        | 40 +++++++++-----------------
+>  drivers/mmc/host/litex_mmc.c         | 12 +-------
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 13 +--------
+>  drivers/mmc/host/meson-mx-sdio.c     | 20 ++++++-------
+>  drivers/mmc/host/mmc_spi.c           |  4 +--
+>  drivers/mmc/host/mmci.c              | 31 ++++++++------------
+>  drivers/mmc/host/moxart-mmc.c        | 40 ++++++++++----------------
+>  drivers/mmc/host/mvsdio.c            | 24 +++++-----------
+>  drivers/mmc/host/mxcmmc.c            | 31 +++++++-------------
+>  drivers/mmc/host/mxs-mmc.c           | 31 ++++++++------------
+>  drivers/mmc/host/omap.c              | 25 ++++++-----------
+>  drivers/mmc/host/omap_hsmmc.c        | 17 ++++-------
+>  drivers/mmc/host/owl-mmc.c           | 37 +++++++++---------------
+>  drivers/mmc/host/pxamci.c            | 42 ++++++++++------------------
+>  drivers/mmc/host/renesas_sdhi_core.c |  6 +---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c    |  5 +---
+>  drivers/mmc/host/rtsx_usb_sdmmc.c    |  4 +--
+>  drivers/mmc/host/sdricoh_cs.c        | 10 ++-----
+>  drivers/mmc/host/sh_mmcif.c          | 17 ++++-------
+>  drivers/mmc/host/sunxi-mmc.c         | 22 ++++++---------
+>  drivers/mmc/host/tifm_sd.c           |  7 +----
+>  drivers/mmc/host/tmio_mmc.h          |  1 -
+>  drivers/mmc/host/tmio_mmc_core.c     | 18 ++----------
+>  drivers/mmc/host/toshsd.c            |  4 +--
+>  drivers/mmc/host/uniphier-sd.c       |  8 ++----
+>  drivers/mmc/host/usdhi6rol0.c        | 30 +++++++-------------
+>  drivers/mmc/host/ushc.c              |  4 +--
+>  drivers/mmc/host/via-sdmmc.c         |  7 ++---
+>  drivers/mmc/host/vub300.c            | 16 ++++-------
+>  drivers/mmc/host/wbsd.c              |  4 +--
+>  drivers/mmc/host/wmt-sdmmc.c         |  8 ++----
+>  39 files changed, 195 insertions(+), 441 deletions(-)
+>
+>
 
-At SDIO func driver (WLAN driver) cleanup?
+It seems like you didn't conclude around the discussion with Martin
+around patch36, hence I am deferring that a bit.
 
->
-> Is calling flush_work(host->sdio_irq_work) a reasonable approach here?
-> This can be done either directly from my driver or added as an API in
-> mmc/host.h.
->
-> Another solution might be registering with MMC core a minimal handler
-> that only triggers a driver-local work item which can be easily flushed
-> by the driver. Though in that case handling IRQs that are already
-> "in-flight" is a bit more tricky.
->
-> Any guidance is much appreciated.
-
-I think the best option to move forward is just to propose something
-(including a complete solution, not just a change to the mmc core)
-that seems reasonable to you. Post it to linux-mmc, then we will get
-the discussion going more easily.
-
->
-> Thanks you and best regards,
-> Michael.
+That said, patch 1->35 applied for next, thanks!
 
 Kind regards
 Uffe
