@@ -1,43 +1,44 @@
-Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazolkn19010013.outbound.protection.outlook.com [52.103.43.13])
+Received: from TY3P286CU002.outbound.protection.outlook.com (mail-japaneastazolkn19010009.outbound.protection.outlook.com [52.103.43.9])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2E33123A9A0;
-	Thu, 19 Jun 2025 05:36:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.103.43.13
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69BA52417FA;
+	Thu, 19 Jun 2025 05:36:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.103.43.9
 ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750311363; cv=fail; b=mJaOQskg1sLw9BYbDKNCgQoVozFj03GKaivkVP0FN4GYo/DDdrjW9sOpM24RSHyIQlch7WlZlVjgjc5sH7vU3KRWD+joMwymoXF5FB17OR84YqplvUgQWtvDhOId70RP6N1TxVbgLI8iKaF2EAZ5IArutY90EeuAFK3Rzs1HDp0=
+	t=1750311367; cv=fail; b=abIy3urFPEtL+BrfZxwQwp3y2LgV1mBTSGx5OO0jkRHaGnSlh4GBQ7iwg6gi4tWJhMqXoHaef4BFgbRkMhHRZhVg0Q1QkCaStUuSy8cXG+oQF69/Nm34JRELDy9+nYaEtjmG8DVn6wrsTGBjr2uwpyhDB3ISzpGDJt5ucv7aoH8=
 ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750311363; c=relaxed/simple;
-	bh=iU4wryjjWYmWl6SWLTMdvS5f5JlyO397uug03l49u0E=;
-	h=From:To:Cc:Subject:Date:Message-ID:Content-Type:MIME-Version; b=HlvzkXWxQdIcRhAz/kC56VaJ/HGQ3s9cznMDH6/H/KR0Z9MMlg+Wu3gsVIcUnjoSuGXI/ImBNtoDjw9AYFWnRIFOQbpiI/9NxKjY2twPJcm3YAb4xupMKe4KhGlGG05X1mnQ6ooDdG8LAp6OMUMBrIQF88ZfhMRcwQleiUHYZMw=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=qoGYSKqq; arc=fail smtp.client-ip=52.103.43.13
+	s=arc-20240116; t=1750311367; c=relaxed/simple;
+	bh=l9E28H91SuiRZMiYj2wavzdI2QvFKzUsV5UOywqrTQA=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=aCLO8ENTEaujygLRsiprlWMGrSVgrYPmrwujytdk/iB7/OLqkAlmFB17EM6q/FSyw7rJNwdKp9/ARfsiR9riwvFG89uAiB06B969iRlenYZMIIEfwXH33s9qYiUBFbbqg7YPxJ9e3fvj163thfpHTgPkfjjBWs4fIqM7WTd9cGU=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com; spf=pass smtp.mailfrom=outlook.com; dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b=Qw0Wxa4X; arc=fail smtp.client-ip=52.103.43.9
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=outlook.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=outlook.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="qoGYSKqq"
+	dkim=pass (2048-bit key) header.d=outlook.com header.i=@outlook.com header.b="Qw0Wxa4X"
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Bf+/HuTME2B+WoAhHVfX98ThWlhIcaI4AktxCPLQXP4068rSbidXozNJmuVbCutULOwpFdzhfI/DqeLbwLElJDTe01InnegklBA3B001LGe01TZBpzwgZrxV3Yz9Ch0EK/2o8oGq4lTqruhU+QIx8DCp3/Ey/4/qicnBxnU0ClQx3bJhAcLqqaM7CUUXi1ESMf2QTR4UagIxfiGO+fE6bj8Oqekc/eLHgjLjTBrz3HsxOn0IbL/C+DDFtn9nlfZ1IPbUmH3xiihsBJ9S5KZ4AhdooSpLQfstHSAJyOahD8cc2ViXbyy3O2TufmhzzjLazBJoB7GI7djc5TeXxfgTSg==
+ b=igZR7jAJM9DORW36wUArvk/m531YVS9lx9aMvAZd7V3pB3ZtpAlC4BurqAA8AmViuDqc0nqQU2ELEB2CUjHA5q/kDe37kEz9MDk4nLfbYtV6imMxUEL3TsiL/SCUE5eZe+KQXPcdw+H81iG1uKdKT9faq3NflZ8YhQ4Nfe+RIfjwMYX1d8CH3HAK/irIs/OL8a4n2zkblIfQJEqDATDgJ1AIVdWT+5Qj1F6qRIye2WWItf4sDdtWcXDpzP/y1npYD8mvPQfQrpaFprHq97DvpuidcBFUSc/WgXEU/AVMiYGulXywvaMmask2K59Bk1Zbc7JBvuoVUR4n+mJRgg/Tog==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector10001;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=aBUenQyT+iXeMfC1FKIrpa+VNxwIrV954787HO451MI=;
- b=cjix4WPyoXxDmsZq3axYOMPR0GyD2riP0xPrjxvDYeTeUFYPAHx9EsK0CVD9Gmfx06jlRWWgCanUhyEx2WW4qIjA21SsI6rzP0MzGXKvgD+9Z8Ej+jBDCKudSM+4c8hr0c55ZQ/B7lOLgFj/ZfDRmrMn5ndVGUpvU8r58TBH2PziFkPsQeEk5HFMrsyAg0PNEW8HREf47pfVZiaODUg7rY5RjTol/sEnxuAl9stLYjIbG5YbfadTj8EJmXQrH8zBZjYEoNdooP5LA2me4mVi45SK7mdJgnuYlpHL89J1+AI8ItymyW7wq6+IYqTnv/txHDPF++1iw1h5ETu3vHOlAw==
+ bh=Q4XNvnBmWktxueVjyOdJhHfHZggemsSL1h/OFPR7oMU=;
+ b=hzyjXYgApZxIVyqfUHiKtCyaTpuuNQUmXYp2WEpsfrA7grffLzoSalB51V7vgwZWPNgcfkTSJY0cu0HKTNlaxM6xW8708fooNUe642MKSWZUGsFlwACGfgdf5MNX4AzsiZvcFYNOSnyE8oGAH+4zG50YNCsyemnBaXJKIe/imZ7CtIO8MeR7RsuBao8rQiw7gVk5oDrxopMfVUoAjBtDRH1af7D4Ct5TJNw9n0gm0rq/g/Wgy12xaQzEawUd4jqPgcHp7ltcI3UOjrFMXbsm0z1tAZ2fel9PJS6zmnUaaxreLdmamIHr5xbtlNS8l2zSToL6R8pUIMs6s0wO0k30WA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
  dkim=none; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
  s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=aBUenQyT+iXeMfC1FKIrpa+VNxwIrV954787HO451MI=;
- b=qoGYSKqqWbbuckupn6irUgSWSIKGiHEEFLQYGM3w+GyzZQijCxkt+5gTwONb0bYv8/30tOApjB1/K3l1dUzvDNoM9cPmhcDchsmW7uP0R2SsJkD9YZoQjabFuIRTEwkyAomI7Sh7RPn4wK2uQQ8OiARnq+IEKHXkCy3iMRULbItYO3CnaTrB2ypGEnFqJDd4SyGlgNqdalywxoys9O2X5BalZvdCX8XYKJvwq1g7vdca0JdYMFj8bPOXNzpNYPKjRqN0S32u55D77xGB06Ebc5b00qbJz+YGXN4Sn33DAIU8YKdcvrs+o8jR+oC10rTbTn7lMcHGt8lbLD2PJIXoEA==
+ bh=Q4XNvnBmWktxueVjyOdJhHfHZggemsSL1h/OFPR7oMU=;
+ b=Qw0Wxa4XnBsecqtkSqYTIgF+vEwbwiM3QAgJcrZXrwyxXGFTY5rrSEpaxEWiuoWfEx337Ce3PnGClCwYd0f2+b5fB1euRqX8fIZfIg/BgeGyIJi1++Y2cnZq6y36RIqdVKJvooTyP/Ai0R6SuwwmmtIDFPZGIQsePL3JJ1G2WdRb71k34bC6Sd6Z+SICg/uvY/PEYrRfkq3vqW471OFrULSBPpvXGTd+x1zG2TQhUR6BkXynahhyrtx35p55pcqmvmNK/QzycEpe+QM2s9wJQ/rUWoivUQ0V9leHAJSbqdtR80IWVOh2/4K+DAruqq0Gh6rRBij0gaWq61rSqWy+xA==
 Received: from OSBPR01MB1670.jpnprd01.prod.outlook.com (2603:1096:603:2::18)
  by OS9PR01MB16295.jpnprd01.prod.outlook.com (2603:1096:604:3f3::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8857.20; Thu, 19 Jun
- 2025 05:35:57 +0000
+ 2025 05:36:02 +0000
 Received: from OSBPR01MB1670.jpnprd01.prod.outlook.com
  ([fe80::c00:ec4e:ee7e:9b7f]) by OSBPR01MB1670.jpnprd01.prod.outlook.com
  ([fe80::c00:ec4e:ee7e:9b7f%7]) with mapi id 15.20.8857.016; Thu, 19 Jun 2025
- 05:35:57 +0000
+ 05:36:02 +0000
 From: Shiji Yang <yangshiji66@outlook.com>
 To: linux-mmc@vger.kernel.org
 Cc: Chaotian Jing <chaotian.jing@mediatek.com>,
@@ -48,18 +49,20 @@ Cc: Chaotian Jing <chaotian.jing@mediatek.com>,
 	linux-arm-kernel@lists.infradead.org,
 	linux-mediatek@lists.infradead.org,
 	Shiji Yang <yangshiji66@outlook.com>
-Subject: [PATCH 0/4] mmc: mtk-sd: improve support for mt7620 variant
-Date: Thu, 19 Jun 2025 13:35:08 +0800
+Subject: [PATCH 1/4] mmc: mtk-sd: disable auto CMD23 support for mt7620
+Date: Thu, 19 Jun 2025 13:35:09 +0800
 Message-ID:
- <OSBPR01MB16708176FE57F691359D0943BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
+ <OSBPR01MB16701142441CAA0F2D12A843BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
 X-Mailer: git-send-email 2.50.0
+In-Reply-To: <OSBPR01MB16708176FE57F691359D0943BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
+References: <OSBPR01MB16708176FE57F691359D0943BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-ClientProxiedBy: SI2PR01CA0032.apcprd01.prod.exchangelabs.com
  (2603:1096:4:192::18) To OSBPR01MB1670.jpnprd01.prod.outlook.com
  (2603:1096:603:2::18)
 X-Microsoft-Original-Message-ID:
- <20250619053512.14507-1-yangshiji66@outlook.com>
+ <20250619053512.14507-2-yangshiji66@outlook.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -69,60 +72,61 @@ MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: OSBPR01MB1670:EE_|OS9PR01MB16295:EE_
-X-MS-Office365-Filtering-Correlation-Id: 051489b0-bdb4-422a-58fe-08ddaef329fc
+X-MS-Office365-Filtering-Correlation-Id: be60d073-8594-4d74-60ae-08ddaef32d03
 X-Microsoft-Antispam:
-	BCL:0;ARA:14566002|461199028|19110799006|7092599006|15080799009|8060799009|5072599009|40105399003|53005399003|3412199025|440099028|1710799026;
+	BCL:0;ARA:14566002|461199028|12121999007|19110799006|7092599006|15080799009|8060799009|5072599009|40105399003|51005399003|3412199025|440099028|1710799026;
 X-Microsoft-Antispam-Message-Info:
-	=?us-ascii?Q?YxnjE6Q//gc/XhV6XjAW9mL7UINITAxHWXEYwT3e9QR3Bl9LHOFflslEydnA?=
- =?us-ascii?Q?9mbVLWiXQjsdmMFyJGYlRZmwC5y1w4yBxek2IwFoKhjqbFQjzoGHBiogmZpr?=
- =?us-ascii?Q?JUMpTnbTuqavpJqTb8ekUwZr9oqI86uMAinm8UFx2InwCjyVYIgOChCkKV5p?=
- =?us-ascii?Q?PyJ1QxXK17FKcBnAZPAmplwH4iY55Ain24b+VP6qNrn/zQ1iIV28qfMiYNDl?=
- =?us-ascii?Q?2j8i1fnkgkIZorj9tlo+J3Ac9Ub7KS3AoeI9YguS9raOQI4OznbkC0bduywJ?=
- =?us-ascii?Q?ivLMl5pbk1ytg1KfAm4t8WMB0zLwgmE0nX+GH9l6vYs6yoNFvDYPM7kX9tYA?=
- =?us-ascii?Q?DJ0gJpc3KKAzXJJZdS9rrrWq0y0ijSr3/dsxzjPqXQIsN4n9KP+ossXsQZ4K?=
- =?us-ascii?Q?qeXU9h1c5s8yeVPJJ7dt/nVmRYqUMiFHFOwJvzFDYZq8SeGLe1IINsGa8adg?=
- =?us-ascii?Q?uuZlv+j/HyLb+zeuVC1MUyRBAZISLud2k25XlQo2MZoqj23eSBQ0SaGpH5DO?=
- =?us-ascii?Q?6eBWlNkJrdfvQAjMYnFhiOWMGEI9TBU/paZrbG8pJoNOxpFHBjGYaV70Sast?=
- =?us-ascii?Q?a919uZa0+5vCIiLN48CJ4WdS6yR53PgZa5WP2g/KmKkmZzXBp8OF70jTQ/Sy?=
- =?us-ascii?Q?NoqPuLoqFJpyzmJ+cvnI29rKdsP6vDtSEXzZKyo45LC5449u9XGDT1KwFRQs?=
- =?us-ascii?Q?m5OZUYTT9hecl1iG/PDAAV91/+yRnmfRsZP0OsA1vXoMfvoghLZvjYO7Ip4t?=
- =?us-ascii?Q?TRk9eboZymAjgq2WRQ1WyG5ViDDjnaKQlYKU+JE/BDqBg7A+tnYkhXzMp9Y0?=
- =?us-ascii?Q?QiQAvEvezCB3PevCx3NpTKV6U9Hz3WqHVIbm26pzQBSvmMt/kAeTZwFO4e2s?=
- =?us-ascii?Q?aOGEVI9Y58ftjE4MVlFnUpU6/ADuTO7WR3pmcYLdRwt10LjKcV85128Zj1rI?=
- =?us-ascii?Q?fXlDlag5Hq7OsLfNc3hWTGVQDJ9Z+0Yb8bQRDGOh0tX/PRQramI2GnpR6HiO?=
- =?us-ascii?Q?f8PjcZT5PJmGF+nDBcmRY59fh1ekwwdXMESCe6TYrjinQYdwuvNGpPAEnhxD?=
- =?us-ascii?Q?TQ7nHx35oDNsYRlL1I4mzz4j3H81GFU5NNc5vIAvOqfRaGgn4euvVv3m4Vjg?=
- =?us-ascii?Q?CRkboZLm0yxhgVQQ0RFQLZektVFGh4Hu/fxokbkph+7QORqPsxJ6POMNSGg9?=
- =?us-ascii?Q?mlqseiKVuGJMRHG06n21HPVBWZEv1EM0bPG3ow=3D=3D?=
+	=?us-ascii?Q?rUNwlLDvLN5hWeYJVTncjGv1AUenfXNk7CZCqLO//fR5wfxtjDvG5goria5Q?=
+ =?us-ascii?Q?+yGN7b6r34uE+awIbkHG/QdSkYmEy0GEGithZsgMJAkyxVQ5MWuIKCVDCXrz?=
+ =?us-ascii?Q?g9lSPJCNydNrVkMgsKds/g2Cgf3onmBf49ImBmoc4eNiOGQaZ92xIcjb4yrg?=
+ =?us-ascii?Q?5Bcwpe3rEQoUG2JsgQck3zcJ96w5rIrCJfhu+ND3jtguCPAurHlVNyFSLL24?=
+ =?us-ascii?Q?FFC91kyebPU4ZvHV7bzY0++THo3bKhVrMI/OKAMJ+/W6IICWDLn6QE/zCfbL?=
+ =?us-ascii?Q?RnVhig8WwuvythJUeLSfRmpYSCxzI86jzrd8PkZj7onXBPzZt9prVQzGvW40?=
+ =?us-ascii?Q?BKYNt2KOgZ5LG25r92sDkPEkx+4uH7ZNDK5Emzs1CaxKjho1eL9q9zoDvVcA?=
+ =?us-ascii?Q?k0Tew804RuVS0A8rPK54JjIm4abG2o1Kyny4Ea3iTjGWROCCZ7OHk/qw1PN2?=
+ =?us-ascii?Q?kFM8oCWwKRU5xkZJCGzPDBDPuwhaY+UimAJBXPdaiINv7RUtFAIjVqlwoVVa?=
+ =?us-ascii?Q?+XzYNp7/hcMG9i3dVXzamJQ2QU6/iG0s6JyO2T0pxaPJW8ThY8GdiwnY6hbz?=
+ =?us-ascii?Q?oh8GYDW+njKKYtGW7ZDA6C14AzYAMABPRrCbqJxIajM9+q12i/WdkAjUDJra?=
+ =?us-ascii?Q?wz56b7R+mhwQuF+Gxh54M5jzAfrRhF2GM90DoksbkOgOoolxrYCi6GW5YKKU?=
+ =?us-ascii?Q?AnvO49pHk15s0nZZKNbRmzcN1qnNllNmIFnWGKdXqKi3kRORXFxpXSmS9B9x?=
+ =?us-ascii?Q?/GDWQFllHy9u2pGYmaFPsp8WeZCsujjCPA91mwjDWdFjRAB5tmwCMpQOA9eM?=
+ =?us-ascii?Q?2sPSMwvTTrzawF7OWWnc4ufmjWN8ZeTV44kZtCrRVZVHdBta7CBGanAbbzji?=
+ =?us-ascii?Q?AlwiwnJS2ljQM761OiNLtnz6CVRPBk40I+AYin/7aInRayMnFuBXvwHqjtgo?=
+ =?us-ascii?Q?6ExPfA3W+sVa0ZJC5Q0l/MURx4r5F3m/bHs4JVjER55/FVCocWCnT6lr+lWs?=
+ =?us-ascii?Q?0wRWdqXQyZGyX+ejjWoMzRa+jwUh5idO+Hw/vKwsyYZ5X3QMPxJGr3rbnSna?=
+ =?us-ascii?Q?Z+KLwciTghXGnqZigNaP+Iei0D7CUjnv+UEeM7oNpVTZiWEtDN+V4qVDRVvo?=
+ =?us-ascii?Q?KcsMZHSYNYE80rjobRVDamA5DJIPAFKJp1EOOmxrbXmlU+fk+EW7gT5o+A+L?=
+ =?us-ascii?Q?ejuuLF1KSRqMxipmeChPB/kTPbuaGi3FnbsRZ7hv7mnzwdb3HYFX3UFJn5g?=
+ =?us-ascii?Q?=3D?=
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
 X-MS-Exchange-AntiSpam-MessageData-0:
-	=?us-ascii?Q?Dx7s4QexOgbhjKMghjCK93EXItKNl6YKxSbJ5VCecuen5j/vdacAQXTfmnMx?=
- =?us-ascii?Q?TYudzRpEuLZbXk+IBOQ//BjTXdHRtONnVgpzDj2CKQ1qkUVHHbtBJfqPMfAt?=
- =?us-ascii?Q?Aa4b7bJ09uqKbfrJL5ooQ93ohfC3ATEzOVCvkay2CgNmjXb578ndN6h0S9ZK?=
- =?us-ascii?Q?EFLUAAHNPuNuTzbYaIk1CzVPe3dgNkgvo/1ejH8dUrYjp9LvDhYwI8sZa3d/?=
- =?us-ascii?Q?ticZWyhIb2q0E4ugKos4/rWrJwtrUqxhJsE+x0IG8Q8NBrD2ZzYC0BkkXFoU?=
- =?us-ascii?Q?Fqami5mwSl7leTSzKecW14NbhglrOOzPHmsotiGbZg/5K9vgctYWsvBKSwR8?=
- =?us-ascii?Q?7MMBDigeO2hcRnsQouV2Z6O1KAZ2853kCoWeiQgE4v7JFoWhQutLW2YIUJ4W?=
- =?us-ascii?Q?dUnxUlbMQAJoSVzNsH4ZJ+XdQ04gZXNumpQf1g8xGwwCkOiRL+UIji4jDllg?=
- =?us-ascii?Q?lKjeGMDH8/5nVQPJfmeF5jIh28u5mE/S8Rb/5puuXErw3+SWyGKG1023T3Ho?=
- =?us-ascii?Q?HcG1c49jCds1LMVvzfW/+11x4+4XdbHUJJDPpnyaRsHz+iRNtgMxHqMM9zJy?=
- =?us-ascii?Q?bZcfAw0llkWKi21INzYMdGM+6K6zUN4gry1ZPxkDYt65ncCGeHcl/aBrYYWp?=
- =?us-ascii?Q?m4KxmRtK/9Hm5nlwzJSJmdMhtA+CJPukhi9/ONnk96p1xKXBsz479HhL4jca?=
- =?us-ascii?Q?yvKnxC19I2PWFAIEiXWm9fUc3D/A258xWie3C15klaqWElnTH6RjtP6oHCzt?=
- =?us-ascii?Q?2heyiAOeU3neYw30gLa4q0EEC62YuEY0IZJFEnU1rfSqFFmvjV1atbUqzG7j?=
- =?us-ascii?Q?7gDqs1Qy0+YY6VbemtlMWR94ETLNP2IbJuq0Kt020oafBm7DlSXacWTtGI2I?=
- =?us-ascii?Q?WCISwaTvnACQ59xS6TBIPvdeGIHpLYxNjifagHkSXNPnjzClxGwaDJFkZnrl?=
- =?us-ascii?Q?RqqozZieza6oZ805lOo27n53qesWgQ/nIPuh1afpaAzP3DRwNqTzS8ASDYYD?=
- =?us-ascii?Q?M2MWlVR8jwikMQTSt8WBL9kXGUYOibawp7LLps5E38Um3FDK1qVxCDSXGKst?=
- =?us-ascii?Q?kdJVQ+YWPa4wOjyvDLn4XIDeXqK8qlpLYpwUgSfm0WoJmljvuMRiXkhSJbhs?=
- =?us-ascii?Q?yrLFPC20llpvAkKmemHuoUO6tatXYoD8vZ1YS+qhd2koG3B2XEYqmBMn1M6d?=
- =?us-ascii?Q?poWyV+B5Qpd9MTQFYFHOxbRWJxZ6h7liPU5k6GGAxifXw2Z5Bkg41aTfteXL?=
- =?us-ascii?Q?asWiw3/nLoC8+8y9UJpK?=
+	=?us-ascii?Q?8K5C5y3zQKThqVbsqnftNguzhEjo/AJC3gtkuLz+r52+nCtuzYSHHoKSwt+M?=
+ =?us-ascii?Q?L7WrAaBihdPf1FJRjo/aThP2B6HeHBBU6dUdSenpM38Ti70TLNWPhUWaltrp?=
+ =?us-ascii?Q?cGsV5WKr+vlxWQK0pa91tKbff8Z5IL0eG0HeNFEGEQ1J3iJo37ZngiNYZlAb?=
+ =?us-ascii?Q?HqlFs8tAPg5+x6JkV/8IOrVhgRAkCrxXYzqDJcqb+a56NxwE/GPkfIzppUf9?=
+ =?us-ascii?Q?w7BxF5r3WeqYedqvnWQIWkeSNMLASZfd5MiLKbLkY3fzHe/s7xlbljthveU/?=
+ =?us-ascii?Q?ypUwjVKQ717pDpf9Nm7fbGYlbwYP69tsxa1o2yffKULmV5gp2m5ougkF57uI?=
+ =?us-ascii?Q?qZgOwEFoTr1uPefutIWHVi28jkdJQ0DTI8/MBN9tFRLoaRPUlV3yHezC5iLO?=
+ =?us-ascii?Q?XNhtAp7hZ5nOtHJ4S9gFvBW6Qs08+fzGmRoiBwCdMNbrsWL0q3LIBxIFxqeR?=
+ =?us-ascii?Q?6ku4Jk2lpKVLOhKU+BsMjM851g7jKkHWlvF5fWWeMHbn+SV3sHKsXmaB63wm?=
+ =?us-ascii?Q?ti/ZOM0ys67s1m2G5LszDsXnjLdlg9ZTRt1Eda+j3EmTwbv+swi0mJJpkx0M?=
+ =?us-ascii?Q?8NNk+nKkve7H2aoYCpEJEreEtzi3tiEeHq27XSG4gwKoKZxYU9BWemiCTkPD?=
+ =?us-ascii?Q?P403eEdEr7CbOezWtq9T/0ZACEkZVNipJ+qpmTypO+dWD5JlpdUTQ8LmJ4IH?=
+ =?us-ascii?Q?NnAAY0ujNmnlDD04Iz7yozonmeg+HtLmEdqpgppwZYBc4fEBWAt6rDYMGZof?=
+ =?us-ascii?Q?GrP/W05xdIAKF5Wl//Lrljbwozhmo9JcZ4r7O/ZA4YfYWcbn219FKjlsCPlL?=
+ =?us-ascii?Q?v077cmF6x2Y+B4Xu8jfKO9cXiVcX024VZMatW91wz5aONu8HBGdbhwwtjAPN?=
+ =?us-ascii?Q?EFV4J01i3L1oEdCaj2h0gqapzOqZ0VDDkffgwklzPmWn9wr26VHyyU1bB1yf?=
+ =?us-ascii?Q?mXVl+3/qRofuRNu72ls2vb9mI6Qxk06dQOaEc2pIX3GHsEmFwn4TdDGhAEWs?=
+ =?us-ascii?Q?VDy3p3ceLMjs6jl4L3EYrdUb4Ucym9aLlwOZJnfDHvTetPBma+wkfhkc9o3W?=
+ =?us-ascii?Q?duLoORHkV0OxnME6KJGdof+cykYcuiMQ1gS/jGtfVk8m9b9L6WAvYFkTQuio?=
+ =?us-ascii?Q?kZVBWz4oFQbHfEqVhgdmbXN3UYdzw0w03SdDDkgCuPSeNwM+LxNduh5QGaGH?=
+ =?us-ascii?Q?VVLIc7KUVYS2EnnYH6Gtpm5fKPjpjSbKRF5QtxRBQb9hfoHeEeCyLDNfbMsa?=
+ =?us-ascii?Q?/ar2V5pfCC73Pntaoiem?=
 X-OriginatorOrg: outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 051489b0-bdb4-422a-58fe-08ddaef329fc
+X-MS-Exchange-CrossTenant-Network-Message-Id: be60d073-8594-4d74-60ae-08ddaef32d03
 X-MS-Exchange-CrossTenant-AuthSource: OSBPR01MB1670.jpnprd01.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jun 2025 05:35:57.7435
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jun 2025 05:36:02.2843
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
@@ -130,21 +134,149 @@ X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg:
 	00000000-0000-0000-0000-000000000000
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS9PR01MB16295
 
-This patchset adds some specific initialization parameters to the
-legacy MIPS mt7620 variant to improve the driver stability. These
-changes have been tested on MT7620, MT7621 and MT7628. I didn't
-notice any negative feedback since it was merged into a popular
-Linux distribution OpenWrt. So it's time to upstream it.
+MT7628 ProgrammingGuide indicates that the host controller version
+3.0 and later support auto CMD23 function. However, it doesn't
+define the SD command register BIT[29](Auto CMD23 enable bit). I
+guess the legacy MIPS MT762x series SoCs don't support this feature
+at all. The experiment on JDCloud RE-SP-01B(MT7621 + 128 GiB EMMC)
+shows that disabling auto CMD23 can fix the following IO errors:
 
-Shiji Yang (4):
-  mmc: mtk-sd: disable auto CMD23 support for mt7620
-  mmc: mtk-sd: add default tuning parameters for mt7620
-  mmc: mtk-sd: add default PAD control for mt7620
-  mmc: mtk-sd: use default PATCH_BIT register values for mt7620
+[  143.344604] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.353661] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.362662] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.371684] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.380684] I/O error, dev mmcblk0boot0, sector 0 op 0x0:(READ) flags 0x80700 phys_seg 4 prio class 0
+[  143.390414] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.399468] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.408516] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.417556] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+[  143.426590] I/O error, dev mmcblk0boot0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 0
+[  143.435585] Buffer I/O error on dev mmcblk0boot0, logical block 0, async page read
 
- drivers/mmc/host/mtk-sd.c | 52 +++++++++++++++++++++++++++++++++++----
- 1 file changed, 47 insertions(+), 5 deletions(-)
+Signed-off-by: Shiji Yang <yangshiji66@outlook.com>
+---
+ drivers/mmc/host/mtk-sd.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 31eb90536..53d63bb4e 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -445,6 +445,7 @@ struct mtk_mmc_compatible {
+ 	u8 pop_en_cnt;
+ 	bool enhance_rx;
+ 	bool support_64g;
++	bool support_cmd23;
+ 	bool use_internal_cd;
+ 	bool support_new_tx;
+ 	bool support_new_rx;
+@@ -535,6 +536,7 @@ static const struct mtk_mmc_compatible mt2701_compat = {
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+ 	.support_64g = false,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt2712_compat = {
+@@ -549,6 +551,7 @@ static const struct mtk_mmc_compatible mt2712_compat = {
+ 	.stop_dly_sel = 3,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt6779_compat = {
+@@ -563,6 +566,7 @@ static const struct mtk_mmc_compatible mt6779_compat = {
+ 	.stop_dly_sel = 3,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt6795_compat = {
+@@ -576,6 +580,7 @@ static const struct mtk_mmc_compatible mt6795_compat = {
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+ 	.support_64g = false,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt7620_compat = {
+@@ -588,6 +593,7 @@ static const struct mtk_mmc_compatible mt7620_compat = {
+ 	.busy_check = false,
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
++	.support_cmd23 = false,
+ 	.use_internal_cd = true,
+ };
+ 
+@@ -603,6 +609,7 @@ static const struct mtk_mmc_compatible mt7622_compat = {
+ 	.stop_dly_sel = 3,
+ 	.enhance_rx = true,
+ 	.support_64g = false,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt7986_compat = {
+@@ -618,6 +625,7 @@ static const struct mtk_mmc_compatible mt7986_compat = {
+ 	.stop_dly_sel = 3,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8135_compat = {
+@@ -631,6 +639,7 @@ static const struct mtk_mmc_compatible mt8135_compat = {
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+ 	.support_64g = false,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8173_compat = {
+@@ -644,6 +653,7 @@ static const struct mtk_mmc_compatible mt8173_compat = {
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+ 	.support_64g = false,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8183_compat = {
+@@ -659,6 +669,7 @@ static const struct mtk_mmc_compatible mt8183_compat = {
+ 	.stop_dly_sel = 3,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8516_compat = {
+@@ -671,6 +682,7 @@ static const struct mtk_mmc_compatible mt8516_compat = {
+ 	.busy_check = true,
+ 	.stop_clk_fix = true,
+ 	.stop_dly_sel = 3,
++	.support_cmd23 = true,
+ };
+ 
+ static const struct mtk_mmc_compatible mt8196_compat = {
+@@ -687,6 +699,7 @@ static const struct mtk_mmc_compatible mt8196_compat = {
+ 	.pop_en_cnt = 2,
+ 	.enhance_rx = true,
+ 	.support_64g = true,
++	.support_cmd23 = true,
+ 	.support_new_tx = true,
+ 	.support_new_rx = true,
+ };
+@@ -3054,7 +3067,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	if (mmc->caps & MMC_CAP_SDIO_IRQ)
+ 		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+ 
+-	mmc->caps |= MMC_CAP_CMD23;
++	if (host->dev_comp->support_cmd23)
++		mmc->caps |= MMC_CAP_CMD23;
++
+ 	if (host->cqhci)
+ 		mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+ 	/* MMC core transfer sizes tunable parameters */
 -- 
 2.50.0
 
