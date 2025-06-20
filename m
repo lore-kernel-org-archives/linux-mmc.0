@@ -1,102 +1,115 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f44.google.com (mail-wm1-f44.google.com [209.85.128.44])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 976532E6127;
-	Fri, 20 Jun 2025 18:25:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CB4FB2222D8;
+	Fri, 20 Jun 2025 19:20:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.44
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750443928; cv=none; b=gh02E83l4OzdyTnYp3Em5UgfQB5tBY38mKAlOZGdV9zw2KImFZO+wLwXASG4ocWb8y2UoyHJZuOrOzoBZdy9UIBCYlO8uNi4dvfQB1tnHjZIELZQTsGkSWg1UYqew005hGqDzgx0KcrSvY4f4JPdJkYUVgDnK7bwOOjObapUaB0=
+	t=1750447246; cv=none; b=KyjBfmdMFg61m0TJhXi7O+0aavj8SyimYA7fOjW7wkQsDy+zXKSPp8neyyGGUu0KSDpcSioq5a71EOY2s+/Nxk8VXTnPwgPZwNyz6pipbIaZDCApyxe9ru+C9eJ8sJKU4umvA5Pm+ewJRB9xSP2pBmne6HG6ElefHaW1pRBbCSk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750443928; c=relaxed/simple;
-	bh=wJ1/5xGnbBYa9//GKBplYzMZXFE09kIONiXVBQVPuuE=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:To:Cc; b=KY6/Odgii167Nm0lXjrHhV3/WiiRliVC1EeP7fthEGojmGq1Y/kGRN1J/zJbyWb3ByL28y9R/36wXl1qdCmWVEBPFFcZ3uoJHOec7KsqrkY/5n4KnLcAlrrmAUPVgBxvxmRIYA5ccKP89iMA8x1ih31Qlj6sjMiLRYLHa3HOZHc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=NGJ9o6Gz; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750447246; c=relaxed/simple;
+	bh=ilXnAqYMDwX2xluyBBX5nFo0usHqV7SIWUSbptLAfII=;
+	h=Date:From:To:Cc:Subject:Message-ID:MIME-Version:Content-Type:
+	 Content-Disposition; b=FCrJNL3Qd3VHtVSCa/ETlXJl1pk7jvIi4gIq38/G2eCFc6QCkcsrcnWMH6OWi4coKGK/N+uXvkAgdJWOhgcZ+/JkklNibs8zjgSEch1wLiAIOZ1Rq4W0PHZgUvZrpPmvEv6Ik0jngVAaFN6EqQr8BkP6JrC7N7pPmMk2tcznQAk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=FkPCnNC6; arc=none smtp.client-ip=209.85.128.44
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=debian.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="NGJ9o6Gz"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 156D1C4CEE3;
-	Fri, 20 Jun 2025 18:25:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750443928;
-	bh=wJ1/5xGnbBYa9//GKBplYzMZXFE09kIONiXVBQVPuuE=;
-	h=From:Date:Subject:To:Cc:From;
-	b=NGJ9o6GzUoyabGg1d6q7m11bzHcvxRXNZ7xdRR9ePphH60jug5P6+ueVzJY51nH4x
-	 nGpNalm49XDQzWSUk7A28JeoSosM57yFUzcCG49enTMORMOUO1MdzfK0RQQuD5J6EY
-	 YuKizT2Iggq067WGcXayTjUeJGXHnPTcLM1cQ3YT06K63xw7Y3Ist1hY0jdbLCeXe9
-	 byRT9N2NWuKGdylvGZ0u9wnLQu6zktYnruTqE46yoo3U0DfG7q6BfZ6je4DYBKYFEG
-	 7bodjp7PM3FuidIP6yRi7T4fH9hlQ1z8PWc+YF4OxlO1PBDPWSG+XcdIfsnsFwMLxu
-	 oaRnQ8T9+KbAA==
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Fri, 20 Jun 2025 11:25:22 -0700
-Subject: [PATCH] mmc: rtsx_usb_sdmmc: Fix clang -Wimplicit-fallthrough in
- sd_set_power_mode()
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FkPCnNC6"
+Received: by mail-wm1-f44.google.com with SMTP id 5b1f17b1804b1-45310223677so17720325e9.0;
+        Fri, 20 Jun 2025 12:20:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1750447243; x=1751052043; darn=vger.kernel.org;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :sender:from:to:cc:subject:date:message-id:reply-to;
+        bh=4UADvpkf2IiBFZKK6AAi88bvFyLNL2fvrTWtjFa2BEw=;
+        b=FkPCnNC6odppzbUrn2KgITRqgzkam2txuPQzfWoRl9/cJASwZUURguUg380ZbjpNvi
+         me0eV4B9Ri1gOzacd0pgbVmasOA0V64lCJ761+eMZIv2iqDiCble4KsJktsg31Ba4w1g
+         eXj5R9RQy+Y/kDl18HMCAxSl0qi+2AvnBvocbKIhUPwishhKqfUt++hu4XB5Fvmc5oGW
+         WxGdh1bCh3xkygtekA8u/uJYMU+LQnqmGyYAdKBCedP/5CMWq5INKWShSV9pw2TBpAwO
+         FxYjF5m3rfLndwORxEGsgO3mpM89HZkPw0k2pJ9+59weGapMj5gwepgp0/xSjguUT8Z6
+         1XMg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750447243; x=1751052043;
+        h=content-disposition:mime-version:message-id:subject:cc:to:from:date
+         :sender:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4UADvpkf2IiBFZKK6AAi88bvFyLNL2fvrTWtjFa2BEw=;
+        b=rFVa4tGRvmAMvqYm/H3uzO5J+kkIr+Xz6DU4guD2o3uFc26Fab28/fmyGf+eQODe7y
+         AJyr1GAq73FGBaA5mRGh5vkyhmVApZAnIsWq68Yx7BVPpOsw+0ICz5rl9p2jqqf3t7Zs
+         GPMTXa8rAMegTZI37Z39YOKIpxhXEH8C4GvAnbPGU2Xps3/wONMbfqedanGCmROniSfg
+         o+r7gICSQN4NHFKlma2gIWAlcb/0l2rsO1Ea8fb0uDNrU36AX2BmYwYW0UZLcsNSkMdT
+         8BHbFgGFO63QTCeo4ZLBZX2rLtGAjBrvUcU8niOyG44UZrpLJJhee8m2j/DgP9ZfSj3Q
+         0weg==
+X-Forwarded-Encrypted: i=1; AJvYcCWZddpk8+esOMc1HRxju44hpknhLox+1XqL+wVV6e8sf4HoDUYvmbSzAabVtboHG8apBYxOweY=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzm+CN4DSy6jGqA0p9J36X2CT92qYs3y0jIPmotAMEw+cKP60Qn
+	3i9MwVPXUjCpJE5pvU4untRdcsQTEF71cbKSHvljj09bO7ym7ETRbAyU
+X-Gm-Gg: ASbGncsU/qyTvePQ0LeOGAFbUkNMjiFuYVaqo/tAh7BUWAeDsx6iSBzSN3yk8HebkYc
+	tGH1ZoZptLew9sD0dPV3gbm3FK/yuq4/6ilvLAfIcgF5MwAeSCTZTdQxtRXMmUHPKruSSzNFrnP
+	wf5rMzgIuJ7i/B/7/V5uTtfzVzQhob93SAM51eECEKfIL14Hxpi8q7pnPZeNYgMBuMtyfEDuwir
+	9ZxP+BiHu4wijWTn/zF2mGzzWbdlgYScF8RmcOxOsLEVLIhqAK26atACUnbkKeJbo2wS7To6rDl
+	sB77kv3ovoPzWPZ8K4CNYyQD7vysgDoEto+kautV4i3EPXpVypfm7bAyFXajGLqQdQZYBgi4Ssp
+	fXJDGGzhIdwRNkXFj6wU=
+X-Google-Smtp-Source: AGHT+IG8aOoZC8S1rb/ev7lP9inHcJLu9ktL7RT5BqPIoEbcvhdGm52Wha1xhaCLBRuUuM1GSAo0nQ==
+X-Received: by 2002:a05:600c:3b2a:b0:43c:fdbe:4398 with SMTP id 5b1f17b1804b1-453659b68afmr35278195e9.6.1750447242856;
+        Fri, 20 Jun 2025 12:20:42 -0700 (PDT)
+Received: from eldamar.lan (c-82-192-244-13.customer.ggaweb.ch. [82.192.244.13])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4535e98b4bbsm66613005e9.15.2025.06.20.12.20.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Jun 2025 12:20:42 -0700 (PDT)
+Sender: Salvatore Bonaccorso <salvatore.bonaccorso@gmail.com>
+Received: by eldamar.lan (Postfix, from userid 1000)
+	id 8766BBE2DE0; Fri, 20 Jun 2025 21:20:41 +0200 (CEST)
+Date: Fri, 20 Jun 2025 21:20:41 +0200
+From: Salvatore Bonaccorso <carnil@debian.org>
+To: regressions@lists.linux.dev, Jeremy Lincicome <w0jrl1@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, 1107979@bugs.debian.org,
+	stable@vger.kernel.org
+Subject: [regression v6.12.30..v6.12.32] mmc1: mmc_select_hs400 failed, error
+ -110 / boot regression on Lenovo IdeaPad 1 15ADA7
+Message-ID: <aFW0ia8Jj4PQtFkS@eldamar.lan>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20250620-mmc-rtsx-usb-sdmmc-fix-clang-implicit-fallthrough-v1-1-4031d11159c0@kernel.org>
-X-B4-Tracking: v=1; b=H4sIAJGnVWgC/x3NSwqDMBAG4KvIrDuQpqZCr1K6iHE0A4nKTBRBv
- HvTLj/4HycoCZPCqzlBaGflZa643xoI0c8TIQ/VYI115mkN5hxQih64aY86/DjygSHVMHJeEwc
- uOPqUSpRlmyJ2D+td1zrX9gbq7ipUG//P9+e6vutbygiDAAAA
-X-Change-ID: 20250620-mmc-rtsx-usb-sdmmc-fix-clang-implicit-fallthrough-732a574554b0
-To: Ulf Hansson <ulf.hansson@linaro.org>, Ricky Wu <ricky_wu@realtek.com>
-Cc: linux-mmc@vger.kernel.org, llvm@lists.linux.dev, 
- patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>
-X-Mailer: b4 0.15-dev
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1696; i=nathan@kernel.org;
- h=from:subject:message-id; bh=wJ1/5xGnbBYa9//GKBplYzMZXFE09kIONiXVBQVPuuE=;
- b=owGbwMvMwCUmm602sfCA1DTG02pJDBmhy6clJt5fJKP1/E/e00NTXwi0nryT5rL5gtnzkjjv+
- T8PPldZ3FHKwiDGxSArpshS/Vj1uKHhnLOMN05NgpnDygQyhIGLUwAmku3D8E+J66hzz8TeeA2R
- gsaDrq4LLuaFX+82ee+V8vBF3EWmphMMf/g3tsw0/yW0M6j014Z7Vnu1Zp5a9CjFQWQWy79t6Zy
- m6fwA
-X-Developer-Key: i=nathan@kernel.org; a=openpgp;
- fpr=2437CB76E544CB6AB3D9DFD399739260CB6CB716
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Clang warns (or errors with CONFIG_WERROR=y):
+Hi
 
-  drivers/mmc/host/rtsx_usb_sdmmc.c:1042:2: error: unannotated fall-through between switch labels [-Werror,-Wimplicit-fallthrough]
-   1042 |         case MMC_POWER_UNDEFINED:
-        |         ^
-  drivers/mmc/host/rtsx_usb_sdmmc.c:1042:2: note: insert 'break;' to avoid fall-through
-   1042 |         case MMC_POWER_UNDEFINED:
-        |         ^
-        |         break;
+In Debian we got a regression report booting on a Lenovo IdeaPad 1
+15ADA7 dropping finally into the initramfs shell after updating from
+6.12.30 to 6.12.32 with messages before dropping into the intiramfs
+shell:
 
-Clang is a little more pedantic than GCC, which does not warn when
-falling through to a case that is just break or return. Clang's version
-is more in line with the kernel's own stance in deprecated.rst, which
-states that all switch/case blocks must end in either break,
-fallthrough, continue, goto, or return. Add the missing break to silence
-the warning.
+mmc1: mmc_select_hs400 failed, error -110
+mmc1: error -110 whilst initialising MMC card
 
-Fixes: 2c3809bd6f65 ("mmc: rtsx_usb_sdmmc: Add 74 clocks in poweron flow")
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- drivers/mmc/host/rtsx_usb_sdmmc.c | 2 ++
- 1 file changed, 2 insertions(+)
+The original report is at https://bugs.debian.org/1107979 and the
+reporter tested as well kernel up to 6.15.3 which still fails to boot.
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 591d37206654..c5f6b9df066b 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1039,6 +1039,8 @@ static void sd_set_power_mode(struct rtsx_usb_sdmmc *host,
- 	case MMC_POWER_ON:
- 		/* stop to send the clock signals */
- 		rtsx_usb_write_register(ucr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0x00);
-+		break;
-+
- 	case MMC_POWER_UNDEFINED:
- 		break;
- 
+Another similar report landed with after the same version update as
+https://bugs.debian.org/1107979 .
 
----
-base-commit: f5c755ef810009b85350884c483705bd04365370
-change-id: 20250620-mmc-rtsx-usb-sdmmc-fix-clang-implicit-fallthrough-732a574554b0
+I only see three commits touching drivers/mmc between
+6.12.30..6.12.32:
 
-Best regards,
---  
-Nathan Chancellor <nathan@kernel.org>
+28306c58daf8 ("mmc: sdhci: Disable SD card clock before changing parameters")
+38828e0dc771 ("mmc: dw_mmc: add exynos7870 DW MMC support")
+67bb2175095e ("mmc: host: Wait for Vdd to settle on card power off")
 
+I have found a potential similar issue reported in ArchLinux at
+https://bbs.archlinux.org/viewtopic.php?id=306024
+
+I have asked if we can get more information out of the boot, but maybe
+this regression report already rings  bell for you?
+
+#regzbot introduced v6.12.30..v6.12.32
+#regzbot link: https://bugs.debian.org/1107979
+#regzbot link: https://bbs.archlinux.org/viewtopic.php?id=306024
+
+Regards,
+Salvatore
