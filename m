@@ -1,116 +1,186 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EE8BD1AE877;
-	Fri, 20 Jun 2025 05:51:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1B2117583;
+	Fri, 20 Jun 2025 07:43:09 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750398672; cv=none; b=Ni+6JXqRcSZJwkqos4EA6xr51xl8052tDGmZFVKVWUmRDRvxQW/stNhIyrKprdWKGywwW6r+GUFxO2izbLsFcsWCDS45SnlhkOozJq+fhwb2fBd7rf8KJYfYvJ0eJe2h4c6dL3YTvPuPp0beVXcrdWfcHQslH5GsWYxwwQ+s5kM=
+	t=1750405391; cv=none; b=fSXivlRpZZgNLJudhEHxpSFWxvyJOMFtjeWS1LQ1mDw86Cuq0s1CJntYL4uAoB7S+P3hve3/qgUPplhye70NjnrEdXv4FRDyqw3OwaCbSxUP6FqPTx7KgHKohFt89OGjmKjS+vdEWXXHoM/EadGQ4/mBaIBw1IF+ZDEPwLMKSDg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750398672; c=relaxed/simple;
-	bh=SdLUypz02FkCtdQzEWZIv0P2z2NdPLyN5uSg8+UhyaQ=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=aUlWbdkeraL+NP66vtn7XCz9JKzRGEj61ahe/Mw7MurefOSQXIJJDTN695852Y19N7JQOVZlXCt224ASAwrY1urs7UfZxgMOpGL1RZzpCUi3+o6RawzMuz4UuaiyJdqhGuNWgHDJrU3SbaxwzhWl39lBzKP3ta+mzPzmwZLqfv8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PJivP71b; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750405391; c=relaxed/simple;
+	bh=i7/0+Wyt/F5MZdrfVE3XpgV5j2JngVJirMoqeFq65mM=;
+	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=rVgyDb8r1NhKzQCusKCikYbzeBTw/q5Wh4BaqZwrBnUZFSXvt4GB0X4IC2ddhUI+32TaDSzlXn0uTnsqNrfOWVaCKQvjEYgxg9V3OXh3K4yQsrBeoGlklre9/SNRwQamq4ncmpuIWkifs9stOUCWdEgYhp+SRI/BfRsEGj0+yoc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=Upnbze+o; arc=none smtp.client-ip=203.29.241.158
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PJivP71b"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1B810C4CEE3;
-	Fri, 20 Jun 2025 05:51:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750398671;
-	bh=SdLUypz02FkCtdQzEWZIv0P2z2NdPLyN5uSg8+UhyaQ=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=PJivP71bnkRLzFuPLm/0btRMesETL+q2P0xjOF7xB1cvwtTuZMeou10k5Cs4GbpMa
-	 R7mEVXZ8JXxbRLAzyCToLntfTKOzSXc8KB/YCJHXsZoJKeVyoM0FwVzqSQIu/9yZFw
-	 MHDG/O5im8D5JvlOzZEE/vm79ZdwSpvAsHLIVqA4Fp/9kCsj2eumBrGbFrV5zZjUbG
-	 dc5lcEFXE+9jybEY+kl2ihIBxBDXiXK1QkJC8VnMLrZwTRsJ3RG3D3PR6f7ZT+5Zrn
-	 szG+RNRxOUSoKxjhIV081w+bWAJXTM2P+qo2jUfa1zvYfGTKUZJ9v1lL7+NaryWoDV
-	 OYBq95h7lInRA==
-Message-ID: <4ce59cfd-1d0d-4152-b19d-2c0b86d25fc7@kernel.org>
-Date: Fri, 20 Jun 2025 07:51:07 +0200
+	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="Upnbze+o"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=codeconstruct.com.au; s=2022a; t=1750405387;
+	bh=i7/0+Wyt/F5MZdrfVE3XpgV5j2JngVJirMoqeFq65mM=;
+	h=Subject:From:To:Date:In-Reply-To:References;
+	b=Upnbze+oVWrWajZF7Trx4o5DhGMK8sIHMGHpedbaCKqqtEzEprWId2j66qzhef1bm
+	 J9uJtaYs+/1SEB2aSPJ9pceE+xxxmsSko5D6WB3iFM1HLjGZWSt+9KPdnTLLLmU8v8
+	 Fqc/fkKtMQ4w0EMq9aVmDZI+7Od1rYSluSUwxzxU/M2xS0oFV5F9nElZaS1moTpqZm
+	 8LvfocHfXNLAHQK3gqFaVP8IgmZjRUFNNU6KRhYoLpAxsFaFBC4dvdhesOQb6epLmi
+	 tq02Jf4MQiyKjrB9dwKawzpt+7BRh/oBrud9XU2qj6pQi9T8DY8m3UhcNz2LLEj8bL
+	 hjekzPsCkiziQ==
+Received: from [192.168.68.112] (unknown [180.150.112.166])
+	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id D16F3640A0;
+	Fri, 20 Jun 2025 15:43:06 +0800 (AWST)
+Message-ID: <2d17ec4f5f9e2cfd75902217a8dd621538a73bc2.camel@codeconstruct.com.au>
+Subject: Re: [PATCH 1/8] mmc: sdhci-of-aspeed: Fix sdhci software reset
+ can't be cleared issue.
+From: Andrew Jeffery <andrew@codeconstruct.com.au>
+To: Cool Lee <cool_lee@aspeedtech.com>, "adrian.hunter@intel.com"
+ <adrian.hunter@intel.com>, "ulf.hansson@linaro.org"
+ <ulf.hansson@linaro.org>,  "joel@jms.id.au" <joel@jms.id.au>,
+ "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>, 
+ "linux-aspeed@lists.ozlabs.org" <linux-aspeed@lists.ozlabs.org>,
+ "openbmc@lists.ozlabs.org" <openbmc@lists.ozlabs.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+ <linux-kernel@vger.kernel.org>, BMC-SW <BMC-SW@aspeedtech.com>
+Date: Fri, 20 Jun 2025 17:13:06 +0930
+In-Reply-To: <TYSPR06MB7068A5F04CE0A5BDB03073C0957DA@TYSPR06MB7068.apcprd06.prod.outlook.com>
+References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
+	 <20250615035803.3752235-2-cool_lee@aspeedtech.com>
+	 <80f56269175d8658ba1ab4a1fe9a43d18294ca60.camel@codeconstruct.com.au>
+	 <TYSPR06MB7068A5F04CE0A5BDB03073C0957DA@TYSPR06MB7068.apcprd06.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v1] mmc: Convert ternary operator to str_true_false()
- helper
-To: Li Dong <lidong@vivo.com>, Aubin Constans <aubin.constans@microchip.com>,
- Ulf Hansson <ulf.hansson@linaro.org>,
- Nicolas Ferre <nicolas.ferre@microchip.com>,
- Alexandre Belloni <alexandre.belloni@bootlin.com>,
- Claudiu Beznea <claudiu.beznea@tuxon.dev>,
- "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..."
- <linux-mmc@vger.kernel.org>,
- "moderated list:ARM/Microchip (AT91) SoC support"
- <linux-arm-kernel@lists.infradead.org>,
- open list <linux-kernel@vger.kernel.org>
-Cc: opensource.kernel@vivo.com, rongqianfeng@vivo.com
-References: <20250620043517.172705-1-lidong@vivo.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250620043517.172705-1-lidong@vivo.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 
-On 20/06/2025 06:35, Li Dong wrote:
-> Replace direct ternary condition check with existing helper function
-> str_true_false() to improve code readability and maintain consistency.
-> 
-> Signed-off-by: Li Dong <lidong@vivo.com>
-> ---
->  drivers/mmc/host/atmel-mci.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-Why are you sending this line per patch? Not even patchset?
+Hello,
 
-Is it again another run of @vivo.com submissions when you spam community
-with low quality things, just because someone told you to run coccinelle?
+On Thu, 2025-06-19 at 06:53 +0000, Cool Lee wrote:
+>=20
+> > > Replace sdhci software reset by scu reset from top.
+> > >=20
+> > > Signed-off-by: Cool Lee <cool_lee@aspeedtech.com>
+> >=20
+> > Can you please add a Fixes: tag?
+> This patch wasn't used to fix a commit. This is a workaround for a hardwa=
+re bug.
 
-Best regards,
-Krzysztof
+A hardware bug in which SoCs? AST2400-AST2700? Or just the AST2700?
+
+> For this condition, do I need a Fixes?
+
+If the bug exists for all SoCs it's a deficiency in the original driver
+and so should have a Fixes: tag.
+
+> >=20
+
+> > > +
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0for (i =3D 0; i < ARRAY_SIZE(reg_array); i++)
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0sdh=
+ci_writel(host, save_array[i],
+> > > +reg_array[i]);
+> > > +
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0sdhci_writew(host, tran_mode,
+> > SDHCI_TRANSFER_MODE);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0writel(mmc8_mode, aspeed_sdc->regs);
+> > > +
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0aspeed_sdhci_set_clock(host, host->clock);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
+> > > +
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0sdhci_reset(host, mask);
+> >=20
+> > Given that we do this after the SCU reset above, what exactly is the SC=
+U reset
+> > fixing? Can you provide more details?
+> The issue is sdhci Software Reset ALL (0x12C[24]) cannot complete which m=
+eans it's always being 1 and not back to 0.
+> The root cause is when sdhci dma operates, it might hold some state signa=
+ls which is not well cleared by Software Reset. These signals prevent Softw=
+are Reset to be cleared.
+> This is a hardware issue so that the workaround is resetting whole SDHCI =
+controller from SCU reset.
+
+Can you please put these details in the commit message?
+
+>=20
+> >=20
+> > > +}
+> > > +
+> > > =C2=A0static const struct sdhci_ops aspeed_sdhci_ops =3D {
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.read_l =3D aspeed_sd=
+hci_readl,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.set_clock =3D aspeed=
+_sdhci_set_clock,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.get_max_clock =3D as=
+peed_sdhci_get_max_clock,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.set_bus_width =3D as=
+peed_sdhci_set_bus_width,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.get_timeout_clock =
+=3D sdhci_pltfm_clk_get_max_clock,
+> > > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.reset =3D sdhci_reset,
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.reset =3D aspeed_sdhci_re=
+set,
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0.set_uhs_signaling =
+=3D sdhci_set_uhs_signaling,
+> > > =C2=A0};
+> > >=20
+> > > @@ -535,6 +582,12 @@ static int aspeed_sdc_probe(struct
+> > > platform_device *pdev)
+> > >=20
+> > > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0spin_lock_init(&sdc->=
+lock);
+> > >=20
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0sdc->rst =3D devm_reset_co=
+ntrol_get(&pdev->dev, NULL);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (!IS_ERR(sdc->rst)) {
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0reset_control_assert(sdc->rst);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0reset_control_deassert(sdc->rst);
+> > > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
+> > > +
+> >=20
+> > The clock driver for the AST2400, AST2500 and AST2600 manages the reset=
+ as
+> > part of managing the clock[1][2].
+> >=20
+> > [1]:
+> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree=
+/drivers
+> > /clk/clk-aspeed.c?h=3Dv6.16-rc2#n71
+> > [2]:
+> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree=
+/drivers
+> > /clk/clk-aspeed.c?h=3Dv6.16-rc2#n209
+> >=20
+> > What you have here asks for a resets property, but that's not currently
+> > specified in the devicetree binding.
+> >=20
+> > So: is the clock driver not doing the right thing given we enable the c=
+lock
+> > directly below this hunk? If not, should we fix that instead?
+> >=20
+> > We can add the resets property to the binding, but I'd also like a bett=
+er
+> > explanation of the problem.
+> For legacy projects, the clock property handles reset simultaneously in t=
+he clock driver.
+> For new project AST2700, clock and reset are separated, and we add a rese=
+t property to the binding.
+> Hence, the patch won't affect until the reset property to the binding.
+> Should I add the reset property in this patch serious?
+
+Yes, please.
+
+Andrew
