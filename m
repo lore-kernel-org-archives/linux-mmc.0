@@ -1,181 +1,99 @@
-Received: from TYDPR03CU002.outbound.protection.outlook.com (mail-japaneastazon11023077.outbound.protection.outlook.com [52.101.127.77])
+Received: from mgamail.intel.com (mgamail.intel.com [198.175.65.20])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9AD0199947;
-	Fri, 20 Jun 2025 10:23:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.127.77
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750414994; cv=fail; b=AI09g7/nvEt7wKlrBbHaIbuEi1iWOAZLLwRhd3ZtdmgzTWo7MYGv9tVsYbeGkKm7P9vnajW+eEytYx5WsjTdHonmEv6B0plueZDzOiWDb4sMkWdJJ+OMhFSl/R9WzIQw1ty7y8GFD51VUcgSOINo8JusOMi4Dmkpw2U7puRnzr4=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750414994; c=relaxed/simple;
-	bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=Sc0/v3e9+ZCsN5F+Rs8fomrebcge4b/kx9s1QuXRSW1WgqvNtpZIA90zvoR/vDN2FjKZ6EpijetqMDoZa27ImxuU9PwnxfggQ6i9nf/pVuGJQwItKwnNYrliqU8YCgx5/ZQKRFb2hVnzK7c5qXqcR+orEXWkHQVLG6RrGC//WbY=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b=cTwGo3kM; arc=fail smtp.client-ip=52.101.127.77
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A8FA21C18E
+	for <linux-mmc@vger.kernel.org>; Fri, 20 Jun 2025 13:20:21 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.175.65.20
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1750425623; cv=none; b=do5Bi9sp5Oly/n3hn60s3Y4faJYXY/0QdztkzwsfFZ1DFNPGosGL0vSAzrfHIBoKmn1FGZkPiCQNxQPP4gVP5O+oc7J6Rcu+87AxydTPZlxN4drxS3zK21xO5BFYMPhkj3Z1o4iQ2e03wGsxI58i7Nv051pXaj6WCJ8eOhMEQMI=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1750425623; c=relaxed/simple;
+	bh=u6th+w4Q2jkKTNrfNmNBg9rKGJcl9ked0gLE4aa35cY=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=B8zJkwlt3yjxr7JzWmTnfNij+oRr7DDzM8z5HX3nYnpNOUZfu28mh/lhCYqk4ep/CGl4mkS1L3Kf7/nVaR9C1XRQtF2rHgkRr84XcOC+Tm0FPa3MtVDM3k8TgPkD9PX+V90U1AiWF0gceBxamzv9lgKXlAmk0m3x5OMc3u/prVo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com; spf=pass smtp.mailfrom=intel.com; dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b=EYcF3WFZ; arc=none smtp.client-ip=198.175.65.20
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=intel.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=intel.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b="cTwGo3kM"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=hbsHdx4b3rbp8rY+oGKBFbbRnbq8LAn5X3oxvm9LguNffwM8Tu58qDQ5+L21+ScUD4V0kXtuAdw3Sid1Vce2tXg9yK8eIpOQx37nAFFIGlJjnS2Oc1w6F6KZnXSSoagRc6y891XeWlCJeg5qJFqqnRf+cmvW8XpUjY//HlioFqVL23v8N/jHTyfAEj8UAT6e6EJ1cdUUVSk3ksAEMQNgwOA1X6EpAfHTaQ1/y0XV8LzIUoCHVvaYXViINxIvSxmkRi9m111JORzeNTGm5iNq8B98HhWjnJjyNBRaE6JpEnu+loEeb3HCktsQ6QPo+K5rTQOzuw27OJmwknzhtZDZ8w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
- b=U1BB1CAEq6DoPMs3zeyyq8KJjaLWXiNarOjcNDOfvOJog+vzdJar9lTp071vMqnli7QdzYQSAtctRHdTXYz5Xzi9oVKbRJP/+g330s2zjFjOq8MrYtOEkL163f3siL3Juvh/lpYj31kUWD8X1LNoyru9jIUAVSTQr1cR2rAoG9ix/U4XWd6DBggfwwyLEsAbf/E+QvfpEbPVelEijvfgNyROTVwSPemWIQN/r+QwRC5OAea2YyCURS16VHSUG9qMafJAPN3LTvuwCOp73djFopBDEGrUt0o71xgqc9NfiYeXwRnrizHHXkQfQYHtvBldBX1L2G444LAkQ5G0rPwAhw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
- header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
- b=cTwGo3kMxXWwjXUw11nouMZ+pl2sASBJwCMWbRXvMZFDWUsYn6QeGjgBB6o/4SYQ8pPswfw+tR7wHgYbtpKb2UY9ZqSXRIzQbZa7KSZ00c6NJA+TEe+pYWm94zKVzt+wwOFvp4EuHFR1w/in8iIglhYSWTWqpUoCOcPF98kTbGWxSFMF61x39fP+n2hxgOfIffaGUCwfp1AwfkrFNasjx5P4MD/3YmaIiBDngj/RMw97JTaKqurPk6BS5XiMuHJ1r3L+eP7zB+jGYEYm2gG96swuVJN5ID7pr1WAWPDyy7S8kuD9WVgWRpPCvYDYlzDA1kduhH2vf2mQj93sjCR18A==
-Received: from SEYPR06MB7072.apcprd06.prod.outlook.com (2603:1096:101:1db::9)
- by SI6PR06MB7113.apcprd06.prod.outlook.com (2603:1096:4:247::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8857.19; Fri, 20 Jun
- 2025 10:23:05 +0000
-Received: from SEYPR06MB7072.apcprd06.prod.outlook.com
- ([fe80::427f:4d26:e479:7659]) by SEYPR06MB7072.apcprd06.prod.outlook.com
- ([fe80::427f:4d26:e479:7659%4]) with mapi id 15.20.8857.022; Fri, 20 Jun 2025
- 10:23:04 +0000
-From: Cool Lee <cool_lee@aspeedtech.com>
-To: Andrew Jeffery <andrew@codeconstruct.com.au>, "adrian.hunter@intel.com"
-	<adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"joel@jms.id.au" <joel@jms.id.au>, "p.zabel@pengutronix.de"
-	<p.zabel@pengutronix.de>, "linux-aspeed@lists.ozlabs.org"
-	<linux-aspeed@lists.ozlabs.org>, "openbmc@lists.ozlabs.org"
-	<openbmc@lists.ozlabs.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>, BMC-SW <BMC-SW@aspeedtech.com>
-Subject: RE: [PATCH 7/8] mmc: sdhci-of-aspeed: Remove timing phase
-Thread-Topic: [PATCH 7/8] mmc: sdhci-of-aspeed: Remove timing phase
-Thread-Index: AQHb3/yk8lgT4h+z1EKWpQv7CmYpOrQLoncw
-Date: Fri, 20 Jun 2025 10:23:04 +0000
-Message-ID:
- <SEYPR06MB7072FC07B4EFC03BB25B537F957CA@SEYPR06MB7072.apcprd06.prod.outlook.com>
-References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
-	 <20250615035803.3752235-8-cool_lee@aspeedtech.com>
- <9c85755a8aff6e6f8a5548f0b5e758dce7d6353e.camel@codeconstruct.com.au>
-In-Reply-To:
- <9c85755a8aff6e6f8a5548f0b5e758dce7d6353e.camel@codeconstruct.com.au>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=aspeedtech.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SEYPR06MB7072:EE_|SI6PR06MB7113:EE_
-x-ms-office365-filtering-correlation-id: 496c4ad9-ab7d-4b03-f828-08ddafe47185
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|1800799024|366016|7416014|376014|38070700018|921020;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?bwzJt0zcaS83/pKxJGUGP5ipZczGpAFYGQKlWPJiXt6YQ8bunp38H8vunN8r?=
- =?us-ascii?Q?VSKtO4m1WYOXrCfiA1yRFFjEDIIHCEaFjZsBEjrlR91TnJRewnnL2f+5Q9j/?=
- =?us-ascii?Q?JlG7VClcu3aPILitYXs0ds8/secRdaOyvLbuHSSGVQrJCrYzWz6DV70V8mAF?=
- =?us-ascii?Q?C/E1jb+ftu7hLFiXAktPJmYj9kq52LmYk2pOIO1kCR2hXhJLVeKpVMkj0E28?=
- =?us-ascii?Q?AK7hP5gmbncQYltnBSifTuOeFQ8smNrSbwy161T/IAxQ9ANgxiB2rnaTK19r?=
- =?us-ascii?Q?xBYqmlLdJRkBAEeSperBo+8Lls5jIfv3GpMyqbaoMzsZozFFPCp1HceBGyP7?=
- =?us-ascii?Q?VUsNnuzZQwI53ghDhOYR7cLntR/1JijlOybXnoI2hLASxFm4RpjlZzfG3ZE9?=
- =?us-ascii?Q?lAr1rnODjfvKwCZemNU8G322dPcvmFyGI9l3jMpzYj9c+8KJewi/wAygMFbp?=
- =?us-ascii?Q?gGpTqfh/pAeVtQ4rH/lOuovt6Fr0kCIqj5ujCTn0NzPhV6IljGyHYAXIGqCS?=
- =?us-ascii?Q?USDTlI9u9s3FPTWklisNl/afNz7l7CKFyY7Vy+Dqb5ryloKNcu4LGa0vhhel?=
- =?us-ascii?Q?wVPOd6saz+r4MzASygOOYTP/lRJunAecrQOo2phYyXYiZO4+SaIW1gX1NiM2?=
- =?us-ascii?Q?R/n4PDOafDb30rMurOPlrRuEKdjnaSbypMAUtyjdDDgytS4x7nGrrfSjQ2ml?=
- =?us-ascii?Q?b5LhP7Kt6mW4c2//OIlgZ/EcjPkceJIH+1BIh5Gg8QRWnGpQEHOBsZU/B8ok?=
- =?us-ascii?Q?nFiyy4RstTRCK5lol0sWsnM/vt23gOiaTK7Tkz8wfRHFtJrkzt9SYK01UdKz?=
- =?us-ascii?Q?5Raqf6RhiYoHg2GNEuKp0I6VV+NQzrcw9Ljr3CZAyZkw2qA8gwb/1LDNZ2VO?=
- =?us-ascii?Q?UF8B3EO94CT8T8YOqNriu0cMjfh+nrOhq8ne2rO0CZo1nzOkVcvKaWHatk5V?=
- =?us-ascii?Q?n5CIFReQ854RDhz03A1B8SHvL74FHho3Fws5A25W0jbq63KonNtWGnnofwPh?=
- =?us-ascii?Q?s7pD0bxVIa+OrJOXbFsSm96oGsD/l/fNue+Wbt1/6Z/OodU39sOnrxr1IPF4?=
- =?us-ascii?Q?no0N5Bz3RZFqYU9pbchTMbKCP4CUjHE7FNnbM6f2ThYBEQX1qhmIfL+/iiYo?=
- =?us-ascii?Q?z9jAFOBCxuGC4E6u3DZl0Pb1lm0YD36WaT9evXYUDdFji3zw+fby/gGsyMw3?=
- =?us-ascii?Q?ULnZpSQU2Pf0FIVuoPx3YcLJ5nUOR+FfRNnnSJxLghOwbK8ISeRlYDa4UZoM?=
- =?us-ascii?Q?kg5yBpigLIlUcjQdZAjOembzzgujhPb+W0POcddfqshfCKDvTSbB6+JSgMhc?=
- =?us-ascii?Q?b3f6dt2V3HAJIGCai5LEJMpc9652UmPbPoTRnPySqNd7sjFb1uJIac+6uk1X?=
- =?us-ascii?Q?bVaDsw7qCUVWJyr+MKdShXS7wrwO6GESAxhr0Z04lD0nhcZQpmA/EU1R8aSZ?=
- =?us-ascii?Q?L3+Jf7vp2aA7IjDsgzDnri2tjur3LaHsgMPvD/hBv+3EVcasf6kFxvPkR3Mn?=
- =?us-ascii?Q?l3Pr3ToJdrQyTKI=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEYPR06MB7072.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(7416014)(376014)(38070700018)(921020);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?FSCQRkjyRvUncPN2WNU+1eqKIZLiQcuxqtqHkRo1TeBXz3Lwg842wZU4u9mR?=
- =?us-ascii?Q?XhLn8fExB8hwkpInjQWlEvMnBGGFCjlzxPmkkYYdxrgGmJZ5ggjFrfmwz8xg?=
- =?us-ascii?Q?8ALXl8ZSnoA8FbxqWZT6M9HvYPSf9YYKkwXLqvX0nPUlOogR9PiZkfsM9yWG?=
- =?us-ascii?Q?stUC0lLb+9w5df9Sw+kiEuuLE2PN8uVchkFvrpwv5Gma/3rTwNR4MJgrCl9L?=
- =?us-ascii?Q?FmBzBL3kmkvUCpTZTJjkTVyiWbC2ImAbtTKBjM0dxpKJpJMnArQT0Lq1QfTj?=
- =?us-ascii?Q?A1CnL/5T49NR0MHAcYRpSPZgI4II0I6aJdajf7/kX6hUy21rslXw+yn5gHYL?=
- =?us-ascii?Q?SiOFnt2v21rJK/flDsp52IKUtU0ppidDsDXmGc69Qfd7xWK0uVyq8XwpnBap?=
- =?us-ascii?Q?Qi+6+sfRGkaAZlE9BcxzdjjyQwXeXHIUm9fflxhT5QRROn3sPS1efIr3CsLa?=
- =?us-ascii?Q?h4M3NKBSkv1jEFLbSv4LI/fVIs/P10utSGCS7RbnTROJim4dcFQI//D09wbP?=
- =?us-ascii?Q?C6BxxchmeKtaCWezlUtx9Ci3XHK5bu5vSJjJVDTPT3fDtGhgTCWiVu4asbsw?=
- =?us-ascii?Q?ZJImLe/6FuervIbCgWRYb4277OMmZNs0apaLGmJLWo6uupy2AVSZWqkKwQ5o?=
- =?us-ascii?Q?6o/BG6HdVRmA8XHJD1HNX/yJhxULucDH8R7wrRrDXxBERbbxpPTiyBpki8nE?=
- =?us-ascii?Q?AZN6DExyqsxYcwxKdZ6v/cROo0475WPqJ23CoBDiISlqNqGfX3kZpqGSLeoD?=
- =?us-ascii?Q?KRNza0tbUjCiJ+92K8MOENoOqb/+p39CenLZLCi28lAc5cP1yh4sVAhDBcD0?=
- =?us-ascii?Q?7jJRrtdN2ufLyGv7BCZay1b3Bku5EvYhimjPRoXU8B2WPCnQkgA5YEt/kmMh?=
- =?us-ascii?Q?I2IiCIiVATbAsG9KliNfxtsRJgLRg7CI8CHn8pBFtITS+S1n8txS2v1ZJSAc?=
- =?us-ascii?Q?E4fs4ilwzFIFWdPJJo6pjR/vc6d2V56aslHd05BRzkElwcg/70eUk/SiPUZz?=
- =?us-ascii?Q?+6qSsX3GrpgutuZoHP+t5a0V2INnedk2BQGe3Wt6xstwJY1C2lgFzZZimUoe?=
- =?us-ascii?Q?1CnAdnXBO3swgIBu3Ep4FjIOFRuJIw+6E6gnSqqUCuiUg1oml/KTGAIQSWtM?=
- =?us-ascii?Q?gcDV5DV93dBR2vq/dOL7IAOP1ZdxJgsgkCoJCBnRN3yyBI8453/+zIfUyPgx?=
- =?us-ascii?Q?VMqwA2QYMw+Arzl7wm+yoeiQKtbgpEATJNPVCnyToUwof5bIoJFLtaT/diGE?=
- =?us-ascii?Q?IyIL1z0dbfkyK2ssWS0+D1muiRSxZ4GdfSPcuPlX64nQBSKzVNt9zlec+8bA?=
- =?us-ascii?Q?Yx51hULbGV6buXw0cQcCMisuw8Mbq7SKniuL20C4PcNG7c1Ua7HEy1DXrd3N?=
- =?us-ascii?Q?+Z7SP9NqCYSISLUfjLGQg+Z/GNPthhFFlTWu8UMmbl1zkxKoXYAdLslNQL0j?=
- =?us-ascii?Q?r7hYxeeVwqK6ROQpvTo9GfNq3MqznFMf5TU9SvgMlgn1v5leNuckbE6+0xCr?=
- =?us-ascii?Q?j2GW0c6c1vPC3SYNzEmUDUYoqbTQongMZrgLS15XXixRH9VL1ABk/O+EmJpy?=
- =?us-ascii?Q?bKJYFwwiB4A33vkadxrUghJ4/mUfihTFdGpuXYXi?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=intel.com header.i=@intel.com header.b="EYcF3WFZ"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1750425621; x=1781961621;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=u6th+w4Q2jkKTNrfNmNBg9rKGJcl9ked0gLE4aa35cY=;
+  b=EYcF3WFZWSjckcDB00obBo4QcoZaXkX7uUY+hvyWrdTore+6mZdh9EVy
+   tALaFgMAoQ1AzqOTJE90Oc3strOlGTmRkbNZ8FtEBqG4zCYejlF4LaaFd
+   ueWedOgCL8iBS0RbucNVqaTbFdEWkdyJKPYu0bRj8Lf2XR3m13/zJtDID
+   GoRSqYRsLKhRK0FnMHz4I97nF0u+zTKf5cM8J4eTFAaL48G64/Lc9IjU3
+   j5t4HosnwJreL6xTKBOU1QestwsbnyBU3BLXxIsV8vGCqva5Fcivxeh51
+   og3f+u/l/1g8b9zCDTKO/c8dlKE8sE+7c83/lGcpgfUM26uE3nrW+okfo
+   Q==;
+X-CSE-ConnectionGUID: fMXDGf1aT3q//NIs5sVuoQ==
+X-CSE-MsgGUID: XUaRrK1wQ0eS6zHYzhWnDw==
+X-IronPort-AV: E=McAfee;i="6800,10657,11469"; a="52389507"
+X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
+   d="scan'208";a="52389507"
+Received: from fmviesa003.fm.intel.com ([10.60.135.143])
+  by orvoesa112.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jun 2025 06:20:21 -0700
+X-CSE-ConnectionGUID: LuxuQ+cpRGypSVUA8fIw9Q==
+X-CSE-MsgGUID: Xky0WJI1SV2iBqP0gQ5liw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="6.16,251,1744095600"; 
+   d="scan'208";a="154929550"
+Received: from lkp-server01.sh.intel.com (HELO e8142ee1dce2) ([10.239.97.150])
+  by fmviesa003.fm.intel.com with ESMTP; 20 Jun 2025 06:20:18 -0700
+Received: from kbuild by e8142ee1dce2 with local (Exim 4.96)
+	(envelope-from <lkp@intel.com>)
+	id 1uSbfE-000Ln3-1x;
+	Fri, 20 Jun 2025 13:20:16 +0000
+Date: Fri, 20 Jun 2025 21:20:11 +0800
+From: kernel test robot <lkp@intel.com>
+To: Binbin Zhou <zhoubinbin@loongson.cn>,
+	Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Ulf Hansson <ulf.hansson@linaro.org>
+Cc: oe-kbuild-all@lists.linux.dev, Xuerui Wang <kernel@xen0n.name>,
+	loongarch@lists.linux.dev, linux-mmc@vger.kernel.org,
+	wanghongliang@loongson.cn
+Subject: Re: [PATCH v3 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO
+ controller driver
+Message-ID: <202506202031.TNchn822-lkp@intel.com>
+References: <abfe54473135df478db14b5ef0e1773326455f21.1750216134.git.zhoubinbin@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: aspeedtech.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SEYPR06MB7072.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 496c4ad9-ab7d-4b03-f828-08ddafe47185
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Jun 2025 10:23:04.8468
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: /4A0RiYGZPZLvofAhuCp2KPARtV4UQPTuD2tsG5FyL199AM037LLNf0X+s1kX2pkSUV7wmDRFm4HXttHIo6QDg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SI6PR06MB7113
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <abfe54473135df478db14b5ef0e1773326455f21.1750216134.git.zhoubinbin@loongson.cn>
 
+Hi Binbin,
 
-> > The timing phase is no more needed since the auto tuning is applied.
-> >
->=20
-> I feel this is unwise: we're now ignoring constraints set in the devicetr=
-ee.
-> Auto-tuning is fine, but I think that should be a feature that new platfo=
-rms can
-> exploit by default. Older platforms that do specify the phase values via =
-the
-> devicetree can be converted at the leisure of their maintainers (by remov=
-ing
-> the phase properties).
->=20
-> Support needs to remain in the driver until there are no (aspeed-based)
-> devicetrees specifying the phases.
-The timing phase only works on AST2600 or newer platform which has added a =
-delay cell in the RTL.
-The older platform AST2500, AST2400 doesn't support the timing phase.
-It supposed no effect on older platform.=20
-The old manner that a static timing value customized from devicetree is inc=
-onvenient because customer needs to check waveform associated with each del=
-ay taps. Once the emmc parts changed, a fixed timing value may not work. Th=
-at's why auto tune here instead of a static value.
+kernel test robot noticed the following build errors:
 
->=20
-> Andrew
+[auto build test ERROR on 187715cfd12932a528ff3a3952648e2b55381d4c]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Binbin-Zhou/dt-bindings-mmc-Add-Loongson-2K-SD-SDIO-eMMC-controller-binding/20250618-160908
+base:   187715cfd12932a528ff3a3952648e2b55381d4c
+patch link:    https://lore.kernel.org/r/abfe54473135df478db14b5ef0e1773326455f21.1750216134.git.zhoubinbin%40loongson.cn
+patch subject: [PATCH v3 2/4] mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+config: microblaze-randconfig-r133-20250620 (https://download.01.org/0day-ci/archive/20250620/202506202031.TNchn822-lkp@intel.com/config)
+compiler: microblaze-linux-gcc (GCC) 8.5.0
+reproduce: (https://download.01.org/0day-ci/archive/20250620/202506202031.TNchn822-lkp@intel.com/reproduce)
+
+If you fix the issue in a separate patch/commit (i.e. not just a new version of
+the same patch/commit), kindly add following tags
+| Reported-by: kernel test robot <lkp@intel.com>
+| Closes: https://lore.kernel.org/oe-kbuild-all/202506202031.TNchn822-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   microblaze-linux-ld: drivers/mmc/host/loongson2-mmc.o: in function `loongson2_mmc_set_ios':
+>> .tmp_gl_loongson2-mmc.o:(.text+0xec8): undefined reference to `__udivdi3'
+
+-- 
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests/wiki
