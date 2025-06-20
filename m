@@ -1,175 +1,181 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from TYDPR03CU002.outbound.protection.outlook.com (mail-japaneastazon11023077.outbound.protection.outlook.com [52.101.127.77])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 281312356C7;
-	Fri, 20 Jun 2025 09:08:09 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750410491; cv=none; b=s6DBL62dofiFp5XQ6DyHr52maBKDlq0/DjoozaAOa/mCghKfSRlQtLQeTWieyWf6n4+SROU9wHtfUbdM6kjXblTvSCAe22ZmbYrCbbQR8OMG83tEyrpcK4JnylAuHTlqy4scKb02YShj5alnvS7Q/fgZTZU/pi3xzgoiYe0fHxc=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750410491; c=relaxed/simple;
-	bh=eAH/XWhV0YrJEAGt/Il57b1YBMEoAFiYpmzuX8AHFt8=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=S9aHkGu3Ew+t+w85P+XHf6EfWOqBYaFNPMlQ8h9FJOabknLe4yJnmaXlf3fOT0Li0sxm+Dq2uBEMpXGiZ1nByDzglt/w19k5Z00LYduvbRH5RzaWU3fwrWXZw/A9Unm3XkFx6jbITBiSpce/Y94N3Fj+f6Tpy/Z2WTp9J1NfaCQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=AHCFnIGU; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9AD0199947;
+	Fri, 20 Jun 2025 10:23:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=52.101.127.77
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1750414994; cv=fail; b=AI09g7/nvEt7wKlrBbHaIbuEi1iWOAZLLwRhd3ZtdmgzTWo7MYGv9tVsYbeGkKm7P9vnajW+eEytYx5WsjTdHonmEv6B0plueZDzOiWDb4sMkWdJJ+OMhFSl/R9WzIQw1ty7y8GFD51VUcgSOINo8JusOMi4Dmkpw2U7puRnzr4=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1750414994; c=relaxed/simple;
+	bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
+	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=Sc0/v3e9+ZCsN5F+Rs8fomrebcge4b/kx9s1QuXRSW1WgqvNtpZIA90zvoR/vDN2FjKZ6EpijetqMDoZa27ImxuU9PwnxfggQ6i9nf/pVuGJQwItKwnNYrliqU8YCgx5/ZQKRFb2hVnzK7c5qXqcR+orEXWkHQVLG6RrGC//WbY=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b=cTwGo3kM; arc=fail smtp.client-ip=52.101.127.77
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="AHCFnIGU"
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55K4VgT2018588;
-	Fri, 20 Jun 2025 09:08:06 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	wIlhP34fZrQL0p3bEORFQhswmsGeT8lZPBkZZMP17rs=; b=AHCFnIGUFKfKXYWZ
-	aS/x5MPtNs0J7TUd/fnYOYr9AwI7lSqFe7Ov/AIbS/wEX9cqgQRNh3NwtdbkJF2C
-	ei0mCVUICWGpcds3t+HEMwIIvl72dpejpGGPPh7T7qHqX/x5xwZiU4bwAU2kp3RE
-	uVx+OdZTxDtSDhgnD+vbPVpYYPtEDUqt4dTUtEsIF8tKf1j35LYJ8WJi+h4oeJIL
-	odQYQi2TdNzBi5sctkAuiBNje/8BwHuv/aNtPudeikvCieCPWTH57+ZHBcATPl7y
-	ZYI/LRJBhPv1yodx8b2Vd70BYxJ8dlp4hPO6MeaPH4X/Rc10e/SODMRpz0c4u8Cv
-	J0FfzQ==
-Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47d0pcgqe7-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Jun 2025 09:08:05 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 55K985Bh014393
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Fri, 20 Jun 2025 09:08:05 GMT
-Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Fri, 20 Jun
- 2025 02:07:59 -0700
-Message-ID: <9e345e90-58e6-4755-a0af-8e0b4ccd5d44@quicinc.com>
-Date: Fri, 20 Jun 2025 14:37:56 +0530
+	dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b="cTwGo3kM"
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=hbsHdx4b3rbp8rY+oGKBFbbRnbq8LAn5X3oxvm9LguNffwM8Tu58qDQ5+L21+ScUD4V0kXtuAdw3Sid1Vce2tXg9yK8eIpOQx37nAFFIGlJjnS2Oc1w6F6KZnXSSoagRc6y891XeWlCJeg5qJFqqnRf+cmvW8XpUjY//HlioFqVL23v8N/jHTyfAEj8UAT6e6EJ1cdUUVSk3ksAEMQNgwOA1X6EpAfHTaQ1/y0XV8LzIUoCHVvaYXViINxIvSxmkRi9m111JORzeNTGm5iNq8B98HhWjnJjyNBRaE6JpEnu+loEeb3HCktsQ6QPo+K5rTQOzuw27OJmwknzhtZDZ8w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
+ b=U1BB1CAEq6DoPMs3zeyyq8KJjaLWXiNarOjcNDOfvOJog+vzdJar9lTp071vMqnli7QdzYQSAtctRHdTXYz5Xzi9oVKbRJP/+g330s2zjFjOq8MrYtOEkL163f3siL3Juvh/lpYj31kUWD8X1LNoyru9jIUAVSTQr1cR2rAoG9ix/U4XWd6DBggfwwyLEsAbf/E+QvfpEbPVelEijvfgNyROTVwSPemWIQN/r+QwRC5OAea2YyCURS16VHSUG9qMafJAPN3LTvuwCOp73djFopBDEGrUt0o71xgqc9NfiYeXwRnrizHHXkQfQYHtvBldBX1L2G444LAkQ5G0rPwAhw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
+ header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=2421UXHoKKeVPREDXCWm5x2jIaMA4XjRj2zL07QMC+U=;
+ b=cTwGo3kMxXWwjXUw11nouMZ+pl2sASBJwCMWbRXvMZFDWUsYn6QeGjgBB6o/4SYQ8pPswfw+tR7wHgYbtpKb2UY9ZqSXRIzQbZa7KSZ00c6NJA+TEe+pYWm94zKVzt+wwOFvp4EuHFR1w/in8iIglhYSWTWqpUoCOcPF98kTbGWxSFMF61x39fP+n2hxgOfIffaGUCwfp1AwfkrFNasjx5P4MD/3YmaIiBDngj/RMw97JTaKqurPk6BS5XiMuHJ1r3L+eP7zB+jGYEYm2gG96swuVJN5ID7pr1WAWPDyy7S8kuD9WVgWRpPCvYDYlzDA1kduhH2vf2mQj93sjCR18A==
+Received: from SEYPR06MB7072.apcprd06.prod.outlook.com (2603:1096:101:1db::9)
+ by SI6PR06MB7113.apcprd06.prod.outlook.com (2603:1096:4:247::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8857.19; Fri, 20 Jun
+ 2025 10:23:05 +0000
+Received: from SEYPR06MB7072.apcprd06.prod.outlook.com
+ ([fe80::427f:4d26:e479:7659]) by SEYPR06MB7072.apcprd06.prod.outlook.com
+ ([fe80::427f:4d26:e479:7659%4]) with mapi id 15.20.8857.022; Fri, 20 Jun 2025
+ 10:23:04 +0000
+From: Cool Lee <cool_lee@aspeedtech.com>
+To: Andrew Jeffery <andrew@codeconstruct.com.au>, "adrian.hunter@intel.com"
+	<adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+	"joel@jms.id.au" <joel@jms.id.au>, "p.zabel@pengutronix.de"
+	<p.zabel@pengutronix.de>, "linux-aspeed@lists.ozlabs.org"
+	<linux-aspeed@lists.ozlabs.org>, "openbmc@lists.ozlabs.org"
+	<openbmc@lists.ozlabs.org>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org"
+	<linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+	<linux-kernel@vger.kernel.org>, BMC-SW <BMC-SW@aspeedtech.com>
+Subject: RE: [PATCH 7/8] mmc: sdhci-of-aspeed: Remove timing phase
+Thread-Topic: [PATCH 7/8] mmc: sdhci-of-aspeed: Remove timing phase
+Thread-Index: AQHb3/yk8lgT4h+z1EKWpQv7CmYpOrQLoncw
+Date: Fri, 20 Jun 2025 10:23:04 +0000
+Message-ID:
+ <SEYPR06MB7072FC07B4EFC03BB25B537F957CA@SEYPR06MB7072.apcprd06.prod.outlook.com>
+References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
+	 <20250615035803.3752235-8-cool_lee@aspeedtech.com>
+ <9c85755a8aff6e6f8a5548f0b5e758dce7d6353e.camel@codeconstruct.com.au>
+In-Reply-To:
+ <9c85755a8aff6e6f8a5548f0b5e758dce7d6353e.camel@codeconstruct.com.au>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=aspeedtech.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SEYPR06MB7072:EE_|SI6PR06MB7113:EE_
+x-ms-office365-filtering-correlation-id: 496c4ad9-ab7d-4b03-f828-08ddafe47185
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam:
+ BCL:0;ARA:13230040|1800799024|366016|7416014|376014|38070700018|921020;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?bwzJt0zcaS83/pKxJGUGP5ipZczGpAFYGQKlWPJiXt6YQ8bunp38H8vunN8r?=
+ =?us-ascii?Q?VSKtO4m1WYOXrCfiA1yRFFjEDIIHCEaFjZsBEjrlR91TnJRewnnL2f+5Q9j/?=
+ =?us-ascii?Q?JlG7VClcu3aPILitYXs0ds8/secRdaOyvLbuHSSGVQrJCrYzWz6DV70V8mAF?=
+ =?us-ascii?Q?C/E1jb+ftu7hLFiXAktPJmYj9kq52LmYk2pOIO1kCR2hXhJLVeKpVMkj0E28?=
+ =?us-ascii?Q?AK7hP5gmbncQYltnBSifTuOeFQ8smNrSbwy161T/IAxQ9ANgxiB2rnaTK19r?=
+ =?us-ascii?Q?xBYqmlLdJRkBAEeSperBo+8Lls5jIfv3GpMyqbaoMzsZozFFPCp1HceBGyP7?=
+ =?us-ascii?Q?VUsNnuzZQwI53ghDhOYR7cLntR/1JijlOybXnoI2hLASxFm4RpjlZzfG3ZE9?=
+ =?us-ascii?Q?lAr1rnODjfvKwCZemNU8G322dPcvmFyGI9l3jMpzYj9c+8KJewi/wAygMFbp?=
+ =?us-ascii?Q?gGpTqfh/pAeVtQ4rH/lOuovt6Fr0kCIqj5ujCTn0NzPhV6IljGyHYAXIGqCS?=
+ =?us-ascii?Q?USDTlI9u9s3FPTWklisNl/afNz7l7CKFyY7Vy+Dqb5ryloKNcu4LGa0vhhel?=
+ =?us-ascii?Q?wVPOd6saz+r4MzASygOOYTP/lRJunAecrQOo2phYyXYiZO4+SaIW1gX1NiM2?=
+ =?us-ascii?Q?R/n4PDOafDb30rMurOPlrRuEKdjnaSbypMAUtyjdDDgytS4x7nGrrfSjQ2ml?=
+ =?us-ascii?Q?b5LhP7Kt6mW4c2//OIlgZ/EcjPkceJIH+1BIh5Gg8QRWnGpQEHOBsZU/B8ok?=
+ =?us-ascii?Q?nFiyy4RstTRCK5lol0sWsnM/vt23gOiaTK7Tkz8wfRHFtJrkzt9SYK01UdKz?=
+ =?us-ascii?Q?5Raqf6RhiYoHg2GNEuKp0I6VV+NQzrcw9Ljr3CZAyZkw2qA8gwb/1LDNZ2VO?=
+ =?us-ascii?Q?UF8B3EO94CT8T8YOqNriu0cMjfh+nrOhq8ne2rO0CZo1nzOkVcvKaWHatk5V?=
+ =?us-ascii?Q?n5CIFReQ854RDhz03A1B8SHvL74FHho3Fws5A25W0jbq63KonNtWGnnofwPh?=
+ =?us-ascii?Q?s7pD0bxVIa+OrJOXbFsSm96oGsD/l/fNue+Wbt1/6Z/OodU39sOnrxr1IPF4?=
+ =?us-ascii?Q?no0N5Bz3RZFqYU9pbchTMbKCP4CUjHE7FNnbM6f2ThYBEQX1qhmIfL+/iiYo?=
+ =?us-ascii?Q?z9jAFOBCxuGC4E6u3DZl0Pb1lm0YD36WaT9evXYUDdFji3zw+fby/gGsyMw3?=
+ =?us-ascii?Q?ULnZpSQU2Pf0FIVuoPx3YcLJ5nUOR+FfRNnnSJxLghOwbK8ISeRlYDa4UZoM?=
+ =?us-ascii?Q?kg5yBpigLIlUcjQdZAjOembzzgujhPb+W0POcddfqshfCKDvTSbB6+JSgMhc?=
+ =?us-ascii?Q?b3f6dt2V3HAJIGCai5LEJMpc9652UmPbPoTRnPySqNd7sjFb1uJIac+6uk1X?=
+ =?us-ascii?Q?bVaDsw7qCUVWJyr+MKdShXS7wrwO6GESAxhr0Z04lD0nhcZQpmA/EU1R8aSZ?=
+ =?us-ascii?Q?L3+Jf7vp2aA7IjDsgzDnri2tjur3LaHsgMPvD/hBv+3EVcasf6kFxvPkR3Mn?=
+ =?us-ascii?Q?l3Pr3ToJdrQyTKI=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEYPR06MB7072.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(1800799024)(366016)(7416014)(376014)(38070700018)(921020);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?FSCQRkjyRvUncPN2WNU+1eqKIZLiQcuxqtqHkRo1TeBXz3Lwg842wZU4u9mR?=
+ =?us-ascii?Q?XhLn8fExB8hwkpInjQWlEvMnBGGFCjlzxPmkkYYdxrgGmJZ5ggjFrfmwz8xg?=
+ =?us-ascii?Q?8ALXl8ZSnoA8FbxqWZT6M9HvYPSf9YYKkwXLqvX0nPUlOogR9PiZkfsM9yWG?=
+ =?us-ascii?Q?stUC0lLb+9w5df9Sw+kiEuuLE2PN8uVchkFvrpwv5Gma/3rTwNR4MJgrCl9L?=
+ =?us-ascii?Q?FmBzBL3kmkvUCpTZTJjkTVyiWbC2ImAbtTKBjM0dxpKJpJMnArQT0Lq1QfTj?=
+ =?us-ascii?Q?A1CnL/5T49NR0MHAcYRpSPZgI4II0I6aJdajf7/kX6hUy21rslXw+yn5gHYL?=
+ =?us-ascii?Q?SiOFnt2v21rJK/flDsp52IKUtU0ppidDsDXmGc69Qfd7xWK0uVyq8XwpnBap?=
+ =?us-ascii?Q?Qi+6+sfRGkaAZlE9BcxzdjjyQwXeXHIUm9fflxhT5QRROn3sPS1efIr3CsLa?=
+ =?us-ascii?Q?h4M3NKBSkv1jEFLbSv4LI/fVIs/P10utSGCS7RbnTROJim4dcFQI//D09wbP?=
+ =?us-ascii?Q?C6BxxchmeKtaCWezlUtx9Ci3XHK5bu5vSJjJVDTPT3fDtGhgTCWiVu4asbsw?=
+ =?us-ascii?Q?ZJImLe/6FuervIbCgWRYb4277OMmZNs0apaLGmJLWo6uupy2AVSZWqkKwQ5o?=
+ =?us-ascii?Q?6o/BG6HdVRmA8XHJD1HNX/yJhxULucDH8R7wrRrDXxBERbbxpPTiyBpki8nE?=
+ =?us-ascii?Q?AZN6DExyqsxYcwxKdZ6v/cROo0475WPqJ23CoBDiISlqNqGfX3kZpqGSLeoD?=
+ =?us-ascii?Q?KRNza0tbUjCiJ+92K8MOENoOqb/+p39CenLZLCi28lAc5cP1yh4sVAhDBcD0?=
+ =?us-ascii?Q?7jJRrtdN2ufLyGv7BCZay1b3Bku5EvYhimjPRoXU8B2WPCnQkgA5YEt/kmMh?=
+ =?us-ascii?Q?I2IiCIiVATbAsG9KliNfxtsRJgLRg7CI8CHn8pBFtITS+S1n8txS2v1ZJSAc?=
+ =?us-ascii?Q?E4fs4ilwzFIFWdPJJo6pjR/vc6d2V56aslHd05BRzkElwcg/70eUk/SiPUZz?=
+ =?us-ascii?Q?+6qSsX3GrpgutuZoHP+t5a0V2INnedk2BQGe3Wt6xstwJY1C2lgFzZZimUoe?=
+ =?us-ascii?Q?1CnAdnXBO3swgIBu3Ep4FjIOFRuJIw+6E6gnSqqUCuiUg1oml/KTGAIQSWtM?=
+ =?us-ascii?Q?gcDV5DV93dBR2vq/dOL7IAOP1ZdxJgsgkCoJCBnRN3yyBI8453/+zIfUyPgx?=
+ =?us-ascii?Q?VMqwA2QYMw+Arzl7wm+yoeiQKtbgpEATJNPVCnyToUwof5bIoJFLtaT/diGE?=
+ =?us-ascii?Q?IyIL1z0dbfkyK2ssWS0+D1muiRSxZ4GdfSPcuPlX64nQBSKzVNt9zlec+8bA?=
+ =?us-ascii?Q?Yx51hULbGV6buXw0cQcCMisuw8Mbq7SKniuL20C4PcNG7c1Ua7HEy1DXrd3N?=
+ =?us-ascii?Q?+Z7SP9NqCYSISLUfjLGQg+Z/GNPthhFFlTWu8UMmbl1zkxKoXYAdLslNQL0j?=
+ =?us-ascii?Q?r7hYxeeVwqK6ROQpvTo9GfNq3MqznFMf5TU9SvgMlgn1v5leNuckbE6+0xCr?=
+ =?us-ascii?Q?j2GW0c6c1vPC3SYNzEmUDUYoqbTQongMZrgLS15XXixRH9VL1ABk/O+EmJpy?=
+ =?us-ascii?Q?bKJYFwwiB4A33vkadxrUghJ4/mUfihTFdGpuXYXi?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
- max-sd-hs-frequency property
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski
-	<krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Bjorn Andersson
-	<andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
-        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <kernel@oss.qualcomm.com>
-References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
- <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
- <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
- <d1ffbcf5-967a-4c1e-9f2c-becc5fb6c6ed@quicinc.com>
- <a3796e76-d597-4c0d-ae7c-d042cce564a5@kernel.org>
-Content-Language: en-US
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <a3796e76-d597-4c0d-ae7c-d042cce564a5@kernel.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: XTSWE4Sv_90BkLJb9rPSjfcXl0D6EZSz
-X-Authority-Analysis: v=2.4 cv=YKyfyQGx c=1 sm=1 tr=0 ts=685524f5 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8
- a=fBqTZhuuraqRRh6TpvYA:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: XTSWE4Sv_90BkLJb9rPSjfcXl0D6EZSz
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjIwMDA2NiBTYWx0ZWRfXy4Gu4uIaBaMU
- lwAjqpLkzirQKGcuMkU0noOto5ZU3gCNj/NSjNQ97Zm2/i6856vPyPG5CE5/YKZfjLoGU0HtIGg
- 5+5jA9k8J7Yh2UaW8toGIealWcefe4emBd8fzJqoa0zz9CKwOdpudoGcBpoAmVgtJVIvT8bq2Qb
- nTLMQxfzdoHTErQ5W5gdK7+wHMcztGeySEC/WTLs1YzT51hsagQyDFz7n3K+ocuPiRk8lBVvIps
- 8IRJRep8Xjrb3TGyi3xrF9k9c5p1C/xIMjY5w1n2plA+33C8SfsAr+vya8wuWAmczPKg+jWBe72
- o7lCEau0rTMETRtNLlvFu3nIr+0zu507vrClcgJdunr+PZYF3Rq+B09LfsDCBrXlbRfJp8rdIIc
- +iFdrLwtBEfFJ6E6aDUOt8qn+2JUetXoL/Hap29ooVOtrRelXHPFtfBFIdrX5M1cpUV7vMZF
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
- definitions=2025-06-20_03,2025-06-18_03,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- bulkscore=0 adultscore=0 impostorscore=0 priorityscore=1501 mlxscore=0
- malwarescore=0 mlxlogscore=999 phishscore=0 suspectscore=0 clxscore=1015
- lowpriorityscore=0 spamscore=0 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2506200066
+X-OriginatorOrg: aspeedtech.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SEYPR06MB7072.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 496c4ad9-ab7d-4b03-f828-08ddafe47185
+X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Jun 2025 10:23:04.8468
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: /4A0RiYGZPZLvofAhuCp2KPARtV4UQPTuD2tsG5FyL199AM037LLNf0X+s1kX2pkSUV7wmDRFm4HXttHIo6QDg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SI6PR06MB7113
 
 
+> > The timing phase is no more needed since the auto tuning is applied.
+> >
+>=20
+> I feel this is unwise: we're now ignoring constraints set in the devicetr=
+ee.
+> Auto-tuning is fine, but I think that should be a feature that new platfo=
+rms can
+> exploit by default. Older platforms that do specify the phase values via =
+the
+> devicetree can be converted at the leisure of their maintainers (by remov=
+ing
+> the phase properties).
+>=20
+> Support needs to remain in the driver until there are no (aspeed-based)
+> devicetrees specifying the phases.
+The timing phase only works on AST2600 or newer platform which has added a =
+delay cell in the RTL.
+The older platform AST2500, AST2400 doesn't support the timing phase.
+It supposed no effect on older platform.=20
+The old manner that a static timing value customized from devicetree is inc=
+onvenient because customer needs to check waveform associated with each del=
+ay taps. Once the emmc parts changed, a fixed timing value may not work. Th=
+at's why auto tune here instead of a static value.
 
-On 6/18/2025 2:38 PM, Krzysztof Kozlowski wrote:
-> On 18/06/2025 10:38, Sarthak Garg wrote:
->>
->>
->> On 6/18/2025 1:13 PM, Krzysztof Kozlowski wrote:
->>> On 18/06/2025 09:28, Sarthak Garg wrote:
->>>> Introduce a new optional device tree property `max-sd-hs-frequency` to
->>>> limit the maximum frequency (in Hz) used for SD cards operating in
->>>> High-Speed (HS) mode.
->>>>
->>>> This property is useful for platforms with vendor-specific hardware
->>>> constraints, such as the presence of a level shifter that cannot
->>>> reliably support the default 50 MHz HS frequency. It allows the host
->>>> driver to cap the HS mode frequency accordingly.
->>>>
->>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
->>>> ---
->>>>    .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
->>>>    1 file changed, 10 insertions(+)
->>>>
->>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>>> index 9a7235439759..1976f5f8c401 100644
->>>> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
->>>> @@ -93,6 +93,16 @@ properties:
->>>>        minimum: 400000
->>>>        maximum: 384000000
->>>>    
->>>> +  max-sd-hs-frequency:
->>>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>>> +    description: |
->>>> +      Maximum frequency (in Hz) to be used for SD cards operating in
->>>> +      High-Speed (HS) mode. This is useful for platforms with vendor-specific
->>>> +      limitations, such as the presence of a level shifter that cannot support
->>>> +      the default 50 MHz HS frequency or other.
->>>> +    minimum: 400000
->>>> +    maximum: 50000000
->>>
->>> This might be fine, but your DTS suggests clearly this is SoC compatible
->>> deducible, which I already said at v1.
->>>
->>> So now you send v3 which is the same as v1, so you get the same comments.
->>>
->>> Best regards,
->>> Krzysztof
->>
->> Introducing this flag no longer becomes SoC compatible because as per
->> discussions in V2 patchset with Ulf and Konrad this new property can be
->> used by any vendor who wants to limit the HS mode frequency due to any
->> reason. Thats why moved to this generic approach again in V3 as compared
->> to compatible based approach in V2.
-> 
-> The are no arguments provided in favor, so my review from v1 stays. You
-> get the same comments.
-> 
-> Best regards,
-> Krzysztof
-
-@Ulf, @Konrad — since you previously supported the idea of a generic 
-property for HS frequency limitation, could you please share your 
-thoughts on whether this still seems like a valid approach?
-
-Best regards,
-Sarthak
+>=20
+> Andrew
