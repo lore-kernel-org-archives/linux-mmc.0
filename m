@@ -1,164 +1,179 @@
-Received: from OS8PR02CU002.outbound.protection.outlook.com (mail-japanwestazon11022091.outbound.protection.outlook.com [40.107.75.91])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 60CFD235051;
-	Fri, 20 Jun 2025 08:19:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=40.107.75.91
-ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750407592; cv=fail; b=kchIMZykc6cvy5aovgU9/qFsQhJET3z3klTiH6DHUg0+BNtiBNOzLSaKj6A/04GwN7r+RdxQum1D+r87+Vu7VGUWT6lO+wfp/+AtQaNGIApuUc8ffq4yVRRqPbboTYkVradCl+82TP5jArsleU3Co4n1TGDyDW1N0I+hocqvaro=
-ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750407592; c=relaxed/simple;
-	bh=RfknfB1HjpVxtQnip9970Y9L+qGRuAwZoXmXF/A0+sI=;
-	h=From:To:Subject:Date:Message-ID:References:In-Reply-To:
-	 Content-Type:MIME-Version; b=YTtN/kiuwrLucmubCE7Nq+P/eYvh0u56cAklnQdVfUUxkK9wzniWzKRZp805NvF20Rbl6b4EQ7lHImTIImAQtTYOZf/vr7nFa6er040YWsmCyD4iZZkoUsXpQmFGJP+dkniy5X6ur+EhGR0LvJPT5M+/96PngUYwLEJuKtiLG6w=
-ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com; spf=pass smtp.mailfrom=aspeedtech.com; dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b=cEC4GUjH; arc=fail smtp.client-ip=40.107.75.91
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=aspeedtech.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=aspeedtech.com
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0931130E845;
+	Fri, 20 Jun 2025 09:03:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1750410225; cv=none; b=mmVajhgkagxJZa5h1l6wwHv5e6UOdTiiQgFeyAnvgqQvKxQoNWaOIGx9Cd1FFvuOb7llrAatrUmfie+35IFIpHbfEQwo/TvTX1fX/RS/W36IXY4vkSTEGDAn6Vs6nU3zc5EfV4OKFFY8Z7a+pBmP1YMNdtPh+aCABdZrlEfrHhg=
+ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1750410225; c=relaxed/simple;
+	bh=NiroWWAQTPQmDKUSLQeuYYIybCwyICBp58ULQi6D1NM=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=nWQm9dc1RLaqCs85MxQpNFZCnjecOANUSI259HjZGD4ml0avpcjqKMVuNxMUqjfs7MKNTotYdqXgNjc9pGpKyIhvR5PpBItoZhvJQJymSi9TNZF/vQ0QzeuOYemg+PAZMqwtmrPKKjzS27IonfxCrL7OZfnFVK/Qrbm2xLk+4AA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=qualcomm.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=fP46PjRI; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=aspeedtech.com header.i=@aspeedtech.com header.b="cEC4GUjH"
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
- b=Cf6fizOHfa8eWkHLo2sUJVxPBNCXqwkFd6xSpqZaU/GTnQRKOsem9CJp8ETjhlbWzYhFft72zKpOw/QhEMhuK86Bz/kk6DP6/ME3Td7qNkQ/Ds+1ENtVX6iHaGG7lmEoaLX9G7EG0ILzfh6DPrLE25O39DP5u/VogOjhp/A/hhK4NGPbaPxTOyeB4/hAwKOIcdbVfa7qXqzRnkPfvwG0oo3kwq7g+1ziDRgatFr12nYFu9yHrvMac41krjaujfm3MjZJhn/7OjZJofHUZ3O/KoFnUAA704Z7LIjmFDrAaD5mgHLq/lNZh3poR0Mf14c1XpZTckbHrOWk414TfCIvnA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector10001;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=RfknfB1HjpVxtQnip9970Y9L+qGRuAwZoXmXF/A0+sI=;
- b=HxufB7ajaIYyCrVLTxWoWzGGZsyggPKRej/wxBmKsFWmjCXWukfvWYnpkog3ZH/WnSvsovWzTs2lszAyzpNuorEoblmNCJAICgyMc12MlTREqMzFxUvyID6VkHfF7tI8uNjBTOvVTaGHdb/rn0pNr218Onu70zQC89Ld6Yelch4QNc6uM36NLMhXUBCGpKoLDaQzRlV6t56JnD1NOzeTvJ6gNxoumbAEj8Wx9SBzD3SUdALxps6YYEmjVs7ARTwRTztlB1Z+gbV7iNqr/HWe4yHm0K0TApeBb5/bp/9dVaUZHt/v+8k7Z23U56E1T3zyb8AxWfBFJVh9a7o7KB6V+g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
- header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=RfknfB1HjpVxtQnip9970Y9L+qGRuAwZoXmXF/A0+sI=;
- b=cEC4GUjHUf9dcrzgdXMSRNJiDU/XPHA03+6L6HAA9H+1LD97YIYi6HJdOaEtHJOWx4qhRYpy+W3BuN/AzsMRU3SDUXJPcMyEMa3McjX+UA3fVToCrLcOiTPhONaN5FoC6woNCbpHzkxbUh8nxGTCs40NvgHyxK8sNfBtJBAtHyiOD4YI5cOyZCh52rghE5Pj+osSrjDMuMtvu1EfHHl6K1C7gAl+wnK6JEJBEEDSXopRQfkZckmV4OtxpGTnlrXJsEaTtA0fTsc1/7A4wgix4/KuKM6//k0a161auQhh9JOFiGEtNbFqIb3xiHF9++O5abtE8pvQc3z51mtP5qOJDw==
-Received: from SEYPR06MB7072.apcprd06.prod.outlook.com (2603:1096:101:1db::9)
- by SE2PPFDAB6F0437.apcprd06.prod.outlook.com (2603:1096:108:1::7ef) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8835.28; Fri, 20 Jun
- 2025 08:19:27 +0000
-Received: from SEYPR06MB7072.apcprd06.prod.outlook.com
- ([fe80::427f:4d26:e479:7659]) by SEYPR06MB7072.apcprd06.prod.outlook.com
- ([fe80::427f:4d26:e479:7659%4]) with mapi id 15.20.8857.022; Fri, 20 Jun 2025
- 08:19:27 +0000
-From: Cool Lee <cool_lee@aspeedtech.com>
-To: Andrew Jeffery <andrew@codeconstruct.com.au>, "adrian.hunter@intel.com"
-	<adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-	"joel@jms.id.au" <joel@jms.id.au>, "p.zabel@pengutronix.de"
-	<p.zabel@pengutronix.de>, "linux-aspeed@lists.ozlabs.org"
-	<linux-aspeed@lists.ozlabs.org>, "openbmc@lists.ozlabs.org"
-	<openbmc@lists.ozlabs.org>, "linux-mmc@vger.kernel.org"
-	<linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org"
-	<linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
-	<linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH 6/8] mmc: sdhci-of-aspeed: Add output timing phase tuning
-Thread-Topic: [PATCH 6/8] mmc: sdhci-of-aspeed: Add output timing phase tuning
-Thread-Index: AQHb3/v0jr6XuJF9oEayJUI4Q+sIfbQLoanQ
-Date: Fri, 20 Jun 2025 08:19:27 +0000
-Message-ID:
- <SEYPR06MB707217BDAD59EC2479384847957CA@SEYPR06MB7072.apcprd06.prod.outlook.com>
-References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
-	 <20250615035803.3752235-7-cool_lee@aspeedtech.com>
- <eaba29c18db8883f88e5e105f905a735a0087a3d.camel@codeconstruct.com.au>
-In-Reply-To:
- <eaba29c18db8883f88e5e105f905a735a0087a3d.camel@codeconstruct.com.au>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach:
-X-MS-TNEF-Correlator:
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=aspeedtech.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: SEYPR06MB7072:EE_|SE2PPFDAB6F0437:EE_
-x-ms-office365-filtering-correlation-id: 75d93544-7995-4d1b-71c0-08ddafd32c86
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam:
- BCL:0;ARA:13230040|376014|7416014|1800799024|366016|38070700018|921020;
-x-microsoft-antispam-message-info:
- =?us-ascii?Q?Sbu2Q8BhMoMZtBrlBKJmAadjevXO4ys7mA46yOy4d6y4sB5qavcV2fAEHJt4?=
- =?us-ascii?Q?AdNqACZdnI0MGRLnAnRit5YlhJWbb7J29keg5+Hq+8W/l3eWXIVKVBfUsn1s?=
- =?us-ascii?Q?8N8ejDLsESK9HUC0gHA1KHcC7WiV7tBlfGwyFuzEC57ZMfUKs/shAxv+m9Cr?=
- =?us-ascii?Q?gf/3s4KNeuZOnc1uIIOgARd1/tQF5t0P5dja+4Qy21Z7FPiImew3UHB+nDQQ?=
- =?us-ascii?Q?nXp3tjK8wGKQ/9YTd7zDI8ROLddWBwGbTJAJFHMfHKPIDVal8lee3AfRkybJ?=
- =?us-ascii?Q?OLX8U5CzkiY+zhxK8EQvC2XX7Xn1iTDoTjqZ/ZEEUgoE9j9omrHCjYx+h22h?=
- =?us-ascii?Q?NOjLuLszB85NoTm+X/L7IXVU1eWvKeV6AlscoaqvqAh5QNzbQ0P9tBDKpkAN?=
- =?us-ascii?Q?IKWNnXTfgzu3Bt8ASqvOH1LfLJoFf/W3scbYpTSc0yTUkqsrX/NVXwXeuLdi?=
- =?us-ascii?Q?4pJmh2HaZz3k7kVz7WwCyfv2Yim56QH3/2M42Qge1sov+GvibjOjhcbg1ioh?=
- =?us-ascii?Q?cP2OpTdojG4VIrba27h8SJxmJODLbW2Q6N0UX4tQVZ5CsPAEuGPRjKWtw8qM?=
- =?us-ascii?Q?65tllPKUHI2KUZxV5b+SNpwQP9IbmVdrFAt8VDYCw2+dzqPkTS0Rmv2wFxQ7?=
- =?us-ascii?Q?vnIhJBN9eaQrObQeglw9xMM7CutH7PYhU8eqzf/IVsQqed7X+cmtrtkkqI7S?=
- =?us-ascii?Q?tP4/DC6vTIyTUJGH6lgk+Xg3+Z8STqPya0hfFLqg6McNfx01IsUcWPxXFAIn?=
- =?us-ascii?Q?kaMDyT89Cea+fI4T6jw5g1xTkHrHwsLcRQXv6hQTBhCR0utTX87d36+7jZmN?=
- =?us-ascii?Q?qGB3G5jWYG6kkxha44qgH7jvdZc+zP3G1SYG7iim9X7DkLMrBFSZ2KBPXoSv?=
- =?us-ascii?Q?zHlKbaxjy6TO+ubKrx0L3DLBhvk41XV10egU2vI7fWLg9L5iAoMey/XwmffL?=
- =?us-ascii?Q?cE2ZkbbfSIZd4i2vp3efCsnLyfhlvHZYyD2DKTVJv6n7V2MD64cmFPqiDgjJ?=
- =?us-ascii?Q?zEB0PwKIpd4Hx7jNaxvkocsIw5S7ZQcw/SNPHHf+pyMmUAep0Mg1HLtouILn?=
- =?us-ascii?Q?66Tlrnx0tCucYRgOyNjNnO9i0sVG5/4sGeJ5zZWMZiIIDLoDW4z3Y67VAUB3?=
- =?us-ascii?Q?Ncup39N4wwkThW9caSOvUam9PTPAnlqDuo20QQGjTogBTpFFMGHH+8ADLUO7?=
- =?us-ascii?Q?DNg7vjmPMKmFS8rUSFdG5h/Il7JYbD36NzVcqlzzVV26TNhwdH3HUmZHDjeK?=
- =?us-ascii?Q?6UqhNj5RPqrTADvfBmmWP9btj3sw49EfZan76VHh2D1CQQZQkcMuf57urGhx?=
- =?us-ascii?Q?XSi8gWnivfKiGjHbzOLJdA22P8HvWbyd/6auRq1VNS7hLPFaq7D6/1LPYS1K?=
- =?us-ascii?Q?CLKr78TBtltc008sUfKhc1EINjswmZVYwp4UlBzMZpbG6eWT/xcJfe4kBTyu?=
- =?us-ascii?Q?5y63kvk38pl38nN8jFrMRV7vlEc4V0gGk63oR6JatzyRlSTPf3Be9xsost6L?=
- =?us-ascii?Q?va0GtfaYQA98+Q8=3D?=
-x-forefront-antispam-report:
- CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SEYPR06MB7072.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(376014)(7416014)(1800799024)(366016)(38070700018)(921020);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0:
- =?us-ascii?Q?2VMZ6mZXTTz1ESqbYP9+tKQ23w2T2X4Os/ZLDi9eNEFWbr2/PDZBdsUoQDRG?=
- =?us-ascii?Q?NciAx0kWjbhAL6BtiSGsdqTUNrKzRb7hTn2vDhIZcrG+AaDJ1yCbId7Ghqt1?=
- =?us-ascii?Q?umPOfJPPJ75S+bhuf6R5+3ALfl4dwV0gA0eOKM0/Hq4fPiFJwH8YHVZWOQh/?=
- =?us-ascii?Q?GEAY9OCN+UZ+wDSBHtlpl88ir0rqSwJ/207oR2wVoa6tY17/P+u9EoC0i1t2?=
- =?us-ascii?Q?4n8uvNCAmXN6HNYkuUU5Kro6XeAsSYWEuTl91NssaBMh0vgQvgQ09B6dF8oI?=
- =?us-ascii?Q?BuSnWO3MiFajQkdzSnVnu+sTMkfF0490bRdpjt57MQKLGg6PX1hOXFldiUny?=
- =?us-ascii?Q?JNJa1D6jHeSzQWtJCIjUvudZ9sxbJunOdgoYC5sfG/MDbNRNNLjtMDtkY3+O?=
- =?us-ascii?Q?MVS2s6eYjLEIpXzvgU44s4WFIEXOCUJw8FgolSiirEfDChimITNc5xquhXEU?=
- =?us-ascii?Q?w36OpGX+ZAv1OilD+Ce4PotTholg9hkO1+sfCoSqbRzeaVk+YeOUvmxdmw/q?=
- =?us-ascii?Q?j0t/qX8NZJDCHA/EoALWC4tvRxIkjrOzksrjElWn5kTbQXSXo77PsSF7AWFm?=
- =?us-ascii?Q?9WiG1duTnmib69MUDlNaIhpIXeQZiYMgKYRA/GNxU2RTSchIentBP4PiBFxs?=
- =?us-ascii?Q?RW7Y1qxN66YatDd1gFML9aH9IcqAJ0Y4cSK3S0IrHvNdTgmwxzyN6cJyECtf?=
- =?us-ascii?Q?RkoR2xQf8YVwTJiP9xzyLBGS6fbF2WtyBUJiYIEDawybmYf+GjDDgoRhMkob?=
- =?us-ascii?Q?Gwxf/F3wPp7jsY4mHDjQzigkHh6uq4Hj1Ld0lZ36YC/idBwxfjXbymVQ1HUi?=
- =?us-ascii?Q?0z6Pnn+PNgydpsVYCDfZLbb/5i9fr9O5nt7dtdZiBfx/w4VJurn6eHH/x2O2?=
- =?us-ascii?Q?H2OuTVPJInA78cnnWG0v2vIsLK/QHHQvhQ7MRRuOoiIad8vGj8VCGT506jaX?=
- =?us-ascii?Q?f8JdkGVVYmvH1MkWg5c0qqvfLkHgDE7GGwH8BKy2QHg+tbrbIO/DXKzCeg2/?=
- =?us-ascii?Q?lSd3WxuHERJh2ONpZ1aDsZGPYieJrwGBJ2YiGrhVZSpBD3nnI5XxXlFBjfsf?=
- =?us-ascii?Q?Ko5zDu2seVoIzTUWaKj5Z+M+TJ9cWGrSjF34YVFwM5lcE7qksRRdlvm9xLa7?=
- =?us-ascii?Q?dNZ7AVGTo0ReyBx1gTyEa0TSwnv3MsKTdH10zg/PgY60uyqRwLWAeFyY232+?=
- =?us-ascii?Q?ren/fEpTOGNzxRGqYN7CC6iMSpRg+sjoYIiuPu8yJiqF7IGb9aNX9/yRX74x?=
- =?us-ascii?Q?3+sBHHaqxNLqf8vu8nSyG8rbUNrXw9U6gWwQFPAXAA7ZToNk5+bt1Mfvh/Uz?=
- =?us-ascii?Q?XUTWaTP1hTXC8PlC2y+m8+b0F9dcebMc0Qlyf4BPxlcLERFCXsoEBfi/Tt5h?=
- =?us-ascii?Q?mQPqrGcwThNIDXZh/ZyrYKdb3ELwY33iCsoOYudjwHcigqK8pljG/dq6qU3G?=
- =?us-ascii?Q?9FSDLWsp5aMC/Rp1aNY/bDyHKiUTbmbnZ3BfUr97gzt/4988LV+/rqJg+e/s?=
- =?us-ascii?Q?sy1tkhr/6ycbPmkNXkY5K5j/i4dkof857J4SgJbuBHSnrmo8HxNHrWg2Rr29?=
- =?us-ascii?Q?GaTF/7CSnW9mYPm9926Rk6ww6Fh/7OeN3apGEwp1?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="fP46PjRI"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55K76nr6025769;
+	Fri, 20 Jun 2025 09:03:40 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:date:from:message-id:mime-version
+	:subject:to; s=qcppdkim1; bh=iI/2yIGDBcnfjcHVQrG4/lhQL5Mu6uGouh7
+	2UAn+AS0=; b=fP46PjRISFCiNb9v4jboZy6+JsHeOyJrI2adLYTaJ7fr8BTOAcR
+	qf87CWH8Zj94MFBbPuGyyUligG/+n+LbpylrcXocBbC/4RXE5RCGP0BZyQxgRQQw
+	Qxp5jZXXAcSNGvvzwT2dg8ttVbbCLJ4SuolWa1TotH/gqPto4FoZtTRCHXiWWe1o
+	8/pWx0rY+MMzeU27qFex6oDxextOpqaUaT42+GJDwxXcdmKBAqXwl6F/vG9fSqVH
+	flhxLz9P3L/QX8IH8QN0XViqcSKurwoUJM8AyYGchyjIlKzJEMHSMWFbsIUHQJVm
+	D1V4dENPxw/K4Flkht59B6rN/BqL8uASQDg==
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 4791cs2gt9-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 20 Jun 2025 09:03:40 +0000 (GMT)
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTP id 55K93aAO013033;
+	Fri, 20 Jun 2025 09:03:36 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 479k1hpv4d-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 20 Jun 2025 09:03:36 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+	by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 55K93af0013028;
+	Fri, 20 Jun 2025 09:03:36 GMT
+Received: from hu-devc-hyd-u22-c.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.147.242.251])
+	by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 55K93aRm013026
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Fri, 20 Jun 2025 09:03:36 +0000
+Received: by hu-devc-hyd-u22-c.qualcomm.com (Postfix, from userid 2339771)
+	id 509625BF; Fri, 20 Jun 2025 14:33:35 +0530 (+0530)
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+To: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_cang@quicinc.com,
+        quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com,
+        kernel@oss.qualcomm.com, Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V2] mmc: sdhci-msm: Ensure SD card power isn't ON when card removed
+Date: Fri, 20 Jun 2025 14:33:33 +0530
+Message-Id: <20250620090333.3068568-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-OriginatorOrg: aspeedtech.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: SEYPR06MB7072.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 75d93544-7995-4d1b-71c0-08ddafd32c86
-X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Jun 2025 08:19:27.6158
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 2xo032keHU57lffq4WXS7Mn3DJ4zMO7d72nXnSN70zLDGS4iPhsS6/fAUWJFcQosQLY5aSEgH/kxSAq1d6WVSw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SE2PPFDAB6F0437
+Content-Transfer-Encoding: 8bit
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: 5hn7trmWggPFowAdWSuYzNdR0U8ZpZas
+X-Authority-Analysis: v=2.4 cv=BoedwZX5 c=1 sm=1 tr=0 ts=685523ec cx=c_pps
+ a=Ou0eQOY4+eZoSc0qltEV5Q==:117 a=Ou0eQOY4+eZoSc0qltEV5Q==:17
+ a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8 a=2lEq4vhO8TPxx0hvuHkA:9
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-GUID: 5hn7trmWggPFowAdWSuYzNdR0U8ZpZas
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjIwMDA2NiBTYWx0ZWRfX5hRI4M8TkTzs
+ Ad0am/pgP5sgegbYAygjmQ6mOnFhc1EpoidtJeTt+Oyl9mjUCBvg4Sq8vW54yq4EOy4MZJqek/s
+ W+SRRiJNK6HmqWXxsjBf3/J0LZJcW7EGJ1F22BirxIZuTDMg6g3X9xr5BIvj5uxlwSm6MN5f52I
+ ebr9Y0zIuDSa0CH1qnf9uDtitA1VIY1PM/zx2PbbQGOc+HDehJXymjmClviAE14bMN6nc48nJuV
+ oEbI7myyXVncp+9w1bOJTUPpzRvGsUnbhCabzZ78vngiDfCXbw/UbRV37KizBrZyH6yxfapKs/0
+ 9zYsDh0G3tNZwIA7khD02uTibFB8Opk0APqkLjEx9uHEa4PhOIVIQYAv4b1hGgBkZ/BAxSReDik
+ sQoOVIQVjbbcZuEQ5zO3S78vVl5bkvh7/w7BvOoauVh0l4m63kTuWhd3hCR6wyiXZTCNHFzz
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.0.736,FMLib:17.12.80.40
+ definitions=2025-06-20_03,2025-06-18_03,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 mlxscore=0 adultscore=0 phishscore=0 lowpriorityscore=0
+ mlxlogscore=999 bulkscore=0 malwarescore=0 priorityscore=1501 clxscore=1015
+ spamscore=0 suspectscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2506200066
 
-> > Enhance auto tuning with input and output calibration.
-> >
->=20
-> Might be best to squash this into the patch with input phase tuning?
-> Why split it?
-Ok, I will do that. Just like to make the commit smaller.
+Make sure SD card power is not enabled when the card is
+being removed.
+On multi-card tray designs, the same card-tray would be used for SD
+card and SIM cards. If SD card is placed at the outermost location
+in the tray, then SIM card may come in contact with SD card power-
+supply while removing the tray. It may result in SIM damage.
+So in sdhci_msm_handle_pwr_irq we skip the BUS_ON request when the
+SD card is removed to be in consistent with the MGPI hardware fix to
+prevent any damage to the SIM card in case of mult-card tray designs.
+But we need to have a similar check in sdhci_msm_check_power_status to
+be in consistent with the sdhci_msm_handle_pwr_irq function.
+Also reset host->pwr and POWER_CONTROL register accordingly since we
+are not turning ON the power actually.
 
->=20
-> Andrew
+Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+---
+Changes from v1:
+As per Adrian Hunter's comment :
+- Removed unrelated changes
+- Created a separate function get_cd for cleaner code
+- Used READ_ONCE when getting mmc->ops to handle card removal cases
+- Reordered if check conditions
+---
+ drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index bf91cb96a0ea..97a895d839c9 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1566,6 +1566,14 @@ static inline void sdhci_msm_complete_pwr_irq_wait(
+ 	wake_up(&msm_host->pwr_irq_wait);
+ }
+ 
++static int get_cd(struct sdhci_host *host)
++{
++	struct mmc_host *mmc = host->mmc;
++	const struct mmc_host_ops *mmc_ops = READ_ONCE(mmc->ops);
++
++	return mmc_ops && mmc->ops->get_cd ? mmc->ops->get_cd(mmc) : 0;
++}
++
+ /*
+  * sdhci_msm_check_power_status API should be called when registers writes
+  * which can toggle sdhci IO bus ON/OFF or change IO lines HIGH/LOW happens.
+@@ -1579,6 +1587,7 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = host->mmc;
+ 	bool done = false;
+ 	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
+ 	const struct sdhci_msm_offset *msm_offset =
+@@ -1636,6 +1645,12 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+ 				 "%s: pwr_irq for req: (%d) timed out\n",
+ 				 mmc_hostname(host->mmc), req_type);
+ 	}
++
++	if ((req_type & REQ_BUS_ON) && mmc->card && !get_cd(host)) {
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		host->pwr = 0;
++	}
++
+ 	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
+ 			__func__, req_type);
+ }
+@@ -1694,6 +1709,13 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+ 		udelay(10);
+ 	}
+ 
++	if ((irq_status & CORE_PWRCTL_BUS_ON) && mmc->card && !get_cd(host)) {
++		irq_ack = CORE_PWRCTL_BUS_FAIL;
++		msm_host_writel(msm_host, irq_ack, host,
++				msm_offset->core_pwrctl_ctl);
++		return;
++	}
++
+ 	/* Handle BUS ON/OFF*/
+ 	if (irq_status & CORE_PWRCTL_BUS_ON) {
+ 		pwr_state = REQ_BUS_ON;
+-- 
+2.34.1
 
