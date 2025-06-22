@@ -1,97 +1,155 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9D712347D5
-	for <linux-mmc@vger.kernel.org>; Sun, 22 Jun 2025 06:39:40 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BD3F179F2;
+	Sun, 22 Jun 2025 09:48:26 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750574380; cv=none; b=QJzbd8YNDiYrR8hvuph9n2uLxF6tv1p04WFH27ueBb3KisWzqQARqIsP2Wue0ECMIihjiYdjEYACRlnOly/u2toHuyEZNTyjchhELqzlZTbqVItyEe/4mQDxYeNTQdYSFZdB/5GRfx20hNxx/GnsVT1GZ63D2B+1XAQvqO+8mMk=
+	t=1750585706; cv=none; b=OgbhbaOrbnDdTfNbx3w2+uM2dYqS70ALI+BZ9YRtsG2nGJb5l+12sT+qEN8KI8qDkB1HcKFB8VwBaTjH6sgPm+PS1LgHCrWVW7nh6kffGc++hz/XEwAOAo5Y0v72StW/CZYKhWbr2VAf90uJJccnSLhyaRZjyXcf78UxOK3n+Tc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750574380; c=relaxed/simple;
-	bh=Jk0n+63VIFUZyvMd38ya/LeV+W90ZaISWPQHDrEqBQA=;
-	h=From:Date:MIME-Version:Content-Type:To:Message-ID:In-Reply-To:
-	 References:Subject; b=TnUCJh7hjyslPQKSHqfRUfDv7/jC8CL4EMfsZMUfxeBooymOZqr7UAthRm8R0efibVDIHiR4uVQ4PTgbe0/+CN9lqym+xLkzUAEq5RKZmzMn3HG8O6SaJ7ikV1Tyol9kvmXPq4C30Z00NpJuZpV2IHdJtkEa94xm/cq5qNglZHw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=V3HEEcN2; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750585706; c=relaxed/simple;
+	bh=4vdRfcPbRQB5zMf1V/AuGgKvWFlvsrisrBycdGuo6YE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=uB4yQWxLspmwJl7yoOkY5z8ZkYcy5GRyfuLbY+ro5QPXp3jJSgRGQs9okhno0r5f2K0LJsUxhnAieCsAUYZOBjcSKSQslOxbeFr4HEiOXyjukL/mlOXznoyOn50wgqFQHHsx+HKuHMlQhbMq75Hi2d7YJmOlFNNWgf5miPNujW0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=OnaFMLJQ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="V3HEEcN2"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2C116C4CEE3;
-	Sun, 22 Jun 2025 06:39:40 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="OnaFMLJQ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82436C4CEE3;
+	Sun, 22 Jun 2025 09:48:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750574380;
-	bh=Jk0n+63VIFUZyvMd38ya/LeV+W90ZaISWPQHDrEqBQA=;
-	h=From:Date:To:In-Reply-To:References:Subject:From;
-	b=V3HEEcN2AgJEFwZgc1bBqZ6xNrFhKGmGhylxXb1Qn9X0h3wOHqRmLgH02oQN8cDU/
-	 tcEQKr61yOVX9G/paayPMn5UB1gV7wDY7qRCuSjXzvN0B34Lo1jyiG+EBvJb5BSy1e
-	 dqqopL5md7GCTNUR+MHNzxTSWt9TrdxR/8H7tYWmgg+PYAq2KfONZC9RXEwCXbnxWB
-	 7VzHCpBNOIfV3mVaHKjoF3/N4ZlP0FVec5w/61SwkrgaxfIGOIzw7FXn0jWXSWQ9t3
-	 nRAq1NlibPbojEqPlHYwInHFRnrQ7PYEBXotAOhKtOsBlD9WHEf6s+k0XLt8NDU0zr
-	 SFNlY9Yq94oag==
-Received: from [10.30.226.235] (localhost [IPv6:::1])
-	by aws-us-west-2-korg-oddjob-rhel9-1.codeaurora.org (Postfix) with ESMTP id B319239FEB77;
-	Sun, 22 Jun 2025 06:40:08 +0000 (UTC)
-From: raoul via Bugspray Bot <bugbot@kernel.org>
-Date: Sun, 22 Jun 2025 06:40:06 +0000
+	s=k20201202; t=1750585706;
+	bh=4vdRfcPbRQB5zMf1V/AuGgKvWFlvsrisrBycdGuo6YE=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=OnaFMLJQi1s1v1Fc+j8+UrUFjfSejiXGaXH/z/S9pcorncNKJBheiUlVnCkEEFVMA
+	 TR1IY5E+3h97LNA/cABkfMZzfz0ByvbSO3+KZsZD85LdHcLpQgl3qme++E+LISj6vj
+	 OgJ5xoo4VMO03nZoG5LXaCfIkMU3MdA7e0qk8UZExZDMEj8HfEQLBqH5sVQdkyZyoM
+	 a7nL7NHLDvRsD/eQyo8KefPfUG4zCJLHjnDg66wNSaOKj2HDzGHMftIcfVpGSu03Lt
+	 dz9dmkqOQ3bReXLMAm0XbP3ZnIyTVErpf+IazeQ5dDNcuvM73azCfRGQBqLnFFAKQe
+	 Etu+57/945Y5g==
+Message-ID: <bba062a3-f96c-456b-8e9e-fdeb0dc2d28d@kernel.org>
+Date: Sun, 22 Jun 2025 11:48:19 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
+ max-sd-hs-frequency property
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+ Sarthak Garg <quic_sartgarg@quicinc.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>,
+ Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
+ quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+ quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
+ <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
+ <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
+ <9627ed6f-2bb8-40b0-b647-5f659d87f2f9@oss.qualcomm.com>
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <9627ed6f-2bb8-40b0-b647-5f659d87f2f9@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-To: ulf.hansson@linaro.org, ben.chuang@genesyslogic.com.tw, 
- victor.shih@genesyslogic.com.tw, linux-mmc@vger.kernel.org, 
- adrian.hunter@intel.com
-Message-ID: <20250622-b220103c2-e5b82e240db0@bugzilla.kernel.org>
-In-Reply-To: <20250510-b220103c0-216fec070bba@bugzilla.kernel.org>
-References: <20250510-b220103c0-216fec070bba@bugzilla.kernel.org>
-Subject: Re: UHS2 init fail
-X-Bugzilla-Product: Drivers
-X-Bugzilla-Component: MMC/SD
-X-Mailer: bugspray 0.1-dev
 
-raoul writes via Kernel.org Bugzilla:
+On 21/06/2025 12:20, Konrad Dybcio wrote:
+> On 6/18/25 9:43 AM, Krzysztof Kozlowski wrote:
+>> On 18/06/2025 09:28, Sarthak Garg wrote:
+>>> Introduce a new optional device tree property `max-sd-hs-frequency` to
+>>> limit the maximum frequency (in Hz) used for SD cards operating in
+>>> High-Speed (HS) mode.
+>>>
+>>> This property is useful for platforms with vendor-specific hardware
+>>> constraints, such as the presence of a level shifter that cannot
+>>> reliably support the default 50 MHz HS frequency. It allows the host
+>>> driver to cap the HS mode frequency accordingly.
+>>>
+>>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>>> ---
+>>>  .../devicetree/bindings/mmc/mmc-controller-common.yaml | 10 ++++++++++
+>>>  1 file changed, 10 insertions(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>>> index 9a7235439759..1976f5f8c401 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller-common.yaml
+>>> @@ -93,6 +93,16 @@ properties:
+>>>      minimum: 400000
+>>>      maximum: 384000000
+>>>  
+>>> +  max-sd-hs-frequency:
+>>> +    $ref: /schemas/types.yaml#/definitions/uint32
+>>> +    description: |
+>>> +      Maximum frequency (in Hz) to be used for SD cards operating in
+>>> +      High-Speed (HS) mode. This is useful for platforms with vendor-specific
+>>> +      limitations, such as the presence of a level shifter that cannot support
+>>> +      the default 50 MHz HS frequency or other.
+>>> +    minimum: 400000
+>>> +    maximum: 50000000
+>>
+>> This might be fine, but your DTS suggests clearly this is SoC compatible
+>> deducible, which I already said at v1.
+> 
+> I don't understand why you're rejecting a common solution to a problem
+> that surely exists outside this one specific chip from one specific
+> vendor, which may be caused by a multitude of design choices, including
+> erratic board (not SoC) electrical design
 
-With kernel 6.15.3 and the latest linux-firmware (20250613), same sd card, I'm seeing this now:
+No one brought any arguments so far that common solution is needed. The
+only argument provided - sm8550 - is showing this is soc design.
 
-[  396.669202] mmc0: UHS2 Lane sync fail in 150ms.
-[  396.669209] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  396.669211] mmc0: sdhci: Sys addr:  0x00000000 | Version:  0x00000005
-[  396.669215] mmc0: sdhci: Blk size:  0x00000000 | Blk cnt:  0x00000000
-[  396.669218] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
-[  396.669222] mmc0: sdhci: Present:   0x230f00f0 | Host ctl: 0x00000000
-[  396.669225] mmc0: sdhci: Power:     0x000000bf | Blk gap:  0x00000000
-[  396.669228] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    0x0000002f
-[  396.669231] mmc0: sdhci: Timeout:   0x00000007 | Int stat: 0x00000000
-[  396.669233] mmc0: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
-[  396.669236] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-[  396.669239] mmc0: sdhci: Caps:      0x39783281 | Caps_1:   0x1803257f
-[  396.669242] mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x000000c8
-[  396.669245] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x00000000
-[  396.669248] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[  396.669251] mmc0: sdhci: Host ctl2: 0x00009117
-[  396.669253] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0x0000000000000000
-[  396.669258] mmc0: sdhci_uhs2: ==================== UHS2 ==================
-[  396.669259] mmc0: sdhci_uhs2: Blk Size:  0x00000000 | Blk Cnt:  0x00000000
-[  396.669262] mmc0: sdhci_uhs2: Cmd:       0x00000000 | Trn mode: 0x00000000
-[  396.669265] mmc0: sdhci_uhs2: Int Stat:  0x00000000 | Dev Sel : 0x00000000
-[  396.669268] mmc0: sdhci_uhs2: Dev Int Code:  0x00000000
-[  396.669269] mmc0: sdhci_uhs2: Reset:     0x00000000 | Timer:    0x000000a7
-[  396.669272] mmc0: sdhci_uhs2: ErrInt:    0x00000000 | ErrIntEn: 0x00030000
-[  396.669275] mmc0: sdhci_uhs2: ErrSigEn:  0x00030000
-[  396.669277] mmc0: sdhci: ============================================
-[  396.669277] mmc0: cannot detect UHS2 interface.
-[  396.669278] mmc0: failed to initial phy for UHS-II!
-[  396.679710] mmc0: SDHCI_UHS2_CAPS_PTR(65535) is wrong.
-[  396.679711] mmc0: UHS2 init fail.
-[  396.679712] mmc0: failed to initial phy for UHS-II!
-[  396.925968] mmc0: new UHS-I speed SDR104 SDXC card at address 59b4
-[  396.947290] mmcblk0: mmc0:59b4 ED2S5 119 GiB
-[  396.948374]  mmcblk0: p1
+I don't reject common solution. I provided review at v1 to which no one
+responded, no one argued, no one provided other arguments.
 
-View: https://bugzilla.kernel.org/show_bug.cgi?id=220103#c2
-You can reply to this message to join the discussion.
--- 
-Deet-doot-dot, I am a bot.
-Kernel.org Bugzilla (bugspray 0.1-dev)
-
+Best regards,
+Krzysztof
