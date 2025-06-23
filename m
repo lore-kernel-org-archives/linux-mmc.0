@@ -1,153 +1,115 @@
-Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com [209.85.219.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A27591F2BAD
-	for <linux-mmc@vger.kernel.org>; Mon, 23 Jun 2025 11:24:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49A25246BB6
+	for <linux-mmc@vger.kernel.org>; Mon, 23 Jun 2025 11:53:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750677893; cv=none; b=Np2/wzBl2U9BlN87Sc4GQU4ksF9ND0keirYXTBekEKXIF42JzXGQpJBv+9BiLUicZLr2PUkudfORmk4bs3tUqLmh0rZ+W8XUqMmtG46vQuVcmEY/EOuAgottVi55nqjN7yMF+GT6/7pFubCUh09mAt+o3y7piyxm3TSvrL+wR1E=
+	t=1750679621; cv=none; b=HLjmSWQh8vgzATW/odkQsvI59pELrGei4VWZSawZZXMNxR8Xs/VhPCF1j6TuW4WjLKiyyG/wjuFWPkRr5JZ2taqBSaii6e/gSYe9rCJrdpncPSWMBCuGPQGL+wGNKGNM2uJCIuPyKjNwEYeLxPMRJkjh9sLWu6R3fqA8OZ7NKPY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750677893; c=relaxed/simple;
-	bh=P5Sl98y38xvSSFCfZCfnoyyg8/BK5OPvXyrI5MLUPNU=;
+	s=arc-20240116; t=1750679621; c=relaxed/simple;
+	bh=RDI8cBCzVZwn53XlfucxBuC50lClvnDZ28m1ys46gaU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=RIAYjE4WDyAZU0f32Mhrr2MAEl2D5dOoUhJ1FtPDVRiSxxkERhEzGeZi1XucViqXaaizSAi2dVhnY+k0pE3H+kCuJMgfr5bNAM292SP/Umr+bZ2ucFbzyKYFhhnK8CRc4e/jxsSX+M4Pc+tkX987CO6kTLdjf6BZvdukazsSM7I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WnPSi4wm; arc=none smtp.client-ip=209.85.219.180
+	 To:Cc:Content-Type; b=ChanYfT1ic4zu+tt3IA8VUS83axYopBnZ/EGPlMfqEHe5YlLOdPlCvf+oEjpx4OXr1J915Y/1d3vFMQC5qvtwghC2ThyguxnAt6M/A9r+y+qUfHHi6ZApUDmNBDmLdzb6KgieEqBxjdxS+h0qskOUgSmOMWQl2lIvDoswB13fYI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TqhPuCML; arc=none smtp.client-ip=209.85.219.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WnPSi4wm"
-Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e7311e66a8eso3486334276.2
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jun 2025 04:24:51 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TqhPuCML"
+Received: by mail-yb1-f177.google.com with SMTP id 3f1490d57ef6-e84207a8aa3so2415461276.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jun 2025 04:53:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1750677890; x=1751282690; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=S3F6ZEyg8xrhvs90KaNs4ZQkdGcaIaLATUUJxYt5iNs=;
-        b=WnPSi4wmpk0QbRiU0SpS2Ydxic57HwRbxpnmd2cKoYmARD5PdIQNYmfcEMrnVA3x8d
-         TdzNw37FfOvpt4jPcf9kJuz9qjHNODr+HF/bWnQOjUcKMND4awi3wUOh8SrQDwaO+ZnN
-         DwkEZZ+wdZZj4QePxBWX4K9XqQ/FjwQLxd3ifnDVRG5kBZMIfe/D9BsbehGFtpBdXKxk
-         sXbk3wvYFb9ZYkQwHc58HYAaWpqJBrZVVdpNnjr5n0I053XDmtUKaW9a4t+jVri7RIe9
-         M43kW7PkxmCn6SSbcKThSVTgIxFwQF8W13RwrvJJTQT77EmwESz4OmQWnFE8hGRViqDf
-         YBvQ==
+        d=linaro.org; s=google; t=1750679618; x=1751284418; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=YZaYyZl4DS0u6LRC5+ULPLhB5YslLRXaRQhUnx/sEOs=;
+        b=TqhPuCMLGlWs9C41COiwUMSqTwb3R2dlCdU0LAKvismv63CX3NNoQXbHuTzwFf2iXH
+         PS8MG6PsQ136QbW9NCtK2J077lA00SM0odAxMVV3HboA73SA9hlN/bN5l/5rblPmjF63
+         4m1wUKXPjMMe2AZGM+GIiCW1Nu/ekW/QdYQekypghsm2UcZ6v20XD+/PO9d+KaMC+Z38
+         5TyqH8BatqlR/N5YIYBR8l2vK4eCHJLyHjLUuX2GLKBzH2V/f4Aoj8L8PwN3TeUjt2Cd
+         9qt4VEliSHBmV5vEdjls6JiHeg79+stsAvwr1LGntoJoZmycvM7H4SSvpf7WRrxwkMsS
+         tZBA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750677890; x=1751282690;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=S3F6ZEyg8xrhvs90KaNs4ZQkdGcaIaLATUUJxYt5iNs=;
-        b=qRvpmYvRjBa1Z2Lp2giMJ1a1ZLGjE53D0S596rSobaa4ODsK69+p3lGY3xy2YzRBYY
-         Mtc3HFIscIXTnRxX9m/ax8s0YRr8vKGlcS40DtnwJfMazZAj0Y7I0sC4cBulBRfWJF4a
-         85+0XtePYafdOXYmODBNY8QyWKMFc0HIo4O9zutBMW1xDWaT6CoZR1E4yNpF7azZjASr
-         2RkIe3WosvsLvQqD1fR7ChnLLsdVE1VB6l0XAUX/ecinEGFXQ+0ocAqjyYd82r5wR9Bx
-         ywUrpM+6ovtadBEuKy4arnFcy9KvGKo67Q+SOVE9eSdw0a0pyp73yCqPtnvtutRg+J9x
-         ra1Q==
-X-Forwarded-Encrypted: i=1; AJvYcCVJ3YushIkljOOWh8ZsF6VhLahNmmV0Mb/kMLsxpBjTzURzbyaNtsDfXqEuiILB/Af9lvWfrJmIr5Y=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxKsK0ggewnYb9YANrJRC0wHqTSxnJVw0wwI0kD+FHrNyOR3Bct
-	1AIDQpqYj+HHnkrr3HL/bv3CNgOeTmwWW9bOliYF2LGBjEMENxmTvGc9YHsJHE8a0U1Xer3p4cJ
-	4ZfGeMsmPJO7uuc9faxjMukDvLvS74tgvPuSIUOcmdA==
-X-Gm-Gg: ASbGncvRX4Atdd07WZSerw3Xi5GUPtB31woWuvRq43tCmcYMNCcWj/Ubys9ROWodb+G
-	GqgSa80gvFUxckFSSAKN14atfxYJpb+pUDzsuALxD/bjPscVnM9ANZKeuNZ9A+/PgnJLrLSq+6B
-	JqfTUNkhEF4ssHGKz6Fj0ySpxy5CGLfh/vmhY0BUqqov/L
-X-Google-Smtp-Source: AGHT+IFBGQTkGwfG1sCUA1pxQDur/r09SkjVSlKnf4sftIQL2kU67dbH4LwgXNNxgqaZMbnr9M1AlBfGJTvOJn3cZQk=
-X-Received: by 2002:a05:6902:110b:b0:e84:2761:9e57 with SMTP id
- 3f1490d57ef6-e842bc9cb1bmr15596380276.20.1750677890449; Mon, 23 Jun 2025
- 04:24:50 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1750679618; x=1751284418;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=YZaYyZl4DS0u6LRC5+ULPLhB5YslLRXaRQhUnx/sEOs=;
+        b=DeHi3upUzs7voDTEXvsFIGi5e1ai5QEwxKHYc2tTq8eYXOIjeL7TiYkGpWWyFvbb5W
+         zNDsRzHEjqeUXnbxXy5u37+JDkWGdFygkt2JYdQ7XfE1gUbFlUI6Agn0khrMIQD9+6ZF
+         AMOIeUYwCz9W/YqFec3bZSBf0O3EmOhxxaWw1i1uIBmp7G2070Qr59Gi4EbCJc2nXRQ2
+         zdU5ws70s9isNdUMLdTYIjXEhNJOCdPAugMJwS24/6Viv4GIQvGsyiofC2pLhAxJ0WWv
+         gb/CE0SOrfqyLSuZtBELV/UuPUPrfq+e50ufYpoN5DlpRwcWet/9yHUwRpvBElAr2nUX
+         n9qQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWowGGLxBmkw8UW7njGRH/LrE6HO6uG42XDB8AOpXuMrIkRYu5eblmlBV7aOJh7H7q7rD1fBexVp1U=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyeJdNVPj5KYqGhGyiBqm9632n2YZ+jq9x5X6EKHWGKJv40mXRC
+	G/anEU+82odwFpGabfH61bwWRNk2cRzXvq5MT8ujIb/ThHyFEJDNSf8cxxBnq3Fg+ejIgcp6QOJ
+	QIWAzKXFxXBIunr2RmI4901y8FtyDduIO7fx/Goi/Gw==
+X-Gm-Gg: ASbGncvSJDa5WVQkbJLPUvtW6mvDXLZ47v2hLJWLEk3vg6T2SeDvHTGmQGl/p5r0I7+
+	p19t0QQKj6RWPibLfCLV9yJBEKWXe/tdop+uUqk815+ey84+AjBwy+oX5/4Ci1AchLNkbSqjHOm
+	SPIZxpLpDAKYKJGM/gzVS2zJJZj5mUZvbLSB44CSek9pjx
+X-Google-Smtp-Source: AGHT+IE8T8YQqjuX2RPIqOvp84NFBEnBd2nf0HMGfblzPzNNFCpE1rQMJhmR6YAjwyaBmt1T2phZME3iCUpiJakAinM=
+X-Received: by 2002:a05:6902:230d:b0:e81:78f7:5532 with SMTP id
+ 3f1490d57ef6-e842bd1787emr15542569276.46.1750679618337; Mon, 23 Jun 2025
+ 04:53:38 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1750216134.git.zhoubinbin@loongson.cn> <aa9cfb9707334cd2e56692397dd4f54c418262ce.1750216134.git.zhoubinbin@loongson.cn>
-In-Reply-To: <aa9cfb9707334cd2e56692397dd4f54c418262ce.1750216134.git.zhoubinbin@loongson.cn>
+References: <cover.1750156323.git.benoit.monin@bootlin.com>
+In-Reply-To: <cover.1750156323.git.benoit.monin@bootlin.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Mon, 23 Jun 2025 13:24:13 +0200
-X-Gm-Features: AX0GCFtUkm2_qzcRRHn7M8CtdXK3QWv2eyxlNDa6aJAl_8XE--LnCn5KSCmtfA4
-Message-ID: <CAPDyKFocFfamgdB96xTCfBjLTFtgn2yrdZPTQZ0S5qW7Q2uvGg@mail.gmail.com>
-Subject: Re: [PATCH v3 4/4] mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC
- controller driver
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Huacai Chen <chenhuacai@kernel.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
-	linux-mmc@vger.kernel.org, wanghongliang@loongson.cn
+Date: Mon, 23 Jun 2025 13:53:02 +0200
+X-Gm-Features: AX0GCFvg50-pG60deTth1xrFtJ6E3jTjfDgX9C52hAY0wmcdIa--eh2NYl1Ihyo
+Message-ID: <CAPDyKFqy54LpU2HxKX75HUKNcis06C5aMC8NUOW37ws0QiTOdg@mail.gmail.com>
+Subject: Re: [PATCH 0/6] Add MMC support for Mobileye EyeQ5 and EyeQ6 SoCs
+To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, 
+	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
+	Gregory CLEMENT <gregory.clement@bootlin.com>, =?UTF-8?B?VGjDqW8gTGVicnVu?= <theo.lebrun@bootlin.com>, 
+	Thomas Bogendoerfer <tsbogend@alpha.franken.de>, Adrian Hunter <adrian.hunter@intel.com>, 
+	Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, 
+	devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, 
+	linux-mips@vger.kernel.org, Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, 18 Jun 2025 at 10:08, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+On Tue, 17 Jun 2025 at 15:26, Beno=C3=AEt Monin <benoit.monin@bootlin.com> =
+wrote:
 >
-> This patch describes the two MMC controllers of the Loongson-2K2000 SoC,
-> one providing an eMMC interface and the other exporting an SD/SDIO
-> interface.
+> The MMC/SDHCI controller found in Mobileye EyeQ5 and EyeQ6 SoCs is
+> based on Cadence cdns sd4hc IP. It supports up to HS400HS mode. The
+> only peculiarity of the hardware is that it needs the preset value
+> quirk to configure the clock properly at speed slower than HS200.
 >
-> Compared to the Loongson-2K1000's MMC controllers, their internals are
-> similar, except that we use an internally exclusive DMA engine instead of
-> an externally shared APBDMA engine.
+> This patchset adds a compatible device tree binding to cdns sdhci for
+> mobileye then uses it in the sdhci-cadence driver.
 >
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-> ---
->  drivers/mmc/host/loongson2-mmc.c | 212 +++++++++++++++++++++++++++++++
->  1 file changed, 212 insertions(+)
+> It also adds an emmc entry in the dtsi of each SoC and the config
+> options in each defconfig to allow using an eMMC for the rootfs.
 >
-> diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-> index 872f5dc21b21..75144221a821 100644
-> --- a/drivers/mmc/host/loongson2-mmc.c
-> +++ b/drivers/mmc/host/loongson2-mmc.c
+> Beno=C3=AEt Monin (6):
+>   dt-bindings: mmc: cdns: add Mobileye EyeQ MMC/SDHCI controller
+>   mmc: sdhci-cadence: add Mobileye eyeQ support
+>   MIPS: mobileye: dts: eyeq6h: add the emmc controller
+>   MIPS: eyeq6_defconfig: add cadence MMC/SDHCI driver
+>   MIPS: mobileye: dts: eyeq5: add the emmc controller
+>   MIPS: eyeq5_defconfig: add cadence MMC/SDHCI driver
+>
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   |  1 +
+>  arch/mips/boot/dts/mobileye/eyeq5.dtsi        | 22 +++++++++++++++++++
+>  arch/mips/boot/dts/mobileye/eyeq6h.dtsi       | 22 +++++++++++++++++++
+>  arch/mips/configs/eyeq5_defconfig             |  2 ++
+>  arch/mips/configs/eyeq6_defconfig             |  2 ++
+>  drivers/mmc/host/sdhci-cadence.c              | 11 ++++++++++
+>  6 files changed, 60 insertions(+)
+>
 
-[...]
-
-> +static void loongson2_mmc_dll_mode_init(struct loongson2_mmc_host *host)
-> +{
-> +       u32 val, pad_delay, delay, ret;
-> +
-> +       regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_SEL,
-> +                          LOONGSON2_MMC_SEL_DATA, LOONGSON2_MMC_SEL_DATA);
-> +
-> +       val = FIELD_PREP(LOONGSON2_MMC_DLLCTL_TIME, 0xc8)
-> +           | FIELD_PREP(LOONGSON2_MMC_DLLCTL_INCRE, 0x1)
-> +           | FIELD_PREP(LOONGSON2_MMC_DLLCTL_START, 0x1)
-> +           | FIELD_PREP(LOONGSON2_MMC_DLLCTL_CLK_MODE, 0x1)
-> +           | FIELD_PREP(LOONGSON2_MMC_DLLCTL_START_BIT, 0x1)
-> +           | FIELD_PREP(LOONGSON2_MMC_DLLCTL_TIME_BPASS, 0xf);
-> +
-> +       regmap_write(host->regmap, LOONGSON2_MMC_REG_DLLCTL, val);
-> +
-> +       ret = regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_DLLVAL, val,
-> +                                      (val & LOONGSON2_MMC_DLLVAL_DONE), 0, 4000);
-
-Please use a define to specify the 4000us timeout.
-
-> +       if (ret < 0)
-> +               return;
-> +
-> +       regmap_read(host->regmap, LOONGSON2_MMC_REG_DLLVAL, &val);
-> +       pad_delay = FIELD_GET(GENMASK(7, 1), val);
-> +
-> +       delay = FIELD_PREP(LOONGSON2_MMC_DELAY_PAD, pad_delay)
-> +             | FIELD_PREP(LOONGSON2_MMC_DELAY_RD, pad_delay + 1);
-> +
-> +       regmap_write(host->regmap, LOONGSON2_MMC_REG_DELAY, delay);
-> +}
-
-[...]
-
-> +/*
-> + * This is a controller hardware defect. Single/multiple block write commands
-> + * must be sent after the TX FULL flag is set, otherwise a data timeout interrupt
-> + * will occur.
-> + */
-> +static void ls2k2000_mmc_fix_data_timeout(struct loongson2_mmc_host *host,
-> +                                         struct mmc_command *cmd)
-> +{
-> +       int val;
-> +
-> +       if (cmd->opcode != MMC_WRITE_BLOCK && cmd->opcode != MMC_WRITE_MULTIPLE_BLOCK)
-> +               return;
-> +
-> +       regmap_read_poll_timeout(host->regmap, LOONGSON2_MMC_REG_FSTS, val,
-> +                                (val & LOONGSON2_MMC_FSTS_TXFULL), 0, 500);
-
-Ditto.
-
-[...]
+Patch1 and patch2 applied for next, thanks!
 
 Kind regards
 Uffe
