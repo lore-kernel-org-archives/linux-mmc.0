@@ -1,26 +1,40 @@
-Received: from mail-m15590.qiye.163.com (mail-m15590.qiye.163.com [101.71.155.90])
+Received: from bali.collaboradmins.com (bali.collaboradmins.com [148.251.105.195])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4C39463A9;
-	Mon, 23 Jun 2025 09:13:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=101.71.155.90
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D67CD2192EC;
+	Mon, 23 Jun 2025 09:57:02 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=148.251.105.195
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750670038; cv=none; b=qeo7p9To4JvKdYlx+RwpMSK3s+jypSLLaSwp4OjeJc3gyZAmWmpe38/YD1j4/NeOxX40e6xtgn0uaXtBnc457ydDRMp7/xAyHep9GBp0GG18ydAe59ZpnhbaAPfPG/EErKZKhdSfOLXAjd3lnaisTkZo+7nh5mFMsnRw4293zEg=
+	t=1750672625; cv=none; b=Sre3uj8MT7vIfTCPVdb6YNYvKYXDgYUlYwYZ4s8UT0Uwy+fXKUpLVCTiHCAHoTdfjceZaslnbUm2zyzA6ApBC1tFZxFW75nKPoUita/CVbRbieAkg+IgEW3ihJA0TLI8t1Iqplu9rQnad02uBg0pXifgf4o+pIGaOkXbtVoWNmU=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750670038; c=relaxed/simple;
-	bh=rot3WInRgfCoXSQnTjnLS77VTpo+YcJ/anVZEHawAkc=;
-	h=Message-ID:Date:MIME-Version:Cc:Subject:To:References:From:
-	 In-Reply-To:Content-Type; b=WJyVaPTKzGoR6yVslr8ywZQMvw6FYqony8dIqUE0bhE7KdsbvBP8lseK/Ih6PQR7it9fdFCSvWBzojZOhwcSb7hchqdowk3W2RhLH6UUcXcMVvej+6SrYxTc6oD+G9HU63NGyiRF4EKSnjMldKNqK0hfbAh/39SXEowfix6YEf0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com; spf=pass smtp.mailfrom=rock-chips.com; dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b=TMGbPh7n; arc=none smtp.client-ip=101.71.155.90
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=rock-chips.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=rock-chips.com
+	s=arc-20240116; t=1750672625; c=relaxed/simple;
+	bh=U7XIW8hy4Y2hgCabhIOAkmUThrnJnj5hGEjrn7p2UNc=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=oibKyIY7C6LXjRP07upzNj8T9wZiIejFPYaUmlIErZiUOgCgKB59gWu2/sXEV2BIfNrP/MJtddkcr46yj5lhyyAQcSgGeMcWWHuVjFIE+trLVudTynoVtJvVFb/d3NK7mz87Q7dCG5CtbDDOsVtNr4MLVPMNHyIp0JkQOZMR5ys=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com; spf=pass smtp.mailfrom=collabora.com; dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b=BkyQmY62; arc=none smtp.client-ip=148.251.105.195
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=collabora.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=collabora.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=rock-chips.com header.i=@rock-chips.com header.b="TMGbPh7n"
-Received: from [172.16.12.129] (unknown [58.22.7.114])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 199b4e06c;
-	Mon, 23 Jun 2025 17:13:44 +0800 (GMT+08:00)
-Message-ID: <004c6e95-7c1b-4a7f-ab68-1774ce5a51d7@rock-chips.com>
-Date: Mon, 23 Jun 2025 17:13:38 +0800
+	dkim=pass (2048-bit key) header.d=collabora.com header.i=@collabora.com header.b="BkyQmY62"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+	s=mail; t=1750672621;
+	bh=U7XIW8hy4Y2hgCabhIOAkmUThrnJnj5hGEjrn7p2UNc=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=BkyQmY627azdUczLx7oZc3igZbN0MsdTraBo/0pVjbZuOdw5mpSQ4zlCh2Gxb7qs3
+	 ShQVrFvbYRj2O9Gfm5SZk2JNDiv+hQrEFCCFFM8oGfcSjTvg6gJJ2wK+1fl11YUu6F
+	 /R5+C/eHWX6uaDf26ohy4DBQPaWOhfx7LOApKDQyDWcm2Y/AgAUu/6OeX1fP8oz+Pr
+	 8lFjROw5L08Q+p8GnF68Qxygy1v/YcMCibXVC4fM288GhOKa7jNOFjku2lgKr79erh
+	 uf2JhZHGniRMqAJOn82nwe0QskP9Grnn47MpisOqJKX79T36P0ay195xdrZZeTuUsf
+	 gqXvREbwpkoUw==
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+	(using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+	 key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+	(No client certificate requested)
+	(Authenticated sender: kholk11)
+	by bali.collaboradmins.com (Postfix) with ESMTPSA id B34E717E0CE6;
+	Mon, 23 Jun 2025 11:57:00 +0200 (CEST)
+Message-ID: <b0bd3ac2-7698-40a4-966f-25a06a15c9ff@collabora.com>
+Date: Mon, 23 Jun 2025 11:57:00 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -28,85 +42,44 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
- 1108065@bugs.debian.org, stable@vger.kernel.org, net147@gmail.com
-Subject: Re: [regression v6.12.30..v6.12.32] mmc1: mmc_select_hs400 failed,
- error -110 / boot regression on Lenovo IdeaPad 1 15ADA7
-To: Salvatore Bonaccorso <carnil@debian.org>, regressions@lists.linux.dev,
- Jeremy Lincicome <w0jrl1@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-References: <aFW0ia8Jj4PQtFkS@eldamar.lan> <aFXCv50hth-mafOR@eldamar.lan>
-From: Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <aFXCv50hth-mafOR@eldamar.lan>
+Subject: Re: [PATCH 1/4] mmc: mtk-sd: disable auto CMD23 support for mt7620
+To: Shiji Yang <yangshiji66@outlook.com>, linux-mmc@vger.kernel.org,
+ Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>,
+ Matthias Brugger <matthias.bgg@gmail.com>, linux-kernel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org
+References: <OSBPR01MB16708176FE57F691359D0943BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
+ <OSBPR01MB16701142441CAA0F2D12A843BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
+From: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Content-Language: en-US
+In-Reply-To: <OSBPR01MB16701142441CAA0F2D12A843BC7DA@OSBPR01MB1670.jpnprd01.prod.outlook.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGkpLH1ZJGE1PQhpOSUNKSUNWFRQJFh
-	oXVRMBExYaEhckFA4PWVdZGBILWUFZTkNVSUlVTFVKSk9ZV1kWGg8SFR0UWUFZT0tIVUpLSU9PT0
-	hVSktLVUpCS0tZBg++
-X-HM-Tid: 0a979c109e6709cckunm166c0bc88900f9
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MAw6LAw5ATEwKCM5NzBONh4W
-	CSkaCxRVSlVKTE5LTUxLS0lOTkhIVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-	C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUlDSU83Bg++
-DKIM-Signature:a=rsa-sha256;
-	b=TMGbPh7nh9+DNCdsyZLDiucsAs/DU1OoHkwdIeDhQkX8XS0zJWrFNYMJNXtV6gfFUPNx83cvfprtGA8R8YbYDnbjAG/3jELTxopIJLBdMsl2FtGQXI5LQRtE8qxpOsOifPY5j3Js5bplcPXCLOJ+MZJ20rXn5YYMm1WmuR3Z16E=; s=default; c=relaxed/relaxed; d=rock-chips.com; v=1;
-	bh=rRS7mqba5IZNQaTjq/rzjK6NiA1kw0qdSnaEJwzGxsg=;
-	h=date:mime-version:subject:message-id:from;
+Content-Transfer-Encoding: 7bit
 
-+ Jonathan Liu
+Il 19/06/25 07:35, Shiji Yang ha scritto:
+> MT7628 ProgrammingGuide indicates that the host controller version
+> 3.0 and later support auto CMD23 function. However, it doesn't
+> define the SD command register BIT[29](Auto CMD23 enable bit). I
+> guess the legacy MIPS MT762x series SoCs don't support this feature
+> at all. The experiment on JDCloud RE-SP-01B(MT7621 + 128 GiB EMMC)
+> shows that disabling auto CMD23 can fix the following IO errors:
+> 
+> [  143.344604] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.353661] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.362662] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.371684] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.380684] I/O error, dev mmcblk0boot0, sector 0 op 0x0:(READ) flags 0x80700 phys_seg 4 prio class 0
+> [  143.390414] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.399468] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.408516] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.417556] mtk-msdc 1e130000.mmc: msdc_track_cmd_data: cmd=6 arg=03B30101; host->error=0x00000002
+> [  143.426590] I/O error, dev mmcblk0boot0, sector 0 op 0x0:(READ) flags 0x0 phys_seg 1 prio class 0
+> [  143.435585] Buffer I/O error on dev mmcblk0boot0, logical block 0, async page read
+> 
+> Signed-off-by: Shiji Yang <yangshiji66@outlook.com>
 
-在 2025/06/21 星期六 4:21, Salvatore Bonaccorso 写道:
-> On Fri, Jun 20, 2025 at 09:20:41PM +0200, Salvatore Bonaccorso wrote:
->> Hi
->>
->> In Debian we got a regression report booting on a Lenovo IdeaPad 1
->> 15ADA7 dropping finally into the initramfs shell after updating from
->> 6.12.30 to 6.12.32 with messages before dropping into the intiramfs
->> shell:
->>
->> mmc1: mmc_select_hs400 failed, error -110
->> mmc1: error -110 whilst initialising MMC card
->>
->> The original report is at https://bugs.debian.org/1107979 and the
->> reporter tested as well kernel up to 6.15.3 which still fails to boot.
->>
->> Another similar report landed with after the same version update as
->> https://bugs.debian.org/1107979 .
->>
->> I only see three commits touching drivers/mmc between
->> 6.12.30..6.12.32:
->>
->> 28306c58daf8 ("mmc: sdhci: Disable SD card clock before changing parameters")
->> 38828e0dc771 ("mmc: dw_mmc: add exynos7870 DW MMC support")
->> 67bb2175095e ("mmc: host: Wait for Vdd to settle on card power off")
->>
->> I have found a potential similar issue reported in ArchLinux at
->> https://bbs.archlinux.org/viewtopic.php?id=306024
->>
->> I have asked if we can get more information out of the boot, but maybe
->> this regression report already rings  bell for you?
+Chaotian, could you please confirm that MT7628 does not support AutoCMD23?
 
-Jonathan reported a similar failure regarding to hs400 on RK3399
-platform.
-https://lkml.org/lkml/2025/6/19/145
-
-Maybe you could try to revert :
-28306c58daf8 ("mmc: sdhci: Disable SD card clock before changing 
-parameters")
-
->>
->> #regzbot introduced v6.12.30..v6.12.32
->> #regzbot link: https://bugs.debian.org/1107979
->> #regzbot link: https://bbs.archlinux.org/viewtopic.php?id=306024
-> 
-> *sigh* apologies for the "mess", the actual right report is
-> https://bugs.debian.org/1108065 (where #1107979 at least has
-> similarities or might have the same root cause).
-> 
-> #regzbot link: https://bugs.debian.org/1108065
-> 
-> Regards,
-> Salvatore
-> 
-> 
+Thanks,
+Angelo
 
