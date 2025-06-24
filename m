@@ -1,124 +1,98 @@
-Received: from lelvem-ot02.ext.ti.com (lelvem-ot02.ext.ti.com [198.47.23.235])
+Received: from codeconstruct.com.au (pi.codeconstruct.com.au [203.29.241.158])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 97E2925A659;
-	Tue, 24 Jun 2025 22:12:46 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.235
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 683AC26B0B6;
+	Tue, 24 Jun 2025 23:31:47 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=203.29.241.158
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750803168; cv=none; b=PXIiI/NW1lH/r+H/kHMB8heIXsXTnIwVj/6GW6zY6l8hpo79mznFWWb+nuB2VNcUaFNrvLEZqqMS/jXNFrOn6fE9/OTg7eDHHE1I3pC64IlnhOPmvpThPiutMxuSIJPvSa5qVV+fXVDhfNpx1tdwZylRZQjvUPP3Vb/JfcFSl8k=
+	t=1750807909; cv=none; b=lmrvMuKEKLhDcCLKEyJJJNwn4vPgYs+b3xpCvYIL6puiXQjIqD8Xg2sT6QxF88jvDliic5u2+EHpgncIUrTtg342lVCQAZeGJ6CFuXfAAS2/typCxKQnYRVfgh6jpURr+ICFn3toeUocLLoygjMSOGjrNWd8iSK369jr/xZDQIQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750803168; c=relaxed/simple;
-	bh=xt9KCza3hF+I3TXVvossfA/VxjFiivbpY4QJvk6e78Y=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=RUPiSw4E/omnPi0YVgM9l9XxmM6lnuOkNxnvv3+avpZUtz9ZFGP7J9D0YHH7gMp6K2PaOx1paL1nyfXiJWlrofa1+Nv+fth8ni2S3onzs24GcMtOlGqhN/rHY5WYApI9KgHPQuhcRw6Z/FUn+fK3O57ZHdP/JLlkSMZt9MylB8g=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Q/C8aypI; arc=none smtp.client-ip=198.47.23.235
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
+	s=arc-20240116; t=1750807909; c=relaxed/simple;
+	bh=wAMDHm88X5DnFfTxjTMlZawEVZqAwKU/UMzX5RRrhEw=;
+	h=Message-ID:Subject:From:To:Date:In-Reply-To:References:
+	 Content-Type:MIME-Version; b=qQ5phYTIopve9Q6Md5JE7xgYS6nOjy/DIOdeuVwrmKXy3bF7CCFugbzOWNI454WBrb03LRrZvOiPTI8TWH+nK1Ffxok4UoImdRT6Zk/8GHqTGi8yFIe1BjUQR2zWB6TlH/PFtd5HW7ewYj/q94/spjW5252Otk8Uk5lQu0OehE0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au; spf=pass smtp.mailfrom=codeconstruct.com.au; dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b=Y6jvrWrI; arc=none smtp.client-ip=203.29.241.158
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=codeconstruct.com.au
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=codeconstruct.com.au
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Q/C8aypI"
-Received: from fllvem-sh03.itg.ti.com ([10.64.41.86])
-	by lelvem-ot02.ext.ti.com (8.15.2/8.15.2) with ESMTP id 55OMCW091932981;
-	Tue, 24 Jun 2025 17:12:32 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-	s=ti-com-17Q1; t=1750803152;
-	bh=ojILrlT5GdYiZsRAu4Z0+07jzeXbFv6th3HqKBTAOPI=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=Q/C8aypINr0GbGpr70qx+72VWvjCZs7FLnJTrZxQ1iQYcgNLO1A/9yGg+Ljb0nV/K
-	 bULy4zbhqQG95V94gIm8SyfbY4s+x7wKa0Tcn9OAgzMosO72H3+8JICa3NRoApZeko
-	 MLAC5Zm72cqWdoCxOEPe1BcbjBXIROeo0BKq9f4o=
-Received: from DLEE108.ent.ti.com (dlee108.ent.ti.com [157.170.170.38])
-	by fllvem-sh03.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 55OMCVPd398618
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Tue, 24 Jun 2025 17:12:31 -0500
-Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE108.ent.ti.com
- (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Tue, 24
- Jun 2025 17:12:30 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE101.ent.ti.com
- (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
- Frontend Transport; Tue, 24 Jun 2025 17:12:30 -0500
-Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 55OMCU9K2248346;
-	Tue, 24 Jun 2025 17:12:30 -0500
-From: Judith Mendez <jm@ti.com>
-To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian
- Hunter <adrian.hunter@intel.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>
-CC: Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
-        Rob Herring
-	<robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley
-	<conor+dt@kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH 1/3] mmc: sdhci_am654: Workaround for Errata i2312
-Date: Tue, 24 Jun 2025 17:12:28 -0500
-Message-ID: <20250624221230.1952291-2-jm@ti.com>
-X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250624221230.1952291-1-jm@ti.com>
-References: <20250624221230.1952291-1-jm@ti.com>
+	dkim=pass (2048-bit key) header.d=codeconstruct.com.au header.i=@codeconstruct.com.au header.b="Y6jvrWrI"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+	d=codeconstruct.com.au; s=2022a; t=1750807905;
+	bh=wAMDHm88X5DnFfTxjTMlZawEVZqAwKU/UMzX5RRrhEw=;
+	h=Subject:From:To:Date:In-Reply-To:References;
+	b=Y6jvrWrI5GNZ8lXWo//Q5UUJUo0iIL68eNHWVPCv70YpSP9TgqLYIqrhLciejhrJ4
+	 sr7IxwJDOYd14/Uvs+JF68Am0yAqaZfy2MqMB36oE1tNHNGmRA/3XoCLPqnM9Mif3O
+	 g8GYNQ1O7JgeKupftTkehLa/o0vmjTAUa30cVSD827oJ3ezXewbD59Go4c7BycZDW2
+	 PENUZQ9mEIVg1qqezl7FA93VIgUQ3gB2899NYCNjre75vK6P1yByCpAtVcCnrYYxJ3
+	 8FsitDufw47hob7JSjlkvJUg23ARqKE8K3Qw44qXdJM7JAk283yaT8sihzjwLfCXyn
+	 54yrE/oJjuR8A==
+Received: from [192.168.68.112] (unknown [180.150.112.166])
+	by mail.codeconstruct.com.au (Postfix) with ESMTPSA id 2B1F7640CD;
+	Wed, 25 Jun 2025 07:31:43 +0800 (AWST)
+Message-ID: <c41c3dfc38c1adc5d544e365de355579d42f90b5.camel@codeconstruct.com.au>
+Subject: Re: [PATCH 7/8] mmc: sdhci-of-aspeed: Remove timing phase
+From: Andrew Jeffery <andrew@codeconstruct.com.au>
+To: Cool Lee <cool_lee@aspeedtech.com>, "adrian.hunter@intel.com"
+ <adrian.hunter@intel.com>, "ulf.hansson@linaro.org"
+ <ulf.hansson@linaro.org>,  "joel@jms.id.au" <joel@jms.id.au>,
+ "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>, 
+ "linux-aspeed@lists.ozlabs.org" <linux-aspeed@lists.ozlabs.org>,
+ "openbmc@lists.ozlabs.org" <openbmc@lists.ozlabs.org>,
+ "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+ "linux-arm-kernel@lists.infradead.org"
+ <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org"
+ <linux-kernel@vger.kernel.org>, BMC-SW <BMC-SW@aspeedtech.com>
+Date: Wed, 25 Jun 2025 09:01:42 +0930
+In-Reply-To: <SEYPR06MB7072FC07B4EFC03BB25B537F957CA@SEYPR06MB7072.apcprd06.prod.outlook.com>
+References: <20250615035803.3752235-1-cool_lee@aspeedtech.com>
+	 <20250615035803.3752235-8-cool_lee@aspeedtech.com>
+	 <9c85755a8aff6e6f8a5548f0b5e758dce7d6353e.camel@codeconstruct.com.au>
+	 <SEYPR06MB7072FC07B4EFC03BB25B537F957CA@SEYPR06MB7072.apcprd06.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.46.4-2 
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-Errata i2312 [0] for K3 silicon mentions the maximum obtainable
-timeout through MMC host controller is 700ms. And for commands taking
-longer than 700ms, hardware timeout should be disabled and software
-timeout should be used.
+On Fri, 2025-06-20 at 10:23 +0000, Cool Lee wrote:
+>=20
+> > > The timing phase is no more needed since the auto tuning is
+> > > applied.
+> > >=20
+> >=20
+> > I feel this is unwise: we're now ignoring constraints set in the
+> > devicetree.
+> > Auto-tuning is fine, but I think that should be a feature that new
+> > platforms can
+> > exploit by default. Older platforms that do specify the phase
+> > values via the
+> > devicetree can be converted at the leisure of their maintainers (by
+> > removing
+> > the phase properties).
+> >=20
+> > Support needs to remain in the driver until there are no (aspeed-
+> > based)
+> > devicetrees specifying the phases.
+> The timing phase only works on AST2600 or newer platform which has
+> added a delay cell in the RTL.
+> The older platform AST2500, AST2400 doesn't support the timing phase.
+> It supposed no effect on older platform.=20
+> The old manner that a static timing value customized from devicetree
+> is inconvenient because customer needs to check waveform associated
+> with each delay taps. Once the emmc parts changed, a fixed timing
+> value may not work. That's why auto tune here instead of a static
+> value.
 
-The workaround for Errata i2312 can be achieved by adding
-SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk in sdhci_am654.
+Sure, I understand that auto-tuning is more convenient, but in my view,
+there's no reason to remove support for static phase values for now. On
+the contrary, switching entirely to auto-tuning risks regressions for
+existing platforms that do specify static values.
 
-[0] https://www.ti.com/lit/pdf/sprz487
+Can you please drop the patch for now? We can revisit removing static
+value support in the future.
 
-Signed-off-by: Judith Mendez <jm@ti.com>
----
- drivers/mmc/host/sdhci_am654.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index ea14d56558c4..86d87d8e0675 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -613,7 +613,8 @@ static const struct sdhci_ops sdhci_am654_ops = {
- static const struct sdhci_pltfm_data sdhci_am654_pdata = {
- 	.ops = &sdhci_am654_ops,
- 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
- };
- 
- static const struct sdhci_am654_driver_data sdhci_am654_sr1_drvdata = {
-@@ -643,7 +644,8 @@ static const struct sdhci_ops sdhci_j721e_8bit_ops = {
- static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
- 	.ops = &sdhci_j721e_8bit_ops,
- 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
- };
- 
- static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
-@@ -667,7 +669,8 @@ static const struct sdhci_ops sdhci_j721e_4bit_ops = {
- static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
- 	.ops = &sdhci_j721e_4bit_ops,
- 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
- };
- 
- static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
--- 
-2.49.0
-
+Andrew
