@@ -1,45 +1,44 @@
-Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
+Received: from fllvem-ot03.ext.ti.com (fllvem-ot03.ext.ti.com [198.47.19.245])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A72B725B303;
-	Tue, 24 Jun 2025 22:12:45 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4E0B325B313;
+	Tue, 24 Jun 2025 22:12:46 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.19.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750803167; cv=none; b=g4Hwn6h/ahol3oLsKGZFyqGHcPHbRgzhR6eo4omeQwsI3uv8q2BPg884RsyJl9eT8B3XjHpaQG6/x2DWRuvbX7HEc9F9cYGKGjUg8qVI71t3eT2/00GVsvibvW20z8mhR7zepC3AAetUOtsSN6npp2DTtu6GSb1HYbcCJyekbng=
+	t=1750803168; cv=none; b=OsRuN3Avw6j7isYgEeicvaPHmzy66Gx60ULTQIOLaF9rMn/qrUe3oB0DaHqqMCQpLaxeTv+SErF7KZ5GEIIsQ1xqye7r/RI4GBrnSc8T90s4mBzK6i4VEIULVlvBiFNiCu/HfVjHP40IElZFbGHZHxPUU27Mw0v8KJDWg8103RM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750803167; c=relaxed/simple;
-	bh=r8buntZ4n35y8007oTKk73dQT8pGjlHkhL2nFxgGllc=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=THNSYr00kTJ/Dasi8dfy1uLX/KPT4K5mag4Vy5oOomKMPrsNJ6e+FdTlfwjXeHaiqaXOc/75iPdQuj54y0rNUwjz1pg3PsFgp9Glteb9BYm7807J0BBZ2q050Ft8Va2lRoWv5EDrtjGi4HVxOMnrt+aIrFKeFkg00bYlXE1Sm9c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=Uxeq/LYU; arc=none smtp.client-ip=198.47.23.234
+	s=arc-20240116; t=1750803168; c=relaxed/simple;
+	bh=2MjRU/ayQyqD2mx0PyDKDNA6DcuITZbDsRfobVCl/Uc=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=TZB6Rde4psVrJ3e+RdOzYRenGa3eDC3mkKbJPFniN9ho3+5hwRRnZ4GbdxRjuZ/ydcVXJnl32uJnJ0V3rHrsEFEcTyQ0CbquAwwlH8dyIMmVM5mn4RQaNd4vRPk0i2C6BO69352Nb1nmmCuvumO49IgvxeLQsZYaZwautJ1/V+Y=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=JgE1WtSN; arc=none smtp.client-ip=198.47.19.245
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="Uxeq/LYU"
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="JgE1WtSN"
 Received: from lelvem-sh01.itg.ti.com ([10.180.77.71])
-	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTP id 55OMCVwb1281096;
+	by fllvem-ot03.ext.ti.com (8.15.2/8.15.2) with ESMTP id 55OMCV5a1669410;
 	Tue, 24 Jun 2025 17:12:31 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
 	s=ti-com-17Q1; t=1750803151;
-	bh=IdGPc8oyeGpMuwgv9EDY68OxmA/Y/eSY3jw2W86biNA=;
-	h=From:To:CC:Subject:Date:In-Reply-To:References;
-	b=Uxeq/LYUp83F+xfrlhT5QtTHfwZDjjxcgRdWG3LnmSkGlsn1kCssrP/8v1AbHub8P
-	 7mJ3n4JtvU/ceCmzfTHahrRRozcKj4MNzSt4+BAH3d7mddUQpZgLPAJIciwmnGn440
-	 GtdsUqmdMbEIibjISj9VgpOD5xpF3TNK7nNAJuyU=
-Received: from DLEE100.ent.ti.com (dlee100.ent.ti.com [157.170.170.30])
-	by lelvem-sh01.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 55OMCVLw1942549
+	bh=9+TWzMrm54xfZ0RWb5/Dm+shOivo1lObaYOF3smCwj4=;
+	h=From:To:CC:Subject:Date;
+	b=JgE1WtSN9PhyKQdfZ59E1u6JrAuHkGJ40AHaSUh2sgThXcI8Nj5D3lDRwqllD5qn5
+	 +FWUSlWCATUURND5C3RApKRZV7HJssEpXwokEWN0zY/IydEHhXN+6RcN8NtKrfL/mI
+	 EhBy7NBE1iJu0+tbfztgZ4tK9K/FpQNbMuVlcCyg=
+Received: from DFLE115.ent.ti.com (dfle115.ent.ti.com [10.64.6.36])
+	by lelvem-sh01.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 55OMCUrk1942543
 	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
-	Tue, 24 Jun 2025 17:12:31 -0500
-Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE100.ent.ti.com
- (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+	Tue, 24 Jun 2025 17:12:30 -0500
+Received: from DFLE108.ent.ti.com (10.64.6.29) by DFLE115.ent.ti.com
+ (10.64.6.36) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Tue, 24
  Jun 2025 17:12:30 -0500
-Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DLEE111.ent.ti.com
- (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE108.ent.ti.com
+ (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
  Frontend Transport; Tue, 24 Jun 2025 17:12:30 -0500
 Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
-	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 55OMCU9L2248346;
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 55OMCU9J2248346;
 	Tue, 24 Jun 2025 17:12:30 -0500
 From: Judith Mendez <jm@ti.com>
 To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>,
@@ -54,12 +53,10 @@ CC: Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
 	<conor+dt@kernel.org>,
         <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH 2/3] arm64: dts: ti: k3-am62-main: Remove eMMC High Speed DDR support
-Date: Tue, 24 Jun 2025 17:12:29 -0500
-Message-ID: <20250624221230.1952291-3-jm@ti.com>
+Subject: [PATCH 0/3] Workaround for Errata i2312
+Date: Tue, 24 Jun 2025 17:12:27 -0500
+Message-ID: <20250624221230.1952291-1-jm@ti.com>
 X-Mailer: git-send-email 2.49.0
-In-Reply-To: <20250624221230.1952291-1-jm@ti.com>
-References: <20250624221230.1952291-1-jm@ti.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,27 +67,27 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-For eMMC, High Speed DDR mode is not supported [0], so remove
-mmc-ddr-1_8v flag which adds the capability.
+This patch series includes fix for Errata i2312 [0].
 
-[0] https://www.ti.com/lit/gpn/am625
-Signed-off-by: Judith Mendez <jm@ti.com>
----
- arch/arm64/boot/dts/ti/k3-am62-main.dtsi | 1 -
- 1 file changed, 1 deletion(-)
+Also include fixes for removing eMMC HS DDR support for am62
+SK which has been descoped as per datasheet [1] and enabling internal
+pullups for AM62 SK and AM62SIP SK, as per JESD84 spec recommendations.
 
-diff --git a/arch/arm64/boot/dts/ti/k3-am62-main.dtsi b/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-index 9e0b6eee9ac7..120ba8f9dd0e 100644
---- a/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-+++ b/arch/arm64/boot/dts/ti/k3-am62-main.dtsi
-@@ -553,7 +553,6 @@ sdhci0: mmc@fa10000 {
- 		clocks = <&k3_clks 57 5>, <&k3_clks 57 6>;
- 		clock-names = "clk_ahb", "clk_xin";
- 		bus-width = <8>;
--		mmc-ddr-1_8v;
- 		mmc-hs200-1_8v;
- 		ti,clkbuf-sel = <0x7>;
- 		ti,otap-del-sel-legacy = <0x0>;
+[0] https://www.ti.com/lit/pdf/sprz487
+[1] https://www.ti.com/lit/gpn/am625
+
+Judith Mendez (3):
+  mmc: sdhci_am654: Workaround for Errata i2312
+  arm64: dts: ti: k3-am62-main: Remove eMMC High Speed DDR support
+  arm64: dts: ti: k3-am62*: Move eMMC pinmux to top level board file
+
+ arch/arm64/boot/dts/ti/k3-am62-lp-sk.dts      | 25 +++++++++++++++++++
+ arch/arm64/boot/dts/ti/k3-am62-main.dtsi      |  1 -
+ arch/arm64/boot/dts/ti/k3-am625-sk.dts        | 25 +++++++++++++++++++
+ .../arm64/boot/dts/ti/k3-am62x-sk-common.dtsi | 24 ------------------
+ drivers/mmc/host/sdhci_am654.c                |  9 ++++---
+ 5 files changed, 56 insertions(+), 28 deletions(-)
+
 -- 
 2.49.0
 
