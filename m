@@ -1,87 +1,109 @@
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com [209.85.167.52])
+Received: from mail-yb1-f180.google.com (mail-yb1-f180.google.com [209.85.219.180])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 034F92D8DBD
-	for <linux-mmc@vger.kernel.org>; Tue, 24 Jun 2025 15:08:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.52
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A03B628BAA6
+	for <linux-mmc@vger.kernel.org>; Tue, 24 Jun 2025 15:11:16 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.180
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750777718; cv=none; b=H/QhImeUzFdCeSfYUiN0rMQwlOjK7YNbB2EaYuFU7LupGmZuChYoaqxudPh6rdt7ycL527OTkUwgeo+YKddtfyrdrTuSPFfH3vI9q526EZZ2AEfzVWhWDk1sNntvZ0hFtCP5yEY74kqyYJEwDY3ceYpvcHYUnmMUHrcoA/vUabo=
+	t=1750777878; cv=none; b=bKdXF8RE/poYk7IGOL33Nz7A8foUPA6LMlaY6dq5Y1duqgKqZPg6UACPkrqPnTvXLioJ5hsdsFNh9inX8po6leXyAMqsMv8hWDMPtVUD6Ru4WsJL52bkRYb03oJgRYJ8/yIhtiX+VYHEvcLSFemR30pBK4eOWzz+NsRCgr7uk+k=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750777718; c=relaxed/simple;
-	bh=V1zBXnrO3sZPKcmbx6+Rt9pQYsUWDBe2xc1l77S9+GQ=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=EA+bty88neKiVRQror7cX+vSvD+O5BSVuRITbho/k0fKxacNaz4u9+8/+PSEZ7AwxP79zyFeTtb2h5DF//OMdMLYHLHF8mJg3ngSsAirY7YIBVr6SLCVID1lAdDk/4lk6zErWRyZGqu5aLUFWHixedg0ShTUdbXsfMRp76DtD+M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=t9TpXwYe; arc=none smtp.client-ip=209.85.167.52
+	s=arc-20240116; t=1750777878; c=relaxed/simple;
+	bh=zM/4jnIerkh7BjJTADhSaTiNt1HHSQSU60svEA3kA8k=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=K99a0N2FtSL3vPFCVzxYyOH6/Jxjt2aQzraPoZ7lJt083UJ23d1xstim0X4nyFelNun55qlRU4R8OJ+WejuywJZtoj2m9tSu6OoJ+Yv+UrdOKPLvvH/rz3nhP1HugYK22b8v6URcUHUzQOTbebcI75hwEW1wlBvLPwAyS1DQmSE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=ttm8QQto; arc=none smtp.client-ip=209.85.219.180
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="t9TpXwYe"
-Received: by mail-lf1-f52.google.com with SMTP id 2adb3069b0e04-553b82f3767so4899943e87.3
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Jun 2025 08:08:36 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ttm8QQto"
+Received: by mail-yb1-f180.google.com with SMTP id 3f1490d57ef6-e7b4ba530feso4626826276.1
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Jun 2025 08:11:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1750777715; x=1751382515; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=V1zBXnrO3sZPKcmbx6+Rt9pQYsUWDBe2xc1l77S9+GQ=;
-        b=t9TpXwYe7zBTNjSGNnVGdNT2do8V/PQyi1SBBfmBZ1+Nd6m31p4fkQu3dn93a5rpa+
-         KXbLEoH5OZFX0+uGDbIONjHpjQLL01WbJfzh+Va/b0CTKB+73BxizXnaBfQHzz/hQo94
-         jEbbbl0iUnVR/xLpxKge4lIMj+KWFYwMVZSo+dfT65f8o/n/UTQc6hi8iY6gLXIDZNk4
-         PbHLAuGlocy+Y73R8yv6b7npvljLBbhe01o7wUPpVsubg8J9L4YAh7UoXDV6MAaOTbAk
-         EaT65FZ8f5D502U/9WOZn7ZBVGqG2GoqZ7rTW6V1+bll2ILzZHArJvATkKEeGVi7lYJZ
-         EDDg==
+        d=linaro.org; s=google; t=1750777875; x=1751382675; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=cZyvelbjEQEqEmmuqZpMjpZROwmzP7cZ0+TBAMIzE3c=;
+        b=ttm8QQtoAfImb6IPSHdfoIHB047p/QQ4euFwPDTKS86gxRHUreF4lho6PCKwtGXHCq
+         seqGUuhgvkzKWXAKxRFq/4aJBK5wEQK5IFUndCC333jzpmOAEdmvAgJXEjOUbbmuEr2B
+         lDlWTaao/yz7Qo1Y3WVOSAxJBjT6LGNjUj1lblRfOe2fPmQVKOSl0vFiahNUZiUb7F84
+         HkJGw/ZWuglaVOX4c5z8pJg00sw3sUGioK73cv+NVFct4oInq6pWMAYra+WUsEzWoS7a
+         RqMOVGIs0tbpCgdUuEP1GCDW3YpKPfMDQH1M6ScDRzFRGaiEHuiPKbi8XKMaO2HSVqZ9
+         4SPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750777715; x=1751382515;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1750777875; x=1751382675;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=V1zBXnrO3sZPKcmbx6+Rt9pQYsUWDBe2xc1l77S9+GQ=;
-        b=Baf5ntjnfZTZ0N29or2SHoGUDsHssCkISmbCb/zmg7Fs+KnLwLVv6I4hElQpNeUAoX
-         ynSqTGgAAPxnocLAJgl1AHhAkV5+R7vwdvClmQSfXb1X1sat/Ja4GntFdQNkclu5eol5
-         46WJGop2T8CiwhEYaVWF/MII9DoHgRQ4a4KmXt22aT3V6T6OiUI3AqzUIxYnCIgEXI3c
-         bDMJbhTD6mmdYv4OyJQAxB9RXnBO3oH4oD9y53Ln6XcdRnjbqLENQ0MUKgMpb0mCWRpH
-         9tPVm/JK9W7YLqffzbYiI2eBEEA9T6HgwaU1SoFp8vR4IMJyzkbgJcI34FcELE4LEnaS
-         ihsA==
-X-Gm-Message-State: AOJu0YyeZinQRWsAT6Is2pW6iKkSL2QKu6ZBENR2a4QLPImJZayYD37g
-	mNxQxtzzWz838/Bex14+WME5k7+scrCT6YMQUmEeESgqfKfOhtyJN74Zt5OHDbutKybzER3CPBV
-	oBMFs
-X-Gm-Gg: ASbGncs3Il5Y08CgLoOePAY1hLShUkMQbu2tOMxkRVX09A7YZ3i5OfHqUOakqW8kOIJ
-	y6HbmIdAV1TFZytiyaIEtMAOzFTjM+OuwsY0frsiFqKVtrsQnrn+WJ+lUhEgWHUfh1g/mIMZE0h
-	+nW0JC8S4F3fdAyrhUNIOPFTJjoNUjwJvY0tMZYmL9i1GZhCd4QvZWw1i+2xutJOmqArx+In7GE
-	z7HyjC4UdRqPYghAdsF17/XGjWoo3ve1Hq2mjndbh5G5qPDx8UprNy61evMWKWqlrkYNW9ktfjQ
-	z+ORUMu3XHL9aH0DgA+MVXLOFk/yzn18+aTlF7EOD8OpIetYuu6bKDN7PGUsNvue8tuFmAY9QSA
-	MJw6xhcFM+jQ/VKj78prAumPuSJE4kO8bUuR/
-X-Google-Smtp-Source: AGHT+IGZqPD+VeY8eWQGlzj2ZKoy4ts+dJxoke/1KMUXrCImIZBI6ZAkuzpVOcutbrc1wic5SSu6jA==
-X-Received: by 2002:a05:6512:3d1f:b0:553:2ed2:15b5 with SMTP id 2adb3069b0e04-553e3d26505mr5235188e87.57.1750777714283;
-        Tue, 24 Jun 2025 08:08:34 -0700 (PDT)
-Received: from uffe-tuxpro14.. (h-178-174-189-39.A498.priv.bahnhof.se. [178.174.189.39])
-        by smtp.gmail.com with ESMTPSA id 2adb3069b0e04-553e41bbda8sm1859856e87.127.2025.06.24.08.08.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 24 Jun 2025 08:08:33 -0700 (PDT)
-From: Ulf Hansson <ulf.hansson@linaro.org>
-To: linux-mmc@vger.kernel.org,
-	Avri Altman <Avri.Altman@sandisk.com>
-Cc: Dario Binacchi <dario.binacchi@amarulasolutions.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	linux-kernel@vger.kernel.org
-Subject: [ANNOUNCE] mmc-utils v1.0
-Date: Tue, 24 Jun 2025 17:08:32 +0200
-Message-ID: <20250624150832.185271-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.43.0
+        bh=cZyvelbjEQEqEmmuqZpMjpZROwmzP7cZ0+TBAMIzE3c=;
+        b=DJPX1+KxyRF0PTlCDXMWpCcMXBnt/sP0ll0mVB2GQh2JnuPKz/6Qvlsd3IKEj6iPMr
+         mJ3uX66hnrWEqSxl+JlGOf0LMGaeJCulsFgZbFWUNO+vOTS/4AeeKIBIOZi5DAlYADne
+         mz/iFZtPW3VJ3slqiqtnrqWHhUcVJuCqR00ukdQ0BbPyfy1yC0qM2V5a9r+ntYqIAVW9
+         P9+2RKfUQjbYosDTYl3IKkhj5cGMRzkGfJJxMtbwkG9p/UH01IXm7J/Had1pGvv2J+4Z
+         cYpxB7NRtFPBS3bJEa6gCo2YKf9DkAUQZztuNNsShBI0CwNxRAlIVaaqfETg92bPrp+V
+         sN3g==
+X-Gm-Message-State: AOJu0Ywgkgh6ZAgsr8AaWOUjpta42wD49hMEv8tv8ugQYCmPjhZT1Vlj
+	Z94EiuCUAxGsYwieomwMKMKykrgNPy0FGAj4vTQsi47UdU36nL2SBme5pF8683kTF+YsHHJRjb3
+	jLkjRI+lqC+LCNLat5+bI4BLukqk3QLRF8tdKbPo2sXWcMa3Nwqoc
+X-Gm-Gg: ASbGncs9CqGDXvjdqtpC7K7yp58uPf0Sf5dbx9z5CrmeZIzdgylPpNph94e5klnyEol
+	dc3IgJU/2MPm5d3zvOhQc/lGI6hGU8ZRgMMIspyZOOYpvDICKzcTpZleNbRotBQKLP74373NCjO
+	ACIA3QdnsaAO9phPJxX9wPW4V9cQAbVXLiJzOcGa85rmqoPjN9xi0tF0E=
+X-Google-Smtp-Source: AGHT+IE2YE2dMSoRUC1FPE3vSTuYpaQnqEVAkIyEcbadurpq23DwVzL6j1/CsQ4NunZ53te+NMSVqJITZAanvE3PsSk=
+X-Received: by 2002:a05:6902:90f:b0:e7d:d162:f15a with SMTP id
+ 3f1490d57ef6-e842bcffd85mr21917789276.40.1750777874952; Tue, 24 Jun 2025
+ 08:11:14 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20250623083300.236198-1-avri.altman@sandisk.com>
+In-Reply-To: <20250623083300.236198-1-avri.altman@sandisk.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 24 Jun 2025 17:10:38 +0200
+X-Gm-Features: Ac12FXzV_soGEtGVuddYArCOoZdvY38aovMRR3EnbzgnCNKc0Cna3LWar9M0LdQ
+Message-ID: <CAPDyKFohJ4CXWWb0cqgTsFH1TRyKdknZ45su8B=wRToDysSRUA@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: Pass key_mac buffer to rpmb_get_key()
+To: Avri Altman <avri.altman@sandisk.com>
+Cc: linux-mmc@vger.kernel.org, Simon Lindhorst <s.lindhorst@wut.de>
+Content-Type: text/plain; charset="UTF-8"
 
-Hi,
+On Mon, 23 Jun 2025 at 10:40, Avri Altman <avri.altman@sandisk.com> wrote:
+>
+> This patch fixes an issue where the key_mac buffer was not passed to
+> rpmb_get_key() in do_rpmb_write_key(), which could result in incorrect
+> key handling during RPMB key programming.
+>
+> This is a resend of a patch originally submitted by Simon Lindhorst,
+> which was previously rejected due to formatting issues.
+>
+> Fixes: 05051e40351c ("mmc-utils: Refactor RPMB key handling into a separate function")
+> Signed-off-by: Simon Lindhorst <s.lindhorst@wut.de>
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 
-This is the first official release for the mmc-utils tool.
-
-Moving forward we don't intend to use a specific schedule for providing new
-releases. Instead, we will decide along the road, based upon contributions.
-
-https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git v1.0
+Applied for master (and included in the v1.0 release), thanks!
 
 Kind regards
-Ulf Hansson
+Uffe
+
+
+> ---
+>  mmc_cmds.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index b2cc3d6..7994223 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2289,7 +2289,7 @@ int do_rpmb_write_key(int nargs, char **argv)
+>                 exit(1);
+>         }
+>
+> -       ret = rpmb_get_key(argv[2], &frame_in, NULL, false);
+> +       ret = rpmb_get_key(argv[2], &frame_in, frame_in.key_mac, false);
+>         if (ret)
+>                 return ret;
+>         /* Execute RPMB op */
+> --
+> 2.25.1
+>
