@@ -1,39 +1,73 @@
-Received: from mout.web.de (mout.web.de [212.227.15.3])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BC34E265CC5
-	for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2025 14:28:47 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=212.227.15.3
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 620E6268C42
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2025 14:38:49 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750861730; cv=none; b=stDCv+rsuasxdM+V7hoGDC31MBL34Gvb1+L3liObyf06Uq6FenjBTIdemiX4Ag3foJf0PtTRDRJb4C3XoeQ85jbWSM4NN+U2KXrqf/0EK9RwZshP8w1IwMTCi0Pi3yMhCqK0UXq2mopf4QldAoSvflB6G1u6RI2NyxzNRtN3AxA=
+	t=1750862330; cv=none; b=m5H3az2tcXFQNugmccT27W5nT/yHm5WYqiSeqbZAWCbCqN9+Tr0KSLruYYQZxVWfgSbb9CfwjcmcofVF/MZcI3eFFimjS2TuVj30M2iWfmYQcIOWTFUASBwrTeldXur+o3lt1YXobEDo+37/a08TQ2mcVHlsyAk2qhSOTiQQCp8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750861730; c=relaxed/simple;
-	bh=HgVXEK3nSlu/Ydn6XI5+ytFIQfMyJedXOtvsYti73EU=;
-	h=Message-ID:Date:MIME-Version:To:Cc:From:Subject:Content-Type; b=n8I8LsER4nuFrD00cWiLGUF82EbKc7hjabX+2pkqSWF3x55Kddx+GvWMY+Fq2sdBsPFpltvpXLRa+DTwSWZrlqiR278tyGjs4LY0CoZVuKr2z3fj5UX/KzdkhxkbVacrweht1NPZXl0ipDA6M2VAUR/xPcrW7Ab1inD+PGNGQJg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de; spf=pass smtp.mailfrom=web.de; dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b=OBCMxahp; arc=none smtp.client-ip=212.227.15.3
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=web.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=web.de
+	s=arc-20240116; t=1750862330; c=relaxed/simple;
+	bh=gUCK5ZPtvm6MgHUIDv1wxFAc1ecbFd2rMDQC/jqlAuk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=iA4UAB3clrlcJatSBWwcUkCWFN9+/88pSyJ5fd6cVwsPtSAq2kqzxLGEHHV3V3r+x2SAIhn5h8XeO3thRt8O+Ix8eEE/x0mgo/wzrQ+DGHoIOTyrlpkJw+7WCr1FHby9uJyw9sk6rWG3mwb9J8Nlv1XglZKqntu2gm/27VZQKiE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ky4Ffp+Y; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=web.de header.i=markus.elfring@web.de header.b="OBCMxahp"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=web.de;
-	s=s29768273; t=1750861723; x=1751466523; i=markus.elfring@web.de;
-	bh=HgVXEK3nSlu/Ydn6XI5+ytFIQfMyJedXOtvsYti73EU=;
-	h=X-UI-Sender-Class:Message-ID:Date:MIME-Version:To:Cc:From:
-	 Subject:Content-Type:Content-Transfer-Encoding:cc:
-	 content-transfer-encoding:content-type:date:from:message-id:
-	 mime-version:reply-to:subject:to;
-	b=OBCMxahpcIHM5kAnP/WBnIBImjAuJfEJuFeIGSb8Gc0uu6wTL7IvfxPCKBqUZ+wk
-	 wiWoEsn02RpKmqNDL7hYMU60cEYhVsgBc7A5sIgwIiDRL7DnHSRaxv4xm9IQQOV5j
-	 hFYkNwY7fLbcEcVD7LAGdViHV6pNopirhIeM3XLP/R6KcGdmxC5HzNjJpX+LB0BdC
-	 P70uQxotSjrTu4glri6gU7fkd+CtiTfg/jRtHY9IrpEWoP7F+Eiahd9vKZFtHeslN
-	 SrIXlim3eZHLP8irTpk6m3BwP7/NuNyWfuuqipnYvbxTuPmYRvXCm3VCIj04IYuX7
-	 C/GG6Nq1uefsDi/FMA==
-X-UI-Sender-Class: 814a7b36-bfc1-4dae-8640-3722d8ec6cd6
-Received: from [192.168.178.29] ([94.31.69.192]) by smtp.web.de (mrweb006
- [213.165.67.108]) with ESMTPSA (Nemesis) id 1N30ZN-1us3Nf3nob-00z6R4; Wed, 25
- Jun 2025 16:28:42 +0200
-Message-ID: <f1bcf11f-817d-4a57-8084-fd1e1e5c5140@web.de>
-Date: Wed, 25 Jun 2025 16:28:42 +0200
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ky4Ffp+Y"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55PCFF1c020776
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2025 14:38:48 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	vyp603+DXROKlY8+1tRFEeF1aiIPfGdpzbAJfdYnfMY=; b=ky4Ffp+Y8DWJ5sga
+	ATB71pj5U7o5cN3QB6T16JQmjj9MVT+way4qI2/Jnj/Bq/MVAyK1OeaP0n9T1lsG
+	nYFZroUkLr3jSm4w2xC4/5tpDKeth0qamfd4HVCm671aUtqZ9txeItoWat8IPjuZ
+	2zXLys17vwfBwPHHcAxyy+fdYMxni94WDpwmBRkWcFyZY/4sNf4iug5HnkGDE9io
+	G/WnjXSB8FAkJYqH7drWISk5RktaYC0S4QOykHl/T0tPfdjGsqLoKtjtAGZpCasv
+	HrhG2PqWoVhlMDa1QH2fv2l1Hn8eYWKj3OveQhgK2IDivLOiIsbTg9NNaMwKxGqJ
+	WuP4LA==
+Received: from mail-qt1-f197.google.com (mail-qt1-f197.google.com [209.85.160.197])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47f4b402hh-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2025 14:38:48 +0000 (GMT)
+Received: by mail-qt1-f197.google.com with SMTP id d75a77b69052e-4a5a9791fa9so20799511cf.1
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jun 2025 07:38:47 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1750862326; x=1751467126;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=vyp603+DXROKlY8+1tRFEeF1aiIPfGdpzbAJfdYnfMY=;
+        b=F+dF2SJjdpEqYdY0YduY2vnkPC4QNqpXBw8tafPAffxQMXdaPB+fdnKPfTfCUJmjsp
+         PMAlswMJCOmw0pXfuNDY9OEhfHY9qn8DpkC1jx0aE7ETqD6LAN/MPR2OhamKu4v2M18X
+         K5qVhUUT8Pja7VFFTNqollXPUrSEPi218sSy3k620XmCwaSLdtCQFpbf55hiWEfoYJP2
+         axMuHUuokxgPuLbvUxmzWZiJ3NymjZ1DTOIlX/WlkpFx1iSCwMB+JOIeJs39UCLJFovb
+         QPC1zvl1TTVMgDzMkrDn6jDcAI12TWql1BZxnnLLt+xnLkdP7t4bZWMxlxnU0wpuuToi
+         4mUg==
+X-Forwarded-Encrypted: i=1; AJvYcCVWfdRdVxMzo7wK9KEnYCM5lZfocKSQ/xYEpMQhmFfM3S+siSLSLqc7rRdTHLkxj8tOK7gwOed+gd0=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yy9Rsv4VDl1msQ2twiinvO6pjlhbeHM4HZTJNRS80zv2VppO8Tj
+	BdYEcGdYAkTgMkGFFa+gbiSrxXB6YQn4/RIt93QUbASNdVMOtVtaeRmNFBC+3MTLmxPPlB5BvB7
+	OGxUYgOg2sbT+t7aw8bF2yNRTai9jyXmCbyQalkE49reO1Whn8A+X7MEooLJDnuY=
+X-Gm-Gg: ASbGncs2Fe/0evwhAz/AFzk+SlfzzDwB1alspnzldZzafA8IC8kZQKe3dZWq86vBgus
+	6NfSOtDrFmEor4ZQttuLHlQX7VFvHlOoXpWWhLtBF0jI1arEEibbQaKdOB0H1kw/m6pXjqaQmcZ
+	hD3PcLyalzpcEB/+zbI3ut4VeiHsW9YM+qM6b9h74JynM6pG5OQ7gUb588NsCqT5FXoRkl3DP8A
+	+PAkC2ll32f7QBylCnjiAv6UQOgnGAtT7i/U9RmMjLdYseJMcAsy+d12YZr3RJgFhWI+OpE5yB3
+	/+npAL2ynx5teBXLl1csybduU+wDAV+gF3r/vpQzc64onEy5oeuIa3Ag1FV0mC4FPKAVike5sRi
+	dS1c=
+X-Received: by 2002:a05:620a:4713:b0:7d3:cec3:3ff with SMTP id af79cd13be357-7d4295fddb1mr179162985a.0.1750862326388;
+        Wed, 25 Jun 2025 07:38:46 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEHsbOpyUO4OQKuHvZNG56/kH2wg/UDN88jgkkkppU/y2V4JJtDrErgvtJkUii1DRKOsax2AQ==
+X-Received: by 2002:a05:620a:4713:b0:7d3:cec3:3ff with SMTP id af79cd13be357-7d4295fddb1mr179159185a.0.1750862325910;
+        Wed, 25 Jun 2025 07:38:45 -0700 (PDT)
+Received: from [192.168.143.225] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae053ee4cdcsm1076068666b.56.2025.06.25.07.38.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 25 Jun 2025 07:38:44 -0700 (PDT)
+Message-ID: <4200b3b8-5669-4d5a-a509-d23f921b0449@oss.qualcomm.com>
+Date: Wed, 25 Jun 2025 16:38:39 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -41,76 +75,186 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Content-Language: en-GB, de-DE
-To: linux-mmc@vger.kernel.org
-Cc: Avri Altman <avri.altman@wdc.com>, Ulf Hansson <ulf.hansson@linaro.org>
-From: Markus Elfring <Markus.Elfring@web.de>
-Subject: mmc-utils: Completion of error handling
+Subject: Re: [PATCH 14/14] arm64: dts: qcom: Add The Fairphone (Gen. 6)
+To: Luca Weiss <luca.weiss@fairphone.com>, Will Deacon <will@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Robert Marko <robimarko@gmail.com>,
+        Das Srinagesh <quic_gurus@quicinc.com>,
+        Thomas Gleixner
+ <tglx@linutronix.de>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Amit Kucheria <amitk@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+ <20250625-sm7635-fp6-initial-v1-14-d9cd322eac1b@fairphone.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <20250625-sm7635-fp6-initial-v1-14-d9cd322eac1b@fairphone.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Provags-ID: V03:K1:xlJS4YN23oLE8cpKlo5zp2PZab0R7erG/YxOhAvcH+cwZMAh8m5
- S/HiEJoL+Cgc+nncFS5qh4I/ejFHCPk/mSXy66HWiIzauHiIc2VPl2cjwMMhAkflUGjQraY
- 7+nhawz1K0F3TL/3wn2rVL6LQGAqrF84oSR07RNPvK/9XYH/PkuFPrv5CzkHVrkhtiLDvOb
- 4dXhLB0QckDgHreYU43fA==
-X-Spam-Flag: NO
-UI-OutboundReport: notjunk:1;M01:P0:yN5peamuv2g=;mFtndzqTBvYfKoFTG6mS9a4P2rR
- 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
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI1MDEwNiBTYWx0ZWRfXx0S/DqIQ3fb0
+ 4m2bhXj6xHcKx+bLC76hgfor09vBxJgQOc7aHGC1a1exoJESvZjdjbPTeGLRRkTcAPDl8ko0U8W
+ BULlCI5Dkyk8Xi7XkfhMFR6j3x7xbR2y/Fz5FI701EtM08zhZ2cmaNPzJGmkbi31l7mM/1wPSfy
+ 6Fy7+YsndZ04+69XyaQD6tq4oozAIOJHp4E82J8IICqjVirg0QUFm/CW8LxmGRZmK/aw2WVsRz+
+ 4Hq+ta7QRE0qxmOkLRML+7SDmma7srb/PWWvZFAok/xbyAMWdF2CUlQh8YDtohRm/1JmUQjfaqi
+ Y12Qp3X5E3JXd5robACthxu4dtaXFC9BcI7MPiFte7qWiSNag2f7BilBSwupB2NNvv60DtkqB61
+ g9r/SBTvGcJEUNPpORGqI0G/D4SlofeX+PuR/L0Zrcmets6dhud/NRa78vBlQe+w5P4+VZih
+X-Proofpoint-ORIG-GUID: hMPxNLFAUztHr9aEif9M-L-ApcYhPfP4
+X-Proofpoint-GUID: hMPxNLFAUztHr9aEif9M-L-ApcYhPfP4
+X-Authority-Analysis: v=2.4 cv=A8BsP7WG c=1 sm=1 tr=0 ts=685c09f8 cx=c_pps
+ a=EVbN6Ke/fEF3bsl7X48z0g==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=VwQbUJbxAAAA:8 a=gOtRruwUTqeMBgDD9hEA:9
+ a=QEXdDO2ut3YA:10 a=5XHQ0vS7sDUA:10 a=a_PwQJl-kcHnX1M80qC6:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-06-25_04,2025-06-25_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 mlxlogscore=999 malwarescore=0 spamscore=0 bulkscore=0
+ phishscore=0 adultscore=0 impostorscore=0 suspectscore=0 mlxscore=0
+ clxscore=1015 priorityscore=1501 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2506250106
 
-Hello,
+On 6/25/25 11:23 AM, Luca Weiss wrote:
+> Add a devicetree for The Fairphone (Gen. 6) smartphone, which is based
+> on the SM7635 SoC.
 
-I have taken also another look at implementation details.
-Thus I have noticed that the error detection is incomplete so far.
+[...]
 
-How do you think about to add more error handling for return values from functions
-like printf() (for example)?
-https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git/tree/mmc.c?h=v1.0#n515
+> +	/* Dummy panel for simple-framebuffer dimension info */
+> +	panel: panel {
+> +		compatible = "boe,bj631jhm-t71-d900";
+> +		width-mm = <65>;
+> +		height-mm = <146>;
+> +	};
 
-Regards,
-Markus
+I haven't ran through all the prerequisite-xx-id, but have
+you submitted a binding for this?
+
+[...]
+
+> +	reserved-memory {
+> +		/*
+> +		 * ABL is powering down display and controller if this node is
+> +		 * not named exactly "splash_region".
+> +		 */
+> +		splash_region@e3940000 {
+> +			reg = <0x0 0xe3940000 0x0 0x2b00000>;
+> +			no-map;
+> +		};
+> +	};
+
+:/ maybe we can convince ABL not to do it..
+
+[...]
+
+> +		vreg_l12b: ldo12 {
+> +			regulator-name = "vreg_l12b";
+> +			/*
+> +			 * Skip voltage voting for UFS VCC.
+> +			 */
+
+Why so?
+
+[...]
+
+> +&gpi_dma0 {
+> +	status = "okay";
+> +};
+> +
+> +&gpi_dma1 {
+> +	status = "okay";
+> +};
+
+These can be enabled in SoC DTSI.. it's possible that the secure 
+configuration forbids access to one, but these are generally made
+per-platform
+
+[...]
+
+> +&pm8550vs_d {
+> +	status = "disabled";
+> +};
+> +
+> +&pm8550vs_e {
+> +	status = "disabled";
+> +};
+> +
+> +&pm8550vs_g {
+> +	status = "disabled";
+> +};
+
+Hm... perhaps we should disable these by deafult
+
+[...]
+
+> +&pmr735b_gpios {
+> +	pm8008_reset_n_default: pm8008-reset-n-default-state {
+> +		pins = "gpio3";
+> +		function = PMIC_GPIO_FUNC_NORMAL;
+> +		bias-pull-down;
+> +	};
+> +
+> +	s1j_enable_default: s1j-enable-default-state {
+> +		pins = "gpio1";
+> +		function = PMIC_GPIO_FUNC_NORMAL;
+> +		power-source = <0>;
+> +		bias-disable;
+> +		output-low;
+> +	};
+
+ordering by pin ID makes more sense, here and in tlmm
+
+(and is actually written down)
+https://docs.kernel.org/devicetree/bindings/dts-coding-style.html#order-of-nodes
+
+[...]
+
+> +&pon_resin {
+> +	linux,code = <KEY_VOLUMEDOWN>;
+> +	status = "okay";
+
+\n before status consistently, please
+
+[...]
+
+> +&tlmm {
+> +	/*
+> +	 * 8-11: Fingerprint SPI
+> +	 * 13: NC
+> +	 * 63-64: WLAN UART
+> +	 */
+> +	gpio-reserved-ranges = <8 4>, <13 1>, <63 2>;
+
+Please match the style in x1-crd.dtsi
+
+[...]
+
+> +&usb_1 {
+> +	dr_mode = "otg";
+> +
+> +	/* USB 2.0 only */
+
+Because there's no usb3phy description yet, or due to hw design?
+
+Konrad
+
