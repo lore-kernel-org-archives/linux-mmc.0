@@ -1,149 +1,112 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1703E28507F;
-	Thu, 26 Jun 2025 14:16:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E56DC2E5411;
+	Thu, 26 Jun 2025 14:19:05 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750947399; cv=none; b=ZJGzcgCDPOIHk1GDgMK11pmxWlj9J1L4S+kwgeqC/daganb59gKOZIFJABEb4k1uoj1L+tWlZGvbsFrbLIPY2ZlI8q4g/epB8jZE4gFcAed1rYyOUglSr+zV1deYIekLDXIXoQG9f+fzXYalnACXjEceLTpkq1s5/AgSamD1l7A=
+	t=1750947548; cv=none; b=aLOeg9PNxZTollRrM0ukG3Xk+RQyYcd+1Zaz/rXVpAAHxYPQ7jH/kUUb6h+3+2yMYmCNErqWOKIio3sbkSMZX+xKIj73CuH5NzehDuzl0jgNn7bteSie0beb3d1baJZYigYauiZVEjdOH+m9d17mZZhVqIFXfobTCbW1QCRbYSI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750947399; c=relaxed/simple;
-	bh=GwBi4n0JlW43cz36R/qfINrSWt1USAJ/uXPLyybQO+s=;
+	s=arc-20240116; t=1750947548; c=relaxed/simple;
+	bh=gd5wsOvo6eYcw7FYl9OPfbJCOvOhsKfh7GYlKa8F2QI=;
 	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=nSCPbKzLCXOZam7UZf/Wzv5pReK31/jVDnFQR8jycsP5A3AW3V16HFAO48AHLrL17ub7zOagCJZlxFdBI0dRj403V+53TooDSTPAhDr8Hgoi9gm4Buh47JL0Qx/J/9kT6WvvzxieIY/T86t8Z6Hc18GU7GBlwOUV3RmA5mdLfTI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=QuLC9237; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	 In-Reply-To:Content-Type; b=AUji4cUQDBiHEitPx6O0s5zue5o+XshMgxcrlGwMjHG6yP1/0VzIzFHlcJdp1hFzpGIU/r13kiAunK+jdnq87yue5hdYmDmzw6J5VeCqSFPoI2/FfC5VsmstWCvLx73QN/e20FKCDmTbKrrsCzZDE74zGXi5nuColzngSpQC66M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=dAF6pKi4; arc=none smtp.client-ip=198.47.23.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="QuLC9237"
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55Q9Uusn031185;
-	Thu, 26 Jun 2025 14:16:32 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	bfGS8hpzciiHwx/PSRhY0YfVUjjIVFBig3eSfl/wbao=; b=QuLC9237ZNIuiNAX
-	wMSvWImxFQ0JUZVCeXLRx0c4W03pyyo0vgDf3bzmOOpOQ0TAciuIox8Wp75g56bU
-	o/9XHkjlhtVvpCy8qWPQMkBrbiRfqDUZ9Zf61F505cbI3KtHiOfM9Jd9fgOF4Mmt
-	5uWy67nENIuoYddIXYrW7qX62oX9YQGproIt1vbA4awYCoaYjMujALf7GOLFw6/N
-	j935sP7bj9yLkQ95tIrxgDNqDVrL8lODo6Xvv0U0j+r7zWxVGoGSxl1I/594MHCi
-	ra+t3asi1Noe7YMG4ppWvKQlhtUe8tLXyQdsT1bDVdi8H/MuZbAA0AR13eQlyzeX
-	nfNfFw==
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47f4b43fw5-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 26 Jun 2025 14:16:32 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 55QEGUh9013653
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 26 Jun 2025 14:16:30 GMT
-Received: from [10.216.48.74] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Thu, 26 Jun
- 2025 07:16:25 -0700
-Message-ID: <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
-Date: Thu, 26 Jun 2025 19:46:19 +0530
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="dAF6pKi4"
+Received: from lelvem-sh02.itg.ti.com ([10.180.78.226])
+	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTP id 55QEIvQM1757161;
+	Thu, 26 Jun 2025 09:18:57 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1750947537;
+	bh=LEpiTYfrKQjJZ0APtPysPfd88bdBjGszmoPLyAL9M+g=;
+	h=Date:Subject:To:CC:References:From:In-Reply-To;
+	b=dAF6pKi4p4zZmoNuM4NJTMa6nVYijZNpgEAvIBPG3wLPLM1/JC2mFzbggocG7z0S5
+	 tFUJYk3EeC85DNynYB9eSPVwVbYPP5hGoc0UcALeP6DmOSyuRHeNyiX5rQblSOwA1b
+	 gkg4aKNvQ3cYvItw2V2zb3gRg1bhl0As6PZx07co=
+Received: from DFLE104.ent.ti.com (dfle104.ent.ti.com [10.64.6.25])
+	by lelvem-sh02.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 55QEIvpX3694908
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Thu, 26 Jun 2025 09:18:57 -0500
+Received: from DFLE109.ent.ti.com (10.64.6.30) by DFLE104.ent.ti.com
+ (10.64.6.25) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Thu, 26
+ Jun 2025 09:18:56 -0500
+Received: from lelvem-mr06.itg.ti.com (10.180.75.8) by DFLE109.ent.ti.com
+ (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Thu, 26 Jun 2025 09:18:56 -0500
+Received: from [128.247.81.105] (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr06.itg.ti.com (8.18.1/8.18.1) with ESMTP id 55QEIuul1133313;
+	Thu, 26 Jun 2025 09:18:56 -0500
+Message-ID: <ba694996-0a17-480f-b286-4cfed81165f0@ti.com>
+Date: Thu, 26 Jun 2025 09:18:56 -0500
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.0
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-Content-Language: en-US
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-        Sachin Gupta
-	<quic_sachgupt@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, "Rob
- Herring" <robh@kernel.org>,
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 0/3] Workaround for Errata i2312
+To: Vignesh Raghavendra <vigneshr@ti.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC: Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
+        Rob Herring
+	<robh@kernel.org>,
         Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        "Conor
- Dooley" <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <quic_mapa@quicinc.com>,
-        <quic_narepall@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_sartgarg@quicinc.com>
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-In-Reply-To: <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Conor Dooley
+	<conor+dt@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+References: <20250624221230.1952291-1-jm@ti.com>
+ <0bf7ccf4-26ae-42f6-b679-d7840e42efc5@ti.com>
+Content-Language: en-US
+From: Judith Mendez <jm@ti.com>
+In-Reply-To: <0bf7ccf4-26ae-42f6-b679-d7840e42efc5@ti.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI2MDEyMSBTYWx0ZWRfX04S0ZwAErbug
- 1LGiGvFp9cGI3qEB/0h/aeSfPASH/N96d7fBx3R8VLeKUD6bN57hc8eG/KbFUPqqSfIMPUWxR/d
- aKcyVVoWdezq8qJZysfLjeyxx+b+rz/eYJM+r6JxwU0857FZaGWepNZ7NIcaZpCNdhorJ/Ut3Le
- 8FlHTHOCx4slo6H36XhqtSLaYHhAqwBA21byzJn5uV//cPcTbBWLx1CeurBeUfH1JPnuMInLFIJ
- AOUJ2lBTk816j8hWXtZqrmcJghNEGuQqLK4MRvUPFfVg+D032gO64WGUsYrnm5kO8QMI7D2QN4j
- BBnsjYgfN3696cRavzXbcpU2B45Ib4C/wcjmKvxlptbyQ9lJ4epnhu+Hne5cqOQaJ9pqrhuLROO
- CtPD7ZEqgdz4slt698FaXRkhA28iN+5V3zHDz+v0CU7zQ55JfYSzz9AVltkXtRtoTCtW8CEj
-X-Proofpoint-ORIG-GUID: QOgtJn9LSxAAE1l36YIN931YlvunmJAy
-X-Proofpoint-GUID: QOgtJn9LSxAAE1l36YIN931YlvunmJAy
-X-Authority-Analysis: v=2.4 cv=A8BsP7WG c=1 sm=1 tr=0 ts=685d5640 cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8
- a=ikfpGsmVBwgCooMSvQQA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-26_06,2025-06-26_04,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- lowpriorityscore=0 mlxlogscore=999 malwarescore=0 spamscore=0 bulkscore=0
- phishscore=0 adultscore=0 impostorscore=0 suspectscore=0 mlxscore=0
- clxscore=1015 priorityscore=1501 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2506260121
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
-> On 22/01/2025 10:47, Sachin Gupta wrote:
->> Document the 'dll-hsr-list' property for MMC device tree bindings.
->> The 'dll-hsr-list' property defines the DLL configurations for HS400
->> and HS200 modes.
+Hi Vignesh,
+
+On 6/25/25 10:56 PM, Vignesh Raghavendra wrote:
+> 
+> 
+> On 25/06/25 03:42, Judith Mendez wrote:
+>> This patch series includes fix for Errata i2312 [0].
 >>
->> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>  1 file changed, 5 insertions(+)
+>> Also include fixes for removing eMMC HS DDR support for am62
+>> SK which has been descoped as per datasheet [1] and enabling internal
+>> pullups for AM62 SK and AM62SIP SK, as per JESD84 spec recommendations.
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> index 8b393e26e025..65dc3053df75 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> @@ -133,6 +133,11 @@ properties:
->>      $ref: /schemas/types.yaml#/definitions/uint32
->>      description: platform specific settings for DLL_CONFIG reg.
->>  
->> +  qcom,dll-hsr-list:
->> +    maxItems: 10
->> +    $ref: /schemas/types.yaml#/definitions/uint32
-> uint32 has only one item. Anyway, there is already DLL there, so don't
-> duplicate or explain why this is different. Explain also why this is not
-> deducible from the compatible.
+>> [0] https://www.ti.com/lit/pdf/sprz487
+>> [1] https://www.ti.com/lit/gpn/am625
+>>
+>> Judith Mendez (3):
+>>    mmc: sdhci_am654: Workaround for Errata i2312
+>>    arm64: dts: ti: k3-am62-main: Remove eMMC High Speed DDR support
+>>    arm64: dts: ti: k3-am62*: Move eMMC pinmux to top level board file
+>>
+> 
+> 2/3 and 3/3 have no relation to 1/3 and they need to go via different
+> trees. Please post them separately.
 
-I will change it to reflect array from uint32.
-There is change with artanis DLL hw addition where it need total of 5 entries
-(dll_config, dll_config_2, dll_config_3, dll_usr_ctl, ddr_config)
-for each HS400 and HS200 modes, hence the new addition in dt. And these values
-are not fixed and varies for every SoC, hence this needs to be passed through
-dt like it was passed earlier for qcom,dll-config & qcom,ddr-config.
+Will separate the patches, thanks (:
 
-And backward compatibility would be taken care by check for qcom,dll-hsr-list,
-where new settings would apply for soc where qcom,dll-hsr-list is added into
-dt.
+~ Judith
 
->
-> Please provide here link to DTS user so we can validate how you use it.
->
->
-> Best regards,
-> Krzysztof
+> 
+>>   arch/arm64/boot/dts/ti/k3-am62-lp-sk.dts      | 25 +++++++++++++++++++
+>>   arch/arm64/boot/dts/ti/k3-am62-main.dtsi      |  1 -
+>>   arch/arm64/boot/dts/ti/k3-am625-sk.dts        | 25 +++++++++++++++++++
+>>   .../arm64/boot/dts/ti/k3-am62x-sk-common.dtsi | 24 ------------------
+>>   drivers/mmc/host/sdhci_am654.c                |  9 ++++---
+>>   5 files changed, 56 insertions(+), 28 deletions(-)
+>>
+> 
+
