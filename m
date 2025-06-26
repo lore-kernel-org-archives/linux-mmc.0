@@ -1,148 +1,121 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from lelvem-ot01.ext.ti.com (lelvem-ot01.ext.ti.com [198.47.23.234])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAFB42ECE8F;
-	Thu, 26 Jun 2025 17:42:51 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 18FB22248B3;
+	Thu, 26 Jun 2025 23:14:55 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=198.47.23.234
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750959771; cv=none; b=TrgVXcg8grUdJkIX337t+0sCKIN6iefH4G4TCFw7t0EQpXtxQfojgHQcbFde4P1mF/zUfYHU8TFCnGVTCw7inFj8EY5Vwjy562SXRp8cVMUzVG/xv3yp+MNgVTUHO/3vv87M43gBBaNoxHqkDC3QCr3hPTib5YJHNgVX/eMNhl4=
+	t=1750979698; cv=none; b=GoYR21uxMprf4HPiCO1n1vlGuy/QDKT2uRzDcuVYtZ4ezt+Jf3IAAhoPcoIoeswawRZHBTzv5HTVSAB2ERRJxN3Ct5QcJwzoY0WizlzDkOxYhAAer8ekYtZSnO9gJlQ8u14/dXU0I9xBNc+xG4zDEjtnEWDg720deXc3xVXNPlQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750959771; c=relaxed/simple;
-	bh=GNfZUt3jfodt/wtNnEm/BMcSGq0vifgDdI9RBpt/6EM=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=FgjboRoQWj4zpgkcEPMxEZzXlbMMRU/0R4yBiLfTIemvh1roQUmvHF3vHCD7lJJUd73bp3lKzrCMKLqwDBFHPUjD8mact46WSSjezYOmDi0m6LXd+MRO6ist0dccscdWv7yrLEZCzTDbJ9FxlaPVuvYlqo8PpavQ7ZIOS7pMiJ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=JtDccXM7; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1750979698; c=relaxed/simple;
+	bh=fk8p9KMCoaUoBwdZllXsBYwYaEmIv4RjCoPM4Ek8oVc=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=f/jjcSJvwPS9+lyEmsYum+bawzXlA2mYhJB1tmMYsU2U7W5UwZJkA16da2K3ZNgSB45v/sEc5SpmbUQYqWcCFCl8r+8+NTUoQWjUoamRbFsUonNf/WchJwOO8cDRbB4oh0q+EstlD0GCY9uU3KwaSjtv0s1V54Qir7Nml4c8TUI=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com; spf=pass smtp.mailfrom=ti.com; dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b=w1Fcz8k6; arc=none smtp.client-ip=198.47.23.234
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=ti.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=ti.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="JtDccXM7"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id A5B7BC4CEEB;
-	Thu, 26 Jun 2025 17:42:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1750959771;
-	bh=GNfZUt3jfodt/wtNnEm/BMcSGq0vifgDdI9RBpt/6EM=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=JtDccXM7VcdyPGDP2fsr6efk5ur9VWl4d1LFZdqIA9u5TJkPmBmSdafeKZfUt+X4J
-	 fG2shEJo7YAhxtPlW3ciWeHFoBqHbp/RWEwN+NFrkdrKJXxHgNDAynzZ8TU0A3crdi
-	 vtnhTRCQnGhUe8/AUlpAUdTX6QplDEj1JkarWfUEhnx0k7RVVkpW1N6v15m1Fclbpn
-	 rEJJemXhwsxY/ITMupux1tOctrpmDIQtbZgUnwi7/Pw/b5Lg+c1EnVADmsAXtTlffq
-	 L7Ws45HV8EjZTYbWD5XGuSChzN5+S+BA0lK8Z81rxa7RgXZDtFcOzM1RgJJuvLjCMp
-	 B+Fi5NHAqO+tg==
-Message-ID: <abdde4ff-eae2-44c4-8608-89c762790549@kernel.org>
-Date: Thu, 26 Jun 2025 19:42:41 +0200
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="w1Fcz8k6"
+Received: from fllvem-sh03.itg.ti.com ([10.64.41.86])
+	by lelvem-ot01.ext.ti.com (8.15.2/8.15.2) with ESMTP id 55QNErfg1866078;
+	Thu, 26 Jun 2025 18:14:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+	s=ti-com-17Q1; t=1750979693;
+	bh=X3M2xnySk4XeHRTFPNC0WLhM6pqnnTecchiA5LMXI9s=;
+	h=From:To:CC:Subject:Date;
+	b=w1Fcz8k6G2CngKUgP3Ohox1PNNVIVbUWRvd0R0YDHuOmgBEVoO011ztGhVZxpELCQ
+	 wQaLgQd2AlsvitBFKLZc/dSLwATKnNggB3YVY0t4KIo5ezKmhm75ofYu0+Y4+yf8fQ
+	 /bIB6RR5tbQKzyd25SL7Geg4GcW2J6EUZQ0YBjDY=
+Received: from DFLE114.ent.ti.com (dfle114.ent.ti.com [10.64.6.35])
+	by fllvem-sh03.itg.ti.com (8.18.1/8.18.1) with ESMTPS id 55QNErPC2408025
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-SHA256 bits=128 verify=FAIL);
+	Thu, 26 Jun 2025 18:14:53 -0500
+Received: from DFLE100.ent.ti.com (10.64.6.21) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55; Thu, 26
+ Jun 2025 18:14:52 -0500
+Received: from lelvem-mr05.itg.ti.com (10.180.75.9) by DFLE100.ent.ti.com
+ (10.64.6.21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.55 via
+ Frontend Transport; Thu, 26 Jun 2025 18:14:52 -0500
+Received: from judy-hp.dhcp.ti.com (judy-hp.dhcp.ti.com [128.247.81.105])
+	by lelvem-mr05.itg.ti.com (8.18.1/8.18.1) with ESMTP id 55QNEqql2059317;
+	Thu, 26 Jun 2025 18:14:52 -0500
+From: Judith Mendez <jm@ti.com>
+To: Judith Mendez <jm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian
+ Hunter <adrian.hunter@intel.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>
+CC: <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: [PATCH v2] mmc: sdhci_am654: Workaround for Errata i2312
+Date: Thu, 26 Jun 2025 18:14:52 -0500
+Message-ID: <20250626231452.3460987-1-jm@ti.com>
+X-Mailer: git-send-email 2.49.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Sachin Gupta <quic_sachgupt@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com,
- quic_mapa@quicinc.com, quic_narepall@quicinc.com, quic_nitirawa@quicinc.com,
- quic_sartgarg@quicinc.com
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
- <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-C2ProcessedOrg: 333ef613-75bf-4e12-a4b1-8e3623f5dcea
 
-On 26/06/2025 16:16, Ram Prakash Gupta wrote:
-> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
->> On 22/01/2025 10:47, Sachin Gupta wrote:
->>> Document the 'dll-hsr-list' property for MMC device tree bindings.
->>> The 'dll-hsr-list' property defines the DLL configurations for HS400
->>> and HS200 modes.
->>>
->>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>  1 file changed, 5 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> index 8b393e26e025..65dc3053df75 100644
->>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>> @@ -133,6 +133,11 @@ properties:
->>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>      description: platform specific settings for DLL_CONFIG reg.
->>>  
->>> +  qcom,dll-hsr-list:
->>> +    maxItems: 10
->>> +    $ref: /schemas/types.yaml#/definitions/uint32
->> uint32 has only one item. Anyway, there is already DLL there, so don't
->> duplicate or explain why this is different. Explain also why this is not
->> deducible from the compatible.
-> 
+Errata i2312 [0] for K3 silicon mentions the maximum obtainable
+timeout through MMC host controller is 700ms. And for commands taking
+longer than 700ms, hardware timeout should be disabled and software
+timeout should be used.
 
+The workaround for Errata i2312 can be achieved by adding
+SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk in sdhci_am654.
 
-Timeline still amazes me. I will be grumpy on this thread.
+[0] https://www.ti.com/lit/pdf/sprz487
 
-> I will change it to reflect array from uint32.
-> There is change with artanis DLL hw addition where it need total of 5 entries
-> (dll_config, dll_config_2, dll_config_3, dll_usr_ctl, ddr_config)
-> for each HS400 and HS200 modes, hence the new addition in dt. And these values
-> are not fixed and varies for every SoC, hence this needs to be passed through
-> dt like it was passed earlier for qcom,dll-config & qcom,ddr-config.
+Signed-off-by: Judith Mendez <jm@ti.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+Changes since v1:
+- Split series [v1] according to Vignesh's review comment in v1
+- Add Adrian's tag
 
+v1: https://lore.kernel.org/linux-mmc/20250624221230.1952291-1-jm@ti.com/
+---
+ drivers/mmc/host/sdhci_am654.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-Eh, no. That's not a valid reason. It's still SoC deducible. Don't bring
-your downstream practices here, but remove EVERYTHING from downstream
-and start doing things like upstream is doing.
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index ea14d56558c4..86d87d8e0675 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -613,7 +613,8 @@ static const struct sdhci_ops sdhci_am654_ops = {
+ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
+ 	.ops = &sdhci_am654_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
+ };
+ 
+ static const struct sdhci_am654_driver_data sdhci_am654_sr1_drvdata = {
+@@ -643,7 +644,8 @@ static const struct sdhci_ops sdhci_j721e_8bit_ops = {
+ static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
+ 	.ops = &sdhci_j721e_8bit_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
+ };
+ 
+ static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+@@ -667,7 +669,8 @@ static const struct sdhci_ops sdhci_j721e_4bit_ops = {
+ static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
+ 	.ops = &sdhci_j721e_4bit_ops,
+ 	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_DISABLE_HW_TIMEOUT,
+ };
+ 
+ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+-- 
+2.49.0
 
-Best regards,
-Krzysztof
