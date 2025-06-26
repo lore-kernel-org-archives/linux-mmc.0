@@ -1,104 +1,166 @@
-Received: from mail-pg1-f179.google.com (mail-pg1-f179.google.com [209.85.215.179])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D30161DE2DC;
-	Thu, 26 Jun 2025 11:25:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.215.179
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 312222DCC10;
+	Thu, 26 Jun 2025 12:30:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1750937102; cv=none; b=QqH/jaIyu/hbDai4Egg241/wmtATfLMec8BGX/+Ma0+Zxiwsf1/PtHnF0xSRzRkyLNppnAKPEDLAwjIgln9JrpvFTtdB9O5rHPYi/VVyHZXYVIWwsE+gZUwA4DG5aUbIqn+64h/LeX7LCLj5e9oS9eo5g9tEX6X8H0jnT3aMIVY=
+	t=1750941056; cv=none; b=hyH1FcjIIYEmrf3hP2ARk+fj6TZWlJD4tOkm9RG3Wlm4CPoJc2ciwCPzXkkMiwbN01XSs8AOmdV4E5QUNJEhY0XiN1H+O/AiAIhH1IWf8fxmAIlCekOUVPhrXP208hSfoc3uwjKrM0Dctv9PdVWOiqKhYSZGasbfDqjnahZOJsQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1750937102; c=relaxed/simple;
-	bh=03PKuUYJrD5nD1QhUdEl4KtAYJCxxfiX2hC+aEDW42A=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=oLMwlFyZVJEBx7OYGIMNpC1ywAtrfIoFtkTBa8GIPF15oOcsRZKs6wenpGPwtOrg/HRdGf4aQSJMw9p8h6baXG6Rot2nGbWSng+jHPIzv4EOUkxQqhvK6/rk5RNDPVdYFdCy+uDWjmpeCcew94Z6I4OLPyH/wHUQII5VF3mOksU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Rx4RUyDI; arc=none smtp.client-ip=209.85.215.179
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1750941056; c=relaxed/simple;
+	bh=Tcuj9liMYKxMkRvp81H+oER4dm3a08kA2i8lcMgGi1o=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=NHfNlurfY1CB7/VJBuYXVzidIUzFREnIBZh8zhrQs9KtIvXZorIX/JsbuQIXBSRv/xwrI8H9azQnXmMR7Bb8SMqUbGLHLynNYxHlcradPuaXSuAXNs9EAIOZApxHWCHrEA0kBvpGUlWk30wrsc/gc2k8W8PDn4aYjBoPy8CYyCE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=AFdvFmGz; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Rx4RUyDI"
-Received: by mail-pg1-f179.google.com with SMTP id 41be03b00d2f7-b2c4e46a89fso720867a12.2;
-        Thu, 26 Jun 2025 04:25:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1750937100; x=1751541900; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=QFQX6uUBpxDtt/1/azFfPLLQ4QGA0qnKL2eurBf3pvU=;
-        b=Rx4RUyDIBFF3oqUbxmRFwUoXR/5Y0WPHOPtT/VYlw5lE10h+WudihjUn/RJ7tQEwS2
-         FcOiDc3hy5JAGRTiCZ+c19M53UYH/UpzbbF76LjCfkQaKt0IO0Lm8IQ2Ibtqdy2Nf2IL
-         FnjiwhYcRAQ0Jc2ryHGKEv854zl+I0kinXGt1paPaktPjgSKCGY00lUvGm4sjD/JxDLq
-         vLHKUZH758vfdLxMlyw91qSR59jRh4+eSkv3Kw8bNIQAIqpdTKlqLR035+1Qz4qpK5sn
-         +jodRzt8a8mLLbC40XndcJf4eESuXkdCDI2tacsMqbcoSwAZQi6M2aqM5Z3d+Xh4BciY
-         /ygQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1750937100; x=1751541900;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=QFQX6uUBpxDtt/1/azFfPLLQ4QGA0qnKL2eurBf3pvU=;
-        b=MDab4xG7L/1qfBoNuZ/rp1RAmADTbMJ2SbRiS8Ftc3DKdr3mAC3sQKyRgDeQR6Ko92
-         yaV8df/reAalPmQfUtGvC4tPRuvXByONbsdsGS6TIsbZMQ3Dgc5QxyqmGkrR0WSdCWjT
-         CNC4eNpg6t7RFgaSbtFs8Ev0SvLxOcfojmuCreT/N6MgKN/pVq62sAjJPKDoO19bI/so
-         e78f5Tz/rCJtCaiGhYxXJGGANd5Z+QbP81mB3saRPAXbZgRT7gXto+7FCflgDdUdV5KO
-         /jdp6qz9EuWvuGf20cSsylgex3eWv4SQcVrDW3nqOB0OxfmrNctkb+ncPtcrJvci2wAa
-         gdCA==
-X-Forwarded-Encrypted: i=1; AJvYcCWAwHroRqxm1ByMJUaNAvpgJeF3KSv9FnOl8hHtFlabLfToQ3pFJl3ACVqb6cfmxca4iW/3+XLAZa9T@vger.kernel.org, AJvYcCXQTV1/LPMECMAgCbTGL3Dyt1oF3PlnzvP/igaAKrBo2tI001ebmKrz8WsDKRFepzOoOSr5ElSOLsbMHlw=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzcoScdZ2ymjgXgJQ069tIY0TyDsHQ7fOj1+HYBFd85MqjoKBXX
-	qmDkoEWR4zqGOMH7L0ljHO7QXf3cKFikSIij8S3SeGOcleTzg0T04YgP
-X-Gm-Gg: ASbGncvDP2FStu1VdphIEZcZRcXuDtc1wddleOXwngc+YBoLr7Q/8LGFL0T0afr/MWf
-	DkMODCDqKh6kD0Pi8JnIbR+aQMZb3LNWSjMKlJeq5PZ5K9AydgHPRY+dcoXu0FXs/1sXUyuYD+I
-	6q6oQzHd62Bli6JIE1/PBqN+JUNVmmZlGEMbKdRf1JShWiFNNk0mlIa7F3ia4/9Jo6QZXFZWtP+
-	6LsFCoGNAAted8TJD6LFEmQRFGWpUgIXH0CiBJpdXBcFGH4GAUN/RWONno/xSGGysBvEEry8kPR
-	KWlDH7itAcIFw2o2a+20ds73NPM/vTchMZeid8+JCgIQYdQSE+zAkujfDubevbJAFKmqdEZdCAM
-	qogDDtg==
-X-Google-Smtp-Source: AGHT+IF6awlLuxZUGb2m0NQDcbLt5zcurz78BLypov2q2wtij+W6y4vevOdr5iSqelRvzpW4kO0jIw==
-X-Received: by 2002:a17:90b:37c5:b0:315:f140:91a8 with SMTP id 98e67ed59e1d1-315f2687f07mr11483087a91.16.1750937100008;
-        Thu, 26 Jun 2025 04:25:00 -0700 (PDT)
-Received: from localhost.localdomain ([187.17.229.193])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-315f53c2951sm3915122a91.26.2025.06.26.04.24.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Jun 2025 04:24:59 -0700 (PDT)
-From: Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
-To: adrian.hunter@intel.com
-Cc: ulf.hansson@linaro.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	edson.drosdeck@gmail.com
-Subject: [PATCH] mmc: sdhci: Quirk for broken command queuing on Intel GLK-based Positivo models
-Date: Thu, 26 Jun 2025 08:24:42 -0300
-Message-Id: <20250626112442.9791-1-edson.drosdeck@gmail.com>
-X-Mailer: git-send-email 2.39.5
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="AFdvFmGz"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0B73C4AF0C;
+	Thu, 26 Jun 2025 12:30:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1750941054;
+	bh=Tcuj9liMYKxMkRvp81H+oER4dm3a08kA2i8lcMgGi1o=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=AFdvFmGzLMJjZXxDjZV/m01zQTuxCUKxLXf0Gg84qB9aK2KhYYiKcdc+mUHnLphwh
+	 pY1p04inasnEKd5nBA2oVSnGZoOP+WRuTkRVo1dfqk01FfhtM56sUQedMdg3NRVSt0
+	 BlzHUtz4HOTNryNTvoWFwB+cIcvzVAiFSiIj8heUxirAbQWxQ8DlIMrokAZtRf76Ql
+	 rrscEOcxyO+r2P+8fR6bsb/j6Nvfcvquv6N6t7HPBMFOWrrIZ27KXcA58zCYtOfCWl
+	 UcdwBYo13JyBVy9NWin6/ulhdNf+E2T3on7horUyivOGmqSn4IPA9dZUUk5b7tIWRH
+	 1LMqAm1Mc3MWQ==
+Received: by mail-ed1-f46.google.com with SMTP id 4fb4d7f45d1cf-60c5b8ee2d9so1908164a12.2;
+        Thu, 26 Jun 2025 05:30:54 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUr6+C4mwzfWqg/7LPTsP+qQVGiypLcoQ9GL6pfCFuZR4cRyTmQkPaglcn1AhUIeLnlNeSPPCYGkVaf@vger.kernel.org, AJvYcCVcmGgGxP3WracRdn8W6iyPfwje4gjzNmmQ2op0bRUqr1uPFT+Er/ivS2LVnB+M0x4lQd4L2mPbhZte@vger.kernel.org
+X-Gm-Message-State: AOJu0YxPdhr/tR038oKjUCg1oTqAbsWfaxiMGOnp4c804OmV7UKytdAv
+	qulc77mtvXUKDIHtAQX+f/o0+EmLtk+R9hV8Bt/2l2J400C+HokjIILGrsz5lWxDsFcL91RNubl
+	zXliWD8TlZTd3NUOkRH8rBf6psSxz4R4=
+X-Google-Smtp-Source: AGHT+IGB1r0RULOVkDK+7jbmAQV6m/K9tlzxxAPjyOT0QbB5tXfeb9acQUc0hgS9pLNBlMdu72qPEKROtVEjnWhhHgs=
+X-Received: by 2002:a05:6402:3513:b0:608:4945:ca47 with SMTP id
+ 4fb4d7f45d1cf-60c6698f22dmr3238889a12.17.1750941053172; Thu, 26 Jun 2025
+ 05:30:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1750765495.git.zhoubinbin@loongson.cn>
+In-Reply-To: <cover.1750765495.git.zhoubinbin@loongson.cn>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Thu, 26 Jun 2025 20:30:39 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H6f9CWGkAJVM45Wir1PYTZaL-tDq4m=5=zazvPzqNSa5A@mail.gmail.com>
+X-Gm-Features: Ac12FXzVVRuUM40OXySAmf7n49eft0EfQfUP6aqZIGlcvt6H_OodNRlHwWbaJQg
+Message-ID: <CAAhV-H6f9CWGkAJVM45Wir1PYTZaL-tDq4m=5=zazvPzqNSa5A@mail.gmail.com>
+Subject: Re: [PATCH v4 0/4] LoongArch: Introduce the Loongson-2K MMC host
+ controller driver
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
+	Rob Herring <robh+dt@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>, 
+	Conor Dooley <conor+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, wanghongliang@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Disable command queuing on Intel GLK-based Positivo models.
+Hi, Binbin,
 
-Without this quirk, CQE (Command Queuing Engine) causes instability
-or I/O errors during operation. Disabling it ensures stable
-operation on affected devices.
+On Tue, Jun 24, 2025 at 7:58=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn=
+> wrote:
+>
+> Hi all:
+>
+> This patchset introduce the MMC host controller on Loongson-2K series
+> CPUs.
+>
+> They are similar, except for the interface characteristics and the use of
+> DMA engine, specifically, the Loongson-2K0500/Loongson-2K1000 use an
+> externally shared APBDMA engine, while the Loongson-2K2000 uses an
+> internally exclusive DMA.
+>
+> Based on this, I'm splitting the driver into two patches.
+>
+> List of the patchset:
+> Patch1: bindings for Loongson-2K0500/Loongson-2K1000;
+> Patch2: driver for MMC controller using externally shared APBDMA engine;
+> Patch3: bindings for Loongson-2K2000;
+> Patch4: driver for MMC controller using internally exclusive DMA.
+>
+> Thanks.
+>
+> -------
+> V4:
+> patch(2/4):
+>  - Code formatting;
+>  - Fix lkp error
+>     https://lore.kernel.org/all/202506202031.TNchn822-lkp@intel.com/
+> patch(4/4):
+>  - Rename function names:
+>         ls2k1000_mmc_regmap_config -> ls2k0500_mmc_regmap_config
+In Patch-1 there is still ls2k1000_mmc_regmap_config(), others look good to=
+ me.
+Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
 
-Signed-off-by: Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Huacai
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 13a84b9309e0..e3877a1c72a9 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -913,7 +913,8 @@ static bool glk_broken_cqhci(struct sdhci_pci_slot *slot)
- {
- 	return slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_GLK_EMMC &&
- 	       (dmi_match(DMI_BIOS_VENDOR, "LENOVO") ||
--		dmi_match(DMI_SYS_VENDOR, "IRBIS"));
-+		dmi_match(DMI_SYS_VENDOR, "IRBIS") ||
-+		dmi_match(DMI_SYS_VENDOR, "Positivo Tecnologia SA"));
- }
- 
- static bool jsl_broken_hs400es(struct sdhci_pci_slot *slot)
--- 
-2.39.5
-
+>         loongson2_mmc_reorder_cmd_data -> ls2k0500_mmc_reorder_cmd_data
+>         loongson2_mmc_set_internal_dma -> ls2k2000_mmc_set_internal_dma
+>  - Use macro definitions for magic numbers.
+>
+> Link to V3:
+> https://lore.kernel.org/all/cover.1750216134.git.zhoubinbin@loongson.cn/
+>
+> V3:
+> patch(1/4):
+>  - Rename dt-binding file as loongson,ls2k0500-mmc.yaml.
+> patch(2/4):
+>  - Fix lkp error;
+>     https://lore.kernel.org/all/202505130918.uanOGxju-lkp@intel.com/
+>  - Add regulators support for ios ops;
+>  - Add ack_sdio_irq() callback;
+>  - Add MMC_CAP2_SDIO_IRQ_NOTHREAD flag;
+> patch(3/4):
+>  - Add Ack-by tag.
+> patch(4/4):
+>  - Update commit for fix_data_timeout().
+>
+> Link to V2:
+> https://lore.kernel.org/all/cover.1746581751.git.zhoubinbin@loongson.cn/
+>
+> V2:
+> patch(1/4):
+>  - Add reg define for each reg entry.
+>
+> patch(2/4):
+>  - Put all code in the c-file;
+>  - Use mmc_from_priv() instead of host->mmc;
+>  - Use sdio_signal_irq() instead of mmc_signal_sdio_irq();
+>  - Use devm_mmc_alloc_host() instead of mmc_alloc_host();
+>  - Use mmc_regulator_get_supply();
+>
+> patch(4/4):
+>  - Add fix_cmd_interrupt function which is needed by Loongson-2K2000.
+>
+> Link to V1:
+> https://lore.kernel.org/linux-mmc/cover.1744273956.git.zhoubinbin@loongso=
+n.cn/
+>
+> Binbin Zhou (4):
+>   dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC controller binding
+>   mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+>   dt-bindings: mmc: loongson,ls2k0500-mmc: Add compatible for
+>     Loongson-2K2000
+>   mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver
+>
+>  .../bindings/mmc/loongson,ls2k0500-mmc.yaml   |  112 ++
+>  MAINTAINERS                                   |    7 +
+>  drivers/mmc/host/Kconfig                      |   13 +
+>  drivers/mmc/host/Makefile                     |    1 +
+>  drivers/mmc/host/loongson2-mmc.c              | 1029 +++++++++++++++++
+>  5 files changed, 1162 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k05=
+00-mmc.yaml
+>  create mode 100644 drivers/mmc/host/loongson2-mmc.c
+>
+>
+> base-commit: f5c755ef810009b85350884c483705bd04365370
+> --
+> 2.47.1
+>
