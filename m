@@ -1,49 +1,49 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13D9420C000;
-	Fri, 27 Jun 2025 19:32:39 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0600221CFF4;
+	Fri, 27 Jun 2025 20:26:24 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751052760; cv=none; b=FRkGFebyGXMWiEShsEmR+8h/qJziNsrH6Pon6X7MqpGrKH4eUa90MSZHVeL85s1W5mQzZ1rn8W0dJDFDZIZOHUhBAsP/MtpQil9IxNFi4HBuoPDDe2l9ptd/eAg9l/f1wS7waY4oyIKBwgGQhjjkl+aPXMmrx2gYHDpaUYp/Kms=
+	t=1751055985; cv=none; b=HG0zBcmdwLncZO0ILGw/BgAtdD+iwyPWQvEOYMhx899GloyTHMq1aaAlge1MLHJD+lo34vNt/jN+MA4APL6B+nqpzuflh0JcsWzPh+EmocGyFsJGKnKULW4YfaDsYFnRwPufDVsBO8paRp7jkRuqWAbgpH1/ZOWMLGHYxx7Gg4Q=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751052760; c=relaxed/simple;
-	bh=N2LlGZclOXCw7TE47Z4FmdVZl/MFbgtwae0FgUWZL2M=;
+	s=arc-20240116; t=1751055985; c=relaxed/simple;
+	bh=xiXaILIEtvdfMijC9n0nmMDCB4bsijR8COa326qvLUg=;
 	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=Ef3KTRa6N2QbBmvR/D3tDAdqU+aP5bPctMQLaOZ7lubsE9Tv4LJXxS1jpdNMCcMXdFYmCchuTNXMBgrAASmdCUleFa2/FhCXJKzFdss7j1BKpDh8OHZI138ZdLTt8Wb/1xOZl8norinuzpEDACqolP5kFgalS2EpY9jPop3nnv0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZUkCoLLa; arc=none smtp.client-ip=10.30.226.201
+	 Content-Type:Content-Disposition:In-Reply-To; b=V2aVzcdE8i9LY0Nwb+Tce/s+YU7Jmuzsyp2ZP+XcNuImR6Bplx9tH2GeuUdpmXeRcZi+/KrWbHZMhHHhFqHgNOIhqEzUiJ6OG2SZfgbE7S0YM9lGk76/hSlYlZxaH+Ar+5WNCGYFmKqhULTROtVf5FaVQo4SZa/qzxif1Sl4HOM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=PZmoX9n2; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZUkCoLLa"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 612E6C4CEE3;
-	Fri, 27 Jun 2025 19:32:39 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="PZmoX9n2"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6C797C4CEE3;
+	Fri, 27 Jun 2025 20:26:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751052759;
-	bh=N2LlGZclOXCw7TE47Z4FmdVZl/MFbgtwae0FgUWZL2M=;
+	s=k20201202; t=1751055984;
+	bh=xiXaILIEtvdfMijC9n0nmMDCB4bsijR8COa326qvLUg=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-	b=ZUkCoLLaU+FTuL7hpCLEOfDH1TS1ct5XQxvZZ3ato8k61iiYYzo1jMiIU1mP4ENfi
-	 +xjZnNF9JCXUMZohhtLqd6jyEHtZ93jZKH1f0x/yCMB6+Nj1rATZJ/JLTgvsu0Fe02
-	 QkusVYMyS+y7Uj8BoZysWD9dafU68FeBu0oZhnRZRnP4GZ5nC0iduGWsaksCVzu7Vv
-	 2/KtYm/b66UTC4Km9MDhYKEsgsnZ5B2HNu6FSjr+jZF/5fKTlvVOePNEknLwZ9mVfu
-	 b5s+hHSZ4/fdpVSaNXHn/4Sjx9ei4R9iT6oxYthUPP1hz0qGGZe47XMQ+j9AeSv2CU
-	 V6AMNI0c75fXg==
-Date: Fri, 27 Jun 2025 14:32:38 -0500
+	b=PZmoX9n2SxjvsVU0mt0+IyyHnt4zsT02TnmrAcUyPxzY41tnk/I3tkc4hMIUH6BM7
+	 b/PgpUGBNgPUr9/Yf1FlQZ6TssuhvMh/uLaThLaYP2fL5LVH0fhhNVv3IHqCYwI9A8
+	 fkEplNXulb3BJOWdzILpJ9WswhUw5RXjn7p5qNHmaD1pF0TDQoLWGX8Qo+7gyIJmQY
+	 pEd8LB5xo/iMEScxyrZzeJpOnngDVbDxgukHze4KI0SGef1bQiDGhkSER77s0eH9C6
+	 jNg+hp5BXLMZGUedEE7Uy7BwPIP1zIPbzLnUS6o4ewGXqtey5ePfbGIy0tbbv6PGkE
+	 vtfDLiLPSrEYw==
+Date: Fri, 27 Jun 2025 15:26:23 -0500
 From: "Rob Herring (Arm)" <robh@kernel.org>
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Conor Dooley <conor+dt@kernel.org>,
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
-	Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
-	Ulf Hansson <ulf.hansson@linaro.org>,
-	Magnus Damm <magnus.damm@gmail.com>,
-	Biju Das <biju.das.jz@bp.renesas.com>, linux-kernel@vger.kernel.org,
+To: Binbin Zhou <zhoubinbin@loongson.cn>
+Cc: devicetree@vger.kernel.org, wanghongliang@loongson.cn,
+	Huacai Chen <chenhuacai@loongson.cn>,
+	Rob Herring <robh+dt@kernel.org>,
 	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	linux-mmc@vger.kernel.org,
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and
- RZ/N2H support
-Message-ID: <175105275812.4046920.1856778113483721034.robh@kernel.org>
-References: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+	Xuerui Wang <kernel@xen0n.name>,
+	Binbin Zhou <zhoubb.aaron@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Huacai Chen <chenhuacai@kernel.org>,
+	Conor Dooley <conor+dt@kernel.org>, linux-mmc@vger.kernel.org,
+	loongarch@lists.linux.dev
+Subject: Re: [PATCH v4 1/4] dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC
+ controller binding
+Message-ID: <175105598309.27283.7574752844130118767.robh@kernel.org>
+References: <cover.1750765495.git.zhoubinbin@loongson.cn>
+ <949c55be120a806ea3d74b47fa2cc96ced2905fc.1750765495.git.zhoubinbin@loongson.cn>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -52,28 +52,19 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <949c55be120a806ea3d74b47fa2cc96ced2905fc.1750765495.git.zhoubinbin@loongson.cn>
 
 
-On Tue, 17 Jun 2025 17:49:14 +0100, Prabhakar wrote:
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On Tue, 24 Jun 2025 19:58:10 +0800, Binbin Zhou wrote:
+> Add the Loongson-2K SoC's SD/SDIO/eMMC controller binding with DT schema
+> format using json-schema.
 > 
-> Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
-> (a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
-> the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
-> allowing reuse of the existing driver without modifications.
-> 
-> Update the binding schema to reflect differences: unlike RZ/V2H(P),
-> RZ/T2H and RZ/N2H do not require the `resets` property and use only a
-> two clocks instead of four.
-> 
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
 > ---
-> v1->v2:
-> - Added the high speed clock to the clocks list.
-> ---
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 85 ++++++++++++-------
->  1 file changed, 53 insertions(+), 32 deletions(-)
+>  .../bindings/mmc/loongson,ls2k0500-mmc.yaml   | 69 +++++++++++++++++++
+>  MAINTAINERS                                   |  6 ++
+>  2 files changed, 75 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k0500-mmc.yaml
 > 
 
 Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
