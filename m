@@ -1,33 +1,73 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8EC1A2E7625;
-	Fri, 27 Jun 2025 14:50:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79174E571
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:32 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751035827; cv=none; b=MF5Mbys5dsOUPFQVj+nMU6eCl/Rd3RPkuRyf+KIVWkZDbZWJ8x5/BoXpuzRm/g25ZSvnKsJtTi1523iTP6u6C19JdcuHkQuK6hK7H0psaMKSfOVs3zmmgIsC5deKUPxG3dgJaOa4W944k3jdoM02YKpTWJwCokrxfF1P4XZJjws=
+	t=1751038474; cv=none; b=FD0fRhYmheXhM5z+d8G39WZx42z78Q713a3aRStMgkmnpVIZovp00Ll/eby4cryh6YRu9a6mT/8KmYxGIleXgrLyjAk0FjEbupUm2SBv+PaRI0iK5/Cd/0iNrafdxZ6x+KPS+JNoZvOlUU1V2gItEy9m0iuVA76MC1f6B71PIPw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751035827; c=relaxed/simple;
-	bh=aklOxKn5K1qbnDT1A0s34OV2xT/E3aOxdSRZaysAFI8=;
+	s=arc-20240116; t=1751038474; c=relaxed/simple;
+	bh=Ew8lpjg2KGw8RUtsdIdGkXQu5umyWwe0BTLTaVIb67w=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=Mey5StEIRvzIU3KwNwmf7FrgUCHnE8A8y8rLiMOxkCenaCASVY/yZebkw7MzI0YCykCcwClTiyjaJe+g8Sj5lpkKztzDJPJc/u3WQPdhbmJS/OrbRBtWOL2TFNFRgIrTzWfYeUtqKi/+VNZe65vRKnhGX+Kr7bjH2CCWYeupCxQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=luh7io+v; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=PubGX2aDgrRmuhYGKP0QwpsxOOT4npnJZ6PVtVxyV8qilBrGLaWA3APd/CFAhwfgJvmN151/ECY8mwH/MTmi+7l9u7r4SOPpZnqMZ5UL/9vXDCC+D1ms+n78TIwvKmhqJdygu85who9ikOXEhjKq3DUI5SkRtpPXd0WRyAHLTkk=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ZIh7/9dP; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="luh7io+v"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 64DF9C4CEF1;
-	Fri, 27 Jun 2025 14:50:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751035827;
-	bh=aklOxKn5K1qbnDT1A0s34OV2xT/E3aOxdSRZaysAFI8=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=luh7io+vB8HPILa9XHwV/e0UFC4RpcBJwS9l1F7vhbzNpKUyyDnzrC9rV6jlQNhnY
-	 zy+peYkcQcEk9ys/JGdIuiYlpB45HvdHwvbMQr7HkJGpW15tGCjjSybu/VDFPpysd1
-	 vieV8NUULFMWbIge4DeXH1oM0nO42B83Mf2+5d2pDQHGKSPInWpmDup79r0TeQkOw4
-	 EP1+Si7d/uk+IWrH6q5k5eMU+n8fO2aBqJz/AHr0rpXvsKtm4+TVfB9Ab3MuIgnnfz
-	 /1+Ms0hpyyYRGzyO6IWl9YofEV28jDExrj8L/2heEZBXoKeNa6UlRf1cSQPxHX8j9b
-	 qOn1iHpjhbsZQ==
-Message-ID: <627428b1-7381-44bf-9d66-f185f2e216f6@kernel.org>
-Date: Fri, 27 Jun 2025 16:50:17 +0200
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ZIh7/9dP"
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55RCLKd9014507
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	fhpcGE0kY2U2qHSOUrNH4gIXVYCbpgzCRlKlqKyiksA=; b=ZIh7/9dPTaRIKAbz
+	qtcRTfYJUmfDMD/1CB8sEgyGGumkjtTwe+1FCskmH91irz9aLvC7+w8nrjV0yIl5
+	QB0xqTRmG3P3Ft7yR9hK7RMWZYwi2POUq3sly/dUJ48WJWKJ9oC/oYfZUNb7O7vm
+	LRWccN5ciTm5RhWLpEa4ACEx19S+i4nLKISatypp1vBgmGk4bGCx72jy9YNPJfE0
+	o0qY4acjP6oYf70tubxgG7+gVbaXm9gWVcLv0iapLnGrDbi7elYbdiW8YQARPy4E
+	GwNMvpxwKqqfzTXYEUxP9yi+/mXni1WFKeH7ELAXBg4/7DE74URNzH7E2BxvGiH2
+	99Dl+w==
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47fbm25wbb-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:31 +0000 (GMT)
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-7d0979e6263so3117685a.2
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 08:34:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1751038470; x=1751643270;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=fhpcGE0kY2U2qHSOUrNH4gIXVYCbpgzCRlKlqKyiksA=;
+        b=HLg7n2psbhbpDvq9RAK26oE6Sa/gLsmnYsDXsSeapuQ6zckgfsc5ukSuzhucYo+dQd
+         hHyHRFMpT10KiAjSC7N04bNq6kImrZzv5qKe9Ujnl0DNc9sSgimgy9+LqnKCvRYICrmG
+         4q+EvDALJAN4S30PtUD/3Maqscu6T1JDGfm2rgcm7g7xDWcZvsfm7GejYUaN6ONk4B4r
+         UrFAHABOog8zsKGJJYC1YB+nioPTOARA3IXsfxobveAxmOgJucCjCEYopKwnRDg0QdB0
+         BoUsEC22obebymvjOycHHjfcs+SEvuFULAoziRrcCR37a9S+eA/x4ARfplPPebxz5lF7
+         uIiw==
+X-Forwarded-Encrypted: i=1; AJvYcCW/J0FRBPB6qKt7pRXJMBf1LV2cquSDAfZi/mEJxWV2CZ+LJDsfshfIaVZn9YbB9cJQDYDJq1mw4Pk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw4b/mBh2yiSiSfr6R04CkyjeR8WDbDJI0dApa9jMfxFodinqJe
+	LPp9ew22XbaEKEXprEeVxG9oYHPt0Bbn+RZALJtsDtPQliEfKsEd5LA8N7T2cGlP8lYeHKi92Sx
+	LUkuJvnEb12GWXOG6vUBiWhiMtsKeQW7Uvn6uy673TtdAWXma8svYUlC5ssGLtTo=
+X-Gm-Gg: ASbGnctaBkhfp4jpo9MHdOJ5fuAw/5a3lm6+llvl2z/BGrIjthXczC3kvDCuCz3WiKj
+	7CS7xShMzC1az90XKpZVzaQRLWGOzxZtBPHdVofR1fr4s4ZFqQuiS5bW/Y2XmQvuVxC6d07wfnZ
+	cOhqkDjLFwm6SDgHTcTNaUZOWl3H5wmgDYXvgIyUputrlD/aDkBWDhALH372r5pai3UGOgs+4j+
+	+hD8zuHA3cE6mrcDHfT7NUgjYpy6SFTBulpFHPwoeXiZDjbV24FXPpkKzpNGKn1L+sXnQ/1D11f
+	j6v6ZexGFfwfSKibIy9VaKXQh2dnED8ZTtwffiUc8xQrMryRXuKjwJx8ivPjTxOIaeUVhAtb2RP
+	jBl0=
+X-Received: by 2002:a05:620a:4390:b0:7c0:bc63:7b73 with SMTP id af79cd13be357-7d443966417mr201233785a.13.1751038470191;
+        Fri, 27 Jun 2025 08:34:30 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHzOTtjkZGz3phOnalpunb7y20OgdgwVxcjlA9JNDAl2YYT7eAuxSBmhUwNsqtuPUIJtvAnnQ==
+X-Received: by 2002:a05:620a:4390:b0:7c0:bc63:7b73 with SMTP id af79cd13be357-7d443966417mr201228685a.13.1751038469653;
+        Fri, 27 Jun 2025 08:34:29 -0700 (PDT)
+Received: from [192.168.143.225] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae35363b244sm142288066b.30.2025.06.27.08.34.25
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 27 Jun 2025 08:34:28 -0700 (PDT)
+Message-ID: <3fbae47b-d20d-426b-a967-b584e32b8c6e@oss.qualcomm.com>
+Date: Fri, 27 Jun 2025 17:34:24 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,125 +75,166 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
- Ram Prakash Gupta <quic_rampraka@quicinc.com>,
- Sachin Gupta <quic_sachgupt@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>,
- Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com,
- quic_mapa@quicinc.com, quic_narepall@quicinc.com, quic_nitirawa@quicinc.com,
- quic_sartgarg@quicinc.com
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
- <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
- <abdde4ff-eae2-44c4-8608-89c762790549@kernel.org>
- <99b9e6aa-36b4-456c-ba46-6e1207cc1019@oss.qualcomm.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH 14/14] arm64: dts: qcom: Add The Fairphone (Gen. 6)
+To: Luca Weiss <luca.weiss@fairphone.com>, Will Deacon <will@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Robert Marko <robimarko@gmail.com>,
+        Das Srinagesh <quic_gurus@quicinc.com>,
+        Thomas Gleixner
+ <tglx@linutronix.de>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Amit Kucheria <amitk@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+ <20250625-sm7635-fp6-initial-v1-14-d9cd322eac1b@fairphone.com>
+ <4200b3b8-5669-4d5a-a509-d23f921b0449@oss.qualcomm.com>
+ <DAXA7TKVM4GI.J6C7M3D1J1XF@fairphone.com>
+ <6d4e77b3-0f92-44dd-b9b0-3129a5f3785b@oss.qualcomm.com>
+ <DAXEA131KUXZ.WTO7PST1F3X6@fairphone.com>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <99b9e6aa-36b4-456c-ba46-6e1207cc1019@oss.qualcomm.com>
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <DAXEA131KUXZ.WTO7PST1F3X6@fairphone.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
+X-Authority-Analysis: v=2.4 cv=YYu95xRf c=1 sm=1 tr=0 ts=685eba07 cx=c_pps
+ a=HLyN3IcIa5EE8TELMZ618Q==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=huVnaSGCcg0LVUp1CDwA:9
+ a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22
+X-Proofpoint-GUID: GmHeU22tpexLY06NmIuLaG2CGBegAoyX
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI3MDEyNSBTYWx0ZWRfX51TjPImhucZp
+ gDRS7xKmL4a2o9B7GkFZMRz/nTOhjLQrNieyXFtmqwWGZng204GCc0JJt/bQsJ36lFF2xJlHmFv
+ ffSRFYzcTPQahk/9OvwwJ47UJYbZ7b3E1k3Wl/U5iX+EMzcQnOI+hq9PoHKJKbbUueyos0LH0dE
+ O0U1NFpFAYTyR9ZcQNpjoom8GIxa67iMW31VQkmJ56d2zSLCnBqjFJOIb8YxY59o3MpXgfEQqnt
+ 2S8oVXwq5DZNLKEJEckhXNg18fxkvN61q7UcS+14tGr8Akorw2li4QYAgr5cKds2fVaWTqsTsYJ
+ tgQzY9O8c03UGtBigLtSpVxNL0OT7+9f7DK634u4Hd54RGBZ3U/w2dg13q/Ul7i0B8isuFcBQbE
+ dOjQ3W0FoIS05bkYBANqFhM+RS2Nou+hL5GM2oOzn1sQSV6DxEX7ZDJBp7QGaMICUM+I8ZRJ
+X-Proofpoint-ORIG-GUID: GmHeU22tpexLY06NmIuLaG2CGBegAoyX
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-06-27_04,2025-06-26_05,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ malwarescore=0 adultscore=0 spamscore=0 impostorscore=0 suspectscore=0
+ lowpriorityscore=0 priorityscore=1501 phishscore=0 mlxlogscore=999
+ clxscore=1015 mlxscore=0 bulkscore=0 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2506270125
 
-On 27/06/2025 15:57, Konrad Dybcio wrote:
-> On 6/26/25 7:42 PM, Krzysztof Kozlowski wrote:
->> On 26/06/2025 16:16, Ram Prakash Gupta wrote:
->>> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
->>>> On 22/01/2025 10:47, Sachin Gupta wrote:
->>>>> Document the 'dll-hsr-list' property for MMC device tree bindings.
->>>>> The 'dll-hsr-list' property defines the DLL configurations for HS400
->>>>> and HS200 modes.
->>>>>
->>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>>> ---
->>>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>>>  1 file changed, 5 insertions(+)
->>>>>
->>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>> index 8b393e26e025..65dc3053df75 100644
->>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>> @@ -133,6 +133,11 @@ properties:
->>>>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>>>      description: platform specific settings for DLL_CONFIG reg.
->>>>>  
->>>>> +  qcom,dll-hsr-list:
->>>>> +    maxItems: 10
->>>>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>>> uint32 has only one item. Anyway, there is already DLL there, so don't
->>>> duplicate or explain why this is different. Explain also why this is not
->>>> deducible from the compatible.
+On 6/27/25 4:44 PM, Luca Weiss wrote:
+> On Fri Jun 27, 2025 at 4:34 PM CEST, Konrad Dybcio wrote:
+>> On 6/27/25 1:33 PM, Luca Weiss wrote:
+>>> On Wed Jun 25, 2025 at 4:38 PM CEST, Konrad Dybcio wrote:
+>>>> On 6/25/25 11:23 AM, Luca Weiss wrote:
+>>>>> Add a devicetree for The Fairphone (Gen. 6) smartphone, which is based
+>>>>> on the SM7635 SoC.
+>>>>
+>>>> [...]
+>>>>
+>>>>> +	/* Dummy panel for simple-framebuffer dimension info */
+>>>>> +	panel: panel {
+>>>>> +		compatible = "boe,bj631jhm-t71-d900";
+>>>>> +		width-mm = <65>;
+>>>>> +		height-mm = <146>;
+>>>>> +	};
+>>>>
+>>>> I haven't ran through all the prerequisite-xx-id, but have
+>>>> you submitted a binding for this?
 >>>
+>>> Actually not, kind of forgot about this. I believe I can create a
+>>> (mostly?) complete binding for the panel, but this simple description
+>>> for only width-mm & height-mm will differ from the final one, which will
+>>> have the DSI port, pinctrl, reset-gpios and various supplies.
+>>>
+>>> I think I'll just drop it from v2 and keep it locally only, to get the
+>>> simpledrm scaling right.
 >>
->>
->> Timeline still amazes me. I will be grumpy on this thread.
->>
->>> I will change it to reflect array from uint32.
->>> There is change with artanis DLL hw addition where it need total of 5 entries
->>> (dll_config, dll_config_2, dll_config_3, dll_usr_ctl, ddr_config)
->>> for each HS400 and HS200 modes, hence the new addition in dt. And these values
->>> are not fixed and varies for every SoC, hence this needs to be passed through
->>> dt like it was passed earlier for qcom,dll-config & qcom,ddr-config.
->>
->>
->> Eh, no. That's not a valid reason. It's still SoC deducible. Don't bring
->> your downstream practices here, but remove EVERYTHING from downstream
->> and start doing things like upstream is doing.
+>> Yeah I think that'd be best in general
 > 
-> QC SoCs have between 0 and 4 SDHCI instances, each one potentially requiring
-> different tuning, let's keep this data in DT
+> Ack
+
+[...]
+
+>>>>> +&pm8550vs_d {
+>>>>> +	status = "disabled";
+>>>>> +};
+>>>>> +
+>>>>> +&pm8550vs_e {
+>>>>> +	status = "disabled";
+>>>>> +};
+>>>>> +
+>>>>> +&pm8550vs_g {
+>>>>> +	status = "disabled";
+>>>>> +};
+>>>>
+>>>> Hm... perhaps we should disable these by deafult
+>>>
+>>> Do you want me to do this in this patchset, or we clean this up later at
+>>> some point? I'd prefer not adding even more dependencies to my patch
+>>> collection right now.
+>>
+>> I can totally hear that..
+>>
+>> Let's include it in this patchset, right before SoC addition
+>> I don't think there's any pm8550vs users trying to get merged in
+>> parallel so it should be OK
+> 
+> Okay, can do. Disable all of them (_c, _d, _e, _g), and re-enable them
+> in current users? I assume there might also be boards that only have
+> e.g. _d and no _c.
+
+I suppose it's only fair to do so, in line with
+
+d37e2646c8a5 ("arm64: dts: qcom: x1e80100-pmics: Enable all SMB2360 separately")
 
 
-OK, this should be explained in commit msg.
+>>>>> +&usb_1 {
+>>>>> +	dr_mode = "otg";
+>>>>> +
+>>>>> +	/* USB 2.0 only */
+>>>>
+>>>> Because there's no usb3phy description yet, or due to hw design?
+>>>
+>>> HW design. Funnily enough with clk_ignore_unused this property is not
+>>> needed, and USB(2.0) works fine then. Just when (I assume) the USB3
+>>> clock is turned off which the bootloader has enabled, USB stops working.
+>>
+>> The USB controller has two possible clock sources: the PIPE_CLK that
+>> the QMPPHY outputs, or the UTMI clock (qcom,select-utmi-as-pipe-clk).
+> 
+> So okay like this for you, for a USB2.0-only HW?
 
-Best regards,
-Krzysztof
+Yeah, maybe change the comment to something like:
+
+/* USB 2.0 only (RX/TX lanes physically not routed) */
+
+to avoid getting this question asked again
+
+>> Because you said there's no USB3, I'm assuming DP-over-Type-C won't
+>> be a thing either? :(
+> 
+> Yep. I'd have preferred USB3+DP as well since it's actually quite cool
+> to have with proper Linux. On Android, at least on older versions it's
+> barely usable imo. Can't even properly watch videos on the big screen
+> with that SW stack.
+
+Bummer! Not something we can change though :(
+
+Konrad
