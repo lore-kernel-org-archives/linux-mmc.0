@@ -1,164 +1,174 @@
-Received: from fout-a5-smtp.messagingengine.com (fout-a5-smtp.messagingengine.com [103.168.172.148])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F0D0A2F1FDF;
-	Fri, 27 Jun 2025 13:44:13 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.148
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 6D54C2DA745
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 13:58:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751031856; cv=none; b=IXM+g/fwQc1X7wneJeNHfQPG6+WG0JEkm43Pz71X00ymctD7ot0fdO9DwSkrWRhav2Y/RlTOkSeXSoy0zR0uGiqFbxnzpSRwaAiBWSakmkVfYKBoPca9ghMR1WTMe47qP6qazM1Ausu8KdYxprkKaFWSv+QZNpvYJvDPRmyTExU=
+	t=1751032687; cv=none; b=Hg5Ry7GAJ1PxX99+YKY8g13Fg4ZDWEZY4l9BoksOiO+auGa9NH3clbAYf9wXK0wpxLbh2nMZ0AhyLoUdZo/ly7lhjMmujTK81X9MjTGIYPcPTJxLQe2dA5Gc/bt0o3AC2uHepSqJ1nQopOF4jtxm9igk/gmc4kmIR86bM8IfjWM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751031856; c=relaxed/simple;
-	bh=ZOXAew4DUwdo/+jR21OmX71rRnDo1/+IYO9r362NZFM=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=gcamENosed1mOjKoBSvaUwzgq00NcaMA8vE7bOGIyYJW9/isvnxncOOdjYu547He3l23eHDe8nMAVOyyPnQeq9nrk9z6trgG50BfpT3kxafMpl6Ac+MB7QL6j3E6k+7N7QwYgvu8yO+M4TR71s5lb9KIVIgzgtta5oWg1KCPBfg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=Zxk6VSsd; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=YMlvIMbO; arc=none smtp.client-ip=103.168.172.148
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1751032687; c=relaxed/simple;
+	bh=PbW+EBtMztzzi8ICMRD/REkIEiRuhchOsk7eMRuZuBo=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=PqSwxRlaE/PZtVtg77QVEswUnfOtimtLCJC4F+p43Xx2fGuGChCHaKk8HSJRJUDKnWK9pcr3SqQzo1pZ8Kijwvxe/+BzWJPvrDnDk/sulpp7tFP0dfYAFzz9TPsvBiDznT5GcAnO6GkTNOtQkyu1xZ2m55I3sQBvhrrbGv8x7Ds=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=p6mlJ+Z8; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="Zxk6VSsd";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="YMlvIMbO"
-Received: from phl-compute-05.internal (phl-compute-05.phl.internal [10.202.2.45])
-	by mailfout.phl.internal (Postfix) with ESMTP id EC73AEC02AB;
-	Fri, 27 Jun 2025 09:44:12 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-05.internal (MEProxy); Fri, 27 Jun 2025 09:44:12 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1751031852;
-	 x=1751118252; bh=MwYMREdsoquOfaH8DwftQzll55uDY1tNpCkxnAXYMU0=; b=
-	Zxk6VSsdo1LsAyRcgfOPdlN6RiCgCoP7JgQDkhQXuvUusPfN3QyZ4l6kCYtkbtMp
-	DjS9G6iNLmvC660VnspQ3dxD+qH/iotPzz8R9AQH10Bs+C+wLwuKKazEWWTVVNlF
-	AvRlbg2FHhq+D3X2fl9KsYcofbNxo+xD3cba4tortPc86Idy9DLgNdaa5UaAvwwd
-	n+QT0FN7wqRPTQFsYb8+d7DTF8E0qhV3Rl9SMLkyLxpu8QuPIltED8QznFyPiY5g
-	dLJCH+7DTM8o9c3HJAqdODDYnqRiwSSEFCFnwj7SGevW8D4BUijNl5HqCNfHk8qf
-	HYy/qW96uLDjhVOO/tMaZw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1751031852; x=
-	1751118252; bh=MwYMREdsoquOfaH8DwftQzll55uDY1tNpCkxnAXYMU0=; b=Y
-	MlvIMbOlITqfMyLwBykRnbA/BXk1s7ugPjpkaoqqGE6i/JOQELaKG1PbUbm46ycl
-	LvW51Chgb04N6XOX8Gkc0yvEMn1eYuVuIZbV4bWZ2E9Not9loXiD2nOUTeT37EHp
-	39mrnkrpM+xqZiCGdGA9jhBaOo9sWHi12jxfQVeYc8NyPxXN5sqGXwSsVUdq/8DZ
-	JHZs0jRM79xueSuA4hoR2bCDjVWNeFcdt+vMWD+Qp2g3LTZIPjxqZVcNdIdknM7s
-	9fuOUSkcDH9z/ioBsAoEpx3Q+q2iuFv65IVWdABW40LgGuRwxgC4ksOO3bgHMthr
-	R+PoBq8odXtudeooO4RfQ==
-X-ME-Sender: <xms:KqBeaPU8h5RoYcHy4fl35wVMfqSg_k9j8UKaiyWHDPq8kRO_4WOK_w>
-    <xme:KqBeaHkuK66dRi-PToEoZ-i9j4b_XxgmM7e_d2liIJKivyDT_B6i7mzb4IFN4yR9i
-    y42E-V6fptTjA51iEY>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdefvdduucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfurfetoffkrfgpnffqhgenuceurghi
-    lhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurh
-    epofggfffhvfevkfgjfhfutgfgsehtqhertdertdejnecuhfhrohhmpedftehrnhguuceu
-    vghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvghrnh
-    epvdfhvdekueduveffffetgfdvveefvdelhedvvdegjedvfeehtdeggeevheefleejnecu
-    vehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghrnhguse
-    grrhhnuggsrdguvgdpnhgspghrtghpthhtohepudegpdhmohguvgepshhmthhpohhuthdp
-    rhgtphhtthhopehgohhrughonhdrghgvsegsshhtrdgrihdprhgtphhtthhopegsshhtqd
-    huphhsthhrvggrmhessghsthgrihdrthhophdprhgtphhtthhopegrnhhgvghlohhgihho
-    rggttghhihhnohdruggvlhhrvghgnhhosegtohhllhgrsghorhgrrdgtohhmpdhrtghpth
-    htohepsggvnhdrtghhuhgrnhhgsehgvghnvghshihslhhoghhitgdrtghomhdrthifpdhr
-    tghpthhtohepvhhitghtohhrrdhshhhihhesghgvnhgvshihshhlohhgihgtrdgtohhmrd
-    htfidprhgtphhtthhopehgvggvrhhtodhrvghnvghsrghssehglhhiuggvrhdrsggvpdhr
-    tghpthhtohepphgsrhhosghinhhsohhnsehgmhgrihhlrdgtohhmpdhrtghpthhtohepsh
-    hhrghntghhuhhnuddvudeksehgmhgrihhlrdgtohhmpdhrtghpthhtoheprggurhhirghn
-    rdhhuhhnthgvrhesihhnthgvlhdrtghomh
-X-ME-Proxy: <xmx:KqBeaLbXD7Fuyd7wgKIt6ZtxHzzvwSeXxSYnrf5Rv4AEjO4vCXwbKw>
-    <xmx:KqBeaKXIN5Qh3uGeBHX7HTGVVr6YYXhSbsZUpbc5AUUvfpQwq9bh8Q>
-    <xmx:KqBeaJlwZIR_cY_XjkhIljx9f9M8MWUGjfIMwjnO8w95Z6F533yXew>
-    <xmx:KqBeaHcD4JdP6c0Wcair0bofHudvv6yK1Zz0267UNbRtc_cpsv0dqQ>
-    <xmx:LKBeaKZ1JFmVwyzmIn7NwZV1Eyk_ijJFUDDfHY-n-OcH3z8pBpg73cbY>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id DA76D700065; Fri, 27 Jun 2025 09:44:10 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="p6mlJ+Z8"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55RBVbTU009539
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 13:58:05 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	8f9O0TugmOaHYNQ6bPlsLyE5Zw/b0P1alMxsrUiNUbk=; b=p6mlJ+Z8/Mn9RTiu
+	zP89Q+yg5MlMjJgCTmhPia3MawoftVFvRTBG3Cbu6lTTeW3nSRmHLOfV/eAzBKJS
+	l/z4dfdNOCuu/drw2CPhWpTiu6a2LIaBEk/oWRIIDNKRQzisZyR7owTrWqZLaTOl
+	sOqnhG62sCoxduAS1OXEi9XA/2qsHiWc8QK4p9TGOaFVlWNYy2XhaRHQLiNsPK+V
+	Y8AijlKN+LUb+3446GZImtZAwfpYtiS9n24FPRw7BLkxCL97biOxqR1Cxvj2oqJq
+	mLyQWuecK1mxYDaPlrxdsHs6zQwxLgm/QDYEj/c3FCPKKUpi8GbyEDWbSCSrF0ip
+	NdNnVA==
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47f4b46y7e-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 13:58:05 +0000 (GMT)
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-7d097083cc3so47144485a.3
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 06:58:05 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1751032684; x=1751637484;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8f9O0TugmOaHYNQ6bPlsLyE5Zw/b0P1alMxsrUiNUbk=;
+        b=EOFN6sQbiFipFN3mZNEs0B+Yyv6pMMqUzm2FdOQQcXCtAhjA7G3XAFtQ5QtCm9m5J/
+         R6zUyVJZmA8S1nEZD/Wpo2h2ZKpPRf3mgLby7X0tIczD02g01hgvW1YWeZLfxEaIeFcq
+         y9A8/nCepaF8d95T7qDI7BqTvpa8GxGPcHeJgqOG0wSRSN74VmsAI8bK0p63CkATWGtR
+         et4kjYMkGfBT0N/QAMa8d02h6OJzLXVd2CmCP6KnfkGCsWp+/m0RhYELMH+El57dTo88
+         pxFTx32DwyrkwEW2Mz0Jje54/2Tgq1U18tYIugHhkhLHrtfG4YiPZnoph7WfVvedHXl1
+         jU6w==
+X-Gm-Message-State: AOJu0Ywk6osA2xhv23J6tJqgqVKju4WSRVDQog7u2oPlS/0XqK6MDsJG
+	uwrlRS4AlJBh15ItnHwhr6/lnc2R8myG0O5zrOxIRedT16fUWbCJfcurVaLN0250NTmkUMOl8F1
+	ajtWrOduSCW69lkcngRDGKEGEISM+hk5xjdh57ktzPquuJ2YZVsr2ArXBgkBSrBg=
+X-Gm-Gg: ASbGnctU2VPkCexMawbn0rvXRrvgem/r+471lHiBob4v4uGGy2Q3T8gtreyX+cqpzDN
+	1ZeE+kcg82B3ELwCDeDIO0tSz7kw4B2OffCQKZjKJR2YqEBBGyu+dGU9H525cfo4l3ch5yKycen
+	pPMYxdfWizVKFJndXyOe6U1i2WLeb6jhN0K0j7h0aaTNpyntcP5DSsvF3imIZJTXMgAOwOmfcQP
+	urywwhxzlXp0Jw9nwyYzb8HLp0Lx4gZ8HeAy9GCeZove2rKJY6tR/b5pkC3zFmqa3WcaeU55Dxn
+	EcDAzudNNQgi0opH0B+XH8OIdmGay6rAZaiT3YidRpHxlRYOPcBqDPoTAJc0mnaV9umPX8rkDae
+	Oh+A=
+X-Received: by 2002:a05:620a:4606:b0:7cd:14b:554b with SMTP id af79cd13be357-7d4439a5828mr185946785a.10.1751032683934;
+        Fri, 27 Jun 2025 06:58:03 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IEsqCNx5b/ikeBt7ufEGaLEu1rBhGNo0bQDVX9XSB7OyW/vrELCoJjxuw9x+u5urdhndBoKUA==
+X-Received: by 2002:a05:620a:4606:b0:7cd:14b:554b with SMTP id af79cd13be357-7d4439a5828mr185943185a.10.1751032683377;
+        Fri, 27 Jun 2025 06:58:03 -0700 (PDT)
+Received: from [192.168.143.225] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae35363b1fdsm131221366b.14.2025.06.27.06.58.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 27 Jun 2025 06:58:02 -0700 (PDT)
+Message-ID: <99b9e6aa-36b4-456c-ba46-6e1207cc1019@oss.qualcomm.com>
+Date: Fri, 27 Jun 2025 15:57:59 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: Tedb66c89affcaf60
-Date: Fri, 27 Jun 2025 15:43:50 +0200
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "Adrian Hunter" <adrian.hunter@intel.com>,
- "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>,
- "Ulf Hansson" <ulf.hansson@linaro.org>, "gordon.ge" <gordon.ge@bst.ai>
-Cc: bst-upstream <bst-upstream@bstai.top>,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
- linux-kernel <linux-kernel@vger.kernel.org>,
- "Geert Uytterhoeven" <geert+renesas@glider.be>,
- "Victor Shih" <victor.shih@genesyslogic.com.tw>,
- "Shan-Chun Hung" <shanchun1218@gmail.com>,
- "AngeloGioacchino Del Regno" <angelogioacchino.delregno@collabora.com>,
- "Peter Robinson" <pbrobinson@gmail.com>,
- "Ben Chuang" <ben.chuang@genesyslogic.com.tw>
-Message-Id: <5c0909b4-f3f6-401d-9a17-8560c5a1d7c0@app.fastmail.com>
-In-Reply-To: <b6bf0b53-8812-4099-b5d3-39e7fd264777@intel.com>
-References: <20250528085453.481320-1-yangzh0906@thundersoft.com>
- <87619781-629b-4393-8c14-b34483a7c734@intel.com>
- <202506271822530452465@thundersoft.com>
- <b6bf0b53-8812-4099-b5d3-39e7fd264777@intel.com>
-Subject: Re: [PATCH v1 5/9] mmc: sdhci: add Black Sesame Technologies BST C1200
- controller driver
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
+ HS200 modes
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Ram Prakash Gupta <quic_rampraka@quicinc.com>,
+        Sachin Gupta <quic_sachgupt@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_mapa@quicinc.com,
+        quic_narepall@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sartgarg@quicinc.com
+References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
+ <20250122094707.24859-2-quic_sachgupt@quicinc.com>
+ <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
+ <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
+ <abdde4ff-eae2-44c4-8608-89c762790549@kernel.org>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <abdde4ff-eae2-44c4-8608-89c762790549@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI3MDExNSBTYWx0ZWRfXw9LGITQfYBgo
+ m53QnbP4LjoiliepqQc8DHlIU0+MfO45gGeYJ6ok2Ixj7OzrBPsr5TLFIeQgsxI0leBz2kgcUaO
+ Ihh/W0Keek0O69Bku8/KCNhVQmUT+mrprJnoKd4ltLACUGvW9FJEnVcMvwrhr46zgGNg20/LUeE
+ utFV7vaNMpo0dAEAbnNYD6av7MCuCYX5nce1PYzr1RAgYnjaO6yz9PpZ7BniaIzzt3xhddPYOal
+ P0A001zZvxXk9re2PbJLhKGKxRupcOr51wb0qc90iTX3HBKJ4ggaI80Wa3mu8BZwLKr1/pDDHyX
+ /k4+BHtP7QAUuicGQmxylIj8wH9cs5d7EBuwObDvZ7olmP+fqQPvfoxgWFpYlbCYeOoPnaKCuJi
+ D6nT+wwm6EQP2t0g+OqLCFV6fT5RIhHXHA0KKsSJ46w18E5v8qEZfPblnBSg2GbmerxTzPRf
+X-Proofpoint-ORIG-GUID: TJL4Hru9ewCYxkV6WnyJBB6obQ_tiXni
+X-Proofpoint-GUID: TJL4Hru9ewCYxkV6WnyJBB6obQ_tiXni
+X-Authority-Analysis: v=2.4 cv=A8BsP7WG c=1 sm=1 tr=0 ts=685ea36d cx=c_pps
+ a=HLyN3IcIa5EE8TELMZ618Q==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8 a=v25VQKkRDONtiw5Uw7IA:9
+ a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-06-27_04,2025-06-26_05,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 mlxlogscore=999 malwarescore=0 spamscore=0 bulkscore=0
+ phishscore=0 adultscore=0 impostorscore=0 suspectscore=0 mlxscore=0
+ clxscore=1015 priorityscore=1501 classifier=spam authscore=0 authtc=n/a
+ authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2506270115
 
-On Fri, Jun 27, 2025, at 15:19, Adrian Hunter wrote:
-> On 27/06/2025 13:22, yangzh0906@thundersoft.com wrote:
->> Dear=C2=A0Mr. Hunter,
->>=20
->> Our platform supports 64-bit physical addressing, but the eMMC contro=
-ller's SRAM-based DMA engine is constrained to a 32-bit address space.=C2=A0
->> When using the standard SDHCI interface, which allocates DDR-based DM=
-A buffers with 64-bit addresses, thedma_map_single() operation fails=C2=A0
->> because the DMA engine cannot handle addresses beyond 32 bits.
+On 6/26/25 7:42 PM, Krzysztof Kozlowski wrote:
+> On 26/06/2025 16:16, Ram Prakash Gupta wrote:
+>> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
+>>> On 22/01/2025 10:47, Sachin Gupta wrote:
+>>>> Document the 'dll-hsr-list' property for MMC device tree bindings.
+>>>> The 'dll-hsr-list' property defines the DLL configurations for HS400
+>>>> and HS200 modes.
+>>>>
+>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
+>>>> ---
+>>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
+>>>>  1 file changed, 5 insertions(+)
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> index 8b393e26e025..65dc3053df75 100644
+>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+>>>> @@ -133,6 +133,11 @@ properties:
+>>>>      $ref: /schemas/types.yaml#/definitions/uint32
+>>>>      description: platform specific settings for DLL_CONFIG reg.
+>>>>  
+>>>> +  qcom,dll-hsr-list:
+>>>> +    maxItems: 10
+>>>> +    $ref: /schemas/types.yaml#/definitions/uint32
+>>> uint32 has only one item. Anyway, there is already DLL there, so don't
+>>> duplicate or explain why this is different. Explain also why this is not
+>>> deducible from the compatible.
+>>
+> 
+> 
+> Timeline still amazes me. I will be grumpy on this thread.
+> 
+>> I will change it to reflect array from uint32.
+>> There is change with artanis DLL hw addition where it need total of 5 entries
+>> (dll_config, dll_config_2, dll_config_3, dll_usr_ctl, ddr_config)
+>> for each HS400 and HS200 modes, hence the new addition in dt. And these values
+>> are not fixed and varies for every SoC, hence this needs to be passed through
+>> dt like it was passed earlier for qcom,dll-config & qcom,ddr-config.
+> 
+> 
+> Eh, no. That's not a valid reason. It's still SoC deducible. Don't bring
+> your downstream practices here, but remove EVERYTHING from downstream
+> and start doing things like upstream is doing.
 
-dma_map_single() should always succeed on arm64 even if the buffer
-is outside of the dma mask: On most modern SoCs there is an SMMU/IOMMU
-that implements the actual mapping, and in the absence of that
-there is a fallback to SWIOTLB, which is always built-in on arm64.
+QC SoCs have between 0 and 4 SDHCI instances, each one potentially requiring
+different tuning, let's keep this data in DT
 
-> SDHCI controllers can use 32-bit DMA or 64-bit DMA, however even with
-> 64-bit DMA it is possible to restrict the DMA addresses to 32-bits
-> by setting a 32-bit DMA mask.
->
-> If the host controller capabilities indicate support for 64-bit DMA
-> but you want the driver to use 32-bit DMA, set SDHCI_QUIRK2_BROKEN_64_=
-BIT_DMA.
->
-> However, if you want to use 64-bit DMA with only 32-bit DMA addresses=20
-> you can instead implement sdhci host op ->set_dma_mask() and in that
-> function dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32))
-
-I would not expect an standard SDHCI to be broken like this any more,
-and if it is, I think the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk is
-more appropriate than overriding the dma_set_mask() operation.
-
-What sometimes happens though is that the SoC integration itself is
-broken, and a 64-bit capable DMA master like SDHCI is connected
-to a 32-bit bus. In this case the DMA limitation should be
-described in the device tree, using the "dma-ranges" property
-of the broken bus node. The SDHCI code then still sets the correct
-64-bit DMA mask according for the device, but the dma_map_single()
-still uses an swiotlb bounce buffer or the IOMMU to work around
-the bus restriction.
-
->>  To resolve this hardware limitation, we implement a bounce buffer al=
-located via >> dma_alloc_coherent() to satisfy DMA addressing constraint=
-s.
->
-> The bounce buffer should not be needed to satisfy DMA addressing
-> constraints.  It is used when SDHCI ADMA (scatter/gather) is broken.
-
-I wonder if the actual problem here is not the addressing limit
-but instead the coherency protocol. If the DMA master is cache
-coherent but listed as non-coherent in DT, or vice versa, there will
-be data corruption for all addresses, and using a dma_alloc_coherent()
-bounce buffer may hide this.
-
-       Arnd
+Konrad
