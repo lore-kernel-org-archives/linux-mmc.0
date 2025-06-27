@@ -1,240 +1,80 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 79174E571
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:32 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 13D9420C000;
+	Fri, 27 Jun 2025 19:32:39 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751038474; cv=none; b=FD0fRhYmheXhM5z+d8G39WZx42z78Q713a3aRStMgkmnpVIZovp00Ll/eby4cryh6YRu9a6mT/8KmYxGIleXgrLyjAk0FjEbupUm2SBv+PaRI0iK5/Cd/0iNrafdxZ6x+KPS+JNoZvOlUU1V2gItEy9m0iuVA76MC1f6B71PIPw=
+	t=1751052760; cv=none; b=FRkGFebyGXMWiEShsEmR+8h/qJziNsrH6Pon6X7MqpGrKH4eUa90MSZHVeL85s1W5mQzZ1rn8W0dJDFDZIZOHUhBAsP/MtpQil9IxNFi4HBuoPDDe2l9ptd/eAg9l/f1wS7waY4oyIKBwgGQhjjkl+aPXMmrx2gYHDpaUYp/Kms=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751038474; c=relaxed/simple;
-	bh=Ew8lpjg2KGw8RUtsdIdGkXQu5umyWwe0BTLTaVIb67w=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=PubGX2aDgrRmuhYGKP0QwpsxOOT4npnJZ6PVtVxyV8qilBrGLaWA3APd/CFAhwfgJvmN151/ECY8mwH/MTmi+7l9u7r4SOPpZnqMZ5UL/9vXDCC+D1ms+n78TIwvKmhqJdygu85who9ikOXEhjKq3DUI5SkRtpPXd0WRyAHLTkk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=ZIh7/9dP; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1751052760; c=relaxed/simple;
+	bh=N2LlGZclOXCw7TE47Z4FmdVZl/MFbgtwae0FgUWZL2M=;
+	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
+	 Content-Type:Content-Disposition:In-Reply-To; b=Ef3KTRa6N2QbBmvR/D3tDAdqU+aP5bPctMQLaOZ7lubsE9Tv4LJXxS1jpdNMCcMXdFYmCchuTNXMBgrAASmdCUleFa2/FhCXJKzFdss7j1BKpDh8OHZI138ZdLTt8Wb/1xOZl8norinuzpEDACqolP5kFgalS2EpY9jPop3nnv0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZUkCoLLa; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="ZIh7/9dP"
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55RCLKd9014507
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	fhpcGE0kY2U2qHSOUrNH4gIXVYCbpgzCRlKlqKyiksA=; b=ZIh7/9dPTaRIKAbz
-	qtcRTfYJUmfDMD/1CB8sEgyGGumkjtTwe+1FCskmH91irz9aLvC7+w8nrjV0yIl5
-	QB0xqTRmG3P3Ft7yR9hK7RMWZYwi2POUq3sly/dUJ48WJWKJ9oC/oYfZUNb7O7vm
-	LRWccN5ciTm5RhWLpEa4ACEx19S+i4nLKISatypp1vBgmGk4bGCx72jy9YNPJfE0
-	o0qY4acjP6oYf70tubxgG7+gVbaXm9gWVcLv0iapLnGrDbi7elYbdiW8YQARPy4E
-	GwNMvpxwKqqfzTXYEUxP9yi+/mXni1WFKeH7ELAXBg4/7DE74URNzH7E2BxvGiH2
-	99Dl+w==
-Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47fbm25wbb-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 15:34:31 +0000 (GMT)
-Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-7d0979e6263so3117685a.2
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 08:34:31 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751038470; x=1751643270;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=fhpcGE0kY2U2qHSOUrNH4gIXVYCbpgzCRlKlqKyiksA=;
-        b=HLg7n2psbhbpDvq9RAK26oE6Sa/gLsmnYsDXsSeapuQ6zckgfsc5ukSuzhucYo+dQd
-         hHyHRFMpT10KiAjSC7N04bNq6kImrZzv5qKe9Ujnl0DNc9sSgimgy9+LqnKCvRYICrmG
-         4q+EvDALJAN4S30PtUD/3Maqscu6T1JDGfm2rgcm7g7xDWcZvsfm7GejYUaN6ONk4B4r
-         UrFAHABOog8zsKGJJYC1YB+nioPTOARA3IXsfxobveAxmOgJucCjCEYopKwnRDg0QdB0
-         BoUsEC22obebymvjOycHHjfcs+SEvuFULAoziRrcCR37a9S+eA/x4ARfplPPebxz5lF7
-         uIiw==
-X-Forwarded-Encrypted: i=1; AJvYcCW/J0FRBPB6qKt7pRXJMBf1LV2cquSDAfZi/mEJxWV2CZ+LJDsfshfIaVZn9YbB9cJQDYDJq1mw4Pk=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw4b/mBh2yiSiSfr6R04CkyjeR8WDbDJI0dApa9jMfxFodinqJe
-	LPp9ew22XbaEKEXprEeVxG9oYHPt0Bbn+RZALJtsDtPQliEfKsEd5LA8N7T2cGlP8lYeHKi92Sx
-	LUkuJvnEb12GWXOG6vUBiWhiMtsKeQW7Uvn6uy673TtdAWXma8svYUlC5ssGLtTo=
-X-Gm-Gg: ASbGnctaBkhfp4jpo9MHdOJ5fuAw/5a3lm6+llvl2z/BGrIjthXczC3kvDCuCz3WiKj
-	7CS7xShMzC1az90XKpZVzaQRLWGOzxZtBPHdVofR1fr4s4ZFqQuiS5bW/Y2XmQvuVxC6d07wfnZ
-	cOhqkDjLFwm6SDgHTcTNaUZOWl3H5wmgDYXvgIyUputrlD/aDkBWDhALH372r5pai3UGOgs+4j+
-	+hD8zuHA3cE6mrcDHfT7NUgjYpy6SFTBulpFHPwoeXiZDjbV24FXPpkKzpNGKn1L+sXnQ/1D11f
-	j6v6ZexGFfwfSKibIy9VaKXQh2dnED8ZTtwffiUc8xQrMryRXuKjwJx8ivPjTxOIaeUVhAtb2RP
-	jBl0=
-X-Received: by 2002:a05:620a:4390:b0:7c0:bc63:7b73 with SMTP id af79cd13be357-7d443966417mr201233785a.13.1751038470191;
-        Fri, 27 Jun 2025 08:34:30 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IHzOTtjkZGz3phOnalpunb7y20OgdgwVxcjlA9JNDAl2YYT7eAuxSBmhUwNsqtuPUIJtvAnnQ==
-X-Received: by 2002:a05:620a:4390:b0:7c0:bc63:7b73 with SMTP id af79cd13be357-7d443966417mr201228685a.13.1751038469653;
-        Fri, 27 Jun 2025 08:34:29 -0700 (PDT)
-Received: from [192.168.143.225] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
-        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae35363b244sm142288066b.30.2025.06.27.08.34.25
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 27 Jun 2025 08:34:28 -0700 (PDT)
-Message-ID: <3fbae47b-d20d-426b-a967-b584e32b8c6e@oss.qualcomm.com>
-Date: Fri, 27 Jun 2025 17:34:24 +0200
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZUkCoLLa"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 612E6C4CEE3;
+	Fri, 27 Jun 2025 19:32:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1751052759;
+	bh=N2LlGZclOXCw7TE47Z4FmdVZl/MFbgtwae0FgUWZL2M=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+	b=ZUkCoLLaU+FTuL7hpCLEOfDH1TS1ct5XQxvZZ3ato8k61iiYYzo1jMiIU1mP4ENfi
+	 +xjZnNF9JCXUMZohhtLqd6jyEHtZ93jZKH1f0x/yCMB6+Nj1rATZJ/JLTgvsu0Fe02
+	 QkusVYMyS+y7Uj8BoZysWD9dafU68FeBu0oZhnRZRnP4GZ5nC0iduGWsaksCVzu7Vv
+	 2/KtYm/b66UTC4Km9MDhYKEsgsnZ5B2HNu6FSjr+jZF/5fKTlvVOePNEknLwZ9mVfu
+	 b5s+hHSZ4/fdpVSaNXHn/4Sjx9ei4R9iT6oxYthUPP1hz0qGGZe47XMQ+j9AeSv2CU
+	 V6AMNI0c75fXg==
+Date: Fri, 27 Jun 2025 14:32:38 -0500
+From: "Rob Herring (Arm)" <robh@kernel.org>
+To: Prabhakar <prabhakar.csengg@gmail.com>
+Cc: Conor Dooley <conor+dt@kernel.org>,
+	Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+	Wolfram Sang <wsa+renesas@sang-engineering.com>,
+	linux-renesas-soc@vger.kernel.org, devicetree@vger.kernel.org,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Magnus Damm <magnus.damm@gmail.com>,
+	Biju Das <biju.das.jz@bp.renesas.com>, linux-kernel@vger.kernel.org,
+	Krzysztof Kozlowski <krzk+dt@kernel.org>,
+	Geert Uytterhoeven <geert+renesas@glider.be>,
+	linux-mmc@vger.kernel.org,
+	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and
+ RZ/N2H support
+Message-ID: <175105275812.4046920.1856778113483721034.robh@kernel.org>
+References: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 14/14] arm64: dts: qcom: Add The Fairphone (Gen. 6)
-To: Luca Weiss <luca.weiss@fairphone.com>, Will Deacon <will@kernel.org>,
-        Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Robert Marko <robimarko@gmail.com>,
-        Das Srinagesh <quic_gurus@quicinc.com>,
-        Thomas Gleixner
- <tglx@linutronix.de>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
- <20250625-sm7635-fp6-initial-v1-14-d9cd322eac1b@fairphone.com>
- <4200b3b8-5669-4d5a-a509-d23f921b0449@oss.qualcomm.com>
- <DAXA7TKVM4GI.J6C7M3D1J1XF@fairphone.com>
- <6d4e77b3-0f92-44dd-b9b0-3129a5f3785b@oss.qualcomm.com>
- <DAXEA131KUXZ.WTO7PST1F3X6@fairphone.com>
-Content-Language: en-US
-From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-In-Reply-To: <DAXEA131KUXZ.WTO7PST1F3X6@fairphone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-Authority-Analysis: v=2.4 cv=YYu95xRf c=1 sm=1 tr=0 ts=685eba07 cx=c_pps
- a=HLyN3IcIa5EE8TELMZ618Q==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
- a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=huVnaSGCcg0LVUp1CDwA:9
- a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22
-X-Proofpoint-GUID: GmHeU22tpexLY06NmIuLaG2CGBegAoyX
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjI3MDEyNSBTYWx0ZWRfX51TjPImhucZp
- gDRS7xKmL4a2o9B7GkFZMRz/nTOhjLQrNieyXFtmqwWGZng204GCc0JJt/bQsJ36lFF2xJlHmFv
- ffSRFYzcTPQahk/9OvwwJ47UJYbZ7b3E1k3Wl/U5iX+EMzcQnOI+hq9PoHKJKbbUueyos0LH0dE
- O0U1NFpFAYTyR9ZcQNpjoom8GIxa67iMW31VQkmJ56d2zSLCnBqjFJOIb8YxY59o3MpXgfEQqnt
- 2S8oVXwq5DZNLKEJEckhXNg18fxkvN61q7UcS+14tGr8Akorw2li4QYAgr5cKds2fVaWTqsTsYJ
- tgQzY9O8c03UGtBigLtSpVxNL0OT7+9f7DK634u4Hd54RGBZ3U/w2dg13q/Ul7i0B8isuFcBQbE
- dOjQ3W0FoIS05bkYBANqFhM+RS2Nou+hL5GM2oOzn1sQSV6DxEX7ZDJBp7QGaMICUM+I8ZRJ
-X-Proofpoint-ORIG-GUID: GmHeU22tpexLY06NmIuLaG2CGBegAoyX
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-27_04,2025-06-26_05,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- malwarescore=0 adultscore=0 spamscore=0 impostorscore=0 suspectscore=0
- lowpriorityscore=0 priorityscore=1501 phishscore=0 mlxlogscore=999
- clxscore=1015 mlxscore=0 bulkscore=0 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2506270125
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-On 6/27/25 4:44 PM, Luca Weiss wrote:
-> On Fri Jun 27, 2025 at 4:34 PM CEST, Konrad Dybcio wrote:
->> On 6/27/25 1:33 PM, Luca Weiss wrote:
->>> On Wed Jun 25, 2025 at 4:38 PM CEST, Konrad Dybcio wrote:
->>>> On 6/25/25 11:23 AM, Luca Weiss wrote:
->>>>> Add a devicetree for The Fairphone (Gen. 6) smartphone, which is based
->>>>> on the SM7635 SoC.
->>>>
->>>> [...]
->>>>
->>>>> +	/* Dummy panel for simple-framebuffer dimension info */
->>>>> +	panel: panel {
->>>>> +		compatible = "boe,bj631jhm-t71-d900";
->>>>> +		width-mm = <65>;
->>>>> +		height-mm = <146>;
->>>>> +	};
->>>>
->>>> I haven't ran through all the prerequisite-xx-id, but have
->>>> you submitted a binding for this?
->>>
->>> Actually not, kind of forgot about this. I believe I can create a
->>> (mostly?) complete binding for the panel, but this simple description
->>> for only width-mm & height-mm will differ from the final one, which will
->>> have the DSI port, pinctrl, reset-gpios and various supplies.
->>>
->>> I think I'll just drop it from v2 and keep it locally only, to get the
->>> simpledrm scaling right.
->>
->> Yeah I think that'd be best in general
+
+On Tue, 17 Jun 2025 17:49:14 +0100, Prabhakar wrote:
+> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 > 
-> Ack
-
-[...]
-
->>>>> +&pm8550vs_d {
->>>>> +	status = "disabled";
->>>>> +};
->>>>> +
->>>>> +&pm8550vs_e {
->>>>> +	status = "disabled";
->>>>> +};
->>>>> +
->>>>> +&pm8550vs_g {
->>>>> +	status = "disabled";
->>>>> +};
->>>>
->>>> Hm... perhaps we should disable these by deafult
->>>
->>> Do you want me to do this in this patchset, or we clean this up later at
->>> some point? I'd prefer not adding even more dependencies to my patch
->>> collection right now.
->>
->> I can totally hear that..
->>
->> Let's include it in this patchset, right before SoC addition
->> I don't think there's any pm8550vs users trying to get merged in
->> parallel so it should be OK
+> Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
+> (a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
+> the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
+> allowing reuse of the existing driver without modifications.
 > 
-> Okay, can do. Disable all of them (_c, _d, _e, _g), and re-enable them
-> in current users? I assume there might also be boards that only have
-> e.g. _d and no _c.
-
-I suppose it's only fair to do so, in line with
-
-d37e2646c8a5 ("arm64: dts: qcom: x1e80100-pmics: Enable all SMB2360 separately")
-
-
->>>>> +&usb_1 {
->>>>> +	dr_mode = "otg";
->>>>> +
->>>>> +	/* USB 2.0 only */
->>>>
->>>> Because there's no usb3phy description yet, or due to hw design?
->>>
->>> HW design. Funnily enough with clk_ignore_unused this property is not
->>> needed, and USB(2.0) works fine then. Just when (I assume) the USB3
->>> clock is turned off which the bootloader has enabled, USB stops working.
->>
->> The USB controller has two possible clock sources: the PIPE_CLK that
->> the QMPPHY outputs, or the UTMI clock (qcom,select-utmi-as-pipe-clk).
+> Update the binding schema to reflect differences: unlike RZ/V2H(P),
+> RZ/T2H and RZ/N2H do not require the `resets` property and use only a
+> two clocks instead of four.
 > 
-> So okay like this for you, for a USB2.0-only HW?
-
-Yeah, maybe change the comment to something like:
-
-/* USB 2.0 only (RX/TX lanes physically not routed) */
-
-to avoid getting this question asked again
-
->> Because you said there's no USB3, I'm assuming DP-over-Type-C won't
->> be a thing either? :(
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> ---
+> v1->v2:
+> - Added the high speed clock to the clocks list.
+> ---
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 85 ++++++++++++-------
+>  1 file changed, 53 insertions(+), 32 deletions(-)
 > 
-> Yep. I'd have preferred USB3+DP as well since it's actually quite cool
-> to have with proper Linux. On Android, at least on older versions it's
-> barely usable imo. Can't even properly watch videos on the big screen
-> with that SW stack.
 
-Bummer! Not something we can change though :(
+Reviewed-by: Rob Herring (Arm) <robh@kernel.org>
 
-Konrad
