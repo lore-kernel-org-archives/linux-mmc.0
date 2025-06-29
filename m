@@ -1,54 +1,54 @@
 Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A9D721E25E8
-	for <linux-mmc@vger.kernel.org>; Sun, 29 Jun 2025 11:06:52 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A670120458A
+	for <linux-mmc@vger.kernel.org>; Sun, 29 Jun 2025 11:06:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.141
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751195214; cv=none; b=bxEdRor5VBay9qFLbIxwtrZC6Ov70Mz3hQRTfcKJZPHD91RImxC8NyLgHXdSFg6yyrAzGA/25gQqvULQrMyer2NuyqgHrOHrJs9jkd5gFSrRZOSh6awyvor0kt89n8YMQGO1lu9XfLfmSDwUKq9H51E9FZbwPiXXUEOrhq7G5is=
+	t=1751195216; cv=none; b=sp1RIvJ+cbWgQrtB0bIAWf778/GiRgcNAnQQ67sRYwWq0+e1fBCdTrsfv81hwLSdFYe/1uR4079H1bFWi/sxVsWv+MGzruX9FXf0SoVbq0Hh68XSEHFyYYBNI9JC7pGNkXBKgiC+GNytfYKgH7sqNbZMQJLPZNhSTogSpwXnK/M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751195214; c=relaxed/simple;
-	bh=WpfXEEk9XRU73dOyHHHb09Rd/Y6XCfawiBFEYeJT2O8=;
+	s=arc-20240116; t=1751195216; c=relaxed/simple;
+	bh=+fnnzg4qxemNGpMoOqzgOY6qG1RWuCcf98j2E1qYhmY=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=DHLcYlZvRkd/fr3/JiJwMxKe1FPAD/FmtRVWypX0E7uEHn1XXmgaMOkaPq+7fBGle1SBEQt3Ew20UOYmC6gIKQQnR0ZZ8elV4ipkgjLjAqhSKgsIkolbGA5u79J0g+giDQv03VGR+mwVxl+sqTI38XpPsuZaS/NrOkEOsXolIRs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=VCplkYqs; arc=none smtp.client-ip=216.71.153.141
+	 MIME-Version; b=Q8AVT4gz+t0TMOA6XS5g9xykt7nN/r0U4iGevaBuTCOUgHKLzJfdHy6OKi+SlVeCw06kMpO1vNJP5WAQa5v3eZtpcKA1Wfrv5xRBpudT2BRyxskMRLj4qQ4BaFl/4y7WTHFwKCJ4hQ4l8+7W0p0CzXpedO3xIic9Tn/IzwM+jUQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=j1moEjwj; arc=none smtp.client-ip=216.71.153.141
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="VCplkYqs"
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="j1moEjwj"
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=sandisk.com; i=@sandisk.com; q=dns/txt;
-  s=dkim.sandisk.com; t=1751195213; x=1782731213;
+  s=dkim.sandisk.com; t=1751195215; x=1782731215;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=WpfXEEk9XRU73dOyHHHb09Rd/Y6XCfawiBFEYeJT2O8=;
-  b=VCplkYqsqbcn1OE1kJsSN3fniiAW+ypv6c1xWfC100sqhoMgvhuIWOYc
-   utT1Tr9i9/YnedOVm717mePcxGvto70xoBIOhDGBuwvxYDgIKlqvri6Se
-   AYLQYYb0IVTo5kws+vpJ/uDyDF40swfSt99zxhKrnkhDi3VVYMIEiWpoC
-   UukasU9W0TK20OEWLb1AyJJUU/cfoKE6jlfBZVk3dDBDZ7GRC6PBj2QKX
-   +buyx3/W6sOWLmc57CD7WS1LO13WNPDum5BIFFO1ZUKSjavSMiy2U1YkO
-   vgzXJtfi07L+FL1OLOevguVzxYYAWNzHQ0DhP7XJI/q6ND+8xqUde/voz
-   A==;
-X-CSE-ConnectionGUID: OATtWWq2RPqaN3rrsKrb+Q==
-X-CSE-MsgGUID: /kPxQ1zKTlSTA7GyK0ITaA==
+  bh=+fnnzg4qxemNGpMoOqzgOY6qG1RWuCcf98j2E1qYhmY=;
+  b=j1moEjwjwknRxL4Q6crzN+4oeFbWvKCSK8bVJ/ZwWF+D6pNPLkDPz86C
+   M77GJfiutO/a4JSD3dLKE3SL/pJNAA53VEU9Uu/D59tVthrf3Yl9/S4iV
+   Jo9nqHhxBYe8b2MgIivo6dXgjxcxCkyMii0J1r7ahlkgNILvwW0Vu77X+
+   9DPpHIl0lVU2xD3uucdE+hKeEWXV1onaE7M8IeGHSCTuJGIU2m2eB6v/S
+   cABo9NssNqsMgxUo+aQ6VpRv/R1WUMCZyLQ5L7pS9+cv5HWRkP/xclNyN
+   VzFkqc/hOgQjCCw7xic5+D5lKmYOCi6ojL0Fkf0C3LZ6loWEA6fghyTUJ
+   w==;
+X-CSE-ConnectionGUID: 7Vd1niLsSxW0Hki/lPktMQ==
+X-CSE-MsgGUID: Pe64YPK7TAa6GOpdIOD9KQ==
 X-IronPort-AV: E=Sophos;i="6.16,275,1744041600"; 
-   d="scan'208";a="86176608"
+   d="scan'208";a="86176611"
 Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 29 Jun 2025 19:06:46 +0800
-IronPort-SDR: 68610fc0_VOyBD7OT57niJwvX4cXn1RXDy++1LzzVhK9ylYSs3L2ybI7
- uP2mAXJ3vJqSYcc10QjRiHyEdwNQiXLzTuewmGQ==
+  by ob1.hgst.iphmx.com with ESMTP; 29 Jun 2025 19:06:54 +0800
+IronPort-SDR: 68610fc7_KvyuvMsJVg3pX1wo4xtYx2ygNF3zP+Dzta2Kz/7AWsOCv2p
+ zMzJHJJhWYtENn63f+Q8zt10d4lhkW73TjVsZgQ==
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 03:04:48 -0700
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 03:04:56 -0700
 WDCIronportException: Internal
 Received: from unknown (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.49])
-  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 04:06:45 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 04:06:53 -0700
 From: Avri Altman <avri.altman@sandisk.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	linux-mmc@vger.kernel.org
 Cc: Avri Altman <avri.altman@sandisk.com>
-Subject: [PATCH 1/2] mmc-utils: Add option to print version
-Date: Sun, 29 Jun 2025 14:06:24 +0300
-Message-Id: <20250629110625.112762-2-avri.altman@sandisk.com>
+Subject: [PATCH 2/2] mmc-utils: Makefile: Make version string to show commit date
+Date: Sun, 29 Jun 2025 14:06:25 +0300
+Message-Id: <20250629110625.112762-3-avri.altman@sandisk.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20250629110625.112762-1-avri.altman@sandisk.com>
 References: <20250629110625.112762-1-avri.altman@sandisk.com>
@@ -60,43 +60,34 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-This change adds support for printing the version as a command-line
-argument. When any of 'ver', '-ver', '--ver', etc. are specified as the
-first argument, mmc-utils will print its version string and exit.
+Previously, the version string included the abbreviated SHA1 of the
+latest commit (e.g., "v1.0-1-g5e67f7"), which was not very informative.
+This change updates the version string to includes the date of the
+latest commit instead (e.g., "v1.0-1-2024-06-29"). This makes it easier
+to identify the build date at a glance.
 
-This makes it easier for users and support personnel to quickly
-determine the exact version of mmc-utils in use, which is especially
-helpful for debugging and when users are running pre-built binaries.
+Many mmc-utils users do not build the tool themselves, so having a clear
+version string with the commit date helps greatly when debugging issues
+or providing support.
 
 Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 ---
- mmc.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ Makefile | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/mmc.c b/mmc.c
-index 315fa70..e941aa2 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -460,12 +460,18 @@ static int parse_args(int argc, char **argv,
- 	char		*prgname = get_prgname(argv[0]);
- 	int		i=0, helprequested=0;
- 
--	if( argc < 2 || !strcmp(argv[1], "help") ||
-+	if(argc < 2 || !strcmp(argv[1], "help") ||
- 		!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")){
- 		help(prgname);
- 		return 0;
- 	}
- 
-+	if(!strcmp(argv[1], "ver") || !strcmp(argv[1], "-ver") || !strcmp(argv[1], "--ver") ||
-+	   !strcmp(argv[1], "version") || !strcmp(argv[1], "-version") || !strcmp(argv[1], "--version")){
-+		printf("%s\n", VERSION);
-+		return 0;
-+	}
-+
- 	for( cp = commands; cp->verb; cp++ )
- 		if( !cp->ncmds)
- 			cp->ncmds = split_command(cp->verb, &(cp->cmds));
+diff --git a/Makefile b/Makefile
+index c0284bb..7631524 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,5 +1,7 @@
+ CC ?= gcc
+-GIT_VERSION := "$(shell git describe --abbrev=6 --always --tags)"
++# GIT_VERSION is set to the latest tag, number of commits since that tag, and the date of the last commit
++# e.g., v1.0-5-2023-10-01
++GIT_VERSION := "$(shell git describe --abbrev=0 --tags)-$$(git rev-list --count $$(git describe --abbrev=0 --tags)..HEAD)-$$(git log -1 --format=%cd --date=short)"
+ AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2 \
+ 	    -DVERSION=\"$(GIT_VERSION)\"
+ CFLAGS ?= -g -O2
 -- 
 2.34.1
 
