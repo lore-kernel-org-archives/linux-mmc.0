@@ -1,110 +1,79 @@
-Received: from mail-qk1-f170.google.com (mail-qk1-f170.google.com [209.85.222.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F08261A2C11
-	for <linux-mmc@vger.kernel.org>; Sat, 28 Jun 2025 01:53:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.222.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DA3091E25E8
+	for <linux-mmc@vger.kernel.org>; Sun, 29 Jun 2025 11:06:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=68.232.141.245
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751075618; cv=none; b=EWmbz3NckDVkMAcTABXpoeAP/+iZBvvL7guKZJn+jpdZcgigVxNlTbx+ymAx/TK9ZkoFbrRiHJxFeW7CaDnQMWuhVLklP2RyiKUs/DMSQfJ2Z/f91OBTTUEa4jXhPHHkUJ5jbvdAeDAgskUwP5nHEzBCg591MTwjpNV34kRzftU=
+	t=1751195207; cv=none; b=adqp0enZPcHcbbrUcPNKFUBQa/TKpU37dFHFjGahuvegBTOAprShhbH0yqQTiUmBSmmwAP0dtVZjfk7nZFrLAQFR5+7WrmMTMAQIEfw0+yxwCHk1jm89PT+eKyWM6awVXIHWEIM4x0fpS1w7SuoVJ/G1j1xaVPUMFnAfkiyZiAg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751075618; c=relaxed/simple;
-	bh=xAVEsFJaJpe1cuzT3LWf6Yt7wVSF7ac/1D8++/chJis=;
-	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=Tbtgwe8ZHf12GGtly30ZEv7oGmI7TcFcfGTaUm/h1xiCH+KfPWMhxeQQ4wUPU1DiIxpXypWS3FWVAO3Av9FKIGKHFV3OdWdIvQkzwoFtrVZtVIKcAFeyDYJMDCALqfiLbwlzd+BgYvGUZ+q030DsR8FkLlAZzeaQ6w6lP/LX8xI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer; spf=none smtp.mailfrom=libretech.co; dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b=gk8BRuiP; arc=none smtp.client-ip=209.85.222.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer
-Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=libretech.co
+	s=arc-20240116; t=1751195207; c=relaxed/simple;
+	bh=uEP3bU7+blH7Agc262RuzQL7vLxDzdMwl4GsCIiOp04=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=XSS100DskW1NS2Yh5EKaE33QJA0cmSpnU/fazDdqXeyaYPWvWCw5EPG9sr0Aq3r36/FxrtQRztoHWJIreKvbHf0gPWx/jolMqAzYDVueuqELflWO0f5iCGMgMac5BmwfQX37/7N1wHlRIlk2slK7SPratUM50zYvIpUSG9hykUY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=FdqshpI4; arc=none smtp.client-ip=68.232.141.245
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b="gk8BRuiP"
-Received: by mail-qk1-f170.google.com with SMTP id af79cd13be357-7d3f1bd7121so38480785a.3
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Jun 2025 18:53:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=libre.computer; s=google; t=1751075616; x=1751680416; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=IDgANBooOaHABbpjHHyBVc8hQrSombBZ6qXbl2V9NGc=;
-        b=gk8BRuiP6zV7SsQTXRzhKoEH1aAVPWlIyRbasH9Q8uDyT3xyc0s5EuWKXDabUbBgXP
-         DzxnnOdNCg6uh22ool2WDzIqoiUwuKVTmu+i9naxLUJzarn1Pktm/37KhMoD2f1C5hZx
-         MSrnsUAHKwVs0Nx1LyNHsfMBjjGMtkjm/5avxei9yDmRhYcFcDMPvEfpSFUitUzOLImh
-         TbQOeYOTu9gRTWfG0hn0Dj3ShTPA8fTzcftpblPTjNHrd8eJfDJdsGKbt+YWc/0LiPjn
-         fY393AyVSEEES0RjM4L2llXdiusOcP3wWdlizBJa5p7JCAE4/m76A8TaPNCPbu+AmVgl
-         54iQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751075616; x=1751680416;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=IDgANBooOaHABbpjHHyBVc8hQrSombBZ6qXbl2V9NGc=;
-        b=a5swuVx5MIHzvzwL5miIDWbEJx6tRdXP2ncHIN257y33uqcdOlwLLL0sMcv3+EKobD
-         5JhCRQXIB31Ihd3qowL48Wd0BsSG7C5hQoFFtx/41qK23k9sr0REI31SB65SwzzLJyZ5
-         saml66oMqPOMrcGh8VH2QjbNggIKofHGGr3Wjc5Q1ZhoomROwkbSFimf39UQaGouskNO
-         3zyHkJ2kcdmq7ZPRc4JaOcebJHaJ51HtFTqjsFl0beNf0tDJLeas54YWqVnXw6PFb9xR
-         VBV8ImcNzm+BRg4/qt4npJBr5oG11v1dc+9ZVHQuDv1M6N2bOHTN+Esi4DHVe6zohrl+
-         vGDg==
-X-Forwarded-Encrypted: i=1; AJvYcCX/pThBBU5Vj9kpxaD5Ncaf2k5KcmdTVB37lgJc37FBzJW7AuDk79zqeloiUa5200yeVOnUuIJToE0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyIU2Iy0t0G/CpbFUqOiOtRcCz/VI1eId5POAX7vRIb/utrW+hJ
-	FIbnx1x+0ktwGeGX6wktUSNIn6Gna6viRrlOKI9o9UHi43NNPSbjANVagYXbtQmfbQ==
-X-Gm-Gg: ASbGncsvLZxYaJq/pWIj4u7Z9cns9kKA1EV2BN59jKBG1PVUDNNKMhdaGHE8jeuwPEA
-	4dMz/FutSMkkhxa114PRpaApSpDMiD6X5eyVq4A703jPAyxXr1wM3e8zFCjj5LxHwuUjQGXDWdW
-	7Jqb6L1yQBbvGokk6MEWZclAq3BNsozgVU8QECb2glX6ql108PGovLdelx6bXsOIYHH+fQhm2Jj
-	8epGmmAmzVA0Xmp1YGWNl2HB9yqqjAypKeXjxkvM+6eqbroMi9LV9FIx8jQVV9zwfq3J3g2VmfQ
-	AzatQ4oOzUr6oqJQJrgu6DACAkUEPtGhflOUfCG5AsatY40aOSTdrihfGQAS5ULUJpvL3A==
-X-Google-Smtp-Source: AGHT+IHDOFs/ZbAzvN7ioQVvaBO3tKspbKCC2PmmEG/e0ea92CY3dBFRoIiyAncqYqaZi3cyXQ2vdQ==
-X-Received: by 2002:a05:620a:198b:b0:7d3:f3e1:b8c4 with SMTP id af79cd13be357-7d443944e85mr816887085a.15.1751075615803;
-        Fri, 27 Jun 2025 18:53:35 -0700 (PDT)
-Received: from localhost ([2607:fb90:6159:6306:aa35:a456:78ca:2103])
-        by smtp.gmail.com with ESMTPSA id d75a77b69052e-4a7fc55c396sm21861621cf.50.2025.06.27.18.53.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Jun 2025 18:53:35 -0700 (PDT)
-From: Da Xue <da@libre.computer>
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="FdqshpI4"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1751195205; x=1782731205;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=uEP3bU7+blH7Agc262RuzQL7vLxDzdMwl4GsCIiOp04=;
+  b=FdqshpI4Ltx5aJvT7/b6DIFknb1HIJzUdLdzG/id+mCJ16Qy6zHMtzjh
+   yxiuUhqH4Dus/TWaTVdNE6d2mXUsIe1ouz2W1PI1Kq+C7O40MrHpS3BaD
+   kysvw7hrH9z6bGsp5g4c0ZMfqPvqJEVcpqOddbTtGRqlw38YosLMUTho6
+   o6Tx0EsdYRN6fceZOTDaYz44fQjw5hNuoJfhKN59Q3htDu1+oupFb3M+G
+   Dhv/9LIVrtdAzHU62qLwMNJeZTIfjMrMVQxYN6G6MG7rw92H4ewzg4CM+
+   //HPb0sFWxq56HOjV8HFa96810DV9forHVrhfdTsB7YgkZx6KgA0WLtlz
+   w==;
+X-CSE-ConnectionGUID: ulykuJApQzG4MRFhHQgitA==
+X-CSE-MsgGUID: 7xFYfzzQRBSqC9Od6nMrSQ==
+X-IronPort-AV: E=Sophos;i="6.16,275,1744041600"; 
+   d="scan'208";a="84921910"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 29 Jun 2025 19:06:38 +0800
+IronPort-SDR: 68610fb8_W5QjACd0PgqRSK8/yRSTTVa+tJfP+ONOLohkhhisVblB8qQ
+ HpM8SP6luUPMuJygCAd0/y9a6bwy1uzSzUPBEIw==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 03:04:40 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.49])
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 04:06:37 -0700
+From: Avri Altman <avri.altman@sandisk.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Neil Armstrong <neil.armstrong@linaro.org>,
-	Kevin Hilman <khilman@baylibre.com>,
-	Jerome Brunet <jbrunet@baylibre.com>,
-	Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Da Xue <da@libre.computer>,
-	linux-mmc@vger.kernel.org,
-	linux-arm-kernel@lists.infradead.org,
-	linux-amlogic@lists.infradead.org,
-	linux-kernel@vger.kernel.org
-Subject: [RFC] mmc: meson-gx-mmc: add delay during poweroff
-Date: Fri, 27 Jun 2025 21:53:28 -0400
-Message-Id: <20250628015328.249637-1-da@libre.computer>
-X-Mailer: git-send-email 2.39.5
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH 0/2] mmc-utils: Improve version reporting
+Date: Sun, 29 Jun 2025 14:06:23 +0300
+Message-Id: <20250629110625.112762-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
-Regulators controlling the SD card power need some settling time for SD
-cards to fully reset from UHS modes. The regulator framework seems to
-ignore falling times set in the device tree causing a few boards with the
-same hardware implementation to hang on reboot because the SD card still
-had some voltage and did not reset properly to be initialized again.
+This series improves version reporting in mmc-utils to make it easier
+for users and developers to identify the exact build in use, which is
+especially helpful for debugging and support—particularly since many
+users run pre-built binaries.
 
-Add a delay sufficiently long for the voltage to drop so that the SD card
-can reset properly. Otherwise the reboot will hang at missing SD card
-especially with Samsung cards.
+These changes should make it easier to track and support mmc-utils
+deployments in the field.
 
-Signed-off-by: Da Xue <da@libre.computer>
----
- drivers/mmc/host/meson-gx-mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+Avri Altman (2):
+  mmc-utils: Add option to print version
+  mmc-utils: Makefile: Make version string to show commit date
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 694bb443d5f3..a39906079d29 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -605,6 +605,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_POWER_OFF:
- 		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
- 		mmc_regulator_disable_vqmmc(mmc);
-+		msleep(50);
- 
- 		break;
- 
+ Makefile | 4 +++-
+ mmc.c    | 8 +++++++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
 -- 
-2.39.5
+2.34.1
 
