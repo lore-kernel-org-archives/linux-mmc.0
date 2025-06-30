@@ -1,166 +1,84 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1DEF3199BC;
-	Mon, 30 Jun 2025 06:33:37 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD95E19A2A3
+	for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2025 07:24:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.153.144
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751265219; cv=none; b=Rxpu/nCFIPWr0wnDNFgkRXsGVx9sRuUta2R+G61W35mDvMc1Cto5GQGjoUYPDH1lTZlaE+oviL6OutposkrQBAUzAPzTmp2dVo3sfSoG93WKzemIfjo81USbfBG03g78j7Gcly6F69qT103tsHPOdmSnyhC1YGPokTgW60yA5L0=
+	t=1751268273; cv=none; b=uHP4B5jhpJFgMzpkWnI/pe+vFvCMxNhBxxRAm8iKJ7zqaRy1o+dHXzrD1vOp3Tr2t4MA5fvSoqe4SUPaASNlWDrefGcKn9BfDvRjy2YzCbg9qT9LRTES9dRIGZ9A1QPMEFCzMKjiYzFoIVXU3keglFHw86laT+AVWWz9rw2Xo+4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751265219; c=relaxed/simple;
-	bh=7DtllwwKByPlp9eu16Mmt6F0qn8vZ+Xmdgb9mLWmraE=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=DEL+NRQf1qxaQHzaoHXru7qcrpbnYRIkbJXyxqIObbsljBM/RkmtaRPXhV5InN7IZ5mG60jjZnwss9m4Rl90qbxabMCJE2e8pGPbZrVz6N6DzxukEJWTZ9Y8V10F5kQualaJG0qBNhVCtKWGPDH6R9JBhGUiNxkVdUVkWvkR6o0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=DTyDAlsa; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1751268273; c=relaxed/simple;
+	bh=OWrcL8ij4I5eq+sPspj9j6hgd019GvgIX3GwkQbvKgg=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version:Content-Type; b=H3sZE3iAjsqdBN8fywyN4ZZdBoKIUMBLtXp3zV59OHKAFGzCuL8ijKlccDFsYt9E8LZh9wUkOBguhsrmeL/kf2YDKw4yskiWrm91CaTKOEsM5apKXSuAiAXkuGjSJpZqiC9nYBIBBhoz/0IWsSePQ135X3FyPrHUyB3UQF3Hn/k=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=FvrTSnVc; arc=none smtp.client-ip=216.71.153.144
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="DTyDAlsa"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55TLeoc3007424;
-	Mon, 30 Jun 2025 06:33:31 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	8/zGp6Xz/Zt9jT/fzPh9nFeSI4zwpmPMD5kpSQY2aR0=; b=DTyDAlsaACMVI3e+
-	YJmElPwCk5eDZkqGziWkhEIRlDEsTjWw+2thwkvzRe7ccC8sC66wghBwqFF5yuH9
-	WeUs+U4r1E8n7eOgvJLNEGYLaiFEt8dWoEjjZ0dNabFFXInhxVlzv1U//RXy+sza
-	a55x0ZEFdcmHQxl6SnSBuowqHi8kjSs6kl18BQ5tzwTuT8Z3UYU5aiPrvy51q+r2
-	JT/XxbAbbEeZvs/XlTdZdGRXOruusKqOlahIeXNfMnmuwA1BeUzr7gKq7K1Bgjqv
-	Jmc7z26aJvHVwk0/+dzidA/AVXqJEEqH3uCNN1DAlGuFAdYQ+/OXHVEOz77Of4IF
-	rJKZ1A==
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47j801uknm-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 30 Jun 2025 06:33:30 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 55U6XTTO011424
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Mon, 30 Jun 2025 06:33:29 GMT
-Received: from [10.218.36.129] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Sun, 29 Jun
- 2025 23:33:23 -0700
-Message-ID: <0d43b504-7f10-cb21-f8df-49677bc99ed1@quicinc.com>
-Date: Mon, 30 Jun 2025 12:03:18 +0530
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="FvrTSnVc"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1751268271; x=1782804271;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=OWrcL8ij4I5eq+sPspj9j6hgd019GvgIX3GwkQbvKgg=;
+  b=FvrTSnVcHUb/yg/ES85izsRwh/52SC8cX61BFYDvselVuv57NRM7jVWN
+   Oc0oMGOGDii3B/R5wAUhL/8h4tE43EhP/bthj3ut9JzXrLkKwfWzfj9Wi
+   9aj3QJEbSTsKBAUtkJrf1ixv6O0Y7YtJwz/u1h0qHwgpiqzE0i5AiEGTg
+   ld3nTbKeU1xopxwmQPiT6D3Duo2ZSYIYoz1QIMftW18+ioJ3+9vFscciR
+   rySDLxtRZ58VOKlmx++YzGdlL4+Yj/m9o4a6v+c+zo9PyC+M4VGouzCI7
+   QObi6g/p9R811QUSCutvcuDSJHIKrTHCOUJFexq72ebH2fBHQAFYr8kwz
+   g==;
+X-CSE-ConnectionGUID: 35N908jpSTChLsvMGiynjA==
+X-CSE-MsgGUID: WHBeJs2dTGGtVTBnrOuCsg==
+X-IronPort-AV: E=Sophos;i="6.16,277,1744041600"; 
+   d="scan'208";a="85476331"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 30 Jun 2025 15:24:25 +0800
+IronPort-SDR: 68622d21_yIUSpZ8JBvL5sl61UwJ61Hcq+IU3R5KEjliVXzPTDujg2of
+ 93rhpgTdT/7g+5lj8BgDhLrqXbLKpXdIvSaNwBQ==
+Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 29 Jun 2025 23:22:26 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.49])
+  by uls-op-cesaip02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 30 Jun 2025 00:24:24 -0700
+From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>
+Subject: [PATCH v2 0/3] mmc-utils: Improve version reporting
+Date: Mon, 30 Jun 2025 10:24:17 +0300
+Message-Id: <20250630072420.114967-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.0
-Subject: Re: [PATCH V3 1/4] dt-bindings: mmc: Add dll-hsr-list for HS400 and
- HS200 modes
-To: Krzysztof Kozlowski <krzk@kernel.org>,
-        Konrad Dybcio
-	<konrad.dybcio@oss.qualcomm.com>,
-        Sachin Gupta <quic_sachgupt@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bhupesh Sharma
-	<bhupesh.sharma@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <quic_mapa@quicinc.com>,
-        <quic_narepall@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_sartgarg@quicinc.com>
-References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
- <20250122094707.24859-2-quic_sachgupt@quicinc.com>
- <72b02fd1-5195-4bb0-b01d-5481b49a5680@kernel.org>
- <379e9199-4a9e-cd38-20cb-0fbd76fa33b3@quicinc.com>
- <abdde4ff-eae2-44c4-8608-89c762790549@kernel.org>
- <99b9e6aa-36b4-456c-ba46-6e1207cc1019@oss.qualcomm.com>
- <627428b1-7381-44bf-9d66-f185f2e216f6@kernel.org>
-Content-Language: en-US
-From: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-In-Reply-To: <627428b1-7381-44bf-9d66-f185f2e216f6@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: qznaPttHlAaZaKnvUmkLh9nunmEFtmpL
-X-Authority-Analysis: v=2.4 cv=YPWfyQGx c=1 sm=1 tr=0 ts=68622fba cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=6IFa9wvqVegA:10 a=COk6AnOGAAAA:8
- a=ia3MPIjHn3TQ6u26krAA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-ORIG-GUID: qznaPttHlAaZaKnvUmkLh9nunmEFtmpL
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjMwMDA1MyBTYWx0ZWRfX0hTZhNVyc/Gm
- HiObLHQmUvjqTGY2hHkZ1L75niwY8jorSKKzLyCs1WqjpKEjjX/J437wqn1zirBIz9w8yFmRP57
- QZKTQnmCCbcOep0mufXXA1U3FUdgVSEUanV28pcLcHW1ARcEddbT5hivGZjI19i150ZkBlzit40
- M6T1/HwLWK12nRrvWGjRtpIKBj+DrCi86jba/XYnopCknz+APk+Fqvd3vZHVPjXLXHsz9U0mGUv
- Co8nXUyuU2vewHjbR57EueDbfaEyhWEeJreGVSYOt887yH2ZhaXbEB6VR7SkHmDU9CqogJwc/Bb
- BlaseFxXeTKfCu2RLSvMkRBzr2kd6UfSEV1jf3ywWGJccHnltmq0tgspFe7ZJfV6TYCzoUqwmWq
- 8kJ5Hbd+8ApJbF/tdx1B14P/1Vt7SR4BhcE1kNArOPHiQW5k/D7piXLZCZGnt3y3qjhbFwIq
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-30_01,2025-06-27_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 mlxlogscore=999 mlxscore=0 malwarescore=0 suspectscore=0
- lowpriorityscore=0 clxscore=1015 impostorscore=0 adultscore=0
- priorityscore=1501 bulkscore=0 phishscore=0 classifier=spam authscore=0
- authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2506300053
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
+This series improves version reporting in mmc-utils to make it easier
+for users and developers to identify the exact build in use, which is
+especially helpful for debugging and support—particularly since many
+users run pre-built binaries.
 
-On 6/27/2025 8:20 PM, Krzysztof Kozlowski wrote:
-> On 27/06/2025 15:57, Konrad Dybcio wrote:
->> On 6/26/25 7:42 PM, Krzysztof Kozlowski wrote:
->>> On 26/06/2025 16:16, Ram Prakash Gupta wrote:
->>>> On 1/22/2025 3:56 PM, Krzysztof Kozlowski wrote:
->>>>> On 22/01/2025 10:47, Sachin Gupta wrote:
->>>>>> Document the 'dll-hsr-list' property for MMC device tree bindings.
->>>>>> The 'dll-hsr-list' property defines the DLL configurations for HS400
->>>>>> and HS200 modes.
->>>>>>
->>>>>> Signed-off-by: Sachin Gupta <quic_sachgupt@quicinc.com>
->>>>>> ---
->>>>>>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->>>>>>  1 file changed, 5 insertions(+)
->>>>>>
->>>>>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>>> index 8b393e26e025..65dc3053df75 100644
->>>>>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->>>>>> @@ -133,6 +133,11 @@ properties:
->>>>>>      $ref: /schemas/types.yaml#/definitions/uint32
->>>>>>      description: platform specific settings for DLL_CONFIG reg.
->>>>>>  
->>>>>> +  qcom,dll-hsr-list:
->>>>>> +    maxItems: 10
->>>>>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>>>> uint32 has only one item. Anyway, there is already DLL there, so don't
->>>>> duplicate or explain why this is different. Explain also why this is not
->>>>> deducible from the compatible.
->>>
->>> Timeline still amazes me. I will be grumpy on this thread.
->>>
->>>> I will change it to reflect array from uint32.
->>>> There is change with artanis DLL hw addition where it need total of 5 entries
->>>> (dll_config, dll_config_2, dll_config_3, dll_usr_ctl, ddr_config)
->>>> for each HS400 and HS200 modes, hence the new addition in dt. And these values
->>>> are not fixed and varies for every SoC, hence this needs to be passed through
->>>> dt like it was passed earlier for qcom,dll-config & qcom,ddr-config.
->>>
->>> Eh, no. That's not a valid reason. It's still SoC deducible. Don't bring
->>> your downstream practices here, but remove EVERYTHING from downstream
->>> and start doing things like upstream is doing.
->> QC SoCs have between 0 and 4 SDHCI instances, each one potentially requiring
->> different tuning, let's keep this data in DT
->
-> OK, this should be explained in commit msg.
->
-> Best regards,
-> Krzysztof
+These changes should make it easier to track and support mmc-utils
+deployments in the field.
 
-sure, I will update this into commit message.
+---
+Changes since v1:
+ - Add a 3rd patch to print the version at program start
 
-Thanks,
-Ram
+Avri Altman (3):
+  mmc-utils: Add option to print version
+  mmc-utils: Makefile: Make version string to show commit date
+  mmc-utils: mmc.c: Print version at program start
+
+ Makefile |  4 +++-
+ mmc.c    | 12 +++++++++++-
+ 2 files changed, 14 insertions(+), 2 deletions(-)
+
+-- 
+2.34.1
 
