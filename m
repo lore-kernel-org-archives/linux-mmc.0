@@ -1,39 +1,81 @@
-Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 832FF17C220;
-	Mon, 30 Jun 2025 08:13:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.172
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 16CE1248F44;
+	Mon, 30 Jun 2025 09:35:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751271210; cv=none; b=bv6SRv+YYAfquMgfydQN309WX+GwS08WD3/CNLIZ+r4lnKyM7zTkN5cWtArJDnCN141QnVLsfSx20SoD/7+aifjf4lQTRSSC+S1dyaAjl1KmCZ3LAinhYMYzL76Y6vUHJ/uGIBK303HC7l61krQ6gWFTTJwdZWbXDMUXvE9iHiM=
+	t=1751276154; cv=none; b=EMj+zG4c8ifwcPsobPhHQ65GAawyeNlAs7rltDK9tfUqrVgpgcWPcwgIQCWga4cSFDppM0bLPjUZ23wg22aYQsOFowlbDAOb1ggMaIu9cLOMzFQ/vj1i2t7YVYtLbbl/48XNPfnz+LLbQfHxWqC2+07ejKk0ZEqtVi3os72G4ds=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751271210; c=relaxed/simple;
-	bh=DB4YoTG+7ceqhcGq1mcwqGaNyc0eZjbwT2mE65xdIHo=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=dC/6zEMHL8H4TIgP0FTdnKTtV7zFzmorD9sGtl0SNl1cG20/aM+wMU3UUIDQTdcm3TEX8i5WJ27XCYKQm6+LljjIFI4AGviIrGhf5kWgpjejwgZokypDAtq7iKpjdSLf/0RTMCnQMChfwmN6Fyd3SwXV+9goTuTDfceC1T4PQh4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; arc=none smtp.client-ip=210.160.252.172
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
-X-CSE-ConnectionGUID: Fukrx9m0SZ6KXSvbYHxfNA==
-X-CSE-MsgGUID: tVnhXkn3Qei4FVMjDPXjBw==
-Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie6.idc.renesas.com with ESMTP; 30 Jun 2025 17:13:26 +0900
-Received: from localhost.localdomain (unknown [10.226.92.44])
-	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 157D141BF1FF;
-	Mon, 30 Jun 2025 17:13:23 +0900 (JST)
-From: Biju Das <biju.das.jz@bp.renesas.com>
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-	Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Biju Das <biju.das.jz@bp.renesas.com>,
+	s=arc-20240116; t=1751276154; c=relaxed/simple;
+	bh=z29HrFDi9s65t9GNCGzh74kdd7wcDIierOJOKdAPlLQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=jAo74iLkE16vn0TqNzPLGiZELY82IvTeRuaS6DOKo1jxNun+Xh55NkCZRtKKwZZtEakVOkeqiF2+EaY1M+aK5Pg2a1fzKJ2qSKrUofaXXRvb4n8Gvw0NNN+1DMkDlUkToOBxDsxjlPo6C7wPTNt7hLjyUo9fqX6I9DkwtZIXn2s=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=gsYx3mjU; arc=none smtp.client-ip=209.85.221.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gsYx3mjU"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-3a4e62619afso464245f8f.1;
+        Mon, 30 Jun 2025 02:35:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1751276150; x=1751880950; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Y1A5u/XezbCzc0vXccv/POOZnvtspnWkWrOLPiV9LNk=;
+        b=gsYx3mjUSXnSoJBZTLI/ou4abMltHTOOBAppbHxNo9HyNLIKcJuB/M+zr/R1YToFat
+         m6AneMUwojfAI5BQTYCcMULbqegeCIyDZztmKHq3QvKprDajV3C0On2XZZ8uM2lUfNC4
+         MnI6UwpZcvbY4W5dJH4lyi2SinUyCNtGSTB1xwF9TcMrXjsHGoA4AY/e3G2ifDCx3Opa
+         Ybx6K1/5OGGPU7HRzfKONi7mvObqBV/7lUaiuyql5l7e3Q6i5kBZ7fZbsZZa7KJ8Rsbi
+         cjQctlOhKyaTQvFOr/rtnBIxPyVAUvcLqN4K8DWAwZdknB534XtETk0KqrAGzhK2HoXS
+         Q66w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1751276150; x=1751880950;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Y1A5u/XezbCzc0vXccv/POOZnvtspnWkWrOLPiV9LNk=;
+        b=hpVyIb2KRCrs3Vtyg06Xh8gnmhlPCfOwC17KL7ApdFTqaGN5MUswfDzwIcG+VcNb8y
+         f9OSo05bggykTpKQ1axLupGPpucfr3UxvAppNKGcD+b0mgspjT6Fc/gWUfXXMUB5xjnA
+         QY5uRfud/OD7cUwPIozNMOXj64lY65BTabP2QWdFI/2Ge0DfmC92Rs7ACzCz5J6iF/E0
+         gI4M1JTr4bPo3Pj9w9Bg9pTwUYpz+3Bo+SmvLKEEp0+MLI1UOMT1RUy7dH3NhMAfihrE
+         BHu9kBIhs6ez6H5V0nSwTTQA+qnZbN5UgDahrVCysZIoWiSBbXDPf50RJroEGKruQHkW
+         UoLQ==
+X-Forwarded-Encrypted: i=1; AJvYcCVn+bAlhBR561F1LCS9Um+zL1CcJmi6wXUyCRTNMz+WTmoMkIsyPxgLwt0uyOj2iHeNgxBUK8RuUMVW@vger.kernel.org, AJvYcCXArlL3GN+GK09eaIUmhTFVz+NVR7m0wFdgFOK0lxzSFOfP2ykFdInAZzGzBxEldFBy2EzScHRPwyNm/ng=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwMrfgQEi2YO564UQqQE6K+n37TcVUlFgsnEAnHzXFWQukx8lNz
+	iwGgumXfwcvbWKuhQQ6ZYOxFTUxm0JolnO/DOm4bbdMAJ5/ux4Jdi+nH
+X-Gm-Gg: ASbGnctau/JBqOZAtPuOJttaDJeS1NplTFQAJeNiaL/ZqwAMTWZjULsk9MgAT0Bo6KG
+	ia7ogqdDekU3EVfarjsib7bXshWndVsJFiCFeloLM2aGWLy6NpmBAMYKy5JKYL3tmK37beGHgMY
+	cJj63I17e/q/rzCKccc6LG+WcsHP+GGGVmYzaxtCfXttckoGRGYeRNW5G/+rd+58yzfCaOT/uek
+	seTZZceFwxicSbWKYPnDXa8bEoQlYhq4meSFFeg9F6gAu0As9gTAqITFrPgCOdoFo73eMlguNP4
+	jEabBvY6IVM+A4yaszwZjYBNDiGwgBk+WT+8uyJIkiVjMNL/RmCerKhAPSzMss134xe4TIxPPhl
+	W5P5s1yEWr7pZSqhHIi4lSOl8cA==
+X-Google-Smtp-Source: AGHT+IENoQHFcKucvcnuAdWdAyrPNttNlfViNN8c8eBHYW6QCFoessLifIGmNu5Aps8j4D3BqFxOXw==
+X-Received: by 2002:a5d:64cb:0:b0:3a6:d680:f282 with SMTP id ffacd0b85a97d-3aaf43b95cfmr2363583f8f.7.1751276150193;
+        Mon, 30 Jun 2025 02:35:50 -0700 (PDT)
+Received: from thomas-precision3591.imag.fr ([2001:660:5301:24:234c:3c9a:efe4:2b60])
+        by smtp.googlemail.com with ESMTPSA id ffacd0b85a97d-3a88c7ec69dsm9774684f8f.6.2025.06.30.02.35.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 30 Jun 2025 02:35:49 -0700 (PDT)
+From: Thomas Fourier <fourier.thomas@gmail.com>
+To: 
+Cc: Thomas Fourier <fourier.thomas@gmail.com>,
+	Ulf Hansson <ulf.hansson@linaro.org>,
+	Florian Fainelli <florian.fainelli@broadcom.com>,
+	Ray Jui <rjui@broadcom.com>,
+	Scott Branden <sbranden@broadcom.com>,
+	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>,
+	Stefan Wahren <wahrenst@gmx.net>,
+	=?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <u.kleine-koenig@baylibre.com>,
+	Yumeng Fang <fang.yumeng@zte.com.cn>,
+	Eric Anholt <eric@anholt.net>,
 	linux-mmc@vger.kernel.org,
-	linux-renesas-soc@vger.kernel.org,
-	Geert Uytterhoeven <geert+renesas@glider.be>,
-	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH RFC/RFT 2/2] mmc: renesas_sdhi: Enable 64-bit polling mode
-Date: Mon, 30 Jun 2025 09:13:11 +0100
-Message-ID: <20250630081315.33288-3-biju.das.jz@bp.renesas.com>
+	linux-rpi-kernel@lists.infradead.org,
+	linux-arm-kernel@lists.infradead.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: bcm2835: Fix dma_unmap_sg() nents value
+Date: Mon, 30 Jun 2025 11:35:07 +0200
+Message-ID: <20250630093510.82871-2-fourier.thomas@gmail.com>
 X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250630081315.33288-1-biju.das.jz@bp.renesas.com>
-References: <20250630081315.33288-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -42,27 +84,29 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-Enable 64-bit polling mode for R-Car gen3 and RZ/G2L SoCs.
+The dma_unmap_sg() functions should be called with the same nents as the
+dma_map_sg(), not the value the map function returned.
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Fixes: 2f5da678351f ("mmc: bcm2835: Properly handle dmaengine_prep_slave_sg")
+Signed-off-by: Thomas Fourier <fourier.thomas@gmail.com>
 ---
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
+ drivers/mmc/host/bcm2835.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 4b389e92399e..9e3ed0bcddd6 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -107,7 +107,8 @@ static const struct renesas_sdhi_of_data of_data_rza2 = {
+diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+index def054ddd256..4fced9b36c80 100644
+--- a/drivers/mmc/host/bcm2835.c
++++ b/drivers/mmc/host/bcm2835.c
+@@ -503,7 +503,8 @@ void bcm2835_prepare_dma(struct bcm2835_host *host, struct mmc_data *data)
+ 				       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
  
- static const struct renesas_sdhi_of_data of_data_rcar_gen3 = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
--			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
-+			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
-+			  TMIO_MMC_64BIT_DATA_PORT,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
- 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
+ 	if (!desc) {
+-		dma_unmap_sg(dma_chan->device->dev, data->sg, sg_len, dir_data);
++		dma_unmap_sg(dma_chan->device->dev, data->sg, data->sg_len,
++			     dir_data);
+ 		return;
+ 	}
+ 
 -- 
 2.43.0
 
