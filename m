@@ -1,23 +1,24 @@
-Received: from relmlie5.idc.renesas.com (relmlor1.renesas.com [210.160.252.171])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 47CC9239E82;
+Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 832FF17C220;
 	Mon, 30 Jun 2025 08:13:27 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.171
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=210.160.252.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751271210; cv=none; b=FLsicrm7xgOX1ie7ee9oeK18l+elqdB/KJ9+i9+Owq48rnyiK2oDx4L6B0kUzWkhTbkPt8BEhcZ4LZbYXKuJgYQw7Y86YJhsO+5t9PcypGXTJ765r8X+S5ayijKO5ZqL9EBfG8AchrkTgIHnI5qHGtz/IoX+EbD7CrU0EPziApM=
+	t=1751271210; cv=none; b=bv6SRv+YYAfquMgfydQN309WX+GwS08WD3/CNLIZ+r4lnKyM7zTkN5cWtArJDnCN141QnVLsfSx20SoD/7+aifjf4lQTRSSC+S1dyaAjl1KmCZ3LAinhYMYzL76Y6vUHJ/uGIBK303HC7l61krQ6gWFTTJwdZWbXDMUXvE9iHiM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1751271210; c=relaxed/simple;
-	bh=8LCExvnyGXEauHQ75u5swL3gccPi+WXz5xY5SUNv6Q4=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=emlZOry6tmB2+YYu4+6t8MWjm8DhX9zleDv87KuvywVqhADnoTfFmH/0NB47ZubJ9FSXZZnpXStA1Wo2vxDrd5DRm2R9Ho91CKrIQWjt3Crgqnc/QdRCDZodSuDc9hTysIAT2OC54eiZ6eOalpxGDj1A1FmhvpoAJav40NjjFnA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; arc=none smtp.client-ip=210.160.252.171
+	bh=DB4YoTG+7ceqhcGq1mcwqGaNyc0eZjbwT2mE65xdIHo=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version; b=dC/6zEMHL8H4TIgP0FTdnKTtV7zFzmorD9sGtl0SNl1cG20/aM+wMU3UUIDQTdcm3TEX8i5WJ27XCYKQm6+LljjIFI4AGviIrGhf5kWgpjejwgZokypDAtq7iKpjdSLf/0RTMCnQMChfwmN6Fyd3SwXV+9goTuTDfceC1T4PQh4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com; spf=pass smtp.mailfrom=bp.renesas.com; arc=none smtp.client-ip=210.160.252.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=bp.renesas.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bp.renesas.com
-X-CSE-ConnectionGUID: KgqNFuYxRKKwAEGOa8b6Eg==
-X-CSE-MsgGUID: h+65nhXGQJOh4DpLPiC2Gw==
+X-CSE-ConnectionGUID: Fukrx9m0SZ6KXSvbYHxfNA==
+X-CSE-MsgGUID: tVnhXkn3Qei4FVMjDPXjBw==
 Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie5.idc.renesas.com with ESMTP; 30 Jun 2025 17:13:20 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 30 Jun 2025 17:13:26 +0900
 Received: from localhost.localdomain (unknown [10.226.92.44])
-	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 60F5241BF1FF;
-	Mon, 30 Jun 2025 17:13:18 +0900 (JST)
+	by relmlir6.idc.renesas.com (Postfix) with ESMTP id 157D141BF1FF;
+	Mon, 30 Jun 2025 17:13:23 +0900 (JST)
 From: Biju Das <biju.das.jz@bp.renesas.com>
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
 	Ulf Hansson <ulf.hansson@linaro.org>
@@ -27,10 +28,12 @@ Cc: Biju Das <biju.das.jz@bp.renesas.com>,
 	Geert Uytterhoeven <geert+renesas@glider.be>,
 	Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
 	Biju Das <biju.das.au@gmail.com>
-Subject: [PATCH RFC/RFT 0/2] Enable 64-bit polling mode for R-Car Gen3 and
-Date: Mon, 30 Jun 2025 09:13:09 +0100
-Message-ID: <20250630081315.33288-1-biju.das.jz@bp.renesas.com>
+Subject: [PATCH RFC/RFT 2/2] mmc: renesas_sdhi: Enable 64-bit polling mode
+Date: Mon, 30 Jun 2025 09:13:11 +0100
+Message-ID: <20250630081315.33288-3-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.43.0
+In-Reply-To: <20250630081315.33288-1-biju.das.jz@bp.renesas.com>
+References: <20250630081315.33288-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -39,22 +42,27 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 
-As per the RZ/{G2L,G3E} HW manual SD_BUF0 can be accessed by 16/32/64
-bits. Most of the data transfer in SD/SDIO/eMMC mode is more than 8 bytes.
-During testing it is found that, if the DMA buffer is not aligned to 128
-bit it fallback to PIO mode. In such cases, 64-bit access is much more
-efficient than the current 16-bit.
+Enable 64-bit polling mode for R-Car gen3 and RZ/G2L SoCs.
 
-Biju Das (2):
-  mmc: tmio: Add 64-bit read/write support for SD_BUF0 in polling mode
-  mmc: renesas_sdhi: Enable 64-bit polling mode
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  3 +-
- drivers/mmc/host/tmio_mmc.h                   | 12 +++++++
- drivers/mmc/host/tmio_mmc_core.c              | 32 +++++++++++++++++++
- include/linux/platform_data/tmio.h            |  3 ++
- 4 files changed, 49 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+index 4b389e92399e..9e3ed0bcddd6 100644
+--- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+@@ -107,7 +107,8 @@ static const struct renesas_sdhi_of_data of_data_rza2 = {
+ 
+ static const struct renesas_sdhi_of_data of_data_rcar_gen3 = {
+ 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
+-			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
++			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2 |
++			  TMIO_MMC_64BIT_DATA_PORT,
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+ 			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
+ 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
 -- 
 2.43.0
 
