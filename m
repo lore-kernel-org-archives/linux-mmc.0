@@ -1,266 +1,229 @@
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B34623F9FB
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2025 21:59:56 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07B571E1DF2;
+	Tue,  1 Jul 2025 06:52:57 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751320798; cv=none; b=er1ZycjhqrZsEnn/Rvo0znpscCjkGDtFRHAv4Ug6KozGqguQblGlPTT6ti7idlUaJ/zntI1qEJen6n4ReFalSL186v5PxydKJ7RR0TpNlXF3KmaTmJ80ngOQzK6E31zLh9qDkI5z+SH6QtAqbNhW93HhcdKqePfjI/hJjAEcDJo=
+	t=1751352779; cv=none; b=gOr7RPzAGOQC+JpetbvTc1nK+9r+reVF4n/0YfMeX/kDjYI3S2/JvDAGMVtwj3eluMBxqWVbtTIowZc7aXAW3iXDnr8ptq4OxPtl//8xJcJ1GylBZ6wOapTEQYjsgq2fRz2PRkmTPuU3BQqh1PQgtZ0s+Tw+3SAZLcYCena4YLg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751320798; c=relaxed/simple;
-	bh=zuloaCZER//BFJaKOvxnCQbs1oE1h9o1l00traZvW+k=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=r9NJ6cSya46JqPyy/+UKF9P76OZ5eu3IUfhZ4vX3IfcOmu/uqN8U1W4MvdoNHu3+MGYGEbrrcWgK6/K2+WG5ehhlJG8nfYgLfQZudbFl5TD+zRku+8nZZkf0zqKlQft8nK7hCMK6/XgiDuYJaV8c8iv7raPptw5o8No1dL2UoZ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=et1/w5/J; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
+	s=arc-20240116; t=1751352779; c=relaxed/simple;
+	bh=9wPu8gcQVg4D3OqtnW2RSYNmwHGKYSyg+wpN0dFpD7c=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=tL550ghakHuKtg2frKQpw1U5Wj2+Ki5ocLhoGbvtLXHLMsKKUMUb+d8KwJDz50r1WNLYytlGnxei0e0DAzZxhIP7quoLhVcm4uDXgddqVEj1qTwX5CeD9tzPhxciLTK5k8bqYQvfySmxXye+eK+8kXCf75uqz0ewVrg+uWQbWk0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=fPQCEHXb; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="et1/w5/J"
-Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 55UGVaWL032752
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2025 21:59:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=j5Bn6WtEbimwKYIt4/ZjgnbS
-	pY9GsCsqCOMb7LdunEU=; b=et1/w5/JkJ7dXjXHYCkG8PGJ0gnTKCmfuMUAHgEo
-	HMusIxEdMGHLVJMBvRXcHeFJ0IU8yHu338YA+kKlJ8zoqUKay/z8lRaXyYA5xXQe
-	TvnFe7sGzVvRjLokMOAw9kZDHFwXOY0Y0VWk5XtDY5ivwcpJOldPKRyo0jsu82W1
-	67+g32o0eWSyLsW7C+lEHxRGzbCq8ncj10DBJcBvDfY5E/VHglRmsaJDBguRp+s7
-	tcQINy6lXufuwmV5jYBFBFKJHeiXSGnUQYng1bF6DrIdzL7T+BseAAMVuz0GKOTu
-	wwQiYhV6I7cl5nv7Eb2HThnTgr28MTwHHOVMFmYjdqxN8g==
-Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47j7qm67yk-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
-	for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2025 21:59:55 +0000 (GMT)
-Received: by mail-pg1-f199.google.com with SMTP id 41be03b00d2f7-b34ca003f1cso1932942a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Jun 2025 14:59:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751320794; x=1751925594;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=j5Bn6WtEbimwKYIt4/ZjgnbSpY9GsCsqCOMb7LdunEU=;
-        b=dJs31GKTmTkVD1uFc6wrLa3WDYgPDl1KaFQYBrGNXY8N80GtBPhA4WQ+ReTXIwmdgB
-         frSCwnAvmeR6lIeDZ5ZjR5fEgDESELTG2O1p0wGErML7JrDJsCNy15uZa/4lBzpU53Mg
-         Hfd0Q7tYvSzV01e0MbD/VxzN2CTmCQe1j3CxQfLdhMJeP+ZFCdxF1W/8zNb36y5ISGU+
-         aQlCnzqO6STzLkT59OJnTqf2bdHe+9KaF3OtMp97jsTQiDJ2wurCFeDR6D1U9k8WI7ax
-         Ngv+I+1m6UQC56H+TGTkY5oiAFIGabLsIjAMun5OHvnWn1eTJO8uIF9O2ALTHG8Nawzb
-         M0vg==
-X-Forwarded-Encrypted: i=1; AJvYcCVVk2DDj6r4IVgYCReuh+bvmC80B1s08LZQEFGYIZRnJvih8Apx+VcebDusuCHqOqxcsi8mXPkKG7Y=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxRViEw0BLy9XOV8yn+IifU+eLOQc6P+g5nOeULsHLAu+lCskcM
-	bMwgkOTlazR+sNhoQRYx87d7fsxm03jTgk0RugTlprWfWqIfmmHuYYwnGejSgPMqb5g3rCYWQYA
-	8xbaPnkLrzS4rXRzrOeKsTveN0e7ZQbp6atE6P9tDYMuIjYB1OQAeNZ3wdGB6vBw=
-X-Gm-Gg: ASbGncuJrdvCl75hnOvFbwzFbRqIA1/aMNnHfp4tmz3YCOQO8ibIKS3YLjTvk4tUgxA
-	MiqTQXIAwDq/SXMsCuY0f+VB3JD5fTLZnfN+82al5S1edvDG9kHMihcFfdMkvdKChAg6z2IJtNe
-	2YCUALybjpnj/3qslgJe18M+DtFdquNsBVPsdfpYcavewyM53BKBPmftJA4q5S0n1NDhdwHgZT6
-	F/HKknLkwWneYxMUz9Z4uvK905jO/etz2dyrUgmzpXi5lASxf6Wwia2G5tcBwJ6jsqzCNJM2Ts3
-	KkCb/D9RG7+VWwc+F8tQY7b5FEpql0rz4uckzV2cuSMGjxCt4pdQ7nFOKjXSBPQl03Ep0umA102
-	cIiz2jg==
-X-Received: by 2002:a17:90b:268d:b0:312:e91c:e340 with SMTP id 98e67ed59e1d1-318c9283adfmr21494853a91.35.1751320793811;
-        Mon, 30 Jun 2025 14:59:53 -0700 (PDT)
-X-Google-Smtp-Source: AGHT+IGb3EC+ajrtLWff/5gPWkKDnqD5kFdfXbHl7+2iA8bxSslPgNcBKF5TWjxSHHYgk8wAF+S2XQ==
-X-Received: by 2002:a17:90b:268d:b0:312:e91c:e340 with SMTP id 98e67ed59e1d1-318c9283adfmr21494807a91.35.1751320793324;
-        Mon, 30 Jun 2025 14:59:53 -0700 (PDT)
-Received: from hu-bjorande-lv.qualcomm.com (Global_NAT1.qualcomm.com. [129.46.96.20])
-        by smtp.gmail.com with ESMTPSA id 98e67ed59e1d1-315f542661asm14131485a91.26.2025.06.30.14.59.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Jun 2025 14:59:52 -0700 (PDT)
-Date: Mon, 30 Jun 2025 14:59:49 -0700
-From: Bjorn Andersson <bjorn.andersson@oss.qualcomm.com>
-To: Luca Weiss <luca.weiss@fairphone.com>
-Cc: Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
-        Joerg Roedel <joro@8bytes.org>, Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konradybcio@kernel.org>,
-        Robert Marko <robimarko@gmail.com>,
-        Das Srinagesh <quic_gurus@quicinc.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 00/14] Various dt-bindings for SM7635 and The Fairphone
- (Gen. 6) addition
-Message-ID: <aGMI1Zv6D+K+vWZL@hu-bjorande-lv.qualcomm.com>
-References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="fPQCEHXb"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5614GtJu024904;
+	Tue, 1 Jul 2025 06:52:55 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	Q3KINF7gvWiCpkXSsByEiiOLNOENKgXXP3u4eWxr4eM=; b=fPQCEHXbMwBDb8oW
+	7fA7I+6a8fWr4GZk+ZPD7acdWMw6buIpzlcqEe+a7K7KfqrEDM/X4Kl2x7fnOioS
+	E6lUq/hHNGHCiRNDMpG4R7uZD6fxKO2vyJ00SKaTfUiny2X+dCzYKuSQYt9nMtd6
+	Livu2G/qAVobYQxPCStme4LBuBptwLuzekjFICR9Iz5OlDcbfC4KDjBM+Eb2xzb7
+	Rphj2gW+0q/Ara9MCA7wa6DcSc56R0shm0vfJBtMkjeb0N6rD/7XWuS4VpA61Jqb
+	OIn+8+QObQaO8c1BZd3j9WZs0QjexFxgMiSPrKJutON/IFJ6+BXLyom1X5Rf+rZ/
+	EFxVdA==
+Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47j801yc49-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 01 Jul 2025 06:52:54 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5616qr3C006918
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Tue, 1 Jul 2025 06:52:53 GMT
+Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Mon, 30 Jun
+ 2025 23:52:49 -0700
+Message-ID: <32ed84b2-41f6-4c1e-a7c6-f3cbc92ae6b5@quicinc.com>
+Date: Tue, 1 Jul 2025 12:22:46 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
-X-Authority-Analysis: v=2.4 cv=C4TpyRP+ c=1 sm=1 tr=0 ts=686308db cx=c_pps
- a=Oh5Dbbf/trHjhBongsHeRQ==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=kj9zAlcOel0A:10 a=6IFa9wvqVegA:10 a=6H0WHjuAAAAA:8 a=ykmX_Yx8RuNhN3dvDKMA:9
- a=CjuIK1q_8ugA:10 a=_Vgx9l1VpLgwpw_dHYaR:22 a=Soq9LBFxuPC4vsCAQt-j:22
-X-Proofpoint-ORIG-GUID: drFAdGacbSZWImf3UK-xC80QYtuS5Tsq
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNjMwMDE4MCBTYWx0ZWRfXzTFiRfk+3D2h
- KTGFL7hHKAlJ/Dp+7bXRmTMMHhqVFADXVwuFx55R/ZuMXDREfLdn6owm28yORTQhilGg2wBi3dJ
- kJzPlK5L4IwM3PuT0M1PAQ/uwqWC8EAJ/8+uRSm/hIOXv6iyrlPQ4ccRCnE5PX0UGXk1m0GLWjc
- /WnK7jd1MvFrjdxNWIBmDTTL3gbcjjLRc2uFc+A1Lr4SD/9t5yuKv/1n3LLILOmtk7hc8uHQP3v
- X3MAzJkUFf6NOuZ3s8h/c7n+wHqT8qBUyTuG6MOauVzAaOlGaA35xLhom/JOUQOyadnpF5hOYc/
- WoPaz8VY6ziD/eNaL9KCvv48ARIprxbZDmqhSxT8Qw5kuN0AKRxzMuacZtNGTO7mbe+hVqsRfH4
- SxFuwbzhy7hNOkS4nQqmls+nHMHf71ypAkcSY8jPfWlZL4zVwbQbxR82/WKHt+tc5OgQ8ZbP
-X-Proofpoint-GUID: drFAdGacbSZWImf3UK-xC80QYtuS5Tsq
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Ensure SD card power isn't ON when
+ card removed
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+        Adrian Hunter
+	<adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC: <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <quic_cang@quicinc.com>,
+        <quic_nguyenb@quicinc.com>, <quic_rampraka@quicinc.com>,
+        <quic_pragalla@quicinc.com>, <quic_sayalil@quicinc.com>,
+        <quic_nitirawa@quicinc.com>, <quic_bhaskarv@quicinc.com>,
+        <kernel@oss.qualcomm.com>
+References: <20250620090333.3068568-1-quic_sartgarg@quicinc.com>
+ <61cffc10-3e05-4331-b967-6c01cc03d072@oss.qualcomm.com>
+Content-Language: en-US
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <61cffc10-3e05-4331-b967-6c01cc03d072@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: jbQbW0LEsUa3CJn6aVgm7oGAi8HIWC7z
+X-Authority-Analysis: v=2.4 cv=YPWfyQGx c=1 sm=1 tr=0 ts=686385c6 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8
+ a=AetVj61-NovANKZkZ4wA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-ORIG-GUID: jbQbW0LEsUa3CJn6aVgm7oGAi8HIWC7z
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzAxMDAzNyBTYWx0ZWRfXy0wZFbgeLNoL
+ 7gUwMlWXm+r8ggtyXWmjAAmGIqgsxEnlDcfaSSbK3SzlVxesUld41agXbjSAdf17HtKI7vaA6Z8
+ AYcjO2Nrh/NwZdixUjwQrlhMzPGVOOw9uGA66rDqg7S5RFOqUZ9wSyIzsqwLpBCOdpNf1mRY8QU
+ jFRYzlS2xZrhVo4n2561e04+8X7woe1yq8NQ703z34ZaQpyPVOBSwSpSuvIzuCf5lolK5jt+m56
+ mPrSRpvYigcGGW8tZo5ZEBAtsrCGkClnpqnBTxZx/CtZZRFsbDvCPLt7Ls19Ye7MQxd/dCarHH9
+ SHIDQxUTRjXg0HV1yReTCtl34BEhIIZoNbs5pR2W2Mdl1sUzf3ys5bXEGBVfHli073+/tjwEhUB
+ Y4yGxTNURl0+u56Z1zcC3y6PhZSKC8WlQwcVAMAOQiEi7FR3H91Wh/KJULgIa8+I26ej2qm2
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
- definitions=2025-06-30_05,2025-06-27_01,2025-03-28_01
+ definitions=2025-07-01_01,2025-06-27_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 phishscore=0 suspectscore=0 bulkscore=0 lowpriorityscore=0
- clxscore=1011 priorityscore=1501 spamscore=0 mlxscore=0 mlxlogscore=999
- adultscore=0 malwarescore=0 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2506300180
-
-On Wed, Jun 25, 2025 at 11:22:55AM +0200, Luca Weiss wrote:
-> Document various bits of the SM7635 SoC in the dt-bindings, which don't
-> really need any other changes.
-> 
-> Then we can add the dtsi for the SM7635 SoC and finally add a dts for
-> the newly announced The Fairphone (Gen. 6) smartphone.
-> 
-> Dependencies:
-> * The dt-bindings should not have any dependencies on any other patches.
-> * The qcom dts bits depend on most other SM7635 patchsets I have sent in
->   conjuction with this one. The exact ones are specified in the b4 deps.
-> 
-
-Very nice to see the various patches for this platform on LKML!
+ spamscore=0 mlxlogscore=999 mlxscore=0 malwarescore=0 suspectscore=0
+ lowpriorityscore=0 clxscore=1015 impostorscore=0 adultscore=0
+ priorityscore=1501 bulkscore=0 phishscore=0 classifier=spam authscore=0
+ authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2507010037
 
 
-Can you please use the name "milos" in compatibles and filenames instead
-of sm7635.
 
-Regards,
-Bjorn
+On 6/21/2025 4:29 PM, Konrad Dybcio wrote:
+> On 6/20/25 11:03 AM, Sarthak Garg wrote:
+>> Make sure SD card power is not enabled when the card is
+>> being removed.
+>> On multi-card tray designs, the same card-tray would be used for SD
+>> card and SIM cards. If SD card is placed at the outermost location
+>> in the tray, then SIM card may come in contact with SD card power-
+>> supply while removing the tray. It may result in SIM damage.
+>> So in sdhci_msm_handle_pwr_irq we skip the BUS_ON request when the
+>> SD card is removed to be in consistent with the MGPI hardware fix to
+>> prevent any damage to the SIM card in case of mult-card tray designs.
+>> But we need to have a similar check in sdhci_msm_check_power_status to
+>> be in consistent with the sdhci_msm_handle_pwr_irq function.
+>> Also reset host->pwr and POWER_CONTROL register accordingly since we
+>> are not turning ON the power actually.
+> 
+> This is very difficult to parse. How about:
+> 
+> Many mobile phones feature multi-card tray designs, where the same
+> tray is used for both SD and SIM cards. If the SD card is placed
+> at the outermost location in the tray, the SIM card may come in
+> contact with SD card power-supply while removing the tray, possibly
+> resulting in SIM damage.
+> 
+> To prevent that, make sure the SD card is really inserted by reading
+> the Card Detect pin state. If it's not, turn off the power in
+> sdhci_msm_check_power_status() and set the BUS_FAIL power state on the
+> controller as part of pwr_irq handling.
+> 
+> 
+> (Now I don't know if this is a good fix as far as logic goes, but I'm
+> simply looking at the patch)
+> 
 
-> Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
-> ---
-> Luca Weiss (14):
->       dt-bindings: arm-smmu: document the support on SM7635
->       dt-bindings: cpufreq: qcom-hw: document SM7635 CPUFREQ Hardware
->       dt-bindings: crypto: qcom,prng: document SM7635
->       dt-bindings: firmware: qcom,scm: document SM7635 SCM Firmware Interface
->       dt-bindings: qcom,pdc: document the SM7635 Power Domain Controller
->       dt-bindings: mailbox: qcom-ipcc: document the SM7635 Inter-Processor Communication Controller
->       dt-bindings: soc: qcom,aoss-qmp: document the SM7635 Always-On Subsystem side channel
->       dt-bindings: thermal: qcom-tsens: document the SM7635 Temperature Sensor
->       dt-bindings: dma: qcom,gpi: document the SM7635 GPI DMA Engine
->       dt-bindings: mmc: sdhci-msm: document the SM7635 SDHCI Controller
->       dt-bindings: soc: qcom: qcom,pmic-glink: document SM7635 compatible
->       dt-bindings: arm: qcom: Add SM7635 and The Fairphone (Gen. 6)
->       arm64: dts: qcom: Add initial SM7635 dtsi
->       arm64: dts: qcom: Add The Fairphone (Gen. 6)
+Sure will update the commit text.
+
+>>
+>> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+>> ---
+>> Changes from v1:
+>> As per Adrian Hunter's comment :
+>> - Removed unrelated changes
+>> - Created a separate function get_cd for cleaner code
+>> - Used READ_ONCE when getting mmc->ops to handle card removal cases
+>> - Reordered if check conditions
+>> ---
+>>   drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++++++
+>>   1 file changed, 22 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index bf91cb96a0ea..97a895d839c9 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -1566,6 +1566,14 @@ static inline void sdhci_msm_complete_pwr_irq_wait(
+>>   	wake_up(&msm_host->pwr_irq_wait);
+>>   }
+>>   
+>> +static int get_cd(struct sdhci_host *host)
+>> +{
+>> +	struct mmc_host *mmc = host->mmc;
+>> +	const struct mmc_host_ops *mmc_ops = READ_ONCE(mmc->ops);
 > 
->  Documentation/devicetree/bindings/arm/qcom.yaml    |    6 +
->  .../bindings/cpufreq/cpufreq-qcom-hw.yaml          |    2 +
->  .../devicetree/bindings/crypto/qcom,prng.yaml      |    1 +
->  .../devicetree/bindings/dma/qcom,gpi.yaml          |    1 +
->  .../devicetree/bindings/firmware/qcom,scm.yaml     |    2 +
->  .../bindings/interrupt-controller/qcom,pdc.yaml    |    1 +
->  .../devicetree/bindings/iommu/arm,smmu.yaml        |    3 +
->  .../devicetree/bindings/mailbox/qcom-ipcc.yaml     |    1 +
->  .../devicetree/bindings/mmc/sdhci-msm.yaml         |    1 +
->  .../bindings/soc/qcom/qcom,aoss-qmp.yaml           |    1 +
->  .../bindings/soc/qcom/qcom,pmic-glink.yaml         |    1 +
->  .../devicetree/bindings/thermal/qcom-tsens.yaml    |    1 +
->  arch/arm64/boot/dts/qcom/Makefile                  |    1 +
->  arch/arm64/boot/dts/qcom/sm7635-fairphone-fp6.dts  |  837 ++++++
->  arch/arm64/boot/dts/qcom/sm7635.dtsi               | 2806 ++++++++++++++++++++
->  15 files changed, 3665 insertions(+)
-> ---
-> base-commit: d9946fe286439c2aeaa7953b8c316efe5b83d515
-> change-id: 20250623-sm7635-fp6-initial-15e40fef53cd
-> prerequisite-change-id: 20250616-eusb2-repeater-tuning-f56331c6b1fa:v2
-> prerequisite-patch-id: 5c504d171a4d1acd9ec376e01e0dd0fddbad92b8
-> prerequisite-patch-id: 0c97dcf5472fbed8ef4cffbd482f3169fe1e972d
-> prerequisite-change-id: 20250617-simple-drm-fb-icc-89461c559913:v2
-> prerequisite-patch-id: 1ce32150adbe39ad43d9a702623b55937d92a17c
-> prerequisite-patch-id: 3562d9a85381bee745402619a7acba9b951f145c
-> prerequisite-patch-id: f8447266657b779a546ecbbbc2e38bd61c422f08
-> prerequisite-patch-id: cb9d07c82e73ab3691e0ace9604bfa69cdd6bb64
-> prerequisite-patch-id: 18ab6ca6a024e5b8ea8138111064db593d72da35
-> prerequisite-change-id: 20250620-sm7635-socinfo-8c6ee8d82c9d:v1 # optional
-> prerequisite-patch-id: f1b2e11df96c271c9e3d010084809f361ee4249c
-> prerequisite-patch-id: 1471abf17230db340c67a84b5a9009f1f2ea6e0e
-> prerequisite-patch-id: 57bff00c4fedce1b78615375f12517b955dd1d16
-> prerequisite-change-id: 20250620-sm7635-pinctrl-9fe3d869346b:v1
-> prerequisite-patch-id: 43b88c44c6fc5b72a490cd3acc5d2585206e81f2
-> prerequisite-patch-id: b3b6ebd4a288bd4abf227c939a1a92eafb2cf2c8
-> prerequisite-change-id: 20250620-sm7635-clocks-7699d338dc37:v1
-> prerequisite-patch-id: 48485e0e7e8a992695af1690f8cd2c09c227a4bf
-> prerequisite-patch-id: 4685ceba3f900ad6d1d2ae35116d37f64a171d5d
-> prerequisite-patch-id: 80f71dad0c0a77da98e5e66b592f38db6d81b4b1
-> prerequisite-patch-id: 49a2fa1a14931d9143da232969e7487061466930
-> prerequisite-patch-id: f5d1794f61488235644f78ffc28e3dacdab215d1
-> prerequisite-patch-id: ab257573067ff09c94270e1fa6ad4de1480c06b9
-> prerequisite-patch-id: 6608bd3f2e198a0780736aebcea3b47ee03df9ef
-> prerequisite-patch-id: c463d0d2d84c8786ed9a09016f43b4657cbc231e
-> prerequisite-patch-id: e113e76af37f01befaf4059ee3063cb45b27fd6b
-> prerequisite-patch-id: 40f8b8acd07a9ff7da8683b1be6a58872250e849
-> prerequisite-change-id: 20250620-sm7635-clocks-misc-0f359ad830ea:v1
-> prerequisite-patch-id: 127f332296fced39a2fd2f9a1f446ba30ec28ceb
-> prerequisite-patch-id: d21a0c8ceb06523c9f3f4ce569d28714878b3f84
-> prerequisite-patch-id: 87029a8844ef174ab3e0f953a1d16957fe6c13cc
-> prerequisite-patch-id: 095c767d7b7aa67d47026589c926636e57349ca6
-> prerequisite-change-id: 20250620-sm7635-rpmhpd-dcb5dc066ce2:v1
-> prerequisite-patch-id: d71fe15334032610c05cb55aeb28bfaa44e3530c
-> prerequisite-patch-id: 729544e856b8046f7a311b719d9495f8b33c1e1f
-> prerequisite-change-id: 20250620-sm7635-icc-e495e0e66109:v1
-> prerequisite-patch-id: b387217215d6f83cbd50c380171b159a2f1406d8
-> prerequisite-patch-id: bffd82274c35f6d520f524aa2a9c1c4bef7e047e
-> prerequisite-change-id: 20250620-sm7635-eusb-phy-d3bab648cdf1:v1
-> prerequisite-patch-id: c242c9b099d738214def29d2e464b64be5f14e62
-> prerequisite-patch-id: 8c1eb426c08bc1ec9462e77139b3b64d5e1453e9
-> prerequisite-patch-id: cdbc469ab33002c6bf697c033755b598dd1a621e
-> prerequisite-patch-id: 6bb2900bb530880091622ef47d141fe1f5756a52
-> prerequisite-change-id: 20250620-sm7635-eusb-repeater-0d78f557290f:v1
-> prerequisite-patch-id: 5c504d171a4d1acd9ec376e01e0dd0fddbad92b8
-> prerequisite-patch-id: 0c97dcf5472fbed8ef4cffbd482f3169fe1e972d
-> prerequisite-patch-id: a618abb349c3de5b49f79b4b0f86d9ab502ad500
-> prerequisite-patch-id: 09f91ff3a25c16a0375bdfec80604a64eab0b4fb
-> prerequisite-patch-id: 8fca8b09d70409c5c78f9f1b77d0a4c75bce38cf
-> prerequisite-patch-id: f5c2c24d2baefcd7ff91718529ab2f2c264ab99f
-> prerequisite-change-id: 20250620-sm7635-remoteprocs-149da64084b8:v1
-> prerequisite-patch-id: 3c95a20dd456dfee100f2833de4e9931a2073c7d
-> prerequisite-patch-id: 5292d77663ea9c44346b8da86bda36e0cce3fe56
-> prerequisite-patch-id: 015edcb2a69b5e837dc7edfbc7adc22145ba611b
-> prerequisite-change-id: 20250620-sm7635-pmiv0104-34a679937d9d:v1
-> prerequisite-patch-id: 8fca8b09d70409c5c78f9f1b77d0a4c75bce38cf
-> prerequisite-patch-id: f5c2c24d2baefcd7ff91718529ab2f2c264ab99f
-> prerequisite-patch-id: d7a06ece910e7844c60b910fe8eed30ad2458f34
-> prerequisite-patch-id: e91b741c9cfc80aa149bfd8e43cae90ca58e17f2
-> prerequisite-patch-id: 5ba4a49c3792cb208ee064a6ba13545e40cb70ac
-> prerequisite-patch-id: 5bdfcbdd226f7223c04a65c1a3cdcc3ecad38858
-> prerequisite-change-id: 20250620-sm7635-pmxr2230-ee55a86a8c2b:v1
-> prerequisite-patch-id: f0bd6e083324f954b988647bb42d4e2be179fbda
-> prerequisite-patch-id: 8fe1c0fc544e8bcb35522c5eba0b36e83bfd0c19
-> prerequisite-patch-id: 525c9eb0087025024bb0aaec1ed1d7d2c0bc8f03
-> prerequisite-change-id: 20250623-pm7550-pmr735b-rpmh-regs-06087e5b3a99:v1
-> prerequisite-patch-id: 7360606a06f8fba3ea9a8f84b4ecfb8209e91ab0
-> prerequisite-patch-id: 7a06a346abdb7f7386912b92f2b84af87e7439a9
-> prerequisite-patch-id: 1e1a6eb9c5421812c07421f9fa7e3f16b26a42da
-> prerequisite-patch-id: 224df3e4068bee3a17bde32e16cd9366c55b5faf
+> What do you need the READ_ONCE for?> +
+>> +	return mmc_ops && mmc->ops->get_cd ? mmc->ops->get_cd(mmc) : 0;
 > 
-> Best regards,
-> -- 
-> Luca Weiss <luca.weiss@fairphone.com>
+> I think this op will always exist for our driver, since we call:
 > 
+> sdhci_msm_probe()
+>   -> sdhci_pltfm_init()
+>      -> sdhci_alloc_host()
+> 
+> which assigns:
+> 
+> host->mmc_host_ops = sdhci_ops;
+> mmc->ops = &host->mmc_host_ops;
+> 
+> which contains:
+> 
+> .get_cd         = sdhci_get_cd,
+> 
+> there's some more layers to this matryoshka, so I'm not a 100% sure
+> 
+
+Yes its not needed will remove it.
+
+>> +}
+>> +
+>>   /*
+>>    * sdhci_msm_check_power_status API should be called when registers writes
+>>    * which can toggle sdhci IO bus ON/OFF or change IO lines HIGH/LOW happens.
+>> @@ -1579,6 +1587,7 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+>>   {
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +	struct mmc_host *mmc = host->mmc;
+>>   	bool done = false;
+>>   	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
+>>   	const struct sdhci_msm_offset *msm_offset =
+>> @@ -1636,6 +1645,12 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
+>>   				 "%s: pwr_irq for req: (%d) timed out\n",
+>>   				 mmc_hostname(host->mmc), req_type);
+>>   	}
+>> +
+>> +	if ((req_type & REQ_BUS_ON) && mmc->card && !get_cd(host)) {
+>> +		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>> +		host->pwr = 0;
+>> +	}
+>> +
+>>   	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
+>>   			__func__, req_type);
+>>   }
+>> @@ -1694,6 +1709,13 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
+>>   		udelay(10);
+>>   	}
+>>   
+>> +	if ((irq_status & CORE_PWRCTL_BUS_ON) && mmc->card && !get_cd(host)) {
+>> +		irq_ack = CORE_PWRCTL_BUS_FAIL;
+>> +		msm_host_writel(msm_host, irq_ack, host,
+>> +				msm_offset->core_pwrctl_ctl);
+> 
+> Since you're dropping out if this function, you can pass the parameter
+> directly to msm_host_writel
+> 
+> Konrad
+
+Sure will update.
+
+~Best regards
+Sarthak
