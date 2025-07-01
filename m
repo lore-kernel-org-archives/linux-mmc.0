@@ -1,48 +1,72 @@
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 07B571E1DF2;
-	Tue,  1 Jul 2025 06:52:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 54F4826C3B6
+	for <linux-mmc@vger.kernel.org>; Tue,  1 Jul 2025 09:04:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751352779; cv=none; b=gOr7RPzAGOQC+JpetbvTc1nK+9r+reVF4n/0YfMeX/kDjYI3S2/JvDAGMVtwj3eluMBxqWVbtTIowZc7aXAW3iXDnr8ptq4OxPtl//8xJcJ1GylBZ6wOapTEQYjsgq2fRz2PRkmTPuU3BQqh1PQgtZ0s+Tw+3SAZLcYCena4YLg=
+	t=1751360693; cv=none; b=fUsa4TsXxYwOrPrcmwkE3iBnxOUwAKHWZfNVyT2lERx1V/hkyADqvLrd8dzpqWIcOXstBzyTiwCwf+wLeyZ/SeR+qNHsFUdWXN+HdY+z9klHX4IoA8gfIZpm41WeJYtksbfvQ+NUTEPQXyukc6/Bigzd6Mjm16M2SAjSPQXtYIg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751352779; c=relaxed/simple;
-	bh=9wPu8gcQVg4D3OqtnW2RSYNmwHGKYSyg+wpN0dFpD7c=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=tL550ghakHuKtg2frKQpw1U5Wj2+Ki5ocLhoGbvtLXHLMsKKUMUb+d8KwJDz50r1WNLYytlGnxei0e0DAzZxhIP7quoLhVcm4uDXgddqVEj1qTwX5CeD9tzPhxciLTK5k8bqYQvfySmxXye+eK+8kXCf75uqz0ewVrg+uWQbWk0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=fPQCEHXb; arc=none smtp.client-ip=205.220.180.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1751360693; c=relaxed/simple;
+	bh=lpfLiQQ4hlhOCJz1bORSb7XRjrfYlRfnFzYM0+NnJdk=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=AJo3mLztcoRp06kUWTsXk4eQpSM9xkP66S1eSuMYxT08Smolesr9DW3HojYrj/+PYXkRwuAAtAitUzRDbydgH7U+C78gLbCdfPfVhlCkVvvRBFOYHHoLlfbavmiwAXzJrOGtuv3AaNtdeSd//4ylEhuhjlquoQaY2s6kkP1J3dw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=hXXH56RJ; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="fPQCEHXb"
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5614GtJu024904;
-	Tue, 1 Jul 2025 06:52:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="hXXH56RJ"
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 5614a7GH002177
+	for <linux-mmc@vger.kernel.org>; Tue, 1 Jul 2025 09:04:51 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
 	cc:content-transfer-encoding:content-type:date:from:in-reply-to
 	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	Q3KINF7gvWiCpkXSsByEiiOLNOENKgXXP3u4eWxr4eM=; b=fPQCEHXbMwBDb8oW
-	7fA7I+6a8fWr4GZk+ZPD7acdWMw6buIpzlcqEe+a7K7KfqrEDM/X4Kl2x7fnOioS
-	E6lUq/hHNGHCiRNDMpG4R7uZD6fxKO2vyJ00SKaTfUiny2X+dCzYKuSQYt9nMtd6
-	Livu2G/qAVobYQxPCStme4LBuBptwLuzekjFICR9Iz5OlDcbfC4KDjBM+Eb2xzb7
-	Rphj2gW+0q/Ara9MCA7wa6DcSc56R0shm0vfJBtMkjeb0N6rD/7XWuS4VpA61Jqb
-	OIn+8+QObQaO8c1BZd3j9WZs0QjexFxgMiSPrKJutON/IFJ6+BXLyom1X5Rf+rZ/
-	EFxVdA==
-Received: from nasanppmta01.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47j801yc49-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 01 Jul 2025 06:52:54 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA01.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 5616qr3C006918
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Tue, 1 Jul 2025 06:52:53 GMT
-Received: from [10.217.216.168] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1544.9; Mon, 30 Jun
- 2025 23:52:49 -0700
-Message-ID: <32ed84b2-41f6-4c1e-a7c6-f3cbc92ae6b5@quicinc.com>
-Date: Tue, 1 Jul 2025 12:22:46 +0530
+	lkIMxJPkQ5VcBbbAsfDLRu3BLuhWWjrI6VV4sNA6DUg=; b=hXXH56RJrGvCQvLR
+	x+I081SlS8bTOI2kT5kKfyQmjvCm+i3FhSZpQ5OD8/AJmMrNbbLoohCTBcN3EMV8
+	BJK/Smbl26D7apB6iNS86tYiieiA2DpUw+Yg1VGvg4RPmv4qU4JQ5hyZbjGgWMap
+	f2dFUws2ucnMik4ukIV0URYZJEXOZNlBBxyjhCcGWW4lLi0qB3oqmtoxCxU7hHAT
+	ZqtvvP2pdCc3cEkwVilCCa25En3NGLbfuwszQSxdlReztA0Uu64rYdK26RpkrLmA
+	Doapmyhe7EsNlH7iu5pTa2UepOp2TqOKaHv2TRyCbje/QCExP9QMF6vuB4GJ9TpD
+	1V3RBg==
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47j9pcqy1j-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Tue, 01 Jul 2025 09:04:51 +0000 (GMT)
+Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-4a5832bdd8dso5493041cf.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Jul 2025 02:04:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1751360690; x=1751965490;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=lkIMxJPkQ5VcBbbAsfDLRu3BLuhWWjrI6VV4sNA6DUg=;
+        b=YTMFImcuSbb84tEEVXfYWudMc/Fwwrbme87sUWv6W28tXv61pmAyfYwLCA3D4D71MN
+         dBEHUayze5xgh8p3LXKuvLOfWqaHBuLT2s5FZ0t0NwyNy8SmUO96w9piAKDakYotXTnr
+         V25K/xeVdBFEbaMxFclCokFWNRokk2KJkMSpQl1dlbwckQR/6dHiCyambaSB3ZHkK6x3
+         vghQ0AFFE9gj+bfhKH5MQbSvdCAtdDGZew8nqFwzVYadPJvyLgO/R0MsiK3T3pEhBi6G
+         5u+pc1Ig3rQB4PIwHGtnV7AT23zlDX31BC1at+bNn5CtAfg7y/Ng6GONcM9K3jUU5gIH
+         C0VA==
+X-Gm-Message-State: AOJu0YyUewgYqnWSXnWJPlO7Tmof2GIC3JR3Av3xVGgbZw+u+DEeN4Y9
+	qMjyVjJDvukZs6FyHlrOvZVAeY7Yilrtjr39nlyhXnyWrirNBem5n/e1thIXAho1rlJxz/4unE6
+	qosXz8FRO9oWy5Mv1nUTSNMP8RHqVy2GfUvWgCIWPWNMsvUHRtcXm3KRfjZlLkjE=
+X-Gm-Gg: ASbGnctKAnmHx089jlewo+sxfMoVMFzVqfJu3KmNWvTl5vxqqg4oug2JFqpoc0zmuic
+	+G3TZz3BFAE5JLJDyCTgb56teNUHJSjxeG9PQzLgxMW41EPuhOTcLuOeYoaxZ+YY0/zmBZBcdlv
+	AbD5IblVASYoO/H6OZZffFOPLYokmxFrQaO1FzPhmnNY/dygC3wGqhWVGh3fq6n3VmCpjBB9/An
+	Gd85dDXrLIhvX2F4Hy3EynRlwcUBSNjYCNYsRkgGrALHmOA4ZzRjqfvlEJxR1Bo0c8R2ZuLXbeV
+	ISaoS/jN+kVKJFMbWul8bMKFAodf0ocxGG/L+0nuyi4jyZmrukGFsdFSJWdBlGUaho7mY31INHJ
+	oeGpopYYj
+X-Received: by 2002:a05:620a:40c1:b0:7cd:4a08:ea12 with SMTP id af79cd13be357-7d468757dc4mr99321885a.0.1751360689564;
+        Tue, 01 Jul 2025 02:04:49 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IFeUDreOqmNQeuBoKNAZdsqkeA395+Jw1kTvuMcKxjfGMcdPAxGzBGNCpTkmEn2wBcAWkMuOg==
+X-Received: by 2002:a05:620a:40c1:b0:7cd:4a08:ea12 with SMTP id af79cd13be357-7d468757dc4mr99319985a.0.1751360689129;
+        Tue, 01 Jul 2025 02:04:49 -0700 (PDT)
+Received: from [192.168.1.114] (83.9.29.190.neoplus.adsl.tpnet.pl. [83.9.29.190])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae353c01980sm810958466b.81.2025.07.01.02.04.46
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 01 Jul 2025 02:04:48 -0700 (PDT)
+Message-ID: <a6117473-fa38-48db-94a1-892b76abc10f@oss.qualcomm.com>
+Date: Tue, 1 Jul 2025 11:04:45 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -50,180 +74,116 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Ensure SD card power isn't ON when
- card removed
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
-        Adrian Hunter
-	<adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC: <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <quic_cang@quicinc.com>,
-        <quic_nguyenb@quicinc.com>, <quic_rampraka@quicinc.com>,
-        <quic_pragalla@quicinc.com>, <quic_sayalil@quicinc.com>,
-        <quic_nitirawa@quicinc.com>, <quic_bhaskarv@quicinc.com>,
-        <kernel@oss.qualcomm.com>
-References: <20250620090333.3068568-1-quic_sartgarg@quicinc.com>
- <61cffc10-3e05-4331-b967-6c01cc03d072@oss.qualcomm.com>
+Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
+ max-sd-hs-frequency property
+To: Krzysztof Kozlowski <krzk@kernel.org>,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        quic_cang@quicinc.com, quic_nguyenb@quicinc.com,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sayalil@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
+ <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
+ <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
+ <9627ed6f-2bb8-40b0-b647-5f659d87f2f9@oss.qualcomm.com>
+ <bba062a3-f96c-456b-8e9e-fdeb0dc2d28d@kernel.org>
+ <5bdae07b-a7b1-49be-b843-1704981bc63b@oss.qualcomm.com>
+ <ffc62906-c3bb-4968-8f7c-fa7ae5028ad5@kernel.org>
+ <fd73a142-3b22-407f-8e6d-00f4e1e1c8eb@oss.qualcomm.com>
+ <e0e66895-e68a-4420-a61b-98a689798ce4@kernel.org>
 Content-Language: en-US
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <61cffc10-3e05-4331-b967-6c01cc03d072@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <e0e66895-e68a-4420-a61b-98a689798ce4@kernel.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: jbQbW0LEsUa3CJn6aVgm7oGAi8HIWC7z
-X-Authority-Analysis: v=2.4 cv=YPWfyQGx c=1 sm=1 tr=0 ts=686385c6 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8
- a=AetVj61-NovANKZkZ4wA:9 a=QEXdDO2ut3YA:10 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-ORIG-GUID: jbQbW0LEsUa3CJn6aVgm7oGAi8HIWC7z
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzAxMDAzNyBTYWx0ZWRfXy0wZFbgeLNoL
- 7gUwMlWXm+r8ggtyXWmjAAmGIqgsxEnlDcfaSSbK3SzlVxesUld41agXbjSAdf17HtKI7vaA6Z8
- AYcjO2Nrh/NwZdixUjwQrlhMzPGVOOw9uGA66rDqg7S5RFOqUZ9wSyIzsqwLpBCOdpNf1mRY8QU
- jFRYzlS2xZrhVo4n2561e04+8X7woe1yq8NQ703z34ZaQpyPVOBSwSpSuvIzuCf5lolK5jt+m56
- mPrSRpvYigcGGW8tZo5ZEBAtsrCGkClnpqnBTxZx/CtZZRFsbDvCPLt7Ls19Ye7MQxd/dCarHH9
- SHIDQxUTRjXg0HV1yReTCtl34BEhIIZoNbs5pR2W2Mdl1sUzf3ys5bXEGBVfHli073+/tjwEhUB
- Y4yGxTNURl0+u56Z1zcC3y6PhZSKC8WlQwcVAMAOQiEi7FR3H91Wh/KJULgIa8+I26ej2qm2
+X-Proofpoint-GUID: -glCy7N-jPRFTlTB_wxhFvX0uuPNuATn
+X-Proofpoint-ORIG-GUID: -glCy7N-jPRFTlTB_wxhFvX0uuPNuATn
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzAxMDA1MiBTYWx0ZWRfXzLtxsqeLjAES
+ +mc+kvYM5nO9YsNzUbkvGhJu0aX7/XejmbqYUCrAY2PfDP5Z7CkMIyF4D49po4BbfVuyjqFC3YC
+ gLLLmXr+SJPtxF5RFK19ITVF9LqThimQt/XRzmjl4ss/SM2UKaRTJzgxQ98R5C7Xi7ddyhulWlB
+ pNHdR8usYPadgTqzHeLxW4RYLBIZPnhijfRuO2I5y0Ho/ZSdwCydgRdGBtNx4fd6yU4GQNk+Hoo
+ gd11cCTHR+/1Hjdn1ouCIoAEvsxjdZGLbN6V+2+CTXLN23N1N5m4s57XtaQtLz/cjLRKOzxUrho
+ R8MxgdDNOrzWFV80hutMkBuPrsUwO6vBEoALhKdi2mvQKaa60lH7YNspXdAE+E4/0+zpoqwHhbv
+ qdJqUdXWZ9gc7xCAoToVqP+nHTgwuyQ7QfayZ8z99J58GOjE6CpiEo1I5eLTmlzldAT4M3mk
+X-Authority-Analysis: v=2.4 cv=QMFoRhLL c=1 sm=1 tr=0 ts=6863a4b3 cx=c_pps
+ a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=fKQzr7EGRj+VoE0XNsDNvQ==:17
+ a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=Nx1jMUExMGuVGuT9j-gA:9
+ a=QEXdDO2ut3YA:10 a=dawVfQjAaf238kedN5IG:22
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
  definitions=2025-07-01_01,2025-06-27_01,2025-03-28_01
 X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- spamscore=0 mlxlogscore=999 mlxscore=0 malwarescore=0 suspectscore=0
- lowpriorityscore=0 clxscore=1015 impostorscore=0 adultscore=0
- priorityscore=1501 bulkscore=0 phishscore=0 classifier=spam authscore=0
- authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2507010037
+ malwarescore=0 priorityscore=1501 bulkscore=0 spamscore=0 adultscore=0
+ mlxlogscore=999 mlxscore=0 lowpriorityscore=0 suspectscore=0 impostorscore=0
+ clxscore=1015 phishscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507010052
 
 
 
-On 6/21/2025 4:29 PM, Konrad Dybcio wrote:
-> On 6/20/25 11:03 AM, Sarthak Garg wrote:
->> Make sure SD card power is not enabled when the card is
->> being removed.
->> On multi-card tray designs, the same card-tray would be used for SD
->> card and SIM cards. If SD card is placed at the outermost location
->> in the tray, then SIM card may come in contact with SD card power-
->> supply while removing the tray. It may result in SIM damage.
->> So in sdhci_msm_handle_pwr_irq we skip the BUS_ON request when the
->> SD card is removed to be in consistent with the MGPI hardware fix to
->> prevent any damage to the SIM card in case of mult-card tray designs.
->> But we need to have a similar check in sdhci_msm_check_power_status to
->> be in consistent with the sdhci_msm_handle_pwr_irq function.
->> Also reset host->pwr and POWER_CONTROL register accordingly since we
->> are not turning ON the power actually.
-> 
-> This is very difficult to parse. How about:
-> 
-> Many mobile phones feature multi-card tray designs, where the same
-> tray is used for both SD and SIM cards. If the SD card is placed
-> at the outermost location in the tray, the SIM card may come in
-> contact with SD card power-supply while removing the tray, possibly
-> resulting in SIM damage.
-> 
-> To prevent that, make sure the SD card is really inserted by reading
-> the Card Detect pin state. If it's not, turn off the power in
-> sdhci_msm_check_power_status() and set the BUS_FAIL power state on the
-> controller as part of pwr_irq handling.
-> 
-> 
-> (Now I don't know if this is a good fix as far as logic goes, but I'm
-> simply looking at the patch)
-> 
-
-Sure will update the commit text.
-
+On 24-Jun-25 08:06, Krzysztof Kozlowski wrote:
+> On 23/06/2025 14:31, Konrad Dybcio wrote:
+>> On 6/23/25 2:16 PM, Krzysztof Kozlowski wrote:
+>>> On 23/06/2025 14:08, Konrad Dybcio wrote:
+>>>>>>>
+>>>>>>> This might be fine, but your DTS suggests clearly this is SoC compatible
+>>>>>>> deducible, which I already said at v1.
+>>>>>>
+>>>>>> I don't understand why you're rejecting a common solution to a problem
+>>>>>> that surely exists outside this one specific chip from one specific
+>>>>>> vendor, which may be caused by a multitude of design choices, including
+>>>>>> erratic board (not SoC) electrical design
+>>>>>
+>>>>> No one brought any arguments so far that common solution is needed. The
+>>>>> only argument provided - sm8550 - is showing this is soc design.
+>>>>>
+>>>>> I don't reject common solution. I provided review at v1 to which no one
+>>>>> responded, no one argued, no one provided other arguments.
+>>>>
+>>>> Okay, so the specific problem that causes this observable limitation
+>>>> exists on SM8550 and at least one more platform which is not upstream
+>>>> today. It can be caused by various electrical issues, in our specific
+>>>> case by something internal to the SoC (but external factors may apply
+>>>> too)
+>>>>
+>>>> Looking at the docs, a number of platforms have various limitations
+>>>> with regards to frequency at specific speed-modes, some of which seem
+>>>> to be handled implicitly by rounding in the clock framework's
+>>>> round/set_rate().
+>>>>
+>>>> I can very easily imagine there are either boards or platforms in the
+>>>> wild, where the speed must be limited for various reasons, maybe some
+>>>> of them currently don't advertise it (like sm8550 on next/master) to
+>>>> hide that
+>>>
+>>> But there are no such now. The only argument (fact) provided in this
+>>> patchset is: this is issue specific to SM8550 SoC, not the board. See
+>>> last patch. Therefore this is compatible-deducible and this makes
+>>> property without any upstream user.
 >>
->> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
->> ---
->> Changes from v1:
->> As per Adrian Hunter's comment :
->> - Removed unrelated changes
->> - Created a separate function get_cd for cleaner code
->> - Used READ_ONCE when getting mmc->ops to handle card removal cases
->> - Reordered if check conditions
->> ---
->>   drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++++++
->>   1 file changed, 22 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index bf91cb96a0ea..97a895d839c9 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -1566,6 +1566,14 @@ static inline void sdhci_msm_complete_pwr_irq_wait(
->>   	wake_up(&msm_host->pwr_irq_wait);
->>   }
->>   
->> +static int get_cd(struct sdhci_host *host)
->> +{
->> +	struct mmc_host *mmc = host->mmc;
->> +	const struct mmc_host_ops *mmc_ops = READ_ONCE(mmc->ops);
+>> When one appears, we will have to carry code to repeat what the property
+>> does, based on a specific compatible.. And all OS implementations will
+>> have to do the same, instead of parsing the explicit information
 > 
-> What do you need the READ_ONCE for?> +
->> +	return mmc_ops && mmc->ops->get_cd ? mmc->ops->get_cd(mmc) : 0;
+> Adding new property in such case will be trivial and simple, unlike
+> having to maintain unused ABI.
 > 
-> I think this op will always exist for our driver, since we call:
-> 
-> sdhci_msm_probe()
->   -> sdhci_pltfm_init()
->      -> sdhci_alloc_host()
-> 
-> which assigns:
-> 
-> host->mmc_host_ops = sdhci_ops;
-> mmc->ops = &host->mmc_host_ops;
-> 
-> which contains:
-> 
-> .get_cd         = sdhci_get_cd,
-> 
-> there's some more layers to this matryoshka, so I'm not a 100% sure
-> 
+> And it will be unused, because last patch DTS should be rejected on that
+> basis: adding redundant properties which are already defined by the
+> compatible.
 
-Yes its not needed will remove it.
+Got some more fresh information.. This apparently *does* vary across
+boards, as there is a recommended hardware workaround to this rate
+limitation (requiring an external clock source, which is up to the
+OEM to implement or not)
 
->> +}
->> +
->>   /*
->>    * sdhci_msm_check_power_status API should be called when registers writes
->>    * which can toggle sdhci IO bus ON/OFF or change IO lines HIGH/LOW happens.
->> @@ -1579,6 +1587,7 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
->>   {
->>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	struct mmc_host *mmc = host->mmc;
->>   	bool done = false;
->>   	u32 val = SWITCHABLE_SIGNALING_VOLTAGE;
->>   	const struct sdhci_msm_offset *msm_offset =
->> @@ -1636,6 +1645,12 @@ static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
->>   				 "%s: pwr_irq for req: (%d) timed out\n",
->>   				 mmc_hostname(host->mmc), req_type);
->>   	}
->> +
->> +	if ((req_type & REQ_BUS_ON) && mmc->card && !get_cd(host)) {
->> +		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->> +		host->pwr = 0;
->> +	}
->> +
->>   	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
->>   			__func__, req_type);
->>   }
->> @@ -1694,6 +1709,13 @@ static void sdhci_msm_handle_pwr_irq(struct sdhci_host *host, int irq)
->>   		udelay(10);
->>   	}
->>   
->> +	if ((irq_status & CORE_PWRCTL_BUS_ON) && mmc->card && !get_cd(host)) {
->> +		irq_ack = CORE_PWRCTL_BUS_FAIL;
->> +		msm_host_writel(msm_host, irq_ack, host,
->> +				msm_offset->core_pwrctl_ctl);
-> 
-> Since you're dropping out if this function, you can pass the parameter
-> directly to msm_host_writel
-> 
-> Konrad
-
-Sure will update.
-
-~Best regards
-Sarthak
+Konrad
