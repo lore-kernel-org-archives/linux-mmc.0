@@ -1,152 +1,97 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2BC34267B6D;
-	Tue,  1 Jul 2025 09:31:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 787BB21771F;
+	Tue,  1 Jul 2025 10:00:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.49
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751362264; cv=none; b=Bl8Hm1v5YLRCXtYzARm6aTiLgiYc08COBsZ2jyrvlyjVNwcDYnGJgrGV+cZOMugPQy81yytYdpa358P4+riU6pPfgYQjGVKOqdg0eWpKccIH50gRKH1Aw0hw78yeEeFdfwKLO48mYJSggROAMgFEM1G6YCwbJIAbaX5i0P3/0Cw=
+	t=1751364014; cv=none; b=NmQPQYSGt+Q47IXt5kYVKA/OuGbksjO7Cq96hGeubowJzExPJkSB+13Aa+mG+k4KbNuPDeT7ybHWBJnm3y98w8rx5eJapl5IvMfBKT0Q6LaRe25Z4OMlKiFuwb9UFQIofnZ5oQvfJnnLWYNnlrdmRmzj44/0BgoQFev/7jOGrWw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751362264; c=relaxed/simple;
-	bh=ou1WGpY1B6KhDjtHPcrYf0u8zfiX7PXTX8+wLqltyZo=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=l02+3wgqchw15PgLvYqU4oSZhgXa465RWRD1lB8tnnk8aBNwGNJFfaxu7G1W/6NTQpCj4oOuxMPi6QENH8AMx2u5jbJfrpKImZptjI09w8JhvnzrZEA0F9XbL0gqETDfjoNXd6HRP008FJmXL9PFbt2bLeZngeoj+QZs4v5sTKY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=ZkCn6cGQ; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1751364014; c=relaxed/simple;
+	bh=dcd4NU6FYr604eOyyCsaYvr/dR8yRtKW86HNNymhJ7U=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=ofQEjEwbVgrN+zFE6Kqr3W4mQBcdMhr9cRB/2vTo5ox+lBZLIv2jwX6sqzMAWCq4/TBq8AQgUB28DRqKyW7IMtws55J7Pfb25CgOxoPjlO27+Mg6tDU1BiZAAiv9uD+ATbBWUHBdfP0c37qZI0eN3i6UMXvmj8gQgbzH2QMt0Jc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=bOJCjmXS; arc=none smtp.client-ip=209.85.218.49
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="ZkCn6cGQ"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F230CC4CEEB;
-	Tue,  1 Jul 2025 09:30:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751362263;
-	bh=ou1WGpY1B6KhDjtHPcrYf0u8zfiX7PXTX8+wLqltyZo=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=ZkCn6cGQ+UG8FpUa2F/+hEfGTKsRCB7Kc5gGqSFd09vvCmP32SbyiUljPX7CegrrL
-	 1Z5T5uW+YSvvbUNCkRwvnKPhVjyrXADRSJW2SwfC0Lk/R8iRjB6eBe1oIIVEkSIgKH
-	 rP2IYyAZQ8jC34htfOcR2sc0SOjDYe1UYAytJuFIk+U2ZwxMJuFwBlZS6k7DS2+tav
-	 piyZn0UD6Xs3qwbGAjEcDoYbacKfr1ATjOeNLHZNPDlbXJNwsn/fyplHKjT7Qdls6a
-	 1FC+Z/AFQPVD7ghnuY/GePbSZwKzyqx5eYNnthZWS90l+ouDLGKYid3RmNi6/GZYvm
-	 Fq2emaLk0qV5g==
-Message-ID: <83f88dd5-8c74-4c2f-b94e-6c16dcbd44f1@kernel.org>
-Date: Tue, 1 Jul 2025 11:30:53 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bOJCjmXS"
+Received: by mail-ej1-f49.google.com with SMTP id a640c23a62f3a-addda47ebeaso1149667366b.1;
+        Tue, 01 Jul 2025 03:00:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1751364011; x=1751968811; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=dcd4NU6FYr604eOyyCsaYvr/dR8yRtKW86HNNymhJ7U=;
+        b=bOJCjmXS6Zc8sbVwJBaUJLLsMBaa9B4FzolbHCuvVUb90Ku7nEiCmIW9UTh8U1Z1PY
+         5zAmIhWIzbKrSbLsVAh7cJbgiRfuIiX281mMKvrr54ix3q0tU8G4XSTw4rrgq6jx/Aj8
+         KcAE2c2l2XdHq81v8XfSlOS85T+6OZxArgyeoiwn2XBG7hsaPdREr6ofYZSfk4FgJL1m
+         bJ1JKLrhc0UVFBhLA9USj7fXcMykM4WwsqAcPNg83LcrEZNc1/bD2KIVixfX1xdC5Pkg
+         iquaOL+fDF0gqOVT25AkYV+hr1Oov+Bw55rbqgEOx/8n5I3iNAFGbZxWZqVeiWqHEnCQ
+         d05Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1751364011; x=1751968811;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=dcd4NU6FYr604eOyyCsaYvr/dR8yRtKW86HNNymhJ7U=;
+        b=FNtVnXm3ocbST34c1LsLqBrhaago1s3sonoRWDObT/zNK3k3SvgDFK/JTSyO602c/o
+         NUU2KMErO5+u6FKp6hyvn7idz/NNdeSuVNS4B2hvs58wtffaNGDVgy1ET5fZo0yBo9YA
+         rUxm3yCdoGIz+JYjrYdWG0eHlIwb41bNjqbZUgddm+9B5V/8gfVtfOcjD9IBQiKeFr5F
+         NZ6cw7pzbTMjZjgHXokaObwMDpOnKbP+fQ9TuLNR0RdnmwHuZP/C2k+Nls8x7+rXrPQu
+         6dS+w/0fsK9Ddo+ea51q/a2y9LlAgfSX9nDF2Y69hEf+TVqSIZhsaKZBjLkZQgv+obVy
+         KHEw==
+X-Forwarded-Encrypted: i=1; AJvYcCVss6CNNbLHM/XeURZ3ZHaGjKTEJ0iP9UQ7VaZ16Tqr6unXONNsWV99G5sDgam66qQytEber3mxHl+CXLI=@vger.kernel.org, AJvYcCWvEJXH5cicruF7f83l8FlziI3IZsDl+tUMBU5cw8j1MTNK4qYYSVJ11xNie4QzSkH6nm5+ZgxfU+vQ@vger.kernel.org
+X-Gm-Message-State: AOJu0Yyiu1yQgihrOfVkRF3EJP+H9EpblBLNNetrNSB0QMg8ZNFJgtP5
+	WJMu7BTk3C8EQYyrrGefFbMSASF+HbKv14r583Ww9+IwuoU6rH2LUKOcD40MmD3Ft1dwETF81Ns
+	t8gXLWqpGRZmtfbVx+cY0mdFkQ9ndCOU=
+X-Gm-Gg: ASbGnct5PcdJgF5CSwj6CT8H35H5HpdEneE+SGtwFyEh83g1TssCX8XnF9bvC42klW2
+	EhaqSzQvlg3FosO183sFEqYgMkXpuVRa5DoBY/8KtTOoNlaZS9RfoiunM/eCRGveu7Gdurn+vo5
+	3XflQ/+NyJxmYi+h9SZ9z5O+HocWlaOImonBxElK5B
+X-Google-Smtp-Source: AGHT+IFVGg9I7ij138HqjSz3k5NX/sRlfBODxu7bE94U+eCEWNa8PihnyeL2ytQK8bGikHE/btLURU84ZtWswTf1e94=
+X-Received: by 2002:a17:906:7308:b0:ae0:ce90:4b6c with SMTP id
+ a640c23a62f3a-ae3501a6b84mr1520367566b.49.1751364010417; Tue, 01 Jul 2025
+ 03:00:10 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V3 2/4] dt-bindings: mmc: controller: Add
- max-sd-hs-frequency property
-To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
- Sarthak Garg <quic_sartgarg@quicinc.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com,
- quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
- quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
-References: <20250618072818.1667097-1-quic_sartgarg@quicinc.com>
- <20250618072818.1667097-3-quic_sartgarg@quicinc.com>
- <6040afd9-a2a8-49f0-85e9-95257b938156@kernel.org>
- <9627ed6f-2bb8-40b0-b647-5f659d87f2f9@oss.qualcomm.com>
- <bba062a3-f96c-456b-8e9e-fdeb0dc2d28d@kernel.org>
- <5bdae07b-a7b1-49be-b843-1704981bc63b@oss.qualcomm.com>
- <ffc62906-c3bb-4968-8f7c-fa7ae5028ad5@kernel.org>
- <fd73a142-3b22-407f-8e6d-00f4e1e1c8eb@oss.qualcomm.com>
- <e0e66895-e68a-4420-a61b-98a689798ce4@kernel.org>
- <a6117473-fa38-48db-94a1-892b76abc10f@oss.qualcomm.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <a6117473-fa38-48db-94a1-892b76abc10f@oss.qualcomm.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20250628015328.249637-1-da@libre.computer>
+In-Reply-To: <20250628015328.249637-1-da@libre.computer>
+From: Anand Moon <linux.amoon@gmail.com>
+Date: Tue, 1 Jul 2025 15:29:53 +0530
+X-Gm-Features: Ac12FXyQuaHFFKC-1pIWDliDfzZokX1a7f9rk99GbHKLqTGFlt79NOp9T2kO1fE
+Message-ID: <CANAwSgTH67T9SBQSFQgFjvyrxNCbtfd9ZaCDZFACWA=ZQ-PYtQ@mail.gmail.com>
+Subject: Re: [RFC] mmc: meson-gx-mmc: add delay during poweroff
+To: Da Xue <da@libre.computer>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
+	Kevin Hilman <khilman@baylibre.com>, Jerome Brunet <jbrunet@baylibre.com>, 
+	Martin Blumenstingl <martin.blumenstingl@googlemail.com>, linux-mmc@vger.kernel.org, 
+	linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
+	linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-On 01/07/2025 11:04, Konrad Dybcio wrote:
->>>>>
->>>>> Looking at the docs, a number of platforms have various limitations
->>>>> with regards to frequency at specific speed-modes, some of which seem
->>>>> to be handled implicitly by rounding in the clock framework's
->>>>> round/set_rate().
->>>>>
->>>>> I can very easily imagine there are either boards or platforms in the
->>>>> wild, where the speed must be limited for various reasons, maybe some
->>>>> of them currently don't advertise it (like sm8550 on next/master) to
->>>>> hide that
->>>>
->>>> But there are no such now. The only argument (fact) provided in this
->>>> patchset is: this is issue specific to SM8550 SoC, not the board. See
->>>> last patch. Therefore this is compatible-deducible and this makes
->>>> property without any upstream user.
->>>
->>> When one appears, we will have to carry code to repeat what the property
->>> does, based on a specific compatible.. And all OS implementations will
->>> have to do the same, instead of parsing the explicit information
->>
->> Adding new property in such case will be trivial and simple, unlike
->> having to maintain unused ABI.
->>
->> And it will be unused, because last patch DTS should be rejected on that
->> basis: adding redundant properties which are already defined by the
->> compatible.
-> 
-> Got some more fresh information.. This apparently *does* vary across
-> boards, as there is a recommended hardware workaround to this rate
-> limitation (requiring an external clock source, which is up to the
-> OEM to implement or not)
+Hi Da,
 
+On Sat, 28 Jun 2025 at 09:15, Da Xue <da@libre.computer> wrote:
+>
+> Regulators controlling the SD card power need some settling time for SD
+> cards to fully reset from UHS modes. The regulator framework seems to
+> ignore falling times set in the device tree causing a few boards with the
+> same hardware implementation to hang on reboot because the SD card still
+> had some voltage and did not reset properly to be initialized again.
+>
+> Add a delay sufficiently long for the voltage to drop so that the SD card
+> can reset properly. Otherwise the reboot will hang at missing SD card
+> especially with Samsung cards.
+>
+Although the driver defines reset identifiers such as
+RESET_SD_EMMC_A, RESET_SD_EMMC_B, and RESET_SD_EMMC_C,
+It does not implement proper reset controller functionality,
+specifically lacking support
+for reset_control_assert() and reset_control_deassert() operations.
 
-This should be clearly explained in commit msg and the DTS patch
-re-written because it seems it is not a property of the SoC.
-
-I mean, really, that last patch here makes entire discussion pointless,
-because till it is in the patchset is a proof this is a SoC level property.
-
-Best regards,
-Krzysztof
+Thanks
+-Anand
