@@ -1,24 +1,24 @@
-Received: from mail-m19731103.qiye.163.com (mail-m19731103.qiye.163.com [220.197.31.103])
+Received: from mail-m32114.qiye.163.com (mail-m32114.qiye.163.com [220.197.32.114])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CAC2B2309B0;
-	Wed,  2 Jul 2025 09:51:52 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.103
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3B95E2309B0;
+	Wed,  2 Jul 2025 09:52:00 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.32.114
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751449915; cv=none; b=fg7W/ZJmvDsYZIxoUtBMj+Hd1OLY9gu/xLTJoRps+6WOuboEuG5+R9yX4UY2s7CoTYYPFLbeqny4RYHFRN1ILBP5pMu2c6VvmEPqfsiTk2uG/gt0J1LW3vp38mviiq/UXK9IlNrOnajg1lpkB5t4XHzrWXFVpPm6ORCxQHArvZ4=
+	t=1751449923; cv=none; b=Vimzj/OgyOu8Ik56xERE0YsTbwg2VR+8aEidjJYoscwgn/loUVg9nYtXBbDXWI6U0T9ogDcxZcZynHB2DEiGqRyQxqbK918jSI0oNPScnZTN45yhxayXj0ZzEx8OYf/PM5f7BHhiCjaAekV9mZuDl9lrDIjbLgOHUs83LlwgHxM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751449915; c=relaxed/simple;
-	bh=1EDFj4goj5CsQ5wj3psPIN+ghrdp1Uo32Zl1NGBk7fg=;
+	s=arc-20240116; t=1751449923; c=relaxed/simple;
+	bh=lPb9dIxD5+q4ZIVxyYI/lgNb35z0XDJuRZgexaTKPl0=;
 	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=MFiDgNVf0FbkzNu+2RdILHDvchKa+GKYuZyPAawKckNpDqudE1tDdQlnScokDpU7Y4JVfbFeMksh29MIaU75Dwm5GqUq+j0RFx2kYGEk1L6E2URwu8Q5+74fLlh3/gW7uZEXK/u8hlnHpIHdYWG90mL4YO5T4AvR8Z806r34I+8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=joicoOyL; arc=none smtp.client-ip=220.197.31.103
+	 MIME-Version; b=PZ41P3/W7nvf6pIpA2W1UESc/G06p//9RNP/+/REgqRWH122j4dRzjNaeVtSh7lTpZ6yxZSysV9cNN8ZSJfM5H+12lUMsndSaWikcec1V86gZL6ZVYKBUAuyQye2C1DrmBXQtkRyIcwpV2hvSNnSBEK/VXGb7Q0dnKo7/S9bHbs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=k/yCuMJx; arc=none smtp.client-ip=220.197.32.114
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="joicoOyL"
+	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="k/yCuMJx"
 Received: from localhost.localdomain (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 1aaa9ed49;
-	Wed, 2 Jul 2025 17:46:35 +0800 (GMT+08:00)
+	by smtp.qiye.163.com (Hmail) with ESMTP id 1aaa9ed79;
+	Wed, 2 Jul 2025 17:46:43 +0800 (GMT+08:00)
 From: Albert Yang <yangzh0906@thundersoft.com>
 To: robh@kernel.org,
 	krzk+dt@kernel.org,
@@ -52,9 +52,9 @@ Cc: linux-arm-kernel@lists.infradead.org,
 	shanchun1218@gmail.com,
 	ben.chuang@genesyslogic.com.tw,
 	Albert Yang <yangzh0906@thundersoft.com>
-Subject: [PATCH v2 4/8] dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
-Date: Wed,  2 Jul 2025 17:44:40 +0800
-Message-Id: <20250702094444.3523973-5-yangzh0906@thundersoft.com>
+Subject: [PATCH v2 8/8] MAINTAINERS: add and consolidate Black Sesame Technologies (BST) ARM SoC support
+Date: Wed,  2 Jul 2025 17:44:44 +0800
+Message-Id: <20250702094444.3523973-9-yangzh0906@thundersoft.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20250702094444.3523973-1-yangzh0906@thundersoft.com>
 References: <20250528085403.481055-1-yangzh0906@thundersoft.com>
@@ -67,121 +67,50 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDGhhKVkgdS08YGExNTk5IQlYVFAkWGhdVEwETFh
-	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSEpOTE5VSk
-	tLVUpCS0tZBg++
-X-HM-Tid: 0a97ca87ec9609cckunmee1cabff3ebb45
+	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDSB0YVk9CGE8ZGUxOHh8fTlYVFAkWGhdVEwETFh
+	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSUhCS0NVSk
+	tLVUpCWQY+
+X-HM-Tid: 0a97ca880db309cckunmee1cabff3ebc57
 X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MDo6Ejo6LDE3Ck8iHSE0HQIC
-	NQwKCzNVSlVKTE5KT09CTkJMSk5CVTMWGhIXVQIaFRwBE0tCS007DxMOFR8eCQgUHQ9VGBQWRVlX
-	WRILWUFZSkpMVUpDT1VKSUJVSkhPWVdZCAFZQU9ITkw3Bg++
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6Ojo6TCo6OTE0KE8xQiEqHUoj
+	DRxPFDJVSlVKTE5KT09CTUtOT01MVTMWGhIXVQIaFRwBE0tCS007DxMOFR8eCQgUHQ9VGBQWRVlX
+	WRILWUFZSkpMVUpDT1VKSUJVSkhPWVdZCAFZQUlNSko3Bg++
 DKIM-Signature:a=rsa-sha256;
-	b=joicoOyLfPcI5Htb1jQL3vfoaIeY1lc6q9SmjGU0vYGNsKgX5FlzEe//fUMFt+F2Dt5msY0bIJHRnbNv2d+Ki7OV8xn3wNKMXXvBaG4Q66kys7HQLCJrgjS6tDstwINmLA7RWk/T5myjQBO8memOyK9cx2gDTqhwHD5Wld7+YVM=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=TfcFw4Er+lRQGjZg8dmF9mso3a6O4zW0NF5yIyCmuEU=;
+	b=k/yCuMJxVeOXaX4UC8xJi8N4oYoHJBUgI1LfpKFjPnB0IpJl5J+ZvP1CeNHd5xPvj8sBdGPHEl5OeI/GNiObheVCq98z6l4Hw7F/B6KMhgVIlpNsRy5+0mWzl6SfnEY1pagXQRbRF+bJDcH1Q70fM5B+IBaK9MIBcLl45KFJN0A=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
+	bh=p49bABjbEnShhniwT4G/iwpGc59+QIBwBwIG2CyY6WA=;
 	h=date:mime-version:subject:message-id:from;
 
-Add device tree binding documentation for the Black Sesame Technologies
-(BST) DWCMSHC SDHCI controller.
-
-This binding describes the required and optional properties for the
-bst,dwcmshc-sdhci compatible controller, including register layout,
-interrupts, bus width, clock configuration, and other controller-specific
-features.
-
----
-Changes for v2:
-- Simplified description, removed redundant paragraphs
-- Updated $schema to reference mmc-specific scheme
-- Corrected compatible to add soc name
-(bst,c1200-dwcmshc-sdhci)
-- Removed all redundant property descriptions
-- Dropped invalid mmc_crm_base/size properties, use reg for all address
-ranges
-- Cleaned up required properties to only essential entries
-- Standardized example DTS format, fixed reg syntax and property
-ordering
-- Removed additionalProperties: true
+Add and consolidate the MAINTAINERS entry for Black Sesame Technologies
+ARM SoC support. This entry covers device tree bindings, drivers, and board
+files for BST SoCs, including MMC, and platform support.
 
 Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
 Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
 ---
- .../bindings/mmc/bst,dwcmshc-sdhci.yaml       | 67 +++++++++++++++++++
- 1 file changed, 67 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
+ MAINTAINERS | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
-new file mode 100644
-index 000000000000..699dc404caac
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
-@@ -0,0 +1,67 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/bst,dwcmshc-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/MAINTAINERS b/MAINTAINERS
+index efb51ee92683..e3236384c28a 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -2441,6 +2441,16 @@ S:	Maintained
+ F:	Documentation/devicetree/bindings/arm/blaize.yaml
+ F:	arch/arm64/boot/dts/blaize/
+ 
++ARM/BST SOC SUPPORT
++M:	Ge Gordon <gordon.ge@bst.ai>
++R:	BST Linux Kernel Upstream Group <bst-upstream@bstai.top>
++L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
++S:	Maintained
++F:	Documentation/devicetree/bindings/arm/bst.yaml
++F:	Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
++F:	arch/arm64/boot/dts/bst/
++F:	drivers/mmc/host/sdhci-of-bst-c1200.c
 +
-+title: Black Sesame Technologies DWCMSHC SDHCI Controller
-+
-+maintainers:
-+  - Ge Gordon <gordon.ge@bst.ai>
-+
-+allOf:
-+  - $ref: mmc-controller.yaml#
-+
-+properties:
-+  compatible:
-+    const: bst,c1200-dwcmshc-sdhci
-+
-+  reg:
-+    maxItems: 2
-+    description: |
-+      Register base addresses and sizes for the SDHCI controller.
-+      First entry is the core SDHCI registers, second entry is the
-+      CRM registers.
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  clock-names:
-+    items:
-+      - const: core
-+
-+  memory-region:
-+    maxItems: 1
-+
-+  dma-coherent: true
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    mmc@22200000 {
-+        compatible = "bst,c1200-dwcmshc-sdhci";
-+        reg = <0x0 0x22200000 0x0 0x1000>,
-+              <0x0 0x23006000 0x0 0x1000>;
-+        interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
-+        clocks = <&clk_mmc>;
-+        clock-names = "core";
-+        memory-region = <&mmc0_reserved>;
-+        max-frequency = <200000000>;
-+        bus-width = <8>;
-+        non-removable;
-+        dma-coherent;
-+        status = "disabled";
-+    };
+ ARM/CALXEDA HIGHBANK ARCHITECTURE
+ M:	Andre Przywara <andre.przywara@arm.com>
+ L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
 -- 
 2.25.1
 
