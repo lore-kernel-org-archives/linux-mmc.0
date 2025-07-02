@@ -1,424 +1,221 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from fout-a5-smtp.messagingengine.com (fout-a5-smtp.messagingengine.com [103.168.172.148])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 392AE238C0C;
-	Wed,  2 Jul 2025 10:30:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8F15244693;
+	Wed,  2 Jul 2025 10:40:54 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.148
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751452250; cv=none; b=uGCOPr/JY0NhIo6AUED8sj8GFMYf6D7GcKt1cqAZGYbJAF+E1byMltX1Ri3MeLlHemp4VYlj8G3BjDPAJyrg6fx8LlATsLOL0Osvb9607cwOMGdCj0HbIXvvOABB1URB+pQLmv0BruyJigKSy2XS4KY0HAaUyT13HA0/EFvQ2Aw=
+	t=1751452856; cv=none; b=nmMVZOBiMhugcXNoIaiQHZ9G9jxOL4nFZk6Rse4T1IUFz4rWcklbRJKA6UmK2ozZXMNgv3SxBMLvDy1fQSTXZQ1cLytNYpcRDjT0O38iDd2FULMoSCYkoTc2nCrQrP44wlYqYVBxdIlZiz1/OitX0VErEdx8PjfNT5pJZJK3u+I=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751452250; c=relaxed/simple;
-	bh=mDp3jgvgSjrH7XdapPjK1I4S+fk4WAUCQ1t47z0AAfA=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=hPPFxH4fDtqqnjpm4jSFVhzt+y3wOWbIlLrEl2s3BpFP08qBrFq1OdNXHktkGWw5ANLJghn3x5TguzVjg+wdtbQndnQiVQ7v89/vAbJqkFida9QTAb7LdeMumM0AvHUcmUFlh2TFgxCNVHWftOZBon9OtGct6fhmxZfqY463GsI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=mNCQcsb0; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1751452856; c=relaxed/simple;
+	bh=KAOjTDNNfMtSybxzzyF1oxwUo5aPUGM4sbjOFZt9Egw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=iKV36f/3iG/asv8wPWr1INZS4It40TY+KW8DcAoO/0YOTNpSpXIJjbTdZvBRt8/0Q72SrspLFrOyiwcyORHOFe47jhEC4m0I0ZVq+pPvXqQ5/n3NtuyjUT35Fi5WKDgft/eWKOjgX3ormoUA4R46o6kSVkwBmYFgPLxNa2xJxW4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=DLhAkNIz; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=IjE3Feu5; arc=none smtp.client-ip=103.168.172.148
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="mNCQcsb0"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 84933C4CEED;
-	Wed,  2 Jul 2025 10:30:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751452249;
-	bh=mDp3jgvgSjrH7XdapPjK1I4S+fk4WAUCQ1t47z0AAfA=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=mNCQcsb00Z8hHxMlxpgaTfQHxNRN6CxQshE5VINtS7FdORNdXH2urmRJip27BoLjH
-	 1XRO9WPRRhUlaBQB78By5E5y6WE/BJ3pK7TegOingtDLSXeK9bt5iN2zpf0SjTQFmF
-	 XFU1f0pzTEm06VQD6XNRp+z0hf1SBwyNDYMGncizLVDSiiao4kAf4Y2Yzy4Ab+DQeH
-	 Bqqyf627q9BK236mNLmDgFbQeN/zdy747C6F8SO0KUPkhwQLJhAN1Xp8QiOThJ88Pb
-	 J46y6v9UHsSny920S5KziwXEvTZHvuTrDiBBBwEsauQW86Y7rqO7DgRNpRO0ppnu1q
-	 a1vfRH3/LSnGA==
-Message-ID: <a570b833-0619-4d1a-909f-971ba08f4202@kernel.org>
-Date: Wed, 2 Jul 2025 12:30:40 +0200
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="DLhAkNIz";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="IjE3Feu5"
+Received: from phl-compute-05.internal (phl-compute-05.phl.internal [10.202.2.45])
+	by mailfout.phl.internal (Postfix) with ESMTP id E59EEEC0476;
+	Wed,  2 Jul 2025 06:40:53 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-05.internal (MEProxy); Wed, 02 Jul 2025 06:40:53 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1751452853;
+	 x=1751539253; bh=f+jtoViYxyDT44gIcm4ScVTqk+vWq1DU/+tdfl4XPXA=; b=
+	DLhAkNIzpkFpF2GoJ3uXO9a8+MQ6k2VWe4RnvK7qkowKYBtldXKEwql0AgYcTQjB
+	6C2WGef0oMQSUwiBTATwXRq1fdyId9dRkKldfFsUIkHvy3SGsHKcWikPXoGKSLLt
+	v2wip6qoJcj8hM+PDREDXIZcj2EkeQ7if5I0NYHooVwe/TjMg7M5vGMutHYK4zpf
+	JKC0nmlrS5+XaiYx0750b6NaXOi+l2CW/8JTaK/kEl2xcjoPDZzqDhBiCCp9loXn
+	E1egiloLO7fam3tP42RGmEVWVsaCYom6LmTgVzHnipHhtuXbyUBAPYzjC4XuyTOZ
+	E8VuUPkwCcc1E3QhpOxIMg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1751452853; x=
+	1751539253; bh=f+jtoViYxyDT44gIcm4ScVTqk+vWq1DU/+tdfl4XPXA=; b=I
+	jE3Feu53gTguVKZDRL2kpkOVMb0KpmQUwmy9BL89R82YGxQ5JpXq9mLZMvBykJdW
+	VUnxvpLKIYW8/e27LfyQMFUtMZJ9qsDWtBije6DVCVDkc2eXN6XzNQej9/cxdVSe
+	W7xNPLZs5DT0w76kYx/QXxUJkRdLWas8mPwQar8G5dxRsSMjzktgv/JdS+PjC7+/
+	Js1sxemUhjDPWstGJDvLdLNJqd1BRuCif5Mz7kI9XRY53e4/9nVSHUcV8R33O2OY
+	eCMG2IOhSds33jp2qgoKhriLBP5/HLWA7F2uZi1OX1oYCKNigZCGUVv4GPPYcv5q
+	goVcU8Lu1AUUSGjBIQ0Tg==
+X-ME-Sender: <xms:swxlaBcENGwyRdD3Lol3wY3YSNcqCO9oHyZae2kSARGeSYHVgoruRQ>
+    <xme:swxlaPOD_MyZkjrHVqAMOiN_BgP7IyrLpyYVV5odiVEkfJkQrvK12v7S2pcZs3Nl8
+    qQzw6DmdViY81zIqi8>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgddujedukecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhhnugcu
+    uegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtthgvrh
+    hnpefhtdfhvddtfeehudekteeggffghfejgeegteefgffgvedugeduveelvdekhfdvieen
+    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnug
+    esrghrnhgusgdruggvpdhnsggprhgtphhtthhopeefuddpmhhouggvpehsmhhtphhouhht
+    pdhrtghpthhtoheptggrthgrlhhinhdrmhgrrhhinhgrshesrghrmhdrtghomhdprhgtph
+    htthhopehgohhrughonhdrghgvsegsshhtrdgrihdprhgtphhtthhopegsshhtqdhuphhs
+    thhrvggrmhessghsthgrihdrthhophdprhgtphhtthhopegsihhgfhhoohhtsegtlhgrsh
+    hsfhhunhdrtghnpdhrtghpthhtohepnhhfrhgrphhrrgguohestgholhhlrggsohhrrgdr
+    tghomhdprhgtphhtthhopegsvghnrdgthhhurghnghesghgvnhgvshihshhlohhgihgtrd
+    gtohhmrdhtfidprhgtphhtthhopehvihgtthhorhdrshhhihhhsehgvghnvghshihslhho
+    ghhitgdrtghomhdrthifpdhrtghpthhtohepghgvvghrthdorhgvnhgvshgrshesghhlih
+    guvghrrdgsvgdprhgtphhtthhopehgvggvrhhtrdhuhihtthgvrhhhohgvvhgvnhesghhm
+    rghilhdrtghomh
+X-ME-Proxy: <xmx:swxlaKjYdHsDdvduhQ0MEcXOW8CMKc87KCvkl6RjdvJ5XPD31U32gA>
+    <xmx:tAxlaK-bKjsdkvf85XBjTrRBq9bNDPMHJlelsR42NkRo33k7eUCebQ>
+    <xmx:tAxlaNtHm_x50MZxO88JkjSADPwfsDVmVUJ6WcBMuB3nd79uTugexQ>
+    <xmx:tAxlaJH2drl5pDUEuk4-L-F6GF3voZF2Kooj9dHI5mlDWaiEzFexTw>
+    <xmx:tQxlaDuN7y1Aicd_OJNllKymHr1i7ALXMocCOAl2OmgXckDib_xxzhcp>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id D7AA1700065; Wed,  2 Jul 2025 06:40:51 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 6/8] arm64: dts: bst: add support for Black Sesame
- Technologies C1200 CDCU1.0 board and defconfig
-To: Albert Yang <yangzh0906@thundersoft.com>, robh@kernel.org,
- krzk+dt@kernel.org, conor+dt@kernel.org, gordon.ge@bst.ai,
- catalin.marinas@arm.com, geert.uytterhoeven@gmail.com, will@kernel.org,
- ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de
+X-ThreadId: Tf7f6c885039edc57
+Date: Wed, 02 Jul 2025 12:40:31 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>,
+ "Rob Herring" <robh@kernel.org>, krzk+dt@kernel.org,
+ "Krzysztof Kozlowski" <krzk@kernel.org>,
+ "Conor Dooley" <conor+dt@kernel.org>, "gordon.ge" <gordon.ge@bst.ai>,
+ "Catalin Marinas" <catalin.marinas@arm.com>,
+ "Geert Uytterhoeven" <geert.uytterhoeven@gmail.com>,
+ "Will Deacon" <will@kernel.org>, "Ulf Hansson" <ulf.hansson@linaro.org>,
+ "Adrian Hunter" <adrian.hunter@intel.com>
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, soc@lists.linux.dev,
- bst-upstream@bstai.top, neil.armstrong@linaro.org,
- jonathan.cameron@huawei.com, bigfoot@classfun.cn, kever.yang@rock-chips.com,
- mani@kernel.org, geert+renesas@glider.be, andersson@kernel.org, nm@ti.com,
- nfraprado@collabora.com, quic_tdas@quicinc.com, ebiggers@google.com,
- victor.shih@genesyslogic.com.tw, shanchun1218@gmail.com,
- ben.chuang@genesyslogic.com.tw
+ devicetree@vger.kernel.org,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ soc@lists.linux.dev, bst-upstream <bst-upstream@bstai.top>,
+ "Neil Armstrong" <neil.armstrong@linaro.org>,
+ "Jonathan Cameron" <jonathan.cameron@huawei.com>, bigfoot@classfun.cn,
+ kever.yang@rock-chips.com, "Manivannan Sadhasivam" <mani@kernel.org>,
+ "Geert Uytterhoeven" <geert+renesas@glider.be>,
+ "Bjorn Andersson" <andersson@kernel.org>, "Nishanth Menon" <nm@ti.com>,
+ =?UTF-8?Q?N=C3=ADcolas_F=2E_R=2E_A=2E_Prado?= <nfraprado@collabora.com>,
+ "Taniya Das" <quic_tdas@quicinc.com>, "Eric Biggers" <ebiggers@google.com>,
+ "Victor Shih" <victor.shih@genesyslogic.com.tw>,
+ "Shan-Chun Hung" <shanchun1218@gmail.com>,
+ "Ben Chuang" <ben.chuang@genesyslogic.com.tw>
+Message-Id: <53ba18c1-4554-4d77-84fd-d921febb7559@app.fastmail.com>
+In-Reply-To: <20250702094444.3523973-6-yangzh0906@thundersoft.com>
 References: <20250528085403.481055-1-yangzh0906@thundersoft.com>
  <20250702094444.3523973-1-yangzh0906@thundersoft.com>
- <20250702094444.3523973-7-yangzh0906@thundersoft.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250702094444.3523973-7-yangzh0906@thundersoft.com>
-Content-Type: text/plain; charset=UTF-8
+ <20250702094444.3523973-6-yangzh0906@thundersoft.com>
+Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200
+ controller driver
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 
-On 02/07/2025 11:44, Albert Yang wrote:
-> Add device tree support for the Black Sesame Technologies (BST) C1200
-> CDCU1.0 ADAS 4C2G platform. This platform is based on the BST C1200 SoC
-> family.
-> 
-> The changes include:
-> - Adding a new BST device tree directory
-> - Adding Makefile entries to build the BST platform device trees
-> - Adding the device tree for the BST C1200 CDCU1.0 ADAS 4C2G board
-> 
-> This board features a quad-core Cortex-A78 CPU, and various peripherals
-> including UART, MMC, watchdog timer, and interrupt controller.
-> 
-> ---
-> Changes for v2:
-> 1. Reorganized memory map into discrete regions
-> 2. Updated MMC controller definition:
->    - Split into core/CRM register regions
->    - Removed deprecated properties
->    - Updated compatible string
-> 3. Standardized interrupt definitions and numeric formats
-> 4. Removed reserved-memory node (superseded by bounce buffers)
-> 5. Added root compatible string for platform identification
-> 6. Add soc defconfig
-> 
-> Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
-> Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
-
-This is messed. SoB does not go to changelog. Apply your patch and look
-at result - do you see SoB? No, because changelog is stripped.
-submitting patches explains how this is supposed to look like.
-
-> ---
->  arch/arm64/boot/dts/Makefile                  |   1 +
->  arch/arm64/boot/dts/bst/Makefile              |   2 +
->  .../dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts    |  60 +++++++++
->  arch/arm64/boot/dts/bst/bstc1200.dtsi         | 117 ++++++++++++++++++
->  arch/arm64/configs/defconfig                  |   1 +
->  5 files changed, 181 insertions(+)
->  create mode 100644 arch/arm64/boot/dts/bst/Makefile
->  create mode 100644 arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts
->  create mode 100644 arch/arm64/boot/dts/bst/bstc1200.dtsi
-> 
-> diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
-> index 79b73a21ddc2..a39b6cafb644 100644
-> --- a/arch/arm64/boot/dts/Makefile
-> +++ b/arch/arm64/boot/dts/Makefile
-> @@ -12,6 +12,7 @@ subdir-y += arm
->  subdir-y += bitmain
->  subdir-y += blaize
->  subdir-y += broadcom
-> +subdir-y += bst
->  subdir-y += cavium
->  subdir-y += exynos
->  subdir-y += freescale
-> diff --git a/arch/arm64/boot/dts/bst/Makefile b/arch/arm64/boot/dts/bst/Makefile
-> new file mode 100644
-> index 000000000000..4c1b8b4cdad8
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/bst/Makefile
-> @@ -0,0 +1,2 @@
-> +# SPDX-License-Identifier: GPL-2.0
-> +dtb-$(CONFIG_ARCH_BST) += bstc1200-cdcu1.0-adas_4c2g.dtb
-> diff --git a/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts b/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts
-> new file mode 100644
-> index 000000000000..4036e0ac2e1d
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/bst/bstc1200-cdcu1.0-adas_4c2g.dts
-> @@ -0,0 +1,60 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/dts-v1/;
-> +
-> +#include "bstc1200.dtsi"
-> +
-> +/ {
-> +	model = "BST C1200-96 CDCU1.0 4C2G";
-> +	compatible = "bst,c1200-cdcu1.0-adas-4c2g", "bst,c1200";
-
-It does not look like you tested the DTS against bindings. Please run
-`make dtbs_check W=1` (see
-Documentation/devicetree/bindings/writing-schema.rst or
-https://www.linaro.org/blog/tips-and-tricks-for-validating-devicetree-sources-with-the-devicetree-schema/
-for instructions).
-Maybe you need to update your dtschema and yamllint. Don't rely on
-distro packages for dtschema and be sure you are using the latest
-released dtschema.
+On Wed, Jul 2, 2025, at 11:44, Albert Yang wrote:
 
 > +
-> +	chosen {
-> +		stdout-path = "serial0:115200n8";
-> +	};
-> +
-> +	memory@810000000 {
-> +		device_type = "memory";
-> +		reg = <0x8 0x10000000 0x0 0x30000000>;
-> +	};
-> +
-> +	memory@8c0000000 {
-> +		device_type = "memory";
-> +		reg = <0x8 0xc0000000 0x1 0x0>;
-> +	};
-> +
-> +	memory@c00000000 {
-> +		device_type = "memory";
-> +		reg = <0xc 0x0 0x0 0x40000000>;
-> +	};
-> +
-> +	memory@800254000 {
-> +		device_type = "memory";
-> +		reg = <0x8 0x254000 0x0 0x1000>;
-> +	};
-> +
-> +	memory@800151000 {
-> +		device_type = "memory";
-> +		reg = <0x8 0x151000 0x0 0x1000>;
-> +	};
+> +config MMC_SDHCI_BST
+> +	tristate "SDHCI OF support for the BST DWC MSHC"
+> +	depends on ARCH_BST || COMPILE_TEST
+> +	depends on MMC_SDHCI_PLTFM
+> +	depends on OF
+> +	help
+> +	  This selects Synopsys DesignWare Cores Mobile Storage Controller
+> +	  support.
 
-Why do you have multiple memory nodes, not one?
+The description does not mention the actual device it's for
+but only DesignWare.
 
-Also, why aren't these sorted according to DTS coding style?
+Try to keep this sorted alphabetically between the other
+CONFIG_MMC_SDHCI_* backends
 
 > +
-> +	reserved-memory {
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
-> +
-> +		mmc0_reserved: mmc0@5160000 {
-> +			compatible = "shared-dma-pool";
-> +			reg = <0x0 0x5160000 0x0 0x10000>;
-> +			no-map;
-> +		};
-> +	};
+> +struct dwcmshc_priv {
+> +	void __iomem *crm_reg_base;
+> +	u32 phy_crm_reg_base;
+> +	u32 phy_crm_reg_size;
 > +};
+
+You are only using the first member here, the phy_crm_reg_base
+and phy_crm_reg_size are assigned during probe but not referenced
+later.  devm_platform_ioremap_resource() should help simplify
+that code further.
+
 > +
-> +&uart0 {
-> +	status = "okay";
-> +};
+> +static void bst_write_phys_bst(void __iomem *addr, u32 value)
+> +{
+> +	iowrite32(value, addr);
+> +}
+
+You always pass priv->crm_reg_base into this helper, so
+it would be simpler to make it take the sdhci_pltfm_host
+pointer and the offset instead of the address.
+
+> +static int bst_sdhci_reallocate_bounce_buffer(struct sdhci_host *host)
+> +{
+> +	struct mmc_host *mmc = host->mmc;
+> +	unsigned int max_blocks;
+> +	unsigned int bounce_size;
+> +	int ret;
 > +
-> +&mmc0 {
-> +	status = "okay";
-> +	memory-region = <&mmc0_reserved>;
-> +};
-> +
-> diff --git a/arch/arm64/boot/dts/bst/bstc1200.dtsi b/arch/arm64/boot/dts/bst/bstc1200.dtsi
-> new file mode 100644
-> index 000000000000..ddff2cb82cb0
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/bst/bstc1200.dtsi
-> @@ -0,0 +1,117 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +#include <dt-bindings/interrupt-controller/arm-gic.h>
-> +#include <dt-bindings/interrupt-controller/irq.h>
-> +
-> +/ {
-> +	compatible = "bst,c1200";
-> +	#address-cells = <2>;
-> +	#size-cells = <2>;
-> +
-> +	cpus {
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +
-> +		cpu@0 {
-> +			compatible = "arm,cortex-a78";
-> +			device_type = "cpu";
-> +			enable-method = "psci";
-> +			next-level-cache = <&l2_cache>;
-> +			reg = <0>;
-> +		};
-> +
-> +		cpu@1 {
-> +			compatible = "arm,cortex-a78";
-> +			device_type = "cpu";
-> +			enable-method = "psci";
-> +			next-level-cache = <&l2_cache>;
-> +			reg = <0x100>;
+> +	/*
+> +	 * Cap the bounce buffer at 64KB. Using a bigger bounce buffer
+> +	 * has diminishing returns, this is probably because SD/MMC
+> +	 * cards are usually optimized to handle this size of requests.
+> +	 */
+> +	bounce_size = SZ_32K;
 
-Nothing improved. I asked to follow DTS coding style in ordering.
-
-It does not look like you tested the DTS against bindings. Please run
-`make dtbs_check W=1` (see
-Documentation/devicetree/bindings/writing-schema.rst or
-https://www.linaro.org/blog/tips-and-tricks-for-validating-devicetree-sources-with-the-devicetree-schema/
-for instructions).
-Maybe you need to update your dtschema and yamllint. Don't rely on
-distro packages for dtschema and be sure you are using the latest
-released dtschema.
-
-You already got this comment. How did you resolve it? You never
-responded to comments, so does it mean you just ignored it or something
-was not clear? In any case, repeating the same mistake is not getting
-this code merged, so respond to comment.
-
-> +		};
-> +
-> +		cpu@2 {
-> +			compatible = "arm,cortex-a78";
-> +			device_type = "cpu";
-> +			enable-method = "psci";
-> +			next-level-cache = <&l2_cache>;
-> +			reg = <0x200>;
-> +		};
-> +
-> +		cpu@3 {
-> +			compatible = "arm,cortex-a78";
-> +			device_type = "cpu";
-> +			enable-method = "psci";
-> +			next-level-cache = <&l2_cache>;
-> +			reg = <0x300>;
-> +		};
-> +
-> +		l2_cache: l2-cache-1 {
-
-l2-cache. Otherwise it is incomplete, so add the second one.
-
-> +			compatible = "cache";
-> +			cache-level = <2>;
-> +			cache-unified;
-> +		};
-> +	};
-> +
-> +	clk_mmc: clock-4000000 {
-> +		compatible = "fixed-clock";
-> +		#clock-cells = <0>;
-> +		clock-frequency = <4000000>;
-> +	};
-> +
-> +	timer {
-
-t > s
-
-> +		compatible = "arm,armv8-timer";
-> +		interrupt-parent = <&gic>;
-> +		always-on;
-> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>,
-> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>;
-> +	};
-> +
-> +	soc: soc@0 {
-> +		compatible = "simple-bus";
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges = <0x0 0x0 0x0 0x0 0xffffffff 0xffffffff>;
+The comment says 64K, but the size you use is 32K.
 
 
-Nothing improved. I asked to follow DTS coding style in ordering.
+> +	/* Get CRM registers from the second reg entry */
+> +	crm_res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
 
+devm_platform_ioremap_resource()
 
-> +		interrupt-parent = <&gic>;
-> +
-> +		mmc0: mmc@22200000 {
-> +			compatible = "bst,c1200-dwcmshc-sdhci";
-> +			reg = <0x0 0x22200000 0x0 0x1000>,
-> +			      <0x0 0x23006000 0x0 0x1000>;
-> +			interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
-> +			clocks = <&clk_mmc>;
-> +			clock-names = "core";
-> +			max-frequency = <200000000>;
-> +			bus-width = <8>;
-> +			non-removable;
-> +			dma-coherent;
-> +			status = "disabled";
-> +		};
-> +
-> +		uart0: serial@20008000 {
-> +			compatible = "snps,dw-apb-uart";
-> +			reg = <0x0 0x20008000 0x0 0x1000>;
-> +			interrupts = <GIC_SPI 211 IRQ_TYPE_LEVEL_HIGH>;
-> +			clock-frequency = <25000000>;
-> +			reg-shift = <2>;
-> +			reg-io-width = <4>;
-> +			status = "disabled";
-> +		};
-> +
-> +		gic: interrupt-controller@32800000 {
-> +			compatible = "arm,gic-v3";
-> +			#interrupt-cells = <3>;
-> +			#address-cells = <2>;
-> +			#size-cells = <2>;
-> +			interrupt-controller;
-> +			ranges;
-> +			reg = <0x0 0x32800000 0x0 0x10000>,
-> +			      <0x0 0x32880000 0x0 0x100000>;
+> +	/*
+> +	 * Hardware limitation workaround:
+> +	 *
+> +	 * Our platform supports 64-bit physical addressing, but the eMMC
+> +	 * controller's SRAM-based DMA engine is constrained to a 32-bit
+> +	 * address space. When using the standard SDHCI interface, which
+> +	 * allocates DDR-based DMA buffers with 64-bit addresses, the
+> +	 * dma_map_single() operation fails because the DMA engine cannot
+> +	 * handle addresses beyond 32 bits.
+> +	 *
+> +	 * To resolve this hardware limitation, we implement a bounce buffer
+> +	 * allocated via dma_alloc_coherent() to satisfy DMA addressing
+> +	 * constraints.
+> +	 */
+> +	err = bst_sdhci_reallocate_bounce_buffer(host);
 
-Nothing improved. I asked to follow DTS coding style in ordering.
+Having an explanation here makes sense, but I don't think this
+captures what is actually going on, in particular:
 
-> +			interrupts = <GIC_PPI 9 (GIC_CPU_MASK_SIMPLE(8) | IRQ_TYPE_LEVEL_LOW)>;
-> +		};
-> +	};
-> +
-> +	psci {
+- dma_alloc_coherent() being backed by an SRAM that is under
+  the 4GB boundary
+- the problem that the SoC is configured that all of DRAM
+  is outside of ZONE_DMA32
+- The type of hardware bug that leads to 64-bit DMA being
+  broken in this SoC.
 
-p < s, it is really randomly put :/
+I still have some hope that the hardware is not actually
+that broken and you can get it working normally, in one
+of these ways:
+- enabling 64-bit addressing in the parent bus
+- enabling SMMU translation for the parent bus
+- configuring the parent bus or the sdhci itself to
+  access the first 4GB of RAM, and describing the
+  offset in dma-ranges
+- moving the start of RAM in a global SoC config
 
+It is rather unlikely that the SoC designer chose to
+integrate a 32-bit-only device without adding some
+way to configure it to access RAM.
 
-> +		compatible = "arm,psci-1.0";
-> +		method = "smc";
-> +	};
-> +};
-> diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-> index 897fc686e6a9..0a1cfaa19688 100644
-> --- a/arch/arm64/configs/defconfig
-> +++ b/arch/arm64/configs/defconfig
-
-This is not a DTS patch.
-
-> @@ -45,6 +45,7 @@ CONFIG_ARCH_BCMBCA=y
->  CONFIG_ARCH_BRCMSTB=y
->  CONFIG_ARCH_BERLIN=y
->  CONFIG_ARCH_BLAIZE=y
-> +CONFIG_ARCH_BST=y
->  CONFIG_ARCH_EXYNOS=y
->  CONFIG_ARCH_SPARX5=y
->  CONFIG_ARCH_K3=y
-
-Best regards,
-Krzysztof
-
+      Arnd
