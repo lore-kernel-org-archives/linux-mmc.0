@@ -1,81 +1,115 @@
-Received: from elvis.franken.de (elvis.franken.de [193.175.24.41])
-	by smtp.subspace.kernel.org (Postfix) with ESMTP id 79C0827EFE7;
-	Wed,  2 Jul 2025 13:19:11 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=193.175.24.41
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(No client certificate requested)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D7E1B28A414;
+	Wed,  2 Jul 2025 13:28:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751462354; cv=none; b=jYHCRxi9MwMYnBHA2LlNmElHx350NnZ8pzFR7AyVu8kNlt77neG+1kimPhcw6MCf7ru8N3yh2PVkkhAmLed2oS9Xm76DinME/XqHdj33p/iz7j1LmqbFgtGTTKJL93rdj4+H4IC8NwE+4q7DrMDnSSh2BsAiXQLJWrNEYUNuXB0=
+	t=1751462913; cv=none; b=pQ69UfWvro346TXjR5EGQz3paV14BXnHxc323dOnulJ0r3FLA3xedgXHt1IrKB1kvh1a3F/E9OqCvLY2Z0TwEaXjkD7rfq/q/IwVGwk+pRWfGjGsukccu8YpTRSlFPF51DmoWRMFDPbW5rtbwpDPqU4jyR9mrk4r7CRB6rP6KB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751462354; c=relaxed/simple;
-	bh=HCL76lN8kEgT5tcyLaPHtOnXtULRZcRok0S4LNq5Y2c=;
-	h=Date:From:To:Cc:Subject:Message-ID:References:MIME-Version:
-	 Content-Type:Content-Disposition:In-Reply-To; b=EpBlJscI0R3r/RZ0rJqY/zL2bbhZ8eVNCkIHrQ0/W/oR+v6aqMpzRJZfsbyj156M6vfP/ygP71hWF7/bYpvY92BF55JVsZIzKQed/668xdDrFFUZxemu2Q2yQUh3cucm/Y+6akFeCIpxx4MNuui2RytCviL9gJ7W6Kb9yku/1XE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de; spf=pass smtp.mailfrom=alpha.franken.de; arc=none smtp.client-ip=193.175.24.41
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=alpha.franken.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=alpha.franken.de
-Received: from uucp by elvis.franken.de with local-rmail (Exim 3.36 #1)
-	id 1uWwaa-00058E-00; Wed, 02 Jul 2025 14:29:24 +0200
-Received: by alpha.franken.de (Postfix, from userid 1000)
-	id 9A587C0176; Wed,  2 Jul 2025 14:01:45 +0200 (CEST)
-Date: Wed, 2 Jul 2025 14:01:45 +0200
-From: Thomas Bogendoerfer <tsbogend@alpha.franken.de>
-To: =?iso-8859-1?Q?Beno=EEt?= Monin <benoit.monin@bootlin.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
-	Krzysztof Kozlowski <krzk+dt@kernel.org>,
-	Conor Dooley <conor+dt@kernel.org>,
-	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>,
-	Gregory CLEMENT <gregory.clement@bootlin.com>,
-	=?iso-8859-1?Q?Th=E9o?= Lebrun <theo.lebrun@bootlin.com>,
-	Adrian Hunter <adrian.hunter@intel.com>,
-	Masahiro Yamada <yamada.masahiro@socionext.com>,
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-	linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
-Subject: Re: [PATCH 0/6] Add MMC support for Mobileye EyeQ5 and EyeQ6 SoCs
-Message-ID: <aGUfqcbUxvE27Um1@alpha.franken.de>
-References: <cover.1750156323.git.benoit.monin@bootlin.com>
+	s=arc-20240116; t=1751462913; c=relaxed/simple;
+	bh=HOh/U2jjhpt3b0ncodfdVaIpcAFRoWXCxIDJv1aaaiY=;
+	h=Date:Content-Type:MIME-Version:From:Cc:To:In-Reply-To:References:
+	 Message-Id:Subject; b=KAtmtvR7J4VVo3+RhTwVB2EL7sVfcjHqIS0Z8b0EN8eYvLg1ttdPQ0soOcEBg7oPSn0uY4hmKSxz5F9HYacA2cqrSFUEaRJfHAO8iQUOemB0W7RTBIU0LkfGDpOw/dQkJQnOCxdnSEqUiuEA4Oa1E9Rd32arS7Ml1SlUEMyNQQs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=LuYpeq2p; arc=none smtp.client-ip=10.30.226.201
+Authentication-Results: smtp.subspace.kernel.org;
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="LuYpeq2p"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A7ABC4CEED;
+	Wed,  2 Jul 2025 13:28:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1751462911;
+	bh=HOh/U2jjhpt3b0ncodfdVaIpcAFRoWXCxIDJv1aaaiY=;
+	h=Date:From:Cc:To:In-Reply-To:References:Subject:From;
+	b=LuYpeq2pMsJv1WcpV1kQwxOWzJ41FmhhGElleCfZJTuIQ6v71aiH6MLEgPD7jZmv2
+	 icusDw3bfy60Vao5HfzKmYAfVFWbfX2hqVWFLteRbrusoovpXK9RVbxwl2d7Ulx8iC
+	 rfVnqpcoB1OeWeGkkPKbnnw0pmuPQjIqH1hdaqN1V5xJukVK7NiTpWq35yULr02st+
+	 Elmb8VxP8b3Mgd7qrd+SacBs8b8diuSllXk8bW6aRa04F2MAqLkd25rtVh+TccLVLY
+	 s09Y4M3qMaN8j+rHxlnXNIZHOOXDNG+pIpF9g48N2dOIyEumKTofjoQ50AxVF7m0Ks
+	 BcEKnaoqf8oow==
+Date: Wed, 02 Jul 2025 08:28:30 -0500
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <cover.1750156323.git.benoit.monin@bootlin.com>
+From: "Rob Herring (Arm)" <robh@kernel.org>
+Cc: andersson@kernel.org, krzk@kernel.org, victor.shih@genesyslogic.com.tw, 
+ will@kernel.org, quic_tdas@quicinc.com, nfraprado@collabora.com, 
+ mani@kernel.org, ebiggers@google.com, geert+renesas@glider.be, 
+ geert.uytterhoeven@gmail.com, krzk+dt@kernel.org, conor+dt@kernel.org, 
+ shanchun1218@gmail.com, nm@ti.com, arnd@arndb.de, 
+ linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, 
+ jonathan.cameron@huawei.com, bigfoot@classfun.cn, catalin.marinas@arm.com, 
+ linux-kernel@vger.kernel.org, soc@lists.linux.dev, gordon.ge@bst.ai, 
+ kever.yang@rock-chips.com, ben.chuang@genesyslogic.com.tw, 
+ bst-upstream@bstai.top, ulf.hansson@linaro.org, neil.armstrong@linaro.org, 
+ linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+To: Albert Yang <yangzh0906@thundersoft.com>
+In-Reply-To: <20250702094444.3523973-5-yangzh0906@thundersoft.com>
+References: <20250528085403.481055-1-yangzh0906@thundersoft.com>
+ <20250702094444.3523973-1-yangzh0906@thundersoft.com>
+ <20250702094444.3523973-5-yangzh0906@thundersoft.com>
+Message-Id: <175146290763.1131398.8272632937196214694.robh@kernel.org>
+Subject: Re: [PATCH v2 4/8] dt-bindings: mmc: add binding for BST DWCMSHC
+ SDHCI controller
 
-On Tue, Jun 17, 2025 at 03:25:50PM +0200, Benoît Monin wrote:
-> The MMC/SDHCI controller found in Mobileye EyeQ5 and EyeQ6 SoCs is 
-> based on Cadence cdns sd4hc IP. It supports up to HS400HS mode. The 
-> only peculiarity of the hardware is that it needs the preset value
-> quirk to configure the clock properly at speed slower than HS200.
-> 
-> This patchset adds a compatible device tree binding to cdns sdhci for 
-> mobileye then uses it in the sdhci-cadence driver.
-> 
-> It also adds an emmc entry in the dtsi of each SoC and the config 
-> options in each defconfig to allow using an eMMC for the rootfs.
-> 
-> Benoît Monin (6):
->   dt-bindings: mmc: cdns: add Mobileye EyeQ MMC/SDHCI controller
->   mmc: sdhci-cadence: add Mobileye eyeQ support
->   MIPS: mobileye: dts: eyeq6h: add the emmc controller
->   MIPS: eyeq6_defconfig: add cadence MMC/SDHCI driver
->   MIPS: mobileye: dts: eyeq5: add the emmc controller
->   MIPS: eyeq5_defconfig: add cadence MMC/SDHCI driver
-> 
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml   |  1 +
->  arch/mips/boot/dts/mobileye/eyeq5.dtsi        | 22 +++++++++++++++++++
->  arch/mips/boot/dts/mobileye/eyeq6h.dtsi       | 22 +++++++++++++++++++
->  arch/mips/configs/eyeq5_defconfig             |  2 ++
->  arch/mips/configs/eyeq6_defconfig             |  2 ++
->  drivers/mmc/host/sdhci-cadence.c              | 11 ++++++++++
->  6 files changed, 60 insertions(+)
 
-applied patches 3-6 to mips-next.
+On Wed, 02 Jul 2025 17:44:40 +0800, Albert Yang wrote:
+> Add device tree binding documentation for the Black Sesame Technologies
+> (BST) DWCMSHC SDHCI controller.
+> 
+> This binding describes the required and optional properties for the
+> bst,dwcmshc-sdhci compatible controller, including register layout,
+> interrupts, bus width, clock configuration, and other controller-specific
+> features.
+> 
+> ---
+> Changes for v2:
+> - Simplified description, removed redundant paragraphs
+> - Updated $schema to reference mmc-specific scheme
+> - Corrected compatible to add soc name
+> (bst,c1200-dwcmshc-sdhci)
+> - Removed all redundant property descriptions
+> - Dropped invalid mmc_crm_base/size properties, use reg for all address
+> ranges
+> - Cleaned up required properties to only essential entries
+> - Standardized example DTS format, fixed reg syntax and property
+> ordering
+> - Removed additionalProperties: true
+> 
+> Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
+> Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
+> ---
+>  .../bindings/mmc/bst,dwcmshc-sdhci.yaml       | 67 +++++++++++++++++++
+>  1 file changed, 67 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml
+> 
 
-Thomas.
+My bot found errors running 'make dt_binding_check' on your patch:
 
--- 
-Crap can work. Given enough thrust pigs will fly, but it's not necessarily a
-good idea.                                                [ RFC1925, 2.3 ]
+yamllint warnings/errors:
+
+dtschema/dtc warnings/errors:
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.example.dtb: mmc@22200000 (bst,c1200-dwcmshc-sdhci): reg: [[0, 572522496], [0, 4096], [0, 587227136], [0, 4096]] is too long
+	from schema $id: http://devicetree.org/schemas/mmc/bst,dwcmshc-sdhci.yaml#
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20250702094444.3523973-5-yangzh0906@thundersoft.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
+
