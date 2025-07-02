@@ -1,161 +1,120 @@
-Received: from fout-a5-smtp.messagingengine.com (fout-a5-smtp.messagingengine.com [103.168.172.148])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D8F15244693;
-	Wed,  2 Jul 2025 10:40:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=103.168.172.148
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 94D23253F15;
+	Wed,  2 Jul 2025 10:47:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751452856; cv=none; b=nmMVZOBiMhugcXNoIaiQHZ9G9jxOL4nFZk6Rse4T1IUFz4rWcklbRJKA6UmK2ozZXMNgv3SxBMLvDy1fQSTXZQ1cLytNYpcRDjT0O38iDd2FULMoSCYkoTc2nCrQrP44wlYqYVBxdIlZiz1/OitX0VErEdx8PjfNT5pJZJK3u+I=
+	t=1751453272; cv=none; b=gH2Eg39k0BCTEVUHlD8Kfgvr+5zby7V3hnjp9cY7juwVFVmoICHfikpEuqsJt9egtNAPYl4c8SAYEz+ZHMMquIm+v/kgyYyeOA+HSgVSfb0AsQAvMtkT6CKX2El+E+Nw/+Nmb2XU2N1bVspZ+o5D3kXEx/i/U5dyCSX2x6wJJqk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751452856; c=relaxed/simple;
-	bh=KAOjTDNNfMtSybxzzyF1oxwUo5aPUGM4sbjOFZt9Egw=;
-	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
-	 Subject:Content-Type; b=iKV36f/3iG/asv8wPWr1INZS4It40TY+KW8DcAoO/0YOTNpSpXIJjbTdZvBRt8/0Q72SrspLFrOyiwcyORHOFe47jhEC4m0I0ZVq+pPvXqQ5/n3NtuyjUT35Fi5WKDgft/eWKOjgX3ormoUA4R46o6kSVkwBmYFgPLxNa2xJxW4=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=DLhAkNIz; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=IjE3Feu5; arc=none smtp.client-ip=103.168.172.148
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
+	s=arc-20240116; t=1751453272; c=relaxed/simple;
+	bh=dkrctSKnjdlsw2PLtAn4EpKUFuAA7kypA3Hrt9pRSVY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=B5kKAIpvPo8ETTSmRj1+hZO5UieKoclyT/tSAjkcjhNIq1BtkptIKKdoaipCGIsY3OuIOsOW7y0pPTVwEb015dB6HRhjwSFCOkNH2T7ulQN5wtXsaOrHQTO268hasLBwsiQUap1KVHbgH26eyyteIFJ0QbUN3d6d/k8xDtHjhyw=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=odj+E+jZ; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="DLhAkNIz";
-	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="IjE3Feu5"
-Received: from phl-compute-05.internal (phl-compute-05.phl.internal [10.202.2.45])
-	by mailfout.phl.internal (Postfix) with ESMTP id E59EEEC0476;
-	Wed,  2 Jul 2025 06:40:53 -0400 (EDT)
-Received: from phl-imap-02 ([10.202.2.81])
-  by phl-compute-05.internal (MEProxy); Wed, 02 Jul 2025 06:40:53 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-	:cc:content-transfer-encoding:content-type:content-type:date
-	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to; s=fm1; t=1751452853;
-	 x=1751539253; bh=f+jtoViYxyDT44gIcm4ScVTqk+vWq1DU/+tdfl4XPXA=; b=
-	DLhAkNIzpkFpF2GoJ3uXO9a8+MQ6k2VWe4RnvK7qkowKYBtldXKEwql0AgYcTQjB
-	6C2WGef0oMQSUwiBTATwXRq1fdyId9dRkKldfFsUIkHvy3SGsHKcWikPXoGKSLLt
-	v2wip6qoJcj8hM+PDREDXIZcj2EkeQ7if5I0NYHooVwe/TjMg7M5vGMutHYK4zpf
-	JKC0nmlrS5+XaiYx0750b6NaXOi+l2CW/8JTaK/kEl2xcjoPDZzqDhBiCCp9loXn
-	E1egiloLO7fam3tP42RGmEVWVsaCYom6LmTgVzHnipHhtuXbyUBAPYzjC4XuyTOZ
-	E8VuUPkwCcc1E3QhpOxIMg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-	messagingengine.com; h=cc:cc:content-transfer-encoding
-	:content-type:content-type:date:date:feedback-id:feedback-id
-	:from:from:in-reply-to:in-reply-to:message-id:mime-version
-	:references:reply-to:subject:subject:to:to:x-me-proxy
-	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1751452853; x=
-	1751539253; bh=f+jtoViYxyDT44gIcm4ScVTqk+vWq1DU/+tdfl4XPXA=; b=I
-	jE3Feu53gTguVKZDRL2kpkOVMb0KpmQUwmy9BL89R82YGxQ5JpXq9mLZMvBykJdW
-	VUnxvpLKIYW8/e27LfyQMFUtMZJ9qsDWtBije6DVCVDkc2eXN6XzNQej9/cxdVSe
-	W7xNPLZs5DT0w76kYx/QXxUJkRdLWas8mPwQar8G5dxRsSMjzktgv/JdS+PjC7+/
-	Js1sxemUhjDPWstGJDvLdLNJqd1BRuCif5Mz7kI9XRY53e4/9nVSHUcV8R33O2OY
-	eCMG2IOhSds33jp2qgoKhriLBP5/HLWA7F2uZi1OX1oYCKNigZCGUVv4GPPYcv5q
-	goVcU8Lu1AUUSGjBIQ0Tg==
-X-ME-Sender: <xms:swxlaBcENGwyRdD3Lol3wY3YSNcqCO9oHyZae2kSARGeSYHVgoruRQ>
-    <xme:swxlaPOD_MyZkjrHVqAMOiN_BgP7IyrLpyYVV5odiVEkfJkQrvK12v7S2pcZs3Nl8
-    qQzw6DmdViY81zIqi8>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgddujedukecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
-    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
-    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhhnugcu
-    uegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtthgvrh
-    hnpefhtdfhvddtfeehudekteeggffghfejgeegteefgffgvedugeduveelvdekhfdvieen
-    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnug
-    esrghrnhgusgdruggvpdhnsggprhgtphhtthhopeefuddpmhhouggvpehsmhhtphhouhht
-    pdhrtghpthhtoheptggrthgrlhhinhdrmhgrrhhinhgrshesrghrmhdrtghomhdprhgtph
-    htthhopehgohhrughonhdrghgvsegsshhtrdgrihdprhgtphhtthhopegsshhtqdhuphhs
-    thhrvggrmhessghsthgrihdrthhophdprhgtphhtthhopegsihhgfhhoohhtsegtlhgrsh
-    hsfhhunhdrtghnpdhrtghpthhtohepnhhfrhgrphhrrgguohestgholhhlrggsohhrrgdr
-    tghomhdprhgtphhtthhopegsvghnrdgthhhurghnghesghgvnhgvshihshhlohhgihgtrd
-    gtohhmrdhtfidprhgtphhtthhopehvihgtthhorhdrshhhihhhsehgvghnvghshihslhho
-    ghhitgdrtghomhdrthifpdhrtghpthhtohepghgvvghrthdorhgvnhgvshgrshesghhlih
-    guvghrrdgsvgdprhgtphhtthhopehgvggvrhhtrdhuhihtthgvrhhhohgvvhgvnhesghhm
-    rghilhdrtghomh
-X-ME-Proxy: <xmx:swxlaKjYdHsDdvduhQ0MEcXOW8CMKc87KCvkl6RjdvJ5XPD31U32gA>
-    <xmx:tAxlaK-bKjsdkvf85XBjTrRBq9bNDPMHJlelsR42NkRo33k7eUCebQ>
-    <xmx:tAxlaNtHm_x50MZxO88JkjSADPwfsDVmVUJ6WcBMuB3nd79uTugexQ>
-    <xmx:tAxlaJH2drl5pDUEuk4-L-F6GF3voZF2Kooj9dHI5mlDWaiEzFexTw>
-    <xmx:tQxlaDuN7y1Aicd_OJNllKymHr1i7ALXMocCOAl2OmgXckDib_xxzhcp>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.phl.internal (Postfix, from userid 501)
-	id D7AA1700065; Wed,  2 Jul 2025 06:40:51 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="odj+E+jZ"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CC5CDC4CEED;
+	Wed,  2 Jul 2025 10:47:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1751453272;
+	bh=dkrctSKnjdlsw2PLtAn4EpKUFuAA7kypA3Hrt9pRSVY=;
+	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+	b=odj+E+jZWQjYS9aRqRuwMJeYI88ylhf5Ci4buASLTti0if+pATjRwHaPhVXvSEP6Q
+	 ra2sJkuj2jGFwOiO9EpuoknxOD8gJHfN3Yj5Ta7MHd8EyJ4ejCc9NJNHwTUujrmwXY
+	 7k/4Deuh4JXl7yUr777QCZh5sJWgeoH6Dv3hwbbBnRtb/SVIqwHrR1Bs29CkxBpU/t
+	 FKQ9ToXgeATVt9+jalL9fYwzlL1bwFK3gfdeQFQoLispw70IC7NnfSosOnr67iHp+E
+	 DlvMSL22ZfKaVqdITqkEdbnXMrPlXXerxOu+HZm0EDFDmbFIABXj3MConV4Qjh0BW0
+	 PQLM8P1+TybkQ==
+Message-ID: <2559f035-787e-4c80-8889-d1826a27171b@kernel.org>
+Date: Wed, 2 Jul 2025 12:47:40 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-X-ThreadId: Tf7f6c885039edc57
-Date: Wed, 02 Jul 2025 12:40:31 +0200
-From: "Arnd Bergmann" <arnd@arndb.de>
-To: "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>,
- "Rob Herring" <robh@kernel.org>, krzk+dt@kernel.org,
- "Krzysztof Kozlowski" <krzk@kernel.org>,
- "Conor Dooley" <conor+dt@kernel.org>, "gordon.ge" <gordon.ge@bst.ai>,
- "Catalin Marinas" <catalin.marinas@arm.com>,
- "Geert Uytterhoeven" <geert.uytterhoeven@gmail.com>,
- "Will Deacon" <will@kernel.org>, "Ulf Hansson" <ulf.hansson@linaro.org>,
- "Adrian Hunter" <adrian.hunter@intel.com>
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST
+ C1200 controller driver
+To: Albert Yang <yangzh0906@thundersoft.com>, robh@kernel.org,
+ krzk+dt@kernel.org, conor+dt@kernel.org, gordon.ge@bst.ai,
+ catalin.marinas@arm.com, geert.uytterhoeven@gmail.com, will@kernel.org,
+ ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de
 Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
- devicetree@vger.kernel.org,
- "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
- soc@lists.linux.dev, bst-upstream <bst-upstream@bstai.top>,
- "Neil Armstrong" <neil.armstrong@linaro.org>,
- "Jonathan Cameron" <jonathan.cameron@huawei.com>, bigfoot@classfun.cn,
- kever.yang@rock-chips.com, "Manivannan Sadhasivam" <mani@kernel.org>,
- "Geert Uytterhoeven" <geert+renesas@glider.be>,
- "Bjorn Andersson" <andersson@kernel.org>, "Nishanth Menon" <nm@ti.com>,
- =?UTF-8?Q?N=C3=ADcolas_F=2E_R=2E_A=2E_Prado?= <nfraprado@collabora.com>,
- "Taniya Das" <quic_tdas@quicinc.com>, "Eric Biggers" <ebiggers@google.com>,
- "Victor Shih" <victor.shih@genesyslogic.com.tw>,
- "Shan-Chun Hung" <shanchun1218@gmail.com>,
- "Ben Chuang" <ben.chuang@genesyslogic.com.tw>
-Message-Id: <53ba18c1-4554-4d77-84fd-d921febb7559@app.fastmail.com>
-In-Reply-To: <20250702094444.3523973-6-yangzh0906@thundersoft.com>
+ devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, soc@lists.linux.dev,
+ bst-upstream@bstai.top, neil.armstrong@linaro.org,
+ jonathan.cameron@huawei.com, bigfoot@classfun.cn, kever.yang@rock-chips.com,
+ mani@kernel.org, geert+renesas@glider.be, andersson@kernel.org, nm@ti.com,
+ nfraprado@collabora.com, quic_tdas@quicinc.com, ebiggers@google.com,
+ victor.shih@genesyslogic.com.tw, shanchun1218@gmail.com,
+ ben.chuang@genesyslogic.com.tw
 References: <20250528085403.481055-1-yangzh0906@thundersoft.com>
  <20250702094444.3523973-1-yangzh0906@thundersoft.com>
  <20250702094444.3523973-6-yangzh0906@thundersoft.com>
-Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200
- controller driver
-Content-Type: text/plain
+From: Krzysztof Kozlowski <krzk@kernel.org>
+Content-Language: en-US
+Autocrypt: addr=krzk@kernel.org; keydata=
+ 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 a/A=
+In-Reply-To: <20250702094444.3523973-6-yangzh0906@thundersoft.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
-On Wed, Jul 2, 2025, at 11:44, Albert Yang wrote:
+On 02/07/2025 11:44, Albert Yang wrote:
+> Add a driver for the DesignWare Mobile Storage Host Controller (DWCMSHC)
+> SDHCI controller found in Black Sesame Technologies C1200 SoCs.
+> 
+> The driver provides specialized clock configuration, tuning, voltage
+> switching, and power management for the BST DWCMSHC controller. It also
+> includes support for eMMC boot and memory-mapped I/O for CRM registers.
+> 
+
+Missing SoB.
+
+...
 
 > +
-> +config MMC_SDHCI_BST
-> +	tristate "SDHCI OF support for the BST DWC MSHC"
-> +	depends on ARCH_BST || COMPILE_TEST
-> +	depends on MMC_SDHCI_PLTFM
-> +	depends on OF
-> +	help
-> +	  This selects Synopsys DesignWare Cores Mobile Storage Controller
-> +	  support.
-
-The description does not mention the actual device it's for
-but only DesignWare.
-
-Try to keep this sorted alphabetically between the other
-CONFIG_MMC_SDHCI_* backends
-
-> +
-> +struct dwcmshc_priv {
-> +	void __iomem *crm_reg_base;
-> +	u32 phy_crm_reg_base;
-> +	u32 phy_crm_reg_size;
-> +};
-
-You are only using the first member here, the phy_crm_reg_base
-and phy_crm_reg_size are assigned during probe but not referenced
-later.  devm_platform_ioremap_resource() should help simplify
-that code further.
-
-> +
-> +static void bst_write_phys_bst(void __iomem *addr, u32 value)
-> +{
-> +	iowrite32(value, addr);
-> +}
-
-You always pass priv->crm_reg_base into this helper, so
-it would be simpler to make it take the sdhci_pltfm_host
-pointer and the offset instead of the address.
-
 > +static int bst_sdhci_reallocate_bounce_buffer(struct sdhci_host *host)
 > +{
 > +	struct mmc_host *mmc = host->mmc;
@@ -169,53 +128,61 @@ pointer and the offset instead of the address.
 > +	 * cards are usually optimized to handle this size of requests.
 > +	 */
 > +	bounce_size = SZ_32K;
-
-The comment says 64K, but the size you use is 32K.
-
-
-> +	/* Get CRM registers from the second reg entry */
-> +	crm_res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-
-devm_platform_ioremap_resource()
-
 > +	/*
-> +	 * Hardware limitation workaround:
-> +	 *
-> +	 * Our platform supports 64-bit physical addressing, but the eMMC
-> +	 * controller's SRAM-based DMA engine is constrained to a 32-bit
-> +	 * address space. When using the standard SDHCI interface, which
-> +	 * allocates DDR-based DMA buffers with 64-bit addresses, the
-> +	 * dma_map_single() operation fails because the DMA engine cannot
-> +	 * handle addresses beyond 32 bits.
-> +	 *
-> +	 * To resolve this hardware limitation, we implement a bounce buffer
-> +	 * allocated via dma_alloc_coherent() to satisfy DMA addressing
-> +	 * constraints.
+> +	 * Adjust downwards to maximum request size if this is less
+> +	 * than our segment size, else hammer down the maximum
+> +	 * request size to the maximum buffer size.
 > +	 */
-> +	err = bst_sdhci_reallocate_bounce_buffer(host);
+> +	if (mmc->max_req_size < bounce_size)
+> +		bounce_size = mmc->max_req_size;
+> +	max_blocks = bounce_size / 512;
+> +
+> +	ret = of_reserved_mem_device_init_by_idx(mmc_dev(mmc), mmc_dev(mmc)->of_node, 0);
+> +	if (ret) {
+> +		dev_err(mmc_dev(mmc), "Failed to initialize reserved memory\n");
+> +		return ret;
+> +	}
+> +
+> +	host->bounce_buffer = dma_alloc_coherent(mmc_dev(mmc), bounce_size,
+> +						 &host->bounce_addr, GFP_KERNEL);
+> +	if (!host->bounce_buffer)
+> +		return -ENOMEM;
+> +
+> +	host->bounce_buffer_size = bounce_size;
+> +
+> +	/* Lie about this since we're bouncing */
+> +	mmc->max_segs = max_blocks;
+> +	mmc->max_seg_size = bounce_size;
+> +	mmc->max_req_size = bounce_size;
+> +
+> +	dev_info(mmc_dev(mmc), "BST reallocate %s bounce up to %u segments into one, max segment size %u bytes\n",
+> +		 mmc_hostname(mmc), max_blocks, bounce_size);
 
-Having an explanation here makes sense, but I don't think this
-captures what is actually going on, in particular:
+Devices are supposed to be silent on success.
 
-- dma_alloc_coherent() being backed by an SRAM that is under
-  the 4GB boundary
-- the problem that the SoC is configured that all of DRAM
-  is outside of ZONE_DMA32
-- The type of hardware bug that leads to 64-bit DMA being
-  broken in this SoC.
+> +
 
-I still have some hope that the hardware is not actually
-that broken and you can get it working normally, in one
-of these ways:
-- enabling 64-bit addressing in the parent bus
-- enabling SMMU translation for the parent bus
-- configuring the parent bus or the sdhci itself to
-  access the first 4GB of RAM, and describing the
-  offset in dma-ranges
-- moving the start of RAM in a global SoC config
 
-It is rather unlikely that the SoC designer chose to
-integrate a 32-bit-only device without adding some
-way to configure it to access RAM.
+...
 
-      Arnd
+> +/**
+> + * dwcmshc_remove - Platform driver remove
+> + * @pdev: Platform device
+> + *
+> + * Removes the SDHCI host controller.
+> + *
+> + * Return: 0 on success
+> + */
+Drop all such fake comments, not helpful. We all now what is the purpose
+of the function and saying that platform driver remove callback is
+"platform driver remove" which "Removes the SDHCI host controller." is
+not only redundant, but actually harming because later you have:
+"Return: 0 on success"
+which is impossible.
+
+Such redundant comments are not kernel coding style. Provide USEFUL
+comments, useful kerneldoc, not something to satisfy line-counters.
+
+
+Best regards,
+Krzysztof
