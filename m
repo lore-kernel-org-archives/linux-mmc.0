@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DB258226CE1;
-	Wed,  2 Jul 2025 10:24:18 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C195123BD0F;
+	Wed,  2 Jul 2025 10:25:35 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751451859; cv=none; b=lIqXtVpjseaeef0OzYGnjCdv4T0aQqnScbgd1nhgUz9r3KvVfAEsdaZuN/NupUypuEm511NXD1UJrDQn2UA/ykN8IYsv99e0i+3it878v48XV8s5aKjaC5+7cPSHVdjp9Ukr6t0vHLlr62J9ola7dG1++jKaQFWcEZJIIYmPHxw=
+	t=1751451935; cv=none; b=GRPvMhLPpEPhEiUZbNf04411HCtZ/08nRYqHpvc9wMB/LfPKyl1htXp4VR+P7ervl+YlgFHLiickeWTvDb+EwltKXfFxqmZ1LYNBM0BBmyzI1Ux0mxhVGBeYdHgwOROT0aPXTgU7No/fLwYq5QWplNxw9pHAU699euGwcfzH+d8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751451859; c=relaxed/simple;
-	bh=UsmMxrbxBsbKyiArM7KRaDTrVIVqy9Mb7Xi3fjN+Fgk=;
+	s=arc-20240116; t=1751451935; c=relaxed/simple;
+	bh=+DJPfc5ReWfCD+fO+gUhNAzTKw+5C48YNgQHh7V1074=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MZNPe2Q4pJqHmKnlOWGcLoWSIZK6b76Kp3d+wsWwyQB5TZqag9shu6zt1jD+WKchIFJT8l6OxKCZqHtDflziAXUQi5aUV2aLu4U1FHvgmelItVUIuI54Cw7NaTkGVLlZOsiINdbBlHzwOnwIt7NWCUOLeYR2aYTAfrIPEmBaLeE=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=sy4gjWkt; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=txqwHyF9wi4F1ursc4gOw2ATwDM06ntowvDifyy2+mxLWO+5NeoqN4EyCHWN8ZKKGEUfoPkmhhmU+u/vmRyu22SzM0VlUy7GfaK9CP0gZa0leZe644UOAacGLk/fzI60tw6A0i+1CPzjjFLqebCH1VtLJcOJgcvYDO1dvMtj+CY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=knAEC3y/; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="sy4gjWkt"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF1A3C4CEED;
-	Wed,  2 Jul 2025 10:24:11 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="knAEC3y/"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C126FC4CEED;
+	Wed,  2 Jul 2025 10:25:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1751451858;
-	bh=UsmMxrbxBsbKyiArM7KRaDTrVIVqy9Mb7Xi3fjN+Fgk=;
+	s=k20201202; t=1751451935;
+	bh=+DJPfc5ReWfCD+fO+gUhNAzTKw+5C48YNgQHh7V1074=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=sy4gjWktF2eOQn1Onxy8QfsZqy5IEKNW4Blt/5ZfCEOj6k7yZic23QjjnnlkMHtBk
-	 0wSDelUsD6efXFANDXvGe2I63DxT6KgXwUWq4GNLXVqVfkS0CylAIog2EPih2YxrJ+
-	 AizBjWdzehnJtDe7LG83kXFcTPEoXwwqGJJWO2sNfsSwIsP0NJPuFvt7PM1ntdLEPu
-	 vPkbKFqTUWAtAnvLCzSAWN/3zshtwMnxse8OY0Db9FwEa5E1oEBeBWndEJKw+1Rw55
-	 F8tbujyVhS+5Qs53uKTWSsUL8xLTdAEbcVPmFXGL17SpeRqZ3XhQBxM+Cp5EBUpezY
-	 182zxPxBUYd9A==
-Message-ID: <c9160561-3792-4230-a7f6-57caf35f9a1d@kernel.org>
-Date: Wed, 2 Jul 2025 12:24:08 +0200
+	b=knAEC3y/na3KKl/jzy09sDZVuzAyHjef7lCAb3w/Q/YuDUIhfwY2szkqUzg8LugR2
+	 sAOo/sFWJHqRTtmv9hnPO6bw8ShhWf6Dm6a+Pr5tEhT5FnbIGuVohafX7Jd+PqaPe9
+	 3tTJV4LY+jB5MzA9PwuCX9n4gop0YdwGWn49rz8ABbl7Ng1vvIb6i40fWpdgpxzJa/
+	 kHLr4mHkFhteRuf/inOPKaSqv0kBfkxGkpvcSkHO6MG+NR0cKqF3LVQV1qSyebCN7P
+	 ypfnt89OGRohLuYaRgd+7Su0fQbs4jFSitsIrJIdedNS0ro59bULMA78TT6Jsmwmxi
+	 Q2R+dIU5u5/Sg==
+Message-ID: <0a7fb511-8dbb-4f3a-890c-133505b79e19@kernel.org>
+Date: Wed, 2 Jul 2025 12:25:26 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH v2 1/8] dt-bindings: vendor-prefixes: Add Black Sesame
- Technologies Co., Ltd.
+Subject: Re: [PATCH v2 7/8] arm64: defconfig: enable BST C1200 DWCMSHC SDHCI
+ controller
 To: Albert Yang <yangzh0906@thundersoft.com>, robh@kernel.org,
  krzk+dt@kernel.org, conor+dt@kernel.org, gordon.ge@bst.ai,
  catalin.marinas@arm.com, geert.uytterhoeven@gmail.com, will@kernel.org,
@@ -51,7 +51,7 @@ Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
  ben.chuang@genesyslogic.com.tw
 References: <20250528085403.481055-1-yangzh0906@thundersoft.com>
  <20250702094444.3523973-1-yangzh0906@thundersoft.com>
- <20250702094444.3523973-2-yangzh0906@thundersoft.com>
+ <20250702094444.3523973-8-yangzh0906@thundersoft.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -97,30 +97,44 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250702094444.3523973-2-yangzh0906@thundersoft.com>
+In-Reply-To: <20250702094444.3523973-8-yangzh0906@thundersoft.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 02/07/2025 11:44, Albert Yang wrote:
-> Black Sesame Technologies Co., Ltd.s a leading automotive-grade
-> computing SoC and SoC-based
-> intelligent vehicle solution provider. Link: https://bst.ai/.
+> Enable the BST C1200 DWCMSHC SDHCI controller driver
+> (CONFIG_MMC_SDHCI_BST)
+> in the ARM64 defconfig to support eMMC/SD card access on Black Sesame
+> Technologies C1200 series SoCs.
+
+Please wrap commit message according to Linux coding style / submission
+process (neither too early nor over the limit):
+https://elixir.bootlin.com/linux/v6.4-rc1/source/Documentation/process/submitting-patches.rst#L597
+
 > 
-> Acked-by: Rob Herring (Arm) <robh@kernel.org>
+> This driver provides hardware-specific implementation for the Synopsys
+> DesignWare Mobile Storage Host Controller integrated in BST SoCs.
+
+Redundant, this duplicates earlier paragraph.
+
+> 
 > Signed-off-by: Ge Gordon <gordon.ge@bst.ai>
 > Signed-off-by: Albert Yang <yangzh0906@thundersoft.com>
 > ---
-Why is this attached to v1?
-
-Where is the changelog?
-
-Most of your emails did not reach mailing list. I also did not get them.
-
-... and the huge amount of CC list, mostly redundant and not relevant to
-this work, could explain that. Don't Cc random people.
-
-Anyway, fix above points - all three - and resend after 24h at least. Or
-consider using b4 relay, if this hits rejections/spam.
+>  arch/arm64/configs/defconfig | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
+> index 0a1cfaa19688..8daf8cf3dc97 100644
+> --- a/arch/arm64/configs/defconfig
+> +++ b/arch/arm64/configs/defconfig
+> @@ -1188,6 +1188,7 @@ CONFIG_MMC_SDHCI_CADENCE=y
+>  CONFIG_MMC_SDHCI_ESDHC_IMX=y
+>  CONFIG_MMC_SDHCI_TEGRA=y
+>  CONFIG_MMC_SDHCI_F_SDH30=y
+> +CONFIG_MMC_SDHCI_BST=y
+This makes little sense without your arch. :/ Send one defconfig patch
+enabling everything wha tis necessary.
 
 Best regards,
 Krzysztof
