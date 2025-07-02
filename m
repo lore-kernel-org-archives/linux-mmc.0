@@ -1,145 +1,108 @@
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 37E0B2F50A6
-	for <linux-mmc@vger.kernel.org>; Wed,  2 Jul 2025 17:07:28 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 74DE630114E
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Jul 2025 17:22:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751476051; cv=none; b=YXIGCv2r2dGLp1KAIRc83mLlr8Ez+n+o1svSKUvEtZudfHHpXAcw53x+2tBmAFSVw9wwVWz7+DkxDS9aAST3eRudS9m6PYhFxH/TAa1JeA506pNTbd7OTo0aWSmjCqjWZ7gOqrHRu+GpRe1TU3q4Y+l0xcDFwlfFr1FYLBI9loA=
+	t=1751476948; cv=none; b=AIJFT8BBWNlQZX6oIWcATDMsxLd5d5shaIV6Zg5Hjqe7cC/mxSUaY2I9AZn/tB8RnG+aRvd9gHOwwakV6e7pTz2feuSkYpslabGsgxMg2NR5oOtAsnTVohyVOI8uaj/kUuXXghivqy4lEtebEz7zfUa2zCh5ajPZHe0b/9l3nZY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751476051; c=relaxed/simple;
-	bh=M+vISXamBlP3ozifS/SwZ99717v8q0Kc6KegIFog+sA=;
-	h=From:To:Cc:Subject:In-Reply-To:References:Date:Message-ID:
-	 MIME-Version:Content-Type; b=VAaitrmmexJ9CeGqOov+aRq2zUJNX9xvzwSMTc4pe/xPy/eF+OuFy0MVFCKPiVhYTDJe5W/mWqYpVYyr9/1QFwSnGyrHV6+NQisMlp+icYOdVThihiwyBSDmstos545YJqljl/DBQjNQoZTsejbSfmpRe7S44XrzGkFa4rxdVCw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com; spf=pass smtp.mailfrom=baylibre.com; dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b=DZvXDh3u; arc=none smtp.client-ip=209.85.128.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=baylibre.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=baylibre.com
+	s=arc-20240116; t=1751476948; c=relaxed/simple;
+	bh=/SkwY6ne+g8BY+F31MtkqlGaiDXb8coPhVMth5244qs=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=A1xGX1J0wrBl4vGVncmEcHOD9HdnNcuL+bqkygyse32a9gTGVR8vpB6wFfIDvb8OMIUrN5JM7LSr+Q2q4xbLvZBZ3RfYdHLufElCr1kw4h7U9nneWK+osfyXnbaRcdcF9367CzPCAd2usNDPWLQLUjiiuDEsP1VLILpsJhPjwGc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer; spf=none smtp.mailfrom=libretech.co; dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b=WaJ1TA29; arc=none smtp.client-ip=209.85.128.177
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=libretech.co
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20230601.gappssmtp.com header.i=@baylibre-com.20230601.gappssmtp.com header.b="DZvXDh3u"
-Received: by mail-wm1-f43.google.com with SMTP id 5b1f17b1804b1-4531e146a24so42428565e9.0
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Jul 2025 10:07:28 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b="WaJ1TA29"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-711a3dda147so77533217b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Jul 2025 10:22:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20230601.gappssmtp.com; s=20230601; t=1751476046; x=1752080846; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:user-agent
-         :references:in-reply-to:subject:cc:to:from:from:to:cc:subject:date
+        d=libre.computer; s=google; t=1751476946; x=1752081746; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=M+vISXamBlP3ozifS/SwZ99717v8q0Kc6KegIFog+sA=;
-        b=DZvXDh3uhX/1Qizqo8aCnLgrSFRFhsn8xq9Z7E2U/ZPR/nCC8a0wQpsIF8Bz+Jvndk
-         zmTwEu2q0lBjKbuOBdkTU66eC2sR/Czst2GjYfjN8u4pCoUfuWNIu9tq4DeR3oMxcptH
-         2WNbzxZWB22tATLV3bbGtWWoUpc66m2cwvY3671ZAhCD6EFmbSzmrwrGLo7AeoZCkKi0
-         r5PB08S1ToEbn8CLZQD2O6BP9RzRdrh3nae+ieLbLMCwxffuY5Qkc/TXU7fAh2VQ/0W+
-         x/7VsUVZJhGAOtZAFpeAFXo3/maXAVHOn2xUUZy9glj+XhnyvHyNgGknGtPZ0xS/n1um
-         Y2cQ==
+        bh=/SkwY6ne+g8BY+F31MtkqlGaiDXb8coPhVMth5244qs=;
+        b=WaJ1TA29Tz82XkVznEqYNerS0pddA1Rb3Yajbi9mj2RuAzt7iPaY0FZN8dU4b0B1ey
+         TQDFtb1KSmqMWvJY50Ed/NYxNxuL8zuW3kBijeMI9RhsjkxfXzNK1FFqDqBk+5LvXn/l
+         0nf2O1MjOouuTBMH93s0MclMJGAhMxNokKO7TJubOd+Xj6zdgHMlpo+S6R2FLGtQGPSK
+         Y3G0qSvGI/ooX0JfTKB0kW+kjB7MN3QHxTCFmYhMj7zNJeZ3IttBQzSuv0tu8ykHSLkd
+         LowgbQpkEUu/Ne3gqLjyoHqk2oK1MBtRpdgboF2g4GHYHwkjycOKQv9XRsv52Qn5BglD
+         ovPg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751476046; x=1752080846;
-        h=content-transfer-encoding:mime-version:message-id:date:user-agent
-         :references:in-reply-to:subject:cc:to:from:x-gm-message-state:from
-         :to:cc:subject:date:message-id:reply-to;
-        bh=M+vISXamBlP3ozifS/SwZ99717v8q0Kc6KegIFog+sA=;
-        b=WTKQD6oDiAEhNKwKni1Pp1HTLoZPvhX58BJSarMs2k0WGlWttbJOfXTrqmTE7efP/B
-         UH14TcO1zJYoJC69t6gQfgU1zeosqOOdh0lK6Fe+pPVwfito6s0IHG3N9zIksCxcNa0m
-         3rpb8uF6d2s4aM+3CBrWTCNqbyFFP5xekTbzqr+9wxcAFIzUnLX0B7CsJat5XZy7DSAO
-         ZBtPfkWfWeC4W5Lr5von7Kxy47HdpuLZWIIm/fMkEnFibddhtTVHahyixuB4JXXABQXy
-         egrn21hF3crSEIf9rApsy0yuG+qUodM2th3ht0qhmey9JqpNAjDXcnbXsMOAgn3n9NNc
-         7hPg==
-X-Forwarded-Encrypted: i=1; AJvYcCWfmVSBjWi60HxZ9EWRTPdQUCOpcN2HPJGoR8eIvSNcZEIj7WmxwQNB24fz/o2X9cZduZonddoSEL0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwLODSwovJk2oLhBT2ZFuRdbJ5JkBF+FWQ0eUZIWfYhM3+ivYfh
-	YOfMkTI9R9/wZrT9MmKsChVpDVQqQeR6HVDJ5L450uYY1QLlsGlIY0TWPe6G9sShBd8=
-X-Gm-Gg: ASbGncv9DVlZQRJW0FtJpwIXnDFWaX/8wBDrnRzfFH9zL1FyVltny8ycmFmwhMM4FdB
-	3fbv3ZV76+w/zzCp+4bgokxGmOX3rNHr07mIRZxyK3UNyq+W+C0MvN82qk485geaPXm94QepDCk
-	POcnTGJZCV650RyP8dYQffrbZPvl2m+HHaVI3/bATOOO2FjWTU4IJuBa+JYlnIzdiO+Q133j9zK
-	NMN2cs7osyRLOowgruwWgTQklZpnmkbPvl2bN/IJoZ32lHGcvaf6wjjOcnIYq6V47Ulga1GQ6Vf
-	5ZY6tvWFsmqreKcOGKcJOr3HQfDo+7CLQxzq9XS2mI07Dly01OTfjsjxXfQtayAO9OhfFmFP
-X-Google-Smtp-Source: AGHT+IGsc5GDljzmbKBoFeO/zgtvwlzCDxGi06+LsKgR6vPGC7cmyTyt4ATYLRK/0lVoCqPQXxkzvA==
-X-Received: by 2002:a05:600c:3b07:b0:450:d00d:d0 with SMTP id 5b1f17b1804b1-454a37083b6mr36766495e9.19.1751476046563;
-        Wed, 02 Jul 2025 10:07:26 -0700 (PDT)
-Received: from localhost ([2a01:e0a:3c5:5fb1:5542:4bad:e07b:9489])
-        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-454a9bced0esm3171085e9.22.2025.07.02.10.07.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Jul 2025 10:07:26 -0700 (PDT)
-From: Jerome Brunet <jbrunet@baylibre.com>
-To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc: Anand Moon <linux.amoon@gmail.com>,  Da Xue <da@libre.computer>,  Ulf
- Hansson <ulf.hansson@linaro.org>,  Neil Armstrong
- <neil.armstrong@linaro.org>,  Kevin Hilman <khilman@baylibre.com>,
-  linux-mmc@vger.kernel.org,  linux-arm-kernel@lists.infradead.org,
-  linux-amlogic@lists.infradead.org,  linux-kernel@vger.kernel.org
-Subject: Re: [RFC] mmc: meson-gx-mmc: add delay during poweroff
-In-Reply-To: <CAFBinCBwTkVwcBTWOzS+G13+rRM2eftMXZ3GHzW+F+BY0bBBzg@mail.gmail.com>
-	(Martin Blumenstingl's message of "Wed, 2 Jul 2025 18:27:55 +0200")
-References: <20250628015328.249637-1-da@libre.computer>
-	<CANAwSgTH67T9SBQSFQgFjvyrxNCbtfd9ZaCDZFACWA=ZQ-PYtQ@mail.gmail.com>
-	<CAFBinCBwTkVwcBTWOzS+G13+rRM2eftMXZ3GHzW+F+BY0bBBzg@mail.gmail.com>
-User-Agent: mu4e 1.12.9; emacs 30.1
-Date: Wed, 02 Jul 2025 19:07:25 +0200
-Message-ID: <1j4ivued2q.fsf@starbuckisacylon.baylibre.com>
+        d=1e100.net; s=20230601; t=1751476946; x=1752081746;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=/SkwY6ne+g8BY+F31MtkqlGaiDXb8coPhVMth5244qs=;
+        b=dY3hPk+8PfaFwPXyYjTpdb3vV6CxxqmP2F1I26quEnuKsW/9l8CghYRAqlBg4uiWhP
+         bNw03/LW9YHS+QV42SvbLv1VHCeXoRLwEMcwjGySZ2uIkGtiYW+vxqe8yg4y6t7QmOMO
+         YmUT3DaoTcPZNNcQf2Sbag1dU2I6iawJ6x8XunuUS6TTWD+yiwlKQ+fSj7l7HjRCeq0P
+         wXSRbghCjiS7MJdVCdwkEM6ZWnAfEZyJqlTINdOTes36QhfXJh5792L/l6Y95rnncDLU
+         WQKkTox+gKlOrVw/8F+6wa3wzDCODtgIo6hN5Nyi6fgPuZLNeoUuK0fvH8HAkuglHH2k
+         GZnw==
+X-Forwarded-Encrypted: i=1; AJvYcCWeoACRpOQV8gq+CUamcLYtmd5a6tgvClhuzdd41vesGAlliumomCckNOJeDtC/AQ5OD5wlx0XZqjI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwgTIvTg80SuqFBnPWw6qoIlFDGK4XipIcE5xbdih+ZVF3e80uE
+	6B0XP5Np/PxYgfERY/bcTjsCOOWHeAEwHmiseGdMJ23yguboH8+43GY05w05DQjssqDSFc+QXDq
+	h8z2nlNbZ3VVqa2ypkS+dAvL2Vyl08hADH8RKpegG
+X-Gm-Gg: ASbGncveI7rw5NV26oorwb7srXnZJvsKoFFZXPObuss09P6ZcuMMeX6xuBaiYOS7mRs
+	oB5KSS2yvEkLNGAZpX7Eo+siPiVtqR55JmPp99e5etKbMhBADhrjiQW1v7LIW7GSWW3BRAIkOxW
+	BE9GGWKAlrhWny9ZRczsLM8o8aIZdaY10XU6kPIAvso3mhNyucCVOQJkV7cfMpxQN+99/CJNpN/
+	Mjm
+X-Google-Smtp-Source: AGHT+IH+2cHiDRkSexobKNpcDsdKZBCYRCcLg4PJcbDmEq49ClTbY7a3qJRhpGa/9rwzq7pB1ZCDPnILu5cCdmgnzFU=
+X-Received: by 2002:a05:690c:7487:b0:712:d70b:45eb with SMTP id
+ 00721157ae682-7164d539984mr52498477b3.31.1751476946103; Wed, 02 Jul 2025
+ 10:22:26 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+References: <20250628015328.249637-1-da@libre.computer> <CANAwSgTH67T9SBQSFQgFjvyrxNCbtfd9ZaCDZFACWA=ZQ-PYtQ@mail.gmail.com>
+ <CAFBinCBwTkVwcBTWOzS+G13+rRM2eftMXZ3GHzW+F+BY0bBBzg@mail.gmail.com> <1j4ivued2q.fsf@starbuckisacylon.baylibre.com>
+In-Reply-To: <1j4ivued2q.fsf@starbuckisacylon.baylibre.com>
+From: Da Xue <da@libre.computer>
+Date: Wed, 2 Jul 2025 13:22:15 -0400
+X-Gm-Features: Ac12FXzMF1aM5Sb75d0lCCLP5TcPQJxcLdk716xFOwxeZ7EpHXVjogygUeOUfJs
+Message-ID: <CACqvRUa8EqMbCd2x=di-a6jbMWW8CMo4kgLH=0qnsqHdO16kxA@mail.gmail.com>
+Subject: Re: [RFC] mmc: meson-gx-mmc: add delay during poweroff
+To: Jerome Brunet <jbrunet@baylibre.com>
+Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>, Anand Moon <linux.amoon@gmail.com>, 
+	Da Xue <da@libre.computer>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Kevin Hilman <khilman@baylibre.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed 02 Jul 2025 at 18:27, Martin Blumenstingl <martin.blumenstingl@googl=
-email.com> wrote:
+On Wed, Jul 2, 2025 at 1:07=E2=80=AFPM Jerome Brunet <jbrunet@baylibre.com>=
+ wrote:
+...
+> If, as the description suggest, the regulator framework somehow ignore
+> the timing set in DT, maybe this is what needs to be checked ?
 
-> Hi Anand,
->
-> On Tue, Jul 1, 2025 at 12:00=E2=80=AFPM Anand Moon <linux.amoon@gmail.com=
-> wrote:
->>
->> Hi Da,
->>
->> On Sat, 28 Jun 2025 at 09:15, Da Xue <da@libre.computer> wrote:
->> >
->> > Regulators controlling the SD card power need some settling time for SD
->> > cards to fully reset from UHS modes. The regulator framework seems to
->> > ignore falling times set in the device tree causing a few boards with =
-the
->> > same hardware implementation to hang on reboot because the SD card sti=
-ll
->> > had some voltage and did not reset properly to be initialized again.
->> >
->> > Add a delay sufficiently long for the voltage to drop so that the SD c=
-ard
->> > can reset properly. Otherwise the reboot will hang at missing SD card
->> > especially with Samsung cards.
->> >
->> Although the driver defines reset identifiers such as
->> RESET_SD_EMMC_A, RESET_SD_EMMC_B, and RESET_SD_EMMC_C,
->> It does not implement proper reset controller functionality,
->> specifically lacking support
->> for reset_control_assert() and reset_control_deassert() operations.
-> I think there's a misunderstanding:
-> The meson-gx-mmc driver calls device_reset_optional() during .probe
-> which will internally call reset_control_reset().
-> So I don't see a problem here.
->
-> The patch seems more about power sequencing, where either the SD card
-> or regulator used to power the SD card requires a certain amount of
-> time (delay) when switching from ON -> OFF -> ON (my understanding is:
-> without this delay the card sees ON -> ON which fails to update some
-> state internally).
->
-> To me it's not clear if this is a property of the SD spec or rather
-> the regulator.
-> Ulf, Jerome - any ideas / inputs from you?
-
-If, as the description suggest, the regulator framework somehow ignore
-the timing set in DT, maybe this is what needs to be checked ?
-
-TBH I would suspect the delays before the regulator framework itself.
-
-Those assert/de-assert delays tend to be just copied from boards to
-boards. Maybe some boards need different delays. If those are too short
-for the actual HW, an ON -> OFF -> ON could result in a NOP.
+The regulator framework only cares about timing for regulator on.
+Regulator off just turns off the regulator and returns without delay.
+The code makes incorrect assumptions. Then the kernel resets the board
+without having enough time.
+I can patch the regulator framework with the same code for regulator
+on but that seems very hazardous given how many things might already
+depend on the original behavior of returning immediately.
 
 >
+> TBH I would suspect the delays before the regulator framework itself.
 >
-> Best regards,
-> Martin
+> Those assert/de-assert delays tend to be just copied from boards to
+> boards. Maybe some boards need different delays. If those are too short
+> for the actual HW, an ON -> OFF -> ON could result in a NOP.
 
---=20
-Jerome
+50ms should be sufficient for all boards as many boards don't even
+have this functionality. < 30ms is sufficient most of the time.
+
+>
+...
+>
+> --
+> Jerome
