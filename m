@@ -1,59 +1,59 @@
-Received: from mail-pl1-f170.google.com (mail-pl1-f170.google.com [209.85.214.170])
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 545132F7D14;
-	Wed,  2 Jul 2025 18:40:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.214.170
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id CE0E821638A
+	for <linux-mmc@vger.kernel.org>; Wed,  2 Jul 2025 19:07:53 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.182
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751481632; cv=none; b=re8lV1yVYcfYnvgFzUp8UxK3N2VOt3Ee9KIBApyDwMkQyogVMPi4yp3qBEdBLmF26G9Zzkc+2BehAbA3yX7Jzjz1vGlWMzMene1ADCo8/uziJM4iQ6/US/4V7a6yzNMMx4yYaGaYThqEOI6cZ8obdE54pIvrWAufRvJKwKaQWN0=
+	t=1751483275; cv=none; b=ALF7BgIuopM3Bg5D6OR93MA8FF6BF+wTSY1gWvq3V9m6WMEfPTvzUF8cgMWu3htXXc9l8ZSkrxluuIEB8wab9MpXeB7Sq3Fx9g7vBDneLvKGxYFLp53ERHWGbjEjzzhtvkA6wQDJ+m0vYTyWzpXmzr/uCobqxLx27GWo1ChsDTo=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751481632; c=relaxed/simple;
-	bh=JD88yMHNIqJLGJNkFMm447HbjKIEZj0pTYj6EiAF6fU=;
+	s=arc-20240116; t=1751483275; c=relaxed/simple;
+	bh=rvdW++MqUNAT9e7oRWP0qIFHszXC+6mKXAM1qsUsnHA=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=mQHZ813vZCeByAZ26had87hsxlebbCoMSlLk8IW39LSoB9tL3w1XlgwytUjEgGMz90fBPh15NOoabPRNbmKHvrs6xp6epUtnDf3yBHqOEDn2Y9Mni4xSccnpC8Pan9PAyQXbuLKBYjmwb8hz4KJBZbyX3sVecwBp7dvY2EVaDIc=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com; spf=pass smtp.mailfrom=googlemail.com; dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b=kGAy9CNP; arc=none smtp.client-ip=209.85.214.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=googlemail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=googlemail.com
+	 To:Cc:Content-Type; b=fI6vInmjWSy5qbfIKwBt+4HD0CDK/uocmKxPHKRf0/JyppoLCD/FaRVqxA65Sn/Ainn8T5vj/IY2xU6tk7/tKwQidX2wFCSVzIbGsVZrui3UzRFWAdQtQMIQ0hIz3F+JHRfrO9kOwruTMW9lv/mcL9dPG49Wx1n0lSxGnQuoFUU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer; spf=none smtp.mailfrom=libretech.co; dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b=EjNwwZ/l; arc=none smtp.client-ip=209.85.219.182
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=libre.computer
+Authentication-Results: smtp.subspace.kernel.org; spf=none smtp.mailfrom=libretech.co
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=googlemail.com header.i=@googlemail.com header.b="kGAy9CNP"
-Received: by mail-pl1-f170.google.com with SMTP id d9443c01a7336-23c703c471dso2299635ad.0;
-        Wed, 02 Jul 2025 11:40:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=libre.computer header.i=@libre.computer header.b="EjNwwZ/l"
+Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-e7dc89108bfso6339747276.3
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Jul 2025 12:07:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20230601; t=1751481630; x=1752086430; darn=vger.kernel.org;
+        d=libre.computer; s=google; t=1751483273; x=1752088073; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=JD88yMHNIqJLGJNkFMm447HbjKIEZj0pTYj6EiAF6fU=;
-        b=kGAy9CNPt7ZisOyQHlRAK9+/BnBge2i474Gabm97NMobHNZPUHatGM1osUaQivd2ur
-         sd80npVlPngyYXTd2OuGOp6K1jX8pabEh+FWwJOhB+B+cF6y0sVxMSoSlRVlBDCnY0ja
-         0tvA3qim3moghcoQox0F2kYgMmXAOEKSGcwNyUfbFlVaRDzg9d9ZJxN2v+P2SerNPtcf
-         mijnWuJVIFQFr05lu9fN2sOodRPfa9UoPIwf8cVz3ka0KYPX1B0EHX46bQR7xKzyxIPg
-         YhB5ZpxswXp4mNvJ9/KbqfRXlUhCJJFGVX0zIPhDTEKiyxCgoniOiJbkCz0NJLIwbTzE
-         RU0A==
+        bh=rvdW++MqUNAT9e7oRWP0qIFHszXC+6mKXAM1qsUsnHA=;
+        b=EjNwwZ/lQ6bz/Hl6hZjIiXD/AtdivpXTFa/VbJwd1FT4kMGQLYpISogicM8bLrH7xv
+         QIE0TlBk5JsetkKOzVNcsHzSGbS+pNurjyQSQMO0ZQv5kTG3kl8kjvWQrr1Q9ENI7wTe
+         T8hVKCWRLPZ4wVn0QDFMZV+RosqEm1r/VNceX1Qdzab51BS59iY+XzxCSrmvR4GiqI8a
+         DYJGSxDz7hPDlEwcLUBGud8Y3ZnwnvJwtOYruh6funlZSf90+QQV/ZOUtmC17yhmboGr
+         /0MeE1WcOGuPm60Rn16s0nfjN31dERN6Srmsbj9LpZDCFQDL9TaWOz1T5M/5dvgXGsK+
+         kJ4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751481630; x=1752086430;
+        d=1e100.net; s=20230601; t=1751483273; x=1752088073;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=JD88yMHNIqJLGJNkFMm447HbjKIEZj0pTYj6EiAF6fU=;
-        b=pli2UtHEKaPl5M+6apcj131DUUsAqL/yKzPVjH9mxm090AWf3QFim9FrRzNJoGv07H
-         fOX4mpp+JYzCFPJy7y7MXDIjMfuNAM08rDLdBFnTeD2wxg6oWDCOgozSciMkIJQyrc4Q
-         Z4y8CVD8mXyJDhuF/RmvvYMDZoNEnxUv7MW4iOVVYPbOfXa3JcuTjqY4RLVQqp2x9w4E
-         FKSH3qRs4JDjj2OljuyRALsIDqi/S2eDn7nlJ8WNSmokNk0s9S5Q8jyo76nbjUn0GT3B
-         G79FQEZ+w8EDRRoa8ukRe3LmjfKrAleoYmrHl1fzfEzH+Ys0jiGhyxe9IA6UC7Mo+Naq
-         tMxg==
-X-Forwarded-Encrypted: i=1; AJvYcCUQ3MXVSxkfYBqzqC1NpPzQNX6+VTCZ6/+a/ZHlm1i2wk/CC0OjiBjwPEy6VCMocoR85BC24TKAvSryijs=@vger.kernel.org, AJvYcCUiHTIqpWXjlj4GuGgg9bxI7Quk+PGyrh5EgaGu7z0rkN3v0NClJSlPfO5TFhDOUKfoqJC4oTocLz/I@vger.kernel.org
-X-Gm-Message-State: AOJu0Yy3p7iphhesN4VHnDN+QTsCx7tOyVTVXIL4OofKlQig5S4SvS6d
-	3V8CAUahqgCxNvVHk/sZVqSnulA9IS3Yq0HWOv67B9MV656tnhZGoTU6HvGFcBTl/8r4sFSKUnh
-	ecmmV4Kr0qao9K8n56AAoBIbWGpn8hAs=
-X-Gm-Gg: ASbGncvU/9Bul2yHWLCXqLH5sN0QjzA8M7t/Q10AK+xAkICXKUV70K6NVixEyVe76Lm
-	LEdElHFBxYbAwa7tjXmW5crmg/kOTWJxsr7btNAvupLOHiDTjf+sFzh2Iy/sBCxIRiS97h/FH5S
-	Empj0+4Ereawhj3QzzEublYGWxFldmG67orvLdP7GE8/zY4GfNK3Hlt1CAcQIJTzN17QM/P6482
-	BAgl/bdsfgNoF8=
-X-Google-Smtp-Source: AGHT+IG65z5JM5OzIy1s20zy0osr0gbaem7rZyJo8s4662EGg8M9d+IcT5RnhEheXmCheH3vHusHJ+Ckhe0dlVQMHpE=
-X-Received: by 2002:a17:902:fc4c:b0:215:b1e3:c051 with SMTP id
- d9443c01a7336-23c793c0efcmr7045825ad.11.1751481630377; Wed, 02 Jul 2025
- 11:40:30 -0700 (PDT)
+        bh=rvdW++MqUNAT9e7oRWP0qIFHszXC+6mKXAM1qsUsnHA=;
+        b=M7YHS+OQ9kGXppKZ1wnWkJdxrb3JemFrS1Q8M69vCKSTRxeaAmW5r8ggF+Ml6vMTck
+         Nd4GZPxhNnEHsLhtlhQA6CgjZ+lPbX/4ijj1/uo9MFOxQMhTpAEtNn/DBznYBkL0NmWI
+         u/EgKI0r72A5PvuoNYMmTJBVemIiRCrNj69T9TGTrRlnbOkl4uDrR66gCcKmFfSWOW1p
+         fXMU/IfkUsuN5wfj1ddX78uMsbPlkTTFAf2YwX6vnFH9UEdYmVB4TbgM+NtkLyRbrZ90
+         0eU42SZzrcefI+KCDlCG396i+8P8CDvTlDaouspRt0kHjyeEiwigVi8IWn+1UQDQtJ+a
+         9LBQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUwl4ase3CSqU7DSz0RkntP7IjGh/FLVUHROoblCNCvCWMiIUVWpj5a3co1A4piyRaLstlb1IOQ7g8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxnF9mNU+QhGULnQ3yEN52pHJJFM43wrg4WdlLDgZwzWY3+jynW
+	Ve2DmzIxXerfTuwWvl24ospmUahOODCsL/R65SdHrWyVF2jA0rfheKqco+qhzTgmh/dcS0kyNxU
+	iggrV53HrKQl5hDyHNRLC8VgLI8GrT8iUEzKUa1M4
+X-Gm-Gg: ASbGncuCLXflgGSx0Xdk8wa7ZjBKmnl1Os8EV6jqxKZSle8aIw6eX0FceSD0R7WhbzW
+	CeEdXa6xpokidFGA22qJjt958Awqi6/stsoYRFP9r0w/reLVOcmfBL7TxgTM6d82t1kKbeYK2kM
+	/flwL1PfdNARsAVNbyIxILR9GHyCivpPVHs+G3vIGTLtlX6RUKGCH4fU2m8g9Pcu/0SkTm/QWsD
+	SL2
+X-Google-Smtp-Source: AGHT+IGHElWqxIych5glg28+DrcUG1t7PUSfK4vTb3oHxY8WbSGSMjUbaCvnzu+2LABndjMybYrTqRZBHCrBQIwHt/8=
+X-Received: by 2002:a05:690c:64c7:b0:715:1696:aafc with SMTP id
+ 00721157ae682-7165a3380f6mr3176317b3.12.1751483272654; Wed, 02 Jul 2025
+ 12:07:52 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -63,45 +63,61 @@ MIME-Version: 1.0
 References: <20250628015328.249637-1-da@libre.computer> <CANAwSgTH67T9SBQSFQgFjvyrxNCbtfd9ZaCDZFACWA=ZQ-PYtQ@mail.gmail.com>
  <CAFBinCBwTkVwcBTWOzS+G13+rRM2eftMXZ3GHzW+F+BY0bBBzg@mail.gmail.com>
  <1j4ivued2q.fsf@starbuckisacylon.baylibre.com> <CACqvRUa8EqMbCd2x=di-a6jbMWW8CMo4kgLH=0qnsqHdO16kxA@mail.gmail.com>
-In-Reply-To: <CACqvRUa8EqMbCd2x=di-a6jbMWW8CMo4kgLH=0qnsqHdO16kxA@mail.gmail.com>
-From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date: Wed, 2 Jul 2025 20:40:19 +0200
-X-Gm-Features: Ac12FXyR3mTzwKK3QsWJnUHD7XVn0YOVkSs2GNj-PlIQxt00gwgIj8Cr0AYFXDE
-Message-ID: <CAFBinCAkW+G9oV+SOJdac50oLezQnbc358dBgs56-RfjPd-zgA@mail.gmail.com>
+ <CAFBinCAkW+G9oV+SOJdac50oLezQnbc358dBgs56-RfjPd-zgA@mail.gmail.com>
+In-Reply-To: <CAFBinCAkW+G9oV+SOJdac50oLezQnbc358dBgs56-RfjPd-zgA@mail.gmail.com>
+From: Da Xue <da@libre.computer>
+Date: Wed, 2 Jul 2025 15:07:42 -0400
+X-Gm-Features: Ac12FXx0jufvdl6aujys7rH-wYZHUiDrrOxM3msmfy3FnqnGlyUndPFaQqBHPFQ
+Message-ID: <CACqvRUYwwgRqid8AbLJ7bp+gTyHw2c=o-pj435Z0PDriJcnnKQ@mail.gmail.com>
 Subject: Re: [RFC] mmc: meson-gx-mmc: add delay during poweroff
-To: Da Xue <da@libre.computer>
-Cc: Jerome Brunet <jbrunet@baylibre.com>, Anand Moon <linux.amoon@gmail.com>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Neil Armstrong <neil.armstrong@linaro.org>, 
-	Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org, 
-	linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, 
-	linux-kernel@vger.kernel.org
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc: Da Xue <da@libre.computer>, Jerome Brunet <jbrunet@baylibre.com>, 
+	Anand Moon <linux.amoon@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, 
+	Neil Armstrong <neil.armstrong@linaro.org>, Kevin Hilman <khilman@baylibre.com>, 
+	linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, 
+	linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jul 2, 2025 at 7:22=E2=80=AFPM Da Xue <da@libre.computer> wrote:
+On Wed, Jul 2, 2025 at 2:40=E2=80=AFPM Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
 >
-> On Wed, Jul 2, 2025 at 1:07=E2=80=AFPM Jerome Brunet <jbrunet@baylibre.co=
-m> wrote:
-> ...
-> > If, as the description suggest, the regulator framework somehow ignore
-> > the timing set in DT, maybe this is what needs to be checked ?
+> On Wed, Jul 2, 2025 at 7:22=E2=80=AFPM Da Xue <da@libre.computer> wrote:
+> >
+> > On Wed, Jul 2, 2025 at 1:07=E2=80=AFPM Jerome Brunet <jbrunet@baylibre.=
+com> wrote:
+> > ...
+> > > If, as the description suggest, the regulator framework somehow ignor=
+e
+> > > the timing set in DT, maybe this is what needs to be checked ?
+> >
+> > The regulator framework only cares about timing for regulator on.
+> > Regulator off just turns off the regulator and returns without delay.
+> There's an exception to this: gpio-regulators without an enable-gpios
+> property. My understanding is that regulator_disable() is a no-op in
+> that case (meson_mmc_set_ios() even has a comment above the
+> switch/case statement), see [0].
 >
-> The regulator framework only cares about timing for regulator on.
-> Regulator off just turns off the regulator and returns without delay.
-There's an exception to this: gpio-regulators without an enable-gpios
-property. My understanding is that regulator_disable() is a no-op in
-that case (meson_mmc_set_ios() even has a comment above the
-switch/case statement), see [0].
+> > The code makes incorrect assumptions. Then the kernel resets the board
+> > without having enough time.
+> Can you please name the board you're testing? I'm worried that I'll be
+> looking at one .dts but you're looking at another one.
 
-> The code makes incorrect assumptions. Then the kernel resets the board
-> without having enough time.
-Can you please name the board you're testing? I'm worried that I'll be
-looking at one .dts but you're looking at another one.
+https://github.com/libre-computer-project/libretech-linux/blob/master/arch/=
+arm64/boot/dts/amlogic/meson-libretech-cottonwood.dtsi#L481
 
+vcc_card is a gpio regulator that gets toggled on->off->on.
 
-Best regards,
-Martin
+I traced the regulator framework a few weeks ago and forgot the final
+regulator disable function call, but that call basically returned
+immediately while the regulator-enable function complement had delays
+implemented.
 
-
-[0] https://elixir.bootlin.com/linux/v6.15/source/drivers/regulator/core.c#=
-L2980
+>
+>
+> Best regards,
+> Martin
+>
+>
+> [0] https://elixir.bootlin.com/linux/v6.15/source/drivers/regulator/core.=
+c#L2980
