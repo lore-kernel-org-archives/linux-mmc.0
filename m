@@ -1,38 +1,55 @@
-Received: from mail-m19731110.qiye.163.com (mail-m19731110.qiye.163.com [220.197.31.110])
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2FCF1286A1;
-	Thu,  3 Jul 2025 04:37:03 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.110
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B9A3523C4E9
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 05:49:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=216.71.154.42
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751517427; cv=none; b=VBFmiDINJGn1yUaWl8xcoUd31coabshjYuOLHm4VbiU+McKypQShLOfFGqna4dbIi1riUbhT2u8I7oilYvpAMZEe5FjyoXgLyy7PK50MSP9dCz6x1zE125A2H9cvo7eLwvzVrIob1DyN00mjiACh2Bz1tAd8HciknrDrXtb1hiA=
+	t=1751521748; cv=none; b=PYSPFxl0BFWumPzHG5j3M6EQiaIqIKlRNtl0vgUquwzigrRE3CvN/hz5nSVgZSipyrscwrMCdsXKB6RuUiMRwa2JdlD4l+2A3Cvhi1Y0OgiziQRDw5im2ksuxnwWcPWmV7AeqVqwqQIM4vrOvRsqNRa6yrtkNZj1d96RxHbHObA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751517427; c=relaxed/simple;
-	bh=eq/0Gz6yWgurCokFmD71XuCYX8fNFWyC9taesIVujXY=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=mxxUBE+fVBNx168jZL5ftNma4PEicrPqb81yewDwX10xJzciFKRqlzwVpztVmdAUQ8BqU3Gc1SRsi27NkMK8EJXwKJlsQ9afPGELWG/m0Uoir9v1NxoMCDGXsJSGbRuUZUlVL+EaK+XZMRF43ElmcyZqkX4bbVwQlFxllJS1ExA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=jn/m6+qx; arc=none smtp.client-ip=220.197.31.110
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
+	s=arc-20240116; t=1751521748; c=relaxed/simple;
+	bh=zJLlF3TBHmJH1+PxipzRq8qYJSFNyeI/F6pqFd+m5QY=;
+	h=From:To:Cc:Subject:Date:Message-Id:MIME-Version; b=i+wV0QDSk3eO0z6KwUhSpSeGa5qzuRHijtIQ/QnjIBWpG4Noeift/hMfmrwhlGRgyvCifskl+OxmMz46nl0mgqHHhPbSvCR3oZxqP4bPdhMFoyGAH6vq3E5aJ2kNdKddtac+eVjizzIC6aU90Av4MorOTe1RvZIrZepLKj/NhY8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=bkA/Dr35; arc=none smtp.client-ip=216.71.154.42
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="jn/m6+qx"
-Received: from localhost.localdomain (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 1ac1ee70e;
-	Thu, 3 Jul 2025 12:36:55 +0800 (GMT+08:00)
-From: Albert Yang <yangzh0906@thundersoft.com>
-To: robh@kernel.org
-Cc: krzk+dt@kernel.org,
-	krzk@kernel.org,
-	conor+dt@kernel.org,
-	devicetree@vger.kernel.org,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 4/8] dt-bindings: mmc: add binding for BST DWCMSHC SDHCI controller
-Date: Thu,  3 Jul 2025 12:36:54 +0800
-Message-Id: <20250703043654.4083833-1-yangzh0906@thundersoft.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <175146290763.1131398.8272632937196214694.robh@kernel.org>
-References: <175146290763.1131398.8272632937196214694.robh@kernel.org>
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="bkA/Dr35"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkim.sandisk.com; t=1751521746; x=1783057746;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=zJLlF3TBHmJH1+PxipzRq8qYJSFNyeI/F6pqFd+m5QY=;
+  b=bkA/Dr35jiJRmNE0skYy5KrrDohAY67TpahoipPVvCtD4f7IVKykNEsx
+   TExapmW73Mmka6fW5CQAGzVa8lZNiby7pqkYRlaGvbOnpx/TNZ+Qxxkqn
+   7ZfKQLvjEqzKD6xaM0xs69oLLooROroQCv2Osil5JPJELhAMZbIqhdqu/
+   dIpzoUVDcVt+zUxpRchxD8ySiNrXUwgNWmU6aZT9QuFwEtu67FOfcJszB
+   uk3PK1Awzoj4/Y4vpOzNnxoZfsuWcS+G42vX93jcX2uXasG4FR9KNKS6Q
+   j1xxzac1zIroZAIqox7tqWs6pgKu15sv70LqWGYQe0437YCPQS9Res+ie
+   g==;
+X-CSE-ConnectionGUID: sR0BRL7PTTC7AT/stch7aQ==
+X-CSE-MsgGUID: vVZ9gRAIQKS6UPnu0UaY8w==
+X-IronPort-AV: E=Sophos;i="6.16,283,1744041600"; 
+   d="scan'208";a="87685629"
+Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 03 Jul 2025 13:49:00 +0800
+IronPort-SDR: 68660b40_ZWJ+4ELWoSEarZUog1L1CEjaopmfh0l4K4K0JScY3FgCGqC
+ gkFQkcFijZW6muhfq/m3XxUjEvJ58XyqR9pdoEA==
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 02 Jul 2025 21:46:56 -0700
+WDCIronportException: Internal
+Received: from unknown (HELO avri-office.sdcorp.global.sandisk.com) ([10.45.31.49])
+  by uls-op-cesaip01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 02 Jul 2025 22:49:00 -0700
+From: Avri Altman <avri.altman@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <avri.altman@sandisk.com>,
+	Markus Elfring <Markus.Elfring@web.de>
+Subject: [PATCH] mmc-utils: Remove unnecessary null pointer checks
+Date: Thu,  3 Jul 2025 08:48:45 +0300
+Message-Id: <20250703054845.49206-1-avri.altman@sandisk.com>
+X-Mailer: git-send-email 2.34.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,62 +57,44 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVkaSE9PVhlJSk4dGE0fTEkaTlYVFAkWGhdVEwETFh
-	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSEpOTEpVSk
-	tLVUpCS0tZBg++
-X-HM-Tid: 0a97ce92c74109cckunm9641f1be55a1d0
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6MzI6NSo5LDE6CkxITS0WPzMs
-	HUoKFCxVSlVKTE5KTkpMT0pNSUtKVTMWGhIXVQIaFRwBE0tCS007DxMOFR8eCQgUHQ9VGBQWRVlX
-	WRILWUFZSkpMVUpDT1VKSUJVSkhPWVdZCAFZQUlNSkg3Bg++
-DKIM-Signature:a=rsa-sha256;
-	b=jn/m6+qxbXdFQcrKxZa8eYip3Zg8G6TyRaF4QxUtkVoGcpfIhVdRLBEj2heRgB7oJH/HVrokj7jzCvAyFvw4qOq+LdmuW5BitO0uTQdWRBoqo/7LUQdQS089/U0QfOT0ADPYAmCuZ1jlg+zldT6r5wApdjehvJqAO+Pwg3B+9Eo=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=PteOhnwZL6+z6LVTAMqE16FB0kBja4U8lGBV/Y06h0M=;
-	h=date:mime-version:subject:message-id:from;
 
-Hi Rob,
+Simplify memory cleanup by removing redundant NULL checks before calling
+free() on pointers. Markus suggested it following static analysis by
+Coccinelle.
 
-Thank you for the automated dt-binding check report.
+Suggested-by: Markus Elfring <Markus.Elfring@web.de>
+Signed-off-by: Avri Altman <avri.altman@sandisk.com>
+---
+ mmc_cmds.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-> My bot found errors running 'make dt_binding_check' on your patch:
-> 
-> /builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.example.dtb: mmc@22200000 (bst,c1200-dwcmshc-sdhci): reg: [[0, 572522496], [0, 4096], [0, 587227136], [0, 4096]] is too long
-> 	from schema $id: http://devicetree.org/schemas/mmc/bst,dwcmshc-sdhci.yaml#
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 7994223..b16ac69 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -3421,8 +3421,7 @@ static int __do_ffu(int nargs, char **argv, enum ffu_download_mode ffu_mode)
+ 		fprintf(stderr, "FFU finished successfully\n");
+ 
+ out:
+-	if (fw_buf)
+-		free(fw_buf);
++	free(fw_buf);
+ 	close(img_fd);
+ 	close(dev_fd);
+ 	return ret;
+@@ -3651,10 +3650,8 @@ int do_alt_boot_op(int nargs, char **argv)
+ 	ret = 0;
+ 
+ alloced_error:
+-	if (mioc)
+-		free(mioc);
+-	if (boot_buf)
+-		free(boot_buf);
++	free(mioc);
++	free(boot_buf);
+ boot_data_close:
+ 	close(boot_data_fd);
+ dev_fd_close:
+-- 
+2.34.1
 
-I have identified and fixed this issue. The problem was that the binding example used 64-bit addresses but lacked the proper bus wrapper with #address-cells and #size-cells settings.
-
-Fix Applied:
-I've wrapped the example in a proper bus node with the correct address/size-cells, following the pattern used in sdhci-am654.yaml for handling 64-bit addresses:
-
-examples:
-  - |
-    #include <dt-bindings/interrupt-controller/arm-gic.h>
-    #include <dt-bindings/interrupt-controller/irq.h>
-
-    bus {
-        #address-cells = <2>;
-        #size-cells = <2>;
-
-        mmc@22200000 {
-            compatible = "bst,c1200-dwcmshc-sdhci";
-            reg = <0x0 0x22200000 0x0 0x1000>,
-                  <0x0 0x23006000 0x0 0x1000>;
-            interrupts = <GIC_SPI 144 IRQ_TYPE_LEVEL_HIGH>;
-            clocks = <&clk_mmc>;
-            clock-names = "core";
-            memory-region = <&mmc0_reserved>;
-            max-frequency = <200000000>;
-            bus-width = <8>;
-            non-removable;
-            dma-coherent;
-        };
-    };
-
-This approach is consistent with how sdhci-am654.yaml handles multiple reg entries with 64-bit addresses, and matches the actual usage in our bstc1200.dtsi file where the soc node defines #address-cells = <2> and #size-cells = <2>.
-
-Verification:
-After the fix, make dt_binding_check DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/bst,dwcmshc-sdhci.yaml passes without errors.
-
-Best regards,
-Albert Yang
