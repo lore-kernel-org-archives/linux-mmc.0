@@ -1,144 +1,128 @@
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com [209.85.219.176])
+Received: from mail-yw1-f169.google.com (mail-yw1-f169.google.com [209.85.128.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 738AD2E3AE1
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 12:20:00 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.176
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5B2602EA14B
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 12:20:04 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751545202; cv=none; b=FfQYoCsBcQ26mD+O9r51S5SYolxrf0gw0Ka2EswHMv2SeDTtUDUhCFF4RjD2cdwapezAs3ft4eallp1LdTFJAvNk+xsbAn38f+KAw9YjqIjOBU1aAo7ZthqbN6Iu7uRKkUSAMVFm0NcuQh6DFYbeVb7nt+ziqOSrLkVCQIuLcJo=
+	t=1751545205; cv=none; b=rC2zYfzY7wFxftERmUpdNIGARFLId0cf5MHdTJkASs6Pq9elTiI8BaZcHGO+YCgRwIs1qC1+6l/tOK0IBkmNe4vlFy6qXYHkOGRm5lKn0lVCVzgVRjO5enpMbZFtz/CHzYunxs5jc+pj/LRWNVJLCettC/gyJtcR+rUUH+dCldg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751545202; c=relaxed/simple;
-	bh=kKL3IDHxSL9ur5slPrsn/ZT6vo1aStrKbY0F9D9k7cI=;
+	s=arc-20240116; t=1751545205; c=relaxed/simple;
+	bh=yfakIDfW4JaD8n7YspMzq+XGk78JLy1DRAAuWtmLotM=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=shWodr6f+vTg8EFF0PWV4BSaG7NaiyWL914vMEO32RHiJuqtgyrCZ7qx66cD2U8uV4RsJ5Q91/ahTnoiGbjGO5XSb8sLpAmkGV16r8a5Sr/sDOU7zKpVMkviT03yVPpc+ToAw21cZMd1kVy4k07J/E2rM+jLYT5V/Oluuf7h/Z8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mUGzxWfL; arc=none smtp.client-ip=209.85.219.176
+	 To:Cc:Content-Type; b=CnQthZMIDn+R3AG8h6vSjp3eiE6+8G4JWmDG4iYgqJJARbRRCDPi/1sWlSA4a7DtO1l9XiCRmLMrqxak5MYE+9sNpNyCbPHkmqfJxtlKmucsOwGFqtxrBQUxumRFnWhhW6ycMyKaXPQJjXMFbA4vuyasu0hdNSUEPCjDUIZl/QE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Ef/8cPjT; arc=none smtp.client-ip=209.85.128.169
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mUGzxWfL"
-Received: by mail-yb1-f176.google.com with SMTP id 3f1490d57ef6-e733a6ff491so5196016276.2
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 05:20:00 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Ef/8cPjT"
+Received: by mail-yw1-f169.google.com with SMTP id 00721157ae682-70e3e0415a7so9887037b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 05:20:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751545199; x=1752149999; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1751545203; x=1752150003; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=P5OmxI4SidnpS0vVfCbFw2K2gtQJNYphQeO8RrhcQo8=;
-        b=mUGzxWfLcANgIxZC82zeORoSi9LpLxJy/TrmbbrTWvsWDXtbUhAMg7g/UfWKxCiLdx
-         pWg9dQnI5SRs4wpZWbevVtXSYFK1A/wXGbrrrVDSBqsEG7U0D6INKcOnnUbFU6iksZ5K
-         wqbVe1R5YEEeFeNJVXKZSWzyfWe0dJ/FvV2CLvMIyEPrCjN/idtFvrNrKJT/hHWDfYlH
-         idUDFdL3MWn5fjFuOZyAiVx6wDx5puarMwaCDb0H+wlqE4wHrMSms6P00vMY7ZIGGYFZ
-         pxQ7Qq4kRnttqwTEdMznfEsA7ly806I0CbvOUkMdIuFEoOiadaJ5wbsRjZsk1P6K93T2
-         LIsg==
+        bh=w/xgkdQ256Gr+SWkG7Kp5pwf29/+EIB0KaUypu7ps1M=;
+        b=Ef/8cPjTtwC9xWc0C8A9jG7t2jd9BSfNxvR4+C9Kz/NgDT/URRT0hfuaNFvx4EJQ/3
+         wK8h/MyY0PbG155WlSYDLFJfZotu0Q5ljO/M/CGppIYRIj9pRJFfRXGiG7fL5VGkzh2D
+         4Dqj+FYDQsJLMNGRTxRjcg7Cse0e+07QagohJUj1np/CDWKlcHa8YWUbBXYe5k56PJtU
+         OonRMJvVS+Bk4Dt8dUVnqLR7cxq/AYJVzx/KLmAxNFUuBa7cD6zknKy3C+jR03pwD7lU
+         oDwUdZnXLLJMbjXgiyw926+fy3u0Q+d5H+EY0zd+tIlCW4g5zJpNr8n/O2qzcZ+YIfUg
+         uMhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751545199; x=1752149999;
+        d=1e100.net; s=20230601; t=1751545203; x=1752150003;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=P5OmxI4SidnpS0vVfCbFw2K2gtQJNYphQeO8RrhcQo8=;
-        b=uKbuTpN06vAdO9C3Xa5Be/8uIrG842Y6TcPZOZ/Zx0bqVuXzX2OwiylQI+LDCt0cM5
-         CwTrUnlLHsOXJxOg/TQd8u6blvIEeTezlqHe5NzdoFWfTl/iOFpwzKdH26refb0NLd45
-         jOpt92bTYaIeFcF508NA/jz4y7CzOd1e+/04kn/p26OU/5ycrNEVH1XINFXM3vXJ4wjS
-         FOSU1CpUehVqcteC/3MKRHosvoy4zNs447VZTjlVi23NUEwdTBfOR7Sm4ssNzTvh3QYE
-         HwIDCbEXrvtxvPw07wBWZw/uw5m91pViCf95k6agiDbKyb6BnF+IgDRjipNnoWscR1zU
-         i8JQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXEofPeezj/USiB3fjhGIdIBo/C/yv0Z7Tppy3/s3aomMthqm/urdbiwwkLt38kLmnT22rtFuZFpJ8=@vger.kernel.org
-X-Gm-Message-State: AOJu0YzURklwp8VGrlGCk0bfFuBPTDne+cByeWDybSVpxGy8+xSH8YEE
-	PzB0tP+ToE3yl+CT6YlpS7iTyvLZ3dnF8PpPBTYYmJaqswZlAC5EkfWu+LiWwFWt2XSp59VB1uK
-	P1dyj2P06iT87IQM5koc4RIHk4f9KkFwErtt6vViD28GVdS0UnDHw
-X-Gm-Gg: ASbGncuxT02J0gieF48hjHy6tHy7+aq0v0jKhnJEVo4ZN+5lTSRpoMZM0b9X68gNkpW
-	UKYQZMXzb6GXz/z6+QZiklzSry97XeMjI6onVCxDQcKO9pUP6EwDkcyptdVzDaRb6dQMNVubLC2
-	Mx4jvjQPEFr7QeQkQe48iXm++p7sMDzF1Lv2qqWhhmJeuX
-X-Google-Smtp-Source: AGHT+IGeQ25BfOeCZ6K58In/sB8b1ZR/YJwrPf+U8PqmfpS8N2JgDxJX3EH5egsVw60A4HjnBNqsJSLLaMm5U7EBU3c=
-X-Received: by 2002:a05:690c:4802:b0:714:268:a9f8 with SMTP id
- 00721157ae682-716590ec815mr46729757b3.27.1751545199558; Thu, 03 Jul 2025
- 05:19:59 -0700 (PDT)
+        bh=w/xgkdQ256Gr+SWkG7Kp5pwf29/+EIB0KaUypu7ps1M=;
+        b=BnLYafIoV9HFYqu9UptqB+g57XqmXYmLw/CG11LRZ0J/FI1OaMe6Nzsw39andlpQQH
+         HSpJLte57VT3Z/3AWFewTPkFI2iP6EmS7Svs1/m69/WNQo3cGcCA6MQriq3XB07r1aTm
+         KStL0spNcvr2vlbm3bIZmM2W53mOSumMaez7L0QypmMYHrpXXkezQx9tA9k/uwZl51yl
+         a2zs03por2dX4EG1xh4OKJt4jm06UC0mvKsSpWl4KvXAhp6qiIcnmDeMAkC5uHbS7UrI
+         2z5I0ScRNEE1FFQMaoMYhgEzbjwevQUO8e3Drg9EskKrfZSfuKnn/N4JUiOYa2R5oP+7
+         wLFg==
+X-Forwarded-Encrypted: i=1; AJvYcCU3fN1XLj4PP5JZ5khU60c3NLWfhJaNqSTAoZzqZwV8siuUPEnMFDL9ETzz7oMlnZm5Jui6LH6rC4g=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxXJYcjZIFb+dEAGkdaN9QSpLOHl+5RAWkt1+DekElC+SSkXjGe
+	DJYRn7fZWb0NIRzTqJuKe3DYW3k02KynV6OwmWpBs8eIDrL8ixpbly0fZ4PFJ98NFMOlxDZJkRy
+	xEbBQzvsQv7hcIQfdR5/J9JuXpRqs4a/id+lnfVeIQw==
+X-Gm-Gg: ASbGncsNiCyJ6RtOMyZpzQH8kbprcEIvEK3jo8X1inE2UM9z3NplXA++ssR/vtXUCrG
+	Gia+Zg/ujVAM4rwqjXZgiTDxlc/VIz7QiFl1D1THiTX9oA4jZPRWGqMIIK/sOnev7kxhDDQnmKu
+	pfl+Buxwhk1TjE3hFjhLyXhFHFiwCM43y6KsC1CYWh6Moq
+X-Google-Smtp-Source: AGHT+IFc/Dp3srh5iqd7hq8Ngg5hON3p7e6BHwMds3WkJexDoH4IJZlEeKBa5tr6EgM89aB4l//e8QnBGEKWzYq/55s=
+X-Received: by 2002:a05:690c:4d09:b0:712:c295:d01f with SMTP id
+ 00721157ae682-7165ca33154mr27601697b3.3.1751545203096; Thu, 03 Jul 2025
+ 05:20:03 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250626112442.9791-1-edson.drosdeck@gmail.com>
- <81d519f5-caac-4fd8-8491-3580ce1b6060@intel.com> <CAMSsBRyvdvxgAQMkoB3UTZUs8MDEdPEVcKh2fFto6TFz-hUeiA@mail.gmail.com>
-In-Reply-To: <CAMSsBRyvdvxgAQMkoB3UTZUs8MDEdPEVcKh2fFto6TFz-hUeiA@mail.gmail.com>
+References: <cover.1750943549.git.benoit.monin@bootlin.com> <e244c1377f7b2ad5d026c9d9368a08de3887129f.1750943549.git.benoit.monin@bootlin.com>
+In-Reply-To: <e244c1377f7b2ad5d026c9d9368a08de3887129f.1750943549.git.benoit.monin@bootlin.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Jul 2025 14:19:23 +0200
-X-Gm-Features: Ac12FXz3uWlhWrNuVR3FR61kkpyGiUJaNlibnmXBnTwXEWNnSDIxaj442r_4-YA
-Message-ID: <CAPDyKFrLBV=AwDTiSC14N+qBknU+zM7bK-Vtj4a=c+byiUOgZA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Quirk for broken command queuing on Intel
- GLK-based Positivo models
-To: edson drosdeck <edson.drosdeck@gmail.com>
+Date: Thu, 3 Jul 2025 14:19:27 +0200
+X-Gm-Features: Ac12FXzupRsyUUbucdgXsXSWaJncWw9XABSgjzl6JCKdNXeKvxiGKlgWFyEkj0s
+Message-ID: <CAPDyKFopr_xPEkxZdT5JALTM16SCYiaj1A=_n-805HNPooBQGA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-cadence: use of_property_present
+To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
 Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
+	linux-kernel@vger.kernel.org, 
+	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
+	Tawfik Bayouk <tawfik.bayouk@mobileye.com>, Gregory CLEMENT <gregory.clement@bootlin.com>, 
+	=?UTF-8?B?VGjDqW8gTGVicnVu?= <theo.lebrun@bootlin.com>, 
+	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, 2 Jul 2025 at 01:07, edson drosdeck <edson.drosdeck@gmail.com> wrot=
-e:
+On Thu, 26 Jun 2025 at 16:44, Beno=C3=AEt Monin <benoit.monin@bootlin.com> =
+wrote:
 >
-> Thanks for the feedback!
+> Instead of using of_property_read_bool to check the presence of the
+> cdns,phy-* properties in the device tree, use of_property_present in
+> function sdhci_cdns_phy_param_count.
 >
-> Just to confirm: should I resend this as v2 with the corrected subject li=
-ne?
+> This silences the following warning messages since the cdns,phy-*
+> properties are all u32, not boolean.
+>
+> OF: /soc/sdhci@d8010000: Read of boolean property 'cdns,phy-input-delay-l=
+egacy' with a value.
+> OF: /soc/sdhci@d8010000: Read of boolean property 'cdns,phy-input-delay-m=
+mc-highspeed' with a value.
+> OF: /soc/sdhci@d8010000: Read of boolean property 'cdns,phy-input-delay-m=
+mc-ddr' with a value.
+> OF: /soc/sdhci@d8010000: Read of boolean property 'cdns,phy-dll-delay-sdc=
+lk' with a value.
+> OF: /soc/sdhci@d8010000: Read of boolean property 'cdns,phy-dll-delay-sdc=
+lk-hsmmc' with a value.
+>
+> Signed-off-by: Beno=C3=AEt Monin <benoit.monin@bootlin.com>
 
-No need for that this time.
-
-I have applied it for fixes and amended the patch according to
-Adrian's suggestions, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
+> ---
+>  drivers/mmc/host/sdhci-cadence.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Best regards,
-> Edson Juliano Drosdeck
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-ca=
+dence.c
+> index a94b297fcf2a..27bd2eb29948 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -144,7 +144,7 @@ static unsigned int sdhci_cdns_phy_param_count(struct=
+ device_node *np)
+>         int i;
 >
+>         for (i =3D 0; i < ARRAY_SIZE(sdhci_cdns_phy_cfgs); i++)
+> -               if (of_property_read_bool(np, sdhci_cdns_phy_cfgs[i].prop=
+erty))
+> +               if (of_property_present(np, sdhci_cdns_phy_cfgs[i].proper=
+ty))
+>                         count++;
 >
-> Em qui., 26 de jun. de 2025 =C3=A0s 11:05, Adrian Hunter
-> <adrian.hunter@intel.com> escreveu:
-> >
-> > On 26/06/2025 14:24, Edson Juliano Drosdeck wrote:
-> > > Disable command queuing on Intel GLK-based Positivo models.
-> > >
-> > > Without this quirk, CQE (Command Queuing Engine) causes instability
-> > > or I/O errors during operation. Disabling it ensures stable
-> > > operation on affected devices.
-> > >
-> > > Signed-off-by: Edson Juliano Drosdeck <edson.drosdeck@gmail.com>
-> >
-> > Subject would normally begin "mmc: sdhci-pci:" instead of "mmc: sdhci:"
-> >
-> > Otherwise:
-> >
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > Also I guess:
-> >
-> > Fixes: bedf9fc01ff1 ("mmc: sdhci: Workaround broken command queuing on =
-Intel GLK")
-> > Cc: stable@vger.kernel.org
-> >
-> > > ---
-> > >  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
-> > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdh=
-ci-pci-core.c
-> > > index 13a84b9309e0..e3877a1c72a9 100644
-> > > --- a/drivers/mmc/host/sdhci-pci-core.c
-> > > +++ b/drivers/mmc/host/sdhci-pci-core.c
-> > > @@ -913,7 +913,8 @@ static bool glk_broken_cqhci(struct sdhci_pci_slo=
-t *slot)
-> > >  {
-> > >       return slot->chip->pdev->device =3D=3D PCI_DEVICE_ID_INTEL_GLK_=
-EMMC &&
-> > >              (dmi_match(DMI_BIOS_VENDOR, "LENOVO") ||
-> > > -             dmi_match(DMI_SYS_VENDOR, "IRBIS"));
-> > > +             dmi_match(DMI_SYS_VENDOR, "IRBIS") ||
-> > > +             dmi_match(DMI_SYS_VENDOR, "Positivo Tecnologia SA"));
-> > >  }
-> > >
-> > >  static bool jsl_broken_hs400es(struct sdhci_pci_slot *slot)
-> >
+>         return count;
