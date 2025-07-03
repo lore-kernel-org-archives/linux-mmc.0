@@ -1,117 +1,174 @@
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com [209.85.128.178])
+Received: from mail-ej1-f54.google.com (mail-ej1-f54.google.com [209.85.218.54])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E5E1B295524
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 10:39:35 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 30B592E2F12
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 11:27:45 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.218.54
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751539177; cv=none; b=G90IfJ5Q30jr+DehDXhlISQ5s9rxg1ag+41oA7pTxNAricZdkzG7j6Gr6m3p/KNGok8gFY6nTf94TmTH9pJxZzryY/DqXkDWdbLzSxazNyEAPMCIwTL/5aDkqWD1mustImCfopWMncm5blnB7nvnoayz4ubVZf+pYVL1a29Z5Wk=
+	t=1751542068; cv=none; b=Yl2y//ZdRxrDbdTcXYKg1rg9ilKTCzNVZF8JQ+sLJvQ8EoX9LWgSQVeKYFeJ+n1+PkpnPMzPBf8LRLndxrp3GzyoWKVmfRbawRd2NblEnHl096ZWK7V2EKwBgYvZihYTRUIF7un2fWfeu4O1U9l3hxl8FwfKSd7JcZdxDJLAoew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751539177; c=relaxed/simple;
-	bh=bGwLvvH+krpxqZJW/aKT+tTKat2sdRhbvziWM56lIss=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Jh6Iy4spU9tWCsfPsfx4lnIxF7OCKFk8UggDoF8z0/je12CAhjTkajdhUEWUekw9Rqo1AIhvFu0EcqG+twnhfUVvFLLVJoOyYE1AV/diHqQ1MdDc7w9w+l8vuAR4s9F6us3HSNT20KaTvuICkyuUuXO3In8P57Vy5ZnngNPsmTI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=SpLjYFsI; arc=none smtp.client-ip=209.85.128.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1751542068; c=relaxed/simple;
+	bh=UlZ75WOORNs4rZE+VlImTZa7mmm9FlJ031wXRJuG6f8=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=LIv6mvcJ6WIA0C2jg1LvbQ96XRzLue3QAZGyuw8aO/Y3m1mUIGY/2rDwyREoN6eEDKTbqZszbVm5SD5+lb3C2qam1e2PT175h8HZsSZw7pRxEH+Eg0S6cTFM7XK99OdbjQtu8Pe3Qtkggsun+u4GaqzhQ2QU2nKob5zhv7ebbUY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev; spf=pass smtp.mailfrom=tuxon.dev; dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b=l5K7sn4a; arc=none smtp.client-ip=209.85.218.54
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=tuxon.dev
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=tuxon.dev
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="SpLjYFsI"
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-7115e32802bso53043077b3.1
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 03:39:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=tuxon.dev header.i=@tuxon.dev header.b="l5K7sn4a"
+Received: by mail-ej1-f54.google.com with SMTP id a640c23a62f3a-ae0ccfd5ca5so783425266b.3
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 04:27:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751539175; x=1752143975; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nbccPWOLMeO5ZiCDV22jEjK7nQ6LCiFcg1Ikp2bgtaE=;
-        b=SpLjYFsIeaeLZNe5zWyXHUZeaqfukoxmfm+giFclTMNef1wfyx+KGc4LAlVh9gk5qw
-         v52I4la6BBWsmJHTLQRh6UT4ETguXXRj5A0S43LiELwbD9Iz6+AqRH52ifPupBpvzY+r
-         XSiN7bmZaCgOsvHGi83o7ZbQuvxi52/Ivn66Tokg4z751pPfhibpiLoiSGfSAHw1ilDf
-         zSwtEyveHXKEuFbxe4rCV1JLh1G9JnyOiN6eGxVfqLecRkI90sD2LdbH+4Sac4bT/jLV
-         bNqPI+7XbFxrxEVCjBgDMS0EhxUzGIpSlOWG5GIVPcUuqM6tCyZEDsoqk2CEjbsBPmcL
-         oDoA==
+        d=tuxon.dev; s=google; t=1751542064; x=1752146864; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=a6PMMz69qo04D/YT8nX2dE04S7ELr0QnXwz/uN4j+eI=;
+        b=l5K7sn4an49hXSu3he2pRlapXvTrBiKvj+FIVPQKXU0QKgqq1ZePud52ttkBScRteZ
+         KXf07vm94x6m/BCztn7+b1NfXByAPNtaOF4WgW5PRybd5ZcHmex4Qgt9l4IwyUsdlDQp
+         fwrS0yw5nXaNTPLpAayTRgR3ARnJxCT3ug7Jtj3/o1ygmMbAMt1cub+cJjOjfZtVFKLA
+         AeQxIDhtiB6JitMDJmtj8b24mgQ6rHhLiyCKZtE4/9ZRKv4yIc9UK9zd2d3MgYY4WYIH
+         RANXc/agfr78NopjZLE6iJZab7To9BS5wWfsMRK/k66/NLaCdnY4/rrqvUrIfU8JHFHV
+         odJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751539175; x=1752143975;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1751542064; x=1752146864;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=nbccPWOLMeO5ZiCDV22jEjK7nQ6LCiFcg1Ikp2bgtaE=;
-        b=MnlpQlThGwm3o50CuRf+foUGxu3lVNruLicvqkxGDapP47f4gsBXrggz6S6G4edZTG
-         PYo87mx+QrnfN5OIE4cIWYdvemRizyLqFiN5RBj2cSv7ZfTR8BFxB7/ndPDuwubaxHTZ
-         fYIhLKeuHgh3TV8B2lteTirvbyuCKHw+Qiz4FJlT4f5N/UBaygA38rdU+gn5C1sHnu92
-         wxGEqvP6H8TTj26YQ1EM78F69M0dNI8R+lCo5CBZrSGmQc11HbgdjyKFJ0Pr9t1HtlbC
-         lB6HAfH5o9LBBvAC2VKmIX8F/T0f2l/6kXE2A6DYzzC7v1VioNbBQXIVK5nGwQkmL67K
-         Xtwg==
-X-Forwarded-Encrypted: i=1; AJvYcCUXLzMRbj/pVMt3KmXAzUId+wBKGRztvG0M+/Wi+S6xEEgc1qnd0BFNlHWEdky5G2wLnNLWKfbJGdM=@vger.kernel.org
-X-Gm-Message-State: AOJu0YwQh6CdRGl6jzKMA9WWDLheyLek7l4U64iA4GielqNLySwiqNsD
-	G2/8kJrH4Aa6sjmlgvY4qjHEFUUNpv5Ab9CGULXSv0VS4mg/Tjf13dCwfMFIZZYYC3lkv+6777+
-	1HmXNKV1X32fo9KH6qA09EI9l6aMf27NP1N0POW5rLC77yo8NYCnV
-X-Gm-Gg: ASbGncuC35xXjTGa6KWLjwKBs6u7QYTPFK1iZ+22Yfb9OobmKZCKP9SLRpHfKZMV3c2
-	e7Z4qzuhDalpKOpS7sdSc0ZcfDjEeXHxg7hZouzUgtw0HKoa296AXfGeMWrhuu/g0jCDuKUwuw0
-	A1mV46cuapII1lk0sR8PfKbnBYHFFmuyx1VOdnEMY8bTHDrvNUWvRVmQE=
-X-Google-Smtp-Source: AGHT+IF9eVk0FlIbMoHs5RgnCTviyum9RB4oGuI3RQdRmxuzWPhnfbE8XXHvyI2bhvdId129RaE1973qQU974VuN4FY=
-X-Received: by 2002:a05:690c:39c:b0:70e:29d2:fb96 with SMTP id
- 00721157ae682-7164d4d235emr83418887b3.36.1751539174826; Thu, 03 Jul 2025
- 03:39:34 -0700 (PDT)
+        bh=a6PMMz69qo04D/YT8nX2dE04S7ELr0QnXwz/uN4j+eI=;
+        b=XSERczHXdekP5DMy0YdTtNCap66jb2qFNzwy4Zw/aG98fHC5z74oEe0BUfGdBrOFcc
+         7ejYQz6Ex4VL/pDhu4pNftjBDIuP94p1P3Ikkvbb9Gzo/qWTQw+EDk3GkydfqMOiaIuD
+         34RBSs4RuJNll7VOV9C0rjxb153kINLaGoQaT4IRPz2VT9J9+Oof/ebtvNaDPHOhk0y8
+         Q3xTtUkdTCrl6ETJewqbWcwBNrKXW9ICojIQJF0fQY/2eY8ow8Lrs6Pv2ljnRjDsponZ
+         NctSnZuKHbVjd5lheJHYuz0ATT7t9Ou31kdBQqJXg9PWlsulZdXAnMYo51mR1JhLt0tv
+         NVWw==
+X-Forwarded-Encrypted: i=1; AJvYcCX3HcwxtutnW7il63OCCSS0aDlJndzbylQ9qUhRgSCEN7csTaqam+PB5Z8pOzr47O3Ejg/nSQelcws=@vger.kernel.org
+X-Gm-Message-State: AOJu0YyfkuN14BEVlz8LSpqvUs5G2eMdFkwCQG/nmueU41vuUMQQAr/H
+	CKaJ+2Ou142zktLUIz2N5vxWjE1XvEMrhsUnE5krUmXE/NoUrzQrvq0GzViMYc4awXs=
+X-Gm-Gg: ASbGncuA06jK1vYWytBhyTKUqmTOgxEbRmEuxEAlJ4YKNmv/zI99by/H1IKjcOoUBEJ
+	6y3HDgYETknVDb6cipcOCse4XdvnOH07CFH1pr6ILHqUYjrzA7XJBxLPFUjqEZHOubKzpxWYISU
+	A5kzM8rct/NEgmGh/2H3amrUnO1QAe2gsM6+7hWSD/2rT5RffAPpQRr53fUcxTiO6kpYNWCh9va
+	sH/xjtfelU0/bdgNiLK6xaL+PtY8vGW+OuZA8Fw+Gfn1DRnr6655aVrIYw9CyeugvLtkCc6jMfY
+	jWP5n8lJhJcAiUpjMCsrL7OPs8b2iLURS0WPQOMCJmDmHHVqkNlTV0TxdACTO/veb4WXvi/fFBT
+	LNTDOO0RpWkNS3d0=
+X-Google-Smtp-Source: AGHT+IGodommfjTvSu9SmK2+f27lr5klD7Mc1oDRjQm+BoxfNtWb86krYFjqI4yPBXvjQSq606lSUA==
+X-Received: by 2002:a17:907:2d94:b0:ae3:6744:3661 with SMTP id a640c23a62f3a-ae3c2da6359mr600970466b.44.1751542064239;
+        Thu, 03 Jul 2025 04:27:44 -0700 (PDT)
+Received: from claudiu-X670E-Pro-RS.. ([82.78.167.83])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae35365a75fsm1247016966b.67.2025.07.03.04.27.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 03 Jul 2025 04:27:43 -0700 (PDT)
+From: Claudiu <claudiu.beznea@tuxon.dev>
+X-Google-Original-From: Claudiu <claudiu.beznea.uj@bp.renesas.com>
+To: linux@armlinux.org.uk,
+	gregkh@linuxfoundation.org,
+	david.m.ertman@intel.com,
+	ira.weiny@intel.com,
+	leon@kernel.org,
+	rafael@kernel.org,
+	dakr@kernel.org,
+	len.brown@intel.com,
+	pavel@kernel.org,
+	andersson@kernel.org,
+	mturquette@baylibre.com,
+	sboyd@kernel.org,
+	maarten.lankhorst@linux.intel.com,
+	mripard@kernel.org,
+	tzimmermann@suse.de,
+	airlied@gmail.com,
+	simona@ffwll.ch,
+	wsa+renesas@sang-engineering.com,
+	ulf.hansson@linaro.org,
+	mathieu.poirier@linaro.org,
+	vkoul@kernel.org,
+	yung-chuan.liao@linux.intel.com,
+	pierre-louis.bossart@linux.dev,
+	broonie@kernel.org,
+	robh@kernel.org,
+	jirislaby@kernel.org,
+	saravanak@google.com,
+	jic23@kernel.org,
+	dmitry.torokhov@gmail.com
+Cc: claudiu.beznea@tuxon.dev,
+	linux-kernel@vger.kernel.org,
+	linux-pm@vger.kernel.org,
+	linux-arm-msm@vger.kernel.org,
+	linux-clk@vger.kernel.org,
+	linux-i2c@vger.kernel.org,
+	linux-mmc@vger.kernel.org,
+	linux-remoteproc@vger.kernel.org,
+	linux-sound@vger.kernel.org,
+	linux-spi@vger.kernel.org,
+	linux-serial@vger.kernel.org,
+	bhelgaas@google.com,
+	geert@linux-m68k.org,
+	linux-iio@vger.kernel.org,
+	linux-renesas-soc@vger.kernel.org,
+	fabrizio.castro.jz@renesas.com,
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Subject: [PATCH v5 0/3] PM: domains: Detach on device_unbind_cleanup()
+Date: Thu,  3 Jul 2025 14:27:05 +0300
+Message-ID: <20250703112708.1621607-1-claudiu.beznea.uj@bp.renesas.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250620033018.87920-1-lidong@vivo.com>
-In-Reply-To: <20250620033018.87920-1-lidong@vivo.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Jul 2025 12:38:58 +0200
-X-Gm-Features: Ac12FXwr34opsEKBKvjMq0YQRpajMerqzhzzFcEylaOwubo_bokLxMggyMS1_jE
-Message-ID: <CAPDyKFrkjuwU5b2-26LLWJ9gWduvXa9SOZ5j1+ndk1n5grXHVA@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: Convert ternary operator to str_write_read() helper
-To: Li Dong <lidong@vivo.com>
-Cc: Conor Dooley <conor.dooley@microchip.com>, 
-	Bartosz Golaszewski <bartosz.golaszewski@linaro.org>, Al Viro <viro@zeniv.linux.org.uk>, 
-	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, 
-	opensource.kernel@vivo.com, luhongfei@vivo.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Fri, 20 Jun 2025 at 05:30, Li Dong <lidong@vivo.com> wrote:
->
-> Replace direct ternary condition check with existing helper function
-> str_write_read() to improve code readability and maintain consistency.
+From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 
-The below tells me there are more cases than mmc_spi. Please re-spin
-and take care of all in one patch for the mmc subsystem.
+Hi,
 
-git grep "\"write\"" drivers/mmc
+Series drops the dev_pm_domain_detach() from platform bus remove and
+adds it in device_unbind_cleanup() to avoid runtime resumming the device
+after it was detached from its PM domain.
 
-Kind regards
-Uffe
+Please provide your feedback.
 
->
-> Signed-off-by: Li Dong <lidong@vivo.com>
-> ---
->  drivers/mmc/host/mmc_spi.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 47443fb5eb33..0a1098140dc0 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -27,6 +27,7 @@
->  #include <linux/spi/mmc_spi.h>
->
->  #include <linux/unaligned.h>
-> +#include <linux/string_choices.h>
->
->
->  /* NOTES:
-> @@ -774,7 +775,7 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
->         unsigned                n_sg;
->         bool                    multiple = (data->blocks > 1);
->         bool                    write = (data->flags & MMC_DATA_WRITE);
-> -       const char              *write_or_read = write ? "write" : "read";
-> +       const char              *write_or_read = str_write_read(write);
->         u32                     clock_rate;
->         unsigned long           timeout;
->
-> --
-> 2.34.1
->
+Thank you,
+Claudiu
+
+Changes in v5:
+- added PD_FLAG_ATTACH_POWER_ON, PD_FLAG_DETACH_POWER_OFF;
+  due to this a new patch was introduced
+  "PM: domains: Add flags to specify power on attach/detach"
+
+Changes in v4:
+- added a flag in dev_pm_info that is saved in dev_pm_domain_attach()
+  and used in device_unbind_cleanup()
+
+Changes in v3:
+- add devm_pm_domain_attach()
+
+Changes in v2:
+- dropped the devres group open/close approach and use
+  devm_pm_domain_attach()
+- adjusted patch description to reflect the new approach
+
+
+Claudiu Beznea (3):
+  PM: domains: Add flags to specify power on attach/detach
+  PM: domains: Detach on device_unbind_cleanup()
+  driver core: platform: Drop dev_pm_domain_detach() call
+
+ drivers/amba/bus.c                       |  4 ++--
+ drivers/base/auxiliary.c                 |  2 +-
+ drivers/base/dd.c                        |  2 ++
+ drivers/base/platform.c                  |  9 +++------
+ drivers/base/power/common.c              |  9 ++++++---
+ drivers/clk/qcom/apcs-sdx55.c            |  2 +-
+ drivers/gpu/drm/display/drm_dp_aux_bus.c |  2 +-
+ drivers/i2c/i2c-core-base.c              |  2 +-
+ drivers/mmc/core/sdio_bus.c              |  2 +-
+ drivers/rpmsg/rpmsg_core.c               |  2 +-
+ drivers/soundwire/bus_type.c             |  2 +-
+ drivers/spi/spi.c                        |  2 +-
+ drivers/tty/serdev/core.c                |  2 +-
+ include/linux/pm.h                       |  1 +
+ include/linux/pm_domain.h                | 10 ++++++++--
+ 15 files changed, 31 insertions(+), 22 deletions(-)
+
+-- 
+2.43.0
+
