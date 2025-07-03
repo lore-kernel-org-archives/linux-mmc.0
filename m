@@ -1,125 +1,101 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
+Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7EC4E2E7658
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 14:18:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 883912E9EAD
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 14:18:23 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751552301; cv=none; b=pU+/3NgZLBe2CdNWvNRBGGAhvC2svMuySPd4bFiwQiyKdKfOt09iNIzEHRjPAEeRrv5lvAv+U0fKfdL9H+usYbR95yA4iIb+TvgHipNlFrtrTnOIqPxUXdb092F2Z1t0V7PtQOdBa5dkp/jaxClHjSHnlAQEcc4ffZFqfUHl564=
+	t=1751552305; cv=none; b=mHlsClWfjYhIR4aSmxmG6+O37OkjaikbwC0WvrEcUISiafsl75A0EV/83ewDXPbbbGj3G+8kKnG8oBTnD9vo7rPYiJStsw+B6d7f2WAkSMurhwQeNKif+G4sFdsUtIWEitd7Atx5N4KXtokhNszYhcjxwgkT3HpB5QwiYdNsJ5U=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751552301; c=relaxed/simple;
-	bh=lDEriJrBoc3Z+FCyx3l8NGEqH25UvL1Vt5miiyOmCZk=;
+	s=arc-20240116; t=1751552305; c=relaxed/simple;
+	bh=esHDcG+Fd2R01UIixorvKM1CIIyYwF/rF08rAwEJAM4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=YhuX6oXLmup0cziMmXMiXTRBsdJ95M2Dk2eTFkPxCwkJvS1di0H+kv/KrJ7a8jFLlhYMK0P8yGDdnpwYvI+PuTiQkCR8+cDaCn9jeoREM83FLSf66n8mN/+j1B9avufEHhea3OwlXP9bqjb4NY0BixMiVL4lfGIxh+jBNIm6PAQ=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FJka/BVM; arc=none smtp.client-ip=209.85.128.180
+	 To:Cc:Content-Type; b=rCpbI623KjsXH8cdau7WBmBQ5iJtk3bNr1LtyBe4z2R96DkZL95RopBYcuieqii+rZGNmlUnWb0GoBtDa6pzM1SgeSLPexyMkWozT7fRIpjgR+LTD3w+07ZWaNZnD3JT/Sa7+my5lkm5abqCGTlamWFXgDTM1Ruy/X5V/86Du54=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YtI2OVVL; arc=none smtp.client-ip=209.85.128.177
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FJka/BVM"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-7111d02c777so54104487b3.3
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 07:18:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YtI2OVVL"
+Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-71173646662so60399397b3.2
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 07:18:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751552298; x=1752157098; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=lDEriJrBoc3Z+FCyx3l8NGEqH25UvL1Vt5miiyOmCZk=;
-        b=FJka/BVMMa+CcS/D4YzLm9Y/gi+MKnnj/rNU9tmjKjS45mywk7ii/fVMjrRmJpKpbB
-         jMVcr6S9WjGSDkBcxWG2BFzItagHdmlaOUCTgKA+iYeSKfXvKLFlV9ExcqaQREPYDz7B
-         9wsI2/ionZg6qtwcxMf3suOy9MnqaMC5Elhn4mjCMzREwMNbtMWX9v0V0hwmTvfuX9gm
-         l3CDEN5XjV7ey8b90migl09S8IHVfUZO8E2cTRm7A9EIEA1z61hJ3OpALVHQnLLHmZHv
-         CE4YEvBsbMDARxEAzAAbQ935pIgVBt4PtvlagID95K27lRykHMjHARP8QK0WoocRXpYm
-         XroQ==
+        d=linaro.org; s=google; t=1751552302; x=1752157102; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=LgN20ThRnhhSyCTCXxiKR/V5yEId2hnk/jbPxyM41ic=;
+        b=YtI2OVVLxKq4hS2/5b4zr1xTWl8O+AKYq4OWihlvqwso2HxW2SOnITaQ2Rncmz9XMj
+         8VVWOmdGD/O1ws2P10hf0ESx+IoG1XoEWZWMsIW4AnpkEIRTCfYDOcPPdMLPtonGOrOY
+         PUqIil21ozldpKMQrvw5tefWUZWwufTtH+oZq5tUHs41Q2l7Awl7sebb44HOt2O9/Mfm
+         HJVyiDY3QMAG0NZ1ii5Qhu0WCSadFgq6G9KTjsmUBVKekEZbpXmZ8ixDkRTbpGaYxidr
+         Q8SuyJewBVcYt8xhSn2LJs3XpqyyuLxVRZlskeU+VTXFAitU1iVf9cn/7ktVgqIrfvlH
+         mRKA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751552298; x=1752157098;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=lDEriJrBoc3Z+FCyx3l8NGEqH25UvL1Vt5miiyOmCZk=;
-        b=VnZXHbqmZ0KqB3rQVQRvVxZ8ZekWURYkkb8/TaffICpCUe2Z55llFCg7C7v9P+PXb7
-         C25G8y4Alk+1dtp6T4a1W7LraOc4jP7Zv7i04VadYKiN3dIrGCKPq1P2NB+dgCHxG8vz
-         cYsxDfwGswiqqhsn7mypEYMHL5PGXpWZ12kDVnTZOtFWnyPXnhhy8aMKywpv8O3p17y8
-         vy78q79G1Cz9jO8yYGc8IaPrFPfSDSTWR6OKpuMfpp3SydoErnEyx4Al1DiZeg27vzZn
-         bqr/qnDZLWx+IF97inx9cMhEQhd7SxKSeY7hEXcRMMi/LWhSVtW+hNVjQMUpOugf6XCz
-         8DUw==
-X-Forwarded-Encrypted: i=1; AJvYcCWThkQdB17hORC6GiAVTlEc40+GgGa9gNmRUKs4N5fkp7irBSh7JUh0uE+FGrbiHGrL5Sdg8FVh4+4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yz8kDv/G2G70LwD2oBoL2PxyZcR8WQnTU/iojSCn+ErXnsaqEH6
-	l1uJCRr5guGPzAp5b9f9m2hl8dqNlJPmMNje6+dhNMVsb/oj8BxmG2VUbDQV96jTaAWymEtOrOP
-	XLpiB3Jis4fjIu8BmSyMhmCo3Ebwmq2lgOltb8dALfg==
-X-Gm-Gg: ASbGncvIixFXbQK9WZlAbaxmFNPY7ciNbPlRlD5z4eVpS33xwyZWopH87fpCwraTro9
-	17jqZv/jlnOo4RpfPVzplRA48PakGgO+fg4NoTGlOabjOkW7qiW2384dTqeQLlCDlzz1+XmzRlW
-	ki+7jIMdb7NscAXmwIdx1Sy4PJ/0WuPf9pxWXzZcf49aL+
-X-Google-Smtp-Source: AGHT+IHKCVcm58iGQvDz5IlH+nt0wPYjDF0vM/IkWNqcRP0IW3DHZFT+X09mtu99FrvVXSO9bQ0r4w8ZqDRsbPuqnNs=
-X-Received: by 2002:a05:690c:4:b0:70d:ed5d:b4b4 with SMTP id
- 00721157ae682-7164d3f1568mr98778977b3.24.1751552298210; Thu, 03 Jul 2025
- 07:18:18 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1751552302; x=1752157102;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=LgN20ThRnhhSyCTCXxiKR/V5yEId2hnk/jbPxyM41ic=;
+        b=w5tc5/Z3lcfMHmI5mXxScEpnQ2HnjbbIGfwXM0KiOiJlGT3TchxbkJonJmhJW/pp+W
+         U0Jn7VvZ7lDQbhlnoi0f4H7IRqFvA9TjSqtRG4yaT/l6CxFugJAuzE/kP78SIJaiIC3+
+         NCsmzRpySgDg4ZdQSjSJP89BT4JKfjWDu/3yWXhaokmLq4SX+CRm5g7MvwnSHWDiS8Xu
+         N5B5YnHeyFy7mvlhvtQCBP1LgCLQL1ctAvHngJtqW+four0/CXN9lEBcBV0OJvpXOLCK
+         yFpvwsEb4zkcLrjTgTbbMmX+oUcaeQZikwjuF5smSYZ8SFgAwFT5hQccwvPrya+tqueR
+         UO2Q==
+X-Gm-Message-State: AOJu0YyScmH+gPpeEerbxf9ZN/QO5lynEDHGlJAD0keAuWnCJWu4wh7H
+	gmaYClpBKBt6aJwt6QTzQVo/ZjvryO6IWt838edgi0x8Gpa6wn057Wt6XGXA2XTVaUSzz9HPOjn
+	n/pwzR0jrn3niDczHFlrY1I9pcflEcjW9KkW+wp6q3A==
+X-Gm-Gg: ASbGncsbA6z3lBn+npjZdDUJa2mi9XFkCAgCYKAKeeML2h64Ug7TCQtTs6jyHluboZ1
+	KkL0AKINWXmj5Jvj1lTUG0bI5yItidbMDC1PeMEVy17U9wgUcVuZnniroO0defbuIp98lMXQkkK
+	GU2/i3CsCeCAbxwAxtsnFIZRSb2YKEjSjjoHblfDcc6/1r
+X-Google-Smtp-Source: AGHT+IHTVMAbLnJYqA2Y29rcLX7sgrl6AAuo4wDyICnVOwVGQ7PB2H/kn8FGzXAE4cyx2p8bY/JnsVpkMv/DwOh2yvY=
+X-Received: by 2002:a05:690c:6e04:b0:70a:2675:70b3 with SMTP id
+ 00721157ae682-716590c3752mr47926877b3.17.1751552302395; Thu, 03 Jul 2025
+ 07:18:22 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250701100659.3310386-1-quic_sartgarg@quicinc.com>
- <c7lpaij5f5monr7zfeqitncwnau22iollid2gs7okyorlegtmg@jlq65x7ipp25> <9db5d1d4-1965-4334-9540-fbb66498d7d5@oss.qualcomm.com>
-In-Reply-To: <9db5d1d4-1965-4334-9540-fbb66498d7d5@oss.qualcomm.com>
+References: <20250630072420.114967-1-avri.altman@sandisk.com>
+In-Reply-To: <20250630072420.114967-1-avri.altman@sandisk.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Jul 2025 16:17:42 +0200
-X-Gm-Features: Ac12FXxdoEtdtcX4FMKf6jgOtjpthIQIwg_rwvmCiwfJ9Oh4FD81OkKMZc8cM-Q
-Message-ID: <CAPDyKFqh9tUrNGRj3xnRGtT=YxX5XhhMcWPCTATdon_joVHqAw@mail.gmail.com>
-Subject: Re: [PATCH V3] mmc: sdhci-msm: Ensure SD card power isn't ON when
- card removed
-To: Sarthak Garg <quic_sartgarg@quicinc.com>, 
-	Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>, 
-	Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-arm-msm@vger.kernel.org, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	quic_cang@quicinc.com, quic_nguyenb@quicinc.com, quic_rampraka@quicinc.com, 
-	quic_pragalla@quicinc.com, quic_sayalil@quicinc.com, 
-	quic_nitirawa@quicinc.com, quic_bhaskarv@quicinc.com, kernel@oss.qualcomm.com
+Date: Thu, 3 Jul 2025 16:17:46 +0200
+X-Gm-Features: Ac12FXzfLSnl2_8_ui8WZ6aogFAhcCirlNP4Zvzrt_ghVY9VeevZHwJ8rvNIqKg
+Message-ID: <CAPDyKFqenCUTcdFM5T99b=+p-RjUthv0ujxAO_de_sEVr-EMgQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/3] mmc-utils: Improve version reporting
+To: Avri Altman <avri.altman@sandisk.com>
+Cc: linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Tue, 1 Jul 2025 at 14:09, Konrad Dybcio
-<konrad.dybcio@oss.qualcomm.com> wrote:
+On Mon, 30 Jun 2025 at 09:24, Avri Altman <avri.altman@sandisk.com> wrote:
 >
+> This series improves version reporting in mmc-utils to make it easier
+> for users and developers to identify the exact build in use, which is
+> especially helpful for debugging and support=E2=80=94particularly since m=
+any
+> users run pre-built binaries.
 >
+> These changes should make it easier to track and support mmc-utils
+> deployments in the field.
 >
-> On 01-Jul-25 12:27, Dmitry Baryshkov wrote:
-> > On Tue, Jul 01, 2025 at 03:36:59PM +0530, Sarthak Garg wrote:
-> >> Many mobile phones feature multi-card tray designs, where the same
-> >> tray is used for both SD and SIM cards. If the SD card is placed
-> >> at the outermost location in the tray, the SIM card may come in
-> >> contact with SD card power-supply while removing the tray, possibly
-> >> resulting in SIM damage.
-> >>
-> >> To prevent that, make sure the SD card is really inserted by reading
-> >> the Card Detect pin state. If it's not, turn off the power in
-> >> sdhci_msm_check_power_status() and also set the BUS_FAIL power state
-> >> on the controller as part of pwr_irq handling for BUS_ON request.
-> >>
-> >> Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > Should this be handled by the MMC core instead?
-
-Ideally, yes, but honestly I am not sure how.
-
-The current support by the core, detects that cards are being removed
-and then it schedules the actual removal/power-off to be managed from
-a punted work. This seems too slow for this kind of use-case.
-
-If the core would try to inform the host at an earlier stage, as soon
-as the mmc core detects that the card is being removed, would that be
-soon enough?
-
+> ---
+> Changes since v1:
+>  - Add a 3rd patch to print the version at program start
 >
-> If possible, yes, but if it only works because our hw-specific
-> sdhci_msm_check_power_status() behaves a certain way, it's good
-> to go as is. I have no clue if that's the case.
+> Avri Altman (3):
+>   mmc-utils: Add option to print version
+>   mmc-utils: Makefile: Make version string to show commit date
+>   mmc-utils: mmc.c: Print version at program start
 >
-> Konrad
+>  Makefile |  4 +++-
+>  mmc.c    | 12 +++++++++++-
+>  2 files changed, 14 insertions(+), 2 deletions(-)
+>
 
-I agree, sdhci_msm_check_power_status() is certainly HW specific.
-
-That said, I decided to apply this as is, for next, thanks!
+Applied for mmc-utils master, thanks!
 
 Kind regards
 Uffe
