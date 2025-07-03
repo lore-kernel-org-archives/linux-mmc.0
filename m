@@ -1,101 +1,119 @@
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com [209.85.128.177])
+Received: from mail-yw1-f179.google.com (mail-yw1-f179.google.com [209.85.128.179])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 883912E9EAD
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 14:18:23 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.177
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C7AA23C512
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 14:18:29 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.179
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751552305; cv=none; b=mHlsClWfjYhIR4aSmxmG6+O37OkjaikbwC0WvrEcUISiafsl75A0EV/83ewDXPbbbGj3G+8kKnG8oBTnD9vo7rPYiJStsw+B6d7f2WAkSMurhwQeNKif+G4sFdsUtIWEitd7Atx5N4KXtokhNszYhcjxwgkT3HpB5QwiYdNsJ5U=
+	t=1751552310; cv=none; b=SUnfMuVUhTSm+eyQrAcw6x7+wXHb4UW9Y7RAznjxKOh5KkaFkmqXc7zX7dTCvrsajXzJJfBvzKvWmIWme3+tGsDTIi9/+8HfV5vvms8a95xbiNqoOjgGKJaJFRhGxeSlnrCMDBampnylLH9DMzepkhfAHkgakj7sJIjZIBcFTHE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751552305; c=relaxed/simple;
-	bh=esHDcG+Fd2R01UIixorvKM1CIIyYwF/rF08rAwEJAM4=;
+	s=arc-20240116; t=1751552310; c=relaxed/simple;
+	bh=ERH+Sdv7GXno1Imeo+4fgGH4RS9yil0Gw9IjwI0Jnx4=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=rCpbI623KjsXH8cdau7WBmBQ5iJtk3bNr1LtyBe4z2R96DkZL95RopBYcuieqii+rZGNmlUnWb0GoBtDa6pzM1SgeSLPexyMkWozT7fRIpjgR+LTD3w+07ZWaNZnD3JT/Sa7+my5lkm5abqCGTlamWFXgDTM1Ruy/X5V/86Du54=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=YtI2OVVL; arc=none smtp.client-ip=209.85.128.177
+	 To:Cc:Content-Type; b=Ilw8ni6JLN4leO44rfC4yKZKXMIYKpEoGa2J3+iflzMxuW46qLqGz1NguFR3lRJp9bG7+eM96XA8CJUb4vwfVozJ3a3lAVm803SNeIBEiMBz/HR+28iWAVk/WuJ1ICkbYz9aMXrt90R3C4KUb2YOmolrWfQkc04Pn7hC82jft1A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FbAeuY7o; arc=none smtp.client-ip=209.85.128.179
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="YtI2OVVL"
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-71173646662so60399397b3.2
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 07:18:23 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FbAeuY7o"
+Received: by mail-yw1-f179.google.com with SMTP id 00721157ae682-71101668dedso82396957b3.1
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 07:18:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751552302; x=1752157102; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=LgN20ThRnhhSyCTCXxiKR/V5yEId2hnk/jbPxyM41ic=;
-        b=YtI2OVVLxKq4hS2/5b4zr1xTWl8O+AKYq4OWihlvqwso2HxW2SOnITaQ2Rncmz9XMj
-         8VVWOmdGD/O1ws2P10hf0ESx+IoG1XoEWZWMsIW4AnpkEIRTCfYDOcPPdMLPtonGOrOY
-         PUqIil21ozldpKMQrvw5tefWUZWwufTtH+oZq5tUHs41Q2l7Awl7sebb44HOt2O9/Mfm
-         HJVyiDY3QMAG0NZ1ii5Qhu0WCSadFgq6G9KTjsmUBVKekEZbpXmZ8ixDkRTbpGaYxidr
-         Q8SuyJewBVcYt8xhSn2LJs3XpqyyuLxVRZlskeU+VTXFAitU1iVf9cn/7ktVgqIrfvlH
-         mRKA==
+        d=linaro.org; s=google; t=1751552308; x=1752157108; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=WsE5lpOllDAHOtA1Ajy5IFanrHLSYP8QdOkPhO+rymo=;
+        b=FbAeuY7oExE/pF171QDUOo2yD62yl0DlX8FX5hYgAN7upq93MYqzc6u2DVCGYGJKfw
+         BO83FsnksPggPAwcdLBUEAaSAVzkBoS0AtNNn7Gwhbr3v2mH3QPUrYg1w6gLlVlwZhW5
+         ZZTKL4qltBZxsVUAUX2f7VP4bpc9hySxa4+BC6KUYsNCUM7nRVD8f//MoD37TFUHAbHs
+         zlJuHq4aP5HCFQa96Y2Zsp2nkznEXsR/FU/Cqbr5oB1wGjrGOtx6a9zOeYMtZ8CvnTOs
+         /2ovOs2W/yaCVLjPLYbBo457wqajbmynwZaLMMeYtIXayCAsKVCP9VlER9A0915LnL6j
+         2eHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751552302; x=1752157102;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=LgN20ThRnhhSyCTCXxiKR/V5yEId2hnk/jbPxyM41ic=;
-        b=w5tc5/Z3lcfMHmI5mXxScEpnQ2HnjbbIGfwXM0KiOiJlGT3TchxbkJonJmhJW/pp+W
-         U0Jn7VvZ7lDQbhlnoi0f4H7IRqFvA9TjSqtRG4yaT/l6CxFugJAuzE/kP78SIJaiIC3+
-         NCsmzRpySgDg4ZdQSjSJP89BT4JKfjWDu/3yWXhaokmLq4SX+CRm5g7MvwnSHWDiS8Xu
-         N5B5YnHeyFy7mvlhvtQCBP1LgCLQL1ctAvHngJtqW+four0/CXN9lEBcBV0OJvpXOLCK
-         yFpvwsEb4zkcLrjTgTbbMmX+oUcaeQZikwjuF5smSYZ8SFgAwFT5hQccwvPrya+tqueR
-         UO2Q==
-X-Gm-Message-State: AOJu0YyScmH+gPpeEerbxf9ZN/QO5lynEDHGlJAD0keAuWnCJWu4wh7H
-	gmaYClpBKBt6aJwt6QTzQVo/ZjvryO6IWt838edgi0x8Gpa6wn057Wt6XGXA2XTVaUSzz9HPOjn
-	n/pwzR0jrn3niDczHFlrY1I9pcflEcjW9KkW+wp6q3A==
-X-Gm-Gg: ASbGncsbA6z3lBn+npjZdDUJa2mi9XFkCAgCYKAKeeML2h64Ug7TCQtTs6jyHluboZ1
-	KkL0AKINWXmj5Jvj1lTUG0bI5yItidbMDC1PeMEVy17U9wgUcVuZnniroO0defbuIp98lMXQkkK
-	GU2/i3CsCeCAbxwAxtsnFIZRSb2YKEjSjjoHblfDcc6/1r
-X-Google-Smtp-Source: AGHT+IHTVMAbLnJYqA2Y29rcLX7sgrl6AAuo4wDyICnVOwVGQ7PB2H/kn8FGzXAE4cyx2p8bY/JnsVpkMv/DwOh2yvY=
-X-Received: by 2002:a05:690c:6e04:b0:70a:2675:70b3 with SMTP id
- 00721157ae682-716590c3752mr47926877b3.17.1751552302395; Thu, 03 Jul 2025
- 07:18:22 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1751552308; x=1752157108;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=WsE5lpOllDAHOtA1Ajy5IFanrHLSYP8QdOkPhO+rymo=;
+        b=mQ+8J80J0XYj/onih68tANl+/NQjjE4cEq1tl5ARcfbrg2cAOfE6vCjgcdpgBGSX56
+         hVs5//b5eAViuNkcTls9Sh6nICVlxPZQZETcm6qQYsO0fEg8S8QxuCaxEgANc3YXLiSr
+         5sPssB5IeEQ8YOooJOMy9lCIuxiE3jJYkh58+iOq2MfhzcSRC1uAd5TyDWTq8daKPmCq
+         Z87/8d1yQEDoS69O9BiZ+kery4U67yoOma7VK1fUyxsoqa++d+1VgQAFNexVH2wQWiaE
+         FoN4r/p2oPKgvVl4ngW3JM+JnC+HIT2S7vuhCu1EJ+rZMPxJ1Ng/QbI60Ugo12hQmFIr
+         /mIQ==
+X-Gm-Message-State: AOJu0Yw4sXV9ARsq7ZusttZCGKnuQZct0Q/GGmZUZ4fCg8MDvOXzbGt9
+	57zOjdv8AMxWWAwqQpzJH+niC96zEWNrVlTxGNs7PuRk2JxyJ3n79lXrXxVFtb8kCzV+zW0hMEL
+	nBcH4kXMDwv3HDHhbxrre3QKRXtwaV0s6e99Dg1Z5SdMNaOLg0OrJ
+X-Gm-Gg: ASbGnct3f1HbmPXGMYm87kfKTzxOGD5FzxKmdER9Z6ml8yTCa0wOHJF6n/T7djG/jJH
+	BhIW0br1lWqLEBnRsZ3U914XfhK7SkxME2WjFWjZPFpogHbef7U5BPe8eIoElmDQIwM+sWhHzM4
+	xBndTwZM0B6t+zyqMZCqPzxwiI0Gbh3/K7SrzwtrX0Pl/taNB0YKpYky0=
+X-Google-Smtp-Source: AGHT+IFne2vi8SBKEYL2sGkgL3IDhj2qT6iWgMFzfsnPufKFonhOFi6RGSaWlWuX1YUxQJny5x2OvtnhMhn8H39giuU=
+X-Received: by 2002:a05:690c:dd1:b0:712:cc11:af0 with SMTP id
+ 00721157ae682-7164d0f8231mr98704517b3.0.1751552307975; Thu, 03 Jul 2025
+ 07:18:27 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250630072420.114967-1-avri.altman@sandisk.com>
-In-Reply-To: <20250630072420.114967-1-avri.altman@sandisk.com>
+References: <20250703054845.49206-1-avri.altman@sandisk.com>
+In-Reply-To: <20250703054845.49206-1-avri.altman@sandisk.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Jul 2025 16:17:46 +0200
-X-Gm-Features: Ac12FXzfLSnl2_8_ui8WZ6aogFAhcCirlNP4Zvzrt_ghVY9VeevZHwJ8rvNIqKg
-Message-ID: <CAPDyKFqenCUTcdFM5T99b=+p-RjUthv0ujxAO_de_sEVr-EMgQ@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] mmc-utils: Improve version reporting
+Date: Thu, 3 Jul 2025 16:17:51 +0200
+X-Gm-Features: Ac12FXyhg7ierCYV8KD-W6BXHGifE0tQUH9uwFcu5Qlvv_ndkVdE-tPBzphVSeE
+Message-ID: <CAPDyKFqUueREyxgCx5E=2Ytz8doi9f9DhXcwzNZ=F=7YF7LCxA@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: Remove unnecessary null pointer checks
 To: Avri Altman <avri.altman@sandisk.com>
-Cc: linux-mmc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Markus Elfring <Markus.Elfring@web.de>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Mon, 30 Jun 2025 at 09:24, Avri Altman <avri.altman@sandisk.com> wrote:
+On Thu, 3 Jul 2025 at 07:49, Avri Altman <avri.altman@sandisk.com> wrote:
 >
-> This series improves version reporting in mmc-utils to make it easier
-> for users and developers to identify the exact build in use, which is
-> especially helpful for debugging and support=E2=80=94particularly since m=
-any
-> users run pre-built binaries.
+> Simplify memory cleanup by removing redundant NULL checks before calling
+> free() on pointers. Markus suggested it following static analysis by
+> Coccinelle.
 >
-> These changes should make it easier to track and support mmc-utils
-> deployments in the field.
->
-> ---
-> Changes since v1:
->  - Add a 3rd patch to print the version at program start
->
-> Avri Altman (3):
->   mmc-utils: Add option to print version
->   mmc-utils: Makefile: Make version string to show commit date
->   mmc-utils: mmc.c: Print version at program start
->
->  Makefile |  4 +++-
->  mmc.c    | 12 +++++++++++-
->  2 files changed, 14 insertions(+), 2 deletions(-)
->
+> Suggested-by: Markus Elfring <Markus.Elfring@web.de>
+> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
 
 Applied for mmc-utils master, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  mmc_cmds.c | 9 +++------
+>  1 file changed, 3 insertions(+), 6 deletions(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 7994223..b16ac69 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -3421,8 +3421,7 @@ static int __do_ffu(int nargs, char **argv, enum ffu_download_mode ffu_mode)
+>                 fprintf(stderr, "FFU finished successfully\n");
+>
+>  out:
+> -       if (fw_buf)
+> -               free(fw_buf);
+> +       free(fw_buf);
+>         close(img_fd);
+>         close(dev_fd);
+>         return ret;
+> @@ -3651,10 +3650,8 @@ int do_alt_boot_op(int nargs, char **argv)
+>         ret = 0;
+>
+>  alloced_error:
+> -       if (mioc)
+> -               free(mioc);
+> -       if (boot_buf)
+> -               free(boot_buf);
+> +       free(mioc);
+> +       free(boot_buf);
+>  boot_data_close:
+>         close(boot_data_fd);
+>  dev_fd_close:
+> --
+> 2.34.1
+>
