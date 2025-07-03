@@ -1,234 +1,122 @@
-Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id EDEBE2E6139
-	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 12:19:49 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BE722E6139
+	for <linux-mmc@vger.kernel.org>; Thu,  3 Jul 2025 12:19:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751545192; cv=none; b=W1utJKwZ7HZcxnyqIo/Ga/VJGd2OqJ4FU3QveZvPfG8sSIPmwNZnL5PxE+t9t7wjDlULhoHv1Oi01mkZmd+QjY9nEpiqkVFHCKYaCposkRXb6mDIMsB8cxiTQoSUWvYLGjRUINMBEloF33KYxVY5hHA1T4lBm69hc1ZaYGCcDGY=
+	t=1751545194; cv=none; b=i+5Nev34j+ehxaMVdwfW/HoYBemrDitgvmUPde/GxS13VcOYuj5XwkgWegEZ38kx2cGaLRRs2DuVGXiXoj4scBp5ysgZuoWPCiDZ5lgsQ/xMrDx0VHpFO06l3lOz/FthGc6n8WDHIxZeCZ4ptnFuE10WCCWO5w5k+00nLOJ/tB0=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751545192; c=relaxed/simple;
-	bh=z8FZnR4Rw/qWdYY8qz/fLFF2yrmytUH3WBZHq3bugK8=;
+	s=arc-20240116; t=1751545194; c=relaxed/simple;
+	bh=TMekI+ePGLb2dVGIQvd4eMWoX3DAqPDpxNlAHJXJ7ns=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=nSRiR1JWCHtAb8yWhq5lVaop8UoAAvefoqS3giRNTiNMdhZ3I63gH4uwP79eHMJbii9XHEFuys2FSO9zDfTeOLNvwCPtErnB0GD4/i3CoQnVc0iGfWzY0Eo/bAATHzNYkGrdoZDjIKsjN+zWN+r5Z/F5Hc7EoKoyHZtux+IaTwg=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=eLH/Rf98; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=Gcp4jDfoIj+Oku88T5gmiBvX7/cX3w3K+e0Ew1GHzBInmcPx93O3k3B/BUSg9f1dZI8wG+MYxukAypEdlzTUbdr5saTurkMWXE65ASuybJvQl6tnbqibeRbV3tK5BQawEIUHGFvnOjUcMQ59IYXz+m5YknAQasLdyWV8veD2Nzc=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=FsFG6m01; arc=none smtp.client-ip=209.85.128.172
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eLH/Rf98"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-70e77831d68so58624017b3.2
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 05:19:49 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="FsFG6m01"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-70e3c6b88dbso58852617b3.0
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Jul 2025 05:19:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751545189; x=1752149989; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1751545192; x=1752149992; darn=vger.kernel.org;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=N2wuby6dihOR3rr2SUBYnQ0Uq7yXMHWKxft/QT/79xE=;
-        b=eLH/Rf98JC/HMuL7KJZBbT6Ya9KGteDjP9Kh4ZPe36Q88AcLivWi60GCowxr/Cg9jv
-         A01pT5MtEtQAV5EzJkZP67t/lNJ58hKDUHG/bgyi/C/ysSjB6HamHtUYS0pkjDs9l4CP
-         eyaAnYETJ0+8ztO1TwB644c+dSA7Os8yO7138nTREOR4e842Oh+JavV4rQlNkcPLTai/
-         uWD90AxCTZPRufjnJnVQqXR5YML7gm0pY8g9svTI+N7UFDd2WDbcpboSW9V3BXLEJqRe
-         zQjqL1J4UuMyv0esy4cn3XLr8cjhtdrhTKEVjm+T4k/zIRafPCKG2CYPEJ7SYF4NpPTi
-         y1vQ==
+        bh=qTC597t48bncltdn47anMKlxgf1mIXgbQUWYTJlSUZI=;
+        b=FsFG6m01aZ51iejphuFwUpt31/T+xR9uKywCpw7cm9ywNpd/LLHUjszKwZk5zye1B+
+         t7bSgTzx00+un7s3RYZxjTOoYSxGB40D/zJ5bam2G/MtEH1eAMtHItdeFaVfrEpYt/4O
+         6yTBRO2CPWGXi2W9VfvDEOTsi4ylB9QmH2g+MBaWF3h8/fB+P55CX2VCaivTyIc91xeX
+         xjf+pTYigO5mru1+M0D+0zq8TRkV0O7cT5wJi9It0DHiAGwcvBbvEOg++3jvGJsNcDs+
+         ObazsHRB5pHCOARh3IzqbaKTzVnllYMTFZLhycZAN2YqvEWqhk6VMFDKhm01xcsL50XD
+         ZQ2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751545189; x=1752149989;
+        d=1e100.net; s=20230601; t=1751545192; x=1752149992;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=N2wuby6dihOR3rr2SUBYnQ0Uq7yXMHWKxft/QT/79xE=;
-        b=AZq2ntt86+T/ohAg2G+ued35nG+45Vqd2YqvSkshnD0H/xR0WTxH8ckDrIdQdKbIge
-         K5uM0L4hJbz3oAwj41e24qfH5R6R6AMF9VelxoP8FH2qrGBOWkNPd7/FUpqQi4W6W2uL
-         K7OptudAJUBGCri2FB1+1Pcq6rIH++k0L/cJsBuM4dCrNnp1RzUYQBPbj2FrXWsqYFKD
-         +8xW0H+ampNm1iCJidBvvt2QECLkCX1yxPc82oNoDkSHSjjSqD6MwL87AUH5QTTyJj5j
-         2/Qqvd4dUqE9wpwPL58iG64im5M6hrxe6yyK32Kv8E+5PG4A8jHzNdXdCKo2YnxK0jaQ
-         LYew==
-X-Forwarded-Encrypted: i=1; AJvYcCW8xck8kZq+4jgPwU69T73JcyhAvnobCw/kOqia3yhNNzbUquNHHOmp5w6qAIhkSZYiwt0tSbB9BdM=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx+vZGc2jVUHM1/bbJM9UAD+IgFi0dy1oWlDRtjkvQelD72Rl0q
-	WB8mBQXQonIItu7XHaMAON1lNw43qR6c0ZSAE+hOXgWxeyRFLMWp6PovP33kkXGRvis1rRU0s9n
-	UvbtcpKU+b7YiFnpTsCteA98nAuDgJF0xE3/uaqtEEQ==
-X-Gm-Gg: ASbGncv6b3I0FjRiwsseV8VqvIY/FKMqSTRGPwdWUh3Cm0HoKlWiafSukLQzZ3h16V6
-	7Myggg0QeMH3bnywdwJgk6SPf0+LULysS58XOcgACRdir9XQPo6a4UwGqjQPE89vCHun6BeUKP/
-	yOLXPwINoVAXWY26GbQcNgDnc0qz+l6NEQf9iRBqdQYy5d
-X-Google-Smtp-Source: AGHT+IEeRTEttwsTQvILUVHrceCqzM9cMbjNTuLR5NzW92fxDyMdJhdnzbpkuw2WPjwuUny5S4J+pKNydZxICX8WeYw=
-X-Received: by 2002:a05:690c:14:b0:70e:2cf0:f66a with SMTP id
- 00721157ae682-71658fd7204mr50507077b3.6.1751545188852; Thu, 03 Jul 2025
- 05:19:48 -0700 (PDT)
+        bh=qTC597t48bncltdn47anMKlxgf1mIXgbQUWYTJlSUZI=;
+        b=mTfU0rlKexZmnA1nLAOHzGF9YRu19IYJjKVQDnkh1ZpWp0CwynBG+gH3t2ufexq1Ay
+         KMYoLfb0HQ79+hibAwguTSGrF9VVkssrdA3gqjqjlel477jxka3UYES03vWvzvi4Ki9X
+         hieSLRfbKZ596i2cTBrvm4OUE+ZCV0GkeUVboMHIYY47VN9cSyNlwmWxdgxMgswhBzDr
+         sRAk4ByYPQaGKY1AcplvqFbDWk1sqRg1VL4VA1JdKtMY3acxWFwl5GZUsXSqrh2VP5tJ
+         YtCjaXuKOJH7zY0uyRWLDrm3mfTuAnmI/hrIiHdA85qXlHpGLGp7vXIL2liIwSA3jHB9
+         Mlrw==
+X-Forwarded-Encrypted: i=1; AJvYcCWvQs11USW34lJacznVltXz4aSocj9Cp6/gtqk+dE6EtMvbnr3IKeq7k6kIBunzBGhxCjlGrYeDwDk=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzg6527NgtmAq7m+I9UAB5JmKJlgT9ozDCMt5Eb9IobhlZ16Obq
+	+thUGfoG4rQ1Y+9b8tXjTDwkUMG74pbT33Sw2UaKcGMyFcWPhVyL1GRTkpSpAWvR/AWBm4SDyO3
+	qee1VnxswnzYlgmcpnDIgFSTIrTQoOcXhUDwKP12c1A==
+X-Gm-Gg: ASbGncubdgFF1VQHxOA/Mc1bOymyYq5Ejv9CytfS1c0WPB8nq+CuG/gK2w7iT4NQGif
+	O+V/4J46I8kp5HbwUiS/R9RfPcmlyDEjuAF6nhJxs2c4BQU2A29dvXjV8/KRRAa+YXFzS8QFkRn
+	hJU9zDJ3oujWjcz6/57xbZhVQKDN72jPxrRMij41UJYyn2
+X-Google-Smtp-Source: AGHT+IEwi+jGBSSdoJm9iL9oKLTvyrTQHOBeWUAEM9l7fKOqqBksvPOst1zV7M7DzNv8oipsKvDD/lmQ+H+HLHXKg+Q=
+X-Received: by 2002:a05:690c:61ca:b0:710:edf9:d940 with SMTP id
+ 00721157ae682-7164d5755b7mr87945397b3.36.1751545191877; Thu, 03 Jul 2025
+ 05:19:51 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <20250617164914.158091-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20250620043517.172705-1-lidong@vivo.com>
+In-Reply-To: <20250620043517.172705-1-lidong@vivo.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Thu, 3 Jul 2025 14:19:12 +0200
-X-Gm-Features: Ac12FXxJYgE2tX-oOlBR7QzPvk6TF-AjaS4HJVIbxSdXpqqJydqW899apydF_zo
-Message-ID: <CAPDyKFqWmqO=Lw9yfLKV+zrwegGe_oCk3h2SWxPaU+_s2XnQjg@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Document RZ/T2H and
- RZ/N2H support
-To: Prabhakar <prabhakar.csengg@gmail.com>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>, Rob Herring <robh@kernel.org>, 
-	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
-	Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, 
-	linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
-	Biju Das <biju.das.jz@bp.renesas.com>, 
-	Fabrizio Castro <fabrizio.castro.jz@renesas.com>, 
-	Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Date: Thu, 3 Jul 2025 14:19:15 +0200
+X-Gm-Features: Ac12FXzM1OH6jEp4Aj99iKPDBaVLgh5QaSjxOO1gOJ_img1HJBSw-vdI_UPPTnc
+Message-ID: <CAPDyKFp+w5UvpGKPtehqUrZHsAJ+tivLKtBcn8vJgOm1ZxWJrQ@mail.gmail.com>
+Subject: Re: [PATCH v1] mmc: Convert ternary operator to str_true_false() helper
+To: Li Dong <lidong@vivo.com>
+Cc: Aubin Constans <aubin.constans@microchip.com>, 
+	Nicolas Ferre <nicolas.ferre@microchip.com>, 
+	Alexandre Belloni <alexandre.belloni@bootlin.com>, Claudiu Beznea <claudiu.beznea@tuxon.dev>, 
+	"open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, 
+	"moderated list:ARM/Microchip (AT91) SoC support" <linux-arm-kernel@lists.infradead.org>, 
+	open list <linux-kernel@vger.kernel.org>, opensource.kernel@vivo.com, 
+	rongqianfeng@vivo.com
 Content-Type: text/plain; charset="UTF-8"
 
-On Tue, 17 Jun 2025 at 18:49, Prabhakar <prabhakar.csengg@gmail.com> wrote:
+On Fri, 20 Jun 2025 at 06:35, Li Dong <lidong@vivo.com> wrote:
 >
-> From: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Replace direct ternary condition check with existing helper function
+> str_true_false() to improve code readability and maintain consistency.
 >
-> Add SDHI bindings for the Renesas RZ/T2H (a.k.a R9A09G077) and RZ/N2H
-> (a.k.a R9A09G087) SoCs. Use `renesas,sdhi-r9a09g057` as a fallback since
-> the SD/MMC block on these SoCs is identical to the one on RZ/V2H(P),
-> allowing reuse of the existing driver without modifications.
->
-> Update the binding schema to reflect differences: unlike RZ/V2H(P),
-> RZ/T2H and RZ/N2H do not require the `resets` property and use only a
-> two clocks instead of four.
->
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Signed-off-by: Li Dong <lidong@vivo.com>
 
 Applied for next, thanks!
+
+Note that I am applying this since $subject patch takes care of *all*
+possible conversions (it just happens to one in this case) to
+str_true_false() for the mmc subsystem.
 
 Kind regards
 Uffe
 
 
 > ---
-> v1->v2:
-> - Added the high speed clock to the clocks list.
-> ---
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 85 ++++++++++++-------
->  1 file changed, 53 insertions(+), 32 deletions(-)
+>  drivers/mmc/host/atmel-mci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index 7563623876fc..ba15ccbda61a 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -72,6 +72,8 @@ properties:
->            - enum:
->                - renesas,sdhi-r9a09g047 # RZ/G3E
->                - renesas,sdhi-r9a09g056 # RZ/V2N
-> +              - renesas,sdhi-r9a09g077 # RZ/T2H
-> +              - renesas,sdhi-r9a09g087 # RZ/N2H
->            - const: renesas,sdhi-r9a09g057 # RZ/V2H(P)
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 0e0666c0bb6e..1f11626c8f47 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -38,6 +38,7 @@
+>  #include <asm/cacheflush.h>
+>  #include <asm/io.h>
+>  #include <linux/unaligned.h>
+> +#include <linux/string_choices.h>
 >
->    reg:
-> @@ -129,59 +131,78 @@ allOf:
->          compatible:
->            contains:
->              enum:
-> -              - renesas,sdhi-r9a09g057
-> -              - renesas,rzg2l-sdhi
-> +              - renesas,sdhi-r9a09g077
-> +              - renesas,sdhi-r9a09g087
->      then:
->        properties:
-> +        resets: false
->          clocks:
->            items:
-> -            - description: IMCLK, SDHI channel main clock1.
-> -            - description: CLK_HS, SDHI channel High speed clock which operates
-> -                           4 times that of SDHI channel main clock1.
-> -            - description: IMCLK2, SDHI channel main clock2. When this clock is
-> -                           turned off, external SD card detection cannot be
-> -                           detected.
-> -            - description: ACLK, SDHI channel bus clock.
-> +            - description: ACLK, IMCLK, SDHI channel bus and main clocks.
-> +            - description: CLK_HS, SDHI channel High speed clock.
->          clock-names:
->            items:
-> -            - const: core
-> -            - const: clkh
-> -            - const: cd
->              - const: aclk
-> -      required:
-> -        - clock-names
-> -        - resets
-> +            - const: clkh
->      else:
->        if:
->          properties:
->            compatible:
->              contains:
->                enum:
-> -                - renesas,rcar-gen2-sdhi
-> -                - renesas,rcar-gen3-sdhi
-> -                - renesas,rcar-gen4-sdhi
-> +                - renesas,sdhi-r9a09g057
-> +                - renesas,rzg2l-sdhi
->        then:
->          properties:
->            clocks:
-> -            minItems: 1
-> -            maxItems: 3
-> -          clock-names:
-> -            minItems: 1
-> -            uniqueItems: true
->              items:
-> -              - const: core
-> -              - enum: [ clkh, cd ]
-> -              - const: cd
-> -      else:
-> -        properties:
-> -          clocks:
-> -            minItems: 1
-> -            maxItems: 2
-> +              - description: IMCLK, SDHI channel main clock1.
-> +              - description: CLK_HS, SDHI channel High speed clock which operates
-> +                             4 times that of SDHI channel main clock1.
-> +              - description: IMCLK2, SDHI channel main clock2. When this clock is
-> +                             turned off, external SD card detection cannot be
-> +                             detected.
-> +              - description: ACLK, SDHI channel bus clock.
->            clock-names:
-> -            minItems: 1
->              items:
->                - const: core
-> +              - const: clkh
->                - const: cd
-> +              - const: aclk
-> +        required:
-> +          - clock-names
-> +          - resets
-> +      else:
-> +        if:
-> +          properties:
-> +            compatible:
-> +              contains:
-> +                enum:
-> +                  - renesas,rcar-gen2-sdhi
-> +                  - renesas,rcar-gen3-sdhi
-> +                  - renesas,rcar-gen4-sdhi
-> +        then:
-> +          properties:
-> +            clocks:
-> +              minItems: 1
-> +              maxItems: 3
-> +            clock-names:
-> +              minItems: 1
-> +              uniqueItems: true
-> +              items:
-> +                - const: core
-> +                - enum: [ clkh, cd ]
-> +                - const: cd
-> +        else:
-> +          properties:
-> +            clocks:
-> +              minItems: 1
-> +              maxItems: 2
-> +            clock-names:
-> +              minItems: 1
-> +              items:
-> +                - const: core
-> +                - const: cd
+>  #define ATMCI_MAX_NR_SLOTS     2
 >
->    - if:
->        properties:
+> @@ -2264,7 +2265,7 @@ static int atmci_init_slot(struct atmel_mci *host,
+>                 "slot[%u]: bus_width=%u, detect_pin=%d, "
+>                 "detect_is_active_high=%s, wp_pin=%d\n",
+>                 id, slot_data->bus_width, desc_to_gpio(slot_data->detect_pin),
+> -               !gpiod_is_active_low(slot_data->detect_pin) ? "true" : "false",
+> +               str_true_false(!gpiod_is_active_low(slot_data->detect_pin)),
+>                 desc_to_gpio(slot_data->wp_pin));
+>
+>         mmc->ops = &atmci_ops;
 > --
-> 2.49.0
+> 2.34.1
 >
