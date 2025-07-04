@@ -1,110 +1,159 @@
-Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9FFDB2EFD84
-	for <linux-mmc@vger.kernel.org>; Fri,  4 Jul 2025 10:44:31 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4A693272E7F
+	for <linux-mmc@vger.kernel.org>; Fri,  4 Jul 2025 11:16:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751625873; cv=none; b=CUnh0dNvDSsVPkYhbsc3ZzTG1WUgz9bGR7RF+wQrKcaZPFyJuzFpwnSPJY24Vs+wfrB9ERKpsxAp+Am2I+nL3+VUUNg5PyWIeLYJ8DVrNJnagr5eL1E7pd42oWUfyN7rcxyOR+rHNFSAPt9x3awFAkwwMuK/cg0FC5Kv+cHtYG8=
+	t=1751627772; cv=none; b=F5Lq5Q+S0A1sDj02GNcSh2sZXI5rUvPwglPHFZPdlAdn4ciNZoh+/MtAjuoUTDyrPnE9PtY+cRzFUe5iwnl/qSnA82HFkBdQuPuXeMbh+3jeIa59MOxDmux3pTQiiR2CTEmkvpIZ/B/QwILHW3ov/NU0Sk/9K7IutPMaIBkY3kk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751625873; c=relaxed/simple;
-	bh=5guiqVsVLnv/ZIr7+V15ooWEV8YcnXKuVyZTVBle8dU=;
+	s=arc-20240116; t=1751627772; c=relaxed/simple;
+	bh=b9rtoKDrBAYC3BaF1M9Ck1YA+omLHf3ebvKNPvZnx2s=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=eNRiVsmvf3yRuP1bP4WPjE8Bp50WZWQmdZxWa3GDWM4kSYC5b6TAbxzJu+0l9BE0duu4pqZgOIwHFjwyC+H5OgODv+Kvq9Xy4ndm/Jl/JqB77a/zBiDbZgt/FLWCV9Z5wFbMDxJDT6uqRhAPDMjWFCBoCUEl8WeaEFQn4DGJOYI=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=mwZ5on26; arc=none smtp.client-ip=209.85.128.172
+	 To:Cc:Content-Type; b=amSfvrd9yS8DmSba80LLpz2f+OBlI7L/j9hizvG7+y7Uwnwf2a7i1WBtrIYxVDPzFbai2QI+JeXKyK16bLkw65nm+dzLi9dSV7DxlQ39h+YUnGqNakMgOM8FIlGGCEVwday7bY3ZOJTZ8Bk7JUPwTuZkRHGGCPu661nCnii8ahg=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=tQyS3S4B; arc=none smtp.client-ip=209.85.219.175
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mwZ5on26"
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-710e344bbf9so6407577b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Jul 2025 03:44:31 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tQyS3S4B"
+Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e81cf6103a6so739037276.3
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Jul 2025 04:16:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751625870; x=1752230670; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=5guiqVsVLnv/ZIr7+V15ooWEV8YcnXKuVyZTVBle8dU=;
-        b=mwZ5on265YXR+SSXVTFAa0sNDQgeMENacIYBGXsL7pHxYtEqldFlh5PV+w6jloKjx2
-         bVYgeo6HHsLJ66vI/AbCrGCiGwtn/FSf1K1BKAPCEsQMlX2uS3o/arGJNRlMAYQ0pT+K
-         a4EOztisXlGhU35XCYlrZQWN9/uvSkrEv/9R8o5iUUwY08OWqg6GJ6zSZV8Ghwddv6pz
-         GaU712QvJJpdR5fetSqX6W7nAeLleeSzIRf55N9ctSvdkp/2b0gEAAejdBA6uZtgs8uq
-         8RTNSFvcmF/atUYG9br6T9OfF1oZYcPvzHwLSxcuyXc5CqEoBxXlBWL1Tuyp8e6slfqU
-         X2Fg==
+        d=linaro.org; s=google; t=1751627767; x=1752232567; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=PjpGYVa/Cr3/NCJD8CT9IY6HzXhXvTQMbsQZwOON6l4=;
+        b=tQyS3S4B2wbGP1Dqsu7JNrBtVdj91LQh2w8veoQ7h0MrGDi1p7vqMTB2KnEfYSxOYT
+         nCeOIdg0bzfoUS9fknPL6U/uxlkZoBZmwNkMV4zBDt1GmAfbMkwVeKutU2q2RNlrQDpR
+         6prf8vynMeEeFXAOcHn0YsENBARqw9mHcSL6Sq/8ElrEo3wIGrX7fqJWQ1wie3U8xryT
+         7IezF6IwbQ86ZUR+nRM3Q2oweyf2+uWHTZWLmUmL7uDSz65WecELfxdVUzs3c92fAZIL
+         AGmaOLE0mGwpaUqqqNHdyNAHU9oKyisiMgEfGXhUHqOvRVJrQrtdTvhr+8krET00XqJ5
+         CoMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751625870; x=1752230670;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=5guiqVsVLnv/ZIr7+V15ooWEV8YcnXKuVyZTVBle8dU=;
-        b=GlYdkZU/GrXpFeZvQwqI4VTy39V07Z8O8kMSSaWXX1YSaFpdyuULZDby8bGHWQD9c6
-         FKsLklQ3mZjWenm0G4eqLPnpafMCItI3YajKlt9e7heMAPKn7pVohaEKq0XDh6YaNKWz
-         ZOIWNhpF0DW7FJlXO9t9lyavZphUk95pi85xJPJA5nOdCRUNYiLoPL6wtrnhX5Fl8s7q
-         QvWzzju7o0/MxOtqZqoGWvhgI1ji3TALeKnzqcyYoBox5PiqfvpvAdnmJ+4Tfh4ga3qd
-         dkC3N/1fKGlV8xI2LV1GeEfdacfMvRwt2/kE9/+s3PZH4pGBO1HiIOV8NwUmer74MA9s
-         37FA==
-X-Forwarded-Encrypted: i=1; AJvYcCXYRRz88ZfYLzK+xaSRuq3FlRZDqFN3/+YRaptfSZqlGuV8DsLik9rW4D70k6n08VxCmk0RIPc/N3A=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yx0I9DaiXTjjeAmj+xAKQ3MZ2SxoNYBpk/TCZZUxUwhVgQhScix
-	D4Zyxxv6JcmfaRmcR+zjW+u2Ir3+w5QXixtkmeNcHNv2sYYuGXg3C6VDH1qHT1PafVHbPcfduar
-	KPE24NJmLqHKHPcWhpUhTbPlEVG7zZ0PqjEbs5aAjuw==
-X-Gm-Gg: ASbGnctC9nj1yqz0y8cevTAfpvPHe945TzpXwYpCZ/RqzJ3L+i9O8S9hPJNzmE0kiWv
-	hXABLpTXprnaQ1Nag8v43iywqJ3BbFauIVf82d/QU2P8A04bgzyYkUJQCFjBEsLAUW6pS+tYZ4l
-	784eda59OXFZBk8qBdcwhi7CEdmfxgf8lmWOpPY2vj1aMf
-X-Google-Smtp-Source: AGHT+IHxcc2Fxf3Ymhe5B77LuEeRBxhSWFvYLVsMhgLwf+RJJkmFP3Px1U7JlwlJL6aiE8sjF/I7Cpuheq/ounuXY9Y=
-X-Received: by 2002:a05:690c:640d:b0:70c:a57c:94a3 with SMTP id
- 00721157ae682-7166b6cd964mr16574447b3.19.1751625870644; Fri, 04 Jul 2025
- 03:44:30 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1751627767; x=1752232567;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=PjpGYVa/Cr3/NCJD8CT9IY6HzXhXvTQMbsQZwOON6l4=;
+        b=cp4gZHau2fEl+uHhxOR3/FDzr/duEtEoRjnFVF7ExG+sps860Jc5/3cZW08uxW714Q
+         F2oXf4KSHZzN9oikNvLDLnbXVrvpTL37NCYanT0gCHwR4qapd68DRYa1OcQ74ZYeWBGG
+         p9QsUOKtqSx57MNyjXVCJFbfXk/uIDSwLJ29WjZF9CWOHHXfec9Kf4BeyNxupgTHcaRV
+         WF7P5JOSWlq8Y4UXtJ3DhEmOzpgA9H5VIfuDaDuPaI5dJJcxgJgPzAwwbE4fmrPxgngq
+         XsN/wFxFE/PFmD+SBwNIDu+oBV6QwIwQjTMBv1x2RVqTnaJRFbqvQJcUSOURYjAmApwC
+         WP0g==
+X-Forwarded-Encrypted: i=1; AJvYcCUFhRNi3DltjL1UAAOhA3jzl1Iq1C4JiBFEokfoR7cFbrxa/g+sbCOAghPZ0FipOyt33m57E0qeGX8=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxHTCeBs/8iOqRWlouNIIwlVX1Zuz/pDJN09pKWne1KPOpvSZ4G
+	+41ybgkVLwyrkNl/AyEpiVzkWJgbVOZKMarFkdeHFaZ5Pdc7aUOgif0eBMMRN8XqWrMN6L9Ujim
+	lBpJxl++Im2x8i51jBlV3i4BSixbMYoH4X51esVkPXA==
+X-Gm-Gg: ASbGncvRNzGN0mc5L5EQHq+HvhqbPiWJn15lqmtoF2TkuSKWMu1ufd0atD4CvPvoUa0
+	VjGr4JcbbJi1X6U39H8etE5Yq9KLXzGF5IpBV+0m2AATgLwTfQ5dOA9ipwP61pArT8yEIxjezdU
+	juY0226hbf9oioeBb9AKRZqgbkTDPetXtfdrYV6Saiw/+z
+X-Google-Smtp-Source: AGHT+IHAW8UyCQ9W+pvHvcTvef9aFULLZGbhQe98R4X9+6EEdiQxhHHKyUMUuOYP0+BDeQPC3PK4UvgN4CdOsI4nxiQ=
+X-Received: by 2002:a05:690c:9c09:b0:70f:9fcd:2075 with SMTP id
+ 00721157ae682-71668c0e0ddmr26398687b3.3.1751627767124; Fri, 04 Jul 2025
+ 04:16:07 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250627025032.1192873-1-rex.chen_1@nxp.com> <20250627025032.1192873-3-rex.chen_1@nxp.com>
- <CAPDyKFrm+KE_XuzuVkLeykmwmRkbNaY8aerLgs45uSWex2SLfQ@mail.gmail.com> <DB9PR04MB9626F66BB0CC3539219D3B82FC42A@DB9PR04MB9626.eurprd04.prod.outlook.com>
-In-Reply-To: <DB9PR04MB9626F66BB0CC3539219D3B82FC42A@DB9PR04MB9626.eurprd04.prod.outlook.com>
+References: <20250703112708.1621607-1-claudiu.beznea.uj@bp.renesas.com>
+In-Reply-To: <20250703112708.1621607-1-claudiu.beznea.uj@bp.renesas.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 4 Jul 2025 12:43:54 +0200
-X-Gm-Features: Ac12FXzL9sGtjblIKfjQcfceCbnswuu_1FKcFADSJhfltP9gZQVUvblVdtrMARM
-Message-ID: <CAPDyKFoWvcsi+6ohd_Dr3CZd935+Sx2cSRRT9m88DrLyzip1jA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: mmc_spi: multiple block read remove read crc ack
-To: Rex Chen <rex.chen_1@nxp.com>
-Cc: "conor.dooley@microchip.com" <conor.dooley@microchip.com>, 
-	"bartosz.golaszewski@linaro.org" <bartosz.golaszewski@linaro.org>, 
-	"viro@zeniv.linux.org.uk" <viro@zeniv.linux.org.uk>, 
-	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "avri.altman@wdc.com" <avri.altman@wdc.com>, 
-	"shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, 
-	"adrian.hunter@intel.com" <adrian.hunter@intel.com>, 
-	"wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>
+Date: Fri, 4 Jul 2025 13:15:31 +0200
+X-Gm-Features: Ac12FXwfheYVCqCiLAFVR27m9ptp6dfE-AwljIFg4O16ch_FdabejHZIDOFh5ww
+Message-ID: <CAPDyKFoznqfdX7Dvu3VPa5Me10VHGphnRRHrU17w-fie7HrQ5g@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] PM: domains: Detach on device_unbind_cleanup()
+To: Claudiu <claudiu.beznea@tuxon.dev>, rafael@kernel.org
+Cc: linux@armlinux.org.uk, gregkh@linuxfoundation.org, 
+	david.m.ertman@intel.com, ira.weiny@intel.com, leon@kernel.org, 
+	dakr@kernel.org, len.brown@intel.com, pavel@kernel.org, andersson@kernel.org, 
+	mturquette@baylibre.com, sboyd@kernel.org, maarten.lankhorst@linux.intel.com, 
+	mripard@kernel.org, tzimmermann@suse.de, airlied@gmail.com, simona@ffwll.ch, 
+	wsa+renesas@sang-engineering.com, mathieu.poirier@linaro.org, 
+	vkoul@kernel.org, yung-chuan.liao@linux.intel.com, 
+	pierre-louis.bossart@linux.dev, broonie@kernel.org, robh@kernel.org, 
+	jirislaby@kernel.org, saravanak@google.com, jic23@kernel.org, 
+	dmitry.torokhov@gmail.com, linux-kernel@vger.kernel.org, 
+	linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
+	linux-sound@vger.kernel.org, linux-spi@vger.kernel.org, 
+	linux-serial@vger.kernel.org, bhelgaas@google.com, geert@linux-m68k.org, 
+	linux-iio@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	fabrizio.castro.jz@renesas.com, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 
-On Fri, 4 Jul 2025 at 12:26, Rex Chen <rex.chen_1@nxp.com> wrote:
+On Thu, 3 Jul 2025 at 13:27, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+>
+> From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+>
+> Hi,
+>
+> Series drops the dev_pm_domain_detach() from platform bus remove and
+> adds it in device_unbind_cleanup() to avoid runtime resumming the device
+> after it was detached from its PM domain.
+>
+> Please provide your feedback.
+>
+> Thank you,
+> Claudiu
+>
+> Changes in v5:
+> - added PD_FLAG_ATTACH_POWER_ON, PD_FLAG_DETACH_POWER_OFF;
+>   due to this a new patch was introduced
+>   "PM: domains: Add flags to specify power on attach/detach"
+>
+> Changes in v4:
+> - added a flag in dev_pm_info that is saved in dev_pm_domain_attach()
+>   and used in device_unbind_cleanup()
+>
+> Changes in v3:
+> - add devm_pm_domain_attach()
+>
+> Changes in v2:
+> - dropped the devres group open/close approach and use
+>   devm_pm_domain_attach()
+> - adjusted patch description to reflect the new approach
 >
 >
-> On Fri, 27 Jun 2025 at 04:50, Rex Chen <rex.chen_1@nxp.com> wrote:
-> >
-> > Multiple block read doesn't need to read crc ack, so remove it.
+> Claudiu Beznea (3):
+>   PM: domains: Add flags to specify power on attach/detach
+>   PM: domains: Detach on device_unbind_cleanup()
+>   driver core: platform: Drop dev_pm_domain_detach() call
 >
-> Why? Please elaborate.
-> -----From Rex Chen:
-> The origin implementation without my change, function mmc_spi_setup_data_=
-message builds data transfer sequence, transfer one block data sequence con=
-tains token, payload, crc, and 29 bytes scratch->status to wait crc ack fro=
-m sdio device side for block write, also 1 byte for block read, I don't kno=
-w why need this 1 byte transfer, and block read transfer failed if I add th=
-is 1 byte sequence.
-> I didn't find related description in specification about this 1 byte tran=
-sfer, maybe I miss it, if so, could you pls let me know the details?
+>  drivers/amba/bus.c                       |  4 ++--
+>  drivers/base/auxiliary.c                 |  2 +-
+>  drivers/base/dd.c                        |  2 ++
+>  drivers/base/platform.c                  |  9 +++------
+>  drivers/base/power/common.c              |  9 ++++++---
+>  drivers/clk/qcom/apcs-sdx55.c            |  2 +-
+>  drivers/gpu/drm/display/drm_dp_aux_bus.c |  2 +-
+>  drivers/i2c/i2c-core-base.c              |  2 +-
+>  drivers/mmc/core/sdio_bus.c              |  2 +-
+>  drivers/rpmsg/rpmsg_core.c               |  2 +-
+>  drivers/soundwire/bus_type.c             |  2 +-
+>  drivers/spi/spi.c                        |  2 +-
+>  drivers/tty/serdev/core.c                |  2 +-
+>  include/linux/pm.h                       |  1 +
+>  include/linux/pm_domain.h                | 10 ++++++++--
+>  15 files changed, 31 insertions(+), 22 deletions(-)
+>
+> --
+> 2.43.0
+>
 
-I don't know the details from the top of my head, sorry.
+The series looks good to me, please add:
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-I would have to go and read the spec to find out, but I don't have the
-time to do that currently. In other words, I will be relying on you
-and others in the community to help out with this. So, please
-re-submit your patches and include a proper commit message with the
-information, then we can take it from there.
+Rafael, do you intend to pick this via your tree?
 
-[...]
+Another note, the similar thing that is being done in patch3 from the
+platform bus, is needed for other buses too (at least the amba bus for
+sure). Claudiu, are you planning to do that as a step on top - or are
+you expecting others to help out?
 
 Kind regards
 Uffe
