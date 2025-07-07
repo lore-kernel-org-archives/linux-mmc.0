@@ -1,188 +1,150 @@
-Received: from relay8-d.mail.gandi.net (relay8-d.mail.gandi.net [217.70.183.201])
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 299A52E11AD;
-	Mon,  7 Jul 2025 15:24:54 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD67F262FF0;
+	Mon,  7 Jul 2025 18:43:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751901898; cv=none; b=uTokmFFlu2Yf5sbOJ74hHCuxC7Q8HehO8BK6ILZUZ38F7WUNZ9YUzA3JrkyNEHmi6zrkK45rFgL7nLd200EXsVEQ8wAqmyikWTP72fCSm9WHtP7AtvBdLiJDc9j6jCUYEIAuOx9AIlDblBXoCVqTEtSrltUL38XcwkfJ8G41BI4=
+	t=1751913812; cv=none; b=FE+1iLnT6ekWPO/MEBUcl766mMJmVnWSvPQ6at5tOpjK2FPSN+LU65xnlfeQcGvZOoaj5nGAoMvA1+nlfwCHBFnq5KKlA2elJm7iuvOHZTjc03cTPWKjhy9FVDPcE1xhjjvJnsoqIFiktu6Ru1T6Vo2NiO794rzao3bvL96/0Ew=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751901898; c=relaxed/simple;
-	bh=z56V3LYt6JflWbtJ6sLvEX0xeXlfbTMu3dFd7UNoQsM=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=p+MeWYzPy/UBrpVmuA6tiB9Uje5pMDZmiSsbBvXgD4QatTywYI4M+Xlvm27ZnADmzH8nYISMOvl40qyux6EdRcxfYg+r6sVp0Ma3KXWz7Kn1svg5yfU5dDjblV5DK3dLkeaYO25AwnAjs/AhU1fA/lLMVmyQR6cLwFwaylqMeQ8=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=dCgZXTtB; arc=none smtp.client-ip=217.70.183.201
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
+	s=arc-20240116; t=1751913812; c=relaxed/simple;
+	bh=hrM7TAUwUzWNU7f4k4yx1Gu9ZxX5m6dymI/e327xOKY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=UdH406kFvGLfVRdgv9sRdiXwFre76j8Cm1g9IwyPPjVSqlT1gM35Dxa62cG4UwQ6gjWUs9kJJuXwHVJ7Ch8+RYQANshLK/2aQYXGGEcBb7GidrjKeUfE1l3eX/c6C3wmPbyzcJa3pofG8yRVmUD+hcKrGcd6uWwJA0k9bQzhUvY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=I1Gc354h; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="dCgZXTtB"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id C3CF444461;
-	Mon,  7 Jul 2025 15:24:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-	t=1751901893;
-	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding:
-	 in-reply-to:in-reply-to:references:references;
-	bh=JEfmHIK+C+t2w8tfy05b4ClfFEIVcsPOdzDGg7LPXR0=;
-	b=dCgZXTtBYuMv7ARy6r+wg8KKXnIuNySF5eC6r4eBi/WmUy4319yHXNmUJO4TVWvOvxlP+8
-	6/OAGxiW6Z2ByL6MpS4x3vC7AHKjj3JWE+N64sdcoK1wMaFyLrdBU1iZ6Q8o4jsh6c6XIj
-	PEyuVkjlrxWcnsm0tsp9IToFmBfSft2WdMMP+UdMk+/FrO9ScNt363amZt40L5Z8lsRZA6
-	w0S4Q+zyXFyDuo2TLKfgfCcxHyEKN9/g0dHqo7ZV+f/o9EHOquMQ5ozViUsqcXJ9PxOuq8
-	PKCuN+40DupzZtai8lNzRmpP2yRquNQ6Qa8ZmwxVRCqWYi4MAqP1N5QT1jGeyg==
-From: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>
-To: Ulf Hansson <ulf.hansson@linaro.org>,
-	Adrian Hunter <adrian.hunter@intel.com>
-Cc: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>,
-	Tawfik Bayouk <tawfik.bayouk@mobileye.com>,
-	Gregory CLEMENT <gregory.clement@bootlin.com>,
-	"Thomas Petazzoni" <thomas.petazzoni@bootlin.com>
-Subject: [PATCH v2 1/4] mmc: core: add mmc_read_blocks to mmc_ops
-Date: Mon,  7 Jul 2025 17:24:33 +0200
-Message-ID: <346c422139b658b2ba6272f7ba7b07374008760f.1751898225.git.benoit.monin@bootlin.com>
-X-Mailer: git-send-email 2.50.0
-In-Reply-To: <cover.1751898225.git.benoit.monin@bootlin.com>
-References: <cover.1751898225.git.benoit.monin@bootlin.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="I1Gc354h"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 77161C4AF0F;
+	Mon,  7 Jul 2025 18:43:31 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1751913811;
+	bh=hrM7TAUwUzWNU7f4k4yx1Gu9ZxX5m6dymI/e327xOKY=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=I1Gc354hwbuJzz57xuHU0adjTwd//JV0gPzmskPDKzgFi0rUipml8X0O2V6LITrXo
+	 3E8TyhoiOVpRorL5Je7NJYQJm7wFgMsRyX73rzrAPpeRq5Y6mKZ/snvPp9NZnIQljo
+	 EJ/Yb7UdKN5WtGgio8YxdoU+yw6/C05cM08V0Q4zjByYzRZFUAg7rdN4loP5CZ0m7N
+	 DSAIL4wUpN9lWI2/2fezfjt8ic6poJ7CHum+6NsaPgJsidjfva1nIMP/bhQLou0fTs
+	 z74T2zsEVCgOebD+jix36p0L6MdL6vdi5pf9RYqMHBP7hnTRoskg4TuCI+hiEinqgi
+	 MQud3uX4AQx2g==
+Received: by mail-oo1-f54.google.com with SMTP id 006d021491bc7-61390809a36so956977eaf.1;
+        Mon, 07 Jul 2025 11:43:31 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUHutvs2AN81vZ6J6Q44DnFjKkFGsfTsMHcGCDetQlgfAE+a3iARkRtgaHwExh0oQKXOXqInpwmGaIa@vger.kernel.org, AJvYcCUo0ZaWXpF053kafWae7MwisDyQ0QlbMGyIEojlRqTWsH/zzJUeuZlDZMDfrevYJcfdo2TjWKJ5CQbL@vger.kernel.org, AJvYcCUwOqRHYxAO9vvknUtTXYhqSAWbZaurZJgn+NEYh+zHE2kW38f5gR3qywEvit0301JGgO9OPe5ce/AEDIjF05AVfA==@vger.kernel.org, AJvYcCV3+1Z22IW6zQmqMbl8WjcjY4zpbRxmlnnsWu0AMqaN4wbXtvSPjJJzFnxyPExWJZytA2r8tkWUJepuONNk@vger.kernel.org, AJvYcCV8JgaoCGEwfMiHrZI9nSaZ6n60BzWuf0DRBxy6tTFSkW7l11jFrnR34rCf/f1Sm72JCA8Y4t6ut8nG@vger.kernel.org, AJvYcCVAjpxXZce9ThTnKCtLFdNDBQJ6dFkbn4E1lYjAjfDgOhxZnbF/BdocT3/7/Xx72aeJrrLnR8FzoqmWAIJ6@vger.kernel.org, AJvYcCVgSUnObPlYLwb1yKcxjJ6OtcDsOYjJv8GIJNvHCYWyU9NYVqL0+ibanlbx80WuXgNgecQz/KhWc8qq@vger.kernel.org, AJvYcCVwzyL4hvT+Ci/bldHrMMZ9+H09l9AT17O5r31rmOXV15IztHMs8HrgsQVTID8q/ieBVikSVCnE2l55gEOZSN9dlYo=@vger.kernel.org, AJvYcCWlv+YsG3nt98nHkqFtTTWakByeRqg32/XeY6IA7Pu5cuU4C6uGVF3b4zLWtJtp74SU7eXQcPIOBuVSfiE=@vger.kernel.org, AJvYcCWtB2OrmkOSbK0Vu1CHes+E3pkuD5poesbhjL3HEtVYLVtu4+yn+eOawr5CY21GsbnY2mjbZM5xGzBb@vger.kernel.org, AJvYcCWxW6EtxI1dpYAYx59v5ff2MrnQUsU3u2e+GCDu/FYhc1sWB3lIXnJC2r5lNGqTCeFGSvrgYrVIJkg=@vger.kernel.org, AJvYcCXfL4M0d21XFlYxz9O0xXWGcCpQVj0YtD7X5IBJ7DcmnSDnjD7zrrcwBqRJgWJ992l2yxT/RJNTZmcuOb6i@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx4hAwDnHt3HYo7wiMB+zRmQf8Sg4F2mN7dks+B1034Qjsfrx5G
+	1LZ/VxRskxHsyYVoNLwEdExgiATxzrjleqOwKFoUxo6WcMLXhIuIXgLVmlYYohmWqlJFUla1Smw
+	lZT7gDMfj47W4I/CtgAVjjATrj+5zIW0=
+X-Google-Smtp-Source: AGHT+IGWFo0UcD4MojnRdJcVhqk/giYu4pxqlIjmLkAJEnDd4MWXJ9qI/qzV8bVwGlXxOpEoErWIuer/la1NZ2vHba8=
+X-Received: by 2002:a05:6820:c8d:b0:611:e30a:f9c7 with SMTP id
+ 006d021491bc7-613c0292e6amr496213eaf.7.1751913810559; Mon, 07 Jul 2025
+ 11:43:30 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-GND-State: clean
-X-GND-Score: -100
-X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdefvdduhecutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffvvefufffkofgjfhggtgfgsehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvdfffeeiieejkeevuefhvdeggeefudffueeuffehffehffevjedugfdtueegtddvnecukfhppedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvhedphhgvlhhopehfrhgrmhgvfihorhhkpdhmrghilhhfrhhomhepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhnsggprhgtphhtthhopeelpdhrtghpthhtohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehlihhnuhigq
- dhmmhgtsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohepvhhlrgguihhmihhrrdhkohhnughrrghtihgvvhesmhhosghilhgvhigvrdgtohhmpdhrtghpthhtohepthgrfihfihhkrdgsrgihohhukhesmhhosghilhgvhigvrdgtohhmpdhrtghpthhtohepghhrvghgohhrhidrtghlvghmvghnthessghoohhtlhhinhdrtghomh
-X-GND-Sasl: benoit.monin@bootlin.com
+References: <20250703112708.1621607-1-claudiu.beznea.uj@bp.renesas.com>
+ <CAPDyKFoznqfdX7Dvu3VPa5Me10VHGphnRRHrU17w-fie7HrQ5g@mail.gmail.com> <CAJZ5v0gH9ZAK9br58KB0VEtG+4VdwO7vEKtrKbpcYOKnZPf7bg@mail.gmail.com>
+In-Reply-To: <CAJZ5v0gH9ZAK9br58KB0VEtG+4VdwO7vEKtrKbpcYOKnZPf7bg@mail.gmail.com>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Date: Mon, 7 Jul 2025 20:43:18 +0200
+X-Gmail-Original-Message-ID: <CAJZ5v0gZK_JYgXYdbJ9pOBgrMO9sBa=VWP8HGOVV4C2mCOSSWg@mail.gmail.com>
+X-Gm-Features: Ac12FXx21d9hRiF0Pqe_4V96M5MioxLeGCoj8OSAh6lGgwSlfReCuBO8e1tghsQ
+Message-ID: <CAJZ5v0gZK_JYgXYdbJ9pOBgrMO9sBa=VWP8HGOVV4C2mCOSSWg@mail.gmail.com>
+Subject: Re: [PATCH v5 0/3] PM: domains: Detach on device_unbind_cleanup()
+To: Ulf Hansson <ulf.hansson@linaro.org>, Claudiu <claudiu.beznea@tuxon.dev>
+Cc: linux@armlinux.org.uk, gregkh@linuxfoundation.org, 
+	david.m.ertman@intel.com, ira.weiny@intel.com, leon@kernel.org, 
+	dakr@kernel.org, len.brown@intel.com, pavel@kernel.org, andersson@kernel.org, 
+	mturquette@baylibre.com, sboyd@kernel.org, maarten.lankhorst@linux.intel.com, 
+	mripard@kernel.org, tzimmermann@suse.de, airlied@gmail.com, simona@ffwll.ch, 
+	wsa+renesas@sang-engineering.com, mathieu.poirier@linaro.org, 
+	vkoul@kernel.org, yung-chuan.liao@linux.intel.com, 
+	pierre-louis.bossart@linux.dev, broonie@kernel.org, robh@kernel.org, 
+	jirislaby@kernel.org, saravanak@google.com, jic23@kernel.org, 
+	dmitry.torokhov@gmail.com, linux-kernel@vger.kernel.org, 
+	linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org, 
+	linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, linux-remoteproc@vger.kernel.org, 
+	linux-sound@vger.kernel.org, linux-spi@vger.kernel.org, 
+	linux-serial@vger.kernel.org, bhelgaas@google.com, geert@linux-m68k.org, 
+	linux-iio@vger.kernel.org, linux-renesas-soc@vger.kernel.org, 
+	fabrizio.castro.jz@renesas.com, 
+	Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Add a generic function to read some blocks of data from the MMC, to be
-used by drivers as part of their tuning.
+On Fri, Jul 4, 2025 at 9:53=E2=80=AFPM Rafael J. Wysocki <rafael@kernel.org=
+> wrote:
+>
+> On Fri, Jul 4, 2025 at 1:16=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.or=
+g> wrote:
+> >
+> > On Thu, 3 Jul 2025 at 13:27, Claudiu <claudiu.beznea@tuxon.dev> wrote:
+> > >
+> > > From: Claudiu Beznea <claudiu.beznea.uj@bp.renesas.com>
+> > >
+> > > Hi,
+> > >
+> > > Series drops the dev_pm_domain_detach() from platform bus remove and
+> > > adds it in device_unbind_cleanup() to avoid runtime resumming the dev=
+ice
+> > > after it was detached from its PM domain.
+> > >
+> > > Please provide your feedback.
+> > >
+> > > Thank you,
+> > > Claudiu
+> > >
+> > > Changes in v5:
+> > > - added PD_FLAG_ATTACH_POWER_ON, PD_FLAG_DETACH_POWER_OFF;
+> > >   due to this a new patch was introduced
+> > >   "PM: domains: Add flags to specify power on attach/detach"
+> > >
+> > > Changes in v4:
+> > > - added a flag in dev_pm_info that is saved in dev_pm_domain_attach()
+> > >   and used in device_unbind_cleanup()
+> > >
+> > > Changes in v3:
+> > > - add devm_pm_domain_attach()
+> > >
+> > > Changes in v2:
+> > > - dropped the devres group open/close approach and use
+> > >   devm_pm_domain_attach()
+> > > - adjusted patch description to reflect the new approach
+> > >
+> > >
+> > > Claudiu Beznea (3):
+> > >   PM: domains: Add flags to specify power on attach/detach
+> > >   PM: domains: Detach on device_unbind_cleanup()
+> > >   driver core: platform: Drop dev_pm_domain_detach() call
+> > >
+> > >  drivers/amba/bus.c                       |  4 ++--
+> > >  drivers/base/auxiliary.c                 |  2 +-
+> > >  drivers/base/dd.c                        |  2 ++
+> > >  drivers/base/platform.c                  |  9 +++------
+> > >  drivers/base/power/common.c              |  9 ++++++---
+> > >  drivers/clk/qcom/apcs-sdx55.c            |  2 +-
+> > >  drivers/gpu/drm/display/drm_dp_aux_bus.c |  2 +-
+> > >  drivers/i2c/i2c-core-base.c              |  2 +-
+> > >  drivers/mmc/core/sdio_bus.c              |  2 +-
+> > >  drivers/rpmsg/rpmsg_core.c               |  2 +-
+> > >  drivers/soundwire/bus_type.c             |  2 +-
+> > >  drivers/spi/spi.c                        |  2 +-
+> > >  drivers/tty/serdev/core.c                |  2 +-
+> > >  include/linux/pm.h                       |  1 +
+> > >  include/linux/pm_domain.h                | 10 ++++++++--
+> > >  15 files changed, 31 insertions(+), 22 deletions(-)
+> > >
+> > > --
+> > > 2.43.0
+> > >
+> >
+> > The series looks good to me, please add:
+> > Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > Rafael, do you intend to pick this via your tree?
+>
+> I do in general, but I haven't looked at this version yet.  I'll get
+> to it early next week.
 
-Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
----
- drivers/mmc/core/card.h    | 10 ++++++
- drivers/mmc/core/mmc_ops.c | 69 ++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h   |  3 ++
- 3 files changed, 82 insertions(+)
-
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 9cbdd240c3a7d..93fd502c1f5fc 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -11,6 +11,7 @@
- #define _MMC_CORE_CARD_H
- 
- #include <linux/mmc/card.h>
-+#include <linux/mmc/mmc.h>
- 
- #define mmc_card_name(c)	((c)->cid.prod_name)
- #define mmc_card_id(c)		(dev_name(&(c)->dev))
-@@ -300,4 +301,13 @@ static inline int mmc_card_no_uhs_ddr50_tuning(const struct mmc_card *c)
- 	return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
- }
- 
-+static inline bool mmc_card_can_cmd23(struct mmc_card *card)
-+{
-+	return ((mmc_card_mmc(card) &&
-+		 card->csd.mmca_vsn >= CSD_SPEC_VER_3) ||
-+		(mmc_card_sd(card) && !mmc_card_ult_capacity(card) &&
-+		 card->scr.cmds & SD_SCR_CMD23_SUPPORT)) &&
-+		!(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
-+}
-+
- #endif
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 66283825513cb..848d8aa3ff2b5 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -1077,3 +1077,72 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
- 	return err;
- }
- EXPORT_SYMBOL_GPL(mmc_sanitize);
-+
-+/**
-+ * mmc_read_blocks() - read data blocks from the mmc
-+ * @card: mmc card to read from, can be NULL
-+ * @host: mmc host doing the read
-+ * @blksz: data block size
-+ * @blocks: number of blocks to read
-+ * @blk_addr: first block address
-+ * @buf: output buffer
-+ * @len: size of the buffer
-+ *
-+ * Read one or more blocks of data from the mmc. This is a low-level helper for
-+ * tuning operation. If card is NULL, it is assumed that CMD23 can be used for
-+ * multi-block read.
-+ *
-+ * Return: 0 in case of success, otherwise -EIO
-+ */
-+int mmc_read_blocks(struct mmc_card *card, struct mmc_host *host,
-+		    unsigned int blksz, unsigned int blocks,
-+		    unsigned int blk_addr, void *buf, unsigned int len)
-+{
-+	struct mmc_request mrq = {};
-+	struct mmc_command sbc = {};
-+	struct mmc_command cmd = {};
-+	struct mmc_command stop = {};
-+	struct mmc_data data = {};
-+	struct scatterlist sg;
-+
-+	if (blocks > 1) {
-+		if (mmc_host_can_cmd23(host) &&
-+		    (!card || mmc_card_can_cmd23(card))) {
-+			mrq.sbc = &sbc;
-+			sbc.opcode = MMC_SET_BLOCK_COUNT;
-+			sbc.arg = blocks;
-+			sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+		}
-+		cmd.opcode = MMC_READ_MULTIPLE_BLOCK;
-+		mrq.stop = &stop;
-+		stop.opcode = MMC_STOP_TRANSMISSION;
-+		stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+	} else {
-+		cmd.opcode = MMC_READ_SINGLE_BLOCK;
-+	}
-+
-+	mrq.cmd = &cmd;
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	mrq.data = &data;
-+	data.flags = MMC_DATA_READ;
-+	data.blksz = blksz;
-+	data.blocks = blocks;
-+	data.blk_addr = blk_addr;
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+	if (card)
-+		mmc_set_data_timeout(&data, card);
-+	else
-+		data.timeout_ns = 1000000000;
-+
-+	sg_init_one(&sg, buf, len);
-+
-+	mmc_wait_for_req(host, &mrq);
-+
-+	if (sbc.error || cmd.error || data.error)
-+		return -EIO;
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(mmc_read_blocks);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 68f09a955a902..72196817a6f0f 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -743,5 +743,8 @@ int mmc_send_status(struct mmc_card *card, u32 *status);
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-+int mmc_read_blocks(struct mmc_card *card, struct mmc_host *host,
-+		    unsigned int blksz, unsigned int blocks,
-+		    unsigned int blk_addr, void *buf, unsigned int len);
- 
- #endif /* LINUX_MMC_HOST_H */
+Now applied as 6.17 material, thanks!
