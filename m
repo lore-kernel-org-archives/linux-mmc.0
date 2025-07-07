@@ -1,35 +1,35 @@
 Received: from relay8-d.mail.gandi.net (relay8-d.mail.gandi.net [217.70.183.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2992F28A1D6;
-	Mon,  7 Jul 2025 15:24:54 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B7C472E2664;
+	Mon,  7 Jul 2025 15:24:55 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751901897; cv=none; b=UZAShv47zcnchmMx20GrlwOR0El97oEIzJv7fZl8jz5XNd+IWIIDeq9rVWEvmyhRQt3YcF1oVmgQCYxnyLTatGG+9MjA3A7fQM9zWyO3EYoeWVO//2dtEXs6tz9IzpsLI/DH6qACsDepnEfjwZb0OjmMWWm6fHLNqVNtIsAmSAw=
+	t=1751901897; cv=none; b=RW+4mCZhqAdR0mpT6NRRjADgPcp35Cgumuh98pxcyqJn/JyhJRjfZK6IPBs9aeSbe2TKnBqKmFr3tyfZd4iAA0AhXlUuZT6kpJSEO0dL+URlpJY9px2gS/H/DQ6Sdbnv0YFO+I1dun9hnrT5C94ufdINC1+fuoaNl1dkdMko3Bg=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1751901897; c=relaxed/simple;
-	bh=qYb9y//QmCZa2tCqRmFc+CD/t63Lr9ZkatkFc6Ffv+s=;
+	bh=gIQsxmwoSHoTmKUAUr8Mq90worR0CkHb2rdYBEvdFgo=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=N0zdjuzMJSXigPW6iRnL6PQ5kyYEFu5HTVvMikiPe4hMhbhIL62PC8+ofRlsBqqBejTo1JUM0cgJcNq2r1nKcTlIKMOA60oBUKmA/wmke62I938KaLbpMQmvhclPQPPwyvpcWFsH6a6cEg54eTCMYwQyHRVbhFMEz/534gKqQIA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=jeqUfG5Z; arc=none smtp.client-ip=217.70.183.201
+	 MIME-Version:Content-Type; b=UjWE4bCtWcGFX9FlRagPvADu2vMNz0qEtkijCywEcPVxA77Zwyyv3xIhk7FOZY4rwbrMNU+kJKrWm05fhS0RQkD6szw1XptJNTf8QfHEJp8GnlD7hdfRWlMO27+Mu9xhP9YXcrwH8G2p7V63UiA5Jt8yl7MQRDj7OWHCqd+4G1A=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=EY1uX1RJ; arc=none smtp.client-ip=217.70.183.201
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="jeqUfG5Z"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 404754446E;
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="EY1uX1RJ"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id AF54042FF4;
 	Mon,  7 Jul 2025 15:24:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-	t=1751901893;
+	t=1751901894;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
 	 content-transfer-encoding:content-transfer-encoding:
 	 in-reply-to:in-reply-to:references:references;
-	bh=A57nz6RK/Z+8UqMlpppM+ROv8Kwa5LbCTBc+BSbupIU=;
-	b=jeqUfG5ZyzKqzRZy9gyXRsNm4w+m+Sn5ZxHn/qBcjRXAhWF/9OQleZmUa+MWRUEpVjeC/5
-	2z7Y7qLeOUwGivFMLdzhtzyyFtCi9HDdy7SihO5Q7fV4vSkgAhKLlCqMb6Z4CsW/QGvhWV
-	1NqaY4GzK+hWvXlYIPMd6GWcfdawQrGIU9eTlbHg5SETQxHQG3BdARSy4uHqj3L2SIbEFF
-	Su50tRMGV36Sh8au9kuBvguWPXbkgJjS2puv4rYVz6bAYtWbIYLCBmxGRlgnvzgMaBbonY
-	OrVesH/f2ypoIijMm1F7dCZ2CePbsbelDP5a7tunZkRoCO70VMs4bZEzbgzhPA==
+	bh=ouoUClIh/gkR2NWqCpyq8tEKwC8nAl5LCDvLuhVBOEI=;
+	b=EY1uX1RJBJnEmI+zRwYa7tTMkYEnY37nnKQJ0s+3laLzeZN2paar7st+A4Tnu9q+lDdZQt
+	xAW65/+Oc+o2ZUHLudaUDrRjh0Q7zUCdyHRE28O1PEcOqbrkzhgAexmScsOOdV7Cz66P5N
+	J2zCTD2wV2Rl5lldKnb7u4X5IYUdFNuCH+v+rtwjaK0vXVAmNloWeKcrznpjtDGnewcDo9
+	0IE3XXg7LghzjXJEMZJOgHagPnMV0oOAwdSUlp2S6ZZpOixUKE9JvBez9s8XeJsVhvNY/L
+	lP/OJ5ex6cKlcHJfdAI26An48JIW5TA1VE8WUmoD+aYDy0oLOelPe/9+Ocekkg==
 From: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>,
 	Adrian Hunter <adrian.hunter@intel.com>
@@ -40,9 +40,9 @@ Cc: =?UTF-8?q?Beno=C3=AEt=20Monin?= <benoit.monin@bootlin.com>,
 	Tawfik Bayouk <tawfik.bayouk@mobileye.com>,
 	Gregory CLEMENT <gregory.clement@bootlin.com>,
 	"Thomas Petazzoni" <thomas.petazzoni@bootlin.com>
-Subject: [PATCH v2 2/4] mmc: sdhci-cadence: implement multi-block read gap tuning
-Date: Mon,  7 Jul 2025 17:24:34 +0200
-Message-ID: <3dfd4773123ca92a4adc935100788129e1970449.1751898225.git.benoit.monin@bootlin.com>
+Subject: [PATCH v2 3/4] mmc: mmc_test: use mmc_card_can_cmd23
+Date: Mon,  7 Jul 2025 17:24:35 +0200
+Message-ID: <a22054a674e895625ba84e64175e0892217a12e2.1751898225.git.benoit.monin@bootlin.com>
 X-Mailer: git-send-email 2.50.0
 In-Reply-To: <cover.1751898225.git.benoit.monin@bootlin.com>
 References: <cover.1751898225.git.benoit.monin@bootlin.com>
@@ -56,129 +56,40 @@ Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-GND-State: clean
 X-GND-Score: -100
-X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdefvdduhecutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffvvefufffkofgjfhggtgfgsehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvdfffeeiieejkeevuefhvdeggeefudffueeuffehffehffevjedugfdtueegtddvnecukfhppedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvhedphhgvlhhopehfrhgrmhgvfihorhhkpdhmrghilhhfrhhomhepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhnsggprhgtphhtthhopeelpdhrtghpthhtohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehlihhnuhigq
+X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdefvdduhecutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffvvefufffkofgjfhggtgfgsehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvdfffeeiieejkeevuefhvdeggeefudffueeuffehffehffevjedugfdtueegtddvnecukfhppedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehnecuvehluhhsthgvrhfuihiivgepvdenucfrrghrrghmpehinhgvthepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvhedphhgvlhhopehfrhgrmhgvfihorhhkpdhmrghilhhfrhhomhepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhnsggprhgtphhtthhopeelpdhrtghpthhtohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehlihhnuhigq
  dhmmhgtsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohepvhhlrgguihhmihhrrdhkohhnughrrghtihgvvhesmhhosghilhgvhigvrdgtohhmpdhrtghpthhtohepthgrfihfihhkrdgsrgihohhukhesmhhosghilhgvhigvrdgtohhmpdhrtghpthhtohepghhrvghgohhrhidrtghlvghmvghnthessghoohhtlhhinhdrtghomh
 X-GND-Sasl: benoit.monin@bootlin.com
 
-The controller suspends the clock between blocks when reading from the
-MMC as part of its flow-control, called read block gap. At higher clock
-speed and with IO delay between the controller and the MMC, this clock
-pause can happen too late, during the read of the next block and
-trigger a read error.
-
-To prevent this, the delay can be programmed for each mode via the pair
-of registers HRS37/38. This delay is obtained during tuning, by trying
-a multi-block read and increasing the delay until the read succeeds.
-
-For now, the tuning is only done in HS200, as the read error has only
-been observed at that speed.
+Use the helper instead of using a local implementation.
 
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- drivers/mmc/host/sdhci-cadence.c | 72 +++++++++++++++++++++++++++++++-
- 1 file changed, 71 insertions(+), 1 deletion(-)
+ drivers/mmc/core/mmc_test.c | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 2d823e158c598..2199100f3d4a7 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -36,6 +36,24 @@
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400	0x5
- #define   SDHCI_CDNS_HRS06_MODE_MMC_HS400ES	0x6
- 
-+/* Read block gap */
-+#define SDHCI_CDNS_HRS37		0x94	/* interface mode select */
-+#define   SDHCI_CDNS_HRS37_MODE_DS		0x0
-+#define   SDHCI_CDNS_HRS37_MODE_HS		0x1
-+#define   SDHCI_CDNS_HRS37_MODE_UDS_SDR12	0x8
-+#define   SDHCI_CDNS_HRS37_MODE_UDS_SDR25	0x9
-+#define   SDHCI_CDNS_HRS37_MODE_UDS_SDR50	0xa
-+#define   SDHCI_CDNS_HRS37_MODE_UDS_SDR104	0xb
-+#define   SDHCI_CDNS_HRS37_MODE_UDS_DDR50	0xc
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_LEGACY	0x20
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_SDR		0x21
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_DDR		0x22
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_HS200	0x23
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_HS400	0x24
-+#define   SDHCI_CDNS_HRS37_MODE_MMC_HS400ES	0x25
-+#define SDHCI_CDNS_HRS38		0x98	/* Read block gap coefficient */
-+#define   SDHCI_CDNS_HRS38_BLKGAP_MAX		0xf
-+
- /* SRS - Slot Register Set (SDHCI-compatible) */
- #define SDHCI_CDNS_SRS_BASE		0x200
- 
-@@ -251,6 +269,52 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
- 	return 0;
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 80e5d87a5e50b..58413af22517b 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -180,20 +180,13 @@ static int mmc_test_set_blksize(struct mmc_test_card *test, unsigned size)
+ 	return mmc_set_blocklen(test->card, size);
  }
  
-+/**
-+ * sdhci_cdns_tune_blkgap() - tune multi-block read gap
-+ * @mmc: MMC host
-+ *
-+ * Tune delay used in multi block read. To do so,
-+ * try sending multi-block read command with incremented gap, unless
-+ * it succeeds.
-+ *
-+ * Return: error code
-+ */
-+static int sdhci_cdns_tune_blkgap(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_cdns_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	void __iomem *hrs37_reg = priv->hrs_addr + SDHCI_CDNS_HRS37;
-+	void __iomem *hrs38_reg = priv->hrs_addr + SDHCI_CDNS_HRS38;
-+	int ret;
-+	u32 gap;
-+	u32 hrs37_mode;
-+	void *buf;
-+
-+	switch (host->timing) {
-+	case MMC_TIMING_MMC_HS200:
-+		hrs37_mode = SDHCI_CDNS_HRS37_MODE_MMC_HS200;
-+		break;
-+	default:
-+		return 0; /* no tuning in this mode */
-+	}
-+
-+	writel(hrs37_mode, hrs37_reg);
-+
-+	buf = kmalloc(512 * 32, GFP_KERNEL);
-+	for (gap = 0; gap <= SDHCI_CDNS_HRS38_BLKGAP_MAX; gap++) {
-+		writel(gap, hrs38_reg);
-+		ret = mmc_read_blocks(NULL, mmc, 512, 32, 0, buf, 512 * 32);
-+		if (ret == 0)
-+			break;
-+	}
-+	kfree(buf);
-+
-+	dev_dbg(mmc_dev(mmc), "read block gap tune %s, gap %d\n",
-+		ret == 0 ? "OK" : "failed", gap);
-+	return ret;
-+}
-+
- /*
-  * In SD mode, software must not use the hardware tuning and instead perform
-  * an almost identical procedure to eMMC.
-@@ -261,6 +325,7 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
- 	int max_streak = 0;
- 	int end_of_streak = 0;
- 	int i;
-+	int ret;
+-static bool mmc_test_card_cmd23(struct mmc_card *card)
+-{
+-	return mmc_card_mmc(card) ||
+-	       (mmc_card_sd(card) && card->scr.cmds & SD_SCR_CMD23_SUPPORT);
+-}
+-
+ static void mmc_test_prepare_sbc(struct mmc_test_card *test,
+ 				 struct mmc_request *mrq, unsigned int blocks)
+ {
+ 	struct mmc_card *card = test->card;
  
- 	/*
- 	 * Do not execute tuning for UHS_SDR50 or UHS_DDR50.
-@@ -288,7 +353,12 @@ static int sdhci_cdns_execute_tuning(struct sdhci_host *host, u32 opcode)
- 		return -EIO;
+ 	if (!mrq->sbc || !mmc_host_can_cmd23(card->host) ||
+-	    !mmc_test_card_cmd23(card) || !mmc_op_multi(mrq->cmd->opcode) ||
+-	    (card->quirks & MMC_QUIRK_BLK_NO_CMD23)) {
++	    !mmc_card_can_cmd23(card) || !mmc_op_multi(mrq->cmd->opcode)) {
+ 		mrq->sbc = NULL;
+ 		return;
  	}
- 
--	return sdhci_cdns_set_tune_val(host, end_of_streak - max_streak / 2);
-+	ret = sdhci_cdns_set_tune_val(host, end_of_streak - max_streak / 2);
-+
-+	if (!ret)
-+		ret = sdhci_cdns_tune_blkgap(host->mmc);
-+
-+	return ret;
- }
- 
- static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
