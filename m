@@ -1,139 +1,192 @@
-Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com [209.85.128.170])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from esa.hc6817-7.iphmx.com (esa.hc6817-7.iphmx.com [216.71.154.88])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9688A2E0927
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Jul 2025 15:14:36 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.170
-ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751987678; cv=none; b=IbFhe8LmKBcy5HHJH5DOSJXNQy6oXok3aj70+padpAgwYEzNO5lzwoFTnUT9Wkg9K+Xlc8hoaKwpGZt5/QCU6RdNPDAioch3yI9bJrHOyISvcgi4K4zoW0Eyh9B1Up4YG3aw5UxdINeC8zczBb+0saMqYMN50sGO1sHSnI5+Vxw=
-ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751987678; c=relaxed/simple;
-	bh=XD+ajlWQHE+HxXuJVKxnMKX/D7lXuezMqrzi6l7iWv8=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=S7Tr7nb1JY9DabT+8AZLroXLBRupTEfXtf94YcuhwZrjct8iR8YUHGtg4lJbIdoOkX12XyakO0uvVmhLx/IU9L836dHPjLf5A9gQ+QzJx/tY6QtR4EgZacpF7/jVEa1MKXlNLNfgp0Fn8kMGEFq+o2pLjawlvmo85w4d6vUlEek=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=e4PZWCrx; arc=none smtp.client-ip=209.85.128.170
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BAD312E0405
+	for <linux-mmc@vger.kernel.org>; Tue,  8 Jul 2025 15:28:52 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=fail smtp.client-ip=216.71.154.88
+ARC-Seal:i=2; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
+	t=1751988534; cv=fail; b=XRwSrCd0CnTT5p43nb3YeTkIJdmRrnnqMZWRv86Fi6uYNqk7jcsowkcJ9WJ1cPs28ZLwDUabfCsbL4yVqWWB/76OhngL5zp0DIekI+QGYpHnqqp+TFXX4FpSkrG3RgRMKbJu/lUkWvRlhe8Nnvqq39v0ixUG0x5Po1UeASRoZ6c=
+ARC-Message-Signature:i=2; a=rsa-sha256; d=subspace.kernel.org;
+	s=arc-20240116; t=1751988534; c=relaxed/simple;
+	bh=GwYgPM1IA+toPY3z22SMpS9/prnxSbcRxUD6lAWyi24=;
+	h=From:To:CC:Subject:Date:Message-ID:References:In-Reply-To:
+	 Content-Type:MIME-Version; b=Qgsmt8WpS7+TeSwRa2WyvFZN1lzXeuyTfWjl7jbmtCcwyKFdAUHa992NbFD3mAcs25OcckgmNnZFLi0+xYisA6V+RDghdbbKgOk4mDjEP/W5Coth5W56iviRsnsA3tc1wtBkVoI8u1D1RF9zCHY0wUVzHLrH9B6nwmkenKjqeS4=
+ARC-Authentication-Results:i=2; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com; spf=pass smtp.mailfrom=sandisk.com; dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b=pBHyyE3L; arc=fail smtp.client-ip=216.71.154.88
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=sandisk.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=sandisk.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="e4PZWCrx"
-Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-7115e32802bso30708297b3.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jul 2025 08:14:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1751987675; x=1752592475; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6MHv0o5tTzfPie41UtU7o14Wz6rrFQd68dfor33PjXA=;
-        b=e4PZWCrxZjpUzSsp6HwHnzzgkOBAWFFt5YJ53A06Xk8B78yqwsE5AecokmYGcclPvy
-         nf7Byq1/yo79eTL7j80m8XFpI0CYF3o3QkVk3z+A6HJBrt5GaDpPPFPG2ZQPtrVj5JS/
-         2Za1XkLD6aHiQFXQh+6h1rjYRPuDLatIDFdbHzZUO9M1e/+ENRGAQ0RgPcjORDx/MWA/
-         BT1VUEVU/XSQTzGMrOz+UM+kTxZ0RKfP8A1aZUlHdzyI/qKeHqR7Be/VTMRcdLADntMh
-         6bP/U31j0uHj0mf26UenLqH1NolUQNG8hB6R4H2ScbJCQI/F44zzKt6ygw0OaNWDTZIA
-         gGZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751987675; x=1752592475;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=6MHv0o5tTzfPie41UtU7o14Wz6rrFQd68dfor33PjXA=;
-        b=Km196EMV7RHd0CULbqz9zJeqLHj3B8XRzNfA0a5Ff3MIVuEVWHtG8sN2lcc0hvRUQ+
-         4mqklW7OY5Y15jn8OlAcAIt1XsTIOqSexeNs7vwdmoRD6nj7poGnJzYM5kFtlTERAlJz
-         IeUOaroL436XBT4f3hAbZbu4aED+8dXHMzP8zHVmg1uMuy0itm8QZmwCdE1gtraHFG2t
-         KlZw/+tUPR/50yaWc8O+CshvrykTBDFYRuq66C+t9rRR9cYDQ54bm/Vmc7MCxM82HGbk
-         9SyF4EHnyJgDkrSWeY81SLwlGT1i4zPVj4r9CY822Whrl3qbXUsWDpbs8OdKFwJ/zYeG
-         C/ZQ==
-X-Gm-Message-State: AOJu0YzirMhd3D9CpUOFsSQ6qR0YZXLIOx+M+yioGSFF0iCyKc6frfgH
-	rlOybY9x41St9SKFxyG5RGgwA3Zlov1AfpIfJKrMsAoHMVMyR9FkqbVDdCjj5tHwiJPSlmqZXMT
-	xQwUYV0Mf2jR3omm0rq2uCtPkREE/8vHqkxjB+cMF2A==
-X-Gm-Gg: ASbGncsH/ycQpFyxTT3S4cwOVK9+XpctQJv5onMuexEU3KlUtUAfdHFJSUmSuAcreci
-	IYbER5ou43Gir4GWGnHgmgvj1c8pL5VpMmLHdq4NPrFN0h0090D+Nowb3sqz+GQgLqpF0jJd+Ue
-	uPLNA8+PuueL0mJPSNnfW12ujkVnhKP+trzC4BdZSCH6+V
-X-Google-Smtp-Source: AGHT+IEI/0SYYzeHymxh2jUoAdEcJIpNy9ZCqz0S2cxSvyilDCrGKDo4QnaaMh/qd3Hhuan88jUhczUtvtCgWdfVKV8=
-X-Received: by 2002:a05:690c:61c1:b0:70e:142d:9c6f with SMTP id
- 00721157ae682-7166b7e87b5mr240830887b3.28.1751987675368; Tue, 08 Jul 2025
- 08:14:35 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=sandisk.com header.i=@sandisk.com header.b="pBHyyE3L"
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=sandisk.com; i=@sandisk.com; q=dns/txt;
+  s=dkimnew.sandisk.com; t=1751988532; x=1783524532;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=GwYgPM1IA+toPY3z22SMpS9/prnxSbcRxUD6lAWyi24=;
+  b=pBHyyE3LAyCoZDUyaKYjLW34LPDnXp60pvlYWc2XpyyE/yONYFynPIWT
+   EoOszjuAqKSpvehnHVAj1yg6/rqhEVlwfuvJf0gD2zw3erJ86FT3nPB2+
+   K3szi5vu0VKl9sUG3tGViKeCNZ8up7phjSWj4QpBuox3+53gYZicYtaOb
+   B9PyMcRtC4lapz5qbl5vRMJGSAuacaLRPpD/JyWxAY8BZAQu0J1UdWigY
+   ZG8K/pUgwZ8Hjr15grMqvB8ADY3fwRLzwdyu19YsNmDOWPz6H0+Jus393
+   iLiwR0vii6ppIaRuBobySV7cju01At6pY8v8MWmcNdjMETfYmXWjENmnx
+   Q==;
+X-CSE-ConnectionGUID: J6hNnpnvTge+h5QieNXbBA==
+X-CSE-MsgGUID: k0q6teNySpeCKKnMI0MZrg==
+Received: from mail-mw2nam10on2116.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([40.107.94.116])
+  by ob1.hc6817-7.iphmx.com with ESMTP; 08 Jul 2025 08:28:45 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none;
+ b=ovlS+loo/5R4Px37+c4J2PhNMXjdt75rip1HYG4+gzlqsRd2P1KwiywkFdW7Yth5RceF39YWA/wrhK/6sgExSFlquvcNL+ndx/GiUrcxwIkwZLXxBCbolsOS8LtihekYks5QG3vb/5KISTE6Fg0QpN7rJduXo2tm/K++TrYVEEamy6+et7U/f6mbObXh1W44eBlYmfVr8yFQeplh2L7xixnCFOyEeVBYN44PLw75VzNPWtbP30DzW84y2lA/Q1mtSoHxCsnPhF3SoH2It+mpGiMyKMci/wNtSdj2iuWISis70IHgIZuIp8cW9Dp/rYl9uzsPGaQidVuQnaPjpA3FNA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector10001;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=YzZn7f3m6JdYg96r0OBBVn2BxsSqYe1FG5ABTaj5dvk=;
+ b=qYi3NtM8ayTvESADHtS1ntTNkEe+D7iBKQ6bBRztZ82l6U7vhjvuR0IWgc32KzE+uwB3FzHL60oazoERdhQ1AW5KLPWOTu4dRRlh2arx2BEDAckmD4TcIV4+XuAkem0zYLJKhH7TZYQQG0Gc7mkAhLWWW/Fuy4SsdKr4YdXO0NmyiotZZYOV02+HgjFBHYTZOxp3EFTAuLp+MpAoxiKx6BTJ64zQEDeeI0sp0JPvihgNCGUXcL8Qap17EWWAwXaoxJgl69KtUIPtGelx5NFcfaF9bO0z28NojOCSHdKmBe+VesGcveXJKvvjitXIoXpOxrGGZBW0X6L3uQBeR8L0yA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=sandisk.com; dmarc=pass action=none header.from=sandisk.com;
+ dkim=pass header.d=sandisk.com; arc=none
+Received: from PH7PR16MB6196.namprd16.prod.outlook.com (2603:10b6:510:312::5)
+ by MN0PR16MB6510.namprd16.prod.outlook.com (2603:10b6:208:4c6::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.8901.23; Tue, 8 Jul
+ 2025 15:28:43 +0000
+Received: from PH7PR16MB6196.namprd16.prod.outlook.com
+ ([fe80::3f03:3b5d:6737:8231]) by PH7PR16MB6196.namprd16.prod.outlook.com
+ ([fe80::3f03:3b5d:6737:8231%7]) with mapi id 15.20.8901.021; Tue, 8 Jul 2025
+ 15:28:43 +0000
+From: Avri Altman <Avri.Altman@sandisk.com>
+To: Michele Dionisio <michele.dionisio@gmail.com>, "linux-mmc@vger.kernel.org"
+	<linux-mmc@vger.kernel.org>
+CC: "avri.altman@wdc.com" <avri.altman@wdc.com>, "ulf.hansson@linaro.org"
+	<ulf.hansson@linaro.org>
+Subject: RE: [PATCH 0/1] mmc-utils: add ability to flush optional eMMC cache
+Thread-Topic: [PATCH 0/1] mmc-utils: add ability to flush optional eMMC cache
+Thread-Index: AQHb7+FUNaCdv7F7J0ma4DIA6UtpIrQoWTWA
+Date: Tue, 8 Jul 2025 15:28:43 +0000
+Message-ID:
+ <PH7PR16MB61969299B80FB299C1458152E54EA@PH7PR16MB6196.namprd16.prod.outlook.com>
+References: <20250708082105.160653-1-michele.dionisio@gmail.com>
+In-Reply-To: <20250708082105.160653-1-michele.dionisio@gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach:
+X-MS-TNEF-Correlator:
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=sandisk.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PH7PR16MB6196:EE_|MN0PR16MB6510:EE_
+x-ms-office365-filtering-correlation-id: 1893d5c2-0592-4555-496b-08ddbe341f93
+x-ms-exchange-atpmessageproperties: SA
+sndkipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;ARA:13230040|366016|376014|1800799024|38070700018;
+x-microsoft-antispam-message-info:
+ =?us-ascii?Q?FjcYVta7DDxINGIa11I8zpdFu98t/L12MSRHOcTfpyN2vSWvpXoit1Ntw+jI?=
+ =?us-ascii?Q?AQoHnKBSbP0w04UpNZW+XvJXgnWYkU6x7rgPcBizAF2PqPx49BWu8vS/qMnt?=
+ =?us-ascii?Q?gOs0/aCk/vCreZc0ExgpnBvKc4dhXws5984rXUQ3Kl6m/UJGLCQ+CotJs4Zt?=
+ =?us-ascii?Q?f/sFHjx0uUBuzSRwUOcF1rU3yGunO1Yr2xfPlXrUt5YKWoSb6e4yMyVJbznp?=
+ =?us-ascii?Q?U9E1kLiXdtLgGYVrpKTws99977H8seVJZeb+BIUcD+ZD4IXs5fyBX4HzAgiK?=
+ =?us-ascii?Q?vz9pJyvcYbzuc/9pK/4xpeBGD3gVSngznIxXBnDJjNeMJEtKQAnxSkdjbSHd?=
+ =?us-ascii?Q?SVa80uSVFpyfbc6RZ4dWREekYdCwE5QdFds1rwBtmrlz3/yKi0+dR+UQq2CA?=
+ =?us-ascii?Q?0H903jD4oSvXlXNO3Ac5pcllhPte3JtlJl2L+S/O+t89uc4CJ03VQDsfJwqe?=
+ =?us-ascii?Q?aUtGd7rvhTVX+MMfZo0nvtyu+mZbpXNGr/fZsSamy+bEkjMVKazNwyhXtc2S?=
+ =?us-ascii?Q?JHPw/Z17NmWCaZZUX/0kc3WV1csW5e9tRDHwhYYhlXuS9tX6ZnFXYGyvggZK?=
+ =?us-ascii?Q?1kWQjLP8nv4B7VN3g+M2a/5xGWHsKQ3QkF4EgwN47Yx7SBE2uAdANunmcWGA?=
+ =?us-ascii?Q?tK1NBbH/A4yXhh3zlAxDLgehXCuKZUs3taZGY9N8WUNDl0dcJNb4yiL7vX5o?=
+ =?us-ascii?Q?5kcmH+wN74AKNpHuh8NZxAnQUgSCjXi4ldFDZbr44Uuhn94zSWpx6q5enKmv?=
+ =?us-ascii?Q?yPGd8tl4gihu9YKEjY4Salq346/5RhPL47pTwxkfswd6UvGuuLvpQMEPsafd?=
+ =?us-ascii?Q?SoFUFo/JLysbN+M+JIyYuJBGclT6Qa0RiBnt+DysvA/bj+6THmQ/Ng2opBAB?=
+ =?us-ascii?Q?JberupC4ZX18fEQCMJEV+9ksSDU74gT4XSIA/NZLicitRt2RWOFw5fm1kYke?=
+ =?us-ascii?Q?hjmbLyOwv25TcOmG/DhQGNJJu7ZU9YzYT0L+esmYRCeF9xJZD4XAmKdDqVhj?=
+ =?us-ascii?Q?/KBC/qSYDeb1g85krUdDYh6Al0EKKjR+08Y+PWXR/44tMX9IjOg6lC07BFjU?=
+ =?us-ascii?Q?foU8G1eaXfGo+LaaMTEOvJNWh6ccO62L3QmbggcVPNuGmTj6QJmYwu3cKpfx?=
+ =?us-ascii?Q?WYcjnF0ezm3ShMflxLs7YLTBQl5DxLU+s63xoTei6oMr1dSC1lsNk+vkPGu5?=
+ =?us-ascii?Q?bb3QB7d1KfpuHyejvA90UtXksNOCkTdHSPCrZGrBUUTCn5CsCY+ujSr3IVAJ?=
+ =?us-ascii?Q?FpFxJTqQ2nDVZ0qinOAmTjplpEm/WcNXY7RKqNBI2QhPQ6HJysKIalOT48YN?=
+ =?us-ascii?Q?FoPtBSVzUiUzyhi59o8UT8XXCCK6lZYDyxr2aLfbNuQX/607cDnabxivrvny?=
+ =?us-ascii?Q?t+ABvG82XRVxKEv2ZKmY0jmZLCPobEVtj4lcRjNWfSHUsjGXPv9cKejwiaO9?=
+ =?us-ascii?Q?fbZrS5e3dJS81qEHAkiDqfokMt59f4Dukc3qUdKYX7M+boIH/7Rq7w=3D=3D?=
+x-forefront-antispam-report:
+ CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH7PR16MB6196.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230040)(366016)(376014)(1800799024)(38070700018);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0:
+ =?us-ascii?Q?F8YDld+oQ6tAsB8qKFrG0akc/k/AvsN2LU36xFyhjIoeEuhBu0Dyp71FNJ+a?=
+ =?us-ascii?Q?N4d0f4cYa/HwIhXIN8brNLEtr4l+lKJ0Db46aG9J98880CrfmpvxJKphBFGD?=
+ =?us-ascii?Q?IclwNMRS2Xh542k6UGLPa3oj/J6J0etmNvPTHorCjUKMY04Jj18F1oC2EWxD?=
+ =?us-ascii?Q?5ICXXBO68wAaINN24EGvmSlDQI7S1hsYhSI/POFIB+Pce5HkKBRfiTe5/GQs?=
+ =?us-ascii?Q?MqkORI+NmAd94aVyzVSOz8a/OSTCb700XzOn4kfFLBTHswDBpjgahnZl0Dn0?=
+ =?us-ascii?Q?6qk0vfY+TeF0dmsxrQPZMhpobvhlx0adM9fMTVwdHjUvKyC1vJRxv2jpX8cR?=
+ =?us-ascii?Q?g5DpX2r+48qDwrkmz/1m2GlF+MOibFrqFIVs4qa8Eakg+bAGh9niQAPtuN34?=
+ =?us-ascii?Q?uKHw4Ghg2OBACqFZ5IeD/2fleUltO2yqQzPy6yUnzhRCYpcn9o2SMCu05sCx?=
+ =?us-ascii?Q?F9t0smR3HVD57OAa/pkuUwwdPDPLg5B/q9x8ySbSpp/jSYp23GjiuLk1BDoQ?=
+ =?us-ascii?Q?9cmQEeA6LpOCA3PQnRnxwdVa4nL6wJ71+wTRHtXAzYXZzUACvCA2NmXzUxqQ?=
+ =?us-ascii?Q?h1zMXkcD69mf69DionoNcHgC3mrReoaAIsWNKRblwFQdkU+PnnLqtnVN0zMr?=
+ =?us-ascii?Q?sCyPbYEL5fFvy2dgD6QPM1FRit9h0Yv/44foLPxg/RGxJgrxqu5j/lFCw6jt?=
+ =?us-ascii?Q?V6ZJg/KOHlKiNDeuKp+NdHq+4yVMMXdqgUEF+rZnK70BhYYLqXlXThh9HPSz?=
+ =?us-ascii?Q?9YJNFoJrtqv0XV4unuklyARGGYFcxfaaIZNoNS3IPqLaQLLKHk0fxwfKNsBu?=
+ =?us-ascii?Q?7CULkXaO9NXSJo6QcEMmKM1hGXzq9/1PCiZH2Ftbo8E+ui9M5F1GVsAPHxsy?=
+ =?us-ascii?Q?ThXPkacjnFqtdoXkTSHgAWwLWNAbRl54wPryGxP5pfMocnvIAfP4utAjCnEZ?=
+ =?us-ascii?Q?GFOfK7waP0x3J48z/ztkEfPHTnxTd8r9TJ8gZuV2SiMx3Pu9RsIxt+A/E+YX?=
+ =?us-ascii?Q?fq0m/PYUryF1Ml9J0Fr53BwkIzDNQ/02ffaDed+2R8fES2GSt8l/Zt545nNJ?=
+ =?us-ascii?Q?8X40MKsRaD/7Aj+AjpCCvld32C7YyipGtg26zbjcCRf/kRWAm5sO1V8LiZFG?=
+ =?us-ascii?Q?NK9HucmoWbORGERP98zD+3XkyHbkiEsFsB48RczvTqm95sRbO1nD16AD/ntw?=
+ =?us-ascii?Q?CUBOtXoLU0O+cA/3aePKmSGwXL1XMsmP6CGItvsJ4UPmPSYo001AosoSZE0G?=
+ =?us-ascii?Q?YiJoM9GaNJWqghS0GWg8GxgGhbxI4TNsjvwjtKRhNpRSYx7Em6h+FZtvzogf?=
+ =?us-ascii?Q?xGZ+2j3aAvG3f3nRpwQ/DAs2ndRFDqMheyJakWut2QNKhrFkURL7161mnZyB?=
+ =?us-ascii?Q?XFVxF0t+1zPpDHasDxVZHGj12UtOpa7k7b6K9CPzTQ2a+x0BOrOClhf+ZABL?=
+ =?us-ascii?Q?OxRc6gIwUzrMAUQi1SM7QPINEI3K0DArzppiw6bxuoZsUTDwEyQSF+FsSnca?=
+ =?us-ascii?Q?p8PP/d3N5yUUgLXgm0VZjmEQS5Rdct0MGycCgW0zItpTwFeZyCtYzrv2TMLN?=
+ =?us-ascii?Q?Q4VVINQWXc7qhQ+22MSgh4iUst8P4zeH6sxQ3vdv?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250619085620.144181-1-avri.altman@sandisk.com> <20250619085620.144181-2-avri.altman@sandisk.com>
-In-Reply-To: <20250619085620.144181-2-avri.altman@sandisk.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Tue, 8 Jul 2025 17:13:59 +0200
-X-Gm-Features: Ac12FXwpp13xdvAYpe1Fj9PimvoQ7v6kLZY-lacmlgJQAaeTFthvCA4UVEyI9VU
-Message-ID: <CAPDyKFqJR+HwnVZU=Lerk0eJ3+_9J7KD-5DWv84t-YG3r5NYuA@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: core sd: Simplify current limit logic for 200mA default
-To: Avri Altman <avri.altman@sandisk.com>
-Cc: linux-mmc@vger.kernel.org, Sarthak Garg <quic_sartgarg@quicinc.com>, 
-	Abraham Bachrach <abe@skydio.com>, Prathamesh Shete <pshete@nvidia.com>, Bibek Basu <bbasu@nvidia.com>, 
-	Sagiv Aharonoff <saharonoff@nvidia.com>, stable@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0:
+	63L8wWQyaINN2Goxm3P55/xMWkPioRmwHYbYzjgr5g7Qs47Cz1Nzj1ypfmxXWqTeH5JNfvxqCawT6rd6Q3ui6bxh6X/pHGE26b70W0W2uJr/+lM19MGqAC6nb237yXu81I0prEqoM7U/PKTWDTuY3zMlm1ICLyLurQSWk5jrxENO5mYZ3GWcX0K6+o0zBs2sAw2S3JEXV4QKGLaTmuK/dOI3AjpY133IEAHcAYH5OdT/Of3CGKzF45fxnuJphu055iDX19SweW4IzI7us+Yf0CmjiwxEo1F9/BrSJwj2WRr2kkBE9t09FuD/E5kXdHCreDwYOTonBTpKQqco1PqzpzdS7LfXQt5ktMpqC/5Ek1OmUyRCLtJY4U/DuhWULT/D9gCK4T6sJTr0m7wWdaVLComI/cLRNFhuBgbd9PCbuTkBsbGEXmB4ByX12N+MF6b5T204GGp5QXeEJmjNokOD0DjPzwFbXABgubo+9oK48txReM5+4nORoBDKbeGaynwmebhwkVL3dcQBpJXtLr32ksXah11vs9DGhBPofeP3Oj2I5MnE2LHmUAnODenIjzK+EVVR5e/4DJA8kmk0KxOjPYQqvG+EPVWIB0U3WFsUZ17Ia+zuFWhdJ/8haL5dRTxG+jp1SswY6hxfqtgpPrRu2w==
+X-OriginatorOrg: sandisk.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PH7PR16MB6196.namprd16.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1893d5c2-0592-4555-496b-08ddbe341f93
+X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Jul 2025 15:28:43.3506
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 7ffe0ff2-35d0-407e-a107-79fc32e84ec4
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 4dek/bjZo6eX+tdoojI2NSbfs9CLavBYDbdeKFq6dX3AHsCb9IBpQ2cbf3nt/2oHxBDySSu67/yqqS4DmHVSOQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN0PR16MB6510
 
-On Thu, 19 Jun 2025 at 11:03, Avri Altman <avri.altman@sandisk.com> wrote:
->
-> The SD current limit logic is updated to avoid explicitly setting the
-> current limit when the maximum power is 200mA (0.72W) or less, as this
-> is already the default value. The code now only issues a current limit
-> switch if a higher limit is required, and the unused
-> SD_SET_CURRENT_NO_CHANGE constant is removed. This reduces unnecessary
-> commands and simplifies the logic.
->
-> Fixes: 0aa6770000ba ("mmc: sdhci: only set 200mA support for 1.8v if 200mA is available")
-> Signed-off-by: Avri Altman <avri.altman@sandisk.com>
-> Cc: stable@vger.kernel.org
+> eMMC 5.0 introduce command to flush cache. Linux Kernel support it, so it
+> can be nice to have this feature also in mmc-utils.
+Maybe you can drop the cover letter and elaborate the commit log of patch 1=
+/1 with these lines.
+Also maybe you can give some stringer line of reasoning beyond "nice" as th=
+e cash is constantly flushed on every runtime suspend.
 
-I am not sure there is really a bug here. To me, it rather looks like
-an optimization, as we are avoiding one unnecessary switch command.
+Thanks,
+Avri
 
-Otherwise this looks good to me.
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/sd.c    | 7 ++-----
->  include/linux/mmc/card.h | 1 -
->  2 files changed, 2 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index ec02067f03c5..cf92c5b2059a 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -554,7 +554,7 @@ static u32 sd_get_host_max_current(struct mmc_host *host)
->
->  static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->  {
-> -       int current_limit = SD_SET_CURRENT_NO_CHANGE;
-> +       int current_limit = SD_SET_CURRENT_LIMIT_200;
->         int err;
->         u32 max_current;
->
-> @@ -598,11 +598,8 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
->         else if (max_current >= 400 &&
->                  card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_400)
->                 current_limit = SD_SET_CURRENT_LIMIT_400;
-> -       else if (max_current >= 200 &&
-> -                card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
-> -               current_limit = SD_SET_CURRENT_LIMIT_200;
->
-> -       if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
-> +       if (current_limit != SD_SET_CURRENT_LIMIT_200) {
->                 err = mmc_sd_switch(card, SD_SWITCH_SET, 3,
->                                 current_limit, status);
->                 if (err)
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index ddcdf23d731c..e9e964c20e53 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -182,7 +182,6 @@ struct sd_switch_caps {
->  #define SD_SET_CURRENT_LIMIT_400       1
->  #define SD_SET_CURRENT_LIMIT_600       2
->  #define SD_SET_CURRENT_LIMIT_800       3
-> -#define SD_SET_CURRENT_NO_CHANGE       (-1)
->
->  #define SD_MAX_CURRENT_200     (1 << SD_SET_CURRENT_LIMIT_200)
->  #define SD_MAX_CURRENT_400     (1 << SD_SET_CURRENT_LIMIT_400)
+>=20
+> I would appreciate any comments on the usefulness of the change and a
+> review.
+>=20
+> Regards
+> Michele
+>=20
+> Michele Dionisio (1):
+>   mmc-utils: add ability to flush optional eMMC cache
+>=20
+>  man/mmc.1  |  4 ++++
+>  mmc.c      |  5 +++++
+>  mmc.h      |  1 +
+>  mmc_cmds.c | 50
+> ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  mmc_cmds.h |  1 +
+>  5 files changed, 61 insertions(+)
+>=20
 > --
-> 2.25.1
->
+> 2.43.0
+
