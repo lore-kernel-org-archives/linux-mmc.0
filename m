@@ -1,103 +1,92 @@
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 931F3262FFE;
-	Mon,  7 Jul 2025 18:56:53 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.167.169
+Received: from mail.loongson.cn (mail.loongson.cn [114.242.206.163])
+	by smtp.subspace.kernel.org (Postfix) with ESMTP id 04CE4BE6C;
+	Tue,  8 Jul 2025 01:15:44 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=114.242.206.163
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751914615; cv=none; b=f9AWSichdmYJMJ/G8gr/1A66ps4CCiwTJvsfVgjDx+P5A2fZ4/WMNORKBcs7yRk/PKeWNcPzDNXdRZh2MHQragsBvguT9l5jAICvmbi3IS0I/RyIifYnWcDYgXOjsuRCixzQWsFj8qhpiIzJvGmT3ZLGiwp6ND1qTsRTUBtGcwM=
+	t=1751937350; cv=none; b=gDXYTKCwS8+3zAcJeH7EOj7AOQUbjgoLTh9TmzZ3AeZQ7YbFHeLxGdqKeK352o4WTdOUaooRLzA99ZeVLzA4/jGOS4p2IqS6dBbLTweYp0AaKsAVa5M2qctOZ33HuxAhfSKFJ2Go4rBWOEyYL0BmYo7CJotZO6bLScU0ERiAGk8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751914615; c=relaxed/simple;
-	bh=9ZxsGfMNuIDd8PUZJl180e6uYMTAtfiL4MXB7zLYGfY=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=rcwO/x5fzqnGgMk85gz+i3VrOFBKDTiy58p0jvKkLFC0r4LP8YC9lw03QYhYFEM5FbdIpl/UGbNLGX09P4g9iJ/MvXeVPfJPOWQoIZVek1iAdfDo/UARc9eyao2w76BA/Aocyy3argrqI8WTTQZlkBOFhnhG/JevuSstAMkM/0M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=hdJuKRG7; arc=none smtp.client-ip=209.85.167.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
-Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hdJuKRG7"
-Received: by mail-oi1-f169.google.com with SMTP id 5614622812f47-40a6692b75cso2511344b6e.1;
-        Mon, 07 Jul 2025 11:56:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1751914612; x=1752519412; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=K6ayYvKDTLhKWG6B6PhMbZPiXC1I4Lt8zkiYPs7tjWQ=;
-        b=hdJuKRG7feEnfbyfqLiNNJO6afcGq0+v7Rq001Iods3tZncRid9p93sdsGJXh0kOHS
-         WL3WmUIg10SJE55lEp2ZtnSMFUbGM0oSNySSm/ERoitPR5vKnxj3FGV333qX8X8CMINs
-         FTnA68OxP/H1RvfFG21jVaEx1pyEhhLiwjUTiQmFm5Khb76qs42sO4ll0Mml0ea3q3Cd
-         3BYr8cFyd2tzE6Zf7DeQqYU9/cVtjG9sit3dZXErlwftsta+n1IGj7RgJ+jF7k7rtLdG
-         FiILZTlomN6meCpVmitRTO4vQvkb1xPm2Q3xrMV19c2it8E8NPmXnMScRFT+eJ5H+h4P
-         HQmQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751914612; x=1752519412;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=K6ayYvKDTLhKWG6B6PhMbZPiXC1I4Lt8zkiYPs7tjWQ=;
-        b=w9+xUCGhA2dCtn3lPNFUegWT/ApTqO7q/Gc9jEey4z5MvjfARdHnwUORfh/aZKStzW
-         R5EACD8nLOSCdXu0NUW45SghOa3IBDUEoDE4vhuzbK49wCcCVvvd25o/g8g/1edYvkpA
-         MsdnRK0KePUcQp1jG0HU3hqMeRYmVRTi4tYiDvEgUB1di6VQxvUno2KlSxpZznaiQEeM
-         4bUi/9yhCr86fCAe+XPn0gKR0cz2ty91L/gaDi/k/rhhH9TOVHBJTHxDRZdEMqCBcqIn
-         DT7ruQkfJdX8mdcwIL/decbX45QdYRtzp7PA7hdRdjObjQsnHLH2/9UdIaq7ZPGmFpfZ
-         HrMA==
-X-Forwarded-Encrypted: i=1; AJvYcCW3UQNvBZj4lqGcokYqWpi4EDiSI9Pp6KAuKp62J+pY9mRppKrXQ5aqmPxIbz/ELwiQEu1QxN0uW0RRKI0=@vger.kernel.org, AJvYcCWyAOpuFFmdKBIBgqZ2SEK5oBniWEhzLHYb/e+vECQNVC5m1BGNHr0RJ9eposoQa/E56Hze19OpfNEb@vger.kernel.org
-X-Gm-Message-State: AOJu0YxZVJvRESe8VnmowygvxOrcr2QjAUDASLZANCgJDJsB66L1eD9q
-	kKcDHskBPYrBjyM3dsrCBKCn6QHesJH9/9oNuFkGM4nW3GpkTdR65yhS
-X-Gm-Gg: ASbGnct7scSQal9Xi6H1vFEgSBeyWJeLSZk3GXplLrAETYiPDQureZKSOHDvANvxx+4
-	Q9XQHuBSN4by7krjFea3bSuMABN0u15ZNZ1TJq9rrna4vQScpe2Si+zjuxFSmCXfsZCoO2/jsGv
-	MrUO8vtUBBCTbwhXh9DVy/2PrKNk+QobBcongtO3akx8Q5pSPlCa+Q1ij4um4ERByXV481Mu7Qg
-	60VxDI2iuNiRL6RS+Hb6VXonOmYmAtRCpeh4OOb4TtJ2z+52GmGr40wQq5WDcD0yDF5S6JTJeBb
-	rnXupASj2jvPf5c/oYHG7R5xeOFpm+xbeVZA1qxI4UQR/gJKjdxHny3VuRP2DrM=
-X-Google-Smtp-Source: AGHT+IG9Bu90q0WTjtWxz7HDuJ2Rzyfv/8PajDWomE8All5ggz2bpklWeqOUkIt8krxiv5gByH/Xcw==
-X-Received: by 2002:a05:6808:1a0e:b0:406:71fd:b610 with SMTP id 5614622812f47-40d073ed6d3mr8063252b6e.33.1751914612548;
-        Mon, 07 Jul 2025 11:56:52 -0700 (PDT)
-Received: from s-machine2.. ([2806:2f0:5501:d07c:d8b:9d6d:a96d:6f71])
-        by smtp.gmail.com with ESMTPSA id 5614622812f47-40d02ab27c3sm1400851b6e.32.2025.07.07.11.56.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Jul 2025 11:56:52 -0700 (PDT)
-From: Sergio Perez Gonzalez <sperezglz@gmail.com>
-To: zhoubinbin@loongson.cn,
-	ulf.hansson@linaro.org
-Cc: Sergio Perez Gonzalez <sperezglz@gmail.com>,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: loongson2: prevent integer overflow in ret variable
-Date: Mon,  7 Jul 2025 12:55:41 -0600
-Message-ID: <20250707185545.46275-1-sperezglz@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	s=arc-20240116; t=1751937350; c=relaxed/simple;
+	bh=XFc9VGY/pzjFV6Dzys3432VYQ+MxqJl1bQbN0BpIJwY=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=TfWCDHj8EHFA1U+Av+CXO0BpBqymheA1uK8fH5RlYi5HeH9oc8M6i4/eW0Pc8Mgjt8UPH6Z/pHdnLNnShffM2yogW1w8YiL5pZaKd57r9L3uIosjzPEuZGQVX1Ry4V1qo9EXPnrBCA6EonTt1Asw4d1Ovs5/aeAS0MrKv3S1bQ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn; spf=pass smtp.mailfrom=loongson.cn; arc=none smtp.client-ip=114.242.206.163
+Authentication-Results: smtp.subspace.kernel.org; dmarc=none (p=none dis=none) header.from=loongson.cn
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=loongson.cn
+Received: from loongson.cn (unknown [223.64.69.51])
+	by gateway (Coremail) with SMTP id _____8AxSWo9cWxoXwgkAQ--.42337S3;
+	Tue, 08 Jul 2025 09:15:41 +0800 (CST)
+Received: from [10.161.0.102] (unknown [223.64.69.51])
+	by front1 (Coremail) with SMTP id qMiowJDxL8I6cWxodr0NAA--.1989S2;
+	Tue, 08 Jul 2025 09:15:39 +0800 (CST)
+Message-ID: <9c425d8c-65d4-4430-a45c-d185806b826d@loongson.cn>
+Date: Tue, 8 Jul 2025 09:15:38 +0800
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH] mmc: loongson2: prevent integer overflow in ret variable
+To: Sergio Perez Gonzalez <sperezglz@gmail.com>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20250707185545.46275-1-sperezglz@gmail.com>
+From: Binbin Zhou <zhoubinbin@loongson.cn>
+In-Reply-To: <20250707185545.46275-1-sperezglz@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
+X-CM-TRANSID:qMiowJDxL8I6cWxodr0NAA--.1989S2
+X-CM-SenderInfo: p2kr3uplqex0o6or00hjvr0hdfq/
+X-Coremail-Antispam: 1Uk129KBj93XoW7Gr1UGw18tr4UJr4Uuw1ruFX_yoW8JF4UpF
+	W3C3yjkrWDGr45ZFy2g34UuF1UW3yagr9FqFWxGw18WF97Xw1j9r15CayFqrsxZrZ0kFyS
+	vFWkCFs8u3WDGabCm3ZEXasCq-sJn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7KY7ZEXa
+	sCq-sGcSsGvfJ3Ic02F40EFcxC0VAKzVAqx4xG6I80ebIjqfuFe4nvWSU5nxnvy29KBjDU
+	0xBIdaVrnRJUUUyKb4IE77IF4wAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2
+	IYs7xG6rWj6s0DM7CIcVAFz4kK6r106r15M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48v
+	e4kI8wA2z4x0Y4vE2Ix0cI8IcVAFwI0_Gr0_Xr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI
+	0_Gr0_Cr1l84ACjcxK6I8E87Iv67AKxVWxJr0_GcWl84ACjcxK6I8E87Iv6xkF7I0E14v2
+	6F4UJVW0owAS0I0E0xvYzxvE52x082IY62kv0487Mc804VCY07AIYIkI8VC2zVCFFI0UMc
+	02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAF
+	wI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcVAKI48JMxAIw28IcxkI7VAKI4
+	8JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xv
+	wVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjx
+	v20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8JwCI42IY6xAIw20E
+	Y4v20xvaj40_Jr0_JF4lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAIcVC2z280aVCY1x0267
+	AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjxU25EfUUUUU
 
-In loongson2_mmc_dll_mode_init(), `ret` variable is declared
-as u32 but it is expected to hold an int value.
+Hi Sergio:
 
-Fixes: d0f8e961deae ("mc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver")
-Reported-by: https://scan7.scan.coverity.com/#/project-view/53936/11354?selectedIssue=1644958
+Thanks for your patch.
 
-Signed-off-by: Sergio Perez Gonzalez <sperezglz@gmail.com>
----
- drivers/mmc/host/loongson2-mmc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+在 2025/7/8 02:55, Sergio Perez Gonzalez 写道:
+> In loongson2_mmc_dll_mode_init(), `ret` variable is declared
+> as u32 but it is expected to hold an int value.
+>
+> Fixes: d0f8e961deae ("mc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver")
+> Reported-by: https://scan7.scan.coverity.com/#/project-view/53936/11354?selectedIssue=1644958
+>
+> Signed-off-by: Sergio Perez Gonzalez <sperezglz@gmail.com>
 
-diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-index 515ccf834f0a..ba6bb8fd5535 100644
---- a/drivers/mmc/host/loongson2-mmc.c
-+++ b/drivers/mmc/host/loongson2-mmc.c
-@@ -485,7 +485,8 @@ static irqreturn_t loongson2_mmc_irq(int irq, void *devid)
- 
- static void loongson2_mmc_dll_mode_init(struct loongson2_mmc_host *host)
- {
--	u32 val, pad_delay, delay, ret;
-+	u32 val, pad_delay, delay;
-+	int ret;
- 
- 	regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_SEL,
- 			   LOONGSON2_MMC_SEL_DATA, LOONGSON2_MMC_SEL_DATA);
--- 
-2.43.0
+Reviewed-by: Binbin Zhou <zhoubinbin@loongson.cn>
+
+> ---
+>   drivers/mmc/host/loongson2-mmc.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
+> index 515ccf834f0a..ba6bb8fd5535 100644
+> --- a/drivers/mmc/host/loongson2-mmc.c
+> +++ b/drivers/mmc/host/loongson2-mmc.c
+> @@ -485,7 +485,8 @@ static irqreturn_t loongson2_mmc_irq(int irq, void *devid)
+>   
+>   static void loongson2_mmc_dll_mode_init(struct loongson2_mmc_host *host)
+>   {
+> -	u32 val, pad_delay, delay, ret;
+> +	u32 val, pad_delay, delay;
+> +	int ret;
+>   
+>   	regmap_update_bits(host->regmap, LOONGSON2_MMC_REG_SEL,
+>   			   LOONGSON2_MMC_SEL_DATA, LOONGSON2_MMC_SEL_DATA);
+Thanks.
+Binbin
 
