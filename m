@@ -1,212 +1,178 @@
-Received: from mail-wm1-f49.google.com (mail-wm1-f49.google.com [209.85.128.49])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 63CA029826D
-	for <linux-mmc@vger.kernel.org>; Tue,  8 Jul 2025 08:21:33 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F471238D53;
+	Tue,  8 Jul 2025 11:37:30 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1751962895; cv=none; b=LNo/f+hfbYitC7KDjr511wpv42cj+5e+ftQWe8QOgf+fcq5DelERcpTPLPKj+BclaUl6Fz/i23QIf42Ky0cVN8VTc9yXV20woZA/AVvvmhPu/X5jQ0PcRBSw3+ZaYCNBJXPe0FIQLZH9L8h2Z/lL840CoLIsuOAOdpWxkU7Bg/A=
+	t=1751974650; cv=none; b=dQTYX9l1+NBZwKNcmcbMfsuGvJMHkqyz1K3Mp2eNDGkWJ5zvI07yFsIFh/iu2eVw6WaepGebGc3bWY9/+2167QOgwyHmF4jrT7k+klNvBUtpMyWUUTd+rovWQitxBGRTi/bXz530S1taY75pRQAHUoGmWDpHsTmVRRVdHkhPb3g=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1751962895; c=relaxed/simple;
-	bh=hdosg4A9scDagyNYuIXsvAHsCP6YBBcuzOSABpntBR4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=KTP++zV8bv71+E5lowaUhNyoFAMwS2OHsW6y/302zq7F9M7W9AR787dfzKg8XOKjQ7ZYmUgXWK3NDPYEqSYlHTXUQOAKwWa9OJIlokWgULi9H/vGlS0St0/g3552bsIF99xVDkxRn+nChXX88E6Sx6H6HfJxPt6cxmKxRGg96lw=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=P5jsOGAp; arc=none smtp.client-ip=209.85.128.49
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1751974650; c=relaxed/simple;
+	bh=Jd1T3sx5/KDM7mM/Zz9GYUL0ia9E2nQPf9lXHvRXZmg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=kvlEOsq9kjotYniE6DKqrWXaPWbY1vYX9BWcbdTbAupMpmBzo9JPqJPOVdA/JrRPvMrzjYb1s6w5P2qzUwWYCPfjPiASTUd7u89pY9M3lRVR7U7JcewGjd5qknmSGT1I6i7y4LWHbrECSxVndA838VsNsUM7Wb4+RxfYZIbqWEM=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=F8nq7PEA; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="P5jsOGAp"
-Received: by mail-wm1-f49.google.com with SMTP id 5b1f17b1804b1-453647147c6so38097845e9.2
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jul 2025 01:21:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1751962891; x=1752567691; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=14RS0hkcfhnwTk1wVwFtDI37LnE1Kj37tJzTM4MfqSI=;
-        b=P5jsOGAppyQXKJ7LgrMiS1Sltoh/xa3EZU9d9wTx8W/QS1JMIhCioW2W/8HK5XLCZ3
-         znY7b+yLB1u6pUUoRXA1InDyTUfYYntzXWJzCmuzhdQixu1KbywOpRvQ7pBnqA6qfWZS
-         T/DuUE9bn4IMSDeou/h03t9i68acNOkCiJrqcMohjzEQLRccA5DiRrGVzINlXMc2OCjB
-         uyGFRAzvzx8jn6aR3weLLrMjyRNFAOgCCUIJSRKmU2Vg6y0Bzoa5TsFxkvK9WZn3Lu2G
-         fNfeRf1idLQz0avyyzW+H3X07mlS83uJKaNoZr6BT+xaoz6kszNoQWh+6wbI2xyhm9fx
-         AiQg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1751962891; x=1752567691;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=14RS0hkcfhnwTk1wVwFtDI37LnE1Kj37tJzTM4MfqSI=;
-        b=LDjaRrTa7MCHevr7v1gRN7OHBvtrNzSKt6dILndpc2Lgrq5BfAD1Uxu4FqmzZrgdvf
-         /q691QMBbNCS5fFIKQixUOxvHqGEmiHIrcxfoOeWWZ3JSjMiJdeGLpgcsk7QAui58jBp
-         /j5UnleAVSlGbr3idepeh9hLPAN9ULqrQyxBI6cUba6KTt0yOst1+4P/WavE89O5fUQa
-         uCDK5pQRn3tPJbiNIfVoaks4KwiNBIV+8hNaqdiYtXF7z+VE6eILB0iNbRht6YU34dG6
-         CWIo30dLVJ26eDf7zVcD8qxMcwcOaBODaJPYUpx/i+eQNSUAP0b9MLnyO7BX0caj4lkq
-         2dgw==
-X-Gm-Message-State: AOJu0YzJV9EHt/7XOsWkyLVbCOJUGnUmp6rVfHH6aqkuzn/ITxPQviHs
-	MWjz4zg+lqVNrppxm4cEI1inxOxbEsUIXf4FSycHqoWgYjSvbbqZOQGCR7asbA==
-X-Gm-Gg: ASbGncs4oXSKbhls1EIKT8diHBQpB1O+7eSzg7hAcHt4XuEtkRS6T5rydtVI3KMKFVe
-	/pN/g0CPcYLjdJymuLv6qCDmNr6VITibDa/iglWEsuewFE5KTGrntU9/eYPzImEIaGTQw7PHsdf
-	JFAQejW2LLEukSZ5I4qJJku88CGggIKUCsihYepkXDaPq8tUy55hbKht1FAdVyUK9l3E2mQmlZo
-	jJ/0qyxhOWf+k1SKNcM31mS+89/FycrcDQA5FlgMtFkBHo3BAQ2qauqwX8SDU7v2XtKEHmYYYd+
-	RI0mXNukZuZ2nvzckRRIkrFs29dvX4qrKNav2E0dVwcWqdJ0pMxy5voE/qN+Hhd5iPb1/U7t3/v
-	/Ba42g+5XRwYmuuKkojjswPmjs7QWbMCrvOx4jcTjlZM=
-X-Google-Smtp-Source: AGHT+IHqg6E7xc0d91yJqIKMwxn0YH/AdIWEIIOCIDEliRxZ9sVsjRrXE41TP2GgIuyddtXO4yiXHQ==
-X-Received: by 2002:a05:600c:5289:b0:439:9b2a:1b2f with SMTP id 5b1f17b1804b1-454cd4d8f27mr21185135e9.3.1751962891065;
-        Tue, 08 Jul 2025 01:21:31 -0700 (PDT)
-Received: from mdionisio-OptiPlex-7070.powersoft.it (srvsp.powersoft.it. [93.146.228.90])
-        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-454cd4938f4sm14296585e9.19.2025.07.08.01.21.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Jul 2025 01:21:30 -0700 (PDT)
-From: Michele Dionisio <michele.dionisio@gmail.com>
-To: linux-mmc@vger.kernel.org
-Cc: avri.altman@wdc.com,
-	ulf.hansson@linaro.org,
-	michele.dionisio@gmail.com,
-	Michele Dionisio <michele.dionisio@powersoft.com>
-Subject: [PATCH 1/1] mmc-utils: add ability to flush optional eMMC cache
-Date: Tue,  8 Jul 2025 10:21:05 +0200
-Message-ID: <20250708082105.160653-2-michele.dionisio@gmail.com>
-X-Mailer: git-send-email 2.43.0
-In-Reply-To: <20250708082105.160653-1-michele.dionisio@gmail.com>
-References: <20250708082105.160653-1-michele.dionisio@gmail.com>
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="F8nq7PEA"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17DBFC4AF09;
+	Tue,  8 Jul 2025 11:37:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=k20201202; t=1751974650;
+	bh=Jd1T3sx5/KDM7mM/Zz9GYUL0ia9E2nQPf9lXHvRXZmg=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+	b=F8nq7PEAruPGzsKz4P4NPY8fjlO12G267D+JfaTOJBlY9Sdy7wsx7gC8260kkay+s
+	 tWzPO2AFi7VgsHZQFuMTUIUB2mOlg4eLLcL1dGT+3O8jKRSOtepBQ50xTYvyVIV+dA
+	 tq2+iW1AyJQ3DPbGaAHWr8v6s4r+shU6M9vCbysNwPP98wgn91/lSxRqp/gyEmXrYd
+	 hEx55u5kpcsnUIVyciA+so3Imi2MRuaol3VWpP1b7hniyGrvJxxOOL/TT3ssfmPABK
+	 2jumotIZ4n9V/NqtlR6USayOsUh8wfkG14ZjSTr1zqhT5Nd65oQnqvoNvFuVM+CiOp
+	 BJwIOmG1igKmA==
+Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-607434e1821so5974963a12.0;
+        Tue, 08 Jul 2025 04:37:30 -0700 (PDT)
+X-Forwarded-Encrypted: i=1; AJvYcCUYwanICshJTPiTZGgCuUJN4/YrhBBWdFv1KKjEsF7kBk5Yw+VRgUy2CXBTt8mUqffPDiGw3wWR68vR@vger.kernel.org, AJvYcCVVeguin5XMRMfO69gJVZ0ICaraoCGSyfLul3+pVICuajWLSdf8KODdkCSJI9M85mToXtz2dMPa0HO+@vger.kernel.org
+X-Gm-Message-State: AOJu0YwCzoZnX+QgyWbOHc4LutfJWrG8+ThRlGKbifmPfcOBTjyzwWHh
+	zzoz+NB2AIHgD/uvoV6FPp2hdtQnQCjEr2xKL18YgJoq+w4ke8kNDKeD5ghVD9+WnO8lQYXchHk
+	d/pNO1jI6RdJuOfczWMG0MARuL/m3il0=
+X-Google-Smtp-Source: AGHT+IEMgxD68DfBMaanXG5eeXbGOXoBXXlNeYuvtnHciJwKTyhTsZrPo9HwnqIJqhWKZ9LIePES093KoEtz6FDlvYM=
+X-Received: by 2002:a05:6402:3591:b0:609:b5e0:598a with SMTP id
+ 4fb4d7f45d1cf-60fd3491e75mr13553204a12.24.1751974648555; Tue, 08 Jul 2025
+ 04:37:28 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1750765495.git.zhoubinbin@loongson.cn> <CAPDyKFrYYdhrctvwJ=VdTRHYSLSO_MjGKfasP53muVbe1+=0ag@mail.gmail.com>
+In-Reply-To: <CAPDyKFrYYdhrctvwJ=VdTRHYSLSO_MjGKfasP53muVbe1+=0ag@mail.gmail.com>
+From: Huacai Chen <chenhuacai@kernel.org>
+Date: Tue, 8 Jul 2025 19:36:59 +0800
+X-Gmail-Original-Message-ID: <CAAhV-H5_iokrgA+efG5A9PEfCiQ-Wh2AhssnTXMzmJPE3RPtUQ@mail.gmail.com>
+X-Gm-Features: Ac12FXy7BnhlcEeIQ7dGegd_kOusW7rEMktXmQkFWtnZ5nNqQpKNzizLE72fA9E
+Message-ID: <CAAhV-H5_iokrgA+efG5A9PEfCiQ-Wh2AhssnTXMzmJPE3RPtUQ@mail.gmail.com>
+Subject: Re: [PATCH v4 0/4] LoongArch: Introduce the Loongson-2K MMC host
+ controller driver
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Binbin Zhou <zhoubinbin@loongson.cn>, Binbin Zhou <zhoubb.aaron@gmail.com>, 
+	Huacai Chen <chenhuacai@loongson.cn>, Rob Herring <robh+dt@kernel.org>, 
+	Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>, 
+	Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, devicetree@vger.kernel.org, 
+	linux-mmc@vger.kernel.org, wanghongliang@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-From: Michele Dionisio <michele.dionisio@powersoft.com>
+On Thu, Jul 3, 2025 at 8:20=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> On Tue, 24 Jun 2025 at 13:58, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
+> >
+> > Hi all:
+> >
+> > This patchset introduce the MMC host controller on Loongson-2K series
+> > CPUs.
+> >
+> > They are similar, except for the interface characteristics and the use =
+of
+> > DMA engine, specifically, the Loongson-2K0500/Loongson-2K1000 use an
+> > externally shared APBDMA engine, while the Loongson-2K2000 uses an
+> > internally exclusive DMA.
+> >
+> > Based on this, I'm splitting the driver into two patches.
+> >
+> > List of the patchset:
+> > Patch1: bindings for Loongson-2K0500/Loongson-2K1000;
+> > Patch2: driver for MMC controller using externally shared APBDMA engine=
+;
+> > Patch3: bindings for Loongson-2K2000;
+> > Patch4: driver for MMC controller using internally exclusive DMA.
+> >
+> > Thanks.
+> >
+> > -------
+> > V4:
+> > patch(2/4):
+> >  - Code formatting;
+> >  - Fix lkp error
+> >     https://lore.kernel.org/all/202506202031.TNchn822-lkp@intel.com/
+> > patch(4/4):
+> >  - Rename function names:
+> >         ls2k1000_mmc_regmap_config -> ls2k0500_mmc_regmap_config
+> >         loongson2_mmc_reorder_cmd_data -> ls2k0500_mmc_reorder_cmd_data
+> >         loongson2_mmc_set_internal_dma -> ls2k2000_mmc_set_internal_dma
+> >  - Use macro definitions for magic numbers.
+> >
+> > Link to V3:
+> > https://lore.kernel.org/all/cover.1750216134.git.zhoubinbin@loongson.cn=
+/
+> >
+> > V3:
+> > patch(1/4):
+> >  - Rename dt-binding file as loongson,ls2k0500-mmc.yaml.
+> > patch(2/4):
+> >  - Fix lkp error;
+> >     https://lore.kernel.org/all/202505130918.uanOGxju-lkp@intel.com/
+> >  - Add regulators support for ios ops;
+> >  - Add ack_sdio_irq() callback;
+> >  - Add MMC_CAP2_SDIO_IRQ_NOTHREAD flag;
+> > patch(3/4):
+> >  - Add Ack-by tag.
+> > patch(4/4):
+> >  - Update commit for fix_data_timeout().
+> >
+> > Link to V2:
+> > https://lore.kernel.org/all/cover.1746581751.git.zhoubinbin@loongson.cn=
+/
+> >
+> > V2:
+> > patch(1/4):
+> >  - Add reg define for each reg entry.
+> >
+> > patch(2/4):
+> >  - Put all code in the c-file;
+> >  - Use mmc_from_priv() instead of host->mmc;
+> >  - Use sdio_signal_irq() instead of mmc_signal_sdio_irq();
+> >  - Use devm_mmc_alloc_host() instead of mmc_alloc_host();
+> >  - Use mmc_regulator_get_supply();
+> >
+> > patch(4/4):
+> >  - Add fix_cmd_interrupt function which is needed by Loongson-2K2000.
+> >
+> > Link to V1:
+> > https://lore.kernel.org/linux-mmc/cover.1744273956.git.zhoubinbin@loong=
+son.cn/
+> >
+> > Binbin Zhou (4):
+> >   dt-bindings: mmc: Add Loongson-2K SD/SDIO/eMMC controller binding
+> >   mmc: loongson2: Add Loongson-2K SD/SDIO controller driver
+> >   dt-bindings: mmc: loongson,ls2k0500-mmc: Add compatible for
+> >     Loongson-2K2000
+> >   mmc: loongson2: Add Loongson-2K2000 SD/SDIO/eMMC controller driver
+> >
+> >  .../bindings/mmc/loongson,ls2k0500-mmc.yaml   |  112 ++
+> >  MAINTAINERS                                   |    7 +
+> >  drivers/mmc/host/Kconfig                      |   13 +
+> >  drivers/mmc/host/Makefile                     |    1 +
+> >  drivers/mmc/host/loongson2-mmc.c              | 1029 +++++++++++++++++
+> >  5 files changed, 1162 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/loongson,ls2k=
+0500-mmc.yaml
+> >  create mode 100644 drivers/mmc/host/loongson2-mmc.c
+> >
+> >
+> > base-commit: f5c755ef810009b85350884c483705bd04365370
+> > --
+> > 2.47.1
+> >
+> >
+>
+> The series applied for next, thanks!
+>
+> Note, I am leaving you to address/discuss Huacai's comment on patch1
+> as a new patch on top.
+Hmmm, if possible, I prefer Binbin to send a clean v5 with that
+modification. Or you modify it by yourself when applying.
 
-The MMC 5.0 instroduce command to flush cache
+Huacai
 
-
-Signed-off-by: Michele Dionisio <michele.dionisio@gmail.com>
----
- man/mmc.1  |  4 ++++
- mmc.c      |  5 +++++
- mmc.h      |  1 +
- mmc_cmds.c | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |  1 +
- 5 files changed, 61 insertions(+)
-
-diff --git a/man/mmc.1 b/man/mmc.1
-index bccabf3..665fe6d 100644
---- a/man/mmc.1
-+++ b/man/mmc.1
-@@ -109,6 +109,10 @@ NOTE! The cache is an optional feature on devices >= eMMC4.5.
- Disable the eMMC cache feature on <device>.
- NOTE! The cache is an optional feature on devices >= eMMC4.5.
- .TP
-+.BR "cache flush <device>"
-+Flush the eMMC cache on <device>.
-+NOTE! The cache is an optional feature on devices >= eMMC5.0.
-+.TP
- .BR "<cmd> --help"
- Show detailed help for a command or subset of commands.
- 
-diff --git a/mmc.c b/mmc.c
-index 6770a45..3c82504 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -231,6 +231,11 @@ static struct Command commands[] = {
- 		"Disable the eMMC cache feature on <device>.\n"
- 		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
- 	},
-+	{ do_cache_flush, -1,
-+	  "cache flush", "<device>\n"
-+		"flush the eMMC cache <device>.\n"
-+		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
-+	},
- 	{ do_read_csd, -1,
- 	  "csd read", "<device path>\n"
- 		  "Print CSD data from <device path>.\n"
-diff --git a/mmc.h b/mmc.h
-index 9fc22ec..2bb346b 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -152,6 +152,7 @@
- #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
- #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_1	53
- #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_0	52
-+#define EXT_CSD_FLUSH_CACHE     32
- #define EXT_CSD_CACHE_CTRL		33
- #define EXT_CSD_MODE_CONFIG		30
- #define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index b16ac69..1b26f31 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2870,6 +2870,56 @@ int do_cache_dis(int nargs, char **argv)
- 	return do_cache_ctrl(0, nargs, argv);
- }
- 
-+int do_cache_flush(int nargs, char **argv)
-+{
-+	__u8 ext_csd[512];
-+	int fd, ret;
-+	char *device;
-+
-+	device = argv[1];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		exit(1);
-+	}
-+
-+	if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
-+		fprintf(stderr,
-+			"The CACHE FLUSH option is only availabe on devices >= "
-+			"MMC 5.0 %s\n", device);
-+		exit(1);
-+	}
-+
-+	/* If the cache size is zero, this device does not have a cache */
-+	if (!(ext_csd[EXT_CSD_CACHE_SIZE_3] ||
-+			ext_csd[EXT_CSD_CACHE_SIZE_2] ||
-+			ext_csd[EXT_CSD_CACHE_SIZE_1] ||
-+			ext_csd[EXT_CSD_CACHE_SIZE_0])) {
-+		fprintf(stderr,
-+			"The CACHE option is not available on %s\n",
-+			device);
-+		exit(1);
-+	}
-+
-+	ret = write_extcsd_value(fd, EXT_CSD_FLUSH_CACHE, 1, 0);
-+	if (ret) {
-+		fprintf(stderr,
-+			"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
-+			EXT_CSD_FLUSH_CACHE, EXT_CSD_FLUSH_CACHE, device);
-+		exit(1);
-+	}
-+
-+	close(fd);
-+	return ret;
-+}
-+
- static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
- {
- 	int ret = 0;
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index ce35d3e..f767deb 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -50,6 +50,7 @@ int do_rpmb_sec_wp_mode_clear(int nargs, char **argv);
- int do_rpmb_sec_wp_en_read(int nargs, char **argv);
- int do_cache_en(int nargs, char **argv);
- int do_cache_dis(int nargs, char **argv);
-+int do_cache_flush(int nargs, char **argv);
- int do_ffu(int nargs, char **argv);
- int do_opt_ffu1(int nargs, char **argv);
- int do_opt_ffu2(int nargs, char **argv);
--- 
-2.43.0
-
+>
+> Kind regards
+> Uffe
