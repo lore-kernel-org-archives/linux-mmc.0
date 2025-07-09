@@ -1,243 +1,239 @@
-Received: from mail-yb1-f175.google.com (mail-yb1-f175.google.com [209.85.219.175])
+Received: from mail-oa1-f50.google.com (mail-oa1-f50.google.com [209.85.160.50])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 9B4B92DFA4D
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Jul 2025 14:47:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.175
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C26232E5439
+	for <linux-mmc@vger.kernel.org>; Wed,  9 Jul 2025 15:06:12 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752072444; cv=none; b=lkoGSqLeTU7tr5j0FHQu0/eI92G+FYPL40dCbSipY/ihAhHAje0gl6cG0FPIMDRSVkz9KNqY4hUFNViBSELWshiCn/u7Hst2zWsVVtFT5/BZy/XFYBJki1PImjIvT7s+AQp6V7pTeGx3LpViTL+c+a+0GB0wR98wdxGwTxWYRMw=
+	t=1752073575; cv=none; b=cbmROLqn6V8WsG4Jpyi7/W/HgfsFj8F0yayPTBzQ9jk8kBJIJ1jQwrw2VH6wA3z9Vt8Vg7miWIZM4xJyn5j0CyclKP+o5v7UjqIm/ks9Ocej3m2cJNunsFKV9fcKUMLHSuXOWxfyFr3dB2ZegXVW2hCyLKpxpNJPlK8742hzFu4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752072444; c=relaxed/simple;
-	bh=2y9TLBtmYiq/ol8HOFbrUlXzZccEQFXCKvLP2xlDRuU=;
+	s=arc-20240116; t=1752073575; c=relaxed/simple;
+	bh=o3VYnZZ+tgbvdHkK92dLWkBeuvHVxESaeyOIu1N/g/A=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=jZqaTaHo0wEnWIhAlfzp+TBXIoLZqTpJaLhFgIMrzmu873fdJfUJ9gmlkGbSUMGzRsS6xDhRxMov5/UuCkgq7BhrN6dC3cq8TD9WpO+UK/4zQzCRWxyX0eUIh1/zvLu+jwRb6oYMoCHTSQJbIXgc6u4nxtEFJxo6n2Hrs5WqN7U=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=WrWGlr+d; arc=none smtp.client-ip=209.85.219.175
+	 To:Cc:Content-Type; b=ohcw+xE/0iTukLpfAoTUXz5kzmF55Ml8RSgLwu9XOCvqzXdAwGV/6mkwxMtfJNfuxC0Gke0s/L0T4KUsPZLRMAEuu1y8dubAf4rGG5rVWTH2mLBamsG7vh1YW1VH9b5QSizlY3XoybSLnAnvhuOBTefiaWPgKL8VvniH5jZqneo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LejgoGzb; arc=none smtp.client-ip=209.85.160.50
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="WrWGlr+d"
-Received: by mail-yb1-f175.google.com with SMTP id 3f1490d57ef6-e7d9d480e6cso4242569276.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2025 07:47:22 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LejgoGzb"
+Received: by mail-oa1-f50.google.com with SMTP id 586e51a60fabf-2eb5cbe41e1so4296862fac.0
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2025 08:06:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1752072442; x=1752677242; darn=vger.kernel.org;
+        d=linaro.org; s=google; t=1752073572; x=1752678372; darn=vger.kernel.org;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=U8h6N8ymdvLxrPdThRLNevh87P5TYtoxTMzmRdyKUHE=;
-        b=WrWGlr+dXnlRLw9lLKSQBSe+X6Pl8zvEzg5gItxkUX1/AIXgaFPx/q9xViqcqgKo9Z
-         beEXnPzBa7+Syzfp/LZWkYizI9oABMzJ9jjl0ggv34M2/xah9huUCRMAs2RRjnhzMG/n
-         t/YsmyK5r9wv37Z9m6CRxPCb9nzkrTPlTIAmp/SN75W//N0nq+dtQOCkvMPOnDfuMvGr
-         PUsbCevXmdua1qTQHm338A/YdBa59bMoH4vtuNAGsbfYmWJDmv+NE1hlwvKrtYdzVU1S
-         PdRDOhqxK5uOUIfppWItHxJdrbaRnjlfZ85lPUxZj4p2P9r+DUI4T19D1pz1rIQo5igj
-         WLpw==
+        bh=dsnFkpfHpSLgnhHehYxT0SXfvXjOpGn3uyHH/tWMnN4=;
+        b=LejgoGzbRoD2/w5y0m+OWWyebygHSyOCnAu+w5C+iomnqqeHG7tdymtKVurHt91lNI
+         eXMG+liJd5ytd8pCNx3TXKY2SJDjeFYQq1vA1uYEIoCHvqvLy23e9+EFCnrHO2pyqgmd
+         TIz+h6YVXzQrXsR9pMjTYsBdkr8Dt6SR520++qBMRnsELXf5faLvuSL/iNu1OhtzLZfi
+         Bs4Of0mrhO5MziM5ntn9DT4A7E9HTbakXbYwibuMyCvKFf4hl72kH8+4bxCw/0gOFWCK
+         mKTVSuS+pniN2BXglroTrgwgW+BfavN4vmvllcFnPd8TZHVwaIvq0G0ZogW1VV4MQoN7
+         Iwkw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752072442; x=1752677242;
+        d=1e100.net; s=20230601; t=1752073572; x=1752678372;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=U8h6N8ymdvLxrPdThRLNevh87P5TYtoxTMzmRdyKUHE=;
-        b=h+8mbHZ9neFmd8+RfpNVjDre056vR+tHaWEVXOBuBFA777YhjcoL27i8g2hd2uhjQB
-         tuFARRnUWHQhnnc3Ywso+NabNg1yTw4dJDgQcppTVe2dYgHcb2dSM2HnNjKV6Bk9sX4T
-         YU1myP3FCH0zqbW/g2KDRjcC9P3HG3dgBy7mve2krxga4EM51hMoyMC/iEjvk+8g1Uv+
-         tHwU/LsEgt1Xj+74WCzhZyYdIIP1CSlgkNiVINbCv2BfuS3wshHOQIVNgxe3QoEpKRxi
-         egF1t/hp9sgUjf1Tr2M8LkCYXOY4Su4OL0tkWtnb7xoWlNl0DaZCMbdXtRu9q54Uzhbe
-         2G/Q==
-X-Forwarded-Encrypted: i=1; AJvYcCU5YDbOLdUysvcr8dO1k3QPSkZpZauGr0lPgn4N/onZEdCZggoAmHhgOcrXbqbwSyXtF/rM4ZQsVYQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxshEuSUk+vFsPj2Gih8ZACKeLuRlwwh44xqwgALnhWIlriKC4l
-	wdLDppA8cN0NmBxOtXDU7EhU1R83NN3SLDXJ7Wc4yH9JuPz8mauyeIlFjBDwU35uwWDOhITUZed
-	PkwgmfuyQA6REtFs2f2DaLHC3JrVrHxF7gq2dN4ly0w==
-X-Gm-Gg: ASbGnctDAriMru9pAYpuucXhj+85/Y4ZFAjNECKltpMF5h4tCy4D6MiHF3RpzLEHlG3
-	Qp3HxLz3WiKGHgZKOB9qUxAvUeO6InANsBeA7lw8iYX0rMTkdQqTLQWKB8s+TxlIklBY45xwgCL
-	7u2HhuRaRV1pRX0rVslgnxw6kmd/AJQyjUXKCc7PnI9VgY
-X-Google-Smtp-Source: AGHT+IHm50Q/Wpaz874mY4jdAmqECDmpXqUtZjcjDmDE66JzxsRL46uGd0Mc+kTBorrd8AfqMgZxO/JQZMz1b8Hsw+Y=
-X-Received: by 2002:a05:690c:3347:b0:70d:f3f9:1898 with SMTP id
- 00721157ae682-717b1a16f3fmr44393627b3.35.1752072441484; Wed, 09 Jul 2025
- 07:47:21 -0700 (PDT)
+        bh=dsnFkpfHpSLgnhHehYxT0SXfvXjOpGn3uyHH/tWMnN4=;
+        b=LKlezX4h6CJ6eApMga0zzkBrqQLdDMvHykys/D3fU6E5bx3LNhtZZiczPRcfja3T3j
+         mLBTSMCuH6+utnizuHgZVJBr78ZGW9jZTCpKM7Deh6XTrbsIF4jTsM2/8LVB/L9TMupz
+         P5fVsgnn8iMc+CqKEeoPEBb71TjLIBRmL0pf8nnzq5bcPj34oltuH+plASSMiR2v2OCa
+         ex9qB0wIixFfC11etxkGnNWNrjbIQw950XEgtjDB5Q7Qz4+XSM19UuWm77YgTNPEJLvi
+         QyDXHACNxEG0QaHlDchAgqCWdu6bU68RuHOIbYLruQug0LMaJGXzYifJko4kX4T4T6GC
+         72sw==
+X-Gm-Message-State: AOJu0Yz4uOSLMQparSabNpDenu/vNIxvBEiFCzolLjeFzAJWNHOzav19
+	LKpyX3doCDo6sOT/he7sMIAA5YJLRzb7UpxV13fnjhiyYtHheINyT2OYffKOmLNWb8p9Kqd+3o6
+	rM8N2+mQPXa4X8le688i0oHvQba4j1F2Q1xA2kwOxcg==
+X-Gm-Gg: ASbGncvFQAzIerwm+baO/tzOcGnpNbz8JjGfUnMMLzCCbFEbuwB1lHHCo3Pj3APdbWQ
+	xwLBxp6v84vv4hklfL8eI0+32Embva6A2ewgmpv16YLPhKd9TtP2Y4JdY8ELYYpZPFhEifm1Tu3
+	LWA2328rtcRjAGZlIPZENh3sA2uRt9pa60usOcObZeqfpPTAeM7oYAgHc=
+X-Google-Smtp-Source: AGHT+IEoIWgN9FHK8lgM2gGwznFgQbiF3DbfPGXKatkisn2IE+PTbhiG0+Lt8kkPL/tOOIf7zyi6ttIW9vTDxhV9tVs=
+X-Received: by 2002:a05:6870:3329:b0:2eb:a8fb:863c with SMTP id
+ 586e51a60fabf-2fef871c3b9mr2055828fac.19.1752073571432; Wed, 09 Jul 2025
+ 08:06:11 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <cover.1751898225.git.benoit.monin@bootlin.com> <346c422139b658b2ba6272f7ba7b07374008760f.1751898225.git.benoit.monin@bootlin.com>
-In-Reply-To: <346c422139b658b2ba6272f7ba7b07374008760f.1751898225.git.benoit.monin@bootlin.com>
+References: <20250619085620.144181-1-avri.altman@sandisk.com>
+ <20250619085620.144181-3-avri.altman@sandisk.com> <CAPDyKFrbjCi4VdEdeUoVG7wbgwXS2BcOZV4yzh8PiTc_V+rxug@mail.gmail.com>
+ <PH7PR16MB6196923468505A9E81C72A69E549A@PH7PR16MB6196.namprd16.prod.outlook.com>
+In-Reply-To: <PH7PR16MB6196923468505A9E81C72A69E549A@PH7PR16MB6196.namprd16.prod.outlook.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Jul 2025 16:46:45 +0200
-X-Gm-Features: Ac12FXyoOH3Cz2x3GZX3zU25hhNwfDgVI-X6k3TawPF3ZhvpR4wWP9rJxod6_uY
-Message-ID: <CAPDyKFp=fvyUhkeiw5TmYbELM+MiC8Do20afrainOyq_pLvSHw@mail.gmail.com>
-Subject: Re: [PATCH v2 1/4] mmc: core: add mmc_read_blocks to mmc_ops
-To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org, 
-	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
-	Tawfik Bayouk <tawfik.bayouk@mobileye.com>, Gregory CLEMENT <gregory.clement@bootlin.com>, 
-	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+Date: Wed, 9 Jul 2025 17:05:35 +0200
+X-Gm-Features: Ac12FXw4izV7yEntC-xOPd2IbjfL_R5Ol4qvcliu4FarntwAyL3EWBV0D1Bead8
+Message-ID: <CAPDyKFooHB5b9YXhifr8XLbw5OB-Nk=eik0smtRbKLYkEOBRog@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: sd: Fix and simplify SD card current limit handling
+To: Avri Altman <Avri.Altman@sandisk.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sarthak Garg <quic_sartgarg@quicinc.com>, 
+	Abraham Bachrach <abe@skydio.com>, Prathamesh Shete <pshete@nvidia.com>, Bibek Basu <bbasu@nvidia.com>, 
+	Sagiv Aharonoff <saharonoff@nvidia.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, 7 Jul 2025 at 17:24, Beno=C3=AEt Monin <benoit.monin@bootlin.com> w=
-rote:
->
-> Add a generic function to read some blocks of data from the MMC, to be
-> used by drivers as part of their tuning.
->
-> Signed-off-by: Beno=C3=AEt Monin <benoit.monin@bootlin.com>
-> ---
->  drivers/mmc/core/card.h    | 10 ++++++
->  drivers/mmc/core/mmc_ops.c | 69 ++++++++++++++++++++++++++++++++++++++
->  include/linux/mmc/host.h   |  3 ++
->  3 files changed, 82 insertions(+)
->
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index 9cbdd240c3a7d..93fd502c1f5fc 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -11,6 +11,7 @@
->  #define _MMC_CORE_CARD_H
->
->  #include <linux/mmc/card.h>
-> +#include <linux/mmc/mmc.h>
->
->  #define mmc_card_name(c)       ((c)->cid.prod_name)
->  #define mmc_card_id(c)         (dev_name(&(c)->dev))
-> @@ -300,4 +301,13 @@ static inline int mmc_card_no_uhs_ddr50_tuning(const=
- struct mmc_card *c)
->         return c->quirks & MMC_QUIRK_NO_UHS_DDR50_TUNING;
->  }
->
-> +static inline bool mmc_card_can_cmd23(struct mmc_card *card)
-> +{
-> +       return ((mmc_card_mmc(card) &&
-> +                card->csd.mmca_vsn >=3D CSD_SPEC_VER_3) ||
-> +               (mmc_card_sd(card) && !mmc_card_ult_capacity(card) &&
-> +                card->scr.cmds & SD_SCR_CMD23_SUPPORT)) &&
-> +               !(card->quirks & MMC_QUIRK_BLK_NO_CMD23);
+[...]
 
-First, please make the above part a separate patch. It makes sense to
-add a helper for this, as you show in patch3 and patch4. I also
-recommend that these patches should also be re-ordered so they come
-first in the series.
-
-Second, I don't think we should mix mmc_card_can* functions with the
-card-quirks. Better to have two separate helpers, especially since
-CMD23 is used for other things too, like RPMB and reliable writes, for
-example. Thus I suggest we add:
-
-mmc_card_can_cmd23() - which looks at what the card supports, similar
-to above without MMC_QUIRK_BLK_NO_CMD23. Put the definition in
-drivers/mmc/core/core.h and export the symbols, similar to what we do
-for mmc_card_can_erase() and friends.
-
-mmc_card_broken_blk_cmd23() - which should only check
-MMC_QUIRK_BLK_NO_CMD23. This belongs in drivers/mmc/core/card.h.
-
-> +}
-> +
->  #endif
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 66283825513cb..848d8aa3ff2b5 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -1077,3 +1077,72 @@ int mmc_sanitize(struct mmc_card *card, unsigned i=
-nt timeout_ms)
->         return err;
->  }
->  EXPORT_SYMBOL_GPL(mmc_sanitize);
-> +
-> +/**
-> + * mmc_read_blocks() - read data blocks from the mmc
-> + * @card: mmc card to read from, can be NULL
-> + * @host: mmc host doing the read
-> + * @blksz: data block size
-> + * @blocks: number of blocks to read
-> + * @blk_addr: first block address
-> + * @buf: output buffer
-> + * @len: size of the buffer
-> + *
-> + * Read one or more blocks of data from the mmc. This is a low-level hel=
-per for
-> + * tuning operation. If card is NULL, it is assumed that CMD23 can be us=
-ed for
-> + * multi-block read.
-> + *
-> + * Return: 0 in case of success, otherwise -EIO
+> >
+> > >
+> > >         /*
+> > >          * Current limit switch is only defined for SDR50, SDR104, an=
+d
+> > > DDR50 @@ -575,33 +574,24 @@ static int sd_set_current_limit(struct
+> > mmc_card *card, u8 *status)
+> > >         max_current =3D sd_get_host_max_current(card->host);
+> >
+> > Looking at the implementation of sd_get_host_max_current(), it's very l=
+imiting.
+> >
+> > For example, if we are using MMC_VDD_34_35 or MMC_VDD_35_36, the
+> > function returns 0. Maybe this is good enough based upon those host dri=
+vers that
+> > actually sets host->max_current_180|300|330, but it kind of looks wrong=
+ to me.
+> >
+> > I think we should re-work this interface to let us retrieve the maximum=
+ current
+> > from the host in a more flexible way. What we are really looking for is=
+ a value in
+> > Watt instead, I think. Don't get me wrong, this deserved it's own stand=
+alone patch
+> > on top of $subject patch.
+> I still need to consult internally, but Yes - I agree.
+> Ultimately however, CMD6 expects us to fill the current limit value, so m=
+ultiplying by voltage and dividing it back seems superfluous.
+> How about adding to missing vdd and treat them as max_current_330, like i=
+n sdhci_get_vdd_value?
+> Maybe something like:
+>
+> +/*
+> + * Get host's max current setting at its current voltage normalized to 3=
+.6
+> + * volt which is the voltage in which the card defines its limits
 > + */
-> +int mmc_read_blocks(struct mmc_card *card, struct mmc_host *host,
-> +                   unsigned int blksz, unsigned int blocks,
-> +                   unsigned int blk_addr, void *buf, unsigned int len)
+> +static u32 sd_host_normalized_max_current(struct mmc_host *host)
 > +{
-> +       struct mmc_request mrq =3D {};
-> +       struct mmc_command sbc =3D {};
-> +       struct mmc_command cmd =3D {};
-> +       struct mmc_command stop =3D {};
-> +       struct mmc_data data =3D {};
-> +       struct scatterlist sg;
+> +       u32 voltage, max_current;
 > +
-> +       if (blocks > 1) {
-> +               if (mmc_host_can_cmd23(host) &&
-> +                   (!card || mmc_card_can_cmd23(card))) {
-> +                       mrq.sbc =3D &sbc;
-> +                       sbc.opcode =3D MMC_SET_BLOCK_COUNT;
-> +                       sbc.arg =3D blocks;
-> +                       sbc.flags =3D MMC_RSP_R1 | MMC_CMD_AC;
-> +               }
-> +               cmd.opcode =3D MMC_READ_MULTIPLE_BLOCK;
-> +               mrq.stop =3D &stop;
-> +               stop.opcode =3D MMC_STOP_TRANSMISSION;
-> +               stop.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +       } else {
-> +               cmd.opcode =3D MMC_READ_SINGLE_BLOCK;
+> +       voltage =3D 1 << host->ios.vdd;
+> +       switch (voltage) {
+> +       case MMC_VDD_165_195:
+> +               max_current =3D host->max_current_180 * 180 / 360;
+> +               break;
+> +       case MMC_VDD_29_30:
+> +       case MMC_VDD_30_31:
+> +               max_current =3D host->max_current_300 * 300 / 360;
+> +               break;
+> +       case MMC_VDD_32_33:
+> +       case MMC_VDD_33_34:
+> +       case MMC_VDD_34_35:
+> +       case MMC_VDD_35_36:
+> +               max_current =3D host->max_current_330 * 330 / 360;
+> +               break;
+> +       default:
+> +               max_current =3D 0;
 > +       }
 > +
-> +       mrq.cmd =3D &cmd;
-> +       cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-> +
-> +       mrq.data =3D &data;
-> +       data.flags =3D MMC_DATA_READ;
-> +       data.blksz =3D blksz;
-> +       data.blocks =3D blocks;
-> +       data.blk_addr =3D blk_addr;
-> +       data.sg =3D &sg;
-> +       data.sg_len =3D 1;
-> +       if (card)
-> +               mmc_set_data_timeout(&data, card);
-> +       else
-> +               data.timeout_ns =3D 1000000000;
-> +
-> +       sg_init_one(&sg, buf, len);
-> +
-> +       mmc_wait_for_req(host, &mrq);
-> +
-> +       if (sbc.error || cmd.error || data.error)
-> +               return -EIO;
-> +
-> +       return 0;
+> +       return max_current;
 > +}
-> +EXPORT_SYMBOL_GPL(mmc_read_blocks);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 68f09a955a902..72196817a6f0f 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -743,5 +743,8 @@ int mmc_send_status(struct mmc_card *card, u32 *statu=
-s);
->  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
->  int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
->  int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-> +int mmc_read_blocks(struct mmc_card *card, struct mmc_host *host,
-> +                   unsigned int blksz, unsigned int blocks,
-> +                   unsigned int blk_addr, void *buf, unsigned int len);
 
-I really think we must avoid exporting such a generic function. This
-becomes visible outside the mmc subsystem and I am worried that it
-will be abused.
+I think it's way better than the current implementation in
+sd_get_host_max_current().
 
-Can we perhaps make it harder to integrate with the tuning support on
-the core, somehow? I haven't thought much about it, but maybe you can
-propose something along those lines - otherwise I will try to think of
-another way to do it.
+Still, I still think it's weird to have three different variables in
+the host, max_current_180, max_current_300 and max_current_330. That
+seems like an SDHCI specific thing to me, unless I am mistaken.
+
+I would rather see a more flexible interface where we move away from
+using host->max_current_180|300|330 entirely and have a function that
+returns the supported limit (whatever unit we decide). Maybe it also
+makes sense to provide some additional helpers from the core that host
+drivers can call, to fetch/translate the values it should provide for
+this.
+
+> +
+>  /* Get host's max current setting at its current voltage */
+>  static u32 sd_get_host_max_current(struct mmc_host *host)
+>  {
+> @@ -572,7 +602,7 @@ static int sd_set_current_limit(struct mmc_card *card=
+, u8 *status)
+>          * Host has different current capabilities when operating at
+>          * different voltages, so find out its max current first.
+>          */
+> -       max_current =3D sd_get_host_max_current(card->host);
+> +       max_current =3D sd_host_normalized_max_current(card->host);
+>
+>
+> >
+> > >
+> > >         /*
+> > > -        * We only check host's capability here, if we set a limit th=
+at is
+> > > -        * higher than the card's maximum current, the card will be u=
+sing its
+> > > -        * maximum current, e.g. if the card's maximum current is 300=
+ma, and
+> > > -        * when we set current limit to 200ma, the card will draw 200=
+ma, and
+> > > -        * when we set current limit to 400/600/800ma, the card will =
+draw its
+> > > -        * maximum 300ma from the host.
+> > > -        *
+> > > -        * The above is incorrect: if we try to set a current limit t=
+hat is
+> > > -        * not supported by the card, the card can rightfully error o=
+ut the
+> > > -        * attempt, and remain at the default current limit.  This re=
+sults
+> > > -        * in a 300mA card being limited to 200mA even though the hos=
+t
+> > > -        * supports 800mA. Failures seen with SanDisk 8GB UHS cards w=
+ith
+> > > -        * an iMX6 host. --rmk
+> >
+> > I think it's important to keep some of the information from above, as i=
+t still stands,
+> > if I understand correctly.
+> I believe this highlights a common misunderstanding: it conflates the car=
+d=E2=80=99s capabilities (i.e., the maximum current it can support)
+> with its actual power consumption, which depends on the required bus spee=
+d and operating conditions.
+> The card will never specify or attempt to draw more current than it is ca=
+pable of handling.
+> If a current limit is set that exceeds the card=E2=80=99s capability, the=
+ card will not draw beyond its maximum;
+> instead, it will operate within its own limits or may reject unsupported =
+current limit settings as per the specification.
+> Therefore, the logic should distinguish between the card=E2=80=99s advert=
+ised capabilities and its real-time power requirements,
+> ensuring we do not confuse the two concepts.
+
+I understand what you are saying and it makes perfect sense to me.
+
+My point is, I think we need some more information in the comment
+rather than the two lines below that you propose. It doesn't matter to
+me if you drop the comments above, just make sure we understand what
+goes on here by giving more details, then I will be happy. :-)
 
 >
->  #endif /* LINUX_MMC_HOST_H */
+> >
+> > > +        * query the card of its maximun current/power consumption gi=
+ven the
+> > > +        * bus speed mode
+> > >          */
+> > > -       if (max_current >=3D 800 &&
+> > > -           card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
+> > > +       err =3D mmc_sd_switch(card, 0, 0, card->sd_bus_speed, status)=
+;
+> > > +       if (err)
+> > > +               return err;
+> > > +
+> > > +       card_needs =3D status[1] | status[0] << 8;
+> >
+
+[...]
 
 Kind regards
 Uffe
