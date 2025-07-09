@@ -1,239 +1,96 @@
-Received: from mail-oa1-f50.google.com (mail-oa1-f50.google.com [209.85.160.50])
+Received: from mx.olsak.net (unknown [37.205.8.231])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C26232E5439
-	for <linux-mmc@vger.kernel.org>; Wed,  9 Jul 2025 15:06:12 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.160.50
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C28CA2253AB;
+	Wed,  9 Jul 2025 17:33:43 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752073575; cv=none; b=cbmROLqn6V8WsG4Jpyi7/W/HgfsFj8F0yayPTBzQ9jk8kBJIJ1jQwrw2VH6wA3z9Vt8Vg7miWIZM4xJyn5j0CyclKP+o5v7UjqIm/ks9Ocej3m2cJNunsFKV9fcKUMLHSuXOWxfyFr3dB2ZegXVW2hCyLKpxpNJPlK8742hzFu4=
+	t=1752082507; cv=none; b=rohU++IQ6s2ip2CHGMLC2KapL+6mvfJfYlOPnMiaE73pSdK5ydKYIqN7PGn5skRPVT7e2w4hnIueU+66pfG8w2ZwtlkA44Jqt6YghMgkJyNXberUSCLpPIVK49rDRj0Og2rpSFeI2kyrkb/6XvR6St9DVvsCeUfJEm0v/0deIK8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752073575; c=relaxed/simple;
-	bh=o3VYnZZ+tgbvdHkK92dLWkBeuvHVxESaeyOIu1N/g/A=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=ohcw+xE/0iTukLpfAoTUXz5kzmF55Ml8RSgLwu9XOCvqzXdAwGV/6mkwxMtfJNfuxC0Gke0s/L0T4KUsPZLRMAEuu1y8dubAf4rGG5rVWTH2mLBamsG7vh1YW1VH9b5QSizlY3XoybSLnAnvhuOBTefiaWPgKL8VvniH5jZqneo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=LejgoGzb; arc=none smtp.client-ip=209.85.160.50
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1752082507; c=relaxed/simple;
+	bh=+64fnXIXSgNnCIG6if9Uadk28NbjJVWxSfgeT94QG74=;
+	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
+	 MIME-Version:Content-Type; b=gF6q8gyTZEBXhwbOFTwHIYcQIUqMcTZ9JIFM7bddx/WOxV9RL1kRBxapVSUvYzGlM2RsBz98u90FyPPGcefcIQpyXdduzwElpETeoPkbmf+ety9S9Ta1nWHfpiIj5k8CJ9m6efEDq9+y+AWXKZGFj/WZWVSBzvPFQTiIYbD1cF8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=Ot9uvKj8; arc=none smtp.client-ip=37.205.8.231
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LejgoGzb"
-Received: by mail-oa1-f50.google.com with SMTP id 586e51a60fabf-2eb5cbe41e1so4296862fac.0
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Jul 2025 08:06:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1752073572; x=1752678372; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dsnFkpfHpSLgnhHehYxT0SXfvXjOpGn3uyHH/tWMnN4=;
-        b=LejgoGzbRoD2/w5y0m+OWWyebygHSyOCnAu+w5C+iomnqqeHG7tdymtKVurHt91lNI
-         eXMG+liJd5ytd8pCNx3TXKY2SJDjeFYQq1vA1uYEIoCHvqvLy23e9+EFCnrHO2pyqgmd
-         TIz+h6YVXzQrXsR9pMjTYsBdkr8Dt6SR520++qBMRnsELXf5faLvuSL/iNu1OhtzLZfi
-         Bs4Of0mrhO5MziM5ntn9DT4A7E9HTbakXbYwibuMyCvKFf4hl72kH8+4bxCw/0gOFWCK
-         mKTVSuS+pniN2BXglroTrgwgW+BfavN4vmvllcFnPd8TZHVwaIvq0G0ZogW1VV4MQoN7
-         Iwkw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752073572; x=1752678372;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=dsnFkpfHpSLgnhHehYxT0SXfvXjOpGn3uyHH/tWMnN4=;
-        b=LKlezX4h6CJ6eApMga0zzkBrqQLdDMvHykys/D3fU6E5bx3LNhtZZiczPRcfja3T3j
-         mLBTSMCuH6+utnizuHgZVJBr78ZGW9jZTCpKM7Deh6XTrbsIF4jTsM2/8LVB/L9TMupz
-         P5fVsgnn8iMc+CqKEeoPEBb71TjLIBRmL0pf8nnzq5bcPj34oltuH+plASSMiR2v2OCa
-         ex9qB0wIixFfC11etxkGnNWNrjbIQw950XEgtjDB5Q7Qz4+XSM19UuWm77YgTNPEJLvi
-         QyDXHACNxEG0QaHlDchAgqCWdu6bU68RuHOIbYLruQug0LMaJGXzYifJko4kX4T4T6GC
-         72sw==
-X-Gm-Message-State: AOJu0Yz4uOSLMQparSabNpDenu/vNIxvBEiFCzolLjeFzAJWNHOzav19
-	LKpyX3doCDo6sOT/he7sMIAA5YJLRzb7UpxV13fnjhiyYtHheINyT2OYffKOmLNWb8p9Kqd+3o6
-	rM8N2+mQPXa4X8le688i0oHvQba4j1F2Q1xA2kwOxcg==
-X-Gm-Gg: ASbGncvFQAzIerwm+baO/tzOcGnpNbz8JjGfUnMMLzCCbFEbuwB1lHHCo3Pj3APdbWQ
-	xwLBxp6v84vv4hklfL8eI0+32Embva6A2ewgmpv16YLPhKd9TtP2Y4JdY8ELYYpZPFhEifm1Tu3
-	LWA2328rtcRjAGZlIPZENh3sA2uRt9pa60usOcObZeqfpPTAeM7oYAgHc=
-X-Google-Smtp-Source: AGHT+IEoIWgN9FHK8lgM2gGwznFgQbiF3DbfPGXKatkisn2IE+PTbhiG0+Lt8kkPL/tOOIf7zyi6ttIW9vTDxhV9tVs=
-X-Received: by 2002:a05:6870:3329:b0:2eb:a8fb:863c with SMTP id
- 586e51a60fabf-2fef871c3b9mr2055828fac.19.1752073571432; Wed, 09 Jul 2025
- 08:06:11 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="Ot9uvKj8"
+DKIM-Signature: a=rsa-sha256; bh=+64fnXIXSgNnCIG6if9Uadk28NbjJVWxSfgeT94QG74=;
+ c=relaxed/relaxed; d=dujemihanovic.xyz;
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1752082383; v=1; x=1752514383;
+ b=Ot9uvKj88SCNKZXhCwSLc7Mlc+19lqQn3riLUfvGUlHkwpR12dYtzxqtfXX5WgIcETyoHYb7
+ 3zAcaawntNY5dakJuNcoE1wSv36nxkOGQeX3JcxmCalOcx9b7noP7k3FmYytVXu75jbrtsusvQ2
+ B9ukt85xBF8QA8e7X0pQZTdQF37Slb82WPUM6haiBwPokSNNZNNYi6g0qG2RJnAia1gg02HeNAc
+ +bbAWjg+znV+Km5vvE31WZ2KBKK/w0Pm3p/T8N4WCbfgnvTkBlbC/NoAmYOng2vON81cbUVH5ma
+ 4sWmXdFHX1qlpqj/hc2csN530rcCW308NmGI7SLoylq9A==
+Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
+ ESMTPS id 66672483; Wed, 09 Jul 2025 19:33:03 +0200
+From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
+To: Krzysztof Kozlowski <krzk@kernel.org>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, Lubomir Rintel <lkundrak@v3.sk>,
+ Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
+ Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>,
+ Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
+ Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>,
+ "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>, David Wronek <david@mainlining.org>,
+ Karel Balej <balejk@matfyz.cz>, devicetree@vger.kernel.org,
+ linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+ linux-hardening@vger.kernel.org, phone-devel@vger.kernel.org,
+ ~postmarketos/upstreaming@lists.sr.ht, soc@lists.linux.dev,
+ linux-mmc@vger.kernel.org
+Subject:
+ Re: [PATCH v16 1/5] dt-bindings: mmc: sdhci-pxa: restrict pinctrl to pxav1
+Date: Wed, 09 Jul 2025 19:33:01 +0200
+Message-ID: <3379810.44csPzL39Z@radijator>
+In-Reply-To: <20250709-spectacular-goat-of-tenacity-ced55a@krzk-bin>
+References:
+ <20250708-pxa1908-lkml-v16-0-b4392c484180@dujemihanovic.xyz>
+ <20250708-pxa1908-lkml-v16-1-b4392c484180@dujemihanovic.xyz>
+ <20250709-spectacular-goat-of-tenacity-ced55a@krzk-bin>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250619085620.144181-1-avri.altman@sandisk.com>
- <20250619085620.144181-3-avri.altman@sandisk.com> <CAPDyKFrbjCi4VdEdeUoVG7wbgwXS2BcOZV4yzh8PiTc_V+rxug@mail.gmail.com>
- <PH7PR16MB6196923468505A9E81C72A69E549A@PH7PR16MB6196.namprd16.prod.outlook.com>
-In-Reply-To: <PH7PR16MB6196923468505A9E81C72A69E549A@PH7PR16MB6196.namprd16.prod.outlook.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 9 Jul 2025 17:05:35 +0200
-X-Gm-Features: Ac12FXw4izV7yEntC-xOPd2IbjfL_R5Ol4qvcliu4FarntwAyL3EWBV0D1Bead8
-Message-ID: <CAPDyKFooHB5b9YXhifr8XLbw5OB-Nk=eik0smtRbKLYkEOBRog@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: core: sd: Fix and simplify SD card current limit handling
-To: Avri Altman <Avri.Altman@sandisk.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sarthak Garg <quic_sartgarg@quicinc.com>, 
-	Abraham Bachrach <abe@skydio.com>, Prathamesh Shete <pshete@nvidia.com>, Bibek Basu <bbasu@nvidia.com>, 
-	Sagiv Aharonoff <saharonoff@nvidia.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
 
-[...]
+On Wednesday, 9 July 2025 09:32:06 Central European Summer Time Krzysztof=20
+Kozlowski wrote:
+> On Tue, Jul 08, 2025 at 07:09:46PM +0200, Duje Mihanovi=C4=87 wrote:
+> > The current pinctrl properties apply only to the pxav1 controller.
+>=20
+> Why they are not applicable for pxav3?
 
-> >
-> > >
-> > >         /*
-> > >          * Current limit switch is only defined for SDR50, SDR104, an=
-d
-> > > DDR50 @@ -575,33 +574,24 @@ static int sd_set_current_limit(struct
-> > mmc_card *card, u8 *status)
-> > >         max_current =3D sd_get_host_max_current(card->host);
-> >
-> > Looking at the implementation of sd_get_host_max_current(), it's very l=
-imiting.
-> >
-> > For example, if we are using MMC_VDD_34_35 or MMC_VDD_35_36, the
-> > function returns 0. Maybe this is good enough based upon those host dri=
-vers that
-> > actually sets host->max_current_180|300|330, but it kind of looks wrong=
- to me.
-> >
-> > I think we should re-work this interface to let us retrieve the maximum=
- current
-> > from the host in a more flexible way. What we are really looking for is=
- a value in
-> > Watt instead, I think. Don't get me wrong, this deserved it's own stand=
-alone patch
-> > on top of $subject patch.
-> I still need to consult internally, but Yes - I agree.
-> Ultimately however, CMD6 expects us to fill the current limit value, so m=
-ultiplying by voltage and dividing it back seems superfluous.
-> How about adding to missing vdd and treat them as max_current_330, like i=
-n sdhci_get_vdd_value?
-> Maybe something like:
->
-> +/*
-> + * Get host's max current setting at its current voltage normalized to 3=
-.6
-> + * volt which is the voltage in which the card defines its limits
-> + */
-> +static u32 sd_host_normalized_max_current(struct mmc_host *host)
-> +{
-> +       u32 voltage, max_current;
-> +
-> +       voltage =3D 1 << host->ios.vdd;
-> +       switch (voltage) {
-> +       case MMC_VDD_165_195:
-> +               max_current =3D host->max_current_180 * 180 / 360;
-> +               break;
-> +       case MMC_VDD_29_30:
-> +       case MMC_VDD_30_31:
-> +               max_current =3D host->max_current_300 * 300 / 360;
-> +               break;
-> +       case MMC_VDD_32_33:
-> +       case MMC_VDD_33_34:
-> +       case MMC_VDD_34_35:
-> +       case MMC_VDD_35_36:
-> +               max_current =3D host->max_current_330 * 330 / 360;
-> +               break;
-> +       default:
-> +               max_current =3D 0;
-> +       }
-> +
-> +       return max_current;
-> +}
+state_cmd_gpio is used for working around a PXA168 SDIO erratum. That SoC u=
+ses=20
+the pxav1 controller and no such erratum exists on any of the other PXA SoC=
+s.
 
-I think it's way better than the current implementation in
-sd_get_host_max_current().
+> > Adding one default pinctrl node to a pxav3 controller therefore causes
+> > a schema warning.
+> >=20
+> > Check the existing properties only on pxav1. pxav2 and pxav3 may add
+> > their own set of pinctrl properties if and when needed.
+>=20
+> This should be rather made complete here, because properties should be
+> defined in top-level, not in allOf: block. Strictly speaking pinctrl-xxx
+> are defined in core schema, but still the binding should follow same
+> rule - define them in top.
 
-Still, I still think it's weird to have three different variables in
-the host, max_current_180, max_current_300 and max_current_330. That
-seems like an SDHCI specific thing to me, unless I am mistaken.
+Would it then be acceptable to declare the pinctrl properties in the top le=
+vel=20
+and define each controller's respective description: and items: in the allO=
+f:=20
+block?
 
-I would rather see a more flexible interface where we move away from
-using host->max_current_180|300|330 entirely and have a function that
-returns the supported limit (whatever unit we decide). Maybe it also
-makes sense to provide some additional helpers from the core that host
-drivers can call, to fetch/translate the values it should provide for
-this.
+Regards,
+=2D-
+Duje
 
-> +
->  /* Get host's max current setting at its current voltage */
->  static u32 sd_get_host_max_current(struct mmc_host *host)
->  {
-> @@ -572,7 +602,7 @@ static int sd_set_current_limit(struct mmc_card *card=
-, u8 *status)
->          * Host has different current capabilities when operating at
->          * different voltages, so find out its max current first.
->          */
-> -       max_current =3D sd_get_host_max_current(card->host);
-> +       max_current =3D sd_host_normalized_max_current(card->host);
->
->
-> >
-> > >
-> > >         /*
-> > > -        * We only check host's capability here, if we set a limit th=
-at is
-> > > -        * higher than the card's maximum current, the card will be u=
-sing its
-> > > -        * maximum current, e.g. if the card's maximum current is 300=
-ma, and
-> > > -        * when we set current limit to 200ma, the card will draw 200=
-ma, and
-> > > -        * when we set current limit to 400/600/800ma, the card will =
-draw its
-> > > -        * maximum 300ma from the host.
-> > > -        *
-> > > -        * The above is incorrect: if we try to set a current limit t=
-hat is
-> > > -        * not supported by the card, the card can rightfully error o=
-ut the
-> > > -        * attempt, and remain at the default current limit.  This re=
-sults
-> > > -        * in a 300mA card being limited to 200mA even though the hos=
-t
-> > > -        * supports 800mA. Failures seen with SanDisk 8GB UHS cards w=
-ith
-> > > -        * an iMX6 host. --rmk
-> >
-> > I think it's important to keep some of the information from above, as i=
-t still stands,
-> > if I understand correctly.
-> I believe this highlights a common misunderstanding: it conflates the car=
-d=E2=80=99s capabilities (i.e., the maximum current it can support)
-> with its actual power consumption, which depends on the required bus spee=
-d and operating conditions.
-> The card will never specify or attempt to draw more current than it is ca=
-pable of handling.
-> If a current limit is set that exceeds the card=E2=80=99s capability, the=
- card will not draw beyond its maximum;
-> instead, it will operate within its own limits or may reject unsupported =
-current limit settings as per the specification.
-> Therefore, the logic should distinguish between the card=E2=80=99s advert=
-ised capabilities and its real-time power requirements,
-> ensuring we do not confuse the two concepts.
 
-I understand what you are saying and it makes perfect sense to me.
-
-My point is, I think we need some more information in the comment
-rather than the two lines below that you propose. It doesn't matter to
-me if you drop the comments above, just make sure we understand what
-goes on here by giving more details, then I will be happy. :-)
-
->
-> >
-> > > +        * query the card of its maximun current/power consumption gi=
-ven the
-> > > +        * bus speed mode
-> > >          */
-> > > -       if (max_current >=3D 800 &&
-> > > -           card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
-> > > +       err =3D mmc_sd_switch(card, 0, 0, card->sd_bus_speed, status)=
-;
-> > > +       if (err)
-> > > +               return err;
-> > > +
-> > > +       card_needs =3D status[1] | status[0] << 8;
-> >
-
-[...]
-
-Kind regards
-Uffe
