@@ -1,70 +1,70 @@
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com [209.85.221.44])
+Received: from mail-wr1-f46.google.com (mail-wr1-f46.google.com [209.85.221.46])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2B2E02550D8
-	for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2025 11:57:19 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.44
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F55C2512D5
+	for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2025 11:57:18 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.46
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752148640; cv=none; b=IWvLMlHpdLEW58/ycaTCvnHfRBuR1R5jhf1kg+FhWD3ESnYX3tJs0N8+R1wTkvTJ0Ed8AXBi2BUJOm8XqkrGMuEmmkEhI4+Oa0mhuKd0whO44X2XB82Dx9GxDJGtTVAJZZn6PRqu/uedKqLlCEf4KBmHMQAsY8CinddJe9IYOp8=
+	t=1752148640; cv=none; b=d1/yJ3npLAMtwXneRY2aOHm4qtVWvrqcn3IuZZaNt+t/eQZw7x/F5ubjQf9lVdhZkTikim12c8t+NxTdk4VIo6HJ7txelw8fenBxKDZ20U3etGL1uMwXPMhKxqaPUvlia7xfq689mHRW1Z4a9HGOkeryZ5SPVJ6BwpDIycsF5sM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752148640; c=relaxed/simple;
-	bh=hC+I/qxnsicGhBSjNc6oecVaLe+pdSOSn9hwoAhWqNE=;
+	bh=5CHUH6a1f97IIC538ZJby+c8UkArNLi/mhEXHzwRaPg=;
 	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version; b=IBlp1/RU71yuHL8A7bnZMN0lMW2zPZGZm3cC8hB2s9Wy1xrV2JQauLzB3EvUPkS8vCp+cD5o9sD7BGjroei9C1XH/nCA7ycGUbg0nEZ7ueazoohBm42Dfv4hPzh1+2NYMpVDpCLZb0QoXgpMd+NFy+i2CErS0BQjne8Z2yb5Rx0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=jnE+d+1C; arc=none smtp.client-ip=209.85.221.44
+	 MIME-Version; b=LC+4tEXG/JMuckqAWFhEoL3jhRDb/fbum5QDKP9+di1Ytfnb/CBwYzYUKPhTbXA5b9G+YD8ZIoEcwZUq2fUEsJNpBpMetFiXr3tHgawD2e5wo5aGaLEgsTQdFl9M49zh23mLOeXFTlQZ2U9QRLQSygmxnaCWfpTyWINJlwDQXGY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RYrXpEna; arc=none smtp.client-ip=209.85.221.46
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="jnE+d+1C"
-Received: by mail-wr1-f44.google.com with SMTP id ffacd0b85a97d-3a54700a463so526708f8f.1
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RYrXpEna"
+Received: by mail-wr1-f46.google.com with SMTP id ffacd0b85a97d-3a503d9ef59so765606f8f.3
         for <linux-mmc@vger.kernel.org>; Thu, 10 Jul 2025 04:57:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1752148637; x=1752753437; darn=vger.kernel.org;
+        d=gmail.com; s=20230601; t=1752148636; x=1752753436; darn=vger.kernel.org;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=SeK52PiS/yxpaDzArE+1uChD/RqPmmTZ71OWYsGexe4=;
-        b=jnE+d+1CS+AkUvXNl/yc4GoeyPzBhSkrIwCQv+5wvRYD7Jv4J+WhSGReRDR71nIwTI
-         vzS4ctdERQbWPQLSWB3V0tX9gxN0EHNwB7yNxrJnep1TdP1j8irInKomLrYx3+pIIL1W
-         oRSMGljAIZu7e4EPDQdDnUyY/1irpiaFB39++0SR0TDJ8g8wDuoogfubPjj1mNvdcTIA
-         2HEaO5xOmRhzKU458EEOLC91zYuTBURG2lpTRt7PFV3uIOYzN5W8u9Jc4+WRJPAQ+qru
-         feKU2p3h/XgUYbU5LQlLWVcTbB9dlu9xhAIQLCcJl3fDgOLLCDNZJgN3+uv5TgfhMYRR
-         owfw==
+        bh=JsS0XUmpT0QmMaxWYo71KlLo8Aaaxss20wqdq4V9g/c=;
+        b=RYrXpEnaOxl0jM3RdGtuqYjfaGYXEbRbxC3ltpKpqhP5d0elngrNJ/Zx3Sue9Xc9ux
+         ORlIMphgTh+jIP6pWWZYfKCZrebJeqYNAa3XPIZJJnE9rIPabcTlMpVUWKF1octUgMRr
+         TCz8Bjxwn3ELaiDiC6DzcSQFCkKL0hDAujpbh00ajd8ZMWrVrPY0cfSj/Vhc3RbPfWvI
+         ZDW8/uUMJY7S0rZggCUOBq36xoD0VXQLoobeBi2UBhVL0VuMZz40QQEC/S40Bb3cxvT0
+         JX1T8A6ZMGVaSux0X7fw1jLm+Q+1flVpKGYTjmvGRGr2Dgmc19NeqinASPyAql8epkl4
+         PeOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752148637; x=1752753437;
+        d=1e100.net; s=20230601; t=1752148636; x=1752753436;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=SeK52PiS/yxpaDzArE+1uChD/RqPmmTZ71OWYsGexe4=;
-        b=dMnqKCdU7LmUwX1UnK506CkCsfWwGjfl3mSP2yCD6YquIESg20xYzP6fP/mBVC5nbu
-         8DjbiWmGEgRDgHBimJM6/s/DOa3lk7V6hVPGMkz25piM33cJeuG3Yx1RB5018uJ+CUEl
-         DBnpi3JqU4Tz0RUVywLvapzT8S1qZVhRfA3iuWBy3VgJ8uory01cHc7+j2D31/wp/lfZ
-         JJZBlRQ0Qvp7DPgP0N56PrO9vQvnGH0UYfSW+l+NSBU0eXAOYlUzMj89zC5qaKKFrAVE
-         i5vxLXFT0VbLb3fed1QYoRKYsveEQKk+3OEtLVDu4PDEVXOnb2CBetEFCtkCzxrKI1FU
-         mnng==
-X-Gm-Message-State: AOJu0YxmRFOvLc7UR7TL2dMB6+zAil58DuQMoS7WvCKiO8+FUEdyQ/Pr
-	G4e++3m5om53C3wUwOvM3L0zV7jrJhlpbqL3ujT/d2/FpVR8HnslDawu7XyfYg==
-X-Gm-Gg: ASbGncvi0ogjGQvPEPEySEEbZSIGC87eJBBIqDKZusWWqBPbHlXOiGbQW00K2weTT0N
-	cKU9+ck/9XZVn41efYfd2NVaRFwR9VXhQsHBLB5jMw8Xw5GqYbKvOdsafL4jGU/3UcPp9sehg4x
-	Rz/JrahXmysvCPpiGQdX/E7vx8PBAoZSVd1YxzSYOY3bN/VkSJkDnodR8gUtOaf73AKZ7CRl+N5
-	QMLOXDrItehTg8roNL/7gQE+MkxXYca8N/Xfjs8pu8WFHBxJMSpSSnAVbbNPNrpQXs+uR3VCWEB
-	2+vpFFpMJEBXBbbGUEHlk12k5Y0iFXbDQeiqe4iiokPIr6qp9ydkerb39svHbFv+f66B5LLhGBJ
-	NtWSCf3akbB1xYhL958j3K1CUFvp8gRGBmhL35q93bzY=
-X-Google-Smtp-Source: AGHT+IHzFOB0Dx2xQdTOBBrJF4gY1ac50whH9AMWiMQW5GFZmmNRoFzyRZY3EUYhHTRLi0ypZNMTKA==
-X-Received: by 2002:a05:6000:4703:b0:3a6:d95e:f37c with SMTP id ffacd0b85a97d-3b5e7f0fb1amr2706494f8f.2.1752148637107;
-        Thu, 10 Jul 2025 04:57:17 -0700 (PDT)
-Received: from mdionisio-OptiPlex-7070.powersoft.it (srvsp.powersoft.it. [93.146.228.90])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b5e8e2747fsm1652622f8f.100.2025.07.10.04.57.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=JsS0XUmpT0QmMaxWYo71KlLo8Aaaxss20wqdq4V9g/c=;
+        b=UJRqIQfxhjTfHX2I8PnUNBBdRFxK3cfyfoAMYwhq2jYS9Rd4p4jKs7+93p+4mHh8h6
+         /Eyk7k0mOBJWilF1qVNb41QOXow1hJOhWOkaIy2Jdp8Hqw2ZzZDtGw8iS2J8TM1dZxp6
+         TEQ5PNmmcAz3s2q0Ggyr1HkRD2OOpqCGW6ei3JCYkD+EXFQCefjxQcY0Bao4Xpbqql+9
+         brfe5aU1/uTps+4+tb2KcYmfG/Nk1czPKmiUXyuR9YMD6JH42zQ3IieZiJh3z2xN2kNl
+         h0qNC4NT5X4MlXCpVXmC+S49FrJFLM9Z+LLsC57NNEIGPHtgIiYksLmMwJWgBdDIApDl
+         hNqQ==
+X-Gm-Message-State: AOJu0YygxYyp8f08JzUXzWMJ6CX2Z/cIDBNFRdzRfGZyMp4B1s4Htt31
+	VN5uLer6rk8/0ThyoNK8z5PLhrGlJm6jC9aM8Ae0NJDPauFhK/KtckuKkB/1vA==
+X-Gm-Gg: ASbGncv5PhS2rs2R2S/LyLf3C0JuRnOJOdk5DKK6bJDqssvDxzk+LaQgBnE0DTRub1t
+	nbjZd1vgwmBAR70Hf7R0hUCEjJtOGz8nYtRTHHDPYkSK9srph4q7RNmWJ7D9GrGIVlSh2LqBuP9
+	FC4kAYDTPEAYFrp45O109pQq1Nd5E7s1f/fMvgR2hEjFXY3HlSQiYIYqlHiaGT6cydIdMuq/A2D
+	0bu6wPaD9gZn2lxYiMChJeUF+cbp7WcQfO4xFcgiwtKjJdysRCHrLv1L5OhOwnaZV7L9MyWM0Sc
+	PpPrVOa/c4GfDKU7m55OEWhg/RvF+UUDRHDUeXt6hcsIx+ALBP2urqC8i1Rv0ELCLpgCSRbmlGB
+	y68g87QT0bT2ssbVv0u2pEPN8FjQNARIYLlfjmlsoIKdpNVHoo2UNEg==
+X-Google-Smtp-Source: AGHT+IGVT02aEcOQDibc28Ip9sEW71Z8cwalkc80g/oqIqVIqwtUkjHjZef07lbNyPzhz7W4HboScg==
+X-Received: by 2002:a05:6000:41fa:b0:3b4:990a:e6 with SMTP id ffacd0b85a97d-3b5e85fedffmr2219758f8f.0.1752148636220;
         Thu, 10 Jul 2025 04:57:16 -0700 (PDT)
+Received: from mdionisio-OptiPlex-7070.powersoft.it (srvsp.powersoft.it. [93.146.228.90])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b5e8e2747fsm1652622f8f.100.2025.07.10.04.57.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 10 Jul 2025 04:57:15 -0700 (PDT)
 From: Michele Dionisio <michele.dionisio@gmail.com>
 To: linux-mmc@vger.kernel.org
 Cc: avri.altman@wdc.com,
 	ulf.hansson@linaro.org,
 	Michele Dionisio <michele.dionisio@gmail.com>
-Subject: [PATCH 2/3] mmc-utils: 1 parameter is the required number not the minimum
-Date: Thu, 10 Jul 2025 13:56:33 +0200
-Message-ID: <20250710115653.2808619-3-michele.dionisio@gmail.com>
+Subject: [PATCH 1/3] mmc-utils: Doc: add missing documentation for cache commands
+Date: Thu, 10 Jul 2025 13:56:32 +0200
+Message-ID: <20250710115653.2808619-2-michele.dionisio@gmail.com>
 X-Mailer: git-send-email 2.43.0
 In-Reply-To: <20250710115653.2808619-1-michele.dionisio@gmail.com>
 References: <PH7PR16MB6196D50A37E3A318ED6B98BEE54EA@PH7PR16MB6196.namprd16.prod.outlook.com>
@@ -79,28 +79,27 @@ Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Michele Dionisio <michele.dionisio@gmail.com>
 ---
- mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ docs/HOWTO.rst | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/mmc.c b/mmc.c
-index 6770a45..7433755 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -221,12 +221,12 @@ static struct Command commands[] = {
- 		  "or read without verification\n"
- 		  "  $ mmc rpmb secure-wp-en-read /dev/mmcblk0 /dev/mmcblk0rpmb",
- 	},
--	{ do_cache_en, -1,
-+	{ do_cache_en, 1,
- 	  "cache enable", "<device>\n"
- 		"Enable the eMMC cache feature on <device>.\n"
- 		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
- 	},
--	{ do_cache_dis, -1,
-+	{ do_cache_dis, 1,
- 	  "cache disable", "<device>\n"
- 		"Disable the eMMC cache feature on <device>.\n"
- 		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
+diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
+index f2f2f35..9b1f1a8 100644
+--- a/docs/HOWTO.rst
++++ b/docs/HOWTO.rst
+@@ -107,3 +107,13 @@ Running mmc-utils
+     ``mmc rpmb secure-wp-enable <rpmb device> <key file>``
+         Disable updating WP related EXT_CSD and CSD fields.
+         Applicable only if secure write protect mode is enabled.
++
++
++
++    ``mmc cache enable <device>``
++        Enable the eMMC cache feature on <device>.
++        Applicable only if device version >= eMMC4.5.
++
++    ``mmc cache disable <device>``
++        Disable the eMMC cache feature on <device>.
++        Applicable only if device version >= eMMC4.5.
 -- 
 2.43.0
 
