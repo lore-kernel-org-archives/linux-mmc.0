@@ -1,163 +1,208 @@
-Received: from mail-m19731109.qiye.163.com (mail-m19731109.qiye.163.com [220.197.31.109])
+Received: from fhigh-b2-smtp.messagingengine.com (fhigh-b2-smtp.messagingengine.com [202.12.124.153])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id F1777469D;
-	Fri, 11 Jul 2025 05:55:38 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=220.197.31.109
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 250C51DF25C;
+	Fri, 11 Jul 2025 06:56:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=202.12.124.153
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752213342; cv=none; b=jh6fzMuX4CS3FRzS4/9ruf3sO1Xucv/pp1KaCZNkutegh96JGviGg/wu4YGuGqgwq0lgiSzsRXX+JfUpw9Uo8rmqrz7bhH3x7MZ8dzJAgR96krO9/W2gWsBbYbABiPDivqi0G6J2g2nxQh6jppHIxKZHJb2JPM7Wfjubau/1oQw=
+	t=1752216971; cv=none; b=saZTCYQxj26yeIY3bkczUiiIyiyQ3RzmjnT5wbVFm39+Sfm1OQwQyXiLoW/wVRRZU8IZUGUdgiO3s6WIe0aXNXZhP2GTKiqJwykrFsoU3n9tjVADflAySFlHySLBBupD7d0Q/UeE8EFEMpP8UOg0MHOLyb2fqiLGI7ASUI3SvQE=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752213342; c=relaxed/simple;
-	bh=ryT+XYho9bF/4V/++q4QOBHcZEKXqBVzYUTq/yWVWaM=;
-	h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-	 MIME-Version; b=PAgptQOTZ5bTsd6rTe34TVWo2EMn+y9ITdCOBGhQZAp1oB59TeLXhaXxgHwCNvxwLF1+e+R4F6QqLmZHSk2guIPvxhRl3PnqYan+cIX/4a040sJdK5E2+Wy4s4jl65hvEismnxBEHMA33uWwZJlWWNweWJcSoX1W+3MV3+1QjmM=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com; spf=pass smtp.mailfrom=thundersoft.com; dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b=krqTzltB; arc=none smtp.client-ip=220.197.31.109
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=thundersoft.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=thundersoft.com
+	s=arc-20240116; t=1752216971; c=relaxed/simple;
+	bh=XgGLwjBI/BLttcKWbYKBlD9gn7f1n3yMFxlQBgojBWw=;
+	h=MIME-Version:Date:From:To:Cc:Message-Id:In-Reply-To:References:
+	 Subject:Content-Type; b=PCHgAAjXyatw9d4yD1aDp0QgoKfCjc8EEriOk8X34siFvI5xB49K8WymBLq9HoNmJ0edCA6zi08c1jmm4KBhw+5MQtKTwErA8LnGfV67ldo9LGEPMOOA/WOtgQtOmWqIBSyuAt5gU6iu+14rafQjhjaQVrjz1TSSpE4aT/V5nO0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de; spf=pass smtp.mailfrom=arndb.de; dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b=cBIdodbs; dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b=LKc9ruPx; arc=none smtp.client-ip=202.12.124.153
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=arndb.de
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=arndb.de
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (1024-bit key) header.d=thundersoft.com header.i=@thundersoft.com header.b="krqTzltB"
-Received: from localhost.localdomain (unknown [117.184.129.134])
-	by smtp.qiye.163.com (Hmail) with ESMTP id 1baa85b36;
-	Fri, 11 Jul 2025 13:55:30 +0800 (GMT+08:00)
-From: Albert Yang <yangzh0906@thundersoft.com>
-To: arnd@arndb.de
-Cc: adrian.hunter@intel.com,
-	ulf.hansson@linaro.org,
-	gordon.ge@bst.ai,
-	linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200 controller driver
-Date: Fri, 11 Jul 2025 13:55:29 +0800
-Message-Id: <20250711055529.1321072-1-yangzh0906@thundersoft.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <53ba18c1-4554-4d77-84fd-d921febb7559@app.fastmail.com>
-References: <53ba18c1-4554-4d77-84fd-d921febb7559@app.fastmail.com>
+	dkim=pass (2048-bit key) header.d=arndb.de header.i=@arndb.de header.b="cBIdodbs";
+	dkim=pass (2048-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="LKc9ruPx"
+Received: from phl-compute-05.internal (phl-compute-05.phl.internal [10.202.2.45])
+	by mailfhigh.stl.internal (Postfix) with ESMTP id D5C1A7A0182;
+	Fri, 11 Jul 2025 02:56:07 -0400 (EDT)
+Received: from phl-imap-02 ([10.202.2.81])
+  by phl-compute-05.internal (MEProxy); Fri, 11 Jul 2025 02:56:08 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+	:cc:content-transfer-encoding:content-type:content-type:date
+	:date:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to; s=fm1; t=1752216967;
+	 x=1752303367; bh=M4Xvz+KPK37iLn4olXTWpx65q/NHcXwB/dKGeGt7s/A=; b=
+	cBIdodbsNpx1wCWAd2Et1s7xbAczlMvnaVsLW7AF4nSuMV+SWVR30UaPAiO+gQ/z
+	B5wWqNk2VBja3lN4t5aJV6AK0c9ds8obU9TJ6A6P8tqbE6OkNcyC+Vsb/EiuY1w6
+	j0nU4XwizVUfYb1tBm6V66ZZWWRi0nuLUNnEMXMuPLDkt2/C841OY9ZIaSLy+V7u
+	T8dWHtveaGdCzBAAqa2Eww3k4GF3Z573LEsGas7ndZ9rlcWq5glk5x8YQb3OeZzA
+	hzxuqKyUCTWmgWWyQDk29Tll0bn3rF6LRwtbCjgTjLxwfrYWr7JwzB3f7nniYbNS
+	dDAdeCItZoSi15/CBrTvMw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+	messagingengine.com; h=cc:cc:content-transfer-encoding
+	:content-type:content-type:date:date:feedback-id:feedback-id
+	:from:from:in-reply-to:in-reply-to:message-id:mime-version
+	:references:reply-to:subject:subject:to:to:x-me-proxy
+	:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; t=1752216967; x=
+	1752303367; bh=M4Xvz+KPK37iLn4olXTWpx65q/NHcXwB/dKGeGt7s/A=; b=L
+	Kc9ruPxAYBW/TmY+QLqk1vE3VKM4uAj7/5U+Xabz4xVEM+jLVsSImO9I2ZzyZZsF
+	nHzWomZZBC7gzqf03Tp6H317gdXHfOIwe+djDiCWsvzlTpcq0oS47eXxmxn38iDg
+	pyPOLZFt+lyqiPuxQ5g2Y+JglG4fLLC7ARsvrVUfxUJdcA/wlNLLp0df2utLFD86
+	st/IPreKT3IVYEJyGT0Q2zKQQ6b7XvVBpPSGWA3P75MQhcZMo03U3j05eqZudjto
+	sb0rV6d+AxfT2RMTt69f4Todze2ii6jH3iG1hrKbgz5iyTSex1OER/ekNKp3kq2A
+	Fkj+NYbfHfWUjHLcsc/mQ==
+X-ME-Sender: <xms:hrVwaNgekwpTo7adTlk91SjiD8clBFD4Bmddb7aSvQCmVgcVUYDiZA>
+    <xme:hrVwaCBOcLXUJwNA_0fCqYhfGjefDHyt7IXm7G2A2IBEeM1seX3yrl3NQfAbhTQPt
+    719IdOPbFNU-gEsJCU>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdegvdeiiecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpuffrtefokffrpgfnqfghnecuuegr
+    ihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjug
+    hrpefoggffhffvvefkjghfufgtgfesthejredtredttdenucfhrhhomhepfdetrhhnugcu
+    uegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtthgvrh
+    hnpefhtdfhvddtfeehudekteeggffghfejgeegteefgffgvedugeduveelvdekhfdvieen
+    ucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrhhnug
+    esrghrnhgusgdruggvpdhnsggprhgtphhtthhopeeipdhmohguvgepshhmthhpohhuthdp
+    rhgtphhtthhopehgohhrughonhdrghgvsegsshhtrdgrihdprhgtphhtthhopegrughrih
+    grnhdrhhhunhhtvghrsehinhhtvghlrdgtohhmpdhrtghpthhtohepuhhlfhdrhhgrnhhs
+    shhonheslhhinhgrrhhordhorhhgpdhrtghpthhtohephigrnhhgiihhtdeltdeisehthh
+    hunhguvghrshhofhhtrdgtohhmpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehv
+    ghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqmhhmtgesvhhgvg
+    hrrdhkvghrnhgvlhdrohhrgh
+X-ME-Proxy: <xmx:hrVwaAj2E8c1PSzr7c1zp7N541EXQpYHoT9Wp2Jp_8IUkGo-B0IAMg>
+    <xmx:hrVwaLT1uHCsBPw-MB7MmG4YhdxiqzHRYbuo73pyjGA8xKLlrvEEhw>
+    <xmx:hrVwaKUxtLAm5nsB2AlIxom3OS5102MVMdE51W6ZgA-lx0tBMEsdAQ>
+    <xmx:hrVwaHTPHorkAMCiuDh_KLsaUzEP6evPZgD3nngan1WSoeWgqMf1Ew>
+    <xmx:h7VwaL1Q7KUDKF0ZTXdoVa5AmyYih7zzx1pqpfSY1NLvuwsxSXoVE1Fp>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.phl.internal (Postfix, from userid 501)
+	id C387E700065; Fri, 11 Jul 2025 02:56:06 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-	tZV1koWUFITzdXWS1ZQUlXWQ8JGhUIEh9ZQVlDSUNCVh5NGR9CGh4fTUlOSFYVFAkWGhdVEwETFh
-	oSFyQUDg9ZV1kYEgtZQVlKSkxVSkNPVUpJQlVKSE9ZV1kWGg8SFR0UWUFZT0tIVUpLSEpOTE5VSk
-	tLVUpCS0tZBg++
-X-HM-Tid: 0a97f80d995609cckunm40278df013f2e34
-X-HM-MType: 1
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6OEk6Fgw5SzExDRgeMkgZQ1YL
-	QhEKChVVSlVKTE5JSUpISEhKT0hJVTMWGhIXVQIaFRwBE0tCS007DxMOFR8eCQgUHQ9VGBQWRVlX
-	WRILWUFZSkpMVUpDT1VKSUJVSkhPWVdZCAFZQU5JSk83Bg++
-DKIM-Signature:a=rsa-sha256;
-	b=krqTzltBSK6R8iO/sIkcsNNJtF/9LFNZ9dkm/hq5CACZ1JSLnmPlXtlG6uCV6TNuEByyvVwJKIH1CJxcDIIwVACnPPb2aLgXMADuelG3Mgm8IEgCFSq5FiwpeWjHS4FcaeBR0tigl7KlKkue+Eog6X/TZ+0rxGylLjymKlj5fqo=; c=relaxed/relaxed; s=default; d=thundersoft.com; v=1;
-	bh=8JI3v8SEkCUiC8EaufkNhA7P5YwSp0PygxDPJd1s0z8=;
-	h=date:mime-version:subject:message-id:from;
+X-ThreadId: Tf7f6c885039edc57
+Date: Fri, 11 Jul 2025 08:55:45 +0200
+From: "Arnd Bergmann" <arnd@arndb.de>
+To: "yangzh0906@thundersoft.com" <yangzh0906@thundersoft.com>
+Cc: "Adrian Hunter" <adrian.hunter@intel.com>,
+ "Ulf Hansson" <ulf.hansson@linaro.org>, "gordon.ge" <gordon.ge@bst.ai>,
+ "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+ linux-kernel@vger.kernel.org
+Message-Id: <05e13ba9-c1fe-450a-a159-9693edce0a23@app.fastmail.com>
+In-Reply-To: <20250711055529.1321072-1-yangzh0906@thundersoft.com>
+References: <53ba18c1-4554-4d77-84fd-d921febb7559@app.fastmail.com>
+ <20250711055529.1321072-1-yangzh0906@thundersoft.com>
+Subject: Re: [PATCH v2 5/8] mmc: sdhci: add Black Sesame Technologies BST C1200
+ controller driver
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 
-Hi Arnd,
+On Fri, Jul 11, 2025, at 07:55, Albert Yang wrote:
+> On Wed, Jul 2, 2025, at 11:44, Arnd Bergmann wrote:
+> Regarding these last two suggestions, I'm not very familiar with the 
+> implementation 
+> details. Could you provide more guidance on:
+>
+> 1. **dma-ranges approach**: We tried adding these properties to the 
+> device tree:
+>    ```
+>    dma-ranges = <0x00000000 0x00000000 0x100000000>;
+>    dma-mask = <0xffffffff>;
+>    ```
+>    However, we still encounter DMA addressing issues. Are there 
+> specific 
+>    examples in other drivers we could reference for similar hardware 
+> constraints?
 
-Thank you for your detailed review and suggestions. I have addressed all the 
-issues you raised in v2 of the patch series.
+The way that 'dma-ranges' is supposed to work is that it accurately
+describes in the bus node how a child device accesses the parent
+view of the physical address space.
 
-On Wed, Jul 2, 2025, at 11:44, Arnd Bergmann wrote:
+The 'dma-mask' property above is not a regular property, but the
+dma-ranges you have looks similar to what you have for a 1:1
+mapping of the first 4GB, matching what you describe is the
+actual hardware mistake, but you are using the wrong address/size
+cells for this bus:
 
-> The description does not mention the actual device it's for
-> but only DesignWare.
-> 
-> Try to keep this sorted alphabetically between the other
-> CONFIG_MMC_SDHCI_* backends
++	soc: soc@0 {
++		compatible = "simple-bus";
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges = <0x0 0x0 0x0 0x0 0xffffffff 0xffffffff>;
 
-Fixed. Updated the Kconfig description to mention "Black Sesame Technologies 
-BST C1200 controller" and moved the config entry to the correct alphabetical 
-position between MMC_SDHCI_BCM_KONA and MMC_SDHCI_F_SDH30.
+What your dts file describes is that there is a single 64-bit
+bus named 'soc@0' that contains the entire 64-bit address
+space. You have given an explicit 'ranges' property that
+maps everything except for the final byte in the downstream
+direction, which is equivalent to having an empty 'ranges'
+property. You have left out the upstream 'dma-ranges'
+translation, which I think means you just get the default
+that matches 'ranges'.
 
-> You are only using the first member here, the phy_crm_reg_base
-> and phy_crm_reg_size are assigned during probe but not referenced
-> later. devm_platform_ioremap_resource() should help simplify
-> that code further.
+Presumably neither of them are correct. In most SoCs there
+is more than one bus, and you have already said above that
+the actual bus that the sdhci device is on only uses 32-bit
+addressing, which for a 1:1 translation would look like
 
-Agreed. Removed the unused phy_crm_reg_base and phy_crm_reg_size fields from 
-dwcmshc_priv structure and replaced the manual platform_get_resource() + 
-ioremap() calls with devm_platform_ioremap_resource().
++	soc: soc@0 {
++		compatible = "simple-bus";
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges = <0x0 0x0 0x0 0x0 0x1 0x00000000>;
++		dma-ranges = <0x0 0x0 0x0 0x0 0x1 0x00000000>;
 
-> You always pass priv->crm_reg_base into this helper, so
-> it would be simpler to make it take the sdhci_pltfm_host
-> pointer and the offset instead of the address.
+meaning that doing an mmio access on the first 4GB of
+CPU address space gets routed to this bus at the same
+address, and that any device trying to do a DMA only
+works on the first 4GB as well, which then correspond
+to the bus itself, not to RAM. If that is your setup,
+that would explain how the SRAM and SDHCI devices are
+both on the same bus and the SDHCI can do DMA internally
+on the bus, but cannot actually reach RAM.
 
-Good suggestion. Replaced bst_write_phys_bst() and bst_read_phys_bst() with 
-bst_crm_write() and bst_crm_read() that take sdhci_pltfm_host pointer and 
-offset parameters for better encapsulation.
+A more sensible setup would be to have the DMA access
+routed to the memory controller. Since memory on your
+system appears to start at 0x8.00000000, that would look
+like
 
-> The comment says 64K, but the size you use is 32K.
+        dma-ranges = <0x0 0x0  0x08 0x00000000  0x1 0x00000000>;
 
-Fixed the comment to correctly state 32KB.
+which means that a DMA to the first 4GB of the bus
+address space gets routed outside of the bus into the
+first 4GB of physical memory. Obviously you cannot just
+change the dts to pretend this is the correct mapping, you
+have to also program the bus controller to use it.
 
-> Having an explanation here makes sense, but I don't think this
-> captures what is actually going on, in particular:
-> 
-> - dma_alloc_coherent() being backed by an SRAM that is under
->   the 4GB boundary
-> - the problem that the SoC is configured that all of DRAM
->   is outside of ZONE_DMA32
-> - The type of hardware bug that leads to 64-bit DMA being
->   broken in this SoC.
+The datasheet for the chip should tell you specifically
+what type of bus this is (AXI, AHB, OPB or something else),
+and what registers are used to program this mapping. It
+is possible that this cannot be reprogrammed, but more likely
+there is a hidden register that is made available to the boot
+loader but is not intended to be reconfigured by the OS.
 
-You're absolutely right. I've enhanced the comment with a detailed explanation 
-of our specific hardware constraints:
+> 2. **Moving RAM start position**: Which component would control this 
+> configuration? 
+>    Would this require bootloader parameter changes or SoC-level 
+> configuration?
 
-1. System memory uses 64-bit bus, eMMC controller uses 32-bit bus
-2. eMMC controller cannot access memory through SMMU due to hardware bug
-3. Our SRAM-based bounce buffer solution works within 32-bit address space
+This would be in the early stages of the boot loader that set up
+the memory controller, as it is hard to reconfigure the RAM
+location after you are already running from DRAM.
 
-> I still have some hope that the hardware is not actually
-> that broken and you can get it working normally, in one
-> of these ways:
-> - enabling 64-bit addressing in the parent bus
-> - enabling SMMU translation for the parent bus
-> - configuring the parent bus or the sdhci itself to
->   access the first 4GB of RAM, and describing the
->   offset in dma-ranges
-> - moving the start of RAM in a global SoC config
+> The v3 patch addresses all your code structure and documentation concerns 
+> while providing a clear explanation of why this approach is necessary for 
+> our platform. I have also fixed compilation warnings about unused variables 
+> that resulted from the refactoring.
+>
+> **Current DMA Issues**: Despite setting DMA32_ZONE, we still encounter DMA 
+> addressing warnings. Key error messages include:
+> ```
+> DMA addr 0x00000008113e2200+512 overflow (mask ffffffff, bus limit 0)
+> software IO TLB: swiotlb_memblock_alloc: Failed to allocate [various sizes]
+> ```
+>
+> This confirms our hardware limitation where the eMMC controller cannot access 
+> memory above 32-bit boundaries, even with ZONE_DMA32 configured.
 
-I appreciate your optimism about finding alternative solutions. Unfortunately, 
-we have thoroughly investigated these approaches:
+All that this confirms is that Linux observes an impossible configuration
+where RAM starts above the DMA32 zone.
 
-Regarding these last two suggestions, I'm not very familiar with the implementation 
-details. Could you provide more guidance on:
-
-1. **dma-ranges approach**: We tried adding these properties to the device tree:
-   ```
-   dma-ranges = <0x00000000 0x00000000 0x100000000>;
-   dma-mask = <0xffffffff>;
-   ```
-   However, we still encounter DMA addressing issues. Are there specific 
-   examples in other drivers we could reference for similar hardware constraints?
-
-2. **Moving RAM start position**: Which component would control this configuration? 
-   Would this require bootloader parameter changes or SoC-level configuration?
-
-We're certainly interested in exploring these alternatives if they could provide 
-a more elegant solution than our current bounce buffer approach.
-
-The v3 patch addresses all your code structure and documentation concerns 
-while providing a clear explanation of why this approach is necessary for 
-our platform. I have also fixed compilation warnings about unused variables 
-that resulted from the refactoring.
-
-**Current DMA Issues**: Despite setting DMA32_ZONE, we still encounter DMA 
-addressing warnings. Key error messages include:
-```
-DMA addr 0x00000008113e2200+512 overflow (mask ffffffff, bus limit 0)
-software IO TLB: swiotlb_memblock_alloc: Failed to allocate [various sizes]
-```
-
-This confirms our hardware limitation where the eMMC controller cannot access 
-memory above 32-bit boundaries, even with ZONE_DMA32 configured.
-
-The complete kernel log with detailed DMA allocation failures and warnings
-is available at: https://pastebin.com/eJgtuHDh
-
-Please let me know if you need any additional information or have suggestions
-for alternative approaches.
-
-Best regards,
-Albert
+       Arnd
