@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B3CD236A9F;
-	Sun, 13 Jul 2025 08:40:08 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C2831CAA9C;
+	Sun, 13 Jul 2025 08:44:59 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752396008; cv=none; b=DBqq6+WeQNabEF5TjUQgMaticf3T8RtpijTIB1QIbCsfO6Vb++OIaD2qlsLmHbnKvgI9M+GYsnDXE6zLvO5SPHEQIfrJ7mJeNypjupIQuqm628BT80S4gjU4M5t/2RTgbDQThzs/1UTfno1Lce1x9oUfX7iR2N8BWvv139R+tEw=
+	t=1752396300; cv=none; b=ZZIfAeWyr1UcfsyqnoAh/CvUxuCo6kwkictlAAWvA9Hgk9tGHZNMBSa3rRdUOloqs8YoycclMq4uJu9jF34tlr7cLyN1ec+Mtx5wrwtQeqx9M+A0SOiyzaeJjkLfDMOheix8YpO9M7IU5t6zOCgMUYyv5WqSDBKTz45sF15Xb34=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752396008; c=relaxed/simple;
-	bh=csqe1O+tkd6nKMHUq6yiCp8apa3jwJYHrPEnFz22I4E=;
+	s=arc-20240116; t=1752396300; c=relaxed/simple;
+	bh=ASPv/r6GXTBe7L2poja4xEnn6UOIN4wrVJugrHA0UqI=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=CkoelRn2QRB2mZl/aeehXfFIRbDm86zSJyr77aNck3mE1ENjFQVsS6Wgzp0Uj7o/Gk2K45s1ZA9hU9m3fL2QLEBY7bEjXYa60jnt8OytvrSkn5hpMX+2XxQpWAKrj0HLeJrJqiCfangjdbebM8a17x7t4iqtz/a1zjJgOsPv/Q0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ko5CdZTX; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=MCqW5IUSESRraIMOc+17U6CNVF4BHfh+4DbRotCQwfepFUWEietCkRmLfdwcil/mDSU4HSak2iAEOcAX5+AXCjN3vPxAEJ/R/adc5zHSfn0oW4SN1hnYRoAIra7hu9AUCnVSa07IsOmHgZ6ilr+1HfATCygc14nTMS2ebHmBaLU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Iv5MbJuE; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ko5CdZTX"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 665EFC4CEF5;
-	Sun, 13 Jul 2025 08:40:03 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Iv5MbJuE"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 571C5C4CEE3;
+	Sun, 13 Jul 2025 08:44:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752396008;
-	bh=csqe1O+tkd6nKMHUq6yiCp8apa3jwJYHrPEnFz22I4E=;
+	s=k20201202; t=1752396299;
+	bh=ASPv/r6GXTBe7L2poja4xEnn6UOIN4wrVJugrHA0UqI=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Ko5CdZTXIbv+CsbnsoUh31B8n8F/q2qNT+hJpHAaFfITYqM2ahTchoIhU2/xYtZB6
-	 xz/okQpWWId41TYHyNe+ubd/9iRBMjZEj7a3tIW+MVTSpD//a8dMlVsotvVG4BsEPT
-	 5B4JbwSP/8N+BNyZpL26fhWnDw+pSTRtP4npDkhuFQWvbC4sKS5Ogdo47epQC6jp1z
-	 cJLxQMqAAgTeqCXn1sgPsvkS7mwpA9gVlckajOkmaL590GKd2fJIp2F0jzwvlrUcfE
-	 h9anCEThsNqRcVcgi7JrSFmWYrUQf9lpZJHK9OLpZq6B5/55zYP0e/iwL45TUuXD7d
-	 Vb9rK+6YaVdXQ==
-Message-ID: <3bec28b9-5ac6-4d93-887d-481495d6cf95@kernel.org>
-Date: Sun, 13 Jul 2025 10:40:01 +0200
+	b=Iv5MbJuExz5JLFy9uM5Se5FuCNyvM/ELAA0NzzRwtcHq8fHNFcXXLjf4Joam1dp1o
+	 mMZape1BlzE7vhjx/eDmdZLZcacV1urJKLIBFTjw0HNuIjCsVE1N3RbeQ8RtBdgDyq
+	 zwwEDiLTUu6QMRZvHlF1Hmz0TDgyV8YO++jAJQPJNs9RWq2tbFMmN3JNgnScJpj/sg
+	 3LmCJ3obCJz2KcPPEbmU7ujNCQFgrvzp/BRVdPII5Sfe3yrw0GdQ3pq3Q9X1CQ3Lzn
+	 SvWBL7ZyYS23OyVVmKpNWxm3PTHOO6d3yibfsu5+9XL9Cjsju23Gxdj/P2WHpggrMQ
+	 UA82Bspu43yGA==
+Message-ID: <3a297f23-9b80-4623-ad58-85de85a5b8f7@kernel.org>
+Date: Sun, 13 Jul 2025 10:44:47 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 3/4] dt-bindings: mmc: add brcmstb share register and
- hwlocks reference
+Subject: Re: [PATCH 4/4] mmc: sdhci-brcmstb: rpmb sharing by claiming host for
+ TZOS
 To: Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
  baolin.wang@linux.alibaba.com, robh@kernel.org, krzk+dt@kernel.org,
  conor+dt@kernel.org, florian.fainelli@broadcom.com, ulf.hansson@linaro.org,
@@ -46,7 +46,7 @@ Cc: bcm-kernel-feedback-list@broadcom.com, linux-remoteproc@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
  Kamal Dasu <kdasu@broadcom.com>
 References: <20250711154221.928164-1-kamal.dasu@broadcom.com>
- <20250711154221.928164-5-kamal.dasu@broadcom.com>
+ <20250711154221.928164-6-kamal.dasu@broadcom.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -92,96 +92,125 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250711154221.928164-5-kamal.dasu@broadcom.com>
+In-Reply-To: <20250711154221.928164-6-kamal.dasu@broadcom.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 11/07/2025 17:42, Kamal Dasu wrote:
-> From: Kamal Dasu <kdasu@broadcom.com>
-> 
-> Adding optional controller share registers and hwspinlock reference fields
-> to be used by sdhci-brcmstb driver.
-> 
-> Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-> ---
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 29 +++++++++++++++++--
->  1 file changed, 27 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> index eee6be7a7867..fe9be7a7eca5 100644
-> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> @@ -27,15 +27,20 @@ properties:
->            - const: brcm,sdhci-brcmstb
->  
->    reg:
-> -    maxItems: 2
-> +    minItems: 2
-> +    maxItems: 4
->  
->    reg-names:
-> +    minItems: 2
->      items:
->        - const: host
->        - const: cfg
-> +      - const: share       # Optional reg
-> +      - const: flshr_ipis0 # Optional reg
-
-Drop comments. Schema says these are optional, so no need to point obvious.
-
->  
->    interrupts:
-> -    maxItems: 1
-> +    minItems: 1
-> +    maxItems: 2
-
-You need to list items with minItem: 1.
-
-Why all devices now got new reg and interrupts? What changed in EXISTING
-hardware? All this has to be explained in the commit msg. If not all
-devices got it, then you miss constraints.
-
->  
->    clocks:
->      minItems: 1
-> @@ -60,6 +65,9 @@ properties:
->      type: boolean
->      description: Specifies that controller should use auto CMD12
->  
-> +  hwlocks:
-> +    maxItems: 1
 > +
->  allOf:
->    - $ref: mmc-controller.yaml#
->    - if:
-> @@ -115,3 +123,20 @@ examples:
->        clocks = <&scmi_clk 245>;
->        clock-names = "sw_sdio";
->      };
-> +  - |
-> +    mmc@84b1000 {
-> +      mmc-ddr-1_8v;
-> +      mmc-hs200-1_8v;
-> +      mmc-hs400-1_8v;
-> +      no-sd;
-> +      no-sdio;
-> +      non-removable;
-> +      bus-width = <0x8>;
-> +      compatible = "brcm,bcm74165b0-sdhci", "brcm,sdhci-brcmstb";
-> +      reg = <0x84b1000 0x260>, <0x84b1300 0x200>,  <0x84b1600 0x10>, <0x84a5404 0x4>;
-> +      reg-names = "host", "cfg", "share", "flshr_ipis0";
-> +      hwlocks = <&hw_lock 0x0>;
-> +      interrupts = <0x1 0x0 0x1f 0x4 0x1b 0x11>;
+> +static int sdhci_brcmstb_sdio_share_init(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(&pdev->dev);
+> +	struct device_node *np = pdev->dev.of_node;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	struct brcmstb_sdio_share_info *si;
+> +	void __iomem *sdio_sh_regs;
+> +	int ret;
+> +
+> +	/* sdio_share block */
+> +	sdio_sh_regs = devm_platform_ioremap_resource_byname(pdev, "share");
+> +	if (IS_ERR(sdio_sh_regs))
+> +		return 0;
+> +
+> +	si = devm_kcalloc(&pdev->dev, 1, sizeof(struct brcmstb_sdio_share_info),
 
-Undecipherable.
+sizeof(*)
 
-> +      clocks = <&scmi_clk 245>;
-> +      clock-names = "sw_sdio";
+> +			  GFP_KERNEL);
+> +	if (!si)
+> +		return -ENOMEM;
+> +
+> +	si->share_reg = sdio_sh_regs;
+> +	ret = of_hwspin_lock_get_id(np, 0);
+> +	if (ret < 0) {
+> +		dev_err(&pdev->dev, "failed to get hwspinlock id %d\n", ret);
 
-Totally random order of properties. Please align it closely with DTS
-coding style.
+Uh? So you changed the ABI in the driver but not in the bindings? No,
+this must be always synced. Look what your binding is saying. Is it
+optional? Yes.
 
-> +    };
+And why would you print errors anyway on deferred probe? Twice! One here
+and warning in your probe.
+
+> +		return ret;
+> +	}
+> +
+> +	si->hwlock = devm_hwspin_lock_request_specific(&pdev->dev, ret);
+> +	if (!si->hwlock) {
+> +		dev_err(&pdev->dev, "failed to request hwspinlock\n");
+
+Syntax is: return dev_err_probe
+
+> +		return -ENXIO;
+> +	}
+> +
+> +	si->irq_recv = platform_get_irq_byname_optional(pdev, "recv_ipi0");
+> +	if (si->irq_recv < 0) {
+> +		ret = si->irq_recv;
+> +		dev_err(&pdev->dev, "recv_ipi0 IRQ not found\n");
+
+Syntax is: return dev_err_probe
+
+> +		return ret;
+> +	}
+> +
+> +	ret = devm_request_irq(&pdev->dev, si->irq_recv,
+> +			       sdhci_brcmstb_recv_ipi0_irq,
+> +			       0, "mmc_recv_ipi0", host);
+> +	if (ret < 0) {
+> +		dev_err(&pdev->dev, "mmc_recv_ipi0 IRQ request_irq failed\n");
+> +		return ret;
+
+return dev_err_probe
+
+> +	}
+> +
+> +	si->ipis0_reg = devm_platform_ioremap_resource_byname(pdev, "flshr_ipis0");
+> +	if (IS_ERR(si->ipis0_reg))
+> +		return -ENXIO;
+> +
+> +	priv->si = si;
+> +	si->host = host;
+> +	init_waitqueue_head(&si->wq);
+> +	/* acquire hwsem */
+> +	sdhci_brcmstb_aquire_hwsem(si);
+> +	si->claim_thread =
+> +		kthread_run(sdhci_brcmstb_host_claim_thread, si,
+> +			    "ksdshrthread/%s", mmc_hostname(host->mmc));
+> +	if (IS_ERR(si->claim_thread)) {
+> +		ret = PTR_ERR(si->claim_thread);
+> +		dev_err(&pdev->dev, "failed to run claim thread\n");
+> +		return -ENOEXEC;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+>  static u32 sdhci_brcmstb_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  {
+>  	int cmd_error = 0;
+> @@ -482,8 +720,11 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>  		goto err;
+>  
+>  	pltfm_host->clk = clk;
+> -	return res;
+> +	res  = sdhci_brcmstb_sdio_share_init(pdev);
+
+Only single space before '='
+
+> +	if (res)
+> +		dev_warn(&pdev->dev, "sdio share unavailable\n");
+
+Why do you warn on completely optional hwlock? Drop, this should be
+silent. You already print errors earlier and there is no point to print
+error twice.
+
+>  
+> +	return 0;
+>  err:
+>  	sdhci_pltfm_free(pdev);
+>  	clk_disable_unprepare(base_clk);
 
 
 Best regards,
