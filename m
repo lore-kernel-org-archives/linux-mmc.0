@@ -1,67 +1,68 @@
-Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com [209.85.221.49])
+Received: from mail-wr1-f41.google.com (mail-wr1-f41.google.com [209.85.221.41])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0568C1F5827
-	for <linux-mmc@vger.kernel.org>; Sun, 13 Jul 2025 08:07:16 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.49
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A94631EA7EC
+	for <linux-mmc@vger.kernel.org>; Sun, 13 Jul 2025 08:07:27 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.41
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752394038; cv=none; b=DLOD6Ucg397Q170gD4dvsA3Bo4pcGrftcO0DkZKFHI6syT+qg+wZLBu1yxwnT4xsvJ1W2b7KL+6KeaSFYKwhYQPVpAFjVQM3jrYjVQ+M25ixM4N4Ai5y1vQCp5mPXDVen3DSEwWhcm8mVmEvgKjJCFG5E/0nJPIZi4rw0O+SUzk=
+	t=1752394050; cv=none; b=kM97P9aoHWVfmBUOMbGQnARO/m9EmUkQkd72Wd22fHMKgrukDhLpXZ3vAyXR574JqP+dk40N81CEZj3OmE8rxIZr1/a3M+BW+98YkQ8I+qP6notgLzPwwCupX9jEDxsCjy0nY6xHtldIZvVuKVv3hmSvNWiOJ0VqIeS6quAFQcA=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752394038; c=relaxed/simple;
-	bh=ZPOAK3xFvDZxKtMubUGBzI+X0LzZj/ehseUCLqV9308=;
+	s=arc-20240116; t=1752394050; c=relaxed/simple;
+	bh=cmEjmUIEwJdszNuha6SGlHW2o0fXW5xz6+LSWPvZsgg=;
 	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=Zx6FvW+Nc70ayADTzqmd8lteFcMIBLrsOMfr/0BFHT+O15XvEw6imfby+rV/KYyD7eemKGr7vfhB1/hTzA8ufhBoQrnl51og7coVireoKdIb0VwiW+5sw2Y8piKufaxyCUVA8MmN8JqZM0ykZtSEFpguY2DNlYvJIgvhB7Q7Q00=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com; spf=pass smtp.mailfrom=fairphone.com; dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b=TG7RkjQO; arc=none smtp.client-ip=209.85.221.49
+	 In-Reply-To:To:Cc; b=ACe+/CE/uMifExm5rtxlpL/NjTDNazlnmsOVGmS+vDPssMH5banAxs576RZSeaG8e6GMp2BfcT5RdY46WKNoik3VZ3zB5feULzVMqLH1OmBxtNN7odssPxd2pHyWtpS0tXITylN01V+kP6gtd52kgBCxKMrLMEsxT9sxeIsYMXY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com; spf=pass smtp.mailfrom=fairphone.com; dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b=rhCmBe63; arc=none smtp.client-ip=209.85.221.41
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fairphone.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b="TG7RkjQO"
-Received: by mail-wr1-f49.google.com with SMTP id ffacd0b85a97d-3b45edf2303so2983032f8f.2
-        for <linux-mmc@vger.kernel.org>; Sun, 13 Jul 2025 01:07:16 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b="rhCmBe63"
+Received: by mail-wr1-f41.google.com with SMTP id ffacd0b85a97d-3a54700a46eso1998468f8f.1
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Jul 2025 01:07:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fairphone.com; s=fair; t=1752394035; x=1752998835; darn=vger.kernel.org;
+        d=fairphone.com; s=fair; t=1752394046; x=1752998846; darn=vger.kernel.org;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=aJyl6Itr2J8CcBOnf8YZMhnDEgMz2YqGF17cfLG0u0w=;
-        b=TG7RkjQOt1q81yyyKBTbe1QUYdoIKhdpCxzaOTjGMogHOwNKL6Egi3VqxzvthquTke
-         TeaOLBI24wSWILWT7/7wJkFK0oilg/7rZY+pPtU6m+EcgQqQuFsC5+Q6Z4P0Tyn3Lt3Y
-         967nN9RiFvhWO7cPiojPW60sDOF5D9SiuJ4cv/AByYCqxnC0Yvd8RVirluvsG1R9YeUS
-         2bmhun+vzkTjSE2xvcQnaUuIOrqEh+ub4UVi+CfZms6IGl209PTWVITiezNPFNkTlci2
-         6bXqW+7tlU+Xu5+p+TENSe+syb3cczNXZZHgm7PZa6DRQLax9ODPMF8yXRi0mwtSaqFi
-         NZMw==
+        bh=HAOuh0e5PjdM5Thiks9XcjQnZt1mrG00zqw/b7U8tlE=;
+        b=rhCmBe63rQcKHBXGf5EHrUzC/Dzyy9df2hTQQco/McWi33I6jERrxoswYpCVq2pMTC
+         ioz623171BTrfBfPuxeDTQ4qfIaJdwe4lsh9T3T8rmCQABJNUXM3h4bKudmxtnUNDgpO
+         ndepDwaMbhlRVJ3HuGgYVhkv2a9qjK6AlTyayqWKELm9gL+Yc2jI+9K4VuEZesA06kIy
+         wtKhOFDARDhqQeRqWcq1QTBiwYrDM4bGd7RAfNUIvPKMg9jEc+IvNuQGsvDx4tZmSYA8
+         olHDRBckQIXEE8VOzPFrg/jYLWJgIRNERXYePXJfRdocIWgm02CD66ZYZzyBEbDOFZNG
+         5ULA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752394035; x=1752998835;
+        d=1e100.net; s=20230601; t=1752394046; x=1752998846;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=aJyl6Itr2J8CcBOnf8YZMhnDEgMz2YqGF17cfLG0u0w=;
-        b=EuVfgMD5vZmwzyV45jQbtlDmyPnuglOTvd0K/yLOWqOeO0WZQhWkdlnfeXvksUjTft
-         ISu7AWGUGbKA9k/+wX/axaprg+7zyG1oFv/0gOxaPa13Cf1AQtOmsY0tL/lMTD6l/arq
-         YAAFmbHlHVvemqTaJmRAhR8cxhkxmJ0pJDa+ItmyzmNHwIOs6aAwPupqT7VomZneYYvY
-         sXzZqCnIXqMXGOhWxs72W6iKhLb/Kjo+KA3j3ICQbkurNPqjH8ZTNe3AmpPpvYfsH4pp
-         xk/GdgS2z5SmBQqTpWbK86cGPv/l0H48FxVDsK9axbjdhh/q5FIHuvWgAGuYEjR4QvJt
-         M89g==
-X-Forwarded-Encrypted: i=1; AJvYcCVliibNnBClkVJ7wOvJ14hgW38JK5XoMDbCUM0AxKF/p7/Mqz99dQJkr1NZHpOza9eB7Mt5O5AyNlg=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyGEcm8taYXnVlPfcU9xAGOdj1rrx3p2kHNjfYiCYVLeBWHDSeV
-	jZPbTP2OCBeIJ92rgXe/2DvRWyrTLNDuM56h4b9nOzfhuCdqmW0lMrgzvcLX5LVumfA=
-X-Gm-Gg: ASbGncs/z9OS/tunF/Mw+LJnOp5R4bajjZ1hUYXw3LcXAl2s8ab/OTiNThj9KDVw2zM
-	CIs8tkPhdajrssjGIBwT8wckD9Kzj5LL+ELgg1SP4kD2aTh+PraAE8Rj6KQbc0419YMbUQcDa9j
-	0hpXFY9oLL2N4xcEPs01XSym/7yT/kRaUZL5YZHcc5Tiw9jfHKpsA7jaU/AS9lNXlQBfolV1LxL
-	hpFIPBHcDTXi7y3SVaDPf2YLqWpUHKqmRcbOqLQYKoCSpVyOt5PR5K8t8fxHlX7142SmLahH7ON
-	+AeiHcYYQvZjxv3T9EQW7ZBzuaLyDKs5KD4AVQfMrqU3Uaq8qgZNf909bOKr/xVKN8PGm08ll7w
-	dE9oUVmySx+UHhw5cvDy040AE0U46tR/iHP9n
-X-Google-Smtp-Source: AGHT+IFDkaJX0TEdwthvnMnibkv7x2m1KVCrimnEeDmcfRvTFWioaF6EXSVrFnCJ2KS+deMt9VV08Q==
-X-Received: by 2002:adf:ae4a:0:b0:3a4:f787:9b58 with SMTP id ffacd0b85a97d-3b5f18abc86mr5290060f8f.58.1752394035324;
-        Sun, 13 Jul 2025 01:07:15 -0700 (PDT)
+        bh=HAOuh0e5PjdM5Thiks9XcjQnZt1mrG00zqw/b7U8tlE=;
+        b=NMW+ubrJXfv/5upoGGKuWE0SWYNZj7pCzO41YsFQNkgQCa3oZPJcTGxBNz0eA5TLI8
+         tYZ4ZEWY61+lve7VKo1+N7MgZE+6m9FRHWUGjijiW7AKv97KPZdr5/MSCSr+mPn/LTIF
+         SDIr5OzMuqVJ2SNQGBfyxU/GYCueFfwxGrZW3Pws0E3k3GLLMc82O21xW0O0quDZgmf/
+         xURpKVlJLW/7zIeK/8Wr1B7CtZVqnkgP31OGXYcMhVgkoM48sSYgwf47pqHWCqfgUnqi
+         e1ZTarFD63eF2yWsKT+KZuniT9kusxwrvl+7r8kLTiEINZeWLqEDwiIthch10V+TVjLf
+         8zqw==
+X-Forwarded-Encrypted: i=1; AJvYcCWBQj8lXKFgbzUT8oQQhUj8APooRxYTjvBJrlsWq4ThE98pD7X2AkwG1rlRP71GnH8+K6l+sbyQO4c=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx5VLp/y3GYaHNYj6u6OMpBKBgOLKNbh3YX3feWV5Cq5BbDcIX/
+	Ai/4BGB5F+WcktuheljMvCmXGQhPgGb7Xh2MvIAtbgDhgry+YUco/SvoV1NNWA9A+mZ6xav0iFO
+	mBlcl
+X-Gm-Gg: ASbGnctvDPpUly4BcT1/Mdvnoco21zLRKjX2sarjgojQIDTqkoZ3GVdZ+iS0ynDmrzd
+	yZ5nYWidX3U3/ZON1/DRSLIXiSFrbRAn2kvSiUGM6DwSS5DgZmyjKOLHeqwt0B/NCkY6W/hObEV
+	EP/qkjL7RXTQ6JgHhbWxGpn8K5Ccbbpub5yyy84mPbZmoEtP6tMsrlHn8cVDWVNClAyoOuX/1gA
+	ZvOBNHNX2mNahKQgBvswTA8dfnKJc2sYrWl9Q+xNG6r5+cM67pvWdQNA91AZ8obQRz7rfEmUhVu
+	RmkC88KLfpd48lmH/I/0btKMAeWgv0r4QAgMZxaSzMeWU72J7ozrLGr+BLvHjXVZ531Rgjg6x/c
+	Ec1mpfZD+ceQ9eFxJuM3D/SpbhNsukUhFeioa
+X-Google-Smtp-Source: AGHT+IHNat+zEG/luHBNIINd5V8v6XlcBVNxebQV2Q9VeRLv4kxzRp8ULT+stMytttEuuhYWEbWuVw==
+X-Received: by 2002:a05:6000:2086:b0:3a5:67d5:a400 with SMTP id ffacd0b85a97d-3b5f18b3eaemr8361545f8f.33.1752394046075;
+        Sun, 13 Jul 2025 01:07:26 -0700 (PDT)
 Received: from [192.168.224.50] ([213.208.155.167])
-        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b5e8dc22a8sm9386608f8f.34.2025.07.13.01.07.04
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b5e8dc22a8sm9386608f8f.34.2025.07.13.01.07.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 13 Jul 2025 01:07:14 -0700 (PDT)
+        Sun, 13 Jul 2025 01:07:25 -0700 (PDT)
 From: Luca Weiss <luca.weiss@fairphone.com>
-Date: Sun, 13 Jul 2025 10:05:30 +0200
-Subject: [PATCH v2 08/15] dt-bindings: thermal: qcom-tsens: document the
- Milos Temperature Sensor
+Date: Sun, 13 Jul 2025 10:05:31 +0200
+Subject: [PATCH v2 09/15] dt-bindings: dma: qcom,gpi: document the Milos
+ GPI DMA Engine
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -70,7 +71,7 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20250713-sm7635-fp6-initial-v2-8-e8f9a789505b@fairphone.com>
+Message-Id: <20250713-sm7635-fp6-initial-v2-9-e8f9a789505b@fairphone.com>
 References: <20250713-sm7635-fp6-initial-v2-0-e8f9a789505b@fairphone.com>
 In-Reply-To: <20250713-sm7635-fp6-initial-v2-0-e8f9a789505b@fairphone.com>
 To: Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>, 
@@ -95,33 +96,33 @@ Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
  linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org, 
  linux-mmc@vger.kernel.org, Luca Weiss <luca.weiss@fairphone.com>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1752393945; l=844;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1752393945; l=809;
  i=luca.weiss@fairphone.com; s=20250611; h=from:subject:message-id;
- bh=ZPOAK3xFvDZxKtMubUGBzI+X0LzZj/ehseUCLqV9308=;
- b=g6khw9Eoj3k7qdE6HzUK3LwUa3ARHqiUtNifgmAtPNMijChPBfhsPG+M6zDWw7Jp/LdMvpqx0
- G/ABS6yAzifCr1yjRWLDxYJ5Q3VDCx3clJN4ZacevbE60KKq1Tn9u0D
+ bh=cmEjmUIEwJdszNuha6SGlHW2o0fXW5xz6+LSWPvZsgg=;
+ b=PdARDzzFMZy7Ut6DdJtISA7htSoj0AT2jFnSpJ6mCPR7xKdPfXUdr9NJCuHBaBjbgQNs+Hcav
+ 9Qi/8P7T+qNBz/thYmFy0Bn74Jp3O9N12GTa6rI4xDYY/rk8g6EpebR
 X-Developer-Key: i=luca.weiss@fairphone.com; a=ed25519;
  pk=O1aw+AAust5lEmgrNJ1Bs7PTY0fEsJm+mdkjExA69q8=
 
-Document the Temperature Sensor (TSENS) on the Milos SoC.
+Document the GPI DMA Engine on the Milos SoC.
 
 Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
 ---
- Documentation/devicetree/bindings/thermal/qcom-tsens.yaml | 1 +
+ Documentation/devicetree/bindings/dma/qcom,gpi.yaml | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-index 0e653bbe9884953b58c4d8569b8d096db47fd54f..94311ebd7652d42eb6f3ae0dba792872c90b623f 100644
---- a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-+++ b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-@@ -49,6 +49,7 @@ properties:
-       - description: v2 of TSENS
-         items:
+diff --git a/Documentation/devicetree/bindings/dma/qcom,gpi.yaml b/Documentation/devicetree/bindings/dma/qcom,gpi.yaml
+index 7052468b15c87430bb98fd10bc972cbe6307a866..1655f21a4f64c588851c48381a18965c946e2df0 100644
+--- a/Documentation/devicetree/bindings/dma/qcom,gpi.yaml
++++ b/Documentation/devicetree/bindings/dma/qcom,gpi.yaml
+@@ -24,6 +24,7 @@ properties:
+           - qcom,sm6350-gpi-dma
+       - items:
            - enum:
-+              - qcom,milos-tsens
-               - qcom,msm8953-tsens
-               - qcom,msm8996-tsens
-               - qcom,msm8998-tsens
++              - qcom,milos-gpi-dma
+               - qcom,qcm2290-gpi-dma
+               - qcom,qcs8300-gpi-dma
+               - qcom,qdu1000-gpi-dma
 
 -- 
 2.50.1
