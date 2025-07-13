@@ -1,33 +1,33 @@
 Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 25E681EF36E;
-	Sun, 13 Jul 2025 08:37:15 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7B3CD236A9F;
+	Sun, 13 Jul 2025 08:40:08 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752395835; cv=none; b=BjewGSZ/+0h2PUv9GBnDXl04WqLJ+m/W6vzz1XK+pEp4y9sYvt7m57oWpH57Czbe/Qsn+wCHssxJX5/ajWHUKaRB5wL3g4wKlyLwQFszVQdTwX0MxYlWWJcF1ijpPy0w7hH+0/QsVJHytKd/BDVkkcby7/6NmYdwhgKOGljR9AU=
+	t=1752396008; cv=none; b=DBqq6+WeQNabEF5TjUQgMaticf3T8RtpijTIB1QIbCsfO6Vb++OIaD2qlsLmHbnKvgI9M+GYsnDXE6zLvO5SPHEQIfrJ7mJeNypjupIQuqm628BT80S4gjU4M5t/2RTgbDQThzs/1UTfno1Lce1x9oUfX7iR2N8BWvv139R+tEw=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752395835; c=relaxed/simple;
-	bh=tCn/GrV9aszlId7gS/rKno0Y7spGuGu52u2u8jFFXys=;
+	s=arc-20240116; t=1752396008; c=relaxed/simple;
+	bh=csqe1O+tkd6nKMHUq6yiCp8apa3jwJYHrPEnFz22I4E=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=j+gB9yIsrL9CJWvKjnaCq5xFkuGKMArvJt8tmXw3DcotluM0tjy602OiNgv8fMNMSE6l8txgDLKftYBKQ23neTbG+rCl8Nw0mcPaCQ5oJr/rm2YFVt9fkxfNDGNteLqthiQjBtoDZLxrw0Ta5nwzCeVnX0UQYshxa5wqpNtHvMU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=KhfAKbyq; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=CkoelRn2QRB2mZl/aeehXfFIRbDm86zSJyr77aNck3mE1ENjFQVsS6Wgzp0Uj7o/Gk2K45s1ZA9hU9m3fL2QLEBY7bEjXYa60jnt8OytvrSkn5hpMX+2XxQpWAKrj0HLeJrJqiCfangjdbebM8a17x7t4iqtz/a1zjJgOsPv/Q0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Ko5CdZTX; arc=none smtp.client-ip=10.30.226.201
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="KhfAKbyq"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4FFA4C4CEE3;
-	Sun, 13 Jul 2025 08:37:11 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Ko5CdZTX"
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 665EFC4CEF5;
+	Sun, 13 Jul 2025 08:40:03 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752395834;
-	bh=tCn/GrV9aszlId7gS/rKno0Y7spGuGu52u2u8jFFXys=;
+	s=k20201202; t=1752396008;
+	bh=csqe1O+tkd6nKMHUq6yiCp8apa3jwJYHrPEnFz22I4E=;
 	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=KhfAKbyqI8BmLdtOcSLrH4WbNY57A3RyKLUnP8dhWquM4/H/K/mpWFo0Q27sShGdX
-	 jxo5oRxBDebsIC4BlIfmxgfkmYC6seYt2HXNK3dgkv7APgHFplKAmo1RqButyY7MDI
-	 uBjPLvwfWxbKh0gHJqubuN5JYudHOaFQCjGgKI6YX7PEd1iUrLX6XUXzVwej7jVkDC
-	 XqN1JVW9KycsqnE0CqvF65lM5fEzvrp9quyNTAGLyvpuVItLD88CD6MilrDcxu7rju
-	 FXEtw0T+tgQm/Wodubjdu3X/d5KpiUi53DkUnwM3auS9ahetmqV/jYqliZVSZMsRez
-	 +KZeheT1dvz2A==
-Message-ID: <b6259b4c-fb65-4494-bd0c-8bb8a6bd1b86@kernel.org>
-Date: Sun, 13 Jul 2025 10:37:08 +0200
+	b=Ko5CdZTXIbv+CsbnsoUh31B8n8F/q2qNT+hJpHAaFfITYqM2ahTchoIhU2/xYtZB6
+	 xz/okQpWWId41TYHyNe+ubd/9iRBMjZEj7a3tIW+MVTSpD//a8dMlVsotvVG4BsEPT
+	 5B4JbwSP/8N+BNyZpL26fhWnDw+pSTRtP4npDkhuFQWvbC4sKS5Ogdo47epQC6jp1z
+	 cJLxQMqAAgTeqCXn1sgPsvkS7mwpA9gVlckajOkmaL590GKd2fJIp2F0jzwvlrUcfE
+	 h9anCEThsNqRcVcgi7JrSFmWYrUQf9lpZJHK9OLpZq6B5/55zYP0e/iwL45TUuXD7d
+	 Vb9rK+6YaVdXQ==
+Message-ID: <3bec28b9-5ac6-4d93-887d-481495d6cf95@kernel.org>
+Date: Sun, 13 Jul 2025 10:40:01 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,8 +35,8 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 1/4] dt-bindings: brcmstb-hwspinlock: support for
- hwspinlock
+Subject: Re: [PATCH 3/4] dt-bindings: mmc: add brcmstb share register and
+ hwlocks reference
 To: Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
  baolin.wang@linux.alibaba.com, robh@kernel.org, krzk+dt@kernel.org,
  conor+dt@kernel.org, florian.fainelli@broadcom.com, ulf.hansson@linaro.org,
@@ -46,7 +46,7 @@ Cc: bcm-kernel-feedback-list@broadcom.com, linux-remoteproc@vger.kernel.org,
  linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
  Kamal Dasu <kdasu@broadcom.com>
 References: <20250711154221.928164-1-kamal.dasu@broadcom.com>
- <20250711154221.928164-3-kamal.dasu@broadcom.com>
+ <20250711154221.928164-5-kamal.dasu@broadcom.com>
 From: Krzysztof Kozlowski <krzk@kernel.org>
 Content-Language: en-US
 Autocrypt: addr=krzk@kernel.org; keydata=
@@ -92,90 +92,96 @@ Autocrypt: addr=krzk@kernel.org; keydata=
  jWt87ecuHlpL3uuQ0ZZNWqHgZoQLXoqC2ZV5KrtKWb/jyiFX/sxSrodALf0zf+tfHv0FZWT2
  zHjUqd0t4njD/UOsuIMOQn4Ig0SdivYPfZukb5cdasKJukG1NOpbW7yRNivaCnfZz6dTawXw
  XRIV/KDsHQiyVxKvN73bThKhONkcX2LWuD928tAR6XMM2G5ovxLe09vuOzzfTWQDsm++9UKF a/A=
-In-Reply-To: <20250711154221.928164-3-kamal.dasu@broadcom.com>
+In-Reply-To: <20250711154221.928164-5-kamal.dasu@broadcom.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 
 On 11/07/2025 17:42, Kamal Dasu wrote:
 > From: Kamal Dasu <kdasu@broadcom.com>
 > 
-> Adding brcmstb_hwspinlock bindings.
+> Adding optional controller share registers and hwspinlock reference fields
+> to be used by sdhci-brcmstb driver.
 > 
 > Signed-off-by: Kamal Dasu <kamal.dasu@broadcom.com>
-
-Please use subject prefixes matching the subsystem. You can get them for
-example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
-your patch is touching. For bindings, the preferred subjects are
-explained here:
-https://www.kernel.org/doc/html/latest/devicetree/bindings/submitting-patches.html#i-for-patch-submitters
-
-missing hwlock prefix
-
 > ---
->  .../hwlock/brcm,brcmstb-hwspinlock.yaml       | 36 +++++++++++++++++++
->  1 file changed, 36 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/hwlock/brcm,brcmstb-hwspinlock.yaml
+>  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 29 +++++++++++++++++--
+>  1 file changed, 27 insertions(+), 2 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/hwlock/brcm,brcmstb-hwspinlock.yaml b/Documentation/devicetree/bindings/hwlock/brcm,brcmstb-hwspinlock.yaml
-> new file mode 100644
-> index 000000000000..b49ead166b1e
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/hwlock/brcm,brcmstb-hwspinlock.yaml
-> @@ -0,0 +1,36 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/hwlock/brcm,brcmstb-hwspinlock.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Broadcom settop Hardware Spinlock
-> +
-> +maintainers:
-> +  - Kamal Dasu <kamal.dasu@broadcom.com>
-> +
-> +properties:
-> +  "#hwlock-cells":
-> +    const: 1
-> +
-> +  compatible:
-> +    const: brcm,brcmstb-hwspinlock
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> index eee6be7a7867..fe9be7a7eca5 100644
+> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+> @@ -27,15 +27,20 @@ properties:
+>            - const: brcm,sdhci-brcmstb
+>  
+>    reg:
+> -    maxItems: 2
+> +    minItems: 2
+> +    maxItems: 4
+>  
+>    reg-names:
+> +    minItems: 2
+>      items:
+>        - const: host
+>        - const: cfg
+> +      - const: share       # Optional reg
+> +      - const: flshr_ipis0 # Optional reg
 
-Please use SoC specific compatibles. Then also filename will change.
+Drop comments. Schema says these are optional, so no need to point obvious.
 
-Compatible always goes first. See 99% of other bindings and DTS coding
-style.
+>  
+>    interrupts:
+> -    maxItems: 1
+> +    minItems: 1
+> +    maxItems: 2
 
-> +
-> +  reg:
+You need to list items with minItem: 1.
+
+Why all devices now got new reg and interrupts? What changed in EXISTING
+hardware? All this has to be explained in the commit msg. If not all
+devices got it, then you miss constraints.
+
+>  
+>    clocks:
+>      minItems: 1
+> @@ -60,6 +65,9 @@ properties:
+>      type: boolean
+>      description: Specifies that controller should use auto CMD12
+>  
+> +  hwlocks:
 > +    maxItems: 1
 > +
-> +required:
-> +  - "#hwlock-cells"
-> +  - compatible
-
-Same here
-
-> +  - reg
-> +
-> +additionalProperties: false
-> +
-> +examples:
+>  allOf:
+>    - $ref: mmc-controller.yaml#
+>    - if:
+> @@ -115,3 +123,20 @@ examples:
+>        clocks = <&scmi_clk 245>;
+>        clock-names = "sw_sdio";
+>      };
 > +  - |
-> +    hwspinlock@8404038 {
+> +    mmc@84b1000 {
+> +      mmc-ddr-1_8v;
+> +      mmc-hs200-1_8v;
+> +      mmc-hs400-1_8v;
+> +      no-sd;
+> +      no-sdio;
+> +      non-removable;
+> +      bus-width = <0x8>;
+> +      compatible = "brcm,bcm74165b0-sdhci", "brcm,sdhci-brcmstb";
+> +      reg = <0x84b1000 0x260>, <0x84b1300 0x200>,  <0x84b1600 0x10>, <0x84a5404 0x4>;
+> +      reg-names = "host", "cfg", "share", "flshr_ipis0";
+> +      hwlocks = <&hw_lock 0x0>;
+> +      interrupts = <0x1 0x0 0x1f 0x4 0x1b 0x11>;
 
-hwlock@
+Undecipherable.
 
-> +        compatible = "brcm,brcmstb-hwspinlock";
+> +      clocks = <&scmi_clk 245>;
+> +      clock-names = "sw_sdio";
 
-And this you got right...
-
-> +        #hwlock-cells = <1>;
-> +        reg = <0x8404038 0x40>;
-
-But this not. Use order from DTS codinh style.
+Totally random order of properties. Please align it closely with DTS
+coding style.
 
 > +    };
-> +
 
 
 Best regards,
