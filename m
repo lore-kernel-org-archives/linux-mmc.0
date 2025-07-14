@@ -1,33 +1,66 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1C2831CAA9C;
-	Sun, 13 Jul 2025 08:44:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id E6D04222574;
+	Mon, 14 Jul 2025 06:13:11 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.50
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752396300; cv=none; b=ZZIfAeWyr1UcfsyqnoAh/CvUxuCo6kwkictlAAWvA9Hgk9tGHZNMBSa3rRdUOloqs8YoycclMq4uJu9jF34tlr7cLyN1ec+Mtx5wrwtQeqx9M+A0SOiyzaeJjkLfDMOheix8YpO9M7IU5t6zOCgMUYyv5WqSDBKTz45sF15Xb34=
+	t=1752473593; cv=none; b=Nt/+GU5MnS8zaxSM8ywnGkMAKTq4dYnp+qSclkY87/qMpn+otLns/xyBoANR6rG88CxFe7U4xBXeBIUMQGLDcvCzJsV8QPvWcMNqqkNxz027n2Ybt4TCg3xDYEKkgCF67PzQLECLjYkMqH7AG1k8skVbRE+bkTjuNceelmwUkFI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752396300; c=relaxed/simple;
-	bh=ASPv/r6GXTBe7L2poja4xEnn6UOIN4wrVJugrHA0UqI=;
+	s=arc-20240116; t=1752473593; c=relaxed/simple;
+	bh=K6rTZa+mjUsFCcLD5fAui8r+wQYrBXhnTQ2dLU8CeRU=;
 	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=MCqW5IUSESRraIMOc+17U6CNVF4BHfh+4DbRotCQwfepFUWEietCkRmLfdwcil/mDSU4HSak2iAEOcAX5+AXCjN3vPxAEJ/R/adc5zHSfn0oW4SN1hnYRoAIra7hu9AUCnVSa07IsOmHgZ6ilr+1HfATCygc14nTMS2ebHmBaLU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=Iv5MbJuE; arc=none smtp.client-ip=10.30.226.201
+	 In-Reply-To:Content-Type; b=k/VDA0grBrMvshtcQ1hdjGI9Gd/6mVK5X/WdZjK9v5oFRhm/9D4Q4+6EsUjrlRSFWNSIIm54UWIpAa+0onJzeiXqZAXNeoaGT1nlZQKqwH6zkdscxH75WBDbmZdFY1aptYbO1oeVLHpCO2eRS8b0zwnIAlnea9endxOiKjMIvHU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=ALsZpZ5N; arc=none smtp.client-ip=209.85.208.50
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="Iv5MbJuE"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 571C5C4CEE3;
-	Sun, 13 Jul 2025 08:44:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752396299;
-	bh=ASPv/r6GXTBe7L2poja4xEnn6UOIN4wrVJugrHA0UqI=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=Iv5MbJuExz5JLFy9uM5Se5FuCNyvM/ELAA0NzzRwtcHq8fHNFcXXLjf4Joam1dp1o
-	 mMZape1BlzE7vhjx/eDmdZLZcacV1urJKLIBFTjw0HNuIjCsVE1N3RbeQ8RtBdgDyq
-	 zwwEDiLTUu6QMRZvHlF1Hmz0TDgyV8YO++jAJQPJNs9RWq2tbFMmN3JNgnScJpj/sg
-	 3LmCJ3obCJz2KcPPEbmU7ujNCQFgrvzp/BRVdPII5Sfe3yrw0GdQ3pq3Q9X1CQ3Lzn
-	 SvWBL7ZyYS23OyVVmKpNWxm3PTHOO6d3yibfsu5+9XL9Cjsju23Gxdj/P2WHpggrMQ
-	 UA82Bspu43yGA==
-Message-ID: <3a297f23-9b80-4623-ad58-85de85a5b8f7@kernel.org>
-Date: Sun, 13 Jul 2025 10:44:47 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ALsZpZ5N"
+Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-60c3aafae23so10396899a12.1;
+        Sun, 13 Jul 2025 23:13:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1752473590; x=1753078390; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Vvozbmvdghn0xuJhVjwu4pQc8eFowQW5vD9wXdzvh2E=;
+        b=ALsZpZ5Nwk0QPl9HEVXg0BgXgV/0oGOnzEJeNal2xZfLiTqtprh8NIc+B9yAZo3Iyw
+         8RY7AeH/stuMCjEmmJBgcQNCDqXHEmAro34tjiskjt9cEYBFJwvbf7XgPG0ChQca3Fp1
+         5nyF2HY1O19gIFwAV0iPuQVzMwWmV1ELLeVifNIiilV/LbQuRNHTAQOYlfeEPsHCaDJn
+         I+6gq0/NE/ae8enM3WsoDcD1N04Zua/PHYgx6iL4E1d11pz3fYmMtOmCeSiojBnqO8U9
+         rgvjfmvMU3pd6JG0ooHR70qlHpOQvXaATLeJs8Rd2oeSPIjF28ACBmEUxwortIYxArWK
+         4Wlw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1752473590; x=1753078390;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Vvozbmvdghn0xuJhVjwu4pQc8eFowQW5vD9wXdzvh2E=;
+        b=AX6KyacYKSsVmXSsn1BHeRqRMO2e7ZoQqLm0Q8MrjJ+MZXX3V3wqTVJlU4Un+cDXdh
+         0eHqOHe/iQKkWsA+P2wbl7XcS+tkxhMVmMKg5LCzRnAUK42krHN2Y4GYyhOM2TDn2dLq
+         +UkMql3hcqNxciNdjOES1jV+4T+goxrEyMrifUPxxW2d7Rh+SP7+EGGxStORcgQXvH+1
+         maimu5sfHNrUgdPBuueHHQdDHvFemDemJnziN7vCmgfZ8LU3rU4gDpCaEmIApDy+DTr/
+         FurycAhOqC3uVdiMEfDp5CLGRclM4iGZ5k4V9uiA9xpB5SgqMpJgFFXV2ht6awEJhWZK
+         AOkw==
+X-Forwarded-Encrypted: i=1; AJvYcCUP9cCEGBtIfr4mj8xq/Eb9LeEOYHuQaWg7DecbOSeLyjmdGBsu89NKvBfOe5Mpxy2p0WMa5X3eB2OQ@vger.kernel.org, AJvYcCUStQ+kZD3RgEiqCqamDPHN0+V8U//75gB5aBA/VFf/8TxBwYmlbFOrNTmcls2xSkxfzTkJbh1izJUn@vger.kernel.org, AJvYcCUu/1mhYdj5sMEGBzzl15XoaiyAFFWhgEjtWzX76d2pShQ/mNzScoB3zBJvqR/9LZq31mqppD0IV70=@vger.kernel.org, AJvYcCVstpNyGdvuY73VnuNsfHVFZp+Ibrgrdw6r36tXAZ6bHdgKEM8rbl+dffkiBgU4ZIz3E4mae5bxw5CYU5w=@vger.kernel.org, AJvYcCW0SyBXuZZvd/xJRQljFHmZZeK27WVLgdkeC50Y0Ub2vYEcwxbkffKOuPuFt/NDDMfwKU0qSkr3+OOeV0V3zg==@vger.kernel.org, AJvYcCW9KUj+JjF5ly7puv2tvDzq8+x1Op4tL9Qp0opokzItOLrzzOp8nZDLBSMKCFsv8iGwfAi2VpTAbRT/@vger.kernel.org, AJvYcCWCJTujwin9rvVzkB2+pYTryRkQpYeQHH7hj/ZAtqaa7ztVx09K4xQ05d8TrssfdLgBtpiikUwl6k0mJaas@vger.kernel.org, AJvYcCWVojriAO944z+btF5GTxaZUZCinYblWnzszeAL3ErTaCzTc4dmv9W51Pv3w/UOIkrUDJwcXKXnKsMlID1S@vger.kernel.org
+X-Gm-Message-State: AOJu0YwHYB1+qM4aL9I+xyEElR/MdHfEasVuCVboe38WY1xF0F4jbRQb
+	PJhr5OJpS0nyaUrTHjE5Xs4BO1IeOKlW234I8ekBlgq7OXfOqlDGmcfE
+X-Gm-Gg: ASbGncsVzO3u2eRRPkqHSExy4M7lF3/AqBCyho/g29LYpWj7iPq7+3VHbuJ8XUz5zUh
+	XvbjJPk9jXCfIQMiqT4i+CEEISiQpedpCb9vyjf4+7DDhq3Jmr1V5+R9ShnnbGf8lPp9ovCVb0V
+	GYnbTFIeLu6NoJa8NB/aWSzV8nXEtD8QXaTDsjm4Gqp6HfiEMSBw0ai8XTXG1R/XJDWQIlXTcAX
+	+fSzIIeS5RrvTPZ8v5iGi2aYialOjERouHKAYIZ0FmgAYr0nhCdDUo3ukisQ2vqqTlQsWm852eH
+	0qrys1fbQfL7XFpn13BhNOrFlQ2Mm06BX3zlOngHXilZmyDqgE5qIF902v/whLdVa5ROZxTfdHb
+	5a30NVO/tm5Y+56IaMLVGLbeVXbKPIfOCHJ6CsLZkQrLFCOQKU5vR7qFhQU5KyQZ7j5UtkII022
+	eawnCCt9xeeqWy3IrLPLA+zA==
+X-Google-Smtp-Source: AGHT+IHhpjs0q3mi1BpnwNvryChqNwp5/Dw+yK56vrj/BWwwZ/DXYC0z9I3eOOpItRqe5sk1H/USWg==
+X-Received: by 2002:a17:906:9f86:b0:ae3:a4a6:a32e with SMTP id a640c23a62f3a-ae6e253ddf4mr1701256366b.29.1752473589912;
+        Sun, 13 Jul 2025 23:13:09 -0700 (PDT)
+Received: from [192.168.0.124] (ip-37-248-155-42.multi.internet.cyfrowypolsat.pl. [37.248.155.42])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae6e8294bc2sm766171566b.135.2025.07.13.23.13.06
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 13 Jul 2025 23:13:09 -0700 (PDT)
+Message-ID: <ee0d148e-71cd-4136-b3cb-145566abdfbe@gmail.com>
+Date: Mon, 14 Jul 2025 08:13:05 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -35,183 +68,65 @@ List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 4/4] mmc: sdhci-brcmstb: rpmb sharing by claiming host for
- TZOS
-To: Kamal Dasu <kamal.dasu@broadcom.com>, andersson@kernel.org,
- baolin.wang@linux.alibaba.com, robh@kernel.org, krzk+dt@kernel.org,
- conor+dt@kernel.org, florian.fainelli@broadcom.com, ulf.hansson@linaro.org,
- adrian.hunter@intel.com
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-remoteproc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
- Kamal Dasu <kdasu@broadcom.com>
-References: <20250711154221.928164-1-kamal.dasu@broadcom.com>
- <20250711154221.928164-6-kamal.dasu@broadcom.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH 00/14] Various dt-bindings for SM7635 and The Fairphone
+ (Gen. 6) addition
+To: Bjorn Andersson <bjorn.andersson@oss.qualcomm.com>,
+ Luca Weiss <luca.weiss@fairphone.com>
+Cc: Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
+ Joerg Roedel <joro@8bytes.org>, Rob Herring <robh@kernel.org>,
+ Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
+ <conor+dt@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>,
+ Viresh Kumar <viresh.kumar@linaro.org>,
+ Manivannan Sadhasivam <mani@kernel.org>,
+ Herbert Xu <herbert@gondor.apana.org.au>,
+ "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>,
+ Das Srinagesh <quic_gurus@quicinc.com>, Thomas Gleixner
+ <tglx@linutronix.de>, Jassi Brar <jassisinghbrar@gmail.com>,
+ Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>,
+ Daniel Lezcano <daniel.lezcano@linaro.org>, Zhang Rui <rui.zhang@intel.com>,
+ Lukasz Luba <lukasz.luba@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+ ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+ <aGMI1Zv6D+K+vWZL@hu-bjorande-lv.qualcomm.com>
 Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <20250711154221.928164-6-kamal.dasu@broadcom.com>
-Content-Type: text/plain; charset=UTF-8
+From: Artur Weber <aweber.kernel@gmail.com>
+In-Reply-To: <aGMI1Zv6D+K+vWZL@hu-bjorande-lv.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 
-On 11/07/2025 17:42, Kamal Dasu wrote:
-> +
-> +static int sdhci_brcmstb_sdio_share_init(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(&pdev->dev);
-> +	struct device_node *np = pdev->dev.of_node;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	struct brcmstb_sdio_share_info *si;
-> +	void __iomem *sdio_sh_regs;
-> +	int ret;
-> +
-> +	/* sdio_share block */
-> +	sdio_sh_regs = devm_platform_ioremap_resource_byname(pdev, "share");
-> +	if (IS_ERR(sdio_sh_regs))
-> +		return 0;
-> +
-> +	si = devm_kcalloc(&pdev->dev, 1, sizeof(struct brcmstb_sdio_share_info),
+On 6/30/25 23:59, Bjorn Andersson wrote:
+> On Wed, Jun 25, 2025 at 11:22:55AM +0200, Luca Weiss wrote:
+>> Document various bits of the SM7635 SoC in the dt-bindings, which don't
+>> really need any other changes.
+>>
+>> Then we can add the dtsi for the SM7635 SoC and finally add a dts for
+>> the newly announced The Fairphone (Gen. 6) smartphone.
+>>
+>> Dependencies:
+>> * The dt-bindings should not have any dependencies on any other patches.
+>> * The qcom dts bits depend on most other SM7635 patchsets I have sent in
+>>    conjuction with this one. The exact ones are specified in the b4 deps.
+>>
+> 
+> Very nice to see the various patches for this platform on LKML!
+> 
+> 
+> Can you please use the name "milos" in compatibles and filenames instead
+> of sm7635.
+Hi, small half-related question - does this mean that future Qualcomm
+SoC additions should use the codename for compatibles instead of the
+model number as well?
 
-sizeof(*)
+I was working on SM7435 (parrot) patches a while back; when I get around
+to submitting those, will I have to use "parrot" or "sm7435" in the
+compatibles?
 
-> +			  GFP_KERNEL);
-> +	if (!si)
-> +		return -ENOMEM;
-> +
-> +	si->share_reg = sdio_sh_regs;
-> +	ret = of_hwspin_lock_get_id(np, 0);
-> +	if (ret < 0) {
-> +		dev_err(&pdev->dev, "failed to get hwspinlock id %d\n", ret);
-
-Uh? So you changed the ABI in the driver but not in the bindings? No,
-this must be always synced. Look what your binding is saying. Is it
-optional? Yes.
-
-And why would you print errors anyway on deferred probe? Twice! One here
-and warning in your probe.
-
-> +		return ret;
-> +	}
-> +
-> +	si->hwlock = devm_hwspin_lock_request_specific(&pdev->dev, ret);
-> +	if (!si->hwlock) {
-> +		dev_err(&pdev->dev, "failed to request hwspinlock\n");
-
-Syntax is: return dev_err_probe
-
-> +		return -ENXIO;
-> +	}
-> +
-> +	si->irq_recv = platform_get_irq_byname_optional(pdev, "recv_ipi0");
-> +	if (si->irq_recv < 0) {
-> +		ret = si->irq_recv;
-> +		dev_err(&pdev->dev, "recv_ipi0 IRQ not found\n");
-
-Syntax is: return dev_err_probe
-
-> +		return ret;
-> +	}
-> +
-> +	ret = devm_request_irq(&pdev->dev, si->irq_recv,
-> +			       sdhci_brcmstb_recv_ipi0_irq,
-> +			       0, "mmc_recv_ipi0", host);
-> +	if (ret < 0) {
-> +		dev_err(&pdev->dev, "mmc_recv_ipi0 IRQ request_irq failed\n");
-> +		return ret;
-
-return dev_err_probe
-
-> +	}
-> +
-> +	si->ipis0_reg = devm_platform_ioremap_resource_byname(pdev, "flshr_ipis0");
-> +	if (IS_ERR(si->ipis0_reg))
-> +		return -ENXIO;
-> +
-> +	priv->si = si;
-> +	si->host = host;
-> +	init_waitqueue_head(&si->wq);
-> +	/* acquire hwsem */
-> +	sdhci_brcmstb_aquire_hwsem(si);
-> +	si->claim_thread =
-> +		kthread_run(sdhci_brcmstb_host_claim_thread, si,
-> +			    "ksdshrthread/%s", mmc_hostname(host->mmc));
-> +	if (IS_ERR(si->claim_thread)) {
-> +		ret = PTR_ERR(si->claim_thread);
-> +		dev_err(&pdev->dev, "failed to run claim thread\n");
-> +		return -ENOEXEC;
-> +	}
-> +
-> +	return 0;
-> +}
-> +
->  static u32 sdhci_brcmstb_cqhci_irq(struct sdhci_host *host, u32 intmask)
->  {
->  	int cmd_error = 0;
-> @@ -482,8 +720,11 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->  		goto err;
->  
->  	pltfm_host->clk = clk;
-> -	return res;
-> +	res  = sdhci_brcmstb_sdio_share_init(pdev);
-
-Only single space before '='
-
-> +	if (res)
-> +		dev_warn(&pdev->dev, "sdio share unavailable\n");
-
-Why do you warn on completely optional hwlock? Drop, this should be
-silent. You already print errors earlier and there is no point to print
-error twice.
-
->  
-> +	return 0;
->  err:
->  	sdhci_pltfm_free(pdev);
->  	clk_disable_unprepare(base_clk);
-
-
-Best regards,
-Krzysztof
+Best regards
+Artur
