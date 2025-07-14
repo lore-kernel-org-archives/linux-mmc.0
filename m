@@ -1,152 +1,229 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com [209.85.221.48])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 3A5021FC3;
-	Mon, 14 Jul 2025 06:26:57 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2F1B0201278
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Jul 2025 06:48:13 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.48
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752474418; cv=none; b=G1U86XErbS+3pLGRfAcvi5/TwqmuJ2UqDj+bjMt+1rT/jW9PDpC24J+w1eHIVDDt0nbzbgvfNPSKipxqBd301KgJbLe96xPPx3KnlcYneVTb3AbOwVMgKeHMPZjK+bF+PyDs7MPDxq9N6pzEWSa8NlOSSgEit7mXHo+Hb0maKEQ=
+	t=1752475695; cv=none; b=OXl40T3mh5qD205XfGH90Z+9s0zlTmLp+sE1DGukVIzrWWQ4XVXY5GdjEt0Xl+rYAGh0y0wnekhp9ZQA79l5TUHZTS8bw3e8xJEXlqqkhxL6qTbr03pQXXSw87NKARaR66kwKxGGKuTZVJuMwk8zVmgo2PsxdCjvpogcOozF08Y=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752474418; c=relaxed/simple;
-	bh=zVmVzXltQlDJ32txnUs+a3Lm/yVkDxzngaGt7p+cC7Y=;
-	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-	 In-Reply-To:Content-Type; b=o3owGoKCrFbfFZjzyKjQdkiAlr4j/OY/rj92GZ83opQ7vF3HHWPQ/1YZGjrZpWgbd3veoV+E3On/JQY2So4cbsc5Pm2L7Ev4N8rCQ+DkQIhymbjUQdcll9C/FAnaS73IKZbOfTusfwU1/Owvb13KCU4013e/FxljbzNCf8jkNFY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=j0POggvS; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1752475695; c=relaxed/simple;
+	bh=ri4phK8K0KTwvLvMiQWhknNRdht5zLBNG8RrCC1LcLQ=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=fUO0WyMy2CM5fOcHWhzfWxGOatjkRIc2kJ7Lm9b68STPucDFXep76udS82hjtfIelP6Nqzb/qbGCc3wzUfFs77W8TrhqEwpqKa/8FpWo2avntTr6L+9qDb8BIUs/dtCA9M68SM3ldG2bXAvQ/oAjDWfsl0XjSqGYNxPp4yDI3X0=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=CqDOr1Y2; arc=none smtp.client-ip=209.85.221.48
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="j0POggvS"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17453C4CEED;
-	Mon, 14 Jul 2025 06:26:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752474417;
-	bh=zVmVzXltQlDJ32txnUs+a3Lm/yVkDxzngaGt7p+cC7Y=;
-	h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-	b=j0POggvSPFvZsKOEKrDId+1rKUQB6YQ68pKyYVPORgSwCVilVmZyaaxncXu5pQjaR
-	 hD8NFRB1dajiXVrNVZDa/Bd4rBA5NQ0im/Ms70cdhetKdN0YMvzEIx2Q0FsFDkI4fu
-	 5ULK0T1t1+fwOthZtRQ0fWugdpP3XJ67itxOBkn844h1eaEyslV7qFL6YD09KPZgKz
-	 MwycQ+tPtW97wx4KfMoaYJsF85W2AJNeEu4T/9dqg3A3vDU+jbbPnPOx4HLpGWh0bX
-	 n+yYgCBHwU3NpwDa/rzy60jgRMhkXFMh68ZpuLkooz28qmLrEOGOlLmrASSPrvCEH1
-	 T/GnwzvhXLUXA==
-Message-ID: <888a7598-38d9-4640-9823-2b073da006f4@kernel.org>
-Date: Mon, 14 Jul 2025 08:26:47 +0200
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CqDOr1Y2"
+Received: by mail-wr1-f48.google.com with SMTP id ffacd0b85a97d-3a54700a463so2147302f8f.1
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Jul 2025 23:48:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1752475692; x=1753080492; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Jh+mK2IgRHnEV6ffgQ7q41nHkn8xL5pNUHK9x2icOZg=;
+        b=CqDOr1Y2jYI1EYStR6HkhsM1OnHIp7zE5M/+vxVv39Cc6ycqxjHBhmLifV7tuF/T4A
+         mNRguZWdIeSZu27KTd7qPFqADjvKtMWeeLtvNgG1/h3gc3J8IBxVk/RlpcdODtPgzCre
+         NYJxudI+82oPAjklHAqgChc2eoHEB0G2uP8Apv7okVyU5kIpwMR2P9f88wovcu8ZCH0Z
+         vmydmwrrN5QtFDKwQQ1p4dG76g70OqSyDvv7aLOO1a7kTswhlHwANS817Z54+xwR6f3n
+         Kcb0DtK+T7r1d3M/OOqevi3GT1eg2zRBRGQ3XlBAE5l7ADpypImreO3BGONi62eoCTA6
+         YUwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1752475692; x=1753080492;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Jh+mK2IgRHnEV6ffgQ7q41nHkn8xL5pNUHK9x2icOZg=;
+        b=J25oGdHbliPa2YQj3h+wDUs1n0OMzmydtSDrm7R/Ma/TEFzLduLvoCc+5EcFJ2BMMX
+         fX/y79D5KTYQor0xuY2KFieJ1TxDg2ryz1+EZH5KH88Rda1QSl+Du9V3aXbUQZE9wzBk
+         80nQZiIzggmw12thJFu2/3jSMCY/Zg1BwoqPgtuqI771Lg/PT2sxKxKWu8+yL4MsgF6J
+         KYLyTNDZXXo5xq2B7Gt5venXURnOLoCBGEm4QjxCqV0go7s50R1J5DA/u3TNX4kc2ihW
+         o2WFoCrDpJVxz8HOilWT+k/9iTt7I8pDwrRVgKLow2wCsTkv2vu6ncWuwhbSYbvngWru
+         F+Jg==
+X-Forwarded-Encrypted: i=1; AJvYcCWs+e1iox8cv9ZKkuPcQ8XHYR0gvn3q1DWAfPPYLWbFwddvQAYx9ZYpbbsZOEOHVLxIsS5cg3oDcjw=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw+DnIjxIzKm+4FACVoQtm2UGgyfULXVbfT6PGyPRZWvLLk/Yro
+	RIdHbBMxSrhRfH8tX+fU9zpPF1ZqKEuPLQq+Nz1hTNKhN+cio1HvxbGr
+X-Gm-Gg: ASbGnct9CczTFDAqp5GMrJG1LMJwaOiHFPIujkH0I+ySi2McYQChlyWvcIvbAXvSC1y
+	c73EkZczRbIBm8IfMMRWkNNlVWIlTnweyFZkwhl3JADD9KwcjoQhea/8DVRVz2y1U1NrVfQqDNY
+	dOaGlvIXhbcCIXXthkHL1ypwuKU3a5gMMWC3mgsv/gf1n9WYKpruBM5UCa+D5stn/Qo4Tmq3je4
+	n20J7MdJH4I/8e5X+4nXf/pdBkkyYOyt/v2GXvy0fvKakcDsUnlb0oBf+y2QZorqP05vlKNY7yL
+	Ggo/9uPZWJdnmxxb4bCyzAbSHWJzCaaXkKJSycKBbGl+uoQ+VohLKLxvGJAEOqx1rQFapEH9ONp
+	Bj8MOurYVoJ7k4QNNIuhgDnpZOtHUMzgO7GjSU1JRRlbGLAlVAU0a9mcrpCkTQxxZxV1syhfUIP
+	Ha/0s=
+X-Google-Smtp-Source: AGHT+IGWpZ5tUZdcAOXF0bvzNqvMD166TSjTcjRuYghcRTdE5zslts64IWvQ4J2wVnYfkEmyCp3TVA==
+X-Received: by 2002:a05:6000:2c09:b0:3a4:dfbe:2b14 with SMTP id ffacd0b85a97d-3b5f1e87023mr9201704f8f.16.1752475692161;
+        Sun, 13 Jul 2025 23:48:12 -0700 (PDT)
+Received: from mdionisio-OptiPlex-7070.powersoft.it (srvsp.powersoft.it. [93.146.228.90])
+        by smtp.gmail.com with ESMTPSA id ffacd0b85a97d-3b5e8dc1e4fsm11439829f8f.21.2025.07.13.23.48.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 13 Jul 2025 23:48:11 -0700 (PDT)
+From: Michele Dionisio <michele.dionisio@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	linux-mmc@vger.kernel.org
+Cc: Avri Altman <Avri.Altman@sandisk.com>,
+	Michele Dionisio <michele.dionisio@gmail.com>
+Subject: [PATCH v2] mmc-utils: add ability to flush optional eMMC cache
+Date: Mon, 14 Jul 2025 08:48:07 +0200
+Message-ID: <20250714064807.1915470-1-michele.dionisio@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH 00/14] Various dt-bindings for SM7635 and The Fairphone
- (Gen. 6) addition
-To: Artur Weber <aweber.kernel@gmail.com>,
- Bjorn Andersson <bjorn.andersson@oss.qualcomm.com>,
- Luca Weiss <luca.weiss@fairphone.com>
-Cc: Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
- Joerg Roedel <joro@8bytes.org>, Rob Herring <robh@kernel.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley
- <conor+dt@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>,
- Viresh Kumar <viresh.kumar@linaro.org>,
- Manivannan Sadhasivam <mani@kernel.org>,
- Herbert Xu <herbert@gondor.apana.org.au>,
- "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
- Bjorn Andersson <andersson@kernel.org>,
- Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>,
- Das Srinagesh <quic_gurus@quicinc.com>, Thomas Gleixner
- <tglx@linutronix.de>, Jassi Brar <jassisinghbrar@gmail.com>,
- Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>,
- Daniel Lezcano <daniel.lezcano@linaro.org>, Zhang Rui <rui.zhang@intel.com>,
- Lukasz Luba <lukasz.luba@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>,
- ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
- linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
- linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
- linux-mmc@vger.kernel.org
-References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
- <aGMI1Zv6D+K+vWZL@hu-bjorande-lv.qualcomm.com>
- <ee0d148e-71cd-4136-b3cb-145566abdfbe@gmail.com>
-From: Krzysztof Kozlowski <krzk@kernel.org>
-Content-Language: en-US
-Autocrypt: addr=krzk@kernel.org; keydata=
- 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 a/A=
-In-Reply-To: <ee0d148e-71cd-4136-b3cb-145566abdfbe@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
-On 14/07/2025 08:13, Artur Weber wrote:
-> On 6/30/25 23:59, Bjorn Andersson wrote:
->> On Wed, Jun 25, 2025 at 11:22:55AM +0200, Luca Weiss wrote:
->>> Document various bits of the SM7635 SoC in the dt-bindings, which don't
->>> really need any other changes.
->>>
->>> Then we can add the dtsi for the SM7635 SoC and finally add a dts for
->>> the newly announced The Fairphone (Gen. 6) smartphone.
->>>
->>> Dependencies:
->>> * The dt-bindings should not have any dependencies on any other patches.
->>> * The qcom dts bits depend on most other SM7635 patchsets I have sent in
->>>    conjuction with this one. The exact ones are specified in the b4 deps.
->>>
->>
->> Very nice to see the various patches for this platform on LKML!
->>
->>
->> Can you please use the name "milos" in compatibles and filenames instead
->> of sm7635.
-> Hi, small half-related question - does this mean that future Qualcomm
-> SoC additions should use the codename for compatibles instead of the
-> model number as well?
-> 
-> I was working on SM7435 (parrot) patches a while back; when I get around
-> to submitting those, will I have to use "parrot" or "sm7435" in the
-> compatibles?
+The MMC 5.0 instroduce command to flush cache. This feature can be use on
+embedded device there power is not stable.
 
-The problem is I don't think something like "Parrot" exists. You might
-be referring to DTS nicknames, but that is something entirely else and
-does not necessarily represent one die. The die name is entirely different.
 
-I don't know how community is supposed to figure out the names... I
-guess Bjorn and Konrad can just disclose them for you.
+Signed-off-by: Michele Dionisio <michele.dionisio@gmail.com>
+---
+Changes since v1:
+ - Remove redundant cover letter
+ - Add docs/HOWTO.rst
+ - add check to not flush if cache is disabled
 
-Best regards,
-Krzysztof
+ docs/HOWTO.rst |  5 +++++
+ man/mmc.1      |  4 ++++
+ mmc.c          |  5 +++++
+ mmc.h          |  1 +
+ mmc_cmds.c     | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h     |  1 +
+ 6 files changed, 68 insertions(+)
+
+diff --git a/docs/HOWTO.rst b/docs/HOWTO.rst
+index f2f2f35..d454d8c 100644
+--- a/docs/HOWTO.rst
++++ b/docs/HOWTO.rst
+@@ -107,3 +107,8 @@ Running mmc-utils
+     ``mmc rpmb secure-wp-enable <rpmb device> <key file>``
+         Disable updating WP related EXT_CSD and CSD fields.
+         Applicable only if secure write protect mode is enabled.
++
++
++    ``mmc cache flush <device>``
++        Flush the eMMC cache for <device>.
++        Applicable only if device version >= eMMC5.0.
+diff --git a/man/mmc.1 b/man/mmc.1
+index bccabf3..665fe6d 100644
+--- a/man/mmc.1
++++ b/man/mmc.1
+@@ -109,6 +109,10 @@ NOTE! The cache is an optional feature on devices >= eMMC4.5.
+ Disable the eMMC cache feature on <device>.
+ NOTE! The cache is an optional feature on devices >= eMMC4.5.
+ .TP
++.BR "cache flush <device>"
++Flush the eMMC cache on <device>.
++NOTE! The cache is an optional feature on devices >= eMMC5.0.
++.TP
+ .BR "<cmd> --help"
+ Show detailed help for a command or subset of commands.
+ 
+diff --git a/mmc.c b/mmc.c
+index 6770a45..fce7eef 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -231,6 +231,11 @@ static struct Command commands[] = {
+ 		"Disable the eMMC cache feature on <device>.\n"
+ 		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
+ 	},
++	{ do_cache_flush, 1,
++	  "cache flush", "<device>\n"
++		"flush the eMMC cache <device>.\n"
++		"NOTE! The cache is an optional feature on devices >= eMMC5.0.",
++	},
+ 	{ do_read_csd, -1,
+ 	  "csd read", "<device path>\n"
+ 		  "Print CSD data from <device path>.\n"
+diff --git a/mmc.h b/mmc.h
+index 9fc22ec..2bb346b 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -152,6 +152,7 @@
+ #define EXT_CSD_DATA_SECTOR_SIZE	61 /* R */
+ #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_1	53
+ #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_0	52
++#define EXT_CSD_FLUSH_CACHE     32
+ #define EXT_CSD_CACHE_CTRL		33
+ #define EXT_CSD_MODE_CONFIG		30
+ #define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index d56a3ed..16c6b2e 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2865,6 +2865,58 @@ int do_cache_dis(int nargs, char **argv)
+ 	return do_cache_ctrl(0, nargs, argv);
+ }
+ 
++int do_cache_flush(int nargs, char **argv)
++{
++	__u8 ext_csd[512];
++	int fd, ret;
++	char *device;
++
++	device = argv[1];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		exit(1);
++	}
++
++	if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
++		fprintf(stderr,
++			"The CACHE FLUSH option is only availabe on devices >= "
++			"MMC 5.0 %s\n", device);
++		exit(1);
++	}
++
++	/* If the cache size is zero, this device does not have a cache */
++	if (!(ext_csd[EXT_CSD_CACHE_SIZE_3] ||
++			ext_csd[EXT_CSD_CACHE_SIZE_2] ||
++			ext_csd[EXT_CSD_CACHE_SIZE_1] ||
++			ext_csd[EXT_CSD_CACHE_SIZE_0])) {
++		fprintf(stderr,
++			"The CACHE option is not available on %s\n",
++			device);
++		exit(1);
++	}
++
++	if (ext_csd[EXT_CSD_CACHE_CTRL]) {
++		ret = write_extcsd_value(fd, EXT_CSD_FLUSH_CACHE, 1, 0);
++		if (ret) {
++			fprintf(stderr,
++				"Could not write 0x%02x to EXT_CSD[%d] in %s\n",
++				EXT_CSD_FLUSH_CACHE, EXT_CSD_FLUSH_CACHE, device);
++			exit(1);
++		}
++	}
++
++	close(fd);
++	return 0;
++}
++
+ static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
+ {
+ 	int ret = 0;
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index ce35d3e..f767deb 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -50,6 +50,7 @@ int do_rpmb_sec_wp_mode_clear(int nargs, char **argv);
+ int do_rpmb_sec_wp_en_read(int nargs, char **argv);
+ int do_cache_en(int nargs, char **argv);
+ int do_cache_dis(int nargs, char **argv);
++int do_cache_flush(int nargs, char **argv);
+ int do_ffu(int nargs, char **argv);
+ int do_opt_ffu1(int nargs, char **argv);
+ int do_opt_ffu2(int nargs, char **argv);
+-- 
+2.43.0
+
