@@ -1,82 +1,172 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 69ACF230BE3;
-	Mon, 14 Jul 2025 22:24:25 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 5178B276058
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Jul 2025 23:38:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752531917; cv=none; b=hg9xhNy6FJH9bNa3XOvYjuEYKBiJpjuaUO4SfRKJ2Cq1En0Iw2oODQw66TxRFoYWDrvt91+Xg4QPMl1hUkz9RsJBAqmfcO0OPdoHPoGUIpa8HxmZbrfV5FHo3bJFWCyr0OE4q3/LvvF6caC6RGsFyOSvX0PK+Mmw02qhl4zEya8=
+	t=1752536331; cv=none; b=sBBUbWWsqwDz/G8nYKN6zDRYKfjeIO8d5awV99i1otRY169qI5kMk5iUfgmLDtxm3/Oz61mf833cSs4H+hQuuStCoCQv1s4+PuF7wRqzSt2XCfv5XRBQmtT3NwGfcJs3H7ZY36kA95eSZHmzd6Uplk7VebhOQMnjt5bUnjrjphQ=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752531917; c=relaxed/simple;
-	bh=4XuX/PYpEN8nAtv8oHkTyRtLKNxOjbkUhAeP/vk/0C4=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=k2cIIT/tcQrLI8XfWc9tnJTvmd1Hma5wKcG2HrxNwaRPZAhQcU9KZuvZ/pz01iNk8FR7kkMU/hLIxLuIuIRsqcHmbfeUayPMJff3SQ7VgUFH2+tuDa5YrBqaDKudzuCLUdG3eAfb3QL5wUYVBzq2wnDSNq10HeL8w4QbxvUAu1I=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=uBtMImE8; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	s=arc-20240116; t=1752536331; c=relaxed/simple;
+	bh=BLc/nG6tbTXqBWHXJq4nAE9fz1qrAgmKgywiVncJEsI=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=FbrYHdAl1X3MB5oPqj+jzGsRmLYBgsf/9RY8Rtz8KpvMjiAehL4WSvUchcvIbqW/Z6SnXS9oGDtUbocc5oyr5LJikZ29HHF5RTEPM1hwnYSEIFyCXnHdWk4ga/lm87/EpSv/mSD1twN5KHfKutzRk1yZkmbQ5M7Be6jl/cdWvu4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=e4zaRps/; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="uBtMImE8"
-DKIM-Signature: a=rsa-sha256; bh=4XuX/PYpEN8nAtv8oHkTyRtLKNxOjbkUhAeP/vk/0C4=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1752531826; v=1; x=1752963826;
- b=uBtMImE8MkSWBszj0mA40VHczqtf8SMXQ+Djm8Dkyh0so7//byOoCXCmE9OkaVtPsNlGaeEi
- DkSO1G1RHzD3hG5xKWZyX6nhG/w4WlcGmHfsrI0K4Ll8fgKLRcF4TMnCnHzzAQbiP2QlxP3TjAR
- jyPutFkgO0QlnVBVd/OvljASXZB+pOsnQ7KZy8StpEBa4/AH2ui/c0eO7VWtScoT1COiJjCAuGk
- V3UIZqWWbSyGQlkPzClEB3duAVeBfjpgouVSPnbx7Y9P72J0KfYUJFsWuE0dFUbPJY05rphxsst
- iJ0hXcfiTtZgtrAKpukggmMvZPiarK78NijZlLIkM1iAQ==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id acbc0645; Tue, 15 Jul 2025 00:23:46 +0200
-From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
-To: Krzysztof Kozlowski <krzk@kernel.org>
-Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
- Conor Dooley <conor+dt@kernel.org>, Lubomir Rintel <lkundrak@v3.sk>,
- Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will@kernel.org>,
- Andrew Lunn <andrew@lunn.ch>, Gregory Clement <gregory.clement@bootlin.com>,
- Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>,
- Kees Cook <kees@kernel.org>, Tony Luck <tony.luck@intel.com>,
- "Guilherme G. Piccoli" <gpiccoli@igalia.com>,
- Ulf Hansson <ulf.hansson@linaro.org>, David Wronek <david@mainlining.org>,
- Karel Balej <balejk@matfyz.cz>, devicetree@vger.kernel.org,
- linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
- linux-hardening@vger.kernel.org, phone-devel@vger.kernel.org,
- ~postmarketos/upstreaming@lists.sr.ht, soc@lists.linux.dev,
- linux-mmc@vger.kernel.org
-Subject:
- Re: [PATCH v16 1/5] dt-bindings: mmc: sdhci-pxa: restrict pinctrl to pxav1
-Date: Tue, 15 Jul 2025 00:23:45 +0200
-Message-ID: <3028096.e9J7NaK4W3@radijator>
-In-Reply-To: <20250711-hypnotic-aloof-nuthatch-f3761c@krzk-bin>
-References:
- <20250708-pxa1908-lkml-v16-0-b4392c484180@dujemihanovic.xyz>
- <3379810.44csPzL39Z@radijator>
- <20250711-hypnotic-aloof-nuthatch-f3761c@krzk-bin>
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="e4zaRps/"
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56EGSFW6011542
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Jul 2025 23:38:49 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	wn0uaTpQJ5msTA4q2mSIBqQxq96F8xnwcsNT4npFJ10=; b=e4zaRps/oaXdJY+l
+	UdQ8DEc0Nne1nK1lwtaLfJAWHqyiLQziUU3CzDFUCkUNeWV8JnAqLF4ZqflmU+qO
+	IaCyiN56c5pDiAQOpJ9+b1AfDTRlfBvVfWpbwY4pCP7ODxRyQwipwVImtiZyO5Zq
+	u1YEOXKa37KH6sh1j/GqAfCY8nztz+Om9WIHf6FDuC7FPCXsgZo6i3zcB6Z7X9e6
+	T4s9AwHPkBTS9WDnUgqpGgWpprpKj9V+ypnQ0HV7+q4MgprRJMUwYBkd+zMuSwgG
+	+3J1azNHufa9RQ/26fQCJmsfd6flX7m+fE3a6H1KmT5/jvGkrb+aWNHeMwONjcg8
+	7N0xIQ==
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47w5dygxt7-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Mon, 14 Jul 2025 23:38:49 +0000 (GMT)
+Received: by mail-qt1-f198.google.com with SMTP id d75a77b69052e-4ab77393308so4076051cf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Jul 2025 16:38:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1752536328; x=1753141128;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=wn0uaTpQJ5msTA4q2mSIBqQxq96F8xnwcsNT4npFJ10=;
+        b=OUfYx+yEj6wyV6kbR1smYyBnZIdPN8lUCjzYuxbpiSuLjbFGJRgW6Jvi6VCY+8Vui/
+         1g2/f0OJfF4O2bEO0G6S/R0Td0dAgNzVtr+Ol4AxQeUQhg+WgLidIXod64HU99PV85dj
+         Ms6fKIBKALmAyhC20kwxJWpA9IT2BBjgTEK8A98z7uhMTfknQVgE30IWmwC64z0AMRva
+         Zizs1eIg8RyfA8lhC2fM3XNx4/hE20MsPjnlZmLCHNXuMHb7GFooZ1vn491zCzqD+28w
+         vnskdos7Iyosu85TCS8KAb2RXXAZ5PjVwwgonn9JHq10wJMXCusQbYDViu3mNkN0q8Vj
+         f1rQ==
+X-Forwarded-Encrypted: i=1; AJvYcCXJnUm9J8+RMyiSSDbcg6Mo66Sf5defDvG8rT9JBFYB4m7wUJGRhK65mDp6jCfZymS7hsPIy7B5i4c=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwkVCIM0xMcfpZu5GbcaR0U5QPvwUgwQak/udxbYJh2JBsYtMGz
+	a60F4iPNK3es39JzlcNp/UYxiwpJWMca1jR8TlNG7JrvJeekt1+jeyHwT4UerIDweoa+u7zYbZu
+	k+2v5cwIm/Q5M61TxiE8nDuVO1AQxKoEk8e8Hso9spnvTDGAhtfHORmGBnEiFYCg=
+X-Gm-Gg: ASbGnctFPOBdTcLZRoxWbMH4BLWj9lqhI1dmxxmhPGFQyBg8lua+KCLkwfzKYQ/MQYy
+	VdvxnT3iV+Zu1wxnX0m2fcRM/5dJOTK4XbUcmsfToxC3sWyjLaAhSaDx7dYreEsvienCYhwyFxR
+	/JZWTXvKesaNtzC2Ffxgc2kU7ywQSO5jay/zmm4tfWoK5v3/RmeMF+HMk+sjtkC1+TWzWyJJN5Q
+	lyFX6NqENF22ePB+qkwcCSc17nGNm2Bdmoi0cMtOohlQrnZBu/8y/haSRr6w/Q3evaNsQZAAW6h
+	0Dpb6orY2spOsywxij+8DkU7F+FfPtEK3wF6uL2hDgxAvhlS5gkHKUDVEdmBLRIyfFE3Mmwf0KX
+	4J4suzExRNgUXDShD35To
+X-Received: by 2002:a05:620a:261e:b0:7d0:9ded:31e0 with SMTP id af79cd13be357-7dde704afd4mr776221985a.0.1752536327958;
+        Mon, 14 Jul 2025 16:38:47 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IE6vgTUK9cbHU9/fu7xu5UC9MgWnhvrvZKB6D6M0lFax9GG6pjPJlqFz9LcPg7nXnR+3oUNPg==
+X-Received: by 2002:a05:620a:261e:b0:7d0:9ded:31e0 with SMTP id af79cd13be357-7dde704afd4mr776220285a.0.1752536327341;
+        Mon, 14 Jul 2025 16:38:47 -0700 (PDT)
+Received: from [192.168.143.225] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-ae6e8316b60sm887600966b.184.2025.07.14.16.38.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 14 Jul 2025 16:38:46 -0700 (PDT)
+Message-ID: <c379aad4-96f6-4134-8b90-0f1eec8001a3@oss.qualcomm.com>
+Date: Tue, 15 Jul 2025 01:38:41 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH 00/14] Various dt-bindings for SM7635 and The Fairphone
+ (Gen. 6) addition
+To: Artur Weber <aweber.kernel@gmail.com>,
+        Bjorn Andersson <bjorn.andersson@oss.qualcomm.com>,
+        Luca Weiss <luca.weiss@fairphone.com>
+Cc: Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
+        Joerg Roedel <joro@8bytes.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konradybcio@kernel.org>,
+        Robert Marko <robimarko@gmail.com>,
+        Das Srinagesh <quic_gurus@quicinc.com>,
+        Thomas Gleixner
+ <tglx@linutronix.de>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Amit Kucheria <amitk@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20250625-sm7635-fp6-initial-v1-0-d9cd322eac1b@fairphone.com>
+ <aGMI1Zv6D+K+vWZL@hu-bjorande-lv.qualcomm.com>
+ <ee0d148e-71cd-4136-b3cb-145566abdfbe@gmail.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <ee0d148e-71cd-4136-b3cb-145566abdfbe@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-Proofpoint-ORIG-GUID: r8wvq7p57qUhQYfTNhQg3ST0gLRHCWUX
+X-Authority-Analysis: v=2.4 cv=RtXFLDmK c=1 sm=1 tr=0 ts=68759509 cx=c_pps
+ a=mPf7EqFMSY9/WdsSgAYMbA==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=ySytLBbe-S1-HUGBodAA:9
+ a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10 a=dawVfQjAaf238kedN5IG:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzE0MDE2NyBTYWx0ZWRfX/gO3nQwttKQe
+ w8V+NtC14dB9G0bNKbKC8Uqm07RH+y+aiYxfyw8neSy9icDZGVjEqMiYCIsgnpWnbMyhN5t0uY1
+ djJijvCn88MFmqE19GcE0CTDHrM4qZUrotwGwb5y8kBY/1aZMxTF+4KjGVOTWhA8MM6hW6Y2ip8
+ 6sNEZIhp2GFwFX54jNJE7bDY45G5jq+uzahdEaTBkiqB/HEPbDjmHsKTqTaYgseRhXlhXfg1bfa
+ wH/BwzSLTh6SRIg999nsC5oi2494RTFjBBE+E+JQSjtgu9CxeI688TQtwkj83b5TFGBLNVecMqa
+ B46tCnprFFkwknRBrKM0j+tzOWO2g4WG0JsqMsE+rM0w6YzNb6igggC9EYHyYCFOdEh0LOM9me1
+ xroQNlXGuu3aBNy1cIRQTJqb89GkW6oWXwhXHHhkam2oL2hUr+qI8Mospxe5jhFKgNujiKez
+X-Proofpoint-GUID: r8wvq7p57qUhQYfTNhQg3ST0gLRHCWUX
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.7,FMLib:17.12.80.40
+ definitions=2025-07-14_03,2025-07-14_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ adultscore=0 mlxscore=0 bulkscore=0 suspectscore=0 lowpriorityscore=0
+ impostorscore=0 malwarescore=0 clxscore=1015 mlxlogscore=999
+ priorityscore=1501 phishscore=0 spamscore=0 classifier=spam authscore=0
+ authtc=n/a authcc= route=outbound adjust=0 reason=mlx scancount=1
+ engine=8.19.0-2505280000 definitions=main-2507140167
 
-On Friday, 11 July 2025 09:31:55 Central European Summer Time Krzysztof=20
-Kozlowski wrote:
-> On Wed, Jul 09, 2025 at 07:33:01PM +0200, Duje Mihanovi=C4=87 wrote:
-> > Would it then be acceptable to declare the pinctrl properties in the top
-> > level and define each controller's respective description: and items: in
-> > the allOf: block?
->=20
-> just min/maxItems should be enough in each allOf:if:then: sections.
+On 7/14/25 8:13 AM, Artur Weber wrote:
+> On 6/30/25 23:59, Bjorn Andersson wrote:
+>> On Wed, Jun 25, 2025 at 11:22:55AM +0200, Luca Weiss wrote:
+>>> Document various bits of the SM7635 SoC in the dt-bindings, which don't
+>>> really need any other changes.
+>>>
+>>> Then we can add the dtsi for the SM7635 SoC and finally add a dts for
+>>> the newly announced The Fairphone (Gen. 6) smartphone.
+>>>
+>>> Dependencies:
+>>> * The dt-bindings should not have any dependencies on any other patches.
+>>> * The qcom dts bits depend on most other SM7635 patchsets I have sent in
+>>>    conjuction with this one. The exact ones are specified in the b4 deps.
+>>>
+>>
+>> Very nice to see the various patches for this platform on LKML!
+>>
+>>
+>> Can you please use the name "milos" in compatibles and filenames instead
+>> of sm7635.
+> Hi, small half-related question - does this mean that future Qualcomm
+> SoC additions should use the codename for compatibles instead of the
+> model number as well?
+> 
+> I was working on SM7435 (parrot) patches a while back; when I get around
+> to submitting those, will I have to use "parrot" or "sm7435" in the
+> compatibles?
 
-I guess for now. Later however I might need to add a state_uhs setting to t=
-he=20
-pxav3 driver; is the method I described right for this or is there somethin=
-g=20
-better?
+If possible, please rename it to "netrani".
 
-Regards,
-=2D-
-Duje
-
-
+Konrad
