@@ -1,170 +1,122 @@
-Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com [209.85.219.178])
+Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 49E0D2F3646
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 10:09:14 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.219.178
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F854221F38;
+	Wed, 16 Jul 2025 10:43:42 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752660556; cv=none; b=Xb3hU5vjoPBqR+L7ymip5YJnYGX2xl1kqWZX1DB4CYH/7tmOhseDkH/QFVWe4ZhNw+cSXstsmVaWwKsdLIauGWYgPXl83FljuYg/Z4Cjntl6TPoC0VzG8s7ifiyz41qN9YWeR8kEvJvKVqUz+whKF6tepsKN4yVLGIdRiKrXUmY=
+	t=1752662624; cv=none; b=lWqdILpDl1jBuQZkOc8gcEew+ir++vQ959CVeqVvX51/SSPX831ZpI4fk4CF78JoKyUxBIEveVwF54MDo9BWcg0DMpwG1n0WNWL3E+krcOjl5kR8K3V12eziuKmVMNXU4jFPJfYDCcE9LITuvRLVz6frmzDfeEMSZh9k1B2or4M=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752660556; c=relaxed/simple;
-	bh=/VEjuhpOm4mcfJFH+WMwCKqtBLq/M4iABFtKjrJ49AU=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=IZoi5pZuMcMiLay2OdIozlLW7vmNKIu7V4jfsopM8M4HxKgZIcxH8cprROhztc4xtG9ndgRjI+//X4P0AgML1o5op2Pxsyzc0e2klZ/PUD+LBNyIROkfxdi7bF27vijWz6sMGOsl2/FFcttACtlBXPPUF3oipaH0XIieWwxdbVs=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=gMRR88LF; arc=none smtp.client-ip=209.85.219.178
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1752662624; c=relaxed/simple;
+	bh=DSS12tYkb9gpA8k48tPe3Spyi8HtEl2WRA7zK0gVzOc=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=e0+q9AkQjvZGKWhRorM2XZvXFmhY1BSsnvPBl2ttM0SGD0fnr2aoCfPqP7RXmxM5qu13YCtTbxvWagGaq9Uu1vn+Q1cjLgXaxirlAjlLMjO3PII3vfMjpCg6+8vT/RRUZPtjTBOM4N1tX1ZIEFH+TC0kRtZiinD5/ZxK84j29sA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MYvD4Q1X; arc=none smtp.client-ip=209.85.210.169
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gMRR88LF"
-Received: by mail-yb1-f178.google.com with SMTP id 3f1490d57ef6-e812fc35985so5481824276.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 03:09:14 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MYvD4Q1X"
+Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-748feca4a61so3691452b3a.3;
+        Wed, 16 Jul 2025 03:43:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1752660553; x=1753265353; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=OnBWYwfo8wiUCGNtHhjPaLy845d6kgQBixwcMR4fh74=;
-        b=gMRR88LFCRI7khBmWlXwAA9Y9pgGkwOaOozVaMjcDKYtqaWZMZBXDXZKPbUmPq+5wO
-         ndjBEopxvFRzWxfK6lqWt4FGrPd22fhwTbQQCxVoEP2JyRbOxXW/aNRXtZjH/Ur9efGS
-         jIMyxolMCJSIT0+VCUf2uRY9khquRqZ0tVzd/bpf6iXE42B1VdRkUOMNEWWl57yrx5CZ
-         kYUvNrCqONf9xemub50nIc18t1gkDjYudNEmJRRFP6jU6lRUMLwjPYr6BKAeDCCb1Rny
-         LfuZQY8HC1Vu4Gq9qSNeeWj0HkE047UbMNk8HIOk9wajKFY4Yd7fDHWTlqPFIqwb9H02
-         X+Gw==
+        d=gmail.com; s=20230601; t=1752662622; x=1753267422; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=MqHz3LAqr/WfrRthPIXWiwm5tyxxKiyEt4eW0IKFByc=;
+        b=MYvD4Q1XBExEVUo93hxLnOy47mwvE+qvuENuTl04Ssfl6hG622WYGIsDpYbySfKSLg
+         O6TtEnhzksjgrK02CGnrpPzba9XQrv67wqIZ+lTaQGApRa8Co00AL0LEYs7SFe1MWVmv
+         M+PtdiEQPVfPgZLuB4tskA6HxSJSiUMHwFr3hPdUxZzMQQtQ2AJQtrsCLkuJnxiyrVUM
+         e57nKKl9VMpXjncAyzoTDeeAbCqnUeHQIFQXN3YvdtSbF/P/ypgE9OyP5SAH98OD5Ju4
+         UQwmCIdHcp/Pxv94LO0kNRirrAQLEVHI1p6m6UnHzL5ZIJGd4BwZIAuWzSbHu1c4ZIwD
+         UWNg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752660553; x=1753265353;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20230601; t=1752662622; x=1753267422;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=OnBWYwfo8wiUCGNtHhjPaLy845d6kgQBixwcMR4fh74=;
-        b=VHwWaNk2kMhskv+hrho61anx4KEUFvNnQphCY5Vq6r8aaUTOFpBCAfGxGo1Z5ue3GC
-         KRV5lOtQcaY+Hub/7Z0mrlC3w7k4Hfhzj6/1f51fMCEHNpOjkg6aTqctZqrI7Y6Ie8SQ
-         Ez+Vm3oyPTMTUMi7TqIrG0Kr6YJXRsr+49PMkj+3zoVNw5BGf9vc6DiRIAjxKWm0nwOM
-         qkhWMTmDAb0QUJAs2PBUNSuwC36jzlIIp/S5dJ7EzZOktcv1yY5Q6j4ufH/oNEuTVQHM
-         4pOGTNBOVuKfJ5M2w2dXOM/CArzXTndxsb62Quzcwetgd0AmY03O3dEAlmYd+i/+lkeQ
-         yLvQ==
-X-Forwarded-Encrypted: i=1; AJvYcCXm9AlBIuSSvjM0lPJbsfHwIGuuXy13ke3UxtQKmAIaXwKHr3OeyfgQyMXPhOyn71IPBQF3kUjy/HU=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yw6xGMApRr7AckbryiavhHueLz7pGqV/JF7vrphee4VVXUqxpsF
-	gYJt4CeXoNwHQGPL/jsdy+HwcMeqURkRZz/NvZ4UnvvX5zD+zwFL5xuqmPw3/MqPm4s47/s/RBK
-	nMWuIXkcYYuIpiLb2Ghnu7vg/UWyLo/5nOpQwB4vWzQ==
-X-Gm-Gg: ASbGnct7UDnbm7wFHJ6VYYAwJbkO5pCyLN3/3t1IazLjF20tFCEXRxRVv+k7VilidFV
-	23p0MDKXjXCjP+04EFp9xElTPH/DMHynCUA5YwREnieJgZxgsFWC17QE341U7ofBH/1EsBqpaul
-	e3sutV568981ivzirl+HThrYvxtDsqrvrKv6H2+SCaMZfLdwbJ2AbSNDj8u8tiFDjM1K/OSUwso
-	3RHZEo9
-X-Google-Smtp-Source: AGHT+IGy3dipAywy/v3t7OOYtOeDboI5JlqIw7qcFV8Y/WnPRMS48rXs5U9ysQX+XZc7N3+MilbgU45XI/TSY+C1E/k=
-X-Received: by 2002:a05:690c:9b0a:b0:6ef:652b:91cf with SMTP id
- 00721157ae682-7183515bc8fmr34066097b3.27.1752660553188; Wed, 16 Jul 2025
- 03:09:13 -0700 (PDT)
+        bh=MqHz3LAqr/WfrRthPIXWiwm5tyxxKiyEt4eW0IKFByc=;
+        b=eJnuIkjV7PLpHabEDomqe95qugLmn89VqYENrsROrRy59gTkextjMWjqEEZjwYDOL2
+         jmq4nipfP9uoObCT7U5atC3yHhLetgeq6g4kRiNs8vYBQ7nVLpgzS1Lbm21UvOStL3cj
+         Ek0tMvdubaY1omWZZDmf0DmsbpXNTuTblxsd/2HUe30JxEN3tD8vAr7TP93bnjYut/O5
+         20yu9bOM6R52kMhGSzu9ErVTSNDkedh56IZryAoK9jSZvLLCjoFUTxk/cGIgHs7ImZDi
+         p25gqQ6YVRrLykx9Zm8qYkLs50vr+tEKUTPZe/bRQa5mmot1lOuEt69U2DF/sXOQARIQ
+         81tQ==
+X-Forwarded-Encrypted: i=1; AJvYcCWt+KNGv9JpyEOE7ylNJsFgp3tvQt4X2M1C6A4x7OWbRgo8BJGfscKkVTgDj86U32YA+wYcWQoysP4xJwQ=@vger.kernel.org
+X-Gm-Message-State: AOJu0YxbigMPhtpjOuJRDGsh3nALu5RPXLrzk07vBHYHQqgPWkGKdyLk
+	CFxiEVLLygor4/IS434iMedh7bXnuDYdAk6iq3vUMbL3f9bZSmvnUtba
+X-Gm-Gg: ASbGnct48FuOqQUpkwL2mDl52rXh/eKUZsomZdmMP/93nbcrX1r5yGmiacqhPiNs0Ps
+	3w9dIh8AwbvX68UpsdLtHjeZtRSFljVNk9cWoo0LrIidSDtCw/x3qQYxqA7UmrqE6kXqCtDHcYd
+	jfo29fyXuIuOBnzLJFtSwYqkBzL0Owu1BSSsiAnEP3MaMmFKxfu7C7WjrwyFjVSEhImbZzBef/0
+	OaTqy5iR0NMsbUAr1QC48+/jU7xqsjxJLItN07KY0+DiEzGeYS5cSlgIJjRKjSiVRMGHYMJTJDL
+	aA0eCLVIFXiOT3dVWxJfYtXBEhKgkgX5Z/Kchf0M0xNGlqtw7UjmFVmp9bU/8iK7naZCYet2GaP
+	9QEFzsc26CuX68ZBeeYGaGCDbIOhu0GVvepXQMtFh
+X-Google-Smtp-Source: AGHT+IGtF7p5vbbiq8GwYN/PJMWf0axj8zu/NbAS1y+ksEiP135eXQg42/kcUxDpIMMltw/Yl2cNJA==
+X-Received: by 2002:a05:6a00:14d0:b0:74e:aa6f:eae1 with SMTP id d2e1a72fcca58-75723e744d2mr2950355b3a.14.1752662621615;
+        Wed, 16 Jul 2025 03:43:41 -0700 (PDT)
+Received: from victorshih.. ([2402:7500:486:ad4c:7324:5bd6:835d:4ac5])
+        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-74eb9f856fdsm13914933b3a.144.2025.07.16.03.43.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 16 Jul 2025 03:43:41 -0700 (PDT)
+From: Victor Shih <victorshihgli@gmail.com>
+To: ulf.hansson@linaro.org,
+	adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org,
+	linux-kernel@vger.kernel.org,
+	benchuanggli@gmail.com,
+	ben.chuang@genesyslogic.com.tw,
+	HL.Liu@genesyslogic.com.tw,
+	Victor Shih <victorshihgli@gmail.com>,
+	Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V1] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
+Date: Wed, 16 Jul 2025 18:43:34 +0800
+Message-ID: <20250716104334.44020-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.43.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250716064421.3823418-1-zhoubinbin@loongson.cn>
-In-Reply-To: <20250716064421.3823418-1-zhoubinbin@loongson.cn>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 16 Jul 2025 12:08:37 +0200
-X-Gm-Features: Ac12FXxmbFb81p4o8_4QaHZmiOqrSxmwLRGTgDmrXWuWmSI0XGrHlo7coapF_Kk
-Message-ID: <CAPDyKFrxVYaH+bxLSaXL3VjsPAdBEtxHk=PonT659GmVnc+n5A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: loongson2: Unify the function prefixes for loongson2_mmc_pdata
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Huacai Chen <chenhuacai@kernel.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
-	linux-mmc@vger.kernel.org, wanghongliang@loongson.cn
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 
-On Wed, 16 Jul 2025 at 08:44, Binbin Zhou <zhoubinbin@loongson.cn> wrote:
->
-> The function prefixes for loongson2_mmc_pdata follow two naming
-> conventions: SoC-based and DMA-based.
->
-> First, DMA-based prefixes are the preferred choice, as they clearly
-> highlight differences, such as prepare_dma; however, for functions
-> related to SoC, such as reorder_cmd_data, it is agreed to use the
-> smallest SoC name as the fallback prefix, such as ls2k0500.
->
-> No functional change intended.
->
-> Suggested-by: Huacai Chen <chenhuacai@loongson.cn>
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-Applied for next, thanks!
+Due to a flaw in the hardware design, the GL9763e replay timer frequently
+times out when ASPM is enabled. As a result, the warning messages will
+often appear in the system log when the system accesses the GL9763e
+PCI config. Therefore, the replay timer timeout must be masked.
 
-Kind regards
-Uffe
+Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 4c2ae71770f7..eb3954729a3c 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -1754,6 +1754,7 @@ static int gl9763e_add_host(struct sdhci_pci_slot *slot)
+ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ {
+ 	struct pci_dev *pdev = slot->chip->pdev;
++	int aer;
+ 	u32 value;
+ 
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+@@ -1780,6 +1781,14 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ 	value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
+ 	pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
+ 
++	/* mask the replay timer timeout of AER */
++	aer = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
++	if (aer) {
++		pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &value);
++		value |= PCI_ERR_COR_REP_TIMER;
++		pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, value);
++	}
++
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+ 	value &= ~GLI_9763E_VHS_REV;
+ 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+-- 
+2.43.0
 
-> ---
->  drivers/mmc/host/loongson2-mmc.c | 20 ++++++++++----------
->  1 file changed, 10 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson2-mmc.c
-> index ba6bb8fd5535..27499f36477c 100644
-> --- a/drivers/mmc/host/loongson2-mmc.c
-> +++ b/drivers/mmc/host/loongson2-mmc.c
-> @@ -594,7 +594,7 @@ static struct mmc_host_ops loongson2_mmc_ops = {
->         .ack_sdio_irq   = loongson2_mmc_ack_sdio_irq,
->  };
->
-> -static const struct regmap_config ls2k1000_mmc_regmap_config = {
-> +static const struct regmap_config ls2k0500_mmc_regmap_config = {
->         .reg_bits = 32,
->         .val_bits = 32,
->         .reg_stride = 4,
-> @@ -610,8 +610,8 @@ static int loongson2_reorder_cmd_list[] = { SD_APP_SEND_SCR, SD_APP_SEND_NUM_WR_
->   * However sdio controller will send these datas in usual data format,
->   * so we need to adjust these datas to a protocol consistent byte order.
->   */
-> -static void loongson2_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
-> -                                          struct mmc_command *cmd)
-> +static void ls2k0500_mmc_reorder_cmd_data(struct loongson2_mmc_host *host,
-> +                                         struct mmc_command *cmd)
->  {
->         struct scatterlist *sg;
->         u32 *data;
-> @@ -704,8 +704,8 @@ static int ls2k0500_mmc_set_external_dma(struct loongson2_mmc_host *host,
->  }
->
->  static struct loongson2_mmc_pdata ls2k0500_mmc_pdata = {
-> -       .regmap_config          = &ls2k1000_mmc_regmap_config,
-> -       .reorder_cmd_data       = loongson2_mmc_reorder_cmd_data,
-> +       .regmap_config          = &ls2k0500_mmc_regmap_config,
-> +       .reorder_cmd_data       = ls2k0500_mmc_reorder_cmd_data,
->         .setting_dma            = ls2k0500_mmc_set_external_dma,
->         .prepare_dma            = loongson2_mmc_prepare_external_dma,
->         .release_dma            = loongson2_mmc_release_external_dma,
-> @@ -736,8 +736,8 @@ static int ls2k1000_mmc_set_external_dma(struct loongson2_mmc_host *host,
->  }
->
->  static struct loongson2_mmc_pdata ls2k1000_mmc_pdata = {
-> -       .regmap_config          = &ls2k1000_mmc_regmap_config,
-> -       .reorder_cmd_data       = loongson2_mmc_reorder_cmd_data,
-> +       .regmap_config          = &ls2k0500_mmc_regmap_config,
-> +       .reorder_cmd_data       = ls2k0500_mmc_reorder_cmd_data,
->         .setting_dma            = ls2k1000_mmc_set_external_dma,
->         .prepare_dma            = loongson2_mmc_prepare_external_dma,
->         .release_dma            = loongson2_mmc_release_external_dma,
-> @@ -838,8 +838,8 @@ static int loongson2_mmc_prepare_internal_dma(struct loongson2_mmc_host *host,
->         return 0;
->  }
->
-> -static int loongson2_mmc_set_internal_dma(struct loongson2_mmc_host *host,
-> -                                         struct platform_device *pdev)
-> +static int ls2k2000_mmc_set_internal_dma(struct loongson2_mmc_host *host,
-> +                                        struct platform_device *pdev)
->  {
->         host->sg_cpu = dma_alloc_coherent(&pdev->dev, PAGE_SIZE,
->                                           &host->sg_dma, GFP_KERNEL);
-> @@ -860,7 +860,7 @@ static struct loongson2_mmc_pdata ls2k2000_mmc_pdata = {
->         .regmap_config          = &ls2k2000_mmc_regmap_config,
->         .reorder_cmd_data       = ls2k2000_mmc_reorder_cmd_data,
->         .fix_data_timeout       = ls2k2000_mmc_fix_data_timeout,
-> -       .setting_dma            = loongson2_mmc_set_internal_dma,
-> +       .setting_dma            = ls2k2000_mmc_set_internal_dma,
->         .prepare_dma            = loongson2_mmc_prepare_internal_dma,
->         .release_dma            = loongson2_mmc_release_internal_dma,
->  };
->
-> base-commit: 4ad9e44c76b301e786eb4cdab890eac8c7eebd42
-> --
-> 2.47.3
->
