@@ -1,138 +1,129 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-yw1-f172.google.com (mail-yw1-f172.google.com [209.85.128.172])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 2DC6D2EF657;
-	Wed, 16 Jul 2025 08:52:01 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A2A252F2C5A
+	for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 10:09:06 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.172
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752655923; cv=none; b=ay5BDtHzbzWG01jWi+GZWj1lLcRaYt7Jmh828fbkaTN/Rfm0W6gEmzRzoABdXEFVAh/psXUUFXnl8ssZ4Mps25etxWsHwjBOlKvAePwfqi8fr4xUCxOkouWlb/VNHxV6MoPO22zvHOgHMCkR3JnnEFyM04RDD7eRIIq36MODa9U=
+	t=1752660549; cv=none; b=jbGMGn/wAiSW42qxWRAGzskwuoxt00V1hA0zWpXejZEW1ROtOcMSWf81YjlGg9yFpfaBHv8aby9DeAixuF/NC7HqwZiTucHXYdWI+ggRMACG60o5CrAyhSVoXNqbPOuh9Xz9Xec90mCL/PemFPSzZiBV4C2ON8vUr9R4ypearrk=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752655923; c=relaxed/simple;
-	bh=ba3xsj1JR3uFQUlvWu1s2ut631oLcsVyu+jMgQ1S/Lc=;
-	h=From:To:CC:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=d4bCQNv6nPHtW+FwYLkU1A9i5P8n3Zv1sYzROZI0dwv+5p0dLMCyGNoRM26q6QNb+31od6ey6g/wXHPhOTxu8p/Sceg+nxOqmOXv6WSrbmXLKrW6ifZKt30BVyecpLGzpBYbz17OlFy0Dk0/dKXqIb7p0QfO8WI4SboNRdHRJ8c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=EhgAfZRR; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1752660549; c=relaxed/simple;
+	bh=bFBhJZawVLHR8IcJ2Vcrd4R81/LwC9KrzFTtxMVX5cg=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=M66ibd4gyN9TjMGXdlNoMzCq2nz/x0UJ8srb6g3rjRReWUecAhqEW31vOYwangvnHBYHa+svw6+S+MkLo4ekGM0mY+oUfAkJdZyGIJZVXBkAROTF1+HP30QoFnwyD2FMUinBrh+JrwzPqA7/pFW6AR8f584oY/p7ZlbjLeq9fh8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=sN1u+dUz; arc=none smtp.client-ip=209.85.128.172
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="EhgAfZRR"
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56G63FEf003267;
-	Wed, 16 Jul 2025 08:51:53 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-type:date:from:in-reply-to:message-id:mime-version
-	:references:subject:to; s=qcppdkim1; bh=l7zH9aHo2OyEeykd42T8XtnZ
-	JrdxgBFY+gGnZRd9f0g=; b=EhgAfZRRXGGPormE1j1jJqh34OwPuFLtLNnCPLuh
-	3/YRxjAN8Vi0DlpO9liJO3P/0sXNRb3MguCFjZTcswP98CQWE3EKfooYBpeyEggq
-	1rCiDMQz0ZZUEOL9Z1T8LASo5bqGYSCbGF5+CbKccpkg9z/BWwznLMyzAmWIgSAC
-	5OM/L2CB2t8Y+MwlRz0Bn4oloPR3n7isk1kEGtBJsfxLpxAjkoTvnO+D6RMhfBTl
-	LW617ItISXiFQwIjXs8v+sz3ucTZ3gsoDVblIyVNLugaXwY9UBBZWWJjVPqda1lf
-	WZd7w6LAs1N9dQk8+ch8bdGLrCFoQ6bUsAuC1XgO1EgmOw==
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47w5drp4na-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 16 Jul 2025 08:51:53 +0000 (GMT)
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-	by NALASPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 56G8pqV2005751
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Wed, 16 Jul 2025 08:51:52 GMT
-Received: from hu-sayalil-hyd.qualcomm.com (10.80.80.8) by
- nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1748.10; Wed, 16 Jul 2025 01:51:49 -0700
-From: Sayali Lokhande <quic_sayalil@quicinc.com>
-To: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
-        <krzk+dt@kernel.org>, <conor+dt@kernel.org>
-CC: <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
-Subject: [PATCH V4 2/2] arm64: dts: qcom: qcs8300-ride: Enable SDHC1 node
-Date: Wed, 16 Jul 2025 14:21:25 +0530
-Message-ID: <20250716085125.27169-3-quic_sayalil@quicinc.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20250716085125.27169-1-quic_sayalil@quicinc.com>
-References: <20250716085125.27169-1-quic_sayalil@quicinc.com>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="sN1u+dUz"
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-7183d264e55so2774387b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 03:09:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1752660546; x=1753265346; darn=vger.kernel.org;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=4gV45BWglfzhUxE59Qv4ombDQhK6ciqBH4GljP84GFs=;
+        b=sN1u+dUzft03wayk/ercLDN00LqfpmYkT5JASpWQV9cKGOzp4Fj/BfP4suoPLQGtlE
+         w/v4eWRukRI75cLmQD7SjCkvSN43rhA7nHRd1OKo5lUdlC9ubwecYGqMQUcMdkOm11Qh
+         wTOt+4KzkFNcmomKhA7vtXvttgUO/pfBq0Xy2E+c+63jLGu32KV86GJw2wKUVL7ROnhI
+         66KDJtFphj9yKl+KiE0ahGEEwb0JCXIyk1TD077C1jXnZQ9/DSIV0bz1Q/bGXYpmKLdv
+         SwkJRWOizAmsoL7t2mMJu8ZS2nVeKI12VSxurVU93WaNGBID5K326LyFn3M9dvxMIBKC
+         SsaQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1752660546; x=1753265346;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4gV45BWglfzhUxE59Qv4ombDQhK6ciqBH4GljP84GFs=;
+        b=sG3z+LeL69u0a70Xk7Nx+MgEvSpzcAeEQ6QnoTwTtLxRVOnduK4EAAzHivXg8OxT2e
+         Py26rYN+SrQxu3nFtr3PCpZbxNsFk8Ai2TfdD46Gnzp/lWKINPEpV2joEzaJoBpwGXwa
+         G17mHtNaIWfu960XJlv8eFC/fPddHb2pTsWj2AhJyTEq238jU49Id3IEfT2Mb6/fmAkS
+         vobYGMtZKMMO7dF3Gd3BLxgCbGDgV50O+s+d+wlzNS9YGTh7ifMydL/9KAeK5g6P4O2X
+         pYmCz+8ZshtbIS29iMTOJ+xmDepdN51aHLsefpuLEjE8MNveErhbPnb8qk3qBJQz9OEk
+         tD/Q==
+X-Forwarded-Encrypted: i=1; AJvYcCUjVQy6XndPwmnuz8IvE+fs7KqqCyX3Z/TVc73vJndq1RoY4nJT35u1evvxu438ziAQai4MwDPZIWE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yw0W+y3xj2H473beHIgS6OU3D6DVhjMoKsKM4YxUu2Nn9fmbVmi
+	to3sBtutgReunqSMsAm/t4h4hombKIFfKLaHU3NsnYcCMahnYNqEZNGt4DJ4QnPpuOeSwa45vuZ
+	NOPfC8WVG6TxGRrJa96DrldTtE0DWHTO7alznhkjasg==
+X-Gm-Gg: ASbGncvW7nBbeCZiDeLglSvqV4R548dOtf3GKCN++RuAVOJOMzZREkAlXdMC60fDX/k
+	13oLa8lxr79qlIrFa50E5kuRb1Ev1lLNk5D2HWhzZGaLBoi9/eoRD4eS21pFlkg8u9o7ggUjf/A
+	6IwqyC1LpQpVXUkO3iua19ogZO0FIEhPKQaK/EQ9/K8HHyXcSNAKHywQcxTtTIUVjkbaheSkPbm
+	pQD1J19
+X-Google-Smtp-Source: AGHT+IHbf9uC6mvlDjLNF6dIc9S4dSQ+VNOZ0NRDgEmrKLk0gdoDzLQwF9jjwQJK77A/D6L0h1BM5w/vF4E9CMZ6E90=
+X-Received: by 2002:a05:690c:730a:b0:70e:7ff6:9ff3 with SMTP id
+ 00721157ae682-7183517dc19mr38773327b3.35.1752660545599; Wed, 16 Jul 2025
+ 03:09:05 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: uu1G1_LjOtlH4Jfn7OFIOCOOvId6Q9TY
-X-Authority-Analysis: v=2.4 cv=D4xHKuRj c=1 sm=1 tr=0 ts=68776829 cx=c_pps
- a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
- a=GEpy-HfZoHoA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8 a=EUspDBNiAAAA:8
- a=_IW4Oi3bjg1409mID4wA:9 a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-GUID: uu1G1_LjOtlH4Jfn7OFIOCOOvId6Q9TY
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzE2MDA3OSBTYWx0ZWRfX3PUBfn5QH/cA
- mGIybfBa4uZC+siUIzz6urL8sx3zeSr3E/T5sYbJRiWiNWr95sfikYgns8Rs4myXyzzSeWVZ/je
- 6YNY1XFYoZx23KtEV2kWL/USWIwX8gUpQskspOgjbN0VSwUahTsXQMVOJn9u/FI6ekCjfpvXeVL
- tWPujLoxKPaeC+rzEr8t4AQOuF30CxD8ZNIjYNyAgp7yQXiYxDP3dUy7KyXPyquWtpY84J8IEF4
- 5D12Dr/u93ACUTeyB8XYjypHC7bBReU64q+b2/1VpgKaXNOfS7cIM8A2O3Qi0Ffi+MZyw3Mxq+y
- bqCcpO2rwC1X7qeXLkmuk6hkxvO8E+cd0cNwVZQJocVqzvkFFAAjJkVwYJVAv1B4HQuiExmbXt9
- Ij+svbTGjdXePh/M/Q9yJYFoVnk3itgXMkUabpF0VHvMnFQGrCapWsYVQg58Kz21piou+Sv/
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-07-16_01,2025-07-15_02,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- adultscore=0 mlxlogscore=761 impostorscore=0 spamscore=0 clxscore=1015
- lowpriorityscore=0 malwarescore=0 suspectscore=0 bulkscore=0 mlxscore=0
- priorityscore=1501 phishscore=0 classifier=spam authscore=0 authtc=n/a
- authcc= route=outbound adjust=0 reason=mlx scancount=1
- engine=8.19.0-2505280000 definitions=main-2507160079
+References: <20250715-memstick-fix-uninit-const-pointer-v1-1-f6753829c27a@kernel.org>
+In-Reply-To: <20250715-memstick-fix-uninit-const-pointer-v1-1-f6753829c27a@kernel.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Wed, 16 Jul 2025 12:08:29 +0200
+X-Gm-Features: Ac12FXyidmVqEt8vJA-TGBN58fq86rVrqsDtWU_9Q1n-pkGowaYzgUWF1QhgIVw
+Message-ID: <CAPDyKFpb+_N_XbZrZ02QDFfgk0MNMWb=oJC4V10+s+CrDXdUQw@mail.gmail.com>
+Subject: Re: [PATCH] memstick: core: Zero initialize id_reg in h_memstick_read_dev_id()
+To: Nathan Chancellor <nathan@kernel.org>
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>, Alex Dubov <oakad@yahoo.com>, 
+	Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, llvm@lists.linux.dev, 
+	patches@lists.linux.dev, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 
-Enable sdhc1 support for qcs8300 ride platform.
+On Wed, 16 Jul 2025 at 00:56, Nathan Chancellor <nathan@kernel.org> wrote:
+>
+> A new warning in clang [1] points out that id_reg is uninitialized then
+> passed to memstick_init_req() as a const pointer:
+>
+>   drivers/memstick/core/memstick.c:330:59: error: variable 'id_reg' is uninitialized when passed as a const pointer argument here [-Werror,-Wuninitialized-const-pointer]
+>     330 |                 memstick_init_req(&card->current_mrq, MS_TPC_READ_REG, &id_reg,
+>         |                                                                         ^~~~~~
+>
+> Commit de182cc8e882 ("drivers/memstick/core/memstick.c: avoid -Wnonnull
+> warning") intentionally passed this variable uninitialized to avoid an
+> -Wnonnull warning from a NULL value that was previously there because
+> id_reg is never read from the call to memstick_init_req() in
+> h_memstick_read_dev_id(). Just zero initialize id_reg to avoid the
+> warning, which is likely happening in the majority of builds using
+> modern compilers that support '-ftrivial-auto-var-init=zero'.
+>
+> Cc: stable@vger.kernel.org
+> Fixes: de182cc8e882 ("drivers/memstick/core/memstick.c: avoid -Wnonnull warning")
+> Link: https://github.com/llvm/llvm-project/commit/00dacf8c22f065cb52efb14cd091d441f19b319e [1]
+> Closes: https://github.com/ClangBuiltLinux/linux/issues/2105
+> Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Reviewed-by: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
----
- arch/arm64/boot/dts/qcom/qcs8300-ride.dts | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+Applied for fixes, thanks!
 
-diff --git a/arch/arm64/boot/dts/qcom/qcs8300-ride.dts b/arch/arm64/boot/dts/qcom/qcs8300-ride.dts
-index 8c166ead912c..9c37a0f5ba25 100644
---- a/arch/arm64/boot/dts/qcom/qcs8300-ride.dts
-+++ b/arch/arm64/boot/dts/qcom/qcs8300-ride.dts
-@@ -17,6 +17,7 @@
- 
- 	aliases {
- 		serial0 = &uart7;
-+		mmc0 = &sdhc_1;
- 	};
- 
- 	chosen {
-@@ -332,6 +333,26 @@
- 	status = "okay";
- };
- 
-+&sdhc_1 {
-+	pinctrl-0 = <&sdc1_state_on>;
-+	pinctrl-1 = <&sdc1_state_off>;
-+	pinctrl-names = "default", "sleep";
-+
-+	bus-width = <8>;
-+	mmc-ddr-1_8v;
-+	mmc-hs200-1_8v;
-+	mmc-hs400-1_8v;
-+	mmc-hs400-enhanced-strobe;
-+	vmmc-supply = <&vreg_l8a>;
-+	vqmmc-supply = <&vreg_s4a>;
-+
-+	non-removable;
-+	no-sd;
-+	no-sdio;
-+
-+	status = "okay";
-+};
-+
- &tlmm {
- 	ethernet0_default: ethernet0-default-state {
- 		ethernet0_mdc: ethernet0-mdc-pins {
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Kind regards
+Uffe
 
+
+> ---
+>  drivers/memstick/core/memstick.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+> index 043b9ec756ff..7f3f47db4c98 100644
+> --- a/drivers/memstick/core/memstick.c
+> +++ b/drivers/memstick/core/memstick.c
+> @@ -324,7 +324,7 @@ EXPORT_SYMBOL(memstick_init_req);
+>  static int h_memstick_read_dev_id(struct memstick_dev *card,
+>                                   struct memstick_request **mrq)
+>  {
+> -       struct ms_id_register id_reg;
+> +       struct ms_id_register id_reg = {};
+>
+>         if (!(*mrq)) {
+>                 memstick_init_req(&card->current_mrq, MS_TPC_READ_REG, &id_reg,
+>
+> ---
+> base-commit: ff09b71bf9daeca4f21d6e5e449641c9fad75b53
+> change-id: 20250715-memstick-fix-uninit-const-pointer-ed6f138bf40d
+>
+> Best regards,
+> --
+> Nathan Chancellor <nathan@kernel.org>
+>
