@@ -1,163 +1,100 @@
-Received: from smtp.kernel.org (aws-us-west-2-korg-mail-1.web.codeaurora.org [10.30.226.201])
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id B187E28E61E
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 08:24:56 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=10.30.226.201
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 4292829B77C;
+	Wed, 16 Jul 2025 08:51:50 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752654296; cv=none; b=XfpdWZlJq1bGdZ5r7UEzqcz9PNCh0jRX41BsubsXWNl3LR+W4U2NHBtfEYHn1sqWpZOeOdNqUJFXmCxnPJYSfoKZC8vOUe711mK3mUMNOqaTQhp2hT8nKfxWKomTsyx+JkqpLDQOcOYxPgX5HtjpELo0ezeb4okxKJgPrMh4WME=
+	t=1752655912; cv=none; b=BqEz9okK1c4v8SKjOJuOWMAUS69mse5HtltwH8QcsW/pV2pjSrjWVod7CigDKPY6FBN8nMvFtGBIHaOmwNysE9eN0CV6r4N1jp/TbzoeQXc0d2VT/FUj1/yTXYCWXFYP0VTQlG50VHUmDcv2LUVqq+KkJF4BNQRu6gvkE8VB7Y4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752654296; c=relaxed/simple;
-	bh=5F5b4fQbQLDyYyfIEIjAfQDxg56N9/W74sAYPQK/zB4=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=BWHAe1Kn1VBIcz1bZ/CFtWtDNXLTStkKjkcP6RlzjRmmpsA6Ycdw4X0aJMjDn1WDLujBC9K3lQu4QTfQib5nawTnSQmIoShvIro8DwYf9bCwh/yxmrH3FrS1rXli4oVPylWBihKNwbzpH0F4eY3frcAWGABSctlDKvCaUoudy7s=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b=nGEyBh88; arc=none smtp.client-ip=10.30.226.201
+	s=arc-20240116; t=1752655912; c=relaxed/simple;
+	bh=C8wk5wd2vdrmCGfvTUy7P+izwKxAI9vCGu3v73GLvNc=;
+	h=From:To:CC:Subject:Date:Message-ID:MIME-Version:Content-Type; b=DKtBRQpSpyzSzzeHofotCI43TtNisQFTqmEFoeMLjYi/quMGldqry+sDC9nV1aVVeif5sQBTMt6+c+h6/U16e2Zk4F5DXiX0xKXGlaLFLdhmekVwI/O2JM+f16MPD9iQc71yeoVgpnto/mmg5T0AFSR82Az3PUvKDmmKjBN4c6E=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=E3H3MdSt; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel.org header.i=@kernel.org header.b="nGEyBh88"
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 91E23C4CEF8
-	for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 08:24:56 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=k20201202; t=1752654296;
-	bh=5F5b4fQbQLDyYyfIEIjAfQDxg56N9/W74sAYPQK/zB4=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-	b=nGEyBh88AK50mOHxIfC25bflLxgZzU2jjJd/yQqQphnbDuWD3KYpdCuZ3c8YEM1xr
-	 DQPjU0PVBI2jhhjNYlu8X2H4eSSkwEK/Z1510P9LHr6kgQafr91T04Iu6o78Y6k6Wq
-	 gPrG1Z2c76YVQmzaTVUuaDgQGPjxAlqsNUdr4mHuQIH0+qx9nbva07REvrhVKh2c5q
-	 CVHr8U0n9w7KSWtKPRlolAUEzVKQxOwpN2FarQuPu8+JL/odDTKrz3M2yfuqNdkmOT
-	 9UJnVqwknr1urfRvwrWKTVCGfZALfqzchrQ95J9/scwRr8e0sgUMFgeOQ0eUyDShWv
-	 fO2dFdMBduelg==
-Received: by mail-ed1-f54.google.com with SMTP id 4fb4d7f45d1cf-6077dea37easo11216355a12.3
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Jul 2025 01:24:56 -0700 (PDT)
-X-Forwarded-Encrypted: i=1; AJvYcCUGUaIcBaopAKnEB3e2V6Yk/IaFWT+YDrZ9FVtTSuhux8WMBf4AFdzVwgQ+Vh+HPssncmjXMkRkFho=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyHY9i6/7Pcic8LxotWWUkU5o5SYYyp/3vc3rim9xby424bS3QN
-	TePsvFXb6r3OGdu3h18gk+e7P4yv7rN658495FiRI34YaIf3c0HVwktiNvYUfUslp6FS8mfsojR
-	EfCgEiUewriS2E8d6oLedwSxNGiRfPIQ=
-X-Google-Smtp-Source: AGHT+IHGVlHEqQxiKOfEg4bAyxr/SOOjmk4blZy7uPzLm1I80XbLCZjS2e8NhKu0qq5UTzK5vk4tm4mfgYgOnhd0C5w=
-X-Received: by 2002:a05:6402:2341:b0:607:e3ec:f8ea with SMTP id
- 4fb4d7f45d1cf-6128591955amr1521159a12.6.1752654295062; Wed, 16 Jul 2025
- 01:24:55 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="E3H3MdSt"
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56G6ThGB031273;
+	Wed, 16 Jul 2025 08:51:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-type:date:from:message-id:mime-version:subject:to; s=
+	qcppdkim1; bh=JAfesH9/TPqW8YiL1mT2tzTzG+h7ZmwO6fSXKlIFXXU=; b=E3
+	H3MdStvdVs8Bt9VQvPHzX1lrHtDgAXQg7jC1hZ2PhJ0YiXN6kIEtmpFem0INgasN
+	1XptolWAOeqG8HyrH4B8MJ7ltGfx2HVXWw/IeBFuqemRbFKzCmvGTxSpI7JOHvS5
+	32clrY+4/qLQaxfo4e712iDZu2WNi/17hsLBoVV1l9YxzbeEAEmG/CBNLigU/ic3
+	eHOFOOVvSjbvJhtpPvxnzD6RKyi3I3M+JMono0gmYcD96rZZqTwB+pyqNx30WpAb
+	lP5wioFkbhl7tCCxAxMUQ9H82vfdygbqSkK4MgSAcdyIcm1Pf0wvsaQN+1S4fphA
+	/HTt/rrt07Ymwp4phGKA==
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 47ufutb3gg-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 16 Jul 2025 08:51:47 +0000 (GMT)
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+	by NALASPPMTA04.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 56G8pkMC003852
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Wed, 16 Jul 2025 08:51:46 GMT
+Received: from hu-sayalil-hyd.qualcomm.com (10.80.80.8) by
+ nalasex01b.na.qualcomm.com (10.47.209.197) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1748.10; Wed, 16 Jul 2025 01:51:43 -0700
+From: Sayali Lokhande <quic_sayalil@quicinc.com>
+To: <andersson@kernel.org>, <konradybcio@kernel.org>, <robh@kernel.org>,
+        <krzk+dt@kernel.org>, <conor+dt@kernel.org>
+CC: <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+Subject: [PATCH V4 0/2] Add eMMC support for qcs8300
+Date: Wed, 16 Jul 2025 14:21:23 +0530
+Message-ID: <20250716085125.27169-1-quic_sayalil@quicinc.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250716064421.3823418-1-zhoubinbin@loongson.cn>
-In-Reply-To: <20250716064421.3823418-1-zhoubinbin@loongson.cn>
-From: Huacai Chen <chenhuacai@kernel.org>
-Date: Wed, 16 Jul 2025 16:24:44 +0800
-X-Gmail-Original-Message-ID: <CAAhV-H41eXF=z+-KNYEkXSAh89mN4WM75duvfvcqFGrXAtY4Fw@mail.gmail.com>
-X-Gm-Features: Ac12FXxfcGvrEgUGmrFc8GhoBshxF9qG9p3jrmb88Gy8-AEpS63Oof7f33xfc7Q
-Message-ID: <CAAhV-H41eXF=z+-KNYEkXSAh89mN4WM75duvfvcqFGrXAtY4Fw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: loongson2: Unify the function prefixes for loongson2_mmc_pdata
-To: Binbin Zhou <zhoubinbin@loongson.cn>
-Cc: Binbin Zhou <zhoubb.aaron@gmail.com>, Huacai Chen <chenhuacai@loongson.cn>, 
-	Ulf Hansson <ulf.hansson@linaro.org>, Xuerui Wang <kernel@xen0n.name>, loongarch@lists.linux.dev, 
-	linux-mmc@vger.kernel.org, wanghongliang@loongson.cn
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=e7gGSbp/ c=1 sm=1 tr=0 ts=68776823 cx=c_pps
+ a=ouPCqIW2jiPt+lZRy3xVPw==:117 a=ouPCqIW2jiPt+lZRy3xVPw==:17
+ a=GEpy-HfZoHoA:10 a=Wb1JkmetP80A:10 a=Ihs08mxtZF4EWRPjB5cA:9
+X-Proofpoint-GUID: evbOKAPL0ZBY_UEiFShYECoFOPfWyXED
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzE2MDA3OSBTYWx0ZWRfX0c5zrLQeCztb
+ m+lsbJUfL27hl5lhXohYMZdMnNsI/wm0lPCjQaMIloWED2+vli2zo1S6nkBn+XETFn1seoIHTma
+ OBbMlP1mEOD7VH3AiN98SIxONTbTTx3y1KHjVn2IC8ULEIDGmgGpsy3CUSCTSTacKh3Za/AL/wf
+ 3v1NA82DLJxwFXAN8+IkN3PmmUPH0xNEH4yRGalcCxMIpQef0Tz54SpUHOCqspm8t9VYZn9ZRHz
+ ZaeaOPYD4Dh7VLpeVCNhCV67QVt8oTa0qaCfUtwpyVJ+i39XH6oJFi242MtDHIOuMhlc2xIz9Z/
+ Y+Xb17xUL/Iwc2On2YtYNXtubD4vnVIaRyQfNRu85Lnacp18xh0NkNO+hJtbLnFJF4XS6F6RADJ
+ 8RKQ6qcucqUEUrTbRdaTYUwHem9Mx79CcLEzDDWKDr4HvS6UmxzokX3DDwK5f+/L21ILd/fQ
+X-Proofpoint-ORIG-GUID: evbOKAPL0ZBY_UEiFShYECoFOPfWyXED
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-16_01,2025-07-15_02,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ lowpriorityscore=0 priorityscore=1501 mlxscore=0 spamscore=0 suspectscore=0
+ phishscore=0 bulkscore=0 impostorscore=0 clxscore=1011 adultscore=0
+ malwarescore=0 mlxlogscore=554 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507160079
 
-Reviewed-by: Huacai Chen <chenhuacai@loongson.cn>
+Add eMMC support for qcs8300 board.
 
+- Changed from V3
+ - used correct name for SLAVE_SDC1
 
-On Wed, Jul 16, 2025 at 2:44=E2=80=AFPM Binbin Zhou <zhoubinbin@loongson.cn=
-> wrote:
->
-> The function prefixes for loongson2_mmc_pdata follow two naming
-> conventions: SoC-based and DMA-based.
->
-> First, DMA-based prefixes are the preferred choice, as they clearly
-> highlight differences, such as prepare_dma; however, for functions
-> related to SoC, such as reorder_cmd_data, it is agreed to use the
-> smallest SoC name as the fallback prefix, such as ls2k0500.
->
-> No functional change intended.
->
-> Suggested-by: Huacai Chen <chenhuacai@loongson.cn>
-> Signed-off-by: Binbin Zhou <zhoubinbin@loongson.cn>
-> ---
->  drivers/mmc/host/loongson2-mmc.c | 20 ++++++++++----------
->  1 file changed, 10 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/loongson2-mmc.c b/drivers/mmc/host/loongson=
-2-mmc.c
-> index ba6bb8fd5535..27499f36477c 100644
-> --- a/drivers/mmc/host/loongson2-mmc.c
-> +++ b/drivers/mmc/host/loongson2-mmc.c
-> @@ -594,7 +594,7 @@ static struct mmc_host_ops loongson2_mmc_ops =3D {
->         .ack_sdio_irq   =3D loongson2_mmc_ack_sdio_irq,
->  };
->
-> -static const struct regmap_config ls2k1000_mmc_regmap_config =3D {
-> +static const struct regmap_config ls2k0500_mmc_regmap_config =3D {
->         .reg_bits =3D 32,
->         .val_bits =3D 32,
->         .reg_stride =3D 4,
-> @@ -610,8 +610,8 @@ static int loongson2_reorder_cmd_list[] =3D { SD_APP_=
-SEND_SCR, SD_APP_SEND_NUM_WR_
->   * However sdio controller will send these datas in usual data format,
->   * so we need to adjust these datas to a protocol consistent byte order.
->   */
-> -static void loongson2_mmc_reorder_cmd_data(struct loongson2_mmc_host *ho=
-st,
-> -                                          struct mmc_command *cmd)
-> +static void ls2k0500_mmc_reorder_cmd_data(struct loongson2_mmc_host *hos=
-t,
-> +                                         struct mmc_command *cmd)
->  {
->         struct scatterlist *sg;
->         u32 *data;
-> @@ -704,8 +704,8 @@ static int ls2k0500_mmc_set_external_dma(struct loong=
-son2_mmc_host *host,
->  }
->
->  static struct loongson2_mmc_pdata ls2k0500_mmc_pdata =3D {
-> -       .regmap_config          =3D &ls2k1000_mmc_regmap_config,
-> -       .reorder_cmd_data       =3D loongson2_mmc_reorder_cmd_data,
-> +       .regmap_config          =3D &ls2k0500_mmc_regmap_config,
-> +       .reorder_cmd_data       =3D ls2k0500_mmc_reorder_cmd_data,
->         .setting_dma            =3D ls2k0500_mmc_set_external_dma,
->         .prepare_dma            =3D loongson2_mmc_prepare_external_dma,
->         .release_dma            =3D loongson2_mmc_release_external_dma,
-> @@ -736,8 +736,8 @@ static int ls2k1000_mmc_set_external_dma(struct loong=
-son2_mmc_host *host,
->  }
->
->  static struct loongson2_mmc_pdata ls2k1000_mmc_pdata =3D {
-> -       .regmap_config          =3D &ls2k1000_mmc_regmap_config,
-> -       .reorder_cmd_data       =3D loongson2_mmc_reorder_cmd_data,
-> +       .regmap_config          =3D &ls2k0500_mmc_regmap_config,
-> +       .reorder_cmd_data       =3D ls2k0500_mmc_reorder_cmd_data,
->         .setting_dma            =3D ls2k1000_mmc_set_external_dma,
->         .prepare_dma            =3D loongson2_mmc_prepare_external_dma,
->         .release_dma            =3D loongson2_mmc_release_external_dma,
-> @@ -838,8 +838,8 @@ static int loongson2_mmc_prepare_internal_dma(struct =
-loongson2_mmc_host *host,
->         return 0;
->  }
->
-> -static int loongson2_mmc_set_internal_dma(struct loongson2_mmc_host *hos=
-t,
-> -                                         struct platform_device *pdev)
-> +static int ls2k2000_mmc_set_internal_dma(struct loongson2_mmc_host *host=
-,
-> +                                        struct platform_device *pdev)
->  {
->         host->sg_cpu =3D dma_alloc_coherent(&pdev->dev, PAGE_SIZE,
->                                           &host->sg_dma, GFP_KERNEL);
-> @@ -860,7 +860,7 @@ static struct loongson2_mmc_pdata ls2k2000_mmc_pdata =
-=3D {
->         .regmap_config          =3D &ls2k2000_mmc_regmap_config,
->         .reorder_cmd_data       =3D ls2k2000_mmc_reorder_cmd_data,
->         .fix_data_timeout       =3D ls2k2000_mmc_fix_data_timeout,
-> -       .setting_dma            =3D loongson2_mmc_set_internal_dma,
-> +       .setting_dma            =3D ls2k2000_mmc_set_internal_dma,
->         .prepare_dma            =3D loongson2_mmc_prepare_internal_dma,
->         .release_dma            =3D loongson2_mmc_release_internal_dma,
->  };
->
-> base-commit: 4ad9e44c76b301e786eb4cdab890eac8c7eebd42
-> --
-> 2.47.3
->
->
+Sayali Lokhande (2):
+  arm64: dts: qcom: Add eMMC support for qcs8300
+  arm64: dts: qcom: qcs8300-ride: Enable SDHC1 node
+
+ arch/arm64/boot/dts/qcom/qcs8300-ride.dts |  21 ++++
+ arch/arm64/boot/dts/qcom/qcs8300.dtsi     | 113 ++++++++++++++++++++++
+ 2 files changed, 134 insertions(+)
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
+
