@@ -1,122 +1,124 @@
-Received: from mail-pf1-f169.google.com (mail-pf1-f169.google.com [209.85.210.169])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from relay8-d.mail.gandi.net (relay8-d.mail.gandi.net [217.70.183.201])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 7F854221F38;
-	Wed, 16 Jul 2025 10:43:42 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.210.169
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD14D1E9B04;
+	Wed, 16 Jul 2025 15:47:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752662624; cv=none; b=lWqdILpDl1jBuQZkOc8gcEew+ir++vQ959CVeqVvX51/SSPX831ZpI4fk4CF78JoKyUxBIEveVwF54MDo9BWcg0DMpwG1n0WNWL3E+krcOjl5kR8K3V12eziuKmVMNXU4jFPJfYDCcE9LITuvRLVz6frmzDfeEMSZh9k1B2or4M=
+	t=1752680879; cv=none; b=HOS0s28nTpXB0U5Hg5L00xrhyhQyVL/O4YMBtWS/QwMbWIIeI0lmIOjrih5GeF+fTBauOXPLcYqnmcHek/AQld1fh+CkhFPlGvfIShdxlzQTjonh2+6Wp+sm+DIlNveBdZ4R2XhY+tjJ+5+URBJrHBhxdh5lGSkPeRq2j0L7t2c=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752662624; c=relaxed/simple;
-	bh=DSS12tYkb9gpA8k48tPe3Spyi8HtEl2WRA7zK0gVzOc=;
-	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version; b=e0+q9AkQjvZGKWhRorM2XZvXFmhY1BSsnvPBl2ttM0SGD0fnr2aoCfPqP7RXmxM5qu13YCtTbxvWagGaq9Uu1vn+Q1cjLgXaxirlAjlLMjO3PII3vfMjpCg6+8vT/RRUZPtjTBOM4N1tX1ZIEFH+TC0kRtZiinD5/ZxK84j29sA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=MYvD4Q1X; arc=none smtp.client-ip=209.85.210.169
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1752680879; c=relaxed/simple;
+	bh=3eOdQOt/3/myQ6BG4kub6yREnqK/aimJ2gjQEsE/ZS4=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=obKN9EFw6cR4QY/pyfv9I+q+DsxDwTj858NpgAVxxdRquIY2FRqq9660CRbsLlCPKuXvmvER3QX8NNjG/uz48NYC6bg6+p0xyXLMiB2blUWpLWWX5QK+noA4Uxhx0t/QJkxHSBLpQKEq/x8fKIyc5iLGR3to8NgyLawAlF/fk1M=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=TAwOnSl9; arc=none smtp.client-ip=217.70.183.201
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MYvD4Q1X"
-Received: by mail-pf1-f169.google.com with SMTP id d2e1a72fcca58-748feca4a61so3691452b3a.3;
-        Wed, 16 Jul 2025 03:43:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1752662622; x=1753267422; darn=vger.kernel.org;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=MqHz3LAqr/WfrRthPIXWiwm5tyxxKiyEt4eW0IKFByc=;
-        b=MYvD4Q1XBExEVUo93hxLnOy47mwvE+qvuENuTl04Ssfl6hG622WYGIsDpYbySfKSLg
-         O6TtEnhzksjgrK02CGnrpPzba9XQrv67wqIZ+lTaQGApRa8Co00AL0LEYs7SFe1MWVmv
-         M+PtdiEQPVfPgZLuB4tskA6HxSJSiUMHwFr3hPdUxZzMQQtQ2AJQtrsCLkuJnxiyrVUM
-         e57nKKl9VMpXjncAyzoTDeeAbCqnUeHQIFQXN3YvdtSbF/P/ypgE9OyP5SAH98OD5Ju4
-         UQwmCIdHcp/Pxv94LO0kNRirrAQLEVHI1p6m6UnHzL5ZIJGd4BwZIAuWzSbHu1c4ZIwD
-         UWNg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752662622; x=1753267422;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=MqHz3LAqr/WfrRthPIXWiwm5tyxxKiyEt4eW0IKFByc=;
-        b=eJnuIkjV7PLpHabEDomqe95qugLmn89VqYENrsROrRy59gTkextjMWjqEEZjwYDOL2
-         jmq4nipfP9uoObCT7U5atC3yHhLetgeq6g4kRiNs8vYBQ7nVLpgzS1Lbm21UvOStL3cj
-         Ek0tMvdubaY1omWZZDmf0DmsbpXNTuTblxsd/2HUe30JxEN3tD8vAr7TP93bnjYut/O5
-         20yu9bOM6R52kMhGSzu9ErVTSNDkedh56IZryAoK9jSZvLLCjoFUTxk/cGIgHs7ImZDi
-         p25gqQ6YVRrLykx9Zm8qYkLs50vr+tEKUTPZe/bRQa5mmot1lOuEt69U2DF/sXOQARIQ
-         81tQ==
-X-Forwarded-Encrypted: i=1; AJvYcCWt+KNGv9JpyEOE7ylNJsFgp3tvQt4X2M1C6A4x7OWbRgo8BJGfscKkVTgDj86U32YA+wYcWQoysP4xJwQ=@vger.kernel.org
-X-Gm-Message-State: AOJu0YxbigMPhtpjOuJRDGsh3nALu5RPXLrzk07vBHYHQqgPWkGKdyLk
-	CFxiEVLLygor4/IS434iMedh7bXnuDYdAk6iq3vUMbL3f9bZSmvnUtba
-X-Gm-Gg: ASbGnct48FuOqQUpkwL2mDl52rXh/eKUZsomZdmMP/93nbcrX1r5yGmiacqhPiNs0Ps
-	3w9dIh8AwbvX68UpsdLtHjeZtRSFljVNk9cWoo0LrIidSDtCw/x3qQYxqA7UmrqE6kXqCtDHcYd
-	jfo29fyXuIuOBnzLJFtSwYqkBzL0Owu1BSSsiAnEP3MaMmFKxfu7C7WjrwyFjVSEhImbZzBef/0
-	OaTqy5iR0NMsbUAr1QC48+/jU7xqsjxJLItN07KY0+DiEzGeYS5cSlgIJjRKjSiVRMGHYMJTJDL
-	aA0eCLVIFXiOT3dVWxJfYtXBEhKgkgX5Z/Kchf0M0xNGlqtw7UjmFVmp9bU/8iK7naZCYet2GaP
-	9QEFzsc26CuX68ZBeeYGaGCDbIOhu0GVvepXQMtFh
-X-Google-Smtp-Source: AGHT+IGtF7p5vbbiq8GwYN/PJMWf0axj8zu/NbAS1y+ksEiP135eXQg42/kcUxDpIMMltw/Yl2cNJA==
-X-Received: by 2002:a05:6a00:14d0:b0:74e:aa6f:eae1 with SMTP id d2e1a72fcca58-75723e744d2mr2950355b3a.14.1752662621615;
-        Wed, 16 Jul 2025 03:43:41 -0700 (PDT)
-Received: from victorshih.. ([2402:7500:486:ad4c:7324:5bd6:835d:4ac5])
-        by smtp.gmail.com with ESMTPSA id d2e1a72fcca58-74eb9f856fdsm13914933b3a.144.2025.07.16.03.43.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Jul 2025 03:43:41 -0700 (PDT)
-From: Victor Shih <victorshihgli@gmail.com>
-To: ulf.hansson@linaro.org,
-	adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org,
-	linux-kernel@vger.kernel.org,
-	benchuanggli@gmail.com,
-	ben.chuang@genesyslogic.com.tw,
-	HL.Liu@genesyslogic.com.tw,
-	Victor Shih <victorshihgli@gmail.com>,
-	Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V1] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer timeout of AER
-Date: Wed, 16 Jul 2025 18:43:34 +0800
-Message-ID: <20250716104334.44020-1-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.43.0
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="TAwOnSl9"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 9673E44430;
+	Wed, 16 Jul 2025 15:47:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
+	t=1752680869;
+	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+	 content-transfer-encoding:content-transfer-encoding;
+	bh=seTcTLcAmQis+HdwGtCVVlFE0RHayr4SEQ28RMy+gCw=;
+	b=TAwOnSl9bpZyu4jEUef2bUBSIFHHoqWZWtEDAxAswJzRBRW1mYNi/lMeZcIwz7G0X8FJ/J
+	fBoPomJhMpZkuFgmEEpumb6sciWuWsaMkpACCy17Y3aIMA5XgZJ2HONE36k4Xg1UuKBxb/
+	8+fARLPMwj4uQZ25TIQs32sJKHk1rowsnW7TCOjhEbpjTgV7QygSbMGOAbuFH2xhysfGii
+	booNYU/GnDe6C01ENlzZfw2UFtOFAJnWP3z97coMCU2RkseAAjjaFQu/QWHJDld+hWG15Q
+	HvU/BpvLBdMdW1XAlOx7gXMvHhqic/ScaX0JqL4YfA8UDpR/hnCwoAts3vvaiA==
+From: =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
+Subject: [PATCH v3 0/6] mmc: introduce multi-block read gap tuning
+Date: Wed, 16 Jul 2025 17:47:11 +0200
+Message-Id: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
+X-B4-Tracking: v=1; b=H4sIAH/Jd2gC/x3MQQ6CMBAF0KuQWTtJKVQjVzEsoP7qJJaSKRAM4
+ e42Lt/mHZShgkxddZBikyxpKmguFfn3ML3A8iwma6wzt/rKMY3ywReMGD2HpLzOeVEMkVtuDYJ
+ z1jeju1MpZkWQ/d8/+vP8AXisVJZuAAAA
+X-Change-ID: 20250716-mobileye-emmc-for-upstream-4-40ef552c3b59
+To: Ulf Hansson <ulf.hansson@linaro.org>, 
+ Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
+ Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
+ Tawfik Bayouk <tawfik.bayouk@mobileye.com>, 
+ Gregory CLEMENT <gregory.clement@bootlin.com>, 
+ Thomas Petazzoni <thomas.petazzoni@bootlin.com>, 
+ =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
+X-Mailer: b4 0.14.2
+X-GND-State: clean
+X-GND-Score: -100
+X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdehkedutdcutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffufffkgggtgffvvefosehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvdekudfftdefvdehjeehheegjefgvdetuedugefggedvffejffefueevgfduvdffnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucfkphepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvheenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepihhnvghtpedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehpdhhvghloheplgduledvrdduieekrddutddrudekjegnpdhmrghilhhfrhhomhepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhnsggprhgtphhtthhopeelpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqmhhmtgesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehtrgiffhhik
+ hdrsggrhihouhhksehmohgsihhlvgihvgdrtghomhdprhgtphhtthhopehthhhomhgrshdrphgvthgriiiiohhnihessghoohhtlhhinhdrtghomhdprhgtphhtthhopegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehgrhgvghhorhihrdgtlhgvmhgvnhhtsegsohhothhlihhnrdgtohhmpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopehulhhfrdhhrghnshhsohhnsehlihhnrghrohdrohhrgh
+X-GND-Sasl: benoit.monin@bootlin.com
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+This patchset implements the multi-block read gap tuning for the SDHCI
+cadence driver.
 
-Due to a flaw in the hardware design, the GL9763e replay timer frequently
-times out when ASPM is enabled. As a result, the warning messages will
-often appear in the system log when the system accesses the GL9763e
-PCI config. Therefore, the replay timer timeout must be masked.
+The first two patches introduce helpers to check for CMD23 support by
+MMC card: mmc_card_can_cmd23 for support proper and mmc_card_blk_no_cmd23
+for the NO_CMD23 quirk.
 
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+The next two patches use the new helpers in mmc/core/mmc_test.c and
+mmc/core/block.c.
+
+The next patch add mmc_read_tuning to read blocks from MMC as part of
+the tuning. This function does not return the data read to the caller,
+only the status of the read operation. It also takes an optional card
+argument, not used when called from execute_tuning() but present in
+execute_hs400_tuning() and prepare_sd_hs_tuning().
+
+Finally the last patch uses mmc_read_tuning to implement the multi-block
+read gap tuning in the cadence host driver, by doing a multi-block read
+and increasing the gap delay until the read succeeds.
+
+v2 -> v3:
+Move the changes related to CMD23 support by MMC card to separate patches
+at the beginning of the series.
+Change the mmc read function to be less appealing to reuse/abuse
+outside of tuning context.
+
+Link to v2:
+https://lore.kernel.org/linux-mmc/cover.1751898225.git.benoit.monin@bootlin.com/
+
+v1 -> v2:
+Split the code between the core and the driver by adding a generic 
+function to read blocks from the MMC.
+
+Link to v1:
+https://lore.kernel.org/linux-mmc/2a43386ffef4012530ca2421ad81ad21c36c8a25.1750943549.git.benoit.monin@bootlin.com/
+
+Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
- drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+Benoît Monin (6):
+      mmc: core: add mmc_card_can_cmd23
+      mmc: card: add mmc_card_blk_no_cmd23
+      mmc: mmc_test: use mmc_card cmd23 helpers
+      mmc: block: use mmc_card cmd23 helpers
+      mmc: core: add mmc_read_tuning
+      mmc: sdhci-cadence: implement multi-block read gap tuning
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 4c2ae71770f7..eb3954729a3c 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1754,6 +1754,7 @@ static int gl9763e_add_host(struct sdhci_pci_slot *slot)
- static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- {
- 	struct pci_dev *pdev = slot->chip->pdev;
-+	int aer;
- 	u32 value;
- 
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-@@ -1780,6 +1781,14 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 	value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
- 
-+	/* mask the replay timer timeout of AER */
-+	aer = pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
-+	if (aer) {
-+		pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &value);
-+		value |= PCI_ERR_COR_REP_TIMER;
-+		pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, value);
-+	}
-+
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
- 	value &= ~GLI_9763E_VHS_REV;
- 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+ drivers/mmc/core/block.c         | 12 ++----
+ drivers/mmc/core/card.h          |  9 ++++-
+ drivers/mmc/core/core.c          |  9 +++++
+ drivers/mmc/core/core.h          |  1 +
+ drivers/mmc/core/mmc_ops.c       | 79 ++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_test.c      | 10 +----
+ drivers/mmc/host/sdhci-cadence.c | 69 ++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/host.h         |  2 +
+ 8 files changed, 171 insertions(+), 20 deletions(-)
+---
+base-commit: 4ad9e44c76b301e786eb4cdab890eac8c7eebd42
+change-id: 20250716-mobileye-emmc-for-upstream-4-40ef552c3b59
+
+Best regards,
 -- 
-2.43.0
+Benoît Monin <benoit.monin@bootlin.com>
 
