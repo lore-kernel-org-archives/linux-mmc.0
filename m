@@ -1,37 +1,38 @@
 Received: from relay8-d.mail.gandi.net (relay8-d.mail.gandi.net [217.70.183.201])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD14D1E9B04;
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id DD1AA22ACEF;
 	Wed, 16 Jul 2025 15:47:56 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=217.70.183.201
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752680879; cv=none; b=HOS0s28nTpXB0U5Hg5L00xrhyhQyVL/O4YMBtWS/QwMbWIIeI0lmIOjrih5GeF+fTBauOXPLcYqnmcHek/AQld1fh+CkhFPlGvfIShdxlzQTjonh2+6Wp+sm+DIlNveBdZ4R2XhY+tjJ+5+URBJrHBhxdh5lGSkPeRq2j0L7t2c=
+	t=1752680879; cv=none; b=ubRoEKV0+Q0mMiYJyYQGa7gM2xcCJNhun6fEIB6oFPPHXLgMRCKePPD08BCcJAmDjRq9iEh4hg4cOvKXTJRMnQz9dgodgfI/IenfjJDaXVhjcudZfDG5pCTXM1GTt9nsXTtdViSAoo5vkMU1sNeQRbbEo4XEiEIwjqa2cvdOwt8=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752680879; c=relaxed/simple;
-	bh=3eOdQOt/3/myQ6BG4kub6yREnqK/aimJ2gjQEsE/ZS4=;
-	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=obKN9EFw6cR4QY/pyfv9I+q+DsxDwTj858NpgAVxxdRquIY2FRqq9660CRbsLlCPKuXvmvER3QX8NNjG/uz48NYC6bg6+p0xyXLMiB2blUWpLWWX5QK+noA4Uxhx0t/QJkxHSBLpQKEq/x8fKIyc5iLGR3to8NgyLawAlF/fk1M=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=TAwOnSl9; arc=none smtp.client-ip=217.70.183.201
+	bh=Upf/68ziVHah6Rlks/oNHiBue0nYeJly5A97BtbIxys=;
+	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
+	 In-Reply-To:To:Cc; b=RQnXRSVib/E5BOcqAY+PwkVsl+Had/tXQrbbSctrV1sgZAlr4CoFtZ5MdBWSXnr9XXo+LnlgRv86vINsRb5C9HVsN2grt3Rbiva0bCflJk4rQQZWpuTYrz7qpTGWaMH5xX81QQlhBw73C7D8ZAzEN6CYZcb2Ult7qvoXnSmfSxA=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com; spf=pass smtp.mailfrom=bootlin.com; dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b=UbAW5QN0; arc=none smtp.client-ip=217.70.183.201
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=bootlin.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="TAwOnSl9"
-Received: by mail.gandi.net (Postfix) with ESMTPSA id 9673E44430;
-	Wed, 16 Jul 2025 15:47:48 +0000 (UTC)
+	dkim=pass (2048-bit key) header.d=bootlin.com header.i=@bootlin.com header.b="UbAW5QN0"
+Received: by mail.gandi.net (Postfix) with ESMTPSA id 407D943B07;
+	Wed, 16 Jul 2025 15:47:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
 	t=1752680869;
 	h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
 	 to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-	 content-transfer-encoding:content-transfer-encoding;
-	bh=seTcTLcAmQis+HdwGtCVVlFE0RHayr4SEQ28RMy+gCw=;
-	b=TAwOnSl9bpZyu4jEUef2bUBSIFHHoqWZWtEDAxAswJzRBRW1mYNi/lMeZcIwz7G0X8FJ/J
-	fBoPomJhMpZkuFgmEEpumb6sciWuWsaMkpACCy17Y3aIMA5XgZJ2HONE36k4Xg1UuKBxb/
-	8+fARLPMwj4uQZ25TIQs32sJKHk1rowsnW7TCOjhEbpjTgV7QygSbMGOAbuFH2xhysfGii
-	booNYU/GnDe6C01ENlzZfw2UFtOFAJnWP3z97coMCU2RkseAAjjaFQu/QWHJDld+hWG15Q
-	HvU/BpvLBdMdW1XAlOx7gXMvHhqic/ScaX0JqL4YfA8UDpR/hnCwoAts3vvaiA==
+	 content-transfer-encoding:content-transfer-encoding:
+	 in-reply-to:in-reply-to:references:references;
+	bh=2K3ECqs8b7BXS3Z8XIsoknOfTvpoi8O6hgk61rndGZg=;
+	b=UbAW5QN0INvxHc7csNuPq5SWWSctRRna/vGRLSWgp6w+VfRnsv7zXM0WooOn2X9qWameGu
+	DclDVXVuUEirCcThVRH/crMcXkK9LL757UvIKZIZcaU0cEYzoi03Dt6NEWZuotUylEtGJL
+	2vX4sewyQdGBux+lM/+Q8Yty2b/H6ud2gEJYsGWEeW8vQLGRfaAV/C06S6mBZfFL2Tru7m
+	iG6XJBynf/afio6DVe/70Oc/qE1LVTRGiB5TUfRG2UasDVMVE3Ix9/TckMu+edZvGgrbBY
+	A23JdV95JD+o4xFESRbC7P8f4AWwSZq1IdTCfKZ6shSOu2N8SE3WT1y7qScHZg==
 From: =?utf-8?q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
-Subject: [PATCH v3 0/6] mmc: introduce multi-block read gap tuning
-Date: Wed, 16 Jul 2025 17:47:11 +0200
-Message-Id: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
+Date: Wed, 16 Jul 2025 17:47:12 +0200
+Subject: [PATCH v3 1/6] mmc: core: add mmc_card_can_cmd23
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -40,10 +41,9 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-B4-Tracking: v=1; b=H4sIAH/Jd2gC/x3MQQ6CMBAF0KuQWTtJKVQjVzEsoP7qJJaSKRAM4
- e42Lt/mHZShgkxddZBikyxpKmguFfn3ML3A8iwma6wzt/rKMY3ywReMGD2HpLzOeVEMkVtuDYJ
- z1jeju1MpZkWQ/d8/+vP8AXisVJZuAAAA
-X-Change-ID: 20250716-mobileye-emmc-for-upstream-4-40ef552c3b59
+Message-Id: <20250716-mobileye-emmc-for-upstream-4-v3-1-dc979d8edef0@bootlin.com>
+References: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
+In-Reply-To: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
 To: Ulf Hansson <ulf.hansson@linaro.org>, 
  Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
@@ -55,70 +55,53 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
 X-Mailer: b4 0.14.2
 X-GND-State: clean
 X-GND-Score: -100
-X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdehkedutdcutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffufffkgggtgffvvefosehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepvdekudfftdefvdehjeehheegjefgvdetuedugefggedvffejffefueevgfduvdffnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucfkphepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvheenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepihhnvghtpedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehpdhhvghloheplgduledvrdduieekrddutddrudekjegnpdhmrghilhhfrhhomhepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhnsggprhgtphhtthhopeelpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqmhhmtgesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehtrgiffhhik
- hdrsggrhihouhhksehmohgsihhlvgihvgdrtghomhdprhgtphhtthhopehthhhomhgrshdrphgvthgriiiiohhnihessghoohhtlhhinhdrtghomhdprhgtphhtthhopegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdprhgtphhtthhopehgrhgvghhorhihrdgtlhgvmhgvnhhtsegsohhothhlihhnrdgtohhmpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopehulhhfrdhhrghnshhsohhnsehlihhnrghrohdrohhrgh
+X-GND-Cause: gggruggvucftvghtrhhoucdtuddrgeeffedrtdefgdehkedutdcutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfitefpfffkpdcuggftfghnshhusghstghrihgsvgenuceurghilhhouhhtmecufedtudenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephfffufggtgfgkfhfjgfvvefosehtkeertdertdejnecuhfhrohhmpeeuvghnohpfthcuofhonhhinhcuoegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomheqnecuggftrfgrthhtvghrnhepudefgfdugfffgfeuhfeguedvuefhkeektdeludelvdelteelteejjeeiteetvedtnecukfhppedvrgdtudemtggsudegmeehheeimeejrgdttdemudehfeejmehffeehmeelfeeiugemvgelvdehnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvdgrtddumegtsgdugeemheehieemjegrtddtmeduheefjeemfhefheemleefiegumegvledvhedphhgvlhhopegludelvddrudeikedruddtrddukeejngdpmhgrihhlfhhrohhmpegsvghnohhithdrmhhonhhinhessghoohhtlhhinhdrtghomhdpnhgspghrtghpthhtohepledprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhmmhgtsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtohepthgrfihfihhkrdgsrgihohhukhesmhhosghilhgvhigvr
+ dgtohhmpdhrtghpthhtohepthhhohhmrghsrdhpvghtrgiiiihonhhisegsohhothhlihhnrdgtohhmpdhrtghpthhtohepsggvnhhoihhtrdhmohhnihhnsegsohhothhlihhnrdgtohhmpdhrtghpthhtohepghhrvghgohhrhidrtghlvghmvghnthessghoohhtlhhinhdrtghomhdprhgtphhtthhopegrughrihgrnhdrhhhunhhtvghrsehinhhtvghlrdgtohhmpdhrtghpthhtohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhg
 X-GND-Sasl: benoit.monin@bootlin.com
 
-This patchset implements the multi-block read gap tuning for the SDHCI
-cadence driver.
-
-The first two patches introduce helpers to check for CMD23 support by
-MMC card: mmc_card_can_cmd23 for support proper and mmc_card_blk_no_cmd23
-for the NO_CMD23 quirk.
-
-The next two patches use the new helpers in mmc/core/mmc_test.c and
-mmc/core/block.c.
-
-The next patch add mmc_read_tuning to read blocks from MMC as part of
-the tuning. This function does not return the data read to the caller,
-only the status of the read operation. It also takes an optional card
-argument, not used when called from execute_tuning() but present in
-execute_hs400_tuning() and prepare_sd_hs_tuning().
-
-Finally the last patch uses mmc_read_tuning to implement the multi-block
-read gap tuning in the cadence host driver, by doing a multi-block read
-and increasing the gap delay until the read succeeds.
-
-v2 -> v3:
-Move the changes related to CMD23 support by MMC card to separate patches
-at the beginning of the series.
-Change the mmc read function to be less appealing to reuse/abuse
-outside of tuning context.
-
-Link to v2:
-https://lore.kernel.org/linux-mmc/cover.1751898225.git.benoit.monin@bootlin.com/
-
-v1 -> v2:
-Split the code between the core and the driver by adding a generic 
-function to read blocks from the MMC.
-
-Link to v1:
-https://lore.kernel.org/linux-mmc/2a43386ffef4012530ca2421ad81ad21c36c8a25.1750943549.git.benoit.monin@bootlin.com/
+Add a dedicated helper to check for CMD23 support for MMC card, similar
+to mmc_host_can_cmd23 for the host, as it is easy to get the check
+wrong.
 
 Signed-off-by: Benoît Monin <benoit.monin@bootlin.com>
 ---
-Benoît Monin (6):
-      mmc: core: add mmc_card_can_cmd23
-      mmc: card: add mmc_card_blk_no_cmd23
-      mmc: mmc_test: use mmc_card cmd23 helpers
-      mmc: block: use mmc_card cmd23 helpers
-      mmc: core: add mmc_read_tuning
-      mmc: sdhci-cadence: implement multi-block read gap tuning
+ drivers/mmc/core/core.c | 9 +++++++++
+ drivers/mmc/core/core.h | 1 +
+ 2 files changed, 10 insertions(+)
 
- drivers/mmc/core/block.c         | 12 ++----
- drivers/mmc/core/card.h          |  9 ++++-
- drivers/mmc/core/core.c          |  9 +++++
- drivers/mmc/core/core.h          |  1 +
- drivers/mmc/core/mmc_ops.c       | 79 ++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_test.c      | 10 +----
- drivers/mmc/host/sdhci-cadence.c | 69 ++++++++++++++++++++++++++++++++++-
- include/linux/mmc/host.h         |  2 +
- 8 files changed, 171 insertions(+), 20 deletions(-)
----
-base-commit: 4ad9e44c76b301e786eb4cdab890eac8c7eebd42
-change-id: 20250716-mobileye-emmc-for-upstream-4-40ef552c3b59
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 874c6fe92855e3535ec0ebc0254146f4b96bccc3..88fd231fee1d150b22baebddb7ad47472c24fb32 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1875,6 +1875,15 @@ bool mmc_card_can_secure_erase_trim(struct mmc_card *card)
+ }
+ EXPORT_SYMBOL(mmc_card_can_secure_erase_trim);
+ 
++bool mmc_card_can_cmd23(struct mmc_card *card)
++{
++	return ((mmc_card_mmc(card) &&
++		 card->csd.mmca_vsn >= CSD_SPEC_VER_3) ||
++		(mmc_card_sd(card) && !mmc_card_ult_capacity(card) &&
++		 card->scr.cmds & SD_SCR_CMD23_SUPPORT));
++}
++EXPORT_SYMBOL(mmc_card_can_cmd23);
++
+ int mmc_erase_group_aligned(struct mmc_card *card, sector_t from,
+ 			    unsigned int nr)
+ {
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 622085cd766f91334d5b9362cd7b96245af8884d..73f5d3d8c77d5da53795fe09beb384f134d6a886 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -123,6 +123,7 @@ bool mmc_card_can_trim(struct mmc_card *card);
+ bool mmc_card_can_discard(struct mmc_card *card);
+ bool mmc_card_can_sanitize(struct mmc_card *card);
+ bool mmc_card_can_secure_erase_trim(struct mmc_card *card);
++bool mmc_card_can_cmd23(struct mmc_card *card);
+ int mmc_erase_group_aligned(struct mmc_card *card, sector_t from, unsigned int nr);
+ unsigned int mmc_calc_max_discard(struct mmc_card *card);
+ 
 
-Best regards,
 -- 
-Benoît Monin <benoit.monin@bootlin.com>
+2.50.1
 
