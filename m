@@ -1,421 +1,131 @@
-Received: from mail-ed1-f45.google.com (mail-ed1-f45.google.com [209.85.208.45])
+Received: from mail-wr1-f53.google.com (mail-wr1-f53.google.com [209.85.221.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C6820285CA0
-	for <linux-mmc@vger.kernel.org>; Thu, 17 Jul 2025 08:29:39 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.45
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 8D63027A445
+	for <linux-mmc@vger.kernel.org>; Thu, 17 Jul 2025 08:45:31 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.221.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752740981; cv=none; b=tfTF+qNDgM0WS1rEjgl3N+ljIEG0ga07jnZP90iYifWK1ehQUY9Oqg/qtMwgEkrXiE3Z1gIZqJIA/KvNnWfWKEpxAI0qD3vy3DZp2oFibVuJxiU6meCFHIwi0MehC+cSaw5zvg9C3kwxtOvuhE1FsJYn0O+tnKNzNN6RVe5RDnQ=
+	t=1752741933; cv=none; b=M65LqHMYFiwOK5KAzvaDBPL8je37kfWiuxr+oftIrO5o97iRDoR01p2SJTgQDzd8EZ+oaQVGKBJ61HtDIHAAKfJYawik+fQ9WhMN6fJjl4DoGju1gTictga801ARaRJ171wAhX/PegzYH/VEbBzmg0eqae9vz+SG0wQoyzfAunM=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752740981; c=relaxed/simple;
-	bh=UNunHUNkH+TN7AOcVml1jP+DpDLBcanyZCyw+pldQvE=;
-	h=Mime-Version:Content-Type:Date:Message-Id:Cc:Subject:From:To:
-	 References:In-Reply-To; b=kxjj6x/buyVitwfgwEK09q1RH7sUHdLVbGJCVXevRuLhuKEv/p+PPpzIjanJ+YZe9LRFg4m2WkWO4+D59q/7bT3LwkscGAO5xDJniKPcPjdNTgS6h7ipC5NcQbg8Q0u9EcmD0v3XQaARTGYQr38LEfHbOzX/iw8X+G9pI2uJskY=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com; spf=pass smtp.mailfrom=fairphone.com; dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b=3zZO/bQw; arc=none smtp.client-ip=209.85.208.45
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=fairphone.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=fairphone.com
+	s=arc-20240116; t=1752741933; c=relaxed/simple;
+	bh=KeBoICQi5vCriX+lE0bMVyU8SmgjFFfJAbuXSXLwOvU=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=DzPujdRussuNIEc7M/2lzITQTvotGQ6CsvxFnYjJaRWvL5H+bOd+7cx0U/eXUKde1WhT4THOqR/QjG2ag9w3RvSkGyBY3foqOp05En2dJXJTtXFbPIOyB8QXggnHe9qRv10s7Ekss9lXfwJPM6kMVkrhEv/KU4m0gc8ptVfuei4=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=Z9p5phMy; arc=none smtp.client-ip=209.85.221.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=fairphone.com header.i=@fairphone.com header.b="3zZO/bQw"
-Received: by mail-ed1-f45.google.com with SMTP id 4fb4d7f45d1cf-607434e1821so1027595a12.0
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Jul 2025 01:29:39 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z9p5phMy"
+Received: by mail-wr1-f53.google.com with SMTP id ffacd0b85a97d-3b49ffbb31bso390106f8f.3
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Jul 2025 01:45:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fairphone.com; s=fair; t=1752740978; x=1753345778; darn=vger.kernel.org;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-transfer-encoding:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ry2yqY4fcB8r6JNTuIg6GJi9ZBAG4EVyeQwgDvrWgsM=;
-        b=3zZO/bQwku27icG21ERWuH7SL6EIVSr/97M3536zv5kGuN1/dmzOy026I6R+otzsH5
-         Qc3mBy9t96Arvk3yWMke97BdB7dQYwy7dLrXY+o2yzK/6TtsRMtWeuxqglzwGtjGATT2
-         6i5Pu+ZOft0LFimO+QgTH34kXDKPfwFYEF8eC9FtDDjg6+SXzK4pPC1wKrHB45rr4mxU
-         6FCzOlt1ocVWLVyHshdurd8ou39ppYsquQ4CFhYJ1b4jQT9PIzZ42DrrmZvJGF/ibyrA
-         KBDCT+kQj9g+O3Eeqnyu+IUo8l6XMTJRk6O3osvzCtGUAwwlIHSERKr9/naKhneiJ7HW
-         tgcA==
+        d=linaro.org; s=google; t=1752741930; x=1753346730; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=lI0pEfmVhQWkOv8EPGMn/xg7zISwfZGg3TSb4XZEXe4=;
+        b=Z9p5phMyeHNhIDU3Bgy2gPhCpHerknLxBYm7WCG/LwPrxjMpI4USLbCyaOjiVnN2Bc
+         0akJB43+4J3uta7FFI0j6VAD1cP64fyKo/TvC47bs35lBzsSewyivPQegM6s9TIKd63z
+         zLB0zu4ZpRlUhXJHIcCrIoDgY4BSLNerw6TUyhoKJeJMG21cVl/AazO7JVwTdN92tt7v
+         099tssRKwqNSXSCtTIWnjJPEs728HkTSydhzSa/WbaKLaFxrfvfE+FWEOlo2CKKsRJqK
+         XTw3F5eThczER5JNuWtg/B8Qf9LF5GvqrgYn4O2CPnmm9LqxPQNtQaAJIFAaheUVJEwl
+         x0CQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752740978; x=1753345778;
-        h=in-reply-to:references:to:from:subject:cc:message-id:date
-         :content-transfer-encoding:mime-version:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=ry2yqY4fcB8r6JNTuIg6GJi9ZBAG4EVyeQwgDvrWgsM=;
-        b=asNDAhquPjvCQr86xUg8S/aam4B7Phz+tef+wbqkAF8h2FExV3SChyX2ZDq4SAbq6L
-         qOvF81JTRkvmZBFz6IiT1my70MH/8RhPLQQVKbFBh8W3I3TXGFCNoAevz1I8LiE8lJaI
-         D+HUxxLr1vzjD2eiQjo9xCc5UD6AEEP8o+3AvX2G5F4jiIIrDQ3hvXIptQZZpGWi1VmN
-         veiEnxqa5XFPlNCjY8vHxeK/8P+EaaxNac0qUCA1A42qPoFNkogCdPVR2SkpUHR9W1fo
-         5aPLwLWggY1IT7iFn2vracZK+WincYXuJ1Df0s0ZNE+ztHvTBONAubzA2dtx925JO8Ri
-         YobA==
-X-Forwarded-Encrypted: i=1; AJvYcCWRctoy3H2AeENKz6qALxDPolThAp3V9SPo6+FEghLNzAW+rZfKpav1I8eXr8ngNN5TBvjcE2Sz4ds=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyVRIaK9AibHsa4Itr6CRPdjWElk2WUOLj12CanfVE62JkiAw/X
-	brZkcLTpn619iiZmnsEQCseLG6O6Gr9CIYpFyCgWIhCFGtJqv9NN2nMKx/NlepWKoDw=
-X-Gm-Gg: ASbGncvbP7fUNw0H0rbvY4ENkXgbUJU/P8lNrAjamOIOqqUF2gzkbAjbvaNXoh0u6rI
-	XKoInpUQrayb24qQFiryS42t1KrvfyjV1igJUBkfe+NHgg4CmAfGNgDVrEMY5FP9HMcaDqEG82b
-	lOhKQ4A0ZUjxTzINbWnvsDJi8qnqNFWcyGaAaUNriSNuKhlk9RI5P/kd8BahxLKEFlLM/5kxjE0
-	hX57TILHQCfsr7j+mD7UBI2HMwBirXiCB9PKUNWrJDN52A5YvnLZaeOovwFOZi8OtBA66cKqWXv
-	O67OMkRuE3WPwtVNtFHvrkOQcGPfK2ibHMu9Nes2EhNSVdxokuzivyzvVu08TaC6LZhwhwSG6e4
-	QdSsmu/dV71I3urs9HKGP7c/NOx1/sANcChqsuzdPJP4tLs955bzD1V6NXfDcn+76uX8=
-X-Google-Smtp-Source: AGHT+IE+TdhlMPh+u91g6pE8N6/1/E6+tgQ36t4anhpy9DrzlSFmbhQrj6aJo6OAcbvrAeM2GDcPYg==
-X-Received: by 2002:a05:6402:35c4:b0:608:6501:6a1f with SMTP id 4fb4d7f45d1cf-61285916635mr4613521a12.1.1752740978021;
-        Thu, 17 Jul 2025 01:29:38 -0700 (PDT)
-Received: from localhost (212095005146.public.telering.at. [212.95.5.146])
-        by smtp.gmail.com with ESMTPSA id 4fb4d7f45d1cf-611c9796432sm9746425a12.73.2025.07.17.01.29.35
+        d=1e100.net; s=20230601; t=1752741930; x=1753346730;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=lI0pEfmVhQWkOv8EPGMn/xg7zISwfZGg3TSb4XZEXe4=;
+        b=TlNvMXi1/fNYc2u2Zx4uWvtXxxGQSMFjH2ocOFHm2Q9ki50K9ym2yfqt2vQlyUnY/Z
+         jMLAAm6d6jBvQDpgdYlyrnEikNJs+yAsPkWz1/SVbRX6J2lTY1wAXMJNjFpOe5H+KY70
+         1XPcHXSJxJn0EfW8Vq9AB6//nG8AdN9g4H7uJV1HOvjTTnsSJ+3jQxUjrFef+M4HHd7B
+         vU0mcEC2E45mekVY3rcKe4iQl+TZcw0QuOR8u9eyxFBP3aEA6e2IMFekDOoJC/H3h6Oq
+         ooPqBqah+c0kCwlhdEQ2NwWPdzpFwMAfOioN2/xV+D+Ob1IRTX+YT1arMEBmK8CF+Kyu
+         KgKw==
+X-Forwarded-Encrypted: i=1; AJvYcCXPs8lznSv/3pOW7ujyI93xk/ZrR46asdB+RMtaZ+oIbi1LZC1jKxXunw5QDLBJBYS8u01l0mk80Co=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yz5KTcmcLSIU3mNNpvyqnLoD2S8n2kTOJE0NovXCuzYeXaKMUoG
+	XJkC1pbqkuAaU5TAJ095GQmP2q6VBtFjkfQTz570Z3I/ufHk1JXZEx+zsrigVrWnS1M=
+X-Gm-Gg: ASbGncu/z7ctXqlCNHbaS951ffAs1wcqcOrtsGJ6TbxqQB5EhIt9pVvxEPVNZt1vS81
+	Xy6tnmzWp8tM4ltW0c7rguxi4UJxgrhm+YXJX6S/hLT7T2aqEf2DQ6VgV3ic+6PZ561q7zQxTdA
+	wXazJSAUA5Pmuck0j6IJjVX7TGy5e/iNh7A1ebY00waTSS6vga9uehVw/i49pTKRyT/ow0MGej8
+	oea+XTqdalZ35Ne1NWxm6JJ/UX1UqqQT3+O2XY0Rau1ZnTQ4+43xAgMnZeIvGjHWhyKuGwLQH8Y
+	6muXO7czTMMnS1NV8tr0HbrvKEzffp0FU870GoPeh12yFpAEQvyy5D+W71fU+vI0uZFWJd0A9Qg
+	BbWmR5bKFmCmRBlTAbhNgZEpCmsxCpLjWjyNIk6tgWCOLLix/YsXObSsrU0YsrkV6/4dGcWwNNa
+	Mp
+X-Google-Smtp-Source: AGHT+IHynfEiO6GXy/zERfnUna5/ILOl/Jpu2n8FLydUo9tQGpFN5rGKrkj6TlP/t2+2sNcZBF+q3Q==
+X-Received: by 2002:a05:6000:250d:b0:3a5:58a5:6a83 with SMTP id ffacd0b85a97d-3b613e66eaemr1561801f8f.13.1752741929767;
+        Thu, 17 Jul 2025 01:45:29 -0700 (PDT)
+Received: from ?IPV6:2a0d:e487:37e:ce58:94c8:a752:de4:96bb? ([2a0d:e487:37e:ce58:94c8:a752:de4:96bb])
+        by smtp.googlemail.com with ESMTPSA id 5b1f17b1804b1-45634f5cad3sm15783305e9.9.2025.07.17.01.45.25
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 17 Jul 2025 01:29:37 -0700 (PDT)
+        Thu, 17 Jul 2025 01:45:29 -0700 (PDT)
+Message-ID: <d1e84ad9-eeea-4d0b-9f29-1dd4be49225c@linaro.org>
+Date: Thu, 17 Jul 2025 10:45:24 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date: Thu, 17 Jul 2025 10:29:35 +0200
-Message-Id: <DBE6TK1KDOTP.IIT72I1LUN5M@fairphone.com>
-Cc: <~postmarketos/upstreaming@lists.sr.ht>, <phone-devel@vger.kernel.org>,
- <linux-arm-kernel@lists.infradead.org>, <iommu@lists.linux.dev>,
- <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
- <linux-pm@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
- <linux-crypto@vger.kernel.org>, <dmaengine@vger.kernel.org>,
- <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH v2 14/15] arm64: dts: qcom: Add initial Milos dtsi
-From: "Luca Weiss" <luca.weiss@fairphone.com>
-To: "Konrad Dybcio" <konrad.dybcio@oss.qualcomm.com>, "Will Deacon"
- <will@kernel.org>, "Robin Murphy" <robin.murphy@arm.com>, "Joerg Roedel"
- <joro@8bytes.org>, "Rob Herring" <robh@kernel.org>, "Krzysztof Kozlowski"
- <krzk+dt@kernel.org>, "Conor Dooley" <conor+dt@kernel.org>, "Rafael J.
- Wysocki" <rafael@kernel.org>, "Viresh Kumar" <viresh.kumar@linaro.org>,
- "Manivannan Sadhasivam" <mani@kernel.org>, "Herbert Xu"
- <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>,
- "Vinod Koul" <vkoul@kernel.org>, "Bjorn Andersson" <andersson@kernel.org>,
- "Konrad Dybcio" <konradybcio@kernel.org>, "Robert Marko"
- <robimarko@gmail.com>, "Das Srinagesh" <quic_gurus@quicinc.com>, "Thomas
- Gleixner" <tglx@linutronix.de>, "Jassi Brar" <jassisinghbrar@gmail.com>,
- "Amit Kucheria" <amitk@kernel.org>, "Thara Gopinath"
- <thara.gopinath@gmail.com>, "Daniel Lezcano" <daniel.lezcano@linaro.org>,
- "Zhang Rui" <rui.zhang@intel.com>, "Lukasz Luba" <lukasz.luba@arm.com>,
- "Ulf Hansson" <ulf.hansson@linaro.org>
-X-Mailer: aerc 0.20.1-0-g2ecb8770224a-dirty
+MIME-Version: 1.0
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH v2 08/15] dt-bindings: thermal: qcom-tsens: document the
+ Milos Temperature Sensor
+To: Luca Weiss <luca.weiss@fairphone.com>, Will Deacon <will@kernel.org>,
+ Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>,
+ Viresh Kumar <viresh.kumar@linaro.org>,
+ Manivannan Sadhasivam <mani@kernel.org>,
+ Herbert Xu <herbert@gondor.apana.org.au>,
+ "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>,
+ Das Srinagesh <quic_gurus@quicinc.com>, Thomas Gleixner
+ <tglx@linutronix.de>, Jassi Brar <jassisinghbrar@gmail.com>,
+ Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>,
+ Zhang Rui <rui.zhang@intel.com>, Lukasz Luba <lukasz.luba@arm.com>,
+ Ulf Hansson <ulf.hansson@linaro.org>
+Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+ linux-mmc@vger.kernel.org
 References: <20250713-sm7635-fp6-initial-v2-0-e8f9a789505b@fairphone.com>
- <20250713-sm7635-fp6-initial-v2-14-e8f9a789505b@fairphone.com>
- <3e0299ad-766a-4876-912e-438fe2cc856d@oss.qualcomm.com>
-In-Reply-To: <3e0299ad-766a-4876-912e-438fe2cc856d@oss.qualcomm.com>
+ <20250713-sm7635-fp6-initial-v2-8-e8f9a789505b@fairphone.com>
+Content-Language: en-US
+From: Daniel Lezcano <daniel.lezcano@linaro.org>
+In-Reply-To: <20250713-sm7635-fp6-initial-v2-8-e8f9a789505b@fairphone.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-On Mon Jul 14, 2025 at 1:06 PM CEST, Konrad Dybcio wrote:
-> On 7/13/25 10:05 AM, Luca Weiss wrote:
->> Add a devicetree description for the Milos SoC, which is for example
->> Snapdragon 7s Gen 3 (SM7635).
->>=20
->> Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
->> ---
->
-> [...]
->
->> +		cpu-map {
->> +			cluster0 {
->> +				core0 {
->> +					cpu =3D <&cpu0>;
->> +				};
->> +
->> +				core1 {
->> +					cpu =3D <&cpu1>;
->> +				};
->> +
->> +				core2 {
->> +					cpu =3D <&cpu2>;
->> +				};
->> +
->> +				core3 {
->> +					cpu =3D <&cpu3>;
->> +				};
->> +			};
->> +
->> +			cluster1 {
->> +				core0 {
->> +					cpu =3D <&cpu4>;
->> +				};
->> +
->> +				core1 {
->> +					cpu =3D <&cpu5>;
->> +				};
->> +
->> +				core2 {
->> +					cpu =3D <&cpu6>;
->> +				};
->> +			};
->> +
->> +			cluster2 {
->> +				core0 {
->> +					cpu =3D <&cpu7>;
->> +				};
->> +			};
->> +		};
->
-> I'm getting mixed information about the core topology..=20
->
-> What does dmesg say wrt this line?
->
-> CPU%u: Booted secondary processor 0x%010lx [0x%08x]\n
+On 7/13/25 10:05, Luca Weiss wrote:
+> Document the Temperature Sensor (TSENS) on the Milos SoC.
+> 
+> Signed-off-by: Luca Weiss <luca.weiss@fairphone.com>
+> ---
+>   Documentation/devicetree/bindings/thermal/qcom-tsens.yaml | 1 +
+>   1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
+> index 0e653bbe9884953b58c4d8569b8d096db47fd54f..94311ebd7652d42eb6f3ae0dba792872c90b623f 100644
+> --- a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
+> +++ b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
+> @@ -49,6 +49,7 @@ properties:
+>         - description: v2 of TSENS
+>           items:
+>             - enum:
+> +              - qcom,milos-tsens
+>                 - qcom,msm8953-tsens
+>                 - qcom,msm8996-tsens
+>                 - qcom,msm8998-tsens
+> 
 
-[    0.003570] CPU1: Booted secondary processor 0x0000000100 [0x410fd801]
-[    0.004738] CPU2: Booted secondary processor 0x0000000200 [0x410fd801]
-[    0.005783] CPU3: Booted secondary processor 0x0000000300 [0x410fd801]
-[    0.007206] CPU4: Booted secondary processor 0x0000000400 [0x410fd811]
-[    0.008206] CPU5: Booted secondary processor 0x0000000500 [0x410fd811]
-[    0.009073] CPU6: Booted secondary processor 0x0000000600 [0x410fd811]
-[    0.010406] CPU7: Booted secondary processor 0x0000000700 [0x410fd811]
+Applied, thanks
 
->
->> +	pmu-a520 {
->> +		compatible =3D "arm,cortex-a520-pmu";
->> +		interrupts =3D <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
->> +	};
->> +
->> +	pmu-a720 {
->> +		compatible =3D "arm,cortex-a720-pmu";
->> +		interrupts =3D <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
->> +	};
->
-> See:
->
-> 9ce52e908bd5 ("arm64: dts: qcom: sm8650: switch to interrupt-cells 4 to a=
-dd PPI partitions")
-> 2c06e0797c32 ("arm64: dts: qcom: sm8650: add PPI interrupt partitions for=
- the ARM PMUs")
+-- 
+<http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
 
-Sure, will take a look.
-
->
-> [...]
->
->> +		gcc: clock-controller@100000 {
->> +			compatible =3D "qcom,milos-gcc";
->> +			reg =3D <0x0 0x00100000 0x0 0x1f4200>;
->> +
->> +			clocks =3D <&rpmhcc RPMH_CXO_CLK>,
->> +				 <&sleep_clk>,
->> +				 <0>, /* pcie_0_pipe_clk */
->> +				 <0>, /* pcie_1_pipe_clk */
->> +				 <0>, /* ufs_phy_rx_symbol_0_clk */
->> +				 <0>, /* ufs_phy_rx_symbol_1_clk */
->> +				 <0>, /* ufs_phy_tx_symbol_0_clk */
->> +				 <0>; /* usb3_phy_wrapper_gcc_usb30_pipe_clk */
->> +			protected-clocks =3D <GCC_PCIE_1_AUX_CLK>, <GCC_PCIE_1_AUX_CLK_SRC>,
->> +					<GCC_PCIE_1_CFG_AHB_CLK>, <GCC_PCIE_1_MSTR_AXI_CLK>,
->> +					<GCC_PCIE_1_PHY_RCHNG_CLK>, <GCC_PCIE_1_PHY_RCHNG_CLK_SRC>,
->> +					<GCC_PCIE_1_PIPE_CLK>, <GCC_PCIE_1_PIPE_CLK_SRC>,
->> +					<GCC_PCIE_1_PIPE_DIV2_CLK>, <GCC_PCIE_1_PIPE_DIV2_CLK_SRC>,
->> +					<GCC_PCIE_1_SLV_AXI_CLK>, <GCC_PCIE_1_SLV_Q2A_AXI_CLK>;
->
-> Does access control disallow accessing these on your prod-fused
-> device?
-
-Hm, taking another look, this property should probably be moved to
-device dts.
-
-Downstream has this in volcano.dtsi but volcano6i.dtsi (QCM6690?) and
-volcano6ip.dtsi (QCS6690?) have a /delete-property/ for this, because
-they have PCIe available.
-
-I don't think this has anything to do with secure boot fuses, but I
-don't think I have tried enabling these clocks on my SB-off prototype.
-
->
-> [...]
->
->> +		usb_1: usb@a600000 {
->> +			compatible =3D "qcom,milos-dwc3", "qcom,snps-dwc3";
->> +			reg =3D <0x0 0x0a600000 0x0 0x10000>;
->
-> size =3D 0xfc_000
-
-Ack
-
->
-> [...]
->
->> +
->> +			clocks =3D <&gcc GCC_CFG_NOC_USB3_PRIM_AXI_CLK>,
->> +				 <&gcc GCC_USB30_PRIM_MASTER_CLK>,
->> +				 <&gcc GCC_AGGRE_USB3_PRIM_AXI_CLK>,
->> +				 <&gcc GCC_USB30_PRIM_SLEEP_CLK>,
->> +				 <&gcc GCC_USB30_PRIM_MOCK_UTMI_CLK>,
->> +				 <&rpmhcc RPMH_CXO_CLK>;
->> +			clock-names =3D "cfg_noc",
->> +				      "core",
->> +				      "iface",
->> +				      "sleep",
->> +				      "mock_utmi",
->> +				      "xo";
->> +
->> +			assigned-clocks =3D <&gcc GCC_USB30_PRIM_MOCK_UTMI_CLK>,
->> +					  <&gcc GCC_USB30_PRIM_MASTER_CLK>;
->> +			assigned-clock-rates =3D <19200000>, <133333333>;
->
-> Set the latter to 200000000 - your device doesn't have USB3, but the
-> next person may lose their hair about tracking down why it doesn't
-> work on theirs
-
-Ah, I think I only checked the downstream reference which was patched to
-be qcom,core-clk-rate =3D <133333333>; for FP6. The original file does
-have:
-
-  qcom,core-clk-rate =3D <200000000>;
-  qcom,core-clk-rate-disconnected =3D <133333333>;
-
->
-> [...]
->
->> +		pdc: interrupt-controller@b220000 {
->> +			compatible =3D "qcom,milos-pdc", "qcom,pdc";
->> +			reg =3D <0x0 0x0b220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
->
-> 1 per line, please
-
-Ack
-
->
->> +			interrupt-parent =3D <&intc>;
->> +
->> +			qcom,pdc-ranges =3D <0 480 40>, <40 140 11>, <51 527 47>,
->> +					  <98 609 31>, <129 63 1>, <130 716 12>,
->> +					  <142 251 5>;
->> +
->> +			#interrupt-cells =3D <2>;
->> +			interrupt-controller;
->> +		};
->> +
->> +		tsens0: thermal-sensor@c228000 {
->> +			compatible =3D "qcom,milos-tsens", "qcom,tsens-v2";
->> +			reg =3D <0x0 0x0c228000 0x0 0x1ff>, /* TM */
->> +			      <0x0 0x0c222000 0x0 0x1ff>; /* SROT */
->
-> drop the comments
->
-> the sizes are 0x1000 for both regions for both controllers
-
-Ack
-
->
->> +
->> +			interrupts =3D <GIC_SPI 506 IRQ_TYPE_LEVEL_HIGH>,
->
-> pdc 26
-
-You mean replace <GIC_SPI 506 IRQ_TYPE_LEVEL_HIGH> with
-<&pdc 26 IRQ_TYPE_LEVEL_HIGH> (plus interrupts-extended)?
-
-I assume you got this from internal docs, but just to mention,
-volcano-thermal.dtsi contains GIC_SPI 506 (+ 507 for tsens1).
-
->
->> +				     <GIC_SPI 640 IRQ_TYPE_LEVEL_HIGH>;
->> +			interrupt-names =3D "uplow",
->> +					  "critical";
->> +
->> +			#qcom,sensors =3D <15>;
->> +
->> +			#thermal-sensor-cells =3D <1>;
->> +		};
->> +
->> +		tsens1: thermal-sensor@c229000 {
->> +			compatible =3D "qcom,milos-tsens", "qcom,tsens-v2";
->> +			reg =3D <0x0 0x0c229000 0x0 0x1ff>, /* TM */
->> +			      <0x0 0x0c223000 0x0 0x1ff>; /* SROT */
->> +
->> +			interrupts =3D <GIC_SPI 507 IRQ_TYPE_LEVEL_HIGH>,
->
-> pdc 27
-
-same as above
-
->
->> +				     <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>;
->> +			interrupt-names =3D "uplow",
->> +					  "critical";
->> +
->> +			#qcom,sensors =3D <14>;
->> +
->> +			#thermal-sensor-cells =3D <1>;
->> +		};
->> +
->> +		aoss_qmp: power-management@c300000 {
->> +			compatible =3D "qcom,milos-aoss-qmp", "qcom,aoss-qmp";
->> +			reg =3D <0x0 0x0c300000 0x0 0x400>;
->> +
->> +			interrupt-parent =3D <&ipcc>;
->> +			interrupts-extended =3D <&ipcc IPCC_CLIENT_AOP IPCC_MPROC_SIGNAL_GLI=
-NK_QMP
->> +						     IRQ_TYPE_EDGE_RISING>;
->> +
->> +			mboxes =3D <&ipcc IPCC_CLIENT_AOP IPCC_MPROC_SIGNAL_GLINK_QMP>;
->> +
->> +			#clock-cells =3D <0>;
->> +		};
->> +
->> +		sram@c3f0000 {
->> +			compatible =3D "qcom,rpmh-stats";
->> +			reg =3D <0x0 0x0c3f0000 0x0 0x400>;
->> +		};
->> +
->> +		spmi_bus: spmi@c400000 {
->> +			compatible =3D "qcom,spmi-pmic-arb";
->
-> There's two bus instances on this platform, check out the x1e binding
-
-Will do
-
->
-> [...]
->
->> +		intc: interrupt-controller@17100000 {
->> +			compatible =3D "arm,gic-v3";
->> +			reg =3D <0x0 0x17100000 0x0 0x10000>,	/* GICD */
->> +			      <0x0 0x17180000 0x0 0x200000>;	/* GICR * 8 */
->
-> drop the comments please
-
-Ack
-
->
-> [...]
->
->> +			clocks =3D <&rpmhcc RPMH_CXO_CLK>, <&gcc GCC_GPLL0>;
->> +			clock-names =3D "xo", "alternate";
->
-> 1 a line, please
-
-Ack
-
->
-> [...]
->
->> +		cpuss0-thermal {
->> +			thermal-sensors =3D <&tsens0 1>;
->> +
->> +			trips {
->> +				cpuss0-hot {
->> +					temperature =3D <110000>;
->> +					hysteresis =3D <1000>;
->> +					type =3D "hot";
->> +				};
->> +
->> +				cpuss0-critical {
->> +					temperature =3D <115000>;
->> +					hysteresis =3D <0>;
->> +					type =3D "critical";
->> +				};
->> +			};
->> +		};
->
-> See:
->
-> 06eadce93697 ("arm64: dts: qcom: x1e80100: Drop unused passive thermal tr=
-ip points for CPU")
->
-> (tldr drop non-critical trips for CPU)
-
-Will take a look.
-
-Regards
-Luca
-
->
-> Konrad
-
+Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
+<http://twitter.com/#!/linaroorg> Twitter |
+<http://www.linaro.org/linaro-blog/> Blog
