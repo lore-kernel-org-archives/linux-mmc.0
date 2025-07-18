@@ -1,35 +1,36 @@
 Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 015331DFDA1;
-	Fri, 18 Jul 2025 21:13:21 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 906F418E20;
+	Fri, 18 Jul 2025 21:13:20 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752873211; cv=none; b=ZCwHWh3mcFTJVrAHPUMirODYd+d34NTBxKSvGH5MlzKWSim49OAb0sT8MCfxcuMDprUv5ABW4AF1zDrDLPJvNKFeNuNCa13NNcKDfvfvQDEqmR9h7JpryCP/lKRrmeyXRHsNN/MMt0BKNEvj6o8m3AcdRFc4ZMjRNcrq76cSVds=
+	t=1752873211; cv=none; b=sBu2lsjoly8pE3v+hVIdcQYc2pWSRjJNN3snsoWTXJpBldg6n3kFUJ9dzPYiAFNOtXNTcz412L6ZOROF5kJguAJJmQqjCfgTlhN9YDLK2m9bgzjiAFFZzIvDvLHrox7xzAaCyMSiQ02zrtX+Wov91nqjyO0rC4JCEp/V1N/3UUI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
 	s=arc-20240116; t=1752873211; c=relaxed/simple;
-	bh=X0ruUBCWmqPUnMw0Occmhf5PEzBxkpVnH5AXoDKfe9M=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=JSzUD76QzWf0w6TS7GgtY5RdFCzQHtwtASIxtYXbwbW212UxW5gMScH2SUI/3h3lGnYcflhAMRPyHI7H/fBZDCJWKWzRIKLRCXkXdVD2V4DQQk6mxlFBZedBIZWInLmdo82HvhNFfAbTdmrMz7SG+6o5mO+1hComiFJgOK9Jx7Y=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=Zv7iDqvA; arc=none smtp.client-ip=37.205.8.231
+	bh=wgoMK2L/RCBs8zdhzxyuzklUZpBH98194Fs6KY5ehK4=;
+	h=From:Subject:Date:Message-Id:MIME-Version:Content-Type:To:Cc; b=a6e66jy87qKdpwH1hI9crKOoXk+2c4YX+VvsJPOMLJbKnR/WJVOFX9gDjwxmwTg+yW+aS/7M44fIpgrZ2yhocisunJrRRhJvT0QtAExETu+ypHTpIFZiDXeqgZ9aBryM/koJVtShM693vtLgoAk+sHtkguJ2Uv1L3/55RQGAiqs=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=QxufMW18; arc=none smtp.client-ip=37.205.8.231
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="Zv7iDqvA"
-DKIM-Signature: a=rsa-sha256; bh=QyqeF9sRoGvvojqnJHNwL0AQl2Z7d0Gpu9tbw2QxQfI=;
+	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="QxufMW18"
+DKIM-Signature: a=rsa-sha256; bh=EvoIQyY24ZpCCLLhJ5n7Fa8bgfcoLCuVdo6XvBEe5QM=;
  c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1752873185; v=1; x=1753305185;
- b=Zv7iDqvA8i69mT3Mv3IqUTB/189Jmv6qe0VH+nuWDKjmt9SaEaNZKMkVv7ifl7Zu2GiLlTAh
- BRMpEm1RCKrj+yHKkRN2NY74AU1SUJDgBQ5Hg4mLbveSxEZYfJbLVHNJCcWIMzLVCpds9I0gHJv
- v4NEW7bxq34bMA91kLY3XKtWxe/iRO8ipTcfDB3EoB/9WsEnzKaTaGvhw4SisPcHxiWA91Fjp7j
- K45oRyHLZHOn7svwnuBHdbZ9lC9lj9N/QoGXjHwatv7scTyrEbPtf1jnazWCVpYmXf4R3wu0s6O
- GVLcGske/27oikZDYxeysZLbIFJ51VDaJnMWvpGuCFC+g==
+ h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:Message-Id:Message-Id:References:Autocrypt:Openpgp;
+ i=@dujemihanovic.xyz; s=default; t=1752873184; v=1; x=1753305184;
+ b=QxufMW18Y46MpZ4p0U07EcppebLZCyZ6p9NKwwiBGNP3WoOb0sM+0fVEk36UV98xHCh1eUKx
+ QU5KCiwncmwCFfoxJ0zKktXXDUTUbUVDILlJsrurtPxDummmdIxbo9I/wDWYzTsjyc6X5a+4umw
+ wXjrc8hQ2fdHhnhkeitnnSeAb9fNHGvbuf96MxAkYlL1Ai7mcrG0pSaG4CLUNa2WrB9UtEEzCXi
+ QPobOaHrCZV/d3EDEffBoMlKsfDyWTs5y0EOVkeS0IRHIMln2QelR9xMGQmTAp13h/LbQddrw4l
+ lCNwLyfCSukRnxemGOZM7mS4dHMldxdb84XKkuXu5K8yw==
 Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id e9e4dbdb; Fri, 18 Jul 2025 23:13:05 +0200
+ ESMTPS id 3c867c5d; Fri, 18 Jul 2025 23:13:04 +0200
 From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Date: Fri, 18 Jul 2025 23:12:38 +0200
-Subject: [PATCH RFC 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
+Subject: [PATCH RFC 0/2] mmc: sdhci-pxav3: pinctrl setting for fast bus
+ clocks
+Date: Fri, 18 Jul 2025 23:12:37 +0200
+Message-Id: <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
@@ -38,9 +39,10 @@ List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-Message-Id: <20250718-pxav3-uhs-v1-1-2e451256f1f6@dujemihanovic.xyz>
-References: <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
-In-Reply-To: <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
+X-B4-Tracking: v=1; b=H4sIAMW4emgC/6tWKk4tykwtVrJSqFYqSi3LLM7MzwNyDHUUlJIzE
+ vPSU3UzU4B8JSMDI1MDc0ML3YKKxDJj3dKMYt0US1OzpLTUFEPjNAMloPqCotS0zAqwWdFKQW7
+ OSrG1tQDf1EHsYAAAAA==
+X-Change-ID: 20250718-pxav3-uhs-d956bfed13f0
 To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
  Krzysztof Kozlowski <krzk+dt@kernel.org>, 
  Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
@@ -50,97 +52,50 @@ Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>,
  ~postmarketos/upstreaming@lists.sr.ht, 
  =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
 X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2602;
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1513;
  i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
- bh=X0ruUBCWmqPUnMw0Occmhf5PEzBxkpVnH5AXoDKfe9M=;
- b=owGbwMvMwCW21nBykGv/WmbG02pJDBlVO+6r+ene42++o23IY3LxT2j6FJ7LJ8y/eB69zdVgV
- VV0/ub6jlIWBjEuBlkxRZbc/47XeD+LbN2evcwAZg4rE8gQBi5OAZiIjzojww7Vn/Lc5celHVo3
- zl616bUOh18375uC35t/1H49vNl/EgPD/2ShPRO0TKNVJpXcrj19+5rFbOPazuaOed9eH/4SkHH
- 7FzcA
+ bh=wgoMK2L/RCBs8zdhzxyuzklUZpBH98194Fs6KY5ehK4=;
+ b=owGbwMvMwCW21nBykGv/WmbG02pJDBlVO+57Trv2wb7w5x4+rwniL39YXK2pFrRy3rPmfIDmo
+ cpnRs16HaUsDGJcDLJiiiy5/x2v8X4W2bo9e5kBzBxWJpAhDFycAjARvk0M/2wO7po4Z9rmJ/8n
+ 7G3uUPfr0WQ9dnfF0Z2FGzVi9eas7O9iZLi7g/vIjeOzoyWTVves3VG6Y5GB3NnVu3IndqqvtP6
+ qKcwDAA==
 X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
  fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
 
-On the pxav3 controller, increasing the drive strength of the data pins
-might be required to maintain stability on fast bus clocks (above 100
-MHz). Add a state_uhs pinctrl to allow this.
+Hello,
 
-The existing state_cmd_gpio pinctrl is changed to apply only on pxav1 as
-it's unneeded on the other controllers.
+This small series adds a pinctrl setting for fast MMC bus clocks to the
+pxav3 driver. On bus clocks above 100 MHz, driving the data pins at a
+higher current helps maintain signal quality.
+
+This series is related to Marvell PXA1908 SoC support; the latest
+version of that patchset (v16 as of now) can be found at
+https://lore.kernel.org/20250708-pxa1908-lkml-v16-0-b4392c484180@dujemihanovic.xyz
+
+The series is RFC because of the following:
+* I'm unsure whether setting pinctrl-{names,1} to true in the top level
+  of the binding is correct.
+* Other mainline MMC drivers select between default and UHS states based
+  on the signal voltage. The PXA1908 vendor kernel does it based on the
+  bus clock. I followed the vendor kernel, but do not know whether this
+  is bad practice and therefore the other mainline drivers should be
+  followed instead.
 
 Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
 ---
+Duje Mihanović (2):
+      dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
+      mmc: sdhci-pxav3: add state_uhs pinctrl setting
+
  .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 45 +++++++++++++++++-----
- 1 file changed, 35 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c                     | 30 ++++++++++++++-
+ include/linux/platform_data/pxa_sdhci.h            |  7 ++++
+ 3 files changed, 71 insertions(+), 11 deletions(-)
+---
+base-commit: 347e9f5043c89695b01e66b3ed111755afcf1911
+change-id: 20250718-pxav3-uhs-d956bfed13f0
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-index 4869ddef36fd89265a1bfe96bb9663b553ac5084..7a9e2a63ac4351aea10b2763ca250ce4889df1eb 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-@@ -30,6 +30,39 @@ allOf:
-           maxItems: 1
-         reg-names:
-           maxItems: 1
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: mrvl,pxav1-mmc
-+    then:
-+      properties:
-+        pinctrl-names:
-+          description:
-+            Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
-+            SDIO CMD and GPIO mode.
-+          items:
-+            - const: default
-+            - const: state_cmd_gpio
-+        pinctrl-1:
-+          description:
-+            Should switch CMD pin to GPIO mode as a high output.
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: mrvl,pxav3-mmc
-+    then:
-+      properties:
-+        pinctrl-names:
-+          description:
-+            Optional for increasing stability of the controller at fast bus clocks.
-+          items:
-+            - const: default
-+            - const: state_uhs
-+        pinctrl-1:
-+          description:
-+            Should switch the drive strength of the data pins to high.
- 
- properties:
-   compatible:
-@@ -62,21 +95,13 @@ properties:
-       - const: io
-       - const: core
- 
--  pinctrl-names:
--    description:
--      Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
--      SDIO CMD and GPIO mode.
--    items:
--      - const: default
--      - const: state_cmd_gpio
-+  pinctrl-names: true
- 
-   pinctrl-0:
-     description:
-       Should contain default pinctrl.
- 
--  pinctrl-1:
--    description:
--      Should switch CMD pin to GPIO mode as a high output.
-+  pinctrl-1: true
- 
-   mrvl,clk-delay-cycles:
-     description: Specify a number of cycles to delay for tuning.
-
+Best regards,
 -- 
-2.50.1
+Duje Mihanović <duje@dujemihanovic.xyz>
 
