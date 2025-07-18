@@ -1,134 +1,157 @@
 Received: from mail-yw1-f173.google.com (mail-yw1-f173.google.com [209.85.128.173])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id D68BE2DAFD2
-	for <linux-mmc@vger.kernel.org>; Fri, 18 Jul 2025 12:57:57 +0000 (UTC)
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 0BBB72D94B9
+	for <linux-mmc@vger.kernel.org>; Fri, 18 Jul 2025 13:04:54 +0000 (UTC)
 Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.173
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752843480; cv=none; b=dOYa1aacUARxwl82kFf0bVc5+h3kpD/8EOrqxth6s9XHdMthWg1E5sBXOWAf5NOD0IKnfStYkhhq5PKugQS+Mb/Ly9ZXIYYRsdqvLaGnt5iZ180XbjM4NmxnCDXnyjHLsgIvby4mHRgVdJfs/2MeH606RzyUbXVcE7rnceE59sI=
+	t=1752843897; cv=none; b=DjxTgZasodnxaKJLP8GeeVU8p4aDa95OpDCRoVO17HwP4x8V2L8yQcy+wNuDiJM0flwmtPbPhNKhZHg+WAfTjufIQkok6CDykHHjuH7JtzHrDMUT7sjk0Kyk3sf2VXf/sij+MZNiNh17b3m8J/U4IgLH5HfsUG1+ygC9Ww1qTAc=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752843480; c=relaxed/simple;
-	bh=2oVBNLLjRvI/epA6VfcF0SznFLcvvWnbecTGR/uJYlY=;
+	s=arc-20240116; t=1752843897; c=relaxed/simple;
+	bh=sozEw8FyWyDjapcwikfsnTLYtBoVTtIi2agNNPNo3lU=;
 	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LUU81E8TzLCpsFKI97fdZR+FOniA03eoEKXkCUOa7v6yJi6/0aex0HzYjHgZU4TbsjuEptmqefo6b/KZlmbqzyDxB2MuealVPV5VEDGAtvu9VJTrtD3IbumWdySKn4VpD5dlPpeNj6AfspEtGpNBETktwEK3DCmter26EBi8o8c=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=zXJMzzal; arc=none smtp.client-ip=209.85.128.173
+	 To:Cc:Content-Type; b=dCvaZvgasieg2MzfLB/CkuzyC3mMyphf4oWrszApNO0Qp7UVZhbUQs7MWhhUsYEzMNBzcuJp/ZYHlC6stpxNQOUyfQYhuwK3w7paQvx6EF6k42c12tpxS83UX/PJe5zAsLor1i2hcNXhb/QLXF5nOjssZjayddoFV9FCaXVpeQ8=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=TsxhWYWz; arc=none smtp.client-ip=209.85.128.173
 Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
 Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zXJMzzal"
-Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-70e77831d68so20138557b3.2
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Jul 2025 05:57:57 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TsxhWYWz"
+Received: by mail-yw1-f173.google.com with SMTP id 00721157ae682-7183dae670dso20097467b3.2
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jul 2025 06:04:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1752843477; x=1753448277; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=2oVBNLLjRvI/epA6VfcF0SznFLcvvWnbecTGR/uJYlY=;
-        b=zXJMzzalaAoPcKA+89aZpl0UashlLYsa0MR/RDy6zqcDmK4fLyf8JCLNEzL3tD2Lcc
-         KILWK54tiV8Qd5gykDDMuefBGu0ZTSOpi7gXxNS0to95Gx/+gWHiTJBCcTcMkJc9gwhJ
-         vVbpQ0KM64EHUnBq44XmkVAKLwXKZ1zL35MeN+b12laD+dXfNxYDRgIfPUdpj9h98FMu
-         eu7zTiSbN2PXg6xpKfuUwdrs/24HkA/fMgZ8s2Gb3NTEyEzTz96gSIPTx8nbSPV3Cl95
-         Baven60FkdLZNDgZF+AQpyf8qv3jiRs/ci8uTOUAmRwY2KW+VJ6ZM47xYhYVvzTqKbmb
-         AXmA==
+        d=linaro.org; s=google; t=1752843894; x=1753448694; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0cjbUkrtlM4UaM9lc1BaVPt7R7JS/MDa+VxvwtUnNho=;
+        b=TsxhWYWztpDmEV+Jhylaoj/hUSk5G3+WDp/q3NryGUBHlcu331aStE02VAmR8IgKHF
+         mXNcadTwzsqDc8AZPO9RBPVqy6nKj8FGkV6PM2GlX7VmM7stpvPoq59NPJr0NmFNjewe
+         y9/Y/f7z8FHUSOf/9aMAL+5eezFf64l5X1csZoAUVUHSskKiIHWB7i1ybybYDpcVoe7W
+         z5T51oI47lgdemsICdy4sLmhIQTQEbCwPcF5TSoxXC1yJrnVzXxacaV9qhkaRIxb2scw
+         b9EfSktvgG67FcGucIW9D6Tfo5AEMAERGHDbyM+cJcXIaTHIvzLJx0yO4zsIMXaYHnb2
+         aq8g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1752843477; x=1753448277;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=2oVBNLLjRvI/epA6VfcF0SznFLcvvWnbecTGR/uJYlY=;
-        b=K+lLoc29CiW3wn5nvX1/SLPJBP28BeWU5rhfFSPpar1jm1u+K2pdxXPWp5VHBe4g/k
-         KuoQROxvFerw/etGRJnUqEstqcArhBohx+UExqQfFtnWDHQ4oeR3bxLChohWyay/qncp
-         vTY6voZBhYnV8rnbUedciPbrE4zlEPrlTPetkxIFaOIQQpnakEnwYA1cq6er2CLLOu7w
-         32lMu2lkKjRwMmI09kVSX33XecEI4XQT7a71BC7BfvVFeHSoECfIrDhvSNGmm6+l+GBS
-         8Ms13Bjn4AjfPRef1UCsfR9C3wJIX9a8bUmlUcUbbihY6GQwjZhMDxTZnP49uacaIAVw
-         jQdQ==
-X-Forwarded-Encrypted: i=1; AJvYcCULdjwYzBsc0GFxnUMXA5ePG3ZPKXLQOWTUzWEB9L+qJUR2x/3hwd+Z/m06D67IMHwYSQrnB+8/lj4=@vger.kernel.org
-X-Gm-Message-State: AOJu0Yyy+lG7rEGBwx3xGahEaNEyAl2n73bmdNTrtwKdhsHk7crikYDF
-	ghWudMlcjNZc7hAh8Ej10xeu+4iz/lz7ovE6KIvRNYTawpy+IP30SbfImSF4nCyhBxrF1/o2O+M
-	O2WkZgKIL6wvQ82rycgm5CSP5+NxvbvQ+TexGUEPCKA==
-X-Gm-Gg: ASbGncuvnfAbMBZgCBtfc+v0VYJf/uTj/QJbEvtr57cKTXfODfOODWr1IHzDq8aUah+
-	LCSQqsc/6ErdI4pv5mNzAgIdtIRrU+7fGuUkLRo0Srh+84l9+5eGqRe3X4lkv8VO6UGjsV3AS5L
-	LHior1ib506jwwO97sRgDCdK1Q3MGFtX67KHoFo0EnCCAoxALzWtAYtv2pYUZwYWyHDUoIfECOG
-	6aayJ4y
-X-Google-Smtp-Source: AGHT+IGL8vq79uRPv+7EgtB0w1khGf/ZZ/t0fKcCIca47IxCbP1gdAWP0LAznLmxVN6tPjXDjywCkYz53fSv6LPH66I=
-X-Received: by 2002:a05:690c:fcc:b0:719:5337:59ef with SMTP id
- 00721157ae682-71953378ed6mr28884307b3.27.1752843476741; Fri, 18 Jul 2025
- 05:57:56 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1752843894; x=1753448694;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=0cjbUkrtlM4UaM9lc1BaVPt7R7JS/MDa+VxvwtUnNho=;
+        b=eHvYhZb5jrIJUk6ecmA5KL5G/dKVcuBP/OKaIxakJlTKM2i6R8yzB88ZascQaU1LAv
+         kcyWuscxgBBdf3vnn+aLcvLK6KMn2FEF5J8F6AFKKPIEYrpfDC55nwFAcT7hD3KxNlnS
+         FFIxwo7lGiC4VSNiLQreAu68WO6AiVWDhEpp0oBJLs3oqnpIoi6UkwPYEzavmyY4Quz/
+         Iif4lmPGWN2iAFMigDxlV2WcHRrsy9fSPn7KlR74h8ECPQIXrwlbOhtGEDry0rUp/43b
+         K9w3N8Gfr6OxAhQ/MBXSQc7dhuny+lU5faXLDvc9OdE4JUgYyyK+AQVhN0ESiJ7FnLo6
+         QBxA==
+X-Forwarded-Encrypted: i=1; AJvYcCV62VpJK93bfO7J78yqaEkFAjJP1i5NHmzyzhKx52anqwfUhpmCZDupaokI1xpge78hVjPZI9FTqfI=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzmRpkhjlgRBCX/elMBCb3DL/fgQiBjsBW15adm2N2Td2PzhXEs
+	fe+5SgcH5BLRAeWTVobOSDu5M8vAY+jop3ZLwthCLohIlC+Uu67Mq34S4t+MBcKOhUsWeeOflkr
+	Fdlj/q+RAX992n2zo1K0366t4NjujAmmRsC41rZfH5g==
+X-Gm-Gg: ASbGncuPU6uJPGHNySdUi0BwA4JyRm27Z30fWQvYH+GXVxY0Cpg+FMo3I2zPVqJ+783
+	D1VoS4sZTxLXeysCzwGpkm+UejOoF2YV3x3kr11CTF3JIFQF3lDeNYbTontSVKu+TrX9/tEu0YC
+	01WVjZASomkAHUofJioMZUoHqMk9ackQX40GkFs3OUAA9rPKdHO5n9uHhiOJSMtBfOR/Z1chlUQ
+	GSeuyTP
+X-Google-Smtp-Source: AGHT+IHAREX9jlEB7DDQFJly6tT608RByxRGCuonOYwIH/zjWk609eGj2ygFHsSBmEbKSc/+O98hZVdjh7b1hxqPJfQ=
+X-Received: by 2002:a05:690c:6611:b0:719:5675:5ef1 with SMTP id
+ 00721157ae682-719567560camr21315517b3.23.1752843893829; Fri, 18 Jul 2025
+ 06:04:53 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250718110217.1929526-1-quic_dmukhopa@quicinc.com> <a569a2c3-2fb2-4a40-8d54-898e7c36f4b3@oss.qualcomm.com>
-In-Reply-To: <a569a2c3-2fb2-4a40-8d54-898e7c36f4b3@oss.qualcomm.com>
+References: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
+In-Reply-To: <20250716-mobileye-emmc-for-upstream-4-v3-0-dc979d8edef0@bootlin.com>
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Fri, 18 Jul 2025 14:57:21 +0200
-X-Gm-Features: Ac12FXwr-Fm6lencmYiNXXyaB3FhAUaboLaEzLqBOtQ2Ce15n_VvqzG4MtGWFZw
-Message-ID: <CAPDyKFqgo4ewJxPOUmY-GE+CG2XUVGQvEqgTQnvo0MfryMemGw@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: Avoid reprogram all keys to Inline Crypto Engine
- for MMC runtime suspend resume
-To: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>, 
-	Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
-Cc: Eric Biggers <ebiggers@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, 
-	linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	linux-arm-msm@vger.kernel.org, kernel@quicinc.com, 
-	Neeraj Soni <quic_neersoni@quicinc.com>, Ram Prakash Gupta <quic_rampraka@quicinc.com>, 
-	Nitin Rawat <quic_nitirawa@quicinc.com>, Sachin Gupta <quic_sachgupt@quicinc.com>, 
-	Bhaskar Valaboju <quic_bhaskarv@quicinc.com>, Gaurav Kashyap <quic_gaurkash@quicinc.com>, 
-	Sarthak Garg <quic_sartgarg@quicinc.com>
+Date: Fri, 18 Jul 2025 15:04:18 +0200
+X-Gm-Features: Ac12FXxVwAQXB6b2VTbpgI0Tf9IffZ9HFaLLM_9W8621oBuAcd55DDCIeBmgDuY
+Message-ID: <CAPDyKFqa6ut25uaDN6pP50wGi2+DZ8MJ6_OZ6ujtgjfHz4hxzg@mail.gmail.com>
+Subject: Re: [PATCH v3 0/6] mmc: introduce multi-block read gap tuning
+To: =?UTF-8?Q?Beno=C3=AEt_Monin?= <benoit.monin@bootlin.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, 
+	linux-kernel@vger.kernel.org, 
+	Vladimir Kondratiev <vladimir.kondratiev@mobileye.com>, 
+	Tawfik Bayouk <tawfik.bayouk@mobileye.com>, Gregory CLEMENT <gregory.clement@bootlin.com>, 
+	Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 18 Jul 2025 at 14:05, Konrad Dybcio
-<konrad.dybcio@oss.qualcomm.com> wrote:
+On Wed, 16 Jul 2025 at 17:47, Beno=C3=AEt Monin <benoit.monin@bootlin.com> =
+wrote:
 >
-> On 7/18/25 1:02 PM, Debraj Mukhopadhyay wrote:
-> > Crypto reprogram all keys is called for each MMC runtime
-> > suspend/resume in current upstream design. If this is implemented
-> > as a non-interruptible call to TEE for security, the cpu core is
-> > blocked for execution while this call executes although the crypto
-> > engine already has the keys. For example, glitches in audio/video
-> > streaming applications have been observed due to this. Add the flag
-> > MMC_CAP2_CRYPTO_NO_REPROG as part of host->caps2 to control reprogramming
-> > keys to crypto engine for socs which dont require this feature.
-> >
-> > Signed-off-by: Seshu Madhavi Puppala <quic_spuppala@quicinc.com>
-> > Co-developed-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> > Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> > Co-developed-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> > Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
-> > Signed-off-by: Debraj Mukhopadhyay <quic_dmukhopa@quicinc.com>
-> >
-> > ---
+> This patchset implements the multi-block read gap tuning for the SDHCI
+> cadence driver.
 >
-> Let's take a step back - do we need to ever program this more than
-> once on QC? What about other devices (e.g. the generic cqhci-crypto)?
-> Do they also lose the crypto context over a runtime pm cycle?
-
-I agree!
-
-I also think it's important to also understand what runtime PM cycle
-we are discussing here. It's a bit blurry for me currently, can we
-please clarify this.
-
-A runtime PM cycle of the card, means that the eMMC card is
-power-cycled and re-initialized (assuming MMC_CAP_AGGRESSIVE_PM is
-set, which I guess is a downstream patch as the upstream sdhci-msm
-driver doesn't have this bit set, at least not yet). The mmc host is
-probably also runtime PM power-cycled when the card is, but it's
-orthogonal to the runtime PM cycle of the card - that's a really
-important point here, I think.
-
-As I understand it, the crypto context is not tied to the card, but to
-the mmc host. What happens with the crypto context when the mmc host
-is runtime PM cycled? Is the context preserved? I assume so, or?
-
+> The first two patches introduce helpers to check for CMD23 support by
+> MMC card: mmc_card_can_cmd23 for support proper and mmc_card_blk_no_cmd23
+> for the NO_CMD23 quirk.
 >
-> If our hardware is fine with set-it-and-forget-it approach, maybe
-> we could limit this to a small if-condition sdhci-msm.c
+> The next two patches use the new helpers in mmc/core/mmc_test.c and
+> mmc/core/block.c.
+>
+> The next patch add mmc_read_tuning to read blocks from MMC as part of
+> the tuning. This function does not return the data read to the caller,
+> only the status of the read operation. It also takes an optional card
+> argument, not used when called from execute_tuning() but present in
+> execute_hs400_tuning() and prepare_sd_hs_tuning().
+>
+> Finally the last patch uses mmc_read_tuning to implement the multi-block
+> read gap tuning in the cadence host driver, by doing a multi-block read
+> and increasing the gap delay until the read succeeds.
+>
+> v2 -> v3:
+> Move the changes related to CMD23 support by MMC card to separate patches
+> at the beginning of the series.
+> Change the mmc read function to be less appealing to reuse/abuse
+> outside of tuning context.
 
-Yes, maybe. Let's see.
+A quick review made me feel a lot better about this, thanks!
 
-[...]
+Although I will need a few more days for review and possibly it's
+getting too late for v6.17 for me, but let's see, I will do my best.
 
 Kind regards
 Uffe
+
+>
+> Link to v2:
+> https://lore.kernel.org/linux-mmc/cover.1751898225.git.benoit.monin@bootl=
+in.com/
+>
+> v1 -> v2:
+> Split the code between the core and the driver by adding a generic
+> function to read blocks from the MMC.
+>
+> Link to v1:
+> https://lore.kernel.org/linux-mmc/2a43386ffef4012530ca2421ad81ad21c36c8a2=
+5.1750943549.git.benoit.monin@bootlin.com/
+>
+> Signed-off-by: Beno=C3=AEt Monin <benoit.monin@bootlin.com>
+> ---
+> Beno=C3=AEt Monin (6):
+>       mmc: core: add mmc_card_can_cmd23
+>       mmc: card: add mmc_card_blk_no_cmd23
+>       mmc: mmc_test: use mmc_card cmd23 helpers
+>       mmc: block: use mmc_card cmd23 helpers
+>       mmc: core: add mmc_read_tuning
+>       mmc: sdhci-cadence: implement multi-block read gap tuning
+>
+>  drivers/mmc/core/block.c         | 12 ++----
+>  drivers/mmc/core/card.h          |  9 ++++-
+>  drivers/mmc/core/core.c          |  9 +++++
+>  drivers/mmc/core/core.h          |  1 +
+>  drivers/mmc/core/mmc_ops.c       | 79 ++++++++++++++++++++++++++++++++++=
+++++++
+>  drivers/mmc/core/mmc_test.c      | 10 +----
+>  drivers/mmc/host/sdhci-cadence.c | 69 ++++++++++++++++++++++++++++++++++=
+-
+>  include/linux/mmc/host.h         |  2 +
+>  8 files changed, 171 insertions(+), 20 deletions(-)
+> ---
+> base-commit: 4ad9e44c76b301e786eb4cdab890eac8c7eebd42
+> change-id: 20250716-mobileye-emmc-for-upstream-4-40ef552c3b59
+>
+> Best regards,
+> --
+> Beno=C3=AEt Monin <benoit.monin@bootlin.com>
+>
