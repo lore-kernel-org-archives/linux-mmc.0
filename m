@@ -1,159 +1,160 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 009D421CA02;
-	Fri, 18 Jul 2025 21:13:22 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1BA182E36EE
+	for <linux-mmc@vger.kernel.org>; Mon, 21 Jul 2025 02:31:56 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.208.43
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1752873212; cv=none; b=ZrKsHaC4WlNReervL+AB7x8x687BAfA1aXpUEgTpHmSCrRTcwfHSnGObKJzh56EMqJa3eO5Wol5qLaECtHsaVqtueIt1Qn3SBL06/TeUpJVbAGj25+99QXjKNd7qhjkZjFz7vqdWW6B8yo+hucsMPPb0aYzDM4vUZ7vH7tt+7+c=
+	t=1753065118; cv=none; b=joVWUK0uhRf4WiPK06t/q+J1Cz9nedD+CST4wXTm1esy+Lul3Tn28ay8sFGh3iN+gqJdwoht9/1O0KrAloYG/3PRi1Hd+Zo2IAp3p27HGYxgkRb3S2oJsWxWXJv0B/bg6sDv7dj1T7DjKWPynIfWqANeQmN+4vkU6vBe8P65CKI=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1752873212; c=relaxed/simple;
-	bh=3RYvkarqfHdoc1OgLllqlLng0i6a19ZDq3zI5M3B0aY=;
-	h=From:Date:Subject:MIME-Version:Content-Type:Message-Id:References:
-	 In-Reply-To:To:Cc; b=bn2khkIN24dGBZwXy4h1W6aG6y/QaT7t73jMtPwtEriTdsPI0XH4iU/DBOG02UsQXFQ9Mj4+OjEpPt+9/M9pxtgHttKfdGlNc31TspU32zA0oMWtXqfy4G5x8B9JTOXSajeIZ7bdHSoQ32pjpoRv5ap0KWoqCThe/afPeDaGvQA=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=DDfPeXbV; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	s=arc-20240116; t=1753065118; c=relaxed/simple;
+	bh=rdpUsZudLIihvHlw8s6RGyY68kSWWDYVobQjYQevUdY=;
+	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+	 To:Cc:Content-Type; b=BRnGcRM4eA24x8byDyU5dpwhrADIWnfJEDLXOxKvQwgXQRI9g+Bq1rotFon+w1zfOIZOfqyGySsvsCkJ2uAmbIQbgC+dDAhroD0F6CD179HB+BDc4TKuSDZaOGiUWxj1JxJtJl08tykci5C6bJW3cHGOJc8HdBqmq0DohtHlFcQ=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=JsDP+5c4; arc=none smtp.client-ip=209.85.208.43
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="DDfPeXbV"
-DKIM-Signature: a=rsa-sha256; bh=gOjp3wQjJ3AE6k78BMHRLvaT8uRUMtnV0AD3Afp4oe8=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1752873185; v=1; x=1753305185;
- b=DDfPeXbVCBvhb7ZGTPiKJV+pOmX67OglQeZPg6nRg7KtNVqIzyCH9gUDE4+AjwnoDf55OlqK
- RPgFUJ5MvsIF16pfLEbtR3uvbLgh0kvLjmkIR5VSc2W5oIj6kblw3kkkFg+wWgoUEjV1SNKdBFK
- ffWpiz/pJGD/PeL8cVAUDbLS2OaMELidr2J5/Lc1tfDsLR9bdvqVxrmSZ7ruX6iOPQmvisbwDop
- +EF+REX2INqioiu/bnUO4IHU7HKLqx59KunJCiwArfrVfuXVxBs0DmBNXeAI+8xiNiAdSxzI7x2
- YtuxlzRzSJcVCz3jfSS7es+XAfldMPwhg0M+BFklwE5gw==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id e2145e2d; Fri, 18 Jul 2025 23:13:05 +0200
-From: =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-Date: Fri, 18 Jul 2025 23:12:39 +0200
-Subject: [PATCH RFC 2/2] mmc: sdhci-pxav3: add state_uhs pinctrl setting
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JsDP+5c4"
+Received: by mail-ed1-f43.google.com with SMTP id 4fb4d7f45d1cf-60c5b8ee2d9so7913267a12.2
+        for <linux-mmc@vger.kernel.org>; Sun, 20 Jul 2025 19:31:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1753065115; x=1753669915; darn=vger.kernel.org;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rdpUsZudLIihvHlw8s6RGyY68kSWWDYVobQjYQevUdY=;
+        b=JsDP+5c4T+v2Xl7WKnVAf5/DS+538rTzKO3CgLZ7l6obfSokt9IWenVPXi6dJDo2uY
+         2JQAN3pJD3x1V56FHrY5xJ1hKAet1KbkTyRQSQGsUUwGSWGcgsZ4crBLT1vwSmb6NXkb
+         D7ycni7KhiP/kb6KQo8Vw63lhf6dW1uZH1uYYTjWRr4CoIdT4Bt/oQSRgNxmWMr0Y1RL
+         QW2LrF3VyMsYodC0AAol/BGNccMJClKTGZk4VQ+fq3FJ+Y6RRh6tmE2nrfPVOSF4EFyJ
+         uBO9jAgfLiuN49E5DuxMcxo0sauC9PBIrKcctTRjd1cJg9arADQeOLDmKEyejzJHdA0v
+         D5YQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1753065115; x=1753669915;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rdpUsZudLIihvHlw8s6RGyY68kSWWDYVobQjYQevUdY=;
+        b=KGkmAluGsbGji6ewpmeBZKaXmI/eGf77d52zVLA87Y5aVYJDLcxS0T+oGctp3hvpzt
+         Qq1RgxS/r9H0ZvRbxtpWTQzycucOYpNSmYxjtm4LXjRT55upfz7Qpzm5WHyEmXstrHqA
+         7fDiIn0eQ9/rP84FIFoDNXeb+x2grauha09C/QLYy2JeU+q0s/Tc0GbvX5GFvtMjC3dS
+         DnfZOz2JHOb2Lt7JAdSKWppFyEJYi2aaXWvynavuUygHYn311ysDTEJxnzIds6KymjC3
+         Z7c1DfOqRQpD+aP3ptrjkf9h82mTkrCgZSvZvXqPYOqNWjFCYWt+hwjnJyh+WjQGFFCf
+         eEoQ==
+X-Forwarded-Encrypted: i=1; AJvYcCUQRlgemPqhGPhD7NYDLNEX1JrJ77GCwYWRZGu18E70CJORO4UC+XJbZ5FfZ0U4KqMTTNQUMeD41NE=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yzav54/3LaP3bMNpdEPlxpHwoenSSx7pwsYQXa1Dk8KpZkKLGey
+	ChWI33PsISB5+IUrtHAv8gtAAxtBmZhziPNSHPwCZVjkEB30Bfi5icnUCfJKov6kzDJGsO1yxih
+	kgtzxAvgV0E2nMs35HoM51K6eZNV3sPOhxdt1
+X-Gm-Gg: ASbGncuqkqxpIkzj1lwjyqZzxvN3Ko9CMlwdOxWAskaFdMJtkr/QFopXwY8ROgDloSF
+	zahFRptayKTYONpHDA+ECZg/odLkdZZUm7fOY5CjJJwMgNYDHDxeMbaZKrInkEgDePlFodfCyB4
+	pCRkuak7pV03VjvH1rMgEqvvwNk0lxf0g9gWx8Ww/stejJBx3wilLsXiSnYdGVqcsNH7PpUq+Ku
+	XjBF6Y=
+X-Google-Smtp-Source: AGHT+IHQIYXAoxfDV05bz0G8EOujDsEy8lqbRuBgkJeD5IzP/s3LbqWC1Mh8bGFvoMFFshb5PQ13FESi5nq5ELfaphQ=
+X-Received: by 2002:a05:6402:2111:b0:612:ce8b:8e3a with SMTP id
+ 4fb4d7f45d1cf-612ce8b93famr8753203a12.18.1753065115196; Sun, 20 Jul 2025
+ 19:31:55 -0700 (PDT)
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
-Message-Id: <20250718-pxav3-uhs-v1-2-2e451256f1f6@dujemihanovic.xyz>
-References: <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
-In-Reply-To: <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>, 
- Krzysztof Kozlowski <krzk+dt@kernel.org>, 
- Conor Dooley <conor+dt@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Karel Balej <balejk@matfyz.cz>, David Wronek <david@mainlining.org>, 
- linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, 
- linux-kernel@vger.kernel.org, phone-devel@vger.kernel.org, 
- ~postmarketos/upstreaming@lists.sr.ht, 
- =?utf-8?q?Duje_Mihanovi=C4=87?= <duje@dujemihanovic.xyz>
-X-Mailer: b4 0.14.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=3497;
- i=duje@dujemihanovic.xyz; s=20240706; h=from:subject:message-id;
- bh=3RYvkarqfHdoc1OgLllqlLng0i6a19ZDq3zI5M3B0aY=;
- b=owGbwMvMwCW21nBykGv/WmbG02pJDBlVO+6zci4QbZHIm/DLQ1UoWInhAbP5s96Gp11mGqtzn
- c3SVvh0lLIwiHExyIopsuT+d7zG+1lk6/bsZQYwc1iZQIYwcHEKwERyJjMyzF7aNW3+irDTlkej
- evMVLc8F7jtoV91jpcxzdNZdCR3Gvwz/c9gc//4VqpPxuFljsruaics0fnZ4tppIfOCvIoHsRRf
- 4AQ==
-X-Developer-Key: i=duje@dujemihanovic.xyz; a=openpgp;
- fpr=6DFF41D60DF314B5B76BA630AD319352458FAD03
+References: <20250510031945.1004129-1-git@thegavinli.com> <CAPDyKFq8evHyh_0QacZq=d36vXfrs3vFPsAuCyFdv3BKh0SP2A@mail.gmail.com>
+ <CA+GxvY4ByPW4HVJfww2v674f-y5kuqKmY=EB8mD5jnRcy+HmPg@mail.gmail.com>
+ <CAPDyKFrXnVkOatAF_adg67LxfU7YOqeR_49_u2mOQLntQcCBfg@mail.gmail.com> <b843b011bebd4dc18f9b9da290958ded@realtek.com>
+In-Reply-To: <b843b011bebd4dc18f9b9da290958ded@realtek.com>
+From: Gavin Li <gfl3162@gmail.com>
+Date: Sun, 20 Jul 2025 22:31:44 -0400
+X-Gm-Features: Ac12FXyRcHPYnz-1Bml2GTVMc5BhQ9NYwFO00j3XHXZA8XDo8_3XnN15CEPysmU
+Message-ID: <CA+GxvY4=sSrhdPCsp9nUDVwNKH=FnH_fCPe8fv06pP+bVpQD9w@mail.gmail.com>
+Subject: Re: [PATCH v1] mmc: rtsx_usb_sdmmc: add parameter to always poll for
+ card presence
+To: Ricky WU <ricky_wu@realtek.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, 
+	"linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Gavin Li <git@thegavinli.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Different bus clocks require different pinctrl states to remain stable.
-Add support for selecting between a default and UHS state according to
-the bus clock.
+Hi Ricky,
 
-Signed-off-by: Duje Mihanović <duje@dujemihanovic.xyz>
----
- drivers/mmc/host/sdhci-pxav3.c          | 30 +++++++++++++++++++++++++++++-
- include/linux/platform_data/pxa_sdhci.h |  7 +++++++
- 2 files changed, 36 insertions(+), 1 deletion(-)
+This issue appears with the SD card reader on the IBM Lenovo
+ThinkCentre M92z, which uses the RTS5179.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 3fb56face3d81259b693c8569682d05c95be2880..0e1bd75a1252e5559deb0b3caabcdc75919aee3d 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -20,9 +20,11 @@
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-+#include <linux/pinctrl/consumer.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
- #include <linux/mbus.h>
-+#include <linux/units.h>
- 
- #include "sdhci.h"
- #include "sdhci-pltfm.h"
-@@ -313,8 +315,24 @@ static void pxav3_set_power(struct sdhci_host *host, unsigned char mode,
- 		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
- }
- 
-+static void pxav3_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
-+	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-+
-+	if (clock < 100 * HZ_PER_MHZ) {
-+		if (!IS_ERR(pdata->pins_default))
-+			pinctrl_select_state(pdata->pinctrl, pdata->pins_default);
-+	} else {
-+		if (!IS_ERR(pdata->pins_uhs))
-+			pinctrl_select_state(pdata->pinctrl, pdata->pins_uhs);
-+	}
-+
-+	sdhci_set_clock(host, clock);
-+}
-+
- static const struct sdhci_ops pxav3_sdhci_ops = {
--	.set_clock = sdhci_set_clock,
-+	.set_clock = pxav3_set_clock,
- 	.set_power = pxav3_set_power,
- 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -441,6 +459,16 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 			host->mmc->pm_caps |= pdata->pm_caps;
- 	}
- 
-+	pdata->pinctrl = devm_pinctrl_get(dev);
-+	if (IS_ERR(pdata->pinctrl))
-+		dev_warn(dev, "could not get pinctrl handle\n");
-+	pdata->pins_default = pinctrl_lookup_state(pdata->pinctrl, "default");
-+	if (IS_ERR(pdata->pins_default))
-+		dev_warn(dev, "could not get default state\n");
-+	pdata->pins_uhs = pinctrl_lookup_state(pdata->pinctrl, "state_uhs");
-+	if (IS_ERR(pdata->pins_uhs))
-+		dev_warn(dev, "could not get uhs state\n");
-+
- 	pm_runtime_get_noresume(&pdev->dev);
- 	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
-diff --git a/include/linux/platform_data/pxa_sdhci.h b/include/linux/platform_data/pxa_sdhci.h
-index 899457cee425d33f82606f0b8c280003bc73d48d..540aa36db11243719707bdf22db23a8e2035674d 100644
---- a/include/linux/platform_data/pxa_sdhci.h
-+++ b/include/linux/platform_data/pxa_sdhci.h
-@@ -35,6 +35,9 @@
-  * @quirks: quirks of platfrom
-  * @quirks2: quirks2 of platfrom
-  * @pm_caps: pm_caps of platfrom
-+ * @pinctrl: pinctrl handle
-+ * @pins_default: default pinctrl state
-+ * @pins_uhs: pinctrl state for fast (>100 MHz) bus clocks
-  */
- struct sdhci_pxa_platdata {
- 	unsigned int	flags;
-@@ -47,5 +50,9 @@ struct sdhci_pxa_platdata {
- 	unsigned int	quirks;
- 	unsigned int	quirks2;
- 	unsigned int	pm_caps;
-+
-+	struct pinctrl	     *pinctrl;
-+	struct pinctrl_state *pins_default;
-+	struct pinctrl_state *pins_uhs;
- };
- #endif /* _PXA_SDHCI_H_ */
+Assume that the rtsx_usb and rtsx_usb_sdmmc modules are loaded at boot time=
+.
 
--- 
-2.50.1
+If the system boots with the SD card inserted, the SD card is detected
+correctly.
 
+if the system boots with the SD card _not_ inserted, then the SD card
+is inserted after the modules are loaded, then the SD card is not
+detected. If I then run `rmmod rtsx_usb_sdmmc && modprobe
+rtsx_usb_sdmmc`, the SD card gets detected after the module reload.
+
+Additionally, if I remove the SD card and insert it again, it is not
+detected until I perform the module reload.
+
+Setting always_poll=3D1 fixes all of the issues above.
+
+Best,
+Gavin
+
+On Tue, May 27, 2025 at 11:10=E2=80=AFPM Ricky WU <ricky_wu@realtek.com> wr=
+ote:
+>
+> > On Sat, 24 May 2025 at 05:37, Gavin Li <gfl3162@gmail.com> wrote:
+> > >
+> > > On Mon, May 19, 2025 at 7:50=E2=80=AFAM Ulf Hansson <ulf.hansson@lina=
+ro.org>
+> > wrote:
+> > >
+> > > > Moving this problem to userspace seems wrong to me. We should be
+> > > > able to do the right thing in the kernel.
+> > >
+> > > Unfortunately, I don't have access to the datasheet for the RTS5179 o=
+r
+> > > related chips. This is what I could do to get my own hardware working=
+,
+> > > and it doesn't make sense to revert to polling mode for all users if
+> > > the interrupt mode detection works and reduces power consumption.
+> >
+> > Agree!
+> >
+> > >
+> > > > We should be able to detect if we are running the broken HW and in
+> > > > that case, set the flag based on that, right?
+> > >
+> > > I don't know of a way to do so, especially since I don't have
+> > > non-broken HW in my possession. On my hardware, once the device enter=
+s
+> > > autosuspend, inserting a card does not trigger a wakeup. I'm hoping
+> > > that there's a way to detect the broken HW via a hardware revision re=
+gister
+> > or something similar.
+> >
+> > Yes, something along those lines would make sense. Let's see if Ricky c=
+an
+> > advise us on how to move forward.
+> >
+>
+> Hi Gavin,
+>
+> I=E2=80=99m not entirely clear on what the actual issue is at this point.=
+ Initially, there was mention of =E2=80=9Csome RTS5179=E2=80=A6=E2=80=9D an=
+d later,
+> =E2=80=9Cbroken hardware=E2=80=A6=E2=80=9D was brought up.
+> Could you please clarify =E2=80=94 is this problem happening only on cert=
+ain platforms? Or is it something else?
+>
+> HI Uif,
+>
+> Is it generally true? That devices using the MMC_CAP_NEEDS_POLL flag may =
+not fully support runtime_suspend,
+> Since they rely on polling rather than interrupts.
+> This can prevent the decices or host controller from reaching deeper powe=
+r-saving states.
+>
+>
+> > Kind regards
+> > Uffe
