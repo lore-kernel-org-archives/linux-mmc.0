@@ -1,113 +1,156 @@
-Received: from mx.olsak.net (mx.olsak.net [37.205.8.231])
+Received: from mail-wm1-f53.google.com (mail-wm1-f53.google.com [209.85.128.53])
 	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 12B80A31;
-	Wed, 23 Jul 2025 14:36:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=37.205.8.231
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id BF5921F7910
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 15:36:17 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.53
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753281426; cv=none; b=EPfrrFYOBZHU0yH4/+31giU2IN4UHNADxg1jxM8dEYkApRj51F5rD9pbQyXsmLfeGgz7UNpSa58LKBJygWJeR8H6CGNg7PVsdqpRMZP3lJMlU93FXDSO729gQsCOXQOT1lwZWCO+iuqtEY1pvxMUi5E56ZzfboeFgU0x3hp1fdY=
+	t=1753284979; cv=none; b=VA1tJPtLgfMfln9V8LjubOOd87hjMaHEU4AOVBy6GnS7yuNDkwp8ZGk8iZbKduDrVZtyyw5U27SuMb0LdkcVOQtEYbNr+lA/oay6+fBmvLUucUjhbfZJE7H/Dr9/78BaUU6xby90bLk6Ke0UAdq5MsPgT5JBw2R4t3wmIbx8mn4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753281426; c=relaxed/simple;
-	bh=1Eu6C66aJDQYWOYhxnwsTT2t5y102QgUEg4VToHlsTI=;
-	h=From:To:Cc:Subject:Date:Message-ID:In-Reply-To:References:
-	 MIME-Version:Content-Type; b=FOXFgC8hHNqbEltxSVezTCxRPEJep2Kc/XHnjBNZA323cNObuLmHimR8l9pniSoi/9i9Our/2tCh98yL2a7kly6GMBDucSLUznBSXcyGRVAtU3iZmuXltt7DlYhVnsez9b8iteqRTKor3wZEKwh7Xv+ZiN0JIHoMKBKS2XsdOfU=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz; spf=pass smtp.mailfrom=dujemihanovic.xyz; dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b=Qx+ki/g6; arc=none smtp.client-ip=37.205.8.231
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=quarantine dis=none) header.from=dujemihanovic.xyz
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=dujemihanovic.xyz
+	s=arc-20240116; t=1753284979; c=relaxed/simple;
+	bh=VA9c0QPMO5+Bov+cQomqLQw1whJoVSRf3QyImu7EoAg=;
+	h=Message-ID:Date:MIME-Version:From:Subject:To:Cc:References:
+	 In-Reply-To:Content-Type; b=GTyJM6YnzH1xuBy5y18h70HfdBSNMgZ4S0zShLkIWB2SWTo8v2OBQPsg1kEjmKMIJLHvRc9aGNczehcEYNMF36brfaMI0fxEoiWhPZG014L5mTSHgh1FA3LQJOxAr0nP+L+KFNqkDTnP6fpObwwGE01SXeBhaf6L/OP+PXIdhnE=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=lei4AiVg; arc=none smtp.client-ip=209.85.128.53
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=dujemihanovic.xyz header.i=@dujemihanovic.xyz header.b="Qx+ki/g6"
-DKIM-Signature: a=rsa-sha256; bh=JE8x8JbxhqSBlVW6JXjbTPZwTk8sConJh4EHbajYP/Q=;
- c=relaxed/relaxed; d=dujemihanovic.xyz;
- h=Subject:Subject:Sender:To:To:Cc:Cc:From:From:Date:Date:MIME-Version:MIME-Version:Content-Type:Content-Type:Content-Transfer-Encoding:Content-Transfer-Encoding:Reply-To:In-Reply-To:In-Reply-To:Message-Id:Message-Id:References:References:Autocrypt:Openpgp;
- i=@dujemihanovic.xyz; s=default; t=1753281394; v=1; x=1753713394;
- b=Qx+ki/g60yiW5sNkfABHdiHKQSO3ov0lBjHTRMsMXXzn6RW2Q8f8jllh88wEI3vqgruy96k3
- vNr09IAfbXnhBPvOy0iI4A6N7YQKAwo+iLgKglW2RUr5x7AQNHVPMagV1t9WFJaxme5ReDKGK7S
- sMPb8suMuouA92EagbLFWoCXvEktZNVxbUpzhlg3mylMvsuaqdkNrFvR8obiwBxfV2Cv3uxotZ7
- I/Wka1IBZ1E3uGUseK4LEGFaakYH+OrcUivdxpFv9WNffn2pAjgEbQveq9s8rS7ksRQUbnnvD0W
- bOCnEpSyAs78mKNPRXbOLogHAIyqmycyotxUlKT11ihaQ==
-Received: by mx.olsak.net (envelope-sender <duje@dujemihanovic.xyz>) with
- ESMTPS id 12094314; Wed, 23 Jul 2025 16:36:34 +0200
-From: Duje =?UTF-8?B?TWloYW5vdmnEhw==?= <duje@dujemihanovic.xyz>
-To: Rob Herring <robh@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>,
- Krzysztof Kozlowski <krzk+dt@kernel.org>, Conor Dooley <conor+dt@kernel.org>,
- Adrian Hunter <adrian.hunter@intel.com>, Karel Balej <balejk@matfyz.cz>,
- David Wronek <david@mainlining.org>, linux-mmc@vger.kernel.org,
- devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
- phone-devel@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht
-Subject:
- Re: [PATCH RFC 1/2] dt-bindings: mmc: sdhci-pxa: add state_uhs pinctrl
-Date: Wed, 23 Jul 2025 16:36:33 +0200
-Message-ID: <5051937.31r3eYUQgx@radijator>
-In-Reply-To: <20250721143541.GA593898-robh@kernel.org>
-References:
- <20250718-pxav3-uhs-v1-0-2e451256f1f6@dujemihanovic.xyz>
- <20250718-pxav3-uhs-v1-1-2e451256f1f6@dujemihanovic.xyz>
- <20250721143541.GA593898-robh@kernel.org>
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lei4AiVg"
+Received: by mail-wm1-f53.google.com with SMTP id 5b1f17b1804b1-45619d70c72so9999415e9.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 08:36:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1753284976; x=1753889776; darn=vger.kernel.org;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=yopYTcaLHy/YngxUjGRVUYbmllYbCh12wVB+pNQbzC0=;
+        b=lei4AiVgu1fISmd3tdJ1VZHkuQt/FJy6bpGQ+7cBfbD9IbsPjwsLT66kDkDpx71a+V
+         tPYouNvAfeMQa3PwzDOisS1but6Zw9CxcNZVHsW5zQ060WTPj9zhmdVk2gXho80iUrtL
+         MzPAOnv25PQposp+76XLEF5IgQ2K5derB5yfOHR/f5IX+NDG2l+TH4jSuO8Rau4RB3Tc
+         W0ZWkhSRz4pHbPeajmO3V3KuUQpWdqRmohdQ/LN6xtiQKN4WyKy1nHxJvvi7qeRGMt65
+         P6FMO29heFkE5R4aTZMKVvMoP7UQBPiJQTZHWhEd5ihxn8ZA/SFkIyUwYw2oH3I6BAdb
+         0KEw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1753284976; x=1753889776;
+        h=content-transfer-encoding:in-reply-to:organization:autocrypt
+         :content-language:references:cc:to:subject:reply-to:from:user-agent
+         :mime-version:date:message-id:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=yopYTcaLHy/YngxUjGRVUYbmllYbCh12wVB+pNQbzC0=;
+        b=kT/vyioz3Z9w7u15FNX/rlzaFy8IuvapLPpC5uwQwHSYtfnh3qdubvZvcWf6swoWmx
+         k0fzirYfvE+pFa9QtwhYdwCRYw1M5jj1kyJjOgs0GftofC0MGEAooRqZccHGrqiBs5pQ
+         6+LtiZuzjBvHSEDxXEAvHFFwiEqpJCEPb1ZSmggtTsB6ashdfMdqyP/iTczh15WVJ4H9
+         pNo7yn5qOsv2nrPQLPalA6G/juWcmgil9YihE9towALWDriIEZTKrd7Jvu+ht1KjTwpu
+         AWui7Io4Y/vtZISe/B6q8Gr/4ch8nZMz3Mo72sfzR3KofuWefXoMaM7k4O+ed83p3zUX
+         Pe0g==
+X-Forwarded-Encrypted: i=1; AJvYcCWIJOzJob1e9r/7ayua5NoNSBUJzutiVYa/nqf0+ULhTZrpyaLZQqh1k7I1D7B4c35sBVcq/tY0dII=@vger.kernel.org
+X-Gm-Message-State: AOJu0YzZ8u7HCDBEYpwSHplbGSS7X3+RM+QzzgWYRuxrq8pX65iHDkcp
+	cBKHc/riFkZx1LT58h36sI95OfOpRpYh//hXJ5bRzyEGnvwn6LhZ50BELHVKrsMooRQ=
+X-Gm-Gg: ASbGncsETTU7ZDwWXKRbLO91k81s0IJelQKtib3ZMT3s8Tlzs4+avY3P2I4I5SqvLbf
+	KZZ6HxA79dEBJ7U839ROUjpu21CXP5KwMHMKkuiIxdFjqBP4K7JzY/3JqptLarAx5tdVPMBEaq2
+	g1YTEd5uiYr79HJqGNqpJHw9TMxgiBFIlwjZvqt2ZAbdaA042+1JdqhfL4PGh9ndmK6DRl+GBVm
+	kOTrb+NS/Lv363uN6sabkV7YuWTUZn2MAq33Hd/d5QF0WY51AaelI34nlc2FvpMjNVzNq2Dt5xN
+	iJCcDw9YwMVn90s4S3VMbQdX0RcpMK2iQax1UDHgTKPfiqwUAXIiReWV359ER+li0rLORStjGZ+
+	lRL+gRZbHbtEkBjlmYgjM9mcNrPTOcSKZN2C591haeFi/3Kj29b/j6MrrmlvKmUSlr91i6OGLzv
+	Hy93tCeD/1dcuu
+X-Google-Smtp-Source: AGHT+IE36FCAwkzfiHLT8YUTKB5dl8mhn5lwwrUiNUjYfXCamvnt7XB94dMS1C8m5vdXXhKPLuuwTA==
+X-Received: by 2002:a05:600c:4fc9:b0:456:1157:59ac with SMTP id 5b1f17b1804b1-45868b23d24mr31817135e9.7.1753284975917;
+        Wed, 23 Jul 2025 08:36:15 -0700 (PDT)
+Received: from ?IPV6:2a01:cb14:150f:cf00:b6af:e6a0:6569:3a1? ([2a01:cb14:150f:cf00:b6af:e6a0:6569:3a1])
+        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-4586918094csm26728745e9.2.2025.07.23.08.36.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 23 Jul 2025 08:36:15 -0700 (PDT)
+Message-ID: <268811ba-03c5-4957-b073-1dfbad77747b@linaro.org>
+Date: Wed, 23 Jul 2025 17:36:14 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="utf-8"
+User-Agent: Mozilla Thunderbird
+From: neil.armstrong@linaro.org
+Reply-To: Neil Armstrong <neil.armstrong@linaro.org>
+Subject: Re: [PATCH v2 14/15] arm64: dts: qcom: Add initial Milos dtsi
+To: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>,
+ Luca Weiss <luca.weiss@fairphone.com>, Will Deacon <will@kernel.org>,
+ Robin Murphy <robin.murphy@arm.com>, Joerg Roedel <joro@8bytes.org>,
+ Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <krzk+dt@kernel.org>,
+ Conor Dooley <conor+dt@kernel.org>, "Rafael J. Wysocki" <rafael@kernel.org>,
+ Viresh Kumar <viresh.kumar@linaro.org>,
+ Manivannan Sadhasivam <mani@kernel.org>,
+ Herbert Xu <herbert@gondor.apana.org.au>,
+ "David S. Miller" <davem@davemloft.net>, Vinod Koul <vkoul@kernel.org>,
+ Bjorn Andersson <andersson@kernel.org>,
+ Konrad Dybcio <konradybcio@kernel.org>, Robert Marko <robimarko@gmail.com>,
+ Das Srinagesh <quic_gurus@quicinc.com>, Thomas Gleixner
+ <tglx@linutronix.de>, Jassi Brar <jassisinghbrar@gmail.com>,
+ Amit Kucheria <amitk@kernel.org>, Thara Gopinath <thara.gopinath@gmail.com>,
+ Daniel Lezcano <daniel.lezcano@linaro.org>, Zhang Rui <rui.zhang@intel.com>,
+ Lukasz Luba <lukasz.luba@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: ~postmarketos/upstreaming@lists.sr.ht, phone-devel@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+ devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+ linux-pm@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+ linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+ linux-mmc@vger.kernel.org
+References: <20250713-sm7635-fp6-initial-v2-0-e8f9a789505b@fairphone.com>
+ <20250713-sm7635-fp6-initial-v2-14-e8f9a789505b@fairphone.com>
+ <3e0299ad-766a-4876-912e-438fe2cc856d@oss.qualcomm.com>
+Content-Language: en-US, fr
+Autocrypt: addr=neil.armstrong@linaro.org; keydata=
+ xsBNBE1ZBs8BCAD78xVLsXPwV/2qQx2FaO/7mhWL0Qodw8UcQJnkrWmgTFRobtTWxuRx8WWP
+ GTjuhvbleoQ5Cxjr+v+1ARGCH46MxFP5DwauzPekwJUD5QKZlaw/bURTLmS2id5wWi3lqVH4
+ BVF2WzvGyyeV1o4RTCYDnZ9VLLylJ9bneEaIs/7cjCEbipGGFlfIML3sfqnIvMAxIMZrvcl9
+ qPV2k+KQ7q+aXavU5W+yLNn7QtXUB530Zlk/d2ETgzQ5FLYYnUDAaRl+8JUTjc0CNOTpCeik
+ 80TZcE6f8M76Xa6yU8VcNko94Ck7iB4vj70q76P/J7kt98hklrr85/3NU3oti3nrIHmHABEB
+ AAHNKk5laWwgQXJtc3Ryb25nIDxuZWlsLmFybXN0cm9uZ0BsaW5hcm8ub3JnPsLAkQQTAQoA
+ OwIbIwULCQgHAwUVCgkICwUWAgMBAAIeAQIXgBYhBInsPQWERiF0UPIoSBaat7Gkz/iuBQJk
+ Q5wSAhkBAAoJEBaat7Gkz/iuyhMIANiD94qDtUTJRfEW6GwXmtKWwl/mvqQtaTtZID2dos04
+ YqBbshiJbejgVJjy+HODcNUIKBB3PSLaln4ltdsV73SBcwUNdzebfKspAQunCM22Mn6FBIxQ
+ GizsMLcP/0FX4en9NaKGfK6ZdKK6kN1GR9YffMJd2P08EO8mHowmSRe/ExAODhAs9W7XXExw
+ UNCY4pVJyRPpEhv373vvff60bHxc1k/FF9WaPscMt7hlkbFLUs85kHtQAmr8pV5Hy9ezsSRa
+ GzJmiVclkPc2BY592IGBXRDQ38urXeM4nfhhvqA50b/nAEXc6FzqgXqDkEIwR66/Gbp0t3+r
+ yQzpKRyQif3OwE0ETVkGzwEIALyKDN/OGURaHBVzwjgYq+ZtifvekdrSNl8TIDH8g1xicBYp
+ QTbPn6bbSZbdvfeQPNCcD4/EhXZuhQXMcoJsQQQnO4vwVULmPGgtGf8PVc7dxKOeta+qUh6+
+ SRh3vIcAUFHDT3f/Zdspz+e2E0hPV2hiSvICLk11qO6cyJE13zeNFoeY3ggrKY+IzbFomIZY
+ 4yG6xI99NIPEVE9lNBXBKIlewIyVlkOaYvJWSV+p5gdJXOvScNN1epm5YHmf9aE2ZjnqZGoM
+ Mtsyw18YoX9BqMFInxqYQQ3j/HpVgTSvmo5ea5qQDDUaCsaTf8UeDcwYOtgI8iL4oHcsGtUX
+ oUk33HEAEQEAAcLAXwQYAQIACQUCTVkGzwIbDAAKCRAWmrexpM/4rrXiB/sGbkQ6itMrAIfn
+ M7IbRuiSZS1unlySUVYu3SD6YBYnNi3G5EpbwfBNuT3H8//rVvtOFK4OD8cRYkxXRQmTvqa3
+ 3eDIHu/zr1HMKErm+2SD6PO9umRef8V82o2oaCLvf4WeIssFjwB0b6a12opuRP7yo3E3gTCS
+ KmbUuLv1CtxKQF+fUV1cVaTPMyT25Od+RC1K+iOR0F54oUJvJeq7fUzbn/KdlhA8XPGzwGRy
+ 4zcsPWvwnXgfe5tk680fEKZVwOZKIEuJC3v+/yZpQzDvGYJvbyix0lHnrCzq43WefRHI5XTT
+ QbM0WUIBIcGmq38+OgUsMYu4NzLu7uZFAcmp6h8g
+Organization: Linaro
+In-Reply-To: <3e0299ad-766a-4876-912e-438fe2cc856d@oss.qualcomm.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-On Monday, 21 July 2025 16:35:41 Central European Summer Time Rob Herring=20
-wrote:
-> On Fri, Jul 18, 2025 at 11:12:38PM +0200, Duje Mihanovi=C4=87 wrote:
-> > On the pxav3 controller, increasing the drive strength of the data pins
-> > might be required to maintain stability on fast bus clocks (above 100
-> > MHz). Add a state_uhs pinctrl to allow this.
-> >=20
-> > The existing state_cmd_gpio pinctrl is changed to apply only on pxav1 as
-> > it's unneeded on the other controllers.
-> >=20
-> > Signed-off-by: Duje Mihanovi=C4=87 <duje@dujemihanovic.xyz>
-> > ---
-> >=20
-> >  .../devicetree/bindings/mmc/sdhci-pxa.yaml         | 45
-> >  +++++++++++++++++----- 1 file changed, 35 insertions(+), 10 deletions(=
-=2D)
-> >=20
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> > b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml index
-> >=20
-4869ddef36fd89265a1bfe96bb9663b553ac5084..7a9e2a63ac4351aea10b2763ca250ce48
-> > 89df1eb 100644 --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.ya=
-ml
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> >=20
-> > @@ -30,6 +30,39 @@ allOf:
-> >            maxItems: 1
-> >         =20
-> >          reg-names:
-> >            maxItems: 1
-> >=20
-> > +  - if:
-> > +      properties:
-> > +        compatible:
-> > +          contains:
-> > +            const: mrvl,pxav1-mmc
-> > +    then:
-> > +      properties:
-> > +        pinctrl-names:
-> > +          description:
-> > +            Optional for supporting PXA168 SDIO IRQ errata to switch C=
-MD
-> > pin between +            SDIO CMD and GPIO mode.
-> > +          items:
-> > +            - const: default
-> > +            - const: state_cmd_gpio
->=20
-> blank line
+Hi,
 
-While at it, should I do the same with the properties: blocks in the existi=
-ng=20
-if: block?
+<snip>
+> 
+>> +	pmu-a520 {
+>> +		compatible = "arm,cortex-a520-pmu";
+>> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
+>> +	};
+>> +
+>> +	pmu-a720 {
+>> +		compatible = "arm,cortex-a720-pmu";
+>> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
+>> +	};
+> 
+> See:
+> 
+> 9ce52e908bd5 ("arm64: dts: qcom: sm8650: switch to interrupt-cells 4 to add PPI partitions")
+> 2c06e0797c32 ("arm64: dts: qcom: sm8650: add PPI interrupt partitions for the ARM PMUs")
+> 
 
-Regards,
-=2D-
-Duje
+Yeah switch to 4 cells now, so you can properly route the PMU PPI interrupt to the right core.
 
+New SoCs DTs should have 4 interrupts-cells from now, I'll migrate sm8550 shortly.
+
+Neil
 
