@@ -1,109 +1,151 @@
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com [209.85.128.180])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id AE20028DB46
-	for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 10:26:07 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.180
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 33A282BD59F
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 10:37:08 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.180.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753266369; cv=none; b=eLlMF/NKWIVb+V1qHCFLjcjzDf7AGgoE5uZSO1tOapxxLjojQzeTQY6Wjm2jJRDPY68wG1I/i8i1s9QdIUBwfbnIM4BS/IxApzvCX2eqJBzbCcRKvjc8DLB931Miw9+njyi8QwgnLsVKhKR3luLz/I1Nu/9OWP2ys7QIeB3nYcM=
+	t=1753267029; cv=none; b=aB+6+5WOmeBTLSWP395YY1gwpZTNASieXnxzLjelXbMQG5vPoe7C30ddX+R0qEffXWOZ1WnMMQGEuYcjqr6uoRc6ocG6NL7XCQ3JrfULeITLMDZwdsoExFu1pREs74lpbswVUco3Tv6MIJBNjyTYKLjgCydwCvaQFM9r3SXk+j4=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753266369; c=relaxed/simple;
-	bh=89wYcJ16h/vBsYqaJ40twaimJn/xvhA0SCY527VaqkM=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=LMiR91L/KC9w/6iaxqij/rCHdKK8u691c9oME116KVmc5iXlRCLR/k0VRwr3BOXtwwxWUF6MtAAOjPOaBQQ44Xrgu9yB4Z/EEzCCSe2AZfXWIt0EvaTn3C/5Y+KboXn3+AcpmzjQaZ5TVoMve3po/aWVZI355jJi9Uasl8sE+wk=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org; spf=pass smtp.mailfrom=linaro.org; dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b=hx5tFD3C; arc=none smtp.client-ip=209.85.128.180
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=linaro.org
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=linaro.org
+	s=arc-20240116; t=1753267029; c=relaxed/simple;
+	bh=VZ6H2QqhGifjHQ2Cq+ZjqLjogniGh02DxOQCdfNC8IE=;
+	h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+	 In-Reply-To:Content-Type; b=Vp7Pq+XeTkkULPJgwpSwiYW7gFC9IcZAIw03X3ZAcEChz4nN1/H7U5P1NF+e9JabkGlOyCveEEZ7Wqyraa+cWWtn8+Mwl+oRxS2fyGpO9ql2/HJsfokNVMRXO11XjgZXsi4HfBy6yhxkNDLVVvNrDkVU6vOO9XJiuOQ/fhTdIDU=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com; spf=pass smtp.mailfrom=oss.qualcomm.com; dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b=Zv1I/PdE; arc=none smtp.client-ip=205.220.180.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=reject dis=none) header.from=oss.qualcomm.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=oss.qualcomm.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hx5tFD3C"
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-712be7e034cso64319527b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 03:26:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1753266367; x=1753871167; darn=vger.kernel.org;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=41nGtfIS+0AAlnYT3zsrXsXWjzXIGVgKsqDTuC+Cygk=;
-        b=hx5tFD3CqFNBYbrZaUAIR4S+3fQ32OBPEKhp8dNvYySMVsWKtoSNoXFcBwYocU1jd1
-         5rmOmk5lwVWvLbltCP7maqF0h1BSjJ5XR/cpVGacZ3LC+hpUriF6m9Ozo0dRNhVmOJV0
-         Ae3RmDbxdkEcUx8DZPWnIZiSD+tDC2jTVhIC/ub6chJ1+c+x1HnJ/Ox1ehQmtAKfKg10
-         iZ5FmgeC2p63Dr5gAhcTJY7AoTvBq9YddGd5QjJGUJS71NF+USRNaeaFZFimBW9fu74o
-         33PKUBywZPPEzZ9qJ6bbiIaHkoUFDH+KuEuucd2DZgNbckzaNnyPCx5KcpsFHiVq8F8a
-         xdtw==
+	dkim=pass (2048-bit key) header.d=qualcomm.com header.i=@qualcomm.com header.b="Zv1I/PdE"
+Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56N9ekZP007879
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 10:37:07 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=qualcomm.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	c3WPPm6RUB+edcD+yYLNUyD+huQyOSescoQcJtylh1s=; b=Zv1I/PdEDk7aA0q1
+	FINhBwRDh/LayvL4SnyhTB1So+vWOL9HgMkPjtiXjvs/t2RB381UOUPA8GnQhXgr
+	e/lmqLi/vYAJ/QEPYJxC+dgTdZkgumz9Bq9ngpqx1juCssJU7Ytf1lULXSppiEZm
+	tQan85pPIEBaSjYz5YKB/OHnINwMaYDpE3QdhlCAEj5Sgu3K71Gq+ZMs7vAF3ECs
+	TvhsNaKcnyTcS/Tcv9f6WQwuXb92QhTj79ippoeK5A97ev1SYuYo/yMyAHdXnTQH
+	YTPQkwsugld8ascrp3XdK8WUMt+p3Iy7dw4L9+ehX8IN72yoxlEkwwOg0lI0grGP
+	T9wC2g==
+Received: from mail-qk1-f199.google.com (mail-qk1-f199.google.com [209.85.222.199])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 48047qcths-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+	for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 10:37:07 +0000 (GMT)
+Received: by mail-qk1-f199.google.com with SMTP id af79cd13be357-7de3c682919so95411485a.2
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Jul 2025 03:37:07 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753266367; x=1753871167;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=41nGtfIS+0AAlnYT3zsrXsXWjzXIGVgKsqDTuC+Cygk=;
-        b=hFUHNwm0svsNKVzJ2xOFIoA8O1jFTavQ9rmQln6mTKNRRJsal0BpVj4YYjXtlY2m5i
-         uWXuMyPZ4OHequRQJrXcgIWPBGNt/3H0HjWC8epJQpu91bCc0J5AJknuMGwXn2CSMyF1
-         zj3B6gUE1J8r5tU+8Ud3BygHijfuaRYsEhsY5QVNiWZvH6cfAreRDLtJgYfcLfYHC5IA
-         FgH9TF/kh+2QED7vI+xnJubQSEhf51MLqL+ALv1gzpo5LEd//Gtp6PQUypeqbCd0vlld
-         GiNR4iLQ/L5AhjCO2GQ00FaYEeEAQ7chD99YzY8wHr1NUm840ysjIT6fR/JanZeJ8aI2
-         8pig==
-X-Forwarded-Encrypted: i=1; AJvYcCUYsREM2vxJovkg6ggqYty8wNyIaLRmKHrfM3Jzs/a+/kTdze2odAPrHzDgwC2Lg0ZK51smhzwCnF0=@vger.kernel.org
-X-Gm-Message-State: AOJu0YyTKKKu2yxvtN2DLupZWbfmJTX/OhnwTpMtXK7DHpEENUT1qiJA
-	zjbXm5ZshOEf6n/XSIB36r/srzqLKA6q6QZ608/IH2GFRUAqvKbvtjRublthI9URrK3izvDjnAr
-	3OB4HxSbfI8lY2gnuqRHTYOb5KuESvBD832u4AEihsA==
-X-Gm-Gg: ASbGncsMY5jNXngvTJfzwSKyQ5t9iG2btm6irxnO9s6WGtqz9dyBPl9K3R6Sw4RcRCa
-	bKdepEn7UQDG5SZw+otgCcIATmOMTcg/YJ04mOhF5OpNWzFZK7YY45auY6BhVtX1L4N/gw1Fkrk
-	d/nMelFTPN7WH1nL1OKof/DKjGk6324XLmdQmrIH6mzWHwiMk4Ras8gfi5mYOb9Ze3/F9rzEN+s
-	izAAD7qr51bn73ozM2fU0X1KYO3hH2C6yvZjUSyBQ==
-X-Google-Smtp-Source: AGHT+IG6B6yrfLJOT0qbrE/bqWHii4PWByxkzfFfz63PKVDO/33ZG/QA9czSlFnn0T62zfPa4elBf5y125sdMA/uqoU=
-X-Received: by 2002:a05:690c:7:b0:714:3e:f424 with SMTP id 00721157ae682-719b4236b7cmr32887317b3.35.1753266366506;
- Wed, 23 Jul 2025 03:26:06 -0700 (PDT)
+        d=1e100.net; s=20230601; t=1753267026; x=1753871826;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=c3WPPm6RUB+edcD+yYLNUyD+huQyOSescoQcJtylh1s=;
+        b=ZxRWIn0u71HFVZH1ym+zn1GI7UkOI8uRQeUJTlmm+brczfvdhTWz2LLVIGoOlrqrij
+         tZ32dJlZUrzqsl3IUPTy1c15kuERy1u3H/y4L0nY34gFwX2AL/UUtTSgrr/aq3sBlxWD
+         RfPXXrCdn+KLJDNxJ6mEvPhSz+CgaZn3lpH+WMMFqJm33EfS8R2FAUBv+Ruo1ZcaL+3e
+         VqwrP1D77adEAkkvqeXpa+xO4Z7TlmWt64CqNvKfx4sqX6ikw/kd72kPOD/ARwCQhLbM
+         pon0qfzaKrRbWtmYRfPkzO0BJhbpHineSB+LzJewj+RAD2t2wfoLUlhbnuN4/18uZdKE
+         0TyA==
+X-Forwarded-Encrypted: i=1; AJvYcCXi2+w5z9GGiCBB7/UUqj383vbPLqMqLmj9vmOsh6m+HvG0RiYboLcGw5/lgSG5mHuarudSGIEpIuM=@vger.kernel.org
+X-Gm-Message-State: AOJu0Yx0nCiqkDBrsA8GSPcHXRQUsmMGnMQ4tF1CnlzDHeV1JHeHbOkv
+	DZeSqjl0OM4zcWzUImawnXKWsbjgxMr8OOoZJ+5kbugWM6JdMIow0uGW+730m+oChSBsWo4mD8j
+	bS9Jx8T7iS1yzaNM5/cEnPoT0bFa80Y4wil4h5a9sZgm7aKLesTeNr24wbaZI4GI=
+X-Gm-Gg: ASbGnctjI7SL5QoWgSOmItoqwVC8YOSUA/B/XCWdJ3VpL4fydG1vReWS8OjgmyMOMD0
+	wyTG3p/G8jIoDXiANtesLUzSI/dKzZJu2VhF08OdVKWtdspELTq1gIeG8Bc4QTIbTfN2lXYqI7I
+	EvRi6FJ69tvHyz9zqUYWz36y2YzmEA+99/Cjrjv8lc28EdlA0eQtqaUHzUrWJEv8U5kAKGi6MXs
+	kcthnZrmFjoSnCMQ4o2oywn5Ok/2aoA8Txu8T8bEoespVCNLZsX10lxIInGxXpuRA3O+9xOT33h
+	YG9QwkbpTBDioYuoiF3HpewRkoPD1/e3rdb4hsj8lRb9vHV4Pb90mhHDTfTaok4x9n3I840lDF8
+	WMmY4NpHKEubtGAYVPQ==
+X-Received: by 2002:a05:620a:2609:b0:7e3:3996:f491 with SMTP id af79cd13be357-7e62a0a57c4mr134094085a.1.1753267026385;
+        Wed, 23 Jul 2025 03:37:06 -0700 (PDT)
+X-Google-Smtp-Source: AGHT+IHf4hV1cEmi4SrXNUuipDGElpSF5X/2irJs3VnwL9DVxlwxrsZDYzctE6f2Vdwwz4dC9NujMg==
+X-Received: by 2002:a05:620a:2609:b0:7e3:3996:f491 with SMTP id af79cd13be357-7e62a0a57c4mr134093185a.1.1753267025970;
+        Wed, 23 Jul 2025 03:37:05 -0700 (PDT)
+Received: from [192.168.43.16] (078088045245.garwolin.vectranet.pl. [78.88.45.245])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-aec6c7d89cdsm1029598966b.62.2025.07.23.03.37.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 23 Jul 2025 03:37:05 -0700 (PDT)
+Message-ID: <2182b484-9ccc-4ebf-89f4-519646958413@oss.qualcomm.com>
+Date: Wed, 23 Jul 2025 12:37:02 +0200
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250721094328.6556-1-quic_sayalil@quicinc.com>
-In-Reply-To: <20250721094328.6556-1-quic_sayalil@quicinc.com>
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Date: Wed, 23 Jul 2025 12:25:29 +0200
-X-Gm-Features: Ac12FXxL_k4CqcJQuBJ2hNtSKMJ4XE8sFEx6XTYV90O9wlUWmP5N9jedMU35YWY
-Message-ID: <CAPDyKFrarv7AebbcfrJ6hWTX0B=iAxLOomQ+7VfAeKZU6eewAw@mail.gmail.com>
-Subject: Re: [PATCH V1 0/1] Export an API to reinit SDIO card
-To: Sayali Lokhande <quic_sayalil@quicinc.com>
-Cc: wsa+renesas@sang-engineering.com, avri.altman@wdc.com, 
-	adrian.hunter@intel.com, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, 
-	linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V3 3/4] mmc: sdhci-msm: Add Device tree parsing logic for
+ DLL settings
+To: Ram Prakash Gupta <quic_rampraka@quicinc.com>,
+        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Sachin Gupta <quic_sachgupt@quicinc.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Conor Dooley
+ <conor+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_cang@quicinc.com,
+        quic_nguyenb@quicinc.com, quic_bhaskarv@quicinc.com,
+        quic_mapa@quicinc.com, quic_narepall@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sartgarg@quicinc.com
+References: <20250122094707.24859-1-quic_sachgupt@quicinc.com>
+ <20250122094707.24859-4-quic_sachgupt@quicinc.com>
+ <6xvsnmbnnvpmlgvmi42pt4d3ugkrxhrgrkp56szqhgh2foxe72@z4ildfxufq7j>
+ <c6ca33b2-f8c5-66e7-bb3b-dd595ed040c5@quicinc.com>
+ <d0af754d-8deb-041f-8e34-1c1214fccb09@quicinc.com>
+Content-Language: en-US
+From: Konrad Dybcio <konrad.dybcio@oss.qualcomm.com>
+In-Reply-To: <d0af754d-8deb-041f-8e34-1c1214fccb09@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzIzMDA4OCBTYWx0ZWRfX1zr06iLKy25n
+ nE/RPm6XLEYzPQkio60vbXcYQ4R5AdjBc3BzrZA0+XyYs1NlpPCcqfhkBQvi5SRmUyaaY2CaG+c
+ TG83uT4B9DBHeOgDoGKEsgiwC2VRMGcadIQRZHJ6jkQYZ1OceJwTELLfmhqVVU9ZiJaZzW2EZix
+ qeQSJafJ88zG9AzeCQYuqSD1OQuptJ5uqULjenVIb+Z4eSFI/Y/RQZO42f141l/qvn4BBYHUYwx
+ 5Ch0caDqKb4+zimM3B3pxG2qzvIg4MsZhVG1jtHu1BQnhbkT31TrbSHD/OGrKi09QnpFM1xMkdw
+ Tqn1yNPWBeNChM+Xbcb4KjSH2cCMmsFKCoGJEXvaHqDiAzjQ8n1v8C7VK6Ir5ca4b0YZQ1c6AlI
+ x7L5BUYGbcu4cLEZ0LraGU37jKlPCXKyGkqJkS+QAFAUe780gj5FkTvEOIFC1NvnCcG94kdw
+X-Proofpoint-ORIG-GUID: bowFdknWQZsuYXotEZAayolyJmD40zgZ
+X-Proofpoint-GUID: bowFdknWQZsuYXotEZAayolyJmD40zgZ
+X-Authority-Analysis: v=2.4 cv=IrMecK/g c=1 sm=1 tr=0 ts=6880bb53 cx=c_pps
+ a=HLyN3IcIa5EE8TELMZ618Q==:117 a=FpWmc02/iXfjRdCD7H54yg==:17
+ a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=OTpidQhUJuL9SOIRPhwA:9
+ a=QEXdDO2ut3YA:10 a=bTQJ7kPSJx9SKPbeHEYW:22
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-23_02,2025-07-22_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ suspectscore=0 lowpriorityscore=0 malwarescore=0 adultscore=0 clxscore=1015
+ priorityscore=1501 spamscore=0 mlxscore=0 mlxlogscore=999 phishscore=0
+ impostorscore=0 bulkscore=0 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507230088
 
-On Mon, 21 Jul 2025 at 11:43, Sayali Lokhande <quic_sayalil@quicinc.com> wrote:
->
-> Some SDIO client drivers, manage external power to the SDIO card.
-> In such cases, the card may be power-cycled independently of the
-> MMC core's runtime PM state.
-> Currently, reinitialization of the SDIO card is tied to the runtime
-> PM resume path. However, if the card is powered off and on again before
-> the autosuspend delay expires, the runtime suspend/resume callbacks are
-> not triggered, leaving the card in an uninitialized state.
->
-> To address this, export sdio_reinit_card() so that client drivers can
-> explicitly trigger reinitialization after powering the card back on,
-> ensuring proper device state regardless of runtime PM behavior.
->
-> This change enables more robust handling of power-managed SDIO devices
-> in scenarios where runtime PM is disabled or insufficient.
+On 7/23/25 12:14 PM, Ram Prakash Gupta wrote:
+> 
+> On 6/10/2025 5:47 PM, Ram Prakash Gupta wrote:
+>> Hi Dmitry,
+>>
+>> As updated in [PATCH V3 2/2] of this series, I have started now to continue
+>> this work. Will address your comment next.
+>>
+>> Thanks,
+>> Ram
 
-Please use mmc_hw|sw_reset() instead.
+[...]
 
-Kind regards
-Uffe
+>>> And the pointer to dll_table is lost, lingering for the driver lifetime.
+>>> Please drop the devm_ part and kfree() it once it is not used anymore.
+> 
+> ok, I ll allocate memory using kzalloc in function  sdhci_msm_dt_get_array
+>  and kfree() after copying data in this function.
 
->
-> Sayali Lokhande (1):
->   mmc: sdio: Export an API to reinit the SDIO card
->
->  drivers/mmc/core/core.h       | 1 +
->  drivers/mmc/core/sdio.c       | 2 +-
->  drivers/mmc/core/sdio_io.c    | 6 ++++++
->  include/linux/mmc/sdio_func.h | 2 ++
->  4 files changed, 10 insertions(+), 1 deletion(-)
->
-> --
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
->
+You can use __free() nowadays (see e.g. drivers/soc/qcom/mdt_loader.c :
+mdt_load_split_segment), which will dispose of the memory when it goes
+out of scope, limiting the need to clean it up every error path
+separately
+
+Konrad
