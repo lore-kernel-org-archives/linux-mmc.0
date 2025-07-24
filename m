@@ -1,183 +1,109 @@
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+Received: from mail-wm1-f52.google.com (mail-wm1-f52.google.com [209.85.128.52])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A65A426D4E5;
-	Thu, 24 Jul 2025 11:15:59 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id 1A2E72727E4;
+	Thu, 24 Jul 2025 11:28:51 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.128.52
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753355761; cv=none; b=gKKcmEBA+eTsCk7Wl3oiQ3FwXh1DiiS3BBuTRxAOsDmmEHZCkgAymBezmVxSzWEl7ntSBpCThFFVnUqkuK8kPxH7NkajlZGFMiiVsCFJOM2d/r1kn/oQ5KJm6tbPYoDcIvG+JTY+mUPLC8JcxlXS7RP7neXMC7zuvdO6cfZ2i3w=
+	t=1753356533; cv=none; b=uDOgOkeDDUkgoFuGVP47zFsioYOZbzPfFM3PaxE4Bc8pAp96TfPsRd6Azjzem9IOcTaWQ0mdUK2UtPTsFuO+TY7osO0IKjm1Br+tPqX+1bo+rPObRDggYbDyyMs9B6MIMM2f5f8tQ/2xn+YBbJtjczrFtxcvDlg7XtY88jMeaGY=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753355761; c=relaxed/simple;
-	bh=VpHmVVdQ0c8Q7OUEjzS083kv4RgxKpTN+CDVpPhMGQ4=;
-	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
-	 In-Reply-To:Content-Type; b=V9z+PRLL66e/f3irF0tnj5Eb1L+5QC4xRtWk7BPo1WvaSSD/7q0/F0LMLrwEWeLiKxFo5Jk5nH2koJU3B0DFkKY7sN7rnL2SEBQYAIyjl8O86W9ADipqRWUaYs4+hu5w07UxBdCO6844AmxgvRAh7kqJhqozVZH08gu5nSXTnUo=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=FrtM7HmU; arc=none smtp.client-ip=205.220.168.131
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
+	s=arc-20240116; t=1753356533; c=relaxed/simple;
+	bh=0IaLIP2KkubPcx7b9qvtF9U4GI61/YekRlyAlo76kSI=;
+	h=From:To:Cc:Subject:Date:Message-ID:MIME-Version:Content-Type; b=DyHyHuh1VXdLAXWS97EYud9lgYXJDcRxxgUknEQgPbOYffnTv6lWTvYSC6AmLuTsu833+YXCo5ah/Zh3n8oVIe1pZSa2zYa90hy++jAEhtbNvFzH+J/PTZQKjSi1pzGIVDihsMxIBSk7URpE91rPIBkqWjXT/YWflwYUfZLIIeY=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=RRP1rFf0; arc=none smtp.client-ip=209.85.128.52
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="FrtM7HmU"
-Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
-	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56O9ZhgY001529;
-	Thu, 24 Jul 2025 11:15:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
-	cc:content-transfer-encoding:content-type:date:from:in-reply-to
-	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
-	cQdU1Oo2rKGAgNAMJSpMpvT7kgzBRMYs5MEbj1ju3pM=; b=FrtM7HmU78r24/4J
-	MmrXophPaHCBfZUlOQkJO0z1/X382TFSVTtdigvbY3lOsehxSnl0L/zj+WaLcp3l
-	xtMefiBxMm9wBy0OBFneXIo2EROku21yxzYrwX8pWx8XdaB8iSk+rwVcmwYV38xP
-	NFZfaiVKxNTmmj4O5UGg8iYSIqWrqDHOdjaDTEXNtaZK+QHypi8UBNRz7jYjO/B9
-	3S5RMWE/uNPf5LSL3mifxAjs1m3cbllcJoAB+C8j1kBHiM7SQGhe9OMRVpO9ctFh
-	cUttBhrG6ORkR7/YzImUWis+0Ez+kNkkB3xxa0ui32wEiLBCPD9bIhkQbS1kZnJD
-	7PE6ww==
-Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 482b1uf351-1
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 24 Jul 2025 11:15:51 +0000 (GMT)
-Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
-	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 56OBFpTq027183
-	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-	Thu, 24 Jul 2025 11:15:51 GMT
-Received: from [10.216.46.74] (10.80.80.8) by nasanex01a.na.qualcomm.com
- (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Thu, 24 Jul
- 2025 04:15:42 -0700
-Message-ID: <22848e2e-bd7d-486c-b481-c624d230d327@quicinc.com>
-Date: Thu, 24 Jul 2025 16:45:38 +0530
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="RRP1rFf0"
+Received: by mail-wm1-f52.google.com with SMTP id 5b1f17b1804b1-4563cfac2d2so8795355e9.3;
+        Thu, 24 Jul 2025 04:28:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20230601; t=1753356530; x=1753961330; darn=vger.kernel.org;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=QPotOZ8Ga3dXelFzNNAZNVkNalbstbUanKtcLwNmZx0=;
+        b=RRP1rFf0xHGi0aKIjGKIHT+2KMUm+tmsJc12pT/LPAdiR08Z28ovD/LnWej32bvCyA
+         csN7wACbl3jWDw5y7hkM6XhbIuEE2yKomANyibTvUagThtaNRUCZMviLeza9qh2kOlW9
+         6LCiaDjRm9J626cWzGONSmImhLSoGkIXlstGrMBJf5eYAtzwk6funHD05MRjPsbdHqw2
+         blNpCt7H3P1COOsDWETyjTmsPZ1i7N7cdpHsOiWgY/Iv4CMb1Dk3UlXarfpWb9GBrNen
+         eIMqwNKDCrIqaTu8SauldzigidB9W7FZ4sQqeM1RG3BDmC2wbotWROccfKffcB7SczoS
+         GY6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1753356530; x=1753961330;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=QPotOZ8Ga3dXelFzNNAZNVkNalbstbUanKtcLwNmZx0=;
+        b=h4StS26yzxVH4cGspFI4egT7qnYhFUO1d4fV8th+HzSIH9VySpiu993eoExm2evaRh
+         ejyH80lVQf5z+f098XDveamJQ96NQiyDPzfEfYaue17kOYftkruR5U6f051TMgobm9Ne
+         58XsiH4IuN5qxVNd3UHzI/iYcTJ/9Fxxy58rHNZQZMszJgR5OYPa8oTPNSvGRtliUU6d
+         J6E7+pixiaHzP3N6LWfTwOm2NylgrSkA36mouKBGi1BNlgWo9AztpPUlUJ35mn4yMHVI
+         8RuPlIf7Dce/GYHajTeoGmt0+JZW42TgPEVn74Fg3QH6h+VXikSOh0CYS+QU1K8SwXB5
+         caLg==
+X-Forwarded-Encrypted: i=1; AJvYcCVza0tbLteUqrCPGav2CO2wLLm37eTPxWYco8qXCQcR1eVYnIRywCJR+UpF2J3Tvk5tZTd+/4VqaLam@vger.kernel.org, AJvYcCWwqpZSsfHd6hxeoRHxkA1VL/THc4BeL2UE4UI3S7npf0DIyVeBqVrAkMgKbr0rGF1qrj75RTKOT+DBb3A=@vger.kernel.org
+X-Gm-Message-State: AOJu0YwSYOBhTDLSjgWl55aCGYHGCDVorss6usHxDtBN4SvxOrq4isoI
+	pE/g06J9QWFgBkE80j1KZO6s/DFKkVAQ+McQHETyTenlOISjMLiJmFrGvUeKyoQYqt8=
+X-Gm-Gg: ASbGnctj72k7NO/iUHf7j/IPgRIR/YUIqSJFCKY0xjoE6v8IKTE43YyxbBR102uAgeI
+	RMPgddn2o5frIEutZXcuNu8JL5bTP95CI7YDskZ0zSBOg7OCxHcZtf1tWCumtTX/ybwaGUey+yc
+	UrHyQtuW87VbHHBwQayphCV54JT7vdjBoR2v5FhgChJwV0XCHlPtJ4E4SF7KQQ+BXxOr5RTG4cd
+	hEXpCzM7v3BoucbkR/KiBCvPdUySpA6DTMP0BjNpeFUNUXtzINilM9IyiHLQ0F5vktFoZ+rfdhz
+	4m1qZkjKDMbDEKb0ylyPiEr5OWrgSilC3UiWX7Fh7kFFJOptbtLiaQ05JsSrmj5X/egEMJq6w7j
+	ufv7PTSkaAUwS0uG2BkVo
+X-Google-Smtp-Source: AGHT+IH1EhcurvPnQijuAxK51VLX1iOh6PM1RpmsVzMiEDdXmQ4OtxzDVBwoAGD/kvqdAI3D8wG/9g==
+X-Received: by 2002:a05:600c:46d2:b0:456:e39:ec1a with SMTP id 5b1f17b1804b1-45868c84329mr68770685e9.14.1753356530123;
+        Thu, 24 Jul 2025 04:28:50 -0700 (PDT)
+Received: from localhost ([87.254.0.133])
+        by smtp.gmail.com with UTF8SMTPSA id 5b1f17b1804b1-458705c4fcfsm16633565e9.29.2025.07.24.04.28.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Jul 2025 04:28:49 -0700 (PDT)
+From: Colin Ian King <colin.i.king@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>,
+	Adrian Hunter <adrian.hunter@intel.com>,
+	linux-mmc@vger.kernel.org
+Cc: kernel-janitors@vger.kernel.org,
+	linux-kernel@vger.kernel.org
+Subject: [PATCH][next] mmc: Kconfig: Fix spelling mistake "referrered" -> "referred"
+Date: Thu, 24 Jul 2025 12:28:17 +0100
+Message-ID: <20250724112817.142784-1-colin.i.king@gmail.com>
+X-Mailer: git-send-email 2.50.0
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla Thunderbird
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
- qualcomm controllers
-Content-Language: en-US
-To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
-CC: Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson
-	<ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
-        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
-        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
-        <quic_bhaskarv@quicinc.com>, <kernel@quicinc.com>
-References: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
- <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
- <10c90fee-ce7f-4034-9028-4252f19cb67f@quicinc.com>
- <CAA8EJpoLLDXFQk-ViuaioKrECzMV0aUrcOj4v+Ufs4oHY53mrw@mail.gmail.com>
- <064d3eed-c2ea-4b41-85b2-d2a5a922f8c7@quicinc.com>
- <ehgjdszjr34xppmkrkicb4pnq326nor26tqu2ekop6ew2j3y3h@pm45aiipzuc5>
- <48c73675-a73f-46f1-81a9-f701a2cf00a5@quicinc.com>
- <c1ebdaf1-92bb-4f73-bca9-35246d7c10e1@oss.qualcomm.com>
- <ca83b841-aea0-4233-93fe-02a7b5985af4@quicinc.com>
- <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
-From: Sarthak Garg <quic_sartgarg@quicinc.com>
-In-Reply-To: <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01a.na.qualcomm.com (10.52.223.231)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Authority-Analysis: v=2.4 cv=LdY86ifi c=1 sm=1 tr=0 ts=688215e7 cx=c_pps
- a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
- a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8
- a=PLseWDGyuym30XmulU8A:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
- a=TjNXssC_j7lpFel5tvFf:22
-X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzI0MDA4NCBTYWx0ZWRfX5WsL3iCrXrMS
- 28w7E4q7DYTE526jjq0+9cDlBUMHMimABLSZojicuqkSJTgBKroOEv2MtLqkjXahGM/dT0ZghTP
- 55lrF2QZ4R2Ek+Q/f0vOI+5YiFq0Fa9EQQNjOGlvjFZar8yi+oadXy9u/l0jRWwScncfXdQ/FAJ
- wbNsQCxqMuO4QKjkBh3CXOanCCat07t+g+6r55auAnwwLHSg6vWlM33iCea3fZCCuGaoDlkGVCg
- cHi3JLK6v8RbL7h0+Exg9dSW1d8Jkk4M9HN0fey+fQBXFeWhafSxM1RTeL2bgHA7i3AuTpZPY0A
- GgUjlrX2uUuJJJqNxrrht6lGwNPxmZCD9KhTDHmunyOks1K+tk2e48eYkRcZDCHXHeyYJwY8LeC
- FVW4xwU5e99aOdfCOZ1c8FVYjXSc2FQykeEVn+u8ki6YS0zeszuarE0yRM1C5g63fGgy9yft
-X-Proofpoint-ORIG-GUID: 7Xsaui01arsE-uz2BIeR8A5sDvW8ko9I
-X-Proofpoint-GUID: 7Xsaui01arsE-uz2BIeR8A5sDvW8ko9I
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
- definitions=2025-07-24_01,2025-07-24_01,2025-03-28_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
- impostorscore=0 mlxscore=0 priorityscore=1501 adultscore=0 phishscore=0
- malwarescore=0 lowpriorityscore=0 mlxlogscore=999 bulkscore=0 spamscore=0
- suspectscore=0 clxscore=1015 classifier=spam authscore=0 authtc=n/a authcc=
- route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
- definitions=main-2507240084
 
+There are two spelling mistakes in the config. Fix them.
 
+Signed-off-by: Colin Ian King <colin.i.king@gmail.com>
+---
+ drivers/mmc/host/Kconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-On 5/21/2025 9:11 PM, Dmitry Baryshkov wrote:
-> On 21/05/2025 18:36, Sarthak Garg wrote:
->>
->>
->> On 5/21/2025 8:19 PM, Dmitry Baryshkov wrote:
->>> On 21/05/2025 17:35, Sarthak Garg wrote:
->>>>
->>>>
->>>> On 5/21/2025 6:25 PM, Dmitry Baryshkov wrote:
->>>>> On Wed, May 21, 2025 at 12:46:49PM +0530, Sarthak Garg wrote:
->>>>>>
->>>>>>
->>>>>> On 11/15/2024 6:53 PM, Dmitry Baryshkov wrote:
->>>>>>> On Fri, 15 Nov 2024 at 12:23, Sarthak Garg 
->>>>>>> <quic_sartgarg@quicinc.com> wrote:
->>>>>>>>
->>>>>>>>
->>>>>>>>
->>>>>>>> On 11/4/2024 4:19 PM, Dmitry Baryshkov wrote:
->>>>>>>>> On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
->>>>>>>>>> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
->>>>>>>>>> This enables runtime PM for eMMC/SD card.
->>>>>>>>>
->>>>>>>>> Could you please mention, which platforms were tested with this 
->>>>>>>>> patch?
->>>>>>>>> Note, upstream kernel supports a lot of platforms, including 
->>>>>>>>> MSM8974, I
->>>>>>>>> think the oldest one, which uses SDHCI.
->>>>>>>>>
->>>>>>>>
->>>>>>>> This was tested with qdu1000 platform.
->>>>>>>
->>>>>>> Are you sure that it won't break other platforms?
->>>>>>>
->>>>>>
->>>>>> Thanks for your valuable comment.
->>>>>> I am not sure about the older platforms so to avoid issues on older
->>>>>> platforms we can enable this for all SDCC version 5.0 targets ?
->>>>>
->>>>> No, there are still a lot of platforms. Either explain why this is
->>>>> required for all v5 platforms (and won't break those) or find some 
->>>>> other
->>>>> way, e.g. limit the change to QDU1000, explaining why it is _not_
->>>>> applicable to other platforms.
->>>>>
->>>>
->>>> Thanks for your comment.
->>>
->>> No need to.
->>>  >> I agree with your concern but for me also its not possible to 
->>> test on
->>>> all the platforms.
->>>
->>> Sure.
->>> >> Lets say if I want to enable this caps for QDU1000 for which it has
->>>> been tested and on any other upcoming target after testing, then how 
->>>> can I proceed to enable?
->>>
->>> Let's start from the beginning: why do you want to enable it on QDU1000?
->>>
->>
->> QDU1000 is one latest available target where we have enabled this and 
->> tested. This has been enabled to save power.
-> 
-> Isn't it a powered device? How much power is the save? Is it worth it?
-> 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 7232de1c0688..4afa0130779d 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -359,7 +359,7 @@ config MMC_SDHCI_S3C
+ 	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+-	  often referrered to as the HSMMC block in some of the Samsung
++	  often referred to as the HSMMC block in some of the Samsung
+ 	  S3C6410, S5Pv210 and Exynos (Exynso4210, Exynos4412) SoCs.
+ 
+ 	  If you have a controller with this interface (thereforeyou build for
+@@ -401,7 +401,7 @@ config MMC_SDHCI_SPEAR
+ 	depends on OF
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+-	  often referrered to as the HSMMC block in some of the ST SPEAR range
++	  often referred to as the HSMMC block in some of the ST SPEAR range
+ 	  of SoC
+ 
+ 	  If you have a controller with this interface, say Y or M here.
+-- 
+2.50.0
 
-Sorry I just did basic sanity on QDU1000 device to confirm its not 
-breaking any eMMC functionality and we have also tested SD card on 
-SM8550 as well.
-For power no's we have stared internal discussions and based on target 
-available for power profiling with eMMC device we will come back.
-
-Regards,
-Sarthak
