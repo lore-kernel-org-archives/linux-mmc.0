@@ -1,136 +1,183 @@
-Received: from mail-vs1-f43.google.com (mail-vs1-f43.google.com [209.85.217.43])
-	(using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
 	(No client certificate requested)
-	by smtp.subspace.kernel.org (Postfix) with ESMTPS id C0B9D26056C;
-	Thu, 24 Jul 2025 11:07:20 +0000 (UTC)
-Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=209.85.217.43
+	by smtp.subspace.kernel.org (Postfix) with ESMTPS id A65A426D4E5;
+	Thu, 24 Jul 2025 11:15:59 +0000 (UTC)
+Authentication-Results: smtp.subspace.kernel.org; arc=none smtp.client-ip=205.220.168.131
 ARC-Seal:i=1; a=rsa-sha256; d=subspace.kernel.org; s=arc-20240116;
-	t=1753355242; cv=none; b=j7jDaA+uaLEJb8OYv8XdgmdxMHu5EqRYYfYsvGhJb1zKoBlxritHJwIeGlPb5i/y2oP/9y//swHS3yTUQE7BqkrBQ3jINrLNMQ7EdMO4+kySX2J93Zo2EXV071/qU+56uO3atkBbIP03AheUpqihhIVozl2IQ3goBaaw0vmOqPk=
+	t=1753355761; cv=none; b=gKKcmEBA+eTsCk7Wl3oiQ3FwXh1DiiS3BBuTRxAOsDmmEHZCkgAymBezmVxSzWEl7ntSBpCThFFVnUqkuK8kPxH7NkajlZGFMiiVsCFJOM2d/r1kn/oQ5KJm6tbPYoDcIvG+JTY+mUPLC8JcxlXS7RP7neXMC7zuvdO6cfZ2i3w=
 ARC-Message-Signature:i=1; a=rsa-sha256; d=subspace.kernel.org;
-	s=arc-20240116; t=1753355242; c=relaxed/simple;
-	bh=Xu48WpKj0SsCQWP/vCqMAOJbDzRPfDPK4MEn1Op/Olk=;
-	h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
-	 To:Cc:Content-Type; b=Mc7ZPBTPWsxYN9HbuwxA+JFmNbX+F4ogMaUmqHWtoRYhtGqdcGGx/YQ6GuLtYBUg+ss2lX0nHFvnoqpwZ1FF6ZJN73not4+DL4h0B7RZrhe4+6zfIfZYXS0yYHi+JEGgxYxoskvddHG6Q5Al5ogB9l8tGm7y/pvUMZJwxjpg3c0=
-ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com; spf=pass smtp.mailfrom=gmail.com; dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b=Nfp76cqG; arc=none smtp.client-ip=209.85.217.43
-Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=gmail.com
-Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=gmail.com
+	s=arc-20240116; t=1753355761; c=relaxed/simple;
+	bh=VpHmVVdQ0c8Q7OUEjzS083kv4RgxKpTN+CDVpPhMGQ4=;
+	h=Message-ID:Date:MIME-Version:Subject:To:CC:References:From:
+	 In-Reply-To:Content-Type; b=V9z+PRLL66e/f3irF0tnj5Eb1L+5QC4xRtWk7BPo1WvaSSD/7q0/F0LMLrwEWeLiKxFo5Jk5nH2koJU3B0DFkKY7sN7rnL2SEBQYAIyjl8O86W9ADipqRWUaYs4+hu5w07UxBdCO6844AmxgvRAh7kqJhqozVZH08gu5nSXTnUo=
+ARC-Authentication-Results:i=1; smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com; spf=pass smtp.mailfrom=quicinc.com; dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b=FrtM7HmU; arc=none smtp.client-ip=205.220.168.131
+Authentication-Results: smtp.subspace.kernel.org; dmarc=pass (p=none dis=none) header.from=quicinc.com
+Authentication-Results: smtp.subspace.kernel.org; spf=pass smtp.mailfrom=quicinc.com
 Authentication-Results: smtp.subspace.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Nfp76cqG"
-Received: by mail-vs1-f43.google.com with SMTP id ada2fe7eead31-4e2b5ffb932so258079137.0;
-        Thu, 24 Jul 2025 04:07:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20230601; t=1753355239; x=1753960039; darn=vger.kernel.org;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=MbPVMkEFJD6XkQQplvkRbG2dZqiB1ksd2yrntVRJPnM=;
-        b=Nfp76cqGTCwp/DF/hHBTINgpMBXqbtUXQ6jYz8a/+oGIbUOMJsjkAVqbvwinLxjxFW
-         oP9Duz5uGMuSxAh9rOsnN9W0J8B8cluIEaAMDy/okNXIhe5Ncz9Y65cBgSqVqvWl161H
-         IWofAlDECAh0PAPO28LJkLFuDVx95VlTUZ1H5RihwgiN3aI/lRdDVo3Jw7vJcyOnXpDT
-         oF56JKlBo2E3S5+uG6sMYxTvIqjfluJ5pfveP9xHupADZp4N8HkCvK2bB1LOoXt7w8PM
-         GexpfQLyWJOASoYh82LpAnJsUSZnKD27LRQ+IuWZAKQLi2+WiuylPmIzfLPDORKegyan
-         em/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20230601; t=1753355239; x=1753960039;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=MbPVMkEFJD6XkQQplvkRbG2dZqiB1ksd2yrntVRJPnM=;
-        b=qHmFKWZ6oGpLqtS23nioGgJrZu8ssJ8iogFBnuUhGIZW89b9FRnURcYQhzjKmHi9+q
-         YlIQ3W1h1LyLr1USpG7B1PrlSeooo8UnFgsivTx6BCCqqrbEnhPqtQwyo/rSyUxeLGb+
-         dt5yGlgi/5aq1M6k99XuY/oxZHhbw26GvlsZXa2xd2SdhKatRygGBBGULQ4stz2xyrbx
-         umz7k92oPRpFBXAaO3iPA3VWrJD4xUhzI7XDVQTVVQI6M2HDtzSmpohjK1QcKGaF9KZf
-         0eM21bl0Z5oihD2BX51fTQjXUI3iikQQUlEiRb42G0qgCLUMGQzltdgEp1BXzn2pzEfM
-         oNdw==
-X-Forwarded-Encrypted: i=1; AJvYcCVEaIWcq+RbhuZ1fXVQE4g6ooBVwJRgANg8nkPPDUqvKo3uHFjZqdttC3rgV/1KBnR3VT6VLKSj5cXGNYw=@vger.kernel.org
-X-Gm-Message-State: AOJu0Ywc2dQaVvmaXC/Jnudo7BJ5oBe9dfMbtXzHCLI0/rRkx9OAJf24
-	aCZRpxjBvdnouUV2Uf32qIAkoMzCVbMsbeaaeXIJozQ8PmW6FACUk9Fdey9ObYSpUN62hQdAO1T
-	h3LrgYiZUMUNlfmZzr4RJZLniNYhVIio=
-X-Gm-Gg: ASbGncv21ufrylsbuhgVHt15wro9nC//0242itIEoD+75otmckO6AqpBjb85sT3GbIc
-	pDyFxWakMAanUu4e/IIPCIh8QCC40z/HPdCmoK/Htecn9QlR/6wAEAlIEQaCNa6HCdsV5sk48T2
-	VAj0CzzeiDafQC2oaX6LviA5BOzOJxJb0jRO1YbmBlXzALouEqGvESuMDbaTtOBoB0SYHH4YEU1
-	KmtyOMHCbKTOX/VgBfpQ3ypBSaeSa6/GQCWcb1o64zHoUiveJs=
-X-Google-Smtp-Source: AGHT+IHbQScuCfcy9d/Im06JXgoGrv0k2Wa14IPyUvV/QjDXnVixbwCarcR2uPJdlf++LVVFiIIya/cociO1mM4ofqA=
-X-Received: by 2002:a05:6102:f10:b0:4df:8259:eab with SMTP id
- ada2fe7eead31-4fa151ee312mr2582077137.19.1753355239410; Thu, 24 Jul 2025
- 04:07:19 -0700 (PDT)
+	dkim=pass (2048-bit key) header.d=quicinc.com header.i=@quicinc.com header.b="FrtM7HmU"
+Received: from pps.filterd (m0279863.ppops.net [127.0.0.1])
+	by mx0a-0031df01.pphosted.com (8.18.1.2/8.18.1.2) with ESMTP id 56O9ZhgY001529;
+	Thu, 24 Jul 2025 11:15:52 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=
+	cc:content-transfer-encoding:content-type:date:from:in-reply-to
+	:message-id:mime-version:references:subject:to; s=qcppdkim1; bh=
+	cQdU1Oo2rKGAgNAMJSpMpvT7kgzBRMYs5MEbj1ju3pM=; b=FrtM7HmU78r24/4J
+	MmrXophPaHCBfZUlOQkJO0z1/X382TFSVTtdigvbY3lOsehxSnl0L/zj+WaLcp3l
+	xtMefiBxMm9wBy0OBFneXIo2EROku21yxzYrwX8pWx8XdaB8iSk+rwVcmwYV38xP
+	NFZfaiVKxNTmmj4O5UGg8iYSIqWrqDHOdjaDTEXNtaZK+QHypi8UBNRz7jYjO/B9
+	3S5RMWE/uNPf5LSL3mifxAjs1m3cbllcJoAB+C8j1kBHiM7SQGhe9OMRVpO9ctFh
+	cUttBhrG6ORkR7/YzImUWis+0Ez+kNkkB3xxa0ui32wEiLBCPD9bIhkQbS1kZnJD
+	7PE6ww==
+Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+	by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 482b1uf351-1
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 24 Jul 2025 11:15:51 +0000 (GMT)
+Received: from nasanex01a.na.qualcomm.com (nasanex01a.na.qualcomm.com [10.52.223.231])
+	by NASANPPMTA02.qualcomm.com (8.18.1.2/8.18.1.2) with ESMTPS id 56OBFpTq027183
+	(version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+	Thu, 24 Jul 2025 11:15:51 GMT
+Received: from [10.216.46.74] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1748.10; Thu, 24 Jul
+ 2025 04:15:42 -0700
+Message-ID: <22848e2e-bd7d-486c-b481-c624d230d327@quicinc.com>
+Date: Thu, 24 Jul 2025 16:45:38 +0530
 Precedence: bulk
 X-Mailing-List: linux-mmc@vger.kernel.org
 List-Id: <linux-mmc.vger.kernel.org>
 List-Subscribe: <mailto:linux-mmc+subscribe@vger.kernel.org>
 List-Unsubscribe: <mailto:linux-mmc+unsubscribe@vger.kernel.org>
 MIME-Version: 1.0
-References: <20250716104334.44020-1-victorshihgli@gmail.com>
-In-Reply-To: <20250716104334.44020-1-victorshihgli@gmail.com>
-From: Victor Shih <victorshihgli@gmail.com>
-Date: Thu, 24 Jul 2025 19:07:07 +0800
-X-Gm-Features: Ac12FXzQ8sqCHRAiCyvdT--M_8TyMxjlQVWigzFl0KuNyWKROQMrH_6VSTulRT4
-Message-ID: <CAK00qKAqLwz17_DKvmcb1nqT8x=YpyUO8_hfTigs=HSkNF=02A@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-pci-gli: GL9763e: Mask the replay timer
- timeout of AER
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, 
-	benchuanggli@gmail.com, ben.chuang@genesyslogic.com.tw, 
-	HL.Liu@genesyslogic.com.tw, Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla Thunderbird
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Enable MMC_CAP_AGGRESSIVE_PM for
+ qualcomm controllers
+Content-Language: en-US
+To: Dmitry Baryshkov <dmitry.baryshkov@oss.qualcomm.com>
+CC: Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson
+	<ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <quic_cang@quicinc.com>, <quic_nguyenb@quicinc.com>,
+        <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sayalil@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_bhaskarv@quicinc.com>, <kernel@quicinc.com>
+References: <20241104060722.10642-1-quic_sartgarg@quicinc.com>
+ <konkbi4hvd7qc4rhokwrymzqntroy7gijk3ndwv5rluswdrykp@xsafrtrjzmuq>
+ <10c90fee-ce7f-4034-9028-4252f19cb67f@quicinc.com>
+ <CAA8EJpoLLDXFQk-ViuaioKrECzMV0aUrcOj4v+Ufs4oHY53mrw@mail.gmail.com>
+ <064d3eed-c2ea-4b41-85b2-d2a5a922f8c7@quicinc.com>
+ <ehgjdszjr34xppmkrkicb4pnq326nor26tqu2ekop6ew2j3y3h@pm45aiipzuc5>
+ <48c73675-a73f-46f1-81a9-f701a2cf00a5@quicinc.com>
+ <c1ebdaf1-92bb-4f73-bca9-35246d7c10e1@oss.qualcomm.com>
+ <ca83b841-aea0-4233-93fe-02a7b5985af4@quicinc.com>
+ <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
+From: Sarthak Garg <quic_sartgarg@quicinc.com>
+In-Reply-To: <1a0a5178-fcf0-49b6-8e4c-1393c0f4f229@oss.qualcomm.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Authority-Analysis: v=2.4 cv=LdY86ifi c=1 sm=1 tr=0 ts=688215e7 cx=c_pps
+ a=JYp8KDb2vCoCEuGobkYCKw==:117 a=JYp8KDb2vCoCEuGobkYCKw==:17
+ a=GEpy-HfZoHoA:10 a=IkcTkHD0fZMA:10 a=Wb1JkmetP80A:10 a=COk6AnOGAAAA:8
+ a=PLseWDGyuym30XmulU8A:9 a=3ZKOabzyN94A:10 a=QEXdDO2ut3YA:10
+ a=TjNXssC_j7lpFel5tvFf:22
+X-Proofpoint-Spam-Details-Enc: AW1haW4tMjUwNzI0MDA4NCBTYWx0ZWRfX5WsL3iCrXrMS
+ 28w7E4q7DYTE526jjq0+9cDlBUMHMimABLSZojicuqkSJTgBKroOEv2MtLqkjXahGM/dT0ZghTP
+ 55lrF2QZ4R2Ek+Q/f0vOI+5YiFq0Fa9EQQNjOGlvjFZar8yi+oadXy9u/l0jRWwScncfXdQ/FAJ
+ wbNsQCxqMuO4QKjkBh3CXOanCCat07t+g+6r55auAnwwLHSg6vWlM33iCea3fZCCuGaoDlkGVCg
+ cHi3JLK6v8RbL7h0+Exg9dSW1d8Jkk4M9HN0fey+fQBXFeWhafSxM1RTeL2bgHA7i3AuTpZPY0A
+ GgUjlrX2uUuJJJqNxrrht6lGwNPxmZCD9KhTDHmunyOks1K+tk2e48eYkRcZDCHXHeyYJwY8LeC
+ FVW4xwU5e99aOdfCOZ1c8FVYjXSc2FQykeEVn+u8ki6YS0zeszuarE0yRM1C5g63fGgy9yft
+X-Proofpoint-ORIG-GUID: 7Xsaui01arsE-uz2BIeR8A5sDvW8ko9I
+X-Proofpoint-GUID: 7Xsaui01arsE-uz2BIeR8A5sDvW8ko9I
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.293,Aquarius:18.0.1099,Hydra:6.1.9,FMLib:17.12.80.40
+ definitions=2025-07-24_01,2025-07-24_01,2025-03-28_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0
+ impostorscore=0 mlxscore=0 priorityscore=1501 adultscore=0 phishscore=0
+ malwarescore=0 lowpriorityscore=0 mlxlogscore=999 bulkscore=0 spamscore=0
+ suspectscore=0 clxscore=1015 classifier=spam authscore=0 authtc=n/a authcc=
+ route=outbound adjust=0 reason=mlx scancount=1 engine=8.19.0-2505280000
+ definitions=main-2507240084
 
-Hi, Ulf and Adrian
 
-Please help to review this patch and let me know if there is anything
-that needs to be modified.
-Thanks.
 
-Thanks, Victor Shih
+On 5/21/2025 9:11 PM, Dmitry Baryshkov wrote:
+> On 21/05/2025 18:36, Sarthak Garg wrote:
+>>
+>>
+>> On 5/21/2025 8:19 PM, Dmitry Baryshkov wrote:
+>>> On 21/05/2025 17:35, Sarthak Garg wrote:
+>>>>
+>>>>
+>>>> On 5/21/2025 6:25 PM, Dmitry Baryshkov wrote:
+>>>>> On Wed, May 21, 2025 at 12:46:49PM +0530, Sarthak Garg wrote:
+>>>>>>
+>>>>>>
+>>>>>> On 11/15/2024 6:53 PM, Dmitry Baryshkov wrote:
+>>>>>>> On Fri, 15 Nov 2024 at 12:23, Sarthak Garg 
+>>>>>>> <quic_sartgarg@quicinc.com> wrote:
+>>>>>>>>
+>>>>>>>>
+>>>>>>>>
+>>>>>>>> On 11/4/2024 4:19 PM, Dmitry Baryshkov wrote:
+>>>>>>>>> On Mon, Nov 04, 2024 at 11:37:22AM +0530, Sarthak Garg wrote:
+>>>>>>>>>> Enable MMC_CAP_AGGRESSIVE_PM for qualcomm controllers.
+>>>>>>>>>> This enables runtime PM for eMMC/SD card.
+>>>>>>>>>
+>>>>>>>>> Could you please mention, which platforms were tested with this 
+>>>>>>>>> patch?
+>>>>>>>>> Note, upstream kernel supports a lot of platforms, including 
+>>>>>>>>> MSM8974, I
+>>>>>>>>> think the oldest one, which uses SDHCI.
+>>>>>>>>>
+>>>>>>>>
+>>>>>>>> This was tested with qdu1000 platform.
+>>>>>>>
+>>>>>>> Are you sure that it won't break other platforms?
+>>>>>>>
+>>>>>>
+>>>>>> Thanks for your valuable comment.
+>>>>>> I am not sure about the older platforms so to avoid issues on older
+>>>>>> platforms we can enable this for all SDCC version 5.0 targets ?
+>>>>>
+>>>>> No, there are still a lot of platforms. Either explain why this is
+>>>>> required for all v5 platforms (and won't break those) or find some 
+>>>>> other
+>>>>> way, e.g. limit the change to QDU1000, explaining why it is _not_
+>>>>> applicable to other platforms.
+>>>>>
+>>>>
+>>>> Thanks for your comment.
+>>>
+>>> No need to.
+>>>  >> I agree with your concern but for me also its not possible to 
+>>> test on
+>>>> all the platforms.
+>>>
+>>> Sure.
+>>> >> Lets say if I want to enable this caps for QDU1000 for which it has
+>>>> been tested and on any other upcoming target after testing, then how 
+>>>> can I proceed to enable?
+>>>
+>>> Let's start from the beginning: why do you want to enable it on QDU1000?
+>>>
+>>
+>> QDU1000 is one latest available target where we have enabled this and 
+>> tested. This has been enabled to save power.
+> 
+> Isn't it a powered device? How much power is the save? Is it worth it?
+> 
 
-On Wed, Jul 16, 2025 at 6:43=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
-m> wrote:
->
-> From: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Due to a flaw in the hardware design, the GL9763e replay timer frequently
-> times out when ASPM is enabled. As a result, the warning messages will
-> often appear in the system log when the system accesses the GL9763e
-> PCI config. Therefore, the replay timer timeout must be masked.
->
-> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> ---
->  drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
-i-gli.c
-> index 4c2ae71770f7..eb3954729a3c 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -1754,6 +1754,7 @@ static int gl9763e_add_host(struct sdhci_pci_slot *=
-slot)
->  static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
->  {
->         struct pci_dev *pdev =3D slot->chip->pdev;
-> +       int aer;
->         u32 value;
->
->         pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> @@ -1780,6 +1781,14 @@ static void gli_set_gl9763e(struct sdhci_pci_slot =
-*slot)
->         value |=3D FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDL=
-Y_5);
->         pci_write_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, value);
->
-> +       /* mask the replay timer timeout of AER */
-> +       aer =3D pci_find_ext_capability(pdev, PCI_EXT_CAP_ID_ERR);
-> +       if (aer) {
-> +               pci_read_config_dword(pdev, aer + PCI_ERR_COR_MASK, &valu=
-e);
-> +               value |=3D PCI_ERR_COR_REP_TIMER;
-> +               pci_write_config_dword(pdev, aer + PCI_ERR_COR_MASK, valu=
-e);
-> +       }
-> +
->         pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->         value &=3D ~GLI_9763E_VHS_REV;
->         value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
-> --
-> 2.43.0
->
+Sorry I just did basic sanity on QDU1000 device to confirm its not 
+breaking any eMMC functionality and we have also tested SD card on 
+SM8550 as well.
+For power no's we have stared internal discussions and based on target 
+available for power profiling with eMMC device we will come back.
+
+Regards,
+Sarthak
